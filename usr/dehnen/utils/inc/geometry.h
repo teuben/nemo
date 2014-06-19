@@ -405,7 +405,7 @@ namespace WDutils {
     ///       another not assuming any aligment. To distinguish them, these
     ///       second versions take an additional integer argument, which is
     ///       not used. That is, the default is to assume 16-byte alignement.
-    ///       \n
+    ///
     ///       Providing data not aligned to 16 bytes to methods assuming
     ///       16-byte alignement will cause a run-time error.
     ///

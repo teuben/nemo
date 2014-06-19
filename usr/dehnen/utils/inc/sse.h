@@ -28,53 +28,58 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 //
 ////////////////////////////////////////////////////////////////////////////////
+/// \version 14-dec-2013  WD  poor man's packed<4,double> & packed<8,double>
+////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_sse_h
 #define WDutils_included_sse_h
 
 #if __cplusplus >= 201103L
-# ifndef WDutils_included_type_traits
-#  include <type_traits>
-#  define WDutils_included_type_traits
-# endif
+#  ifndef WDutils_included_type_traits
+#    include <type_traits>
+#    define WDutils_included_type_traits
+#  endif
 #endif
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 // with GCC 4.4 use x86intrin.h
-# if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4) || defined(__clang__)
+#  if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4) || defined(__clang__)
 extern "C" {
-#  include <x86intrin.h>
+#    include <x86intrin.h>
 }
-# else
+#  else
 extern "C" {
-#  ifdef __SSE__
-#  include <xmmintrin.h>
-#  endif
-#  ifdef __SSE2__
-#  include <emmintrin.h>
-#  endif
-#  if defined (__SSE4_2__) || defined (__SSE4_1__)
-#  include <smmintrin.h>
-#  endif
-#  ifdef __AVX__
-#  include <avxintrin.h>
-#  endif
-#  ifdef __AVX2__
-#  include <avx2intrin.h>
-#  endif
+#    ifdef __SSE__
+#      include <xmmintrin.h>
+#    endif
+#    ifdef __SSE2__
+#      include <emmintrin.h>
+#    endif
+#    if defined (__SSE4_2__) || defined (__SSE4_1__)
+#      include <smmintrin.h>
+#    endif
+#    ifdef __AVX__
+#      include <avxintrin.h>
+#    endif
+#    ifdef __AVX2__
+#      include <avx2intrin.h>
+#    endif
 }
-# endif
+#  endif
 #elif defined(__SSE__)
 // use individual headers for intrinsics
 
-# ifdef defined(__INTEL_COMPILER) && defined(_MM_MALLOC_H_INCLUDED)
-#  warning The intel compiler has seen _mm_malloc.h by GNU which declares _mm_malloc() and _mm_free() to have different linking than those declared in xmmintrin.h by INTEL, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
-# endif
+#  ifdef defined(__INTEL_COMPILER) && defined(_MM_MALLOC_H_INCLUDED)
+#    warning The intel compiler has seen _mm_malloc.h by GNU which declares _mm_malloc() and _mm_free() to have different linking than those declared in xmmintrin.h by INTEL, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
+#  endif
 
 extern "C" {
-# include <immintrin.h>
+#  include <immintrin.h>
 }
 #endif    // __SSE__
 
+#ifndef WDutils_included_cachesize_h
+#  include <cachesize.h>
+#endif
 #ifndef WDutils_included_meta_h
 #  include <meta.h>
 #endif
@@ -90,9 +95,9 @@ extern "C" {
 #endif
 
 #if __cplusplus < 201103L
-# define noexcept
-# define constexpr
-# define static_assert(EXPR,MESG) WDutilsStaticAssert(EXPR)
+#  define noexcept
+#  define constexpr
+#  define static_assert(EXPR,MESG) WDutilsStaticAssert(EXPR)
 #endif
 
 #if   defined(__INTEL_COMPILER)
@@ -116,11 +121,11 @@ namespace WDutils {
   }
 
 #ifdef __SSE__
-# if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
-#  define always_inline __attribute__((__always_inline__))
-# else
-#  define always_inline
-# endif
+#  if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
+#    define always_inline __attribute__((__always_inline__))
+#  else
+#    define always_inline
+#  endif
   //
   namespace meta {
     union float_and_uint {
@@ -142,7 +147,7 @@ namespace WDutils {
     ///
     /// @a K packed floating-point number of type @c T
     ///
-    /// The idea is to provide a unique and simple C++ interface to use the
+    /// The idea is to provide a unique and simple C++ interface for the
     /// SSE and AVX instruction set with any compiler that supports the usual
     /// intrinsics (like _mm_mul_ps). The various member functions and
     /// operators are directly implemented in terms of these intrinsics, making
@@ -150,13 +155,16 @@ namespace WDutils {
     ///
 
     template<int K, typename T> struct packed;
-
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wdocumentation"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdocumentation"
+#endif
     ///
     /// @a packed_is_supported<a,b>::value=true if @a packed<a,b> is supported
     ///
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
     template<int _S, typename _T>
     struct packed_is_supported
     {
@@ -211,16 +219,16 @@ namespace WDutils {
       /// block index given an index
       constexpr static unsigned block_index(unsigned i) noexcept
       { return i >> block_shft; }
-      /// # blocks given # elements
+      /// \# blocks given \## elements
       constexpr static unsigned num_blocks(unsigned n) noexcept
       { return (n+block_trim)>>block_shft; }
-      /// # elements in full blocks, given # elements
+      /// \# elements in full blocks, given \# elements
       constexpr static unsigned blocked_num(unsigned n) noexcept
       { return (n+block_trim)&block_mask; }
     };
     //--------------------------------------------------------------------------
     ///
-    /// 4 packed single-precision floating-point numbers
+    /// 4 packed single-precision floating-point numbers, requires SSE
     ///
     //--------------------------------------------------------------------------
     template<> struct packed<4,float> : packed_base<4>
@@ -276,7 +284,7 @@ namespace WDutils {
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single integer value: set all element equal to single value
       explicit always_inline packed(int x) noexcept
-      { _m = _mm_set1_ps(x); }
+      { _m = _mm_set1_ps(float(x)); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm_set1_ps(x); }
@@ -318,20 +326,20 @@ namespace WDutils {
       /// constant element access, templated
       template<unsigned I>
       friend element_type at(packed) noexcept;
-# ifdef __SSE2__
+#ifdef __SSE2__
       /// upcast: convert lower two elements to  @c packed<2,double>
       friend packed<2,double> upcast_lo(packed) noexcept;
       /// upcast: convert upper two elements to  @c packed<2,double>
       friend packed<2,double> upcast_hi(packed) noexcept;
       /// downcast: convert 2 @c packed<2,double>  to  @c packed<4,float>
       friend packed downcast(packed<2,double>, packed<2,double>) noexcept;
-# endif
-# ifdef __AVX__
+#endif
+#ifdef __AVX__
       /// downcast: convert  @c packed<4,double>  to  @c packed<4,float>
       friend packed downcast(packed<4,double>) noexcept;
       /// upcast:   convert  @c packed<4,float>   to  @c packed<4,double>  
       friend packed<4,double> upcast(packed) noexcept;
-# endif
+#endif
       //@}
 
       /// \name load and store
@@ -411,6 +419,9 @@ namespace WDutils {
       /// unary -
       packed always_inline operator-() const noexcept
       { return packed(_mm_xor_ps(_m,sgn_mask())); }
+      /// set to negative
+      friend packed&always_inline negate(packed&p) noexcept
+      { _mm_xor_ps(p._m,sgn_mask()); return p; }
       /// *=
       packed& always_inline operator*=(packed p) noexcept
       { _m = _mm_mul_ps(p._m,_m); return*this; }
@@ -604,14 +615,14 @@ namespace WDutils {
       friend packed always_inline blend(packed sign, packed x, packed y)
 	noexcept
       { 
-# ifdef __SSE4_1__
+#ifdef __SSE4_1__
 	return packed(_mm_blendv_ps(y._m,x._m,sign._m));
-# else
+#else
 	// perhaps there is a better way using move and movemask?
         __m128 mask = _mm_cmplt_ps(sign._m,_mm_setzero_ps());
         return packed(_mm_or_ps(_mm_and_ps(mask,x._m),
 				_mm_andnot_ps(mask,y._m)));
-# endif // __SSE4_1__
+#endif // __SSE4_1__
       }
       /// combine two vectors depending on third:  result = mask? x : y
       /// \note All bits in mask[i] must be either 0 or 1.
@@ -622,12 +633,12 @@ namespace WDutils {
       friend packed always_inline combine(packed mask, packed x, packed y)
 	noexcept
       {
-# ifdef __SSE4_1__
+#ifdef __SSE4_1__
 	return packed(_mm_blendv_ps(y._m,x._m,mask._m));
-# else
+#else
 	return packed(_mm_or_ps(_mm_and_ps(mask._m,x._m),
 				_mm_andnot_ps(mask._m,y._m)));
-# endif // __SSE4_1__
+#endif // __SSE4_1__
       }
       //@}
       static element_type always_inline nil_mask_elem() noexcept
@@ -638,9 +649,42 @@ namespace WDutils {
       { return WDutils::meta::float_and_uint(0x80000000u).f; }
       static element_type always_inline abs_mask_elem() noexcept
       { return WDutils::meta::float_and_uint(0x7fffffffu).f; }
+      /// all bits set
+      static packed always_inline all_bits_set() noexcept
+      { return packed(all_mask_elem()); }
+      /// mask containing first k all_mask_elem(), rest nil_mask_elem()
+      static packed always_inline front_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return zero();
+	case 1:  return packed(all_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 2:  return packed(all_mask_elem(), all_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 3:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), nil_mask_elem());
+	default: return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	}
+      }
+      /// mask containing first k nil_mask_elem(), rest all_mask_elem()
+      static packed always_inline back_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 1:  return packed(nil_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 2:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 3:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), all_mask_elem());
+	default: return zero();
+	}
+      }
     private:
       //
-# ifdef __SSE2__
+#ifdef __SSE2__
       static data_type always_inline nil_mask() noexcept
       { return _mm_castsi128_ps(_mm_set1_epi32(0x0)); }
       static data_type always_inline one_mask() noexcept
@@ -649,7 +693,7 @@ namespace WDutils {
       { return _mm_castsi128_ps(_mm_set1_epi32(int(0x80000000))); }
       static data_type always_inline abs_mask() noexcept
       { return _mm_castsi128_ps(_mm_set1_epi32(0x7fffffff)); }
-# else
+#else
       static data_type always_inline nil_mask() noexcept
       { return _mm_set1_ps(WDutils::meta::float_and_uint(0x0u).f); }
       static data_type always_inline one_mask() noexcept
@@ -658,7 +702,7 @@ namespace WDutils {
       { return _mm_set1_ps(WDutils::meta::float_and_uint(0x80000000u).f); }
       static data_type always_inline abs_mask() noexcept
       { return _mm_set1_ps(WDutils::meta::float_and_uint(0x7fffffffu).f); }
-# endif // __SSE2__
+#endif // __SSE2__
       /// just our sign bits
       data_type always_inline signmask() const noexcept
       { return _mm_and_ps(_m,sgn_mask()); }
@@ -671,19 +715,19 @@ namespace WDutils {
     float always_inline at(fvec4 p) noexcept
     {
       static_assert(I < fvec4::block_size,"index out of range");
-# if   defined(__clang__)
+#if   defined(__clang__)
       return p._m[I];
-# elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
       return __builtin_ia32_vec_ext_v4sf(p._m,I);
-# elif defined(__SSE4_1__)
+#elif defined(__SSE4_1__)
       float tmp;
       _MM_EXTRACT_FLOAT(tmp,p.m,I);
       return tmp;
-# else
+#else
       fvec4::aligned_element_block tmp;
       _mm_store_ps(tmp,p.m);
       return tmp[I];
-# endif
+#endif
     }
     //
     template<int K> inline
@@ -707,10 +751,10 @@ namespace WDutils {
   WDutils_TRAITS(SSE::fvec4,"fvec4");
   //
   namespace SSE {
-# ifdef __AVX__
+#ifdef __AVX__
     //--------------------------------------------------------------------------
     ///
-    /// 8 packed single-precision floating-point numbers
+    /// 8 packed single-precision floating-point numbers, requires AVX
     ///
     //--------------------------------------------------------------------------
     template<> struct packed<8,float> : packed_base<8>
@@ -756,17 +800,17 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() WDutilsCXX11DefaultBody
-#if __cplusplus >= 201103L
+#  if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
-#endif
+#  endif
       /// ctor from data_type
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single integer value: set all element equal to single value
       explicit always_inline packed(int x) noexcept
-      { _m = _mm256_set1_ps(x); }
+      { _m = _mm256_set1_ps(float(x)); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm256_set1_ps(x); }
@@ -910,6 +954,9 @@ namespace WDutils {
       /// unary -
       packed always_inline operator-() const noexcept
       { return packed(_mm256_xor_ps(_m,sgn_mask())); }
+      /// set to negative
+      friend packed&always_inline negate(packed&p) noexcept
+      { _mm256_xor_ps(p._m,sgn_mask()); return p; }
       /// *=
       packed& always_inline operator*=(packed p) noexcept
       { _m = _mm256_mul_ps(p._m,_m); return*this; }
@@ -1073,6 +1120,88 @@ namespace WDutils {
       { return WDutils::meta::float_and_uint(0x80000000u).f; }
       static element_type always_inline abs_mask_elem() noexcept
       { return WDutils::meta::float_and_uint(0x7fffffffu).f; }
+      /// all bits set
+      static packed always_inline all_bits_set() noexcept
+      { return packed(all_mask_elem()); }
+      /// mask containing first k all_mask_elem(), rest nil_mask_elem()
+      static packed always_inline front_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return zero();
+	case 1:  return packed(all_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 2:  return packed(all_mask_elem(), all_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 3:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 4:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 5:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 6:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 7:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), nil_mask_elem());
+	default: return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	}
+      }
+      /// mask containing first k nil_mask_elem(), rest all_mask_elem()
+      static packed always_inline back_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 1:  return packed(nil_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 2:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 3:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 4:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 5:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 6:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 7:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), all_mask_elem());
+	default: return zero();
+	}
+      }
+      //
     private:
       static data_type always_inline nil_mask() noexcept
       { return _mm256_castsi256_ps(_mm256_set1_epi32(0x0)); }
@@ -1113,12 +1242,12 @@ namespace WDutils {
   WDutils_TRAITS(SSE::fvec8,"fvec8");
   //
   namespace SSE {
-# endif // __AVX__
+#endif // __AVX__
 
-# ifdef __SSE2__
+#ifdef __SSE2__
     //--------------------------------------------------------------------------
     ///
-    /// 2 packed double-precision floating-point numbers
+    /// 2 packed double-precision floating-point numbers, requires SSE2
     ///
     //--------------------------------------------------------------------------
     template<> struct packed<2,double> : packed_base<2>
@@ -1165,17 +1294,20 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() WDutilsCXX11DefaultBody
-#if __cplusplus >= 201103L
+#  if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
-#endif
+#  endif
       /// ctor from data_type is private
       explicit always_inline packed(__m128d m) : _m(m) {}
       /// ctor from single integer value: set all element equal to single value
       explicit always_inline packed(int x) noexcept
-      { _m = _mm_set1_pd(x); }
+      { _m = _mm_set1_pd(double(x)); }
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int64_t x) noexcept
+      { _m = _mm_set1_pd(double(x)); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
       { _m = _mm_set1_pd(double(x)); }
@@ -1304,6 +1436,9 @@ namespace WDutils {
       /// unary -
       packed always_inline operator-() const noexcept
       { return packed(_mm_xor_pd(_m,sgn_mask())); }
+      /// set to negative
+      friend packed&always_inline negate(packed&p) noexcept
+      { _mm_xor_pd(p._m,sgn_mask()); return p; }
       /// *=
       packed& always_inline operator*=(packed p) noexcept
       { _m = _mm_mul_pd(p._m,_m); return*this; }
@@ -1504,6 +1639,28 @@ namespace WDutils {
       { return WDutils::meta::double_and_uint(0x8000000000000000lu).d; }
       static element_type always_inline abs_mask_elem() noexcept
       { return WDutils::meta::double_and_uint(0x7ffffffffffffffflu).d; }
+      /// all bits set
+      static packed always_inline all_bits_set() noexcept
+      { return packed(all_mask_elem()); }
+      /// mask containing first k all_mask_elem(), rest nil_mask_elem()
+      static packed always_inline front_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return zero();
+	case 1:  return packed(all_mask_elem(), nil_mask_elem());
+	default: return packed(all_mask_elem(), all_mask_elem());
+	}
+      }
+      /// mask containing first k nill_mask_elem(), rest all_mask_elem()
+      static packed always_inline back_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return packed(all_mask_elem(), all_mask_elem());
+	case 1:  return packed(nil_mask_elem(), all_mask_elem());
+	default: return zero();
+	}
+      }
+      //
     private:
       static __m128d always_inline nil_mask() noexcept
       { return _mm_castsi128_pd(_mm_set1_epi64x(0x0l)); }
@@ -1526,15 +1683,15 @@ namespace WDutils {
     double always_inline at(dvec2 p) noexcept
     {
       static_assert(I<dvec2::block_size,"index out of range");
-# if   defined(__clang__)
+#  if   defined(__clang__)
       return p._m[I];
-# elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
+#  elif defined(__GNUC__) && !defined(__INTEL_COMPILER)
       return __builtin_ia32_vec_ext_v2df(p._m,I);
-# else
+#  else
       dvec2::aligned_element_block q;
       _mm_store_pd(q,p._m);
       return q[I];
-# endif
+#  endif
     }
     //
     template<int K> inline
@@ -1548,12 +1705,12 @@ namespace WDutils {
   WDutils_TRAITS(SSE::dvec2,"dvec2");
   //
   namespace SSE {
-# endif // __SSE2__
+#endif // __SSE2__
 
-# ifdef __AVX__
+#ifdef __AVX__
     //--------------------------------------------------------------------------
     ///
-    /// 4 packed double-precision floating-point numbers
+    /// 4 packed double-precision floating-point numbers, requires AVX
     ///
     //--------------------------------------------------------------------------
     template<> struct packed<4,double> : packed_base<4>
@@ -1599,25 +1756,28 @@ namespace WDutils {
       //@{
       /// default ctor
       always_inline packed() WDutilsCXX11DefaultBody
-#if __cplusplus >= 201103L
+#  if __cplusplus >= 201103L
       /// copy ctor
       always_inline packed(packed const&) = default;
       /// copy operator
       packed& always_inline operator=(packed const&) = default;
-#endif
+#  endif
       /// ctor from data_type is private
       explicit always_inline packed(data_type m) : _m(m) {}
       /// ctor from single integer value: set all element equal to single value
       explicit always_inline packed(int x) noexcept
-      { _m = _mm256_set1_pd(x); }
+      { _m = _mm256_set1_pd(double(x)); }
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int64_t x) noexcept
+      { _m = _mm256_set1_pd(double(x)); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(float x) noexcept
-      { _m = _mm256_set1_pd(float(x)); }
+      { _m = _mm256_set1_pd(double(x)); }
       /// ctor from single value: set all element equal to single value
       explicit always_inline packed(double x) noexcept
       { _m = _mm256_set1_pd(x); }
       /// ctor from 4 values: set elements
-      /// \note inverse ordre to _mm256_set_pd()
+      /// \note inverse order to _mm256_set_pd()
       always_inline packed(element_type a, element_type b,
 			   element_type c, element_type d) noexcept
       { _m = _mm256_set_pd(d,c,b,a); }
@@ -1631,7 +1791,7 @@ namespace WDutils {
       packed& always_inline set(element_type x) noexcept
       { _m = _mm256_set1_pd(x); return*this; }
       /// set elements
-      /// \note inverse ordre to _mm256_set_pd()
+      /// \note inverse order to _mm256_set_pd()
       packed& always_inline set(element_type a, element_type b,
 				element_type c, element_type d) noexcept
       { _m = _mm256_set_pd(d,c,b,a); return*this; }
@@ -1753,6 +1913,9 @@ namespace WDutils {
       /// unary -
       packed always_inline operator-() const noexcept
       { return packed(_mm256_xor_pd(_m,sgn_mask())); }
+      /// set to negative
+      friend packed&always_inline negate(packed&p) noexcept
+      { _mm256_xor_pd(p._m,sgn_mask()); return p; }
       /// *=
       packed& always_inline operator*=(packed p) noexcept
       { _m = _mm256_mul_pd(p._m,_m); return*this; }
@@ -1818,14 +1981,14 @@ namespace WDutils {
 	_mm256_store_pd(q,p._m);
 	return q[0]+q[1]+q[2];
       }
-#if(0)
+#  if(0)
       /// horizontal sum in each element
       friend packed always_inline hadd(packed p) noexcept
       /// horizontal maximum
       friend element_type always_inline max(packed p) noexcept
       /// horizontal minimum
       friend element_type always_inline min(packed p) noexcept
-#endif
+#  endif
       //@}
 
       /// \name vectorised comparisons
@@ -1925,6 +2088,40 @@ namespace WDutils {
       { return WDutils::meta::double_and_uint(0x8000000000000000lu).d; }
       static element_type always_inline abs_mask_elem() noexcept
       { return WDutils::meta::double_and_uint(0x7ffffffffffffffflu).d; }
+      /// all bits set
+      static packed always_inline all_bits_set() noexcept
+      { return packed(all_mask_elem()); }
+      /// mask containing first k all_mask_elem(), rest nil_mask_elem()
+      static packed always_inline front_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return zero();
+	case 1:  return packed(all_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 2:  return packed(all_mask_elem(), all_mask_elem(),
+			       nil_mask_elem(), nil_mask_elem());
+	case 3:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), nil_mask_elem());
+	default: return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	}
+      }
+      /// mask containing first k nil_mask_elem(), rest all_mask_elem()
+      static packed always_inline back_mask(unsigned k) noexcept
+      {
+	switch(k) {
+	case 0:  return packed(all_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 1:  return packed(nil_mask_elem(), all_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 2:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       all_mask_elem(), all_mask_elem());
+	case 3:  return packed(nil_mask_elem(), nil_mask_elem(),
+			       nil_mask_elem(), all_mask_elem());
+	default: return zero();
+	}
+      }
+      //
     private:
       static data_type always_inline nil_mask() noexcept
       { return _mm256_castsi256_pd(_mm256_set1_epi64x(0x0l)); }
@@ -1966,7 +2163,7 @@ namespace WDutils {
     {
       static_assert(K>=0 && K<dvec4::block_size,"K out of range");
 #  ifdef __AVX2__
-#   warning more efficient implementation possible with AVX2
+#    warning more efficient implementation possible with AVX2
 #  endif
       return dvec4(_mm256_permute_pd
 		   (_mm256_permute2f128_pd(p._m,p._m,K&2?49:32),K&1?15:0));
@@ -1976,8 +2173,476 @@ namespace WDutils {
   WDutils_TRAITS(SSE::dvec4,"dvec4");
   //
   namespace SSE {
-# endif // __AVX__
-#endif  // __SSE__
+#endif // __AVX__ 
+
+#ifdef WDutilsExtendSSE
+    //--------------------------------------------------------------------------
+    ///
+    /// H+H packed double-precision floating-point numbers
+    ///
+    /// \note A poor man's version of packed<K,double>. The main purpose is to
+    ///       enable mixed-precision arithmetic between packed<K,float> and
+    ///       packed<K,double>.
+    ///
+    //--------------------------------------------------------------------------
+#  if   defined(__MIC__)
+    struct packed<16,double> : packed_base<16>
+#  elif defined(__AVX__)
+    struct packed<8,double> : packed_base<8>
+#  elif defined(__SSE2__)
+    struct packed<4,double> : packed_base<4>
+#  endif
+    {
+      /// \name types, constants, and static methods
+      //@
+#  if   defined(__MIC__)
+      using base = packed_base<16>;
+#  elif defined(__AVX__)
+      using base = packed_base<8>;
+#  elif defined(__SSE2__)
+      using base = packed_base<4>;
+#  endif
+      //
+      using base::block_size;
+      using base::block_shft;
+      using base::block_trim;
+      using base::block_mask;
+      using base::sub_index;
+      using base::block_index;
+      using base::num_blocks;
+      using base::blocked_num;
+      //
+      static const int half_block = block_size/2;
+      using sub_t = packed<half_block,double>;
+      /// is given index aligned to block_index?
+      constexpr static bool is_aligned(unsigned i) noexcept
+      { return sub_t::is_aligned(i); }
+      /// aligned index given an index
+      constexpr static unsigned aligned_index(unsigned i) noexcept
+      { return sub_t::aligned_index(i); }
+      /// associated element type
+      typedef typename sub_t::element_type element_type;
+      /// associated SSE/AVX vector type
+      typedef typename sub_t::data_type data_type;
+      /// equivalent array of elements
+      typedef element_type element_block[block_size];
+      /// required alignement (bytes)
+      static const unsigned alignment = sub_t::alignment;
+      /// aligned equivalent array of elements
+      typedef element_block alignas(sub_t::aligned_element_block)
+	aligned_element_block;
+      /// a packed with all elements equal to 0
+      static packed always_inline zero() noexcept
+      { return packed(sub_t::zero(),sub_t::zero()); }
+      /// a packed with all elements equal to 1
+      static packed always_inline one() noexcept
+      { return packed(sub_t::one(),sub_t::one()); }
+      /// is given pointer appropriately aligned?
+      static bool is_aligned(void*p) noexcept
+      { return sub_t::is_aligned(p); }
+      /// offset (number of element_types) of pointer from alignment
+      static size_t offset(element_type*p) noexcept
+      { return sub_t::offset(p); }
+      //@}
+      
+      /// \name construction and assignment
+      //@{
+      /// default ctor
+      always_inline packed() WDutilsCXX11DefaultBody
+#  if __cplusplus >= 201103L
+      /// copy ctor
+      always_inline packed(packed const&) = default;
+      /// copy operator
+      packed& always_inline operator=(packed const&) = default;
+#  endif
+      /// ctor from sub_t
+      explicit always_inline packed(sub_t m) noexcept
+	: s0(m), s1(m) {}
+      /// ctor from two sub_t
+      always_inline packed(sub_t m0, sub_t m1) noexcept
+	: s0(m0), s1(m1) {}
+      /// ctor from two data_type
+      always_inline packed(data_type m0, data_type m1) noexcept
+	: s0(m0), s1(m1) {}
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int x) noexcept
+	: s0(x), s1(s0) {}
+      /// ctor from single integer value: set all element equal to single value
+      explicit always_inline packed(int64_t x) noexcept
+	: s0(x), s1(s0) {}
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(float x) noexcept
+	: s0(x), s1(s0) {}
+      /// ctor from single value: set all element equal to single value
+      explicit always_inline packed(double x) noexcept
+	: s0(x), s1(s0) {}
+      /// ctor from K=4 values: set elements
+      always_inline packed(element_type a, element_type b,
+			   element_type c, element_type d) noexcept
+      	: s0(a,b), s1(c,d)
+      { static_assert(block_size==4,"wrong number of arguments"); }
+      /// ctor from K=8 values: set elements
+      always_inline packed(element_type a, element_type b,
+			   element_type c, element_type d,
+			   element_type e, element_type f,
+			   element_type g, element_type h) noexcept
+      	: s0(a,b,c,d), s1(e,f,g,h)
+      { static_assert(block_size==8,"wrong number of arguments"); }
+      /// ctor from K=16 values: set elements
+      always_inline packed(element_type a, element_type b,
+			   element_type c, element_type d,
+			   element_type e, element_type f,
+			   element_type g, element_type h,
+			   element_type i, element_type j,
+			   element_type k, element_type l,
+			   element_type m, element_type n,
+			   element_type o, element_type p) noexcept
+      	: s0(a,b,c,d,e,f,g,h), s1(i,j,k,l,m,n,o,p)
+      { static_assert(block_size==16,"wrong number of arguments"); }
+      /// set from K=4 values: set elements
+      packed& always_inline set(element_type a, element_type b,
+				element_type c, element_type d) noexcept
+      {
+	static_assert(block_size==4,"wrong number of arguments");
+	s0.set(a,b); s1.set(c,d); return*this;
+      }
+      /// set from K=8 values: set elements
+      packed& always_inline set(element_type a, element_type b,
+				element_type c, element_type d,
+				element_type e, element_type f,
+				element_type g, element_type h) noexcept
+      {
+	static_assert(block_size==8,"wrong number of arguments");
+	s0.set(a,b,c,d); s1.set(e,f,g,h); return*this;
+      }
+      /// set from K=16 values: set elements
+      always_inline packed(element_type a, element_type b,
+			   element_type c, element_type d,
+			   element_type e, element_type f,
+			   element_type g, element_type h,
+			   element_type i, element_type j,
+			   element_type k, element_type l,
+			   element_type m, element_type n,
+			   element_type o, element_type p) noexcept
+      {
+	static_assert(block_size==16,"wrong number of arguments");
+      	s0.set(a,b,c,d,e,f,g,h); s1.set(i,j,k,l,m,n,o,p) return*this;
+      }
+      /// set all elements equal to zero
+      packed& always_inline set_zero() noexcept
+      { s1 = s0.set_zero(); return*this; }
+      /// set all elements equal to single value
+      packed& always_inline set(element_type x) noexcept
+      { s1 = s0.set(x); return*this; }
+      //@}
+
+      /// \name data access and conversion
+      //@{
+      /// direct data const access
+      data_type const& always_inline data(const bool i) const noexcept
+      { return i? s1.data() : s0.data(); }
+      /// direct non-const data access
+      data_type& always_inline data(const bool i) noexcept
+      { return i? s1.data() : s0.data(); }
+      /// obtain lower (I=0) or upper (I=1)  sub_t
+      template<unsigned I>
+      friend sub_t always_inline extract(packed p) noexcept
+      { return I? p.s1:p.s0; }
+      /// obtain lower sub_t
+      friend sub_t always_inline lower(packed p) noexcept
+      { return p.s0; }
+      /// obtain upper sub_t
+      friend sub_t always_inline upper(packed p) noexcept
+      { return p.s1; }
+      /// constant element access, templated
+      template<unsigned I>
+      friend element_type always_inline at(packed p) noexcept
+      { return I<half_block? at<I>(p.s0) : at<I-half_block>(p.s1); }
+      /// downcast: convert @c packed<K,double>  to @c packed<K,float>
+      friend packed<K,float> always_inline downcast(packed p) noexcept
+      { return downcast(p.s0,p.s1); }
+      /// upcast:   convert @c packed<K,float>  to @c packed<K,double>  
+      friend packed always_inline upcast(packed<K,float> p) noexcept
+      { return packed(upcast(lower(p)),upcast(upper(p))); }
+      //@}
+
+      /// \name load and store
+      //@{
+      /// load from aligned memory location
+      static packed always_inline load(const element_type*p) noexcept
+      { return packed(sub_t::load(p),sub_t::load(p+half_block)); }
+      /// load from unaligned memory location
+      static packed always_inline loadu(const element_type*p) noexcept
+      { return packed(sub_t::loadu(p),sub_t::loadu(p+half_block)); }
+      /// load from aligned memory location, using template arg for alignment
+      template<bool aligned>
+      static packed always_inline load_t(const element_type*p) noexcept
+      { return packed(sub_t::load_t<aligned>(p),
+		      sub_t::load_t<aligned>(p+half_block)); }
+      /// store to aligned memory location
+      void always_inline store(element_type*p) const noexcept
+      { s0.store(p); s1.store(p+half_block); }
+      /// store to unaligned memory location
+      void always_inline storeu(element_type*p) const noexcept
+      { s0.storeu(p); s1.storeu(p+half_block); }
+      /// store to aligned memory location, using template arg for alignment
+      template<bool aligned> 
+      void always_inline store_t(element_type*p) const noexcept
+      { s0.store_t<aligned>(p); s1.store_t<aligned>(p+half_block); }
+      /// load aligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline pack(class_with_member_data const&a) noexcept
+      { return load(a.data()); }
+      /// load unaligned object with member data() returning const element_type*
+      template<typename class_with_member_data>
+      static packed always_inline packu(class_with_member_data const&a) noexcept
+      { return loadu(a.data()); }
+      /// load object with member data() returning const element_type*
+      template<bool aligned, typename class_with_member_data>
+      static packed always_inline pack_t(class_with_member_data const&a)
+	noexcept
+      { return load_t<aligned>(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpack(class_with_member_data&a) const noexcept
+      { store(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<typename class_with_member_data>
+      void always_inline unpacku(class_with_member_data&a) const noexcept
+      { storeu(a.data()); }
+      /// store to aligned object with member data() returning element_type*
+      template<bool aligned, typename class_with_member_data>
+      void always_inline unpack_t(class_with_member_data&a) const noexcept
+      { store_t<aligned>(a.data()); }
+      /// store directly to aligned memory without polluting cashes
+      void always_inline stream(element_type*p) const noexcept
+      { s0.stream(p); s1.stream(p+half_block); }
+      //@}
+
+      /// \name vectorised arithmetic operations
+      //@{
+      /// +=
+      packed& always_inline operator+=(packed p) noexcept
+      { s0+=p.s0; s1+=p.s1; return*this; }
+      /// +
+      packed always_inline operator+ (packed p) const noexcept
+      { return packed(s0+p.s0, s1+p.s1); }
+      /// -=
+      packed& always_inline operator-=(packed p) noexcept
+      { s0-=p.s0; s1-=p.s1; return*this; }
+      /// -
+      packed always_inline operator- (packed p) const noexcept
+      { return packed(s0-p.s0, s1-p.s1); }
+      /// unary -
+      packed always_inline operator-() const noexcept
+      { return packed(-s0,-s1); }
+      /// set to negative
+      friend packed&always_inline negate(packed&p) noexcept
+      { negate(p.s0); negate(p.s1); return p; }
+      /// *=
+      packed& always_inline operator*=(packed p) noexcept
+      { s0*=p.s0; s1*=p.s1; return*this; }
+      /// *
+      packed always_inline operator* (packed p) const noexcept
+      { return packed(s0*p.s0, s1*p.s1); }
+      /// /=
+      packed& always_inline operator/=(packed p) noexcept
+      { s0/=p.s0; s1/=p.s1; return*this; }
+      /// /
+      packed always_inline operator/ (packed p) const noexcept
+      { return packed(s0/p.s0, s1/p.s1); }
+      /// sqrt
+      friend packed always_inline sqrt(packed p) noexcept
+      { return packed(sqrt(p.s0), sqrt(p.s1)); }
+      /// square
+      friend packed always_inline square(packed p) noexcept
+      { return  packed(square(p.s0), square(p.s1)); }
+      /// reciprocal
+      friend packed always_inline reciprocal(packed p) noexcept
+      { return packed(reciprocal(p.s0), reciprocal(p.s1)); }
+      /// maximum of two packed
+      friend packed always_inline max(packed a,
+					      packed b) noexcept
+      { return packed(max(a.s0,b.s0), max(a.s1,b.s1)); }
+      /// minimum of two packed
+      friend packed always_inline min(packed a,
+					      packed b) noexcept
+      { return packed(min(a.s0,b.s0), min(a.s1,b.s1)); }
+      /// abs
+      friend packed always_inline abs(packed p) noexcept
+      { return packed(abs(p.s0), abs(p.s1)); }
+      /// -abs
+      friend packed always_inline negabs(packed p) noexcept
+      { return packed(negabs(p.s0), negabs(p.s1)); }
+      /// abs(x-y)
+      friend packed always_inline diff(packed a,
+					       packed b) noexcept
+      { return packed(diff(a.s0,b.s0), diff(a.s1,b.s1)); }
+      /// x = abs(x-y)
+      packed& always_inline make_diff(packed p) noexcept
+      { s0.make_diff(p.s0); s1.make_diff(p.s1); return*this; }
+      /// sign(a)*b
+      friend packed always_inline signmove(packed a,
+						   packed b) noexcept
+      { return packed(signmove(a.s0,b.s0), signmove(a.s1,b.s1)); }
+      //@}
+
+      /// \name horizontal arithmetic operations
+      //@{
+      /// horizontal sum
+      friend element_type always_inline sum(packed p) noexcept
+      { return sum(p.s0) + sum(p.s1); }
+#  if(0)
+      /// horizontal sum in each element
+      friend packed always_inline hadd(packed p) noexcept
+      /// horizontal maximum
+      friend element_type always_inline max(packed p) noexcept
+      { return std::max(max(p.s0),max(p.s1)); }
+      /// horizontal minimum
+      friend element_type always_inline min(packed p) noexcept
+      { return std::min(min(p.s0),min(p.s1)); }
+#  endif
+      //@}
+
+      /// \name vectorised comparisons
+      //@{
+      /// <
+      packed always_inline operator< (packed p) const noexcept
+      { return packed(s0<p.s0, s1<p.s1); }
+      /// <=
+      packed always_inline operator<=(packed p) const noexcept
+      { return packed(s0<=p.s0, s1<=p.s1); }
+      /// >
+      packed always_inline operator> (packed p) const noexcept
+      { return packed(s0>p.s0, s1>p.s1); }
+      /// >=
+      packed always_inline operator>=(packed p) const noexcept
+      { return packed(s0>=p.s0, s1>=p.s1); }
+      /// ==
+      packed always_inline operator==(packed p) const noexcept
+      { return packed(s0==p.s0, s1==p.s1); }
+      /// !=
+      packed always_inline operator!=(packed p) const noexcept
+      { return packed(s0!=p.s0, s1!=p.s1); }
+      //@}
+
+      /// \name vectorised logical operations
+      /// &=
+      packed& always_inline operator&=(packed p) noexcept
+      { s0&=p.s0; s1&=p.s1; return*this; }
+      /// &
+      packed always_inline operator& (packed p) const noexcept
+      { return packed(s0&p.s0, s1&p.s1); }
+      /// |=
+      packed& always_inline operator|=(packed p) noexcept
+      { s0|=p.s0; s1|=p.s1; return*this; }
+      /// |
+      packed always_inline operator| (packed p) const noexcept
+      { return packed(s0|p.s0, s1|p.s1); }
+      /// ^=
+      packed& always_inline operator^=(packed p) noexcept
+      { s0^=p.s0; s1^=p.s1; return*this; }
+      /// ^
+      packed always_inline operator^ (packed p) const noexcept
+      { return packed(s0^p.s0, s1^p.s1); }
+      /// unary !
+      packed always_inline operator! () const noexcept
+      { return packed(!s0,!s1); }
+      /// and not: this=this&!that
+      packed always_inline andnot(packed p) const noexcept
+      { return packed(s0.andnot(p.s0), s1.andnot(p.s1)); }
+      //@}
+
+      /// \name boolean or integer properties
+      //@{
+      /// return integer with bits equal to sign bits
+      /// \note if @a p is the result of a boolean operation (comparison, or
+      ///       bit-wise operations on comparison results), signbit(p) can be
+      ///       used to in an if statement.
+      friend always_inline int signbits(packed p) noexcept
+      { return (signbits(p.s1)<<half_block) | signbits(p.s0); }
+      /// is any element negative
+      friend always_inline bool has_negative(packed p) noexcept
+      { return has_negative(p.s0) || has_negative(p.s1); }
+      /// are all elements negative
+      friend always_inline bool all_negative(packed p) noexcept
+      { return all_negative(p.s0) && all_negative(p.s1); }
+      /// is any element non-zero
+      friend always_inline bool has_non_zero(packed p) noexcept
+      { return has_non_zero(p.s0) || has_non_zero(p.s1); }
+      /// are all elements non-zero
+      friend always_inline bool all_non_zero(packed p) noexcept
+      { return all_non_zero(p.s0) && all_non_zero(p.s1); }
+      /// is any element zero
+      friend always_inline bool has_zero(packed p) noexcept
+      { return has_zero(p.s0) || has_zero(p.s1); }
+      /// are all elements zero
+      friend always_inline bool all_zero(packed p) noexcept
+      { return all_zero(p.s0) && all_zero(p.s1); }
+      //@}
+
+      /// \name miscellaneous
+      //@{
+      /// set all elements to Ith element of argument
+      template<int I>
+      friend packed always_inline single(packed p) noexcept
+      {
+	return (I < half_block)?
+	  packed(single<I  >(p.s0),single<I  >(p.s0)) :
+	  packed(single<I-half_block>(p.s1),single<I-half_block>(p.s1)) ;
+      }
+      /// blend two vectors depending on sign of third:  result = sign<0? x : y
+      friend packed blend(packed sign, packed x,
+				  packed y) noexcept
+      { return packed(blend(sign.s0,x.s0,y.s0),
+			      blend(sign.s1,x.s1,y.s1)); }
+      /// combine two vectors depending on third:  result = mask? x : y
+      friend packed combine(packed mask,
+				    packed x, packed y) noexcept
+      { return packed(combine(mask.s0,x.s0,y.s0),
+			      combine(mask.s1,x.s1,y.s1)); }
+      /// all bits set
+      static packed always_inline all_bits_set() noexcept
+      { return packed(sub_t::all_bits_set()); }
+      /// mask containing first k all_mask_elem(), rest nil_mask_elem()
+      static packed always_inline front_mask(unsigned k) noexcept
+      {
+	return k<half_block?
+	  packed(sub_t::front_mask (k), sub_t::zero      ()   ) :
+	  packed(sub_t::all_bits_set(), sub_t::front_mask(k-half_block)) ;
+      }
+      /// mask containing first k nil_mask_elem(), rest all_mask_elem()
+      static packed always_inline back_mask(unsigned k) noexcept
+      {
+	return k<half_block?
+	  packed(sub_t::back_mask(k), sub_t::all_bits_set()) :
+	  packed(sub_t::zero      (), sub_t::back_mask(k-half_block)) ;
+      }
+      //@}
+    private:
+      /// data
+      sub_t s0,s1;
+    };// struct packed<H+H,double>
+#  if   defined(__MIC__)
+    typedef packed<16,double> dvec8p8;
+#  elif defined(__AVX__)
+    typedef packed<8,double> dvec4p4;
+#  elif defined(__SSE2__)
+    typedef packed<4,double> dvec2p2;
+#  endif
+
+  }
+#  if   defined(__MIC__)
+  WDutils_TRAITS(SSE::dvec8p8,"dvec8p8");
+#  elif defined(__AVX__)
+  WDutils_TRAITS(SSE::dvec4p4,"dvec4p4");
+#  elif defined(__SSE2__)
+  WDutils_TRAITS(SSE::dvec2p2,"dvec2p2");
+#  endif
+  namespace SSE {
+
+#endif // WDutilsExtendSSE
+#endif // __SSE__
     /// is_packed<X>::value is true if X is SSE::packed<K,T>
     template<typename vec>
     struct is_packed {
@@ -1991,32 +2656,70 @@ namespace WDutils {
 #ifdef __AVX__
 	|| is_same<dvec4,vec>::value
 	|| is_same<fvec8,vec>::value
+#  ifdef WDutilsExtendSSE
+	|| is_same<dvec4p4,vec>::value
+#  endif
+#elif defined(__SSE2__)
+#  ifdef WDutilsExtendSSE
+	|| is_same<dvec2p2,vec>::value
+#  endif
 #endif
 	;
     };
-    /// get_packed<X>::type is packed<K,X> with largest supported K
+    /// get_packed<X>::type is packed<K,X> with largest hardware supported K
     template<typename T> struct get_packed;
 #ifdef __SSE__
     template<> struct get_packed<float>
-# ifdef __AVX__
+#  ifdef __AVX__
     { typedef fvec8 type; };
-# else
+#  else
     { typedef fvec4 type; };
-# endif
+#  endif
 #endif
 #ifdef __SSE2__
     template<> struct get_packed<double>
-# ifdef __AVX__
+#  ifdef __AVX__
     { typedef dvec4 type; };
-# else
+#  else
     { typedef dvec2 type; };
-# endif
+#  endif
 #endif
+#if __cplusplus >= 201103L
+    template<typename T>
+    using max_packed_t = typename get_packed<T>::type;
+    ///
+    template<typename T>
+    struct is_max_packed {
+      static const bool value = false
+	|| is_same<T,max_packed_t<float > >::value
+	|| is_same<T,max_packed_t<double> >::value;
+    };
+#endif
+    /// formatted output of packed<>
+    template<int K, typename X>
+    std::ostream& operator<<(std::ostream&s, packed<K,X> const&x)
+    {
+#if __cplusplus >= 201103L
+      auto w = s.width();
+      auto p = s.precision();
+#else
+      int w = s.width();
+      int p = s.precision();
+#endif
+      typename packed<K,X>::aligned_element_block q;
+      x.store(q);
+      s << q[0];
+      for(int k=1; k!=K; ++k) {
+	s.width(w);
+	s.precision(p);
+	s << ' ' << q[k];
+      }
+      return s;
+    }
   } // namespace WDutils::SSE
   //
 #ifdef __SSE__
-# ifdef __INTEL_COMPILER
-// #  ifndef __SSE4_1__
+#  ifdef __INTEL_COMPILER   // icc
   inline float xmm0(__m128 _A)
   { float t; _MM_EXTRACT_FLOAT(t,_A,0); return t; }
   inline float xmm1(__m128 _A)
@@ -2025,14 +2728,13 @@ namespace WDutils {
   { float t; _MM_EXTRACT_FLOAT(t,_A,2); return t; }
   inline float xmm3(__m128 _A)
   { float t; _MM_EXTRACT_FLOAT(t,_A,3); return t; }
-// #  endif// __SSE4_1__
-#  ifdef __SSE2__
+#    ifdef __SSE2__
   inline double xmm0(__m128d _A)
   { double x; _mm_storel_pd(&x,_A); return x; }
   inline double xmm1(__m128d _A)
   { double x; _mm_storeh_pd(&x,_A); return x; }
-#  endif// __SSE2__
-# elif defined(__clang__)  // clang
+#    endif// __SSE2__
+#  elif defined(__clang__)  // clang
   inline float xmm0(__m128 _A)
   { return _A[0]; }
   inline float xmm1(__m128 _A)
@@ -2041,7 +2743,7 @@ namespace WDutils {
   { return _A[2]; }
   inline float xmm3(__m128 _A)
   { return _A[3]; }
-# elif defined(__GNUC__)  // __INTEL_COMPILER / __GNUC__
+#  elif defined(__GNUC__)  // gcc
   inline float xmm0(__m128 _A)
   { return __builtin_ia32_vec_ext_v4sf(_A,0); }
   inline float xmm1(__m128 _A)
@@ -2050,15 +2752,15 @@ namespace WDutils {
   { return __builtin_ia32_vec_ext_v4sf(_A,2); }
   inline float xmm3(__m128 _A)
   { return __builtin_ia32_vec_ext_v4sf(_A,3); }
-#  ifdef __SSE2__
+#    ifdef __SSE2__
   inline double xmm0(__m128d _A)
   { return __builtin_ia32_vec_ext_v2df(_A,0); }
   inline double xmm1(__m128d _A)
   { return __builtin_ia32_vec_ext_v2df(_A,1); }
-#  endif// __SSE2__
-# endif // __INTEL_COMPILER / __GNUC__
-# ifdef __AVX__
-#  if defined(__clang__)  // clang
+#    endif// __SSE2__
+#  endif // __INTEL_COMPILER / __GNUC__
+#  ifdef __AVX__
+#    if defined(__clang__)  // clang
   inline float ymm0(__m256 _A)
   { return _A[0]; }
   inline float ymm1(__m256 _A)
@@ -2084,7 +2786,7 @@ namespace WDutils {
   { return _A[2]; }
   inline double ymm3(__m256d _A)
   { return _A[3]; }
-#  else
+#    else                   // icc, gcc
   inline float ymm0(__m256 _A)
   { return xmm0(_mm256_extractf128_ps(_A,0)); }
   inline float ymm1(__m256 _A)
@@ -2110,8 +2812,8 @@ namespace WDutils {
   { return xmm0(_mm256_extractf128_pd(_A,1)); }
   inline double ymm3(__m256d _A)
   { return xmm1(_mm256_extractf128_pd(_A,1)); }
-#  endif
-# endif // __AVX__
+#    endif
+#  endif // __AVX__
 #endif // __SSE__
 //
   namespace SSE {
@@ -2363,7 +3065,7 @@ namespace WDutils {
 	    helper::connect<Functor>(x,*y);
 	    --n,++x,++y; 
 	  }
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=2 && (size_t(x)&31)) {
 	    helper::connect<Functor>(x,dvec2::loadu(y));
 	    n-=2,x+=2,y+=2;
@@ -2383,14 +3085,14 @@ namespace WDutils {
 	      n-=2,x+=2,y+=2;
 	    }
 	  }
-# else
+#  else
 	  if(size_t(y)&15)
 	    for(; n>=2; n-=2,x+=2,y+=2)
 	      helper::connect<Functor>(x,dvec2::loadu(y));
 	  else
 	    for(; n>=2; n-=2,x+=2,y+=2)
 	      helper::connect<Functor>(x,dvec2::load(y));
-# endif
+#  endif
 	  if(n)
 	    helper::connect<Functor>(x,*y);
 	}
@@ -2401,7 +3103,7 @@ namespace WDutils {
 	    helper::swap<1,0>(x,y);
 	    --n,++x,++y; 
 	  }
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=2 && (size_t(x)&31)) {
 	    helper::swap<2,0>(x,y);
 	    n-=2,x+=2,y+=2;
@@ -2421,14 +3123,14 @@ namespace WDutils {
 	      n-=2,x+=2,y+=2;
 	    }
 	  }
-# else
+#  else
 	  if(size_t(y)&15)
 	    for(; n>=2; n-=2,x+=2,y+=2)
 	      helper::swap<2,0>(x,y);
 	  else
 	    for(; n>=2; n-=2,x+=2,y+=2)
 	      helper::swap<2,1>(x,y);
-# endif
+#  endif
 	  if(n)
 	    helper::swap<1,0>(x,y);
 	}
@@ -2441,7 +3143,7 @@ namespace WDutils {
 	    --n,++x; 
 	  }
 	  dvec2 y2(y);
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=2 && (size_t(x)&31)) {
 	    helper::connect<Functor>(x,y2);
 	    n-=2,x+=2;
@@ -2449,7 +3151,7 @@ namespace WDutils {
 	  dvec4 y4(y);
 	  for(; n>=4; n-=4,x+=4)
 	    helper::connect<Functor>(x,y4);
-# endif
+#  endif
 	  for(; n>=2; n-=2,x+=2)
 	    helper::connect<Functor>(x,y2);
 	  if(n)
@@ -2469,7 +3171,7 @@ namespace WDutils {
 	{
 	  for(; n && (size_t(x)&15); --n,++x,++y)
 	    helper::connect<Functor>(x,*y);
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=4 && (size_t(x)&31)) {
 	    helper::connect<Functor>(x,fvec4::loadu(y));
 	    n-=4,x+=4,y+=4;
@@ -2489,14 +3191,14 @@ namespace WDutils {
 	      n-=4,x+=4,y+=4;
 	    }
 	  }
-# else
+#  else
 	  if(size_t(y)&15)
 	    for(; n>=4; n-=4,x+=4,y+=4)
 	      helper::connect<Functor>(x,fvec4::loadu(y));
 	  else
 	    for(; n>=4; n-=4,x+=4,y+=4)
 	      helper::connect<Functor>(x,fvec4::load(y));
-# endif
+#  endif
 	  for(; n; --n,++x,++y)
 	    helper::connect<Functor>(x,*y);
 	}
@@ -2505,7 +3207,7 @@ namespace WDutils {
 	{
 	  for(; n && (size_t(x)&15); --n,++x,++y)
 	    helper::swap<1,0>(x,y);
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=4 && (size_t(x)&31)) {
 	    helper::swap<4,0>(x,y);
 	    n-=4,x+=4,y+=4;
@@ -2525,14 +3227,14 @@ namespace WDutils {
 	      n-=4,x+=4,y+=4;
 	    }
 	  }
-# else
+#  else
 	  if(size_t(y)&15)
 	    for(; n>=4; n-=4,x+=4,y+=4)
 	      helper::swap<4,0>(x,y);
 	  else
 	    for(; n>=4; n-=4,x+=4,y+=4)
 	      helper::swap<4,1>(x,y);
-# endif
+#  endif
 	  for(; n; --n,++x,++y)
 	    helper::swap<1,0>(x,y);
 	}
@@ -2543,7 +3245,7 @@ namespace WDutils {
 	  for(; n && (size_t(x)&15); --n,++x)
 	    helper::connect<Functor>(x,y);
 	  fvec4 y4(y);
-# ifdef __AVX__
+#  ifdef __AVX__
 	  if(n>=4 && (size_t(x)&31)) {
 	    helper::connect<Functor>(x,y4);
 	    n-=4,x+=4;
@@ -2551,7 +3253,7 @@ namespace WDutils {
 	  fvec8 y8(y);
 	  for(; n>=8; n-=8,x+=8)
 	    helper::connect<Functor>(x,y8);
-# endif
+#  endif
 	  for(; n>=4; n-=4,x+=4)
 	    helper::connect<Functor>(x,y4);
 	  for(; n; --n,++x)
@@ -2604,7 +3306,7 @@ namespace WDutils {
       {
 	// for(i=0; i!=N; ++i) Functor::operate(x[i], y[i]);
 	template<unsigned N, typename Functor>
-	static typename enable_if<N>::type
+	static typename enable_if<N!=0>::type
 	connect(RealType*x, const RealType*y) noexcept
 	{
 	  Functor::operate(*x,*y);
@@ -2614,19 +3316,19 @@ namespace WDutils {
 	static typename enable_if<N==0>::type
 	always_inline connect(RealType*, const RealType*) noexcept {}
 	// for(i=0; i!=N; ++i) swap(x[i], y[i]);
-	template<unsigned N, typename Functor>
-	static typename enable_if<N>::type
+	template<unsigned N>
+	static typename enable_if<N!=0>::type
 	swap(RealType*x, RealType*y) noexcept
 	{
 	  meta::swap::operate(*x,*y);
-	  swap<N-1,Functor>(++x,++y);
+	  swap<N-1>(++x,++y);
 	}
-	template<unsigned N, typename Functor>
+	template<unsigned N>
 	static typename enable_if<N==0>::type
 	always_inline swap(RealType*, RealType*) noexcept {}
 	// for(i=0; i!=N; ++i) Functor::operate(x[i], y);
 	template<unsigned N, typename Functor>
-	static typename enable_if<N>::type
+	static typename enable_if<N!=0>::type
 	foreach(RealType*x, const RealType y) noexcept
 	{
 	  Functor::operate(*x,y);
@@ -2642,7 +3344,7 @@ namespace WDutils {
       class static_connector<double> : connector_helper<double>
       {
 	typedef connector_helper<double> helper;
-# if __cplusplus >= 201103L
+#  if __cplusplus >= 201103L && !defined(__INTEL_COMPILER)
 	//
 	static constexpr unsigned half_block(unsigned block)
 	{ return block>1? block/2 : 1; }
@@ -2653,15 +3355,16 @@ namespace WDutils {
 	    N >= max_block? max_block : 
 	    N >= half_block(max_block)? half_block(max_block) : 1;
 	}
-# else  //
+#  else  //
 	template<unsigned N, unsigned maxb>
 	struct size_block {
 	  static const unsigned half  = maxb>1? maxb/2 : 1;
 	  static const unsigned block = N >= maxb? maxb : 
 	                                N >= half? half : 1;
 	};
+#  define half_block(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::half
 #  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
-# endif
+#endif
 	//
 	template<typename Functor, unsigned N, unsigned max_block>
 	static void always_inline connect_start(double*x, const double*y)
@@ -2696,9 +3399,9 @@ namespace WDutils {
 	//
 	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==2
-# ifdef __AVX__
+#ifdef __AVX__
 				  && (N<4)
-# endif
+#endif
 	                         >::type
 	connect_t(double*x, const double*y) noexcept
 	{
@@ -2706,7 +3409,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,dvec2::load_t<y_aligned>(y));
 	  connect_t<Functor,N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
 	}
-# ifdef __AVX__
+#ifdef __AVX__
 	//
 	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=4) && block==2>::type
@@ -2728,7 +3431,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,dvec4::load_t<y_aligned>(y));
 	  connect_t<Functor,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
-# endif
+#endif
       public:
 	// for(i=0; i!=N; ++i) Functor::operator(x[i], y[i]);
 	template<unsigned N, typename Functor>
@@ -2770,9 +3473,9 @@ namespace WDutils {
 	//
 	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==2
-# ifdef __AVX__
+#ifdef __AVX__
 				  && (N<4)
-# endif
+#endif
 	                         >::type
 	swap_t(double*x, double*y) noexcept
 	{
@@ -2780,7 +3483,7 @@ namespace WDutils {
 	  helper::swap<2,y_aligned>(x,y);
 	  swap_t<N-2,block_size(N-2,2),y_aligned>(x+=2,y+=2);
 	}
-# ifdef __AVX__
+#ifdef __AVX__
 	//
 	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=4) && block==2>::type
@@ -2802,7 +3505,7 @@ namespace WDutils {
 	  helper::swap<4,y_aligned>(x,y);
 	  swap_t<N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
-# endif
+#endif
       public:
 	// for(i=0; i!=N; ++i) swap(x[i], y[i]);
 	template<unsigned N>
@@ -2810,11 +3513,11 @@ namespace WDutils {
 	{ swap_t<N,1,0>(x,y); }
 	//
       private:
-# ifdef __AVX__
+#ifdef __AVX__
 #  define VECS_DECL dvec2, dvec4
-# else
+#else
 #  define VECS_DECL dvec2
-# endif
+#endif
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<N==0 && block==1>::type
@@ -2825,14 +3528,14 @@ namespace WDutils {
 	foreach_t(double*x, const double y, VECS_DECL) noexcept
 	{ helper::connect<Functor>(x,y); }
 	//
-#  undef  VECS_DECL
-# ifdef __AVX__
+#undef  VECS_DECL
+#ifdef __AVX__
 #  define VECS_DECL const double y, const dvec2&y2, const dvec4&y4
 #  define VECS_PASS y, y2, y4
-# else
+#else
 #  define VECS_DECL const double y, const dvec2&y2
 #  define VECS_PASS y, y2
-# endif
+#endif
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<(N>1) && block==1>::type
@@ -2848,9 +3551,9 @@ namespace WDutils {
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<block==2
-# ifdef __AVX__
+#ifdef __AVX__
 				  && (N<4)
-# endif
+#endif
 			       	   >::type
 	foreach_t(double*x, VECS_DECL) noexcept
 	{
@@ -2858,7 +3561,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,y2);
 	  foreach_t<Functor,N-2,block_size(N-2,2)>(x+=2, VECS_PASS);
 	}
-# ifdef __AVX__
+#ifdef __AVX__
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<(N>=4) && block==2>::type
@@ -2880,10 +3583,10 @@ namespace WDutils {
 	  helper::connect<Functor>(x,y4);
 	  foreach_t<Functor,N-4,block_size(N-4,4)>(x+=4, VECS_PASS);
 	}
-# endif
-# undef block_size
-# undef VECS_DECL
-# undef VECS_PASS
+#endif
+#undef block_size
+#undef VECS_DECL
+#undef VECS_PASS
 	//
 	template<typename Functor, unsigned N>
 	static typename enable_if<N==0>::type
@@ -2893,7 +3596,7 @@ namespace WDutils {
 	static typename enable_if<N==1>::type
 	m_foreach(double*x, const double y) noexcept
 	{ helper::connect<Functor>(x,y); }
-# ifdef __AVX__
+#ifdef __AVX__
 	//
 	template<typename Functor, unsigned N>
 	static typename enable_if<(N>=2 && N<4)>::type
@@ -2909,7 +3612,7 @@ namespace WDutils {
 	static typename enable_if<(N>=2)>::type
 	m_foreach(double*x, double y) noexcept
 	{ foreach_t<Functor,N,1>(x,y,dvec2(y)); }
-# endif
+#endif
       public:
 	// for(i=0; i!=N; ++i) Functor::operator(x[i], y);
 	template<unsigned N, typename Functor>
@@ -2923,7 +3626,7 @@ namespace WDutils {
       struct static_connector<float> : private connector_helper<float>
       {
 	typedef connector_helper<float> helper;
-# if __cplusplus >= 201103L && !defined(__INTEL_COMPILER)
+#  if __cplusplus >= 201103L && !defined(__INTEL_COMPILER)
 	//
 	static constexpr unsigned smll_block(unsigned block)
 	{ return block==8? 4 : 1; }
@@ -2934,15 +3637,15 @@ namespace WDutils {
 	    N >= max_block? max_block  : 
 	    N >= smll_block(max_block)? smll_block(max_block) : 1;
 	}
-# else  //
+#  else //
 	template<unsigned N, unsigned maxb>
 	struct size_block {
 	  static const unsigned smll  = maxb==8? 4 : 1;
 	  static const unsigned block = N >= maxb? maxb : 
 	                                N >= smll? smll : 1;
 	};
-#  define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
-# endif
+#    define block_size(NUM,MAXBLOCK) size_block<NUM,MAXBLOCK>::block
+#  endif
 	//
 	template<typename Functor, unsigned N, unsigned max_block>
 	static void always_inline connect_start(float*x, const float*y) noexcept
@@ -3007,9 +3710,9 @@ namespace WDutils {
 	//
 	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==4
-# ifdef __AVX__
+#  ifdef __AVX__
 				  && (N<8)
-# endif
+#  endif
 			       	   >::type
 	connect_t(float*x, const float*y) noexcept
 	{
@@ -3017,7 +3720,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,fvec4::load_t<y_aligned>(y));
 	  connect_t<Functor,N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
-# ifdef __AVX__
+#  ifdef __AVX__
 	//
 	template<typename Functor, unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=8) && block==4>::type
@@ -3039,7 +3742,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,fvec8::load_t<y_aligned>(y));
 	  connect_t<Functor,N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
 	}
-# endif
+#  endif
       public:
 	/// unrolled for(i=0; i!=N; ++i) Functor::operator(x[i], y[i]);
 	template<unsigned N, typename Functor>
@@ -3110,9 +3813,9 @@ namespace WDutils {
 	//
 	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<block==4
-# ifdef __AVX__
+#  ifdef __AVX__
 				  && (N<8)
-# endif
+#  endif
 			       	   >::type
 	swap_t(float*x, float*y) noexcept
 	{
@@ -3120,7 +3823,7 @@ namespace WDutils {
 	  helper::swap<4,y_aligned>(x,y);
 	  swap_t<N-4,block_size(N-4,4),y_aligned>(x+=4,y+=4);
 	}
-# ifdef __AVX__
+#  ifdef __AVX__
 	//
 	template<unsigned N, unsigned block, bool y_aligned>
 	static typename enable_if<(N>=8) && block==4>::type
@@ -3141,7 +3844,7 @@ namespace WDutils {
 	  helper::swap<8,y_aligned>(x,y);
 	  swap_t<N-8,block_size(N-8,8),y_aligned>(x+=8,y+=8);
 	}
-# endif
+#  endif
       public:
 	/// unrolled for(i=0; i!=N; ++i) swap(x[i], y[i]);
 	template<unsigned N>
@@ -3149,11 +3852,11 @@ namespace WDutils {
 	{ swap_t<N,1,0>(x,y); }
 	//
       private:
-# ifdef __AVX__
-#  define VECS_DECL fvec4, fvec8
-# else
-#  define VECS_DECL fvec4
-# endif
+#  ifdef __AVX__
+#    define VECS_DECL fvec4, fvec8
+#  else
+#    define VECS_DECL fvec4
+#  endif
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<N==0 && block==1>::type
@@ -3182,13 +3885,13 @@ namespace WDutils {
 	}
 	//
 #  undef  VECS_DECL
-# ifdef __AVX__
-#  define VECS_DECL const float y, const fvec4&y4, const fvec8&y8
-#  define VECS_PASS y, y4, y8
-# else
-#  define VECS_DECL const float y, const fvec4&y4
-#  define VECS_PASS y, y4
-# endif
+#  ifdef __AVX__
+#    define VECS_DECL const float y, const fvec4&y4, const fvec8&y8
+#    define VECS_PASS y, y4, y8
+#  else
+#    define VECS_DECL const float y, const fvec4&y4
+#    define VECS_PASS y, y4
+#  endif
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<(N>3) && block==1>::type
@@ -3218,9 +3921,9 @@ namespace WDutils {
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<block==4
-# ifdef __AVX__
+#  ifdef __AVX__
 				  && (N<8)
-# endif
+#  endif
 			       	   >::type
 	foreach_t(float*x, VECS_DECL) noexcept
 	{
@@ -3228,7 +3931,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x,y4);
 	  foreach_t<Functor,N-4,block_size(N-4,4)>(x+=4, VECS_PASS);
 	}
-# ifdef __AVX__
+#  ifdef __AVX__
 	//
 	template<typename Functor, unsigned N, unsigned block>
 	static typename enable_if<(N>=8) && block==4>::type
@@ -3250,10 +3953,10 @@ namespace WDutils {
 	  helper::connect<Functor>(x,y8);
 	  foreach_t<Functor,N-8,block_size(N-8,8)>(x+=8, VECS_PASS);
 	}
-# endif
-# undef block_size
-# undef VECS_DECL
-# undef VECS_PASS
+#  endif
+#  undef block_size
+#  undef VECS_DECL
+#  undef VECS_PASS
 	//
 	template<typename Functor, unsigned N>
 	static typename enable_if<N==0>::type
@@ -3281,7 +3984,7 @@ namespace WDutils {
 	  helper::connect<Functor>(x  ,y);
 	}
 	//
-# ifdef __AVX__
+#  ifdef __AVX__
 	template<unsigned N, typename Functor>
 	static typename enable_if<(N>=4 && N<8)>::type
 	m_foreach(float*x, float y) noexcept
@@ -3291,12 +3994,12 @@ namespace WDutils {
 	static typename enable_if<(N>=8)>::type
 	m_foreach(float*x, float y) noexcept
 	{ foreach_t<Functor,N,1>(x,y,fvec4(y),fvec8(y)); }
-# else  //
+#  else //
 	template<unsigned N, typename Functor>
 	static typename enable_if<(N>=4)>::type
 	m_foreach(float*x, float y) noexcept
 	{ foreach_t<Functor,N,1>(x,y,fvec4(y)); }
-# endif
+#  endif
       public:
 	/// unrolled for(i=0; i!=N; ++i) Functor::operator(x[i], y);
 	template<unsigned N, typename Functor>
@@ -3358,13 +4061,13 @@ namespace WDutils {
 	return std::memcpy(dest,srce,bytes);
 #ifdef __SSE__
       // assert no undue overlap
-# ifdef __AVX__
+#  ifdef __AVX__
       WDutilsAssert(size_t(dest)+32    <= size_t(srce) &&
 		    size_t(srce)+bytes <= size_t(dest));
-# else
+#  else
       WDutilsAssert(size_t(dest)+16    <= size_t(srce) &&
 		    size_t(srce)+bytes <= size_t(dest));
-# endif
+#  endif
       char      *p_dest = static_cast<char*> (dest);
       const char*p_srce = static_cast<const char*>(dest);
       // ensure alignment to  4 bytes
@@ -3374,7 +4077,7 @@ namespace WDutils {
       for(; bytes>=16 && size_t(p_dest)&15; bytes-=4,p_dest+=4,p_srce+=4)
 	reinterpret_cast<int32_t&>(*p_dest) =
 	  reinterpret_cast<const int32_t&>(*p_srce);
-# ifdef __AVX__
+#  ifdef __AVX__
       // ensure alignment to 32 bytes
       if(bytes>=16 && size_t(p_dest)&31) {
 	_mm_store_ps(reinterpret_cast<float*>(p_dest),
@@ -3407,7 +4110,7 @@ namespace WDutils {
 	  p_srce+=16;
 	}
       }
-# else
+#  else
       // loop blocks of 16 bytes
       if(size_t(p_srce)&15) {
 	for(; bytes>=16; bytes-=16,p_dest+=16,p_srce+=16)
@@ -3418,7 +4121,7 @@ namespace WDutils {
 	  _mm_store_ps(reinterpret_cast<float*>(p_dest),
 		       _mm_load_ps(reinterpret_cast<const float*>(p_srce)));
       }
-# endif
+#  endif
       // do remaining blocks of 4 bytes
       for(; bytes>=4; bytes-=4,p_dest+=4,p_srce+=4)
 	reinterpret_cast<int32_t&>(*p_dest) =
@@ -3429,7 +4132,7 @@ namespace WDutils {
 #endif // __SSE__
       return dest;
     }
-#endif
+#endif // ???
     /// smallest multiple of 16/sizeof(_F) not less than i
     template<typename _F, typename _I> inline
     _I Top(_I i) {
@@ -3473,6 +4176,17 @@ namespace WDutils {
     template<typename Base>
     struct Extend16 : public Extension<Base,16>::Extended {};
 #endif
+//     /// extend a class to have alignment to cache lines and size a multiple of
+//     /// that of a cache line.
+// #if __cplusplus >= 201103L
+//     template<typename Base>
+//     using WDutilsAlignTo(LEVEL1_DCACHE_LINESIZE) CacheAligned = typename
+//       Extension<Base,sizeof_cache_line>::Extended;
+// #else
+//     template<typename Base>
+//     struct WDutilsAlignTo(LEVEL1_DCACHE_LINESIZE) CacheAligned :
+//       public Extension<Base,sizeof_cache_line>::Extended {};
+// #endif
     //
 #ifdef __SSE__
     /// \note Not intended for consumption, use routine below instead.
@@ -3487,7 +4201,7 @@ namespace WDutils {
     /// swap a multiple of 16 bytes at 16-byte aligned memory.
     /// \param[in] a   16-byte aligned memory address
     /// \param[in] b   16-byte aligned memory address
-    /// \param[in] n   multiple of 16: # bytes to swap at @a a and @a b
+    /// \param[in] n   multiple of 16: \# bytes to swap at @a a and @a b
     /// \note For reasons of efficiency, the above conditions are not tested.
     ///       If either address is not 16-byte aligned, a run-time error
     ///       (segmentation fault) will result. If @a n is not a multiple of

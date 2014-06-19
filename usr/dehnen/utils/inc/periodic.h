@@ -34,13 +34,16 @@
 #define WDutils_included_periodic_h
 
 #ifndef WDutils_included_geometry_h
-#  include <geometry.h>
+#  include "geometry.h"
 #endif
 #ifndef WDutils_included_inline_h
-#  include <inline.h>
+#  include "inline.h"
 #endif
 
 namespace WDutils {
+#if __cplusplus < 201103L
+#  define noexcept
+#endif
   ///
   /// type used to hold offset bitset for positional offsets
   ///
@@ -61,16 +64,16 @@ namespace WDutils {
 #endif
   protected:
     /// is x within the periodic range?
-    static bool inside(real x, real hp)
+    static bool inside(real x, real hp) noexcept
     { return -hp<=x && x<=hp; }
     /// shift x into the periodic range
-    static void shift(real&x, real hp, real fp)
+    static void shift(real&x, real hp, real fp) noexcept
     {
       while(x<-hp) x+= fp;
       while(x> hp) x-= fp;
     }
     /// shift x into the periodic range, but not by more than a full period
-    static void shift_short(real&x, real hp, real fp)
+    static void shift_short(real&x, real hp, real fp) noexcept
     {
       if     (x<-hp) x+=fp;
       else if(x> hp) x-=fp;
@@ -90,7 +93,7 @@ namespace WDutils {
     ///
     /// default ctor: open boundary in all dimensions
     ///
-    PeriodicBoxBase()
+    PeriodicBoxBase() noexcept
       : HalfP(real(0))
       , FullP(real(0))
       , InvFP(real(0))
@@ -103,7 +106,7 @@ namespace WDutils {
     /// \param[in]  hp   half the period in each dimension
     /// \note if hp[d]=0, no periodic boundary is imposed in dimension d
     ///
-    explicit PeriodicBoxBase(xvec const&hp)
+    explicit PeriodicBoxBase(xvec const&hp) noexcept
     { SetPeriod(hp); }
   public:
     ///
@@ -111,7 +114,7 @@ namespace WDutils {
     /// \param[in]  hp   half the period in each dimension
     /// \note if hp[d]=0, no periodic boundary is imposed in dimension d
     ///
-    void SetPeriod(xvec const&hp)
+    void SetPeriod(xvec const&hp) noexcept
     {
       MinHP = 0;
       PiDim = 0;
@@ -132,64 +135,64 @@ namespace WDutils {
     ///
     /// are we implementing the same periodic box as other?
     ///
-    bool operator==(PeriodicBoxBase const&other) const
+    bool operator==(PeriodicBoxBase const&other) const noexcept
     { return HalfP == other.HalfP; }
     ///
     /// are we implementing another periodic box as other?
     ///
-    bool operator!=(PeriodicBoxBase const&other) const
+    bool operator!=(PeriodicBoxBase const&other) const noexcept
     { return HalfP != other.HalfP; }
     ///
     /// half period in dimension d
     ///
-    real const&half_period(int d) const
+    real const&half_period(int d) const noexcept
     { return HalfP[d]; }
     ///
     /// full period in dimension d
     ///
-    real const&full_period(int d) const
+    real const&full_period(int d) const noexcept
     { return FullP[d]; }
     ///
     /// is there any periodicity in any dimension?
     ///
-    bool is_periodic() const
+    bool is_periodic() const noexcept
     { return PiAny; }
     ///
     /// is there periodicity in all dimensions?
     ///
-    bool is_fully_periodic() const
+    bool is_fully_periodic() const noexcept
     { return PiAll; }
     ///
     /// is there periodicity in given dimension?
     ///
-    bool is_periodic(int d) const
+    bool is_periodic(int d) const noexcept
     { return PiDim[d]; }
     ///
     /// minimum non-zero half-period
     ///
-    real min_half_period() const
+    real min_half_period() const noexcept
     { return MinHP; }
     ///
     /// is a given (smoothing) length okay for find_ghosts()?
     ///
-    bool length_okay(real h) const
+    bool length_okay(real h) const noexcept
     { return !PiAny || h<MinHP; }
     ///
     /// is a given (smoothing) length okay for find_ghosts()?
     ///
     template<typename scalar>
-    bool length_okay(scalar h) const
+    bool length_okay(scalar h) const noexcept
     { return !PiAny || h<MinHP; }
     ///
     /// is a given (smoothing) length-squared okay for find_ghosts()?
     ///
-    bool length_sq_okay(real q) const
+    bool length_sq_okay(real q) const noexcept
     { return !PiAny || q<MinHP*MinHP; }
     ///
     /// given an offset bitset, return the positional offset in given dimension
     ///
     template<int D>
-    real offset(offsetbits off) const
+    real offset(offsetbits off) const noexcept
     { return off&(1<<(D+D))? -FullP[D] : off&(2<<(D+D))? FullP[D] : real(0); }
   };// class PeriodicBoxBase<,> 
   
@@ -217,6 +220,7 @@ namespace WDutils {
     using base::inside;
     using base::shift;
     using base::shift_short;
+    using base::length_sq_okay;
   public:
     typedef typename base::real real;
     typedef typename base::bvec bvec;
@@ -225,18 +229,23 @@ namespace WDutils {
     ///
     /// default ctor: open boundary in all dimensions
     ///
-    PeriodicBox() : base() {}
+    PeriodicBox()
+#if __cplusplus >= 201103L
+    = default;
+#else
+    : base() {}
+#endif
     ///
     /// ctor from given half range
     /// \param[in]  hp   half the period in each dimension
     /// \note if hp[d]=0, no periodic boundary is imposed in dimension d
     ///
-    explicit PeriodicBox(xvec const&hp) : base(hp) {}
+    explicit PeriodicBox(xvec const&hp) noexcept : base(hp) {}
     ///
     /// given a velocity, give the maximum 1/step so that any particle will
     /// not move by more than a full period in any dimension
     ///
-    real max_inv_step(xvec const&v) const
+    real max_inv_step(xvec const&v) const noexcept
     {
       real p=0;
       if(PiDim[0]) update_max(p,InvFP[0]*abs(v[0]));
@@ -246,7 +255,7 @@ namespace WDutils {
     ///
     /// is a position inside the periodic box?
     ///
-    bool is_inside(xvec const&x) const
+    bool is_inside(xvec const&x) const noexcept
     { 
       return  !PiAny || ( ( !PiDim[0] || inside(x[0],HalfP[0]) ) &&
 			  ( !PiDim[1] || inside(x[1],HalfP[1]) ) );
@@ -256,7 +265,7 @@ namespace WDutils {
     ///
     /// \param[in,out] x  position to map back periodically into box
     ///
-    void make_periodic(xvec&x) const
+    void make_periodic(xvec&x) const noexcept
     {
       if(!PiAny) return;
       if(PiDim[0]) shift(x[0],HalfP[0],FullP[0]);
@@ -270,7 +279,7 @@ namespace WDutils {
     /// \note This routine fails to bring a position back into the periodic box
     ///       if it was away more than one full period.
     ///
-    void make_periodic_short(xvec&x) const
+    void make_periodic_short(xvec&x) const noexcept
     {
       if(!PiAny) return;
       if(PiDim[0]) shift_short(x[0],HalfP[0],FullP[0]);
@@ -283,7 +292,7 @@ namespace WDutils {
     /// \param[in] y  position inside box (assumed and not asserted)
     /// \return x-y shifted into box
     ///
-    xvec distance(xvec const&x, xvec const&y) const
+    xvec distance(xvec const&x, xvec const&y) const noexcept
     {
       xvec d=x-y;
       make_periodic_short(d);
@@ -296,7 +305,7 @@ namespace WDutils {
     /// \param[in] y  position inside box (assumed and not asserted)
     /// \return periodic(x-y)^2
     ///
-    real dist_sq(xvec const&x, xvec const&y) const
+    real dist_sq(xvec const&x, xvec const&y) const noexcept
     {
       if(!PiAny) return WDutils::dist_sq(x,y);
       real q=0,d;
@@ -307,7 +316,7 @@ namespace WDutils {
     ///
     /// is an offset bitset possibly correct
     ///
-    bool is_okay(offsetbits off) const
+    bool is_okay(offsetbits off) const noexcept
     {
       return 
 	( PiDim[0]? !((off& 1) && (off& 2)) : !(off& 3) ) &&
@@ -316,21 +325,26 @@ namespace WDutils {
     ///
     /// given an offset bitset, return the positional offset
     ///
-    xvec offset(offsetbits off) const
+    xvec offset(offsetbits off) const noexcept
     {
       return xvec(off& 1? -FullP[0] : off& 2? FullP[0] : real(0),
 		  off& 4? -FullP[1] : off& 8? FullP[1] : real(0));
     }
     ///
+    /// given @c offsetbits, return those corresponding to the reversed
+    ///
+    static offsetbits reversed(offsetbits old) noexcept
+    {
+       offsetbits off=0;
+       if(old& 1) off |= 2; else if(old& 2) off |= 1;
+       if(old& 4) off |= 8; else if(old& 8) off |= 4;
+       return off;
+    }
+    ///
     /// render offset bitset such that offset(original) = -offset(final)
     ///
-    static void reverse(offsetbits&off)
-    {
-      offsetbits old=off;
-      off=0;
-      if(old& 1) off |= 2; else if(old& 2) off |= 1;
-      if(old& 4) off |= 8; else if(old& 8) off |= 4;
-    }
+    static void reverse(offsetbits&off) noexcept
+    { off = reversed(off); }
     ///
     /// find periodic ghosts positions which neighbour the box
     ///
@@ -349,6 +363,7 @@ namespace WDutils {
     ///
     unsigned find_ghosts(xvec const&x, real q, offsetbits off[7]) const
     {
+      WDutilsAssert(length_sq_okay(q));
       unsigned n=0;
       if(PiAny) {
 	real  qi[2] = {real(0)};
@@ -380,7 +395,7 @@ namespace WDutils {
     ///
     /// \note @a find_ghosts() finds all ghosts with distance-squared > 0.
     ///
-    real ghost_dist_sq(xvec const&x, offsetbits off) const
+    real ghost_dist_sq(xvec const&x, offsetbits off) const noexcept
     {
       real q=0;
       if(PiAny) {
@@ -406,6 +421,7 @@ namespace WDutils {
     using base::inside;
     using base::shift;
     using base::shift_short;
+    using base::length_sq_okay;
   public:
     typedef typename base::real real;
     typedef typename base::bvec bvec;
@@ -414,18 +430,23 @@ namespace WDutils {
     ///
     /// default ctor: open boundary in all dimensions
     ///
-    PeriodicBox() : base() {}
+    PeriodicBox()
+#if __cplusplus >= 201103L
+    = default;
+#else
+    : base() {}
+#endif
     ///
     /// ctor from given half range
     /// \param[in]  hp   half the period in each dimension
     /// \note if hp[d]=0, no periodic boundary is imposed in dimension d
     ///
-    explicit PeriodicBox(xvec const&hp) : base(hp) {}
+    explicit PeriodicBox(xvec const&hp) noexcept : base(hp) {}
     ///
     /// given a velocity, give the maximum 1/step so that any particle will
     /// not move by more than a full period in any dimension
     ///
-    real max_inv_step(xvec const&v) const
+    real max_inv_step(xvec const&v) const noexcept
     {
       real p=0;
       if(PiDim[0]) update_max(p,InvFP[0]*abs(v[0]));
@@ -436,7 +457,7 @@ namespace WDutils {
     ///
     /// is a position inside the periodic box?
     ///
-    bool is_inside(xvec const&x) const
+    bool is_inside(xvec const&x) const noexcept
     { 
       return  !PiAny || ( ( !PiDim[0] || inside(x[0],HalfP[0]) ) &&
 			  ( !PiDim[1] || inside(x[1],HalfP[1]) ) &&
@@ -447,7 +468,7 @@ namespace WDutils {
     ///
     /// \param[in,out] x  position to map back periodically into box
     ///
-    void make_periodic(xvec&x) const
+    void make_periodic(xvec&x) const noexcept
     {
       if(!PiAny) return;
       if(PiDim[0]) shift(x[0],HalfP[0],FullP[0]);
@@ -462,7 +483,7 @@ namespace WDutils {
     /// \note This routine fails to bring a position back into the periodic box
     ///       if it was away more than one full period.
     ///
-    void make_periodic_short(xvec&x) const
+    void make_periodic_short(xvec&x) const noexcept
     {
       if(!PiAny) return;
       if(PiDim[0]) shift_short(x[0],HalfP[0],FullP[0]);
@@ -476,7 +497,7 @@ namespace WDutils {
     /// \param[in] y  position inside box (assumed and not asserted)
     /// \return x-y shifted into box
     ///
-    xvec distance(xvec const&x, xvec const&y) const
+    xvec distance(xvec const&x, xvec const&y) const noexcept
     {
       xvec d=x-y;
       make_periodic_short(d);
@@ -489,7 +510,7 @@ namespace WDutils {
     /// \param[in] y  position inside box (assumed and not asserted)
     /// \return periodic(x-y)^2
     ///
-    real dist_sq(xvec const&x, xvec const&y) const
+    real dist_sq(xvec const&x, xvec const&y) const noexcept
     {
       if(!PiAny) return WDutils::dist_sq(x,y);
       real q=0,d;
@@ -501,7 +522,7 @@ namespace WDutils {
     ///
     /// is an offset bitset possibly correct
     ///
-    bool is_okay(offsetbits off) const
+    bool is_okay(offsetbits off) const noexcept
     {
       return 
 	( PiDim[0]? !((off& 1) && (off& 2)) : !(off& 3) ) &&
@@ -511,23 +532,28 @@ namespace WDutils {
     ///
     /// given an offset bitset, return the positional offset
     ///
-    xvec offset(offsetbits off) const
+    xvec offset(offsetbits off) const noexcept
     {
       return xvec(off& 1? -FullP[0] : off& 2? FullP[0] : real(0),
 		  off& 4? -FullP[1] : off& 8? FullP[1] : real(0),
 		  off&16? -FullP[2] : off&32? FullP[2] : real(0));
     }
     ///
-    /// render offset bitset such that offset(original) = -offset(final)
+    /// given @c offsetbits, return those corresponding to the reversed
     ///
-    static void reverse(offsetbits&off)
+    static offsetbits reversed(offsetbits old) noexcept
     {
-      offsetbits old=off;
-      off=0;
+      offsetbits off=0;
       if(old& 1) off |= 2; else if(old& 2) off |= 1;
       if(old& 4) off |= 8; else if(old& 8) off |= 4;
       if(old&16) off |=32; else if(old&32) off |=16;
+      return off;
     }
+    ///
+    /// render offset bitset such that offset(original) = -offset(final)
+    ///
+    static void reverse(offsetbits&off) noexcept
+    { off = reversed(off); }
     ///
     /// find periodic ghosts positions which neighbour the box
     ///
@@ -546,6 +572,7 @@ namespace WDutils {
     ///
     unsigned find_ghosts(xvec const&x, real q, offsetbits off[7]) const
     {
+      WDutilsAssert(length_sq_okay(q));
       unsigned n=0;
       if(PiAny) {
 	real  qi[3] = {real(0)};
@@ -583,7 +610,7 @@ namespace WDutils {
     ///
     /// \note @a find_ghosts() finds all ghosts with distance-squared > 0.
     ///
-    real ghost_dist_sq(xvec const&x, offsetbits off) const
+    real ghost_dist_sq(xvec const&x, offsetbits off) const noexcept
     {
       real q=0;
       if(PiAny) {
@@ -594,6 +621,9 @@ namespace WDutils {
       return q;
     }
   };// class PeriodicBox<3,X>
+#if __cplusplus < 201103L
+#  undef noexcept
+#endif
 } // namespace WDutils
 ////////////////////////////////////////////////////////////////////////////////
 #endif // WDutils_included_periodic_h

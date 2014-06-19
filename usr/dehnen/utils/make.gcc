@@ -18,15 +18,16 @@ PLATFORM 	:= $(shell uname -m)
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow \
-		-Woverloaded-virtual
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -Winline
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow
 endif
 ifndef TBBROOT
+ifdef WDutilsDevel
 WARNING		+= -Wold-style-cast
 endif
-WARNING		+= -Wno-unknown-pragmas
+endif
+#WARNING		+= -Wno-unknown-pragmas
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
@@ -34,31 +35,28 @@ WARNING		+= -Wno-unknown-pragmas
 #endif
 # general optimisation and warning flags
 OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
-		-ggdb3 $(WARNING) -O2 -fPIC -funroll-loops \
-		-fforce-addr $(PROFLAGS) $(RDYNAMIC)
+		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
+		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 ifneq ($(VENDOR),apple)
 OPTFLAGS	+= -rdynamic
 endif
 
-
-
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
 
-ifdef WDutilsDevel
-CXX11		:= 1
-OPENMP		:= 1
-endif
+WARNING		+= -Woverloaded-virtual
+OPTFLAGS	+= -Woverloaded-virtual
 
 ifdef CXX11
-CXXFLAGS	:= -std=c++0x $(OPTFLAGS)
+CXXFLAGS	:= -std=c++11 $(OPTFLAGS)
 else
 CXXFLAGS	:= $(OPTFLAGS)
 endif
 
 ifdef OPENMP
 CXXFLAGS	+= -fopenmp
+CFLAGS		+= -fopenmp
 LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
 else
 LDFLAGS		:= -shared $(PROFLAGS)

@@ -57,8 +57,8 @@ double WDutils::SphVol(int d)
   if(d==1) return 2;
   if(d==2) return Pi;
   if(d==3) return FPit;
-  register int k,n;
-  register double 
+  int k,n;
+  double 
     cn = Pi,
     ae = 2.,
     ao = Pih;
@@ -80,12 +80,12 @@ complex<double> WDutils::lnsin(complex<double> const&x)
 #ifdef __GNUC__
   double s,c;
   sincos(std::real(x),s,c);
-  register double 
+  double 
   ep = exp(-2*abs(std::imag(x))),
   em = s*(1.+ep);
   ep = c*(1.-ep);
 #else
-  register double 
+  double 
   ep = exp(-2*abs(std::imag(x))),
   em = sin(std::real(x))*(1.+ep);
   ep = cos(std::real(x))*(1.-ep);
@@ -99,12 +99,12 @@ complex<double> WDutils::lncos(complex<double> const&x)
 #ifdef __GNUC__
   double s,c;
   sincos(std::real(x),s,c);
-  register double 
+  double 
   ep = exp(-2*abs(std::imag(x))),
   em = c*(1.+ep);
   ep = s*(1.-ep);
 #else
-  register double 
+  double 
   ep = exp(-2*abs(std::imag(x))),
   em = cos(std::real(x))*(1.+ep);
   ep = sin(std::real(x))*(1.-ep);
@@ -118,12 +118,12 @@ complex<double> WDutils::lnsinh(complex<double> const&x)
 #ifdef __GNUC__
   double s,c;
   sincos(std::imag(x),s,c);
-  register double 
+  double 
   ep = exp(-2*abs(std::real(x))),
   em = s*(1.+ep);
   ep = c*(1.-ep);
 #else
-  register double 
+  double 
   ep = exp(-2*abs(std::real(x))),
   em = sin(std::imag(x))*(1.+ep);
   ep = cos(std::imag(x))*(1.-ep);
@@ -137,12 +137,12 @@ complex<double> WDutils::lncosh(complex<double> const&x)
 #ifdef __GNUC__
   double s,c;
   sincos(std::imag(x),s,c);
-  register double 
+  double 
   ep = exp(-2*abs(std::real(x))),
   em = c*(1.+ep);
   ep = s*(1.-ep);
 #else
-  register double 
+  double 
   ep = exp(-2*abs(std::real(x))),
   em = cos(std::imag(x))*(1.+ep);
   ep = sin(std::imag(x))*(1.-ep);
@@ -160,9 +160,9 @@ namespace {
     const double cof[6]={ 76.18009172947146, -86.50532032941677,
 			  24.01409824083091, -1.231739572450155,
 			  1.208650973866179e-3, -5.395239384953e-6 };
-    register double ser=1.000000000190015, y=x, tmp=y+5.5;
+    double ser=1.000000000190015, y=x, tmp=y+5.5;
     tmp-= (y+0.5) * log(tmp);
-    for(register int j=0; j<6; j++) ser+= cof[j]/++y;
+    for(int j=0; j<6; j++) ser+= cof[j]/++y;
     return -tmp + log(STPi*ser/x);
   }
   //----------------------------------------------------------------------------
@@ -182,11 +182,11 @@ namespace {
 			  double x,               // I: x >= 0                  
 			  const char  *func = 0)  //[I: name of caller]         
   {
-    register double
+    double
       ap  = a,
       del = 1.0/a,
       sum = del;
-    for(register int n=1; n<=maxit; n++) {
+    for(int n=1; n<=maxit; n++) {
       ap  += 1.;
       del *= x/ap;
       sum += del;
@@ -202,12 +202,12 @@ namespace {
 			  double x,         // I: x >= 0                  
 			  const char  *func = 0)  //[I: name of caller]         
   {
-    register double an,del,
+    double an,del,
       b = x+1.-a,
       c = 1./fpmin,
       d = 1./b,
       h = d;
-    for(register int i=1; i<=maxit; i++) {
+    for(int i=1; i<=maxit; i++) {
       an =-i*(i-a);
       b += 2.;
       d  = an*d+b; if(abs(d)<fpmin) d=fpmin;
@@ -235,13 +235,13 @@ complex<double> WDutils::LogGamma(complex<double> const&z)
 		      1.208650973866179e-3, -5.395239384953e-6 };
   if(iszero(std::imag(z)) && std::real(z) <= 0. && is_integral(-std::real(z))) 
     MathError("z=-n","LogGamma(z)");
-  register bool turn = std::real(z)<1;
+  bool turn = std::real(z)<1;
   complex<double> 
     ser = complex<double>(1.000000000190015),
     y   = turn? complex<double>(2.0)-z : z,
     tmp = y+complex<double>(4.5);
   tmp-= (y-complex<double>(0.5))*log(tmp);
-  for(register int j=0; j<6; j++) {
+  for(int j=0; j<6; j++) {
     ser+= c[j]/y;
     y  += 1.;
   }
@@ -294,8 +294,8 @@ double WDutils::LogGamma(double a, double x)
 namespace {
   inline double betacf(double a, double b, double x)
   {
-    register int    m,m2;
-    register double aa,del,h,
+    int    m,m2;
+    double aa,del,h,
       qab=a+b,
       qap=a+1,
       qam=a-1,
@@ -377,10 +377,10 @@ double WDutils::En(int n, double x)
   if(n<0 || x<0. || (iszero(x) && n<=1)) MathError("bad argumends","En()");
   if(n==0)  return exp(-x)/x;
   if(iszero(x)) return 1./double(n-1);
-  register double ans;
+  double ans;
   if(x>1.) {
-    register int    i,nm1=n-1;
-    register double a,b,c,d,del,h;
+    int    i,nm1=n-1;
+    double a,b,c,d,del,h;
     b = x+n;
     c = 1./fpmin;
     d = 1./b;
@@ -397,8 +397,8 @@ double WDutils::En(int n, double x)
     ans = h*exp(-x);
     MathWarning("continued fraction failed","En()");
   } else {
-    register int    i,ii,nm1=n-1;
-    register double del,fac,psi;
+    int    i,ii,nm1=n-1;
+    double del,fac,psi;
     ans = nm1? 1./double(nm1) : -log(x)-EulerGamma();
     fac = 1.;
     for(i=1; i<=maxit; i++) {
@@ -423,9 +423,9 @@ double WDutils::Ei(double x)
 {
   if(x<=0.)   return -En(1,-x);
   if(x<fpmin) return log(x)+EulerGamma();
-  register int    k;
+  int    k;
   const double logeps =-20.72326583694641115616192309216;
-  register double fact=1.,sum=0.,term=1.;
+  double fact=1.,sum=0.,term=1.;
   if(x<=-logeps) {
     for(k=1; k<=maxit; k++) {
       fact*= x/k;
@@ -454,7 +454,7 @@ double WDutils::Ei(double x)
 ////////////////////////////////////////////////////////////////////////////////
 double WDutils::J0(double x)
 {
-  register double ax=abs(x),y,ans1,ans2;
+  double ax=abs(x),y,ans1,ans2;
   if(ax < 8.) {
     y    = x*x;
     ans1 = 57568490574.0+y*(-13362590354.0+y*(651619640.7
@@ -463,7 +463,7 @@ double WDutils::J0(double x)
 	   +y*(59272.64853+y*(267.8532712+y*1.0))));
     return ans1/ans2;
   } else {
-    register double z=8./ax, xx=ax-0.785398164;
+    double z=8./ax, xx=ax-0.785398164;
     y   =z*z;
     ans1=1.0+y*(-0.1098628627e-2+y*(0.2734510407e-4
          +y*(-0.2073370639e-5+y*0.2093887211e-6)));
@@ -475,7 +475,7 @@ double WDutils::J0(double x)
 //------------------------------------------------------------------------------
 double WDutils::J1(double x)
 {
-  register double ax=abs(x),y,ans1,ans2;
+  double ax=abs(x),y,ans1,ans2;
   if(ax < 8.) {
     y    = x*x;
     ans1 = x*(72362614232.0+y*(-7895059235.0+y*(242396853.1
@@ -484,7 +484,7 @@ double WDutils::J1(double x)
 	   +y*(99447.43394+y*(376.9991397+y*1.0))));
     return ans1/ans2;
   } else {
-    register double z=8./ax, xx=ax-2.356194491;
+    double z=8./ax, xx=ax-2.356194491;
     y    = z*z;
     ans1 = 1.0+y*(0.183105e-2+y*(-0.3516396496e-4
 	   +y*(0.2457520174e-5+y*(-0.240337019e-6))));
@@ -545,7 +545,7 @@ double WDutils::Jn(unsigned n, double x)
 double WDutils::Y0(double x)
 {
   if(x<0.) MathError("negative argument","Y0(x)");
-  register double y,ans1,ans2;
+  double y,ans1,ans2;
   if(x < 8.0) {
     y    = x*x;
     ans1 =-2957821389.0+y*(7062834065.0+y*(-512359803.6
@@ -554,7 +554,7 @@ double WDutils::Y0(double x)
 	   +y*(47447.26470+y*(226.1030244+y*1.0))));
     return (ans1/ans2)+0.636619772*J0(x)*log(x);
   } else {
-    register double z=8./x, xx=x-0.785398164;
+    double z=8./x, xx=x-0.785398164;
     y    = z*z;
     ans1 = 1.0+y*(-0.1098628627e-2+y*(0.2734510407e-4
 	   +y*(-0.2073370639e-5+y*0.2093887211e-6)));
@@ -568,7 +568,7 @@ double WDutils::Y0(double x)
 double WDutils::Y1(double x)
 {
   if(x<0.) MathError("negative argument","Y1(x)");
-  register double y,ans1,ans2;
+  double y,ans1,ans2;
   if(x < 8.) {
     y    = x*x;
     ans1 = x*(-0.4900604943e13+y*(0.1275274390e13
@@ -579,7 +579,7 @@ double WDutils::Y1(double x)
 	   +y*(0.1020426050e6+y*(0.3549632885e3+y)))));
     return (ans1/ans2)+0.636619772*(J1(x)*log(x)-1.0/x);
   } else {
-    register double z=8./x, xx=x-2.356194491;
+    double z=8./x, xx=x-2.356194491;
     y    = z*z;
     ans1 = 1.0+y*(0.183105e-2+y*(-0.3516396496e-4
 	   +y*(0.2457520174e-5+y*(-0.240337019e-6))));
@@ -594,8 +594,8 @@ double WDutils::Yn(unsigned n, double x)
   if(x<0.) MathError("negative argument","Yn(x)");
   if(n==0) return Y0(x);
   if(n==1) return Y1(x);
-  register double by=Y1(x),bym=Y0(x),byp,tox=2./x;
-  for(register unsigned j=1; j!=n; ++j) {
+  double by=Y1(x),bym=Y0(x),byp,tox=2./x;
+  for(unsigned j=1; j!=n; ++j) {
     byp = j*tox*by-bym;
     bym = by;
     by  = byp;
@@ -605,7 +605,7 @@ double WDutils::Yn(unsigned n, double x)
 //------------------------------------------------------------------------------
 double WDutils::I0(double x)
 {
-  register double ax=abs(x),y;
+  double ax=abs(x),y;
   if(ax < 3.75) {
     y = x/3.75;
     y*= y;
@@ -622,7 +622,7 @@ double WDutils::I0(double x)
 //------------------------------------------------------------------------------
 double WDutils::I1(double x)
 {
-  register double ans,ax=abs(x),y;
+  double ans,ax=abs(x),y;
   if(ax < 3.75) {
     y = x/3.75;
     y*= y;
@@ -666,7 +666,7 @@ double WDutils::In(unsigned n, double x)
 double WDutils::K0(double x)
 {
   if(x<0.) MathError("negative argument","K0(x)");
-  register double y;
+  double y;
   if(x <= 2.) {
     y = x*x/4.;
     return (-log(x/2.0)*I0(x))+(-0.57721566+y*(0.42278420
@@ -683,7 +683,7 @@ double WDutils::K0(double x)
 double WDutils::K1(double x)
 {
   if(x<0.) MathError("negative argument","K1(x)");
-  register double y;
+  double y;
   if(x <= 2.) {
     y=x*x/4.0;
     return (log(x/2.0)*I1(x))+(1.0/x)*(1.0+y*(0.15443144
@@ -702,11 +702,11 @@ double WDutils::Kn(unsigned n, double x)
   if(x<0.) MathError("negative argument","Kn(x)");
   if(n==0) return K0(x);
   if(n==1) return K1(x);
-  register double bk,bkm,bkp,tox;
+  double bk,bkm,bkp,tox;
   tox = 2./x;
   bkm = K0(x);
   bk  = K1(x);
-  for(register unsigned j=1; j!=n; ++j) {
+  for(unsigned j=1; j!=n; ++j) {
     bkp = bkm+j*tox*bk;
     bkm = bk;
     bk  = bkp;
@@ -720,8 +720,8 @@ double WDutils::HermiteH(unsigned n, double x)
 {
   if(n==0) return 1;
   if(n==1) return 2.*x;
-  register double h0=1., h1=2*x, hi=h1;
-  for(register unsigned i=1; i!=n; ++i) {
+  double h0=1., h1=2*x, hi=h1;
+  for(unsigned i=1; i!=n; ++i) {
     hi = 2. * (x*h1 - i*h0);
     h0 = h1;
     h1 = hi;
@@ -733,7 +733,7 @@ void WDutils::HermiteH(unsigned n, double x, double *H)
 {
   H[0] = 1.; 	if(n==0) return;
   H[1] = 2*x;	if(n==1) return;
-  for(register unsigned i=1; i!=n; ++i) H[i+1] = 2*(x*H[i]-2*H[i-1]);
+  for(unsigned i=1; i!=n; ++i) H[i+1] = 2*(x*H[i]-2*H[i-1]);
 }
 //------------------------------------------------------------------------------
 void WDutils::NormSqHermite(unsigned n, double *N)

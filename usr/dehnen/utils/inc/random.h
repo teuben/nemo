@@ -31,12 +31,12 @@
 #define WDutils_included_random_h
 
 #ifndef WDutils_included_iostream
-# define WDutils_included_iostream
-# include <iostream>
+#  define WDutils_included_iostream
+#  include <iostream>
 #endif
 #ifndef WDutils_included_cmath
-# define WDutils_included_cmath
-# include <cmath>
+#  define WDutils_included_cmath
+#  include <cmath>
 #endif
 #ifndef WDutils_included_inline_h
 #  include <inline.h>
@@ -48,8 +48,10 @@
 #  include <traits.h>
 #endif
 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wweak-vtables"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wweak-vtables"
+#endif
 namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                            
@@ -390,6 +392,8 @@ namespace WDutils {
   };// PowerLawDist
   //////////////////////////////////////////////////////////////////////////////
 } // namespace WDutils {
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 //-----------------------------------------------------------------------------+
 #endif // WDutils_included_random_h

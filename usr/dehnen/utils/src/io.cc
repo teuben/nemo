@@ -176,7 +176,7 @@ void input::close() {
 // class WDutils::FortranIRec
 //
 ////////////////////////////////////////////////////////////////////////////////
-size_t WDutils::FortranIRec::read_size() throw(WDutils::exception)
+size_t WDutils::FortranIRec::read_size()
 {
   if(HSZE == 4) {
     uint32_t S;
@@ -196,7 +196,7 @@ size_t WDutils::FortranIRec::read_size() throw(WDutils::exception)
 }
 //------------------------------------------------------------------------------
 WDutils::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)
-  throw(WDutils::exception) : IN(in), HSZE(rec), SWAP(swap), READ(0)
+  : IN(in), HSZE(rec), SWAP(swap), READ(0)
 {
   DebugInfo(8,"FortranIRec: opening ... \n");
   if(!IN) throw exception("FortranIRec::FortranIRec(): input corrupted");
@@ -208,7 +208,6 @@ WDutils::FortranIRec::FortranIRec(input& in, unsigned rec, bool swap)
 }
 //------------------------------------------------------------------------------
 size_t WDutils::FortranIRec::read_bytes(char*buf, size_t n)
-  throw(WDutils::exception)
 {
   if(!IN) throw exception("FortranIRec::read_bytes(): input corrupted");
   if(READ + n > SIZE) {
@@ -229,7 +228,7 @@ void WDutils::FortranIRec::skip_bytes(size_t n) {
   for(char C; n; --n,++READ) IN.read(&C,1);
 }
 //------------------------------------------------------------------------------
-void WDutils::FortranIRec::close() throw(WDutils::exception)
+void WDutils::FortranIRec::close()
 {
   if(!IN) throw exception("FortranIRec::close(): input corrupted");
   if(READ != SIZE) {
@@ -247,7 +246,7 @@ void WDutils::FortranIRec::close() throw(WDutils::exception)
 // class WDutils::FortranORec
 //
 ////////////////////////////////////////////////////////////////////////////////
-void WDutils::FortranORec::write_size() throw(WDutils::exception)
+void WDutils::FortranORec::write_size()
 {
   if(HSZE == 4) {
     uint32_t S = uint32_t(SIZE);
@@ -260,7 +259,7 @@ void WDutils::FortranORec::write_size() throw(WDutils::exception)
 }
 //------------------------------------------------------------------------------
 WDutils::FortranORec::FortranORec(output& out, size_t rsize, unsigned rec)
-  throw(WDutils::exception) : OUT(out), HSZE(rec), SIZE(rsize), WRITTEN(0)
+  : OUT(out), HSZE(rec), SIZE(rsize), WRITTEN(0)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(OUT.FREC)
@@ -271,7 +270,6 @@ WDutils::FortranORec::FortranORec(output& out, size_t rsize, unsigned rec)
 }
 //------------------------------------------------------------------------------
 size_t WDutils::FortranORec::write_bytes(const char*buf, size_t n)
-  throw(WDutils::exception)
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN + n > SIZE) {
@@ -291,7 +289,7 @@ void WDutils::FortranORec::fill_bytes(size_t n, char C) {
   for(; n; --n,++WRITTEN) OUT.write(&C,1);
 }
 //------------------------------------------------------------------------------
-void WDutils::FortranORec::close() throw(WDutils::exception)
+void WDutils::FortranORec::close()
 {
   if(!OUT) throw exception("FortranORec: output corrupted");
   if(WRITTEN!=SIZE) {

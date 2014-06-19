@@ -218,14 +218,13 @@ namespace WDutils {
   { return meta::__TypeCompare<__T>::equal(x,y); }
   /// is a number insignificant compared to another
 
-  /// \note Numerical code sometimes contains statements like \code
-  ///       if(e+x==x) \endcode. This is meant as "if e is so small compared
-  ///       to x that adding it to x would not change the finite
-  ///       representation of x". However, for floating-point types this
-  ///       code is (1) unreliable as floating-point equality and
-  ///       inequalities generally are, and (2) may be optimised by the
-  ///       compiler to \code if(e!=0) \endcode, which is clearly not the
-  ///       same. Here we compare e to x times epsilon.
+  /// \note Numerical code sometimes contains statements like @c
+  ///       if(e+x==x). This is meant as "if e is so small compared to x that
+  ///       adding it to x would not change the finite representation of
+  ///       x". However, for floating-point types this code is (1) unreliable
+  ///       as floating-point equality and inequalities generally are, and (2)
+  ///       may be optimised by the compiler to @c if(e!=0), which is clearly
+  ///       not the same. Here we compare e to x times epsilon.
   /// \note This is a template which works fine for all built-in types
   ///       and pointers. However, if you want or need to use this function
   ///       for a user-defined type, you best provide an overloaded version.
@@ -241,7 +240,7 @@ namespace WDutils {
   /// integral of power (inline)                                                
   inline double Ipow(double x, double p)
   {
-    register double p1=p+1;
+    double p1=p+1;
     if(!iszero(p1)) return std::pow(x,p1)/p1;
     else            return std::log(x);
   }
@@ -264,9 +263,9 @@ namespace WDutils {
   /// \return approximation to 1/sqrt(x), 5-6 digits accurate
   inline float invsqrt(float x)
   {
-    register union { float y; int i; } R; // union to manipulate bits via int i
+    union { float y; int i; } R;          // union to manipulate bits via int i
     R.y = x;
-    register float xhalf = 0.5f*R.y;      // take x/2
+    float xhalf = 0.5f*R.y;               // take x/2
     R.i = 0x5f375a86 - (R.i>>1);          // manipulate bits: get initial guess
     R.y*= 1.5f-xhalf*R.y*R.y;             // 1st Newton Raphson step
     R.y*= 1.5f-xhalf*R.y*R.y;             // 2nd Newton Raphson step
@@ -278,9 +277,9 @@ namespace WDutils {
   }
 //   inline double invsqrt(double x)
 //   {
-//     register union { double y; long long int i; } R;
+//     union { double y; long long int i; } R;
 //     R.y = x;
-//     register double xhalf = 0.5*R.y;
+//     double xhalf = 0.5*R.y;
 //     R.i = 0x5fe6ec85e7de30daLL - (R.i>>1);
 //     R.y*= 1.5-xhalf*R.y*R.y;
 //     R.y*= 1.5-xhalf*R.y*R.y;
@@ -317,7 +316,7 @@ namespace WDutils {
   }
   /// secans hyperbolicus
   inline double sech(double x) {
-    register double ex = x<0 ? exp(x) : exp(-x);
+    double ex = x<0 ? exp(x) : exp(-x);
     return 2.*ex/(1+ex*ex);
   }
   template<typename T> struct __sincos {

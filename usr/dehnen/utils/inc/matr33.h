@@ -374,7 +374,7 @@ namespace WDutils {
     /// \note the produce of two symmetric matrices is in general not symmetric
     Matrix operator*(SymmMatrix33 const&m) const noexcept
     {
-      register X t11=A[1]*m.A[1], t22=A[2]*m.A[2], t44=A[4]*m.A[4];
+      X t11=A[1]*m.A[1], t22=A[2]*m.A[2], t44=A[4]*m.A[4];
       return Matrix(A[0]*m.A[0] + t11         + t22,
 		    A[0]*m.A[1] + A[1]*m.A[3] + A[2]*m.A[4],
 		    A[0]*m.A[2] + A[1]*m.A[4] + A[2]*m.A[5],

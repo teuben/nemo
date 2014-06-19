@@ -149,6 +149,22 @@ namespace WDutils {
     { return taken; }
 #endif
   };// class Timer
+
+  ///
+  /// struct holding a timer as protected mutable object, allowing const 
+  ///
+  struct MutableTimer
+  {
+    /// start timer: take clock reading and reset counter
+    void start() const { timer.start(); }
+    /// stop timer and return elapsed time
+    double stop() const { return timer.stop(); }
+    /// time since last call to start() or stop()
+    double take() const { return timer.take(); }
+  private:
+    mutable Timer timer;
+  };
+
 } // namespace WDutils
 // /////////////////////////////////////////////////////////////////////////////
 #endif // WDutils_included_timer_h

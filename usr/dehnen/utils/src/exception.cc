@@ -5,11 +5,11 @@
 ///
 /// \author  Walter Dehnen
 ///
-/// \date    2000-2013
+/// \date    2000-14
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2013  Walter Dehnen
+// Copyright (C) 2000-14  Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify it
 // under the terms of the GNU General Public License as published by the Free
@@ -33,6 +33,7 @@
 #include <cstring>
 #include <ctime>
 #include <iostream>
+#include <iomanip>
 #include <fstream>
 #ifdef _OPENMP
 #  include <omp.h>
@@ -52,14 +53,21 @@ extern "C" {
 #pragma warning (disable:161) /* unrecognized pragma */
 #endif
 
-#ifdef WDutilsTBB
-
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wundef"
+#if __cplusplus >= 201103L && defined(WDutilsDevel)
 #  include <map>
-#  include <tbb/tbb_thread.h>
+#  include <thread>
+#  include <mutex>
+#endif
+#ifdef WDutilsTBB
+#  ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wundef"
+#    pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#  endif
 #  include <tbb/task_scheduler_init.h>
-# pragma clang diagnostic pop
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  endif
 namespace {
   typedef tbb::task_scheduler_init _tbb_ts_init;
 }
@@ -95,10 +103,14 @@ WDutils::RunInfo::RunInfo()
     // set run time
     {
       time_t now = ::time(0);
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-security"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-security"
+#endif
       SNprintf(_m_time,104,ctime(&now));
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
       _m_time[24] = 0;
     }
 #if defined(__unix) || defined(__DARWIN_UNIX03)
@@ -111,10 +123,14 @@ WDutils::RunInfo::RunInfo()
     {
       const char*user__ = getenv("USER");
       if(user__) {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-security"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-security"
+#endif
 	SNprintf(_m_user,104,user__);
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 	_m_user_known = 1;
       } else
 	SNprintf(_m_user,104,"unknown.user");
@@ -175,11 +191,8 @@ WDutils::RunInfo::RunInfo()
 #endif 
       _m_tbb_size = _m_tbb_proc;
     }
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winline"
   } 
   catch(WDutils::exception ex) { WDutils_RETHROW(ex); }
-#pragma GCC diagnostic pop
 }
 //
 void WDutils::RunInfo::set_omp(int 
@@ -240,25 +253,17 @@ WDutils::RunInfo::~RunInfo()
 #ifdef WDutilsTBB
 void WDutils::RunInfo::set_tbb(unsigned n)
 {
-  if(n==1) {
-    if(Info._m_tbb_init) {
-      delete static_cast<_tbb_ts_init*>(Info._m_tbb_init);
-      Info._m_tbb_init = 0;
-    }
-    Info._m_tbb_size = 1;
-  } else {
-    if(Info._m_tbb_init==0)
-      Info._m_tbb_init = n==0?
-	new _tbb_ts_init(_tbb_ts_init::automatic) :
-	new _tbb_ts_init(int(n))                  ;
-    else if(n >1 && n!=Info._m_tbb_size)
-      static_cast<_tbb_ts_init*>(Info._m_tbb_init)
-	-> initialize(int(n));
-    else if(n==0 && Info._m_tbb_proc != Info._m_tbb_size)
-      static_cast<_tbb_ts_init*>(Info._m_tbb_init)
-	-> initialize(int(Info._m_tbb_proc));
-    Info._m_tbb_size = n==0? Info._m_tbb_proc : n;
-  }
+  if(Info._m_tbb_init==0)
+    Info._m_tbb_init = n==0?
+      new _tbb_ts_init(_tbb_ts_init::automatic) :
+      new _tbb_ts_init(int(n))                  ;
+  else if(n>=1 && n!=Info._m_tbb_size)
+    static_cast<_tbb_ts_init*>(Info._m_tbb_init)
+      -> initialize(int(n));
+  else if(n==0 && Info._m_tbb_proc != Info._m_tbb_size)
+    static_cast<_tbb_ts_init*>(Info._m_tbb_init)
+      -> initialize(int(Info._m_tbb_proc));
+  Info._m_tbb_size = n==0? Info._m_tbb_proc : n;
 }
 //
 void WDutils::RunInfo::set_tbb(const char* arg)
@@ -278,23 +283,31 @@ void WDutils::RunInfo::set_tbb(const char* arg)
   set_tbb(n);
 }
 //
-unsigned WDutils::RunInfo::tbb_thread_id()
+#elif defined(WDutilsDevel)
+#  warning not implementing TBB stuff
+#endif // WDutilsTBB
+//
+#if __cplusplus >= 201103L && defined(WDutilsDevel)
+unsigned WDutils::RunInfo::thread_id()
 {
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wexit-time-destructors"
+#  ifdef __clang__
+#    pragma clang diagnostic push
+#    pragma clang diagnostic ignored "-Wexit-time-destructors"
+#  endif
   // yes, I know that ids will be destroyed at exit time. this is not problem.
   static unsigned nextindex = 0;
-  static std::map<tbb::tbb_thread::id, unsigned> ids;
-  auto id = tbb::this_tbb_thread::get_id();
+  static std::mutex my_mutex;
+  static std::map<std::thread::id, unsigned> ids;
+  auto id = std::this_thread::get_id();
+  std::lock_guard<std::mutex> lock(my_mutex);
   if(ids.find(id) == ids.end())
     ids[id] = nextindex++;
   return ids[id];
-# pragma clang diagnostic pop
+#  ifdef __clang__
+#    pragma clang diagnostic pop
+#  endif
 }
-//
-#elif defined(WDutilsDevel)
-# warning not implementing TBB stuff
-#endif // WDutilsTBB
+#endif
 //
 void WDutils::RunInfo::header(std::ostream&out)
 {
@@ -338,11 +351,15 @@ double WDutils::RunInfo::WallClock()
 }
 #endif
 //
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wglobal-constructors"
-#pragma clang diagnostic ignored "-Wexit-time-destructors"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wglobal-constructors"
+#  pragma clang diagnostic ignored "-Wexit-time-destructors"
+#endif
 WDutils::RunInfo WDutils::RunInfo::Info;
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 
 //
 
@@ -411,16 +428,54 @@ namespace {
     else
       /*w=*/snprintf(t,size_t(s),": %s%s",dpth,fmt);
     //t+=w; s-=w;
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wformat-nonliteral"
-# ifdef __unix
-# pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
-# endif
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#  ifdef __unix
+#    pragma clang diagnostic ignored "-Wdisabled-macro-expansion"
+#  endif
+#endif
     vfprintf(stderr,ffmt,ap);
     fflush(stderr);
-# pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   }
 }
+//
+#if __cplusplus >= 201103L
+template<typename Traits>
+void WDutils::Reporting<Traits>::print_header(std::ostringstream&ostr,
+					      int depth) const
+{
+  char dpth[21] = "                    ";
+  if(depth>20) depth=20;
+  dpth[depth] = 0;
+  ostr     << '#';
+  if(library)
+    ostr   << ' ' << library;
+  if(Traits::issue())
+    ostr   << ' ' << Traits::issue();
+  bool mpi = RunInfo::is_mpi_proc();
+  bool thr = flag&1;
+  if(mpi || thr) {
+    ostr   << " @";
+    if(mpi)
+      ostr << RunInfo::mpi_proc();
+    if(mpi && thr)
+      ostr << ':';
+    if(thr)
+      ostr << RunInfo::thread_id();
+  }
+  if(depth)
+    ostr   << dpth;
+  if(file)
+    ostr   << " [" << file << ':' << line << ']';
+  if(func)
+    ostr   << " in " << func;
+  ostr     << ": ";
+}
+#endif
 //
 template<typename Traits>
 void WDutils::Reporting<Traits>::operator()(int lev, const char* fmt, ...) const
@@ -455,7 +510,12 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
 {
   size_t size = 1024, len;
   char   buffer[1024], *buf=buffer;
-  if(file) {
+  bool   error = false 
+#ifdef _OPENMP
+    || (omp_get_level() && InsteadOfThrow)
+#endif
+    ;
+  if(!error && file) {
     len  = size_t(SNprintf(buf,size,"[%s:%d]",file,line));
     buf += len;
     size-= len;
@@ -474,11 +534,8 @@ WDutils::exception WDutils::Thrower::operator()(const char*fmt, ...) const
   va_start(ap,fmt);
   vsnprintf(buf, size, fmt, ap);
   va_end(ap);
-#ifdef _OPENMP
-  if(omp_get_level() && InsteadOfThrow)
+  if(error)
     InsteadOfThrow(file,line,buffer);
-//   MakeError(file,line,buffer);
-#endif
   return exception(buffer);
 }
 //
@@ -489,10 +546,14 @@ WDutils::exception::exception(const char*fmt, ...)
   char _m_text[msize];
   va_list  ap;
   va_start(ap,fmt);
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wformat-nonliteral"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   int w = vsnprintf(_m_text,msize,fmt,ap);
-# pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   if(w>=msize) {
     WDutils_WarningF("string size of %d characters exceeded\n",msize);
     _m_text[msize-1]=0;
@@ -503,14 +564,18 @@ WDutils::exception::exception(const char*fmt, ...)
   std::runtime_error::operator= (std::runtime_error(_m_text));
 }
 //
-WDutils::message::message(const char*fmt, ...) throw(exception)
+WDutils::message::message(const char*fmt, ...)
 {
   va_list  ap;
   va_start(ap,fmt);
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wformat-nonliteral"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   int w = vsnprintf(_m_text,size,fmt,ap);
-# pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   if(w>=static_cast<int>(size))
     WDutils_THROW("string size of %ld characters exceeded\n",size);
   if(w < 0)
@@ -522,10 +587,14 @@ int WDutils::snprintf(char*str, size_t l, const char* fmt, ...)
 {
   va_list ap;
   va_start(ap,fmt);
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wformat-nonliteral"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
   int w = vsnprintf(str,l,fmt,ap);
-# pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   va_end(ap);
   if(w==static_cast<int>(l))
     WDutils_THROWF("trailing 0 lost");

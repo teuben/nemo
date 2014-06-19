@@ -40,9 +40,9 @@
 #endif
 
 #ifdef __INTEL_COMPILER
-#pragma warning (disable:383) /* reference to temporary used */
-#pragma warning (disable:424) /* extra ";" ignored */
-#pragma warning (disable:981) /* operands are evaluated in unspecified order */
+#  pragma warning (disable:383)/* reference to temporary used */
+#  pragma warning (disable:424)/* extra ";" ignored */
+#  pragma warning (disable:981)/* operands are evaluated in unspecified order */
 #endif
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -510,13 +510,17 @@ namespace {
   };// class FindPercentile<>
 } // namespace {
 namespace WDutils {
-# pragma clang diagnostic push
-# pragma clang diagnostic ignored "-Wunused-member-function"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wunused-member-function"
+#endif
   WDutils_TRAITS(Ranker<float>::point,"Ranker<float>::point");
   WDutils_TRAITS(Ranker<float>::range,"Ranker<float>::range");
   WDutils_TRAITS(Ranker<double>::point,"Ranker<double>::point");
   WDutils_TRAITS(Ranker<double>::range,"Ranker<double>::range");
-# pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
 }
 //
 namespace {

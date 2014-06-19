@@ -5,11 +5,11 @@
 ///
 /// \author Walter Dehnen
 ///                                                                             
-/// \date   2000-2013
+/// \date   2000-14
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
-// Copyright (C) 2000-2013 Walter Dehnen
+// Copyright (C) 2000-14 Walter Dehnen
 //
 // This program is free software; you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
@@ -43,6 +43,16 @@
 #  define WDutils_included_string
 #  include <string>
 #endif
+#if __cplusplus >= 201103L
+#  ifndef WDutils_included_iostream
+#    define WDutils_included_iostream
+#    include <iostream>
+#  endif
+#  ifndef WDutils_included_sstream
+#    define WDutils_included_sstream
+#    include <sstream>
+#  endif
+#endif
 #ifndef WDutils_included_limits
 #  define WDutils_included_limits
 #  include <limits>
@@ -60,9 +70,10 @@
 #    include <type_traits>
 #  endif
 #endif
-
-#ifdef __INTEL_COMPILER
-#  pragma warning (disable:161) /* unrecognized pragma */
+#if __cplusplus >= 201103L && defined(_OPENMP) && \
+  !defined(WDutils_included_omp_h)
+#  include <omp.h>
+#  define WDutils_included_omp_h
 #endif
 
 //                                                                              
@@ -75,7 +86,8 @@ namespace WDutils {
 
   /// provides information about the running process
   /// \note only one object exists, the static RunInfo::Info
-  class RunInfo {
+  class RunInfo 
+  {
   private:
     bool _m_host_known;
     bool _m_user_known;
@@ -83,10 +95,14 @@ namespace WDutils {
     bool _m_name_known;
     bool _m_cmd_known;
     bool _m_is_mpi_proc;
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wunused-private-field"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wunused-private-field"
+#endif
     bool _m_dummy_bool[2]; // padding to 8 bytes
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
     char _m_time   [104];
     char _m_host   [104];
     char _m_user   [104];
@@ -127,18 +143,18 @@ namespace WDutils {
 
     /// \name openMP stuff
     //@{
-    /// set # openMP threads
-    /// \note If @a arg[0] == 't', we set # threads to # processors.\n
-    ///       If @a arg[0] == 'f', we set # threads to 1 (no openMP).\n
+    /// set \# openMP threads
+    /// \note If @a arg[0] == 't', we set \# threads to \# processors.
+    ///       If @a arg[0] == 'f', we set \# threads to 1 (no openMP).
     ///       Otherwise, we try to convert @a arg to an integer number and
-    ///       take that. This may exceed the # processors.
+    ///       take that. This may exceed the \# processors.
     static void set_omp(const char*arg);
-    /// set # openMP threads
+    /// set number of openMP threads
     static void set_omp(int n);
-    /// maximum # processors available for openMP
+    /// maximum \# processors available for openMP
     static int max_omp_proc()
     { return Info._m_omp_proc; }
-    /// # openMP threads to be used, may exceed @a max_omp_proc()
+    /// number of openMP threads to be used, may exceed @a max_omp_proc()
     /// \note defaults to max_omp_proc, implying openMP is used if available
     static int omp_threads()
     { return Info._m_omp_size; }
@@ -154,35 +170,34 @@ namespace WDutils {
 #else
 #  define _END_FUNCTION_ {}
 #endif
-    /// set # TBB threads
-    /// \note If @a arg[0] == 't', we set # threads to automatic
-    ///       If @a arg[0] == 'f', we set # threads to 1.         \n
+    /// set \# TBB threads
+    /// \note If @a arg[0] == 't', we set \# threads to automatic
+    ///       If @a arg[0] == 'f', we set \# threads to 1.
     ///       Otherwise, we try to convert @a arg to an integer number and
-    ///       take that. This may exceed the # processors.
+    ///       take that. This may exceed the \# processors.
     static void set_tbb(const char*) _END_FUNCTION_;
-    /// set # TBB threads, if arg=0, uses tbb::task_scheduler_init::automatic
+    /// set \# TBB threads, if arg=0, uses tbb::task_scheduler_init::automatic
     /// \note use n=1 to de-activate tbb parallelism
     static void set_tbb(unsigned =0) _END_FUNCTION_;
 #undef _END_FUNCTION_
     /// use tbb
     static bool use_tbb()
     { return Info._m_tbb_size > 1; }
-    /// maximum # processors available for TBB
+    /// maximum \# processors available for TBB
     static unsigned max_tbb_proc()
     { return Info._m_tbb_proc; }
-    /// # TBB threads to be used, may exceed @a max_tbb_proc()
+    /// \# TBB threads to be used, may exceed @a max_tbb_proc()
     static unsigned tbb_threads()
     { return Info._m_tbb_size; }
     /// is TBB parallelism activated through set_tbb()?
     /// \note you can use TBB parallelism even if tbb_is_active() returns false
     static bool tbb_is_active()
     { return tbb_threads() > 0; }
-#ifdef WDutilsTBB
-    /// return a unique short id for the current tbb thread
-    static unsigned tbb_thread_id();
-#endif
     //@}
-
+#if __cplusplus >= 201103L && defined(WDutilsDevel)
+    /// return a unique short id for the current std::thread
+    static unsigned thread_id();
+#endif
     /// is host name known?
     static bool host_known()
     { return Info._m_host_known; }
@@ -248,9 +263,16 @@ namespace WDutils {
     static void WallClock(unsigned&sec, unsigned&usec);
 #endif
   };
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#endif
   /// is debugging level exceeded by debugging depth (argument)?
   /// \relates DebugInformation
   /// \param d debugging depth
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   inline bool debug(int d)
   { return RunInfo::debug(d); }
   /* 
@@ -269,6 +291,36 @@ namespace WDutils {
 #else
 #  define WDutilsThisFunction	0
 #endif
+  //
+#if __cplusplus >= 201103L
+  inline std::ostringstream&make_ostr(std::ostringstream&ostr) noexcept
+  {
+    return ostr;
+  }
+  template<class T, class... R>
+  inline std::ostringstream&make_ostr(std::ostringstream&ostr,
+				      T const&x, R&&... r)
+  {
+    ostr<<x;
+    return make_ostr(ostr, std::forward<R>(r)...);
+  }
+  /// make a C++ string from any number of arguments using C++ formatted output
+  template<class... Args>
+  inline std::string make_string(Args&&... args)
+  {
+    std::ostringstream ostr;
+    make_ostr(ostr,std::forward<Args>(args)...);
+    return std::move(ostr.str());
+  }
+  inline std::string make_string(const char*text)
+  {
+    return {text};
+  }
+  inline std::string make_string(std::string const&text)
+  {
+    return {text};
+  }
+#endif // C++11
   //
   /// \name print debugging information to stderr, reporting [file:line]        
   //@{
@@ -312,7 +364,32 @@ namespace WDutils {
       __attribute__ ((format (printf, 3, 4)))
 #endif
       ;
+    /// report message constructed from any number of arguments
+#if __cplusplus >= 201103L
+    template<class... Args>
+    void report(Args&&... args) const
+    {
+      std::ostringstream ostr;
+      print_header(ostr);
+      make_ostr(ostr,std::forward<Args>(args)...);
+      std::clog << ostr.str() << std::endl;      
+    }
+    template<class... Args>
+    void debug(int level, Args&&... args) const
+    {
+      if(ReportTraits::condition(level)) {
+	std::ostringstream ostr;
+	print_header(ostr,level);
+	make_ostr(ostr,std::forward<Args>(args)...);
+	std::clog << ostr.str() << std::endl;      
+      }
+    }
+#endif
   private:
+#if __cplusplus >= 201103L
+    /// print header of report() output
+    void print_header(std::ostringstream&, int=0) const;
+#endif
     //  no copy ctor and no operator=
     Reporting           (const Reporting&) WDutilsCXX11Delete;
     Reporting& operator=(const Reporting&) WDutilsCXX11Delete;
@@ -330,7 +407,8 @@ namespace WDutils {
   ///   void DebugInfo(int debug_level, const char*format, ...);
   ///   void DebugInfo(const char*format, ...); 
   /// \endcode
-#define DebugInfo WDutils::DebugInformation(__FILE__,__LINE__,"WDutils")
+#define DebugInfo \
+  WDutils::DebugInformation(__FILE__,__LINE__,"WDutils")
   /// print debug info to stderr and report func:
   /// use like NEMO's debug_info(), i.e. with EXACTLY the same syntax:
   /// \code
@@ -347,6 +425,15 @@ namespace WDutils {
   /// \endcode
 #define DebugInfoN  WDutils::DebugInformation("WDutils")
 #define DebugInfoN0 WDutils::DebugInformation("WDutils",0u)
+#if __cplusplus >= 201103L
+#  define DebugInfo11  \
+  WDutils::DebugInformation(__FILE__,__LINE__,"WDutils").debug
+#  define DebugInfo11F \
+  WDutils::DebugInformation(WDutilsThisFunction,__FILE__,__LINE__,\
+			    "WDutils").debug
+#  define DebugInfo11N \
+  WDutils::DebugInformation("WDutils").debug
+#endif
   /// traits for Error
   struct ErrorTraits {
     static bool condition(int) { return true; }
@@ -359,7 +446,8 @@ namespace WDutils {
   /// \code
   ///   void WDutils_Error(const char*format, ...);
   /// \endcode
-#define WDutils_Error WDutils::Error(__FILE__,__LINE__,"WDutils")
+#define WDutils_Error \
+  WDutils::Error(__FILE__,__LINE__,"WDutils")
   /// print error message to stderr, reporting [file:line]func, and exit.
   /// use like NEMO's error(), i.e. with the same syntax:
   /// \code
@@ -373,6 +461,14 @@ namespace WDutils {
   ///   void WDutils_ErrorN(const char*format, ...);
   /// \endcode
 #define WDutils_ErrorN WDutils::Error("WDutils")
+#if __cplusplus >= 201103L
+#  define WDutilsError11  \
+  WDutils::Error(__FILE__,__LINE__,"WDutils").report
+#  define WDutilsError11F \
+  WDutils::Error(WDutilsThisFunction,__FILE__,__LINE__,"WDutils").report
+#  define WDutilsError11N \
+  WDutils::Error("WDutils").report
+#endif
   /// traits for Warning
   struct WarningTraits {
     static bool condition(int) { return true; }
@@ -399,11 +495,17 @@ namespace WDutils {
   ///   void WDutils_WarningN(const char*format, ...);
   /// \endcode
 #define WDutils_WarningN WDutils::Warning("WDutils")
+#if __cplusplus >= 201103L
+#  define WDutilsWarning11  \
+  WDutils::Warning(__FILE__,__LINE__,"WDutils").report
+#  define WDutilsWarning11F \
+  WDutils::Warning(WDutilsThisFunction,__FILE__,__LINE__,"WDutils").report
+#  define WDutilsWarning11N \
+  WDutils::Warning("WDutils").report
+#endif
   /// \name exception treatment                                                 
   //@{                                                                          
   /// simple exception with error message
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winline"
   struct exception : std::runtime_error
   {
     /// construction from std::runtime_error
@@ -417,14 +519,20 @@ namespace WDutils {
     /// must match format, exactly as in printf, which will be called.
     /// \param[in] fmt gives the format in C printf() style
     explicit exception(const char*fmt, ...);
-    /// return error message 
-    const char*text() const
-    { return std::runtime_error::what(); }
+    ///
+    using std::runtime_error::what;
   };
-#pragma GCC diagnostic pop
+  /// make an exception from any number of arguments
+#if __cplusplus >= 201103L
+  template<class... Args>
+  exception make_exception(Args&&... args)
+  {
+    return exception(make_string(std::forward<Args>(args)...));
+  }
+#endif
   /// return error message given an exception
   inline const char*text(exception const&e)
-  { return e.text(); }
+  { return e.what(); }
   //
   struct ThrowGuard;
   /// for generating exceptions
@@ -461,14 +569,40 @@ namespace WDutils {
     /// generate an exception; for usage in WDutilsAssert
     /// \param[in] expr  boolean expression: throw exception if false
     exception operator()(bool expr) const;
+#if __cplusplus >= 201103L
+    template<class... Args>
+    exception throw_it(Args&&... args) const
+    {
+      const bool error = false
+#  ifdef _OPENMP
+	|| (omp_get_level() && InsteadOfThrow)
+#  endif
+	;
+      std::ostringstream ostr;
+      if(!error && file)
+	ostr << '[' << file << ':' << line << "] ";
+      if(func)
+	ostr << "in " << func;
+      make_ostr(ostr,std::forward<Args>(args)...);
+#  ifdef _OPENMP
+      if(error)
+	InsteadOfThrow(file,line,ostr.str().c_str());
+#  endif
+      return exception(ostr.str());
+    }
+#endif
   };
   /// method invoking an error, suitable as @a Thrower::handler
   inline void MakeError(const char*file, unsigned line, const char*mess)
-  { 
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-security"
+  {
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-security"
+#endif
     Error(file,line,"WDutils")(mess);
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   }
   /// guard against throwing an exception inside an openMP parallel region
   struct ThrowGuard
@@ -507,7 +641,7 @@ namespace WDutils {
     /// Uses a printf() style format string as first argument, further arguments
     /// must match format, exactly as in printf, which will be called.
     /// \param fmt gives the format in C printf() style
-    explicit message(const char* fmt, ...) throw(exception);
+    explicit message(const char* fmt, ...);
     /// conversion to C-style string
     operator const char*() const { return _m_text; }
     /// return C-style string
@@ -530,7 +664,7 @@ namespace WDutils {
 #  define WDutils_THROWER       WDutils::Error
   //----------------------------------------------------------------------------
   /// use "WDutils_RETHROW(E)" to re-throw a caught exception "E"
-#  define WDutils_RETHROW(E)    WDutils_Error (text(E))
+#  define WDutils_RETHROW(E)    WDutils_Error (E.what())
 #else // 0/1
 #  define WDutils_EXCEPTIONS
   /// use instead of <tt> throw(WDutils::exception) </tt> after function
@@ -539,12 +673,21 @@ namespace WDutils {
 #  define WDutils_THROWER       throw WDutils::Thrower
 #  define WDutils_THROWN        throw WDutils::exception
 #  define WDutils_RETHROW(E)    throw E
+#  if __cplusplus >= 201103L
+#    define WDutilsThrow11N     throw make_exception
+#  endif
 #endif
   /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROW  \
   WDutils_THROWER(WDutilsThisFunction,__FILE__,__LINE__)
   /// use to report an error like <tt> WDutils_THROW("x=%f<0",x); </tt>
 #define WDutils_THROWF WDutils_THROWER(WDutilsThisFunction)
+#if __cplusplus >= 201103L
+#  define WDutilsThrow11  \
+  WDutils_THROWER(WDutilsThisFunction,__FILE__,__LINE__).throw_it
+#  define WDutilsThrow11F \
+  WDutils_THROWER(WDutilsThisFunction).throw_it
+#endif
   //@}
   //
   //  macro for compile-time assertion, stolen from the boost library

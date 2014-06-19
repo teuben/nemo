@@ -616,7 +616,6 @@ namespace WDutils {
     RootSafe(const char*f, int l) : FileLineFind(f,l) {}
     template <typename X>
     X operator() (void(*func)(X,X&,X&), X x1, X x2, X xacc)
-      throw(WDutils::exception)
     {
       const int maxit=100;
       X xh,xl,dx,dxo,f,df,fh,fl,rts,temp;
@@ -684,7 +683,7 @@ namespace WDutils {
   /// \param[in] xacc desired accuracy for root
   /// \note f(x1)*f(x2) \b must not be positive on input
   template <typename X>
-  X rtsafe(void(*func)(X,X&,X&), X x1, X x2, X xacc) throw(WDutils::exception)
+  X rtsafe(void(*func)(X,X&,X&), X x1, X x2, X xacc)
   {
     return RootSafe()(func,x1,x2,xacc);
   }
@@ -1097,7 +1096,7 @@ namespace WDutils {
   /// \note       @c T prepare for eigenvector extraction?
   /// \note       @c X scalar type (float or double)
   /// \param[in]     N size of matrix
-  /// \param[in,out] A on input: real symmetric matrix,\n
+  /// \param[in,out] A on input: real symmetric matrix,
   ///                  on putput: input required by \a EigenSystemTridiagonal()
   /// \param[out]    D diagonal elements of tridiagonal form
   /// \param[out]    E off-diagonal elements of tridiagonal form
@@ -1114,7 +1113,7 @@ namespace WDutils {
   // ---------------------------------------------------------------------------
   /// compute eigensystem of tridiagonal symmetric matrix
   ///
-  /// \pnote      @c X  only X=float and X=double are implemented
+  /// \note       @c X  only X=float and X=double are implemented
   /// \param[in]     N  size of matrix
   /// \param[in,out] D  on input: diagonal elements; on output: eigenvalues
   /// \param[in,out] E  on input: off-diagonal elements; on output: destroyed

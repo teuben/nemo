@@ -61,6 +61,9 @@
 #  include <stdexcept>
 #  define WDutils_included_stdexcept
 #endif
+#ifndef WDutils_included_cachesize_h
+#  include <cachesize.h>
+#endif
 #ifndef WDutils_included_traits_h
 #  include <traits.h>
 #endif
@@ -69,18 +72,18 @@
 #endif
 
 #if __cplusplus < 201103L
-# define noexcept
-# define constexpr
+#  define noexcept
+#  define constexpr
 #endif
 #if defined(__clang__) || (defined(__GNUC__) && !defined(__INTEL_COMPILER))
-# define always_inline inline __attribute__((__always_inline__))
+#  define always_inline inline __attribute__((__always_inline__))
 #else
-# define always_inline inline
+#  define always_inline inline
 #endif
 
 namespace WDutils {
 #ifndef WDutilsAllocDebugLevel
-# define WDutilsAllocDebugLevel 8
+#  define WDutilsAllocDebugLevel 8
 #endif
   // ///////////////////////////////////////////////////////////////////////////
   //
@@ -217,10 +220,7 @@ namespace WDutils {
     if(!pobj)
       return;
     try {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winline"
       delete pobj;
-#pragma GCC diagnostic pop
     } catch(...) {
       throw Thrower(file,line)
 	("de-allocating object '%s' @ %p failed\n", nameof(T),pobj);
@@ -244,7 +244,7 @@ namespace WDutils {
 }
 //
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#include <mm_malloc.h>
+#  include <mm_malloc.h>
 #endif
 //
 namespace WDutils {
@@ -277,18 +277,9 @@ namespace WDutils {
 #elif __cplusplus >= 201103L
 #  define WDutilsAlignTo(K) alignas(K)
 #else
-#  warning do not know how to enforce memory alignment
+#  warning do not know how to enforce memory alignment with this compiler
 #  define WDutilsAlignTo(K)
 #endif
-// #if defined(__clang__) && __cplusplus >= 201103L
-// #  define WDutilsAlignTo(K) alignas(K)
-// #elif defined (__INTEL_COMPILER)
-// #  define WDutilsAlignTo(K) __declspec(align(K))
-// #elif (defined (__GNUC__) && __GNUC__ > 2) || defined(__PGI)
-// #  define WDutilsAlignTo(K) __attribute__ ((aligned(K)))
-// #else
-// #  define WDutilsAlignTo(K)
-// #endif
   /// struct holding aligned datum
   template<int alignment, typename data_type> struct AlignedDatum
   {
@@ -373,7 +364,7 @@ namespace WDutils {
   {
     WDutilsCXX11StaticAssert(K>0 && (K&(K-1))==0,"K not power of 2");
     size_t nbytes = nobj*sizeof(T);
-#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+#if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
     void*t;
     bool failed=0;
     try {
@@ -391,7 +382,7 @@ namespace WDutils {
        "allocated %u %s = %u bytes aligned to %d @ %p\n",
        uint32_t(nobj),nameof(T),uint32_t(nbytes),K,t);
     return static_cast<T*>(t);
-#else // __GNUC__ or __INTEL_COMPILER
+#else // __clang__ or __GNUC__ or __INTEL_COMPILER
     WDutilsCXX11StaticAssert(K==16,"only implemented for K=16");
     // linear memory model:                                                     
     // ^    = 16byte alignment points                                           
@@ -451,7 +442,7 @@ namespace WDutils {
   void DelArrayAligned(const T*array, const char*file, unsigned line,
 		       size_t num=0, const char*lib="WDutils")
   {
-#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+#if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
     if(!array)
       return;
     if(!is_aligned<K>(array)) {
@@ -500,11 +491,13 @@ namespace WDutils {
 #define WDutils_DEL16(P) WDutils_DEL_aligned(16,P)
 #define WDutils_DEL16N(P,N) WDutils_DEL_alignedN(16,P,N)
   // ///////////////////////////////////////////////////////////////////////////
+  template<typename ptr> struct data_buffer;
+  
   /// 
   /// an imported array with limited container functionality
   ///
   template<typename T>
-  struct data_buffer
+  struct data_buffer<T*>
   {
     typedef T value_type;
     typedef size_t size_type;
@@ -519,11 +512,16 @@ namespace WDutils {
     //
     data_buffer(pointer b=0, size_type n=0) noexcept
     : _M_buf(b), _M_cnt(b?n:0) {}
-//     //
-//     data_buffer(data_buffer const&) = default;
-// #if __cplusplus >= 201103L
-//     data_buffer(data_buffer &&) = default;
-// #endif
+    //
+    template<typename Alloc>
+    explicit data_buffer(std::vector<T,Alloc>&x) noexcept
+    : _M_buf(x.data()), _M_cnt(x.size()) {}
+    //
+    data_buffer(data_buffer const&)
+#if __cplusplus >= 201103L
+    = default
+#endif
+      ;
     // data access
     reference       operator[](size_t i)       noexcept { return _M_buf[i]; }
     const_reference operator[](size_t i) const noexcept { return _M_buf[i]; }
@@ -531,7 +529,7 @@ namespace WDutils {
     {
       if(i>_M_cnt) {
 	std::ostringstream s;
-	s << "data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	s << "data_buffer<"<<nameof(T)<<"*>::at(): i="<<i
 	  << " > size()="<<_M_cnt;
 	throw std::out_of_range(s.str());
       }
@@ -541,7 +539,7 @@ namespace WDutils {
     { 
       if(i>_M_cnt) {
 	std::ostringstream s;
-	s << "data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	s << "data_buffer<"<<nameof(T)<<"*>::at(): i="<<i
 	  << " > size()="<<_M_cnt;
 	throw std::out_of_range(s.str());
       }
@@ -566,6 +564,10 @@ namespace WDutils {
     iterator          end()       noexcept { return _M_buf+_M_cnt; }
     const_iterator    end() const noexcept { return _M_buf+_M_cnt; }
     const_iterator   cend() const noexcept { return _M_buf+_M_cnt; }
+    // iterator to end of buffer
+    iterator         last()       noexcept { return _M_buf+_M_cnt-1; }
+    const_iterator   last() const noexcept { return _M_buf+_M_cnt-1; }
+    const_iterator  clast() const noexcept { return _M_buf+_M_cnt-1; }
     // iterator to begin of reversed buffer
     reverse_iterator        rbegin()       noexcept
     { return reverse_iterator(--end()); } 
@@ -588,7 +590,7 @@ namespace WDutils {
   /// a constant imported array with limited container functionality
   ///
   template<typename T>
-  struct const_data_buffer
+  struct data_buffer<const T*>
   {
     typedef T value_type;
     typedef size_t size_type;
@@ -601,27 +603,28 @@ namespace WDutils {
     typedef std::reverse_iterator<iterator> reverse_iterator;
     typedef std::reverse_iterator<const_iterator> const_reverse_iterator;
     //
-    const_data_buffer(pointer b=0, size_type n=0) noexcept
+    data_buffer(pointer b=0, size_type n=0) noexcept
     : _M_buf(b), _M_cnt(b?n:0) {}
-//     //
-//     const_data_buffer(const_data_buffer const&) = default;
-// #if __cplusplus >= 201103L
-//     const_data_buffer(const_data_buffer &&) = default;
-// #endif
     //
-    const_data_buffer(data_buffer<T> const&b) noexcept
-    : _M_buf(b._M_buf), _M_cnt(b._M_cnt) {}
+    template<typename Alloc>
+    explicit data_buffer(std::vector<T,Alloc> const&x) noexcept
+    : _M_buf(x.data()), _M_cnt(x.size()) {}
+    //
+    data_buffer(data_buffer const&)
 #if __cplusplus >= 201103L
-   const_data_buffer(data_buffer<T>&&b) noexcept
-    : _M_buf(b._M_buf), _M_cnt(b._M_cnt) {}
+    = default
 #endif
+	     ;
+    //
+    data_buffer(data_buffer<T*> const&b) noexcept
+    : _M_buf(b.data()), _M_cnt(b.size()) {}
     // data access
     const_reference operator[](size_t i) const noexcept { return _M_buf[i]; }
     const_reference at        (size_t i) const
     {
       if(i>_M_cnt) {
 	std::ostringstream s;
-	s << "const_data_buffer<"<<nameof(T)<<">::at(): i="<<i
+	s << "data_buffer<const "<<nameof(T)<<"*>::at(): i="<<i
 	  << " > size()="<<_M_cnt;
 	throw std::out_of_range(s.str());
       }
@@ -641,6 +644,9 @@ namespace WDutils {
     // iterator to end of buffer
     const_iterator    end() const noexcept { return _M_buf+_M_cnt; }
     const_iterator   cend() const noexcept { return _M_buf+_M_cnt; }
+    // iterator to end of buffer
+    const_iterator   last() const noexcept { return _M_buf+_M_cnt-1; }
+    const_iterator  clast() const noexcept { return _M_buf+_M_cnt-1; }
     // iterator to begin of reversed buffer
     const_reverse_iterator  rbegin() const noexcept
     { return const_reverse_iterator(--end()); } 
@@ -657,32 +663,36 @@ namespace WDutils {
   };
   //
   template<typename T>
-  bool operator==(data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  bool operator==(data_buffer<T*> const&x, data_buffer<T*> const&y) noexcept
   { return x.data()==y.data() && x.size()==y.size(); }
   template<typename T>
-  bool operator!=(data_buffer<T> const&x, data_buffer<T> const&y) noexcept
+  bool operator!=(data_buffer<T*> const&x, data_buffer<T*> const&y) noexcept
   { return !(x==y); }
   //
   template<typename T>
-  bool operator==(const_data_buffer<T> const&x, data_buffer<T> const&y) noexcept
-  { return x.data()==y.data() && x.size()==y.size(); }
-  template<typename T>
-  bool operator!=(const_data_buffer<T> const&x, data_buffer<T> const&y) noexcept
-  { return !(x==y); }
-  //
-  template<typename T>
-  bool operator==(data_buffer<T> const&x, const_data_buffer<T> const&y) noexcept
-  { return x.data()==y.data() && x.size()==y.size(); }
-  template<typename T>
-  bool operator!=(data_buffer<T> const&x, const_data_buffer<T> const&y) noexcept
-  { return !(x==y); }
-  //
-  template<typename T>
-  bool operator==(const_data_buffer<T> const&x, const_data_buffer<T> const&y)
+  bool operator==(data_buffer<const T*> const&x, data_buffer<T*> const&y)
     noexcept
   { return x.data()==y.data() && x.size()==y.size(); }
   template<typename T>
-  bool operator!=(const_data_buffer<T> const&x, const_data_buffer<T> const&y)
+  bool operator!=(data_buffer<const T*> const&x, data_buffer<T*> const&y)
+    noexcept
+  { return !(x==y); }
+  //
+  template<typename T>
+  bool operator==(data_buffer<T*> const&x, data_buffer<const T*> const&y)
+    noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(data_buffer<T*> const&x, data_buffer<const T*> const&y)
+    noexcept
+  { return !(x==y); }
+  //
+  template<typename T>
+  bool operator==(data_buffer<const T*> const&x, data_buffer<const T*> const&y)
+    noexcept
+  { return x.data()==y.data() && x.size()==y.size(); }
+  template<typename T>
+  bool operator!=(data_buffer<const T*> const&x, data_buffer<const T*> const&y)
     noexcept
   { return !(x==y); }
   // ///////////////////////////////////////////////////////////////////////////
@@ -694,11 +704,11 @@ namespace WDutils {
   class Array16 {
     /// ensure sizeof(T) is either multiple or dividor of 16
     WDutilsStaticAssert( 0 == (sizeof(T) % 16)  ||  0 == (16 % sizeof(T)) );
-    /// # objects to allocate for n
+    /// \# objects to allocate for n
     static unsigned Nalloc(unsigned n)
     { return sizeof(T)>=16? n : ((n*sizeof(T)+15)&(~15))/sizeof(T); }
     //  data
-    unsigned N; ///< # allocated data
+    unsigned N; ///< \# allocated data
     T       *A; ///< allocates array
     //  no copy ctor and no operator=
     Array16           (const Array16&) WDutilsCXX11Delete;
@@ -748,7 +758,7 @@ namespace WDutils {
 	A = newA;
       }
     }
-    /// # allocated elements
+    /// \# allocated elements
     unsigned nalloc() const { return N; }
     /// const data access
     template<typename integer>
@@ -946,9 +956,9 @@ namespace WDutils {
     //@{
     block       *FIRST;  ///< first block in linked list
     block       *LAST;   ///< last block in linked list
-    size_type    NTOT;   ///< # elements allocated
-    size_type    NUSED;  ///< # elements used
-    size_type    NBLCK;  ///< # blocks
+    size_type    NTOT;   ///< \# elements allocated
+    size_type    NUSED;  ///< \# elements used
+    size_type    NBLCK;  ///< \# blocks
     //@}
   public:
     /// \name member functions of class WDutils::block_alloc
@@ -1048,7 +1058,7 @@ namespace WDutils {
     /// element of a given running number
     ///
     /// \param[in]  n  running number, must be in [0, N_used[
-    /// \return     pointer to element # @a n, NULL is @a n outside range
+    /// \return     pointer to element \# @a n, NULL is @a n outside range
     pointer element(unsigned n) const
     {
       for(block*B=FIRST; B; B=B->next()) {
@@ -1064,7 +1074,7 @@ namespace WDutils {
     bool is_element(const_pointer E) const
     {
       if(E==0) return 0;
-      for(register block*B=FIRST; B; B=B->next())
+      for(block*B=FIRST; B; B=B->next())
 	if(E >= B->front() && E < B->end())
 	  return 1;
       return 0;
@@ -1104,15 +1114,12 @@ namespace WDutils {
 #endif
   block_alloc<T,K>::~block_alloc()
   {
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winline"
     block *A=FIRST, *N;
     while(A) {
       N = A->next();
       WDutils_DEL_O(A);
       A = N;
     }
-#pragma clang diagnostic pop
   }
   //
   //  class WDutils::pool
@@ -1166,10 +1173,10 @@ namespace WDutils {
     /// \name data
     //@{
   private:
-    const size_type N;                    ///< # elements / chunk
+    const size_type N;                    ///< \# elements / chunk
     const size_type Kp;                   ///< sizeof(element)
-    unsigned        NC;                   ///< # chunks
-    size_type       Na, Nmax;             ///< # elements given out
+    unsigned        NC;                   ///< \# chunks
+    size_type       Na, Nmax;             ///< \# elements given out
     chunk          *CHUNKS;               ///< pter to 1st chunk
     link           *HEAD;                 ///< pter to 1st free element
     //@}
@@ -1228,13 +1235,13 @@ namespace WDutils {
       HEAD    = p;
       Na--;
     }
-    /// # chunks used
+    /// \# chunks used
     unsigned N_chunks() const
     { return NC; }
-    /// # elements handed out
+    /// \# elements handed out
     size_type N_alloc() const
     { return Na; }
-    /// # elements allocated
+    /// \# elements allocated
     size_type N_alloc_max() const
     { return Nmax; }
   };// class WDutils::pool
@@ -1265,9 +1272,9 @@ namespace WDutils {
     /// freeing: take back a single element
     void free (T*e)
     { pool::free(e); }
-    using pool::N_chunks;    ///< # chunks used
-    using pool::N_alloc;     ///< # elements handed out
-    using pool::N_alloc_max; ///< # elements allocated
+    using pool::N_chunks;    ///< \# chunks used
+    using pool::N_alloc;     ///< \# elements handed out
+    using pool::N_alloc_max; ///< \# elements allocated
   };// class WDutils::Pool<>
   //
   template<typename T> struct traits< Pool<T> > {
@@ -1944,7 +1951,7 @@ namespace WDutils {
       if(n > max_size())
 	throw std::bad_alloc();
       void*ret =
-#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+#if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
 	_mm_malloc
 #else
 	_aligned_malloc
@@ -1962,7 +1969,7 @@ namespace WDutils {
       DebugInfoN(WDutilsAllocDebugLevel+2,
 		 "static_allocator<%lu>: trying to de-allocated memory @ %p\n",
 		 alignment,p);
-#if defined(__GNUC__) || defined (__INTEL_COMPILER)
+#if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
       _mm_free
 #else
       _aligned_free
@@ -2116,6 +2123,12 @@ namespace WDutils {
   template<typename T, std::size_t alignment>
   using alignment_allocator = AlignmentAllocator<T,alignment>;
   ///
+  template<typename T>
+  using cache_aligned_allocator = AlignmentAllocator<T,sizeof_cache_line>;
+  ///
+  template<typename T>
+  using cache_aligned_vector = std::vector<T,cache_aligned_allocator<T> >;
+  ///
   /// allocator that doesn't initialise memory by default.
   /// \note this violates the standard, but allows for uninitialised vectors
   ///       here is some pseudo code to illustrate
@@ -2126,7 +2139,16 @@ namespace WDutils {
   {
     template<typename U>
     using base_t = typename base_allocator::template rebind<U>::other;
-
+    // this constructor is necessary for 
+    //    std::queue<T,uninitialised_allocator<T>>   (when U=T*)
+    // to work with gcc 4.8.0 (and compliable icc), but not clang 3.2
+    template<typename U>
+    uninitialised_allocator(uninitialised_allocator<U,base_t<U> > const&a)
+      : base_t<T>(a) {}
+    // these constructors are necessary since we provide the previous one
+    uninitialised_allocator() {}
+    uninitialised_allocator(uninitialised_allocator &&) = default;
+    uninitialised_allocator(uninitialised_allocator const&) = default;
     // 
     template<typename U>
     struct rebind
@@ -2166,7 +2188,7 @@ namespace WDutils {
   using uninitialised_vector
   = std::vector<T, uninitialised_allocator<T,base_allocator> >;
 #  ifndef __INTEL_COMPILER
-  //  icpc 13.1.1 still cannot alignof(type)
+  //  icpc 14.0.1 still cannot alignof(type)
   ///
   /// the maximum alignment required in aligned vector
   /// 

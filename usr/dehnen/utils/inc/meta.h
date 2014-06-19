@@ -63,6 +63,20 @@ namespace WDutils {
   using std::remove_volatile;
   using std::remove_const;
   using std::remove_cv;
+  ///
+  /// is_callable<Func,Args>::value is true if F::operator(Args) exists
+  ///
+  template<typename Func, typename... Args>
+  class is_callable
+  {
+    template <typename U>
+    static decltype(std::declval<U>()(std::declval<Args>()...), void(), 0)
+      test(int);
+    template <typename>
+    static void test(...);
+  public:
+    static const bool value = !std::is_void<decltype(test<Func>(0))>::value;
+  };
 #else
   template<bool B, class T = void>
   struct enable_if {};
@@ -107,8 +121,9 @@ namespace WDutils {
     // operational dependence on even or odd integer
     template<int> struct _m_EvenOdd;
     template<> struct _m_EvenOdd<0> {
-      template<typename R> static void neg (R&) noexcept {}
-      template<typename R> static R    pow (R ) noexcept { return R(1); }
+      template<typename R> static void neg (R& ) noexcept {}
+      template<typename R> static R    equ (R x) noexcept { return x; }
+      template<typename R> static R    pow (R  ) noexcept { return R(1); }
       template<typename R> static R    powp(R ,  R y) noexcept { return y; }
       template<typename R> static void ass (R&x, R y) noexcept { x =y; }
       template<typename R> static void add (R&x, R y) noexcept { x+=y; }
@@ -120,6 +135,7 @@ namespace WDutils {
     };
     template<> struct _m_EvenOdd<1> {
       template<typename R> static void neg (R&x) noexcept { x=-x; }
+      template<typename R> static R    equ (R x) noexcept { return -x; }
       template<typename R> static R    pow (R x) noexcept { return x; }
       template<typename R> static R    powp(R x, R y) noexcept { return x*y; }
       template<typename R> static void ass (R&x, R y) noexcept { x =-y; }
@@ -130,6 +146,11 @@ namespace WDutils {
       template<typename R> static R    sum (R x, R y) noexcept { return x-y; }
       template<typename R> static R    diff(R x, R y) noexcept { return x+y; }
     };
+    /// returns +/- x, depending on whether N is even or odd
+    /// \param[in] x  rvalue
+    /// \return    x  if N is even, -x if n is odd
+    template<int N, typename R> inline
+    R Equate(R x) noexcept { return _m_EvenOdd<N&1>::equ(x); }
     /// assigns positive or negative, depending on whether N is even or odd
     /// \param[in,out] x lvalue, replaced by y if N is even, -y if N is odd
     /// \param[in]     y rvalue
@@ -179,13 +200,16 @@ namespace WDutils {
     /// sign of an integer
     template<int N> struct Sign
     { const static int S = N<0? -1 : N>0? 1 : 0; };
+    ///  x=-x
+    inline float &negate(float &x) noexcept { return x=-x; }
+    inline double&negate(double&x) noexcept { return x=-x; }
     /// Inverse of an integer: replace integer divisions of real numbers by
     /// multiplications to generate faster code.
     /// \note instantinated for all integers up to 100
     template<int N> struct IntegerInverse
 #ifndef WDutilsMetaNoDefaultIntegerInverse
     {
-      WDutilsStaticAssert((N!=0 && N!=1));
+      WDutilsStaticAssert((N>1));
       /// inverse of integer
       template<typename R> static R Inverse() noexcept
       { return R(1)/R(N); }
@@ -204,20 +228,33 @@ namespace WDutils {
 #endif
     ;
     ///
+    template<> struct IntegerInverse<-1> {
+      template<typename R> static R Inverse() noexcept { return R(-1); }
+      template<typename R> static void Divide(R&X) noexcept { negate(X); }
+      template<typename R> static R Ratio(R X) noexcept { return -X; }
+    };
     template<> struct IntegerInverse<0> {};
     template<> struct IntegerInverse<1> {
       template<typename R> static R Inverse() noexcept { return R(1); }
       template<typename R> static void Divide(R&) noexcept {}
       template<typename R> static R Ratio(R X) noexcept { return X; }
     };
-#define DEFINVERSE(NUM,INVERSE)						\
-    template<> struct IntegerInverse<NUM> {				\
-      template<typename R> static R Inverse() noexcept 		\
-      { return R(INVERSE); }						\
+#define DEFINVERSE(NUM,INVERSE)					\
+    template<> struct IntegerInverse<NUM> {			\
+      template<typename R> static R Inverse() noexcept		\
+      { return R(INVERSE); }					\
       template<typename R> static void Divide(R&X) noexcept	\
-      { X *= R(INVERSE); }						\
-      template<typename R> static R Ratio(R X) noexcept 	\
-      { return X * R(INVERSE); }					\
+      { X *= R(INVERSE); }					\
+      template<typename R> static R Ratio(R X) noexcept		\
+      { return X * R(INVERSE); }				\
+    };								\
+    template<> struct IntegerInverse<- NUM> {			\
+      template<typename R> static R Inverse() noexcept		\
+      { return R(- INVERSE); }					\
+      template<typename R> static void Divide(R&X) noexcept	\
+      { X *= R(- INVERSE); }					\
+      template<typename R> static R Ratio(R X) noexcept		\
+      { return X * R(- INVERSE); }				\
     }
     // all numbers up to 100
     DEFINVERSE(   2, 0.5);

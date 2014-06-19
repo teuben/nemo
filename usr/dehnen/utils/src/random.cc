@@ -50,8 +50,8 @@ namespace {
 //------------------------------------------------------------------------------
 Random3::Random3(long idum) : inext(0), inextp(31)
 {
-  register long  mj,mk;
-  register int   i,ii,k;
+  long  mj,mk;
+  int   i,ii,k;
   mj     = mseed - (idum<0 ? -idum : idum);
   mj    %= mbig;
   ma[55] = mj;
@@ -239,7 +239,7 @@ ExpDisk::ExpDisk(const RandomNumberGenerator*r, const double H) :
 //------------------------------------------------------------------------------
 double ExpDisk::ranvar() const
 {
-  register double y, p=(*R)();
+  double y, p=(*R)();
   while(p>=1.) p=(*R)();
   y = polev(p,P,Y,N1);
   return h*y/(1.-y);
@@ -252,7 +252,7 @@ double ExpDisk::value(double x) const
 //------------------------------------------------------------------------------
 double ExpDisk::radius(double p) const
 {
-  register double y;
+  double y;
   y = polev(p,P,Y,N1);
   return h*y/(1.-y);
 }

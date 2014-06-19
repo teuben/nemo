@@ -18,10 +18,10 @@
 // Software Foundation; either version 2 of the License, or (at your option)
 // any later version.
 //
-// This program is distributed in the hope that it will be useful, but          
-// WITHOUT ANY WARRANTY; without even the implied warranty of                   
-// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU            
-// General Public License for more details.                                     
+// This program is distributed in the hope that it will be useful, but
+// WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHA1NTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+// General Public License for more details.
 //
 // You should have received a copy of the GNU General Public License along
 // with this program; if not, write to the Free Software Foundation, Inc., 675
@@ -102,8 +102,8 @@ namespace WDutils {
     if(! S.is_open() ) WDutils_Error("cannot open file \"%s\" for output",file);
   }
   /// try to open an output file for appending.
-  /// if not successful, we issue a warning and return 0\n
-  /// if file did already exist and was opened for appending, return 1\n
+  /// if not successful, we issue a warning and return 0
+  /// if file did already exist and was opened for appending, return 1
   /// if did not exist and but a new one has been opened, return 2
   /// \return see above
   /// \param[in,out] S ofstream to open
@@ -119,7 +119,7 @@ namespace WDutils {
   }
   /// try to open an output file for appending.
   /// if not successful, we issue a fatal error
-  /// if file did already exist and was opened for appending, return 1\n
+  /// if file did already exist and was opened for appending, return 1
   /// if did not exist and but a new one has been opened, return 2
   /// \return see above
   /// \param[in,out] S ofstream to open
@@ -189,10 +189,17 @@ namespace WDutils {
   }
   //@}
   //----------------------------------------------------------------------------
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wdocumentation-unknown-command"
+#endif
   /// swallow the rest of the current line.
   /// reads all characters up to and including the next '\n'.
   /// \return istream read (this allows to put this routine in a >> >> sequence)
   /// \param[in,out] from istream to read from
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
   inline std::istream&SwallowRestofLine(std::istream& from)
   {
     char c;
@@ -289,7 +296,7 @@ namespace WDutils {
   std::ostream& write_array(std::ostream&s, const X* x, unsigned N)
   {
     s << x[0];
-    for(register unsigned i=1; i!=N; ++i) s<<" "<<x[i];
+    for(unsigned i=1; i!=N; ++i) s<<" "<<x[i];
     return s;
   }
 #if(0)
@@ -303,28 +310,29 @@ namespace WDutils {
   template<typename X> inline
   std::istream& read_array(std::istream&s, X* x, unsigned N)
   {
-    register X y[N];
+    X y[N];
     char c=0;
     s >> c;
     if(c == '(') {
-      for(register unsigned i=0; i!=N; ++i) s >> y[i];
+      for(unsigned i=0; i!=N; ++i) s >> y[i];
       s >> c;
       if(c != ')') s.clear(std::ios::badbit);
     } else {
       s.putback(c);
-      for(register unsigned i=0; i!=N; ++i) s >> y[i];
+      for(unsigned i=0; i!=N; ++i) s >> y[i];
     }
-    for(register unsigned i=0; i!=N; ++i) x[i] = y[i];
+    for(unsigned i=0; i!=N; ++i) x[i] = y[i];
     return s;
   }
 #endif // (0)
   //}@
   //----------------------------------------------------------------------------
   template<typename X>
-  struct smanip_fp_width {
+  struct smanip_fp_width
+  {
     X   x;
     int p,w,s;
-    int width(double l) {            // given precision, what is minimum width
+    int width(X l) {                 // given precision, what is minimum width
       int il = 1+int(l);
       int fw = l<0? 3+p-il : il>=p? il : p+1;
       int ew = p+5;
@@ -339,8 +347,8 @@ namespace WDutils {
 	else           s=0;
       }
       if(x<=0 && x>=0 ) return;
-      double l=std::log10(std::abs(x));
-      w =std::max(w,width(l));       // minimum width to achieve
+      X l=log10(abs(x));
+      w  =max(w,width(l));           // minimum width to achieve
       for(++p; width(l)<=w; ++p) ;   // try for more precision
       --p;
     }
@@ -398,6 +406,29 @@ namespace WDutils {
   inline smanip_fp_vec_width<X> print(vector<N,X> const&x, int w, int p)
   { return smanip_fp_vec_width<X>(x.data(),N,w,p); }
 #endif
+
+  //----------------------------------------------------------------------------
+  template<typename UnsignedInteger>
+  struct smanip_bits {
+    UnsignedInteger x;
+    unsigned  highest;
+    explicit smanip_bits(UnsignedInteger i, unsigned width)
+      : x(i), highest(width>0? width-1:0u) {}
+  };
+  template<typename X>
+  inline std::ostream& operator<<(std::ostream&o, smanip_bits<X> const&m)
+  {
+    unsigned h=8*sizeof(X)-1;
+    X t = X(1)<<h;
+    for(; h>m.highest && !(t&m.x); --h, t>>=1) ;
+    for(; h                      ; --h, t>>=1) 
+      o << ((t&m.x)? '1':'0');
+    return o << ((X(1)&m.x)? '1':'0');
+  }
+  /// manipulator: write bits
+  template<typename X>
+  inline smanip_bits<X> bitwise(X x, unsigned w=1u)
+  { return smanip_bits<X>(x,w); }
   // ///////////////////////////////////////////////////////////////////////////
   //
   // WDutils::FileSize()
@@ -595,10 +626,14 @@ namespace WDutils {
     bool reopen(const char*format, T const&tag, bool append=0)
     {
       char FNEW[FNAME_MAX_SIZE];
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wformat-nonliteral"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wformat-nonliteral"
+#endif
       SNprintf(FNEW,FNAME_MAX_SIZE,format,tag);
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
       if(OUT==0 || strcmp(FNEW,FNAME)) {
 	open(FNEW,append);
 	return true;
@@ -638,10 +673,14 @@ namespace WDutils {
     /// unformatted output
     void write(const char*a, size_t n)
     {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
       if(OUT) OUT->write(a,n);
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
     }
     //--------------------------------------------------------------------------
     /// call if opening any output to stdout from NEMO main
@@ -797,10 +836,14 @@ namespace WDutils {
     /// unformatted input
     void read(char*a, size_t n)
     {
-#pragma clang diagnostic push
-#pragma clang diagnostic ignored "-Wsign-conversion"
+#ifdef __clang__
+#  pragma clang diagnostic push
+#  pragma clang diagnostic ignored "-Wsign-conversion"
+#endif
       if(IN) IN->read(a,n);
-#pragma clang diagnostic pop
+#ifdef __clang__
+#  pragma clang diagnostic pop
+#endif
     }
     //--------------------------------------------------------------------------
     /// call if opening any input to stdin from NEMO main
@@ -827,21 +870,20 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     FortranIRec           (FortranIRec const&); // not implemented
     FortranIRec& operator=(FortranIRec const&); // not implemented
-    size_t read_size() throw(WDutils::exception);
+    size_t read_size();
   public:
     //--------------------------------------------------------------------------
     /// constructor: read buffer with size information
     /// \param[in,out] in  WDutils::input to read from
     /// \param[in]     rec (optional) size of Fortran record header: 4 or 8
     /// \param[in]     bswap (optional) swap bytes for size information?
-    FortranIRec(input&in, unsigned rec=4, bool bswap=0)
-      throw(WDutils::exception);
+    FortranIRec(input&in, unsigned rec=4, bool bswap=0);
     //--------------------------------------------------------------------------
     /// close: same as destruction
-    void close() throw(WDutils::exception);
+    void close();
     //--------------------------------------------------------------------------
     /// destructor: read to end of record, read end buffer
-    ~FortranIRec() throw(WDutils::exception) { close(); }
+    ~FortranIRec() { close(); }
     //--------------------------------------------------------------------------
     /// read some bytes
     ///
@@ -851,7 +893,7 @@ namespace WDutils {
     /// \return     number of bytes actually read
     /// \param[out] buf buffer to read into
     /// \param[in]  n   number of bytes to read
-    size_t read_bytes(char*buf, size_t n) throw(WDutils::exception);
+    size_t read_bytes(char*buf, size_t n);
     //--------------------------------------------------------------------------
     /// read some data of any type
     ///
@@ -862,7 +904,7 @@ namespace WDutils {
     /// \param[out] buf buffer to read into
     /// \param[in]  n   number of data to read
     template<typename T>
-    size_t read(T*buf, size_t n) throw(WDutils::exception) {
+    size_t read(T*buf, size_t n) {
       if(READ+n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranIRec::read(): cannot read %d, but only %d %s\n",
 			n, (SIZE-READ)/sizeof(T), nameof(T));
@@ -886,7 +928,6 @@ namespace WDutils {
     /// \param[in]  rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     static void Read(input &in, T*buf, size_t n, unsigned rec=4)
-      throw(WDutils::exception)
     {
       FortranIRec FIR(in,rec);
       if( sizeof(T) * n > FIR.size() )
@@ -926,21 +967,20 @@ namespace WDutils {
     //--------------------------------------------------------------------------
     FortranORec           (FortranORec const&); // not implemented
     FortranORec& operator=(FortranORec const&); // not implemented
-    void write_size() throw(WDutils::exception);
+    void write_size();
   public:
     //--------------------------------------------------------------------------
     /// constructor: write buffer with size information
     /// \param[in,out] out  output stream to write to
     /// \param[in]     size size (in bytes) of record
     /// \param[in]     rec  (optional) size of header must be 4 or 8
-    FortranORec(output&out, size_t size, unsigned rec=4)
-      throw(WDutils::exception);
+    FortranORec(output&out, size_t size, unsigned rec=4);
     //--------------------------------------------------------------------------
     /// destructor: write to end of record, write end buffer
-    ~FortranORec() throw(WDutils::exception) { close(); }
+    ~FortranORec() { close(); }
     //--------------------------------------------------------------------------
     /// close: same as destruction
-    void close() throw(WDutils::exception);
+    void close();
     //--------------------------------------------------------------------------
     /// write some bytes
     ///
@@ -950,7 +990,7 @@ namespace WDutils {
     /// \return number of bytes actually written
     /// \param buf buffer to write
     /// \param n   number of bytes to write
-    size_t write_bytes(const char*buf, size_t n) throw(WDutils::exception);
+    size_t write_bytes(const char*buf, size_t n);
     //--------------------------------------------------------------------------
     /// fill some bytes with a given value
     ///
@@ -967,7 +1007,7 @@ namespace WDutils {
     /// \param[in] buf buffer to write
     /// \param[in] n   number of data to write
     template<typename T>
-    size_t write(const T*buf, size_t n) throw(WDutils::exception) {
+    size_t write(const T*buf, size_t n) {
       if(WRITTEN + n*sizeof(T) > SIZE) {
 	WDutils_Warning("FortranORec::write(): "
 			"cannot write %lu, but only %lu  %s\n",
@@ -987,7 +1027,6 @@ namespace WDutils {
     /// \param[in]     rec size of FORTRAN record header; must be 4 or 8
     template<typename T>
     static void Write(output&out, const T*buf, size_t n, unsigned rec=4)
-      throw(WDutils::exception)
     {
       FortranORec FOR(out, sizeof(T)*n, rec);
       FOR.write(buf,n);
