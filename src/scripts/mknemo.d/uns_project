@@ -15,7 +15,7 @@ set args=""
 
 if (-e $dir) then
   cd $dir/build
-  cmake .
+  cmake ..
   make
   make install 
 else
