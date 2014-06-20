@@ -11,7 +11,7 @@
 
 set dir=$NEMO/usr/jcl/glnemo2
 set sys=`uname -s`
-set cmake=1
+set cmake=0
 
 # for linux
 set args=""
