@@ -119,6 +119,36 @@ void processFromRangeComp(std::string select, uns::CunsIn * unsin,uns::CunsOut *
     if (ok) {
       saveComponent(mass,"mass",n,vec,1,comp,unsout);      
     }
+    // read Ids
+    int * id;
+    ok = unsin->snapshot->getData("all","id" ,&n,&id );
+    if (ok) {
+      saveComponent(id,"id",n,vec,1,comp,unsout);
+    }
+    // read accelerations
+    float * acc;
+    ok = unsin->snapshot->getData("all","acc" ,&n,&acc );
+    if (ok) {
+      saveComponent(acc,"acc",n,vec,3,comp,unsout);
+    }
+    // read pot
+    float * pot;
+    ok = unsin->snapshot->getData("all","pot" ,&n,&pot );
+    if (ok) {
+      saveComponent(pot,"pot",n,vec,1,comp,unsout);
+    }
+    if (comp=="gas") {
+      float * rho, * hsml;
+      // Try to get Rho
+      ok = unsin->snapshot->getData("all","rho" ,&n,&rho );
+      if (ok) {
+        saveComponent(rho,"rho",n,vec,1,comp,unsout);
+      }
+      // Try to get Hsml
+      ok = unsin->snapshot->getData("all","hsml" ,&n,&hsml );
+      if (ok)
+        saveComponent(hsml,"hsml",n,vec,1,comp,unsout);
+    }
   }
 }
 //------------------------------------------------------------------------------
@@ -134,23 +164,41 @@ void processFromComp(std::string comp, uns::CunsIn * unsin,uns::CunsOut * unsout
   // read position
   ok = unsin->snapshot->getData(comp,"pos" ,&n1,&pos );
   if (ok) {
+    if (comp=="all") unsout->snapshot->setNbody(n1);
     unsout->snapshot->setData(comp,"pos",n1,pos,false);
   }
   // read velocities
   ok = unsin->snapshot->getData(comp,"vel" ,&n2,&vel );
   if (ok) {
+    if (comp=="all") unsout->snapshot->setNbody(n2);
     unsout->snapshot->setData(comp,"vel",n2,vel,false);
   }
   // read masses
   ok = unsin->snapshot->getData(comp,"mass" ,&n3,&mass );
   if (ok) {
+    if (comp=="all") unsout->snapshot->setNbody(n3);
     unsout->snapshot->setData(comp,"mass",n3,mass,false);
   }
   // read Ids
   int * id;
   ok = unsin->snapshot->getData(comp,"id" ,&nbody,&id );
   if (ok) { 
+    if (comp=="all") unsout->snapshot->setNbody(nbody);
     unsout->snapshot->setData(comp,"id",nbody,id,false);
+  }
+  // read Pot
+  float * pot;
+  ok = unsin->snapshot->getData(comp,"pot" ,&nbody,&pot );
+  if (ok) {
+    if (comp=="all") unsout->snapshot->setNbody(nbody);
+    unsout->snapshot->setData(comp,"pot",nbody,pot,false);
+  }
+  // read accelerations
+  float * acc;
+  ok = unsin->snapshot->getData(comp,"acc" ,&nbody,&acc );
+  if (ok) {
+    if (comp=="all") unsout->snapshot->setNbody(nbody);
+    unsout->snapshot->setData(comp,"acc",nbody,acc,false);
   }
   if (comp=="all") {
     float * rho, * hsml;
@@ -159,11 +207,13 @@ void processFromComp(std::string comp, uns::CunsIn * unsin,uns::CunsOut * unsout
     // Try to get Rho
     ok = unsin->snapshot->getData("rho" ,&nn,&rho );
     if (ok && nbody == nn) {
+      if (comp=="all") unsout->snapshot->setNbody(nn);
       unsout->snapshot->setData(comp,"rho",nbody,rho,false);
     }  
     // Try to get Hsml
     ok = unsin->snapshot->getData("hsml" ,&nn,&hsml );
     if (ok && nbody == nn)  {
+      if (comp=="all") unsout->snapshot->setNbody(nn);
       unsout->snapshot->setData(comp,"hsml",nbody,hsml,false);  
     }
   }
@@ -187,14 +237,14 @@ void processFromComp(std::string comp, uns::CunsIn * unsin,uns::CunsOut * unsout
     if (ok) 
       unsout->snapshot->setData(comp,"temp",nbody,temp,false);  
     // Try to get gas metalicity
-    ok = unsin->snapshot->getData(comp,"gas_metal" ,&nbody,&metal );
+    ok = unsin->snapshot->getData(comp,"metal" ,&nbody,&metal );
     if (ok) 
       unsout->snapshot->setData(comp,"gas_metal",nbody,metal,false);  
   }
   if (comp == "stars") {
     float * age, * metal;
     // Try to get stars metalicity
-    ok = unsin->snapshot->getData(comp,"stars_metal" ,&nbody,&metal );
+    ok = unsin->snapshot->getData(comp,"metal" ,&nbody,&metal );
     if (ok) 
       unsout->snapshot->setData(comp,"stars_metal",nbody,metal,false);
     // Try to get stars age
@@ -212,7 +262,7 @@ int main(int argc, char ** argv )
   // global bariable
   std::string typein,file_structin, file_structout;
   //   start  NEMO
-  initparam(const_cast<char**>(argv),const_cast<char**>(defv)); 
+  initparam(const_cast<char**>(argv),const_cast<char**>(defv));
   if (argc) {;} // remove compiler warning :)
   
   // Get input parameters
@@ -270,13 +320,13 @@ int main(int argc, char ** argv )
       file_structin = unsin->snapshot->getFileStructure();
       std::cerr << "Input file type      :"<<typein<<"\n";
       std::cerr << "Input file structure :"<<file_structin<<"\n";
-      bool ok;
+
       int nbody;      
       float time;
       // get the input number of bodies according to the selection
-      ok =unsin->snapshot->getData("nsel",&nbody);
+      unsin->snapshot->getData("nsel",&nbody);
       // get the simulation time
-      ok=unsin->snapshot->getData("time",&time);
+      unsin->snapshot->getData("time",&time);
       //      
       std::cerr << "nbody=" << nbody << " time="<<time <<"\n";
       if (nbody>0) { // there are particles

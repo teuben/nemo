@@ -25,7 +25,16 @@ namespace jclut {
     T * data() { return gaussian;}
     void applyOnArrayXY(T * tab, const int dimx,
                         const int dimy, const int x, const int y,
+                        const T weight=1.0, const int psort=0);
+    void applyOnArrayXYStep(T * tab, const int dimx,
+                        const int dimy, const int x, const int y,
                         const T weight=1.0);
+    void computeOnArrayXY(T * tab, const int dimx,
+                        const int dimy, const int x, const int y,
+                        const T weight=1.0, const int pixel=20);
+    void createGaussianMap(const int pixel);
+    T evalHermite(const T pA, const T pB, const T vA, const T vB, const T u);
+
   private:
     int pixel;
     T g;

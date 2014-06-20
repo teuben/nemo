@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2009-2010                                       
+// Copyright Jean-Charles LAMBERT - 2009-2013
 // e-mail:   Jean-Charles.Lambert@oamp.fr                                      
 // address:  Dynamique des galaxies                                            
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -12,17 +12,23 @@
 #include <iostream>
 #include <ctime>
 #include <sstream>
+#include <cstdlib>
 #include <iomanip>
 #include <cstring>
 #include <assert.h>
 #include <cmath>
+//#include <algorithm>    // std::sort
 #include "c2dplot.h"
 #include "csnaptools.h"
 #include "ctimer.h"
+#include <limits>
+#include <cutilpgplot.h>
 
 using namespace uns_proj;
 using namespace jclut;
 using namespace std;
+
+#define WEIGHT(X) ((weight==NULL)?1.0:weight[(X)])
 // ----------------------------------------------------------------------------
 // contructor
 template <class T> C2dplot<T>::C2dplot(const int _nthreads, const int _pixel, const int _dimx, const int _dimy, const T _g)
@@ -51,7 +57,8 @@ template C2dplot<double>::C2dplot(const int _nthreads, const int pixel, const in
 // compute
 template <class T> void C2dplot<T>::compute(std::string _dev, const int _no_frame,const int _nbody, T * _pos , float _range[3][2], 
                                             std::string _title,std::string _sel_comp,std::string _filename, float _timu,
-                                            bool _xy, bool _xz, bool _zy, bool _sview)
+                                            bool _xy, bool _xz, bool _zy, bool _sview, T * _weight,
+                                            const int _psort, T * _hsml, const int _itf, const bool _wedge, std::string _legend, const int _cmap)
 {
   // get paramaters
   dev       = _dev;
@@ -66,7 +73,14 @@ template <class T> void C2dplot<T>::compute(std::string _dev, const int _no_fram
   xz        = _xz;
   zy        = _zy;
   sview     = _sview;
-  
+  weight    = _weight;
+  hsml      = _hsml;
+  psort     = _psort;
+  itf       = _itf;
+  wedge     = _wedge;
+  legend    = _legend;
+  cmap      = _cmap;
+
   memcpy(range,_range,sizeof(float)*6);
   
   //
@@ -92,11 +106,11 @@ template <class T> void C2dplot<T>::compute(std::string _dev, const int _no_fram
   }  
   
   // Process XY view
-  drawImage(xy,0,1,nbview,showtext);
+  if (xy) drawImage(xy,0,1,nbview,showtext);
   // Process XZ view
-  drawImage(xz,0,2,nbview,showtext);
+  if (xz) drawImage(xz,0,2,nbview,showtext);
   // Process ZY view
-  drawImage(zy,2,1,nbview,showtext);
+  if (zy) drawImage(zy,2,1,nbview,showtext);
   
   if (sview) {
     cpgask(1);
@@ -105,10 +119,10 @@ template <class T> void C2dplot<T>::compute(std::string _dev, const int _no_fram
 }
 template void C2dplot<float >::compute(std::string pic,const int no_frame, const int nbody, float  * pos , float range[3][2], 
                                        std::string title,std::string sel_comp, std::string filename, 
-                                       float timu,bool xy, bool xz, bool yz, bool sview);
+                                       float timu,bool xy, bool xz, bool yz, bool sview, float * _weight, const int _psort, float * hsml, const int _itf, const bool _wedge, std::string _legend, const int _cmap);
 template void C2dplot<double>::compute(std::string pic,const int no_frame, const int nbody, double * pos , float range[3][2], 
                                        std::string title,std::string sel_comp, std::string filename, 
-                                       float timu,bool xy, bool xz, bool yz, bool sview);
+                                       float timu,bool xy, bool xz, bool yz, bool sview, double * _weight, const int _psort, double * hsml, const int _itf, const bool _wedge, std::string _legend, const int _cmap);
 // ----------------------------------------------------------------------------
 // drawImage
 template <class T> void C2dplot<T>::drawImage(const bool disp,const int xaxis, const int yaxis, const int nbview, int &showtext)
@@ -149,15 +163,6 @@ template <class T> void C2dplot<T>::computeImage(const int xaxis, const int yaxi
 {
   float zmin,zmax;  
   
-  float bright=0.5;
-  float contrast=1.0;
-
-  float RL[9] = {-0.5, 0.0, 0.17, 0.33, 0.50, 0.67, 0.83, 1.0, 1.7};
-  //float RL[9] = {0.0,  0.1, 0.17, 0.33, 0.50, 0.67, 0.83, 1.0, 1.7};
-  float RR[9] = { 0.0, 0.0,  0.0,  0.0,  0.6,  1.0,  1.0, 1.0, 1.0};
-  float RG[9] = { 0.0, 0.0,  0.0,  1.0,  1.0,  1.0,  0.6, 0.0, 1.0};
-  float RB[9] = { 0.0, 0.3,  0.8,  1.0,  0.3,  0.0,  0.0, 0.0, 1.0};
-
   // look for indexes in the range axis
   findIndexes(xaxis,yaxis);
   std::cerr << "XYZ particles => Nb indexes found = " << indexes.size() << "\n";
@@ -188,8 +193,15 @@ template <class T> void C2dplot<T>::computeImage(const int xaxis, const int yaxi
   // viewpart according to the boundary
   cpgenv(xmin,xmax,ymin,ymax,1,0);
   // create color image gradient
-  cpgctab(RL, RR, RG, RB, 9, contrast, bright);
+  cpgsitf(itf);
+
+  CUtilPgplot cutpg;
+  cutpg.selectCMap(cmap);
+
   cpgimag(tab[0],dimx,dimy,1,dimx,1,dimy,zmin,zmax,tr);  
+  if (wedge) {
+    cpgwedg("BI",4.,5.,zmin,zmax,legend.c_str());
+  }
 }
 // ----------------------------------------------------------------------------
 //  buildFrameName
@@ -219,7 +231,8 @@ template <class T> void C2dplot<T>::displayText(bool sview)
   cpgsci(1);
   cpgsch(1.5/factor);
   std::string basename=CSnaptools::basename(filename);
-  cpgmtxt("t",1.8,0.,0.,basename.c_str() );
+  std::string txt=basename + " " + legend;
+  cpgmtxt("t",1.8,0.,0.,txt.c_str() );
   
   // component
   cpgsci(1);
@@ -252,10 +265,10 @@ template <class T> void C2dplot<T>::findIndexes(const int xaxis, const int yaxis
   /* loop on all particles */
   for (int i=0 ; i<nbody; i++, pp+=3) {
     if (
-	pp[r] >= range[r][0] &&
-	pp[r] <= range[r][1] &&
-	pp[f] >= range[f][0] &&
-	pp[f] <= range[f][1] ) {
+        pp[r] >= range[r][0] &&
+        pp[r] <= range[r][1] &&
+        pp[f] >= range[f][0] &&
+        pp[f] <= range[f][1] ) {
       indexes.push_back(i);
     }
   }
@@ -264,7 +277,7 @@ template <class T> void C2dplot<T>::findIndexes(const int xaxis, const int yaxis
 // startWorkers
 // start all the thread in parallel
 //
-template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, const int xaxis, const int yaxis, float& zmin, float& zmax)
+template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, const int xaxis, const int yaxis, float & zmin, float& zmax)
 {
   int npart=indexes.size()/nthreads;
   int offset=0;
@@ -295,83 +308,189 @@ template <class T> void C2dplot<T>::startWorkers(const int nbody, T * data, cons
   for (int x=1; x<nthreads; x++) {
     for (int i=0;i<dimy; i++)
       for (int j=0;j<dimx; j++) {
-	tab[0][i*dimx+j]+=tab[x][i*dimx+j] ;
+        tab[0][i*dimx+j]+=tab[x][i*dimx+j] ;
       }
   }
   // find zmin zmax
-  zmax=-1000000.0;
-  zmin=10000000.0;
-  for (int i=0;i<dimy; i++)
-    for (int j=0;j<dimx; j++) {
-      zmax=std::max(zmax, tab[0][i*dimx+j]);
-      float zzmin=std::min(zmin, tab[0][i*dimx+j]);
-      if (zzmin != 0.0)  zmin=zzmin;
-
+  zmin=numeric_limits<float>::max();
+  zmax=-zmin;
+  if (0 &&  weight) {
+    for (int i=0;i<nbody;i++) {
+      zmin = std::min(zmin,(float) weight[i]);
+      zmax = std::max(zmax,(float) weight[i]);
     }
-  for (int i=0;i<dimy; i++)
-    for (int j=0;j<dimx; j++) {
-      if (tab[0][i*dimx+j]==0.0) tab[0][i*dimx+j]=zmin ;
-
-    }  
-  std::cerr << "FIRST zmax="<<zmax<<" zmin="<<zmin<<"\n";
-
-  // compute LOG
-  zmax=log(zmax);
-  zmin=log(zmin);
-  for (int i=0;i<dimy; i++)
-    for (int j=0;j<dimx; j++) {
-      if (tab[0][i*dimx+j] != 0.0) {
-	tab[0][i*dimx+j] = log(tab[0][i*dimx+j]);///zmax; // normalize
+  }
+  else {
+    for (int i=0;i<dimy; i++)
+      for (int j=0;j<dimx; j++) {
+        zmax=std::max(zmax, tab[0][i*dimx+j]);
+        float zzmin=std::min(zmin, tab[0][i*dimx+j]);
+        //if (zzmin != 0.0)  zmin=zzmin;
+        zmin=zzmin;
       }
-    }    
+    float offset2=0.0;
+#if 0
+    if (zmin <= 0.0) offset2 = -zmin+.1+numeric_limits<float>::min();
+    for (int i=0;i<dimy; i++)
+      for (int j=0;j<dimx; j++) {
+        //if (tab[0][i*dimx+j]==0.0) tab[0][i*dimx+j]=zmin ;
+        tab[0][i*dimx+j] += (zmin+offset2);
+      }
+#endif
+    //std::cerr << "FIRST zmax="<<zmax<<" zmin="<<zmin<<" correct=" << zmin+offset2 << "\n" ;
+
+    // compute LOG
+    //zmax=log(zmax+offset2);
+    //zmin=log(zmin+offset2);
+    zmax=zmax+offset2;
+    zmin=zmin+offset2;
+    //zmin += 0.003*(zmax-zmin);
+    //zmax -= 0.9999999*(zmax-zmin);
+    for (int i=0;i<dimy; i++)
+      for (int j=0;j<dimx; j++) {
+        if (tab[0][i*dimx+j] != 0.0) {
+          //tab[0][i*dimx+j] = log(tab[0][i*dimx+j]);///zmax; // normalize
+        } else {
+           //tab[0][i*dimx+j]=numeric_limits<float>::min();
+        }
+      }
+  }
+
+  std::cerr << "[-->] zmin="<<zmin<<" zmax="<<zmax<<" nbody="<<nbody<< "\n";
 }
+template void C2dplot<float >::startWorkers(const int nbody, float  * data, const int xaxis, const int yaxis, float& zmin, float& zmax);
+template void C2dplot<double>::startWorkers(const int nbody, double * data, const int xaxis, const int yaxis, float& zmin, float& zmax);
 // ----------------------------------------------------------------------------
 // worker
 // function executed in parallel by each threads
 template <class T> void C2dplot<T>::worker(const int ithread, const int offset, const int npart, T * data,const int xaxis, const int yaxis)
 {
+  float * tab_hsml = new float [dimx*dimy];
   // Reset each local array
   for (int i=0;i<dimy; i++)
-    for (int j=0;j<dimx; j++)
+    for (int j=0;j<dimx; j++) {
       tab[ithread][i*dimx+j] = 0.0;
+      tab_hsml[i*dimx+j] = numeric_limits<float>::max();
+    }
 
   //displayIndexes();
 
   // loop on all sub particles
   // to fill array 
+  float zmin=numeric_limits<float>::max();
+  float zmax=-zmin;
+  //std::cerr << ">>>> zmin" << zmin << " zmax" << zmax << "\n";
   for (int i=0; i<npart; i++) {
     int    ii = indexes[(offset+i)];
     float  xx = data[ii*3+xaxis];
     int     x = ((xx-xmin)/(xmax-xmin))*(dimx-1);
     float  yy = data[ii*3+yaxis];
     int     y = ((yy-ymin)/(ymax-ymin))*(dimy-1);
+    //std::cerr << xmax << " " << xmin << " "<< dimx << " "<< hsml[ii] << " " << ((hsml[ii])/(xmax-xmin))*(dimx-1) << "\n";
+    float hsml_size;
+    if (hsml) {
+      hsml_size=ceil(((hsml[ii])/(xmax-xmin))*(dimx-1));
+      if (hsml_size>700)
+        std::cerr << "hsml_size="<<hsml_size << " hsml="<< hsml[ii] << "\n";
+    }
 
     assert(x<dimx);
     assert(y<dimy);
-    tab[ithread][x*dimx+y] += 1.0; // one more particles into the cell
+    if (i==-1) { // first time
+        tab[ithread][x*dimx+y] = (1.0*WEIGHT(ii));
+    } else {
+        switch (psort) {
+        case 0: // accumulated
+            tab[ithread][x*dimx+y] += (1.0*WEIGHT(ii)); // one more particles into the cell
+            if (hsml) tab_hsml[x*dimx+y] = std::min(tab_hsml[x*dimx+y],hsml_size);
+            else      tab_hsml[x*dimx+y] = pixel;
+            break;
+        case 1: // sort max properties
+            //std::cerr << "max = " << tab[ithread][x*dimx+y] << "  weight="<<WEIGHT(ii)<<" ii="<<ii<<"\n";
+            tab[ithread][x*dimx+y] = std::max((double) tab[ithread][x*dimx+y],(double) WEIGHT(ii));
+            if (hsml) tab_hsml[x*dimx+y] = std::min(tab_hsml[x*dimx+y],hsml_size);
+            else     tab_hsml[x*dimx+y] = pixel;
+
+            break;
+        case 2: // sort min properties
+            tab[ithread][x*dimx+y] = std::min((double) tab[ithread][x*dimx+y],(double) WEIGHT(ii));
+            break;
+        default: // algo error
+            assert(0);
+            std::cerr << "Should not be here...\n";
+            std::exit(0);
+        }
+    }
+    zmin = std::min(zmin,tab[ithread][x*dimx+y]);
+    zmax = std::max(zmax,tab[ithread][x*dimx+y]);
   }  
+
+  std::cerr << "Before gaussian Zmin = "<<zmin<< "  zmax = "<<zmax << "\n";
   // loop to store cells from the array which have a weight
-  std::vector<float> cells;
+  std::map<int, int> HSML;
+  pvec.clear();
   for (int i=0;i<dimy; i++) {
     for (int j=0;j<dimx; j++) {
-      if (tab[ithread][i*dimx+j] != 0.0) {
-        cells.push_back(i); // x coordinate
-        cells.push_back(j); // y coordinate
-        cells.push_back(tab[ithread][i*dimx+j]); // weight
+      if (tab[ithread][i*dimx+j] != 0.0) {      
+        float myhsml;
+        if (hsml) {
+          myhsml=tab_hsml[i*dimx+j];
+        } else {
+          myhsml=pixel;
+        }
+        CPartProp p(i,j,(float) tab[ithread][i*dimx+j],myhsml);
+        pvec.push_back(p);
+        HSML[(int) tab_hsml[i*dimx+j]]++;
         // reset array
-        tab[ithread][i*dimx+j] = 0.0;        
+        tab[ithread][i*dimx+j] = 0.0;
+      }
+      if  (tab[ithread][i*dimx+j] != 0.0) {
+        assert(1);
       }
     }
+
   }
-  // Add [gaussian X weight] to
-  // not empty cells
-  for (unsigned int i=0; i<cells.size()/3; i++) {
-    int    x = cells[i*3+0]; // x
-    int    y = cells[i*3+1]; // y
-    float  w = cells[i*3+2]; // weight
+  // sort vector of particles
+  //std::sort(pvec.begin(),pvec.end(),CPartProp::mySort);
+
+  std::cerr << "HSML size =" << HSML.size() << "\n";
+  int cpt=0;
+  for (std::map<int, int>::iterator ii=HSML.begin(); ii !=HSML.end(); ii++) {
+
+    HSML[(int) ((*ii).first)] = cpt++;
+    //int nb= (*ii).second ;
+    //std::cerr << (*ii).first << ": " << (*ii).second << "/" <<nb << std::endl;
+  }
+
+  for (std::vector <CPartProp>::iterator it=pvec.begin(); it != pvec.end(); ++it) {
+    //std::cerr << "->"<<(*it).prop << "\n";
+    int    x = (*it).x; // x
+    int    y = (*it).y; // y
+    float  w = (*it).prop; // weight
+    float  h = (*it).hsml; // hsml size
+
+    //std::cerr << "x=" << x << " y=" << y << "\n";
+    //std::cerr << "->" << h << "\n";
+
     // add gaussian on XY coordinates
-    gaussian->applyOnArrayXY(tab[ithread],dimx,dimy,x,y,w);
+    //gaussian->applyOnArrayXY(tab[ithread],dimx,dimy,x,y,w);
+    //h = std::min((double) h, dimx/1.);
+    //h=std::min((double)h,0.01*dimx);
+    //gaussian->computeOnArrayXY(tab[ithread],dimx,dimy,x,y,1.,20);
+    //h = 10.;
+    h = std::min(h,(float)150.);
+    if (hsml) {
+      gaussian->computeOnArrayXY(tab[ithread],dimx,dimy,x,y,w,h*2.);
+    }
+    else {
+      //tab[ithread][y*dimx+x] = 1.;
+      gaussian->applyOnArrayXY(tab[ithread],dimx,dimy,x,y,w,psort);
+    }
   }
+  delete [] tab_hsml;
 }
+template void C2dplot<float >::worker(const int ithread, const int offset, const int npart, float  * data,const int xaxis, const int yaxis);
+template void C2dplot<double>::worker(const int ithread, const int offset, const int npart, double * data,const int xaxis, const int yaxis);
+
 //
 // ----------------------------------------------------------------------------

@@ -1,12 +1,13 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2010                                       
-// e-mail:   Jean-Charles.Lambert@oamp.fr                                      
-// address:  Dynamique des galaxies                                            
+// Copyright Jean-Charles LAMBERT - 2010-2014
+//           Centre de donneeS Astrophysiques de Marseille (CeSAM)
+// e-mail:   Jean-Charles.Lambert@lam.fr                                      
+// address:  Aix Marseille Universite, CNRS, LAM 
 //           Laboratoire d'Astrophysique de Marseille                          
 //           Pole de l'Etoile, site de Chateau-Gombert                         
 //           38, rue Frederic Joliot-Curie                                     
 //           13388 Marseille cedex 13 France                                   
-//           CNRS U.M.R 6110                                                   
+//           CNRS UMR 7326                                       
 // ============================================================================
 #include <iostream>                                   // C++ I/O     
 #include <fstream>                                    // C++ file I/O
@@ -26,32 +27,33 @@
 // Nemo variable
 const char * defv[] = {
   "in=???\n		      UNS input snapshot",  
-  "select=???\n               select particles (range, or component name)\n"
+  "select=all\n               select particles (range, or component name)\n"
   "                   component: gas,halo,disk,bulge,stars,bndry",
   "display=t\n                display array's content (t|f)",
-  "bits=mxvXRIUMAHT\n physicals quantities that you want to display\n",
+  "bits=\n         (default: all , but you cat set \"mxvpXRIUMAHT\" physicals quantities that you want to display\n",
   "maxline=2\n                max lines per components",  
   "times=all\n		      selected time",
   "verbose=f\n                verbose on/off",
-  "VERSION=2.O\n              compiled on <"__DATE__"> JCL  ",
+  "VERSION=2.1\n              compiled on <"__DATE__"> JCL  ",
   NULL,
 };
 const char * usage="Print information about an UNS file";
 using namespace std;
 void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns);
 template <class T> void displayFormat(int maxlines,std::string text, T * array, int dim, int size, int np);
+bool component_exist=false;
 // ------------------------------------------------------------
 //  displayInfo
 void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
 {
-  float * pos, * vel, * mass, * pot , *acc;
+  float * pos, * vel, * mass, * pot , *acc, *eps;
   int * id;
   int nbody=0;
   bool ok=false;
 
   float * nullp;
   ok = uns->snapshot->getData(comp,"nbody" ,&nbody,&nullp);
-  
+  if (ok) component_exist=true;
   if (ok) {
     std::cout << setw(50) << setfill('=') << ""<<"\n";
     std::cout<< setfill(' ');
@@ -72,6 +74,10 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   ok = uns->snapshot->getData(comp,"pot" ,&nbody,&pot );
   if (ok && display) {
     displayFormat(maxlines,"pot [1] = ",pot ,1,nbody, 3);
+  }
+  ok = uns->snapshot->getData(comp,"eps" ,&nbody,&eps );
+  if (ok && display) {
+    displayFormat(maxlines,"eps [1] = ",eps ,1,nbody, 3);
   }
   ok = uns->snapshot->getData(comp,"acc" ,&nbody,&acc );
   if (ok && display) {
@@ -111,6 +117,35 @@ void displayInfo(bool display,int maxlines, std::string comp, uns::CunsIn * uns)
   if (ok && display) {
     displayFormat(maxlines,"age [1] = ",age,1,nbody, 3);
   } 
+  float * im;
+  ok = uns->snapshot->getData(comp,"im" ,&nbody,&im );
+  if (ok && display) {
+    displayFormat(maxlines,"im [1] = ",im,1,nbody, 3);
+  }
+  float * ssl;
+  ok = uns->snapshot->getData(comp,"ssl" ,&nbody,&ssl );
+  if (ok && display) {
+    displayFormat(maxlines,"ssl [1] = ",ssl,1,nbody, 3);
+  }
+  float * zs,* zsmt;
+  int czs, czsmt, nzs, nzsmt;
+  ok = uns->snapshot->getData(comp,"zs" ,&nzs,&zs );
+  if (ok && display) {
+    ok = uns->snapshot->getData("czs"   ,&czs );
+    std::cerr << "nzs="<< nzs<<" czs ="<<czs<<"\n";
+    displayFormat(maxlines,"zs [1] = ",zs,1,nzs, 3);
+  }
+  ok = uns->snapshot->getData(comp,"zsmt" ,&nzsmt,&zsmt );
+  if (ok && display) {
+    ok = uns->snapshot->getData("czsmt"   ,&czsmt );
+    std::cerr << "nzsmt="<< nzsmt<<"  czsmt ="<<czsmt<<"\n";
+    displayFormat(maxlines,"zsmt[1] = ",zsmt,1,nzsmt, 3);
+  }
+  float * cm; int ncm;
+  ok = uns->snapshot->getData(comp,"cm" ,&ncm,&cm );
+  if (ok && display) {
+    displayFormat(maxlines,"cm [1] = ",cm,1,ncm, 3);
+  }
 //  ok = uns->snapshot->getData(comp,"metal" ,&nbody,&metal );
 //  if (ok && display) {
 //    displayFormat(maxlines,"metal[1] = ",metal,1,nbody, 3);
@@ -130,7 +165,7 @@ template <class T>  void displayFormat(int maxlines,std::string text, T * array,
   }
   std::cout << "\n";
   // other lines
-  for (int i=1; i<std::min(maxlines,size); i+=np) {
+  for (int i=1; i<std::min(maxlines,size/min(size,np)); i+=min(size,np)) {
     std::cout << left << setw(11) << "";
     for (int k=0;k<std::min(size,np);k++) {
       for (int j=0;j<dim;j++) {
@@ -169,22 +204,29 @@ int main(int argc, char ** argv )
       std::cout << setw(50) << setfill('*') << ""<<"\n";
       std::cout << "File name : "<<uns->snapshot->getFileName()<<"\n";
       std::cout << "File type : "<<stype<<"\n";
-      int nbody; float time; bool ok;
+      int nbody; float time;
       // get the input number of bodies according to the selection
-      ok=uns->snapshot->getData("nsel",&nbody);
+      uns->snapshot->getData("nsel",&nbody);
       // get the simulation time
-      ok=uns->snapshot->getData("time",&time);
+      uns->snapshot->getData("time",&time);
 
       std::cout << "Nbody selected = " << nbody << "\nTime="<<time <<"\n";
-      if (file_structure=="range") {
-        displayInfo(display,maxlines,"all",uns);
-      } else {
-        displayInfo(display,maxlines,"gas"  ,uns);
-        displayInfo(display,maxlines,"halo" ,uns);
-        displayInfo(display,maxlines,"disk" ,uns);
-        displayInfo(display,maxlines,"bulge",uns);
-        displayInfo(display,maxlines,"stars",uns);
-        displayInfo(display,maxlines,"bndry",uns);
+
+      if (nbody >0) {
+        if (0 && file_structure=="range") {
+          displayInfo(display,maxlines,"all",uns);
+        } else {
+          component_exist=false;
+          displayInfo(display,maxlines,"gas"  ,uns);
+          displayInfo(display,maxlines,"halo" ,uns);
+          displayInfo(display,maxlines,"disk" ,uns);
+          displayInfo(display,maxlines,"bulge",uns);
+          displayInfo(display,maxlines,"stars",uns);
+          displayInfo(display,maxlines,"bndry",uns);
+          if (!component_exist) { // no comp, diplay all
+            displayInfo(display,maxlines,"all",uns);
+          }
+        }
       }
     }
   }

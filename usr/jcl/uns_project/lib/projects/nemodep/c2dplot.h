@@ -17,6 +17,7 @@
 #define C2DPLOT_H
 
 #include <string>
+#include <algorithm>    // std::sort
 #include <vector>
 #include <iostream>
 #ifndef NOBOOST
@@ -37,19 +38,46 @@ namespace uns_proj {
      int nblock, offset;
    } t_cuda_grid;
   
+//------------------------------------------------------------------------------
+// CPartProp, class to store image properties foreach particles displayed
+  class CPartProp {
+  public:
+    CPartProp(int _x, int _y, float _prop, float _hsml) {
+      x    = _x;
+      y    = _y;
+      prop = _prop;
+      hsml = _hsml;
+    }
+    static bool mySort(const CPartProp&a, const CPartProp &b) {
+      return a.prop < b.prop; // ascending tree
+    }
+    static bool mySortR2(const CPartProp&a, const CPartProp &b) {
+      return ((a.x*a.x + a.y*a.y) < (b.x*b.x+b.y*b.y)); // ascending tree
+    }
+    int x,y; // x,y image coordinates
+    float prop, hsml; // properties, hsml
+  };
+
   template <class T> class C2dplot {
   public:
     C2dplot(const int,const int,const int, const int, const T);
     
     void compute(std::string pic, const int _no_frame,const int _nbody, T * _pos , 
 		 float _range[3][2], std::string _title, 
-		 std::string _sel_comp, std::string _filename, float _time,
-                 bool _xy, bool _xz, bool _zy, bool _sview);
+         std::string _sel_comp, std::string _filename, const float _time,
+                 bool _xy, bool _xz, bool _zy, bool _sview, T * _weight, const int psort, T * hsml,
+    const int _itf, const bool wedge, std::string legend,const int _cmap);
 
 
   private:
+    int psort; // control properties sorting
     int nthreads, dimx, dimy, pixel;
+    int itf; // image transfer function
+    bool wedge; // toogle on/off color bar display
+    std::string legend;
+    int cmap; // color map
     jclut::CGaussian<float> * gaussian;
+    std::vector <CPartProp> pvec; // vector of particles properties
     T g;
     float * tab[NTHREAD_MAX];
     std::vector <int> indexes;
@@ -81,6 +109,7 @@ namespace uns_proj {
     float time,range[3][2];
     T * pos;
     bool xy, xz, zy, sview;
+    T * weight, * hsml;
 #ifndef NO_CUDA
     // CUDA stuffs
     int GPU_N;

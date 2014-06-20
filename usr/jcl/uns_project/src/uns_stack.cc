@@ -31,6 +31,7 @@ const char * defv[] = {
   "deltav=0.0,0.0,0.0\n	      velocity of in1 w.r.t. in2",
   "shift=1\n                  Shift over 1st or 2nd one?",
   "zerocm=f\n                 Centering On Mass after stacking?",
+  "time=0.0\n                 set output snapshot time",
   "verbose=f\n                verbose on/off",
   "VERSION=1.O\n              compiled on <"__DATE__"> JCL  ",
   NULL,
@@ -90,11 +91,18 @@ void addComponent(std::string comp, CunsIn * uns1,CunsIn * uns2,
     addArray(comp,"u"    ,1,uns1,uns2,unsout,verbose);
     addArray(comp,"hsml" ,1,uns1,uns2,unsout,verbose);
     addArray(comp,"rho"  ,1,uns1,uns2,unsout,verbose);
+    addArray(comp,"temp"  ,1,uns1,uns2,unsout,verbose);
+    addArray(comp,"metal" ,1,uns1,uns2,unsout,verbose);
   }
+  if (comp == "stars") {
+    addArray(comp,"age"    ,1,uns1,uns2,unsout,verbose);
+    addArray(comp,"metal" ,1,uns1,uns2,unsout,verbose);
+  }
+
 }
 // ------------------------------------------------------------
 // process
-void process(CunsIn * uns1,CunsIn * uns2, char * out, char * dr, char * dv, bool com, int shift, bool verbose)
+void process(CunsIn * uns1,CunsIn * uns2, char * out, char * dr, char * dv, bool com, int shift, bool verbose, float otime)
 {
   // convert string to vector
   std::vector<float> deltar=CSnaptools::stringToVector<float>(dr,3,0.0);
@@ -126,6 +134,7 @@ void process(CunsIn * uns1,CunsIn * uns2, char * out, char * dr, char * dv, bool
   }
   if (com)
     std::vector<double> com=unsout->snapshot->moveToCom(); // shift to COM
+  unsout->snapshot->setData("time",otime); // snapshot time
   unsout->snapshot->save();  // save file
 }
 
@@ -144,7 +153,8 @@ int main(int argc, char ** argv )
   bool   com     = getbparam((char *) "zerocm"   );
   int    shift   = getiparam((char *) "shift"    );  
   bool   verbose = getbparam((char *) "verbose"  );  
-  
+  float  otime   = getdparam((char *) "time"     );
+
   // instantiate a new UNS input object (for reading)
   uns::CunsIn * uns1 = new uns::CunsIn(in1,"all","all",verbose);
   
@@ -170,7 +180,7 @@ int main(int argc, char ** argv )
       std::cerr << "UNS files types are not identical, aborting....\n";
       std::exit(1);
     }
-    process(uns1,uns2,out,dr,dv,com,shift,verbose);
+    process(uns1,uns2,out,dr,dv,com,shift,verbose,otime);
   } else {
     std::cerr << "Can't read nextFrame ....\n";
   }

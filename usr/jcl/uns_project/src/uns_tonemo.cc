@@ -58,6 +58,7 @@ void processComponent(std::string select,std::string comp, uns::CunsIn * uns,uns
     std::cerr << "--> "<< std::left << std::setfill('.')<<
         std::setw(8) << comp << ":" << std::setfill(' ')<<
         std::right   << std::setw(10) << n1 <<"\n";
+    unsout->snapshot->setNbody(n1);
     unsout->snapshot->setData(comp,n1,mass,pos,vel,false);
   }  
  
@@ -124,16 +125,16 @@ int main(int argc, char ** argv )
   
   if (unsin->isValid()) { // input file is known by UNS lib        
     int cpt=0;
-    while(unsin->snapshot->nextFrame("mxvRHI")&&!stop) { // there is a new frame
+    while(unsin->snapshot->nextFrame("mxvRHXI")&&!stop) { // there is a new frame
       std::string itype = unsin->snapshot->getInterfaceType();
       std::cerr << "Input file is of type :"<<itype<<"\n";
-      bool ok;
+
       int nbody;      
       float time;
       // get the input number of bodies according to the selection
-      ok =unsin->snapshot->getData("nsel",&nbody);
+      unsin->snapshot->getData("nsel",&nbody);
       // get the simulation time
-      ok=unsin->snapshot->getData("time",&time);
+      unsin->snapshot->getData("time",&time);
       //      
       std::cerr << "nbody=" << nbody << " time="<<time <<"\n";
       if (nbody>0) { // there are particles
