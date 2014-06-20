@@ -22,7 +22,7 @@
 
 namespace uns {
 
-const std::string VERSION="1.0.0"; // UNSIO version
+const std::string VERSION="1.0.1"; // UNSIO version
 
 inline std::string getVersion() { return uns::VERSION; }
 

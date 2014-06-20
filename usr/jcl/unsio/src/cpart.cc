@@ -36,7 +36,7 @@ CPart::CPart(const std::string _indir, const bool _v)
     indir.erase(found,indir.length()-found);
   }
   if (verbose)
-    std::cerr << "indir =" << indir <<"\n";
+    std::cerr << "indir =[" << indir <<"]\n";
   
   found=(int) indir.rfind("output_"); 
   if (found!=(int) std::string::npos) {
@@ -49,7 +49,7 @@ CPart::CPart(const std::string _indir, const bool _v)
       std::cerr << "Run index = " << s_run_index << "\n";
     infile = indir + "/part_" + s_run_index + ".out00001";
     if (verbose)
-      std::cerr << "infile =" << infile <<"\n";
+      std::cerr << "infile =[" << infile <<"]\n";
   }
 }
 
@@ -127,6 +127,7 @@ int CPart::loadData(uns::CParticles * particles,
     }
 
     if (nstar>0) { // || 1) { // there are stars
+
       part.skipBlock(); // skip level
       agetmp = new double[npart];
       part.readDataBlock((char *) agetmp);
@@ -188,11 +189,11 @@ int CPart::loadData(uns::CParticles * particles,
               particles->id.push_back(id[k]); // save real id for dm or stars
               particles->load_bits |= ID_BIT;
             }
-            if (take && agetmp[k]!=0) {
+            if ( (take && agetmp[k]!=0) || (!req_bits && agetmp[k]!=0)) { // !req_bits for uns_info and siplay=f
                particles->indexes.push_back(4); // save star positions
                particles->nstars++;               
             }
-            if (take && agetmp[k]==0) {
+            if ((take && agetmp[k]==0) || (!req_bits && agetmp[k]==0)) {
                particles->indexes.push_back(1); // save DM positions
                particles->ndm++;
             }
@@ -239,10 +240,10 @@ int CPart::loadData(uns::CParticles * particles,
               particles->load_bits |= ID_BIT;
             }
             if (req_bits&METAL_BIT) {
-              particles->metal.push_back(-1.0); // we put -1.0 when no metellicity
+              particles->metal.push_back(-1.0); // !!!! we put -1.0 when no metallicity
               particles->load_bits |= METAL_BIT;
             }
-            if (take) {
+            if (take || !req_bits) { // !req_bits for uns_info and siplay=f
                particles->indexes.push_back(1); // save DM positions
                particles->ndm++;               
             }

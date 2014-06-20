@@ -374,7 +374,7 @@ int CAmr::loadData(uns::CParticles * particles,
                   particles->id.push_back(-1.); // no id for gas, use "-1"
                   particles->load_bits |= ID_BIT;
                 }
-                if (take) {
+                if (take|| !req_bits) { // !req_bits for uns_info and siplay=f
                   particles->indexes.push_back(0); // GAS particles
                   particles->ngas++; // One more gas particles
 

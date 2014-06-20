@@ -1554,6 +1554,15 @@ int CSnapshotGadgetOut::setData(std::string name,std::string array,  const int n
     case uns::StarsMetal  :
       status = setMetalStars(n, data, _addr);
       break;
+    case uns::Metal  :
+      if (name=="gas") {
+        status = setMetalGas(n, data, _addr);
+      } else {
+        if (name=="stars") {
+          status = setMetalStars(n, data, _addr);
+        }
+      }
+      break;
     default: ok=false;
     }
 

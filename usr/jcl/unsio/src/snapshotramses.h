@@ -28,8 +28,12 @@ namespace uns {
 
 class CParticles {
 public:
-  CParticles() {
-    ntot=ngas=ndm,nstars=0;
+  CParticles() {    
+    ntot  =0; // SWIG forbid multiple variable affectation
+    ngas  =0; // like ntto=ngas=ndm=0 !!!!!!!!!
+    ndm   =0; // it was a bug in py_unsio wrapper for ramses files,
+    nstars=0; // really really damn crazy !!!!!
+
     load_bits=0;
   }
   std::vector <float> pos,vel,mass,hsml,rho,temp,age,metal;

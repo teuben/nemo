@@ -1,4 +1,6 @@
 # -----------------------------------------------------------------------
+#!/usr/bin/python
+# -----------------------------------------------------------------------
 # The following program shows how to use UNSIO library from
 # a Python program
 #

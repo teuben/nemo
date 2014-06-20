@@ -116,9 +116,11 @@ int CSnapshotRamsesIn::nextFrame(uns::UserSelection &user_select)
       std::cerr << "ndm    = "<< particles->ndm <<"\n";
       std::cerr << "nstars = "<< particles->nstars <<"\n";
       std::cerr << "Box len=" << amr->getHeader()->boxlen << "\n";
-      std::cerr << "Start reordering...\n";
-      reorderParticles(user_select);
-      std::cerr << "Stop reordering...\n";
+      //if (req_bits) {
+        std::cerr << "Start reordering...\n";
+        reorderParticles(user_select);
+        std::cerr << "Stop reordering...\n";
+      //}
       status = 1;
     }
   }
@@ -153,6 +155,7 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
   npart_comp[1] = particles->ndm;
   npart_comp[4] = particles->nstars;
 
+  assert(particles->indexes.size()>0);
   assert(select_order.size()<7);
   bool first=true;
   // according to user selection
@@ -210,7 +213,7 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
     uns::ComponentRange::list(&crv);
 
   // particles reordering
-  if (particles->ntot) { // exist particles to reorder
+  if (particles->ntot && req_bits) { // exist particles to reorder
     std::vector <float> pos,vel,mass,metal;
     std::vector <int> id;
     if (particles->pos.size()>0)
@@ -229,6 +232,9 @@ int CSnapshotRamsesIn::reorderParticles(uns::UserSelection &user_select)
       bool found=false;
 
       int icomp=particles->indexes[i]; // integer component
+      if (! (icomp==0 ||icomp==1 || icomp==4)) {
+        std::cerr << "ASSERT fails i="<<i<<" icomp="<<icomp<<"\n";
+      }
       assert(icomp==0 ||icomp==1 || icomp==4); // gas || halo || stars only
       int istart=offset_comp[icomp]; // index start in the new pos array
 

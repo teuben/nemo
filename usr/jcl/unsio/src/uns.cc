@@ -37,9 +37,6 @@ std::map<std::string, int> CunsIn::s_mapCompInt;
 CunsIn::CunsIn(const std::string _name ,const std::string _comp ,const std::string _time, const bool verb)
 {
   init(_name,_comp,_time,verb);
-  if (verbose) {
-    std::cerr << "CunsIn::CunsIn -- UNSIO version = "<<uns::getVersion()<< "\n";
-  }
 }
 
 // ----------------------------------------------------------------------------
@@ -53,6 +50,9 @@ CunsIn::CunsIn(const char * _name ,const char * _comp, const char * _time,
 //
 void CunsIn::init(const std::string _name ,const std::string _comp ,const std::string _time, const bool verb )
 {
+  if (verb) {
+    std::cerr << "CunsIn::CunsIn -- UNSIO version = "<<uns::getVersion()<< "\n";
+  }
   valid = false;
   simname  = tools::Ctools::fixFortran(_name.c_str(),false);
   sel_comp = tools::Ctools::fixFortran(_comp.c_str(),false);
@@ -82,20 +82,27 @@ void CunsIn::init(const std::string _name ,const std::string _comp ,const std::s
   if (simname == "-") { // we assume here that "-"
     tryNemo();          // is standard input and a NEMO stream...
   } else {
-    if (tools::Ctools::isFileExist(simname)   && // file exist
-        ! tools::Ctools::isDirectory(simname)) { // not a directory
-      tryGadget();               // try gadget
-      if (!valid) {              // gadget failed
+    if (tools::Ctools::isFileExist(simname)) { // file exist
+      if ( tools::Ctools::isDirectory(simname)) {
         tryRamses();             // try ramses
-      }
-      if (!valid) {              // gadget failed
-        tryNemo();               // try nemo
-      }
-      if (!valid) {              // nemo
-        trySnapList();           // try snapshotlist
-      }
-      if (!valid) {
-        trySimDB();              // try DataBase
+        if (!valid) {
+          trySimDB();              // try DataBase
+        }
+      } else {
+        // ! ) { // not a directory
+        tryGadget();               // try gadget
+        if (!valid) {
+          tryRamses();             // try ramses
+        }
+        if (!valid) {              // gadget failed
+          tryNemo();               // try nemo
+        }
+        if (!valid) {              // nemo
+          trySnapList();           // try snapshotlist
+        }
+        if (!valid) {
+          trySimDB();              // try DataBase
+        }
       }
     }
     else {                       // file does not exist
