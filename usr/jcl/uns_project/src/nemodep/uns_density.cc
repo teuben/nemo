@@ -95,11 +95,11 @@ int main(int argc, char ** argv )
   
   if (uns->isValid()) { // input file is known by UNS lib        
     int cpt=0;
-    while(uns->snapshot->nextFrame("mxvpI")&&!stop) { // there is a new frame
+    while(uns->snapshot->nextFrame("maxvpI")&&!stop) { // there is a new frame
       std::cerr << "Input file is of type :"<<uns->snapshot->getInterfaceType()<<"\n";
       bool ok;
       int cnbody,nbody;      
-      float * pos, * vel, * mass, time;
+      float * pos, * vel, * mass, * acc, time;
       // get the input number of bodies according to the selection
       ok=uns->snapshot->getData("nsel",&nbody);
       assert(ok==true);
@@ -113,6 +113,8 @@ int main(int argc, char ** argv )
       // get MASS from input snapshot
       ok=uns->snapshot->getData("mass",&cnbody,&mass);
       assert(ok==true);
+      // get ACC from input snapshot
+      ok=uns->snapshot->getData("acc",&cnbody,&acc);
       std::cerr << "nbody=" << nbody << " time="<<time <<"\n";
       // OUTPUT operations
       // create an output filename : basename +  integer
@@ -158,6 +160,9 @@ int main(int argc, char ** argv )
         }
         if (mass) {
           unsout->snapshot->setData("mass",nbody,mass,false);
+        }
+        if (acc) {
+          unsout->snapshot->setData("acc",nbody,acc,false);
         }
         unsout->snapshot->setData("rho" ,nbody,rho ,false);
         unsout->snapshot->setData("hsml",nbody,hsml,false);
