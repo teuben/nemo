@@ -115,11 +115,7 @@ RL		:= ranlib
 # ---------------
 
 IUTIL		:= -I$(IUTI)
-ifdef STATIC
-LUTIL		:= -Lutils/lib -lWDutils$(EXT)
-else
-LUTIL		:= -Lutils/lib -lWDutils$(EXT)
-endif
+LUTIL		:= -Lutils/lib -lWDutils
 
 # --------------
 # falcON library

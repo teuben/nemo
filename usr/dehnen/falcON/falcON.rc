@@ -50,7 +50,7 @@ endif
 # set compiler
 if($?MODULE_VERSION) then
   module purge
-  module load gcc/4.7.1
+  module load gcc
 endif
 
 # add FALCONLIB to LD_LIBRARY_PATH and DYLD_LIBRARY_PATH

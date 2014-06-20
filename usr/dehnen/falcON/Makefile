@@ -41,14 +41,6 @@ ifeq ($(COMPILER),gcc)
 endif
 endif
 
-ifndef Standard
-## ifdef DPROPER
-ifdef DWALTER
-# 3.2 full sph support (development version)
-DSPH			:= -DfalcON_SPH
-endif
-endif
-
 # 3.3 individual softening lengths (default: non-adaptive)
 DSOFT 			:= # -DfalcON_ADAP
 
@@ -141,9 +133,9 @@ links			:=	$(links_pro) utils inc/utils $(links_sph) $(links_walter) $(links_pjm
 links			:	$(links)
 
 # 6.1 utils library
-utils/lib/libWDutils$(EXT).a	: utils
-			$(MAKE) Standard=$(Standard) -C utils
-libutils		: utils utils/lib/libWDutils$(EXT).a
+utils/lib/libWDutils.a	: utils
+			$(MAKE) -C utils
+libutils		: utils utils/lib/libWDutils.a
 
 # 6.3 falcON library
 # NOTE: $(falcON) defined in makedefs, depending on value of STATIC
@@ -153,7 +145,7 @@ $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
-			$(CXX) $^ -Lutils/lib -lWDutils$(EXT) $(LNEMO) -shared -o $@
+			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
 
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 
