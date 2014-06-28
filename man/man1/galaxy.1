@@ -1,4 +1,4 @@
-.TH GALAXY1 1NEMO "24 June 1997"
+.TH GALAXY1 1NEMO "28 June 2014"
 .SH NAME
 galaxy \-  3D FFT N-body code
 .SH SYNOPSIS
@@ -55,6 +55,9 @@ The gravitational field is determined by a call to FINDF.
 The model is integrated forward by a call to STEP.
 After the desired evolution is completed, the positions and velocities of
 the particles are saved by a call to UNLOAD.
+.SH 
+The new 2014 public release of \fBgalaxy\fP contains an updated code, including
+versions of SCF (see \fIscfm(1NEMO)\fP) and BHTREE (see \fBhackcode1(1NEMO)\fP).
 .SH FILES
 .nf
 .ta +2i
@@ -130,6 +133,7 @@ rungalaxy(1NEMO), unfio(1NEMO), snapshot(5NEMO)
 James & Sellwood (1978, MNRAS v182, p331) 
 James (1977, J Comp Phys v25, p71).  
 Sellwood (1997, in "Computational Astrophysics" ed Clarke & West, ASP Conf series v123, p215) 
+http://www.physics.rutgers.edu/galaxy   (full 2014 version)
 .fi
 .SH AUTHOR
 Jerry Sellwood
@@ -140,4 +144,5 @@ Jerry Sellwood
 24-jun-97	V1.1  added ICHECK/MEASURE; dtlog to galaxy.dat 	JS
 18-mar-04	fixed bad usage line; refer to rungalaxy now	PJT
 8-mar-06	V1.3  now installs by default into NEMOBIN	PJT
+26-jun-2014	notes on the official full public release	PJT
 .fi
