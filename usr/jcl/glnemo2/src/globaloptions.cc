@@ -146,7 +146,7 @@ GlobalOptions::GlobalOptions()
   zmax=1.;
   lmax=0;
   lmin=0;
-  scale=1000.0;
+  scale=1.0;
   // select
   select_time = "";
   select_part = "";

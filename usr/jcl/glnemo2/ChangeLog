@@ -1,3 +1,14 @@
+1.7.0 (July, 3rd 2014)
+----------------------
+  - add tipsy standard support
+  - improve auto texture size computation
+  - add alternative play action with space bar
+
+1.6.2 (May, 12 2014)
+--------------------
+  - fix Ramses bug when boxlen != 1.0
+  - fix Ramses bug when  loading "all" components from CLI
+
 1.6.1 (April, 2nd 2014)
 ----------------------------
   - bug fix in best zoom from CLI

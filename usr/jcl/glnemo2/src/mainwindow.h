@@ -162,7 +162,7 @@ class MainWindow : public QMainWindow {
     QAction * toggle_grid_action;
     QAction * particles_form_action;
     QAction * options_form_action;
-    QAction * toggle_play_action;
+    QAction * toggle_play_action, * toggle_play_action2;
     QAction * screenshot_action;
     QAction * movie_form_action;
     QAction * reload_action;

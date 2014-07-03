@@ -35,8 +35,7 @@
 
 #include "mainwindow.h"
 using namespace std;
-
-#define RELEASE_VERSION "1.6.1"
+#define RELEASE_VERSION "1.7.0"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 // Import snapshot plugins
@@ -45,6 +44,7 @@ Q_IMPORT_PLUGIN(SnapshotFtm)
 Q_IMPORT_PLUGIN(SnapshotGadget)
 Q_IMPORT_PLUGIN(SnapshotPhiGrape)
 Q_IMPORT_PLUGIN(SnapshotRamses)
+Q_IMPORT_PLUGIN(SnapshotTipsy)
 Q_IMPORT_PLUGIN(SnapshotList)
 Q_IMPORT_PLUGIN(SnapshotNetwork)
 #else // QT4
@@ -53,6 +53,7 @@ Q_IMPORT_PLUGIN(ftmplugin);
 Q_IMPORT_PLUGIN(gadgetplugin);
 Q_IMPORT_PLUGIN(phigrapeplugin);
 Q_IMPORT_PLUGIN(ramsesplugin);
+Q_IMPORT_PLUGIN(tipsyplugin);
 Q_IMPORT_PLUGIN(listplugin);
 Q_IMPORT_PLUGIN(networkplugin);
 #endif
@@ -76,7 +77,7 @@ Q_IMPORT_PLUGIN(networkplugin);
     "zmax=1.0\n        zmax box (for ramses input)                      ",
     "lmin=0.0\n        level min (for ramses amr input)                 ",
     "lmax=0.0\n        level max (for ramses amr input)                 ",
-    "scale=1000.\n     ramses rescaling factor                          ",
+    "scale=1.\n        ramses rescaling factor                          ",
     "vel=f\n           load velocity coordinates                        ",
     "disp_vel=f\n      display velocity vectors                         ",
     "blending=t\n      Activate blending colors                         ",

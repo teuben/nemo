@@ -211,6 +211,7 @@ const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
 // copyProperties                                                             
 void ParticlesObject::copyProperties(const ParticlesObject&m)
 {
+  first_init   = m.first_init;
   visible      = m.visible;
   part         = m.part;
   part_size    = m.part_size;
@@ -304,6 +305,22 @@ void ParticlesObject::initOrbitsVectorPOV(ParticlesObjectVector& pov)
   }
 }
 // ============================================================================
+// checkPhysic()
+void ParticlesObject::checkPhysic(ParticlesObjectVector& pov, ParticlesData   * current_data )
+{
+  if (current_data) {
+    glnemo::PhysicalData * phys_select = current_data->getPhysData();
+    for (ParticlesObjectVector::iterator pvit=pov.begin(); pvit!=pov.end(); pvit++) {
+      for (int i=0; i<pvit->npart; i++) {
+        int index=pvit->index_tab[i];
+        if (phys_select && phys_select->isValid()) {
+          if (phys_select->data[index] != -1) pvit->setPhysic(true);
+        }
+      }
+    }
+  }
+}
+// ============================================================================
 // destructor                                                                  
 ParticlesObject::~ParticlesObject()
 {
@@ -329,6 +346,7 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
   obj_name = _name;
   pos = nobj;
   nobj++;
+  first_init   =  true;
   npart        =  0;
   first        = -1;
   last         = -1;

@@ -7,6 +7,7 @@ SUBDIRS += \
 	   plugins/ftm \
            plugins/zlib \
            plugins/network \
+           plugins/tipsy \
 	   plugins \
 	   src
 TEMPLATE = subdirs 

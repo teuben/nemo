@@ -18,8 +18,11 @@ project (glnemo2)
 # check QTDIR5
 FILE(GLOB GLOB_TEMP_VAR1 $ENV{QTDIR5})
 IF(NOT GLOB_TEMP_VAR1)
-  MESSAGE(FATAL_ERROR "\n\nCannot continue, because environment variable >>> QTDIR5 <<< must be defined on QT5 location directory")
+  MESSAGE(STATUS "\n\nWARNING,  environment variable >>> QTDIR5 <<< is not defined")
+  MESSAGE(STATUS "If it does not compile, try to set it to your QT5 location directory\n\n")
+  SET(QTDIR5 "/usr")
 ELSE (NOT GLOB_TEMP_VAR1)
+  SET(QTDIR5 $ENV{QTDIR5})
   MESSAGE(STATUS "QTDIR5 location = $ENV{QTDIR5}")
 ENDIF(NOT GLOB_TEMP_VAR1)
 
@@ -31,7 +34,7 @@ IF(GLOB_TEMP_VAR)
 ENDIF(GLOB_TEMP_VAR)
 
 # MODULEs PATH
-SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake $ENV{QTDIR5}) 
+SET(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/cmake ${QTDIR5}) 
 
 # Instruct CMake to run moc automatically when needed.
 #set(CMAKE_AUTOMOC ON)
@@ -62,13 +65,14 @@ FILE(GLOB lib_files
      plugins/network/*.cc
      plugins/network/*.cpp
      plugins/ramses/*.cc
+     plugins/tipsy/*.cc
      utils/*.cc
      3rdparty/pfntlib/*.cxx
     )
 
 # Find plugins qt headers
 FILE(GLOB hdrs1_files plugins/*.h plugins/ftm/*.h ..plugins/gadget/*.h 
-     plugins/network/*.h plugins/ramses/*.h
+     plugins/network/*.h plugins/ramses/*.h plugins/tipsy/*.h
      )
 
 # Destination path for the lib
@@ -85,7 +89,7 @@ ADD_DEFINITIONS(${QT_DEFINITIONS})
 # Add compiler flags for building executables (-fPIE)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 # Make sure the compiler can find include files from our Hello library.
-include_directories (${PROJECT_SOURCE_DIR}/plugins ${PROJECT_SOURCE_DIR}/plugins/nemolight/inc ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/plugins/ftm ${PROJECT_SOURCE_DIR}/plugins/gadget ${PROJECT_SOURCE_DIR}/src/glew ${PROJECT_SOURCE_DIR}/plugins/network ${PROJECT_SOURCE_DIR}/plugins/ramses ${PROJECT_SOURCE_DIR}/plugins/zlib ${PROJECT_SOURCE_DIR}/3rdparty/pfntlib ${PROJECT_SOURCE_DIR}/utils)
+include_directories (${PROJECT_SOURCE_DIR}/plugins ${PROJECT_SOURCE_DIR}/plugins/nemolight/inc ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/plugins/ftm ${PROJECT_SOURCE_DIR}/plugins/gadget ${PROJECT_SOURCE_DIR}/plugins/tipsy ${PROJECT_SOURCE_DIR}/src/glew ${PROJECT_SOURCE_DIR}/plugins/network ${PROJECT_SOURCE_DIR}/plugins/ramses ${PROJECT_SOURCE_DIR}/plugins/zlib ${PROJECT_SOURCE_DIR}/3rdparty/pfntlib ${PROJECT_SOURCE_DIR}/utils)
 include_directories (${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS})
 
 # run moc files

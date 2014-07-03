@@ -130,6 +130,7 @@ QMAKE_LIBDIR = \
     ../plugins/ramses/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/gadget/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/zlib/lib/$$ARCH/$$COMPILEMODE \
+    ../plugins/tipsy/lib/$$ARCH/$$COMPILEMODE \
     ../plugins/network/lib/$$ARCH/$$COMPILEMODE
 
 # Icons
@@ -157,6 +158,7 @@ INCLUDEPATH += \
     ../plugins/gadget \
     ../plugins/zlib \
     ../plugins/network \
+    ../plugins/tipsy \
     ../src \
     $$NEMOLIB \
     $$NEMOINC \
@@ -169,6 +171,7 @@ LIBS += \
     -lgadget \
     -lramses \
     -lnetwork \
+    -ltipsy \
     -lutils
 win32 {
     LIBS += -lzlib
@@ -191,6 +194,7 @@ POST_TARGETDEPS += \
     ../plugins/ramses/lib/$$ARCH/$$COMPILEMODE/libramses.a \
     ../plugins/network/lib/$$ARCH/$$COMPILEMODE/libnetwork.a \
     ../plugins/zlib/lib/$$ARCH/$$COMPILEMODE/libzlib.a \
+    ../plugins/tipsy/lib/$$ARCH/$$COMPILEMODE/libtipsy.a \
     ../utils/lib/$$ARCH/$$COMPILEMODE/libutils.a
 DISTFILES += ../ChangeLog
 

@@ -227,6 +227,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
                   }
                   cpt_dm++;
                 } 
+#if 0
                 if (take_stars /*&& age[k]!=0*/) { // STARS selected and it's a star
                   int cpt = namr_box+(take_halo?ndm_box:0)+cpt_star;
                   assert(cpt<(nselect+namr_box));
@@ -238,7 +239,7 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
                   }
                   cpt_star++;
                 }
-                
+#endif
               }
               nbody++;  
             }

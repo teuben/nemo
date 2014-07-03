@@ -23,14 +23,17 @@ HEADERS += snapshotnemo.h \
     snapshotgadget.h \
     snapshotramses.h \
     snapshotphigrape.h \
-    snapshotnetwork.h
+    snapshotnetwork.h \
+    snapshottipsy.h
+
 SOURCES += snapshotnemo.cc \
     snapshotftm.cc \
     snapshotlist.cc \
     snapshotgadget.cc \
     snapshotramses.cc \
     snapshotphigrape.cc \
-    snapshotnetwork.cc
+    snapshotnetwork.cc \
+    snapshottipsy.cc
 
 # CONFIG -= release
 DESTDIR = lib/$${ARCH}/$$COMPILEMODE
@@ -38,6 +41,7 @@ INCLUDEPATH += ftm \
     gadget \
     ramses \
     network \
+    tipsy \
     ../src \
     ../utils \
     ../plugins \
@@ -49,7 +53,8 @@ DEPENDPATH += \
     ftm \
     gadget \
     ramses \
-    network
+    network \
+    tipsy
 
 #
 
@@ -60,4 +65,6 @@ OTHER_FILES += \
     phigrapePlugin.json \
     gadgetPlugin.json \
     ramsesPlugin.json \
-    ftmPlugin.json
+    ftmPlugin.json \
+    tipsyPlugin.json
+

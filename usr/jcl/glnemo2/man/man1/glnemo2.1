@@ -1,4 +1,4 @@
-.TH GLNEMO2 1NEMO "January 2014"
+.TH GLNEMO2 1NEMO "July 2014"
 .SH NAME
 glnemo2 \- An interactive 3D OpenGL visualization program for Nemo snapshots
 .SH SYNOPSIS
@@ -9,7 +9,7 @@ particles positions of the different components (gas, stars, disk,
 dark mater halo, bulge) of an N-body snapshot. It's a very useful tool
 for everybody running N-body simulations from isolated galaxies to cosmological simulations. It can show quickly a lot of information about  data by revealing shapes, dense areas, formation of structures
 such as spirals arms, bars, peanuts or clumps of galaxies. Glnemo2 has
-been designed to meet the  requirements of the user, with simplicity in mind, easy to install, easy to use with an interactive and responsive graphical user interface (based on Digia QT 4.X API) , powerful with a fast 3D engine (OPenGL and GLSL), and generic with the possibility to load different kinds of input files. 
+been designed to meet the  requirements of the user, with simplicity in mind, easy to install, easy to use with an interactive and responsive graphical user interface (based on Digia QT 4.X/5.X API) , powerful with a fast 3D engine (OPenGL and GLSL), and generic with the possibility to load different kinds of input files. 
 
 
  You can zoom in/out, rotate, scale, translate, select different particles 
@@ -22,7 +22,8 @@ using camera path. All this features are accessible from a very intuitive graphi
 .nf
 - NEMO files ( http://carma.astro.umd.edu/nemo )
 - Gadget 1 and 2 -little and big endian- files ( http://www.mpa-garching.mpg.de/gadget/ )
-- RAMSES files ( http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html )
+- RAMSES files ( http://www.ics.uzh.ch/~teyssier/ramses/RAMSES.html  )
+- TIPSY file ( http://www-hpcc.astro.washington.edu/tools/tipsy/tipsy.html )
 - FTM files (Clayton Heller's sph/nbody code)
 - phiGRAPE file ( http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE )
 - list of files stored in a file
@@ -37,7 +38,7 @@ rendering. Millions of particles can be rendered, in real time, with a fast GPU.
 technology, glnemo2 can be 1000% times faster than glnemo1 !
 
  Glnemo2 runs fine on Linux, Windows(using minGW compiler), and
- MaxOSX, thanks to the QT4 API.
+ MaxOSX, thanks to the QT4/QT5 API.
 
 .SH Examples
  From the command line you can select particles to load by specifying a range of particles, or
@@ -96,6 +97,7 @@ r              launch particles ranges/color dialog box
 o              launch option dialog box
 s              take a screenshot
 p              play all snapshots
+[space]        play all snapshots
 y
 
 Density threshold
@@ -408,4 +410,6 @@ Jean-Charles Lambert
 09-Jan-13	Ver 1.53  - bug fix release		JCL
 08-Jan-14	Ver 1.6.0 - Happy QT5    		JCL
 02-Apr-14	Ver 1.6.1 - bug fix release     	JCL
+12-May-14	Ver 1.6.2 - Ramses bug fix release     	JCL
+03-Jul-14	Ver 1.7.0 - add tipsy support     	JCL
 .fi

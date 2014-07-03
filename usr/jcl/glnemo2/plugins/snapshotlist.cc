@@ -84,10 +84,10 @@ ComponentRangeVector * SnapshotList::getSnapshotRange()
       // load from disk
       //current_data->nextFrame(user_select->getIndexesTab(),user_select->getNSel());
       if (first) {
-	first       = false;
-	crv_first   = current_data->crv_first;
-	nbody_first = current_data->nbody_first;
-	time_first  = current_data->time_first;
+        first       = false;
+        crv_first   = current_data->crv_first;
+        nbody_first = current_data->nbody_first;
+        time_first  = current_data->time_first;
       }
     }
   }
@@ -129,6 +129,7 @@ bool SnapshotList::openFile()
 {
   bool status;
   QDir dir(QString(filename.c_str()));
+  std::cerr << "SnapshotList::openFile()=["<<filename<<"]\n";
     // open file
   if (filename == "-")
     ;//fi = &std::cin;//fi.open(std::cin,std::ios::in);
@@ -199,24 +200,26 @@ bool SnapshotList::getLine(const bool force)
       if ( ! fi.eof()) {
         std::istringstream str(line);  // stream line
         std::string parse;
-        // following loop parse each lines previously read   
+        // following loop parse each lines previously read
         //
         int cpt=0;
-        while (  str >> parse   &&              // something to read 
-                parse[0] != '#' &&              // not commented out 
-                parse[0] != '!' &&              // not commented out 
-                parse[0] != '\n'                // not a blank line
-                ) {
-            cpt++;
-            if (cpt==1) snapshot=parse;
+        while (  str >> parse   &&              // something to read
+                 parse[0] != '#' &&              // not commented out
+                 parse[0] != '!' &&              // not commented out
+                 parse[0] != '\n'                // not a blank line
+                 ) {
+          cpt++;
+          if (cpt==1) snapshot=parse;
         }
         if (cpt > 0 ) {
-	  unsigned int i=0;
-	  while(i<snapshot.length() && snapshot[i]==' ') i++; // search first non blank
-	  if (i<snapshot.length() && snapshot[i]!='/')        // first char not a '/'  
-	    snapshot = dirpath.toStdString() + snapshot;      // append to dirpath     
-	  stop   = true; // we have a snapshot
-	  status = true; // so we can stop reading          
+          unsigned int i=0;
+          std::cerr << "0:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
+          while(i<snapshot.length() && snapshot[i]==' ') i++; // search first non blank
+          //if (i<snapshot.length() && snapshot[i]!='/')        // first char not a '/'
+          //  snapshot = dirpath.toStdString() + snapshot;      // append to dirpath
+          std::cerr << "1:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
+          stop   = true; // we have a snapshot
+          status = true; // so we can stop reading
         }
       }
       else { // end of file

@@ -359,13 +359,13 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
                   pos[3*cpt+1] = py + getSign()*dx2*getRandomGaussian(dx2);
                   pos[3*cpt+2] = pz + getSign()*dx2*getRandomGaussian(dx2);
 #else
-                  pos[3*cpt+0] = px ;
-                  pos[3*cpt+1] = py ;
-                  pos[3*cpt+2] = pz ;
+                  pos[3*cpt+0] = px*header.boxlen ;
+                  pos[3*cpt+1] = py*header.boxlen ;
+                  pos[3*cpt+2] = pz*header.boxlen ;
 #endif
 
 #endif
-                  rneib[cpt]   = dx;
+                  rneib[cpt]   = dx*header.boxlen;
                   rho[cpt] = var[0*ngrida*twotondim+ind*ngrida+i];
 #if 1
                   temp[cpt]= std::max(0.0,var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt]);

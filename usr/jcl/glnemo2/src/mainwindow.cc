@@ -496,7 +496,13 @@ void MainWindow::createActions()
   toggle_play_action->setStatusTip(tr("Play next snapshot"));
   //connect(toggle_play_action, SIGNAL( triggered() ), this, SLOT(actionPlay()) );
   connect(toggle_play_action, SIGNAL( triggered() ), form_options, SLOT(on_play_pressed2()));
-  
+  // alternative play action with space bar
+  toggle_play_action2 = new QAction(toggle_play_action);
+  toggle_play_action2->setShortcut(QKeySequence(Qt::Key_Space));
+  connect(toggle_play_action2, SIGNAL( triggered() ), toggle_play_action, SIGNAL(triggered()));
+  addAction(toggle_play_action2);
+
+
   // reload
   reload_action = new QAction(QIcon(GlobalOptions::RESPATH+"/images/reload.png"),tr("Reload snaphot"),this);
   reload_action->setShortcut(tr("l"));
@@ -777,15 +783,23 @@ void MainWindow::loadNewData(const std::string select,
         //listObjects(pov2);
       }
       if (first) {
+        if (current_data)
+          ParticlesObject::checkPhysic(pov2,current_data->part_data);
         if (store_options->auto_texture_size && !store_options->rho_exist) {
-          store_options->texture_size = current_data->part_data->getMaxSize()/100.;
+          store_options->texture_size = current_data->part_data->getMaxSize()/300.;
           if (store_options->texture_size>1.0) store_options->texture_size=1.0;
           //store_options->texture_size = pow(current_data->part_data->getMaxSize(),3)/(*(current_data->part_data->nbody));
           std::cerr << "Resampled Texture Size = "<< store_options->texture_size <<"\n";
+        } else {
+          if (store_options->auto_texture_size && store_options->rho_exist) {
+            store_options->texture_size = current_data->part_data->rneib->getMin()*2.;
+            std::cerr << "Use HSMLx2 as Texture Size = "<< store_options->texture_size <<"\n";
+            if (store_options->texture_size>1.0) store_options->texture_size=1.0;
+          }
         }
-        setDefaultParamObject(pov2); // set some default parameter if first loading
       }
-      
+      setDefaultParamObject(pov2); // set some default parameter if first loading
+
       form_o_c->update( current_data->part_data, &pov2,store_options);
       form_options->update();
       updateOsd();
@@ -874,20 +888,30 @@ void MainWindow::listObjects(ParticlesObjectVector& ppov)
 // -----------------------------------------------------------------------------
 void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
   for (int i=0; i<(int)pov.size();i++) {
-    pov[i].setPartSize(store_options->psize);
-    pov[i].setPart(store_options->show_points);
-    pov[i].setGaz(store_options->show_poly);
-    pov[i].setGazSize(store_options->texture_size);
-    pov[i].setGazAlpha(store_options->texture_alpha*255);
-    pov[i].setGazSizeMax(store_options->texture_size);
-    pov[i].setVel(store_options->show_vel);
-    if (store_options->phys_min_glob!=-1) {
-      pov[i].setMinPhys(store_options->phys_min_glob);
+    if (pov[i].isFirstInit()) {
+      pov[i].setFirstInit(false);
+      pov[i].setPartSize(store_options->psize);
+      pov[i].setPart(store_options->show_points);
+      pov[i].setGaz(store_options->show_poly);
+      pov[i].setGazSize(store_options->texture_size);
+      pov[i].setGazAlpha(store_options->texture_alpha*255);
+      pov[i].setGazSizeMax(store_options->texture_size);
+      pov[i].setVel(store_options->show_vel);
+      if (store_options->phys_min_glob!=-1) {
+        pov[i].setMinPhys(store_options->phys_min_glob);
+      }
+      if (store_options->phys_max_glob!=-1) {
+        pov[i].setMaxPhys(store_options->phys_max_glob);
+      }
+      if (pov[i].hasPhysic()) {
+        std::cerr << "object ["<<i<<"] has physic\n";
+        pov[i].setGazSize(1.0);
+        pov[i].setGazSizeMax(1.0);
+      } else {
+        std::cerr << "object ["<<i<<"] has no physic\n";
+        pov[i].setGazSize(store_options->texture_size);
+      }
     }
-    if (store_options->phys_max_glob!=-1) {
-      pov[i].setMaxPhys(store_options->phys_max_glob);
-    }
-    
   }
 }
 // -----------------------------------------------------------------------------
@@ -1712,6 +1736,7 @@ void MainWindow::uploadNewFrame()
       //pov2=pov;
       ParticlesObject::initOrbitsVectorPOV(pov);
       ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel()); 
+      setDefaultParamObject(pov2); // set some default parameter if first loading
       form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
       form_options->update();
       form_options->setPlaySettings(current_data->getNumberFrames(), current_data->getCurrentFrameIndex());

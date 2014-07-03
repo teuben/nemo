@@ -20,7 +20,8 @@ known.
 Currently, glnemo2 reads:
 - NEMO files (http://carma.astro.umd.edu/nemo)
 - Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
-- RAMSES files (http://irfu.cea.fr/Projets/Site_ramses/RAMSES.html)
+- RAMSES files (http://www.ics.uzh.ch/~teyssier/ramses/RAMSES.html)
+- TIPSY files (http://www-hpcc.astro.washington.edu/tools/tipsy/tipsy.html)
 - FTM files (Clayton Heller's sph/nbody code)
 - phiGRAPE file (http://wiki.cs.rit.edu/bin/view/GRAPEcluster/phiGRAPE)
 - list of files stored in a file
@@ -74,7 +75,7 @@ mouse (LMB or RMB)
 
 - to take a snapshot : press s  ( or click 'camera' icon).
 
-- to play all the snapshot time steps : press p ( or click 'arrow" icon).
+- to play all the snapshot time steps : press p or [space bar]( or click 'arrow" icon).
 
 - to reload a snapshot : or click 'curly arrow" icon.
 

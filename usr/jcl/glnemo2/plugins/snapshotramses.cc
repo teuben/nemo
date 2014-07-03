@@ -12,7 +12,7 @@
 // ============================================================================
 #include <QtGui>  // Mandatory for plugins management
 #include "snapshotramses.h"
-
+#include <limits>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 Q_PLUGIN_METADATA(IID "fr.glnemo2.phigrapePlugin")
 #endif
@@ -83,13 +83,13 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
   parseSelectTime();
   
   
-  if ((go->select_part.find("gas")!=std::string::npos)) 
+  if (go->select_part=="all" || (go->select_part.find("gas")!=std::string::npos))
     take_gas = true;
   else namr=0;
-  if ((go->select_part.find("halo")!=std::string::npos)) 
+  if (go->select_part=="all" || (go->select_part.find("halo")!=std::string::npos))
     take_halo = true;
   else ndm=0;
-  if ((go->select_part.find("stars")!=std::string::npos)) 
+  if (go->select_part=="all" || (go->select_part.find("stars")!=std::string::npos))
     take_stars = true;
   else nstars=0;
   
@@ -129,11 +129,11 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
     //part_data->computeMaxSize();
     // rescale particles
     for (int i=0;i <nsel; i++) {
-      part_data->pos[i*3+0]     *= go->scale*amr->getHeader()->boxlen;
-      part_data->pos[i*3+1]     *= go->scale*amr->getHeader()->boxlen;
-      part_data->pos[i*3+2]     *= go->scale*amr->getHeader()->boxlen;
+      part_data->pos[i*3+0]     *= go->scale;//*amr->getHeader()->boxlen;
+      part_data->pos[i*3+1]     *= go->scale;//*amr->getHeader()->boxlen;
+      part_data->pos[i*3+2]     *= go->scale;//*amr->getHeader()->boxlen;
       if (part_data->rneib->data[i]!=-1)
-        part_data->rneib->data[i] *= go->scale*amr->getHeader()->boxlen;
+        part_data->rneib->data[i] *= go->scale;//*amr->getHeader()->boxlen;
     }
     part_data->computeVelNorm();
     part_data->rho->computeMinMax();
@@ -202,6 +202,11 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   std::cerr << "SnapshotRamses::initLoading IN\n";
   float x[8];
   // boundary box
+  x[0]=x[2]=x[4]=std::numeric_limits<float>::min();
+  x[1]=x[3]=x[5]=std::numeric_limits<float>::max();
+  x[6]=(float )0; // level min
+  x[7]=0; // nlevelmax
+ #if 0
   x[0] = so->xmin;
   x[1] = so->xmax;
   x[2] = so->ymin;
@@ -210,13 +215,14 @@ int SnapshotRamses::initLoading(GlobalOptions * so)
   x[5] = so->zmax;
   x[6] = so->lmin;
   x[7] = so->lmax;
+#endif
   amr->setBoundary(x);
   part->setBoundary(x);
-  if (so->select_part=="" || (so->select_part.find("gas")!=std::string::npos)) 
+  if (so->select_part=="" || so->select_part=="all" || (so->select_part.find("gas")!=std::string::npos))
     take_gas = true;
-  if (so->select_part=="" || (so->select_part.find("halo")!=std::string::npos)) 
+  if (so->select_part=="" || so->select_part=="all" || (so->select_part.find("halo")!=std::string::npos))
     take_halo = true;
-  if (so->select_part=="" || (so->select_part.find("stars")!=std::string::npos)) 
+  if (so->select_part=="" || so->select_part=="all" || (so->select_part.find("stars")!=std::string::npos))
     take_stars = true;
   
   if (take_gas && amr->isValid()) {
