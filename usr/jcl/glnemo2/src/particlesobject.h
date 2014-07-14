@@ -89,13 +89,13 @@ class ParticlesObject{
     // gas
     bool isGazEnable() const  { return gaz;    }
     void setGaz(const bool _v)      { gaz = _v; }
-    void setGazSize(const float _v) { gaz_size=_v;  }
-    void setGazAlpha(const int _v)  { gaz_alpha=_v;  }
-    float getGazSize()        { return gaz_size;}
-    int getGazAlpha()        { return gaz_alpha; }
+    void setGazSize(const float _v) { gaz_size[render_mode%2]=_v; }
+    void setGazAlpha(const int _v)  { gaz_alpha[render_mode%2]=_v;}
+    float getGazSize()        { return gaz_size[render_mode%2];}
+    int getGazAlpha()        { return gaz_alpha[render_mode%2]; }
     bool isGazRotate()         { return gaz_rotate; }
-    float getGazSizeMax()    { return gaz_size_max;}
-    void setGazSizeMax(const float _v) { gaz_size_max = _v;}
+    float getGazSizeMax()    { return gaz_size_max[render_mode%2];}
+    void setGazSizeMax(const float _v) { gaz_size_max[render_mode%2] = _v;}
     void setGazRotate( const bool _b) { gaz_rotate = _b; }
     void setTextureIndex(const int _tex) { texture_index = _tex;}
     int getTextureIndex()     { return texture_index; }
@@ -141,6 +141,10 @@ class ParticlesObject{
     }
     void setPhysic(const bool _v) { has_physic = _v;}
     bool  hasPhysic() const { return has_physic;}
+    // render_mode (>=1 : has_physic, otherwise accumulate blending color)
+    void setRenderMode(const int _render_mode) { render_mode=_render_mode;   }
+    int getRenderMode() const { return render_mode;}
+
   private:
 
     void copyDataObject(const ParticlesObject&, const bool garbage=false);
@@ -154,12 +158,15 @@ class ParticlesObject{
     int   part_alpha;
     // gas
     bool gaz;        // TRUE to display gaz effect
-    float gaz_size;
-    int gaz_alpha;
+    float gaz_size[2];
+    int gaz_alpha[2];
     int texture_index;
     bool gaz_rotate;
-    float gaz_size_max;
+    float gaz_size_max[2];
     bool gaz_glsl;
+    // alternate gas variable (for accumulation rendering, no density)
+    int render_mode;
+
     // velocity
     bool vel;        // TRUE to display velocity vectors
     float vel_size, vel_size_max;

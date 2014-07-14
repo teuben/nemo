@@ -599,7 +599,7 @@ void MainWindow::createActions()
   
   // Auto rotate reverse around Y 
   rotateyr_action = new QAction(this);
-  rotateyr_action->setShortcut(tr("Ctrl++Shift+Y"));
+  rotateyr_action->setShortcut(tr("Ctrl+Shift+Y"));
   connect( rotateyr_action, SIGNAL( triggered() ), this, SLOT( actionRotateRY() ) );
   addAction(rotateyr_action);
   
@@ -798,28 +798,33 @@ void MainWindow::loadNewData(const std::string select,
           }
         }
       }
-      setDefaultParamObject(pov2); // set some default parameter if first loading
 
-      form_o_c->update( current_data->part_data, &pov2,store_options);
-      form_options->update();
-      updateOsd();
-      tbench.restart();
-      
       if (interact && !reload && store_options->rho_exist) {
-        store_options->render_mode = 2; // density mode
+        store_options->render_mode = 1; // density mode
       }
       if (interact && !reload && !store_options->rho_exist) {
         store_options->render_mode = 0; // alpha blending accumulation mode
       }
       // 9 dec 2011 force to density mode if rho exist
       if (store_options->rho_exist) {
-        store_options->render_mode = 2; // density mode
+        store_options->render_mode = 1; // density mode
       } else {
         store_options->render_mode = 0; // alpha blending accumulation mode
       }
       if (! store_options->auto_render) {
         store_options->render_mode=0;
       }
+      setDefaultParamObject(pov2); // set some default parameter if first loading
+
+      setRenderMode(pov);
+      setRenderMode(pov2);
+
+      form_o_c->update( current_data->part_data, &pov2,store_options);
+      form_options->update();
+      updateOsd();
+      tbench.restart();
+
+
       if (store_options->auto_com ||  store_options->cod) {
         actionCenterToCom(false);
       }
@@ -887,15 +892,20 @@ void MainWindow::listObjects(ParticlesObjectVector& ppov)
 // Set default parameters to all the object                                     
 // -----------------------------------------------------------------------------
 void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
+
   for (int i=0; i<(int)pov.size();i++) {
     if (pov[i].isFirstInit()) {
+
       pov[i].setFirstInit(false);
       pov[i].setPartSize(store_options->psize);
       pov[i].setPart(store_options->show_points);
       pov[i].setGaz(store_options->show_poly);
+      pov[i].setRenderMode(0); // accumulation blending mode
       pov[i].setGazSize(store_options->texture_size);
       pov[i].setGazAlpha(store_options->texture_alpha*255);
       pov[i].setGazSizeMax(store_options->texture_size);
+
+
       pov[i].setVel(store_options->show_vel);
       if (store_options->phys_min_glob!=-1) {
         pov[i].setMinPhys(store_options->phys_min_glob);
@@ -903,6 +913,9 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
       if (store_options->phys_max_glob!=-1) {
         pov[i].setMaxPhys(store_options->phys_max_glob);
       }
+
+      pov[i].setRenderMode(1); // individual hsml
+      pov[i].setGazAlpha(store_options->texture_alpha*255);
       if (pov[i].hasPhysic()) {
         std::cerr << "object ["<<i<<"] has physic\n";
         pov[i].setGazSize(1.0);
@@ -910,8 +923,19 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
       } else {
         std::cerr << "object ["<<i<<"] has no physic\n";
         pov[i].setGazSize(store_options->texture_size);
+        pov[i].setGazSizeMax(store_options->texture_size);
       }
+      // set default render mode
+      pov[i].setRenderMode(store_options->render_mode);
     }
+  }
+}
+// -----------------------------------------------------------------------------
+// Set default parameters to all the object
+// -----------------------------------------------------------------------------
+void MainWindow::setRenderMode(ParticlesObjectVector & pov){
+  for (int i=0; i<(int)pov.size();i++) {
+    pov[i].setRenderMode(store_options->render_mode);
   }
 }
 // -----------------------------------------------------------------------------
@@ -1218,9 +1242,15 @@ void MainWindow::actionBestZoom()
 // actionRenderMode()                                                           
 void MainWindow::actionRenderMode()
 {
-  store_options->render_mode = (store_options->render_mode+1)%3;
-  if (store_options->render_mode==1) store_options->render_mode=2; // giveup mode 1
+  store_options->render_mode = (store_options->render_mode+1)%2;
+  //if (store_options->render_mode==1) store_options->render_mode=2; // giveup mode 1
   store_options->auto_render=true;
+  setRenderMode(pov2);
+  setRenderMode(pov);
+  if (current_data) { // update dialog box according
+                      // to rendering mode
+    form_o_c->update( current_data->part_data, &pov2,store_options);
+  }
   gl_window->updateGL();
 }
 // -----------------------------------------------------------------------------
@@ -1751,7 +1781,7 @@ void MainWindow::uploadNewFrame()
     updateOsd();
 #if 0
     if (store_options->rho_exist) {
-      store_options->render_mode = 2; // density mode
+      store_options->render_mode = 1; // density mode
     }
     if (!store_options->rho_exist) {
       store_options->render_mode = 0; // alpha blending accumulation mode

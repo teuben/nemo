@@ -35,7 +35,7 @@
 
 #include "mainwindow.h"
 using namespace std;
-#define RELEASE_VERSION "1.7.0"
+#define RELEASE_VERSION "1.7.1"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 // Import snapshot plugins
@@ -44,7 +44,9 @@ Q_IMPORT_PLUGIN(SnapshotFtm)
 Q_IMPORT_PLUGIN(SnapshotGadget)
 Q_IMPORT_PLUGIN(SnapshotPhiGrape)
 Q_IMPORT_PLUGIN(SnapshotRamses)
+#ifndef _WIN32
 Q_IMPORT_PLUGIN(SnapshotTipsy)
+#endif
 Q_IMPORT_PLUGIN(SnapshotList)
 Q_IMPORT_PLUGIN(SnapshotNetwork)
 #else // QT4
@@ -53,7 +55,9 @@ Q_IMPORT_PLUGIN(ftmplugin);
 Q_IMPORT_PLUGIN(gadgetplugin);
 Q_IMPORT_PLUGIN(phigrapeplugin);
 Q_IMPORT_PLUGIN(ramsesplugin);
+#ifndef _WIN32
 Q_IMPORT_PLUGIN(tipsyplugin);
+#endif
 Q_IMPORT_PLUGIN(listplugin);
 Q_IMPORT_PLUGIN(networkplugin);
 #endif

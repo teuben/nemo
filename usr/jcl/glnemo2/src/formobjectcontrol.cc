@@ -603,8 +603,8 @@ void FormObjectControl::updateObjectSettings( const int row)
       setPhysicalTabName();
     }
     if (pobj->hasPhysic() && phys_select && phys_select->isValid()) {
-      std::cerr << "updateObjectSettings("<<row<<") getMax="<<log(phys_select->getMax())<< " getMin="<<
-            log(phys_select->getMin())<<"\n";
+      //std::cerr << "updateObjectSettings("<<row<<") getMax="<<log(phys_select->getMax())<< " getMin="<<
+      //      log(phys_select->getMin())<<"\n";
       dens_histo->drawDensity(phys_select->data_histo);
       double diff_rho=(log(phys_select->getMax())-log(phys_select->getMin()))/100.;
       //min

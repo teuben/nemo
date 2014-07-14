@@ -215,6 +215,7 @@ class MainWindow : public QMainWindow {
     ComponentRangeVector * crv;
     void listObjects(ParticlesObjectVector& ppov);
     void setDefaultParamObject(ParticlesObjectVector&);
+    void setRenderMode(ParticlesObjectVector&);
     // NEMO parameters
     std::string snapshot,select,server, s_times,version;
     bool keep_all;

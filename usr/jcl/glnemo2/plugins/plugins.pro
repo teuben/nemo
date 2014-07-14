@@ -35,6 +35,7 @@ SOURCES += snapshotnemo.cc \
     snapshotnetwork.cc \
     snapshottipsy.cc
 
+
 # CONFIG -= release
 DESTDIR = lib/$${ARCH}/$$COMPILEMODE
 INCLUDEPATH += ftm \
@@ -68,3 +69,11 @@ OTHER_FILES += \
     ftmPlugin.json \
     tipsyPlugin.json
 
+# No tipsy support for windows
+win32 {
+HEADERS -= snapshottipsy.h
+SOURCES -= snapshottipsy.cc
+INCLUDEPATH -= tipsy
+DEPENDPATH -= tipsy
+OTHER_FILES -= tipsyPlugin.json
+}

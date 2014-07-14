@@ -54,7 +54,7 @@ GlobalOptions::GlobalOptions()
   perspective=true;
   orthographic=false;
   use_shaders = true;
-  render_mode = 2;
+  render_mode = 1;
   init_glsl   = true;
   // from Scene Orientation TAB
   zoom=-1.0;

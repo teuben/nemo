@@ -198,6 +198,13 @@ POST_TARGETDEPS += \
     ../utils/lib/$$ARCH/$$COMPILEMODE/libutils.a
 DISTFILES += ../ChangeLog
 
+# No TPSY support for windows
+win32 {
+QMAKE_LIBDIR -= ../plugins/tipsy/lib/$$ARCH/$$COMPILEMODE
+INCLUDEPATH  -= ../plugins/tipsy
+LIBS         -= -ltipsy
+POST_TARGETDEPS -= ../plugins/tipsy/lib/$$ARCH/$$COMPILEMODE/libtipsy.a
 
+}
 
 

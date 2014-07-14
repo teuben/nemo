@@ -11,3 +11,7 @@ SUBDIRS += \
 	   plugins \
 	   src
 TEMPLATE = subdirs 
+
+win32 {
+SUBDIRS -= plugins/tipsy
+}

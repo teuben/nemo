@@ -84,127 +84,13 @@ void ParticlesObject::copyDataObject(const ParticlesObject&m, const bool garbage
 // copy onstructor                                                             
 ParticlesObject::ParticlesObject(const ParticlesObject&m)
 {
-#if 1
   copyDataObject(m);
-#else
-  obj_from     = m.obj_from;
-  obj_name     = m.obj_name;
-  npart        = m.npart;
-  first        = m.first;
-  last         = m.last;
-  step         = m.step;
-  visible      = m.visible;
-  part         = m.part;
-  part_size    = m.part_size;
-  part_alpha   = m.part_alpha;
-  gaz          = m.gaz;
-  gaz_size     = m.gaz_size;
-  gaz_alpha    = m.gaz_alpha;
-  gaz_size_max = m.gaz_size_max;
-  gaz_rotate   = m.gaz_rotate;
-  gaz_glsl     = m.gaz_glsl;
-  texture_index=m.texture_index;
-  vel          = m.vel;
-  vel_size     = m.vel_size;
-  vel_alpha    = m.vel_alpha;
-  vel_factor   = m.vel_factor;
-  vel_size_max = m.vel_size_max;
-  color        = m.color;
-  pos          = m.pos;
-  orbits       = m.orbits;
-  o_record     = m.o_record;
-  orbits_max   = m.orbits_max;
-  orbits_history=m.orbits_history;
-  orbits_animate=m.orbits_animate;
-  min_phys   = m.min_phys;
-  max_phys   = m.max_phys;
-  min_percen_phys = m.min_percen_phys;
-  max_percen_phys = m.max_percen_phys;
-  has_physic      = m.has_physic;
-  OrbitsVector oo = m.ov;
-  // loop on orbits_max
-  for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
-    OrbitsList ol;
-    // loop on orbit_history
-    for (OrbitsList::iterator oil=(*oit).begin(); oil != (*oit).end(); oil++){
-      Orbits * ob = new Orbits(*oil); // get each orbits
-      ol.push_back(*ob);              // add in new list
-      delete ob;
-    }
-    ov.push_back(ol);  // insert new list in new object
-  }
-  if (m.index_tab) {
-    cpt +=npart;
-    index_tab    = new int[npart];
-    memcpy(index_tab,m.index_tab,sizeof(int)*npart);
-    //for (int i=0;i<npart;i++) index_tab[i] = m.index_tab[i];
-  }
-  else index_tab=NULL;
-#endif
 }
 // ============================================================================
 // copy constructor                                                            
 const ParticlesObject& ParticlesObject::operator=(const ParticlesObject&m)
 {
-#if 1
   copyDataObject(m,true);
-#else
-  obj_from     = m.obj_from;
-  obj_name     = m.obj_name;
-  npart        = m.npart;
-  first        = m.first;
-  last         = m.last;
-  step         = m.step;
-  visible      = m.visible;
-  part         = m.part;
-  part_size    = m.part_size;
-  part_alpha   = m.part_alpha;
-  gaz          = m.gaz;
-  gaz_size     = m.gaz_size;
-  gaz_alpha    = m.gaz_alpha;
-  gaz_size_max = m.gaz_size_max;
-  gaz_rotate   = m.gaz_rotate;
-  gaz_glsl     = m.gaz_glsl;
-  texture_index= m.texture_index;
-  vel          = m.vel;
-  vel_size     = m.vel_size;
-  vel_alpha    = m.vel_alpha;
-  vel_factor   = m.vel_factor;
-  vel_size_max = m.vel_size_max;  
-  color        = m.color;
-  pos          = m.pos;
-  orbits       = m.orbits;
-  o_record     = m.o_record;
-  orbits_max   = m.orbits_max;
-  orbits_history=m.orbits_history;
-  orbits_animate=m.orbits_animate;
-  min_phys   = m.min_phys;
-  max_phys   = m.max_phys;
-  min_percen_phys = m.min_percen_phys;
-  max_percen_phys = m.max_percen_phys;
-  has_physic      = m.has_physic;
-  OrbitsVector oo = m.ov;
-  // loop on orbits_max
-  for (OrbitsVector::iterator oit =oo.begin();oit!=oo.end() ; oit++) {
-    OrbitsList ol;
-    // loop on orbit_history
-    for (OrbitsList::iterator oil=(*oit).begin(); oil != (*oit).end(); oil++){
-      Orbits * ob = new Orbits(*oil); // get each orbits
-      ol.push_back(*ob);              // add in new list
-      delete ob;
-    }
-    ov.push_back(ol);  // insert new list in new object
-  }
-  if (m.index_tab) {
-    if (index_tab)
-      delete [] index_tab;
-    cpt += npart;
-    index_tab    = new int[npart];
-    memcpy(index_tab,m.index_tab,sizeof(int)*npart);
-    //for (int i=0;i<npart;i++) index_tab[i] = m.index_tab[i];
-  }
-  else index_tab=NULL;
-#endif
   return *this;
 }
 // ============================================================================
@@ -217,11 +103,15 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   part_size    = m.part_size;
   part_alpha   = m.part_alpha;
   gaz          = m.gaz;
-  gaz_size     = m.gaz_size;
-  gaz_alpha    = m.gaz_alpha;
-  gaz_size_max = m.gaz_size_max;
+  gaz_size[0]  = m.gaz_size[0];
+  gaz_size[1]  = m.gaz_size[1];
+  gaz_alpha[0] = m.gaz_alpha[0];
+  gaz_alpha[1] = m.gaz_alpha[1];
+  gaz_size_max[0] = m.gaz_size_max[0];
+  gaz_size_max[1] = m.gaz_size_max[1];
   gaz_rotate   = m.gaz_rotate;
   gaz_glsl     = m.gaz_glsl;
+
   texture_index=m.texture_index;
   vel          = m.vel;
   vel_size     = m.vel_size;
@@ -240,6 +130,7 @@ void ParticlesObject::copyProperties(const ParticlesObject&m)
   min_percen_phys = m.min_percen_phys;
   max_percen_phys = m.max_percen_phys;
   has_physic      = m.has_physic;
+  render_mode     = m.render_mode;
   //ol           = m.ol;
   //pos          = m.pos;
 }
@@ -356,14 +247,19 @@ void ParticlesObject::init(const ObjFrom _of, const std::string _name)
   part_size    =  1;
   part_alpha   =  255;
   gaz          =  true;
-  gaz_size     =  1.;
+  gaz_size[0]  =  1.;
+  gaz_size[1]  =  1.;
   if (!GLWindow::GLSL_support) {
-    gaz_size   =  0.1;
+    gaz_size[0] =  0.1;
+    gaz_size[1] =  0.1;
     gaz        =  false;
     part       =  true;
   }
-  gaz_alpha    =  255;
-  gaz_size_max =  1.0;
+  gaz_alpha[0] =  255;
+  gaz_alpha[1] =  255;
+  gaz_size_max[0] =  1.0;
+  gaz_size_max[1] =  1.0;
+  render_mode  = 0;
   gaz_rotate   = true;
   gaz_glsl     = true;
   texture_index= 0;

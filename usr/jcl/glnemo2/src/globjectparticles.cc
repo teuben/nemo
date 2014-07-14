@@ -172,7 +172,7 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   glTexEnvi(GL_POINT_SPRITE_ARB, GL_COORD_REPLACE_ARB, GL_TRUE);
   glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_NV);
 
-  if (hasPhysic && go->render_mode==2) {                 // if physic
+  if (hasPhysic && go->render_mode==1) {                 // if physic
     GLObject::setColor(Qt::black); // send black color to the shader
   } else {                              // else
     GLObject::setColor(po->getColor()); // send user selected color 
@@ -183,14 +183,14 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
     glColor4ub(mycolor.red(), mycolor.green(), mycolor.blue(),po->getGazAlpha());
   
   //if ((go->render_mode == 0 || go->render_mode == 1) && !hasPhysic) { // Alpha blending accumulation
-  if ((go->render_mode == 0 || go->render_mode == 1) ) { // Alpha blending accumulation
+  if ((go->render_mode == 0 ) ) { // Alpha blending accumulation
     glBlendFunc(GL_SRC_ALPHA, GL_ONE);
     glEnable(GL_BLEND);
     glDepthMask(GL_FALSE);
     checkGlError("GLObjectParticles::displayVboShader -> Alpha blending accumulation");
   }
   else 
-    if (go->render_mode == 2) {  // No Alpha bending accumulation
+    if (go->render_mode == 1) {  // No Alpha bending accumulation
       glDepthMask(GL_FALSE);
       glDisable(GL_DEPTH_TEST);
       //glEnable(GL_DEPTH_TEST);
@@ -240,12 +240,12 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
     std::cerr << "Error occured when getting \"a_phys_data\" attribute\n";
     exit(1);
   }
-  if ((go->render_mode == 1 || go->render_mode == 2)) { // individual size and color
+  if ((go->render_mode == 1 )) { // individual size and color
     // Send vertex object neighbours size
     if (hasPhysic && phys_select && phys_select->isValid()) { 
       // set back texture_size to one for gas
-      po->setGazSize(1.0);
-      po->setGazSizeMax(1.0);
+      //po->setGazSize(1.0);
+      //po->setGazSizeMax(1.0);
       glEnableVertexAttribArrayARB(a_sprite_size);
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_size);
       start = min_index*sizeof(float);
@@ -260,7 +260,7 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
     }
   } else {
     if (hasPhysic) { // gas only
-      glVertexAttrib1f(a_sprite_size,go->texture_size);
+      //glVertexAttrib1f(a_sprite_size,go->texture_size);
     }
   }
   // Draw points 
@@ -316,7 +316,7 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   shader->stop();
 
 
-  if (hasPhysic && ( go->render_mode == 1 || go->render_mode == 2)) {
+  if (hasPhysic && ( go->render_mode == 1)) {
     //glDisableClientState(GL_NORMAL_ARRAY);
     if (phys_select && phys_select->isValid()) {  
       glDisableVertexAttribArray(a_sprite_size);
@@ -396,7 +396,7 @@ void GLObjectParticles::updateVbo()
   buildVboPhysData();
   if (GLWindow::GLSL_support) { // && po->isGazEnable()) {
 
-    if (go->render_mode == 1 || go->render_mode == 2) {
+    if (go->render_mode == 1) {
       // We must re ordering indexes
       if (phys_select && phys_select->isValid()) {
 #if ! GLDRAWARRAYS
@@ -428,7 +428,7 @@ void GLObjectParticles::updateVbo()
 // updateVbo                                                                   
 void GLObjectParticles::updateColorVbo()
 {
-  if (1||go->render_mode == 1 || go->render_mode == 2) {
+  if (1||go->render_mode == 1 ) {
     updateBoundaryPhys();
   }
 }
@@ -695,7 +695,7 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
   float alpha;
   if (use_point) alpha=po->getPartAlpha()/255.;
   else alpha=po->getGazAlpha()/255.;
-  if (go->render_mode == 1 || go->render_mode == 2) { // individual size and color
+  if (go->render_mode == 1 ) { // individual size and color
     if (physic)  
       shader->sendUniformf("alpha", alpha*alpha); // send alpha channel
     else
@@ -757,7 +757,7 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
   shader->sendUniformf("powalpha",go->poweralpha);
   
   // send physical quantities stuffs
-  if (hasPhysic&& go->render_mode==2) { // physic) {
+  if (hasPhysic&& go->render_mode==1) { // physic) {
     if (!go->dynamic_cmap) {
       // send absolute min and max phys of the object
       shader->sendUniformf("data_phys_min",log(phys_select->getMin()));

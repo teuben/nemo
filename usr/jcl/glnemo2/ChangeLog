@@ -1,3 +1,8 @@
+1.7.1 (July, 11th 2014)
+----------------------
+  - fix issue #1460 regarding to size of gas particles
+  - remove tipsy support for windows target (no XDR lib on windows)
+
 1.7.0 (July, 3rd 2014)
 ----------------------
   - add tipsy standard support
