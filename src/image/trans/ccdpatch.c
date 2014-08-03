@@ -1,7 +1,9 @@
 /* 
- * CCDPATCH: patch a value in a region
+ * CCDPATCH: patch a value in a polygon region
  *
  *       2-aug-2014     quick hack for DataBay_MD               pjt
+ *
+ *  @todo   allow circles, boxes, etc.
  *                      
  */
 
@@ -17,7 +19,10 @@ string defv[] = {
   "out=???\n      Output image file",
   "patch=0.0\n    Data value to patch in",
   "polygon=\n     Polygon",
-  "VERSION=0.1\n  2-aug-2014 PJT",
+  "box=\n         Box xmin,ymin,xmax,ymax ** not implemented **",
+  "circle=\n      XCenter,Ycenter,Radius ** not implemented **",
+  "ellipse=\n     XCenter,Ycenter,Major,Minor,PositionAngle ** not implemented **",
+  "VERSION=0.2\n  2-aug-2014 PJT",
   NULL,
 };
 
@@ -40,7 +45,6 @@ void nemo_main(void)
 {
   stream   instr, outstr;
   int      m, n, nx, ny, nz;             /* size of map */
-  int      ngood, ntry, nlin;
   int      i,j,k, di, dj, npatch;
   imageptr iptr=NULL;                    /* pointer to images */
   real     patch = getdparam("patch");
@@ -60,21 +64,22 @@ void nemo_main(void)
   
   npatch = 0;
   for (k=0; k<nz; k++) {
-      for (j=0; j<ny; j++) {
-	yj = j;
-    	for (i=0; i<nx; i++) {
-	  xi = i;
-	  if (inpolygon(np,xp,yp,xi,yj)) {
-	    npatch++;
-	    CubeValue(iptr,i,j,k) = patch;
-	  }
+    for (j=0; j<ny; j++) {
+      yj = j+1;
+      for (i=0; i<nx; i++) {
+	xi = i+1;
+	if (inpolygon(np,xp,yp,xi,yj)) {
+	  npatch++;
+	  CubeValue(iptr,i,j,k) = patch;
 	}
       }
-      dprintf(0,"Found %d values to patch\n",npatch);
-      if (ngood == 0 || ntry==ngood) break;
+    }
+    dprintf(0,"Found %d values to patch\n",npatch);
   } /* k */
   write_image(outstr, iptr);
 }
+
+/* the code below copied from tabpolygon, unmodified */
 
 int pairs(string p, real *pairs, real *xp, real *yp, int maxp)
 {
@@ -97,7 +102,6 @@ int pairs(string p, real *pairs, real *xp, real *yp, int maxp)
 }
 
 
-
 /*	Early version, for updates see snapplot.c or some library */
 /*  The current algorithm has some flaws, may not be the fastest,
  *  (I have seen a faster one somewhere, but can't recall where),
@@ -107,7 +111,7 @@ int pairs(string p, real *pairs, real *xp, real *yp, int maxp)
 
 /*		Code for this is now in editplot/snapplot */
 
-int inpolygon (int n, real *x, real *y, real x0, real y0)
+int inpolygon_old (int n, real *x, real *y, real x0, real y0)
 {
   int i,b;              /* b=0:outside b=1:inside */
         
@@ -122,3 +126,15 @@ int inpolygon (int n, real *x, real *y, real x0, real y0)
   }
   return b;
 }
+
+int inpolygon(int nvert, real *vertx, real *verty, real testx, real testy)
+{
+  int i, j, c = 0;
+  for (i = 0, j = nvert-1; i < nvert; j = i++) {
+    if ( ((verty[i]>testy) != (verty[j]>testy)) &&
+     (testx < (vertx[j]-vertx[i]) * (testy-verty[i]) / (verty[j]-verty[i]) + vertx[i]) )
+       c = !c;
+  }
+  return c;
+}
+
