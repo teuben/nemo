@@ -1,0 +1,48 @@
+.TH CCDPATCH 1NEMO "02 August 2014"
+.SH NAME
+ccdpatch \- patch up regions from polygon/shapes
+.SH SYNOPSIS
+\fBccdpatch\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdpatch\fP replaces the values of image within a specified region
+with a specified value.
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file [???]    
+.TP
+\fBout=\fP
+Output image file [???]    
+.TP
+\fBpatch=\fP
+Data value to patch in [0.0]  
+.TP
+\fBpolygon=\fP
+Polygon describing a region within which data are to be replaced. These
+should be tuples of x,y positions with the vertices of the polygon, where
+the last point connects to the first point. Thus a minimum is 6 values
+are needed here.  Currently only image coordinates are allowed, with (1,1)
+the lower left corner.
+.TP
+\fBbox=\fP
+Box xmin,ymin,xmax,ymax ** not implemented ** [] 
+.TP
+\fBcircle=\fP
+XCenter,Ycenter,Radius ** not implemented ** []  
+.TP
+\fBellipse=\fP
+XCenter,Ycenter,Major,Minor,PositionAngle ** not implemented ** []  
+.SH SEE ALSO
+ccdfill(1NEMO), tabpolygon(1NEMO), image(5NEMO)
+.SH FILES
+src/image/trans/ccdpatch.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+02-Aug-14	V0.1 Created for @DataBay_MD
+.fi
