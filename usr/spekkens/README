@@ -1,2 +1,9 @@
 The programs velfit and diskfit are publicly available.
 See man pages for runvelfitss07 and rundiskfit
+
+The mknemo build script knows about them.
+
+Private version for NEMO (slightly enhanced with a Makefile.NEMO
+and the NUMREC directory) can be obtained via NEMO.
+
+
