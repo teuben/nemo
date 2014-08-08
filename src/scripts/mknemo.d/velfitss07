@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#
+#  Spekkens' velfit program (called velfitss07 here to avoid name collision of an existing NEMO program)
+#                            
+
+set dir=$NEMO/usr/spekkens/velfit
+
+if (-e $dir) then
+  cd $dir/CODE
+  make -f ../Makefile.NEMO velfitss07
+  mv velfitss07 $NEMOBIN
+else
+  echo mknemo.d: $dir does not exist
+endif
+
