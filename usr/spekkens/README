@@ -6,4 +6,24 @@ The mknemo build script knows about them.
 Private version for NEMO (slightly enhanced with a Makefile.NEMO
 and the NUMREC directory) can be obtained via NEMO.
 
+Examples to obtain velfit:
+
+cvs -d /home/cvsroot co -r VERSION velfit
+where version is one of:
+
+    V1_0  (oct 2008)
+    V1_1  (aug 2009)
+    V2_0  (jan 2010)
+
+Notice that the manual, velfit.pdf, is also adjusted within each revision.
+
+
+Same for diskfit:
+
+cvs -d /home/cvsroot co -r VERSION diskfit
+
+with tags:
+
+    V1_0   (sep 2012)
+    V1_1   (mar 2013)
 
