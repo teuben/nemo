@@ -1,0 +1,15 @@
+#! /bin/csh -f
+#
+#  Spekkens' diskfit program (this superseded the velfit/velfitss07 program)
+#                            
+
+set dir=$NEMO/usr/spekkens/diskfit
+
+if (-e $dir) then
+  cd $dir/CODE
+  make -f ../Makefile.NEMO diskfit
+  mv diskfit $NEMOBIN
+else
+  echo mknemo.d: $dir does not exist
+endif
+
