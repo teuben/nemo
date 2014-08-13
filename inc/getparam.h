@@ -72,6 +72,8 @@ extern void outdparams(string, int, double *);
 extern void outfparams(string, int, float *);
 extern void outbparams(string, int, bool *);
 
+extern string *getargv(int *argc);
+
 
 extern int    natoi(string);
 extern double natof(string);
