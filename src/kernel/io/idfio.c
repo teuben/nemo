@@ -3,7 +3,8 @@
  *
  *    ...many years in the making...
  *
- *	12-aug-2014	Created - static version 
+ *	12-aug-2014	Created - static version only, no library yet
+ *      13-aug-2014     static, but with one open ended (last) array
  */
 
 #include <stdinc.h>
@@ -17,15 +18,27 @@
 
 local string idf_types[] = { "c", "r", "i", "b", "s", "qs"};
 
+  /* debugging output ? */
+local bool Q = FALSE;
+
+typedef struct cstring {
+  string          val;
+  struct cstring *nxt;
+} cstring;
+
+/*  'type:key'  or 'type:key[]'   or   'type:key[len]' (not yet) */
 typedef struct my_idf {
   int itype;     /* one if IDF_xxx types (1,2,3....) */
   string type;   /* same one, but the string value */
   string key;    /* keyword name (part of -- getargv) */
+  string len;    /* reference to a length (optional) */
   string val;    /* string value of key */
   int row;       /* 1=1st row    */
   int col;       /* 1=1st column */
+  int nvals;     /* -1=scalar  0=to end of file >1: taken */
   string raw;    /* orginal line (raw entry) */
   string out;    /* new value to be output */
+  cstring cout;  /* chained string of outvalues until 0 */
 } IDF;
 
 typedef struct my_line {
@@ -34,10 +47,10 @@ typedef struct my_line {
 } LINE;
 
 
-IDF *idf_open_string(string *idfs);
-IDF *idf_open_file(string file);
+IDF    *idf_open_string(string *idfs);
+IDF    *idf_open_file(string file);
+void    idf_write(int nidf, IDF *idf, string file);
 string *line_open_file(string file);
-void idf_write(int nidf, IDF *idf, string file);
 
 
 void strip_newline(char *line) {
@@ -80,20 +93,21 @@ string defv[] = {
   "par=\n         Input parameter file",
   "out=\n         Output parameter file",
   "lineno=f\n     Add linenumbers to output?",
-  "VERSION=1.0\n  12-aug-2014 PJT", 
+  "checktype=f\n  Type checking on parameters?",
+  "VERSION=1.1\n  13-aug-2014 PJT", 
   NULL,
 };
 
 string testidf[] = {
   "# a comment that is ignored by the parser",
-  "c:comment   # a true comment line that will be skipped during parsing",
+  "c:comment1  # a true comment line that will be skipped during parsing",
   "r:a         # the real parameter 'a'",
   "i:n         # an integer value",
   "b:q         # a boolean value",
   "s:s1        # a direct string",
   "qs:s2       # a quoted string",
   "i:n1 i:n2   # two integers",
-  "c:comment   # another true parting comment",
+  "c:comment2  # another true parting comment",
   "# a parting comment",
   NULL,
 };
@@ -107,11 +121,14 @@ nemo_main()
   double dval;
   int i, k, l, n, n2, iw, i1, i2, lineno, ival;
   string *sp, *idf0, *pars;
-  char *cp, line[MAX_LINELEN];
+  char *cp, *cp1, line[MAX_LINELEN];
   bool Qline = getbparam("lineno");
-  int argc, nidf, nidf2, nw;
+  bool Qshow_idf;
+  bool Qtype = getbparam("checktype");
+  int argc, nidf, nidf2, nw, nopen;
   IDF *idf;
   string *argv, *av, *w;
+  cstring *csp, *csn;
   
   if (hasvalue("idf")) {
     n = nemo_file_lines(getparam("idf"),0);
@@ -130,17 +147,20 @@ nemo_main()
     idf0 = testidf;
   }
 
-  /* report, pre-parse and count the true IDF's */
+  /* report, and pre-parse and count the true IDF's */
 
   dprintf(1,"report IDF\n");
+  Qshow_idf = !hasvalue("out");
   nidf = 0;
   for (sp = idf0, lineno=0; *sp; sp++) {
     if (*sp[0] == '#') continue;
     lineno++;
-    if (Qline)
-      printf("%d: %s\n",lineno,*sp);	
-    else
-      printf("%s\n",*sp);	
+    if (Qshow_idf) {
+      if (Qline)
+	printf("%d: %s\n",lineno,*sp);	
+      else
+	printf("%s\n",*sp);	
+    }
     w = burststring(*sp," \t");
     nw = xstrlen(w,sizeof(string))-1;
     for (i=0; i<nw; i++) {
@@ -152,12 +172,14 @@ nemo_main()
   } 
   dprintf(0,"Found %d idf in %d lines\n",nidf,lineno);
 
-  /* fully parse IDF again */
+  /* now fully parse IDF */
 
   idf = (IDF *) allocate(nidf*sizeof(IDF));
   nidf2 = 0;
+  nopen = 0;
   for (sp = idf0; *sp; sp++) {
     if (*sp[0] == '#') continue;
+    if (nopen) error("Cannot handle any parameters after an open ended array");
     w = burststring(*sp," \t");
     nw = xstrlen(w,sizeof(string))-1;
     for (i=0; i<nw; i++) {
@@ -165,11 +187,21 @@ nemo_main()
       cp = strchr(w[i],':');
       if (cp==NULL) error("Missing : on %s",w[i]);
       *cp++ = 0;
-      /* now w[i] points to type; cp to keyword */
+      /* now w[i] points to type; cp to keyword, possibly with a [] */
       idf[nidf2].type = strdup(w[i]);
       idf[nidf2].key  = strdup(cp);
       idf[nidf2].row  = nidf2+1;
       idf[nidf2].col  = i+1;
+      cp1 = strchr(cp,'[');
+      if (cp1) {
+	if (*++cp1 == ']') {
+	  if (nopen) error("Cannot handle more than one open ended array");
+	  idf[nidf2].nvals = 0;
+	  nopen++;
+	} else
+	  error("fixed dimensioned arrays not allowed yet : %s",cp);
+      } else 
+	idf[nidf2].nvals = -1;
       nidf2++;
     }
   }
@@ -178,22 +210,29 @@ nemo_main()
 
   /* report the full IDF */
 
-  for (i=0; i<nidf; i++) {
-    printf("###: [%d,%d] %s %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key);
+  if (Q) {
+    for (i=0; i<nidf; i++) {
+      printf("###: [%d,%d] %s %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key);
+    }
   }
 
   if (hasvalue("par")) {
     pars = line_open_file(getparam("par"));
     n2 = xstrlen(pars,sizeof(string))-1;
-    printf("Found %d lines in par file\n",n2);
+    dprintf(0,"Found %d lines in par file\n",n2);
     if (n2 != lineno) warning("par file not same as idf");
 
-    for (l=0, i=0; l<lineno; l++) {    /* loop over all lines :   l counts lines, i counts idf's */
+    for (l=0, i=0; l<n2; l++) {    /* loop over all lines :   l counts lines, i counts idf's */
       /*  idf[i] is the current IDF */
       /*  pars[l] is the current line */
       /*  idf[i].row should match the current line */
-      if (streq(idf[i].type,IDF_COMMENT)) {
+
+
+      /* a comment spans (by definition) the whole line */
+      if (i<nidf && streq(idf[i].type,IDF_COMMENT)) {
 	  idf[i].out = strdup(pars[l]);
+	  idf[i].cout.val = strdup(pars[l]);
+	  idf[i].cout.nxt = 0;
 	  i++;
 	  continue;
       } 
@@ -205,11 +244,30 @@ nemo_main()
       /* just do it, no checking */
       for (iw=0; iw<nw; iw++) {
 	if (*w[iw] == '#') break;
-	idf[i].out = strdup(w[iw]);
+	if (i < nidf) {
+	  idf[i].out = strdup(w[iw]);
+	  idf[i].cout.val = strdup(w[iw]);
+	  idf[i].cout.nxt = 0;
+	} else {
+	  if (nopen==0) error("Too many values, and no open ended array");
+
+	  csn = (cstring *) allocate(sizeof(cstring));
+	  csn->val = strdup(w[iw]);
+	  csn->nxt = 0;
+
+	  csp = &idf[nidf-1].cout;
+	  while (csp->nxt)
+	    csp = csp->nxt;
+	  csp->nxt = csn;
+	}
 	i++;
       }
+      if (i==nidf) {
+	warning("end of idf %d %d",l,n2);
+	if (l<n2-1) warning("not exhausting lines in par file");
+      }
 #else
-      /* double checking */
+      /* messy double checking */
       for (i1=i; i<nidf && idf[i1].row==idf[i].row; i1++) {
 	dprintf(0,"i=%d i1=%d row=%d row1=%d\n",i,i1,idf[i].row,idf[i1].row);
       }
@@ -221,8 +279,10 @@ nemo_main()
 #endif
     }
 
-    for (i=0; i<nidf; i++) {
-      printf("###: [%d,%d] %-3s %-10s = %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key, idf[i].out);
+    if (Q) {
+      for (i=0; i<nidf; i++) {
+	printf("###: [%d,%d] %-3s %-10s = %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key, idf[i].out);
+      }
     }
   }
 
@@ -233,14 +293,15 @@ nemo_main()
   dprintf(1,"  argc=%d\n",argc);
   if (argc>0) {
     argv++; /* skip the -- */
+    if (Qtype) warning("Type checking not implemented yet");
     for (av = argv; *av; av++) {
-      printf("arg: %s\n",*av);
+      if (Q) printf("arg: %s\n",*av);
       cp = strchr(*av,'=');
       if (cp) {
 	*cp++ = 0;
 	for (i=0; i<nidf; i++) {
 	  if (streq(*av,idf[i].key)) {
-	    dprintf(0,"Patching key=%s with val=%s\n",*av,cp);
+	    dprintf(1,"Patching key=%s with val=%s\n",*av,cp);
 	    idf[i].out = strdup(cp);
 	    break;
 	  }
@@ -252,13 +313,12 @@ nemo_main()
     }
   }
 
-
-  for (i=0; i<nidf; i++) {
-    printf(">>>: [%d,%d] %-3s %-10s = %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key, idf[i].out);
+  if (Q) {
+    for (i=0; i<nidf; i++) {
+      printf(">>>: [%d,%d] %-3s %-10s = %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key, idf[i].out);
+    }
   }
   
-
-
   if (hasvalue("out")) {
     istr = stropen(getparam("out"),"w");
     for (i=0; i<nidf; i++) {
@@ -267,6 +327,13 @@ nemo_main()
       fprintf(istr,"%s ",idf[i].out);
     }
     fprintf(istr,"\n");
+    if (nopen) {
+      csp = idf[nidf-1].cout.nxt;
+      while (csp) {
+	fprintf(istr,"%s\n",csp->val);	
+	csp = csp->nxt;
+      }
+    }
     strclose(istr);
   }
 
