@@ -1,0 +1,70 @@
+.TH IDF 1NEMO "12 August 2014"
+.SH NAME
+idf \- Input Directive File (IDF) I/O processor
+.SH SYNOPSIS
+\fBidf\fP [parameter=value]  [-- idf_parameter=value ...]
+.SH DESCRIPTION
+\fBidf\fP processes an Input Directive File (IDF, describes named and typed input parameters 
+meant to supply the parameters to a program), 
+which is then matched to an actual example of this
+parameter file, and requested parameters are then written out to a new
+parameter file in order for the external program to run.
+.PP
+For a full description of the format, see \fIidf(5NEMO)\fP
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBidf=\fP
+Input Directive File.  If none supplied, an internal example is shown
+that can be played with.
+.TP
+\fBpar=\fP
+Input parameter file. If none supplied, only IDF parsing is attempted.
+.TP
+\fBout=\fP
+Output parameter file. If none supplied, only substituation is attempted,
+as long as the input parameter file is given.
+.TP
+\fBlineno=\fP
+Add linenumbers to output? A debug option [f]   
+.TP
+\fB--\fP
+Any parameters after this designator are not parsed by the NEMO command
+line processor (see also \fIgetparam(3NEMO)\fP), but the keyword
+names are expected to be present in the IDF file.
+.TP
+\fBkey=\fIval\fP..
+.SH EXAMPLES
+In the following example an integer and real parameter are read by a program from standard input:
+.nf
+
+ % cat foobar.idf
+ # commented for FooBar
+ i:n
+ r:eps
+
+ % cat foobar.par
+ 10
+ 0.05
+
+ % idf foobar.idf foobar.par run1.par -- eps=0.1
+
+ % cat run1.par
+ 10
+ 0.1
+
+ % foobar < run1.par
+ ...
+.nf
+.SH SEE ALSO
+idf(5NEMO), getparam(3NEMO), run(3NEMO)
+.SH FILES
+src/kernel/io/idfio.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+12-Aug-14	V0.1 man page written	PJT
+.fi
