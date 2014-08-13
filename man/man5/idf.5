@@ -1,0 +1,87 @@
+.TH IDF 5NEMO "12 August 2014" 
+.SH NAME
+idf \- Input Directive File format
+.SH DESCRIPTION
+\fBidf\fP files describe named and typed parameters in a textual
+layout, which is then matched to an actual instantiation of this
+parameter file. Programs
+such as \fIidf(1NEMO)\fP can then be used to replaced such named
+parameters and create a new parameter file, to be used by an
+external non-NEMO program to be run.
+.SH FORMAT
+Parameters are (uniquely) typed and named, using the : as separator.
+Comment lines that don't count in the matching parameter file
+can be given using the usual # symbol, true comment lines are 
+directives that start with c:
+.nf
+
+  #  a comment line for the sake of commenting, otherwise ignored
+  c: a comment line (also expected in the parameter file)
+  r:eps        # a real parameter, named eps
+  i:nmax       # an integer
+  b:verbose    # a boolean
+  s:name       # a string, no quotes 
+  qs:file      # a (single) quoted string
+  i:n1 i:n2    # a line with multiple parameters is allowed too
+  r:size[n1]   # an array with 'n1' values, can span many lines ** not implemented **
+  r:rad[]      # an array with as many values as left in the file (one per line?)
+
+.fi
+.SH EXAMPLES
+In the following example, we use the technique in NEMO where named parameters are defined
+before the \fB"--"\fP, and client parsed command line arguments after. See also
+the \fIgetargv()\fP function in \fIgetparam(3NEMO)\fP
+.nf
+
+   % idf idf=nbody.idf par=run1.par out=run2.par  --   eps=0.02 n1=4 size=1,2,3,4 rad=10,20,30,40
+   % cat run2.par
+   Example to run that fortran nbody program
+   0.02   # eps
+   10   
+   T      # verbose?
+   Benchmark Example      # voila
+   'file.out'
+   4 6 
+   1 2 3 4 
+   10 
+   20 
+   30
+   40
+   % nbody0 < run2.par
+
+.fi
+.SH CAVEATS
+This parameter list is very static, there is no room for a new line, depending on the value
+or presence of another parameter
+.PP
+THe idea of an array \fB"r:size[n1]"\fP is just an idea, there is no need for this yet.  Also
+we probably need to agree if they can (or must) be on a single line, or can they span.
+What if you then allow two array parameters, like \fB"r:x[n1] r:y[n1]"\fP, that would suggest
+to pair them up
+.nf 
+      x1 y1
+      x2 y2
+      ...
+.fi
+otherwise they should appear on two separate lines.
+.PP
+The idea of an open ended array, as the "\fBr:rad[]"\fP in the example above, is a real one
+that exists in \fIrunvelfitss07(1NEMO)\fP. In that particular example they are one per line,
+and it gets worse, the first radius (but only the first) is followed by a boolean in the 
+newer version. But that can probably be worked around with.
+.PP
+What about the filler space in the parameter file. Should we allow it to have comma separated?
+.PP
+The (single) quoted string is sometimes needed in fortran, but not in C. Makes one wonder if we need
+a double quoted (qqs?) string at some point.
+.fi
+.SH SEE ALSO
+runvelfitss07(1NEMO), rungalaxy(1NEMO), idf(1NEMO), run(3NEMO), idfio(3NEMO), getparam(3NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+12-aug-2014	documentation written	PJT
+.fi
+
