@@ -25,7 +25,7 @@ OBJFILES=  dprintf.o command.o convert.o cvsid.o defv.o endian.o extstring.o \
 LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(cvsid.o) $L(defv.o) $L(endian.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
 	   $L(ieeehalfprecision.o) $L(stropen.o) $L(mstropen(.o) $L(usage.o)
-BINFILES = csf tsf rsf qsf hisf endian
+BINFILES = csf tsf rsf qsf hisf endian idf
 TESTFILES= getpartest stropentest extstrtest commandtest \
            testio testfs testprompt memiotest mstropentest
 
@@ -101,6 +101,9 @@ tests: $(TESTFILES)
 
 hisf: history.c
 	$(CC) $(CFLAGS) -DTOOLBOX -o hisf history.c $(NEMO_LIBS)
+
+idf: idfio.c
+	$(CC) $(CFLAGS) -DTOOLBOX -o idf idfio.c $(NEMO_LIBS)
 
 endian: endian.c
 	$(CC) $(CFLAGS) -DTOOLBOX -o endian endian.c $(NEMO_LIBS)
