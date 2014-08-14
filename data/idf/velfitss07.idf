@@ -1,0 +1,19 @@
+#  comment line, doesn't count
+c:comment
+qs:vinfile
+qs:poutfile
+qs:moutfile
+r:xcen 
+r:ycen
+r:vsys
+r:pa 
+r:inc
+r:rmsism
+b:fitgeo b:fitcen b:fitvsys b:fitm0 b:fitm12 b:fitunc
+i:m
+i:seed
+i:bootstrap
+r:j
+r:rcirc
+# now the open ended array starts with K sample radii  r1...rK
+r:r[]
