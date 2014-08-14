@@ -91,12 +91,12 @@ string *line_open_file(string fname) {
 #include <getparam.h>
 
 string defv[] = {
-  "idf=\n         Input Directive File",
+  "idf=???\n      Input Directive File (use blank for self-generated)",
   "par=\n         Input parameter file",
   "out=\n         Output parameter file",
   "lineno=f\n     Add linenumbers to output?",
   "checktype=f\n  Type checking on parameters?",
-  "VERSION=1.1\n  13-aug-2014 PJT", 
+  "VERSION=1.1a\n 14-aug-2014 PJT", 
   NULL,
 };
 
@@ -127,7 +127,7 @@ nemo_main()
   bool Qline = getbparam("lineno");
   bool Qshow_idf;
   bool Qtype = getbparam("checktype");
-  int argc, nidf, nidf2, nw, nopen;
+  int argc, nidf, nidf2, nw, nopen, nrow;
   IDF *idf;
   string *argv, *av, *w;
   cstring *csp, *csn;
@@ -179,8 +179,10 @@ nemo_main()
   idf = (IDF *) allocate(nidf*sizeof(IDF));
   nidf2 = 0;
   nopen = 0;
+  nrow = 0;
   for (sp = idf0; *sp; sp++) {
     if (*sp[0] == '#') continue;
+    nrow++;
     if (nopen) error("Cannot handle any parameters after an open ended array");
     w = burststring(*sp," \t");
     nw = xstrlen(w,sizeof(string))-1;
@@ -192,7 +194,7 @@ nemo_main()
       /* now w[i] points to type; cp to keyword, possibly with a [] */
       idf[nidf2].type = strdup(w[i]);
       idf[nidf2].key  = strdup(cp);
-      idf[nidf2].row  = nidf2+1;
+      idf[nidf2].row  = nrow;
       idf[nidf2].col  = i+1;
       cp1 = strchr(cp,'[');
       if (cp1) {
@@ -217,8 +219,8 @@ nemo_main()
   /* report the full IDF */
 
   if (Q) {
-    for (i=0; i<nidf; i++) {
-      printf("###: [%d,%d] %s %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key);
+      for (i=0; i<nidf; i++) {
+      dprintf(1,"###: [%d,%d] %s %s\n", idf[i].row, idf[i].col, idf[i].type, idf[i].key);
     }
   }
 
