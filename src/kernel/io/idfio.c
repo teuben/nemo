@@ -351,7 +351,11 @@ nemo_main()
     for (i=0; i<nidf; i++) {
       if (i>0 && idf[i].row != idf[i-1].row) 
 	fprintf(istr,"\n");
-      fprintf(istr,"%s ",idf[i].out);
+      if (streq(idf[i].type,"qs") && idf[i].out[0] != '\'')
+	fprintf(istr,"'%s' ",idf[i].out);
+      else
+	fprintf(istr,"%s ",idf[i].out);
+
     }
     fprintf(istr,"\n");
     if (nopen) {
