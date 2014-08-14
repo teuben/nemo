@@ -5,6 +5,8 @@
  *
  *	12-aug-2014	Created - static version only, no library yet
  *      13-aug-2014     static, but with one open ended (last) array
+ *
+ *  WARNING:  this program has memory leaks like a bucket shot with a bbgun
  */
 
 #include <stdinc.h>
@@ -194,14 +196,18 @@ nemo_main()
       idf[nidf2].col  = i+1;
       cp1 = strchr(cp,'[');
       if (cp1) {
-	if (*++cp1 == ']') {
+	*cp1++ = 0;
+	idf[nidf2].key  = strdup(cp);
+	if (*cp1 == ']') {
 	  if (nopen) error("Cannot handle more than one open ended array");
 	  idf[nidf2].nvals = 0;
 	  nopen++;
 	} else
 	  error("fixed dimensioned arrays not allowed yet : %s",cp);
-      } else 
+      } else {
+	idf[nidf2].key   = strdup(cp);
 	idf[nidf2].nvals = -1;
+      }
       nidf2++;
     }
   }
@@ -302,7 +308,26 @@ nemo_main()
 	for (i=0; i<nidf; i++) {
 	  if (streq(*av,idf[i].key)) {
 	    dprintf(1,"Patching key=%s with val=%s\n",*av,cp);
-	    idf[i].out = strdup(cp);
+	    if (idf[i].nvals < 0) {
+	      idf[i].out      = strdup(cp);
+	      idf[i].cout.val = strdup(cp);
+	      idf[i].cout.nxt = 0;
+	    } else {
+	      w = burststring(cp," ,");
+	      nw = xstrlen(w,sizeof(string))-1;
+	      idf[i].out      = strdup(w[0]);
+	      idf[i].cout.val = strdup(cp);
+	      idf[i].cout.nxt = 0;
+	      csn = &idf[i].cout;
+	      for (iw=0; iw<nw; iw++) {
+		csn->val = strdup(w[iw]);
+		if (iw<nw-1) {
+  		  csn->nxt = (cstring *) allocate(sizeof(cstring));
+		  csn = csn->nxt;
+		} else
+		  csn->nxt = 0;
+	      }
+	    }
 	    break;
 	  }
 	}
