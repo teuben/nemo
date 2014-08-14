@@ -1,14 +1,17 @@
-.TH IDF 1NEMO "12 August 2014"
+.TH IDF 1NEMO "13 August 2014"
 .SH NAME
 idf \- Input Directive File (IDF) I/O processor
 .SH SYNOPSIS
 \fBidf\fP [parameter=value]  [-- idf_parameter=value ...]
 .SH DESCRIPTION
-\fBidf\fP processes an Input Directive File (IDF, describes named and typed input parameters 
-meant to supply the parameters to a program), 
-which is then matched to an actual example of this
-parameter file, and requested parameters are then written out to a new
-parameter file in order for the external program to run.
+\fBidf\fP processes an Input Directive File (IDF).  An
+IDF describes named and typed input parameters 
+meant to supply the parameters to a program. This file
+then matched to an actual example of this
+parameter file, of which selected named parameters
+can be changed then written out to a new
+parameter file in order for an external program to run and
+use this parameter file.
 .PP
 For a full description of the format, see \fIidf(5NEMO)\fP
 .SH PARAMETERS
@@ -26,8 +29,11 @@ Input parameter file. If none supplied, only IDF parsing is attempted.
 Output parameter file. If none supplied, only substituation is attempted,
 as long as the input parameter file is given.
 .TP
-\fBlineno=\fP
-Add linenumbers to output? A debug option [f]   
+\fBlineno=t|f\fP
+Add linenumbers to IDF output? A debug option [f]   
+.TP
+\fBchecktype=t|f\fP
+Check types (real/integer/string/...). Not implemented yet. [f]
 .TP
 \fB--\fP
 Any parameters after this designator are not parsed by the NEMO command
@@ -35,6 +41,12 @@ line processor (see also \fIgetparam(3NEMO)\fP), but the keyword
 names are expected to be present in the IDF file.
 .TP
 \fBkey=\fIval\fP..
+.SH CAVEATS
+Open ended array IDF keywords do not use \fInemoinp(1NEMO)\fP style expression yet, .e.g.
+you cannot use \fBrad=2:10:2\fP.
+.PP
+IDF keyword do not use \fIgetparam(3NEMO)\fP yet, so interesting constructs such
+as \fBrad=@radii.tab\fP.
 .SH EXAMPLES
 In the following example an integer and real parameter are read by a program from standard input:
 .nf
@@ -48,7 +60,7 @@ In the following example an integer and real parameter are read by a program fro
  10
  0.05
 
- % idf foobar.idf foobar.par run1.par -- eps=0.1
+ % idf foobar.idf foobar.par run1.par -- eps=0.1 
 
  % cat run1.par
  10
@@ -58,7 +70,7 @@ In the following example an integer and real parameter are read by a program fro
  ...
 .nf
 .SH SEE ALSO
-idf(5NEMO), getparam(3NEMO), run(3NEMO)
+idf(5NEMO), idfio(3NEMO), getparam(3NEMO), run(3NEMO)
 .SH FILES
 src/kernel/io/idfio.c
 .SH AUTHOR
@@ -66,5 +78,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-12-Aug-14	V0.1 man page written	PJT
+12-Aug-2014	V0.1 man page written	PJT
+13-aug-2014	implemented single open ended array	PJT
 .fi
