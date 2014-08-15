@@ -96,6 +96,7 @@ string defv[] = {
   "out=\n         Output parameter file",
   "lineno=f\n     Add linenumbers to output?",
   "checktype=f\n  Type checking on parameters?",
+  "report=f\n     Report all final RDF key=val pairs",
   "VERSION=1.1a\n 14-aug-2014 PJT", 
   NULL,
 };
@@ -127,6 +128,7 @@ nemo_main()
   bool Qline = getbparam("lineno");
   bool Qshow_idf;
   bool Qtype = getbparam("checktype");
+  bool Qreport = getbparam("report");
   int argc, nidf, nidf2, nw, nopen, nrow;
   IDF *idf;
   string *argv, *av, *w;
@@ -172,7 +174,7 @@ nemo_main()
       nidf++;
     }
   } 
-  dprintf(0,"Found %d idf in %d lines\n",nidf,lineno);
+  dprintf(0,"Found %d IDF_parameters in %d lines in idf file\n",nidf,lineno);
 
   /* now fully parse IDF */
 
@@ -228,7 +230,8 @@ nemo_main()
     pars = line_open_file(getparam("par"));
     n2 = xstrlen(pars,sizeof(string))-1;
     dprintf(0,"Found %d lines in par file\n",n2);
-    if (n2 != lineno) warning("par file not same as idf");
+    if (Q)
+      if (n2 != lineno) warning("par file not same as idf");
 
     for (l=0, i=0; l<n2; l++) {    /* loop over all lines :   l counts lines, i counts idf's */
       /*  idf[i] is the current IDF */
@@ -270,9 +273,11 @@ nemo_main()
 	}
 	i++;
       }
-      if (i==nidf) {
-	warning("end of idf %d %d",l,n2);
-	if (l<n2-1) warning("not exhausting lines in par file");
+      if (Q) {
+	if (i==nidf) {
+	  warning("end of idf %d %d",l,n2);
+	  if (l<n2-1) warning("not exhausting lines in par file");
+	}
       }
 #else
       /* messy double checking */
@@ -351,10 +356,11 @@ nemo_main()
     for (i=0; i<nidf; i++) {
       if (i>0 && idf[i].row != idf[i-1].row) 
 	fprintf(istr,"\n");
+      if (idf[i].col > 1) fprintf(istr," ");
       if (streq(idf[i].type,"qs") && idf[i].out[0] != '\'')
-	fprintf(istr,"'%s' ",idf[i].out);
+	fprintf(istr,"'%s'",idf[i].out);
       else
-	fprintf(istr,"%s ",idf[i].out);
+	fprintf(istr,"%s",idf[i].out);
 
     }
     fprintf(istr,"\n");
@@ -368,6 +374,11 @@ nemo_main()
     strclose(istr);
   }
 
+  if (Qreport) {
+    for (i=0; i<nidf; i++) {
+      printf("%s=%s\n",idf[i].key,idf[i].out);
+    }
+  }
 
 }
 
