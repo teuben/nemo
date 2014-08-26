@@ -16,6 +16,8 @@
  *      23-apr-13       half= option, use compute_robust_moment()
  *       6-jun-13   3.2 added torben, cleanup a bit
  *      28-feb-14   3.3 added tab=
+ *      25-aug-14   3.5 added maxpos=, fixed duplicate header, so format='ascii.commented_header'
+ *                      works in astropy
  *
  */
 
@@ -37,13 +39,14 @@ string defv[] = {
     "torben=f\n     Use torben method for median instead",
     "robust=f\n     Compute robust median",
     "mmcount=f\n    Count occurances of min and max",
+    "maxpos=f\n     Add location of where the max occured",
     "half=f\n       Only use half (negative) values and symmetrize them",
     "maxmom=4\n     Control how many moments are computed",
     "ignore=t\n     (for summing) Ignore cell width when N=1 (assumed infinity)",
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.3\n  28-feb-2014 PJT",
+    "VERSION=3.5\n  25-aug-2014 PJT",
     NULL,
 };
 
@@ -68,16 +71,22 @@ int *planes = NULL;                     /* selected planes , if used */
 
 real get_median(int n, real *x);
 
+extern real median(int,real*);
+extern real median_q1(int,real*);
+extern real median_q3(int,real*);
+
 
 nemo_main()
 {
     int  i, j, k, ki;
-    real x, y, z, xmin, xmax, mean, sigma, skew, kurt, median, bad, w, *data;
-    real sum, sov;
+    real x, y, z, xmin, xmax, mean, sigma, skew, kurt,  bad, w, *data;
+    real dmin, dmax;
+    real sum, sov, q1, q2, q3;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
+    bool Qmaxpos = getbparam("maxpos");
     real nu, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
@@ -85,6 +94,7 @@ nemo_main()
     int nplanes;
     int min_count, max_count;
     int maxmom = getiparam("maxmom");
+    int maxpos[2];
     char slabel[32];
 
     instr = stropen (getparam("in"), "r");
@@ -199,12 +209,16 @@ nemo_main()
 	printf ("Min and Max           : %f %f\n",min_moment(&m), max_moment(&m));
 	printf ("Mean and dispersion   : %f %f\n",mean,sigma);
 	printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
-	printf ("Sum and Sum*%s        : %f %f\n",sum, slabel, sum*sov);
+	printf ("Sum and Sum*%s        : %f %f\n",slabel, sum, sum*sov);
 	if (Qmedian) {
 	  if (Qtorben) {
 	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
 	  } else {
 	    printf ("Median                : %f\n",get_median(ngood,data));
+	    q2 = median(ngood,data);
+	    q1 = median_q1(ngood,data);
+	    q3 = median_q3(ngood,data);
+	    printf ("Q1,Q2,Q3              : %f %f %f\n",q1,q2,q3);
 	  }
 #if 1
 	  if (ndat>0)
@@ -240,9 +254,10 @@ nemo_main()
 
       /* tabular output, one line per (selected) plane */
 
-      printf("# iz z min  max  N  mean sigma skew kurt sum sum ");
+      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov ");
       if (Qmedian) printf(" [med med]");
       if (Qrobust) printf(" robust[N mean sig med]");
+      if (Qmaxpos) printf(" maxposx maxposy");
       printf("\n");
 
       ini_moment(&m,maxmom,ndat);
@@ -257,6 +272,10 @@ nemo_main()
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
             if (Qbad && x==bad) continue;
+	    if (Qmaxpos) {
+	      if (i==0 && j==0) { dmax = x; maxpos[0] = 0; maxpos[1] = 0;}
+	      else if (x>dmax) {  dmax = x; maxpos[0] = i; maxpos[1] = j;}
+	    }
 	    w = Qw ? CubeValue(wptr,i,j,k) : 1.0;
             accum_moment(&m,x,w);
 	    if (Qmedian) data[ngood++] = x;
@@ -290,6 +309,9 @@ nemo_main()
 	  compute_robust_moment(&m);
 	  printf ("   %d %f %f %f",n_robust_moment(&m), mean_robust_moment(&m),
 		  sigma_robust_moment(&m), median_robust_moment(&m));
+	}
+	if (Qmaxpos) {
+	  printf("   %d %d",maxpos[0],maxpos[1]);
 	}
 #if 0	  
 	if (Qmmcount) {
