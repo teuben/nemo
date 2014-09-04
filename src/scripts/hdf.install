@@ -7,12 +7,13 @@
 #  11-mar-07    fixed for new hdfgroup location and their new naming convention
 #  28-sep-09    updated version and added hint for symlink
 #  17-jan-12    fixed for new naming convention (no more upper lower case)
+#   4-sep-2014  updated for current 4.2.10 HDF version
 # 
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
 #			 	.. command line keywords ..
-set hdf=hdf-4.2.8
+set hdf=hdf-4.2.10
 set src=$NEMO/local/hdf
 
 set prefix=$NEMO
