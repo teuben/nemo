@@ -1,0 +1,51 @@
+#! /bin/csh -f
+#
+#  Install the JPL line catalog in $MIRCAT
+#  Clients that can use this are:
+#   1) (sma)miriad's program SmaUvSpec
+# 
+#   2)  nemo's program  tabpp      (needs PP_DIR set to $MIRCAT/jplcat)
+#       http://bima.astro.umd.edu/nemo/man_html/tabpp.1.html
+#      
+#
+#  See also 
+# http://sma-www.cfa.harvard.edu/miriadWWW/manuals/SMAuguide/smauserhtml/index_JPLCatIdentify.html
+# http://sma-www.cfa.harvard.edu/miriadWWW/manuals/SMAuguide/smauserhtml/index_JPLCatInstall.html
+#
+
+set mode=1
+
+set backup_url=ftp://ftp.astro.umd.edu/pub/carma/jplcatalog.tar.gz
+set url=http://www.cfa.harvard.edu/sma/miriad/smaspec/catalog/jplcatalog.tar.gz
+
+foreach a ($*)
+  set $a
+end
+
+
+cd $MIRCAT
+if (-e jplcat) then
+  echo Warning: existing directory $MIRCAT/jplcat will be filled again
+endif
+
+if ($mode == 1) then
+  curl $url | tar zxf -
+  if ($status) goto bad
+else if ($mode = 2) then
+  wget $url
+  if ($status) goto bad
+  tar zxf $url:t
+  rm $url:t
+else
+  echo "mode $mode not supported (mode=1 curl mode=2 wget)
+endif
+
+
+exit 0
+
+bad:
+  echo Bad url=$url
+  echo Try url=$backup_url
+  exit 1
+
+
