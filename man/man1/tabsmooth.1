@@ -11,19 +11,23 @@ is also given:
 .TP 20
 \fBin=\fP
 Input file name [???]    
-.TP 20
+.TP 
 \fBxcol=\fP
 Column(s) to use. Although multiple columns can be used, only those 
 columns are output to stdout.  [1]
-.TP 20
+.TP 
 \fBnmax=\fP
 max size if a pipe [100000]  
+.TP 
+\fBsmooth=\fP
+Smoothing array. By default, single Hanning smooth (0.25,0.5,0.25).
 .SH SEE ALSO
-tabmath(1NEMO)
+tabmath(1NEMO), tabtrend(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 20-Dec-2010	V0.1 Created	PJT
+13-oct-2014	documented smooth=
 .fi

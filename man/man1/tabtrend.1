@@ -23,11 +23,23 @@ Column(s) to use [1]
 \fBnmax=\fP
 max size if a pipe [100000]  
 .SH EXAMPLES
-Create 1000 numbers from gaussian with dispersion 1, observe that the distribution
-now has a sigma of about 1.4:
+Create 10000 numbers gaussian distributed with dispersion 1, observe the following:
 .nf
-nemoinp 0:1000 | tabmath - - 'rang(0,1)' | tabtrend - 2 | tabhist - 
+set n = 10000
+
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 |                             tabhist - 1 -2 2 nmax=$n
+# sigma=1
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - |               tabhist - 1 -2 2 nmax=$n
+# sigma=0.612 (sqrt(3/8))
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  |               tabhist - 1 -2 2 nmax=$n
+# sigma=1.414 (sqrt(2))
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - | tabtrend -  | tabhist - 1 -2 2 nmax=$n
+# sigma=0.5
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  | tabsmooth - | tabhist - 1 -2 2 nmax=$n
+# sigma=0.5
 .fi
+Note that smoothing and trending are related, so their resulting dispersions in the last two 
+examples do not multiply.
 .SH SEE ALSO
 tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
 .SH AUTHOR
@@ -36,4 +48,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 26-Nov-2012	finally documented	PJT
+13-oct-2014	better examples		PJT
 .fi
