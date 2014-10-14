@@ -1,33 +1,54 @@
-.TH IDF 1NEMO "13 August 2014"
+.TH IDF 1NEMO "15 August 2014"
 .SH NAME
-idf \- Input Directive File (IDF) I/O processor
+idf \- Input Directive File (IDF) processor
 .SH SYNOPSIS
 \fBidf\fP [parameter=value]  [-- idf_parameter=value ...]
 .SH DESCRIPTION
-\fBidf\fP processes an Input Directive File (IDF).  An
+\fBidf\fP creates an input parameter file 
+by changing selected parameters based on 
+an Input Directive File (IDF).  An
 IDF describes named and typed input parameters 
-meant to supply the parameters to a program. This file
+meant to supply parameters to a program. This file
 then matched to an actual example of this
-parameter file, of which selected named parameters
+parameter file, where the parameters are not named
+(list a list of numbers). Selected named parameters
 can be changed then written out to a new
 parameter file in order for an external program to run and
 use this parameter file.
 .PP
+A typical example of use would be where two input files
+(foobar.idf and foobar.inp) create an output
+file (run1.inp) where two parameters were given a new value:
+.nf
+
+    idf foobar.idf foobar.inp run1.inp --  n=100 eps=0.01
+    foobar < run1.inp
+
+.fi
+but see also the EXAMPLES below.
+.PP
 For a full description of the format, see \fIidf(5NEMO)\fP
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
-is also given:
+is also given, and need to be given before the IDF PARAMETERS (see below)
 .TP 20
 \fBidf=\fP
-Input Directive File.  If none supplied, an internal example is shown
-that can be played with.
+Input Directive File.  This file is the template with type and name
+information for the parameters. See also \fIidf(5NEMO)\fP.
+If none supplied, the internal example is shown
+that can be played with. No default.
 .TP
 \fBpar=\fP
-Input parameter file. If none supplied, only IDF parsing is attempted.
+Input parameter file. This file is an example that another program
+will use as input file, but where some of the values need to be modified.
+If none supplied, only IDF parsing is attempted.
+Default: none.
 .TP
 \fBout=\fP
-Output parameter file. If none supplied, only substituation is attempted,
-as long as the input parameter file is given.
+Output parameter file. The file contains the changed parameter based
+on the new values given to the IDF parameters.
+If none supplied, only substituation is attempted,
+as long as the input parameter file is given. Default: none
 .TP
 \fBlineno=t|f\fP
 Add linenumbers to IDF output? A debug option [f]   
@@ -35,24 +56,36 @@ Add linenumbers to IDF output? A debug option [f]
 \fBchecktype=t|f\fP
 Check types (real/integer/string/...). Not implemented yet. [f]
 .TP
+\fBreport=t|f\fP
+Report all key=val pairs for the IDF_parameters. Useful as a reminder [f]
+.SH IDF PARAMETERS
+The following IDF parameters have to be preceded by the standard
+\fB--\fP separator, such that NEMO parsing can stop.
+.TP
 \fB--\fP
-Any parameters after this designator are not parsed by the NEMO command
+Any parameters after this designator is not parsed by the NEMO command
 line processor (see also \fIgetparam(3NEMO)\fP), but the keyword
 names are expected to be present in the IDF file.
 .TP
 \fBkey=\fIval\fP..
+Any set of named IDF_parameters can be listed here. Currently very little
+parsing checks are done here.
 .SH CAVEATS
 Open ended array IDF keywords do not use \fInemoinp(1NEMO)\fP style expression yet, .e.g.
-you cannot use \fBrad=2:10:2\fP.
+you cannot use \fBrad=2:10:2\fP, but instead would need  (csh notation):
+.nf
+    set rtmp=(`nemoinp 2:10:2`)
+    .. rad="$rtmp"
+.fi
 .PP
 IDF keyword do not use \fIgetparam(3NEMO)\fP yet, so interesting constructs such
-as \fBrad=@radii.tab\fP.
+as \fBrad=@radii.tab\fP cannot be used here.
 .SH EXAMPLES
 In the following example an integer and real parameter are read by a program from standard input:
 .nf
 
  % cat foobar.idf
- # commented for FooBar
+ # comments for the 'foobar' program 
  i:n
  r:eps
 
@@ -68,16 +101,31 @@ In the following example an integer and real parameter are read by a program fro
 
  % foobar < run1.par
  ...
-.nf
+.fi
+.PP
+FORTRAN programs have a variety of styles of getting input parameters. The most common ones that don't use a NAMELIST are:
+
+1) read directly from standard input:   'foobar < foobar.inp'
+
+2) ask for the file that contains the parameters:     'echo foobar.inp | foobar'
+
+3) fixed name, where it expects that file (e.g. foobar.inp) to be present:   'foobar'
+
+In addition, some programs also have little flexibility to change their output filename, which results 
+in the usage of a run directory in order for programs to run in parallel.
 .SH SEE ALSO
 idf(5NEMO), idfio(3NEMO), getparam(3NEMO), run(3NEMO)
 .SH FILES
-src/kernel/io/idfio.c
+.nf
+.ta +3i
+src/kernel/io/idfio.c	source code
+$NEMODAT/idf/*.idf	Example IDF for various NEMO examples
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
-12-Aug-2014	V0.1 man page written	PJT
+.ta +1.0i +3.0i
+12-aug-2014	V0.1 man page written	PJT
 13-aug-2014	implemented single open ended array	PJT
 .fi
