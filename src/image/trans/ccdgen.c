@@ -6,6 +6,7 @@
  *      6-jan-05        V0.7: added many more models and features. added factor=
  *      8-jan-05        V0.8: add m!=2 multi-arm spirals
  *      5-aug-11        V0.9: object = test
+ *     15-oct-2014      V0.10:  object=noise now can do 3D
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
@@ -41,7 +42,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=0.9a\n  29-may-2013 PJT",
+  "VERSION=0.10\n  15-oct-2014 PJT",
   NULL,
 };
 
@@ -215,7 +216,7 @@ void nemo_main ()
  *  create new map from scratch, using %x and %y as position parameters 
  *		0..nx-1 and 0..ny-1
  */
-local void do_create(int nx, int ny,int nz)
+local void do_create(int nx, int ny, int nz)
 {
     double m_min, m_max, total;
     real   fin[5], fout;
@@ -567,9 +568,10 @@ local void object_spiral(int npars, real *pars)
 
 local void object_noise(int npars, real *pars)
 {
-  int i,j;
+  int i,j,k;
   int nx = Nx(iptr);
   int ny = Ny(iptr);
+  int nz = Nz(iptr);
   double m = 1.0;
   double s = 1.0;
 
@@ -586,9 +588,10 @@ local void object_noise(int npars, real *pars)
     dprintf(0,"noise: m->%g  s->%g\n",m,s);
   }
   
-  for (j=0; j<ny; j++)
-    for (i=0; i<nx; i++)
-      MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + grandom(m,s);
+  for (k=0; k<nz; k++)
+    for (j=0; j<ny; j++)
+      for (i=0; i<nx; i++)
+	CubeValue(iptr,i,j,k) = factor*CubeValue(iptr,i,j,k) + grandom(m,s);
 }
 
 
