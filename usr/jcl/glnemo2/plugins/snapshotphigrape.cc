@@ -49,7 +49,7 @@ SnapshotPhiGrape::~SnapshotPhiGrape()
   if (pos)   free ((float *) pos);
   if (vel)   free ((float *) vel);
 
-  if (valid) close();
+  close();
   if (BUFF) delete [] BUFF;
 
 }
@@ -363,8 +363,8 @@ int SnapshotPhiGrape::nextFrame(const int * index_tab, const int nsel)
 int SnapshotPhiGrape::close()
 {
   int ret=0;
-  if (valid) {
-    gzclose(file);
+  if (file) gzclose(file);
+  if (valid) {    
     end_of_data=false;
     valid = false;
     ret=1; 

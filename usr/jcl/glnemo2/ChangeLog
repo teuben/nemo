@@ -1,3 +1,14 @@
+1.8.0 (November, 4th 2014)
+--------------------------
+  - drag and drop files support
+  - double click on file works on MacOSX
+  - ramses 2D support
+  - ramses velocities vectors for gas particles added
+  - fix bad rendering for highest density points
+  - colorbar display correct temperature when selected
+  - screenshots from command line works again
+  - MacOSX Maverick/QT5 compilation success
+
 1.7.1 (July, 11th 2014)
 ----------------------
   - fix issue #1460 regarding to size of gas particles

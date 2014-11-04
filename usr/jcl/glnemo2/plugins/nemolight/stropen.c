@@ -101,113 +101,113 @@ static string urlGetCommand = "wget -q -O -";
 
 stream stropen(const_string name, string mode)		
 {
-    bool inflag,canSeek = TRUE;
-    int fds;
-    fentry*fe;
-    char tempname[MAXPATHLEN];   /* buffer for temp name in case of scratch file */
-    stream res;
-    struct stat buf;
+  bool inflag,canSeek = TRUE;
+  int fds;
+  fentry*fe;
+  char tempname[MAXPATHLEN];   /* buffer for temp name in case of scratch file */
+  stream res;
+  struct stat buf;
 #if __MINGW32__
-    // under windows binary read mode is defined "rb"  
-    // DAMN IT (8 hours to figure out this)!!!!!!!!!!!
-    string readwin32="rb";
+  // under windows binary read mode is defined "rb"
+  // DAMN IT (8 hours to figure out this)!!!!!!!!!!!
+  string readwin32="rb";
 #endif
 
-    inflag = streq(mode, "r");
+  inflag = streq(mode, "r");
 #if __MINGW32__
-    if (streq(mode, "r")) {
-	mode = readwin32;
-    }
+  if (streq(mode, "r")) {
+    mode = readwin32;
+  }
 #endif
-    if (name[0] == '-') {		/* see if '-' or '-num' special file */
-        if (streq(mode,"s")) 
-            error("stropen: no scratch mode allowed in %s",name);
-	if (streq(name, "-")) {
-	    fds = dup(fileno(inflag ? stdin : stdout));
-	    if (fds == -1)
-		error("stropen: cannot dup %s", inflag ? "stdin" : "stdout");
-	} else {
-	    fds = atoi(&name[1]);
-        }
-	res = (stream ) fdopen(fds, streq(mode, "w!") ? "w" : mode);
-	if (res == NULL)
-	    error("stropen: cannot open f.d. %d for %s\n",
-		  fds, inflag ? "input" : "output");
-	fe = (fentry*) allocate(sizeof(fentry));
-	fe->next = flist;
-	flist = fe;                /* hook into the list */
-	fe->name = scopy(name);
-	fe->str = res;
-	fe->scratch = FALSE;
-	fe->seek = FALSE;
-    } else {                                    /* regular file */
-        strncpy(tempname,name,MAXPATHLEN);
-        if (streq(mode,"s")) {          /* scratch mode */
-     	    fds = -1;
-            if (*name != '/') {     /* ignore name: make a new one */
-                strcpy(tempname,"/tmp/scrNemo.XXXXXX");
+  if (name[0] == '-') {		/* see if '-' or '-num' special file */
+    if (streq(mode,"s"))
+      error("stropen: no scratch mode allowed in %s",name);
+    if (streq(name, "-")) {
+      fds = dup(fileno(inflag ? stdin : stdout));
+      if (fds == -1)
+        error("stropen: cannot dup %s", inflag ? "stdin" : "stdout");
+    } else {
+      fds = atoi(&name[1]);
+    }
+    res = (stream ) fdopen(fds, streq(mode, "w!") ? "w" : mode);
+    if (res == NULL)
+      error("stropen: cannot open f.d. %d for %s\n",
+            fds, inflag ? "input" : "output");
+    fe = (fentry*) allocate(sizeof(fentry));
+    fe->next = flist;
+    flist = fe;                /* hook into the list */
+    fe->name = scopy(name);
+    fe->str = res;
+    fe->scratch = FALSE;
+    fe->seek = FALSE;
+  } else {                                    /* regular file */
+    strncpy(tempname,name,MAXPATHLEN);
+    if (streq(mode,"s")) {          /* scratch mode */
+      fds = -1;
+      if (*name != '/') {     /* ignore name: make a new one */
+        strcpy(tempname,"/tmp/scrNemo.XXXXXX");
 #if 0
-                mktemp(tempname);    /* should not use it, insecure */
+        mktemp(tempname);    /* should not use it, insecure */
 #else
 #ifndef __MINGW32__
-		fds = mkstemp(tempname);
+        fds = mkstemp(tempname);
 #endif
 #endif
-            } 
-	    if (fds < 0) {
-	      if (stat(tempname,&buf)==0)
-                error("stropen: scratch file \"%s\" already exists", tempname);
+      }
+      if (fds < 0) {
+        if (stat(tempname,&buf)==0)
+          error("stropen: scratch file \"%s\" already exists", tempname);
 #if __MINGW32__
-	      res = fopen(tempname,"wb+");
+        res = fopen(tempname,"wb+");
 #else
-	      res = fopen(tempname,"w+");
+        res = fopen(tempname,"w+");
 #endif
-	    } else
+      } else
 #if __MINGW32__
-	      res = fdopen(fds,"wb+");
+        res = fdopen(fds,"wb+");
 #else
-	      res = fdopen(fds,"w+");
+        res = fdopen(fds,"w+");
 #endif
-            if (res==NULL) 
-                error("stropen: cannot open scratch file \"%s\"",tempname);
-        } else {                    /* "r" or "w" mode */
-            if (streq(mode, "w") &&
-		!streq(name,".") &&
-		stat(tempname, &buf) == 0)
-                error("stropen: file \"%s\" already exists\n", tempname);
-            if (streq(name,".")) {
+      if (res==NULL)
+        error("stropen: cannot open scratch file \"%s\"",tempname);
+    } else {                    /* "r" or "w" mode */
+      if (streq(mode, "w") &&
+          !streq(name,".") &&
+          stat(tempname, &buf) == 0)
+        error("stropen: file \"%s\" already exists\n", tempname);
+      if (streq(name,".")) {
 #if __MINGW32__
-            	res = fopen("/dev/null", "wb!");
+        res = fopen("/dev/null", "wb!");
 #else
-            	res = fopen("/dev/null", "w!");
+        res = fopen("/dev/null", "w!");
 #endif
-		canSeek = FALSE;
-            } else {
-	      if (inflag && strstr(name,"://")) {
-		sprintf(tempname,"%s %s",urlGetCommand,name);
-		dprintf(1,"urlGetCommand: %s\n",tempname);
-		res = popen(tempname,"r");
-		canSeek = FALSE;
-	      } else
+        canSeek = FALSE;
+      } else {
+        if (inflag && strstr(name,"://")) {
+          sprintf(tempname,"%s %s",urlGetCommand,name);
+          dprintf(1,"urlGetCommand: %s\n",tempname);
+          res = popen(tempname,"r");
+          canSeek = FALSE;
+        } else
 #if __MINGW32__
-            	res = fopen(tempname, streq(mode, "w!") ? "wb" : mode);
+          res = fopen(tempname, streq(mode, "w!") ? "wb" : mode);
 #else
-            	res = fopen(tempname, streq(mode, "w!") ? "w" : mode);
+          res = fopen(tempname, streq(mode, "w!") ? "w" : mode);
 #endif
-	    }
-            if (res == NULL)
-                error("stropen: cannot open file \"%s\" for %s\n",
-                     tempname, inflag ? "input" : "output");
-        }
-	fe = (fentry*) allocate(sizeof(fentry));
-	fe->next = flist;
-	flist = fe;                /* hook into the list */
-	fe->name = scopy(tempname);
-	fe->str = res;
-	fe->scratch = streq(mode,"s");
-	fe->seek = canSeek;
+      }
+      if (res == NULL)
+        error("stropen: cannot open file \"%s\" for %s\n",
+              tempname, inflag ? "input" : "output");
     }
-    return res;
+    fe = (fentry*) allocate(sizeof(fentry));
+    fe->next = flist;
+    flist = fe;                /* hook into the list */
+    fe->name = scopy(tempname);
+    fe->str = res;
+    fe->scratch = streq(mode,"s");
+    fe->seek = canSeek;
+  }
+  return res;
 }
 
 /*

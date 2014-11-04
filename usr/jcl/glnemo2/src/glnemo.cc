@@ -35,7 +35,7 @@
 
 #include "mainwindow.h"
 using namespace std;
-#define RELEASE_VERSION "1.7.1"
+#define RELEASE_VERSION "1.8.0"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 // Import snapshot plugins
@@ -45,7 +45,7 @@ Q_IMPORT_PLUGIN(SnapshotGadget)
 Q_IMPORT_PLUGIN(SnapshotPhiGrape)
 Q_IMPORT_PLUGIN(SnapshotRamses)
 #ifndef _WIN32
-Q_IMPORT_PLUGIN(SnapshotTipsy)
+Q_IMPORT_PLUGIN(SnapshotTipsy) // WIN32 has no native XDR support requested by TIPSY
 #endif
 Q_IMPORT_PLUGIN(SnapshotList)
 Q_IMPORT_PLUGIN(SnapshotNetwork)
@@ -56,7 +56,7 @@ Q_IMPORT_PLUGIN(gadgetplugin);
 Q_IMPORT_PLUGIN(phigrapeplugin);
 Q_IMPORT_PLUGIN(ramsesplugin);
 #ifndef _WIN32
-Q_IMPORT_PLUGIN(tipsyplugin);
+Q_IMPORT_PLUGIN(tipsyplugin); // WIN32 has no native XDR support requested by TIPSY
 #endif
 Q_IMPORT_PLUGIN(listplugin);
 Q_IMPORT_PLUGIN(networkplugin);
@@ -158,7 +158,7 @@ Q_IMPORT_PLUGIN(networkplugin);
 int main(int argc, char *argv[])
 {
   QApplication::setDesktopSettingsAware(true);
-  QApplication app(argc, argv);
+  glnemo::QMyApplication app(argc, argv);
   setlocale(LC_NUMERIC,"C"); // force numerics functions to use decimal point
 
   if ( !QGLFormat::hasOpenGL() ) {
@@ -204,6 +204,8 @@ int main(int argc, char *argv[])
   main_win.setGeometry(x,y,wsize,hsize);
   // move to the center of the screen
   main_win.move(x,y);
+
+  QObject::connect(&app, SIGNAL(loadFile(const QString )), &main_win, SLOT(actionMenuFileOpen(QString )));
 
   
   if (interact) {

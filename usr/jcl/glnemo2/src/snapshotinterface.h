@@ -93,17 +93,23 @@ class SnapshotInterface: public QObject
       jump_frame = _v;
       frame.unlock();
     }
+    virtual std::vector<std::string> getVectorFile() {
+      std::vector<std::string> v;
+      return v;
+    }
     // normal functions        
-	void setFileName(std::string _f) { filename = _f;}
-	std::string getFileName() const { return filename;}
-	std::string getInterfaceType() { return interface_type;}
-	bool isFileExist() { return QFile::exists(QString(filename.c_str()));}
-        bool isListOf() {
-          if (interface_type.compare(0,4,"List")==0)
-            return true;
-          else
+    void setFileName(std::string _f) { filename = _f;}
+    std::string getFileName() const { return filename;}
+    std::string getInterfaceType() { return interface_type;}
+    bool isFileExist() { return QFile::exists(QString(filename.c_str()));}
+    bool isListOf() {
+      if (interface_type.compare(0,4,"List")==0)
+        return true;
+      else
             return false;
-        }
+    }
+
+
     ParticlesData * part_data;
     int nbody_first;
     float time_first;

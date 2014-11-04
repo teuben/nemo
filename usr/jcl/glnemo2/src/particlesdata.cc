@@ -465,7 +465,7 @@ int PhysicalData::computeMinMax()
     min = LMAX;
     // compute Min/Max
     for (int i=0; i<(nbody); i++) {
-      if (data[i] != -1 ) {
+      if (data[i] != -1) {
         max=std::max(max,(double) data[i]);
         min=std::min(min,(double) data[i]);
       }
@@ -561,12 +561,16 @@ int PhysicalData::computeMinMax()
     }
     if (valid) {
       for (int i=0; i<(nbody); i++) {
-        if (data[i] != -1 && data[i] != 0) {
+        if (data[i] != -1.0 && data[i] != 0.0) {
             int index=(log(data[i])-log(min))*(nhisto-1.)/(log(max)-log(min));
           //int index=((data[i])-(min))*99./((max)-(min));
           assert(index<nhisto);
           data_histo[index]++; // data_histo stores the number of particles foreach percentage
                                // of physical value from 0 to 99 %
+        } else {
+          if (data[i]==0.0) {
+            //data_histo[0]++;
+          }
         }
       }
     }

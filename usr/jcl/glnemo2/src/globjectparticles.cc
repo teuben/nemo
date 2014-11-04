@@ -222,7 +222,7 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   glEnableClientState(GL_VERTEX_ARRAY);
   int start=3*min_index*sizeof(float);
   int maxvert=max_index-min_index+1;
-  //std::cerr << "min_index="<<min_index<<" max_inex="<<max_index<<" maxvert="<<maxvert<<"\n";
+  //std::cerr << "min_index="<<min_index<<" max_index="<<max_index<<" maxvert="<<maxvert<<"\n";
   glVertexPointer(3, GL_FLOAT, 0, (void *) (start));
 
   // get attribute location for sprite size
@@ -443,10 +443,23 @@ void GLObjectParticles::updateBoundaryPhys()
   if (hasPhysic && phys_select && phys_select->isValid()) {
     //std::cerr << " Pobj min index="<<po->getMinPercenPhys()
     //    << " max index="<<po->getMaxPercenPhys()<<"\n";
-    assert(po->getMinPercenPhys()>=0 && po->getMaxPercenPhys()<100);
-    min_index = index_histo[po->getMinPercenPhys()*nhisto/100];
-    max_index = index_histo[po->getMaxPercenPhys()*nhisto/100];
+    int permin=po->getMinPercenPhys();
+    int permax=po->getMaxPercenPhys();
+    assert(permin>=0 && permax<100);
+    int imin=permin*nhisto/100;
+    min_index = index_histo[imin];
+    int imax =permax*nhisto/100;
+    max_index = index_histo[imax];
+    if (permax==99) {
+        max_index = nvert_pos-1; // we take all the vertex
+    }
+#if 0
+    std::cerr << "min ="<<min_index << " max ="<<max_index<<"\n";
+    std::cerr << "imin ="<<imin << " imax ="<<imax<<"\n";
+    std::cerr << "permin ="<<permin << " permax ="<<permax<<"\n";
+#endif
   }
+
 }
 // ============================================================================
 // buildVboPos                                                                 
@@ -647,7 +660,7 @@ void GLObjectParticles::buildVboPhysData()
   checkGlError("2222");
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
   checkGlError("3333");
-  //std::cerr << "Phys_data size="<<phys_data.size()<<"\n";
+  std::cerr << "Phys_data size="<<phys_data.size()<<"\n";
   phys_data.clear();
   //delete [] phys_data;
   if (BENCH) qDebug("Time elapsed to build VBO data: %f s", tbench.elapsed()/1000.);
@@ -760,13 +773,21 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
   if (hasPhysic&& go->render_mode==1) { // physic) {
     if (!go->dynamic_cmap) {
       // send absolute min and max phys of the object
+      float moremax=(phys_select->getMax()-phys_select->getMin())/100.0;
       shader->sendUniformf("data_phys_min",log(phys_select->getMin()));
-      shader->sendUniformf("data_phys_max",log(phys_select->getMax()));
+      shader->sendUniformf("data_phys_max",log(phys_select->getMax()+moremax));
+
       //std::cerr << "!go->dynamic_cmap : log(phys_select->getMin())="<<log(phys_select->getMin())<<"\n";
       //std::cerr << "!go->dynamic_cmap : log(phys_select->getMax())="<<log(phys_select->getMax())<<"\n";
     } else {
+      // July 2014, really nasty bug,
+      // because of low accuracy with float running on GLSL shaders
+      // highest density points were not displayed !!! I fixed this issue
+      // by adding 1% more values on max data
+      float moremax=(po->getMaxPhys()-po->getMinPhys())/100.0;
+      //std::cerr <<"moremax : " << moremax << "\n";
       shader->sendUniformf("data_phys_min",log(po->getMinPhys()));
-      shader->sendUniformf("data_phys_max",log(po->getMaxPhys()));
+      shader->sendUniformf("data_phys_max",log(po->getMaxPhys()+moremax));
     }
     
     //int imin=phys_itv[min_index].index;
@@ -775,6 +796,8 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
     //shader->sendUniformf("osel_phys_min",log(phys_select->data[imin]));
     //shader->sendUniformf("osel_phys_max",log(phys_select->data[imax]));
 #if 0
+    int imin=phys_itv[min_index].index;
+    int imax=phys_itv[max_index].index;
     std::cerr << "imin = "<<imin<<" imax="<<imax<<"\n";
     std::cerr << "object :"<<phys_select->data[imin] << " --- " << phys_select->data[imax] << "\n";
     std::cerr << "data   :"<<phys_select->getMin() << " --- " << phys_select->getMax() << "\n";
@@ -981,8 +1004,8 @@ void GLObjectParticles::buildIndexHisto()
     for (int i=0; i <nhisto; i++) {
       if (index_histo[i]==-1) index_histo[i]=last;
       else last=index_histo[i];
-      //std::cerr << "Percentage["<<i<<"%]="<<index_histo[i]<<" quant="<< 
-      //    phys_select->data[phys_itv[index_histo[i]].index]<<"\n";
+      //std::cerr << nhisto<< " Percentage["<<i<<"%]="<<index_histo[i]<<" quant="<<
+      //  phys_select->data[phys_itv[index_histo[i]].index]<<"\n";
     }
     // if no physical quantity for the object
     if (index_histo[nhisto-1]==0) index_histo[nhisto-1] = nvert_pos;
@@ -1058,8 +1081,8 @@ void GLObjectParticles::sortByDensity()
       indexes_sorted[cpt++] = i;
     }
   }
-nind_sorted=cpt;
-  std::cerr << "index_min="<< index_min <<"   index_max=" << index_max << "\n";
+  nind_sorted=cpt;
+  //std::cerr << "index_min="<< index_min <<"   index_max=" << index_max << " index sorted="<< nind_sorted <<"\n";
       // bind VBO in order to use
   glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, vbo_index);
     // upload data to VBO

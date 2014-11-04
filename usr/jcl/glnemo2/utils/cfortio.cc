@@ -48,7 +48,7 @@ int CFortIO::open(const std::string myfile, bool fake,bool _swap)
     in.clear();
     in.open(myfile.c_str(),std::ios::in | std::ios::binary);
     if ( ! in.is_open()) {
-      std::cerr << "Unable to open file ["<<myfile<<"], aborting...\n";
+      std::cerr << "CFortIO::open : Unable to open file ["<<myfile<<"], aborting...\n";
       ret=0;
     }
   }

@@ -33,6 +33,7 @@ SnapshotList::SnapshotList():SnapshotInterface()
   interface_type    ="List";
   interface_type_ori="List";
   current_file_index=0;
+  snapshot="";
   vector_file.clear();
 }
 
@@ -138,7 +139,7 @@ bool SnapshotList::openFile()
   }
   std::cerr << "good :" << fi.good() << "\n";
   if (! fi.is_open() || dir.exists()) {
-    std::cerr << "Unable to open file ["<<filename<<"] for reading, aborting...\n";
+    std::cerr << "SnapshotList::openFile(): Unable to open file ["<<filename<<"] for reading, aborting...\n";
     status = false;
   }
   else {
@@ -155,17 +156,23 @@ bool SnapshotList::openFile()
       if (getLine(true)) { // read the first file
         SnapshotInterface * test_data = plugins->getObject(snapshot);
         if (test_data) { // it's a valid snaphot
-          delete test_data;
-          status = true;
-          //fi.seekg(0, std::ios::beg); // go back to the beginning
-          vector_file.push_back(snapshot); // add one more file
+          if (test_data->getInterfaceType()=="List") {
+            std::vector<std::string> vf_son=test_data->getVectorFile();
+            vector_file.insert(vector_file.end(),vf_son.begin(),vf_son.end());
+          } else {
+            //fi.seekg(0, std::ios::beg); // go back to the beginning
+            vector_file.push_back(snapshot); // add one more file
+          }
           bool stop=false;
           while (!stop && getLine(true)) {       // read all files
             vector_file.push_back(snapshot); // feed up vector
           }
+
+          delete test_data;
+          status = true;
         }
-      } 
-      else {        
+      }
+      else {
         status=false;
         fi.close();
       }
@@ -247,6 +254,7 @@ bool SnapshotList::getNextFile()
         snapshot = vector_file[current_file_index]; // get current snap
         current_file_index++;
         status=true;
+
       }
     }
     else {             // backward play
@@ -265,6 +273,9 @@ bool SnapshotList::getNextFile()
     jump_frame=-1;
   }
   frame.unlock();
+  if (status) {
+    setFileName(snapshot);
+  }
   return status;
 }
 
@@ -274,7 +285,9 @@ int SnapshotList::close()
   int status=1;
   if (valid) {
     fi.close();
-    current_data->close();
+    if (current_data) {
+      current_data->close();
+    }
     valid=false;
     end_of_data=false;
   }

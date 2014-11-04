@@ -31,7 +31,7 @@ CAmr::CAmr(const std::string _indir, const bool _v)
   verbose=_v;
   indir = _indir;
   infile="";
-
+  ndim=0;
   // keep filename untill last /
   int found=indir.find_last_of("/");
   if (found != (int) std::string::npos && (int) indir.rfind("output_")<found) {
@@ -87,6 +87,7 @@ bool CAmr::isValid()
   else
     valid=false;
   amr.close();
+  hydro.close();
   return valid;
 }
 // ============================================================================
@@ -99,7 +100,7 @@ bool CAmr::readInfoFile()
   fi.open(info_file.c_str(),std::ios::in);
 
   if (! fi.is_open()) {
-    std::cerr << "Unable to open file ["<<info_file.c_str()<<"] for reading, aborting...\n";
+    std::cerr << "CAmr::readInfoFile(): Unable to open file ["<<info_file.c_str()<<"] for reading, aborting...\n";
     status = false;
   }
   else {
@@ -319,7 +320,7 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
           for (int ind=0;ind<twotondim;ind++) {
             for (int ivar=0; ivar<nvarh; ivar++) {
               if (j==icpu) {
-		hydro.readDataBlock((char *) &var[ivar*ngrida*twotondim+ind*ngrida]);
+                hydro.readDataBlock((char *) &var[ivar*ngrida*twotondim+ind*ngrida]);
               }
               else hydro.skipBlock();
             }
@@ -334,16 +335,19 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
 	    // compute cell center
             double px=xg[0*ngrida+i]+xc[0][ind]-xbound[0]; // x
             double py=xg[1*ngrida+i]+xc[1][ind]-xbound[1]; // y
-            double pz=xg[2*ngrida+i]+xc[2][ind]-xbound[2]; // z
+            double pz=0.0;
+            if (ndim>2) {
+              pz=xg[2*ngrida+i]+xc[2][ind]-xbound[2]; // z
+            }
             bool ok_cell =       (
                 !(son[ind*ngrida+i]>0 && ilevel<lmax) && // cells is NOT refined
                 (ilevel>=lmin)                        &&
                 ((px+dx2)>=xmin)                      &&
                 ((py+dx2)>=ymin)                      &&
-                ((pz+dx2)>=zmin)                      &&
+                (((ndim<3)||(pz+dx2)>=zmin))          &&
                 ((px-dx2)<=xmax)                      &&
                 ((py-dx2)<=ymax)                      &&
-                ((pz-dx2)<=zmax) );
+                (((ndim<3)||((pz-dx2)<=zmax) )));
             if (ok_cell) {
               if (!count_only) {
                 int idx=index[nbody];
@@ -361,14 +365,34 @@ int CAmr::loadData(float * pos, float * vel, float * rho, float * rneib, float *
 #else
                   pos[3*cpt+0] = px*header.boxlen ;
                   pos[3*cpt+1] = py*header.boxlen ;
-                  pos[3*cpt+2] = pz*header.boxlen ;
+                  if (ndim>2)
+                    pos[3*cpt+2] = pz*header.boxlen ;
+                  else
+                    pos[3*cpt+2] = 0.0 ;
 #endif
 
+                  if (load_vel) {
+                    vel[3*cpt+0] = var[1*ngrida*twotondim+ind*ngrida+i];
+                    vel[3*cpt+1] = var[2*ngrida*twotondim+ind*ngrida+i];
+                    if (ndim>2) {
+                      vel[3*cpt+2] = var[3*ngrida*twotondim+ind*ngrida+i];
+                    } else {
+                      vel[3*cpt+2] = 0.0;
+                    }
+                  }
 #endif
                   rneib[cpt]   = dx*header.boxlen;
-                  rho[cpt] = var[0*ngrida*twotondim+ind*ngrida+i];
+                  rho[cpt] = var[0*ngrida*twotondim+ind*ngrida+i];                  
 #if 1
-                  temp[cpt]= std::max(0.0,var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt]);
+                  if (rho[cpt] != 0.0) {
+                    if (ndim>2) {
+                      temp[cpt]= std::max(0.0,var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt]);
+                    } else {
+                      temp[cpt]= std::max(0.0,var[3*ngrida*twotondim+ind*ngrida+i]/rho[cpt]);
+                    }
+                  } else {
+                    temp[cpt]=0.0;
+                  }
                   //temp[cpt]= var[4*ngrida*twotondim+ind*ngrida+i]/rho[cpt];
 #else
                   float p=var[4*ngrida*twotondim+ind*ngrida+i]; // pressure

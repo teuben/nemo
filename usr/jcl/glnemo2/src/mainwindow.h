@@ -20,6 +20,9 @@
 #include <QMainWindow>
 #include <QTimer>
 #include <QMutex>
+#include <QDropEvent>
+#include <QTemporaryFile>
+#include <QApplication>
 
 // project's includes
 
@@ -44,11 +47,33 @@ class QMenu;
 
 
 namespace glnemo {
+
+// we sublass QApplication to allow open file when double click on finder
+// Thanks Evgenii Vasiliev
+class QMyApplication : public QApplication {
+  Q_OBJECT
+public:
+  QMyApplication(int argc, char *argv[]): QApplication(argc, argv) {}
+protected:
+  bool event(QEvent *event) {
+    switch (event->type()) {
+    case QEvent::FileOpen:
+      emit loadFile(static_cast<QFileOpenEvent *>(event)->file());
+      return true;
+    default:
+      return QApplication::event(event);
+    }
+  };
+signals:
+  void loadFile(const QString fileName);
+};
+
   // prototypes of class in glnemo namespace
   class GLWindow;
   class PluginsManage;
   class SnapshotInterface;
   class UserSelection;
+
 class MainWindow : public QMainWindow {
   Q_OBJECT
 
@@ -56,6 +81,9 @@ class MainWindow : public QMainWindow {
     MainWindow(std::string);
     void start(std::string);
     ~MainWindow();
+  protected:
+    void dropEvent(QDropEvent *ev);
+    void dragEnterEvent(QDragEnterEvent *ev);
   private slots:
     // action
     void actionFullScreen();
@@ -69,8 +97,8 @@ class MainWindow : public QMainWindow {
     void actionFormObjectControl();
     void actionFormOptions();
     void actionFormOptionsShowMovie();
-    void actionMenuFileOpen();
-	void actionMenuFileConnect();
+    void actionMenuFileOpen(QString myfile="");
+  void actionMenuFileConnect();
     bool actionMenuFileConnect2(std::string ip, int port, bool velocities, bool dencities, bool interactivSelect);
     void actionReset();
     void actionReload();
@@ -138,6 +166,8 @@ class MainWindow : public QMainWindow {
                             const bool , const bool, const bool first=false);
     void killPlayingEvent();
     void connectCurrentData();
+    // QTemporaryFile for drag n drop
+    QTemporaryFile dndfile;
     // Menus
     QMenu *file_menu;
     QMenu *help_menu;

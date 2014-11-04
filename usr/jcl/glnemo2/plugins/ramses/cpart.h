@@ -47,6 +47,7 @@ public:
     *stars = nstar_box; 
     return nselect;
   }
+  int getNdim() { return ndim; }
 signals:
     void stringStatus(const QString);
     void intStatus(const int);    

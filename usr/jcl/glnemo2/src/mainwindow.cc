@@ -24,6 +24,7 @@
 #include <QHBoxLayout>
 #include <QMessageBox>
 #include <QLayout>
+#include <QMimeData>
 #include <assert.h>
 #include <iomanip>
 #include <sstream>
@@ -43,6 +44,7 @@ namespace glnemo {
 // -----------------------------------------------------------------------------
 MainWindow::MainWindow(std::string _ver)
 {
+  setAcceptDrops(true); // grant drag n drop files
   user_select = NULL;
   version = _ver;
   mutex_data = new QMutex(QMutex::Recursive); // Recursive: a thread can lock a mutex more than
@@ -263,6 +265,34 @@ MainWindow::~MainWindow()
   if (user_select) delete user_select;
 
 }
+// -----------------------------------------------------------------------------
+// dropEvent
+// -----------------------------------------------------------------------------
+void MainWindow::dropEvent(QDropEvent *ev)
+{
+  dndfile.remove(); // remove previous temporary file
+
+  if (dndfile.open()) {
+    std::cerr << "Temporary file :" << dndfile.fileName().toStdString() << "\n";
+  }
+  QTextStream out(&dndfile);
+  QList<QUrl> urls = ev->mimeData()->urls();
+  foreach(QUrl url, urls)    {
+    //qDebug()<<url.toLocalFile();  //url.toString();
+    out << url.toLocalFile() <<"\n";
+    //actionMenuFileOpen(url.toLocalFile());
+  }
+  dndfile.close();
+  actionMenuFileOpen(dndfile.fileName());
+}
+// -----------------------------------------------------------------------------
+// dragEnterEvent
+// -----------------------------------------------------------------------------
+void MainWindow::dragEnterEvent(QDragEnterEvent *ev)
+{
+    ev->accept();
+}
+
 // -----------------------------------------------------------------------------
 // create menus                                                                 
 // -----------------------------------------------------------------------------
@@ -1081,12 +1111,19 @@ void MainWindow::killPlayingEvent()
 }
 // -----------------------------------------------------------------------------
 // actionMenuFileOpen()
+// if myfile is empty, action comes from file menu open
+// if myfile is not empty, action comes from drag n drop
 //------------------------------------------------------------------------------
-void MainWindow::actionMenuFileOpen()
+void MainWindow::actionMenuFileOpen(QString myfile)
 {
   static QString menudir("");
   killPlayingEvent();       // wait the end of loading thread
-  QString fileName = QFileDialog::getOpenFileName(this,tr("Select snapshot"),menudir);
+  QString fileName;
+  if (myfile=="") {
+    fileName=QFileDialog::getOpenFileName(this,tr("Select snapshot"),menudir);
+  } else {
+    fileName=myfile;
+  }
   if (!fileName.isEmpty()) {
     menudir = fileName;
     snapshot = fileName.toStdString();
@@ -1424,7 +1461,9 @@ void MainWindow::takeScreenshot(const int width, const int height,  std::string 
         gl_window->setFBO(true);                              // activate Frame Buffer Object
         gl_window->setFBOSize(size.width(),size.height());    // set the offscreen rendering size
 
-        gl_window->updateGL();                                // draw in FBO
+        //!!!gl_window->updateGL();                                // draw in FBO
+        gl_window->forcePaintGL();  // draw in FBO
+                                    // use force for screenshot from CLI
 
         QImage img=(((gl_window->grabFrameBufferObject()).mirrored()).rgbSwapped()); // convert FBO to img
 

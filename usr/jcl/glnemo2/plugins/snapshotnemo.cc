@@ -98,7 +98,7 @@ bool SnapshotNemo::isValidData()
       stream str=stropen(filename.c_str(),(char *) "r"); // open NEMO file for reading
       if ( ! str )  status = false; // failed to open
       if (qsf(str)) status = true;  // it's a structured binary file (NEMO)
-      else          status = false; // it's not                            
+      else          status = false; // it's not
       strclose(str);
       if (status)  {                // it's a NEMO snapshot
 	int * ptr=NULL;      // get the full nbody

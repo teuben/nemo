@@ -65,7 +65,7 @@ public:
     double getMapInfo(std::string _s) {
       return mapinfo[_s];
     }
-    
+    int getNdim() { return ndim; }
 signals:
     void stringStatus(const QString);
     void intStatus(const int);    

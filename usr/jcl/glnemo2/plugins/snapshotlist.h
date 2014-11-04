@@ -66,7 +66,7 @@ public:
       }
       return end_of_data;
     }
-
+    std::vector<std::string> getVectorFile() { return vector_file; }
 
 private:
     std::ifstream fi;

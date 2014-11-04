@@ -13,6 +13,8 @@
 #include <QtGui>  // Mandatory for plugins management
 #include "snapshotramses.h"
 #include <limits>
+#include <iostream>
+#include <sstream>
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 Q_PLUGIN_METADATA(IID "fr.glnemo2.phigrapePlugin")
 #endif
@@ -70,6 +72,10 @@ bool SnapshotRamses::isValidData()
     connect(amr, SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));    //SLOT(slotStringStatus(const Qstring)));
     connect(part,SIGNAL(stringStatus(const QString)),this,SLOT(slotStringStatus(QString)));
     valid=true;
+    int ndim=std::max(part->getNdim(),amr->getNdim());
+    std::stringstream ss;
+    ss << ndim << "D";
+    interface_type = interface_type + ss.str();
   }
 
   return valid; 
@@ -119,12 +125,15 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
     }
     *part_data->nbody = nsel;
     
-    if (take_gas&&namr)          // there are gas particles requested
+    if (take_gas&&namr) {         // there are gas particles requested
       amr->loadData(part_data->pos,part_data->vel,part_data->rho->data, part_data->rneib->data,part_data->temp->data,
                     index_tab,nsel,load_vel);
+      std::cerr << "after amr->loadata\n";
+    }
     
-    if ((take_halo&&ndm) || (take_stars&&nstars)) // there are halo|stars particles requested
+    if ((take_halo&&ndm) || (take_stars&&nstars)) { // there are halo|stars particles requested
       part->loadData(take_halo,take_stars,part_data->pos,part_data->vel,index_tab,nsel,load_vel,namr);
+    }
     
     //part_data->computeMaxSize();
     // rescale particles
@@ -134,6 +143,9 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
       part_data->pos[i*3+2]     *= go->scale;//*amr->getHeader()->boxlen;
       if (part_data->rneib->data[i]!=-1)
         part_data->rneib->data[i] *= go->scale;//*amr->getHeader()->boxlen;
+       //std::cerr << part_data->rho->data[i] <<"\n";
+      //part_data->rho->data[i]=1.0;
+
     }
     part_data->computeVelNorm();
     part_data->rho->computeMinMax();

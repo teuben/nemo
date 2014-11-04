@@ -31,7 +31,8 @@ CPart::CPart(const std::string _indir, const int _select,const bool _v)
   select = _select;
   indir = _indir;
   infile="";
-  
+  ndim=0;
+
   // keep filename untill last /
   int found=indir.find_last_of("/");
   if (found != (int) string::npos && (int) indir.rfind("output_")<found) {
@@ -118,7 +119,11 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
     
     double * tmp[6];//=new double[npart];
     part.skipBlock(3);
-    
+
+    // some initialisations
+    for (int i=0;i<6;i++) {
+       tmp[i] = NULL;
+    }
     // read positions
     
     for (int j=0; j<ndim; j++) {
@@ -153,7 +158,8 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
             (age[k]!=0.&& (select==1 || select==2))) {  // its' stars && (Stars sel || DM + Stars sel)
           if ((tmp[0][k]>=xmin && tmp[0][k]<=xmax) &&
               (tmp[1][k]>=ymin && tmp[1][k]<=ymax) &&
-              (tmp[2][k]>=zmin && tmp[2][k]<=zmax)) {
+              ((ndim<3) ||(tmp[2][k]>=zmin && tmp[2][k]<=zmax))
+              ) {
             
             if (count_only) {
               if (age[k]==0) { // it's DM
@@ -169,21 +175,33 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
                 if (take_halo && age[k]==0) { // DM selected and it's a  DM
                   int cpt = namr_box+cpt_dm;
                   assert(cpt<(nselect+namr_box));
-                  for (int l=0;l<3;l++) {
+                  for (int l=0;l<ndim;l++) {
                     pos[cpt*3+l]=tmp[l][k];
                     if (load_vel) {
                       vel[cpt*3+l]=tmp[3+l][k];
                     }
                   }
+                  if (ndim<3) { // for 2D only
+                    pos[cpt*3+2]=0.0;
+                    if (load_vel) {
+                      vel[cpt*3+2]=0.0;
+                    }
+                  }
                   cpt_dm++;
-                } 
+                }
                 if (take_stars && age[k]!=0) { // STARS selected and it's a star
                   int cpt = namr_box+(take_halo?ndm_box:0)+cpt_star;
                   assert(cpt<(nselect+namr_box));
-                  for (int l=0;l<3;l++) {
+                  for (int l=0;l<ndim;l++) {
                     pos[cpt*3+l]=tmp[l][k];
                     if (load_vel) {
                       vel[cpt*3+l]=tmp[3+l][k];
+                    }
+                  }
+                  if (ndim<3) { // for 2D only
+                    pos[cpt*3+2]=0.0;
+                    if (load_vel) {
+                      vel[cpt*3+2]=0.0;
                     }
                   }
                   cpt_star++;
@@ -203,7 +221,8 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
         for (int k=0; k<npart; k++) {
           if ((tmp[0][k]>=xmin && tmp[0][k]<=xmax) &&
               (tmp[1][k]>=ymin && tmp[1][k]<=ymax) &&
-              (tmp[2][k]>=zmin && tmp[2][k]<=zmax)) {
+              ((ndim<3) ||(tmp[2][k]>=zmin && tmp[2][k]<=zmax))
+              ) {
             
             if (count_only) {
               if (1 /*age[k]==0*/) { // it's DM
@@ -219,10 +238,16 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
                 if (take_halo/* && age[k]==0*/) { // DM selected and it's a  DM
                   int cpt = namr_box+cpt_dm;
                   assert(cpt<(nselect+namr_box));
-                  for (int l=0;l<3;l++) {
+                  for (int l=0;l<ndim;l++) {
                     pos[cpt*3+l]=tmp[l][k];
                     if (load_vel) {
                       vel[cpt*3+l]=tmp[3+l][k];
+                    }
+                  }
+                  if (ndim<3) { // for 2D only
+                    pos[cpt*3+2]=0.0;
+                    if (load_vel) {
+                      vel[cpt*3+2]=0.0;
                     }
                   }
                   cpt_dm++;
@@ -251,7 +276,9 @@ int CPart::loadData(bool take_halo, bool take_stars,float * pos, float * vel,con
     } 
     // garbage collecting
     for (int i=0; i<6; i++)
-        delete [] tmp[i];    
+      if (tmp[i]) {
+        delete [] tmp[i];
+      }
      
     part.close(); // close current file  
   } // for ... 
