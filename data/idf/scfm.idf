@@ -1,0 +1,15 @@
+# Self Consistent Field code (Lars Hernquist) - see also runscfm 
+c:comment1
+s:headline
+i:nsteps
+i:noutbod
+i:noutlog
+r:dtime
+r:G
+b:selfgrav
+b:inptcoef
+b:outpcoef
+b:zeroodd
+b:zeroeven
+b:fixacc
+c:comment1

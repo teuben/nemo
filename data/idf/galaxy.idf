@@ -1,0 +1,7 @@
+# Jerry Sellwood's earlier release (<2000) of galaxy
+i:ngridx   i:ngridy   i:ngridz
+r:scale
+r:dt
+r:dtout
+r:dtlog
+r:tstop
