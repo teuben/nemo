@@ -33,7 +33,7 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.1\n  19-feb-2014 PJT",
+  "VERSION=2.1a\n 4-feb-2015 PJT",
   NULL,
 };
 
@@ -204,7 +204,7 @@ void nemo_main()
       if (!Qdummy) ax_shift(iptr1);
       write_image(outstr, iptr1);
     } else {                            /* nothing really done, still a great benchmark */
-      warning("nothing really done?");
+      warning("No x=,y=,z= selection applied");
       if (!Qdummy) ax_shift(iptr);
       write_image(outstr, iptr);
     }
