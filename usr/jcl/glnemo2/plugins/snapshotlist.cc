@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -12,6 +12,7 @@
 // ============================================================================
 #include <QtGui> // Mandatory for plugins management
 #include <QDir>
+#include <QFile>
 #include <sstream>
 #include "snapshotlist.h"
 
@@ -35,6 +36,7 @@ SnapshotList::SnapshotList():SnapshotInterface()
   current_file_index=0;
   snapshot="";
   vector_file.clear();
+  go = NULL;
 }
 
 // ============================================================================
@@ -126,9 +128,21 @@ bool SnapshotList::isValidData()
   
 }
 // ============================================================================
+void SnapshotList::prependDirPath()
+{
+  unsigned int i=0;
+  while(i<snapshot.length() && snapshot[i]==' ') i++; // search first non blank
+  if (i<snapshot.length()
+      && snapshot[i]!='/'      // first char not a '/'
+      && snapshot[i]!='\\' ) { // first char not a '\'
+    snapshot = dirpath.toStdString() + snapshot;      // append to dirpath
+  }
+}
+
+// ============================================================================
 bool SnapshotList::openFile()
 {
-  bool status;
+  bool status=false;
   QDir dir(QString(filename.c_str()));
   std::cerr << "SnapshotList::openFile()=["<<filename<<"]\n";
     // open file
@@ -152,9 +166,15 @@ bool SnapshotList::openFile()
 #if 1
       fi.seekg(0, std::ios::beg); // go back to the beginning
       vector_file.clear();
-
+      bool prepend_dir=false;
       if (getLine(true)) { // read the first file
+        QFile testf(snapshot.c_str());
+        if (! testf.exists()) { // snapshot does not exist
+          prependDirPath();     // prepend dir path
+          prepend_dir = true;
+        }
         SnapshotInterface * test_data = plugins->getObject(snapshot);
+
         if (test_data) { // it's a valid snaphot
           if (test_data->getInterfaceType()=="List") {
             std::vector<std::string> vf_son=test_data->getVectorFile();
@@ -165,9 +185,11 @@ bool SnapshotList::openFile()
           }
           bool stop=false;
           while (!stop && getLine(true)) {       // read all files
+            if (prepend_dir) {
+              prependDirPath();
+            }
             vector_file.push_back(snapshot); // feed up vector
           }
-
           delete test_data;
           status = true;
         }
@@ -220,11 +242,8 @@ bool SnapshotList::getLine(const bool force)
         }
         if (cpt > 0 ) {
           unsigned int i=0;
-          std::cerr << "0:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
-          while(i<snapshot.length() && snapshot[i]==' ') i++; // search first non blank
-          //if (i<snapshot.length() && snapshot[i]!='/')        // first char not a '/'
-          //  snapshot = dirpath.toStdString() + snapshot;      // append to dirpath
-          std::cerr << "1:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
+//          std::cerr << "0:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
+//          std::cerr << "1:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
           stop   = true; // we have a snapshot
           status = true; // so we can stop reading
         }
@@ -249,6 +268,7 @@ bool SnapshotList::getNextFile()
     //assert(current_file_index< (int) vector_file.size());
     //snapshot = vector_file[current_file_index]; // get current snap
     if (play_forward) { // forward play
+      current_file_index=std::max(0,current_file_index);
       assert(current_file_index>=0);
       if (current_file_index < (int) vector_file.size()) {
         snapshot = vector_file[current_file_index]; // get current snap
@@ -258,9 +278,10 @@ bool SnapshotList::getNextFile()
       }
     }
     else {             // backward play
-      if (current_file_index>0) {
+      if (current_file_index>=0) {
         snapshot = vector_file[current_file_index]; // get current snap
         current_file_index--;
+        //current_file_index=std::max(0,current_file_index);
         status=true;
       }
     }
@@ -275,6 +296,7 @@ bool SnapshotList::getNextFile()
   frame.unlock();
   if (status) {
     setFileName(snapshot);
+
   }
   return status;
 }

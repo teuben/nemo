@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -277,13 +277,23 @@ void MainWindow::dropEvent(QDropEvent *ev)
   }
   QTextStream out(&dndfile);
   QList<QUrl> urls = ev->mimeData()->urls();
+
+  QString onefile;
+  int cpt=0;
   foreach(QUrl url, urls)    {
     //qDebug()<<url.toLocalFile();  //url.toString();
     out << url.toLocalFile() <<"\n";
+    onefile = url.toLocalFile();
+    cpt++;
     //actionMenuFileOpen(url.toLocalFile());
   }
   dndfile.close();
-  actionMenuFileOpen(dndfile.fileName());
+  if (cpt>1) { // more than one file
+    actionMenuFileOpen(dndfile.fileName());
+  } else {
+    actionMenuFileOpen(onefile);
+  }
+
 }
 // -----------------------------------------------------------------------------
 // dragEnterEvent
@@ -1124,7 +1134,7 @@ void MainWindow::actionMenuFileOpen(QString myfile)
   } else {
     fileName=myfile;
   }
-  if (!fileName.isEmpty()) {
+  if (!fileName.isEmpty()) {    
     menudir = fileName;
     snapshot = fileName.toStdString();
     bool save_rho_exist = store_options->rho_exist;

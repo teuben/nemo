@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -98,6 +98,9 @@ FormOptions::FormOptions(GlobalOptions * _go, QMutex * _mutex, QWidget *parent):
         arg(go->gcb_color.blue());  
   form.gcb_font_color->setStyleSheet(css);
   
+  // ----- auto screnshots tab
+  form.radio_res_standard->clicked(true);
+
   update();
 }
 // ============================================================================

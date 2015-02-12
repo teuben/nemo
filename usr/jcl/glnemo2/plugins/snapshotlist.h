@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -83,6 +83,7 @@ private:
     std::vector<std::string> vector_file;
     int current_file_index;
     bool getNextFile();
+    void prependDirPath();
 };
 
 }

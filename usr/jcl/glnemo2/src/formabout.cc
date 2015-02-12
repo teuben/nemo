@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -28,7 +28,7 @@ FormAbout::FormAbout(QWidget *parent):QDialog(parent)
   //"<b>Glnemo2:</b> an interactive 3D visualisation program for nbody simulation data"
   
   QString info(tr((
-       "<center>Copyright (c) <b>Jean-Charles LAMBERT</b> 2007-2014"
+       "<center>Copyright (c) <b>Jean-Charles LAMBERT</b> 2007-2015"
       "<br><a href=\"mailto:Jean-Charles.Lambert@lam.fr\">Jean-Charles.Lambert@lam.fr</a>"
        "<br><br>Dynamique des Galaxies"
        "<br>Centre de donneeS Astrophysique de Marseille (CeSAM)"

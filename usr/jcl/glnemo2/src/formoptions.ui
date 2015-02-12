@@ -25,7 +25,7 @@
    <item row="0" column="0">
     <widget class="QTabWidget" name="options_dialog">
      <property name="currentIndex">
-      <number>0</number>
+      <number>7</number>
      </property>
      <widget class="QWidget" name="tab_i_select">
       <attribute name="title">
@@ -6025,6 +6025,9 @@ p, li { white-space: pre-wrap; }
               <layout class="QGridLayout" name="gridLayout_11">
                <item row="0" column="0">
                 <widget class="QRadioButton" name="radio_res_custom">
+                 <property name="enabled">
+                  <bool>true</bool>
+                 </property>
                  <property name="text">
                   <string>custom</string>
                  </property>
@@ -6034,6 +6037,9 @@ p, li { white-space: pre-wrap; }
                 <widget class="QRadioButton" name="radio_res_standard">
                  <property name="text">
                   <string>standard</string>
+                 </property>
+                 <property name="checked">
+                  <bool>true</bool>
                  </property>
                 </widget>
                </item>
@@ -6595,17 +6601,40 @@ p, li { white-space: pre-wrap; }
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit"/>
-            </item>
-            <item>
-             <widget class="QLabel" name="label_30">
-              <property name="text">
-               <string>X</string>
+             <widget class="QSpinBox" name="custom_width">
+              <property name="maximum">
+               <number>10000</number>
+              </property>
+              <property name="value">
+               <number>400</number>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit_2"/>
+             <widget class="QLabel" name="label_30">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="text">
+               <string>X</string>
+              </property>
+              <property name="alignment">
+               <set>Qt::AlignCenter</set>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QSpinBox" name="custom_height">
+              <property name="maximum">
+               <number>10000</number>
+              </property>
+              <property name="value">
+               <number>400</number>
+              </property>
+             </widget>
             </item>
            </layout>
           </item>
@@ -9064,28 +9093,12 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>285</x>
-     <y>79</y>
+     <x>343</x>
+     <y>92</y>
     </hint>
     <hint type="destinationlabel">
-     <x>351</x>
-     <y>108</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>frame_dial</sender>
-   <signal>valueChanged(int)</signal>
-   <receiver>frame_slide</receiver>
-   <slot>setValue(int)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>470</x>
-     <y>151</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>715</x>
-     <y>86</y>
+     <x>416</x>
+     <y>122</y>
     </hint>
    </hints>
   </connection>
@@ -9096,108 +9109,108 @@ p, li { white-space: pre-wrap; }
    <slot>setValue(int)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>664</x>
-     <y>78</y>
+     <x>343</x>
+     <y>92</y>
     </hint>
     <hint type="destinationlabel">
-     <x>482</x>
-     <y>184</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radio_res_custom</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>screen_size</receiver>
-   <slot>setDisabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>68</x>
-     <y>102</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>104</x>
-     <y>130</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radio_res_custom</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineEdit</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>56</x>
-     <y>93</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>81</x>
-     <y>159</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radio_res_custom</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>lineEdit_2</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>37</x>
-     <y>98</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>230</x>
-     <y>163</y>
-    </hint>
-   </hints>
-  </connection>
-  <connection>
-   <sender>radio_res_standard</sender>
-   <signal>clicked(bool)</signal>
-   <receiver>screen_size</receiver>
-   <slot>setEnabled(bool)</slot>
-   <hints>
-    <hint type="sourcelabel">
-     <x>148</x>
-     <y>95</y>
-    </hint>
-    <hint type="destinationlabel">
-     <x>152</x>
+     <x>523</x>
      <y>128</y>
     </hint>
    </hints>
   </connection>
   <connection>
-   <sender>radio_res_standard</sender>
+   <sender>radio_res_custom</sender>
    <signal>clicked(bool)</signal>
-   <receiver>lineEdit</receiver>
+   <receiver>screen_size</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>134</x>
-     <y>100</y>
+     <x>104</x>
+     <y>122</y>
     </hint>
     <hint type="destinationlabel">
-     <x>123</x>
-     <y>163</y>
+     <x>191</x>
+     <y>164</y>
     </hint>
    </hints>
   </connection>
   <connection>
    <sender>radio_res_standard</sender>
    <signal>clicked(bool)</signal>
-   <receiver>lineEdit_2</receiver>
+   <receiver>screen_size</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>203</x>
+     <y>122</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>239</x>
+     <y>164</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_standard</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>custom_width</receiver>
    <slot>setDisabled(bool)</slot>
    <hints>
     <hint type="sourcelabel">
-     <x>171</x>
-     <y>101</y>
+     <x>144</x>
+     <y>108</y>
     </hint>
     <hint type="destinationlabel">
-     <x>234</x>
-     <y>151</y>
+     <x>100</x>
+     <y>186</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_standard</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>custom_height</receiver>
+   <slot>setDisabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>183</x>
+     <y>105</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>221</x>
+     <y>182</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_custom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>custom_width</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>86</x>
+     <y>107</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>133</x>
+     <y>191</y>
+    </hint>
+   </hints>
+  </connection>
+  <connection>
+   <sender>radio_res_custom</sender>
+   <signal>clicked(bool)</signal>
+   <receiver>custom_height</receiver>
+   <slot>setEnabled(bool)</slot>
+   <hints>
+    <hint type="sourcelabel">
+     <x>97</x>
+     <y>115</y>
+    </hint>
+    <hint type="destinationlabel">
+     <x>202</x>
+     <y>174</y>
     </hint>
    </hints>
   </connection>

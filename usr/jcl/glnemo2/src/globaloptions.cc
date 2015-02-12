@@ -1,5 +1,5 @@
 // ============================================================================
-// Copyright Jean-Charles LAMBERT - 2007-2014                                  
+// Copyright Jean-Charles LAMBERT - 2007-2015                                  
 // e-mail:   Jean-Charles.Lambert@lam.fr                                      
 // address:  Centre de donneeS Astrophysique de Marseille (CeSAM)              
 //           Laboratoire d'Astrophysique de Marseille                          
@@ -226,6 +226,7 @@ const GlobalOptions& GlobalOptions::operator=(const GlobalOptions &m)
   ortho_range = m.ortho_range;
   
   list_type = m.list_type;
+
     // SET default parameters
   MAX_PARTICLES_SIZE   = m.MAX_PARTICLES_SIZE;
   MAX_TEXTURE_SIZE     = m.MAX_TEXTURE_SIZE;
