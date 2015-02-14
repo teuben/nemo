@@ -9,6 +9,8 @@
  *          If a=0 standard Plummer model; if b=0 standard Kuzmin disk
  *             Realistic choice: b = 0.2 a
  *
+ * For a realistic galaxy model, see e.g. http://arxiv.org/abs/1502.00627
+ *
  *  March 90 Stefano Casertano, University of Pittsburgh
  * 10-Nov-90 inserted omega as first parameter for standard Nemo  PJT
  *  6-oct-91 fixed bug - and made code accept both XYZ and XZY versions (pjt)
