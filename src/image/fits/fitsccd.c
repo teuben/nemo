@@ -64,7 +64,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.0\n	3-dec-2013 PJT",
+    "VERSION=5.0a\n	3-feb-2015 PJT",
     NULL,
 };
 
@@ -86,7 +86,7 @@ void nemo_main()
     FITS *fitsfile;
     int ndim=3, naxis[3], nx, ny, nz, i, j, k, npl, p, planes[MAXPLANES];
     int nbval=0;
-    real bval_out, rmin, rmax, tmp;
+    real bval_out, rmin, rmax, tmp, fbval;
     FLOAT *buffer, *bp, bval_in;  /* fitsio- is in FLOAT !!! */
     FLOAT fdata_min, fdata_max, fnan;
     int mir_nan = -1;    /* MIRIAD's FITS NaN */
@@ -203,8 +203,10 @@ void nemo_main()
     write_image(outstr,iptr);
     if (nbval==0)
       dprintf(0,"There were no blank values set in the image\n");
-    else
-      dprintf(0,"There were %d blank values in the image\n",nbval);
+    else {
+      fbval = (1.0*nbval)/(nx*ny*nz);
+      dprintf(0,"There were %d blank values in the image (%f %%)\n",nbval,fbval*100);
+    }
     free(buffer);
 }
 
