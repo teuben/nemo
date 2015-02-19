@@ -1,4 +1,4 @@
-.TH FITSCCD 1NEMO "3 December 2013"
+.TH FITSCCD 1NEMO "19 February 2015"
 .SH NAME
 fitsccd \- read a (fits) image file from disk
 .SH SYNOPSIS
@@ -34,6 +34,12 @@ List of planes to be read from the fits file in case a cube was
 processed. If no list supplied, all are used. Planes count
 from 0 upwards. 
 [Default: all].
+.TP
+\fBbox=\fIxmin,ymin,xmax,ymax\fP
+If used, 4 integers in the range 1..NAXIS1 (for x) and 1..NAXIS2 (for y) are needed
+in the order \fIxmin,ymin,xmax,ymax\fP. It selects a box that needs to be
+fully contained in the fits XY plane.
+Default: none.
 .TP
 \fBblocking=\fIfactor\fP
 Integer that denotes the blocking factor with which file was written.
@@ -176,4 +182,5 @@ Peter Teuben
 21-mar-00	V3.6a fixed offset bug for raw cubes	PJT
 7-nov-00	V3.7 added relcoords=	PJT
 23-nov-04	V4.9 added axistype=  for new image format PJT
+19-feb-2015	V5.1 added box= to select a subregion in XY	PJT
 .fi
