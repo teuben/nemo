@@ -64,7 +64,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.0a\n	3-feb-2015 PJT",
+    "VERSION=5.0b\n	15-feb-2015 PJT",
     NULL,
 };
 
@@ -72,7 +72,7 @@ string usage = "convert (near)fits files into ccd images";
 
 string cvsid="$Id$";
 
-#define MAXPLANES 512
+#define MAXPLANES 2048
 
 void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
@@ -99,6 +99,8 @@ void nemo_main()
     if (Qout)
       outstr = stropen(getparam("out"),"w");   /* open image file for output */
     npl = nemoinpi(getparam("planes"),planes,MAXPLANES);
+    if (npl<0) warning("Error parsing %d planes=",MAXPLANES);
+    dprintf(0,"npl = %d\n",npl);
     mode = getparam("mode");
     blankval = getparam("blank");
     Qblank = (*blankval != 0);
