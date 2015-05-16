@@ -19,6 +19,8 @@
  *                             store Acc and Phi of particles    PJT
  *             11-mar-14  abs= to control the vel.dispersions differently    PJT
  *
+ *  @todo     deal when sigma^2 < 0
+ *
  */
 
 #include <stdinc.h>
