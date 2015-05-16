@@ -36,7 +36,8 @@ string defv[] = {
     "nudge=0\n                    nudge overlapping particles with this dispersion",
     "verbose=f\n		  flag to print # of particles finished ",
     "density=t\n                  write density, or distance to Kth particle",
-    "VERSION=2.2d\n		  6-jan-09 PJT",
+    "ndim=3\n                     3D or 2D computation",
+    "VERSION=2.2d\n		  6-jan-2009 PJT",
     NULL,
 };
 
