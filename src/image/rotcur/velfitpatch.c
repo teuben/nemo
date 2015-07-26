@@ -1,10 +1,11 @@
 /*
- * VELFITPATH: 
+ * VELFITPATCH: 
  *
- *	VELFITPATH fits a local velocity field in a small area
+ *	VELFITPATCH fits a local velocity field in a small area
  *	around a set of points taking along a (smooth) curve.
  *
  *   24-jul-2015   pjt    Written out specs 
+ *   26-jul-2015   pjt    implemented - realized ccdtrace should probably do the curve part
  *
  */
 
@@ -14,38 +15,44 @@
 
 string defv[] = {
   "in=???\n       input velocity field",
-  "curve=???\n    Table with X and Y positions (in image coordinates) for curve",
-  "spline=n\n     Spline fit along curve?",
-  "step=1\n       Steps along curve",
-  "box=10,10\n    Boxsize in X and Y (X along curve)",
-  "VERSION=0.1\n  24-jul-2015 PJT",
+  "out=\n         basename for 3 output files (vc,ox,oy) or (vc,om,pa)",
+  "patch=3\n      Patch (size of box will be 2*patch+1)",
+  "scale=1\n      Scale factor for gradients",
+  "blank=0.0\n    Blank Value in velocity field",
+  "mode=xy\n      Output mode (xy derivates, vs. gp (gradient/positionangle)",
+  "tab=\n         If given, tabular output file name",
+  "VERSION=0.2\n  26-jul-2015 PJT",
   NULL,
 };
 
-string usage="fit local velocity field along a curve";
+string usage="fit local linear velocity field (full map, or along a curve)";
 
 string cvsid="$Id$";
 
 
 #define MAXRING    4096
 
+void fit_patch(int npt, real *x, real *y, real *v, real *sol);
+void xy2rt(real *sol);
 
 imageptr denptr = NULL, velptr = NULL, outptr = NULL;
 
 
 nemo_main()
 {
+  bool Qsample, Qtab, Qxy;
   stream curstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, sint, cost, costmin, 
-    x, y, xt, yt, r, den, vrot_s, dvdr_s;
+    xt, yt, r, den, vrot_s, dvdr_s;
   real vr, wt, frang, dx, dy, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
   real sincosi, cos2i, tga, dmin, dmax, dval, vmod;
-  int i, j, k, nx, ny, ir, nring, nundf, nout, nang, nsum, coswt;
-  string outmode;
+  real *x, *y, *v, sol[3];
+  int i, j, id, jd, nx, ny, nd, d, d2;
+  string outmode = getparam("mode");
   int mode = -1;
+  int npt = 0;
 
   velstr = stropen(getparam("in"),"r");
-  curstr = stropen(getparam("curve"),"r");
 
   /* read velocity field */
 
@@ -53,33 +60,71 @@ nemo_main()
   nx = Nx(velptr);
   ny = Ny(velptr);
 
-  /* read in curve */
+  /* needed arrays */
 
-  /* optionally: make spline through curve */
+  d = getiparam("patch");
+  d2 = 2*d + 1;
+  x = (real *) allocate(d2*d2*sizeof(real));
+  y = (real *) allocate(d2*d2*sizeof(real));
+  v = (real *) allocate(d2*d2*sizeof(real));
+
+  /* output mode */
+
+  Qtab = hasvalue("tab");
+  Qxy  = (*outmode == 'x' || *outmode == 'X');
+
+  for (i=d; i<nx-d; i++) {
+    for (j=d; j<ny-d; j++) {
+      nd = 0;
+      for (id=-d; id<=d; id++) {
+	for (jd=-d; jd<=d; jd++) {
+	  x[nd] = id;
+	  y[nd] = jd;
+	  v[nd] = MapValue(velptr, i+id, j+jd);
+	  if (v[nd] != 0.0) nd++;
+	}
+      }
+      fit_patch(nd, x, y, v, sol);
+      if (!Qxy) xy2rt(sol);
+      if (Qtab) printf("%d %d   %g %g %g\n",i,j,sol[0],sol[1],sol[2]);
+      npt++;
+    }
+  }
+  dprintf(0,"Processed %d points with patch area %d x %d\n",npt,d2,d2);
 
 
-  /* walk along the line in steps S */
+}
+
+/*
+ * input:  v,dx,dy
+ * output: v,dr,phi
+ */
+
+void xy2rt(real *sol)
+{
+  real dx = sol[1];
+  real dy = sol[2];
+  sol[1] = sqrt(dx*dx+dy*dy);
+  sol[2] = atan2(dy,dx) * 180.0 / PI;
+}
 
 
-  /* find the points in the box LX,LY around this point */
+#define MAXCOL 4
 
-  /* fit a plane:
-          v(x,y) = v0 + a*x + b*y
-     where (x,y) are the coordinates w.r.t. the center of the box
-  */
+void fit_patch(int npt, real *x, real *y, real *v, real *sol)
+{ 
+  real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], a[MAXCOL+2];
+  bool Qpoly = FALSE;
+  int i, order=2;
 
-
-  /* print out results :
-     Sx = center in X along curve
-     Sy = center in Y along curve
-     Sl = length along curve from starting point
-     S_phi = PA of curve 
-     S_vel = fitted PA of center velocity
-     V0  = fitted center velocity
-     dVdS = fitted velocity gradient
-  */
-
-
-
+  lsq_zero(order+1, mat, vec);
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;
+    a[1] = x[i];
+    a[2] = y[i];
+    a[3] = v[i];
+    lsq_accum(order+1,mat,vec,a,1.0);
+  }
+  lsq_solve(order+1,mat,vec,sol);
 }
 
