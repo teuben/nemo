@@ -33,6 +33,17 @@ Output mode (xy derivates, vs. gp (gradient/positionangle) [xy]
 \fBtab=\fP
 If given, tabular output file name [] 
 .SH EXAMPLES
+Here is an example of following the velocities along a set of (x,y) positions in a map:
+.nf
+    velfitpatch in=mom1 out=fit1 mode=rt
+    ccdtrace fit1.vc fit1.vctab xytrace.tab cumul=t
+    ccdtrace fit1.om fit1.omtab xytrace.tab
+    ccdtrace fit1.pa fit1.patab xytrace.tab
+    paste fit1.vc fit1.om fit1.pa | awk '{print $4,$3,$7,$10}' > fit1.vop
+.fi
+resulting in a file \fIfit1.vop\fP, with columns  L,Vc,Omega,P.A,
+where L is the length along the trace. Watch out for units. See \fIccdtrace(1NEMO)\fP
+for more info on units.
 .SH SEE ALSO
 rotcur(1NEMO), ccdtrace(1NEMO), image(5NEMO)
 .SH FILES
