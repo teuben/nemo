@@ -7,6 +7,7 @@
  *  31-jul-96  Created (for use by Mike Regan to aid printing
  *             out additional values from "orbits" produced by flowcode)
  *  26-sep-02  file_lines fix
+ *  26-jul-15  add a cumulative option
  *
  */
 
@@ -20,7 +21,8 @@ string defv[] = {
     "out=???\n      Output table of X,Y,I coordinates",
     "xytab=???\n    Input table of X,Y coordinates",
     "nmax=10000\n   Allocation space for input XY table, if needed",
-    "VERSION=1.0b\n  10-oct-02 PJT",
+    "cumulative=f\n Add Cumulative distance along the trace?",
+    "VERSION=2.0\n  26-jul-2015 PJT",
     NULL,
 };
 
@@ -37,6 +39,7 @@ nemo_main()
 local imageptr iptr = NULL;
 local double   idx, idy, xmin, ymin;
 local int      nx, ny;
+local bool     Qcum;
 
 get_image()
 {
@@ -71,6 +74,8 @@ get_image()
     if (idy<0) warning("1/Dy=%f",idy);
     dprintf(1,"Offset and scale factors: xmin,ymin,1/dx,1/dy=%f %f %f %f\n",
             xmin,ymin,idx,idy);
+
+    Qcum = getbparam("cumulative");
 }
 
 
@@ -126,10 +131,14 @@ trace_image()
     double xp, yp, dx, dy, outval;
     int i, ix, iy, nout = 0;
     stream outstr;
+    real d = 0.0;
 
     outstr = stropen(getparam("out"),"w");
 
     for (i=0; i<npt;i++) {
+        if (i>0) {
+  	  d += sqrt( sqr(x[i]-x[i-1]) + sqr(y[i]-y[i-1]));
+	}
         xp = (x[i]-xmin)*idx + 0.5;        /* fractional cell index  0..nx */
         yp = (y[i]-ymin)*idy + 0.5;
         ix = (int) floor(xp);              /* cell index:   0 .. nx-1 */
@@ -146,7 +155,10 @@ trace_image()
 	                 dx*(1-dy)*F(ix+1,iy)   +      /* Abram.& Steguhn  */
 	                 (1-dx)*dy*F(ix,iy+1)   +      /* par. 25.2.66     */
 			     dx*dy*F(ix+1,iy+1);       /* Four Foint Formu */
-            fprintf(outstr,"%g %g %g\n",x[i],y[i],outval);
+	    if (Qcum)
+	      fprintf(outstr,"%g %g %g %g\n",x[i],y[i],outval,d);
+	    else
+	      fprintf(outstr,"%g %g %g\n",x[i],y[i],outval);
         }
     }
     dprintf(0,"Trace: %d/%d outside grid\n",nout,npt);
