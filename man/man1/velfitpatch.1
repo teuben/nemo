@@ -1,0 +1,45 @@
+.TH VELFITPATCH 1NEMO "26 July 2015"
+.SH NAME
+velfitpatch \- fit local linear velocity field 
+.SH SYNOPSIS
+\fBvelfitpatch\fP [parameter=value]
+.SH DESCRIPTION
+\fBvelfitpatch\fP fits a local linear velocity field 
+(v = vc + ox * x + oy * y) to a small square region around
+each point in a velocity field. Output can be specified to
+be in linear gradients (ox,oy) or a radial,position angle (om,pa)
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input velocity field. No default.
+.TP
+\fBout=\fP
+basename for 3 output files (vc,ox,oy) or (vc,om,pa). See \fmode\fP.
+.TP
+\fBpatch=\fP
+Patch (size of box will be 2*patch+1) [3]
+.TP
+\fBscale=\fP
+Scale factor for gradients [1]   
+.TP
+\fBblank=\fP
+Blank Value in velocity field [0.0]  
+.TP
+\fBmode=\fP
+Output mode (xy derivates, vs. gp (gradient/positionangle) [xy]
+.TP
+\fBtab=\fP
+If given, tabular output file name [] 
+.SH EXAMPLES
+.SH SEE ALSO
+rotcur(1NEMO), ccdtrace(1NEMO), image(5NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Jul-15	V0.1 Created	PJT
+.fi
