@@ -36,7 +36,11 @@ Default: 10000.
 .TP
 \fBcumul=t|f\fP
 Add a 4th column in the output which is the culumative length, in the
-native units.
+native units. Default: f
+.TP
+\fBwcs=t|f\fP
+By default, the table is assumed to be in WCS (the units used in the image),
+but with wcs=f you can use pixel coordinates.
 .SH FILES
 src/nbody/evolve/flowcode/ccdtrace.c
 .SH SEE ALSO
@@ -48,5 +52,6 @@ Peter Teuben
 .ta +1.0i +4.0i
 31-jul-96	V1.0 Created     	Peter Teuben
 26-sep-2001	V1.0a updated doc, fixed code for file_lines	PJT
-26-jul-2015	V1.1 added cumul=t	PJT
+26-jul-2015	V1.1 added cumul=t option	PJT
+26-jul-2015     V1.2 added wcs=f option		PJT
 .fi
