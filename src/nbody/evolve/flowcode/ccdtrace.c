@@ -7,7 +7,7 @@
  *  31-jul-96  Created (for use by Mike Regan to aid printing
  *             out additional values from "orbits" produced by flowcode)
  *  26-sep-02  file_lines fix
- *  26-jul-15  add a cumulative option
+ *  26-jul-15  add a cumul= option
  *
  */
 
@@ -21,8 +21,9 @@ string defv[] = {
     "out=???\n      Output table of X,Y,I coordinates",
     "xytab=???\n    Input table of X,Y coordinates",
     "nmax=10000\n   Allocation space for input XY table, if needed",
-    "cumulative=f\n Add Cumulative distance along the trace?",
-    "VERSION=2.0\n  26-jul-2015 PJT",
+    "cumul=f\n      Add Cumulative distance along the trace?",
+    "wcs=t\n        Use WCS from image, or else pixel coordinates",
+    "VERSION=1.2\n  26-jul-2015 PJT",
     NULL,
 };
 
@@ -40,6 +41,7 @@ local imageptr iptr = NULL;
 local double   idx, idy, xmin, ymin;
 local int      nx, ny;
 local bool     Qcum;
+local bool     Qwcs;
 
 get_image()
 {
@@ -75,7 +77,8 @@ get_image()
     dprintf(1,"Offset and scale factors: xmin,ymin,1/dx,1/dy=%f %f %f %f\n",
             xmin,ymin,idx,idy);
 
-    Qcum = getbparam("cumulative");
+    Qcum = getbparam("cumul");
+    Qwcs = getbparam("wcs");
 }
 
 
@@ -139,10 +142,17 @@ trace_image()
         if (i>0) {
   	  d += sqrt( sqr(x[i]-x[i-1]) + sqr(y[i]-y[i-1]));
 	}
-        xp = (x[i]-xmin)*idx + 0.5;        /* fractional cell index  0..nx */
-        yp = (y[i]-ymin)*idy + 0.5;
-        ix = (int) floor(xp);              /* cell index:   0 .. nx-1 */
-        iy = (int) floor(yp);
+	if (Qwcs) {
+	  xp = (x[i]-xmin)*idx + 0.5;        /* fractional cell index  0..nx */
+	  yp = (y[i]-ymin)*idy + 0.5;
+	  ix = (int) floor(xp);              /* cell index:   0 .. nx-1 */
+	  iy = (int) floor(yp);
+	} else {
+	  xp = x[i];
+	  yp = y[i];
+	  ix = (int) floor(xp);              /* cell index:   0 .. nx-1 */
+	  iy = (int) floor(yp);
+	}
         dx = xp-ix;			   /* index in a cell: 0.0 .. 1.0 */
         dy = yp-iy;
         dprintf(1,"%g %g %d %d %g %g\n",
