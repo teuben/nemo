@@ -2,7 +2,6 @@
  * VELFITPATCH: 
  *
  *	VELFITPATCH fits a local velocity field in a small area
- *	around a set of points taking along a (smooth) curve.
  *
  *   24-jul-2015   pjt    Written out specs 
  *   26-jul-2015   pjt    implemented - realized ccdtrace should probably do the curve part
@@ -15,28 +14,25 @@
 
 string defv[] = {
   "in=???\n       input velocity field",
-  "out=\n         basename for 3 output files (vc,ox,oy) or (vc,om,pa)",
+  "out=\n         basename for 3 output files (.vc,.ox,.oy) or (.vc,.om,.pa)",
   "patch=3\n      Patch (size of box will be 2*patch+1)",
-  "scale=1\n      Scale factor for gradients",
-  "blank=0.0\n    Blank Value in velocity field",
-  "mode=xy\n      Output mode (xy derivates, vs. gp (gradient/positionangle)",
+  "scale=1\n      Extra scale factor for gradients",
+  "blank=0.0\n    Blank Value in velocity field to skip",
+  "mode=xy\n      Output mode (xy derivates, vs. gp (gradient/position angle)",
   "tab=\n         If given, tabular output file name",
-  "VERSION=0.3\n  26-jul-2015 PJT",
+  "VERSION=0.4\n  26-jul-2015 PJT",
   NULL,
 };
 
-string usage="fit local linear velocity field (full map, or along a curve)";
+string usage="fit local linear velocity field";
 
 string cvsid="$Id$";
 
-
-#define MAXRING    4096
 
 void fit_patch(int npt, real *x, real *y, real *v, real *sol, real scale);
 void xy2rt(real *sol);
 
 imageptr velptr = NULL, outptr0 = NULL, outptr1 = NULL, outptr2 = NULL;
-
 
 nemo_main()
 {
@@ -119,7 +115,7 @@ nemo_main()
 
 /*
  * input:  v,dx,dy
- * output: v,dr,phi
+ * output: v,dr,pa
  */
 
 void xy2rt(real *sol)
