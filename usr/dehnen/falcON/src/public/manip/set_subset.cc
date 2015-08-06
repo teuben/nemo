@@ -81,17 +81,19 @@ namespace Manipulate {
   // ///////////////////////////////////////////////////////////////////////////
   class set_subset : public manipulator {
   private:
-    BodyFilter         *BF;
+    BodyFilter*BF;
     mutable std::string DS;
+    mutable char DESC[1024];
     //--------------------------------------------------------------------------
   public:
     const char*name    () const { return "set_subset"; }
     const char*describe() const {
-      if(BF && *BF)
-	return message("chooses subset of bodies according to filter \"%s\" "
-		       "with parameters %s",
-		       BF->expression(), BF->parameters());
-      else
+      if(BF && *BF) {
+	if(DESC[0]==0)
+	  sprintf(DESC,"chooses subset of bodies according to filter \"%s\" "
+		  "with parameters %s",BF->expression(), BF->parameters());
+	return DESC;
+      } else
 	return "chooses subset of bodies: all bodies";
     }
     //--------------------------------------------------------------------------
@@ -106,6 +108,7 @@ namespace Manipulate {
     /// \param params parameters (if any) required by filter
     set_subset(const char*params, const char*filter) falcON_THROWING 
     : BF(0) {
+      DESC[0]=0;
       try {
 	BF = new BodyFilter(filter, params);
       } catch (falcON::exception E) {

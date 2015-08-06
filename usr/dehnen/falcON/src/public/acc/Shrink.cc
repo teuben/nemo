@@ -203,15 +203,15 @@ namespace {
 	    p[n]  = alpha * reinterpret_cast<const scalar*>(POT)[n];
       }
       // add or assign acceleration times alpha^2
-      scalar fac = alpha*alpha;
+      scalar fc = alpha*alpha;
       if(add & 2) {
 	for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	  if(f==0 || f[n] & 1)
-	    v_addtimes<NDIM>(a+nn, reinterpret_cast<const scalar*>(ACC)+nn,fac);
+	    v_addtimes<NDIM>(a+nn, reinterpret_cast<const scalar*>(ACC)+nn,fc);
       } else {
 	for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	  if(f==0 || f[n] & 1)
-	    v_asstimes<NDIM>(a+nn, reinterpret_cast<const scalar*>(ACC)+nn,fac);
+	    v_asstimes<NDIM>(a+nn, reinterpret_cast<const scalar*>(ACC)+nn,fc);
       }
     }
     /// copy string up to and excluding white space

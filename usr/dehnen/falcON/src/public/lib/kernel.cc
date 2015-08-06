@@ -38,15 +38,15 @@
 ////////////////////////////////////////////////////////////////////////////////
 
 #ifdef falcON_SSE_CODE
-#  define __ARG_D D,J
+#  define _ARG_D D,J
 #else
-#  define __ARG_D D
+#  define _ARG_D D
 #endif
 
 #define CellLeaf(A,B,D,J,R) {						       \
   grav::Cset F;                                    /* to hold F^(n)        */  \
   if(is_active(A)) {                               /* IF A is active       */  \
-    set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
+    set_dPhi(F,R,_ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_B2C(A->Coeffs(),F);                      /*   C_A   = ...        */  \
     if(is_active(B)) {                             /*   IF B is active, too*/  \
       F.flip_sign_odd();                           /*     flip sign:F^(odd)*/  \
@@ -54,14 +54,14 @@
     }                                              /*   ENDIF              */  \
   } else if(is_active(B)) {                        /* ELIF B is active     */  \
     R.negate();                                    /*   flip sign: R       */  \
-    set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
+    set_dPhi(F,R,_ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_C2B(B->Coeffs(),F,A->poles());           /*   C_B   = ...        */  \
   }                                                /* ENDIF                */  \
 }
 
 #define CellLeafAll(A,B,D,J,R) {					       \
   grav::Cset F;                                    /* to hold F^(n)        */  \
-  set_dPhi(F,R,__ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
+  set_dPhi(F,R,_ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
   add_C_B2C(A->Coeffs(),F);                        /* C_A   = ...          */  \
   F.flip_sign_odd();                               /* F^(n) = d^nPhi/dR^n  */  \
   add_C_C2B(B->Coeffs(),F,A->poles());             /* C_B   = ...          */  \
@@ -70,7 +70,7 @@
 #define CellCell(A,B,D,J,R) {						       \
   grav::Cset F;                                    /* to hold F^(n)        */  \
   if(is_active(A)) {                               /* IF A is active       */  \
-    set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
+    set_dPhi(F,R,_ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_C2C(A->Coeffs(),F,B->poles());           /*   C_A   = ...        */  \
     if(is_active(B)) {                             /*   IF B is active, too*/  \
       F.flip_sign_odd();                           /*     flip sign:F^(odd)*/  \
@@ -78,14 +78,14 @@
     }                                              /*   ENDIF              */  \
   } else if(is_active(B)) {                        /* ELIF B is active     */  \
     R.negate();                                    /*   flip sign: R       */  \
-    set_dPhi(F,R,__ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
+    set_dPhi(F,R,_ARG_D);                         /*   F^(n) = d^nPhi/dR^n*/  \
     add_C_C2C(B->Coeffs(),F,A->poles());           /*   C_B   = ...        */  \
   }                                                /* ENDIF                */  \
 }
 
 #define CellCellAll(A,B,D,J,R) {					       \
   grav::Cset F;                                    /* to hold F^(n)        */  \
-  set_dPhi(F,R,__ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
+  set_dPhi(F,R,_ARG_D);                           /* F^(n) = d^nPhi/dR^n  */  \
   add_C_C2C(A->Coeffs(),F,B->poles());             /* C_A   = ...          */  \
   F.flip_sign_odd();                               /* F^(n) = d^nPhi/dR^n  */  \
   add_C_C2C(B->Coeffs(),F,A->poles());             /* C_B   = ...          */  \
@@ -480,7 +480,7 @@ namespace {
       GRAV_FEW(LOAD,DSINGL)					\
     }
   //////////////////////////////////////////////////////////////////////////////
-  template<kern_type, bool> struct __direct;
+  template<kern_type, bool> struct _direct;
   //----------------------------------------------------------------------------
 #define ARGS					\
   leaf_iter const&A,				\
@@ -488,10 +488,10 @@ namespace {
   leaf_iter const&BN,				\
   real&EQ, real&, real& 
 
-  template<> struct __direct<p0,0> {
+  template<> struct _direct<p0,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P0_G);
   };
-  template<> struct __direct<p0,1> {
+  template<> struct _direct<p0,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P0_I);
   };
   //----------------------------------------------------------------------------
@@ -502,17 +502,17 @@ namespace {
   leaf_iter const&BN,				\
   real&EQ, real&HQ, real& 
 
-  template<> struct __direct<p1,0> {
+  template<> struct _direct<p1,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P1_G);
   };
-  template<> struct __direct<p1,1> {
+  template<> struct _direct<p1,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P1_I);
   };
   //----------------------------------------------------------------------------
-  template<> struct __direct<p2,0> {
+  template<> struct _direct<p2,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P2_G);
   };
-  template<> struct __direct<p2,1> {
+  template<> struct _direct<p2,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P2_I);
   };
   //----------------------------------------------------------------------------
@@ -523,10 +523,10 @@ namespace {
   leaf_iter const&BN,				\
   real&EQ, real&HQ, real&QQ 
 
-  template<> struct __direct<p3,0> {
+  template<> struct _direct<p3,0> {
     DIRECT(START_G,LOAD_G,DSINGL_P3_G);
   };
-  template<> struct __direct<p3,1> {
+  template<> struct _direct<p3,1> {
     DIRECT(START_I,LOAD_I,DSINGL_P3_I);
   };
 #undef LOAD_G
@@ -538,38 +538,38 @@ namespace {
   template<bool I> struct Direct {
     static void many_YA(kern_type KERN, ARGS) {
       switch(KERN) {
-      case p1: __direct<p1,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
-      case p2: __direct<p2,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
-      case p3: __direct<p3,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
-      default: __direct<p0,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      case p1: _direct<p1,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: _direct<p2,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: _direct<p3,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
+      default: _direct<p0,I>::many_YA(A,B0,BN,EQ,HQ,QQ); break;
       } }
     static void many_YS(kern_type KERN, ARGS) {
       switch(KERN) {
-      case p1: __direct<p1,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
-      case p2: __direct<p2,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
-      case p3: __direct<p3,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
-      default: __direct<p0,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      case p1: _direct<p1,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: _direct<p2,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: _direct<p3,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
+      default: _direct<p0,I>::many_YS(A,B0,BN,EQ,HQ,QQ); break;
       } }
     static void many_YN(kern_type KERN, ARGS) {
       switch(KERN) {
-      case p1: __direct<p1,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
-      case p2: __direct<p2,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
-      case p3: __direct<p3,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
-      default: __direct<p0,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      case p1: _direct<p1,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: _direct<p2,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: _direct<p3,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
+      default: _direct<p0,I>::many_YN(A,B0,BN,EQ,HQ,QQ); break;
       } }
     static void many_NA(kern_type KERN, ARGS) {
       switch(KERN) {
-      case p1: __direct<p1,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
-      case p2: __direct<p2,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
-      case p3: __direct<p3,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
-      default: __direct<p0,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      case p1: _direct<p1,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: _direct<p2,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: _direct<p3,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
+      default: _direct<p0,I>::many_NA(A,B0,BN,EQ,HQ,QQ); break;
       } }
     static void many_NS(kern_type KERN, ARGS) {
       switch(KERN) {
-      case p1: __direct<p1,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
-      case p2: __direct<p2,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
-      case p3: __direct<p3,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
-      default: __direct<p0,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      case p1: _direct<p1,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      case p2: _direct<p2,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      case p3: _direct<p3,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
+      default: _direct<p0,I>::many_NS(A,B0,BN,EQ,HQ,QQ); break;
       } }
   };
   //////////////////////////////////////////////////////////////////////////////
@@ -761,7 +761,7 @@ namespace {
   EQ   = square(eph(A)+eph(B));			\
   real XX=one/(Rq+EQ);				\
   D[0] = mass(A)*mass(B);			\
-  __setE<P>::s(EQ,HQ,QQ); 
+  _setE<P>::s(EQ,HQ,QQ); 
   //////////////////////////////////////////////////////////////////////////////
 #define ARGS_B					\
   cell_iter const&A,				\
@@ -778,41 +778,41 @@ namespace {
   real&EQ, real&HQ, real&QQ
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
-  // class __setE<kern_type>                                                  //
-  // class __block<kern_type, order>                                          //
+  // class _setE<kern_type>                                                  //
+  // class _block<kern_type, order>                                          //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<kern_type>          struct __setE;
-  template<kern_type,int>      struct __block;
+  template<kern_type>          struct _setE;
+  template<kern_type,int>      struct _block;
 #define sv   static void
   //////////////////////////////////////////////////////////////////////////////
   // kern_type = p0                                                             
   //////////////////////////////////////////////////////////////////////////////
-  template<> struct __setE<p0> {
+  template<> struct _setE<p0> {
     sv s(real,real&,real&) {
     } };
   //----------------------------------------------------------------------------
-  template<> struct __block<p0,1> : public __setE<p0> {
+  template<> struct _block<p0,1> : public _setE<p0> {
     enum { ND=2 };
     sv b(real&X, real D[ND], real, real, real) {
       D[0] *= sqrt(X);
       D[1]  = X * D[0];
     } };
-  template<int K> struct __block<p0,K> : public __setE<p0> {
+  template<int K> struct _block<p0,K> : public _setE<p0> {
     enum { ND=K+1, F=K+K-1 };
     sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
-      __block<p0,K-1>::b(X,D,EQ,HQ,QQ);
+      _block<p0,K-1>::b(X,D,EQ,HQ,QQ);
       D[K] = int(F) * X * D[K-1];
     } };
   //////////////////////////////////////////////////////////////////////////////
   // kern_type = p1                                                             
   //////////////////////////////////////////////////////////////////////////////
-  template<> struct __setE<p1> {
+  template<> struct _setE<p1> {
     sv s(real EQ, real&HQ, real&) {
       HQ = half * EQ;
     } };
   //----------------------------------------------------------------------------
-  template<> struct __block<p1,1> : public __setE<p1> {
+  template<> struct _block<p1,1> : public _setE<p1> {
     enum { ND=3 };
     sv b(real&X, real D[ND], real, real HQ, real) {
       D[0] *= sqrt(X);
@@ -821,22 +821,22 @@ namespace {
       D[0] += HQ*D[1];
       D[1] += HQ*D[2];
     } };
-  template<int K> struct __block<p1,K> : public __setE<p1> {
+  template<int K> struct _block<p1,K> : public _setE<p1> {
     enum { ND=K+2, F=K+K+1 };
     sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
-      __block<p1,K-1>::b(X,D,EQ,HQ,QQ);
+      _block<p1,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+1] = int(F) * X * D[K];
       D[K]  += HQ  * D[K+1];
     } };
   //////////////////////////////////////////////////////////////////////////////
   // kern_type = p2                                                             
   //////////////////////////////////////////////////////////////////////////////
-  template<> struct __setE<p2> {
+  template<> struct _setE<p2> {
     sv s(real EQ, real&HQ, real&) {
       HQ = half * EQ;
     } };
   //----------------------------------------------------------------------------
-  template<> struct __block<p2,1> : public __setE<p2> {
+  template<> struct _block<p2,1> : public _setE<p2> {
     enum { ND=4 };
     sv b(real&X, real D[ND], real, real HQ, real) {
       D[0] *= sqrt(X);
@@ -846,23 +846,23 @@ namespace {
       D[0] += HQ*(D[1]+HQ*D[2]);
       D[1] += HQ*(D[2]+HQ*D[3]);
     } };
-  template<int K> struct __block<p2,K> : public __setE<p2> {
+  template<int K> struct _block<p2,K> : public _setE<p2> {
     enum { ND=K+3, F=K+K+3 };
     sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
-      __block<p2,K-1>::b(X,D,EQ,HQ,QQ);
+      _block<p2,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+2] = int(F) * X * D[K+1];
       D[K]  += HQ*(D[K+1]+HQ*D[K+2]);
     } };
   //////////////////////////////////////////////////////////////////////////////
   // kern_type = p3                                                             
   //////////////////////////////////////////////////////////////////////////////
-  template<> struct __setE<p3> {
+  template<> struct _setE<p3> {
     sv s(real EQ, real&HQ, real&QQ) {
       HQ = half * EQ;
       QQ = half * QQ;
     } };
   //----------------------------------------------------------------------------
-  template<> struct __block<p3,1> : public __setE<p3> {
+  template<> struct _block<p3,1> : public _setE<p3> {
     enum { ND=5 };
     sv b(real&X, real D[ND], real, real HQ, real QQ) {
       D[0] *= sqrt(X);
@@ -873,10 +873,10 @@ namespace {
       D[0] += HQ*(D[1]+QQ*(D[2]+HQ*D[3]));
       D[1] += HQ*(D[2]+QQ*(D[3]+HQ*D[4]));
     } };
-  template<int K> struct __block<p3,K> : public __setE<p3> {
+  template<int K> struct _block<p3,K> : public _setE<p3> {
     enum { ND=K+4, F=K+K+5 };
     sv b(real&X, real D[ND], real EQ, real HQ, real QQ) {
-      __block<p3,K-1>::b(X,D,EQ,HQ,QQ);
+      _block<p3,K-1>::b(X,D,EQ,HQ,QQ);
       D[K+3] = int(F) * X * D[K+2];
       D[K]  += HQ*(D[K+1]+QQ*(D[K+2]+HQ*D[K+3]));
     } };
@@ -887,25 +887,25 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<kern_type,int,bool,bool=0> struct kernel;
   //////////////////////////////////////////////////////////////////////////////
-  template<kern_type P, int K> struct kernel<P,K,0,0> : private __block<P,K> {
-    enum { ND = __block<P,K>::ND };
+  template<kern_type P, int K> struct kernel<P,K,0,0> : private _block<P,K> {
+    enum { ND = _block<P,K>::ND };
     sv a(ARGS_B) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
-  template<kern_type P, int K> struct kernel<P,K,0,1> : private __block<P,K> {
-    enum { ND = __block<P,K>::ND };
+  template<kern_type P, int K> struct kernel<P,K,0,1> : private _block<P,K> {
+    enum { ND = _block<P,K>::ND };
     sv a(ARGS_B) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellLeaf(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCell(A,B,D,0,R); }
   };
-  template<kern_type P, int K> struct kernel<P,K,1,0> : private __block<P,K> {
-    enum { ND = __block<P,K>::ND };
+  template<kern_type P, int K> struct kernel<P,K,1,0> : private _block<P,K> {
+    enum { ND = _block<P,K>::ND };
     sv a(ARGS_B) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_G kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };
 #if defined(__GNUC__) && (__GNUC__ == 4) && (__GNUC_MINOR__ == 1) 
   // gcc 4.1.2 gives crashing code, if this is inlined.
-  template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-    enum { ND = __block<P,K>::ND };
+  template<kern_type P, int K> struct kernel<P,K,1,1> : private _block<P,K> {
+    enum { ND = _block<P,K>::ND };
     sv a(ARGS_B);
     sv a(ARGS_C);
   };
@@ -914,8 +914,8 @@ namespace {
   template<kern_type P, int K> void kernel<P,K,1,1>::a(ARGS_C)
     { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
 #else
-  template<kern_type P, int K> struct kernel<P,K,1,1> : private __block<P,K> {
-    enum { ND = __block<P,K>::ND };
+  template<kern_type P, int K> struct kernel<P,K,1,1> : private _block<P,K> {
+    enum { ND = _block<P,K>::ND };
     sv a(ARGS_B) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellLeafAll(A,B,D,0,R); }
     sv a(ARGS_C) { LOAD_I kernel::b(XX,D,EQ,HQ,QQ); CellCellAll(A,B,D,0,R); }
   };

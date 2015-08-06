@@ -41,33 +41,11 @@
 #endif
 
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-// with GCC 4.4 use x86intrin.h
-#  if (__GNUC__ >= 4 && __GNUC_MINOR__ >= 4) || defined(__clang__)
 extern "C" {
-#    include <x86intrin.h>
+#  include <x86intrin.h>
 }
-#  else
-extern "C" {
-#    ifdef __SSE__
-#      include <xmmintrin.h>
-#    endif
-#    ifdef __SSE2__
-#      include <emmintrin.h>
-#    endif
-#    if defined (__SSE4_2__) || defined (__SSE4_1__)
-#      include <smmintrin.h>
-#    endif
-#    ifdef __AVX__
-#      include <avxintrin.h>
-#    endif
-#    ifdef __AVX2__
-#      include <avx2intrin.h>
-#    endif
-}
-#  endif
 #elif defined(__SSE__)
 // use individual headers for intrinsics
-
 #  ifdef defined(__INTEL_COMPILER) && defined(_MM_MALLOC_H_INCLUDED)
 #    warning The intel compiler has seen _mm_malloc.h by GNU which declares _mm_malloc() and _mm_free() to have different linking than those declared in xmmintrin.h by INTEL, which we are going to include now. This may cause a compiler error, which can be prevented by ensuring that _mm_malloc.h is not explicitly included when using the intel compiler.
 #  endif

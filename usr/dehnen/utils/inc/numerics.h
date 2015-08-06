@@ -219,7 +219,7 @@ namespace WDutils {
 #if __cplusplus >= 201103L
     WDutilsStaticAssert(std::is_integral<integer>::value);
 #endif
-    WDutilsAssert      (n <= std::numeric_limits<integer>::max());
+    WDutilsAssert      (n <= size_t(std::numeric_limits<integer>::max()));
     if(n<=0) return;
     if(n==1) { indx[0]=0; return; }
     for(size_t j=0; j!=n; ++j) indx[j] = integer(j);

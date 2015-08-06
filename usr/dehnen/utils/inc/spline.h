@@ -327,7 +327,10 @@ namespace WDutils {
   template<class scalar_type, class table_type>
   struct traits<spline<scalar_type,table_type> > {
     static const char  *name () {
-      return message("spline<%s,%s>",nameof(scalar_type),nameof(table_type));
+      static char _name[1024]={0};
+      if(_name[0]==0)
+	sprintf(_name,"spline<%s,%s>",nameof(scalar_type),nameof(table_type));
+      return _name;
     }
   };
   // ///////////////////////////////////////////////////////////////////////////

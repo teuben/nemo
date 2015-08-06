@@ -1104,7 +1104,10 @@ namespace WDutils {
   //
   template<typename T, int K> struct traits< block_alloc<T,K> > {
     static const char  *name () {
-      return message("block_alloc<%s,%d>",traits<T>::name(),K);
+      static char _name[1024]={0};
+      if(_name[0]==0)
+	sprintf(_name,"block_alloc<%s,%d>",traits<T>::name(),K);
+      return _name;
     }
   };
   // ///////////////////////////////////////////////////////////////////////////

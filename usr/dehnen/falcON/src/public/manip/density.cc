@@ -101,11 +101,14 @@ namespace Manipulate {
     int             N;        ///< # order of Ferrers kernel
     double          STEP;     ///< delta time between manipulations
     mutable double  TRHO;     ///< time of actual density.
+    mutable char    DESC[1024];
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "density"; }
     const char* describe() const {
-      return message("estimates density using %dth nearest neighbour",K);
+      if(DESC[0]==0)
+	sprintf(DESC,"estimates density using %dth nearest neighbour",K);
+      return DESC;
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::m | fieldset::x; }
@@ -122,6 +125,7 @@ namespace Manipulate {
       STEP ( npar>2?         pars[2]     : 0. ),
       TRHO ( 0.0 )
     {
+      DESC[0]=0;
       if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"

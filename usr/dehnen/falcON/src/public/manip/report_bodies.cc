@@ -193,7 +193,7 @@ namespace falcON { namespace Manipulate {
   public:
     const char* name    () const { return "report_bodies"; }
     const char* describe() const {
-      return message("for selected bodies: writes basic data to file(s)");
+      return "for selected bodies: writes basic data to file(s)";
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { return fieldset::basic; }

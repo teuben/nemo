@@ -68,12 +68,15 @@ namespace falcON { namespace Manipulate {
     const   int     NP;
     const   double  e,V;
     mutable int     K;
+    mutable char    DESC[1024];
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "add_plummer"; }
     const char* describe() const {
-      return message("add a %d new bodies drawn from a Plummer "
-		     "sphere, one each time step",N);
+      if(DESC[0]==0)
+	sprintf(DESC,"add a %d new bodies drawn from a Plummer "
+		"sphere, one each time step",N);
+      return DESC;
     }
     //--------------------------------------------------------------------------
     void draw(double&r, double&vr, double&vt) const
@@ -162,6 +165,7 @@ namespace falcON { namespace Manipulate {
       e   (npar>6?       pars[6]  : 0.1 ),
       V   ( sqrt(GM/R ) )
     {
+      DESC[0]=0;
       if((npar<6 && debug(1)) || debug(2))
 	std::cerr<<
 	  "\n Manipulator \"add_plummer\":\n"

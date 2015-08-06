@@ -69,12 +69,15 @@ namespace Manipulate {
     kern_type       Kern;
     real            Grav, fsnk;
     mutable forces *FALC;
+    mutable char    DESC[1024];
   public:
     const char* name    () const { return "addgravity"; }
     const char* describe() const
-    { return message("adds self-gravity using "
-		     "eps=%g, theta=%g, kernel=%s, G=%g",
-		     Eps,The,falcON::describe(Kern),Grav);
+    { 
+      if(DESC[0]==0)
+	sprintf(DESC,"adds self-gravity using eps=%g, theta=%g, kernel=%s, "
+		"G=%g",Eps,The,falcON::describe(Kern),Grav);
+      return DESC;
     }
     //
     fieldset need   () const
@@ -96,6 +99,7 @@ namespace Manipulate {
 	    one ),
       FALC( 0 )
     {
+      DESC[0]=0;
       if((npar==0 && debug(1)) || debug(2))
 	std::cerr<<
 	  " Manipulator \""<<name()<<"\":\n"

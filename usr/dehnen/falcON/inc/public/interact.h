@@ -56,12 +56,14 @@ namespace falcON {
 //------------------------------------------------------------------------------
 namespace WDutils {
   template<typename A, typename B> struct traits< falcON::iaction<A,B> > {
-    static const char  *name() {
-      char __a[1024];
-      strcpy(__a,traits<A>::name());
-      return message("iaction< %s, %s >", __a, traits<B>::name());
-//       return
-// 	message("iaction< %s, %s >", traits<A>::name(), traits<B>::name());
+    static const char *name() {
+      static char _name[1024]={0};
+      if(_name[0]==0) {
+	char a[1024]; strcpy(a,traits<A>::name());
+	char b[1024]; strcpy(b,traits<B>::name());
+	sprintf(_name,"iaction<%s,%s>",a,b);
+      }
+      return _name;
     }
   };
 }
@@ -117,8 +119,13 @@ namespace falcON {
 //------------------------------------------------------------------------------
 namespace WDutils {
   template<typename A> struct traits< falcON::saction<A> > {
-    static const char  *name() { 
-      return message("saction< %s >", traits<A>::name());
+    static const char  *name() {
+      static char _name[1024]={0};
+      if(_name[0]==0) {
+	char a[1024]; strcpy(a,traits<A>::name());
+	sprintf(_name,"saction<%s>",a);
+      }
+      return _name;
     }
   };
 }

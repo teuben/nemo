@@ -62,20 +62,22 @@ namespace falcON { namespace Manipulate {
   class set_centre : public manipulator {
   private:
     vect XC,VC,*X0,*V0;
+    mutable char DESC[1024];
     //--------------------------------------------------------------------------
   public:
     const char* name    () const { return "set_centre"; }
     const char* describe() const {
-      if(X0)
-	if(V0)
-	  return message("sets 'xcen' to (%f,%f,%f)"
-			 " and 'vcen' to (%f,%f,%f)",
-			 XC[0],XC[1],XC[2], VC[0],VC[1],VC[2]);
-	else
-	  return message("sets 'xcen' to (%f,%f,%f)"
-			 " and resets 'vcen' to null\n",
-			 XC[0],XC[1],XC[2]);
-      else
+      if(X0) {
+	if(DESC[0]==0)
+	  V0?
+	    sprintf(DESC,"sets 'xcen' to (%f,%f,%f)"
+		    " and 'vcen' to (%f,%f,%f)",
+		    XC[0],XC[1],XC[2], VC[0],VC[1],VC[2]) :
+	    sprintf(DESC,"sets 'xcen' to (%f,%f,%f)"
+		    " and 'vcen' to null",
+		    XC[0],XC[1],XC[2]);
+	return DESC;
+      } else
 	return "resets 'xcen' and 'vcen' to null";
     }
     //--------------------------------------------------------------------------
@@ -88,6 +90,7 @@ namespace falcON { namespace Manipulate {
     set_centre(const double*pars, int npar, const char*) :
       X0(0), V0(0)
     {
+      DESC[0]=0;
       if(npar == 0 || debug(2)) {
 	std::cerr<<
 	  " Manipulator \"set_centre\":\n"

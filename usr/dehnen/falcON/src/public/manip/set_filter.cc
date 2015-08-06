@@ -64,15 +64,17 @@ namespace falcON { namespace Manipulate {
   class set_filter : public manipulator {
   private:
     BodyFilter *BF;
+    mutable char DESC[1024];
     //--------------------------------------------------------------------------
   public:
     const char*name    () const { return "set_filter"; }
     const char*describe() const {
-      if(BF && *BF) 
-	return message("filters bodies according to filter \"%s\" "
-		       "with parameters %s",
-		       BF->expression(), BF->parameters());
-      else return "open filter: no effect\n";
+      if(BF && *BF) {
+	if(DESC[0]==0)
+	  sprintf(DESC,"filters bodies according to filter \"%s\" "
+		  "with parameters %s",BF->expression(), BF->parameters());
+	return DESC;
+      } else return "open filter: no effect\n";
     }
     //--------------------------------------------------------------------------
     fieldset need   () const { 
@@ -83,6 +85,7 @@ namespace falcON { namespace Manipulate {
     //--------------------------------------------------------------------------
     set_filter(const char*params, const char*filter) falcON_THROWING
     : BF(0) {
+      DESC[0]=0;
       try {
 	BF = new BodyFilter(filter, params);
       } catch (falcON::exception E) {

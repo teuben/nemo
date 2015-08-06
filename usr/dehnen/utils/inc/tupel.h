@@ -57,6 +57,10 @@
 #  include <cmath>
 #  define WDutils_included_cmath
 #endif
+#ifndef WDutils_included_cstdio
+#  include <cstdio>
+#  define WDutils_included_cstdio
+#endif
 ////////////////////////////////////////////////////////////////////////////////
 #ifndef WDutils_included_exception_h
 # if __cplusplus >= 201103L
@@ -735,11 +739,14 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
 #ifdef WDutils_included_traits_h
   template<int N, typename T> struct traits< tupel<N,T> > {
-    static const char  *name () {
-      return message("tupel<%d,%s>",N,traits<T>::name());
+    static const char *name () {
+      static char _name[1024]={0};
+      if(_name[0]==0)
+	sprintf(_name,"tupel<%d,%s>",N,traits<T>::name());
+      return _name;
     }
-    static const char  *names() {
-      return message("tupel<%d,%s>",N,traits<T>::name());
+    static const char *names() {
+      return name();
     }
     static const unsigned size = sizeof(tupel<N,T>);
   };
