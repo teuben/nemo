@@ -2330,12 +2330,15 @@ namespace {
 		    int       add) {               // I: add or assign?         
       K = 0;                                       //   reset buffer            
       if(f) {                                      //   IF only flagged bodies  
-	for(int i=0; i!=n; ++i) if(f[i] & 1) {     //     LOOP flagged bodies   
-	  load(i,x[i]);                            //       load into buffer    
-	  if(K==4) flush<SYM>(p,a,add);            //       flush full buffer   
-	}                                          //     END LOOP              
+#pragma omp for
+	for(int i=0; i<n; ++i) 
+	  if(f[i] & 1) {                           //     LOOP flagged bodies   
+	    load(i,x[i]);                          //       load into buffer    
+	    if(K==4) flush<SYM>(p,a,add);          //       flush full buffer   
+	  }                                        //     END LOOP              
       } else {                                     //   ELSE: all bodies        
-	for(int i=0; i!=n; ++i) {                  //     LOOP all bodies       
+#pragma omp for
+	for(int i=0; i<n; ++i) {                   //     LOOP all bodies       
 	  load(i,x[i]);                            //       load into buffer    
 	  if(K==4) flush<SYM>(p,a,add);            //       flush full buffer   
 	}                                          //     END LOOP              
@@ -2689,9 +2692,13 @@ void PotExp::SetGravity (Anlm const       &C,       // I: C_nlm coefficients
   CHECKMISMATCH("SetGravity",C);
   setAL(AL);
   setR0(R0);
-  GBlock<T> B4(C);
-  B4.AddGravity(SYM,n,x,p,a,f,d);
+#pragma omp parallel
+  {
+    GBlock<T> B4(C);
+    B4.AddGravity(SYM,n,x,p,a,f,d);
+  }
 }
+
 //------------------------------------------------------------------------------
 template void PotExp::
 SetGravity<float>(Anlm const&, int, const vector<3,float>*,

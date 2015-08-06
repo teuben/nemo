@@ -5,7 +5,7 @@
 ///
 /// \author Walter Dehnen
 ///
-/// \date   2007-2012
+/// \date   2007-12,15
 ///
 ////////////////////////////////////////////////////////////////////////////////
 //
@@ -39,9 +39,10 @@
 // v 2.0   09/03/2010  WD sorting, new filter (in body.h)
 // v 2.0.1 22/06/2011  WD check for snapshot first
 // v 2.1   04/12/2012  WD added rotaxis and rotangle
+// v 2.2   28/01/2015  WD added dx,dv
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.1"
-#define falcON_VERSION_D "04-dec-2012 Walter Dehnen                          "
+#define falcON_VERSION   "2.2"
+#define falcON_VERSION_D "28-jan-2015 Walter Dehnen                          "
 //
 #ifndef falcON_NEMO                                // this is a NEMO program
 #  error You need NEMO to compile "s2s"
@@ -58,6 +59,8 @@ const char*defv[] = {
   "in=???\n         snapshot input file                                ",
   "out=???\n        snapshot output file                               ",
   "times=all\n      time range(s) to copy (\"first\", \"last\" are allowed)",
+  "dx=0,0,0\n       shift positions  of snapshot by dx                 ",
+  "dv=0,0,0\n       shift velocities of snapshot by dv                 ",
   "filter=\n        boolean bodyfunc expression (man page): filter     ",
   "params=\n        parameters, must match requirements for filter     ",
   "sorting=\n       scalar bodyfunc expression: property to sort       ",
@@ -102,16 +105,17 @@ inline void rotate(falcON::fieldset r, falcON::body&B, Matrix const&R)
 //
 namespace {
   using namespace falcON;
-  struct FilterSortRotateWrite
+  struct FilterSortRotateShiftWrite
   {
     BodyFilter     Filter;
     BodyFunc<real> SortFunc;
     fieldset       Copy,Need;
     nemo_out       Out;
     bool           keys,zm,rot;
+    vect           dx,dv;
     Matrix33<real> RotMat;
 
-    FilterSortRotateWrite()
+    FilterSortRotateShiftWrite()
       : Filter(getparam_z("filter"),getparam_z("params"))
       , SortFunc(getparam_z("sorting"),getparam_z("sortpars"))
       , Copy(getioparam_a("copy"))
@@ -119,6 +123,8 @@ namespace {
       , keys(getioparam_z("copy").contain(fieldbit::k))
       , zm(getbparam("zeromissing"))
       , rot(hasvalue("rotaxis"))
+      , dx(getvparam("dx"))
+      , dv(getvparam("dv"))
     { 
       if(keys) Copy |= fieldset::k;
       if(getrparam("rotangle")==0) {
@@ -166,6 +172,12 @@ namespace {
 	  LoopAllBodies(&shot,B)
 	    rotate(VecCopy,B,RotMat);
 	}
+	if(norm(dx))
+	  LoopAllBodies(&shot,B)
+	    B.pos() += dx;
+	if(norm(dv))
+	  LoopAllBodies(&shot,B)
+	    B.vel() += dv;
 	if(!Out) Out.open(getparam("out"));
 	shot.write_nemo(Out,Copy);
       }
@@ -178,28 +190,28 @@ void falcON::main() falcON_THROWING
   nemo_in  In(getparam("in"));
   fieldset Read;
   snapshot Shot;
-  FilterSortRotateWrite FSRW;
+  FilterSortRotateShiftWrite FSRSW;
   if(!In.has_snapshot())
     falcON_THROW("no snapshots found in input file\n");
   if(0==strcmp(getparam("times"),"first")) {
     // special case times=first
-    Shot.read_nemo(In,Read,FSRW.Need,0,0);
-    FSRW(Shot);
+    Shot.read_nemo(In,Read,FSRSW.Need,0,0);
+    FSRSW(Shot);
   } else if(0==strcmp(getparam("times"),"last")) {
     // special case times=last
     while(In.has_snapshot())
-      Shot.read_nemo(In,Read,FSRW.Need,0,0);
+      Shot.read_nemo(In,Read,FSRSW.Need,0,0);
     Shot.del_fields(~Read);
-    FSRW(Shot);
+    FSRSW(Shot);
   } else {
     // general case for times
     while(In.has_snapshot())
-      if(Shot.read_nemo(In,Read,FSRW.Need,getparam("times"),0)) {
+      if(Shot.read_nemo(In,Read,FSRSW.Need,getparam("times"),0)) {
 	Shot.del_fields(~Read);
-	FSRW(Shot);
+	FSRSW(Shot);
       }
   }
-  if(!FSRW.Out)
+  if(!FSRSW.Out)
     falcON_Warning("no snapshot matching \"times=%s\" found in input\n",
 		   getparam("times"));
 }

@@ -184,7 +184,7 @@ namespace {
 	     " -L$FALCONLIB -lfalcON -L$FALCON/utils/lib -lWDutils"
 #endif
 	     " >& %s.log",
-	     getenv("CPATH")? "$CPATH/" COMPILER : COMPILER,
+	     COMPILER,
 	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
     DebugInfo(2,"now compiling using the following command\n   %s\n",cmmd);
     if(system(cmmd)) {
