@@ -1555,10 +1555,10 @@ falcON_TRAITS(::PointerBank::PterWithKey,
 	      "{body.cc}::PointerBank::PterWithKey");
 #endif
 //
-void snapshot::__add_pointer(const void*p,
-			     const char*k,
-			     size_t     s,
-			     const char*n) const falcON_THROWING
+void snapshot::_add_pointer(const void*p,
+			    const char*k,
+			    size_t     s,
+			    const char*n) const falcON_THROWING
 {
   if(debug(4))
     DebugInfo("snapshot::add_pointer() %p to '%s' under \"%s\"\n",p,n,k);
@@ -1571,10 +1571,10 @@ void snapshot::__add_pointer(const void*p,
       falcON_THROW("snapshot::add_pointer(): key '%s' is already in bank\n",k);
 }
 //
-void snapshot::__set_pointer(const void*p,
-			     const char*k,
-			     size_t     s,
-			     const char*n) const falcON_THROWING
+void snapshot::_set_pointer(const void*p,
+			    const char*k,
+			    size_t     s,
+			    const char*n) const falcON_THROWING
 {
   if(debug(4))
     DebugInfo("snapshot::set_pointer() %p to '%s' under \"%s\"\n",p,n,k);
@@ -1587,9 +1587,9 @@ void snapshot::__set_pointer(const void*p,
     static_cast<PointerBank*>(PBNK)->del(k);
 }
 //
-const void* snapshot::__get_pointer(const char*k,
-				    size_t     s,
-				    const char*n) const falcON_THROWING
+const void* snapshot::_get_pointer(const char*k,
+				   size_t     s,
+				   const char*n) const falcON_THROWING
 {
   const void*p = PBNK? static_cast<PointerBank*>(PBNK)->get(k,s,n,
 							    "get_pointer") : 0;

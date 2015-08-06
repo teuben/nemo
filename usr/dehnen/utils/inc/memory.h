@@ -840,8 +840,8 @@ namespace WDutils {
       ~block()
       { WDutils_DEL_aligned(Align,FIRST); }
       /// link block to next block
-      void link(block*__n)
-      { NEXT = __n; }
+      void link(block*_n)
+      { NEXT = _n; }
       /// give out: another element
       pointer new_element()
       { return END++; }
@@ -1448,17 +1448,17 @@ namespace WDutils {
     using Base::A;
     /// \name data
     //@{
-    unsigned __N[D];  ///< __N[d]: size in dimension d 
-    unsigned __K[D];  ///< __K[d] = Prod_i>d __N[i]      
+    unsigned _N[D];  ///< _N[d]: size in dimension d 
+    unsigned _K[D];  ///< _K[d] = Prod_i>d _N[i]      
     //@}
     /// set N[d] and K[d]
     /// \param[in] n size of array in each dimension
     void set(const unsigned*n) {
       for(unsigned d=0; d!=D; ++d)
-	__N[d] = n? n[d] : 0;
-      __K[D-1] = 1;
+	_N[d] = n? n[d] : 0;
+      _K[D-1] = 1;
       for(unsigned d=D-1; d!=0; --d)
-	__K[d-1] = K[d] * N[d];
+	_K[d-1] = K[d] * N[d];
     }
     /// is a set @a n of sizes equal to ours?
     /// \param[in] n  size of array in each dimension
@@ -1475,16 +1475,16 @@ namespace WDutils {
     using Base::ConstSub;
     /// default constructor: sizes are all equal to 0
     Array()
-      : Base(__N,__K,0) { set(0); }
+      : Base(_N,_K,0) { set(0); }
     /// construction from sizes
     /// \param[in] n size of array in each dimension
     explicit Array(const unsigned n[D])
-      : Base(__N,__K,0) { reset(n); }
+      : Base(_N,_K,0) { reset(n); }
     /// construction from sizes for D=2 (compile-time error otherwise)
     /// \param[in] n0 size of array in dimension 0
     /// \param[in] n1 size of array in dimension 1
     Array(unsigned n0, unsigned n1)
-      : Base(__N,__K,0)
+      : Base(_N,_K,0)
     {
       WDutilsStaticAssert(D==2);
       const unsigned n[2] = {n0,n1};
@@ -1495,7 +1495,7 @@ namespace WDutils {
     /// \param[in] n1 size of array in dimension 1
     /// \param[in] n2 size of array in dimension 2
     Array(unsigned n0, unsigned n1, unsigned n2)
-      : Base(__N,__K,0)
+      : Base(_N,_K,0)
     {
       WDutilsStaticAssert(D==3);
       const unsigned n[3] = {n0,n1,n2};
@@ -1507,7 +1507,7 @@ namespace WDutils {
     /// \param[in] n2 size of array in dimension 2
     /// \param[in] n3 size of array in dimension 3
     Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3)
-      : Base(__N,__K,0)
+      : Base(_N,_K,0)
     {
       WDutilsStaticAssert(D==4);
       const unsigned n[4] = {n0,n1,n2,n3};
@@ -1520,7 +1520,7 @@ namespace WDutils {
     /// \param[in] n3 size of array in dimension 3
     /// \param[in] n4 size of array in dimension 4
     Array(unsigned n0, unsigned n1, unsigned n2, unsigned n3, unsigned n4)
-      : Base(__N,__K,0)
+      : Base(_N,_K,0)
     {
       WDutilsStaticAssert(D==5);
       const unsigned n[5] = {n0,n1,n2,n3,n4};
@@ -1530,7 +1530,7 @@ namespace WDutils {
     /// \param[in] n size of array in each dimension
     /// \param[in] x initialize each element with this value
     Array(const unsigned n[D], T const&x)
-    : Base(__N,__K,0) { reset(n,x); }
+    : Base(_N,_K,0) { reset(n,x); }
     /// destruction: de-allocate memory
     ~Array()
     {
@@ -2044,32 +2044,32 @@ namespace WDutils {
 
     ~AlignmentAllocator () noexcept {}
 
-    pointer address (reference __x) const noexcept
+    pointer address (reference _x) const noexcept
     {
 #if __cplusplus >= 201103L
-      return std::addressof(__x);
+      return std::addressof(_x);
 #else
-      return reinterpret_cast<_Tp*>(&reinterpret_cast<char&>(__x));
+      return reinterpret_cast<_Tp*>(&reinterpret_cast<char&>(_x));
 #endif
     }
 
-    const_pointer address (const_reference __x) const noexcept
+    const_pointer address (const_reference _x) const noexcept
     {
 #if __cplusplus >= 201103L
-      return std::addressof(__x);
+      return std::addressof(_x);
 #else
-      return reinterpret_cast<const _Tp*>(&reinterpret_cast<const char&>(__x));
+      return reinterpret_cast<const _Tp*>(&reinterpret_cast<const char&>(_x));
 #endif
     }
 
-    pointer allocate (size_type __n, const void* = 0)
+    pointer allocate (size_type _n, const void* = 0)
     {
       return
-	static_cast<pointer>(static_alloc::allocate(__n*sizeof(value_type)));
+	static_cast<pointer>(static_alloc::allocate(_n*sizeof(value_type)));
     }
 
-    void deallocate (pointer __p, size_type)
-    { static_alloc::deallocate(__p); }
+    void deallocate (pointer _p, size_type)
+    { static_alloc::deallocate(_p); }
 
     size_type max_size () const noexcept
     { return static_alloc::max_size() / sizeof (value_type); }
@@ -2077,20 +2077,20 @@ namespace WDutils {
 #if __cplusplus >= 201103L
 
     template<typename _Up, typename... _Args>
-    void construct(_Up* __p, _Args&&... __args)
-    { ::new(static_cast<void*>(__p)) _Up(std::forward<_Args>(__args)...); }
+    void construct(_Up* _p, _Args&&... _args)
+    { ::new(static_cast<void*>(_p)) _Up(std::forward<_Args>(_args)...); }
     
     template<typename _Up>
-    void destroy(_Up* __p)
-    { __p->~_Up(); }
+    void destroy(_Up* _p)
+    { _p->~_Up(); }
 
 #else
 
-    void construct (pointer __p, const_reference __val)
-    { ::new(static_cast<void*>(__p)) value_type(__val); }
+    void construct (pointer _p, const_reference _val)
+    { ::new(static_cast<void*>(_p)) value_type(_val); }
 
-    void destroy (pointer __p)
-    { __p->~value_type (); }
+    void destroy (pointer _p)
+    { _p->~value_type (); }
 
 #endif
 

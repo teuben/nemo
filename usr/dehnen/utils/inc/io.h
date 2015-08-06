@@ -339,8 +339,8 @@ namespace WDutils {
       il = fw<ew? fw:ew;
       return x<0? il+1 : il;
     }
-    smanip_fp_width(X __x, int __w, int __p, int __s=0)
-      : x(__x), p(__p), w(__w), s(__s)
+    smanip_fp_width(X _x, int _w, int _p, int _s=0)
+      : x(_x), p(_p), w(_w), s(_s)
     {
       if(s) {
 	if(x>0 && w>1) --w;
@@ -377,8 +377,8 @@ namespace WDutils {
   struct smanip_fp_vec_width {
     const X*x;
     int     n,p,w;
-    smanip_fp_vec_width(const X*__x, int __n, int __w, int __p)
-      : x(__x), n(__n), p(__p), w(__w) {}
+    smanip_fp_vec_width(const X*_x, int _n, int _w, int _p)
+      : x(_x), n(_n), p(_p), w(_w) {}
   };
   template<typename X>
   inline std::ostream& operator<<(std::ostream&o,
@@ -529,7 +529,7 @@ namespace WDutils {
     output           (output const&); // not implemented
     output& operator=(output const&); // not implemented
     //--------------------------------------------------------------------------
-    void __open (bool);
+    void _open (bool);
   public:
     /// \name const boolean information
     //@{
@@ -579,26 +579,26 @@ namespace WDutils {
     output(const char*fname, bool append=0) : APPENDING(false), FREC(0) {
       DebugInfo(4,"output(%s,%d)\n",fname,append);
       setfile(fname);
-      __open(append);
+      _open(append);
     }
     /// construction from file name and potential option for appending.
     /// same as above, except for type of first argument
     explicit
     output(std::string const&fname, bool append=0) : APPENDING(false), FREC(0) {
       setfile(fname.c_str());
-      __open(append);
+      _open(append);
     }
     /// close possible old stream, then proceed as in construction
     void open(const char*fname, bool append = 0) {
       close();
       setfile(fname);
-      __open(append);
+      _open(append);
     }
     /// close possible old stream, then proceed as in construction
     void open(std::string const&fname, bool append = 0) {
       close();
       setfile(fname.c_str());
-      __open(append);
+      _open(append);
     }
     /// open file with name made from \a format string and \a tag.
     ///
@@ -710,7 +710,7 @@ namespace WDutils {
     input           (input const&); // not implemented
     input& operator=(input const&); // not implemented
     //--------------------------------------------------------------------------
-    void __open();
+    void _open();
   public:
     /// \name const boolean information
     //@{
@@ -755,7 +755,7 @@ namespace WDutils {
     explicit
     input(const char*fname) : FREC(0) {
       setfile(fname);
-      __open();
+      _open();
     }
     /// construction from file name.
     /// If \e fname equals "-", and no other input or nemo_in is opened to \c
@@ -764,19 +764,19 @@ namespace WDutils {
     explicit
     input(std::string const&fname) : FREC(0) {
       setfile(fname.c_str());
-      __open();
+      _open();
     }
     /// close possible old stream, then proceed as in construction
     void open(const char*fname) {
       close();
       setfile(fname);
-      __open();
+      _open();
     }
     /// close possible old stream, then proceed as in construction
     void open(std::string const&fname) {
       close();
       setfile(fname.c_str());
-      __open();
+      _open();
     }
     /// open file with name made from \a format string and \a tag.
     ///

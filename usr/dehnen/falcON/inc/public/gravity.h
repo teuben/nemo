@@ -71,8 +71,8 @@ namespace falcON {
     InvertZ          *IZ;                     ///< inversion method
   private:
     /// \return 1/theta(M)
-    /// \param[in] __x log(M/M_tot)
-    real inv_theta_of_M(real __x) const;
+    /// \param[in] _x log(M/M_tot)
+    real inv_theta_of_M(real _x) const;
   public:
     /// ctor
     /// \param[in] mac type of MAC
@@ -315,16 +315,16 @@ namespace falcON {
       //------------------------------------------------------------------------
       // private data access                                                    
       //------------------------------------------------------------------------
-#define __srce  static_cast<srce_data*>(AUX1.PTER)
-      real const&mass  () const { return __srce->MASS; }
+#define _srce  static_cast<srce_data*>(AUX1.PTER)
+      real const&mass  () const { return _srce->MASS; }
       vect const&cofm  () const { return POS; }
       real const&rmax  () const { return RAD; }
       real const&size  () const { return RAD; }
       real const&rcrit () const { return RAD; }
       real       rcrit2() const { return square(rcrit()); }
-      real const&eph   () const { return __srce->EPSH; }
+      real const&eph   () const { return _srce->EPSH; }
       Cset&Coeffs() const { return *static_cast<Cset*>(AUX2.PTER); }
-      const Mset&poles () const { return __srce->POLS; }
+      const Mset&poles () const { return _srce->POLS; }
       //------------------------------------------------------------------------
       // simple manipulations                                                   
       //------------------------------------------------------------------------
@@ -345,14 +345,14 @@ namespace falcON {
       //------------------------------------------------------------------------
       // non-const data access via members                                      
       //------------------------------------------------------------------------
-      real &mass  () { return __srce->MASS; }
+      real &mass  () { return _srce->MASS; }
       vect &cofm  () { return POS; }
       real &rmax  () { return RAD; }
       real &size  () { return RAD; }
-      real &eph   () { return __srce->EPSH; }
+      real &eph   () { return _srce->EPSH; }
       Cset &Coeffs() { return *static_cast<Cset*>(AUX2.PTER); }
-      Mset &poles () { return __srce->POLS; }
-#undef __srce
+      Mset &poles () { return _srce->POLS; }
+#undef _srce
       //------------------------------------------------------------------------
       // const data access via friends                                          
       //------------------------------------------------------------------------

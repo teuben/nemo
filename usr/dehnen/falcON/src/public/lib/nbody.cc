@@ -875,9 +875,9 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
   CPU_TREE      ( 0. ),
   CPU_GRAV      ( 0. ),
   CPU_AEX       ( 0. ),
-  __EPS         ( e ),
-  __EPSSINK     ( es? es:e ),
-  __KERN        ( ke )
+  _EPS          ( e ),
+  _EPSSINK      ( es? es:e ),
+  _KERN         ( ke )
 {
 #ifdef falcON_MPI
   if(SELF_GRAV && MPI::Initialized())
@@ -897,9 +897,9 @@ ForceALCON::ForceALCON(snapshot          *s,       // I: snapshot: time & bodies
     falcON_THROW("ForceALCON: using individual adaptive softening, "
 		 "but Nsoft=0\n");
 #endif
-  s->add_pointer(&__EPS,"eps");
-  s->add_pointer(&__EPSSINK,"epssink");
-  s->add_pointer(&__KERN,"kernel");
+  s->add_pointer(&_EPS,"eps");
+  s->add_pointer(&_EPSSINK,"epssink");
+  s->add_pointer(&_KERN,"kernel");
   s->add_pointer(&FALCON,"forces");
   DebugInfo(4,"ForceALCON constructed\n");
 }

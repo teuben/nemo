@@ -189,11 +189,11 @@ namespace falcON {
       /// like destruction followed by construction
       /// \param nmax maximum for n
       /// \param lmax maximum for l
-      void reset(int __nmax, int __lmax) {
-	if(__nmax!=N || __lmax!=L) {
+      void reset(int _nmax, int _lmax) {
+	if(_nmax!=N || _lmax!=L) {
 	  falcON_DEL_A(A);
-	  *(const_cast<int*>(&N)) = __nmax;  // dirty trick to change const data
-	  *(const_cast<int*>(&L)) = __lmax;
+	  *(const_cast<int*>(&N)) = _nmax;  // dirty trick to change const data
+	  *(const_cast<int*>(&L)) = _lmax;
 	  *(const_cast<int*>(&N1)) = N+1;
 	  *(const_cast<int*>(&L1)) = L+1;
 	  *(const_cast<int*>(&L1Q)) = L1*L1;
@@ -203,8 +203,8 @@ namespace falcON {
       //------------------------------------------------------------------------
       /// construction from given n_max & l_max, includes default constructor
       explicit
-      Anlm (int __nmax=0, int __lmax=0) :
-	N(__nmax), L(__lmax),
+      Anlm (int _nmax=0, int _lmax=0) :
+	N(_nmax), L(_lmax),
 	N1(N+1), L1(L+1), L1Q(L1*L1), A(falcON_NEW(scalar,N1*L1Q)) {}
       /// construction form a potential expansion
       template<typename POTEXP>
@@ -314,9 +314,9 @@ namespace falcON {
 	return *this;
       }
       bool IsNaN(symmetry s=none) const
-      { return const_cast<Anlm*>(this)->__IsNaN(s); }
+      { return const_cast<Anlm*>(this)->_IsNaN(s); }
     private:
-      bool __IsNaN(symmetry s);
+      bool _IsNaN(symmetry s);
     public:
       //------------------------------------------------------------------------
 #ifdef falcON_MPI

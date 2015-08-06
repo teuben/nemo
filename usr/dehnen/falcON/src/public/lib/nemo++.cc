@@ -75,29 +75,29 @@ int falcON::nemo_debug_level() {
 ////////////////////////////////////////////////////////////////////////////////
 
 namespace {
-  template<typename Type> struct __inpA;
-  template<> struct __inpA<double> {
+  template<typename Type> struct _inpA;
+  template<> struct _inpA<double> {
     static int inp(const char*p, double*a, int m) {
       return ::nemoinpd(const_cast<char*>(p),a,m);
     } };
-  template<> struct __inpA<float> {
+  template<> struct _inpA<float> {
     static int inp(const char*p, float*a, int m) {
       return ::nemoinpf(const_cast<char*>(p),a,m);
     } };
-  template<> struct __inpA<int> {
+  template<> struct _inpA<int> {
     static int inp(const char*p, int*a, int m) {
       return ::nemoinpi(const_cast<char*>(p),a,m);
     } };
-  template<> struct __inpA<long> {
+  template<> struct _inpA<long> {
     static int inp(const char*p, long*a, int m) {
       return ::nemoinpl(const_cast<char*>(p),a,m);
     } };
-  template<> struct __inpA<unsigned> {
+  template<> struct _inpA<unsigned> {
     static int inp(const char*p, unsigned*a, int m) {
       return ::nemoinpi(const_cast<char*>(p),
 			static_cast<int*>(static_cast<void*>(a)),m);
     } };
-  template<> struct __inpA<bool> {
+  template<> struct _inpA<bool> {
     static int inp(const char*p, bool*a, int m) {
       return ::nemoinpb(const_cast<char*>(p),a,m);
     } };
@@ -105,7 +105,7 @@ namespace {
 
 template<typename T>
 int falcON::nemoinp(const char*e, T*x, int n) {
-  return __inpA<T>::inp(e,x,n);
+  return _inpA<T>::inp(e,x,n);
 }
 
 template int falcON::nemoinp(const char*, bool    *, int);
@@ -565,9 +565,9 @@ falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING :
     if(0 == std::strcmp(time_type,DoubleType))
 	get_data(INPUT.STREAM,TimeTag,DoubleType,&TIME,0);
     else if(0 == std::strcmp(time_type,FloatType)) {
-      float __TIME;
-      get_data(INPUT.STREAM,TimeTag,FloatType,&__TIME,0);
-      TIME = __TIME;
+      float _TIME;
+      get_data(INPUT.STREAM,TimeTag,FloatType,&_TIME,0);
+      TIME = _TIME;
     } else
       falcON_Warning("nemo input: unknown type '%s' for time\n",time_type);
   }

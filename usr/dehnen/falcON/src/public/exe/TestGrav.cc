@@ -165,7 +165,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   if(argc>p) DIR[3] = atoi(argv[p++]);
   if(argc>p) rmax   = atoi(argv[p++]);
   if(argc>p) dump   = atoi(argv[p++]);
-  bodies __BODIES(Nbod), *BODIES=&__BODIES;
+  bodies _BODIES(Nbod), *BODIES=&_BODIES;
   if(indiv_soft) BODIES->add_fields(fieldset::e);
   EPS  = falcON::abs(EPS);
   vect  *A = new vect[N];

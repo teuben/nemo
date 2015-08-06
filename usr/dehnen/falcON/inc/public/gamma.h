@@ -353,9 +353,9 @@ namespace falcON {
   {
     return XofY(y);
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::X(double a) const
+  template<DehnenModel::mass _M> inline double DehnenModel::X(double a) const
   {
-    return XofY(Y<__M>(a));
+    return XofY(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Ps<DehnenModel::ps>(double p) const
@@ -367,9 +367,9 @@ namespace falcON {
     if(g==2.) return -std::log(y);
     return (y==0.) ?  ig2 : ig2*(1.-pow(y,g2));
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::Ps(double a) const
+  template<DehnenModel::mass _M> inline double DehnenModel::Ps(double a) const
   {
-    return Ps<ym>(Y<__M>(a));
+    return Ps<ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Ps1<DehnenModel::ym>(double y,
@@ -384,10 +384,10 @@ namespace falcON {
       return ig2 * (1.-y*t);
     }
   }
-  template<DehnenModel::mass __M>
+  template<DehnenModel::mass _M>
   inline double DehnenModel::Ps1(double a, double&dP) const
   {
-    return Ps1<ym>(Y<__M>(a),dP);
+    return Ps1<ym>(Y<_M>(a),dP);
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Ps2<DehnenModel::ym>(double y,
@@ -406,10 +406,10 @@ namespace falcON {
       return ig2 * (1.-y*y*t);
     }
   }
-  template<DehnenModel::mass __M>
+  template<DehnenModel::mass _M>
   inline double DehnenModel::Ps2(double a, double&d1P, double&d2P) const
   {
-    return Ps2<ym>(Y<__M>(a),d1P,d2P);
+    return Ps2<ym>(Y<_M>(a),d1P,d2P);
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::M <DehnenModel::mm>(double m) const
@@ -420,9 +420,9 @@ namespace falcON {
   {
     return pow(y,g3);
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::M (double a) const
+  template<DehnenModel::mass _M> inline double DehnenModel::M (double a) const
   {
-    return M <ym>(Y<__M>(a));
+    return M <ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Rh<DehnenModel::ym>(double y) const
@@ -431,9 +431,9 @@ namespace falcON {
     if(y==0.) falcON_Error("DehnenModel: density diverges at r=0");
     return g3f*pow(y,-g)*power<4>(1-y);
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::Rh(double a) const
+  template<DehnenModel::mass _M> inline double DehnenModel::Rh(double a) const
   {
-    return Rh<ym>(Y<__M>(a));
+    return Rh<ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Rh1<DehnenModel::ym>(double y,
@@ -446,10 +446,10 @@ namespace falcON {
     dR = -y1 * rh * ( g==0.? 4. : 4.+g*y1/y );
     return rh;
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::Rh1(double a,
+  template<DehnenModel::mass _M> inline double DehnenModel::Rh1(double a,
 								 double&dR)
     const {
-    return Rh1<ym>(Y<__M>(a),dR);
+    return Rh1<ym>(Y<_M>(a),dR);
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Rh2<DehnenModel::ym>(double y,
@@ -466,11 +466,11 @@ namespace falcON {
     d2R  = g==0.? tm * (y1*rh - d1R)   : tm*(y1*rh-d1R)+rh*y1*g*square(y1/y);
     return rh;
   }
-  template<DehnenModel::mass __M> inline double DehnenModel::Rh2(double a,
+  template<DehnenModel::mass _M> inline double DehnenModel::Rh2(double a,
 								 double&d1R,
 								 double&d2R)
     const {
-    return Rh2<ym>(Y<__M>(a),d1R,d2R);
+    return Rh2<ym>(Y<_M>(a),d1R,d2R);
   }
   //----------------------------------------------------------------------------
   // falcON::DehnenModel: circular orbits                                       
@@ -504,27 +504,27 @@ namespace falcON {
   {
     return XofY(y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Xc(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Xc(double a) const
   {
-    return XofY(Yc<__C>(a));
+    return XofY(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Vq<DehnenModel::yc>(double y) const
   {
     return g2==0? 1-y : pow(y,g2)*(1-y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Vq(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Vq(double a) const
   {
-    return Vq<yc>(Yc<__C>(a));
+    return Vq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Vc<DehnenModel::yc>(double y) const
   {
     return sqrt(Vq<yc>(y));
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Vc(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Vc(double a) const
   {
-    return Vc<yc>(Yc<__C>(a));
+    return Vc<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Lq<DehnenModel::lc>(double l) const
@@ -539,9 +539,9 @@ namespace falcON {
   {
     return pow(y,g4)/(1-y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Lq(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Lq(double a) const
   {
-    return Lq<yc>(Yc<__C>(a)); 
+    return Lq<yc>(Yc<_C>(a)); 
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Lc<DehnenModel::lc>(double l) const
@@ -556,9 +556,9 @@ namespace falcON {
   {
     return sqrt(q);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Lc(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Lc(double a) const
   {
-    return Lc<yc>(Yc<__C>(a));
+    return Lc<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Ec<DehnenModel::ec>(double e) const
@@ -571,36 +571,36 @@ namespace falcON {
       log(y) - 0.5*(1-y) :
       ig2 + pow(y,g2)*(0.5*(y-1)-ig2);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Ec(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Ec(double a) const
   {
-    return Ec<yc>(Yc<__C>(a));
+    return Ec<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Oq<DehnenModel::yc>(double y) const
   {
     return pow(y,-g)*power<3>(1-y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Oq(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Oq(double a) const
   {
-    return Oq<yc>(Yc<__C>(a));
+    return Oq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Kq<DehnenModel::yc>(double y) const
   {
     return Oq<yc>(y)*(g4-g3*y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Kq(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Kq(double a) const
   {
-    return Kq<yc>(Yc<__C>(a));
+    return Kq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline double DehnenModel::Gm<DehnenModel::yc>(double y) const
   {
     return 2./sqrt(g4-g3*y);
   }
-  template<DehnenModel::circ __C> inline double DehnenModel::Gm(double a) const
+  template<DehnenModel::circ _C> inline double DehnenModel::Gm(double a) const
   {
-    return Gm<yc>(Yc<__C>(a));
+    return Gm<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   // non-circular orbits                                                        
@@ -613,10 +613,10 @@ namespace falcON {
   //----------------------------------------------------------------------------
   // isotropic velocity dispersion                                              
   //----------------------------------------------------------------------------
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double DehnenModel::sigq(double a) const
   {
-    return SigIsoQ(X<__M>(a));
+    return SigIsoQ(X<_M>(a));
   }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -675,10 +675,10 @@ namespace falcON {
   {
     return sR*DehnenModel::X <ym>(y);
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::R(double a) const
   {
-    return R <ym>(Y<__M>(a));
+    return R <ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -691,10 +691,10 @@ namespace falcON {
   {
     return sM*DehnenModel::M <ym>(y);
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::M(double a) const
   {
-    return M <ym>(Y<__M>(a));
+    return M <ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -707,23 +707,23 @@ namespace falcON {
   {
     return sE*DehnenModel::Ps<ym>(y);
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Ps(double a) const
   {
-    return Ps<ym>(Y<__M>(a));
+    return Ps<ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
   double ScaledDehnenModel::Ps1<DehnenModel::ym>(double y, double&dP) const
   {
-    register double __ps = sE*DehnenModel::Ps1<ym>(y,dP);
+    register double _ps = sE*DehnenModel::Ps1<ym>(y,dP);
     dP *= sA;
-    return __ps;
+    return _ps;
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Ps1(double a, double&dP) const
   {
-    return Ps1<ym>(Y<__M>(a),dP);
+    return Ps1<ym>(Y<_M>(a),dP);
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -731,15 +731,15 @@ namespace falcON {
 						 double&d1P,
 						 double&d2P) const
   {
-    register double __ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
+    register double _ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
     d1P *= sA;
     d2P *= sS;
-    return __ps;
+    return _ps;
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Ps2(double a, double&d1P, double&d2P) const
   {
-    return Ps2<ym>(Y<__M>(a),d1P,d2P);
+    return Ps2<ym>(Y<_M>(a),d1P,d2P);
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -747,10 +747,10 @@ namespace falcON {
   {
     return sD*DehnenModel::Rh<ym>(y);
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Rh(double a) const
   {
-    return Rh<ym>(Y<__M>(a));
+    return Rh<ym>(Y<_M>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -760,10 +760,10 @@ namespace falcON {
     dR *= sB;
     return rh;
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Rh1(double a, double&dR) const
   {
-    return Rh1<ym>(Y<__M>(a),dR);
+    return Rh1<ym>(Y<_M>(a),dR);
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -776,10 +776,10 @@ namespace falcON {
     d2R *= sC;
     return rh;
   }
-  template<DehnenModel::mass __M> inline
+  template<DehnenModel::mass _M> inline
   double ScaledDehnenModel::Rh2(double a, double&d1R, double&d2R) const
   {
-    return Rh2<ym>(Y<__M>(a),d1R,d2R);
+    return Rh2<ym>(Y<_M>(a),d1R,d2R);
   }
   //----------------------------------------------------------------------------
   // circular orbits                                                            
@@ -820,10 +820,10 @@ namespace falcON {
   {
     return sR*DehnenModel::Xc<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Rc(double a) const
   {
-    return Rc<yc>(Yc<__C>(a));
+    return Rc<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -831,10 +831,10 @@ namespace falcON {
   {
     return sV*DehnenModel::Vc<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Vc(double a) const
   {
-    return Vc<yc>(Yc<__C>(a));
+    return Vc<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -842,10 +842,10 @@ namespace falcON {
   {
     return sE*DehnenModel::Vq<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Vq(double a) const
   {
-    return Vq<yc>(Yc<__C>(a));
+    return Vq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -863,10 +863,10 @@ namespace falcON {
   {
     return sL*DehnenModel::Lc<yc>(y);
   }
-  template<DehnenModel::circ __C> inline 
+  template<DehnenModel::circ _C> inline 
   double ScaledDehnenModel::Lc(double a) const
   {
-    return Lc<yc>(Yc<__C>(a));
+    return Lc<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -884,10 +884,10 @@ namespace falcON {
   {
     return sQ*DehnenModel::Lq<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Lq(double a) const
   {
-    return Lq<yc>(Yc<__C>(a));
+    return Lq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -900,10 +900,10 @@ namespace falcON {
   {
     return sE*DehnenModel::Ec<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Ec(double a) const
   {
-    return Ec<yc>(Yc<__C>(a));
+    return Ec<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -911,10 +911,10 @@ namespace falcON {
   {
     return sO*DehnenModel::Oq<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Oq(double a) const
   {
-    return Oq<yc>(Yc<__C>(a));
+    return Oq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -922,10 +922,10 @@ namespace falcON {
   {
     return sO*DehnenModel::Kq<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Kq(double a) const
   {
-    return Kq<yc>(Yc<__C>(a));
+    return Kq<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   template<> inline
@@ -933,10 +933,10 @@ namespace falcON {
   {
     return    DehnenModel::Gm<yc>(y);
   }
-  template<DehnenModel::circ __C> inline
+  template<DehnenModel::circ _C> inline
   double ScaledDehnenModel::Gm(double a) const
   {
-    return Gm<yc>(Yc<__C>(a));
+    return Gm<yc>(Yc<_C>(a));
   }
   //----------------------------------------------------------------------------
   // non-circular orbits                                                        
@@ -1007,9 +1007,9 @@ namespace falcON {
   {
     return sF*DehnenModel::F(e*iE);
   }
-  inline double ScaledDehnenModel::Fsub(double e, double __G) const
+  inline double ScaledDehnenModel::Fsub(double e, double _G) const
   {
-    return sF*DehnenModel::Fsub(e*iE,__G);
+    return sF*DehnenModel::Fsub(e*iE,_G);
   }
   inline double ScaledDehnenModel::G(double e) const
   {
@@ -1059,9 +1059,9 @@ namespace falcON {
     return ScaledDehnenModel::Ps<DehnenModel::xm>(r);
   }
   //----------------------------------------------------------------------------
-  inline double DehnenModelSampler::Psy(double __y) const
+  inline double DehnenModelSampler::Psy(double _y) const
   {
-    return ScaledDehnenModel::Ps<DehnenModel::ym>(__y);
+    return ScaledDehnenModel::Ps<DehnenModel::ym>(_y);
   }
   //----------------------------------------------------------------------------
   inline double DehnenModelSampler::Mr(double r) const

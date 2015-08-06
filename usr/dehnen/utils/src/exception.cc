@@ -121,13 +121,13 @@ WDutils::RunInfo::RunInfo()
     }
     // set user name
     {
-      const char*user__ = getenv("USER");
-      if(user__) {
+      const char*user_ = getenv("USER");
+      if(user_) {
 #ifdef __clang__
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wformat-security"
 #endif
-	SNprintf(_m_user,104,user__);
+	SNprintf(_m_user,104,user_);
 #ifdef __clang__
 #  pragma clang diagnostic pop
 #endif

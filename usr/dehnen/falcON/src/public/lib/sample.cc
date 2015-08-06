@@ -38,10 +38,10 @@ using namespace falcON;
 //
 namespace {
   const int Ne1=1000, Ne=Ne1+1;
-  double __p;
+  double _p;
   inline double dI(double eta, double const&)
   {
-    return pow(sin(eta),__p);
+    return pow(sin(eta),_p);
   }
 }
 //
@@ -53,31 +53,31 @@ inline void SphericalSampler::setis()
   Xe[0][0] = 0.;
   Xe[0][1] = 1.;
   const double de =Pi/Ne1;
-  double __eta = 0.;
-  __p = 1-b0-b0;
+  double _eta = 0.;
+  _p = 1-b0-b0;
   for(register int i=1; i!=Ne; ++i) {
-    Is[i]    = rk4(Is[i-1],__eta,de,dI);
-    __eta   += de;
-    Xe[i][0] = sin(__eta);
-    Xe[i][1] = cos(__eta);
+    Is[i]    = rk4(Is[i-1],_eta,de,dI);
+    _eta   += de;
+    Xe[i][0] = sin(_eta);
+    Xe[i][1] = cos(_eta);
   }
 }
 //
 #ifdef falcON_PROPER
 #  include <proper/sample.cc>
 #endif
-SphericalSampler::SphericalSampler(double __mt,
-				   double __ra,
-				   double __b0,
-				   bool   __c) :
-  careful ( __c ),
-  OM      ( __ra>0. ),
-  beta    ( __b0 != 0. ),
-  Mt      ( __mt ),
-  ra      ( __ra ),
-  iraq    ( __ra>0? 1./(__ra*__ra) : 0. ),
-  b0      ( __b0 ),
-  ibt     ( 1./(3. - __b0 - __b0) ),
+SphericalSampler::SphericalSampler(double _mt,
+				   double _ra,
+				   double _b0,
+				   bool   _c) :
+  careful ( _c ),
+  OM      ( _ra>0. ),
+  beta    ( _b0 != 0. ),
+  Mt      ( _mt ),
+  ra      ( _ra ),
+  iraq    ( _ra>0? 1./(_ra*_ra) : 0. ),
+  b0      ( _b0 ),
+  ibt     ( 1./(3. - _b0 - _b0) ),
   Xe      ( beta? Ne : 0 ),
   Is      ( beta? Ne : 0 )
 #ifdef falcON_PROPER

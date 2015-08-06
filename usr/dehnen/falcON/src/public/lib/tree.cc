@@ -120,22 +120,22 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 #define LoopDims for(int d=0; d!=Ndim; ++d)
   //----------------------------------------------------------------------------
-#define __LoopLeafKids(TREE,CELL,KID)			\
+#define _LoopLeafKids(TREE,CELL,KID)			\
     for(OctTree::Leaf* KID = LeafNo(TREE,fcleaf(CELL));	\
 	KID != LeafNo(TREE,ecleaf(CELL)); ++KID)
-#define __LoopAllLeafs(TREE,CELL,KID)			\
+#define _LoopAllLeafs(TREE,CELL,KID)			\
     for(OctTree::Leaf* KID = LeafNo(TREE,fcleaf(CELL));	\
 	KID != LeafNo(TREE,ncleaf(CELL)); ++KID)
-#define __LoopCellKids(TREE,CELL,KID)			\
+#define _LoopCellKids(TREE,CELL,KID)			\
     for(OctTree::Cell* KID = CellNo(TREE,fccell(CELL));	\
 	KID != CellNo(TREE,eccell(CELL)); ++KID)
-#define __LoopLeafs(TREE,LEAF)				\
+#define _LoopLeafs(TREE,LEAF)				\
     for(OctTree::Leaf* LEAF = FstLeaf(TREE);		\
         LEAF != EndLeaf(TREE); ++LEAF)
-#define __LoopMyCellsUp(CELL)				\
+#define _LoopMyCellsUp(CELL)				\
     for(OctTree::Cell* CELL=EndCells()-1;		\
 	CELL != FstCell()-1; --CELL)
-#define __LoopLeafsRange(TREE,FIRST,END,LEAF)		\
+#define _LoopLeafsRange(TREE,FIRST,END,LEAF)		\
     for(OctTree::Leaf* LEAF=LeafNo(TREE,FIRST);		\
 	LEAF != LeafNo(TREE,END); ++LEAF)
   //////////////////////////////////////////////////////////////////////////////
@@ -225,16 +225,16 @@ namespace {
     nleafs_(C) = 0;                                // reset cell: # leaf kids   
     ncells_(C) = 0;                                // reset cell: # cell kids   
     fcleaf_(C) = NoLeaf(T,Lf);                     // set cell: sub-leafs       
-    __LoopLeafKids(PT,P,pl)                        // LOOP(leaf kids of Pcell)  
+    _LoopLeafKids(PT,P,pl)                        // LOOP(leaf kids of Pcell)  
       if(in_subtree(pl)) {                         //   IF(leaf == subt leaf)   
 	(Lf++)->copy(pl);                          //     copy link to body etc 
 	nleafs_(C)++;                              //     increment # leaf kids 
       }                                            //   ENDIF                   
-    __LoopCellKids(PT,P,pc)                        // LOOP(cell kids of Pcell)  
+    _LoopCellKids(PT,P,pc)                        // LOOP(cell kids of Pcell)  
       if(is_subtreecell(pc))                       //   IF(cell==subt cell)     
 	ncells_(C)++;                              //     count # subt cell kids
       else if(in_subtree(pc))                      //   ELIF(cell==subt node)   
-	__LoopAllLeafs(PT,pc,pl)                   //     LOOP sub cell's leafs 
+	_LoopAllLeafs(PT,pc,pl)                   //     LOOP sub cell's leafs 
 	  if(in_subtree(pl)) {                     //       IF(leaf==subt leaf) 
 	    (Lf++)->copy(pl);                      //         copy link etc     
 	    nleafs_(C)++;                          //         incr # leaf kids  
@@ -245,7 +245,7 @@ namespace {
       OctTree::Cell*Ci=Cf;                         //   remember free cells     
       fccell_(C) = NoCell(T,Ci);                   //   set cell children       
       Cf += ncells_(C);                            //   reserve children cells  
-      __LoopCellKids(PT,P,pc)                      //   LOOP(c kids of Pcell)   
+      _LoopCellKids(PT,P,pc)                      //   LOOP(c kids of Pcell)   
 	if(is_subtreecell(pc)) {                   //     IF(cell == subt cell) 
 	  pacell_(Ci) = c;                         //       sub-cell's parent   
 	  int de =link(PT,pc,T,Ci,Cf,Lf);          //       link sub cells      
@@ -1165,7 +1165,7 @@ namespace {
     dot*Di = D0 = falcON_NEW(dot,BB->N_bodies());
     XAVE = zero;
     XMAX = XMIN = BB->pos(mybody(LeafNo(TREE,0)));
-    __LoopLeafs(TREE,Li) {
+    _LoopLeafs(TREE,Li) {
       Di->set_up(BB,mybody(Li));
       Di->pos().up_min_max(XMIN,XMAX);
       XAVE += Di->pos();

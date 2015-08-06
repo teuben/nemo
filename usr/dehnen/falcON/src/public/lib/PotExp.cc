@@ -1679,24 +1679,24 @@ namespace {
   scalar(*fu)(scalar);
   scalar(*fb)(scalar,scalar);
   scalar(*ft)(scalar,scalar,scalar);
-  struct __neg  { static void op(scalar&a, scalar  , scalar )  {a = -a; } };
-  struct __setX { static void op(scalar&a, scalar  , scalar x) {a =  x; } };
-  struct __mulX { static void op(scalar&a, scalar  , scalar x) {a*=  x; } };
-  struct __setB { static void op(scalar&a, scalar b, scalar )  {a =  b; } };
-  struct __mulB { static void op(scalar&a, scalar b, scalar )  {a*=  b; } };
-  struct __addB { static void op(scalar&a, scalar b, scalar )  {a+=  b; } };
-  struct __subB { static void op(scalar&a, scalar b, scalar )  {a-=  b; } };
+  struct _neg  { static void op(scalar&a, scalar  , scalar )  {a = -a; } };
+  struct _setX { static void op(scalar&a, scalar  , scalar x) {a =  x; } };
+  struct _mulX { static void op(scalar&a, scalar  , scalar x) {a*=  x; } };
+  struct _setB { static void op(scalar&a, scalar b, scalar )  {a =  b; } };
+  struct _mulB { static void op(scalar&a, scalar b, scalar )  {a*=  b; } };
+  struct _addB { static void op(scalar&a, scalar b, scalar )  {a+=  b; } };
+  struct _subB { static void op(scalar&a, scalar b, scalar )  {a-=  b; } };
 #if 0 // not used
-  struct __setT { static void op(scalar&a, scalar b, scalar x) {a =x*b; } };
+  struct _setT { static void op(scalar&a, scalar b, scalar x) {a =x*b; } };
 #endif
-  struct __nan  { static void op(scalar&a, scalar  , scalar  )
+  struct _nan  { static void op(scalar&a, scalar  , scalar  )
     { if(WDutils::isnan(a)) nan=true; } };
-  struct __addT { static void op(scalar&a, scalar b, scalar x) {a+=x*b; } };
-  struct __subT { static void op(scalar&a, scalar b, scalar x) {a-=x*b; } };
-  struct __una  { static void op(scalar&a, scalar  , scalar  ) {a =fu(a);  } };
-  struct __binX { static void op(scalar&a, scalar  , scalar x) {a =fb(a,x);} };
-  struct __binB { static void op(scalar&a, scalar b, scalar  ) {a =fb(a,b);} };
-  struct __tert { static void op(scalar&a, scalar b, scalar x) {a =ft(a,b,x);}};
+  struct _addT { static void op(scalar&a, scalar b, scalar x) {a+=x*b; } };
+  struct _subT { static void op(scalar&a, scalar b, scalar x) {a-=x*b; } };
+  struct _una  { static void op(scalar&a, scalar  , scalar  ) {a =fu(a);  } };
+  struct _binX { static void op(scalar&a, scalar  , scalar x) {a =fb(a,x);} };
+  struct _binB { static void op(scalar&a, scalar b, scalar  ) {a =fb(a,b);} };
+  struct _tert { static void op(scalar&a, scalar b, scalar x) {a =ft(a,b,x);}};
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // Spherical(): computing spherical coordinates from Cartesian              //
@@ -1803,13 +1803,13 @@ YlmRec &YlmRec::set(YlmRec&T, YlmRec&P,
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::assign(scalar x) {
-  AUX<S>::template Connect<__setX>(*this,*this,x);
+  AUX<S>::template Connect<_setX>(*this,*this,x);
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline bool YlmRec::hasnan() const {
   nan=false;
-  AUX<S>::template Connect<__nan>(*const_cast<YlmRec*>(this),
+  AUX<S>::template Connect<_nan>(*const_cast<YlmRec*>(this),
 				  *const_cast<YlmRec*>(this),scalar(0));
   return nan;
 }
@@ -1819,7 +1819,7 @@ template<symmetry S> inline YlmRec &YlmRec::reset() {
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::multiply(scalar x) {
-  AUX<S>::template Connect<__mulX>(*this,*this,x);
+  AUX<S>::template Connect<_mulX>(*this,*this,x);
   return *this;
 }
 //------------------------------------------------------------------------------
@@ -1828,27 +1828,27 @@ template<symmetry S> inline YlmRec &YlmRec::divide(scalar x) {
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::copy(YlmRec const&B) {
-  AUX<S>::template Connect<__setB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_setB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::add(YlmRec const&B) {
-  AUX<S>::template Connect<__addB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_addB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::addtimes(YlmRec const&B, scalar x) {
-  AUX<S>::template Connect<__addT>(*this,B,x);
+  AUX<S>::template Connect<_addT>(*this,B,x);
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::sub(YlmRec const&B) {
-  AUX<S>::template Connect<__subB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_subB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline YlmRec &YlmRec::subtimes(YlmRec const&B, scalar x) {
-  AUX<S>::template Connect<__subT>(*this,B,x);
+  AUX<S>::template Connect<_subT>(*this,B,x);
   return *this;
 }
 //------------------------------------------------------------------------------
@@ -1889,13 +1889,13 @@ void YlmRec::table_print(symmetry     s,
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
 template<symmetry S> inline AnlRec &AnlRec::assign(scalar x) {
-  AUX<S>::template Connect<__setX>(*this,*this,x);
+  AUX<S>::template Connect<_setX>(*this,*this,x);
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline bool AnlRec::hasnan() const {
   nan=false;
-  AUX<S>::template Connect<__nan>(*const_cast<AnlRec*>(this),
+  AUX<S>::template Connect<_nan>(*const_cast<AnlRec*>(this),
 				  *const_cast<AnlRec*>(this),scalar(0));
   return nan;
 }
@@ -1905,7 +1905,7 @@ template<symmetry S> inline AnlRec &AnlRec::reset() {
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::multiply(scalar x) {
-  AUX<S>::template Connect<__mulX>(*this,*this,x);
+  AUX<S>::template Connect<_mulX>(*this,*this,x);
   return *this;
 }
 //------------------------------------------------------------------------------
@@ -1914,27 +1914,27 @@ template<symmetry S> inline AnlRec &AnlRec::divide(scalar x) {
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::copy(AnlRec const&B) {
-  AUX<S>::template Connect<__setB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_setB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::add(AnlRec const&B) {
-  AUX<S>::template Connect<__addB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_addB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::addtimes(AnlRec const&B, scalar x) {
-  AUX<S>::template Connect<__addT>(*this,B,x);
+  AUX<S>::template Connect<_addT>(*this,B,x);
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::sub(AnlRec const&B) {
-  AUX<S>::template Connect<__subB>(*this,B,scalar(0));
+  AUX<S>::template Connect<_subB>(*this,B,scalar(0));
   return *this;
 }
 //------------------------------------------------------------------------------
 template<symmetry S> inline AnlRec &AnlRec::subtimes(AnlRec const&B, scalar x) {
-  AUX<S>::template Connect<__subT>(*this,B,x);
+  AUX<S>::template Connect<_subT>(*this,B,x);
   return *this;
 }
 //------------------------------------------------------------------------------
@@ -1983,48 +1983,48 @@ void AnlRec::table_print(symmetry     s,
   }
 //----------------------------------------------------------------------------
 Anlm&Anlm::assign(scalar x, symmetry S) {
-  CONNECT(__setX,*this,x);
+  CONNECT(_setX,*this,x);
 }
 Anlm&Anlm::negate(symmetry S) {
-  CONNECT(__neg ,*this,scalar(0));
+  CONNECT(_neg ,*this,scalar(0));
 }
 Anlm&Anlm::multiply(scalar x, symmetry S) {
-  CONNECT(__mulX,*this,x);
+  CONNECT(_mulX,*this,x);
 }
 Anlm&Anlm::copy(Anlm const&B, symmetry S) {
-  CONNECT(__setB,B,scalar(0));
+  CONNECT(_setB,B,scalar(0));
 }
 Anlm&Anlm::add(Anlm const&B, symmetry S) {
-  CONNECT(__addB,B,scalar(0));
+  CONNECT(_addB,B,scalar(0));
 }
 Anlm&Anlm::subtract(Anlm const&B, symmetry S) {
-  CONNECT(__subB,B,scalar(0));
+  CONNECT(_subB,B,scalar(0));
 }
 Anlm&Anlm::multiply(Anlm const&B, symmetry S) {
-  CONNECT(__mulB,B,scalar(0));
+  CONNECT(_mulB,B,scalar(0));
 }
 Anlm&Anlm::addtimes(Anlm const&B, scalar x, symmetry S) {
-  CONNECT(__addT,B,x);
+  CONNECT(_addT,B,x);
 }
 Anlm&Anlm::subtimes(Anlm const&B, scalar x, symmetry S) {
-  CONNECT(__subT,B,x);
+  CONNECT(_subT,B,x);
 }
 Anlm&Anlm::unary(scalar(*f)(scalar), symmetry S) {
   ::fu = f;
-  CONNECT(__una,*this,scalar(0));
+  CONNECT(_una,*this,scalar(0));
 }
 Anlm&Anlm::binary(scalar(*f)(scalar,scalar), scalar x, symmetry S) {
   ::fb = f;
-  CONNECT(__binX,*this,x);
+  CONNECT(_binX,*this,x);
 }
 Anlm&Anlm::binary(scalar(*f)(scalar,scalar), Anlm const&B, symmetry S) {
   ::fb = f;
-  CONNECT(__binB,B,scalar(0));
+  CONNECT(_binB,B,scalar(0));
 }
 Anlm&Anlm::tertiary(scalar(*f)(scalar,scalar,scalar), Anlm const&B, scalar x,
 		    symmetry S) {
   ::ft = f;
-  CONNECT(__tert,B,x);
+  CONNECT(_tert,B,x);
 }
 #undef CONNECT
 //------------------------------------------------------------------------------
@@ -2159,7 +2159,7 @@ namespace {
 		     <<" sp="<<sp[k]<<'\n';
 	  }
 	}
-	AUX<SYM>::template Connect<__addB>(C,Psi,Ylm,scalar(0));
+	AUX<SYM>::template Connect<_addB>(C,Psi,Ylm,scalar(0));
 	                                           //     add to C_nlm          
       }                                            //   END LOOP                
       K = 0;                                       //   reset the counter       
@@ -2203,7 +2203,7 @@ namespace {
 	SetPsi<SYM>(Psi,rd,T(1));
 	SetYlm<SYM>(Ylm,ct,st,cp,sp);
 	for(int j=0; j!=m; ++m)
-	  AUX<SYM>::template Connect<__addT>(C[j],Psi,Ylm,y[i][j]);
+	  AUX<SYM>::template Connect<_addT>(C[j],Psi,Ylm,y[i][j]);
       }
     }
   public:
@@ -2527,9 +2527,9 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   template<symmetry SYM>
   inline void normalize(Anlm&C, Anlm const&K, scalar G) {
-    AUX<SYM>::template Connect<__mulB>(C,K,scalar(0));
+    AUX<SYM>::template Connect<_mulB>(C,K,scalar(0));
     if(G != 1)
-      AUX<SYM>::template Connect<__mulX>(C,C,G);
+      AUX<SYM>::template Connect<_mulX>(C,C,G);
   }
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
@@ -2576,7 +2576,7 @@ PotExp::PotExp(scalar   a,                         // parameter alpha
   SetNlm(Nlm);
   SetKnl(Knl);
   SetAnl(Anl,Knl);
-  AUX<none>::Connect<__setB>(Knlm,Anl,Nlm,scalar(0));
+  AUX<none>::Connect<_setB>(Knlm,Anl,Nlm,scalar(0));
 }
 //------------------------------------------------------------------------------
 #define CHECKMISMATCH(FUNC,COEFF)					\
@@ -2925,16 +2925,16 @@ int main()
     SetYlm(sym,Yh0,cos(the+d),sin(the+d),cos(phi  ),sin(phi  ));
     SetYlm(sym,Y,Yt,Yp,cos(the  ),sin(the  ),cos(phi  ),sin(phi  ));
 
-#define PRINTY(__L,__M)							\
+#define PRINTY(_L,_M)							\
     {									\
       scalar								\
-        y  =Y00(__L,__M),						\
-	yt =(Yh0(__L,__M)-Yl0(__L,__M))/td,				\
-	yp =(Y0h(__L,__M)-Y0l(__L,__M))/td,				\
-	yy =Y(__L,__M),							\
-	yyt=Yt(__L,__M),						\
-	yyp=Yp(__L,__M);						\
-      cout<< " (" << setw( 1) <<  (__L) << ',' << setw( 2) << (__M)	\
+        y  =Y00(_L,_M),							\
+	yt =(Yh0(_L,_M)-Yl0(_L,_M))/td,					\
+	yp =(Y0h(_L,_M)-Y0l(_L,_M))/td,					\
+	yy =Y(_L,_M),							\
+	yyt=Yt(_L,_M),							\
+	yyp=Yp(_L,_M);							\
+      cout<< " (" << setw( 1) <<  (_L) << ',' << setw( 2) << (_M)	\
 	  << "): Y="  << setw(13) << y					\
 	  << " dY/dt="<< setw(13) << yt					\
 	  << " dY/dp="<< setw(13) << yp					\
@@ -2980,13 +2980,13 @@ int main()
     SetPsi(sym,Pl,r-d,1);
     SetPsi(sym,Ph,r+d,1);
     SetPsi(sym,PP,Pr,r);
-#define PRINTP(__N,__L)						\
-    cout<< " (" << (__N) << ',' << (__L)			\
-	<< "): P="  << setw(13) <<  P0(__N,__L)			\
-	<< " dP/dr="<< setw(13) << (Ph(__N,__L)-Pl(__N,__L))/td	\
+#define PRINTP(_N,_L)						\
+    cout<< " (" << (_N) << ',' << (_L)				\
+	<< "): P="  << setw(13) <<  P0(_N,_L)			\
+	<< " dP/dr="<< setw(13) << (Ph(_N,_L)-Pl(_N,_L))/td	\
 	<< "\n       "						\
-	<< " P="    << setw(13) <<  PP(__N,__L)			\
-	<< " dP/dr="<< setw(13) <<  Pr(__N,__L)	<<endl;
+	<< " P="    << setw(13) <<  PP(_N,_L)			\
+	<< " dP/dr="<< setw(13) <<  Pr(_N,_L)	<<endl;
 
     int dl = (sym & PotExp::pint)? 2 : 1;
     for(int n=0; n<=nmax; ++n) {
@@ -3016,17 +3016,17 @@ int main()
     PE.SetYlm(Y,ct,st,cos(phi),sin(phi));
     PE.Add(A,P,Y);
     
-#define PRINTA(__N,__L,__M)						\
-    cout<< " A("  << setw( 1) << (__N)					\
-        << ','    << setw( 1) << (__L)					\
-	<< ','    << setw( 2) << (__M)					\
-	<< ") ="  << setw(12) <<  A(__N,__L,__M)			\
-	<< " P("  << setw( 1) << (__N)					\
-	<< ','    << setw( 1) << (__L)					\
-	<< ")*Y(" << setw( 1) << (__L)					\
-	<< ','    << setw( 2) << (__M)					\
-	<< ") ="  << setw(12) << P(__N,__L) * Y(__L,__M)		\
-        <<((abs(A(__N,__L,__M) - P(__N,__L) * Y(__L,__M))>1.e-8)?	\
+#define PRINTA(_N,_L,_M)						\
+    cout<< " A("  << setw( 1) << (_N)					\
+        << ','    << setw( 1) << (_L)					\
+	<< ','    << setw( 2) << (_M)					\
+	<< ") ="  << setw(12) <<  A(_N,_L,_M)				\
+	<< " P("  << setw( 1) << (_N)					\
+	<< ','    << setw( 1) << (_L)					\
+	<< ")*Y(" << setw( 1) << (_L)					\
+	<< ','    << setw( 2) << (_M)					\
+	<< ") ="  << setw(12) << P(_N,_L) * Y(_L,_M)			\
+        <<((abs(A(_N,_L,_M) - P(_N,_L) * Y(_L,_M))>1.e-8)?		\
            "        PROBLEM\n" : "\n");
 
     cout<<'\n';

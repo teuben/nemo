@@ -49,16 +49,16 @@ namespace falcON {
   //                                                                            
   // meta programmed sum over array                                             
   //                                                                            
-  template<int I, int N1> struct __Sum {
+  template<int I, int N1> struct _Sum {
     template<typename T> static T sum(const T*X) {
-      return X[I]+__Sum<I+1,N1>::sum(X); }
+      return X[I]+_Sum<I+1,N1>::sum(X); }
   };
-  template<int I> struct __Sum<I,I> {
+  template<int I> struct _Sum<I,I> {
     template<typename T> static T sum(const T*X) { 
       return X[I]; }
   };
   template<int N, typename T> T sum(const T X[N]) {
-    return N? __Sum<0,N-1>::sum(X) : T(0);
+    return N? _Sum<0,N-1>::sum(X) : T(0);
   }
   //
   class ebodies;                                   // declared in forcesC.cc
@@ -1610,13 +1610,13 @@ namespace falcON {
     void set_time(double t) const { TIME  = t; }          ///< set time
     void reset_time() const { TIME  = 0.; }               ///< set time to zero
   private:
-    void __add_pointer(const void*, const char*, size_t, const char*)
+    void _add_pointer(const void*, const char*, size_t, const char*)
       const falcON_THROWING;
-    void __set_pointer(const void*, const char*, size_t, const char*)
+    void _set_pointer(const void*, const char*, size_t, const char*)
       const falcON_THROWING;
-    void __rep_pointer(const void*, const char*, size_t, const char*)
+    void _rep_pointer(const void*, const char*, size_t, const char*)
       const falcON_THROWING;
-    const void*__get_pointer(const char*, size_t, const char*) const
+    const void*_get_pointer(const char*, size_t, const char*) const
       falcON_THROWING;
   public:
     //==========================================================================
@@ -1639,7 +1639,7 @@ namespace falcON {
     /// \param[in] hand handle for the pointer
     template<typename T>
     void add_pointer(const T*pter, const char*hand) const falcON_THROWING {
-      __add_pointer(pter, hand, sizeof(T), nameof(T));
+      _add_pointer(pter, hand, sizeof(T), nameof(T));
     }
     /// set a pointer to pointer bank (see also add_pointer()).
     ///
@@ -1652,7 +1652,7 @@ namespace falcON {
     /// \param[in] hand handle for the pointer
     template<typename T>
     void set_pointer(const T*pter, const char*hand) const falcON_THROWING {
-      __set_pointer(pter, hand, sizeof(T), nameof(T));
+      _set_pointer(pter, hand, sizeof(T), nameof(T));
     }
     /// return pointer to a given handle (see also add_pointer()).
     ///
@@ -1670,7 +1670,7 @@ namespace falcON {
     /// compiler cannot determine the return type from the arguments.
     template<typename T>
     const T*pointer(const char*hand) const falcON_THROWING { 
-      return static_cast<const T*>(__get_pointer(hand, sizeof(T), nameof(T)));
+      return static_cast<const T*>(_get_pointer(hand, sizeof(T), nameof(T)));
     }
     /// get a pointer to a given handle, routine version of pointer()
     ///
@@ -1689,7 +1689,7 @@ namespace falcON {
     ///       required.
     template<typename T>
     void get_pointer(const T* &pter, const char*hand) const falcON_THROWING {
-      pter = static_cast<const T*>(__get_pointer(hand, sizeof(T), nameof(T)));
+      pter = static_cast<const T*>(_get_pointer(hand, sizeof(T), nameof(T)));
     }
     /// delete an entry from the pointer bank
     ///

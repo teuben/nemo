@@ -70,7 +70,7 @@ namespace WDutils {
   template<bool> struct STATIC_ASSERTION_FAILURE;
   template<>     struct STATIC_ASSERTION_FAILURE<true> { enum { value = 1 }; };
 #  define WDutilsStaticAssert(TEST)				\
-  enum { __DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
+  enum { _DUMMY = sizeof(WDutils::STATIC_ASSERTION_FAILURE<	\
     static_cast<bool>((TEST))>)					\
   }
 }

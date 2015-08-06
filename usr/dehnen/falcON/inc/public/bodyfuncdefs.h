@@ -40,12 +40,12 @@
 #endif
 namespace {
   template<typename T> struct make_bool {
-    static bool cond(const T&__x) { return bool(__x); } };
+    static bool cond(const T&_x) { return bool(_x); } };
   template<> struct make_bool<vect> {
-    static bool cond(const vect&__x) { return __x!=zero; } };
+    static bool cond(const vect&_x) { return _x!=zero; } };
   // cond(x): type conversion to bool
   template<typename T> inline
-  bool cond(const T&__x) { return make_bool<T>::cond(__x); }
+  bool cond(const T&_x) { return make_bool<T>::cond(_x); }
 
 #if defined(BD_TEST)
   // dummy functions that aid computing need and type
@@ -64,8 +64,8 @@ namespace {
   template<typename T>
   char TypeLetter(T const&) { return BfTypeInfo<T>::type; }
 
-  int      __test(0);                // to sum boolean tests
-  fieldset __need(fieldset::empty);  // to accumulate fields needed
+  int      _test(0);                // to sum boolean tests
+  fieldset _need(fieldset::empty);  // to accumulate fields needed
   // provides return value for dummy functions,
   // preventing compiler from optimising dummy function calls away
   WDutils::Random3 RNG(1);
@@ -73,10 +73,10 @@ namespace {
   // dummy functions which are allowed but not field functions
   inline int    bodyindex() {                      return int   (RNG()); }
   inline int    ntot     () {                      return int   (RNG()); }
-  inline double mtot     () { __need |= fieldset::m; return double(RNG()); }
-  inline double vrad     () { __need |= fieldset::phases; return double(RNG()); }
-  inline double vtan     () { __need |= fieldset::phases; return double(RNG()); }
-  inline double vphi     () { __need |= fieldset::phases; return double(RNG()); }
+  inline double mtot     () { _need |= fieldset::m; return double(RNG()); }
+  inline double vrad     () { _need |= fieldset::phases; return double(RNG()); }
+  inline double vtan     () { _need |= fieldset::phases; return double(RNG()); }
+  inline double vphi     () { _need |= fieldset::phases; return double(RNG()); }
   inline bool   is_sph   () { return RNG() > 0.5; }
   inline bool   is_std   () { return RNG() > 0.5; }
   inline bool   is_sink  () { return RNG() > 0.5; }
@@ -89,7 +89,7 @@ namespace {
 #define DEF_DUMMY(BIT,NAME)			\
   inline Return<BIT>::Type NAME()		\
   {						\
-    __need |= fieldset(fieldbit(BIT));		\
+    _need |= fieldset(fieldbit(BIT));		\
     return Return<BIT>::Type(RNG());		\
   }
   DEF_NAMED(DEF_DUMMY);

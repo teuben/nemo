@@ -115,11 +115,11 @@ namespace falcON {
 //
 #ifdef TEST_TIMING
 #  include <ctime>
-#  define SET_I        std::clock_t __C0_TIMING = std::clock();
+#  define SET_I        std::clock_t _C0_TIMING = std::clock();
 #  define SET_T(TEXT)  std::cerr<<TEXT					\
-                                <<(std::clock()-__C0_TIMING)/		\
+                                <<(std::clock()-_C0_TIMING)/		\
                                    double(CLOCKS_PER_SEC)<<'\n';	\
-                       __C0_TIMING = std::clock();
+                       _C0_TIMING = std::clock();
 #else
 #  define SET_I        {}
 #  define SET_T(TEXT)  {}

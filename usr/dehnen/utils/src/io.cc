@@ -78,9 +78,9 @@ size_t WDutils::FileSize(const char*sFileName)
 // class WDutils::output
 //
 ////////////////////////////////////////////////////////////////////////////////
-void output::__open(bool append)
+void output::_open(bool append)
 {
-  DebugInfo(8,"output::__open(%d): FILE=%s\n",append,FILE);
+  DebugInfo(8,"output::_open(%d): FILE=%s\n",append,FILE);
   APPENDING = false;
   if     (0 == FILE    ||
 	  0 == FILE[0] ||
@@ -92,7 +92,7 @@ void output::__open(bool append)
     OUT = &std::cout;
     DebugInfo(5,"output: open stdout\n");
   } else {
-    DebugInfo(10,"output::__open(%d): FILE=%s\n",append,FILE);
+    DebugInfo(10,"output::_open(%d): FILE=%s\n",append,FILE);
     std::ofstream *FOUT = new std::ofstream();
     if(append) {
       FOUT->open(FILE,std::ios::out | std::ios::app);
@@ -136,7 +136,7 @@ void output::close() {
 // class WDutils::input
 //
 ////////////////////////////////////////////////////////////////////////////////
-void input::__open() {
+void input::_open() {
   if     (0 == FILE || FILE[0] == 0) {
     IN = 0;
     DebugInfo(2,"input: empty file\n");

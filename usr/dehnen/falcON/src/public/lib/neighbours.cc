@@ -363,9 +363,9 @@ namespace {
     /// \param l leaf to make list for
     /// \param P cell surrounding leaf (this is not checked, but required)
   public:
-    void make_list(const leaf*l, const cell*P, Neighbour*List, int __k)
+    void make_list(const leaf*l, const cell*P, Neighbour*List, int _k)
     {
-      K = __k;
+      K = _k;
       LIST = List;
       L = l;
       X = pos(L);

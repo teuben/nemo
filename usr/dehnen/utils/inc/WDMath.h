@@ -125,66 +125,66 @@ namespace WDutils {
   // ///////////////////////////////////////////////////////////////////////////
   namespace meta {
     // all exact built-in types
-    template<typename, bool> struct __TypeCompareE;
-    template<typename __T> struct __TypeCompareE<__T,true>
+    template<typename, bool> struct _TypeCompareE;
+    template<typename _T> struct _TypeCompareE<_T,true>
     {
-      static bool iszero(__T x) { return x==__T(0); }
-      static bool equal(__T x, __T y) { return x==y; }
-      static bool insignificant(__T e, __T) { return iszero(e); }
+      static bool iszero(_T x) { return x==_T(0); }
+      static bool equal(_T x, _T y) { return x==y; }
+      static bool insignificant(_T e, _T) { return iszero(e); }
     };
     // all floating-point types
-    template<typename __T> struct __TypeCompareE<__T,false>
+    template<typename _T> struct _TypeCompareE<_T,false>
     {
       // static assert to avoid non-exact non-float-point types
-      WDutilsStaticAssert(is_floating_point<__T>::value);
-      static bool iszero(__T x)
+      WDutilsStaticAssert(is_floating_point<_T>::value);
+      static bool iszero(_T x)
       {
-	return std::abs(x) < std::numeric_limits<__T>::min();
+	return std::abs(x) < std::numeric_limits<_T>::min();
       }
-      static bool equal(__T x, __T y)
+      static bool equal(_T x, _T y)
       {
 	return std::abs(x-y) <=
 	  std::max(std::abs(x),std::abs(y)) *
-	  std::numeric_limits<__T>::epsilon();
+	  std::numeric_limits<_T>::epsilon();
       }
-      static bool insignificant(__T e, __T x)
+      static bool insignificant(_T e, _T x)
       {
-	return std::abs(e) < std::abs(x) * std::numeric_limits<__T>::epsilon();
+	return std::abs(e) < std::abs(x) * std::numeric_limits<_T>::epsilon();
       }
     };
     // all built-in types
-    template<typename __T> struct __TypeCompare :
-      public __TypeCompareE<__T, std::numeric_limits<__T>::is_exact> {};
+    template<typename _T> struct _TypeCompare :
+      public _TypeCompareE<_T, std::numeric_limits<_T>::is_exact> {};
     // specialisation: pointer
-    template<typename __T> struct __TypeCompare<__T*> :
-      public __TypeCompareE<__T*, true> {};
+    template<typename _T> struct _TypeCompare<_T*> :
+      public _TypeCompareE<_T*, true> {};
     // specialisation: const pointer
-    template<typename __T> struct __TypeCompare<const __T*> :
-      public __TypeCompareE<const __T*, true> {};
+    template<typename _T> struct _TypeCompare<const _T*> :
+      public _TypeCompareE<const _T*, true> {};
 #ifdef WDutils_COMPLEX
     // specialisation: complex
-    template<typename __T> struct __TypeCompare<std::complex<__T> >
+    template<typename _T> struct _TypeCompare<std::complex<_T> >
     {
-      typedef __TypeCompareE<__T, std::numeric_limits<__T>::is_exact> __Comp;
-      static bool iszero(std::complex<__T> x)
+      typedef _TypeCompareE<_T, std::numeric_limits<_T>::is_exact> _Comp;
+      static bool iszero(std::complex<_T> x)
       { 
 	return
-	  __Comp::iszero(std::real(x)) &&
-	  __Comp::iszero(std::imag(x)) ;
+	  _Comp::iszero(std::real(x)) &&
+	  _Comp::iszero(std::imag(x)) ;
       }
-      static bool equal(std::complex<__T> x,
-			std::complex<__T> y)
+      static bool equal(std::complex<_T> x,
+			std::complex<_T> y)
       {
 	return
-	  __Comp::equal(std::real(x),std::real(y)) &&
-	  __Comp::equal(std::imag(x),std::imag(y)) ;
+	  _Comp::equal(std::real(x),std::real(y)) &&
+	  _Comp::equal(std::imag(x),std::imag(y)) ;
       }
-      static bool insignificant(std::complex<__T> e,
-				std::complex<__T> x)
+      static bool insignificant(std::complex<_T> e,
+				std::complex<_T> x)
       {
 	return
-	  __Comp::insignificant(std::real(e),std::real(x)) &&
-	  __Comp::insignificant(std::imag(e),std::imag(x)) ;
+	  _Comp::insignificant(std::real(e),std::real(x)) &&
+	  _Comp::insignificant(std::imag(e),std::imag(x)) ;
       }
     };
 #endif    
@@ -199,9 +199,9 @@ namespace WDutils {
   /// \note This is a template which works fine for all built-in types
   ///       and pointers. However, if you want or need to use this function
   ///       for a user-defined type, you best provide an overloaded version.
-  template<typename __T>
-  inline bool iszero(__T x)
-  { return meta::__TypeCompare<__T>::iszero(x); }
+  template<typename _T>
+  inline bool iszero(_T x)
+  { return meta::_TypeCompare<_T>::iszero(x); }
   /// are two numbers equal?
   /// \note For floating-point numbers, the naive comparison "X==Y" is
   ///       not reliable at all. It depends very much on the actual
@@ -213,9 +213,9 @@ namespace WDutils {
   /// \note This is a template which works fine for all built-in types
   ///       and pointers. However, if you want or need to use this function
   ///       for a user-defined type, you best provide an overloaded version.
-  template<typename __T>
-  inline bool equal(__T x, __T y)
-  { return meta::__TypeCompare<__T>::equal(x,y); }
+  template<typename _T>
+  inline bool equal(_T x, _T y)
+  { return meta::_TypeCompare<_T>::equal(x,y); }
   /// is a number insignificant compared to another
 
   /// \note Numerical code sometimes contains statements like @c
@@ -228,10 +228,10 @@ namespace WDutils {
   /// \note This is a template which works fine for all built-in types
   ///       and pointers. However, if you want or need to use this function
   ///       for a user-defined type, you best provide an overloaded version.
-  template<typename __T>
-  inline bool insignificant(__T e, __T x)
+  template<typename _T>
+  inline bool insignificant(_T e, _T x)
   { 
-    return meta::__TypeCompare<__T>::insignificant(e,x);
+    return meta::_TypeCompare<_T>::insignificant(e,x);
   }
   // ///////////////////////////////////////////////////////////////////////////
   /// volume of unit sphere in n dimensions                                     
@@ -319,12 +319,12 @@ namespace WDutils {
     double ex = x<0 ? exp(x) : exp(-x);
     return 2.*ex/(1+ex*ex);
   }
-  template<typename T> struct __sincos {
+  template<typename T> struct _sincos {
     static void sc(T, T&, T&) {
       WDutils_THROW("sincos() of \"%s\" called\n",traits<T>::name());
     }
   };
-  template<> struct __sincos<float> {
+  template<> struct _sincos<float> {
     static void sc(float x, float&s, float&c) {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGI)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
@@ -334,7 +334,7 @@ namespace WDutils {
 #endif
     }
   };
-  template<> struct __sincos<double> {
+  template<> struct _sincos<double> {
     static void sc(double x, double&s, double&c) {
 #if defined(__GNUC__) || defined (__INTEL_COMPILER) || defined (__PGI)
     __asm __volatile__ ("fsincos" : "=t" (s), "=u" (c) : "0" (x) );
@@ -346,7 +346,7 @@ namespace WDutils {
   };
   /// sinus and cosinus of real-valued scalar simultaneously
   template<typename REAL> inline void sincos(REAL x, REAL&s, REAL&c) {
-    __sincos<REAL>::sc(x,s,c);
+    _sincos<REAL>::sc(x,s,c);
   }
   //@}
 #ifdef WDutils_COMPLEX

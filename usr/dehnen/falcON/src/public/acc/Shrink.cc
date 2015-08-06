@@ -46,10 +46,10 @@ namespace {
 
   const int AccMax = 10;
 
-  template <typename T> struct __type;
-  template <> struct __type<float > { static const char t='f'; };
-  template <> struct __type<double> { static const char t='d'; };
-  template <typename T> char type(T = T(0)) { return __type<T>::t; }
+  template <typename T> struct _type;
+  template <> struct _type<float > { static const char t='f'; };
+  template <> struct _type<double> { static const char t='d'; };
+  template <typename T> char type(T = T(0)) { return _type<T>::t; }
   //
   /// a shrinking/growing external gravitational potential.
   /*!
@@ -71,7 +71,7 @@ namespace {
     static void SwallowRestofLine(std::istream& from)
     { char c; do from.get(c); while(from.good() && c !='\n'); }
     /// read line until character `#'; swallow rest of line
-    static void __read_line(std::istream& from, char*line, int const&n)
+    static void _read_line(std::istream& from, char*line, int const&n)
     {
       // 1. find first non-space character whereby:
       //    - return empty line if EOF, EOL, '#' are encountered
@@ -101,7 +101,7 @@ namespace {
     static void read_line(std::istream& from, char*line, int const&n)
     {
       do {
-	__read_line(from,line,n);
+	_read_line(from,line,n);
       } while(from.good() && *line == 0);
     }
     /// \name data
@@ -398,8 +398,8 @@ namespace {
   } *MyAcc[AccMax] = {0};
   int AccN = 0;
   
-#undef  __DEF__ACC__NO
-#define __DEF__ACC__NO(NUM)					\
+#undef  _DEF_ACC_NO
+#define _DEF_ACC_NO(NUM)					\
 void acceleration##NUM(int        d,				\
 		       double     t,				\
 		       int        n,				\
@@ -412,16 +412,16 @@ void acceleration##NUM(int        d,				\
 		       int        i,				\
 		       char       y)				\
 { (MyAcc[NUM])->acc(d,t,n,m,x,v,f,p,a,i,y); }
-__DEF__ACC__NO(0)
-__DEF__ACC__NO(1)
-__DEF__ACC__NO(2)
-__DEF__ACC__NO(3)
-__DEF__ACC__NO(4)
-__DEF__ACC__NO(5)
-__DEF__ACC__NO(6)
-__DEF__ACC__NO(7)
-__DEF__ACC__NO(8)
-__DEF__ACC__NO(9)
+_DEF_ACC_NO(0)
+_DEF_ACC_NO(1)
+_DEF_ACC_NO(2)
+_DEF_ACC_NO(3)
+_DEF_ACC_NO(4)
+_DEF_ACC_NO(5)
+_DEF_ACC_NO(6)
+_DEF_ACC_NO(7)
+_DEF_ACC_NO(8)
+_DEF_ACC_NO(9)
   acc_pter Accs[AccMax] = {&acceleration0,
 			   &acceleration1,
 			   &acceleration2,

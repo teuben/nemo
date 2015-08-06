@@ -355,9 +355,9 @@ double WDutils::Beta(double a, double b, double x)
       exp(a*log(x)+b*log(1-x))*betacf(b,a,1-x)/b;
 }
 //------------------------------------------------------------------------------
-WDutils::BetaFunc::BetaFunc(double __a, double __b)
-  : a ( __a ), 
-    b ( __b ), 
+WDutils::BetaFunc::BetaFunc(double _a, double _b)
+  : a ( _a ), 
+    b ( _b ), 
     B ( exp(lnGam_pos(a)+lnGam_pos(b)-lnGam_pos(a+b)) ),
     x0( (a+1)/(a+b+2) ) {}
 double WDutils::BetaFunc::operator() (double x) const {

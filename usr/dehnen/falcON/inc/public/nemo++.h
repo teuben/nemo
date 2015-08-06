@@ -285,12 +285,12 @@ namespace falcON {
   /// \param[in] p parameter name as specified in 2nd argument to initparam()
   /// \return value associated with p
   inline PotExp::symmetry getsymparam(const char*p) {
-    int __sym (getiparam(p));
+    int _sym (getiparam(p));
     return
-      __sym==4? PotExp::spherical   :
-      __sym==3? PotExp::cylindrical :
-      __sym==2? PotExp::triaxial    :
-      __sym==1? PotExp::reflexion   : PotExp::none;
+      _sym==4? PotExp::spherical   :
+      _sym==3? PotExp::cylindrical :
+      _sym==2? PotExp::triaxial    :
+      _sym==1? PotExp::reflexion   : PotExp::none;
   }
 #endif
 

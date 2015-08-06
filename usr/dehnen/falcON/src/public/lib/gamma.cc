@@ -74,11 +74,11 @@ namespace {
   }
 }
 //------------------------------------------------------------------------------
-double DehnenModel::YcofLq(double __Lq) const
+double DehnenModel::YcofLq(double _Lq) const
 {
-  if(__Lq==0.) return 0.;
-  ::lq = __Lq;
-  if(g==2.) return 0.5*(sqrt(__Lq*(__Lq+4))-lq);
+  if(_Lq==0.) return 0.;
+  ::lq = _Lq;
+  if(g==2.) return 0.5*(sqrt(_Lq*(_Lq+4))-lq);
   ::g3 = g3;
   ::g4 = g4;
   return rtsafe(&subyclg,0.,1.,eps);
@@ -199,14 +199,14 @@ double DehnenModel::CumSurfaceDensity(double R) const
 }
 //==============================================================================
 namespace {
-  double __ep;
+  double _ep;
   void subxef(double R, double&f, double&df)
   {
     s  = R;
     sa = 1-s;
     ts = s+s;
-    f  = 0.5 - 2 * g3 / pow(s+1,2.5-g) * qbulir(&subcsd,0.,1.,__ep);
-    df =       2 * g3 / pow(s+1,3.5-g) * qbulir(&subsur,0.,1.,__ep);
+    f  = 0.5 - 2 * g3 / pow(s+1,2.5-g) * qbulir(&subcsd,0.,1.,_ep);
+    df =       2 * g3 / pow(s+1,3.5-g) * qbulir(&subsur,0.,1.,_ep);
   }
 }
 //------------------------------------------------------------------------------
@@ -215,7 +215,7 @@ double DehnenModel::EffectiveRadius() const
   ::g = g;
   ::g1= g1;
   ::g3= g3;
-  __ep= eps;
+  _ep= eps;
   const double a = X<mm>(0.5) * (((-0.00182*g+0.00322)*g-0.00439)*g+0.7549);
   return rtsafe(&subxef,0.9*a,1.1*a,eps);
 }
@@ -288,7 +288,7 @@ namespace {
   }
 }
 //------------------------------------------------------------------------------
-double DehnenModel::Fsub(double E, double __G) const
+double DehnenModel::Fsub(double E, double _G) const
 {
   if(E==0.) return 0.;
   ::e   = E;
@@ -299,8 +299,8 @@ double DehnenModel::Fsub(double E, double __G) const
     falcON_Error("DehnenModel: Eps=%f < 0 in DfIsotropic()",E);
   if(g2>0. && eg2==1.)
     falcON_Error("DehnenModel: DfIsotropic() diverging at E=Psi(0)");
-  if(__G<=0.) __G=g;
-  double dg = g-__G;
+  if(_G<=0.) _G=g;
+  double dg = g-_G;
   if(dg<0.)
     falcON_Error("DehnenModel: G > gamma in F(E,G)");
   if(g==0. && dg==0.) {
@@ -309,11 +309,11 @@ double DehnenModel::Fsub(double E, double __G) const
   }
   ::g2 = g2;
   ::ig2= ig2;
-  ::Ag = __G*(2-dg);
-  ::Bg = twice((2-__G)*(2-dg)+2*(__G-1));
-  ::Cg = (4-__G)*(2+dg);
+  ::Ag = _G*(2-dg);
+  ::Bg = twice((2-_G)*(2-dg)+2*(_G-1));
+  ::Cg = (4-_G)*(2+dg);
   ::Pg = 4-g-dg;
-  return (3-__G) * 0.25 /(sqrt2*Pi3) *sqrt(e) *qbulir(&subfei,0.,1.,eps,0,0,50);
+  return (3-_G) * 0.25 /(sqrt2*Pi3) *sqrt(e) *qbulir(&subfei,0.,1.,eps,0,0,50);
 }
 //==============================================================================
 namespace {
@@ -348,7 +348,7 @@ double DehnenModel::F(double Q, double ra) const
 }
 //==============================================================================
 namespace {
-  inline double sub__geA(double t)
+  inline double sub_geA(double t)
   {
     // for gamma < 2
     register double tq = t*t;
@@ -356,7 +356,7 @@ namespace {
     if(z<=0. || z>=1.) return 0;
     return pow(z,g1) * tq/power<4>(1-pow(z,ig2));
   }
-  inline double sub__geB(double t)
+  inline double sub_geB(double t)
   {
     // for gamma > 2
     register double tq = t*t;
@@ -364,7 +364,7 @@ namespace {
     if(y<=0. || y>=1.) return 0;
     return pow(y,g1) * tq/power<4>(1-y);
   }
-  inline double sub__geC(double z)
+  inline double sub_geC(double z)
   {
     // for gamma = 2
     if(z<=0. || z>=1.) return 0.;
@@ -383,19 +383,19 @@ double DehnenModel::G(double E) const
     falcON_Error("DehnenModel::G() E out of range");
   if(E==0.) falcON_Error("DehnenModel::G() diverging at E=0");
   if(g==2.) {
-    return 32 * sqrt2 * Pi2 * qbulir(&sub__geC,0.,1.,eps,0,0,50);
+    return 32 * sqrt2 * Pi2 * qbulir(&sub_geC,0.,1.,eps,0,0,50);
   } else if(g<2.) {
     ::g1  = (g+1)*ig2;
     ::eg2 = 1-e*g2;
     ::ig2 = ig2;
     return 32 * sqrt2 * Pi2 * pow(ig2,1.5) * 
-      qbulir(&sub__geA,0.,sqrt(eg2),eps,0,0,50);
+      qbulir(&sub_geA,0.,sqrt(eg2),eps,0,0,50);
   } else {
     ::g1  = 6-3*g/2;
     ::eg2 = 1./(1-e*g2);
     ::ig2 = ig2;
     return 32 * sqrt2 * Pi2 * pow(-ig2,1.5) * eg2 *
-      qbulir(&sub__geB,0.,1.,eps,0,0,50);
+      qbulir(&sub_geB,0.,1.,eps,0,0,50);
   }
 }
 ////////////////////////////////////////////////////////////////////////////////
@@ -410,19 +410,19 @@ DehnenModelSampler(double gam,               // I: gamma
 		   double r_a,               //[I: anisotropy radius]     
 		   double rmax,              //[I: maximum radius]        
 		   int    N,                 //[I: # points on table f(y)]
-		   double __eps                //[I: numerical precision]   
+		   double _eps                //[I: numerical precision]   
 #ifdef falcON_PROPER
-		  ,double __rs,              //[I: mass adaption: scale radius]
-		   double __mm,              //[I: mass adaption: mass ratio]
-		   double __et,              //[I: mass adaption: shape param]
-		   double __nm,              //[I: mass adaption: n_max]
-		   bool   __pr               //[I: mass adaption: R_-/Re]
+		  ,double _rs,              //[I: mass adaption: scale radius]
+		   double _mm,              //[I: mass adaption: mass ratio]
+		   double _et,              //[I: mass adaption: shape param]
+		   double _nm,              //[I: mass adaption: n_max]
+		   bool   _pr               //[I: mass adaption: R_-/Re]
 #endif
 		   ) :
-  ScaledDehnenModel ( gam,radius,Mtot,__eps ),
+  ScaledDehnenModel ( gam,radius,Mtot,_eps ),
   SphericalSampler  ( rmax>0? Mr(rmax):Mtot, r_a
 #ifdef falcON_PROPER
-		      ,__rs,__mm,__et,__nm,__pr
+		      ,_rs,_mm,_et,_nm,_pr
 #endif
                     ),
   n                 ( N ),

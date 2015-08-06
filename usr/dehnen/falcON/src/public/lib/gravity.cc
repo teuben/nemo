@@ -637,18 +637,18 @@ namespace {
   // is_act<bool>()                                                           //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template<bool> struct __IsAct;
-  template<> struct __IsAct<0> {
+  template<bool> struct _IsAct;
+  template<> struct _IsAct<0> {
     template<typename T> static bool is(T const&t) { return is_active(t); }
   };
-  template<> struct __IsAct<1> {
+  template<> struct _IsAct<1> {
     template<typename T> static bool is(T const&) { return 1; }
   };
 
   template<bool ALL> inline
-  bool is_act(const grav::leaf*L) { return __IsAct<ALL>::is(L); }
+  bool is_act(const grav::leaf*L) { return _IsAct<ALL>::is(L); }
   template<bool ALL> inline
-  bool is_act(flags F) { return __IsAct<ALL>::is(F); }
+  bool is_act(flags F) { return _IsAct<ALL>::is(F); }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
   // UpdateBodiesGrav<ALL_ACT>()                                              //

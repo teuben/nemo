@@ -77,37 +77,37 @@ namespace WDutils {
   }
 #else
   namespace meta {
-    template<typename I, typename U> struct __ISIZE {
+    template<typename I, typename U> struct _ISIZE {
       typedef I signed_integer;
       typedef U unsigned_integer;
       WDutilsStaticAssert(sizeof(signed_integer) == sizeof(unsigned_integer));
       static const int  size = sizeof(signed_integer);
     };
 
-    template<int> struct __ITRAITS;
-    template<> struct __ITRAITS<0> : 
-      public __ISIZE<char, unsigned char> {};
-    template<> struct __ITRAITS<1> :
-      public __ISIZE<short, unsigned short> {};
-    template<> struct __ITRAITS<2> :
-      public __ISIZE<int, unsigned int> {};
-    template<> struct __ITRAITS<3> :
-      public __ISIZE<long, unsigned long> {};
-    template<> struct __ITRAITS<4> :
-      public __ISIZE<long long, unsigned long long> {};
+    template<int> struct _ITRAITS;
+    template<> struct _ITRAITS<0> : 
+      public _ISIZE<char, unsigned char> {};
+    template<> struct _ITRAITS<1> :
+      public _ISIZE<short, unsigned short> {};
+    template<> struct _ITRAITS<2> :
+      public _ISIZE<int, unsigned int> {};
+    template<> struct _ITRAITS<3> :
+      public _ISIZE<long, unsigned long> {};
+    template<> struct _ITRAITS<4> :
+      public _ISIZE<long long, unsigned long long> {};
 
     template<int WORDS> struct IntTypeWords
     {
     private:
       static const int TYPE = 
-    __ITRAITS<0>::size == WORDS ? 0 :
-    __ITRAITS<1>::size == WORDS ? 1 :
-    __ITRAITS<2>::size == WORDS ? 2 :
-    __ITRAITS<3>::size == WORDS ? 3 :
-    __ITRAITS<4>::size == WORDS ? 4 : 5;
+    _ITRAITS<0>::size == WORDS ? 0 :
+    _ITRAITS<1>::size == WORDS ? 1 :
+    _ITRAITS<2>::size == WORDS ? 2 :
+    _ITRAITS<3>::size == WORDS ? 3 :
+    _ITRAITS<4>::size == WORDS ? 4 : 5;
     public:
-      typedef typename __ITRAITS<TYPE>::signed_integer signed_integer;
-      typedef typename __ITRAITS<TYPE>::unsigned_integer unsigned_integer;
+      typedef typename _ITRAITS<TYPE>::signed_integer signed_integer;
+      typedef typename _ITRAITS<TYPE>::unsigned_integer unsigned_integer;
     private:
       WDutilsStaticAssert(sizeof(signed_integer) == WORDS);
     };

@@ -72,24 +72,24 @@
 namespace falcON {
   namespace meta {
   //////////////////////////////////////////////////////////////////////////////
-  template<int N, int I=0> struct __tr {
+  template<int N, int I=0> struct _tr {
     template<typename scalar> static scalar a(scalar t[N+1][N+1]) {
-      return t[I][I] + __tr<N,I+1>::a(t); } };
-  template<int N> struct __tr<N,N> {
+      return t[I][I] + _tr<N,I+1>::a(t); } };
+  template<int N> struct _tr<N,N> {
     template<typename scalar> static scalar a(scalar t[N+1][N+1]) {
       return t[N][N]; } };
   //////////////////////////////////////////////////////////////////////////////
-  template<int N, int I=0, int J=0> struct __addt {
+  template<int N, int I=0, int J=0> struct _addt {
     template<typename scalar> static 
     void a(scalar t[N+1][N+1], const scalar*x, const falcON::real*y) {
       t[I][J] += x[I] * y[J];
-      __addt<N,I,J+1>::a(t,x,y); } };
-  template<int N,int I> struct __addt<N,I,N> {
+      _addt<N,I,J+1>::a(t,x,y); } };
+  template<int N,int I> struct _addt<N,I,N> {
     template<typename scalar> static 
     void a(scalar t[N+1][N+1], const scalar*x, const falcON::real*y) {
       t[I][N] += x[I] * y[N];
-      __addt<N,I+1,0>::a(t,x,y); } };
-  template<int N> struct __addt<N,N,N> {
+      _addt<N,I+1,0>::a(t,x,y); } };
+  template<int N> struct _addt<N,N,N> {
     template<typename scalar> static 
     void a(scalar t[N+1][N+1], const scalar*x, const falcON::real*y) {
       t[N][N] += x[N] * y[N]; } };
@@ -122,18 +122,18 @@ namespace falcON {
     /// 3x3 matrix, not necessarily symmetric
     typedef real tensor[Ndim][Ndim];
     /// trace of tensor                                                         
-    static double tr(double t[Ndim][Ndim]) { return meta::__tr<Ndim-1>::a(t); }
+    static double tr(double t[Ndim][Ndim]) { return meta::_tr<Ndim-1>::a(t); }
     /// trace of tensor                                                         
-    static float  tr(float  t[Ndim][Ndim]) { return meta::__tr<Ndim-1>::a(t); }
+    static float  tr(float  t[Ndim][Ndim]) { return meta::_tr<Ndim-1>::a(t); }
     /// tensor computation as outer product or two vectors                      
     static void AddTensor(double t[Ndim][Ndim], vect_d const&x, vect const&y) {
-      meta::__addt<Ndim-1>::a(t,
+      meta::_addt<Ndim-1>::a(t,
 			      static_cast<const double*> (x),
 			      static_cast<const real  *> (y));
     }
     /// tensor computation as outer product or two vectors                      
     static void AddTensor(float t[Ndim][Ndim], vect_f const&x, vect const&y) {
-      meta::__addt<Ndim-1>::a(t,
+      meta::_addt<Ndim-1>::a(t,
 			      static_cast<const float*> (x),
 			      static_cast<const real *> (y));
     }
@@ -931,8 +931,8 @@ namespace falcON {
     mutable forces      FALCON;            ///< force algorithm(s)
     mutable unsigned    REUSED;            ///< how often has tree been re-used
     mutable double      CPU_TREE, CPU_GRAV, CPU_AEX; ///< CPU timings
-    const real          __EPS,__EPSSINK;
-    const kern_type     __KERN;
+    const real          _EPS,_EPSSINK;
+    const kern_type     _KERN;
     //@}
     /// build tree and compute forces
     /// \param[in] all   for all bodies (or active only)?

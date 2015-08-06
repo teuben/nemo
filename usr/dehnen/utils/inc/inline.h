@@ -102,21 +102,21 @@ namespace WDutils {
   scalar_type times4(scalar_type x)
   { return 4*x; }
   //
-  template<int N> struct times__ {
+  template<int N> struct times_ {
     template<typename S> static S is(S const&x) { return N * x; } };
-  template<> struct times__<2> {
+  template<> struct times_<2> {
     template<typename S> static S is(S const&x) { return x + x; } };
-  template<> struct times__<1> {
+  template<> struct times_<1> {
     template<typename S> static S is(S const&x) { return x; } };
-  template<> struct times__<0> {
+  template<> struct times_<0> {
     template<typename S> static S is(S const& ) { return S(0); } };
-  template<> struct times__<-1> {
+  template<> struct times_<-1> {
     template<typename S> static S is(S const&x) { return -x; } };
-  template<> struct times__<-2> {
+  template<> struct times_<-2> {
     template<typename S> static S is(S const&x) { return -x-x; } };
   /// N*x: uses faster code for |N| < 3
   template<int N, typename scalar_type> inline
-  scalar_type times (scalar_type x) { return times__<N>::is(x); }
+  scalar_type times (scalar_type x) { return times_<N>::is(x); }
   //
   template<unsigned, bool ISODD> struct powU;
   template<unsigned N> struct powU<N,0> {

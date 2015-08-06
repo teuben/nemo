@@ -73,17 +73,17 @@ void falcON::main() falcON_THROWING
   bodiesfunc    BF  (getparam("prop"));
   const int     prec(getiparam("prec"));
   const bool    time(getbparam("givetime"));
-  real        __P[10], *P=0;
+  real         _P[10], *P=0;
   snapshot      SHOT;
   if(BF.npar()) {
-    int n = getaparam_z("pars",__P,10);
+    int n = getaparam_z("pars",_P,10);
     if(n == 0)
       falcON_THROW("prop=\"%s\" requires %d parameters, none given",
 		   getparam("prop"),BF.npar());
     if(n < BF.npar())
       falcON_THROW("prop=\"%s\" requires %d parameters, only %d given",
 		   getparam("prop"),BF.npar(),n);
-    P = __P;
+    P = _P;
   }
   // loop snapshots, process them and make outputs                              
   while(IN.has_snapshot()) {

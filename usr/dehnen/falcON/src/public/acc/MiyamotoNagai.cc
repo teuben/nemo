@@ -86,9 +86,9 @@ namespace {
 		    scalar      *) const;
   }; // class MiyamotoNagai {
   //////////////////////////////////////////////////////////////////////////////
-  template<int NDIM> struct __helper {
+  template<int NDIM> struct _helper {
     template<typename scalar> static
-    void __acc(MiyamotoNagai const&POT,
+    void _acc(MiyamotoNagai const&POT,
 	       const scalar       *pos,
 	       scalar             &pot,
 	       scalar             *acc)
@@ -103,11 +103,11 @@ namespace {
       acc[1] = pos[1] * F;
       acc[2] = ZB? pos[2]*F*AZ/ZB : 0;
     }
-  }; // struct __helper
+  }; // struct _helper
   //////////////////////////////////////////////////////////////////////////////
-  template<> struct __helper<2> {
+  template<> struct _helper<2> {
     template<typename scalar> static
-    void __acc(MiyamotoNagai const&POT,
+    void _acc(MiyamotoNagai const&POT,
 	       const scalar       *pos,
 	       scalar             &pot,
 	       scalar             *acc)
@@ -119,7 +119,7 @@ namespace {
       acc[0] = pos[0] * F;
       acc[1] = pos[1] * F;
     }
-  }; // struct __helper<2>
+  }; // struct _helper<2>
   //////////////////////////////////////////////////////////////////////////////
   template<int NDIM, typename scalar>
   inline void MiyamotoNagai::acc(const scalar*,
@@ -128,7 +128,7 @@ namespace {
 				 scalar      &p,
 				 scalar      *a) const
   { 
-    __helper<NDIM>::__acc(*this,x,p,a);
+    _helper<NDIM>::_acc(*this,x,p,a);
   }
 } // namespace {
 //------------------------------------------------------------------------------

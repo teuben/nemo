@@ -244,7 +244,7 @@ namespace {
       if(to+6 >= toUP) throw ParseErr("expression too long");
       // Note. using sprintf here is safe, while SNprintf() causes a problem,
       // since we don't want a trailing 0 to be written.
-      sprintf(to,"__P[%d]",p);                     //   add parameter to output 
+      sprintf(to,"_P[%d]",p);                     //   add parameter to output 
       to += 6;                                     //   increment output        
     } else {                                       // ELSE                      
       *(to++) = *(in++);                           //     read expr into sexpr  
@@ -506,21 +506,21 @@ namespace {
       "#define BD_TEST\n"
       "#define body_func\n"
       "#include <public/bodyfuncdefs.h>\n\n"
-      "real   __P[10]={RNG()};\n\n"
+      "real   _P[10]={RNG()};\n\n"
       "extern \"C\" {\n"
-      "  fieldset "<<ftype<<"(char&__type)\n"
+      "  fieldset "<<ftype<<"(char&_type)\n"
       "  {\n"
       "    double t=0.;\n"
-      "    __need = fieldset::empty;\n"
-      "    __type = TypeLetter("<<expr<<");\n"
-      "    if(__type == 'b') {\n"
-      "      for(int __i=0; __i!=100; ++__i) {\n"
-      "        for(int __j=0; __j!=10; ++__j)\n"
-      "          __P[__j] = RNG();\n"
-      "        if( "<<expr<<" ) ++ __test;\n"
+      "    _need = fieldset::empty;\n"
+      "    _type = TypeLetter("<<expr<<");\n"
+      "    if(_type == 'b') {\n"
+      "      for(int _i=0; _i!=100; ++_i) {\n"
+      "        for(int _j=0; _j!=10; ++_j)\n"
+      "          _P[_j] = RNG();\n"
+      "        if( "<<expr<<" ) ++ _test;\n"
       "      }\n"
       "    }\n"
-      "    return __need;\n"
+      "    return _need;\n"
       "  }\n"
       "}\n";
     file.close();
@@ -586,7 +586,7 @@ namespace {
       "extern \"C\" {\n"
       "  "<<ftype<<
       "  "<<ffunc<<
-      "(falcON::body const&b, double t, const real*__P)\n"
+      "(falcON::body const&b, double t, const real*_P)\n"
       "  {\n"
       "    return ("<<expr<<");\n"
       "  }\n"
@@ -662,7 +662,7 @@ namespace {
     scond[we] = 0;                                 // reset subconditional      
     sexpr[we] = subexpr[we];                       // set new subexpr           
     sname[we] = subname[we];                       // set new subname           
-    SNprintf(sname[we],MAX_TYPE_LENGTH,"__S%02d",we); // write subname          
+    SNprintf(sname[we],MAX_TYPE_LENGTH,"_S%02d",we); // write subname          
     char* sex = sexpr[we];                         // pter in subexpr           
     char* const sexUP = sex + MAX_LENGTH_SUBEXPR;  // ceiling of subexpr        
     while(*expr) {                                 // LOOP through expression   
@@ -671,7 +671,7 @@ namespace {
 	if(sex+5 >= sexUP)
 	  throw ParseErr("expression too long");
 	// Note. using sprintf() is safe here. SNprintf() wouldn't, though.
-	sprintf(sex,"__S%02d",sub);                //     add func call to sexpr
+	sprintf(sex,"_S%02d",sub);                //     add func call to sexpr
 	sex += 5;                                  //     increment sex         
        	if(*expr!='{')
 	  throw ParseErr(message("'%s' must be followed by '{'",
@@ -774,24 +774,24 @@ namespace {
 	    <<"\n"
 	    <<"namespace {\n"
 	    <<"  double t=0.;\n"
-	    <<"  real __P[10]={RNG()};\n"
+	    <<"  real _P[10]={RNG()};\n"
 	    <<"}\n"
 	    <<"\n"
 	    <<"extern \"C\" {\n";
     for(int s=sub-1; s >= 0; --s) {
       file  <<"\n"
 	    <<"# define "<<sname[s]<<" ("<<(sexpr[s]?sexpr[s]:"1")<<")\n"
-	    <<"  fieldset "<<ftype<<'_'<<s<<"(char&__type)\n"
+	    <<"  fieldset "<<ftype<<'_'<<s<<"(char&_type)\n"
 	    <<"  {\n"
-	    <<"    __need = fieldset::empty;\n";
+	    <<"    _need = fieldset::empty;\n";
       if(scond[s])
-	file<<"    for(int __i=0; __i!=100; ++__i) {\n"
-	    <<"      for(int __j=0; __j!=10; ++__j)\n"
-	    <<"        __P[__j] = RNG();\n"
-	    <<"      if( "<<scond[s]<<" ) ++__test;\n"
+	file<<"    for(int _i=0; _i!=100; ++_i) {\n"
+	    <<"      for(int _j=0; _j!=10; ++_j)\n"
+	    <<"        _P[_j] = RNG();\n"
+	    <<"      if( "<<scond[s]<<" ) ++_test;\n"
 	    <<"    }\n";
-      file  <<"    __type = TypeLetter("<<(sexpr[s]?sexpr[s]:"1")<<");\n"
-	    <<"    return __need;\n"
+      file  <<"    _type = TypeLetter("<<(sexpr[s]?sexpr[s]:"1")<<");\n"
+	    <<"    return _need;\n"
 	    <<"  }\n";
     }
     file    <<"\n"
@@ -836,18 +836,18 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n\n"
-	  <<"    "<<SumTypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" _X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
-	  <<"    unsigned int __N = 0;\n"
+	  <<"    unsigned int _N = 0;\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
       file<<"\n      if(cond("<<scond[s]<<"))";
     file  <<"{\n"
-	  <<space<<"  __X += "<<sexpr[s]<<";\n"
-	  <<space<<"  __N ++;\n"
+	  <<space<<"  _X += "<<sexpr[s]<<";\n"
+	  <<space<<"  _N ++;\n"
 	  <<space<<"}\n"
-	  <<"    if(__N) __X /= "<<(stype[s]=='i'? "__N":"real(__N)")<<";\n"
-	  <<"    return __X;\n";
+	  <<"    if(_N) _X /= "<<(stype[s]=='i'? "_N":"real(_N)")<<";\n"
+	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
   inline void make_mmean(std::ostream&file, int s) throw(ParseErr) {
@@ -858,18 +858,18 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    "<<SumTypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" _X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
-	  <<"    double __M(zero);\n"
+	  <<"    double _M(zero);\n"
 	  <<"    LoopAllBodies(&B, b)";
     if(scond[s])
       file<<"\n      if(cond("<<scond[s]<<"))";
     file  <<"{\n"
-	  <<space<<"  __X += m*("<<sexpr[s]<<");\n"
-	  <<space<<"  __M += m;\n"
+	  <<space<<"  _X += m*("<<sexpr[s]<<");\n"
+	  <<space<<"  _M += m;\n"
 	  <<space<<"}\n"
-	  <<"    if(__M) __X /= __M;\n"
-	  <<"    return __X;\n";
+	  <<"    if(_M) _X /= _M;\n"
+	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
   inline void make_sum(std::ostream&file, int s) throw(ParseErr) {
@@ -879,13 +879,13 @@ namespace {
     if(scond[s])
       file<<sep<<scond[s];
     file  <<"}\"\n"
-	  <<"    "<<SumTypeName(stype[s])<<" __X("
+	  <<"    "<<SumTypeName(stype[s])<<" _X("
 	  << (stype[s]=='i'? "0)":"zero)") << ";\n"
 	  <<"    LoopAllBodies(&B, b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n  ";
-    file  <<"      __X += "<<sexpr[s]<<";\n"
-	  <<"    return __X;\n";
+    file  <<"      _X += "<<sexpr[s]<<";\n"
+	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
   inline void make_max(std::ostream&file, int s) throw(ParseErr) {
@@ -909,12 +909,12 @@ namespace {
 	  <<"      return "<<(stype[s]=='i'? "0":
 			      stype[s]=='v'? "vect(zero)":"zero") <<";\n"
 	  <<"    }\n"
-	  <<"    "<<TypeName(stype[s])<<" __X = "<<sexpr[s]<<";\n"
+	  <<"    "<<TypeName(stype[s])<<" _X = "<<sexpr[s]<<";\n"
 	  <<"    for(++b; b!=B.end_all_bodies(); ++b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n";
-    file  <<space<<"  update_max(__X,"<<sexpr[s]<<");\n"
-	  <<"    return __X;\n";
+    file  <<space<<"  update_max(_X,"<<sexpr[s]<<");\n"
+	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
   inline void make_min(std::ostream&file, int s) throw(ParseErr) {
@@ -938,12 +938,12 @@ namespace {
 	  <<"      return "<<(stype[s]=='i'? "0":
 			      stype[s]=='v'? "vect(zero)":"zero") << ";\n"
 	  <<"    }\n"
-	  <<"    "<<TypeName(stype[s])<<" __X = "<<sexpr[s]<<";\n"
+	  <<"    "<<TypeName(stype[s])<<" _X = "<<sexpr[s]<<";\n"
 	  <<"    for(++b; b!=B.end_all_bodies(); ++b)\n";
     if(scond[s])
       file<<"      if(cond("<<scond[s]<<"))\n";
-    file  <<space<<"  update_min(__X,"<<sexpr[s]<<");\n"
-	  <<"    return __X;\n";
+    file  <<space<<"  update_min(_X,"<<sexpr[s]<<");\n"
+	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
   inline void make_and(std::ostream&file, int s) {
@@ -976,15 +976,15 @@ namespace {
     if(scond[s]==0 || scond[s][0]==0)
       throw ParseErr("empty condition for operator 'Num'");
     file  <<"    // encoding \"Num{"<<scond[s]<<"}\"\n"
-	  <<"    int __N = 0;\n"
+	  <<"    int _N = 0;\n"
 	  <<"    LoopAllBodies(&B, b)\n"
-	  <<"      if(cond("<<scond[s]<<")) ++ __N;\n"
-	  <<"    return __N;\n";
+	  <<"      if(cond("<<scond[s]<<")) ++ _N;\n"
+	  <<"    return _N;\n";
   }
   //----------------------------------------------------------------------------
   void make_sub(std::ostream&file, int s) throw(ParseErr) {
     file<<"\n  inline "<<TypeName(stype[s])<<' '<<sname[s]<<'F'
-	<<"(bodies const&B, double t, const real*__P) {\n";
+	<<"(bodies const&B, double t, const real*_P) {\n";
     switch(soper[s]) {
     case 0: make_mean (file,s); break;
     case 1: make_mmean(file,s); break;
@@ -1052,9 +1052,9 @@ namespace {
 	  <<"\n"
 	  <<"extern \"C\"{\n"
 	  <<"  "<<TypeName(stype[0])<<" "<<ffunc
-	  <<"(bodies const&B, double t, const real*__P) {\n";
+	  <<"(bodies const&B, double t, const real*_P) {\n";
     for(int s=sub-1; s>0; --s)
-      file<<"    "<<sname[s]<<" = "<<sname[s]<<"F(B,t,__P);\n";
+      file<<"    "<<sname[s]<<" = "<<sname[s]<<"F(B,t,_P);\n";
     file  <<"\n"
 	  <<"    return "<<sexpr[0]<<";\n"
 	  <<"  }\n"
@@ -1107,7 +1107,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     // 1.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"bf_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    SNprintf(ffunc,FNAME_SIZE,"bf__%d",fcount);
+    SNprintf(ffunc,FNAME_SIZE,"bf_%d",fcount);
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
@@ -1319,7 +1319,7 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     // 1.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"Bf_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    SNprintf(ffunc,FNAME_SIZE,"Bf__%d",fcount);
+    SNprintf(ffunc,FNAME_SIZE,"Bf_%d",fcount);
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
@@ -1450,10 +1450,10 @@ namespace {
       "#include <public/bodyfuncdefs.h>\n\n"
       "extern \"C\" {\n"
       "  void "<<ffunc<<
-      "(void*__X, falcON::bodies const&B, double t, const real*__P)\n"
+      "(void*_X, falcON::bodies const&B, double t, const real*_P)\n"
       "  {\n"
       "    LoopAllBodies(&B,b)\n"
-      "      static_cast<"<<ftype<<"*>(__X)[i] = ("<<expr<<");\n"
+      "      static_cast<"<<ftype<<"*>(_X)[i] = ("<<expr<<");\n"
       "  }\n"
       "}\n";
     file.close();
@@ -1657,7 +1657,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     // 2.2 function not found, so try to get unique new function name
     SNprintf(fname,FNAME_SIZE,"Bm_%s%d",RunInfo::pid(),function++);
     int fcount = BD->counter();                     // try to get valid counter 
-    SNprintf(ffunc,FNAME_SIZE,"Bm__%d",fcount);
+    SNprintf(ffunc,FNAME_SIZE,"Bm_%d",fcount);
     funcname = ffunc;
   }
   // 2.E database error occured, we cannot use it at all

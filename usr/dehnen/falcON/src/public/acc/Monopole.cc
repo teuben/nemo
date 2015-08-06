@@ -177,7 +177,7 @@ namespace {
     do from.get(c); while(from.good() && c !='\n');
   }
   //////////////////////////////////////////////////////////////////////////////
-  void __read_line(std::istream& from, char*line, int const&n)
+  void _read_line(std::istream& from, char*line, int const&n)
   // read line until character `#'; swallow rest of line
   {
     // 1. find first non-space character whereby:
@@ -216,7 +216,7 @@ namespace {
   // skip lines whose first non-space character is #
   {
     do {
-      __read_line(from,line,n);
+      _read_line(from,line,n);
     } while(from.good() && *line == 0);
     return *line != 0;
   }
@@ -449,9 +449,9 @@ namespace {
   // auxiliary templates                                                      //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  template <typename scalar> struct __type;
-  template <> struct __type<float > { static const char t='f'; };
-  template <> struct __type<double> { static const char t='d'; };
+  template <typename scalar> struct _type;
+  template <> struct _type<float > { static const char t='f'; };
+  template <> struct _type<double> { static const char t='d'; };
   //////////////////////////////////////////////////////////////////////////////
   template <int, bool> struct set;
   template <int NDIM> struct set<NDIM,0> {
@@ -691,7 +691,7 @@ namespace {
     //
     if(ampl == 1.) {
       nemo_dprintf(4,"Monopole: setting P = Phi\n");
-      PHI(NDIM,time,nbod,0,x,0,f,p,a,add,__type<scalar>::t);
+      PHI(NDIM,time,nbod,0,x,0,f,p,a,add,_type<scalar>::t);
       return;                                                     // DONE !
     }
     //
@@ -710,7 +710,7 @@ namespace {
     nemo_dprintf(4,"Monopole: adding P += %f * Phi\n",ampl);
     scalar *pots = new scalar[nbod];
     scalar *accs = new scalar[NDIM*nbod];
-    PHI(NDIM,time,nbod,0,x,0,f,pots,accs,0,__type<scalar>::t);
+    PHI(NDIM,time,nbod,0,x,0,f,pots,accs,0,_type<scalar>::t);
     scalar       *ps = pots;
     scalar       *as = accs;
     for(int n=0; n!=nbod; ++n,p++,ps++,a+=NDIM,as+=NDIM) 
@@ -728,8 +728,8 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
   Monopole *MyAcc[AccMax] = {0};
   int       AccN          = 0;
-#undef  __DEF__ACC__NO
-#define __DEF__ACC__NO(NUM)				\
+#undef  _DEF_ACC_NO
+#define _DEF_ACC_NO(NUM)				\
   void acceleration##NUM(int        d,			\
 			 double     t,			\
 			 int        n,			\
@@ -742,16 +742,16 @@ namespace {
 			 int        i,			\
 			 char       y)			\
     { (MyAcc[NUM])->acc(d,t,n,m,x,v,f,p,a,i,y); }
-  __DEF__ACC__NO(0)
-  __DEF__ACC__NO(1)
-  __DEF__ACC__NO(2)
-  __DEF__ACC__NO(3)
-  __DEF__ACC__NO(4)
-  __DEF__ACC__NO(5)
-  __DEF__ACC__NO(6)
-  __DEF__ACC__NO(7)
-  __DEF__ACC__NO(8)
-  __DEF__ACC__NO(9)
+  _DEF_ACC_NO(0)
+  _DEF_ACC_NO(1)
+  _DEF_ACC_NO(2)
+  _DEF_ACC_NO(3)
+  _DEF_ACC_NO(4)
+  _DEF_ACC_NO(5)
+  _DEF_ACC_NO(6)
+  _DEF_ACC_NO(7)
+  _DEF_ACC_NO(8)
+  _DEF_ACC_NO(9)
   acc_pter Accs[AccMax] = {&acceleration0,
 			   &acceleration1,
 			   &acceleration2,

@@ -321,18 +321,18 @@ double DoublePowerLawHalo::operator()(double x, double&rh1, double&rh2) const {
 }
 //
 namespace {
-  const HaloModifier* __HM;
-  double __z0,__iE,__Ai,__Ao,__Rc,__Yo;
-  inline double __dM(double z)
+  const HaloModifier* _HM;
+  double _z0,_iE,_Ai,_Ao,_Rc,_Yo;
+  inline double _dM(double z)
   {
-    if(z<=__z0) return 0.;
+    if(z<=_z0) return 0.;
     double z1 = 1-z;
-    if(z1<=0) return __Yo;
-    double u = std::pow(z/z1,__iE);
-    if(u<=__Rc) return 0.;
-    double r = __Rc? sqrt(u*u-__Rc*__Rc) : u;
-    double y = (r/u) * std::pow(z,__Ai) * std::pow(z1,__Ao);
-    return __HM->truncated()? __HM->trunc(r) * y : y;
+    if(z1<=0) return _Yo;
+    double u = std::pow(z/z1,_iE);
+    if(u<=_Rc) return 0.;
+    double r = _Rc? sqrt(u*u-_Rc*_Rc) : u;
+    double y = (r/u) * std::pow(z,_Ai) * std::pow(z1,_Ao);
+    return _HM->truncated()? _HM->trunc(r) * y : y;
   }
 }
 double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
@@ -342,15 +342,15 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
     if(go < 3+et && !hm.truncated())
       falcON_THROW("DoublePowerLawHalo::Mtot(): cannot compute total mass"
 		   "for outer<3+eta and no truncation");
-    __HM = &hm;
-    __iE = 1./et;
-    __Ai = __iE*(3-gi)-1;
-    __Ao = __iE*(go-3)-1;
-    __Yo = __Ao > 1.e-7 || __HM->truncated()? 0. : 1.;
-    __Rc = hm.r_c();
-    double tm = std::pow(__Rc,et);
-    __z0 = tm/(1.+tm);
-    return FPi*qbulir(&__dM,__z0,1.,1.e-9)/et;
+    _HM = &hm;
+    _iE = 1./et;
+    _Ai = _iE*(3-gi)-1;
+    _Ao = _iE*(go-3)-1;
+    _Yo = _Ao > 1.e-7 || _HM->truncated()? 0. : 1.;
+    _Rc = hm.r_c();
+    double tm = std::pow(_Rc,et);
+    _z0 = tm/(1.+tm);
+    return FPi*qbulir(&_dM,_z0,1.,1.e-9)/et;
   } else {
     if(gi >= 3. || go <= 3.)
       falcON_THROW("DoublePowerLawHalo::Mtot(): total mass diverges");
