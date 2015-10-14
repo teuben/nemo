@@ -154,7 +154,7 @@ namespace falcON {
     //@}
     //==========================================================================
     /// dtor: will delete all allocated structures (tree & estimators)          
-    ~forces() falcON_THROWING;
+    ~forces();
     //==========================================================================
     /// \name generation and maintainance of an oct tree                        
     //@{                                                                        
