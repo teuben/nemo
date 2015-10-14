@@ -94,7 +94,7 @@ namespace falcON {
     BODIES->set_forces(this);
   }
   //----------------------------------------------------------------------------
-  inline forces::~forces() falcON_THROWING
+  inline forces::~forces()
   {
     if(TREE) falcON_DEL_O(TREE);
     falcON_DEL_O(GMAC);

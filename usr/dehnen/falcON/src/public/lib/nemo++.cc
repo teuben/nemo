@@ -153,7 +153,7 @@ double falcON::getdparam(const char*p) {
   return ::getdparam(const_cast<char*>(p));
 }
 
-falcON::vect falcON::getvparam(const char*p) falcON_THROWING {
+falcON::vect falcON::getvparam(const char*p) {
   vect X;
   int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
   if(N!=Ndim) {
@@ -164,7 +164,7 @@ falcON::vect falcON::getvparam(const char*p) falcON_THROWING {
   return X;
 }
 
-falcON::vect falcON::getvrparam(const char* p) falcON_THROWING {
+falcON::vect falcON::getvrparam(const char* p) {
   vect X;
   int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
   if(N==1) for(int d=1; d!=Ndim; ++d) X[d]=X[0];
@@ -176,7 +176,7 @@ falcON::vect falcON::getvrparam(const char* p) falcON_THROWING {
   return X;
 }
 
-falcON::vect* falcON::getvparam_z(const char* p, vect&X) falcON_THROWING {
+falcON::vect* falcON::getvparam_z(const char* p, vect&X) {
   if(!hasvalue(p)) return 0;
   int N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
   if(Ndim != N) {
@@ -188,7 +188,7 @@ falcON::vect* falcON::getvparam_z(const char* p, vect&X) falcON_THROWING {
   return &X;
 }
 
-falcON::vect* falcON::getvrparam_z(const char* p, vect&X) falcON_THROWING {
+falcON::vect* falcON::getvrparam_z(const char* p, vect&X) {
   if(!hasvalue(p)) return 0;
   int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
   if(N==1) for(int d=1; d!=Ndim; ++d) X[d]=X[0];
@@ -273,7 +273,7 @@ void falcON::mapsys(char*f) {
 #endif
 
 namespace {
-  inline const char* NemoTag(falcON::nemo_io::Field f) falcON_THROWING
+  inline const char* NemoTag(falcON::nemo_io::Field f)
   {
     switch(f) {
     case falcON::nemo_io::mass   : return MassTag;
@@ -308,9 +308,11 @@ namespace {
     case falcON::nemo_io::MolWght: return MolWeightTag;
     case falcON::nemo_io::Spin   : return SpinTag;
     case falcON::nemo_io::null:
-      falcON_THROW("nemo I/O: nemo_io::null not I/O able");
+      falcON_Warning("nemo I/O: nemo_io::null not I/O able");
+      return "Unknown";
     default:
-      falcON_THROW("nemo I/O: unknown nemo_io::Field '%d'",f);
+      falcON_Warning("nemo I/O: unknown nemo_io::Field '%d'",f);
+      return "Unknown";
     }
   }
   inline falcON::nemo_io::DataType Type(const char* NemoType)
@@ -446,7 +448,7 @@ using namespace Aux;
 //------------------------------------------------------------------------------
 // class falcON::nemo_io
 //------------------------------------------------------------------------------
-void falcON::nemo_io::open(const char*file, const char*mode) falcON_THROWING
+void falcON::nemo_io::open(const char*file, const char*mode)
 {
   close();
   if(file && file[0]) {
@@ -489,7 +491,7 @@ void falcON::nemo_io::close()
 //------------------------------------------------------------------------------
 // class falcON::nemo_in
 //------------------------------------------------------------------------------
-void falcON::nemo_in::close() falcON_THROWING
+void falcON::nemo_in::close()
 {
   if(SNAP) {
     DebugInfo(4,"nemo_in::close(): closing open snap_in first ... \n");
@@ -509,7 +511,7 @@ bool falcON::nemo_in::has_snapshot() const
 //------------------------------------------------------------------------------
 // class falcON::snap_in
 //------------------------------------------------------------------------------
-falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING : 
+falcON::snap_in::snap_in(nemo_in const&in) : 
   INPUT(in), DATA(0), FIELDS_READ(0), HAS_TIME(0), NTOT(0u), TIME(0.)
 {
   DebugInfo(4,"snap_in::snap_in() ...\n");
@@ -586,7 +588,7 @@ falcON::snap_in::snap_in(nemo_in const&in) falcON_THROWING :
   DebugInfo(5,"  snap_in::snap_in(): particles set opened\n");
 }
 //------------------------------------------------------------------------------
-falcON::snap_in::~snap_in() falcON_THROWING
+falcON::snap_in::~snap_in()
 {
   if(DATA) {
     DebugInfo(4,"snap_in::~snap_in(): closing open data_in first\n");
@@ -617,7 +619,7 @@ namespace {
   using namespace falcON;
   typedef falcONVec<Ndim,notreal> Vect;
 }
-falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) falcON_THROWING :
+falcON::data_in::data_in(snap_in const&snap, nemo_io::Field f) :
   INPUT(snap), FIELD(f), NREAD(0), NTOT(0), TYPE(nemo_io::Null), SUBN(0)
 {
   DebugInfo(5,"data_in::data_in(%s) ...\n",NemoTag(FIELD));
@@ -775,7 +777,7 @@ void falcON::data_in::read_phases(void*pos, void*vel, unsigned Num)
 //------------------------------------------------------------------------------
 // class falcON::nemo_out
 //------------------------------------------------------------------------------
-void falcON::nemo_out::close() falcON_THROWING
+void falcON::nemo_out::close()
 {
   if(SNAP) {
     DebugInfo(4,"nemo_out::close(): closing open snap_out first\n");
@@ -786,7 +788,6 @@ void falcON::nemo_out::close() falcON_THROWING
 }
 //------------------------------------------------------------------------------
 falcON::nemo_out& falcON::nemo_out::open(const char*file, bool app)
-falcON_THROWING
 {
   // NOTE: we MUST call nemo_io::open() even if file==0
   // If the trailing letter of file is '!' or '@', we temporarily remove it
@@ -811,7 +812,7 @@ falcON_THROWING
 //------------------------------------------------------------------------------
 falcON::snap_out::snap_out(nemo_out const&out,
 			   const unsigned nbod[bodytype::NUM],
-			   double time) falcON_THROWING :
+			   double time) :
   OUTPUT(out), DATA(0), FIELDS_WRITTEN(0), NTOT(0u)
 {
   DebugInfo(4,"snap_out::snap_out() ...\n");
@@ -839,7 +840,7 @@ falcON::snap_out::snap_out(nemo_out const&out,
   Aux::put_data(OUTPUT.STREAM,CoordSystemTag,IntType,&CS,0);
 }
 //------------------------------------------------------------------------------
-falcON::snap_out::~snap_out() falcON_THROWING
+falcON::snap_out::~snap_out()
 {
   if(DATA) {
     DebugInfo(4,"snap_out::~snap_out(): closing open data_out first\n");
@@ -856,7 +857,6 @@ falcON::snap_out::~snap_out() falcON_THROWING
 // class falcON::data_out
 //------------------------------------------------------------------------------
 falcON::data_out::data_out(snap_out const&snap, nemo_io::Field f)
-falcON_THROWING
 : OUTPUT(snap), FIELD(f), NWRITTEN(0),
   NTOT(OUTPUT.N(FIELD)), TYPE(nemo_io::type(FIELD)),
   SUBN(::is_scalar(FIELD)? 1: ::is_vector(FIELD)? NDIM : 2*NDIM)

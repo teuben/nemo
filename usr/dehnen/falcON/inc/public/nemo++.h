@@ -230,19 +230,19 @@ namespace falcON {
   /// get vect
   /// \param[in] p parameter name as specified in 2nd argument to initparam()
   /// \note implemented in nemo++.cc using NEMO
-  vect getvparam(const char*p) falcON_THROWING;
+  vect getvparam(const char*p);
 
   /// get vect, but allow single value, i.e. (0,0,0) if value of p is "0".
   /// \param[in] p parameter name as specified in 2nd argument to initparam()
   /// \note implemented in nemo++.cc using NEMO
-  vect getvrparam(const char*p) falcON_THROWING;
+  vect getvrparam(const char*p);
 
   /// read vect from nemo parameter into 2nd argument, return pointer
   /// \return on success: pointer to vect, otherwise: NULL
   /// \param[in]  p parameter name as specified in 2nd argument to initparam()
   /// \param[out] x if returning not NULL, this vector is assigned to
   /// \note implemented in nemo++.cc using NEMO
-  vect* getvparam_z(const char* p, vect&x) falcON_THROWING;
+  vect* getvparam_z(const char* p, vect&x);
 
   /// read vect from nemo param into 2nd arg, allow single value, return pter
   /// \return on success: pointer to vect, otherwise: NULL
@@ -250,7 +250,7 @@ namespace falcON {
   /// \param[out] x if returning not NULL, this vector is assigned to
   /// \note implemented in nemo++.cc using NEMO
   /// \note implemented in nemo++.cc using NEMO
-  vect* getvrparam_z(const char* p, vect&x) falcON_THROWING;
+  vect* getvrparam_z(const char* p, vect&x);
 
   /// read array of type T
   /// \param[in]  p parameter name as specified in 2nd argument to initparam()
@@ -499,7 +499,7 @@ namespace falcON {
       }
     }
     /// what \a fieldbit corresponds to a given \a Field
-    static fieldbit bit(Field F) falcON_THROWING {
+    static fieldbit bit(Field F) {
       switch(F) {
       case mass:    return fieldbit::m;
       case pos:     return fieldbit::x;
@@ -531,7 +531,8 @@ namespace falcON {
       case DivV:    return fieldbit::D;
       case MolWght: return fieldbit::M;
       case Spin:    return fieldbit::S;
-      default: falcON_THROW("unaccountable nemo_io::Field\n");
+      default: falcON_Warning("unaccountable nemo_io::Field\n");
+	return fieldbit::invalid;
       }
     }
     /// given a collection of \a Field s, return the corresponding fieldset     
@@ -549,7 +550,7 @@ namespace falcON {
     /// close stream if open, then open new file
     /// \param[in] file  name of file to open, "-": stdin/stdout, "." sink
     /// \param[in] mode  r,w,w!,s for read, write, overwrite, scratch
-    void open(const char*file, const char*mode) falcON_THROWING;
+    void open(const char*file, const char*mode);
     /// close stream if open
     void close();
     /// default ctor: set stream to (nil)
@@ -580,10 +581,10 @@ namespace falcON {
     //--------------------------------------------------------------------------
   public:
     /// close open input stream (and close an open snap_in, if any)
-    void close() falcON_THROWING;
+    void close();
     /// open new file (and close any old input stream)
     /// \param[in] file name of file to be opened, may be (nil)
-    nemo_in&open(const char*file=0) falcON_THROWING {
+    nemo_in&open(const char*file=0) {
       close();
       nemo_io::open(file,"r");
       return *this;
@@ -591,11 +592,11 @@ namespace falcON {
     /// default ctor and ctor from file name: open file for NEMO input.
     /// If \a file equals "-", set pipe, ie. read from stdin instead from a file
     /// \param[in] file name of file to be opened, may be (nil)
-    explicit nemo_in(const char*file=0) falcON_THROWING : SNAP(0) {
+    explicit nemo_in(const char*file=0) : SNAP(0) {
       nemo_io::open(file,"r");
     }
     /// dtor: close()
-    ~nemo_in() falcON_THROWING { close(); }
+    ~nemo_in() { close(); }
     /// can a snapshot be opened?
     /// \return true if a \a snap_in can be constructed from *this
     bool has_snapshot() const;
@@ -627,10 +628,10 @@ namespace falcON {
   public:
     /// ctor: open a snapshot set from a NEMO input stream
     /// \param[in] in NEMO input stream
-    explicit snap_in(nemo_in const&in) falcON_THROWING;
+    explicit snap_in(nemo_in const&in);
     //--------------------------------------------------------------------------
     /// dtor: close snapshot set in NEMO input stream
-    ~snap_in() falcON_THROWING;
+    ~snap_in();
     //--------------------------------------------------------------------------
     /// do we have simul time?  
     bool has_time() const { return HAS_TIME; }
@@ -679,7 +680,7 @@ namespace falcON {
     ///       no type mismatch; otherwise throw an exception
     /// \param[in] s  input snapshot to be read from
     /// \param[in] f data field to be read
-    data_in(snap_in const &s, nemo_io::Field f) falcON_THROWING;
+    data_in(snap_in const &s, nemo_io::Field f);
     /// dtor: close data set
     ~data_in();
     /// which data field are we reading?
@@ -721,7 +722,7 @@ namespace falcON {
     nemo_out(nemo_out const&);                     // not implemented           
   public:
     /// close open output stream
-    void close() falcON_THROWING;
+    void close();
     /// open a nemo_out, special options by filename                            
     ///                                                                         
     /// If \e file equals "-", and no output or other nemo_out writes to
@@ -742,16 +743,16 @@ namespace falcON {
     /// \return *this
     /// \param[in] file name of file to be opened, see detailled comments
     /// \param[in] append (optional) append existing file anyway?
-    nemo_out&open(const char*file=0, bool append=false) falcON_THROWING;
+    nemo_out&open(const char*file=0, bool append=false);
     /// default ctor and ctor from file name: open file for NEMO output.
     /// If \a file equals "-", set pipe, ie. write to stdout instead to a file
     /// \param[in] file   name of file to be opened, may be (nil)
     /// \note             see detailled comments for open()
     /// \param[in] append (optional) append existing file anyway?
-    explicit nemo_out(const char*file=0, bool append=false) falcON_THROWING
+    explicit nemo_out(const char*file=0, bool append=false)
       : SNAP(0) { open(file,append); }
     /// close open output stream
-    ~nemo_out() falcON_THROWING { close(); }
+    ~nemo_out() { close(); }
     /// convertion to bool: true if is_writing()
     operator bool() const { return is_writing(); }
   };// class nemo_out
@@ -778,9 +779,9 @@ namespace falcON {
     /// \param[in] Nbod  total # bodies per bodytype
     /// \param[in] time  simulation time
     snap_out(nemo_out const&out, const unsigned Nbod[bodytype::NUM],
-	     double time) falcON_THROWING;
+	     double time);
     /// dtor: close snapshot set in NEMO output stream
-    ~snap_out() falcON_THROWING;
+    ~snap_out();
     /// return total # bodies
     unsigned const&Ntot() const { return NTOT; }
     /// return # bodies per type
@@ -817,7 +818,7 @@ namespace falcON {
     /// ctor: open a NEMO data set
     /// \param[in] s  our \a snap_out snapshot set to write to
     /// \param[in] f  the data field to write out with this
-    data_out(snap_out const&s, nemo_io::Field f) falcON_THROWING;
+    data_out(snap_out const&s, nemo_io::Field f);
     /// dtor: close data set
     ~data_out();
     /// return out data field
