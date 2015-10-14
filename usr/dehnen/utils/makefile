@@ -191,7 +191,7 @@ testsuite	:	library $(TESTSUITE)
 dox/html/index.htlm:	$(Pi_h) $(heap_h) $(meta_h) $(inline_h) $(exception_h) \
 			$(sse_h) $(traits_h) $(io_h) $(vector_h) $(memory_h) \
 			$(numerics_h) $(spline_h) $(radix_h) $(random_h) \
-			$(WDMath_h) $(octtree_h)
+			$(WDMath_h)
 			doxygen utils.dox
 
 doxu		:	dox/html/index.htlm

@@ -164,6 +164,8 @@ namespace WDutils {
   /// \param[in] line  number of the line in that file
   /// \param[in] num   (optional) number of elements de-allocated
   /// \param[in] lib   (optional) name of calling library (default: "WDutils")
+  ///
+  /// WD  14-Oct-2015  avoid throwing, since this may be called from destructor
   template<typename T> inline
   void DelArray(const T*array, const char*file, unsigned line, size_t num=0,
 		const char*lib = "WDutils")
@@ -173,8 +175,8 @@ namespace WDutils {
     try {
       delete[] array;
     } catch(...) {
-      throw Thrower(file,line)
-	("de-allocating array of '%s' @ %p failed\n", nameof(T),array);
+      WDutils_Error("de-allocating array of '%s' @ %p failed\n",
+		    nameof(T),array);
     }
     if(debug(WDutilsAllocDebugLevel)) {
       if(details::_report<T>::report(num))
@@ -213,6 +215,8 @@ namespace WDutils {
   /// \param[in] file  name of the source file where this routines is called
   /// \param[in] line  number of the line in that file
   /// \param[in] lib   (optional) name of calling library (default: "WDutils")
+  ///
+  /// WD  14-Oct-2015  avoid throwing, since this may be called from destructor
   template<typename T> inline
   void DelObject(const T*pobj, const char*file, unsigned line,
 		 const char*lib="WDutils")
@@ -222,8 +226,8 @@ namespace WDutils {
     try {
       delete pobj;
     } catch(...) {
-      throw Thrower(file,line)
-	("de-allocating object '%s' @ %p failed\n", nameof(T),pobj);
+      WDutils_Error("de-allocating object '%s' @ %p failed\n",
+		    nameof(T),pobj);
     }
     if(debug(WDutilsAllocDebugLevel))
       DebugInformation(file,line,lib)
