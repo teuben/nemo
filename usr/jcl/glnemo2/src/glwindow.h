@@ -57,6 +57,7 @@ public:
       setTranslation(0,0,0);
       resetEvents(true);
     }
+    void gpvClear() { gpv.clear(); }
     static bool GLSL_support;
     void setFBO(bool _b) { fbo = _b; }
     void setFBOSize(GLuint w, GLuint h) { texWidth=w; texHeight=h;}
@@ -78,6 +79,7 @@ public:
     void sigScreenshot();
     void leaveEvent();
     void sigMouseXY(const int x, const int y);
+    void doneRendering();
 public slots:
    void  update(ParticlesData   * ,
                 ParticlesObjectVector * ,
@@ -93,9 +95,13 @@ public slots:
    void  rebuildGrid(bool ugl=true);
    void  updateGrid(bool ugl=true);
    void  updateGL();
+   void  updateOsdZrt(bool ugl=true);
    void forcePaintGL() {
        makeCurrent();
        paintGL();
+   }
+   void select_all_particles_on_screen() { // from gui, interactive select, press button select all particles
+       gl_select->selectOnArea(pov->size(),mProj,mModel,viewport,true);
    }
 
    void  osdZoom(bool ugl=true);
@@ -143,7 +149,17 @@ private slots:
   void rotateAroundU() { rotateAroundAxis(3);}
   void rotateAroundV() { rotateAroundAxis(4);}
   void rotateAroundW() { rotateAroundAxis(5);}
-  
+  void resetMatrix() {
+      resetMatScreen();
+      resetMatScene();
+      //reset_screen_rotation = true;
+      //reset_scene_rotation  = true;
+      last_xrot = last_yrot = last_zrot = 0.0;
+      last_posx = last_posy = last_posz = 0.0;
+      y_mouse=store_options->xrot;
+      x_mouse=store_options->yrot;
+      z_mouse=store_options->zrot;
+  }
   void translateX()    { translateAlongAxis(0); }
   void translateY()    { translateAlongAxis(1); }
   void translateZ()    { translateAlongAxis(2); }
@@ -246,7 +262,7 @@ private:
   // bench
   int nframe;
   // Shaders
-  CShader * shader;
+  CShader * shader, * vel_shader;
   void initShader();
   unsigned int m_vertexShader, m_pixelShader;
 

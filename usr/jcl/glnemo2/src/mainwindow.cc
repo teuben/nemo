@@ -87,6 +87,7 @@ MainWindow::MainWindow(std::string _ver)
           this,    SLOT(pressedKeyMouse(const bool, const bool)));
   connect(gl_window, SIGNAL(sigMouseXY(int,int)),
           form_o_c,SLOT(dens_slide_min_max(int,int)));
+  connect(gl_window,SIGNAL(doneRendering()),form_options,SLOT(update()));
   connect(form_o_c,SIGNAL(objectSettingsChanged()),gl_window,SLOT(updateGL()));
   connect(form_o_c,SIGNAL(objectUpdateVel(const int)),gl_window,SLOT(updateVel(const int)));
   connect(form_o_c,SIGNAL(objectUpdate()),gl_window,SLOT(update()));
@@ -111,6 +112,8 @@ MainWindow::MainWindow(std::string _ver)
           form_options,SLOT(updateParticlesSelect(const int)));
   connect(form_options,SIGNAL(select_and_zoom(const bool)),
           gl_window->gl_select,SLOT(setZoom(bool)));
+  connect(form_options,SIGNAL(select_all_part()),
+          gl_window,SLOT(select_all_particles_on_screen()));
   connect(form_options,SIGNAL(save_selected()),this,SLOT(saveIndexList()));
   connect(form_options,SIGNAL(create_obj_selected()),this,SLOT(createObjFromIndexList()));
   // Camera
@@ -128,7 +131,7 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_o_c,SIGNAL(reverseColorMap(bool)),colormap,SLOT(reverse(bool)));
   // options play tab
   connect(form_options,SIGNAL(playPressed()),this,SLOT(actionPlay()));
-  connect(this,SIGNAL(endOfSnapshot(const int)),form_options,SLOT(on_play_pressed2(const int)));
+  connect(this,SIGNAL(endOfSnapshot(const int)),form_options,SLOT(play_pressed2(const int)));
   connect(form_options,SIGNAL(change_frame()),this,SLOT(playOneFrame()));
   connect(form_options,SIGNAL(centering()),this,SLOT(actionCenterToCom()));
   // options auto rotate
@@ -140,6 +143,7 @@ MainWindow::MainWindow(std::string _ver)
   connect(form_options,SIGNAL(update_grid()),gl_window,SLOT(updateGrid()));
   connect(form_options,SIGNAL(rebuild_grid()),gl_window,SLOT(rebuildGrid()));
   // options osd tab
+  connect(form_options,SIGNAL(update_osd(bool)),gl_window,SLOT(resetMatrix()));
   connect(form_options,SIGNAL(update_osd(bool)),this,SLOT(updateOsd(bool)));
   connect(form_options,SIGNAL(update_osd_font()),gl_window,SLOT(changeOsdFont()));
   connect(form_options,SIGNAL(update_gl()),gl_window,SLOT(updateGL()));
@@ -213,7 +217,7 @@ void MainWindow::start(std::string shot)
     else {
         if(actionMenuFileConnect2(ip, port, vel, false, false)) {
             crv = current_data->getSnapshotRange();
-            selectPart(select, true);
+            selectPart(select, true, vel);
         }
     }
   }
@@ -374,13 +378,14 @@ void MainWindow::createForms()
   // sig/slot
   connect(form_sshot,SIGNAL(screenshot(const int, const int)),
 	  this,SLOT(takeScreenshot(const int, const int)));
-  connect(form_spart,SIGNAL(selectPart(const std::string,const bool)),
-	  this,SLOT(selectPart(const std::string, const bool)));
+  connect(form_spart,SIGNAL(selectPart(const std::string,const bool, const bool)),
+      this,SLOT(selectPart(const std::string, const bool, const bool)));
   connect(form_options,SIGNAL(start_bench(const bool)),this,SLOT(startBench(const bool)));
   connect(form_connect, SIGNAL(newConnect(std::string, int, bool, bool, bool)), this, SLOT(actionMenuFileConnect2(std::string, int, bool, bool, bool)));
   // some init
   form_about->setVersion(QString(version.c_str()));
   form_o_c->init(mutex_data);
+
 }
 // -----------------------------------------------------------------------------
 // create docking windows                                                       
@@ -535,7 +540,7 @@ void MainWindow::createActions()
   toggle_play_action->setShortcut(tr("p"));
   toggle_play_action->setStatusTip(tr("Play next snapshot"));
   //connect(toggle_play_action, SIGNAL( triggered() ), this, SLOT(actionPlay()) );
-  connect(toggle_play_action, SIGNAL( triggered() ), form_options, SLOT(on_play_pressed2()));
+  connect(toggle_play_action, SIGNAL( triggered() ), form_options, SLOT(play_pressed2()));
   // alternative play action with space bar
   toggle_play_action2 = new QAction(toggle_play_action);
   toggle_play_action2->setShortcut(QKeySequence(Qt::Key_Space));
@@ -746,10 +751,12 @@ void MainWindow::interactiveSelect(std::string _select, const bool first_snapsho
 // Slots connected to "select particles dialog box" to allow to load particles  
 // according to the user's selection.                                           
 // -----------------------------------------------------------------------------
-void MainWindow::selectPart(const std::string _select, const bool first_snapshot)
+void MainWindow::selectPart(const std::string _select, const bool first_snapshot, const bool load_vel)
 {
   select = _select;
   store_options->select_part = select;
+  store_options->vel_req = load_vel;
+
   if ((reload) && current_data) {// reload action requested
     //store_options->phys_max_glob = store_options->phys_min_glob = -1; // reset for colobar display
     current_data->close();     // close the current snapshot
@@ -765,10 +772,19 @@ void MainWindow::selectPart(const std::string _select, const bool first_snapshot
     actionReset();             // reset view if menu file open
   }
 
+  pov.clear();
+  pov2.clear();
+  gl_window->gpvClear(); // clear list of object
+
   current_data->setSelectPart(select);
   std::cerr << "MainWindow::selectPart store_options->select_time = " << store_options->select_time << "\n";
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  status_bar->showMessage("Loading, please wait....");
   loadNewData(select,store_options->select_time,  // load data
 	      keep_all,true,first_snapshot);
+  status_bar->showMessage("Ready");
+  QApplication::restoreOverrideCursor();
+
 }
 // -----------------------------------------------------------------------------
 // loadNewData                                                                  
@@ -947,6 +963,8 @@ void MainWindow::setDefaultParamObject(ParticlesObjectVector & pov){
 
 
       pov[i].setVel(store_options->show_vel);
+      pov[i].setVelSizeMax(store_options->vel_vector_size);
+
       if (store_options->phys_min_glob!=-1) {
         pov[i].setMinPhys(store_options->phys_min_glob);
       }
@@ -995,6 +1013,7 @@ void MainWindow::parseNemoParameters()
   keep_all                = getbparam((char *) "keep_all");
   store_options->vel_req  = getbparam((char *) "vel");
   store_options->show_vel = getbparam((char *) "disp_vel");
+  store_options->vel_vector_size = getdparam((char *) "vel_factor");
   store_options->blending = getbparam((char *) "blending");
   store_options->dbuffer  = getbparam((char *) "dbuffer");
   store_options->show_grid= getbparam((char *) "grid");
@@ -1041,9 +1060,9 @@ void MainWindow::parseNemoParameters()
   store_options->xrot     = getdparam((char *) "xrot");
   store_options->yrot     = getdparam((char *) "yrot");
   store_options->zrot     = getdparam((char *) "zrot");
-  store_options->xtrans   = getdparam((char *) "xtrans");
-  store_options->ytrans   = getdparam((char *) "ytrans");
-  store_options->ztrans   = getdparam((char *) "ztrans");
+  store_options->xtrans   = -1.*getdparam((char *) "xtrans");
+  store_options->ytrans   = -1.*getdparam((char *) "ytrans");
+  store_options->ztrans   = -1.*getdparam((char *) "ztrans");
   store_options->zoom     = getdparam((char *) "zoom");
   store_options->psize    = getdparam((char *) "psize");
   store_options->port     = getiparam((char *) "port");
@@ -1086,7 +1105,17 @@ void MainWindow::parseNemoParameters()
   
   // ortho
   store_options->ortho_range = getdparam((char *) "ortho_range");
-  
+
+  // colors
+  store_options->osd_color  = QColor(getparam((char *) "osd_color"));
+  store_options->background_color = QColor(getparam((char *) "bg_color"));
+
+  store_options->gcb_color  = QColor(getparam((char *) "cbf_color"));
+  store_options->col_x_grid  = QColor(getparam((char *) "xyg_color"));
+  store_options->col_y_grid  = QColor(getparam((char *) "yzg_color"));
+  store_options->col_z_grid  = QColor(getparam((char *) "xzg_color"));
+  store_options->col_cube    = QColor(getparam((char *) "cube_color"));
+
   if (store_options->port) {;} // do nothing (remove compiler warning)
   
   //                         finish NEMO
@@ -1890,25 +1919,23 @@ void MainWindow::updateOsd(bool ugl)
     std::string title = g->osd_title_name.toStdString();
     if (title=="") {
       title = current_data->getFileName();
-    }
-    
-    
-    
+    }           
     gl_window->setOsd(GLObjectOsd::Title,
                       QString(title.c_str()),
                       g->osd_title,false);
     gl_window->setOsd(GLObjectOsd::Getdata,
                       QString((current_data->getInterfaceType()).c_str()),
                       g->osd_data_type,false);
-    gl_window->setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom,
-                      g->osd_zoom,false);
-    gl_window->setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
-                      (const float) store_options->yrot,
-                      (const float) store_options->zrot, g->osd_rot,false);
-    gl_window->setOsd(GLObjectOsd::Trans,(const float) store_options->xtrans,
-                      (const float) store_options->ytrans,
-                      (const float) store_options->ztrans,g->osd_trans,false);
+
   }
+  gl_window->setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom,
+                    g->osd_zoom,false);
+  gl_window->setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
+                    (const float) store_options->yrot,
+                    (const float) store_options->zrot, g->osd_rot,false);
+  gl_window->setOsd(GLObjectOsd::Trans,(const float) -store_options->xtrans,
+                    (const float) -store_options->ytrans,
+                    (const float) -store_options->ztrans,g->osd_trans,false);
   if (ugl) {
     gl_window->updateGL();
   }
@@ -1953,6 +1980,8 @@ void MainWindow::updateBenchFrame()
 // createObjFromIndexList()                                                                
 void MainWindow::createObjFromIndexList()
 {
+  QApplication::setOverrideCursor(QCursor(Qt::WaitCursor));
+  status_bar->showMessage("Building object, please wait...");
   std::vector <int> * list = gl_window->gl_select->getList();
   if (list->size()) { //&& current_data->part_data->id.size()>0) {
     std::vector <int> indexes;
@@ -1965,6 +1994,7 @@ void MainWindow::createObjFromIndexList()
         indexes.push_back(*i);
       }
     }
+#if 0
     ParticlesObject * po = new ParticlesObject(ParticlesObject::Range); // new object
     po->buildIndexList(indexes);
     pov.push_back(*po);
@@ -1974,7 +2004,20 @@ void MainWindow::createObjFromIndexList()
     form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
     updateOsd();
     gl_window->update( current_data->part_data, &pov2,store_options,false);
+#else // JCL modification 2015 March 24
+    ParticlesObject * po = new ParticlesObject(ParticlesObject::Range); // new object
+    po->buildIndexList(indexes);
+    pov2.push_back(*po);
+    delete po;
+    //listObjects(pov);
+    //ParticlesObject::copyVVkeepProperties(pov,pov2,user_select->getNSel());
+    form_o_c->update( current_data->part_data, &pov2,store_options,false); // update Form
+    updateOsd();
+    gl_window->update( current_data->part_data, &pov2,store_options,false);
+#endif
   }
+  QApplication::restoreOverrideCursor();
+  status_bar->showMessage("Ready");
 }
 
 // -----------------------------------------------------------------------------

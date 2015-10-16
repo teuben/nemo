@@ -24,7 +24,8 @@ HEADERS += snapshotnemo.h \
     snapshotramses.h \
     snapshotphigrape.h \
     snapshotnetwork.h \
-    snapshottipsy.h
+    snapshottipsy.h \
+    snapshotfits.h
 
 SOURCES += snapshotnemo.cc \
     snapshotftm.cc \
@@ -33,7 +34,8 @@ SOURCES += snapshotnemo.cc \
     snapshotramses.cc \
     snapshotphigrape.cc \
     snapshotnetwork.cc \
-    snapshottipsy.cc
+    snapshottipsy.cc \
+    snapshotfits.cc
 
 
 # CONFIG -= release
@@ -47,6 +49,7 @@ INCLUDEPATH += ftm \
     ../utils \
     ../plugins \
     zlib \
+    /usr/include/CCfits \
     $$NEMOINC \
     $$NEMOLIB
 DEPENDPATH += \
@@ -67,7 +70,8 @@ OTHER_FILES += \
     gadgetPlugin.json \
     ramsesPlugin.json \
     ftmPlugin.json \
-    tipsyPlugin.json
+    tipsyPlugin.json \
+    fitsPlugin.json
 
 # No tipsy support for windows
 win32 {

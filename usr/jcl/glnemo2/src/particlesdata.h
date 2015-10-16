@@ -22,7 +22,7 @@ namespace glnemo {
 class PhysicalData {
   public:
   enum ALLOC {New,Malloc};
-  enum PHYS {neib,rho,temperature,pressure,temperaturesd};
+  enum PHYS {neib,rho,temperature,pressure,temperaturesd,velnorm};
   PhysicalData(const PHYS, const int _nbody=0, const ALLOC model=New);
   ~PhysicalData();
   const PhysicalData& operator=(const PhysicalData& m);
@@ -61,11 +61,11 @@ public:
 
     int   * nbody, i_max[3], * nemobits;;
     float * pos, 
-    * vel, * vel_norm,
+    * vel,
     * timu, coo_max[3], coo_min[3];//* rneib, * rho, * temp, * pressure;
     int tree_size_max;
     std::vector <int> id;
-    PhysicalData * rneib, * rho, * temp, * pressure;
+    PhysicalData * rneib, * rho, * temp, * pressure, * vel_norm;
     static char * mallocate(char *, int, bool force=false);
     void computeVelNorm();
     void computeMaxSize();

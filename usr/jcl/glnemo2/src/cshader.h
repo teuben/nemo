@@ -19,7 +19,7 @@ namespace glnemo {
 class CShader {
   
 public:
-  CShader(std::string vert_file, std::string frag_file, bool verbose=true);
+  CShader(std::string vert_file, std::string frag_file, std::string geom_file="",bool verbose=true);
   bool init();
   void start();
   void stop();
@@ -34,10 +34,12 @@ private:
   bool verbose;
   std::string vert_file;
   std::string frag_file;
-  
+  std::string geom_file;
+
   std::string load(std::string); // load source code file
   bool processVertex();
   bool processPixel();
+  bool processGeom();
   bool createProgram();
   void printLog(GLuint obj,std::string);
   
@@ -45,7 +47,9 @@ private:
   GLhandleARB m_vertexShader;
   // This handle stores our fragment shader information
   GLhandleARB m_pixelShader;
-  // handle to the sahder program itself
+  // This handle stores our geometry shader information
+  GLhandleARB m_geomShader;
+  // handle to the shader program itself
   GLhandleARB m_program;
   
 };

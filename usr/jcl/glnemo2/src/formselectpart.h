@@ -28,7 +28,7 @@ class FormSelectPart: public QDialog {
     ~FormSelectPart();
   void update(SnapshotInterface *,ComponentRangeVector *, const std::string, const bool first_snapshot=false);
   signals:
-      void selectPart(const std::string, const bool);
+      void selectPart(const std::string, const bool, const bool);
   private slots:
     void on_all_check_clicked()   { updateSelect(); }
     void on_disk_check_clicked()  { updateSelect(); }
@@ -37,10 +37,11 @@ class FormSelectPart: public QDialog {
     void on_bulge_check_clicked() { updateSelect(); }
     void on_stars_check_clicked() { updateSelect(); }
     void on_bndry_check_clicked() { updateSelect(); }
+    void on_load_vel_check_clicked()    { load_vel = form.load_vel_check->isChecked(); }
     void on_manual_range_textChanged(QString s) { updateSelect(); s="";}
     void on_button_box_accepted() {
       accept();
-      emit selectPart(form.final_select->text().toStdString(), first_snapshot);
+      emit selectPart(form.final_select->text().toStdString(), first_snapshot, load_vel);
     };
     void on_button_clear_clicked() { reset(false); form.manual_range->clear();}
     void on_button_clear_man_clicked() { form.manual_range->clear();}
@@ -48,6 +49,7 @@ class FormSelectPart: public QDialog {
     Ui::FormSelectPart form;
     ComponentRangeVector * crv;
     SnapshotInterface * current_data;
+    bool load_vel;
     void reset(bool range=true);
     void updateSelect();
     bool first_snapshot;

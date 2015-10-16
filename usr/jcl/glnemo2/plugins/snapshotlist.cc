@@ -36,7 +36,6 @@ SnapshotList::SnapshotList():SnapshotInterface()
   current_file_index=0;
   snapshot="";
   vector_file.clear();
-  go = NULL;
 }
 
 // ============================================================================
@@ -241,7 +240,7 @@ bool SnapshotList::getLine(const bool force)
           if (cpt==1) snapshot=parse;
         }
         if (cpt > 0 ) {
-          unsigned int i=0;
+
 //          std::cerr << "0:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
 //          std::cerr << "1:SnapshotList::getLine snapshot=["<<snapshot<<"]\n";
           stop   = true; // we have a snapshot

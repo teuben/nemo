@@ -85,7 +85,8 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   i_wmat = 2;
   
   connect(gl_select, SIGNAL(updateGL()), this, SLOT(updateGL()));
-  connect(gl_select, SIGNAL(updateZoom()), this, SLOT(osdZoom()));
+  //connect(gl_select, SIGNAL(updateZoom()), this, SLOT(osdZoom()));
+  connect(gl_select, SIGNAL(updateZoom()), this, SLOT(updateOsdZrt()));
   connect(this,SIGNAL(sigScreenshot()),parent,SLOT(startAutoScreenshot()));
   setFocus();
   wwidth=894;wheight=633;
@@ -96,6 +97,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   initializeGL();
   checkGLErrors("initializeGL");
   shader = NULL;
+  vel_shader = NULL;
   initShader();
   checkGLErrors("initShader");
   ////////
@@ -131,7 +133,7 @@ GLWindow::GLWindow(QWidget * _parent, GlobalOptions*_go,QMutex * _mutex, Camera 
   font = new fntTexFont(store_options->osd_font_name.toStdString().c_str());
   text.setFont(font);
   text.setPointSize(store_options->osd_font_size );
-  osd = new GLObjectOsd(wwidth,wheight,text,Qt::yellow);
+  osd = new GLObjectOsd(wwidth,wheight,text,store_options->osd_color);
   // colorbar
   gl_colorbar = new GLColorbar(store_options,true);
   
@@ -165,6 +167,7 @@ GLWindow::~GLWindow()
     glDeleteRenderbuffersEXT(1, &renderbuffer);
     glDeleteRenderbuffersEXT(1, &framebuffer);
     if (shader) delete shader;
+    if (vel_shader) delete vel_shader;
   }
   std::cerr << "Destructor GLWindow::~GLWindow()\n";
 }
@@ -176,10 +179,10 @@ void GLWindow::updateGL()
   if ( !store_options->duplicate_mem) {
     mutex_data->lock();
     if (store_options->new_frame) update();
-    else QGLWidget::updateGL();
+    else QGLWidget::update();
     mutex_data->unlock();
   }
-  else QGLWidget::updateGL();
+  else QGLWidget::update();
 }
 //QMutex mutex1;
 
@@ -214,7 +217,7 @@ void GLWindow::update(ParticlesData   * _p_data,
   for (unsigned int i=0; i<pov->size() ;i++) {
     if (i>=gpv.size()) {
       GLObjectParticles * gp = new GLObjectParticles(p_data,&((*pov)[i]),
-                                                     store_options,&gtv,shader);
+                                                     store_options,&gtv,shader,vel_shader);
       //GLObjectParticles * gp = new GLObjectParticles(&p_data,pov[i],store_options);
       gpv.push_back(*gp);
       delete gp;
@@ -342,7 +345,7 @@ void GLWindow::initLight()
 long int CPT=0;
 void GLWindow::paintGL()
 {
-  CPT++;
+  CPT++; 
   //std::cerr << "GLWindow::paintGL() --> "<<CPT<<"\n";
   if (store_options->auto_gl_screenshot) {
     store_options->auto_gl_screenshot = false;
@@ -433,8 +436,8 @@ void GLWindow::paintGL()
     glGetDoublev (GL_MODELVIEW_MATRIX, mScene); // set to Identity
     reset_scene_rotation=false;
     last_urot = last_vrot = last_wrot = 0.0;
-  }
-  
+  }  
+
   glLoadIdentity (); // reset OGL rotations
   // set camera
   if ( store_options->perspective) {
@@ -473,6 +476,21 @@ void GLWindow::paintGL()
     gridz->display();
     cube->display();
     glDisable(GL_BLEND);
+  }
+
+  // sphere display
+  if (0) {
+    glDisable(GL_DEPTH_TEST);
+    glEnable(GL_BLEND);
+    GLUquadricObj *quadric=gluNewQuadric();
+    gluQuadricDrawStyle(quadric,GLU_LINE);
+    gluQuadricNormals(quadric, GLU_SMOOTH);
+    GLdouble radius=GLdouble(store_options->mesh_length*store_options->nb_meshs/2.0);
+    GLint subdivisions=16;
+    gluSphere(quadric, radius, subdivisions,subdivisions);
+    gluDeleteQuadric(quadric);
+    glDisable(GL_BLEND);
+
   }
   // camera display path and control points
   camera->display();
@@ -540,7 +558,10 @@ void GLWindow::paintGL()
   if (store_options->axes_enable)
     axes->display(mScreen, mScene, wwidth,wheight,
                   store_options->axes_loc,store_options->axes_psize, store_options->perspective);
-  
+
+  // reset viewport to the windows size because axes object modidy it
+  glViewport(0, 0,  wwidth, wheight);
+
   if (fbo && GLWindow::GLSL_support) {
     fbo = false;
     //imgFBO = grabFrameBuffer();
@@ -557,11 +578,19 @@ void GLWindow::paintGL()
 
   nframe++; // count frames
   //glDrawPixels(gldata.width(), gldata.height(), GL_RGBA, GL_UNSIGNED_BYTE, gldata.bits());
+  emit doneRendering();
 }
 // ============================================================================
 void GLWindow::initShader()
 {
   if (store_options->init_glsl) {
+    const GLubyte* gl_version=glGetString ( GL_VERSION );
+    std::cerr << "OpenGL version : ["<< gl_version << "]\n";
+    int major = 0;
+    int minor = 0;
+    glGetIntegerv(GL_MAJOR_VERSION, &major);
+    glGetIntegerv(GL_MINOR_VERSION, &minor);
+    std::cerr << "OpenGL :"<< major << "." << minor << "\n";
     GLSL_support = true;
     std::cerr << "begining init shader\n";
     int err=glewInit();
@@ -574,9 +603,35 @@ void GLWindow::initShader()
     }
 
     if (GLSL_support ) {
+      // check GLSL version supported
+      const GLubyte* glsl_version=glGetString ( GL_SHADING_LANGUAGE_VERSION );
+      std::cerr << "GLSL version supported : ["<< glsl_version << "]\n";
+      //GLuint glsl_num;
+      //glGetStringi(GL_SHADING_LANGUAGE_VERSION,glsl_num);
+      //std::cerr << "GLSL version NUM : ["<< glsl_num << "]\n";
+      // particles shader
       shader = new CShader(GlobalOptions::RESPATH.toStdString()+"/shaders/particles.vert.cc",
                            GlobalOptions::RESPATH.toStdString()+"/shaders/particles.frag.cc");
       shader->init();
+      // velocity shader
+      if (1) {
+
+#if 0
+          // Geometry shader OpenGL 3.30 and above only
+          vel_shader = new CShader(GlobalOptions::RESPATH.toStdString()+"/shaders/velocity.vert330.cc",
+                                   GlobalOptions::RESPATH.toStdString()+"/shaders/velocity.frag330.cc",
+                                   GlobalOptions::RESPATH.toStdString()+"/shaders/velocity.geom330.cc");
+
+#else
+          vel_shader = new CShader(GlobalOptions::RESPATH.toStdString()+"/shaders/velocity.vert.cc",
+                                   GlobalOptions::RESPATH.toStdString()+"/shaders/velocity.frag.cc");
+
+#endif
+          if (!vel_shader->init() ) {
+              delete vel_shader;
+              vel_shader=NULL;
+          }
+      }
     }
 
   }
@@ -749,8 +804,10 @@ void GLWindow::mouseReleaseEvent( QMouseEvent *e )
 #endif
   if (is_shift_pressed) {
     if ( !store_options->duplicate_mem) mutex_data->lock();
+    //JCL 07/21/2015 setPerspectiveMatrix(); // toggle to perspective matrix mode
+    gl_select->selectOnArea(pov->size(),mProj,mModel,viewport);
     setPerspectiveMatrix(); // toggle to perspective matrix mode
-    gl_select->zoomOnArea(pov->size(),mProj,mModel,viewport);
+    gl_select->zoomOnArea(mProj,mModel,viewport);
     osd->setText(GLObjectOsd::Zoom,(const float) store_options->zoom);
     osd->updateDisplay();
     if ( !store_options->duplicate_mem) mutex_data->unlock();
@@ -1031,7 +1088,7 @@ void GLWindow::setTranslation( const int x, const int y, const int z )
   GLfloat yTrans = (GLfloat)( y*store_options->zoom/(Viewport[3])); //Viewport[3]*ratio));
   GLfloat zTrans = (GLfloat)( z*store_options->zoom/(Viewport[2]));
   // display on HUD
-  osd->setText(GLObjectOsd::Trans,xTrans,yTrans,zTrans);
+  osd->setText(GLObjectOsd::Trans,-xTrans,-yTrans,-zTrans);
   osd->updateDisplay();
   // save
   store_options->xtrans=xTrans;
@@ -1039,6 +1096,27 @@ void GLWindow::setTranslation( const int x, const int y, const int z )
   store_options->ztrans=zTrans;
   updateGL();
 }
+// -----------------------------------------------------------------------------
+// updateOsd()
+void GLWindow::updateOsdZrt(bool ugl)
+{
+  GlobalOptions * g = store_options;
+  setOsd(GLObjectOsd::Zoom,(const float) store_options->zoom,
+                    g->osd_zoom,false);
+  setOsd(GLObjectOsd::Rot,(const float) store_options->xrot,
+                    (const float) store_options->yrot,
+                    (const float) store_options->zrot, g->osd_rot,false);
+  setOsd(GLObjectOsd::Trans,(const float) -store_options->xtrans,
+                    (const float) -store_options->ytrans,
+                    (const float) -store_options->ztrans,g->osd_trans,false);
+
+  osd->updateDisplay();
+  if (ugl) {
+   updateGL();
+  }
+
+}
+
 // ============================================================================
 // setup zoom according to a z value
 void GLWindow::setZoom(const int z)
@@ -1166,6 +1244,7 @@ void GLWindow::bestZoomFit()
 
   setPerspectiveMatrix(); // toggle to perspective matric mode
 
+
   Tools3D::bestZoomFromObject(mProj,mModel,
                               viewport, pov, p_data, store_options);
     
@@ -1173,7 +1252,7 @@ void GLWindow::bestZoomFit()
   ortho_left  =-store_options->ortho_range;
   ortho_top   = store_options->ortho_range;
   ortho_bottom=-store_options->ortho_range;
-  store_options->zoomo = 1.;
+  //store_options->zoomo = 1.;
   
   osdZoom();
   if ( !store_options->duplicate_mem) mutex_data->unlock();

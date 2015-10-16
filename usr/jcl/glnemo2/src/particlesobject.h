@@ -18,9 +18,12 @@
 #include <vector>
 #include <iostream>
 #include <QColor>
+#include "particlesdata.h"
 #include "orbits.h"
 
 namespace glnemo {
+
+
 class ParticlesObject;
 
 typedef std::vector <ParticlesObject> ParticlesObjectVector; 
@@ -64,6 +67,11 @@ class ParticlesObject{
     int last;        // index of the last particle
     int step;        // incremental step between particles.
     int * index_tab; // particles's indexes
+    // object creation method
+    bool hasIndexesList() { // return true if object has been created from indexes list
+        return sel_from_index_list;
+    }
+
     //
     // Orbits stuff
     //
@@ -185,6 +193,7 @@ class ParticlesObject{
     int min_percen_phys;
     int max_percen_phys;
     bool rho_sorted;
+    bool sel_from_index_list; // object created from a list of indexes
     void setColor();
     std::string obj_name;  // or file name
     ObjFrom obj_from;

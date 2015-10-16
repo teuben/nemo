@@ -56,6 +56,7 @@ void GLAxesObject::display(const double * mScreen,const double * mScene, const i
   // set projection  
   //setProjection( width-size, 0, size, size);
   //setProjection( width/2-size/2, width/2, size, size);
+  // !! BE carefull the following call will change the viewport !!!
   setProjection( pwidth, pheight, size, size,perspective);
   
   glMatrixMode( GL_MODELVIEW );

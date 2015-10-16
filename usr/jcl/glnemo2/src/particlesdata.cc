@@ -102,21 +102,14 @@ const ParticlesData& ParticlesData::operator=(const ParticlesData& m)
     // velocity norm "vel_norm"
     if (m.vel_norm) {
       max_vel_norm = m.max_vel_norm;
-      if (cmodel)
-        vel_norm = (float *) mallocate((char *) vel_norm, sizeof (float) * (*nbody), true);
-      else {
-        if (vel_norm) delete [] vel_norm;
-        vel_norm = new float[*nbody];
-      }
-      //memcpy((float *) vel_norm, (float *) m.vel_norm, sizeof(float)* (*nbody));
-      for (int i=0; i < (*nbody); i++) {
-        vel_norm[i] = m.vel_norm[i];
-      }
+      if (vel_norm) delete vel_norm;
+      vel_norm = new PhysicalData(PhysicalData::velnorm,*nbody);
+      *vel_norm = *m.vel_norm;
     }
     else {
       if (vel_norm) {
         if (cmodel) { free ((float *) vel_norm); }
-        else        { delete [] vel_norm;        }
+        else        { delete  vel_norm;        }
       }
       vel_norm = NULL;
     }
@@ -216,7 +209,7 @@ ParticlesData::~ParticlesData()
   }
   if (vel_norm) {
     if (cmodel) { free ((float *) vel_norm); }
-    else        { delete [] vel_norm;        }
+    else        { delete vel_norm;        }
   }
 
   if (rho) {
@@ -303,24 +296,27 @@ void ParticlesData::computeVelNorm()
 {
   if (vel) {
     if (! vel_norm) {
-      if (cmodel)
-        vel_norm = (float *) mallocate((char *) vel_norm, sizeof(float)*(*nbody),true);
-      else
-        vel_norm = new float[*nbody];
+//      if (cmodel)
+//        vel_norm = (float *) mallocate((char *) vel_norm, sizeof(float)*(*nbody),true);
+//      else
+//        vel_norm = new float[*nbody];
+      vel_norm = new PhysicalData(PhysicalData::velnorm,*nbody);
     }
     bool first=true;
     for (int i=0; i<(*nbody); i++) {
       float vx=vel[i*3];
       float vy=vel[i*3 + 1];
       float vz=vel[i*3 + 2];
-      vel_norm[i] = sqrt(vx*vx + vy*vy + vz*vz);
-      if (first) {
-        first=false;
-        max_vel_norm = vel_norm[0];
-      }
-      else 
-        if (vel_norm[i] > max_vel_norm) max_vel_norm = vel_norm[i];
+      vel_norm->data[i] = sqrt(vx*vx + vy*vy + vz*vz);
+//      if (first) {
+//        first=false;
+//        max_vel_norm = vel_norm[0];
+//      }
+//      else
+//        if (vel_norm[i] > max_vel_norm) max_vel_norm = vel_norm[i];
     }
+    vel_norm->computeMinMax();
+    max_vel_norm = vel_norm->getMax();
   }
 }
 // ============================================================================
@@ -354,7 +350,9 @@ PhysicalData * ParticlesData::getPhysData(int index) const
     //assert(temp!=NULL);
     ptr = temp;
     break;
-    
+  case 5:
+    ptr = vel_norm;
+    break;    
     default:
     assert(0);
   }
@@ -509,6 +507,11 @@ int PhysicalData::computeMinMax()
       else       GlobalOptions::pressure_exist    = false;
       std::cerr << "Pressure    range :\n";
       break;                        
+    case PhysicalData::velnorm :
+      if (valid) GlobalOptions::velnorm_exist    = true;
+      else       GlobalOptions::velnorm_exist    = false;
+      std::cerr << "Velnorm     range :\n";
+      break;
     } 
     std::cerr << "VALID =["<<valid<<"]\n";
     std::cerr <<" min = "<< std::scientific << std::setw(10) << min

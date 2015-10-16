@@ -112,13 +112,24 @@ void GLSelection::display(const int width, const int height)
   }
 }
 // ============================================================================
-// zoomOnArea                                                                  
+// selectOnArea
 // according to the user selection, the selected area will be centered and     
 // zoomed in                                                                   
-void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
-                             const int viewport[4])
+void GLSelection::selectOnArea(const int nobj, double mProj[16],double mModel[16],
+                             const int viewport[4],const bool whole_screen)
 {
-  if (nobj&&enable) {
+  com[0] = 0.;  // Center Of Mass
+  com[1] = 0.;  // Center Of Mass
+  com[2] = 0.;  // Center Of Mass
+  in_area=0;
+
+  if (nobj&&enable || nobj&&whole_screen) {
+    if (whole_screen) {
+        x0=viewport[0];
+        y0=viewport[1];
+        x1=viewport[2];
+        y1=viewport[3];
+    }
     // reordering square selection on X
     if (x1<x0) {
       float xx=x0;
@@ -132,11 +143,8 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
     
     FrustumCulling frustum;
     frustum.getFC(mModel,mProj); // compute frustum  
-    Tools3D t3d(mModel,mProj);   // 3D stuffs        
+    Tools3D t3d(mModel,mProj);   // 3D stuffs            
 
-    const ParticlesData * part_data;
-    double com[3] = { 0.,0.,0.};  // Center Of Mass   
-    int in_area=0;
     list.clear();
     // loop on all the objects
     // to find out all particles in the
@@ -165,6 +173,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
           float winy=viewport[1] + (1 + v3d.y) * viewport[3] / 2;
           winy = viewport[3]-winy;
           bool indensity=true;
+#if 1 // if 0 - > 07/21/2015 select all particles even those outside density threshold
           if (phys_select && phys_select->isValid()) { 
             if (phys_select->data[jndex] >= DMIN && 
                 phys_select->data[jndex] <= DMAX) {
@@ -173,6 +182,7 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
                 indensity=false;
             }
           }
+#endif
           //std::cerr << winx << " " << x0 << " " << x1 << " " << winy << " " << y0 << " " << y1 << " " <<frustum.isPointInside(x,y,z) << "\n"; 
           // is particle visible ?
           if (indensity && winx >= x0 && winx <= x1 && winy >= y0 && winy <= y1 && // in selected area
@@ -192,67 +202,77 @@ void GLSelection::zoomOnArea(const int nobj, double mProj[16],double mModel[16],
     }
     reset();
     emit updatePareticlesSelected(in_area); // update Form Option
+  }
+  else reset();
+}
+
+// ============================================================================
+// zoomOnArea
+// according to the user selection, the selected area will be centered and
+// zoomed in
+void GLSelection::zoomOnArea(double mProj[16],double mModel[16],const int viewport[4])
+{
     if (in_area) { // particles exist
         // normalizing COM
-	com[0] /= (float) in_area;
-	com[1] /= (float) in_area;
-	com[2] /= (float) in_area;        
-	
+        com[0] /= (float) in_area;
+        com[1] /= (float) in_area;
+        com[2] /= (float) in_area;
+
         //std::cerr << "in_area = " << in_area << "  list ="<<list.size()<<"\n";
-	//std::cerr << "center of mass:" << com[0] << " " << com[1] << " " << com[2] <<"\n";
+        //std::cerr << "center of mass:" << com[0] << " " << com[1] << " " << com[2] <<"\n";
         //std::cerr << "zoom in=" << store_options->zoom << "\n";
         // save information
-        float zoom1 =store_options->zoom; // zoom value
-        float zoomo1=store_options->zoomo; // zoom value
-        float ortho1=store_options->ortho_range; // zoom value
+        double zoom1 =store_options->zoom; // zoom value
+        double zoomo1=store_options->zoomo; // zoom value
+        double ortho1=store_options->ortho_range; // zoom value
         trans_in.set(store_options->xtrans,store_options->ytrans,store_options->ztrans);
-        if (zoom) {// best ZOOM on particles inside selected area 
-           // centering on COM
-           store_options->xtrans -= com[0];
-           store_options->ytrans -= com[1];
-           store_options->ztrans -= com[2];
-           trans_out.set(store_options->xtrans,store_options->ytrans,store_options->ztrans);
+        if (zoom) {// best ZOOM on particles inside selected area
+            // centering on COM
+            store_options->xtrans -= com[0];
+            store_options->ytrans -= com[1];
+            store_options->ztrans -= com[2];
+            trans_out.set(store_options->xtrans,store_options->ytrans,store_options->ztrans);
 
-           // in following function we compute the best
-           // zoom for perspective and orthographic projection
-           // BUT for orthographic, best zoom is set to ortho_range
-           Tools3D::bestZoomFromList(mProj,mModel,viewport,&list, part_data, store_options);
-           if (anim_zoom) {
-            float zoom2 =store_options->zoom; // new zoom value            
-            // perspective zoom offset
-            zoom_dynamic =(zoom2-zoom1)/float(total_frame); // animation zoom value offset
-            // orthoraphic zoom offset
-            zoomo_dynamic=(store_options->ortho_range-ortho1*zoomo1)/float(total_frame); 
-            //std::cerr << "ortho0 =" << store_options->ortho_range << " ortho1="<< ortho1 << "\n";
-            //std::cerr << "zoomo_dynmaic = "<< zoomo_dynamic << " zoomo1="<<zoomo1<<"\n";
-            // set initial Center
-            store_options->xtrans=trans_in[0];
-            store_options->ytrans=trans_in[1];
-            store_options->ztrans=trans_in[2];
-  
-            comvec = trans_out-trans_in; // vector director to COM
+            // in following function we compute the best
+            // zoom for perspective and orthographic projection
+            // BUT for orthographic, best zoom is set to ortho_range
+            Tools3D::bestZoomFromList(mProj,mModel,viewport,&list, part_data, store_options);
+            if (anim_zoom) {
+                double zoom2 =store_options->zoom; // new zoom value
+                // perspective zoom offset
+                zoom_dynamic =(zoom2-zoom1)/double(total_frame); // animation zoom value offset
+                // orthoraphic zoom offset
+                zoomo_dynamic=(store_options->ortho_range-ortho1*zoomo1)/double(total_frame);
+                //std::cerr << "ortho0 =" << store_options->ortho_range << " ortho1="<< ortho1 << "\n";
+                //std::cerr << "zoomo_dynmaic = "<< zoomo_dynamic << " zoomo1="<<zoomo1<<"\n";
+                // set initial Center
+                store_options->xtrans=trans_in[0];
+                store_options->ytrans=trans_in[1];
+                store_options->ztrans=trans_in[2];
+
+                comvec = trans_out-trans_in; // vector director to COM
             Vec3D v;
             v = comvec + comvec;
             store_options->zoom  = zoom1; // set initial zoom value
             store_options->zoomo = 1.; // we want to keep zoomo = 1
             store_options->ortho_range = ortho1*zoomo1; // initial range with zoomo = 1
+
             frame_counter = 0;
             mutex_data->lock();          // keep priority on data
-            anim_timer->start(20);       // start zoom animation 
+            anim_timer->start(20);       // start zoom animation
           }
           else emit updateZoom();          // update GL
         }
         //std::cerr << "zoom out=" << store_options->zoom << "\n";
     }
-  }
-  else reset();
+
 }
 
 void GLSelection::playZoomAnim()
 {
   frame_counter++;                                       // one more frame         
   if (frame_counter<=total_frame) {                      // frame exist            
-    float off = float(frame_counter)/float(total_frame); // new displacement offset
+    double off = double(frame_counter)/double(total_frame); // new displacement offset
     store_options->zoom  += zoom_dynamic;                 // new zoom               
     //store_options->zoomo += zoomo_dynamic;                 // new zoom   
     store_options->ortho_range += zoomo_dynamic;

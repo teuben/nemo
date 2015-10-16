@@ -20,7 +20,7 @@ Q_PLUGIN_METADATA(IID "fr.glnemo2.nemoPlugin")
 #endif
 
 extern "C" {
-  int io_nemo(const char * , const char *, ...);
+int io_nemo(const char * , const char *, ...);
 # include <stdinc.h>
 # include <filestruct.h>
 # include <nemo.h>
@@ -83,13 +83,13 @@ bool SnapshotNemo::isValidData()
     load_vel=true;
     if (load_vel) { // velocities requested
       status_ionemo=io_nemo(filename.c_str(),"info,float,read,sp,n,pos,vel,dens,aux,k,t,st,b",
-		     select_part.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
-		     &ntimu, select_time.c_str(),&nnemobits);
+                            select_part.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
+                            &ntimu, select_time.c_str(),&nnemobits);
     }
     else {          // velocities NOT requested
       status_ionemo=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,k,t,st,b",
-                     select_part.c_str(),&nnbody,&npos, &nrho,&nrneib,&nid,&ntimu,
-		     select_time.c_str(),&nnemobits);
+                            select_part.c_str(),&nnbody,&npos, &nrho,&nrneib,&nid,&ntimu,
+                            select_time.c_str(),&nnemobits);
     }
     full_nbody = *nnbody;
     assert(npos!=NULL);
@@ -101,15 +101,15 @@ bool SnapshotNemo::isValidData()
       else          status = false; // it's not
       strclose(str);
       if (status)  {                // it's a NEMO snapshot
-	int * ptr=NULL;      // get the full nbody
-	ntimu=NULL;nnemobits = NULL; 
-	int status1=io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nnemobits);
+        int * ptr=NULL;      // get the full nbody
+        ntimu=NULL;nnemobits = NULL;
+        int status1=io_nemo(filename.c_str(),"float,read,n,t,b",&ptr,&ntimu,&nnemobits);
         if (status1 > 0 || status1 == -1) {
           io_nemo(filename.c_str(),"close");
         }
-	assert(ptr);
-	full_nbody=*ptr;
-	free((int *) ptr);
+        assert(ptr);
+        full_nbody=*ptr;
+        free((int *) ptr);
       }
     }
     else
@@ -149,6 +149,7 @@ ComponentRangeVector * SnapshotNemo::getSnapshotRange()
 // initLoading()                                                               
 int SnapshotNemo::initLoading(GlobalOptions * so)
 {
+  go = so; // copy global options
   load_vel = so->vel_req;
   select_part="all";
   select_time=so->select_time;
@@ -163,7 +164,7 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
   std::string force_select;
   if (keep_all) force_select = "all";        // we want to select all particles
   else          force_select = select_part;  // we want a substet of particles
- 
+
 #if 0
   if (load_vel) { // velocities requested
     status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,t,st,b",
@@ -176,27 +177,29 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
                    select_time.c_str(),&part_data->nemobits);
   }
 #endif
+  assert(go != NULL);
+  load_vel = go->vel_req;
   if ( ! first_stream) { // Normal NEMO file
     npos=NULL; nvel=NULL; ntimu=NULL; nrho=NULL; nrneib=NULL;
     nnemobits = NULL; ;nnbody = NULL; nid=NULL;
     std::cerr << "selected time = "<< select_time << "\n";
     if (load_vel) { // velocities requested
       status=io_nemo(filename.c_str(),"float,read,sp,n,pos,vel,dens,aux,k,t,st,b",
-                   force_select.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
-		   &ntimu, select_time.c_str(),&nnemobits);
+                     force_select.c_str(),&nnbody,&npos,&nvel,&nrho,&nrneib,&nid,
+                     &ntimu, select_time.c_str(),&nnemobits);
     }
     else {          // velocities NOT requested
       status=io_nemo(filename.c_str(),"float,read,sp,n,pos,dens,aux,k,t,st,b",
                      force_select.c_str(),&nnbody,&npos, &nrho,&nrneib,&nid,&ntimu,
-		     select_time.c_str(),&nnemobits);
+                     select_time.c_str(),&nnemobits);
     }
   }
   else { // nemo file from standard input "-"
     status = status_ionemo;
   }
   
- // std::cerr << "status next frame ="<< status <<" nsel ="<<nsel<<" part  nbody"<<*part_data->nbody<<" nbody = "<<*nnbody<<"\n";
- // assert(npos);
+  // std::cerr << "status next frame ="<< status <<" nsel ="<<nsel<<" part  nbody"<<*part_data->nbody<<" nbody = "<<*nnbody<<"\n";
+  // assert(npos);
   if (first_stream || status != 0) {
     if (first_stream) first_stream=false;
     if (status ==  0) end_of_data=true;
@@ -212,28 +215,28 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
     if (status != -2) { // NEMO snapshot must have particles TAG
       // copy data from NEMO array to glnemo
       if (nsel > *part_data->nbody) {
-	if (part_data->pos) delete [] part_data->pos;
-	part_data->pos = new float[nsel*3];
-	if (load_vel && nvel) {
-	  if (part_data->vel) delete [] part_data->vel;
-	  part_data->vel = new float[nsel*3];
-	}
+        if (part_data->pos) delete [] part_data->pos;
+        part_data->pos = new float[nsel*3];
+        if (load_vel && nvel) {
+          if (part_data->vel) delete [] part_data->vel;
+          part_data->vel = new float[nsel*3];
+        }
       }
       assert(nsel<=*nnbody);
       //*part_data->nbody=nsel; // !!!! 07 November 2010 !!!!!!
       int cpt=0;
       for (int i=0; i<*nnbody; i++) {
-	int idx=index_tab[i];
-	//std::cerr << "idx="<<idx<<"\n";
-	if (idx!=-1) {
-	  for (int j=0; j<3; j++) {
-	    part_data->pos[cpt*3+j] = npos[idx*3+j];
-	    if (load_vel && nvel) part_data->vel[cpt*3+j] = nvel[idx*3+j];
-	  }
-	  cpt++;
-	}
+        int idx=index_tab[i];
+        //std::cerr << "idx="<<idx<<"\n";
+        if (idx!=-1) {
+          for (int j=0; j<3; j++) {
+            part_data->pos[cpt*3+j] = npos[idx*3+j];
+            if (load_vel && nvel) part_data->vel[cpt*3+j] = nvel[idx*3+j];
+          }
+          cpt++;
+        }
       }
-      assert(cpt==nsel);
+      //assert(cpt==nsel);
       // garbage collecting
       if (npos)     free ((float *) npos);
       if (nvel)     free ((float *) nvel);
@@ -254,8 +257,8 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
         for (int i=0; i<*nnbody; i++) {
           int idx=index_tab[i];
           if (idx!=-1) {
-              part_data->rho->data[cpt]   = nrho[idx];
-              cpt++;
+            part_data->rho->data[cpt]   = nrho[idx];
+            cpt++;
           }
         }
         assert(cpt==nsel);
@@ -276,7 +279,7 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
       }
 
       // read Ids
-      if (*nnemobits & KeyBit) {        
+      if (*nnemobits & KeyBit) {
         if (nsel > *part_data->nbody) {
           part_data->id.clear();
           for (int i=0; i<nsel; i++) part_data->id.push_back(-1);
@@ -291,7 +294,7 @@ int SnapshotNemo::nextFrame(const int * index_tab, const int nsel)
         }
         assert(cpt==nsel);
         if (nid) free ((int*) nid);
-      }      
+      }
       // garbage collecting
       if (nrneib)   free ((float *) nrneib   );
       if (ntimu)    free ((float *) ntimu    );
@@ -315,7 +318,7 @@ int SnapshotNemo::close()
   if (valid) {
     status = io_nemo(filename.c_str(),"close");
     end_of_data = false;
-    valid = false; // added 2009 June 19th 
+    valid = false; // added 2009 June 19th
   }
   return status;
 }

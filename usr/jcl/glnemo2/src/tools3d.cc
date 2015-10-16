@@ -52,6 +52,16 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
     std::cerr << "MM = " << MM(2,3)  << " best zoom ="<<best_zoom<<"\n";
     float mid_screenx = (viewport[2]-viewport[0])/2.;
     float mid_screeny = (viewport[3]-viewport[1])/2.;
+    // Ortho computation
+    double ratio=((double )viewport[2]) / ((double )viewport[3]);
+    double fx,fy;
+    if (ratio<1.0) {
+      fx = 1.0  ; fy = 1./ratio;
+    }
+    else {
+      fx = ratio; fy = 1.0;
+    }
+
     float coo[3];
     double absxmax=0.;//fabs(std::numeric_limits<double>::min());
     double absymax=0.;//fabs(std::numeric_limits<double>::min());
@@ -90,9 +100,16 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
           py /= pw;
           pz /= pw;
           // compute orthographic best zoom
+#if 0
           if (fabs(x)>fabs(absxmax)) absxmax =x;
           if (fabs(y)>fabs(absymax)) absymax =y; 
-          
+#endif
+          // FOR ORTHOGRAPHIC
+          float xm = mx/mw;
+          float ym = my/mw;
+          if (fabs(xm)>fabs(absxmax)) absxmax =xm;
+          if (fabs(ym)>fabs(absymax)) absymax =ym;
+
           //std::cerr << px << " " << py << " " << pz << "\n";
           // compute screen coordinates
           float winx=viewport[0] + (1 + px) * viewport[2] / 2;
@@ -124,6 +141,8 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
             if (new_zoomx < best_zoom) {
               best_zoom = new_zoomx;
               coo[0] = x; coo[1] = y; coo[2] = z;
+              store_options->ortho_range=fabs(xm);
+              store_options->zoomo = 1./fx;
             }
           }
           // proceed from bottom to mid-side of the screen
@@ -144,6 +163,8 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
             if (new_zoomy < best_zoom) {
               best_zoom = new_zoomy;
               coo[0] = x; coo[1] = y; coo[2] = z;
+              store_options->ortho_range=fabs(ym);
+              store_options->zoomo = 1./fy;
             }
           }
         }
@@ -151,7 +172,7 @@ void Tools3D::bestZoomFromObject(double * mProj,double * mModel,
       else { // object not visible
       }
     }
-    store_options->ortho_range=std::max(fabs(absxmax),fabs(absymax));
+    //store_options->ortho_range=std::max(fabs(absxmax),fabs(absymax));
     std::cerr << "ortho_range = " << store_options->ortho_range << "\n";
     //setZoom( best_zoom);
     store_options->zoom  = best_zoom;

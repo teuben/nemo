@@ -53,7 +53,7 @@ namespace glnemo {
 class QMyApplication : public QApplication {
   Q_OBJECT
 public:
-  QMyApplication(int argc, char *argv[]): QApplication(argc, argv) {}
+  QMyApplication(int &argc, char *argv[]): QApplication(argc, argv) {}
 protected:
   bool event(QEvent *event) {
     switch (event->type()) {
@@ -132,7 +132,7 @@ class MainWindow : public QMainWindow {
     void pressedKeyMouse(const bool, const bool);
     void uploadNewFrame();
     void takeScreenshot(const int, const int, std::string name="");
-    void selectPart(const std::string, const bool);
+    void selectPart(const std::string, const bool, const bool);
     void startBench(const bool);
     void updateBenchFrame();
     void startAutoScreenshot();

@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>346</width>
+    <width>372</width>
     <height>940</height>
    </rect>
   </property>
@@ -29,7 +29,7 @@
    <iconset>
     <normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</normaloff>../../../../../../../../../../../../../../home/jcl/.designer/backup</iconset>
   </property>
-  <layout class="QGridLayout" name="gridLayout_7">
+  <layout class="QGridLayout" name="gridLayout_9">
    <item row="0" column="0">
     <widget class="QGroupBox" name="groupBox_3">
      <property name="sizePolicy">
@@ -670,8 +670,11 @@ p, li { white-space: pre-wrap; }
         <property name="toolTip">
          <string/>
         </property>
+        <property name="tabShape">
+         <enum>QTabWidget::Triangular</enum>
+        </property>
         <property name="currentIndex">
-         <number>1</number>
+         <number>0</number>
         </property>
         <widget class="QWidget" name="tab_particles">
          <attribute name="title">
@@ -936,22 +939,6 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
-             <item row="0" column="2">
-              <widget class="QSpinBox" name="vel_spin">
-               <property name="sizePolicy">
-                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-                 <horstretch>0</horstretch>
-                 <verstretch>0</verstretch>
-                </sizepolicy>
-               </property>
-               <property name="minimum">
-                <number>1</number>
-               </property>
-               <property name="value">
-                <number>2</number>
-               </property>
-              </widget>
-             </item>
              <item row="1" column="0">
               <widget class="QLabel" name="label_2">
                <property name="sizePolicy">
@@ -1007,6 +994,19 @@ p, li { white-space: pre-wrap; }
                </property>
               </widget>
              </item>
+             <item row="0" column="2">
+              <widget class="QDoubleSpinBox" name="vel_spin">
+               <property name="sizePolicy">
+                <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                 <horstretch>0</horstretch>
+                 <verstretch>0</verstretch>
+                </sizepolicy>
+               </property>
+               <property name="value">
+                <double>2.000000000000000</double>
+               </property>
+              </widget>
+             </item>
             </layout>
            </widget>
           </item>
@@ -1016,7 +1016,7 @@ p, li { white-space: pre-wrap; }
          <attribute name="title">
           <string>Density</string>
          </attribute>
-         <layout class="QGridLayout" name="gridLayout_9">
+         <layout class="QGridLayout" name="gridLayout_7">
           <item row="0" column="0">
            <widget class="QGraphicsView" name="dens_histo_view">
             <property name="sizePolicy">
@@ -1367,7 +1367,7 @@ Physical value can be:
                </property>
               </widget>
              </item>
-             <item row="1" column="0">
+             <item row="1" column="0" colspan="2">
               <layout class="QHBoxLayout" name="horizontalLayout_4">
                <item>
                 <widget class="QRadioButton" name="temp_phys_radio">
@@ -1398,6 +1398,13 @@ Physical value can be:
               <widget class="QRadioButton" name="pressure_phys_radio">
                <property name="text">
                 <string>pressure</string>
+               </property>
+              </widget>
+             </item>
+             <item row="2" column="1">
+              <widget class="QRadioButton" name="velnorm_phys_radio">
+               <property name="text">
+                <string>velocity norm</string>
                </property>
               </widget>
              </item>

@@ -30,6 +30,7 @@ Currently, glnemo2 reads:
 - Gadget 1 and 2 -little and big endian- files (http://www.mpa-garching.mpg.de/gadget/)
 - RAMSES files (http://www.ics.uzh.ch/~teyssier/ramses/RAMSES.html)
 - TIPSY files (http://www-hpcc.astro.washington.edu/tools/tipsy/tipsy.html)
+- FITS files, 2D and 3D datacube (http://fits.gsfc.nasa.gov/)
 - FTM files (Clayton Heller's sph/nbody code)
 - phiGRAPE file (http://www-astro.physik.tu-berlin.de/~harfst/index.php?pid=8)
 - list of files stored in a file

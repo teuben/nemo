@@ -370,7 +370,7 @@ int GadgetIO::read(std::vector <int> * id, float * pos, float * vel, float * rho
     } // end of loop on numfiles
 
     std::cerr << "Use gas = " << use_gas << " start=" << s_gas << " end=" << e_gas << "\n";
-    if (version == 2 && is_temp && use_gas && ! header.flag_cooling) {
+    if (version == 2 && is_temp && use_gas && ! header.flag_cooling && intenerg!=NULL) {
       for(int n=0;n<nsel;n++) {
         temp[n] = 1.0;
       }

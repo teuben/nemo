@@ -94,6 +94,7 @@ ComponentRangeVector * SnapshotFtm::getSnapshotRange()
 // initLoading()                                                               
 int SnapshotFtm::initLoading(GlobalOptions * so)
 {
+  go = so;
   load_vel = so->vel_req;
   select_time = so->select_time;
   return 1;
@@ -103,6 +104,7 @@ int SnapshotFtm::initLoading(GlobalOptions * so)
 int SnapshotFtm::nextFrame(const int * index_tab, const int nsel)
 {
   int status=0;
+  load_vel = go->vel_req;
   if (valid) {
   if (ftm_io->read(part_data,index_tab,nsel,load_vel)) {
     status=1;

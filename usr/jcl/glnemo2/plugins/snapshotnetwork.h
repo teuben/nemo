@@ -48,7 +48,6 @@ namespace glnemo {
 			bool valid;
 			network::Serveur *cl;
 			bool connected;
-                        GlobalOptions * go;
 			int socketDescriptor;
                         QThread *currentThread;
 

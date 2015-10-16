@@ -76,6 +76,7 @@ class FormOptions: public QDialog {
     void on_obj_button_pressed()     { emit create_obj_selected(); }
     void on_sel_zoom_radio_pressed() { emit select_and_zoom(true);}
     void on_sel_only_radio_pressed() { emit select_and_zoom(false);}
+    void on_button_sel_all_part_pressed()    { emit select_all_part();}
     //                     
     // camera selection tab
     void on_cam_pts_display_clicked() { 
@@ -95,9 +96,9 @@ class FormOptions: public QDialog {
     void on_cam_play_pressed();
     //                   
     // play selection tab
-    void on_play_pressed2(const int forcestop=-1);
+    void play_pressed2(const int forcestop=-1);
     void on_play_pressed() {
-      on_play_pressed2();
+      play_pressed2();
     }
 
     void on_com_clicked() { go->auto_com = form.com->isChecked();
@@ -196,6 +197,37 @@ class FormOptions: public QDialog {
       go->osd_font_size = (float ) value;
       emit update_osd_font();
     }
+
+    void on_zoom_dspin_valueChanged(double value) {      
+      if (EMIT) {
+          go->zoom=value;
+          emit update_osd(true);
+      }
+    }
+    void on_rx_dspin_valueChanged(double value) {
+      go->xrot=(float) value;
+      if (EMIT) emit update_osd(true);
+    }
+    void on_ry_dspin_valueChanged(double value) {
+      go->yrot=(float) value;
+      if (EMIT) emit update_osd(true);
+    }
+    void on_rz_dspin_valueChanged(double value) {
+      go->zrot=(float) value;
+      if (EMIT) emit update_osd(true);
+    }
+    void on_tx_dspin_valueChanged(double value) {
+      go->xtrans=(float) -value;
+      if (EMIT) emit update_osd(true);
+    }
+    void on_ty_dspin_valueChanged(double value) {
+      go->ytrans=(float) -value;
+      if (EMIT) emit update_osd(true);
+    }
+    void on_tz_dspin_valueChanged(double value) {
+      go->ztrans=(float) -value;
+      if (EMIT) emit update_osd(true);
+    }
     // ColorBar TAB
     void on_gcb_enable_clicked(bool b) {
       go->gcb_enable = b;
@@ -252,14 +284,16 @@ class FormOptions: public QDialog {
     void on_gcb_font_color_clicked() {
       QPalette pal = form.gcb_font_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.gcb_font_color->setStyleSheet(css); 
-      go->gcb_color = color;
-      emit update_gcb_font();
-      emit update_gl();
+                  arg(color.blue());
+          form.gcb_font_color->setStyleSheet(css);
+          go->gcb_color = color;
+          emit update_gcb_font();
+          emit update_gl();
+      }
     }
     
     
@@ -267,25 +301,29 @@ class FormOptions: public QDialog {
     void on_font_color_clicked() {
       QPalette pal = form.font_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.font_color->setStyleSheet(css); 
-      go->osd_color = color;
-      emit update_osd_font();
+                  arg(color.blue());
+          form.font_color->setStyleSheet(css);
+          go->osd_color = color;
+          emit update_osd_font();
+      }
     }
     // change background color button
     void on_background_color_clicked() {
-      QPalette pal = form.font_color->palette();
+      QPalette pal = form.background_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.background_color->setStyleSheet(css); 
-      go->background_color = color;
-      emit update_gl();
+                  arg(color.blue());
+          form.background_color->setStyleSheet(css);
+          go->background_color = color;
+          emit update_gl();
+      }
     }
     // change title
     void on_title_name_returnPressed() {
@@ -327,50 +365,58 @@ class FormOptions: public QDialog {
     void on_xy_grid_color_clicked() {
       QPalette pal = form.xy_grid_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.xy_grid_color->setStyleSheet(css);
-      form.xy_grid_color->setPalette(pal);
-      go->col_x_grid = color;
-      emit update_grid();
+                  arg(color.blue());
+          form.xy_grid_color->setStyleSheet(css);
+          form.xy_grid_color->setPalette(pal);
+          go->col_x_grid = color;
+          emit update_grid();
+      }
     }
     // change yz grid color button
     void on_yz_grid_color_clicked() {
       QPalette pal = form.yz_grid_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.yz_grid_color->setStyleSheet(css);
-      go->col_y_grid = color;
-      emit update_grid();
+                  arg(color.blue());
+          form.yz_grid_color->setStyleSheet(css);
+          go->col_y_grid = color;
+          emit update_grid();
+      }
     }
     // change xz grid color button
     void on_xz_grid_color_clicked() {
       QPalette pal = form.xz_grid_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.xz_grid_color->setStyleSheet(css);  
-      go->col_z_grid = color;
-      emit update_grid();
+                  arg(color.blue());
+          form.xz_grid_color->setStyleSheet(css);
+          go->col_z_grid = color;
+          emit update_grid();
+      }
     }
     // change cube color button
     void on_cube_color_clicked() {
       QPalette pal = form.cube_color->palette();
       QColor color=QColorDialog::getColor(pal.color(QPalette::Button));
-      QString css=QString("background:rgb(%1,%2,%3)").
+      if (color.isValid()) {
+          QString css=QString("background:rgb(%1,%2,%3)").
                   arg(color.red()).
                   arg(color.green()).
-                  arg(color.blue());  
-      form.cube_color->setStyleSheet(css);  
-      go->col_cube = color;
-      emit update_grid();
+                  arg(color.blue());
+          form.cube_color->setStyleSheet(css);
+          go->col_cube = color;
+          emit update_grid();
+      }
     }
     
     // axis bottom
@@ -541,6 +587,7 @@ class FormOptions: public QDialog {
     void jump_frame(const int);
     void change_frame();
     void centering();
+    void select_all_part();
     // auto rotation
     void autoRotate(const int);
     

@@ -49,7 +49,8 @@ HEADERS += mainwindow.h \
     formhelp.h \
     cshader.h \
     glcolorbar.h \
-    glaxesobject.h
+    glaxesobject.h \
+    version.h
 SOURCES += glnemo.cc \
     mainwindow.cc \
     glwindow.cc \
@@ -100,16 +101,15 @@ CONFIG(debug, debug|release) {
     TARGET = ../bin/$$ARCH/$$COMPILEMODE/glnemo2
     win32 { 
         DESTDIR = ../bin/$$COMPILEMODE/$$ARCH
-        TARGET = glnemo2
+        TARGET = $$WEXE
     }
     unix:
 }
-
-else { 
+else {
     TARGET = ../bin/$$ARCH/$$COMPILEMODE/glnemo2
-    win32 { 
+    win32 {
         DESTDIR = ../bin/$$COMPILEMODE/$$ARCH
-        TARGET = glnemo2
+        TARGET = $$WEXE
     }
 }
 TEMPLATE = app
@@ -174,16 +174,20 @@ LIBS += \
     -ltipsy \
     -lutils
 win32 {
-    LIBS += -lzlib
+    #LIBS += -lzlib
     LIBS += -lopengl32
+    LIBS += -lCCfits -lcfitsio -lgomp -lpthread
 }
 unix {
     LIBS += -lz
     LIBS += -lGLU
+    LIBS += -lCCfits
+    LIBS += -lgomp
 }
 macx {
     LIBS += -lz
     LIBS -= -lGLU
+    LIBS += -lCCfits
 }
 POST_TARGETDEPS += \
     ../3rdparty/pfntlib/lib/$$ARCH/$$COMPILEMODE/libpfntlib.a \

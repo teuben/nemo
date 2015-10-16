@@ -7,7 +7,7 @@
 0) Requirements:
 ------------------  
  Glnemo2 compiles and runs fine on Linux, Windows and MacOSX platform.
-  In order to compile it, you need QT development  library (qt > 4.6).
+  In order to compile it, you need QT development  library (qt > 4.6), qt5 is preferred.
 Go to http://qt-project.org/downloads to download QT, click on the link for
 your appropriate platform.
  You also need a decent video card with a fast opengl driver. Glnemo2
@@ -35,10 +35,9 @@ qt4 are still installed there). Change to 'glnemo2' directory and enter the comm
           then
        make
 
-    c) cmake experimental
-       - - - - - - - - -
-     for linux only and qt5 dev package installed, if you have cmake package installed, you can try
-    to run the following commands :
+    c) cmake (prefered method for Linux and Mac)
+       - - -
+    You must have cmake utility installed (> 2.8)
     cd build
     cmake ..
     make
@@ -62,10 +61,10 @@ you architecture, and could be "unix", "win32" or "macx".
 
 see $NEMO/usr/jcl/glnemo2/gyrfalcon/README
 
-4) MacOSX and Windows Binaries
-------------------------------
+4) Binaries
+-----------
 
-You can download and install directly glnemo2 binary for MacOSX and windows 32 platform.
+You can download and install directly glnemo2 binary for different linux disrtributions, MacOSX and windows 32 et 64 bits platform.
 
 See http://projets.lam.fr/projects/glnemo2/wiki/Download
 

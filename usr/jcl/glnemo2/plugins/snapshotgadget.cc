@@ -86,6 +86,7 @@ ComponentRangeVector * SnapshotGadget::getSnapshotRange()
 // initLoading()                                                               
 int SnapshotGadget::initLoading(GlobalOptions * so)
 {
+  go = so;
   load_vel = so->vel_req;
   select_time = so->select_time;
   std::cerr << "select_time ="<<select_time<<"\n";
@@ -99,6 +100,7 @@ int SnapshotGadget::nextFrame(const int * index_tab, const int nsel)
   int status=0;
   stv.clear();
   parseSelectTime();
+  load_vel = go->vel_req;
   if (valid && checkRangeTime(gadget_io->getTime())) {
     status=1;
     if (nsel > *part_data->nbody) {

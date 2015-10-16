@@ -32,10 +32,12 @@
 // Nemo stuffs
 #define _vectmath_h // put this statement to avoid conflict with C++ vector class
 #include <nemo.h>
-
+#include <string>
 #include "mainwindow.h"
+
+#include "version.h"
+
 using namespace std;
-#define RELEASE_VERSION "1.8.1"
 
 #if QT_VERSION >= QT_VERSION_CHECK(5, 0, 0)
 // Import snapshot plugins
@@ -47,6 +49,7 @@ Q_IMPORT_PLUGIN(SnapshotRamses)
 #ifndef _WIN32
 Q_IMPORT_PLUGIN(SnapshotTipsy) // WIN32 has no native XDR support requested by TIPSY
 #endif
+Q_IMPORT_PLUGIN(SnapshotFits)
 Q_IMPORT_PLUGIN(SnapshotList)
 Q_IMPORT_PLUGIN(SnapshotNetwork)
 #else // QT4
@@ -58,10 +61,17 @@ Q_IMPORT_PLUGIN(ramsesplugin);
 #ifndef _WIN32
 Q_IMPORT_PLUGIN(tipsyplugin); // WIN32 has no native XDR support requested by TIPSY
 #endif
+Q_IMPORT_PLUGIN(fitsplugin);
 Q_IMPORT_PLUGIN(listplugin);
 Q_IMPORT_PLUGIN(networkplugin);
 #endif
 
+std::string release=std::string(GLNEMO2_MAJOR)+"."+
+                    std::string(GLNEMO2_MINOR)+"."+
+                    std::string(GLNEMO2_PATCH)+
+                    std::string(GLNEMO2_EXTRA);
+
+std::string VERSION = "VERSION="+release+"\n    "+__DATE__+"  - JCL  compiled at <"+ __TIME__ +">      ";
 // ============================================================================
 // NEMO parameters                                                             
   const char * defv[] = {  
@@ -84,6 +94,7 @@ Q_IMPORT_PLUGIN(networkplugin);
     "scale=1.\n        ramses rescaling factor                          ",
     "vel=f\n           load velocity coordinates                        ",
     "disp_vel=f\n      display velocity vectors                         ",
+    "vel_factor=1.0\n  velocity vectors multiplier factor               ",
     "blending=t\n      Activate blending colors                         ",
     "dbuffer=f\n       Activate OpenGL depth buffer                     ",
     "perspective=t\n   false means orthographic                         ",
@@ -96,17 +107,23 @@ Q_IMPORT_PLUGIN(networkplugin);
     "xrot=0.0\n        rotation angle on X axis                         ",
     "yrot=0.0\n        rotation angle on Y axis                         ",
     "zrot=0.0\n        rotation angle on Z axis                         ",
-    "xtrans=0.0\n      translation on X                                 ",
-    "ytrans=0.0\n      translation on Y                                 ",
-    "ztrans=0.0\n      translation on Z                                 ",
+    "xtrans=0.0\n      centering on X                                 ",
+    "ytrans=0.0\n      centering on Y                                 ",
+    "ztrans=0.0\n      centering on Z                                 ",
     "grid=t\n          Show grid                                        ",
     "nb_meshs=28\n     #meshs for the grid                              ",
     "mesh_size=1.0\n   grid's size of one mesh                          ",
+    "bg_color=#000000\n background color                                 ",
     "xyg=t\n           display a grid in XY plan                        ",
     "yzg=f\n           display a grid in YZ plan                        ",
     "xzg=f\n           display a grid in XZ plan                        ",
+    "xyg_color=#888d66\n XY grid color                                  ",
+    "yzg_color=#edff98\n YZ grid color                                  ",
+    "xzg_color=#a3c058\n XZ grid color                                  ",
     "cube=f\n          display a cube                                   ",
+    "cube_color=#00ff00\n cube color                                  ",
     "osd=t\n           Show On Screen Display                           ",
+    "osd_color=#ffff00\n OSD texture font color                           ",
     "osdtime=t\n       Show time on OSD                                 ",
     "osdnbody=t\n      Show nbody on OSD                                ",
     "osdzoom=t\n       Show zoom on OSD                                 ",
@@ -121,6 +138,7 @@ Q_IMPORT_PLUGIN(networkplugin);
     "odd=f\n           enable opaque disc display (coronograph)        ",
     "axis=t\n          display axis                                     ",
     "cb=t\n            display Color Bar (CB) on the screen             ",
+    "cbf_color=#a0a0a4\n       ColorBar font color                      ",
     "cblog=f\n         display real or log of the physical value on CB  ",
     "cbloc=3\n         CB location, 0:top 1:right 2:bottom 3:left       ",
     "cbdigits=1\n      CB #digits                                       ",
@@ -148,12 +166,12 @@ Q_IMPORT_PLUGIN(networkplugin);
     "shot_ext=jpg\n    Screenshot's extension jpg|png                    ",
     "smooth_gui=t\n    if true it allows a smoother interactivity with  ",
     "                   the GUI, but it **double** the memory usage. \n",
-    "VERSION=" RELEASE_VERSION "\n    " __DATE__ "  - JCL  compiled at <" __TIME__ ">      ",
+    VERSION.c_str(),
     NULL
   };
   const char * usage="Interactive 3D OpenGL NBody simulation Snapshots rendering program";
 
-  // ============================================================================
+// ============================================================================
 //  The main program is here                                                   
 int main(int argc, char *argv[])
 {
@@ -196,7 +214,7 @@ int main(int argc, char *argv[])
 //    splash.show();
 //    app.processEvents();
 //  }
-  glnemo::MainWindow main_win(RELEASE_VERSION); // main window object
+  glnemo::MainWindow main_win(release); // main window object
 
   // compute window size
   const int x=((desktop->width()  - wsize)/2);
@@ -206,7 +224,6 @@ int main(int argc, char *argv[])
   main_win.move(x,y);
 
   QObject::connect(&app, SIGNAL(loadFile(const QString )), &main_win, SLOT(actionMenuFileOpen(QString )));
-
   
   if (interact) {
     main_win.show();

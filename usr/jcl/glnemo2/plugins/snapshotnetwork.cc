@@ -154,7 +154,8 @@ namespace glnemo {
   //============================================================================
   int SnapshotNetwork::nextFrame(const int * index_tab, const int nsel) {
     
-    bool retur = 0;
+    //bool retur = 0;
+    load_vel = go->vel_req;
     if (valid) {
       //Need new connection cause the new thread of nextFrame
       cl = new network::Serveur();
@@ -170,7 +171,7 @@ namespace glnemo {
             part_data->rho->computeMinMax();
           }
           end_of_data=false; // only one frame from an ftm snapshot
-          retur = 1;
+          //retur = 1;
         }
         else {
           end_of_data=true;

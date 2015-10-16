@@ -29,7 +29,7 @@ if    (WIN32)
 endif ()
 if    (APPLE)
   MESSAGE(STATUS "\n\n\n- - - Mac OSX  - - -\n\n\nWARNING : DO NOT FORGET TO RUN CMAKE LIKE THIS\n\n ")
-  MESSAGE(STATUS "cmake .. -DCMAKE_PREFIX_PATH=/Users/jcl/Qt/5.3/clang_64/lib/cmake\n\n\n")
+  MESSAGE(STATUS "cmake .. -DCMAKE_PREFIX_PATH=/Users/jcl/Qt/5.4/clang_64/lib/cmake\n\n\n")
 endif ()
 # check QTDIR5
 FILE(GLOB GLOB_TEMP_VAR1 $ENV{QTDIR5})
@@ -124,6 +124,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${Qt5Widgets_EXECUTABLE_COMPILE_FLAGS}")
 # Make sure the compiler can find include files from our Hello library.
 include_directories (${PROJECT_SOURCE_DIR}/plugins ${PROJECT_SOURCE_DIR}/plugins/nemolight/inc ${PROJECT_SOURCE_DIR}/src ${PROJECT_SOURCE_DIR}/plugins/ftm ${PROJECT_SOURCE_DIR}/plugins/gadget ${PROJECT_SOURCE_DIR}/plugins/tipsy ${PROJECT_SOURCE_DIR}/src/glew ${PROJECT_SOURCE_DIR}/plugins/network ${PROJECT_SOURCE_DIR}/plugins/ramses ${PROJECT_SOURCE_DIR}/plugins/zlib ${PROJECT_SOURCE_DIR}/3rdparty/pfntlib ${PROJECT_SOURCE_DIR}/utils)
 include_directories (${Qt5Widgets_INCLUDE_DIRS} ${Qt5Core_INCLUDE_DIRS} ${Qt5OpenGL_INCLUDE_DIRS} ${Qt5Network_INCLUDE_DIRS} {Qt5PrintSupport_INCLUDE_DIRS})
+include_directories(/usr/include/CCfits /usr/include/cfitsio /usr/local/include/CCfits)
 
 if (APPLE)
   include_directories(/usr/include/malloc /usr/X11/include)
@@ -141,7 +142,7 @@ add_library (uns STATIC ${moc1_src} ${lib_files})
 # -----------------------
 
 # Make sure the linker can find the Hello library once it is built.
-link_directories (${CMAKE_BINARY_DIR}/LIB)
+link_directories (${CMAKE_BINARY_DIR}/LIB /usr/local/lib )
 
 # Glew file
 set (glew src/glew/glew.c) 
@@ -188,7 +189,7 @@ set (GOMP "gomp")
 if (APPLE)
   set (GOMP "")
 endif()
-target_link_libraries (glnemo2 uns z ${OPENGL_LIBRARY}  ${QT_LIBRARIES} ${GOMP} )
+target_link_libraries (glnemo2 uns z ${OPENGL_LIBRARY}  ${QT_LIBRARIES} ${GOMP} CCfits cfitsio)
 
 qt5_use_modules(glnemo2 Gui Widgets Core OpenGL Network PrintSupport)
 
@@ -201,11 +202,39 @@ ELSE()
 ENDIF () 
 
 MESSAGE(STATUS "CMAKE_INSTALL_PREFIX :" ${CMAKE_INSTALL_PREFIX} )
-set(PROJECT_VERSION_MAJOR "1")
-set(PROJECT_VERSION_MINOR "8")
-set(PROJECT_VERSION_PATCH "1")
-set(PROJECT_VERSION_EXTRA "")
-set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${PROJECT_VERSION_EXTRA}")
+
+# VERSION
+if (EXISTS "${PROJECT_SOURCE_DIR}/src/version.h") # detect version from "version.h" file
+  set(CURRENT_VERSION "")
+  file(READ "${PROJECT_SOURCE_DIR}/src/version.h" CURRENT_VERSION_H)
+
+  # GLNEMO2_MAJOR
+  string(REGEX MATCH "GLNEMO2_MAJOR \"([a-zA-Z0-9.-]+)\"" XXXX "${CURRENT_VERSION_H}")
+  set(PROJECT_VERSION_MAJOR ${CMAKE_MATCH_1})
+
+  # GLNEMO2_MINOR
+  string(REGEX MATCH "GLNEMO2_MINOR \"([a-zA-Z0-9.-]+)\"" XXXX "${CURRENT_VERSION_H}")
+  set(PROJECT_VERSION_MINOR ${CMAKE_MATCH_1})
+
+  #  GLNEMO2_PATCH
+  string(REGEX MATCH "GLNEMO2_PATCH \"([a-zA-Z0-9.-]+)\"" XXXX "${CURRENT_VERSION_H}")
+  set(PROJECT_VERSION_PATCH ${CMAKE_MATCH_1})
+
+  # GLNEMO2_EXTRA
+  string(REGEX MATCH "GLNEMO2_EXTRA \"([a-zA-Z0-9.-]+)\"" XXXX "${CURRENT_VERSION_H}")
+  set(PROJECT_VERSION_EXTRA ${CMAKE_MATCH_1})
+  
+  # PROJECT_VERSION
+  set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${PROJECT_VERSION_EXTRA}")
+
+  message(STATUS "Project Version = " ${PROJECT_VERSION})
+endif()
+
+#set(PROJECT_VERSION_MAJOR "1")
+#set(PROJECT_VERSION_MINOR "9")
+#set(PROJECT_VERSION_PATCH "0")
+#set(PROJECT_VERSION_EXTRA "-dev")
+#set(PROJECT_VERSION "${PROJECT_VERSION_MAJOR}.${PROJECT_VERSION_MINOR}.${PROJECT_VERSION_PATCH}${PROJECT_VERSION_EXTRA}")
 
 
 if (APPLE)
@@ -254,7 +283,8 @@ set(CPACK_PACKAGE_RELEASE 1)
 set(CPACK_PACKAGE_CONTACT "Jean-Charles LAMBERT")
 set(CPACK_PACKAGE_VENDOR "LAM - CeSAM")
 set(CPACK_PACKAGING_INSTALL_PREFIX ${CMAKE_INSTALL_PREFIX})
-set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${LINUX_NAME}.${CMAKE_SYSTEM_PROCESSOR}")
+set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}.${LINUX_NAME}.${CMAKE_SYSTEM_PROCESSOR}")
+#set(CPACK_PACKAGE_FILE_NAME "${CPACK_PACKAGE_NAME}-${CPACK_PACKAGE_VERSION}-${CPACK_PACKAGE_RELEASE}.${LINUX_NAME}.${CMAKE_SYSTEM_PROCESSOR}")
 
 # CPACK RPM specific
 set(CPACK_RPM_CHANGELOG_FILE "${PROJECT_SOURCE_DIR}/ChangeLog")
@@ -315,7 +345,8 @@ if(APPLE) # OR WIN32)
   # Qt5::QCocoaPrinterSupportPlugin.... but fails when I run cmake command...
   #
  
-  set(LIST_PLUGIN "Qt5::AccessibleFactory;Qt5::QJpegPlugin;Qt5::QICNSPlugin")
+  #set(LIST_PLUGIN "Qt5::AccessibleFactory;Qt5::QJpegPlugin;Qt5::QICNSPlugin")
+  set(LIST_PLUGIN "Qt5::QJpegPlugin;Qt5::QICNSPlugin")
   set (QT_ADD_PLUGIN "")
   foreach (plugin ${LIST_PLUGIN})
     get_property(QT_GET_PLUGIN TARGET ${plugin} PROPERTY LOCATION_RELEASE) 

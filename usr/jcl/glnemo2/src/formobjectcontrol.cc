@@ -460,16 +460,18 @@ void FormObjectControl::checkComboLine(const int row, const int col)
         if ( i_obj != -1) { // it's an existing object
           assert(i_obj < (int)pov->size());
           ParticlesObject * pobj = &(*pov)[i_obj];
-          pobj->npart = npart;
-          pobj->first = first;
-          pobj->last  = last;
-          pobj->step  = step;
-          pobj->buildIndexList();   // build object index list
-          current_object = row;
-          // parse all the objects to check if physic is present
-          //checkPhysic(); // uncomment this to activate physic rendering (2/sep/2011)
-          updateObjectSettings(row);// update form !!! CAUSE OF CRASH
-          emit objectUpdate();      // update OpenGL
+          if (! pobj->hasIndexesList()) { // only range allowed
+              pobj->npart = npart;
+              pobj->first = first;
+              pobj->last  = last;
+              pobj->step  = step;
+              pobj->buildIndexList();   // build object index list
+              current_object = row;
+              // parse all the objects to check if physic is present
+              //checkPhysic(); // uncomment this to activate physic rendering (2/sep/2011)
+              updateObjectSettings(row);// update form !!! CAUSE OF CRASH
+              emit objectUpdate();      // update OpenGL
+          }
         }
         else {              // it's a new object
           ParticlesObject * po = new ParticlesObject(); // new object                
@@ -585,7 +587,7 @@ void FormObjectControl::updateObjectSettings( const int row)
                      form.vel_slide_size->maximum()/pobj->getVelSizeMax();
     form.vel_slide_size->setValue(x);
     form.vel_slide_alpha->setValue(pobj->getVelAlpha());
-    form.vel_spin->setValue((int) (pobj->getVelSizeMax()));
+    form.vel_spin->setValue((pobj->getVelSizeMax()));
     // -- Orbits TAB
     form.odisplay_check->setChecked(pobj->isOrbitsEnable());
     form.orecord_check->setChecked(pobj->isOrbitsRecording());
@@ -600,6 +602,7 @@ void FormObjectControl::updateObjectSettings( const int row)
       form.temp_phys_radio->setEnabled    (current_data->temp!=NULL    ?true:false);
       form.tempdens_phys_radio->setEnabled(current_data->temp!=NULL    ?true:false);
       form.pressure_phys_radio->setEnabled(current_data->pressure!=NULL?true:false);
+      form.velnorm_phys_radio->setEnabled(current_data->vel_norm!=NULL?true:false);
       setPhysicalTabName();
     }
     if (pobj->hasPhysic() && phys_select && phys_select->isValid()) {
@@ -921,8 +924,10 @@ void FormObjectControl::on_vel_slide_size_valueChanged(int value)
     assert(i_obj < (int)pov->size());
     ParticlesObject * pobj = &(*pov)[i_obj];
     pobj->setVelSize((float) value*((float) form.vel_spin->value()/float(form.vel_slide_size->maximum())));
-    if (EMIT) emit objectUpdateVel(i_obj);
-    if (EMIT) emit objectSettingsChanged();
+    if (form.vel_check->isChecked()) {
+        if (EMIT) emit objectUpdateVel(i_obj);
+        if (EMIT) emit objectSettingsChanged();
+    }
   }
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
@@ -938,14 +943,16 @@ void FormObjectControl::on_vel_slide_alpha_valueChanged(int value)
     assert(i_obj < (int)pov->size());
     ParticlesObject * pobj = &(*pov)[i_obj];
     pobj->setVelAlpha(value);
-    if (EMIT) emit objectSettingsChanged();
+    if (form.vel_check->isChecked()) {
+        if (EMIT) emit objectSettingsChanged();
+    }
   }
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
 }
 // ============================================================================
 // on_vel_spin_valueChanged                                                    
-void FormObjectControl::on_vel_spin_valueChanged(int value)
+void FormObjectControl::on_vel_spin_valueChanged(double value)
 {
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->lock();
@@ -956,8 +963,10 @@ void FormObjectControl::on_vel_spin_valueChanged(int value)
     //go->vel_vector_size = form.vel_slide_size->value();
     pobj->setVelSizeMax(value);
     pobj->setVelSize((float) form.vel_slide_size->value()*((float) value/form.vel_slide_size->maximum()));
-    if (EMIT) emit objectUpdateVel(i_obj);
-    if (EMIT) emit objectSettingsChanged();
+    if (form.vel_check->isChecked()) {
+        if (EMIT) emit objectUpdateVel(i_obj);
+        if (EMIT) emit objectSettingsChanged();
+    }
   }
   //if (lock)
   if (go  && ! go->duplicate_mem) mutex_data->unlock();
@@ -1278,6 +1287,16 @@ void FormObjectControl::on_pressure_phys_radio_clicked()
   physicalSelected();
 }
 // ============================================================================
+// on_velnorm_phys_radio_pressed()
+void FormObjectControl::on_velnorm_phys_radio_clicked()
+{
+  mutex_data->lock();
+  current_data->setIpvs(PhysicalData::velnorm);
+  emit updateIpvs(PhysicalData::velnorm);
+  mutex_data->unlock();
+  physicalSelected();
+}
+// ============================================================================
 // physicalSelected()                                                      
 void FormObjectControl::physicalSelected()
 {
@@ -1288,8 +1307,8 @@ void FormObjectControl::physicalSelected()
     ParticlesObject * pobj = &(*pov)[i_obj];
     setPhysicalTabName();
     if (phys_select && phys_select->isValid()) {
-      form.dens_slide_min->setValue(0);
-      form.dens_slide_max->setValue(100);
+      form.dens_slide_min->setValue(0);      // here we should put current object value (from PhysObject), not   0
+      form.dens_slide_max->setValue(100);    // here we should put current object value (from PhysObject), not 100
       
       pobj->setMinPhys(phys_select->getMin());
       pobj->setMaxPhys(phys_select->getMax());
@@ -1336,7 +1355,11 @@ void FormObjectControl::setPhysicalTabName()
           case PhysicalData::pressure :
             form.objects_properties->setTabText(1,"Pressure");
             form.pressure_phys_radio->setChecked(true);
-            break;                        
+            break;
+          case PhysicalData::velnorm :
+            form.objects_properties->setTabText(1,"VelocityNorm");
+            form.velnorm_phys_radio->setChecked(true);
+            break;
           }
   }
 }

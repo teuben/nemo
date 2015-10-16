@@ -78,7 +78,6 @@ private:
     SnapshotInterface * current_data;
     PluginsManage * plugins;
     std::string interface_type_ori;
-    GlobalOptions * go;
     QString dirpath;
     std::vector<std::string> vector_file;
     int current_file_index;

@@ -87,7 +87,7 @@ int SnapshotRamses::nextFrame(const int * index_tab, const int nsel)
   int status=0;
   stv.clear();
   parseSelectTime();
-  
+  load_vel = go->vel_req;
   
   if (go->select_part=="all" || (go->select_part.find("gas")!=std::string::npos))
     take_gas = true;

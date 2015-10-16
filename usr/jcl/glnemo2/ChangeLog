@@ -1,4 +1,20 @@
 
+* Tue Oct 14 2015 - 1.9.0
+- experimental FITS files plugin reader
+- objects creation feature from GUI
+- new shader to display velocity, better interactivity
+- velocity factor in floating point format
+- particles can be colored by velocity norm
+- add option to load velocities from GUI
+- background and text color can be set from CLI
+- add button to select all particles on screen
+- osd print out center instead of transfer
+- zoom/rot/center can be modified from GUI
+- improve toggle perspective/orthographic view
+- coronograph also works with particles without density
+- fix a slow rendering issue with qt 5.2.1 and above (linux)
+- add busy cursor when processing
+
 * Tue Feb 10 2015 - 1.8.1
 - improve drag and drop files support
 - fix regression #1594

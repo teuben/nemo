@@ -22,10 +22,11 @@ using namespace glnemo;
 using namespace std;
 // ============================================================================
 // constructor        
-CShader::CShader(std::string _vert_file, std::string _frag_file, bool _v)
+CShader::CShader(std::string _vert_file, std::string _frag_file,  std::string _geom_file, bool _v)
 {
   vert_file  = _vert_file;
   frag_file  = _frag_file;
+  geom_file  = _geom_file;
   verbose = _v;
 }
 
@@ -33,15 +34,17 @@ CShader::CShader(std::string _vert_file, std::string _frag_file, bool _v)
 // init      
 bool CShader::init()
 {
-  bool ret=false;
-  if (processVertex()) {
-    if(processPixel()) {
-      if (createProgram()) {
-        ret=true;
-      }
+    bool ret=false;
+    if (processVertex()) {
+        if(processPixel()) {
+            if (processGeom()) {
+                if (createProgram()) {
+                    ret=true;
+                }
+            }
+        }
     }
-  }
-  return ret;  
+    return ret;
 }
 // ============================================================================
 // start
@@ -102,11 +105,14 @@ bool CShader::createProgram()
   bool ret=true;
   std::cerr << "Creating program\n";
   m_program = glCreateProgramObjectARB();
-  std::cerr << "Attaching vertex shader\n";
+  std::cerr << "Attaching vertex shader["<<vert_file<<"]\n";
   glAttachObjectARB(m_program, m_vertexShader);
-  std::cerr << "Attaching pixel shader\n";
+  std::cerr << "Attaching pixel shader["<<frag_file<<"]\n";
   glAttachObjectARB(m_program, m_pixelShader);
-  
+  if (geom_file!="") {
+      std::cerr << "Attaching geom shader["<<geom_file<<"]\n";
+      glAttachObjectARB(m_program, m_geomShader);
+  }
   // bind attribute
   //glBindAttribLocation(m_program, 100, "a_sprite_size");
   std::cerr << "Linking  program\n";
@@ -116,11 +122,14 @@ bool CShader::createProgram()
   int  link_status;
   glGetProgramiv(m_program, GL_LINK_STATUS, &link_status);
   if(link_status != GL_TRUE) {
-    cerr << "Unable to LINK Shader program.....\n";
-    exit(1);
+    cerr << "Unable to LINK Shader program .....\n";
+    return false;
   }
   glDeleteShader(m_vertexShader);
   glDeleteShader(m_pixelShader);
+  if (geom_file!="") {
+      glDeleteShader(m_geomShader);
+  }
   std::cerr << "ending init shader\n";
   return ret;
 }
@@ -134,20 +143,20 @@ bool CShader::processVertex()
   if (vert_src.size()>0) {
     m_vertexShader = glCreateShaderObjectARB(GL_VERTEX_SHADER);
     if (!m_vertexShader) {
-      cerr << "Unable to create VERTEX SHADER.....\n";
-      exit(1);
+      cerr << "Unable to create VERTEX SHADER["<<vert_file<<"]......\n";
+      return false;
     }
     const char * v =  vert_src.c_str();
     glShaderSourceARB(m_vertexShader, 1, &v , NULL);
-    std::cerr << "Compiling vertex shader\n";
+    std::cerr << "Compiling vertex shader["<<vert_file<<"]\n";
     GLint compile_status;
     glCompileShaderARB(m_vertexShader);
     GLWindow::checkGLErrors("compile Vertex Shader");
     printLog(m_vertexShader,"Compiling vertex shader");
     glGetShaderiv(m_vertexShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
-      cerr << "Unable to COMPILE VERTEX SHADER.....\n";
-      exit(1);
+      cerr << "Unable to COMPILE VERTEX SHADER["<<vert_file<<"].....\n";
+      return false;
     }
     
   }
@@ -163,20 +172,48 @@ bool CShader::processPixel()
   if (frag_src.size()>0) {
     m_pixelShader = glCreateShaderObjectARB(GL_FRAGMENT_SHADER);
     if (!m_pixelShader) {
-      cerr << "Unable to create PIXEL SHADER.....\n";
-      exit(1);
+      cerr << "Unable to create PIXEL SHADER["<<frag_file<<"].....\n";
+      return false;
     }
     const char * v =  frag_src.c_str();
     glShaderSourceARB(m_pixelShader, 1, &v , NULL);
-    std::cerr << "Compiling pixel shader\n";
+    std::cerr << "Compiling pixel shader["<<frag_file<<"]\n";
     GLint compile_status;
     glCompileShaderARB(m_pixelShader);
     GLWindow::checkGLErrors("compile Pixel Shader");
     printLog(m_pixelShader,"Compiling pixel shader");
     glGetShaderiv(m_pixelShader, GL_COMPILE_STATUS, &compile_status);
     if(compile_status != GL_TRUE) {
-      cerr << "Unable to COMPILE PIXEL SHADER.....\n";
-      exit(1);
+      cerr << "Unable to COMPILE PIXEL SHADER["<<frag_file<<"]......\n";
+      return false;
+    }
+  }
+  return ret;
+}
+// ============================================================================
+// processGeom()
+bool CShader::processGeom()
+{
+  bool ret=true;
+  // process PIXEL
+  std::string  geom_src = load(geom_file);
+  if (geom_file!= "" && geom_src.size()>0) {
+    m_geomShader = glCreateShaderObjectARB(GL_GEOMETRY_SHADER);
+    if (!m_geomShader) {
+      cerr << "Unable to create GEOMETRY SHADER["<<geom_file<<"]......\n";
+      return false;
+    }
+    const char * v =  geom_src.c_str();
+    glShaderSourceARB(m_geomShader, 1, &v , NULL);
+    std::cerr << "Compiling geometry shader\n";
+    GLint compile_status;
+    glCompileShaderARB(m_geomShader);
+    GLWindow::checkGLErrors("compile geometry Shader");
+    printLog(m_geomShader,"Compiling geometry shader");
+    glGetShaderiv(m_geomShader, GL_COMPILE_STATUS, &compile_status);
+    if(compile_status != GL_TRUE) {
+      cerr << "Unable to COMPILE GEOMETRY SHADER["<<geom_file<<"].....\n";
+      return false;
     }
   }
   return ret;
@@ -185,27 +222,28 @@ bool CShader::processPixel()
 // load      
 std::string CShader::load(std::string filename)
 {
-  std::ifstream fi;
-  std::string src="";
-  
-  // Open file
-  QFile infile(filename.c_str());
-  if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    std::cerr << "CShader::load Unable to open file ["<<filename<<"] for reading, ...\n";
-    std::exit(1);
-  }
-  else {  
-    QTextStream in(&infile);
-    QString line;
-    do {
-      line = in.readLine();
-      if (!line.isNull()) {
-        src = src + "\n" + line.toStdString();
-      }
-    } while (!line.isNull());
-    infile.close();
-  }
-  return src;
+    std::ifstream fi;
+    std::string src="";
+    if (filename!="") {
+        // Open file
+        QFile infile(filename.c_str());
+        if (!infile.open(QIODevice::ReadOnly | QIODevice::Text)) {
+            std::cerr << "CShader::load Unable to open file ["<<filename<<"] for reading, ...\n";
+            std::exit(1);
+        }
+        else {
+            QTextStream in(&infile);
+            QString line;
+            do {
+                line = in.readLine();
+                if (!line.isNull()) {
+                    src = src + "\n" + line.toStdString();
+                }
+            } while (!line.isNull());
+            infile.close();
+        }
+    }
+    return src;
 }
 // ============================================================================
 // printLog      

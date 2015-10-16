@@ -52,7 +52,6 @@ private:
     int ndm;
     bool valid;
     int full_nbody;
-    GlobalOptions * go;
     bool take_gas, take_halo, take_stars;
 };
 

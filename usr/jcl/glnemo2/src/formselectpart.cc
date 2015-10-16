@@ -20,6 +20,7 @@ FormSelectPart::FormSelectPart(QWidget *parent)
 {
   if (parent) {;}  // remove compiler warning
   form.setupUi(this);
+  load_vel = false;
 }
 
 // ============================================================================

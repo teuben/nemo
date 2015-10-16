@@ -21,6 +21,7 @@ namespace glnemo {
   bool  GlobalOptions::rho_exist         = false;
   bool  GlobalOptions::temperature_exist = false;
   bool  GlobalOptions::pressure_exist    = false;
+  bool  GlobalOptions::velnorm_exist    = false;
 // ============================================================================
 // constructor                                                                 
 GlobalOptions::GlobalOptions()

@@ -64,7 +64,17 @@ void main()
   if (data_phys_valid==1) {
     col=computeColor();
   } else {
-    col = vec4(gl_Color.r,gl_Color.g,gl_Color.b,gl_Color.a);   
+    if (show_zneg==1) {
+      col = vec4(gl_Color.r,gl_Color.g,gl_Color.b,gl_Color.a);   
+    } else {
+      float a_alpha;
+      if (isVisible()) {
+	a_alpha = gl_Color.a;
+      } else {
+	a_alpha = 0.0;
+      }
+      col = vec4(gl_Color.r,gl_Color.g,gl_Color.b,a_alpha);   
+    }
   }
   
   // compute texture size
@@ -77,9 +87,9 @@ void main()
     float pointSize =  a_sprite_size*factor_size;
     vec3 pos_eye = vec3 (gl_ModelViewMatrix * vert);                  
     if (perspective==1) {
-      gl_PointSize = max(0.00001, pointSize / (1.0 - pos_eye.z));        
+      gl_PointSize = max(0.0000001, pointSize / (1.0 - pos_eye.z));
     } else {
-      gl_PointSize = max(0.00001, pointSize - pos_eye.z + pos_eye.z);        
+      gl_PointSize = max(0.0000001, pointSize - pos_eye.z + pos_eye.z);
     }
   }
   gl_TexCoord[0] = gl_MultiTexCoord0;                                

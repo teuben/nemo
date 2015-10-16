@@ -65,6 +65,7 @@ class SnapshotInterface: public QObject
       //setPlayForward();
       play_forward = true;
       setJumpFrame();
+      go = NULL;
     }
     virtual ~SnapshotInterface() {};
     // ---------------------------------------------------
@@ -109,7 +110,9 @@ class SnapshotInterface: public QObject
             return false;
     }
 
-
+    void setCrv(ComponentRangeVector _crv) {
+        crv = _crv;
+    }
     ParticlesData * part_data;
     int nbody_first;
     float time_first;
@@ -151,6 +154,7 @@ protected:
     float * pos, *vel;
     bool first;
     CSelectTimeVector stv;
+    GlobalOptions * go;
     void parseSelectTime();
     std::string parseString(std::string & next_string);
     inline bool diffTime(const float t,const float fuzz=0.000001) {

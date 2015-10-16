@@ -165,7 +165,7 @@ namespace glnemo {
     void on_vel_slide_size_valueChanged(int);
     void on_vel_slide_alpha_valueChanged(int);
     // on velocity spin box
-    void on_vel_spin_valueChanged(int);
+    void on_vel_spin_valueChanged(double);
 
     // -- Orbits Tab --
     void on_orecord_check_clicked(bool);
@@ -185,6 +185,7 @@ namespace glnemo {
     void on_temp_phys_radio_clicked();  
     void on_tempdens_phys_radio_clicked();  
     void on_pressure_phys_radio_clicked();  
+    void on_velnorm_phys_radio_clicked();
     
     // colormap group
     void on_next_cmap_clicked() {

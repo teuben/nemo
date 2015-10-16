@@ -62,7 +62,7 @@ public:
     bool cam_display_spline;
     bool cam_play;
     // from Scene Orientation TAB
-    float zoom,zoomo;
+    double zoom,zoomo;
     float xrot,yrot,zrot;
     float urot,vrot,wrot;
     float ixrot,iyrot,izrot;
@@ -131,6 +131,8 @@ public:
     static bool temperature_exist;
     // pressure
     static bool pressure_exist;
+    // velocity norm
+    static bool velnorm_exist;
     // colormap
     int colormap;
     bool reverse_cmap; // reverse colormap

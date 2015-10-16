@@ -23,7 +23,7 @@ char * GLObjectOsd::OsdText[n_OsdKeys] = {
  (char *) ""                   , // Getdata
  (char *) "Zoom"               , // Zoom
  (char *) "Rot"                , // Rotation Angle
- (char *) "Trans"              , // Tanslation
+ (char *) "Center"              , // Tanslation
  (char *) ""                   , // Loading
  (char *) ""                     // Projection type
 };

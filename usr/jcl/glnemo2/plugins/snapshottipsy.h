@@ -47,7 +47,6 @@ public:
 private:
     bool valid;
     tipsy::TipsyIO * tipsy_io;
-    GlobalOptions * go;
     bool take_gas, take_halo, take_stars;
 };
 

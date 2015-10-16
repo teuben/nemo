@@ -53,6 +53,10 @@ GLObjectParticles::GLObjectParticles(GLTextureVector * _gtv ):GLObject()
     glGenBuffersARB(1,&vbo_pos);
     glGenBuffersARB(1,&vbo_data);
 //    glGenBuffersARB(1,&vbo_color);
+#if 0 // glsl 330
+    glGenBuffersARB(1,&vbo_vel);     // get Vertex Buffer Object
+#endif
+    glGenBuffersARB(1,&vbo_vel_X2);     // get Vertex Buffer Object
     glGenBuffersARB(1,&vbo_size);
     glGenBuffersARB(1,&vbo_index);
     glGenBuffersARB(1,&vbo_index2);
@@ -66,11 +70,12 @@ GLObjectParticles::GLObjectParticles(GLTextureVector * _gtv ):GLObject()
 GLObjectParticles::GLObjectParticles(const ParticlesData   * _part_data,
                                      ParticlesObject * _po,
                                      const GlobalOptions   * _go,
-                                     GLTextureVector * _gtv, CShader * _shader):GLObject()
+                                     GLTextureVector * _gtv, CShader * _shader, CShader * _vel_shader):GLObject()
 {
-  shader = _shader; // link shader program pointer
+  shader     = _shader; // link shader program pointer (particles)
+  vel_shader = _vel_shader; // link shader program pointer (velocities)
   dplist_index = glGenLists( 1 );    // get a new display list index
-  vel_dp_list  = glGenLists( 1 );    // get a new display vel list
+  //vel_dp_list  = glGenLists( 1 );    // get a new display vel list
   orb_dp_list  = glGenLists( 1 );    // get a new display orb list
   // reserve memory
   index_histo.reserve(nhisto);
@@ -81,6 +86,12 @@ GLObjectParticles::GLObjectParticles(const ParticlesData   * _part_data,
     glGenBuffersARB(1,&vbo_index);   // get Vertex Buffer Object
     glGenBuffersARB(1,&vbo_index2);
     glGenBuffersARB(1,&vbo_data);    
+    if (_part_data->vel) {
+#if 0 // glsl 330
+        glGenBuffersARB(1,&vbo_vel);     // get Vertex Buffer Object
+#endif
+        glGenBuffersARB(1,&vbo_vel_X2);     // get Vertex Buffer Object
+    }
   }
   indexes_sorted = NULL;
   nind_sorted = 0;
@@ -120,9 +131,14 @@ void GLObjectParticles::display(const double * mModel, int win_height)
       glEnable(GL_BLEND);
       GLObject::updateAlphaSlot(po->getVelAlpha());
       GLObject::setColor(po->getColor());
-      GLObject::display(vel_dp_list);
+      if (GLWindow::GLSL_support && vel_shader) {
+          displayVboVelShader130(win_height,true);
+      }
+      //else
+      //  GLObject::display(vel_dp_list);
       glDisable(GL_BLEND);
     }
+
     // display sprites
     if (po->isGazEnable() && texture) {
       if (GLWindow::GLSL_support && po->isGazGlsl()) {      
@@ -143,12 +159,163 @@ void GLObjectParticles::display(const double * mModel, int win_height)
   }
 }
 // ============================================================================
+// displayVboVelShader()
+void GLObjectParticles::displayVboVelShader330(const int win_height, const bool use_point)
+{
+    static bool zsort=false;
+    int err;
+
+    int start=3*min_index*sizeof(float);
+    int maxvert=max_index-min_index+1;
+
+    // Velocity vectors with sahder
+    int vpositions,vvelocities;
+    if (po->isVelEnable() && part_data->vel && vel_shader) {
+
+        // start velocity shader
+        vel_shader->start();
+        // send color
+        float col[3];
+        QColor c=po->getColor();
+        col[0]=c.redF();
+        col[1]=c.greenF();
+        col[2]=c.blueF();
+        vel_shader->sendUniformXfv("color",3,1, col ); // send color
+        // send alpha channel color
+        vel_shader->sendUniformf("alpha", po->getVelAlpha()/255.); // send alpha channel
+        // send vel factor
+        vel_shader->sendUniformf("vel_factor", po->getVelSize()); // send alpha channel
+
+        // send matrix
+        GLfloat proj[16];
+        glGetFloatv( GL_PROJECTION_MATRIX,proj);
+        vel_shader->sendUniformXfv("projMatrix",16,1,&proj[0]);
+        GLfloat mview[16];
+        glGetFloatv( GL_MODELVIEW_MATRIX,mview);
+        vel_shader->sendUniformXfv("modelviewMatrix",16,1,&mview[0]);
+
+        // positions
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+        vpositions=glGetAttribLocation(vel_shader->getProgramId(), "position");
+        glEnableVertexAttribArrayARB(vpositions);        
+        start = 2*3*min_index*sizeof(float);
+        int stride=2*3*sizeof(GLfloat);
+        glVertexAttribPointerARB(vpositions,3,GL_FLOAT, 0, stride, (void *) (start));
+#if 0 // glsl 330
+        // velocities
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_vel);
+        vvelocities=glGetAttribLocation(vel_shader->getProgramId(), "velocity");
+        glEnableVertexAttribArrayARB(vvelocities);        
+        start = 3*min_index*sizeof(float);
+        glVertexAttribPointerARB(vvelocities,3,GL_FLOAT, 0, 0, (void *) (start));
+#endif
+        //glBindVertexArray(vao[0]);
+        if (maxvert > 0 && maxvert<=nvert_pos) {
+          //std::cerr << ">> rendering...\n";
+          glDrawArrays(GL_POINTS, 0, maxvert);
+          //glDrawArrays(GL_LINES, 0, maxvert);
+          //std::cerr << "<< rendering...\n";
+        }
+
+
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+        vel_shader->stop();
+
+        glDisableVertexAttribArray(vpositions);
+#if 0 // glsl 330
+        glDisableVertexAttribArray(vvelocities);
+#endif
+        //glDisableClientState(GL_VERTEX_ARRAY);
+
+        glDisable(GL_POINT_SPRITE_ARB);
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+}
+// ============================================================================
+// displayVboVelShader()
+void GLObjectParticles::displayVboVelShader130(const int win_height, const bool use_point)
+{
+
+    // Velocity vectors with shader
+    if (po->isVelEnable() && part_data->vel && vel_shader) {
+
+        int start,stride;
+        // start velocity shader
+        vel_shader->start();
+        // send color
+        float col[3];
+        QColor c=po->getColor();
+        col[0]=c.redF();
+        col[1]=c.greenF();
+        col[2]=c.blueF();
+        vel_shader->sendUniformXfv("color",3,1, col ); // send color
+        // send alpha channel color
+        vel_shader->sendUniformf("alpha", po->getVelAlpha()/255.); // send alpha channel
+
+        // send vel factor
+        vel_shader->sendUniformf("vel_factor", po->getVelSize()); // send alpha channel
+
+        // send matrix
+        GLfloat proj[16];
+        glGetFloatv( GL_PROJECTION_MATRIX,proj);
+        vel_shader->sendUniformXfv("projMatrix",16,1,&proj[0]);
+        GLfloat mview[16];
+        glGetFloatv( GL_MODELVIEW_MATRIX,mview);
+        vel_shader->sendUniformXfv("modelviewMatrix",16,1,&mview[0]);
+
+        // send vel factor
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_vel_X2);
+        int vvel_factor=glGetAttribLocation(vel_shader->getProgramId(), "velocity");
+        glEnableVertexAttribArrayARB(vvel_factor);
+        start = 2*3*min_index*sizeof(float);
+        stride= 0;
+        glVertexAttribPointerARB(vvel_factor,3,GL_FLOAT, 0, stride, (void *) (start));
+
+        // positions and velocities (ending vector)
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+        int vpositions=glGetAttribLocation(vel_shader->getProgramId(), "position");
+        glEnableVertexAttribArrayARB(vpositions);
+        start = 2*3*min_index*sizeof(float);
+        stride=0;
+        glVertexAttribPointerARB(vpositions,3,GL_FLOAT, 0, stride, (void *) (start));
+
+
+        int maxvert=max_index-min_index+1;
+
+        if (maxvert > 0 && maxvert<=nvert_pos) {
+          //std::cerr << ">> rendering...\n";
+          glDrawArrays(GL_LINES, 0, maxvert*2);
+          //glDrawArrays(GL_LINES, 0, maxvert);
+          //std::cerr << "<< rendering...\n";
+        }
+
+        glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+        vel_shader->stop();
+
+        glDisableVertexAttribArray(vpositions);
+        glDisableVertexAttribArray(vvel_factor);
+        //glDisableClientState(GL_VERTEX_ARRAY);
+
+        glDisable(GL_POINT_SPRITE_ARB);
+        glDisable(GL_BLEND);
+        glDepthMask(GL_TRUE);
+        glEnable(GL_DEPTH_TEST);
+    }
+
+}
+
+// ============================================================================
 // displayVboShader()                                                            
 void GLObjectParticles::displayVboShader(const int win_height, const bool use_point)
 {
   static bool zsort=false;
   int err;
-
+#if 0
   //  detect if rho exist for the component
   int index;
   bool is_rho=false;
@@ -156,13 +323,14 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
     index = phys_itv[0].index;
     if (phys_select->data[index] != -1) is_rho = true;
   }
+#endif
   if (go->zsort) { // Z sort particles
       zsort = true;
       sortByDepth();
   } else {
       if (zsort) {
         zsort = false;
-        sortByDensity(); // we have to resort by density
+        //!!!sortByDensity(); // we have to resort by density
       }
   }
   checkGlError("GLObjectParticles::displayVboShader -> Beginning");
@@ -217,13 +385,17 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   glActiveTextureARB(GL_TEXTURE0_ARB);
   texture->glBindTexture();  // bind texture
   
-  // Send vertex object positions
-  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
-  glEnableClientState(GL_VERTEX_ARRAY);
-  int start=3*min_index*sizeof(float);
-  int maxvert=max_index-min_index+1;
-  //std::cerr << "min_index="<<min_index<<" max_index="<<max_index<<" maxvert="<<maxvert<<"\n";
-  glVertexPointer(3, GL_FLOAT, 0, (void *) (start));
+//  // Send vertex object positions
+//  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+//  glEnableClientState(GL_VERTEX_ARRAY);
+//  int start=2*3*min_index*sizeof(float);
+//  int maxvert=max_index-min_index+1;
+//  //std::cerr << "min_index="<<min_index<<" max_index="<<max_index<<" maxvert="<<maxvert<<"\n";
+//  GLsizei stride=0;
+//  if (part_data->vel) {
+//      stride=3*sizeof(GLfloat);
+//  }
+//  glVertexPointer((GLint) 3, GL_FLOAT, (GLsizei) stride, (void *) start);
 
   // get attribute location for sprite size
   int a_sprite_size = glGetAttribLocation(shader->getProgramId(), "a_sprite_size");
@@ -248,14 +420,14 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
       //po->setGazSizeMax(1.0);
       glEnableVertexAttribArrayARB(a_sprite_size);
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_size);
-      start = min_index*sizeof(float);
+      int start = min_index*sizeof(float);
       glVertexAttribPointerARB(a_sprite_size,1,GL_FLOAT, 0, 0, (void *) (start));
     }
     // Send physical data
     if (hasPhysic && phys_select && phys_select->isValid()) {  
       glEnableVertexAttribArrayARB(a_phys_data);
       glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_data);      
-      start = min_index*sizeof(float);
+      int start = min_index*sizeof(float);
       glVertexAttribPointerARB(a_phys_data,1,GL_FLOAT, 0, 0, (void *) (start));
     }
   } else {
@@ -263,6 +435,7 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
       //glVertexAttrib1f(a_sprite_size,go->texture_size);
     }
   }
+
   // Draw points 
 #if GLDRAWARRAYS
 #if 0
@@ -270,9 +443,49 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   std::cerr << " min_index = " <<min_index << "  max_index = " << max_index << "\n";
   std::cerr <<"maxvert="<<maxvert<< " #part="<<max_index-min_index+1<< " nvert_pos ="<<nvert_pos<<"\n";
 #endif
+
+  int start,maxvert;
+  GLsizei  stride;
+  maxvert=max_index-min_index+1;
+#if 0
+  // Send vertex object positions and velocities for drawing vectors
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  start=2*3*min_index*sizeof(float);
+  //std::cerr << "min_index="<<min_index<<" max_index="<<max_index<<" maxvert="<<maxvert<<"\n";
+  stride=0;
+  glVertexPointer((GLint) 3, GL_FLOAT, (GLsizei) stride, (void *) start);
+
+
+  if (maxvert > 0 && maxvert<=nvert_pos) {
+    //std::cerr << ">> rendering...\n";
+    //glDrawArrays(GL_POINTS, 0, maxvert);
+    glDrawArrays(GL_LINES, 0, maxvert*2);
+    //std::cerr << "<< rendering...\n";
+  }
+#endif
+  //glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+  //glDisableClientState(GL_VERTEX_ARRAY);
+  // send vertex positions only
+  glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
+  glEnableClientState(GL_VERTEX_ARRAY);
+  if (part_data->vel) {
+    start=2*3*min_index*sizeof(float); // pos + vel
+  } else {
+    start=3*min_index*sizeof(float); // pos only
+  }
+  //maxvert=max_index-min_index+1;
+  //std::cerr << "min_index="<<min_index<<" max_index="<<max_index<<" maxvert="<<maxvert<<"\n";
+  stride=0;
+  if (part_data->vel) {
+      stride=2*3*sizeof(GLfloat);
+  }
+  glVertexPointer((GLint) 3, GL_FLOAT, (GLsizei) stride, (void *) start);
+
   if (maxvert > 0 && maxvert<=nvert_pos) {
     //std::cerr << ">> rendering...\n";
     glDrawArrays(GL_POINTS, 0, maxvert);
+    //glDrawArrays(GL_LINES, 0, maxvert);
     //std::cerr << "<< rendering...\n";
   }
 
@@ -315,7 +528,6 @@ void GLObjectParticles::displayVboShader(const int win_height, const bool use_po
   // deactivate shaders programs
   shader->stop();
 
-
   if (hasPhysic && ( go->render_mode == 1)) {
     //glDisableClientState(GL_NORMAL_ARRAY);
     if (phys_select && phys_select->isValid()) {  
@@ -353,7 +565,8 @@ void GLObjectParticles::update( const ParticlesData   * _part_data,
   
   if (update_obj) { // force to rebuild VBO and display list
     if (!GLWindow::GLSL_support) buildDisplayList();
-    buildVelDisplayList();
+    if (!GLWindow::GLSL_support && part_data->vel)
+        buildVelDisplayList();
     if (po->isOrbitsRecording()) {
       po->addOrbits(part_data);
       buildOrbitsDisplayList();
@@ -462,6 +675,54 @@ void GLObjectParticles::updateBoundaryPhys()
 
 }
 // ============================================================================
+// buildVboVelFactor
+// Build Vector Buffer Object for velcocity vector factor
+// usefull only with OpenGL >= 3.00 (glsl 130)
+void GLObjectParticles::buildVboVelFactor()
+{
+    QTime tbloc;
+    tbloc.restart();
+    assert(part_data->vel != NULL);
+    std::vector <GLfloat> vel_factor;
+    for (int i=0; i < po->npart; i+=po->step) {
+        int index;
+        if (po->rhoSorted() &&
+            phys_select && phys_select->getType() != PhysicalData::rho && part_data->rho) {
+          index = rho_itv[i].index; // it's temperature/pressure, we sort by density
+        }
+        else {
+          if (phys_select && phys_select->isValid())
+            index = phys_itv[i].index; // we sort by physical value
+          else                index = po->index_tab[i]; // no physic
+        }
+        // store velocity one time with value 0.0
+        vel_factor.push_back(0.); // velocity X
+        vel_factor.push_back(0.); // velocity Y
+        vel_factor.push_back(0.); // velocity Z
+        // store velocity second time
+        vel_factor.push_back(part_data->vel[index*3  ]); // velocity X
+        vel_factor.push_back(part_data->vel[index*3+1]); // velocity Y
+        vel_factor.push_back(part_data->vel[index*3+2]); // velocity Z
+    }
+
+    // bind VBO buffer for sending data
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_vel_X2);
+
+    std::cerr << "buildVbo vel_factor nvert = "<<vel_factor.size()<<"\n";
+    std::cerr << "Velocity factor = " << vel_factor[1] << "\n";
+
+    // upload Positions (and Velocities) to VBO
+    glBufferDataARB(GL_ARRAY_BUFFER_ARB, vel_factor.size() * sizeof(float), &vel_factor[0], GL_STATIC_DRAW_ARB);
+
+    //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
+    glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+
+    if (BENCH) qWarning("Time elapsed to build and transfert VBO vel_factor to GPU: %f s", tbloc.elapsed()/1000.);
+    vel_factor.clear();
+
+}
+
+// ============================================================================
 // buildVboPos                                                                 
 // Build Vector Buffer Object for positions array                              
 void GLObjectParticles::buildVboPos()
@@ -470,10 +731,12 @@ void GLObjectParticles::buildVboPos()
   tbench.restart();
   nvert_pos=0;
   tbloc.restart();
-  
-  std::vector <GLfloat> vertices;
+
+  std::vector <GLfloat> vertices, vertices_vel;
   vertices.reserve(((po->npart/po->step)+1)*3);
-  
+  if (part_data->vel) {
+      vertices_vel.reserve(((po->npart/po->step)+1)*3);
+  }
   //rho.clear();      // clear rho density vector
   phys_itv.clear(); // clear ohysical value vector
   rho_itv.clear();
@@ -508,7 +771,7 @@ void GLObjectParticles::buildVboPos()
     vindex_sel.push_back(myz);
 #endif
   }
-  if (BENCH) qDebug("Time elapsed to setup PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to setup PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
   
 #ifdef _OPENMP
   int ntask=omp_get_max_threads(); // return number of task requested
@@ -523,7 +786,7 @@ void GLObjectParticles::buildVboPos()
   } else {
     sort(phys_itv.begin(),phys_itv.end(),GLObjectIndexTab::compareLow);
   }
-  if (BENCH) qDebug("Time elapsed to SORT PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to SORT PHYSICAL arrays: %f s", tbloc.elapsed()/1000.);
   //sort(rho.begin(),rho.end(),GLObjectIndexTab::compareHigh);
 #endif
   // select vertices
@@ -539,34 +802,73 @@ void GLObjectParticles::buildVboPos()
         index = phys_itv[i].index; // we sort by physical value
       else                index = po->index_tab[i]; // no physic
     }
-    // fill vertices array sorted by density
+    // fill vertices array sorted by density with particles positions
     vertices.push_back(part_data->pos[index*3  ]);
     vertices.push_back(part_data->pos[index*3+1]);
     vertices.push_back(part_data->pos[index*3+2]);
     nvert_pos++; // one more particle
+
+    if (part_data->vel) {
+        // fill vertices array sorted by density with particles velocities
+        vertices.push_back(part_data->pos[index*3  ]);
+        vertices.push_back(part_data->pos[index*3+1]);
+        vertices.push_back(part_data->pos[index*3+2]);
+        //nvert_pos++;
+#if 0 // glsl 330
+        vertices_vel.push_back(part_data->vel[index*3  ]);
+        vertices_vel.push_back(part_data->vel[index*3+1]);
+        vertices_vel.push_back(part_data->vel[index*3+2]);
+#endif
+    }
   }
-  if (BENCH) qDebug("Time elapsed to setup VBO arrays: %f s", tbloc.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to setup VBO arrays: %f s", tbloc.elapsed()/1000.);
   // build first particle index in the histo
   min_index=0; max_index=nvert_pos-1;
 
   tbloc.restart();
   buildIndexHisto();  
-  if (BENCH) qDebug("Time elapsed to build indexes histo : %f s", tbloc.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to build indexes histo : %f s", tbloc.elapsed()/1000.);
 
   tbloc.restart();
+  // POSITIONS
   // bind VBO buffer for sending data
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_pos);
   assert( nvert_pos <= (po->npart/po->step)+1);
   std::cerr << "buildVbo Pos nvert_pos="<<nvert_pos<<"\n";
   
-  // upload data to VBO
-  glBufferDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 3 * sizeof(float), &vertices[0], GL_STATIC_DRAW_ARB);
+  int factor=1.0;
+  if (part_data->vel) {
+      factor = 2.0;
+  }
+  // upload Positions (and Velocities) to VBO
+  glBufferDataARB(GL_ARRAY_BUFFER_ARB, factor * nvert_pos * 3 * sizeof(float), &vertices[0], GL_STATIC_DRAW_ARB);
 
   //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
   glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
-  if (BENCH) qDebug("Time elapsed to transfert VBO arrays to GPU: %f s", tbloc.elapsed()/1000.);
+
+  if (part_data->vel) {
+#if 0 // glsl 330
+      // VELOCITIES
+      // bind VBO buffer for sending data
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB, vbo_vel);
+      assert( nvert_pos <= (po->npart/po->step)+1);
+      std::cerr << "buildVbo Vel nvert_pos="<<nvert_pos<<"\n";
+
+      // upload data to VBO
+      glBufferDataARB(GL_ARRAY_BUFFER_ARB, nvert_pos * 3 * sizeof(float), &vertices_vel[0], GL_STATIC_DRAW_ARB);
+
+      //checkVboAllocation((int) (nvert_pos * 3 * sizeof(float)));
+      glBindBufferARB(GL_ARRAY_BUFFER_ARB, 0);
+#endif
+      buildVboVelFactor();
+  }
+  if (BENCH) qWarning("Time elapsed to transfert VBO arrays to GPU: %f s", tbloc.elapsed()/1000.);
+  std::cerr << "VERTICES_POS size="<<vertices.size() << "\n";
+  std::cerr << "VERTICES_VEL size="<<vertices_vel.size() << "\n";
   vertices.clear();
-  if (BENCH) qDebug("Time elapsed to build VBO pos: %f s", tbench.elapsed()/1000.);
+  vertices_vel.clear();
+
+  if (BENCH) qWarning("Time elapsed to build VBO pos: %f s", tbench.elapsed()/1000.);
 }
 // ============================================================================
 // buildVboHsml                                                             
@@ -615,7 +917,7 @@ void GLObjectParticles::buildVboHsml()
   std::cerr << "buildVboHsml ="<<hsml_value.size()<<"\n";
 
   hsml_value.clear();
-  if (BENCH) qDebug("Time elapsed to build VBO Hsml: %f s", tbench.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to build VBO Hsml: %f s", tbench.elapsed()/1000.);
 }
 // ============================================================================
 // buildVboData                                                                
@@ -663,7 +965,7 @@ void GLObjectParticles::buildVboPhysData()
   std::cerr << "Phys_data size="<<phys_data.size()<<"\n";
   phys_data.clear();
   //delete [] phys_data;
-  if (BENCH) qDebug("Time elapsed to build VBO data: %f s", tbench.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to build VBO data: %f s", tbench.elapsed()/1000.);
 }
 // ============================================================================
 //
@@ -785,7 +1087,7 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
       // highest density points were not displayed !!! I fixed this issue
       // by adding 1% more values on max data
       float moremax=(po->getMaxPhys()-po->getMinPhys())/100.0;
-      //std::cerr <<"moremax : " << moremax << "\n";
+      //std::cerr <<"moremax : " << moremax << " data_min_phys=<<"<<log(po->getMinPhys())<<" data_phys_max="<< log(po->getMaxPhys()+moremax)<<"\n";
       shader->sendUniformf("data_phys_min",log(po->getMinPhys()));
       shader->sendUniformf("data_phys_max",log(po->getMaxPhys()+moremax));
     }
@@ -815,7 +1117,8 @@ void GLObjectParticles::sendShaderColor(const int win_height, const bool use_poi
 // update                                                                      
 void GLObjectParticles::updateVel()
 {
-  buildVelDisplayList();
+  //buildVelDisplayList();
+  // buildVboVelFactor();
 }
 
 // ============================================================================
@@ -840,7 +1143,7 @@ void GLObjectParticles::buildDisplayList()
   }
   glEnd();
   glEndList();
-  if (BENCH) qDebug("Time elapsed to build Pos Display list: %f s", tbench.elapsed()/1000.);
+  if (BENCH) qWarning("Time elapsed to build Pos Display list: %f s", tbench.elapsed()/1000.);
 }
 // ============================================================================
 // buildDisplayList                                                            
@@ -849,6 +1152,7 @@ void GLObjectParticles::buildVelDisplayList()
   if (part_data->vel) {
     QTime tbench;
     tbench.restart();
+
     // display list
     glNewList( vel_dp_list, GL_COMPILE );
     glBegin(GL_LINES);
@@ -871,7 +1175,9 @@ void GLObjectParticles::buildVelDisplayList()
     }
     glEnd();
     glEndList();
-    if (BENCH) qDebug("Time elapsed to build Vel Display list: %f s", tbench.elapsed()/1000.);
+    if (BENCH) qWarning("Time elapsed to build Vel Display list: %f s", tbench.elapsed()/1000.);
+
+
   }
 }
 // ============================================================================
@@ -1107,21 +1413,25 @@ void GLObjectParticles::sortByDepth()
   // get ModelView Matrix
   glGetDoublev(GL_MODELVIEW_MATRIX, (GLdouble *) mModel);
   nind_sorted=0;
-  for (int i=0; i < po->npart; i+=po->step) {
-    int index=po->index_tab[i];
-    if (part_data->rho->data[index] >= PHYS_MIN && part_data->rho->data[index] <= PHYS_MAX) {
-    float
-        x=part_data->pos[index*3  ],
-        y=part_data->pos[index*3+1],
-        z=part_data->pos[index*3+2];
-         // compute point coordinates according to model view via matrix
-    float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
-    vindex_sel[nind_sorted].value=mz;
-    vindex_sel[nind_sorted].i_point=i;
-    vindex_sel[nind_sorted].index = index;
-    nind_sorted++;
-   }
-  }
+      if ( phys_select && phys_select->isValid()) {
+        PHYS_MIN = phys_select->getMin();
+        PHYS_MAX = phys_select->getMax();
+        for (int i=0; i < po->npart; i+=po->step) {
+            int index=po->index_tab[i];
+        if (part_data->rho->data[index] >= PHYS_MIN && part_data->rho->data[index] <= PHYS_MAX) {
+        float
+            x=part_data->pos[index*3  ],
+            y=part_data->pos[index*3+1],
+            z=part_data->pos[index*3+2];
+             // compute point coordinates according to model view via matrix
+        float mz=  MM(2,0)*x + MM(2,1)*y + MM(2,2)*z + MM(2,3);//*w;
+        vindex_sel[nind_sorted].value=mz;
+        vindex_sel[nind_sorted].i_point=i;
+        vindex_sel[nind_sorted].index = index;
+        nind_sorted++;
+       }
+      }
+      }
   // sort according to the Z Depth
   sort(vindex_sel.begin(),vindex_sel.begin()+nind_sorted,GLObjectIndexTab::compareLow);
   //nind_sorted = 0;
@@ -1172,8 +1482,8 @@ void GLObjectParticles::displaySprites(const double * mModel)
   
   texture->glBindTexture();  // bind texture
   // uv coordinates
-  float uv[4][2] = { {0.0         , 1.0-texture->V()}, {0.0         , 1.0             },
-                     {texture->U(), 1.0             }, {texture->U(), 1.0-texture->V()}
+  float uv[4][2] = { {0.0f         , 1.0f-texture->V()}, {0.0f         , 1.0f             },
+                     {texture->U(), 1.0f             }, {texture->U(), 1.0f-texture->V()}
                    };
 
   // some usefull variables
