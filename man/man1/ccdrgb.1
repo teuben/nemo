@@ -5,6 +5,19 @@ ccdrgb \- create composite RGB color images from multiple input images
 \fBccdrgb\fP [parameter=value]
 .SH DESCRIPTION
 No description available. This manual page was created by mkman
+.PP
+To convert an RGB into a greyscale image, there are some general
+practices:
+.nf
+   Y = .2126 * R^gamma + .7152 * G^gamma + .0722 * B^gamma
+.fi
+where gamma = 2.2 typically. This is the Y in XYZ color space. Followed by
+.nf
+   L* = 116 * Y ^ 1/3 - 16
+.fi
+in LAB  color space, where L* 
+"... aspires to perceptual uniformity ... closely matches human perception of lightness."
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
