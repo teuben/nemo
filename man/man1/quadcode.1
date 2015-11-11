@@ -8,8 +8,10 @@ quadcode \- global quadrupole-order N-body code integrator
 N-body code where the forces and potential are computed
 from a potential expansion in spherical harmonics
 (S. White, \fIAp.J.\fP \fB274\fP, 53 (1983), who dubbed
-it multipole expansion). See also Hernquist, L. & Barnes, J. 
-\fIAp.J.\fP \fB349\fP, 562 (1990).
+it multipole expansion). See also a followup in
+Bontekoe & van Albada (MNRAS 224, 349 (1987)) and a rebuttal
+in Zaritsky & White (MNRAS 235, 289 (1988).
+See also Hernquist, L. & Barnes, J. \fIAp.J.\fP \fB349\fP, 562 (1990)
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -81,7 +83,7 @@ to be recompiled, for example:
 be recompiled if the maximum allowed number of bodies will
 be changed.
 .SH SEE ALSO
-quadforce(1NEMO), quadinter(1NEMO)
+quadforce(1NEMO), quadinter(1NEMO), CSG(1NEMO), octcode(1NEMO) 
 .SH BUGS
 When a \fBrestart\fP is specified, values must be given for \fBALL\fP
 legal parameters which do not take default values.
