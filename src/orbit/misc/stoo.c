@@ -121,6 +121,7 @@ void setparams()
   nsteps = getiparam("nsteps");
   norb = nemoinpi(getparam("ibody"),isel,MOBJ);
   if (norb < 0) error("ibody=%s bad",getparam("ibody"));
+  if (norb == 0) warning("no orbits will be output");
   
 }
 
@@ -131,6 +132,7 @@ void setparams()
 int read_snap()
 {				
   int i, cs;
+  static bool first = TRUE;
     
   for(;;) {  /* loop until one snapshot found */
     get_history(instr);
@@ -142,8 +144,12 @@ int read_snap()
     get_set(instr, SnapShotTag);
       get_set(instr, ParametersTag);
         get_data(instr, NobjTag, IntType, &nobj, 0);
+	if (first) {
+	  dprintf(0,"read_snap: Found first snapshot with %d bodies\n",nobj);
+	  first = FALSE;
+	}
 	if (nobj>MOBJ)
-		error ("read_snap: not enough declared space to get data");
+	  error ("read_snap: not enough declared space to get data");
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
 		get_data(instr,TimeTag,RealType,&tsnap,0);
 	else
