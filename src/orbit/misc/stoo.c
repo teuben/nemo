@@ -27,7 +27,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
   "nsteps=10000\n		allocation default",
-  "VERSION=3.0\n		25-jul-2013 PJT",
+  "VERSION=3.0a\n		25-jul-2013 PJT",
   NULL,
 };
 
@@ -163,7 +163,7 @@ int read_snap()
 	 if (get_tag_ok(instr,KeyTag))
 	   get_data(instr, KeyTag, IntType, key, nobj, 0);
 	 else {
-	   dprintf(0,"added ordinal keys\n");
+	   dprintf(1,"added ordinal keys\n");
 	   for (i=0; i<nobj; i++) key[i] = i;
 	 }
       get_tes(instr,ParticlesTag);
