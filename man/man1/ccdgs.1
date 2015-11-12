@@ -1,0 +1,46 @@
+.TH CCDGS 1NEMO "11 November 2015"
+.SH NAME
+ccdgs \- gather-scatter operations on large blocks of data
+.SH SYNOPSIS
+\fBccdgs\fP [parameter=value]
+.SH DESCRIPTION
+This program was purely written to check how your I/O subsystem
+is handling transposing matrices in 2D or 3D. Examples of use
+would be to see how a series of snapshots, e.g. an APT cube
+(where A=Attribute, P=Particle, T=Time) transforms to a series
+of orbits, an ATP cube.   Typical sizes: A=10 P=10^6, T=10^3.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input filename (2d/3d block of data) [???] 
+.TP
+\fBout=\fP
+Output filename (2d/3d block of data) [???] 
+.TP
+\fBsize=\fP
+Size in nx,ny[,nz] [10,10,1]    
+.TP
+\fBbs=\fP
+Block size per item [4]   
+.TP
+\fBmode=\fP
+Mode of copy [xy]    
+.TP
+\fBoffset=\fP
+Offset (not used) [0]    
+.SH EXAMPLES
+nothing yet.
+.SH SEE ALSO
+
+.SH FILES
+src/image/io/ccdgs.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-jul-2013	tinkertoy written	PJT
+11-nov-2015	finished XY and YX 2D versions	PJT
+.fi
