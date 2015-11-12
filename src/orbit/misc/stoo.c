@@ -28,7 +28,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
   "nsteps=10000\n		max orbit length allocated",
-  "VERSION=3.1\n		11-nov-2015 PJT",
+  "VERSION=3.1a\n		12-nov-2015 PJT",
   NULL,
 };
 
@@ -166,7 +166,7 @@ int read_snap()
       get_set(instr, ParticlesTag);
          get_data(instr, CoordSystemTag, IntType, &cs, 0);
          if (get_tag_ok(instr,MassTag)) {
-           get_data(instr, MassTag, DoubleType, mass, nobj, 0);
+           get_data(instr, MassTag, RealType, mass, nobj, 0);
            Qmass=TRUE;
          }
          else if (!Qmass) {	   
@@ -175,7 +175,7 @@ int read_snap()
                  mass[i] = 1.0/(double)nobj;
          }
          
-         get_data(instr, PhaseSpaceTag, DoubleType, phase, nobj, 2, NDIM, 0);
+         get_data(instr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
 	 /* need additional Qkey here ? */
 	 if (get_tag_ok(instr,KeyTag))
 	   get_data(instr, KeyTag, IntType, key, nobj, 0);
