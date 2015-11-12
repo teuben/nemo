@@ -10,7 +10,8 @@
  *	 7-mar-92	     make gcc happy
  *	25-may-92	V2.5 need <potential.h> now
  *	18-apr-95       V2.6 
- *      25-jul-2013     V3.0 allow multiple orbits output
+ *      25-jul-2013     V3.0 allow multiple orbits output;
+ *      11-nov-2015     V3.1 now the efficient way
  */
 
 #include <stdinc.h>
@@ -26,8 +27,8 @@ string defv[] = {
   "in=???\n			snapshot input file name",
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
-  "nsteps=10000\n		allocation default",
-  "VERSION=3.0a\n		25-jul-2013 PJT",
+  "nsteps=10000\n		max orbit length allocated",
+  "VERSION=3.1\n		11-nov-2015 PJT",
   NULL,
 };
 
@@ -40,18 +41,19 @@ string headline;
 
  	/* global snapshot stuff */
 
-#define MOBJ 	8000
-int    nobj, norb;
+#define MOBJ 	1000000
+int    nobj;                    /* number of bodies per snapshot */
+int    norb;                    /* number of orbits to extract */
 real   tsnap;			/* time of snapshot */
 real   mass[MOBJ];
 real   phase[MOBJ][2][NDIM];
 int    key[MOBJ];
-int    isel[MOBJ];            /* select for output orbit?*/
+int    isel[MOBJ];              /* select for output orbit? */
 bool   Qtime, Qmass, Qkey;
 	/* global orbit stuff */
 
 int    ibody, nsteps;		/* allocation */
-orbitptr optr;			/* pointer to orbit */
+orbitptr *optr;			/* pointer to orbit pointers */
 
 void setparams();
 int read_snap();
@@ -65,40 +67,49 @@ void nemo_main()
   instr  = stropen(iname,"r");		/* read from snapshot */
   outstr = stropen(oname,"w");		/* write to orbit */
 
-  optr=NULL;
-  allocate_orbit (&optr,NDIM,nsteps);
-  
-  for (j=0; j<norb; j++) {
-    ibody = isel[j];
-    i = 0;				/* counter of timesteps */
-    if (j>0) rewind(instr);
-    while (read_snap()) {		/* read until exausted */
-      if (i==0) {			/* first time around */
-	Masso(optr) = mass[ibody];
-	I1(optr) = I2(optr) = I3(optr) = 0.0;
-      }
-      if (ibody>=nobj) {
-	printf ("request to output ibody=%d, however nobj=%d\n",ibody,nobj);
-	exit(1);
-      }
-      if (i>=nsteps) {
-	printf ("Warning: too many timesteps requested, stopped at %d",i);
-	break;
-      }
-      Torb(optr,i) = tsnap;
-      Key(optr)    = key[ibody];
-      Xorb(optr,i) = phase[ibody][0][0];	
-      Yorb(optr,i) = phase[ibody][0][1];	
-      Zorb(optr,i) = phase[ibody][0][2];	
-      Uorb(optr,i) = phase[ibody][1][0];	
-      Vorb(optr,i) = phase[ibody][1][1];	
-      Worb(optr,i) = phase[ibody][1][2];
-      i++;
-    }
-    Nsteps(optr) = i;			/* record actual number */
-    if (j==0) put_history(outstr);
-    write_orbit(outstr,optr);		/* write orbit to file */
+  optr=(orbitptr *) allocate(norb*sizeof(orbitptr));
+  for (i=0; i<norb; i++) {
+    optr[i] = NULL;
+    allocate_orbit (&optr[i],NDIM,nsteps);
   }
+  
+      
+  i = 0;				/* counter of timesteps */
+  while (read_snap()) {		         /* read until exausted */
+      if (i==0) {			/* first time around */
+	for (j=0; j<norb; j++) {
+	  ibody = isel[j];
+	  if (ibody>=nobj)
+	    error("request to output ibody=%d, however nobj=%d",ibody,nobj);
+	  Masso(optr[j]) = mass[ibody];
+	  I1(optr[j]) = I2(optr[j]) = I3(optr[j]) = 0.0;
+	}
+      } else {
+	if (i>=nsteps) {
+	  warning("too many timesteps requested, stopped at %d",i);
+	  break;
+	  }
+      }
+      for (j=0; j<norb; j++) {
+	ibody = isel[j];
+	Key(optr[0])    = key[ibody];
+	Torb(optr[j],i) = tsnap;
+	Xorb(optr[j],i) = phase[ibody][0][0];	
+	Yorb(optr[j],i) = phase[ibody][0][1];	
+	Zorb(optr[j],i) = phase[ibody][0][2];	
+	Uorb(optr[j],i) = phase[ibody][1][0];	
+	Vorb(optr[j],i) = phase[ibody][1][1];	
+	Worb(optr[j],i) = phase[ibody][1][2];
+      }
+      i++;
+      for (j=0; j<norb; j++)
+	Nsteps(optr[j]) = i;			/* record actual number */      
+  }
+  put_history(outstr);
+  for (j=0; j<norb; j++)
+    write_orbit(outstr,optr[j]);		/* write orbit to file */
+
+  
   strclose(outstr);			/* close files */
   strclose(instr);
 }
@@ -132,7 +143,7 @@ int read_snap()
       get_set(instr, ParametersTag);
         get_data(instr, NobjTag, IntType, &nobj, 0);
 	if (nobj>MOBJ)
-		error ("read_snap: not enough declared space to get data\n");
+		error ("read_snap: not enough declared space to get data");
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
 		get_data(instr,TimeTag,RealType,&tsnap,0);
 	else
