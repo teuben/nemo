@@ -40,6 +40,11 @@ seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  | tabsmooth - | tabhi
 .fi
 Note that smoothing and trending are related, so their resulting dispersions in the last two 
 examples do not multiply.
+.PP
+This also means if you don't know if a signal had been applied a Hanning smoothing, compute the sigma
+before and after a difference operator. If that ratio is sqrt(2), it means it was not, it was a pure
+un-correllated gaussian. However, if the ratio is sqrt(2/3) = 0.816, it was a Hanning smoothed signal
+to begin with.
 .SH SEE ALSO
 tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
 .SH AUTHOR
