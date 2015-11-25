@@ -26,6 +26,8 @@
 #include <public/basic.h>
 #include <utils/spline.h>
 #include <utils/WDMath.h>
+#include <utils/timer.h>
+#include <cassert>
 using namespace falcON;
 //
 // class falcON::HaloModifier
@@ -321,18 +323,18 @@ double DoublePowerLawHalo::operator()(double x, double&rh1, double&rh2) const {
 }
 //
 namespace {
-  const HaloModifier* _HM;
-  double _z0,_iE,_Ai,_Ao,_Rc,_Yo;
-  inline double _dM(double z)
+  const HaloModifier* __HM;
+  double __z0,__iE,__Ai,__Ao,__Rc,__Yo;
+  inline double __dM(double z)
   {
-    if(z<=_z0) return 0.;
+    if(z<=__z0) return 0.;
     double z1 = 1-z;
-    if(z1<=0) return _Yo;
-    double u = std::pow(z/z1,_iE);
-    if(u<=_Rc) return 0.;
-    double r = _Rc? sqrt(u*u-_Rc*_Rc) : u;
-    double y = (r/u) * std::pow(z,_Ai) * std::pow(z1,_Ao);
-    return _HM->truncated()? _HM->trunc(r) * y : y;
+    if(z1<=0) return __Yo;
+    double u = std::pow(z/z1,__iE);
+    if(u<=__Rc) return 0.;
+    double r = __Rc? sqrt(u*u-__Rc*__Rc) : u;
+    double y = (r/u) * std::pow(z,__Ai) * std::pow(z1,__Ao);
+    return __HM->truncated()? __HM->trunc(r) * y : y;
   }
 }
 double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
@@ -342,15 +344,15 @@ double DoublePowerLawHalo::Mtot(const HaloModifier&hm) const
     if(go < 3+et && !hm.truncated())
       falcON_THROW("DoublePowerLawHalo::Mtot(): cannot compute total mass"
 		   "for outer<3+eta and no truncation");
-    _HM = &hm;
-    _iE = 1./et;
-    _Ai = _iE*(3-gi)-1;
-    _Ao = _iE*(go-3)-1;
-    _Yo = _Ao > 1.e-7 || _HM->truncated()? 0. : 1.;
-    _Rc = hm.r_c();
-    double tm = std::pow(_Rc,et);
-    _z0 = tm/(1.+tm);
-    return FPi*qbulir(&_dM,_z0,1.,1.e-9)/et;
+    __HM = &hm;
+    __iE = 1./et;
+    __Ai = __iE*(3-gi)-1;
+    __Ao = __iE*(go-3)-1;
+    __Yo = __Ao > 1.e-7 || __HM->truncated()? 0. : 1.;
+    __Rc = hm.r_c();
+    double tm = std::pow(__Rc,et);
+    __z0 = tm/(1.+tm);
+    return FPi*qbulir(&__dM,__z0,1.,1.e-9)/et;
   } else {
     if(gi >= 3. || go <= 3.)
       falcON_THROW("DoublePowerLawHalo::Mtot(): total mass diverges");
@@ -466,14 +468,23 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     Array<vect_d> pos_e(n), acc_e(n);
     for(int i=0; i!=n; ++i) 
       pos_e[i] = vect_d(r[i],0.,0.);
+    WDutils::Timer Tim;
     MON->set(0.,n,0,pos_e.array(),0,0,
 	     pot_e.array(),acc_e.array(),0);    // get external monopole
+    DebugInfo(4,"HaloPotential: call to external potential for %d particles "
+	      " took %f seconds",n,Tim.stop());
     for(int i=0; i!=n; ++i) {
       ps[i] =-pot_e[i];                         // get Psi_e(r)
       mt[i] =-square(r[i])*acc_e[i][0];         // get M_e(<r)
-      if(i && ps[i]>ps[i-1])
+      if(!(ps[i]>0))
+	falcON_THROW("HaloPotential: external Ps(%g)=%20.16g",
+	      r[i],ps[i]);
+      if(!(mt[i]>0))
+	falcON_THROW("HaloPotential: external M(%g)=%20.16g",
+		     r[i],mt[i]);
+      if(i && !(ps[i]<=ps[i-1]))
 	falcON_THROW("HaloPotential: external Ps(%g)=%20.16g > Ps(%g)=%20.16g",
-	      r[i],ps[i],r[i-1],ps[i-1]);
+		     r[i],ps[i],r[i-1],ps[i-1]);	
     }
     //    find density generating external monopole
     double extA  = (log(mt[1])-log(mt[0]))/dlr; // dlnM/dlnr for monopole
@@ -483,13 +494,19 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     for(int i=0; i!=n; ++i) {
       Sext(lr[i], &(rh[i]));                    // G*rho = d(G*M)/dlnr
       rh[i] /= FPi * cube(r[i]);                //       / (4 Pi r^3)
+      if(!(rh[i]>0))
+	falcON_THROW("HaloPotential: external Rh(%g)=%20.16g",
+	      r[i],rh[i]);
     }
     DebugInfo(4,"HaloPotential: M_mono(<%g)=%g\n",r[n1],mt[n1]);
   }
   // 2.2 make mt hold the total cumulative mass and rh the total density
   for(int i=0; i!=n; ++i) {
     mt[i] += mh[i];
+    assert(mt[i]>0);
+    assert(i==0 || mt[i]>=mt[i-1]);
     rh[i] += DEN(r[i]);
+    assert(rh[i]>0);
   }
   // 2.3 find the smallest index beyond which mh does not seem to change
   for(nm=0; nm!=n1; ++nm)
@@ -852,10 +869,11 @@ HaloModel::HaloModel(HaloDensity const&model,
     bool integrand_negative = false;
     for(int i=0; i!=n; ++i) {
       double rd1,
-	ps1 = -mt[i]/square(r[i]);                // psi'                       
-      (*RED)(r[i],rd1);                           // red'                       
-      in[i] = rd1/ps1;                            // dred/dpsi                  
-      if(in[i]<0.) {
+	ps1 = -mt[i]/square(r[i]);                // psi'
+      (*RED)(r[i],rd1);                           // red'
+      in[i] = rd1/ps1;                            // dred/dpsi
+      assert(!std::isinf(in[i]) && !std::isnan(in[i]));
+      if(in[i]<0) {
 	integrand_negative = true;
 	if(in[i]<negative_v) {
 	  negative_v = in[i];
@@ -874,6 +892,7 @@ HaloModel::HaloModel(HaloDensity const&model,
 	ps2 =-twice(ps1)/r[i]-FPi*(rh[i]);        // psi"                       
       (*RED)(r[i],rd1,rd2);                       // red', red"                 
       in[i] = (rd2*ps1 - rd1*ps2)/cube(ps1);      // d^2red/dpsi^2              
+      assert(!std::isinf(in[i]) && !std::isnan(in[i]));
       if(in[i]<0.) {
 	integrand_negative = true;
 	if(in[i]<negative_v) {
@@ -898,6 +917,7 @@ HaloModel::HaloModel(HaloDensity const&model,
   negative_v=0;
   if(B == 0.5  ||  B ==-0.5 ||  B ==-1.5)     // trivial cases: no integration  
     for(int i=0; i!=n; ++i) {
+      assert(!std::isinf(in[i]) && !std::isnan(in[i]));
       if(in[i] < 0) {
 	g_negative = true;
 	if(in[i] < negative_v) { 
@@ -934,6 +954,7 @@ HaloModel::HaloModel(HaloDensity const&model,
       Q = ps[i];
       iI= 1/in[i];
       double err, g = qbulir(intgQ,0.,1.,1.e-8,&err,0,50);
+      assert(!std::isinf(g) && !std::isnan(g));
       if(g<0.) {
 	g_negative = true;
 	g *= pow(Q,p1);
