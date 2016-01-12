@@ -15,6 +15,7 @@
  *       8-dec-12   1.1  allow mom=-3 for differentials (axis=3 only for now) in 2..Nz()
  *      13-feb-13   2.0  default integration, instead of just summing
  *      29-apr-13   2.1  add clumping definition  http://arxiv.org/abs/1304.1586  (mom=-4)
+ *      12-jan-16   2.2a minmax computation was forgotten
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -39,7 +40,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2 [not impl]",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.2\n  16-aug-2013 PJT",
+  "VERSION=2.2a\n 12-jan-2016 PJT",
   NULL,
 };
 
@@ -62,7 +63,7 @@ void nemo_main()
     int     nclip, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
-    real    *spec, ifactor, cv, clip[2];
+    real    *spec, ifactor, cv, clip[2], m_min, m_max;
     int     *smask;
     bool    Qkeep = getbparam("keep");
     bool    Qoper = hasvalue("oper");
@@ -156,7 +157,8 @@ void nemo_main()
 	    smask = (int *) allocate(nz*sizeof(int));
         } else if (axis < 0) {
 	    nx1 = nx;   ny1 = ny;   nz1 = nz;
-	    spec = smask = NULL;
+	    spec = NULL;
+	    smask = NULL;
 	} else
             error("Invalid axis: %d (Valid: 1,2,3)",axis);
         dprintf(0,"Reducing %d*%d*%d to a %d*%d*%d cube\n",
@@ -404,6 +406,18 @@ void nemo_main()
     } else
         error("Cannot do axis %d",axis);
 
+    m_min = HUGE;
+    m_max = -HUGE;
+    for (k=0; k<Nz(iptr1); k++)
+    for (j=0; j<Ny(iptr1); j++)
+    for (i=0; i<Nx(iptr1); i++) {
+      cv = CubeValue(iptr1,i,j,k);
+      m_max = MAX(m_max, cv);
+      m_min = MIN(m_min, cv);
+
+    }
+    MapMin(iptr1) = m_min;
+    MapMax(iptr1) = m_max;
     write_image(outstr, iptr1);
 }
 
