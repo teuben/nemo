@@ -37,7 +37,10 @@ global real gravc;                     /* gravitational constant [1] */
 void nemo_main(void);
 void startrun(void);
 void testdata(bool cencon);
-void stepsystem(void);
+
+void stepsystem_leapfrog(void);
+void stepsystem_euler(void);
+void stepsystem_old(void);
 
 /* code_io.c */
 void inputdata(string file);
