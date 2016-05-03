@@ -2,6 +2,7 @@
  * CCDPEAKSTATS
  *
  *       1-nov-2015  V0.1   Cloned off ccdstat to play with segments and peaks, the fast way
+ *       3-may-2015  V0.2   print FWHM, not sigma
  *
  */
 
@@ -20,7 +21,7 @@ string defv[] = {
     "x=\n           Pick an X pixel (0....)",
     "y=\n           Pick an Y pixel (0....)",
     "tab=\n         If given, print out data values",
-    "VERSION=0.1\n  1-nov-2015 PJT",
+    "VERSION=0.2\n  3-may-2016 PJT",
     NULL,
 };
 
@@ -102,7 +103,7 @@ nemo_main()
 	  print_segments(nz,sp,nseg,s0,s1);
 	}
       }
-      dprintf(0,"Found %d points with segments\n",ndet);
+      dprintf(0,"Found %d/%d points with segments\n",ndet,nx*ny);
     }
 }
 
@@ -170,6 +171,7 @@ print_segments(int nz, real *sp, int nseg, int *s0, int *s1)
 {
   int i, k, klen;
   real sum0, sum1, sum2, peak;
+  
   for (i=0; i<nseg; i++) {
     sum0 = sum1 = sum2 = peak = 0.0;
     klen = s1[i]-s0[i]+1;
@@ -183,6 +185,7 @@ print_segments(int nz, real *sp, int nseg, int *s0, int *s1)
     sum2 = sum2/sum0 - sum1*sum1;
     if (sum2<0) sum2 = 0.0;
     sum2 = sqrt(sum2);    /* <kw>  */
+    sum2 = 2.354820 * sum2;  /* convert to FWHM */
     printf("%g %g %g %d\n",peak,sum1,sum2,klen);
   }
   
