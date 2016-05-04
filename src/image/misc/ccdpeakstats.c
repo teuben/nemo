@@ -20,8 +20,9 @@ string defv[] = {
     "maxgap=2\n     Max number of channels below cutoff allowed in a segments",
     "x=\n           Pick an X pixel (0....)",
     "y=\n           Pick an Y pixel (0....)",
+    "z=\n           Pick a segment (two numbers) if to override sigma/nsigma",
     "tab=\n         If given, print out data values",
-    "VERSION=0.2\n  3-may-2016 PJT",
+    "VERSION=0.3\n  3-may-2016 PJT",
     NULL,
 };
 
@@ -55,6 +56,7 @@ nemo_main()
     real *sp;
     int minchan = getiparam("minchan");
     int maxgap  = getiparam("maxgap");
+    int ns, seg[2];
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -66,6 +68,7 @@ nemo_main()
     sigma = getrparam("sigma");
     nsigma = getrparam("nsigma");
     cutoff = nsigma * sigma;
+    ns = nemoinpi(getparam("z"),seg,2);
 
     Qpix = (hasvalue("x") && hasvalue("y"));
     if (Qpix) {
@@ -100,7 +103,7 @@ nemo_main()
 	    ndet++;
 	    dprintf(1,"%d %d  %d\n",i,j,nseg);
 	  }
-	  print_segments(nz,sp,nseg,s0,s1);
+	  print_segments(i,j,nz,sp,nseg,s0,s1);
 	}
       }
       dprintf(0,"Found %d/%d points with segments\n",ndet,nx*ny);
@@ -167,7 +170,7 @@ line_segments(int n, real *spec, int *w, int *s0, int *s1, real cutoff, int minc
   return nseg;
 }
 
-print_segments(int nz, real *sp, int nseg, int *s0, int *s1)
+print_segments(int ix, int iy, int nz, real *sp, int nseg, int *s0, int *s1)
 {
   int i, k, klen;
   real sum0, sum1, sum2, peak;
@@ -175,7 +178,9 @@ print_segments(int nz, real *sp, int nseg, int *s0, int *s1)
   for (i=0; i<nseg; i++) {
     sum0 = sum1 = sum2 = peak = 0.0;
     klen = s1[i]-s0[i]+1;
-    for (k=s0[i]; k<=s1[i]; k++) {
+    //for (k=s0[i]; k<=s1[i]; k++) {
+    for (k=s0[i]; k<s1[i]; k++) {
+      printf("# %d %f\n",k,sp[k]);
       sum0 += sp[k];
       sum1 += k*sp[k];
       sum2 += k*k*sp[k];
@@ -186,7 +191,6 @@ print_segments(int nz, real *sp, int nseg, int *s0, int *s1)
     if (sum2<0) sum2 = 0.0;
     sum2 = sqrt(sum2);    /* <kw>  */
     sum2 = 2.354820 * sum2;  /* convert to FWHM */
-    printf("%g %g %g %d\n",peak,sum1,sum2,klen);
+    printf("%g %g %g %d %d %d\n",peak,sum1,sum2,klen,ix,iy);
   }
-  
 }
