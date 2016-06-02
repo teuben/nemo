@@ -526,7 +526,7 @@ do_line()
 
 
 
-inline real signo(real a, real b)
+static inline real signo(real a, real b)
 {
   if (b < 0) return -a;
   return a;
