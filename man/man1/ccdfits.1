@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "12 December 2013"
+.TH CCDFITS 1NEMO "26 May 2016"
 .SH NAME
 ccdfits \- write a fits file to disk
 .SH SYNOPSIS
@@ -72,7 +72,9 @@ by the input. By default not used.
 \fIradecvel=t|f\fP
 If no reference map used, this can be used to enforce a more reasonable
 axis descriptor (RA/DEC/VEL) for astronomical data packages which 
-cannot handle theory data too well (e.g. miriad, karma etc.).
+cannot handle theory data too well (e.g. miriad, karma etc.). We also
+add CUNITn and BUNIT (albeit in JY/PIXEL). See also \fIccdsky(1NEMO)\fP
+for a smart scaling placing the object at a computed distance.
 [Default: \fBf\fP].
 .TP
 \fIdummy=t|f\fP
@@ -165,7 +167,7 @@ You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
  $!
 .fi
 .SH "SEE ALSO"
-ccdfitsio(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+ccdsky(1NEMO), ccdfitsio(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -186,4 +188,5 @@ apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
 6-may-02	V4.0b properly implemented dummy= 	PJT
 4-jan-04	V5.2 docomented the recent changes to crval/cdelt/crpix=	PJT
 20-jun-09	V5.4 added select= to grab not the first image  	PJT
+26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true	PJT
 .fi
