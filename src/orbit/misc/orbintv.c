@@ -3,9 +3,7 @@
  *           for the harder problems
  *
  *      15-may-2011    Cloned off orbint               Peter Teuben
- *
- * @todo
- *    (18-sep-2013) possibly a 64bit issue, now coredumps
+ *      11-jun-2016    fixed *** stack smashing detected ***
  *
  */
 
@@ -29,7 +27,7 @@ string defv[] = {
   "potfile=\n		extra data-file for potential ",
   "mode=dopri5\n        integration method (dopri5 dop853)",
   "tol=-7\n             tolerance of integration",
-  "VERSION=1.1\n        16-may-11 PJT",
+  "VERSION=1.1a\n       11-jun-2016 PJT",
   NULL,
 };
 
@@ -297,9 +295,9 @@ real print_diag(double time, double *posvel)
     double epot;
     permanent bool first = TRUE;
     permanent double etot_0, etot_00;
-    permanent idiag = 0;
+    permanent int idiag = 0;
     double err;
-    double f[3];
+    double f[6];
     double *pos = posvel;
     double *vel = pos+3;
 
