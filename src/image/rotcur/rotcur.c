@@ -143,7 +143,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.12a\n 3-may-2013 PJT",
+    "VERSION=2.12b\n 12-jun-2016 PJT",
     NULL,
 };
 
@@ -194,11 +194,11 @@ int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, 
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
 	   real elp4[], int cor[], int *npt, real *rms, int fitmode, real nsigma, bool useflag, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
-int rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
+void rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], real res[], int npt[], real factor);
 void stat2(real a[], int n, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
+void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
 	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, bool useflag);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
@@ -368,8 +368,8 @@ stream  lunpri;       /* LUN for print output */
     stream velstr, denstr;
     string *burststring(), *fmode;
     bool Qdens, scanopt();
-    real *coldat[3];
-    int colnr[3];
+    real *coldat[4];
+    int colnr[4];
 
     dprintf(0,"%s: NEMO VERSION %s\n", 
                         getparam("argv0"), getparam("VERSION"));
@@ -743,7 +743,7 @@ stream  lunpri;       /* LUN for print output */
  *    RMS      real            residual rms velocities
  */
 
-rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, rms, fitmode, nsigma, useflag, lunres)
+int rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, rms, fitmode, nsigma, useflag, lunres)
 real ri,ro;      /* inner and outer radius of ring */
 int mask[];      /* mask for free/fixed parameters */
 int wpow;        /* weighting function */
@@ -797,7 +797,7 @@ stream lunres;   /* file for residuals */
     getdat(x,y,w,idx,res,&n,MAXPTS,p,ri,ro,thf,wpow,&q,side,&full,nfr,useflag);  /* this ring */
     *rms = q;
     if (useflag)
-      return;
+      return -1;
 
     for (i=0;i<n;i++) iblank[i] = 1;
 
@@ -995,7 +995,7 @@ perform_out(int h,real *p,int n,real q)
  *  is set. Otherwise it exits.
  */
 
-rotplt(rad,vsy,evs,vro,evr,pan,epa,inc,ein,xce,exc,yce,eyc,
+void rotplt(rad,vsy,evs,vro,evr,pan,epa,inc,ein,xce,exc,yce,eyc,
        mask,ifit,elp,lunpri,cor,res,npt,factor)
 real rad[],vsy[],evs[],vro[],evr[],pan[],epa[],inc[],ein[],
      xce[],exc[],yce[],eyc[],elp[][4], res[], factor;
@@ -1090,7 +1090,7 @@ void stat2(real *a,int n,real *mean,real *sig)
  *    UFLAG    logical          flag points in ring
  */
 
-getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,useflag)
+void getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,useflag)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
@@ -1313,9 +1313,9 @@ int l,m;        /* grid coordinates w.r.t. 0,0 */
         dn[0] = (MapValue(denptr,l+1,m)-MapValue(denptr,l-1,m))/d/grid[0];
         dn[1] = (MapValue(denptr,l,m+1)-MapValue(denptr,l,m-1))/d/grid[1];
         vcor(xx,p,&vdif,dn); /*  calculate correction */
-        return(vdif);
+        return vdif;
     } else
-        return(0.0);
+        return 0.0;
 }
 
 /*  External functions needed by the nllsqfit routine */
@@ -1364,7 +1364,7 @@ real vn,v2;                                  /* correction to radial velocity */
 real vobs_c1(real *c,real *p,int m)
 {
       perform_init(p,c);
-      return( vs+vc*sini1*cost1 );      /* circular motion */
+      return vs+vc*sini1*cost1;      /* circular motion */
 }
 
 
