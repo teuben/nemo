@@ -24,6 +24,7 @@
  *      14-may-11  2.3  different options for bootstrap method
  *       9-dec-12  3.0  xrange= now allows separate sections   a:b,c:d,....
  *      10-oct-13  4.0  method=
+ *      26-may-16  4.1  the fit=grow recoded
  *
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
@@ -68,7 +69,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
-    "VERSION=4.0a\n     11-oct-2013 PJT",
+    "VERSION=4.1\n      26-may-2016 PJT",
     NULL
 };
 
@@ -236,15 +237,15 @@ static real func_grow(real *x, real *p, int np)
 {
   real arg;
   arg = x[0]/p[1];
-  return p[0] * (exp(arg)-1);
+  return p[0] * (1-exp(-arg));
 }
 
 static void derv_grow(real *x, real *p, real *e, int np)
 {
   real arg,arg1;
   arg = x[0]/p[1];
-  arg1 = exp(arg);
-  e[0] = arg1-1.0;
+  arg1 = exp(-arg);
+  e[0] = 1-arg1;
   e[1] = -p[0]*arg1*x[0]/(p[1]*p[1]);
 }
 
@@ -595,10 +596,10 @@ int inrange(a_range *r, real rval)
   int i,  nr = r->nr;
   if (nr==0) return 1;
   for (i=0; i<nr; i++) {
-    dprintf(0,"%g <? %g <? %g\n",r->rmin[i],rval,r->rmax[i]);
+    dprintf(1,"%g <? %g <? %g\n",r->rmin[i],rval,r->rmax[i]);
     if (r->rmin[i] <= rval && rval <= r->rmax[i]) return 1;
   }
-  dprintf(0,"%g not in range\n",rval);
+  dprintf(1,"%g not in range\n",rval);
   return 0;
 }
 
@@ -1346,7 +1347,7 @@ do_exp()
 
 
 /*
- * GROW:       y = a * (exp(x/b) - 1)
+ * GROW:       y = a * (1-exp(-x/b))
  *
  */
  
@@ -1363,7 +1364,7 @@ do_grow()
   if (nycol<1) error("Need 1 value for ycol=");
   if (tol < 0) tol = 0.0;
   if (lab < 0) lab = 0.01;
-  sprintf(fmt,"Fitting a*(exp(x/b)-1):  \na= %s %s \nb= %s %s \n",
+  sprintf(fmt,"Fitting a*(1-exp(-x/b)):  \na= %s %s \nb= %s %s \n",
 	  format,format,format,format);
   x = xcol[0].dat;
   y = ycol[0].dat;
@@ -1391,7 +1392,7 @@ do_grow()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
-  bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+  //bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
     for (i=0; i<npt; i++)
