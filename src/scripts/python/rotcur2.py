@@ -14,6 +14,14 @@
 # Example of use:
 #       rotcur2.py NGC2347 NGC2347.co.ringfit -o NGC2347.ha.ringfit -u -r try2.rotcur 
 #
+#
+# Example rotcur2.txt file: (first non-comment line needs to be the column names!!!)
+#<<
+##  name             rmax   vsys  inc   w50  w90
+##  NGC2347          30.0   4421  50.2  416  445
+#>>
+#
+
 
 from astropy.io import ascii
 import matplotlib.pyplot as plt
