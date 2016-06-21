@@ -221,12 +221,19 @@ def plabel(umode,scale):
 def print_usage(argv):
     print "Multi-table rotation curve plotter and comparisons"
     print "Usage:"
-    print "%s [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
+    print "%s [key=val] [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
     print "   -u   rotcur type table  (for this and all following tables until reset) "
     print "   -i   ringfit type table  (for this and all following tables until reset) "
     print "   -r   radio convention  (for this and all following tables until reset) "
     print "   -r   optical convention  (for this and all following tables until reset) "
     print "Currently all curves are *plotted* in the radio convention"
+    print ""
+    print "In addition, for a limited number of keyword, a new value can be given:"
+    print "   rmax"
+    print "   vsys"
+    print "   inc"
+    print "   w50"
+    print "   w90"
     
     sys.exit(0)
 
@@ -242,7 +249,6 @@ if __name__ == "__main__":
     inc = p['inc']
     w50 = p['w50']
     w90 = p['w90']
-    o2r = 1.0-2.0*vsys/c
     #
     fig = plt.figure()
     plt.title('%s   :   VSYS=%g    INC=%g' % (gal,vsys,inc))
@@ -273,6 +279,7 @@ if __name__ == "__main__":
             (r1,v1) = get_ringplot(data)    # 'i'
             #(r1,v1) = get_velfit(data)     # 's'
         if scale:
+            o2r = 1.0-2.0*vsys/c
             v1 = v1 * o2r
         n = len(data)
         print "Found %d radii for %s" % (n,name)
