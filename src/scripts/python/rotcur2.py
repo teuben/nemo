@@ -24,6 +24,7 @@ import os,sys
 degrad = 57.2957795
 c = 299792.458
 
+parfile = 'rotcur2.txt'
 
 def properties(name, file='rotcur2.txt'):
     """
@@ -208,9 +209,24 @@ def plabel(umode,scale):
     else:
         lab = lab + '-r'
     return lab
+
+def print_usage(argv):
+    print "Multi-table rotation curve plotter and comparisons"
+    print "Usage:"
+    print "%s [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
+    print "   -u   rotcur type table  (for this and all following tables until reset) "
+    print "   -i   ringfit type table  (for this and all following tables until reset) "
+    print "   -r   radio convention  (for this and all following tables until reset) "
+    print "   -r   optical convention  (for this and all following tables until reset) "
+    print "Currently all curves are *plotted* in the radio convention"
+    
+    sys.exit(0)
+
     
 
 if __name__ == "__main__":
+    print "LEN:",len(sys.argv)
+    if len(sys.argv) < 2: print_usage(sys.argv)
     gal = sys.argv[1]
     p = properties(gal)
     rmax = p['rmax']
