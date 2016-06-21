@@ -29,6 +29,8 @@ import numpy as np
 import math
 import os,sys
 
+version = "21-jun-2016 PJT"
+
 degrad = 57.2957795
 c = 299792.458
 
@@ -219,16 +221,18 @@ def plabel(umode,scale):
     return lab
 
 def print_usage(argv):
-    print "Multi-table rotation curve plotter and comparisons"
+    print "Multi-table rotation curve plotter and comparisons - version %s " % version
     print "Usage:"
-    print "%s [key=val] [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
-    print "   -u   rotcur type table  (for this and all following tables until reset) "
-    print "   -i   ringfit type table  (for this and all following tables until reset) "
-    print "   -r   radio convention  (for this and all following tables until reset) "
-    print "   -r   optical convention  (for this and all following tables until reset) "
+    print "%s name  [key=val] [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
+    print "   name     Required name, an ID grab default values from %s" % parfile
+    print "   key=val  Optional re-assigned keyword"
+    print "   -u       rotcur type table  (for this and all following tables until reset) "
+    print "   -i       ringfit type table  (for this and all following tables until reset) "
+    print "   -r       radio convention  (for this and all following tables until reset) "
+    print "   -r       optical convention  (for this and all following tables until reset) "
     print "Currently all curves are *plotted* in the radio convention"
     print ""
-    print "In addition, for a limited number of keyword, a new value can be given:"
+    print "In addition, for a limited number of keywords, a new value can be given:"
     print "   rmax"
     print "   vsys"
     print "   inc"
