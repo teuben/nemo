@@ -32,7 +32,7 @@ string defv[] = {
   "in=???\n       Input image file",
   "out=???\n      Output image file",
   "axis=3\n       Axis to take moment along (1=x 2=y 3=z)",
-  "mom=0\n	  Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc,-1=mean val,-2=disp val,-3=clump]",
+  "mom=0\n	  Moment to take [0=sum,1=mean loc,2=disp loc,3=peak loc,4=peak mom1,-1=mean val,-2=disp val,-3=clump]",
   "keep=f\n	  Keep moment axis in full length, and replace all values",
   "cumulative=f\n Cumulative axis (only valid for mom=0)",
   "oper=\n        Operator on output (enforces keep=t)",
@@ -40,7 +40,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2 [not impl]",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.2a\n 12-jan-2016 PJT",
+  "VERSION=2.3\n  21-jun-2016 PJT",
   NULL,
 };
 
@@ -82,7 +82,7 @@ void nemo_main()
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
-    if (mom==3 && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
+    if ((mom%10==3 ) && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
 
     if (Qclip) {
       nclip = nemoinpr(getparam("clip"),clip,2);
@@ -330,11 +330,17 @@ void nemo_main()
 		newvalue = scale*(tmp1/tmp0) + offset;
 	      else if (mom==2)
 		newvalue = scale*sqrt(tmp2/tmp0 - sqr(tmp1/tmp0));
-	      else if (mom==3) {
+	      else if (mom%10==3) {  /* mom=3, 30,31,32,33,34 */
 		if (npeak == 0) {
-		  newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
+		  if (mom==3)
+		      newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
+		  else {
+		      /* @todo */
+		      newvalue = 0.0;
+		  }
 		} else {
-		  for (k=0; k<nz; k++) smask[k] = 1;
+		  
+		  (void) peak_find(nz, spec, smask, 0);    /* for (k=0; k<nz; k++) smask[k] = 1;     */
 		  apeak1 = peak_find(nz, spec, smask, 1);
 		  if (apeak1 > 0) {
 		    if  (apeak1 != apeak && (apeak!=0 && apeak!=nz-1)) {
@@ -359,7 +365,7 @@ void nemo_main()
 	    if (mom>-3)
 	      for (k=0; k<nz1; k++)
 		CubeValue(iptr1,i,j,k) = newvalue;
-    	}
+    	} /* i */
 
         /* TODO: */
 
@@ -465,6 +471,11 @@ local int peak_find(int n, real *data, int *mask, int npeak)
   real peakvalue, oldvalue;
 
   dprintf(1,"peak_find %d\n",n);
+  if (npeak==0) {               /* initialize by resetting the mask */
+    for(i=0; i<n; i++)
+      mask[i] = 1;
+    return -1;
+  }
 
   while (1) {                   /* iterate until a good peak found ? */
     ipeak++;
