@@ -1,6 +1,6 @@
 #! /bin/csh -f
 #
-#  mkvelfie3:    make a velocity field with smoothing and noise
+#  mkvelfie3:    make a velocity field with double smoothing and noise
 #
 #  
 #  needs NEMO
@@ -16,11 +16,14 @@ set rmax=6                 # edge of disk
 
 set pa=90                  # PA of disk on sky (E through N)
 set inc=60                 # INC of disk
-set beam=0.1                 # FWHM of beam
-set range=6                # gridding from -range:range 
-set vrange=120             # velocity gridding -vrange:vrange
+set beam=0.1               # FWHM of (smaller) beam
+set beam2=0.2              # FWHM of (bigger) beam2
+set vbeam=0                # FWHM of spectral smoothing beam 
+set mass2=0.0              # fraction of beam2 (between 0 and 1)
+set range=8                # gridding from -range:range 
+set vrange=300             # velocity gridding -vrange:vrange
 set nsize=128              # number of pixels in gridding (px=py=2*range/nx)
-set nvel=256               # number of pixels in velocity
+set nvel=60                # number of pixels in velocity
 
 set seed=0                 # random seed
 set frac=0                 # fraction random motion
@@ -67,9 +70,9 @@ echo "Creating a velocity field - method 1"
 snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
 snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
 snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
-ccdsmooth $run.21 $run.21c $beam 
-ccdsmooth $run.22 $run.22c $beam 
-ccdsmooth $run.23 $run.23c $beam 
+ccdsmooth $run.21 $run.21c $beam
+ccdsmooth $run.22 $run.22c $beam
+ccdsmooth $run.23 $run.23c $beam
 ccdmath $run.21c,$run.22c,$run.23c $run.20d %1
 ccdmath $run.21c,$run.22c,$run.23c $run.20v "%2/%1"
 ccdmath $run.21c,$run.22c,$run.23c $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
@@ -79,23 +82,40 @@ ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
 ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
 
 
-xpaset -p ds9 frame frameno 1
-nds9 $run.21d
-xpaset -p ds9 frame frameno 2
-nds9 $run.21v
-xpaset -p ds9 frame frameno 3
-nds9 $run.21s
+
+echo "Creating the beam"
+mkplummer - 1 | snapgrid - $run.p1 $grid_pars
+ccdsmooth $run.p1 $run.p1a $beam
+ccdsmooth $run.p1 $run.p1b $beam2
+ccdmath $run.p1a,$run.p1b $run.beam "(1-$mass2)*%1+$mass2*%2"
 
 echo "Creating a velocity field - method 2"
 snapgrid $run.20 $run.30 $grid_pars \
     zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m
 ccdstat $run.30
-ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
-ccdsmooth $run.31 $run.32 $beam
+if ($vbeam == 0) then
+  ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
+else
+  ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam z
+endif
+ccdsmooth $run.31 $run.32.a $beam                                  # twice beam smearing
+ccdsmooth $run.31 $run.32.b $beam2
+ccdmath $run.32.a,$run.32.b $run.32 "(1-$mass2)*%1+$mass2*%2"
 ccdstat $run.32
 ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
 ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
 ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
+
+xpaset -p ds9 frame frameno 1
+#nds9 $run.21d
+nds9 $run.33d
+xpaset -p ds9 frame frameno 2
+#nds9 $run.21v
+nds9 $run.33v
+xpaset -p ds9 frame frameno 3
+#nds9 $run.21s
+nds9 $run.33s
+
 
 # single dish profile
 ccdmom $run.32 - axis=1 mom=0 |\
