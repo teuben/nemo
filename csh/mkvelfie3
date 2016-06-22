@@ -1,0 +1,127 @@
+#! /bin/csh -f
+#
+#  mkvelfie3:    make a velocity field with smoothing and noise
+#
+#  
+#  needs NEMO
+#
+
+#  parameters, can be changed by the user via the commandline
+set run=model1             # identification, and basename for all files
+set nbody=1000000          # number of bodies per model
+set r0=1                   # turnover radius
+set v0=100                 # peak velocity
+set re=2                   # exponential scalelength of disk
+set rmax=6                 # edge of disk
+
+set pa=90                  # PA of disk on sky (E through N)
+set inc=60                 # INC of disk
+set beam=0.1                 # FWHM of beam
+set range=6                # gridding from -range:range 
+set vrange=120             # velocity gridding -vrange:vrange
+set nsize=128              # number of pixels in gridding (px=py=2*range/nx)
+set nvel=256               # number of pixels in velocity
+
+set seed=0                 # random seed
+set frac=0                 # fraction random motion
+
+set noise=0                # add optional noise to cube
+set clip=0                 # clipping level for cube
+
+#  parse the command line arguments (they will then override the above defaults)
+
+foreach a ($*)
+  set $a
+end
+
+#
+if ($?NEMO == 0) then
+  echo NEMO has not been loaded in your shell
+  exit 1
+endif
+
+
+#  derive some parameters that appear common or logically belong together
+
+set grid_pars=(xrange=-${range}:${range} yrange=-${range}:${range} nx=$nsize ny=$nsize)
+set cell=`nemoinp "2*$range/$nsize*60"`
+set cen=`nemoinp $nsize/2-0.5`
+
+#  keep a log, incase we call this routine multiple times
+echo `date` :: $* >> $run.history
+
+# ================================================================================ START
+
+rm -f $run.* >& /dev/null
+
+echo Creating homogeneous disk with $nbody particles times
+
+
+mkdisk out=- nbody=$nbody seed=$seed \
+       potname=rotcur0 potpars=0,$r0,$v0 mass=1 sign=-1 frac=$frac rmax=$rmax |\
+    snapmass - - "mass=exp(-r/$re)" |\
+    snaprotate - $run.20 "$inc,$pa" yz
+
+
+echo "Creating a velocity field - method 1"
+snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
+snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
+snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
+ccdsmooth $run.21 $run.21c $beam 
+ccdsmooth $run.22 $run.22c $beam 
+ccdsmooth $run.23 $run.23c $beam 
+ccdmath $run.21c,$run.22c,$run.23c $run.20d %1
+ccdmath $run.21c,$run.22c,$run.23c $run.20v "%2/%1"
+ccdmath $run.21c,$run.22c,$run.23c $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
+#  cutoff
+ccdmath $run.20d,$run.21 $run.21d "ifgt(%2,0,%1,0)"
+ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
+ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
+
+
+xpaset -p ds9 frame frameno 1
+nds9 $run.21d
+xpaset -p ds9 frame frameno 2
+nds9 $run.21v
+xpaset -p ds9 frame frameno 3
+nds9 $run.21s
+
+echo "Creating a velocity field - method 2"
+snapgrid $run.20 $run.30 $grid_pars \
+    zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m
+ccdstat $run.30
+ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
+ccdsmooth $run.31 $run.32 $beam
+ccdstat $run.32
+ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
+ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
+ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
+
+# single dish profile
+ccdmom $run.32 - axis=1 mom=0 |\
+ ccdmom - - axis=2 mom=0 |\
+  ccdprint - x= y= z= label=z newline=t |\
+  tabcomment - - punct=f delete=t > $run.spec
+
+# export for barolo or so, in decent units (could also use ccdsky)
+ccdfits $run.32 $run.fits radecvel=t scale=1/60.0,1/60.0,1000.0 vsys=1000
+# rotcur
+
+rotcur $run.21v 0:250:10 0:100:20 90 60 0 63.5,63.5 units=arcmin fixed=vsys,pa,inc,xpos,ypos tab=$run.rotcur1 beam="$beam*60.0"
+rotcur $run.21v 0:250:10 0:100:20 90 60 0 63.5,63.5 units=arcmin fixed=vsys,pa,inc,xpos,ypos tab=$run.rotcur2 beam="$beam*60.0" dens=$run.21d 
+
+echo "0 0 0 0 0 90.00  0 60.00  0  63.50 0 63.50  0  0 0" > $run.rotcurtab1
+echo "0 0 0 0 0 90.00  0 60.00  0  63.50 0 63.50  0  0 0" > $run.rotcurtab2
+tabcomment $run.rotcur1 - delete=t >> $run.rotcurtab1
+tabcomment $run.rotcur2 - delete=t >> $run.rotcurtab2
+
+tabplot $run.rotcurtab1 1 4 dycol=5 line=1,1 point=2,0.1 xmin=0 ymin=0 ymax=120 xmax=240 ycoord=100 xcoord="$beam*60.0" yapp=1/xs
+tabplot $run.rotcurtab2 1 4 dycol=5 line=1,1 point=2,0.1 xmin=0 ymin=0 ymax=120 xmax=240 ycoord=100 xcoord="$beam*60.0" yapp=2/xs
+
+head -5 $run.rotcurtab1 | tabnllsqfit - 1 4 par=0,1 free=0,1
+
+tabnllsqfit $run.rotcurtab1 1 4 fit=grow par=100,60 free=1,1 out=$run.fit
+ tabmath $run.fit - %2-%3 |\
+ tabplot - 1 2,3,4 color=2,3,4 line=1,1 ycoord=0 xcoord=0 yapp=3/xs
+
+ tabplot $run.spec line=1,1 xmin=-120 xmax=120 ymin=0 yapp=4/xs 
