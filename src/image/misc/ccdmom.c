@@ -28,6 +28,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
+#include <moment.h>
 
 string defv[] = {
   "in=???\n       Input image file",
@@ -81,7 +82,7 @@ void nemo_main()
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
-    if (mom < -4 || mom > 3)  error("Illegal value mom=%d",mom);
+    if (mom < -4 || mom > 35)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
@@ -371,9 +372,11 @@ void nemo_main()
 		  for (k=0; k<nz; k++)  
 		      printf("%d %g  %g\n",k,spec[k],smask[k]==0 ? 0 : peakvalue/smask[k]);
 #endif
-		  if (mom>=30) {
+		  dprintf(1,"MOM: mom/30\n",mom/30);
+		  if (mom/30 == 1) {
 		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);
-		  }
+		  } else
+		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);		    
 		}
 	      }
 	    }
@@ -464,7 +467,15 @@ local real peak_spectrum(int n, real *spec, int p)
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom)
 {
   int i;
-  
+  Moment m;
+
+  dprintf(1,"peak_mom %d %d\n",peak,mom);
+
+  ini_moment(&m, mom, n);
+  for (i=0; i<n; i++)
+    if (smask[i]==peak)
+      accum_moment(&m, spec[i], 1.0);
+  return show_moment(&m, mom);
 }
 
 /* deprecated ; use peak_spectrum */
@@ -609,3 +620,4 @@ local void image_oper(imageptr ip1, string oper, imageptr ip2)
     error("invalid operator: %s",oper);
  
 }
+
