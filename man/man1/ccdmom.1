@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "16 August 2013"
+.TH CCDMOM 1NEMO "21 June 2016"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -29,11 +29,14 @@ Axis to take moment along (1=x 2=y 3=z)
 [Default: \fB3\fP]
 .TP
 \fBmom=\fP
-Moment to take [-5,-4,-3,-2,-1,0,1,2,3..]    
-Compute either the sum (0), mean (1), dispersion (2), or peak location (3). Negative
+Moment to take [-5,-4,-3,-2,-1,0,1,2,3,30,31,32,33,34..]    
+Compute either the sum (0,30), mean (1,31), dispersion (2,32), or peak location (3). Negative
 numbers also have a special meaning. -1 computes the average intensity along the axis,
 where -2 computes the dispersion around the mean value. -4 computes the clumping factor
-per plane (only axis=3 supported now). -3 computes differentials along axis=3. 
+per plane (only axis=3 supported now). -3 computes differentials along axis=3.
+The mom=30,31,32,33,34 computes moments based on the "single profile near the peak",
+useful for smooth high S/N profiles. mom=33 computes the h3, and mom=34 the h4 Gauss-Hermite
+moments (see S2.4 in van der Marel & Franx, 1993ApJ...407..525V)
 [Default: \fB0\fP].
 .TP
 \fBkeep=t|f\fP
@@ -105,4 +108,5 @@ Peter Teuben
 16-sep-11	V0.8 added clip= and rngmsk= [lost code]	PJT
 27-nov-12	V1.0 added oper=	PJT
 14-feb-13	V2.0 integrate=t is now the new default for mom=0	PJT
+21-jun-2016	V2.4 added mom=30,31,32,33,34
 .fi
