@@ -82,7 +82,7 @@ void nemo_main()
 
     instr = stropen(getparam("in"), "r");
     mom = getiparam("mom");
-    if (mom < -4 || mom > 35)  error("Illegal value mom=%d",mom);
+    if (mom < -4)  error("Illegal value mom=%d",mom);
     axis = getiparam("axis");
     if (axis < 0 || axis > 3) error("Illegal value axis=%d",axis);
 
@@ -298,9 +298,9 @@ void nemo_main()
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
-	  if (j!=51) continue;
+	  //if (j!=51) continue;
       	  for(i=0; i<nx; i++) {
-	    if(i!=34) continue;
+	    //if(i!=34) continue;
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
@@ -339,7 +339,7 @@ void nemo_main()
 		newvalue = scale*(tmp1/tmp0) + offset;
 	      else if (mom==2)
 		newvalue = scale*sqrt(tmp2/tmp0 - sqr(tmp1/tmp0));
-	      else if (mom%10==3) {  /* mom=3, 30,31,32,33,34 */
+	      else if (mom==3 || mom/10==3) {  /* mom=3, 30,31,32,33,34 */
 		if (npeak == 0) {
 		  if (mom==3) {
 		      //newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
@@ -349,7 +349,8 @@ void nemo_main()
 		      newvalue = 0.0;
 		  }
 		} else {
-		  apeak1 = peak_find(nz, spec, smask, 1);    /* first peak again, also initializes smask */
+		  (void) peak_find(nz, spec, smask, 0);                  /* initialize smask */
+		  apeak1 = peak_find(nz, spec, smask, 1);                /* first peak again */
 		  if (apeak1 > 0) {
 		    if  (apeak1 != apeak && (apeak!=0 && apeak!=nz-1)) { /* odd if it's not finding the same */
 		      for (k=0; k<nz; k++)  
@@ -363,30 +364,31 @@ void nemo_main()
 		  if (npeak > 1) { 
 		    for (k=2; k<=npeak; k++)
 		      apeak1 = peak_find(nz,spec,smask,k);
-		    if (apeak1 > 0) {
-		      newvalue = scale*(apeak1 + peak_spectrum(nz,spec,apeak1)) + offset;
-		    } else
-		      newvalue = 0;
+		    if (mom==3) {
+		      if (apeak1 > 0) {
+			newvalue = scale*(apeak1 + peak_spectrum(nz,spec,apeak1)) + offset;
+		      } else
+			newvalue = 0;
+		    }
 		  }
-#if 1
+#if 0
 		  for (k=0; k<nz; k++)  
 		      printf("%d %g  %g\n",k,spec[k],smask[k]==0 ? 0 : peakvalue/smask[k]);
 #endif
 		  dprintf(1,"MOM: mom/30\n",mom/30);
-		  if (mom/30 == 1) {
+		  if (mom >= 30) {
 		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);
-		  } else
-		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);		    
+		      if (mom==31) newvalue = scale*newvalue + offset;
+		      if (mom==32) newvalue = scale*newvalue;
+		  }
 		}
 	      }
 	    }
 	    if (mom>-3)
 	      for (k=0; k<nz1; k++)
 		CubeValue(iptr1,i,j,k) = newvalue;
-	  } /* j */
-    	} /* i */
-
-        /* TODO: */
+	  } /* i */
+    	} /* j */
 
         Xmin(iptr1) = Xmin(iptr);
         Ymin(iptr1) = Ymin(iptr);
@@ -474,8 +476,21 @@ local real peak_mom(int n, real *spec, int *smask, int peak, int mom)
   ini_moment(&m, mom, n);
   for (i=0; i<n; i++)
     if (smask[i]==peak)
-      accum_moment(&m, spec[i], 1.0);
-  return show_moment(&m, mom);
+      accum_moment(&m, i, spec[i]);
+  if (mom==0)
+    return sum_moment(&m);
+  else if (mom==1)
+    return mean_moment(&m);
+  else if (mom==2)
+    return sigma_moment(&m);
+  else if (mom==3)
+    //return skewness_moment(&m); 
+    return h3_moment(&m); 
+  else if (mom==4)
+    //return kurtosis_moment(&m); 
+    return h4_moment(&m); 
+  else
+    return 0.0;
 }
 
 /* deprecated ; use peak_spectrum */
@@ -510,7 +525,7 @@ local real peak_axis(imageptr iptr, int i, int j, int k, int axis)
  * 2 for the 2nd etc.
  *
  * During the first call, the mask[] array is set to all 0's.
- * i.e. unassigned to a peak
+ * i.e. unassigned to a peak, you will need npeak=0
  *
  * Returns: peak location (an integer)  and mask[] was modified
  */
@@ -522,9 +537,10 @@ local int peak_find(int n, real *data, int *mask, int npeak)
   real peakvalue, oldvalue;
 
   dprintf(1,"peak_find %d\n",n);
-  if (npeak==1) {               /* initialize by resetting the mask */
+  if (npeak==0) {               /* initialize by resetting the mask */
     for(i=0; i<n; i++)
       mask[i] = 0;              /* 0 means no peak assigned */
+    return -1;
   }
 
   while (1) {                   /* iterate until a good peak found ? */
