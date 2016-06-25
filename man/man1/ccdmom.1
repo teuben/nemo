@@ -75,9 +75,9 @@ Don't assign a 1st moment if the value results in a value outside the
 range of the axis. This can easily happen for noisy data. Default: false.
 .TP
 \fBpeak=N\fP
-For \fBmom=3\fP where it finds the peak, this allows you to find the N-th
-peak instead of the first. This is achieved by visiting each peak, and masking
-out all values downwards those peaks and then finding the next one.
+For \fBmom=3,30-34\fP where it finds the peak, this allows you to find the N-th
+peak instead of the first. This is achieved by visiting each peak, and assigning
+a peak membership downwards from the peak and then finding the next one.
 .TP
 \fBoper=\fP
 If supplied, this is an extra operator supplied to the input file and output file,
