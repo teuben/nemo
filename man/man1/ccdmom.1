@@ -25,18 +25,31 @@ Input image file. No default.
 Output image file. No default.
 .TP
 \fBaxis=\fP
-Axis to take moment along (1=x 2=y 3=z)
-[Default: \fB3\fP]
+Axis to take moment along (1=x 2=y 3=z). Unless \fBkeep=\fP, this axis will
+be reduced. [Default: \fB3\fP]
 .TP
 \fBmom=\fP
-Moment to take [-5,-4,-3,-2,-1,0,1,2,3,30,31,32,33,34..]    
-Compute either the sum (0,30), mean (1,31), dispersion (2,32), or peak location (3). Negative
-numbers also have a special meaning. -1 computes the average intensity along the axis,
-where -2 computes the dispersion around the mean value. -4 computes the clumping factor
-per plane (only axis=3 supported now). -3 computes differentials along axis=3.
+Moment to take along the selected axis. For convenience
+referring to the selected axis as "\fIvelocity\fP" we have the following moments:
+.nf
+.ta +0.5i
+0	total emission
+1	mean velocity
+2	sigma, the velocity dispersion (FWHM = 2.355 * sigma)
+3	velocity of peak fit (around the max and the two points on either)
+-1	average intensity along the axis
+-2	dispersion around the mean intensity along the axis
+-3	differentials along an axis
+-4	clumping factor (only axis=3 supported now)
+30	total emission in the Nth (peak=) peak
+31	mean velocity of the Nth peak
+32	sigma, velocity dispersion, of the Nth peak
+33	h3 (like a skewness) of the Nth peak, 
+34	h4 (like a kurtosis) of the Nth peak
+.fi
 The mom=30,31,32,33,34 computes moments based on the "single profile near the peak",
-useful for smooth high S/N profiles. mom=33 computes the h3, and mom=34 the h4 Gauss-Hermite
-moments (see S2.4 in van der Marel & Franx, 1993ApJ...407..525V)
+useful for smooth high S/N profiles. 
+For a description of the h3 and h4 see S2.4 in van der Marel & Franx (1993ApJ...407..525V)
 [Default: \fB0\fP].
 .TP
 \fBkeep=t|f\fP
@@ -108,5 +121,5 @@ Peter Teuben
 16-sep-11	V0.8 added clip= and rngmsk= [lost code]	PJT
 27-nov-12	V1.0 added oper=	PJT
 14-feb-13	V2.0 integrate=t is now the new default for mom=0	PJT
-21-jun-2016	V2.4 added mom=30,31,32,33,34
+21-jun-2016	V2.4 added mom=30,31,32,33,34	PJT
 .fi
