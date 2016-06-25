@@ -47,7 +47,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax1.xaxis.label.set_size(10)
     ax1.yaxis.label.set_size(10)
     ax1.set_xlim([0,rmax])
-    ax1.set_ylim([0,90])
+    #ax1.set_ylim([0,90])
     ##
     ax2 = fig.add_subplot(2,4,8)
     #ax2.set_title('RMS velocities in ring')
@@ -56,7 +56,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax2.xaxis.label.set_size(10)
     ax2.yaxis.label.set_size(10)
     ax2.set_xlim([0,rmax])
-    ax2.set_ylim([0,10])
+    #ax2.set_ylim([0,10])
     ##
     ax3 = fig.add_subplot(2,4,1)
     ax3.scatter(r,v)
@@ -65,7 +65,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax3.xaxis.label.set_size(10)
     ax3.yaxis.label.set_size(10)
     ax3.set_xlim([0,rmax])
-    ax3.set_ylim([0,110])
+    #ax3.set_ylim([0,110])
     ##
     ax4 = fig.add_subplot(2,4,5)
     #ax2.set_title('V.sin(INC)')
@@ -75,7 +75,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax4.xaxis.label.set_size(10)
     ax4.yaxis.label.set_size(10)
     ax4.set_xlim([0,rmax])
-    ax4.set_ylim([0,110])
+    #ax4.set_ylim([0,110])
     ##
     ax5 = fig.add_subplot(2,4,3)
     ax5.set_title('X-center')
@@ -84,7 +84,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax5.xaxis.label.set_size(10)
     ax5.yaxis.label.set_size(10)
     ax5.set_xlim([0,rmax])
-    ax5.set_ylim([150,400])
+    #ax5.set_ylim([150,400])
     #
     ax6 = fig.add_subplot(2,4,7)
     ax6.set_title('Y-center')
@@ -93,14 +93,14 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax6.xaxis.label.set_size(10)
     ax6.yaxis.label.set_size(10)
     ax6.set_xlim([0,rmax])
-    ax6.set_ylim([250,500])
+    #ax6.set_ylim([250,500])
     #
     ax7 = fig.add_subplot(2,4,4)
     ax7.set_title('VSYS')
     ax7.scatter(r,vsys)
     ax7.errorbar(r,vsys,yerr=d_vsys,fmt='ro')
     ax7.set_xlim([0,rmax])
-    ax7.set_ylim([140,190])
+    #ax7.set_ylim([140,190])
     ax7.xaxis.label.set_size(10)
     ax7.yaxis.label.set_size(10)
     #
@@ -109,7 +109,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax8.scatter(r,pa)
     ax8.errorbar(r,pa,yerr=d_pa,fmt='ro')
     ax8.set_xlim([0,rmax])
-    ax8.set_ylim([0,90])
+    #ax8.set_ylim([0,90])
     ax8.xaxis.label.set_size(10)
     ax8.yaxis.label.set_size(10)
     #
