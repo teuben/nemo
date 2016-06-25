@@ -16,7 +16,7 @@
  *      13-feb-13   2.0  default integration, instead of just summing
  *      29-apr-13   2.1  add clumping definition  http://arxiv.org/abs/1304.1586  (mom=-4)
  *      12-jan-16   2.2a minmax computation was forgotten
- *      23-jun-16   2.3  mom=30,31,32,33
+ *      24-jun-16   2.3  mom=30,31,32,33
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -345,8 +345,12 @@ void nemo_main()
 		  if (mom==3) {
 		      //newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
 		      newvalue = scale*(apeak + peak_spectrum(nz,spec,apeak)) + offset;
+		  } else if (mom>=30) {
+		      (void) peak_find(nz, spec, smask, 0);                  /* initialize smask */
+		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);
+		      if (mom==31) newvalue = scale*newvalue + offset;
+		      if (mom==32) newvalue = scale*newvalue;
 		  } else {
-		      /* @todo */
 		      newvalue = 0.0;
 		  }
 		} else {
