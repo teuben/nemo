@@ -42,7 +42,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.3\n  23-jun-2016 PJT",
+  "VERSION=2.3a\n 25-jun-2016 PJT",
   NULL,
 };
 
@@ -53,6 +53,7 @@ local real peak_spectrum(int n, real *spec, int p);
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom);
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
+local int  peak_assign(int n, real *data, int *mask);
 local bool out_of_range(real);
 local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
@@ -298,9 +299,9 @@ void nemo_main()
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
-	  //if (j!=51) continue;
+	  if (j!=51) continue;
       	  for(i=0; i<nx; i++) {
-	    //if(i!=34) continue;
+	    if(i!=34) continue;
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
@@ -371,6 +372,7 @@ void nemo_main()
 			newvalue = 0;
 		    }
 		  }
+		  peak_assign(nz, spec, smask);
 #if 0
 		  for (k=0; k<nz; k++)  
 		      printf("%d %g  %g\n",k,spec[k],smask[k]==0 ? 0 : peakvalue/smask[k]);
@@ -453,6 +455,9 @@ void nemo_main()
  * return location of peak for (-1,y1) (0,y2) (1,y3)
  * as determined from the 2d polynomial going through
  * these 3 points
+ * Also finds valleys
+ *
+ * Returns number between -0.5 and 0.5
  */
 
 local real peak_spectrum(int n, real *spec, int p)
@@ -528,6 +533,9 @@ local real peak_axis(imageptr iptr, int i, int j, int k, int axis)
  * i.e. unassigned to a peak, you will need npeak=0
  *
  * Returns: peak location (an integer)  and mask[] was modified
+ *
+ * TODO:    after all peaks have been find, need to resolve the issue
+ *          of possibly re-assigning membership to the neighbor peak
  */
 
 
@@ -602,6 +610,37 @@ local int peak_find(int n, real *data, int *mask, int npeak)
   return apeak;
 }
 
+static inline int outside(real x,int i0,int i1) {
+  if(x<i0) return 0;
+  if(x>i1) return 0;
+  return 1;
+}
+
+local int peak_assign(int n, real *d, int *s)
+{
+  int i;
+  real p;
+
+  for (i=1; i<n-1; i++) {
+    if (s[i] && s[i-1] && s[i]!=s[i-1]) {      /* look for neighbor peaks */
+      if (d[i] < d[i-1]) {
+	p = peak_spectrum(n,d,i);
+	//dprintf(0,"assign-1: %d %d %d   %g   %g %g\n",i,s[i],s[i-1],p,d[i-1],d[i]);
+	if (p>0) {
+	  dprintf(1,"re-assign-1 @%d from %d to %d\n",i,s[i],s[i-1]);
+	  s[i] = s[i-1];                       /* re-assign */
+	}
+      } else {
+	p = peak_spectrum(n,d,i-1);
+	//dprintf(0,"assign-2: %d %d %d   %g   %g %g\n",i,s[i],s[i-1],p,d[i-1],d[i]);	
+	if (p<0) {
+	  dprintf(1,"re-assign-2 @%d from %d to %d\n",i,s[i-1],s[i]);
+	  s[i-1] = s[i];                       /* re-assign */
+	}
+      } 
+    }
+  }
+}
 
 
 local bool out_of_range(real x)
