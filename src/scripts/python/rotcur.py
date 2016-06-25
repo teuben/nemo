@@ -6,6 +6,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import math
 import sys
+import os
 
 degrad = 57.2957795
 
@@ -13,8 +14,12 @@ def rotcurtab(file):
     """ reads a outputfile from tab= in rotcur
     if no comments in it, perhaps use popen("tabcomment $file -")
     """
-    data = ascii.read(file)
-    data.sort('col1')
+    if True:
+        os.system('tabcomment %s - > %s.tmp' % (file,file))
+        data = ascii.read('%s.tmp' % file)
+    else:
+        data = ascii.read(file)
+        data.sort('col1')
     return data
 
 def plot1(data, label='',efactor=1,rmax=2):
@@ -116,7 +121,7 @@ def plot1(data, label='',efactor=1,rmax=2):
     plt.show()
     fig.savefig('junk.pdf')
 
-def region_ds9(data,ds9,scale=0.0083333):
+def region_ds9(data,ds9,scale=0.0083333*30):
     """ create a ds9 region of the ellipses found in rotcur solution 
     Also needs the scale to convert to pixels in a map
     """
