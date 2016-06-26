@@ -159,7 +159,7 @@ static void   dcd_evaluate(int q);
 
 /*  definitions/declarations for the function code  */
 
-#define maxfiecode 512
+#define maxfiecode 1024
 
 #define bif     2       /* number of floats in a double real                 */
 #define bii     2       /* number of integers in a double real               */
