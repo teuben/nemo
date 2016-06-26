@@ -295,6 +295,11 @@ real mard_moment(Moment *m)
   return mean;
 }
 
+/*
+ *  MAD = Median Absolute Deviation
+ *  (sigma = 1.4826 * mad for a normal distribution)
+ */
+
 real mad_moment(Moment *m)
 {
   real median, x;
