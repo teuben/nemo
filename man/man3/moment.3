@@ -1,4 +1,4 @@
-.TH MOMENT 3NEMO "16 January 2014"
+.TH MOMENT 3NEMO "23 June 2016"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
@@ -75,7 +75,10 @@ get the quartiles.
 measure for the Standard Deviation. As with the robust moments, it needs to
 keep a copy of the data available. MAD is formally RMS/1.4826.  Related is
 \fBmard_moment\fP, the Mean Absolute Relative Difference (MARD).
-.Sh EXAMPLES
+.SH MOMENTS
+A note on the h3 and h4 moments, somewhat peculiar to astronomy. See
+S2.4 in van der Marel & Franx (1993) 
+.SH EXAMPLES
 The following code computes a weighted mean and dispersion of a set of points:
 .nf
 
