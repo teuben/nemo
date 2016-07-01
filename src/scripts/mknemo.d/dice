@@ -1,0 +1,29 @@
+#! /bin/csh -f
+#
+# DICE : initial conditions for galaxies
+# See also:    https://bitbucket.org/vperret/dice
+#
+# To get it:
+#   cd $NEMO/usr
+#   git clone https://bitbucket.org/vperret/dice
+#
+#
+set dir = $NEMO/usr/dice
+
+if (! -e $dir) then
+  echo $dir does not exist
+  echo Try grabbing it via:
+  echo '   cd $NEMO/usr'
+  echo '   git clone https://bitbucket.org/vperret/dice'
+  echo 'Then run "mknemo dice" again'
+  exit 1
+endif
+
+
+cd $dir
+mkdir -p build
+cd build
+#cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEMO/opt ..
+cmake -DCMAKE_INSTALL_PREFIX=$NEMO ..
+make
+make install
