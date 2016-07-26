@@ -34,6 +34,7 @@
  *      31-dec-03  V3.4  added colname=
  *       1-jan-04     a  changed interface to get_line
  *
+ *
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -54,11 +55,12 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "delcol=\n          columns to skip while writing",
     "selfie=\n          select rows using fie notation",
     "format=%g\n        format for new output columns",
-    "select=all\n	Select lines",
+    "select=all\n	Select lines (not implemented)",
     "seed=0\n           Initial random number",
     "colname=\n         (unchecked) commented column names to add into output",
     "comments=f\n       Pass through comments?",
-    "VERSION=3.4a\n     1-jan-04 PJT",
+    "refie=f\n          Re-FIE each output column",
+    "VERSION=3.5a\n     26-jul-2016 PJT",
     NULL
 };
 
@@ -84,6 +86,7 @@ int    ndelc;                           /* actual number of skip columns */
 string *fies, selfie;                   /* fie pointers */
 int    nfies;                           /* number of fie pointers */
 bool   Qfie;				/* boolean if multiple fie's loaded */
+bool   Qrefie;                          /* recompute each columns via fie ? */
 string *colname=NULL;                   /* names of columns */
 
 bool   Qcomment;
@@ -162,6 +165,7 @@ local void setparams(void)
     Qcomment = getbparam("comments");
     if (hasvalue("colname"))
       colname = burststring(getparam("colname"),",");
+    Qrefie = getbparam("refie");
 }
 
 
@@ -214,6 +218,7 @@ local void convert(int ninput, stream *instr, stream outstr)
         tab2space(line);	          /* work around a Gipsy (?) problem */
         if (nfies>0 || *selfie) {              	/* if a new column requested */
             nval = nemoinpr(line,dval,MAXCOL);         /* split into numbers */
+	    if (nval < 0) error("bad parsing in %s",line);
 	    /* this could contain some NULL's, so how do we measure this ??? */
             dprintf (3,"nval=%d \n",nval);
             if (nval>MAXCOL)
@@ -221,7 +226,7 @@ local void convert(int ninput, stream *instr, stream outstr)
             for(i=0; i<nfies; i++) {
                 if (Qfie) loadfie(i+1);
                 dofie(dval,&one,&dval[nval+i],&errval);
-                dprintf(3," dofie(%d) -> %g\n",i+1,dval[nval+i]);
+                dprintf(3," dofie(%d) -> %g\n",i+1,dval[nval+i]); //BUG
                 strcat(line," ");
                 sprintf(newdat,fmt,dval[nval+i]);
                 dprintf (2,"newdat=%s\n",newdat);
