@@ -56,6 +56,7 @@
  *               3-nov-01: use NEMO's random numbers, not rand()           pjt
  *              10-nov-03: allow and handle "null" more gracefully         pjt
  *              24-jan-04: STACKMAX check
+ *              26-jul-2016:    double precision log(min/max) = 308        pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -297,8 +298,8 @@ static union {
 #define MAXLOG             38.0
 #define MINLOG            -38.0
 #else
-#define MAXLOG             99.0
-#define MINLOG            -99.0
+#define MAXLOG             308.0
+#define MINLOG            -308.0
 #endif
 
 static void dcd_inifblank()
