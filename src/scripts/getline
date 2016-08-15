@@ -7,11 +7,17 @@
 
 import os, sys
 
-def read_file(file):
+def read_file(file, skip=False):
     # read a file
     fd = open(file,'r')
     lines = fd.readlines()
     fd.close()
+    if skip:
+        newlines = []
+        for line in lines:
+            if line[0] != '#':
+                newlines.append(line)
+        return newlines
     return lines
 
 def strip_comments(line, comment='#'):
@@ -22,18 +28,23 @@ def strip_comments(line, comment='#'):
 if __name__ == "__main__":
     n = len(sys.argv)
     if n==1:
-        print "Usage: %s [-c] file [nnn]"
+        print "Usage: %s [-c] [-s] file [nnn]"
         print "Displays line 'nnn' from a file, or report number of lines in a file"
         print "Options:"
         print "  -c     remove anything after comment (#) character"
+        print "  -s     skip comment lines alltogether"
         sys.exit(0)
     argv = sys.argv[1:]
     comment = False
+    skip    = False
     have_file = False
     have_line = False
     while len(argv) > 0:
         if len(argv) > 0 and argv[0] == '-c':
             comment = True
+            argv = argv[1:]
+        if len(argv) > 0 and argv[0] == '-s':
+            skip = True
             argv = argv[1:]
         if len(argv) > 0 and not have_file:
             file = argv[0]
@@ -46,7 +57,7 @@ if __name__ == "__main__":
         if len(argv) > 0:
             print "Unprocessed arguments ",argv
             sys.exit(1)
-    lines = read_file(file)
+    lines = read_file(file,skip)
     nl = len(lines)
     if not have_line:
         # assume you want to know the number of lines in a file
