@@ -2,6 +2,8 @@
  * mdarray: a simple multi-dimensional array (allocator)
  *          cannot be used in a multi-threaded environment
  *
+ * See also: Iliffe Vector
+ *
  * Note:  MDMAXDIM defines the highest dimension we've implemented (currently 7)
  *        see mdarray.h
  *
