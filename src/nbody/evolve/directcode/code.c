@@ -38,7 +38,7 @@ string defv[] = {		/* DEFAULT PARAMETER VALUES */
 
     "gravc=1\n                    Gravitatonal constant",
 
-    "VERSION=1.3a\n		  30-jul-09 PJT",
+    "VERSION=1.3b\n		  6-dec-2016 PJT",
     NULL,
 };
 
@@ -51,14 +51,16 @@ string cvsid="$Id$";
 extern  bool scanopt(string, string);
 
 
-#define stepsystem stepsystem_leapfrog
+/* apple lvvm could not deal with this?
+  #define stepsystem stepsystem_leapfrog
+ */
 
 void nemo_main(void)
 {
   startrun();				/* set params, input data   */
   initoutput();				/* begin system output      */
   while (tnow < tstop + 0.1/freq)	/* while not past tstop     */
-    stepsystem();			/*   advance N-body system  */
+    stepsystem_leapfrog();		/*   advance N-body system  */
   stopoutput();				/* finish up output         */
 }
 
