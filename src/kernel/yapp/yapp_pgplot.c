@@ -85,7 +85,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     } else {
       iterm = pgbegin_(&dummy,"?", &nx, &ny, 1)==1;
     }
-    if (iterm==0) return;
+    if (iterm==0) return 0;
 #if 1
     ask = 0;        /* 'ask' should really be a fortran LOGICAL ! */
     pgask_(&ask);   /* here we want ask=FALSE */
@@ -156,7 +156,7 @@ plltype(int lwid, int lpat)
 {
     int lw, ls;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (lwid > 0) {
         lw = lwid;
@@ -176,7 +176,7 @@ plline(real x, real y)
 {
     float xp,yp;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y;         /* RECALC !! */
     pgdraw_(&xp,&yp);
@@ -187,7 +187,7 @@ plmove(real x, real y)
 {
    float xp,yp;
 
-   if (iterm==0) return;       /* no graphics output requested */
+   if (iterm==0) return 0;       /* no graphics output requested */
 
    xp=x; yp=y;          /* RECALC !! */
    pgmove_(&xp,&yp);
@@ -200,7 +200,7 @@ plpoint(real x, real y)
     int ipoint=-1, npoint=1;
     float xp,yp;
     
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y;         /* RECALC !! */
     pgpoint_(&npoint, &xp, &yp, &ipoint);       /* draw 1 dot */
@@ -215,7 +215,7 @@ plcircle(real x, real y, real r)
     int npnts, i;
     real theta;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     npnts = MAX(2400 * r / dxymax, 6.0);
     plmove(x + r, y);
@@ -227,7 +227,7 @@ plcircle(real x, real y, real r)
 
 plcross(real x, real y, real s)
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (s > 0.0) {
         plmove(x - s, y);
@@ -245,7 +245,7 @@ plcross(real x, real y, real s)
 
 plbox(real x, real y, real s)
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     if (s > 0.0) {
         plmove(x - s, y - s);
@@ -272,7 +272,7 @@ static float fjust = 0.0;   /* pgplot default: left justified */
 
 pljust(int jus)       /* -1, 0, 1 for left, mid, right just */
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     fjust = (jus < -1 ? 0.0 : (jus > 1 ? 1.0 : 0.5));
 }
@@ -288,7 +288,7 @@ pltext(string msg, real x, real y, real hgt, real ang)
     float newsize, sl, sh;
     int   n;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     xp=x; yp=y; ap=ang;         /* copy into local variables */
 
@@ -305,7 +305,7 @@ pltext(string msg, real x, real y, real hgt, real ang)
 
 plflush() 
 { 
-    if (iterm==0) return;
+    if (iterm==0) return 0;
 
     pgupdt_();
 }
@@ -316,7 +316,7 @@ plflush()
 
 plframe()
 {
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
     pgpage_();
 }
@@ -331,7 +331,7 @@ plstop()
 {
     int nvec, bell=0x07;
 
-    if (iterm==0) return;       /* no graphics output requested */
+    if (iterm==0) return 0;       /* no graphics output requested */
 
 
     if (debug_level > 0)
@@ -502,7 +502,7 @@ pl_getpoly(float *x, float *y, int n)
     if (nn>0) {
         pgdraw_(&x[0],&y[0]);       /* close polygon */
     }
-    return(nn<3 ? 0 : nn);        
+    return nn<3 ? 0 : nn;
 }
 
 int pl_cursor(real *x, real *y, char *c)
