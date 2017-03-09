@@ -38,6 +38,8 @@
  *       4-feb-04   5.2  also listen to changed crval/cdelt/crpix= without refmap
  *       8-may-05   5.3  deal with the new  axis type 1 images          PJT
  *      17-aug-12   5.5  default restfreq to keep some WCS routines happy    PJT
+ *       8-sep-15   5.7  add dummy 4th stokes axis to keep CASA/ADMIT happy  PJT
+ *      26-may-16   5.8  added CUNITn and BUNIT, and better WCS output when radecvel=t
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -69,11 +71,12 @@ string defv[] = {
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
 	"restfreq=115271204000\n   Restfreq (in Hz) if a doppler axis is used",
+	"vsys=0\n        VSYS correction (test)",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.6a\n  8-may-2013 PJT",
+        "VERSION=5.8a\n  9-mar-2017 PJT",
         NULL,
 };
 
@@ -86,7 +89,7 @@ stream  instr, outstr;                         /* file streams */
 imageptr iptr=NULL;                     /* image, allocated dynamically */
 int  isel = 0;
 
-double scale[3];        /* scale conversion for FITS (CDELT) */
+double scale[4];        /* scale conversion for FITS (CDELT) */
 double iscale[2];	/* intensity rescale */
 string object;           /* name of object in FITS header */
 string comment;          /* extra comments */
@@ -99,9 +102,10 @@ bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;            /* write dummy axes ? */
 
 int   nref = 0, nfill = 0;
-FLOAT ref_crval[3], ref_crpix[3], ref_cdelt[3];
-char  ref_ctype[3][80], ref_cunit[3][80];
+FLOAT ref_crval[4], ref_crpix[4], ref_cdelt[4];
+char  ref_ctype[4][80], ref_cunit[4][80];
 FLOAT restfreq;
+real  vsys;
 
 void setparams(void);
 void write_fits(string,imageptr);
@@ -127,7 +131,7 @@ void nemo_main()
 void setparams(void)
 {
   int i,n;
-  real tmpr[3];
+  real tmpr[4];
 
   isel = getiparam("select");
 
@@ -179,41 +183,46 @@ void setparams(void)
   Qdummy = getbparam("dummy");
   nfill = getiparam("nfill");
   proj = getparam("proj");
+  vsys = getrparam("vsys");
 }
 
-static string ctypes[3] = { "CTYPE1",   "CTYPE2",   "CTYPE3" };
-static string cdelts[3] = { "CDELT1",   "CDELT2",   "CDELT3" };
-static string crvals[3] = { "CRVAL1",   "CRVAL2",   "CRVAL3" };
-static string crpixs[3] = { "CRPIX1",   "CRPIX2",   "CRPIX3" };
-static string radeves[3]= { "RA---SIN", "DEC--SIN", "VELO-LSR" };
-static string radevet[3]= { "RA---TAN", "DEC--TAN", "VELO-LSR" };
-static string xyz[3]    = { "X",        "Y",        "Z" };
+static string ctypes[4] = { "CTYPE1",   "CTYPE2",   "CTYPE3",   "CTYPE4"};
+static string cdelts[4] = { "CDELT1",   "CDELT2",   "CDELT3",   "CDELT4"};
+static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
+static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
+static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
+static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
+static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
 
 void write_fits(string name,imageptr iptr)
 {
-    FLOAT tmpr,xmin[3],xref[3],dx[3],mapmin,mapmax;   /* fitsio FLOAT !!! */
+    FLOAT tmpr,xmin[4],xref[4],dx[4],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FLOAT bmaj,bmin,bpa;
     FITS *fitsfile;
     char *cp, origin[80];
-    char *ctype1_name, *ctype2_name, *ctype3_name;
-    string *hitem, axname[3];
+    char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
+    string *hitem, axname[4];
     float *buffer, *bp;
-    int i, j, k, axistype, bitpix, keepaxis[3], nx[3], p[3], nx_out[3], ndim=3;
+    int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=4;
     double bscale, bzero;
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
     nx[0] = Nx(iptr);
     nx[1] = Ny(iptr);
     nx[2] = Nz(iptr);   if (nx[2] <= 0) nx[2] = 1;
+    nx[3] = 1;
     xmin[0] = Xmin(iptr)*scale[0];
     xmin[1] = Ymin(iptr)*scale[1];
-    xmin[2] = Zmin(iptr)*scale[2];
+    xmin[2] = (Zmin(iptr)+vsys)*scale[2];
+    xmin[3] = 1.0;
     dx[0] = Dx(iptr)*scale[0];
     dx[1] = Dy(iptr)*scale[1];
     dx[2] = Dz(iptr)*scale[2];
+    dx[3] = 1.0;
     xref[0] = Xref(iptr)+1.0;
     xref[1] = Yref(iptr)+1.0;
     xref[2] = Zref(iptr)+1.0;
+    xref[3] = 1.0;
     axistype = Axis(iptr);
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
@@ -225,20 +234,20 @@ void write_fits(string name,imageptr iptr)
     bpa  = 0.0;        /* only spherical beams for now */
 
     if (Qdummy) 
-      for (i=0; i<3; i++) p[i] = i;
+      for (i=0; i<4; i++) p[i] = i;   /* set permute order */
     else {
       if (Qrefmap) warning("dummy=f and usage of refmap will result in bad headers");
       permute(nx,p,3);
       dprintf(0,"Reordering axes: %d %d %d\n",p[0],p[1],p[2]);
     }
 #if 1
-    for (i=0; i<3; i++)  nx_out[i] = nx[p[i]];
+    for (i=0; i<4; i++)  nx_out[i] = nx[p[i]];
     /* fix this so CubeValue works */
     Nx(iptr) = nx_out[0];
     Ny(iptr) = nx_out[1];
     Nz(iptr) = nx_out[2];
 #else
-    for (i=0; i<3; i++)  nx_out[i] = nx[i];
+    for (i=0; i<4; i++)  nx_out[i] = nx[i];
 #endif
     sprintf(origin,"NEMO ccdfits %s",getparam("VERSION"));
 
@@ -274,15 +283,18 @@ void write_fits(string name,imageptr iptr)
       fitwrhdr(fitsfile,"CRPIX1",ref_crpix[0]);       
       fitwrhdr(fitsfile,"CRPIX2",ref_crpix[1]);       
       if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",ref_crpix[2]);
+      if (ndim>3) fitwrhdr(fitsfile,"CRPIX4",ref_crpix[4]);
     } else {
       if (axistype==1) {
 	fitwrhdr(fitsfile,"CRPIX1",xref[0]);      
 	fitwrhdr(fitsfile,"CRPIX2",xref[1]);
 	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",xref[2]);
+	if (ndim>3) fitwrhdr(fitsfile,"CRPIX4",xref[3]);
       } else {
 	fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
 	fitwrhdr(fitsfile,"CRPIX2",1.0);
 	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",1.0);
+	if (ndim>3) fitwrhdr(fitsfile,"CRPIX4",1.0);
       }
     }
     if (Qrefmap || Qcrval) {
@@ -290,10 +302,12 @@ void write_fits(string name,imageptr iptr)
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
       if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
+      if (ndim>3) fitwrhdr(fitsfile,"CRVAL4",ref_crval[3]);
     } else {
       fitwrhdr(fitsfile,"CRVAL1",xmin[p[0]]);
       fitwrhdr(fitsfile,"CRVAL2",xmin[p[1]]);
       if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",xmin[p[2]]);
+      if (ndim>3) fitwrhdr(fitsfile,"CRVAL4",xmin[p[3]]);
     }
 
     if (Qcdmatrix) {
@@ -306,10 +320,12 @@ void write_fits(string name,imageptr iptr)
 	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
+	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       } else {
 	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
 	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
+	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       }
     }
 
@@ -318,19 +334,33 @@ void write_fits(string name,imageptr iptr)
 	ctype1_name = radeves[p[0]];
 	ctype2_name = radeves[p[1]];
 	ctype3_name = radeves[p[2]];
+	ctype4_name = radeves[p[3]];
       } else if (streq(proj,"TAN")) {
 	ctype1_name = radevet[p[0]];
 	ctype2_name = radevet[p[1]];
 	ctype3_name = radevet[p[2]];
+	ctype4_name = radevet[p[3]];
       } else
 	error("Illegal projection scheme %s",proj);
 
-      dprintf(0,"[Axes names written as %s, %s, %s\n",
+      dprintf(0,"Axes names written as %s, %s, %s\n",
 	      ctype1_name,ctype2_name,ctype3_name);
       fitwrhda(fitsfile,"CTYPE1",ctype1_name);
       fitwrhda(fitsfile,"CTYPE2",ctype2_name);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
+      if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
       fitwrhdr(fitsfile,"RESTFREQ",restfreq);
+      //
+      fitwrhda(fitsfile,"CUNIT1","deg");
+      fitwrhda(fitsfile,"CUNIT2","deg");
+      fitwrhda(fitsfile,"CUNIT3","km/s");            /* or m/s */
+      fitwrhda(fitsfile,"CUNIT4","");
+      if (bmaj > 0.0)
+	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
+      else
+	fitwrhda(fitsfile,"BUNIT","JY/PIXEL");        /* if we have no beam */
+      fitwrhda(fitsfile,"TELESCOP","NEMO");  
+      
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
@@ -340,11 +370,12 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
+	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);	
       }
     }
 
-    fitwrhdr(fitsfile,"BMAJ",bmaj);
-    fitwrhdr(fitsfile,"BMIN",bmin);
+    fitwrhdr(fitsfile,"BMAJ",bmaj*scale[0]);
+    fitwrhdr(fitsfile,"BMIN",bmin*scale[1]);
     fitwrhdr(fitsfile,"BPA",bpa);
 
     fitwrhdr(fitsfile,"DATAMIN",mapmin);
@@ -435,7 +466,7 @@ void set_refmap(string name)
   FITS *fitsfile;
   FLOAT tmpr, defval;
   int ndim = 3;
-  int naxis[3], tmpi;
+  int naxis[4], tmpi;
   int wcsaxes = -1;
 
   fitsfile = fitopen(name,"old",ndim,naxis);
