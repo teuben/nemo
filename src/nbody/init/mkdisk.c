@@ -50,8 +50,10 @@ string defv[] = {
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "abs=f\n            Use absolute vel.disp instead of fractional?",
+    "z0=0\n             Vertical scaleheight",
+    "vloss=0.1\n        Fractional loss of orbital speed at the scaleheight",
     "headline=\n	Text headline for output",
-    "VERSION=4.7\n	11-mar-2014 PJT",
+    "VERSION=4.8\n	27-jun-2016 PJT",
     NULL,
 };
 
@@ -69,9 +71,22 @@ local Body *disk;
 
 local proc potential;
 
+local real z0;
+local real vloss;
+
 extern double xrandom(double,double), grandom(double,double);
 
 local real took(real);
+local real mysech2(real z)
+{
+  real y = exp(z);
+  return sqr(2.0/(y+1.0/y));
+}
+
+local real myexp(real z)
+{
+  return 1.0/exp(z);
+}
 
 void nemo_main()
 {
@@ -85,6 +100,8 @@ void nemo_main()
     rmax = getdparam("rmax");
     vrad = getdparam("vrad");
     ndisk = getiparam("nbody");
+    z0 = getrparam("z0");
+    vloss = getrparam("vloss");
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
     nfrac = nemoinpr(getparam("frac"),frac,NDIM);
@@ -184,6 +201,12 @@ testdisk()
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
+	/* now cheat and rotate slower away from the plane */
+	if (z0 > 0) {
+	  Pos(dp)[2] = grandom(0.0, 0.5 * z0);
+	  vcir_i *= (1-vloss*ABS(Pos(dp)[2]/z0));
+	}
+
 #if 1
 	if (Qabs) {
 	  sigma_r = grandom(0.0,frac[0]);
