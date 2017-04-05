@@ -1,0 +1,48 @@
+.TH MOM2CUBE 1NEMO "05 April 2017"
+.SH NAME
+mom2cube \- Use moments to reconstruct a cube
+.SH SYNOPSIS
+\fBmom2cube\fP [parameter=value]
+.SH DESCRIPTION
+Using the first two or three moment maps, a data cube is recontructed.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBmom0=\fP
+Input mom0 image file [???]   
+.TP 20
+\fBmom1=\fP
+Input mom1 image file [???]   
+.TP 20
+\fBmom2=\fP
+Optional mom2 image file []   
+.TP 20
+\fBout=\fP
+Output cube [???]     
+.TP 20
+\fBsigma=\fP
+Optional mom2 (if constant) [1.0]   
+.TP 20
+\fBcube=\fP
+Optional cube to describe 3rd axis [] 
+.TP 20
+\fBz=\fP
+Zmin,Zmax,dZ (or use cube) [-1.0,1.0,0.1]   
+.TP 20
+\fBnorm=\fP
+Normalization? [t]      
+.TP 20
+\fBVERSION=\fP
+5-apr-2017 PJT [0.1]     
+.SH EXAMPLES
+.SH SEE ALSO
+ccdmom(1NEMO), image(5NEMO)
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+05-Apr-17	V0.1 Created	PJT
+.fi
