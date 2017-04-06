@@ -42,7 +42,7 @@ string defv[] = {
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.3a\n 25-jun-2016 PJT",
+  "VERSION=2.3b\n 5-apr-2017 PJT",
   NULL,
 };
 
@@ -299,9 +299,9 @@ void nemo_main()
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
-	  if (j!=51) continue;
+	  //if (j!=51) continue;
       	  for(i=0; i<nx; i++) {
-	    if(i!=34) continue;
+	    //if(i!=34) continue;
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
@@ -338,9 +338,13 @@ void nemo_main()
 		newvalue = tmp0 * ifactor;
 	      else if (mom==1)
 		newvalue = scale*(tmp1/tmp0) + offset;
-	      else if (mom==2)
-		newvalue = scale*sqrt(tmp2/tmp0 - sqr(tmp1/tmp0));
-	      else if (mom==3 || mom/10==3) {  /* mom=3, 30,31,32,33,34 */
+	      else if (mom==2) {
+		newvalue = tmp2/tmp0 - sqr(tmp1/tmp0);
+	        if (newvalue <= 0.0)
+		  newvalue = 0.0;
+		else
+		  newvalue = scale*sqrt(newvalue);
+	      } else if (mom==3 || mom/10==3) {  /* mom=3, 30,31,32,33,34 */
 		if (npeak == 0) {
 		  if (mom==3) {
 		      //newvalue = scale*(apeak + peak_axis(iptr,i,j,apeak,axis)) + offset;
