@@ -10,7 +10,6 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
-#include <moment.h>
 
 string defv[] = {
   "mom0=???\n         Input mom0 image file",
@@ -21,17 +20,17 @@ string defv[] = {
   "cube=\n            Optional cube to describe 3rd axis",
   "z=-1.0,1.0,0.1\n   Zmin,Zmax,dZ (or use cube)",
   "clip=0.0\n         Clipvalue for mom0",
-  "norm=f\n           Normalization?",
+  "norm=t\n           Normalize integral to mom0?",
   "clone=f\n          Clone the cube for output",
-  "VERSION=0.3\n      5-apr-2017 PJT",
+  "VERSION=0.4\n      6-apr-2017 PJT",
   NULL,
 };
 
 string usage = "Use moments to reconstruct a cube";
-string cvsid="$Id$";
+string cvsid = "$Id$";
 
 
-
+
 void nemo_main()
 {
     stream  mom0str, mom1str, mom2str, cubestr, outstr;
@@ -62,7 +61,7 @@ void nemo_main()
 
     nx = Nx(mom0);	
     ny = Ny(mom1);
-
+
     if (hasvalue("cube")) {
       dprintf(0,"Using cube\n");
       cubestr = stropen(getparam("cube"),"r");
@@ -71,19 +70,16 @@ void nemo_main()
       z[0] = Zmin(cube);
       z[1] = Zmin(cube) + (nz-1) * Dz(cube);
       z[2] = Dz(cube);
-      if (!Qclone)
+      if (!Qclone) {
+	free_image(cube);
 	create_cube(&cube,nx,ny,nz);
+      }
     } else {
       nz = round((z[1]-z[0])/z[2]);
       create_cube(&cube,nx,ny,nz);
     }
     dprintf(0,"Cube with %d planes from %g to %g in steps %g\n",nz,z[0],z[1],z[2]);
 
-    if (sigma > 0) {
-      sfactor = sqrt(TWO_PI) * z[2] / sigma;
-      dprintf(0,"Scaling factor %g\n",sfactor);
-    }
- 
     sumc = sum0 = 0.0;
     for (j=0; j<ny; j++) {
       for (i=0; i<nx; i++) {
