@@ -1,48 +1,58 @@
-.TH MOM2CUBE 1NEMO "05 April 2017"
+.TH MOM2CUBE 1NEMO "5 April 2017"
 .SH NAME
-mom2cube \- Use moments to reconstruct a cube
+mom2cube \- Use cube moments along Z to reconstruct a cube
 .SH SYNOPSIS
 \fBmom2cube\fP [parameter=value]
 .SH DESCRIPTION
-Using the first two or three moment maps, a data cube is recontructed.
+Using the first two or three moment maps, a data cube is recontructed. The
+third axis needs to be described, or inherited from a supplied cube.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBmom0=\fP
-Input mom0 image file [???]   
-.TP 20
+Input moment-0 image. Units can be sum or sum*dz. See \fBnorm=\fP below,
+and also \fIccdmom(1NEMO)\fP with the
+\fBintegrate=t\fP option. No default.
+.TP
 \fBmom1=\fP
-Input mom1 image file [???]   
-.TP 20
+Input moment-1 image.
+No default.
+.TP
 \fBmom2=\fP
-Optional mom2 image file []   
-.TP 20
+Input moment-2 image. Optional. If not given, a  constant \fBsigma\fP (see below)
+is used.
+.TP
 \fBout=\fP
-Output cube [???]     
-.TP 20
+Reconstructed output cube. 
+.TP
 \fBsigma=\fP
-Optional mom2 (if constant) [1.0]   
-.TP 20
+Constant value for mom2 (sigma) if that image is not supplied.
+.TP
 \fBcube=\fP
-Optional cube to describe 3rd axis [] 
-.TP 20
+Optional cube to describe 3rd axis, see also \fBclone=\fP. [] 
+.TP
 \fBz=\fP
 Zmin,Zmax,dZ (or use cube) [-1.0,1.0,0.1]   
-.TP 20
-\fBnorm=\fP
-Normalization? [t]      
-.TP 20
-\fBVERSION=\fP
-5-apr-2017 PJT [0.1]     
-.SH EXAMPLES
+.TP
+\fBnorm=t|f\fP
+Normalization of the cube?  This will make sure that the values \fBmom0\fP
+correspond to the integral in the cube (I.dv) not just the sum of the values.
+[true]
+.TP
+\fBclone=t|f\fP
+Should the cube be cloned (including WCS).  This also saves memory, but can only
+be done if they spatially agree in X and Y.
+[false]
 .SH SEE ALSO
-ccdmom(1NEMO), image(5NEMO)
+ccdmom(1NEMO), ccdstat(1NEMO), image(5NEMO)
 .SH FILES
+src/image/misc/mom2ccd.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-05-Apr-17	V0.1 Created	PJT
+5-apr-2017	V0.1 Created	PJT
+6-apr-2017	V0.4 released with some improved options and defaults	PJT
 .fi
