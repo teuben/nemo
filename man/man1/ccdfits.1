@@ -1,6 +1,6 @@
-.TH CCDFITS 1NEMO "26 May 2016"
+.TH CCDFITS 1NEMO "6 April 2017"
 .SH NAME
-ccdfits \- write a fits file to disk
+ccdfits \- convert an image to a fits file 
 .SH SYNOPSIS
 .PP
 \fBccdfits in=\fPimage \fBout=\fPfits [parameter=value]
@@ -116,6 +116,8 @@ since the data is never needed. You can see \fIscanfits(1NEMO)\fP for this:
 	ccdfits ... refmap=cube.fitshdr ...
 .fi
 .SH FITS TAPES
+For historic amusement:
+.PP
 In the old days (somewhere before the 90s) there were actually
 software systems that could only directly read FITS files from
 tape, not from disk. The disk-fits file must be written to tape in 'raw'
