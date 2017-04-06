@@ -20,9 +20,10 @@ string defv[] = {
   "sigma=1.0\n        Optional mom2 (if constant)",
   "cube=\n            Optional cube to describe 3rd axis",
   "z=-1.0,1.0,0.1\n   Zmin,Zmax,dZ (or use cube)",
-  "norm=f\n           Normalization?",
   "clip=0.0\n         Clipvalue for mom0",
-  "VERSION=0.1\n      5-apr-2017 PJT",
+  "norm=f\n           Normalization?",
+  "clone=f\n          Clone the cube for output",
+  "VERSION=0.3\n      5-apr-2017 PJT",
   NULL,
 };
 
@@ -30,16 +31,16 @@ string usage = "Use moments to reconstruct a cube";
 string cvsid="$Id$";
 
 
-
 
 void nemo_main()
 {
     stream  mom0str, mom1str, mom2str, cubestr, outstr;
     real    sigma;    /* replaces mom2str */
     real    z[3];     /* replaces cubestr */
-    bool    Qnorm;
+    bool    Qnorm, Qclone;
     int     i,j,k,nx,ny,nz;
     real    m0, m1, m2, v, clip, sfactor, sum0, sumc;
+    imageptr mom0=NULL, mom1=NULL, mom2=NULL, cube=NULL;
 
     outstr  = stropen(getparam("out"), "w");
     mom0str = stropen(getparam("mom0"), "r");
@@ -52,19 +53,31 @@ void nemo_main()
       sigma = getrparam("sigma");
     nz    = nemoinpd(getparam("z"),z,3);    /* or cubestr */
     Qnorm = getbparam("norm");
+    Qclone = getbparam("clone");
     clip  = getrparam("clip");
-    imageptr mom0=NULL, mom1=NULL, mom2=NULL, cube=NULL;
 
     read_image( mom0str, &mom0);
     read_image( mom1str, &mom1);
     if (sigma < 0) read_image( mom2str, &mom2);
-    
+
     nx = Nx(mom0);	
     ny = Ny(mom1);
-    nz = round((z[1]-z[0])/z[2]);
+
+    if (hasvalue("cube")) {
+      dprintf(0,"Using cube\n");
+      cubestr = stropen(getparam("cube"),"r");
+      read_image(cubestr, &cube);
+      nz   = Nz(cube);
+      z[0] = Zmin(cube);
+      z[1] = Zmin(cube) + (nz-1) * Dz(cube);
+      z[2] = Dz(cube);
+      if (!Qclone)
+	create_cube(&cube,nx,ny,nz);
+    } else {
+      nz = round((z[1]-z[0])/z[2]);
+      create_cube(&cube,nx,ny,nz);
+    }
     dprintf(0,"Cube with %d planes from %g to %g in steps %g\n",nz,z[0],z[1],z[2]);
-
-    create_cube(&cube,nx,ny,nz);
 
     if (sigma > 0) {
       sfactor = sqrt(TWO_PI) * z[2] / sigma;
@@ -82,11 +95,11 @@ void nemo_main()
 	  m2 = sigma;
 	if (m0 > clip)sum0 += m0;
 	if (Qnorm)
-	  sfactor = sqrt(TWO_PI) * z[2] / m2;
+	  sfactor = 1.0 / (sqrt(TWO_PI) * m2);
 	else
 	  sfactor = 1.0;
 	for (k=0; k<nz; k++) {
-	  if (m0 > clip) {
+	  if (m0 > clip && m2 > 0) {
 	    v = z[0] + k*z[2] - m1;
 	    v = 0.5*v*v/(m2*m2);
 	    CubeValue(cube,i,j,k) = sfactor * m0 * exp(-v);
@@ -96,7 +109,7 @@ void nemo_main()
 	}
       }
     }
-    dprintf(0,"MOM0 sum=%g  CUBE sum=%g\n",sum0,sumc);
+    dprintf(0,"MOM0 sum=%g  CUBE sum=%g\n",sum0,sumc*z[2]);
     
     write_image(outstr, cube);
     
