@@ -1,4 +1,4 @@
-.TH RUNVELFITSS07 1NEMO "29 October 2008"
+.TH RUNVELFITSS07 1NEMO "7 August 2014"
 .SH NAME
 runvelfitss07 \- frontend to run Spekkens & Sellwood's 2007 \fIvelfit\fP code
 .SH SYNOPSIS
@@ -82,17 +82,27 @@ although the original name of the SS07 is \fIvelfit\fP, this conflicts with
 \fIvelfitss07\fP.  [velfitss07]   
 .SH EXAMPLES
 The standard example
-from the Users Guide can be run as follows:
+from the Users Guide can be run as follows (note we are more free to pick a directory):
 .nf
-runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5
+runvelfitss07 examp.vels examp1.m examp1.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5
 .fi
+of which you can find the results in Figure 7.
 and the next 3 examples from the Users Guide are run as follows:
 .nf
-runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,0 rmsism=2.0
-runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,1 rmsism=2.0
-runvelfitss07 examp.vels examp.m examp.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,0,1,1 rmsism=2.0
+runvelfitss07 examp.vels examp2.m examp2.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,0 rmsism=2.0 
+runvelfitss07 examp.vels examp3.m examp3.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,1,0,1 rmsism=2.0
+runvelfitss07 examp.vels examp4.m examp4.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5 flags=1,1,1,0,1,1 rmsism=2.0
 .fi
-
+which you can find the output .p parameter files in Figure 9, Figure 11 and Figure 3 resp.
+.SH BENCHMARK
+The 4 examples run in the following CPU time on a  2.4GHz i7-3630QM CPU:
+.nf
+.ta +1i
+1	1.29\"
+2	4.86\"
+3	-
+4	-
+.fi
 .SH SEE ALSO
 rotcur(1NEMO), velfit(1NEMO), rotcurshape(1NEMO), rundiskfit(1NEMO)
 .nf
@@ -108,7 +118,7 @@ NEMO/src/image/rotcur	- NEMO frontend
 .fi
 .SH CAVEATS
 The parameter file (velfit.inc) is in the local run directory, and is silently overwritten.
-This will hamper running the program in parallel.
+This will seriously hamper running the program in parallel.
 .SH EXAMPLES
 Below is an example snippet C-shell code to output the table in the format \fBvelfitss07\fP needs:
 .nf
@@ -147,6 +157,8 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 27-oct-2008	V1.0 : frontend for velfitss07 V1.0 (oct 2008)	PJT
+??-???-????	V1.1 : should be compatible with their V1.1 (aug 2009)	PJT
 ??-???-????	V2.0 : still not implemented	PJT
-14-sep-2012	noting this is now deprecated	PJT
+14-sep-2012	noting this is now deprecated in favor of diskfit	PJT
+7-aug-2014	V1_0, V1_1, V2_0 now in a local CVS with NUMREC		PJT
 .fi
