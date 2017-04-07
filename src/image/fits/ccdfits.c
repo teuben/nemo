@@ -40,6 +40,7 @@
  *      17-aug-12   5.5  default restfreq to keep some WCS routines happy    PJT
  *       8-sep-15   5.7  add dummy 4th stokes axis to keep CASA/ADMIT happy  PJT
  *      26-may-16   5.8  added CUNITn and BUNIT, and better WCS output when radecvel=t
+ *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -65,18 +66,19 @@ string defv[] = {
 	"cdmatrix=f\n    Use standard CD matrix instead of CDELT?",
 	"blocking=1\n	 Blocking factor for output (blocksize/2880)",
 	"refmap=\n       reference map to inherit WCS from",
+	"refaxis=1,2,3\n which axes from refmap to be used (1,2,3)",
 	"crpix=\n        reference pixel, if different from default",
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
-	"restfreq=115271204000\n   Restfreq (in Hz) if a doppler axis is used",
+	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",
 	"vsys=0\n        VSYS correction (test)",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.8a\n  9-mar-2017 PJT",
+        "VERSION=5.9\n   6-apr-2017 PJT",
         NULL,
 };
 
@@ -100,6 +102,7 @@ bool Qradecvel;         /* fake astronomy WCS header */
 bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;            /* write dummy axes ? */
+int  nrefaxis, refaxis[4];
 
 int   nref = 0, nfill = 0;
 FLOAT ref_crval[4], ref_crpix[4], ref_cdelt[4];
@@ -159,8 +162,10 @@ void setparams(void)
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qrefmap = hasvalue("refmap");
-  if (Qrefmap)
+  if (Qrefmap) {
     set_refmap(getparam("refmap"));
+    nrefaxis = nemoinpi(getparam("refaxis"),refaxis,4);
+  }
 
   Qcrpix = hasvalue("crpix");
   if (Qcrpix) {
