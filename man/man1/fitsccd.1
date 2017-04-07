@@ -153,6 +153,17 @@ AXIS3:    1   0 4079.75 -23565         -35347.5  -35347.5
 notice the third axis is bogus in this example. The last two columns (xmin,xmax)
 include half the pixel, so mean to signify the edges of this cells, in units
 relative to the reference pixel (crpix), not in units of
+.SH OTHER
+Most packages in astronomy can write a fits file from their native
+format, here are some examples:
+.nf
+.ta +1.5i +4.0i
+
+MIRIAD  	fits in=cube.mir out=cube.fits op=xyout
+CLASS/GILDAS	vector\fits cube.fits from cube.lmv
+CASA		exportfits("cube.im","cube.fits")
+GIPSY		wfits
+.fi
 .SH "CAVEATS"
 There are FITS image files stored as extensions to a dummy HDU. In those
 cases \fIscanfits(1NEMO)\fP must be used to extract the correct HDU and
