@@ -25,8 +25,10 @@ output file, will be in \fIImage(5)\fP format [no default]
 \fBgauss=\fIvalue\fP
 Beam size (FWHM, note FWHM = 2*sqrt(2*ln(2)) = 2.355 * sigma) of a 
 gaussian smoothing
-kernel. Note this is size of the used smoothing kernel, NOT the resulting
-beam in the output map.
+kernel, in WCS units.
+Note this is size of the used smoothing kernel, NOT the resulting
+beam in the output map, which generally will be bigger depending on
+the pre-existing beam. 
 If this parameter is used, the parameter \fBsmooth\fP is
 ignored [default: not used].
 .TP
