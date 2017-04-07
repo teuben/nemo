@@ -291,7 +291,7 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",xref[2]);
 	if (ndim>3) fitwrhdr(fitsfile,"CRPIX4",xref[3]);
       } else {
-	fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by Nemo definition */
+	fitwrhdr(fitsfile,"CRPIX1",1.0);        /* CRPIX = 1 by NEMO definition */
 	fitwrhdr(fitsfile,"CRPIX2",1.0);
 	if (ndim>2) fitwrhdr(fitsfile,"CRPIX3",1.0);
 	if (ndim>3) fitwrhdr(fitsfile,"CRPIX4",1.0);
@@ -348,6 +348,8 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",ctype1_name);
       fitwrhda(fitsfile,"CTYPE2",ctype2_name);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);  
+
       if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
       fitwrhdr(fitsfile,"RESTFREQ",restfreq);
       //
