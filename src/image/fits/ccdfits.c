@@ -41,9 +41,15 @@
  *       8-sep-15   5.7  add dummy 4th stokes axis to keep CASA/ADMIT happy  PJT
  *      26-may-16   5.8  added CUNITn and BUNIT, and better WCS output when radecvel=t
  *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
+ *       8-apr-17   6.0  new approach inheriting a new WCS
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
+ *
+ *      WCS should follow the following strategy:
+ *      - use the (usually crappy) WCS from the NEMO image (radecval=True)
+ *      - inherit certain refaxis from a refmap
+ *      - override any of crpix/crval/cdelt/
  */
 
 
@@ -66,7 +72,7 @@ string defv[] = {
 	"cdmatrix=f\n    Use standard CD matrix instead of CDELT?",
 	"blocking=1\n	 Blocking factor for output (blocksize/2880)",
 	"refmap=\n       reference map to inherit WCS from",
-	"refaxis=1,2,3\n which axes from refmap to be used (1,2,3)",
+	"refaxis=\n      which axes from refmap to be used (1,2,3,4)",
 	"crpix=\n        reference pixel, if different from default",
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
@@ -78,7 +84,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=5.9\n   6-apr-2017 PJT",
+        "VERSION=6.09\n  8-apr-2017 PJT",
         NULL,
 };
 
@@ -103,6 +109,7 @@ bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;            /* write dummy axes ? */
 int  nrefaxis, refaxis[4];
+bool Qrefaxis[4];
 
 int   nref = 0, nfill = 0;
 FLOAT ref_crval[4], ref_crpix[4], ref_cdelt[4];
@@ -165,6 +172,8 @@ void setparams(void)
   if (Qrefmap) {
     set_refmap(getparam("refmap"));
     nrefaxis = nemoinpi(getparam("refaxis"),refaxis,4);
+    for (i=0; i<4; i++) Qrefaxis[i] = FALSE;
+    for (i=0; i<4; i++) Qrefaxis[refaxis[i]-1] = TRUE;
   }
 
   Qcrpix = hasvalue("crpix");
