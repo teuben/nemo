@@ -4,6 +4,7 @@
  *	19-sep-96   q&d                             pjt
  *      5-apr-96    added divergence and vorticity  PJT
  *	11-apr-96   forgot to copy proper header elements   PJT
+ *      17-apr-2017   laplace (classic) vs. lapabs
  *                      
  */
 
@@ -17,8 +18,8 @@
 string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
-	"mode=laplace\n	Modes (laplace, aregan, pregan, divergence, vorticity)",
-	"VERSION=0.2a\n  11-apr-96 PJT",
+	"mode=laplace\n	Modes (laplace, lapabs, aregan, pregan, divergence, vorticity)",
+	"VERSION=0.2\n  17-apr-2017 PJT",
 	NULL,
 };
 
@@ -31,11 +32,13 @@ string usage = "enhance/sharpen an image";
 #define CVO(x,y,z)  CubeValue(optr,x,y,z)
 
 local string valid_modes = "laplace,aregan,pregan,divergence,vorticity";
+
 #define MODE_LAPLACE (1<<0)
 #define MODE_AREGAN  (1<<1)
 #define MODE_PREGAN  (1<<2)
 #define MODE_DIV     (1<<3)
 #define MODE_VORT    (1<<4)
+#define MODE_LAPABS  (1<<5)
 
 extern int match(string, string, int *);
 
@@ -81,6 +84,24 @@ void nemo_main()
     /* should do the others too */
 
     if (mode & MODE_LAPLACE) {
+        for (k=0; k<nz; k++) {
+            for (j=1; j<ny-1; j++) {
+                for (i=1; i<nx-1; i++) {
+		    d1 = CV1(i-1,j,k) - CV1(i,j,k);
+		    d2 = CV1(i+1,j,k) - CV1(i,j,k);
+		    d3 = CV1(i,j-1,k) - CV1(i,j,k);
+		    d4 = CV1(i,j+1,k) - CV1(i,j,k);
+                    CVO(i,j,k) = d1+d2+d3+d4;
+                }
+                CVO(0,j,k) = 0.0;
+                CVO(nx-1,j,k) = 0.0;
+            }
+            for (i=0; i<nx; i++) {
+                CVO(i,0,k) = 0.0;
+                CVO(i,ny-1,k) = 0.0;
+            }
+        }
+    } else if (mode & MODE_LAPABS) {
         for (k=0; k<nz; k++) {
             for (j=1; j<ny-1; j++) {
                 for (i=1; i<nx-1; i++) {
