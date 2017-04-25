@@ -24,6 +24,7 @@
 #>>
 #
 
+from __future__ import print_function
 
 from astropy.io import ascii
 import matplotlib.pyplot as plt
@@ -31,7 +32,7 @@ import numpy as np
 import math
 import os,sys
 
-version = "17-mar-2017 PJT"
+version = "25-apr-2017 PJT"
 
 degrad = 57.2957795
 c = 299792.458
@@ -46,7 +47,7 @@ def properties(name, file='rotcur2.txt'):
     names = data['name'].data.tolist()
     idx = names.index(name)
     if True:
-        print data[idx]
+        print(data[idx])
         return data[idx]
     else:
         p = {}
@@ -187,9 +188,9 @@ def region_ds9(data,ds9,scale=0.0083333):
     maj = r / scale
     min = r*np.cos(inc/degrad) / scale
     if False:
-	print "Center: ",xpos,ypos
-	print "PA,INC: ",pa,inc
-	print "Radius: ",r
+        print("Center: ",xpos,ypos)
+        print("PA,INC: ",pa,inc)
+        print("Radius: ",r)
     r1='global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\n'
     r2='image\n'
     #
@@ -199,11 +200,11 @@ def region_ds9(data,ds9,scale=0.0083333):
     fp.write(r1)
     fp.write(r2)
     for i in range(len(data)):
-	r3='ellipse(%f,%f,%f,%f,%f) # color=black width=2\n' % (xpos[i],ypos[i],min[i],maj[i],pa[i])
-	print r3
-	fp.write(r3)
+        r3='ellipse(%f,%f,%f,%f,%f) # color=black width=2\n' % (xpos[i],ypos[i],min[i],maj[i],pa[i])
+        print(r3)
+        fp.write(r3)
     fp.close()
-    print data
+    print(data)
 
 def region_cgdisp(data,ds9,scale=0.0083333):
     """ create an overlay file for miriad::cgdisp 
@@ -223,30 +224,30 @@ def plabel(umode,scale):
     return lab
 
 def print_usage(argv):
-    print "Multi-table rotation curve plotter and comparisons - version %s " % version
-    print "Usage:"
-    print "%s name  [key=val] [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0]
-    print "   name     Required name, an ID grab default values from %s" % parfile
-    print "   key=val  Optional re-assigned keyword"
-    print "   -u       rotcur type table  (for this and all following tables until reset) "
-    print "   -i       ringfit type table  (for this and all following tables until reset) "
-    print "   -r       radio convention  (for this and all following tables until reset) "
-    print "   -o       optical convention  (for this and all following tables until reset) "
-    print "Currently all curves are *plotted* in the radio convention"
-    print ""
-    print "In addition, for a limited number of keywords, a new value can be given:"
-    print "   rmax"
-    print "   vsys"
-    print "   inc"
-    print "   w50"
-    print "   w90"
-    
+    print("Multi-table rotation curve plotter and comparisons - version %s " % version)
+    print("Usage:")
+    print("%s name  [key=val] [-u] [-i] [-r] [-o] curve1  [-u] [-i] [-r] [-o] curve2 ..." % argv[0])
+    print("   name     Required name, an ID grab default values from %s" % parfile)
+    print("   key=val  Optional re-assigned keyword")
+    print("   -u       rotcur type table  (for this and all following tables until reset) ")
+    print("   -i       ringfit type table  (for this and all following tables until reset) ")
+    print("   -r       radio convention  (for this and all following tables until reset) ")
+    print("   -o       optical convention  (for this and all following tables until reset) ")
+    print("Currently all curves are *plotted* in the radio convention")
+    print("")
+    print("In addition, for a limited number of keywords, a new value can be given:")
+    print("   rmax")
+    print("   vsys")
+    print("   inc")
+    print("   w50")
+    print("   w90")
+
     sys.exit(0)
 
     
 
 if __name__ == "__main__":
-    print "LEN:",len(sys.argv)
+    print("LEN:",len(sys.argv))
     if len(sys.argv) < 2: print_usage(sys.argv)
     gal = sys.argv[1]
     p = properties(gal)
@@ -263,7 +264,7 @@ if __name__ == "__main__":
     umode = False      # -u: rotcur format       -i: ringfit format (default)
     for name in sys.argv[2:]:
         if name.find('=') > 0:
-            print "EXEC: ",name
+            print("EXEC: ",name)
             exec(name)
             continue
         if name=='-o':
@@ -288,7 +289,7 @@ if __name__ == "__main__":
             o2r = 1.0-2.0*vsys/c
             v1 = v1 * o2r
         n = len(data)
-        print "Found %d radii for %s" % (n,name)
+        print("Found %d radii for %s" % (n,name))
         ax.plot(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
     (rmin,rmax) = ax.get_xlim()
     (vmin,vmax) = ax.get_ylim()
@@ -297,7 +298,7 @@ if __name__ == "__main__":
     sini = math.sin(inc*math.pi/180.0)
     v50 = 0.5*w50/sini
     v90 = 0.5*w90/sini
-    print v50,v90
+    print(v50,v90)
     ax.plot([0.9*rmax,rmax],[v50,v50],'k-',label='HI-W50',linestyle='-',linewidth=2)
     ax.plot([0.8*rmax,rmax],[v90,v90],'k-',label='HI-W90',linestyle='-',linewidth=2)
     ax.plot([0.0,0.1*rmax],[v50,v50],'k-',linestyle='-',linewidth=2)
