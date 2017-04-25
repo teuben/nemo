@@ -22,7 +22,8 @@ string defv[] = {
   "clip=0.0\n         Clipvalue for mom0",
   "norm=t\n           Normalize integral to mom0?",
   "clone=f\n          Clone the cube for output",
-  "VERSION=0.4\n      6-apr-2017 PJT",
+  "chan0=-1\n         Select a channel to set at 0",
+  "VERSION=0.5\n      11-apr-2017 PJT",
   NULL,
 };
 
@@ -37,7 +38,7 @@ void nemo_main()
     real    sigma;    /* replaces mom2str */
     real    z[3];     /* replaces cubestr */
     bool    Qnorm, Qclone;
-    int     i,j,k,nx,ny,nz;
+    int     i,j,k,nx,ny,nz, chan0;
     real    m0, m1, m2, v, clip, sfactor, sum0, sumc;
     imageptr mom0=NULL, mom1=NULL, mom2=NULL, cube=NULL;
 
@@ -54,6 +55,7 @@ void nemo_main()
     Qnorm = getbparam("norm");
     Qclone = getbparam("clone");
     clip  = getrparam("clip");
+    chan0 = getiparam("chan0");
 
     read_image( mom0str, &mom0);
     read_image( mom1str, &mom1);
@@ -106,6 +108,17 @@ void nemo_main()
       }
     }
     dprintf(0,"MOM0 sum=%g  CUBE sum=%g\n",sum0,sumc*z[2]);
+
+    Zmin(cube) = z[0];  /* *1000 ? */
+    Dz(cube)   = z[2];
+    Namez(cube) = "VELO-LSR";
+
+    if (chan0 >= 0 && chan0 < nz) {
+      dprintf(0,"Selecting channel %d to zero out\n",chan0);
+      for (j=0; j<ny; j++)
+	for (i=0; i<nx; i++)
+	  CubeValue(cube,i,j,chan0) = 0.0;
+    }
     
     write_image(outstr, cube);
     
