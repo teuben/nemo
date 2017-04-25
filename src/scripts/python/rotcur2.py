@@ -9,6 +9,8 @@
 # -r   keep in radio format
 # -o   convert from radio to optical convention (needs vsys)
 #
+# -z   (not implemented yet) convert everything to relativistic format
+#
 # key=value    allowed to override
 #       
 # Example of use:
@@ -29,7 +31,7 @@ import numpy as np
 import math
 import os,sys
 
-version = "21-jun-2016 PJT"
+version = "17-mar-2017 PJT"
 
 degrad = 57.2957795
 c = 299792.458
@@ -229,7 +231,7 @@ def print_usage(argv):
     print "   -u       rotcur type table  (for this and all following tables until reset) "
     print "   -i       ringfit type table  (for this and all following tables until reset) "
     print "   -r       radio convention  (for this and all following tables until reset) "
-    print "   -r       optical convention  (for this and all following tables until reset) "
+    print "   -o       optical convention  (for this and all following tables until reset) "
     print "Currently all curves are *plotted* in the radio convention"
     print ""
     print "In addition, for a limited number of keywords, a new value can be given:"
