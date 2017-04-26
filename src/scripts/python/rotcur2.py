@@ -31,7 +31,9 @@ from __future__ import print_function
 
 from astropy.io import ascii
 import matplotlib.pyplot as plt
+import matplotlib.cm     as cm
 import numpy as np
+import itertools
 import math
 import os,sys
 
@@ -268,6 +270,7 @@ if __name__ == "__main__":
     scale = False      # scale from optical to radio convention?   (-o and -r)
     umode = False      # -u: rotcur format       -i: ringfit format (default)
     lines = True       # -l: lines               -p: points
+    colors = itertools.cycle(["r", "b", "g"])
     for name in sys.argv[2:]:
         if name.find('=') > 0:
             print("EXEC: ",name)
@@ -305,7 +308,7 @@ if __name__ == "__main__":
         if lines:
             ax.plot(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
         else:
-            ax.scatter(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
+            ax.scatter(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)), color=next(colors))
     (rmin,rmax) = ax.get_xlim()
     (vmin,vmax) = ax.get_ylim()
     ax.set_xlim([0.0,rmax])
