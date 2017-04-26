@@ -9,6 +9,9 @@
 # -r   keep in radio format
 # -o   convert from radio to optical convention (needs vsys)
 #
+# -p   points 
+# -l   lines
+#
 # -z   (not implemented yet) convert everything to relativistic format
 #
 # key=value    allowed to override
@@ -233,6 +236,8 @@ def print_usage(argv):
     print("   -i       ringfit type table  (for this and all following tables until reset) ")
     print("   -r       radio convention  (for this and all following tables until reset) ")
     print("   -o       optical convention  (for this and all following tables until reset) ")
+    print("   -l       use lines")
+    print("   -p       use points")
     print("Currently all curves are *plotted* in the radio convention")
     print("")
     print("In addition, for a limited number of keywords, a new value can be given:")
@@ -262,6 +267,7 @@ if __name__ == "__main__":
     ax = fig.add_subplot(1,1,1)
     scale = False      # scale from optical to radio convention?   (-o and -r)
     umode = False      # -u: rotcur format       -i: ringfit format (default)
+    lines = True       # -l: lines               -p: points
     for name in sys.argv[2:]:
         if name.find('=') > 0:
             print("EXEC: ",name)
@@ -279,6 +285,12 @@ if __name__ == "__main__":
         if name=='-i':
             umode = False
             continue
+        if name=='-l':
+            lines = True
+            continue
+        if name=='-p':
+            lines = False 
+            continue
         data = rotcurtab(name)
         if umode:
             (r1,v1) = get_rotcur(data)      # 'u'
@@ -290,7 +302,10 @@ if __name__ == "__main__":
             v1 = v1 * o2r
         n = len(data)
         print("Found %d radii for %s" % (n,name))
-        ax.plot(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
+        if lines:
+            ax.plot(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
+        else:
+            ax.scatter(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
     (rmin,rmax) = ax.get_xlim()
     (vmin,vmax) = ax.get_ylim()
     ax.set_xlim([0.0,rmax])
