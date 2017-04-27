@@ -11,6 +11,7 @@
 #
 # -p   points 
 # -l   lines
+# -e   add error bar to points
 #
 # -z   (not implemented yet) convert everything to relativistic format
 #
@@ -86,7 +87,7 @@ def get_ringplot(data, efactor=1):
     d_vr  = data['col5']*efactor
     vsys  = data['col6']
     d_vsys= data['col7']*efactor
-    return (r,vt)
+    return (r,vt,d_vt)
 
 def get_rotcur(data, efactor=1):
     """
@@ -95,7 +96,7 @@ def get_rotcur(data, efactor=1):
     r     = data['col1']
     vt    = data['col4'] 
     d_vt  = data['col5']*efactor
-    return (r,vt)
+    return (r,vt,d_vt)
 
 def get_velfit(data, efactor=1):
     """
@@ -240,6 +241,7 @@ def print_usage(argv):
     print("   -o       optical convention  (for this and all following tables until reset) ")
     print("   -l       use lines")
     print("   -p       use points")
+    print("   -e       plot error bars (for points only)")
     print("Currently all curves are *plotted* in the radio convention")
     print("")
     print("In addition, for a limited number of keywords, a new value can be given:")
@@ -267,10 +269,11 @@ if __name__ == "__main__":
     fig = plt.figure()
     plt.title('%s   :   VSYS=%g    INC=%g' % (gal,vsys,inc))
     ax = fig.add_subplot(1,1,1)
-    scale = False      # scale from optical to radio convention?   (-o and -r)
-    umode = False      # -u: rotcur format       -i: ringfit format (default)
-    lines = True       # -l: lines               -p: points
-    colors = itertools.cycle(["r", "b", "g"])
+    scale  = False      # scale from optical to radio convention?   (-o and -r)
+    umode  = False      # -u: rotcur format       -i: ringfit format (default)
+    lines  = True       # -l: lines               -p: points
+    errors = False
+    colors = itertools.cycle(["r", "g", "b"])
     for name in sys.argv[2:]:
         if name.find('=') > 0:
             print("EXEC: ",name)
@@ -294,11 +297,14 @@ if __name__ == "__main__":
         if name=='-p':
             lines = False 
             continue
+        if name=='-e':
+            errors = True
+            continue
         data = rotcurtab(name)
         if umode:
-            (r1,v1) = get_rotcur(data)      # 'u'
+            (r1,v1,ve1) = get_rotcur(data)      # 'u'
         else:
-            (r1,v1) = get_ringplot(data)    # 'i'
+            (r1,v1,ve1) = get_ringplot(data)    # 'i'
             #(r1,v1) = get_velfit(data)     # 's'
         if scale:
             o2r = 1.0-2.0*vsys/c
@@ -308,7 +314,10 @@ if __name__ == "__main__":
         if lines:
             ax.plot(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)))
         else:
-            ax.scatter(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)), color=next(colors))
+            color = next(colors)
+            ax.scatter(r1,v1,label="%s[%s]" % (name,plabel(umode,scale)), color=color)
+            if errors:
+                ax.errorbar(r1,v1,yerr=ve1,color=color)
     (rmin,rmax) = ax.get_xlim()
     (vmin,vmax) = ax.get_ylim()
     ax.set_xlim([0.0,rmax])
