@@ -1,0 +1,48 @@
+.TH CCD2VEL 1NEMO "28 April 2017"
+.SH NAME
+ccd2vel \- convert map of wave/freq/velocities to doppler velocities
+.SH SYNOPSIS
+\fBccd2vel\fP [parameter=value]
+.SH DESCRIPTION
+This program converts an input map to doppler velocity map. The input
+units can be in wavelenth (restwave is needed), frequency (restfreq is needed)
+or one of three doppler velocity frames of reference (radio, optical, relativistic).
+The output map will be in one of the doppler velocity frames of reference
+ (radio, optical, relativistic). Units are normally km/s.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given
+.TP 20
+\fBin=\fP
+Optional input image file []   
+.TP
+\fBout=\fP
+Output image file []    
+.TP
+\fBfrom=\fP
+Frame of reference (relativistic, radio, optical) [rel] 
+.TP
+\fBto=\fP
+Frame of reference (relativistic, radio, optical) [rel] 
+.TP
+\fBrestwave=\fP
+Rest wavelength, in the units of the map
+.TP
+\fBrestfreq=\fP
+Rest frequency, in the units of the map
+.TP
+\fBclip=\fP
+Clipping of output (none, or two values needed)
+.TP
+\fBunits=\fP
+Desired output units (km/s, m/s) [km/s]  
+.SH EXAMPLES
+.SH SEE ALSO
+ccdsky(1NEMO), ccdmath(1NEMO), fitsccd(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+27-Apr-17	V0.3 Created	PJT
+.fi
