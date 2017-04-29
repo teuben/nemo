@@ -4,14 +4,14 @@ ccd2vel \- convert map of wave/freq/velocities to doppler velocities
 .SH SYNOPSIS
 \fBccd2vel\fP [parameter=value]
 .SH DESCRIPTION
-\fBccd2vel\fP converts an input map to doppler velocity map. The input
+\fBccd2vel\fP converts a map to a doppler velocity map. The input map
 units can be in wavelength (\fBrestwave=\fP is needed), frequency (\fBrestfreq=\fP is needed)
 or one of three doppler velocity frames of reference (radio, optical, relativistic).
-The output map will be in one of the doppler velocity frames of reference
- (radio, optical, relativistic). Units are normally km/s.
- .PP
- This program ignores references to being in a Barycenric, Heliocentric or LSR frame. See comments below in the
- CASA and MIRIAD sections.
+The output map will be in one of those three doppler velocity frames of reference
+(radio, optical, relativistic). Output units are normally km/s.
+.PP
+This program ignores references to being in a Barycenric, Heliocentric or LSR frame. See comments below in the
+CASA and MIRIAD sections.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given
@@ -22,11 +22,11 @@ Optional input image file. No default.
 \fBout=\fP
 Output image file. No Default.
 .TP
-\fBfrom=\fP
-Frame of reference (relativistic, radio, optical).
-Use the first 3 letters. [rel] 
+\fBfrom=rel|rad|opt\fP
+Frame of reference (relativistic, radio, optical). When using \fBrestwave=\fP or \fBrestfreq=\fP this keyword is ignored.
+[rel] 
 .TP
-\fBto=\fP
+\fBto=rel|rad|opt\fP
 Frame of reference (relativistic, radio, optical) [rel] 
 .TP
 \fBrestwave=\fP
@@ -47,7 +47,7 @@ to a relatistic velocity field:
 .nf
    fitsccd Ha.cube.fits  - | ccdmom - - mom=3 | ccd2vel - Ha-3.vel opt rel 6562.80 
 .fi
-and here
+and here an optical velocity field into a relativistic
 .nf
    NGC2347.VoptFromHa.fits - | ccd2vel - NGC2347.VrelFromHa.ccd opt rel
 .fi
