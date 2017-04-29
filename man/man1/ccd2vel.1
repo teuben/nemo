@@ -40,7 +40,7 @@ Desired output units (km/s, m/s) [km/s]
 .SH EXAMPLES
 Here is how one converts a fits cube in optical wavelengths to a relatistic velocity field:
 .nf
-fitsccd NGC2347.V500.rscube.fits  -|ccdsub - - z=1435:1485|ccdmom - - mom=3|ccd2vel - vel-Ha-3.ccd opt rel 6562.80 clip=4000,4800
+fitsccd Ha.cube.fits  -|ccdmom - - mom=3|ccd2vel - Ha-3.vel opt rel 6562.80 
 .fi
 and here
 .nf
