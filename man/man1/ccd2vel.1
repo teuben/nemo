@@ -26,17 +26,26 @@ Frame of reference (relativistic, radio, optical) [rel]
 Frame of reference (relativistic, radio, optical) [rel] 
 .TP
 \fBrestwave=\fP
-Rest wavelength, in the units of the map
+Rest wavelength, in the units of the map.  
+Only one of restwave of restfreq can be used.
 .TP
 \fBrestfreq=\fP
 Rest frequency, in the units of the map
 .TP
-\fBclip=\fP
+\fBclip=\fP\fImin,max\fP
 Clipping of output (none, or two values needed)
 .TP
-\fBunits=\fP
+\fBunits=km/s\fP
 Desired output units (km/s, m/s) [km/s]  
 .SH EXAMPLES
+Here is how one converts a fits cube in optical wavelengths to a relatistic velocity field:
+.nf
+fitsccd NGC2347.V500.rscube.fits  -|ccdsub - - z=1435:1485|ccdmom - - mom=3|ccd2vel - vel-Ha-3.ccd opt rel 6562.80 clip=4000,4800
+.fi
+and here
+.nf
+NGC2347.VoptFromHa.fits - | ccd2vel - NGC2347.VrelFromHa.ccd opt rel
+.fi
 .SH SEE ALSO
 ccdsky(1NEMO), ccdmath(1NEMO), fitsccd(1NEMO)
 .SH AUTHOR
