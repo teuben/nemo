@@ -1,4 +1,4 @@
-.TH CCDFILL 1NEMO "6 July 2012"
+.TH CCDFILL 1NEMO "3 May 2017"
 .SH NAME
 ccdfill \- patch up the holes in an image
 .SH SYNOPSIS
@@ -52,6 +52,11 @@ Default: 4
 Minimum number of iterations.  0 is also an allowed value, in which
 case the image will just be copied unmodified.
 Default: 1
+.TP
+\fBspike=\fP
+If given, for each point in the map, if a point deviates more than \fBspike\fB from
+all it's 4 direct neighbors, this value will be reset to \fBbad\fP before the actually
+filling will take place. Default: none (not applied)
 .SH CAVEATS
 With m=3 you will see some singular matrix warnings, and patched values
 will be bogus. It is better to set m=4 for those cases.
@@ -70,4 +75,5 @@ Peter Teuben
 22-feb-97	V1.1 added bad=	PJT
 19-feb-02	V1.2 added all=, m=	PJT
 3-may-03	V1.3 added iter=	PJT
+3-may-2017	V2.0 added spike=	PJT
 .fi
