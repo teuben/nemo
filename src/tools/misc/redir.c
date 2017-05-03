@@ -32,11 +32,12 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <sys/file.h>
 
 #define USAGESTRING ("Usage: %s [-[a][oeOE] file] ... command-words\n")
 
-main(argc, argv)
+int main(argc, argv)
 int             argc;
 char          **argv;
 {
