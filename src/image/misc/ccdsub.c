@@ -10,6 +10,7 @@
  * 1.5  added a more proper WCS when simple subsetting is done     PJT
  * 2.0  rearranged a lot, removed useless options, enabled others  PJT
  * 2.1  added moving=t averaging for nxaver only (for now)         PJT
+ * 2.2  fixed WCS on output 
 
     TODO:  wcs is wrong on output
  */
@@ -33,7 +34,7 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.1a\n 4-feb-2015 PJT",
+  "VERSION=2.2\n  6-may-2017 PJT",
   NULL,
 };
 
@@ -191,13 +192,13 @@ void nemo_main()
 	    CV(iptr1,i,j,k) = CV(iptr,ix[i],iy[j],iz[k]);
       warning("Attempting to fix the WCS");
 
-      Xmin(iptr1) = Xmin(iptr) + (ix[0]-1)*Dx(iptr);
+      Xmin(iptr1) = Xmin(iptr) + ix[0]*Dx(iptr);
       Dx(iptr1)   = (ix[1]-ix[0]) * Dx(iptr);
 
-      Ymin(iptr1) = Ymin(iptr) + (iy[0]-1)*Dy(iptr);
+      Ymin(iptr1) = Ymin(iptr) + iy[0]*Dy(iptr);
       Dy(iptr1)   = (iy[1]-iy[0]) * Dy(iptr);
 
-      Zmin(iptr1) = Zmin(iptr) + (iz[0]-1)*Dz(iptr);
+      Zmin(iptr1) = Zmin(iptr) + iz[0]*Dz(iptr);
       Dz(iptr1)   = (iz[1]-iz[0]) * Dz(iptr);
       dprintf(0,"WCS Corner: %g %g %g\n",Xmin(iptr1),Ymin(iptr1),Zmin(iptr1));
 
