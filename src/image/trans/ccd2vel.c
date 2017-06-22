@@ -24,7 +24,7 @@ string defv[] = {
   "restfreq=\n      Input rest frequency, in the units of the map, only if needed",
   "clip=\n          Clipping of output (none, or two values needed)",
   "units=km/s\n     Desired output units (km/s, m/s)",
-  "VERSION=0.3\n    28-apr-2017 PJT",
+  "VERSION=0.4\n    6-may-2017 PJT",
   NULL,
 };
 
@@ -160,6 +160,7 @@ void nemo_main()
     if (mode1 == WAV2REL && mode2 == REL2OPT) { mode1 = WAV2OPT; mode2 = ONE2ONE;}
     if (mode1 == FRQ2REL && mode2 == REL2RAD) { mode1 = FRQ2RAD; mode2 = ONE2ONE;}        
     dprintf(0,"MODES: 0x%x  and 0x%x\n",mode1,mode2);
+    dprintf(0,"Using c=%f km/s\n",c);
     
     if (hasvalue("in") && hasvalue("out")) {    
       instr = stropen(getparam("in"), "r");
