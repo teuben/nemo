@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "25 August 2004" 
+.TH CCDMATH 1NEMO "23 August 2017" 
 .SH NAME
 ccdmath \- map arithmetic using function expressions
 .SH SYNOPSIS
@@ -90,6 +90,12 @@ assuming you know the size of the cube (nx,ny,nz) and pixel sizes (dx,dy,dz):
 and creating an annulus:
 .nf
   %  \fBccdmath "" map0 "ifgt(%w,20,1,iflt(%w,10,1,0))" size=512 crpix=256,256\fP
+.fi
+Rescaling a map to a linear-log, retaining linear near 0, and logarithmic in signal/noise for large values
+from the mean:
+.nf
+  set s = 0.19
+  cddmath map0 map0s "sign(%1)*$s*log(1+abs(%1)/$s)"
 .fi
 .SH TIMING
 Performance on Rigel (SUN 3/160, 16Mhz):
