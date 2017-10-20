@@ -462,10 +462,12 @@ void WDutils::Reporting<Traits>::print_header(std::ostringstream&ostr,
     ostr   << " @";
     if(mpi)
       ostr << RunInfo::mpi_proc();
+#if defined(WDutilsDevel)
     if(mpi && thr)
       ostr << ':';
     if(thr)
       ostr << RunInfo::thread_id();
+#endif
   }
   if(depth)
     ostr   << dpth;
