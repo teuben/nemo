@@ -17,3 +17,6 @@ Some other comments:
   Contopolous, in his 2004 Scientific Autobiography, comments on the optimism of Lecar when
   different integrators would find anywhere from 1 to 5 escaping stars in this simulation.
   He decided the number of escapers was 3 plus or minus 2!
+
+- the JPL (PIcket et al. 1998) catalogue used by tabpp can be installed with the script
+  $NEMO/src/scripts/get_jplcatalog
