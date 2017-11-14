@@ -14,10 +14,12 @@
 string defv[] = {
   "in=???\n       Input image file",
   "out=???\n      Output image file",
+  "lut=$NEMODAT/rainbow1.lut\n     RGB response",
   "z=\n           z range, if used",
-  "mode=box\n     boxcar, pyramid",
+  "gamma=1\n      Gamma factor",
+  "color=R,G,B\n  Pick R, G or B",
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2",
-  "VERSION=0.1\n  20-aug-2013 PJT",
+  "VERSION=0.2\n  20-aug-2013 PJT",
   NULL,
 };
 
