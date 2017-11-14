@@ -101,6 +101,10 @@ Note that the maximum grid size and maximum amount of particles are hardcoded
 during compilation. See comments in \fBrjinclude.h\fP how to change the
 maximum grid size and the parameter \fBmbod\fP in
 \fBgalaxy.f\fP for the maximum particle number that can be used.
+.PP
+The new release V15 does not depend on commercial (e.g. NAG) software, and
+can be compiled using open source tools and libraries. PGPLOT must be
+installed independantly.
 .SH RES2SNAP
 The following shell script, given as an example, will convert a particular
 snapshot from a binary "galaxy.res" file into a NEMO \fIsnapshot(5NEMO)\fP
@@ -124,7 +128,7 @@ unfio $file "$n*2" float maxbuf=100000 |\\
    tabtos - ${file:r}.$n.snap "" pos,vel,phi options=wrap times=$tsnap nbody=$nbody
 .fi
 .SH BENCHMARKS
-1000 particles on a 32**3 cube integrating for 20 steps took 4.77" on
+1000 particles on a 32**3 cube integrating for 20 steps took 4.77\" on
 a sparc Ultra-2.
 .SH SEE ALSO
 rungalaxy(1NEMO), unfio(1NEMO), snapshot(5NEMO)
@@ -145,4 +149,5 @@ Jerry Sellwood
 18-mar-04	fixed bad usage line; refer to rungalaxy now	PJT
 8-mar-06	V1.3  now installs by default into NEMOBIN	PJT
 26-jun-2014	notes on the official full public release	PJT
+10-mar-2017     notes on the new V15 release	PJT
 .fi
