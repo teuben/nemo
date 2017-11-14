@@ -1,0 +1,48 @@
+.TH DICE 1NEMO "14 November 2017"
+.SH NAME
+dice \-  create initial conditions of idealised galaxies
+.SH SYNOPSIS
+\fBdice dice.config\fP 
+.SH DESCRIPTION
+\fIDICE\fP
+is an open source code modelling initial conditions of idealised
+galaxies to study their secular evolution, or to study more complex
+interactions such as mergers or compact groups using N-Body/hydro
+codes. The particularity of this code is its ability to setup a large
+number of components modelling distinct parts of the galaxy. The code
+creates 3D distributions of particles using a N-try MCMC algorithm
+which does not require a prior knowledge of the distribution
+function. The gravitational potential is then computed on a
+multi-level cartesian mesh by solving the poisson equation in the
+Fourier space. Finally, the dynamical equilibrium of each component is
+computed by integrating the Jeans equations for each
+particles. Several galaxies can be generated in a row and be placed on
+Keplerian orbits to model interactions. DICE writes the initial
+conditions in the Gadget1 or Gadget2 format and is fully compatible
+with Ramses thanks to a patch included in the public ramses
+distribution.
+.SH RUNNING
+DICE uses ascii files as inputs. There is three kind of files to consider:
+.PP
+DICE configuration files, which are the only argument you should give to DICE.
+.PP
+Galaxy parameters files, which list all the physical parameters of each galaxy you want to build.
+.PP
+Stream parameters files, which list all the physical parameters of each stream you want to build.
+.PP
+Calling DICE should then look like this:
+.nf
+    dice dice.config
+.fi
+.SH SEE ALSO
+mkplummer(1NEMO), magalie(1NEMO), mkkd95(1NEMO)
+.PP
+https://bitbucket.org/vperret/dice/wiki/Running%20DICE
+.fi
+.SH AUTHOR
+Valentin Perret 
+.SH HISTORY
+.nf
+.ta +1i +4i
+14-nov-2017	man written	PJT
+.fi
