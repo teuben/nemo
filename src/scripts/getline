@@ -4,6 +4,9 @@
 #    plus line contents
 #    optionally strip off comment(s)
 #
+#    <1992         original csh script   - Peter Teuben
+#     jul-2012     replaced with python
+#     aug-2016     add -s flag
 
 import os, sys
 
