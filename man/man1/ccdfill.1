@@ -39,7 +39,8 @@ Value in the map that should be patched.
 \fBall=t|f\fP
 Normally only bad pixels are patches. By setting \fBall=t\fP all pixels
 are re-fitted with a planar fit, effectively smoothing the map. This
-will obviously not conserve flux, and should be used with caution.
+will obviously not conserve flux, where applicaple,
+and should be used with caution.
 Default: f
 .TP
 \fBm=\fP
@@ -54,8 +55,8 @@ case the image will just be copied unmodified.
 Default: 1
 .TP
 \fBspike=\fP
-If given, for each point in the map, if a point deviates more than \fBspike\fB from
-all it's 4 direct neighbors, this value will be reset to \fBbad\fP before the actually
+If given, for each point in the map, if a point deviates more than \fBspike\fP from
+all it's 4 non-bad direct neighbors, this value will be reset to \fBbad\fP before the actually
 filling will take place. Default: none (not applied)
 .SH CAVEATS
 With m=3 you will see some singular matrix warnings, and patched values
