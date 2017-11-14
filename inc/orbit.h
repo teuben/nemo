@@ -48,6 +48,8 @@ typedef struct {
 #define MAXsteps(optr)  ((optr)->maxsteps)
 #define TimePath(optr)  ((optr)->time)
 #define PhasePath(optr) ((optr)->phase)
+#define PosPath(optr)   ((optr)->phase)
+#define VelPath(optr)   ((optr)->phase+Ndim(optr))
 #define Potential(optr) ((optr)->pot)
 
 /*      a few dangerous (does not check for ndim) access functions */
@@ -55,9 +57,9 @@ typedef struct {
 #define I1(optr)        (*(IOM(optr)))
 #define I2(optr)        (*(IOM(optr)+1))
 #define I3(optr)        (*(IOM(optr)+2))
-#define IE1(optr)        (*(IOMERR(optr)))
-#define IE2(optr)        (*(IOMERR(optr)+1))
-#define IE3(optr)        (*(IOMERR(optr)+2))
+#define IE1(optr)       (*(IOMERR(optr)))
+#define IE2(optr)       (*(IOMERR(optr)+1))
+#define IE3(optr)       (*(IOMERR(optr)+2))
 /*      OLD V1.x structure
 #define Torb(optr,i)    *(TimePath(optr)+i)
 #define Xorb(optr,i)    *(PhasePath(optr)+i)
@@ -104,6 +106,8 @@ typedef struct {
 #define     NstepsTag           "Nsteps"
 #define     TimePathTag         "TimePath"
 #define     PhasePathTag        "PhasePath"
+#define     PosPathTag          "PosPath"
+#define     VelPathTag          "VelPath"
 
 
 
