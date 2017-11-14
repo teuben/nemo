@@ -13,6 +13,9 @@
  *
  *  \smallskip
  *  See also the description for the Kuzmin disk.
+ *
+ *  A mestel disk has a flat rotation curve, and up until the radius R,
+ *  a surface brightness $ v_o^2 / (2\pi G R) $.
  */
  
 
