@@ -13,7 +13,7 @@
 #include <stdinc.h>
 #include <extstring.h>
 
-#define MWRD 1024	/* max words in list */
+#define MWRD 2048	/* max words in list */
 #define MSTR 256	/* max chars per word */
 
 string *burststring(string lst, string sep)
