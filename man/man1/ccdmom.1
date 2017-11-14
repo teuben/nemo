@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "21 June 2016"
+.TH CCDMOM 1NEMO "21 June 2017"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -14,6 +14,8 @@ via \fIpvtrace(1NEMO)\fP.
 .PP
 To get the intensity weighted shape of an object using the moments
 of inertia, use \fIccdshape(1NEMO)\fP.
+.PP
+Continuum subtraction is needed for reliable moments where applicable.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -36,7 +38,7 @@ referring to the selected axis as "\fIvelocity\fP" we have the following moments
 0	total emission
 1	mean velocity
 2	sigma, the velocity dispersion (FWHM = 2.355 * sigma)
-3	velocity of peak fit (around the max and the two points on either)
+3	velocity of peak fit (around the max and the two points on either side)
 -1	average intensity along the axis
 -2	dispersion around the mean intensity along the axis
 -3	differentials along an axis
@@ -97,6 +99,17 @@ When using mom=0 the signal is summed along an axis, you can either just sum
 the numbers (this used to be the old default), or integrate, ie. multiply
 the sum by the cell-size along that axis. This is now the default, to make
 it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
+.TP
+\fBabs=t|f\fP
+Use absolute values of the intensities for weights to a moment analysis. This is
+useful for low S/N data where at the wings a sign change can bias the moments.
+It is assumed the data have been continuum subtracted.
+.TP
+\fBpos=\fP\fI[ix0,iy0]\fP
+If used, this should contain two (zero-based) pixel coordinates, at which position a spectrum
+is printed to stdout. Currently only implemented along the Z direction, hence X and Y. At
+some future time it may also support spectra along Y or X, but most advanced features are only
+implemented along axis=3. Default: none
 .SH SEE ALSO
 pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), mom2cube(1NEMO), image(5NEMO)
 .SH CAVEATS
@@ -121,5 +134,8 @@ Peter Teuben
 16-sep-11	V0.8 added clip= and rngmsk= [lost code]	PJT
 27-nov-12	V1.0 added oper=	PJT
 14-feb-13	V2.0 integrate=t is now the new default for mom=0	PJT
-21-jun-2016	V2.4 added mom=30,31,32,33,34	PJT
+21-jun-2016	V2.3 added mom=30,31,32,33,34	PJT
+10-may-2017	V2.4 force q&d cont subtraction on mom=30,31,....	PJT
+15-jun-2017	V2.5 add pos= option	PJT
+21-jun-2017	V2.6 add abs= option	PJT
 .fi
