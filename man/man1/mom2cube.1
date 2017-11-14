@@ -1,4 +1,4 @@
-.TH MOM2CUBE 1NEMO "5 April 2017"
+.TH MOM2CUBE 1NEMO "11 April 2017"
 .SH NAME
 mom2cube \- Use cube moments along Z to reconstruct a cube
 .SH SYNOPSIS
@@ -44,6 +44,11 @@ correspond to the integral in the cube (I.dv) not just the sum of the values.
 Should the cube be cloned (including WCS).  This also saves memory, but can only
 be done if they spatially agree in X and Y.
 [false]
+.TP
+\fBchan0=\fP
+Select a channel to be zero'd out. This can be useful if you need the cube
+for a simulation where there is a channel with no signal.
+Default: -1 (no channel zeroed)
 .SH SEE ALSO
 ccdmom(1NEMO), ccdstat(1NEMO), image(5NEMO)
 .SH FILES
@@ -55,4 +60,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 5-apr-2017	V0.1 Created	PJT
 6-apr-2017	V0.4 released with some improved options and defaults	PJT
+11-apr-2017	V0.5 added chan0=	PJT
 .fi
