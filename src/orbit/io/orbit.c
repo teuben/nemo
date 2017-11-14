@@ -21,6 +21,7 @@
  *  19-apr-96       c initialize strings to "" instead of NULL  pjt
  *   1-mar-03   V3.3  added stuff for iom_err			pjt
  *  25-jul-13   V4.0  added support for key                     pjt
+ *  12-nov-2015 V5.0  some support for split Pos/Vel            pjt
  *------------------------------------------------------------------------------
  */
 
