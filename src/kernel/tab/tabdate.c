@@ -4,6 +4,8 @@
  *      1-feb-05    0.1 Created
  *      9-may-05    0.2 added time0= (tcol= still defaulted to 'all')
  *      3-apr-09    0.3 initialize the 'struct tm' structures better, using dcol= now
+ *
+ * TODO:   allow non-date columns to pass through
  */
 
 #include <stdinc.h>
