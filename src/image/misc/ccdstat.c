@@ -255,8 +255,8 @@ nemo_main()
       /* tabular output, one line per (selected) plane */
 
       printf("# iz z min  max  N  mean sigma skew kurt sum sumsov ");
-      if (Qmedian) printf(" [med med]");
-      if (Qrobust) printf(" robust[N mean sig med]");
+      if (Qmedian) printf(" med1 med2");
+      if (Qrobust) printf(" rN rmean rsigma rmed]");
       if (Qmaxpos) printf(" maxposx maxposy");
       printf("\n");
 
