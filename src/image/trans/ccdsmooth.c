@@ -14,9 +14,13 @@
  *	 7-mar-98      a attempted to handle maps with < 0 Dx/Dy/Dz	PJT
  *      12-mar-98  V3.1  handle gauss=0 and added cut= keyword          PJT
  *	20-apr-01      a bigger default size for MSIZE			pjt
+ *      30-jun-2016 V3.4 option to use a moffat smoothing
  *
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
+ *
+ *  todo
+ *     - near an edge, normalization is done with full beam, so the signal tapers off....
  */
 
 #include <stdinc.h>
@@ -29,15 +33,17 @@
 string defv[] = {
 	"in=???\n               Input filename",
 	"out=???\n              Output filename",
-	"gauss=\n               FWHP gaussian beamwidth, if used",		
+	"gauss=\n               FWHP gaussian beamwidth, if used",
+	"moffat=\n              FWHM moffat function, if used",
 	"dir=xy\n               Coordinates to smooth (xyz)",			
 	"smooth=0.25,0.5,0.25\n Alternate smoothing array if gauss= not used",
 	"wiener=\n              Size of a wiener filter, if used (square in X,Y)",
 	"nsmooth=1\n            Number of smoothings",
 	"bad=\n			Optional ignoring this bad value",
+	"beta=4.765\n           beta parameter for the moffat function",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=3.3b\n         2-may-2013 PJT",
+	"VERSION=3.4\n          29-jun-2016 PJT",
 	NULL,
 };
 
@@ -66,14 +72,20 @@ int    lsmooth;				/* actual smoothing length */
 int    nsmooth;				/* number of smoothings */
 real   gauss_fwhm;			/* beam size in case gauss */
 real   gauss_cut;                       /* cutoff of gaussian */
+real   moffat_fwhm;
+real   moffat_alpha;
+real   moffat_beta;
 string dir;                             /* direction to smooth 'xyz' */
 int    mode;                            /* special edge smoothing modes */
 
 bool   Qbad;                            /* ignore smoothing for */
 real   bad;                             /* this value */
 
-void setparams(), smooth_it(), make_gauss_beam();
+void setparams(), smooth_it();
 int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
+
+void make_gauss_beam(char *sdir);
+void make_moffat_beam(char *sdir);
 
 
 void nemo_main ()
@@ -95,6 +107,13 @@ void nemo_main ()
 
     if(hasvalue("gauss"))
         make_gauss_beam(getparam("dir"));
+    else if (hasvalue("moffat")) {    /*  http://adsabs.harvard.edu/abs/1969A%26A.....3..455M */
+	moffat_fwhm = getrparam("moffat");
+        moffat_beta = getrparam("beta");
+	moffat_alpha = moffat_fwhm / (2*sqrt(pow(2.0,1.0/moffat_beta)-1));
+	dprintf(0,"Moffat: alpha=%g beta=%g\n",moffat_alpha, moffat_beta);
+	make_moffat_beam(getparam("dir"));
+    }
 
     outstr = stropen (outfile,"w");
     if (hasvalue("wiener"))
@@ -195,8 +214,10 @@ void smooth_it()
 }
 
 
-void make_gauss_beam(sdir)
-char *sdir;		/* smoothing direction: 'x', 'y' or 'z' */
+/*  sdir:    smoothing direction: 'x', 'y' or 'z' */
+
+void make_gauss_beam(char *sdir)
+
 {
     real sigma, sum, x, fx;
     int    i;
@@ -237,6 +258,43 @@ char *sdir;		/* smoothing direction: 'x', 'y' or 'z' */
     for (i=0; i<lsmooth; i++) {
         x = (i-(lsmooth-1)/2)*cell/sigma;
         smooth[i] = exp(-0.5*x*x) * sum;   /* normalize */
+    }
+}
+
+void make_moffat_beam(char *sdir)
+{
+    real sigma, sum, x, fx;
+    int    i;
+
+    sigma = moffat_fwhm;    /* FWHM = 2*a*sqrt(2^(1/b)-1) */
+    lsmooth=1;              /* count how many we need for the 'smooth' ARRAY */
+    x=0;                    /* minimum is 1, at x=0 */
+    sum=1.0;                /* unnormalized value at x=0 */
+    if (*sdir == 'x')
+        cell = ABS(dx);
+    else if (*sdir == 'y')
+        cell = ABS(dy);
+    else if (*sdir == 'z')
+        cell = ABS(dz);
+    if (cell==0.0)    
+        error("make_moffat_beam: cellsize zero for dir=%c",*sdir);
+    dprintf(0,"dir=%c sigma=%g cell=%g\n",*sdir,sigma,cell);
+
+    do {
+        x += cell;
+        lsmooth += 2;
+        fx = 1.0 / pow( 1+ sqr(x/moffat_alpha), moffat_beta);
+        sum += 2*fx;
+    } while ((fx>gauss_cut) && (lsmooth<MSMOOTH));  /* cutoff beam */
+    sum = 1.0/sum;
+    dprintf (1,"Moffat beam will contain %d points at cutoff %g \n",
+                lsmooth, gauss_cut);
+    if ((lsmooth==MSMOOTH) && (fx>gauss_cut)) 
+        dprintf(0,"Warning: beam cutoff %g at %d points\n",
+                gauss_cut, MSMOOTH);
+    for (i=0; i<lsmooth; i++) {
+        x = (i-(lsmooth-1)/2)*cell;
+        smooth[i] = sum / pow(1+sqr(x/moffat_alpha),moffat_beta);
     }
 }
                 
