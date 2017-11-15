@@ -80,11 +80,12 @@ string defv[] = {
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
 	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",
 	"vsys=0\n        VSYS correction (test)",
+	"freq=f\n        Output axis in FREQ or VHEL",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
-	"select=1\n      Which image (if more than 1 present) to select",
-        "VERSION=6.09\n  8-apr-2017 PJT",
+	"select=1\n      Which image (if more than 1 present, 1=first) to select",
+        "VERSION=5.9\n   14-apr-2017 PJT",
         NULL,
 };
 
@@ -105,6 +106,7 @@ string headline;         /* optional NEMO headline, added as COMMENT */
 string proj;             /* projection type for WCS */
 bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
 bool Qradecvel;         /* fake astronomy WCS header */
+bool Qfreq;              /* freq or vel output ? */
 bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;            /* write dummy axes ? */
@@ -112,7 +114,9 @@ int  nrefaxis, refaxis[4];
 bool Qrefaxis[4];
 
 int   nref = 0, nfill = 0;
-FLOAT ref_crval[4], ref_crpix[4], ref_cdelt[4];
+FLOAT ref_crval[4] = {0,0,0,1},
+      ref_crpix[4] = {1,1,1,1},
+      ref_cdelt[4] = {1,1,1,1};
 char  ref_ctype[4][80], ref_cunit[4][80];
 FLOAT restfreq;
 real  vsys;
@@ -168,6 +172,9 @@ void setparams(void)
   restfreq = getrparam("restfreq");
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
+  Qfreq     = getbparam("freq");
+
+  
   Qrefmap = hasvalue("refmap");
   if (Qrefmap) {
     set_refmap(getparam("refmap"));
@@ -178,19 +185,19 @@ void setparams(void)
 
   Qcrpix = hasvalue("crpix");
   if (Qcrpix) {
-    nref =  nemoinpr(getparam("crpix"),tmpr,3);
+    nref =  nemoinpr(getparam("crpix"),tmpr,4);
     for (i=0; i<nref; i++)
       ref_crpix[i] = tmpr[i];
   }
   Qcrval = hasvalue("crval");
   if (Qcrval) {
-    nref =  nemoinpr(getparam("crval"),tmpr,3);
+    nref =  nemoinpr(getparam("crval"),tmpr,4);
     for (i=0; i<nref; i++)
       ref_crval[i] = tmpr[i];
   }
   Qcdelt = hasvalue("cdelt");
   if (Qcdelt) {
-    nref =  nemoinpr(getparam("cdelt"),tmpr,3);
+    nref =  nemoinpr(getparam("cdelt"),tmpr,4);
     for (i=0; i<nref; i++)
       ref_cdelt[i] = tmpr[i];
   }
@@ -206,6 +213,8 @@ static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
 static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
 static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
 static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
+static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
+static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
 
 void write_fits(string name,imageptr iptr)
@@ -347,12 +356,12 @@ void write_fits(string name,imageptr iptr)
       if (streq(proj,"SIN")) {
 	ctype1_name = radeves[p[0]];
 	ctype2_name = radeves[p[1]];
-	ctype3_name = radeves[p[2]];
+	ctype3_name = Qfreq ? radefrs[p[2]] : radeves[p[2]];
 	ctype4_name = radeves[p[3]];
       } else if (streq(proj,"TAN")) {
 	ctype1_name = radevet[p[0]];
 	ctype2_name = radevet[p[1]];
-	ctype3_name = radevet[p[2]];
+	ctype3_name = Qfreq ? radefrt[p[2]] : radevet[p[2]];	
 	ctype4_name = radevet[p[3]];
       } else
 	error("Illegal projection scheme %s",proj);
@@ -369,7 +378,10 @@ void write_fits(string name,imageptr iptr)
       //
       fitwrhda(fitsfile,"CUNIT1","deg");
       fitwrhda(fitsfile,"CUNIT2","deg");
-      fitwrhda(fitsfile,"CUNIT3","km/s");            /* or m/s */
+      if (Qfreq)
+	fitwrhda(fitsfile,"CUNIT3","Hz");
+      else
+	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or m/s */
       fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
