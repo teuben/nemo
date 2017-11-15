@@ -1,4 +1,4 @@
-.TH TABTREND 1NEMO "26 November 2012"
+.TH TABTREND 1NEMO "15 June 2016"
 .SH NAME
 tabtrend \- difference rows from previous rows
 .SH SYNOPSIS
@@ -18,7 +18,10 @@ is also given:
 Input file name. No default.
 .TP
 \fBxcol=\fP
-Column(s) to use [1]    
+Column(s) to use [1]
+.TP
+\fBcumul=t|f\fP
+Cumulative, instead of differences.  Default: false
 .TP
 \fBnmax=\fP
 max size if a pipe [100000]  
@@ -54,4 +57,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 26-Nov-2012	finally documented	PJT
 13-oct-2014	better examples		PJT
+15-jun-2016	added cumul=		PJT
 .fi

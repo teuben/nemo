@@ -11,7 +11,7 @@ tabhist \- histogram plotter and gaussian fit for tabular data
 It calculates the mean, dispersion,
 skewness and kurtosis. It then plots the data in the form of a histogram,
 optionally with a 'best' gaussian fit and residuals. It can also plot
-a cumulative histogram of the data. 
+a cumulative histogram of the data (see also tabtrend(1NEMO))
 .PP
 The median is also optionally computed, for which an 
 alternate sorting routine can be selected (if available). 
@@ -94,7 +94,7 @@ If true, the residual (data - fit) will be plotted as a dashed line.
 .TP
 \fBcumul=t|f\fP
 Plot a cumulative histogram instead. If set, the keywords gauss, residual,
-and ylog are automatically re-set to false. 
+and ylog are automatically re-set to false.  
 [Default: \fBf\fP].
 .TP
 \fBmedian=t|f\fP
@@ -131,7 +131,7 @@ right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is
 exactly opposite that of SM's behavior, which was used to compare results.
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO)
+tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO), tabtrend(1NEMO)
 .PP
 http://vostat.org
 .PP
