@@ -22,6 +22,7 @@
  *                            structure when split=t
  *                            added fix=promote     XTENSION->SIMPLE    PJT
  *	12-feb-99	    a changes for new fts_cdata			PJT
+ *
  */
 
 #include <stdinc.h>
