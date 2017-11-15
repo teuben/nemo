@@ -101,12 +101,12 @@ local void read_data()
 {
     int   i,j,k;
     
+    ncol = 2;
     dprintf(0,"Reading %d column(s)\n",ncol);
     xcol = (real *) allocate(sizeof(real)*nmax);
     ycol = (real *) allocate(sizeof(real)*nmax);
     coldat[0] = xcol;
     coldat[1] = ycol;
-    ncol = 2;
 
     npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
     if (npt == -nmax) {
@@ -146,8 +146,6 @@ local void mean_data(void)
 {
   int i,i0,i1,ipeak;
   real peak, sum0, sum1, sum2, xmean, xsig;
-
-  /* loop over all interior points and find peaks or valleys, fit local polynomial */
 
 
   /* find first occurence > clip */
