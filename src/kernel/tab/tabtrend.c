@@ -2,6 +2,7 @@
  * TABTREND: difference rows from previous rows
  *          
  *   12-may-05   Created quick & dirty for CARMA               PJT
+ *   15-jun-2016 cumul= option
  *                        
  * 
  * TODO:
@@ -25,11 +26,12 @@ string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.1\n		  12-may-05 PJT",
+    "cumul=f\n                    cumulative instead?",
+    "VERSION=0.2\n		  15-jun-2016 PJT",
     NULL
 };
 
-string usage = "difference rows from previous rows";
+string usage = "difference rows from previous rows, or cumulate them";
 
 string cvsid = "$Id$";
 
@@ -55,10 +57,13 @@ real *coldat[MAXCOL];
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 
+local bool   Qcumul;
+
 
 local void setparams(void);
 local void read_data(void); 
 local void trend_data(void);
+local void cumul_data(void);
 
 
 
@@ -68,7 +73,10 @@ nemo_main()
 {
     setparams();			/* read the parameters */
     read_data();
-    trend_data();
+    if (Qcumul)
+      cumul_data();
+    else
+      trend_data();
 }
 
 local void setparams()
@@ -81,6 +89,8 @@ local void setparams()
     if (nmax<1) error("Problem reading from %s",input);
 
     instr = stropen (input,"r");
+
+    Qcumul = getbparam("cumul");
 }
 
 
@@ -107,6 +117,24 @@ local void trend_data(void)
   for (i=1; i<npt; i++) {
     for (j=0; j<ncol;  j++)
       printf("%g ",coldat[j][i]-coldat[j][i-1]);
+    printf("\n");
+  }
+}
+
+local void cumul_data(void)
+{
+  int i,j;
+  real sum[MAXCOL];
+
+  for (i=0; i<npt; i++) {
+    if (i==0)
+      for (j=0; j<ncol;  j++)
+	sum[j] = -coldat[j][0];
+	  
+    for (j=0; j<ncol;  j++) {
+	sum[j] += coldat[j][i];
+	printf("%g ",sum[j]);
+    }
     printf("\n");
   }
 }
