@@ -17,6 +17,10 @@
  *      29-apr-13   2.1  add clumping definition  http://arxiv.org/abs/1304.1586  (mom=-4)
  *      12-jan-16   2.2a minmax computation was forgotten
  *      24-jun-16   2.3  mom=30,31,32,33
+ *      30-apr-17   2.3c various for EDGE clarifications
+ *      10-may-17   2.4  add cont subtraction for modes 30,31,32,33,...
+ *      15-jun-17   2.5  pos=x,y triggering debug output
+ *      21-jun-17   2.6  use abs values for
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -30,6 +34,9 @@
 #include <image.h>
 #include <moment.h>
 
+/* this may slow the code down if you don't ever need the pos= keyword */
+#define USE_POS
+
 string defv[] = {
   "in=???\n       Input image file",
   "out=???\n      Output image file",
@@ -41,8 +48,16 @@ string defv[] = {
   "peak=0\n       Find N-th peak in case of peak finding (mom=3) [0 means first as well]",
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2",
   "rngmsk=f\n     Invalidate pixel when first moment falls outside range of valid axis [not impl]",
+  "abs=f\n        Use absolute values in moment calculations (abs=t is better for low S/N)",
+  "zero=f\n       Mask out values below zero for mom=30,31,32 (**experimental**)",
+  "contsub=t\n    Fake a continuum subtraction for mom=30,31,32  (**experimental**)",
   "integrate=t\n  Use integration instead of just summing, only used for mom=0",
-  "VERSION=2.3b\n 5-apr-2017 PJT",
+#ifdef USE_POS  
+  "pos=\n         Given this (i,j) [0 based] location, debug output spectral information",
+#else  
+  "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
+#endif  
+  "VERSION=2.6a\n  15-nov-2017 PJT",
   NULL,
 };
 
@@ -50,7 +65,7 @@ string usage = "moment along an axis of an image";
 string cvsid="$Id$";
 
 local real peak_spectrum(int n, real *spec, int p);
-local real peak_mom(int n, real *spec, int *smask, int peak, int mom);
+local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero);
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
 local int  peak_assign(int n, real *data, int *mask);
@@ -64,6 +79,7 @@ void nemo_main()
     stream  instr, outstr;
     string  oper;
     int     i,j,k,nx, ny, nz, nx1, ny1, nz1;
+    int     pos[2];
     int     axis, mom;
     int     nclip, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
@@ -75,6 +91,10 @@ void nemo_main()
     int     npeak = getiparam("peak");
     bool    Qint  = getbparam("integrate"); 
     bool    Qclip = hasvalue("clip");
+    bool    Qpos  = hasvalue("pos");
+    bool    Qabs  = getbparam("abs");
+    bool    Qzero = getbparam("zero");
+    bool    Qcontsub = getbparam("contsub");
 
     if (Qoper) {
       Qkeep = TRUE;
@@ -89,6 +109,10 @@ void nemo_main()
 
     if ((mom%10==3 ) && axis!=3 && npeak>1) error("Nth-peak>1 finding only axis=3");
 
+    if (Qpos)
+      if (nemoinpi(getparam("pos"),pos,2) != 2)
+	error("Need 2 integer (0 based) values for x,y position in pos=%s",getparam("pos"));
+
     if (Qclip) {
       nclip = nemoinpr(getparam("clip"),clip,2);
       if (nclip<1) error("error parsing clip=%s",getparam("clip"));
@@ -97,7 +121,6 @@ void nemo_main()
 	clip[0] = -clip[1];
       }
     }
-
 
     if (getbparam("cumulative"))
       axis = -axis;
@@ -294,7 +317,7 @@ void nemo_main()
 
 	if (Qoper) image_oper(iptr,oper,iptr1);
 
-    } else if (axis==3) {                       /* this one is well tested */
+    } else if (axis==3) {                       /* this one is well tested and has more options */
         scale = Dz(iptr);
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
@@ -351,7 +374,7 @@ void nemo_main()
 		      newvalue = scale*(apeak + peak_spectrum(nz,spec,apeak)) + offset;
 		  } else if (mom>=30) {
 		      (void) peak_find(nz, spec, smask, 0);                  /* initialize smask */
-		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);
+		      newvalue = peak_mom(nz, spec, smask, 0, mom-30, Qcontsub, Qabs, Qzero);
 		      if (mom==31) newvalue = scale*newvalue + offset;
 		      if (mom==32) newvalue = scale*newvalue;
 		  } else {
@@ -387,9 +410,19 @@ void nemo_main()
 #endif
 		  dprintf(1,"MOM: mom/30\n",mom/30);
 		  if (mom >= 30) {
-		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30);
+		      newvalue = peak_mom(nz, spec, smask, npeak, mom-30,Qcontsub,Qabs,Qzero);
 		      if (mom==31) newvalue = scale*newvalue + offset;
 		      if (mom==32) newvalue = scale*newvalue;
+#ifdef USE_POS
+		      /* DEBUG */
+		      if (Qpos && i==pos[0] && j==pos[1]) {
+			printf("# spectrum at %d,%d (0 based pixels)\n",i,j);
+			for (int ii=0; ii<nz; ii++) {
+			  printf("%d %g %g %d\n",ii,spec[ii],smask[ii]*spec[ii],smask[ii]);
+			}
+			printf("# mom = %g\n",newvalue);
+		      }
+#endif		      
 		  }
 		}
 	      }
@@ -460,12 +493,18 @@ void nemo_main()
 
 
 /*
+ * peak_spectrum:
  * return location of peak for (-1,y1) (0,y2) (1,y3)
- * as determined from the 2d polynomial going through
- * these 3 points
- * Also finds valleys
+ * as determined from the 2nd order polynomial going through
+ * these 3 points.
+ * (also finds valleys)
  *
- * Returns number between -0.5 and 0.5
+ * Returns a number between -0.5 and 0.5 from the center
+ * because it is guarenteed y2 is a local extremum
+ * (though this is NOT checked here)
+ *
+ * It returns an exact fit, because of the 2nd order poly,
+ * could try 5 points and do a lsqfit or gaussfit....
  */
 
 local real peak_spectrum(int n, real *spec, int p)
@@ -479,17 +518,40 @@ local real peak_spectrum(int n, real *spec, int p)
   return 0.5*(y1-y3)/(y1+y3-2*y2);
 }
 
-local real peak_mom(int n, real *spec, int *smask, int peak, int mom)
+/*
+ * @todo:    have an option to use abs() for mom2 calculations,
+ *           but this assumes Qcontsub has been applied
+ */
+
+local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero)
 {
   int i;
   Moment m;
+  bool Qfirst = TRUE;
+  real cont = 0.0;
 
-  dprintf(1,"peak_mom %d %d\n",peak,mom);
+  if (Qzero) {
+    for (i=0; i<n; i++) {
+      if (smask[i] && spec[i] < 0.0) smask[i] = 0;
+    }
+  }
 
   ini_moment(&m, mom, n);
+  if (Qcontsub) {
+    for (i=0; i<n; i++) {
+      if (smask[i]==peak) {
+	if (Qfirst) {
+	  cont = spec[i];
+	  Qfirst = FALSE;
+	}
+	if (spec[i] < cont) cont = spec[i];
+      }
+    }
+  }
+  dprintf(1,"peak_mom %d %d %g\n",peak,mom,cont);
   for (i=0; i<n; i++)
     if (smask[i]==peak)
-      accum_moment(&m, i, spec[i]);
+      accum_moment(&m, i, spec[i]-cont);
   if (mom==0)
     return sum_moment(&m);
   else if (mom==1)
