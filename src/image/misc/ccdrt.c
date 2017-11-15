@@ -23,14 +23,15 @@ but applies no radiative transfer
 #include <image.h>
 
 string defv[] = {
-        "in=???\n       Input intensity image file",
-	"out=???\n      Output image file",
-	"peak=f\n       Use peak value",
-	"VERSION=0.1\n  3-jul-2012 PJT",
-	NULL,
+  "in=???\n       Input intensity image file",
+  "out=???\n      Output image file",
+  "peak=f\n       Use peak value",
+  "VERSION=0.1\n  3-jul-2012 PJT",
+  NULL,
 };
 
 string usage = "apply some radiative transfer in a cube to create a map";
+
 string cvsid="$Id$";
 
 local real peak_axis(imageptr iptr, int i, int j, int k);

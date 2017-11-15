@@ -13,10 +13,11 @@
  *   30sep92  mchw  New task for Miriad.
  *   29aug02  pjt   Added frang= to prevent large divisions for models
  *   31aug02  pjt   Ieck, rms calculation wrong, arrays not reset to 0
- *    5-oct-2003  Created, embedding in rotcur was too painful    PJT
- *   22-oct-2005  Optional output map with rotation velocities  SNV/PJT
- *    3-feb-2011  more options to output map, added tab=           PJT
+ *    5-oct-2003  Created, embedding in rotcur was too painful      PJT
+ *   22-oct-2005  Optional output map with rotation velocities      SNV/PJT
+ *    3-feb-2011  more options to output map, added tab=            PJT
  *   10-feb-2011  cleanup and order of keywords aligned with rotcur PJT
+ *   11-aug-2014  allow par= to use another parameter file          PJT
  *
  *
  */
@@ -40,7 +41,7 @@ string defv[] = {
   "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad,dv/dr}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.4a\n 2-mar-2014 PJT",
+  "VERSION=1.5\n  11-aug-2014 PJT",
   NULL,
 };
 
