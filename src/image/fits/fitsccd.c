@@ -5,6 +5,8 @@
  *		allow bscale/bzero/crpix etc. to be overriden
  *		even if fits file; i.e. make their
  *		defaults blanks, and use hasvalue() to detect mode.
+ *              fix header if box= or planes= is used
+ *             
  *
  *        ==>>  fix the NaN problem
  *
@@ -38,6 +40,7 @@
  *      14-apr-03           b fix NaN problems with FITS files
  *      23-nov-04        4.9  deal with axistype 1 images, but forced keyword   pjt
  *       3-dec-2013      5.0  showcs option      pjt
+ *      18-feb-2015      5.1  add box=           pjt
  */
 
 #include <stdinc.h>
@@ -50,6 +53,7 @@ string defv[] = {
     "in=???\n		Input fits file",
     "out=\n		Output image file",
     "planes=\n          Planes to select from fits cube [all]", 
+    "box=\n             Box (xmin,ymin,xmax,ymax) to select from fits cube [all]",
     "blocking=1\n	Extra blocking factor for input (blocksize/2880)",
     "mode=fits\n        Format mode of input file {fits,raw}",
     "blocksize=1\n      Blocksize in raw mode",
@@ -64,7 +68,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.0b\n	15-feb-2015 PJT",
+    "VERSION=5.1\n	18-feb-2015 PJT",
     NULL,
 };
 
@@ -85,6 +89,7 @@ void nemo_main()
     stream outstr;
     FITS *fitsfile;
     int ndim=3, naxis[3], nx, ny, nz, i, j, k, npl, p, planes[MAXPLANES];
+    int nbox, box[4], i0, j0;
     int nbval=0;
     real bval_out, rmin, rmax, tmp, fbval;
     FLOAT *buffer, *bp, bval_in;  /* fitsio- is in FLOAT !!! */
@@ -100,7 +105,15 @@ void nemo_main()
       outstr = stropen(getparam("out"),"w");   /* open image file for output */
     npl = nemoinpi(getparam("planes"),planes,MAXPLANES);
     if (npl<0) warning("Error parsing %d planes=",MAXPLANES);
-    dprintf(0,"npl = %d\n",npl);
+    nbox = nemoinpi(getparam("box"),box,4);
+    if (nbox<0) 
+      error("Error parsing box=");
+    else if (nbox == 0)
+      box[0] = box[1] = box[2] = box[3] = 0;
+    else if (nbox != 4) 
+      error("Need 4 integers box=xmin,ymin,xmax,ymax");
+    if (nbox>0) warning("New feature box= not fully tested");  /* > 2GP files wrong? */
+    dprintf(0,"npl=%d nbox=%d\n",npl,nbox);
     mode = getparam("mode");
     blankval = getparam("blank");
     Qblank = (*blankval != 0);
@@ -118,10 +131,12 @@ void nemo_main()
 
     if (fitsfile==NULL) error("Could not open file %s in %s mode\n",
                getparam("in"),mode);
-    nx = naxis[0];
-    ny = naxis[1];
+    /* box=xmin,ymin,xmax,ymax */
+    /*      0    1    2    3   */
+    nx = (nbox>0 ? box[2]-box[0]+1 : naxis[0]);
+    ny = (nbox>0 ? box[3]-box[1]+1 : naxis[1]);
     nz = (npl>0) ? npl : naxis[2];
-    if (nx*ny*nz==0) error("Bad fits image: nx*ny*nz=0");
+    if (nx*ny*nz <=0) error("Bad fits image: nx*ny*nz=0");
     if (nx==1) warning("Fits image: nx=1");
     if (ny==1) warning("Fits image: ny=1");
     if (nz > 1) {
@@ -158,48 +173,50 @@ void nemo_main()
     }
 
 
-    buffer = (FLOAT *) allocate(nx*sizeof(FLOAT));
+    buffer = (FLOAT *) allocate(naxis[0]*sizeof(FLOAT));
 
     rmin = HUGE;
     rmax = -HUGE;
     for (k=0; k<nz; k++) {          /* loop over all/selected planes */
-        p = (npl>0) ? planes[k] : k;        /* select plane number */
-        dprintf(2,"Reading plane %d\n",p);
-        fitsetpl(fitsfile,1,&p);
-        for (j=0; j<ny; j++) {      /* loop over all rows */
-            fitread(fitsfile,j,buffer);     /* read it from fits file */
-            for (i=0, bp=buffer; i<nx; i++, bp++) {   /* stuff it in memory */
-                if (Qblank) {
-		  if (is_feq((int *)bp,(int *)&bval_in)) {
-		    nbval++;
-		    *bp = bval_out;
-		  } else if (isnan(*bp)) {
-		    nbval++;
-		    *bp = bval_out;
-		  }
-                } else {
-		  if (is_feq((int *)bp,(int *)&fnan)) {
-		    nbval++;
-		    *bp = bval_out;
-		  } else if (isnan(*bp)) {
-		    nbval++;
-		    *bp = bval_out;
-		  }
-		  dprintf(2,"%g %g %g %g, %d\n",*bp,fdata_min, fdata_max,fnan,nbval); 
-		}
-                tmp = CubeValue(iptr,i,j,k) = *bp;
-                rmin=MIN(rmin,tmp);
-                rmax=MAX(rmax,tmp);
-            }
-        }
+      p = (npl>0) ? planes[k] : k;        /* select plane number */
+      dprintf(2,"Reading plane %d\n",p);
+      fitsetpl(fitsfile,1,&p);
+      for (j=0; j<ny; j++) {      /* loop over all rows */
+	j0 = (nbox == 0 ? j : j+box[1]-1);
+	fitread(fitsfile,j0,buffer);     /* read it from fits file */
+	i0 = (nbox == 0 ? 0 : box[0]-1);
+	for (i=0, bp=&buffer[i0]; i<nx; i++, bp++) {   /* stuff it in memory */
+	  if (Qblank) {
+	    if (is_feq((int *)bp,(int *)&bval_in)) {
+	      nbval++;
+	      *bp = bval_out;
+	    } else if (isnan(*bp)) {
+	      nbval++;
+	      *bp = bval_out;
+	    }
+	  } else {
+	    if (is_feq((int *)bp,(int *)&fnan)) {
+	      nbval++;
+	      *bp = bval_out;
+	    } else if (isnan(*bp)) {
+	      nbval++;
+	      *bp = bval_out;
+	    }
+	    dprintf(2,"%g %g %g %g, %d\n",*bp,fdata_min, fdata_max,fnan,nbval); 
+	  }
+	  tmp = CubeValue(iptr,i,j,k) = *bp;
+	  rmin=MIN(rmin,tmp);
+	  rmax=MAX(rmax,tmp);
+	}
+      }
     }
     if (rmin != MapMin(iptr)) {
-        warning("Setting map minimum from %g to %g",MapMin(iptr),rmin);
-        MapMin(iptr) = rmin;
+      warning("Setting map minimum from %g to %g",MapMin(iptr),rmin);
+      MapMin(iptr) = rmin;
     } 
     if (rmax != MapMax(iptr)) {
-        warning("Setting map maximum from %g to %g",MapMax(iptr),rmax);
-        MapMax(iptr) = rmax;
+      warning("Setting map maximum from %g to %g",MapMax(iptr),rmax);
+      MapMax(iptr) = rmax;
     }
     fitclose(fitsfile);
     write_image(outstr,iptr);
@@ -290,6 +307,11 @@ void print_axis(int axis, int naxis, real crpix, real crval, real cdelt)
   printf("AXIS%d: %d %g %g %g   %g %g\n", axis,naxis,crpix,crval,cdelt,xmin,xmax);
 }
 
+
+/* 
+ * @todo   if nbox>0 header needs adjusting
+ *         crval1 -= box[0]    *         crval2 -= box[1]
+ */
 
 
 void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axistype,
