@@ -1,0 +1,53 @@
+.TH SNAPFOLDE 1NEMO "20 November 2017"
+.SH NAME
+snapfold \- fold a thin disk N-body snapshot file into a cone
+.SH SYNOPSIS
+\fBsnapfold in=\fPsnap-file \fBout=\fPsnap-file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIsnapfold\fP folds the positions and velocities of an
+N-body snapshot file representing a thin disk. The disk can be folded
+up to a cone around the +Z axis, or down to a cone around the -Z axis.
+Fold angle (\fBtheta=\fP) must thus  be between -90 and +90.
+.SH PARAMETERS
+The following parameters are recognized; they may be given in any order.
+.TP 24
+\fBin=\fP\fIsnap-file\fP
+Input data is read from \fIsnap-file\fP, which must be in snapshot format.
+.TP
+\fBout=\fP\fIsnap-file\fP
+Output data is written to \fIsnap-file\fP.
+.TP
+\fBtheta=\fP\fIx-angle\fP
+Fold Angle (in degrees).
+Default: 0.0
+.SH EXAMPLES
+Here is an example creating a tilted cone with outflow
+.nf
+
+  set nbody = 10000
+  set vscale = 0
+  set outflow = 1.0
+  set cone = 30
+  set inc = 30
+  
+.fi
+where ...
+.nf
+
+  mkdisk - 10000 mass=1 |\\
+    snapscale - - vscale=$vscale |\\
+    snapspin - - omega=$outflow outflow=t|\\
+    snapfold - - theta=90-$cone |\\
+    snaprotate - - $inc y |\\
+    snapgrid - $out.vel moment=-1
+.fi
+
+.SH SEE ALSO
+snaprotate(1NEMO), snapspin(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH HISTORY
+.nf
+.ta +1i +4i
+20-nov-2017	V0.1 a quick hack to make a cone	PJT
+.fi
