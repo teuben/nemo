@@ -19,6 +19,7 @@
  *              5-jul-03  V4.6 fixed energy= bug ; also
  *                             store Acc and Phi of particles    PJT
  *             11-mar-14  abs= to control the vel.dispersions differently    PJT
+ *                2017    V4.9 various tests with for Levy's paper           PJT
  *
  *  @todo     deal when sigma^2 < 0
  *
@@ -28,6 +29,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <potential.h>
 
 #include <snapshot/snapshot.h>
@@ -54,7 +56,7 @@ string defv[] = {
     "z0=0\n             Vertical scaleheight",
     "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
     "headline=\n	Text headline for output",
-    "VERSION=4.9d\n	20-sep-2017 PJT",
+    "VERSION=4.9e\n	27-nov-2017 PJT",
     NULL,
 };
 
@@ -75,10 +77,16 @@ local proc potential;
 local real z0;
 local real vloss;
 
+/* old style */
+// #define OLD_BURKERT   1
+
+
 extern double xrandom(double,double), grandom(double,double);
 
 local real took(real);
-
+local void writegalaxy(string name, string headline, bool Qmass);
+local void testdisk(void);
+  
 local real mysech2(real z)
 {
   real y = exp(z);
@@ -93,7 +101,12 @@ local real pick_z(real z0)
 
 local real pick_dv(real r, real z, real z0)
 {
+#ifdef OLD_BURKERT  
   real dv = 1 - (1 + (z/z0) * tanh(z/z0))*(z0/r);
+#else
+  real dv = tanh(z/z0);
+  dv = 1 - ABS(dv);
+#endif  
   dprintf(1,"PJT %g %g %g\n",r,z,dv);
   return dv;
 }
@@ -114,9 +127,13 @@ void nemo_main()
     vloss = getrparam("vloss");
     if (z0 > 0)
       if (vloss < 0)
-	dprintf(0,"Burkert et al 2010 streaming(z) model");
+#ifdef OLD_BURKERT	
+	dprintf(0,"Burkert et al 2010 streaming(z) model\n");
+#else
+        dprintf(0,"new style tanh(z) streaming model\n");
+#endif
       else
-	dprintf(0,"Toy streaming(z) model with vloss=%g",vloss);
+	dprintf(0,"Toy streaming(z) model with vloss=%g\n",vloss);
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
     nfrac = nemoinpr(getparam("frac"),frac,NDIM);
@@ -154,10 +171,7 @@ void nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(name, headline, Qmass)
-string name;
-string headline;
-bool Qmass;
+void writegalaxy(string name, string headline, bool Qmass)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -182,7 +196,7 @@ bool Qmass;
  * density test disk.  
  */
 
-testdisk()
+void testdisk(void)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
@@ -223,7 +237,7 @@ testdisk()
 	    Pos(dp)[2] = grandom(0.0, 0.5 * z0);
 	    vcir_i *= (1-vloss*ABS(Pos(dp)[2]/z0));
 	  } else {
-	    // improved Burkert et al. 2010 model, doesn't need vloss= anymore, triggered when vloss < 0
+	    // Burkert et al. 2010 model, doesn't need vloss= anymore, triggered when vloss < 0
 	    Pos(dp)[2] = pick_z(z0);
 	    vcir_i = vcir_i*vcir_i;
 	    vcir_i *= pick_dv(r_i,Pos(dp)[2],z0);
