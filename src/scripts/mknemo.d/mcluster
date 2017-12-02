@@ -1,0 +1,16 @@
+#! /bin/csh -f
+#
+
+set dir=$NEMO/usr/kuepper/mcluster
+
+if (-e $dir) then
+  cd $dir
+  make mcluster
+  mv mcluster $NEMOBIN
+else
+  echo mknemo.d: $dir does not exist
+  echo mkdir -p $NEMO/usr/kuepper
+  echo cd $NEMO/usr/kuepper
+  echo git clone https://github.com/ahwkuepper/mcluster
+endif
+
