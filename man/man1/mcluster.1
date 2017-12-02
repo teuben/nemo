@@ -4,7 +4,23 @@ mcluster \- make a star cluster
 .SH SYNOPSIS
 mcluster -[N|M|P|W|R|r|c|g|S|D|T|Q|C|A|O|G|o|f|a|m|B|b|p|s|t|e|Z|X|V|x|u|h|?]
 .SH DESCRIPTION
-bla bla
+\fIMcLuster\fP is a program that can be
+used to either set up initial conditions for N-body computations or,
+alternatively, to generate artificial star clusters for direct
+investigation. There are two different versions of the code, one basic
+version for generating all kinds of unevolved clusters (in the
+following called \fBmcluster\fP) and one for setting up evolved
+stellar populations at a given age. The former is completely contained
+in the C file main.c and the header file 
+main.h. The latter (here dubbed as \fBmcluster_sse\fP) is
+more complex and requires additional FORTRAN routines, namely
+the Single-Star/Binary-Star Evolution SSE/BSE routines by
+Hurley which are provided with the
+\fIMcLuster\fP code. For a quick introduction read the README file
+which is also provided with the code. For technical details on how to
+generate initial conditions for star cluster in general we would like
+to refer to Kroupa (2008) and referenced literature therein.
+
 .SH PARAMETERS
 .TP 20
 -N <number>
@@ -16,13 +32,14 @@ need a lot of memory/or may temporarily generate more stars than
 the required number. The parameter NMAX within the main 
 routine may have to be set to a higher value then.       
 .TP       
-0M <value>
+-M <value>
 (mass of cluster; specify either N or M)           
 .TP       
--P <0|1|2|3|-1> (density profile; 0= Plummer, 1= King (1966), 
-                   2= Subr et al. (2007) mass-segregated,            
-                   3= 2-dimensional EFF/Nuker template,              
-                   -1= no density gradient)                          
+-P <0|1|2|3|-1>
+density profile; 0= Plummer, 1= King (1966), 
+2= Subr et al. (2007) mass-segregated,            
+3= 2-dimensional EFF/Nuker template,              
+-1= no density gradient)                          
 .TP       
 -W <1-12>
 W0 parameter for King model                       
@@ -168,13 +185,15 @@ Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS, 417, 2300
 "Mass segregation and fractal substructure in young massive clusters: 
 (I) the McLuster code and method calibration"
 .PP
+Kroupa P., 2008, LNP, 760, 181
+.PP
 https://github.com/ahwkuepper/mcluster
 .SH AUTHOR
 Andreas H.W. Kuepper
 SH FILES
 .nf
 .ta +3.0i
-~/usr/kuepper/mcluster		source code
+~/usr/kuepper/mcluster		source code + manual
 .fi
 .SH "UPDATE HISTORY"
 .nf
