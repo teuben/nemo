@@ -24,6 +24,7 @@ cd $dir
 mkdir -p build
 cd build
 #cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEMO/opt ..
-cmake -DCMAKE_INSTALL_PREFIX=$NEMO ..
+#cmake -DCMAKE_INSTALL_PREFIX=$NEMO ..
+cmake -DENABLE_THREADS=ON -DCMAKE_INSTALL_PREFIX=$NEMO ..
 make
 make install
