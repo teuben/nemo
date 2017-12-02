@@ -12,12 +12,14 @@
  *      14-aug-96       V1.4    source code moved from nbody/{reduc->trans} PJT
  *       5-jun-97       V1.4a   fixed typo, removed nested externs
  *      18-jul-2012     V2.0    allow out= to be optional, so it only reports    PJT
+ *       2-dec-2017     V2.1    mscale implemented (leaving vscale and rscale at 1.0)  PJT
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -32,15 +34,17 @@ string defv[] = {
     "vscale=t\n		Scale velocities ?",
     "times=all\n	Times of snapshots to select",
     "virial=\n		New virial ratio (|2T/W|), if to be changed",
-    "VERSION=1.4a\n	6-jun-97 PJT",
+    "VERSION=2.1\n	2-dec-2017 PJT",
     NULL,
 };
 
 string usage="rescale snapshot for re-virialization";
 
+string version="$Id: ";
+
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     real   mscale, rscale, vscale, e_pot, e_kin, tsnap, virial;
@@ -126,7 +130,8 @@ nemo_main()
                     error("virial ratio not set (2: m=f r=t v=f)");
 	    }
         } else {
-	    error("Mscale not implemented");
+	    mscale = -2*e_kin/e_pot * virial;
+	    dprintf(0,"mscale=%g\n",mscale);
         }
         phi_scale = mscale/rscale;
         acc_scale = phi_scale/rscale;
