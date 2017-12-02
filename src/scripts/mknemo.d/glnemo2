@@ -3,9 +3,11 @@
 # a quick hack       - June 2009
 # added cmake option - Jan 2012
 # for QT5            - Mar 2014 
+#
 # 
 # ubuntu12 :    qt4-qmake libqt4-dev
 # fedora17:     qt-devel   
+# ubuntu13:     qt5-default   (to make that the default)
 #
 # @todo:   did not clean up e.g. glnemo2/utils/lib/unix/debug/libutils.a
 
