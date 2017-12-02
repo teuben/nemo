@@ -1,0 +1,183 @@
+.TH MCLUSTER 1NEMO "2 December 2017"
+.SH NAME
+mcluster \- make a star cluster
+.SH SYNOPSIS
+mcluster -[N|M|P|W|R|r|c|g|S|D|T|Q|C|A|O|G|o|f|a|m|B|b|p|s|t|e|Z|X|V|x|u|h|?]
+.SH DESCRIPTION
+bla bla
+.SH PARAMETERS
+.TP 20
+-N <number>
+The number of stars may vary from 3 to ~10^6. Remember though 
+that some procedures within the code require ~N^2 computational 
+steps which may take incredibly long. Furthermore, processes
+like mass segregation and fractalization may temporarily 
+need a lot of memory/or may temporarily generate more stars than
+the required number. The parameter NMAX within the main 
+routine may have to be set to a higher value then.       
+.TP       
+0M <value>
+(mass of cluster; specify either N or M)           
+.TP       
+-P <0|1|2|3|-1> (density profile; 0= Plummer, 1= King (1966), 
+                   2= Subr et al. (2007) mass-segregated,            
+                   3= 2-dimensional EFF/Nuker template,              
+                   -1= no density gradient)                          
+.TP       
+-W <1-12>
+W0 parameter for King model                       
+.TP       
+-R <value>
+half-mass radius [pc], ignored for P = 3
+.TP       
+-r <value>
+scale radius of EFF/Nuker template [pc]          
+.TP       
+-c <value>
+cut-off radius of EFF/Nuker template [pc]        
+.TP       
+-g <value>
+power-law slope(s) of EFF/Nuker template; use     
+once for EFF template; use three times for Nuker  
+template (outer slope, inner slope, transition   
+.TP       
+-S <0.0-1.0>
+degree of mass segregation; 0.0= no segregation
+.TP       
+-D <1.6-3.0>
+fractal dimension; 3.0= no fractality
+.TP       
+-T <value>
+tcrit in N-body units
+.TP       
+-Q <value>
+virial ratio                                     
+.TP       
+-C <0|1|3|5>
+code; 0= Nbody6, 1= Nbody4, 3= table of stars, 5= Nbody6++
+.TP       
+-A <value>
+dtadj in N-body units
+.TP       
+-O <value>
+deltat in N-body units                           
+.TP       
+-G <0|1>
+GPU usage; 0= no GPU, 1= use GPU                   
+.TP       
+-o <name>
+output name of cluster model                      
+.TP       
+-f <0|1|2|3|4>
+IMF; 0= no IMF, 1= Kroupa (2001),             
+2= user defined, 3= Kroupa (2001) with optimal sampling,
+4= L3 IMF (Maschberger 2012))                           
+.TP       
+-a <value>
+IMF slope; for user defined IMF, may be used      
+multiple times, from low mass to high mass;       
+for L3 IMF use three times for alpha, beta and mu)
+.TP       
+-m <value>
+IMF mass limits, has to be used multiple times    
+(at least twice), from low mass to high mass [Msun]
+.TP       
+-B <number>
+number of binary systems                        
+.TP       
+-b <value>
+binary fraction, specify either B or b          
+.TP       
+-p <0|1|2|3>
+binary pairing, 0= random, 1= ordered for M>5.0 Msun,
+2= random but separate pairing for M>5.0 Msun)
+3= random but uniform distribution of mass ratio (0.1<q<1.0) for M>5.0 Msun)
+.TP       
+-s <number>
+seed for randomization; 0= randomize by timer   
+.TP       
+-t <0|1|2|3>
+tidal field; 0= no tidal field, 1= near-field,  
+2= point-mass, 3= Milky-Way potential           
+.TP       
+-e <value>
+epoch for stellar evolution [Myr]                
+.TP       
+-Z <value>
+metallicity [0.0001-0.03, 0.02 = solar]          
+.TP       
+-X <value>
+galactocentric radius vector, use 3x, [pc]       
+.TP       
+-V <value>
+cluster velocity vector, use 3x, [km/s]          
+.TP       
+-x <value>
+specify external (gas) Plummer potential, use 4x, 
+1. gas mass [Msun], 2. Plummer radius [pc]         
+3. decay time for gas expulsion [Myr], 4. delay    
+time for start of gas expulsion [Myr]             
+.TP       
+-u <0|1>
+output units; 0= Nbody, 1= astrophysical           
+.TP       
+-h
+display this help                                        
+.TP       
+-?
+display this help                                       
+.SH EXAMPLES
+McLuster can be run from the command line by passing arguments
+to the code which specify the desired cluster, e.g.,
+.nf
+	mcluster -N1000 -R2.0 -P0
+.fi
+would give a cluster with a Plummer profile and a half-mass
+radius of 2 pc, consisting of 1000 stars. For parameters
+which are not specified default values are taken, which can be
+changed within the code. 
+
+
+.nf
+Examples: mcluster -N 1000 -R 0.8 -P 1 -W 3.0 -f 1 -B 100 -o test1  
+          mcluster -f 2 -m 0.08 -a -1.35 -m 0.5 -a -2.7 -m 100.0    
+          mcluster -t 3 -X 8500 -X 0 -X 0 -V 0 -V 220 -V 0          
+          mcluster -D 1.6 -Q 0.4 -P -1                              
+.fi
+Since units are not virial units, data need to be scaled. The data is in
+solar-mass, parsec and km/s, thus the mass-scale should be 0.0043032 to make it
+to virial units (see also units(1NEMO)). Otherwise auto-scaling can be done via NEMO routines.
+Here's an example of setting up a plummer sphere, re-virializing them for \fIhackcode1(1NEMO)\fP
+and some example plotting of the results:
+.nf
+
+	mcluster -o plummer1
+	tabcomment plummer1.txt - delete=t > plummer1.tab
+	tabtos plummer1.tab plummer1.dat block1=m,pos,vel
+	hackforce plummer1.dat plummer1.datf
+	snapvirial plummer1.datf plummer1.datv mscale=t rscale=f vscale=f virial=1
+	hackcode plummer1.datv plummer1.out tstop=10 freqout=100 freq=200
+	snapdiagplot plummer1.out
+	snapmradii plummer1.out 0.01,0.1:0.9:0.1,0.99 | tabplot - 1 2:11 line=1,1 color=2,3::8,4
+
+.fi
+.SH SEE ALSO
+mkplummer(1NEMO)
+.PP
+Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS, 417, 2300
+"Mass segregation and fractal substructure in young massive clusters: 
+(I) the McLuster code and method calibration"
+.PP
+https://github.com/ahwkuepper/mcluster
+.SH AUTHOR
+Andreas H.W. Kuepper
+SH FILES
+.nf
+.ta +3.0i
+~/usr/kuepper/mcluster		source code
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.5i
+2-dec-2017	man page added to NEMO		PJT
+.fi
