@@ -19,11 +19,11 @@ string defv[] = {
     "out=???\n             Output snapshot file",
     "theta=\n              Angle (degrees) to fold from XY into Z [-90..90]",
     "select=pos,vel,acc\n  Select the vectors for rotation",
-    "VERSION=0.1\n         20-nov-2017 PJT",
+    "VERSION=0.2\n         20-nov-2017 PJT",
     NULL,
 };
 
-string usage = "fold a snapshot";
+string usage = "fold a snapshot along the Z axis into a cone";
 
 string cvsid="$Id$";
 
