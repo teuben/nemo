@@ -173,7 +173,7 @@ and some example plotting of the results:
 	tabtos plummer1.tab plummer1.dat block1=m,pos,vel
 	hackforce plummer1.dat plummer1.datf
 	snapvirial plummer1.datf plummer1.datv mscale=t rscale=f vscale=f virial=1
-	hackcode plummer1.datv plummer1.out tstop=10 freqout=100 freq=200
+	hackcode1 plummer1.datv plummer1.out tstop=10 freqout=100 freq=200
 	snapdiagplot plummer1.out
 	snapmradii plummer1.out 0.01,0.1:0.9:0.1,0.99 | tabplot - 1 2:11 line=1,1 color=2,3::8,4
 
