@@ -206,10 +206,10 @@ size_t fts_rhead(fits_header *fh, stream instr)
         }
         if (icard==1) 
             if (p->token != I_SIMPLE && p->token != I_XTENSION)
-                error("First FITS keyword not SIMPLE or XTENSION");
+                warning("First FITS keyword not SIMPLE or XTENSION");
         if (icard==2)
             if (p->token != I_BITPIX)
-                error("Second FITS keyword not BITPIX");        
+                warning("Second FITS keyword not BITPIX");        
 
         if (p->name == NULL) {
             dprintf(2,"### (Card %d) skipped unknown keyword %s (%s)\n",
