@@ -17,12 +17,13 @@
 #include <orbit.h>
 
 string defv[] = {
-	"in=???\n           Input filename (an orbit)",
-	"n=1\n              stride in time through the orbit",
-        "maxsteps=10000\n   Maximum number of steps allowed",
-	"format=%g\n        Format for output",
-	"VERSION=2.4\n      15-feb-03 PJT",
-	NULL,
+  "in=???\n           Input filename (an orbit)",
+  "n=1\n              stride in time through the orbit",
+  "maxsteps=10000\n   Maximum number of steps allowed",
+  "format=%g\n        Format for output",
+  "mode=t,p,v\n       Output:  o,t,p,v",
+  "VERSION=2.4\n      15-feb-03 PJT",
+  NULL,
 };
 
 string usage = "list an orbit path";
