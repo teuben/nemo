@@ -314,9 +314,11 @@ int free_image_mask (image_maskptr mptr)
  
 int create_image (imageptr *iptr, int nx, int ny)
 {
+    size_t nxy;
+    nxy = nx * ny;
     *iptr = (imageptr ) allocate(sizeof(image));
     dprintf (DLEV,"create_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny);
-    Frame(*iptr) = (real *) allocate(nx*ny*sizeof(real));	
+    Frame(*iptr) = (real *) allocate(nxy*sizeof(real));	
     dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
     Axis(*iptr) = 0;            /* old style axis with no reference pixel */
     Nx(*iptr) = nx;             /* old style ONE map, no cube */
@@ -465,13 +467,14 @@ int sub_image (imageptr iptr, regionptr rptr, imageptr *optr)
  */
 int create_cube (imageptr *iptr, int nx, int ny, int nz)
 {
+    size_t np = (size_t)nx*(size_t)ny*(size_t)nz;  
     *iptr = (imageptr ) allocate(sizeof(image));
-    dprintf (DLEV,"CREATE_CUBE: Allocated image @ cube %d size=%d * %d * %d",
-		*iptr,nx,ny,nz);
+    dprintf (DLEV,"CREATE_CUBE: Allocated image @ cube %d size=%d * %d * %d (%ld)",
+	     *iptr,nx,ny,nz,np);
     if (*iptr == NULL)
 	return 0;	/* no memory available */
     	
-    Frame(*iptr) = (real *) allocate(nx*ny*nz*sizeof(real));	
+    Frame(*iptr) = (real *) allocate(np*sizeof(real));	
     dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
     Nx(*iptr) = nx;             /* cube dimension */
     Ny(*iptr) = ny;
