@@ -184,7 +184,7 @@ typedef struct {
 /* row major:   data[iy][ix]   data[r][c]   offset = row*NUMCOLS + col    */
 #if defined(CDEF)
 #define MapValue(i,ix,iy)	(*( (i)->frame + iy + Ny(i)*(ix)))
-#define CubeValue(i,ix,iy,iz)   (*( (i)->frame + iz + Nz(i)*(iy + Ny(i)*(ix))))
+#define CubeValue(i,ix,iy,iz)   (*( (i)->frame + (size_t)iz + (size_t)Nz(i)*((size_t)iy + (size_t)Ny(i)*((size_t)ix))))
 #endif
 
 /* column major:    data(ix,iy)  data(r,c)   offset = col*NUMROWS + row    */
