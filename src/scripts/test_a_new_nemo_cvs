@@ -14,11 +14,15 @@
 #               24-may-2010   glnemo deprecated, only glnemo2 
 #               19-jan-2011   added a cmake=1 option to build internally
 #               25-jan-2012   DSO linking (dso=1) needed for modern linux
+#               29-apr-2014   option to re-use miriad's PGPLOT
+#               11-jun-2016   merge llvm options back in
 
 set nemo=nemo           # root directory name
 
 set pgplot=1		# install PGPLOT via CVS also
+set miriad=0            # if set, use PGPLOT from MIRIAD (assumes $MIR present)
 set intel=0		# pick intel compiler (astromake)
+set llvm=0              # pick LLVM (clang) compiler for C/C++
 set gfortran=1          # pick gfortran compiler (otherwise g77 is the default)
 set gcc=0		# pick gcc version (version number via astromake)
 set anonymous=0		# anonymous CVS ?
@@ -104,6 +108,12 @@ if ($gfortran) then
   setenv F77 gfortran
 endif
 
+if ($llvm) then
+  setenv CC  clang
+  setenv CXX clang
+  setenv F77 clang
+endif
+
 if ($clean) then
   if (-e $nemo) then
     echo Cleaning old nemo=$nemo directory
@@ -133,6 +143,7 @@ if ($reuse) then
   $make distclean >& install.distclean.log
 endif
 
+#    @todo fix this 
 if ($pgplot && $reuse == 0) then   
   (cd local; cvs -Q checkout pgplot)
 endif
@@ -159,7 +170,13 @@ endif
 set copts=()
 # set copts=($copts --disable-gsl)
 if ($gsl) set copts=($copts --enable-gsl)
-if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($pgplot) then
+  if ($miriad) then
+    set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=$MIRLIB)
+  else
+    set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+  endif
+endif
 if ($png) set copts=($copts --enable-png)
 if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
