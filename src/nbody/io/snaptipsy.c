@@ -6,6 +6,7 @@
     -- not completed yet -- use only mode=d
  *	17-aug-00       V1.2 padding byte ....		PJT
  *      16-jun-11       V1.3 add warning - padding was turned off???   PJT
+ *                           fix bug in swapping particles
  */
 
 #include <stdinc.h>
@@ -28,7 +29,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "mode=dark\n                Output mode (dark|gas|star)",
     "swap=f\n                   Swap bytes on output?",
-    "VERSION=1.3\n		16-jun-2011",
+    "VERSION=1.3a\n		16-jun-2011",
     NULL,
 };
 
@@ -118,7 +119,7 @@ void nemo_main()
 	    }
         }
         if (Qswap)
-            bswap((char *)dark, sizeof(float), nbody*sizeof(*dark));
+            bswap((char *)dark, sizeof(float), nbody*sizeof(*dark)/sizeof(Real));
 	fwrite((char *)dark, sizeof(*dark), nbody, outstr);
     }
     strclose(instr);
