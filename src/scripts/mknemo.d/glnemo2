@@ -2,18 +2,21 @@
 #
 # a quick hack       - June 2009
 # added cmake option - Jan 2012
-# for QT5            - Mar 2014 
+# for QT5            - Mar 2014
+# for git release    - Dec 2017
 #
 # 
 # ubuntu12 :    qt4-qmake libqt4-dev
 # fedora17:     qt-devel   
 # ubuntu13:     qt5-default   (to make that the default)
+#               libglm-dev
 #
 # @todo:   did not clean up e.g. glnemo2/utils/lib/unix/debug/libutils.a
+#          new release can't build glnemo2/utils/lib/unix/debug/libnemo.a   [fatal]
 
 set dir=$NEMO/usr/jcl/glnemo2
 set sys=`uname -s`
-set cmake=0
+set cmake=1
 
 # for linux
 set args=""
@@ -31,6 +34,7 @@ if (-e $dir) then
   if ($cmake) then
     echo "WARNING: using new experimental CMAKE install for QT5"
     if ($?QTDIR5 == 0) setenv QTDIR5 /usr
+    mkdir -p $dir/build
     cd $dir/build
     if (-e Makefile) make clean
     cmake ..
@@ -38,6 +42,7 @@ if (-e $dir) then
     make install
   else
     cd $dir
+    # mkdir -p build
     $qmake -recursive $args
       if ($status) then
       echo "It appears as if the Qt library , or at least the development"
