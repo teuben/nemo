@@ -13,13 +13,14 @@ set args=""
 
 
 if (-e $dir) then
+  mkdir -p $dir/build
   cd $dir/build
   cmake ..
   make
   make install 
   # new python stuff (13 march 2014)
   cd ../py
-  mkdir build
+  mkdir -p build
   cd build
   cmake ..
   make
