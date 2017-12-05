@@ -23,7 +23,7 @@ string defv[] = {
   "offset=0\n         Offset (0 or 1) to index coordinates X,Y,Z",
   "pixel=f\n          XYZ in Pixel? else Physical coordinates",
   "dim=2\n            2d or 3d interpolation? (use 0 for nearest)",
-  "VERSION=1.1\n      28-apr-2011 PJT",
+  "VERSION=1.1a\n      28-apr-2011 PJT",
   NULL,
 };
 
@@ -77,6 +77,14 @@ nemo_main()
     nx = Nx(iptr);	                        /* cube dimensions */
     ny = Ny(iptr);
     nz = Nz(iptr);
+#if 0
+    ixr = (real *) allocate(nx*sizeof(real));        /* allocate position arrays */
+    iyr = (real *) allocate(ny*sizeof(real));
+    izr = (real *) allocate(nz*sizeof(real));
+    nxpos = ini_array("x",ixr,nx,offset,Qpixel);
+    nypos = ini_array("y",iyr,ny,offset,Qpixel);
+    nzpos = ini_array("z",izr,nz,offset,Qpixel);
+#else
     dprintf(1,"MAXP=%d\n",MAXP);
     nxpos = ini_array("x",xr,MAXP,offset,Qpixel);
     nypos = ini_array("y",yr,MAXP,offset,Qpixel);
@@ -85,7 +93,8 @@ nemo_main()
       for (l=1; l<nxpos;l++) zr[l] = zr[0];
       nzpos = nxpos;
     }
-					  
+#endif
+
     if (nxpos != nypos || nypos != nzpos) error("Not same number of x,y,z");
     nout = 0;
     for (l=0; l<nxpos; l++) {
