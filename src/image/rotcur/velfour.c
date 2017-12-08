@@ -29,6 +29,7 @@ string defv[] = {
   "sin=1:4:1\n    List of non-zero sin(m.phi) terms",
   "amode=t\n      Display sin/cos amps or amp/phase if possible?",
 
+  "out=\n         Optional output map of converted rotation speeds []",
   "tab=\n         Optional output table of radii, velocities etc.",
   "VERSION=0.1\n  5-dec-2017 PJT",
   NULL,
@@ -113,7 +114,7 @@ void nemo_main()
   nx = Nx(velptr);
   ny = Ny(velptr);
 
-  if (Qout) {  // never happens anymore
+  if (hasvalue("out")) {
     outmode = getparam("mode");
     mode = string_index(outmodes, outmode);
     if (mode < 0) error("Illegal mode=%s [%d], valid:",outmode,mode,outmodes);
