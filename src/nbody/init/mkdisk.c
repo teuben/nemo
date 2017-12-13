@@ -56,7 +56,7 @@ string defv[] = {
     "z0=0\n             Vertical scaleheight",
     "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
     "headline=\n	Text headline for output",
-    "VERSION=4.9e\n	27-nov-2017 PJT",
+    "VERSION=4.9f\n	4-dec-2017 PJT",
     NULL,
 };
 
@@ -105,7 +105,7 @@ local real pick_dv(real r, real z, real z0)
   real dv = 1 - (1 + (z/z0) * tanh(z/z0))*(z0/r);
 #else
   real dv = tanh(z/z0);
-  dv = 1 - ABS(dv);
+  dv = sqrt(1 - ABS(dv));
 #endif  
   dprintf(1,"PJT %g %g %g\n",r,z,dv);
   return dv;
@@ -236,6 +236,7 @@ void testdisk(void)
 	    // toy model (early sep 2017)
 	    Pos(dp)[2] = grandom(0.0, 0.5 * z0);
 	    vcir_i *= (1-vloss*ABS(Pos(dp)[2]/z0));
+	    if (vcir_i < 0) vcir_i = 0.0; /* added dec 2017 */
 	  } else {
 	    // Burkert et al. 2010 model, doesn't need vloss= anymore, triggered when vloss < 0
 	    Pos(dp)[2] = pick_z(z0);
