@@ -53,10 +53,10 @@ string defv[] = {
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "abs=f\n            Use absolute vel.disp instead of fractional?",
-    "z0=0\n             Vertical scaleheight",
+    "z0=0,0\n           Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
     "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
     "headline=\n	Text headline for output",
-    "VERSION=4.9f\n	4-dec-2017 PJT",
+    "VERSION=4.9g\n	13-dec-2017 PJT",
     NULL,
 };
 
@@ -74,7 +74,8 @@ local Body *disk;
 
 local proc potential;
 
-local real z0;
+local real z0_d;    /* the old z0 */
+local real z0_v;    /* dropoff in velocity */
 local real vloss;
 
 /* old style */
@@ -114,7 +115,8 @@ local real pick_dv(real r, real z, real z0)
 void nemo_main()
 {
     bool Qmass;
-    int nfrac, seed;
+    int nfrac, seed, nz;
+    real z0[2];
     
     if (hasvalue("in")) error("\"in=\" not implemented yet");
     potential = get_potential(getparam("potname"),
@@ -123,9 +125,19 @@ void nemo_main()
     rmax = getdparam("rmax");
     vrad = getdparam("vrad");
     ndisk = getiparam("nbody");
-    z0 = getrparam("z0");
+
+    /* z0= is now split in a density and velocity */
+    nz = nemoinpr(getparam("z0"),z0,2);
+    if (nz == 0)
+      z0[0] = z0[1] = 0.0;
+    else if (nz == 1)
+      z0[1] = 0.0;
+    z0_d = z0[0];
+    z0_v = z0[1];
+  
+
     vloss = getrparam("vloss");
-    if (z0 > 0)
+    if (z0_d > 0)
       if (vloss < 0)
 #ifdef OLD_BURKERT	
 	dprintf(0,"Burkert et al 2010 streaming(z) model\n");
@@ -231,17 +243,17 @@ void testdisk(void)
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
 	/* now cheat and rotate slower away from the plane */
-	if (z0 > 0) {
+	if (z0_d > 0) {
 	  if (vloss >= 0.0) {
 	    // toy model (early sep 2017)
-	    Pos(dp)[2] = grandom(0.0, 0.5 * z0);
-	    vcir_i *= (1-vloss*ABS(Pos(dp)[2]/z0));
+	    Pos(dp)[2] = grandom(0.0, 0.5 * z0_d);
+	    vcir_i *= (1-vloss*ABS(Pos(dp)[2]/z0_d));
 	    if (vcir_i < 0) vcir_i = 0.0; /* added dec 2017 */
 	  } else {
 	    // Burkert et al. 2010 model, doesn't need vloss= anymore, triggered when vloss < 0
-	    Pos(dp)[2] = pick_z(z0);
+	    Pos(dp)[2] = pick_z(z0_d);
 	    vcir_i = vcir_i*vcir_i;
-	    vcir_i *= pick_dv(r_i,Pos(dp)[2],z0);
+	    vcir_i *= pick_dv(r_i,Pos(dp)[2],z0_v);
 	    if (vcir_i > 0)
 	      vcir_i = sqrt(vcir_i);
 	    else
