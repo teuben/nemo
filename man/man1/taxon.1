@@ -1,0 +1,36 @@
+.TH TAXON 1NEMO "25 July 2013"
+.SH NAME
+taxon - orbit classification
+.SH SYNOPSIS
+\fBtaxon\fP
+.SH DESCRIPTION
+\fItaxon\fP classifies 2D or 3D orbits. An ascii input file with positions
+is all that is needed.  A \fBtaxon.par\fP file controls the program.
+.PP
+.SH PARAMETERS
+Example 2D input
+.nf
+.ta +3i
+43.orb			\fBinput ascii table with X,Y positions\fP
+2 0 0 1			\fBjdim,jcla,jcl,jpan\fP
+.fi
+.PP
+jdim : Dimension (2 or 3)
+.PP
+jcla : Dump results to file
+.PP
+jcl : Dump simplified results to file
+.PP
+jpan : Dump messages to the screen
+.SH AUTHOR 
+Daniel Carpintero
+.SH SEE ALSO
+stoo(1NEMO), snapmask(1NEMO), orbit(1NEMO)
+.PP
+Carpintero & Aguilar, 1998. MNRAS 298, 1.
+.SH HISTORY
+.nf
+.ta +1i +4i
+oct-2006	V13.1	DC
+25-jul-2013	added to NEMO	PJT
+.fi
