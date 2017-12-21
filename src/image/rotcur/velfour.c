@@ -1,8 +1,8 @@
 /*
  * VELFOUR: 
  *
- *	VELFOUR computes the fourier harmonics to an image,
- *      allowing for a center and inclined disk.
+ *	VELFOUR computes the fourier harmonics of an image,
+ *      allowing for a center and inclined disk at given position angle
  *   
  *   5-dec-2017   Cloned off velfit (and fitting code via snapfour)
  *
