@@ -3,6 +3,7 @@
  *
  *	27-oct-2008    initial version
  *      17-sep-2013    use new run interface..
+ *      11-aug-2014    V1.2 : allow inp= to mirror how rundiskfit works 
  * 
  *  @TODO: 
  *
@@ -36,8 +37,12 @@ string defv[] = {
   "rcirc=50\n            Radius beyond which no non-circular rmotions fitted",
   "radii=\n              Ring Radii at which velocity field components are extracted",
 
+  /* inp= is optional, it's the original way to run velfitss07 */
+
+  "inp=\n                Input parameter file (optional way to run)",
   "exe=velfitss07\n      name of VELFITSS07 executable in your $PATH",
-  "VERSION=1.1\n         17-sep-2013 PJT",
+  "par=velfit.inc\n      parameter file passed for VELFITSS07",
+  "VERSION=1.2\n         11-aug-2014 PJT",
   NULL,
 };
 
@@ -56,11 +61,22 @@ int nemo_main()
   string infile = getparam("in");
   string outfile = getparam("out");
   string parfile = getparam("par");
+  string inpfile = getparam("inp");
   stream datstr;
   
   string exefile = getparam("exe");
   char dname[256];
   char command[256];
+  FILE  *fp;
+
+  if (hasvalue("inp"))  {
+    warning("sloppy version that only accepts inp=");
+    fp = popen(exefile,"w");
+    sprintf(dname,"'%s'\n",inpfile);
+    fprintf(fp,dname);
+    fclose(fp);
+    stop(0);
+  } 
 
 #if 0
   seed = init_xrandom(getparam("seed"));
@@ -114,3 +130,28 @@ int nemo_main()
     error("Problem executing %s",exefile);
 }
 
+/*
+
+  Input Directive File (IDF)     qs=quoted string  b=bool  r=real
+
+  #  comment line, doesn't count
+  :comment
+  qs:vinfile
+  qs:poutfile
+  qs:moutfile
+  r:xcen 
+  r:ycen
+  r:vsys
+  r:pa 
+  r:inc
+  r:rmsism
+  b:fitgeo b:fitcen b:fitvsys b:fitm0 b:fitm12 b:fitunc
+  i:m
+  i:seed
+  i:bootstrap
+  r:j
+  r:rcirc
+  # now the array starts with K sample radii  r1...rK
+  r:r[]
+
+ */
