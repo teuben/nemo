@@ -682,7 +682,7 @@ cleansrc:
 	(cd src; $(MAKE) clean)
 
 libs:	corelibs
-	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
+	-(cd usr/dehnen; $(MAKE) -i clean all; $(MAKE) -i all) >> install.log 2>&1 
 	@echo Done at `date`
 
 corelibs:
