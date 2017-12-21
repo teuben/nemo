@@ -1,0 +1,58 @@
+<HTML>
+<HEAD>
+<TITLE> What's Down in NEMO</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1> What's Down in NEMO </H1>
+
+Here we intend to list software decided not to be supported
+anymore, or that under consideration. If you would be in trouble
+because of this, let <I> teuben@astro.umd.edu </I> know a.s.a.p.
+Last modified on: 
+<I> 17-feb-00 </I>.
+
+<HR>
+
+<H2> Discontinued support for </H2>
+<UL>
+<LI> suntools, since Solaris 2.x has dropped it.
+<LI> old-style makefiles; we plan to allow includes, and possibly
+	full 'gnu-makefile'
+<LI> non-ANSI (old tyle K&R) compilers, there is now code that is
+     purely ANSI prototyped. The program 
+     <A HREF=man/catl/unproto.l> unproto </A> needs to be compiled
+     and installed as a <I> cpp </I> replacement if you really have
+     a compiler that cannot handle ansi C code. There may be cmpilers
+     around which do not allow a cpp replacement.
+<LI> (nov-94) With the upcoming V3 of the command line user interface
+     <A HREF=man_html/getparam.3.html> getparam(3NEMO) </A>
+     the following features  will not be available anymore:
+    <UL>
+    <LI> The host= system keyword, but we are thinking of using
+        sockets
+    <LI> DMM menu interface. If compiled, it was available under
+        help=8.
+    <LI> No more UsageLog, this kept a list in $NEMO/adm/Usage. Was
+        normally not compiled anymore, but now supporting code has
+        been removed.
+    </UL>
+
+</UL>
+
+<H2> Considering dropping support for  </H2>
+<UL> 
+<LI> old style images which do not carry a reference pixel (default: 0).
+the fits equivalent is the CRPIXn keyword.
+</UL>
+
+<P>
+Back to: <A HREF=nemo.html> NEMO Home page </A>, the
+<A HREF=whatsup.html> What's Up </A>, or the
+<A HREF=whatsnew.html> What's New </A> page.
+
+
+<Address>By: teuben@astro.umd.edu</Address>
+</BODY>
+

@@ -1,0 +1,105 @@
+<HTML>
+<HEAD>
+<TITLE> What's Up in NEMO</TITLE>
+</HEAD>
+
+<BODY>
+
+
+<H1> What's Up in NEMO </H1>
+Not everything you see here may have been implemented in the export
+version.
+
+<P>
+Here we intend to list software currently under construction or
+consideration. If you would like to join efforts, please let
+<I> teuben@astro.umd.edu </I> know.  Last modified:
+<I> 7-jan-03 </I>.
+
+<HR>
+
+<H2> Currently working on </H2>
+<UL>
+<LI> slow migration to a Linux Standards Base (LSB), to simplify running binary
+	distributions of NEMO
+<LI> code conversions:
+  <UL>
+  <LI> proper  prototype usage to aid compilation with -DSINGLEPREC and
+ 	using the g++ compiler instead of gcc compiler 
+  <LI> Random I/O:
+  <LI> Adding some new integrators: Sellwood's GALAXY, Aarseth's
+	NBODY1 and NBODY2.
+  <LI> although all -DSINGLEPREC is now supposed to work, some minor
+      cleanup may be needed, in particular the proc's. Perhaps
+      use new typedef's for prototyped versions. Sometimes one can
+      get by with only a helper typedef in the actual code where
+      the (*proc)() is called. [see e.g. contour.c]
+  <LI> shared libraries. Works for linux, but formal installation
+	not supported yet.
+  <LI> A nearly completely rewritten command line user interface
+	<A HREF=man_html/getparam.3.html> getparam(3NEMO) </A>
+	Also fixed many small bugs. The main new features will be:
+        <UL>
+        <LI> new argv= system keyword. To allow hackers to bypass some
+            of the restrictions os a static program keyword list. One
+            obvious example is a resource list for X windows yapp
+            drivers (although yapp= should be used for this primarely)
+        <LI> keywords can be used in minimum matched mode, but a warning
+            will be given for each minimum match that gets expanded.
+        <LI> if keywords have not been used, and a debug level is given,
+            the user will be warned about this.
+        <LI> a tcl interface, although by default this is not compiled
+        </UL>
+  </UL>
+<LI> Planned upgrades:
+    <UL>
+    <LI> automatic selection of yapp's during installation
+    <LI> automatic guess of NEMORC.local during installation
+    <LI> default hdf support
+    <LI> add cmhog/hdfgrid support
+    <LI> add some more potentials, e.g. athan92, piner94
+    <LI> tcl/tk support for genscript's
+    <LI> better mapsys support, currently too much in $NMEOBIN/cc expected
+    <LI> Sellwood's N-body integrator
+    <LI> add NEMOXLIB, NEMOXINC environment variables for X windows
+    <LI> starlab support
+    </UL>
+<LI> supplying <B> all </B> manual pages for the kernel routines
+<LI> orbname, orbwood - orbit classification and spectral dynamics
+<LI> snapfit - best fit 6D snapshot to a 3D data cube
+<LI> yapp_x - generic X windows device  (Patrick Frisch' contribution)
+<LI> nbody0, nbody1, nbody2, nbody5 - interfaces
+<LI> snap interface (Luis Aguilar)
+<LI> tabview - dynamic table queries
+<LI> serial snapshot processing. This is primarely usefull for 'small'
+    memory (slow?) machines where as snapshot is broken up in pieces
+    (see e.g. <A HREF=man_html/snapsplit.3.html> snapsplit </A> or 
+    <A HREF=man_html/mkspiral.1.html>mkspiral</A>) 
+    and processed independantly. Useful
+    for Monte-Carlo simulations.
+<LI> WWW
+</UL>
+
+<H2> Considering work on  </H2>
+<UL> 
+<LI> yapp_generic - binds multiple yapp's into one (cf. yapp_pgplot),
+	in particular for yapp_x and yapp_ps
+<LI> tk interface ala Khoros/Cantata and Mirtool
+<LI> using GNU make (gmake). This would (eventually) make it impossible
+	to install NEMO without gmake. It would become part of the
+	installation procedure.
+<LI> better image data-structure, e.g. allowing dynamic typing, and 
+	better random access for big images/cubes.
+<LI> support for non-homogenous snapshots (e.g. SPH, Tipsy "3S")
+<LI> stripping kernel routines in favor of a more generic library, such
+	as glib (part of <A HREF=http://www.gtk.org/>GTK+</A>).
+</UL>
+
+<P>
+Back to: <A HREF=nemo.html> NEMO Home page </A>, the
+<A HREF=whatsdown.html> What's Down </A>, or the
+<A HREF=whatsnew.html> What's New </A> page.
+
+<Address>By: teuben@astro.umd.edu</Address>
+</BODY>
+

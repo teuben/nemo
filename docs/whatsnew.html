@@ -1,0 +1,1197 @@
+<HTML>
+<HEAD>
+<TITLE> What's New in NEMO</TITLE>
+</HEAD>
+
+<BODY>
+
+<H1> What's New in NEMO </H1>
+
+The latest official export version is
+<!--#include file="lastftp" -->
+</A>, though you can also try the probably more recent
+<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz> 
+nemo_cvs.tar.gz </A>, which is a CVS enabled
+directory tree for anonymous CVS. The file 
+<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/VERSION_cvs>VERSION_cvs</A>
+contains a timestamp of that creation.
+<p>
+<hr>
+
+
+If you upgrade from a release 3.1.x you will need to
+read <A HREF=nemo32.html>these upgrade details</A>.
+<A NAME=4_0_0>
+<H2> 4.0.0:  in GIT (a.k.a. the ESO release) </H2>
+<UL>
+<LI> (nov-2017) conversion of a source code based in CVS to GIT. Hosting planned on github
+</UL>
+
+
+<A NAME=3_3_3>
+<H2> 3.3.2:  in CVS </H2>
+<UL>
+<LI> (16-oct-2015) update glnemo2 to 1.9.0, reading 2D and 3D fits files
+<LI> (14-feb-2015) update glnemo2 to 1.8.1, Qt5 now fully supported,
+  <a href=http://projets.lam.fr/projects/glnemo2/wiki/Download>
+linux binaries are now also available. </A>
+<LI> (20-jun-2014) updated to UNSIO 1.0.1 : <A HREF=http://projets.lam.fr/news/126> here</A>
+<LI> (19-jun-2014) updates to gyrfalcON
+</UL>
+
+<A NAME=3_3_2>
+<H2> 3.3.2:  14 March 2014 (a.k.a. the Artic Vortex release)</H2>
+<UL>
+<LI> (14-mar-2014) lots of minor updates to man pages and a number of ccd image tools
+<LI> (13-mar-2014) update glnemo2 to 1.6.1, it now compiles with qt5 (and qt4 still too)
+<LI> (12-mar-2014) updated <A HREF=http://projets.lam.fr/projects/unsio/>UNSIO</A> to 1.0.0!!, this
+also include python support (see $NEMO/py/modules after this has been installed)
+<LI> (17-sep-2013) new <A HREF=man_html/runbulgerot.1.html>runbulgerot</A> program to compute rotation curves of Sersic bulges (Noordermeer,2008)
+<LI> massive updates to glnemo2/unsio
+<LI> (29-mar-2013) updated supper for <A HREF=http://astronomy.swin.edu.au/s2plot/>
+	s2plot</A>. No changes needed to 
+ <A HREF=man_html/snaps2plot.1.html>snaps2plot</A> itself.
+<LI> (10-mar-2013) added 3body.tab and a script mk_3body to run the orbits
+from the <A HREF=http://arxiv.org/abs/1303.0181>
+Suvakov & Dmitrasinovic (2013)</A> paper.
+<LI> (13-feb-2013) more consistent usage of voxel units and using moments and such that reporting total
+emission from cubes and moment maps via snapgrid, ccdmom is consistent.
+<LI> (24-jan-2013) clean up some macos 10.8 installation issues, now fully clean, though Ubuntu 12 now
+needs the DSO linking fix (e.g. uncomment the NEMO_CFLAGS1 macro in $NEMOLIB/makedefs)
+
+<LI> (17-jan-2013) branched MATDEF, to clarify CDEF and FORDEF with the goal to switch over to FORDEF
+<LI> nothing new yet,  updates to rundiskfit expected.
+</UL>
+
+<A NAME=3_3_1>
+<H2>3.3.1: 14 Sep 2012  (a.k.a. the NEMO 3D release) </H2>
+
+Coinciding with the re-release of the namesake movie.
+<UL>
+<LI> (13-sep-2012) <A HREF=man_html/rundiskfit.1.html>rundiskfit</A>  
+frontend to run the Spekkens/Sellwood velfit updated version dubbed <B>diskfit</B>. See their 
+<A HREF=http://www.physics.rutgers.edu/~spekkens/diskfit/>website</A>.
+(new)
+
+<LI> (17-aug-2012) <A HREF=man_html/ccdsky.1.html>ccdsky</A>,a program
+to simplify scaling between simulations and observations.
+(new)
+
+<LI> as of a while back, within <A HREF=http://carma.astro.umd.edu/miriad/>MIRIAD</A>
+	you can install NEMO with the command
+	<B>mir.install nemo</B>
+<LI> (8-feb-2012) version 1.40 of <A HREF=http://projets.oamp.fr/projects/glnemo2>
+glnemo2</A> released .
+<LI> NEMO is now in <A HREF=http://ascl.net/1010.051>ASCL</A>
+<LI> many updates to gryfalcON
+<LI> (15-may-2011) <A HREF=man_html/orbintv.1.html>orbintv</A>  high order variable timestep orbit integrator (new) 
+<LI> (3-may-2011) version 1.20 of  glnemo2 released - major release. 
+	
+	See also <A HREF=http://www.youtube.com/watch?v=06jG2Wr212M>this movie</A> and 
+	<A HREF=http://projets.oamp.fr/projects/glnemo2>the glnemo2 website</A>
+<LI> (24-feb-2011) version 1.11 of glnemo2 released
+<LI> (14-feb-2011) <A HREF=man_html/snaps2plot.1.html>snaps2plot</A>  (new) 
+<LI> (8-feb-2011)  <A HREF=man_html/ccdhist.1.html>ccdhist</A> (new)
+<LI> (3-feb-2011)  <A HREF=man_html/velmap.1.html>velmap</A> (new)
+and <A HREF=man_html/velfit.1.html>velfit</A> (updates)
+<LI> (24-nov-2010) improved version of UNSIO (also handling NEMO style pipe),
+including some new tools in the UNS_PROJECT, such as
+<A HREF=man_html/uns_2dplot.1.html>uns_2dplot</A>. See also
+a new <A HREF=examples/uns.html>example</A>
+Compiling and linking does require a few extra tools and libraries, 
+such as cmake, sqlite.
+<LI> (24-may) some more adjustments in the default gfortran scheme
+</UL>
+
+<A NAME=3_3_0>
+<H2>3.3.0: 22 May 2010  (a.k.a. the Leiden Release) </H2>
+<UL>
+<LI> a pre-release of the UNSIO, Unified Nbody Snapshot I/O, library ,
+	as discussed at the amuse2010 meeting in Leiden. It also uses a new
+	<A HREF=http://www.cmake.org/>cmake</A> procedure for installation.
+<LI> gfortran now the default compiler (V4.1 or earlier cannot use pgplot/gif drivers)
+<LI> (23-apr-10) major rework on glnemo2:
+  <UL>
+  <LI> added experimental reader for RAMSES smulation files 
+  <LI> added gyrfalcON's runtime manipulator (see glnemo's README file)
+  <LI> a <A HREF=man_html/glnemo2.1.html>glnemo2</A> man page
+  </UL>
+<LI> (24-dec-09) <A HREF=man_html/tkrun.l.html>tkrun</A> can now save/load key files
+<LI> (dec-09) a new type "halfp" (16 bit floats) added to NEMO, can be used in I/O.
+<LI> (9-dec-09) tablsqfit now has an option to fit with errors in X *and* Y, 
+	and uses mpfit (working) or NR's fitexy (testing) for this. Currently
+	a compiler option since it is being tested.
+<LI> (14-sep-09) density2 (new), a faster version of hackdens
+<LI> (10-aug-09)  ** certain files > 2GB failed, now fixed ** 
+<LI> (8-aug-09) <A HREF=man_html/snappat.1.html>snappat</A> (new), convert
+a snapshot to a Particle-Attribute-Time (PAT) cube for fast processing
+in e.g. IDL
+<LI> during PiTP: several programs updated, a few new programs:
+<A HREF=man_html/mkh41.1.html>mkh41</A> ,
+<A HREF=man_html/mk2body.1.html>mk2body</A> ,
+<A HREF=man_html/orbmax.1.html>orbmax</A> ,
+<LI> (jul-09) glnemo2, an significant update to
+<A HREF=man_html/glnemo.1.html>glnemo</A> (new)
+<LI> (jun-09) <A HREF=man_html/snapmap.1.html>snapmap</A> (new),
+alternative to <A HREF=man_html/snapgrid.1.html>snapgrid</A>
+<LI> (apr-09) <A HREF=man_html/snapifu.1.html>snapifu</A> (new),
+alternative to <A HREF=man_html/snapgrid.1.html>snapgrid</A> for
+irregular grids
+<LI> (26-feb-09) <A HREF=man_html/runmond.1.html>runmond</A> (new), a
+frontend to Ciotti et al.'s MOND integrator
+<LI> attempting a clean compile with g++ instead of gcc
+</UL>
+
+<A NAME=3_2_5>
+<H2>3.2.5: 10 September 2008 </H2>
+
+<UL>
+<LI> (20-jun) various updates to the NEMO library which will require a complete "cd $NEMO/src/;make clean install"
+	because a few fundamental header files have changes.
+<LI> (24-sep) added 
+	<A HREF=mkgalaxy_user_guide.pdf>mkgalaxy</A>, a frontend for 
+	<A HREF=man_html/mkWD99disc.1.html>mkWD99disc</A> and
+	<A HREF=man_html/mkhalo.1.html>mkhalo</A>
+	to build a halo-buge-disk galaxy model (Dehnen)
+<LI> (25-may) patches to allow objects > 2GB. (allocate.c, stdinc.h, filesecret.c)
+<LI> (8-nov) added 
+	<A HREF=man_html/nemo2gadget.1.html>nemo2gadget</A>
+	and
+	<A HREF=man_html/snapgridsmooth.1.html>snapgridsmooth</A> (JCL)
+<LI> (7-nov) added 
+	<A HREF=man_html/gadget2nemo.1.html>gadget2nemo</A>
+	and a toy program
+	<A HREF=man_html/mkcosmo.1.html>mkcosmo</A> for some cosmology trials.
+<LI> (26-sep) glnemo now also can display velocity vectors in 3D
+<LI> (31-aug) fixed various installation problems, added optional png support for pgplot, fixed some SINGLEPREC issues
+<LI> (15-aug) resurrected hackcode3 and quadcode (and various other prototype fixes)
+<LI> (10-aug) slightly overhauled directory structure for the public version of falcON [use: <B>cvs update -dP</B> to update ].
+	We are still shaking down some installation issues with this.
+<LI> (6-aug) Various small updates cleaned up from the GH-2006 summerschool - they will trickle
+	in over the coming week.
+</UL>
+
+ <A NAME=3_2_4>
+<H2>3.2.4: 5 August 2006 (a.k.a. the Puebla release) </H2>
+This was the release the day after the GH-2006 summerschool ended.
+
+<UL>
+<LI> (5-aug) general cleanup for the Puebla release
+<LI> (1-aug) (upd) gyrfalcON cleaned up during GH2006 school.
+<LI> (12-jul) (upd) new release of falcON: new bodyfunc (an improved version
+	of NEMO's bodytrans) + improved manipulator support   [gcc 4.1.1 initially failed, now ok]
+<LI> (6-jul) (upd) fixed gadget interfaces 
+<LI> (22-may) (new) <A HREF=man_html/CGS.1.html>CGS</A> integrator released (Trenti)
+<LI> (26-apr) (upd) glnemo (V0.90) - animations, octree engine (Lambert)
+<LI> (15-apr) various fixes for installing under <A HREF=macosx104.html>macosx 10.4</A> (the story hasn't ended yet)
+<LI> (31-mar) gyrfalcON updated to 3.0.5. utils/ split from falcON/.   Now also
+	works with gcc 4.1.0  (Dehnen)
+<LI> (8-mar) (upd) configure now derived from an  .ac file, not .in, adding
+	UNFIO_HDR_SIZE into config.h
+<LI> (28-feb) (new/upd) <A HREF=man_html/runbody4.1.html>runbody4</A> interface
+	to runing Nbody4 (or Brut4), and adapted 
+	<A HREF=man_html/unfio.3.html>unfio</A> to deal with the
+	new gfortran unformatted I/O format.
+<LI> (19-feb) (upd) <A HREF=man_html/mdarray.3.html>mdarray</A> data are now
+	in sequential memory. Several programs (mkconfig,mktt72,mkpolytrope) 
+	were updated so they can use dynamic memory.
+<LI> (7-feb) (upd)  <A HREF=man_html/snapgrid.1.html>snapgrid</A> (V5.1) new
+	option integrate=t to deal with particles that represent a density.
+<LI> (9-dec) (upd) stropen() will now read files that look like URL's
+<LI> (5-dec) (upd) pgplot install able to select compiler  dialects and detect x86_64
+<LI> (21-nov) (upd) tablsqfit and tabnllsqfit added fit=gauss1d and gauss2d
+<LI> (16-nov) (upd) various small bugfixes submitted for the falcON tools (Dehnen)
+<LI> (15-nov) (upd) <A HREF=man_html/snapshell.1.html>snapshell</A> (V2.1)
+rewritten and different more clear user interface.
+<LI> (7-nov) <A HREF=man_html/glnemo.1.html>glnemo</A>
+now has sample manipulator included to watch a gyrfalcON "live". You
+will need to use <I>cvs update -d</I> for this update.
+<LI> (2-nov) new programs: <A HREF=man_html/ccdmerge.1.html>ccdmerge</A> 
+	and <A HREF=man_html/snapplot3.1.html>snapplot3</A> 
+<LI> (27-oct) gyrfalcON has been updated to 3.0.4, the
+	<A HREF=man_html/gyrfalcON.1.html>manual page</A> 
+	has also been updated. Major new feature is the use
+	of <B>accname=</B> instead of
+	<B>potname=</B>, an enhanced version of
+	<A HREF=man_html/potential.5.html>potential</A>. Run-time
+	<A HREF=man_html/manipulator.5.html>manipulator</A>
+	files (<B>manipname=</B>) are also introduced in this version. 
+<LI> (17-sep) The
+	<A HREF=man_html/layout.3.html>layout</A> library
+	 can now use GNU readline to read commands. Testing in
+	 <A HREF=man_html/tabplot.1.html>tabplot</A> using the
+	<B>readline=t</B> keyword. Also added support in configure
+	to force readline off.
+<LI> (20-aug) [new] gadget.install: script to aid and simplify in installing
+	various versions of 
+	<A HREF=http://www.mpa-garching.mpg.de/gadget/>Gadget2</A>.
+	In addition, gadget I/O will get optional support
+	for <A HREF=http://hdf.ncsa.uiuc.edu/HDF5/>hdf5</A> format.
+</UL>
+
+
+ <A NAME=3_2_3>
+<H2>3.2.3: 1 August 2005 (a.k.a. Amsterdam release) </H2>
+This was the (modest 5c)
+<A HREF=http://modesta.science.uva.nl/modest/modest5c/index.html>
+nbody-school</A> release.
+
+<UL>
+
+<LI> (1-aug)  Resurrected
+ <A HREF=man_html/dtos.1.html>dtos</A>. and
+ <A HREF=man_html/stod.1.html>stod</A> to keep the conversion of data
+between nemo and starlab going. 
+<LI> (11-jul) some more patches for Fedora Core 4
+<LI> (11-dec)  <A HREF=man_html/glnemo.1.html>glnemo</A>, fairly major
+	update, also works with gcc4.
+<LI> (4-jul) (new)  <A HREF=man_html/ccdmos.1.html>ccdmos</A>  simple mosaicer
+<LI> (2-jun) new routines <I>put_data_blocked</I> and <I>get_data_blocked</I>
+	allowing blocked (sequential) I/O. These routines work much like
+	their random counterparts, 
+	 <I>put_data_ran</I> and <I>get_data_ran</I>
+	except I/O must occur sequentially. No doubt some bugshaking will
+	be needed.
+<LI> (13-may) (new)  <A HREF=man_html/tabextinct.1.html>tabextinct</A>  and
+ <A HREF=man_html/tabint.1.html>tabint</A>.
+<LI> (13-may) various cleanups for 64 bit based machines, made GSL a little easier to
+	be enabled.
+<LI> (12-may) (new)  <A HREF=man_html/tabfilter.1.html>tabfilter</A>  and tabtrend
+<LI> (9-may) (new/upd) <A HREF=man_html/tabdate.1.html>tabdate</A> 
+	date/time conversions in tables.
+<LI> (18-apr) (new) <A HREF=man_html/mkgalorbit.1.html>mkgalorbit</A> computes galactic orbits from observational quantities
+<LI> (11-apr) added nmodel= to mkplummer (mostly for benchmarking)
+<LI> (28-mar) some additional fixes for cygwin, but still too far from an automated install.
+	See <A HREF=man_html/bench.5.html>benchmarks</A> for some standard
+	NEMO benchmarks. Basic conclusion: don't use cygwin for any serious
+	work,particularly the I/O is nearly a factor of 10 worse, and 
+	C++ code runs about 2-4 slower. C and Fortran much closer.
+<LI> (25-mar) (new) <A HREF=man_html/snappot.1.html>snappot</A> computes potentials/forces from analytical potentials
+<LI> (16-mar) yapp's pl_matrix() now has a blankvalue argument, for better ccdplot results
+<LI> (15-mar) cleaned up a number of files so NEMO compiles with g++
+<LI> (14-mar) many revisions to io_nemo (JCL)
+<LI> (7-feb) (new) <A HREF=man_html/potrot.1.html>potrot</A> computes
+an (angular averaged) rotation curve from a potential.
+<LI> (2-feb) moment's have been updated to handle moving moments
+<LI> (5-jan-2005) (new) <A HREF=man_html/ccdgen.1.html>ccdgen</A> to
+	create simple 2D objects in an image
+<LI> (26-dec) added simplified HDF install at boostrap
+</UL>
+
+ <A NAME=3_2_2>
+<H2>3.2.2: 25 December 2004 (a.k.a. the Christmas release) </H2>
+
+<UL>
+<LI> (24-dec) fixed a few Mac-specific problem (out3 vs. OUT3.. grrrr) and
+	added valgrind support to the testsuite
+<LI> (17-dec) (new) <A HREF=man_html/hdfwedge.1.html>hdfwedge</A> cloned
+	off hdfgrid to create more flexible pictures of wedges.
+<LI> (15-dec) hdfgrid can now grid in a pic=t (Particle in Cell) mode
+<LI> (10-dec) Fixed a number of HDF access problems in tsd, sdsfits and
+	hdfgrid when dealing with rank=3 files.
+<LI> (3-dec)  (new) <A HREF=man_html/glnemo.1.html>glnemo</A>, a Qt based 
+  interactive visualization program (Lambert). 
+	<A HREF=glnemo.avi>here</A> is an example of a movie
+	created with this program.
+        In addition, mknemo now supports
+	non-standard installations via scripts in src/scripts/mknemo.d
+<LI> (23-nov) fitsccd now has axistype= keyword to force new-style images
+<LI> (15-nov) fixed weighting error in nllsqfit if errors not the same
+<LI> (13-nov) added a set of <A HREF=examples>example scripts</A> to the web page
+<LI> (18-oct) implemented the "cvsid" string in programs. help=I will print the CVS ID, whereas help=V the human created version
+<LI> (19-sep) all C potential's now support potential_float and potential_double
+<LI> (6-sep) LocalMakedefs file in any directory will be optionally used by NEMO's Makefiles
+<LI> (25-aug) acceleration: improvements (Dehnen)
+<LI> (19-aug) maxsizes.h : provide a default in $NEMO/inc/max. For those
+	using CVS updates, you have to manuallly copy it:
+<PRE>
+	cp $NEMO/inc/max/maxsizes.h $NEMOLIB 
+</PRE>
+	else the installation will automagically take care of this.
+<LI> (19-aug) perorb : fixed allocation and added new  last= keyword
+<LI> (29-jul) cfitsio.install and test_a_new_nemo_cvs now simplify using CFITSIO
+<LI> (15-jul) acceleration: a new more general version of potential (Walter Dehnen)
+<LI> (14-jul) some important fixes for -DSINGLE_PREC users
+	[you should recompile the library and relink all/most executables]
+<LI> (1-jul) fits8to16 (new): convert 8bit to 16bit image.
+<LI> (24-jun) the <A HREF=macosx.html>MacOSX notes</A> have been updated with
+	some more unsderstanding of the pitfalls.
+<LI> (13-jun) rotcurshape: can now optionally return the full fit in the
+	residual map instead.
+<LI> (26-may) various improvements in rotcurshape (and rotcur) underway.
+<LI> (21-may) gyrfalcON: new update with new internal manual pages.
+	The version number hasn't changed, still reported to be 2.1 
+<LI> (13-may) the user interface (getparam.c) now supports help=c, which
+will report CPU usage for each NEMO program on debug level 0.
+<LI> (12-may) gyrfalcON has been updated to 2.1, which came 
+with a few new programs, e.g.
+<A HREF=man_html/lagrange_radii.1.html>lagrange_radii</A>,
+<A HREF=man_html/density_centre.1.html>density_centre</A>,
+<A HREF=man_html/mkdehnen.1.html>mkdehnen</A>,
+<A HREF=man_html/mkking.1.html>mkking</A>,
+<A HREF=man_html/mkplum.1.html>mkplum</A>.
+
+<LI> (8-may) infrastructure changes to images, to deal with an astronomical WCS.
+	in particular, <A HREF=man_html/snapgrid.1.html>snapgrid</A> can
+	now grid most common astronomical coordinate systems, see also
+	<A HREF=man_html/wcs.1.html>wcs</A> for more background info.
+<LI> (25-apr) added NEMO I/O to <A HREF=man_html/treecode1.1.html>treecode1</A>,
+	<A HREF=perf3.ps>this plot</A> summarizes the performance and
+	force accuracy for a N=4000 plummer sphere.
+<LI> (24-apr) few minor fixes for gnu compiler 3.4.0
+<LI> (23-apr) new <A HREF=man_html/timers.3.html>timers</A> functions available for intel/amd
+<LI> (22-apr) tkrun more flexible in reading "#>" directives 
+<LI> (15-apr) gyrfalcON has been updated to 2.0.1, the
+	<A HREF=man_html/gyrfalcON.1.html>manual page</A> has also been updated.
+<LI> (12-apr) User and Programmers guide: slowly etching away more old lies
+<LI> (12-apr) activated a new toplevel 'make bins', which should make as many programs
+as are possible (depending on correct settings of your makedefs file).
+Good excersize of your CPU and HD. Instead of the usual 100 or
+so binaries with the testsuite method, this one gives you nearly 200! The manual page
+tree contains 270 entries, so still some more additions to do.
+</UL>
+
+ <A NAME=3_2_1>
+<H2>3.2.1: 11 April 2004 (a.k.a. the Easter release) </H2>
+
+<UL>
+<LI> (11-apr) User and Programmers guide: first 4 chapters now updated. 
+<LI> (11-apr) removed YAPPLIB from the environment into makedefs
+<LI> (11-apr) yanc, the predecessor of falcON, has been removed from the tree and CVS.
+<LI> (11-apr) A small patch is still needed for 
+	<A HREF=macosx.html>MacOSX</A> 10.3 users, read item 3 at the
+	bottom of this link (almost perfect)
+<LI> (11-apr) CVS (or any other) updates should read <A HREF=nemo32.html>upgrade details</A>
+<LI> (11-apr) merged from the branch <B>NemoHost3</B> the following
+changes are made in the build system, as well as a few fixes.
+<UL>
+<LI>A change in the directory structure in the sense that $NEMOHOST
+subdirectories in $NEMO/{bin,lib,obj} are now no longer supported;
+instead files are directly placed in the {bin,lib,obj}
+directories. The environment 
+variables $NEMOBIN, $NEMOLIB, $NEMOOBJ are accordingly modified, 
+otherwise it has very little impact on a running system. The
+$NEMO/host tree has disappeared, and is replaced with the $NEMO/opt tree.
+<LI>  added more programs to the testsuite
+<LI>  fixed two bugs in bodytrans: when more than one new bodytrans 
+	function was given in the same program, and fixed bodytrans
+	usage in pipes again.
+	 (bodytrans is now  also removing the /tmp/bt* files)
+<LI>  fixed PGPLOT interface for multi-panel programs (this may not work
+	well if PGPLOT_FOREGROUND/BACKGROUND are used)
+<LI>  MacOSX (10.3) support (as much as the filesystem
+	with its filecasing problem supports)
+</UL>
+</UL>
+
+<hr>
+
+ <A NAME=3_2_0>
+<H2>3.2.0: --never released as such -- </H2>
+
+
+This releas was just a placeholder while the NemoHost3 branch was being tested.
+<UL>
+<LI> (11-apr) merge with 3.2.1 occured, this version thus never released
+<LI> (24-mar) magalie updated to 1.2
+<LI> (23-mar) <A HREF=man_html/snapaddbh.1.html> snapaddbh</A> (new)
+<LI> few other small things, lost from the records due to an editor glitch
+</UL>
+ <A NAME=3_1_2>
+<H2>3.1.2: 23 March 2004 (a.k.a. the Strasbourg release) </H2>
+
+This version was released on CD for the participants of the N-body school in Strasbourg.
+<UL>
+<LI> (23-mar) <A HREF=man_html/magalie.1.html>magalie</A> (NEW: wrapper program) (Christian Boily)
+<LI> (18-mar) nemo_io updated to handle eps (particle softening)
+<LI> (15-mar) added GalactICS from Kuijken-Dubinski
+<LI> (15-mar) orbint: variable timesteps
+<LI> (13-mar) various improvements to nbody0, mostly due to the problems around the figure8 orbit
+<LI> (5-mar)  <A HREF=man_html/mkkd95.1.html>mkkd95</A> (NEW: wrapper program 
+	to the Kuijken-Dubinski disk generation tools)
+<LI> (24-feb) fixed nbody00 for integrations of orbits like figure8
+<LI> (20-feb) <A HREF=man_html/newton0.1.html>newton0</A> (NEW ;
+an old program from 1987 finally cleaned up and added to NEMO)
+<LI> (19-feb) dtos: added an option to select what to output (experimental)
+<LI> (18-feb) command(3EMO): now reads command files
+<LI> (17-feb) <A HREF=man_html/directcode.1.htm>directcode</A> (NEW): classic direct N-body code
+<LI> (15-feb) better support for compilers like intel80 for fortran-c interfaces (still some problems left)
+<LI> (14-feb) configure/makedefs: pretty important <A HREF=bug1.html>subtle bug</A> forgetting -fpic compiling for shared objects
+<LI> (13-feb) tab2xml: new program (actually writes VOTables, not arbitrary xml files)
+<LI> (11-feb) fixed bootstrap pgplot install problem, as well as in AAA_SOURCE_ME
+<LI> (10-feb) some more SPH support in snapshots
+<LI> (7-feb) flowcode V0.6: implemented diffusion for orbits
+<LI> (1-jan) get_line would terminate on blank line: many programs changed for new get_line interface
+<LI> (29-dec) snaptrim:  allow extraction of something nearest to requested time
+<LI> (28-dec) intel compiler 8.0 causes link problems with Fortran/C/Nemo
+<LI> (27-dec) mknemo updated to 2.0, it now detects that there is a new version,
+	useful if you like to use the new -l and -u flags , run
+	<B> mknemo -u; cp $NEMO/src/scripts/mknemo $NEMOBIN </B> and never need
+	to update this command again.
+</UL>
+
+ <A NAME=3_1_1>
+<H2>3.1.1: 27 December 2003 </H2>
+<UL>
+<LI> (27-dec) allow 64 open files (NEMO_MAXFD)
+<LI> (24-dec) command (NEW), optionally using readline, to embed simple interactive commands 
+<LI> (16-dec) ccdppm (NEW), scripted up to create all <A HREF=lut/>color lookup tables </A>(lut)
+<LI> (20-nov) mkflowdisk (NEW), flowcode, vrtm51 (NEW): various M51 project related improvements
+<LI> (25-oct) plplot support revived in prepartion for their 5.2.2 release (--without-double needed for configure)
+<LI> (16-oct) splitstream.cc (new, via falcON environment; WD)
+<LI> (15-oct) dtos, stod: made it work for starlab4 again
+<LI> (9-oct) snapplot(v) : support for the new style (pos/vel) snapshots
+<LI> (21-sep) nemo_file_lines: changed meaning of deflen, which means most programs that used 
+	nmax= should get a negative count argument.
+<LI> (19-sep) a number of new programs in src/tutor that can be more easily used as template/teaching tool
+<LI> (10-aug) kstwo: indexing bug, tabcmp also needs recompilation
+<LI> (30-jul) snapfit: various fixes and improvements going on... 
+<LI> (29-jul) changed SIGN -> SNG since num.rec. uses it (NEMO's compilation thus failed)
+<LI> (28-jul) gyrfalcON: important version 1.6.1 for gcc 3.3 (Walter Dehnen)
+<LI> (15-jul) snapfit: new program (imported from 1992 code base!)
+<LI> (14-jul) minor updates on io_nemo (JCL)
+</UL>
+
+ <A NAME=3_1_0>
+<H2>3.1.0: 12 July 2003 </H2>
+<UL>
+<LI> (12-jul) various minor changes to aid a <A HREF=macosx.html>full install on Mac OS X</A>10.2 (to be checked for 10.1)
+	(for loadobj the
+	<A HREF=http://www.opendarwin.org/projects/dlcompat/>dlcompat</A>
+	 library needs to be installed first)
+<LI> (12-jul) getparam: added "--" processing
+<LI> (7-may) tabhist: handle multiple columns (using mdarray)
+<LI> (6-may) mdarray: a useful set of multi-dimensional array alloc/free routines
+<LI> (23-apr) ellipse: new program to toy with ellipses and orbits
+<LI> (4-apr) tabnllsqfit: fixed bug in using dycol=, added dypow=
+<LI> (5-mar) potcode is being hacked on, it can now analytically integrate epicycle orbits
+<LI> (2-mar) wcs tools added in src/image/wcs
+<LI> (1-mar) ccdmath: allow fiddle with WCS; 
+	<A HREF=man_html/index.html>new online manual pages using rman</A>
+<LI> (1-mar) orbits now have a slot to store errors in the I.O.M.
+<LI> (17-feb) snapgalview: new program, and added some pre-defined bodytrans
+	for glat/glon/mul/mub
+<LI> (15-feb) Testfile supports nemo.coverage analysis, if enabled
+<LI> (13-feb) nlllsqfit: added an 'arm3' (simultaneaous m=1,3 fitting) (Shetty)
+<LI> (12-feb) rotcur/rotcurshape: fixed serious bug in residual map computation
+<LI> (6-feb) ccdvel: modulated orbits allowed (mexp=, phexp=)
+<LI> (4-feb) patch for io_nemo to make it compile on some newer versions of linux with gcc3 (JCL)
+<LI> (10-jan) renamed some little used macros (SGN,RNG,RND) to longer names
+<LI> (7-jan) some work on making the important parts compilable under g++
+	(read: get GalPot to work for gcc3 for e.g. potlist)
+</UL>
+
+ <A NAME=3_0_16>
+<H2>3.0.16: 7 January 2003 </H2>
+<UL>
+<LI> (4-jan) falcON added (this deprecates YancNemo), with gyrfalcON as the integrator [Walter Dehnen] -- needs gcc3 !!
+<LI> (2-jan) LFS (files > 2GB) is now enabled by default in configure
+<LI> (2-jan-2003) many small fixes for gcc3 and -DSINGLEPREC (bodytrans prototypes)
+<LI> (5-dec-2002) mktt72: create Toomre & Toomre 72 disks
+<LI> (4-dec) getparam: better handling of long commandline arguments
+</UL>
+
+ <A NAME=3_0_15>
+<H2>3.0.15: 3 December 2002 </H2>
+<UL>
+<LI> (2-dec) <A HREF=mass99/>NEMO tutorial (recepies) for mass99 users</A>
+<LI> (2-dec) added vogl ($NEMO/usr/vogl) to NEMO's CVS release
+<LI> (26-nov) snapidl: new program to pipe data (binary) into IDL.
+
+<LI> (23-nov) tabclip: new program to clip tabular data
+<LI> (4-oct) tabtranspose.c: new program
+</UL>
+
+ <A NAME=3_0_14>
+<H2>3.0.14: 14 September 2002 </H2>
+<UL>
+<LI> (14-sep) snapsplit,snaptrim can output multiple files
+<LI> (10-sep) many changes to rotcur/rotcurshape
+<LI>  (5-aug) $NEMOBIN/nemo.pl made by configure for perl users
+<LI>  (2-aug) tabplot: multi xcol= allowed for pairwise plotting
+<LI>  (21-jul) rotcurshape: new program to fit velocity fields using shaped rotation curves
+<LI>  (19-jul) JC-Lambert's new io_nemo added , adds a fortran I/O layer to
+	the nbody I/O routines. If you incrementally upgrade to 
+	this version, you need to remove an old io_nemo module from the library:
+<pre>
+	ar d $NEMOLIB/libnemo.a toolsnemo.o
+</pre>
+<LI>  (17-jul) nr_nllsqfit: NumRec interface to nllsqfit, and changed  tabnllsqfit
+	to make use of this and dynamic object modules for arbitrary function fitting
+<LI>  (17-jul) nemo-fied numrec1 now converted to nemofied numrec2
+<LI>  (12-jul) tabnllsqfit: new program, using nllsqfit, modeled after tablsqfit
+</UL>
+
+
+ <A NAME=3_0_13>
+<H2>3.0.13: 1 July 2002 </H2>
+<UL>
+<LI>  (28-jun) rotcur: read tables in addition to images
+<LI>  (14-jun) tsf: now writing out integer in decimal (not octal) format
+<LI>  (13-jun) YancNemo: new version 1.2 (Walter Dehnen)
+<LI>  (12-jun) file permission patches for bodytans (Jean-Charles Lambert), HP-UX fix
+<LI>  (7-jun)  GalPot.cc: new Galaxy Potential (Walter Dehnen)
+<LI>  (23-may) filesecret.c: support for >2GB files
+<LI>  (24-apr) getparam.c: adding in support for new system keyword outkeys=
+<LI>  (13-feb) stropen.c: fixed mktemp -> mkstemp for security
+<LI>  (20-jan) getparam.c: allow putparam to create new indexed files
+<LI>  (19-jan) getparam.c: fix reading indexed keywords from keyword file
+</UL>
+
+ <A NAME=3_0_12>
+<H2>3.0.12: 17 Jan 2002 </H2>
+<UL>
+<LI>  (17-jan) get_snap reads ZENO (Position/Velocity) snapshots
+<LI>  (16-jan) fixed various indexing problems in getparam.c
+<LI>  (29-dec) rotcur0.c added as potential descriptor
+<LI>  (19-dec) C++ style exception handling for C (exception.c, in development)
+<LI>  (19-dec) example cfitsio interfaces, fitsio.h is now fitsio_nemo.h and 
+	fitsio.c will optionally contain the CFITSIO wrapper interface
+<LI>  (dec) getparam.c improved the indexed keyword interfaces
+</UL>
+
+ <A NAME=3_0_11>
+<H2>3.0.11: 26 Nov 2001 </H2>
+<UL>
+<LI>  (w.i.p) example cfitsio interfaces
+<LI>  (13-oct) fix failing bitpix 64 configure check support on solaris
+<LI>  (9-oct) add tidaldisk and vertdisk potentials (Walter Dehnen)
+<LI>  (10-oct) add dens and eps support as bodytrans variables (left out in 3.0.10)
+<LI>  (15-nov) new program snapshell to analyze bodyvariables on shells
+<LI>  (16-nov) new yanc (1.0.15) 
+<LI>  (25-nov) improved access for indexed parameters  (getparam)
+<LI>  (25-nov) added AAA_SOURCE_ME for manybody.org
+</UL>
+
+ <A NAME=3_0_10>
+<H2>3.0.10: 8 October 2001 (linux only quicky release) </H2>
+<UL>
+<LI> (9-oct) support for Density and Eps in snapshot I/O (the quicky... see also 3.0.11 for better support)
+<LI> (7-oct) flushing filestruct I/O when writing at the top level
+<LI> (29-sep) some support for experimental FITS BITPIX=64 integers for images and tables
+	(this stuff breaks on solaris, unless you run autoconf again)
+<LI>  basic stuff - no dynamic object loaded yet - 
+works under darwin (mac OS X), except needed to manually
+change
+<PRE>
+	#FLIBS =  -lcrt1.o -lg2c -lcc_dynamic -lSystem
+	FLIBS =   -lg2c -lcc_dynamic -lSystem
+</PRE>
+in the $NEMOLIB/makedefs file.
+</UL>
+
+ <A NAME=3_0_9>
+<H2>3.0.9: 23 September 2001 </H2>
+<UL>
+<LI>  indexed keywords for getparam (wo/ minmatch)
+<LI>  potlist can auto-detect _double and _float potentials
+<LI>  new yanc (1.0.12) with support for external (nemo) potentials
+</UL>
+
+ <A NAME=3_0_8>
+<H2>3.0.8: 13 September 2001 </H2>
+<UL>
+<LI>  adding <maxsizes.h> for site related MAX* sizes
+	(upgraders need to re-run "make dirs" and "config.status")
+<LI>  adding support for GSL (GNU Scientific Library):
+	xrandom, tabspline, tabpoly
+<LI>  creating shadow/symlink directories under $NEMO/host to allow
+	hosting alien autoconf package with 
+<pre>
+	configure --prefix=$NEMO/host/$NEMOHOST
+</pre>
+	probably need a new name for this, or else we could abandon
+	the current scheme and put bin,lib,obj,inc->include, sort of
+	how AIPS++ does it. That's for release 3.1 perhaps. What
+	about other common names, like man and share?
+<LI>   cfitsio configurations fixed
+<LI>   file_size -> nemo_file_size (for cfitsio)
+<LI>   new yanc (1.0.8) with mkking; also fixed up redundant
+	inc/tree and src/tree directories
+<LI>	better prototypes for potential proc's to help C++ users
+      (and new _float/_double routines in potential(3NEMO))
+</UL>
+
+
+ <A NAME=3_0_7>
+<H2>3.0.7: 4 September 2001 </H2>
+<UL>
+<LI> tablsqfit:  added errors to ellips axis ratio 
+<LI> fitsio.c: fixed serious error in reading fits headers that 
+     have N*36+1 cards,	affects fitsccd. Very old bug.
+<LI> yanc/YancNemo: version 1.0.7 merged. ok.
+<LI> yanc/YancNemo: version 1.0.8 merged, ok now.
+<LI> various 
+</UL>
+
+ <A NAME=3_0_6>
+<H2>3.0.6: 18 July 2001 </H2>
+<UL>
+<LI> many syntax fixes for gcc3.0 to make it compile for g++. Speedup
+is a mere 5% for hackcode1's (nbody=1024/tstop=10)
+<LI> simplified running the testsuite with a new -b flag
+<LI> SGI installation was broken
+<LI> various added macros and functions to aid integrating some types
+of ZENO code
+<LI> added Barnes improved treecode (V1.4) and integrated it in NEMO,
+albeit still with his original I/O (atos/stoa can convert the data)
+<LI> added YANC (version 1.0.5) into NEMO/usr/dehnen/yanc as follows:
+<pre>
+	cvs import -d -m "YANC 1.0.5" nemo/usr/dehnen/yanc vendor start
+</pre>
+documentation on YancNemo is already present in YancNemo(1)
+<LI> JC-Lambert's io_nemo added , only C version for now, fortran in next
+release.
+<LI> configure now handles single/double/mixed precision modes, and a few
+other bugs removed from the configure setup
+</UL>
+
+ <A NAME=3_0_5>
+<H2>3.0.5: 7 June 2001 </H2>
+
+<UL>
+<LI> proper support for integrating alien C++ code (e.g. YANC -> YancNemo)
+<LI> uNEMO finalized: only provides an I/O library, no user interface
+<LI> Added 'demo1' from the Mexico GH2001 workshop ($NEMO/demo/demo1)
+<LI> Fixed nemo_start if run from a non-writeable directory
+<LI> configure improvements for YAPP 
+</UL>
+
+ <A NAME=3_0_3>
+<H2>3.0.3: 28 May 2001 </H2>
+
+<UL>
+<LI> Identified the smallest subset of routines needed to get acccess to
+	basic NEMO I/O without user interface needs - also cleaned getparam.c
+	to give running code with the user defined main() instead of
+	nemo_main(). See $NEMO/src/uNEMO
+<LI> some support for Dehnen's YANC
+<LI> various small fixes made in Mexico
+</UL>
+
+ <A NAME=3_0_2>
+<H2>3.0.2: 16 May 2001 </H2>
+
+A rushy release, since i'm travelling for two weeks, and also working
+on NEMO.
+<UL>
+<LI> fix some minor configure problems
+<LI> fixed short string space for long filenames (bodytrans.c)
+<LI> finally testsuite is passing the -DSINGLEPREC test
+<LI> added Kawaii's nbody and ftc code
+<LI> added flowcode to solve dr/dt=v type problems, potcode now also compiles
+</UL>
+
+ <A NAME=3_0_1>
+<H2>3.0.1: (5 April 2001) </H2>
+
+This release is claimed to configure and compile clean on linux (at
+least redhat 6.2). It also works on most Solaris and SGI, but may need
+some tweaking of the 
+<B>$NEMOLIB/makedefs</B> and <B>$NEMO/NEMORC.local</B> files. 
+
+ <A NAME=3_0_0>
+<H2>3.0.0: (1 April 2001) </H2>
+The new release series for NEMO V3 is imminent. Although the code is
+compatible, some details in shared object loaded have now been changed,
+and are not backwards compatible. You should probably not overlay the new
+NEMO on top of an old directory structure (although nothing has
+changed to that). CVS is now also offered to those who like to 
+participate in the development.
+<UL>
+<LI> source code control now under CVS
+<LI> installation now via autoconf's configure script
+<LI> dynamic object loading (loadobj) is now using .so files, and not
+	compatible with the .o files (although files could simply
+	be renamed)  [we're not using libtool (yet)].
+<LI> numerous documentation changes 
+<LI> numerous code cleanup and enhancements
+<LI> a number of new N-body codes have been added
+</UL>
+<hr>
+
+<A NAME=2_5_6>
+<H2>2.5.6: --never released as such-- </H2>
+
+this is a active list of things we know are broken and/or being worked on that
+may make it into the next release, as well as some proposed things that
+may make it into some next version:
+<UL>
+<LI> conversion to CVS, all of NEMO is now until CVS control
+<LI> solaris configure broken again
+<LI> snapgrid: can produce infinity with using small VZ smoothing ?
+<LI> (fixed) hdfgrid: parsing error 
+<LI> (upd) tabcmp: added KS2 test to table comparison
+<LI> (upd) xyzview: new option to view an orbit at the same time
+<LI> (fixed) configure does not seem to handle MESA correctly
+
+<LI> (proposed new) add indexed keywords to getparam.c
+<LI> (proposed new) shared library support using 
+	<A HREF=http://www.gnu.org/software/libtool/libtool.html>libtool</A>
+<LI> (proposed new) a new system keyword to export named parameters (export=)</UL>
+
+<A NAME=2_5_5>
+<H2>2.5.5: 23 August 2000 </H2>
+
+this is a list of things we know are broken and/or being worked on that
+may make it into the next release:
+<UL>
+<LI> (fix) tipsy conversion routines for byte-swapping
+<LI> (fix) fitsccd,fitsio bug fixed for raw cubes (planes were ok)
+<LI> (fix) stropen: scratch files now should not exist yet when opened
+<LI> (fix) solaris configure is a bit broken for fortran
+<LI> (fix) testsuite fails for nbody1, funcc due to directory changes
+<LI> (fix) copy issues for scfm at install time
+<LI> (fix) -DSINGLEPREC  is probably broken at the makefile level, it should
+    now be easier to add to $NEMOBIN/cc or the $NEMOLIB/makedefs
+<LI> (fix) tabplot documentation/workover
+<LI> (upd) snapplot, tabfits
+
+
+</UL>
+
+<A NAME=2_5_4>
+<H2>2.5.4: 28 January 2000 </H2>
+
+<UL>
+<LI> new programs: tabcols
+<LI> many small fixes to: tabdms,tabhist, tabplot, tabview
+<LI> fixed small-deltat bug in nbody0
+<LI> more autoconf/configure features (e.g. HDF)
+<LI> more generic Fortran-to-C interface using F77_FUNC macros (using
+	autoconf)
+<LI> small user interface (getparam) extensions, added cntparam()
+<LI> yapp_pgplot now has pl_cursor
+</UL>
+
+<A NAME=2_5_3>
+<H2>2.5.3: 6 January 2000 </H2>
+
+<UL>
+<LI> bug fix getparam.c, added NEMO/src/image/hdf/cmhog (mainly hdfgrid)
+<LI> better integrated autoconf/configure support
+<LI> documentation (although the manual is still not updated)
+<LI> A linux binary release is now available through 
+	<A HREF=http://carma.astro.umd.edu/nemo/linuxastro/astromake/>
+	astromake</A>, but this version may be somewhat older than
+	the latest source code.
+</UL>
+
+<A NAME=2_5_1>
+<H2>2.5.1: 18 December 1999 </H2>
+
+<UL>
+<LI> (18-dec) fixed up some installation issues for Solaris
+</UL>
+
+<A NAME=2_5_0>
+<H2>2.5.0: 16 December 1999 </H2>
+
+<UL>
+<LI>
+(16-dec) Major new release with many many small changes. The most important
+change is probably usage of standard <B>configure</B> script as the
+first stage during installation. Also, we are now 
+(kind of) using CVS for source
+code management. During the next few weeks I expect to have a few more
+small updates that irons out installations on a variety of machines. 
+
+
+<LI> (16-dec) merged all the never-released 2.4.5 updates, 
+	and went straight to an official 2.5.0 release.
+<LI> (12-jan) random snap I/O implemented with promising performance
+	benchmarks.
+<LI> (21-feb) all makefile's now use -O compile flags, as opposed to
+	a debugged -g. On some archictures significant improvements
+	can be achieved with tailored FLAGS, e.g. -fast on some Sparc's.
+<LI> (11-feb) nbody0 had an emberassing array index bug, and although
+	in a higher order term correction, will cause substantial
+	errors on long integrations. Various minor improvements to
+	installation, including automated pgplot installation.
+</UL>
+<hr>
+
+<A NAME=2_4_4>
+<H2>2.4.4: 28 January 1998 </H2>
+<UL>
+<LI> (28-jan) Long awaiting. Added tkrun, Aarseth's triple star integrator and 
+  finalized this release. Fixed some export files for scfm. gamma functions
+  for tablsqfit, version ID checking (nemo.version)
+<LI> (25-jul) fits.c now checks for new ("Year-2000") style DATExxxx header
+	items.
+<LI> (7-jul) added <B>scfm</B>, the self consistent field method N-body
+	integrator. Thanks to Lars Hernquist.
+<LI> (1-jul) the next release (sometime later this month) 
+	will be 2.5.0, not 2.4.5 because of a change
+	in directory structure  on the "aarseth/nbody*" series. You can
+	safely overlay the old tree, but be sure to delete
+	aarseth/nbody2 before you do this.
+<LI> (27-jun) new manpages (authors.5, ommod.5), working on king(1NEMO)
+	and runbody2(1NEMO)
+</UL>
+
+<A NAME=2_4_3>
+<H2>2.4.3: 26 June 1997</H2>
+<UL>
+<LI> (26-jun) 2.4.3 Released: also contains nbody2, which may get a few small
+	modifications. New: catpgps (to catenate PGPLOT ps files), runbody2
+	(a frontend for nbody2), added Dehnen's potential, snapmass with IMF.
+	<br>
+	accidentally a core dump and two executables were added to yapp's
+	source code directory.
+<LI> (6-jun) Added Sellwood's 3D cartesian Nbody code. (src/nbody/sellwood/code1)
+<LI> (1-jun) Fixed another typo in the initial conditions of the IAU 25 body problem.
+The energy is now -0.2 within the expected margin of error. This should really
+be the last fix to this benchmark dataset.
+</UL>
+
+<A NAME=2_4_2>
+<H2>2.4.2: 27 May 1997</H2>
+<UL>
+<LI> (27-may) Version 2.4.2 released, fixed some 64bit processor 
+   portability problems.
+   remaining (tabmath) problem on SGI's fixed, rvsnap and snaprv 
+	completed. Number of man pages updated and upgraded.
+<LI> Version 2.4.1 installed on a DecAlpha 500, running 
+Digital UNIX V4.0B  (Rev. 564), the fastest
+machine we have NEMO currently running on. The standard hackcode1 bench
+runs in 0.0048 sec, twice the speed on the Onyx-2. Since we didn't have
+a fortran compiler, yapp_gl with VOGL (GL emulator) was used (fixed few
+minor bugs)
+
+</UL>
+
+<A NAME=2_4_1>
+<H2>2.4.1: 13 April 1997</H2>
+<UL>
+<LI> Version 2.4.1 released. Continuing upgrades and bug fixes 
+    in the 2.4 release:
+    <UL>
+    <LI> shared library support now for both linux and solaris ("sun5")
+    <LI> nemo-starlab I/O support (src/nbody/io/starlab)
+    </UL>
+
+
+</UL>
+
+<A NAME=2_4_0>
+<H2>2.4.0: 1 April 1997</H2>
+<UL>
+<LI> Version 2.4.0 released, which is the one that comes after 2.3.8.
+	It will contain two major changes, and a number of
+	small changes and additions:
+    <UL>
+    <LI> code should now run in -DSINGLEPREC mode. Some problem areas remain,
+         which are planned to be solved in upcoming patches:
+        <UL>
+        <LI> use of vectmath in potential's is not good, since potentials
+            are hardcoded in double precision, and vectmath uses 'real' and 
+            the precision flag.
+        <LI> function pointers cannot always be generic proc's, they need to
+		be typedef'd by function if the arguments are float's
+		(some compilers may pass unspecified arguments as double)
+        </UL>
+    <LI> various directories now have a <em>Testfile</em>, which are gnu 
+         compatible makefile's used to run a testsuite of
+         programs through nemo. You can look at our most
+         recent <A HREF=testsuite.log>testsuite.log</A> and compare
+         with your version (if we have it online).
+    <LI> fortran (src/kernel/fortran) support now compiled in the library 
+         by default. Portability not really looked into.
+    <LI> xyz programs (snapxyz, xyzview) for 3D viewing and movies formally
+        added. You either need to compile the 
+	<A HREF=optional.html>vogl library</A>, or on an SGI
+        you can use the native GL library (much nicer and faster).
+    </UL>
+</UL>
+
+<H2>16 February 1997</H2>
+<UL>
+<LI> SGI IRIX 6.2 has some problems with loadobj, some routines
+	don't compile, and it cannot handle more than 5 expressions
+	in e.g. snapprint. For one, I probably have to break down and make
+	libnemo a shared library. <I> this has been solved in 2.4.0 </I>
+<LI> Linux slackware3.1 (and possibly some other distributions too) may
+	need <A HREF=ftp://ftp.astro.umd.edu/progs/nemo/gnumalloc.so>
+	/lib/gnumalloc.so</A> to be linked in. There is a problem with
+	the malloc/free in the standard libc (e.g. 5.3.12 is broken).
+	You can look at my 
+	<A HREF=ftp://ftp.astro.umd.edu/progs/nemo/cc>
+	$NEMOBIN/cc</A> for linux (ELF) how i've solved this.
+<LI> (TBA) Sellwood's 3D cartesian grid code is going to be incoorporated
+	in NEMO. Thanks Jerry!
+</UL>
+
+<H2>22 October 1996 </H2>
+<UL>
+<LI> (23-oct) Some linux (slackware 3.1) releases may need a patch/fix
+	due to a <A HREF=bugfix/linux.23oct96>libdl bug</A>
+<LI> (22-oct) Release 2.3.7 with a fix to make linux (default is now ELF
+	based, linux-aout present but not officially supported) work
+	out of the box. sun5 (solaris) and sgi (irix 5.x) are also
+	supported out of the box; all remaining OS may need some patch
+	work. 
+<LI> (22-oct) Old tar and patch files have been deleted. Only the
+	current version (2.3.7) is present.
+<LI> (13-sep) User interface bug fixed for telnet sessions under solaris 2.5
+	[blank environment variable was present] (getparam.c)
+</UL>
+
+<H2>30 August 1996 </H2>
+<UL>
+<LI> (30-aug) Release 2.3.6 after this summers work in Amsterdam with full
+	 support to import and export starlab datafiles. (loadobj.c)
+</UL>
+
+<H2>13 July 1996 </H2>
+<UL>
+<LI> (12-jul) linux ELF scripts  (cc, ldso) were broken
+<LI> (29-jun) fix ldso script for SGI 
+<LI> (28-jun) Release 2.3.5 formally released, 
+<LI> The hosttype command is now fully based on the uname command the
+    host is supposed to have.
+<LI> Linux default is now ELF based, although some support for a.out
+    based systems remains. 
+<LI> Various minor bugfixes and updates to the manual, man pages and 
+    a variety of programs. 
+</UL>
+<hr>
+<H2>4 April 1996 </H2>
+<UL>
+<LI> Support for the new ULTRA-Sparcs underway. So far only
+     a fix to the hosttype script was needed (Solaris 2.5)
+<LI> Linux ELF support, solved by patching scripts ldso, cc. PGPLOT 5.0.3
+	from sunsite works fine. Needs dummy nemomain.o(MAIN__) to fool f2c.
+</UL>
+<hr>
+<H2>28 January 1996 </H2>
+<UL>
+<LI> I'm playing with a <A HREF=nemo_new.html>new design NEMO homepage</A>;
+	be careful, it is using some HTML3 features that may only be
+	accessible through e.g. Netscape2
+<LI> The <A HREF=lfa.html>Linux for Astronomy</A> CD-ROM is out, and 
+	contains a copy of NEMO.
+</UL>
+<H2>15 December 1995 </H2>
+For release 2.3.4:
+<UL>
+<LI> made the dynamic object loader work for OSF1 V3.2 (dec alpha)
+	(should also work for SGI and LINUX, 
+	but the next release will make this
+	formal)
+<LI> new command  '<B>ldso</B>' that aids dynamic object loading more
+  portably accross architectures.
+<LI> various minor bug fixed and features added, e.g.
+    <UL>
+    <LI> <b>mkop73</b>: fixed bug on solaris
+    <LI> <b>snaprotate</b>: allowed more than 3 rotations
+    <LI> <b>snapscale</b>: reporting
+    <LI> <b>ccdmom</b>: new program to take moments on a cube (simple version)
+    <LI> <b>fitstiff</b>
+    <LI> <b>ccdfits, fitsccd</b>: resolved some WCS issued around the CTYPE's
+    </UL>
+</UL>
+<hr>
+
+<H2>5 October 1995 </H2>
+<UL>
+<LI> The so-called portable random number generator from the Numerical
+     Recepies library that NEMO uses is perhaps portable, but goes out
+     of bounds a bit too often. Fixed by letting xrandom() spin until
+     it's in range. This is part of release 2.3.3
+<LI> loadobjDL.c will be patched to work with SGI IRIX 5.x (IRIX 4.x 
+     is hopeless, I've given up on that now). IRIX 6.x to be confirmed.
+     Not in release 2.3.3 yet.
+</UL>
+
+<p>
+
+<H2>22 July 1995 </H2>
+<UL>
+<LI> I've added a <A HREF=bugs.html> known bugs list</A>, of which eventually
+     most will go into this whatsnew list.
+<LI> NEMO Release 2.3 is out!
+        <UL>
+        <LI> Undoubtedly  there will be small patch (incremental tar) 
+             files coming out. Such new versions will be versioned
+             with patchlevels, e.g. nemo_2.3.11.tar.gz will be
+             patchlevel 11, and would require you to load 11
+             upgrades, or get the new tarfile.
+             <UL>
+             <LI> 5-jul-95 (2.3.1) bootstrap file upgraded, 
+                    small manual and man pages were changed, versioning
+		    through the user interface, nemoinp, tablsqfit
+             <LI> 22-jul-95 (2.3.2) bug fix in snapslit, and Makefile 
+                    support
+		    for automated updating the anon.ftp area.
+             <LI> 5-oct-95 (2.3.3) xrandom/ran3 bug fixed, added snapplotv
+                    and ccdsharp
+             </UL>
+        <LI> If your site uses Solaris *with* a LD_LIBRARY_PATH environment
+             variable, check with your system mananger, or contact me
+	     if you have trouble.
+        <LI> I'm still working on the manual. 
+        </UL>
+</UL>
+
+<hr>
+
+<H2>19 April 1995 </H2>
+<UL>
+<LI> Release 2.3 is about to come out! From now on a release will have a version
+consisting of major (2) and minor (3) version id, with patchlevels.
+<LI> 26-may-95: too much time spent in HDF and FITSIO routines for
+some of my own work. In addition something with -xcg92 compilation
+broke on our solaris installation, and that needs to be tracked down
+too. And some other fires.. Soooo, Release 2.3 won't be out until
+mid june.
+</UL>
+<hr>
+
+<A NAME=linux>
+<H2>10 January 1995 </H2>
+<UL>
+<LI> LINUX version is running, including 
+<A HREF="man_html/loadobj.3.html"> loadobj </A>. Since PGPLOT has been
+ported to LINUX, there is nothing holding official LINUX support
+back now. I expect this new release (version 2.3) to be in mid february.
+<LI> Although we have always had support for a single precision
+NEMO, ANSI compiling with more strict rules has set me back
+considerably. Until *everything* relevant has been properly
+prototyped, compiling with -DSINGLEPREC is not recommended. I hope
+to fix this soon, but not in release V2.3
+<LI> Added some <A HREF=
+http://fits.cv.nrao.edu/traffic/scidataformats/faq.html> hdf </A> 
+utilities: 
+<A HREF=man_html/tsd.1.html> tsd </A>,
+<A HREF=man_html/fitssds.1.html> fitssds </A>,
+<A HREF=man_html/sdsfits.1.html> sdsfits </A>, and
+<A HREF=man_html/snaphdf.1.html> snaphdf </A>.
+</UL>
+<hr>
+<H2>16 November 1994 </H2>
+<UL>
+<LI> We are now running NCSA's new 
+<A HREF=http://hoohoo.ncsa.uiuc.edu/docs/Overview.html> httpd </A> (V1.3) 
+server. This has a new powerful
+server include mechanism, and lots of other goodies. There may be
+some problems with the current info you are reading, since some files
+had to be converted. We are running this server with the option that
+(server include) parsing is only done when the execute bit of a file
+is turned on. It seems that that the new <I> netscape </I> WWW browser
+has some problems with this, but 
+<A HREF=http://www.ncsa.uiuc.edu/SDG/Software/Mosaic/Docs/web-index.html>
+NCSA Mosaic </A> doesn't.
+
+</UL>
+<H2>8 October 1994 </H2>
+<UL>
+<LI> An <A href=nbody/index.html> Nbody Data Interchange Format </A>
+     discussion group has been set up. This includes an email exploder
+     (<I> nbody@astro.umd.edu </I>) and various archives of data in
+    different formats and accompanying software.
+<LI> An X-windows <a href=man_html/yapp.3.html> YAPP </a>
+    (NEMO's graphics interface) has been installed. This software
+    was written by Patrick Frisch, who has written a number of programs
+    within the NEMO environment. (<i> pfrisch@walhall.uni-sw.gwdg.de </i>)
+    You can 
+    <a href=ftp://astro.umd.edu/pub/nemo/yapp_x.tar.gz>     
+    pick up the patch file </a>
+    (a compressed tarfile) from our
+    anonymous ftp, and overload it on your current NEMO. Be aware, it
+    also contains a NEW NEMORC startup file.
+<LI> The ``public domain'' PLPLOT package (obtainable from
+    <A HREF=ftp://dino.ph.utexas.edu/plplot> dino.ph.utexas.edu </A>) can now
+    be used with a new YAPP device driver yapp_plplot.c.
+<LI>
+</UL>
+<H2>7 August 1994 </H2>
+<UL>
+<LI>
+    An experimental reference listing on N-body and-related
+    <a href=methods.html> methodologies </a>.
+<LI>
+    The manual pages have now been converted using a patched up
+    roff2html converter, and has links into the 
+	<A HREF=http://www.cis.ohio-state.edu/man/sunos.top.html>
+    SunOS manual pages</A>, where appropriate.
+    You can start at the 
+	<A HREF=http://carma.astro.umd.edu/nemo/man1.html?converted>
+    seconds half of the man1 index </A> page.
+
+<LI>
+  The <A HREF="man/cat1/gaussfit.1"> gaussfit </A> program,
+  for arbitrary least squares fitting
+  and robust estimation, has been added with a NEMO interface.
+<LI>
+  <A HREF="man/cat1/snaprect.1"> snaprect </A> has been extended
+  with more options to determine the shape of a potential, in
+  addition it can determine the axial ratio profile. 
+</UL>
+
+<H2>12 June 1994 </H2>
+
+<UL> 
+<LI> A <A HREF=bootstrap> bootstrap </A> loader is supplied that takes
+	away virtually all the work in installing NEMO. 
+<LI> A <A HREF="nbody/questionnaire"> QUESTIONNAIRE </A> is available which
+	will be used to design and prototype an interchange and archive
+	format for particle simulation data. Please look at it, load it
+	to your local disk (<B> Options/Load To Local Disk</B> in Xmosaic),
+	fill in the blanks, and send me your copy by e-mail.
+<LI> Added Quinn/Balcells conversion of their
+    <A HREF="man/cat5/xvp.5"> xvp </A> format in the form of a sample
+    <A HREF="man/cat1/xvpsnap.1"> xvpsnap </A> program. A few small
+    mostly cosmetic (less verbosities, smaller <I>nmax</I>) were needed
+    to relevant I/O subroutines.
+</UL>
+
+<H2>10 May 1994 </H2>
+
+<UL>
+<LI> Couchman' cosmological N-body simulator is available in
+     $NEMO/usr/couchman. NEMO wrappers for his programs
+<A HREF="man/cat1/prun.1"> prun </A> and
+<A HREF="man/cat1/pstart.1"> pstart </A> have been written.
+In addition, this resulted in an experimential I/O library
+with access to fortran unformatted binary files from C routines.
+See the manual pages for
+<A HREF="man/cat3/unfio.3"> unfio(3) </A> and
+<A HREF="man/cat3/memio.3"> memio(3) </A>.
+
+</UL>
+
+<H2>25 February 1994 </H2>
+
+<UL>
+<LI> The <A HREF=tipsy/tipsy.html> TIPSY </A> package has been installed;
+    the source code is 
+    intended to reside in $NEMO/usr/tipsy. Documentation is still limited,
+    but being worked on. 
+<LI> A new version of 
+   <A HREF=starlab/starlab.html> Starlab </A> has been installed. We upgraded
+    from 1.0 to 1.1.1. We now follow the convention of directory names, so
+   <I> $NEMO/usr/starlab/1.1.1 </I> will be the value of $STARLABPATH.
+</UL>
+
+<A NAME=solaris>
+<H2>24 January 1994 </H2>
+
+With Solaris 2.3 (SUN OS 5.3) now running on a local UMD test machine,
+most of NEMO is now running. This includes a smooth running  
+<A HREF="man/cat3/loadobj.3"> loadobj </A> package, as well as a 
+<A HREF="man/cat3/yapp.3"> yapp </A> in X (this one thanks to 
+<I> Patrick Frisch </I>).
+
+<B> NOTE: </B> the export tar files have not been updated yet, as much
+more proper testing is needed.
+
+
+<P>
+Back to: <A HREF=nemo.html> NEMO Home page </A>, the
+<A HREF=whatsup.html> What's Up </A>, or the
+<A HREF=whatsdown.html> What's Down </A> page.
+
+<Address>By: teuben@astro.umd.edu</Address>
+</BODY>
+
