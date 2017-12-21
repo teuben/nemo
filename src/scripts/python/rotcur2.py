@@ -6,7 +6,7 @@
 # -i   ringfit format
 # -s   velfitss07 format  [not activated yet]
 #
-# -r   keep in radio format
+# -r   keep in radio format (or whichever format it was)
 # -o   convert from radio to optical convention (needs vsys)
 #
 # -p   points 
@@ -38,7 +38,7 @@ import itertools
 import math
 import os,sys
 
-version = "25-apr-2017 PJT"
+version = "9-may-2017 PJT"
 
 degrad = 57.2957795
 c = 299792.458
@@ -100,12 +100,13 @@ def get_rotcur(data, efactor=1):
 
 def get_velfit(data, efactor=1):
     """
-    runvelfitss07
+    runvelfitss07 produces a .p file
     r   npt  vt   eVt Vr eVr Vm,t  eVm,t   Vm,r   eVm,r
     """
     r     = data['col1']
-    vt    = data['col3'] 
-    return (r,vt)
+    vt    = data['col3']
+    evt   = data['col4']
+    return (r,vt,evt)
 
 def junk():
     ax1.scatter(r,inc)
@@ -237,7 +238,7 @@ def print_usage(argv):
     print("   key=val  Optional re-assigned keyword")
     print("   -u       rotcur type table  (for this and all following tables until reset) ")
     print("   -i       ringfit type table  (for this and all following tables until reset) ")
-    print("   -r       radio convention  (for this and all following tables until reset) ")
+    print("   -r       radio convention  (for this and all following tables until reset) [default] ")
     print("   -o       optical convention  (for this and all following tables until reset) ")
     print("   -l       use lines")
     print("   -p       use points")
@@ -273,7 +274,7 @@ if __name__ == "__main__":
     umode  = False      # -u: rotcur format       -i: ringfit format (default)
     lines  = True       # -l: lines               -p: points
     errors = False
-    colors = itertools.cycle(["r", "g", "b"])
+    colors = itertools.cycle(["r", "g", "b", "c"])
     for name in sys.argv[2:]:
         if name.find('=') > 0:
             print("EXEC: ",name)
@@ -305,7 +306,7 @@ if __name__ == "__main__":
             (r1,v1,ve1) = get_rotcur(data)      # 'u'
         else:
             (r1,v1,ve1) = get_ringplot(data)    # 'i'
-            #(r1,v1) = get_velfit(data)     # 's'
+            #(r1,v1,ve1) = get_velfit(data)     # 's'
         if scale:
             o2r = 1.0-2.0*vsys/c
             v1 = v1 * o2r
@@ -333,4 +334,7 @@ if __name__ == "__main__":
     ax.legend(loc='best',prop={'size':8})
     ax.set_xlabel('Radius (arcsec)')
     ax.set_ylabel('Velocity (km/s)')
+    plt.savefig("rotcur2.png")
     plt.show()
+
+    #
