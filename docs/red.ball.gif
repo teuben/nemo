@@ -1,0 +1,104 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<HTML>
+<HEAD>
+   <META HTTP-EQUIV="Content-Type" CONTENT="text/html; charset=iso-8859-1">
+   <META NAME="GENERATOR" CONTENT="Mozilla/4.06 [en] (X11; I; SunOS 5.5 sun4u) [Netscape]">
+   <TITLE> Error 404: Missing Document</TITLE>
+</HEAD>
+<BODY TEXT="#000000" BGCOLOR="#FFFFFF" LINK="#0000EE" VLINK="#551A8B" ALINK="#FF0000">
+
+<CENTER>
+<H2>
+<FONT FACE="Times New Roman,Times"><FONT COLOR="#A0522D">
+No Such Document</FONT></FONT></H2></CENTER><HR>
+
+<FONT FACE="Arial,Helvetica" SIZE=+1>
+<CENTER>
+<B><I>You step in the stream,<BR>
+but the water has moved on.<BR>
+This page is not here.</I></B>
+</CENTER><P>
+The document you requested is not available.  If you think
+it really should be there, send email to the address below.
+</FONT>
+<P>
+
+
+<P>
+<CENTER>
+<TABLE WIDTH="580" BGCOLOR="#C0C0C0">
+<tr align="center"><td align="center" halign="center">
+<TABLE CELLSPACING=0 BGCOLOR="#EEFFFF" WIDTH="575">
+<tr halign="center" align="center">
+<td align="center" halign="center">
+<form name=seek method=get action="http://www.search.umd.edu/query.html">
+        <input type=hidden name=qc value="">
+        <input type=hidden name=ws value="0">
+        <input type=hidden name=qm value="0">
+        <input type=hidden name=st value="1">
+        <input type=hidden name=nh value="25">
+        <input type=hidden name=lk value="1">
+        <input type=hidden name=rf value="0">
+        <input type=hidden name=oq value="">
+        <input type=hidden name=rq value="0">
+        <input type=hidden name=qs value="">
+        <input type=hidden name=col value="umd">
+        <input type=hidden name=qp value="url:http://bima.astro.umd.edu">
+        <input type=text name=qt size=20 maxlength=2047>
+        <input type=submit value="Search the BIMA Web">
+&nbsp;
+&nbsp;
+&nbsp;
+<a href=http://search.umd.edu/help/index.html>Help</a>
+      </form>
+<CENTER><TABLE COLS=9 WIDTH="550" BGCOLOR="#FFE1E1" NOSAVE >
+<TR NOSAVE>
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/home.html">Home</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/whatsnew/whatsnew.html">New</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/general/general.html">General</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/proposal/proposal.html">Proposal</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/array/status.html">Status</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/user/user.html">U Info</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1><A HREF="/user/tools.html">U Tools</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1>
+<A HREF="/memo/memo.html">Memos</A></FONT></FONT></TD>
+
+<TD ALIGN=CENTER VALIGN=CENTER NOSAVE><FONT FACE="Arial,Helvetica"><FONT SIZE=+1>
+<A HREF="http://www.ncsa.uiuc.edu/Cyberia/Bima/BimaHome.html">Learn</A></FONT></FONT></TD>
+</TR>
+</TABLE></CENTER>
+</td>
+</tr>
+</TABLE>
+
+</td>
+</tr>
+</TABLE>
+</CENTER>
+
+
+<HR WIDTH="100%">
+<FONT SIZE=-2>Please direct comments, criticisms, corrections
+and contributions to: <I>
+<A HREF="mailto:web@bima2.astro.uiuc.edu">
+web@bima2.astro.uiuc.edu</A></I>.
+<br>
+<a href="/disclaimer.html">Standard disclaimer</a>
+</FONT>
+
+ 
+<BR><FONT SIZE=-2>Page last modified:
+Monday, 09-Nov-1998 09:58:54 EST.
+
+</FONT>
+
+
+</BODY>
+</HTML>
