@@ -24,7 +24,7 @@ string defv[] = {
   "restfreq=\n      Input rest frequency, in the units of the map, only if needed",
   "clip=\n          Clipping of output (none, or two values needed)",
   "units=km/s\n     Desired output units (km/s, m/s)",
-  "VERSION=0.4\n    6-may-2017 PJT",
+  "VERSION=0.5\n    21-jun-2017 PJT",
   NULL,
 };
 
@@ -152,7 +152,9 @@ void nemo_main()
     else
       error("Unknown to= frame");
 
+    /* set the input and output modes */
     dprintf(0,"MODES: 0x%x  and 0x%x\n",mode1,mode2);
+    /* then see if there are shortcuts */
     if (mode1 == OPT2REL && mode2 == REL2OPT) { mode1 = mode2 = ONE2ONE;}
     if (mode1 == RAD2REL && mode2 == REL2RAD) { mode1 = mode2 = ONE2ONE;}
     if (mode1 == RAD2REL && mode2 == REL2OPT) { mode1 = RAD2OPT; mode2 = ONE2ONE;}
