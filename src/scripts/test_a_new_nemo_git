@@ -1,7 +1,8 @@
 #! /bin/csh -f
 #
-#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w
+#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w            ~2004
 # P1600/
+#    i7/     125.240u 25.740s 2:52.00 87.7%	0+0k 239968+895168io 785pf+0w      2017
 #
 #  History:     29-mar-2004   for NEMO V3.2
 #                4-may-2004   various new keywords and cfitsio optional install
@@ -16,7 +17,7 @@
 #               25-jan-2012   DSO linking (dso=1) needed for modern linux
 #                5-dec-2017   converted CVS to GIT
 
-set nemo=nemo           # root directory name
+set nemo=nemo           # root directory name from the current directory
 
 set pgplot=1		# install PGPLOT via GIT also
 set intel=0		# pick intel compiler (astromake)
@@ -32,14 +33,13 @@ set gif=1               # add gi/pp/wd drivers (they use %ref/%val) for pgplot -
 set single=0            # singe or double (default) precision
 set all=1		# make all binaries , or just testsuite?
 set clean=1		# remove old nemo directory before installing (rm -r nemo)
-set git_nemo=https://github.com/teuben/nemo
-set git_pgplot=https://github.com/teuben/pgplot
+set git_nemo    = https://github.com/teuben/nemo
+set git_pgplot  = https://github.com/teuben/pgplot
 set branch=()		# use a GIT branch?
 set yapp=(/null)	# set a YAPP device during the install
                   	# point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
-set cfitsio=ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2500.tar.gz   
-set cfitsio=/home/carma_pkg/cfitsio2500.tar.gz 
-set cfitsio=0           # disable for formal release since there are some problems
+set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
+set cfitsio     = 0     # disable for formal release since there are some problems
 set debug=1             # compile in debug mode (not implemented)
 set pedantic=0          # compile in pedantic mode
 set make=make           # make, gmake, pmake, bmake, ....
@@ -85,6 +85,7 @@ if ($?CC  == 0)  setenv CC  gcc
 if ($?CXX == 0)  setenv CXX g++
 if ($?F77 == 0)  setenv F77 g77
 
+#       if modules are used, should start from a clean slate
 if ($?MODULE_VERSION) then
   echo WARNING: MODULE_VERSION=$MODULE_VERSION
   module purge
