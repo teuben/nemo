@@ -1,0 +1,62 @@
+# List of files which must be ignored by git status command
+
+# remove .o files
+*/*.o
+*/*/*.o
+*/*/*/*.o
+*/*/*/*/*.o
+*/*/*/*/*/*.o
+*/*/*/*/*/*/*.o
+*/*/*/*/*/*/*/*.o
+
+# remove .so files
+*/*.so
+*/*/*.so
+*/*/*/*.so
+*/*/*/*/*.so
+*/*/*/*/*/*.so
+*/*/*/*/*/*/*.so
+*/*/*/*/*/*/*/*.so
+
+# remove files created during configure
+.version
+Makefile
+NEMORC.gen
+NEMORC.local
+NEMORC.sh
+adm/
+bin/
+config.h
+config.log
+config.status
+etc/
+include
+install.log
+lib/
+makedefs
+nemo.pl
+nemo_start
+obj/
+one.dat
+tmp/
+src/kernel/fortran/hdr_size
+src/nbody/evolve/aarseth/nbody4/nbody4
+src/nbody/evolve/directcode/directcode
+src/nbody/evolve/hackcode/hackcode1/hackcode1
+src/nbody/evolve/hackcode/hackcode1/hackcode1_qp
+src/nbody/evolve/hackcode/hackcode1/hackforce
+src/nbody/evolve/hackcode/hackcode1/hackforce_qp
+src/nbody/evolve/sellwood/code1/galaxy
+src/nbody/evolve/sellwood/code1/galaxy.a
+
+# Denhen's directories
+usr/dehnen/falcON/acc/
+usr/dehnen/falcON/bin/
+usr/dehnen/falcON/dox/html/
+usr/dehnen/falcON/inc/utils
+usr/dehnen/falcON/lib/
+usr/dehnen/falcON/manip/
+usr/dehnen/falcON/utils
+usr/dehnen/utils/inc/cachesize.h
+usr/dehnen/utils/lib/
+usr/dehnen/utils/obj
