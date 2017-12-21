@@ -92,6 +92,10 @@
  *
  *      - allow expansion term, and elliptical like streaming
  *
+ *      - allow a single radius (rmax) to fit a linearly rising rotation curve
+ *        to match output for rotation curve plotting.
+ *        Could also use rotcurves for this.
+ *
  */
 
 #include <stdinc.h>
@@ -143,7 +147,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.12b\n 12-jun-2016 PJT",
+    "VERSION=2.12c\n 1-jul-2016 PJT",
     NULL,
 };
 
@@ -272,7 +276,7 @@ nemo_main()
       factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
     else
       factor = 1.0;
-    dprintf(1,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
+    dprintf(0,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
 	    factor,old_factor);
     Qfirstring = TRUE;           /* for rotfit residual calc */
     for (irng=0; irng<nring-1; irng++) {  /* loop for each ring */
@@ -472,8 +476,8 @@ stream  lunpri;       /* LUN for print output */
 	  else
 	    MapValue(velptr,i,j) *= tokms;
       
-      printf("Mapsize is %g * %g arcsec; Found %d/%d undefined map values\n",
-	     ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), 
+      printf("Mapsize is %g * %g arcsec; pixel %g arcsec; found %d/%d undefined map values\n",
+	     ABS(dx*(lmax-lmin+1.0)), ABS(dy*(mmax-mmin+1.0)), ABS(dx),
 	     n, Nx(velptr)*Ny(velptr));
       
       grid[0]=dx;        /* grid-separations in VELPAR (dx) */
