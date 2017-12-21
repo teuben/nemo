@@ -7,7 +7,8 @@
  *  31-jul-96  Created (for use by Mike Regan to aid printing
  *             out additional values from "orbits" produced by flowcode)
  *  26-sep-02  file_lines fix
- *  26-jul-15  add a cumul= option
+ *  26-jul-15  add a cumul= option, later also added the PA
+ *             add a wcs= option
  *
  */
 
@@ -21,13 +22,22 @@ string defv[] = {
     "out=???\n      Output table of X,Y,I coordinates",
     "xytab=???\n    Input table of X,Y coordinates",
     "nmax=10000\n   Allocation space for input XY table, if needed",
-    "cumul=f\n      Add Cumulative distance along the trace?",
+    "cumul=f\n      Add cumulative distance along the X,Y trace output?",
     "wcs=t\n        Use WCS from image, or else pixel coordinates",
-    "VERSION=1.2\n  26-jul-2015 PJT",
+    "dx=0\n         X Offset added to table",
+    "dy=0\n         Y Offset added to table",
+    "VERSION=1.4\n  27-jul-2015 PJT",
     NULL,
 };
 
-string usage = "interpolate a set of coordinates in an image";
+string usage = "interpolate a set of coordinates from an image";
+
+
+local imageptr iptr = NULL;
+local double   idx, idy, xmin, ymin, dx, dy;
+local int      nx, ny;
+local bool     Qcum;
+local bool     Qwcs;
 
 nemo_main()
 {
@@ -35,13 +45,6 @@ nemo_main()
     get_table();
     trace_image();
 }
-
-
-local imageptr iptr = NULL;
-local double   idx, idy, xmin, ymin;
-local int      nx, ny;
-local bool     Qcum;
-local bool     Qwcs;
 
 get_image()
 {
@@ -79,6 +82,8 @@ get_image()
 
     Qcum = getbparam("cumul");
     Qwcs = getbparam("wcs");
+    dx = getdparam("dx");
+    dy = getdparam("dy");
 }
 
 
@@ -113,10 +118,13 @@ get_table()
     }
 
     /* go through the table, find and report min & max in X and Y */
+    /* also add the offset */
 
     xmint = ymint =  HUGE;
     xmaxt = ymaxt = -HUGE;
     for (i=0; i<npt; i++) {
+        x[i] += dx;
+        y[i] += dy;
         xmaxt=MAX(x[i],xmaxt);
         xmint=MIN(x[i],xmint);
         ymaxt=MAX(y[i],ymaxt);
@@ -134,13 +142,16 @@ trace_image()
     double xp, yp, dx, dy, outval;
     int i, ix, iy, nout = 0;
     stream outstr;
-    real d = 0.0;
+    real d = 0.0, pa=0.0;
 
     outstr = stropen(getparam("out"),"w");
 
     for (i=0; i<npt;i++) {
         if (i>0) {
   	  d += sqrt( sqr(x[i]-x[i-1]) + sqr(y[i]-y[i-1]));
+	  pa = atan2(y[i]-y[i-1], x[i]-x[i-1])  * 180.0 / PI;
+	} else {
+	  pa = atan2(y[1]-y[0], x[1]-x[0])  * 180.0 / PI;
 	}
 	if (Qwcs) {
 	  xp = (x[i]-xmin)*idx + 0.5;        /* fractional cell index  0..nx */
@@ -166,7 +177,7 @@ trace_image()
 	                 (1-dx)*dy*F(ix,iy+1)   +      /* par. 25.2.66     */
 			     dx*dy*F(ix+1,iy+1);       /* Four Foint Formu */
 	    if (Qcum)
-	      fprintf(outstr,"%g %g %g %g\n",x[i],y[i],outval,d);
+	      fprintf(outstr,"%g %g %g %g %g\n",x[i],y[i],outval,d,pa);
 	    else
 	      fprintf(outstr,"%g %g %g\n",x[i],y[i],outval);
         }
