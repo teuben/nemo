@@ -952,16 +952,18 @@ local void save_history(string *argv)
 
     if (!nemo_history) return;
 
+    dprintf(0,"savehist: progname=%s help_level=%d\n",progname,help_level);
+
     if (help_level) {         /* if external help, argv[] is not appropriate */
         histlen = 0;
         for (i=0; i<nkeys; i++)            /* count how much needed */
-            histlen += strlen(keys[i].key) + strlen(keys[i].val) + 2;
+  	    histlen += strlen(keys[i].key) + strlen(keys[i].val) + 2;      /* +2 for extra ' ' and '=' */
         hist = (char *) allocate(histlen+20);   /* extra 20 for help=.... */
         strcpy(hist,keys[0].val);
         for (i=1; i<nkeys; i++) {
-            strcat(hist," ");
+	    strcat(hist," ");          /* +1 */
             strcat(hist,keys[i].key);
-            strcat(hist,"=");
+            strcat(hist,"=");          /* +1 */
             strcat(hist,keys[i].val);
         }
         sprintf(&hist[strlen(hist)]," help=%d",help_level);     /* add help */
