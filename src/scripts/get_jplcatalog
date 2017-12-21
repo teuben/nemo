@@ -23,9 +23,9 @@ foreach a ($*)
 end
 
 
-cd $MIRCAT
+cd $NEMODAT
 if (-e jplcat) then
-  echo Warning: existing directory $MIRCAT/jplcat will be filled again
+  echo Warning: existing directory $NEMODAT/jplcat will be filled again
 endif
 
 if ($mode == 1) then
@@ -37,7 +37,7 @@ else if ($mode = 2) then
   tar zxf $url:t
   rm $url:t
 else
-  echo "mode $mode not supported (mode=1 curl mode=2 wget)
+  echo "mode $mode not supported (mode=1 curl mode=2 wget)"
 endif
 
 
