@@ -16,8 +16,6 @@ A related package, ZENO, was spun off NEMO V1, and is maintained by Barnes.
   	  NEMO:     ascl:1010.051
 	  ZENO:     ascl:1102.027
 
-See README.install for installation guidelines.
-
 Packages we optionally use:
 
 	 PGPLOT:    ascl:1103.002
@@ -28,3 +26,10 @@ Packages we optionally use:
 	 gyrfalcON: ascl:1402.031 (included with NEMO)
 	 unsio
 	 uns_project
+
+See README.install for installation guidelines. In it's simplest the following commands may work:
+
+
+	 wget https://teuben.github.io/nemo/test_a_new_nemo_git
+	 chmod +x test_a_new_nemo_git
+	 ./test_a_new_nemo_git nemo=$HOME/opt/nemo
