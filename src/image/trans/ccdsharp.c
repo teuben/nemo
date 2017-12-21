@@ -19,7 +19,7 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"mode=laplace\n	Modes (laplace, lapabs, aregan, pregan, divergence, vorticity)",
-	"VERSION=0.2\n  17-apr-2017 PJT",
+	"VERSION=0.3\n  17-apr-2017 PJT",
 	NULL,
 };
 
@@ -31,14 +31,14 @@ string usage = "enhance/sharpen an image";
 #define CV2(x,y,z)  CubeValue(iptr2,x,y,z)
 #define CVO(x,y,z)  CubeValue(optr,x,y,z)
 
-local string valid_modes = "laplace,aregan,pregan,divergence,vorticity";
+local string valid_modes = "laplace,lapabs,aregan,pregan,divergence,vorticity";
 
 #define MODE_LAPLACE (1<<0)
-#define MODE_AREGAN  (1<<1)
-#define MODE_PREGAN  (1<<2)
-#define MODE_DIV     (1<<3)
-#define MODE_VORT    (1<<4)
-#define MODE_LAPABS  (1<<5)
+#define MODE_LAPABS  (1<<1)
+#define MODE_AREGAN  (1<<2)
+#define MODE_PREGAN  (1<<3)
+#define MODE_DIV     (1<<4)
+#define MODE_VORT    (1<<5)
 
 extern int match(string, string, int *);
 
@@ -84,6 +84,7 @@ void nemo_main()
     /* should do the others too */
 
     if (mode & MODE_LAPLACE) {
+        dprintf(1,"mode=laplace\n");
         for (k=0; k<nz; k++) {
             for (j=1; j<ny-1; j++) {
                 for (i=1; i<nx-1; i++) {
@@ -102,6 +103,7 @@ void nemo_main()
             }
         }
     } else if (mode & MODE_LAPABS) {
+        dprintf(1,"mode=lapabs\n");
         for (k=0; k<nz; k++) {
             for (j=1; j<ny-1; j++) {
                 for (i=1; i<nx-1; i++) {
@@ -120,6 +122,7 @@ void nemo_main()
             }
         }
     } else if (mode & MODE_DIV || mode & MODE_VORT) {
+        dprintf(1,"mode=div/vort\n");
         for (k=0; k<nz; k++) {
             for (j=0; j<ny-1; j++) {
                 for (i=0; i<nx-1; i++) {
@@ -149,6 +152,7 @@ void nemo_main()
             }
         }
     } else if (mode & MODE_AREGAN || mode & MODE_PREGAN) {
+        dprintf(1,"mode=aregan/pregan\n");      
         for (k=0; k<nz; k++) {
             for (j=0; j<ny-1; j++) {
                 for (i=0; i<nx-1; i++) {
@@ -172,6 +176,7 @@ void nemo_main()
             }
         }
     }
+    
     write_image(outstr, optr);
 
 }
