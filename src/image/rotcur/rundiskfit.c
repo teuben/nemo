@@ -50,13 +50,14 @@ string defv[] = {
   "inp=\n                Input parameter file",
   "regrid=f\n            Rasterize ascii tabular data into an image?",
   "exe=diskfit\n         name of VELFITSS07 executable in your $PATH",
-  "VERSION=0.2\n         18-sep-2012 PJT",
+  "VERSION=0.2\n         11-aug-2014 PJT",
   NULL,
 };
 
 string usage = "frontend to run Spekkens & Sellwood's 2012 diskfit code";
 
 string cvsid="$Id$";
+
 
 #define MAXRAD   100
 #define MAXFLAGS   6
@@ -97,9 +98,9 @@ int nemo_main()
     stop(0);
   } 
 
-  if (*mode == 'p')
+  if (*mode == 'p')        /* photometry */
     Qphot = TRUE;
-  else if (*mode == 'v')
+  else if (*mode == 'v')   /* velocities / kinematics */
     Qphot = FALSE;
   else
     error("mode=phot or mode=vel are the only valid options");
@@ -132,7 +133,7 @@ int nemo_main()
     if (nemoinpi(getparam("region"),region,4) != 4) error("region= needs 4 values");
     if (nemoinpr(getparam("sample"),sample,5) != 5) error("sample= needs 5 values");
   } else {
-    error("mode=vel not yet supported");
+    warning("mode=vel not yet supported");
   }
 
 
@@ -146,11 +147,14 @@ int nemo_main()
     fprintf(datstr,"%g %g %g\n",sky[0],sky[1],sky[2]);
     fprintf(datstr,"%d %d %d %d\n",region[0],region[1],region[2],region[3]);
     fprintf(datstr,"%g %g %g %d %g\n",sample[0],sample[1],sample[2],(int)sample[3],sample[4]);
-	    
-    
+  } else {
+    fprintf(datstr,"vels\n");
+    fprintf(datstr,"F F\n");    // only for text file ala velfitss07 now
+    fprintf(datstr,"'%s'\n",infile);               /* invfile */   
+    fprintf(datstr,"N/A\n");
+    fprintf(datstr,"N/A\n");
+    fprintf(datstr,"N/A\n");
   }
-  fprintf(datstr,"'%s'\n",infile);                 /* invfile */
-  fprintf(datstr,"'%s'\n",parfile);                /* outpfile */
   fprintf(datstr,"'%s'\n",outfile);                /* outmfile */
   fprintf(datstr,"%g\n",center[0]);                /* xcen*/
   fprintf(datstr,"%g\n",center[1]);                /* ycen*/
@@ -172,7 +176,7 @@ int nemo_main()
 
   strclose(datstr);
 
-  if (run_popen1(exefile,"'velfit.inp'"))
+  if (run_popen1(exefile,"'diskfit.inp'"))
     error("Problem executing %s",exefile);
 }
 
