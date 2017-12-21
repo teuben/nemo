@@ -1,0 +1,990 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"> 
+<HTML>
+<HEAD>
+<TITLE> NEMO Stellar Dynamics Toolbox </TITLE>
+<META HTTP-EQUIV="Description" NAME="Description" CONTENT="NEMO is an open source software toolbox to perform a variety of stellar dynamics and related calculations">
+<META HTTP-EQUIV="Keywords"    NAME="Keywords"    CONTENT="nemo,software,sph,stellar dynamics,n-body,orbits,images,fits,table,pgplot,animation">
+</HEAD>
+
+<!-- only edit this file when named index.html -->
+
+<BODY>
+<hr>
+<H1>
+<IMG ALIGN=bottom SRC=nemo.gif ALT="*NOT A LOGO*">
+NEMO -  A Stellar Dynamics Toolbox </H1>
+
+<hr>
+<IMG SRC=new.gif ALT="*">: Version 3.3.2 was released March 14, 2014,
+3.3.3 is now managed in CVS.
+<br>
+For the regulars: keep reading the
+<B><A HREF="whatsnew.html"> What's New </A></B>, the
+<B><A HREF="whatsup.html"> What's Up </A></B>, and the
+<B><A HREF="whatsdown.html"> What's Down </A></B> memos in NEMO!
+<hr>
+
+<H2> What is NEMO? </H2>
+
+
+<!-- BEGIN abstract -->
+<B>
+<A HREF=other.html> NEMO </A>
+is an extendible <I> Stellar Dynamics Toolbox</I>, following an
+Open-Source Software model.
+It has various
+programs to create, integrate, analyze and visualize N-body and SPH like
+systems, following the <I>pipe and filter</I> architecture.
+In addition there are various tools to operate on images,
+tables and orbits, including FITS files to export/import to/from other
+astronomical data reduction packages. A large growing fraction of NEMO
+has been contributed by a growing list of
+<A HREF=man_html/authors.5.html>authors</A>.
+The source code consist of 
+a little over 4000 files and a little under 1,000,000 
+lines of code and documentation, mostly C, and some
+C++ and Fortran.
+We also advertise <A HREF="#others">
+other software packages </A>, which work on similar problems. NEMO
+development started in 1986 in Princeton (USA) by Barnes, Hut and Teuben.
+NEMO is also in <A HREF=http://ascl.net/1010.051>ASCL</A>,
+<A HREF=http://adsabs.harvard.edu/abs/1995ASPC...77..398T>ADS</A>,
+and <A HREF=http://adsabs.harvard.edu/abs/2010ascl.soft10051B>ADS/ascl</A>
+</B>
+<!-- END abstract -->
+<P>
+<img src="/icons/contents_motif.gif" alt="*">
+
+
+<UL>
+<LI> <A HREF="#documentation"> Documentation </A>
+<LI> <A HREF="#images"> Images and SnapShots (data archive) </A>
+<LI> <A HREF="#papers"> Papers </A>
+<LI> <A HREF="#installation"> Installation - Anonymous FTP Source Code </A>
+<LI> <A HREF="#others"> Other Software </A>
+<LI> <A HREF="#nbody"> N-body Data Interchange Format </A>
+<LI> <A HREF="#author"> Local Information </A>
+</UL>
+
+
+<!-- Search My Google Search Appliance -->
+<form method="get" action="http://www.searchum.umd.edu/search">
+  <table>
+   <tr>
+      <td>
+      <input type="text" name="q" size="25" maxlength="255" value=""/>
+      <input type="submit" name="btnG" value="Search NEMO pages"/>
+      <input type="hidden" name="site" value="UMCP"/>
+      <input type="hidden" name="client" value="UMCP"/>
+      <input type="hidden" name="proxystylesheet" value="UMCP"/>
+      <input type="hidden" name="output" value="xml_no_dtd"/>
+      </td>
+      </tr>
+   </table>
+</form>
+<!-- Search My Google Search Appliance-->
+<HR>
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=documentation> Documentation </A></H2>
+
+
+The following manuals and documents describe various aspect of NEMO.
+The hypertext versions were compiled with automated tools, and may not
+all be in great shape, however, for all of them fine looking postscript
+files are available.
+
+<UL>
+<LI> The
+      <A HREF="manual/nemo.html"> Users and Programmers Guide </A> is
+	an extensive (150 pages) manual. It's four major parts give
+	a general introduction, a cookbook with many examples, a
+	programmers guide and an appendix with many reference sections.
+    <br>
+    <B>NOTE:</B> This manual is currently being rewritten for
+	version 3.2. In the
+    mean time you can <A HREF=nemo-draft.pdf>
+    download </A> a snapshot of this new version.
+
+<LI> At the GH-2001 workshop we started a
+NEMO demo series, wrapped around
+<A HREF=demo1/start.html>A Gentle Introduction to NEMO</A>. 
+
+<LI> <IMG SRC=new.gif> <A HREF=examples/>Example scripts</A>
+to highlight certain procedures or packages in NEMO.
+
+<LI> The <A HREF="survival/survival.html"> Survival Guide </A>
+	is intended for the casual usual, who is familiar with
+	operating packages within UNIX.
+	(<I> badly outdated </I>)
+
+<LI> A <A HREF="summary/summary.html"> summary of features </A>.
+	(<I> badly outdated </I>)
+
+<LI> A <A HREF="tut/tut.html"> Tutorial </A> for the eager users
+     	who want to see what you can do, and try out features.
+	(<I> under construction </I>)
+
+
+<LI> 	<A HREF=man_html/index.html>NEMO manual pages</A>:
+	Good starting points are the manual pages
+	<A HREF="man_html/programs.8.html"> programs(8NEMO)</A>, which lists
+	programs thematically, and 
+	<A HREF="man_html/index.1.html"> index(1NEMO)</A>, which lists them 
+	alphabetically. 
+
+   <UL>
+   <LI> <A HREF="man_html/index1.html"> programs (1NEMO)</A>.
+   <LI> <A HREF="man_html/index3.html"> functions (3NEMO) </A>.
+   <LI> <A HREF="man_html/index5.html"> file formats (5NEMO) </A>.
+   <LI> <A HREF="man_html/index6.html"> hardware (6NEMO) </A>.
+   <LI> <A HREF="man_html/index8.html"> administrativia (8NEMO) </A>.
+   <LI> <A HREF="man_html/indexl.html"> local programs (lNEMO) </A>.
+   <LI> <A HREF="man_html/whatis.html"> whatis </A> manual database.
+   </UL> 
+<LI> <A HREF=nemo-amsc664.pdf>An AMSC664 lecture on some NEMO design</A>
+	(April 8, 2004) - see also
+	<A HREF=http://www.cscamm.umd.edu/education/courses/AMSC664_s04.htm>
+	AMSC664/Spring '04</A>)
+<!--
+<LI> <A HREF=starlab/man/> experimental manual pages </A> using inline
+    documentation (feb 1995)
+-->
+</UL>
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=images> Images and Snapshots </A></H2>
+
+Some example 
+<A HREF="images.html"> images </A> which can be generated with NEMO
+are shown here. Most
+of them have clickable images, which may take some time loading, and
+they may not be as pretty as they appear on the screen, but give you an
+idea of the kind of environment NEMO offers. 
+
+In addition a 
+<A HREF=archive/> Snapshot Data Archive </A> of interesting simulations
+are now available.
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=papers> Papers </A></H2>
+
+Papers that discuss Stellar Dynamics Software can be found in:
+
+<UL>
+<LI> <A HREF="papers/hutsus87.html"> On Toolboxes and Telescopes </A>, by
+    Hut and Sussman, (1986) 
+    in: The Use of Supercomputers in Stellar Dynamics, 
+    Springer Verlag, p 193-198.
+<LI> <A HREF=papers/baas88.html> An Environment for Experiments in 
+    Stellar Dynamics </A>, by:
+    Barnes, Hernquist, Hut and Teuben (1988) BAAS, 20, 706.
+<LI> <A HREF="papers/iau109.html"> A Laboratory for Gravitational
+    Scattering Experiments </A> by Hut, in: <I> IAU colloq 109</I>, 
+    pp. yyy.
+<LI> <A HREF="papers/pasj94/talk.html"> NEMO: A Stellar Dynamics Toolbox </A>,
+     by Teuben (1994, PASJ, xxx, yyy) overviews the current state of 
+     NEMO and introduces a proposal to use
+	<A HREF="http://fits.cv.nrao.edu/documents/documents.html"> 
+	FITS </A>  as a vehicle to interchange and archive NBODY data
+	(see also the <A HREF="nbody/questionnaire"> QUESTIONNAIRE </A>).
+	A gzip compressed
+	<A HREF="papers/pasj94/talk.ps.gz"> postscript </A> version
+	of this paper is also available.
+	The 
+	<A HREF="http://fits.cv.nrao.edu/traffic/scidataformats/faq.html">
+	Sci.Data.Formats FAQ </A> discussion may be relevant.
+        The <A HREF=nbody/nbody.for> example program </A> mentioned in
+	PASJ94 writes
+	an <B> NBODY BINTABLE </B>.
+<LI> <A HREF="http://adass.org/adass/proceedings/adass94/teubenp.html"> ADASS (1994) paper </A>,
+	adass.org</A> version. I also keep a
+	<A HREF=papers/adass94/nemo.ps.gz>postscript</A> version around.
+<LI> <A HREF=papers/Tokyo99>GRAPE User Workshop</A>
+<LI> <A HREF=papers/others.html> other miscellaneous papers </A>
+</UL>
+
+If you acknowledge the use of NEMO, and want to refer to
+a publication, this is the most current one:
+
+<CENTER><PRE>
+Teuben, P.J. The Stellar Dynamics Toolbox NEMO, in: 
+Astronomical Data Analysis Software and Systems IV, 
+ed. R. Shaw, H.E. Payne and J.J.E. Hayes. (1995),
+PASP Conf Series 77, p398.
+</PRE></CENTER>
+
+I appreciate if authors could send me a reference of any paper
+in which NEMO has been used.
+
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=installation> Installation </A></H2>
+
+The <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/> NEMO anonymous ftp directory</A> 
+has the following to offer:
+
+<UL>
+ <LI> The now recommended CVS based installation. You can browse
+	some example scripts in the <A HREF=install>install scripts</A>
+	directory, this is the basic 3 lines:
+<PRE>
+        wget  ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz 
+        tar zxf nemo_cvs.tar.gz 
+	  # or combine these two with this one-liner (wget also has a similar mode):
+	curl ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz | tar zxf -
+
+		# wget could need --active-ftp, since --passive-ftp is default
+		# curl has a similar option, --ftp-pasv
+
+        cd nemo_cvs
+        cvs login ; cvs update -d          # just to be sure to be up to date
+        source AAA_SOURCE_ME
+</PRE>
+    and you should have a working NEMO with PGPLOT as the plotting
+    engine.
+ <LI> There are a number of optional libraries you will need to install
+      all of the programs:
+   <UL>
+   <LI> pgplot or plplot (with this X11 of course)
+   <LI> hdf4
+   <LI> cfitsio
+   <LI> pvm
+   <LI> png
+   <LI> gsl
+   <LI> miriad
+   <LI> fftw
+   <LI> rdl (readline)
+   </UL>
+ <LI> <A HREF=autobuild_logs>automatic build logfile of NEMO</A> are
+	now produced as soon as new code has been checked into CVS.
+
+ 
+ <LI>  	<!--#include file="lastftp" -->, a (normally 
+	<A HREF=ftp://ftp.netscape.com/pub/unsupported/gnu>gzip</A>
+	compressed) tar 
+	file, that contains the	latest official release.
+	Note this contains a full <I>src</I> tree, and small sections
+	of the so-called <I>usr </I> tree.
+        If you plan to use a stable NEMO and probably won't upgrade for a while,
+	this would be the recommended path of installing.
+<LI>    Some older <A HREF=macosx.html>MacOSX related installation notes</A>,
+	although the regular installation method should work fine as long
+	as you have compilers and various external libraries (notably X11) installed.
+
+ <LI>  You can also download the latest
+	<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz> 
+	nemo_cvs.tar.gz </A>, which is an anonymous-
+	<A HREF=http://www.astro.umd.edu/~teuben/miriad/cvs.html>
+	CVS</A> enabled
+	directory tree. Just install it as usual (i.e. read the
+	blurbs in the file INSTALL).
+	If you want
+	bleeding edge (read: fast and reliable) updates, this
+	command will do it:
+	<pre>
+	    cd $NEMO ; make cvslogin              # one time setup
+	    cvs -n -q update                      # check what's new, locally
+	    cvs update -d -P                      # update the tree locally
+	</pre>
+	We currently don't use any <A HREF=http://www.txcorp.com/codeconventions/BranchRelease.html>
+	CVS branching</A>, just a single mainline CVS.
+	After this you can update your libraries/programs, e.g.
+	<pre>
+	    cd $NEMO ; make libs                  # redo libraries, if needed
+	    mknemo tsf mkplummer ....             # relink selected binaries
+	</pre>
+      If you plan to use NEMO in any development way, this would be the recommended
+	path of installing. If you prefer to stay more "stable", you can
+	always use our tagnames to update only to the most recent update, e.g.
+	<pre>
+            cd $NEMO
+            cvs update -r nemo_3_0_16
+	</pre>
+        i.e. replace the dot with an underscore in your VERSION. Notice
+        that this operation will create sticky tags, if you change
+        a file for your own purporse, CVS will flag you a conflict.
+<!--
+ <LI> A <A HREF="ftp://ftp.astro.umd.edu/pub/nemo/bootstrap"> bootstrap </A>
+      loader. 
+      <A HREF=bootstrap> This </A> is a small C-shell script, that you can
+      save anywhere on 
+      your local disk, and execute it to bootstrap NEMO from scratch. 
+      For example,
+	<UL>
+	<LI> <b> chmod +x bootstrap </b>
+	<LI> <b> bootstrap nemo=/usr/nemo </b>
+	</UL>
+      will pick up the tar file from Maryland, via anonymous ftp, 
+      and install a bootstrap
+      version of NEMO, including a few small programs, in a directory
+      called <b>/usr/nemo</b> and below. Note that the <b>nemo=</b>
+      directory must be an absolute directory name.
+      After this bootstrap installation you still have to tailor your
+      site for things like graphics and dynamic object loading, but
+	at least it gets you started.
+
+-->
+
+ <LI>  A binary release of NEMO is also available within 
+	<A HREF=linuxastro/astromake>astromake</A>, either
+	download astromake and update via the astromake
+	procedure, or download the binary from
+	<A HREF=ftp://ftp.astro.umd.edu/pub/astro/>
+	ftp://ftp.astro.umd.edu/pub/astro/</A>.
+
+<!-- BEGIN abstract 
+ <LI>  	<!--#include file="lastpatch" -->, the last patch tarfile that 
+	was made. This patch file can be updated several times, until
+	the next patchlevel has come out. If the patch level is the
+	same as that export version there is no reason 
+        to get this now-old patch file. This patch file should
+	be untarred in the $NEMO directory.
+-->
+
+ <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nbody0.tar.gz>
+        Aarseth's nbody0</A>. Although the source code is 
+	taken directly from NEMO, the Makefile contains 
+	targets to create standalone versions, both in FORTRAN-77
+	(the exact copy from Binney & Tremaine, 1st Ed), and a C version.
+	A very popular item to download, hence also available
+	"standalone". See also 
+	<A HREF=ftp://ftp.ast.cam.ac.uk/pub/sverre>Sverre's anonymous ftp</A>
+	for the more advanced versions. NEMO also contains nbody1 and 
+	nbody2 with NEMO interfaces.
+
+ <LI> <A HREF="ftp://ftp.astro.umd.edu/pub/nemo/nbodyfits.tex">
+        NEMO nbody fits proposal</A> (This is now an outdated version,
+	please refer to the 
+       <A HREF="papers/pasj94/talk.html"> 1994 PASJ paper </A>
+
+ <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/tkrun.tar.gz>
+	tkrun</A>, 
+	automatic GUI builder and frontend to run shell scripts or programs.
+
+ <LI> <A HREF=optional.html> optional software</A> that can be installed
+	to enrich NEMO (this is where you find links to PGPLOT, HDF, CFITSIO etc.)
+
+ <LI>  The <A HREF=http://www.randomfactory.com/>
+	Linux for Astronomy </A> CD-ROM contains a release of NEMO. Also
+  	check <A HREF=lfa.html>latest LFA comments</A>.
+</UL>
+
+Difficulties during installation are most likely resolved by consulting
+Appendix G in the (rather large)
+<A HREF="ftp://ftp.astro.umd.edu/pub/nemo/nemo.ps.Z"> manual </A>,
+and checking last minute changes that are
+discussed in the <A HREF="README"> $NEMO/README </A> file. 
+You may
+also pick up some hints from my <A HREF="NEMORC.local"> NEMORC.local </A>
+file.
+<P>
+If you download NEMO, we ask that you register the software, you can also
+optionally be notified of new releases, but please:
+<A HREF=mailto:nemo@astro.umd.edu>Send us an email!</A>
+
+
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=others> Other Software </A></H2>
+
+Other software, that we know of, that deal with particle simulations, are
+(apologies if the URL appears outdated, that's a fact of life these days):
+<UL>
+
+<LI> <A HREF=http://www.ids.ias.edu/~starlab/starlab.html> STARLAB </A>; 
+created by Piet Hut, Steve McMillan and Jun Makino, was loosely modeled
+after NEMO.
+
+<LI> <A HREF=http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html>ZENO</A>
+is NEMO's close relative; created by
+<A HREF=http://www.ifa.hawaii.edu/faculty/barnes/>Josh Barnes</A> 
+(he also maintains an <A HREF=ftp://hubble.ifa.hawaii.edu/pub/barnes/>
+anonymous ftp </A> directory with updated versions
+of the treecode in C as well as fortran, see also his
+<A HREF=http://www.ifa.hawaii.edu/faculty/barnes/software.html>
+Software Distribution</A>).
+
+<!-- <LI>
+<LI>
+<A HREF=http://www.uni-sw.gwdg.de/~pfrisch/minimo.html>MINIMO</A>
+A micro version of NEMO, developed by Patrick Frisch for portability
+reasons. 
+(disappeared)
+-->
+
+<LI> 
+<A HREF=http://www.ArtCompSci.org>The Art of Computational Science</A>,
+	A series of e-books on how to build a computational lab (Hut & Makino) -
+alos has lots of code and examples available.
+
+<LI> 
+<A HREF="http://www-hpcc.astro.washington.edu/tools/tipsy/tipsy.html">  TIPSY </A>,
+an interactive X-windows based display package maintained by
+Neal Katz and Tom Quinn. Their 
+<A HREF="http://www-hpcc.astro.washington.edu/">  HPCC project </A>
+also maintains a 
+<A HREF="http://www-hpcc.astro.washington.edu/tools/tools.html"> software </A>
+archive. 
+You should also read about their
+new 
+<A HREF=http://hpcc.astro.washington.edu/nchilada/bin/view/Nchilada/WebHome>
+N-Chilada visualization and analysis software SALSA</A>
+<!--
+In some NEMO versions you may find a <A HREF=tipsy/tipsy.html> TIPSY copy</A>
+in <B> $NEMO/usr/tipsy </B>
+-->
+
+
+<LI> <A HREF=amnh/>partiview</A>, a 4D (space and time) OpenGL-based
+visualization tool that also understand starlab data.
+<LI> <A HREF=http://casa.colorado.edu/~gnedin/IFRIT/>IFRIT</A>
+	(Gnedin's general purpose visualization utility)
+
+<LI><IMG SRC=new.gif>  <A HREF=http://amusecode.org>AMUSE</A>:
+a software framework for large-scale simulations of dense stellar systems,
+in which existing codes for dynamics, stellar evolution, hydrodynamics
+and radiative transfer can be easily coupled.
+<LI>
+
+<IMG SRC=new.gif>  <A HREF=http://www.initialconditions.org/>
+	initialconditions.org</A>, a blog on Astrophysical
+Initial conditions (for the N-body problem).
+
+
+
+<LI> <A HREF=http://code.google.com/p/pynbody/>pynbody</A>, a
+ framework for N-body and SPH astrophysical simulations, written in python.
+<LI>
+<A HREF=http://cosmolab.cineca.it/>Cosmo.Lab</A>: 
+(AstroMD)
+A Multi Dimensional visualization and analysis toolkit for astrophysics.
+
+<LI>
+<A HREF=http://gravit.slowchop.com/>Gravit</A>, gravity simulator
+with viewing of orbit histories. Uses OpenGL/SDL.
+<LI><IMG SRC=new.gif> 
+<A HREF=http://gravetat.sourceforge.net/gravetat/>Gravetat</A>:
+gravity and electromagnetism simulator
+
+<LI>
+<A HREF=http://code.google.com/p/nmod/>nMod</A>:
+modelling planatary systems, including replicating the orbits of moons
+around planets while those planets orbit a central sun.
+
+<LI><IMG SRC=new.gif> 
+<A HREF=http://moody.politespider.com/>Moody</A>,
+a cross platform concurrent n-body modelling framework written in C++.
+
+
+
+
+<!-- 
+<LI> <A HREF=man/catl/nora.l> Nora </A>, an interactive PGPLOT based 
+analysis and display package built by Marc Balcells 
+(<A HREF=http://www.astro.rug.nl/> University of Groningen </A>). 
+Is not publically available yet.
+-->
+
+<LI> <A HREF=http://www.thesalmons.org/~jsalmon/>John Salmon's</A> home page,
+which pointers and references to parallel treecodes.
+
+<LI> <A HREF=http://www.astro.northwestern.edu/~fregeau/code.html>John Fregeau's</A>
+	fewbody and glstarview
+
+<LI> <A HREF=http://www.ee.duke.edu/~wrankin/Dpmta/>
+	DPMTA</A>: 
+	Bill Rankin's implementation of the Fast Multipole Algorithm.
+	(see also <A HREF=http://www.ks.uiuc.edu/Research/namd/>NAMD</A>)
+
+<LI> <A HREF=http://cosmos.ucsd.edu/enzo/>
+	ENZO</A> (Terascale application for cosmological hydrodynamics)
+	
+
+
+<!-- <LI>
+<LI> <A HREF=http://pokey.arc.nasa.gov/gerber/codes.html> Richard Gerber's </A>
+Codes: gobs and gobs of computer code freely made available. 
+(<B>disappeared</B>)
+-->
+<!-- 
+<LI> <A HREF=http://antares.mit.edu/> GRACOS</A> P3M, MPI, cosmology
+-->
+<LI> <A HREF=http://astro.princeton.edu/~bode/TPM/>TPM</A>
+	(Paul Bode's Tree-Particle-Mesh code)
+<LI> <A HREF=http://www.mpa-garching.mpg.de/gadget/>GADGET</A>, 
+  Volker Springer's and Naoki Yoshida's tree-code for (cosmological) N-
+  body/SPH simulations .
+<LI> <A HREF=http://www.astro.northwestern.edu/StarCrash/>
+	StarCrash</A>, an parallel SPH code.
+<LI> <A HREF=http://www-thphys.physics.ox.ac.uk/users/MLAPM/>
+  MLAPM</A>: Alexander Knebe's  recursively refined Cartesian grid code.
+A new version under the name 
+<A HREF=http://www.aip.de/People/aknebe/AMIGA>AMIGA</A> is now available.
+
+<LI> 
+	Rainer Spurzem's version of 
+	<A HREF=http://silkroad.bao.ac.cn/nb6mpi/>
+	NBODY6++</A> can be downloaded from this
+	<A HREF=http://silkroad.bao.ac.cn/web/index.php/research/software>
+	Silk Road Project site</A>.   There's a 
+        <A HREF=http://nb6mpi.pbwiki.com/>
+        wiki page</A> on it as well, though will migrate to its 
+        <A HREF=http://silkroad.bao.ac.cn>
+	new location </A> later in 2012.
+        Also some interesting
+	<A HREF=http://www.ari.uni-heidelberg.de/mitarbeiter/spurzem/nbody-lecture/>
+	N-body lectures</A>
+
+<LI> <A HREF=http://www.oamp.fr/lam/equipes/dynamique/jcl/glnemo/index.html>
+	glnemo</A> is an interactive visualization 3D program, using Qt,
+	that comes with NEMO.  This has now been superseded by
+	<A HREF=http://projets.oamp.fr/projects/glnemo2>glnemo2</A>.
+
+<LI>	<A HREF=http://www.fz-juelich.de/zam/xnbody/>
+	 	Xnbody</A>: an online visualization tool for nbody6++
+
+<LI> <A HREF=http://arXiv.org/abs/astro-ph/0003209>
+	Walter Dehnen's new and Very Fast and Momentum-Conserving Tree Code</A>.
+	It was first 
+	introduced in NEMO as <B>YancNemo</B>, but later renamed to 
+	<A HREF=man_html/gyrfalcON.1.html>gyrfalcON</A>
+<LI> <A HREF=http://www.astro.inin.mx/mar/nagbody/index.html>NagBody</A>
+	(Numerical Algorithms for General Body Dynamics) , an N-body
+        code plus toolset by Mario Alberto Rodriguez-Meza
+
+<LI> <A HREF=http://www.cita.utoronto.ca/webpages/code/pmfast/>
+	PMFAST</A> particle-mesh N-body code (f90) with MPI/OpenMP.
+
+<LI> <A HREF=http://janus.astro.umd.edu/HNBody/>
+	HNBody Symplectic Integration Package</A> (Rauch & Hamilton)
+<LI> <A HREF=http://www.boulder.swri.edu/~hal/swift.html>SWIFT</A>:
+	 A solar system integration software package (Levison/Duncan).
+
+
+<LI> 
+	<A HREF=http://astro.nmsu.edu/~aklypin/PM/pmcode/index.html>
+	Anatoly Klypin's</A> PM code. See also their 
+	<A HREF=ftp://astro.nmsu.edu/pub/aklypin/PMCODE>
+	ann.ftp.</A> files.
+
+<LI> <A HREF=http://www.physics.mcmaster.ca/people/faculty/Couchman_H.html>
+Hugh Couchman's </A>
+home page. His adaptive P3M code (
+<A HREF=http://coho.mcmaster.ca/hydra/pub/ap3m/ap3m.html>
+A3PM</A>) is also available with a 
+NEMO frontend in (<A HREF=man_html/pstart.1.html>pstart</A>, 
+<A HREF=man_html/prun.1.html>prun</A>).  See also 
+<A HREF=http://coho.mcmaster.ca/hydra/pub/hydra/hydra.html> HYDRA</A> below. 
+Manual also available from
+<A HREF=http://xxx.lanl.gov/abs/astro-ph/9603116>astro-ph</A>.
+
+<LI> <A HREF=http://www.midwestcs.com/xstar/>The XStar N-body Solver</A>
+
+<LI>
+	The 
+<A HREF=http://coho.mcmaster.ca/hydra> Hydra Consortium</A>,
+<I>Purveyors of fine N-body algorithms and simulation data</I>,
+(or their 
+<A HREF=http://star-www.maps.susx.ac.uk/~frp/consort.html>
+UK mirror</A>), provide public domain software and data for 
+N-body hydrodynamical simulations. <BR>
+New pages (Spring 2000) are now at:
+<A HREF=http://coho.mcmaster.ca/hydra/pub/hydra/hydra.html>Hydra</A>.
+
+
+<LI> <A HREF=http://star-www.dur.ac.uk:80/~frazerp/virgo/virgo.html>
+	VIRGO</A>, a consortium of a number of N-Body related 
+	key projects, including a page with
+     <A HREF=http://www.epcc.ed.ac.uk/t3e/virgo/>Software</A>, and now
+     <A HREF=http://www.mpa-garching.mpg.de/Virgo/data_download.html>Data</A>.
+
+
+<LI><A HREF=http://www.ast.cam.ac.uk/~sverre/web/pages/nbody.htm>
+	Sverre Aarseth's</A> collection of nbody codes.
+<A HREF=http://www.maths.ed.ac.uk/~douglas/>Douglas Heggie's</A> homepage
+contains the material for 
+<A HREF=http://www.maths.ed.ac.uk/~douglas/experiment.html>
+A collaborative experiment on star cluster evolution</A>
+
+<LI> <A HREF=http://sverre.com/>Sverre's new interactive movie website</A>
+
+
+<LI> <A HREF=http://www.astro.umd.edu/~dcr/>
+Derek Richardson's</A> web-page contains the 
+<B>Box Tree Code</B> as well as <B>xa</B>, an X11 animation tool.
+
+
+<LI> <A HREF=http://www.geocities.com/SiliconValley/Lakes/3015/galaxies.html>
+	Galactic Collider</A>, interactive Toomre-type galaxy collisions.
+
+<LI> <A HREF=http://cfcp.uchicago.edu/~andrey/soft/p3d/p3d.html>
+	plotting and manipulating 3D particle distributions with PGPLOT</A>
+	(Andrey Kravtsov)
+
+<LI> The <A HREF=http://krone.physik.unizh.ch/~moore/>N-Body Site</A>, 
+	Ben Moore's compilation (formerly www.nbody.net) with
+	lots of pictures and movies.
+
+<LI> <A HREF=http://www.kof.zcu.cz/st/dis/schwarzmeier/>
+	Galaxy Dynamics N-Body Simulations</A> (Jakub Schwarzmeier's self-teaching project)
+
+<LI>
+	The <A HREF=http://www.strw.leidenuniv.nl/~dynamics/>
+	Leiden Dynamics Group</A> is also maintaining a software page.
+
+<LI> 
+<A HREF=http://galileo.as.utexas.edu/hugo/hugo_prof.html>Hugo Martel</A>
+has organized
+<A HREF=http://galileo.as.utexas.edu/Texas-Database.html>
+The Texas P3M Database</A>, a database of COBE-Normalized CDM Simulations.
+Send email to 
+<A HREF=mailto:database@galileo.as.utexas.edu>
+database@galileo.as.utexas.edu</A> if you want any of their 68 models.
+Their abbreviated paper is available on 
+<A HREF=http://xxx.lanl.gov/abs/astro-ph/9903210>ASTRO-PH</A>, and there
+are routines within NEMO to read the data.
+
+<LI>
+<A HREF=http://hpc.sourceforge.net/index2.php#gravsim>GRAVSIM</A>,
+Mark Bellon's N-body solver.
+<LI>
+<A HREF=http://www.grav-sim.com/>Mark Ridler's grav-sim simulator</A>
+
+<LI>
+<A HREF=http://flash.uchicago.edu/>FLASH</A> (also incoorporates
+	poisson solvers). See also
+    <A HREF=http://flash.uchicago.edu/~ricker/research/codes/cosmos/>
+	COSMOS</A>, a Fortran 90 code for parallel computers that solves the
+      evolution equations for gravitationally coupled gas and collisionless
+        matter in one, two, or three dimensions. 
+
+<!-- 	<IMG SRC=new.gif> -->
+
+<LI>
+<A HREF=http://www.nbodylab.com/>
+NBodyLab Stellar Dynamics Simulation Testbed</A>
+
+<LI>
+<A HREF=http://www.usm.uni-muenchen.de/people/mwetz/Overview.html>VINE</A>,
+a particle based astrophysical simulation code using a tree structure
+and SPH for gas dynamical effects.
+
+<LI> 
+<A HREF=http://orsa.sourceforge.net/>ORSA</A>
+(Orbit Reconstruction, Simulation and Analysis).
+
+<LI>
+<A HREF=http://burtleburtle.net/bob/java/orbit/index.html>
+Java Applet for Gravitational Orbit Simulation</A> (includes source code)
+
+<LI> <A HREF=http://www.imcce.fr/Equipes/ASD/trip/trip.php> 
+     TRIP </A>: a general computer algebra system dedicated to celestial mechanics.
+(Laskar and Gastineau)
+
+<LI> <A HREF=http://hal.phys.cmu.edu/iasg.html> IASG </A>: 
+Kavan Ratnatunga's Galactic Structure
+Analysis package. It contains a modified version of the
+<A HREF=http://www.sns.ias.edu/~jnb/Html/galaxy.html>
+Bahcall-Soneira Galaxy model </A>.
+<! upd IASG link from JHU to CMU 1-aug-00 >
+
+<LI> 
+<A HREF=http://www.astro.rug.nl/~kuijken/galactics.html>GalactICS Software</A>,
+developed  by John Dubinski and Konrad Kuijken, 
+for generating N-body realizations of axisymmetric
+galaxy models consisting of disk, bulge and halo.
+We keep a local copy within in NEMO in standard Fortran, 
+so it also compiles under Linux.
+
+<LI> <A HREF=http://burro.astr.cwru.edu/researchFRAMES.html>
+	Chris Mihos'</A> Models of Merging Galaxies.
+<!--
+<LI> <A HREF=http://aci5.astronomy.pomona.edu/>  
+Astronomical Computing at Pomona College</A>, with a NEMO enabled
+<A HREF=http://aci5.astronomy.pomona.edu/astro/docs/nbody/pcns_overview.html>
+N-body Simulation Testbed</A>
+-->
+
+<!-- doesn't belong here
+<LI> <A HREF=http://www.iap.fr/users/fioc/PEGASE.html>PEGASE</A>
+	a code to compute the spectral evolution of galaxies
+-->
+<LI> The
+  <A HREF=http://zeus.ncsa.uiuc.edu:8080/lca_home_page.html>
+  Laboratory for Computational Astrophysics  </A> (LCA) maintains
+  an archive of their
+  <A HREF=http://zeus.ncsa.uiuc.edu:8080/lca_codes_docs.html>
+  codes and documentation </A>.
+
+
+	
+<LI> The 
+  <A HREF=http://zeus.ncsa.uiuc.edu:8080/GC3_Home_Page.html>
+  Grand Challenge Cosmology Consortium </A> (GC3) figures out
+  the origin of large scale structure in the universe. They have a
+  <A HREF=http://zeus.ncsa.uiuc.edu:8080/GC3_software_archive.html>
+  software archive </A>, a
+  <A HREF=http://zeus.ncsa.uiuc.edu:8080/GC3_data_archive.html>
+  data archive </A>, and lot's of other interesting pages and links.
+
+<LI>  The <A HREF=http://galmer.obspm.fr/>GalMer</A> database contains 
+	many galaxy merger simulations. 
+
+<LI> The 
+  <A HREF=http://web.mit.edu/~edbert>
+  COSMICS and Grafic</A> (Cosmological Initial Conditions Codes) (Bertschinger)
+<LI> <A HREF=http://www.gracos.org/>GRACOS</A>, a parallel cosmological N-body code (Shirokov/Bertschinger)
+<LI> 
+  <A HREF=http://www.astro.princeton.edu/~esirko/ic/>
+	Sirko's Cosmological Initial conditions</A>
+
+<LI> 
+<A HREF=http://members.aol.com/flashgrbiv/msimulator/index.html>
+	Multi-body Gravity Simulator</A>(MGS), A java-3d based package
+	to perform realtime simulations, three dimensional visualizations,
+	design simulations in XML and with a GUI.
+
+<LI> <A HREF=http://flash.uchicago.edu/~tomek/index.html>
+    Tomasz Plewa's </A> 
+    (Warsaw University Observatory)
+     Smooth Particle Hydrodynamics
+     list, part of the CFD codes list document, 
+    which is regularly posted to the
+    <A HREF=news://news/sci.physics.computational.fluid-dynamics> 
+    sci.physics.computational.fluid-dynamics newsgroup </A>.
+	The <A HREF=http://www.icemcfd.com/cfd/CFD_codes.html>
+	current list</A> is now maintained by Wayne Christopher. It
+	also included Greg Lindahl's 
+	<A HREF=http://www.icemcfd.com/cfd/sph.html>
+	SPH list</A>.
+
+<LI> <A HREF=http://astro-sim.org/>astrophysical simulation codes</A>
+
+
+
+<LI> <A HREF=http://wwwasd.web.cern.ch/wwwasd/geant4/geant4.html>
+	Geant4</A>, 
+    a toolkit for the simulation of the passage of particles through matter.
+
+
+<LI> The <A HREF=http://idlastro.gsfc.nasa.gov/homepage.html>
+     IDL Astronomy User's Library</A> has some routines to aid in
+     plotting N-body systems.
+	(see also
+	<A HREF=http://astron.berkeley.edu/~marc/idlshare/Nbody/>Marc Davies' IDL resources</A>)
+
+<LI> <A HREF=http://www.3wells-computing.com/index.php/en/lnews/13-overview/1-overview-particula>
+	Particula Numerica</A>, a real-time Gravitational N-Body Simulator. (mac/windows)
+
+<LI> <A HREF=http://kornelix.squarespace.com/galaxy/>galaxy</A>, a free
+	linux program which simulates the motion of stars under the influence of gravity.
+
+
+
+<LI> <B> Meta-information</B> 
+    <UL>
+    <LI> <A HREF=http://www.epcc.ed.ac.uk/~mario/nbody.html>
+	N-Body Methods Resources</A> by
+	Mario Antonioletti.
+
+    <LI> <A HREF=http://www-2.cs.cmu.edu/~scandal/alg/nbody.html>
+        Parallel N-Body Simulations </A>
+
+    <LI> 
+    <A HREF=http://www.amara.com/papers/nbody.html> 
+    Amara Graps's</A> N-body/Particle simulation methods home page.
+    (This also includes a nice <A HREF=http://www.amara.com/papers/miscpap.html>
+    summary </A> from a sci.math.num-analysis newsgroup
+    discussion on N-body/Particle simulation numerical schemes.
+
+    <LI>
+    <A HREF=http://ascl.net/>Astrophysics Source Code Library</A> contains
+    references to ``referreed'' codes in the major astronomical
+    journals. The new <IMG SRC=new.gif> discussion forum is 
+	<A HREF=http://bb.nightskylive.net/asterisk/viewforum.php?f=35>here</A>.
+
+
+    <LI> <A HREF=http://www.cv.nrao.edu/~jhibbard/students/students.html>
+    Student Projects</A> of John Hibbard, with lots of useful links to
+    simulation software.
+	<!-- old link, he moved mid 2003 
+    <LI> <A HREF=http://www.astro.rug.nl/~cesar/links.html>Some Nbody links</A>
+	-->
+
+
+    </UL>
+
+<LI> <B> PC-Based programs</B> 
+    <UL>
+    <LI> <A HREF=http://www.galasimu.de>
+	GalaSimu </A>
+	is a PC-based simulation of interacting galaxies 
+	written by Christian Sturm. 
+    <LI> <A HREF=http://www.shodor.org/MASTER/galaxy_home.html>
+	Galaxy</A> software (also has a cool interactive web based tool) 
+    <LI>
+        <A HREF=http://www.zephyrs.com/astro.htm>Astronomy Software</A> from
+         <A HREF=http://www.zephyrs.com/>Zephyr</A>. They have several programs
+        with which N-body systems can be created and evolved, but expect
+	to pay some money.
+    </UL>
+
+
+
+<LI> <B> Animations </B> (you probably need to have
+ <A HREF=http://www.geom.umn.edu/docs/mpeg_play/mpeg_play.html> mpeg_play </A>
+ or 
+ <A HREF=http://www.mpegtv.com> mtv </A>)
+and other pretty pictures:
+
+ <UL> 
+
+ <LI> A sample <A HREF=http://zebu.uoregon.edu/movie.html> movie </A> by
+ Chris Mihos and Lars Hernquist
+ show an encounter between two equal mass galaxy disks. 
+
+<LI>
+	The <A HREF=http://www.ifa.hawaii.edu/~barnes/saas-fee.html>
+	1996 Saas-Fee lectures</A> by Josh Barnes contain a number
+	of pictures and animations.
+ 
+ <LI> The 
+ <A HREF=http://enif.astro.indiana.edu> Indiana University 
+ Astronomy Department </A> also has some 
+ <A HREF=http://enif.astro.indiana.edu/animations> animations </A>
+ containing N-body simulations.
+
+ <LI> The
+ <A HREF=http://www.evl.uic.edu/EVL/SHOWCASE/cosmic/cosmic_app.html>
+ Cosmic Explorer </A> has (well, had) various animations on cosmological
+ simulations from the UIUC group.
+
+ <LI> The LCA
+ <A HREF=http://zeus.ncsa.uiuc.edu:8080/lca_cosmology.html>
+ Cosmology </A> simulations.
+ Check out the recent 
+ <A href=http://zeus.ncsa.uiuc.edu:8080/chdm_script.html> 
+ record breaker </A>
+
+ <LI> A sample of GC3
+ <A HREF=http://zeus.ncsa.uiuc.edu:8080/GC3_Gallery.html>
+ Cosmology </A> simulations. Some overlap with the previous
+ item. -- BAD --
+
+ <LI> 
+ <A HREF=http://www.astro.cf.ac.uk/groups/starform/work/work.html>
+ SPH Simulations </A> from the 
+ <A HREF=http://www.astro.cf.ac.uk/groups/starform/>
+ Cardiff Star Formation group </A>
+
+ <LI> <A HREF=http://grape.c.u-tokyo.ac.jp/~makino/index-e.html>
+    Jun Makino</A>'s homepage has some interesting 
+    <A HREF=http://grape.c.u-tokyo.ac.jp/~makino/animations/>
+    animations</A>.
+
+ <LI> HPCC-UW <A HREF=http://www-hpcc.astro.washington.edu/picture/picture.html>
+	Multimedia Show</A>.
+ <LI> <A HREF=http://www.mpa-garching.mpg.de/index.html>
+	Max Planck Institute fuer Astrophysik</A>
+	Galaxy Formation Group 	
+	<A HREF=http://www.mpa-garching.mpg.de/Galaxien/movies.html>
+	movies </A>
+<LI> <A HREF=http://saguaro.as.arizona.edu/~matthias/movies.html>
+	Matthias Steinmetz
+     </A> Galaxy Formation movies.
+<LI> Some of Dubinsky's animations:
+	<A HREF=http://www.cita.utoronto.ca/~dubinski/tflops/>M31/MW merger</A>,
+<LI> Language shootout:	 (n-body problem)
+	<A HREF=http://shootout.alioth.debian.org/gp4/benchmark.php?test=nbody&lang=all> gentoo Intel P4</A>,
+	<A HREF=http://shootout.alioth.debian.org/debian/benchmark.php?test=nbody&lang=all> debian AMD Sempron</A>,
+	<A HREF=http://shootout.alioth.debian.org/gp4sandbox/benchmark.php?test=nbody&lang=all>P4 (alpha)</A>,
+	<A HREF=http://shootout.alioth.debian.org/sandbox/benchmark.php?test=nbody&lang=all> AMD (alpha)</A>.
+
+ </UL>
+
+<LI> <B> Some Related Fields</B> 
+    <UL>
+    <LI> <A HREF=http://www.gromacs.org/>Fast, Free and Flexible MD</A>
+	and their <A HREF=http://wiki.gromacs.org/>wiki</A>
+    <LI> <A HREF=http://www.ks.uiuc.edu/Research/vmd/>VMD</A>:
+	Molecular Dynamics Vizualisation.
+	(see also
+	<A HREF=http://www.ks.uiuc.edu/Research/namd/>NAMD</A>)
+    <LI> <A HREF=http://www.fisica.uniud.it/~ercolessi/mdbnch.html> MDBNCH </A>, 
+	   A molecular dynamics benchmark. 
+   <LI> <A HREF=http://ambermd.org/>AMBER</A>, a molecular dynamics 
+  <LI> <A HREF=http://www.lassp.cornell.edu/LASSPTools/LASSPTools.html>
+ 	LASSPTools</A>  is a collection of Unix utilities for numerical 
+	analysis and graphics, built very much in the philosophy of NEMO,
+	and may be useful in NEMO shell scripts.
+  <LI> <A HREF=http://www.research.att.com/areas/stat/xgobi/>
+	XGobi</A> 
+	vizualization and selecting data from general multi-variate data.
+	(see also: ggobi, mirage)
+  </UL>
+<LI> Some software information banks that may be relevant:
+  <UL>
+  <LI> <A HREF=http://asds.stsci.edu/asds/index.html> ASDS </A>
+	(Astronomical Software & Documentation Service)
+  <LI> <A HREF=http://fits.cv.nrao.edu/www/yp_software.html>AstroWeb</A>
+
+  </UL>
+<!-- TO COME? 
+   <LI> <A HREF=peta/index.html> Petaflop Computer </A> 
+-->
+
+</UL>
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=nbody> N-Body Data Interchange Format </A></H2>
+
+Some time ago a <A HREF=nbody> discussion </A> took place on if to
+choose an N-body Data Interchange Format, and if so, which.
+An e-mail exploder was installed to act as a 
+<A HREF=nbody/mail> discussion forum</A>, and 
+<A HREF=nbody/#archive> sample data </A>
+are archived locally and elsewhere. Currently, this interest has shifted
+to the 
+<A HREF=http://carma.astro.umd.edu/nemo/tvo/> Virtual Observatory (TVO) </A>.
+
+
+<H2><img src=/icons/red.ball.gif alt="*">
+    <A NAME=author> Local Information </A></H2>
+
+NEMO is maintained by 
+<A HREF="http://www.astro.umd.edu/~teuben"> 
+Peter Teuben </A>.
+He works in the
+<A HREF="http://carma.astro.umd.edu/bima/general/lma.html"> 
+Laboratory for Millimeter-Wave Astronomy </A>, part of
+<A HREF="http://carma.astro.umd.edu/bima/"> 
+BIMA </A>, now
+<A HREF=http://www.mmarray.org>CARMA</A>,
+at the
+<A HREF="http://www.astro.umd.edu/"> 
+Astronomy Department </A> of the
+<A HREF="http://www.umd.edu/"> 
+University of Maryland</A> in
+<A HREF=http://www.ci.college-park.md.us/>College Park</A>,
+<A HREF=http://www.state.md.us/>MD</A> (USA) - 
+<A HREF=http://seds.lpl.arizona.edu/nineplanets/nineplanets/earth.html>earth</A>
+...
+
+<P>
+
+<form method="get" action="http://www.google.com/custom">
+<input type="text" name="q" size="25" maxlength="255" value="" style="font-size: small"/>
+<input type="hidden" name="sitesearch" value="carma.astro.umd.edu"/> Google this site.
+
+
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT. &#169; 2004...2012
+
+</BODY>
+
+</HTML>
+
