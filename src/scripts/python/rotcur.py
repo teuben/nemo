@@ -119,7 +119,8 @@ def plot1(data, label='',efactor=1,rmax=2):
     ax8.yaxis.label.set_size(10)
     #
     plt.show()
-    fig.savefig('junk.pdf')
+    fig.savefig('rotcur.png')
+    #fig.savefig('junk.pdf')
 
 def region_ds9(data,ds9,scale=0.0083333*30):
     """ create a ds9 region of the ellipses found in rotcur solution 
