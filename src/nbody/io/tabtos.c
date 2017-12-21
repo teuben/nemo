@@ -69,7 +69,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.5b\n 18-Jan-2012 PJT",
+    "VERSION=1.5c\n 16-nov-2017 PJT",
     NULL,
 };
 
@@ -215,7 +215,7 @@ void check_options(void)
     string options;
     bool scanopt();
 
-    if (!hasvalue("options")) return;
+    // if (!hasvalue("options")) return;
 
     options=getparam("options");
     scan = scanopt(options,"scan");
@@ -236,6 +236,8 @@ local bool get_header(void)
     char line[MAXLINE];
 
     if (feof(instr)) return FALSE;
+
+    dprintf(0,"get_header(nskip=%d)\n",nskip);
 
     /* @TODO:  nskip appears not to work??? */
     for (i=0; i<nskip; i++) {
