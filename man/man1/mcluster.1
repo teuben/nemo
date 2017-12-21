@@ -1,6 +1,6 @@
-.TH MCLUSTER 1NEMO "2 December 2017"
+.TH MCLUSTER 1NEMO "4 December 2017"
 .SH NAME
-mcluster \- make a star cluster
+mcluster, mcluster_sse \- make a star cluster
 .SH SYNOPSIS
 mcluster -[N|M|P|W|R|r|c|g|S|D|T|Q|C|A|O|G|o|f|a|m|B|b|p|s|t|e|Z|X|V|x|u|h|?]
 .SH DESCRIPTION
@@ -155,8 +155,7 @@ which are not specified default values are taken, which can be
 changed within the code. 
 
 
-.nf
-Examples: mcluster -N 1000 -R 0.8 -P 1 -W 3.0 -f 1 -B 100 -o test1  
+.nf -N 1000 -R 0.8 -P 1 -W 3.0 -f 1 -B 100 -o test1  
           mcluster -f 2 -m 0.08 -a -1.35 -m 0.5 -a -2.7 -m 100.0    
           mcluster -t 3 -X 8500 -X 0 -X 0 -V 0 -V 220 -V 0          
           mcluster -D 1.6 -Q 0.4 -P -1                              
@@ -178,6 +177,8 @@ and some example plotting of the results:
 	snapmradii plummer1.out 0.01,0.1:0.9:0.1,0.99 | tabplot - 1 2:11 line=1,1 color=2,3::8,4
 
 .fi
+.SH INSTALL
+Non-standard install via "mknemo mcluster"
 .SH SEE ALSO
 mkplummer(1NEMO)
 .PP
@@ -190,7 +191,7 @@ Kroupa P., 2008, LNP, 760, 181
 https://github.com/ahwkuepper/mcluster
 .SH AUTHOR
 Andreas H.W. Kuepper
-SH FILES
+.SH FILES
 .nf
 .ta +3.0i
 ~/usr/kuepper/mcluster		source code + manual
