@@ -1,4 +1,4 @@
-VERSION = NEMO V3.9 21-dec-2017 PJT
+VERSION = NEMO V3.9 22-dec-2017 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -322,7 +322,6 @@ timestamp_ls:
 
 helptar:
 	@echo "Install tar targets:"
-	@echo "  % make tartape [TAPE=$(TAPE)]"
 	@echo "  % make tarfile [FILE=$(FILE)]"
 	@echo "  % make tarbackup [BACKUP=$(BACKUP)]"
 	@echo "  % make purge"
@@ -335,16 +334,19 @@ helptar:
 	@echo "  % make distu"
 	@echo ""
 
-tardu:
-	@echo ""
-	@echo $(EXPORTA)
-	@echo "" 
-	@echo Let me show you the space this will take:
-	@du -s $(EXPORTA) | tee /tmp/nemo.du
-	@echo " ### Total blocksize:";
-	@awk 'BEGIN{n=0} {n=n+$1} END{print n}' /tmp/nemo.du
-	@echo A third possibility is to use 'make backup' for a full tar image
-	@echo Check with: 'make help' to see default devices.
+VER = `cat $(NEMO)/VERSION`
+GIT1 = https://github.com/teuben/nemo/
+GIT2 = https://github.com/teuben/pgplot/
+
+targit:
+	rm -rf nemo_$(VER)
+	git clone $(GIT1) nemo_$(VER)
+	mkdir nemo_$(VER)/local
+	git clone $(GIT2) nemo_$(VER)/local/pgplot
+	echo WARNING: snapshot gitless export `date` >> nemo_$(VER)/VERSION
+	echo	rm -rf nemo_$(VER)/.git nemo_$(VER)/local/pgplot/.git
+	tar zcf nemo_$(VER).tar.gz nemo_$(VER)
+
 
 tarfile:
 	@echo NEMO=$(NEMO)
@@ -527,12 +529,6 @@ tarbima:
 	  src/tools/unproto"
 
 
-
-tartape:
-	@echo NEMO=$(NEMO) 
-	@echo You must be logged in on tape host machine to do this
-	@tar -coFFvf $(TAPE) $(EXPORTA)
-
 tarfileb:
 	@echo NEMO=$(NEMO)
 	@echo A binary tar file $(FILE) will be silently created for you.
@@ -540,10 +536,6 @@ tarfileb:
 	@tar -coFFf $(FILE) $(EXPORTB)
 	@echo ... All done!
 
-tartapeb:
-	@echo NEMO=$(NEMO) 
-	@echo You must be logged in on tape host machine to do this
-	@tar -coFFvf $(TAPE) $(EXPORTB)
 
 # silent backup of whole image
 
@@ -597,7 +589,7 @@ vogl:
 install:
 	@echo "There is no official install from the root menu"
 	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
-	@echo "      or AAA_SOURCE_ME"
+	@echo "      or docs/test_a_new_nemo_git"
 	@echo ""
 	@echo "Typically you would do the following: (must be in (t)csh)"
 	@echo "      ./configure        -- run configure, with lots of options"
@@ -681,9 +673,11 @@ cleanall:
 cleansrc:
 	(cd src; $(MAKE) clean)
 
-libs:	corelibs
-	-(cd usr/dehnen; $(MAKE) -i clean all; $(MAKE) -i all) >> install.log 2>&1 
+libs:	corelibs dehnen
 	@echo Done at `date`
+
+dehnen:
+	-(cd usr/dehnen; $(MAKE) -i clean all; $(MAKE) -i all) >> install.log 2>&1 
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
@@ -723,7 +717,7 @@ check:
 TEST=""
 reinstall:
 	@echo 'It is adviced to "cvs update" before this step'
-	src/scripts/test_a_new_nemo_cvs reuse=1 nemo=. $(TEST)
+	docs/scripts/test_a_new_nemo_git reuse=1 nemo=. $(TEST)
 
 sure:	libs bins
 
