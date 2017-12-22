@@ -1,8 +1,8 @@
 NEMO is a toolbox for stellar dynamics, particle simulations, image processing and
-tabular data manipulation. See also https://teuben.github.io/nemo
+tabular data manipulation. See also https://teuben.github.io/nemo 
 
 This is the 4th major release of NEMO,  and although data are compatible
-with earlier releases, source code will generally need to be tweaked a
+with earlier releases, source code may need to be tweaked a
 bit to compile and link in the newer releases. 
 
    * NEMO V1:	IAS release (Barnes, Hut & Teuben; appr. 1987)
@@ -33,3 +33,6 @@ See README.install for installation guidelines. In it's simplest the following c
 	 wget https://teuben.github.io/nemo/test_a_new_nemo_git
 	 chmod +x test_a_new_nemo_git
 	 ./test_a_new_nemo_git nemo=$HOME/opt/nemo
+
+Some obvious and perhaps not so obvious tools you will need to have installed:  C/C++/Fortran compiler,
+the csh shell, git, 
