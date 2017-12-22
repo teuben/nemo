@@ -717,7 +717,7 @@ check:
 TEST=""
 reinstall:
 	@echo 'It is adviced to "cvs update" before this step'
-	docs/scripts/test_a_new_nemo_git reuse=1 nemo=. $(TEST)
+	docs/test_a_new_nemo_git reuse=1 nemo=. $(TEST)
 
 sure:	libs bins
 
