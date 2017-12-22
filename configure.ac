@@ -5,7 +5,7 @@ dnl this.
 dnl http://www-106.ibm.com/developerworks/linux/library/l-debcon.html
 dnl ---------------------------------------------------------------------------------
 
-AC_INIT(NEMORC)
+AC_INIT(nemo_start.csh.in)
 
 AC_MSG_CHECKING([NEMO config])
 
