@@ -1,24 +1,13 @@
 # List of files which must be ignored by git status command
 
-# remove .o files
-*/*.o
-*/*/*.o
-*/*/*/*.o
-*/*/*/*/*.o
-*/*/*/*/*/*.o
-*/*/*/*/*/*/*.o
-*/*/*/*/*/*/*/*.o
+# ignore .o files
+*.o
 
-# remove .so files
-*/*.so
-*/*/*.so
-*/*/*/*.so
-*/*/*/*/*.so
-*/*/*/*/*/*.so
-*/*/*/*/*/*/*.so
-*/*/*/*/*/*/*/*.so
+# ignore .so files
+*.so
 
-# remove files created during configure
+# ignore files created during configure
+*~
 .version
 Makefile
 NEMORC.gen
@@ -49,7 +38,7 @@ src/nbody/evolve/hackcode/hackcode1/hackforce_qp
 src/nbody/evolve/sellwood/code1/galaxy
 src/nbody/evolve/sellwood/code1/galaxy.a
 
-# Denhen's directories
+# ignore Denhen's directories
 usr/dehnen/falcON/acc/
 usr/dehnen/falcON/bin/
 usr/dehnen/falcON/dox/html/
