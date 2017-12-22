@@ -650,7 +650,6 @@ clean:
 distclean: config_clean cleansrc
 	@echo Cleaning as much as one can to simulate a distribution
 	rm -rf $(CHECKDIR2)
-	rm -f NEMORC.local
 
 cleanall:
 	rm -rf $(CLEAN)
