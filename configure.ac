@@ -878,7 +878,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-AC_CONFIG_FILES(NEMORC.gen Makefile makedefs nemo_start nemo.pl)
+AC_CONFIG_FILES(Makefile makedefs nemo_start.csh nemo_start.sh nemo.pl)
 AC_OUTPUT
 
 echo "
