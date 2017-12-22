@@ -1,6 +1,6 @@
-The detailed installation instructions are in the file README.install
-Two scripts, AAA_SOURCE_ME and src/scripts/test_a_new_nemo_cvs, contain
-fully worked out examples how to install NEMO.
+The detailed installation instructions are in the file README.install.
+The script  docs/test_a_new_nemo_git contains a  fully worked out
+example how to install NEMO.
 
 Basically, the install is a sequence is that most autoconf based software
 uses:
@@ -9,8 +9,7 @@ uses:
 	make install
 
 however, make install does not actuall install the software,
-but merely prints out the instructions what to do. See the
-README.install for more details.
+but merely prints out the instructions what to do. 
 
 - Peter Teuben
 
