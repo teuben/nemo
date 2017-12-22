@@ -153,16 +153,8 @@ dirs: nemo_start
 	    ls -l $(MOTD);\
 	fi
 	@echo "`cat VERSION` `date`" >> .version
-	@if [ ! -f NEMORC.local ]; then \
-            echo Copying NEMORC.gen to NEMORC.local file on `date`;\
-	    cp NEMORC.gen NEMORC.local;\
-	else \
-	    echo "NEMORC.local exists:";\
-	    ls -l NEMORC.local;\
-	fi
 	@if [ ! -f $(NEMOLIB)/maxsizes.h ]; then \
 	    cp inc/max/maxsizes.h $(NEMOLIB)/maxsizes.h;\
-	    cp NEMORC.gen NEMORC.local;\
 	else \
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
 	    ls -l $(NEMOLIB)/maxsizes.h;\
