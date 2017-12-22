@@ -206,7 +206,7 @@ testcompiler	:
 cleanbackup	:
 			rm -f *~ $(INC)*~ $(SRC)*~ test/*~
 cleandirs	:
-			rm -rf obj.*  lib
+			rm -rf obj  lib
 clean		:	cleandirs
 cleanall	:	cleandirs cleanbackup
 
