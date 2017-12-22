@@ -624,7 +624,6 @@ diff_new:
 #	useful if you want to start with a clean slate
 config_clean:
 	rm -f $(CONFIG_CLEAN)
-	mv NEMORC.local NEMORC.local.old
 
 CLEAN = host bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 
