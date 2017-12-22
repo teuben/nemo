@@ -1,4 +1,4 @@
-VERSION = NEMO V3.9 22-dec-2017 PJT
+VERSION = NEMO V3.9 23-dec-2017 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -109,7 +109,7 @@ helphelp:
 helpme:
 	@echo "Additional help targets: helpme, helpman, helpfind, helptar"
 
-dirs: nemo_start
+dirs: 
 	@echo Checking directory structure on `date`
 	@echo By `whoami` on `hostname`
 	-@for i in $(CHECKDIR1) $(ASCIIDIRS); do \
@@ -176,12 +176,6 @@ pjt:
 	    ls -l $(NEMOLIB)/makedefs;\
 	fi
 
-
-nemo_start:
-	echo '# this file has been automatically created ' > nemo_start
-	echo '# by the root makefile: make nemo_start'    >> nemo_start
-	echo 'if ($$?NEMO == 0) setenv NEMO' $(NEMO)      >> nemo_start
-	echo 'source $$NEMO/nemo.rc'                      >> nemo_start
 
 start:
 	$(MAKE) nemo_start NEMO=`pwd`
