@@ -12,6 +12,7 @@
 #
 
 setenv NEMO          @NEMO@
+setenv NEMOHOST      @NEMOHOST@
 setenv YAPP          @YAPP_DEF@
 setenv PGPLOT_DIR    @PGPLOT_DIR@
 
