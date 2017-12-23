@@ -71,9 +71,12 @@ BACKUP = $(NEMO)/nemo-fullbck.tar
 #
 MOTD = $(NEMO)/etc/motd
 TIMESTAMP=$(NEMO)/adm/TIMESTAMP
+#
+NEMO_RC_CSH = $(NEMO)/nemo_local.csh
+NEMO_RC_SH  = $(NEMO)/nemo_local.sh
+
 
 #  Master site (Maryland) specific, and probably not used anywhere else
-#FTPDIR = /home/ftp/progs/nemo
 FTPDIR = /local/ftp/pub/nemo/
 WWWDIR = $(NEMO)/local/www
 ################################################################################
@@ -152,6 +155,21 @@ dirs:
 	    echo "MOTD exists:";\
 	    ls -l $(MOTD);\
 	fi
+	@if [ ! -f $(NEMO_RC_CSH) ]; then \
+            echo Creating $(NEMO_RC_CSH) file on `date`; \
+            echo "# place your local NEMO csh commands here" > $(NEMO_RC_CSH);\
+	else \
+	    echo "nemo_local.csh exists:";\
+	    ls -l $(NEMO_RC_CSH);\
+	fi
+	@if [ ! -f $(NEMO_RC_SH) ]; then \
+            echo Creating $(NEMO_RC_SH) file on `date`; \
+            echo "# place your local NEMO sh commands here" > $(NEMO_RC_SH);\
+	else \
+	    echo "nemo_local.sh exists:";\
+	    ls -l $(NEMO_RC_SH);\
+	fi
+
 	@echo "`cat VERSION` `date`" >> .version
 	@if [ ! -f $(NEMOLIB)/maxsizes.h ]; then \
 	    cp inc/max/maxsizes.h $(NEMOLIB)/maxsizes.h;\
@@ -184,28 +202,13 @@ alias:
 	@echo "# add these lines to your .cshrc file:"
 	@echo "alias nemo 'setenv NEMO "$(NEMO)" ; source $$NEMO/nemo_start'"
 
-
-OS = $(NEMOHOST)
-
-#SCRIPTS = cc f77 make ranlib	## this was NEMO V2
-SCRIPTS = 
-
 scripts:
 	@echo Installing scripts on `date` 
 	@echo By `whoami` on `hostname`
 	(cd $(NEMO)/src/scripts; $(MAKE) install)
 
-scripts_old:
-	-@for i in $(SCRIPTS); do \
-		(cd $(NEMO)/src/scripts; \
-		echo "Available are: " ; ls $$i.* ; \
-		$(MAKE) $$i OS=$(OS)); \
-		( echo "hashed..." ; hash $(NEMOBIN)/$$i ); \
-		echo "$$i will now be: `which $$i`" ; done
-
 # The next four targets are not currently supported 
 #all:	nemo_lib nemo_bin
-
 
 nemo_lib:
 	@echo Make all subdirectories on `date`
@@ -578,7 +581,7 @@ install:
 	@echo "      or docs/test_a_new_nemo_git"
 	@echo ""
 	@echo "Typically you would do the following: (must be in (t)csh)"
-	@echo "      ./configure        -- run configure, with lots of options"
+	@echo "      ./configure  ....  -- run configure, with lots of options"
 	@echo "      source nemo_end    -- if you have an *old* NEMO env"
 	@echo "      source nemo_start  -- load the NEMO environment"
 	@echo "      make postconfig    -- basic post configure things"
