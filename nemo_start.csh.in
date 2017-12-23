@@ -158,7 +158,7 @@ if (-e $NEMO/usr/zeno/ZENORC) then
 endif
 
 #       here are site local things
-source $NEMO/nemo_start.csh
+source $NEMO/nemo_local.csh
 
 #	this is where each user can hide its own things
 if ($?HOME) then
