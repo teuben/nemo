@@ -64,6 +64,7 @@ fi
 
 
 # ZENO has no bash support yet
+test -f $NEMO/usr/zeno/ZENORC   &&     echo "No ZENO support for bash yet"
 
 test -f $NEMO/nemo_local.sh     &&     source $NEMO/nemo_local.sh
 test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
@@ -72,3 +73,4 @@ test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 export PATH=$NEMOBIN:$PATH
 
 # falcON has no bash support yet
+echo No falcON support for bash yet
