@@ -11,6 +11,7 @@
 #         $HOME/.nemorc
 #
 
+#                                       Things via configure
 setenv NEMO          @NEMO@
 setenv NEMOHOST      @NEMOHOST@
 setenv YAPP          @YAPP_DEF@
@@ -156,14 +157,8 @@ if (-e $NEMO/usr/zeno/ZENORC) then
   source $NEMO/usr/zeno/ZENORC
 endif
 
-
-#### NOTE: The order of reading the "nemorc" startup files is:
-#### 	1)  	$NEMO/NEMORC
-#### 	2)	$NEMO/NEMORC.local
-####	3)	$NEMOLIB/NEMORC
-####	4)	$HOME/.nemorc
-
-
+#       here are site local things
+source $NEMO/nemo_start.csh
 
 #	this is where each user can hide its own things
 if ($?HOME) then
