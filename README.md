@@ -27,12 +27,14 @@ Packages we optionally use:
 	 unsio
 	 uns_project
 
-See README.install for installation guidelines. In it's simplest the following commands may work:
+See README.install for installation guidelines. In it's simplest the following commands may work
+(replace .csh with .sh if appropriate)
 
 
 	 wget https://teuben.github.io/nemo/test_a_new_nemo_git
 	 chmod +x test_a_new_nemo_git
 	 ./test_a_new_nemo_git nemo=$HOME/opt/nemo
+	 source $HOME/opt/nemo/nemo_start.csh
 
 Some obvious and perhaps not so obvious tools you will need to have installed:  C/C++/Fortran compiler,
-the csh shell, git, 
+csh, git, cmake,
