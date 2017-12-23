@@ -4,12 +4,10 @@
 #
 #   @WARNING@
 #
-#   source this file to start NEMO; this file has some commented lines, which
-#   you can place in your personal .nemorc or site NEMORC.local
+#   source this file to start NEMO; this file has some commented lines, 
+#   which you can place in your personal .nemo_local.sh or site nemo_local.sh
 # 
-#   this file optionally will source other files in the following order
-#         $HOME/.nemorc
-#
+
 
 #                                       Things via configure
 setenv NEMO          @NEMO@
@@ -151,13 +149,11 @@ endif
 
 
 #                                                            optional ZENO
-if (-e $NEMO/usr/zeno/ZENORC) source $NEMO/usr/zeno/ZENORC
+if (-e $NEMO/usr/zeno/ZENORC)  source $NEMO/usr/zeno/ZENORC
 
-#                                                            optional local NEMO things
-if (-e $NEMO/nemo_local.csh)  source $NEMO/nemo_local.csh
-
-#                                                            optional personal NEMO things
-if (-e $HOME/.nemorc)         source $HOME/.nemorc
+#                                                            optional local and personal NEMO things
+if (-e $NEMO/nemo_local.csh)   source $NEMO/nemo_local.csh
+if (-e $HOME/.nemo_local.csh)  source $HOME/.nemo_local.csh
 
 
 if ($path[1] == ".") then
