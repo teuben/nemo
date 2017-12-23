@@ -78,27 +78,27 @@ endif
 # GNU compiler
 ifeq ($(COMPILER),gcc)
 LIMITED_WARNINGS	:= -Wextra -Winit-self 
--include utils/make.gcc
+-include ../utils/make.gcc
 endif
 
 # Portland group compiler
 ifeq ($(COMPILER),pgi)
--include utils/make.pgi
+-include ../utils/make.pgi
 endif
 
 # Pathscale compiler
 ifeq ($(COMPILER),pth)
--include utils/make.pth
+-include ../utils/make.pth
 endif
 
 # Sun compiler
 ifeq ($(COMPILER),sun)
--include utils/make.sun
+-include ../utils/make.sun
 endif
 
 # Intel compiler
 ifeq ($(COMPILER),icc)
--include utils/make.icc
+-include ../utils/make.icc
 endif
 
 # final compiler and linker flags
@@ -115,7 +115,7 @@ RL		:= ranlib
 # ---------------
 
 IUTIL		:= -I$(IUTI)
-LUTIL		:= -Lutils/lib -lWDutils
+LUTIL		:= -L../utils/lib -lWDutils
 
 # --------------
 # falcON library
