@@ -31,7 +31,6 @@ set log=/tmp/make_html.$$.log
 cd $NEMO/man
 if (! -e html) mkdir html
 
-#				this method uses rman
 
 echo "Running rman on all levels ($manlevels)"
 foreach d ($manlevels)
@@ -43,7 +42,8 @@ foreach d ($manlevels)
     # -r '%s.%s.html'
     # PolyglotMan v3.0.8+X.Org                          - works
     # PolyglotMan v3.2 of $Date$  - broken, it adds NEMO to the url....
-   (rman -f HTML -r '%s.%s.html' $file  >  html/$base.html ) >>& $log
+    #(rman -f HTML -r '%s.%s.html' $file  >  html/$base.html ) >>& $log
+    (rman -f HTML -r '%s.%s.html' $file |sed 's/\.1NEMO/\.1/g'|sed 's/\.3NEMO/\.3/g'|sed 's/\.5NEMO/\.5/g'|sed 's/\.6NEMO/\.6/g'|sed 's/\.8NEMO/\.8/g'|sed 's/\.lNEMO/\.l/g' > html/$base.html ) >>& $log
  end
  (make_man.csh $d > html/index$d.html) >>& $log
  if ($status) echo Some error during make_man, inspect your $log
