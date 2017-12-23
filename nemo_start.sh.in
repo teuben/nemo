@@ -9,10 +9,10 @@
 # 
 
 #                                       Things via configure
-export NEMO          @NEMO@
-export NEMOHOST      @NEMOHOST@
-export YAPP          @YAPP_DEF@
-export PGPLOT_DIR    @PGPLOT_DIR@
+export          NEMO=@NEMO@
+export      NEMOHOST=@NEMOHOST@
+export          YAPP=@YAPP_DEF@
+export    PGPLOT_DIR=@PGPLOT_DIR@
 
 #  				        Basic derived environment variables
 export NEMOLIB=$NEMO/lib
