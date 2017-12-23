@@ -32,6 +32,7 @@ export NEMOSITE=`hostname`
 
 
 #  todo: fix the MANPATH
+echo Warning; no MANPATH yet
 
 #  If you use the VoGL library for xyzview, this is the only reasonable default
 export VDEVICE=X11
