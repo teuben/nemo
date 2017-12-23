@@ -140,30 +140,24 @@ if (1) then
   
 endif
 
+# for unsio 1.0.0: $NEMO/py/modules
 if (1) then
-  # mostly for unsio 1.0.0: $NEMO/py/modules
-  if (-d $NEMO/py/modules) then
-    if ($?PYTHONPATH) then
-      setenv PYTHONPATH $NEMO/py/modules:$PYTHONPATH
-    else
-      setenv PYTHONPATH $NEMO/py/modules
-    endif
+  if ($?PYTHONPATH) then
+    setenv PYTHONPATH $NEMO/py/modules:$PYTHONPATH
+  else
+    setenv PYTHONPATH $NEMO/py/modules
   endif
 endif
 
 
+#                                                            optional ZENO
+if (-e $NEMO/usr/zeno/ZENORC) source $NEMO/usr/zeno/ZENORC
 
-if (-e $NEMO/usr/zeno/ZENORC) then
-  source $NEMO/usr/zeno/ZENORC
-endif
+#                                                            optional local NEMO things
+if (-e $NEMO/nemo_local.csh)  source $NEMO/nemo_local.csh
 
-#       here are site local things
-source $NEMO/nemo_local.csh
-
-#	this is where each user can hide its own things
-if ($?HOME) then
-  if (-e $HOME/.nemorc) source $HOME/.nemorc
-endif
+#                                                            optional personal NEMO things
+if (-e $HOME/.nemorc)         source $HOME/.nemorc
 
 
 if ($path[1] == ".") then
