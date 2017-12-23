@@ -3,6 +3,7 @@
 #  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w            ~2004
 # P1600/
 #    i7/     125.240u 25.740s 2:52.00 87.7%	0+0k 239968+895168io 785pf+0w      2017
+#            172.416u 15.444s 3:22.60 92.7%	0+0k 197896+1088264io 618pf+0w
 #
 #  History:     29-mar-2004   for NEMO V3.2
 #                4-may-2004   various new keywords and cfitsio optional install
@@ -16,6 +17,13 @@
 #               19-jan-2011   added a cmake=1 option to build internally
 #               25-jan-2012   DSO linking (dso=1) needed for modern linux
 #                5-dec-2017   converted CVS to GIT
+#
+#
+#  Example of usage if you do git development to test your other git release before you've pushed this one:
+#  great if you don't have an internet connection
+#  
+#        test_a_new_nemo_git  git_nemo=`pwd`/nemo git_pgplot=`pwd`/nemo/local/pgplot    nemo=nemo2
+
 
 set nemo=nemo           # root directory name from the current directory
 
@@ -170,15 +178,12 @@ if ($dso == 0)  set copts=($copts --without-dso)
 echo Running configure $copts
 echo configure $copts  >& install.config.log
 ./configure  $copts   >>& install.config.log
-if (-e nemo_start) then
-  source nemo_start
-else
-  echo Configure failed, no nemo_start produced.
-  exit 0
-endif
+echo nemo_start
+source nemo_start.csh
+echo postconfig
 $make postconfig
+rehash
 
-source NEMORC.local
 
 if ($#yapp > 0) setenv YAPP $yapp
 
@@ -197,9 +202,8 @@ endif
 rehash
 $make libs
 
-# kludged sh support for manybody
-ln -s nemo_start nemo_start.csh
-src/scripts/mk_nemo_start.sh >  nemo_start.sh
+# backward compatibility support
+ln -s nemo_start.csh nemo_start 
 
 
 if ($vogl) then
@@ -222,6 +226,7 @@ if ($unsio) then
   if ($status) echo "### Error: uns_project build problem".  
 endif
 
+rehash
 
 if ($all) then
   $make bins
