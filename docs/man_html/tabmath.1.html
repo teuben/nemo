@@ -34,7 +34,7 @@ to be used to delete computed columns, the word <b>all</b> can be used to delete
 all original input columns. <p>
 Rows can also be deleted/selected based on a
 function evaluation of the current column values. For this the <b>selfie=</b> keyword
-can be used. It uses the same <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+can be used. It uses the same <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  syntax as those for the new
 column expressions. It must evaluate to exactly 0 in order for a row not
 to be written. For example "<i>selfie=iflt(%1,3,1,0)</i>" would only output rows
@@ -59,7 +59,7 @@ output data are written [no default]. </dd>
 <dt><b>newcol=<i>expression</i></b> </dt>
 <dd>Expression with
 which the newly added column(s) will be calculated. Parsing will be done
-by <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+by <a href='fie.3.html'><i>fie(3NEMO)</i></a>
 , see the man pages for specific rules. [no default]. </dd>
 
 <dt><b>delcol=<i>expression</i></b>
@@ -82,7 +82,7 @@ with which the new columns are written to output [<b>%g</b>]. </dd>
 <dt><b>seed=</b><i>seed</i> </dt>
 <dd>Integer
 initial seed in case random numbers have been used in the expression. If
-0 is given, the time of the day will be used (see  <a href='xrandom.3NEMO.html'><i>xrandom(3NEMO)</i></a>
+0 is given, the time of the day will be used (see  <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
  for other
 special seed values) to initialize the random number generator. [Default:
 <b>0</b>]. </dd>
@@ -138,7 +138,7 @@ between values $a and $b: <br>
 <pre>   tabmath file - selfie="ifgt(%4,$a,iflt(%4,$b,1,0),0)"
 </pre>
 <h2><a name='sect5' href='#toc5'>Common Expressions</a></h2>
-Although <a href='fie.3NEMO.html'>fie(3NEMO)</a>
+Although <a href='fie.3.html'>fie(3NEMO)</a>
  expressions  are quite rich, some
 common boolean constructions are hard to write down (ever written complex
 SQL expressions?). So, here are some common ones. We will use a notation
@@ -156,11 +156,11 @@ or false (R2): <br>
 , <a href='awk.1.html'>awk(1)</a>
 , <a href='cut.1.html'>cut(1)</a>
 , <a href='paste.1.html'>paste(1)</a>
-, <a href='tablines.1NEMO.html'>tablines(1NEMO)</a>
+, <a href='tablines.1.html'>tablines(1NEMO)</a>
 ,
-<a href='tabtranspose.1NEMO.html'>tabtranspose(1NEMO)</a>
-, <a href='tabplot.1NEMO.html'>tabplot(1NEMO)</a>
-, <a href='table.5NEMO.html'>table(5NEMO)</a>
+<a href='tabtranspose.1.html'>tabtranspose(1NEMO)</a>
+, <a href='tabplot.1.html'>tabplot(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
  <p>
 jdb (http://www.isi.edu/~johnh/SOFTWARE/JDB/):
  a package of commands for manipulating flat-ASCII databases from shell
@@ -175,7 +175,7 @@ an ASCII relational database for UNIX.
 Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Bugs</a></h2>
 Parsing of
-<b>newcol</b> expression is done by <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+<b>newcol</b> expression is done by <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 , and  is space sensitive. Parsing
 allows more than one value, e.g. "1 _+ 1" is interpreted as two values, instead
 of the number 2. "1+1" would be interpreted as 2. Hence multiple columns

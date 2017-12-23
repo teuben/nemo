@@ -16,13 +16,13 @@ ccdfits - convert an image to a fits file
 <b>out=</b>fits [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdfits</b> writes a fits file to disk.
-The input must be in  <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+The input must be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
  format, the output will be in standard
-<a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+<a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format on disk. <p>
 An experimental version of this program that
 uses the standard <a href='cfitsio.3.html'><i>cfitsio(3)</i></a>
- library is known as <a href='ccdfitsio.1NEMO.html'><i>ccdfitsio(1NEMO)</i></a>
+ library is known as <a href='ccdfitsio.1.html'><i>ccdfitsio(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
@@ -31,12 +31,12 @@ given:
 <dl>
 
 <dt><b>in=<i>image-file</i></b> </dt>
-<dd>input file, in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>input file, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format [no default]. </dd>
 
 <dt><b>out=<i>fits-file</i></b>
 </dt>
-<dd>output file, will be in <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+<dd>output file, will be in <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format [no default]. </dd>
 
 <dt><b>bitpix=<i>number</i></b> </dt>
@@ -95,7 +95,7 @@ not used. </dd>
 <dd>If no reference map used, this can be used to enforce
 a more reasonable axis descriptor (RA/DEC/VEL) for astronomical data packages
 which  cannot handle theory data too well (e.g. miriad, karma etc.). We also
-add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1NEMO.html'><i>ccdsky(1NEMO)</i></a>
+add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
  for a
 smart scaling placing the object at a computed distance. [Default: <b>f</b>]. </dd>
 
@@ -131,9 +131,9 @@ use the following math: <br>
 <pre>        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
 </pre><p>
 A reference map (<b>refmap=</b>) does not have to be a full FITS cube. If the NEMO
-<a href='fitsio.3NEMO.html'><i>fitsio(3NEMO)</i></a>
+<a href='fitsio.3.html'><i>fitsio(3NEMO)</i></a>
  routines are used, the header will suffice, since the data
-is never needed. You can see <a href='scanfits.1NEMO.html'><i>scanfits(1NEMO)</i></a>
+is never needed. You can see <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
  for this: <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;scanfits in=cube.fits out=cube.fitshdr select=header
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits ... refmap=cube.fitshdr ...
@@ -183,14 +183,14 @@ the following command procedure on VMS (Bob Hanisch, ST ScI): <br>
  $!
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='ccdsky.1NEMO.html'>ccdsky(1NEMO)</a>
-, <a href='ccdfitsio.1NEMO.html'>ccdfitsio(1NEMO)</a>
-, <a href='snapccd.1NEMO.html'>snapccd(1NEMO)</a>
-, <a href='ccdmath.1NEMO.html'>ccdmath(1NEMO)</a>
+<a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+, <a href='ccdfitsio.1.html'>ccdfitsio(1NEMO)</a>
+, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
+, <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 ,
-<a href='iofits.1NEMO.html'>iofits(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
-, <a href='fits.5NEMO.html'>fits(5NEMO)</a>
+<a href='iofits.1.html'>iofits(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>

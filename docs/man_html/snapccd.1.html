@@ -19,7 +19,7 @@ in=</b>snapshot <b>out=</b>image [parameter=value]
 frame from an N-body snapshot, by binning the (projected) x-y coordinates
 of all stars on a regular  rectangular (square) grid and assigning a mean
 integrated &rsquo;surface density&rsquo; (integrated along z-axis, i.e.  the line of sight,
-The ccd frame is written to a standard <a href='Image.5NEMO.html'><i>Image(5NEMO)</i></a>
+The ccd frame is written to a standard <a href='Image.5.html'><i>Image(5NEMO)</i></a>
  output file, and can
 be accessed by various other programs for smoothing, display etc. <p>
 Stellar
@@ -33,9 +33,9 @@ Note that the radial velocity
 has the astronomical convention. The observer is located at infinity at
 the positive Z-axis: a positive z velocity (<b>vz</b>) means stars are approaching,
 i.e. negative radial velocity. <p>
-<a href='snaprotate.1NEMO.html'><i>snaprotate(1NEMO)</i></a>
+<a href='snaprotate.1.html'><i>snaprotate(1NEMO)</i></a>
  has to be used first to do
-any other than a top-view, probably the more general version <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+any other than a top-view, probably the more general version <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 
 should be used. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -44,12 +44,12 @@ order if the keyword is also given:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, must be in <a href='SnapShot.5NEMO.html'><i>SnapShot(5NEMO)</i></a>
+<dd>input file, must be in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
 
 format [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will be in <a href='Image.5NEMO.html'><i>Image(5NEMO)</i></a>
+<dd>output file, will be in <a href='Image.5.html'><i>Image(5NEMO)</i></a>
  format
 [no default]. </dd>
 
@@ -117,8 +117,8 @@ formally be divided by <b>(vmax-vmin)</b>, for a  gaussian beam (<b>vrange=vmean
 by <b>vsig*sqrt(2*pi)</b>. Also remember that a gaussian beam has <b>FWHM = 2.355*sigma</b>.
 
 <h2><a name='sect6' href='#toc6'>Future</a></h2>
-<a href='snapccd.1NEMO.html'><i>snapccd(1NEMO)</i></a>
-&rsquo;s function is rather similar to that of <a href='snapplot.1NEMO.html'><i>snapplot(1NEMO)</i></a>
+<a href='snapccd.1.html'><i>snapccd(1NEMO)</i></a>
+&rsquo;s function is rather similar to that of <a href='snapplot.1.html'><i>snapplot(1NEMO)</i></a>
 ,
 except of plotting the position of the stars, its bins the data. It would
 be a nice idea to combine both programs. 
@@ -129,17 +129,17 @@ used. Need larger memory machine. <p>
 The program gracefully allows the user
 to use nonzero <b>moment</b> and a non-infinite <b>vrange</b>. No warnings here. 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
-<a href='snapgrid.1NEMO.html'>snapgrid(1NEMO)</a>
+<a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
 ,
-<a href='snapmap.1NEMO.html'>snapmap(1NEMO)</a>
-, <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
-, <a href='snapslit.1NEMO.html'>snapslit(1NEMO)</a>
-, <a href='snapsmooth.1NEMO.html'>snapsmooth(1NEMO)</a>
+<a href='snapmap.1.html'>snapmap(1NEMO)</a>
+, <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+, <a href='snapslit.1.html'>snapslit(1NEMO)</a>
+, <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
 ,
-<a href='snapaxsym.1NEMO.html'>snapaxsym(1NEMO)</a>
-,  <a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='ccdgrid.1NEMO.html'>ccdgrid(1NEMO)</a>
-, <a href='ccdsky.1NEMO.html'>ccdsky(1NEMO)</a>
+<a href='snapaxsym.1.html'>snapaxsym(1NEMO)</a>
+,  <a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='ccdgrid.1.html'>ccdgrid(1NEMO)</a>
+, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
  
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter

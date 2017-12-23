@@ -16,7 +16,7 @@ bswap - swap bytes in a file
 <b>bswap</b>
 swaps the bytes in a file. This can be useful if the file was copied between
 different endian machines (e.g. Sparc-Solaris and pc-linux), and consists of
-a homogeneous datatype. (most NEMO files, e.g. those made via <a href='filestruct.5NEMO.html'><i>filestruct(5NEMO)</i></a>
+a homogeneous datatype. (most NEMO files, e.g. those made via <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
 
 are notable example where you cannot use this technique, though NEMO&rsquo;s binary
 files swap on-the-fly if they detect them to be originating from another
@@ -87,7 +87,7 @@ REAL*4) created using fortran unformatted I/O from the  following statement:
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;WRITE(1) (x(i),i=1,np),(y(i),i=1,np),(z(i),i=1,np)
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;CLOSE(1)
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;END
-</pre>with <a href='unfio.1NEMO.html'><i>unfio(1NEMO)</i></a>
+</pre>with <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
  one can see the blocks, and optionally data: <br>
 <pre>    $ unfio junk.dat
     1   8
@@ -99,15 +99,15 @@ REAL*4) created using fortran unformatted I/O from the  following statement:
 from the machine where it is being read, the <b>unfio</b> would have returned
 nothing, it would need to be swapped with <b>len=4</b>: <br>
 <pre>    $ bswap junk.dat junks.dat 4
-</pre>This above example is a bit contrived, since <a href='unfio.1NEMO.html'><i>unfio(1NEMO)</i></a>
+</pre>This above example is a bit contrived, since <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
  also has a <b>swap=</b>
 keyword to read files from the opposite endianism machine. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='filestruct.5NEMO.html'>filestruct(5NEMO)</a>
+<a href='filestruct.5.html'>filestruct(5NEMO)</a>
 ,
-<a href='unfio.1NEMO.html'>unfio(1NEMO)</a>
+<a href='unfio.1.html'>unfio(1NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
-, <a href='bswap.3NEMO.html'>bswap(3NEMO)</a>
+, <a href='bswap.3.html'>bswap(3NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 

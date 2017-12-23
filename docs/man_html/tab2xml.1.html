@@ -16,9 +16,9 @@ tab2xml
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tab2xml</b> selects columns from a file, and
 outputs the columns in VOTable format. <p>
-To select lines, use <a href='tablines.1NEMO.html'><i>tablines(1NEMO)</i></a>
+To select lines, use <a href='tablines.1.html'><i>tablines(1NEMO)</i></a>
 
-or <a href='tabmath.1NEMO.html'><i>tabmath(1NEMO)</i></a>
+or <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in
@@ -30,7 +30,7 @@ any order if the keyword is also given:
 <b>out=</b> output VOTable. No default. </dd>
 
 <dt><b>col=</b> </dt>
-<dd>list of columns to select. Any <a href='nemoinp.1NEMO.html'><i>nemoinp(1NEMO)</i></a>
+<dd>list of columns to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
 
  expression can be used. Columns can be repeated, and in any order. The output
 will be in exactly the same order as given with this keyword. First column
@@ -48,7 +48,7 @@ column names, then one selecting columns and giving them proper names <br>
     tab2xml a.tab a2.xml col=4,8:10 colnames=z,ax,ay,az
 </pre>
 <h2><a name='sect5' href='#toc5'>Limitation</a></h2>
-Currently can only do a subset of the <a href='VOTable.5NEMO.html'><i>VOTable(5NEMO)</i></a>
+Currently can only do a subset of the <a href='VOTable.5.html'><i>VOTable(5NEMO)</i></a>
  version
 1.0 standard, as shown below: <br>
 <pre>&lt;?xml version=&rsquo;1.0&rsquo;?&gt;
@@ -74,10 +74,10 @@ Currently can only do a subset of the <a href='VOTable.5NEMO.html'><i>VOTable(5N
 &lt;/VOTABLE&gt;
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='tabcols.1NEMO.html'>tabcols(1NEMO)</a>
-, <a href='tabmath.1NEMO.html'>tabmath(1NEMO)</a>
+<a href='tabcols.1.html'>tabcols(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='awk.1.html'>awk(1)</a>
-, <a href='VOTable.5NEMO.html'>VOTable(5NEMO)</a>
+, <a href='VOTable.5.html'>VOTable(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/kernel/tab/tab2xml.c

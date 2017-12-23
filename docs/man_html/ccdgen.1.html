@@ -17,7 +17,7 @@ ccdgen - create or add objects to an image
 <b>ccdgen</b> creates or <a href='modified.2D.html'>modified (2D)</a>
  images by
  adding simple parameterized two-dimensional objects. For arbitrary expressions
-use <a href='ccdmath.1NEMO.html'><i>ccdmath(1NEMO)</i></a>
+use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
  instead.  <p>
 An added feature is that the objects can be
 added as if they are in a "galactic" disk with given inclination and position
@@ -34,7 +34,7 @@ are recognized in any order if the keyword is also given:
 </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file, in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>Output file, in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. No default.      </dd>
 
 <dt><b>object=</b>
@@ -135,14 +135,14 @@ the first argument, and a scale length as the second parameter. The next
 parameters are sometimes scale free  <p>
 Bars have an additional axis ratio
 (we mostly use e=1-b/a here) and position angle of the bar w.r.t. the disk
-in the disk plane (see <a href='snaprotate.1NEMO.html'><i>snaprotate(1NEMO)</i></a>
+in the disk plane (see <a href='snaprotate.1.html'><i>snaprotate(1NEMO)</i></a>
  for an approach if you know the
 angle of the bar in the sky plane). A Ferrers bar also needs to know the
 power (usuall an integer) to which 1-r^2 is raised. <p>
 Spirals are yet more complex:
 A and h are the usual peak and exponential scale-length. k is the wavenumber
 (related to the pitch angle as <a href='tan.pitch.html'>tan(pitch)</a>
-=1/(2.pi.k.r),  see also <a href='mkspiral.1NEMO.html'><i>mkspiral(1NEMO)</i></a>
+=1/(2.pi.k.r),  see also <a href='mkspiral.1.html'><i>mkspiral(1NEMO)</i></a>
 ),
 p controls the relative width of the spiral (assumed to be cos^p(m*phi),
  r0 the starting radius of the spiral (defaults to 0), p0 the phase of
@@ -150,7 +150,7 @@ the spiral at radius r0, and m the number of spiral arms. In particular,
 since the <a href='pow.3.html'><i>pow(3)</i></a>
  function is used internally for non-integer values of <b>p</b>,
 the behavior of <b>m</b> for integer and non-integer values of <b>p</b> is different:
-for integer values our own internal <a href='powi.3NEMO.html'><i>powi(3NEMO)</i></a>
+for integer values our own internal <a href='powi.3.html'><i>powi(3NEMO)</i></a>
  is used, and correctly
 represents. For example, for m=1 and p=1 you&rsquo;ll get a one armed spiral, but
 with negative counter-arm. With p=2 it becomes a 2-armed spiral, as they will
@@ -173,9 +173,9 @@ units come out in degrees for the conversion to FITS, viz.: <br>
  ccdfits - bar.fits radecvel=t
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='ccdmath.1NEMO.html'>ccdmath(1NEMO)</a>
-, <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/image/trans

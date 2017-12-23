@@ -16,7 +16,7 @@ ccdvel - create a velocity field; grid or retrace
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>ccdvel</i> creates a model velocity field for
 a disk with material in circular orbits. The user supplies the program with
-a table of a rotation curve (see also <a href='rotcurshape.3NEMO.html'><i>rotcurshape(3NEMO)</a>
+a table of a rotation curve (see also <a href='rotcurshape.3.html'><i>rotcurshape(3NEMO)</a>
  for another approach)
 with a set of radii and rotation velocities. The position angle and inclination
 of each &rsquo;ring&rsquo; can also be varied to simulate  geometrical warps. <p>
@@ -55,7 +55,7 @@ The following parameters are recognized:
 <dl>
 
 <dt><b>out</b>=<i>image_out</i> </dt>
-<dd>Output velocity field map, will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>Output velocity field map, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format.
 No default. </dd>
 
@@ -131,9 +131,9 @@ if <i>rotcur_table</i> is not used, else the <i>center_ring</i> entry from the <
 
 <dt><b>rotcurfit=</b><i>rotcur_table</i> </dt>
 <dd>All ring parameters can also be read from this table,
- that is normally output by <a href='rotcur.1NEMO.html'><i>rotcur(1NEMO)</i></a>
+ that is normally output by <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
 &rsquo;s <b>tab=</b> keyword. That table needs
-to be commented with <a href='tabcomment.1NEMO.html'><i>tabcomment(1NEMO)</i></a>
+to be commented with <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
 . </dd>
 
 <dt><b>fixring=</b><i>center_ring</i> </dt>
@@ -150,12 +150,12 @@ If a large number is given, the last table entry is used.  </dd>
 <dd>If
 set to true (or 1) it will create an amplitude (surface brightness) map,
 instead of a velocity field. In this case, the rotation speed is taken as
-the amplitude of the density map. See also <a href='ccdgen.1NEMO.html'><i>ccdgen(1NEMO)</i></a>
+the amplitude of the density map. See also <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
 . </dd>
 
 <dt><b>seed=</b> </dt>
 <dd>Initial seed
-for random number generator. See <a href='xrandom.3NEMO.html'><i>xrandom(3NEMO)</i></a>
+for random number generator. See <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
  for defaults. Default: 0
 </dd>
 
@@ -191,7 +191,7 @@ were both model and observations are not undefined, i.e. 0.0):
             fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"
 </pre><p>
 One can also use ccdvel to create a surface brightness. Creating a functional
-form for the density can be done using <a href='tabmath.1NEMO.html'><i>tabmath(1NEMO)</i></a>
+form for the density can be done using <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 . E.g. the following
 example creates an exponential surface density profile: <br>
 <pre>    5% set rad=&lsquo;nemoinp 0:100:5&lsquo;
@@ -221,14 +221,14 @@ the radius, systemic velocity, rotation velocity,  position angle, inclination,
 x center and y center  are in columns 1, 2, 4, 6, 8, 10 and 12 resp. 
 <h2><a name='sect6' href='#toc6'>See
 Also</a></h2>
-<a href='snapgrid.1NEMO.html'>snapgrid(1NEMO)</a>
-, <a href='ccdgrid.1NEMO.html'>ccdgrid(1NEMO)</a>
-, <a href='snapslit.1NEMO.html'>snapslit(1NEMO)</a>
-, <a href='ccdgen.1NEMO.html'>ccdgen(1NEMO)</a>
-, <a href='rotcur.1NEMO.html'>rotcur(1NEMO)</a>
+<a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
+, <a href='ccdgrid.1.html'>ccdgrid(1NEMO)</a>
+, <a href='snapslit.1.html'>snapslit(1NEMO)</a>
+, <a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
+, <a href='rotcur.1.html'>rotcur(1NEMO)</a>
 ,
-<a href='rotcurshape.1NEMO.html'>rotcurshape(1NEMO)</a>
-, <a href='velcube.1NEMO.html'>velcube(1NEMO)</a>
+<a href='rotcurshape.1.html'>rotcurshape(1NEMO)</a>
+, <a href='velcube.1.html'>velcube(1NEMO)</a>
 , velfi(GIPSY) 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 

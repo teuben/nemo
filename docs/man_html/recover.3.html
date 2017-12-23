@@ -40,7 +40,7 @@ Each of these functions converts, formats,  and  prints  its
 <b>args</b> under control of the <b>format</b>, as described in <a href='printf.3.html'><i>printf(3)</i></a>
 . <p>
 When <b>debug_level</b>
-is larger than 5 (see <a href='getparam.3NEMO.html'><i>getparam(3NEMO)</i></a>
+is larger than 5 (see <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
 ) <a href='abort.3.html'><i>abort(3)</i></a>
  is called, instead of <a href='exit.3.html'><i>exit(3)</i></a>
 .
@@ -50,17 +50,17 @@ This should create a coredump, if your <i>coredumpsize</i> is large enough.
 exits to the system, similar to <a href='exit.3.html'><i>exit(3)</i></a>
 , but performs some standard NEMO
 cleanup functions, for example, if the error count is non-zero (using the
-<b>error=</b> system keyword, see <a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
+<b>error=</b> system keyword, see <a href='getparam.3.html'>getparam(3NEMO)</a>
 ), this function will return
 to the caller. If not, it exits to the sytem, using <a href='exit.3.html'><i>exit(3)</i></a>
 , but also properly
-closes NEMOs parameter files using <a href='finiparam.3NEMO.html'>finiparam(3NEMO)</a>
+closes NEMOs parameter files using <a href='finiparam.3.html'>finiparam(3NEMO)</a>
  
 <h2><a name='sect3' href='#toc3'>See Also</a></h2>
-<a href='dprintf.3NEMO.html'>dprintf(3NEMO)</a>
+<a href='dprintf.3.html'>dprintf(3NEMO)</a>
 ,
-<a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
-, <a href='exception.3NEMO.html'>exception(3NEMO)</a>
+<a href='getparam.3.html'>getparam(3NEMO)</a>
+, <a href='exception.3.html'>exception(3NEMO)</a>
 , <a href='exit.3.html'>exit(3)</a>
 , <a href='abort.3.html'>abort(3)</a>
 , <a href='varargs.3.html'>varargs(3)</a>

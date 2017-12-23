@@ -18,7 +18,7 @@ in=</b>snap_in  [parameter=value]
 <b>snapdens</b> finds the space density
 in an N-body snapshot by using the Kth nearest neighbor density estimator
 discussed by Casertano &amp; Hut (1985, ApJ 298, 80). It uses a simple N^2 algorithm,
-and is hence slow for large snapshots (see also <a href='hackdens.1NEMO.html'><i>hackdens(1NEMO)</i></a>
+and is hence slow for large snapshots (see also <a href='hackdens.1.html'><i>hackdens(1NEMO)</i></a>
 ). <p>
 In case
 the number of nearest neighbours used is large enough and the velocity
@@ -34,12 +34,12 @@ if the keyword is also given:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
 format [no default] </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>optional output file, in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>optional output file, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
 format. The Aux() key will contain the density or phase space density, depending
 on the <b>dens</b> key below. [not used]. </dd>
@@ -69,8 +69,8 @@ to velocities, used in computing the phase space densities. ** in development
 
 <dt><b>nn=t|f</b> </dt>
 <dd>If set, the neighest neighbor (a number from 0 and Nnbody-1) is
-saved in the <i>Key</i> of a <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
-.  This is required for the <a href='atlas.5NEMO.html'><i>atlas(5NEMO)</i></a>
+saved in the <i>Key</i> of a <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+.  This is required for the <a href='atlas.5.html'><i>atlas(5NEMO)</i></a>
 
 format. Default: f </dd>
 
@@ -88,14 +88,14 @@ Snapdens:<tt> </tt>&nbsp;<tt> </tt>&nbsp;Nbody=512<tt> </tt>&nbsp;<tt> </tt>&nbs
 Hackdens:<tt> </tt>&nbsp;<tt> </tt>&nbsp;Nbody=512<tt> </tt>&nbsp;<tt> </tt>&nbsp;Kmax=16 xx"<tt> </tt>&nbsp;<tt> </tt>&nbsp;pollux SUN 3/110 (f68881)
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='snappeak.1NEMO.html'>snappeak(1NEMO)</a>
-, <a href='snapstat.1NEMO.html'>snapstat(1NEMO)</a>
-, <a href='hackdens.1NEMO.html'>hackdens(1NEMO)</a>
+<a href='snappeak.1.html'>snappeak(1NEMO)</a>
+, <a href='snapstat.1.html'>snapstat(1NEMO)</a>
+, <a href='hackdens.1.html'>hackdens(1NEMO)</a>
 , <a href='density.1falcON.html'>density(1falcON)</a>
 ,
-<a href='snapatlas.1NEMO.html'>snapatlas(1NEMO)</a>
-, <a href='atlas.5NEMO.html'>atlas(5NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapatlas.1.html'>snapatlas(1NEMO)</a>
+, <a href='atlas.5.html'>atlas(5NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  <br>
 <pre>M. Maciejewski et. al: <tt> </tt>&nbsp;<tt> </tt>&nbsp;Phase-space structures I: A comparison of 6D density
 estimators (arXiv:0810.0504v1)

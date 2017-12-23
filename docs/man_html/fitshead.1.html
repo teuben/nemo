@@ -16,17 +16,17 @@ header
 <b>fitshead in=</b>fits_file  [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>fitshead</i>
-reads FITS file(s) from disk and dumps the headers. Since <a href='fits.3NEMO.html'><i>fits(3NEMO)</i></a>
+reads FITS file(s) from disk and dumps the headers. Since <a href='fits.3.html'><i>fits(3NEMO)</i></a>
  routines
 are used, various FITS (mis)interpretations may be reported. Try using 
-<a href='scanfits.1NEMO.html'><i>scanfits(1NEMO)</i></a>
+<a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
  if really stuck. <p>
 FITS Header-Data Unit&rsquo;s (HDU) can be extracted
 individually by using the <i>hdu=</i> keyword. <p>
 Since fitshead can only process
 disk FITS files, FITS files on tape have to be extracted from tape using
 <a href='dd.1.html'><i>dd(1)</i></a>
- or similar programs. See also notes in <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+ or similar programs. See also notes in <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  how  to process
 fits files from tape. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -61,7 +61,7 @@ yet</i> </dd>
 is needed. If given, the input file should must be an ascii file, and not
 contain strange control characters. (a NULL can trigger erroneous conversions).
 However, no checking is done if the input file is properly  formatted (see
-<a href='fits.5NEMO.html'>fits(5NEMO)</a>
+<a href='fits.5.html'>fits(5NEMO)</a>
 ). </dd>
 
 <dt><b>counter=t|fP </b></dt>
@@ -95,8 +95,8 @@ a FITS header by specifying the width to be 80 characters, viz. <br>
 <pre>    % dd cbs=80 conv=unblock in=map1.fits | more
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='scanfits.1NEMO.html'>scanfits(1NEMO)</a>
-, <a href='fits.5NEMO.html'>fits(5NEMO)</a>
+<a href='scanfits.1.html'>scanfits(1NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
 , <a href='fold.1.html'>fold(1)</a>
  

@@ -126,12 +126,12 @@ Here&rsquo;s a neat way to plot a Black Body spectrum. We are using a flat filte
 spectrum (the alias filter=1 is available for this, which is defined as
 1 from 1 Angstrom to 1e9 Angstrom) and redefining xmin and xmax with out=
 to produce a spectrum. Since the output is an ASCII file, it can be piped
-into for example  <a href='tabplot.1NEMO.html'><i>tabplot(1NEMO)</i></a>
+into for example  <a href='tabplot.1.html'><i>tabplot(1NEMO)</i></a>
  for visual inspection: <br>
 <pre>  % tabfilter 1 tbb=1000 xmin=10 xmax=80000 step=10 out=- |\
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;tabplot - xmin=0 xmax=80000
 </pre>The same could be done to a spectrum and re-interpolate it (simular to 
-<a href='tabspline.1NEMO.html'><i>tabspline(1NEMO)</i></a>
+<a href='tabspline.1.html'><i>tabspline(1NEMO)</i></a>
 ) <br>
 <pre>  % tabfilter 1 data.tab xmin=4000 xmax=5000 step=1 out=- | tabplot - 
 </pre>
@@ -142,11 +142,11 @@ The integration is a simple eulerian one,
 though 1A should be sufficient  for most application. In case of doubt,
 check with a smaller or bigger value. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='tabmath.1NEMO.html'>tabmath(1NEMO)</a>
-, <a href='tabspline.1NEMO.html'>tabspline(1NEMO)</a>
+<a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='tabspline.1.html'>tabspline(1NEMO)</a>
 ,
-<a href='tabint.1NEMO.html'>tabint(1NEMO)</a>
-, <a href='filter.5NEMO.html'>filter(5NEMO)</a>
+<a href='tabint.1.html'>tabint(1NEMO)</a>
+, <a href='filter.5.html'>filter(5NEMO)</a>
  <p>
 Filters: <a href='http://voservices.net/filter/'>http://voservices.net/filter/</a>
  <p>

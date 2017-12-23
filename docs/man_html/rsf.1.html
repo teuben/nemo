@@ -11,11 +11,11 @@
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 rsf - read a structured file 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>rsf in</b>file <b>out</b>file 
+<b>rsf in=</b>file <b>out=</b>file 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>rsf</i>
 reads the ascii representation of a structured binary file  (ASF) as generated,
-for example, by <a href='tsf.1NEMO.html'><i>tsf</i>(1NEMO)</a>
+for example, by <a href='tsf.1.html'><i>tsf</i>(1NEMO)</a>
 , and writes a binary version. <p>
 In this fashion
 tsf/rsf can be used to port data between machines of a totally different
@@ -25,24 +25,24 @@ The following
 parameters are recognized. 
 <dl>
 
-<dt><b>in</b><i>file</i> </dt>
+<dt><b>in=</b><i>file</i> </dt>
 <dd>Input data is read from <i>file</i>, which must
 be an ascii file. </dd>
 
-<dt><b>out</b><i>file</i> </dt>
+<dt><b>out=</b><i>file</i> </dt>
 <dd>Output data is written to <i>file</i> in binary form.
 </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='csf.1NEMO.html'>csf(1NEMO)</a>
-, <a href='filestruct.3NEMO.html'>filestruct(3NEMO)</a>
+<a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='csf.1.html'>csf(1NEMO)</a>
+, <a href='filestruct.3.html'>filestruct(3NEMO)</a>
 . 
 <h2><a name='sect5' href='#toc5'>Debug</a></h2>
 <b>debug=2</b> reports
 values of <i>MaxTagLen</i> and <i>MaxVecDim</i> as defined in "<b>filestruct.h</b>". For <i>MaxSetLen</i>
-see <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</i></a>
+see <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
 . 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 <i>rsf</i> does not recognize items which have been truncated
@@ -56,7 +56,7 @@ enough linelength (using the <b>margin=</b> keyword).
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>
 <b>rsf</b> does not recognize
 decimal numbers, it assumes  they are always octal, and does not pay attention
-to a leading 0 to distinguish. Thereforce, since <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</i></a>
+to a leading 0 to distinguish. Thereforce, since <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
  now defaults
 decimal integers by default, it has to be forced to output octal if <b>rsf</b>
 is part of the pipe to transfer information, e.g.: <br>

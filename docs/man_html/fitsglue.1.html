@@ -19,7 +19,7 @@ in a fits cube. It only works for FITS primary header images. It also had
 rudimentary options to attempt to fix up the WCS of the new fits cube. <p>
 If
 you need to catenate the images in the spatial (1st or 2nd dimension) plane,
-use <a href='ccdmos.1NEMO.html'><i>ccdmos(1NEMO)</i></a>
+use <a href='ccdmos.1.html'><i>ccdmos(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in
@@ -68,7 +68,7 @@ the <b>in=</b> keyword does not directly support the usual unix wildcard, althou
 an extra pass with sed may be used: <br>
 <pre>    % set in=&lsquo;echo map*.fits | sed &rsquo;s/&nbsp;/,/g&rsquo;&lsquo;
     % fitsglue in=$in out=cube.fits
-</pre>You can also use NEMO&rsquo;s macro substitution (see also <a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
+</pre>You can also use NEMO&rsquo;s macro substitution (see also <a href='getparam.3.html'>getparam(3NEMO)</a>
 ): <br>
 <pre>    % ls map*.fits &gt; input_files
     % fitsglue in=@input_file out=cube.fits
@@ -79,13 +79,13 @@ probably wrong. <p>
 Size of resulting data is not filled to multiple 2880 boundary
 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='fits.5NEMO.html'>fits(5NEMO)</a>
-, <a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
-, <a href='ccdfits.1NEMO.html'>ccdfits(1NEMO)</a>
-, <a href='fitsccd.1NEMO.html'>fitsccd(1NEMO)</a>
-, <a href='ccdmos.1NEMO.html'>ccdmos(1NEMO)</a>
+<a href='fits.5.html'>fits(5NEMO)</a>
+, <a href='getparam.3.html'>getparam(3NEMO)</a>
+, <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
+, <a href='fitsccd.1.html'>fitsccd(1NEMO)</a>
+, <a href='ccdmos.1.html'>ccdmos(1NEMO)</a>
 ,
-<a href='ccdmerge.1NEMO.html'>ccdmerge(1NEMO)</a>
+<a href='ccdmerge.1.html'>ccdmerge(1NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 

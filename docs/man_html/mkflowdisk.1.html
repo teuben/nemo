@@ -16,12 +16,12 @@ on a flow potential
 ...] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkflowdisk</i> sets up a two-dimensional disk of test particles
- in a user-supplied flow potential (in standard <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+ in a user-supplied flow potential (in standard <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  format).
  Optionally the surface density of particles can mimic that of a logarithmic
 spiral, and thus create a kinematic spiral. <p>
-<a href='snapmass.1NEMO.html'><i>snapmass(1NEMO)</i></a>
- and <a href='snapcenter.1NEMO.html'><i>snapcenter(1NEMO)</i></a>
+<a href='snapmass.1.html'><i>snapmass(1NEMO)</i></a>
+ and <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
 
 have to be used if for some reason the user want finite mass particles
 and a perfectly centered set of particles. <p>
@@ -33,7 +33,7 @@ are recognized in any order if the keyword is also given:
 
 <dt><b>out=<i>out_file</i></b>
 </dt>
-<dd>The data are written to this file in <a href='SnapShot.5NEMO.html'><i>SnapShot(5NEMO)</i></a>
+<dd>The data are written to this file in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
   format [no default].
 </dd>
 
@@ -43,7 +43,7 @@ are recognized in any order if the keyword is also given:
 <dt><b>potname=<i>potential_name</i></b>
 </dt>
 <dd>name of the potential, see $NEMOOBJ/potential for the current repository.
-The user can supply his own, see <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+The user can supply his own, see <a href='potential.5.html'>potential(5NEMO)</a>
 . [default: <b>vrtm51</b>]. </dd>
 
 <dt><b>potpars=<i>pot_pars</i></b>
@@ -51,7 +51,7 @@ The user can supply his own, see <a href='potential.5NEMO.html'>potential(5NEMO)
 <dd>Parameters to the user supplied potential. The number of parameters depends
 on the potential supplied, the first parameter is reserved for a pattern
 speed. [default: not supplied, parameters are defaulted by how they are
-defined in the  <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+defined in the  <a href='potential.5.html'>potential(5NEMO)</a>
  code]. </dd>
 
 <dt><b>potfile=<i>pot_file</i></b> </dt>
@@ -100,7 +100,7 @@ snapshot. Default: not used.  </dd>
 
 <dt><b>seed=<i>random_seed</i></b> </dt>
 <dd>Use random number seed. A zero
-seed will generate a system-time dependant seed. See <a href='xrandom.3NEMO.html'><i>xrandom(3NEMO)</i></a>
+seed will generate a system-time dependant seed. See <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
  [default:
 <b>0</b>]. </dd>
 
@@ -131,13 +131,13 @@ The current implementation assumes the density is defined
 along the angular coordinate, since it can currently only do a one-dimensional
 interpolation. A radial dependance is not possible yet. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='mkspiral.1NEMO.html'>mkspiral(1NEMO)</a>
+<a href='mkspiral.1.html'>mkspiral(1NEMO)</a>
 ,
-<a href='mkdisk.1NEMO.html'>mkdisk(1NEMO)</a>
-, <a href='snapmass.1NEMO.html'>snapmass(1NEMO)</a>
-, <a href='snapcenter.1NEMO.html'>snapcenter(1NEMO)</a>
-, <a href='flowcode.1NEMO.html'>flowcode(1NEMO)</a>
-, <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+<a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
+, <a href='snapmass.1.html'>snapmass(1NEMO)</a>
+, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
+, <a href='flowcode.1.html'>flowcode(1NEMO)</a>
+, <a href='potential.5.html'>potential(5NEMO)</a>
 
 
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>

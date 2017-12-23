@@ -41,7 +41,7 @@ The meaning of the 3rd axis cannot always be trusted.
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 Although the input may seem to only support a single set of images,
 using Unix pipe one can use multiple. If certain images need to be cut out
-of a cube, <a href='csf.1NEMO.html'><i>csf(1NEMO)</i></a>
+of a cube, <a href='csf.1.html'><i>csf(1NEMO)</i></a>
  can be used first. Here&rsquo;s an example of these two how
 to re-arrange the first 5 even and odd images into a single cube: <br>
 <pre>     csf ccd1 ccd1e item=Image select=2,4,6,8,10
@@ -49,9 +49,9 @@ to re-arrange the first 5 even and odd images into a single cube: <br>
      cat ccd1e ccd1o | ccdmerge - ccd2
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='csf.1NEMO.html'>csf(1NEMO)</a>
-, <a href='fitsglue.1NEMO.html'>fitsglue(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='csf.1.html'>csf(1NEMO)</a>
+, <a href='fitsglue.1.html'>fitsglue(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/image/trans/ccdmerge.c

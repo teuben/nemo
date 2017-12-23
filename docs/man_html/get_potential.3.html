@@ -19,13 +19,13 @@ get_potential_double (potname, potpars, potfile)potproc_float  get_potential_flo
     <tt> </tt>&nbsp;<tt> </tt>&nbsp;/* optional (file) name or string */
 proc get_inipotential ()real get_pattern()</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<a href='potential.3NEMO.html'><i>potential(3NEMO)</i></a>
+<a href='potential.3.html'><i>potential(3NEMO)</i></a>
 
-provides a uniform interface to handle the input of the <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+provides a uniform interface to handle the input of the <a href='potential.5.html'><i>potential(5NEMO)</i></a>
 
 &rsquo;datafile&rsquo; format.  It returns a pointer to the function wich computes potentials,
 forces etc. <p>
-<i>get_potential</i> reads a formulation file of a potential (see <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+<i>get_potential</i> reads a formulation file of a potential (see <a href='potential.5.html'><i>potential(5NEMO)</i></a>
 ).
 <i>potname</i> is the generic name of the filename, which <b>must</b> contain at least
 two entry points <b>inipotential</b> and  <b>potential</b> with a predefined parameter
@@ -56,14 +56,14 @@ way one could re-initialize and re-use the potential.
 = get_potential("harmonic","0.0,1.0,0.5",NULL);(*mypot)(&amp;ndim,pos,acc,&amp;pot,&amp;time);...</pre>
 <h2><a name='sect4' href='#toc4'>See
 Also</a></h2>
-<a href='potlist.1NEMO.html'>potlist(1NEMO)</a>
-,<a href='potential.5NEMO.html'>potential(5NEMO)</a>
-,<a href='loadobj.3NEMO.html'>loadobj(3NEMO)</a>
-,<a href='acceleration.3NEMO.html'>acceleration(3NEMO)</a>
+<a href='potlist.1.html'>potlist(1NEMO)</a>
+,<a href='potential.5.html'>potential(5NEMO)</a>
+,<a href='loadobj.3.html'>loadobj(3NEMO)</a>
+,<a href='acceleration.3.html'>acceleration(3NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
-Uses a dynamic object loader. See <a href='loadobj.3NEMO.html'>loadobj(3NEMO)</a>
+Uses a dynamic object loader. See <a href='loadobj.3.html'>loadobj(3NEMO)</a>
  for implementations,
 but see below for a standalone loader. <p>
 Fortran C interface only works on

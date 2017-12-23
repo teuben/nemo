@@ -18,7 +18,7 @@ snapfit - fit <a href='a.6D.html'>a (6D)</a>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapfit</i> attempts to match an observed 3D datacube (where X and
 Y are normally positions on the sky, and Z the radial velocity)  with a
-6D model snapshot (with the usual <b>x,y,z,vx,vy,vz</b> coordinates, see <a href='bodytrans.1NEMO.html'><i>bodytrans(1NEMO)</i></a>
+6D model snapshot (with the usual <b>x,y,z,vx,vy,vz</b> coordinates, see <a href='bodytrans.1.html'><i>bodytrans(1NEMO)</i></a>
 ).
 It finds the best match by varying the two viewing angles, two scale factors
 and three offsets of the model. The scalefactors in X and Y are forced to
@@ -33,9 +33,9 @@ be modified using a standard <a href='bodytrans.5.html'><i>bodytrans(5)</i></a>
 individually, using the <b>weight</b> parameter. <p>
 Currently the match is done in
 a rather primitive way:  with respect to their center of mass  the two
-moments of inertia  (see <a href='snapinert.1NEMO.html'><i>snapinert(1NEMO)</i></a>
+moments of inertia  (see <a href='snapinert.1.html'><i>snapinert(1NEMO)</i></a>
 ) of the model and data are compared,
-after which the rotation matrix for each is derived (see also <a href='snaprect.1NEMO.html'><i>snaprect(1NEMO)</i></a>
+after which the rotation matrix for each is derived (see also <a href='snaprect.1.html'><i>snaprect(1NEMO)</i></a>
 ).
 Then the product of one and the inverse of the other is compared with the
 unity matrix, and the norm of this difference matrix is going to be minimized
@@ -48,12 +48,12 @@ recognized in any order if the keyword is also given:
 
 <dt><b>in=</b><i>in_snapshot</i> </dt>
 <dd>Input
-model <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+model <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 . No default. </dd>
 
 <dt><b>cube=</b><i>in_image</i> </dt>
 <dd>Input data. This can be either
-a 3D datacube in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+a 3D datacube in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format or an ascii table, with <b>x,y,vz,I</b>
 in the first four columns. In the latter case  the intensity <b>I</b> is optional,
 a default value of 1.0 will be taken for data with missing intensity. No
@@ -65,13 +65,13 @@ values less then <i>data_cutoff</i> are ignored. Default: no cutoff given, all
 data from image (table) are used. </dd>
 
 <dt><b>weight=</b><i>body_weight</i> </dt>
-<dd>Weight (see <a href='bodytrans.1NEMO.html'><i>bodytrans(1NEMO)</i></a>
+<dd>Weight (see <a href='bodytrans.1.html'><i>bodytrans(1NEMO)</i></a>
 )
 given to model particles. Bodies with weight less or equal zero are ignored.
 [default: <b>1</b>]. </dd>
 
 <dt><b>out=</b><i>out_snapshot</i> </dt>
-<dd>Optional output <a href='snapshot.1NEMO.html'><i>snapshot(1NEMO)</i></a>
+<dd>Optional output <a href='snapshot.1.html'><i>snapshot(1NEMO)</i></a>
 . It can also
 be controlled by the <b>minchi</b> and <b>frame</b> parameters. No name, and this is the
 default, there will be no output snapshot. If selected,  of the phase space
@@ -107,9 +107,9 @@ with the position angle of a disk, if this is kept in mind. </dd>
 </dt>
 <dd>Optional output file, in which for all input angles (<i>theta1,theta2</i>) the
 values of the logarithm of the norm of the difference matrix (<b>log(sum)</b>)
-is stored in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+is stored in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format.  Contour plots can be made with
-<a href='ccdplot.1NEMO.html'><i>ccdplot(1NEMO)</i></a>
+<a href='ccdplot.1.html'><i>ccdplot(1NEMO)</i></a>
  Default: none. </dd>
 
 <dt><b>iter=</b> </dt>
@@ -134,10 +134,10 @@ May
 work reasonably well for single features to fit, for double features a
 principle component analysis may have to be done beforehand. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='tablsqfit.1NEMO.html'>tablsqfit(1NEMO)</a>
+<a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 ,
-<a href='snaprect.1NEMO.html'>snaprect(1NEMO)</a>
-, <a href='snapinert.1NEMO.html'>snapinert(1NEMO)</a>
+<a href='snaprect.1.html'>snaprect(1NEMO)</a>
+, <a href='snapinert.1.html'>snapinert(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 

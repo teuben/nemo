@@ -20,16 +20,16 @@ orbsos - compute SOS coordinates from an orbit
 in the x-y plane. There is an option to compute the X-VX or Y-VY SOS coordinates.
 <p>
 The output is a simple ascii table with 4 columns: number, time, position
-and velocity. Example of use with <a href='tabplot.1NEMO.html'>tabplot(1NEMO)</a>
+and velocity. Example of use with <a href='tabplot.1.html'>tabplot(1NEMO)</a>
  <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out x | tabplot - 3 4 xlab=x ylab=vx
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out y | tabplot - 3 4 xlab=y ylab=vy
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out x,y | tabplot - 3 4 xlab=x,y ylab=vx,vy
 </pre><p>
 <i>orbsos</i> can be useful in locating unknown orbital families.  Finding periodic
-orbits can be automated, but is easier through programs like <a href='perorb.1NEMO.html'><i>perorb(1NEMO)</i></a>
+orbits can be automated, but is easier through programs like <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
 
-and <a href='henyey.1NEMO.html'><i>henyey(1NEMO)</i></a>
+and <a href='henyey.1.html'><i>henyey(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in
@@ -38,7 +38,7 @@ any order if the keyword is also given:
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>Input file, which must
-be an <a href='orbit.5NEMO.html'><i>orbit(5NEMO)</i></a>
+be an <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
 . [No default]. </dd>
 
 <dt><b>mode=x|y|x,y| </b></dt>
@@ -57,7 +57,7 @@ of section is symmetric w.r.t. to the position axis. [Default: <b>f</b>] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='perorb.1NEMO.html'>perorb(1NEMO)</a>
+<a href='perorb.1.html'>perorb(1NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>

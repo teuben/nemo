@@ -16,7 +16,7 @@ snapidl - tabulate a snapshot for IDL in binary mode
 <h2><a name='sect2' href='#toc2'></b></b>Description</a></h2>
 <b>snapidl</b> outputs selected particle variables
 in binary format (e.g. for IDL or fortran unformatted read&rsquo;s) The output format
-is a local host binary  format(see <a href='snapprint.1NEMO.html'><i>snapprint(1NEMO)</i></a>
+is a local host binary  format(see <a href='snapprint.1.html'><i>snapprint(1NEMO)</i></a>
  for an ascii table
 version), and should only be used on that local host to prevent endianism
 and floating point format conversion problems. See examples below on how
@@ -24,9 +24,9 @@ to read the binary data into IDL and fortran. <p>
 Note that this program write
 all variables as float (single precision), including integers. <p>
 For an alternative
-approach, use <a href='snappat.1NEMO.html'><i>snappat(1NEMO)</i></a>
+approach, use <a href='snappat.1.html'><i>snappat(1NEMO)</i></a>
  to create a Particle-Attribute-Time datacube,
-convert this to FITS using <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+convert this to FITS using <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  and read this into IDL. For simulations
 with a large number of snapshots this can be significantly faster. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -113,17 +113,17 @@ can also be read as follows: <br>
 </pre>
 <h2><a name='sect6' href='#toc6'>Caveat</a></h2>
 Some versions of IDL (e.g. 6.3) do not properly read/write 8 byte headers
-where needed on 64 bit systems. See also <a href='unfio.1NEMO.html'><i>unfio(1NEMO)</i></a>
+where needed on 64 bit systems. See also <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
  for a description.
 <p>
 Careful cutting and pasting examples from man pages, hidden characters
 can  slip unseen into your session. 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='snapprint.1NEMO.html'>snapprint(1NEMO)</a>
-, <a href='snappat.1NEMO.html'>snappat(1NEMO)</a>
+<a href='snapprint.1.html'>snapprint(1NEMO)</a>
+, <a href='snappat.1.html'>snappat(1NEMO)</a>
 ,
-<a href='unfio.1NEMO.html'>unfio(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='unfio.1.html'>unfio(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 ,  
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 src/nbody/io<tt> </tt>&nbsp;<tt> </tt>&nbsp;- snapidl.c 

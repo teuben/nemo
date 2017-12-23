@@ -15,11 +15,11 @@ tabtos - convert structured ASCII tables into snapshot format
 in=</b>ascii_file <b>out=</b>snap_file [parameter=value] ... 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tabtos</i> converts
-ASCII tables into <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+ASCII tables into <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. These tables can be structured
 as well as unstructured tables. There is a control parameter (<b>options=scan</b>)
 with which one  may be able to figure out the structure of a file. For binary
-files, there are several examples, as well the more generic <a href='binsnap.1NEMO.html'><i>binsnap(1NEMO)</i></a>
+files, there are several examples, as well the more generic <a href='binsnap.1.html'><i>binsnap(1NEMO)</i></a>
 .
 <p>
 Structured tables consist of a small (though optional) header,  that normally
@@ -68,11 +68,11 @@ not processed). Default: none supplied. </dd>
 that are present in this block  of <b>nbody</b> lines, in the order give. 
 <p> Recognized
 are: <b>mass, pos, vel, phase, acc, phi, dens, aux</b> for real-valued and <b>key</b>
-for integer valued columns (see also <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+for integer valued columns (see also <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 ). In addition, single
 elements from the <b>ndim</b> vector are recognized as <b>x, y, z, vx, vy, vz, ax,
 ay, az</b>. <b>m</b> is also recognized as <b>mass</b>, to be symmetric with the standard
-<a href='bodytrans.5NEMO.html'><i>bodytrans(5NEMO)</i></a>
+<a href='bodytrans.5.html'><i>bodytrans(5NEMO)</i></a>
  names. As before, the name <b>skip</b> (or <b>-</b>) can be used to skip
 a column. If the variable <b>skip</b> appears are the only item in a block, all
 <b>nbody</b> rows in that block are skipped, independant of  the number of columns
@@ -131,7 +131,7 @@ not used. </dd>
 <dd>Time(s) of snapshot(s), if the header doesn&rsquo;t supply
 it. This can be a list of times, if multiple snapshot are being read. Implied
 do loops can be given, for example,  <b>0:100:2.5</b> is a legal way to specify
-an array of 41 times (see <a href='nemoinp.1NEMO.html'><i>nemoinp(1NEMO)</i></a>
+an array of 41 times (see <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
 ) Specifying times through this
 keyword not only overrides any header values, but also limits the maximum
 number of snapshot that are read (thus avoiding the dreaded fatal EOF error)
@@ -150,7 +150,7 @@ of this is that the next record in that same block starts immediately following
 the wrapped number.  <b>spill</b> discards all numbers read from the last line
 to fill a record within a block, and hence negates the side-effect of the
 wrap option. <b>time</b> auto-increments time (by 1) as new snapshots are found.
-<b>history</b> uses comment lines and adds them to the data history (see <a href='history.3NEMO.html'><i>history(3NEMO)</i></a>
+<b>history</b> uses comment lines and adds them to the data history (see <a href='history.3.html'><i>history(3NEMO)</i></a>
 ).
 </dd>
 
@@ -164,13 +164,13 @@ To read in a single snapshot table with masses, (3D) positions
 and  velocities in columns 1-7, with the number of bodies equals the number
 of rows in the table, you can use: <br>
 <pre>    % tabtos in=table out=snap block1=mass,pos,vel
-</pre>To read in "205" formatted N-body snapshots  (see also <a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
+</pre>To read in "205" formatted N-body snapshots  (see also <a href='atos.1.html'><i>atos(1NEMO)</i></a>
 ), with
 three seperate blocks of masses, positions and velocities, you can use:
 <br>
 <pre>    % tabtos in=table out=snap header=nbody,ndim,time \
             block1=mass block2=pos block3=vel
-</pre>To read in "205" pure-SPH data (i.e. NGAS=NOBJ, see also  <a href='atosph.1NEMO.html'><i>atosph(1NEMO)</i></a>
+</pre>To read in "205" pure-SPH data (i.e. NGAS=NOBJ, see also  <a href='atosph.1.html'><i>atosph(1NEMO)</i></a>
 ),
 in which the density is going to be stored in the <b>mass</b> slot, entropy/temperature
 in <b>aux</b>, potentials in <b>phi</b>, and masses and smoothing lengths are skipped,
@@ -179,11 +179,11 @@ use: <br>
             block1=skip block2=pos block3=vel block4=mass block5=aux \
             block6=skip block7=phi
 </pre>Note: files with Ngas &lt; Nobj cannot be processed (yet), since the blocks
-have different length. See <a href='atosph.1NEMO.html'><i>atosph(1NEMO)</i></a>
+have different length. See <a href='atosph.1.html'><i>atosph(1NEMO)</i></a>
 . 
 <h2><a name='sect5' href='#toc5'>205 Format</a></h2>
 For a full explanation,
-see <a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
+see <a href='atos.1.html'><i>atos(1NEMO)</i></a>
 , but below we list the two different popular "205" formats
 around (atos, and atosph) 
 <p> <br>
@@ -194,7 +194,7 @@ atosph<tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody,ngas,ndim,time<tt> </tt>&nbsp;<tt> <
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 <i>tabtos</i> is very tolerant (sometimes too!) with respect to slight
 under- or over-specifications. It tries to write data, but only if it really
-gets stuck, the program is aborted.  <a href='warning.3NEMO.html'><i>warning(3NEMO)</i></a>
+gets stuck, the program is aborted.  <a href='warning.3.html'><i>warning(3NEMO)</i></a>
  messages should not
 be discarded, check them to see if they make sense. Otherwise what you think
 is correct data, may not have been parsed correctly. That&rsquo;s life in the fast
@@ -216,19 +216,19 @@ complicated ascii files. <p>
 This program cannot parse fixed column files if
 they are not separated by whitespace. <p>
 Files with comment lines cannot be
-parsed. Use <a href='tabcomment.1NEMO.html'><i>tabcomment(1NEMO)</i></a>
+parsed. Use <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
  to delete them: <br>
 <pre>    tabcomment tab.in - delete=t | tabtos - snap.out ....
 </pre>though the drawback of using a pipe in this example is that typically 
 the keyword <b>nbody=</b> needs to be supplied. 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
-<a href='atos.1NEMO.html'>atos(1NEMO)</a>
-, <a href='atosph.1NEMO.html'>atosph(1NEMO)</a>
+<a href='atos.1.html'>atos(1NEMO)</a>
+, <a href='atosph.1.html'>atosph(1NEMO)</a>
 ,
-<a href='binsnap.1NEMO.html'>binsnap(1NEMO)</a>
-, <a href='snapprint.1NEMO.html'>snapprint(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='unfio.1NEMO.html'>unfio(1NEMO)</a>
+<a href='binsnap.1.html'>binsnap(1NEMO)</a>
+, <a href='snapprint.1.html'>snapprint(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='unfio.1.html'>unfio(1NEMO)</a>
  
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter

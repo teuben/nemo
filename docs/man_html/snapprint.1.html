@@ -19,10 +19,10 @@ in=</b>snap_in  [parameter=value]
 values of requested quantities of the bodies in a snapshot. These can be
 processed with programs such as <b>tabhist, tablsqfit</b> or packages such as
 <b>mongo</b>, <b>super-mongo</b> and <b>gnuplot</b>. If your processing package is able to read
-other types of nbody formats, look at programs such as <a href='snapgadget.1NEMO.html'><i>snapgadget(1NEMO)</i></a>
+other types of nbody formats, look at programs such as <a href='snapgadget.1.html'><i>snapgadget(1NEMO)</i></a>
 ,
-<a href='snaprv.1NEMO.html'><i>snaprv(1NEMO)</i></a>
-, or  <a href='snaptipsy.1NEMO.html'><i>snaptipsy(1NEMO)</i></a>
+<a href='snaprv.1.html'><i>snaprv(1NEMO)</i></a>
+, or  <a href='snaptipsy.1.html'><i>snaptipsy(1NEMO)</i></a>
 . <p>
 <b>snapprint</b> also has an option of producing
 a table of separations between all bodies of the system. For N bodies this
@@ -35,7 +35,7 @@ any order if the keyword is also given:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
 format [no default] </dd>
 
@@ -70,7 +70,7 @@ If none, output will be standard output. [default: no file]. </dd>
 <dd>Add
 a header to the output? The header will contain the number of particles,
 followed by the timestamp, of the snapshot. If masses, position and velocities
-are output in the table, this format is also referred to as the <a href='ntmpv.5NEMO.html'><i>ntmpv(5NEMO)</i></a>
+are output in the table, this format is also referred to as the <a href='ntmpv.5.html'><i>ntmpv(5NEMO)</i></a>
 
 format. [Default: <b>f</b>] </dd>
 
@@ -89,20 +89,20 @@ Times=time-string does
 not work, returns btab=NULL, bits=1, i.e. something weird here. Code is identical
 to snapcenter, which uses same technique. <p>
 The inversion function of snapprint,
-reading a snapshot from a simple table, could be done with <a href='tabtos.1NEMO.html'><i>tabtos(1NEMO)</i></a>
+reading a snapshot from a simple table, could be done with <a href='tabtos.1.html'><i>tabtos(1NEMO)</i></a>
 .
 Another route is the somewhat complicated ascii file,  consisting of a
 number of catenated tables, that has to be created with  a little header.
-See the "205" format in <a href='atos.1NEMO.html'>atos(1NEMO)</a>
- or <a href='stoa.1NEMO.html'>stoa(1NEMO)</a>
+See the "205" format in <a href='atos.1.html'>atos(1NEMO)</a>
+ or <a href='stoa.1.html'>stoa(1NEMO)</a>
 . There are shell scripts
 which handle some of the cases here. 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 A single expression like <i>atan2(y,x)</i>
 is parsed into two. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='tabhist.1NEMO.html'>tabhist(1NEMO)</a>
-, <a href='tabtos.1NEMO.html'>tabtos(1NEMO)</a>
+<a href='tabhist.1.html'>tabhist(1NEMO)</a>
+, <a href='tabtos.1.html'>tabtos(1NEMO)</a>
 , mongo users-manual
 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>

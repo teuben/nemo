@@ -15,7 +15,7 @@ treecode2 - fortran version of hackcode, with Cray optimizations and
 treecode2 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>treecode2</b> is the Hernquist version
-(Version 2, November 1988) of the Barnes and Hut treecode (see also <a href='hackcode1.1NEMO.html'><i>hackcode1(1NEMO)</i></a>
+(Version 2, November 1988) of the Barnes and Hut treecode (see also <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
 .
 This version is written in fortran,  has been optimized for supercomputers
 and is fully vectorized, no recursion used. See the file <i>treecode.f</i> for 
@@ -44,11 +44,11 @@ steps [1]
 <tt> </tt>&nbsp;<tt> </tt>&nbsp; usequad   <tt> </tt>&nbsp;<tt> </tt>&nbsp;Option to include quadrupole terms (.TRUE./.FALSE.) [.FALSE.]
 </pre><p>
 The second file has to be named <b>TREEBI</b>, and contains the input  bodies
-in a format described in <a href='stoa.1NEMO.html'><i>stoa(1NEMO)</i></a>
+in a format described in <a href='stoa.1.html'><i>stoa(1NEMO)</i></a>
 . <p>
 Output files created are <b>TREEBOA</b>,
 which contains all the requested (see <b>noutbod</b>) output snapshots  in ascii
-<a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
+<a href='atos.1.html'><i>atos(1NEMO)</i></a>
  format, <b>TREELOG</b>, which contains a log (see <b>noutlog</b>) of the
 run and <b>TREEBO</b>, which contains a binary (machine dependable) dump of the
 last snapshot. <i>Note that these three output files must not be present when
@@ -63,7 +63,7 @@ of <b>treecode2</b> in the same directory. Script usage: <p>
 <b>runtreecode2</b> <i>input_snapshot
 output_snapshot pars_file</i> <p>
 The <i>input_snapshot</i> and  <i>output_snapshot</i> are now
-in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format, whereas the <i>pars_file</i> is in the format described
 in the previous <b>PARAMETERS</b> section. <p>
 A regular NEMO program <b>treecode0</b> can
@@ -77,7 +77,7 @@ appropiately defining the <b>OS=</b> macro in the Makefile, as well as running
 benchmarks within NEMO&rsquo;s environment. See Makefile for details. 
 <h2><a name='sect6' href='#toc6'>Benchmarks</a></h2>
 Timings
-from the running the standard benchmark (see also <a href='hackcode1.1NEMO.html'><i>hackcode1(1NEMO)</i></a>
+from the running the standard benchmark (see also <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
  from
 the makefile (cpu times are in seconds): <br>
 <pre>machine <tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu<tt> </tt>&nbsp;<tt> </tt>&nbsp;compiler<tt> </tt>&nbsp;<tt> </tt>&nbsp;OS
@@ -100,12 +100,12 @@ Lars Hernquist
 ~/src/nbody/evolve/treecode2/<tt> </tt>&nbsp;<tt> </tt>&nbsp;official NEMO version (ASCII atos/stoa I/O)
 </pre>
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
-<a href='hackcode1.1NEMO.html'>hackcode1(1NEMO)</a>
-, <a href='treecode.1NEMO.html'>treecode(1NEMO)</a>
-, <a href='nbody0.1NEMO.html'>nbody0(1NEMO)</a>
-, <a href='atos.1NEMO.html'>atos(1NEMO)</a>
+<a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
+, <a href='treecode.1.html'>treecode(1NEMO)</a>
+, <a href='nbody0.1.html'>nbody0(1NEMO)</a>
+, <a href='atos.1.html'>atos(1NEMO)</a>
 ,
-<a href='tabtos.1NEMO.html'>tabtos(1NEMO)</a>
+<a href='tabtos.1.html'>tabtos(1NEMO)</a>
  
 <h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>

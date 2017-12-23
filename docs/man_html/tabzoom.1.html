@@ -16,14 +16,14 @@ tabzoom - dynamic query table viewer with interactive zoom and action
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tabzoom</i> is an
 interactive program that displays numeric data from an ASCII table in a
-2D plot (see also <a href='tabplot.1NEMO.html'><i>tabplot(1NEMO)</i></a>
- and <a href='tabview.1NEMO.html'><i>tabview(1NEMO)</i></a>
+2D plot (see also <a href='tabplot.1.html'><i>tabplot(1NEMO)</i></a>
+ and <a href='tabview.1.html'><i>tabview(1NEMO)</i></a>
 ), while dynamically
 querying related columns from the same table, and allowing zooming and
 performing an action on a selected point. Dynamic Query (DQ) is an effective
 way to visualize an N-dimensional dataset in 2D. Two variables are selected
 to be plotted, they can either be directly  taken as a column from the
-table, or computed via a <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+table, or computed via a <a href='fie.3.html'><i>fie(3NEMO)</i></a>
   expression involving any column, e.g.
 <i>"sqrt(%1**2+%2**2)"</i>. <p>
 Each selected &rsquo;column&rsquo; can be manipulated using sliders.
@@ -59,7 +59,7 @@ for ascii tables. The default is that all columns are selected to become
 sliders. </dd>
 
 <dt><b>xvar=</b><i>X_expression</i> </dt>
-<dd>X-variable to plot. Any <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+<dd>X-variable to plot. Any <a href='fie.3.html'><i>fie(3NEMO)</i></a>
  expression involving
 input columns (see <b>col=</b>) can be given. The first extracted column given
 by <b>col=</b> is referred to as %1 etc. [Default: <b>%1</b>]. </dd>
@@ -86,7 +86,7 @@ to <i>xmax</i> [autoscale + 5% edges]. </dd>
 
 <dt><b>color=</b><i>C_expression</i>
 </dt>
-<dd>A <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+<dd>A <a href='fie.3.html'><i>fie(3NEMO)</i></a>
  expression  which is used to colorize the particles. Color
 will be an integer, 0 being invisible (actually: background color), 1 the
 foreground color, and 2,3,4... the colors your graphics device has. [Default:
@@ -94,22 +94,22 @@ foreground color, and 2,3,4... the colors your graphics device has. [Default:
 <p> </dd>
 
 <dt><b>psize=</b><i>S_expression</i> </dt>
-<dd>Size of points in cm. This is allowed to be a <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+<dd>Size of points in cm. This is allowed to be a <a href='fie.3.html'><i>fie(3NEMO)</i></a>
 
 expression, in terms of other columns. It must evaluate in cm. Default: 0
 (dots - this is also the fastest and highly recommended) </dd>
 
 <dt><b>ptype=</b><i>P_expression</i>
 </dt>
-<dd>Point type. This is allowed to be  a <a href='fie.3NEMO.html'><i>fie(3NEMO)</i></a>
+<dd>Point type. This is allowed to be  a <a href='fie.3.html'><i>fie(3NEMO)</i></a>
  expression, in terms of
-other columns. After evaluation, is is converted to an integer, see <a href='yapp.3NEMO.html'><i>yapp(3NEMO)</i></a>
+other columns. After evaluation, is is converted to an integer, see <a href='yapp.3.html'><i>yapp(3NEMO)</i></a>
 
 for valid <i>ptype</i>&rsquo;s. Default: 0 (a point) </dd>
 
 <dt><b>layout=</b><i>layout_file</i> </dt>
 <dd>Filename with
-<a href='layout.5NEMO.html'><i>layout(5NEMO)</i></a>
+<a href='layout.5.html'><i>layout(5NEMO)</i></a>
  commands to be added to plot?  Default: none. </dd>
 
 <dt><b>action=</b><i>action_script</i>
@@ -195,17 +195,17 @@ The <b>!</b> simply runs the <i>cmd</i> command through the shell, whereas the <
 all currently visible data into the <i>cmd</i> command. For example to do a linear
 least squares fit to the visible data, <br>
 <pre>        |tablsqfit -
-</pre>would be needed (see <a href='tablsqfit.1NEMO.html'><i>tablsqfit(1NEMO)</i></a>
+</pre>would be needed (see <a href='tablsqfit.1.html'><i>tablsqfit(1NEMO)</i></a>
 ), all subsequents fits can be done
 using the <br>
 <pre>        |
 </pre>command itself, since it remembers the last used <b>|</b><i>cmd</i>.  
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='tabview.1NEMO.html'>tabview(1NEMO)</a>
+<a href='tabview.1.html'>tabview(1NEMO)</a>
 ,
-<a href='tabplot.1NEMO.html'>tabplot(1NEMO)</a>
-, <a href='fie.3NEMO.html'>fie(3NEMO)</a>
-, <a href='layout.3NEMO.html'>layout(3NEMO)</a>
+<a href='tabplot.1.html'>tabplot(1NEMO)</a>
+, <a href='fie.3.html'>fie(3NEMO)</a>
+, <a href='layout.3.html'>layout(3NEMO)</a>
 , <a href='xgobi.l.html'>xgobi(l)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>

@@ -31,7 +31,7 @@ The code consists of an original (fortran based) executable, <b>CGS</b>,
 assumes files with a fixed name, it can be somewhat cumbersome to run multiple
 sets of simulations with different input parameters. A simple frontend organizes
 a directories structure and places their output in these run directories,
-as well as optionally handles I/O to/from NEMO <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+as well as optionally handles I/O to/from NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  files. <p>
 A
 detailed code description can be found in Trenti M. (2005),   PhD Thesis,
@@ -205,7 +205,7 @@ or
 </pre>
 <h2><a name='sect8' href='#toc8'>Data Conversion</a></h2>
 If snapshots are requested, CGS will create a file <b>fort.90</b>,
-which can be converted to NEMO&rsquo;s <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+which can be converted to NEMO&rsquo;s <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  <br>
 <pre>tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 </pre>
@@ -214,14 +214,14 @@ which can be converted to NEMO&rsquo;s <a href='snapshot.5NEMO.html'><i>snapshot
 Although all particles are equally massive (by the nature of the
 code), the total mass of the system can be choosen as an input parameter.
 The gravitation constant is 4.4971, which is appropriate for a galactic
-scale system where the units (see also <a href='units.5NEMO.html'><i>units(5NEMO)</i></a>
+scale system where the units (see also <a href='units.5.html'><i>units(5NEMO)</i></a>
 ) are 10^11 solar mass,
 10 kpc and 10^8 years. This gives a unit of velocity of about 97.8 km/s 
 <h2><a name='sect10' href='#toc10'>See
 Also</a></h2>
-<a href='scfm.1NEMO.html'>scfm(1NEMO)</a>
-, <a href='quadcode.1NEMO.html'>quadcode(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='scfm.1.html'>scfm(1NEMO)</a>
+, <a href='quadcode.1.html'>quadcode(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  <p>
 <br>
 <pre>Trenti, M. (2005), PhD Thesis, Pisa (see Chapter 3 for many details on the

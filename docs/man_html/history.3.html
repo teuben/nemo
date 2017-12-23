@@ -21,14 +21,14 @@ instr, outstr;string s;</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>history</i> is a general mechanism to keep
 track of data history, and also store random user-supplied comments to data
-in <a href='filestruct.5NEMO.html'><i>filestruct(5NEMO)</i></a>
+in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
  format. One history database at a time can be managed,
 history from a file can be added to this, and it can be written out to
 a file. Whenever a NEMO command is run, the history is initialized with
 the actual command line supplied.  History from datafiles can be appended
 to this. <p>
 <i>get_history()</i> appends history from a file <b>instr</b> (assumed to be
-in <a href='filestruct.5NEMO.html'><i>filestruct(5NEMO)</i></a>
+in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
  format) to  the internal history buffer. This is usually
 one of the first things a program should do before other input is attempted,
 as the data history is normally prepended to the data.  <p>
@@ -56,9 +56,9 @@ it is also written via <i>put_history</i>.
 ~/inc                <tt> </tt>&nbsp;<tt> </tt>&nbsp;history.h
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
-, <a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='rsf.3NEMO.html'>rsf(3NEMO)</a>
+<a href='getparam.3.html'>getparam(3NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='rsf.3.html'>rsf(3NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 

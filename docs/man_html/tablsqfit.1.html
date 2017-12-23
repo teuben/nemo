@@ -30,7 +30,7 @@ is also  computed in a second fit an error column (<b>dycol=</b>) is given. <p>
 For
 most linear functions the non-linear version of this program will also work
 fine, and has the added power that certain parameters can be fixed, and
-error estimates are returned. See <a href='tabnllsqfit.1NEMO.html'><i>tabnllsqfit(1NEMO)</i></a>
+error estimates are returned. See <a href='tabnllsqfit.1.html'><i>tabnllsqfit(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following
@@ -95,16 +95,16 @@ non-linear fits </dd>
 
 <dt><b>nmax=</b><i>max_lines</i> </dt>
 <dd>Maximum number of lines allocated if the
-input file was being read from a pipe. If not, the routine <a href='file_lines.3NEMO.html'><i>file_lines(3NEMO)</i></a>
+input file was being read from a pipe. If not, the routine <a href='file_lines.3.html'><i>file_lines(3NEMO)</i></a>
 
 is used to allocate space for the table. [Default: <b>10000</b>]. </dd>
 
 <dt><b>mpfit=</b><i>mode</i> </dt>
 <dd>The
-fitting mode in which <a href='mpfit.3NEMO.html'><i>mpfit(3NEMO)</i></a>
+fitting mode in which <a href='mpfit.3.html'><i>mpfit(3NEMO)</i></a>
  is used. 0=no errors. 1=only errors in
 X used  (dxcol=), 2=only errors in Y used (dycol=), 3=errors in both X
-and Y used. See also <a href='linreg.1NEMO.html'><i>linreg(1NEMO)</i></a>
+and Y used. See also <a href='linreg.1.html'><i>linreg(1NEMO)</i></a>
 . </dd>
 
 <dt><b>tab=t|f</b> </dt>
@@ -130,12 +130,12 @@ table with a straight line, with some added noise and random weights between
 </pre>The fitted line is written either as <b>y=ax+b</b> or alternatively with their
 (x0,y0) intercepts as <b>x/x0 + y/y0=1</b>. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='tabhist.1NEMO.html'>tabhist(1NEMO)</a>
-, <a href='tabmath.1NEMO.html'>tabmath(1NEMO)</a>
+<a href='tabhist.1.html'>tabhist(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 ,
-<a href='gaussfit.1NEMO.html'>gaussfit(1NEMO)</a>
-, <a href='linreg.1NEMO.html'>linreg(1NEMO)</a>
-, <a href='tabnllsqfit.1NEMO.html'>tabnllsqfit(1NEMO)</a>
+<a href='gaussfit.1.html'>gaussfit(1NEMO)</a>
+, <a href='linreg.1.html'>linreg(1NEMO)</a>
+, <a href='tabnllsqfit.1.html'>tabnllsqfit(1NEMO)</a>
  <i>Numerical Recipies in
 C, Ch.14</i> <p>
 mpfit: <a href='http://www.physics.wisc.edu/~craigm/idl/cmpfit.html'>http://www.physics.wisc.edu/~craigm/idl/cmpfit.html</a>

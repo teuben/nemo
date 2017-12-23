@@ -15,17 +15,17 @@ snapmap - map a snapshot into a 2D image
 <b>snapmap in=</b>snapshot
 <b>out=</b>image [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snapmap</i> "grids" two arbitrary <a href='bodytrans.3NEMO.html'><i>bodytrans(3NEMO)</i></a>
+<i>snapmap</i> "grids" two arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
 
 expressions  (default: <b>x</b>, and <b>y</b>) of a snapshot into a 2D map, using another
-<a href='bodytrans.3NEMO.html'><i>bodytrans(3NEMO)</i></a>
+<a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
  expression (default: <b>m</b>) as the map value. The result is
-an <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+an <a href='image.5.html'><i>image(5NEMO)</i></a>
 , with optional astronomical projection for direct comparision
 with true astronomical images. There are a number of ways implemented to
 "grid" the particles: mean value, with or without gaussian or cone weighting,
 and forms of linear interpolation. <p>
-Use <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+Use <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
  instead to grid datacubes
 (e.g. X-Y-Z), or if you need various styles of line of sight integrations. <b>snapmap</b>
 is more appropriate to obtain well interpolated maps from <i>irregularly sampled</i>
@@ -38,13 +38,13 @@ are recognized:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, must be in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format.
 Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.
  [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. Note
 that multiple <b>times</b> and/or multiple <b>evar</b>&rsquo;s will produce multiple images
 in this file. [no default]. </dd>
@@ -116,7 +116,7 @@ write one image per selected (see <b>times=</b>) time? [default: <b>f</b>]. </dd
 <dt><b>proj=</b> </dt>
 <dd>If a
 valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT) but see also
-<a href='wcs.1NEMO.html'><i>wcs(1NEMO)</i></a>
+<a href='wcs.1.html'><i>wcs(1NEMO)</i></a>
 , the input coordinates are interpreted in angular degrees, and
 griddes with the appropriate sky projection. Default: no sky projection.
 </dd>
@@ -137,7 +137,7 @@ is done in linear space.
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
 This program was written to create maps
 with more accurate interpolated velocity fields from models. However, in
-the default mode it used the same <i>mean</i> pixel value as <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+the default mode it used the same <i>mean</i> pixel value as <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 :
 <br>
 <pre>   snapmap  snap101 ccd101 evar=-vz
@@ -148,7 +148,7 @@ the default mode it used the same <i>mean</i> pixel value as <a href='snapgrid.1
 </pre>produces the same images <i>ccd101</i> and <i>ccd102</i> from the input snapshot <i>snap101</i>
 <p>
 When using multiple <b>evar</b>&rsquo;s, the multiple images are not in a cube, but 
-separate images. If you want them in a single image cube, use  <a href='snapmerge.1NEMO.html'><i>snapmerge(1NEMO)</i></a>
+separate images. If you want them in a single image cube, use  <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
 .
 Here&rsquo;s a simple example using NEMO&rsquo;s pipes: <br>
 <pre>    mkspiral - |\
@@ -156,15 +156,15 @@ Here&rsquo;s a simple example using NEMO&rsquo;s pipes: <br>
       ccdmerge - spiral.ccd
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='snapgrid.1NEMO.html'>snapgrid(1NEMO)</a>
-, <a href='snapifu.1NEMO.html'>snapifu(1NEMO)</a>
-, <a href='snapsmooth.1NEMO.html'>snapsmooth(1NEMO)</a>
-, <a href='snapccd.1NEMO.html'>snapccd(1NEMO)</a>
+<a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
+, <a href='snapifu.1.html'>snapifu(1NEMO)</a>
+, <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
+, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
 ,
-<a href='ccdintpol.1NEMO.html'>ccdintpol(1NEMO)</a>
-, <a href='ccdmerge.1NEMO.html'>ccdmerge(1NEMO)</a>
-, <a href='ccdsky.1NEMO.html'>ccdsky(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
+, <a href='ccdmerge.1.html'>ccdmerge(1NEMO)</a>
+, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter

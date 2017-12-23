@@ -53,7 +53,7 @@ the input  bodies. The first line must contain the number of bodies, and
 the time of this snapshot, followed by  <p>
 Output files created are <b>SNAP</b><i>xxx</i>,
 which contains all the requested (see <b>noutbod</b>) output snapshots, one for
-each  requested output time in ascii <a href='ntmpv.5NEMO.html'><i>ntmpv(5NEMO)</i></a>
+each  requested output time in ascii <a href='ntmpv.5.html'><i>ntmpv(5NEMO)</i></a>
  format. 
 <p> which contains
 a log (see <b>noutlog</b>) of the run and <b>SCFBO</b>, which contains a binary (machine
@@ -69,7 +69,7 @@ two versions of <b>scfm</b> in the same directory. Script usage: <p>
 <b>runscfm</b> <i>input_snapshot
 output_snapshot pars_file</i> <p>
 The <i>input_snapshot</i> and  <i>output_snapshot</i> are now
-in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format, whereas the <i>pars_file</i> is in the format described
 in the previous <b>PARAMETERS</b> section. 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
@@ -77,7 +77,7 @@ Preparing an input dataset for
 scfm can be done as follows: <br>
 <pre>    snapprint in=i.snap options=m,x,y,z,vx,vy,vz header=t &gt; i.tab
 </pre><p>
-Converting output tables made by scfm into <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+Converting output tables made by scfm into <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  can be done
 as follows: <br>
 <pre>tabtos in=p.tab out=o.snap header=nbody,time block1=mass,pos,vel
@@ -122,10 +122,10 @@ Ultra-10/300<tt> </tt>&nbsp;<tt> </tt>&nbsp;9.64<tt> </tt>&nbsp;<tt> </tt>&nbsp;
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.33<tt> </tt>&nbsp;<tt> </tt>&nbsp;(f77 -fast)
 </pre>
 <h2><a name='sect11' href='#toc11'>See Also</a></h2>
-<a href='runscfm.1NEMO.html'>runscfm(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='snapprint.1NEMO.html'>snapprint(1NEMO)</a>
-, <a href='ntmpv.5NEMO.html'>ntmpv(5NEMO)</a>
+<a href='runscfm.1.html'>runscfm(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='snapprint.1.html'>snapprint(1NEMO)</a>
+, <a href='ntmpv.5.html'>ntmpv(5NEMO)</a>
 
 <p>
 Hernquist, L. &amp; Ostriker, J. (1992) <i>A Self-Constistent Field Method for Galactic

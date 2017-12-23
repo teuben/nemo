@@ -15,9 +15,9 @@ potccd - Create an image with potentials or densities from a potential
 <b>potccd</b> [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>potccd</i> stores the potential
-values of a potential descriptor  (see <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+values of a potential descriptor  (see <a href='potential.5.html'>potential(5NEMO)</a>
 ) on a regular grid
-in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. It is also possible to store the Poissonian
 density, either 2D or 3D. For this numerical derivatives of the force field
 are used, and hence a small difference step needs to be given. 
@@ -31,7 +31,7 @@ given:
 <dd>Output file (image). No default. </dd>
 
 <dt><b>potname=</b> </dt>
-<dd>Name of the <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+<dd>Name of the <a href='potential.5.html'><i>potential(5NEMO)</i></a>
 .
 No default </dd>
 
@@ -85,15 +85,15 @@ Here is an example how to create a smooth radial profile of the function
 "f(x)=1/sqrt(4+x)" on a grid from -10..10: <br>
 <pre>    % nemoinp 0:10 | tabmath - - &rsquo;1/(sqrt(4+%1)&rsquo; &gt; map0.tab
     % potccd map0 rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
-</pre>If the functional form is know, <a href='ccdmath.1NEMO.html'><i>ccdmath(1NEMO)</i></a>
+</pre>If the functional form is know, <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
  will perhaps do better,
 if not a little more involved to type. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='potlist.1NEMO.html'>potlist(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='potlist.1.html'>potlist(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
 ,
-<a href='potential.3NEMO.html'>potential(3NEMO)</a>
-, <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+<a href='potential.3.html'>potential(3NEMO)</a>
+, <a href='potential.5.html'>potential(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 

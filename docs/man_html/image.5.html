@@ -18,10 +18,10 @@ image - binary format for 2D and 3D image/cube files
 </pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>image</i> implement a rectangular  2-dimensional matrix or 3-dimensional
-cube in a  <a href='filestruct.5NEMO.html'><i>filestruct(5NEMO)</i></a>
+cube in a  <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
  datafile.  The current implementation restricts
 images to well known 2- and 3-dimensional cases, as well  as the restriction
-that the whole image must be in memory. See <a href='mdarray.3NEMO.html'><i>mdarray(3NEMO)</i></a>
+that the whole image must be in memory. See <a href='mdarray.3.html'><i>mdarray(3NEMO)</i></a>
  for a more general
  multi-dimensional array interface (though there is no special I/O interface
 for this data structure). The coordinate transformation  to world coordinates
@@ -30,9 +30,9 @@ is by no means restricted to a simple linear equation of the form: <br>
 </pre>where <i>i</i> runs from 0 to N-1, the dimension of the matrix in any of its coordinates.
 <p>
 <i>Image</i> files are used in 2D and 3D images, i.e. a matrix of values of any
-kind (intensity, velocity etc.). The output format of <a href='image.3NEMO.html'><i>image(3NEMO)</i></a>
+kind (intensity, velocity etc.). The output format of <a href='image.3.html'><i>image(3NEMO)</i></a>
  files
-is the general binary structured fileformat as described in <a href='filestruct.3NEMO.html'><i>filestruct(3NEMO)</i></a>
+is the general binary structured fileformat as described in <a href='filestruct.3.html'><i>filestruct(3NEMO)</i></a>
 .
 <p>
 The data is stored on disk in Fortran (column-major) or C (row-major) fashion,
@@ -138,21 +138,21 @@ In CDef mode: <br>
 The current default images (axis=0) have their original at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no freedom in
 the location of the reference pixel, it&rsquo;s (0,0). For axis=1 (only a few programs
-now support it, notably <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
- and <a href='fitsccd.1NEMO.html'><i>fitsccd(1NEMO)</i></a>
+now support it, notably <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
+ and <a href='fitsccd.1.html'><i>fitsccd(1NEMO)</i></a>
 ) this limitation
 will go away, but only simple cartesian coordinate systems are supported.
 
 <h2><a name='sect7' href='#toc7'>Future Expansions</a></h2>
-Code could be modified to use <a href='dynamem.3NEMO.html'>dynamem(3NEMO)</a>
+Code could be modified to use <a href='dynamem.3.html'>dynamem(3NEMO)</a>
 . Allows more
 flexable use by addressing image[i][j] instead of slower macros MapValue(iptr,i,j)
 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
-<a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='image.3NEMO.html'>image(3NEMO)</a>
-, <a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='mdarray.3NEMO.html'>mdarray(3NEMO)</a>
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='image.3.html'>image(3NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='mdarray.3.html'>mdarray(3NEMO)</a>
  
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter

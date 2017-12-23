@@ -30,38 +30,38 @@ recognized in any order if the keyword is also given:
 
 <dt><b>in=</b><i>image_in</i> </dt>
 <dd>Input
-VL(B) image. This must be an <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+VL(B) image. This must be an <a href='image.5.html'><i>image(5NEMO)</i></a>
  file.  No default. </dd>
 
 <dt><b>out=</b><i>image_out</i>
 </dt>
-<dd>Optional output image, will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>Optional output image, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. If no name supplied,
 no output image is generated. Default: none. </dd>
 
 <dt><b>rotcur=</b><i>table_in</i> </dt>
 <dd>Input rotation
-curve in (ascii) <a href='table.5NEMO.html'><i>table(5NEMO)</i></a>
+curve in (ascii) <a href='table.5.html'><i>table(5NEMO)</i></a>
  format, with radius (in kpc) in column 1,
 and velocity (in km/s) in column 2. Note that the table will internally
 be normalized to  (<b>r0,v0</b>). No default. </dd>
 
 <dt><b>xgrid=</b><i>x1,x2,...</i> </dt>
 <dd>Grid coordinates in image
-X coordinates, using a <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+X coordinates, using a <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  list expression. They are either normalized
 X or THETA, depending on the gridding <b>mode</b> (see below). </dd>
 
 <dt><b>ygrid=</b><i>y1,y2,...</i> </dt>
 <dd>Grid
-coordinates in image Y coordinates, using a <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+coordinates in image Y coordinates, using a <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  list expression.
 They are either normalized Y or normalized RADIUS, depending on the gridding
 <b>mode</b> (see below).  </dd>
 
 <dt><b>zgrid=</b><i>z1,z2,...</i> </dt>
 <dd>Grid coordinates in image Z coordinates,
-using a <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+using a <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  list expression. They are normalized with the solar
 radius (r0, see below). By default only one plane (z=0) is gridded, all
 emission  is averaged in Z (or b for that matter). </dd>
@@ -89,12 +89,12 @@ table of  {theta,radius,l,v,l_grid,v_grid,surden,vrot}. Default: none. </dd>
 
 <h2><a name='sect4' href='#toc4'>See
 Also</a></h2>
-<a href='hispectrum.1NEMO.html'>hispectrum(1NEMO)</a>
-, <a href='image.3NEMO.html'>image(3NEMO)</a>
-, <a href='fitsccd.1NEMO.html'>fitsccd(1NEMO)</a>
-, <a href='hispectrum.1NEMO.html'>hispectrum(1NEMO)</a>
+<a href='hispectrum.1.html'>hispectrum(1NEMO)</a>
+, <a href='image.3.html'>image(3NEMO)</a>
+, <a href='fitsccd.1.html'>fitsccd(1NEMO)</a>
+, <a href='hispectrum.1.html'>hispectrum(1NEMO)</a>
 ,
-<a href='fitshicube.1NEMO.html'>fitshicube(1NEMO)</a>
+<a href='fitshicube.1.html'>fitshicube(1NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben 

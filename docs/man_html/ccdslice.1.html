@@ -19,12 +19,12 @@ along any (orthogonal) axis and can thereby also reorder the axes, or remove
 a redundant axis. <p>
 A chain of <b>ccdslice</b> has to be applied if the first (x)
 or second (y) axis needs to be reduced but the ordering of the cube coordinates
-to remain the same (see EXAMPLES below), see also <a href='ccdsub.1NEMO.html'><i>ccdsub(1NEMO)</i></a>
+to remain the same (see EXAMPLES below), see also <a href='ccdsub.1.html'><i>ccdsub(1NEMO)</i></a>
  for a better
 alternative. <p>
-<a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+<a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  can also remove redundant ("dummy") axes when
-writing out a <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+writing out a <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  file. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized
@@ -32,7 +32,7 @@ in any order if the keyword is also given:
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input filename, in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>Input filename, in <a href='image.5.html'><i>image(5NEMO)</i></a>
 
 format. [no default] </dd>
 
@@ -47,7 +47,7 @@ the 3rd axis. [<b>z</b>]. </dd>
 <dt><b>zrange=</b> </dt>
 <dd>Slices to select. Multiple planes can be selected,
 but must be in the range 1..N<b>zvaR</b>. If none given, all planes will be selected.
-Any <a href='nemoinp.1NEMO.html'><i>nemoinp(1NEMO)</i></a>
+Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  expression can be given, but only regular ranges will
 result in a correct coordinate system. Default: the whole <i>zvar</i> axis is extracted.
 </dd>
@@ -67,17 +67,17 @@ the X axis, but leaving the cube intact: <br>
  </pre>
 <h2><a name='sect5' href='#toc5'>Bugs/Caveats</a></h2>
 This code depends on the fact that the data is 3-dimensional,
-i.e. an image cube. This is a limitation of the <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+i.e. an image cube. This is a limitation of the <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. <p>
 The coordinate
 system description of the new <i>zvar</i> axis can easily  be corrupted by choosing
 an irregular layout with <b>xrange=</b>. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='ccdsub.1NEMO.html'>ccdsub(1NEMO)</a>
-, <a href='ccdfits.1NEMO.html'>ccdfits(1NEMO)</a>
+<a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
+, <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
 ,
- <a href='image.5NEMO.html'>image(5NEMO)</a>
-, <a href='fits.5NEMO.html'>fits(5NEMO)</a>
+ <a href='image.5.html'>image(5NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 

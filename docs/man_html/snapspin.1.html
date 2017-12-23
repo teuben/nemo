@@ -28,9 +28,9 @@ momentum, the particles can also be given a Z-axial outflow (or inflow).
 An outflow curve can optionally also be specified in tabular form, the
 same way as for spin/rotation. Again, no corrections to potential and forces
 are made in these cases. <p>
-Use <a href='snaprotate.1NEMO.html'><i>snaprotate(1NEMO)</i></a>
+Use <a href='snaprotate.1.html'><i>snaprotate(1NEMO)</i></a>
  to transform to a different
-spin-axis, and <a href='snapshift.1NEMO.html'><i>snapshift(1NEMO)</i></a>
+spin-axis, and <a href='snapshift.1.html'><i>snapshift(1NEMO)</i></a>
  to a different center of rotation. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
@@ -40,12 +40,12 @@ given:
 
 <dt><b>in=<i>snap_in</i></b> </dt>
 <dd>Input data is read from <i>snap_in</i>, which must be in standard
-<a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format [no default]. </dd>
 
 <dt><b>out=<i>snap_out</i></b> </dt>
 <dd>Transformed data is written
-to <i>snap_out</i>, which will also be in  <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+to <i>snap_out</i>, which will also be in  <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format [No default].
 </dd>
 
@@ -55,12 +55,12 @@ to <i>snap_out</i>, which will also be in  <a href='snapshot.5NEMO.html'><i>snap
 
 <dt><b>rotcur=</b><i>r_v_table</i>
 </dt>
-<dd>An ascii <a href='table.5NEMO.html'><i>table(5NEMO)</i></a>
+<dd>An ascii <a href='table.5.html'><i>table(5NEMO)</i></a>
  with radii and velocities in columns 1 and 2 resp.
 If a table is supplied, the value of <i>omega</i> above is ignored. Between r=0
 and the first radius the rotation curve is linearly interpolated, outside
 the last radius a Keplerian falloff is assumed, and overall interpolation
-is done using cubic splines (see <a href='spline.3NEMO.html'><i>spline(3NEMO)</i></a>
+is done using cubic splines (see <a href='spline.3.html'><i>spline(3NEMO)</i></a>
 ). <i>Note:</i> radii in the table
 must be sorted. Default: none. </dd>
 
@@ -82,8 +82,8 @@ outflow mode. By default spin is added to a snapshot (outflow=f). </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>

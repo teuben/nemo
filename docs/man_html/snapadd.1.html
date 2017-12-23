@@ -21,16 +21,16 @@ to their center of mass, though this is not the default. If the input files
 contain more than one snapshot, they are concurrently added (copying over
 the timestamp of the snapshot in the first file) until any of the files
 is exhausted. <p>
-If only two snapshots are added,  <a href='snapstack.1NEMO.html'><i>snapstack(1NEMO)</i></a>
+If only two snapshots are added,  <a href='snapstack.1.html'><i>snapstack(1NEMO)</i></a>
  offers
 some more options, such as adding a relative shift in phase space. If more
-complicated shifts are necessary, <a href='snapshift.1NEMO.html'><i>snapshift(1NEMO)</i></a>
+complicated shifts are necessary, <a href='snapshift.1.html'><i>snapshift(1NEMO)</i></a>
  can be used before <i>snapadd</i>.
 <p>
 If you want to keep the snapshots separate, simple unix tools like <a href='cat.1.html'><i>cat(1)</i></a>
 
 will work fine. For some of the older NEMO programs, embedded history could
-throw them off, and <a href='csf.1NEMO.html'><i>csf(1NEMO)</i></a>
+throw them off, and <a href='csf.1.html'><i>csf(1NEMO)</i></a>
  should be used to create cleaner snapshots.
 See an example below. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -40,12 +40,12 @@ in any order if the keyword is also given:
 
 <dt><b>in=<i>in1, in2, ..</i></b> </dt>
 <dd>A number of input
-files can be supplied, separated by comma&rsquo;s. They must all be in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+files can be supplied, separated by comma&rsquo;s. They must all be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
 format [no default]. </dd>
 
 <dt><b>out=<i>out_file</i></b> </dt>
-<dd>output file,  in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>output file,  in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format
 [no default] </dd>
 
@@ -62,14 +62,14 @@ in the input files [default: none]. </dd>
 Snapshots only copy accross
 <i>Mass</i> (if they have it) and  <i>PhaseSpace</i>. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='snapstack.1NEMO.html'>snapstack(1NEMO)</a>
-, <a href='snapmerge.1NEMO.html'>snapmerge(1NEMO)</a>
+<a href='snapstack.1.html'>snapstack(1NEMO)</a>
+, <a href='snapmerge.1.html'>snapmerge(1NEMO)</a>
 ,
-<a href='snapmerge_a.1NEMO.html'>snapmerge_a(1NEMO)</a>
-, <a href='snapshift.1NEMO.html'>snapshift(1NEMO)</a>
-, <a href='snapcenter.1NEMO.html'>snapcenter(1NEMO)</a>
-, <a href='scf.1NEMO.html'>scf(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapmerge_a.1.html'>snapmerge_a(1NEMO)</a>
+, <a href='snapshift.1.html'>snapshift(1NEMO)</a>
+, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
+, <a href='scf.1.html'>scf(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 
 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
@@ -84,7 +84,7 @@ with their own timestamps, unix <a href='cat.1.html'><i>cat(1)</i></a>
  will do just fine: <br>
 <pre>  % cat snap1 snap2 snap3 &gt; snap.all
 </pre>though this might throw off some older NEMO programs that cannot handle
-embeddded history tags. If so, filter them through <a href='csf.1NEMO.html'><i>csf(1NEMO)</i></a>
+embeddded history tags. If so, filter them through <a href='csf.1.html'><i>csf(1NEMO)</i></a>
 , e.g.: <br>
 <pre>  % csf snap1 snap.all
   % csf snap2 - item=SnapShot &gt;&gt; snap.all

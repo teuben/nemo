@@ -16,39 +16,39 @@ moments
 <b>snapgrid in=</b>snapshot <b>out=</b>image [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapgrid</i>
-grids three arbitrary <a href='bodytrans.3NEMO.html'><i>bodytrans(3NEMO)</i></a>
+grids three arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
  expressions  (default: <b>x</b>, <b>y</b> and
-<b>-vz</b>) of a snapshot into a 2D or 3D <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<b>-vz</b>) of a snapshot into a 2D or 3D <a href='image.5.html'><i>image(5NEMO)</i></a>
  dataset, with optional astronomical
 projection for direct comparision with astronomical images. <p>
 The X and Y
 coordinates of the datacube can only be regularly gridded in histogram
-fashion  (for spatial XY-smoothing see <a href='ccdsmooth.1NEMO.html'><i>ccdsmooth(1NEMO)</i></a>
+fashion  (for spatial XY-smoothing see <a href='ccdsmooth.1.html'><i>ccdsmooth(1NEMO)</i></a>
 , for interpolating
-see also <a href='snapmap.1NEMO.html'><i>snapmap(1NEMO)</i></a>
+see also <a href='snapmap.1.html'><i>snapmap(1NEMO)</i></a>
 ), however the Z coordinate has the property that
 it can take moments in this variable, pick a number of planes or planes
 with smoothing. <p>
-The output image is written in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+The output image is written in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format,
  and can be accessed by various other programs for smoothing, display etc.
 <p>
-Although <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
- can grid datacubes (e.g. X-Y-Z),  <a href='snapgridsmooth.1NEMO.html'><i>snapgridsmooth(1NEMO)</i></a>
+Although <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
+ can grid datacubes (e.g. X-Y-Z),  <a href='snapgridsmooth.1.html'><i>snapgridsmooth(1NEMO)</i></a>
 
 is probably easier to use,  since it does not integrate along any lines
 of sight, whereas this program is more suited for taking moments along
 the 3rd axis. <p>
 For images that require more accurate interpolation, instead
-of this histogramming approach, use <a href='snapmap.1NEMO.html'><i>snapmap(1NEMO)</i></a>
+of this histogramming approach, use <a href='snapmap.1.html'><i>snapmap(1NEMO)</i></a>
 . <p>
 For a related program
-that creates images (and can create movies as well), see <a href='uns_2dplot.1NEMO.html'><i>uns_2dplot(1NEMO)</i></a>
+that creates images (and can create movies as well), see <a href='uns_2dplot.1.html'><i>uns_2dplot(1NEMO)</i></a>
 .
 <p>
 As of V6.0 the units in 3D cubes will be particle density. This ensures that
-programs such as <a href='ccdmom.1NEMO.html'><i>ccdmom(1NEMO)</i></a>
- and <a href='ccdstat.1NEMO.html'><i>ccdstat(1NEMO)</i></a>
+programs such as <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
+ and <a href='ccdstat.1.html'><i>ccdstat(1NEMO)</i></a>
  give the proper answer
 in their summed emission. <p>
 In the <b>yt</b> package such images are called <i>phase
@@ -60,13 +60,13 @@ are recognized:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, must be in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format.
 Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.
  [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format [no
 default]. </dd>
 
@@ -160,7 +160,7 @@ in a cell be averaged? This also controls the units of the gridding. For
 <b>mean=f</b> (the default) a <i>surface-density</i> is computed (emission per square
 length),  whereas for <b>mean=t</b> the average per<br>
  pixel (or voxel) is computed of the units of emission. Another way of looking
- at this, <b>mean=t</b> is for interpolating maps (see also <a href='snapmap.1NEMO.html'><i>snapmap(1NEMO)</i></a>
+ at this, <b>mean=t</b> is for interpolating maps (see also <a href='snapmap.1.html'><i>snapmap(1NEMO)</i></a>
 ), where
 as <b>mean=f</b> is for splatting information as if this was observed. [Default:
 <b>f</b>]. </dd>
@@ -179,7 +179,7 @@ stacked snapshots yet ** [default: <b>f</b>]. </dd>
 
 <dt><b>proj=</b> </dt>
 <dd>If a valid projection type
-(SIN, TAN, ARC, NCP, GLS, MER, AIT) but see also <a href='wcs.1NEMO.html'><i>wcs(1NEMO)</i></a>
+(SIN, TAN, ARC, NCP, GLS, MER, AIT) but see also <a href='wcs.1.html'><i>wcs(1NEMO)</i></a>
 , the input
 coordinates are interpreted in angular degrees, and griddes with the appropriate
 sky projection. Default: no sky projection. </dd>
@@ -214,7 +214,7 @@ a range=A-dx/2:B+dx/2, where dx=(B-A)/(N-1).  One can also make a grid with
 N cells with emission,  and K blank cells between each valued cell (K would
 be typically small, perhaps 1 or 2). With NK=(K+1)N-K and dx=(B-A)/(NK-1),
 a range=A-dx/2:B+dx/2 is used.  If this is done in both the X and Y dimension,
-the program <a href='ccdintpol.1NEMO.html'><i>ccdintpol(1NEMO)</i></a>
+the program <a href='ccdintpol.1.html'><i>ccdintpol(1NEMO)</i></a>
  can be used to create a bi-linearly interpolated
 grid with more pixels for a seemingly higher sampled map. Most likely the
 option <b>mean=t</b> will have to be used to conserve units between runs with
@@ -225,7 +225,7 @@ stored in the <i>Aux</i> field, and we use these as weights (i.e. sum(mass*Aux)/
 would be the quantity of interest). The unweighted average uses the <b>mean=t</b>
 key: <br>
 <pre>    snapgrid ... out=map0 evar=m mean=t
-</pre>but the weighted average computes the two maps seperately and uses <a href='ccdmath.1NEMO.html'><i>ccdmath(1NEMO)</i></a>
+</pre>but the weighted average computes the two maps seperately and uses <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
 
 to divide them to get the desired result: <br>
 <pre>    snapgrid ... out=map1 evar=&rsquo;m*aux&rsquo; 
@@ -251,9 +251,9 @@ produced (<b>moment=0</b>),  the data are not normalized w.r.t. the convolving v
 beam. For a rectangular beam (<b>vrange=vmin:vmax</b>) the data should formally
 be divided by <b>(vmax-vmin)</b>, for a  gaussian beam (<b>vrange=vmean,vsig</b>) by <b>vsig*sqrt(2*pi)</b>.
 Also remember that a gaussian beam has <b>FWHM = 2.355*sigma</b>. <p>
-Although <a href='snapscale.1NEMO.html'><i>snapscale(1NEMO)</i></a>
+Although <a href='snapscale.1.html'><i>snapscale(1NEMO)</i></a>
 
-can also be used, after a snapshot has been gridded into a map/cube, <a href='ccdsky.1NEMO.html'><i>ccdsky(1NEMO)</i></a>
+can also be used, after a snapshot has been gridded into a map/cube, <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
 
 can optionally be used to rescale a cube in astronomical units (degrees
 and m/s) such  that exported FITS files can be compared directly with model
@@ -267,23 +267,23 @@ and the image.  <p>
 Sky projections do not guarantee flux conservation.  
 <h2><a name='sect8' href='#toc8'>See
 Also</a></h2>
-<a href='snapgridsmooth.1NEMO.html'>snapgridsmooth(1NEMO)</a>
-, <a href='snapmap.1NEMO.html'>snapmap(1NEMO)</a>
-, <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
-, <a href='snapslit.1NEMO.html'>snapslit(1NEMO)</a>
+<a href='snapgridsmooth.1.html'>snapgridsmooth(1NEMO)</a>
+, <a href='snapmap.1.html'>snapmap(1NEMO)</a>
+, <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+, <a href='snapslit.1.html'>snapslit(1NEMO)</a>
 ,
-<a href='snapifu.1NEMO.html'>snapifu(1NEMO)</a>
-, <a href='snapsmooth.1NEMO.html'>snapsmooth(1NEMO)</a>
-, <a href='uns_2dplot.1NEMO.html'>uns_2dplot(1NEMO)</a>
-, <a href='snapaxsym.1NEMO.html'>snapaxsym(1NEMO)</a>
+<a href='snapifu.1.html'>snapifu(1NEMO)</a>
+, <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
+, <a href='uns_2dplot.1.html'>uns_2dplot(1NEMO)</a>
+, <a href='snapaxsym.1.html'>snapaxsym(1NEMO)</a>
 ,
-<a href='wcs.1NEMO.html'>wcs(1NEMO)</a>
-, <a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='snapccd.1NEMO.html'>snapccd(1NEMO)</a>
-, <a href='ccdintpol.1NEMO.html'>ccdintpol(1NEMO)</a>
-, <a href='ccdsky.1NEMO.html'>ccdsky(1NEMO)</a>
+<a href='wcs.1.html'>wcs(1NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
+, <a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
+, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 ,
-<a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='image.5.html'>image(5NEMO)</a>
 ,  <p>
 <a href='http://www.iinet.com.au/~watson/nngridr.html'>http://www.iinet.com.au/~watson/nngridr.html</a>
  <p>

@@ -15,13 +15,13 @@ stou4 - convert snapshot to unit-4 for NBODYx
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>stou4</b> converts a NEMO snapshot format to a fortran unformatted
-file, used in <a href='nbody1.1NEMO.html'><i>nbody1(1NEMO)</i></a>
- and  <a href='nbody2.1NEMO.html'><i>nbody2(1NEMO)</i></a>
+file, used in <a href='nbody1.1.html'><i>nbody1(1NEMO)</i></a>
+ and  <a href='nbody2.1.html'><i>nbody2(1NEMO)</i></a>
  to read initial conditions
 from an external file. <p>
 Note that some versions will now use ASCII, for which
-<a href='snapprint.1NEMO.html'><i>snapprint(1NEMO)</i></a>
- will have to be used. <a href='nbody4.1NEMO.html'>nbody4(1NEMO)</a>
+<a href='snapprint.1.html'><i>snapprint(1NEMO)</i></a>
+ will have to be used. <a href='nbody4.1.html'>nbody4(1NEMO)</a>
  uses the ASCII version,
 controlled by setting KZ(22), and on unit-10 instead. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -31,7 +31,7 @@ parameters are recognized in any order if the keyword is also given:
 
 <dt><b>in=</b>
 </dt>
-<dd>input file name, must be a <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file name, must be a <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format.  No default. </dd>
 
 <dt><b>out=</b> </dt>
@@ -51,16 +51,16 @@ code will read from unformatted  unit 4 <br>
     READ (4)  BODY(I), (X(K,I),K=1,3), (XDOT(K,I),K=1,3)
   ENDDO
 </pre>Note that another version of nbody2 used the <b>READ (4,*)</b> format, so a simple
-table using <a href='snapprint.1NEMO.html'><i>snapprint(1NEMO)</i></a>
+table using <a href='snapprint.1.html'><i>snapprint(1NEMO)</i></a>
  can be made: <br>
 <pre>    % mkplummer out=p100 nbody=100
     % snapprint in=p100 options=m,x,y,z,vx,vy,vz &gt; fort.4
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='u4tos.1NEMO.html'>u4tos(1NEMO)</a>
-, <a href='nbody1.1NEMO.html'>nbody1(1NEMO)</a>
-, <a href='nbody2.1NEMO.html'>nbody2(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='u4tos.1.html'>u4tos(1NEMO)</a>
+, <a href='nbody1.1.html'>nbody1(1NEMO)</a>
+, <a href='nbody2.1.html'>nbody2(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter

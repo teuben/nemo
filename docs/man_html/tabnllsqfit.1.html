@@ -125,7 +125,7 @@ Default: none. </dd>
 
 <dt><b>nmax=</b><i>max_lines</i> </dt>
 <dd>Maximum number of lines allocated if the input
-file was being read from a pipe. If not, the routine <a href='file_lines.3NEMO.html'><i>file_lines(3NEMO)</i></a>
+file was being read from a pipe. If not, the routine <a href='file_lines.3.html'><i>file_lines(3NEMO)</i></a>
  is
 used to allocate space for the table. [Default: <b>10000</b>]. </dd>
 
@@ -157,9 +157,9 @@ in pairs. Default:0 </dd>
 0 </dd>
 
 <dt><b>method=g|n|m</b> </dt>
-<dd>Fitting method. Gipsy uses their <a href='nllsqfit.3NEMO.html'><i>nllsqfit(3NEMO)</i></a>
+<dd>Fitting method. Gipsy uses their <a href='nllsqfit.3.html'><i>nllsqfit(3NEMO)</i></a>
 , NumRec uses
-their <i>mrqfit</i> and MINPACK uses <a href='mpfit.3NEMO.html'><i>mpfit(3NEMO)</i></a>
+their <i>mrqfit</i> and MINPACK uses <a href='mpfit.3.html'><i>mpfit(3NEMO)</i></a>
 .  Only first character is used,
 case insensitive.  [Default: <b>g</b>] </dd>
 </dl>
@@ -249,7 +249,7 @@ bootstrap= 3.11603 0.164922 1.96464 0.086429 0.00293632 0.00820007
 <p> 
 <h2><a name='sect6' href='#toc6'>Load Functions</a></h2>
 With the <b>load=</b> keyword dynamic object files can be loaded
-using the <a href='loadobj.3NEMO.html'><i>loadobj(3NEMO)</i></a>
+using the <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
  mechanism. The convention is that two functions
 must be externally visible, and named <i>func_</i><i>method</i> and <i>derv_</i><i>method</i>  (where
 <i>method</i> is the same as the <b>fit=</b> keyword. <p>
@@ -317,13 +317,13 @@ derivative.
 It will not recognize linear fits if the non-linear parameters
 are kept fixed, e.g. the offset 0 in <b>fit=gauss1d</b>. 
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
-<a href='tablsqfit.1NEMO.html'>tablsqfit(1NEMO)</a>
+<a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 ,
-<a href='tabhist.1NEMO.html'>tabhist(1NEMO)</a>
-, <a href='tabmath.1NEMO.html'>tabmath(1NEMO)</a>
-,  <a href='gaussfit.1NEMO.html'>gaussfit(1NEMO)</a>
-, <a href='linreg.1NEMO.html'>linreg(1NEMO)</a>
-, <a href='nllsqfit.3NEMO.html'>nllsqfit(3NEMO)</a>
+<a href='tabhist.1.html'>tabhist(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
+,  <a href='gaussfit.1.html'>gaussfit(1NEMO)</a>
+, <a href='linreg.1.html'>linreg(1NEMO)</a>
+, <a href='nllsqfit.3.html'>nllsqfit(3NEMO)</a>
 ,
 fit.dc1(GIPSY) <p>
 <i>Numerical Recipies in C, Ch.14</i> <p>

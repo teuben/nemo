@@ -15,11 +15,11 @@ snapcmphist - compare two N-body snapshots and plot histogram
 in1=</b>snap_file <b>in2=</b>snap_file [parameter=value] ... 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapcmphist</i> like
-<a href='snapcmp.1NEMO.html'><i>snapcmp</i>(1NEMO)</a>
+<a href='snapcmp.1.html'><i>snapcmp</i>(1NEMO)</a>
  is a flexible tool for comparing two N-body snapshots on
 a particle by particle basis, but <i>snapcmphist</i> plots a histogram of the
 resulting values.  An arbitrary &lsquo;&lsquo;observable&rsquo;&rsquo; defined in terms of the basic
-components of a <a href='body.3NEMO.html'><i>body</i>(3NEMO)</a>
+components of a <a href='body.3.html'><i>body</i>(3NEMO)</a>
  may be specified for the comparison.  Particles
 are compared by differencing their observables, or by computing the observable
 applied to a differenced particle.  These options cover most of the common
@@ -36,7 +36,7 @@ The following parameters are recognized.
 
 <dt><b>in2=</b><i>snap_file2</i> </dt>
 <dd>Input data is read from <i>snap_file1</i> and <i>snap_file2</i>, which
-must be in <a href='snapshot.5NEMO.html'><i>snapshot</i>(5NEMO)</a>
+must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
  format.  Default: none. </dd>
 
 <dt><b>time1=</b><i>time_range1</i> </dt>
@@ -51,7 +51,7 @@ the effect of using the first pair of frames in the files. </dd>
 
 <dt><b>obs=</b><i>obs_expression</i>
 </dt>
-<dd><i>obs_expression</i> is the observable used to compare the particles. See <a href='bodytrans.1NEMO.html'><i>bodytrans</i>(1NEMO)</a>
+<dd><i>obs_expression</i> is the observable used to compare the particles. See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
 
 for the form of <i>obs_expression</i>. Default: <b>r</b>, which compares the positions
 of particles. </dd>
@@ -103,10 +103,10 @@ none. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapcmp.1NEMO.html'>snapcmp(1NEMO)</a>
-, <a href='snapdiff.1NEMO.html'>snapdiff(1NEMO)</a>
-, <a href='bodytrans.3NEMO.html'>bodytrans(3NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapcmp.1.html'>snapcmp(1NEMO)</a>
+, <a href='snapdiff.1.html'>snapdiff(1NEMO)</a>
+, <a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>

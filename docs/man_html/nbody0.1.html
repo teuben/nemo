@@ -46,7 +46,7 @@ recognized in any order when the keyword is also given
 
 <dt><b>in=<i>in_name</i></b> </dt>
 <dd>Input
-file in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+file in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. Depending on how <b>nbody0</b> was compiled, other
 input formats are supported. [no default].  </dd>
 
@@ -85,7 +85,7 @@ cf. the  <i>eta</i>-derived timestep <i>dt</i>) [t]. </dd>
 determine the timestep from <i>eta</i>. In the determination of the timestep a
 simplified formulae using just F and F2DOT is used, which is what the original
 BT87 code uses. By setting this keyword higher order terms F3DOT (and also
-FDOT) are used, which mimic the behavior of <a href='nbody1.1NEMO.html'><i>nbody1(1NEMO)</i></a>
+FDOT) are used, which mimic the behavior of <a href='nbody1.1.html'><i>nbody1(1NEMO)</i></a>
 . This keyword
 was introduced to integrate nice orbits like the Figure8 orbit, in which
 both F and FDOT were 0 for the central particle. [f]. </dd>
@@ -94,7 +94,7 @@ both F and FDOT were 0 for the central particle. [f]. </dd>
 <dd>Miscellaneous
 control options, specified as a comma separated list of keywords. Currently
 implemented are: <b>step</b>, outputs the current timestep per particle  in the
-<i>Aux</i> array of  a <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<i>Aux</i> array of  a <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 . Default: none. </dd>
 </dl>
 
@@ -107,9 +107,9 @@ automatically and  hence easily generate a new version with a different
 value for  NMAX, <i>e.g.</i> <b>make nmax NMAX=256 nbody0</b>. The NDIM parameter should
 not be changed, and remains at 3. <p>
 Close encounters are not treated in any
-special way.  See any of the modified  versions of the Aarseth code (<a href='nbody2.1NEMO.html'><i>nbody2(1NEMO)</i></a>
+special way.  See any of the modified  versions of the Aarseth code (<a href='nbody2.1.html'><i>nbody2(1NEMO)</i></a>
 )
-or in case regularization is needed (see also newton0_reg in: <a href='newton0.1NEMO.html'><i>newton0(1NEMO)</i></a>
+or in case regularization is needed (see also newton0_reg in: <a href='newton0.1.html'><i>newton0(1NEMO)</i></a>
 ).
 <p>
 Timesteps are not recomputed until the current timestep has expired. <p>
@@ -168,12 +168,12 @@ NEMO/usr/aarseth/                      <tt> </tt>&nbsp;<tt> </tt>&nbsp;SJA&rsquo
 all exported)
 </pre>
 <h2><a name='sect10' href='#toc10'>See Also</a></h2>
-<a href='hackcode1.1NEMO.html'>hackcode1(1NEMO)</a>
-, <a href='runbody2.1NEMO.html'>runbody2(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='atos.1NEMO.html'>atos(1NEMO)</a>
+<a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
+, <a href='runbody2.1.html'>runbody2(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='atos.1.html'>atos(1NEMO)</a>
 ,
-<a href='stoa.1NEMO.html'>stoa(1NEMO)</a>
+<a href='stoa.1.html'>stoa(1NEMO)</a>
  <p>
 Binney, J. &amp; Tremaine, S. <i>Galactic Dynamics</i>. Princeton Unversity
 Press (1987), pp678. <p>

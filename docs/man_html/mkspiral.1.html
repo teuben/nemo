@@ -16,7 +16,7 @@ mkspiral - uniform-density test disk plus spiral in spherical potential
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkspiral</i>
 sets up a cold disk of test particles orbiting clockwise in the gravitational
-potential of a user-supplied potential (in <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+potential of a user-supplied potential (in <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  format). In addition
 a spiral is added with constant width in degrees along a galactic circle.
 For given ratio of spiral/disk perturbation <b>a</b> and width <b>w</b> (now measured
@@ -24,14 +24,14 @@ in radians) the fraction of particles in the disk will be about <b> pi / (pi
 + a.w.sqrt(2.pi))</b> for not too large <b>w</b>. The inverse wavelenght of the spiral
 (related to the pitch angle) will be positive for a <i>trailing spiral pattern</i>.
 <p>
-<a href='snapmass.1NEMO.html'><i>snapmass(1NEMO)</i></a>
- and <a href='snapcenter.1NEMO.html'><i>snapcenter(1NEMO)</i></a>
+<a href='snapmass.1.html'><i>snapmass(1NEMO)</i></a>
+ and <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
  have to be used if for some reason
 the user want finite mass particles and a perfectly centered set of particles.
 <p>
 Note this particle distribution is only useful for display, e.g. spiral structure
 in a Longitude-Velocity diagram, and should not be integrated with programs
-like <a href='hackcode3.1NEMO.html'><i>hackcode3(1NEMO)</i></a>
+like <a href='hackcode3.1.html'><i>hackcode3(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized
@@ -40,7 +40,7 @@ in any order if the keyword is also given:
 
 <dt><b>out=<i>out_file</i></b> </dt>
 <dd>The data are written
-to this file in <a href='SnapShot.5NEMO.html'><i>SnapShot(5NEMO)</i></a>
+to this file in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
   format [no default]. </dd>
 
 <dt><b>ndisk=<i>num_bodies</i></b> </dt>
@@ -50,7 +50,7 @@ of disk particles [default: <b>2048</b>] </dd>
 <dt><b>potname=<i>potential_name</i></b> </dt>
 <dd>name of the potential,
 see $NEMO/obj/potential for the current repository. The user can supply
-his own, see <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+his own, see <a href='potential.5.html'>potential(5NEMO)</a>
 . [default: <b>plummer</b>]. </dd>
 
 <dt><b>potpars=<i>pot_pars</i></b> </dt>
@@ -157,9 +157,9 @@ sum: 68.63u 22.34s 2:31.54 60.0%  U440
 tsf: 21.85u 30.73s 2:32.06 34.5%  U440
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='mkdisk.1NEMO.html'>mkdisk(1NEMO)</a>
-, <a href='snapmass.1NEMO.html'>snapmass(1NEMO)</a>
-, <a href='snapcenter.1NEMO.html'>snapcenter(1NEMO)</a>
+<a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
+, <a href='snapmass.1.html'>snapmass(1NEMO)</a>
+, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
 , <a href='hackcode3.1NEM0.html'>hackcode3(1NEM0)</a>
 
 

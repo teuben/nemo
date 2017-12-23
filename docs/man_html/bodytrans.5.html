@@ -15,18 +15,18 @@ bodytrans - dataformat for body to scalar mapping functions
 files are binary loadable files (see also  <a href='a.out.5.html'><i>a.out(5)</i></a>
  or <a href='elf.5.html'><i>elf(5)</i></a>
 ) which are
-functions to represent a body to scalar transformation (see also <a href='bodytrans.1NEMO.html'><i>bodytrans(1NEMO)</i></a>
+functions to represent a body to scalar transformation (see also <a href='bodytrans.1.html'><i>bodytrans(1NEMO)</i></a>
 ).
  They are either generated on the fly (as a user runs a program) by the
 host C-compiler (see <a href='cc.1.html'><i>cc(1)</i></a>
 ), or if available, a number of precompiled frequently
 used mappings. If the environment variable CFLAGS is present, it is also
 used in the compilation. <p>
-The dynamic object loader package (<a href='loadobj.3NEMO.html'><i>loadobj(3NEMO)</i></a>
+The dynamic object loader package (<a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
 )
  provides a lower level interface to load the images in memory  return
 pointers to requested functions, but in the case of bodytrans, a higher
-level interface is available (<a href='bodytrans.3NEMO.html'><i>bodytrans(3NEMO)</i></a>
+level interface is available (<a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
 ). Although on most modern
 computers this is implemented via <a href='dlopen.3.html'><i>dlopen(3)</i></a>
 , at the time when NEMO was
@@ -36,7 +36,7 @@ contains a table with entries of non-standard <i>bodytrans</i> functions. The fi
 column is the full expression used to return a scalar value, and the second
 column the file name under which this function is saved in that same directory.
 This file must be writable by NEMO users if the SAVE_OBJ function is turned
-on in <a href='bodytrans.3NEMO.html'><b>bodytrans(3NEMO)</b></a>
+on in <a href='bodytrans.3.html'><b>bodytrans(3NEMO)</b></a>
 . 
 <h2><a name='sect2' href='#toc2'>List of Functions</a></h2>
 <p>
@@ -84,7 +84,7 @@ ysky<tt> </tt>&nbsp;<tt> </tt>&nbsp;real<tt> </tt>&nbsp;<tt> </tt>&nbsp;returns 
 </pre>
 <h2><a name='sect3' href='#toc3'>Sky Projections</a></h2>
 Two common sky projections are available, both produce numbers
-in degrees, which is the common unit in the <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+in degrees, which is the common unit in the <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format. <p>
 <b>glon,glat</b>
 is the galactic coordinate system, useful to observe a galactic disk in
@@ -101,9 +101,9 @@ xvar=xsky yvar=ysky xrange=-${a}:${a} yrange=-${a}:${a}
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='elf.5.html'>elf(5)</a>
 , <a href='a.out.5.html'>a.out(5)</a>
-, <a href='bodytrans.1NEMO.html'>bodytrans(1NEMO)</a>
-, <a href='bodytrans.3NEMO.html'>bodytrans(3NEMO)</a>
-, <a href='loadobj.3NEMO.html'>loadobj(3NEMO)</a>
+, <a href='bodytrans.1.html'>bodytrans(1NEMO)</a>
+, <a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
+, <a href='loadobj.3.html'>loadobj(3NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>

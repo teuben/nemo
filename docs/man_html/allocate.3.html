@@ -22,7 +22,7 @@ allocate, reallocate - memory allocation with error control.
 and <a href='realloc.3.html'><i>realloc(3)</i></a>
 , but with guaranteed to return a sufficient amount of memory.
 The caller does not have to do any error control, instead the NEMO routines
-will call <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+will call <a href='error.3.html'><i>error(3NEMO)</i></a>
  and in general exit when memory is exhausted. <p>
 This
 would also be the place to replace you malloc routine with another one,
@@ -32,7 +32,7 @@ see <br>
 <h2><a name='sect3' href='#toc3'>Example</a></h2>
 Here is an example of allocating a simple 1D array, after which
 the size is increased. All failures in allocation will result in a call
-to <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+to <a href='error.3.html'><i>error(3NEMO)</i></a>
 . <br>
 <pre>    int n = 1000;
     double *x = allocate(n * sizeof(double));
@@ -44,7 +44,7 @@ Although NEMO program should all call <i>allocate</i> instead of  the system
 routine <a href='malloc.3.html'><i>malloc(3)</i></a>
 , there are a few places left where <i>malloc</i> is called since
 failure to allocate must be caught immediately. We don&rsquo;t supply a good solution
-to this, other than error control (see <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+to this, other than error control (see <a href='error.3.html'><i>error(3NEMO)</i></a>
 ). 
 <h2><a name='sect5' href='#toc5'>History</a></h2>
 <br>

@@ -64,7 +64,7 @@ given in any order.
 <dt><b>in=</b><i>infile</i> </dt>
 <dd>If <i>infile</i> is specified, a nbody snapshot is
 read in from this file (a quick way of preparing a simple system for testing
-purposes is to use <i> <a href='snapenter.1NEMO.html'>snapenter(1NEMO)</i></a>
+purposes is to use <i> <a href='snapenter.1.html'>snapenter(1NEMO)</i></a>
 ). The command line parameters are used
 to determine the type and duration of the integration, and the modes of
 output. Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i> may be
@@ -78,11 +78,11 @@ at the end of the integration. Since only one output is performed, the integrati
 can be viewed as a black box which maps an in-state to an out-state without
 any clutter of intermediate information.  This option is useful for testing
 purposes, since the <i>lastoutfile</i>s of two different runs can be compared
-directly, for example using <a href='snapdiff.1NEMO.html'><i>snapdiff(1NEMO)</i></a>
+directly, for example using <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
 ; using snapdiff on two <i>outfile</i>s
 would only compare the echos of the initial states, and later states would
-have to be extracted using <a href='snaptrim.1NEMO.html'><i>snaptrim(1NEMO)</i></a>
- before passing them to <a href='snapdiff.1NEMO.html'><i>snapdiff(1NEMO)</i></a>
+have to be extracted using <a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
+ before passing them to <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
 
 (Default: no file specification). </dd>
 
@@ -135,7 +135,7 @@ file), and all will be well again, one hopes (Default: no file specification).
 <dd>seed for the random number generator used in generating
 a new Plummer model (default: a value 0, which will be converted into a
 unique new value using UNIX&rsquo;s clock time, in seconds since once-upon-a-time-in-the-seventies-of-the-previous-century).
-See also <a href='xrandom.1NEMO.html'><i>xrandom(1NEMO)</i></a>
+See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
  for more info on seed= </dd>
 
 <dt><b>t_begin=</b><i>real</i> </dt>
@@ -300,9 +300,9 @@ in on the correct end-time; Default: <b>niter=</b>3). </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='mkplummer.1NEMO.html'>mkplummer(1NEMO)</a>
+<a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
 ,
-<a href='nbody0.1NEMO.html'>nbody0(1NEMO)</a>
+<a href='nbody0.1.html'>nbody0(1NEMO)</a>
  <p>
 STARLAB: <a href='http://www.sns.ias.edu/~starlab/'>http://www.sns.ias.edu/~starlab/</a>
  
@@ -310,7 +310,7 @@ STARLAB: <a href='http://www.sns.ias.edu/~starlab/'>http://www.sns.ias.edu/~star
 <b>newton0</b> has
 not been maintained for a long time, the code was  revived in 2001 as version
 2.0, but for any serious research codes such as the <b>nbodyX</b> series written
-by S.Aarseth (see e.g. <a href='nbody0.1NEMO.html'><i>nbody0(1NEMO)</i></a>
+by S.Aarseth (see e.g. <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
 ) or the <i>starlab</i> package should be used.
 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>

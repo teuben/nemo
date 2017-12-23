@@ -15,13 +15,13 @@ snapplot, trakplot - display an N-body snapshot file
 in</b>snap-file [parametervalue] ... 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapplot</i> plots a sequence of frames
-from a standard N-body snapshot file on a <a href='yapp.5NEMO.html'><i>yapp(5NEMO)</i></a>
+from a standard N-body snapshot file on a <a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
  display device. <i>trakplot</i>
 is an old name of snapplot that would  not erase and redraw the screen
 after each frame plotted, and  could thus be used to show the orbit of
 the selected points. The later added (boolean)  keyword <b>trak=</b> (see below)
 should now be used to explicitly  set the &rsquo;trak&rsquo;ing mode. See also the <b>stack=</b>
-option in <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+option in <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
  <p>
 Arbitrary (algebraic) transformations from particle
 coordinates to plotting coordinates may be specified; the visibility, point
@@ -90,7 +90,7 @@ The default is <b>0</b>. </dd>
 
 <dt><b>crange</b><i>color-range</i> </dt>
 <dd>Range of colors that should be mapped.
-Below and above these ranges the <a href='yapp.3NEMO.html'><i>yapp(3NEMO)</i></a>
+Below and above these ranges the <a href='yapp.3.html'><i>yapp(3NEMO)</i></a>
  plotting layer may determine
 the visibility of the points. The default range is <b>0:1</b>. </dd>
 
@@ -109,7 +109,7 @@ Precompiled transformations include: <b>x</b>, <b>y</b>, <b>z</b>, <b>vx</b>, <b
 <b>jtot</b>, <b>phi</b>, <b>etot</b>, <b>t</b>, and <b>i</b>. A complete list may be deduced by looking in
 <b>.../nemo/obj/bodytrans/</b>, which is the default repository. It is possible to
 customize your own transformations and mantain alternate collections; see
-<a href='bodytrans.1NEMO.html'><i>bodytrans</i>(1NEMO)</a>
+<a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
  for more information. 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 Plot snapshot file "r100.dat"
@@ -129,13 +129,13 @@ NB: this last example assumes that "r100.dat" includes potential data in
 addition to the usual phase-space data. The expression specified for <i>visib</i>
 will be passed to the C compiler. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='glnemo2.1NEMO.html'>glnemo2(1NEMO)</a>
-, <a href='snapplot3.1NEMO.html'>snapplot3(1NEMO)</a>
+<a href='glnemo2.1.html'>glnemo2(1NEMO)</a>
+, <a href='snapplot3.1.html'>snapplot3(1NEMO)</a>
 ,
-<a href='snapplotv.1NEMO.html'>snapplotv(1NEMO)</a>
-, <a href='bodytrans.1NEMO.html'>bodytrans(1NEMO)</a>
-, <a href='uns_2dplot.1NEMO.html'>uns_2dplot(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapplotv.1.html'>snapplotv(1NEMO)</a>
+, <a href='bodytrans.1.html'>bodytrans(1NEMO)</a>
+, <a href='uns_2dplot.1.html'>uns_2dplot(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 .
 
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>

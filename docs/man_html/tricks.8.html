@@ -17,8 +17,8 @@ One can use
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;cat r001a.dat &gt;&gt;r001.dat
 </pre><p>
 To copy structured binary files between machines of different binary format,
-use the <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</a>
-, <a href='rsf.1NEMO.html'>rsf(1NEMO)</i></a>
+use the <a href='tsf.1.html'><i>tsf(1NEMO)</a>
+, <a href='rsf.1.html'>rsf(1NEMO)</i></a>
  programs and, if available, the <a href='compress.1.html'><i>compress(1)</a>
 ,
 <a href='uncompress.1.html'>uncompress(1)</i></a>
@@ -26,7 +26,7 @@ use the <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</a>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;tsf in=r001.dat maxprec=t allline=t | compress &gt;&gt; r001.data.Z
 and on the other machine:
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;zcat r001.data.Z | rsf - r001.dat
-</pre>On non-Unix supercomputers, often the ASCII "205" format (see e.g. <a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
+</pre>On non-Unix supercomputers, often the ASCII "205" format (see e.g. <a href='atos.1.html'><i>atos(1NEMO)</i></a>
 )
 will be used. This may be saved in compressed format also, and can be processed
 by NEMO after <br>
@@ -42,19 +42,19 @@ to prepend the datafile with a large enough &rsquo;dummy&rsquo; file. <p>
 To display a scatter
 diagram in the form of a contour map, convert the two columns to a snapshot
 by calling them &rsquo;x&rsquo; and &rsquo;y&rsquo; coordinates. Remaining phase space coordinates are
-unimportant. Set masses to 1, and use the <a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
+unimportant. Set masses to 1, and use the <a href='atos.1.html'><i>atos(1NEMO)</i></a>
  format. A program like
 <a href='awk.1.html'><i>awk(1)</i></a>
- can write the file for <a href='atos.1NEMO.html'><i>atos(1NEMO)</i></a>
-, then <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+ can write the file for <a href='atos.1.html'><i>atos(1NEMO)</i></a>
+, then <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
  creates
-a <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
- file, which can be optionally smoothed using <a href='ccdsmooth.1NEMO.html'><i>ccdsmooth(1NEMO)</i></a>
+a <a href='image.5.html'><i>image(5NEMO)</i></a>
+ file, which can be optionally smoothed using <a href='ccdsmooth.1.html'><i>ccdsmooth(1NEMO)</i></a>
 
-and displayed with <a href='ccdplot.1NEMO.html'><i>ccdplot(1NEMO)</i></a>
+and displayed with <a href='ccdplot.1.html'><i>ccdplot(1NEMO)</i></a>
 . In case your host has nicer contour plotting
-programs, use <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
- to write a <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+programs, use <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
+ to write a <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format file. Check also
 the tabccd shell script, if available, or perhaps someone wrote it in C
 already. It calls awk, atos and snapgrid. <p>
@@ -62,9 +62,9 @@ The <a href='ds.1LOCAL.html'><i>ds(1LOCAL)</i></a>
  program, written
 by Bill Sebok, is one of the external  programs which can be used to display
 images. <i>ds</i> can understand a variety of image file formats, of which the
-<a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+<a href='fits.5.html'><i>fits(5NEMO)</i></a>
  is best suited for our needs. Transform your image to a fits
-file using <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+file using <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
 , and use  ds on that fits file. Although <a href='ds.1L.html'><i>ds(1L)</i></a>
 
  works on monochrome SUN workstations, it&rsquo;s best on a color monitor. The

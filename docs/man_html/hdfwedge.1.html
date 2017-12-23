@@ -17,7 +17,7 @@ in=SDS-file out=CCD-file [parameter=value]
 <b>hdfwedge</b> regrids HDF
 (SDS) files that are assumed to be in polar (rad-phi) coordinates, but can
 contain any size wedge (ideally an integer fraction of 2.PI). It was cloned
-off <a href='hdfgrid.1NEMO.html'>hdfgrid(1NEMO)</a>
+off <a href='hdfgrid.1.html'>hdfgrid(1NEMO)</a>
  in December 2004, so a number of their  comments on
 the assumptions on the input format also apply to this program. See also
 CAVEATS below for some important notes. <p>
@@ -41,7 +41,7 @@ order if the keyword is also given:
 </dd>
 
 <dt><b>out=</b><i>image</i> </dt>
-<dd>Output file, in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>Output file, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. </dd>
 
 <dt><b>select=</b><i>frame_no</i> </dt>
@@ -87,7 +87,7 @@ plane by making the data periodic. ** currently only periodic=t works **
 <dt><b>order=</b><i>{z,p,r}</i>
 </dt>
 <dd>Order of HDF axes. Note again that the order of axes in HDF is defined in
-C order (eg. as seen in <a href='tsd.1NEMO.html'><i>tsd(1NEMO)</i></a>
+C order (eg. as seen in <a href='tsd.1.html'><i>tsd(1NEMO)</i></a>
 ), where the first printed axis is the
 slowest varying axis (usually the Z  axis in an R-P-Z cube. But we still would
 call this cube with <b>order=zpr</b> </dd>
@@ -116,9 +116,9 @@ have a minor discontinuity along -X axis.
 src/image/hdf/cmhog  <tt> </tt>&nbsp;<tt> </tt>&nbsp;hdfwedge.c
 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
-<a href='hdfgrid.1NEMO.html'>hdfgrid(1NEMO)</a>
-, <a href='tsd.1NEMO.html'>tsd(1NEMO)</a>
-, <a href='sdsfits.1NEMO.html'>sdsfits(1NEMO)</a>
+<a href='hdfgrid.1.html'>hdfgrid(1NEMO)</a>
+, <a href='tsd.1.html'>tsd(1NEMO)</a>
+, <a href='sdsfits.1.html'>sdsfits(1NEMO)</a>
  <br>
 <pre>visit: http://www.llnl.gov/visit/
 </pre>

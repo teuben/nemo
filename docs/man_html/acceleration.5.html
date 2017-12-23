@@ -31,9 +31,9 @@ char*,   /* input:  acc_file               */bool      *,   /* output:
 need masses?           */bool      *);  /* output: need velocities?   
    */</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<a href='acceleration.5NEMO.html'><i>acceleration(5NEMO)</i></a>
+<a href='acceleration.5.html'><i>acceleration(5NEMO)</i></a>
  are implemented as an improvement to
-the  nearly-compatible <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+the  nearly-compatible <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  format. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The 4th argument
@@ -84,7 +84,7 @@ is however available, but is not guaranteed to work on all machines. Also
 keep in mind if you write your potentials in fortran: common blocks and
 other used routines get loaded into the executable, with the potential
 for duplicate symbol names. 
-<p> Most likely <a href='loadobj.3NEMO.html'><i>loadobj(3NEMO)</i></a>
+<p> Most likely <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
  will break under
 such circumstances. <p>
 Second: no I/O should be done. In practise this also
@@ -92,9 +92,9 @@ means that this third parameter, <b>potfile</b>, of <i>inipotential</i> cannot b
 as is mostly serves as a filename. The reason is that we didn&rsquo;t want the
 programs to have to link in huge fortran I/O libraries, including various
 portability problems.  <p>
-There is one exception: <a href='potlist.1NEMO.html'><i>potlist(1NEMO)</i></a>
+There is one exception: <a href='potlist.1.html'><i>potlist(1NEMO)</i></a>
  is allowed
-to  load <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+to  load <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  files with FORTRAN WRITE statements. After you
 have made sure the function works as you think,  these statements must
 be Commented out and can then be reloaded by most other potential/orbit
@@ -104,11 +104,11 @@ programs.
 The environment variable <b>ACCPATH</b> can be used to search
 for accelerations in other than the local directory.  
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='acceleration.3NEMO.html'>acceleration(3NEMO)</a>
+<a href='acceleration.3.html'>acceleration(3NEMO)</a>
 ,
-<a href='potential.5NEMO.html'>potential(5NEMO)</a>
-, <a href='manipulator.5NEMO.html'>manipulator(5NEMO)</a>
-,<a href='gyrfalcON.1NEMO.html'>gyrfalcON(1NEMO)</a>
+<a href='potential.5.html'>potential(5NEMO)</a>
+, <a href='manipulator.5.html'>manipulator(5NEMO)</a>
+,<a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
  
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben

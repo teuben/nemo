@@ -14,7 +14,7 @@ snaptrim - select a subset of the snapshot frames in a file
 <b>snaptrim
 in=<i>in_file</i></b> <b>out=<i>out_file</i></b> [parameter=value] ... 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snaptrim</i> reads <a href='snapshot.5NEMO.html'><i>snapshot</i>(5NEMO)</a>
+<i>snaptrim</i> reads <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
 
 data from <b>in</b> and copies a subset of the frames to <b>out</b>.  Frames may be selected
 by specifying either a time range, or sampling frequencies for particle
@@ -29,13 +29,13 @@ The following parameters are recognized:
 
 <dt><b>in=<i>in_file</i></b>
 </dt>
-<dd>Input data is read from <i>in_file</i>, in <a href='snapshot.5NEMO.html'><i>snapshot</i>(5NEMO)</a>
+<dd>Input data is read from <i>in_file</i>, in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
  format.  Default: none.
 </dd>
 
 <dt><b>out=<i>out_file</i></b> </dt>
 <dd>Selected frames are written to <i>out_file</i>.  If the name contains
-a valid <a href='mstropen.3NEMO.html'><i>mstropen(3NEMO)</i></a>
+a valid <a href='mstropen.3.html'><i>mstropen(3NEMO)</i></a>
  formatted name, the output file will be split over
 multiple files. Default: none. </dd>
 
@@ -75,10 +75,10 @@ time. In this case, the <b>times=</b> keyword cannot contain ranges. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapsample.1NEMO.html'>snapsample(1NEMO)</a>
+<a href='snapsample.1.html'>snapsample(1NEMO)</a>
 ,
-<a href='snapmask.1NEMO.html'>snapmask(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapmask.1.html'>snapmask(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 For <b>times=last</b> you should not use

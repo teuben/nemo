@@ -17,12 +17,12 @@ snapvirial - scale snapshots while retaining or setting virial ratio
 <i>snapvirial</i>
 copies an N-body system from <b>in</b> to <b>out</b>, scaling particle qantities such
 that the virial ratio is either retained or gets a specified value. For
-a more manual rescale use <a href='snapscale.1NEMO.html'><i>snapscale(1NEMO)</i></a>
+a more manual rescale use <a href='snapscale.1.html'><i>snapscale(1NEMO)</i></a>
 . <p>
 The input snapshot must not
 only contain masses and phase space information, but also potential, as
 to make the rescaling computation a linear operation. Depending on accuracy
-needed, a general algorithm as in <a href='hackforce.1NEMO.html'><i>hackforce(1NEMO)</i></a>
+needed, a general algorithm as in <a href='hackforce.1.html'><i>hackforce(1NEMO)</i></a>
  can be used to add potentials
 and forces  to a snapshot. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -31,7 +31,7 @@ The following parameters are recognized:
 <dl>
 
 <dt><b>in=<i>in_file</i></b> </dt>
-<dd>input file, in <a href='snapshot.5NEMO.html'><i>snapshot</i>(5NEMO)</a>
+<dd>input file, in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
  format.  Default: none. </dd>
 
 <dt><b>out=<i>out_file</i></b>
@@ -63,16 +63,16 @@ retained [default: not used]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapscale.1NEMO.html'>snapscale(1NEMO)</a>
-, <a href='hackforce.1NEMO.html'>hackforce(1NEMO)</a>
+<a href='snapscale.1.html'>snapscale(1NEMO)</a>
+, <a href='hackforce.1.html'>hackforce(1NEMO)</a>
 ,
-<a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='units.5NEMO.html'>units(5NEMO)</a>
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='units.5.html'>units(5NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 It is considered an error when either
 the potential energy is positive or the kinetic energy is negative. This
-usually requires the snapshot to be in the center of mass frame. Use <a href='snapcenter.1NEMO.html'><i>snapcenter(1NEMO)</i></a>
+usually requires the snapshot to be in the center of mass frame. Use <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
 
 if need be.  <p>
 This program has no intelligence about the shape of the system,

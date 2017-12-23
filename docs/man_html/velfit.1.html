@@ -21,19 +21,19 @@ The default option is to fit a rotation curve to an isovelocity image of
 a rotating disk. The rotation curve and rms for the fit are tabulated and
 can be used to find the best fit to the other parameters. For more details
 see  Warner, Wright and Baldwin (1973MNRAS.163..163W).  This may not be  the
-best method to fit a rotation curve (see also <a href='rotcur.1NEMO.html'><i>rotcur(1NEMO)</i></a>
+best method to fit a rotation curve (see also <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
 ), but it is
 very simple and elegant to program. <p>
 Optionally an output map can be generated
 with amusing quantities,  as well an output table that contains, amongst,
-the rotation curve. For additional map manipulations, see also <a href='velmap.1NEMO.html'><i>velmap(1NEMO)</i></a>
+the rotation curve. For additional map manipulations, see also <a href='velmap.1.html'><i>velmap(1NEMO)</i></a>
 .
 <p>
 The name of this program, <b>velfit</b>, unfortunately collides with the same
-written by Spekkens &amp; Sellwood, and a frontend in NEMO is available as <a href='runvelfitss07.1NEMO.html'><i>runvelfitss07(1NEMO)</i></a>
+written by Spekkens &amp; Sellwood, and a frontend in NEMO is available as <a href='runvelfitss07.1.html'><i>runvelfitss07(1NEMO)</i></a>
 .
 However, their program was updated, and is now available as <b>diskfit</b>, with
-a NEMO frontend called <a href='rundiskfit.1NEMO.html'><i>rundiskfit(1NEMO)</i></a>
+a NEMO frontend called <a href='rundiskfit.1.html'><i>rundiskfit(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
@@ -42,13 +42,13 @@ are recognized in any order if the keyword is also given:
 
 <dt><b>in=</b> </dt>
 <dd>input observed
-velocity field, in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+velocity field, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. We refer to this as <b>vobs</b>. No default.
 </dd>
 
 <dt><b>radii=</b> </dt>
 <dd>radii of the ring boundaries. For N rings, N+1 values need to be
-given. They need to be sorted by increasing radius.   See <a href='nemoinp.1NEMO.html'><i>nemoinp(1NEMO)</i></a>
+given. They need to be sorted by increasing radius.   See <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
 
 for syntax, though <i>rmin:rmax:rstep</i> is a common shortcut. It uses units from
 the image, usually degrees if you come from a FITS file  (see EXAMPLE below)
@@ -88,8 +88,8 @@ pixel to be ignored. Default: 0.0 </dd>
 
 <dt><b>wwb73=</b> </dt>
 <dd>use the classic WWB73 method? Currently there is no other  method.
- See <a href='rotcur.1NEMO.html'><i>rotcur(1NEMO)</i></a>
- and <a href='rotcurshape.1NEMO.html'><i>rotcurshape(1NEMO)</i></a>
+ See <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
+ and <a href='rotcurshape.1.html'><i>rotcurshape(1NEMO)</i></a>
  for alternate discussions. [t]
   </dd>
 
@@ -109,12 +109,12 @@ in the ring and some other values.  Default: none </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='rotcur.1NEMO.html'>rotcur(1NEMO)</a>
+<a href='rotcur.1.html'>rotcur(1NEMO)</a>
 ,
-<a href='runvelfitss07.1NEMO.html'>runvelfitss07(1NEMO)</a>
-, <a href='rotcurshape.1NEMO.html'>rotcurshape(1NEMO)</a>
-, <a href='velmap.1NEMO.html'>velmap(1NEMO)</a>
-, <a href='velfitpatch.1NEMO.html'>velfitpatch(1NEMO)</a>
+<a href='runvelfitss07.1.html'>runvelfitss07(1NEMO)</a>
+, <a href='rotcurshape.1.html'>rotcurshape(1NEMO)</a>
+, <a href='velmap.1.html'>velmap(1NEMO)</a>
+, <a href='velfitpatch.1.html'>velfitpatch(1NEMO)</a>
 
 
 <h2><a name='sect5' href='#toc5'>Files</a></h2>

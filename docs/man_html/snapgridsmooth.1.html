@@ -18,7 +18,7 @@ smoothing
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapgridsmooth</i> grids three arbitrary bodytrans expressions 
 (default: <b>x</b>, <b>y</b> and <b>z</b>) of a snapshot into a datacube with adaptive smoothing
-based on a bodytrans variable. Unlike <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+based on a bodytrans variable. Unlike <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 , which handles 2D
 projections and certain types of line-of-sight processing, this program simply
 accumulates the emission in each cell, and optional smoothing, normalization
@@ -30,13 +30,13 @@ order if the keyword is also passed with it:
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, must
-be in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. Multiple snapshots can be stacked uses the
 <b>times=</b> keyword: see <b>stack=</b> below.  [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
 <dd>output file,
-will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. Depending on the use of <b>times=</b>, <b>stack=</b> and
 <b>evar=</b> (see below) one more multiple cubes can be output. [no default]. </dd>
 
@@ -113,10 +113,10 @@ and never smoothed/aliased into the visible grid.  [Default: f] </dd>
 The following
 example ... 
 <h2><a name='sect5' href='#toc5'>Caveat</a></h2>
-This program was cloned from <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+This program was cloned from <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 , and the keywords
 stack= and multiple values for evar= have not been tested out. <p>
-Unlike <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+Unlike <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 ,
 this program is meant to use the 3 gridding variables in the same units.
 The snapgridsmooth an x-y-vz cube is tricky. <p>
@@ -130,12 +130,12 @@ they don&rsquo;t have a specific name, but carry their normal meaning &rsquo;len
 &rsquo;velocity&rsquo; and &rsquo;mass&rsquo;. Since <i>snapgridsmooth</i> calculates space densities, its
 units are formally &rsquo;mass&rsquo; per cubic &rsquo;length&rsquo; 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='snapgrid.1NEMO.html'>snapgrid(1NEMO)</a>
-, <a href='uns_2dplot.1NEMO.html'>uns_2dplot(1NEMO)</a>
+<a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
+, <a href='uns_2dplot.1.html'>uns_2dplot(1NEMO)</a>
 ,
-<a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 

@@ -23,7 +23,7 @@ quantity <i>f</i> is fitted as <br>
 <pre>  f(r,theta) = sum_{cmi..}{A(r)cos(cmi*theta) + sum_{smi..}{B(r)sin(smi*theta)
 
 </pre>where <i>x</i>, <i>y</i> as well as <i>f</i> </pre>  r = sqrt(x*x+y*y) , theta=atan2(y,x)<br>
- </pre>can be any arbitrary <a href='bodytrans.3NEMO.html'><i>bodytrans(3NEMO)</i></a>
+ </pre>can be any arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
  expression using the <b>xvar</b>, <b>yvar</b>
 and <b>fvar</b> keywords. The least squares is done using normalized equations,
 which are known for roundoff problem in case a large number of coefficients
@@ -37,7 +37,7 @@ given:
 <dl>
 
 <dt><b>in=<i>in_file</i></b> </dt>
-<dd>Input data file, must be in standard <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>Input data file, must be in standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
  format [No default]. </dd>
 
@@ -89,7 +89,7 @@ sin and cos terms, if false, the amplitudes and phases (in degrees). [Default:
   % tabplot tab1 1 5:11:2 line=1,1 color=2,3,4,5 ycoord=0
 </pre>Another case is that of an inclined disk that first needs to be  rectified,
 but preserving the position angle of the major axis. Lets assume the <b>$pa</b>
-and <b>$inc</b> are known.  Unlike for kinematic  observations (see e.g. <a href='rotcur.1NEMO.html'><i>rotcur(1NEMO)</i></a>
+and <b>$inc</b> are known.  Unlike for kinematic  observations (see e.g. <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
 )
 we don&rsquo;t care which side of the disk is the near side. The rectify operation
 to get the galaxy back to a "face-on" view depends if you disk is truely
@@ -104,9 +104,9 @@ case we then get: <br>
   % snapfour disk2 ...
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='bodytyrans.1NEMO.html'>bodytyrans(1NEMO)</a>
-, <a href='orbfour.1NEMO.html'>orbfour(1NEMO)</a>
-, <a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='bodytyrans.1.html'>bodytyrans(1NEMO)</a>
+, <a href='orbfour.1.html'>orbfour(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  <p>
 Binney, J.J. &amp;
 Spergel, D. (1982) ApJ 253, 308. 

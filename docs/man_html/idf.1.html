@@ -29,7 +29,7 @@ create an output file (run1.inp) where two parameters were given a new value:
     foobar &lt; run1.inp
 </pre>but see also the EXAMPLES below. <p>
 For a full description of the format, see
-<a href='idf.5NEMO.html'><i>idf(5NEMO)</i></a>
+<a href='idf.5.html'><i>idf(5NEMO)</i></a>
  
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in any order
@@ -39,7 +39,7 @@ if the keyword is also given, and need to be given before the IDF PARAMETERS
 
 <dt><b>idf=</b> </dt>
 <dd>Input Directive File.  This file is the template with type
-and name information for the parameters. See also <a href='idf.5NEMO.html'><i>idf(5NEMO)</i></a>
+and name information for the parameters. See also <a href='idf.5.html'><i>idf(5NEMO)</i></a>
 . If none supplied,
 the internal example is shown that can be played with. No default. </dd>
 
@@ -76,7 +76,7 @@ to be preceded by the standard <b>--</b> separator, such that NEMO parsing can s
 
 <dt><b>--</b> </dt>
 <dd>Any parameters after this designator is not parsed by the NEMO command
-line processor (see also <a href='getparam.3NEMO.html'><i>getparam(3NEMO)</i></a>
+line processor (see also <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
 ), but the keyword names are expected
 to be present in the IDF file. </dd>
 
@@ -87,13 +87,13 @@ be listed here. Currently very little parsing checks are done here. </dd>
 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
 Open
-ended array IDF keywords do not use <a href='nemoinp.1NEMO.html'><i>nemoinp(1NEMO)</i></a>
+ended array IDF keywords do not use <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  style expression yet,
 .e.g. you cannot use <b>rad=2:10:2</b>, but instead would need  (csh notation): <br>
 <pre>    set rtmp=(&lsquo;nemoinp 2:10:2&lsquo;)
     .. rad="$rtmp"
 </pre><p>
-IDF keyword do not use <a href='getparam.3NEMO.html'><i>getparam(3NEMO)</i></a>
+IDF keyword do not use <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
  yet, so interesting constructs such
 as <b>rad=@radii.tab</b> cannot be used here. 
 <h2><a name='sect6' href='#toc6'>Examples</a></h2>
@@ -125,11 +125,11 @@ foobar.inp) to be present:   &rsquo;foobar&rsquo;
 little flexibility to change their output filename, which results  in the
 usage of a run directory in order for programs to run in parallel. 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='idf.5NEMO.html'>idf(5NEMO)</a>
+<a href='idf.5.html'>idf(5NEMO)</a>
 ,
-<a href='idfio.3NEMO.html'>idfio(3NEMO)</a>
-, <a href='getparam.3NEMO.html'>getparam(3NEMO)</a>
-, <a href='run.3NEMO.html'>run(3NEMO)</a>
+<a href='idfio.3.html'>idfio(3NEMO)</a>
+, <a href='getparam.3.html'>getparam(3NEMO)</a>
+, <a href='run.3.html'>run(3NEMO)</a>
  
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>

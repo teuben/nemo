@@ -32,7 +32,7 @@ __DEF__MAN(foobar)
 </pre>The <i>foobar</i> class gets compiled into a shared object <i>foobar.so</i>, and is required
 to have a specific type of constructor and a number of  member functions.
 The __DEF__MAN macro will then create an extern "C"  function, called <i>inimanip</i>,
-which can be loaded by the dynamic  object loaded (see also <a href='loadobj.3NEMO.html'><i>loadobj(3NEMO)</i></a>
+which can be loaded by the dynamic  object loaded (see also <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
 ).
 It will instantiate a <b>foobar</b> object, and made available to the code. <p>
 
@@ -46,8 +46,8 @@ the work, the <b>Manipulator</b> class constrols this.
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>manipulator</i>s are plugins that can be used to perform action(s)
 on a snapshots that are not known at compile time, but can be dynamically
-choosen by the user at run-time. Similar to <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
- and  <a href='acceleration.5NEMO.html'><i>acceleration(5NEMO)</i></a>
+choosen by the user at run-time. Similar to <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ and  <a href='acceleration.5.html'><i>acceleration(5NEMO)</i></a>
 ,
 they are code (in this case a C++ class, see the example above) that has
 been pre-compiled and can be loaded at run-time, based on a descriptive name
@@ -72,10 +72,10 @@ also be used to separate their names.
 <p> 
 <h2><a name='sect3' href='#toc3'>Examples</a></h2>
 Examples can be found within
-the <a href='gyrfalcON.1NEMO.html'><i>gyrfalcON(1NEMO)</i></a>
+the <a href='gyrfalcON.1.html'><i>gyrfalcON(1NEMO)</i></a>
  source tree. Here is an example, actually taken from
 the glnemo source tree, of the integrator able to send snapshot data, as
-they are produced, into the <a href='glnemo.1NEMO.html'><i>glnemo(1NEMO)</i></a>
+they are produced, into the <a href='glnemo.1.html'><i>glnemo(1NEMO)</i></a>
  display server via a manipulator:
 <br>
 <pre>  host1% mkexpdisk disk1 50000
@@ -91,11 +91,11 @@ The environment variable
 directory. This feature is however not implemented everywhere, hence the
 <b>manippath=</b> keyword. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='acceleration.5NEMO.html'>acceleration(5NEMO)</a>
-, <a href='potential.5NEMO.html'>potential(5NEMO)</a>
-, <a href='gyrfalcON.1NEMO.html'>gyrfalcON(1NEMO)</a>
+<a href='acceleration.5.html'>acceleration(5NEMO)</a>
+, <a href='potential.5.html'>potential(5NEMO)</a>
+, <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
 ,
-<a href='loadobj.5NEMO.html'>loadobj(5NEMO)</a>
+<a href='loadobj.5.html'>loadobj(5NEMO)</a>
  <p>
 <a href='http://www.tntnet.org/cxxtools.bhtm'>http://www.tntnet.org/cxxtools.bhtm</a>
  for another c++ wrapper

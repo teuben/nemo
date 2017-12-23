@@ -15,14 +15,14 @@ ccdtrace - interpolate a set of coordinates from an image
 [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdtrace</b> takes a set of (X,Y) coordinates,
-in the form of an ascii <a href='table.1NEMO.html'><i>table(1NEMO)</i></a>
-, and interpolates them from an <a href='image.1NEMO.html'><i>image(1NEMO)</i></a>
+in the form of an ascii <a href='table.1.html'><i>table(1NEMO)</i></a>
+, and interpolates them from an <a href='image.1.html'><i>image(1NEMO)</i></a>
 .
 The output will also be in standard table format. The input coordinate must
 be in the physical coordinates of the input image, as defined by Xmin/Ymin/Dx/Dy
-coordinates (see <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</i></a>
+coordinates (see <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
  to view them). Sky image copied via FITS can
-sometimes have unexpected units. See also <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+sometimes have unexpected units. See also <a href='fits.5.html'><i>fits(5NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following
@@ -31,7 +31,7 @@ parameters are recognized in any order if the keyword is also given:
 
 <dt><b>in=</b><i>image</i>
 </dt>
-<dd>Input <a href='Image.5NEMO.html'>Image(5NEMO)</a>
+<dd>Input <a href='Image.5.html'>Image(5NEMO)</a>
  file. Currently only 2D images are supported, for 3D
 cubes the first plane could be used.  No default. </dd>
 
@@ -62,12 +62,12 @@ units used in the image), but with wcs=f you can use pixel coordinates.
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 src/nbody/evolve/flowcode/ccdtrace.c 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='ccdprint.1NEMO.html'>ccdprint(1NEMO)</a>
-, <a href='tsf.1NEMO.html'>tsf(1NEMO)</a>
+<a href='ccdprint.1.html'>ccdprint(1NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
 ,
-<a href='image.5NEMO.html'>image(5NEMO)</a>
-, <a href='fits.5NEMO.html'>fits(5NEMO)</a>
-, <a href='ccdfits.1NEMO.html'>ccdfits(1NEMO)</a>
+<a href='image.5.html'>image(5NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
+, <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 

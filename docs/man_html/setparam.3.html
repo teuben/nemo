@@ -44,7 +44,7 @@ _bell_level_history_review_flag_yapp_dev_yapp_string_help_string_argv_string
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 These
 functions provide a simple and uniform mechanism for  command line processing
-(see also <a href='nemomain.3NEMO.html'>nemomain(3NEMO)</a>
+(see also <a href='nemomain.3.html'>nemomain(3NEMO)</a>
  for an even simpler approach). Input as well as
 output (storage) of selected parameters can be controlled via command line
 parameters. First, <i>initparam</i> is called to set up values associated with
@@ -53,7 +53,7 @@ may be called to access and/or parse the value associated with a specified
  keyword. <i>finiparam</i>  should be called before the program ends, to ensure
 any outstanding requests are dealt with (e.g. writing updated keyword files,
 see HELP and DEBUG below), or optionally complain about unprocessed command
-line arguments. Output of parameters is described in <a href='outparam.3NEMO.html'><i>outparam(3NEMO)</i></a>
+line arguments. Output of parameters is described in <a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
 . <p>
 <i>initparam</i>
 is called with two arguments: the argument vector <i>argv</i> which is passed
@@ -101,7 +101,7 @@ be obtained (as a <b>string</b>) by <i>getparam</i>, or directly  converted to a
 and <i>getbparam</i> respectively. The latter recognizes the digit "1" or any string
 starting with one of "tTyY" as TRUE, and "0" or any string starting with
 one of "fFnN" as FALSE. All the <i>getXparam</i> function can do simple parsing
-of expressions, see <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+of expressions, see <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  for some extended rules. Also note that
  <i>getparam</i> returns a string into private space, that should not be modified
 or freed! An single parameter integer that starts with the <b>0x</b> string, can
@@ -109,7 +109,7 @@ also be parsed as a hexdecimal value (see <a href='strtol.3.html'><i>strtol(3)</
 ). <p>
 <b>getparamstat</b> is currently
 only available to provide ZENO compatibility, it currently triggers a call
-to <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+to <a href='error.3.html'><i>error(3NEMO)</i></a>
  when called. <p>
 As a special case, the contents of <i>argv</i>[0],
 which is the name used to invoke the process, are associated with the keyword
@@ -123,7 +123,7 @@ may have no other way of determining what program called them; for example,
 could be used to print an error message from a square-root procedure, giving
 the name of the program in which the error occured. The macro getargv0(),
 defined in getparam.h, can also be used for this, instead of called getparam().
-This technique is used by the routine, <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+This technique is used by the routine, <a href='error.3.html'><i>error(3NEMO)</i></a>
 ; it reports the program
 name in square brackets before the string is output.  <p>
 The optional <b>usage</b>
@@ -199,7 +199,7 @@ include
  </dd>
 
 <dt><b>o</b> </dt>
-<dd>- show output keywords (see <a href='outparam.3NEMO.html'><i>outparam(3NEMO)</i></a>
+<dd>- show output keywords (see <a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
 ) <br>
  </dd>
 
@@ -248,13 +248,13 @@ a non-zero number to change to various levels of interactive input if implemente
 
 <h2><a name='sect7' href='#toc7'>Output Keys</a></h2>
 The system keyword <b>outkeys=</b><i>key1,key2,...</i> controls which  pre-defined
-output keys (see <a href='outparam.3NEMO.html'><i>outparam(3NEMO)</i></a>
+output keys (see <a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
 ) are going to  output to NEMO&rsquo;s persistent
 global keyword database. 
 <h2><a name='sect8' href='#toc8'>Debugging</a></h2>
 The system keyword <b>debug=</b><i>debug_level</i> is
 checked for by the <i>initparam</i> call. It sets the <b>debug_level</b> to the requested
-value. Any calls to <a href='dprintf.3NEMO.html'><i>dprintf(3NEMO)</i></a>
+value. Any calls to <a href='dprintf.3.html'><i>dprintf(3NEMO)</i></a>
  will only be send to the standard error
 output device,(<i>stderr</i>), if <b>debug</b> is less or equal than <b>debug_level</b>. Any
 initial setting of <b>debug_level</b> is also done through an environment variable
@@ -266,15 +266,15 @@ initial setting of <b>debug_level</b> is also done through an environment variab
 </pre>
 <h2><a name='sect10' href='#toc10'>See Also</a></h2>
 <a href='environ.5.html'>environ(5)</a>
-, <a href='dprintf.3NEMO.html'>dprintf(3NEMO)</a>
-, <a href='error.3NEMO.html'>error(3NEMO)</a>
-, <a href='nemoinp.3NEMO.html'>nemoinp(3NEMO)</a>
-, <a href='nemomain.3NEMO.html'>nemomain(3NEMO)</a>
+, <a href='dprintf.3.html'>dprintf(3NEMO)</a>
+, <a href='error.3.html'>error(3NEMO)</a>
+, <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
+, <a href='nemomain.3.html'>nemomain(3NEMO)</a>
 ,
-<a href='outparam.3NEMO.html'>outparam(3NEMO)</a>
+<a href='outparam.3.html'>outparam(3NEMO)</a>
  
 <h2><a name='sect11' href='#toc11'>Diagnostics</a></h2>
-Complains via <a href='error.3NEMO.html'><i>error(3NEMO)</i></a>
+Complains via <a href='error.3.html'><i>error(3NEMO)</i></a>
  or the <i>local_error()</i>
 function about extra arguments, unknown arguments,  etc.  This will generally
 result in a stopped program. 

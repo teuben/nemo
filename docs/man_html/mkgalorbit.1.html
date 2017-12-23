@@ -14,9 +14,9 @@ mkgalorbit - Make a galactic orbit with from given initial conditions
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkgalorbit&nbsp;out=</b>orbit-file [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Unlike <a href='mkorbit.1NEMO.html'><i>mkorbit(1NEMO)</i></a>
+Unlike <a href='mkorbit.1.html'><i>mkorbit(1NEMO)</i></a>
 
-where an arbitrary orbit can be initialized, <a href='mkgalorbit.1NEMO.html'><i>mkgalorbit(1NEMO)</i></a>
+where an arbitrary orbit can be initialized, <a href='mkgalorbit.1.html'><i>mkgalorbit(1NEMO)</i></a>
  is specifically
 intended to initialize orbits in a galactic potential w.r.t. an assumed solar
 motion (LSR). Input coordinates are galactic. <p>
@@ -76,7 +76,7 @@ gal=GLON/GLAT [gal]   </dd>
 <dd>time [0.0]       </dd>
 
 <dt><b>potname=</b> </dt>
-<dd>optional <a href='potential.5NEMO.html'>potential(5NEMO)</a>
+<dd>optional <a href='potential.5.html'>potential(5NEMO)</a>
 
 []      </dd>
 
@@ -122,9 +122,9 @@ an orbit representing the LSR  <br>
          -153.932     -493.095      97.3592
  
 </pre>To use a particular galaxy model in an external potential, we first need
-to compute the phase space coordinates of the LSR in that model. <a href='snapgalview.1NEMO.html'><i>snapgalview(1NEMO)</i></a>
+to compute the phase space coordinates of the LSR in that model. <a href='snapgalview.1.html'><i>snapgalview(1NEMO)</i></a>
 
-can help viewing a <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+can help viewing a <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 . <br>
 <pre>   % 
 </pre>
@@ -140,7 +140,7 @@ this oppostive that of the angular moment vector, which is mathematically
 negative). In order for (u,v,w) to be compatible with the (vx,vy,vz) we
 use in NEMO, the sun must be placed at (-R,0,0) and since the galaxy is
 rotating clock wise, with a velocity of (0,V,0). If you want something else,
-you can always use <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
+you can always use <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Solar Motion</a></h2>
 Several systems of the
@@ -177,12 +177,12 @@ LGROUP -- Local group velocity -- 308km/s towards l,b = [105,-7] deg (F. Ghigo)
 CMB -- CMB velocity -- 369.5km/s towards l,b = [264.4, 48.4] deg (F. Ghigo)
 </pre>
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='mkorbit.1NEMO.html'>mkorbit(1NEMO)</a>
-, <a href='potcode.1NEMO.html'>potcode(1NEMO)</a>
-, <a href='snapgalview.1NEMO.html'>snapgalview(1NEMO)</a>
-, <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
+<a href='mkorbit.1.html'>mkorbit(1NEMO)</a>
+, <a href='potcode.1.html'>potcode(1NEMO)</a>
+, <a href='snapgalview.1.html'>snapgalview(1NEMO)</a>
+, <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
 ,
-<a href='potential.5NEMO.html'>potential(5NEMO)</a>
+<a href='potential.5.html'>potential(5NEMO)</a>
  <p>
 <br>
 <pre>http://idlastro.gsfc.nasa.gov/ftp/pro/astro/gal_uvw.pro - used the opposite

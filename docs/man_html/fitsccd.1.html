@@ -16,15 +16,15 @@ fitsccd - read a (fits) image file from disk
 <b>out=</b>fits [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>fitsccd</b> reads a (fits) image file
-from disk. The input is normally in  <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+from disk. The input is normally in  <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format, although certain
 foreign data formats can  also be read in a limited form of <i>raw</i> mode (see
 <b>FOREIGN FORMATS</b> below). This effectively allows you to read formats such
 as MIRIAD, GIPSY, IRAF, ZODIAC and AIPS data,  given the right parameters...
-The output will always be in  standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+The output will always be in  standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. Typicall you
 will need the keywords <b>bitpix=</b>,<b>offset=</b> and <b>naxis=</b>. <p>
-See old notes in <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+See old notes in <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
 
 how to process fits files from tape instead disk. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -163,20 +163,20 @@ GIPSY<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;wfits
 </pre>
 <h2><a name='sect7' href='#toc7'>Caveats</a></h2>
 There are FITS image files stored as extensions to a dummy HDU. In
-those cases <a href='scanfits.1NEMO.html'><i>scanfits(1NEMO)</i></a>
+those cases <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
  must be used to extract the correct HDU and
 continue the data analysis, e.g. <br>
 <pre>    % scanfits abc.fits abc1.fits hdu=2
     % ccdfits abc1.fits abc1.ccd
 </pre>Note that FITS files in NEMO do now allow the use of pipes. 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
-<a href='ccdfits.1NEMO.html'>ccdfits(1NEMO)</a>
+<a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
 ,
-<a href='snapccd.1NEMO.html'>snapccd(1NEMO)</a>
-, <a href='iofits.1NEMO.html'>iofits(1NEMO)</a>
-, <a href='scanfits.1NEMO.html'>scanfits(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
-, <a href='fits.5NEMO.html'>fits(5NEMO)</a>
+<a href='snapccd.1.html'>snapccd(1NEMO)</a>
+, <a href='iofits.1.html'>iofits(1NEMO)</a>
+, <a href='scanfits.1.html'>scanfits(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
 ,
 <a href='dd.1.html'>dd(1)</a>
  

@@ -48,15 +48,15 @@ integer ndim     real pos(*)real acc(*) real potreal time</pre>
 <i>potential</i>
 is a convenient data structure to hold an ascii description of a user selected
 potential, and all it&rsquo;s descriptors (id-name, parameters, associated strings/file(s)).
-It is currently also stored in the <a href='orbit.5NEMO.html'><i>orbit(5NEMO)</i></a>
+It is currently also stored in the <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
  data structure. <p>
-<a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+<a href='potential.5.html'><i>potential(5NEMO)</i></a>
 
  is a &rsquo;filestructure&rsquo; which  defines a potential (and force/density or velocity
-field)  through a standardized  interface routine, as described in <a href='potential.3NEMO.html'><i>potential(3NEMO)</i></a>
+field)  through a standardized  interface routine, as described in <a href='potential.3.html'><i>potential(3NEMO)</i></a>
 .
 <p>
-A <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+A <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  datafile <b>must</b> have two (or three) externally accessible
 routines  <b>inipotential</b> and <b>potential_double</b> and/or <b>potential_flot</b>, (old
 name:<b>potential</b>) with a  parameter sequence as described above. The parameters
@@ -92,7 +92,7 @@ is however available, but is not guaranteed to work on all machines. Also
 keep in mind if you write your potentials in fortran: common blocks and
 other used routines get loaded into the executable, with the potential
 for duplicate symbol names. 
-<p> Most likely <a href='loadobj.3NEMO.html'><i>loadobj(3NEMO)</i></a>
+<p> Most likely <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
  will break under
 such circumstances. <p>
 Second: no I/O should be done. In practise this also
@@ -100,24 +100,24 @@ means that this third parameter, <b>potfile</b>, of <i>inipotential</i> cannot b
 as is mostly serves as a filename. The reason is that we didn&rsquo;t want the
 programs to have to link in huge fortran I/O libraries, including various
 portability problems.  <p>
-There is one exception: <a href='potlist.1NEMO.html'><i>potlist(1NEMO)</i></a>
+There is one exception: <a href='potlist.1.html'><i>potlist(1NEMO)</i></a>
  is allowed
-to  load <a href='potential.5NEMO.html'><i>potential(5NEMO)</i></a>
+to  load <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  files with FORTRAN WRITE statements. After you
 have made sure the function works as you think,  these statements must
 be Commented out and can then be reloaded by most other potential/orbit
 programs. 
 <h2><a name='sect5' href='#toc5'>Flow Potentials</a></h2>
 Experimental changes to the interface were implemented
-by the <a href='flowcode.1NEMO.html'><i>flowcode(1NEMO)</i></a>
- and <a href='vpotcode.1NEMO.html'><i>vpotcode(1NEMO)</i></a>
+by the <a href='flowcode.1.html'><i>flowcode(1NEMO)</i></a>
+ and <a href='vpotcode.1.html'><i>vpotcode(1NEMO)</i></a>
  code. This requires special versions
 of potential desriptors, with the same calling convention but different
 meaning to the arguments: <p>
 <b>flowcode</b> uses a potential which returns the (currently
 2-dimensional) velocities at the requested input position. These are returned
 in the <b>acc</b> slot. The <b>pot</b> has no meaning, though is used to represent densities
-in programs like <a href='mkflowdisk.1NEMO.html'><i>mkflowdisk(1NEMO)</i></a>
+in programs like <a href='mkflowdisk.1.html'><i>mkflowdisk(1NEMO)</i></a>
 . <p>
 <b>vpotcode</b> uses a potential which expects
 the velocity to be  input in the <b>acc</b> slot, but the returned arguments (<b>acc</b>
@@ -152,15 +152,15 @@ potential_double() and potential_float(), or rename potential() to potential_dou
 and include &lt;potential_float.h&gt; (available for NEMO 3.2.2 and above) to have
 _float call  _double (the penalty for this is about 4%). 
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
-<a href='get_potential.3NEMO.html'>get_potential(3NEMO)</a>
+<a href='get_potential.3.html'>get_potential(3NEMO)</a>
 ,
-<a href='orbit.5NEMO.html'>orbit(5NEMO)</a>
-, <a href='acceleration.5NEMO.html'>acceleration(5NEMO)</a>
-, <a href='manipulator.5NEMO.html'>manipulator(5NEMO)</a>
-, <a href='flowcode.1NEMO.html'>flowcode(1NEMO)</a>
+<a href='orbit.5.html'>orbit(5NEMO)</a>
+, <a href='acceleration.5.html'>acceleration(5NEMO)</a>
+, <a href='manipulator.5.html'>manipulator(5NEMO)</a>
+, <a href='flowcode.1.html'>flowcode(1NEMO)</a>
 ,
-<a href='mkflowdisk.1NEMO.html'>mkflowdisk(1NEMO)</a>
-, <a href='vpotcode.1NEMO.html'>vpotcode(1NEMO)</a>
+<a href='mkflowdisk.1.html'>mkflowdisk(1NEMO)</a>
+, <a href='vpotcode.1.html'>vpotcode(1NEMO)</a>
  
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 

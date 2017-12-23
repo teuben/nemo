@@ -17,9 +17,9 @@ in=</b>snap_file [parameter=value] ...
 <i>snapshell</i> computes selected
 diagnostics and their statistics  from an N-body snapshot in a set of shells
 in an arbitrary body variable (normally <b>rvar=r</b>). The snapshot must have
-been properly centered and oriented using  other tools (e.g. <a href='snapcenter.1NEMO.html'><i>snapcenter(1NEMO)</i></a>
+been properly centered and oriented using  other tools (e.g. <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
 
-and/or <a href='snaprect.1NEMO.html'><i>snaprect(1NEMO)</i></a>
+and/or <a href='snaprect.1.html'><i>snaprect(1NEMO)</i></a>
 ).  <p>
 Normally the shell radii are explicitly set (optionally
 normalized) in <b>rvar</b> space, by setting <b>cumulative=t</b> the <b>mvar=</b> variable is
@@ -37,20 +37,20 @@ following parameters are recognized.
 
 <dt><b>in=</b><i>snap_file</i> </dt>
 <dd>Input data is read from
-<i>snap_file</i>, which must be in <a href='snapshot.5NEMO.html'><i>snapshot</i>(5NEMO)</a>
+<i>snap_file</i>, which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
  format.  Note that only the
 first snapshot found in this file will be used. No default. </dd>
 
 <dt><b>radii=</b><i>r0,r1,r2,...</i>
 </dt>
-<dd>A set of radii in <a href='nemoinp.3NEMO.html'><i>nemoinp(3NEMO)</i></a>
+<dd>A set of radii in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
  format, representing the edges of the
 shell. They are normalized if <b>normalized=t</b> is used, and their units are
 in <b>rvar</b> space, unless <b>cumulative=t</b> is used, when they are in <b>cvar</b> units.
 No default. </dd>
 
 <dt><b>pvar=</b><i>variable</i> </dt>
-<dd>The <a href='bodytrans.1NEMO.html'><i>bodytrans</i>(1NEMO)</a>
+<dd>The <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
  variable selected for statistics.
  [Default: <b>vt</b>]. </dd>
 
@@ -63,7 +63,7 @@ m </dd>
 
 <dt><b>weight=</b><i>body_weight</i> </dt>
 <dd>Expression used to compute the weight of each body.
-See <a href='bodytrans.1NEMO.html'><i>bodytrans</i>(1NEMO)</a>
+See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
  for the form of <i>body_weight</i>. Default: <b>1.0</b>. </dd>
 
 <dt><b>axes=</b><i>x,y,z</i>
@@ -108,11 +108,11 @@ they apply. [Default: <b>f</b>]
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapkinem.1NEMO.html'>snapkinem(1NEMO)</a>
-, <a href='snaprect.1NEMO.html'>snaprect(1NEMO)</a>
-, <a href='snapsort.1NEMO.html'>snapsort(1NEMO)</a>
+<a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
+, <a href='snaprect.1.html'>snaprect(1NEMO)</a>
+, <a href='snapsort.1.html'>snapsort(1NEMO)</a>
 ,
-<a href='snapshot.5NEMO.html'>snapshot(5NEMO)</a>
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 To get a mean rotation speed in the disk, and the
@@ -133,7 +133,7 @@ is used for this:
 <p> <br>
 <pre>    % mkdisk - rmax=10 | snapsort - - r | snapshell - 0:1:0.01 cumulative=t mvar=1
 normalized=t
-</pre>where we also needed to use <b>mvar=1 normalized=t</b>,since <a href='mkdisk.1NEMO.html'><i>mkdisk(1NEMO)</i></a>
+</pre>where we also needed to use <b>mvar=1 normalized=t</b>,since <a href='mkdisk.1.html'><i>mkdisk(1NEMO)</i></a>
  creates
 a disk of test particles, and does not by default set the mass of the disk.
 <p>

@@ -16,7 +16,7 @@ snapshot - format for N-body snapshot files
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapshot</i>  is the format used to store N-body particle data. The
 format is that of the general binary structured fileformat as described
-in <a href='filestruct.3NEMO.html'><i>filestruct(3NEMO)</i></a>
+in <a href='filestruct.3.html'><i>filestruct(3NEMO)</i></a>
 . <p>
 
 <h2><a name='sect3' href='#toc3'>TAGS and BITS</a></h2>
@@ -63,7 +63,7 @@ Coordinate system codes; these assume 32-bit ints. <br>
 #define MeanAnomaly (6 &lt;&lt; 16)
 #define PeriPassage (7 &lt;&lt; 16)
 </pre><p>
-The coordinate system flag, usually visible as an octal number via <a href='tsf.1NEMO.html'><i>tsf(1NEMO)</i></a>
+The coordinate system flag, usually visible as an octal number via <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
 ,
 consists of three parts: <b>nder</b>  refers to the number of derived quantities
 (2 if position and velocities are given, 3 of the jerk is also given, 1
@@ -76,7 +76,7 @@ the coordinate type (from <i>&lt;snapshot/snapshot.h&gt;</i>: <i>Cartesian, Sphe
 In newer versions of NEMO you may find a SnapShot format with
 a split <i>Position</i> and <i>Velocity</i>, instead of the classic combined  <i>PhaseSpace</i>.
 In such case, most conversion programs stubbornly convert the datastream
-to the classic <i>PhaseSpace</i> format. E.g. <a href='gyrfalcON.1NEMO.html'>gyrfalcON(1NEMO)</a>
+to the classic <i>PhaseSpace</i> format. E.g. <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
  produces output data
 in the new format. <br>
 <pre>    mkplummer p100 100
@@ -84,8 +84,8 @@ in the new format. <br>
     snapscale p100.out - | stoa - p100.atos
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='atosph.1NEMO.html'>atosph(1NEMO)</a>
-, <a href='filestruct.5NEMO.html'>filestruct(5NEMO)</a>
+<a href='atosph.1.html'>atosph(1NEMO)</a>
+, <a href='filestruct.5.html'>filestruct(5NEMO)</a>
  <p>
 <br>
 <pre>Large Particles, e.g. Stern et al. MNRAS, 272, 291 (1995)

@@ -17,11 +17,11 @@ snapifu - take spectra from a snapshot at a set of specified grid points
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapifu</i>
 computes spectra, or reduces this to moments, in a number of predefined
-gridpoints, very simular to <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+gridpoints, very simular to <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 . The model behind this is Integral
 Field Units such as DensePak, SparsePak and Sauron. <p>
 The output image is
-written in standard <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+written in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format,  where the X coordinates enumerates
 the grid points, the Y axis is dummy, and the Z axis the spectrum. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -30,13 +30,13 @@ following parameters are recognized:
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>input file, must be in <a href='snapshot.5NEMO.html'><i>snapshot(5NEMO)</i></a>
+<dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
 format. Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b>
 below.  [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will be in <a href='image.5NEMO.html'><i>image(5NEMO)</i></a>
+<dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format
 [no default]. </dd>
 
@@ -48,7 +48,7 @@ multiple output images. [Default: <b>all</b>]. </dd>
 
 <dt><b>xgrid=</b><i>x-positions</i> </dt>
 <dd>A set of X (see
-<b>xvar=</b>) positions where spectra are taken. Use <a href='tabcols.1NEMO.html'><i>tabcols(1NEMO)</i></a>
+<b>xvar=</b>) positions where spectra are taken. Use <a href='tabcols.1.html'><i>tabcols(1NEMO)</i></a>
  if the grid
 points are hidden in a columns in a table.  Default: 0.<br>
  </dd>
@@ -60,7 +60,7 @@ Default: 0. </dd>
 <dt><b>size=</b> </dt>
 <dd>Size of the grid point. The shape of the point is circular,
 and the size is the diameter of this point. For square/recangular shapes,
-use <a href='snapgrid.1NEMO.html'><i>snapgrid(1NEMO)</i></a>
+use <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 . </dd>
 
 <dt><b>xvar=</b><i>x-expression</i> </dt>
@@ -139,7 +139,7 @@ the image(s) must fit into memory to obtain turbo speeds. Use non-negative
 to the snapshot and the image.  
 <h2><a name='sect6' href='#toc6'>Examples</a></h2>
 If the grid points are hidden in
-the columns of an ASCII table, the <a href='tabcols.1NEMO.html'><i>tabcols(1NEMO)</i></a>
+the columns of an ASCII table, the <a href='tabcols.1.html'><i>tabcols(1NEMO)</i></a>
  can be used to extract
 them directly into the xgrid= and ygrid= keyword, albeit perhaps somewhat
 ugly looking. Here is an example of taking a spectrum around each star in
@@ -151,15 +151,15 @@ a  10-body Plummer sphere, <br>
    snapifu p10 p10.ccd xgrid="$x" ygrid="$y"
 </pre><p>
 Currently the spectra are written to a CCD image where the 2nd axis is
-a dummy axis. There are least two ways to view these data. With <a href='ccdfits.1NEMO.html'><i>ccdfits(1NEMO)</i></a>
+a dummy axis. There are least two ways to view these data. With <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
 
-you can write a <a href='fits.5NEMO.html'><i>fits(5NEMO)</i></a>
+you can write a <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  file and ignore the dummy axis, and then display
 it in your favorite display program <br>
 <pre>  snapifu p10 p10.ccd xgrid="$x" ygrid="$y" zrange=-2:2 nz=32
   ccdfits p10.ccd p10.fits dummy=f
   nds9 p10.fits
-</pre>or use <a href='ccdsub.1NEMO.html'><i>ccdsub(1NEMO)</i></a>
+</pre>or use <a href='ccdsub.1.html'><i>ccdsub(1NEMO)</i></a>
  to reduce this axis for data that want a 2D image
 in the first two dimensions: <br>
 <pre>  ccdsub p10.ccd p10a.ccd dummy=f
@@ -167,14 +167,14 @@ in the first two dimensions: <br>
   ccdprint p10a.ccd x= y=
 </pre>
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='snapgrid.1NEMO.html'>snapgrid(1NEMO)</a>
-,  <a href='snaprotate.1NEMO.html'>snaprotate(1NEMO)</a>
-, <a href='snapslit.1NEMO.html'>snapslit(1NEMO)</a>
-, <a href='snapccd.1NEMO.html'>snapccd(1NEMO)</a>
+<a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
+,  <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+, <a href='snapslit.1.html'>snapslit(1NEMO)</a>
+, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
 ,
-<a href='ccdsub.1NEMO.html'>ccdsub(1NEMO)</a>
-, <a href='ccdprint.1NEMO.html'>ccdprint(1NEMO)</a>
-, <a href='image.5NEMO.html'>image(5NEMO)</a>
+<a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
+, <a href='ccdprint.1.html'>ccdprint(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 

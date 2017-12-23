@@ -111,12 +111,12 @@ command lists all species present in the catalogue <br>
   or shorthand:
     % tablovas master.lis all name | awk &rsquo;{print $1}&rsquo; | sort | uniq
 </pre><i>tablovas</i> is also suitable to be chained using Unix pipes and NEMO&rsquo;s convention
-to use <i>&rsquo;-&rsquo;</i> to designate a file on <i>stdin/out</i> (see <a href='getparam.3NEMO.html'><i>getparam(3NEMO)</i></a>
+to use <i>&rsquo;-&rsquo;</i> to designate a file on <i>stdin/out</i> (see <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
 ). <br>
 <pre>    % cat master.list | tablovas  - ... | tablovas - ... | more
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='tabpp.1NEMO.html'>tabpp(1NEMO)</a>
+<a href='tabpp.1.html'>tabpp(1NEMO)</a>
 , <a href='awk.1.html'>awk(1)</a>
 , <a href='grep.1v.html'>grep(1v)</a>
 , <a href='perl.1.html'>perl(1)</a>
