@@ -9,7 +9,7 @@ AC_INIT(nemo_start.csh.in)
 
 AC_MSG_CHECKING([NEMO config])
 
-dnl AC_CONFIG_HEADER([config.h:config.h.in])
+AC_CONFIG_HEADER([config.h:config.h.in])
 
 dnl -- checks for programs
 dnl -- checks for libraries
@@ -878,7 +878,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-AC_CONFIG_FILES(Makefile makedefs nemo_start.csh nemo_start.sh nemo.pl config.h)
+AC_CONFIG_FILES(Makefile makedefs nemo_start.csh nemo_start.sh nemo.pl)
 AC_OUTPUT
 
 echo "
