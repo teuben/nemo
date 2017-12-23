@@ -585,7 +585,6 @@ install:
 	@echo "      source nemo_end    -- if you have an *old* NEMO env"
 	@echo "      source nemo_start  -- load the NEMO environment"
 	@echo "      make postconfig    -- basic post configure things"
-	@echo "      source NEMORC.local   -- any last minute local changes"
 	@echo "      rehash                -- update search path" 
 	@echo "      make libs             -- install the libraries"
 	@echo ""
