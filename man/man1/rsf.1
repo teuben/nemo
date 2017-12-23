@@ -3,7 +3,7 @@
 .SH NAME
 rsf \- read a structured file
 .SH SYNOPSIS
-\fBrsf in\*e\fPfile \fBout\*e\fPfile
+\fBrsf in=\fPfile \fBout=\fPfile
 .SH DESCRIPTION
 \fIrsf\fP reads the ascii representation of a structured binary file 
 (ASF) as
@@ -14,10 +14,10 @@ totally different binary data type (e.g. Cray's, Sun's, Convex, DECs, IBMs)
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
-\fBin\*e\fP\fIfile\fP
+\fBin=\fP\fIfile\fP
 Input data is read from \fIfile\fP, which must be an ascii file.
 .TP 24
-\fBout\*e\fP\fIfile\fP
+\fBout=\fP\fIfile\fP
 Output data is written to \fIfile\fP in binary form.
 .SH SEE ALSO
 tsf(1NEMO), csf(1NEMO), filestruct(3NEMO).
