@@ -13,6 +13,10 @@ Makefile
 NEMORC.gen
 NEMORC.local
 NEMORC.sh
+nemo_local.csh
+nemo_local.sh
+nemo_start.csh
+nemo_start.sh
 adm/
 bin/
 config.h
