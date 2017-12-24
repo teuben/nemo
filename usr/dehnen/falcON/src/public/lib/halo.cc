@@ -28,6 +28,7 @@
 #include <utils/WDMath.h>
 #include <utils/timer.h>
 #include <cassert>
+#include </usr/include/strings.h> // ugly fix to prevent loading NEMOINC/strings.h
 using namespace falcON;
 //
 // class falcON::HaloModifier
