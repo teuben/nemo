@@ -15,6 +15,34 @@ CC              := $(GCC)
 FC              := gfortran
 
 PLATFORM 	:= $(shell uname -m)
+#
+# Detect GCC version
+#
+empty:=
+space:= $(empty) $(empty)
+GCCVERSIONSTRING := $(shell expr `$(CC) -dumpversion`)
+#Create version number without "."
+GCCVERSION := $(shell expr `echo $(GCCVERSIONSTRING)` | cut -f1 -d.)
+GCCVERSION += $(shell expr `echo $(GCCVERSIONSTRING)` | cut -f2 -d.)
+GCCVERSION += $(shell expr `echo $(GCCVERSIONSTRING)` | cut -f3 -d.)
+# Make sure the version number has at least 3 decimals
+GCCVERSION += 00
+# Remove spaces from the version number
+GCCVERSION := $(subst $(space),$(empty),$(GCCVERSION))
+# Crop the version number to 3 decimals.
+GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-3)
+#$(warning $(GCCVERSION))
+gccversion:
+	@echo "GCC version = " $(GCCVERSION)
+
+# set following variable to 1 if gcc > 700
+API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
+
+ifeq "$(API_GCC_7)" "1"
+    STDAPI=-std=c++03 
+else
+    STDAPI=
+endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
@@ -51,7 +79,7 @@ OPTFLAGS	+= -Woverloaded-virtual
 ifdef CXX11
 CXXFLAGS	:= -std=c++11 $(OPTFLAGS)
 else
-CXXFLAGS	:= -std=c++03 $(OPTFLAGS)
+CXXFLAGS	:= $(STDAPI) $(OPTFLAGS)
 endif
 
 ifdef OPENMP
