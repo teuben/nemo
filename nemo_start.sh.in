@@ -73,5 +73,7 @@ test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 # optional dot check?
 export PATH=$NEMOBIN:$PATH
 
-# falcON has no bash support yet
-echo No falcON support for bash yet
+# falcON 
+echo Only partial falcON support for bash 
+export LD_LIBRARY_PATH=$NEMO/usr/dehnen/utils/lib:$NEMO/usr/dehnen/falcON/lib:$LD_LIBRARY_PATH
+export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
