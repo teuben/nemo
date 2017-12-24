@@ -1742,7 +1742,7 @@ namespace WDutils {
     ConstSub operator[] (unsigned i) const
     { return A[i]; }
   };// class Array<T,1>
-  template<int D> class Array<void,D> {};
+  template<unsigned int D> class Array<void,D> {};
   template<> class Array<void,1> {};
   //
   /// \brief  Specialisation for D=0, provided for completeness only
