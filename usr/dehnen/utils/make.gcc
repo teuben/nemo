@@ -18,9 +18,9 @@ PLATFORM 	:= $(shell uname -m)
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
@@ -51,7 +51,7 @@ OPTFLAGS	+= -Woverloaded-virtual
 ifdef CXX11
 CXXFLAGS	:= -std=c++11 $(OPTFLAGS)
 else
-CXXFLAGS	:= $(OPTFLAGS)
+CXXFLAGS	:= -std=c++03 $(OPTFLAGS)
 endif
 
 ifdef OPENMP
