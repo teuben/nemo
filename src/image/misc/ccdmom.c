@@ -57,7 +57,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.6a\n  15-nov-2017 PJT",
+  "VERSION=2.6b\n  15-nov-2017 PJT",
   NULL,
 };
 
@@ -80,7 +80,7 @@ void nemo_main()
     string  oper;
     int     i,j,k,nx, ny, nz, nx1, ny1, nz1;
     int     pos[2];
-    int     axis, mom;
+    int     ii, axis, mom;
     int     nclip, apeak, apeak1, cnt;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
@@ -417,7 +417,7 @@ void nemo_main()
 		      /* DEBUG */
 		      if (Qpos && i==pos[0] && j==pos[1]) {
 			printf("# spectrum at %d,%d (0 based pixels)\n",i,j);
-			for (int ii=0; ii<nz; ii++) {
+			for (ii=0; ii<nz; ii++) {
 			  printf("%d %g %g %d\n",ii,spec[ii],smask[ii]*spec[ii],smask[ii]);
 			}
 			printf("# mom = %g\n",newvalue);
