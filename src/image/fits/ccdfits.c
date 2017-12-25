@@ -85,7 +85,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=5.9\n   14-apr-2017 PJT",
+        "VERSION=5.9a\n  25-dec-2017 PJT",
         NULL,
 };
 
@@ -226,7 +226,7 @@ void write_fits(string name,imageptr iptr)
     char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
     string *hitem, axname[4];
     float *buffer, *bp;
-    int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=4;
+    int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
