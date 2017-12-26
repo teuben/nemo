@@ -2,6 +2,8 @@
  *
  *      Revision history:
  *
+ *                        ansi-fied - Peter Teuben   
+ *
  *          Version 2.0:  Modified by Donald L. Nash to run on IBM PCs,
  *                        generic MS-DOS machines, generic UN!X machines
  *                        with big-endian architectures, and non-ASCII
@@ -26,10 +28,17 @@ long addr = 0l;                     /* current address in file */
 int linel;                          /* current line on page */
 CHAR encode[]="0123456789ABCDEF";   /* to convert int to hex number */
 
-main(argc, argv)
-int argc;
-CHAR *argv[];
 
+void address();
+int dumpline(FILE *fp);
+void format(CHAR *cbuf, int ccount, CHAR *fbuf);
+int getbuf(CHAR *bp, FILE *fp);
+FILE *nextfile(int argc, CHAR *argv[]);
+void page();
+void xlate(CHAR *cbuf, int ccount, CHAR *fbuf);
+
+
+void main(int argc, CHAR *argv[])
 {
 
     FILE *fp, *nextfile();
@@ -42,7 +51,7 @@ CHAR *argv[];
 } /* main */
 
 
-address()
+void address()
 
 /*
     This function prints out the current offset into the file.  If the
@@ -75,8 +84,7 @@ address()
 } /* address */
 
 
-dumpline(fp)
-FILE *fp;
+int dumpline(FILE *fp)
 
 /*
     This function dumps a CBSIZE byte line to stdout.  Each line contains
@@ -103,11 +111,7 @@ FILE *fp;
 } /* dumpline */
 
 
-format(cbuf, ccount, fbuf)
-CHAR *cbuf;
-int ccount;
-CHAR *fbuf;
-
+void format(CHAR *cbuf, int ccount, CHAR *fbuf)
 /*
     This function reads ccount bytes from cbuf and turns them into
     hexadecimal digit pairs in fbuf.
@@ -160,9 +164,7 @@ CHAR *fbuf;
 } /* format */
 
 
-int getbuf(bp, fp)
-CHAR *bp;
-FILE *fp;
+int getbuf(CHAR *bp, FILE *fp)
 
 /*
     This function gets the next CBSIZE bytes from fp.  The bytes read are
@@ -185,9 +187,7 @@ FILE *fp;
 } /* getbuf */
 
 
-FILE *nextfile(argc, argv)
-int argc;
-CHAR *argv[];
+FILE *nextfile(int argc, CHAR *argv[])
 
 /*
     This function steps through the files on the command line opening
@@ -239,7 +239,7 @@ loop:
 } /* nextfile */
 
 
-page()
+void page()
 
 /*
     This function starts a new page, prints the name of the input file or
@@ -277,10 +277,7 @@ page()
 } /* page */
 
 
-xlate(cbuf, ccount, fbuf)
-CHAR *cbuf;
-int ccount;
-CHAR *fbuf;
+void xlate(CHAR *cbuf, int ccount, CHAR *fbuf)
 
 /*
     This function reads ccount bytes from cbuf and puts them in fbuf.  A
