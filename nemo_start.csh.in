@@ -5,8 +5,12 @@
 #   @WARNING@
 #
 #   source this file to start NEMO; this file has some commented lines, 
-#   which you can place in your personal .nemo_local.sh or site nemo_local.sh
-# 
+#   which you can place in your personal 
+#            ~/.nemo_local.csh 
+#   or site installation
+#            $NEMO/nemo_local.csh
+#   
+#   CSH users can place this in their ~/.cshrc file
 
 
 #                                       Things via configure
