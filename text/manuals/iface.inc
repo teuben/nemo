@@ -1,4 +1,4 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
 %  Chapter: User Interface
 \myfile{iface.inc}

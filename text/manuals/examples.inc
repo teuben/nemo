@@ -1,4 +1,4 @@
-% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 % It also includes potential.inc
 %
 %   Chapter: examples, the start of the cookbook...
@@ -112,7 +112,7 @@ which is displayed in Figure~\ref{f:encounter1}.
         \leavevmode
         \epsfxsize=10cm
         \epsfysize=10cm
-        \epsffile{encounter1.ps}
+        %TODO \epsffile{encounter1.ps}
     \end{center}
  \else
     \vspace{1.0in}

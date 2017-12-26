@@ -1,4 +1,4 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
 % chapter Installing NEMO, updates and exporting
 %
@@ -6,11 +6,13 @@
 \mylabel{a:install}
 
 This Appendix describes installation and maintenance of NEMO. 
-NEMO currently consists of about 35MB of source, documentation, datafiles etc.
+NEMO currently consists of almost 60MB of source,
+documentation, datafiles etc.
 obtained either as a compressed tar file (around 6MB) or, preferably 
-actually, via CVS.\index{CVS}
-In NEMO V3 the installation has been simplified using autoconf, and
-users are encouraged to use CVS to install and update  their version
+actually, via git\index{git}. As of December 2017
+we no longer maintain the CVS \index{CVS} release.
+In NEMO V4 the installation has been simplified using autoconf, and
+users are encouraged to use git to install and update  their version
 of NEMO.
 
 The first Section \ref{as:suninst} walks you through an installation 
@@ -29,7 +31,7 @@ commands such as {\tt setenv}, {\tt source}, {\tt rehash}, {\tt set} etc.
 by the appropriate ones for another shell.  We mereley leave this as
 an excersize for the reader (:-).
 
-\section{CVS - NEMO V3.2}
+\section{git - NEMO V4.0}
 
 Most of this is now described in more detail in the file 
 {\tt README.install}, but
@@ -37,16 +39,14 @@ briefly here are the steps of a typical current NEMO install, using PGPLOT,
 in csh (there still is no proper sh support):
 
 \begin{verbatim}
-  setenv CVSROOT :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
-  cvs login			(a one-time only RETURN)
-  cvs -Q co nemo
+  git clone https://github.com/teuben/nemo
   cd nemo
-  (mkdir local; cd local; cvs -Q co pgplot)
+  (mkdir local; cd local; git clone https://github.com/teuben/pgplot)
 
   ./configure --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib
-  source nemo_start
+  source nemo_start.csh
   make postconfig
-  source NEMORC.local
+  rehash
 
   make pgplot
   make vogl
@@ -55,8 +55,8 @@ in csh (there still is no proper sh support):
  
 \end{verbatim}
 
-This process takes currently 2.5 minutes (P1.6GHz laptop, redhat 9) 
-and produces about 190 programs and occupies about 125MB of diskspace
+This process takes a few (2-3) minutes 
+and produces about 200 programs and occupies about 125MB of diskspace
 
 \section{Bootstrap}
 

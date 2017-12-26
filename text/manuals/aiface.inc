@@ -1,12 +1,10 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
 % Appendix: The user interface - references
 \myfile{aiface.inc}
 \mylabel{a:iface}
 
 This Appendix overviews the basic command-line interface of NEMO programs. 
-Front-ends, such as {\tt mirtool} and the {\tt miriad} shell are
-also described here.
 
 Every NEMO program accepts input through a user supplied parameter list
 of {\it 'keyword=value'} arguments. In addition to these 

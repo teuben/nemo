@@ -1,106 +1,83 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
-%  26-mar-94  for V2.2
-%   7-apr-01  for V3.0
+%  26-mar-94    for V2.2
+%   7-apr-01    for V3.0
+%  26-dec-2017  for V4.0, greatly simplified
+%
 % Appendix: setup
 \myfile{setup.inc}
 \mylabel{a:setup}
 
-This Appendix describe how you have to modify your UNIX environment in
-order to use NEMO.  It requires nothing more than a few additions to
-your standard {\tt .cshrc} startup file. 
-\index{.cshrc} \index{.login} We do however
-differentiate here between a {\bf static} and {\bf dynamic} setup.
 
-Overall installation of the NEMO package will be discussed separately,
-in Appendix~\ref{a:install} and requires some knowledge of the UNIX
-operating system. 
+
+This Appendix describes how you have to modify your UNIX environment in
+order to use NEMO.
+
+Overall installation of the NEMO package will be discussed separately
+in Appendix~\ref{a:install}, and requires some knowledge of your Unix
+operating system.  Here we assume somebody has already installed NEMO
+somewhere on the system for you. 
  
-\section{Static Setup}
+\section{Setup}
 \mylabel{s:staticins}
 
-A {\bf static} setup provides NEMO automatically every time you log in
-and may consist of up to four modifications to the {\tt .cshrc} file:
-    
-(1) The environment variable 
-{\bf NEMO}\footnote{The environment variable {\bf NEMOPATH} 
-is\index{NEMOPATH, environment} from V1 is now invalid}
-should\index{NEMO, environment}
-be defined to tell NEMO where its root directory is.
-This environment variable 
-is used to derive many subsequent references to locations
-of data files, documentation, program binaries, libraries etc.
-Add the following line to your
-{\tt .cshrc} file before any other references to NEMO are made,
-{\it e.g.}:
+The simplest would be something like
 
 \begin{verbatim}
-    setenv NEMO /usr/nemo
+    source /local/pkg/nemo/nemo_start.csh
 \end{verbatim}
 
-(or whatever your local root directory for NEMO is).
-
-(2) The optional environment variable {\bf NEMOHOST}\index{NEMOHOST,
-environment} should be set
-to refer to the HOSTTYPE\index{HOSTTYPE, environment} you want to run.
-If not present, NEMO will attempt to resolve it. Some UNIX shells 
-define an environment variable HOSTTYPE, which could also be used.
-
-(3) Add the statement\index{NEMORC, file}\index{startup file, NEMORC}
+if you are using a {\tt csh} type shell. This example is in the case when NEMO had
+been installed in {\tt /local/pkg/nemo/}.  In case you were using the {\tt bash}
+shell, this example would read
 
 \begin{verbatim}
-    source $NEMO/NEMORC
+    source /local/pkg/nemo/nemo_start.sh
 \end{verbatim}
 
-to your {\tt .cshrc} file. 
-
-(3) Your search path should include 
-{\tt \$NEMOBIN}, preferably in\index{PATH, environment}
-the beginning of the path definition.
-The reason for this specific location is that we often use
-a slightly modified {\it cc(1)} compiler (script),
-{\it e.g.}, you may then have something like \index{NEMOBIN, environment}
+If you don't know which shell you are using, the command
 
 \begin{verbatim}
-    set path=(. $NEMOBIN /bin /usr/bin /usr/local/bin )
+    echo $SHELL
 \end{verbatim}
 
-in your {\tt .cshrc} file. 
+should tell you.
 
-If you do this the very first time, make these modifications permanent for
-your current terminal session, {\it e.g.}:
-\begin{verbatim}
-    % source .cshrc ; rehash ; echo $PATH
-\end{verbatim}
+A word of caution: NEMO modifies a number of environment variables
+(e.g. {\tt \$PATH}) in order to work. It can happen that this will
+interfere with other packages which do the same.
 
-\section{Dynamic Setup}
-\mylabel{s:dynains}
+If you want to automatically make NEMO part of your shell, you will need to add
+the {\tt source} command to your {\tt .cshrc} or {\tt .bashrc} file, depending if
+you use {\tt csh} or {\tt bash} resp.\footnote{Mac users need to use .{\tt bash\_login}}
 
-A {\bf dynamic} setup provides NEMO only after a startup
-load command, usually dubbed {\tt nemo}, issued during an
-interactive terminal session. A script 
-{\tt \$NEMO/nemo.rc}\index{nemo.rc, file}\index{startup file, nemo.rc}
-is available for this purpose. The following two modification are then
-necessary to your {\tt .cshrc} file, instead of the above described
-procedure:
-
-\begin{verbatim}
-    setenv NEMO /usr/nemo
-    alias nemo 'source $NEMO/nemo.rc'
-\end{verbatim}
-
-Note the single quotes, to allow so-called late evaluation.
-Whenever the command ``{\tt nemo}'' is issued, the NEMO environment
-is loaded with whatever the current value of \$NEMO is.
-After this has been done, the {\tt nemo} alias is 
-replaced by another one to prevent re-entry. The alias
-{\tt omen}\index{omen} will unload NEMO from the environment.
 
 \section{Tailoring}
 \mylabel{s:tailoring}
 
-If you create a file {\tt .nemorc}\index{.nemorc}  in your
-home directory, it will be read after the standard  {\tt \$NEMO/NEMORC}
-(or {\tt nemo.rc})
-file, and this is where you would want to add your private NEMO additions,
+If you create a file {\tt .nemo\_start.csh}
+(or {\tt .nemo\_start.sh}) in your
+home directory, it will be read after the standard setup,
+and this is where you would want to add your private NEMO additions,
 or even override the things you don't want.
+
+\section{Interactive vs. Login shell}
+
+A reminder on Unix shells might be in place here. The two shells
+that most Unix shells are derived from are the orginal Bourne shell
+({\tt sh}) and C-shell (\tt csh}).  Their modern equivalents are {\tt bash}
+and {\tt tcsh}.
+
+Shells are either a login shell or an interactive shell. Depending on
+this nature, the shell will read one or more startup files. So placing
+the appropriate {\tt nemo\_start.(c)sh} file can be daunting under
+different Unix implementations (Linux and Mac seems to have taken a
+different approach).
+
+
+
+  
+% interactive bash:  /etc/profile, ~/.bash_profile, ~/.bash_login, ~/.profile
+
+% BASH: /etc/profile  ~/.profile  ~/.bash_login 1) ~/bash_profile
+% CSH:  /etc/csh.login  /etc/csh.cshrc  ~/.cshrc ~/.login

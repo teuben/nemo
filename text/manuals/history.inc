@@ -1,4 +1,4 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
 % chapter: Future, Present and Past
 \myfile{history.inc}
@@ -286,6 +286,10 @@ and making small updates to the package will be a lot easier.
 This section is not updated frequently, for more timely information it is probably
 better to consult
 {\tt http://www.astro.umd.edu/nemo/whatsnew.html}.
+
+\subsection{Release 4.0}
+Maintenance is now done via git. Include file directory in a new {\tt include/nemo}
+hierarchy to define a better namespace in C.
 
 \subsection{Release 3.3}
 To be released around the 2nd NbodySchool (Amsterdam, July 23-30 2005). Improved
@@ -684,5 +688,8 @@ tutorial/workshop weeks.
 
 \item[Summer 2005] Second summerschool, at MODEST-5c, In Amsterdam. Manual
 expanded with more examples.
+
+\item[Winter 2017] Conversion from using CVS to GIT, hosting on {\tt github.com}.
+Dubbed Version 4. now.
 
 \end{description}

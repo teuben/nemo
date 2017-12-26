@@ -1,5 +1,4 @@
-% This file is to be included by latex in nemo.tex
-% It also includes potential.inc
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 %
 % \section{Orbits}
 
@@ -119,7 +118,7 @@ keywords can be given, if the input orbit contains...
     \begin{center}
     \leavevmode
     \epsfysize=8cm
-    \epsfbox[90 90 510 510]{orb1.ps}
+    %TODO \epsfbox[90 90 510 510]{orb1.ps}
     \end{center}
 \caption{Sample orbit 1 ({\tt orb1.out})}
 \mylabel{f:orbit1}
@@ -221,7 +220,7 @@ will plot either a Y-VY or X-VX surface of section.
     \begin{center}
     \leavevmode
     \epsfysize=8cm
-    \epsfbox[90 90 510 510]{orb1sos.ps}
+    %TODO \epsfbox[90 90 510 510]{orb1sos.ps}
     \end{center}
 \caption{Surface of Section for sample orbit 1 ({\tt orb1.long})}
 \mylabel{f:orbit2}
