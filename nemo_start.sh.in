@@ -1,13 +1,19 @@
 #! /bin/csh
 #
 #   nemo_start.sh:
-#
+n#
 #   @WARNING@
 #
-#   source this file to start NEMO; the csh counterpart has some commented lines, 
-#   which you can place in your personal .nemo_local.sh or site nemo_local.sh
-# 
-
+#   source this file to start NEMO; the csh counterpart has some commented 
+#   lines, which you can place in your personal 
+#            ~/.nemo_local.sh 
+#   or site installation
+#            $NEMO/nemo_local.sh
+#   
+#   BASH interactive shell uses ~/.bashrc     
+#        login shell       uses ~/.bash_login (or .bash_profile)
+#   Note Linux uses the interactive shell, Mac uses the login shell
+#
 #                                       Things via configure
 export          NEMO=@NEMO@
 export      NEMOHOST=@NEMOHOST@
