@@ -2,11 +2,19 @@
  * run: tools to run external non-NEMO programs
  *
  *      17-sep-2013     finally written
+ *      26-dec-2017     add include's
  *
  */
 
 #include <stdinc.h>
 #include <run.h>
+
+/* mkdir */
+#include <sys/stat.h>
+#include <sys/types.h>
+/* chdir */
+#include <unistd.h>
+
 
 
 int run_mkdir(string name)
@@ -43,7 +51,7 @@ int run_popen1(string exe, string file)
 {
   FILE *fp = popen(exe,"w");
   if (fp==NULL) return 1;
-  fprintf(fp,file);
+  fprintf(fp,file);        /* has no args */
   fclose(fp);
   return 0;
 }
