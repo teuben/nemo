@@ -1,7 +1,7 @@
 #! /bin/csh
 #
 #   nemo_start.sh:
-n#
+#
 #   @WARNING@
 #
 #   source this file to start NEMO; the csh counterpart has some commented 
