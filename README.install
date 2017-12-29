@@ -1,37 +1,44 @@
 Installation overview:
 ----------------------
 
-This document gives some background information in case the  more
-automated scripts to install NEMO have failed you.
+This document gives some background information in case the more
+automated script(s) to install NEMO have failed you.
 
-Installation of NEMO V3.x roughly follows that of most open source
+Installation of NEMO V4.x roughly follows that of most open source
 packages, except that NEMO does not install its products in an
 external prefix like /usr/local, but keeps them "in-place" and
-bootstraps a special NEMO shell environment by sourcing a NEMORC file 
+bootstraps a special NEMO shell environment by sourcing an "rc" file 
 where things like your search path are modified for your shell.  Hence
 the basic scheme is more one of (except commands are different and
 detailed below!!!):
 
-	configure
-	source NEMORC		**bad**
+	configure [options]
+	source nemo_start.csh
 	make
 
-This installation has recently been slightly modified in VERSION
-3.2, and you will also need to run a conversion script if you upgrade
-from a VERSION 3.1 or below source code tree. There is no support for
-such upgrades from a 2.x version though, since the installation procedure
-between version 2 and 3 is too major, and by now nobody should be running
-2.x versions (before april 2001).
+This installation has recently been slightly simplified in VERSION
+4.0, at the same time we switched from CVS to GIT maintenance. There
+is no recommended conversion script, other than installing NEMO V4
+from scratch. The CVS tree is not maintained anymore.
 
 It may be handy to pre-install a few libraries and packages on your
 system, if they do not exist yet, though for a few common ones
-(e.g. pgplot, gsl, hdf) we do have some support to install them
+(e.g. pgplot, gsl, hdf) we also do have some support to install them
 within the NEMO tree before NEMO is installed.
 
 Preconditions to INSTALLATION
 =============================
 
-a1) Installing PGPLOT (native)
+a1) Installing PGPLOT - native distribution
+
+   Some (linux) distributions keep pgplot in their package list. For example
+   in Ubuntu you can say
+      	     sudo apt install pgplot5
+   (but see below for the giza version).  In this case you can use
+
+   	configure --with-yapp=pgplot --with-pgplot-prefix=/usr/lib
+
+a2) Installing PGPLOT (native CALTECH version)
 
    It is recommended to install PGPLOT before you install NEMO. 
    We do have a simple procedure to install PGPLOT during the NEMO
@@ -55,16 +62,31 @@ a1) Installing PGPLOT (native)
    On some older linux systems may need to create the following symbolic link
 		 ln -s /usr/X11R6 /usr/X11
 
-a2) Install PGPLOT (giza) - last updated 2015
 
-   Almost working?
+a3) Installing PGPLOT - MIRIAD pgplot git release
 
-   cd $NEMO/local
-   svn co http://svn.code.sf.net/p/giza/code/ giza
-   cd giza
-   ./configure --prefix=$NEMO
-   make
-   make install
+   You can also place the pgplot source code in $NEMO/local (the default git install
+   uses this method), and use something like
+
+   	make pgplot png=1 gif=1
+
+
+a4) Install PGPLOT (giza) - 
+
+    The giza package (http://giza.sourceforge.net) has its own implementation of PGPLOT,
+    which is compatible with cairo. Here is an example that seems to work with NEMO
+
+    cd $NEMO/local
+    svn co http://svn.code.sf.net/p/giza/code/ giza
+    cd giza
+    ./configure --prefix=$NEMO
+    make
+    make install
+
+    After this you can use the regular
+
+    cd $NEMO
+    configure --with-yapp=pgplot --with-pgplot-prefix=$NEMO/lib
 
 b) Installing HDF (now often called HDF4, since there HDF5 is the current version)
     
@@ -142,6 +164,8 @@ d) If you are on a system where you need to install NEMO and other packages,
 Brief overview of a Version 3.x INSTALLATION  
 ============================================
 
+*** this section needs changes for Version 4.x  ***
+
 1) Obtain the (compressed) tar file, nemo_<VERSION>.tar.gz, from ftp.astro.umd.edu:/progs/nemo
    and uncompress it anywhere where you have enough space (at least 150MB, but more is better):
 
@@ -165,10 +189,8 @@ Brief overview of a Version 3.x INSTALLATION
 		 or whichever is applicable, if the fortran compiler does not
 		 get detected properly, the run configure again)
 		 Check the file config.log if configure fails
-	% source nemo_end		(if you had an old NEMO running, but it won't hurt)
-	% source nemo_start
+	% source nemo_start.csh
 	% make postconfig
-	% source NEMORC.local		 
 	% rehash
 	% make libs
 
@@ -218,21 +240,18 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	% source nemo_start
 	% make dirs 
 	% make config_clean				<==
-	% rm NEMORC.local
 	% src/scripts/pgplot.install dir=/tmp		<==
 	% ./configure --with-pgplot-prefix=$NEMOLIB --with-yapp=pgplot
 	% make dirs config_extra scripts
-	% source NEMORC.local
 	% rehash
 	% make libs
 
    Or if you want to use our (not TJP blessed) PGPLOT cvs release 
 
 	% ./configure 
-	% source nemo_start
+	% source nemo_start.csh
 	% make dirs 
 	% make config_clean				<==
-	% rm NEMORC.local
         % cd $NEMO/local
 	% cvs co pgplot					<== cvs.astro.umd.edu
 	% cd $NEMO
@@ -466,29 +485,3 @@ before the
 
 
 
--- upgrading 3.1 -> 3.2
-
-
-If you are using CVS (or a tar file) to upgrade an existing NEMO installation,
-you must follow the following directions. Otherwise the safer route is to install
-NEMO from scratch again.
-
-For those who upgrade, you will probably do the following:
-
-    cd $NEMO
-    cvs update           # you will see lots of messages
-                         # the file "VERSION" should now read 3.2.1
-    src/scripts/nemo.32  # this will warn you that you current NEMO is unusable
-    omen                 # unload the current dis-functional NEMO
-    nemo                 # and load it back in
-
-this probably will work. To make sure see if you can compile, in fact you
-should, since some library routines have been fixed:
- 
-    make libs
-    mknemo tsf         # test if a simple program recompiles ok
-    mknemo snapplot    # test if a pgplot based program compiles ok
-
-if this all worked, probably it meant the transition to 3.2.1 was good. if not,
-changes in the $NEMOLIB/makedefs file and/or NEMORC.local may be needed. Please
-consult the installation procedure how to proceed on these.
