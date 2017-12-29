@@ -31,7 +31,7 @@ within the NEMO tree before NEMO is installed.
 Preconditions to INSTALLATION
 =============================
 
-a) Installing PGPLOT
+a1) Installing PGPLOT (native)
 
    It is recommended to install PGPLOT before you install NEMO. 
    We do have a simple procedure to install PGPLOT during the NEMO
@@ -54,6 +54,17 @@ a) Installing PGPLOT
 
    On some older linux systems may need to create the following symbolic link
 		 ln -s /usr/X11R6 /usr/X11
+
+a2) Install PGPLOT (giza) - last updated 2015
+
+   Almost working?
+
+   cd $NEMO/local
+   svn co http://svn.code.sf.net/p/giza/code/ giza
+   cd giza
+   ./configure --prefix=$NEMO
+   make
+   make install
 
 b) Installing HDF (now often called HDF4, since there HDF5 is the current version)
     
