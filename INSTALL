@@ -5,11 +5,11 @@ example how to install NEMO.
 Basically, the install is a sequence is that most autoconf based software
 uses:
 
-	./configure
+	./configure [options]
 	make install
 
-however, make install does not actuall install the software,
-but merely prints out the instructions what to do. 
+however, make install does not actuall install the software, but
+merely prints out the instructions what to do. 
 
 - Peter Teuben
 
