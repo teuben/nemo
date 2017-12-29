@@ -2,14 +2,11 @@
 ---------------------------------------------------------------------------
   MANIFEST                   This file
   Makefile                   Root makefile for NEMO (created by configure)
-  NEMORC                     Generic NEMORC startup file.
-* NEMORC.local               Your local tailoring & overwrite features
-  NEMORC.gen		     Exported version of NEMORC.local; copy at install
-  README                     Quick info on NEMO and where to continue reading
+  README.md                  Quick info on NEMO and where to continue reading
+  INSTALL                    Pointer to other instructions
   README.install             Installation instructions
   VERSION                    major.minor.patch - see src/scripts/version
-  nemo.rc                    Alternative startup procedure
-* nemo_start                 Startup 
+  nemo_start.sh              Startup  for bourne shell
+  nemo_start.csh             Startup  for C shell
 
 
-(*: files not exported to other sites, since they are site specific)
