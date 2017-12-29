@@ -26,6 +26,7 @@
 
 
 set nemo=nemo           # root directory name from the current directory
+set install=1           # set this to 0 when you only grab the source code
 
 set pgplot=1		# install PGPLOT via GIT also
 set intel=0		# pick intel compiler (astromake)
@@ -78,8 +79,7 @@ if ($reuse) then
 endif
   
 if ($?NEMO) then
-  echo Cannot test if NEMO=$NEMO is present already
-  echo "You may have the alias 'omen' to remove NEMO from the environment"
+  echo Cannot install with this script if NEMO=$NEMO is present already, this is not recommended
   exit 1
 endif
 
@@ -162,6 +162,10 @@ if ($cfitsio != 0) then
   set cfitsio=0
  endif
 endif
+
+
+# here? or before cfitsio? or move cfitsio down?
+if ($install == 0) exit 0
 
 
 set copts=()
