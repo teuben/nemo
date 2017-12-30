@@ -161,13 +161,12 @@ d) If you are on a system where you need to install NEMO and other packages,
 
 
 
-Brief overview of a Version 3.x INSTALLATION  
+Brief overview of a Version 4.x INSTALLATION  
 ============================================
 
-*** this section needs changes for Version 4.x  ***
 
-1) Obtain the (compressed) tar file, nemo_<VERSION>.tar.gz, from ftp.astro.umd.edu:/progs/nemo
-   and uncompress it anywhere where you have enough space (at least 150MB, but more is better):
+1) Obtain the source code via git or a versioned tar files.  We keep several versions in ftp.astro.umd.edu:/progs/nemo
+
 
         % gzip -cd nemo_VERSION.tar.gz | tar xf -
 
@@ -183,7 +182,7 @@ Brief overview of a Version 3.x INSTALLATION
 
 2) Run configure and install the basic NEMO libraries:
 
-	% ./configure 
+	% ./configure  [options]
 		(sometimes you may need to set your default compiler, e.g.
 			setenv F77 gfortran
 		 or whichever is applicable, if the fortran compiler does not
@@ -468,15 +467,15 @@ Example install: (assuming CVSROOT has been set)
 before the 
 	
 	cd $NEMO
-	src/script/version inc			
+	src/scripts/version inc			
   or
-	src/script/version set 3.0.1		
+	src/scripts/version set 4.0.1		
 
   then make a tar ball
 
-	make dist
+	make targit
 
-  which makes nemo_3.0.1.tar.gz
+  which makes nemo_4.0.1.tar.gz
 
 	make stamp
 
