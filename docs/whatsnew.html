@@ -7,8 +7,10 @@
 
 <H1> What's New in NEMO </H1>
 
+<!--
+    
 The latest official export version is
-<!--#include file="lastftp" -->
+   --#include file="lastftp" --
 </A>, though you can also try the probably more recent
 <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz> 
 nemo_cvs.tar.gz </A>, which is a CVS enabled
@@ -17,14 +19,12 @@ directory tree for anonymous CVS. The file
 contains a timestamp of that creation.
 <p>
 <hr>
+-->
 
-
-If you upgrade from a release 3.1.x you will need to
-read <A HREF=nemo32.html>these upgrade details</A>.
 <A NAME=4_0_0>
-<H2> 4.0.0:  in GIT (a.k.a. the ESO release) </H2>
+<H2> 4.0.0:  1 January 2018 (a.k.a. the ESO release) </H2>
 <UL>
-<LI> (nov-2017) conversion of a source code based in CVS to GIT. Source on
+<LI> conversion of our source code based in CVS to GIT. Source on
   <A HREF=https://github.com/teuben/nemo>  https://github.com/teuben/nemo</A>, docs now served via github pages on
   <A HREF=https://teuben.github.io/nemo>   https://teuben.github.io/nemo</A>.  The conversion process is
   when you see versions 3.9.2 and up (but before 4.0.0)
@@ -32,7 +32,8 @@ read <A HREF=nemo32.html>these upgrade details</A>.
   <A HREF=https://github.com/teuben/pgplot>  https://github.com/teuben/pgplot</A>, though this code is shared with miriad. Since MIRIAD has not been converted
   to git yet, sans the fork at
 <A HREF=https://github.com/pkgw/carma-miriad>carma-miriad</A>, this will need to be resolved. Apart from the dormant Caltech site, various Linux and Mac distros also make pgplot available, e.g. in Ubuntu "apt install pgplot5" works with
-NEMO as well. Another PGPLOT re-implemention seems to be in the <A HREF=http://giza.sourceforge.net/>giza</A> package.
+NEMO as well. Another PGPLOT re-implemention seems to be in the <A HREF=http://giza.sourceforge.net/>giza</A> package,
+but not all pgplot functions are fully implemented yet.
   
 <LI> The <A HREF=http://www.astro.umd.edu/nemo> old NEMO website </A> should disappear.
  
@@ -40,8 +41,9 @@ NEMO as well. Another PGPLOT re-implemention seems to be in the <A HREF=http://g
 
 
 <A NAME=3_3_3>
-<H2> 3.3.2:  in CVS </H2> (never released)
+<H2> 3.3.3:  in CVS </H2> (never released)
 <UL>
+<LI> lots of small updates in 2015 and 2016, but no numbered release was created.  
 <LI> (16-oct-2015) update glnemo2 to 1.9.0, reading 2D and 3D fits files
 <LI> (14-feb-2015) update glnemo2 to 1.8.1, Qt5 now fully supported,
   <a href=http://projets.lam.fr/projects/glnemo2/wiki/Download>
