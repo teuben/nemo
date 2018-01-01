@@ -1,4 +1,4 @@
-%% This file is to be included by latex in nemo.tex
+%    -*- LaTeX -*-     for inclusion in nemo.tex
 % 26-mar-94  for V2.2
 %
 %  Opening statements: Acknowledgements:
@@ -17,7 +17,7 @@ project we have also benefitted from contributions by Lyman\index{Hurd
 L.} Hurd, Eric\index{Roberts E.} Roberts, Mark\index{Ross M.} Ross, and
 Panayotis Skordis\index{Skordis P.}. You will also find many ideas
 originally developed in NEMO in derived and evolved products
-such as Starlab and ZENO.
+such as AMUSE, Starlab and ZENO.
 
 Of course any package will only improve when it is used.  Numerous
 people, in particular the University of Maryland graduate students and
@@ -53,7 +53,8 @@ references.
 {\it College Park, Maryland}\\
 {\it November, 1991}\\
 {\it August, 1994}\\
-{\it June, 2005}
+{\it June, 2005}\\
+{\it December, 2017}
 \end{flushleft}
 
 \normalsize
