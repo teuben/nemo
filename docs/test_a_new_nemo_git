@@ -17,6 +17,7 @@
 #               19-jan-2011   added a cmake=1 option to build internally
 #               25-jan-2012   DSO linking (dso=1) needed for modern linux
 #                5-dec-2017   converted CVS to GIT
+#               29-dec-2017   install=0 mktar=0 option
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -25,36 +26,37 @@
 #        test_a_new_nemo_git  git_nemo=`pwd`/nemo git_pgplot=`pwd`/nemo/local/pgplot    nemo=nemo2
 
 
-set nemo=nemo           # root directory name from the current directory
-set install=1           # set this to 0 when you only grab the source code
+set nemo        = nemo           # root directory name from the current directory
 
-set pgplot=1		# install PGPLOT via GIT also
-set intel=0		# pick intel compiler (astromake)
-set gfortran=1          # pick gfortran compiler (otherwise g77 is the default)
-set gcc=0		# pick gcc version (version number via astromake)
-set vogl=1		# compile vogl
-set glnemo=1            # compile glnemo2
-set unsio=0             # compile unsio and uns_project
-set gsl=0               # add GSL library
-set hdf=1               # use HDF library, if present
-set png=0               # add png for pgplot (can easily break other programs in NEMO)
-set gif=1               # add gi/pp/wd drivers (they use %ref/%val) for pgplot - not for gfortran <= 41
-set single=0            # singe or double (default) precision
-set all=1		# make all binaries , or just testsuite?
-set clean=1		# remove old nemo directory before installing (rm -r nemo)
+set install     = 1             # set this to 0 when you only grab the source code
+set mktar       = 0             # make a tar file before install starts
+set pgplot      = 1		# install PGPLOT via GIT also
+set intel       = 0		# pick intel compiler (astromake)
+set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
+set gcc         = 0		# pick gcc version (version number via astromake)
+set vogl        = 1		# compile vogl
+set glnemo      = 1             # compile glnemo2
+set unsio       = 0             # compile unsio and uns_project
+set gsl         = 0             # add GSL library
+set hdf         = 1             # use HDF library, if present
+set png         = 0             # add png for pgplot (can easily break other programs in NEMO)
+set gif         = 1             # add gi/pp/wd drivers (they use %ref/%val) for pgplot - not for gfortran <= 41
+set single      = 0             # singe or double (default) precision
+set all         = 1		# make all binaries , or just the one for the testsuite?
+set clean       = 1		# remove old nemo directory before installing (rm -r nemo)
 set git_nemo    = https://github.com/teuben/nemo
 set git_pgplot  = https://github.com/teuben/pgplot
-set branch=()		# use a GIT branch?
-set yapp=(/null)	# set a YAPP device during the install
-                  	# point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
+set branch      = ()		# use a GIT branch?
+set yapp        = (/null)	# set a YAPP device during the install
+                  	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
 set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
-set cfitsio     = 0     # disable for formal release since there are some problems
-set debug=1             # compile in debug mode (not implemented)
-set pedantic=0          # compile in pedantic mode
-set make=make           # make, gmake, pmake, bmake, ....
-set cmake=0             # 1= build internally
+set cfitsio     = 0             # disable for formal release since there are some problems
+set debug       = 1             # compile in debug mode (not implemented)
+set pedantic    = 0             # compile in pedantic mode
+set make        = make          # make, gmake, pmake, bmake, ....
+set cmake       = 0             # 1= build internally
 
-set unames=`uname -s`   # Darwin, Linux
+set unames      = `uname -s`    # Darwin, Linux
 
 # dso:                  # use DSO linking trick for new linux gcc.  4.6.3 on ubuntu needs it
 if ($unames == Linux) then
@@ -165,6 +167,11 @@ endif
 
 
 # here? or before cfitsio? or move cfitsio down?
+if ($mktar == 1) then
+  (cd ..; tar zcf $nemo.tar.gz $nemo)
+  echo $nemo.tar.gz created
+endif
+
 if ($install == 0) exit 0
 
 
@@ -207,8 +214,7 @@ rehash
 $make libs
 
 # backward compatibility support
-ln -s nemo_start.csh nemo_start 
-
+# ln -s nemo_start.csh nemo_start 
 
 if ($vogl) then
   echo "Compiling vogl for xyzview (logfile: install.vogl.log)"
