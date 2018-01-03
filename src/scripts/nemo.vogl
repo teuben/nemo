@@ -1,5 +1,7 @@
 #! /bin/csh -f
 #
+#   vogl is a simple (Open)GL based 3D library, with xyzview as the viewer
+#   Superseded by glnemo2
 
 switch (`uname -s`)
   case "Linux":
