@@ -323,6 +323,8 @@ helptar:
 	@echo "  % make distu"
 	@echo ""
 
+
+# @todo warning:  VER vs. $NEMOVER
 VER = `cat $(NEMO)/VERSION`
 GIT1 = https://github.com/teuben/nemo/
 GIT2 = https://github.com/teuben/pgplot/
