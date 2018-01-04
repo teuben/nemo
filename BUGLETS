@@ -4,10 +4,12 @@
   (they all depend on a weaker FS, vfat and HFS+ which cannot handle
   such names)
 
-- intel 8.0 - some linkeage problems left with loadobj based
-  routines, e.g. vrtm51.so can't  find get_atable
+- should move serious issues over into https://github.com/teuben/nemo/issues
 
-- intel 8.0 - io_nemo doesn't compile
+- intel 8.0
+  - some linkeage problems left with loadobj based routines,
+     e.g. vrtm51.so can't  find get_atable
+  - intel 8.0 - io_nemo doesn't compile
 
 - intel 7.1 also has some remaining problems. Linking needs to
   be done with fortran and the -Vaxlib library
@@ -26,20 +28,12 @@
 	 -DSINGLEPREC does not work for a number of programs due to
 	bad prototyping of the "proc" functions. This will be fixed,
 	and is also needed in preparation for NEMO V4 when a C++ compiler
-	will be the default compiler.
+	will be the default compiler. [obviously V4 is not adopted C++ yet]
 
 - install on darwin:
 	- FORLIBS get crt1.o or something, and this is not needed,
 	and will cause linkers to fail. It needs to be removed
-	from the $NEMOLIB/makedefs and NEMORC.local - if  present -
-
-- install on solaris:
-	awk cannot handle too many in src/scripts/need/
-	exception.c does not compile for gcc3 as well as solaris' cc
-	- FORLIBS needs the 
-	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
-	  type solution for pgplot, and if so,
-	- FORLIBS need to be added to YAPPLIB
+	from the $NEMOLIB/makedefs 
 
 * LFS seems to work, but keep an eye open on e.g.
 	http://freshmeat.net/articles/view/709/
@@ -113,15 +107,8 @@
 
   gcc3.0 is ok again, as is 2.95.3
 
-- solaris: still get -rdynamic in the link options, it works, but it
-  does not look nice. this is for gcc, didn't try /opt/SUNSWpro yet
-
 - Suse didn't resolve fortran binding to C too well for potentials
   (.so object files, e.g. athan92)
-
-- sol8:  potlist does not built due to __powf missing....   (cc)
-  need to manually adjust the $NEMOLIB/makedefs file and move the
-  -lsunmath line to FORLIBS
 
 - sgi: loadobjDL works for bodytrans, but not potentials....
 
@@ -140,6 +127,7 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences
+		 testsuite nbody/init and nbody/evolve/flowcode have problems
 
 - sgi:  for 64 bit mode add
 	 -mabi=64   (if gnu) ,or
@@ -170,11 +158,8 @@ potlist: rld: Fatal Error: attempted access to unresolvable symbol in
 - cfitsio: currently broken, seems to write huge files in e.g. ccdfits
 
 - magalie: hangs on gcc 4.1.0 ?? but this is the same gcc 4.1.0 in which
-	falcON mishbehaves, while on the laptop it's both ok.
-- gmake:  not working on FC5 ?
-
-- if configure fails (exit != 0) should we stop the install ??
-
+	falcON mis-behaves, while on the laptop it's both ok.
+	
 - pgplot (or yapp_pgplot): if the sccreen aspect ratio is not the
   classic 4:3, the plot is not square
 

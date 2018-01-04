@@ -16,7 +16,8 @@ NEMO -  A Stellar Dynamics Toolbox </H1>
 
 <hr>
 <IMG SRC=new.gif ALT="*">:
-NEMO is now managed in <A HREF=https://github.com/teuben/nemo>github</A>
+NEMO is now managed with git and hosted on
+<A HREF=https://github.com/teuben/nemo>github</A>
 <br>
 For the regulars: keep reading the
 <B><A HREF="whatsnew.html"> What's New </A></B>, the
@@ -221,32 +222,56 @@ in which NEMO has been used.
 <H2><img src=red.ball.gif alt="*">
     <A NAME=installation> Installation </A></H2>
 
+<!-- 
 The <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/> NEMO anonymous ftp directory</A> 
 has the following to offer:
+-->
 
-<UL>
- <LI> The now recommended CVS based installation. You can browse
-	some example scripts in the <A HREF=install>install scripts</A>
-	directory, this is the basic 3 lines:
+<OL>
+ <LI> Here is the now recommended GIT based installation.
+
 <PRE>
-        wget  ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz 
-        tar zxf nemo_cvs.tar.gz 
-	  # or combine these two with this one-liner (wget also has a similar mode):
-	curl ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz | tar zxf -
+	 %1 wget https://teuben.github.io/nemo/test_a_new_nemo_git
+	 %2 chmod +x test_a_new_nemo_git
+	 %3 ./test_a_new_nemo_git nemo=$HOME/opt/nemo
+	 %4 source $HOME/opt/nemo/nemo_start.csh
+     
+</PRE>
+
+There are some assumptions in these 4 basic steps. For the 1st step,
+if you don't have the wget program, get something
+similar that can download this script, e.g. curl, or just your favorite browser.
+You can of course pick the
+location of NEMO to be anywhere, but we picked $HOME/opt/nemo in this example.
+In the 4th step it also assumed you
+were using the C-shell. If you are a bash user, source the nemo_start.sh script
+instead!
+
+
+ <LI> A tar file from our ftp server may also work. 
+   Here is an example using 
+<PRE>
+        %1 wget  ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz
+           or
+	%1 curl ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz | tar zxf -
+	
+	%2 tar zxf nemo_git.tar.gz 
 
 		# wget could need --active-ftp, since --passive-ftp is default
 		# curl has a similar option, --ftp-pasv
 
-        cd nemo_cvs
-        cvs login ; cvs update -d          # just to be sure to be up to date
-        source AAA_SOURCE_ME
+        %3 cd nemo_git
+	%4 git pull                # optional if you don't need any updates
+	%5 docs/test_a_new_nemo_git nemo=. reuse=1
 </PRE>
     and you should have a working NEMO with PGPLOT as the plotting
     engine.
- <LI> There are a number of optional libraries you will need to install
-      all of the programs:
+   <LI> There are a number of optional libraries you will need to install
+     if you want to use every possible program or option in NEMO. If this is you
+     first time using NEMO, we recommend you to skip this unless you need a specific
+     program that needs one of those optional libraries.
    <UL>
-   <LI> pgplot or plplot (with this X11 of course)
+   <LI> pgplot or plplot (both will need X11, the default installation uses our builtin pgplot)
    <LI> hdf4
    <LI> cfitsio
    <LI> pvm
@@ -256,91 +281,28 @@ has the following to offer:
    <LI> fftw
    <LI> rdl (readline)
    </UL>
- <LI> <A HREF=autobuild_logs>automatic build logfile of NEMO</A> are
-	now produced as soon as new code has been checked into CVS.
 
- 
- <LI>  	<!--#include file="lastftp" -->, a (normally 
-	<A HREF=ftp://ftp.netscape.com/pub/unsupported/gnu>gzip</A>
+ <LI>  A versioned <A HREF=ftp://ftp.netscape.com/pub/unsupported/gnu>gzip</A>
 	compressed) tar 
-	file, that contains the	latest official release.
-	Note this contains a full <I>src</I> tree, and small sections
-	of the so-called <I>usr </I> tree.
+	file, that contains the	latest official release. Pick any nemo_4.x.y version
+	from the
+	<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/> NEMO anonymous ftp directory</A>.
         If you plan to use a stable NEMO and probably won't upgrade for a while,
-	this would be the recommended path of installing.
-<LI>    Some older <A HREF=macosx.html>MacOSX related installation notes</A>,
+        this would be one way of installing. We still recommend the git
+        based release, as you can always go back to an older release, for example
+<PRE>
+        % git checkout nemo_4_0_2
+</PRE>
+        would get you the equivalence of the 4.0.2 release.
+        Although old tags in the 3.x series exist when NEMO was maintained in CVS,
+        installation procedures and directory structures were different, which we
+        don't support anymore. You will be on your own here.
+        
+   
+<LI>    Some old <A HREF=macosx.html>MacOSX related installation notes</A>,
 	although the regular installation method should work fine as long
-	as you have compilers and various external libraries (notably X11) installed.
+  as you have compilers and various external libraries (notably X11) installed.
 
- <LI>  You can also download the latest
-	<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nemo_cvs.tar.gz> 
-	nemo_cvs.tar.gz </A>, which is an anonymous-
-	<A HREF=http://www.astro.umd.edu/~teuben/miriad/cvs.html>
-	CVS</A> enabled
-	directory tree. Just install it as usual (i.e. read the
-	blurbs in the file INSTALL).
-	If you want
-	bleeding edge (read: fast and reliable) updates, this
-	command will do it:
-	<pre>
-	    cd $NEMO ; make cvslogin              # one time setup
-	    cvs -n -q update                      # check what's new, locally
-	    cvs update -d -P                      # update the tree locally
-	</pre>
-	We currently don't use any <A HREF=http://www.txcorp.com/codeconventions/BranchRelease.html>
-	CVS branching</A>, just a single mainline CVS.
-	After this you can update your libraries/programs, e.g.
-	<pre>
-	    cd $NEMO ; make libs                  # redo libraries, if needed
-	    mknemo tsf mkplummer ....             # relink selected binaries
-	</pre>
-      If you plan to use NEMO in any development way, this would be the recommended
-	path of installing. If you prefer to stay more "stable", you can
-	always use our tagnames to update only to the most recent update, e.g.
-	<pre>
-            cd $NEMO
-            cvs update -r nemo_3_0_16
-	</pre>
-        i.e. replace the dot with an underscore in your VERSION. Notice
-        that this operation will create sticky tags, if you change
-        a file for your own purporse, CVS will flag you a conflict.
-<!--
- <LI> A <A HREF="ftp://ftp.astro.umd.edu/pub/nemo/bootstrap"> bootstrap </A>
-      loader. 
-      <A HREF=bootstrap> This </A> is a small C-shell script, that you can
-      save anywhere on 
-      your local disk, and execute it to bootstrap NEMO from scratch. 
-      For example,
-	<UL>
-	<LI> <b> chmod +x bootstrap </b>
-	<LI> <b> bootstrap nemo=/usr/nemo </b>
-	</UL>
-      will pick up the tar file from Maryland, via anonymous ftp, 
-      and install a bootstrap
-      version of NEMO, including a few small programs, in a directory
-      called <b>/usr/nemo</b> and below. Note that the <b>nemo=</b>
-      directory must be an absolute directory name.
-      After this bootstrap installation you still have to tailor your
-      site for things like graphics and dynamic object loading, but
-	at least it gets you started.
-
--->
-
- <LI>  A binary release of NEMO is also available within 
-	<A HREF=linuxastro/astromake>astromake</A>, either
-	download astromake and update via the astromake
-	procedure, or download the binary from
-	<A HREF=ftp://ftp.astro.umd.edu/pub/astro/>
-	ftp://ftp.astro.umd.edu/pub/astro/</A>.
-
-<!-- BEGIN abstract 
- <LI>  	<!--#include file="lastpatch" -->, the last patch tarfile that 
-	was made. This patch file can be updated several times, until
-	the next patchlevel has come out. If the patch level is the
-	same as that export version there is no reason 
-        to get this now-old patch file. This patch file should
-	be untarred in the $NEMO directory.
--->
 
  <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nbody0.tar.gz>
         Aarseth's nbody0</A>. Although the source code is 
@@ -351,7 +313,9 @@ has the following to offer:
 	"standalone". See also 
 	<A HREF=ftp://ftp.ast.cam.ac.uk/pub/sverre>Sverre's anonymous ftp</A>
 	for the more advanced versions. NEMO also contains nbody1 and 
-	nbody2 with NEMO interfaces.
+	nbody2 with NEMO interfaces to make running from the unix commandline
+	a bit more painless. An example manual page of such a program for
+	NBODY1 is given <A HREF=man_html/runbody1.1.html>here</A>.
 
  <LI> <A HREF="ftp://ftp.astro.umd.edu/pub/nemo/nbodyfits.tex">
         NEMO nbody fits proposal</A> (This is now an outdated version,
@@ -360,24 +324,19 @@ has the following to offer:
 
  <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/tkrun.tar.gz>
 	tkrun</A>, 
-	automatic GUI builder and frontend to run shell scripts or programs.
+   automatic GUI builder and frontend to run shell scripts or programs.
+   It also comes included with NEMO, and is part of the default install.
 
  <LI> <A HREF=optional.html> optional software</A> that can be installed
 	to enrich NEMO (this is where you find links to PGPLOT, HDF, CFITSIO etc.)
 
  <LI>  The <A HREF=http://www.randomfactory.com/>
 	Linux for Astronomy </A> CD-ROM contains a release of NEMO. Also
-  	check <A HREF=lfa.html>latest LFA comments</A>.
-</UL>
+  	check <A HREF=lfa.html>latest LFA comments</A>. 
+</OL>
 
 Difficulties during installation are most likely resolved by consulting
-Appendix G in the (rather large)
-<A HREF="ftp://ftp.astro.umd.edu/pub/nemo/nemo.ps.Z"> manual </A>,
-and checking last minute changes that are
-discussed in the <A HREF="README"> $NEMO/README </A> file. 
-You may
-also pick up some hints from my <A HREF="NEMORC.local"> NEMORC.local </A>
-file.
+the $NEMO/README.install file.
 <P>
 If you download NEMO, we ask that you register the software, you can also
 optionally be notified of new releases, but please:
@@ -394,7 +353,7 @@ Other software, that we know of, that deal with particle simulations, are
 
 <LI> <A HREF=http://www.ids.ias.edu/~starlab/starlab.html> STARLAB </A>; 
 created by Piet Hut, Steve McMillan and Jun Makino, was loosely modeled
-after NEMO.
+after NEMO, but deals more with collisional dynamics.
 
 <LI> <A HREF=http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html>ZENO</A>
 is NEMO's close relative; created by
@@ -514,7 +473,8 @@ Codes: gobs and gobs of computer code freely made available.
 	(Paul Bode's Tree-Particle-Mesh code)
 <LI> <A HREF=http://www.mpa-garching.mpg.de/gadget/>GADGET</A>, 
   Volker Springer's and Naoki Yoshida's tree-code for (cosmological) N-
-  body/SPH simulations .
+body/SPH simulations. Related are GADGET2 (rewritten in C) and GADGET3
+(not publically available).
 <LI> <A HREF=http://www.astro.northwestern.edu/StarCrash/>
 	StarCrash</A>, an parallel SPH code.
 <LI> <A HREF=http://www-thphys.physics.ox.ac.uk/users/MLAPM/>
@@ -928,6 +888,7 @@ and other pretty pictures:
   <LI> <A HREF=http://asds.stsci.edu/asds/index.html> ASDS </A>
 	(Astronomical Software & Documentation Service)
   <LI> <A HREF=http://fits.cv.nrao.edu/www/yp_software.html>AstroWeb</A>
+  <LI> <A HREF=http://ascl.net>ASCL</A>
 
   </UL>
 <!-- TO COME? 
@@ -982,7 +943,7 @@ University of Maryland</A> in
 This page was last modified on
 <!--#config timefmt="%d-%h-%Y" -->
 <!--#echo var="LAST_MODIFIED" -->
-by PJT. &#169; 2004...2012
+by PJT. &#169; 2004...2018
 
 </BODY>
 

@@ -5,11 +5,11 @@ This is the 4th major release of NEMO,  and although data are compatible
 with earlier releases, source code may need to be tweaked a
 bit to compile and link in the newer releases. 
 
-   * NEMO V1:	IAS release (Barnes, Hut & Teuben; appr. 1987)
-   * NEMO V2:	UMD release (Teuben 1994)
-   * NEMO V3:	UMD release (Teuben 2001) with autoconf support and
+   * NEMO V1:	IAS release (Barnes, Hut & Teuben, 1987)
+   * NEMO V2:	UMD release (Teuben, 1994)
+   * NEMO V3:	UMD release (Teuben, 2001) with autoconf support and
 		hooks into manybody.org modules starlab and partiview
-   * NEMO V4:        UMD/ESO release (2017) now maintained within github
+   * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
 A related package, ZENO, was spun off NEMO V1, and is maintained by Barnes.
 

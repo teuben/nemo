@@ -1,10 +1,12 @@
   - a new CVS branch is dealing with a better definition of		
     images, basically doing FORDEF instead of CDEF.
-    CDEF has always been a bad idea...
+    CDEF has always been a bad idea... given that most our
+    image work is via FITS
 
   - objects > 2GB or 4GB have issues, since allocate() deals 
     with int, not size_t. That's being addressed in 3.2.5
     (May 2007)
+    [fixed now]
 
 MacOSX problems: (a special macosx.html web page dedicated to this)
     See:     http://bima.astro.umd.edu/nemo/macosx.html
@@ -28,7 +30,7 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
   - xyzview is too slow to be useful, we should recode it such that
     OpenGL (and thus Mesa) can be linked. This would also remove the
     immediate need for vogl.
-    try JCL's new program 'glnemo' instead, it's far superior.
+    -> now superseded by glnemo2
 
   - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
     the path -> pgplot didn't get build.
@@ -171,32 +173,15 @@ some other help on configure:
 code & line coverage: (gcov, lcov)
   http://ltp.sourceforge.net/coverage/lcov.php
   
-- io_nemo library written by JCL in Marseille
-	has problems in -DSINGLEPREC
-	problems with intel compiler
-
 - use cfortran?  cfitsio also uses it.
 
 - gyrfalcON uses potentials in such a way that only potential_float
   is looked for ???
 
-- install on solaris is broken:				[fixed w/ gcc, cc/f77 minor patch needed]
-
-  for native (cc/CC/f77) compilers, use:
-	- FORLIBS needs the 
-	  -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath 
-	  type solution for pgplot, and if so,
-	- FORLIBS need to be added to YAPPLIB
-  Also:
-	- sun's make (e.g. the one in /usr/ccs/bin/make) doesn't work, we need gmake (GnuMake)
-
 - compile under cygwin
     - macro usage of some math function?  real rlog2(real); 
 
 - fix problems when replacing gnu make with pmake
-
-- fix for pgplot  when libpng is needed, or tcl/tk for that matter....
-	**done; pgn=0 or 1 is now a keyword, --enable-png is allowed and used**
 
 - unsio (and possibly a few more modules) won't link if e.g. pgplot was enabled
   with png. are some interfaces not cleanly separated?  maybe via yapp_pgplot ?
@@ -247,10 +232,9 @@ code & line coverage: (gcov, lcov)
 	        include    if it specifies -I DIR
 		    lib    if it specifies -L DIR
 
-
 - alternatives to autoconf?  
 	Pre Make Kit  = http://pmk.sourceforge.net/
-	Cmake (KDE uses it)
+	cmake (KDE uses it)
   also check the Autoconf Macro Archive: http://autoconf-archive.cryp.to/
  
 - Testfile's:    also needs a program to be added to the local Makefile,
@@ -258,31 +242,8 @@ code & line coverage: (gcov, lcov)
 	that's non-intuitive
 
 - man pages vs. doxygen; especially the introduction of C++ is showing 
-  the aging of man pages. should we switch to doxygen.
+  the aging of man pages. should we switch to doxygen?
 
-- solaris10 on intel: (sep 2005)
-
-  choose CC,CXX,F77 =>  /opt/SUNWspro/bin/{cc,CC,f77}	      Sun Studio 10: C 5.7 compiler
-	or:             /opt/sfw/gcc-3/bin/{gcc,g++,g77}      GNU 3.4.0
-
-  Need to patch your env before installing:
-
-	make -> gmake			/usr/ccs/bin/make is the default and not GNU
-				ln -s /opt/sfw/bin/gmake make
-	whoami -> who am i    (e.g. use shell script "
-
-
-setenv CC  /opt/SUNWspro/bin/cc
-setenv CCX /opt/SUNWspro/bin/CC
-setenv F77 /opt/SUNWspro/bin/f77
-
-or
-setenv CC  /opt/sfw/gcc-3/bin/gcc
-setenv CCX /opt/sfw/gcc-3/bin/g++
-setenv F77 /opt/sfw/gcc-3/bin/g77
-
-	
-	Problem:   loadobj doesn't work, testloadobj doesn't find dprintf
 
 Linking:
 --------
@@ -372,4 +333,38 @@ patch brent.for -i brent.patch -o brent_dbl.f
 
 diff brent.for ..
 diff brent_dbl.f ..
+
+
+git tricks
+----------
+
+0) commands beginners should know
+
+   git clone URL                    # get a new repo from URL
+   git pull                         # update the repo
+   git add FILE                     # add a new FILE
+   git commit FILE                  # commit the FILE 
+   git push                         # push the commit's
+
+1) working with tags
+
+   git tag --list                   # see what tags you have
+   git tag nemo_4_3_2               # make a new tag (locally)
+   git tag -d nemo_4_3_2            # delete that tag
+   git push origin nemo_4_3_2       # push it out to the world 
+   git checkout nemo_4_3_2          # switch to a tag
+   git checkout master              # revert back
+
+   todo:  see if "git push --tags"  also works
+
+2) can you see what will be pushed when you "git push"
+   since you may have done a whole bunch of "git commit"
+   It would say something like
+      "Your branch is ahead of 'origin/master' by 8 commits"
+
+
+3) if you accidentally edited a FILE and want to "undo" it,
+   i.e. revert back to the original FILE:
+
+   git checkout FILE
 

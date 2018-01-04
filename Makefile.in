@@ -1,9 +1,9 @@
-VERSION = NEMO V3.9 23-dec-2017 PJT
+VERSION = NEMO V4.0 3-jan-2018 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
 
-#  useful for MacOSX since it can't distinguish case (grmpfff)
+#  useful for MacOSX since it can't distinguish case for most users (grmpfff)
 .PHONY:  INSTALL install
 
 
@@ -13,17 +13,19 @@ VERSION = NEMO V3.9 23-dec-2017 PJT
 # They are always architecture dependant files, that never get exported and
 # created during a new installation.
 
-# relative to $(NEMO)
+# these are all relative to $(NEMO)
 CHECKDIR1 = data inc news tmp csh \
             man man/man1 man/man3 man/man5 man/man8 man/manl \
             demo etc adm bin lib obj \
 	    local \
-            adm/import adm/export adm/install adm/submit adm/purge 
+            adm/import adm/export adm/install adm/submit adm/purge
+
+_ASCIIDIRS_  = text bugs man/doc  $(SRC) $(USR)       # check if ASCIIDIRS can go
+
 
 # absolute (derived) directories & files
 CHECKDIR2 = $(NEMOBIN) $(NEMOLIB) $(NEMOOBJ) \
-            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential $(NEMOOBJ)/acc $(NEMOOBJ)/manip \
-            $(NEMOOBJ)/fit \
+            $(NEMOOBJ)/bodytrans $(NEMOOBJ)/potential $(NEMOOBJ)/acc $(NEMOOBJ)/manip $(NEMOOBJ)/fit \
             $(NEMO)/py $(NEMO)/py/modules \
 	    opt opt/include opt/lib opt/bin
 
@@ -34,8 +36,8 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 ################################################################################
 #  Top level sub-directories in NEMO that contain Makefiles for NEMO install.
 #  Currently accepted are:
-#	src 		- standard export
-#	usr		- user contributions (not really supported anymore)
+#	src 		- standard export (NEMO expects install targets)
+#	usr		- user contributions (have their own install methods)
 MAKEDIRS = src 
 
 ################################################################################
@@ -43,13 +45,16 @@ MAKEDIRS = src
 # and used in incremental export tar files (Nightly/export.csh)
 # SRC is to select subsections of the whole src tree
 # To get all of NEMO, choose SRC=src usr (see e.g. tarkernel below)
+#
+# @todo   this can go for 4.0
 SRC = src
 USR =
 #
 ASCIIFILES = COPYING MANIFEST NEMORC PORTING README VERSION \
 	     src/Makefile \
 	     configure configure.in \
-	     Makefile.in makedefs.in config.h.in makedefs.in NEMORC.gen.in nemo_start.in \
+	     Makefile.in makedefs.in config.h.in \
+	     nemo_start.csh.in nemo_start.sh.in \
              install-sh config.sub config.guess \
 	     nemo.rc nemo_end \
 	     man/tmac.an man/whatis man/Makefile 
@@ -63,21 +68,20 @@ CHKFILE = adm/chkfile
 #	Some default macro names, they can be overridden by supplying them
 #	on the commandline, e.g. "make tarfile /usr/moi/nemo.tar
 
-TAPE   = /dev/tape
 FILE   = $(NEMO)/nemo.tar
-USRTAR = $(NEMO)/nemo_usr.tar
 BACKUP = $(NEMO)/nemo-fullbck.tar
 
 #
 MOTD = $(NEMO)/etc/motd
 TIMESTAMP=$(NEMO)/adm/TIMESTAMP
-#
+
+# local NEMO enhanced installed manually by a NEMO administrator
 NEMO_RC_CSH = $(NEMO)/nemo_local.csh
 NEMO_RC_SH  = $(NEMO)/nemo_local.sh
 
-
 #  Master site (Maryland) specific, and probably not used anywhere else
 FTPDIR = /local/ftp/pub/nemo/
+SFTPDIR = chara.astro.umd.edu:$(FTPDIR)
 WWWDIR = $(NEMO)/local/www
 ################################################################################
 # INSTALL:
@@ -86,13 +90,13 @@ WWWDIR = $(NEMO)/local/www
 
 SHELL = /bin/sh
 
-# this should remain the first target in this Makefile
-helphelphelp:
+# this should remain the first target in this Makefile, so a default "make" invocation goes here
+help:
 	@echo ""
 	@echo "There is no default make in NEMO. For installation"
-	@echo "guidelines use 'make install'"
+	@echo "guidelines use 'make install' or read the INSTALL file"
 
-helphelp:
+help2:
 	@echo ""
 	@echo " ### NEMO installation help menu ###"
 	@echo ""
@@ -105,13 +109,9 @@ helphelp:
 	@echo FC=$(FC)  FFLAGS=$(FFLAGS)
 	@echo MAKE=$(MAKE) MFLAGS=$(MFLAGS)
 	@echo ""
-	@echo check your .cshrc file, installation manual and the README file 
-	@echo in case some of the above environment variables are not defined.
-	@echo ""
-	@make helpme
-helpme:
-	@echo "Additional help targets: helpme, helpman, helpfind, helptar"
+	@echo "Additional help targets: helpfind, helptar"
 
+# make sure all directories and files are present before install can take place
 dirs: 
 	@echo Checking directory structure on `date`
 	@echo By `whoami` on `hostname`
@@ -180,6 +180,7 @@ dirs:
 	@echo "OK, all main directories and files should be there now"
 	@echo Done at `date`
 
+# @todo: deprecate?
 pjt:
 	@if [ ! -f $(NEMOLIB)/makedefs ]; then \
 	    if [ -f $(NEMO)/makedefs ]; then \
@@ -194,13 +195,6 @@ pjt:
 	    ls -l $(NEMOLIB)/makedefs;\
 	fi
 
-
-start:
-	$(MAKE) nemo_start NEMO=`pwd`
-
-alias:
-	@echo "# add these lines to your .cshrc file:"
-	@echo "alias nemo 'setenv NEMO "$(NEMO)" ; source $$NEMO/nemo_start'"
 
 scripts:
 	@echo Installing scripts on `date` 
@@ -240,70 +234,9 @@ html:  doxygen
 doxygen:
 	(cd text; doxygen nemo-doxygen.cfg)
 
-readme.html: readme.md
-	markdown_py -x toc readme.md > readme.html
-
-##############################################################################
-# FIND utilities
-#
-FINDDIR=src
-
-
-##############################################################################
-# FIND utilities
-#
-FINDDIR=src
-
-helpfind:
-	@echo "Some expert targets here are (FINDDIR=$(FINDDIR)) :"
-	@echo "new:         show all new files since CHKFILE=$(CHKFILE)"
-	@echo "new_patch:   show all new files since last patch $(PATCHTAR)"
-	@echo "clobber:     delete all .o and .a files"
-	@echo "findbad:     find where all .[aio] files under NEMO/src are"
-	@echo "findexec:    find where all the executables are"
-	@echo "findold:     find where backup files are"
-	@echo "timestamp:   list all files newer than TIMESTAMP"
-	@echo "timestamp_ls:list all files newer than TIMESTAMP in ls -l format"
-
-new:
-	-@for i in $(EXPORTA); do \
-	(find $$i -newer $(CHKFILE) -type f  \! -name '.[a-z,A-Z]*' -print); done
-
-newtar:
-	@echo Slow process, using CHKFILE=$(CHKFILE)
-	@touch tmp/newtar;tar cvf new.tar tmp/newtar
-	-@for i in $(EXPORTA); do \
-	(find $$i -newer $(CHKFILE) -type f -exec tar rvf new.tar '{}' \;); done
-	@rm tmp/newtar
-
-clobber:
-	@echo "Deleting all .a and .o files - sleeping 5 seconds first"
-	sleep 5
-	find $(FINDDIR) -type f \( -name '*.[oa]' \) -print -exec rm '{}' \;
-
-findbad:
-	find $(FINDDIR) -type f \( -name '*.[aio]' -o -name \*.def -o -name \*.log \) -print
-
-finddot:
-	find $(FINDDIR) -type f \( -name .\* \) -print
-
-findold:
-	find $(FINDDIR) -name \*~ -print
-
-
-findexec:
-	@echo "Showing where executable files live..."
-	@find . -type f -perm -0111 -print
-
-timestamp:
-	@echo "Showing new file since last local timestamp:"
-	@ls -l $(TIMESTAMP)
-	@find . -type f -newer $(TIMESTAMP) -print
-
-timestamp_ls:
-	@echo "Showing new file since last local timestamp:"
-	@ls -l $(TIMESTAMP)
-	@find . -type f -newer $(TIMESTAMP) -exec ls -l '{}' \;
+README.html: README.md
+	# markdown_py -x toc readme.md > readme.html
+	pandoc README.md -o README.html
 
 
 ##############################################################################
@@ -311,6 +244,8 @@ timestamp_ls:
 
 helptar:
 	@echo "Install tar targets:"
+	@echo "  % make targit"
+	@echo "  % make targit0"
 	@echo "  % make tarfile [FILE=$(FILE)]"
 	@echo "  % make tarbackup [BACKUP=$(BACKUP)]"
 	@echo "  % make purge"
@@ -323,6 +258,8 @@ helptar:
 	@echo "  % make distu"
 	@echo ""
 
+
+# @todo warning:  VER vs. $NEMOVER
 VER = `cat $(NEMO)/VERSION`
 GIT1 = https://github.com/teuben/nemo/
 GIT2 = https://github.com/teuben/pgplot/
@@ -333,10 +270,18 @@ targit:
 	mkdir nemo_$(VER)/local
 	git clone $(GIT2) nemo_$(VER)/local/pgplot
 	echo WARNING: snapshot gitless export `date` >> nemo_$(VER)/VERSION
-	echo	rm -rf nemo_$(VER)/.git nemo_$(VER)/local/pgplot/.git
+	rm -rf nemo_$(VER)/.git nemo_$(VER)/local/pgplot/.git
 	tar zcf nemo_$(VER).tar.gz nemo_$(VER)
 
+targit0:
+	rm -rf nemo_git
+	git clone $(GIT1) nemo_git
+	mkdir nemo_git/local
+	git clone $(GIT2) nemo_git/local/pgplot
+	tar zcf nemo_git.tar.gz nemo_git
 
+
+# deprecated
 tarfile:
 	@echo NEMO=$(NEMO)
 	@echo A tar file FILE=$(FILE) will be created.
@@ -344,7 +289,7 @@ tarfile:
 	tar -cf $(FILE) $(EXPORTA)
 	@echo ... All done!
 
-# autoconf/CVS based export
+# autoconf/GIT based export
 #
 
 DIST_DIR = nemo_$(NEMOVER)
@@ -352,89 +297,42 @@ DIST_DIR = nemo_$(NEMOVER)
 dist:
 	@if [ ! -d $(DIST_DIR) ]; \
 	then \
-	  cvs -q export -D tomorrow -d $(DIST_DIR) nemo 2>&1 > /tmp/nemodist.log; \
-	  tar -zcf $(DIST_DIR).tar.gz $(DIST_DIR); \
-	  rm -rf $(DIST_DIR); \
-	  echo 'TODO: ----------------------------------------------------'; \
+	  echo 'TODO for a new DIST: -------------------------------------'; \
 	  echo Date: `date`; \
-	  echo 'Change this date in:  www/nemo/lastftp'; \
-	  echo 'Change: whatsnew.html'; \
-	  echo 'Change: nemo.html'; \
+	  echo 'Change this date in:  www/nemo/lastftp {FIX THIS}'; \
+	  echo 'Change: docs/whatsnew.html'; \
+	  echo 'Change: docs/index.html'; \
 	  echo 'And run the following commands: '; \
-	  echo "cvs -Q tag `echo nemo_$(NEMOVER) | sed 's/\./_/g'`"; \
-	  echo 'scp $(DIST_DIR).tar.gz chara:/local/ftp/pub/nemo'; \
+	  echo 'make targit'; \
+	  echo 'scp $(DIST_DIR).tar.gz $(SFTPDIR)'; \
+	  echo "git tag `echo nemo_$(NEMOVER) | sed 's/\./_/g'`"; \
+	  echo "git push origin `echo nemo_$(NEMOVER) | sed 's/\./_/g'`"; \
 	  echo 'src/scripts/version inc'; \
-	  echo 'cvs commit VERSION inc/version.h'; \
-	  echo 'DONE: ----------------------------------------------------';\
+	  echo 'git commit VERSION inc/version.h'; \
+	  echo 'git push'; \
+	  echo 'DONE: ----------------------------------------------------'; \
 	else \
 	  echo Directory $(DIST_DIR) exists; \
 	fi;
 
-distcvs:
-	$(MAKE) dist DIST_DIR=nemo
-
-distu:
-	tar -zcf $(DIST_DIR)_cvs.tar.gz `find . -name Entries -exec src/scripts/cvsutar '{}' \;`
-
-cvs:
-	@if [ -d CVS ]; \
-	then \
-	  cat CVS/Root; \
-	else \
-	  echo This NEMO does not seem to be CVS enabled; \
-	fi;	
-
-cvsnew:
-	cvs -n -q update
-
-cvsu:
-	cvsu | grep ^M
-
-cvsq:
-	cvs -n -q update | grep ^U
-
-cvsc:
-	cvs -n -q update | grep ^C
-
-ACVSROOT = :pserver:anonymous@cvs.astro.umd.edu:/home/cvsroot
-
-cvslogin:
-	cvs -d $(ACVSROOT) login
-
-cvstar:
-	cvs -Q -d $(ACVSROOT) co -d nemo_cvs nemo
-	date > nemo_cvs/VERSION_cvs
-	echo "$(ACVSROOT) A" > nemo_cvs/.cvspass
-	cp nemo_cvs/VERSION_cvs /tmp
-	(mkdir nemo_cvs/local; cd nemo_cvs/local; cvs -Q -d $(ACVSROOT) co pgplot)
-	gtar zcf nemo_cvs.tar.gz nemo_cvs
-	rm -rf nemo_cvs
-	scp nemo_cvs.tar.gz /tmp/VERSION_cvs chara:/local/ftp/pub/nemo
 
 # The following 'ftp' targets only supposed to work at the master site
-# Warning:  (COMPRESS) .gz extensions have been hardcoded here
 
 COMPRESS = gzip -f
-NEMOTAR=nemo_`cat $(NEMO)/VERSION`.tar
-PATCHTAR=patch_`cat $(NEMO)/VERSION`.tar
+NEMOTAR  = nemo_`cat $(NEMO)/VERSION`.tar
 
 export:
 	@echo "Steps to update NEMO:"
-	@echo "make dist                        CVS based distribution maker"
+	@echo "make dist                        GIT based distribution maker"
 	@echo "make new                         to see what's new for ftp"
-	@echo "make ftp_patch                   export a new patch (can redo)"
-	@echo "make new_patch                   show new since last patch"
 	@echo "make ftp                         full  compressed (src) export"
 	@echo "src/scripts/version inc          increase patch level"
 	@echo "  or:"
 	@echo "src/scripts/version set MA.MI.PA set new Major/Minor/Patch"
 	@echo "FTPDIR=$(FTPDIR)"
+	@echo "SFTPDIR=$(SFTPDIR)"
 	@echo "NEMOTAR=$(NEMOTAR)"
 
-
-usrftp:
-	@echo Creating usr tarfile for USR=$(USR)
-	@$(MAKE) tarfile EXPORTA=$(USR) FILE=$(FTPDIR)/$(USRTAR)
 
 ftp:
 	@echo Working from FTPDIR=$(FTPDIR) :;df -k $(FTPDIR)
@@ -457,29 +355,13 @@ stamp:
 	@echo You should probably now increment the version:
 	@echo "   src/scripts/version inc"
 
-ftp_patch:
-	tar cvf $(FTPDIR)/$(PATCHTAR) `$(MAKE) new CHKFILE=$(CHKFILE)`
-	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(PATCHTAR)> $(PATCHTAR) </A>"  > $(WWWDIR)/lastpatch
-	@echo "(`date`)" >> $(WWWDIR)/lastpatch
-
-new_patch:
-	@$(MAKE) new CHKFILE=$(FTPDIR)/$(PATCHTAR)
-
 new_time:
 	@echo "`cat $(NEMO)/VERSION` `date +%m%d%H%M%y` `whoami` `date`" >> $(CHKFILE)
 	@tail -1 $(CHKFILE)
 
-test1:
-	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(PATCHTAR)> $(PATCHTAR) </A>"  > $(WWWDIR)/lastpatch
-	@echo "(`date`)" >> $(WWWDIR)/lastpatch
 test2:
 	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(NEMOTAR).gz> $(NEMOTAR).gz </A>"  > $(WWWDIR)/lastftp
 	@echo "(`date`)" >> $(WWWDIR)/lastftp
-
-new_ftp:
-	-@for i in $(EXPORTA); do \
-	(find $$i -newer $(FTPDIR)/$(NEMOTAR).gz -type f -print); done
-
 
 tarkernel:
 	@echo KERNEL+SCRIPTS only for small bootstrap
@@ -502,14 +384,6 @@ tarorbit:
 	@echo All done
 	@ls -l orbit.tar*
 
-tarman:
-	@echo MAN only 
-	@$(MAKE) tarfile ASCIIDIRS= FILE=man.tar \
-           ASCIIFILES="man/man? man/Makefile man/tmac.an man/w*"
-	@$(COMPRESS) man.tar
-	@echo All done
-	@ls -l man.tar*
-
 tarbima: 
 	$(MAKE) tarfile FILE=checker.tar \
 	 "ASCIIDIRS=inc usr/bima\
@@ -518,39 +392,10 @@ tarbima:
 	  src/tools/unproto"
 
 
-tarfileb:
-	@echo NEMO=$(NEMO)
-	@echo A binary tar file $(FILE) will be silently created for you.
-	@echo -n Hang on ...
-	@tar -coFFf $(FILE) $(EXPORTB)
-	@echo ... All done!
-
-
-# silent backup of whole image
-
-tarbackup:
-	@echo NEMO=$(NEMO)
-	@echo Creating big tar backup of whole NEMO on $(BACKUP)
-	@tar -cf $(BACKUP) $(NEMO)
-
-purge:
-	@(if [ -f  adm/purge/`date +%d%h%y`.tar ]; \
-	then \
-		echo "Backup already done today (check your makefile)"; \
-	else \
-		echo "Creating list of old version files in /tmp/list.bck:" ; \
-		find . -name '.*.*[0-9]' -print > /tmp/list.bck ; \
-		echo "Found `wc -l /tmp/list.bck` in there." ; \
-		echo "Creating backup file adm/purge/`date +%d%h%y`.tar";\
-		tar cf adm/purge/`date +%d%h%y`.tar `cat /tmp/list.bck`; \
-		echo "deleting old version files now..." ;\
-		find . -name '.*.*[0-9]' -exec rm '{}' \; ; \
-	fi);
-
-
 ##############################################################################
 #	Some helpful non-NEMO targets
 
+# deprecated: needs doc files
 miriad:
 	@echo "Installing miriad shells..."
 	(cd $(NEMO)/src/tools/miriad/miriad;\
@@ -558,6 +403,7 @@ miriad:
 	(cd $(NEMO)/src/tools/miriad/mirtool;\
 	 $(MAKE) nemotool ; mv nemotool $(NEMOBIN); $(MAKE) clean)
 
+# deprecated: makeindex comes with latex
 makeindex:
 	@echo "Installing makeindex utility for LaTeX manuals"	(cd $(NEMO)/src/tools/makeindex;\
 	 $(MAKE);mv indexsrc/index $(NEMOBIN)/makeindex;$(MAKE) clean)
@@ -569,6 +415,7 @@ pgplot:
 cfitsio:
 	src/scripts/cfitsio.install
 
+# deprecated: superseded by glnemo2
 vogl:
 	src/scripts/nemo.vogl
 
@@ -591,11 +438,12 @@ install:
 	@echo "      mknemo tsf tabhist nemoinp"
 	@echo "      rehash"
 	@echo "      nemoinp 1:10 | tabhist -"
+	@echo "to test compile and link"
 	@echo ""
 	@echo "Else go and compile and test the NEMO standard suite of binaries:"
 	@echo "      src/scripts/testsuite -b"
 	@echo ""
-	@echo "Or if you really want to install all binaries:"
+	@echo "Or if you want to install all binaries:"
 	@echo "      make bins"
 #	@echo "Any subsquent programs should be installed with the mknemo script,"
 #	@echo "eg."
@@ -609,9 +457,10 @@ postconfig:	dirs config_extra scripts
 config:	configure
 	./configure
 
-configure:	configure.in
+configure:	configure.ac
 	autoconf
 
+# nemo.pl can be deprecated
 config_extra:
 	cp config.h makedefs $(NEMOLIB)
 	(chmod +x nemo.pl; cp nemo.pl $(NEMOBIN))
@@ -626,7 +475,7 @@ diff_new:
 config_clean:
 	rm -f $(CONFIG_CLEAN)
 
-CLEAN = host bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
+CLEAN = bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 
 CONFIG_CLEAN = config.h makedefs config.cache config.log config.status \
 	nemo_start.sh nemo_start.csh
@@ -661,6 +510,7 @@ cleansrc:
 libs:	corelibs dehnen
 	@echo Done at `date`
 
+# gyrfalcON
 dehnen:
 	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
 
@@ -701,7 +551,7 @@ check:
 #
 TEST=""
 reinstall:
-	@echo 'It is adviced to "cvs update" before this step'
+	@echo 'It is adviced to "git update" before this step'
 	docs/test_a_new_nemo_git reuse=1 nemo=. $(TEST)
 
 sure:	libs bins
