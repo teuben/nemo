@@ -1,6 +1,6 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter tabtrend gauss1d gauss2d meanmed
+      tabfilter tabtrend gauss1d gauss2d meanmed tabstat
 
 NEED = $(BIN) nemoinp
 
@@ -34,6 +34,12 @@ tabhist:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
+
+tabstat:
+	@echo Running $*
+	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
+	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - nmax=-$(NMAX); nemo.coverage tabstat.c
+	
 
 
 meanmed:
