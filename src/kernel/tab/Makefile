@@ -14,7 +14,8 @@ SRCFILES = table.c gettab.c tabselect.c funtab.c getaline.c
 OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o
 LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o)
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab meanmed \
-	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend
+	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend \
+	   tabstat
 TESTFILES= getaline
 
 help:
