@@ -548,6 +548,9 @@ testsuite:
 check:
 	src/scripts/testsuite
 
+bench:
+	time src/scripts/nemo.bench
+
 #
 TEST=""
 reinstall:
