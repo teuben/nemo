@@ -952,7 +952,7 @@ local void save_history(string *argv)
 
     if (!nemo_history) return;
 
-    dprintf(0,"savehist: progname=%s help_level=%d\n",progname,help_level);
+    dprintf(1,"savehist: progname=%s help_level=%d\n",progname,help_level);
 
     if (help_level) {         /* if external help, argv[] is not appropriate */
         histlen = 0;
