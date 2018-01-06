@@ -40,12 +40,13 @@ if (0) then
 else
     echo 'Needs:  directcode mkplummer nbody0 hackcode1 gyrfalcON mkspiral ccdmath ccdpot'
 
-    time directcode nbody=10240 >& bench.directcode.log
-    time hackcode1 nbody=10240  >& bench.hackcode1.log
-    time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05 >& bench.gyrfalcon.log
-    time mkspiral s000 1000000 nmodel=40 >& bench.mkspiral.log
-    ccdmath "" - 'ranu(0,1)' size=256 seed=123 | ccdpot - . help=c
-
-
+    time directcode nbody=3072  help=c                                             >& bench.directcode.log
+    time hackcode1 nbody=10240  help=c                                             >& bench.hackcode1.log
+    time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05 help=c    >& bench.gyrfalcon.log
+    time mkspiral s0 1000000 nmodel=40 help=c                                      >& bench.mkspiral.log
+    time ccdmath "" c0 'ranu(0,1)' size=256 seed=123; time ccdpot c0 . help=c      >& bench.ccdpot.log
+    
+    grep CPU_USAGE bench.*.log
+    
 endif
 
