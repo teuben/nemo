@@ -11,27 +11,41 @@ cd $tmp
 
 
 set nbody1=1000
+set size=128
 
 foreach a ($*)
   set $a
 end
 
-echo "NEMOBENCH: (2001-07-18) $tmp : nbody1=$nbody1 "
+echo "NEMOBENCH: (2018-01-06) $tmp : nbody1=$nbody1 tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
-echo 'Needs:  mkplummer nbody0 hackcode1 YancNemo'
 
 
+if (0) then
+    echo 'Needs:  mkplummer nbody0 hackcode1 gyrfalcON'
 
-echo -n "mkplummer:  "
-time mkplummer out=nbody1.in nbody=$nbody1 seed=123 >& mkplummer.log
-echo -n "nbody0:     "
-time nbody0 in=nbody1.in out=nbody1.out1 >& nbody0.log
-echo -n "hackcode1:  "
-time hackcode1 in=nbody1.in out=nbody1.out2 tstop=10 >& hackcode1.log
-#echo -n "gyrfalcON:   "
-time gyrfalcON in=nbody1.in out=nbody1.out3 >& gyrfalcON.log 
-echo -n "scfm:       "
-time runscfm in=`pwd`/nbody1.in outdir=nbody1.run nsteps=300 >& scfm.log
+    echo -n "mkplummer:  "
+    time mkplummer out=nbody1.in nbody=$nbody1 seed=123 >& mkplummer.log
+    echo -n "nbody0:     "
+    time nbody0 in=nbody1.in out=nbody1.out1 >& nbody0.log
+    echo -n "hackcode1:  "
+    time hackcode1 in=nbody1.in out=nbody1.out2 tstop=10 >& hackcode1.log
+    #echo -n "gyrfalcON:   "
+    time gyrfalcON in=nbody1.in out=nbody1.out3 >& gyrfalcON.log 
+    echo -n "scfm:       "
+    time runscfm in=`pwd`/nbody1.in outdir=nbody1.run nsteps=300 >& scfm.log
+
+else
+    echo 'Needs:  directcode mkplummer nbody0 hackcode1 gyrfalcON mkspiral ccdmath ccdpot'
+
+    time directcode nbody=10240 >& bench.directcode.log
+    time hackcode1 nbody=10240  >& bench.hackcode1.log
+    time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05 >& bench.gyrfalcon.log
+    time mkspiral s000 1000000 nmodel=40 >& bench.mkspiral.log
+    ccdmath "" - 'ranu(0,1)' size=256 seed=123 | ccdpot - . help=c
+
+
+endif
 
