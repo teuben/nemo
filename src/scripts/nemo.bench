@@ -5,19 +5,22 @@
 #	average. The baseline was a pentium-600 where each integrator
 #	would take about 30 seconds
 #
-set tmp=bench$$
-mkdir $tmp
-cd $tmp
-
-
-set nbody1=1000
-set size=128
+set tmp    = bench$$
+set nbody0 = 3072
+set nbody1 = 10240
+set nbody2 = 10240
+set nbody3 = 1000000
+set size   = 256
+set clean  = 1
 
 foreach a ($*)
   set $a
 end
 
-echo "NEMOBENCH: (2018-01-06) $tmp : nbody1=$nbody1 tmp=$tmp"
+mkdir $tmp
+cd $tmp
+
+echo "NEMOBENCH: (2018-01-07) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -38,15 +41,21 @@ if (0) then
     time runscfm in=`pwd`/nbody1.in outdir=nbody1.run nsteps=300 >& scfm.log
 
 else
-    echo 'Needs:  directcode mkplummer nbody0 hackcode1 gyrfalcON mkspiral ccdmath ccdpot'
+    echo 'Times:  directcode hackcode1 mkplummer gyrfalcON mkspiral ccdmath ccdpot'
 
-    time directcode nbody=3072  help=c                                             >& bench.directcode.log
-    time hackcode1 nbody=10240  help=c                                             >& bench.hackcode1.log
-    time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05 help=c    >& bench.gyrfalcon.log
-    time mkspiral s0 1000000 nmodel=40 help=c                                      >& bench.mkspiral.log
-    time ccdmath "" c0 'ranu(0,1)' size=256 seed=123; time ccdpot c0 . help=c      >& bench.ccdpot.log
+    time directcode nbody=$nbody0 help=c                                             >& bench.directcode.log
+    time hackcode1 nbody=$nbody1  help=c                                             >& bench.hackcode1.log
+    time mkplummer p1 $nbody2; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05 help=c    >& bench.gyrfalcon.log
+    time mkspiral s0 $nbody3 nmodel=40 help=c                                        >& bench.mkspiral.log
+    time ccdmath "" c0 'ranu(0,1)' size=$size seed=123; time ccdpot c0 . help=c      >& bench.ccdpot.log
     
     grep CPU_USAGE bench.*.log
+
+    if ($clean) then
+       echo Cleaning $tmp
+       cd ..
+       rm -rf $tmp
+    endif
     
 endif
 
