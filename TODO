@@ -138,7 +138,7 @@ general things for 3.2.x
 
  - need a gyrfalcON testsuite section
 
--  falcON/utils install uses some linux dialect:
+ -  falcON/utils install uses some linux dialect:
 
    1) mkdir
 	mkdir --parents --mode=755 ...
@@ -357,7 +357,7 @@ git tricks
 
    todo:  see if "git push --tags"  also works
 
-2) can you see what will be pushed when you "git push"
+2) ? can you see what will be pushed when you "git push"
    since you may have done a whole bunch of "git commit"
    It would say something like
       "Your branch is ahead of 'origin/master' by 8 commits"
@@ -367,4 +367,7 @@ git tricks
    i.e. revert back to the original FILE:
 
    git checkout FILE
+
+   this will silently overwrite your modified FILE with the
+   original version
 
