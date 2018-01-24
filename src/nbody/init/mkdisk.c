@@ -56,7 +56,7 @@ string defv[] = {
     "z0=0,0\n           Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
     "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
     "headline=\n	Text headline for output",
-    "VERSION=4.9g\n	13-dec-2017 PJT",
+    "VERSION=4.9i\n	19-jan-2018 PJT",
     NULL,
 };
 
@@ -105,8 +105,11 @@ local real pick_dv(real r, real z, real z0)
 #ifdef OLD_BURKERT  
   real dv = 1 - (1 + (z/z0) * tanh(z/z0))*(z0/r);
 #else
-  real dv = tanh(z/z0);
-  dv = sqrt(1 - ABS(dv));
+  //real dv = tanh(z/z0);
+  //dv = sqrt(1 - ABS(dv));
+  real dv = ABS(z/z0);
+  //dv = sqrt(exp(-dv));
+  dv = exp(-dv);
 #endif  
   dprintf(1,"PJT %g %g %g\n",r,z,dv);
   return dv;
