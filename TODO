@@ -362,6 +362,8 @@ git tricks
    It would say something like
       "Your branch is ahead of 'origin/master' by 8 commits"
 
+   git diff --stat --cached origin/master
+
 
 3) if you accidentally edited a FILE and want to "undo" it,
    i.e. revert back to the original FILE:
