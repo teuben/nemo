@@ -34,7 +34,10 @@ GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-3)
 #$(warning $(GCCVERSION))
 gccversion:
 	@echo "GCC version = " $(GCCVERSION)
-
+# detect OSTYPE (Linux or Darwin) 
+OSTYPE := $(shell uname)
+ostype:
+	@echo "OSTYPE = " $(OSTYPE)
 # set following variable to 1 if gcc > 700
 API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
@@ -62,12 +65,12 @@ endif
 #PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
 #endif
 # general optimisation and warning flags
-OPTFLAGS	:= -march=native -mfpmath=sse -mpreferred-stack-boundary=4 \
+OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 \
 		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
-ifneq ($(VENDOR),apple)
-OPTFLAGS	+= -rdynamic
+ifneq ($(OSTYPE),Darwin)
+OPTFLAGS	+= -rdynamic -march=native 
 endif
 
 # these are actually to be set
