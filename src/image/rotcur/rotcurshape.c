@@ -94,7 +94,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4\n   29-jan-08 PJT",
+    "VERSION=1.4a\n  4-feb-2018 PJT",
     NULL,
 };
 
@@ -164,14 +164,14 @@ int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, 
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
 	   real elp4[], int cor[], int *npt, real nsigma, stream lunres);
 int perform_out(int h, real p[6], int n, real q);
-int rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[], 
+void rotplt(real rad[], real vsy[], real evs[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   real p[], real e[],
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], int npt[], real factor);
 int set_blank(int n, real *res, real *w, int *iblank, int nfr, real nsigma, real *q);
 void stat2(real a[], int n, int nf, real *mean, real *sig);
 void stat2b(real a[], int b[], int n, int nf, real *mean, real *sig);
-int getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, 
+void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, 
 	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, int mode);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
@@ -197,7 +197,7 @@ extern int match(string, string, int *);
 
 
 /******************************************************************************/
-nemo_main()
+void nemo_main()
 {
     int  ier;            /* error return code */
     int  ifit=0;         /* counter for number of succesful fits */
@@ -488,7 +488,7 @@ rotcurparse()
  *    LUNPRI   integer          LUN for print output
  */
 
-rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,nsigma,lunpri)
+int rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,nsigma,lunpri)
 int  *wpow;           /* weighting function to be applied */
 int  ring, *nring;    /* max. number of rings and wanted number of rings */
 int  mask[];          /* mask to define free and fixed parameters */
@@ -861,7 +861,7 @@ stream  lunpri;       /* LUN for print output */
  *    NPT      integer         number of points in ring
  */
 
-rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, nsigma, lunres)
+int rotfit(ri, ro, p, e, mask, wpow, side, thf, elp4, cor, npt, nsigma, lunres)
 real ri,ro;      /* inner and outer radius of ring */
 int mask[];      /* mask for free/fixed parameters */
 int wpow;        /* weighting function */
@@ -1123,7 +1123,7 @@ stream lunres;   /* file for residuals */
     return ier;
 } /* rotfit */
 
-perform_out(int h,real *p,int n,real q)
+int perform_out(int h,real *p,int n,real q)
 {
   int i;
   printf(" %4d  %7.2f  %7.2f  %7.2f  %7.2f  %7.2f",
@@ -1172,7 +1172,7 @@ int set_blank(int n, real *res, real *w, int *iblank, int nfr, real nsigma, real
  *  is set. Otherwise it exits.
  */
 
-rotplt(rad,vsy,evs,pan,epa,inc,ein,xce,exc,yce,eyc,p,e,
+void rotplt(rad,vsy,evs,pan,epa,inc,ein,xce,exc,yce,eyc,p,e,
        mask,ifit,elp,lunpri,cor,npt,factor)
 real rad[],vsy[],evs[],pan[],epa[],inc[],ein[],p[],e[],
      xce[],exc[],yce[],eyc[],elp[][4], factor;
@@ -1284,7 +1284,7 @@ void stat2b(real *a,int *b,int n,int nf, real *mean,real *sig)
  *    MODE     integer          fitmode (0=fitting w/ masking 1=fit, no mask)
  */
 
-getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,mode)
+void getdat(x,y,w,idx,res,n,nmax,p,ri,ro,thf,wpow,q,side,full,nfr,mode)
 int   *n,nmax;       /* number of pixels loaded (O), max. number (I) */
 int   nfr;           /* number of degrees of freedom */
 int   wpow;          /* weigthing function */
@@ -1661,7 +1661,7 @@ void vcor_c1(real *c,real *p,real *vd,real *dn)
 
 real vobs_s1(real *c,real *p,int m)
 {
-  error("cannot do inflow yet");
+      error("cannot do inflow yet");
       perform_init(p,c);
       return vs+vc*sini1*sint1;      /* radial outflow motion */
 }
@@ -1669,7 +1669,7 @@ real vobs_s1(real *c,real *p,int m)
 void vobsd_s1(real *c,real *p,real *d,int m)
 {
     perform_init(p,c);
-  error("cannot do inflow yet");
+    error("cannot do inflow yet");
     d[0]=1.0;                    /* partial derivative with respect to Vsys */
     d[1]= grid[0]*vc*(0);
     d[2]=-grid[1]*vc*(0);
@@ -1738,7 +1738,7 @@ void vcor_s1(real *c,real *p,real *vd,real *dn)
 }
 
 
-perform_init(real *p,real *c)
+int perform_init(real *p,real *c)
 {
   int i;
 
