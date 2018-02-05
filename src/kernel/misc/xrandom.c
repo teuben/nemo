@@ -27,6 +27,8 @@
  *  19-jun-08   enable init_xrandom(0) (previously caused Segmentation fault)  WD
  *  27-Sep-10   MINGW32/WINDOWS support  JCL
  *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
+ *  24-jan-18   faster version of grandom() with better caching               PJT
+ *              1e7 grandom:   V2.2 -> 1.40"    V2.3 -> 0.85
  */
 
 #include <stdinc.h>
@@ -213,7 +215,7 @@ double grandom(double mean, double sdev)
 
     if (gcount) {
         gcount = 0;
-        return mean + sdev * v2 * sqrt(-2.0 * log(s) / s);
+        return mean + sdev * v2 * s;
     }
 
     do {				/* loop until */
@@ -221,11 +223,13 @@ double grandom(double mean, double sdev)
 	v2 = xrandom(-1.0, 1.0);	/* the unit square */
 	s = v1*v1 + v2*v2;		/* have radius such that */
     } while (s >= 1.0);			/* point fall inside unit circle */
-
+    s = sqrt(-2.0 * log(s) / s);
+    
     gcount = 1;
-    return mean + sdev * v1 * sqrt(-2.0 * log(s) / s);
+    return mean + sdev * v1 * s;
 
 }
+
 
 
 
@@ -249,7 +253,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.2\n  9-oct-2012 PJT",
+    "VERSION=2.3\n  24-jan-2018 PJT",
     NULL,
 };
 
@@ -269,7 +273,7 @@ string defaults[] = {
 
 static bool check(string, string, string, int, int);
 
-nemo_main()
+void nemo_main()
 {
   int i, j, k, seed, n, m, npars;
   double sum[5], mean, sigma, skew, kurt, x, y, s;
