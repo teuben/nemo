@@ -170,7 +170,7 @@ AC_ARG_WITH(hdf,  [  --with-hdf              force the use of HDF], with_hdf=$wi
 AC_ARG_WITH(ccmalloc, 
 		  [  --with-ccmalloc         use CCMALLOC for malloc], with_ccmalloc=$withval, with_ccmalloc=no)
 AC_ARG_WITH(dso,
-		  [  --with-dso              use DSO linking], with_dso=$withval, with_dso=yes)
+		  [  --with-dso              use DSO linking], with_dso=$withval, with_dso=no)
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
