@@ -382,6 +382,7 @@ git tricks
    git remote                                                # see which ones you have
    git remote add upstream https://github.com/teuben/nemo    # add this one-time
 
+   git branch                                                # check what branch you are on
    git checkout master                                       # ensure on your master
    git fetch upstream                                        # fetch the upstream
    git merge upstream/master                                 # merge in 
