@@ -1,0 +1,249 @@
+#! /bin/csh -f
+#
+#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w            ~2004
+# P1600/
+#    i7/     125.240u 25.740s 2:52.00 87.7%	0+0k 239968+895168io 785pf+0w      2017
+#            172.416u 15.444s 3:22.60 92.7%	0+0k 197896+1088264io 618pf+0w
+#
+#  History:     29-mar-2004   for NEMO V3.2
+#                4-may-2004   various new keywords and cfitsio optional install
+#               30-jul-2004   optional cfitsio install
+#               11-jul-2005   various additional packages for NEMO V3.2.3
+#                5-mar-2006   also create nemo_start.sh
+#               20-aug-2006   falcON install 
+#               21-jan-2008   optional nemo= where the root is located
+#               19-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
+#               24-may-2010   glnemo deprecated, only glnemo2 
+#               19-jan-2011   added a cmake=1 option to build internally
+#               25-jan-2012   DSO linking (dso=1) needed for modern linux
+#                5-dec-2017   converted CVS to GIT for NEMO V4
+#               29-dec-2017   install=0 mktar=0 option
+#                7-feb-2018   script now called install_nemo
+#
+#
+#  Example of usage if you do git development to test your other git release before you've pushed this one:
+#  great if you don't have an internet connection
+#  
+#       install_nemo git_nemo=`pwd`/nemo git_pgplot=`pwd`/nemo/local/pgplot    nemo=nemo2
+
+
+set nemo        = nemo           # root directory name from the current directory
+
+set install     = 1             # set this to 0 when you only grab the source code
+set mktar       = 0             # make a tar file before install starts
+set pgplot      = 1		# install PGPLOT via GIT also
+set intel       = 0		# pick intel compiler (astromake)
+set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
+set gcc         = 0		# pick gcc version (version number via astromake)
+set vogl        = 1		# compile vogl
+set glnemo      = 1             # compile glnemo2
+set unsio       = 0             # compile unsio and uns_project
+set gsl         = 0             # add GSL library
+set hdf         = 1             # use HDF library, if present
+set png         = 0             # add png for pgplot (can easily break other programs in NEMO)
+set gif         = 1             # add gi/pp/wd drivers (they use %ref/%val) for pgplot - not for gfortran <= 41
+set single      = 0             # singe or double (default) precision
+set all         = 1		# make all binaries , or just the one for the testsuite?
+set clean       = 1		# remove old nemo directory before installing (rm -r nemo)
+set git_nemo    = https://github.com/teuben/nemo
+set git_pgplot  = https://github.com/teuben/pgplot
+set branch      = ()		# use a GIT branch?
+set yapp        = (/null)	# set a YAPP device during the install
+                  	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
+set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
+set cfitsio     = 0             # disable for formal release since there are some problems
+set debug       = 1             # compile in debug mode (not implemented)
+set pedantic    = 0             # compile in pedantic mode
+set make        = make          # make, gmake, pmake, bmake, ....
+set cmake       = 0             # 1= build internally
+
+set unames      = `uname -s`    # Darwin, Linux
+
+# dso:                  # use DSO linking trick for new linux gcc.  4.6.3 on ubuntu needs it
+if ($unames == Linux) then
+  set dso=1
+else
+  set dso=0
+endif
+
+
+# some variables that affect variables set before
+
+set reuse=0             # don't clean and use GIT, just reuse the current nemo tree
+set quick=0             # install with minimal extra packages
+
+foreach _a ($*)
+  set $_a
+end
+
+#   if reusing current tree, make sure we're not removing the directory
+if ($reuse) then
+  set clean=0
+endif
+  
+if ($?NEMO) then
+  echo Cannot install with this script if NEMO=$NEMO is present already, this is not recommended
+  exit 1
+endif
+
+#	pick another GNU compiler (this is rather astromake specific of course)
+if ($gcc != 0) then
+   source /astromake/astromake_start
+   astroload -v $gcc gcc
+endif
+
+if ($?CC  == 0)  setenv CC  gcc
+if ($?CXX == 0)  setenv CXX g++
+if ($?F77 == 0)  setenv F77 g77
+
+#       if modules are used, should start from a clean slate
+if ($?MODULE_VERSION) then
+  echo WARNING: MODULE_VERSION=$MODULE_VERSION
+  module purge
+endif
+
+#	pick intel compiler (ifort means >= 8.0)
+if ($intel) then
+  # source /astromake/astromake_start
+  # astroload intel
+  setenv CC  icc
+  setenv CXX icpc
+  setenv F77 ifort
+endif
+
+if ($gfortran) then
+  setenv CC  gcc
+  setenv CXX g++
+  setenv F77 gfortran
+endif
+
+if ($clean) then
+  if (-e $nemo) then
+    echo Cleaning old nemo=$nemo directory
+    rm -rf $nemo
+  endif
+endif
+
+#		pick a certain GIT release, if requested
+#		then get the source
+if ($reuse == 0) then
+  git clone $git_nemo $nemo
+endif
+
+cd $nemo  
+
+if ($#branch) then
+  echo git: Using branch $branch
+  git checkout $branch
+endif
+
+if (! -e local) mkdir local
+
+if ($reuse) then
+  echo DISTCLEAN
+  $make distclean >& install.distclean.log
+endif
+
+if ($pgplot && $reuse == 0) then   
+  (cd local; git clone $git_pgplot)
+endif
+
+if ($cfitsio != 0) then
+ if (! -e $cfitsio) then
+   echo Attempting to find/retrieve $cfitsio
+   wget -q $cfitsio
+   set cfitsio=`pwd`/$cfitsio:t
+ endif
+ if (-e $cfitsio) then
+  echo Installing bootstrapping cfitsio
+  if (! -e include) ln -s inc include
+  (cd local; tar zxf $cfitsio)
+  src/scripts/cfitsio.install >& install.cfitsio.log
+  echo cfitsio installed with STATUS=$status
+  set cfitsio=1
+ else
+  set cfitsio=0
+ endif
+endif
+
+
+# here? or before cfitsio? or move cfitsio down?
+if ($mktar == 1) then
+  (cd ..; tar zcf $nemo.tar.gz $nemo)
+  echo $nemo.tar.gz created
+endif
+
+if ($install == 0) exit 0
+
+
+set copts=()
+# set copts=($copts --disable-gsl)
+if ($gsl) set copts=($copts --enable-gsl)
+if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($png) set copts=($copts --enable-png)
+if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
+if ($single) set copts=($copts --enable-single)
+if ($debug) set copts=($copts --enable-debug)
+if ($pedantic) set copts=($copts --enable-pedantic)
+if ($dso == 0)  set copts=($copts --without-dso)
+
+echo Running configure $copts
+echo configure $copts  >& install.config.log
+./configure  $copts   >>& install.config.log
+echo nemo_start
+source nemo_start.csh
+echo postconfig
+$make postconfig
+rehash
+
+
+if ($#yapp > 0) setenv YAPP $yapp
+
+if ($pgplot) then
+  echo "Compiling internal pgplot (logfile: install.pgplot.log)"
+  $make pgplot PNG=$png GIF=$gif >& install.pgplot.log
+  if ($status) echo "### Error: pgplot build problem."
+endif
+
+if ($cmake) then
+  echo "Compiling internal cmake (logfile: install.cmake.log)"
+  src/scripts/cmake.install >& install.cmake.log
+  if ($status) echo "### Error: cmake build problem."
+endif
+
+rehash
+$make libs
+
+# backward compatibility support
+# ln -s nemo_start.csh nemo_start 
+
+if ($vogl) then
+  echo "Compiling vogl for xyzview (logfile: install.vogl.log)"
+  $make vogl >& install.vogl.log
+  if ($status) echo "### Error: vogl build problem."
+endif
+
+if ($glnemo) then
+  echo "Compiling glnemo2 (logfile: install.glnemo2.log)"
+  mknemo glnemo2 >& install.glnemo2.log
+  if ($status) echo "### Error: glnemo2 build problem".
+endif
+
+if ($unsio) then
+  echo "Compiling unsio and uns_project (logfile: install.unsio.log)"
+  mknemo unsio >& install.unsio.log
+  if ($status) echo "### Error: unsio build problem".  
+  mknemo uns_project >>& install.unsio.log
+  if ($status) echo "### Error: uns_project build problem".  
+endif
+
+rehash
+
+if ($all) then
+  $make bins
+  src/scripts/testsuite
+else
+  src/scripts/testsuite -b
+endif
+
+echo All done.
