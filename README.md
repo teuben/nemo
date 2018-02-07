@@ -31,9 +31,9 @@ See README.install for installation guidelines. In it's simplest the following c
 (replace .csh with .sh if appropriate)
 
 
-	 wget https://teuben.github.io/nemo/test_a_new_nemo_git
-	 chmod +x test_a_new_nemo_git
-	 ./test_a_new_nemo_git nemo=$HOME/opt/nemo
+	 wget https://teuben.github.io/nemo/install_nemo
+	 chmod +x install_nemo
+	 ./install_nemo nemo=$HOME/opt/nemo
 	 source $HOME/opt/nemo/nemo_start.csh
 
 Some obvious and perhaps not so obvious tools you will need to have installed:  C/C++/Fortran compiler,
