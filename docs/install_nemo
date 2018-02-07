@@ -53,6 +53,7 @@ set yapp        = (/null)	# set a YAPP device during the install
 set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
 set cfitsio     = 0             # disable for formal release since there are some problems
 set debug       = 1             # compile in debug mode (not implemented)
+set test        = 1             # also run testsuite at the end
 set pedantic    = 0             # compile in pedantic mode
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
@@ -214,7 +215,7 @@ endif
 rehash
 $make libs
 
-# backward compatibility support
+# backward compatibility support?
 # ln -s nemo_start.csh nemo_start 
 
 if ($vogl) then
@@ -239,11 +240,13 @@ endif
 
 rehash
 
-if ($all) then
-  $make bins
-  src/scripts/testsuite
-else
-  src/scripts/testsuite -b
-endif
+if ($test) then
+  if ($all) then
+    $make bins
+    src/scripts/testsuite
+  else
+    src/scripts/testsuite -b
+  endif
+endif  
 
 echo All done.
