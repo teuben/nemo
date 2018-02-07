@@ -37,6 +37,7 @@
 #include <stdlib.h>
 #include <vectmath.h>		/* otherwise NDIM undefined */
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -50,13 +51,13 @@ string defv[] = {
     "mode=ascii\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
-    "VERSION=2.1a\n             25-oct-03 pjt",
+    "VERSION=2.1b\n             4-feb-2018 pjt",
     NULL,
 };
 
 string usage="convert tipsy ascii/binary file to snapshot";
 
-nemo_main()
+void nemo_main()
 {
     int ndim ;
     int nbodies ;
@@ -239,7 +240,7 @@ nemo_main()
 	for(gp=gas_particles; gp < lastgp ; gp++){
 	    count = fscanf(instr,"%f%*[, \t\n]",&gp->phi);
 	    if ( (count == EOF) || (count==0) )
-	      return -1;
+	      return ;
 	}
 	for(dp=dark_particles; dp < lastdp;  dp++){
 	    count = fscanf(instr,"%f%*[, \t\n]",&dp->phi);
@@ -249,7 +250,7 @@ nemo_main()
 	for(sp=star_particles; sp < lastsp; sp++){
 	    count = fscanf(instr,"%f%*[, \t\n]",&sp->phi);
 	    if ( (count == EOF) || (count==0) )
-	      return -1;
+	      return ;
 	}
 	bp=btab;
 	if (Qgas)	    
