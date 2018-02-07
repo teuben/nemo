@@ -4,13 +4,15 @@
 #  note this will overwrite the old (v1.3) galaxy executable in $NEMOBIN
 
 
-#  GALAXY15 is about 8944 KB
+#  GALAXY15 is about 8944 KB, 1042 files
 set dir=$NEMO/usr/sellwood/GALAXY15
 
 if (! -e $dir) then
-   echo Go visit http://www.physics.rutgers.edu/galaxy/,
-   echo download galaxy.tgz and untar this in:
-   echo $dir
+   echo Warning:  $dir  does not exist.
+   echo ""
+   echo Go visit http://www.physics.rutgers.edu/galaxy/
+   echo enter email, download galaxy.tgz and untar this in:
+   echo $dir:h
    exit 0
 endif
 
