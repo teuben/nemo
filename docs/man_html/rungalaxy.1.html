@@ -15,74 +15,75 @@ rungalaxy - run Sellwood&rsquo;s galaxy program
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>rungalaxy</b> is a front-end to Sellwood&rsquo;s <a href='galaxy.1.html'><i>galaxy(1NEMO)</i></a>
- program. 
+ program. It
+currently only supports the older V1.3 version. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input snapshot (nemo <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<dd>input snapshot
+(nemo <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format). No Default. </dd>
 
-<dt><b>outdir=</b>
-</dt>
-<dd>directory in which GALAXY will be run. Within this directory several output
-files are created. No default. </dd>
+<dt><b>outdir=</b> </dt>
+<dd>directory in which GALAXY
+will be run. Within this directory several output files are created. No default.
+</dd>
 
 <dt><b>scale=</b> </dt>
-<dd>number of grid cells per unit length
-[15.0] </dd>
+<dd>number of grid cells per unit length [15.0] </dd>
 
 <dt><b>dt=</b> </dt>
-<dd>integration time step [0.05]     </dd>
+<dd>integration time
+step [0.05]     </dd>
 
 <dt><b>dtout=</b> </dt>
-<dd>time between particle
-outputs [0.5]    </dd>
+<dd>time between particle outputs [0.5]    </dd>
 
 <dt><b>dtlog=</b> </dt>
-<dd>time between integral checks [0.1]    </dd>
+<dd>time
+between integral checks [0.1]    </dd>
 
 <dt><b>tstop=</b> </dt>
-<dd>end
-time [1.0]      </dd>
+<dd>end time [1.0]      </dd>
 
 <dt><b>grid=</b> </dt>
-<dd>number of grid cells in (x,y,z,) [33,33,33]  </dd>
+<dd>number
+of grid cells in (x,y,z,) [33,33,33]  </dd>
 
-<dt><b>format=%g</b>
-</dt>
+<dt><b>format=%g</b> </dt>
 <dd>A <a href='printf.3.html'><i>printf(3)</i></a>
--style format specification used to write positions and velocities
-for the galaxy.ini input file. Default: %g </dd>
+-style format
+specification used to write positions and velocities for the galaxy.ini
+input file. Default: %g </dd>
 
 <dt><b>header=|4|8</b> </dt>
-<dd>If used, this is the
-header size for fortran unfromatted data. Normally the system should know
-which value to take. See also <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
+<dd>If used, this is the header size for fortran
+unfromatted data. Normally the system should know which value to take. See
+also <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
 . </dd>
 
 <dt><b>exe=</b> </dt>
-<dd>name of GALAXY executable
-[galaxy.exe]    </dd>
+<dd>name of GALAXY executable [galaxy.exe]    </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
-Within the run-directory several files are created. See
-<a href='galaxy.1.html'><i>galaxy(1NEMO)</i></a>
- for a full  description, but in addition a nemo <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
-,
-<i>galaxy.snap</i> is created with the positions, velocities, and potential stored
-in single precision. 
+Within
+the run-directory several files are created. See <a href='galaxy.1.html'><i>galaxy(1NEMO)</i></a>
+ for a full
+ description, but in addition a nemo <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+, <i>galaxy.snap</i> is created
+with the positions, velocities, and potential stored in single precision.
+
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='galaxy.1.html'>galaxy(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Jerry
-Sellwood (galaxy), Peter Teuben (rungalaxy) 
+Jerry Sellwood (galaxy), Peter
+Teuben (rungalaxy) 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>18-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;man page created
