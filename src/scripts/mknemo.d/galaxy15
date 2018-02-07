@@ -1,0 +1,36 @@
+#! /bin/csh -f
+#
+#  Jerry Sellwood's new GALAXY (V1.5) version
+#  note this will overwrite the old (v1.3) galaxy executable in $NEMOBIN
+
+
+#  GALAXY15 is about 8944 KB
+set dir=$NEMO/usr/sellwood/GALAXY15
+
+if (! -e $dir) then
+   echo Go visit http://www.physics.rutgers.edu/galaxy/,
+   echo download galaxy.tgz and untar this in:
+   echo $dir
+   exit 0
+endif
+
+cd $dir
+
+# libraries
+foreach d (lib15 lib15_mpi RAJ utils)
+   echo "###     Working on SRC/$d"
+   ( cd SRC/$d;  ./rebuild )
+end
+
+# programs
+
+set bins=(analys cold compress corrplt dfiter dflook dmp2pcs estfreq gadget2pcs galaxy \
+       genplt isotropy merge mkpcs modefit pcs2dmp plotpft ptest smooth weed \
+       tipsy2pcs dmp2pcs_mpi galaxy_mpi pcs2dmp_mpi ptest_mpi )
+
+echo "###     Working on SRC/progs"
+(cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
+
+echo "###     Moving binaries to NEMOBIN, remove local static libaries"
+(cd bin ; mv * $NEMOBIN)
+(cd lib ; rm -f *.a)
