@@ -85,7 +85,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=5.9a\n  25-dec-2017 PJT",
+        "VERSION=5.9b\n  19-feb-2018 PJT",
         NULL,
 };
 
@@ -211,8 +211,10 @@ static string ctypes[4] = { "CTYPE1",   "CTYPE2",   "CTYPE3",   "CTYPE4"};
 static string cdelts[4] = { "CDELT1",   "CDELT2",   "CDELT3",   "CDELT4"};
 static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
 static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
-static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
-static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
+static string radeves[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
+static string radevet[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
+//static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
+//static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
 static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
@@ -381,7 +383,7 @@ void write_fits(string name,imageptr iptr)
       if (Qfreq)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
-	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or m/s */
+	fitwrhda(fitsfile,"CUNIT3","m/s");            /* or km/s */
       fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
