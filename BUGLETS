@@ -66,7 +66,6 @@
 - filestruct history: long character strings are broken in silly places,
 	and don't port very well between tsf/rsf
 
-
 - comment from Walter:
 
 > I tried to make my own potential very much in the same way in which
