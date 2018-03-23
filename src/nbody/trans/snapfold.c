@@ -1,7 +1,8 @@
 /*
  * SNAPFOLD.C: fold radial lines to create a conical shape
  *
- *      20-nov-2017 V0.1 hack                                           PJT
+ *      20-nov-2017 V0.1 hack at ESO                                 PJT
+ *      22-mar-2018 V0.3 once again at ESO, hack-2 filling the cone  PJT
  */
 
 #include <stdinc.h>
@@ -17,9 +18,10 @@
 string defv[] = {	
     "in=???\n	           Input snapshot file",
     "out=???\n             Output snapshot file",
-    "theta=\n              Angle (degrees) to fold from XY into Z [-90..90]",
+    "theta=0\n              Angle (degrees) to fold from XY into Z [-90..90]",
     "select=pos,vel,acc\n  Select the vectors for rotation",
-    "VERSION=0.2\n         20-nov-2017 PJT",
+    "fill=f\n              Filling the cone uniformly?",
+    "VERSION=0.3\n         22-mar-2018 PJT",
     NULL,
 };
 
@@ -31,7 +33,12 @@ string cvsid="$Id$";
 
 
 
-void rotate(real angle,Body *btab,int nbody);
+void rotate(real angle,bool fill, Body *btab,int nbody);
+
+real my_fun(real x)
+{
+  return cos(x * DEG2RAD);
+}
 
 void nemo_main()
 {
@@ -40,20 +47,21 @@ void nemo_main()
     Body *btab = NULL;
     int i, nop, nopt, nbody, bits;
     real tsnap, tscale, *ang, theta;
-    bool   invert, need_hist = TRUE;
+    bool   invert, fill, need_hist = TRUE;
     string rotvects = getparam("select");
     bool Qpos, Qvel, Qacc;
 
     instr = stropen(getparam("in"), "r");           /* open input file */
     theta = getrparam("theta");
     outstr = stropen(getparam("out"), "w");
+    fill = getbparam("fill");
 
     get_history(instr);
     while (get_tag_ok(instr, SnapShotTag)) {
       get_snap(instr, &btab, &nbody, &tsnap, &bits);
       if (bits & PhaseSpaceBit) {
 	dprintf(1,"Processing time %g bits=0x%x\n",tsnap,bits);
-	rotate(theta, btab, nbody);
+	rotate(theta, fill, btab, nbody);
 	if (need_hist) {
 	  put_history(outstr);
 	  need_hist = FALSE;
@@ -65,10 +73,10 @@ void nemo_main()
     strclose(outstr);
 }
 
-void rotate(real angle,Body *btab,int nbody)
+void rotate(real angle, bool fill, Body *btab,int nbody)
 {
     real x,y,vx,vy,r,vr;
-    real sint, cost;
+    real t, sint, cost;
     int  i;
 
     /*
@@ -80,6 +88,12 @@ void rotate(real angle,Body *btab,int nbody)
     sint = sin(angle * DEG2RAD);
     
     for (i = 0; i < nbody; i++) {
+      if (fill) {
+	// t = xrandom(angle, 90.0);
+	t = frandom(angle, 90.0, my_fun);
+	cost = cos(t * DEG2RAD);
+	sint = sin(t * DEG2RAD);
+      }
       x = Pos(&btab[i])[0];
       y = Pos(&btab[i])[1];
       
