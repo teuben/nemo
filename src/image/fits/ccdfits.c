@@ -85,7 +85,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=5.9b\n  19-feb-2018 PJT",
+        "VERSION=5.9c\n  20-feb-2018 PJT",
         NULL,
 };
 
@@ -411,13 +411,20 @@ void write_fits(string name,imageptr iptr)
     fitwrhdr(fitsfile,"DATAMIN",mapmin);
     fitwrhdr(fitsfile,"DATAMAX",mapmax);
     fitwrhda(fitsfile,"ORIGIN",origin);
+    fitwrhda(fitsfile,"SPECSYS","LSRK");     /* spectral reference frame */
+    
 
     cp = getenv("USER");                                /* AUTHOR */
-    if (cp)
+    if (cp) {
         fitwrhda(fitsfile,"AUTHOR",cp);
-    else
+        fitwrhda(fitsfile,"OBSERVER",cp);
+    } else {
         fitwrhda(fitsfile,"AUTHOR","NEMO");
-
+        fitwrhda(fitsfile,"OBSERVER","NEMO");
+    }
+    
+    // DATE-OBS= '2015-06-14T15:42:02.319999'
+    
     if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
 
