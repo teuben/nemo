@@ -1,4 +1,4 @@
-.TH BENCH 5NEMO "6 January 2018"
+.TH BENCH 5NEMO "7 January 2018"
 .SH NAME
 bench \- NEMO benchmarks in NemoStones
 .SH DESCRIPTION
@@ -9,10 +9,12 @@ quadrupole corrections, for 10240 particles and 64 timesteps.
 \fBbench2\fP tests a more modern Treecode, this one is the
 O(N) version from Dehnen (2002?). Again 64 timesteps.
 \fBbench0\fP has been added to compare a tree code with a 
-direct N-body code, also 64 timesteps. 
+direct N-body code, also 64 timesteps, but now for fewer particles to prevent
+the benchmark to dominate the whole series.
 \fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
+\fBbench4\fP benchmarks an image operation.
 .SH DATA
-Here are the commands to execute the benchmarks
+Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
 .ta +1i
 .nf
 \fBbench0\fP:	\fItime directcode nbody=10240\fP
@@ -27,7 +29,7 @@ and the data :
 .nf
 .ta +3i
 bench0 (directcode)
-       I5/7200@2.5       47.7
+       I5/7200@2.5       47.7 
        I7/3630QM@3.6	174.2  (nemo2: 
        I7/3770@3.5	152.6
        P4/3.0            342.7
