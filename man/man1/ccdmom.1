@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "21 June 2017"
+.TH CCDMOM 1NEMO "3 April 2018"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
 .SH SYNOPSIS
@@ -76,11 +76,6 @@ Exclude pixels with values in the range -clip to clip. Default: 0
 Don't assign a 1st moment if the value results in a value outside the
 range of the axis. This can easily happen for noisy data. Default: false.
 .TP
-\fBpeak=N\fP
-For \fBmom=3,30-34\fP where it finds the peak, this allows you to find the N-th
-peak instead of the first. This is achieved by visiting each peak, and assigning
-a peak membership downwards from the peak and then finding the next one.
-.TP
 \fBoper=\fP
 If supplied, this is an extra operator supplied to the input file and output file,
 to create the final output file. This is to prevent having to type two commands
@@ -94,6 +89,11 @@ instead of
     ccdmom map0 map1 axis=1 mom=-1 oper=-
 .fi
 .TP
+\fBpeak=N\fP
+For \fBmom=3,30-34\fP where it finds the peak, this allows you to find the N-th
+peak instead of the first. This is achieved by visiting each peak, and assigning
+a peak membership downwards from the peak and then finding the next one.
+.TP
 \fBintegrate=t|f\fP
 When using mom=0 the signal is summed along an axis, you can either just sum
 the numbers (this used to be the old default), or integrate, ie. multiply
@@ -104,6 +104,14 @@ it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
 Use absolute values of the intensities for weights to a moment analysis. This is
 useful for low S/N data where at the wings a sign change can bias the moments.
 It is assumed the data have been continuum subtracted.
+.TP
+\fBzero=t|f\fP
+Mask out values below zero for mom=30,31,32 (**experimental**)
+[f]
+.TP
+\fBcontsub=t|f\fP
+Fake a continuum subtraction for mom=30,31,32  (**experimental**)
+[t]
 .TP
 \fBpos=\fP\fI[ix0,iy0]\fP
 If used, this should contain two (zero-based) pixel coordinates, at which position a spectrum

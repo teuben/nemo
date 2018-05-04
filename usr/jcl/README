@@ -4,11 +4,11 @@ patch/experiment with something more recent, here are the
 recipes:
 
 
-unsio:   (see also: http://projets.oamp.fr/projects/unsio/)
+unsio:   (see also: http://projets.lam.fr/projects/unsio/)
 `   git clone https://gitlab.lam.fr/jclamber/unsio
     mknemo unsio
 
-glnemo2: (see also: http://projets.oamp.fr/projects/glnemo2)
+glnemo2: (see also: http://projets.lam.fr/projects/glnemo2)
     git clone https://gitlab.lam.fr/jclamber/glnemo2.git
     mknemo glnemo2
 

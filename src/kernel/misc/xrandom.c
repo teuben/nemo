@@ -29,6 +29,8 @@
  *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
  *  24-jan-18   faster version of grandom() with better caching               PJT
  *              1e7 grandom:   V2.2 -> 1.40"    V2.3 -> 0.85
+ *
+ *  See also: getrandom(2LINUX)
  */
 
 #include <stdinc.h>
