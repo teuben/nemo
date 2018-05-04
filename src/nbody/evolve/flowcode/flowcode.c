@@ -12,6 +12,7 @@
  * See also:
  *    http://www.amara.com/ftpstuff/streamlines1.txt
  *    http://www.amara.com/ftpstuff/streamlines2.txt
+ *    https://en.wikipedia.org/wiki/Line_integral_convolution
  */
 
 #define global
