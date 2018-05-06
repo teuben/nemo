@@ -3,7 +3,7 @@
 
 <html>
 <head>
-<title>DATA(5NEMO) manual page</title>
+<title>BENCH(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
@@ -25,13 +25,14 @@ Here are the commands to execute the benchmarks
 <br>
 <pre>bench0:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time directcode nbody=10240
 bench1:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time hackcode1 nbody=10240
-bench2:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2
+bench2:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05
 bench3:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkspiral s000 1000000 nmodel=40
 bench4:<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdmath "" - &rsquo;ranu(0,1)&rsquo; size=128 | ccdpot - . help=c
 </pre><p>
 and the data : <p>
 <br>
 <pre>bench0 (directcode)
+       I5/7200@2.5       47.7
        I7/3630QM@3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;174.2  (nemo2: 
        I7/3770@3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;152.6
        P4/3.0            342.7
@@ -43,6 +44,7 @@ and the data : <p>
        x86_64/3.2        480.6
        sparcv9+vis/0.36 3048.2
 bench1 (hackcode1)
+       I5/2.5            2.2
        I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;14.0  (nemo2: 1.2 - 3.6)  5.1
        I7/3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; 4.4
        P4/3.0           13.4
@@ -54,6 +56,7 @@ bench1 (hackcode1)
        x86_64/3.2       10.7
        sparcv9+vis/0.36 81.5
 bench2 (gyrfalcON)
+       I5/2.5            2.5
        I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; 8.1  (nemo2)  2.948 3.19 5.09
        I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;31.2  (?)
        P4/3.0           10.8
@@ -64,6 +67,7 @@ bench2 (gyrfalcON)
        x86_64/3.2        8.6
        sparcv9+vis/0.36 85.1  
 bench3 (mkspiral)
+       I5/2.5    5.4u   1.6s
        I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.657u 3.856s 0:28.04 98.0%  (nemo2)
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;        10.760u 0.832s 0:20.33 57.0%
        I7/3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.112u 1.520 0:09.37 98.5%
@@ -77,6 +81,9 @@ bench3 (mkspiral)
        x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
        i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
        i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
+bench4 (ccdpot)
+       I5/2.5   11.9
+       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.657u 3.856s 0:28.04 98.0%  (nemo2)
 </pre>
 <h2><a name='sect3' href='#toc3'>Caveats</a></h2>
 Defining and running a benchmark can be very tricky stuff. It might
@@ -134,6 +141,7 @@ Peter Teuben
 31-mar-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;added some cygwin numbers, fixed input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-may-11    added i7 and SHMEM/HDD comparison   PJT
 27-sep-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;added caveats<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+6-jan-2018<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated for V4, more balanced benchmarks<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -16,14 +16,15 @@
 #               24-may-2010   glnemo deprecated, only glnemo2 
 #               19-jan-2011   added a cmake=1 option to build internally
 #               25-jan-2012   DSO linking (dso=1) needed for modern linux
-#                5-dec-2017   converted CVS to GIT
+#                5-dec-2017   converted CVS to GIT for NEMO V4
 #               29-dec-2017   install=0 mktar=0 option
+#                7-feb-2018   script now called install_nemo
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
 #  great if you don't have an internet connection
 #  
-#        test_a_new_nemo_git  git_nemo=`pwd`/nemo git_pgplot=`pwd`/nemo/local/pgplot    nemo=nemo2
+#       install_nemo git_nemo=`pwd`/nemo git_pgplot=`pwd`/nemo/local/pgplot    nemo=nemo2
 
 
 set nemo        = nemo           # root directory name from the current directory
@@ -52,6 +53,7 @@ set yapp        = (/null)	# set a YAPP device during the install
 set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
 set cfitsio     = 0             # disable for formal release since there are some problems
 set debug       = 1             # compile in debug mode (not implemented)
+set test        = 1             # also run testsuite at the end
 set pedantic    = 0             # compile in pedantic mode
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
@@ -213,7 +215,7 @@ endif
 rehash
 $make libs
 
-# backward compatibility support
+# backward compatibility support?
 # ln -s nemo_start.csh nemo_start 
 
 if ($vogl) then
@@ -238,11 +240,13 @@ endif
 
 rehash
 
-if ($all) then
-  $make bins
-  src/scripts/testsuite
-else
-  src/scripts/testsuite -b
-endif
+if ($test) then
+  if ($all) then
+    $make bins
+    src/scripts/testsuite
+  else
+    src/scripts/testsuite -b
+  endif
+endif  
 
 echo All done.

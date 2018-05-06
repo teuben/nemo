@@ -138,7 +138,7 @@ general things for 3.2.x
 
  - need a gyrfalcON testsuite section
 
--  falcON/utils install uses some linux dialect:
+ -  falcON/utils install uses some linux dialect:
 
    1) mkdir
 	mkdir --parents --mode=755 ...
@@ -357,10 +357,12 @@ git tricks
 
    todo:  see if "git push --tags"  also works
 
-2) can you see what will be pushed when you "git push"
+2) ? can you see what will be pushed when you "git push"
    since you may have done a whole bunch of "git commit"
    It would say something like
       "Your branch is ahead of 'origin/master' by 8 commits"
+
+   git diff --stat --cached origin/master
 
 
 3) if you accidentally edited a FILE and want to "undo" it,
@@ -368,3 +370,28 @@ git tricks
 
    git checkout FILE
 
+   this will silently overwrite your modified FILE with the
+   original version
+
+ 
+4) working with another remote upstream
+
+   Let say you work off a fork, and cloned that as you private workspace.
+   The original NEMO would be the upstream master:
+
+   git remote                                                # see which ones you have
+   git remote add upstream https://github.com/teuben/nemo    # add this one-time
+
+   git branch                                                # check what branch you are on
+   git checkout master                                       # ensure on your master
+   git fetch upstream                                        # fetch the upstream
+   git merge upstream/master                                 # merge in 
+   git status                                                # should be no new things
+   git push                                                  # push it to your origin
+
+5) When pgplot changed their URL:
+
+   git remote -v
+
+   git remote rename origin teuben
+   git remote add origin https://github.com/astroumd/pgplot

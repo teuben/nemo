@@ -5645,7 +5645,7 @@ fi
 if test "${with_dso+set}" = set; then :
   withval=$with_dso; with_dso=$withval
 else
-  with_dso=yes
+  with_dso=no
 fi
 
 
@@ -10388,6 +10388,8 @@ main ()
     if (*(data + i) != *(data3 + i))
       return 14;
   close (fd);
+  free (data);
+  free (data3);
   return 0;
 }
 _ACEOF

@@ -59,12 +59,14 @@ if ($?LD_LIBRARY_PATH) then
 else
   setenv LD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}
 endif
-if($?VENDOR && $VENDOR == apple) then
-  if($?DYLD_LIBRARY_PATH) then
-    setenv DYLD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}":"${DYLD_LIBRARY_PATH}
-  else
-    setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
-  endif
+
+set uname = (`uname -s`)       # for now, we only support Linux and Darwin
+if($uname == Darwin) then
+    if($?DYLD_LIBRARY_PATH) then
+      setenv DYLD_LIBRARY_PATH ${FALCONLIB}":"${WDUTILSLIB}":"${DYLD_LIBRARY_PATH}
+    else
+      setenv DYLD_LIBRARY_PATH $LD_LIBRARY_PATH
+    endif
 endif
 
 # provide alias 'NOclaf' to de-active falcON

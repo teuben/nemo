@@ -5,6 +5,8 @@
 
 # ignore .so files
 *.so
+# mac
+*.dSYM
 
 # ignore files created during configure
 *~
