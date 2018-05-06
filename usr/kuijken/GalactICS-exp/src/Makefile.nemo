@@ -34,36 +34,36 @@ ALLFILES= dbh genhalo genbulge gendisk diskdf tobinary \
 all: $(ALLFILES)
 
 dbh: dbh.o dbhplot.o polardens.o bulgepotential.o totdens.o halopotential.o pot.o diskdens.o dens.o appdiskpot.o plgndr1.o bulgedenspsi.o densrpsi.o polarbulgedens.o polarhalodens.o appdiskdens.o halodens.o erfcen.o modstamp.o
-	$(F77) $(FFLAGS) $(MYFLIBS) dbh.o dbhplot.o polardens.o bulgepotential.o totdens.o halopotential.o pot.o diskdens.o dens.o appdiskpot.o plgndr1.o bulgedenspsi.o densrpsi.o polarbulgedens.o polarhalodens.o appdiskdens.o halodens.o erfcen.o modstamp.o  -o dbh
+	$(F77) $(FFLAGS) dbh.o dbhplot.o polardens.o bulgepotential.o totdens.o halopotential.o pot.o diskdens.o dens.o appdiskpot.o plgndr1.o bulgedenspsi.o densrpsi.o polarbulgedens.o polarhalodens.o appdiskdens.o halodens.o erfcen.o modstamp.o  $(MYFLIBS) -o dbh
 
 genhalo: genhalo.o readmassrad.o query.o ran1.o readharmfile.o pot.o halodens.o appdiskpot.o plgndr1.o densrpsi.o erfcen.o
-	$(CC) $(CFLAGS) $(MYFLIBS) genhalo.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o densrpsi.o pot.o halodens.o erfcen.o $(FORLIBS) -o genhalo
+	$(CC) $(CFLAGS) genhalo.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o densrpsi.o pot.o halodens.o erfcen.o $(FORLIBS) $(MYFLIBS) -o genhalo
 
 genbulge: genbulge.o readmassrad.o query.o ran1.o readharmfile.o pot.o bulgedens.o appdiskpot.o plgndr1.o bulgedenspsi.o erfcen.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) genbulge.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o bulgedenspsi.o pot.o bulgedens.o erfcen.o $(FORLIBS) -o genbulge
+	$(CC) $(MYFLAGS) genbulge.o readmassrad.o query.o ran1.o readharmfile.o appdiskpot.o plgndr1.o bulgedenspsi.o pot.o bulgedens.o erfcen.o $(FORLIBS) $(MYFLIBS) -o genbulge
 
 gendisk: gendisk.o ran1.o query.o \
 	readdiskdf.o golden.o simpson.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) gendisk.o ran1.o query.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o \
-	readdiskdf.o golden.o simpson.o $(FORLIBS) -o gendisk
+	$(CC) $(MYFLAGS) gendisk.o ran1.o query.o diskdf5ez.o diskdensf.o readharmfile.o sigr2.o sigz2.o omekap.o diskdens.o splined.o splintd.o diskdf3ez.o diskdenspsi.o pot.o fnamidden.o appdiskpot.o plgndr1.o rcirc.o \
+	readdiskdf.o golden.o simpson.o $(FORLIBS) $(MYFLIBS) -o gendisk
 
 diskdf: diskdf.o diskdf5intez.o diskdensf.o splintd.o splined.o readharmfile.o sigr2.o sigz2.o omekap.o pot.o diskdf3intez.o appdiskpot.o plgndr1.o fnamidden.o rcirc.o diskdens.o modstamp.o
-	$(F77) $(FFLAGS)  $(MYFLIBS) diskdf.o diskdf5intez.o diskdf3intez.o appdiskpot.o plgndr1.o diskdensf.o splintd.o splined.o readharmfile.o sigr2.o sigz2.o fnamidden.o rcirc.o diskdens.o omekap.o pot.o modstamp.o  -o diskdf
+	$(F77) $(FFLAGS)  diskdf.o diskdf5intez.o diskdf3intez.o appdiskpot.o plgndr1.o diskdensf.o splintd.o splined.o readharmfile.o sigr2.o sigz2.o fnamidden.o rcirc.o diskdens.o omekap.o pot.o modstamp.o  $(MYFLIBS) -o diskdf
 
 getfreqs: getfreqs.o pot.o appdiskpot.o plgndr1.o erfcen.o
-	$(F77) $(FFLAGS)  $(MYFLIBS) getfreqs.o pot.o appdiskpot.o plgndr1.o erfcen.o -o getfreqs
+	$(F77) $(FFLAGS)  getfreqs.o pot.o appdiskpot.o plgndr1.o erfcen.o  $(MYFLIBS) -o getfreqs
 
 tobinary: tobinary.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) tobinary.o $(FORLIBS) -o tobinary
+	$(CC) $(MYFLAGS) tobinary.o $(FORLIBS) $(MYFLIBS)  -o tobinary
 
 vcirc: vcirc.o query.o readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o
-	$(CC) $(MYFLAGS) $(MYFLIBS) vcirc.o query.o  readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o $(FORLIBS) -o vcirc
+	$(CC) $(MYFLAGS) vcirc.o query.o  readharmfile.o force.o appdiskforce.o appdiskpot.o plgndr1.o $(FORLIBS)  $(MYFLIBS) -o vcirc
 
 plothalo: plothalo.o contourden.o readdiskdf.o diskdens.o halodens.o bulgedens.o bulgedenspsi.o diskdensf.o readharmfile.o sigr2.o densrpsi.o omekap.o pot.o splined.o appdiskpot.o splintd.o diskdenspsi.o erfcen.o plgndr1.o  modstamp.o
-	$(F77) $(FFLAGS) $(MYFLIBS)  plothalo.o contourden.o readdiskdf.o diskdens.o halodens.o diskdensf.o bulgedens.o bulgedenspsi.o readharmfile.o sigr2.o densrpsi.o omekap.o pot.o splined.o appdiskpot.o splintd.o diskdenspsi.o erfcen.o plgndr1.o modstamp.o  -o plothalo
+	$(F77) $(FFLAGS)  plothalo.o contourden.o readdiskdf.o diskdens.o halodens.o diskdensf.o bulgedens.o bulgedenspsi.o readharmfile.o sigr2.o densrpsi.o omekap.o pot.o splined.o appdiskpot.o splintd.o diskdenspsi.o erfcen.o plgndr1.o modstamp.o  $(MYFLIBS) -o plothalo
 
 plotforce: plotforce.o readharmfile.o readdiskdf.o force.o appdiskforce.o appdiskpot.o diskdensf.o sigr2.o omekap.o plgndr1.o diskdens.o splined.o splintd.o diskdenspsi.o pot.o modstamp.o
-	$(F77) $(FFLAGS) $(MYFLIBS)  plotforce.o readharmfile.o readdiskdf.o force.o appdiskforce.o appdiskpot.o diskdensf.o sigr2.o omekap.o plgndr1.o diskdens.o splined.o splintd.o diskdenspsi.o pot.o  modstamp.o  -o plotforce
+	$(F77) $(FFLAGS)  plotforce.o readharmfile.o readdiskdf.o force.o appdiskforce.o appdiskpot.o diskdensf.o sigr2.o omekap.o plgndr1.o diskdens.o splined.o splintd.o diskdenspsi.o pot.o  modstamp.o  $(MYFLIBS) -o plotforce
 
 #clean:
 #       rm -f *.o genhalo genbulge gendisk genglob genrings \
