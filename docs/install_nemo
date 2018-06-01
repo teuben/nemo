@@ -19,6 +19,7 @@
 #                5-dec-2017   converted CVS to GIT for NEMO V4
 #               29-dec-2017   install=0 mktar=0 option
 #                7-feb-2018   script now called install_nemo
+#                4-may-2018   option to use giza (https://github.com/danieljprice/giza) instead of pgplot
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
