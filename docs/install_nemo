@@ -50,6 +50,7 @@ set clean       = 1		# remove old nemo directory before installing (rm -r nemo)
 set git_nemo    = https://github.com/teuben/nemo
 set git_pgplot  = https://github.com/teuben/pgplot
 set git_giza    = https://github.com/teuben/giza
+set git_giza    = https://github.com/danieljprice/giza
 set branch      = ()		# use a GIT branch?
 set yapp        = (/null)	# set a YAPP device during the install
                   	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
@@ -216,6 +217,18 @@ if ($pgplot) then
   echo "Compiling internal pgplot (logfile: install.pgplot.log)"
   $make pgplot PNG=$png GIF=$gif >& install.pgplot.log
   if ($status) echo "### Error: pgplot build problem."
+endif
+
+if ($giza) then
+  echo "Compiling internal pgplot from giza (logfile: install.giza.log)"
+  pushd $NEMO/local/giza
+  ./configure --prefix=$NEMO >& install.giza.log
+  if ($status) echo "### Error: giza build problem."  
+  make                      >>& install.giza.log
+  if ($status) echo "### Error: giza build problem."  
+  make install              >>& install.giza.log
+  if ($status) echo "### Error: giza build problem."
+  popd
 endif
 
 if ($cmake) then
