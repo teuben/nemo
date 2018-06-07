@@ -33,6 +33,7 @@ set nemo        = nemo           # root directory name from the current director
 set install     = 1             # set this to 0 when you only grab the source code
 set mktar       = 0             # make a tar file before install starts
 set pgplot      = 1		# install PGPLOT via GIT also
+set giza        = 0             # install GIZA instead of PGPLOT
 set intel       = 0		# pick intel compiler (astromake)
 set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
 set gcc         = 0		# pick gcc version (version number via astromake)
@@ -48,6 +49,7 @@ set all         = 1		# make all binaries , or just the one for the testsuite?
 set clean       = 1		# remove old nemo directory before installing (rm -r nemo)
 set git_nemo    = https://github.com/teuben/nemo
 set git_pgplot  = https://github.com/teuben/pgplot
+set git_giza    = https://github.com/teuben/giza
 set branch      = ()		# use a GIT branch?
 set yapp        = (/null)	# set a YAPP device during the install
                   	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
@@ -146,8 +148,16 @@ if ($reuse) then
   $make distclean >& install.distclean.log
 endif
 
+# pick just one from pgplot,giza
+if ($giza)   set pgplot = 0
+if ($pgplot) set giza   = 0
+
 if ($pgplot && $reuse == 0) then   
   (cd local; git clone $git_pgplot)
+endif
+
+if ($giza && $reuse == 0) then   
+  (cd local; git clone $git_giza)
 endif
 
 if ($cfitsio != 0) then
@@ -182,6 +192,7 @@ set copts=()
 # set copts=($copts --disable-gsl)
 if ($gsl) set copts=($copts --enable-gsl)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($giza) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
 if ($png) set copts=($copts --enable-png)
 if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
