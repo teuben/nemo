@@ -1,5 +1,76 @@
-Installation overview:
-----------------------
+Preconditions to Installation
+=============================
+To build and run nemo you will need to install a few packages if you don't 
+have them already.
+
+-gfortran
+-libx11-dev
+-libxt-dev
+-libxext-dev
+-libcairo2-dev
+-build-essential
+-cmake
+-csh
+
+
+All of the above can be installed using the bash shell command
+
+sudo apt install PACKAGENAME
+
+
+
+DOWNLOAD and INSTALLATION using install_nemo script
+===================================================
+
+The easiest way to install nemo is using the included install_nemo script.
+If you haven't already downloaded nemo, these commands should get you up and
+running.  The following will download the latest version of nemo from github
+and install it into your $HOME/opt/nemo directory.
+
+ wget https://teuben.github.io/nemo/install_nemo
+ chmod +x install_nemo
+ ./install_nemo nemo=$HOME/opt/nemo
+ source $HOME/opt/nemo/nemo_start.csh
+
+ *replace .csh with .sh in the last line if you are running the command from bash
+
+DOWNLOAD using git
+==================
+If you haven't yet installed git, it can be obtained through the package manager.  For
+example
+
+sudo apt install git
+
+To download the files using git, you can use git clone from your terminal.  For example
+
+git clone https://github.com/teuben/nemo.git
+
+Then you can proceed to "INSTALLATION using instlal_nemo script" below
+
+
+INSTALLATION using install_nemo script
+======================================
+You can also use the script if you have already downloaded nemo from github
+or from another source.  The install_nemo script is located in nemo/docs.  Here
+is an example assuming you are already in your nemo directory.
+
+cd docs
+./install_nemo nemo=$HOME/opt/nemo
+source $HOME/opt/nemo/nemo_start.csh
+
+*replace .csh with .sh in the last line if you are running the command from bash
+
+*IMPORTANT*
+==========
+If you would like to use giza which allows for pdf output as opposed to postscript,
+you must install using the giza=1 argument to the install_nemo script.  For example
+
+./install_nemo giza=1
+
+This is one example of many arguments you can pass to install_nemo.
+
+MANUAL INSTALLATION OVERVIEW:
+=============================
 
 This document gives some background information in case the more
 automated script(s) to install NEMO have failed you.
@@ -71,7 +142,22 @@ a3) Installing PGPLOT - MIRIAD pgplot git release
    	make pgplot png=1 gif=1
 
 
-a4) Install PGPLOT (giza) - 
+a4) Install PGPLOT (giza github installation) -
+
+	The giza package is now primarily maintained on the developer's github account
+	(https://github.com/danieljprice/giza).  The giza implementation of PGPLOT can be installed
+	by adding an extra parameter to the ./install_nemo script: "./install_nemo giza=1"
+
+	It can also be cloned from price's repository using git clone https://github.com/danieljprice/giza.git.
+	Then it can be installed using the same instructions as the sourceforge download.  Here is an example
+
+	git clone https://github.com/danieljprice/giza.git
+	cd giza
+	./configure --prefix=$NEMO
+	make
+	make install
+
+	(OLD) Install PGPLOT (giza sourceforge) - 
 
     The giza package (http://giza.sourceforge.net) has its own implementation of PGPLOT,
     which is compatible with cairo. Here is an example that seems to work with NEMO
@@ -100,6 +186,14 @@ b) Installing HDF (now often called HDF4, since there HDF5 is the current versio
    A newer version of HDF (HDF5) is currently under development. NEMO does
    not support this yet.
 
+   The install package for hdf4 can be found at https://support.hdfgroup.org/products/hdf4/.
+   You will need to extract the package. The next command assumes you are already in HDF4 directory
+   One way to install this package is 
+
+   configure --prefix=$NEMO
+   make
+   make install
+
 c) Installing CFITSIO  (pending work on configure.in)
  
    NEMO has two internal routines (fits.c and fitsio.c) that handle various
@@ -107,8 +201,8 @@ c) Installing CFITSIO  (pending work on configure.in)
    fitsio_nemo.c implements the fitsio.c file by providing a wrapper
    that actually calls the CFITSIO library (courtesy Bill Pence)
 
-   wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio2490.tar.gz
-   (see http://heasarc.gsfc.nasa.gov/docs/software/fitsio/fitsio.html)
+   wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3390.tar.gz
+   (see https://heasarc.gsfc.nasa.gov/fitsio/fitsio.html)
  
    One way is to embed it into NEMO, so when you configure cfitsio
 
@@ -184,7 +278,7 @@ Brief overview of a Version 4.x INSTALLATION
 
 	% ./configure  [options]
 		(sometimes you may need to set your default compiler, e.g.
-			setenv F77 gfortran
+			setenv F77 gfortran (or use export for bash)
 		 or whichever is applicable, if the fortran compiler does not
 		 get detected properly, the run configure again)
 		 Check the file config.log if configure fails
@@ -276,6 +370,8 @@ Results in /home/teuben/nemo_3.0.4/tmp/test22005/testsuite.log
 	- if 'configure' fails for some reason, check the config.log file. 
 	  Sometimes the cause is a rather trivial one, e.g. missing licences 
 	  or a bad path or even a bad shell
+
+	- on occasion the sellwood/tools test will hang.
 
 *) pieces of configure out of date?  Encountering a new machine?
 
