@@ -77,10 +77,14 @@ local float red[MAXCOLOR];              /* RGB color tables                 */
 local float blue[MAXCOLOR];
 local float green[MAXCOLOR];
 
-
-
-local real xscale(real), yscale(real);		/* user to pt mappings */
-local prolog(real, real), trailer(), begpage(), endpage(), begpath(), endpath();
+static real xscale(real x);
+static real yscale(real y);
+static prolog(real dx, real dy);
+static trailer(void);
+static begpage(void);
+static endpage(void);
+static begpath(void);
+static endpath(void);
 
 extern string date_id(void);                    /* date id */
 

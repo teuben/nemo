@@ -20,7 +20,7 @@
 
 if ($#argv == 0) then
   echo "Usage: $0 <BASENAME>"
-  echo NEMO V3 system utility that converts an object file BASENAME.o 
+  echo NEMO V4 system utility that converts an object file BASENAME.o 
   echo into a shared object file BASENAME.so.
   exit 0
 endif

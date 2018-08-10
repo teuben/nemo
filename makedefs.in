@@ -1,3 +1,4 @@
+# -*- makefile -*-
 
 #  ONLY EDIT THIS FILE IF IT'S $NEMOLIB/makedefs
 #    diff $NEMO/makedefs $NEMOLIB

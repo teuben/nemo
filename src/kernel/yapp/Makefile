@@ -47,7 +47,7 @@ LIBMESA	    = -lGL $(LIBX)
 
 OBJFILES = yapp.o
 YAPPOBJS = yapp_ps.o yapp_null.o yapp_pgplot.o yapp_plplot.o \
-	yapp_cpgplot.o yapp_meta.o
+	yapp_cpgplot.o yapp_meta.o yapp_giza.o
 BINFILES = catps catpgps yapp
 # wow: the following are TRUE original NEMO V1 programs !!!    can't be in BINFILES yet
 # pltext_ps plarrow_ps
@@ -59,7 +59,7 @@ TESTFILES = yapptest \
 	   yapptest_ps yapptest_ps_new yapptest_psg \
 	   yapptest_cg yapptest_cg_new \
 	   yapptest_sv yapptest_sm yapptest_gt yapptest_plplot \
-	   yapptest_x
+	   yapptest_x yapptest_giza 
 
 # Target provided for helpless people.
 
@@ -149,6 +149,10 @@ yapptest_suntools: yapp_suntools.c testyapp.c
 #OK
 yapptest_pgplot: yapp_pgplot.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_pgplot yapp_pgplot.c testyapp.c \
+		$(NEMO_LIBS) $(LIBPGPLOT) $(EL) -lm
+
+yapptest_giza: yapp_giza.c testyapp.c
+	$(CC) $(CFLAGS) -o yapptest_giza yapp_giza.c testyapp.c \
 		$(NEMO_LIBS) $(LIBPGPLOT) $(EL) -lm
 
 yapptest_plplot: yapp_plplot.c testyapp.c

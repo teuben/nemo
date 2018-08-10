@@ -68,3 +68,7 @@ nemo-fortunes.dat: nemo-fortunes
 #    Peter's update for the website
 chara:
 	./make_html chara.astro.umd.edu:/chara/teuben/nemo-www/man_html/
+
+#    updates the docs tree for https://teuben.github.io/nemo/
+docs:
+	./make_html 
