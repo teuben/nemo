@@ -37,8 +37,15 @@ See README.install for installation guidelines. In it's simplest the following c
 	 source $HOME/opt/nemo/nemo_start.csh
 
 Some obvious and perhaps not so obvious tools you will need to have installed:  C/C++/Fortran compiler,
-csh, git, cmake. Use your local package manager to install those before you attempt to run the install_nemo
-script.  For example, on a fresh ubuntu distro, you're likely going to need this:
+csh, git, cmake. If you don't have wget, use url or any other program (even any browser works) to get that script.
+E.g.
+
+     curl -O https://teuben.github.io/nemo/install_nemo
+
+
+Use your local package manager to install those before you attempt to run the install_nemo
+script. For example, on a fresh Ubuntu distro, you're likely going to need to install two
+packages before running the install script, viz.
 
 	 sudo apt install tcsh git
  	 ./install_nemo ubuntu=1
