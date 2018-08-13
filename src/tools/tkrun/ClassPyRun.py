@@ -1,4 +1,4 @@
-#! /bin/env python
+#! /usr/bin/env python
 # Last Modified on 08-18-08 by Brian J. Prager
    
 class Test:   
