@@ -41,6 +41,7 @@
  *                     b : fix bug in bins with no dispersive data, switch to moment.h
  *       9-oct-06      d : Implemented the dxcol= and dycol=
  *       8-apr-11      e : fixed dycol reference bug
+ *      22-aug-2018 V3.1 : print commented line if bin= causes an empty bin
  */
 
 /* TODO:
@@ -102,7 +103,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.0f\n	 8-apr-11 PJT",
+    "VERSION=3.1\n	 22-aug-2018 PJT",
     NULL
 };
 
@@ -643,8 +644,11 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 	  }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab && n_moment(&mx))    /* only print non-zero bins */
-            printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
+	if(Qtab)
+	    if (n_moment(&mx))    /* print non-zero bins */
+	      printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
+            else
+	      printf("# 0\n");    /* comment line for empty bin */
         iold = i;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
