@@ -30,14 +30,22 @@ Packages we optionally use:
 See README.install for installation guidelines. In it's simplest the following commands may work
 (replace .csh with .sh if appropriate)
 
-
 	 wget https://teuben.github.io/nemo/install_nemo
 	 chmod +x install_nemo
 	 ./install_nemo nemo=$HOME/opt/nemo
 	 source $HOME/opt/nemo/nemo_start.csh
 
 Some obvious and perhaps not so obvious tools you will need to have installed:  C/C++/Fortran compiler,
-csh, git, cmake, etc.    If you don't have wget, use url or any other program (even any browser works)
-to get that script. E.g.
+csh, git, cmake. Use your local package manager to install those before you attempt to run the install_nemo
+script. For example, on a fresh Ubuntu distro, you're likely going to need to install two
+packages before running the install script, viz.
 
-         curl -O https://teuben.github.io/nemo/install_nemo
+	 sudo apt install tcsh git
+ 	 ./install_nemo ubuntu=1
+
+
+And you don't have wget (e.g. MacOSX) use curl or any other program (even any browser works) to get that script.
+E.g.
+
+     curl -O https://teuben.github.io/nemo/install_nemo
+
