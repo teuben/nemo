@@ -20,6 +20,7 @@
  *      19-feb-02  V2.8 added ltype=				pjt
  *      16-mar-05  V3.0 loop over all images if more found      PJT
  *                     a   added blankval to the new pl_matrix routine    PJT
+ *      23-aug-18  V3.1  xscale,yscale,xlab,ylab                          PJT
  *	
  */
 
@@ -55,7 +56,11 @@ string defv[] = {
 	"cmode=0\n	Contour mode (0=orginal 1=pgplot)",
 	"blankval=\n	if used, use this as blankval",
 	"ltype=\n	width and type for contour",
-	"VERSION=3.0e\n	16-mar-05 PJT",
+	"xlab=\n	(override) Label along X-axis",
+	"ylab=\n	(override) Label along Y-axis",
+	"xscale=1\n     Scale all X values by this",
+	"yscale=1\n     Scale all Y values by this",
+	"VERSION=3.1\n	23-aug-2018 PJT",
 	NULL,
 };
 
@@ -81,6 +86,7 @@ real   origin[2];			/* from header: in sky coordinates */
 real xsize,ysize,size;		        /* frame dimension */
 real xmin,ymin,dx,dy,cell;		/* frame dimensions */
 real blankval;                          /* blank value */
+real xscale, yscale;
 
 #define MCNTVAL	100			/* maximum contour levels */
 string cntstr;				/* string of contour levels */
@@ -89,6 +95,7 @@ int ncntval;				/* actual number of contours */
 
 real xplot[2],   yplot[2];		/* ranges in plot variables */
 
+string xlab=NULL, ylab=NULL;
 char   xlabel[80], ylabel[80];              
 char   plabel[80], clabel[80], glabel[80], tlabel[80];
 string headline;			/* extra label */
@@ -117,8 +124,8 @@ nemo_main()
     if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
     xmin=Xmin(iptr);
     ymin=Ymin(iptr);
-    dx=Dx(iptr);
-    dy=Dy(iptr);
+    dx=Dx(iptr) * xscale;
+    dy=Dy(iptr) * yscale;
     xsize = nx * dx;
     ysize = ny * dy;
     if (n>0) {
@@ -191,6 +198,10 @@ setparams()
             lwidth = getiparam("ltype");
             /* oops, skip ltype for now */
         }
+	xscale = getrparam("xscale");
+	yscale = getrparam("yscale");
+	if (hasvalue("xlab")) xlab = getparam("xlab");
+	if (hasvalue("ylab")) ylab = getparam("ylab");
             
 }
 
@@ -201,8 +212,8 @@ plot_map ()
     int    i, ix, iy;
     int    cnt;		/* counter of pixels */
 
-    nsize = Nx(iptr);  /* old method forced square .. */			
-    cell = Dx(iptr);   /* and forced so for gray scale due to LW mem-problems */
+    nsize = Nx(iptr);           /* old method forced square .. */			
+    cell = Dx(iptr) * xscale;   /* and forced so for gray scale due to LW mem-problems */
     size = nsize*cell;
     
     m_min = MapMin(iptr);	/* get min- and max from header */
@@ -231,8 +242,12 @@ plot_map ()
     if (xplot[0]==UNDEF || xplot[1]==UNDEF) {
     	xplot[0] = Xmin(iptr) - 0.5*Dx(iptr);
     	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr);
+    	xplot[0] *= xscale;
+    	xplot[1] *= xscale;
     }
-    if (Namex(iptr))
+    if (xlab != NULL)
+        strncpy(xlabel,xlab,80);
+    else if (Namex(iptr))
         strncpy(xlabel,Namex(iptr),80);
     else
         strcpy (xlabel,"");
@@ -240,8 +255,13 @@ plot_map ()
     if (yplot[0]==UNDEF || yplot[1]==UNDEF) {
     	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr);
     	yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr);
+    	yplot[0] *= yscale;
+    	yplot[1] *= yscale;
+	
     }
-    if (Namey(iptr))
+    if (ylab != NULL)
+        strncpy(ylabel,ylab,80);
+    else if (Namey(iptr))
         strncpy(ylabel,Namey(iptr),80);
     else
         strcpy (ylabel,"");
@@ -251,7 +271,7 @@ plot_map ()
 
     if (gray) {		
 				/* gray-scale */
-       dcm = Dx(iptr) / (xplot[1]-xplot[0]) * 16.0;
+       dcm = Dx(iptr) / (xplot[1]-xplot[0]) * 16.0 * xscale;
        pl_matrix (Frame(iptr), nx, ny, 
 		  xtrans(Xmin(iptr)), ytrans(Ymin(iptr)), dcm , mmin, mmax, power, blankval);
            /*  color_bar (100.0,500.0,32);  */
@@ -259,11 +279,11 @@ plot_map ()
      		/* OLD ROUTINE, has to call relocate/frame ---> plcontour */
      plltype(lwidth,ltype);
      if (cmode==0) 
-        contour (Frame(iptr),nx,ny,cntval,ncntval,
+        contour (Frame(iptr),nx,ny,cntval,ncntval,          /*  @todo  scaling not correct, see xplot/yplot[] */
 		Xmin(iptr), 
 		Ymin(iptr), 
-		Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr),
-		Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr), lineto);
+		Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr)*xscale,
+		Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr)*yscale, lineto);
     
      else if (cmode==1)
          pl_contour (Frame(iptr),nx,ny,ncntval,cntval);
