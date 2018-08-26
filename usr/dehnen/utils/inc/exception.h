@@ -595,13 +595,20 @@ namespace WDutils {
   /// method invoking an error, suitable as @a Thrower::handler
   inline void MakeError(const char*file, unsigned line, const char*mess)
   {
-#ifdef __clang__
+#if defined(__clang__)
 #  pragma clang diagnostic push
 #  pragma clang diagnostic ignored "-Wformat-security"
 #endif
+#if defined(__GNUC__)
+#  pragma GCC diagnostic push
+#  pragma GCC diagnostic ignored "-Wformat-security"
+#endif
     Error(file,line,"WDutils")(mess);
-#ifdef __clang__
+#if defined(__clang_)
 #  pragma clang diagnostic pop
+#endif
+#if defined(__GNUC___)
+#  pragma GCC diagnostic pop
 #endif
   }
   /// guard against throwing an exception inside an openMP parallel region
