@@ -1,6 +1,23 @@
 
 all:	test1 test2 test3 test4 test5 test6
 
+bench1a:
+	time ./plummer_stats.csh tmp=bench1a nexp=100 mlo=1 mhi=1
+	echo "R_v should show ...0.966369 0.0685018"
+	echo "tail should show ..."
+
+bench1b:
+	time ./cluster_stats.py  out='"bench1b"' nexp=100 mlo=1 mhi=1
+	echo "R_v should show ..."
+	echo "tail should show ..."
+#r_c: 0.9663689500000001 +/- 0.06850180731183303
+#r_v: 0.3959586 +/- 0.13051354191592532
+
+bench1c:
+	time ./cluster_stats.py  out='"bench1c"' nexp=100 mlo=1 mhi=1 mode=1
+	time ./cluster_stats.py  out='"bench1c"' nexp=100 mlo=1 mhi=1 mode=2
+
+
 # NEMO's mkplummer
 test1:
 	plummer_stats.csh tmp=exp1 nexp=100 mlo=1 mhi=1
