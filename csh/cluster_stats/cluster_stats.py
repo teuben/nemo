@@ -9,6 +9,20 @@
 #  new default:
 #      cluster_stats.py out='"Exp1"' nexp=100 mlo=1 mhi=1
 #  takes about 3", unequal masses more like 10"
+#
+#  Once split: nemo loop = 1.0"   python loop = 3.3"   n=100
+#                          2.5                 13.3    n=500
+#                          4.8                 21.6    n=1000
+#                          8.7                 43.8    n=2000
+#
+# Just running mkplummer nmodel=$nexp, shows the expected behavior O(nbody*nmodel)
+# nexp\nbody  100     200    400
+#  2000     0.185   0.425  0.737
+#  4000     0.429   0.773  1.500
+#  8000     0.824   1.480  3.024
+# 16000     1.614   3.159  5.576
+# -> 6M particles in 5.5" -> PR=1Mpps  for mkhomsph PR=1.7Mpps
+# In the init loop-1 this is more like 0.23 Mpps, is that python looping, or small file I/O overhead?
 
 import numpy as np
 import numpy.ma as ma
@@ -30,7 +44,7 @@ rcut   = 5.0                     # cutoff in virial radii of small cluster
 tstop  = 0                       # use 10 or so if evolution is needed
 rbin   = np.arange(0,4,0.125)    # radial bins
 show   = 0                       # show plots on screen?
-mode   = 0                       # 0=all  1=only init  2=only analyis
+mode   = 0                       # 0=all  1=only NEMO init   2=only PYTHON analyis
 
 
 # poor man's command line parser --- do not change parameters below this ---
@@ -38,11 +52,11 @@ for arg in sys.argv[1:]:
     exec(arg)
 
 
-# administrativia, clean up old mess
+# administrativia, if needed, clean up old mess 
 if mode==0 or mode==1:
     os.system('rm -rf %s.*'  % out)
 
-#@ todo make the big "nbody" sized cluster
+#@ todo make the big "nbody" sized cluster - but need a model building function for this
 
 nbin = len(rbin)-1
 
@@ -82,9 +96,8 @@ for i in range(nexp):
     file2 = "%s.%d.tab" % (out,i+1)
     cmd = 'snapprint %s r2,m,vx,vy,vz,v2 debug=-1 > %s' % (file1,file2)
     os.system(cmd)
-    # 
+
     (r2,m,vx,vy,vz,v2) = np.loadtxt(file2,unpack=True)
-    # rvtab = np.loadtxt(file2)    # [N,6]
 
     file3 = "%s.stats" % (out)
     cmd = 'hackforce_qp %s - debug=-1 | snapstat - all=t > %s'   % (file1,file3)
@@ -98,7 +111,7 @@ for i in range(nexp):
     cmd = "grep r_c %s | awk '{print $3}' >> %s" % (file3,file5)
     os.system(cmd)
 
-    def std(a):
+    def std(a):         # not used, but never tested if this or the lambda is faster
         return a.std()
 
     # the eqv. of the htab tables
@@ -123,10 +136,10 @@ v2_s = ma.masked_invalid(v2_s)
 r = (rbin[1:] + rbin[:-1])/2.0
 
 # report the core and virial radii averages over the sample
-rc = np.loadtxt(file4)
-rv = np.loadtxt(file5)
-print("r_c:",rc.mean(),"+/-",rc.std())
+rv = np.loadtxt(file4)
+rc = np.loadtxt(file5)
 print("r_v:",rv.mean(),"+/-",rv.std())
+print("r_c:",rc.mean(),"+/-",rc.std())
 
 # take mean and disp over all the experiments
 vz_mm = vz_m.mean(axis=0)
