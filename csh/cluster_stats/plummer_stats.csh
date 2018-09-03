@@ -46,18 +46,16 @@ setenv DEBUG -1
 echo "=== Make a baseline large cluster/plot"
 set scaling = (xscale=$rscale yscale=$vscale xlab='R2(pc)' ylab='V2(km/s)')
 
-if ($nbody > 0) then
-    mkplummer $tmp.0.dat $nbody 
-    snapgrid $tmp.0.dat $tmp.rvt xvar=r2 yvar=v2 yrange=0:2 xrange=0:8
-    ccdplot $tmp.rvt 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvt.ps/vps
-    snapgrid $tmp.0.dat $tmp.rvz xvar=r2 yvar=vz yrange=-2:2 xrange=0:8
-    ccdplot $tmp.rvz 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvz.ps/vps
+mkplummer $tmp.0.dat $nbody 
+snapgrid $tmp.0.dat $tmp.rvt xvar=r2 yvar=v2 yrange=0:2 xrange=0:8
+ccdplot $tmp.rvt 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvt.ps/vps
+snapgrid $tmp.0.dat $tmp.rvz xvar=r2 yvar=vz yrange=-2:2 xrange=0:8
+ccdplot $tmp.rvz 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvz.ps/vps
 
-    snapsort $tmp.0.dat - r  | snapshell - $rbin v   r  > $tmp.0.vtab
-    snapsort $tmp.0.dat - r  | snapshell - $rbin vt  r  > $tmp.0.vttab
-    snapsort $tmp.0.dat - r2 | snapshell - $rbin vr2 r2 > $tmp.0.vr2tab
-    snapsort $tmp.0.dat - r2 | snapshell - $rbin vt2 r2 > $tmp.0.vt2tab
-endif
+snapsort $tmp.0.dat - r  | snapshell - $rbin v   r  > $tmp.0.vtab
+snapsort $tmp.0.dat - r  | snapshell - $rbin vt  r  > $tmp.0.vttab
+snapsort $tmp.0.dat - r2 | snapshell - $rbin vr2 r2 > $tmp.0.vr2tab
+snapsort $tmp.0.dat - r2 | snapshell - $rbin vt2 r2 > $tmp.0.vt2tab
 
 
 #
