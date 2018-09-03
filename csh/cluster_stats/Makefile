@@ -2,20 +2,30 @@
 all:	test1 test2 test3 test4 test5 test6
 
 bench1a:
-	time ./plummer_stats.csh tmp=bench1a nexp=100 mlo=1 mhi=1
-	echo "R_v should show ...0.966369 0.0685018"
-	echo "tail should show ..."
+	time ./plummer_stats.csh tmp=bench1a nexp=100 nbody=0 mlo=1 mhi=1
+	@echo "R_v above should show ...0.966369 0.0685018"
+	@echo "tail should show ..."
+	sort -n bench1a.100.tab | tail -2
+	@echo Should be:
+	@echo 2.51094 0.01 -0.0920454 0.247735 0.0795859 0.264282 
+	@echo 3.67919 0.01 -0.18561 0.123529 -0.143081 0.222958 
 
 bench1b:
-	time ./cluster_stats.py  out='"bench1b"' nexp=100 mlo=1 mhi=1
-	echo "R_v should show ..."
-	echo "tail should show ..."
-#r_c: 0.9663689500000001 +/- 0.06850180731183303
-#r_v: 0.3959586 +/- 0.13051354191592532
+	time ./cluster_stats.py  out='"bench1b"' nexp=100 nbody=0 mlo=1 mhi=1
+	@echo "R_v,R_c above should show ..."
+	@echo "r_v: 0.9663689500000001 +/- 0.06850180731183303"
+	@echo "r_c: 0.3959586 +/- 0.13051354191592532"
+	sort -n bench1b.100.tab | tail -2
+	@echo Should be:
+	@echo 2.51094 0.01 -0.0920454 0.247735 0.0795859 0.264282 
+	@echo 3.67919 0.01 -0.18561 0.123529 -0.143081 0.222958 
 
 bench1c:
 	time ./cluster_stats.py  out='"bench1c"' nexp=100 mlo=1 mhi=1 mode=1
 	time ./cluster_stats.py  out='"bench1c"' nexp=100 mlo=1 mhi=1 mode=2
+
+bench1d:
+	time ./cluster_stats.py  out='"bench1d"' nexp=2000 mlo=1 mhi=1 mode=1 
 
 
 # NEMO's mkplummer
