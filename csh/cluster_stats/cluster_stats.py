@@ -30,6 +30,8 @@ rcut   = 5.0                     # cutoff in virial radii of small cluster
 tstop  = 0                       # use 10 or so if evolution is needed
 rbin   = np.arange(0,4,0.125)    # radial bins
 show   = 0                       # show plots on screen?
+mode   = 0                       # 0=all  1=only init  2=only analyis
+
 
 # poor man's command line parser --- do not change parameters below this ---
 for arg in sys.argv[1:]:
@@ -37,8 +39,8 @@ for arg in sys.argv[1:]:
 
 
 # administrativia, clean up old mess
-os.system('rm -rf %s.*'  % out)
-
+if mode==0 or mode==1:
+    os.system('rm -rf %s.*'  % out)
 
 #@ todo make the big "nbody" sized cluster
 
@@ -49,26 +51,34 @@ v2_m  = np.zeros(nexp*nbin).reshape(nexp,nbin)
 vz_s  = np.zeros(nexp*nbin).reshape(nexp,nbin)
 v2_s  = np.zeros(nexp*nbin).reshape(nexp,nbin)
 
-#
-print("=== Loop over %d experiments of %d bodies each" % (nexp,nsmall))
+# Loop1: creating data
+if mode < 2:
+    print("=== Loop over %d experiments of %d bodies each: creating data" % (nexp,nsmall))
+    for i in range(nexp):
+        file1 = "%s.%d.dat" % (out,i+1)
+        if mlo==mhi:
+            # faster version for equal mass starts (3" vs. 10")
+            cmd = "mkplummer %s %d rfrac=%g seed=%d " \
+              %      (file1, nsmall,  rcut,   i+1)
+        else:
+            # official version
+            cmd = "mkplummer %s %d rfrac=%g seed=%d massname='n(m)' masspars=p,%g massrange=%g,%g > /dev/null 2>&1" \
+              %      (file1, nsmall,  rcut,   i+1,                       pimf,         mlo, mhi)
+        os.system(cmd)
+
+        if tstop > 0:
+            # @todo fix this
+            cmd = 'hackcode1 $tmp.$i.dat $tmp.$i.edat tstop=$tstop > $tmp.$i.edat.log'
+            cmd = 'rm $tmp.$i.dat '
+            cmd = 'snaptrim $tmp.$i.edat $tmp.$i.dat  times=$tstop'
+
+if mode==1:
+    sys.exit(0)
+
+# Loop2: analysis
+print("=== Loop over %d experiments of %d bodies each: analysis" % (nexp,nsmall))
 for i in range(nexp):
     file1 = "%s.%d.dat" % (out,i+1)
-    if mlo==mhi:
-        # faster version for equal mass starts (3" vs. 10")
-        cmd = "mkplummer %s %d rfrac=%g seed=%d " \
-          %      (file1, nsmall,  rcut,   i+1)
-    else:
-        # official version
-        cmd = "mkplummer %s %d rfrac=%g seed=%d massname='n(m)' masspars=p,%g massrange=%g,%g > /dev/null 2>&1" \
-          %      (file1, nsmall,  rcut,   i+1,                       pimf,         mlo, mhi)
-    os.system(cmd)
-
-    if tstop > 0:
-        # @todo fix this
-        cmd = 'hackcode1 $tmp.$i.dat $tmp.$i.edat tstop=$tstop > $tmp.$i.edat.log'
-        cmd = 'rm $tmp.$i.dat '
-        cmd = 'snaptrim $tmp.$i.edat $tmp.$i.dat  times=$tstop'
-
     file2 = "%s.%d.tab" % (out,i+1)
     cmd = 'snapprint %s r2,m,vx,vy,vz,v2 debug=-1 > %s' % (file1,file2)
     os.system(cmd)
