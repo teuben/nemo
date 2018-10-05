@@ -34,12 +34,13 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
+#include <moment.h>
+#include <grid.h>
+
 extern rproc  getrfunc();
 Body    *mkplummer();
 
 local string headline;		/* random text message */
-
-#ifdef TOOLBOX
 
 string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "out=???\n		      Output file name",
@@ -60,7 +61,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "VERSION=2.9\n            15-sep-2010 PJT",
+    "mode=1\n                 TBD",
+    "VERSION=3.0\n            24-sep-2018 PJT",
     NULL,
 };
 
@@ -76,9 +78,9 @@ string cvsid="$Id$";
 void nemo_main(void)
 {
     bool    zerocm;
-    int     nbody, seed, bits, quiet, i, n, nmodel;
-    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale;
-    Body    *btab;
+    int     nbody, seed, bits, quiet, i, j, n, nmodel;
+    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale, rsum;
+    Body    **btab, *bp;
     stream  outstr;
     string  massname;
     char    hisline[80];
@@ -109,26 +111,24 @@ void nemo_main(void)
 
     outstr = stropen(getparam("out"), "w");
 
+    btab = (Body **) allocate(sizeof(Body **) * nmodel);
     for (i=0; i<nmodel; i++) {
-      if (nmodel>1) dprintf(0,".");
-      btab = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
+      btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
-      bits = (MassBit | PhaseSpaceBit | TimeBit);
-      if (i==0) {
-	sprintf(hisline,"init_xrandom: seed used %d",seed);
-	put_string(outstr, HeadlineTag, hisline);
-	put_history (outstr);           /* update history */
-	if (*headline)
-	  put_string (outstr, HeadlineTag, headline);
-      }
-      put_snap (outstr, &btab, &nbody, &snap_time, &bits);
-      free(btab);
     }
-    if (nmodel>1) dprintf(0,"\n");
-    strclose(outstr);
-}
 
-#endif
+
+    for (i=0; i<nmodel; i++) {
+      // btab[i] is now the root of each model
+      rsum = 0.0;
+      for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
+	// Pos(bp) are positions
+	// Vel(bp) are velocities
+	// Mass(bp) are masses
+	rsum += absv(Pos(bp));
+      }
+    }
+}
 
 
 /*-----------------------------------------------------------------------------
