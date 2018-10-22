@@ -33,6 +33,7 @@
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
+#include <bodytransc.h>
 
 #include <moment.h>
 #include <grid.h>
@@ -41,6 +42,9 @@ extern rproc  getrfunc();
 Body    *mkplummer();
 
 local string headline;		/* random text message */
+
+#define MAXNGR2 100
+
 
 string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "out=???\n		      Output file name",
@@ -85,6 +89,13 @@ void nemo_main(void)
     string  massname;
     char    hisline[80];
     rproc   mfunc;
+    rproc_body   r2func, v2func;
+    Moment  mx;
+    Grid    gr2;
+    int     ngr2, ir2;
+    Moment  mgv2[MAXNGR2], mgvz[MAXNGR2];
+    real    v2, vz, r2, r2min, r2max;
+      
 
     nbody = getiparam("nbody");
     mfrac = getdparam("mfrac");
@@ -107,7 +118,9 @@ void nemo_main(void)
     	dprintf(1,"Massrange from %f : %f\n",mrange[0],mrange[1]);
     } else
         mfunc = NULL;
-    
+
+    r2func = btrtrans("r2");
+    v2func = btrtrans("v2");
 
     outstr = stropen(getparam("out"), "w");
 
@@ -117,16 +130,52 @@ void nemo_main(void)
 		       quiet,mrange,mfunc);
     }
 
+    r2min = 0.0;
+    r2max = 5.0;
+    ngr2 = 20;
+
+    inil_grid(&gr2,ngr2,r2min,r2max);
+    ini_moment(&mx, 2, nbody);
+    for (j=0; j<ngr2; j++) {
+      ini_moment(&mgv2[j], 2, nbody);
+      ini_moment(&mgvz[j], 2, nbody);
+    }
 
     for (i=0; i<nmodel; i++) {
       // btab[i] is now the root of each model
       rsum = 0.0;
+      reset_moment(&mx);
+      for (j=0; j<ngr2; j++) {
+	reset_moment(&mgv2[j]);
+	reset_moment(&mgvz[j]);
+      }
+	
       for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
 	// Pos(bp) are positions
 	// Vel(bp) are velocities
 	// Mass(bp) are masses
-	rsum += absv(Pos(bp));
+
+	r2 = r2func(bp,0.0,j);
+	ir2 = index_grid(&gr2, r2);
+	
+	v2 = v2func(bp,0.0,j);
+	vz = Pos(bp)[2];
+	if (ir2 >= 0 && ir2 < ngr2) {
+	  accum_moment(&mgv2[ir2], v2, 1.0);
+	  accum_moment(&mgvz[ir2], vz, 1.0);
+	}
+	
       }
+      for (j=0; j<ngr2; j++)
+	printf("j=%d %g %g   %g %g n=%d %d\n",j,
+	       mean_moment(&mgv2[j]),
+	       sigma_moment(&mgv2[j]),
+	       mean_moment(&mgvz[j]),
+	       sigma_moment(&mgvz[j]),
+	       n_moment(&mgv2[j]),
+	       n_moment(&mgvz[j]));
+
+
     }
 }
 
@@ -338,3 +387,7 @@ rproc mf;
 }
 
 /* end of: mkplummer.c */
+
+
+
+
