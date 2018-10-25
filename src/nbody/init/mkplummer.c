@@ -90,10 +90,10 @@ void nemo_main(void)
     char    hisline[80];
     rproc   mfunc;
     rproc_body   r2func, v2func;
-    Moment  mx;
     Grid    gr2;
     int     ngr2, ir2;
-    Moment  mgv2[MAXNGR2], mgvz[MAXNGR2];
+    Moment  mgv2[MAXNGR2],  mgvz[MAXNGR2];
+    Moment  mmgv2[MAXNGR2], mmgvz[MAXNGR2];
     real    v2, vz, r2, r2min, r2max;
       
 
@@ -135,16 +135,16 @@ void nemo_main(void)
     ngr2 = 20;
 
     inil_grid(&gr2,ngr2,r2min,r2max);
-    ini_moment(&mx, 2, nbody);
     for (j=0; j<ngr2; j++) {
-      ini_moment(&mgv2[j], 2, nbody);
-      ini_moment(&mgvz[j], 2, nbody);
+      ini_moment(&mgv2[j], 1, nbody);
+      ini_moment(&mgvz[j], 1, nbody);
+      ini_moment(&mmgv2[j], 2, nbody);
+      ini_moment(&mmgvz[j], 2, nbody);
     }
 
     for (i=0; i<nmodel; i++) {
       // btab[i] is now the root of each model
       rsum = 0.0;
-      reset_moment(&mx);
       for (j=0; j<ngr2; j++) {
 	reset_moment(&mgv2[j]);
 	reset_moment(&mgvz[j]);
@@ -166,17 +166,25 @@ void nemo_main(void)
 	}
 	
       }
-      for (j=0; j<ngr2; j++)
-	printf("j=%d %g %g   %g %g n=%d %d\n",j,
-	       mean_moment(&mgv2[j]),
-	       sigma_moment(&mgv2[j]),
-	       mean_moment(&mgvz[j]),
-	       sigma_moment(&mgvz[j]),
-	       n_moment(&mgv2[j]),
-	       n_moment(&mgvz[j]));
+      for (j=0; j<ngr2; j++) {
+	accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
+	accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+      } //j<ngr2
 
+    }//i<nmodel
 
+    // final report for the bin statistics
+    
+    for (j=0; j<ngr2; j++) {
+      printf("j=%d %g %g   %g %g n=%d %d\n",j,
+	     mean_moment(&mmgv2[j]),
+	     sigma_moment(&mmgv2[j]),
+	     mean_moment(&mmgvz[j]),
+	     sigma_moment(&mmgvz[j]),
+	     n_moment(&mmgv2[j]),
+	     n_moment(&mmgvz[j]));
     }
+    
 }
 
 
