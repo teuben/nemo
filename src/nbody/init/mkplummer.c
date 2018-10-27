@@ -65,8 +65,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "mode=1\n                 TBD",
-    "VERSION=3.0\n            24-sep-2018 PJT",
+    "mode=0\n                 TBD",
+    "VERSION=3.0\n            26-oct-2018 PJT",
     NULL,
 };
 
@@ -82,7 +82,7 @@ string cvsid="$Id$";
 void nemo_main(void)
 {
     bool    zerocm;
-    int     nbody, seed, bits, quiet, i, j, n, nmodel;
+    int     nbody, seed, bits, quiet, i, j, n, nmodel, mode;
     real    snap_time, rfrac, mfrac, mlow, mrange[2], scale, rsum;
     Body    **btab, *bp;
     stream  outstr;
@@ -109,6 +109,7 @@ void nemo_main(void)
     headline = getparam("headline");
     massname = getparam("massname");
     nmodel = getiparam("nmodel");
+    mode = getiparam("mode");
     if (*massname) {
         mysymbols(getargv0());
         n=1;
@@ -128,6 +129,18 @@ void nemo_main(void)
     for (i=0; i<nmodel; i++) {
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
+    }
+    if (mode == 0) {
+      bits = (MassBit | PhaseSpaceBit | TimeBit);
+      sprintf(hisline,"init_xrandom: seed used %d",seed);
+      put_string(outstr, HeadlineTag, hisline);
+      put_history (outstr);           /* update history */
+      if (*headline)
+	put_string (outstr, HeadlineTag, headline);
+      for (i=0; i<nmodel; i++)
+	put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
+      strclose(outstr);
+      return;
     }
 
     r2min = 0.0;
