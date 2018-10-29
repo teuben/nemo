@@ -65,8 +65,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "mode=0\n                 TBD",
-    "VERSION=3.0\n            26-oct-2018 PJT",
+    "mode=0\n                 0=classic 1=no file written",
+    "VERSION=3.0\n            29-oct-2018 PJT",
     NULL,
 };
 
