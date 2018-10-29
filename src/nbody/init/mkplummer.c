@@ -127,6 +127,10 @@ void nemo_main(void)
 
     btab = (Body **) allocate(sizeof(Body **) * nmodel);
     for (i=0; i<nmodel; i++) {
+      if (i>0) {
+	seed++;
+	init_xrandom(seed);
+      }
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
     }
