@@ -87,7 +87,7 @@ void nemo_main(void)
     Body    **btab, *bp;
     stream  outstr;
     string  massname;
-    char    hisline[80];
+    char    hisline[80], sseed[80];
     rproc   mfunc;
     rproc_body   r2func, v2func;
     Grid    gr2;
@@ -129,7 +129,8 @@ void nemo_main(void)
     for (i=0; i<nmodel; i++) {
       if (i>0) {
 	seed++;
-	init_xrandom(seed);
+	sprintf(sseed,"%d",seed);
+	init_xrandom(sseed);
       }
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
