@@ -65,8 +65,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "mode=0\n                 0=classic 1=no file written",
-    "VERSION=3.0\n            29-oct-2018 PJT",
+    "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
+    "VERSION=3.0\n            30-oct-2018 PJT",
     NULL,
 };
 
@@ -123,7 +123,7 @@ void nemo_main(void)
     r2func = btrtrans("r2");
     v2func = btrtrans("v2");
 
-    outstr = stropen(getparam("out"), "w");
+    if (mode>0) outstr = stropen(getparam("out"), "w");
 
     btab = (Body **) allocate(sizeof(Body **) * nmodel);
     for (i=0; i<nmodel; i++) {
@@ -135,7 +135,7 @@ void nemo_main(void)
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
     }
-    if (mode == 0) {
+    if (mode > 0) {
       bits = (MassBit | PhaseSpaceBit | TimeBit);
       sprintf(hisline,"init_xrandom: seed used %d",seed);
       put_string(outstr, HeadlineTag, hisline);
@@ -145,8 +145,10 @@ void nemo_main(void)
       for (i=0; i<nmodel; i++)
 	put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
       strclose(outstr);
-      return;
-    }
+      if (mode==1) return;
+      dprintf(0,"mode=2: data is stored, analysis now following\n");
+    } else
+      dprintf(0,"mode=0: no data stored, analysis now following\n");      
 
     r2min = 0.0;
     r2max = 5.0;
