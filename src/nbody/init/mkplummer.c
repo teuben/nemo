@@ -66,7 +66,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0\n            30-oct-2018 PJT",
+    "VERSION=3.0\n            5-nov-2018 PJT",
     NULL,
 };
 
@@ -89,7 +89,7 @@ void nemo_main(void)
     string  massname;
     char    hisline[80], sseed[80];
     rproc   mfunc;
-    rproc_body   r2func, v2func;
+    rproc_body   r2func, v2func, vzfunc;
     Grid    gr2;
     int     ngr2, ir2;
     Moment  mgv2[MAXNGR2],  mgvz[MAXNGR2];
@@ -122,6 +122,7 @@ void nemo_main(void)
 
     r2func = btrtrans("r2");
     v2func = btrtrans("v2");
+    vzfunc = btrtrans("vz");
 
     if (mode>0) outstr = stropen(getparam("out"), "w");
 
@@ -150,36 +151,34 @@ void nemo_main(void)
     } else
       dprintf(0,"mode=0: no data stored, analysis now following\n");      
 
+    /* match the default grid in cluster_stats.py */
     r2min = 0.0;
-    r2max = 5.0;
-    ngr2 = 20;
+    r2max = 3.875;
+    ngr2  = 31;
 
     inil_grid(&gr2,ngr2,r2min,r2max);
     for (j=0; j<ngr2; j++) {
-      ini_moment(&mgv2[j], 1, nbody);
-      ini_moment(&mgvz[j], 1, nbody);
+      ini_moment(&mgv2[j],  1, nbody);
+      ini_moment(&mgvz[j],  1, nbody);
       ini_moment(&mmgv2[j], 2, nbody);
       ini_moment(&mmgvz[j], 2, nbody);
+      // printf("%d %g\n", j, value_grid(&gr2,j));
     }
 
     for (i=0; i<nmodel; i++) {
-      // btab[i] is now the root of each model
       rsum = 0.0;
       for (j=0; j<ngr2; j++) {
 	reset_moment(&mgv2[j]);
 	reset_moment(&mgvz[j]);
       }
-	
-      for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
-	// Pos(bp) are positions
-	// Vel(bp) are velocities
-	// Mass(bp) are masses
 
-	r2 = r2func(bp,0.0,j);
+      // btab[i] is now the root of each model
+      for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
+	r2  = r2func(bp,0.0,j);
 	ir2 = index_grid(&gr2, r2);
 	
 	v2 = v2func(bp,0.0,j);
-	vz = Pos(bp)[2];
+	vz = Vel(bp)[2];	
 	if (ir2 >= 0 && ir2 < ngr2) {
 	  accum_moment(&mgv2[ir2], v2, 1.0);
 	  accum_moment(&mgvz[ir2], vz, 1.0);
@@ -187,8 +186,10 @@ void nemo_main(void)
 	
       }
       for (j=0; j<ngr2; j++) {
-	accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
-	accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+	if (n_moment(&mgv2[j]) > 0) {
+	  accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
+	  accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+	}
       } //j<ngr2
 
     }//i<nmodel
@@ -196,7 +197,9 @@ void nemo_main(void)
     // final report for the bin statistics
     
     for (j=0; j<ngr2; j++) {
-      printf("j=%d %g %g   %g %g n=%d %d\n",j,
+      dprintf(1,"j=%d %g  %g %g   %g %g n=%d %d\n",
+	     j,
+	     value_grid(&gr2,j+0.5),
 	     mean_moment(&mmgv2[j]),
 	     sigma_moment(&mmgv2[j]),
 	     mean_moment(&mmgvz[j]),
