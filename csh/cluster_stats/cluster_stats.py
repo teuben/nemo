@@ -45,6 +45,7 @@ tstop  = 0                       # use 10 or so if evolution is needed
 rbin   = np.arange(0,4,0.125)    # radial bins
 show   = 0                       # show plots on screen?
 mode   = 0                       # 0=all  1=only NEMO init   2=only PYTHON analyis
+quick  = 0                       # 1=just simple stats, no r_v and r_c
 
 
 # poor man's command line parser --- do not change parameters below this ---
@@ -99,17 +100,18 @@ for i in range(nexp):
 
     (r2,m,vx,vy,vz,v2) = np.loadtxt(file2,unpack=True)
 
-    file3 = "%s.stats" % (out)
-    cmd = 'hackforce_qp %s - debug=-1 | snapstat - all=t > %s'   % (file1,file3)
-    os.system(cmd)
+    if quick == 0:
+        file3 = "%s.stats" % (out)
+        cmd = 'hackforce_qp %s - debug=-1 | snapstat - all=t > %s'   % (file1,file3)
+        os.system(cmd)
 
-    file4 = "%s.rvtab" % (out)
-    cmd = "grep r_v %s | awk '{print $5}' >> %s" % (file3,file4)
-    os.system(cmd)
+        file4 = "%s.rvtab" % (out)
+        cmd = "grep r_v %s | awk '{print $5}' >> %s" % (file3,file4)
+        os.system(cmd)
 
-    file5 = "%s.rctab" % (out)
-    cmd = "grep r_c %s | awk '{print $3}' >> %s" % (file3,file5)
-    os.system(cmd)
+        file5 = "%s.rctab" % (out)
+        cmd = "grep r_c %s | awk '{print $3}' >> %s" % (file3,file5)
+        os.system(cmd)
 
     def std(a):         # not used, but never tested if this or the lambda is faster
         return a.std()
@@ -136,10 +138,11 @@ v2_s = ma.masked_invalid(v2_s)
 r = (rbin[1:] + rbin[:-1])/2.0
 
 # report the core and virial radii averages over the sample
-rv = np.loadtxt(file4)
-rc = np.loadtxt(file5)
-print("r_v:",rv.mean(),"+/-",rv.std())
-print("r_c:",rc.mean(),"+/-",rc.std())
+if quick == 0:
+    rv = np.loadtxt(file4)
+    rc = np.loadtxt(file5)
+    print("r_v:",rv.mean(),"+/-",rv.std())
+    print("r_c:",rc.mean(),"+/-",rc.std())
 
 # take mean and disp over all the experiments
 vz_mm = vz_m.mean(axis=0)
@@ -169,5 +172,9 @@ tabplot(3,out,show,r,v2_mm,v2_ms,[0,4],[0,2], 'r2','v2_mean')
 tabplot(4,out,show,r,v2_sm,v2_ss,[0,4],[0,2], 'r2','v2_std')
 if show>0:
     plt.show()
+
+if False:
+    for i in range(len(r)):
+        print(r[i],v2_mm[i],v2_ms[i],vz_mm[i],vz_ms[i])
 
 # end    
