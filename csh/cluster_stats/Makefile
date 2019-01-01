@@ -1,6 +1,8 @@
 
 all:	test1 test2 test3 test4 test5 test6
 
+#  standard benchmarks
+
 bench1a:
 	time ./plummer_stats.csh tmp=bench1a nexp=100 nbody=0 mlo=1 mhi=1
 	@echo "R_v above should show ...0.966369 0.0685018"
@@ -27,6 +29,8 @@ bench1c:
 bench1d:
 	time ./cluster_stats.py  out='"bench1d"' nexp=2000 mlo=1 mhi=1 mode=1 
 
+
+# below here private tests that should probably be removed
 
 # NEMO's mkplummer
 test1:
