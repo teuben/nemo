@@ -13,7 +13,7 @@
 
 string defv[] = {
   "in=???\n       Input filename",
-  "VERSION=1.1\n  20-feb-2018 PJT",
+  "VERSION=1.2\n  8-jan-2019 PJT",
   NULL,
 };
 
@@ -50,7 +50,9 @@ nemo_main()
     printf("Size:      %d %d %d\n", Nx(iptr), Ny(iptr), Nz(iptr));
     printf("Cell:      %g %g %g\n", Dx(iptr), Dy(iptr), Dz(iptr));
     printf("LL-Corner: %g %g %g\n", Xmin(iptr), Ymin(iptr), Zmin(iptr));
-    printf("TR-Corner: %g %g %g\n", Xmin(iptr), Ymin(iptr), Zmin(iptr));    //FIX THIS
+    printf("TR-Corner: %g %g %g\n", Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr),
+                                    Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr),
+                                    Zmin(iptr)+(Nz(iptr)-1)*Dz(iptr));
     printf("X-range:   %g %g\n", xmin,xmax);
     printf("Y-range:   %g %g\n", ymin,ymax);
     printf("Z-range:   %g %g\n", zmin,zmax);
