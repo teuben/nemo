@@ -1,6 +1,7 @@
 
 all:	test1 test2 test3 test4 test5 test6
 
+#  standard benchmarks
 clean:
 	rm -f bench1?.* 
 
@@ -43,6 +44,8 @@ bench1c-old:
 bench1d-old:
 	time ./cluster_stats.py  out='"bench1d"' nexp=2000 mlo=1 mhi=1 mode=1 
 
+
+# below here private tests that should probably be removed
 
 # NEMO's mkplummer
 test1:
