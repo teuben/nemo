@@ -15,9 +15,9 @@ bench1a:
 
 bench1b:
 	time ./cluster_stats.py  out='"bench1b"' nexp=100 nbody=0 mlo=1 mhi=1 quick=1
-	@echo "R_v,R_c above should show ..."
-	@echo "r_v: 0.9663689500000001 +/- 0.06850180731183303"
-	@echo "r_c: 0.3959586 +/- 0.13051354191592532"
+	#@echo "R_v,R_c above should show ..."
+	#@echo "r_v: 0.9663689500000001 +/- 0.06850180731183303"
+	#@echo "r_c: 0.3959586 +/- 0.13051354191592532"
 	sort -n bench1b.100.tab | tail -2
 	@echo Should be:
 	@echo 2.51094 0.01 -0.0920454 0.247735 0.0795859 0.264282 
