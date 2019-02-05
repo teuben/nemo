@@ -46,6 +46,7 @@ rbin   = np.arange(0,4,0.125)    # radial bins
 show   = 0                       # show plots on screen?
 mode   = 0                       # 0=all  1=only NEMO init   2=only PYTHON analyis
 quick  = 0                       # 1=just simple stats, no r_v and r_c
+plot   = 0                       # make plots?
 
 
 # poor man's command line parser --- do not change parameters below this ---
@@ -73,7 +74,7 @@ if mode < 2:
         file1 = "%s.%d.dat" % (out,i+1)
         if mlo==mhi:
             # faster version for equal mass starts (3" vs. 10")
-            cmd = "mkplummer %s %d rfrac=%g seed=%d " \
+            cmd = "mkplummer %s %d rfrac=%g seed=%d debug=-1" \
               %      (file1, nsmall,  rcut,   i+1)
         else:
             # official version
@@ -166,12 +167,13 @@ def tabplot(f,out,show,x,y,dy,xrange,yrange,xlab,ylab):
     figname = '%s.%s.%s.png' % (out,xlab,ylab)
     plt.savefig(figname)
 
-tabplot(1,out,show,r,vz_mm,vz_ms,[0,4],[-1,1],'r2','vz_mean')
-tabplot(2,out,show,r,vz_sm,vz_ss,[0,4],[0,2], 'r2','vz_std')
-tabplot(3,out,show,r,v2_mm,v2_ms,[0,4],[0,2], 'r2','v2_mean')
-tabplot(4,out,show,r,v2_sm,v2_ss,[0,4],[0,2], 'r2','v2_std')
-if show>0:
-    plt.show()
+if plot > 0:
+    tabplot(1,out,show,r,vz_mm,vz_ms,[0,4],[-1,1],'r2','vz_mean')
+    tabplot(2,out,show,r,vz_sm,vz_ss,[0,4],[0,2], 'r2','vz_std')
+    tabplot(3,out,show,r,v2_mm,v2_ms,[0,4],[0,2], 'r2','v2_mean')
+    tabplot(4,out,show,r,v2_sm,v2_ss,[0,4],[0,2], 'r2','v2_std')
+    if show>0:
+        plt.show()
 
 if False:
     for i in range(len(r)):
