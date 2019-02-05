@@ -66,7 +66,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0\n            5-nov-2018 PJT",
+    "single=true\n            Single output file?",
+    "VERSION=3.0\n            7-nov-2018 PJT",
     NULL,
 };
 
@@ -81,13 +82,13 @@ string cvsid="$Id$";
  */
 void nemo_main(void)
 {
-    bool    zerocm;
+    bool    zerocm, single;
     int     nbody, seed, bits, quiet, i, j, n, nmodel, mode;
     real    snap_time, rfrac, mfrac, mlow, mrange[2], scale, rsum;
     Body    **btab, *bp;
     stream  outstr;
     string  massname;
-    char    hisline[80], sseed[80];
+    char    hisline[80], sseed[80], fname[80];
     rproc   mfunc;
     rproc_body   r2func, v2func, vzfunc;
     Grid    gr2;
@@ -95,8 +96,10 @@ void nemo_main(void)
     Moment  mgv2[MAXNGR2],  mgvz[MAXNGR2];
     Moment  mmgv2[MAXNGR2], mmgvz[MAXNGR2];
     real    v2, vz, r2, r2min, r2max;
+    real    t0, t1, t2, t3, t4;
       
 
+    t0 = cputime();                    // start
     nbody = getiparam("nbody");
     mfrac = getdparam("mfrac");
     mlow  = getdparam("mlow");
@@ -110,6 +113,7 @@ void nemo_main(void)
     massname = getparam("massname");
     nmodel = getiparam("nmodel");
     mode = getiparam("mode");
+    single = getbparam("single");
     if (*massname) {
         mysymbols(getargv0());
         n=1;
@@ -124,8 +128,10 @@ void nemo_main(void)
     v2func = btrtrans("v2");
     vzfunc = btrtrans("vz");
 
-    if (mode>0) outstr = stropen(getparam("out"), "w");
+    if (mode>0 && single) outstr = stropen(getparam("out"), "w");
 
+    t1 = cputime();   // init
+    
     btab = (Body **) allocate(sizeof(Body **) * nmodel);
     for (i=0; i<nmodel; i++) {
       if (i>0) {
@@ -136,68 +142,79 @@ void nemo_main(void)
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
 		       quiet,mrange,mfunc);
     }
+    t2 = cputime(); // models created now
     if (mode > 0) {
-      bits = (MassBit | PhaseSpaceBit | TimeBit);
-      sprintf(hisline,"init_xrandom: seed used %d",seed);
-      put_string(outstr, HeadlineTag, hisline);
-      put_history (outstr);           /* update history */
-      if (*headline)
-	put_string (outstr, HeadlineTag, headline);
-      for (i=0; i<nmodel; i++)
-	put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
-      strclose(outstr);
-      if (mode==1) return;
-      dprintf(0,"mode=2: data is stored, analysis now following\n");
-    } else
-      dprintf(0,"mode=0: no data stored, analysis now following\n");      
+      if (single) {
+	bits = (MassBit | PhaseSpaceBit | TimeBit);
+	sprintf(hisline,"init_xrandom: seed used %d",seed);
+	put_string(outstr, HeadlineTag, hisline);
+	put_history (outstr);           /* update history */
+	if (*headline)
+	  put_string (outstr, HeadlineTag, headline);
+	for (i=0; i<nmodel; i++)
+	  put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
+	strclose(outstr);
+      } else {
+	for (i=0; i<nmodel; i++) {
+	  sprintf(fname,"%s.%d",getparam("out"),i);
+	  outstr = stropen(fname, "w");
+	  put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
+	  strclose(outstr);
+	}
+      }
+    } 
 
-    /* match the default grid in cluster_stats.py */
-    r2min = 0.0;
-    r2max = 3.875;
-    ngr2  = 31;
+    t3 = cputime(); // i/o done
 
-    inil_grid(&gr2,ngr2,r2min,r2max);
-    for (j=0; j<ngr2; j++) {
-      ini_moment(&mgv2[j],  1, nbody);
-      ini_moment(&mgvz[j],  1, nbody);
-      ini_moment(&mmgv2[j], 2, nbody);
-      ini_moment(&mmgvz[j], 2, nbody);
-      // printf("%d %g\n", j, value_grid(&gr2,j));
-    }
+    if (mode != 1) {
+      dprintf(0,"analysis now following\n");
+      /* match the default grid in cluster_stats.py */
+      r2min = 0.0;
+      r2max = 3.875;
+      ngr2  = 31;
 
-    for (i=0; i<nmodel; i++) {
-      rsum = 0.0;
+      inil_grid(&gr2,ngr2,r2min,r2max);
       for (j=0; j<ngr2; j++) {
-	reset_moment(&mgv2[j]);
-	reset_moment(&mgvz[j]);
+	ini_moment(&mgv2[j],  1, nbody);
+	ini_moment(&mgvz[j],  1, nbody);
+	ini_moment(&mmgv2[j], 2, nbody);
+	ini_moment(&mmgvz[j], 2, nbody);
+	// printf("%d %g\n", j, value_grid(&gr2,j));
       }
 
-      // btab[i] is now the root of each model
-      for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
-	r2  = r2func(bp,0.0,j);
-	ir2 = index_grid(&gr2, r2);
-	
-	v2 = v2func(bp,0.0,j);
-	vz = Vel(bp)[2];	
-	if (ir2 >= 0 && ir2 < ngr2) {
-	  accum_moment(&mgv2[ir2], v2, 1.0);
-	  accum_moment(&mgvz[ir2], vz, 1.0);
+      for (i=0; i<nmodel; i++) {
+	rsum = 0.0;
+	for (j=0; j<ngr2; j++) {
+	  reset_moment(&mgv2[j]);
+	  reset_moment(&mgvz[j]);
 	}
-	
-      }
-      for (j=0; j<ngr2; j++) {
-	if (n_moment(&mgv2[j]) > 0) {
-	  accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
-	  accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+
+	// btab[i] is now the root of each model
+	for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
+	  r2  = r2func(bp,0.0,j);
+	  ir2 = index_grid(&gr2, r2);
+	  
+	  v2 = v2func(bp,0.0,j);
+	  vz = Vel(bp)[2];	
+	  if (ir2 >= 0 && ir2 < ngr2) {
+	    accum_moment(&mgv2[ir2], v2, 1.0);
+	    accum_moment(&mgvz[ir2], vz, 1.0);
+	  }
+	  
 	}
-      } //j<ngr2
+	for (j=0; j<ngr2; j++) {
+	  if (n_moment(&mgv2[j]) > 0) {
+	    accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
+	    accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+	  }
+	} //j<ngr2
 
-    }//i<nmodel
+      }//i<nmodel
 
-    // final report for the bin statistics
+      // final report for the bin statistics
     
-    for (j=0; j<ngr2; j++) {
-      dprintf(1,"j=%d %g  %g %g   %g %g n=%d %d\n",
+      for (j=0; j<ngr2; j++) {
+	dprintf(1,"j=%d %g  %g %g   %g %g n=%d %d\n",
 	     j,
 	     value_grid(&gr2,j+0.5),
 	     mean_moment(&mmgv2[j]),
@@ -206,8 +223,10 @@ void nemo_main(void)
 	     sigma_moment(&mmgvz[j]),
 	     n_moment(&mmgv2[j]),
 	     n_moment(&mmgvz[j]));
+      }
     }
-    
+    t4 = cputime(); // analysis done
+    dprintf(0,"%g %g %g %g\n",(t1-t0)*60,(t2-t1)*60,(t3-t2)*60,(t4-t3)*60);
 }
 
 
