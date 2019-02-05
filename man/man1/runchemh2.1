@@ -4,7 +4,19 @@ runchemh2 \- Frontend to the CHEMH2 program
 .SH SYNOPSIS
 \fBrunchemh2\fP [parameter=value]
 .SH DESCRIPTION
-No description available yet.
+\fBrunchemh2\fP is a front-end for Wolfire's \fIlegacy\fP program \fBchemh2\fP.
+Based on a standard template parameter file (chemie6.dat, which is in a very specific ASCII format),
+a number of those parameters are selected to be editable (see PARAMETERS below). It will then
+run \fBchemh2\fP in a specified run directory.
+.PP
+Some complications concerning the Meudon Merge Option need to be described here.
+.PP
+In the run directory standard files (chemie6.dat, chemh2.log etc.) are present, this is where
+the command
+.nf
+        chemh2 > chemh2.log
+.fi
+ran, and all other output files 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -68,11 +80,19 @@ Example Input datafile [chemie6.dat]
 .TP 20
 \fBVERSION=\fP
 5-feb-2018 PJT [0.1]     
-.SH EXAMPLES
+.SH DATA FILES
+The following files need to be present in the current directory, or in a to-be-specified
+set of directories in $CHEMPATH (to be implemented)
+.nf
+.ta +1i
+chemie6.dat	standard parameters for chemh2
+nprd.in		input file for the Meudon Merge Option
+
+.fi
 .SH SEE ALSO
 .SH FILES
 .SH AUTHOR
-mkman
+Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
