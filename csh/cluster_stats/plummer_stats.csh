@@ -29,6 +29,8 @@ set rscale = 1             #
 set vscale = 1             # 
 set rbin   = 0:2.5:0.25    # bins, in the $rscale (pc) units
 
+set quick  = 0             # skip r_v and r_c
+
 set tmp    = tmplummer     # baseline for files
 
 # poor man's command line parser
@@ -46,16 +48,18 @@ setenv DEBUG -1
 echo "=== Make a baseline large cluster/plot"
 set scaling = (xscale=$rscale yscale=$vscale xlab='R2(pc)' ylab='V2(km/s)')
 
-mkplummer $tmp.0.dat $nbody 
-snapgrid $tmp.0.dat $tmp.rvt xvar=r2 yvar=v2 yrange=0:2 xrange=0:8
-ccdplot $tmp.rvt 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvt.ps/vps
-snapgrid $tmp.0.dat $tmp.rvz xvar=r2 yvar=vz yrange=-2:2 xrange=0:8
-ccdplot $tmp.rvz 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvz.ps/vps
+if ($nbody > 0) then
+    mkplummer $tmp.0.dat $nbody 
+    snapgrid $tmp.0.dat $tmp.rvt xvar=r2 yvar=v2 yrange=0:2 xrange=0:8
+    ccdplot $tmp.rvt 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvt.ps/vps
+    snapgrid $tmp.0.dat $tmp.rvz xvar=r2 yvar=vz yrange=-2:2 xrange=0:8
+    ccdplot $tmp.rvz 0.001,0.003,0.01,0.03,0.1,0.3,1 $scaling yapp=$tmp.rvz.ps/vps
 
-snapsort $tmp.0.dat - r  | snapshell - $rbin v   r  > $tmp.0.vtab
-snapsort $tmp.0.dat - r  | snapshell - $rbin vt  r  > $tmp.0.vttab
-snapsort $tmp.0.dat - r2 | snapshell - $rbin vr2 r2 > $tmp.0.vr2tab
-snapsort $tmp.0.dat - r2 | snapshell - $rbin vt2 r2 > $tmp.0.vt2tab
+    snapsort $tmp.0.dat - r  | snapshell - $rbin v   r  > $tmp.0.vtab
+    snapsort $tmp.0.dat - r  | snapshell - $rbin vt  r  > $tmp.0.vttab
+    snapsort $tmp.0.dat - r2 | snapshell - $rbin vr2 r2 > $tmp.0.vr2tab
+    snapsort $tmp.0.dat - r2 | snapshell - $rbin vt2 r2 > $tmp.0.vt2tab
+endif    
 
 
 #
@@ -63,15 +67,21 @@ echo "=== Loop over $nexp experiments of $nsmall bodies each"
 set scaling = (xscale=$rscale yscale=$vscale)
 foreach i (`seq 1 $nexp`)
    echo $i
-   mkplummer $tmp.$i.dat $nsmall rfrac=$rcut seed=$i massname='n(m)' masspars=p,$pow massrange=$mlo,$mhi
+   if ($mlo == $mhi) then
+     mkplummer $tmp.$i.dat $nsmall rfrac=$rcut seed=$i >& /dev/null   
+   else
+     mkplummer $tmp.$i.dat $nsmall rfrac=$rcut seed=$i massname='n(m)' masspars=p,$pow massrange=$mlo,$mhi >& /dev/null
+   endif
    if ($tstop > 0) then
      hackcode1 $tmp.$i.dat $tmp.$i.edat tstop=$tstop > $tmp.$i.edat.log
      rm $tmp.$i.dat 
      snaptrim $tmp.$i.edat $tmp.$i.dat  times=$tstop
    endif
-   
-   hackforce_qp $tmp.$i.dat - | snapstat - all=t | grep r_v >> $tmp.rvtab
-   
+
+   if ($quick == 0) then
+     hackforce_qp $tmp.$i.dat - | snapstat - all=t | grep r_v >> $tmp.rvtab
+   endif
+     
    snapsort $tmp.$i.dat  $tmp.$i.sdat r2
    snapprint $tmp.$i.sdat r2,m,vx,vy,vz,v2 >  $tmp.$i.tab
    tabplot $tmp.$i.tab 1 2 xbin=$rbin tab=t $scaling yapp=/null > $tmp.$i.2htab     
@@ -83,11 +93,14 @@ foreach i (`seq 1 $nexp`)
    # tabhist $tmp.$i.tab 1 0 4 10 24 yapp=99/xs gauss=f residual=f
 end
 
-echo "=== Finding r_v statistics"
-awk '{print $5}' $tmp.rvtab | tabhist - debug=0 |& grep Mean
+if ($quick == 0) then
+  echo "=== Finding r_v statistics"
+  awk '{print $5}' $tmp.rvtab | tabhist - debug=0 |& grep Mean
+endif  
 
 echo "=== Accumulating bin averages for all experiments"
 #   the right way to average is via the bin avarages
+#   this matrix transposing is a very slow step
 set nbin=`getline $tmp.1.3htab`
 foreach i (`seq 1 $nexp`)
     foreach j (`seq 1 $nbin`)

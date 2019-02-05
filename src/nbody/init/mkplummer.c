@@ -33,13 +33,18 @@
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
+#include <bodytransc.h>
+
+#include <moment.h>
+#include <grid.h>
 
 extern rproc  getrfunc();
 Body    *mkplummer();
 
 local string headline;		/* random text message */
 
-#ifdef TOOLBOX
+#define MAXNGR2 100
+
 
 string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "out=???\n		      Output file name",
@@ -60,7 +65,8 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
-    "VERSION=2.9\n            15-sep-2010 PJT",
+    "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
+    "VERSION=3.0\n            5-nov-2018 PJT",
     NULL,
 };
 
@@ -76,13 +82,20 @@ string cvsid="$Id$";
 void nemo_main(void)
 {
     bool    zerocm;
-    int     nbody, seed, bits, quiet, i, n, nmodel;
-    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale;
-    Body    *btab;
+    int     nbody, seed, bits, quiet, i, j, n, nmodel, mode;
+    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale, rsum;
+    Body    **btab, *bp;
     stream  outstr;
     string  massname;
-    char    hisline[80];
+    char    hisline[80], sseed[80];
     rproc   mfunc;
+    rproc_body   r2func, v2func, vzfunc;
+    Grid    gr2;
+    int     ngr2, ir2;
+    Moment  mgv2[MAXNGR2],  mgvz[MAXNGR2];
+    Moment  mmgv2[MAXNGR2], mmgvz[MAXNGR2];
+    real    v2, vz, r2, r2min, r2max;
+      
 
     nbody = getiparam("nbody");
     mfrac = getdparam("mfrac");
@@ -96,6 +109,7 @@ void nemo_main(void)
     headline = getparam("headline");
     massname = getparam("massname");
     nmodel = getiparam("nmodel");
+    mode = getiparam("mode");
     if (*massname) {
         mysymbols(getargv0());
         n=1;
@@ -105,30 +119,96 @@ void nemo_main(void)
     	dprintf(1,"Massrange from %f : %f\n",mrange[0],mrange[1]);
     } else
         mfunc = NULL;
-    
 
-    outstr = stropen(getparam("out"), "w");
+    r2func = btrtrans("r2");
+    v2func = btrtrans("v2");
+    vzfunc = btrtrans("vz");
+
+    if (mode>0) outstr = stropen(getparam("out"), "w");
+
+    btab = (Body **) allocate(sizeof(Body **) * nmodel);
+    for (i=0; i<nmodel; i++) {
+      if (i>0) {
+	seed++;
+	sprintf(sseed,"%d",seed);
+	init_xrandom(sseed);
+      }
+      btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
+		       quiet,mrange,mfunc);
+    }
+    if (mode > 0) {
+      bits = (MassBit | PhaseSpaceBit | TimeBit);
+      sprintf(hisline,"init_xrandom: seed used %d",seed);
+      put_string(outstr, HeadlineTag, hisline);
+      put_history (outstr);           /* update history */
+      if (*headline)
+	put_string (outstr, HeadlineTag, headline);
+      for (i=0; i<nmodel; i++)
+	put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
+      strclose(outstr);
+      if (mode==1) return;
+      dprintf(0,"mode=2: data is stored, analysis now following\n");
+    } else
+      dprintf(0,"mode=0: no data stored, analysis now following\n");      
+
+    /* match the default grid in cluster_stats.py */
+    r2min = 0.0;
+    r2max = 3.875;
+    ngr2  = 31;
+
+    inil_grid(&gr2,ngr2,r2min,r2max);
+    for (j=0; j<ngr2; j++) {
+      ini_moment(&mgv2[j],  1, nbody);
+      ini_moment(&mgvz[j],  1, nbody);
+      ini_moment(&mmgv2[j], 2, nbody);
+      ini_moment(&mmgvz[j], 2, nbody);
+      // printf("%d %g\n", j, value_grid(&gr2,j));
+    }
 
     for (i=0; i<nmodel; i++) {
-      if (nmodel>1) dprintf(0,".");
-      btab = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
-		       quiet,mrange,mfunc);
-      bits = (MassBit | PhaseSpaceBit | TimeBit);
-      if (i==0) {
-	sprintf(hisline,"init_xrandom: seed used %d",seed);
-	put_string(outstr, HeadlineTag, hisline);
-	put_history (outstr);           /* update history */
-	if (*headline)
-	  put_string (outstr, HeadlineTag, headline);
+      rsum = 0.0;
+      for (j=0; j<ngr2; j++) {
+	reset_moment(&mgv2[j]);
+	reset_moment(&mgvz[j]);
       }
-      put_snap (outstr, &btab, &nbody, &snap_time, &bits);
-      free(btab);
-    }
-    if (nmodel>1) dprintf(0,"\n");
-    strclose(outstr);
-}
 
-#endif
+      // btab[i] is now the root of each model
+      for (j = 0, bp=btab[i]; j < nbody; j++, bp++) {
+	r2  = r2func(bp,0.0,j);
+	ir2 = index_grid(&gr2, r2);
+	
+	v2 = v2func(bp,0.0,j);
+	vz = Vel(bp)[2];	
+	if (ir2 >= 0 && ir2 < ngr2) {
+	  accum_moment(&mgv2[ir2], v2, 1.0);
+	  accum_moment(&mgvz[ir2], vz, 1.0);
+	}
+	
+      }
+      for (j=0; j<ngr2; j++) {
+	if (n_moment(&mgv2[j]) > 0) {
+	  accum_moment(&mmgv2[j], mean_moment(&mgv2[j]), 1.0);
+	  accum_moment(&mmgvz[j], mean_moment(&mgvz[j]), 1.0);
+	}
+      } //j<ngr2
+
+    }//i<nmodel
+
+    // final report for the bin statistics
+    
+    for (j=0; j<ngr2; j++) {
+      dprintf(1,"j=%d %g  %g %g   %g %g n=%d %d\n",
+	     j,
+	     value_grid(&gr2,j+0.5),
+	     mean_moment(&mmgv2[j]),
+	     sigma_moment(&mmgv2[j]),
+	     mean_moment(&mmgvz[j]),
+	     sigma_moment(&mmgvz[j]),
+	     n_moment(&mmgv2[j]),
+	     n_moment(&mmgvz[j]));
+    }
+    
+}
 
 
 /*-----------------------------------------------------------------------------
@@ -338,3 +418,7 @@ rproc mf;
 }
 
 /* end of: mkplummer.c */
+
+
+
+
