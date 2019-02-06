@@ -64,6 +64,7 @@ local string fn1[] = {          // unit
   "twophasepg10fh25em1.dat",    // 67
   "twophasepg10fh27em1.dat",    // 68
   "twophasepg10fh29em1.dat",    // 69
+  "q_oh2_12c16o.dat",           // 23
   "q_ph2_12c16o.dat",           // 23
   NULL,
 };
