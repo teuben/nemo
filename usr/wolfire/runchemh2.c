@@ -46,10 +46,20 @@ string cvsid="$Id$";
 
 
 
+/* TODO's
+ *
+ *     - the dat= file should be able to be read , edited, and written. now they both need to co-exist.
+ */
 
+
+/* files needed in runtime,
+ * perhaps these should be listed in an acii file given by tab= or so?
+ *
+ */
 
 local string fn1[] = {          // unit
   "chemie6.dat",                // 10
+  // "chemie7.dat",                // 10   fatal error? or soon the new format?
   "euv633.dat",                 // 20 
   "marks_spect.snreuv.dat4",    // 21
   "avrout.dat",                 // 22
@@ -66,6 +76,7 @@ local string fn1[] = {          // unit
   "twophasepg10fh29em1.dat",    // 69
   "q_oh2_12c16o.dat",           // 23
   "q_ph2_12c16o.dat",           // 23
+  // some kind of virgin GRIDOUTPUT tree, and a fresh GRIDSTEP file in there as well.
   NULL,
 };
 
@@ -78,6 +89,7 @@ local string patch_f(string key,string line,int start,int len, string fmt);
 local string patch_e(string key,string line,int start,int len, string fmt);
 local string patch_i(string key,string line,int start,int len, string fmt);
   
+
 
 void nemo_main()
 {
@@ -221,6 +233,7 @@ void nemo_main()
   strclose(outstr);
 }
 
+
 /*
  * The following 3 patch routines either patch a line with parameters in place (len>0)
  * or return the string representing the N'th (start) parameter on the line if len==0
