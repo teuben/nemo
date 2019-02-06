@@ -6,95 +6,128 @@ runchemh2 \- Frontend to the CHEMH2 program
 .SH DESCRIPTION
 \fBrunchemh2\fP is a front-end for Wolfire's \fIlegacy\fP program \fBchemh2\fP.
 Based on a standard template parameter file (chemie6.dat, which is in a very specific ASCII format),
-a number of those parameters are selected to be editable (see PARAMETERS below). It will then
-run \fBchemh2\fP in a specified run directory.
+a number of its parameters are selected to be editable (see PARAMETERS below). It will then
+run \fBchemh2\fP in a specified run directory, after setting some other conditions needed for the run.
 .PP
-Some complications concerning the Meudon Merge Option need to be described here.
+Some complications concerning the Meudon Merge Option (IBRLO=1) still need to be described and worked out here.
 .PP
 In the run directory standard files (chemie6.dat, chemh2.log etc.) are present, this is where
 the command
 .nf
         chemh2 > chemh2.log
 .fi
-ran, and all other output files 
+ran, and all other output files (see FILES below) are located.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBrundir=\fP
 Run directory [???]     
-.TP 20
+.TP
 \fBdat=\fP
 Example Input datafile [chemie6.dat]    
-.TP 20
+.TP
 \fBDENS0=\fP
 2nd line... []     
-.TP 20
+.TP
 \fBZETACR=\fP
 ... []      
-.TP 20
+.TP
 \fBG0=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNC=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNO=\fP
 ... []      
-.TP 20
+.TP
+\fBDVDOP=\fP
+... []      
+.TP
 \fBXPRES=\fP
 3rd line... []     
-.TP 20
+.TP
 \fBABUNMG=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNSI=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNFE=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNS=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNF=\fP
 ... []      
-.TP 20
+.TP
 \fBABUNCL=\fP
 ... []      
-.TP 20
+.TP
 \fBFGPUMP=\fP
 5th line... []     
-.TP 20
+.TP
 \fBIBRLO=\fP
-... []      
-.TP 20
+Meudon flag ... []      
+.TP
 \fBISO=\fP
 ... []      
-.TP 20
+.TP
 \fBITURB=\fP
 ... []      
-.TP 20
+.TP
 \fBITHP=\fP
 ... []      
-.TP 20
-\fBVERSION=\fP
-5-feb-2018 PJT [0.1]     
-.SH DATA FILES
-The following files need to be present in the current directory, or in a to-be-specified
-set of directories in $CHEMPATH (to be implemented)
-.nf
-.ta +1i
-chemie6.dat	standard parameters for chemh2
-nprd.in		input file for the Meudon Merge Option
-
-.fi
 .SH SEE ALSO
+nemoinp(1NEMO), hisf(1NEMO)
+.SH EXAMPLES
+In a typical environment you would set the CHEMPATH environment variable to point to a directory (or : separated set
+of directories) where all the DATA FILES are located. Typically you would have a sample (template) chemie6.dat file in your
+working directory, from where you can then easily run several chemh2's runs, e.g.
+.nf
+    setenv CHEMPATH /usr/local/data/chemh2:~/chemh2
+    
+    runchemh2 run001 DENS0=0.5  G0=0.80 &
+    runchemh2 run002 DENS0=1.0  G0=0.75   ABUNC=2.0e-4 &
+    runchemh2 run003 DENS0=1.5  G0=0.70 &
+.fi
 .SH FILES
+The following files need to be present in the current directory, or in a specified
+set of colon separated directories listed in $CHEMPATH 
+.nf
+.ta +2i
+chemie6.dat	standard parameters for chemh2 (can be overridden with \fBdat=\fP)
+nprd.in		input file for the Meudon Merge Option (TBD what to do with this)
+euv633.dat
+marks_spect.snreuv.dat4
+avrout.dat
+twophasepg10fh20.dat
+twophasepg10fh21em4.dat
+twophasepg10fh21em3.dat
+twophasepg10fh23em3.dat
+twophasepg10fh21em2.dat
+twophasepg10fh23em2.dat
+twophasepg10fh21em1.dat
+twophasepg10fh23em1.dat
+twophasepg10fh25em1.dat
+twophaqsepg10fh27em1.dat
+twophasepg10fh29em1.dat
+q_ph2_12c160.dat
+.fi
+The following files are dumped in the run directory:
+.nf
+.ta +2i
+chemie6.dat	Parsed input file for chemh2
+chemh2.log	Log file from running chemh2
+history.bin	How the program was run (command:  \fBhisf history.bin\fP)
+XYZ		output file(s) from chemh2
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
-05-Feb-19	V0.0 Created by mkman	NEMO
+.ta +1i +4i
+5-Feb-2019	V0.2 hacked up in NEMO		PJT
 .fi
