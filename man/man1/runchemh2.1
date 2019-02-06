@@ -4,7 +4,7 @@ runchemh2 \- Frontend to the CHEMH2 program
 .SH SYNOPSIS
 \fBrunchemh2\fP [parameter=value]
 .SH DESCRIPTION
-\fBrunchemh2\fP is a front-end for Wolfire's \fIlegacy\fP program \fBchemh2\fP.
+\fBrunchemh2\fP is a front-end to run Wolfire's \fIlegacy\fP program \fBchemh2\fP.
 Based on a standard template parameter file (chemie6.dat, which is in a very specific ASCII format),
 a number of its parameters are selected to be editable (see PARAMETERS below). It will then
 run \fBchemh2\fP in a specified run directory, after setting some other conditions needed for the run.
@@ -82,6 +82,15 @@ Meudon flag ... []
 ... []      
 .SH SEE ALSO
 nemoinp(1NEMO), hisf(1NEMO)
+.nf
+Some possible references on \fBchemh2\fP:
+
+Tielens & Hollenbach - ApJ 1985 291, 722 
+Hollenbach, Takahashi & Tielens - ApJ, 377, 192 (1991)
+Wolfire, Tielens, & Hollenbach 1990, ApJ, 358, 116 
+Wolfire, Hollenbach, McKee, Tielens, & Bakes 1995, ApJ, 443, 152 
+Wolfire, McKee, Hollenbach, & Tielens 2003, ApJ, 587, 278 .
+.fi
 .SH EXAMPLES
 In a typical environment you would set the CHEMPATH environment variable to point to a directory (or : separated set
 of directories) where all the DATA FILES are located. Typically you would have a sample (template) chemie6.dat file in your
@@ -114,7 +123,7 @@ twophasepg10fh23em1.dat
 twophasepg10fh25em1.dat
 twophaqsepg10fh27em1.dat
 twophasepg10fh29em1.dat
-q_ph2_12c160.dat
+q_ph2_12c16o.dat
 .fi
 The following files are dumped in the run directory:
 .nf
@@ -125,7 +134,7 @@ history.bin	How the program was run (command:  \fBhisf history.bin\fP)
 XYZ		output file(s) from chemh2
 .fi
 .SH AUTHOR
-Peter Teuben
+Peter Teuben (fortran code: Xander Tielens / Mark Wolfire)
 .SH UPDATE HISTORY
 .nf
 .ta +1i +4i
