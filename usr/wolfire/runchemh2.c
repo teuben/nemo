@@ -15,6 +15,7 @@
 
 string defv[] = {
   "rundir=???\n          Run directory",
+  "exe=chemh2\n          Name of executable (in $PATH)",
   "dat=chemie6.dat\n     Example Input datafile",
   "DENS0=\n              2nd line...",
   "ZETACR=\n             ...",
@@ -34,7 +35,7 @@ string defv[] = {
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "VERSION=0.2a\n        6-feb-2018 PJT",
+  "VERSION=0.3\n         6-feb-2018 PJT",
   NULL,
 };
 
