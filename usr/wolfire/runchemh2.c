@@ -35,7 +35,7 @@ string defv[] = {
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "VERSION=0.3a\n        6-feb-2018 PJT",
+  "VERSION=0.4\n         6-feb-2018 PJT",
   NULL,
 };
 
@@ -63,6 +63,7 @@ local string fn1[] = {          // unit
   "euv633.dat",                 // 20 
   "marks_spect.snreuv.dat4",    // 21
   "avrout.dat",                 // 22
+  "contable.dat",               // 29
   "twophasepg10fh20.dat",       // 59
   "twophasepg10fh21em4.dat",    // 60
   "twophasepg10fh21em3.dat",    // 61
