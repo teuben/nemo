@@ -19,22 +19,22 @@ string defv[] = {
   "DENS0=\n              2nd line...",
   "ZETACR=\n             ...",
   "G0=\n                 ...",
-  "ABUNC=\n              ...",
-  "ABUNO=\n              ...",
-  "DVDOP=\n              ...",
+  "ABUNC=\n              ...C abundance",
+  "ABUNO=\n              ...O abundance",
+  "DVDOP=\n              ...line width (km/s??)",
   "XPRES=\n              3rd line...",
-  "ABUNMG=\n             ...",
-  "ABUNSI=\n             ...",
-  "ABUNFE=\n             ...",
-  "ABUNS=\n              ...",
-  "ABUNF=\n              ...",
-  "ABUNCL=\n             ...",
+  "ABUNMG=\n             ...Mg abundance",
+  "ABUNSI=\n             ...Si abundance",
+  "ABUNFE=\n             ...Fe abundance",
+  "ABUNS=\n              ...S abundance",
+  "ABUNF=\n              ...F abundance",
+  "ABUNCL=\n             ...Cl abundance",
   "FGPUMP=\n             5th line...",
-  "IBRLO=\n              ...",
+  "IBRLO=\n              ...meudon flag",
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "VERSION=0.2\n         6-feb-2018 PJT",
+  "VERSION=0.2a\n        6-feb-2018 PJT",
   NULL,
 };
 
@@ -43,7 +43,7 @@ string usage="Frontend to the CHEMH2 program";
 string cvsid="$Id$";
 
 
-
+
 
 
 
@@ -81,7 +81,7 @@ void nemo_main()
 {
   stream parstr, outstr, datstr;
   string datfile = getparam("dat");
-  string outdir = getparam("rundir");
+  string outdir  = getparam("rundir");
   string exefile = "chemh2";
   string parfile = "start.txt";
   string logfile = "chemh2.log";
@@ -219,6 +219,15 @@ void nemo_main()
   strclose(outstr);
 }
 
+/*
+ * The following 3 patch routines either patch a line with parameters in place (len>0)
+ * or return the string representing the N'th (start) parameter on the line if len==0
+ * The latter is needed if free format(*) was used.
+ * Since line is overwritten in case len>0 this routine cannot be mixed between these
+ * two types of calls .  After all, this is a hack.
+ * To make matters worse, there may also be some memory leaks.
+ *
+ */
 
 string patch_f(string key,string line,int start,int len, string fmt)
 {
@@ -231,9 +240,10 @@ string patch_f(string key,string line,int start,int len, string fmt)
     sp = burststring(line," ");
     if (hasvalue(key))
       rv = getparam(key);
-    else
-      rv = sp[start];
-    /* memleak */
+    else {
+      rv = strdup(sp[start]);
+      freestrings(sp);
+    }
     dprintf(1,"KEY: %s[%d] = %s\n",key,start,rv);    
     return rv;
   }
@@ -252,6 +262,8 @@ string patch_e(string key,string line,int start,int len, string fmt)
   int i;
   real val;
   char fval[64];
+
+  // no len=0 needed here, since we never use that option
   
   if (!hasvalue(key)) return;
   val = getrparam(key);
@@ -274,8 +286,10 @@ string patch_i(string key,string line,int start,int len, string fmt)
     dprintf(1,"KEY: %s len=%d\n",key,xstrlen(sp,sizeof(string)));
     if (hasvalue(key))
       rv = getparam(key);
-    else
-      rv = sp[start];
+    else {
+      rv = strdup(sp[start]);
+      freestrings(sp);
+    }
     dprintf(1,"KEY: %s[%d] = %s\n",key,start,rv);
     /* memleak */
     return rv;
