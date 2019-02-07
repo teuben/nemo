@@ -35,7 +35,8 @@ string defv[] = {
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "VERSION=0.5\n         7-feb-2018 PJT",
+  "GRIDSTEP=25,29,0,6\n  Written to the GRIDOUTPUT/GRIDSTEP file",
+  "VERSION=0.6\n         7-feb-2018 PJT",
   NULL,
 };
 
@@ -77,7 +78,7 @@ local string fn1[] = {          // unit
   "twophasepg10fh29em1.dat",    // 69
   "q_oh2_12c16o.dat",           // 23
   "q_ph2_12c16o.dat",           // 23
-  "GRIDOUTPUT",                 // this is a whole complex tree of read and write
+  // "GRIDOUTPUT",                 // this is a whole complex tree of read and write
   NULL,
 };
 
@@ -86,15 +87,21 @@ local string fn2[] = {
   NULL,
 };
 
+local string gridoutput_files =
+  "CI CO CP FeI FeII H2 HCOP OI SI SiI SiII TS TSav0p01 TSav0p03 TSav0p1 TSav0p3 TSav1p0 TSav3p0";
+
+
 local string patch_f(string key,string line,int start,int len, string fmt);
 local string patch_e(string key,string line,int start,int len, string fmt);
 local string patch_i(string key,string line,int start,int len, string fmt);
-  
+
+#define MAXGRIDSTEP  4
+
 
 
 void nemo_main()
 {
-  stream parstr, outstr, datstr;
+  stream parstr, outstr, datstr, tmpstr;
   string datfile = getparam("dat");
   string outdir  = getparam("rundir");
   string exefile = "chemh2";
@@ -104,6 +111,11 @@ void nemo_main()
   char dname[256], cmd[256];
   char line[256];
   int i, nf1, nf2, ibrlo;
+  int gridstep[MAXGRIDSTEP];
+
+  /* fetch/check some variables */
+  if (nemoinpi(getparam("GRIDSTEP"),gridstep,MAXGRIDSTEP) != MAXGRIDSTEP)
+    error("GRIDSTEP= needs 4 integers");
 
   /* (debug) report data files needed */
   
@@ -231,6 +243,15 @@ void nemo_main()
     } else
       warning("Missing file %s along $CHEMPATH\n",fn2[i]);
   }
+
+  /* deal with GRIDOUTPUT */
+  mkdir("GRIDOUTPUT",0775);
+
+  tmpstr = stropen("GRIDOUTPUT/GRIDSTEP","w");
+  fprintf(tmpstr,"%12d%12d%12d%12d\n",gridstep[0],gridstep[1],gridstep[2],gridstep[3]);
+
+  sprintf(cmd,"cd GRIDOUTPUT; touch %s", gridoutput_files);
+  run_sh(cmd);
 
   sprintf(cmd,"%s > %s ", exefile, logfile);
   run_sh(cmd);
