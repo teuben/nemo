@@ -35,7 +35,7 @@ string defv[] = {
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "VERSION=0.4\n         6-feb-2018 PJT",
+  "VERSION=0.5\n         7-feb-2018 PJT",
   NULL,
 };
 
@@ -77,7 +77,7 @@ local string fn1[] = {          // unit
   "twophasepg10fh29em1.dat",    // 69
   "q_oh2_12c16o.dat",           // 23
   "q_ph2_12c16o.dat",           // 23
-  // some kind of virgin GRIDOUTPUT tree, and a fresh GRIDSTEP file in there as well.
+  "GRIDOUTPUT",                 // this is a whole complex tree of read and write
   NULL,
 };
 
@@ -212,16 +212,22 @@ void nemo_main()
   for (i=1; i<nf1; i++) {  // skip the first one, chemie6.dat, we wrote it manually
     fn = pathfind(chempath,fn1[i]);
     if (fn != NULL) {
-      dprintf(1,"SYMLINK %s %s\n",fn1[i],fn);
-      symlink(fn,fn1[i]);
+      // dprintf(1,"SYMLINK %s %s\n",fn1[i],fn);
+      // symlink(fn,fn1[i]);
+      sprintf(cmd,"cp -a %s .", fn);
+      dprintf(1,"%s\n",cmd);      
+      run_sh(cmd);
     } else
       warning("Missing file %s along $CHEMPATH\n",fn1[i]);
   }
   for (i=0; i<nf2; i++) {  // skip the first one, chemie6.dat, we wrote it manually
     fn = pathfind(chempath,fn2[i]);
     if (fn != NULL) {
-      dprintf(1,"SYMLINK %s %s\n",fn2[i],fn);
-      symlink(fn,fn2[i]);
+      // dprintf(1,"SYMLINK %s %s\n",fn2[i],fn);
+      // symlink(fn,fn2[i]);
+      sprintf(cmd,"cp -a %s .", fn);
+      dprintf(1,"%s\n",cmd);
+      run_sh(cmd);
     } else
       warning("Missing file %s along $CHEMPATH\n",fn2[i]);
   }
