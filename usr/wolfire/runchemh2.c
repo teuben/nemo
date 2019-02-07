@@ -249,13 +249,16 @@ void nemo_main()
 
   tmpstr = stropen("GRIDOUTPUT/GRIDSTEP","w");
   fprintf(tmpstr,"%12d%12d%12d%12d\n",gridstep[0],gridstep[1],gridstep[2],gridstep[3]);
+  strclose(tmpstr);
 
   sprintf(cmd,"cd GRIDOUTPUT; touch %s", gridoutput_files);
   run_sh(cmd);
 
+  /* run the program */
   sprintf(cmd,"%s > %s ", exefile, logfile);
   run_sh(cmd);
 
+  /* write some history, NEMO style */
   outstr = stropen("history.bin","w");
   put_history(outstr);
   strclose(outstr);
