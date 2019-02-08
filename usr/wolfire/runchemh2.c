@@ -36,7 +36,7 @@ string defv[] = {
   "ITURB=\n              ...",
   "ITHP=\n               ...",
   "GRIDSTEP=25,29,0,0\n  Written to the GRIDOUTPUT/GRIDSTEP file",
-  "VERSION=0.6a\n        8-feb-2018 PJT",
+  "VERSION=0.6b\n        8-feb-2018 PJT",
   NULL,
 };
 
@@ -107,6 +107,7 @@ void nemo_main()
   string exefile = "chemh2";
   string parfile = "start.txt";
   string logfile = "chemh2.log";
+  string fn, chempath = getenv("CHEMPATH");
   string l5[5];
   char dname[256], cmd[256];
   char line[256];
@@ -132,8 +133,10 @@ void nemo_main()
 
   /*************************************************************************************/  
   /* read input par file, copy to output par in run directory while editing parameters */
+  fn = pathfind(chempath,datfile);
+  dprintf(1,"Found %s\n",fn);
+  datstr = stropen(fn,"r");
   
-  datstr = stropen(datfile,"r");             /* input par, normally chemie6.dat, but can be anything */
   sprintf(dname,"%s/%s",outdir,fn1[0]);      /* output par name should chemie6.dat */
   parstr = stropen(dname,"w");
 
@@ -150,7 +153,7 @@ void nemo_main()
   /* 1005 format(2x,f6.3,2x,e8.2,2x,f6.3,6(1PE8.1))   */
   /*    1.000  0.20E-15   0.750 1.6E-04 3.2E-04 1.5E+00 1.0E-01 4.4E-01 2.7E+00 */
   /* DENS0,ZETACR,G0,ABUNC,ABUNO,DVDOP,YPE,XD,EB */
-  /* ----- ------ -- ----- -----                 */
+  /* ----- ------ -- ----- ----- -----           */
 
   get_line(datstr, line);
   patch_f("DENS0",  line, 2,6, "%6.3f");
@@ -217,7 +220,6 @@ void nemo_main()
   run_cd(outdir);
 
   //   get symlinks to the datafiles
-  string fn, chempath = getenv("CHEMPATH");
   if (chempath == NULL) chempath = strdup("..");
   dprintf(1,"CHEMPATH: %s\n",chempath);
     
