@@ -1,13 +1,33 @@
 
-RUNS =  run001 run002
+RUNS = run000  run001 run002
 
 all: $(RUNS)
 
 clean:
 	rm -rf $(RUNS)
 
-run001:
-	time runchemh2 run001 IBRLO=0
+run000:
+	time runchemh2 run000 IBRLO=0
 
-run002:
-	time runchemh2 run002 IBRLO=0 ABUNMG=1.1e-6
+run1xx:
+	rm -rf run1??
+	# 2nd line
+	time runchemh2 run121 IBRLO=0 DENS0=1
+	time runchemh2 run122 IBRLO=0 ZETACR=2e-16
+	time runchemh2 run123 IBRLO=0 G0=0.75
+	time runchemh2 run124 IBRLO=0 ABUNC=1.6e-4
+	time runchemh2 run125 IBRLO=0 ABUNC=3.2e-4
+	time runchemh2 run126 IBRLO=0 DVDOP=1.5
+	# 3rd line
+	time runchemh2 run131 IBRLO=0 XPRES=0
+	time runchemh2 run132 IBRLO=0 ABUNMG=1.1e=6
+	time runchemh2 run133 IBRLO=0 ABUNSI=1.7e-6
+	time runchemh2 run134 IBRLO=0 ABUNFE=1.7e-7
+	time runchemh2 run135 IBRLO=0 ABUNS=2.8e-5
+	time runchemh2 run136 IBRLO=0 ABUNF=1.8e-8
+	time runchemh2 run137 IBRLO=0 ABUNCL=1.8e-7
+	# 5th line
+	time runchemh2 run151 IBRLO=0 FGPUMP=1
+	time runchemh2 run152 IBRLO=0 ISO=0
+	time runchemh2 run153 IBRLO=0 ITURB=0
+	time runchemh2 run154 IBRLO=0 ITHP=0
