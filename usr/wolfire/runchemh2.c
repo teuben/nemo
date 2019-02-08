@@ -31,12 +31,12 @@ string defv[] = {
   "ABUNF=\n              ...F abundance",
   "ABUNCL=\n             ...Cl abundance",
   "FGPUMP=\n             5th line...",
-  "IBRLO=\n              ...meudon flag",
+  "IBRLO=0\n             ...meudon flag (needs to be 0 for now)",
   "ISO=\n                ...",
   "ITURB=\n              ...",
   "ITHP=\n               ...",
-  "GRIDSTEP=25,29,0,6\n  Written to the GRIDOUTPUT/GRIDSTEP file",
-  "VERSION=0.6\n         7-feb-2018 PJT",
+  "GRIDSTEP=25,29,0,0\n  Written to the GRIDOUTPUT/GRIDSTEP file",
+  "VERSION=0.6a\n        8-feb-2018 PJT",
   NULL,
 };
 
