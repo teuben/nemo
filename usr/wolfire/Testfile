@@ -1,0 +1,13 @@
+
+RUNS =  run001 run002
+
+all: $(RUNS)
+
+clean:
+	rm -rf $(RUNS)
+
+run001:
+	time runchemh2 run001 IBRLO=0
+
+run002:
+	time runchemh2 run002 IBRLO=0 ABUNMG=1.1e-6
