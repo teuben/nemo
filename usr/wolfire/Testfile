@@ -16,11 +16,11 @@ run1xx:
 	time runchemh2 run122 IBRLO=0 ZETACR=2e-16
 	time runchemh2 run123 IBRLO=0 G0=0.75
 	time runchemh2 run124 IBRLO=0 ABUNC=1.6e-4
-	time runchemh2 run125 IBRLO=0 ABUNC=3.2e-4
+	time runchemh2 run125 IBRLO=0 ABUNO=3.2e-4
 	time runchemh2 run126 IBRLO=0 DVDOP=1.5
 	# 3rd line
 	time runchemh2 run131 IBRLO=0 XPRES=0
-	time runchemh2 run132 IBRLO=0 ABUNMG=1.1e=6
+	time runchemh2 run132 IBRLO=0 ABUNMG=1.1e-6
 	time runchemh2 run133 IBRLO=0 ABUNSI=1.7e-6
 	time runchemh2 run134 IBRLO=0 ABUNFE=1.7e-7
 	time runchemh2 run135 IBRLO=0 ABUNS=2.8e-5
