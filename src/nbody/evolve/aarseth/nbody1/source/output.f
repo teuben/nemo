@@ -25,9 +25,10 @@
 *       Form virial theorem ratio (NB! VIR differs from POT if EPS2 > 0).
       Q = ZKIN/POT
 *
-*       Define the standard crossing time.
+*       Define the standard crossing time. (or code units)
       ETOT = ZKIN - POT
       TCR = ZMASS**2.5/(2.0*ABS(ETOT))**1.5
+      IF(KZ(15).EQ.1) TCR=1
 *
 *       Update energies and form the relative error using MAX(ZKIN,POT).
       IF (TIME.EQ.0.0D0) THEN
