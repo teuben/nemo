@@ -30,7 +30,7 @@
               XGDOT(K) = VG(K) + XIDOT(K)
     2     CONTINUE
 *       Employ differential instead of linearized forms for better accuracy.
-          IF (GMG.LT.0.0D0) THEN
+          IF (GMG.GT.0.0D0) THEN
               CALL FNUC(RG,VG,FS,FSD)
               CALL FNUC(XG,XGDOT,FM,FMD)
               DO 10 K = 1,3
@@ -40,7 +40,7 @@
           END IF
 *
 *       Include Miyamoto disk for positive disk mass.
-          IF (DISK.LT.0.0D0) THEN
+          IF (DISK.GT.0.0D0) THEN
               CALL FDISK(RG,VG,FS,FSD)
               CALL FDISK(XG,XGDOT,FM,FMD)
               DO 20 K = 1,3
