@@ -5,6 +5,7 @@
  *  17-mar-04   using in= didn't enable kz(4) properly        PJT
  *  17-mar-06   using fullname()                              PJT
  *  17-sep-2013  V1.3   using new run interface               PJT
+ *   9-feb-2017  V2.0   better defaults for snapshot input    PJT
  *
  *
  */
@@ -35,7 +36,7 @@ string defv[] = {
     "eps=0.05\n       Potential softening parameter",
 
 
-    "kz=1,2,0,0,0,1,0,0,0,0,1\n  Non-zero options for alternative paths (see below)\n"
+    "kz=0,0,1,1,0,1,0,0,0,1,0,0,0,0,1\n  Non-zero options for alternative paths (see below)\n"
       " 1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT.\n"
       " 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
       " 3  Basic data written to unit 3 at output time (frequency NFIX).\n"
@@ -50,7 +51,8 @@ string defv[] = {
       "12  Initial parameters for binary orbit.\n"
       "13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE).\n"
       "14  Adjustment of coordinates & velocities to c.m. condition.\n",
-
+     " 15  Use code units for tcrit/deltat",
+    
     "alphas=2.3\n     Power-law index for initial mass function",
     "body1=5.0\n      Maximum particle mass before scaling",
     "bodyn=1.0\n      Minimum particle mass before scaling",
