@@ -1,9 +1,10 @@
-*       Program NBODY0. Hermite block-steps. Coded by Sverre Aarseth 10/06.
+*     Program NBODY0. Hermite block-steps. Coded by Sverre Aarseth 10/06.
+*     Changed maxnbody from 50 to 256 - Peter Teuben Feb-2019      
       IMPLICIT REAL*8 (A-H,O-Z)
-      COMMON  X(3,50),XDOT(3,50),BODY(50),D2(3,50),D3(3,50),EPS2,N
-      REAL*8  X0(3,50),X0DOT(3,50),T0(50),STEP(50),F(3,50),FDOT(3,50),
-     &        FIRR(3),FD(3)
-      INTEGER NEXT(50)
+      COMMON  X(3,256),XDOT(3,256),BODY(256),D2(3,256),D3(3,256),EPS2,N
+      REAL*8  X0(3,256),X0DOT(3,256),T0(256),STEP(256),F(3,256),
+     &        FDOT(3,256),FIRR(3),FD(3)
+      INTEGER NEXT(256)
       DATA TIME,TNEXT,SMAX,TMIN,NSTEPS /0.0D0,0.0D0,64.0D0,1.0D+10,0/
       READ (5,*)  N, ETA, DELTAT, TCRIT, EPS2
       READ (5,*)  (BODY(I), (X(K,I),K=1,3), (XDOT(K,I),K=1,3),I=1,N)
@@ -96,7 +97,7 @@
       END
       SUBROUTINE FFDOT(I,FIRR,FD)
       IMPLICIT REAL*8 (A-H,O-Z)
-      COMMON  X(3,50),XDOT(3,50),BODY(50),D2(3,50),D3(3,50),EPS2,N
+      COMMON  X(3,256),XDOT(3,256),BODY(256),D2(3,256),D3(3,256),EPS2,N
       REAL*8  FIRR(3),FD(3),A(3),DV(3)
       DO 1 K = 1,3
           FIRR(K) = 0.0D0
