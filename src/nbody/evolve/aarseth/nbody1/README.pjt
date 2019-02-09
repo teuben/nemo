@@ -5,3 +5,5 @@ November 1997:	imported "as is" from SJA with one important change:
 		Makefile itself is now a symlink to Makefile.nemo
 
 6-mar-98	added call to VERIFY in input.f
+
+feb-2019:       added KZ(15)=1 to mean using code units for tcrit/deltat
