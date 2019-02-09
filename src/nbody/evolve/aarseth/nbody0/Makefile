@@ -31,7 +31,7 @@ SRC = nbody0.f nbodyio.c nbodyio.f main.c main.f \
       fdefs.inc nmax.inc \
       nbody00.c nbody0.h \
       Makefile Testfile README
-BIN = nbody0 nbody00 nbody0_ff
+BIN = nbody0 nbody00 nbody0_ff nbody0h4
 BINFILES = $(BIN)
 MAN1= nbody0.1
 MAN = $(MAN1)
@@ -95,11 +95,11 @@ all:   $(BIN)
 
 nbody0: main.o nbody0.o nbodyio.o
 	$(FC) $(F77_CMAIN_FFLAGS) $(FFLAGS) -o nbody0 main.o nbodyio.o nbody0.o \
- 		$(L) $(LIBF77) -lm
+		$(L) $(LIBF77) -lm
 
 nbody00: main.o nbody00.o nbodyio.o
 	$(CC) $(CFLAGS) -o nbody00 main.o nbodyio.o nbody00.o \
- 		$(L) -lm
+		$(L) -lm
 
 nbody00.o: nbody00.c
 	$(CC) $(CFLAGS) -c nbody00.c
@@ -116,7 +116,12 @@ nbody0.o:  nbody0.f nmax.inc
 #	Vanilla fortran stuff: no NEMO I/O at all
 
 nbody0_ff:  main.f nbodyio.f nmax.inc nbody0.f
-	$(FC) $(FFLAGS) -o nbody0_ff main.f nbodyio.f nbody0.f 
+	$(FC) $(FFLAGS) -o nbody0_ff main.f nbodyio.f nbody0.f
+
+#  hermite code
+
+nbody0h4:
+	$(FC) $(FFLAGS) -o nbody0h4 nbody0h4.f
 
 double:
 	@echo Tarfile for cray-et-al, all DOUBLEs become REAL
