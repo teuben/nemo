@@ -108,6 +108,7 @@
 *       Define standard crossing time.
       ETOT = ZKIN - POT - ETIDE
       TCR = ZMASS**2.5/(2.0*ABS(ETOT))**1.5
+      IF(KZ(19).EQ.1) TCR=1
 *
 *       Update energies and form the relative error using MAX(ZKIN,POT).
       IF (TIME.LE.0.0D0) THEN
