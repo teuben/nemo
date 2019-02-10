@@ -36,7 +36,7 @@ string defv[] = {
     "eps=0.05\n       Potential softening parameter",
 
 
-    "kz=0,0,1,1,0,1,0,0,0,1,0,0,0,0,1\n  Non-zero options for alternative paths (see below)\n"
+    "kz=1,2,1,2,0,1,0,0,0,1,1,0,0,0,1\n  Non-zero options for alternative paths (see below)\n"
       " 1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT.\n"
       " 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
       " 3  Basic data written to unit 3 at output time (frequency NFIX).\n"
@@ -69,11 +69,11 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.3\n    17-sep-2013 PJT",
+    "VERSION=2.0\n    9-feb-2019 PJT",
     NULL,
 };
 
-string usage="N-body code";
+string usage="front end for Aarseth nbody1 N-body code";
 
 #define KZ_MAX  15
 
