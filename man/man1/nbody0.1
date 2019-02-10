@@ -1,6 +1,6 @@
-.TH NBODY0 1NEMO "14 March 2004"
+.TH NBODY0 1NEMO "9 February 2019"
 .SH NAME
-nbody0, nbody00 - direct summation Aarseth N-body integrator
+nbody0, nbody00, nbody0h4 - direct summation Aarseth N-body integrator
 .SH SYNOPSIS
 nbody0 in=snap_in out=snap_out [keyword=value ...]
 .SH DESCRIPTION
@@ -163,6 +163,17 @@ nbody5    	with regularization handling triples & binaries
 nbody6     	... for new parallel machine
 nbody7		... secret
 .fi
+.SH NBODY0H4
+On Sverre's CODES site, he also presents \fBnbody0\fP,
+a simple \fICompact fourth-order Hermite block-step code\fP.
+We include it here as \fBnbody0h4\fP. This code has an unusual interface, in that it reads
+the input from standard input, the first line contains the usual
+.nf
+      N, ETA, DELTAT, TCRIT, EPS2
+.fi
+(though note the softening EPS is entered in the square value). This is followed
+by \fBN\fP lines of m,x,y,z,vx,vy,vz for each of the particles each.
+At some point in the future we may provide a wrapper for this. 
 .SH FILES
 .nf
 .ta +2i
@@ -170,7 +181,7 @@ NEMO/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
 NEMO/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
 .fi
 .SH SEE ALSO
-hackcode1(1NEMO), runbody2(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
+hackcode1(1NEMO), runbody1(1NEMO), runbody2(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
 .PP
 Binney, J. & Tremaine, S. \fIGalactic Dynamics\fP.
 Princeton Unversity Press (1987), pp678.
@@ -198,4 +209,5 @@ S.J. Aarseth, 2003,
 11-feb-98	V1.3a fixed array index bug for higher order term	PJT
 21-jan-00	V1.4 added reset= to fix small deltat problem/bug	PJT
 24-feb-04	V1.5 documented the academic figure8 orbit problem, fixed in nbody00	PJT
+9-feb-19	added some docs on nbody0h4	PJT
 .fi
