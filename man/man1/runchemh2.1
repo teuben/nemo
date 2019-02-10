@@ -1,22 +1,23 @@
-.TH RUNCHEMH2 1NEMO "5 February 2019"
+.TH RUNCHEMH2 1NEMO "10 February 2019"
 .SH NAME
 runchemh2 \- Frontend to the CHEMH2 program
 .SH SYNOPSIS
 \fBrunchemh2\fP [parameter=value]
 .SH DESCRIPTION
 \fBrunchemh2\fP is a front-end to run Wolfire's \fIlegacy\fP program \fBchemh2\fP.
-Based on a standard template parameter file (chemie6.dat, which is in a very specific ASCII format),
+Based on a standard template parameter file (typically chemie6.dat, which is in a very specific ASCII format),
 a number of its parameters are selected to be editable (see PARAMETERS below). It will then
 run \fBchemh2\fP in a specified run directory, after setting some other conditions needed for the run.
 .PP
 Some complications concerning the Meudon Merge Option (IBRLO=1) still need to be described and worked out here.
+The current version only runs in IBRLO=0 mode (currently the default)
 .PP
-In the run directory standard files (chemie6.dat, chemh2.log etc.) are present, this is where
+Once the run directory contains all standard files (chemie6.dat, chemh2.log etc.) 
 the command
 .nf
         chemh2 > chemh2.log
 .fi
-ran, and all other output files (see FILES below) are located.
+can be run, this is also where all other output files (see FILES below) are then located.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -70,7 +71,7 @@ Example Input datafile [chemie6.dat]
 5th line... []     
 .TP
 \fBIBRLO=\fP
-Meudon flag ... []      
+Meudon flag ... [0]      
 .TP
 \fBISO=\fP
 ... []      
@@ -81,9 +82,9 @@ Meudon flag ... []
 \fBITHP=\fP
 ... []      
 .SH SEE ALSO
-nemoinp(1NEMO), hisf(1NEMO)
+nemoinp(1NEMO), hisf(1NEMO), tabplot(1NEMO)
 .nf
-Some possible references on \fBchemh2\fP:
+Some possible references on \fBchemh2\fP to be worked out:
 
 Tielens & Hollenbach - ApJ 1985 291, 722 
 Hollenbach, Takahashi & Tielens - ApJ, 377, 192 (1991)
@@ -102,6 +103,9 @@ working directory, from where you can then easily run several chemh2's runs, e.g
     runchemh2 run002 DENS0=1.0  G0=0.75   ABUNC=2.0e-4 &
     runchemh2 run003 DENS0=1.5  G0=0.70 &
 .fi
+where the idea is that one can run as many instances as memory and CPU allows.
+.SH BENCHMARK
+TBD
 .SH FILES
 The following files need to be present in the current directory, or in a specified
 set of colon separated directories listed in $CHEMPATH 
@@ -131,7 +135,7 @@ The following files are dumped in the run directory:
 chemie6.dat	Parsed input file for chemh2
 chemh2.log	Log file from running chemh2
 history.bin	How the program was run (command:  \fBhisf history.bin\fP)
-XYZ		output file(s) from chemh2
+fort.N		output file(s) from chemh2 (and a few more)
 .fi
 .SH AUTHOR
 Peter Teuben (fortran code: Xander Tielens / Mark Wolfire)
@@ -139,4 +143,5 @@ Peter Teuben (fortran code: Xander Tielens / Mark Wolfire)
 .nf
 .ta +1i +4i
 5-Feb-2019	V0.2 hacked up in NEMO		PJT
+10-feb-2018	V0.6 working in non-Meudon (IBRLO=0) mode	PJT
 .fi
