@@ -1,4 +1,4 @@
-.TH RUNBODY1 1NEMO "17 March 2006"
+.TH RUNBODY1 1NEMO "9 February 2019"
 .SH NAME
 runbody1, nbody1 \- (frontend to) Aarseth N-body code
 .SH SYNOPSIS
@@ -7,12 +7,17 @@ runbody1, nbody1 \- (frontend to) Aarseth N-body code
 \fBnbody1  \fP\fI < nbody1.in\fP
 .fi
 .SH DESCRIPTION
-\fBrunbody1\fP is a frontend to the NBODY1 fortran program. 
+\fBrunbody1\fP is a NEMO frontend to Aarseth's NBODY1 (fortran) program,
+running the code in a run directory where all files are stored.
 .PP
-Output snapshots are by default not created, and must be  turned on
-with a options flag (see \fBkz=\fP below). All of the input
-parameter names are the same as their counterpart in the NBODY1
-program.
+The new version 2.x interface tries to mimic to run nbody1 in virial units
+with a default input and output.
+In previous versions the defaults were more geared towards
+running the classic interface where data were scaled and times were measured
+in crossing times, making comparisons with other codes in NEMO much harder.
+This however means it is now more work to make nbody1 run in classic mode.
+Parameters names and meaning have not changed, except for the introduction
+of kz(15), to work in code (virial) units.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -69,24 +74,24 @@ Potential softening parameter
 .TP
 \fBkz=\fP
 ** Non-zero options for alternative paths (see below) 
-[Default: 1,0,0,0,1,1,0,0,0,0,0,0,0,0,0]
+[Default: 1,2,1,2,0,0,0,0,0,1,1,0,0,0,1]
 .nf
 .ta +0.5i
    1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT. [1]
-   2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2). [0]
-   3  Basic data written to unit 3 at output time (frequency NFIX). [0]
-   4  Initial conditions on unit 4 (=1: output; =2: input). [0]
-   5  Initial conditions (=0: uniform & isotropic; =1: Plummer). [1]
-   6  Output of significant binaries. [1]
+   2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2). [2]
+   3  Basic data written to unit 3 at output time (frequency NFIX). [1]
+   4  Initial conditions on unit 4 (=1: output; =2: input). [2]
+   5  Initial conditions (=0: uniform & isotropic; =1: Plummer). [0]
+   6  Output of significant binaries. [0]
    7  Output of movie frames on unit 7. [0]
    8  Generation of two subsystems (merger experiment). [0]
    9  Individual bodies printed at output time (MIN(5**KZ9,N)). [0]
-  10  No scaling of initial conditions. [0]
-  11  Modification of ETA by tolerance QE. [0]
+  10  No scaling of initial conditions. [1]
+  11  Modification of ETA by tolerance QE. [1]
   12  Initial parameters for binary orbit. [0]
   13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE). [0]
   14  Adjustment of coordinates & velocities to c.m. condition. [0]
-  15  Not used at present [0]
+  15  Use code units for tcrit/deltat [1]
 .fi
 .TP
 \fBalphas=\fP
@@ -176,4 +181,5 @@ Peter Teuben
 4-mar-98	V1.1 documented, and changed out= to outdir=, n= to nbody= PJT
 17-mar-04	V1.1a fixed bug when in= was specified
 17-mar-06	V1.2 using fullname for in=
+7-feb-2019	V2.0 better defaults for snapshot input	PJT
 .fi

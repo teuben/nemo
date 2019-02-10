@@ -1,4 +1,4 @@
-.TH RUNBODY2 1NEMO "17 March 2006"
+.TH RUNBODY2 1NEMO "9 February 2019"
 .SH NAME
 runbody2 \- Ahmad-Cohen N-body code
 .SH SYNOPSIS
@@ -7,16 +7,17 @@ runbody2 \- Ahmad-Cohen N-body code
 \fBnbody2  \fP\fI < nbody2.in\fP
 .fi
 .SH DESCRIPTION
-\fBrunbody2\fP is a frontend to the NBODY2 fortran program.
-It  (optionally)
-creates a run directory, prepares
-a parameter input file, and optionally input snapshot data, and runs
-the NBODY2 program.
+\fBrunbody2\fP is a frontend to the NBODY2 fortran program,
+running the code in a run directory where all files are stored.
 .PP
-Output snapshots are by default not created, and must be  turned on
-with a options flag (see \fBkz=\fP below). All of the input
-parameter names are the same as their counterpart in
-\fBnbody2\fP.
+The new version 2.x interface tries to mimic to run nbody1 in virial units
+with a default input and output.
+In previous versions the defaults were more geared towards
+running the classic interface where data were scaled and times were measured
+in crossing times, making comparisons with other codes in NEMO much harder.
+This however means it is now more work to make nbody1 run in classic mode.
+Parameters names and meaning have not changed, except for the introduction
+of kz(19), to work in code (virial) units.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -87,17 +88,17 @@ Potential softening parameter
 .TP
 \fBkz=\fP
 Non-zero options for alternative paths (see below) 
-[Default: 1,2,0::4,1::2,0::2,1]
+[Default: 1,2,1,2,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0]
 .nf
 .ta +0.5i
  1  	COMMON save on unit 1 at end of run (=2: every 100*NMAX steps) [1]
  2  	COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2) [2]
- 3  	Basic data written to unit 3 at output time (frequency NFIX) [0]
- 4 	Initial conditions on unit 4 (=1: output; =2: input) [0]
+ 3  	Basic data written to unit 3 at output time (frequency NFIX) [1]
+ 4 	Initial conditions on unit 4 (=1: output; =2: input) [2]
  5  	Initial conditions (=0: uniform & isotropic; =1: Plummer  model) [0]
  6  	Output of significant binaries (=2: frequency NFIX) [0]
- 7  	Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types) [1]
- 8  	Core radius & density centre (N > 20 only) [1]
+ 7  	Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types) [0]
+ 8  	Core radius & density centre (N > 20 only) [0]
  9  	Individual bodies printed at output time (MIN(5**KZ(9),N)) [0]
  10  	No unique density centre (skips velocity modification of RS(I)) [0]
  11  	Modification of ETAI & ETAR by tolerance QE [1]
@@ -105,10 +106,10 @@ Non-zero options for alternative paths (see below)
  13  	Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE) [0]
  14  	Skip full predictor loop if NNB > KZ(14) = <NNB> & KZ(14) > [0]
  15  	External potential (=1: Plummer model; =2: logarithmic potential) [0]
- 16  	No scaling of initial conditions [0]
+ 16  	No scaling of initial conditions [1]
  17  	Generation of two subsystems (merger experiment) [0]
  18  	Adjustment of coordinates & velocities to c.m. condition [0]
- 19  	Not used at present [0]
+ 19  	Use code units for tcrit/deltat [1]
  20  	Not used at present [0]
 .fi
 .TP
@@ -200,4 +201,5 @@ Peter Teuben
 15-jul-97	V1.2 out= now outdir=, nbody= now required value	PJT
 5-mar-98	readying for new release	PJT
 17-mar-06	V1.4 using fullname for in=	PJT
+9-feb-2019	V2.0 better defaults for snapshot input	PJT
 .fi
