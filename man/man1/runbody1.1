@@ -10,12 +10,12 @@ runbody1, nbody1 \- (frontend to) Aarseth N-body code
 \fBrunbody1\fP is a NEMO frontend to Aarseth's NBODY1 (fortran) program,
 running the code in a run directory where all files are stored.
 .PP
-The new version 2.x interface tries to mimic to run nbody1 in virial units
+The new version 2.x interface tries to mimic to run NBODY1 in virial units
 with a default input and output.
 In previous versions the defaults were more geared towards
 running the classic interface where data were scaled and times were measured
 in crossing times, making comparisons with other codes in NEMO much harder.
-This however means it is now more work to make nbody1 run in classic mode.
+This however means it is now more work to make NBODY1 run in classic mode.
 Parameters names and meaning have not changed, except for the introduction
 of kz(15), to work in code (virial) units.
 .SH PARAMETERS
@@ -25,7 +25,8 @@ is also given:
 \fBin=\fP
 input file (optional, see \fBnbody=\fP to generate your own input 
 data on the fly). If input data are given, you must also set KZ(4)=2 (see 
-below).  
+below).   WARNING:  The input snapshot will be mass-weight centered before
+the integration started by NBODY1.
 Default: not used.
 .TP
 \fBoutdir=\fP
@@ -142,7 +143,7 @@ not supposed to be used, but counts max computing time alotted.
 Scaling can cause output to become out of bounds.
 .PP
 Coding the the input-order logic in the frontend program can be hazardous
-to your health. It will depend on how the nbody1 main program is structured.
+to your health. It will depend on how the NBODY1 main program is structured.
 .SH INPUT
 Order of input lines in "nbody1.in" for a new run (KSTART=1)
 .nf
