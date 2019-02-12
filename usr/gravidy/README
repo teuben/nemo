@@ -1,0 +1,6 @@
+See https://arxiv.org/abs/1702.00440
+
+As for install, the 'cpu' version is the easiest to install, although
+also the slowest.  It just needs the BOOST library, which in Ubuntu
+is a simple
+     sudo apt-get install libboost-all-dev
