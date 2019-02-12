@@ -1,0 +1,33 @@
+.TH GRAVIDY1 1NEMO "12 February 2019"
+.SH NAME
+gravidy - direct summation hermite N-body integrator with variable block timesteps
+.SH SYNOPSIS
+\fBgravidy -i input_file ...\fP
+.SH DESCRIPTION
+\fIgravidy\fP is ...
+.SH EXAMPLE
+Here is an example integrating gravidy with NEMO files
+.fi
+  mkplummer p128 128
+  snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f > p128.tab
+  gravidy --input p128.tab --output p128 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
+  cat p128.out.snapshot_0* | sed 's/# Time://' | tabtos - - time skip,m,pos,vel nbody=128 | csf - p128.out SnapShot
+.fi
+although note that the last snapshot (time=10.0) is replicated.
+.SH AUTHOR
+Cristian Maureira-Fredes, and Pao Amaro-Seoane
+.SH FILES
+NEMO/usr/gravidy
+.SH SEE ALSO
+nbody1(1NEMO)
+.PP
+https://arxiv.org/abs/1702.00440
+.PP
+Maureira-Fredes, C and Amaro-Seoane, P. "GraviDy, a GPU modular, parallel direct-summation N-body integrator: Dynamics with softening", MNRAS, vol. 473, pp. 3113-3127, Jan . 2018.
+.PP
+http://github.com/cmaureir/gravidy.git
+.SH HISTORY
+.nf
+.ta +1i +4i
+12-feb-2017	example added	PJT
+.fi
