@@ -16,6 +16,7 @@
  *      20-jan-94   1.5c sqr() decl for solaris
  *      15-mar-06   1.5f use statics to hide names
  *       1-aug-06   1.5g make it listen to the times= keyword
+ *      11-feb-19   1.6  add crossing time estimate
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -50,7 +51,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.5g\n             1-aug-06 PJT",
+    "VERSION=1.6\n              11-feb-2019 PJT",
     NULL
 };
 
@@ -394,10 +395,9 @@ report_analysis()
         real r,v;
         real xm,ym,zm,xs,ys,zs;
         real um,vm,wm,us,vs,ws;
-        real rmsvel;
+        real rmsvel, t_cr;
         real ecc_x, ecc_y, ecc_z;
         real ekintot, epottot, ecomtot, e, emin, emax, cv, ecm, ekin;
-        double sqrt(), sqr();
         int    i, nplus;
                                         
         if (n1<2) {
@@ -466,6 +466,10 @@ report_analysis()
         printf ("Clausius energy = %f\n",cv);
         printf ("Virial = %f (Clausius => %f)\n",
                 epottot+2*ekintot,cv+2*ekintot);
+
+	t_cr = pow(mtot,2.5) / pow(2*ABS(ekintot+epottot),1.5);
+	printf("Crossing time = %f\n", t_cr);
+	
 }
 
 
@@ -474,8 +478,6 @@ int sumn1;                      /*  input:  number of values used to sum.. */
 real  sumx1,sumx2;            /*  input:  sum of X and X^2               */
 real  *mean,*sigma;           /*  output: mean X and dispersion in X     */
 {
-        double sqrt(), sqr();
-        
         *mean  = sumx1/(real)sumn1;                           
         *sigma = sqrt(sumx2/(real)sumn1 - sqr(*mean));
 }
@@ -493,7 +495,6 @@ radii(int n)
 /*      real halfmass_radius();                               */
         real radius, dr, drmin, r2, sum, half_sur_den_0;
         int    ntot, i, low, mid, high;
-        double sqrt(), sqr();
         
         sortptr (rad, idr, n);          /* sort radii in index array */
         if (Qr_h) {
