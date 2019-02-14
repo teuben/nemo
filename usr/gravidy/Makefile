@@ -12,7 +12,7 @@ clean:
 	rm -rf gravidy
 
 install: gravidy
-	(cd gravidy/src ; make pn; cp gravidy-cpu $(NEMOBIN)/gravidy)
+	(cd gravidy/src ; make clean pn $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)
 
 gravidy-view:
 	git clone https://gitlab.com/cmaureir/gravidy-view
@@ -22,5 +22,8 @@ ubuntu:
 
 
 NEMO_BFLAGS = "BOOSTFLAGS =-I$(NEMO)/opt/include -I$(NEMO)/opt/lib -lboost_program_options"
+NEMO_NVCC   = /test/usr/local/cuda/bin/nvcc
 install_gpu: gravidy
-	(cd gravidy/src ; make gpu $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)	
+	(cd gravidy/src ; \
+	make clean gpu NVCC=$(NEMO_NVCC) BOOSTFLAGS = "$(NEMO_BFLAGS)"; \
+	cp gravidy-cpu $(NEMOBIN)/gravidy)	
