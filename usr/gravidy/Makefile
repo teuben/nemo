@@ -19,3 +19,8 @@ gravidy-view:
 
 ubuntu:
 	sudo apt install libboost-all-dev
+
+
+NEMO_BFLAGS = "BOOSTFLAGS =-I$(NEMO)/opt/include -I$(NEMO)/opt/lib -lboost_program_options"
+install_gpu: gravidy
+	(cd gravidy/src ; make gpu $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)	
