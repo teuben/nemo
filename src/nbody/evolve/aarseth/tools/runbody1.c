@@ -20,11 +20,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <vectmath.h>
+#include <filestruct.h>
+
+#include <snapshot/snapshot.h>
+#include <snapshot/body.h>
+#include <snapshot/get_snap.c>
+
+
 string defv[] = {
     "in=\n            input file (optional - see nbody= ) ",
     "outdir=???\n     output run directory (required)",
 
-    "nbody=???\n      Total particle number (<= NMAX).",
+    "nbody=\n         Total particle number (<= NMAX) if in= not given",
     "nfix=1\n         Output frequency of data save or binaries; KZ(3 & 6)",
     "nrand=0\n        Random number sequence skip",
     "nrun=1\n         Run identification index",
@@ -50,8 +58,8 @@ string defv[] = {
       "11  Modification of ETA by tolerance QE.\n"
       "12  Initial parameters for binary orbit.\n"
       "13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE).\n"
-      "14  Adjustment of coordinates & velocities to c.m. condition.\n",
-     " 15  Use code units for tcrit/deltat",
+      "14  Adjustment of coordinates & velocities to c.m. condition.\n"
+      "15  Use code units for tcrit/deltat",
     
     "alphas=2.3\n     Power-law index for initial mass function",
     "body1=5.0\n      Maximum particle mass before scaling",
@@ -69,7 +77,7 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=2.0\n    9-feb-2019 PJT",
+    "VERSION=2.1\n    14-feb-2019 PJT",
     NULL,
 };
 
@@ -84,6 +92,26 @@ string usage="front end for Aarseth nbody1 N-body code";
 #define KZ_MER   8
 #define KZ_BIN  12
 #define KZ_COM  14
+
+int get_nbody(string filename)
+{
+  stream instr = stropen(filename,"r");
+  Body **btptr;
+  Body *btab = NULL;
+  int nbody = 0;
+  real tsnap;
+  real bits;
+  
+  get_history(instr);
+  if (!get_tag_ok(instr, SnapShotTag))
+    return -1;
+  //get_snap_parameters(instr, btptr, nbptr, tsptr, ifptr)
+  //get_snap_parameters(instr, btptr, &nbody, &tsnap, &bits);
+  get_snap(instr, &btab, &nbody, &tsnap, &bits);
+  dprintf(0,"get_nbody: %d %f %d\n",nbody,tsnap,bits);
+  
+  return nbody;
+}
 
 void nemo_main(void)
 {
@@ -102,7 +130,6 @@ void nemo_main(void)
     kstart = getiparam("kstart");
     tcomp =  getdparam("tcomp");
 
-    nbody = getiparam("nbody");
     nfix = getiparam("nfix");
     nrand = getiparam("nrand");
     nrun = getiparam("nrun");
@@ -135,7 +162,17 @@ void nemo_main(void)
     run_mkdir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
-    datstr = stropen(dname,"w");    
+    datstr = stropen(dname,"w");
+
+    if (hasvalue("in")) {
+      nbody = get_nbody(getparam("in"));
+      dprintf(0,"Grabbing nbody=%d\n",nbody);
+    } else {
+      if (hasvalue("nbody"))
+	nbody = getiparam("nbody");
+      else
+	error("nbody= needs to be specified");
+    }
 
     /*  New Run */
 
@@ -177,10 +214,15 @@ void nemo_main(void)
 	}
 	dprintf(0,"%s\n",runcmd);
         if (system(runcmd)) error("Error converting input data");
+	// @todo   grab nbody
     }
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
     run_sh(runcmd);
+    
+    sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1");
+    run_sh(runcmd);    
+    
   } else {
     error("kstart=%d not yet supported",kstart);
   }
