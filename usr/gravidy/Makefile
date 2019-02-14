@@ -21,7 +21,7 @@ ubuntu:
 	sudo apt install libboost-all-dev
 
 
-NEMO_BFLAGS = "BOOSTFLAGS =-I$(NEMO)/opt/include -I$(NEMO)/opt/lib -lboost_program_options"
+NEMO_BFLAGS = "BOOSTFLAGS =-I$(NEMO)/opt/include -L$(NEMO)/opt/lib -lboost_program_options"
 NEMO_NVCC   = /test/usr/local/cuda/bin/nvcc
 install_gpu: gravidy
 	(cd gravidy/src ; \
