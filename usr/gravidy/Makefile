@@ -1,3 +1,4 @@
+include $(NEMOLIB)/makedefs
 
 help:
 	@echo "install:         install NEMOBIN/gravidy"
@@ -27,3 +28,27 @@ install_gpu: gravidy
 	(cd gravidy/src ; \
 	make clean gpu NVCC=$(NEMO_NVCC) BOOSTFLAGS = "$(NEMO_BFLAGS)"; \
 	cp gravidy-cpu $(NEMOBIN)/gravidy)	
+
+
+
+# example runs
+
+NBODY = 128
+
+p128:
+	mkplummer p128 $(NBODY) seed=128
+
+
+run3:   p128
+	mkdir run3
+	snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f > run3/in
+	gravidy --input run3/in --output run3/run3 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
+	cat run3/run3.out.snapshot_0* | sed 's/# Time://' |\
+                tabtos - - time skip,m,pos,vel nbody=128 |\
+                csf - run3/OUT3.snap SnapShot
+
+run4:	p128
+	rungravidy p128 run4 eta=0.01 deltat=0.1 tcrit=10.0 eps=0.05
+
+cmp34:  run3 run4
+	snapcmp run3/OUT3.snap run4/OUT3.snap
