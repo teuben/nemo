@@ -17,12 +17,13 @@ NemoStones) <p>
 quadrupole corrections, for 10240 particles and 64 timesteps. <b>bench2</b> tests
 a more modern Treecode, this one is the O(N) version from Dehnen (2002?).
 Again 64 timesteps. <b>bench0</b> has been added to compare a tree code with a
- direct N-body code, also 64 timesteps.  <b>bench3</b> benchmarks the I/O and creation
-of a large (&gt;2GB) snapshot. 
+ direct N-body code, also 64 timesteps, but now for fewer particles to prevent
+the benchmark to dominate the whole series. <b>bench3</b> benchmarks the I/O and
+creation of a large (&gt;2GB) snapshot. <b>bench4</b> benchmarks an image operation.
+
 <h2><a name='sect2' href='#toc2'>Data</a></h2>
-Here are the commands to execute the benchmarks
-<p>
-<br>
+Here are the commands to execute the benchmarks, now the default in
+"cd $NEMO;make bench" <br>
 <pre>bench0:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time directcode nbody=10240
 bench1:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time hackcode1 nbody=10240
 bench2:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05
@@ -32,7 +33,7 @@ bench4:<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdmath "" - &rsquo;ranu(0,1)&rsquo; size
 and the data : <p>
 <br>
 <pre>bench0 (directcode)
-       I5/7200@2.5       47.7
+       I5/7200@2.5       47.7 
        I7/3630QM@3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;174.2  (nemo2: 
        I7/3770@3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;152.6
        P4/3.0            342.7
