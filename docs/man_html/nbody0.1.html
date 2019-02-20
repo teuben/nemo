@@ -9,50 +9,50 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-nbody0, nbody00 - direct summation Aarseth N-body integrator 
+nbody0, nbody00, nbody0h4 - direct summation Aarseth N-body integrator
+
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-nbody0
-in=snap_in out=snap_out [keyword=value ...] 
+nbody0 in=snap_in out=snap_out [keyword=value ...] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>nbody0</b> is the NEMO
-adaptation of version 0 (the <i>Micky Mouse</i> version) of Aarseth&rsquo;s N-body integrator,
-as published in Appendix 4B of Binney &amp; Tremaine (1987). It is a direct N-body
-integrator, <i>i.e.</i> for each particle it computes the force due to all other
-N-1 particles, hence the computational time grows approximately as N*N. Although
-also being referred to as a &rsquo;toy version&rsquo;, it is  a fully functional N-body
-integrator. <p>
-Each particle is followed with its own integration step - an
-essential feature when the dynamical times of different particles vary
-a lot. A complete description is given in: S.J. Aarseth, "Multiple Time Scales",
-ed. U.J. Brackhill &amp; B.I. Cohen, pp377. Orlando: Academic Press. (1985). <p>
-An important
-input parameter to the program is the accuracy parameter <i>eta</i> (see also
-<b>eta=</b> below). The timestep, <i>dt</i>, chosen for a given particle is related to
-the force, <i>F</i>, and its time derivatives by <i>dt = sqrt(eta * F / (d2Fdt2))</i>,
-which is a slight modification of the criterion given by Aarseth in the
-above mentioned reference (but see also <b>BUGS</b> below on academic cases like
-the <i>figure8</i> orbit). <p>
-A typical value of <i>eta = 0.02</i> usually conserves the energy
-better than one part in 10000 over one crossing time, in the absence of
-close encounters. <p>
-<b>nbody00</b> is the C version of <b>nbody0</b>,  based on the f2c
-translated code (and hence will look odd and ugly in places). It has more
-debug output (debug=1 and higher) and also fixes problems with orbits like
-the Figure8 orbit (see BUGS below). 
+<b>nbody0</b>
+is the NEMO adaptation of version 0 (the <i>Micky Mouse</i> version) of Aarseth&rsquo;s
+N-body integrator, as published in Appendix 4B of Binney &amp; Tremaine (1987).
+It is a direct N-body integrator, <i>i.e.</i> for each particle it computes the force
+due to all other N-1 particles, hence the computational time grows approximately
+as N*N. Although also being referred to as a &rsquo;toy version&rsquo;, it is  a fully
+functional N-body integrator. <p>
+Each particle is followed with its own integration
+step - an essential feature when the dynamical times of different particles
+vary a lot. A complete description is given in: S.J. Aarseth, "Multiple Time
+Scales", ed. U.J. Brackhill &amp; B.I. Cohen, pp377. Orlando: Academic Press. (1985).
+<p>
+An important input parameter to the program is the accuracy parameter <i>eta</i>
+(see also <b>eta=</b> below). The timestep, <i>dt</i>, chosen for a given particle is
+related to the force, <i>F</i>, and its time derivatives by <i>dt = sqrt(eta * F
+/ (d2Fdt2))</i>, which is a slight modification of the criterion given by Aarseth
+in the above mentioned reference (but see also <b>BUGS</b> below on academic cases
+like the <i>figure8</i> orbit). <p>
+A typical value of <i>eta = 0.02</i> usually conserves
+the energy better than one part in 10000 over one crossing time, in the
+absence of close encounters. <p>
+<b>nbody00</b> is the C version of <b>nbody0</b>,  based
+on the f2c translated code (and hence will look odd and ugly in places).
+It has more debug output (debug=1 and higher) and also fixes problems with
+orbits like the Figure8 orbit (see BUGS below). 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order when the keyword is also given 
+The following
+parameters are recognized in any order when the keyword is also given 
 <dl>
 
-<dt><b>in=<i>in_name</i></b> </dt>
-<dd>Input
-file in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format. Depending on how <b>nbody0</b> was compiled, other
-input formats are supported. [no default].  </dd>
+<dt><b>in=<i>in_name</i></b>
+</dt>
+<dd>Input file in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ format. Depending on how <b>nbody0</b> was compiled,
+other input formats are supported. [no default].  </dd>
 
 <dt><b>out=<i>out_name</i></b> </dt>
-<dd>Output file in snapshot
-format [no default]. </dd>
+<dd>Output file
+in snapshot format [no default]. </dd>
 
 <dt><b>eta=<i>value</i></b> </dt>
 <dd>Accurracy parameter, which automatically
@@ -161,31 +161,45 @@ nbody5    <tt> </tt>&nbsp;<tt> </tt>&nbsp;with regularization handling triples &
 nbody6     <tt> </tt>&nbsp;<tt> </tt>&nbsp;... for new parallel machine
 nbody7<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;... secret
 </pre>
-<h2><a name='sect9' href='#toc9'>Files</a></h2>
+<h2><a name='sect9' href='#toc9'>Nbody0h4</a></h2>
+On Sverre&rsquo;s CODES site, he also presents <b>nbody0</b>, a simple <i>Compact
+fourth-order Hermite block-step code</i>. We include it here as <b>nbody0h4</b>. This
+code has an unusual interface, in that it reads the input from standard
+input, the first line contains the usual <br>
+<pre>      N, ETA, DELTAT, TCRIT, EPS2
+</pre>(though note the softening EPS is entered in the square value). This is
+followed by <b>N</b> lines of m,x,y,z,vx,vy,vz for each of the particles each.
+At some point in the future we may provide a wrapper for this.  
+<h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>NEMO/src/nbody/evolve/aarseth/nbody0<tt> </tt>&nbsp;<tt> </tt>&nbsp;official source code within NEMO
 NEMO/usr/aarseth/                      <tt> </tt>&nbsp;<tt> </tt>&nbsp;SJA&rsquo;s other nbodyX versions (not
 all exported)
 </pre>
-<h2><a name='sect10' href='#toc10'>See Also</a></h2>
+<h2><a name='sect11' href='#toc11'>See Also</a></h2>
 <a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
+, <a href='runbody1.1.html'>runbody1(1NEMO)</a>
 , <a href='runbody2.1.html'>runbody2(1NEMO)</a>
-, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-, <a href='atos.1.html'>atos(1NEMO)</a>
+, <a href='gravidy.1.html'>gravidy(1NEMO)</a>
 ,
-<a href='stoa.1.html'>stoa(1NEMO)</a>
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='atos.1.html'>atos(1NEMO)</a>
+, <a href='stoa.1.html'>stoa(1NEMO)</a>
  <p>
-Binney, J. &amp; Tremaine, S. <i>Galactic Dynamics</i>. Princeton Unversity
-Press (1987), pp678. <p>
-S.J.Aarseth, 1972, p.373 in: "Gravitational N-Body Problem",
-IAU Colloquium #10, M.Lecar (Ed.), Reidel, Dordrecht. <p>
-S.J.Aarseth, 1985, p.377
-in: "Multiple Time Scales", U.J. Brackbill &amp; B.I. Cohen (Eds.), Academic Press,
-Orlando. <p>
-S.J. Aarseth, 2003, "Gravitational N-Body Simulations : Tools and
-Algorithms" (Cambridge Univ. Press). 
-<p> 
-<h2><a name='sect11' href='#toc11'>History</a></h2>
+Binney, J. &amp; Tremaine, S. <i>Galactic
+Dynamics</i>. Princeton Unversity Press (1987), pp678. <p>
+S.J.Aarseth, 1972, p.373
+in: "Gravitational N-Body Problem", IAU Colloquium #10, M.Lecar (Ed.), Reidel,
+Dordrecht. <p>
+S.J.Aarseth, 1985, p.377 in: "Multiple Time Scales", U.J. Brackbill
+&amp; B.I. Cohen (Eds.), Academic Press, Orlando. <p>
+S.J. Aarseth, 1999. "From NBODY1
+to NBODY6: The Growth of an Industry" <a href='http://adsabs.harvard.edu/abs/1999PASP..111.1333A'>http://adsabs.harvard.edu/abs/1999PASP..111.1333A</a>
+
+<p>
+S.J. Aarseth, 2003, "Gravitational N-Body Simulations : Tools and Algorithms"
+(Cambridge Univ. Press). 
+<h2><a name='sect12' href='#toc12'>History</a></h2>
 <br>
 <pre>30-jun-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created + NEMO interfaces to fortran source<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 3-jul-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 mods to f2c interface, name of keywords       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -197,6 +211,7 @@ Algorithms" (Cambridge Univ. Press).
 11-feb-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3a fixed array index bug for higher order term<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-jan-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 added reset= to fix small deltat problem/bug<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 24-feb-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 documented the academic figure8 orbit problem, fixed in nbody00<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+9-feb-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;added some docs on nbody0h4<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -211,9 +226,10 @@ Algorithms" (Cambridge Univ. Press).
 <li><a name='toc6' href='#sect6'>Storage</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>Genealogy</a></li>
-<li><a name='toc9' href='#sect9'>Files</a></li>
-<li><a name='toc10' href='#sect10'>See Also</a></li>
-<li><a name='toc11' href='#sect11'>History</a></li>
+<li><a name='toc9' href='#sect9'>Nbody0h4</a></li>
+<li><a name='toc10' href='#sect10'>Files</a></li>
+<li><a name='toc11' href='#sect11'>See Also</a></li>
+<li><a name='toc12' href='#sect12'>History</a></li>
 </ul>
 </body>
 </html>

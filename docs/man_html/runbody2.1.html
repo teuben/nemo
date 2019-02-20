@@ -16,91 +16,95 @@ runbody2 - Ahmad-Cohen N-body code
 nbody2   &lt; nbody2.in
 </pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>runbody2</b> is a frontend to the NBODY2 fortran program. It  (optionally)
-creates a run directory, prepares a parameter input file, and optionally
-input snapshot data, and runs the NBODY2 program. <p>
-Output snapshots are by
-default not created, and must be  turned on with a options flag (see <b>kz=</b>
-below). All of the input parameter names are the same as their counterpart
-in <b>nbody2</b>. 
+<b>runbody2</b> is a frontend to the NBODY2 fortran program, running
+the code in a run directory where all files are stored. <p>
+The new version
+2.x interface tries to mimic to run nbody1 in virial units with a default
+input and output. In previous versions the defaults were more geared towards
+running the classic interface where data were scaled and times were measured
+in crossing times, making comparisons with other codes in NEMO much harder.
+This however means it is now more work to make nbody1 run in classic mode.
+Parameters names and meaning have not changed, except for the introduction
+of kz(19), to work in code (virial) units. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order
-if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file (optional, see <b>nbody=</b> to generate
-your own input  data on the fly). If input data are given, it forces <a href='KZ.4.html'>KZ(4)</a>
-=2
-(see  below).  Can also be a directory, in which case the input file for
-a restart run is assumed to be the default (fort.4)  in native  format. Default:
-not used. </dd>
+<dd>input file
+(optional, see <b>nbody=</b> to generate your own input  data on the fly). If input
+data are given, it forces <a href='KZ.4.html'>KZ(4)</a>
+=2 (see  below).  Can also be a directory,
+in which case the input file for a restart run is assumed to be the default
+(fort.4)  in native  format. Default: not used. </dd>
 
 <dt><b>outdir=</b> </dt>
-<dd>Output run directory. This directory should not exist,
-although can be overriden with NEMO&rsquo;s standard <b>error=</b> system keyword. No
-default. </dd>
+<dd>Output run directory.
+This directory should not exist, although can be overriden with NEMO&rsquo;s standard
+<b>error=</b> system keyword. No default. </dd>
 
 <dt><b>nbody=</b> </dt>
-<dd>Total particle number. The maximum value (NMAX) is compiled
-into the NBODY2 program. Note that even if <i>in=</i> is supplied, this parameter
-is needed. No default. </dd>
+<dd>Total particle number. The maximum
+value (NMAX) is compiled into the NBODY2 program. Note that even if <i>in=</i>
+is supplied, this parameter is needed. No default. </dd>
 
 <dt><b>nfix=</b> </dt>
-<dd>Output frequency of data save or binaries; KZ(3
-&amp; 6) [Default: 1] </dd>
+<dd>Output frequency
+of data save or binaries; KZ(3 &amp; 6) [Default: 1] </dd>
 
 <dt><b>nrand=</b> </dt>
-<dd>Random number sequence skip. [Default: 0] </dd>
+<dd>Random number sequence
+skip. [Default: 0] </dd>
 
-<dt><b>nnbmax=</b>
-</dt>
-<dd>Maximum number of neighbours. Should be less then LMAX, which  is compiled
-into the NBODY2 program. [Default: 40] </dd>
+<dt><b>nnbmax=</b> </dt>
+<dd>Maximum number of neighbours. Should be less then
+LMAX, which  is compiled into the NBODY2 program. [Default: 40] </dd>
 
 <dt><b>nrun=</b> </dt>
-<dd>Run identification index. [Default:
-1] </dd>
+<dd>Run
+identification index. [Default: 1] </dd>
 
 <dt><b>etai=</b> </dt>
-<dd>Time-step parameter for irregular force polynomial. [Default: 0.02]
-</dd>
+<dd>Time-step parameter for irregular
+force polynomial. [Default: 0.02] </dd>
 
 <dt><b>etar=</b> </dt>
-<dd>Time-step parameter for regular force polynomial. [Default: 0.04] </dd>
+<dd>Time-step parameter for regular force
+polynomial. [Default: 0.04] </dd>
 
-<dt><b>rs0=</b>
-</dt>
-<dd>Initial radius of neighbour sphere. [Default: 1] </dd>
+<dt><b>rs0=</b> </dt>
+<dd>Initial radius of neighbour sphere. [Default:
+1] </dd>
 
 <dt><b>deltat=</b> </dt>
-<dd>Output time interval
-in units of the crossing. [Default: 0.25] </dd>
+<dd>Output time interval in units of the crossing. [Default: 0.25]
+</dd>
 
 <dt><b>tcrit=</b> </dt>
-<dd>Termination time in units
-of the crossing time. [Default: 5] </dd>
+<dd>Termination time in units of the crossing time. [Default: 5] </dd>
 
-<dt><b>qe=</b> </dt>
-<dd>Energy tolerance (restart if DE/E
-&gt; 5*QE &amp; <a href='KZ.2.html'>KZ(2)</a>
+<dt><b>qe=</b>
+</dt>
+<dd>Energy tolerance (restart if DE/E &gt; 5*QE &amp; <a href='KZ.2.html'>KZ(2)</a>
  &gt; 1) [Default: 2e-5] </dd>
 
-<dt><b>eps=</b> </dt>
-<dd>Potential softening parameter    
- [Default: 0.01] </dd>
+<dt><b>eps=</b>
+</dt>
+<dd>Potential softening parameter      [Default: 0.01] </dd>
 
 <dt><b>kz=</b> </dt>
-<dd>Non-zero options for alternative paths (see below) 
-[Default: 1,2,0::4,1::2,0::2,1] <br>
+<dd>Non-zero options for
+alternative paths (see below)  [Default: 1,2,1,2,0,0,0,0,0,0,1,0,0,0,0,1,0,0,1,0]
+<br>
 <pre> 1  <tt> </tt>&nbsp;<tt> </tt>&nbsp;COMMON save on unit 1 at end of run (=2: every 100*NMAX steps) [1]
  2  <tt> </tt>&nbsp;<tt> </tt>&nbsp;COMMON save on unit 2 at output (=1); restart if DE/E &gt; 5*QE (=2) [2]
- 3  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Basic data written to unit 3 at output time (frequency NFIX) [0]
- 4 <tt> </tt>&nbsp;<tt> </tt>&nbsp;Initial conditions on unit 4 (=1: output; =2: input) [0]
+ 3  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Basic data written to unit 3 at output time (frequency NFIX) [1]
+ 4 <tt> </tt>&nbsp;<tt> </tt>&nbsp;Initial conditions on unit 4 (=1: output; =2: input) [2]
  5  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Initial conditions (=0: uniform &amp; isotropic; =1: Plummer  model) [0]
  6  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Output of significant binaries (=2: frequency NFIX) [0]
- 7  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types) [1]
- 8  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Core radius &amp; density centre (N &gt; 20 only) [1]
+ 7  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Lagrangian radii (=1: unit 6; =2: unit 7; =3: both types) [0]
+ 8  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Core radius &amp; density centre (N &gt; 20 only) [0]
  9  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Individual bodies printed at output time (MIN(5**KZ(9),N)) [0]
  10  <tt> </tt>&nbsp;<tt> </tt>&nbsp;No unique density centre (skips velocity modification of RS(I)) [0]
  11  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Modification of ETAI &amp; ETAR by tolerance QE [1]
@@ -109,10 +113,10 @@ of the crossing time. [Default: 5] </dd>
  14  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Skip full predictor loop if NNB &gt; KZ(14) = &lt;NNB&gt; &amp; KZ(14) &gt; [0]
  15  <tt> </tt>&nbsp;<tt> </tt>&nbsp;External potential (=1: Plummer model; =2: logarithmic potential)
 [0]
- 16  <tt> </tt>&nbsp;<tt> </tt>&nbsp;No scaling of initial conditions [0]
+ 16  <tt> </tt>&nbsp;<tt> </tt>&nbsp;No scaling of initial conditions [1]
  17  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Generation of two subsystems (merger experiment) [0]
  18  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Adjustment of coordinates &amp; velocities to c.m. condition [0]
- 19  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Not used at present [0]
+ 19  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Use code units for tcrit/deltat [1]
  20  <tt> </tt>&nbsp;<tt> </tt>&nbsp;Not used at present [0]
 </pre></dd>
 
@@ -208,6 +212,7 @@ AuthorPeter Teuben Update History
 15-jul-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 out= now outdir=, nbody= now required value<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 5-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;readying for new release<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 using fullname for in=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+9-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 better defaults for snapshot input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

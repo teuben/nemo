@@ -197,12 +197,16 @@ layout annotator (see also <a href='layout.5.html'><i>layout(5NEMO)</i></a>
 ) be called.  [<b>f</b>] </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-tab= doesn&rsquo;t
-work properly with multiple columns 
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
-Here is an example working
-with layout files.  <br>
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<a href='tabhist.1.html'>tabhist(1NEMO)</a>
+,
+<a href='snapplot.1.html'>snapplot(1NEMO)</a>
+ 
+<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
+tab= doesn&rsquo;t work properly with multiple columns 
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
+Here
+is an example working with layout files.  <br>
 <pre>  % nemoinp 1:20 | tabmath - -  &rsquo;ranu(0,1),ranu(0,1)&rsquo; all &gt; ran.tab
   % tabmath ran.tab - &rsquo;2+%1*16,2+%2*16,0.2&rsquo; all | awk &rsquo;{print "circle",$0}&rsquo; &gt; ran.layout
   % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
@@ -227,7 +231,7 @@ http://www.star.bris.ac.uk/~mbt/stilts/
 AuthorPeter Teuben Files
 ~/src/kernel/tab<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabplot.c
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>25-nov-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 - created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-nov-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 deleted nmax= by using file_lines()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -252,12 +256,13 @@ AuthorPeter Teuben Files
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Bugs</a></li>
-<li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Bugs</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

@@ -16,26 +16,33 @@ runbody1, nbody1 - (frontend to) Aarseth N-body code
 nbody1   &lt; nbody1.in
 </pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>runbody1</b> is a frontend to the NBODY1 fortran program.  <p>
-Output
-snapshots are by default not created, and must be  turned on with a options
-flag (see <b>kz=</b> below). All of the input parameter names are the same as their
-counterpart in the NBODY1 program. 
+<b>runbody1</b> is a NEMO frontend to Aarseth&rsquo;s NBODY1 (fortran) program,
+running the code in a run directory where all files are stored. <p>
+The new
+version 2.x interface tries to mimic to run NBODY1 in virial units with
+a default input and output. In previous versions the defaults were more
+geared towards running the classic interface where data were scaled and
+times were measured in crossing times, making comparisons with other codes
+in NEMO much harder. This however means it is now more work to make NBODY1
+run in classic mode. Parameters names and meaning have not changed, except
+for the introduction of kz(15), to work in code (virial) units. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file (optional,
-see <b>nbody=</b> to generate your own input  data on the fly). If input data are
-given, you must also set <a href='KZ.4.html'>KZ(4)</a>
-=2 (see  below).   Default: not used. </dd>
+<dd>input file (optional, see <b>nbody=</b> to generate your own input
+ data on the fly). If input data are given, you must also set <a href='KZ.4.html'>KZ(4)</a>
+=2 (see
+ below).   WARNING:  The input snapshot will be mass-weight centered before
+the integration started by NBODY1. Default: not used. </dd>
 
-<dt><b>outdir=</b>
-</dt>
-<dd>Output run directory. This directory should not exist, although can be overriden
-with NEMO&rsquo;s standard <b>error=</b> system keyword. No default. </dd>
+<dt><b>outdir=</b> </dt>
+<dd>Output run
+directory. This directory should not exist, although can be overriden with
+NEMO&rsquo;s standard <b>error=</b> system keyword. No default. </dd>
 
 <dt><b>nbody=</b> </dt>
 <dd>** Total particle
@@ -80,23 +87,23 @@ if DE/E &gt; 5*QE &amp; <a href='KZ.2.html'>KZ(2)</a>
 
 <dt><b>kz=</b> </dt>
 <dd>** Non-zero options for alternative paths (see below)
- [Default: 1,0,0,0,1,1,0,0,0,0,0,0,0,0,0] <br>
+ [Default: 1,2,1,2,0,0,0,0,0,1,1,0,0,0,1] <br>
 <pre>   1  COMMON save on unit 1 if TCOMP &gt; CPU or if TIME &gt; TCRIT. [1]
    2  COMMON save on unit 2 at output (=1); restart if DE/E &gt; 5*QE (=2).
-[0]
-   3  Basic data written to unit 3 at output time (frequency NFIX). [0]
-   4  Initial conditions on unit 4 (=1: output; =2: input). [0]
-   5  Initial conditions (=0: uniform &amp; isotropic; =1: Plummer). [1]
-   6  Output of significant binaries. [1]
+[2]
+   3  Basic data written to unit 3 at output time (frequency NFIX). [1]
+   4  Initial conditions on unit 4 (=1: output; =2: input). [2]
+   5  Initial conditions (=0: uniform &amp; isotropic; =1: Plummer). [0]
+   6  Output of significant binaries. [0]
    7  Output of movie frames on unit 7. [0]
    8  Generation of two subsystems (merger experiment). [0]
    9  Individual bodies printed at output time (MIN(5**KZ9,N)). [0]
-  10  No scaling of initial conditions. [0]
-  11  Modification of ETA by tolerance QE. [0]
+  10  No scaling of initial conditions. [1]
+  11  Modification of ETA by tolerance QE. [1]
   12  Initial parameters for binary orbit. [0]
   13  Escaper removal (R &gt; 2*RTIDE; RTIDE = 10*RSCALE). [0]
   14  Adjustment of coordinates &amp; velocities to c.m. condition. [0]
-  15  Not used at present [0]
+  15  Use code units for tcrit/deltat [1]
 </pre></dd>
 
 <dt><b>alphas=</b> </dt>
@@ -152,7 +159,7 @@ computing time alotted. </dd>
 Scaling can cause output to become out of bounds.
 <p>
 Coding the the input-order logic in the frontend program can be hazardous
-to your health. It will depend on how the nbody1 main program is structured.
+to your health. It will depend on how the NBODY1 main program is structured.
 
 <h2><a name='sect5' href='#toc5'>Input</a></h2>
 Order of input lines in "nbody1.in" for a new run (KSTART=1) <br>
@@ -194,6 +201,7 @@ Peter Teuben
 <pre>4-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 documented, and changed out= to outdir=, n= to nbody= PJT
 17-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1a fixed bug when in= was specified
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 using fullname for in=
+7-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 better defaults for snapshot input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
