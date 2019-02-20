@@ -1,4 +1,4 @@
-.TH U3TOS 1NEMO "4 March 2006"
+.TH U3TOS 1NEMO "19 February 2019"
 .SH NAME
 u3tos \- Convert NBODY unit 3 output data to snapshot
 .SH SYNOPSIS
@@ -46,10 +46,10 @@ reading data that were created on a machine that had the
 opposite endianism from the one you're using this program one.
 By default no byte swapping is performed.
 .TP
-\fBmode=1|2|4\fP
+\fBmode=1|2|4|6\fP
 Which of the nbodyX style of output to support. Allowed are 1 and 2 (identical
-actually) and 4 (which also outputs rho and phi,and an addition key for each
-particle). Default: 1
+actually), 4 (which also outputs rho and phi,and an addition key for each
+particle), and 6. Default: 1
 .TP
 \fBheader=|4|8\fP
 Header size of the fortran unformatted data. This is 4 (old fortran) or 8 (modern
@@ -77,5 +77,6 @@ nbody1(NEMO), runbody4(1NEMO), unfio(1NEMO), u4tos(1NEMO) stou4(1NEMO), snapshot
 10-jun-95	V1.1c  bug in alen implementation fixed   	PJT
 1-mar-06	V1.2 nbody4 support	PJT
 4-mar-06	V1.4 header= has now a blank default	PJT
+19-feb-10	V1.6 added support for nbody6++ (mode=6)	PJT
 .fi
 
