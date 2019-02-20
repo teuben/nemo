@@ -160,8 +160,32 @@ Order of input lines in "nbody1.in" for a new run (KSTART=1)
       NFRAME DELTAF               KZ(7).GT.0              SCALE
       XCM ECC                     KZ(8).GT.0              SUBSYS
 .fi
+.SH CAVEATS
+The input snapshot is (mass-weighted) centered before integration is started.
+Not clear why kz(14) still gives some different answers.
+.PP
+By decreasing TCRIT, you \fIobserve\fP the integrations at finer details, thus
+re-syncing all particles again. This will have an effect on orbits
+.SH EXAMPLES
+If you want to use runnbody1 as a NEMO tool with snapshots in and out, here
+is an example with a 128-body plummer sphere:
+.nf
+   mkplummer p128 128
+   runbody1 p128 run1 deltat=0.1 tcrit=10
+.fi
+This will create a run1/OUT3.snap. Code units are now used, not crossing time units.
+
+.PP
+If however you want to use the more original NBODY1 flavored run, pay attention to the kz= vector
+as the default will not suffice anymore.
+.nf
+   runbody1 outdir=run2 nbody=128 deltat=0.1 tcrit=10 kz=1,2,1,1,1
+.fi
+Note that requesting tcript=10 you will see the final snapshot written at time=28.2843
+because the crossing time is about 2.828 and tcrit is measured in terms of crossing times,
+as opposed to code times for the default run with kz(15)=1.
 .SH SEE ALSO
-nbody0(1NEMO), runbody2(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO)
+nbody0(1NEMO), runbody2(1NEMO), runbody4(1NEMO), runbody6(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO)
 .SH FILES
 .nf
 .ta +3i
@@ -183,4 +207,5 @@ Peter Teuben
 17-mar-04	V1.1a fixed bug when in= was specified
 17-mar-06	V1.2 using fullname for in=
 7-feb-2019	V2.0 better defaults for snapshot input	PJT
+14-feb-2019	V2.1 default run now computes nbody= and converts to snapshot	PJT
 .fi
