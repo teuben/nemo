@@ -37,14 +37,14 @@ string defv[] = {
     "etai=0.02\n      Time-step parameter for irregular force polynomial",
     "etar=0.02\n      Time-step parameter for regular force polynomial",
     "rs0=0.1\n        Initial guess for all radii of neighbor spheres",
-    "dtadj=2.0\n      Time interval for parameter adjustment and energy check",
+    "dtadj=0.25\n     Time interval for parameter adjustment and energy check",
     "deltat=0.25\n    Output time interval",
     "tcrit=10.0\n     Termination time",
     "qe=2e-5\n        Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1)",
     "rbar=1.0\n       mean radius of system",
     "zmbar=0.5\n      mean mass of system, in solar units",
 
-    "kz=0 0 1 0 0 0 5 0 0 0  0 0 0 0 1 0 0 0 0 0  1 2 2 0 0 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0  0 0 0 0 0 0 0 0 0 0\n",
+    "kz=0 0 1 0 0 0 5 0 0 1  0 0 0 0 2 0 0 0 0 0  1 2 2 0 0 2 0 0 0 2  0 0 2 0 0 0 1 0 0 0  0 0 0 0 0 0 0 0 0 0\n",
       "Non-zero options for alternative paths (see below)\n"
       "       1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).\n"
       "       2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
@@ -100,13 +100,13 @@ string defv[] = {
       "    # 41..50  TBD",
     
 
-    "dtmin=1e-5\n     time-step criterion for regularization search",
-    "rmin=1e-4\n      distance criterion for regularization search",
-    "etau=0.2\n       ",
+    "dtmin=1e-4\n     time-step criterion for regularization search",
+    "rmin=1e-3\n      distance criterion for regularization search",
+    "etau=0.1\n       ",
     "eclose=1.0\n     ",
     "gmin=1e-6\n      ",
     "gmax=0.001\n     ",
-    "smax=\n          ",
+    "smax=0.25\n      ",
 
     "alpha=2.3\n      Power-law index for initial mass function",
     "body1=10.0\n     Maximum particle mass before scaling",
@@ -146,7 +146,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.1\n    19-feb-2019 PJT",
+    "VERSION=0.2\n    19-feb-2019 PJT",
     NULL,
 };
 
@@ -212,7 +212,7 @@ void nemo_main(void)
   for (k=0; k<KZ_MAX; k++) {
     if (indexparam("KZ",k+1)) {
       dprintf(0,"KZ %d=%d\n",k+1,getiparam_idx("KZ",k+1));
-	kz[k] = getiparam_idx("KZ",k+1);
+      kz[k] = getiparam_idx("KZ",k+1);
     }
   }
 
@@ -304,25 +304,18 @@ void nemo_main(void)
     if (kz[7] == 1 || kz[7] == 3)
       fprintf(datstr,"%g %g %g %g 0 0 0 \n",semi,ecc,ratio,range);
 
+    fprintf(datstr,"# this last bogus line should not bother nbody6++\n");
 
     strclose(datstr);
 
     run_cd(rundir);
 
-
     histr = stropen("history","w");
     put_history(histr);
     strclose(histr);
 
-    /*
-     * two options here: the snapshot can be written in ascii, and read
-     * or stou4 can be used, thereby preserving more digits reliably....
-     * in some future version this will be aligned with nbody1 and 2
-     * or vice versa....
-     */
-
     if (hasvalue("in")) {
-      dprintf(0,"Using ascii printout with format=%s to convert data for nbody6\n",fmt);
+      dprintf(1,"Using ascii printout with format=%s to convert data for nbody6\n",fmt);
       sprintf(fmt7,"%s %s %s %s %s %s %s\n",fmt,fmt,fmt,fmt,fmt,fmt,fmt);
       outstr = stropen("dat.10","w");
       for (bp=btab; bp<btab+nbody; bp++)
@@ -335,6 +328,10 @@ void nemo_main(void)
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
     run_sh(runcmd);
+
+    sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 ; rm OUT3");
+    run_sh(runcmd);
+    
   } else {
     error("kstart=%d not yet supported for NBODY6++",kstart);
   }
