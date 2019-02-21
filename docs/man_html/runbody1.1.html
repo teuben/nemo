@@ -175,15 +175,40 @@ Order of input lines in "nbody1.in" for a new run (KSTART=1) <br>
       NFRAME DELTAF               KZ(7).GT.0              SCALE
       XCM ECC                     KZ(8).GT.0              SUBSYS
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+The input snapshot is (mass-weighted) centered before integration
+is started. Not clear why kz(14) still gives some different answers. <p>
+By decreasing
+TCRIT, you <i>observe</i> the integrations at finer details, thus re-syncing all
+particles again. This will have an effect on orbits 
+<h2><a name='sect7' href='#toc7'>Examples</a></h2>
+If you want
+to use runnbody1 as a NEMO tool with snapshots in and out, here is an example
+with a 128-body plummer sphere: <br>
+<pre>   mkplummer p128 128
+   runbody1 p128 run1 deltat=0.1 tcrit=10
+</pre>This will create a run1/OUT3.snap. Code units are now used, not crossing
+time units. 
+<p> <p>
+If however you want to use the more original NBODY1 flavored
+run, pay attention to the kz= vector as the default will not suffice anymore.
+<br>
+<pre>   runbody1 outdir=run2 nbody=128 deltat=0.1 tcrit=10 kz=1,2,1,1,1
+</pre>Note that requesting tcript=10 you will see the final snapshot written
+at time=28.2843 because the crossing time is about 2.828 and tcrit is measured
+in terms of crossing times, as opposed to code times for the default run
+with kz(15)=1. 
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='nbody0.1.html'>nbody0(1NEMO)</a>
 , <a href='runbody2.1.html'>runbody2(1NEMO)</a>
+, <a href='runbody4.1.html'>runbody4(1NEMO)</a>
+,
+<a href='runbody6.1.html'>runbody6(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
-,
-<a href='stou4.1.html'>stou4(1NEMO)</a>
+, <a href='stou4.1.html'>stou4(1NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>$NEMO/src/nbody/evolve/aarseth/nbody1<tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody code
 $NEMO/src/nbody/evolve/aarseth/tools<tt> </tt>&nbsp;<tt> </tt>&nbsp;various tools code
@@ -194,14 +219,15 @@ $outdir/fort.4                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;restart d
 $outdir/fort.7                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;formatted frame files (option KZ(7))
 $outdir/OUT3                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;particle dump (see u3tos(1NEMO))
 </pre>
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>4-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 documented, and changed out= to outdir=, n= to nbody= PJT
 17-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1a fixed bug when in= was specified
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 using fullname for in=
 7-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 better defaults for snapshot input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 default run now computes nbody= and converts to snapshot<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -213,10 +239,12 @@ Peter Teuben
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Bugs</a></li>
 <li><a name='toc5' href='#sect5'>Input</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
+<li><a name='toc7' href='#sect7'>Examples</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Update History</a></li>
 </ul>
 </body>
 </html>
