@@ -15,15 +15,10 @@ nbody6:
 	(mkdir nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
 
 # just an example on a simple laptop
-install_nbody6_sse:
-	(cd nbody6/GPU2 ;\
-	make sse ;\
-	cp run/nbody7.sse $(NEMOBIN)/nbody6.sse)
-
+# note the order of building appears to matter !!!
 install_nbody6:
-	(cd nbody6/Ncode ;\
-	make ;\
-	cp nbody6 $(NEMOBIN)/nbody6)
+	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN)/nbody6.sse)
+	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN)/nbody6)
 
 
 nbody6++: Nbody6ppGPU
