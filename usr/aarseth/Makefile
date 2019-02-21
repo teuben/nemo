@@ -27,8 +27,6 @@ nbody6++: Nbody6ppGPU
 Nbody6ppGPU:
 	git clone $(URL2)
 
-clean:
-	rm -rf gravidy
 
 # just an example on a simple laptop
 install_nbody6++:
@@ -41,22 +39,14 @@ install_nbody6:
 
 # example runs
 
-NBODY = 128
+NBODY = 1024
 
-p128:
-	mkplummer p128 $(NBODY) seed=128
+p.snap:
+	mkplummer p.snap $(NBODY) seed=123
 
 
-run3:   p128
-	mkdir run3
-	snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f > run3/in
-	gravidy --input run3/in --output run3/run3 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
-	cat run3/run3.out.snapshot_0* | sed 's/# Time://' |\
-                tabtos - - time skip,m,pos,vel nbody=128 |\
-                csf - run3/OUT3.snap SnapShot
+run1:   p.snap
+	runbody6 p.snap run1 tcrit=1 deltat=0.1
 
-run4:	p128
-	rungravidy p128 run4 eta=0.01 deltat=0.1 tcrit=10.0 eps=0.05
-
-cmp34:  run3 run4
-	snapcmp run3/OUT3.snap run4/OUT3.snap
+run2:   p.snap
+	runbody6 p.snap run2 tcrit=1 deltat=0.1 exe=nbody6 nbody6=0
