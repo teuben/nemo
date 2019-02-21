@@ -26,7 +26,7 @@ string defv[] = {
     "in=\n            input file (optional - see nbody= ) ",
     "outdir=???\n     output run directory (required)",
 
-    "nbody=1000\n     Total particle number (<= NMAX).",
+    "nbody=1000\n     Total particle number (<= NMAX) if no in= given",
     "nfix=1\n         Output frequency of data save or binaries; KZ(3 & 6)",
     "ncrit=5\n        Final particle number (alternative termination criterion)",
     "nrand=123\n      Random number seed",
@@ -120,9 +120,9 @@ string defv[] = {
     /* some kz(5) > 0 options here: APO,ECC,N2,SCALE SEMI, M1,M2,ZMH,RCUT */
 
     "q=0.5\n          Virial ratio (q=0.5 for virial equilibrium)",
-    "vxrot=\n         XY velocity scaling",
-    "vzrot=\n         Z velocity scaling",
-    "rtide=\n         Unscaled tidal radius for kz(14)=2 and kz(22) >= 2",
+    "vxrot=1\n         XY velocity scaling",
+    "vzrot=1\n         Z velocity scaling",
+    "rtide=1\n         Unscaled tidal radius for kz(14)=2 and kz(22) >= 2",
 
     /* some more:   GMG,RG0 if kz(14)=2 or 3*/
 
@@ -145,8 +145,10 @@ string defv[] = {
 
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
+    "exe=nbody6++\n   Name of the executable",
+    "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
 
-    "VERSION=0.2\n    19-feb-2019 PJT",
+    "VERSION=0.3\n    19-feb-2019 PJT",
     NULL,
 };
 
@@ -174,10 +176,11 @@ void nemo_main(void)
   real apo, ecc, dmin, semi, scale, m1, m2, ratio, range;
   Body *bp, *btab = NULL;
 
-  string exefile = "nbody6";
+  string exefile = getparam("exe");
   string parfile = "nbody6.in";
   string rundir = getparam("outdir");
   string fmt = getparam("format");
+  int nbody6_mode = getiparam("nbody6");
   string infile;
   char dname[256], runcmd[256], fmt7[256];
   stream datstr, histr, instr, outstr;
@@ -225,7 +228,7 @@ void nemo_main(void)
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
     strclose(instr);
     if (kz[21] == 0) {
-      warning("patching kz[22]=1 since in= was given");
+      warning("patching kz[22]=2 since in= was given");
       kz[21] = 2;
     }
   } else
@@ -279,17 +282,28 @@ void nemo_main(void)
     /*  New Run */
   
   if (kstart == 1) {
+
+    if (nbody6_mode == 1)
+      fprintf(datstr,"%d 999999.9 1.E6 40 40 640\n",kstart);
+    else
+      fprintf(datstr,"%d 999999.9\n",kstart);
+
+    if (nbody6_mode == 1)
+      fprintf(datstr,"%d %d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun,ncomm);
+    else
+      fprintf(datstr,"%d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun);
     
-    fprintf(datstr,"%d 999999.9 1.E6 40 40 640\n",kstart);
-    fprintf(datstr,"%d %d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun,ncomm);
-    fprintf(datstr,"%g %g %g %g %g %g %g %g %g\n",etai,etar,rs0,dtadj,deltat,tcrit,qe,rbar,zmbar);
+    fprintf(datstr,"%g %g %g %g %g %g %g %g %g\n",etai,etar,rs0,dtadj,deltat,tcrit,qe,rbar,zmbar); // ok
 
     for (k=0; k<KZ_MAX; k++) {
       fprintf(datstr,"%d ",kz[k]);
       if (k%10 == 9)     fprintf(datstr,"\n");
     }
-
-    fprintf(datstr,"%g %g %g %g %g %g %g\n",dtmin,rmin,etau,eclose,gmin,gmax,smax);
+    if (nbody6_mode == 1)
+      fprintf(datstr,"%g %g %g %g %g %g %g\n",dtmin,rmin,etau,eclose,gmin,gmax,smax);
+    else
+      fprintf(datstr,"%g %g %g %g %g %g\n",dtmin,rmin,etau,eclose,gmin,gmax);
+    
     fprintf(datstr,"%g %g %g %d %d %g %g %g\n",alpha,body1,bodyn,nbin0,nhi0,zmet,epoch0,dtplot);
 
     if (kz[4] == 2)
@@ -299,12 +313,15 @@ void nemo_main(void)
     else if (kz[4] == 4) 
       fprintf(datstr,"%g %g %g %g\n",semi,ecc,m1,m2);
 
-    fprintf(datstr,"%g 0  0 0 \n",q);
+    if (nbody6_mode == 1)
+      fprintf(datstr,"%g 0  0 0 \n",q); 
+    else
+      fprintf(datstr,"%g 1.0 1.0 1.0 %g\n",q,smax);    // READ (5,*)  Q, VXROT, VZROT, RTIDE, SMAX
 
     if (kz[7] == 1 || kz[7] == 3)
       fprintf(datstr,"%g %g %g %g 0 0 0 \n",semi,ecc,ratio,range);
 
-    fprintf(datstr,"# this last bogus line should not bother nbody6++\n");
+    fprintf(datstr,"# this last bogus line should not bother nbody6(++) as it's not supposed to be read\n");
 
     strclose(datstr);
 
@@ -317,7 +334,10 @@ void nemo_main(void)
     if (hasvalue("in")) {
       dprintf(1,"Using ascii printout with format=%s to convert data for nbody6\n",fmt);
       sprintf(fmt7,"%s %s %s %s %s %s %s\n",fmt,fmt,fmt,fmt,fmt,fmt,fmt);
-      outstr = stropen("dat.10","w");
+      if (nbody6_mode == 1)
+	outstr = stropen("dat.10","w");
+      else
+	outstr = stropen("fort.10","w");
       for (bp=btab; bp<btab+nbody; bp++)
 	fprintf(outstr,fmt7,
 		Mass(bp),
@@ -329,10 +349,13 @@ void nemo_main(void)
     sprintf(runcmd,"%s < %s",exefile,parfile);
     run_sh(runcmd);
 
-    sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 ; rm OUT3");
-    run_sh(runcmd);
+    if (nbody6_mode == 1)
+      sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 ; rm OUT3");
+    else
+      sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=6");
+    run_sh(runcmd);    
     
   } else {
-    error("kstart=%d not yet supported for NBODY6++",kstart);
+    error("kstart=%d not supported for NBODY6(++)",kstart);
   }
 }
