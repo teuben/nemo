@@ -88,34 +88,42 @@ and output datasets will now have the same shape and dimension.  [Default:
 outside the range of the axis. This can easily happen for noisy data. Default:
 false. </dd>
 
-<dt><b>peak=N</b> </dt>
-<dd>For <b>mom=3,30-34</b> where it finds the peak, this allows you to
-find the N-th peak instead of the first. This is achieved by visiting each
-peak, and assigning a peak membership downwards from the peak and then
-finding the next one. </dd>
-
 <dt><b>oper=</b> </dt>
-<dd>If supplied, this is an extra operator supplied
-to the input file and output file, to create the final output file. This
-is to prevent having to type two commands such as <br>
+<dd>If supplied, this is an extra operator supplied to the input
+file and output file, to create the final output file. This is to prevent
+having to type two commands such as <br>
 <pre>    ccdmom map0 tmp0 axis=1 mom=-1 keep=t
     ccdmath map0,tmp0 map1 %1-%2
 </pre>instead of <br>
 <pre>    ccdmom map0 map1 axis=1 mom=-1 oper=-
 </pre></dd>
 
-<dt><b>integrate=t|f</b> </dt>
-<dd>When using mom=0 the signal is summed along an axis, you can
-either just sum the numbers (this used to be the old default), or integrate,
-ie. multiply the sum by the cell-size along that axis. This is now the default,
-to make it more consistent with the new units in <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
-. </dd>
+<dt><b>peak=N</b> </dt>
+<dd>For <b>mom=3,30-34</b> where it finds the peak, this allows you to find
+the N-th peak instead of the first. This is achieved by visiting each peak,
+and assigning a peak membership downwards from the peak and then finding
+the next one. </dd>
 
-<dt><b>abs=t|f</b>
-</dt>
+<dt><b>integrate=t|f</b> </dt>
+<dd>When using mom=0 the signal is summed along an
+axis, you can either just sum the numbers (this used to be the old default),
+or integrate, ie. multiply the sum by the cell-size along that axis. This
+is now the default, to make it more consistent with the new units in <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
+.
+</dd>
+
+<dt><b>abs=t|f</b> </dt>
 <dd>Use absolute values of the intensities for weights to a moment analysis.
 This is useful for low S/N data where at the wings a sign change can bias
 the moments. It is assumed the data have been continuum subtracted. </dd>
+
+<dt><b>zero=t|f</b>
+</dt>
+<dd>Mask out values below zero for mom=30,31,32 (**experimental**) [f] </dd>
+
+<dt><b>contsub=t|f</b>
+</dt>
+<dd>Fake a continuum subtraction for mom=30,31,32  (**experimental**) [t] </dd>
 
 <dt><b>pos=</b><i>[ix0,iy0]</i>
 </dt>

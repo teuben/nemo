@@ -10,6 +10,7 @@
  *  8-aug-95    created             pjt
  * 20-jun-01    gcc3 casting        pjt
  * 28-feb-06    nbody4 has more arrays, deprecated INTEGER*2    PJT
+ * 19-feb-19    nbody6++ added                                  PJT
  */
 
 #include <stdinc.h>
@@ -75,16 +76,24 @@ void nb3data_c(int *n, int *nk, int *mode, float *a,
     int   *ibuf;
 
     /* nbody1,2:
+     * 
      * READ (3)  (a(k),k=1,nk), (body(j),j=1,n),
      *           ((xs(k,j),k=1,NDIM),j=1,n), ((xdot(k,j),k=1,NDIM),j=1,n),
      *           (name(j),j=1,n)
      * nbody4:
      *
-      WRITE (3)  NTOT, MODEL, NRUN, NK
-      WRITE (3)  (AS(K),K=1,NK), (BODYS(J),J=1,NTOT),
-     &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
-     &           (RHO1(J),J=1,NTOT),(PHI1(J),J=1,NTOT),
-     &           (NAME(J),J=1,NTOT),(KSTAR(J),J=1,NTOT)
+     * WRITE (3)  NTOT, MODEL, NRUN, NK
+     * WRITE (3)  (AS(K),K=1,NK), (BODYS(J),J=1,NTOT),
+     *           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
+     *           (RHO1(J),J=1,NTOT),(PHI1(J),J=1,NTOT),
+     *           (NAME(J),J=1,NTOT),(KSTAR(J),J=1,NTOT)
+     * nbody6++:
+     *
+     * WRITE (3)  NTOT, MODEL, NRUN, NK
+     * WRITE (3)  (AS(K),K=1,NK),
+     *           (BODYS(J),J=1,NTOT),(RHOS(J),J=1,NTOT),(XNS(J),J=1,NTOT),
+     *           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
+     *           (PHI(J),J=1,NTOT),(NAME(J),J=1,NTOT)
      */
 
     if (sizeof_name == 2) 
@@ -97,7 +106,10 @@ void nb3data_c(int *n, int *nk, int *mode, float *a,
     if (*mode == 4) {         /* nbody4 reads 2 more float and one more int array */
       n1 += 2*(*n);
       n2 += (*n);
+    } else if (*mode == 6) {  /* nbody6++ needs 3 more float */
+      n1 += 3*(*n);
     }
+    dprintf(1,"data size: n1=%d n2=%d\n",n1,n2);
     nbuf = n1 * sizeof_data + n2 * sizeof_name ;
     buf = (char *) allocate(nbuf);
     nread = unfread(unit3,buf,nbuf);
@@ -111,6 +123,15 @@ void nb3data_c(int *n, int *nk, int *mode, float *a,
         a[k] = fbuf[count++];
     for(j=0; j < (*n); j++)                 /* masses */
         body[j] = fbuf[count++];
+
+    if (*mode == 6) {
+      for(j=0; j < (*n); j++)                 /* rho1 */
+        rho[j] = fbuf[count++];
+      for(j=0; j < (*n); j++)                 /* xns */
+        rho[j] = fbuf[count++];
+    }
+      
+      
     for(i=0, j=0; j < (*n); j++)            /* positions */
         for (k=0; k < 3; k++)
             xs[i++] = fbuf[count++];
@@ -118,13 +139,13 @@ void nb3data_c(int *n, int *nk, int *mode, float *a,
         for (k=0; k < 3; k++)
             xdot[i++] = fbuf[count++];
     
-    if (*mode == 4) {
+    if (*mode == 4)
       for(j=0; j < (*n); j++)                 /* rho1 */
         rho[j] = fbuf[count++];
-      
+
+    if (*mode == 4 || *mode == 6)
       for(j=0; j < (*n); j++)                 /* phi1 */
         phi[j] = fbuf[count++];
-    }
 
     ibuf = (int *) &fbuf[count];
     for(count=0, j=0; j < (*n); j++)           /* name */

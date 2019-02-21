@@ -16,26 +16,33 @@ runbody1, nbody1 - (frontend to) Aarseth N-body code
 nbody1   &lt; nbody1.in
 </pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>runbody1</b> is a frontend to the NBODY1 fortran program.  <p>
-Output
-snapshots are by default not created, and must be  turned on with a options
-flag (see <b>kz=</b> below). All of the input parameter names are the same as their
-counterpart in the NBODY1 program. 
+<b>runbody1</b> is a NEMO frontend to Aarseth&rsquo;s NBODY1 (fortran) program,
+running the code in a run directory where all files are stored. <p>
+The new
+version 2.x interface tries to mimic to run NBODY1 in virial units with
+a default input and output. In previous versions the defaults were more
+geared towards running the classic interface where data were scaled and
+times were measured in crossing times, making comparisons with other codes
+in NEMO much harder. This however means it is now more work to make NBODY1
+run in classic mode. Parameters names and meaning have not changed, except
+for the introduction of kz(15), to work in code (virial) units. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file (optional,
-see <b>nbody=</b> to generate your own input  data on the fly). If input data are
-given, you must also set <a href='KZ.4.html'>KZ(4)</a>
-=2 (see  below).   Default: not used. </dd>
+<dd>input file (optional, see <b>nbody=</b> to generate your own input
+ data on the fly). If input data are given, you must also set <a href='KZ.4.html'>KZ(4)</a>
+=2 (see
+ below).   WARNING:  The input snapshot will be mass-weight centered before
+the integration started by NBODY1. Default: not used. </dd>
 
-<dt><b>outdir=</b>
-</dt>
-<dd>Output run directory. This directory should not exist, although can be overriden
-with NEMO&rsquo;s standard <b>error=</b> system keyword. No default. </dd>
+<dt><b>outdir=</b> </dt>
+<dd>Output run
+directory. This directory should not exist, although can be overriden with
+NEMO&rsquo;s standard <b>error=</b> system keyword. No default. </dd>
 
 <dt><b>nbody=</b> </dt>
 <dd>** Total particle
@@ -80,23 +87,23 @@ if DE/E &gt; 5*QE &amp; <a href='KZ.2.html'>KZ(2)</a>
 
 <dt><b>kz=</b> </dt>
 <dd>** Non-zero options for alternative paths (see below)
- [Default: 1,0,0,0,1,1,0,0,0,0,0,0,0,0,0] <br>
+ [Default: 1,2,1,2,0,0,0,0,0,1,1,0,0,0,1] <br>
 <pre>   1  COMMON save on unit 1 if TCOMP &gt; CPU or if TIME &gt; TCRIT. [1]
    2  COMMON save on unit 2 at output (=1); restart if DE/E &gt; 5*QE (=2).
-[0]
-   3  Basic data written to unit 3 at output time (frequency NFIX). [0]
-   4  Initial conditions on unit 4 (=1: output; =2: input). [0]
-   5  Initial conditions (=0: uniform &amp; isotropic; =1: Plummer). [1]
-   6  Output of significant binaries. [1]
+[2]
+   3  Basic data written to unit 3 at output time (frequency NFIX). [1]
+   4  Initial conditions on unit 4 (=1: output; =2: input). [2]
+   5  Initial conditions (=0: uniform &amp; isotropic; =1: Plummer). [0]
+   6  Output of significant binaries. [0]
    7  Output of movie frames on unit 7. [0]
    8  Generation of two subsystems (merger experiment). [0]
    9  Individual bodies printed at output time (MIN(5**KZ9,N)). [0]
-  10  No scaling of initial conditions. [0]
-  11  Modification of ETA by tolerance QE. [0]
+  10  No scaling of initial conditions. [1]
+  11  Modification of ETA by tolerance QE. [1]
   12  Initial parameters for binary orbit. [0]
   13  Escaper removal (R &gt; 2*RTIDE; RTIDE = 10*RSCALE). [0]
   14  Adjustment of coordinates &amp; velocities to c.m. condition. [0]
-  15  Not used at present [0]
+  15  Use code units for tcrit/deltat [1]
 </pre></dd>
 
 <dt><b>alphas=</b> </dt>
@@ -152,7 +159,7 @@ computing time alotted. </dd>
 Scaling can cause output to become out of bounds.
 <p>
 Coding the the input-order logic in the frontend program can be hazardous
-to your health. It will depend on how the nbody1 main program is structured.
+to your health. It will depend on how the NBODY1 main program is structured.
 
 <h2><a name='sect5' href='#toc5'>Input</a></h2>
 Order of input lines in "nbody1.in" for a new run (KSTART=1) <br>
@@ -168,15 +175,40 @@ Order of input lines in "nbody1.in" for a new run (KSTART=1) <br>
       NFRAME DELTAF               KZ(7).GT.0              SCALE
       XCM ECC                     KZ(8).GT.0              SUBSYS
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+The input snapshot is (mass-weighted) centered before integration
+is started. Not clear why kz(14) still gives some different answers. <p>
+By decreasing
+TCRIT, you <i>observe</i> the integrations at finer details, thus re-syncing all
+particles again. This will have an effect on orbits 
+<h2><a name='sect7' href='#toc7'>Examples</a></h2>
+If you want
+to use runnbody1 as a NEMO tool with snapshots in and out, here is an example
+with a 128-body plummer sphere: <br>
+<pre>   mkplummer p128 128
+   runbody1 p128 run1 deltat=0.1 tcrit=10
+</pre>This will create a run1/OUT3.snap. Code units are now used, not crossing
+time units. 
+<p> <p>
+If however you want to use the more original NBODY1 flavored
+run, pay attention to the kz= vector as the default will not suffice anymore.
+<br>
+<pre>   runbody1 outdir=run2 nbody=128 deltat=0.1 tcrit=10 kz=1,2,1,1,1
+</pre>Note that requesting tcript=10 you will see the final snapshot written
+at time=28.2843 because the crossing time is about 2.828 and tcrit is measured
+in terms of crossing times, as opposed to code times for the default run
+with kz(15)=1. 
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='nbody0.1.html'>nbody0(1NEMO)</a>
 , <a href='runbody2.1.html'>runbody2(1NEMO)</a>
+, <a href='runbody4.1.html'>runbody4(1NEMO)</a>
+,
+<a href='runbody6.1.html'>runbody6(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
-,
-<a href='stou4.1.html'>stou4(1NEMO)</a>
+, <a href='stou4.1.html'>stou4(1NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>$NEMO/src/nbody/evolve/aarseth/nbody1<tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody code
 $NEMO/src/nbody/evolve/aarseth/tools<tt> </tt>&nbsp;<tt> </tt>&nbsp;various tools code
@@ -187,13 +219,15 @@ $outdir/fort.4                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;restart d
 $outdir/fort.7                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;formatted frame files (option KZ(7))
 $outdir/OUT3                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;particle dump (see u3tos(1NEMO))
 </pre>
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>4-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 documented, and changed out= to outdir=, n= to nbody= PJT
 17-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1a fixed bug when in= was specified
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 using fullname for in=
+7-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 better defaults for snapshot input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 default run now computes nbody= and converts to snapshot<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -205,10 +239,12 @@ Peter Teuben
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Bugs</a></li>
 <li><a name='toc5' href='#sect5'>Input</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
+<li><a name='toc7' href='#sect7'>Examples</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Update History</a></li>
 </ul>
 </body>
 </html>
