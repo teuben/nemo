@@ -30,9 +30,9 @@ string defv[] = {
     "nfix=1\n         Output frequency of data save or binaries; KZ(3 & 6)",
     "ncrit=5\n        Final particle number (alternative termination criterion)",
     "nrand=123\n      Random number seed",
-    "nnbopt=20\n      Desired optimal neighbor number",
+    "nnbopt=20\n      Desired optimal neighbor number (NNBMAX in nbody6)",
     "nrun=1\n         Run identification index",
-    "ncomm=10\n       Frequency to store dumping data",
+    "ncomm=10\n       Frequency to store dumping data (nbody6++ only)",
 
     "etai=0.02\n      Time-step parameter for irregular force polynomial",
     "etar=0.02\n      Time-step parameter for regular force polynomial",
@@ -148,7 +148,7 @@ string defv[] = {
     "exe=nbody6++\n   Name of the executable",
     "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
 
-    "VERSION=0.3\n    19-feb-2019 PJT",
+    "VERSION=0.4\n    21-feb-2019 PJT",
     NULL,
 };
 
@@ -316,7 +316,7 @@ void nemo_main(void)
     if (nbody6_mode == 1)
       fprintf(datstr,"%g 0  0 0 \n",q); 
     else
-      fprintf(datstr,"%g 1.0 1.0 1.0 %g\n",q,smax);    // READ (5,*)  Q, VXROT, VZROT, RTIDE, SMAX
+      fprintf(datstr,"%g 0.0 0.0 0.0 %g\n",q,smax);    // READ (5,*)  Q, VXROT, VZROT, RTIDE, SMAX
 
     if (kz[7] == 1 || kz[7] == 3)
       fprintf(datstr,"%g %g %g %g 0 0 0 \n",semi,ecc,ratio,range);
@@ -352,7 +352,7 @@ void nemo_main(void)
     if (nbody6_mode == 1)
       sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 ; rm OUT3");
     else
-      sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=6");
+      sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1");
     run_sh(runcmd);    
     
   } else {
