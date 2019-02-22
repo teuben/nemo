@@ -11,6 +11,7 @@
  *  28-feb-06   1.4  with the new nbody4 a mode= is needed      pjt
  *                   and in general header= needs known        
  *   4-mar-06   1.5  header= now blank default                  pjt
+ *  19-feb-19   1.6  trying nbody6++                            pjt
 
 
 nbody1
@@ -29,6 +30,18 @@ nbody4
      &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
      &           (RHO1(J),J=1,NTOT),(PHI1(J),J=1,NTOT),
      &           (NAME(J),J=1,NTOT),(KSTAR(J),J=1,NTOT)
+nbody6:     
+      WRITE (3)  NTOT, MODEL, NRUN, NK
+      WRITE (3)  (AS(K),K=1,NK), (BODYS(J),J=1,NTOT),
+     &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
+     &           (NAME(J),J=1,NTOT)
+*     CLOSE (UNIT=3)
+nbody6++
+      WRITE (3)  NTOT, MODEL, NRUN, NK
+      WRITE (3)  (AS(K),K=1,NK),
+     &           (BODYS(J),J=1,NTOT),(RHOS(J),J=1,NTOT),(XNS(J),J=1,NTOT),
+     &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
+     &           (PHI(J),J=1,NTOT),(NAME(J),J=1,NTOT)
 
 
  */
@@ -47,15 +60,15 @@ string defv[] = {
     "frame=0\n      Frames to read (0=all)",
     "alen=\n        If given, override length of A array (0=do not read A)",
     "swap=f\n       Swap byte (big vs. little endian only)",
-    "mode=1\n       NBODYx mode (valid are 1,2,4)",
+    "mode=1\n       NBODYx mode (valid are 1,2,4,6)",
     "key=name\n     snapshot Key comes from 'name' or 'key'?",
     "header= \n     if used, force unfio header size (4 or 8)",
     "integer=4\n    Size of integers in dataset (2 or 4) ** 2 is deprecated **",
-    "VERSION=1.4\n  1-mar-06 PJT",
+    "VERSION=1.6\n  19-feb-2017 PJT",
     NULL,
 };
 
-string usage = "Convert NBODY output to snapshot";
+string usage = "Convert NBODY OUT3 output to snapshot";
 
 string cvsid="$Id$";
 
@@ -78,6 +91,12 @@ void nemo_main(void)
     real *rmass, *rphase, tsnap;
     bool Qswap;
     stream outstr;
+
+#ifdef FIO
+    dprintf(1,"Compiled with FIO\n");
+#else
+    dprintf(1,"Compiled without FIO\n");
+#endif    
 
     if (hasvalue("header"))
       unfsize(getiparam("header"));   
@@ -108,16 +127,17 @@ void nemo_main(void)
 #else
       nb3header_c(&nbody, &model, &run, &alen);
 #endif
+      if (iframe==0) dprintf(1,"nb3header: %d %d %d %d\n",nbody,model,run,alen);
       if (nbody == 0) break;     /* end of file */
       if (nbody<0 || nbody > 1000000) 
         warning("Strange value for nbody=%d; perhaps need to change to swap=%c",
                 nbody, Qswap ? "false" : "true");
       if (alen_fix > 0) alen = alen_fix;       /* override alen */
-      nwflt = (mode == 4 ?  9  :  6);
-      nwint = (mode == 4 ?  2  :  1);
-      dprintf(1,"Header: nbody=%d model=%d run=%d nk=%d Snapshotsize=%d bytes\n",
-                nbody,model,run,alen,
-                32 + sizeof(float)*(alen+nwflt*nbody) + sizeof(int)*nwint*nbody);
+      nwflt = (mode == 6 ?  10  : mode==4 ? 9 : 7);
+      nwint = (mode == 6 ?   1  : mode==4 ? 2 : 1);
+      dprintf(1,"Header: nbody=%d model=%d run=%d nk=%d nbody_mode=%d Snapshotsize=%d bytes\n",
+	      nbody,model,run,alen,mode,
+	      32 + sizeof(float)*(alen+nwflt*nbody) + sizeof(int)*nwint*nbody);
       if (nbody < 0) break;      /* something bad surely */
       if (alen<1 || alen>MAXHEADER)
          error("Bad headerlength nk=%d\n",alen);
@@ -125,8 +145,8 @@ void nemo_main(void)
       mass  = (float *) allocate(nbody*sizeof(float));
       pos   = (float *) allocate(nbody*sizeof(float)*3);
       vel   = (float *) allocate(nbody*sizeof(float)*3);
-      phi   = (float *) allocate(nbody*sizeof(float));    /* only for nbody 4 */
-      aux   = (float *) allocate(nbody*sizeof(float));    /* only for nbody 4 */
+      phi   = (float *) allocate(nbody*sizeof(float));    /* only for nbody 4,6 */
+      aux   = (float *) allocate(nbody*sizeof(float));    /* only for nbody 4,6 */
       name  = (int *)   allocate(nbody*sizeof(int));
       key   = (int *)   allocate(nbody*sizeof(int));      /* only for nbody 4 */
 #ifdef FIO
@@ -163,7 +183,7 @@ void nemo_main(void)
         put_data(outstr, CoordSystemTag, IntType, &coordsys, 0);
         put_data(outstr, MassTag, RealType, rmass, nbody, 0);
         put_data(outstr,PhaseSpaceTag,RealType,rphase,nbody,2,3,0);
-	if (mode == 4) {
+	if (mode == 4 || mode == 6) {
 	  for (ibody=0; ibody<nbody ; ibody++)
 	    rmass[ibody] = phi[ibody];
 	  put_data(outstr, PotentialTag, RealType, rmass, nbody, 0);

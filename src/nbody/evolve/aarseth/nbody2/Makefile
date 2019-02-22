@@ -16,3 +16,7 @@ install:
 bins:
 	(cd source; $(MAKE) $@)
 
+
+wget:
+	wget ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody2/nbody2.tar.Z
+	wget ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody2/nbody2h.tar.Z

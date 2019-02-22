@@ -29,12 +29,12 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "rmin=0\n       Inner cutoff radius",
     "rmax=1.2\n     Outer cutoff radius",
     "2t/w=0.0\n     Virial ratio (isotropic velocities)",
-    "vmax=0\n       alternative Vmax for isotropic velocities",
+    "vmax=0\n       alternative (to virial) Vmax for isotropic velocities",
     "power=0\n      Power index for density rho= r^{-p}",
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.4b\n 24-mar-05",
+    "VERSION=1.4c\n 29-aug-2018 PJT",
     NULL,
 };
 
@@ -104,18 +104,21 @@ void mksphere(void)
 {
     Body *bp;
     real rmin3, rmax3, r_i, v_i, theta_i, phi_i, mass_i, sigma = 0.0;
+    real sinp, cosp, sint, cost;
     int i;
 
     btab = (Body *) allocate(nbody * sizeof(Body));
 #ifdef OLD
-    rmin3 = rmin*rmin*rmin;
-    rmax3 = rmax*rmax*rmax;
+    rmin3 = qbe(rmin);
+    rmax3 = qbe(rmax);
 #else
     rmin3 = pow(rmin,3-power);
     rmax3 = pow(rmax,3-power);
 #endif
     mass_i = 1.0/nbody;
     if (virial > 0.0) {
+        /* the sphere has potential energy -3GM^2/(5R)  */
+        /* sigma is the 1D velocity dispersion of an isotropic one */
         sigma = sqrt(virial/(5*rmax));		/* rmin==0  and power==0 !! */
         dprintf(1,"Gaussian isotropic velocities: sigma=%g\n",sigma);
     } else if (vmax > 0.0) {

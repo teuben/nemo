@@ -1,4 +1,4 @@
-.TH BODYTRANS 5NEMO "7 May 2013"
+.TH BODYTRANS 5NEMO "26 August 2018"
 .SH NAME
 bodytrans \- dataformat for body to scalar mapping functions
 .SH DESCRIPTION
@@ -68,6 +68,10 @@ y	real	returns \fBy\fP, the Y-position
 z	real	returns \fBz\fP, the Z-position
 xsky	real	returns \fBatan2(x,z)*180/pi\fP, the RA---TAN projection
 ysky	real	returns \fBatan2(y,z)*180/pi\fP, the DEC---TAN projection
+r2	real	returns the Z-projected 2D radius in the X,Y plane
+v2	real	returns the Z-projected 2D velocity in the X,Y plane
+vr2	real	returns the Z-projected 2D radial velocity in the X,Y plane
+vt2     real    returns the Z-projected 2D tangential velocity in the X,Y plane
 .fi
 .SH "SKY PROJECTIONS"
 Two common sky projections are available, both produce numbers in degrees, which
@@ -95,5 +99,6 @@ Josh Barnes, Peter Teuben
 20-nov-89	Created    	PJT
 27-nov-90	Added table of functions	PJT
 15-may-05	Some long overdue updates	PJT
+26-aug-2018	Add 2D projection shortcuts	PJT
 .fi
 

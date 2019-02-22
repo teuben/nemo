@@ -9,11 +9,13 @@
  *	 5-mar-98   V1.3    added KZ_ parameters in the code		   PJT
  *      17-mar-06   V1.4    using fullname() for in=                       pjt
  *      17-sep-2013 V1.5    using new run interface                        PJT
+ *       9-feb-2017 V2.0    better defaults for snapshot input             PJT
  *
  */
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <history.h>
 #include <filefn.h>
 #include <run.h>
 
@@ -38,10 +40,10 @@ string defv[] = {
     "tcrit=5.0\n      Termination time in units of the crossing time",
     "tnext=\n         Next output time for restart runs",
     "qe=0.00002\n     Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1)",
-    "eps=0.01\n       Potential softening parameter",
+    "eps=0.05\n       Potential softening parameter",
 
 
-    "kz=1,2,0,0,0,0,1,1,0,0,1\n  Non-zero options for alternative paths (see below)\n"
+    "kz=1,2,1,2,0,1,0,0,0,0,1,0,0,0,0,1,0,0,1,0\n  Non-zero options for alternative paths (see below)\n"
       " 1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps)\n"
       " 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2)\n"
       " 3  Basic data written to unit 3 at output time (frequency NFIX)\n"
@@ -60,7 +62,8 @@ string defv[] = {
      " 16  No scaling of initial conditions\n"
      " 17  Generation of two subsystems (merger experiment)\n"
      " 18  Adjustment of coordinates & velocities to c.m. condition\n"
-     " 19  Not used at present (same for # 20)",
+     " 19  Use code units for tcrit/deltat",
+     " 20  Not used at present"
 
     "xtpar1=\n        Mass of external Plummer model (KZ(15) = 1; scaled units)",
     "xtpar2=\n        Length scale for Plummer model (KZ(15) = 1)",
@@ -83,11 +86,11 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=1.5\n    17-sep-2013 PJT",
+    "VERSION=2.0\n    9-feb-2019 PJT",
     NULL,
 };
 
-string usage="Ahmad-Cohen N-body code";
+string usage="front end to Ahmad-Cohen N-body code nbody2";
 
 #define KZ_MAX  20
 
@@ -97,7 +100,7 @@ string usage="Ahmad-Cohen N-body code";
 #define KZ_MER  17
 #define KZ_COM  18
 
-nemo_main()
+void nemo_main(void)
 {
     int nbody, nfix, nrand, nnbmax, nrun, kstart;
     real etai, etar, rs0, deltat, tcrit, qe, eps, tcomp;

@@ -113,6 +113,7 @@
 *
 *       Set initial crossing time in scaled units.
    90 TCR = ZMASS**2.5/(2.0*ABS(E0))**1.5
+      IF(KZ(19).EQ.1) TCR=1
       TCR0 = TCR
 *
 *       Scale output time interval & termination time by initial TCR.

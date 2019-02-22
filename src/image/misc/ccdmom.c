@@ -57,7 +57,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.6b\n  15-nov-2017 PJT",
+  "VERSION=2.7\n  24-sep-2018 PJT",
   NULL,
 };
 
@@ -69,7 +69,7 @@ local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcont
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
 local int  peak_assign(int n, real *data, int *mask);
-local bool out_of_range(real);
+local bool out_of_range(real *clip, real x);
 local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
 
@@ -214,7 +214,7 @@ void nemo_main()
 	    peakvalue = CubeValue(iptr,0,j,k);
             for (i=0; i<nx; i++) {
 	        spec[i] = CubeValue(iptr,i,j,k);
- 	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
+ 	        if (out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
 		tmp00 += sqr(CubeValue(iptr,i,j,k));
@@ -271,7 +271,7 @@ void nemo_main()
 	    peakvalue = CubeValue(iptr,i,0,k);
             for (j=0; j<ny; j++) {
 	        spec[j] = CubeValue(iptr,i,j,k); 
- 	        if (out_of_range(CubeValue(iptr,i,j,k))) continue;
+ 	        if (out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
 		tmp00 += sqr(CubeValue(iptr,i,j,k));
@@ -329,7 +329,7 @@ void nemo_main()
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
 	        spec[k] = CubeValue(iptr,i,j,k);
- 	        if (out_of_range(spec[k])) continue;
+ 	        if (out_of_range(clip,spec[k])) continue;
 		if (cnt==0) {
 		  apeak = k;
 		  peakvalue = spec[k];
@@ -713,11 +713,11 @@ local int peak_assign(int n, real *d, int *s)
 }
 
 
-local bool out_of_range(real x)
+local bool out_of_range(real *clip, real x)
 {
-  /* @todo more to come */
-
-  return FALSE;
+  if (clip[0] == clip[1]) return FALSE;
+  if (x < clip[0] || x > clip[1]) return FALSE;
+  return TRUE;
 }
 
 #define CV(p,i,j,k)   CubeValue(p,i,j,k)

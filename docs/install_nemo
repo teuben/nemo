@@ -20,6 +20,7 @@
 #               29-dec-2017   install=0 mktar=0 option
 #                7-feb-2018   script now called install_nemo
 #                4-may-2018   option to use giza (https://github.com/danieljprice/giza) instead of pgplot
+#                8-aug-2018   add ubuntu option (Jason Lammers) if you start from a virgin ubuntu
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -30,6 +31,7 @@
 
 set nemo        = nemo           # root directory name from the current directory
 
+set ubuntu	= 0             # runs "sudo apt" on a few required packages
 set install     = 1             # set this to 0 when you only grab the source code
 set mktar       = 0             # make a tar file before install starts
 set pgplot      = 1		# install PGPLOT via GIT also
@@ -37,7 +39,7 @@ set giza        = 0             # install GIZA instead of PGPLOT
 set intel       = 0		# pick intel compiler (astromake)
 set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
 set gcc         = 0		# pick gcc version (version number via astromake)
-set vogl        = 1		# compile vogl
+set vogl        = 0		# compile vogl
 set glnemo      = 1             # compile glnemo2
 set unsio       = 0             # compile unsio and uns_project
 set gsl         = 0             # add GSL library
@@ -89,6 +91,18 @@ endif
 if ($?NEMO) then
   echo Cannot install with this script if NEMO=$NEMO is present already, this is not recommended
   exit 1
+endif
+
+if ($ubuntu) then
+   sudo apt update
+   sudo apt install gfortran -y
+   sudo apt install libx11-dev -y
+   sudo apt install libxt-dev -y
+   sudo apt install libxext-dev -y
+   sudo apt install libcairo2-dev -y
+   sudo apt install build-essential -y
+   sudo apt install cmake -y
+   sudo apt install csh -y
 endif
 
 #	pick another GNU compiler (this is rather astromake specific of course)
@@ -193,7 +207,7 @@ set copts=()
 # set copts=($copts --disable-gsl)
 if ($gsl) set copts=($copts --enable-gsl)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
-if ($giza) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($giza) set copts=($copts --with-yapp=giza --with-pgplot-prefix=`pwd`/lib)
 if ($png) set copts=($copts --enable-png)
 if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
