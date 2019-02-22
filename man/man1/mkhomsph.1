@@ -26,7 +26,9 @@ Number of stars in sphere [default: \fB2048\fP]
 Inner cutoff radius of the sphere. [Default: \fB0.0\fP].
 .TP
 \fBrmax=\fImax_radius\fP
-Outer cutoff radius of the sphere. [Default: \fB1.2\fP].
+Outer cutoff radius of the sphere. The default values of \fBrmin=0\fP and \fBrmax=1.2\fP
+give a virial radius of 1.0
+[Default: \fB1.2\fP].
 .TP
 \fB2t/w=\fIratio\fP
 Virial ratio which measures deviation from virial equilibrium
@@ -48,7 +50,7 @@ Power law exponent of the density as function of radius, Density
 [default: \fB0\fP].
 .TP
 \fBseed=\fIrandom_seed\fP
-Use random number seed. 
+Use random number seed. Non-positive have special meaning.
 [default: \fB0\fP].
 .TP
 \fBzerocm=\fBt|f\fP
@@ -59,7 +61,7 @@ Text headline for output file [default: not used].
 .SH BUGS
 When shells are created (non-zero \fBrmin\fP) the calculation of 'virial
 equilibrium' velocity dispersions is not correct anymore. See 
-snapvirial(1NEMO) for a slightly better approach.
+\fIsnapvirial(1NEMO)\fP for a slightly better approach.
 .SH "SEE ALSO"
 snapmass(1NEMO), snapcenter(1NEMO), mkhom(1NEMO), snapvirial(1NEMO)
 .SH "UPDATE HISTORY"
