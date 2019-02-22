@@ -53,3 +53,11 @@ run2:   p.snap
 
 run3:   p.snap
 	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=0 exe=nbody6.sse
+
+run4:	p.snap
+	time runbody4 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
+
+#       for kicks, a softened gravity run
+run0:
+	time rungravidy p.snap run0 tcrit=$(TCRIT) deltat=0.1 eps=0.01
+
