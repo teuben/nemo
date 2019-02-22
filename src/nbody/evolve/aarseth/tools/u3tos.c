@@ -30,20 +30,18 @@ nbody4
      &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
      &           (RHO1(J),J=1,NTOT),(PHI1(J),J=1,NTOT),
      &           (NAME(J),J=1,NTOT),(KSTAR(J),J=1,NTOT)
-nbody6:     
+nbody6
       WRITE (3)  NTOT, MODEL, NRUN, NK
       WRITE (3)  (AS(K),K=1,NK), (BODYS(J),J=1,NTOT),
      &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
      &           (NAME(J),J=1,NTOT)
-*     CLOSE (UNIT=3)
 nbody6++
       WRITE (3)  NTOT, MODEL, NRUN, NK
       WRITE (3)  (AS(K),K=1,NK),
      &           (BODYS(J),J=1,NTOT),(RHOS(J),J=1,NTOT),(XNS(J),J=1,NTOT),
      &           ((XS(K,J),K=1,3),J=1,NTOT), ((VS(K,J),K=1,3),J=1,NTOT),
      &           (PHI(J),J=1,NTOT),(NAME(J),J=1,NTOT)
-
-
+ *
  */
 
 #include <stdinc.h>
