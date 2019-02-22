@@ -27,6 +27,7 @@
 # 25-oct-07     note that gcc 4.2.2 compiles GI/PP/
 # 16-aug-09     added support for Cygwin (JM)
 # 19-may-10     gfortran default, and option to use gif because of old gfortran41/40
+# 21-feb-19     add brew option for darwin
 
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
@@ -181,9 +182,15 @@ switch ($host)
   case *darwin*:
     if ($?CC && $?F77) then
       echo ${F77}_${CC}
-      $dir/pgplot/makemake  $dir/pgplot darwin ${F77}_${CC} $new4
+      $dir/pgplot/makemake     $dir/pgplot darwin ${F77}_${CC} $new4
     else
-      $dir/pgplot/makemake   $dir/pgplot darwin gfortran_gcc
+      if (-e /opt/X11/include/X11/Xos.h) then
+        echo brew installed with /opt/X11
+        $dir/pgplot/makemake   $dir/pgplot darwin gfortran_gcc
+      else
+        echo Classic /usr/X11R6
+        $dir/pgplot/makemake   $dir/pgplot darwin gfortran_gcc_old
+      endif
     endif
     breaksw
   case SunOS:
