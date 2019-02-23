@@ -4,14 +4,14 @@
 
 To use it (this assumes somebody has installed it for you)
 
-   source /somewhere/nemo/nemo_start.sh           (or .csh)
+       source /somewhere/nemo/nemo_start.sh           (or .csh)
 
 To install it in a bash shell:
 
-   wget https://teuben.github.io/nemo/install_nemo
-   chmod +x install_nemo
-   ./install_nemo 
-   source nemo/nemo_start.sh
+       wget https://teuben.github.io/nemo/install_nemo
+       chmod +x install_nemo
+       ./install_nemo 
+       source nemo/nemo_start.sh
 
 ## Using
 
