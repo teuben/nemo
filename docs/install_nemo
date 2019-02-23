@@ -21,6 +21,7 @@
 #                7-feb-2018   script now called install_nemo
 #                4-may-2018   option to use giza (https://github.com/danieljprice/giza) instead of pgplot
 #                8-aug-2018   add ubuntu option (Jason Lammers) if you start from a virgin ubuntu
+#               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -36,6 +37,7 @@ set install     = 1             # set this to 0 when you only grab the source co
 set mktar       = 0             # make a tar file before install starts
 set pgplot      = 1		# install PGPLOT via GIT also
 set giza        = 0             # install GIZA instead of PGPLOT
+set brew        = 0             # (MacOSX only) assuming homebrew has everything we need
 set intel       = 0		# pick intel compiler (astromake)
 set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
 set gcc         = 0		# pick gcc version (version number via astromake)
@@ -166,6 +168,7 @@ endif
 # pick just one from pgplot,giza
 if ($giza)   set pgplot = 0
 if ($pgplot) set giza   = 0
+if ($brew)   set pgplot = 0
 
 if ($pgplot && $reuse == 0) then   
   (cd local; git clone $git_pgplot)
@@ -208,12 +211,14 @@ set copts=()
 if ($gsl) set copts=($copts --enable-gsl)
 if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
 if ($giza) set copts=($copts --with-yapp=giza --with-pgplot-prefix=`pwd`/lib)
+if ($brew) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=/usr/local/lib)
 if ($png) set copts=($copts --enable-png)
 if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single) set copts=($copts --enable-single)
 if ($debug) set copts=($copts --enable-debug)
 if ($pedantic) set copts=($copts --enable-pedantic)
 if ($dso == 0)  set copts=($copts --without-dso)
+
 
 echo Running configure $copts
 echo configure $copts  >& install.config.log
