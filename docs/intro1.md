@@ -2,9 +2,9 @@
 
 ## Installing
 
-To use it (this assumes somebody has installed it for you)
+To use it (*this assumes somebody has installed it for you*) in csh shell:
 
-       source /somewhere/nemo/nemo_start.sh           (or .csh)
+       source /somewhere/nemo/nemo_start.csh
 
 To install it in a bash shell:
 
@@ -13,17 +13,22 @@ To install it in a bash shell:
        ./install_nemo 
        source nemo/nemo_start.sh
 
+The source command can then be added to your **.cshrc** (csh shell) or
+**.bashrc** (linux bash) or **.bash_profile** (mac bash)
+
 ## Using
 
-The source command will have modified your shell and added a number
-of new commands to your unix shell. Much like other unix commands
+Your unix shell will now have been modified and a large number
+of new commands are available. Much like other unix commands
 these NEMO commands will:
+    
 
-      * have a unix man page, e.g.          man mkplummer
-      * have a --help option, e.g.          mkplummer --help
-      * have a help= system keyword, e.g.   mkplummer help=h
-        to describe the program keywords
-      * use unix pipes                      mkplummer - 10 | tsf -
+      * live in $NEMOBIN, e.g.                    ls $NEMOBIN
+      * have a unix man page, e.g.                man mkplummer
+      * have a --help option, e.g.                mkplummer --help
+      * have a help= system keyword, e.g.         mkplummer help=\?
+        and describe the program keywords, e.g.   mkplummer help=h
+      * use unix pipes                            mkplummer - 10 | tsf -
 
 
 ## Example 1: 
