@@ -21,6 +21,7 @@
  *      10-may-17   2.4  add cont subtraction for modes 30,31,32,33,...
  *      15-jun-17   2.5  pos=x,y triggering debug output
  *      21-jun-17   2.6  use abs values for
+ *      25-sep-18   2.7  tinkering because of "bettermoments"
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -57,7 +58,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.7\n  24-sep-2018 PJT",
+  "VERSION=2.7\n  25-sep-2018 PJT",
   NULL,
 };
 
@@ -322,9 +323,7 @@ void nemo_main()
 	offset = Zmin(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
-	  //if (j!=51) continue;
-      	  for(i=0; i<nx; i++) {
-	    //if(i!=34) continue;
+      	  for(i=0; i<nx; i++) {                         /* loop over all X and Y positions */
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
@@ -349,7 +348,7 @@ void nemo_main()
 		  else
 		    CubeValue(iptr1,i,j,k) = spec[k]-spec[k-1];
 		}
-    	    }
+    	    } /* for(k) */
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {
@@ -424,9 +423,9 @@ void nemo_main()
 		      }
 #endif		      
 		  }
-		}
-	      }
-	    }
+		} /* npeak */
+	      } /* mom */
+	    } /* cnt */
 	    if (mom>-3)
 	      for (k=0; k<nz1; k++)
 		CubeValue(iptr1,i,j,k) = newvalue;
