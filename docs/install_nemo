@@ -35,7 +35,7 @@ set nemo        = nemo           # root directory name from the current director
 set ubuntu	= 0             # runs "sudo apt" on a few required packages
 set install     = 1             # set this to 0 when you only grab the source code
 set mktar       = 0             # make a tar file before install starts
-set pgplot      = 1		# install PGPLOT via GIT also
+set pgplot      = 1		# install PGPLOT via GIT also (there are other options)
 set giza        = 0             # install GIZA instead of PGPLOT
 set brew        = 0             # (MacOSX only) assuming homebrew has everything we need
 set intel       = 0		# pick intel compiler (astromake)
@@ -58,7 +58,7 @@ set git_giza    = https://github.com/danieljprice/giza
 set branch      = ()		# use a GIT branch?
 set yapp        = (/null)	# set a YAPP device during the install
                   	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
-set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3420.tar.gz   
+set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3450.tar.gz   
 set cfitsio     = 0             # disable for formal release since there are some problems
 set debug       = 1             # compile in debug mode (not implemented)
 set test        = 1             # also run testsuite at the end
@@ -66,9 +66,9 @@ set pedantic    = 0             # compile in pedantic mode
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
 
-set unames      = `uname -s`    # Darwin, Linux
+set unames      = `uname -s`    # supported are: Darwin, Linux
 
-# dso:                  # use DSO linking trick for new linux gcc.  4.6.3 on ubuntu needs it
+# dso:                          # use DSO linking trick for new linux gcc.  4.6.3 on ubuntu needed it
 if ($unames == Linux) then
   set dso=1
 else
@@ -104,7 +104,7 @@ if ($ubuntu) then
    sudo apt install libcairo2-dev -y
    sudo apt install build-essential -y
    sudo apt install cmake -y
-   sudo apt install csh -y
+   sudo apt install pgplot5 -y
 endif
 
 #	pick another GNU compiler (this is rather astromake specific of course)
@@ -125,7 +125,7 @@ endif
 
 #	pick intel compiler (ifort means >= 8.0)
 if ($intel) then
-  # source /astromake/astromake_start
+  # source /astromake/astromake_start.csh
   # astroload intel
   setenv CC  icc
   setenv CXX icpc
@@ -158,14 +158,14 @@ if ($#branch) then
   git checkout $branch
 endif
 
-if (! -e local) mkdir local
+mkdir -p local
 
 if ($reuse) then
   echo DISTCLEAN
   $make distclean >& install.distclean.log
 endif
 
-# pick just one from pgplot,giza
+# pick just one from pgplot,giza   brew is special for mac
 if ($giza)   set pgplot = 0
 if ($pgplot) set giza   = 0
 if ($brew)   set pgplot = 0
@@ -208,16 +208,22 @@ if ($install == 0) exit 0
 
 set copts=()
 # set copts=($copts --disable-gsl)
-if ($gsl) set copts=($copts --enable-gsl)
-if ($pgplot) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
-if ($giza) set copts=($copts --with-yapp=giza --with-pgplot-prefix=`pwd`/lib)
-if ($brew) set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=/usr/local/lib)
-if ($png) set copts=($copts --enable-png)
-if ($cfitsio) set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
-if ($single) set copts=($copts --enable-single)
-if ($debug) set copts=($copts --enable-debug)
+if ($gsl)      set copts=($copts --enable-gsl)
+if ($png)      set copts=($copts --enable-png)
+if ($cfitsio)  set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
+if ($single)   set copts=($copts --enable-single)
+if ($debug)    set copts=($copts --enable-debug)
 if ($pedantic) set copts=($copts --enable-pedantic)
-if ($dso == 0)  set copts=($copts --without-dso)
+if ($dso == 0) set copts=($copts --without-dso)
+if ($pgplot)   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($giza)     set copts=($copts --with-yapp=giza --with-pgplot-prefix=`pwd`/lib)
+if ($brew) then
+  if ($unames == Darwin) then
+    set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=/usr/local/lib)
+  else
+    set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=/usr/lib)
+  endif
+endif   
 
 
 echo Running configure $copts
@@ -258,9 +264,6 @@ endif
 
 rehash
 $make libs
-
-# backward compatibility support?
-# ln -s nemo_start.csh nemo_start 
 
 if ($vogl) then
   echo "Compiling vogl for xyzview (logfile: install.vogl.log)"
