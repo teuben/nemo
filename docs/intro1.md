@@ -74,6 +74,7 @@ Smooth the CCD to 0.1
        ccdsmooth t1.ccd t1s.ccd
 
 Plot
+
        ccdplot t0s.ccd contour=0.1,0.3,0.7 yapp=3/xs
        ccdplot t1s.ccd contour=0.1,0.3,0.7 yapp=4/xs
 
