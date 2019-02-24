@@ -10,7 +10,12 @@
 
 
 2) follow the now older instructions in $NEMO/src/scripts/zeno.install
-
+   --now deprecated--
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
 and may not be doing exactly the same thing.
+
+
+git clone https://github.com/joshuabarnes/zeno/
+cd zeno
+make -f Zeno
