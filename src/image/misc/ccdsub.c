@@ -34,7 +34,7 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.2\n  6-may-2017 PJT",
+  "VERSION=2.3\n  8-jan-2018 PJT",
   NULL,
 };
 
@@ -99,7 +99,7 @@ void nemo_main()
     Qreorder = hasvalue("reorder");
     if (Qreorder) {
       reorder = getparam("reorder");
-      if (strlen(reorder) != 3) error("Reorder must have 3 letters");
+      if (strlen(reorder) != 3) error("Reorder must have 3 letters (e.g. xzy)");
     } 
 
     outstr = stropen(getparam("out"), "w");
@@ -158,7 +158,7 @@ void nemo_main()
 	create_cube(&iptr1,nx1,nz1,ny1);
 	ax_copy(iptr,iptr1);
 	ax_swap_yz(iptr1);
-	LOOP(k,nz1) LOOP(j,ny1) LOOP(i,nx1) CV(iptr1,i,j,k) = CV(iptr,i,k,j);
+	LOOP(k,nz1) LOOP(j,ny1) LOOP(i,nx1) CV(iptr1,i,k,j) = CV(iptr,i,j,k);
       } else if (streq(reorder,"yxz")) {
 	create_cube(&iptr1,ny1,nx1,nz1);
 	ax_copy(iptr,iptr1);
@@ -278,7 +278,7 @@ void ax_swap_xy(imageptr iptr)
   real   tmpr;
   string tmps;
 
-  SWAP(Nx(iptr),Ny(iptr),tmpi);
+  //SWAP(Nx(iptr),Ny(iptr),tmpi);
   SWAP(Dx(iptr),Dy(iptr),tmpr);
   SWAP(Xmin(iptr),Ymin(iptr),tmpr);
   SWAP(Xref(iptr),Yref(iptr),tmpr);
@@ -292,7 +292,7 @@ void ax_swap_xz(imageptr iptr)
   real   tmpr;
   string tmps;
 
-  SWAP(Nx(iptr),Nz(iptr),tmpi);
+  //SWAP(Nx(iptr),Nz(iptr),tmpi);
   SWAP(Dx(iptr),Dz(iptr),tmpr);
   SWAP(Xmin(iptr),Zmin(iptr),tmpr);
   SWAP(Xref(iptr),Zref(iptr),tmpr);
@@ -306,7 +306,7 @@ void ax_swap_yz(imageptr iptr)
   real   tmpr;
   string tmps;
 
-  SWAP(Nz(iptr),Ny(iptr),tmpi);
+  //SWAP(Nz(iptr),Ny(iptr),tmpi);
   SWAP(Dz(iptr),Dy(iptr),tmpr);
   SWAP(Zmin(iptr),Ymin(iptr),tmpr);
   SWAP(Zref(iptr),Yref(iptr),tmpr);
