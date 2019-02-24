@@ -38,7 +38,11 @@ A few other NEMO things useful to know
       * parameters can refer to others            dtadj='$deltat/2'
       * parameters can be stored in a file        rad=@rad.in
       * nemoinp expression parser                 nemoinp 'c,G,h,pi,iflt(1,2,3,4)'
-        1 AU in km                                nemoinp 'p*pi/(3600*180)' 
+        1 AU in km                                nemoinp 'p*pi/(3600*180)'
+      * The debug= and yapp= system keywords      debug=1   yapp=plot1.ps/vcps
+        control debugging level and graphics out  yapp=1/xs yapp=plot1.png/png
+      * potentials dynamically loaded             potname=plummer potpars=0,10,0.5,0.8
+      * bodytransformations dynamically loaded    xvar='sqrt(x*x+y*y)' yvar=vz
 
 ## Example 1: Gentle collapse of a plummer sphere
 
@@ -84,6 +88,10 @@ Look at outliers via total M/L=1 intensity map (look for Max and Sum*Dx*Dy)
        ccdstat t0s.ccd
        ccdstat t1s.ccd
 
+## Example 2: Cluster Simulations Correctness
+
+When relaxation occurs, close encounters cannot be followed with softened potentials.
+How do we show the correct orbits?
 
 ## Other geeky things that NEMO does
 
