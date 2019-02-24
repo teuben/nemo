@@ -61,19 +61,22 @@ them to fractional degrees. For H:M:S parsing the user is
 responsible for the extra factor of 15.
 Default: \fBf\fP.
 .SH SEE ALSO
-seq(1), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO)
+seq(1), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), functions(5NEMO)
 .SH EXAMPLES
 .nf
-   nemoinp 4.2+3.1          simple math
-   nemoinp 'sqrt(2)'        math functions
-   nemoinp pi+3             some support for funny numbers
-   nemoinp 2:20:4           from 2 to 20 in steps of 4 (NEMO command)
-   seq 2 4 20               from 2 to 20 in steps of 4 (UNIX command)
-   set n=20                 a C-shell variable
-   nemoinp 2:${n}:4         as before, now using a shell variable
-   nemoinp 2::4             repeat the value 4 times
-   nemoinp 'iflt(1,2,3,4)'  print 3, not 4, because 1 is less than 1
-    
+   nemoinp 4.2+3.1           simple math
+   nemoinp 'sqrt(2)'         math functions
+   nemoinp pi+3              some support for funny numbers
+   nemoinp 2:20:4            from 2 to 20 in steps of 4 (NEMO command)
+   seq 2 4 20                from 2 to 20 in steps of 4 (UNIX command)
+   set n=20                  a C-shell variable
+   nemoinp 2:${n}:4          as before, now using a shell variable
+   nemoinp 2::4              repeat the value 4 times
+   nemoinp 'iflt(1,2,3,4)'   print 3, not 4, because 1 is less than 1
+   nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal 30.5043
+   nemoinp c,G,h,p,m         a few good constants
+   nemoinp 'p*pi/(3600*180)' 1 AU in km
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH "UPDATE HISTORY"
