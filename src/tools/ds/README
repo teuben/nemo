@@ -1,2 +1,4 @@
 Display Program 'ds' removed ; compressed source code moved to
 $NEMO/usr/wls
+This program only worked under the suntools window manager
+and has been superseded by ds9
