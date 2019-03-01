@@ -1,6 +1,6 @@
 # A birds eye view of the stellar dynamics toolbox NEMO
 
-NEMO is a collection of (unix) programs. Each program is specialized
+NEMO is a collection of (Unix) programs. Each program is specialized
 to do certain things, and you then orchestrate a simulation by scripting a
 series of these programs.
 
@@ -24,17 +24,17 @@ The last **source** command can then be added to your **.cshrc** (csh shell) or
 
 ## Some properties of NEMO
 
-Your unix shell will now have been modified and a large number
-of new commands are available. Much like other unix commands
+Your (Unix) shell will now have been modified and a large number
+of new commands are available. Much like other Unix commands
 these NEMO commands will:
     
 
       * live in $NEMOBIN, e.g.                    ls $NEMOBIN
-      * have a unix man page, e.g.                man mkplummer
+      * have a Unix man page, e.g.                man mkplummer
       * have a --help option, e.g.                mkplummer --help
       * have a help= system keyword, e.g.         mkplummer help=\?
         and describe the program keywords, e.g.   mkplummer help=h
-      * use unix pipes                            mkplummer - 10 | tsf -
+      * use Unix pipes                            mkplummer - 10 | tsf -
 
 A few other NEMO things useful to know
 
@@ -49,23 +49,25 @@ A few other NEMO things useful to know
         control debugging level and graphics out  yapp=1/xs yapp=plot1.png/png
       * external potentials dynamically loaded    potname=plummer potpars=0,10,0.5,0.8
       * body transformations dynamically loaded   xvar='sqrt(x*x+y*y)' yvar=vz
-      * "snap" "tab", "orb", "ccd" programs       
+      * "snap" "tab", "orb", "ccd" programs       snapplot, tabplot, orbplot, ccdplot
 	
 ## Example 1: The Gentle Collapse of a Plummer (1911) Sphere
 
 
-Initialize
+Initialize: 1024 stars in a plummer sphere
 
        mkplummer p1k 1024
        snapscale p1k p1ks vscale="1/sqrt(2)"
+       snapplot p1ks
+       snapplot p1ks xvar=x yvar=vx
 
-Evolve (pick one)
+Evolve (pick one, though runbody6 has issues) for about 20 dynamical times
 
        hackcode1 p1ks run1.out tstop=20 freqout=10 options=mass,phase,phi,acc
        gyrfalcON p1ks run2.out tstop=20 step=0.1    eps=0.05 kmax=7 give=mxvpa
        runbody6  p1ks run3     tcrit=10 deltat=0.1
 
-Plot
+Plot some properties
 
        snapplot run1.out nxy=3,3 times=0,1,2,5,10,15,20 yapp=1/xs
        snapmradii run1.out 0.01,0.1:0.9:0.1,0.99 log=t | tabplot - 1 2:12 line=1,1  color=2,3::9,2 yapp=2/xs
@@ -81,7 +83,7 @@ Smooth the CCD to 0.1 FWHM
        ccdsmooth t0.ccd t0s.ccd 0.1
        ccdsmooth t1.ccd t1s.ccd 0.1
 
-Plot
+Plot the CCD
 
        ccdplot t0s.ccd contour=0.1,0.3,0.9,1.4 yapp=3/xs
        ccdplot t1s.ccd contour=0.1,0.3,0.9,1.4 yapp=4/xs
@@ -104,7 +106,7 @@ When relaxation occurs in small N clusters,
 close encounters cannot be followed with softened potentials.
 How do we show the correct orbits?
 
-Here we use the data from RAMSES that Chongchong collected
+Here we use the data from RAMSES that Chongchong collected as initial conditions
          
        grep  -v e-11 job332out32.in | sed s/^605/603/ |\
 	     tabtos - snap1 nbody,time m,pos,vel headline='grep  -v e-11 job332out32.in | sed s/^605/603/'
@@ -114,9 +116,12 @@ Here we use the data from RAMSES that Chongchong collected
        snapscale snap31 snap32 1/14332.49 1/0.357757 'sqrt(0.357757/14332.492353)'
        snapstat snap32 all=t exact=t
 
-Example plotting two stars that are interacting
+Example plotting two stars that are interacting  (note this snap2 does not have the correct units)
 
+       hisf snap2
+       runbody2 snap2 run4b 605 deltat=0.1 tcrit=100 
        snapplot run4b/OUT3.snap xrange=19:27 yrange=-23:-15 trak=t 'visib=i==287||i==118' 'color=i==287?0.1:0'
+       
 
 ## Example 3: Exploring a problem with tkrun
 
@@ -129,7 +134,7 @@ Enter tkrun in NEMO.
        ./do1
        tkrun ./do1
 
-## Other geeky unix things that NEMO does
+## Other geeky Unix things that NEMO does
 
    * Uses hierarchy of "Makefile" for installation
    * Uses hierarchy of "Testfile" to do regression/baseline tests
