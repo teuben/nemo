@@ -71,7 +71,8 @@ Plot some properties
 
        snapplot run1.out nxy=3,3 times=0,1,2,5,10,15,20 yapp=1/xs
        snapmradii run1.out 0.01,0.1:0.9:0.1,0.99 log=t | tabplot - 1 2:12 line=1,1  color=2,3::9,2 yapp=2/xs
-       snapvratio run1.out all phi | tabplot - 1 2 ycoord=1 line=1,1
+       snapvratio run1.out all | tabplot - 1 2 ycoord=1 line=1,1
+       snapvratio run1.out all | tabmath - - '%1,-2*%4/%5,-2*%4/%6' all | tabplot - 1 2,3 ycoord=1 line=1,1 color=2,3
 
 Convert to a "CCD"
 
