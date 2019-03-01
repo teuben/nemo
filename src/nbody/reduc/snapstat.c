@@ -522,7 +522,7 @@ radii(int n)
  
     if (Qr_c) {
         
-/*  first compute smallest interparticle distance  */
+        /*  first compute smallest interparticle distance  */
  
         drmin = rad[idr[n-1]];                  /* largest distance */
         for (i=1; i<n; i++) {           /* because arrays were sorted */
@@ -531,34 +531,36 @@ radii(int n)
                         drmin=dr;
         }
         drmin *= minradfrac;            /* and take a fraction of that */
-/*      printf ("SD: drmin*minradfrac=%20.10e\n",drmin);                */
+	/*      printf ("SD: drmin*minradfrac=%20.10e\n",drmin);                */
 
 
-/*  find central surface density */
+        /*  find central surface density */
         sum=0.0;
         for (i=0; i<n; i++)
                 sum += mass[idr[i]] / ( sqr(rad[idr[i]]) );
         half_sur_den_0 = 0.5 * sum;
         printf ("SD: central surface brightness = %f\n",sum);   
 
-/*  then subdivide interval until surface density half the central   */
-        low = 0; high = n-1;
-        while ((high-low)>1) {
+	if (n>2) {
+          /*  then subdivide interval until surface density half the central   */
+	  low = 0; high = n-1;
+	  while ((high-low)>1) {
                 mid = (high+low)/2;
                 radius=rad[idr[mid]] + drmin;
-/*              printf ("RC: Radius #%d = %f ",mid,radius);     */
+                /*              printf ("RC: Radius #%d = %f ",mid,radius);     */
                 sum=0.0;
                 for (i=mid+1; i<n; i++)
                    sum += mass[idr[i]] / ( rad[idr[i]] * sqrt (
                           (rad[idr[i]] - radius)*(rad[idr[i]] + radius) ) );
-/*              printf (" sur_den = %f\n",sum);                 */
+		/*              printf (" sur_den = %f\n",sum);                 */
                 if (sum>half_sur_den_0)
                         low = mid;
                 else
                         high = mid;
-        }       
-        r_c = rad[idr[mid]];                    /* core radius */
-        printf ("\nr_c = %f\n",r_c);
+	  }       
+	  r_c = rad[idr[mid]];                    /* core radius */
+	  printf ("\nr_c = %f\n",r_c);
+	}
 
     }  /* end Qr_c  */
                 
