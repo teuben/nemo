@@ -30,13 +30,16 @@
 % \usepackage{ahpage}
 
 \title{ 
-{\Huge MANYBODY:} \\
+  {\Huge MANYBODY:} \\
   {\LARGE an accompanying software guide to }\\
+  {\bf  Advanced School and Workshop on Computational Gravitational Dynamics } \\
+  { Leiden, May 3-13, 2010} \\
+  {\small and previously} \\
   {\bf  Escuela Internacional de Simulaciones Galacticas Y Cosmol\'ogicas de N--cuerpos} \\
   {\bf  International School on Galactic and Cosmological N--body Simulations} \\
   { INAOE, Tonantzintla, \\
     Puebla, Mexico, 23 July - 4 August 2006}\\
-  {\small and previously} \\
+%  {\small and previously} \\
   {\bf  Zomer school over direkte N--deeltjes simulaties} \\
   {\bf  Summer school on direct N--body simulations} \\
   { Astronomical Institute {\it 'Anton Pannekoek'}, \\
@@ -48,20 +51,20 @@
     Strasbourg, 19-22 March 2004}
 }
 
-
 \author{
  {Peter Teuben } \\
 % my spiritual co-authors :
 % Douglas Heggie - Piet Hut - Jun Makino 2004/2005
 % McMillan/Portegies Zwart 2005
 % Aguilar/Athanassoula/Dehnen/ 2006
-       }
+% ???  2010
+{
 
-\date{{\small Version 1.9} \\
-      {\small Summer 2006} \\
+\date{{\small Version 2.0} \\
+      {\small Spring 2010} \\
       {\small Last document revised: \today} \\ 
-      {\small \tt URL: http://bima.astro.umd.edu/nemo/manybody/index.html} \\
-     }
+      {\small \tt URL: http://www.astro.umd.edu/nemo/manybody/} \\
+}
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 \def\eps@scaling{1.0}%
@@ -93,7 +96,7 @@
 \maketitle
 
 \begin{htmlonly}
-A \htmladdnormallink{postscript version}{ftp://ftp.astro.umd.edu/pub/nemo/blabla.ps.gz}
+\htmladdnormallink{postscript version}{ftp://ftp.astro.umd.edu/pub/nemo/blabla.ps.gz}
 is available. 
 
 {\bf Warning:} The contents of this document are likely to change.
@@ -144,7 +147,8 @@ unfinished sections.
 
 %% == this is modest specific
 
-A large number of programs are within the NEMO and Starlab packages, 
+A large number of programs are within the NEMO, Starlab and now
+AMUSE packages, 
 though a number of useful programs and smaller packages
 that are available elsewhere have been assembled here
 and made available via the {\it manybody} environment.
@@ -212,6 +216,8 @@ differences. In ``real life'' you may not always want to do this!
 
 % yes, intel vs. gcc ; solaris vs. linux ; -g vs. -O on gnu. etc.
 
+\section*{Python shell}
+
 \section*{Examples}
 
 You will find shell script examples in the manual, at the top of the example
@@ -262,7 +268,8 @@ Buy your friendly teachers a Coffee or Beer
 I would like to thank my co-authors in spirit, 
 Douglas Heggie, Piet Hut, and Junichiro Makino for their contributions, 
 Simon Portegies Zwart and Christian Boily for the MODEST schools in Amsterdam 
-and Strasbourg respectively, where much of this material was written. 
+and Strasbourg respectively, where much of this material was first
+written down.
 In the true spirit of open source, 
 numerous authors have contributed their software, which you can find on
 the DVD. Without their generous contributions this guide would not be
@@ -288,7 +295,7 @@ Self-consistent direct N-body integrations\footnote{See Table~\ref{t:codes}}
 Orbit integrator in a general Gravitational Potential\footnote{{\tt potcode} in NEMO}
 \begin{equation}
     \ddot{\vec{\bf r}} = -\nabla \Phi(\vec{\bf r})
-\end{equation}
+\end{equation} 
 
 \item
 Orbit integrator in a Flow Potential\footnote{{\tt flowcode} in NEMO}
@@ -298,6 +305,9 @@ Orbit integrator in a Flow Potential\footnote{{\tt flowcode} in NEMO}
 
 % \item
 % Molecular Dynamics
+
+%% G<0: glass
+%% eps^2 < 0,  Pseudo-Newtonion   1/(r-eps)
 
 \end{enumerate}
 
@@ -369,6 +379,8 @@ can be used in the {\it manybody} environment.
 
 {\tt TPM} & PM &  Bode & \\
 
+{\tt partree} & PP &  Dubinski & \\
+
 
 \hline 
 
@@ -380,11 +392,11 @@ can be used in the {\it manybody} environment.
 \section{firstn}
 
 The first N-body code (skipping the pioneering analog experiments by 
-Holmberg (1941))
+Holmberg (1941)\footnote{see also {\tt mkh41}}
 %Holmberg, Ap.J. 94, 385, 1941)
 was arguably written by von Hoerner (1960)  % (Z.f.Astrophys. 50, 184, 1960) 
 and has recently
-been resurrected by Aarseth and is available as {\tt firstn} in NEMO. Here is an
+been resurrected by Aarseth and is also available as {\tt firstn} in NEMO. Here is an
 example running the code for two crossing times on a self-generated 16-body
 Plummer sphere configuration
 
@@ -414,7 +426,7 @@ Plummer sphere configuration
  
 \end{verbatim}\normalsize
 
-It simply prints out the time T, the virial ratio Q (Q=T/W where 0.5 means in virial
+It simply prints out the time T, the virial ratio Q (Q=T/W, thus 0.5 means virial
 equilibrium), number of STEPS taken, energy conservation and total energy, and another 
 line on the center of mass motion. No actual snapshots are stored in this 
 simulation, although the code layout is very similar to that of {\tt nbody0},
@@ -433,7 +445,7 @@ Binney \& Tremaine (1987).
 You can find this implementation in Fortran ({\tt nbody0})
 as well as an identical C
 ({\tt nbody00}) in NEMO, with both a simple ASCII dataformat,
-as well as the better supported NEMO {\it snapshot} format. Aarseth likes
+as well as the NEMO {\it snapshot} format. Aarseth likes
 to refer to this version as the ``Mickey Mouse'' version, and really prefers
 you to use the full version, {\tt nbody1}, or better yet,
 {\tt nbody4} or {\tt nbody6} (see below).
@@ -485,7 +497,7 @@ Time resets needed 0 times / 9 dumps
 \end{verbatim}\normalsize
 
 Notice that when running {\tt mkplummer} the first two parameters ({\tt in=} and {\tt nbody=})
-were not explicitly named, because they were given in the order known to the program.
+were not explicitly named, because they were given in the order known to the program. This is a feature of the NEMO command line interface.
 
 
 \section{nbody1, nbody2}
@@ -567,7 +579,8 @@ Currently the only other
 code capable of doing combined dynamical and stellar evolution
 is the {\tt kira} code in Starlab.  A very newe project,
 {\tt muse}\footnote{{\tt http://www.science.uva.nl/sites/modesta/wiki/index.php/Main\_Page}},
-aims to modularize this approach.
+aims to modularize this approach. This is now superseded by 
+the AMUSE project\footnote{{\tt http://www.amusecode.org}},
 
 \section{nbody6}
 
@@ -607,7 +620,8 @@ each level.
 {\it fewbody} also comes with an OpenGL vizualizer called {\tt GLStarView},
 which can visualize a simulation as it is being computed by directly
 piping the data. You can find fewbody  version 0.21 in {\tt \$NEMO/usr/fregeau},
-as wel as glstarview.
+as wel as glstarview. Within NEMO the {\tt glnemo2} visualization tool has
+similar capabilities.
 
 There are  4 programs that come with {\it fewbody}:
 {\tt binbin}, {\tt binsingle}, {\tt triplebin} and {\tt cluster},
@@ -891,9 +905,10 @@ and the diagnostics overview ({\tt snapdiagplot})
 
 
 Note that this code does not conserve linear momentum, since the
-forces are not symmetric and do not exactly cancel. Therefore
+forces are not symmetric and thus do not exactly cancel. Therefore
 you will see a drift in the center of mass (CM), as numerically
-shown by the output of {\tt snapcenter}.
+shown by the output of {\tt snapcenter}. For a spherical system this should
+be a random walk.
 
 In addition to {\tt hackcode1}, there is also
 {\tt hackcode1\_qp}, which is slightly more expensive (but more accurate) and adds
@@ -956,7 +971,9 @@ SPH particles
 and, for cosmological simulations, the Ewald sum technique to create periodic
 boundary conditions. The code was originally written in Fortran, but in 2005 re-released
 and completely rewritten in C. It runs in a parallelized mode under MPI, even if you 
-have a single processor, you will need the infrastructure to use MPI. Also,
+have a single processor, you will need the infrastructure to use MPI
+(e.g. mpich2 and openmpi)
+Also,
 {\tt gadget2} will typicall be compiled for a specific physical situation. In the
 standard distribution you will find 4 different ones: 
 {\it cluster}, {\it galaxy}, {\it gassphere} and 
@@ -1110,7 +1127,8 @@ harmonics Particle-Mesh code. The current version is a largely expanded and
 improved version from van Albada by Trenti (Trenti 2005). A convenient
 NEMO wrapper, called {\tt runCGS} is available:
 
-\footnotesize\begin{verbatim}
+\footnotesize
+\begin{verbatim}
  # File: examples/ex9 :  
  1% runCGS in=p1024.in out=run2 
 >>> snapprint p1024.in x,y,z    > run2/initPOS.dat
@@ -1134,7 +1152,8 @@ Using snapshot in=p1024.in with nbody=1024
  4% snapmass run2/snap.out - mass=1 | snapmradii - log=t | tabplot - 1 2:10 line=1,1
 
 
-\end{verbatim}\normalsize
+\end{verbatim}
+\normalsize
 
 % there is something a little odd with this simulation. explain.
 
@@ -1149,7 +1168,8 @@ the program itself has some of the usual fortran
 restrictions, and a NEMO frontend {\tt rungalaxy}
 is available to simplify running this code:
 
-\footnotesize\begin{verbatim}
+\footnotesize
+\begin{verbatim}
 1% mkplummer p1024.in 1024
 2% rungalaxy p1024.in run1
  galaxy V1.3 
@@ -1177,7 +1197,12 @@ Time=1
 
 
 
-\end{verbatim}\normalsize
+\end{verbatim}
+\normalsize
+
+\subsection{AMUSE}
+
+Integrators in AMUSE are to be described here.
 
 % see admin.h and reset parameter ( mbuff = 100000 )  to get more particles
 
@@ -1235,6 +1260,8 @@ are nbody0, galaxy, gyrfalcON, hackcode1 and xxx}
 
 {\tt superbox}       & & & & & \\
 
+{\tt partree}       & & & & & \\
+
 \hline 
 
 \end{tabular}
@@ -1282,6 +1309,8 @@ is 3 particles on a Pythagoran Triangle with sides 3-4-5
 and relative masses 3:4:5 (Szebehely \& Peters, 1967).
 See Section~\ref{s:pyth} for more details and the
 coverpage for a sample integration.
+
+% add something about Montgomery's figure-8 and other orbits?
 
 
 \section{Aarseth, Henon \& Wielen - 1974}
@@ -1463,7 +1492,7 @@ here, one of these is usually close enough to be modified to work quickly.
 {\it 3dv}         &    -     &     -      &    snapidl        &   for a variety of 3D viewers \\
 {\it xyz}         &   NEMO    &     -      &    snapxyz        &  for xyzview \\
 {\it specks}      &  partiview &     -      &    snapspecks      &  for partiview \\
-
+{\it ...}       &  partree     &     -      &    -              &  - \\
 
 
 
@@ -1498,6 +1527,9 @@ changed!
 
 Aarseth uses {\it N-body Units}, i.e.
 
+{\tt AMUSE} attaches units to numbers, e.g. {\tt m = 100.0 | units.MSun},
+{\tt r = 1 | units.parsec}.
+
 \section{Initial Conditions}
 
 Although some initial conditions can be generated from basic principles,
@@ -1507,7 +1539,7 @@ specific state consistent with the chosen integrator that uses that force.
 The position of the 25th
 body in the IAU 25-body problem is a simple 
 example of where an on-the-fly calculation
-is needed.
+is needed to guarentee the center of mass is numerically at (0,0,0).
 
 Also important is the issue of quiet starts, as extensively
 discussed by Sellwood (1987, 1997). Suppression of shot noise.
@@ -1544,6 +1576,10 @@ Where is the dark matter in the S+S remnants sometimes called Ellipticals?
 (cf. Baes' papers about dark matter in E's). How does the shape
 of tidal tails depend on the extent of the dark matter.
 
+Also, this is an ideal scenario to study systematic effects of errors
+in the treecode before and after the overlap. Check conservation of energy
+and properties of the resulting object(s).
+
 
 \section{Galactic Discs}
 
@@ -1560,7 +1596,7 @@ of tidal tails depend on the extent of the dark matter.
 
 
   Simulations:
-     - bar formation
+     - bar formation - properties, dependance on ICs, random, Q4
      - heating of the disk
      - interactions:
        - M31/MW
@@ -1612,9 +1648,11 @@ and an XZ projection (right). - try also snapplot3 }
 
 As can be seen in the two projections in Figure~\ref{f:s1xy}, the density center
 of the collapsed object does not remain at the origin, despite that a 
+perfect
 momentum-conserving integrator has been used. Why is that?
 
-To solve this we will translate the center of mass to the density center. Since
+To study the structure of the resulting object,
+we will translate the center of mass to the density center. Since
 we have instructed the integrator to also store the potential (already
 available to the code during the integration) in the output data stream, which
 can now be used to weigh the particles in {\tt snapcenter} with an appropriate
@@ -1630,8 +1668,7 @@ snapcenter s1.out - "-phi*phi*phi" | snapmradii - 0.01,0.1:0.9:0.1,0.99 log=t > 
 
 tabplot s1a.mtab 1 2:12 0 10 -2 2 nxticks=9 line=1,1 color=2,3,3,3,3,2,3,3,3,3,2
 tabplot s1b.mtab 1 2:12 0 10 -2 2 nxticks=9 line=1,1 color=2,3,3,3,3,2,3,3,3,3,2
-
-xlab=Time "ylab=log(M(r))"
+        xlab=Time "ylab=log(M(r))"
 
 1000: 10?
 4000: 37"
@@ -1896,12 +1933,14 @@ the orbit for one selected star from the simulation.
 
 {\it need an orbit example here as well}
 
-\subsection{glnemo}
+\subsection{glnemo2}
 
 A recent addition from the Marseille group, {\tt glnemo} is a versatile 
 interactive 3D viewer that can also display SPH/gas particles. Examples
 dataset are in {\tt \$NEMO/src/nbody/glnemo/snapshot}. 
-Recent updates to  {\tt glnemo} included making animations.
+Recent updates to  {\tt glnemo} included making animations. A completely
+rewritten version, {\tt glnemo2} is now the default version, and the
+previous version is deprecated.
 
 \section{Starlab}
 \subsection{xstarplot}
@@ -2019,7 +2058,10 @@ tool that can be used to visualize 3-d data sets.
 \section{xnbody}
 
 an online visualization tool for nbody6++, written by
-Andreas Ernst (heidelberg)
+Sonja Habbinga for her diploma thesis at the
+Research Centre Juelich in Juelich, Germany. 
+{\tt http://www.fz-juelich.de/jsc/JSCPeople/habbinga}
+
 
 \section{OpenDX}
 
@@ -2043,7 +2085,8 @@ and a simple command line interface for interactions.
 
 \section{python}
 
-Excellent language, now very popular. Graphics interface {\tt matplotlib}.
+Excellent language, now very popular. Graphics interface {\tt matplotlib},
+or alternatively {\tt qwt}.
 
 
 \section{R}
@@ -2061,9 +2104,12 @@ Although this program is not freely available,
 many people have written display and 
 analysis routines for IDL that are freely available.
 Gadget comes with some
-routines. See also NEMO's {\tt snapidl} routine to export data for IDL.
+routines. See also NEMO's inefficient {\tt snapidl} routine to export data for IDL.
 The Berkeley group (Marc Davis) has some routines on their website
 and some of your instructors admitted having used it (but they never inhaled).
+
+A public version, GDL,  is available which is largely IDL V6 compatible, and uses
+{\tt gnuplot}\index{gnuplot}\index{GDL} are the graphics engine.
 
 % give a snapidl example...
 
@@ -2165,6 +2211,9 @@ dates:  now, 1-jul-2006, ..
 Try out the {\tt galaxy} screensaver in Linux, study their code
 and generate initial conditions for NEMO integrators. How realistic are they?
 Compare Toomre \& Toomre's (1972) classic work.
+
+\item
+Study the Holmberg (1941) galactic disk, in particular the stability properties.
 
 \end{enumerate}
 
@@ -2378,6 +2427,8 @@ http://www.artcompsci.org/                                The Art of Computation
 http://www.manybody.org/                                  Manybody portal (including MODEST)
 http://www.astro.umd.edu/nemo                             NEMO website
 http://www.ids.ias.edu/~starlab/                          Starlab website
+http://muse.li/                                           MUSE
+http://www.amusecode.org/                                 AMUSE
 
 \end{verbatim}
 \normalsize
@@ -2390,13 +2441,13 @@ http://www.ids.ias.edu/~starlab/                          Starlab website
 % \part{Appendices}
 \chapter                {Setting Up Your Account}
 
-\section{GH06 Linux Lab setup}
+\section{Leiden 2010 setup}
 
-We will be using 25 Linux workstations, running Suse 10.1 (x86-64) with dual 64bit 
+We will be using Linux workstations, running Suse 10.1 (x86-64) with dual 64bit 
 Intel 3 GHz CPU processors (totaling 150 GHz!). Each workstation comes with
-1 GB memory. 
+1 GB memory.  Bla bla.
 
-A common data directory {\tt /soft/gh06} is available on all 25
+GH06: A common data directory {\tt /soft/gh06} is available on all 25
 linux lab workstations. These machines are 
 named {\tt c01tgh}, {\tt c02tgh} ... {\tt c24tgh} and the server
 is called 
@@ -2857,6 +2908,11 @@ The future of CVS is unclear. A lot of open source packages are  switching
 to SubVersion (command: {\tt svn}). In practice the {\tt cvs} and 
 {\tt svn} commands are nearly interchangeable.
 
+\section{git}
+
+A more recent innovation is the use of distributed CMS, such as {\tt git}. This
+has the advantage of maintaining/creating your own repository and only later merge
+them. The linux kernel is currently maintained using {\it git}.
 
 \begin{figure}[htb]
 \plotone{cvs.eps}
@@ -2954,9 +3010,15 @@ in NEMO, unknown data is generally passed onwards unmodified.
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %\cleardoublepage
+\chapter                {Using AMUSE}
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%\cleardoublepage
 \chapter                {Cover Art}
 
-The figures on the cover page were made in the following way:
+The figures on the cover page were made in the following way, printed out
+and cut and pasted the classical way.
 
 \section{Collisional Orbit}
 \label{s:pyth} 

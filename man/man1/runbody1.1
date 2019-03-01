@@ -184,6 +184,11 @@ as the default will not suffice anymore.
 Note that requesting tcript=10 you will see the final snapshot written at time=28.2843
 because the crossing time is about 2.828 and tcrit is measured in terms of crossing times,
 as opposed to code times for the default run with kz(15)=1.
+.SH CAVEATS
+\fBnbody1\fP still uses the old-style individual time-steps with force polynomials, not the
+\fIimproved\fP hermite integrater that is embedded in later versions of the NBODYx series. However,
+Sverre has made versions available with a hermite integrator, see for example
+the micky-mouse version \fInbody04h\fP described in \fInbody0(1NEMO)\fP.
 .SH SEE ALSO
 nbody0(1NEMO), runbody2(1NEMO), runbody4(1NEMO), runbody6(1NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO)
 .SH FILES

@@ -15,11 +15,10 @@ nbody6:
 	(mkdir nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
 
 # just an example on a simple laptop
+# note the order of building appears to matter !!!
 install_nbody6:
-	(cd nbody6/GPU2 ;\
-	make sse ;\
-	cp run/nbody7.sse $(NEMOBIN)/nbody6)
-
+	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN)/nbody6.sse)
+	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN)/nbody6)
 
 
 nbody6++: Nbody6ppGPU
@@ -40,13 +39,25 @@ install_nbody6:
 # example runs
 
 NBODY = 1024
+TCRIT = 1.0
 
 p.snap:
 	mkplummer p.snap $(NBODY) seed=123
 
 
 run1:   p.snap
-	runbody6 p.snap run1 tcrit=1 deltat=0.1
+	time runbody6 p.snap run1 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05
 
 run2:   p.snap
-	runbody6 p.snap run2 tcrit=1 deltat=0.1 exe=nbody6 nbody6=0
+	time runbody6 p.snap run2 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=0 exe=nbody6 
+
+run3:   p.snap
+	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=0 exe=nbody6.sse
+
+run4:	p.snap
+	time runbody4 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
+
+#       for kicks, a softened gravity run
+run0:
+	time rungravidy p.snap run0 tcrit=$(TCRIT) deltat=0.1 eps=0.01
+

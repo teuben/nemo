@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -fr run1 run1.log  run2 run2.log run2a run2b run2c run4a run4b run4c
+	@rm -fr run1 run1.log  run2 run2.p run2.log run2a run2b run2c run4a run4b run4c
 
 NBODY = 10
 
@@ -23,10 +23,13 @@ CMPLOG = $(NEMO)/$(DIR)/../nbody1/test/testrun
 #	this also tests stou4, as it's called in runbody1
 #	then compares the two input models, one via stou4->u3tos
 #	the other straight from nemo
+#  @todo fix the pipe inputninto runbody1
 
 u3tos:
-	@mkplummer - $(NBODY) seed=123 |\
-	  runbody1 - run2 $(NBODY) kz=1,2,1,2,0,0,0,0,0,1,1 > run2.log
+	#@mkplummer - $(NBODY) seed=123 |\
+	#  runbody1 - run2 $(NBODY) kz=1,2,1,2,0,0,0,0,0,1,1 > run2.log
+	@mkplummer run2.p $(NBODY) seed=123
+	@runbody1 run2.p run2 $(NBODY) kz=1,2,1,2,0,0,0,0,0,1,1 > run2.log
 	@u3tos run2/OUT3 run2/out3.dat; nemo.coverage u3tos.c
 	@mkplummer run2/test1 $(NBODY) seed=123
 	@snaptrim run2/out3.dat run2/test2 times=0

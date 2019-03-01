@@ -46,7 +46,7 @@ string defv[] = {
     "zmbar=0.5\n      mean mass of system, in solar units",
 
 #if 0
-    "kz=0 1 0 0 1 0 1 0 0 0  0 0 0 1 1 1 0 0 3 4  1 0 2 0 0 1 0 0 0 1  0 0 0 0 0 0 1 0 0 0\n"
+    "kz=0 1 0 0 1 0 1 0 0 0  0 0 0 1 1 1 0 0 3 4  1 0 2 0 0 1 0 0 0 1  0 0 0 0 0 0 1 0 0 0\n",
 #else
     "kz=0 0 1 0 1 0 5 0 0 0  0 0 0 0 1 0 0 0 3 0  1 0 2 0 1 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0\n",
 #endif
@@ -102,7 +102,7 @@ string defv[] = {
       "    # 38  Multiple use of GRAPE-6 (sleep 1 sec after each timer check).\n"
       "      39  Neighbour list (=-1: on host; =0: full list or closest on GRAPE).\n"
       "      40  (not used).\n"
-      "    # Currently supressed",
+      "    # Currently surpressed",
 
     "dtmin=1e-5\n     time-step criterion for regularization search",
     "rmin=1e-4\n      distance criterion for regularization search",
@@ -139,7 +139,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.5\n    17-sep-2013 PJT",
+    "VERSION=0.6\n    21-feb-2019 PJT",
     NULL,
 };
 
@@ -155,7 +155,7 @@ string cvsid="$Id$";
 #define KZ_MER  17
 #define KZ_COM  18
 
-nemo_main()
+void nemo_main(void)
 {
   int nbody, nfix, ncrit, nrand, nnbmax, nrun, kstart, gpid, nbin0, n2;
   real eta, dtadj, deltat, tcrit, qe, eps, tcomp;
@@ -336,6 +336,9 @@ nemo_main()
     }
 
     sprintf(runcmd,"%s < %s",exefile,parfile);
+    run_sh(runcmd);
+
+    sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=4");
     run_sh(runcmd);
   } else {
     error("kstart=%d not yet supported for NBODY4",kstart);

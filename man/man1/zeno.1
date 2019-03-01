@@ -1,4 +1,4 @@
-.TH ZENO 1NEMO "2 January 2003"
+.TH ZENO 1NEMO "22 February 2019"
 .SH SYNOPSIS
 \fBprogram [key1=]val1 [key2=]val2 .\!.\!.
 .SH DESCRIPTION
@@ -6,9 +6,39 @@
 derived from NEMO. The binary datafiles, via \fIflestruct(3NEMO)\fP
 are largely compatible.
 .PP
+.SH EXAMPLES
+A \fIsnapshot(5NEMO)\fP created with ZENO has Position and Velocity, as well
+as using NBody instead of Nobj.
+It can be converted to NEMO's PhaseSpace with e.g. \fIsnapcopy(1NEMO)\fP, and then
+processed like NEMO snapshots. E.g.:
+.nf
+    % plumsnap p16k
+    % snapcopy p16k - | snapplot -
+.fi
+The magic of this ZENO detection is in get_snap.c, and programs (such as snapplot) that use
+older direct reading of snapshots will not be able to process these snapshots with such a
+filter.
+.SH DIFFERENCES WITH NEMO
+As highlighted in the example, a ZENO snapshot uses \fINBody\fP instead of NEMO's \fINobj\fP, but
+as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted.
+.PP
+NEMO's \fIpotential(5NEMO)\fP are similar to ZENO's \fIgspmodels\fP, where the latter also allows for adding
+potentials (much harder in NEMO).
+.PP
+NEMO has no real support for SPH (though some tags in snapshot's are supported)
+.PP
+ZENO has not plotting such as NEMO's yapp
+.SH FILES
+.nf
+.ta +2i
+$NEMO/usr/zeno		instructions how to install
+.fi
 .SH SEE ALSO
 nemo(1NEMO)
 .SH AUTHOR
 Josh Barnes
 .SH FURTHER INFORMATION
+.nf
 http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+https://github.com/joshuabarnes/zeno/
+.fi

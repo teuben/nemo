@@ -387,7 +387,7 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.10b\n	5-feb-06 PJT",
+    "VERSION=1.10c\n	23-feb-2019 PJT",
     NULL,
 };
 
@@ -422,17 +422,20 @@ void nemo_main(void)
     }
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"init_xrandom: seed=%d\n",seed);
-    Qdms = getbparam("dms");
-    if (Qdms) {
-      nret = nemoinpx(getparam("expression"),dms,32);
-      if (nret < 0) error("Parsing dms expression");
-      for (i=0; i<nret; i++)
-	printf("%g\n",dms[i]);
-      return;  /* for now */
-    }
 
     strcpy (fmt1,cp);                   /* store it in 'fmt' */
     strcpy (fmt2,cp);                   /* and here */
+    
+    Qdms = getbparam("dms");
+    if (Qdms) {
+      strcat(fmt1,"\n");
+      nret = nemoinpx(getparam("expression"),dms,32);
+      if (nret < 0) error("Parsing dms expression");
+      for (i=0; i<nret; i++)
+	printf(fmt1,dms[i]);
+      return;  /* for now */
+    }
+
     cp = getparam("separ");             
     if (hasvalue("separ"))              /* separator between numbers ? */
         strcat(fmt2,getparam("separ"));

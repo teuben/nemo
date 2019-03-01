@@ -37,7 +37,7 @@ string defv[] = {
     "etai=0.02\n      Time-step parameter for irregular force polynomial",
     "etar=0.02\n      Time-step parameter for regular force polynomial",
     "rs0=0.1\n        Initial guess for all radii of neighbor spheres",
-    "dtadj=0.25\n     Time interval for parameter adjustment and energy check",
+    "dtadj=$deltat\n  Time interval for parameter adjustment and energy check",
     "deltat=0.25\n    Output time interval",
     "tcrit=10.0\n     Termination time",
     "qe=2e-5\n        Energy tolerance (restart if DE/E > 5*QE & KZ(2) > 1)",
@@ -120,9 +120,9 @@ string defv[] = {
     /* some kz(5) > 0 options here: APO,ECC,N2,SCALE SEMI, M1,M2,ZMH,RCUT */
 
     "q=0.5\n          Virial ratio (q=0.5 for virial equilibrium)",
-    "vxrot=1\n         XY velocity scaling",
-    "vzrot=1\n         Z velocity scaling",
-    "rtide=1\n         Unscaled tidal radius for kz(14)=2 and kz(22) >= 2",
+    "vxrot=0\n        XY velocity scaling",
+    "vzrot=0\n        Z velocity scaling",
+    "rtide=1\n        Unscaled tidal radius for kz(14)=2 and kz(22) >= 2",
 
     /* some more:   GMG,RG0 if kz(14)=2 or 3*/
 
@@ -148,11 +148,11 @@ string defv[] = {
     "exe=nbody6++\n   Name of the executable",
     "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
 
-    "VERSION=0.4\n    21-feb-2019 PJT",
+    "VERSION=0.5\n    21-feb-2019 PJT",
     NULL,
 };
 
-string usage="NEMO frontend to the NBODY6++ code";
+string usage="NEMO frontend to the NBODY6(++) code";
 
 string cvsid="$Id$";
 
@@ -184,6 +184,8 @@ void nemo_main(void)
   string infile;
   char dname[256], runcmd[256], fmt7[256];
   stream datstr, histr, instr, outstr;
+
+  warning("This is a not fully tested pre-release version %s",getparam("VERSION"));
 
   kstart = getiparam("kstart");
   tcomp =  getdparam("tcomp");
