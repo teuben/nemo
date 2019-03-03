@@ -1,0 +1,43 @@
+.TH SNAPBINARY 1NEMO "3 March 2019"
+.SH NAME
+snapbinary \- analyse binaries in a snapshot
+.SH SYNOPSIS
+\fBsnapbinary\fP [parameter=value]
+.SH DESCRIPTION
+For a given pair of stars, some statistics of what kind of binary it is.
+For a bound pair the semi-major axis, period and eccentricity will be given.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name [???]    
+.TP
+\fBi1=\fP
+First star [0]     
+.TP
+\fBi2=\fP
+Second star [1]     
+.TP
+\fBzerocm=\fP
+Center of mass correction? [f]
+.SH EXAMPLES
+.nf
+% snapbinary snap22  188 406
+  m1,m2,mu=0.00122891 0.000262444 0.00149135
+  0.000156675 -0.000590395 0.000228021 0.152756 -0.147408 0.406277
+  T,W,E,a=0.105062 -2.28734 -2.18228 0.000341696 
+  period=0.00102766
+
+.fi
+.SH SEE ALSO
+kep2kep(1NEMO)
+.SH FILES
+NEMO/src/nbody/reduc/snapbinary.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+3-Mar-2019	V0.1 quick hack		PJT
+.fi
