@@ -4,7 +4,8 @@ snapbinary \- analyse binaries in a snapshot
 .SH SYNOPSIS
 \fBsnapbinary\fP [parameter=value]
 .SH DESCRIPTION
-For a given pair of stars, some statistics of what kind of binary it is.
+For a given pair of stars, some statistics of what kind of binary it is,
+ignoring any other stars in the neighborhood.
 For a bound pair the semi-major axis, period and eccentricity will be given.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
@@ -14,10 +15,10 @@ is also given:
 input file name [???]    
 .TP
 \fBi1=\fP
-First star [0]     
+First star, where 0 is the first star in the snapshot. [0]     
 .TP
 \fBi2=\fP
-Second star [1]     
+Second star. [1]     
 .TP
 \fBzerocm=\fP
 Center of mass correction? [f]
@@ -31,7 +32,7 @@ Center of mass correction? [f]
 
 .fi
 .SH SEE ALSO
-kep2kep(1NEMO)
+kep2kep(1NEMO), mk2body(1NEMO) , snapshot(5NEMO)
 .SH FILES
 NEMO/src/nbody/reduc/snapbinary.c
 .SH AUTHOR
