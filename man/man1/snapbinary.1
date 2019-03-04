@@ -1,12 +1,15 @@
 .TH SNAPBINARY 1NEMO "3 March 2019"
 .SH NAME
-snapbinary \- analyse binaries in a snapshot
+snapbinary \- analyze binaries in a snapshot
 .SH SYNOPSIS
 \fBsnapbinary\fP [parameter=value]
 .SH DESCRIPTION
-For a given pair of stars, some statistics of what kind of binary it is,
-ignoring any other stars in the neighborhood.
+For a given pair of stars, some statistics is computed of what kind of binary it is
+(ignoring any other stars in the neighborhood).
 For a bound pair the semi-major axis, period and eccentricity will be given.
+.PP
+The program \fIsnapstat(1NEMO)\fP with option \fBdebug=1\fP will report the progression
+of nearest neighbors, which are good candidates for binaries.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -23,16 +26,53 @@ Second star. [1]
 \fBzerocm=\fP
 Center of mass correction? [f]
 .SH EXAMPLES
+In this given snapshot \fIsnapstat(1NEMO)\fP is used to report close pairs
+(but note it will only report pairs closer than the previous one):
 .nf
-% snapbinary snap22  188 406
-  m1,m2,mu=0.00122891 0.000262444 0.00149135
-  0.000156675 -0.000590395 0.000228021 0.152756 -0.147408 0.406277
-  T,W,E,a=0.105062 -2.28734 -2.18228 0.000341696 
-  period=0.00102766
 
+% snapstat snap22 exact=t all=t debug=1
+...
+### nemo Debug Info: rmin=31.0396 for (0,1) mass (0.00131882,0.000923836)
+### nemo Debug Info: rmin=8.34925 for (0,4) mass (0.00131882,0.000368837)
+### nemo Debug Info: rmin=5.88091 for (0,5) mass (0.00131882,0.000265256)
+### nemo Debug Info: rmin=4.40751 for (0,6) mass (0.00131882,0.000296517)
+### nemo Debug Info: rmin=2.86166 for (0,7) mass (0.00131882,0.000534057)
+### nemo Debug Info: rmin=2.70097 for (0,28) mass (0.00131882,0.000926514)
+### nemo Debug Info: rmin=0.315905 for (1,8) mass (0.000923836,0.00156653)
+### nemo Debug Info: rmin=0.0229803 for (8,33) mass (0.00156653,0.000452991)
+### nemo Debug Info: rmin=0.00713546 for (23,24) mass (0.000450885,0.000545665)
+### nemo Debug Info: rmin=0.00623804 for (23,26) mass (0.000450885,0.000242503)
+### nemo Debug Info: rmin=0.00586965 for (41,46) mass (0.0132193,0.0132209)
+### nemo Debug Info: rmin=0.00439421 for (45,151) mass (0.00408217,0.00155427)
+### nemo Debug Info: rmin=0.00404594 for (51,141) mass (0.00565297,0.00139231)
+### nemo Debug Info: rmin=0.00345551 for (61,138) mass (0.00394162,0.00155196)
+### nemo Debug Info: rmin=0.00337327 for (61,141) mass (0.00394162,0.00139231)
+### nemo Debug Info: rmin=0.00292007 for (64,68) mass (0.00475124,0.00506128)
+### nemo Debug Info: rmin=0.00240338 for (70,76) mass (0.00603871,0.0529179)
+### nemo Debug Info: rmin=0.00133495 for (70,93) mass (0.00603871,0.0048034)
+### nemo Debug Info: rmin=0.00097828 for (145,420) mass (0.00324217,0.00133839)
+### nemo Debug Info: rmin=0.000652002 for (188,406) mass (0.00122891,0.000262444)
+...
+Star 70 might be part of a triple.
+
+% snapbinary snap22  188 406
+  m1,m2,mu: 0.00122891 0.000262444 0.00149135
+  pos,vel:  0.000156675 -0.000590395 0.000228021 0.152756 -0.147408 0.406277
+  T,W,E:    0.105062 -2.28734 -2.18228 
+  H,|H|:    -0.000206252 -2.88217e-05 6.70914e-05 0.000218796
+  a,b,p,e:  0.000341696 0.000104729 3.20995e-05 0.951871
+  period:   0.00102766
+  
+% snapbinary snap22  1 8
+  m1,m2,mu: 0.000923836 0.00156653 0.00249036
+  pos,vel:  0.29847 -0.0686271 -0.0774708 -0.113217 -0.010249 -0.0666479
+  T,W,E:    0.00868257 -0.00788328 0.000799292 
+  H,|H|:    0.00377985 0.0286634 -0.0108288 0.030873
+  a,b,p,e:  -1.55786 -0.772167 0.382732 1.1161
+  period:   Inf (Not a binary)
 .fi
 .SH SEE ALSO
-kep2kep(1NEMO), mk2body(1NEMO) , snapshot(5NEMO)
+kep2kep(1NEMO), mk2body(1NEMO) , snapstat(1NEMO), snapshot(5NEMO)
 .SH FILES
 NEMO/src/nbody/reduc/snapbinary.c
 .SH AUTHOR
