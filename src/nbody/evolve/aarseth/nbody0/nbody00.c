@@ -208,6 +208,7 @@ L100:
 		    + f[k+i*3] * 2.0) * dt + x0dot[k+i*3];
 	}
 	itmp=i+1;
+	//  this suffers from the Heisenbug, output depends on the timestep
 	outbods(&body[i], &x[i*3], a, &step[i], &itmp);
 	d__1 = a[0];
 	d__2 = a[1];
@@ -373,9 +374,9 @@ L200:
 	    i,time,sum_f,sum_f2dot,step[i]);
     ++nsteps;
     if (time - tnext >= 0.0) {
-	goto L100;
+      goto L100;               // energy check and output
     } else {
-	goto L200;
+      goto L200;               // next timestep
     }
 } /* nbody0 */
 
