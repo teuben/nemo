@@ -19,7 +19,7 @@ string defv[] = {
     "i1=0\n                     First star",
     "i2=1\n                     Second star",
     "zerocm=f\n                 Center of mass correction?",
-    "VERSION=0.1\n	        3-mar-2019 PJT",
+    "VERSION=0.2\n	        4-mar-2019 PJT",
     NULL,
 };
 
@@ -34,8 +34,8 @@ void nemo_main(void)
   int i2 = getiparam("i2");
   bool Qcm = getbparam("zerocm");
   int nbody, bits;
-  real tsnap, m1, m2, mu, T,W,E,a,period, w_sum;
-  vector tmpx, tmpv, w_pos, w_vel;
+  real tsnap, m1, m2, mu, T,W,E,a,b,L,period, w_sum, p, e;
+  vector tmpx, tmpv, w_pos, w_vel, H;
 
   instr = stropen(getparam("in"), "r");
   get_history(instr);
@@ -66,20 +66,32 @@ void nemo_main(void)
   m1 = Mass(bp1);
   m2 = Mass(bp2);
   mu = m1+m2;
-  printf("m1,m2,mu=%g %g %g\n",m1,m2,mu);
+  printf("m1,m2,mu: %g %g %g\n",m1,m2,mu);
   SUBV(tmpx,Pos(bp1),Pos(bp2));
   SUBV(tmpv,Vel(bp1),Vel(bp2));
-  printf("%g %g %g %g %g %g\n", tmpx[0],tmpx[1],tmpx[2],tmpv[0],tmpv[1],tmpv[2]);
+  printf("pos,vel:  %g %g %g %g %g %g\n", tmpx[0],tmpx[1],tmpx[2],tmpv[0],tmpv[1],tmpv[2]);
   T = 0.5 * (tmpv[0]*tmpv[0] + tmpv[1]*tmpv[1] + tmpv[2]*tmpv[2]);
   W = -mu/sqrt(tmpx[0]*tmpx[0] + tmpx[1]*tmpx[1] + tmpx[2]*tmpx[2]);
   E = T + W;
   a = -mu/2/E;
-  printf("T,W,E,a=%g %g %g %g \n",T,W,E,a);
+  printf("T,W,E:    %g %g %g \n",T,W,E);
+
+  CROSSVP(H,tmpx,tmpv);
+  ABSV(L,H);
+  printf("H,|H|:    %g %g %g %g\n",H[0],H[1],H[2],L);
+  p = L*L/mu;
+  e = sqrt(1 - p/a);
+  if (e<1)
+    b = a * sqrt(1-e*e);
+  else
+    b = a * sqrt(e*e-1);
+  printf("a,b,p,e:  %g %g %g %g\n",a,b,p,e);
+  
   if (a>0) {
     period = TWO_PI * a * sqrt(a/mu);
-    printf("period=%g\n",period);
+    printf("period:   %g\n",period);
   } else
-    printf("Not a binary\n");
+    printf("period:   Inf (Not a binary)!\n");
     
 
 }
