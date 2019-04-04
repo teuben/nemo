@@ -1,15 +1,8 @@
 The detailed installation instructions are in the file README.install.
-The script  docs/test_a_new_nemo_git contains a  fully worked out
-example how to install NEMO.
+The script  docs/install_nemo  contains a  fully worked outexample how 
+to install NEMO. It should work on Linux and Mac.
+ 
 
-Basically, the install is a sequence is that most autoconf based software
-uses:
-
-	./configure [options]
-	make install
-
-however, make install does not actuall install the software, but
-merely prints out the instructions what to do. 
 
 - Peter Teuben
 
