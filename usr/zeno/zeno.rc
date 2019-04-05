@@ -1,4 +1,4 @@
-setenv ZENOPATH         "$NEMO/usr/zeno"
+setenv ZENOPATH         "$NEMO/usr/zeno/zeno"
 setenv ZCC              "gcc"
 #setenv ZCCFLAGS        "-DMACOSX -I$ZENOPATH/inc"
 setenv ZCCFLAGS         "-DLINUX  -I$ZENOPATH/inc"

@@ -46,7 +46,7 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.5\n  25-aug-2014 PJT",
+    "VERSION=3.5a\n 23-feb-2019 PJT",
     NULL,
 };
 
@@ -159,6 +159,9 @@ nemo_main()
     if (!Qx) strcat(slabel,"Dx*");
     if (!Qy) strcat(slabel,"Dy*");
     if (!Qz) strcat(slabel,"Dz*");
+    /* make it always 10 in lenght */
+    for (i=strlen(slabel); i<10; i++)
+      strcat(slabel," ");
     
     if (maxmom < 0) {
       warning("No work done, maxmom<0");
@@ -205,11 +208,11 @@ nemo_main()
 	if (maxmom > 3)
 	  kurt = kurtosis_moment(&m);
 	
-	printf ("Number of points      : %d\n",n_moment(&m));
-	printf ("Min and Max           : %f %f\n",min_moment(&m), max_moment(&m));
-	printf ("Mean and dispersion   : %f %f\n",mean,sigma);
-	printf ("Skewness and kurtosis : %f %f\n",skew,kurt);
-	printf ("Sum and Sum*%s        : %f %f\n",slabel, sum, sum*sov);
+	printf ("Number of points       : %d\n",n_moment(&m));
+	printf ("Min and Max            : %f %f\n",min_moment(&m), max_moment(&m));
+	printf ("Mean and dispersion    : %f %f\n",mean,sigma);
+	printf ("Skewness and kurtosis  : %f %f\n",skew,kurt);
+	printf ("Sum and Sum%s  : %f %f\n",slabel,sum,sum*sov);   /* align trick */
 	if (Qmedian) {
 	  if (Qtorben) {
 	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);

@@ -14,6 +14,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -26,7 +27,7 @@ string defv[] = {
     "wmode=acc\n      Use for W (acc|phi|exact)",
     "newton=f\n       Do an exact N^2 newtonian calculation too?",
     "eps=0.05\n	      Gravitational softening, if used",
-    "VERSION=0.5\n    30-jul-97 PJT",
+    "VERSION=0.5a\n   28-feb-2019 PJT",
     NULL,
 };
 
@@ -37,7 +38,7 @@ string usage = "compute various global virials (clausius, newton)";
 #define EXACT_MODE 0x04
 
 
-nemo_main()
+void nemo_main(void)
 {
     stream instr;
     real   tsnap,T2,v2,rij,s, eps, eps2;
@@ -54,8 +55,7 @@ nemo_main()
     eps2 = sqr(eps);
 
     dprintf(1,"wmode=0x%x\n",wmode);
-    printf("# T  2T/W  T+W   T  W_acc W_phi W_exact\n");
-    
+    printf("# time     2T/W      T+W      T       W_acc     W_phi    W_exact  M\n");  // only for default wmode
     instr = stropen(getparam("in"), "r");           /* open input file */
     get_history(instr);			    /* accumulate data history */
     count = 0;

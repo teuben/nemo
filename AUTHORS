@@ -6,4 +6,5 @@ been the maintainer of NEMO since. There is also a derived version,
 ZENO, in development by Joshua Barnes.
 
 There have been many many contributions, authors are (hopefully all) 
-listed in the unix manual page "man/man5/authors.5".
+listed in the unix manual page "man/man5/authors.5", accessible with
+the command "man authors" once NEMO has been loaded in the shell.

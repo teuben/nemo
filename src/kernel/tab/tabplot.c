@@ -56,6 +56,7 @@
 #include <yapp.h>
 #include <axis.h>
 #include <layout.h>
+#include <table.h>
 #include <moment.h>
                     /* undefined values trick !!!  MACHINE DEP  !!! */
 #ifdef SINGLEPREC
@@ -103,7 +104,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.1\n	 22-aug-2018 PJT",
+    "VERSION=3.1a\n	 4-apr-2019 PJT",
     NULL
 };
 
@@ -161,6 +162,7 @@ local bool Qreadlines;
 void setparams(), plot_data();
 
 extern real median(int, real *);
+extern int nemo_file_lines(string, int);
 
 local real  xtrans(real),  ytrans(real);    /* WC -> cmXY */
 local real ixtrans(real), iytrans(real);    /* cmXY -> WC */
@@ -168,7 +170,7 @@ local void setrange(real *rval, string rexp);
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();
 
@@ -359,6 +361,7 @@ read_data()
        replace them with pointers */
 
     npt = get_atable(instr,nxcol+nycol+ndxcol+ndycol,colnr,coldat,nmax);    /* get data */
+    dprintf(1,"get_atable: %d\n",npt);
     if (npt < 0) {
     	npt = -npt;
     	warning("Could only read first set of %d data",npt);

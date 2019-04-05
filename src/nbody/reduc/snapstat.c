@@ -51,7 +51,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.6\n              11-feb-2019 PJT",
+    "VERSION=1.6a\n             28-feb-2019 PJT",
     NULL
 };
 
@@ -87,17 +87,17 @@ local real **up, **vp, **wp;  /* pointers to velocities; for sorting */
 local string times;                           /* input parameters */
 local real minradfrac;
 local real eps, sqreps;
-local bool   Qpot, Qr_v, Qr_c, Qr_h, Qrms, Qexact;
-local bool   verbose;
+local bool Qpot, Qr_v, Qr_c, Qr_h, Qrms, Qexact;
+local bool verbose;
 local real Ecutoff;
-local bool   need_phi, need_acc, need_rad, Qacc;
+local bool need_phi, need_acc, need_rad, Qacc;
 
 local real x1,testy1,z1,x2,y2,z2;               /* buffers used in stat analysis */
 local real u1,v1,w1,u2,v2,w2;
-local int    n1;
+local int  n1;
 local real r2min = -1;
 
-local real ucm, vcm, wcm;                   /* center of mass motion */
+local real ucm, vcm, wcm;                           /* center of mass motion */
 local real etot;                                    /* total energy */
 local real mtot;                                    /* total mass     */
 local real r_v;                                     /* Virial radius    */
@@ -109,7 +109,7 @@ local real mass_radius[]  ={0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
 
 local real *epot=NULL;                              /* potential energies */
 local real *rad=NULL;                               /* radii */
-local int    *idr=NULL;                             /* index array for sorting */
+local int  *idr=NULL;                               /* index array for sorting */
 
 
 /****************************** START OF PROGRAM **********************/
@@ -307,7 +307,7 @@ exact()                         /* exact potential and forces */
 
 analysis(int nbody)
 {
-        int i,j;
+        int i,j,i1,i2;
         real x,y,z,u,v,w;
         real inv_rad, pmass, tmp, r2;
         real xdir, ydir, zdir, artmp, axtmp, aytmp, aztmp;
@@ -328,9 +328,13 @@ analysis(int nbody)
                         ydir = y - *yp[j];
                         zdir = z - *zp[j];
                         r2 = sqr(xdir) + sqr(ydir) + sqr(zdir);
-                        dprintf (1,"%d %d %f\n",i,j,sqrt(r2));
-                        if (r2<r2min)
-                                r2min=r2;
+                        dprintf (2,"%d %d %f\n",i,j,sqrt(r2));
+                        if (r2<r2min) {
+			  i1=i;
+			  i2=j;
+			  r2min=r2;
+			  dprintf(1,"rmin=%g for (%d,%d) mass (%g,%g)\n",sqrt(r2min),i1+1,i2+1,mass[i1],mass[i2]);
+			}
                         if (!Qacc) {
                           artmp = mass[j]/((r2+sqreps)*sqrt(r2));  /* tmp force */
                           axtmp = xdir*artmp;
@@ -518,7 +522,7 @@ radii(int n)
  
     if (Qr_c) {
         
-/*  first compute smallest interparticle distance  */
+        /*  first compute smallest interparticle distance  */
  
         drmin = rad[idr[n-1]];                  /* largest distance */
         for (i=1; i<n; i++) {           /* because arrays were sorted */
@@ -527,34 +531,36 @@ radii(int n)
                         drmin=dr;
         }
         drmin *= minradfrac;            /* and take a fraction of that */
-/*      printf ("SD: drmin*minradfrac=%20.10e\n",drmin);                */
+	/*      printf ("SD: drmin*minradfrac=%20.10e\n",drmin);                */
 
 
-/*  find central surface density */
+        /*  find central surface density */
         sum=0.0;
         for (i=0; i<n; i++)
                 sum += mass[idr[i]] / ( sqr(rad[idr[i]]) );
         half_sur_den_0 = 0.5 * sum;
         printf ("SD: central surface brightness = %f\n",sum);   
 
-/*  then subdivide interval until surface density half the central   */
-        low = 0; high = n-1;
-        while ((high-low)>1) {
+	if (n>2) {
+          /*  then subdivide interval until surface density half the central   */
+	  low = 0; high = n-1;
+	  while ((high-low)>1) {
                 mid = (high+low)/2;
                 radius=rad[idr[mid]] + drmin;
-/*              printf ("RC: Radius #%d = %f ",mid,radius);     */
+                /*              printf ("RC: Radius #%d = %f ",mid,radius);     */
                 sum=0.0;
                 for (i=mid+1; i<n; i++)
                    sum += mass[idr[i]] / ( rad[idr[i]] * sqrt (
                           (rad[idr[i]] - radius)*(rad[idr[i]] + radius) ) );
-/*              printf (" sur_den = %f\n",sum);                 */
+		/*              printf (" sur_den = %f\n",sum);                 */
                 if (sum>half_sur_den_0)
                         low = mid;
                 else
                         high = mid;
-        }       
-        r_c = rad[idr[mid]];                    /* core radius */
-        printf ("\nr_c = %f\n",r_c);
+	  }       
+	  r_c = rad[idr[mid]];                    /* core radius */
+	  printf ("\nr_c = %f\n",r_c);
+	}
 
     }  /* end Qr_c  */
                 
