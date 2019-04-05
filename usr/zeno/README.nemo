@@ -1,7 +1,8 @@
 
 1) go to http://www.ifa.hawaii.edu/~barnes/software.html
-   fetch the main release (009 now)
-   fetch the update (009e now)
+   fetch the main release (010 now)
+        http://www.ifa.hawaii.edu/~barnes/zeno/zeno.010.tar.gz
+   fetch the update (none now)
    edit the MAC or LINUX portion in our local version zeno.rc
    source zeno.rc
    make -f Zeno
