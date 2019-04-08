@@ -1,6 +1,6 @@
-.TH RUNBODY6 1NEMO "21 February 2019"
+.TH RUNBODY6 1NEMO "6 April 2019"
 .SH NAME
-runbody6 \- Hermite N-body code with optional stellar evolution, frontend to nbody6 and nbody6++
+runbody6 \- Hermite N-body code with optional stellar evolution, NEMO frontend to nbody6 and nbody6++
 .SH SYNOPSIS
 .nf
 \fBrunbody6\fP [parameter=value]
@@ -130,14 +130,23 @@ Non-zero options for alternative paths (up to 50)
 31	Centre of mass correction after energy check.
 32	Increase of output intervals (based on single particle energy).
 33	Block-step diagnostics at main output (=2: active pipes).
-34 #	Roche lobe overflow (suppressed).
+34 	Roche lobe overflow (suppressed).
 35	Time offset (global time from TTOT = TIME + DTOFF; offset = 100).
 36	Step reduction for hierarchical systems (not recommended).
 37	Step reduction for encounters with high-velocity particles.
-38 #	Multiple use of GRAPE-6 (sleep 1 sec after each timer check).
+38 	Multiple use of GRAPE-6 (sleep 1 sec after each timer check).
 39	Neighbour list (=-1: on host; =0: full list or closest on GRAPE).
-
-40-50   Description to come, so far this is NBODY4's KZ vector described
+40      Use force and first deriv to estimate time steps (0), >0 uses Flploy2
+41      proto-star evolution properties
+42      Initial binary distribution
+43      (unused)
+44      (unused)
+45      (unused)
+46      HDF5/binary/ANSI format
+47      frequency of KZ(47) output
+48      (unused)
+49      compute moments of inertia (Chr. Theis)
+50      for unpert KS binary.
 
 #	currently surpressed
 .fi
@@ -219,7 +228,8 @@ run1 and a plummer sphere in run2.
 
 .fi
 .PP
-You can also supply existing NEMO snapshots as initial conditions
+You can also supply existing NEMO snapshots as initial conditions, this is the best supported way to use
+runbody6:
 .nf
     % mkplummer p1024 1024
     % runbody6 p1024 run3 tcrit=1
@@ -228,6 +238,9 @@ You can also supply existing NEMO snapshots as initial conditions
 Small N systems may need to be tuned with larger \fBrs0=\fP and \fBnnbopt=\fP.
 .PP
 The dreaded CALCULATIONS HALTED message means you will need to consult the NBODY6++ manual
+.PP
+The interface has been primarely tested with nbody6++, it's possible that some differences between
+nbody6 and nbody6++ have not been taken care of.
 .SH SEE ALSO
 runbody1(1NEMO), nbody2(1NEMO), nbody4(5NEMO), snapshot(5NEMO), u3tos(1NEMO), stou4(1NEMO), snapprint(1NEMO)
 .PP
@@ -247,5 +260,6 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 20-feb-2019	V0.1 cloned off runbody4, some of keyword descriptions not complete yet		PJT
-22-feb-2019	V0.5 support nbody6/nbody6++
+22-feb-2019	V0.5 support nbody6/nbody6++	PJT
+5-apr-2019	V0.7 support writing snapshots without virtual particles	PJT
 .fi
