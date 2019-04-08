@@ -64,7 +64,7 @@ string defv[] = {
     "header= \n     if used, force unfio header size (4 or 8)",
     "integer=4\n    Size of integers in dataset (2 or 4) ** 2 is deprecated **",
     "nbody=0\n      Limit the nbody number (name) [for nbody6]",
-    "VERSION=1.7\n  5-apr-2019 PJT",
+    "VERSION=1.7a\n 7-apr-2019 PJT",
     NULL,
 };
 
@@ -159,7 +159,7 @@ void nemo_main(void)
       if (nbodymax > 0) {
 	for (i=0, j=0; i<nbody; i++)
 	  if (name[i] <= nbodymax) j++;
-	dprintf(0,"nbody recompute: %d %d %d\n",nbody,nbodymax,j);
+	dprintf(1,"nbody recompute: %d %d %d\n",nbody,nbodymax,j);
 	for (ibody=0, i=0; ibody<nbody; ibody++) {
 	  if (name[ibody] <= nbodymax) {
 	    if (ibody > i) {
@@ -183,8 +183,8 @@ void nemo_main(void)
 
       dprintf(1,"Data  : a(%d)=",alen);
       for (i=0; i<alen; i++)
-        dprintf(1," %g",a[i]);
-      dprintf(1,"\n");
+        dprintf(2," %g",a[i]);
+      dprintf(2,"\n");
 
       if (nframe==0 || model==frame[iframe]) {
         tsnap = a[0];
