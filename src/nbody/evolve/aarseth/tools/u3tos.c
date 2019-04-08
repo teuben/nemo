@@ -12,6 +12,7 @@
  *                   and in general header= needs known        
  *   4-mar-06   1.5  header= now blank default                  pjt
  *  19-feb-19   1.6  trying nbody6++                            pjt
+ *   5-apr-19   1.7  option to limit name <= nbody (for nbody6) pjt
 
 
 nbody1
@@ -62,7 +63,8 @@ string defv[] = {
     "key=name\n     snapshot Key comes from 'name' or 'key'?",
     "header= \n     if used, force unfio header size (4 or 8)",
     "integer=4\n    Size of integers in dataset (2 or 4) ** 2 is deprecated **",
-    "VERSION=1.6\n  19-feb-2017 PJT",
+    "nbody=0\n      Limit the nbody number (name) [for nbody6]",
+    "VERSION=1.7\n  5-apr-2019 PJT",
     NULL,
 };
 
@@ -84,6 +86,7 @@ void nemo_main(void)
     int ilen, alen, saved=0, alen_fix=-1;
     int frame[MAXFRAME], nframe, iframe;
     int nbody, model, run, *name, *key, i, j, k, ibody, mode, nwflt, nwint;
+    int nbodymax = getiparam("nbody");
     int coordsys = CSCode(Cartesian, 3, 2);
     float *mass, *pos, *vel, *phi, *aux, a[MAXHEADER];
     real *rmass, *rphase, tsnap;
@@ -152,6 +155,31 @@ void nemo_main(void)
 #else
       nb3data_c(&nbody,&alen,&mode,a,mass,pos,vel,phi,aux,name,key);
 #endif
+
+      if (nbodymax > 0) {
+	for (i=0, j=0; i<nbody; i++)
+	  if (name[i] <= nbodymax) j++;
+	dprintf(0,"nbody recompute: %d %d %d\n",nbody,nbodymax,j);
+	for (ibody=0, i=0; ibody<nbody; ibody++) {
+	  if (name[ibody] <= nbodymax) {
+	    if (ibody > i) {
+	      mass[i]    = mass[ibody];
+	      pos[3*i]   = pos[3*ibody];
+	      pos[3*i+1] = pos[3*ibody+1];
+	      pos[3*i+2] = pos[3*ibody+2];
+	      vel[3*i]   = vel[3*ibody];
+	      vel[3*i+1] = vel[3*ibody+1];
+	      vel[3*i+2] = vel[3*ibody+2];
+	      phi[i]     = phi[ibody];	      
+	      aux[i]     = aux[ibody];	      
+	      name[i]    = name[ibody];	      
+	      key[i]     = key[ibody];	      
+	    }
+	    i++;
+	  }
+	}
+	nbody = i;
+      }
 
       dprintf(1,"Data  : a(%d)=",alen);
       for (i=0; i<alen; i++)
