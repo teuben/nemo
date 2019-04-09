@@ -1,5 +1,5 @@
 /*
- * SNAPBINARY.C: analyse a pair of body's as a binary
+ * SNAPBINARY.C: analyse a pair of body's as a binary, purely based on pos and vel
  *
  * See also $NEMO/src/nbody/evolve/aarseth/nbody1/source/bodies.f
  *
@@ -25,14 +25,14 @@ string defv[] = {
     "i2=1\n                     Second star, must be > i1 (or list of stars > i2)",
     "bound=t\n                  Only show bound stars?",
     "out=\n                     Optional out with strongest bound pair sink'd",
-    "VERSION=0.4\n	        7-mar-2019 PJT",
+    "VERSION=0.5\n	        9-apr-2019 PJT",
     NULL,
 };
 
 string usage="analyse binaries in a snapshot, optionally merge a selected pair";
 
 
-#define MAXNBODY 1000
+#define MAXNBODY 10000
 
 
 
@@ -41,7 +41,7 @@ void nemo_main(void)
   stream instr, outstr;
   Body *btab = NULL, *bp, *bp1, *bp2;
   int n1,i1[MAXNBODY],j1, n2,i2[MAXNBODY],j2;
-  int nbody, bits, i1_min,i2_min;
+  int nbody, bits, i1_min,i2_min, nch=0, nbn=0;
   real tsnap, m1, m2, mu, T,W,E,a,b,L,period, w_sum, p, e, w_min;
   vector x, v, w_pos, w_vel, H;
   bool Qbound = getbparam("bound");
@@ -63,13 +63,14 @@ void nemo_main(void)
     for (j1=0; j1<n1; j1++) {
       bp1 = &btab[i1[j1]];                               // pointer to body
       bp2 = &btab[i2[j2]];
-      dprintf(2,"i1,i2:    %d %d\n",i1[j1],i2[j2]);      
-      if (i1[j1] > i2[j2]) continue;                     // skip
+      dprintf(2,"i1,i2:    %d %d\n",i1[j1],i2[j2]);
+      if (i1[j1] >= i2[j2])continue;                     // skip
       if (i2[j2] >= nbody) continue;      
       if (i1[j1] >= nbody) {                             // or break when illegal
 	error("nbody=%d\n",nbody);
 	break;
       }
+      nch++;                                             // count #checks
       
       m1 = Mass(bp1);
       m2 = Mass(bp2);
@@ -87,7 +88,8 @@ void nemo_main(void)
 	i1_min = i1[j1];
 	i2_min = i2[j2];
 	dprintf(1,"W_min:    %g %d %d\n",w_min, i1[j1],i2[j2]);
-      }
+      } else 
+	dprintf(2,"Unbound a=%g %d %d\n",a,i1[j1],i2[j2]);
 
       CROSSVP(H,x,v);
       ABSV(L,H);
@@ -111,10 +113,12 @@ void nemo_main(void)
       if (a>0) {
 	period = TWO_PI * a * sqrt(a/mu);
 	printf("period:   %g\n",period);
+	nbn++;
       } else if (!Qbound) !
 	printf("period:   Inf (Not a binary)!\n");
     }
-  printf("W_min:    %g for %d %d\n",w_min,i1_min,i2_min);
+  dprintf(1,"Checked %d pairs, %d were bound\n",nch,nbn);
+  printf("W_min:    %g for %d %d (found %d bound pairs)\n",w_min,i1_min,i2_min,nbn);
   
   if (hasvalue("out")) {
     bp1 = &btab[i1_min];
