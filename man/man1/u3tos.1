@@ -1,4 +1,4 @@
-.TH U3TOS 1NEMO "19 February 2019"
+.TH U3TOS 1NEMO "5 April 2019"
 .SH NAME
 u3tos \- Convert NBODY unit 3 output data to snapshot
 .SH SYNOPSIS
@@ -17,6 +17,12 @@ It is strongly recommended to
 use \fIunfio(1NEMO)\fP and check if a dataset looks ok. You may also 
 need to set \fBswap=t\fP in this program, as well as
 a \fBmode=\fP and \fBheader=\fP choice.
+.PP
+A tricky part of the format is the inclusion of (for lack of a better name) \fIvirtual\fP particles,
+which describe a KS object. Normally these are the result of close binaries
+(or higher order chain) being regularized. The \fBnbody=\fP can be used to exlude
+such particles. The result is now that each snapshot in an integration will have the
+same number of particles.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -51,6 +57,9 @@ Which of the nbodyX style of output to support. Allowed are 1 and 2 (identical
 actually), 4 (which also outputs rho and phi,and an addition key for each
 particle), and 6. Default: 1
 .TP
+\fBkey=name|key\fP
+Which of the NBODY6 arrays to put in the Key snapshot tag.
+.TP
 \fBheader=|4|8\fP
 Header size of the fortran unformatted data. This is 4 (old fortran) or 8 (modern
 compilers, such as gfortran). 
@@ -62,6 +71,11 @@ Older data may have used INTEGER*2, which limits the number of particles
 to 32767, patched programs (and presumably later official versions from Sverre)
 will always write INTEGER*4 (or having the same size as a REAL),
 [Default: \fB4\fP].
+.TP
+\fBnbody=\fP
+Limit the body number ("NAME" in NBODY6, and \fIKey\fP if \fPkey=name\fP) written.
+This will effectly remove the virtual KS particles in case binaries were regularized.
+Default: not used.
 .SH CAVEATS
 At the current time the \fBmode=\fP and \fBheader=\fP must be known in order
 for the conversion to succeed. There is no runtime autodetection of formats yet.
@@ -78,5 +92,6 @@ nbody1(1NEMO), runbody4(1NEMO), unfio(1NEMO), u4tos(1NEMO) stou4(1NEMO), snapsho
 1-mar-06	V1.2 nbody4 support	PJT
 4-mar-06	V1.4 header= has now a blank default	PJT
 19-feb-19	V1.6 added support for nbody6++ (mode=6)	PJT
+5-apr-19	V1.7 nbody= to limit particle output for nbody6	PJT
 .fi
 

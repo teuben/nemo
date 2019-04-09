@@ -3,7 +3,9 @@
  *	
  *  19-feb-2019  V0.1     draft for nbody6++                             PJT
  *                         
- *  CAVEAT:    this is optimized to read a NEMO snapshot and process that.
+ *  CAVEAT:    this is optimized to read a NEMO snapshot and process that and
+ *             write a NEMO snapshot.
+ *             Although it (should) work with nbody6, it was developed with nbody6++
  * 
  */
 
@@ -44,7 +46,7 @@ string defv[] = {
     "rbar=1.0\n       mean radius of system",
     "zmbar=0.5\n      mean mass of system, in solar units",
 
-    "kz=0 0 1 0 0 0 5 0 0 1  0 0 0 0 2 0 0 0 0 0  1 2 2 0 0 2 0 0 0 2  0 0 2 0 0 0 1 0 0 0  0 0 0 0 0 0 0 0 0 0\n",
+    "kz=0 0 1 0 0 1 5 0 0 1  0 0 0 0 2 1 1 0 0 0  1 2 0 0 0 2 0 0 0 2  0 0 2 0 0 0 1 0 0 1  0 0 0 0 0 0 0 0 0 0\n",
       "Non-zero options for alternative paths (see below)\n"
       "       1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).\n"
       "       2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
@@ -148,7 +150,7 @@ string defv[] = {
     "exe=nbody6++\n   Name of the executable",
     "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
 
-    "VERSION=0.5\n    21-feb-2019 PJT",
+    "VERSION=0.7\n    8-apr-2019 PJT",
     NULL,
 };
 
@@ -157,12 +159,6 @@ string usage="NEMO frontend to the NBODY6(++) code";
 string cvsid="$Id$";
 
 #define KZ_MAX  50
-
-#define KZ_OUT   3
-#define KZ_INI   4
-#define KZ_EXT  15
-#define KZ_MER  17
-#define KZ_COM  18
 
 void nemo_main(void)
 {
@@ -352,9 +348,9 @@ void nemo_main(void)
     run_sh(runcmd);
 
     if (nbody6_mode == 1)
-      sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 ; rm OUT3");
+      sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=%d ; rm OUT3",nbody);
     else
-      sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1");
+      sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1 nbody=%d",nbody);
     run_sh(runcmd);    
     
   } else {

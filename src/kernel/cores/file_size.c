@@ -12,6 +12,7 @@
  *      20-jun-01   prototypes 
  *	12-sep-01   nemo_
  *      21-sep-03   changed meaning of 'deflen' in nemo_file_lines    PJT
+ *       4-apr-19   nemo_file_size::stat() now returns 0 for pipes?   PJT
  */
 
 #include <stdinc.h>
@@ -24,9 +25,10 @@ int nemo_file_size(char *name)
 {
   struct stat buf;
   
-  if (stat(name,&buf) == 0)
+  if (stat(name,&buf) == 0) {
+    dprintf(9,"nemo_file_size: %d\n",buf.st_size);
     return buf.st_size;
-  else {
+  } else {
     dprintf(1,"nemo_file_size: stat returned errno=%d\n",errno);
     return -1;
   }
@@ -59,7 +61,7 @@ int nemo_file_lines(char *name, int deflen)
     stream str;
 
     len = nemo_file_size(name);
-    if (len<0) {       /* probably a pipe or special NEMO thing, so we need hints */
+    if (len<=0) {       /* probably a pipe or special NEMO thing, so we need hints */
       if (deflen == 0) return MAXLINES;
       return ABS(deflen);
     }
@@ -69,7 +71,7 @@ int nemo_file_lines(char *name, int deflen)
 #if 0
     if (isatty(fileno(str))) {
         warning("nemo_file_lines: %s is not a true file",name);
-        return(-1);
+        return -1;
     }
 #endif
 
@@ -100,12 +102,12 @@ int nemo_file_lines(char *name, int deflen)
 string defv[] = {
     "in=file_size.c\n       File to test file_size/lines on",
     "nmax=-10000\n          Default size for files on pipes",
-    "VERSION=1.5\n          21-sep-03 PJT",
+    "VERSION=1.5a\n         4-apr-2019 PJT",
     NULL,
 };
 string usage="file_size.c testbed";
 
-nemo_main()
+void nemo_main(void)
 {
     string fname;
     int deflen;

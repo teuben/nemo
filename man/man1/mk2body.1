@@ -1,4 +1,4 @@
-.TH MK2BODY 1NEMO "7 June 2010"
+.TH MK2BODY 1NEMO "3 March 2019"
 .SH NAME
 mk2body \- make a 2 body system
 .SH SYNOPSIS
@@ -7,9 +7,6 @@ mk2body \- make a 2 body system
 Creates initial conditions for a 2-body problem but where the main body
 is initially at the origin with unit mass. Only the mass and phase space
 coordinates of the 2nd body can given. 
-.PP
-Alternatively orbital parameters for the 2nd body can be given, though 
-not  implemented yet.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -47,7 +44,7 @@ if true, zero the center of mass [true]
 \fBheadline=\fP
 verbiage for output []    
 .SH SEE ALSO
-mkconfig(1NEMO), mktt72(1NEMO)
+mkconfig(1NEMO), mktt72(1NEMO), snapbinary(1NEMO), snapshot(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
