@@ -9,6 +9,7 @@
  *	mar-94 ansi
  *      20-nov-03  2.5 add sync option (but isn't doing much but warning)
  *      23-nov-03  2.5a carry over Key if present (but only if all snapshots have it)
+ *      11-apr-19  2.5c MAXSNAP now 512 since StrTabLen in filesecret.h has been increased
  *
  * Some limitations:
  *  snapshots should be not change in size, or else reallocate perhaps
@@ -32,14 +33,15 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=\n         Forced output of: {acc, phi}",
     "sync=f\n           Force time sync, based on first file in list",
     "headline=\n	random verbiage",
-    "VERSION=2.5b\n	2-dec-03 PJT",
+    "VERSION=2.5c\n	11-apr-2019 PJT",
     NULL,
 };
 
 string usage="add N-body systems on top of each other";
 
+
 #if !defined(MAXSNAP)
-# define MAXSNAP 64
+# define MAXSNAP 512
 #endif
 
 stream instr[MAXSNAP], outstr=NULL;
