@@ -10,6 +10,8 @@
  *	  14-mar-95   minor cleanup
  *   3.2  15-mar-05   finally using (g++ enforced) cleaned up function prototypes
  *   3.5   8-jun-13   element counter type fixed to handle > 2B
+ *   3.6  11-apr-19   increase StrTabLen from 64 to 1024 (Linux now handles 1024)
+ *                    check with  'ulimit -n'
  */
  
 #define RANDOM  /* allow random access */
@@ -51,8 +53,8 @@ typedef struct {
  * STRSTK: structure used to associate stream with item stack.
  */
 
-#define SetStkLen  8
-#define StrTabLen 64
+#define SetStkLen    8
+#define StrTabLen 1024
 
 typedef struct {
   stream  ss_str;                 /* pointer to stdio stream */
