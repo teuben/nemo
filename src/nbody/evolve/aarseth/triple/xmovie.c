@@ -5,16 +5,19 @@
  *   Makoto Taiji
  *	linux adaptation by Peter Teuben	jan.98 (Amsterdam)
  *	fixed Y sign convention			23-feb-98	pjt
+ *   Fixed second-underscore back to single
  */
 
 /* linux uses double trailing underscores since it has an embedded underscore */
 /* or use the g77 compile flag  */
 /* -fno-second-underscore	*/
+
+/* gfortran doesn't do this anymore, which is the current default */
 #ifdef linux
-# define init_movie init_movie__
-# define plot_all   plot_all__
-# define write_text write_text__
-# define x_flush    x_flush__
+# define init_movie init_movie_
+# define plot_all   plot_all_
+# define write_text write_text_
+# define x_flush    x_flush_
 #else
 # define init_movie init_movie__
 # define plot_all   plot_all__
