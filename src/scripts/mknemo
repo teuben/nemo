@@ -1,0 +1,353 @@
+#! /bin/csh -f
+#
+#   april-2001		allow making from file+ext (e.g. scfm.exe) too
+#   jul-2001            fixed -n bug
+#   jun-2003            optional -u "cd $NEMO;cvs update"
+#   feb-2004            both -t and -T flag
+#   mar-2004            no more NEMOBIN bug; added -d flag to cvs update
+#   apr-2004            handle make vs. gmake and other names of make
+#   nov-2004            be more generous if full filenames are used: chop them off
+#   dec-2004            look for mknemo.d scripts first
+#   dec-2005            -u also looks a NEMO/local/pgplot etc.
+#   mar-2006            give help, even if locked
+#   aug-2006            some sanity checks if cvs is present if -u is used; fixed dir search -a
+#   nov-2010            report special things it can do
+#   mar-2019            git instead of cvs
+#
+
+#  todo:    bug not doing cvs update when new mknemo detected ?
+#           safeguard if disk is full
+#
+set version="MKNEMO Version 4.1 9-apr-2019"
+if ($#argv == 0) goto usage
+set old_argv=($*)
+
+if (X$1 == X-h) goto usage
+
+onintr error
+
+set newbins=0
+set errs=0
+set logfile=$NEMO/adm/install/mknemo.log
+set make=make
+set sdir=$NEMO/src/scripts/mknemo.d
+if (! -w $logfile) then
+  echo "MKNEMO> Warning: you have no write permission on $logfile; using /dev/null instead"
+  set logfile=/dev/null
+endif
+
+set lockfile=$NEMO/adm/install/mknemo.lock
+if ("$argv[1]" == "-r") then
+  rm -f $lockfile >& /dev/null
+  echo "MKNEMO> $lockfile removed beforehand"
+endif
+if (-e $lockfile) then
+  echo "MKNEMO> Lockfile $lockfile exists; cannot run mknemo:"
+  cat $lockfile
+  echo "MKNEMO> Remove this file if you think this is a relic of a previous mknemo error."
+  exit 0
+else
+  set bywhom=`whoami`@`hostname`
+  echo "`date` | $bywhom | $*" > $lockfile
+endif
+
+#if ($?CFLAGS == 0) setenv CFLAGS "-g"
+
+# set defaults which can be modified by command line options
+
+set src=$NEMO/src
+set usr=$NEMO/usr
+set n=0
+set d=0
+set D=0
+set code=""
+set post_tidy=""
+set pre_tidy=""
+set u=0
+set l=0
+set a=0
+set v=0
+set go=0
+
+# process command line options
+loop:
+ switch ($argv[1])
+  case -a:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set a=1
+    breaksw
+  case -c:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set code=$argv[1]
+    shift argv
+    breaksw
+  case -d:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set d=1
+    breaksw
+  case -D:
+    shift argv
+    set D=1
+    set go=1
+    breaksw
+  case -l:
+    shift argv
+    set l=1
+    set go=1
+    breaksw
+  case -g:
+    shift argv
+    set make=gmake
+    breaksw
+  case -n:
+    shift argv
+    if ($#argv == 0) goto noargs
+    set n=$argv[1]
+    shift argv
+    breaksw
+  case -s:
+    shift argv
+    if ($#argv == 0) goto noargs
+    if (! -d $argv[1]) then
+      echo "MKNEMO> Directory $argv[1] not found."
+      goto error
+    else
+      set src=$argv[1]
+      echo "MKNEMO> Resetting root for find to $src"
+    endif
+    shift argv
+    breaksw
+  case -t:
+    set pre_tidy="$make clean"
+    shift argv
+    breaksw
+  case -T:
+    set post_tidy="$make clean"
+    shift argv
+    breaksw
+  case -r:
+    shift argv
+    breaksw
+  case -u:
+    set u=1
+    set go=1
+    shift argv
+    breaksw
+  case -v:
+    set v=1
+    shift argv
+    breaksw
+  case -*:
+    echo "MKNEMO> Option $argv[1] not understood"
+    shift argv
+    breaksw
+  default:
+    goto process
+ endsw
+ if ($#argv == 0) then
+    if ($go) goto process
+    goto noargs
+ endif
+    
+ goto loop
+
+process:
+
+if ($go == 0 && $#argv == 0) goto noargs
+
+# sanity check on a frequent problem, replace 1 with 0 if you want to skip this
+if (1) then
+  grep iraf $NEMOLIB/makedefs
+  if ($status == 0) then
+    echo WARNING: you have some iraf references in $NEMOLIB/makedefs
+    echo this is likely an IRAF bug - now fixed.
+    echo During the installation, setenv FC gfortran, and reinstall.
+    echo Or edit $NEMOBIN/mknemo and disable this section of code
+    rm -f $lockfile >& /dev/null
+    exit 1
+  endif
+endif
+
+if ($D) then
+  ls $NEMO/src/scripts/mknemo.d  | egrep -v README
+  rm -f $lockfile >& /dev/null
+  exit 0
+endif
+
+if ($u) then
+  (echo git pull ... ;cd $NEMO; git pull)
+  cmp -s $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
+  if ($status) then
+    # this procedure will fail if there was a C (conflict)
+    echo UPDATED mknemo and CLONING : $0 -r $old_argv
+    cp $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
+    exec $0 -r $*
+  endif
+endif
+
+if ($l) then
+  (cd $NEMO; $make libs)
+endif
+
+foreach f ($argv)
+ if (X$f:e != X) then
+   echo "MKNEMO> Cannot handle arguments that appear like full filenames - trying $f:r"
+   set f=$f:r
+ endif
+ # strip any extensions from the arguments, we're looking to make executables
+ set ft=$f:t
+ set file=$ft:r
+ # echo FILE=$file F=$f FT=$ft
+ set err=0
+ # if there is a mknemo.d script, use it.
+ if (-e $sdir/$file) then
+   $sdir/$file
+   continue
+ endif
+ # if a local file, use that to compile, don't search for it
+ if (-e $file.c) then
+   echo -n "MKNEMO> Using local ${file}.c: "
+   set l=./$file.c
+ else
+   if ("$code" == "") then
+      set ccode=$file
+   else
+      set ccode=$code
+   endif
+   foreach e (c cc cxx C f F for )
+     echo "MKNEMO> Searching ${ccode}.${e}: "
+     set l=(`find $src -name $ccode.$e -type f -print`)
+     if ($#l) break
+     if ($a) then
+	set l=(`find $usr -name $ccode.$e -type f -print`)
+	if ($#l) break
+     endif
+   end
+ endif
+ set mk="#"
+ set err=0
+
+ if ($n > 0) then
+    if ($n > $#l) then
+    echo Too few elements in the list for your selection
+      @ errs++
+      continue
+    else
+      set l=$l[$n]
+    endif
+ endif
+
+ if ($#l > 1) then
+   echo "Cannot handle multiple files yet:"
+   echo $l
+ else if ($#l == 0) then
+   echo " .. trying directories..."
+   if ($a) then
+     set l=(`find $NEMO/{src,usr} -name $file -type d -print`)
+   else
+     set l=(`find $src -name $file -type d -print`)
+   endif
+   if ($#l == 1) then
+     if (-e $l/Makefile) then
+       set mk=$ft
+       if (! -e $NEMOBIN/$mk) set newbins=1
+       (cd $l;$pre_tidy;$make $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
+       @ errs += $status
+       if ($v) then
+         echo help=I: `$NEMOBIN/$mk help=I`
+         echo help=V: `$NEMOBIN/$mk help=V`
+       endif
+       if ($d) then
+           mkpdoc $mk
+	   @ errs += $status
+       endif
+     else
+       @ errs += 1
+       echo "Cannot install $file without a Makefile"
+     endif
+   else if ($#l > 1) then
+     @ errs += 1
+     echo "Cannot handle multiple directories yet:"
+     echo $l
+   else
+     @ errs += 1
+     echo "Nothing found, try the -D flag to find out special projects"
+     echo "or the -a flag to also search under \$NEMO/usr"
+   endif
+ else
+   echo "found one: $l"
+   set dir=$l:h
+   set t=$file:t
+##   set mk=$t:r
+#		now allowing makings from extensions (e.g. scfm.exe)
+   set mk=$f
+   if (! -e $dir/Makefile) then
+      echo "### Warning: using funny template Makefile"
+      set mf="-f $NEMO/src/nbody/trans/Makefile"
+   else 
+      set mf=""
+   endif
+   if (! -e $NEMOBIN/$mk) set newbins=1
+   (cd $dir ; $pre_tidy; $make $mf $mk; set err=$status; mv $mk $NEMOBIN; $post_tidy)
+   @ errs += $err
+   if ($v) then
+     echo help=I: `$NEMOBIN/$mk help=I`
+     echo help=V: `$NEMOBIN/$mk help=V`
+   endif
+   # see if new doc file needed...
+   if ($d) then
+	mkpdoc $mk
+        @ errs += $status
+   endif
+ endif
+ if ($mk != "#") then
+   if ($err == 0) then
+      echo "`date`: $mk installed $bywhom" >> $logfile
+   else
+      echo "`date`: $mk ###error### $bywhom >> $logfile
+   endif
+ endif
+end
+
+end:
+  if ($newbins == 1) then
+    echo ""; echo ""
+    echo "### Warning: Use rehash for access to the new programs"
+  else
+    echo "";
+  endif
+  rm -f $lockfile
+  exit $errs
+
+error:
+  echo "MKNEMO> Interrupted, or some error occured. Removing lockfile."
+  rm -f $lockfile
+  exit 1
+
+noargs:
+  rm -f $lockfile
+  echo "MKNEMO> Not enough arguments"
+usage:
+  echo "$version"
+  echo "Usage: $0 program-name(s)"
+  echo ""
+  echo "Attempts to find NEMO sourcecode, install NEMO programs "
+  echo "and update the doc file if needed"
+  echo "Options: "
+  echo "  -c CODE   search for CODE.c to set the directory for target(s)"
+  echo "  -n N      selection of N-th element from unresolved list [1]"
+  echo "  -s DIR    root directory to start search [$NEMO]"
+  echo "  -r        remove lockfile before starting"
+  echo "  -d        also make doc file (only for true NEMO programs)"
+  echo "  -t        cleanup after having made the binaries"
+  echo "  -T        cleanup before making the binaries"
+  echo "  -u        run 'git pull' to NEMO before making"
+  echo "  -l        recompile the library by running 'make libs'"
+  echo "  -g        explicitly use gmake, instead of make"
+  echo "  -a        use all directories, usr and src, to find code to update"
+  echo "  -v        more verbose, it will report version and cvsid of program"
+  echo "  -D        show special projects from the mknemo.d directory"
+  exit 1
