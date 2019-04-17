@@ -190,12 +190,17 @@ common.blk:	parameter(NCE=28)        	Max number of Spherical Harmonics Coeffici
 The standard benchmark is 40000 particles and runs for 832 steps. The user CPU is listed (in sec)
 in the 2nd column. 
 .nf
-.ta +1i
-P4/1.6	325.856 (g77 3.2.3)
-P4/1.6	292.722 (gfortran 4.0.1)
-P4/1.6	195.908 (intel 8.1)
-AMD64/	130.252 (g77 3.4.2)
-G5/1.6	218.47u (g77 3.5.0)
+.ta +2.5i
+P4/1.6	325.9 (g77 3.2.3)
+P4/1.6	292.7 (gfortran 4.0.1)
+P4/1.6	195.9 (intel 8.1)
+G5/1.6	218.5 (g77 3.5.0)
+AMD64/	130.3 (g77 3.4.2)
+Xeon-X5660@2.80GHz	79.4 (gfortran_4.4.7 -O3) - gaia
+i7-8550U @ 1.80GHz	43.4 (gfortran_7.3.0 -O3) - T480
+i7-3820 CPU @ 3.60GHz	52.5 (gfortran_4.4.7 -O3) - dante
+i7-3820 CPU @ 3.60GHz	31.7 (ifort_12.1.0 -O3) - dante
+
 .fi
 You can run the command either as:
 .nf
@@ -204,10 +209,10 @@ or
    % time CGS
 .fi
 .SH DATA CONVERSION
-If snapshots are requested, CGS will create a file \fBfort.90\fP, which can be converted
-to NEMO's \fIsnapshot(5NEMO)\fP
+If output \fIsnapshot(5NEMO)\fP are requested, CGS will create a file \fBfort.90\fP, which can be converted
+to NEMO's \fIsnapshot(5NEMO)\fP, viz.
 .nf
-tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
+   tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 .fi
 
 .SH UNITS
@@ -216,9 +221,9 @@ the total mass of the system can be choosen as an input parameter. The
 gravitation constant is 4.4971, which is appropriate for a galactic
 scale system where the units (see also \fIunits(5NEMO)\fP) are
 10^11 solar mass, 10 kpc and 10^8 years. This gives a unit of velocity
-of about 97.8 km/s
+of about 97.8 km/s.
 .SH SEE ALSO
-scfm(1NEMO), quadcode(1NEMO), snapshot(5NEMO)
+scfm(1NEMO), quadcode(1NEMO), snapshot(5NEMO), units(1NEMO), units(5NEMO)
 .PP
 .nf
 Trenti, M. (2005), PhD Thesis, Pisa (see Chapter 3 for many details on the code)
@@ -227,7 +232,7 @@ van Albada, T.S. (1982), MNRAS, 201, 939. \fIDissipationless galaxy formation an
 van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar Dynamics for Systems with Axial Symmetry\fP
 .fi
 .SH AUTHOR
-Michele Trenti & Tjeerd van Albada (NEMO's adaptation: Peter Teuben)
+Michele Trenti & Tjeerd van Albada (NEMO adaptation: Peter Teuben)
 .SH CREDIT
 Any scientific publication or presentation which has benefited from using CGS should quote the paper
 .nf

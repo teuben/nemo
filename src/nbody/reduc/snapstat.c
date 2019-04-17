@@ -17,6 +17,8 @@
  *      15-mar-06   1.5f use statics to hide names
  *       1-aug-06   1.5g make it listen to the times= keyword
  *      11-feb-19   1.6  add crossing time estimate
+ *       8-apr-19   1.6c   fix times= bug
+ *      11-apr-19   1.6d   add virial ration 2T/W
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -51,11 +53,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.6a\n             28-feb-2019 PJT",
+    "VERSION=1.6d\n             11-apr-2019 PJT",
     NULL
 };
 
-string usage="determine various statistics from an N-body system";
+string usage="determine various statistics of an N-body system";
 
 string cvsid="$Id$";
 
@@ -140,15 +142,17 @@ void nemo_main()
     instr = stropen(getparam("in"), "r");
 
     for(;;) {
-        if ( (gs = get_snap(instr)) > 0) {
-	    if (!within(tsnap,times,TIMEFUZZ))
-	      continue;
-            analysis( nbody );          /* this scans through all particles */
-                                        /* in worst case O(N*N) method */
-            radii( nbody );             /* various radii of system */
-            shape ();                   /* shape analysis */
-        } else if (gs < 0)
-            break;                      /* not snapshots found */
+      if ( (gs = get_snap(instr)) > 0) {
+	if (!streq(times,"all") && !within(tsnap,times,TIMEFUZZ)) {
+	  dprintf(1,"Skipping time %g\n", tsnap);
+	  continue;
+	}
+	analysis( nbody );          /* this scans through all particles */
+	                            /* in worst case O(N*N) method */
+	radii( nbody );             /* various radii of system */
+	shape ();                   /* shape analysis */
+      } else if (gs < 0)
+	break;                      /* not snapshots found */
     } 
 }
 
@@ -165,11 +169,15 @@ get_snap(stream instr) /* returns:   -1: not a snapshot   0: no ParticlesTag */
 {
     int i, j;
     real *p;
+
+    dprintf(1,"get_snap\n");
     
     get_history(instr);         /* just to be safe */
 
-    if (!get_tag_ok(instr, SnapShotTag))        /* must be a snapshot */
-        return(-1);
+    if (!get_tag_ok(instr, SnapShotTag)) {    /* must be a snapshot */
+      dprintf(1,"not a SnapShot: \n");
+      return -1;
+    }
 
     get_set(instr, SnapShotTag);
       get_set(instr, ParametersTag);
@@ -246,7 +254,7 @@ get_snap(stream instr) /* returns:   -1: not a snapshot   0: no ParticlesTag */
         up[i] = p++;    vp[i] = p++;   wp[i] = p++;
     }
     mbody = MAX(mbody,nbody);           /* reset allocate space counter */
-    return(1);
+    return 1;
 }
 
 snap_alloc()
@@ -333,7 +341,7 @@ analysis(int nbody)
 			  i1=i;
 			  i2=j;
 			  r2min=r2;
-			  dprintf(1,"rmin=%g for (%d,%d) mass (%g,%g)\n",sqrt(r2min),i1+1,i2+1,mass[i1],mass[i2]);
+			  dprintf(1,"rmin=%g for (%d,%d) mass (%g,%g)\n",sqrt(r2min),i1,i2,mass[i1],mass[i2]);
 			}
                         if (!Qacc) {
                           artmp = mass[j]/((r2+sqreps)*sqrt(r2));  /* tmp force */
@@ -468,8 +476,8 @@ report_analysis()
         for (i=0;  i<nbody; i++) 
                 cv += mass[i] * (*xp[i]*ax[i] + *yp[i]*ay[i] + *zp[i]*az[i]);
         printf ("Clausius energy = %f\n",cv);
-        printf ("Virial = %f (Clausius => %f)\n",
-                epottot+2*ekintot,cv+2*ekintot);
+        printf ("Virial = %f (Clausius => %f)    2T/W = %f  (Clausius => %f)\n",
+                epottot+2*ekintot,cv+2*ekintot,-2*ekintot/epottot, -2*ekintot/cv);
 
 	t_cr = pow(mtot,2.5) / pow(2*ABS(ekintot+epottot),1.5);
 	printf("Crossing time = %f\n", t_cr);

@@ -2,7 +2,7 @@
  *  preprocessor to run (a series of) CGS
  *
  *
- *	3-nov-2005		written
+ *	3-nov-2005     written
  *     12-dec-2005     added writing pos/vel files with freqout=
  *     16-mar-2006     0.4 update version 
  *     22-mar-2006     0.5 also read forces and potentials
@@ -21,7 +21,7 @@
 
 string defv[] = {
     "outdir=???\n    directory in which GALAXY will be run",
-    "nbody=40000\n   nbody, if needed",
+    "nbody=40000\n   nbody, if no in= given",
     "nrad=80\n       nradii in code",
     "maxstep=1000\n  max number of integration steps",
     "dt=0.0025\n     initial integration step",
@@ -37,9 +37,9 @@ string defv[] = {
     "ndtout=10\n     number of steps between snapshot output",
     "in=\n           optional input snapshot (nemo format)",
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
-    "options=\n      Optional output:  phi(potential), acc (forces) ** soon to come **",
+    "options=\n      Optional output:  phi(potential), acc (forces) [not implemented yet]",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=2.1\n   17-sep-2013 PJT",
+    "VERSION=2.1a\n  9-apr-2019 PJT",
     NULL,
 };
 
@@ -119,7 +119,7 @@ void nemo_main()
 
   run_cd(rundir);
 
-  sprintf(command,"%s >& CGS.log",exefile);
+  sprintf(command,"%s > CGS.log",exefile);
   dprintf(0,">>> %s\n",command);
   run_sh(command);
 

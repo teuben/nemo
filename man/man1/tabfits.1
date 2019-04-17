@@ -84,6 +84,14 @@ to follow the FITS rules in their formatting.
      1.34486E-06
 ...
 .fi
+An example how to create (some kind of) FITS header that might be useful
+for tabfits can be created in the following two step procedure:
+.nf
+
+  ccdgen out=- size=512,512,1 | ccdsky - - | ccdfits - /tmp/toy.fits
+  fitshead /tmp/toy.fits  | awk '{printf("# %s\n",$0)}' > /tmp/toy.fitshead
+  
+.fi
 .SH SEE ALSO
 tabfits(1NEMO), tabmath(1NEMO), fits(5NEMO), wcs(1NEMO)
 .SH FILES

@@ -58,7 +58,7 @@ c random number common
         integer idum
         common /ised/ idum
 
-        double precision ran2
+        real ran2
         external ran2
 
 C___________________________________________________
