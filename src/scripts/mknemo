@@ -12,12 +12,12 @@
 #   mar-2006            give help, even if locked
 #   aug-2006            some sanity checks if cvs is present if -u is used; fixed dir search -a
 #   nov-2010            report special things it can do 
-#
+#   mar-2018            convert to using git
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 3.5b 15-sep-2013"
+set version="MKNEMO Version 4.0 23-mar-2018"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -178,18 +178,18 @@ endif
 if ($u) then
   # 
   pushd $NEMO >& /dev/null
-  if (! -e CVS/Root) then
-    echo Your $NEMO does not appear to be CVS enabled
+  if (! -d .git) then
+    echo Your $NEMO does not appear to be git enabled
     exit 1
   endif
-  cvs version >& /dev/null
+  git --version >& /dev/null
   if ($status) then
-    echo You do not seem to have the cvs command installed, cannot use -u
+    echo You do not seem to have the git command installed, cannot use -u
     exit 1
   endif
   popd >& /dev/null
 
-  (echo Checking mknemo ... ;cd $NEMO/src/scripts; cvs update mknemo)
+  (echo Checking mknemo ... ;cd $NEMO/src/scripts; git pull)
   cmp -s $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
   if ($status) then
     # this procedure will fail if there was a C (conflict)
@@ -197,9 +197,9 @@ if ($u) then
     cp $NEMO/src/scripts/mknemo $NEMOBIN/mknemo 
     exec $0 -r $*
   endif
-  (cd $NEMO; cvs update -d |& grep '^[A-Z]' | grep -v cvs)
-  if (-e $NEMO/local/pgplot/CVS) then
-    (cd $NEMO/local/pgplot; cvs update -d |& grep '^[A-Z]' | grep -v cvs)
+  (cd $NEMO; git status)
+  if (-d $NEMO/local/pgplot) then
+    (cd $NEMO/local/pgplot; git pull)
   endif
 endif
 
@@ -359,7 +359,7 @@ usage:
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
   echo "  -T        cleanup before making the binaries"
-  echo "  -u        run 'cvs update -d' to NEMO before making"
+  echo "  -u        run 'git pull' to NEMO before making"
   echo "  -l        recompile the library by running 'make libs'"
   echo "  -g        explicitly use gmake, instead of make"
   echo "  -a        use all directories, usr and src, to find code to update"
