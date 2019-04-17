@@ -97,6 +97,11 @@ are copied verbosely, so be sure to follow the FITS rules in their formatting.
      1.57882E-06
      1.51197E-06
      1.34486E-06
+</pre>An example how to create (some kind of) FITS header that might be useful
+for tabfits can be created in the following two step procedure: <br>
+<pre>  ccdgen out=- size=512,512,1 | ccdsky - - | ccdfits - /tmp/toy.fits
+  fitshead /tmp/toy.fits  | awk &rsquo;{printf("# %s0,$0)}&rsquo; &gt; /tmp/toy.fitshead
+  
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabfits.1.html'>tabfits(1NEMO)</a>

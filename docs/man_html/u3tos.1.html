@@ -25,7 +25,13 @@ usage, in particular when only endianism is the issue. <p>
 It is strongly recommended
 to  use <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
  and check if a dataset looks ok. You may also  need
-to set <b>swap=t</b> in this program, as well as a <b>mode=</b> and <b>header=</b> choice. 
+to set <b>swap=t</b> in this program, as well as a <b>mode=</b> and <b>header=</b> choice. <p>
+A
+tricky part of the format is the inclusion of (for lack of a better name)
+<i>virtual</i> particles, which describe a KS object. Normally these are the result
+of close binaries (or higher order chain) being regularized. The <b>nbody=</b>
+can be used to exlude such particles. The result is now that each snapshot
+in an integration will have the same number of particles. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
 following parameters are recognized in any order if the keyword is also
@@ -64,33 +70,44 @@ swapping is performed. </dd>
 support. Allowed are 1 and 2 (identical actually), 4 (which also outputs
 rho and phi,and an addition key for each particle), and 6. Default: 1 </dd>
 
-<dt><b>header=|4|8</b>
+<dt><b>key=name|key</b>
 </dt>
-<dd>Header size of the fortran unformatted data. This is 4 (old fortran) or
-8 (modern compilers, such as gfortran).  By default the value determined
-to be the correct value for your compiler is used. </dd>
+<dd>Which of the NBODY6 arrays to put in the Key snapshot tag. </dd>
+
+<dt><b>header=|4|8</b> </dt>
+<dd>Header
+size of the fortran unformatted data. This is 4 (old fortran) or 8 (modern
+compilers, such as gfortran).  By default the value determined to be the
+correct value for your compiler is used. </dd>
 
 <dt><b>integer=2|4</b> </dt>
-<dd>Signal the
-reader what kind of INTEGERs were used in the output dataset. Older data
-may have used INTEGER*2, which limits the number of particles to 32767,
-patched programs (and presumably later official versions from Sverre) will
-always write INTEGER*4 (or having the same size as a REAL), [Default: <b>4</b>].
-</dd>
+<dd>Signal the reader what
+kind of INTEGERs were used in the output dataset. Older data may have used
+INTEGER*2, which limits the number of particles to 32767, patched programs
+(and presumably later official versions from Sverre) will always write
+INTEGER*4 (or having the same size as a REAL), [Default: <b>4</b>]. </dd>
+
+<dt><b>nbody=</b> </dt>
+<dd>Limit
+the body number ("NAME" in NBODY6, and <i>Key</i> if key=name) written. This will
+effectly remove the virtual KS particles in case binaries were regularized.
+Default: not used. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-At the current time the <b>mode=</b> and <b>header=</b> must be known in order
-for the conversion to succeed. There is no runtime autodetection of formats
-yet. 
+At the current time the <b>mode=</b> and <b>header=</b> must
+be known in order for the conversion to succeed. There is no runtime autodetection
+of formats yet. <p>
+Potentials are stored as positive values, scaled by the
+wrong mass still. 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='nbody1.1.html'>nbody1(1NEMO)</a>
 , <a href='runbody4.1.html'>runbody4(1NEMO)</a>
-, <a href='unfio.1.html'>unfio(1NEMO)</a>
 ,
-<a href='u4tos.1.html'>u4tos(1NEMO)</a>
+<a href='unfio.1.html'>unfio(1NEMO)</a>
+, <a href='u4tos.1.html'>u4tos(1NEMO)</a>
  <a href='stou4.1.html'>stou4(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
@@ -102,6 +119,7 @@ Peter Teuben
 1-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 nbody4 support<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 4-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 header= has now a blank default<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-feb-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 added support for nbody6++ (mode=6)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+5-apr-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 nbody= to limit particle output for nbody6<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 

@@ -18,7 +18,7 @@ mknemo - attempt to find NEMO programs and install them
 <i>mknemo</i> attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them. If successfull,
 the binary will be placed in <b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag if your NEMO is under
-CVS control, so you can force an update before the build. <p>
+git control, so you can force an update before the build. <p>
 Finding the method
 how to install <i>program</i> takes several paths: <p>
 First, if a file <i>$NEMO/src/scripts/mknemo.d/program</i>
@@ -46,18 +46,19 @@ file needs  to be updated. (<i>** doc files not maintained anymore **</i>)
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
   -T        cleanup before making the binaries
-  -u        update your NEMO cvs tree before (re)making
+  -u        update your NEMO git tree before (re)making
   -l        recompile the library before (re)making 
   -g        use gmake, instead of make
-  -v        more verbose, it will report version and cvsid of program
+  -v        more verbose, it will report version and cvsid of program (deprecated)
 </pre>
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 <br>
-<pre>firstn    <tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody code
-glnemo   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics
+<pre>firstn    <tt> </tt>&nbsp;<tt> </tt>&nbsp;the very first (?) nbody code
+glnemo2   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics
 gyrfalcON   <tt> </tt>&nbsp;<tt> </tt>&nbsp;falcON tools (gyrfalcON, mkplum, the acc&rsquo;s and manip&rsquo;s)
 rotcur    <tt> </tt>&nbsp;<tt> </tt>&nbsp;rotcur program (there is also a confusing rotcur potential(5NEMO))
+galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.x
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='mkbin.8.html'>mkbin(8NEMO)</a>
@@ -83,6 +84,7 @@ $NEMO/adm/install/mknemo.lock<tt> </tt>&nbsp;<tt> </tt>&nbsp;lockfile, to preven
 20-jun-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4: added -u flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5: added -l flag, also cloned sbin/mkstarlab<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-jun-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4: added -a flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+11-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0: git based
 </pre><p>
 
 <hr><p>

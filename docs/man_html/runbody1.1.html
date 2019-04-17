@@ -198,17 +198,25 @@ run, pay attention to the kz= vector as the default will not suffice anymore.
 at time=28.2843 because the crossing time is about 2.828 and tcrit is measured
 in terms of crossing times, as opposed to code times for the default run
 with kz(15)=1. 
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect8' href='#toc8'>Caveats</a></h2>
+<b>nbody1</b> still uses the old-style individual time-steps
+with force polynomials, not the <i>improved</i> hermite integrater that is embedded
+in later versions of the NBODYx series. However, Sverre has made versions
+available with a hermite integrator, see for example the micky-mouse version
+<i>nbody04h</i> described in <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
+. 
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='nbody0.1.html'>nbody0(1NEMO)</a>
 , <a href='runbody2.1.html'>runbody2(1NEMO)</a>
-, <a href='runbody4.1.html'>runbody4(1NEMO)</a>
 ,
-<a href='runbody6.1.html'>runbody6(1NEMO)</a>
+<a href='runbody4.1.html'>runbody4(1NEMO)</a>
+, <a href='runbody6.1.html'>runbody6(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
 , <a href='stou4.1.html'>stou4(1NEMO)</a>
- 
-<h2><a name='sect9' href='#toc9'>Files</a></h2>
+
+
+<h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>$NEMO/src/nbody/evolve/aarseth/nbody1<tt> </tt>&nbsp;<tt> </tt>&nbsp;nbody code
 $NEMO/src/nbody/evolve/aarseth/tools<tt> </tt>&nbsp;<tt> </tt>&nbsp;various tools code
@@ -219,9 +227,9 @@ $outdir/fort.4                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;restart d
 $outdir/fort.7                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;formatted frame files (option KZ(7))
 $outdir/OUT3                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;particle dump (see u3tos(1NEMO))
 </pre>
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
+<h2><a name='sect11' href='#toc11'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect11' href='#toc11'>Update History</a></h2>
+<h2><a name='sect12' href='#toc12'>Update History</a></h2>
 <br>
 <pre>4-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 documented, and changed out= to outdir=, n= to nbody= PJT
 17-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1a fixed bug when in= was specified
@@ -241,10 +249,11 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>Input</a></li>
 <li><a name='toc6' href='#sect6'>Caveats</a></li>
 <li><a name='toc7' href='#sect7'>Examples</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Files</a></li>
-<li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>Caveats</a></li>
+<li><a name='toc9' href='#sect9'>See Also</a></li>
+<li><a name='toc10' href='#sect10'>Files</a></li>
+<li><a name='toc11' href='#sect11'>Author</a></li>
+<li><a name='toc12' href='#sect12'>Update History</a></li>
 </ul>
 </body>
 </html>

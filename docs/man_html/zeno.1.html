@@ -16,25 +16,56 @@ version of NEMO. The code is largely  derived from NEMO. The binary datafiles,
 via <a href='flestruct.3.html'><i>flestruct(3NEMO)</i></a>
  are largely compatible. <p>
 
-<h2><a name='sect2' href='#toc2'>See Also</a></h2>
+<h2><a name='sect2' href='#toc2'>Examples</a></h2>
+A <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ created
+with ZENO has Position and Velocity, as well as using NBody instead of
+Nobj. It can be converted to NEMO&rsquo;s PhaseSpace with e.g. <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
+, and
+then processed like NEMO snapshots. E.g.: <br>
+<pre>    % plumsnap p16k
+    % snapcopy p16k - | snapplot -
+</pre>The magic of this ZENO detection is in get_snap.c, and programs (such as
+snapplot) that use older direct reading of snapshots will not be able to
+process these snapshots with such a filter. 
+<h2><a name='sect3' href='#toc3'>Differences with Nemo</a></h2>
+As highlighted
+in the example, a ZENO snapshot uses <i>NBody</i> instead of NEMO&rsquo;s <i>Nobj</i>, but as
+get as snapshot I/O is done via the <i>get_snap</i> macros, they  will be converted.
+<p>
+NEMO&rsquo;s <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ are similar to ZENO&rsquo;s <i>gspmodels</i>, where the latter
+also allows for adding potentials (much harder in NEMO). <p>
+NEMO has no real
+support for SPH (though some tags in snapshot&rsquo;s are supported) <p>
+ZENO has
+not plotting such as NEMO&rsquo;s yapp 
+<h2><a name='sect4' href='#toc4'>Files</a></h2>
+<br>
+<pre>$NEMO/usr/zeno<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;instructions how to install
+</pre>
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
  
-<h2><a name='sect3' href='#toc3'>Author</a></h2>
-Josh
-Barnes 
-<h2><a name='sect4' href='#toc4'>Further Information</a></h2>
-<a href='http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html'>http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html</a>
-
-<p>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Josh Barnes 
+<h2><a name='sect7' href='#toc7'>Further Information</a></h2>
+<br>
+<pre>http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+https://github.com/joshuabarnes/zeno/
+</pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
 <li><a name='toc0' href='#sect0'>Synopsis</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>See Also</a></li>
-<li><a name='toc3' href='#sect3'>Author</a></li>
-<li><a name='toc4' href='#sect4'>Further Information</a></li>
+<li><a name='toc2' href='#sect2'>Examples</a></li>
+<li><a name='toc3' href='#sect3'>Differences with Nemo</a></li>
+<li><a name='toc4' href='#sect4'>Files</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Further Information</a></li>
 </ul>
 </body>
 </html>

@@ -193,21 +193,26 @@ common.blk:<tt> </tt>&nbsp;<tt> </tt>&nbsp;parameter(NCE=28)        <tt> </tt>&n
 <h2><a name='sect7' href='#toc7'>Benchmarks</a></h2>
 The standard benchmark is 40000 particles and runs for 832 steps.
 The user CPU is listed (in sec) in the 2nd column.  <br>
-<pre>P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;325.856 (g77 3.2.3)
-P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;292.722 (gfortran 4.0.1)
-P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;195.908 (intel 8.1)
-AMD64/<tt> </tt>&nbsp;<tt> </tt>&nbsp;130.252 (g77 3.4.2)
-G5/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;218.47u (g77 3.5.0)
+<pre>P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;325.9 (g77 3.2.3)
+P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;292.7 (gfortran 4.0.1)
+P4/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;195.9 (intel 8.1)
+G5/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;218.5 (g77 3.5.0)
+AMD64/<tt> </tt>&nbsp;<tt> </tt>&nbsp;130.3 (g77 3.4.2)
+Xeon-X5660@2.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;79.4 (gfortran_4.4.7 -O3) - gaia
+i7-8550U @ 1.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;43.4 (gfortran_7.3.0 -O3) - T480
+i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;52.5 (gfortran_4.4.7 -O3) - dante
+i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;31.7 (ifort_12.1.0 -O3) - dante
 </pre>You can run the command either as: <br>
 <pre>   % time runCGS out=bench1 nemo=f
 or
    % time CGS
 </pre>
 <h2><a name='sect8' href='#toc8'>Data Conversion</a></h2>
-If snapshots are requested, CGS will create a file <b>fort.90</b>,
-which can be converted to NEMO&rsquo;s <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- <br>
-<pre>tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
+If output <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ are requested, CGS will create
+a file <b>fort.90</b>, which can be converted to NEMO&rsquo;s <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+, viz. <br>
+<pre>   tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 </pre>
 <p> 
 <h2><a name='sect9' href='#toc9'>Units</a></h2>
@@ -216,13 +221,16 @@ code), the total mass of the system can be choosen as an input parameter.
 The gravitation constant is 4.4971, which is appropriate for a galactic
 scale system where the units (see also <a href='units.5.html'><i>units(5NEMO)</i></a>
 ) are 10^11 solar mass,
-10 kpc and 10^8 years. This gives a unit of velocity of about 97.8 km/s 
+10 kpc and 10^8 years. This gives a unit of velocity of about 97.8 km/s. 
 <h2><a name='sect10' href='#toc10'>See
 Also</a></h2>
 <a href='scfm.1.html'>scfm(1NEMO)</a>
 , <a href='quadcode.1.html'>quadcode(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
- <p>
+, <a href='units.1.html'>units(1NEMO)</a>
+, <a href='units.5.html'>units(5NEMO)</a>
+
+<p>
 <br>
 <pre>Trenti, M. (2005), PhD Thesis, Pisa (see Chapter 3 for many details on the
 code)
@@ -233,7 +241,7 @@ van Albada, T.S. &amp; van Gorkum, J.H. (1977) A&amp;A,54,121. Experimental Stel
 for Systems with Axial Symmetry
 </pre>
 <h2><a name='sect11' href='#toc11'>Author</a></h2>
-Michele Trenti &amp; Tjeerd van Albada (NEMO&rsquo;s adaptation: Peter Teuben)
+Michele Trenti &amp; Tjeerd van Albada (NEMO adaptation: Peter Teuben)
 
 <h2><a name='sect12' href='#toc12'>Credit</a></h2>
 Any scientific publication or presentation which has benefited from
