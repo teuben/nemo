@@ -143,14 +143,14 @@ string defv[] = {
     
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=10.0\n     Maximum allowed running time (minutes) **ignored **",
-    "gpid=0\n         Number of grape boards (starting from 0) ** if applicable **",
+    "gpid=0\n         Number of grape boards (starting from 0) ** ignored **",
 
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
     "exe=nbody6++\n   Name of the executable",
     "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
 
-    "VERSION=0.7\n    8-apr-2019 PJT",
+    "VERSION=0.7a\n   13-apr-2019 PJT",
     NULL,
 };
 
@@ -348,7 +348,7 @@ void nemo_main(void)
     run_sh(runcmd);
 
     if (nbody6_mode == 1)
-      sprintf(runcmd,"cat conf.3_* > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=%d ; rm OUT3",nbody);
+      sprintf(runcmd,"cat `ls -tr conf.3_*` > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=%d ; rm OUT3",nbody);
     else
       sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1 nbody=%d",nbody);
     run_sh(runcmd);    
