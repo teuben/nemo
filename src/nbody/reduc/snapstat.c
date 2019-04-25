@@ -17,7 +17,8 @@
  *      15-mar-06   1.5f use statics to hide names
  *       1-aug-06   1.5g make it listen to the times= keyword
  *      11-feb-19   1.6  add crossing time estimate
- *       8-apr-19   1.6c   fix times= bug 
+ *       8-apr-19   1.6c   fix times= bug
+ *      11-apr-19   1.6d   add virial ration 2T/W
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -52,7 +53,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "rms=false\n                Want rms",
     "ecutoff=0.0\n              Cutoff for bound particles",
     "verbose=t\n                verbose mode?",
-    "VERSION=1.6c\n             8-apr-2019 PJT",
+    "VERSION=1.6d\n             11-apr-2019 PJT",
     NULL
 };
 
@@ -475,8 +476,8 @@ report_analysis()
         for (i=0;  i<nbody; i++) 
                 cv += mass[i] * (*xp[i]*ax[i] + *yp[i]*ay[i] + *zp[i]*az[i]);
         printf ("Clausius energy = %f\n",cv);
-        printf ("Virial = %f (Clausius => %f)\n",
-                epottot+2*ekintot,cv+2*ekintot);
+        printf ("Virial = %f (Clausius => %f)    2T/W = %f  (Clausius => %f)\n",
+                epottot+2*ekintot,cv+2*ekintot,-2*ekintot/epottot, -2*ekintot/cv);
 
 	t_cr = pow(mtot,2.5) / pow(2*ABS(ekintot+epottot),1.5);
 	printf("Crossing time = %f\n", t_cr);

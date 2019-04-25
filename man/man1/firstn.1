@@ -4,8 +4,9 @@ firstn - von Hoerners first N-body code
 .SH SYNOPSIS
 firstn < firstn.in
 .SH DESCRIPTION
-\fBfirstn\fP currently only integrates an example internally-generated Plummer
-sphere.
+Arguably the first N-body code was written by von Hoerner (1960). This version,
+\fBfirstn\fP, currently only integrates an example internally-generated Plummer
+sphere, and was written by S. Aarseth.
 .SH INPUT 
 The \fBfirstn.in\fP input file contains 3 lines (See also \fInbody0(1NEMO)\fP).
 .nf
@@ -36,7 +37,7 @@ Q - Initial virial ratio (1  meant 2T/W=1)
 .TP
 ISCALE - 
 .SH PERFORMANCE
-CPU should  scale as N^2. Here are some numbers from a 
+CPU should  scale as N^2. Here are some numbers 
 .nf
 .ta +1i +1i +1i
 N	cpu"	cpu"
@@ -49,12 +50,12 @@ N	cpu"	cpu"
 256	n/a	834.3	746.5
 .fi
 .SH CAVEATS
-This is a code meant to be historic and educational, and should most
-certainly not be used for any serious work.
+This historic code is meant to be educational.
 .SH AUTHOR
 S. von Hoerner (original), Sverre Aarseth (21st century adaptation)
 .nf
 Z.f.Astrophys. 50, 184, 1960 (1960ZA.....50..184V)
+Z.f.Astrophys. 57, 47, 1963 
 .SH FILES
 .nf
 .ta +2.6i
@@ -66,5 +67,5 @@ nbody0(1NEMO)
 .nf
 .ta +1i +4i
 dec-2000	version from Aarseth			       	PJT
-9-mar-04	man page written, 				PJT
+9-mar-04	man page written 				PJT
 .fi

@@ -82,21 +82,30 @@ For H:M:S parsing the user is responsible for the extra factor of 15. Default:
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
 , <a href='getrange.3.html'>getrange(3NEMO)</a>
- 
+, <a href='functions.5.html'>functions(5NEMO)</a>
+
+
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 <br>
-<pre>   nemoinp 4.2+3.1          simple math
-   nemoinp &rsquo;sqrt(2)&rsquo;        math functions
-   nemoinp pi+3             some support for funny numbers
-   nemoinp 2:20:4           from 2 to 20 in steps of 4 (NEMO command)
-   seq 2 4 20               from 2 to 20 in steps of 4 (UNIX command)
-   set n=20                 a C-shell variable
-   nemoinp 2:${n}:4         as before, now using a shell variable
-   nemoinp 2::4             repeat the value 4 times
-   nemoinp &rsquo;iflt(1,2,3,4)&rsquo;  print 3, not 4, because 1 is less than 1
-    
-AuthorPeter Teuben Update History
-18-apr-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>   nemoinp 4.2+3.1           simple math
+   nemoinp &rsquo;sqrt(2)&rsquo;         math functions
+   nemoinp pi+3              some support for funny numbers
+   nemoinp 2:20:4            from 2 to 20 in steps of 4 (NEMO command)
+   seq 2 4 20                from 2 to 20 in steps of 4 (UNIX command)
+   set n=20                  a C-shell variable
+   nemoinp 2:${n}:4          as before, now using a shell variable
+   nemoinp 2::4              repeat the value 4 times
+   nemoinp &rsquo;iflt(1,2,3,4)&rsquo;   print 3, not 4, because 1 is less than 1
+   nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal
+30.5043
+   nemoinp c,G,h,p,m         a few good constants
+   nemoinp &rsquo;p*pi/(3600*180)&rsquo; 1 AU in km
+</pre>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Peter Teuben 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<br>
+<pre>18-apr-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-jun-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0a small changed - doc updated<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
  5-jul-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added nmax parameter<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;documentation

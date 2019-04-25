@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "4 December 2017"
+.TH MKNEMO 8NEMO "11 April 2019"
 .SH NAME
 mknemo \- attempt to find NEMO programs and install them
 .SH SYNOPSIS
@@ -8,7 +8,7 @@ mknemo \- attempt to find NEMO programs and install them
 \fImknemo\fP attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them.
 If successfull, the binary will be placed in \fB$NEMOBIN\fP.
-Add the '-u' flag if your NEMO is under CVS control, so you can
+Add the '-u' flag if your NEMO is under git control, so you can
 force an update before the build.
 .PP
 Finding the method how to install \fIprogram\fP takes several paths:
@@ -41,19 +41,20 @@ to be updated. (\fI** doc files not maintained anymore **\fP)
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
   -T        cleanup before making the binaries
-  -u        update your NEMO cvs tree before (re)making
+  -u        update your NEMO git tree before (re)making
   -l        recompile the library before (re)making 
   -g        use gmake, instead of make
-  -v        more verbose, it will report version and cvsid of program
+  -v        more verbose, it will report version and cvsid of program (deprecated)
 .fi
 .SH EXAMPLES
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 .nf 
 .ta +2i
-firstn    	nbody code
-glnemo   	glnemo graphics
+firstn    	the very first (?) nbody code
+glnemo2   	glnemo graphics
 gyrfalcON   	falcON tools (gyrfalcON, mkplum, the acc's and manip's)
 rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\fP)
+galaxy15	Sellwood's GALAXY V15.x
 .fi
 .SH "SEE ALSO"
 mkbin(8NEMO)
@@ -80,4 +81,5 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 20-jun-03	V1.4: added -u flag	PJT
 16-dec-03	V1.5: added -l flag, also cloned sbin/mkstarlab	PJT
 11-jun-04	V2.4: added -a flag	PJT
+11-apr-2019	V4.0: git based
 .fi

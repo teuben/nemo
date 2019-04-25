@@ -41,48 +41,49 @@ is also given:
 
 <dt><b>rmax=<i>max_radius</i></b>
 </dt>
-<dd>Outer cutoff radius of the sphere. [Default: <b>1.2</b>]. </dd>
+<dd>Outer cutoff radius of the sphere. The default values of <b>rmin=0</b> and <b>rmax=1.2</b>
+give a virial radius of 1.0 [Default: <b>1.2</b>]. </dd>
 
 <dt><b>2t/w=<i>ratio</i></b> </dt>
-<dd>Virial ratio
-which measures deviation from virial equilibrium (two times the ratio of
-kinetic to potential energy, <b>2t/w</b> must be positive).  Only accurate for
-a homogenous sphere (<b>power=0</b> and <b>rmin=0</b>). See also <b>vmax=</b> for an alternate
-means to specify scaling velocities. [default: <b>0</b>]. </dd>
+<dd>Virial ratio which
+measures deviation from virial equilibrium (two times the ratio of kinetic
+to potential energy, <b>2t/w</b> must be positive).  Only accurate for a homogenous
+sphere (<b>power=0</b> and <b>rmin=0</b>). See also <b>vmax=</b> for an alternate means to specify
+scaling velocities. [default: <b>0</b>]. </dd>
 
 <dt><b>vmax=<i>vmax</i></b> </dt>
-<dd>Maximum of isotropic
-velocities. No scaling as function of radius is applied.  [default: <b>0</b>]. </dd>
+<dd>Maximum of isotropic velocities.
+No scaling as function of radius is applied.  [default: <b>0</b>]. </dd>
 
-<dt><b>power=<i>p</i></b>
-</dt>
-<dd>Power law exponent of the density as function of radius, Density <i>rho =
-r^{-p}</i>, thus centrally concentrated models have <i>p &gt; 0 </i> . Values of <i> p &gt; 3</i> are
-illegal. [default: <b>0</b>]. </dd>
+<dt><b>power=<i>p</i></b> </dt>
+<dd>Power
+law exponent of the density as function of radius, Density <i>rho = r^{-p}</i>,
+thus centrally concentrated models have <i>p &gt; 0 </i> . Values of <i> p &gt; 3</i> are illegal.
+[default: <b>0</b>]. </dd>
 
 <dt><b>seed=<i>random_seed</i></b> </dt>
-<dd>Use random number seed.  [default:
-<b>0</b>]. </dd>
+<dd>Use random number seed. Non-positive have special
+meaning. [default: <b>0</b>]. </dd>
 
 <dt><b>zerocm=<b>t|f</b></b> </dt>
-<dd>Center coordinates on center of mass after generation? [default:
-<b>t</b>]. </dd>
+<dd>Center coordinates on center of mass after
+generation? [default: <b>t</b>]. </dd>
 
 <dt><b>headline=<i>message</i></b> </dt>
-<dd>Text headline for output file [default: not used]. </dd>
+<dd>Text headline for output file
+[default: not used]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-When
-shells are created (non-zero <b>rmin</b>) the calculation of &rsquo;virial equilibrium&rsquo;
-velocity dispersions is not correct anymore. See  <a href='snapvirial.1.html'>snapvirial(1NEMO)</a>
- for
-a slightly better approach. 
+When shells are created (non-zero <b>rmin</b>) the calculation
+of &rsquo;virial equilibrium&rsquo; velocity dispersions is not correct anymore. See 
+<a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
+ for a slightly better approach. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapmass.1.html'>snapmass(1NEMO)</a>
-, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
 ,
-<a href='mkhom.1.html'>mkhom(1NEMO)</a>
+<a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
+, <a href='mkhom.1.html'>mkhom(1NEMO)</a>
 , <a href='snapvirial.1.html'>snapvirial(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
