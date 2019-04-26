@@ -19,8 +19,8 @@ nbody6:
 # just an example on a simple laptop
 # note the order of building appears to matter !!!
 install_nbody6:  nbody6
-	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN)/nbody6.sse)
-	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN)/nbody6)
+	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN))
+	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN))
 
 
 nbody6++: Nbody6ppGPU
