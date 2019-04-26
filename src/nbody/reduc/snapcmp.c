@@ -54,7 +54,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.6\n			  16-jul-09 PJT",
+    "VERSION=1.6a\n			  25-apr-2019 PJT",
     NULL,
 };
 
@@ -194,6 +194,7 @@ local void printquart(real result[], int nbody, real tsnap)
 
   if (Qheader) {
     printf("# time  Min  Qlow Median Qhigh  Max   Mean Sigma\n");
+    printf("# obs=%s\n",getparam("obs"));
     Qheader = 0;
   }
   qsort(result, nbody, sizeof(real), cmpreal);
