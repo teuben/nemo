@@ -172,7 +172,7 @@ void nemo_main(void)
   real apo, ecc, dmin, semi, scale, m1, m2, ratio, range;
   Body *bp, *btab = NULL;
 
-  string exefile;
+  string exefile = getparam("exe");
   string parfile = "nbody6.in";
   string rundir = getparam("outdir");
   string fmt = getparam("format");
