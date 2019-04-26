@@ -334,6 +334,7 @@ void nemo_main(void)
     fprintf(datstr,"20000.0 2 0\n");
     fprintf(datstr,"20000.0 2 0\n");
     fprintf(datstr,"# this last bogus line should not bother nbody6(++) as it's not supposed to be read\n");
+    fprintf(datstr,"# other perhaps useful info: nbody6=%d exefile=%s\n",nbody6_mode,exefile);
 
     strclose(datstr);
 
