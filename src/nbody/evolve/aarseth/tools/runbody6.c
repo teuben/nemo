@@ -147,10 +147,10 @@ string defv[] = {
 
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
-    "exe=nbody6++\n   Name of the executable",
     "nbody6=0\n       run mode : 1=nbody6  0=nbody6++",
+    "exe=\n           Name of the executable (default see nbody6=)",
 
-    "VERSION=0.8\n    26-apr-2019 PJT",
+    "VERSION=0.8a\n   26-apr-2019 PJT",
     NULL,
 };
 
@@ -172,7 +172,7 @@ void nemo_main(void)
   real apo, ecc, dmin, semi, scale, m1, m2, ratio, range;
   Body *bp, *btab = NULL;
 
-  string exefile = getparam("exe");
+  string exefile;
   string parfile = "nbody6.in";
   string rundir = getparam("outdir");
   string fmt = getparam("format");
@@ -182,6 +182,10 @@ void nemo_main(void)
   stream datstr, histr, instr, outstr;
 
   warning("This is a not fully tested pre-release version %s",getparam("VERSION"));
+  if (!hasvalue("exe")) {
+    exefile = (nbody6_mode == 1) ? "nbody6" : "nbody6++";
+    dprintf(0,"exefile=%s\n",exefile);
+  }
 
   kstart = getiparam("kstart");
   tcomp =  getdparam("tcomp");
@@ -326,10 +330,9 @@ void nemo_main(void)
     if (kz[7] == 1 || kz[7] == 3)
       fprintf(datstr,"%g %g %g %g 0 0 0 \n",semi,ecc,ratio,range);
 
-    if (nbody6_mode == 1) {
-      fprintf(datstr,"20000.0 2 0\n");
-      fprintf(datstr,"20000.0 2 0\n");
-    }
+    /*  this one is not well documented - gleaned by Massimo from source code */
+    fprintf(datstr,"20000.0 2 0\n");
+    fprintf(datstr,"20000.0 2 0\n");
     fprintf(datstr,"# this last bogus line should not bother nbody6(++) as it's not supposed to be read\n");
 
     strclose(datstr);
