@@ -76,7 +76,7 @@ string defv[] = {
       "      19  Stellar evolution and mass loss (=1: old supernova scheme;\n"
       "                      =3: Eggleton, Tout & Hurley; >4: Chernoff--Weinberg).\n"
       "      20  Initial mass function (=0,1: Salpeter; >1: various, see IMF).\n"
-      "      21  Extra output (>0: model, etc; >1: CENTRE; >2: MTRACE; >3: GLOBAL).\n"
+      "      21  Extra output (>0: model, etc; >1: CENTER; >2: MTRACE; >3: GLOBAL).\n"
       "      22  Initial conditions on unit 10 (=1: output; =2,3(unscaled): input).\n"
       "      23  Escaper removal (>1: diagnostics in file ESC; =2: angles unit #6;\n"
       "                           >1: tidal tails output if #14 = 3).\n"
@@ -89,7 +89,7 @@ string defv[] = {
       "      28  (not used).\n"
       "    # 29  Boundary reflection for hot system (suppressed).\n"
       "      30  Chain regularization (=1: basic; >1: main output; >2: each step).\n"
-      "      31  Centre of mass correction after energy check.\n"
+      "      31  Center of mass correction after energy check.\n"
       "      32  Increase of output intervals (based on single particle energy).\n"
       "      33  Block-step diagnostics at main output (=2: active pipes).\n"
       "    # 34  Roche lobe overflow (suppressed).\n"
@@ -148,9 +148,9 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
     "exe=nbody6++\n   Name of the executable",
-    "nbody6=1\n       run mode : 0=nbody6  1=nbody6++",
+    "nbody6=0\n       run mode : 1=nbody6  0=nbody6++",
 
-    "VERSION=0.7a\n   13-apr-2019 PJT",
+    "VERSION=0.8\n    26-apr-2019 PJT",
     NULL,
 };
 
@@ -210,6 +210,10 @@ void nemo_main(void)
   for (k=0; k<KZ_MAX; k++) dprintf(1,"%d ",kz[k]);
   dprintf(1,"\n");
 
+  if (nbody6_mode == 1) {
+    if (kz[21] == 2) kz[21] = 3;  /* prevent scaling in nbody6 */
+  }
+
   for (k=0; k<KZ_MAX; k++) {
     if (indexparam("KZ",k+1)) {
       dprintf(0,"KZ %d=%d\n",k+1,getiparam_idx("KZ",k+1));
@@ -227,7 +231,10 @@ void nemo_main(void)
     strclose(instr);
     if (kz[21] == 0) {
       warning("patching kz[22]=2 since in= was given");
-      kz[21] = 2;
+      if (nbody6_mode == 0)
+	kz[21] = 2;
+      else
+	kz[21] = 3;
     }
   } else
     nbody = getiparam("nbody");
@@ -281,12 +288,12 @@ void nemo_main(void)
   
   if (kstart == 1) {
 
-    if (nbody6_mode == 1)
+    if (nbody6_mode == 0)
       fprintf(datstr,"%d 999999.9 1.E6 40 40 640\n",kstart);
     else
       fprintf(datstr,"%d 999999.9\n",kstart);
 
-    if (nbody6_mode == 1)
+    if (nbody6_mode == 0)
       fprintf(datstr,"%d %d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun,ncomm);
     else
       fprintf(datstr,"%d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun);
@@ -297,7 +304,7 @@ void nemo_main(void)
       fprintf(datstr,"%d ",kz[k]);
       if (k%10 == 9)     fprintf(datstr,"\n");
     }
-    if (nbody6_mode == 1)
+    if (nbody6_mode == 0)
       fprintf(datstr,"%g %g %g %g %g %g %g\n",dtmin,rmin,etau,eclose,gmin,gmax,smax);
     else
       fprintf(datstr,"%g %g %g %g %g %g\n",dtmin,rmin,etau,eclose,gmin,gmax);
@@ -311,7 +318,7 @@ void nemo_main(void)
     else if (kz[4] == 4) 
       fprintf(datstr,"%g %g %g %g\n",semi,ecc,m1,m2);
 
-    if (nbody6_mode == 1)
+    if (nbody6_mode == 0)
       fprintf(datstr,"%g 0  0 0 \n",q); 
     else
       fprintf(datstr,"%g 0.0 0.0 0.0 %g\n",q,smax);    // READ (5,*)  Q, VXROT, VZROT, RTIDE, SMAX
@@ -319,6 +326,10 @@ void nemo_main(void)
     if (kz[7] == 1 || kz[7] == 3)
       fprintf(datstr,"%g %g %g %g 0 0 0 \n",semi,ecc,ratio,range);
 
+    if (nbody6_mode == 1) {
+      fprintf(datstr,"20000.0 2 0\n");
+      fprintf(datstr,"20000.0 2 0\n");
+    }
     fprintf(datstr,"# this last bogus line should not bother nbody6(++) as it's not supposed to be read\n");
 
     strclose(datstr);
@@ -332,7 +343,7 @@ void nemo_main(void)
     if (hasvalue("in")) {
       dprintf(1,"Using ascii printout with format=%s to convert data for nbody6\n",fmt);
       sprintf(fmt7,"%s %s %s %s %s %s %s\n",fmt,fmt,fmt,fmt,fmt,fmt,fmt);
-      if (nbody6_mode == 1)
+      if (nbody6_mode == 0)
 	outstr = stropen("dat.10","w");
       else
 	outstr = stropen("fort.10","w");
@@ -347,7 +358,7 @@ void nemo_main(void)
     sprintf(runcmd,"%s < %s",exefile,parfile);
     run_sh(runcmd);
 
-    if (nbody6_mode == 1)
+    if (nbody6_mode == 0)
       sprintf(runcmd,"cat `ls -tr conf.3_*` > OUT3; u3tos OUT3 OUT3.snap mode=6 nbody=%d ; rm OUT3",nbody);
     else
       sprintf(runcmd,"u3tos in=OUT3 out=OUT3.snap mode=1 nbody=%d",nbody);
