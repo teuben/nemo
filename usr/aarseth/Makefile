@@ -54,7 +54,7 @@ run2:   p.snap
 
 # nbody6 SSE multiprocessor
 run3:   p.snap
-	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody6.sse
+	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody7.sse
 
 run4:	p.snap
 	time runbody4 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
