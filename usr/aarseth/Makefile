@@ -36,6 +36,7 @@ install_nbody6++.avx:  Nbody6ppGPU
 	(cd Nbody6ppGPU ; make clean ;\
 	./configure --disable-gpu --disable-mpi ;\
 	make ;\
+	cp build/nbody6++.avx $(NEMOBIN) ;\
 	cp build/nbody6++.avx $(NEMOBIN)/nbody6++)
 
 # this one should work more generically
@@ -43,6 +44,7 @@ install_nbody6++:  Nbody6ppGPU
 	(cd Nbody6ppGPU ; make clean ;\
 	./configure --disable-gpu --disable-mpi --enable-simd=sse ;\
 	make ;\
+	cp build/nbody6++.sse $(NEMOBIN) ;\
 	cp build/nbody6++.sse $(NEMOBIN)/nbody6++)
 
 # example runs
