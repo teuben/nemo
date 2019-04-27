@@ -30,11 +30,20 @@ Nbody6ppGPU:
 
 
 # just an example on a simple laptop
-install_nbody6++:  Nbody6ppGPU
-	(cd Nbody6ppGPU ;\
+# the avx option may not work in some XEON's, watch out for the outut of configure
+
+install_nbody6++.avx:  Nbody6ppGPU
+	(cd Nbody6ppGPU ; make clean ;\
 	./configure --disable-gpu --disable-mpi ;\
 	make ;\
 	cp build/nbody6++.avx $(NEMOBIN)/nbody6++)
+
+# this one should work more generically
+install_nbody6++:  Nbody6ppGPU
+	(cd Nbody6ppGPU ; make clean ;\
+	./configure --disable-gpu --disable-mpi --enable-simd=sse ;\
+	make ;\
+	cp build/nbody6++.sse $(NEMOBIN)/nbody6++)
 
 # example runs
 
@@ -47,14 +56,17 @@ p.snap:
 # nbody6++
 run1:   p.snap
 	time runbody6 p.snap run1 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05
+	snapprint run1/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
 
 # nbody6 single processor
 run2:   p.snap
 	time runbody6 p.snap run2 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody6 
+	snapprint run2/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
 
 # nbody6 SSE multiprocessor
 run3:   p.snap
 	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody7.sse
+	snapprint run3/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
 
 run4:	p.snap
 	time runbody4 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
