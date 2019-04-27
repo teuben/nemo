@@ -58,7 +58,7 @@ p.snap:
 # nbody6++
 run1:   p.snap
 	time runbody6 p.snap run1 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05
-	snapprint run1/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
+	snapprint run1/OUT3.snap key,x,y,z,vx,vy,vz times=$(TCRIT) | head -4
 
 # nbody6 single processor
 run2:   p.snap
