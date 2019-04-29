@@ -1,7 +1,7 @@
 /*
  *  rungravidy:   NEMO frontend for gravidy
  *	
- *  15-feb-2019  V0.1  innitial draft                  PJT
+ *  15-feb-2019  V0.1  initial draft                  PJT
  *
  *
  */
@@ -33,7 +33,9 @@ string defv[] = {
     "tcrit=2.0\n      Termination time in units of the crossing time",
     "eps=0.05\n       Potential softening parameter",
 
-    "VERSION=0.1\n    15-feb-2019 PJT",
+    "exe=gravidy\n    Name of the executable",
+
+    "VERSION=0.2\n    18-feb-2019 PJT",
     NULL,
 };
 
@@ -44,7 +46,7 @@ void nemo_main(void)
 {
   int nbody;
     real eta, deltat, tcrit, qe, eps, tcomp;
-    string exefile = "gravidy";
+    string exefile = getparam("exe");
     string tabfile = "gravidy.in";
     string rundir = getparam("outdir");
     string infile, fname;
@@ -58,10 +60,11 @@ void nemo_main(void)
 
     infile = getparam("in");
     fname = fullname(infile);
+    dprintf(0,"fullname: %s\n",fname);
 
     run_mkdir(rundir);
 
-    stream instr = stropen(getparam("in"),"r");
+    stream instr = stropen(infile,"r");
     nbody = get_snap_nbody(instr);
     strclose(instr);
     dprintf(0,"Grabbing nbody=%d\n",nbody);
