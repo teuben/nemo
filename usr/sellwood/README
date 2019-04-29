@@ -1,7 +1,11 @@
-Jerry Sellwood's new GALAXY (V1.5) version should be placed in the GALAXY15
-directory.
-See http://www.physics.rutgers.edu/galaxy how to download this. 
+Jerry Sellwood's new GALAXY (V1.5) version should be placed in the
+GALAXY15 directory.
+
+See http://www.physics.rutgers.edu/galaxy how to download this.
 
 Instaling via the command
 	mknemo galaxy15
 but note this will overwrite the old (v1.3) galaxy executable in $NEMOBIN
+
+You may also need to tinker with some variables as suggested in
+$NEMO/src/scripts/mknemo.d/galaxy15 if the default compilation fails.
