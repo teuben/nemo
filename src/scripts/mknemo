@@ -18,7 +18,7 @@
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 4.1 9-apr-2019"
+set version="MKNEMO Version 4.1a 6-may-2019"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
