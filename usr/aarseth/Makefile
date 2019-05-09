@@ -12,15 +12,12 @@ help:
 	@echo "install_nbody6:    install in $(NEMOBIN)"
 	@echo "install_nbody6++:  install in $(NEMOBIN)"
 
+install:	install_nbody6 install_nbody6++ install_nbody6++.avx
+
+
 nbody6:
 	wget $(URL1)
 	(mkdir nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
-
-# just an example on a simple laptop
-# note the order of building appears to matter !!!
-install_nbody6:  nbody6
-	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN))
-	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN))
 
 
 nbody6++: Nbody6ppGPU
@@ -28,6 +25,11 @@ nbody6++: Nbody6ppGPU
 Nbody6ppGPU:
 	git clone $(URL2)
 
+# just an example on a simple laptop
+# note the order of building appears to matter !!!
+install_nbody6:  nbody6
+	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN))
+	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN))
 
 # just an example on a simple laptop
 # the avx option may not work in some XEON's, watch out for the outut of configure
@@ -54,10 +56,11 @@ TCRIT = 1.0
 
 p.snap:
 	mkplummer p.snap $(NBODY) seed=123
+	mknemo runbody6
 
-# nbody6++
+# nbody6++.SSE mode (also the default)
 run1:   p.snap
-	time runbody6 p.snap run1 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05
+	time runbody6 p.snap run1 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 exe=nbody6++.sse
 	snapprint run1/OUT3.snap key,x,y,z,vx,vy,vz times=$(TCRIT) | head -4
 
 # nbody6 single processor
@@ -70,8 +73,14 @@ run3:   p.snap
 	time runbody6 p.snap run3 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody7.sse
 	snapprint run3/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
 
-run4:	p.snap
-	time runbody4 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
+# nbody6++.AVX mode
+run4:   p.snap
+	time runbody6 p.snap run4 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 nbody6=1 exe=nbody6++.avx
+	snapprint run3/OUT3.snap key,x,y,z,vx,vy,vz times=1 | head -4
+
+#
+run9:	p.snap
+	time runbody4 p.snap run9 tcrit=$(TCRIT) deltat=0.1 dtadj=0.05 
 
 #       for kicks, a softened gravity run
 run0:
