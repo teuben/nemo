@@ -150,7 +150,7 @@ string defv[] = {
     "nbody6=0\n       run mode : 1=nbody6  0=nbody6++",
     "exe=\n           Name of the executable (default see nbody6=)",
 
-    "VERSION=0.8a\n   26-apr-2019 PJT",
+    "VERSION=0.8b\n   13-may-2019 PJT",
     NULL,
 };
 
@@ -236,9 +236,9 @@ void nemo_main(void)
     if (kz[21] == 0) {
       warning("patching kz[22]=2 since in= was given");
       if (nbody6_mode == 0)
-	kz[21] = 2;
+	kz[21] = 2;          // nbody6++
       else
-	kz[21] = 3;
+	kz[21] = 3;          // nbody6
     }
   } else
     nbody = getiparam("nbody");
@@ -301,8 +301,11 @@ void nemo_main(void)
       fprintf(datstr,"%d %d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun,ncomm);
     else
       fprintf(datstr,"%d %d %d %d %d %d\n",nbody,nfix,ncrit,nrand,nnbopt,nrun);
-    
-    fprintf(datstr,"%g %g %g %g %g %g %g %g %g\n",etai,etar,rs0,dtadj,deltat,tcrit,qe,rbar,zmbar); // ok
+
+    if (nbody6_mode == 0)
+      fprintf(datstr,"%g %g %g %g %g %g %g %g %g\n",etai,etar,rs0,dtadj,deltat,tcrit,qe,rbar,zmbar);
+    else
+      fprintf(datstr,"%g %g %g %g %g %g %g %g %g\n",etai,etar,rs0,dtadj,deltat,tcrit+dtadj,qe,rbar,zmbar);   // work around tcrit bug in nbody6
 
     for (k=0; k<KZ_MAX; k++) {
       fprintf(datstr,"%d ",kz[k]);
@@ -369,6 +372,14 @@ void nemo_main(void)
     run_sh(runcmd);    
     
   } else {
-    error("kstart=%d not supported for NBODY6(++)",kstart);
+    error("kstart=%d not supported for NBODY6(++) yet; you will need to do it manually",kstart);
+    // for nbody6_mode==0
+    // kstart=2:   no further lines needed
+    //        3:   one line: DTADJ,DELTAT,DTADJ,TNEXT,TCRIT,QE,J,K
+    //        4:   one line: ETAI,ETAR,ETAU,DTMIN,RMIN,NCRIT,NNBOPT,SMAX
+    //        5:
+    // for nbody6_mode==1
+    // kstart=2:   standard restart
+    //       >2:   read new parameters (see modify.f)
   }
 }
