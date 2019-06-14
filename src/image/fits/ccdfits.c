@@ -42,6 +42,7 @@
  *      26-may-16   5.8  added CUNITn and BUNIT, and better WCS output when radecvel=t
  *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
  *       8-apr-17   6.0  new approach inheriting a new WCS
+ *      14-jun-19   6.0a correct VSYS when in freq=t mode, fix cdelt1 in one common case
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -79,13 +80,13 @@ string defv[] = {
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
 	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",
-	"vsys=0\n        VSYS correction (test)",
+	"vsys=0\n        VSYS correction in km/s",
 	"freq=f\n        Output axis in FREQ or VHEL",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=5.9c\n  20-feb-2018 PJT",
+        "VERSION=6.0a\n  14-jun-2019 PJT",
         NULL,
 };
 
@@ -230,6 +231,9 @@ void write_fits(string name,imageptr iptr)
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
+
+    if (Qfreq)
+      vsys = -restfreq * vsys / 300000.0;        // convert km/s to Hz
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
     nx[0] = Nx(iptr);
@@ -326,7 +330,13 @@ void write_fits(string name,imageptr iptr)
       dprintf(1,"Using ref_crval\n");
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
-      if (ndim>2) fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
+      if (ndim>2) {
+	if (Qfreq)
+	  fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]+vsys);
+	else
+	  fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
+	
+      }
       if (ndim>3) fitwrhdr(fitsfile,"CRVAL4",ref_crval[3]);
     } else {
       fitwrhdr(fitsfile,"CRVAL1",xmin[p[0]]);
@@ -347,7 +357,7 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       } else {
-	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
+	fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);    
 	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
