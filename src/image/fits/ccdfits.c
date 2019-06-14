@@ -86,7 +86,7 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=6.0a\n  14-jun-2019 PJT",
+        "VERSION=6.0b\n  14-jun-2019 PJT",
         NULL,
 };
 
@@ -359,7 +359,12 @@ void write_fits(string name,imageptr iptr)
       } else {
 	fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);    
 	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
-	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
+	if (ndim>2) {
+	  if (Qfreq)
+	    fitwrhdr(fitsfile,"CDELT3",-dx[p[2]]);
+	  else
+	    fitwrhdr(fitsfile,"CDELT3",dx[p[2]]);
+	}
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       }
     }
