@@ -6,6 +6,7 @@
  *	21-may-92   fixed wrong getparam parameter "x"
  *      22-feb-97   allow flipping x and y if the image is square,
  *		    also fixed an initialization problem!
+ *      17-jun-2019 allow flipping in z
  *                      
  */
 
@@ -20,11 +21,11 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output file",
 	"flip=x\n       Flip in x,y  or allow xy for square images",
-	"VERSION=1.2\n  22-feb-97 PJT",
+	"VERSION=1.3\n  17-jun-2019 PJT",
 	NULL,
 };
 
-string usage = "flip an image";
+string usage = "flip an image along certain axes";
 
 #define X 0
 #define Y 1
@@ -48,7 +49,7 @@ void nemo_main()
 {
     stream  instr, outstr;
     int     nx, ny, nz;        /* size of scratch map */
-    int     ix, iy, flip;
+    int     ix, iy, iz, flip;
     imageptr iptr=NULL;        /* pointer to image */
     real    tmp, zzz;
     string  flipmode;
@@ -60,6 +61,8 @@ void nemo_main()
         flip = Y;
     else if (streq(flipmode,"xy"))
         flip = XY;
+    else if (streq(flipmode,"z"))
+        flip = Z;      
     else
         error("Illegal flip axis");
 
@@ -105,6 +108,18 @@ void nemo_main()
       SWAPR(Xmin(iptr),  Ymin(iptr));
       SWAPR(Dx(iptr),    Dy(iptr));
       SWAPS(Namex(iptr), Namey(iptr));
+    } else if (flip==Z) {
+      for (ix=0; ix<nx; ix++) {
+	for (iy=0; iy<ny; iy++) {	
+	  for (iz=0; iz<nz/2; iz++) {	    /* flip in z */
+	    tmp = CubeValue(iptr,ix,iy,iz);
+            zzz = CubeValue(iptr,ix,iy,nz-iz-1);
+            dprintf(1,"%d %d: %f %f\n",ix,iy,iz,tmp,zzz);
+            CubeValue(iptr,ix,iy,iz) = CubeValue(iptr,ix,iy,nz-iz-1);
+            CubeValue(iptr,ix,iy,nz-iz-1) = tmp;
+	  }
+        }
+      }
     }
     write_image(outstr, iptr);
 }
