@@ -43,6 +43,7 @@
  *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
  *       8-apr-17   6.0  new approach inheriting a new WCS
  *      14-jun-19   6.0a correct VSYS when in freq=t mode, fix cdelt1 in one common case
+ *      19-jun-10   6.1  Output now in km/s
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -79,14 +80,14 @@ string defv[] = {
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
-	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",
+	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
 	"vsys=0\n        VSYS correction in km/s",
-	"freq=f\n        Output axis in FREQ or VHEL",
+	"freq=f\n        Output axis in FREQ or VEL",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=6.0b\n  14-jun-2019 PJT",
+        "VERSION=6.1\n   19-jun-2019 PJT",
         NULL,
 };
 
@@ -242,7 +243,7 @@ void write_fits(string name,imageptr iptr)
     nx[3] = 1;
     xmin[0] = Xmin(iptr)*scale[0];
     xmin[1] = Ymin(iptr)*scale[1];
-    xmin[2] = (Zmin(iptr)+vsys)*scale[2];
+    xmin[2] = Zmin(iptr)*scale[2];
     xmin[3] = 1.0;
     dx[0] = Dx(iptr)*scale[0];
     dx[1] = Dy(iptr)*scale[1];
@@ -331,11 +332,7 @@ void write_fits(string name,imageptr iptr)
       fitwrhdr(fitsfile,"CRVAL1",ref_crval[0]);
       fitwrhdr(fitsfile,"CRVAL2",ref_crval[1]);
       if (ndim>2) {
-	if (Qfreq)
-	  fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]+vsys);
-	else
-	  fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]);
-	
+	fitwrhdr(fitsfile,"CRVAL3",ref_crval[2]+vsys);
       }
       if (ndim>3) fitwrhdr(fitsfile,"CRVAL4",ref_crval[3]);
     } else {
@@ -398,7 +395,7 @@ void write_fits(string name,imageptr iptr)
       if (Qfreq)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
-	fitwrhda(fitsfile,"CUNIT3","m/s");            /* or km/s */
+	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or km/s */
       fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
