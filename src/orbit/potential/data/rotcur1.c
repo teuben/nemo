@@ -5,7 +5,7 @@
  */
 
 /*CTEX
- *  {\bf potname=rotcur0
+ *  {\bf potname=rotcur1
  *       potpars={\it $\Omega,r_0,\alpha$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
@@ -34,7 +34,7 @@ void inipotential (int *npar, double *par, string name)
     if (n>3) a     = par[3];
     if (n>4) warning("Rotcur1 potential: only 4 parameters usable");
     
-    dprintf (1,"INIPOTENTIAL Rotcur0 potential %s\n",name);
+    dprintf (1,"INIPOTENTIAL Rotcur1 potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  R0 = %g  V0 = %g A=%g\n", r0, v0, a);
 
