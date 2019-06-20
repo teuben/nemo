@@ -24,7 +24,7 @@ MAN5FILES =
 INCFILES = 
 
 POT_CC = \
-	bar83.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
+	bar83.c brandt.c bulge1.c ccd.c cp80.c dehnen.c dublinz.c expdisk.c flatz.c halo.c \
 	grow_plum.c grow_plum2.c hdgrow1.c \
 	harmonic.c hernquist.c hom.c hubble.c kim11.f kuzmindisk.c \
 	isochrone.c jaffe.c log.c log2.c mestel.c miyamoto.c nfw.c nfw2.c null.c \
