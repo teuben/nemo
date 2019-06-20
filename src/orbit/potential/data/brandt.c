@@ -10,6 +10,8 @@
  *	 
  * The forces returned are the axisymmetric forces as defined by
  * a parameterized rotation curve as defined by the turnover point $r_0,v_0$.
+ *
+ * See also Brandt, J.C. 1960, ApJ 131, 293. eq. (26)
  */
  
 
@@ -21,7 +23,7 @@
 local double omega = 0.0;
 local double r0    = 1.0;
 local double v0    = 1.0;
-local double m     = 2.0;    /* logarithmic potential */
+local double m     = 2.0;   
 
 void inipotential (int *npar, double *par, string name)
 {
@@ -50,6 +52,7 @@ void potential_double (int *ndim, double *pos,double *acc,double *pot,double *ti
         r2 += sqr(pos[i]);
     r=sqrt(r2);
 
+    /* the 1/3 and 2/3 are from Greisen 2009, but Brandt 1960 eq.26 seems to use 1 and 1 */
     v = v0 * r / pow(1/3.0 + (2/3.0)*pow(r/r0,m),1.5/m);
 
     if (r > 0)
