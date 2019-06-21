@@ -6,7 +6,7 @@
 
 /*CTEX
  *  {\bf potname=rotcur1
- *       potpars={\it $\Omega,r_0,\alpha$}}
+ *       potpars={\it $\Omega,r_0,v_0,\alpha$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
  * a parameterized rotation curve as defined by the turnover point $r_0,v_0$.
