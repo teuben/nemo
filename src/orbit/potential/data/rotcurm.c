@@ -6,7 +6,7 @@
 
 /*CTEX
  *  {\bf potname=rotcurm
- *       potpars={\it $\Omega,r_0,m$}}
+ *       potpars={\it $\Omega,r_0,v_0,m$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
  * a parameterized rotation curve as defined by the turnover point $r_0,v_0$.
@@ -50,7 +50,7 @@ void potential_double (int *ndim, double *pos,double *acc,double *pot,double *ti
         r2 += sqr(pos[i]);
     r=sqrt(r2);
 
-    v = v0 * r / pow(1 + pow(r/r0,m),1/m);
+    v = v0 * (r/r0) / pow(1 + pow(r/r0,m),1/m);
 
     if (r > 0)
 	f = sqr(v/r);
