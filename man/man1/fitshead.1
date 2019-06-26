@@ -85,8 +85,15 @@ equally so, \fIdd(1)\fP:
 .nf
     % dd cbs=80 conv=unblock in=map1.fits | more
 .fi
+Stripping trailing white space is sometimes needed to compare fits headers with the \fIdiff(1)\fP
+program:
+.nf
+    % fitshead ngc6503.fits | sed 's/ *$//' > ngc6503.fitshead
+.fi
 .SH "SEE ALSO"
-scanfits(1NEMO), fits(5NEMO), dd(1), fold(1)
+scanfits(1NEMO), fits(5NEMO), dd(1), fold(1), diff(1), sed(1)
+.PP
+\fBfitsheader\fP is a popular program in many packages, e.g. in astropy-utils
 .SH AUTHOR
 Peter Teuben
 .SH FILES
