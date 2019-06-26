@@ -9,19 +9,18 @@
  *       potpars={\it $\Omega,r_0,v_0,m$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
- * a parameterized rotation curve as defined by the turnover point $r_0,v_0$.
+ * a parameterized rotation curve as defined by the turnover point $r_0,v_0$
+ * and shape parameter $m$.
  */
  
 
 #include <stdinc.h>
-#include <spline.h>
-#include <table.h>
 #include <potential_float.h>
 
 local double omega = 0.0;
 local double r0    = 1.0;
 local double v0    = 1.0;
-local double m     = 2.0;    /* logarithmic potential */
+local double m     = 2.0;    /* m=2: logarithmic potential */
 
 void inipotential (int *npar, double *par, string name)
 {
@@ -34,9 +33,9 @@ void inipotential (int *npar, double *par, string name)
     if (n>3) m     = par[3];
     if (n>4) warning("Rotcurm potential: only 4 parameters usable");
     
-    dprintf (1,"INIPOTENTIAL Rotcurm potential %s\n",name);
+    dprintf (1,"INIPOTENTIAL rotcurm Potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  R0 = %g  V0 = %g m=%g\n", r0, v0, m);
+    dprintf (1,"  R0 = %g  V0 = %g  m=%g\n", r0, v0, m);
 
     par[0] = omega;     /* return pattern speed again */
 }
@@ -50,10 +49,10 @@ void potential_double (int *ndim, double *pos,double *acc,double *pot,double *ti
         r2 += sqr(pos[i]);
     r=sqrt(r2);
 
-    v = v0 * (r/r0) / pow(1 + pow(r/r0,m),1/m);
+    v = v0 * (r/r0) / pow(1 + pow(r/r0,m),1.0/m);
 
     if (r > 0)
-	f = sqr(v/r);
+        f = sqr(v/r);
     else
     	f = 0;
     dprintf(2,"r=%g v=%g f=%g\n",r,v,f);
