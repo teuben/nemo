@@ -1,4 +1,4 @@
-.TH ROTCURVES 1NEMO "1 July 2016"
+.TH ROTCURVES 1NEMO "25 June 2019"
 .SH NAME
 rotcurves \- rotation curve of a composite potential
 .SH SYNOPSIS
@@ -34,6 +34,9 @@ Optional file for first potential. Defaults as defined by the
 potential itself.
 .TP
 <etc> for \fBname2, name3, name4\fP.
+.br
+NOTE that because of the specific code implementation, you cannot re-use the same potential,
+since they share their static code data.
 .TP
 \fBradii=\fIr1,r2,...\fP
 Radii where to compute the rotation curve.
@@ -122,6 +125,11 @@ results along the X and Y axes, and average.
 .PP
 Rotating potentials are not implemented, except for the search for
 Lindblad resonances in \fBmode=omega\fP.
+.PP
+Potentials (name1,2,....) cannot be re-used. Since \fIloadobj(3NEMO)\fP is used
+to load the potentials, their static code data is shared. One possible solution
+would be to make a physical copy of the .so file from $NEMOOBJ/potential
+in the local directory with different names
 .SH AUTHOR
 Peter Teuben
 .SH FILES
