@@ -25,7 +25,7 @@ string defv[] = {
 	"beam=\n       Override beam/pixel ratio",
 	"diff=f\n      Difference Map? (as opposed to Observed)",
 	"beeg=t\n      Use the Begeman correction terms to V",
-	"VERSION=0.1\n 2-jul-2019 PJT",
+	"VERSION=0.2\n 2-jul-2019 PJT",
 	NULL,
 };
 
@@ -114,16 +114,22 @@ void nemo_main()
 
     for (j=1; j<ny-1; j++) {
       for (i=1; i<nx-1; i++) {
-	// laplacian (d2vdx2, ...)
+	if (CV01(i,j) == 0) {
+	  CVO(i,j) = 0;        // blank out where model is 0
+	  continue;
+	}
+	
+	// 2nd order terms
 	d1 = CV02(i-1,j) - CV02(i,j);
-	d2 = CV02(i+1,j) - CV02(i,j);
+	d2 = CV02(i+1,j) - CV02(i,j); // d2V/dx2 = d1+d2
 	d3 = CV02(i,j-1) - CV02(i,j);
-	d4 = CV02(i,j+1) - CV02(i,j);
-	// (dvdx, dndx, ...)
-	n1 = 0.5*(CV01(i+1,j) - CV01(i-1,j));
-	v1 = 0.5*(CV02(i+1,j) - CV02(i-1,j));
-	n2 = 0.5*(CV01(i,j+1) - CV01(i,j-1));
-	v2 = 0.5*(CV02(i,j+1) - CV02(i,j-1));
+	d4 = CV02(i,j+1) - CV02(i,j); // d2V/dy2 = d3+d4
+	// linear terms
+	n1 = 0.5*(CV01(i+1,j) - CV01(i-1,j));    // dN/dx
+	v1 = 0.5*(CV02(i+1,j) - CV02(i-1,j));    // dV/dx
+	n2 = 0.5*(CV01(i,j+1) - CV01(i,j-1));    // dN/dy
+	v2 = 0.5*(CV02(i,j+1) - CV02(i,j-1));    // dV/dy
+	//
 	CVO(i,j)  = CV02(i,j);
 	if (Qbeeg) {
 	  CVO(i,j) += (d1+d2+d3+d4) * CV01(i,j) * b * b / ( 2 * CV11(i,j));
