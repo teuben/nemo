@@ -1,0 +1,59 @@
+.TH TESTBSC 1NEMO "3 July 2019"
+.SH NAME
+testbsc \- testing Beam Smearing Corrections
+.SH SYNOPSIS
+\fBtestbsc\fP [parameter=value]
+.SH DESCRIPTION
+\fBtestbsc\fP tests various Beam Smearing Corrections to the velocity field. Currently
+only Begeman's correction is available.
+.PP
+Begeman's (1989, Appendix B, eq.(8)) recipe reads as follows:
+.nf
+     v = V + b^2/n * ( Vx*Nx + Vy*Ny + N * (Vxx + Vyy) / 2)
+.fi
+where the correction terms (\fBbeeg=t\fP below) have single and double
+derivatives. (N,V) are the model density and velocity, (n,v) the
+observed/smoothed values, in this case with a circular gaussian beam
+with sigma (not FWHM) of \fBb\fP (see \fBbeam=\fP below) points per pixel.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP
+\fBinD=\fP
+Input Model Density image file []  
+.TP
+\fBinV=\fP
+Input Model Velocity image file []  
+.TP
+\fBind=\fP
+Input Observed (smoothed) Density image file []  
+.TP
+\fBinv=\fP
+Input Observed (smoothed) Velocity image file []  
+.TP
+\fBout=\fP
+Output file, depends on the values of \fBdiff=\fP and \fBbeeg=\fP.
+.TP
+\fBbeam=\fP
+Override sigma_beam/pixel ratio. Recall FWHM = 2.355 * SIGMA. By default the beam
+size will be in the header.
+.TP
+\fBdiff=f|t\fP
+Difference Map? (as opposed to Observed). Normally the Observed velocity field is
+computed from the Model and BS correction terms, but turning this option on,
+the input computed Observed is subtracted from the computed Observed. [f]
+.TP
+\fBbeeg=t|f\fP
+Use the Begeman correction terms to V. This is of course the default, but by
+turning this off, a simple different of V-v (Model - Observed) can be computed. [t]
+.SH SEE ALSO
+ccdmath(1NEMO), image(5NEMO)
+.SH FILES
+NEMO/src/image/rotcur
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+2-Jul-2019	V0.1 Created	PJT
+.fi
