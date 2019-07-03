@@ -1,0 +1,43 @@
+.TH YAPP 1NEMO "03 July 2019"
+.SH NAME
+yapp \- simple scripting interface to yapp
+.SH SYNOPSIS
+\fByapp\fP [parameter=value]
+.SH DESCRIPTION
+This allows you to write a script calling yapp functions.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBname=\fP
+Override for yapp= system keyword (*** = default)
+.TP 20
+\fBlayout=\fP
+Optional layout file []    
+.TP 20
+\fBVERSION=\fP
+6-dec-2011 PJT [0.1]     
+.SH EXAMPLES
+In the case of a yapp device that can switch between graphics output, here is a
+csh-example in the PGPLOT version of yapp, how to auto-increment your output devices:
+.nf
+#  before the script starts, assign two variables and initialize the $yapp
+set yapps = yapp%d.ps/vcps    # yapp printf string (%d/xs, yapp%d.ps/vcps)
+set yappn = 1                 # first yapp number
+set yapp  = `printf $yapps $yappn` ; @ yappn++   # increment counter
+
+#  call you program that needs the yapp=$yapp argument
+#  but follow it with the incrementor line
+tabplot .... yapp=$yapp
+set yapp=`printf $yapps $yappn` ; @ yappn++
+
+.fi
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+03-Jul-19	V0.0 Created by mkman	NEMO
+.fi
