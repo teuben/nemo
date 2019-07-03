@@ -1,11 +1,12 @@
 .TH TESTBSC 1NEMO "3 July 2019"
 .SH NAME
-testbsc \- testing Beam Smearing Corrections
+testbsc \- testing Beam Smearing Correction algorithms
 .SH SYNOPSIS
 \fBtestbsc\fP [parameter=value]
 .SH DESCRIPTION
-\fBtestbsc\fP tests various Beam Smearing Corrections to the velocity field. Currently
-only Begeman's correction is available.
+\fBtestbsc\fP tests various Beam Smearing Correction schemes to a velocity field. Currently
+only Begeman's correction is available, but expect to try out Leung's (2018) method
+in an upcoming version.
 .PP
 Begeman's (1989, Appendix B, eq.(8)) recipe reads as follows:
 .nf
@@ -39,15 +40,31 @@ Override sigma_beam/pixel ratio. Recall FWHM = 2.355 * SIGMA. By default the bea
 size will be in the header.
 .TP
 \fBdiff=f|t\fP
-Difference Map? (as opposed to Observed). Normally the Observed velocity field is
-computed from the Model and BS correction terms, but turning this option on,
-the input computed Observed is subtracted from the computed Observed. [f]
+Compute a Difference map? (as opposed to Computed Observed). Normally the Observed velocity field is
+computed from the Model and BSC terms, but turning this option on,
+the input Observed is subtracted from the computed Observed. [f]
 .TP
 \fBbeeg=t|f\fP
-Use the Begeman correction terms to V. This is of course the default, but by
-turning this off, a simple different of V-v (Model - Observed) can be computed. [t]
+Use the Begeman correction terms. This is of course the default, but by
+turning this off, a simple different of V-v (Model - Observed) can be computed, as
+can be seen in the EXAMPLES below. [t]
 .SH SEE ALSO
-ccdmath(1NEMO), image(5NEMO)
+ccdmath(1NEMO), rotcur(1NEMO), image(5NEMO)
+.SH EXAMPLES
+In this example we show off the interplay of the \fBdiff=\fP and \fBbeeg=\fP keywords:
+.nf
+  testbsc N.ccd V.ccd n.ccd v.ccd map1 diff=f beeg=f
+  testbsc N.ccd V.ccd n.ccd v.ccd map2 diff=t beeg=f
+  testbsc N.ccd V.ccd n.ccd v.ccd map3 diff=f beeg=t
+  testbsc N.ccd V.ccd n.ccd v.ccd map4 diff=t beeg=t
+.fi
+Now the four maps will have the following meaning:
+.nf
+  map1:  V
+  map2:  V - v
+  map3:  V + bsc       (should be close to 'v')
+  map4:  V + bsc - v   (should be close to 0)
+.fi
 .SH FILES
 NEMO/src/image/rotcur
 .SH AUTHOR
@@ -55,5 +72,5 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-2-Jul-2019	V0.1 Created	PJT
+3-jul-2019	V0.4 Created/released	PJT
 .fi
