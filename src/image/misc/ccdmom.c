@@ -58,7 +58,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.7\n  25-sep-2018 PJT",
+  "VERSION=2.7a\n 2-jul-2019 PJT",
   NULL,
 };
 
@@ -442,6 +442,9 @@ void nemo_main()
         Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
         Namey(iptr1) = Namey(iptr);
         Namez(iptr1) = Namez(iptr);
+
+	Beamx(iptr1) = Beamx(iptr);
+	Beamy(iptr1) = Beamy(iptr);
 
 	if (Qoper) image_oper(iptr,oper,iptr1);
         
