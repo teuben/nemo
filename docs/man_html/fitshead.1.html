@@ -93,13 +93,21 @@ a FITS header by specifying the width to be 80 characters, viz. <br>
 </pre>equally so, <a href='dd.1.html'><i>dd(1)</i></a>
 : <br>
 <pre>    % dd cbs=80 conv=unblock in=map1.fits | more
+</pre>Stripping trailing white space is sometimes needed to compare fits headers
+with the <a href='diff.1.html'><i>diff(1)</i></a>
+ program: <br>
+<pre>    % fitshead ngc6503.fits | sed &rsquo;s/ *$//&rsquo; &gt; ngc6503.fitshead
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='scanfits.1.html'>scanfits(1NEMO)</a>
 , <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
 , <a href='fold.1.html'>fold(1)</a>
- 
+, <a href='diff.1.html'>diff(1)</a>
+, <a href='sed.1.html'>sed(1)</a>
+ <p>
+<b>fitsheader</b>
+is a popular program in many packages, e.g. in astropy-utils 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben
 

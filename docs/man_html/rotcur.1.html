@@ -140,90 +140,91 @@ is assumed independant. [no correction]. </dd>
 <dt><b>dens</b>=<i>image_den|true|false</i> </dt>
 <dd>Image containing
 the density. From this local derivatives <i>(dN/dx)/N</i> and  <i>(dN/dy)/N</i> are computed
-numerically, and used for an  estimate of beam smearing corrections. Note
-that for bizarre reasons this keyword can be used to trigger reading a
-weight column in tabular input mode (Bimagemode=). [Default: required if
-a beam is supplied]. </dd>
+numerically, and used for an  estimate of beam smearing corrections. See
+also <a href='testbsc.1.html'><i>testbsc(1NEMO)</i></a>
+. Note that for bizarre reasons this keyword can be used
+to trigger reading a weight column in tabular input mode (Bimagemode=).
+[Default: required if a beam is supplied]. </dd>
 
 <dt><b>tab</b>= </dt>
-<dd>If specified, this output table is used in <i>append</i>
-mode! This table can be piped through <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
- and  fed to <a href='ccdvel.1.html'><i>ccdvel(1NEMO)</i></a>
+<dd>If specified, this output
+table is used in <i>append</i> mode! This table can be piped through <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
 
-to create model velocity fields. [Default: not used]. </dd>
-
-<dt><b>resid</b>= </dt>
-<dd>If specified,
-this output will either contain a residual image (OBS-FIT) if the input
-file was an image, or a table with X, Y, Velocity and Residual Velocities
-in each ring.  Each ring will be separated from the previous one with a
-simple commented line specifying which ring it refers to.  [Default: not
+and  fed to <a href='ccdvel.1.html'><i>ccdvel(1NEMO)</i></a>
+ to create model velocity fields. [Default: not
 used]. </dd>
 
+<dt><b>resid</b>= </dt>
+<dd>If specified, this output will either contain a residual image
+(OBS-FIT) if the input file was an image, or a table with X, Y, Velocity
+and Residual Velocities in each ring.  Each ring will be separated from
+the previous one with a simple commented line specifying which ring it
+refers to.  [Default: not used]. </dd>
+
 <dt><b>tol</b>= </dt>
-<dd>Tolerance for convergence of <i>nllsqfit</i> [Default: <b>0.001</b>]. </dd>
+<dd>Tolerance for convergence of <i>nllsqfit</i>
+[Default: <b>0.001</b>]. </dd>
 
 <dt><b>lab</b>= </dt>
-<dd>Mixing
-parameter for <i>nllsqfit</i> [Default: <b>0.001</b>] </dd>
+<dd>Mixing parameter for <i>nllsqfit</i> [Default: <b>0.001</b>] </dd>
 
-<dt><b>itmax</b>= </dt>
-<dd>Maximum number of allowed
-<i>nllsqfit</i> iterations [Default: <b>50</b>] </dd>
+<dt><b>itmax</b>=
+</dt>
+<dd>Maximum number of allowed <i>nllsqfit</i> iterations [Default: <b>50</b>] </dd>
 
 <dt><b>units</b>= </dt>
-<dd>Units of input axes for radius
-and velocity. Valid options are <b>deg, arcmin, arcsec, rad</b> for radius. A numeric
-value can also be given, in which case your image pixel separation from
-the image header is multiplied by this number to get to the &lsquo;&lsquo;arcsec&rsquo;&rsquo; that
-will be quoted in the tables. The units for velocity can only be numeric,
-and will be the factor by which the velocities in the map are multiplied.
-[Default: <b>deg</b>] </dd>
+<dd>Units
+of input axes for radius and velocity. Valid options are <b>deg, arcmin, arcsec,
+rad</b> for radius. A numeric value can also be given, in which case your image
+pixel separation from the image header is multiplied by this number to
+get to the &lsquo;&lsquo;arcsec&rsquo;&rsquo; that will be quoted in the tables. The units for velocity
+can only be numeric, and will be the factor by which the velocities in
+the map are multiplied. [Default: <b>deg</b>] </dd>
 
 <dt><b>blank=</b> </dt>
-<dd>Value of the blank pixel that needs to be ignored.
-[Default: <b>0.0</b>]. </dd>
+<dd>Value of the blank pixel that
+needs to be ignored. [Default: <b>0.0</b>]. </dd>
 
 <dt><b>inherit=t|f</b> </dt>
-<dd>Logical denoting if the initial conditions for
-subsequent fitted rings should be inherited from the previous successfully
-fitted ring. The fixed parameters keep of course their fixed value. [Default:
-<b>t</b>] </dd>
+<dd>Logical denoting if the initial
+conditions for subsequent fitted rings should be inherited from the previous
+successfully fitted ring. The fixed parameters keep of course their fixed
+value. [Default: <b>t</b>] </dd>
 
 <dt><b>reuse=t|f</b> </dt>
-<dd>Reuse pixels between rings. If neighboring rings have a different
-geometries, it can occur that pixels will be reused. This flag will prevent
-that. Note, if you don&rsquo;t reuse pixels, rotcur will more likely produce a
-different rotation curve if you start at outer rings,e.g. radii=100:0:-10.
-[Default: <b>t</b>] </dd>
+<dd>Reuse pixels between rings. If neighboring rings
+have a different geometries, it can occur that pixels will be reused. This
+flag will prevent that. Note, if you don&rsquo;t reuse pixels, rotcur will more
+likely produce a different rotation curve if you start at outer rings,e.g.
+radii=100:0:-10. [Default: <b>t</b>] </dd>
 
 <dt><b>fitmode=</b><b>cos|sin</b><b>,1</b> </dt>
 <dd></dd>
 
 <dt><b>nsigma=</b> </dt>
-<dd>Reject outlier points will fall outside
-nsigma times the dispersion  away from the mean velocity in a ring. By default,
-it will not reject any outliers. </dd>
+<dd>Reject outlier points
+will fall outside nsigma times the dispersion  away from the mean velocity
+in a ring. By default, it will not reject any outliers. </dd>
 
 <dt><b>imagemode=t|f</b> </dt>
-<dd>Image input file mode? By
-default the input file is an image, alternatively a simple ascii table
-with X and Y positions in columns 1 and 2, and radial velocities in column
-3, and optional errors in the radial velocity in column 4 (activated by
-setting <b>dens=t</b>). [Default: t] </dd>
+<dd>Image
+input file mode? By default the input file is an image, alternatively a
+simple ascii table with X and Y positions in columns 1 and 2, and radial
+velocities in column 3, and optional errors in the radial velocity in column
+4 (activated by setting <b>dens=t</b>). [Default: t] </dd>
 
 <dt><b>wwb73=t|f</b> </dt>
-<dd>Use a simpler WWB73 linear method
-of fitting? [false] </dd>
+<dd>Use a simpler WWB73
+linear method of fitting? [false] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>AWK</a></h2>
-The standard output is normally not very useful;
-it displays, for each iteration, the run of parameters plus the number
-of points and mean error in the ring. The following <a href='awk.1.html'><i>awk(1)</i></a>
- scripts may be
-useful to extract information per ring: <i>iter. number, vsys, vrot, pa, icn,
-xpos, ypos, npoints, sigma_vel</i>. <br>
+The standard output is normally not
+very useful; it displays, for each iteration, the run of parameters plus
+the number of points and mean error in the ring. The following <a href='awk.1.html'><i>awk(1)</i></a>
+ scripts
+may be useful to extract information per ring: <i>iter. number, vsys, vrot,
+pa, icn, xpos, ypos, npoints, sigma_vel</i>. <br>
 <pre>BEGIN{count=0;line="";}
 {
   if ($1 == "radius"){
@@ -292,8 +293,9 @@ in  overlapping rings (e.g. warps) only the last ring velocity will be used.
 <a href='pvtrace.1.html'>pvtrace(1NEMO)</a>
 , <a href='runvelfitss07.1.html'>runvelfitss07(1NEMO)</a>
 , <a href='ccdmom.1.html'>ccdmom(1NEMO)</a>
-,  gal(AIPS), rocur(AIPS),
-<a href='velfitpatch.1.html'>velfitpatch(1NEMO)</a>
+, <a href='testbsc.1.html'>testbsc(1NEMO)</a>
+,  gal(AIPS),
+rocur(AIPS), <a href='velfitpatch.1.html'>velfitpatch(1NEMO)</a>
  <br>
 <pre>TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
 pPXF: http://www-astro.physics.ox.ac.uk/~mxc/idl/#ppxf

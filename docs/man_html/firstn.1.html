@@ -13,13 +13,14 @@ firstn - von Hoerners first N-body code
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 firstn &lt; firstn.in 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>firstn</b>
-currently only integrates an example internally-generated Plummer sphere.
-
+Arguably
+the first N-body code was written by von Hoerner (1960). This version, <b>firstn</b>,
+currently only integrates an example internally-generated Plummer sphere,
+and was written by S. Aarseth. 
 <h2><a name='sect3' href='#toc3'>Input</a></h2>
-The <b>firstn.in</b> input file contains 3 lines (See also <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
-).
-<br>
+The <b>firstn.in</b> input file contains 3 lines
+(See also <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
+). <br>
 <pre>N ETA EPS DELTAT TCRIT
 ALPHAS BODY1 BODYN KZ5
 Q, ISCALE
@@ -66,7 +67,7 @@ data are generated. </dt>
 
 <h2><a name='sect4' href='#toc4'>Performance</a></h2>
 CPU
-should  scale as N^2. Here are some numbers from a  <br>
+should  scale as N^2. Here are some numbers  <br>
 <pre>N<tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu"<tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu"
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;?<tt> </tt>&nbsp;<tt> </tt>&nbsp;p4/1600/gcc<tt> </tt>&nbsp;<tt> </tt>&nbsp;ifort
 16<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.79
@@ -76,12 +77,12 @@ should  scale as N^2. Here are some numbers from a  <br>
 256<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<tt> </tt>&nbsp;<tt> </tt>&nbsp;834.3<tt> </tt>&nbsp;<tt> </tt>&nbsp;746.5
 </pre>
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-This is a code meant to be historic and educational, and should
-most certainly not be used for any serious work. 
+This historic code is meant to be educational. 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-S. von Hoerner (original),
-Sverre Aarseth (21st century adaptation) <br>
+S. von Hoerner
+(original), Sverre Aarseth (21st century adaptation) <br>
 <pre>Z.f.Astrophys. 50, 184, 1960 (1960ZA.....50..184V)
+Z.f.Astrophys. 57, 47, 1963 
 Files
 ~/usr/aarseth/firstn<tt> </tt>&nbsp;<tt> </tt>&nbsp;original
 </pre>
@@ -91,7 +92,7 @@ Files
 <h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>dec-2000<tt> </tt>&nbsp;<tt> </tt>&nbsp;version from Aarseth<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-9-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;man page written, <tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+9-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;man page written <tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

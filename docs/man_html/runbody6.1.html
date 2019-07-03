@@ -219,47 +219,52 @@ and using a default for the long kz= vector. For example "kz=@kz.def KZ22=2
 KZ5=2". See <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
  for a description of indexed keywords. </dd>
 
-<dt><b>exe=</b> </dt>
-<dd>Name
-of the nbody6 executable in the $PATH. Both nbody6 and nbody6++ are supported.
-Default: nbody6++ </dd>
+<dt><b>nbody6=0|1<b>
+</b></b></dt>
+<dd>Support mode for nbody6:  1=nbody6, 0=nbody6++ (default) </dd>
 
-<dt><b>nbody6=0|1<b> </b></b></dt>
-<dd>Support mode for nbody6:  0=nbody6, 1=nbody6++
-(default) </dd>
+<dt><b>exe=</b> </dt>
+<dd>Name of the
+nbody6 executable in your $PATH (absolute or relative path also allowed).
+Both nbody6 and nbody6++ are supported. The default for <b>exe</b> depends on the
+value for <b>nbody6=</b>:   1=nbody6  0=nbody6++ Note that for nbody6=1 the default
+nbody6 executable is the single-processing version, there is also a parallel
+version, dubbed <b>nbody7.sse</b>. For nbody6++ there is the default <b>nbody6++.sse</b>
+and the possibly faster <b>nbody6++.avx</b> available. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-<b>nbody6</b> can also be used to generate snapshots. Here is
-an example to create a 1024 body homogeneous sphere in the directory run1
-and a plummer sphere in run2. <br>
+<b>nbody6</b> can also be
+used to generate snapshots. Here is an example to create a 1024 body homogeneous
+sphere in the directory run1 and a plummer sphere in run2. <br>
 <pre>    % runbody6 "" run1 1024 tcrit=0 KZ5=0 KZ22=1
     % snapplot run1/OUT3.snap
     % runbody6 "" run2 1024 tcrit=0 KZ5=1 KZ22=1
     % snapplot run2/OUT3.snap
 </pre><p>
 You can also supply existing NEMO snapshots as initial conditions, this
-is the best supported way to use runbody6: <br>
+is actually the best supported way to use runbody6: <br>
 <pre>    % mkplummer p1024 1024
     % runbody6 p1024 run3 tcrit=1
 </pre>
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Small N systems may need to be tuned with larger <b>rs0=</b> and <b>nnbopt=</b>.
-<p>
-The dreaded CALCULATIONS HALTED message means you will need to consult
-the NBODY6++ manual <p>
-The interface has been primarely tested with nbody6++,
-it&rsquo;s possible that some differences between nbody6 and nbody6++ have not
-been taken care of. 
+Small N systems may need to be tuned with larger <b>rs0=</b> and <b>nnbopt=</b>,
+but don&rsquo;t even think of trying a 3-body problem. <p>
+The dreaded CALCULATIONS
+HALTED message means you will need to consult the NBODY6++ manual <p>
+The interface
+has been primarely tested with nbody6++, it&rsquo;s possible that some differences
+between nbody6 and nbody6++ have not been taken care of. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='runbody1.1.html'>runbody1(1NEMO)</a>
-, <a href='nbody2.1.html'>nbody2(1NEMO)</a>
-, <a href='nbody4.5.html'>nbody4(5NEMO)</a>
 ,
-<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+<a href='nbody2.1.html'>nbody2(1NEMO)</a>
+, <a href='nbody4.5.html'>nbody4(5NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
 , <a href='stou4.1.html'>stou4(1NEMO)</a>
-, <a href='snapprint.1.html'>snapprint(1NEMO)</a>
+,
+<a href='snapprint.1.html'>snapprint(1NEMO)</a>
  <p>
 <br>
 <pre>nbody6:    ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz
@@ -278,6 +283,7 @@ Peter Teuben
 yet<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 support nbody6/nbody6++<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 5-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 support writing snapshots without virtual particles<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+26-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 reversed logic of nbody6=, fix  KZ22 option for nbody6=1<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -47,57 +47,60 @@ Defaults as defined by the  potential itself. </dd>
 
 <dt>&lt;etc&gt; for <b>name2, name3, name4</b>.
 </dt>
-<dd></dd>
+<dd><br>
+NOTE that because of the specific code implementation, you cannot re-use
+the same potential, since they share their static code data. </dd>
 
-<dt><b>radii=<i>r1,r2,...</i></b> </dt>
-<dd>Radii where to compute the rotation curve. [default: <b>0:2:0.1</b>].
-</dd>
+<dt><b>radii=<i>r1,r2,...</i></b>
+</dt>
+<dd>Radii where to compute the rotation curve. [default: <b>0:2:0.1</b>]. </dd>
 
 <dt><b>axis=x|y|z</b> </dt>
-<dd>Choice of axis to compute rotation curve along. The rotation curve
-is defined from circular orbits balancing the local gravitational force.
-[default: <b>x</b>]. </dd>
+<dd>Choice
+of axis to compute rotation curve along. The rotation curve is defined from
+circular orbits balancing the local gravitational force. [default: <b>x</b>]. </dd>
 
-<dt><b>mode=<i>option</i></b> </dt>
-<dd>Mode can be <b>velocity</b> or <b>omega</b>, the former selecting
-the true rotation curve, the latter a Lindblad diagram. In a Lindblad diagram
-only the total curve is given, not the individual components. If a finite
-pattern speed is given, it also computes the lindblad resonances, but make
-sure the OLR is included, else the program will abort. [default: <b>velocity</b>].
-</dd>
+<dt><b>mode=<i>option</i></b>
+</dt>
+<dd>Mode can be <b>velocity</b> or <b>omega</b>, the former selecting the true rotation curve,
+the latter a Lindblad diagram. In a Lindblad diagram only the total curve
+is given, not the individual components. If a finite pattern speed is given,
+it also computes the lindblad resonances, but make sure the OLR is included,
+else the program will abort. [default: <b>velocity</b>]. </dd>
 
 <dt><b>n=</b> </dt>
-<dd>For angular velocity diagrams (<b>mode=omega</b>) this gives the Lindblad resonance
-to be computed. By default the classical <b>n=2</b> is used, from which the ILR
-and OLR can be derived. For <b>n=4</b> the two UHR can be determined etc. [Default:
-<b>2</b>] </dd>
+<dd>For angular velocity
+diagrams (<b>mode=omega</b>) this gives the Lindblad resonance to be computed.
+By default the classical <b>n=2</b> is used, from which the ILR and OLR can be
+derived. For <b>n=4</b> the two UHR can be determined etc. [Default: <b>2</b>] </dd>
 
-<dt><b>r0l=<i>r0,l,radii</i></b> </dt>
-<dd>Solar radius, galactic longitude and a list of radii
-(distances  along the line of sight) to calculate radial velocity for. <i>
-Experimental, only in <b>lv</b></i> mode </dd>
+<dt><b>r0l=<i>r0,l,radii</i></b>
+</dt>
+<dd>Solar radius, galactic longitude and a list of radii (distances  along
+the line of sight) to calculate radial velocity for. <i> Experimental, only
+in <b>lv</b></i> mode </dd>
 
 <dt><b>plot=t|f</b> </dt>
-<dd>Select viewing in form of a plot.
-[Default: <b>t</b>] </dd>
+<dd>Select viewing in form of a plot. [Default: <b>t</b>] </dd>
 
-<dt><b>tab=t|f</b> </dt>
+<dt><b>tab=t|f</b>
+</dt>
 <dd>Select viewing in form of a table. [Default: <b>f</b>] </dd>
 
-<dt><b>format=</b>
-</dt>
+<dt><b>format=</b> </dt>
 <dd><a href='printf.3.html'><i>printf(3)</i></a>
- style format specification for each of the columns in tabular
-output. [Default: <b>%g</b>] </dd>
+ style
+format specification for each of the columns in tabular output. [Default:
+<b>%g</b>] </dd>
 
 <dt><b>xrange=<i>xmin,xmax|xmin</i></b> </dt>
-<dd>Range in plot for X-axis, always
-radius. Two (min and max), one (min) or zero (autoscaling) values can be
-given. [default: autoscaling] </dd>
+<dd>Range in plot for X-axis, always radius. Two (min
+and max), one (min) or zero (autoscaling) values can be given. [default:
+autoscaling] </dd>
 
 <dt><b>yrange=<i>ymin,ymax|ymin</i></b> </dt>
-<dd>Range in plot for Y-axis,
-either velocity or omega. See also <b>xrange=</b>. [default: autoscaling] </dd>
+<dd>Range in plot for Y-axis, either velocity
+or omega. See also <b>xrange=</b>. [default: autoscaling] </dd>
 
 <dt><b>headline=<i>plotlabel_text</i></b>
 </dt>
@@ -146,7 +149,12 @@ and one has to resort to a periodic orbit searching program such as <a href='per
 You can also try and average the results along the X and Y axes, and average.
 <p>
 Rotating potentials are not implemented, except for the search for Lindblad
-resonances in <b>mode=omega</b>. 
+resonances in <b>mode=omega</b>. <p>
+Potentials (name1,2,....) cannot be re-used. Since <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
+
+is used to load the potentials, their static code data is shared. One possible
+solution would be to make a physical copy of the .so file from $NEMOOBJ/potential
+in the local directory with different names 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
