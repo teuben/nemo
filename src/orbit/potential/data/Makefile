@@ -28,7 +28,7 @@ POT_CC = \
 	grow_plum.c grow_plum2.c hdgrow1.c \
 	harmonic.c hernquist.c hom.c hubble.c kim11.f kuzmindisk.c \
 	isochrone.c jaffe.c log.c log2.c mestel.c miyamoto.c nfw.c nfw2.c null.c \
-	op73.c plummer.c plummer2.c rh84.c rotcur0.c rotcur1.c rotcure.c rotcurm.c rotcur.c teusan85.c triax.c \
+	op73.c plummer.c plummer2.c persic.c rh84.c rotcur0.c rotcur1.c rotcure.c rotcurm.c rotcur.c teusan85.c triax.c \
 	twofixed.c plummer4.c vertdisk.c tidaldisk.c polynomial.c wada94.c \
         zero.c point.c
 
