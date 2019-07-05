@@ -1,4 +1,5 @@
 #	Makefile for NEMO/src/kernel/tab/fit
+#       .so functions in here are currently only used by tabnllsqfit
 include $(NEMOLIB)/makedefs
 
 #	Compile flags  $(NFLAGS)
@@ -24,7 +25,7 @@ MAN5FILES =
 INCFILES = 
 
 FIT_CC  = \
-	gauss2.c  gauss3_hcn.c	gauss7_n2h+.c  gaussn.c  myline.c  taugauss.c
+	gauss2.c  gauss3_hcn.c	gauss7_n2h+.c  gaussn.c  myline.c  taugauss.c rotcurm.c 
 
 FIT_CXX = \
 
