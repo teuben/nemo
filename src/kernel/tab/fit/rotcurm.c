@@ -19,8 +19,8 @@ real func_rotcurm(real *x, real *p, int np)
     debug_first = 0;
   }
 
-  r = x[0]/p[1];
-  arg1 = 1+pow(r,p[2]);
+  r    = x[0]/p[1];
+  arg1 = 1 + pow(r,p[2]);
   
   return p[0] * r / pow( arg1, 1/p[2]);
 }
@@ -29,11 +29,12 @@ void derv_rotcurm(real *x, real *p, real *e, int np)
 {
   real r, arg1;
 
-  r = x[0]/p[1];
+  r    = x[0]/p[1];
   arg1 = 1+pow(r,p[2]);
 
   e[0] = r/pow( arg1, 1/p[2]);
-  e[1] = r*(pow(r,p[2])/arg1 - 1)/pow(arg1,1/p[2]);
+  e[1] = p[0]*x[0]*x[0]*pow(x[0]/p[1],p[2]-1)*pow(arg1,-1-1/p[2])/(p[1]*p[1]*p[1]) -
+         p[0]*x[0]/(p[1]*p[1]*pow(arg1,1/p[2]));
   e[2] = p[0]*r/pow(arg1,1/p[2]) * (log(arg1)/(p[2]*p[2]) - pow(r,p[2])*log(r)/(p[2]*arg1));
 }
 
