@@ -69,7 +69,7 @@ string defv[] = {
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
-    "VERSION=4.1\n      26-may-2016 PJT",
+    "VERSION=4.1a\n     7-jul-2019 PJT",
     NULL
 };
 
@@ -430,9 +430,10 @@ static void derv_psf(real *x, real *p, real *e, int np)
 
   e[0] =      x1*x2;
   e[1] = p[0]*x1*x2*log(x[0]);
-  e[2] = p[0]*x1*x2*log(x[1]);
+  e[2] = p[0]*x1*x2*log(sin(x[1]));
   e[3] =                        1.0;
 }
+
 
 
 
