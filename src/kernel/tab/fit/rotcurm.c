@@ -1,7 +1,7 @@
 /*
- * example fit function for a rotcurm rotation curve
+ * fit function for a rotcurm rotation curve
  *
- *	f = p0 * (x/p1) / (1+(x/p1)**m)**(1/m)
+ *	f = p0 * (x/p1) / (1+(x/p1)**p2)**(1/p2)
  *
  * 4-jul-2019	created 
  */
@@ -34,6 +34,7 @@ void derv_rotcurm(real *x, real *p, real *e, int np)
 
   e[0] = r/pow( arg1, 1/p[2]);
   e[1] = r*(pow(r,p[2])/arg1 - 1)/pow(arg1,1/p[2]);
-  e[2] = p[0]*r*log(arg1)*log(r)*pow(r,p[2])/(p[2]*p[2]*pow(arg1,1/p[2]));
+  e[2] = p[0]*r/pow(arg1,1/p[2]) * (log(arg1)/(p[2]*p[2]) - pow(r,p[2])*log(r)/(p[2]*arg1));
 }
+
 
