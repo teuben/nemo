@@ -94,7 +94,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4a\n  4-feb-2018 PJT",
+    "VERSION=1.4b\n  9-jul-2019 PJT",
     NULL,
 };
 
@@ -422,8 +422,8 @@ rotcurparse()
 	mmsk[nmod][1] = natoi(sp[5]);
 	mmsk[nmod][2] = natoi(sp[6]);
 	rcfn[nmod] = rotcur_nfw;
-      } else if (streq(sp[0],"core")) {
-	if (nsp != 6) error("core needs 3 parameters");
+      } else if (streq(sp[0],"core") || streq(sp[0],"rotcurm")) {
+	if (nsp != 6) error("core/rotcurm needs 3 parameters");
 	npar[nmod] = 3;
 	mpar[nmod][0] = natof(sp[1]);
 	mpar[nmod][1] = natof(sp[2]);
@@ -700,22 +700,22 @@ stream  lunpri;       /* LUN for print output */
       error("Need two numbers to define the center (%d)",n);
     *thf = getdparam("frang");
 
-    printf("ROTCUR: free angle %4.1f (degrees)\n", *thf);
+    printf("ROTCURSHAPE: free angle %4.1f (degrees)\n", *thf);
     if (lunpri) fprintf(lunpri," free angle          : %4.1f (degrees)\n",*thf);
 
     input = getparam("side");
     if (*input=='r') {
         *side = 1;
-        printf("ROTCUR: rotation curve of receding half\n");
+        printf("ROTCURSHAPE: rotation curve of receding half\n");
         if (lunpri) fprintf(lunpri," velocity field      : receding half\n");
     } else if (*input=='a') {
-        printf("ROTCUR: rotation curve of approaching half\n");
+        printf("ROTCURSHAPE: rotation curve of approaching half\n");
         if (lunpri) fprintf(lunpri," velocity field      : approaching side\n");
         *side = 2;
     } else if (*input=='w') {
         error("side=wedge not supported yet");
     } else {
-        printf("ROTCUR: rotation curve of both halves\n");
+        printf("ROTCURSHAPE: rotation curve of both halves\n");
         if (lunpri) fprintf(lunpri," velocity field      : both halves\n");
         *side = 3;
     }
@@ -727,15 +727,15 @@ stream  lunpri;       /* LUN for print output */
 
     input = getparam("weight");
     if (*input == 'u') {
-        printf("ROTCUR: uniform weighting\n");
+        printf("ROTCURSHAPE: uniform weighting\n");
         if (lunpri) fprintf(lunpri," used weighting      : uniform\n");
         *wpow = 0;
     } else if (streq(input,"cos-squared")) {
-        printf("ROTCUR: cosine-squared weighting\n");
+        printf("ROTCURSHAPE: cosine-squared weighting\n");
         if (lunpri) fprintf(lunpri," used weighting      : cos-squared\n");
         *wpow = 2;
     } else {            /* default is cosine weighting */
-        printf("ROTCUR: cosine weighting\n");
+        printf("ROTCURSHAPE: cosine weighting\n");
         if (lunpri) fprintf(lunpri," used weighting      : cosine\n");
         *wpow = 1;
     }
@@ -782,7 +782,7 @@ stream  lunpri;       /* LUN for print output */
     for (nfixed=0,i=0; i<nparams; i++)      /* count number of fixed par's */
         if (mask[i]==0) nfixed++; 
 
-    printf("ROTCUR: will fit the following parameter(s)\n");
+    printf("ROTCURSHAPE: will fit the following parameter(s)\n");
     if (lunpri) fprintf(lunpri," parameters to fit   :");
     if (mask[0]==1) {
         printf("       - Systemic velocity \n");
@@ -828,7 +828,7 @@ stream  lunpri;       /* LUN for print output */
     tol = getdparam("tol");
     lab = getdparam("lab");
     itmax = getiparam("itmax");
-    printf("ROTCUR: tol=%g lab=%g iTmax=%d\n",tol,lab,itmax);
+    printf("ROTCURSHAPE: tol=%g lab=%g iTmax=%d\n",tol,lab,itmax);
     if (lunpri) fprintf(lunpri," tol, lab, itmax     : %g %g %d\n",
                                     tol,lab,itmax);
 
@@ -1033,22 +1033,22 @@ stream lunres;   /* file for residuals */
 
     switch(ier) {           /* process some error codes, see also nllsqfit(3) */
       case -1:                                       /* no degrees of freedom */
-         warning("ROTCUR: no degrees of freedom");
+         warning("ROTCURSHAPE: no degrees of freedom");
          break;
       case -2:
-         warning("ROTCUR: you have no free parameters");
+         warning("ROTCURSHAPE: you have no free parameters");
          break;
       case -3:                                        /* problems with matrix */
-         warning("ROTCUR: not enough degrees of freedom");
+         warning("ROTCURSHAPE: not enough degrees of freedom");
          break;
       case -4:
-         warning("ROTCUR: problems with matrix inversion");
+         warning("ROTCURSHAPE: problems with matrix inversion");
          break;
       case -5:                                        /* floating zero divide */
-         warning("ROTCUR: floating zero divide");
+         warning("ROTCURSHAPE: floating zero divide");
          break;
       case -10:                     /* maximum number of iterations too small */
-         warning("ROTCUR: max. number of iterations %d to small",itmax);
+         warning("ROTCURSHAPE: max. number of iterations %d to small",itmax);
          break;
       default:
          perform_out(h,p,n-nblank,q);                  /* write final results */
