@@ -94,7 +94,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4b\n  9-jul-2019 PJT",
+    "VERSION=1.4c\n  10-jul-2019 PJT",
     NULL,
 };
 
@@ -1033,22 +1033,22 @@ stream lunres;   /* file for residuals */
 
     switch(ier) {           /* process some error codes, see also nllsqfit(3) */
       case -1:                                       /* no degrees of freedom */
-         warning("ROTCURSHAPE: no degrees of freedom");
+         error("ROTCURSHAPE: no degrees of freedom");
          break;
       case -2:
-         warning("ROTCURSHAPE: you have no free parameters");
+         error("ROTCURSHAPE: you have no free parameters");
          break;
       case -3:                                        /* problems with matrix */
-         warning("ROTCURSHAPE: not enough degrees of freedom");
+         error("ROTCURSHAPE: not enough degrees of freedom");
          break;
       case -4:
-         warning("ROTCURSHAPE: problems with matrix inversion");
+         error("ROTCURSHAPE: problems with matrix inversion");
          break;
       case -5:                                        /* floating zero divide */
-         warning("ROTCURSHAPE: floating zero divide");
+         error("ROTCURSHAPE: floating zero divide");
          break;
       case -10:                     /* maximum number of iterations too small */
-         warning("ROTCURSHAPE: max. number of iterations %d to small",itmax);
+         error("ROTCURSHAPE: max. number of iterations %d to small",itmax);
          break;
       default:
          perform_out(h,p,n-nblank,q);                  /* write final results */
