@@ -3,9 +3,9 @@
  *           This version can only compute one version; i.e.
  *           on re-entry of inipotential(), old versions are lost
  *
- *	nov-90	created?	PJT
- *    19-jul-92 finished for Bikram     PJT
- *	 oct-93 get_pattern
+ *	   nov-90  created?	PJT
+ *      19-jul-92  finished for Bikram     PJT
+ *	   oct-93  get_pattern
  *	15-apr-98  oops, made forces now negative
  *      23-jun-01  gcc warnings
  *      26-feb-03  potential now contains the "rotation curve" (or whatever)
