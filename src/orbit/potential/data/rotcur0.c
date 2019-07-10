@@ -35,7 +35,7 @@ void inipotential (int *npar, double *par, string name)
     if (n>0) omega = par[0];
     if (n>1) v0    = par[1];
     if (n>2) r0    = par[2];
-    if (n>3) warning("Rotcur potential: only 3 parameters usable");
+    if (n>3) warning("Rotcur0 potential: only 3 parameters usable");
     
     dprintf (1,"INIPOTENTIAL Rotcur0 potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
