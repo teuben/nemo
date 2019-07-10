@@ -4,11 +4,12 @@
  *
  *	29-dec-01	derived from rotcur
  *      19-sep-04       float/double
+ *       9-jul-19       swith par order: v0 first
  */
 
 /*CTEX
  *  {\bf potname=rotcur0
- *       potpars={\it $\Omega,r_0,v_0$}}
+ *       potpars={\it $\Omega,v_0,r_0$}}
  *	 
  * The forces returned are the axisymmetric forces as defined by
  * a linear-flat rotation curve as defined by the turnover point $r_0,v_0$.
@@ -23,8 +24,8 @@
 #include <potential_float.h>
 
 local double omega = 0.0;
-local double r0  = 1.0;
-local double v0 = 1.0;
+local double v0    = 1.0;
+local double r0    = 1.0;
 
 void inipotential (int *npar, double *par, string name)
 {
@@ -32,13 +33,13 @@ void inipotential (int *npar, double *par, string name)
 
     n = *npar;
     if (n>0) omega = par[0];
-    if (n>1) r0    = par[1];
-    if (n>2) v0    = par[2];
+    if (n>1) v0    = par[1];
+    if (n>2) r0    = par[2];
     if (n>3) warning("Rotcur potential: only 3 parameters usable");
     
     dprintf (1,"INIPOTENTIAL Rotcur0 potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  R0 = %g  V0 = %g\n", r0, v0);
+    dprintf (1,"  V0 = %g  R0 = %g\n", v0, r0);
 
     par[0] = omega;     /* return pattern speed again */
 }
