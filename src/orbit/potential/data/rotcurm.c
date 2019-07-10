@@ -2,6 +2,7 @@
  * rotcurm.c: potential & forces as defined by a rotation curve
  *
  *	20-jun-2019	derived from rotcur1
+ *       9-jul-2019     switches order:   now v0,r0
  */
 
 /*CTEX
@@ -11,6 +12,7 @@
  * The forces returned are the axisymmetric forces as defined by
  * a parameterized rotation curve as defined by the turnover point $r_0,v_0$
  * and shape parameter $m$.
+ * In other places (e.g. rotcurshape) this rotation curve as known as "core". 
  */
  
 
@@ -18,8 +20,8 @@
 #include <potential_float.h>
 
 local double omega = 0.0;
-local double r0    = 1.0;
 local double v0    = 1.0;
+local double r0    = 1.0;
 local double m     = 2.0;    /* m=2: logarithmic potential */
 
 void inipotential (int *npar, double *par, string name)
@@ -28,14 +30,14 @@ void inipotential (int *npar, double *par, string name)
 
     n = *npar;
     if (n>0) omega = par[0];
-    if (n>1) r0    = par[1];
-    if (n>2) v0    = par[2];
+    if (n>1) v0    = par[1];
+    if (n>2) r0    = par[2];
     if (n>3) m     = par[3];
     if (n>4) warning("Rotcurm potential: only 4 parameters usable");
     
     dprintf (1,"INIPOTENTIAL rotcurm Potential %s\n",name);
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  R0 = %g  V0 = %g  m=%g\n", r0, v0, m);
+    dprintf (1,"  V0 = %g  R0 = %g  m=%g\n", v0, r0, m);
 
     par[0] = omega;     /* return pattern speed again */
 }
