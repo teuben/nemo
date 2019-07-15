@@ -1,11 +1,12 @@
-.TH CCDFLIP 1NEMO "22 February 1997"
+.TH CCDFLIP 1NEMO "15 July 2019"
 .SH NAME
-ccdflip \- flip an image
+ccdflip \- flip an image in X,Y,Z 
 .SH SYNOPSIS
 \fBccdflip\fP [parameter=value]
 .SH DESCRIPTION
 \fBccdflip\fP flips the coordinates of one of the principle axes
-(X, Y or Z) of an image.
+(X, Y or Z) of an image. Not all permutations were implemented,
+as this program was a quick hack.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -17,13 +18,18 @@ Input image file
 Output file      
 .TP
 \fBflip=\fP
-Flip in x,y or z?   
+Flip in x,y or z?   Use 'xy' for flipping axes on square images.
+Default: x
 .SH EXAMPLES
-.SH SEE ALSO
+To rotate an image by 90 degrees (clockwise) use two flips:
+.nf
+    ccdflip gal1.ccd - xy | - gal2.ccd y
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 22-Feb-97	man written	PJT
+15-jul-2019	example added	PJT
 .fi
