@@ -9,7 +9,7 @@ OS=
 #LDFLAGS = -O
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version \
-	fitsedit nds9 shtool nemo.coverage showvar mir2nemo getline
+	fitsedit nds9 shtool nemo.coverage showvar mir2nemo getline pedit
 MAKES = Makefile.lib 
 FAKES = cc make f77 ranlib
 
