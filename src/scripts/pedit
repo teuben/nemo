@@ -15,7 +15,7 @@
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: %s [options] parfile a=1 f=\"'a.fits'\"" % sys.argv[0])
+    print("Usage: %s [options] parfile a=1 f=\"'a.fits'\" > parfile.new" % sys.argv[0])
     sys.exit(1)
 
 
