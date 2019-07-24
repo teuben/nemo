@@ -54,7 +54,7 @@ nbody4:	$(OBJECTS)
 	$(FC) $(FFLAGS) $(OBJECTS) -o nbody4
 
 clean:
-	\rm *.o nbody4
+	\rm -f *.o nbody4
 
 install: nbody4
 	cp $? $(NEMOBIN)
