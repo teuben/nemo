@@ -122,9 +122,9 @@ setenv VDEVICE X11
 if (1) then
 
   if ($?LD_LIBRARY_PATH) then
-    setenv LD_LIBRARY_PATH ${NEMOLIB}:${LD_LIBRARY_PATH}
+    setenv LD_LIBRARY_PATH ${NEMOLIB}:${NEMO}/opt/lib:${LD_LIBRARY_PATH}
   else
-    setenv LD_LIBRARY_PATH ${NEMOLIB}
+    setenv LD_LIBRARY_PATH ${NEMOLIB}:$(NEMO)/opt/lib
   endif
   if ("$PGPLOT_DIR" != "$NEMOLIB") then
     setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:$PGPLOT_DIR
@@ -161,9 +161,9 @@ if (-e $HOME/.nemo_local.csh)  source $HOME/.nemo_local.csh
 
 
 if ($path[1] == ".") then
-  set path = ( . $NEMOBIN $path[2-] )
+  set path = ( . $NEMOBIN $NEMO/opt/bin $path[2-] )
 else
-  set path = ( $NEMOBIN $path )
+  set path = ( $NEMOBIN $NEMO/opt/bin $path )
 endif
 rehash
 
