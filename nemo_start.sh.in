@@ -77,7 +77,7 @@ test -f $NEMO/nemo_local.sh     &&     source $NEMO/nemo_local.sh
 test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 
 # optional dot check?
-export PATH=$NEMOBIN:$NEMO/opt/bin/$PATH
+export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 
 # falcON 
 echo Only partial falcON support for bash 
