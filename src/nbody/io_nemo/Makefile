@@ -67,7 +67,7 @@ clean:    allclean
 allclean  : clean_obj clean_test
 
 clean_obj :
-	/bin/rm ${IONO}/*.o
+	/bin/rm -f ${IONO}/*.o
 
 clean_test :
 	/bin/rm -rf compile/bin/*
