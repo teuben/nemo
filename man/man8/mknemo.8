@@ -1,6 +1,6 @@
 .TH MKNEMO 8NEMO "11 April 2019"
 .SH NAME
-mknemo \- attempt to find NEMO programs and install them
+mknemo \- attempt to find NEMO (and related) programs and install them
 .SH SYNOPSIS
 .PP
 \fBmknemo \fIprogram(s)\fP 
@@ -15,7 +15,9 @@ Finding the method how to install \fIprogram\fP takes several paths:
 .PP
 First, if a file \fI$NEMO/src/scripts/mknemo.d/program\fP exists,
 it is assumed to be a shell script with directions how to install this
-program. \fPgyrfalcON\fP is an example of such a complex program.
+program. \fPgyrfalcON\fP is an example of such a complex program. In
+this case \fIprogram\fP can also be a package name, in which case
+the script will be more complex.
 .PP
 Next, within the $NEMO/src (optionally also the $NEMO/usr tree) a
 source file \fIprogram.c\fP (or C++ or Fortran) is looked for, which is
