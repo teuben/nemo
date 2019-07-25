@@ -3,6 +3,12 @@
 #   mknemo build helper for BBarolo (ok, I call it barolo here)
 #
 #
+<<<<<<< HEAD
+=======
+#   See also:  https://bbarolo.readthedocs.io/en/latest/
+#
+#
+>>>>>>> 9b44265b6cbe077b21305eebf1a98b87a4d03cf4
 # Unless you have obtained the 3 needed libraries via other means, you'll need
 # to grab them, and install them manually.   E.g.
 # 
@@ -16,7 +22,13 @@
 #    make
 #    make install
 #
+<<<<<<< HEAD
 # Example of package install for Ubuntu: (actually not checked yet)
+=======
+# See example below.
+#
+# An example of package install for Ubuntu: (actually not checked yet)
+>>>>>>> 9b44265b6cbe077b21305eebf1a98b87a4d03cf4
 #
 #    sudo apt install wcslib-dev libcfitsio-dev libfftw3-dev
 #
