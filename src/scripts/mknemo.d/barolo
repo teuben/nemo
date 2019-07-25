@@ -2,8 +2,9 @@
 #
 #   Build helper for BBarolo (ok, I call it barolo here)
 #
-
-
+#   See also:  https://bbarolo.readthedocs.io/en/latest/
+#
+#
 # Unless you have obtained the 3 needed libraries via other means, you'll need
 # to grab them, and install them manually.   E.g.
 # 
@@ -17,7 +18,10 @@
 #    make
 #    make install
 #
-# Example of package install for Ubuntu: (actually not checked yet)
+# See example below.
+#
+# An example of package install for Ubuntu: (actually not checked yet)
+#
 #    sudo apt install wcslib-dev libcfitsio-dev libfftw3-dev
 #
 
@@ -48,7 +52,6 @@ if (1) then
   make install
   cd ..
 endif
-
 
 
 
