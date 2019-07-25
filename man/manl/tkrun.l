@@ -92,11 +92,11 @@ The code is horribly non-defensive, and does not handle syntax errors on the
 Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
 out sections of the script.
 .SH SEE ALSO
-wish(1)
+wish(1), zenity(1)
 .PP
 .nf
 .ta +2i
-http://sunscript.sun.com/	Home Page of Tcl/Tk (now outdated)
+http://sunscript.sun.com/	Home Page of Tcl/Tk (now gone)
 http://www.neosoft.com/		Archive of Tcl/Tk tools 
 http://tcl.sourceforge.net/	Current home page and source code repo
 .fi
