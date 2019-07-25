@@ -1,9 +1,8 @@
 #! /bin/csh -f
 #
-#   Build helper for BBarolo (ok, I call it barolo here)
+#   mknemo build helper for BBarolo (ok, I call it barolo here)
 #
-
-
+#
 # Unless you have obtained the 3 needed libraries via other means, you'll need
 # to grab them, and install them manually.   E.g.
 # 
@@ -18,11 +17,14 @@
 #    make install
 #
 # Example of package install for Ubuntu: (actually not checked yet)
+#
 #    sudo apt install wcslib-dev libcfitsio-dev libfftw3-dev
 #
 
 cd $NEMO/local
 
+#                 Warning: version numbers, in particular for fftw, will change
+#                          and will break this script. fix it manually
 if (1) then
   wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
   tar jxf wcslib.tar.bz2
@@ -50,10 +52,11 @@ if (1) then
 endif
 
 
-
-
-git clone https://github.com/editeodoro/Bbarolo
+if (! -d Bbarolo) then
+  git clone https://github.com/editeodoro/Bbarolo
+endif  
 cd Bbarolo
+git pull
 ./configure --prefix=$NEMO/opt --with-cfitsio=$NEMO/opt --with-wcslib=$NEMO/opt --with-fftw3=$NEMO/opt
 make 
 make install
