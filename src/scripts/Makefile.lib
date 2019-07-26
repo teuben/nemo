@@ -1,6 +1,7 @@
 #	template Makefile to install NEMO binaries and libraries....
 #	Usually installed as $NEMOLIB/Makefile and use by the 'bake' replace
 #	ment of 'make'
+#       The original source is in $NEMO/src/scripts
 
 include $(NEMOLIB)/makedefs
 
