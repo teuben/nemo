@@ -11,6 +11,8 @@
  *  {\bf potname=halo
  *       potpars={\it $\Omega,v_0,r_c$}}
  *
+ *   rotcurm with m=2
+ *
  */
 
 
