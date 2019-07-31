@@ -22,6 +22,7 @@
  *      15-jun-17   2.5  pos=x,y triggering debug output
  *      21-jun-17   2.6  use abs values for
  *      25-sep-18   2.7  tinkering because of "bettermoments"
+        29-jul-19   2.7c fix bug when no clip was given
  *                      
  * TODO : cumulative along an axis, sort of like numarray.accumulate()
  *        man page talks about clip= and  rngmsk=, where is this code?
@@ -58,7 +59,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.7a\n 2-jul-2019 PJT",
+  "VERSION=2.7c\n 30-jul-2019 PJT",
   NULL,
 };
 
@@ -190,7 +191,7 @@ void nemo_main()
 	    smask = NULL;
 	} else
             error("Invalid axis: %d (Valid: 1,2,3)",axis);
-        dprintf(0,"Reducing %d*%d*%d to a %d*%d*%d cube\n",
+        dprintf(1,"Reducing %d*%d*%d to a %d*%d*%d cube\n",
                    nx,ny,nz, nx1,ny1,nz1);
     }
 
@@ -215,7 +216,7 @@ void nemo_main()
 	    peakvalue = CubeValue(iptr,0,j,k);
             for (i=0; i<nx; i++) {
 	        spec[i] = CubeValue(iptr,i,j,k);
- 	        if (out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
+ 	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
 		tmp00 += sqr(CubeValue(iptr,i,j,k));
@@ -272,7 +273,7 @@ void nemo_main()
 	    peakvalue = CubeValue(iptr,i,0,k);
             for (j=0; j<ny; j++) {
 	        spec[j] = CubeValue(iptr,i,j,k); 
- 	        if (out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
+ 	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
     	        tmp0 += CubeValue(iptr,i,j,k);
 		tmp00 += sqr(CubeValue(iptr,i,j,k));
@@ -328,7 +329,7 @@ void nemo_main()
 	    cnt = 0;
     	    for(k=0; k<nz; k++) {
 	        spec[k] = CubeValue(iptr,i,j,k);
- 	        if (out_of_range(clip,spec[k])) continue;
+ 	        if (Qclip && out_of_range(clip,spec[k])) continue;
 		if (cnt==0) {
 		  apeak = k;
 		  peakvalue = spec[k];
@@ -717,6 +718,7 @@ local int peak_assign(int n, real *d, int *s)
 
 local bool out_of_range(real *clip, real x)
 {
+  /* already certified that clip has a valid number, and wasn't blank */
   if (clip[0] == clip[1]) return FALSE;
   if (x < clip[0] || x > clip[1]) return FALSE;
   return TRUE;
