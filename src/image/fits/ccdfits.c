@@ -87,7 +87,8 @@ string defv[] = {
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
-        "VERSION=6.1\n   19-jun-2019 PJT",
+	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
+        "VERSION=6.2\n   1-aug-2019 PJT",
         NULL,
 };
 
@@ -106,12 +107,14 @@ string object;           /* name of object in FITS header */
 string comment;          /* extra comments */
 string headline;         /* optional NEMO headline, added as COMMENT */
 string proj;             /* projection type for WCS */
-bool Qcdmatrix;         /* writing out new-style cdmatrix ? */
-bool Qradecvel;         /* fake astronomy WCS header */
+bool Qcdmatrix;          /* writing out new-style cdmatrix ? */
+bool Qradecvel;          /* fake astronomy WCS header */
 bool Qfreq;              /* freq or vel output ? */
 bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
-bool Qdummy;            /* write dummy axes ? */
+bool Qdummy;             /* write dummy axes ? */
+bool Qblank;
+real blankval;
 int  nrefaxis, refaxis[4];
 bool Qrefaxis[4];
 
@@ -175,6 +178,8 @@ void setparams(void)
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qfreq     = getbparam("freq");
+  Qblank    = hasvalue("blank");
+  if (Qblank) blankval = getrparam("blank");
 
   
   Qrefmap = hasvalue("refmap");
@@ -225,6 +230,7 @@ void write_fits(string name,imageptr iptr)
 {
     FLOAT tmpr,xmin[4],xref[4],dx[4],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FLOAT bmaj,bmin,bpa;
+    FLOAT fnan;
     FITS *fitsfile;
     char *cp, origin[80];
     char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
@@ -232,6 +238,8 @@ void write_fits(string name,imageptr iptr)
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
+
+    get_nanf(&fnan);    
 
     if (Qfreq)
       vsys = -restfreq * vsys / 300000.0;        // convert km/s to Hz
@@ -460,8 +468,12 @@ void write_fits(string name,imageptr iptr)
     for (k=0; k<nx_out[2]; k++) {          /* loop over all planes */
         fitsetpl(fitsfile,1,&k);
         for (j=0; j<nx_out[1]; j++) {      /* loop over all rows */
-            for (i=0, bp=buffer; i<nx_out[0]; i++, bp++)
-                *bp =  iscale[0] * CubeValue(iptr,i,j,k) + iscale[1];
+ 	  for (i=0, bp=buffer; i<nx_out[0]; i++, bp++) {
+	    if (Qblank && CubeValue(iptr,i,j,k) == blankval)
+	      *bp = fnan;
+	    else
+	      *bp =  iscale[0] * CubeValue(iptr,i,j,k) + iscale[1];
+	  }
             fitwrite(fitsfile,j,buffer);
         }
     }
