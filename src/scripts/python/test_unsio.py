@@ -30,3 +30,4 @@ while my_in.nextFrame():
   pos=pos.reshape(nbody,3)
   print("Time=%g %d %d %s" % (timex,s1,s2,str(pos.shape)))
   print("Pos[0]: %s" % str(pos[0]))
+  # be aware that snapshots with no PhaseSpace will not be flagged as such, the same pos array is returned
