@@ -22,7 +22,7 @@ print(my_in.getFileStructure())
 #
 # Reading Loop
 #
-while my_in.nextFrame(): # load first snapshot
+while my_in.nextFrame(): 
   s1,pos=my_in.getData("stars","pos")
   s2,timex=my_in.getData("time")
   print("Time=%g %d %d %s" % (timex,s1,s2,str(pos.shape)))
