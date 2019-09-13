@@ -8,11 +8,11 @@
 import unsio.input as uns_in
 import os
 
+myfile="p100"
 
-if True:
-    os.system('hackcode1 out=p100')
+if not os.path.exists(myfile):
+    os.system('hackcode1 out=%s' % myfile)
 
-myfile="p100" 
 
 my_in=uns_in.CUNS_IN(myfile,"all")
 
@@ -23,13 +23,13 @@ print(my_in.getFileStructure())
 #
 
 while my_in.nextFrame(): 
+  s0,nsel  = my_in.getData("nsel")
   s1,pos   = my_in.getData("all","pos")
   s2,timex = my_in.getData("time")
-  s0,nsel = my_in.getData("nsel")
-  if s1 and s2 and s0:
+  if s0 and s1 and s2:
       n1 = len(pos)
-      nbody = n1//3                         #   why not something like this my_in.getData("nbody")
+      nbody = n1//3          
       pos=pos.reshape(nbody,3)
-      print("Time=%g %d %d %s nbody=" % (timex,s1,s2,str(pos.shape),nsel))
+      print("Time=%g %s nbody=%d" % (timex,str(pos.shape),nsel))
       print("Pos[0]: %s" % str(pos[0]))
   # be aware that snapshots with no PhaseSpace will not be flagged as such, the same pos array is returned
