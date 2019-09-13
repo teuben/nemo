@@ -6,9 +6,12 @@
 #
 
 import unsio.input as uns_in
-import os
+import os, sys
 
-myfile="p100"
+if len(sys.argv) > 1:
+    myfile = sys.argv[1]
+else:
+    myfile = "p100"
 
 if not os.path.exists(myfile):
     os.system('hackcode1 out=%s' % myfile)
