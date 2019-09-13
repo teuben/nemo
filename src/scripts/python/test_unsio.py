@@ -1,0 +1,26 @@
+#! /usr/bin/env python
+#
+# To install:    pip install python-unsio -U
+#
+
+import unsio.input as uns_in
+import os
+
+
+if False:
+    os.system('hackcode1 out=p100')
+
+myfile="p100" 
+
+my_in=uns_in.CUNS_IN(myfile,"stars")
+#my_in=uns_in.CUNS_IN(myfile)
+
+print(my_in.getFileStructure())
+
+#
+# Reading Loop
+#
+while my_in.nextFrame(): # load first snapshot
+  s1,pos=my_in.getData("stars","pos")
+  s2,timex=my_in.getData("time")
+  print("Time=%g %d %d %s" % (timex,s1,s2,str(pos.shape)))
