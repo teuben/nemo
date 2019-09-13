@@ -9,12 +9,12 @@ import unsio.input as uns_in
 import os
 
 
-if False:
+if True:
     os.system('hackcode1 out=p100')
 
 myfile="p100" 
 
-my_in=uns_in.CUNS_IN(myfile,"stars")
+my_in=uns_in.CUNS_IN(myfile,"all")
 #my_in=uns_in.CUNS_IN(myfile)
 
 print(my_in.getFileStructure())
