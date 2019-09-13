@@ -4,6 +4,8 @@
 # See also:      https://pypi.org/project/python-unsio/
 #                https://projets.lam.fr/projects/unsio
 #
+# Created on Wicked Friday (friday Sep 13, 2019) in a commit war between PJ and JC
+#
 
 import unsio.input as uns_in
 import os, sys
