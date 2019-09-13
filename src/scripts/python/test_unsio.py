@@ -1,6 +1,8 @@
 #! /usr/bin/env python
 #
 # To install:    pip install python-unsio -U
+# See also:      https://pypi.org/project/python-unsio/
+#                https://projets.lam.fr/projects/unsio
 #
 
 import unsio.input as uns_in
