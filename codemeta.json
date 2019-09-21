@@ -9,30 +9,30 @@
             "@type": "Person",
             "givenName": "Joshua",
             "familyName": "Barnes",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/xxxxxx) here"
+            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0002-3371-1082) here"
         },
         {
             "@type": "Person",
             "givenName": "Piet",
             "familyName": "Hut",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/xxxxxx) here"
+            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0001-7565-5843) here"
         },
         {
             "@type": "Person",
             "givenName": "Peter",
             "familyName": "Teuben",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/xxxxxx) here"
+            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0003-1774-3436) here"
         }
     ],
-    "citation": "http://adsabs.harvard.edu/abs/1995ASPC...77..398T",
+    "citation": "https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T",
     "relatedLink": [
-        "http://carma.astro.umd.edu/nemo/"
+        "http://www.astro.umd.edu/nemo/"
     ],
     "codeRepository": "https://github.com/teuben/nemo",
     "referencePublication": [
         {
             "@type": "ScholarlyArticle",
-            "url": "http://adsabs.harvard.edu/abs/1995ASPC...77..398T",
+            "url": "https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T",
             "id": "PLACEHOLDER: Add DOI (https://doi.org/xxxxxx) here"
         }
     ],
