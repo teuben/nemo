@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6f 31-jan-2013 PJT"
+#define GETPARAM_VERSION_ID  "3.6g 17-oct-2019 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -910,6 +910,9 @@ local void scan_environment()
 #ifdef darwin
     if(environ == NULL) environ = * _NSGetEnviron();
 #endif
+    if ((ev=getenv("NEMO")) == NULL)
+      warning("$NEMO not defined");
+      
     for (i = 0; environ[i] != NULL; i++) {
     	/* printf("%d: \"%s\"\n",i+1,environ[i]); */
         if (streq("BELL", parname(environ[i])))
