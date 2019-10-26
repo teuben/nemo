@@ -16,7 +16,7 @@
  *  
  *
  *  This bar potential was used by Sanders and Huntley (1976) and
- *  revived by Sanders (2019)
+ *  also used in Sanders (2019)
  *
  */
  
@@ -28,22 +28,32 @@ static double omega     = 8.1;         /* \omega: [Myr^-1]   Pattern speed */
 static double sh_A      = 965.0;       /* mass */
 static double sh_alpha  = 1.5;         /* exponent */
 static double sh_eps    = 0.0;         /* bar strenght */
-static double sh_L      = 1.0;         /* length scale kpc */
+static double sh_L      = 1.0;         /* length scale kpc -- not used */
 
 static double c1, beta;
-static double tpg       = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  */
+static double G2pi      = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  */
                                        /* G = 1/2.32385e5  in Msolar, kpc, km/s */
 
 extern double gamma(double);
 
 /*
- *
- from math import gamma
- sh_alpha = 1.5
- (gamma(0.5*(2-sh_alpha)) * gamma(0.5*(sh_alpha+1)))/(gamma(0.5*sh_alpha) * gamma(0.5*(3-sh_alpha)))
- 2.1884396152264767
-*/
+rotcurves sh76 8.1,965,1.5,0,2 debug=1 mode=omega radii=0:28:0.1 yrange=0,16
 
+gives that IRL more like 3 kpc, not 7kpc.   Is their 2piG correct? Mine is 2.70378-05
+
+### nemo Debug Info: INIPOTENTIAL Sanders-Huntley 1976 
+### nemo Debug Info:   Parameters : Pattern Speed = 8.100000
+### nemo Debug Info:   A= 965  alpha= 1.5 eps=0 
+### nemo Debug Info:   c1= 2.18844 beta= 0
+
+this looks better, but why do i need to scale A by ~11.8
+
+rotcurves sh76 '8.1,965*11.8,1.5,0,1' debug=1 mode=omega radii=0:28:0.01 yrange=0,16
+### nemo Debug Info: OLR: 21.9891
+### nemo Debug Info: CR: 15.005
+### nemo Debug Info: oILR: 7.03018
+
+*/
 
 void inipotential (int  *npar, double *par, char *name)
 {
@@ -80,42 +90,24 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     double dpsi, dksi, dphi, vr2; 
         
     r2 = sqr(pos[0]) + sqr(pos[1]);
-    r = sqrt(r2);
-    if (r2>0.0)
-        theta = atan2(pos[1], pos[0]);
-    else
-        theta = 0.0;
+    if (r2>0.0) {
+      r = sqrt(r2);
+      theta = atan2(pos[1], pos[0]);
+    } else {
+      r = 0.0;
+      theta = 0.0;
+    }
 
     /* rotcur */
     //vr2 = tp2 * sh_A * c1 * pow(1-sh_alpha);
 
-    fr = -tpg * sh_A * c1 * pow(r, -sh_alpha-1);
-    ft = 0.0;
-    
-#if 0
-	/* this indented section is really when aa > 0, but also does aa=0 */
-
-    	tmp1 = 1 + pow(r/rh_r0,rh_j);
-        ksi =  aa*r2/sqr(ra2);
-        phi =  jt*log(tmp1);
-        sinp = sin(2*theta+phi);
-        cosp = cos(2*theta+phi);
-        *pot = psi*(1+ksi*cosp);
-
-
-
-    dpsi = gm * r / (ra2*ra2sq);                            /* d(psi)/dr */
-    dksi = aa * 2 * r * (sqr(rh_a) - r2) / qbe(ra2);        /* d(ksi)/dr */
-    dphi = jt * rh_j * (tmp1-1)/(tmp1*r);                   /* d(phi)/dr */
-    
-
-    fr = (dpsi*(1+ksi*cosp) + psi*(dksi*cosp-ksi*sinp*dphi))/r;
-    ft = -2*psi*ksi*sinp/r2;
-
-#endif
+    fr = -G2pi * sh_A * c1 * pow(r, -sh_alpha);
+    ft = -2 * fr * beta * sin(2*theta);
+    fr *= (1 + beta * (sh_alpha-1) * cos(2*theta))/r;
     
     acc[0] = -fr*pos[0] + ft*pos[1];
     acc[1] = -fr*pos[1] - ft*pos[0];
     acc[2] = 0.0;
-    
+
+    *pot = 0.0;   /* not implemented yet */
 }
