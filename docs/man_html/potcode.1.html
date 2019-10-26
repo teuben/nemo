@@ -86,89 +86,83 @@ steps per unit time)]. </dd>
 6=modified Euler (kick done after drift)
 -1=special epicyclic motion, full motion)
 -2=special epicyclic motion, shows only epi motion
+</pre>[default: <b>3]. </dd>
 
-[default: 3].
+<dt><b>tstop</b></b>=<i>stop-time</i> </dt>
+<dd>Time to stop integration in N-body model units.
+Default is <b>2.0</b>. </dd>
 
+<dt><b>freqout</b>=<i>out-freq</i> </dt>
+<dd>Frequency of major N-body data outputs. Default
+is <b>4.0</b> (4 frames per unit time). </dd>
 
+<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dd>Frequency of minor
+diagnostic outputs. Default is <b>32.0</b> (32 diagnostic measurements per unit
+time). </dd>
 
+<dt><b>options</b>=<i>option-string</i> </dt>
+<dd>Miscellaneous control options, specified as
+a comma-separated list of keywords. Currently recognized keywords are: <b>reset_time</b>:
+when reading initial data, set <i>tnow</i> to zero; <b>new_tout</b>: when restarting,
+set new output times; <b>mass</b>, <b>phi</b>, <b>acc</b>: output mass, potential, acceleration
+data with major data outputs. </dd>
 
+<dt><b>eta</b>=<i>loss-fraction</i> </dt>
+<dd>Fraction of random energy
+that is dissipated [Default: <b>0.0</b>]. </dd>
 
+<dt><b>cell</b>=<i>box-size</i> </dt>
+<dd>Cell size in which dissipation
+is performed after every timestep. Dissipation is current performed on a
+cartesian grid, in which  cells are <a href='square.2D.html'>square (2D)</a>
+ or a <a href='cube.3D.html'>cube (3D)</a>
+. [Default:
+<b>0.1</b>]. </dd>
 
+<dt><b>rmax</b>=<i>max_box-size</i> </dt>
+<dd>Maximum size of the "box" (actually cube) within which
+dissipation is performed. If a negative number is given, the box is allow
+to grow as large as is needed, though this may consume a lot of memory.
+Default: <b>-1</b>, i.e. box can grow indefinite. </dd>
 
+<dt><b>fheat=</b><i>fheat</i> </dt>
+<dd>The ratio of diffusion
+angle to rms velocity dispersion in a cell. If <i>fheat&gt;0</i>, each time dissipation
+is applied, the rms velocity dispersion in a cell is computed, and a diffusion
+angle computed. The velocity vector of each particle is then rotated with
+a gaussian distributed value with rms <i>fheat*velsig</i>. This in effect gives
+a dissipation dependant heating source. See also <b>sigma=</b>, which is position
+independant. [Default: <b>0</b>]. </dd>
 
+<dt><b>sigma</b>=<i>angle</i> </dt>
+<dd>Diffusion angle, gaussian distributed
+with this sigma, about which each velocity vector is rotated after each
+timestep. [Default: <b>0</b>]. </dd>
 
+<dt><b>seed</b>=<i>random-seed</i> </dt>
+<dd>Random number seed, only used when
+diffusion (<b>sigma=</b>) is used. 0 must be used to get the random seed from the
+time of the day. [Default: <b>0</b>]. </dd>
 
+<dt><b>headline</b>= </dt>
+<dd>Identifying text for this run. Default:
+not used. </dd>
+</dl>
 
+<h2><a name='sect4' href='#toc4'>Bugs</a></h2>
+RK, PC and PC1 don&rsquo;t work in rotating potential - use EULER
+or RK4. <p>
+Since <b>cell</b> is a fixed number throughout the execution, is doesn&rsquo;t
+deal well with systems who&rsquo;s lenght-scale changes, in particular, expanding
+systems will allocate more and more space to hold the dissipation grid.
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-tstop=stop-timeTime to stop integration in N-body model units.Default is 2.0.freqout=out-freqFrequency
-of major N-body data outputs.Default is 4.0 (4 frames per unit time).minor_freqout=out-freqFrequency
-of minor diagnostic outputs.Default is 32.0 (32 diagnostic measurements per
-unit time).options=option-stringMiscellaneous control options, specified
-as a comma-separated listof keywords.Currently recognized keywords are:reset_time:
-when reading initial data, set tnow to zero;new_tout: when restarting,
-set new output times;mass, phi, acc: output mass, potential,acceleration
-data with major data outputs.eta=loss-fractionFraction of random energy that
-is dissipated[Default: 0.0].cell=box-sizeCell size in which dissipation is
-performed after every timestep.Dissipation is current performed on a cartesian
-grid, in which cells are square (2D) or a cube (3D).[Default: 0.1].rmax=max_box-sizeMaximum
-size of the "box" (actually cube) within which dissipationis performed.
-If a negative number is given, the box is allow to growas large as is needed,
-though this may consume a lot of memory.Default: -1, i.e. box can grow indefinite.fheat=fheatThe
-ratio of diffusion angle to rms velocity dispersion in a cell.If fheat&gt;0,
-each time dissipation is applied, the rmsvelocity dispersion in a cell
-is computed, and a diffusion anglecomputed. The velocity vector of each
-particle is thenrotated with a gaussian distributed value with rms fheat*velsig.This
-in effect gives a dissipation dependant heating source. See alsosigma=,
-which is position independant. [Default: 0].sigma=angleDiffusion angle, gaussian
-distributed with this sigma, about whicheach velocity vector is rotated
-after each timestep.[Default: 0].seed=random-seedRandom number seed, only
-used when diffusion (sigma=) is used.0 must be used to get the random seed
-from the time of the day.[Default: 0].headline=Identifying text for this
-run. Default: not used.BugsRK, PC and PC1 don&rsquo;t work in rotating potential
-- use EULER or RK4. Since cell is a fixed number throughout the execution,
-is doesn&rsquo;t deal well with systems who&rsquo;s lenght-scale changes, in particular,
-
-expanding systems will allocate more and more space to hold the dissipation
-grid. DissipationVarious schemes of dissipation can be invoked. Here&rsquo;s one,
-see also Lin &amp; Pringle (1974): For each cell the relative position and velocity
-for each particle within that cell is computed: 
-        R   =  r  - &lt;r &gt;
+<h2><a name='sect5' href='#toc5'>Dissipation</a></h2>
+Various schemes of dissipation can be invoked. Here&rsquo;s one, see
+also Lin &amp; Pringle (1974): <p>
+For each cell the relative position and velocity
+for each particle within that cell is computed: <br>
+<pre>        R   =  r  - &lt;r &gt;
          i      i     i
         V   =  v  - &lt;v &gt;
          i      i     i
@@ -213,7 +207,7 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>tstop=stop-timeTime to stop integration in N-body model units.Default is 2.0.freqout=out-freqFrequency of major N-body data outputs.Default is 4.0 (4 frames per unit time).minor_freqout=out-freqFrequency of minor diagnostic outputs.Default is 32.0 (32 diagnostic measurements per unit time).options=option-stringMiscellaneous control options, specified as a comma-separated listof keywords.Currently recognized keywords are:reset_time: when reading initial data, set tnow to zero;new_tout: when restarting, set new output times;mass, phi, acc: output mass, potential,acceleration data with major data outputs.eta=loss-fractionFraction of random energy that is dissipated[Default: 0.0].cell=box-sizeCell size in which dissipation is performed after every timestep.Dissipation is current performed on a cartesian grid, in which cells are square (2D) or a cube (3D).[Default: 0.1].rmax=max_box-sizeMaximum size of the "box" (actually cube) within which dissipationis performed. If a negative number is given, the box is allow to growas large as is needed, though this may consume a lot of memory.Default: -1, i.e. box can grow indefinite.fheat=fheatThe ratio of diffusion angle to rms velocity dispersion in a cell.If fheat>0, each time dissipation is applied, the rmsvelocity dispersion in a cell is computed, and a diffusion anglecomputed. The velocity vector of each particle is thenrotated with a gaussian distributed value with rms fheat*velsig.This in effect gives a dissipation dependant heating source. See alsosigma=, which is position independant. [Default: 0].sigma=angleDiffusion angle, gaussian distributed with this sigma, about whicheach velocity vector is rotated after each timestep.[Default: 0].seed=random-seedRandom number seed, only used when diffusion (sigma=) is used.0 must be used to get the random seed from the time of the day.[Default: 0].headline=Identifying text for this run. Default: not used.Bugs</a></li>
+<li><a name='toc4' href='#sect4'>Bugs</a></li>
 <li><a name='toc5' href='#sect5'>Dissipation</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
