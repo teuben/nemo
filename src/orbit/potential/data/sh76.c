@@ -34,6 +34,17 @@ static double c1, beta;
 static double tpg       = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  */
                                        /* G = 1/2.32385e5  in Msolar, kpc, km/s */
 
+extern double gamma(double);
+
+/*
+ *
+ from math import gamma
+ sh_alpha = 1.5
+ (gamma(0.5*(2-sh_alpha)) * gamma(0.5*(sh_alpha+1)))/(gamma(0.5*sh_alpha) * gamma(0.5*(3-sh_alpha)))
+ 2.1884396152264767
+*/
+
+
 void inipotential (int  *npar, double *par, char *name)
 {
     int n;
@@ -53,10 +64,10 @@ void inipotential (int  *npar, double *par, char *name)
 
     par[0] = omega;
     beta = (2-sh_alpha)*sh_eps/(sh_alpha*(3-sh_alpha));
-    c1 = (gamma(0.5*(2-sh_alpha)) * gamma(0.5*(sh_alpha+1))) /
-         (gamma(0.5*sh_alpha) * gamma(0.5*(3-sh_alpha)));
+    c1 = (tgamma(0.5*(2-sh_alpha)) * tgamma(0.5*(sh_alpha+1))) /
+         (tgamma(0.5*sh_alpha) * tgamma(0.5*(3-sh_alpha)));
     if (c1 < 0) {
-      warning("sh76: c1=%g wrong sign, fixing it",c1);
+      warning("sh76: c1=%g wrong sign for alpha=%g, fixing it",c1,sh_alpha);
       c1 = -c1;
     }
     dprintf (1,"  c1= %g beta= %g\n", c1, beta);
