@@ -108,7 +108,7 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     //vr2 = tp2 * sh_A * c1 * pow(1-sh_alpha);
 
     fr = -G2pi * sh_A * c1 * pow(r, -sh_alpha);
-    ft = -2 * fr * beta * sin(2*theta);
+    ft = 2 * fr * beta * sin(2*theta);
     fr *= (1 + beta * (sh_alpha-1) * cos(2*theta))/r;
     
     acc[0] = -fr*pos[0] + ft*pos[1];
