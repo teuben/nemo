@@ -1,0 +1,137 @@
+<HTML>
+
+<BODY>
+<H1> Orbits in the Sanders and Huntley (1976) potential </H1>
+
+<P>
+Here we try and reproduce the potential used by
+<A HREF=https://ui.adsabs.harvard.edu/abs/1976ApJ...209...53S/abstract>Sanders and Huntley (1976)</A>
+and give you some idea of what's happening in NEMO behind the scenes.
+Some basics of orbits are also discussed in
+<A HREF=orbits.html>previous example-1</A> and 
+<A HREF=galactic-orbits.html>previous example-2</A>
+
+
+
+<P>
+After reading the paper, we create a new file
+<A HREF=https://github.com/teuben/nemo/blob/master/src/orbit/potential/data/sh76.c>
+  $NEMO/src/orbit/potential/data/sh76.c</A>
+(typically by cloning another file that closely resembles it, in this case rh84.c).   The name "<B>sh76.c</B>"
+needs to be added to the <b>POT_CC</b> list in the <b>Makefile</b> in that directory. After this the command
+"<B>make install</B> should install the <B>sh76.so</B> compiled shared object file into </B>$NEMOOBJ/potential</B>.
+This will make the potential available for future releases of NEMO. The order of the parameters
+for the common <B>potname=sh76 potpars=</B> keyword are:  omega, A, alpha, eps.
+
+<h2> Some problems to be resolved: </h2>
+  
+<P>
+  Problem 1:
+  The default parameters seem to give a galaxy with the resonances too far in. After some experimenting
+  multiplying A by about 11.8 seems to give a more reasonably sized galaxy:
+
+<PRE>
+  % <font color=red> rotcurves sh76 '8.1,965*11.8,1.5,0' mode=omega radii=0:28:0.01 yrange=0,16 debug=1
+  </font>
+### nemo Debug Info: INIPOTENTIAL Sanders-Huntley 1976 
+### nemo Debug Info:   Parameters : Pattern Speed = 8.100000
+### nemo Debug Info:   A= 11387  alpha= 1.5 eps=0 
+### nemo Debug Info:   c1= 2.18844 beta= 0
+### nemo Debug Info: OLR: 21.9891
+### nemo Debug Info: CR: 15.005
+### nemo Debug Info: oILR: 7.03018
+### nemo Debug Info: iILR: -nan
+
+</PRE>
+
+Perhaps units are not understood by me. In NEMO we use 1/G=2.32e5 in the (Msolar,kpc,km/s) system. Thus
+2.pi.G = 2.70378-05
+
+<P>
+
+  
+  Problem 2:
+  The paper does not give the potential, only the forces. That's ok for orbit calculations,
+but we cannot check energy conservation. We did add an "un-documented" feature where a negative 5th parameters will trigger
+that the density (eq (1) in SH76) is returned in the potential slot, so we can make a density plot using the
+<A HREF=../man_html/potccd.1.html>potccd</A> program. For example:
+
+<PRE>
+  %<font color=red> potccd - sh76 '0.0,965*11.8,1.5,0.295,-1' x=-16:16:0.1 y=-16:16:0.1  |\
+    ccdplot - 100,300,1000,3000,10000
+  </font>
+### nemo Debug Info: Creating image 321 * 321 * 1
+### Warning [potccd]: SH76:  returning density instead of potential
+### nemo Debug Info: using Omega = 0
+
+</PRE>
+
+so in some future version the potential will be implemented. Also note for eps=0.295 the equidensity contours do look
+a bit too squared, whereas eps=0.15 looks a bit more realistic if we want to call it an oval.
+
+<h2> Rotation Curve </h2>
+
+Working with the up-scaled potential, here is the rotation curve of the axisymmtric potential:
+
+
+<PRE>
+
+  % <font color=red> rotcurves sh76 '8.1,965*11.8,1.5,0' radii=0:28:0.01 yrange=0,240
+  </font>
+</PRE>
+
+
+<h2> Some orbits </h2>
+
+Based on a rotation speed around 200km/s at 2kpc, first a near-circular orbit:
+
+
+<PRE>
+  %<font color=red> mkorbit - 1 0 0 0 230 0 potname=sh76  potpars='8.1,965*11.8,1.5,0' |\
+    orbint - - 10000 0.0001 1000 |\
+    orbplot - xrange=-2:2 yrange=-2:2
+  </font>
+</PRE>
+
+
+Since the oIRL is around 7kpc we can use a small radius to probe an X2 orbit:
+
+<PRE>
+  %<font color=red> mkorbit - 1 0 0 0 245 0 potname=sh76  potpars='8.1,965*11.8,1.5,0.2' |\
+    orbint - - 10000 0.0001 1000 |\
+    orbplot - xrange=-2:2 yrange=-2:2
+  </font>
+</PRE>
+
+
+and here that the X2 orbit in an even stronger oval potential
+<PRE>
+  %<font color=red> mkorbit - 1 0 0 0 270 0 potname=sh76  potpars='8.1,965*11.8,1.5,0.4' |\
+    orbint - - 10000 0.0001 1000 |\
+    orbplot - xrange=-2:2 yrange=-2:2
+  </font>
+</PRE>
+
+<h2> Surface of Section </h2>
+
+The orbsos program takes an orbit, and returns an ascii listing of the surface of section coordinates along
+a specified axis, y in the example below:
+
+<PRE>
+  %<font color=red> mkorbit - 1 0 0 0 270 0 potname=sh76  potpars='8.1,965*11.8,1.5,0.4' |\
+    orbint - - 10000 0.0001 0 |\
+    orbsos - y |\
+    tabplot - 3 4 
+  </font>
+</PRE>
+
+  
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT.
+
+
+</BODY>
+</HTML>
