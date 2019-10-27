@@ -27,8 +27,8 @@
 static double omega     = 8.1;         /* \omega: [Myr^-1]   Pattern speed */
 static double sh_A      = 965.0;       /* mass */
 static double sh_alpha  = 1.5;         /* exponent */
-static double sh_eps    = 0.0;         /* bar strenght */
-static double sh_L      = 1.0;         /* length scale kpc -- not used */
+static double sh_eps    = 0.295;       /* oval distortion strength */
+static double sh_L      = 1.0;         /* length scale kpc -- not used here */
 
 static double c1, beta;
 static double G2pi      = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  */
@@ -37,9 +37,9 @@ static double G2pi      = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  
 extern double gamma(double);
 
 /*
-rotcurves sh76 8.1,965,1.5,0,2 debug=1 mode=omega radii=0:28:0.1 yrange=0,16
+rotcurves sh76 8.1,965,1.5,0 debug=1 mode=omega radii=0:28:0.1 yrange=0,16
 
-gives that IRL more like 3 kpc, not 7kpc.   Is their 2piG correct? Mine is 2.70378-05
+gives that IRL more like 3 kpc, not 7kpc.   Is their 2.pi.G correct? Mine is 2.70378-05
 
 ### nemo Debug Info: INIPOTENTIAL Sanders-Huntley 1976 
 ### nemo Debug Info:   Parameters : Pattern Speed = 8.100000
@@ -48,7 +48,7 @@ gives that IRL more like 3 kpc, not 7kpc.   Is their 2piG correct? Mine is 2.703
 
 this looks better, but why do i need to scale A by ~11.8
 
-rotcurves sh76 '8.1,965*11.8,1.5,0,1' debug=1 mode=omega radii=0:28:0.01 yrange=0,16
+rotcurves sh76 '8.1,965*11.8,1.5,0' debug=1 mode=omega radii=0:28:0.01 yrange=0,16
 ### nemo Debug Info: OLR: 21.9891
 ### nemo Debug Info: CR: 15.005
 ### nemo Debug Info: oILR: 7.03018
