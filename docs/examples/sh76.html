@@ -46,6 +46,7 @@ for the common <B>potname=sh76 potpars=</B> keyword are:  omega, A, alpha, eps.
 ### nemo Debug Info: iILR: -nan
 
 </PRE>
+<img src=sh76a.gif><br>
 
 Perhaps units are not understood by me. In NEMO we use 1/G=2.32e5 in the (Msolar,kpc,km/s) system. Thus
 2.pi.G = 2.70378-05
@@ -68,6 +69,8 @@ that the density (eq (1) in SH76) is returned in the potential slot, so we can m
 ### nemo Debug Info: using Omega = 0
 
 </PRE>
+<img src=sh76b1.gif>
+<img src=sh76b2.gif><br>
 
 so in some future version the potential will be implemented. Also note for eps=0.295 the equidensity contours do look
 a bit too squared, whereas eps=0.15 looks a bit more realistic if we want to call it an oval.
@@ -82,7 +85,7 @@ Working with the up-scaled potential, here is the rotation curve of the axisymmt
   % <font color=red> rotcurves sh76 '8.1,965*11.8,1.5,0' radii=0:28:0.01 yrange=0,240
   </font>
 </PRE>
-
+<img src=sh76c.gif><br>
 
 <h2> Some orbits </h2>
 
@@ -95,7 +98,7 @@ Based on a rotation speed around 200km/s at 2kpc, first a near-circular orbit:
     orbplot - xrange=-2:2 yrange=-2:2
   </font>
 </PRE>
-
+<img src=sh76d1.gif><br>
 
 Since the oIRL is around 7kpc we can use a small radius to probe an X2 orbit:
 
@@ -105,7 +108,7 @@ Since the oIRL is around 7kpc we can use a small radius to probe an X2 orbit:
     orbplot - xrange=-2:2 yrange=-2:2
   </font>
 </PRE>
-
+<img src=sh76d2.gif><br>
 
 and here that the X2 orbit in an even stronger oval potential
 <PRE>
@@ -114,6 +117,7 @@ and here that the X2 orbit in an even stronger oval potential
     orbplot - xrange=-2:2 yrange=-2:2
   </font>
 </PRE>
+<img src=sh76d3.gif><br>
 
 <h2> Surface of Section </h2>
 
@@ -127,7 +131,7 @@ a specified axis, y in the example below:
     tabplot - 3 4 
   </font>
 </PRE>
-
+<img src=sh76e.gif><br>
   
 <P>
 This page was last modified on
