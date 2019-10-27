@@ -1,0 +1,107 @@
+<HTML>
+
+<BODY>
+<H1> Galactic Velocity Fields </H1>
+
+<P>
+Here are some examples of how to generate some galactic
+velocity fields within NEMO, and analyze them. There are several
+ways to get a velocity field: from snapshots, from orbits (but turning
+them into a snapshot to make the velocity field) and directly
+from observations
+(usually via a FITS file). In addition, RA-DEC-VEL style datacubes
+can also be generated (or read) from which velocity fields can then be
+derived.
+<P>
+<h2> A simple model </h2>
+
+
+
+<P>
+The first step is create a rotating thin disk, and incline it a bit:
+
+<PRE>
+% <font color=red> mkspiral - 200000 rmax=2 a=0 | snaprotate - snap1 60,60 xz</font>
+</PRE>
+
+which is a snapshot. There are several ways to make a velocity field out of
+this:
+
+
+<PRE>
+
+% <font color=red> snapmap snap1 map1 </font>
+
+% <font color=red> ds9 & </font>
+
+% <font color=red> nds9 map1 </font>
+</PRE>
+<IMG SRC=velfie1.gif>
+<br>
+Next method would be snapgrid, which has more options to simulate
+beam smearing. 
+
+<PRE>
+
+% <font color=red> snapgrid snap1 map2 moment=-1 </font>
+
+% <font color=red> ccdmath map1,map2 map1-2 %1-%2 </font>
+
+</PRE>
+
+gives nearly the same result, as can be seen by viewing
+a difference map.
+<p>
+Third, create a cube:
+
+
+<PRE>
+
+% <font color=red> snapgrid snap1 cube1  zrange=-0.6:0.6 nz=64 </font>
+
+% <font color=red> ccdmom cube1 map3 axis=3 mom=1  </font>
+
+% <font color=red> ccdmath map1,map3 map1-3 %1-%2 </font>
+
+% <font color=red> ccdstat map3 bad=0 </font>
+Min=-0.515625  Max=0.516481
+Number of points      : 1701
+Mean and dispersion   : 0.000112 0.027680
+Skewness and kurtosis : 3.350128 274.874773
+Sum and Sum*Dx*Dy*Dz  : 0.190883 0.000746
+2395/4096 out-of-range points discarded
+
+
+</PRE>
+
+<P>
+Lastly, pvtrace can now also be used on cubes:
+<PRE>
+
+% <font color=red> pvtrace cube1 out=map4 mode=3 </font>
+### Warning [pvtrace]: cube mode
+### nemo Debug Info: Map [64 x 64 POS x 64 VEL] I_t=0.040192 vsys=0 (vrange: -0.590625 0.590625)
+### nemo Debug Info: MinMax in map: -0.534375 0.534375
+
+% <font color=red> ccdmath map1,map4 map1-4 %1-%2 </font>
+
+% <font color=red> ccdstat map4 bad=0 </font>           
+Min=-0.515625  Max=0.516481
+Number of points      : 1701
+Mean and dispersion   : 0.000112 0.027680
+Skewness and kurtosis : 3.350128 274.874773
+Sum and Sum*Dx*Dy*Dz  : 0.190883 0.000746
+2395/4096 out-of-range points discarded
+
+</PRE>
+
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT.
+<hr>
+
+
+</BODY>
+</HTML>

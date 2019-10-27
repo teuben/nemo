@@ -1,0 +1,82 @@
+#! /bin/csh -f
+#
+#   Make fake bars
+#   History
+#     V0.1   5-jan-05  pjt        Created for kartik to play with     
+#     V0.2                        defined the spiral in ccdgen now
+#     V0.3   6-jan     pjt        added ferrers bar, changed name of bar pa (bp->bb), add log=
+#
+
+#    central bulge (amp,scale)
+set ac=1
+set hc=4
+
+#    exp bar
+set ab=1
+set hb=20
+set eb=0.2
+set bb=70
+
+#    ferrers bar
+set af=1
+set hf=20
+set ef=0.2
+set bf=70
+set pf=2
+
+#    disk (amp,scale)
+set ad=1
+set hd=40
+
+#    spiral
+set as=1
+set hs=40
+set ks=0.003
+set ps=8
+set r0s=10
+set p0s=0
+
+#    noise
+set an=0
+set hn=0
+
+#   disk geometry
+set pa=40
+set inc=60
+
+#    mapsize etc.
+set size=256
+set out=model.fits
+set log=0
+
+
+foreach par ($*)
+   set $par
+end
+
+#    start of script, note we're define numbers above in arcsec, but
+#    the remainder of the script will convert them to degrees so they
+#    come out nice in the resulting FITS file.
+
+set geom=(pa=$pa inc=$inc totflux=t)
+set wcs=(cdelt=-1/3600,1/3600)
+
+rm -f $out
+
+ccdgen out=- object=exp     spar=$ad,$hd/3600              size=$size $wcs  $geom |\
+  ccdgen - - object=exp     spar=$ac,$hc/3600                               $geom |\
+  ccdgen - - object=bar     spar=$ab,$hb/3600,$eb,$bb                       $geom |\
+  ccdgen - - object=ferrers spar=$af,$hf/3600,$ef,$bf,$pf                   $geom |\
+  ccdgen - - object=spiral  spar="$as,$hs/3600,$ks*3600,$ps,$r0s/3600,$p0s" $geom |\
+  ccdgen - - object=noise   spar=$an,$hn                                    $geom |\
+  ccdmath - - "ifeq($log,1,log(%1),%1)"     |\
+  ccdfits - $out radecvel=t
+
+# view it, and show the total flux
+mirds9 model.fits
+fitsccd model.fits - | ccdstat - |& grep Sum
+
+exit 0
+
+
+####   the output

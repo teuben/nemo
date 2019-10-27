@@ -1,0 +1,112 @@
+<HTML>
+
+<BODY>
+<H1> Orbits in Gridded Potentials </H1>
+
+Here is another example how to compute <A HREF=orbits.html>orbits</A>
+within NEMO, but now within a potential that is defined on a grid. This
+opens up an way to take real data (yes yes, from the sky).
+
+<h3> MIRIAD </h3>
+
+First we need a small excursion into the obervers domain. Here are the basic
+steps (and you can skip steps if they've been taken already):
+<OL>
+<LI> import your fits data into miriad, using <B> fits in= out= op=xyin</B>
+<LI> make sure the center of the galaxy is at the reference pixel,otherwise
+	fake it by using <B>puthd in=map/crpix1 value=</B> and
+	 <B>puthd in=map/crpix2 value=</B>. This will mess up the RA/DEC,
+	but we only care about relative numbers here.
+<LI> deproject the image to face on. Since the reference pixel has been
+	set properly in the previous step, you only need to decide on
+	the position angle and the inclination.
+	<B> deproject in= out= pa=xxx inc=yyy </B>
+<LI> use any smoothing or transformation you like to make a more realistic (?)
+	density distribution. Perhaps even using <B>ellint</B>.
+<LI> calculate the potential from the density and with an assumed scale height
+	of the gas:  <B> potfft in= out= h=zzz</B>. The units of scale height
+	are the same units as the pixel, unless the distance in Mpc is given,
+	these need to be given in pc.
+<LI> hi saf
+<LI> output the file in fits for importing into nemo:   <B> fits in= out= op=xyout</B>
+</OL>
+
+<H3> NEMO </H3>
+
+There are three ways to make an 
+potential image
+ that can be used with the <B>potname=ccd</B> 
+<A HREF=../man_html/potential.5.html>descriptor</A>:
+<OL>
+<LI> Import the fits file into NEMO using 
+<A HREF=../man_html/fitsccd.1.html>fitsccd</A>,
+for example from a file you exported in MIRIAD
+<pre>
+   fitsccd in=pot1.fits out=pot1
+</pre>
+<LI> Use <A HREF=../man_html/ccdmath.1.html>ccdmath</A>
+to define an image from scratch. Here is an
+example of a Plummer potential:
+
+<pre>
+    ccdmath out=pot2 fie="-1/sqrt((%r/100)**2+1)" size=800,800,1 cdelt=0.01,0.01 crpix=400,400
+</pre>
+Note the peculiar normalization of the radius because the pixel size
+is 1/100. 
+<LI> Use 
+<A HREF=../man_html/potccd.1.html>potccd</A>
+to define an image from another potential
+descriptor, e.g. the same plummer potential as in the previous
+example:
+<pre>
+    potccd pot3 plummer x=-4:4:0.01 y=-4:4:0.01
+</pre>
+</OL>
+You may want to test some values of this potential
+using 
+<A HREF=../man_html/potlist.1.html>potlist</A>
+or simply display the potential in ds9 with the
+<B>nds9</B> script.
+<P>
+
+Now create an orbit wit
+<A HREF=../man_html/mkorbit.1.html>mkorbit</A>
+<pre>
+    mkorbit orb1 x=1 y=0 z=0 vx=0 vy=1 vz=0 potname=plummer
+    tsf orb1
+    ...
+       double IOM[3] -0.207107 1.00000 0.00000
+    ...
+</pre>
+where for convenience the Plummer potential was also given (not
+required if you pass all 6 phase space coordinates) to check
+if the energy is bound and negative (-0.207107).
+<P>
+Now the orbit can be integrated using
+<A HREF=../man_html/orbint.1.html>orbint</A>
+using either potential descriptor:
+<pre>
+   orbint orb1 orb1.out 10000 0.01 potname=plummer
+   orbint orb1 orb2.out 10000 0.01 potname=ccd potfile=pot2
+   orbint orb1 orb3.out 10000 0.01 potname=ccd potfile=pot3
+</pre>
+and plotted using 
+<A HREF=../man_html/orbplot.1.html>orbplot</A>
+<pre>
+   orbplot orb1.out yapp=1/xs xrange=-4:4 yrange=-4:4
+   orbplot orb2.out yapp=2/xs xrange=-4:4 yrange=-4:4
+   orbplot orb3.out yapp=3/xs xrange=-4:4 yrange=-4:4
+</pre>
+and you should see they are basically all the same.
+<P>
+<img src=orb1.gif>
+
+<H3> potcode </H3>
+
+The 
+<A HREF=../man_html/potcode.1.html>potcode</A> program can compute
+orbits in static potential with certain forms of interaction between
+the particles.
+
+</BODY>
+</HTML>

@@ -1,0 +1,24 @@
+<HTML>
+
+<BODY>
+<H1> A Fake Bar </H1>
+
+Here is an examples of a script to make a fake composite disk galaxy
+with  bulge, disk, halo, spiral arms and some noise.  The shell script
+has reasonable defaults for everything, except no noise. The
+accompanying figure was produced using version 0.1 of the script
+<PRE>
+    fakebar.csh an=1 hn=1
+</PRE>
+This picture actually has a bulge, bar, disk and of course spiral arms.
+The disk is at INC=60 and PA=40, see if you can guess what PA the bar is? 
+<BR>
+<img src=fakebar.gif>
+<BR>
+You can download the latest <A HREF=fakebar.txt>fakebar.csh</A> from here, 
+as well as the original <A HREF=fakebar.fits>fakebar.fits</A> file that
+was produced with it. It mostly uses the
+program <A HREF=http://bima.astro.umd.edu/nemo/man_html/ccdgen.1.html>
+ccdgen</A> in a pipe.
+</HTML>
+</BODY>

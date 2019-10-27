@@ -1,0 +1,87 @@
+<HTML>
+
+<H1> Figure8 Orbit </H1>
+This is a phase space plot of the figure8 orbit. For a shell script
+that produced this figure, see below
+
+<IMG SRC=figure8.gif>
+
+<H2> The shell script </H2>
+Here is a simple shell script using NEMO programs to produce the plot above.
+<PRE>
+#! /bin/csh -f 
+#
+
+#  PGPLOT's default is 512 x 512
+setenv PGPLOT_GIF_WIDTH 1024
+setenv PGPLOT_GIF_HEIGHT 1024
+
+#  here is an example of nbody00, which understands native snapshot file
+
+<A HREF=../man_html/nbody0.1.html>nbody00</A> $NEMODAT/figure8.dat - tcrit=20 deltat=0.01 eps=0.0 debug=-1 |\
+    snapprint - x,y,vx,vy |\
+    tabplot - 1,1,1,2,2,3 2,3,4,3,4,4 -1.6 1.6 -1.6 1.6 \
+            color=2,3,4,5,6,7 \
+            xlab="x=Red x=Green x=Blue y=LightBlue y=Purple y=Yellow" \
+            ylab="y=Red vx=Green vy=Blue vx=LightBlue vy=Purple vy=Yellow" \
+	    headline="Figure8 phase space (nbody00)" \
+	    yapp=figure8.gif/gif
+
+
+# here is an example of an integrator that understands ascii files
+
+snapprint $NEMODAT/figure8.dat m,x,y,z,vx,vy,vz header=t newline=t |\
+    <A HREF=../man_html/nbody_sh1.1.html>nbody_sh1</A> -i -o 0.01 -t 20 |\
+    tabtos - - nbody,time m,x,y,z,vx,vy,vz nbody=3 debug=-1 |\
+    snapprint - x,y,vx,vy |\
+    tabplot - 1,1,1,2,2,3 2,3,4,3,4,4 -1.6 1.6 -1.6 1.6 \
+            color=2,3,4,5,6,7 \
+            xlab="x=Red x=Green x=Blue y=LightBlue y=Purple y=Yellow" \
+            ylab="y=Red vx=Green vy=Blue vx=LightBlue vy=Purple vy=Yellow" \
+            headline="Figure8 phase space (nbody_sh)" \
+            yapp=figure8.gif/gif
+
+</PRE>
+
+<hr>
+The output - at least in Feb 2004 - of these two scripts was as follows:
+
+<H2> the nbody00 example </H2>
+<PRE>
+x y vx vy
+### Warning [nbody00]: You have hit upon an F2DOT=0 case, correcting....
+read 6003 points
+min and max value in xcolumns 1,1,1,2,2,3: [-1.107690 : 1.107670]
+min and max value in ycolumns 2,3,4,3,4,4: [-1.107690 : 1.107670]
+</PRE>
+<hr>
+<H2> the nbody_sh1 example </H2>
+<PRE>
+m x y z vx vy vz
+x y vx vy
+Starting a Hermite integration for a 3-body system,
+  from time t = 0 with time step control parameter dt_param = 0.03  until time 20 ,
+  with diagnostics output interval dt_dia = 1,
+  and snapshot output interval dt_out = 0.01.
+at time t = 0 , after 0 steps :
+  E_kin = 1.21286 , E_pot = -2.5 , E_tot = -1.28714
+                absolute energy error: E_tot - E_init = 0
+                relative energy error: (E_tot - E_init) / E_init = -0
+at time t = 1.00963 , after 90 steps :
+  E_kin = 1.2152 , E_pot = -2.50234 , E_tot = -1.28714
+                absolute energy error: E_tot - E_init = -3.33568e-10
+                relative energy error: (E_tot - E_init) / E_init = 2.59154e-10
+...
+at time t = 19.0027 , after 1675 steps :
+  E_kin = 1.21359 , E_pot = -2.50074 , E_tot = -1.28714
+                absolute energy error: E_tot - E_init = -1.10575e-07
+                relative energy error: (E_tot - E_init) / E_init = 8.59076e-08
+at time t = 20.0111 , after 1765 steps :
+  E_kin = 1.21337 , E_pot = -2.50052 , E_tot = -1.28714
+                absolute energy error: E_tot - E_init = -1.19831e-07
+                relative energy error: (E_tot - E_init) / E_init = 9.30987e-08
+read 6003 points
+min and max value in xcolumns 1,1,1,2,2,3: [-1.107670 : 1.107670]
+min and max value in ycolumns 2,3,4,3,4,4: [-1.107670 : 1.107670]
+
+</PRE>

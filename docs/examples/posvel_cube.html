@@ -1,0 +1,46 @@
+<HTML>
+
+<BODY>
+<H1> Position Velocity Data Cubes </H1>
+
+<P>
+Here is an example how to generate a data cube (X-Y-V), where X is along
+the major axis, Y along the minor axis, and V the doppler velocity.
+In this example we use a monte carlo approach and generate particles
+in a rotation disk using various prescriptions. See for example
+<A HREF=../man_html/mkexpdisk.1.html>mkexpdisk</A> or
+<A HREF=../man_html/mkbaredisk.1.html>mkbaredisk</A> .
+<P>
+<h2> A simple model </h2>
+
+</PRE>
+<IMG SRC=posvel_cube.jpg>
+<br>
+On the left channel number 180 out of 256 of an exponential disk inclined at 60
+degrees. On the right a pos-vel map along the major axis.
+
+<P>
+The script that generated this plot 
+
+<PRE>
+% <font color=red> ./mk_posvel_cube.csh </font>
+% <font color=red> nds9 run1.5 </font>
+% <font color=red> nds9 run1.6 </font>
+
+</PRE>
+
+can also be viewed/downloaded <A HREF=mk_posvel_cube.csh>here</A>. This
+256 x 256 x 256 cube based on 10M particles took about 30 seconds to compute
+on a 2011-type intel-7 computer.
+
+
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT.
+<hr>
+
+
+</BODY>
+</HTML>

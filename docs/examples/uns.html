@@ -1,0 +1,42 @@
+<HTML>
+
+<BODY>
+<H1> UNS files and making movies with uns_2dplot </H1>
+
+<P>
+UNS (Unified N-Body Snapshot) files can be in any of the
+understood file formats (see <A HREF=../man_html/unsio.3.html>
+unsio manual page</A>).
+<P>
+<h2> An animation </h2>
+
+the following pipe will follow the evolution of 20,000 particles in an
+exponential disk for about 1.5 dynamical times, and is grossly unstable
+due to the lack of an embedded halo:
+<pre> 
+% <font color=red> mkexpdisk - 20000 | gyrfalcON - - kmax=6 logfile=/dev/null step=0 tstop=1.5 | uns_2dplot - all range=1.5 dev=frame </font>
+</pre>
+this simulation is piped into uns_2plot to create a series of gif files,
+one for each of the 96 timesteps,
+which can then be combined into a movie using for example ffmpeg:
+
+<PRE>
+% <font color=red> ffmpeg -f image2 -i frame.%5d.gif -r 25 -threads 2 -vcodec libx264 -vpre default -b 4000k -y plot.avi  </font>
+</PRE>
+after this you can for example use mplayer in a loop to replay it:
+<PRE>
+% <font color=red> mplayer -loop 0 plot.avi </font>
+</PRE>
+The last frame (#96) looks as follows:<br>
+<IMG SRC=frame.00096.gif>
+
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT.
+<hr>
+
+
+</BODY>
+</HTML>

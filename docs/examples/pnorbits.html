@@ -1,0 +1,128 @@
+<HTML>
+
+<BODY>
+<H1> Pseudo-Newtonian Orbits </H1>
+
+<B> *** under construction *** </B>
+<p>
+
+There is an option in the
+<A HREF=../man_html/directcode.1.html>
+directcode </A> (a toy code) to use negative softening length, whicb
+activates a pseudo-Newtonian potential of the form <B>-eps = 3GM/c^2</B>
+
+<PRE>
+
+#! /bin/csh -f
+#
+#   simple nbody integrator testing the precession of orbits in a pseudo-newtonian potential
+#
+#   30-jul-2009   created - peter teuben
+
+set eps=0.001
+set m=0.0001
+set v=0.7
+
+foreach _arg ($*)
+   set $_arg
+end
+
+rm junk1.*
+
+mk2body junk1.in m=$m vy=$v
+directcode junk1.in junk1.out freq=1000 freqout=1000 tstop=40 eps=-$eps  > junk1.log
+snapdiagplot junk1.out yapp=/null
+stoo junk1.out junk1.orb 1 nsteps=100000 
+orbmax junk1.orb 1 > junk1.tab
+orbmax junk1.orb 2 > junk1.tabmin
+tablsqfit junk1.tab > junk1.lsq
+tabtrend junk1.tab | tabhist - yapp=/null >& junk1.hist
+
+
+set dpdt=`grep 'a  =' junk1.lsq  | awk '{print $3}'`
+set p=`grep Mean   junk1.hist | awk '{print $9}'`
+
+# shape of orbit: get rmin and rmax
+
+tabhist junk1.tab    5 yapp=/null >& junk1.histmax
+tabhist junk1.tabmin 5 yapp=/null >& junk1.histmin
+
+set rmax=`grep Mean   junk1.histmax | awk '{print $9}'`
+set rmin=`grep Mean   junk1.histmin | awk '{print $9}'`
+
+set a=`nemoinp "0.5*($rmax+$rmin)"`
+set e=`nemoinp "($rmax-$rmin)/($rmax+$rmin)"`
+
+# now compute the thing that should be 2.pi
+set twopi=`nemoinp "$dpdt*$p*$a*(1-$e*$e)/$eps"`
+
+echo $eps $v $m $dpdt $p $rmax $rmin $a $e  $twopi
+
+</PRE>
+
+
+
+<P>
+We can also use a potential descriptor and a standard orbit integrator
+to solve this problem. For example <B>potname=point potpars=0,1,eps</B>
+would do the same thing.
+
+<PRE>
+#! /bin/csh -f
+#
+#   simple nbody integrator testing the precession of orbits in a pseudo-newtonian potential
+#
+#   30-jul-2009   created - peter teuben
+
+set eps=0.001
+set m=0
+set v=0.9
+
+foreach _arg ($*)
+   set $_arg
+end
+
+rm junk1.*
+
+mkorbit junk1.in x=1 y=0 z=0 vx=0 vy=$v vz=0 potname=point
+orbint junk1.in junk1.orb dt=1.0/1000.0 ndiag=4000 nsteps=40000 nsave=1 potname=point potpars=0,1,$eps debug=1 
+>& junk1.log
+
+orbplot junk1.orb
+orbmax junk1.orb 1 > junk1.tab
+orbmax junk1.orb 2 > junk1.tabmin
+tablsqfit junk1.tab > junk1.lsq
+tabtrend junk1.tab | tabhist - yapp=/null >& junk1.hist
+
+
+set dpdt=`grep 'a  =' junk1.lsq  | awk '{print $3}'`
+set p=`grep Mean   junk1.hist | awk '{print $9}'`
+
+# shape of orbit: get rmin and rmax
+
+tabhist junk1.tab    5 yapp=/null >& junk1.histmax
+tabhist junk1.tabmin 5 yapp=/null >& junk1.histmin
+
+set rmax=`grep Mean   junk1.histmax | awk '{print $9}'`
+set rmin=`grep Mean   junk1.histmin | awk '{print $9}'`
+
+set a=`nemoinp "0.5*($rmax+$rmin)"`
+set e=`nemoinp "($rmax-$rmin)/($rmax+$rmin)"`
+
+# now compute the thing that should be 2.pi
+set twopi=`nemoinp "$dpdt*$p*$a*(1-$e*$e)/$eps"`
+set one=`nemoinp "$twopi/2/pi"`
+
+echo $eps $v $m $dpdt $p $rmax $rmin $a $e  $twopi $one
+
+</PRE>
+
+<hr>
+
+<P>
+The orbit can be integrated using
+<A HREF=../man_html/orbint.1.html>orbint</A>
+
+
+</BODY>
+</HTML>
