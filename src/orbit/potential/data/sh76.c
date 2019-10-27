@@ -12,11 +12,16 @@
 
 /*CTEX
  *  {\bf potname=sh76
- *       potpars={\it $\Omega,B,a,A,r_0,i_0,j$}}
- *  
+ *       potpars={\it $\Omega,A,alpha,epsilon$}}
  *
  *  This bar potential was used by Sanders and Huntley (1976) and
- *  also used in Sanders (2019)
+ *  also used in Sanders (2019).   The density perturbation is given
+ *  by
+ *
+ * $$ 
+ *    \sigma(r,\theta) = A r^{-\alpha} (1+\epsilon*\cos{2\theta})
+ * $$
+ *
  *
  */
  
