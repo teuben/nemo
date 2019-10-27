@@ -39,21 +39,21 @@ static double c1, beta;
 static double G2pi      = 2.70378-05;  /* 2 * pi * G  ; in SH76 galactic units  */
                                        /* G = 1/2.32385e5  in Msolar, kpc, km/s */
 
-extern double gamma(double);
-
 /*
 rotcurves sh76 8.1,965,1.5,0 debug=1 mode=omega radii=0:28:0.1 yrange=0,16
 
-gives that IRL more like 3 kpc, not 7kpc.   Is their 2.pi.G correct? Mine is 2.70378-05
+gives that IRL is more like 2.5 kpc, not 7kpc.   Is their 2.pi.G correct? Mine is 2.70378-05
 
 ### nemo Debug Info: INIPOTENTIAL Sanders-Huntley 1976 
 ### nemo Debug Info:   Parameters : Pattern Speed = 8.100000
 ### nemo Debug Info:   A= 965  alpha= 1.5 eps=0 
 ### nemo Debug Info:   c1= 2.18844 beta= 0
+### nemo Debug Info: oILR: 2.62013
 
 this looks better, but why do i need to scale A by ~11.8
 
 rotcurves sh76 '8.1,965*11.8,1.5,0' debug=1 mode=omega radii=0:28:0.01 yrange=0,16
+### nemo Debug Info:   A= 11387  alpha= 1.5 eps=0 
 ### nemo Debug Info: OLR: 21.9891
 ### nemo Debug Info: CR: 15.005
 ### nemo Debug Info: oILR: 7.03018
@@ -79,6 +79,7 @@ void inipotential (int  *npar, double *par, char *name)
 
     par[0] = omega;
     beta = (2-sh_alpha)*sh_eps/(sh_alpha*(3-sh_alpha));
+    /* note that gamma() is deprecated */
     c1 = (tgamma(0.5*(2-sh_alpha)) * tgamma(0.5*(sh_alpha+1))) /
          (tgamma(0.5*sh_alpha) * tgamma(0.5*(3-sh_alpha)));
     if (c1 < 0) {
