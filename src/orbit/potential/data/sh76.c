@@ -87,27 +87,34 @@ void inipotential (int  *npar, double *par, char *name)
       c1 = -c1;
     }
     dprintf (1,"  c1= %g beta= %g\n", c1, beta);
+    if (sh_L < 0)
+      warning("SH76:  returning density instead of potential");
+    else
+      warning("SH76:  only forces returned, potential = 0.0");
 }
-
+
 void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
     double r, r2, ra2, ra2sq;
     double theta, psi, ksi, phi, tmp1, fr, ft, sinp, cosp;
-    double dpsi, dksi, dphi, vr2; 
+    double amr, vr2; 
         
     r2 = sqr(pos[0]) + sqr(pos[1]);
     if (r2>0.0) {
       r = sqrt(r2);
       theta = atan2(pos[1], pos[0]);
+      amr = sh_A * pow(r, -sh_alpha);
     } else {
       r = 0.0;
       theta = 0.0;
+      amr = 0.0;
     }
 
     /* rotcur */
     //vr2 = tp2 * sh_A * c1 * pow(1-sh_alpha);
 
-    fr = -G2pi * sh_A * c1 * pow(r, -sh_alpha);
+
+    fr = -G2pi * c1 * amr;
     ft = 2 * fr * beta * sin(2*theta);
     fr *= (1 + beta * (sh_alpha-1) * cos(2*theta))/r;
     
@@ -116,4 +123,8 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     acc[2] = 0.0;
 
     *pot = 0.0;   /* not implemented yet */
+
+    /* unofficial feature for this potential:  pass density instead of potential */
+    if (sh_L < 0) 
+      *pot = amr * (1 + sh_eps * cos(2*theta));
 }
