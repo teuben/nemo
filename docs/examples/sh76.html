@@ -132,8 +132,42 @@ a specified axis, y in the example below:
   </font>
 </PRE>
 <img src=sh76e.gif><br>
-  
+The center of these points is the periodic orbit.
+
+<h2> Periodic Orbits </h2>
+
+The center of the surface of section "tube" is the period orbit itself. The program
+<A HREF=../man_html/perorb.1.html>perorb</A>
+is able to find those centers in an iterative
+fashion. A few orbit calculations with
+<A HREF=../man_html/orbint.1.html>orbint</A>
+and plotting a surface of section using
+<A HREF=../man_html/orbsos.1.html>orbsos</A>
+will give reasonable initial conditions that have a chance of converging.
+
+<PRE>
+  %<font color=red> perorb dt=0.0001 potname=sh76  potpars='0.0,965*11.8,1.5,0.4'  phase=1,0,0,0,270,0 norbit=10
+  </font>
+# x0   v0   y1   x1   NPT   NITER   PERIOD   ETOT   LZ_MEAN   ETOT_ERR
+-0.799788 0.000000 0.777762 325.193779 64 40 0.012513 36450.000000 279.125157 -0.447589
+-0.800426 0.000000 0.777930 325.302287 64 29 0.012515 36450.000000 279.148003 0.31501
+-0.800428 0.000000 0.777931 325.302562 64 29 0.012515 36450.000000 279.148061 0.315594
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+-0.800428 0.000000 0.777931 325.302563 64 29 0.012515 36450.000000 279.148061 0.315595
+</PRE>
+
+so obviously something is not working here. This is the
+result of not having potentials available. Stay tuned.
+
+
+
 <P>
+  
 This page was last modified on
 <!--#config timefmt="%d-%h-%Y" -->
 <!--#echo var="LAST_MODIFIED" -->
