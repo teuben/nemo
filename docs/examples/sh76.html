@@ -143,7 +143,9 @@ fashion. A few orbit calculations with
 <A HREF=../man_html/orbint.1.html>orbint</A>
 and plotting a surface of section using
 <A HREF=../man_html/orbsos.1.html>orbsos</A>
-will give reasonable initial conditions that have a chance of converging.
+will give reasonable initial conditions that have a chance of converging. In the example below
+we launch the first estimate at (1,0,0) into +Y direction (0,270,0). Notice the pattern speed is 0
+in this example.
 
 <PRE>
   %<font color=red> perorb dt=0.0001 potname=sh76  potpars='0.0,965*11.8,1.5,0.4'  phase=1,0,0,0,270,0 norbit=10 dir=x out=orb1
@@ -160,10 +162,18 @@ will give reasonable initial conditions that have a chance of converging.
   1.849080 262.682062 2.446281 -133.363212 354 3 0.070413 -53400.289148 398.375205 0.000493367
   1.944113 263.097791 2.629030 -127.067264 384 3 0.076468 -51115.657597 413.545664 0.00116701
   %<font color=red> orbplot orb1
-
+  </font>
 </PRE>
 <img src=sh76f.gif><br>
 which looks reasonable. I'm not happy with the behavior of energy conservation.
+
+<P>
+
+Note this is still in a non-rotating potential.
+By convention in NEMO rotating potentials the pattern speed is measured counter clock wise, which causes the stable X1 and X2
+orbits to have positive angular moments. The X4 orbits have negative angular momentum.
+
+To find the extent of the X2 orbits, it is better to launch along the Y axis:
 
 
 
