@@ -27,11 +27,11 @@ string defv[] = {
     "y=0\n          Y-coordinate(s) to test potential at",
     "z=0\n          Z-coordinate(s) to test potential at",
     "t=0.0\n        Time to test potential at",
-    "mode=pot\n     Output pot,ax,ay,az,ar,at",
+    "mode=pot\n     Output pot,ax,ay,az,ar,at,den",
     "dr=\n          Differential step for (Poisson) density map",
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.5a\n 7-jun-09 PJT",
+    "VERSION=1.5b\n 7-jun-09 PJT",
     NULL,
 };
 
