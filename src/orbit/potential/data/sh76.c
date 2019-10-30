@@ -122,7 +122,7 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     acc[1] = -fr*pos[1] - ft*pos[0];
     acc[2] = 0.0;
 
-    *pot = 0.0;   /* not implemented yet */
+    *pot = -G2pi * c1 * amr * r / (1-sh_alpha) * (1 + beta * (sh_alpha-1) * cos(2*theta));
 
     /* unofficial feature for this potential:  pass density instead of potential */
     if (sh_L < 0) 
