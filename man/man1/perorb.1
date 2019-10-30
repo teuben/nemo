@@ -1,4 +1,4 @@
-.TH PERORB 1NEMO "19 August 2004"
+.TH PERORB 1NEMO "29 October 2019"
 .SH NAME
 perorb \- find periodic orbits in symmetric potentials
 .SH SYNOPSIS
@@ -9,15 +9,16 @@ perorb \- find periodic orbits in symmetric potentials
 .PP
 In the iterative mode it will integrate an orbit for a half or
 whole period, and iteratively converge towards a periodic orbit
-assuming regular phase space. It uses a convergence criterion
+assuming regular phase space where the surface of section
+is a single point. It uses a convergence criterion
 in the surface of section coordinates.
 It then can proceed, and attempt to find family members
 with slightly different energies or spatial extent.
 The orbits can be stored in a binary file along the way, and also a table
-with major an minor axis rotation curves, period and energy can be
-stored in a table.
+with major an minor axis rotation curves, period, energy and average
+angular momentum can be stored in a table.
 .PP
-In the interactive mode the selected orbits are integrated for a
+In the interactive mode (ncross>1) the selected orbits are integrated for a
 specified number of surface of section (S.O.S.)
 crossings, and their S.O.S. 
 coordinates are plotted; from a visual inspection the central 
@@ -61,11 +62,11 @@ maximum number of reserved integration steps. [default: \fB5000\fP].
 time step (constant) to be taken [default: \fB0.05\fP].
 .TP
 \fBphase=\fItrial-phase\fP
-Initial trial phase space coodinates for orbit. Although currently
-only planar orbits in the XY-plane can be investigated, all 
-6 phase-space coordinates need to be specified. There should be only
-two non-zero entries in this case as the launch coordinates.
-If a 7th number is given (optional), 
+Initial trial phase space coodinates for orbit. The full
+6 phase-space coordinates can specified, although
+you can also specify the (x0,v0) for dirint=0 or (y0,u0) for
+dirint=1.
+If a 7th (or 3rd) number is given (optional), 
 this is taken as the trial energy for the
 first orbit. The trial launch velocity is then calculated from the
 available potential at the specified launch position.
@@ -102,7 +103,8 @@ Default: 50.
 Number of crossings through surface of section
 used to plot/iterate. This count does include the 
 half-period crossings if the keyword \fBperiod=2\fP
-is choosen. [default: \fB1\fP]
+is choosen. If set larger than 1, interactive mode is used.
+[default: \fB1\fP]
 .TP
 \fBperiod=2|1\fP
 The number of surface of section coordinates to generate
@@ -212,6 +214,28 @@ of the 1:1 resonance orbit in a logarithmic potential
 The last command  shows the ratio of the angular momentum along the major
 and minor axis, and that they equal the axis ratio (q) of the potential.
 
+.PP
+In interactive mode the Time,Ycross,VYcross,Energy for each surface
+of section are listed, and can be piped
+into tabplot to get an idea of phase space and help you getter better initial
+conditions.
+.nf
+
+% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tabplot - 2 3
+
+% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tablsqfit - 2 3 fit=ellipse
+..
+ x-center:        0.0732815
+ y-center:        1.0291e-06
+..
+.fi
+E=0.0322215
+.nf
+% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2,0.0322215
+# y0      u0        x1        v1     NPT   NITER PERIOD   ETOT  LZ_MEAN   ETOT_ERR
+0.074508 -0.225473 -0.166434 -0.100333 234 6 4.650688 0.032222 0.029217 -3.71096e-06
+.fi
+
 
 .SH "SEE ALSO"
 orbstat(1NEMO), potlist(1NEMO), orbint(1NEMO), newton0(1NEMO), potential(5NEMO)
@@ -234,4 +258,5 @@ pjt/orbit	original sources
 19-apr-95	V1.5 various, rk4 is now default integrator	PJT
 1-mar-03	minor code cleanup, less lies in the man page, added etot_err	PJT
 19-aug-04	V1.6 added last= and fixed an allocation problem	PJT
+29-oct-2019	V1.7 allow phase= with 2 or 3 values	PJT
 .fi
