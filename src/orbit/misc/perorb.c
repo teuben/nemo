@@ -36,8 +36,10 @@
  *      10-jan-03       d SGN -> SIGN                                      pjt
  *       1-feb-03       e report energy conservation, use new IOM errors   pjt
  *      12-apr-04       f SIGN -> SNG (since NumRec uses  SIGN)            pjt
+ *      29-oct-2019 V1.7  allow phase= to have 2 or 3 values               pjt
  *
  *  TODO:   check why rk2 and rk4 both seem to converge at the same rate
+ *          perhaps SOS is linearly interpolated, higher order rk4 defeats this?
  */
 
 #include <stdinc.h>
@@ -69,7 +71,7 @@ string defv[] = {
     "mode=rk4\n                integration method (euler,leapfrog,rk2,rk4)",
     "last=f\n                  Use the last orbit in the in= orbit file?",
     "headline=\n               Random verbiage for output file",
-    "VERSION=1.6\n             19-aug-04 PJT",
+    "VERSION=1.7\n             29-oct-2019 PJT",
     NULL,
 };
 
@@ -175,8 +177,29 @@ setparams()
     eps_min = getdparam("accuracy");
     eps_max = 1/eps_min;    /* just a guess */
 
+    cp = getparam("dir");
+    switch (*cp) {
+         case 'x': dirint =0; break;
+         case 'y': dirint =1; break;
+         default:  error("Invalid stepper direction %s (must be x or y)\n",cp);
+    }
+
     n = nemoinpd(getparam("phase"),phase,2*NDIM+1);
-    if (n!=2*NDIM) {        /* if not just pos&vel given: */
+    if (n==2 || n==3) {
+      if (n==3) phase[6] = phase[2];
+      if (dirint==0) {         /* (x0,v0[,E]) */
+	phase[4] = phase[1];
+	phase[1] = phase[2] = phase[3] = phase[5] = 0.0;
+      } else if (dirint==1) {  /* (y0,u0[,E]) */
+	phase[3] = phase[1];
+	phase[1] = phase[0];
+	phase[0] = phase[2] = phase[4] = phase[5] = 0.0;
+      } else error("illegal dirint");
+      if (n==2)
+	Qfix = FALSE;
+      else
+	Qfix = TRUE;
+    } else if (n!=2*NDIM) {        /* if not just pos&vel given: */
         if (n==2*NDIM+1) {  /* accept the last one as a fixed energy */
             dprintf(0,"Using %g as (fixed) energy for first orbit\n",phase[2*NDIM]);
             Qfix = TRUE;
@@ -244,12 +267,6 @@ setparams()
     if (period < 1 || period > 2) error("This version needs period to be 1 or 2");
     sign = (period==1 ? 1 : -1 );
 
-    cp = getparam("dir");
-    switch (*cp) {
-         case 'x':    dirint =0; break;
-         case 'y':    dirint =1; break;
-         default:     error("Invalid direction %s (must be x or y)\n",cp);
-    }
     if (Qfix) {       /* get the true launch velocity if Energy was supplied */
         ndim = NDIM;
         time = 0.0;
@@ -331,7 +348,7 @@ my_write_orbit(stream outstr, orbitptr o, int maxout, int freqout, int period)
           }
           nout = 2*nout-1;
        } else
-	 warning("Not enough space to save symmetric part of orbit: nout=%d maxout=%d",
+	 warning("Not enough space to save symmetric part of orbit: nout=%d maxsteps=%d",
 		 nout,maxout);
     }
     Nsteps(o) = nout;   /* make sure only all these are written */
@@ -367,7 +384,7 @@ prepare()
         Worb(o1,0) = phase[5];
     } else {	         /* for third orbit a better extrapol. could be done */
         if (Qfix) {
-            phase[2*NDIM] += phasestep;     /* tweek the energy */
+            phase[2*NDIM] += phasestep;     /* tweak the energy */
             dir0 = SGN(Velorb(o1,0,1-dirint));
             time = Torb(o1,0);
             pos[0] = Xorb(o1,0);
@@ -512,10 +529,10 @@ iterate()
         h = (period==1 ? l2/4 : l2/2);       /* where to get the other */
 	if (first_out) {
 	  fprintf(tab,"# %s   %s   %s   %s   NPT   NITER   PERIOD   ETOT   LZ_MEAN   ETOT_ERR\n",
-		  dirint ? "x0" : "y0",
-		  dirint ? "v0" : "u0",
-		  dirint ? "y1" : "u1",
-		  dirint ? "x1" : "v1");
+		  dirint==0 ? "x0" : "y0",
+		  dirint==0 ? "v0" : "u0",
+		  dirint==0 ? "y1" : "x1",
+		  dirint==0 ? "u1" : "v1");
 	  first_out = FALSE;
 	}
         fprintf(tab,"%f %f %f %f %d %d %f %f %f %g\n",
@@ -526,7 +543,7 @@ iterate()
            Xorb(o2,0), Yorb(o2,0), Uorb(o2,0), Vorb(o2,0),
            Xorb(o2,l2-1), Yorb(o2,l2-1), Uorb(o2,l2-1), Vorb(o2,l2-1));
         copy_orbit(o2,o1);
-        return(l2);                         /* and be done with iterations */
+        return l2;                         /* and be done with iterations */
     } else if (eps > eps_max)
         break;
     if (iter==maxiter) 
