@@ -6,7 +6,10 @@
 /*CTEX
  *	{\bf potname=zero}
  *
- *  Zero potential
+ *  Zero potential, no forces. Most potentials have a scaling factor that can
+ *  be set to 0 which results in the same, but at the cost of some useless
+ *  operations.
+ * 
  *
  * $$
  *    \Phi =  0
