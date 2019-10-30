@@ -19,15 +19,16 @@ perorb - find periodic orbits in symmetric potentials
 in two ways: <p>
 In the iterative mode it will integrate an orbit for a half
 or whole period, and iteratively converge towards a periodic orbit assuming
-regular phase space. It uses a convergence criterion in the surface of section
-coordinates. It then can proceed, and attempt to find family members with
-slightly different energies or spatial extent. The orbits can be stored
-in a binary file along the way, and also a table with major an minor axis
-rotation curves, period and energy can be stored in a table. <p>
+regular phase space where the surface of section is a single point. It uses
+a convergence criterion in the surface of section coordinates. It then can
+proceed, and attempt to find family members with slightly different energies
+or spatial extent. The orbits can be stored in a binary file along the way,
+and also a table with major an minor axis rotation curves, period, energy
+and average angular momentum can be stored in a table. <p>
 In the interactive
-mode the selected orbits are integrated for a specified number of surface
-of section (S.O.S.) crossings, and their S.O.S.  coordinates are plotted; from
-a visual inspection the central  periodic orbit(s) can then be estimated
+mode (ncross&gt;1) the selected orbits are integrated for a specified number
+of surface of section (S.O.S.) crossings, and their S.O.S.  coordinates are plotted;
+from a visual inspection the central  periodic orbit(s) can then be estimated
 at this energy, and used to get good estimates in the iterative mode to
 find the periodic orbits. <p>
 This technique has been used in various forms
@@ -67,12 +68,11 @@ number of reserved integration steps. [default: <b>5000</b>]. </dd>
 
 <dt><b>phase=<i>trial-phase</i></b> </dt>
 <dd>Initial trial phase
-space coodinates for orbit. Although currently only planar orbits in the
-XY-plane can be investigated, all  6 phase-space coordinates need to be specified.
-There should be only two non-zero entries in this case as the launch coordinates.
-If a 7th number is given (optional),  this is taken as the trial energy
-for the first orbit. The trial launch velocity is then calculated from the
-available potential at the specified launch position. </dd>
+space coodinates for orbit. The full 6 phase-space coordinates can specified,
+although you can also specify the (x0,v0) for dirint=0 or (y0,u0) for dirint=1.
+If a 7th (or 3rd) number is given (optional),  this is taken as the trial
+energy for the first orbit. The trial launch velocity is then calculated
+from the available potential at the specified launch position. </dd>
 
 <dt><b>step=<i>step,perturb</i></b>
 </dt>
@@ -103,38 +103,38 @@ to find a periodic orbit. Default: 50. </dd>
 <dt><b>ncross=<i>count</i></b> </dt>
 <dd>Number of crossings through
 surface of section used to plot/iterate. This count does include the  half-period
-crossings if the keyword <b>period=2</b> is choosen. [default: <b>1</b>] </dd>
+crossings if the keyword <b>period=2</b> is choosen. If set larger than 1, interactive
+mode is used. [default: <b>1</b>] </dd>
 
 <dt><b>period=2|1</b> </dt>
-<dd>The
-number of surface of section coordinates to generate per period. Must be
-either 1 or 2. A value of 2 make search faster, but a bit more difficult
-for irregular orbits or near resonances. Also non-symmetric orbits cannot
-be found this way. [default: <b>2</b>]. </dd>
+<dd>The number of surface of section coordinates
+to generate per period. Must be either 1 or 2. A value of 2 make search faster,
+but a bit more difficult for irregular orbits or near resonances. Also non-symmetric
+orbits cannot be found this way. [default: <b>2</b>]. </dd>
 
 <dt><b>potname=<i>name</i></b> </dt>
-<dd>name of file of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
-
-descriptor  [default: <b>plummer</b>]. </dd>
+<dd>name of file
+of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ descriptor  [default: <b>plummer</b>]. </dd>
 
 <dt>potpars=<i>par-list</i> </dt>
-<dd>List of parameters to the
-potential descriptor. The first parameter must be the pattern speed in the
-x-y plane, although rotating frames of reference are not yet supported. The
-remaining parameters are used by the <i>_inipotential()</i> routine in the potential
-descriptor. [default: none - let them be defined by routine itself]. </dd>
+<dd>List
+of parameters to the potential descriptor. The first parameter must be the
+pattern speed in the x-y plane, although rotating frames of reference are
+not yet supported. The remaining parameters are used by the <i>_inipotential()</i>
+routine in the potential descriptor. [default: none - let them be defined
+by routine itself]. </dd>
 
-<dt><b>potfile=<i>name</i></b>
-</dt>
-<dd>name of an optional datafile to the potential descriptor. This might be
-an N-body snapshot or list of spline fit coefficients etc. [default: none].
-</dd>
+<dt><b>potfile=<i>name</i></b> </dt>
+<dd>name of an optional datafile to the potential
+descriptor. This might be an N-body snapshot or list of spline fit coefficients
+etc. [default: none]. </dd>
 
 <dt><b>tab=<i>table_file</i></b> </dt>
-<dd>If set to a filename, a table, which normally appears on
-<i>stdout</i> is now written to a file. It contains the two axes rotation curves,
-number of steps in the orbit, numer of iterations in surface of section,
-the full period and  the energy: <i>pos,vel,pos,vel,nsteps,niter,period,energy</i>.
+<dd>If set to a filename, a table, which
+normally appears on <i>stdout</i> is now written to a file. It contains the two
+axes rotation curves, number of steps in the orbit, numer of iterations
+in surface of section, the full period and  the energy: <i>pos,vel,pos,vel,nsteps,niter,period,energy</i>.
 [Default: none]. </dd>
 
 <dt><b>mode=<i>int_mode</i></b> </dt>
@@ -209,6 +209,24 @@ the 1:1 resonance orbit in a logarithmic potential  <br>
 <p> The last command  shows the ratio of the angular momentum along the major
 and minor axis, and that they equal the axis ratio (q) of the potential.
 
+<p> <p>
+In interactive mode the Time,Ycross,VYcross,Energy for each surface of
+section are listed, and can be piped into tabplot to get an idea of phase
+space and help you getter better initial conditions. <br>
+<pre>% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tabplot -
+2 3
+% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tablsqfit
+- 2 3 fit=ellipse
+
+ x-center:        0.0732815
+ y-center:        1.0291e-06
+
+</pre>E=0.0322215 <br>
+<pre>% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2,0.0322215
+# y0      u0        x1        v1     NPT   NITER PERIOD   ETOT  LZ_MEAN
+  ETOT_ERR
+0.074508 -0.225473 -0.166434 -0.100333 234 6 4.650688 0.032222 0.029217 -3.71096e-06
+</pre>
 <p> 
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
@@ -235,6 +253,7 @@ Peter Teuben
 19-apr-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 various, rk4 is now default integrator<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 1-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;minor code cleanup, less lies in the man page, added etot_err<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-aug-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 added last= and fixed an allocation problem<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+29-oct-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 allow phase= with 2 or 3 values<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
