@@ -15,13 +15,14 @@
 #               19-may-2010   gfortran now the default (but 4.1 or below no pgplot/GIF)
 #               24-may-2010   glnemo deprecated, only glnemo2 
 #               19-jan-2011   added a cmake=1 option to build internally
-#               25-jan-2012   DSO linking (dso=1) needed for modern linux
+#               25-jan-2012   DSO linking (dso=1) needed for modern linux (DSO = Dynamic Shared Objects)
 #                5-dec-2017   converted CVS to GIT for NEMO V4
 #               29-dec-2017   install=0 mktar=0 option
 #                7-feb-2018   script now called install_nemo
 #                4-may-2018   option to use giza (https://github.com/danieljprice/giza) instead of pgplot
 #                8-aug-2018   add ubuntu option (Jason Lammers) if you start from a virgin ubuntu
 #               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
+#                7-may-2019   add centos=1 option to get a redhat flavor
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -33,6 +34,7 @@
 set nemo        = nemo           # root directory name from the current directory
 
 set ubuntu	= 0             # runs "sudo apt" on a few required packages
+set centos      = 0             # runs "sudo yum" on a few required packages
 set install     = 1             # set this to 0 when you only grab the source code
 set mktar       = 0             # make a tar file before install starts
 set pgplot      = 1		# install PGPLOT via GIT also (there are other options)
@@ -97,7 +99,10 @@ endif
 
 if ($ubuntu) then
    sudo apt update
+   sudo apt install gcc -y
+   sudo apt install g++ -y
    sudo apt install gfortran -y
+   # xorg-dev ???
    sudo apt install libx11-dev -y
    sudo apt install libxt-dev -y
    sudo apt install libxext-dev -y
@@ -105,6 +110,17 @@ if ($ubuntu) then
    sudo apt install build-essential -y
    sudo apt install cmake -y
    sudo apt install pgplot5 -y
+endif
+
+
+# CENTOS7:
+# https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-devel-5.2.2-35.el7.x86_64.rpm
+# https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-5.2.2-35.el7.x86_64.rpm
+# 
+
+if ($centos) then
+   sudo yum install -y cmake
+   sudo yum install -y libXext-devel
 endif
 
 #	pick another GNU compiler (this is rather astromake specific of course)
@@ -165,10 +181,11 @@ if ($reuse) then
   $make distclean >& install.distclean.log
 endif
 
-# pick just one from pgplot,giza   brew is special for mac
+# pick just one from pgplot,giza   brew is special for mac, ubuntu now also uses it's own pgplot
 if ($giza)   set pgplot = 0
 if ($pgplot) set giza   = 0
 if ($brew)   set pgplot = 0
+if ($ubuntu) set pgplot = 0
 
 if ($pgplot && $reuse == 0) then   
   (cd local; git clone $git_pgplot)
