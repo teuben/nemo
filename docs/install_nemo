@@ -233,6 +233,7 @@ if ($debug)    set copts=($copts --enable-debug)
 if ($pedantic) set copts=($copts --enable-pedantic)
 if ($dso == 0) set copts=($copts --without-dso)
 if ($pgplot)   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
+if ($ubuntu)   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=/usr/lib)
 if ($giza)     set copts=($copts --with-yapp=giza --with-pgplot-prefix=`pwd`/lib)
 if ($brew) then
   if ($unames == Darwin) then
