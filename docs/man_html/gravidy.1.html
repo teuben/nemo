@@ -18,13 +18,14 @@ timesteps
 by default in NEMO. See FILES below. 
 <h2><a name='sect3' href='#toc3'>Example</a></h2>
 Here is an example integrating
-gravidy with NEMO files </pre>  mkplummer p128 128<br>
-   snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f &gt; p128.tab<br>
-   gravidy --input p128.tab --output p128 --interval 0.1 --time 10 --eta 0.01 --softening
-0.05<br>
-   cat p128.out.snapshot_0* | sed &rsquo;s/# Time://&rsquo; | tabtos - - time skip,m,pos,vel
-nbody=128 | csf - p128.out SnapShot<br>
- </pre>although note that the last snapshot (time=10.0) is replicated. 
+gravidy with NEMO files <br>
+<pre>  mkplummer p128 128
+  snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f &gt; p128.tab
+  gravidy --input p128.tab --output p128 --interval 0.1 --time 10 --eta 0.01 --softening
+0.05
+  cat p128.out.snapshot_0* | sed &rsquo;s/# Time://&rsquo; | tabtos - - time skip,m,pos,vel
+nbody=128 | csf - p128.out SnapShot
+</pre>although note that the last snapshot (time=10.0) is replicated. 
 <h2><a name='sect4' href='#toc4'>Author</a></h2>
 Cristian
 Maureira-Fredes, and Pao Amaro-Seoane 
