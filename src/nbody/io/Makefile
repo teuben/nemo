@@ -118,8 +118,9 @@ snaptipsy: snaptipsy.c
 tipsysnap: tipsysnap.c
 	$(CC) $(CFLAGS) -o tipsysnap tipsysnap.c  $(NEMO_LIBS)
 
+# @todo  this needs to be done  via configure
 H_FLAGS = -I/usr/include/hdf5/serial
-H_LIBS = -lread_eagle -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5
+H_LIBS  = -lread_eagle -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5
 
 eaglesnap: eaglesnap.c
 	$(CC) $(CFLAGS) $(H_FLAGS) -o eaglesnap eaglesnap.c $(H_LIBS) $(NEMO_LIBS)
