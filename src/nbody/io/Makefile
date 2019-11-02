@@ -16,6 +16,7 @@ OBJFILES = snapserial.o
 SRCDIR = $(NEMO)/src/nbody/io
 SUBDIRS= gadget
 BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
+	   eaglesnap \
 	   rvsnap snaprv snaptipsy tipsysnap \
 	   gadgetsnap snapgadget binsnap
 
@@ -116,3 +117,9 @@ snaptipsy: snaptipsy.c
 
 tipsysnap: tipsysnap.c
 	$(CC) $(CFLAGS) -o tipsysnap tipsysnap.c  $(NEMO_LIBS)
+
+H_FLAGS = -I/usr/include/hdf5/serial
+H_LIBS = -lread_eagle -L/usr/lib/x86_64-linux-gnu/hdf5/serial -lhdf5
+
+eaglesnap: eaglesnap.c
+	$(CC) $(CFLAGS) $(H_FLAGS) -o eaglesnap eaglesnap.c $(H_LIBS) $(NEMO_LIBS)
