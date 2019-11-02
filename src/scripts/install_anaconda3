@@ -1,0 +1,26 @@
+#! /bin/csh -f
+#
+#  Install an anaconda3 (or miniconda3) python 
+
+set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.03-Linux-x86_64.sh
+set msh   = $mc3:t
+set dir   = `pwd`/anaconda3
+
+# you better know what you are doing here
+foreach arg ($*)
+  set $arg
+end
+
+if (! -e $msh) wget $mc3
+bash $msh -b -p $dir
+
+setenv PATH "$dir/bin:$PATH"
+
+conda update -y conda
+pip install --upgrade pip
+
+
+echo "set path = ($dir/bin "'$path); rehash'  >> python_start.csh
+echo "export PATH=${dir}/bin:"'$PATH'         >> python_start.sh
+
