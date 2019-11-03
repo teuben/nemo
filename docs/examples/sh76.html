@@ -132,7 +132,12 @@ a specified axis, y in the example below:
   </font>
 </PRE>
 <img src=sh76e.gif><br>
-The center of these points is the periodic orbit.
+The center of these points is of course the periodic orbit. There is a shortcut of this using the perorb program discussed in the next session:
+
+<PRE>
+  %<font color=red> perorb dt=0.0001 maxsteps=10000 potname=sh76 potpars='8.1,965*11.8,1.5,0.4' ncross=50 phase=1,270 dir=x  | tabplot - 2 3 
+  </font>
+</PRE>
 
 <h2> Periodic Orbits </h2>
 
