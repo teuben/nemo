@@ -1,0 +1,78 @@
+.TH EAGLESNAP 1NEMO "2 November 2019"
+.SH NAME
+eaglesnap \- convert EAGLE hdf5 snapshots to NEMO snapshot format
+.SH SYNOPSIS
+\fBeaglesnap\fP [parameter=value]
+.SH DESCRIPTION
+\fBeaglesnap\fP converts an HDF5 snapshot from the EAGLE simulation
+in a NEMO snapshot format. Selections in an X,Y,Z region, as well as particle
+type are possible.
+.PP
+debug=1 will also list the datasets contents of the HDF5 file.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (HDF5) No default.
+.TP
+\fBout=\fP
+Output file, in snapshot format. No default.
+.TP
+\fBptype=\fP
+Which particle type 0-5  (0=gas, 1=DM, 4=star, 5=BH) [0]  
+.TP
+\fBregion=\fP
+Select rectangular region (xmin,xmax,ymin,ymax,zmin,zmax).
+If two values are given, they are \fIxmin,xmax\fP and replicated as a cube for Y and Z.
+If one value is given, this is \fIxmax\fP, and \fI0,xmax\fP is selected and again replicated
+for Y and Z.
+[0,10,0,10,0,10]
+.TP
+\fBgroup=\fP
+Select this group (-1 means all) [-1] 
+.TP
+\fBsubgroup=\fP
+Select this subgroup (-1 means all) [-1]
+.TP
+\fBunits=\fP
+Convert to Mpc, Msol, .... - not implemented yet.
+
+.SH EXAMPLES
+Assuming you have a username/password for databasea access, the following commands
+show some of the things you can do
+.nf
+    wget --user=... --ask-password --content-disposition 
+        "http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots//download?run=RefL0012N0188&snapnum=28"
+    tar xvf RefL0012N0188_snap_028.tar
+    h5dump -n RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5
+    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5 snap1  ptype=0 region=2
+.fi
+Data are taken from a typical co-moving cosmological grid. Objects near the edge, may seem to wind up
+in two places, as can be seen in the following example snapshot:
+.nf
+    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5 snap2 0 group=2
+    snapplot3 snap2 xrange=-10:10 yrange=-10:10 zrange=-10:10
+.fi
+.SH SEE ALSO
+snapshot(5NEMO)
+.nf
+http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots/ - EAGLE
+http://icc.dur.ac.uk/Eagle/index.php - The EAGLE Project
+http://icc.dur.ac.uk/Eagle/database.php - EAGLE database access
+https://github.com/jchelly/read_eagle - library used
+https://kyleaoman.github.io/martini - MARTINI
+.fi
+.SH FILES
+.nf
+.ta +2i
+NEMO/usr/eagle	directory with support to install EAGLE tools
+NEMO/src/nbody/io/eaglesnap.c	code for eaglesnap
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+02-Nov-19	V0.1 Created		PJT
+.fi
