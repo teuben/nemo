@@ -8,6 +8,10 @@ eaglesnap \- convert EAGLE hdf5 snapshots to NEMO snapshot format
 in a NEMO snapshot format. Selections in an X,Y,Z region, as well as particle
 type are possible.
 .PP
+Currently only mass and phasespace coordinates are converted. This is
+currently done in code units, in a future option conversion to astrophysical
+units will be done.
+.PP
 debug=1 will also list the datasets contents of the HDF5 file.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
