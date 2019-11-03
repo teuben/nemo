@@ -26,7 +26,10 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "out=???\n			Output file (snapshot)",
     "ptype=0\n                  Which particle type (0=gas, ...)",
     "region=0,10,0,10,0,10\n    Select region (xmin,xmax,ymin,ymax,zmin,zmax)",
-    "VERSION=0.1\n		2-nov-2019",
+    "group=-1\n                 Select this group (-1 means all)",
+    "subgroup=-1\n              Select this subgroup (-1 means all)",
+    "units=\n                   Convert to Mpc, Msol, ....",
+    "VERSION=0.2\n		2-nov-2019",
     NULL,
 };
 
@@ -37,20 +40,26 @@ local void rv_data(stream, int, Body **, real *);
 
 void nemo_main(void)
 {
-  stream instr, outstr;
-  real   tsnap;
+  stream outstr;
+  real   tsnap=0, rscale, vscale, mscale;
   string times;
   Body *btab = NULL, *p;
-  int i, j, nbody, bits, ptype, nregion;
+  int i, j, k, nbody, bits, ptype, nregion;
   real region[6];
   float *mass, *pos, *vel;
+  int *grp, *sgrp, selgrp, selsgrp, grpmin, grpmax, grpnull;
   long long *ids;
   char buf[200];
   int itype, iset, nset;
 
   ptype = getiparam("ptype");
+  selgrp = getiparam("group");
+  selsgrp = getiparam("subgroup");
+  
   nregion = nemoinpr(getparam("region"),region,6);
-  if (nregion == 1) {
+  if (nregion == 0) {
+    warning("All particles selected");
+  } else if (nregion == 1) {
     region[1] = region[3] = region[5] = region[0];
     region[0] = region[2] = region[4] = 0.0;
   } else if (nregion == 2) {
@@ -58,7 +67,8 @@ void nemo_main(void)
     region[3] = region[5] = region[1];
   } else if (nregion != 6)
     error("region=%s needs 6 values",getparam("region"));
-  printf("Region: %g,%g %g,%g %g,%g\n",
+  if (nregion > 0)
+    dprintf(0,"Region: %g,%g %g,%g %g,%g\n",
 	 region[0], region[1], region[2], region[3], region[4], region[5]);
   
   EagleSnapshot *snap = open_snapshot(getparam("in"));
@@ -72,13 +82,13 @@ void nemo_main(void)
     }
   }
 
-  /* Choose region to read */
-  select_region(snap, region[0], region[1], region[2], region[3], region[4], region[5]);
+  if (nregion > 0)
+    select_region(snap, region[0], region[1], region[2], region[3], region[4], region[5]);
 
   /* Find out how many particles we're going to get back */
   nbody = count_particles(snap, ptype);
   if (nbody > 0)
-    printf("Found %d particles of type %d\n",nbody,ptype);
+    dprintf(0,"Found %d particles of type %d\n",nbody,ptype);
   else
     error("No valid particles of type %d\n",ptype);
 
@@ -86,42 +96,55 @@ void nemo_main(void)
   mass= malloc(sizeof(float)*1*nbody);
   pos = malloc(sizeof(float)*3*nbody);
   vel = malloc(sizeof(float)*3*nbody);
-  if(read_dataset_float(snap, ptype, "Coordinates", pos, nbody*3) < 0) {
-      printf("read_dataset failed!\n");
-      printf("Reason: %s\n", get_error());
-      exit(1);
-  }
-  if(read_dataset_float(snap, ptype, "Velocity", vel, nbody*3) < 0) {
-      printf("read_dataset failed!\n");
-      printf("Reason: %s\n", get_error());
-      exit(1);
-  }
+  grp = malloc(sizeof(int)*1*nbody);
+  sgrp= malloc(sizeof(int)*1*nbody);
 
-  /* Read particle IDs */
+  if(read_dataset_float(snap, ptype, "Mass", mass, nbody) < 0)
+    error("failed reading Mass: %s", get_error());
+  if(read_dataset_float(snap, ptype, "Coordinates", pos, nbody*3) < 0)
+    error("failed reading Coordinates: %s", get_error());
+  if(read_dataset_float(snap, ptype, "Velocity", vel, nbody*3) < 0)
+    error("failed reading Velocity: %s", get_error());    
+  if(read_dataset_int(snap, ptype, "GroupNumber", grp, nbody) < 0)
+    error("failed reading GroupNumber: %s", get_error());
+  if(read_dataset_int(snap, ptype, "SubGroupNumber", sgrp, nbody) < 0)
+    error("failed reading SubGroupNumber: %s", get_error());    
+
   ids = malloc(sizeof(long long)*nbody);
   read_dataset_long_long(snap, ptype, "ParticleIDs", ids, nbody);
 
-  /* Write out the particles */
-  for(i=0;i<nbody;i++)
-    dprintf(2,"%i %14.6f %14.6f %14.6f\n", (int) ids[i], pos[3*i+0], pos[3*i+1], pos[3*i+2]);
-  
+  grpnull = 1073741824;   /* 2^30 */
+  grpmin =  grpnull;
+  grpmax = -grpnull;
+  for(i=0;i<nbody;i++) {
+    dprintf(2,"%i %d %d %14.6f %14.6f %14.6f\n", (int) ids[i], grp[i], sgrp[i], pos[3*i+0], pos[3*i+1], pos[3*i+2]);
+    if (grp[i] != grpnull) {
+      if (grp[i] > grpmax) grpmax = grp[i];
+      if (grp[i] < grpmin) grpmin = grp[i];
+    }
+  }
+  dprintf(0,"GroupNumber: %d - %d\n",grpmin,grpmax);
   close_snapshot(snap);
-
             
   outstr = stropen(getparam("out"), "w");	/* open output file */
 
   btab = (body *) allocate(nbody*sizeof(body));  /* allocate body table */
-  for (i=0, p = btab; i<nbody; i++, p++) {      
+  for (i=0, k=0, p = btab; i<nbody; i++) {
+    if (selgrp  >= 0 && selgrp  !=  grp[i]) continue;
+    if (selsgrp >= 0 && selsgrp != sgrp[i]) continue;
     Mass(p) = mass[i];
     for(j=0; j<NDIM; j++) {
       Pos(p)[j] = pos[3*i+j];
       Vel(p)[j] = vel[3*i+j];
     }
+    k++;
+    p++;
   }
+  dprintf(0,"Writing %d particles (group %d, subgroup %d)\n", k, selgrp, selsgrp);
 
   put_history(outstr);
   bits = (TimeBit | MassBit | PhaseSpaceBit);
-  put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+  put_snap(outstr, &btab, &k, &tsnap, &bits);
   strclose(outstr);
 }
 
