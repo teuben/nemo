@@ -1,0 +1,21 @@
+
+
+git clone https://github.com/jchelly/read_eagle
+cd read_eagle
+cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEMO .
+make
+make install
+
+this will create $NEMOLIB/libread_eagle.so and $NEMOINC/read_eagle.h
+An example in $NEMO/src/nbody/io will compile eaglesnap.c
+
+
+Also useful, if you want to do a lot more in python
+
+https://github.com/kyleaoman/eagleSqlTools
+https://github.com/kyleaoman/simfiles
+https://github.com/kyleaoman/martini
+https://github.com/kyleaoman/pyread_eagle
+https://github.com/kyleaoman/g3t
+https://github.com/kyleaoman/Hdecompose
+https://github.com/kyleaoman/pyread_eagle
