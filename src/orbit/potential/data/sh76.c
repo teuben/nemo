@@ -12,7 +12,7 @@
 
 /*CTEX
  *  {\bf potname=sh76
- *       potpars={\it $\Omega,A,alpha,epsilon$}}
+ *       potpars={\it $\Omega,A,\alpha,\epsilon$}}
  *
  *  This bar potential was used by Sanders and Huntley (1976) and
  *  also used in Sanders (2019).   The density perturbation is given
@@ -21,8 +21,20 @@
  * $$ 
  *    \sigma(r,\theta) = A r^{-\alpha} (1+\epsilon*\cos{2\theta})
  * $$
- *
- *
+ *   and the potential
+ * $$
+ *    \Phi(r,\theta) = -2\pi G c_1 A r^{-\alpha+1} {1 \over {1-\alpha}} ( 1 + \beta (\alpha-1) \cos{2\theta})
+ * $$
+ * where
+ * $$
+ *  	\beta =  { {(2-\alpha)} \over { \alpha(3-\alpha)} }  \epsilon
+ * $$
+ * and
+ * $$
+ *  	c_1 = { { \Gamma{[{1\over 2}(2-\alpha)]}  \Gamma{[{1\over 2}(\alpha+1)]} }   \over
+ *              { \Gamma{[{1\over 2}\alpha]}  \Gamma{[{1\over 2}(3-\alpha)]} } }
+ * $$
+ *  
  */
  
 
