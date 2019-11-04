@@ -59,9 +59,9 @@ in two places, as can be seen in the following example snapshot:
     snapplot3 snap2 xrange=-10:10 yrange=-10:10 zrange=-10:10
 .fi
 .SH SEE ALSO
-snapshot(5NEMO)
+snapshot(5NEMO), eagle(5NEMO)
 .nf
-http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots/ - EAGLE
+http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots/ - EAGLE snapshots
 http://icc.dur.ac.uk/Eagle/index.php - The EAGLE Project
 http://icc.dur.ac.uk/Eagle/database.php - EAGLE database access
 https://github.com/jchelly/read_eagle - library used
@@ -73,6 +73,16 @@ https://kyleaoman.github.io/martini - MARTINI
 NEMO/usr/eagle	directory with support to install EAGLE tools
 NEMO/src/nbody/io/eaglesnap.c	code for eaglesnap
 .fi
+.SH EAGLE5
+This will be the section for \fIeagle(5NEMO)\fP, but now it's here
+.PP
+\fBRefL0012N0188\fP is the small volume (12Mpc) reference run. It has 29 slices in z,
+ranging from slice 0 at z=20 to slice 28 at z=0.0. Slice 27, the one but most recent
+slice, is at z=0.10. The number of particles is (188^3) 6,644,672 per species (gas and DM).
+At z=0 one can see 6,381,559 gas, 262380 stars, and 547 BH, this still 186 short, so did some merge?
+This means SFE = 4.0%
+.PP
+Simulations with L=12, 25, 50, 100 co-moving Mpc are available.
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
