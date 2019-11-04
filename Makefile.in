@@ -449,6 +449,11 @@ install:
 #	@echo "eg."
 #	@echo "      mknemo mkplummer snapplot tabhist orbsos"
 
+python: anaconda3
+
+anaconda3:
+	src/scripts/install_anaconda3
+
 helpconfig:
 	@echo config, configure, config_extra, config_clean
 
