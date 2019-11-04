@@ -22,14 +22,14 @@
 
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
-    "in=???\n			Input file (RV format)",
-    "out=???\n			Output file (snapshot)",
+    "in=???\n			Input file (EAGLE HDF5 format)",
+    "out=???\n			Output file (NEMO snapshot)",
     "ptype=0\n                  Which particle type (0=gas, ...)",
     "region=0,10,0,10,0,10\n    Select region (xmin,xmax,ymin,ymax,zmin,zmax)",
     "group=-1\n                 Select this group (-1 means all)",
     "subgroup=-1\n              Select this subgroup (-1 means all)",
     "units=\n                   Convert to Mpc, Msol, ....",
-    "VERSION=0.2\n		2-nov-2019",
+    "VERSION=0.3\n		3-nov-2019",
     NULL,
 };
 
@@ -58,7 +58,7 @@ void nemo_main(void)
   
   nregion = nemoinpr(getparam("region"),region,6);
   if (nregion == 0) {
-    warning("All particles selected");
+    error("No region is not supported");
   } else if (nregion == 1) {
     region[1] = region[3] = region[5] = region[0];
     region[0] = region[2] = region[4] = 0.0;
@@ -99,8 +99,13 @@ void nemo_main(void)
   grp = malloc(sizeof(int)*1*nbody);
   sgrp= malloc(sizeof(int)*1*nbody);
 
-  if(read_dataset_float(snap, ptype, "Mass", mass, nbody) < 0)
-    error("failed reading Mass: %s", get_error());
+  if(ptype != 1) {
+    if(read_dataset_float(snap, ptype, "Mass", mass, nbody) < 0)
+      error("failed reading Mass: %s", get_error());
+  } else {
+    warning("No masses for DM, setting total mass to 1.0");
+    for (i=0; i<nbody; i++) mass[i] = 1.0/nbody;
+  }
   if(read_dataset_float(snap, ptype, "Coordinates", pos, nbody*3) < 0)
     error("failed reading Coordinates: %s", get_error());
   if(read_dataset_float(snap, ptype, "Velocity", vel, nbody*3) < 0)
