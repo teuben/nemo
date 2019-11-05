@@ -9,19 +9,19 @@
             "@type": "Person",
             "givenName": "Joshua",
             "familyName": "Barnes",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0002-3371-1082) here"
+            "id": "https://orcid.org/0000-0002-3371-1082"
         },
         {
             "@type": "Person",
             "givenName": "Piet",
             "familyName": "Hut",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0001-7565-5843) here"
+            "id": "https://orcid.org/0000-0001-7565-5843"
         },
         {
             "@type": "Person",
             "givenName": "Peter",
             "familyName": "Teuben",
-            "id": "PLACEHOLDER: Add ORCID (https://orcid.org/0000-0003-1774-3436) here"
+            "id": "https://orcid.org/0000-0003-1774-3436"
         }
     ],
     "citation": "https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T",
@@ -36,6 +36,6 @@
             "id": "PLACEHOLDER: Add DOI (https://doi.org/xxxxxx) here"
         }
     ],
-    "version": "PLACEHOLDER: Add version here",
+    "version": "4.0.1",
     "license": "PLACEHOLDER: Add license (ideally as a URL to the SPDX page - e.g. https://spdx.org/licenses/MIT.html) here"
 }
