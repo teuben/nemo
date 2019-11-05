@@ -1,0 +1,149 @@
+<HTML>
+
+<BODY>
+
+  <I> 4-nov-2019: This notebook is under construction, awaiting more examples and actual figures </i>
+  
+<H1> Mock observations from EAGLE simulations </H1>
+
+<P>
+
+The program
+<A HREF=../man_html/eaglesnap.1.html>eaglesnap</A> is an alternative to the much nicer
+python interfaces of <A HREF=https://kyleaoman.github.io/martini>martini</A> to make mock
+observations of the <A HREF=http://icc.dur.ac.uk/Eagle/index.php>EAGLE</A> simulations.
+Nonetheless we will show here what kind of things can be done with NEMO.
+
+<P>
+If you want to play with this, you will need to get an account to download the data, so the
+remainder of this page assumes you have done that.
+<P>
+  <h2> Getting data and initial inspection </h2>
+  
+First, getting at the data.  Here's an example session and a quick look:
+
+<pre>
+  wget --user=??? --ask-password --content-disposition
+      "http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots//download?run=RefL0012N0188&snapnum=28"
+  tar xvf RefL0012N0188_snap_028.tar
+  
+  h5dump RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 | more
+  
+  eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 snap1  ptype=0 region=2
+  ### nemo Debug Info: Region: 0,2 0,2 0,2
+  ### nemo Debug Info: Found 97418 particles of type 0
+  ### nemo Debug Info: GroupNumber: 82 - 4064
+  ### nemo Debug Info: Writing 97418 particles (group -1, subgroup -1)
+
+</pre>
+
+  <h2> Looking at groups </h2>
+  
+Data are taken from a typical co-moving cosmological grid. Groups
+near the edge may seem to wind up in two places, as can be seen in
+the following example snapshot:
+
+<pre>
+  eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 - 0 group=2 |\
+  snapplot3 - xrange=-10:10 yrange=-10:10 zrange=-10:10
+</pre>
+  <!-- yapp=eagle_1.png/png -->
+  <img src=eagle_1.png><br>
+
+so we get a rough idea where this group is. We repeat this for group 4, since it's in the example
+martini_eagle notebook:
+<pre>
+  eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 - 0 group=4 |\
+  snapplot3 - xrange=-10:10 yrange=-10:10 zrange=-10:10
+</pre>
+  <!-- yapp=eagle_2.png/png -->
+  <img src=eagle_2.png><br>
+
+noting the rough coordinates of the center of this group, we
+then use a common trick to weigh by potential to a large power to center and rectify
+this group:
+
+<pre>
+  eaglesnap snap_028_z000p000.0.hdf5 - 0 group=4 center=1.9,6.6,1.2 boxsize=8.47125 |\
+  hackforce - - |\
+  snapcenter - - '-phi*phi*phi' |\
+  snaprect - snap4cr '-phi*phi*phi'
+
+  s=0.05
+  snapplot3 snap4cr xrange=-$s:$s yrange=-$s:$s zrange=-$s:$s
+</pre>
+  <!-- yapp=eagle_3.png/png -->
+  <img src=eagle_3.png><br>
+  
+As can be seen from the side views, it wasn't so sucessfull. Also note a large number of gas particles
+in a halo type formation are visible.
+
+<pre>
+  snapgrid snap4cr ccd0s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=0  svar=0.001
+  snapgrid snap4cr ccd1s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=-1 svar=0.001
+  ccdplot ccd0s
+  ccdplot ccd1s
+</pre>
+  
+  <h2> Comparing GAS and DM cubes.</h2>
+<pre>  
+  b=8.47125      # box size
+  dm=4365.77     # cheat to get the correct DM amount
+
+  eaglesnap snapshot_028_z000p000/snap_028_z000p000.0.hdf5 - 0 |\
+  snapgridsmooth - -  xrange=0:$b yrange=0:$b zrange=0:$b nx=128 ny=128 nz=128 periodic=t |\
+  ccdsmooth - gas0s 0.1 dir=xyz
+  
+  eaglesnap snapshot_028_z000p000/snap_028_z000p000.0.hdf5 - 1 dm=$dm |\
+  snapgridsmooth - -  xrange=0:$b yrange=0:$b zrange=0:$b nx=128 ny=128 nz=128 periodic=t |\
+  ccdsmooth - dm0s 0.1 dir=xyz
+
+  eaglesnap snapshot_000_z020p000/snap_000_z020p000.0.hdf5 - 0 |\
+  snapgridsmooth - -  xrange=0:$b yrange=0:$b zrange=0:$b nx=128 ny=128 nz=128 periodic=t |\
+  ccdsmooth - gas20s 0.1 dir=xyz
+
+  eaglesnap snapshot_000_z020p000/snap_000_z020p000.0.hdf5 - 1 dm=$dm |\
+  snapgridsmooth - -  xrange=0:$b yrange=0:$b zrange=0:$b nx=128 ny=128 nz=128 periodic=t |\
+  ccdsmooth - dm20s 0.1 dir=xyz
+
+  # compute masses
+  ccdstat gas0s
+  -> Sum and Sum*Dx*Dy*Dz*  : 2706454.922333 784.536918
+  ccdstat dm0s
+  -> Sum and Sum*Dx*Dy*Dz*  : 14849409.591463 4304.490697
+  ccdstat gas20s
+  -> Sum and Sum*Dx*Dy*Dz*  : 2783269.386730 806.803604
+  ccdstat dm20s
+  -> Sum and Sum*Dx*Dy*Dz*  : 14925292.575197 4326.487370
+  
+  # compute local Baryonic Fraction
+  ccdmath gas20s,dm20s bf20 %1/%2
+  ccdmath gas0s,dm0s   bf0  %1/%2
+
+  ccdstat bf20
+  -> Min and Max            : 0.092280 0.339595
+  -> Mean and dispersion    : 0.187254 0.017474
+
+  ccdstat bf0
+  -> Min and Max            : 0.000000 10459.553627
+  -> Mean and dispersion    : 0.937404 13.933238
+</pre>
+<img src=eagle_4.png><br>
+
+Plotting and comparing some slices through these cubes. Shown is z-slice 5,
+from top-left to bottom-right are:   gas density, baryon fraction at z=20,
+gas density and baryon fraction at z=0. Note that along the structures
+the baryon fraction is 5-15%, but on either side can increase quite significantly
+due to what looks like highler collapse factors in the DM.
+
+
+<P>
+  
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by PJT.
+
+
+</BODY>
+</HTML>
