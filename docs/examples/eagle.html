@@ -82,9 +82,13 @@ in a halo type formation are visible.
 <pre>
   snapgrid snap4cr ccd0s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=0  svar=0.001
   snapgrid snap4cr ccd1s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=-1 svar=0.001
-  ccdplot ccd0s
+  ccdplot ccd0s power=0.5
   ccdplot ccd1s
 </pre>
+  <!-- yapp=eagle_5.png/png -->
+  <img src=eagle_5.png><br>
+  Again note the presence of the "halo" gas, which will be confusing when making a velocity field
+  of looking at the velocity dispersion. Those particles will need to be taken out.
   
   <h2> Comparing GAS and DM cubes.</h2>
 <pre>  
