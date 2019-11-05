@@ -12,7 +12,8 @@ The program
 <A HREF=../man_html/eaglesnap.1.html>eaglesnap</A> is an alternative to the much nicer
 python interfaces of <A HREF=https://kyleaoman.github.io/martini>martini</A> to make mock
 observations of the <A HREF=http://icc.dur.ac.uk/Eagle/index.php>EAGLE</A> simulations.
-Nonetheless we will show here what kind of things can be done with NEMO.
+Nonetheless we will show here what kind of things can be done with NEMO. Keep in mind
+that in the current version units are still code-units.
 
 <P>
 If you want to play with this, you will need to get an account to download the data, so the
@@ -112,8 +113,12 @@ in a halo type formation are visible.
   ccdstat dm0s
   -> Sum and Sum*Dx*Dy*Dz*  : 14849409.591463 4304.490697
   ccdstat gas20s
+  -> Min and Max            : 0.241956 10.012325
+  -> Mean and dispersion    : 1.327166 0.430398
   -> Sum and Sum*Dx*Dy*Dz*  : 2783269.386730 806.803604
   ccdstat dm20s
+  -> Min and Max            : 1.507509 54.906773
+  -> Mean and dispersion    : 7.116934 2.306722
   -> Sum and Sum*Dx*Dy*Dz*  : 14925292.575197 4326.487370
   
   # compute local Baryonic Fraction
