@@ -77,11 +77,13 @@ this group:
   <img src=eagle_3.png><br>
   
 As can be seen from the side views, it wasn't so sucessfull. Also note a large number of gas particles
-in a halo type formation are visible.
+  in a halo type formation are visible.  We are setting the plotting box size a bit bigger, to show
+  a surprising (?) companian:
 
-<pre>
-  snapgrid snap4cr ccd0s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=0  svar=0.001
-  snapgrid snap4cr ccd1s xrange=-0.05:0.05 yrange=-0.05:0.05 nx=128 ny=128 mom=-1 svar=0.001
+  <pre>
+  s=0.1
+  snapgrid snap4cr ccd0s xrange=-$s:$s yrange=-$s:$s nx=128 ny=128 mom=0  svar=0.001
+  snapgrid snap4cr ccd1s xrange=-$s:$s yrange=-$s:$s nx=128 ny=128 mom=-1 svar=0.001
   ccdplot ccd0s power=0.5
   ccdplot ccd1s
 </pre>
