@@ -13,12 +13,13 @@
 #   aug-2006            some sanity checks if cvs is present if -u is used; fixed dir search -a
 #   nov-2010            report special things it can do
 #   mar-2019            git instead of cvs
+#   nov-2019            maintain tasklist descriptions
 #
 
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 4.1a 6-may-2019"
+set version="MKNEMO Version 4.2 14-nov-2019"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -260,6 +261,7 @@ foreach f ($argv)
          echo help=I: `$NEMOBIN/$mk help=I`
          echo help=V: `$NEMOBIN/$mk help=V`
        endif
+       echo "$mk `$NEMOBIN/$mk help=u`" >> $NEMO/etc/tasklist
        if ($d) then
            mkpdoc $mk
 	   @ errs += $status
@@ -297,6 +299,7 @@ foreach f ($argv)
      echo help=I: `$NEMOBIN/$mk help=I`
      echo help=V: `$NEMOBIN/$mk help=V`
    endif
+   echo "$mk `$NEMOBIN/$mk help=u`" >> $NEMO/etc/tasklist
    # see if new doc file needed...
    if ($d) then
 	mkpdoc $mk
