@@ -1,0 +1,162 @@
+atos convert ASCII N-body file to binary format
+ccdclip clip an image
+ccddump dump the bytes of an image, optional scaling
+ccdfill patch up holes (or spikes) in an image by linear interpolation
+ccdfits convert image to a fits file
+ccdflip flip an image along certain axes
+ccdgen image creation/modification with objects
+ccdgoat LV diagram diagnostics (PJT)
+ccdhead print out image header
+ccdhist General image statistics and histogram plotter
+ccdintpol image bi-linear interpolation
+ccdmath image arithmetic and wcs
+ccdmedian median filter of an image
+ccdmom moment along an axis of an image
+ccdpatch patch up regions from polygon/shapes
+ccdplot display an image using contours and/or gray-scales
+ccdprint print values at gridpoints of an image
+ccdrow hacking rows of an image for CLASSy
+ccdsharp3 enhance/sharpen an image cube
+ccdsky lazy sky scaling (cosmology) calculator
+ccdslice takes slices from a cube
+ccdsmooth smooth image cube in XYZ
+ccdstat basic statistics of an image, optional chi2 calculation
+ccdsub sub/average of an image, with reorder option
+ccdtrace interpolate a set of coordinates from an image
+ccdvel create a velocity field from a rotation curve
+csf Copy a binary structured file
+density estimate mass density based on distance to Kth neighbour
+directcode simple direct N-body code
+eaglesnap convert EAGLE hdf5 snapshots to NEMO snapshot format
+layout YAPP interpreter
+meanmed simple stats of all the numbers in a file
+mk2body make a 2 body system
+mkbaredisk set up a (bare) exponential disk
+mkconfig make a static configuration of particles
+mkcube create a uniform cube of equal massive stars
+mkdisk set up a uniform-density test disk in a spherical potential
+mkexpdisk set up a (bare) exponential disk
+mkexphot set up an exponential disk in a halo
+mkflowdisk toy spiral density perturbation in a uniform disk
+mkgalaxy Create a bunch of spinning disk galaxies
+mkhom create an equal-mass homogeneous spherical N-body system
+mkhomsph create a uniform sphere of equal massive stars
+mkommod spherical system with anisotropic distribution function a la Osipkov-Merritt
+mkop73 Set up a Mestel disk using 1973 Ostriker & Peebles' method
+mkorbit Make an orbit with from given initial conditions
+mkplummera construct a Plummer model
+mkplummer construct a Plummer model
+mkpolytrope N-body realization of one of Henon's generalized polytropes
+mksphere construct an arbitrary spherical mass distribution
+mkspiral toy spiral density perturbation in a uniform disk
+mktestdisk uniform density test-disk inside a spherical N-body
+orbdim Determine the number of isolating integrals in an orbit
+orbfour get some fourier coeficients from an orbit
+orbint integrate stellar orbits
+orbintv integrate stellar orbits
+orblist list an orbit path
+orbplot Plot an orbit trajectory
+orbsos Generate SOS from an orbit
+orbstat Tabulate some statistics of orbit(s)
+potccd Create potential or density image from a NEMO potential
+potcode Analytical potential orbit integrator
+potlist show a NEMO potential
+potq query a NEMO potential in the XY plane
+potrot query a NEMO potential in the XY plane, and derive a rotation curve 
+potsf find potential parameters in a structured file
+rotcurshape nonlinear fit of kinematical parameters to the velocity field of a coplanar disk
+rotcurtab prints a table of a rotation curve
+rotcurves display rotation curve of composite potentials
+rsf Read an ascii structured file into binary structured file
+runbody1 front end for Aarseth nbody1 N-body code
+runbody2 front end to Ahmad-Cohen N-body code nbody2
+runbody4 Hermite N-body code
+runbody6 NEMO frontend to the NBODY6(++) code
+rungalaxy frontend to run Sellwood's galaxy code
+runscfm Self Consistent Field Method N-body code
+scanfits scan fits files, optionally repair (and output) them
+scanopt TESTBED scanopt
+snapadd add N-body systems on top of each other
+snapbinary analyse binaries in a snapshot, optionally merge a selected pair
+snapccd simple conversion of snapshot to image
+snapcenter Center a snapshot based on a weighed subset of particles
+snapcenterp Center a snapshot based on iterative Cruz method
+snapcmp compare two N-body snapshots
+snapcopy copy an N-body snapshot
+snapdens density estimator using Kth-nearest neighbor
+snapdiagplot plot diagnostics of a snapshot file
+snapenter enter an nbody snapshot interactively
+snapfit fit snapshots to some model
+snapfits ### NEMO program with unknown intent...(missing usage)
+snapfour Fourier coefficients of an N-body distribution
+snapgadget convert snapshot to GADGET format
+snapgrid grid a snapshot into a 2/3D image-cube
+snapgridsmooth grid a snapshot into a 3D image-cube with adaptive smoothing
+snapinert get inertia tensor & its eigenvectors, eigenvalues
+snapkinem compute various diagnostics with specified weights.
+snapkinplot plot various diagnostics from snapkinem
+snapkmean find kmean in selected phase space of a snapshot
+snapmap grid a snapshot into a 2D map
+snapmask mask out particles while copying snapshot data
+snapmass (re)assign masses to a snapshot
+snapmerge merge N-body snapshots together
+snapmnmx find min and/or max of snapshot variables
+snapmradii Langrangian mass-fraction radii of a snapshot
+snapmstat report some statistics of the masses in a snapshot
+snapopt Special Ostriker-Peebles 't' calculator
+snapplot3 plot particle positions in a 3-panel XY,ZY,XZ from a snapshot file
+snapplot   plot particle positions from a snapshot file
+snapplot plot particle positions from a snapshot file
+snapplotv plot particle positions from a snapshot file
+snappot add analytical potentials/forces to an N-body system
+snapprint   tabulate a snapshot
+snapprint tabulate a snapshot
+snaprect rectify a snapshot using selected particles and weight
+snaprotate rotate a snapshot
+snaprstat snapshot statistics
+snaprv ### NEMO program with unknown intent...(missing usage)
+snapsample sub-sample of a snapshot
+snapscale rescale a snapshot
+snapshell compute statistics of bodyvariables in a set of shells
+snapshift shift an N-body system
+snapslit slit spectra of N-body systems: 3 moments
+snapsort sort particles according to a user-specified ranking
+snapspecks tabulate a snapshot in specks format for PartiView
+snapsphere copy a selected number of particles from an N-body system
+snapspin give a snapshot a spin around or outflow from the Z-axis
+snapsplit cut an N-body snapshot in pieces for serial processing
+snapstack stack two N-body systems on top of each other
+snapstat determine various statistics of an N-body system
+snaptipsy convert snapshot to tipsy binary format
+snaptrak track centroids of user-specified particle groups
+snaptrans coordinate transformations of a snapshot
+snaptrim cut a snapshot file down to size
+snapvirial rescale snapshot for re-virialization
+snapvratio compute various global virials (clausius, newton)
+snapxyz Convert snapshot to xyzc data
+tab2xml Select columns from a table and convert to VOTable/XML
+tabcomment Add comments to a table, or comments certain lines
+tabdate Convert a date/time column
+tabfilter flux derived from convolving a filter with a spectrum
+tabfits convert tables into FITS images
+tabhist General tabular 1D statistics and histogram plotter
+tablsqfit a linear least square fitting program
+tablst list a (binary) table
+tabmath General table manipulator
+tabnllsqfit a non-linear least square fitting program for tabular data
+tabplot general table plotter
+tabspline interpolation and first two derivatives of a function table
+tabstat table column statistics
+tabtos convert ASCII tabular information to snapshot format
+tabtrend difference rows from previous rows, or cumulate them
+treecode1 Hierarchical N-body code (theta scan)
+tsf   type contents of a (binary) structured file
+tsf type contents of a (binary) structured file
+u3tos Convert NBODY OUT3 output to snapshot
+u4tos Convert NBODY unit-4 file to snapshot
+unbind iteratively finds unbound stars to an N-body system
+unfio access fortran unformatted I/O files
+velcube create a cube from a velocity field
+velfit fit rotation curve to coplanar disk (WWB73 method)
+xrandom Return seed for random numbers and optionally random numbers
+xyzview Display 3-D velocity data
