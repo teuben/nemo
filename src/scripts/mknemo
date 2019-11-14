@@ -15,7 +15,7 @@
 #   mar-2019            git instead of cvs
 #   nov-2019            maintain tasklist descriptions
 #
-
+#
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
