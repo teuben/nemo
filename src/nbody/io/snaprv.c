@@ -10,6 +10,7 @@
 #include <stdlib.h>
 #include <vectmath.h>		/* otherwise NDIM undefined */
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -23,6 +24,8 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "VERSION=1.0\n		4-may-94",
     NULL,
 };
+
+string usage = "convert a snapshot to Carlberg's binary 'RV' format";
 
 void nemo_main(void)
 {
