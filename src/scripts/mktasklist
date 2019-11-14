@@ -6,3 +6,9 @@ set tab1 = $NEMO/src/scripts/tasklist
 set tab2 = $NEMO/etc/tasklist
 
 cat $tab1 $tab2 | sort | uniq > tasklist
+
+
+# testing a piece of CITATION.cff style output, the codemeta.json is a little tougher in awk
+if (0) then
+   awk '{printf("- name: %s\n",$1); printf("  description: ");for(i=2;i<=NF;++i) printf(" %s",$i); printf("\n")}' tasklist
+endif   
