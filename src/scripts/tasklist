@@ -1,4 +1,5 @@
 atos convert ASCII N-body file to binary format
+bodytrans bodytrans manipulator
 ccdclip clip an image
 ccddump dump the bytes of an image, optional scaling
 ccdfill patch up holes (or spikes) in an image by linear interpolation
@@ -28,7 +29,18 @@ csf Copy a binary structured file
 density estimate mass density based on distance to Kth neighbour
 directcode simple direct N-body code
 eaglesnap convert EAGLE hdf5 snapshots to NEMO snapshot format
+fitsccd convert (near)fits files into ccd images
+fitsglue catenate fits images into a fitscube
+fitshead display, or convert to, a fits header
+flowcode Analytical flow_potential orbit integrator
+ftoc nemo_main() builder from (fortran) source code
+gadgetsnap convert gadget files to snapshot format
+hackcode1 Barnes & Hut hierarchical N-body tree code
+hdfgrid Regrid a CMHOG polar HDF SDS image to a cartesian NEMO image
+hdfwedge Regrid a CMHOG polar (RPZ) HDF SDS wedge to a cartesian NEMO image
 layout YAPP interpreter
+linreg six linear regressions
+magalie Boily et al. composite bulge-disk-halo model
 meanmed simple stats of all the numbers in a file
 mk2body make a 2 body system
 mkbaredisk set up a (bare) exponential disk
@@ -50,6 +62,8 @@ mkpolytrope N-body realization of one of Henon's generalized polytropes
 mksphere construct an arbitrary spherical mass distribution
 mkspiral toy spiral density perturbation in a uniform disk
 mktestdisk uniform density test-disk inside a spherical N-body
+nbody00 NEMO driver for nbody0
+nbody0 NEMO driver for nbody0
 orbdim Determine the number of isolating integrals in an orbit
 orbfour get some fourier coeficients from an orbit
 orbint integrate stellar orbits
@@ -76,6 +90,7 @@ rungalaxy frontend to run Sellwood's galaxy code
 runscfm Self Consistent Field Method N-body code
 scanfits scan fits files, optionally repair (and output) them
 scanopt TESTBED scanopt
+sdsmath **unfinished**: Manipulate a CMHOG polar HDF SDS (den,vr,vt) dataset
 snapadd add N-body systems on top of each other
 snapbinary analyse binaries in a snapshot, optionally merge a selected pair
 snapccd simple conversion of snapshot to image
@@ -88,6 +103,7 @@ snapdiagplot plot diagnostics of a snapshot file
 snapenter enter an nbody snapshot interactively
 snapfit fit snapshots to some model
 snapfits ### NEMO program with unknown intent...(missing usage)
+snapfits write a snapshot into fits format
 snapfour Fourier coefficients of an N-body distribution
 snapgadget convert snapshot to GADGET format
 snapgrid grid a snapshot into a 2/3D image-cube
@@ -114,7 +130,7 @@ snapprint tabulate a snapshot
 snaprect rectify a snapshot using selected particles and weight
 snaprotate rotate a snapshot
 snaprstat snapshot statistics
-snaprv ### NEMO program with unknown intent...(missing usage)
+snaprv convert a snapshot to Carlberg's binary 'RV' format
 snapsample sub-sample of a snapshot
 snapscale rescale a snapshot
 snapshell compute statistics of bodyvariables in a set of shells
@@ -150,7 +166,6 @@ tabstat table column statistics
 tabtos convert ASCII tabular information to snapshot format
 tabtrend difference rows from previous rows, or cumulate them
 treecode1 Hierarchical N-body code (theta scan)
-tsf   type contents of a (binary) structured file
 tsf type contents of a (binary) structured file
 u3tos Convert NBODY OUT3 output to snapshot
 u4tos Convert NBODY unit-4 file to snapshot
@@ -158,5 +173,6 @@ unbind iteratively finds unbound stars to an N-body system
 unfio access fortran unformatted I/O files
 velcube create a cube from a velocity field
 velfit fit rotation curve to coplanar disk (WWB73 method)
+wcs coordinate transforms
 xrandom Return seed for random numbers and optionally random numbers
 xyzview Display 3-D velocity data
