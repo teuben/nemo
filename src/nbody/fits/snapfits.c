@@ -28,6 +28,8 @@ string defv[] = {
         NULL,
 };
 
+string usage = "write a snapshot into fits format";
+
 static stream  instr, outstr;                          /* file streams */
 
                 /* SNAPSHOT INTERFACE */
