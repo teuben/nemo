@@ -1,0 +1,8 @@
+#! /bin/csh -f
+#
+
+
+set tab1 = $NEMO/src/scripts/tasklist
+set tab2 = $NEMO/etc/tasklist
+
+cat $tab1 $tab2 | sort | uniq > tasklist
