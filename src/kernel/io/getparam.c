@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6g 17-oct-2019 PJT"
+#define GETPARAM_VERSION_ID  "3.6h 14-nov-2019 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1100,6 +1100,8 @@ local void printhelp(string help)
     
     if (strchr(help,'u')) {
         printf("%s\n",usage);
+	local_exit(0);
+	/*NOTREACHED*/	
     } /* 'u' */
 
     if (strchr(help,'o')) {
