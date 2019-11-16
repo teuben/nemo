@@ -42,13 +42,13 @@ string defv[] = {
     "vy=\n                y-",
     "vz=\n                z-",
     "etot=\n		  total energy (ekin+epot)",
-    "lz=\n		  angular momentum in z (**ignored**)",
+    "lz=\n		  sign of angular momentum in z",
     "time=0.0\n           time",
     "potname=\n		  optional potential(5NEMO)",
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.2\n        24-jul-2013 PJT",
+    "VERSION=4.3\n        16-nov-2019 PJT",
     NULL,
 };
 
@@ -142,12 +142,14 @@ void setparams()
       signcount++;
     }
     if (signcount > 1) error("Can only set one of vx,vy,vz to + or -");
-    tnow = getdparam("time");
+    dprintf(1,"Dpos=%d Dvel=%d\n",Dpos,Dvel);
     
+    tnow = getdparam("time");
 
     outfile = getparam("out");
-    if(hasvalue("etot")) {	  /* energy given; calculate missing vx or vy */
+    if(hasvalue("etot")) {	  /* energy given; calculate missing vx or vy */      
  	   etot = getdparam("etot");
+	   dprintf(1,"etot=%g\n", etot);
            if(!hasvalue("potname"))
               error("No potential given (potname=)");
 	   pot = get_potential_double(p.name, p.pars, p.file);
@@ -174,12 +176,12 @@ void setparams()
 		v = getdparam("vy");
 		u = 2*(etot-epot) - v*v;
 		if (u<0.0)
-			error("vy too large for this energy: epot=%g vy(max)=%g\n",
-					epot,2*sqrt(etot-epot));
+		  error("vy too large for this energy: epot=%g vy(max)=%g\n",
+			epot,2*sqrt(etot-epot));
 		else
-			u = sqrt(u);
+		  u = sqrt(u);
 		lz = x*v-y*u;	
-		if(lzsign<0 && lz>0) u = -u;     /* switch rotation */
+		if(lzsign<0) u = -u;     /* switch rotation */
 	   } else {
                 if(hasvalue("vy"))
 			error("cannot give e=,  vx= and vy= at the same time");
@@ -191,7 +193,7 @@ void setparams()
 		else
 			v = sqrt(v);
 		lz = x*v-y*u;	
-		if(lzsign<0 && lz>0) v = -v;     /* switch rotation */
+		if(lzsign<0) v = -v;     /* switch rotation */
 	   }
 	   w = 0.0;
            lz = x*v-y*u;
