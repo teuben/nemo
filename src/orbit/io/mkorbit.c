@@ -48,7 +48,7 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.3\n        16-nov-2019 PJT",
+    "VERSION=4.3a\n       18-nov-2019 PJT",
     NULL,
 };
 
@@ -181,7 +181,7 @@ void setparams()
 		else
 		  u = sqrt(u);
 		lz = x*v-y*u;	
-		if(lzsign<0) u = -u;     /* switch rotation */
+		if(lzsign != SGN(lz)) u = -u;     /* switch rotation */
 	   } else {
                 if(hasvalue("vy"))
 			error("cannot give e=,  vx= and vy= at the same time");
@@ -193,7 +193,7 @@ void setparams()
 		else
 			v = sqrt(v);
 		lz = x*v-y*u;	
-		if(lzsign<0) v = -v;     /* switch rotation */
+		if(lzsign != SGN(lz)) v = -v;     /* switch rotation */
 	   }
 	   w = 0.0;
            lz = x*v-y*u;
