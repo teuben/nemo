@@ -1,7 +1,9 @@
 
 RUNS = run000  run001 run002
 
-all: $(RUNS)
+all:
+	@echo tests are disabled 
+all0: $(RUNS)
 
 clean:
 	rm -rf $(RUNS)
