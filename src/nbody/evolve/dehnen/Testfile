@@ -1,5 +1,5 @@
 DIR = src/nbody/evolve/dehnen
-BIN = gyrfalcON
+BIN = gyrfalcON mkhalo
 NEED = $(BIN) snapscale snapmradii
 
 help:
@@ -10,12 +10,12 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -fr core p1024.*
+	@rm -fr core p1024.* mkhalo1.*
 
 NBODY = 10
 TSTOP = 2
 
-all: gyrfalcON
+all: gyrfalcON mkhalo
 
 gyrfalcON:
 	@echo Running $@
@@ -38,3 +38,11 @@ gyrfalcON:
 	@echo tabplot p1024.tab2 1 2:10 line=1,1
 
 #   now do some work on manipulators
+
+#   mkgalaxy is a script that composites galaxies.  The script should be installed in $NEMOBIN
+
+mkgalaxy:
+	$(EXEC) mkgalaxy name=test-mkgalaxy
+
+mkhalo:
+	$(EXEC) mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60 r_c=0 b=0 r_a=0 seed=1 eps=0.02 giveF=f accname=Halo accpars=0,0.2,0.2,1,4,1,0,0  debug=2 > mkhalo1.log 
