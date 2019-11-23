@@ -19,6 +19,7 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 #include <sys/types.h>
@@ -26,6 +27,7 @@
 #include <fcntl.h>
 #include <unistd.h>
 #include <errno.h>
+
 
 #define MAXCARDS 256
 
@@ -35,9 +37,21 @@ static int ncards = 0;
 
 static char *haskey(char *, char *);
 
-static char *program_version = "runcmhog:  Version 1.3 21-jul-2003";
+static char *program_version = "runcmhog:  Version 1.3a 19-nov-2019";
 
 static int Qdebug = 0;                  /* -d (debug toggle) */
+
+// forward references
+
+int usage(char *name);
+void read_namelist(char *filename);
+void patch_namelist(char *keyval);
+char *haskey(char *line, char *key);
+void strinsert(char *a, char *b, int n);
+void goto_rundir(char *name);
+void write_namelist(char *name);
+void run_program(char *exe);
+
 
 int main(int argc, char *argv[])
 {
@@ -92,7 +106,7 @@ int usage(char *name)
   exit(0);
 }
 
-read_namelist(char *filename)
+void read_namelist(char *filename)
 {
     FILE *fp;
     char line[256], *cp1, *cp2;
@@ -121,7 +135,7 @@ read_namelist(char *filename)
     }
 }
 
-patch_namelist(char *keyval)
+void patch_namelist(char *keyval)
 {
     char key[128], val[128], *cp, *cp1;
     int i, j, k = -1;
@@ -208,7 +222,7 @@ char *haskey(char *line,char *key)
  *      (see als hsh.h in ..../hermes/lib  --  PJT)
  */
 
-strinsert(char *a, char *b, int n)
+void strinsert(char *a, char *b, int n)
 {
     int    i, idiff, alen, blen;
 
@@ -231,7 +245,7 @@ strinsert(char *a, char *b, int n)
 
 
 
-goto_rundir(char *name)
+void goto_rundir(char *name)
 {
 #if 1
   char *cmd = (char *)malloc(strlen(name) + 30);
@@ -265,7 +279,7 @@ goto_rundir(char *name)
   if (chdir(name)) exit(2);
 }
 
-write_namelist(char *name)
+void write_namelist(char *name)
 {
     int i;
     FILE *fp;
@@ -282,7 +296,7 @@ write_namelist(char *name)
 
 
 
-run_program(char *exe)
+void run_program(char *exe)
 {
 #if 1
     system(exe);
