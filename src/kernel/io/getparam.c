@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6h 14-nov-2019 PJT"
+#define GETPARAM_VERSION_ID  "3.6i 23-nov-2019 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -445,6 +445,7 @@ void initparam(string argv[], string defv[])
     int i, j, nzeno, idx;
     bool posflag, useflag, defflag;
     string name;
+    char cmd[128];
     keyword *kw;
 
     progname = argv[0];        /* cheat in case local_error called early on */
@@ -528,8 +529,13 @@ void initparam(string argv[], string defv[])
         if (posflag) {                          /*   match by position?     */
             getparam_argc++;			/* count keywords */
             if (i > maxkeys) error("Too many un-named arguments");
-            if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
-		streq(argv[i],"-h") || streq(argv[i],"help")) {
+	    if (streq(argv[i],"-man") || streq(argv[i],"--man")) {
+	      sprintf(cmd,"man %s",progname);
+	      system(cmd);
+	      local_exit(0);
+	      /*NOTREACHED*/
+            } else if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
+		       streq(argv[i],"-h") || streq(argv[i],"help")) {
 	      set_help("");
             } else if (streq(argv[i],"-version") || streq(argv[i],"--version")) {
 	      printhelp("V");    /* will also exit */
@@ -679,6 +685,7 @@ void initparam(string argv[], string defv[])
             error("(initparam) Error running editor (%s)",keybuf);
                         
 	readkeys("initparam(2)",(bool)FALSE);
+	free(edtcmd);
     }
 
     if (help_level&HELP_GLOBAL) {                /* write global keyword file */
