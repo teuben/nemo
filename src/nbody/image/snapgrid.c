@@ -41,6 +41,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <strlib.h>
 
 #include <snapshot/body.h>      /* snapshot's */
@@ -75,7 +76,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=6.0\n			  13-feb-2013 PJT",
+	"VERSION=6.0a\n			  27-jul-2019 PJT",
 	NULL,
 };
 
@@ -147,7 +148,7 @@ local real odepth(real tau);
 local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
 
 
-nemo_main ()
+void nemo_main (void)
 {
     int i;
     
