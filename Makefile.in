@@ -1,6 +1,7 @@
 VERSION = NEMO V4.1 24-nov-2019 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
+#       do not edit, it is derived from Makefile.in
 ################################################################################
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
@@ -551,6 +552,10 @@ testsuite:
 
 check:
 	(source nemo_start.sh; src/scripts/testsuite)
+
+# show the latest testsuite build log
+checklog:
+	(source nemo_start.sh; cat `ls -tr $(NEMO)/tmp/test*/testsuite.log | tail -1`
 
 bench:
 	time src/scripts/nemo.bench
