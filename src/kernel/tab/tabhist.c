@@ -67,6 +67,7 @@
 #include <yapp.h>
 #include <axis.h>
 #include <mdarray.h>
+#include <table.h>
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
@@ -96,7 +97,7 @@ string defv[] = {
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
-    "VERSION=6.4\n		  15-jan-2014 PJT",
+    "VERSION=6.4a\n		  24-nov-2019 PJT",
     NULL
 };
 
@@ -169,10 +170,14 @@ local int   ring_index(int n, real *r, real rad);
 
 extern real median_torben(int n, real *x, real xmin, real xmax);
 
+extern int  nemo_file_lines(string fname, int nmax);
+
+extern void minmax(int n, real *x, real *xmin, real *xmax);
+
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();			/* read the parameters */
     read_data();
