@@ -12,34 +12,35 @@ is also advertised.
 		hooks into manybody.org modules starlab and partiview
    * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
-A related package, ZENO, was spun off NEMO V1, and is maintained by Barnes.
+A related package, ZENO, was spun off NEMO V1, and is still maintained by Josh Barnes.
 
 	 NEMO:      ascl:1010.051
 	 ZENO:      ascl:1102.027 (see also $NEMO/usr/zeno)
 
 Packages we optionally use:
 
-	 PGPLOT:    ascl:1103.002 (can be included with NEMO)
+	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
 	 WCSLIB:    ascl:1108.003
-	 HDF:	    ascl:1502.009
 	 glnemo2:   ascl:1110.008
 	 gyrfalcON: ascl:1402.031 (included with NEMO)
+	 HDF4
+	 HDF5       https://www.hdfgroup.org
 	 gsl
 	 plplot
 	 unsio
 	 uns_project
 
 See README.install for installation guidelines. In it's simplest the following commands may work
-(replace .csh with .sh if appropriate)
+(use the .sh or .csh version depending on your $SHELL):
 
 	 wget https://teuben.github.io/nemo/install_nemo
 	 chmod +x install_nemo
-	 ./install_nemo nemo=$HOME/opt/nemo
-	 source $HOME/opt/nemo/nemo_start.csh
+	 ./install_nemo
+	 source nemo/nemo_start.sh
 
 Some obvious and perhaps not so obvious tools you will need to have pre-installed:  C/C++/Fortran compiler,
-csh, git, cmake. Use your local package manager to install those before you attempt to run the install_nemo
+(t)csh, git, cmake. Use your local package manager to install those before you attempt to run the install_nemo
 script. For example, on a fresh Ubuntu distro, you're likely going to need to install two
 packages before running the install script, and triggering a few more using the ubuntu=1 flag, viz.
 
@@ -55,6 +56,8 @@ enabled:
 	 chmod +x install_nemo
 	 ./install_nemo brew=1
 	 source nemo/nemo_start.sh
+
+There are some examples of NEMO scripts and figures on https://teuben.github.io/nemo/examples/
 
 
 
