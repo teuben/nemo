@@ -56,9 +56,15 @@ Example of use: ( b = A.x)
 When referring to rows and columns, we write these
 as A[row][col] (e.g. in C, or the current mdarray2) or 
 A(row,col) (e.g. in Fortran)
-
+.PP
+When using this with 3rd party software that needs to write into contiguous memory,
+the address of the first element will normally be sufficient, e.g.
+.nf
+      mdarray2 data2 = allocate_mdarray2(nrows,ncols);
+      fits_read_col(fptr, TDOUBLE, data_col, 1, 1, ncols, &nulval, &data2[0][0], &anynul, &status);      
+.fi
 .SH TIMING
-The TESTBED function (\fBmdarraytest\fP) excersizes a simple initialization of 
+The TESTBED function (\fBmdarraytest\fP) exercizes a simple initialization of 
 all array elements, and
 summing them up. This also clearly shows how reversing the order of array access 
 affects the CPU speed , viz. timings on a P4/1600 laptop:
