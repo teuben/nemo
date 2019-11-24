@@ -1,5 +1,11 @@
 #! /usr/bin/env python
 #
+#
+#  A word of caution about masking here:
+#  - the fits file needs NaN for masking to work
+#  - a numpy    mask = True (1) means the data is bad
+#  - in MIRIAD  mask = 1 means the data is good !! 
+#  - in CASA    mask = True means ....
 
 import sys
 import numpy as np    
