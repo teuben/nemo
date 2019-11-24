@@ -1,0 +1,89 @@
+#! /bin/sh
+#
+#    This script helps users of NEMO to re-use the various libraries
+#    that it uses in compilation scripts.
+#    One option is to inherit them via the $NEMOLIB/makedefs file,
+#    another via something like "nemo-config --libs" and its siblings.
+#
+#    april 2019 -- created       Peter Teuben
+
+prefix=@NEMO@
+exec_prefix=@NEMO@
+includedir=@NEMO@/inc
+
+usage()
+{
+    cat <<EOF
+Usage: nemo-config [OPTION]
+
+Known values for OPTION are:
+
+  --prefix		show NEMO installation prefix 
+  --libs		print library linking information, with yapp
+  --libs-without-yapp	print library linking information, without yapp
+  --libs-yapp           print yapp library linking information, without yapp itself
+  --cflags		print pre-processor and compiler flags
+  --help		display this help and exit
+  --version		output version information
+
+
+EOF
+
+    exit $1
+}
+
+if test $# -eq 0; then
+    usage 1
+fi
+
+cflags=false
+libs=false
+
+while test $# -gt 0; do
+    case "$1" in
+    -*=*) optarg=`echo "$1" | sed 's/[-_a-zA-Z0-9]*=//'` ;;
+    *) optarg= ;;
+    esac
+
+    case "$1" in
+    --prefix=*)
+	prefix=$optarg
+	;;
+
+    --prefix)
+	echo $prefix
+	;;
+
+    --version)
+	cat @NEMO@/VERSION
+	exit 0
+	;;
+
+    --help)
+	usage 0
+	;;
+
+    --cflags)
+       	echo -I/usr/include 
+       	;;
+
+    --libs)
+	echo -L$NEMOLIB -lnemo -lm
+       	;;
+
+    --libs-without-yapp)
+	echo -L/usr/lib/x86_64-linux-gnu -lgsl -lm
+       	;;
+
+    --libs-yapp)
+	echo @YAPP_LIBS@
+       	;;
+    *)
+	usage
+	exit 1
+	;;
+    esac
+    shift
+done
+
+exit 0
