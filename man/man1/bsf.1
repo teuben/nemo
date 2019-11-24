@@ -1,0 +1,57 @@
+.TH BSF 1NEMO "24 November 2019"
+.SH NAME
+bsf \- benchmark stats on all floating point values in a (binary) structured file
+.SH SYNOPSIS
+\fBbsf\fP [parameter=value]
+.SH DESCRIPTION
+\fBbsf\fP computes some numbers for all the floating point values in a structured
+file, which can then be used against previously obtained number in an effort
+to assert proper regression.
+.PP
+The output will \fImean, rms, min, max\fP and \fInumber of points\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file name [???]
+.TP
+\fBfmt=\fP\fIC-fmt\P
+C-Format string for the 4 floating point values output.  [%g]
+.TP
+\fBtest=\fP\fItest-string\fP
+If given, this is the resulting string that should have been obtained. Default: none
+.TP
+\fBeps=\fP
+In some next version this accuracy parameter
+can control if the regression numbers need to agree within some fraction.
+Default: not used and not implemented.
+.SH EXAMPLES
+Here are some examples of the stats of the masses and phase space coordinates of
+a plummer sphere with 10 particles and seed=123. The last example is to show that
+the output of %g (the default) and %f do differ.
+.nf
+    mkplummer - 10 seed=123 | bsf -
+    0.0140845 0.896875 -4.6523 4.80925 71
+    
+    mkplummer - 10 seed=123 | csf - - convert=d2f | bsf -
+    0.0140845 0.896875 -4.6523 4.80925 71
+
+    mkplummer - 10 seed=123 | csf - - convert=d2f | bsf - %f "0.0140845 0.896875 -4.6523 4.80925 71"
+    0.014085 0.896875 -4.652300 4.809249 71 FAIL
+    0.0140845 0.896875 -4.6523 4.80925 71 expected
+
+.fi
+When you run these with seed=0, you will see the first and last number do not change,
+because mkplummer by default value centers the snapshot (\fBzerocm=t\fP).!q
+.SH SEE ALSO
+tsf(1NEMO), filestruct(3NEMO)
+.SH FILES
+NEMO/src/kernel/io
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-Nov-2019	V0.1 Created		PJT
+.fi
