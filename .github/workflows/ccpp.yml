@@ -14,12 +14,14 @@ jobs:
     - name: autoconf
       run:  autoconf
     - name: configure
-      run: ./configure --with-yapp=ps
+      run: ./configure --with-yapp=pgplot
     - name: build1
       run: make build1 
     - name: build2
       run: make build2
     - name: build3
       run: make build3
+    - name build4
+      run: make build4
     - name: make check
       run: make check
