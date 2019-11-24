@@ -421,11 +421,11 @@ vogl:
 
 #	END
 
-build_ps:
+configure_ps:
 	./configure --with-yapp=ps
 
-build_pgplot:
-	./configure --with-yapp=pgplot
+configure_pgplot:
+	./configure --with-yapp=pgplot --with-pgplot-prefix=/usr/lib
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig)
@@ -436,32 +436,14 @@ build2:
 build3:
 	(source nemo_start.sh ; $(MAKE) bins)
 
-install_old:
-	@echo "There is no official install from the root menu"
-	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
-	@echo "      or docs/install_nemo"
-	@echo ""
-	@echo "Typically you would do the following: (example for (t)csh)"
+install:
+	@echo "There is no official single step install from the root menu"
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
-	@echo "      source nemo_start.csh  -- or .sh for bash"
-	@echo "      make postconfig        -- basic post configure things"
-	@echo "      rehash                 -- update search path (only for .csh)" 
-	@echo "      make libs              -- install the libraries"
-	@echo ""
-	@echo "If you want, test to compile two basic routines:"
-	@echo "      mknemo tsf tabhist nemoinp"
-	@echo "      rehash"
-	@echo "      nemoinp 1:10 | tabhist -"
-	@echo "to test compile and link"
-	@echo ""
-	@echo "Else go and compile and test the NEMO standard suite of binaries:"
-	@echo "      src/scripts/testsuite -b"
-	@echo ""
-	@echo "Or if you want to install all binaries:"
-	@echo "      make bins"
-#	@echo "Any subsquent programs should be installed with the mknemo script,"
-#	@echo "eg."
-#	@echo "      mknemo mkplummer snapplot tabhist orbsos"
+	@echo "      make build1            -- the old postconfig"
+	@echo "      make build2            -- the old libs"
+	@echo "      make build3            -- the old bins"
+	@echo "      make check             -- the testsuite"
+
 
 python: anaconda3
 
