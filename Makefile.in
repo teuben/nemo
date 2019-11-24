@@ -427,6 +427,8 @@ configure_ps:
 configure_pgplot:
 	./configure --with-yapp=pgplot --with-pgplot-prefix=/usr/lib
 
+build:   build1 build2 build3
+
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig)
 
