@@ -422,11 +422,9 @@ vogl:
 #	END
 
 build_ps:
-	autoconf
 	./configure --with-yapp=ps
 
 build_pgplot:
-	autoconf
 	./configure --with-yapp=pgplot
 
 build1:
