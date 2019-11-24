@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: csh
-      run:  sudo apt install csh
+      run:  sudo apt install csh pgplot5 -y
     - name: autoconf
       run:  autoconf
     - name: configure
