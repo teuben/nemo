@@ -1,11 +1,23 @@
 #! /bin/csh -f
 #
-#  Install an anaconda3 (or miniconda3) python 
+#  Install an anaconda3 (or miniconda3) python.
+#
+#  It is adviced to install this *after* NEMO has been installed
+#
+#  An alternative is to set up a special conda environment for NEMO, e.g.
+#
+#     conda create -n nemo1 python=x.x -y
+#     source activate nemo1
+#     conda install -n nemo1 [package]
+#     source deactivate
+#     conda remove -n nemo1 -all
+#
 
 set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.03-Linux-x86_64.sh
+set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh
 set msh   = $mc3:t
 set dir   = `pwd`/anaconda3
+set opt   = 1
 
 # you better know what you are doing here
 foreach arg ($*)
@@ -20,7 +32,41 @@ setenv PATH "$dir/bin:$PATH"
 conda update -y conda
 pip install --upgrade pip
 
+# write the sourcable shell startup files
 
 echo "set path = ($dir/bin "'$path); rehash'  >> python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         >> python_start.sh
+
+
+if ($opt == 0) exit 0
+
+
+
+# http://projets.lam.fr/projects/unsio/
+# install a default via pip
+pip install unsio uns_projects
+# but then install the developers version if these directories exist
+foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
+  if (-d $dir) then
+    echo Installing with pip install $dir
+    (cd $dir ; pip install -e .)
+  endif
+end
+
+# https://github.com/adrn/gala
+# conda install astro-gala --channel conda-forge
+pip install astro-gala
+
+# https://github.com/jobovy/galpy
+#
+pip install galpy
+
+# https://github.com/pynbody/pynbody
+#
+pip install pynbody
+
+# https://github.com/kyleaoman/martini
+pip install astromartini
+
+
 
