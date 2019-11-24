@@ -9,11 +9,15 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: autoconf
+      run:  autoconf
     - name: configure
-      run: ./configure
-    - name: make
-      run: make
+      run: ./configure --with-yapp=ps
+    - name: build1
+      run: make build1 
+    - name: build2
+      run: make build2
+    - name: build3
+      run: make build3
     - name: make check
       run: make check
-    - name: make distcheck
-      run: make distcheck
