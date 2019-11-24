@@ -30,8 +30,23 @@ set bins=(analys cold compress corrplt dfiter dflook dmp2pcs estfreq gadget2pcs 
        genplt isotropy merge mkpcs modefit pcs2dmp plotpft ptest smooth weed \
        tipsy2pcs dmp2pcs_mpi galaxy_mpi pcs2dmp_mpi ptest_mpi )
 
+# in GALAXY15/SRC/progs/Makefile the defaults:       
+#     pgplot_lib = /usr/local/pgplot/libpgplot.a
+#     sys_lib = -lgfortran -lpng12 -L/usr/X11R6/lib64 -L/usr/lib64 -lX11
+# may not work for you.....
+       #  libpng-config --libs
+       #  x86_64-pc-linux-gnu-pkg-config --libs x11
 echo "###     Working on SRC/progs"
-(cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
+if (1) then
+  (cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
+else
+  (cd SRC/progs;  make pgplot_lib=/usr/lib/libpgplot.a; make clean)
+endif
+
+# if you need mpi versions:
+if (0) then
+   (cd SRC/progs_mpi;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
+endif   
 
 echo "###     Moving binaries to NEMOBIN, remove local static libaries"
 (cd bin ; mv * $NEMOBIN)
