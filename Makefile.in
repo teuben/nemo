@@ -461,10 +461,8 @@ config:	configure
 configure:	configure.ac
 	autoconf
 
-# nemo.pl can be deprecated
 config_extra:
 	cp config.h makedefs $(NEMOLIB)
-	(chmod +x nemo.pl; cp nemo.pl $(NEMOBIN))
 
 DIFF = diff
 
