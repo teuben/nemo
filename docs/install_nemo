@@ -43,9 +43,11 @@ set brew        = 0             # (MacOSX only) assuming homebrew has everything
 set intel       = 0		# pick intel compiler (astromake)
 set gfortran    = 1             # pick gfortran compiler (otherwise g77 is the default)
 set gcc         = 0		# pick gcc version (version number via astromake)
+set clang       = 0             # use LLVM clang instead
 set vogl        = 0		# compile vogl
 set glnemo      = 1             # compile glnemo2
 set unsio       = 0             # compile unsio and uns_project
+set falcon      = 1             # Dehnen's falcon environment
 set gsl         = 0             # add GSL library
 set hdf         = 1             # use HDF library, if present
 set png         = 0             # add png for pgplot (can easily break other programs in NEMO)
@@ -99,17 +101,21 @@ endif
 
 if ($ubuntu) then
    sudo apt update
+   sudo apt install build-essential -y
    sudo apt install gcc -y
    sudo apt install g++ -y
    sudo apt install gfortran -y
+   # clang ???
    # xorg-dev ???
    sudo apt install libx11-dev -y
    sudo apt install libxt-dev -y
    sudo apt install libxext-dev -y
    sudo apt install libcairo2-dev -y
-   sudo apt install build-essential -y
    sudo apt install cmake -y
    sudo apt install pgplot5 -y
+   sudo apt install wcslib-dev -y
+   sudo apt install libhdf4-dev libhdf5-dev hdf5-tools
+   sudo apt install libgsl-dev
 endif
 
 
@@ -121,6 +127,7 @@ endif
 if ($centos) then
    sudo yum install -y cmake
    sudo yum install -y libXext-devel
+   
 endif
 
 #	pick another GNU compiler (this is rather astromake specific of course)
@@ -153,6 +160,13 @@ if ($gfortran) then
   setenv CXX g++
   setenv F77 gfortran
 endif
+
+if ($clang) then
+  setenv CC  clang
+  setenv CXX clang
+  setenv F77 gfortran
+endif
+
 
 if ($clean) then
   if (-e $nemo) then
@@ -281,7 +295,11 @@ if ($cmake) then
 endif
 
 rehash
-$make libs
+if ($falcon) then
+  $make libs
+else
+  $make corelibs
+endif
 
 if ($vogl) then
   echo "Compiling vogl for xyzview (logfile: install.vogl.log)"
