@@ -1,4 +1,4 @@
-VERSION = NEMO V4.0 3-jan-2018 PJT
+VERSION = NEMO V4.1 24-nov-2019 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 ################################################################################
@@ -421,8 +421,20 @@ vogl:
 
 #	END
 
+build0:
+	autoconf
+	$(MAKE)
 
-install:
+build1:
+	(source nemo_start.sh ; $(MAKE) postconfig)
+
+build2:
+	(source nemo_start.sh ; $(MAKE) libs)
+
+build3:
+	(source nemo_start.sh ; $(MAKE) bins)
+
+install_old:
 	@echo "There is no official install from the root menu"
 	@echo "see also src/scripts/bootstrap how to bootstrap NEMO"
 	@echo "      or docs/install_nemo"
@@ -551,7 +563,7 @@ testsuite:
 	@echo 'src/scripts/testsuite -b'
 
 check:
-	src/scripts/testsuite
+	(source nemo_start.sh; src/scripts/testsuite)
 
 bench:
 	time src/scripts/nemo.bench
