@@ -19,7 +19,9 @@
 string defv[] = {
   "in=???\n              input file name",
   "fmt=%g\n              output format for floating point values",
-  "VERSION=0.2\n         24-nov-2019 PJT ",
+  "test=\n               If given, this is the regression test",
+  "eps=\n                Accuracy comparison (not implemented)",
+  "VERSION=0.3\n         24-nov-2019 PJT ",
   NULL,
 };
 
@@ -42,11 +44,13 @@ void nemo_main()
 {
   string *tags;
   string fmt = getparam("fmt");
+  string test = getparam("test");
   char fmt4[32];
+  char current[128];
 
   dprintf(2,"TSF: MaxSetLen = %d\n",MaxSetLen);
   ini_moment(&m,2,0);
-  sprintf(fmt4,"%s %s %s %s %%d\n",fmt,fmt,fmt,fmt);
+  sprintf(fmt4,"%s %s %s %s %%d",fmt,fmt,fmt,fmt);
   dprintf(1,"%s\n",fmt4);
     
   instr = stropen(getparam("in"), "r");
@@ -56,10 +60,21 @@ void nemo_main()
     free((char *)tags);
   }
   
-  printf(fmt4,
+  sprintf(current,fmt4,
 	 mean_moment(&m), sigma_moment(&m),
 	 min_moment(&m), max_moment(&m),
 	 n_moment(&m));
+
+  if (hasvalue("test")) {
+    if (streq(current,test))
+      printf("%s OK\n",current);
+    else {
+      printf("%s FAIL\n",current);
+      printf("%s expected\n",test);
+    }
+  } else {
+    printf("%s\n",current);
+  }
 }
 
 void accum_item(string tag)
