@@ -88,7 +88,7 @@ WWWDIR = $(NEMO)/local/www
 #	----------Installation starts here------------
 # make sure you're in $(NEMO) from here
 
-SHELL = /bin/sh
+SHELL = /bin/bash
 
 # this should remain the first target in this Makefile, so a default "make" invocation goes here
 help:
@@ -421,9 +421,13 @@ vogl:
 
 #	END
 
-build0:
+build_ps:
 	autoconf
-	$(MAKE)
+	./configure --with-yapp=ps
+
+build_pgplot:
+	autoconf
+	./configure --with-yapp=pgplot
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig)
