@@ -427,7 +427,7 @@ configure_ps:
 configure_pgplot:
 	./configure --with-yapp=pgplot --with-pgplot-prefix=/usr/lib
 
-build:   build1 build2 build3
+build:   build1 build2 build3 build4
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig)
@@ -437,6 +437,9 @@ build2:
 
 build3:
 	(source nemo_start.sh ; $(MAKE) bins)
+
+build4:
+	(source nemo_start.sh ; mknemo tsf tabhist)
 
 install:
 	@echo "There is no official single step install from the root menu"
