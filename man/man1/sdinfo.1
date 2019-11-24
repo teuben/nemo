@@ -6,17 +6,36 @@ sdinfo \- sdfits info
 .SH DESCRIPTION
 \fBsdinfo\fP list some tabular properties of an SDFITS file, and has some
 options to benchmark some basic operations
+.PP
+SDFITS files have a BINTABLE extension named "SINGLE DISH", and is used to store
+single dish spectra and all associated variables. This particular program was only
+written to provide some size info and various baseline benchmarks.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input SDFITS fits file. Multiple files can be given as well.
+Input SDFITS fits file. Multiple files can be given as well, as a space or comma separated this.
 No default.
 .TP
+\fBstats=t|f\fP
+If true, some basic statistics will be computed.
+.TP
+\fBmom=\fP\fI
+Maximum moment some statistics will be computed. [2].
 .SH EXAMPLES
+The following example takes all fits files matching a particular pattern and summarize their contents.
+.nf
+    ls *.?.fits > dirin.lis
+    sdinfo in=@dirin.lis
+
+AGBT15B_287_35.raw.vegas.A.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_39.raw.vegas.B.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
+.fi
 .SH SEE ALSO
-scanfits(1NEMO), fitsheaad(1NEMO)
+scanfits(1NEMO), fitshead(1NEMO)
+.PP
+https://fits.gsfc.nasa.gov/registry/sdfits.html
 .SH FILES
 src/image/fits
 .SH AUTHOR
