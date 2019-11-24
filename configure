@@ -10973,7 +10973,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-ac_config_files="$ac_config_files Makefile makedefs nemo_start.csh nemo_start.sh nemo.pl"
+ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -11670,9 +11670,9 @@ do
     "config.h") CONFIG_HEADERS="$CONFIG_HEADERS config.h:config.h.in" ;;
     "Makefile") CONFIG_FILES="$CONFIG_FILES Makefile" ;;
     "makedefs") CONFIG_FILES="$CONFIG_FILES makedefs" ;;
+    "nemo-config") CONFIG_FILES="$CONFIG_FILES nemo-config" ;;
     "nemo_start.csh") CONFIG_FILES="$CONFIG_FILES nemo_start.csh" ;;
     "nemo_start.sh") CONFIG_FILES="$CONFIG_FILES nemo_start.sh" ;;
-    "nemo.pl") CONFIG_FILES="$CONFIG_FILES nemo.pl" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
@@ -12267,9 +12267,8 @@ output from the command
 
      make install
 
-Note that this command actually does not install NEMO yet, but merely
-tells you what to do in which order. The recommended procedure is using
-the bootstrap script in NEMO/src/scripts.
+Users need to source the nemo_start.(c)sh file in their shell to
+enable NEMO commands and set up the NEMO environment.
 -------------------------------------------------------------------------
 "
 

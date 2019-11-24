@@ -878,7 +878,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-AC_CONFIG_FILES(Makefile makedefs nemo_start.csh nemo_start.sh nemo.pl)
+AC_CONFIG_FILES(Makefile makedefs nemo-config nemo_start.csh nemo_start.sh)
 AC_OUTPUT
 
 echo "
@@ -888,9 +888,8 @@ output from the command
 
      make install
 
-Note that this command actually does not install NEMO yet, but merely
-tells you what to do in which order. The recommended procedure is using
-the bootstrap script in NEMO/src/scripts.
+Users need to source the nemo_start.(c)sh file in their shell to
+enable NEMO commands and set up the NEMO environment.
 -------------------------------------------------------------------------
 "
 
