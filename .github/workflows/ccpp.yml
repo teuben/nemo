@@ -9,6 +9,8 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
+    - name: csh
+      run:  sudo apt install csh
     - name: autoconf
       run:  autoconf
     - name: configure
