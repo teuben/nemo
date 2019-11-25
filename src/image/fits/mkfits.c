@@ -8,15 +8,15 @@
 
 string defv[] = {
     "out=???\n      Output fits file",
-    "VERSION=0.2\n  29-jul-04 PJT",
+    "VERSION=0.2a\n 23-nov-2019 PJT",
     NULL,
 };
 
 string usage = "Trial with cfitsio";
 
 #if defined(HAVE_LIBCFITSIO)
-# include <cfitsio/fitsio.h>  
-# include <cfitsio/longnam.h>
+# include <fitsio.h>  
+# include <longnam.h>
 #else
 #error CFITSIO not available or properly configured
 #endif
