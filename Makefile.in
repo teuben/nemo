@@ -558,7 +558,7 @@ checklog:
 	cat `ls -tr tmp/test*/testsuite.log | tail -1`
 
 bench:
-	time src/scripts/nemo.bench
+	(source nemo_start.sh; time src/scripts/nemo.bench)
 
 #
 TEST=""
