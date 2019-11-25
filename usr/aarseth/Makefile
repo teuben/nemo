@@ -28,8 +28,8 @@ Nbody6ppGPU:
 # just an example on a simple laptop
 # note the order of building appears to matter !!!
 install_nbody6:  nbody6
-	(cd nbody6/GPU2 ;  make sse ; cp run/nbody7.sse $(NEMOBIN))
-	(cd nbody6/Ncode ; make ;     cp nbody6 $(NEMOBIN))
+	(cd nbody6/GPU2 ;  make clean; make sse ; cp run/nbody7.sse $(NEMOBIN))
+	(cd nbody6/Ncode ; make clean; make     ; cp nbody6         $(NEMOBIN))
 
 # just an example on a simple laptop
 # the avx option may not work in some XEON's, watch out for the outut of configure
