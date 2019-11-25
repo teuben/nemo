@@ -48,7 +48,7 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0)",
   "cdelt=\n        Override/Set cdelt (1,1,1)",
   "seed=0\n        Random seed",
-  "VERSION=3.2a\n  10-may-05 PJT",
+  "VERSION=3.2b\n  24-nov-2019 PJT",
   NULL,
 };
 
@@ -104,7 +104,7 @@ void nemo_main ()
     else
         fnames = burststring(getparam("in"), ", ");  /* input file names */
     if(mapgen) {            /* map from scratch */
-        dprintf(0,"Generating a map from scratch\n");
+        dprintf(1,"Generating a map from scratch\n");
         switch (nemoinpi(getparam("size"),size,3)) {
             case 1:			/*  nx[,nx,1] */
                 size[1] = size[0];
