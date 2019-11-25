@@ -9,21 +9,23 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mknemo - attempt to find NEMO programs and install them 
+mknemo - attempt to find NEMO (and related) programs and install them
+
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>mknemo
-<i>program(s)</i></b>  
+<b>mknemo <i>program(s)</i></b>  
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>mknemo</i> attempts to find the source code of the program(s)
-specified on the command line, and tries to compile them. If successfull,
-the binary will be placed in <b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag if your NEMO is under
-git control, so you can force an update before the build. <p>
-Finding the method
-how to install <i>program</i> takes several paths: <p>
-First, if a file <i>$NEMO/src/scripts/mknemo.d/program</i>
-exists, it is assumed to be a shell script with directions how to install
-this program. gyrfalcON is an example of such a complex program. <p>
+<i>mknemo</i> attempts to find the source
+code of the program(s) specified on the command line, and tries to compile
+them. If successfull, the binary will be placed in <b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag
+if your NEMO is under git control, so you can force an update before the
+build. <p>
+Finding the method how to install <i>program</i> takes several paths: <p>
+First,
+if a file <i>$NEMO/src/scripts/mknemo.d/program</i> exists, it is assumed to be
+a shell script with directions how to install this program. gyrfalcON is
+an example of such a complex program. In this case <i>program</i> can also be a
+package name, in which case the script will be more complex. <p>
 Next, within
 the $NEMO/src (optionally also the $NEMO/usr tree) a source file <i>program.c</i>
 (or C++ or Fortran) is looked for, which is compiled with a local <b>Makefile</b>

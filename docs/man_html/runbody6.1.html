@@ -18,79 +18,83 @@ nbody6   &lt; nbody6.in
 nbody6++   &lt; nbody6.in
 </pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>runbody6</b> is a NEMO frontend to the Aarseth family NBODY6++ program.
-It creates a run directory, prepares a parameter input file, and optionally
-input <i>(<a href='snapshot.5.html'>snapshot(5NEMO)</i></a>
- data, and runs the NBODY6(++) program. This can be
-particularly useful if you need to run a lot of simulations unattended.
-<p>
-Note that this front-end is not yet designed to run every possible way in
-which NBODY6++ can be run, particularly re-runs, but it most useful to run
-initial conditions from a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<b>runbody6</b> is a NEMO frontend to the Aarseth family NBODY6(++)
+program. It creates a run directory, prepares a parameter input file, and
+optionally input <i>(<a href='snapshot.5.html'>snapshot(5NEMO)</i></a>
+ data, and runs the NBODY6(++) program.
+This can be particularly useful if you need to run a lot of simulations
+unattended. <p>
+Note that this front-end is not yet designed to run every possible
+way in which NBODY6++ can be run, particularly re-runs, but it most useful
+to run initial conditions from a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  file. <p>
-Although the <b>kz=</b> vector
-can be specified, an alternative way is the indexed parameter access method
-that <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- provides, which overrides the default <b>kz=</b>. For example
-to turn off KS, use <br>
+Although the
+<b>kz=</b> vector can be specified, an alternative way is the indexed parameter
+access method that <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+ provides, which overrides the default
+<b>kz=</b>. For example to turn off KS, use <br>
 <pre>      KZ15=0 KZ30=0
 </pre>note the all-caps name of these indexed keywords. Since in NBODY6++ this
 vector has 50 elements, overriding them with an indexed parameter may be
-easier. 
+easier. It also bypasses any decisions of using the correct default for
+certain KZ&rsquo;s that is done in the kz= vector. For example, for nbody6=1 the
+default value for kz(22)=2 will be reset to kz(22)=3, but by setting KZ22=2
+you can cheat and override these. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if
-the keyword is also given:  
+The following parameters are
+recognized in any order if the keyword is also given:  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file (optional, see <b>nbody=</b> to generate
-your own input  data on the fly). If input data are given, it forces KZ(22)=2
-(see  below).   Default: not used. </dd>
+<dd>input file (optional,
+see <b>nbody=</b> to generate your own input  data on the fly). If input data are
+given, it forces KZ(22)=2 (see  below).   Default: not used. </dd>
 
 <dt><b>outdir=</b> </dt>
-<dd>Output run directory. This directory
-should not exist, although can be overriden with NEMO&rsquo;s standard <b>error=</b>
-system keyword. No default. </dd>
+<dd>Output
+run directory. This directory should not exist, although can be overriden
+with NEMO&rsquo;s standard <b>error=</b> system keyword. No default. </dd>
 
 <dt><b>nbody=</b> </dt>
-<dd>Total particle number. The maximum value
-(NMAX) is compiled into the NBODY4 program. Note that even if <i>in=</i> is supplied,
-this parameter is needed. No default. </dd>
+<dd>Total particle
+number. The maximum value (NMAX) is compiled into the NBODY4 program. Note
+that even if <i>in=</i> is supplied, this parameter is needed. No default. </dd>
 
-<dt><b>nfix=</b> </dt>
-<dd>Output frequency of data save
-or binaries; KZ(3 &amp; 6) [Default: 1] </dd>
+<dt><b>nfix=</b>
+</dt>
+<dd>Output frequency of data save or binaries; KZ(3 &amp; 6) [Default: 1] </dd>
 
-<dt><b>nrand=</b> </dt>
-<dd>Random number sequence skip. [Default:
-0] </dd>
+<dt><b>nrand=</b>
+</dt>
+<dd>Random number sequence skip. [Default: 0] </dd>
 
 <dt><b>nrun=</b> </dt>
-<dd>Run identification index. [Default: 1] </dd>
+<dd>Run identification index.
+[Default: 1] </dd>
 
 <dt><b>eta=</b> </dt>
-<dd>Time-step parameter
-for force polynomials. [Default: 0.02] </dd>
+<dd>Time-step parameter for force polynomials. [Default: 0.02]
+</dd>
 
 <dt><b>deltat=</b> </dt>
-<dd>Output time interval in units
-of the crossing. [Default: 0.25] </dd>
+<dd>Output time interval in units of the crossing. [Default: 0.25] </dd>
 
-<dt><b>tcrit=</b> </dt>
-<dd>Termination time in units of the
-crossing time. [Default: 5] </dd>
+<dt><b>tcrit=</b>
+</dt>
+<dd>Termination time in units of the crossing time. [Default: 5] </dd>
 
 <dt><b>qe=</b> </dt>
-<dd>Energy tolerance (restart if DE/E &gt; 5*QE
-&amp; <a href='KZ.2.html'>KZ(2)</a>
+<dd>Energy
+tolerance (restart if DE/E &gt; 5*QE &amp; <a href='KZ.2.html'>KZ(2)</a>
  &gt; 1) [Default: 2e-5] </dd>
 
 <dt><b>eps=</b> </dt>
-<dd>Potential softening parameter      [Default:
-0.01] </dd>
+<dd>Potential
+softening parameter      [Default: 0.01] </dd>
 
 <dt><b>kz=</b> </dt>
-<dd>Non-zero options for alternative paths (up to 50) <br>
+<dd>Non-zero options for alternative
+paths (up to 50) <br>
 <pre>[0 0 1 0 0 0 5 0 0 1  0 0 0 0 2 0 0 0 0 0  1 2 2 0 0 2 0 0 0 2  0 0 2 0
 0 0 1 0 0 0  0 0 0 0 0 0 0 0 0 0]
 1<tt> </tt>&nbsp;<tt> </tt>&nbsp;COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).
@@ -255,29 +259,32 @@ HALTED message means you will need to consult the NBODY6++ manual <p>
 The interface
 has been primarely tested with nbody6++, it&rsquo;s possible that some differences
 between nbody6 and nbody6++ have not been taken care of. 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
+In mode nbody6=1
+the end-time does not seem to be reached. Seem to halt at tcrit-dtadj ? 
+<h2><a name='sect7' href='#toc7'>See
+Also</a></h2>
 <a href='runbody1.1.html'>runbody1(1NEMO)</a>
-,
-<a href='nbody2.1.html'>nbody2(1NEMO)</a>
+, <a href='nbody2.1.html'>nbody2(1NEMO)</a>
 , <a href='nbody4.5.html'>nbody4(5NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
-, <a href='stou4.1.html'>stou4(1NEMO)</a>
 ,
-<a href='snapprint.1.html'>snapprint(1NEMO)</a>
+<a href='stou4.1.html'>stou4(1NEMO)</a>
+, <a href='snapprint.1.html'>snapprint(1NEMO)</a>
  <p>
 <br>
 <pre>nbody6:    ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz
 nbody6++:  https://github.com/nbodyx/Nbody6ppGPU
 </pre>
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>$NEMO/usr/aarseth<tt> </tt>&nbsp;<tt> </tt>&nbsp;support to install and test the codes
 $outdir/OUT3.snap<tt> </tt>&nbsp;<tt> </tt>&nbsp;particle dump (see u3tos(1NEMO)) in snapshot(5NEMO) format.
 </pre>
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>20-feb-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 cloned off runbody4, some of keyword descriptions not complete
 yet<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -295,10 +302,11 @@ yet<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Bugs</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

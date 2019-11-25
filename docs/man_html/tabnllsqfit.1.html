@@ -33,54 +33,56 @@ Each fit
 can also produce an output file with an additional column computing the
 difference between the data and the model (in that order). In the special
 case where the user has supplied no free parameters, the residuals are
-still computed correctly. 
+still computed correctly. <p>
+This routine can also be used to plot the function,
+although only in 1D cases, see <b>x=</b>. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following parameters are
+recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>(ascii) input file,
-a table of values from which data is taken. No default. </dd>
+<dd>(ascii)
+input file, a table of values from which data is taken. No default. </dd>
 
-<dt><b>xcol=<i>col,...</i></b> </dt>
-<dd>The column(s)
-from which the (independant) X-values are taken. The first column is numbered
-1 [default: <b>1</b>]. </dd>
+<dt><b>xcol=<i>col,...</i></b>
+</dt>
+<dd>The column(s) from which the (independant) X-values are taken. The first
+column is numbered 1 [default: <b>1</b>]. </dd>
 
 <dt><b>ycol=<i>col,...</i></b> </dt>
-<dd>The column(s) from which the (dependant) Y-values
-are taken  [default: <b>2</b>]. </dd>
+<dd>The column(s) from which the
+(dependant) Y-values are taken  [default: <b>2</b>]. </dd>
 
 <dt><b>dycol=<i>int</i></b> </dt>
-<dd>Optional column from which the weights
-will be derived. By default this column is meant to refer to an error bar,
-and normally  the inverse square of the errors are uses as weights for
-those fits where these are used (see <b>dypow=</b> next). [default: none assigned].
-</dd>
+<dd>Optional column from
+which the weights will be derived. By default this column is meant to refer
+to an error bar, and normally  the inverse square of the errors are uses
+as weights for those fits where these are used (see <b>dypow=</b> next). [default:
+none assigned]. </dd>
 
 <dt><b>dypow=<i>power</i></b> </dt>
-<dd>By changing this value, you can adjust the weights column (<b>dycol</b>).
-Instead of the normal <i>weight = 1/sigma^2</i>, you will be able to use them as
-<i>weight^dypow</i>. The most common use is when your <b>dycol</b> does not refer to an
-error, but to the weight directly (e.g. an intensity), in which case <b>dypow=-0.5</b>
-is appropriate. [default: 1]. </dd>
+<dd>By changing this value, you can adjust the weights
+column (<b>dycol</b>). Instead of the normal <i>weight = 1/sigma^2</i>, you will be able
+to use them as <i>weight^dypow</i>. The most common use is when your <b>dycol</b> does
+not refer to an error, but to the weight directly (e.g. an intensity), in
+which case <b>dypow=-0.5</b> is appropriate. [default: 1]. </dd>
 
-<dt><b>xrange=<i>xmin:xmax,xmin:xmax,...</i></b> </dt>
-<dd>Range in X-values
-for which the fit is done. A set of min:max, separated by comma&rsquo;s, can be
-given. This keyword cannot be used if more than one X-column is used. [default:
-no entry, i.e. all]. </dd>
+<dt><b>xrange=<i>xmin:xmax,xmin:xmax,...</i></b>
+</dt>
+<dd>Range in X-values for which the fit is done. A set of min:max, separated
+by comma&rsquo;s, can be given. This keyword cannot be used if more than one X-column
+is used. [default: no entry, i.e. all]. </dd>
 
 <dt><b>fit=</b><i>model</i> </dt>
-<dd>Model name what to fit. Currently implemented
-are <i>line</i>, <i>plane</i>, <i>poly</i>, <i>gauss1d</i>, <i>loren</i>, and <i>exp</i>. [default: <b>line</b>]. </dd>
-
-<dt><b>order=</b><i>order</i>
-</dt>
-<dd>Highest order of the polynomial fit (<b>fit=poly</b>) or  number of dimension
-of the hyper-plane fit (<b>fit=plane</b>). 0 would fit a constant.  [Default: <b>0</b>].
+<dd>Model name what to fit. Currently
+implemented are <i>line</i>, <i>plane</i>, <i>poly</i>, <i>gauss1d</i>, <i>loren</i>, and <i>exp</i>. [default: <b>line</b>].
 </dd>
+
+<dt><b>order=</b><i>order</i> </dt>
+<dd>Highest order of the polynomial fit (<b>fit=poly</b>) or  number of
+dimension of the hyper-plane fit (<b>fit=plane</b>). 0 would fit a constant.  [Default:
+<b>0</b>]. </dd>
 
 <dt>out=<i>filename</i> </dt>
 <dd>Optional output filename where the data and residuals are

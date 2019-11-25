@@ -47,14 +47,19 @@ Example of use: ( b = A.x) <br>
     
 </pre><p>
 When referring to rows and columns, we write these as A[row][col] (e.g. in
-C, or the current mdarray2) or  A(row,col) (e.g. in Fortran) 
-<p> 
+C, or the current mdarray2) or  A(row,col) (e.g. in Fortran) <p>
+When using this
+with 3rd party software that needs to write into contiguous memory, the
+address of the first element will normally be sufficient, e.g. <br>
+<pre>      mdarray2 data2 = allocate_mdarray2(nrows,ncols);
+      fits_read_col(fptr, TDOUBLE, data_col, 1, 1, ncols, &amp;nulval, &amp;data2[0][0],
+&amp;anynul, &amp;status);      
+</pre>
 <h2><a name='sect3' href='#toc3'>Timing</a></h2>
-The TESTBED
-function (<b>mdarraytest</b>) excersizes a simple initialization of  all array
-elements, and summing them up. This also clearly shows how reversing the
-order of array access  affects the CPU speed , viz. timings on a P4/1600
-laptop: <br>
+The TESTBED function (<b>mdarraytest</b>) exercizes a simple initialization
+of  all array elements, and summing them up. This also clearly shows how
+reversing the order of array access  affects the CPU speed , viz. timings
+on a P4/1600 laptop: <br>
 <pre>    % time mdarraytest 4,4,4 iter=1000000  flip=f
     Working with ndim=3 MD_Array[[4][4][4]
     2.110u 0.010s 0:02.31 91.7%     0+0k 0+0io 135pf+0w

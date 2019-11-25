@@ -15,21 +15,23 @@ eaglesnap - convert EAGLE hdf5 snapshots to NEMO snapshot format
 [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>eaglesnap</b> converts an HDF5 snapshot from the
-EAGLE simulation in a NEMO snapshot format. Selections in an X,Y,Z region,
-as well as particle type are possible. <p>
-Currently only mass and phasespace
-coordinates are converted. This is currently done in code units, in a future
-option conversion to astrophysical units will be done. <p>
-debug=1 will also
-list the datasets contents of the HDF5 file. 
+EAGLE simulation in a NEMO snapshot format. Various selections are possible:
+an X,Y,Z region, particle type (enforced), group and subgroup. <p>
+Currently
+only mass and phasespace coordinates are converted. This is still done in
+code units, in a future option conversion to astrophysical units will be
+possible. <p>
+debug=1 will also list the datasets contents of the HDF5 file.
+
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The following parameters are recognized in any order if the keyword
+is also given: 
 <dl>
 
-<dt><b>in=</b> </dt>
-<dd>Input file
-(HDF5) No default. </dd>
+<dt><b>in=</b><i>hdf_file</i> </dt>
+<dd>Input file (HDF5). Only one of the HDF5 parts
+needs to be given. The <i>eagle_read</i> access routines know how to find all of
+them. No default. </dd>
 
 <dt><b>out=</b> </dt>
 <dd>Output file, in snapshot format. No default. </dd>
@@ -46,38 +48,56 @@ given, this is <i>xmax</i>, and <i>0,xmax</i> is selected and again replicated f
 and Z. [0,10,0,10,0,10] </dd>
 
 <dt><b>group=</b> </dt>
-<dd>Select this group (-1 means all) [-1]  </dd>
+<dd>Select this group (-1 means all,1..NG are validm
+2^30 is no group)) [-1]  </dd>
 
-<dt><b>subgroup=</b>
-</dt>
-<dd>Select this subgroup (-1 means all) [-1] </dd>
+<dt><b>subgroup=</b> </dt>
+<dd>Select this subgroup (-1 means all, 0..NSG-1
+are valid, 2^30 is no subgroup) [-1] </dd>
 
 <dt><b>units=</b> </dt>
-<dd>Convert to Mpc, Msol, .... - not
-implemented yet. 
-<p> </dd>
+<dd>Convert to Mpc, Msol, .... - not implemented
+yet. </dd>
+
+<dt><b>center=</b> </dt>
+<dd>If given, it will center the selected particles here (3 values,
+in code units), meaning the coordinated will be shifted such that the center
+will be (0,0,0).  You will also need to specify a boxsize, since the grid
+is periodic. [Default: not used] </dd>
+
+<dt><b>boxsize=</b> </dt>
+<dd>Size of the box if center= is
+used.  This value is also inside the HDF file, but not available via <i>read_eagle</i>.
+Default: not used, required if <b>center=</b> is given. </dd>
+
+<dt><b>dm=</b> </dt>
+<dd>A cheat by which the
+total dark matter (DM) mass can be set. Once eagle_read() can grab those
+from the header, this keyword will not be needed anymore and likely disappear.
+Current default: 1 </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Assuming you have a username/password for databasea
+Assuming you have a username/password for database
 access, the following commands show some of the things you can do <br>
 <pre>    wget --user=... --ask-password --content-disposition 
         "http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots//download?run=RefL0012N0188&amp;snapnum=28"
     tar xvf RefL0012N0188_snap_028.tar
-    h5dump -n RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5
-    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5
+    h5dump -n RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5
+    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5
 snap1  ptype=0 region=2
 </pre>Data are taken from a typical co-moving cosmological grid. Objects near the
 edge, may seem to wind up in two places, as can be seen in the following
 example snapshot: <br>
-<pre>    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5
+<pre>    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5
 snap2 0 group=2
     snapplot3 snap2 xrange=-10:10 yrange=-10:10 zrange=-10:10
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='eagle.5.html'>eagle(5NEMO)</a>
  <br>
-<pre>http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots/ - EAGLE
+<pre>http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots/ - EAGLE snapshots
 http://icc.dur.ac.uk/Eagle/index.php - The EAGLE Project
 http://icc.dur.ac.uk/Eagle/database.php - EAGLE database access
 https://github.com/jchelly/read_eagle - library used
@@ -88,9 +108,24 @@ https://kyleaoman.github.io/martini - MARTINI
 <pre>NEMO/usr/eagle<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory with support to install EAGLE tools
 NEMO/src/nbody/io/eaglesnap.c<tt> </tt>&nbsp;<tt> </tt>&nbsp;code for eaglesnap
 </pre>
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Eagle5</a></h2>
+This will be the section for <a href='eagle.5.html'><i>eagle(5NEMO)</i></a>
+, but now it&rsquo;s here <p>
+<b>RefL0012N0188</b>
+is the small volume (12Mpc) reference run. It has 29 slices in z, ranging
+from slice 0 at z=20 to slice 28 at z=0.0. Slice 27, the one but most recent
+slice, is at z=0.10. The number of particles is (188^3) 6,644,672 per species
+(gas and DM). At z=0 one can see 6,381,559 gas, 262380 stars, and 547 BH,
+this still 186 short, so did some merge? This means SFE = 4.0%    Each snapshot
+comes in "nfiles" parts, e.g. snap_028_z000p000.0.hdf5, snap_028_z000p000.1.hdf5,
+... snap_028_z000p000.15.hdf5. The <i>read_eagle</i> routines will automatically read
+of all these in order to populate the snapshot correctly. <p>
+Simulations with
+L=12, 25, 50, 100 co-moving Mpc are available. 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update
+History</a></h2>
 <br>
 <pre>02-Nov-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -105,8 +140,9 @@ Peter Teuben
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>Eagle5</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

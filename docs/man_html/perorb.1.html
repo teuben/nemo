@@ -213,29 +213,35 @@ and minor axis, and that they equal the axis ratio (q) of the potential.
 In interactive mode the Time,Ycross,VYcross,Energy for each surface of
 section are listed, and can be piped into tabplot to get an idea of phase
 space and help you getter better initial conditions. <br>
-<pre>% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tabplot -
-2 3
-% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tablsqfit
+<pre>1% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50
+#  Time    Ycross    VYcross    Energy
+2.36021 0.0947884 -0.0301556 0.0322215
+4.70673 0.0817796 -0.0484523 0.0322859
+2% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tabplot
+- 2 3
+3% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2 ncross=50 | tablsqfit
 - 2 3 fit=ellipse
 
  x-center:        0.0732815
  y-center:        1.0291e-06
 
-</pre>E=0.0322215 <br>
-<pre>% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2,0.0322215
+4% perorb potname=log potpars=0.1,1,1,0.9 phase=0.1,-0.2,0.0322215
 # y0      u0        x1        v1     NPT   NITER PERIOD   ETOT  LZ_MEAN
   ETOT_ERR
 0.074508 -0.225473 -0.166434 -0.100333 234 6 4.650688 0.032222 0.029217 -3.71096e-06
 </pre>
-<p> 
+<p> In the 1st example we establish that energy is roughly conserved (and
+the value is 0.0322215). The 2nd example plots the SOS. The 3rd example takes
+column 2 and 3 and fits an ellipse and reports the center. The 4th example
+tries to reproduce the periodic orbit with that specified energy. 
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='orbstat.1.html'>orbstat(1NEMO)</a>
-, <a href='potlist.1.html'>potlist(1NEMO)</a>
+,
+<a href='potlist.1.html'>potlist(1NEMO)</a>
 , <a href='orbint.1.html'>orbint(1NEMO)</a>
 , <a href='newton0.1.html'>newton0(1NEMO)</a>
-,
-<a href='potential.5.html'>potential(5NEMO)</a>
+, <a href='potential.5.html'>potential(5NEMO)</a>
  <br>
 <pre>Particle Swarm Optimization (PSO): Skokos et al. - 2005MNRAS.359..251S
 </pre>

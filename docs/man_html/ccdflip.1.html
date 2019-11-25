@@ -9,38 +9,42 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-ccdflip - flip an image 
+ccdflip - flip an image in X,Y,Z  
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>ccdflip</b> [parameter=value] 
-<h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdflip</b>
-flips the coordinates of one of the principle axes (X, Y or Z) of an image.
+<b>ccdflip</b> [parameter=value]
 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+<b>ccdflip</b> flips the coordinates of one of the principle axes (X,
+Y or Z) of an image. Not all permutations were implemented, as this program
+was a quick hack. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+The following parameters are recognized in any
+order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>Input image file      </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file       </dd>
+<dd>Output
+file       </dd>
 
 <dt><b>flip=</b> </dt>
-<dd>Flip
-in x,y or z?    </dd>
+<dd>Flip in x,y or z?   Use &rsquo;xy&rsquo; for flipping axes on square
+images. Default: x </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+To rotate an image by 90 degrees (clockwise)
+use two flips: <br>
+<pre>    ccdflip gal1.ccd - xy | - gal2.ccd y
+</pre>
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>22-Feb-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;man written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+15-jul-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;example added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -51,9 +55,8 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc6' href='#sect6'>Update History</a></li>
 </ul>
 </body>
 </html>
