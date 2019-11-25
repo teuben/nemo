@@ -13,12 +13,16 @@
  *      24-jul-97       2.1 added norm=
  *	 8-sep-01       a   init_xrandom
  *      29-aug-06       c   prototypes for frandom() and getrfunc() properly used
+ *      12-jul-2019     2.2 added ccd=
  *
  */
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
+#include <image.h>
+#include <loadobj.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -26,6 +30,7 @@
 #include <snapshot/put_snap.c>
 
 #include <bodytrans.h>
+
 
 string defv[] = {
     "in=???\n		      input (snapshot) file",
@@ -37,8 +42,9 @@ string defv[] = {
     "masspars=p,0.0\n         Mass function parameters (e.g. p,0.0)",
     "massrange=1,1\n          Range for mass-spectrum (e.g. 1,2)",
     "seed=0\n                 Random seed",
+    "ccd=\n                   Input CCD with mapvalues that represent mass",
     "norm=\n                  Normalization value for the total mass (if used)",
-    "VERSION=2.1c\n           29-aug-06 PJT",
+    "VERSION=2.2\n            12-jul-2019 PJT",
     NULL,
 };
 
@@ -50,13 +56,15 @@ string cvsid="$Id$";
 
 extern real_proc getrfunc(string , string , string , int *);
 
-nemo_main()
+void nemo_main(void)
 {
-    stream instr, inmassstr, outstr;
+    stream instr, inmassstr, outstr, ccdstr;
     real   tsnap, tsnapmass, mass_star, mtot, mrange[2], norm;
+    real   xpos, ypos, xmin, ymin, idx, idy;
     Body  *btab = NULL, *bp;
     Body  *bmasstab = NULL, *bmassp;
-    int i, n, nbody, nbodymass, bits, bitsmass, seed;
+    imageptr iptr = NULL;
+    int i, n, nbody, nbodymass, bits, bitsmass, seed, ix, iy;
     rproc_body  bfunc;
     real_proc   mfunc;
     bool  Qnorm, first = TRUE;
@@ -80,8 +88,19 @@ nemo_main()
         inmassstr = NULL;
     } else if (hasvalue("inmass")) {
         inmassstr = stropen(getparam("inmass"),"r");
-    } else
-    	error("One of: mass=, massname=, inmass= must be given");
+    } else if (hasvalue("ccd")) {
+      warning("new ccd mode");
+      ccdstr = stropen(getparam("ccd"),"r");
+      read_image(ccdstr,&iptr);
+      idx = 1.0/Dx(iptr);
+      idy = 1.0/Dy(iptr);
+      xmin = Xmin(iptr);
+      ymin = Ymin(iptr);
+      inmassstr = NULL;
+      mfunc = NULL;
+      bfunc = NULL;      
+    } else 
+    	error("One of: mass=, massname=, inmass=, ccd= must be given");
     outstr = stropen(getparam("out"), "w");
     seed = init_xrandom(getparam("seed"));
     Qnorm = hasvalue("norm");
@@ -121,7 +140,7 @@ nemo_main()
                     warning("too many bodies (%d > %d)",nbodymass,nbody);
             }
             if ((bitsmass & MassBit) == 0) {
-                unlink(getparam("out"));
+  	        // unlink(getparam("out"));
                 error("essential mass data missing\tbits = %x\n", bits);
             }
         }
@@ -143,6 +162,17 @@ nemo_main()
         } else if (mfunc) {
             for (bp=btab, i=0; i<nbody; bp++,i++)
 	        Mass(bp) = frandom(mrange[0], mrange[1], mfunc);
+	} else if (iptr) {
+	    for (bp=btab, i=0; i<nbody; bp++,i++) {
+	      xpos = (Pos(bp)[0]-xmin)*idx + 0.5;    /* fractional cell index   0..nx */
+	      ypos = (Pos(bp)[1]-ymin)*idy + 0.5;
+	      ix = (int) floor(xpos);            /* cell index:   0 .. nx-1 */
+	      iy = (int) floor(ypos);
+	      if (ix<0 || iy<0 || ix>=Nx(iptr) || iy>=Ny(iptr))
+      		  Mass(bp) = 0.0;
+	      else
+		  Mass(bp) = MapValue(iptr,ix,iy);
+	    }
         } else             
             error("bad flow logic");
 
