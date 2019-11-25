@@ -113,6 +113,9 @@ sdsfits: sdsfits.c
 mkfits: mkfits.c 
 	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
+sdinfo: sdinfo.c
+	$(CC) $(CFLAGS) -o sdinfo sdinfo.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
+
 ccdfitsio: ccdfitsio.c 
 	$(CC) $(CFLAGS) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
