@@ -5,6 +5,7 @@
 *       ----------------------------------
 *
       INCLUDE 'common1.h'
+      EXTERNAL VERIFY
 *
 *
 *       Read first, second or both lines (KSTART = 3, 4, 5).

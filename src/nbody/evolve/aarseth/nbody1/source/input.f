@@ -5,6 +5,7 @@
 *       ----------------
 *
       INCLUDE 'common1.h'
+      EXTERNAL VERIFY
 *
 *
 *       Make a formal call to define input parameters & counters.

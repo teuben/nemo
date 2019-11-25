@@ -5,6 +5,7 @@
 *       --------------------------
 *
       INCLUDE 'common1.h'
+      EXTERNAL SCALE
 *
 *
 *       Initialize global scalars, counters & useful constants.
