@@ -6,13 +6,16 @@ is a simple
      sudo apt-get install libboost-all-dev
 
 
-Example install from scratch: (version may be newer)
+Example install from scratch: (version is 1.70.1 here, may be newer)
 
-   wget https://dl.bintray.com/boostorg/release/1.69.0/source/boost_1_69_0.tar.gz
-   tar zxf boost_1_69_0.tar.gz
-   cd boost_1_69_0
+   set vu=1_70_0
+   set vd=`echo $vu | sed s/_/./g`
+
+   wget https://dl.bintray.com/boostorg/release/$vd/source/boost_${vu}.tar.gz
+   tar zxf boost_${vu}.tar.gz
+   cd boost_${vu}
    ./bootstrap.sh --prefix=$NEMO/opt
-   ./b2
+   time ./b2
 
-
-   
+The last command will compile and install in $NEMO/opt/, and can take a while
+(~15 mins)
