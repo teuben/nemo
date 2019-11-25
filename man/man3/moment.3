@@ -93,7 +93,7 @@ The following code computes a weighted mean and dispersion of a set of points:
 	mean_moment(&m), sigma_moment(&m));
     compute_robust_moment(&m);
     printf("Robust Mean: %g   Dispersion: %g\\n",
-	robust_mean_moment(&m), robust_sigma_moment(&m));
+	mean_robust_moment(&m), sigma_robust_moment(&m));
 
 .fi
 .SH MOMENT STRUCTURE
