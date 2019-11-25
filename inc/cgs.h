@@ -11,9 +11,10 @@
 
 
 #define c_CGS 299792458000.0    /* speed of light [cm/sec] */
-#define k_CGS 1.380658e-16      /* Boltzmann  [erg/deg] */
-#define h_CGS 6.6260755e-27     /* Planck [erg-sec] */
+#define k_CGS 1.380649e-16      /* Boltzmann  [erg/deg] */
+#define h_CGS 6.62607015e-27    /* Planck [erg-sec] */
 #define G_CGS 6.67259e-8	/* gravitional constant */
+#define g_MKS 980.665           /* standard acceleration of gravity */
 
 #define Msol_CGS 1.988547e33    /* solar mass in grams */
 #define Rsol_CGS 6.95508e10     /* solar radius in cm */

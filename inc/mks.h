@@ -5,13 +5,15 @@
  *  "The Fundamental Physical Constants" by
  *      E. Richard Cohen and Barry N. Taylor
  *          (PHYICS TODAY, August 1989, Austus 1994)
+ *  https://physics.nist.gov/
  */
 
 
 #define c_MKS 299792458.0       /* speed of light [m/s] */
-#define k_MKS 1.380658e-23      /* Boltzmann  [J/K] */
-#define h_MKS 6.6260755e-34     /* Planck [J-s] */
-#define G_MKS 6.67259e-11       /* Newton's Gravitational Constant "G" [N m^2/kg^2] */
+#define k_MKS 1.380649e-23      /* Boltzmann  [J/K] */
+#define h_MKS 6.62607015e-34    /* Planck [J-s] */
+#define G_MKS 6.67259e-11       /* Newton's Gravitational Constant "G" [N m^2/kg^2] 6.674 30 */
+#define g_MKS 9.80665           /* standard acceleration of gravity */
 
 #define M_SOLAR   1.989e30	/* Mass of Sun [kg] */
 #define L_SOLAR   3.827e26 	/* Luminosity of Sun [W] */
@@ -22,3 +24,8 @@
 #define PC        3.0856e16     /* Parsec [m] */
 
 #define HI_MHz    1420.40575177 /* 21cm (21.10611405413 cm) line  of HI */
+
+/*
+ *  1au = exactly 149597870700 metres, in agreement with the value adopted in IAU 2009 Resolution B2
+ *  1pc = 648000/pi AU (IAU 2015 Resolution B2) = 3.085677581491367e+16
+ */
