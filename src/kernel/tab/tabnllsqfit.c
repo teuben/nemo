@@ -578,7 +578,7 @@ int setrange(a_range *r, string rexp)
   r->rmax = (real *) allocate(nr*sizeof(real));
 
   for (i=0; i<nr; i++) {
-    printf("bs=%s\n",bs[i]);
+    dprintf(0,"bs=%s\n",bs[i]);
     cptr = strchr(bs[i], ':');
     if (cptr) {
       r->rmin[i] = natof(bs[i]);
