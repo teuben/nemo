@@ -1,24 +1,26 @@
-.TH EAGLESNAP 1NEMO "2 November 2019"
+.TH EAGLESNAP 1NEMO "4 November 2019"
 .SH NAME
 eaglesnap \- convert EAGLE hdf5 snapshots to NEMO snapshot format
 .SH SYNOPSIS
 \fBeaglesnap\fP [parameter=value]
 .SH DESCRIPTION
 \fBeaglesnap\fP converts an HDF5 snapshot from the EAGLE simulation
-in a NEMO snapshot format. Selections in an X,Y,Z region, as well as particle
-type are possible.
+in a NEMO snapshot format. Various selections are possible: an X,Y,Z region, particle
+type (enforced), group and subgroup.
 .PP
 Currently only mass and phasespace coordinates are converted. This is
-currently done in code units, in a future option conversion to astrophysical
-units will be done.
+still done in code units, in a future option conversion to astrophysical
+units will be possible.
 .PP
 debug=1 will also list the datasets contents of the HDF5 file.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
-\fBin=\fP
-Input file (HDF5) No default.
+\fBin=\fP\fIhdf_file\fP
+Input file (HDF5). Only one of the HDF5 parts needs to be given. The
+\fIeagle_read\fP access routines
+know how to find all of them. No default.
 .TP
 \fBout=\fP
 Output file, in snapshot format. No default.
@@ -34,28 +36,42 @@ for Y and Z.
 [0,10,0,10,0,10]
 .TP
 \fBgroup=\fP
-Select this group (-1 means all) [-1] 
+Select this group (-1 means all,1..NG are validm 2^30 is no group)) [-1] 
 .TP
 \fBsubgroup=\fP
-Select this subgroup (-1 means all) [-1]
+Select this subgroup (-1 means all, 0..NSG-1 are valid, 2^30 is no subgroup) [-1]
 .TP
 \fBunits=\fP
 Convert to Mpc, Msol, .... - not implemented yet.
-
+.TP
+\fBcenter=\fP
+If given, it will center the selected particles here (3 values, in code units), meaning
+the coordinated will be shifted such that the center will be (0,0,0). 
+You will also need to specify a boxsize, since the grid is periodic.
+[Default: not used]
+.TP
+\fBboxsize=\fP
+Size of the box if center= is used.  This value is also inside the HDF file, but
+not available via \fIread_eagle\fP. Default: not used, required if \fBcenter=\fP is given.
+.TP
+\fBdm=\fP
+A cheat by which the total dark matter (DM) mass can be set. Once eagle_read()
+can grab those from the header, this keyword will not be needed anymore
+and likely disappear. Current default: 1
 .SH EXAMPLES
-Assuming you have a username/password for databasea access, the following commands
+Assuming you have a username/password for database access, the following commands
 show some of the things you can do
 .nf
     wget --user=... --ask-password --content-disposition 
         "http://dataweb.cosma.dur.ac.uk:8080/eagle-snapshots//download?run=RefL0012N0188&snapnum=28"
     tar xvf RefL0012N0188_snap_028.tar
-    h5dump -n RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5
-    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5 snap1  ptype=0 region=2
+    h5dump -n RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5
+    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 snap1  ptype=0 region=2
 .fi
 Data are taken from a typical co-moving cosmological grid. Objects near the edge, may seem to wind up
 in two places, as can be seen in the following example snapshot:
 .nf
-    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.4.hdf5 snap2 0 group=2
+    eaglesnap RefL0012N0188/snapshot_028_z000p000/snap_028_z000p000.0.hdf5 snap2 0 group=2
     snapplot3 snap2 xrange=-10:10 yrange=-10:10 zrange=-10:10
 .fi
 .SH SEE ALSO
@@ -80,7 +96,9 @@ This will be the section for \fIeagle(5NEMO)\fP, but now it's here
 ranging from slice 0 at z=20 to slice 28 at z=0.0. Slice 27, the one but most recent
 slice, is at z=0.10. The number of particles is (188^3) 6,644,672 per species (gas and DM).
 At z=0 one can see 6,381,559 gas, 262380 stars, and 547 BH, this still 186 short, so did some merge?
-This means SFE = 4.0%
+This means SFE = 4.0%    Each snapshot comes in "nfiles" parts, e.g.
+snap_028_z000p000.0.hdf5, snap_028_z000p000.1.hdf5, ... snap_028_z000p000.15.hdf5. The \fIread_eagle\fP
+routines will automatically read of all these in order to populate the snapshot correctly.
 .PP
 Simulations with L=12, 25, 50, 100 co-moving Mpc are available.
 .SH AUTHOR
