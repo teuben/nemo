@@ -25,7 +25,7 @@
 *
 *       KZ(J)   Non-zero options for alternative paths (see table).
 *
-*       ALPHAS  Power-law index for initial mass function (not KZ(4) = 2)
+*       ALPHAS  Power-law index for initial mass function (routine DATA).
 *       BODY1   Maximum particle mass before scaling.
 *       BODYN   Minimum particle mass before scaling.
 *
