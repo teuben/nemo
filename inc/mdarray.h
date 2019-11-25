@@ -1,10 +1,12 @@
 
 /*
- * simple multi-dimensional arrays 
+ * simple multi-dimensional arrays  - sorry, no template programming
  * (real = double or float, depending on the setting in NEMO)
  *
  * MDMAXDIM: maximum number of dimensions we support here;
  * it's hardcoded.
+ *
+ * See: NEMO/src/kernel/misc/mdarray.c
  *
  */
 
