@@ -23,11 +23,19 @@
 #include <fcntl.h>
 #include <unistd.h>
 
+#include <vectmath.h>
+#include <filestruct.h>
+
+#include <snapshot/snapshot.h>
+#include <snapshot/body.h>
+#include <snapshot/get_snap.c>
+
+
 string defv[] = {
     "in=\n            input file (optional - see nbody= ) ",
     "outdir=???\n     output run directory (required)",
 
-    "nbody=???\n      Total particle number (<= NMAX).",
+    "nbody=\n         Total particle number (<= NMAX) if in= not given",    
     "nfix=1\n         Output frequency of data save or binaries; KZ(3 & 6)",
     "nrand=0\n        Random number sequence skip",
     "nnbmax=40\n      Maximum number of neighbours (< LMAX)",
@@ -62,8 +70,8 @@ string defv[] = {
      " 16  No scaling of initial conditions\n"
      " 17  Generation of two subsystems (merger experiment)\n"
      " 18  Adjustment of coordinates & velocities to c.m. condition\n"
-     " 19  Use code units for tcrit/deltat",
-     " 20  Not used at present"
+     " 19  Use code units for tcrit/deltat\n"
+     " 20  Not used at present",
 
     "xtpar1=\n        Mass of external Plummer model (KZ(15) = 1; scaled units)",
     "xtpar2=\n        Length scale for Plummer model (KZ(15) = 1)",
@@ -86,7 +94,11 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=2.0\n    9-feb-2019 PJT",
+    "KZ#=\n           [indexed] Override some kz= keywords",
+    "exe=nbody2\n     Name of the executable",
+    
+
+    "VERSION=2.2\n    11-feb-2019 PJT",
     NULL,
 };
 
@@ -107,7 +119,7 @@ void nemo_main(void)
     int k, nkz, kz[KZ_MAX];
     real alphas, body1, bodyn;
     real q, vxrot, vzrot, rbar, zmbar;
-    string exefile = "nbody2";
+    string exefile = getparam("exe");
     string parfile = "nbody2.in";
     string rundir = getparam("outdir");
     string infile, fname;
@@ -117,7 +129,6 @@ void nemo_main(void)
     kstart = getiparam("kstart");
     tcomp =  getdparam("tcomp");
 
-    nbody = getiparam("nbody");
     nfix = getiparam("nfix");
     nrand = getiparam("nrand");
     nnbmax = getiparam("nnbmax");
@@ -137,6 +148,13 @@ void nemo_main(void)
     for (k=0; k<KZ_MAX; k++) dprintf(1,"%d ",kz[k]);
     dprintf(1,"\n");
 
+    for (k=0; k<KZ_MAX; k++) {
+      if (indexparam("KZ",k+1)) {
+	dprintf(0,"KZ %d=%d\n",k+1,getiparam_idx("KZ",k+1));
+	kz[k] = getiparam_idx("KZ",k+1);
+      }
+    }
+
     alphas = getdparam("alphas");
     body1 = getdparam("body1");
     bodyn = getdparam("bodyn");
@@ -153,7 +171,20 @@ void nemo_main(void)
     run_mkdir(rundir);
 
     sprintf(dname,"%s/%s",rundir,parfile);
-    datstr = stropen(dname,"w");    
+    datstr = stropen(dname,"w");
+
+    if (hasvalue("in")) {
+      stream instr = stropen(getparam("in"),"r");
+      nbody = get_snap_nbody(instr);
+      strclose(instr);
+      dprintf(0,"Grabbing nbody=%d\n",nbody);
+    } else {
+      if (hasvalue("nbody"))
+	nbody = getiparam("nbody");
+      else
+	error("nbody= needs to be specified");
+    }
+    
 
     /*  New Run */
 
@@ -162,6 +193,11 @@ void nemo_main(void)
     fprintf(datstr,"%d %g\n",kstart,tcomp);
     fprintf(datstr,"%d %d %d %d %d\n",nbody,nfix,nrand,nnbmax,nrun);
     fprintf(datstr,"%g %g %g %g %g %g %g\n",etai,etar,rs0,deltat,tcrit,qe,eps);
+
+    if (hasvalue("in") && kz[KZ_INI-1] != 2) {
+      warning("Using in= and setting kz(%d)=2",KZ_INI);
+      kz[KZ_INI-1] = 2;
+    }
 
     for (k=0; k<KZ_MAX; k++) fprintf(datstr,"%d ",kz[k]);
     fprintf(datstr,"\n");
