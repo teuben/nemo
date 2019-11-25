@@ -1,7 +1,7 @@
 
 See https://amusecode.github.io/
 
-On ubuntu preconditions
+On ubuntu some preconditions are needed (and a choice of MPI:  mpich vs.openmpi)
 
 sudo apt-get install build-essential gfortran python-dev \
   libopenmpi-dev openmpi-bin \
@@ -10,15 +10,19 @@ sudo apt-get install build-essential gfortran python-dev \
   libhdf5-serial-dev hdf5-tools \
   git
 
+recommended are also
+
 pip install numpy nose docutils mpi4py h5py
 
 pip install scipy astropy jupyter pandas seaborn
 
+# this can have issues
 # pip install amuse
 
+# then just the framework
 pip install amuse-framework
 
-https://amusecode.github.io/getting-started
+# and whatever community codes you need
 
 pip install amuse-brutus
 pip install amuse-bhtree
@@ -27,7 +31,7 @@ pip install amuse-fractalcluster
 pip install amuse-gadget2 
 
 
-Example:
+Example comparing two codes:
 
 from amuse.community.brutus.interface import Brutus
 from amuse.community.bhtree.interface import BHTree
@@ -72,3 +76,5 @@ channel.copy()
 print(earth.position.as_quantity_in(units.AU)[0])
 
 instance.stop()
+
+
