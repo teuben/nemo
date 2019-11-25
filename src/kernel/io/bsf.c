@@ -21,7 +21,7 @@ string defv[] = {
   "fmt=%g\n              output format for floating point values",
   "test=\n               If given, this is the regression test",
   "eps=\n                Accuracy comparison (not implemented)",
-  "VERSION=0.3\n         24-nov-2019 PJT ",
+  "VERSION=0.4\n         24-nov-2019 PJT ",
   NULL,
 };
 
@@ -67,13 +67,13 @@ void nemo_main()
 
   if (hasvalue("test")) {
     if (streq(current,test))
-      printf("%s OK\n",current);
+      printf("BSF: %s OK\n",current);
     else {
-      printf("%s FAIL\n",current);
-      printf("%s expected\n",test);
+      printf("BSF: %s FAIL\n",current);
+      printf("BSF: %s expected\n",test);
     }
   } else {
-    printf("%s\n",current);
+    printf("BSF: %s\n",current);
   }
 }
 
