@@ -77,7 +77,10 @@ string defv[] = {
     "kstart=1\n       Running mode (1=new 2=restart 3,4,5=restart w/ new par",
     "tcomp=40.0\n     Maximum allowed running time (minutes)",
 
-    "VERSION=2.1\n    14-feb-2019 PJT",
+    "KZ#=\n           [indexed] Override some kz= keywords",
+    "exe=nbody1\n     Name of the executable",
+    
+    "VERSION=2.2\n    6-mar-2019 PJT",
     NULL,
 };
 
@@ -93,26 +96,6 @@ string usage="front end for Aarseth nbody1 N-body code";
 #define KZ_BIN  12
 #define KZ_COM  14
 
-int get_nbody(string filename)
-{
-  stream instr = stropen(filename,"r");
-  Body **btptr;
-  Body *btab = NULL;
-  int nbody = 0;
-  real tsnap;
-  real bits;
-  
-  get_history(instr);
-  if (!get_tag_ok(instr, SnapShotTag))
-    return -1;
-  //get_snap_parameters(instr, btptr, nbptr, tsptr, ifptr)
-  //get_snap_parameters(instr, btptr, &nbody, &tsnap, &bits);
-  get_snap(instr, &btab, &nbody, &tsnap, &bits);
-  dprintf(0,"get_nbody: %d %f %d\n",nbody,tsnap,bits);
-  
-  return nbody;
-}
-
 void nemo_main(void)
 {
     int nbody, nfix, nrand, nrun, kstart;
@@ -120,7 +103,7 @@ void nemo_main(void)
     int k, nkz, kz[KZ_MAX];
     real alphas, body1, bodyn;
     real q, vxrot, vzrot, rbar, zmbar;
-    string exefile = "nbody1";
+    string exefile = getparam("exe");
     string parfile = "nbody1.in";
     string rundir = getparam("outdir");
     string infile, fname;
@@ -146,6 +129,14 @@ void nemo_main(void)
     for (k=0; k<KZ_MAX; k++) dprintf(1,"%d ",kz[k]);
     dprintf(1,"\n");
 
+    for (k=0; k<KZ_MAX; k++) {
+      if (indexparam("KZ",k+1)) {
+	dprintf(0,"KZ %d=%d\n",k+1,getiparam_idx("KZ",k+1));
+	kz[k] = getiparam_idx("KZ",k+1);
+      }
+    }
+    
+
     alphas = getdparam("alphas");
     body1 = getdparam("body1");
     bodyn = getdparam("bodyn");
@@ -165,7 +156,9 @@ void nemo_main(void)
     datstr = stropen(dname,"w");
 
     if (hasvalue("in")) {
-      nbody = get_nbody(getparam("in"));
+      stream instr = stropen(getparam("in"),"r");
+      nbody = get_snap_nbody(instr);
+      strclose(instr);
       dprintf(0,"Grabbing nbody=%d\n",nbody);
     } else {
       if (hasvalue("nbody"))
