@@ -333,3 +333,7 @@ if ($test) then
 endif  
 
 echo All done.
+echo ""
+echo "bash users:  source $nemo/nemo_start.sh  to activate NEMO in your shell"
+echo "tcsh users:  source $nemo/nemo_start.csh to activate NEMO in your shell"
+
