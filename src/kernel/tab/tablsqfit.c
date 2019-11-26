@@ -965,7 +965,7 @@ do_gauss1d()
   printf("  y = A * exp( -[(x-x0)^2]/2b^2 ):\n\n");
   if (sol[2] > 0) {
     warning("Bad gauss1d fit: 1/b^2 = %g\n",sol[2]);
-    return;
+    return 0;
   }
 
   x0 = -sol[1]/(2*sol[2]);
@@ -1022,7 +1022,7 @@ do_gauss2d()
   printf("  y = A * exp( -[(x-x0)^2 + (y-y0)^2]/2b^2 ):\n\n");
   if (sol[3] > 0) {
     warning("Bad gauss2d fit: 1/b^2 = %g\n",sol[3]);
-    return;
+    return 0;
   }
 
   x0 = -sol[1]/(2*sol[3]);
@@ -1119,12 +1119,12 @@ do_peak()
     if (j==0 || j==npt-1) {			/* handle edge cases */
         warning("Peak at the edge");
         printf("%g %g\n",x[j],y[j]);
-        return;
+        return 0;
     }
     if (range==2) {
     	if (j==1 || j==npt-2) {
     	    warning("Peak too close to edge");
-    	    return;
+    	    return 0;
     	}
     }
 
@@ -1142,6 +1142,7 @@ do_peak()
     printf("Peak:x,y= %g %g\n",
             x[j] - sol[1]/(2*sol[2]),
 	   sol[0]-sol[1]*sol[1]/(4*sol[2]));
+    return 0;
 }
 
 /* find a zero point
@@ -1203,8 +1204,6 @@ do_area()
        compute half the sum of x[i+1]*y[i]-x[i]*y[i+1]
        that's the area
     */
-       
-
 }
 
 
