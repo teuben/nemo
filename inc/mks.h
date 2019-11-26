@@ -9,10 +9,10 @@
  */
 
 
-#define c_MKS 299792458.0       /* speed of light [m/s] */
+#define c_MKS 299792458.0000    /* speed of light [m/s] */
 #define k_MKS 1.380649e-23      /* Boltzmann  [J/K] */
 #define h_MKS 6.62607015e-34    /* Planck [J-s] */
-#define G_MKS 6.67259e-11       /* Newton's Gravitational Constant "G" [N m^2/kg^2] 6.674 30 */
+#define G_MKS 6.67430e-11       /* Newton's Gravitational Constant "G" [N m^2/kg^2] 6.674 30 */
 #define g_MKS 9.80665           /* standard acceleration of gravity */
 
 #define M_SOLAR   1.989e30	/* Mass of Sun [kg] */
