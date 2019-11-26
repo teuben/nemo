@@ -46,7 +46,7 @@ csf:
 
 bsf:
 	@echo Running bsf
-	$(EXEC) bsf rsf.out
+	$(EXEC) bsf rsf.out  test="5.55552 4.32102 1.2345 9.87654 2"; nemo.coverage bsf.c
 
 hisf:
 	@echo Running hisf
