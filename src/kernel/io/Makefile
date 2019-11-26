@@ -25,7 +25,7 @@ OBJFILES=  dprintf.o command.o convert.o cvsid.o defv.o endian.o extstring.o \
 LOBJFILES= $L(dprintf.o) $L(command.o) $L(convert.o) $L(cvsid.o) $L(defv.o) $L(endian.o) $L(extstring.o) \
            $L(filesecret.o) $L(getparam.o) $L(history.o) $L(memio.o) $L(outdefv.o) \
 	   $L(ieeehalfprecision.o) $L(stropen.o) $L(mstropen(.o) $L(usage.o)
-BINFILES = csf tsf rsf qsf hisf endian idf
+BINFILES = csf tsf rsf qsf bsf hisf endian idf
 TESTFILES= getpartest stropentest extstrtest commandtest \
            testio testfs testprompt memiotest mstropentest
 
