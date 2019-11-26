@@ -17,6 +17,7 @@
  *	31-mar-01   now using CLK_TCK instead of HZ (POSIX ?)
  *      21-nov-03   adding clock() for testing, using sysconf to get clk_tck;
  *      15-mar-05   fallback to CLOCKS_PER_SEC for g++
+ *       7-nov-18   CLK_TCK erroneously at 1000000 now?
  *	
  */
 
@@ -27,8 +28,10 @@
 #include <unistd.h>     /* for sysconf() */
 
 #define TRY_CLOCK
+// test  LINUX doesn't do CLK_TCK correct anymore?
+#define CLK_TCK 100
 
-/*  CLK_TCK is typically 100, in g++ CLK_TCK isn't know, uses CLOCK_PER_SEC, else fail */
+/*  CLK_TCK is typically 100, in g++ CLK_TCK isn't known, uses CLOCK_PER_SEC, else fail */
 
 #ifndef CLK_TCK
 # ifndef CLOCKS_PER_SEC
@@ -148,7 +151,7 @@ main(int ac,char *av[])
 string defv[] =  {
    "count=4000\n       KiloLoop count (in 1000)",
    "mode=f\n           Float or Int test",
-   "VERSION=1.3\n      31-mar-01 pjt",
+   "VERSION=1.3\n      31-mar-2001 pjt",
    NULL,
 };
 
