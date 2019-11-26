@@ -12,6 +12,7 @@
 #   29-mar-04   documented -b; email now to teuben@astro.umd.edu
 #   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
 #    6-aug-06   look for Testfile's in usr tree also (-u will disable)
+#   26-nov-19   add bsf tests if not OK
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -159,9 +160,12 @@ cleanup:
         set clean=1
     else
         echo Results in $testdir/$log
+	echo BSF regression results that failed:
+	grep BSF $testdir/$log | grep -v OK
 	echo If you have any unsolved problems, this file should be sent to the teuben@astro.umd.edu
         head -1 $testdir/$log
         tail -1 $testdir/$log
+	
     endif
 
     if ($cleanup || $clean) then
