@@ -432,15 +432,19 @@ build:   build1 build2 build3 build4
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig)
+	@echo 'Continue with "make build2"'
 
 build2:
 	(source nemo_start.sh ; $(MAKE) libs)
+	@echo 'Continue with "make build3"'
 
 build3:
 	(source nemo_start.sh ; $(MAKE) bins)
+	@echo 'Continue with "make build4"'
 
 build4:
 	(source nemo_start.sh ; mknemo tsf tabhist)
+	@echo 'Continue with "make check"'
 
 install:
 	@echo "There is no official single step install from the root menu"
@@ -448,7 +452,9 @@ install:
 	@echo "      make build1            -- the old postconfig"
 	@echo "      make build2            -- the old libs"
 	@echo "      make build3            -- the old bins"
+	@echo "      make build4            -- an test compile using mknemo (can be skipped)"
 	@echo "      make check             -- the testsuite"
+	@echo "      make checklog          -- check the logs of the testsuite if need be"
 
 
 python: anaconda3
@@ -552,6 +558,7 @@ testsuite:
 
 check:
 	(source nemo_start.sh; src/scripts/testsuite)
+	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
 # show the latest testsuite build log
 checklog:
