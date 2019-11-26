@@ -29,7 +29,7 @@ string defv[] = {
     "weight=1\n            Weight applied to observable",
     "amode=t\n             Display sin/cos amps or amp/phase if possible?",
     "times=all\n           Snapshots to select",
-    "VERSION=1.2b\n        15-jul-04 PJT",
+    "VERSION=1.2c\n        25-nov-2019 PJT",
     NULL,
 };
 
@@ -123,7 +123,7 @@ bool amode;                 /* TRUE=amps only FALSE=amp+phase if all available *
         if (Qsin[m]) dim++;
     if (dim==0) {
        warning("snap_four: dim=0");
-       return;
+       return 0;
     }
     dprintf(1,"snap_four: maxorder=%d dim=%d\n",maxorder,dim);
     if (!amode) {       /* check if OK to do phases and amplitudes */
@@ -187,6 +187,7 @@ bool amode;                 /* TRUE=amps only FALSE=amp+phase if all available *
 	}
         printf("\n");
     } /* i */
+    return 0;
 }
 
 print_header(maxorder,Qcos,Qsin,amode)
