@@ -1,6 +1,6 @@
 DIR = src/nbody/init
 BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral magalie
-NEED = $(BIN) tsf snapprint
+NEED = $(BIN) bsf tsf snapprint
 
 help:
 	@echo $(DIR)
@@ -11,7 +11,7 @@ need:
 clean:
 	@echo Cleaning $(DIR)
 	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out mkexpdisk.out
-	@rm -f mkhomsph.out mkommod.out mkspiral.out
+	@rm -f mkhomsph.out mkommod.out mkspiral.out magalie.out
 
 NBODY = 10
 
@@ -42,6 +42,7 @@ snapenter:
 	$(EXEC) snapprint snapenter.out m,x,y,z,vx,vy,vz
 	@echo Comparing snapenter.out snapenter.cmp
 	$(EXEC) tsf snapenter.out octal=t | $(EXEC) rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+	@bsf snapenter.out test="0.175 0.6255 -1 2 15"
 
 mkplummer:
 	@echo Running $@
@@ -50,40 +51,49 @@ mkplummer:
 	$(EXEC) mkplummer - $(NBODY) seed=123 |\
 		massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
 		tsf - ;  nemo.coverage mkplummer.c
+	@bsf mkplummer.out test="0.0140845 0.896875 -4.6523 4.80925 71"
 
 mkexpdisk:
 	@echo Running $@
 	$(EXEC) mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
 	$(EXEC) tsf mkexpdisk.out
+	@bsf mkexpdisk.out test="0.0135151 0.39335 -1.19916 0.857764 71"
 
 mkommod:
 	@echo Running $@
 	$(EXEC) mkommod $(NEMODAT)/k5isot.dat mkommod.out $(NBODY) seed=123
 	$(EXEC) tsf mkommod.out
+	@bsf mkommod.out test="0.0140845 0.412423 -1.18567 1.60994 71"
 
 mkhomsph:
 	@echo Running $@
 	$(EXEC) mkhomsph mkhomsph.out $(NBODY) seed=123
 	$(EXEC) tsf mkhomsph.out
+	@bsf mkhomsph.out test="0.0140845 0.34933 -1.10775 1.04002 71"
 
 mkspiral:
 	@echo Running $@
 	$(EXEC) mkspiral mkspiral.out $(NBODY) seed=123 a=100
 	$(EXEC) tsf mkspiral.out
+	@bsf mkspiral.out  test="0.00314971 0.257217 -0.92151 0.4912 71"
 
 magalie:
 	@echo Disabled $@ because it hangs every now and then
+	@echo The
 
 magalie_null:
 	@echo Running $@
 	@rm -rf magalie.out.tmpdir
-	$(EXEC) magalie magalie.out 2000 500 4000 cleanup=f
+	$(EXEC) magalie magalie.out 2000 500 4000 seed=123 cleanup=f
 	$(EXEC) tsf magalie.out
-	
+	@bsf magalie.out test="0.000905738 2.23592 -19.3119 19.1632 45501"
 
 real:
 	@echo f2d conversion:
-	$(EXEC) mkplummer - 100 | $(EXEC) csf - - convert=f2d | $(EXEC) snapplot - 
+	$(EXEC) mkplummer - 100 seed=123 | $(EXEC) csf - - convert=f2d | $(EXEC) snapplot - 
 	@echo d2f conversion:
-	$(EXEC) mkplummer - 100 | $(EXEC) csf - - convert=d2f | $(EXEC) snapplot - 
+	$(EXEC) mkplummer - 100 seed=123 | $(EXEC) csf - - convert=d2f | $(EXEC) snapplot -
+	@echo now with bsf:
+	$(EXEC) mkplummer - 100 seed=123 | $(EXEC) csf - - convert=f2d | bsf - test='0.00142653 0.648292 -4.67407 5.57043 701'
+	$(EXEC) mkplummer - 100 seed=123 | $(EXEC) csf - - convert=d2f | bsf - test='0.00142653 0.648292 -4.67407 5.57043 701'
 
