@@ -44,8 +44,5 @@ if($uname == Darwin) then
     endif
 endif
 
-# provide alias 'NOclaf' to de-active falcON
-alias NOclaf 'source $FALCON/falcON_end; unalias NOclaf'
-
 done:
 
