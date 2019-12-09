@@ -9,7 +9,7 @@ if [ -z $FALCON ]; then
   echo "Environment variable FALCON is not set, falcON cannot be set up"
   echo "add something like: export FALCON=/xxx/yyy"
   echo "to denote the root directory of falcON to your .bashrc file"
-
+else
   # set enviroment variables FALCONLIB and ACCPATH
   export  FALCONLIB=$FALCON/lib
   export WDUTILSLIB=$FALCON/utils/lib
