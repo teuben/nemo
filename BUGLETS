@@ -4,31 +4,39 @@
   (they all depend on a weaker FS, vfat and HFS+ which cannot handle
   such names)
 
-- should move serious issues over into https://github.com/teuben/nemo/issues
+* active issues are now moved to https://github.com/teuben/nemo/issues
 
-- intel 8.0
-  - some linkeage problems left with loadobj based routines,
-     e.g. vrtm51.so can't  find get_atable
-  - intel 8.0 - io_nemo doesn't compile
+* this is the TODO list for the 4.1 release
 
-- intel 7.1 also has some remaining problems. Linking needs to
-  be done with fortran and the -Vaxlib library
+- falcon for bash !
+- default configure gives yapp.ps, but should check if pgplot is natively there
+- is rman partially broken on U18?
+- fix up bsf ? might need label= to override input pipe
+- finish populating bsf in Testfile's
+- some notebooks for associated stuff
+- ACOM example? - NO
+- no default dox building for dehnen, it fails too often
+- fix mkhalo ?
+- is there rman -> rst ?
 
-- intel 9.0: how the heck do you use multiple .o's on the link line
+
+* Below here just old stuff, 
+
 
 - install on machines where IRAF's f77 is in the path before the 
   system version: you will need to
 	setenv F77 g77
   or whichever appropriate. the IRAF script will cause various
   fortran-c link schemes to fail.
+  The install_nemo script now does that.
 
 - gcc3:  when using c++ NEMO's "string" will now collide with the 
          default C++ type 'string'....
 
 	 -DSINGLEPREC does not work for a number of programs due to
 	bad prototyping of the "proc" functions. This will be fixed,
-	and is also needed in preparation for NEMO V4 when a C++ compiler
-	will be the default compiler. [obviously V4 is not adopted C++ yet]
+	and is also needed in preparation for NEMO V5 when a C++ compiler
+	will be the default compiler. 
 
 - install on darwin:
 	- FORLIBS get crt1.o or something, and this is not needed,
@@ -36,17 +44,12 @@
 	from the $NEMOLIB/makedefs 
 
 * LFS seems to work, but keep an eye open on e.g.
-	http://freshmeat.net/articles/view/709/
-  and 
 	http://www.suse.de/~aj/linux_lfs.html
   for an outline of the problems
 
 - large objects (> 2GB or > 4GB), specifically snapshots, can be limited
   in size of they use private calls to allocate() without making sure the
   argument has been casted to (size_t)
-
-- runbody1/2 : input files can have velocities changed by 2t/w ??
-	also needs nbody= when really not needed?
 
 - filestruct:
   The following snippet of code stores only  "1" for the value of pi,
@@ -68,24 +71,13 @@
 
 - comment from Walter:
 
-> I tried to make my own potential very much in the same way in which
-> plummer.c works, except that I added a routine "potential()", beside
-> "potential_double()" and "potential_float()", but identical to
-> "potential_double()". It appears that adding "potential()" creates a
-> segmentation fault (on returning from "potential_float()"). I don't know
-> why, do you?
+  > I tried to make my own potential very much in the same way in which
+  > plummer.c works, except that I added a routine "potential()", beside
+  > "potential_double()" and "potential_float()", but identical to
+  > "potential_double()". It appears that adding "potential()" creates a
+  > segmentation fault (on returning from "potential_float()"). I don't know
+  > why, do you?
 
-
-- compiling on some older linux versions will fail due to a prototype
-  for dprintf() in /usr/include/stdio.h - you can comment out our
-  version in $NEMOINC/stdinc.h and it will work
-  Or add		-DHAVE_DPRINTF
-  to CFLAGS (should add that to configure.in)
-  The official name is now nemo_dprintf, though internally
-  dprintf will stay and #defined to nemo_configure
-
-  still a linking problem on those cases left... (redhat 5.2)
-	-ansi ?
 
 - mktemp() should be converted mkstemp() in stropen.c (recent gcc compilers
   will complain about it, but it will work)
@@ -106,23 +98,6 @@
 
   gcc3.0 is ok again, as is 2.95.3
 
-- Suse didn't resolve fortran binding to C too well for potentials
-  (.so object files, e.g. athan92)
-
-- sgi: loadobjDL works for bodytrans, but not potentials....
-
-potlist: rld: Fatal Error: attempted access to unresolvable symbol in
-/home/starlab/nemo_3.0.6/obj/mips-sgi-irix6.5/potential/athan92.so: __powdi
-  (some conceptual program? since sol8 seems to have the same problem)
-
-  Also, for the SGI at sulfur.amnh.org (where there is some problem with
-  the default f77 license) one needs to do
-
-	setenv F77 f90
-
-  before configure is run.  This is a "mips-sgi-irix6.5" machine.
-
-- sgi:  hackforce does not compile/link
 
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences
