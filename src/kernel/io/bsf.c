@@ -18,10 +18,11 @@
 
 string defv[] = {
   "in=???\n              input file name",
-  "fmt=%g\n              output format for floating point values",
   "test=\n               If given, this is the regression test",
+  "fmt=%g\n              output format for floating point values",
   "eps=\n                Accuracy comparison (not implemented)",
-  "VERSION=0.5\n         24-nov-2019 PJT ",
+  "label=\n              Override the in= filename in reporting",
+  "VERSION=1.0\n         10-dec-2019 PJT ",
   NULL,
 };
 
@@ -46,6 +47,7 @@ void nemo_main()
   string infile = getparam("in");
   string fmt = getparam("fmt");
   string test = getparam("test");
+  string label;
   char fmt4[32];
   char current[128];
 
@@ -53,6 +55,10 @@ void nemo_main()
   ini_moment(&m,2,0);
   sprintf(fmt4,"%s %s %s %s %%d",fmt,fmt,fmt,fmt);
   dprintf(1,"%s\n",fmt4);
+  if (hasvalue("label"))
+    label = getparam("label");
+  else
+    label = infile;
     
   instr = stropen(infile, "r");
   while ((tags = list_tags(instr)) != NULL) {
@@ -68,13 +74,13 @@ void nemo_main()
 
   if (hasvalue("test")) {
     if (streq(current,test))
-      printf("BSF %s: %s OK\n",infile,current);
+      printf("BSF %s: %s OK\n",label,current);
     else {
-      printf("BSF %s: %s FAIL\n",infile,current);
-      printf("BSF %s: %s expected\n",infile,test);
+      printf("BSF %s: %s FAIL\n",label,current);
+      printf("BSF %s: %s expected\n",label,test);
     }
   } else {
-    printf("BSF %s: %s\n",infile,current);
+    printf("BSF %s: %s\n",label,current);
   }
 }
 
