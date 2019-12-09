@@ -160,20 +160,11 @@ if (-e $NEMO/nemo_local.csh)   source $NEMO/nemo_local.csh
 if (-e $HOME/.nemo_local.csh)  source $HOME/.nemo_local.csh
 
 
-if ($path[1] == ".") then
-  set path = ( . $NEMOBIN $NEMO/opt/bin $path[2-] )
-else
-  set path = ( $NEMOBIN $NEMO/opt/bin $path )
-endif
+set path = ( $NEMOBIN $NEMO/opt/bin $path )
 rehash
 
-# provide alias to load falcON, if present
-#alias falcON 'setenv FALCON $NEMO/usr/dehnen/falcON; source $FALCON/falcON_start'
+# falcON
 setenv FALCON $NEMO/usr/dehnen/falcON
-source $FALCON/falcON_start
-
-# provide alias to end NEMO
-#alias omen 'source $NEMO/nemo_end; unalias omen; alias nemo source $NEMO/nemo_start'
-#alias omen 'source $NEMO/nemo_end; unalias omen'
+source $FALCON/falcON_start.csh
 
 

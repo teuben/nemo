@@ -80,6 +80,5 @@ test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 
 # falcON 
-echo Only partial falcON support for bash 
-export LD_LIBRARY_PATH=$NEMO/usr/dehnen/utils/lib:$NEMO/usr/dehnen/falcON/lib:$LD_LIBRARY_PATH
-export DYLD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export FALCON=$NEMO/usr/dehnen/falcON
+source $FALCON/falcON_start.sh
