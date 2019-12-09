@@ -1,4 +1,3 @@
-#! /bin/csh
 #
 # FALCON bash startup, needs to be sourced in the shell
 # Written for NEMO V4.1
