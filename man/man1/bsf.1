@@ -1,4 +1,4 @@
-.TH BSF 1NEMO "24 November 2019"
+.TH BSF 1NEMO "10 December 2019"
 .SH NAME
 bsf \- benchmark stats on all floating point values in a (binary) structured file
 .SH SYNOPSIS
@@ -19,16 +19,20 @@ is also given:
 \fBin=\fP
 input file name [???]
 .TP
-\fBfmt=\fP\fIC-fmt\P
-C-Format string for the 4 floating point values output.  [%g]
-.TP
 \fBtest=\fP\fItest-string\fP
 If given, this is the resulting string that should have been obtained. Default: none
+.TP
+\fBfmt=\fP\fIC-fmt\P
+C-Format string for the 4 floating point values output.  [%g]
 .TP
 \fBeps=\fP
 In some next version this accuracy parameter
 can control if the regression numbers need to agree within some fraction.
 Default: not used and not implemented.
+.TP
+\fBlabel=\fP\fIlabel-string\fP
+By default the input file name is reported, but with label= you can override this.
+Particularly useful when unix pipes are used.
 .SH EXAMPLES
 Here are some examples of the stats of the masses and phase space coordinates of
 a plummer sphere with 10 particles and seed=123. The last example is to show that
@@ -56,5 +60,6 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-24-Nov-2019	V0.1 Created		PJT
+24-Nov-2019	V0.1 Created	PJT
+10-dec-2019	V1.0 finalized with label=	PJT
 .fi
