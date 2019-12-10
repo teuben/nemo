@@ -48,7 +48,7 @@ string defv[] = {
     "potpars=\n		  .. with optional parameters",
     "potfile=\n		  .. and optional datafile name",
     "headline=\n          random verbiage",
-    "VERSION=4.3a\n       18-nov-2019 PJT",
+    "VERSION=4.3b\n       9-dec-2019 PJT",
     NULL,
 };
 
@@ -147,7 +147,7 @@ void setparams()
     tnow = getdparam("time");
 
     outfile = getparam("out");
-    if(hasvalue("etot")) {	  /* energy given; calculate missing vx or vy */      
+    if(hasvalue("etot")) {	  /* energy given; calculate missing vx (for y) or vy (for x) */      
  	   etot = getdparam("etot");
 	   dprintf(1,"etot=%g\n", etot);
            if(!hasvalue("potname"))
@@ -172,7 +172,7 @@ void setparams()
 	   (*pot)(&ndim,pos,acc,&epot,&tnow);
 	   epot -= 0.5*omega*omega*(x*x+y*y);
 
-           if(!hasvalue("vx")) {                /* vx missing */
+           if(hasvalue("y")) {                /* vx missing */
 		v = getdparam("vy");
 		u = 2*(etot-epot) - v*v;
 		if (u<0.0)
@@ -182,16 +182,14 @@ void setparams()
 		  u = sqrt(u);
 		lz = x*v-y*u;	
 		if(lzsign != SGN(lz)) u = -u;     /* switch rotation */
-	   } else {
-                if(hasvalue("vy"))
-			error("cannot give e=,  vx= and vy= at the same time");
+	   } else if(hasvalue("x")) {
 		u = getdparam("vx");
 		v = 2*(etot-epot) - u*u;
 		if (v<0.0)
-			error("vx too large for this energy: epot=%g vx(max)=%g\n",
+		  error("vx too large for this energy: epot=%g vx(max)=%g\n",
 					epot,2*sqrt(etot-epot));
 		else
-			v = sqrt(v);
+		  v = sqrt(v);
 		lz = x*v-y*u;	
 		if(lzsign != SGN(lz)) v = -v;     /* switch rotation */
 	   }
