@@ -24,6 +24,7 @@ all:	snap.in $(BIN)
 snap.in:
 	@echo Creating snap.in
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
+	@bsf snap.in
 
 snapcenter: snap.in
 	@echo Running snapcenter
@@ -61,6 +62,7 @@ snapshift: snap.in
 	@echo Running $*
 	$(EXEC) snapshift snap.in snap.in2 rshift=1,2,3 vshift=4,5,6;\
 	 nemo.coverage snapshift.c
+	@bsf snap.in2
 
 snapstack: snap.in
 	$(EXEC) snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,0,0 | tsf -;\
