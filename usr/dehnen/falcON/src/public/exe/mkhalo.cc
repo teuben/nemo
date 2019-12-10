@@ -60,8 +60,8 @@
 // v 2.6    04/08/2010  WD  keyword model
 // v 2.6.1  09/12/2011  WD  improved explanation
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "2.6.1"
-#define falcON_VERSION_D "09-dec-2011 Walter Dehnen                          "
+#define falcON_VERSION   "2.6.2"
+#define falcON_VERSION_D "10-dec-2019 PJT/Walter Dehnen                        "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO                                // this is a NEMO program    
 #  error You need NEMO to compile mkhalo
