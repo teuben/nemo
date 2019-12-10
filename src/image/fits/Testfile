@@ -23,32 +23,43 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 #	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-	$(EXEC) ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1	
+	$(EXEC) ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1
+	@bsf ccd.in	
 
 map001.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | $(EXEC) ccdfits - map001.fits ; nemo.coverage ccdfits.c
+	@bsf map001.fits	
 
 map002.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=2 | $(EXEC) ccdfits - map002.fits; nemo.coverage ccdfits.c
+	@bsf map002.fits	
 
 map003.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | $(EXEC) ccdfits - map003.fits; nemo.coverage ccdfits.c
+	@bsf map003.fits	
+	
 
 bitpix64:
 	$(EXEC) ccdmath "" map004.ccd "%x+%y" size=10,10,1 
 	$(EXEC) ccdfits map004.ccd map004.fits bitpix=64 ; nemo.coverage ccdfits.c
 	$(EXEC) fitsccd map004.fits map004a.ccd; nemo.coverage fitsccd.c
 	$(EXEC) ccdmath map004a.ccd,map004.ccd - %1-%2 | ccdstat -
+	@bsf map004.ccd
+	@bsf map004.fits
+	@bsf map004a.fits	
+	
 
 ccdfits: ccd.in
 	@echo Running $@
 	$(EXEC) ccdfits ccd.in fits.in; nemo.coverage ccdfits.c
+	@bsf fits.in	
 
 fitsccd: ccdfits
 	@echo Running $@
 	$(EXEC) fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
 	@echo Testing ccd-fits-ccd with "FIE=$(FIE)"
 	$(EXEC) ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
+	@bsf ccd.out	
 
 scanfits: ccdfits
 	@echo Running $@
@@ -62,6 +73,7 @@ fitsglue: map001.fits map002.fits map003.fits
 	$(EXEC) fitshead map002.fits | grep DATA
 	$(EXEC) fitshead map003.fits | grep DATA
 	$(EXEC) fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
+	@bsf cube.fits
 	
 
 fitshead: map003.fits
@@ -74,3 +86,4 @@ tab.in:
 tabfits:	tab.in
 	$(EXEC) tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
 	$(EXEC) fitshead tab.fits | grep DATA
+	@bsf tab.fits
