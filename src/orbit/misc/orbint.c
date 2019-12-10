@@ -33,6 +33,9 @@
  *      10-feb-04       V4.0 variable timestepping              PJT
  *      14-jul-09       V4.1 Bastille Day @ PiTP - added some extra integration modes PJT
  *                           after Tremaines nice lecture
+ *      10-dec-2019     V4.2 Add optional Phi/Acc to output     PJT
+ *                           but not implemented for all cases - also fixed pattern speed bug
+ *                           
  *
  */
 
@@ -54,7 +57,7 @@ string defv[] = {
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=4.1c\n       14-aug-09 PJT",
+    "VERSION=4.2\n        10-dec-2019 PJT",
     NULL,
 };
 
@@ -92,6 +95,8 @@ void setparams(), prepare();
 void integrate_euler1(), integrate_euler2(), 
      integrate_leapfrog1(), integrate_leapfrog2(),
      integrate_rk2(), integrate_rk4();
+void set_rk(double *ko, double *pos, double *vel, double *acc, 
+	    int n, double dt, double *ki);
 
 
 /*----------------------------------------------------------------------------*/
@@ -130,23 +135,23 @@ void nemo_main ()
     outstr = stropen (outfile,"w");
     prepare();
     match(getparam("mode"),"euler leapfrog test rk2 rk4 me end",&imode);
-    if (imode==0x01)
+    if (imode==0x01)           // euler
         integrate_euler1();
-    else if (imode==0x02)
+    else if (imode==0x02)      // leapfrog
         integrate_leapfrog1();
-    else if (imode==0x04)
+    else if (imode==0x04)      // test
         integrate_leapfrog2();
-    else if (imode==0x08)
+    else if (imode==0x08)      // rk2
         integrate_rk2();
-    else if (imode==0x10)
+    else if (imode==0x10)      // rk4
         integrate_rk4();
-    else if (imode==0x20)
+    else if (imode==0x20)      // me
         integrate_euler2();
     else
         error("imode=0x%x; Illegal integration mode=",imode);
 
     put_history(outstr);
-    write_orbit (outstr,o_out); 		/* write output file */
+    write_orbit (outstr,o_out); 
     strclose(outstr);
 }
 
@@ -189,6 +194,12 @@ void integrate_euler1()
     vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
     vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
     vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+#ifdef ORBIT_PHI
+    Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
+    AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
+    AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
+    AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
+#endif    
 
     ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
     kdiag=0;			/* counter for diagnostics output */
@@ -205,9 +216,10 @@ void integrate_euler1()
 	}
 	if (i>=nsteps) break;           /* see if need to quit looping */
 
-	time += dt;                     /* advance particle */
+	time   += dt;                     /* advance particle */
         acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
         acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
+	
 
 	pos[0] += dt*vel[0];
 	pos[1] += dt*vel[1];
@@ -230,10 +242,17 @@ void integrate_euler1()
 	    Uorb(o_out,isave) = vel[0];
 	    Vorb(o_out,isave) = vel[1];
 	    Worb(o_out,isave) = vel[2];
+#ifdef ORBIT_PHI
+	    (*pot)(&ndim,pos,acc,&epot,&time);	    
+	    Porb(o_out,isave) = epot   - 0.5*omega2*(pos[0]*pos[0]+pos[1]*pos[1]);
+	    AXorb(o_out,isave)= acc[0] + omega2*pos[0] + tomega*vel[1];
+	    AYorb(o_out,isave)= acc[1] + omega2*pos[1] - tomega*vel[0];
+	    AZorb(o_out,isave)= acc[2];
+#endif	    
 	}
     } /* for(;;) */
-    if (ndiag)
-    dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+    if (ndiag)          // @todo   make this also print if ndiag=0
+      dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
 }
 
 /* Modified Euler integration (drift/kick) */
@@ -300,6 +319,12 @@ void integrate_euler2()
 	    Uorb(o_out,isave) = vel[0];
 	    Vorb(o_out,isave) = vel[1];
 	    Worb(o_out,isave) = vel[2];
+#ifdef ORBIT_PHI
+	    Porb(o_out,isave) = epot   - 0.5*omega2*(pos[0]*pos[0]+pos[1]*pos[1]);
+	    AXorb(o_out,isave)= acc[0];
+	    AYorb(o_out,isave)= acc[1];
+	    AZorb(o_out,isave)= acc[2];
+#endif	    
 	}
 	if (i>=nsteps) break;           /* see if need to quit looping */
 
@@ -347,7 +372,7 @@ void integrate_leapfrog1_implicit_test()
 	vel[0] = (vel0 + dt*omega*vel1)/det;
 	vel[1] = (vel1 - dt*omega*vel0)/det;
 #endif
-	vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	vel[2] += dt2*acc[2];
 	while (i<nsteps) {
 		i++;
 		time += dt;
@@ -367,7 +392,7 @@ void integrate_leapfrog1_implicit_test()
 		vel[0] += dvel0;	/* half an integration */
 		vel[1] += dvel1;
 #endif
-	        vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	        vel[2] += dt2*acc[2];
 
 		if (ndiag && ++kdiag == ndiag) {
 		    e_last=print_diag(time,pos,vel,epot);
@@ -384,6 +409,12 @@ void integrate_leapfrog1_implicit_test()
 		    Uorb(o_out,isave) = vel[0];
 		    Vorb(o_out,isave) = vel[1];
 		    Worb(o_out,isave) = vel[2];
+#ifdef ORBIT_PHI
+		    Porb(o_out,isave) = epot;    // plus centrifugal term?
+		    AXorb(o_out,isave)= acc[0];  // not correction for omega ?
+		    AYorb(o_out,isave)= acc[1];
+		    AZorb(o_out,isave)= acc[2];
+#endif	    
 		}
                 /* put back out of sync */
 #if 0
@@ -393,7 +424,7 @@ void integrate_leapfrog1_implicit_test()
 		vel[0] += dvel0;	/* fix up the remaining half */
 		vel[1] += dvel1;
 #endif
-	        vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	        vel[2] += dt2*acc[2];
 	}
     if (ndiag)
     dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
@@ -415,6 +446,13 @@ void integrate_leapfrog1()
 	vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
 	vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
 	vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+#ifdef ORBIT_PHI
+	Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
+	AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
+	AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
+	AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
+#endif    
+	
 	ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
 	kdiag=0;			/* reset-counter for diagnostics */
 	ksave=0;			/* reset-counter for saving */
@@ -425,7 +463,7 @@ void integrate_leapfrog1()
         /* prepare half step for LEAPFROG to get VEL and POS out of sync */
 	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
 	vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	vel[2] += dt2*acc[2];
 	while (i<nsteps) {
 		i++;
 		time += dt;
@@ -436,7 +474,7 @@ void integrate_leapfrog1()
                 /* bring back to sync for possible output */
         	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
 	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	        vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	        vel[2] += dt2*acc[2];
 
 		if (ndiag && ++kdiag == ndiag) {
 		    e_last=print_diag(time,pos,vel,epot);
@@ -457,11 +495,11 @@ void integrate_leapfrog1()
                 /* put back out of sync */
         	vel[0] += dt2*(acc[0]+omega2*pos[0]+tomega*vel[1]);
 	        vel[1] += dt2*(acc[1]+omega2*pos[1]-tomega*vel[0]);
-	        vel[2] += dt2*(acc[2]+omega2*pos[2]);
+	        vel[2] += dt2*acc[2];
 
 	}
     if (ndiag)
-    dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
+      dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
 }
 
 /* Modified Leapfrog, as used in hackcode1 */
@@ -562,6 +600,12 @@ void integrate_rk2()
     vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
     vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
     vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+#ifdef ORBIT_PHI
+    Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
+    AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
+    AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
+    AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
+#endif    
 
     ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
     kdiag=0;			/* counter for diagnostics output */
@@ -597,7 +641,7 @@ void integrate_rk2()
 	    ksave=0;
 	    isave++;
 	    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
-            if (isave>=Nsteps(o_out)) error("Storage error EULER");
+            if (isave>=Nsteps(o_out)) error("Storage error RK2");
 	    Torb(o_out,isave) = time;
 	    Xorb(o_out,isave) = pos[0];
 	    Yorb(o_out,isave) = pos[1];
@@ -605,6 +649,13 @@ void integrate_rk2()
 	    Uorb(o_out,isave) = vel[0];
 	    Vorb(o_out,isave) = vel[1];
 	    Worb(o_out,isave) = vel[2];
+#ifdef ORBIT_PHI
+	    (*pot)(&ndim,pos,acc,&epot,&time);
+	    Porb(o_out,isave) = epot   - 0.5*omega2*(pos[0]*pos[0]+pos[1]*pos[1]);
+	    AXorb(o_out,isave)= acc[0] + omega2*pos[0] + tomega*vel[1];
+	    AYorb(o_out,isave)= acc[1] + omega2*pos[1] - tomega*vel[0];
+	    AZorb(o_out,isave)= acc[2];
+#endif	    
 	}
     } /* for(;;) */
     if (ndiag)
@@ -629,6 +680,12 @@ void integrate_rk4()
     vel[0] = Uorb(o_out,0) = Uorb(o_in,Nsteps(o_in)-1);
     vel[1] = Vorb(o_out,0) = Vorb(o_in,Nsteps(o_in)-1);
     vel[2] = Worb(o_out,0) = Worb(o_in,Nsteps(o_in)-1);
+#ifdef ORBIT_PHI
+    Porb(o_out,0)  = Porb(o_in,Nsteps(o_in)-1);
+    AXorb(o_out,0) = AXorb(o_in,Nsteps(o_in)-1);
+    AYorb(o_out,0) = AYorb(o_in,Nsteps(o_in)-1);
+    AZorb(o_out,0) = AZorb(o_in,Nsteps(o_in)-1);
+#endif    
 
     ndim=Ndim(o_in);		/* number of dimensions (2 or 3) */
     kdiag=0;			/* counter for diagnostics output */
@@ -666,7 +723,7 @@ void integrate_rk4()
 	    ksave=0;
 	    isave++;
 	    dprintf(2,"writing isave=%d for i=%d\n",isave,i);
-            if (isave>=Nsteps(o_out)) error("Storage error EULER");
+            if (isave>=Nsteps(o_out)) error("Storage error RK4");
 	    Torb(o_out,isave) = time;
 	    Xorb(o_out,isave) = pos[0];
 	    Yorb(o_out,isave) = pos[1];
@@ -674,14 +731,21 @@ void integrate_rk4()
 	    Uorb(o_out,isave) = vel[0];
 	    Vorb(o_out,isave) = vel[1];
 	    Worb(o_out,isave) = vel[2];
+#ifdef ORBIT_PHI
+	    (*pot)(&ndim,pos,acc,&epot,&time);
+	    Porb(o_out,isave) = epot - 0.5*omega2*(pos[0]*pos[0]+pos[1]*pos[1]);
+	    AXorb(o_out,isave)= acc[0] + omega2*pos[0] + tomega*vel[1];
+	    AYorb(o_out,isave)= acc[1] + omega2*pos[1] - tomega*vel[0];
+	    AZorb(o_out,isave)= acc[2];
+#endif	    
 	}
     } /* for(;;) */
     if (ndiag)
     dprintf(0,"Energy conservation: %g\n", ABS((e_last-I1(o_out))/I1(o_out)));
 }
 
-set_rk(double *ko, double *pos, double *vel, double *acc, 
-       int n, double dt, double *ki)
+void set_rk(double *ko, double *pos, double *vel, double *acc, 
+	    int n, double dt, double *ki)
 {
     double tpos[3], tvel[3], epot, tdum;
     int ndim=3;
@@ -707,8 +771,7 @@ set_rk(double *ko, double *pos, double *vel, double *acc,
     ko[2] = dt*tvel[2];
     ko[3] = dt*(acc[0] + omega2*tpos[0] + tomega*tvel[1]);
     ko[4] = dt*(acc[1] + omega2*tpos[1] - tomega*tvel[0]);
-    ko[5] = dt*(acc[2] + omega2*tpos[2]);
-
+    ko[5] = dt*acc[2];
 }
 
 
@@ -724,9 +787,8 @@ real print_diag(double time, double *pos, double *vel, double epot)
     permanent double etot_0, etot_00;
     double err;
 	
-    ekin=sqr(vel[0]) + sqr(vel[1])+ sqr(vel[2]);
-    ekin *= 0.5;
-    epot -= 0.5*omega2*(sqr(pos[0]) + sqr(pos[1])+ sqr(pos[2]));
+    ekin = 0.5*(sqr(vel[0]) + sqr(vel[1])+ sqr(vel[2]));
+    epot -= 0.5*omega2*(sqr(pos[0]) + sqr(pos[1]));   
     if (first) {
         dprintf (1,"time   Etot =   ekin +  epot\n");
 	first = FALSE;
