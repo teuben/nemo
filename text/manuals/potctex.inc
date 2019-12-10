@@ -164,6 +164,18 @@ See also {\bf dublinz} for a variation on this theme.
 potpars={\it $\Omega,v_0,r_c$}} 
 
 
+\section{hh64}
+\index{potential, hh64.c}
+% File: hh64.c
+
+% CTEX Line: 10
+{\bf potname=hh64
+potpars={\it $\Omega,\lambda$}}
+
+
+$$
+       \Phi = {1 \over 2} ( x^2 + x^2 ) + \lambda ( x^2 y - {1\over 3} y^3 )
+$$
 
 
 \section{grow\_plum}
