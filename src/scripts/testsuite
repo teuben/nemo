@@ -162,11 +162,11 @@ cleanup:
         echo Results in $testdir/$log
 	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
 	if (-z $testdir/bsf-fail.log) then
-	    echo BSF regressions that are OK: `grep OK $testdir/bsf-fail.log | wc -l`
+	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
 	else
 	    echo BSF regression results that failed:
 	    cat $testdir/bsf-fail.log
-	    echo BSF regressions that are OK: `grep OK $testdir/bsf-fail.log | wc -l`
+	    echo BSF regressions that are not OK: `grep OK $testdir/bsf-fail.log | wc -l`
 	endif
 	echo If you have any unsolved problems, this file should be sent to the teuben@astro.umd.edu
         head -1 $testdir/$log
