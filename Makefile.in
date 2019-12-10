@@ -81,7 +81,7 @@ NEMO_RC_CSH = $(NEMO)/nemo_local.csh
 NEMO_RC_SH  = $(NEMO)/nemo_local.sh
 
 #  Master site (Maryland) specific, and probably not used anywhere else
-FTPDIR = /local/ftp/pub/nemo/
+FTPDIR = /n/ftp/pub/nemo/
 SFTPDIR = chara.astro.umd.edu:$(FTPDIR)
 WWWDIR = $(NEMO)/local/www
 ################################################################################
