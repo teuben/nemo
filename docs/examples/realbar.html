@@ -6,9 +6,9 @@
 Here is an examples of a script to make a real bar in a composite disk
 galaxy with  bulge, disk, and halo. There are currently two programs in NEMO
 that create realistic galaxies: 
-<A HREF=http://carma.astro.umd.edu/nemo/man_html/magalie.1.html>magalie</A>
+<A HREF=../man_html/magalie.1.html>magalie</A>
 and
-<A HREF=http://carma.astro.umd.edu/nemo/man_html/mkkd95.1.html>mkkd95</A>
+<A HREF=../man_html/mkkd95.1.html>mkkd95</A>
 <P>
 Initial conditions, integration and visual inspection of the integration 
 as follows:
@@ -21,7 +21,7 @@ A few words on the units:  V=1 is scaled to the milky way's 220 km/s,
 R=1 is the (exponential) scale-length of the disk, where the sun is
 at about R=2.4 (=8 kpc). Hence the unit of time is about 15 Myr
 (see also 
-<A HREF=http://carma.astro.umd.edu/nemo/man_html/units.1.html>units</A>)
+<A HREF=../man_html/units.1.html>units</A>)
 <P>
 <IMG SRC=realbar1.gif>
 <P>
@@ -36,7 +36,7 @@ in the plot below.
 <IMG SRC=realbar2.gif>
 <P>
 and then aligning the bar E-W in all frames, using
-<A HREF=http://carma.astro.umd.edu/nemo/man_html/snaprect.1.html>snaprect</A>,
+<A HREF=../man_html/snaprect.1.html>snaprect</A>,
 looking at this orbit in the rotating frame of reference:
 <PRE>
    snaprect disk5.out disk5r.out 'i<20000?-phi*phi*phi:0'
@@ -45,7 +45,7 @@ looking at this orbit in the rotating frame of reference:
 <IMG SRC=realbar3.gif>
 <P>
 Finally, with a bit of hacking from 
-<A HREF=http://carma.astro.umd.edu/nemo/man_html/snapinert.1.html>snapinert</A>
+<A HREF=../man_html/snapinert.1.html>snapinert</A>
 and table formatting
 <PRE>
    snapinert disk5.out disk5.i3tab weight="i<20000?-phi*phi*phi:0" tab=t
