@@ -78,29 +78,10 @@
   Problem: can't get a fileno from a FILE * (the other way around
   is ok, use fileno()) so we're stuck....
 
-* nbody0: some weird problems with some (all?) gcc 2.96's:
-  e.g. gcc 2.96 20000731 (Linux-Mandrake 8.0 2.96-0.48mdk) 
-	-O0 	is ok
-	-g  	is ok
-	-O1 	is bad
-	-g -O2	is bad
-  cd $NEMO/src/nbody/evolve/aarseth/nbody0
-	make clean nbody00 OPT=-O0
-	make -f Testfile clean all
-  (this assumes you have a makedefs file with hacked OPT in it, not
-  CFLAGS)
-
-  gcc3.0 is ok again, as is 2.95.3
-
 
 - -DSINGLEPREC:  scfm does not work
  		 athan92 shows some significant force differences
 		 testsuite nbody/init and nbody/evolve/flowcode have problems
-
-- sgi:  for 64 bit mode add
-	 -mabi=64   (if gnu) ,or
-	-64
-  For 64 bit compilations.
 
 ? kawai/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
   (at least on linux)
@@ -122,7 +103,3 @@
   classic 4:3, the plot is not square
 
 
-==
-
-pot and acc:  
-gyralcON wanted sqr in plummer.so
