@@ -10,6 +10,7 @@
  * 22-aug-00        c bit more ansi cc					pjt
  * 15-mar-02        d added option log to allow piping of output        WD 
  * 31-dec-02    V1.4  gcc3/SINGLEPREC
+ *  1-mar-2019
  *
  *  TODO:
  *    might need a snapshape program, see e.g.
@@ -21,6 +22,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -36,7 +38,8 @@ string defv[] = {
     "times=all\n		  range of times to transform",
     "log=\n                       write to this file instead of stdout",
     "test=\n                      Use this snapshot instead, to transform",
-    "VERSION=1.4\n		  31-dec-02 PJT",
+    "pos=t\n                      Use pos, or vel, or rectify",
+    "VERSION=1.5a\n		  6-nov-2019 PJT",
     NULL,
 };
 
@@ -47,18 +50,33 @@ int nbody;			/* number of bodies in array		    */
 real tsnap = 0.0;		/* time associated with data		    */
 Body *testtab = NULL;
 bool Qtest;
+bool Qpos; 
 
 rproc_body weight;		/* weighting function for bodies	    */
 
 real rcut;			/* cutoff to suppress outlying bodies	    */
 
-nemo_main()
+void roughcenter(body *btab);
+void findcenter(body *btab);
+void findmoment(body *btab);
+void findmoment_vel(body *btab);
+void snaptransform(stream out);
+void eigenframe(vector frame[], matrix mat);
+void printvec(string name, vector vec, stream out);
+void xyz2rtp(vector xyz, vector rtp);
+
+
+void jacobi(float **a,int n,float d[],float **v,int *nrot);
+void eigsrt(float d[],float **v, int n);
+
+void nemo_main(void)
 {
     stream instr, outstr, logstr;
     string times;
     int bits;
 
     weight = btrtrans(getparam("weight"));
+    Qpos = getbparam("pos");
     Qtest = hasvalue("test");
     if (Qtest) {
     	instr = stropen(getparam("test"),"r");
@@ -99,7 +117,7 @@ vector w_vel;			/* weighted center of mass velocity	    */
 
 matrix w_qpole;			/* weighted quadrupole moment		    */
 
-roughcenter(Body *btab)
+void roughcenter(Body *btab)
 {
     int i;
     real w_tot, w_b;
@@ -124,7 +142,7 @@ roughcenter(Body *btab)
     dprintf(1,"Roughcenter: %g %g %g\n",cm_pos[0], cm_pos[1], cm_pos[2]);
 }
 
-findcenter(Body *btab)
+void findcenter(Body *btab)
 {
     int i;
     Body *b;
@@ -151,7 +169,7 @@ findcenter(Body *btab)
     dprintf(1,"Findcenter: %g %g %g\n",w_pos[0], w_pos[1], w_pos[2]);
 }
 
-findmoment(Body *btab)
+void findmoment(Body *btab)
 {
     int i;
     Body *b;
@@ -172,6 +190,28 @@ findmoment(Body *btab)
     DIVMS(w_qpole, w_qpole, w_sum);
     dprintf(1,"Findmoment:\n");
 }
+
+void findmoment_vel(Body *btab)
+{
+    int i;
+    Body *b;
+    real w_b;
+    vector tmpv, pos_b;
+    matrix tmpm;
+
+    CLRM(w_qpole);
+    for (i = 0, b = btab; i < nbody; i++, b++) {
+	w_b = (weight)(b, tsnap, i);
+	if (w_b > 0.0 && (rcut <= 0.0 || distv(Pos(b), cm_pos) < rcut)) {
+	    SUBV(pos_b, Pos(b), w_pos);
+	    MULVS(tmpv, pos_b, w_b);
+	    OUTVP(tmpm, tmpv, pos_b);
+	    ADDM(w_qpole, w_qpole, tmpm);
+	}
+    }
+    DIVMS(w_qpole, w_qpole, w_sum);
+    dprintf(1,"Findmoment_vel:\n");
+}
 
 vector oldframe[3] = {
     { 1.0, 0.0, 0.0, },
@@ -179,7 +219,7 @@ vector oldframe[3] = {
     { 0.0, 0.0, 1.0, },
 };
 
-snaptransform(stream out)
+void snaptransform(stream out)
 {
     vector frame[3], pos_b, vel_b, acc_b;
     Body *b;
@@ -212,7 +252,7 @@ snaptransform(stream out)
 
 #include "nrutil.h"
 
-eigenframe(vector frame[], matrix mat)
+void eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -230,7 +270,7 @@ eigenframe(vector frame[], matrix mat)
 	    frame[i-1][j-1] = v[j][i];
 }
 
-printvec(string name, vector vec, stream out)
+void printvec(string name, vector vec, stream out)
 {
     vector rtp;	/* radius - theta - phi */
     xyz2rtp(vec,rtp);
@@ -239,7 +279,7 @@ printvec(string name, vector vec, stream out)
 	    rtp[1]*180.0/PI, rtp[2]*180.0/PI);
 }
 
-xyz2rtp(vector xyz, vector rtp)
+void xyz2rtp(vector xyz, vector rtp)
 {
     real z = xyz[2];
     real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));
