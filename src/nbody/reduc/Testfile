@@ -19,6 +19,7 @@ all:	snap.in hack.out $(BIN)
 snap.in:
 	@echo Creating $@
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
+	@bsf cube.in
 
 cube.in: snap.in
 	@echo Creating $@
@@ -27,10 +28,12 @@ cube.in: snap.in
 hack.out: snap.in
 	@echo Creating $@
 	$(EXEC) hackcode1 snap.in hack.out fcells=4 tstop=2 freqout=1 > /dev/null
+	@bsf hack.out	
 
 hack2.out: snap.in
 	@echo Creating $@
 	$(EXEC) hackcode1 snap.in hack2.out fcells=4 tstop=10 freqout=8 > /dev/null
+	@bsf hack2.out	
 
 snapplot: hack.out
 	@echo Running $@
