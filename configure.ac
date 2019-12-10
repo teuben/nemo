@@ -113,12 +113,12 @@ fi
 
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-  flags="ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
+  flags="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
   flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
   flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O4"
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
-  FFLAGS="$CFLAGS $flags"
+  # FFLAGS="$CFLAGS $flags"
 fi
 
 AC_MSG_CHECKING(which precision NEMO is going to use)
