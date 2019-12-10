@@ -10,16 +10,21 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f orb1.in snap1.in orb?.out orb??.out snap?.out orb?.log
+	@rm -f orb1.in orb2.in snap1.in orb?.out orb??.out snap?.out orb?.log
 
 NBODY = 10
+OMEGA = 0.1
 
 all:    $(BIN)
 
 mkorbit:
 	@echo Running $@
 	$(EXEC) mkorbit orb1.in x=1 vy=1 potname=plummer
-	@bsf orb1.in "0.179569 0.449097 -0.353553 1 18"
+	@bsf orb1.in "0.151791 0.486094 -0.707107 1 18"
+
+orb2.in:
+	$(EXEC) mkorbit orb2.in x=1 vy=1 potname=plummer potpars=$(OMEGA)
+	@bsf orb2.in "0.151513 0.4863 -0.707107 1 18"
 
 otos:
 	@echo Running $@
@@ -28,30 +33,42 @@ otos:
 	$(EXEC) potcode snap1.in snap2.out plummer freq=10 tstop=1 freqout=10 mode=6  > orb2.log
 	$(EXEC) potcode snap1.in snap3.out plummer freq=10 tstop=1 freqout=10 mode=5  > orb3.log
 	$(EXEC) potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4  > orb4.log
-	@bsf snap1.in
-	@bsf snap1.out
-	@bsf snap2.out
-	@bsf snap3.out
-	@bsf snap4.out
+	@bsf snap1.in '0.285714 0.451754 0 1 7'
+	@bsf snap1.out '0.0990123 0.413027 -1.03153 1.03153 485'
+	@bsf snap2.out '0.0977812 0.409197 -1 1 485'
+	@bsf snap3.out '0.0975953 0.409614 -1 1 485'
+	@bsf snap4.out '0.0977268 0.40934 -1 1 485'
 	
 	
-orbint: orb1.in
+orbint: orb1.in orbint2
 	@echo Running $@
 	$(EXEC) orbint orb1.in orb1.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=euler   
 	$(EXEC) orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me      
 	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
 	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
-	@bsf orb1.out
-	@bsf orb2.out
-	@bsf orb3.out
-	@bsf orb4.out
+	@bsf orb1.out '0.146682 0.502794 -0.707107 1 128'
+	@bsf orb2.out '0.155618 0.492162 -0.705346 1 128'
+	@bsf orb3.out '0.231297 0.417577 -0.707107 1 128'
+	@bsf orb4.out '0.144751 0.500719 -0.707107 1 128'
+
+orbint2: orb2.in
+	@echo Running $@
+	$(EXEC) orbint orb2.in orb2a.out nsteps=10000 dt=0.01 ndiag=1000 mode=euler   
+	$(EXEC) orbint orb2.in orb2b.out nsteps=10000 dt=0.01 ndiag=1000 mode=leapfrog
+	$(EXEC) orbint orb2.in orb2c.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk2
+	$(EXEC) orbint orb2.in orb2d.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk4
+	@bsf orb2a.out '4.28069 17.0096 -9.04051 100 110018'
+	@bsf orb2b.out '4.33963 16.9909 -8.84718 100 110018'
+	@bsf orb2c.out '4.29883 17.0019 -8.86182 100 110018'
+	@bsf orb2d.out '4.29881 17.0019 -8.8621 100 110018'
+
 
 orbintv:
 	@echo Running $@
 	$(EXEC) orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
 	$(EXEC) orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
-	@bsf orb1v.out
-	@bsf orb2v.out
+	@bsf orb1v.out '0.949343 2.26243 -2.46954 10 714'
+	@bsf orb2v.out '0.949343 2.26243 -2.46954 10 714'
 
 orblist:
 	@echo Running $@
