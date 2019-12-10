@@ -6,12 +6,12 @@
 
 /*CTEX
  * {\bf potname=htt
- *       potpars={\it $\Omega$}}
+ *       potpars={\it $\Omega,\lambda$}}
  *
  *
  * Henon Heiles 1964 potential
  * $$
- *        \Phi = {1 \over 2} ( x^2 + x^2 ) + \lambda ( 2x^2 y - {2\over 3} y^3 )
+ *        \Phi = {1 \over 2} ( x^2 + x^2 ) + \lambda ( x^2 y - {1\over 3} y^3 )
  * $$
  */
  
@@ -39,9 +39,11 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
   int    i;
   double x = pos[0];
   double y = pos[1];
+  double xx = x*x;
+  double yy = y*y;
   
-  *pot = 0.5 * (x*x + y*y) + lambda * (x*x*y - y*y*y/3);
+  *pot = 0.5 * (xx + yy) + lambda * (xx - yy/3) * y;
   acc[0] = -x - lambda*2*x*y;
-  acc[1] = -y - lambda*(x*x - y*y);
+  acc[1] = -y - lambda*(xx - yy);
   acc[2] = 0.0;
 }
