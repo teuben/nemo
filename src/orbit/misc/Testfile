@@ -19,6 +19,7 @@ all:    $(BIN)
 mkorbit:
 	@echo Running $@
 	$(EXEC) mkorbit orb1.in x=1 vy=1 potname=plummer
+	@bsf orb1.in "0.179569 0.449097 -0.353553 1 18"
 
 otos:
 	@echo Running $@
@@ -29,12 +30,13 @@ otos:
 	$(EXEC) potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4  > orb4.log
 	
 	
-orbint:
+orbint: orb1.in
 	@echo Running $@
 	$(EXEC) orbint orb1.in orb1.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=euler   
 	$(EXEC) orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me      
 	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
-	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4     
+	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
+	@bsf 
 
 orbintv:
 	@echo Running $@
