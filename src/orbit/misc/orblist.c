@@ -22,7 +22,7 @@ string defv[] = {
   "maxsteps=10000\n   Maximum number of steps allowed",
   "format=%g\n        Format for output",
   "mode=t,p,v\n       Output:  o,t,p,v",
-  "VERSION=2.4\n      15-feb-03 PJT",
+  "VERSION=2.4\n      9-dec-2019 PJT",
   NULL,
 };
 
@@ -42,7 +42,7 @@ local int    n;
 local double trange[2];   /* time range to plot */
 local int maxsteps;
 
-nemo_main ()
+void nemo_main(void)
 {
 	int ndim;
 	string format = getparam("format");
