@@ -28,6 +28,11 @@ otos:
 	$(EXEC) potcode snap1.in snap2.out plummer freq=10 tstop=1 freqout=10 mode=6  > orb2.log
 	$(EXEC) potcode snap1.in snap3.out plummer freq=10 tstop=1 freqout=10 mode=5  > orb3.log
 	$(EXEC) potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4  > orb4.log
+	@bsf snap1.in
+	@bsf snap1.out
+	@bsf snap2.out
+	@bsf snap3.out
+	@bsf snap4.out
 	
 	
 orbint: orb1.in
@@ -36,13 +41,17 @@ orbint: orb1.in
 	$(EXEC) orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me      
 	$(EXEC) orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
 	$(EXEC) orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
-	@bsf 
+	@bsf orb1.out
+	@bsf orb2.out
+	@bsf orb3.out
+	@bsf orb4.out
 
 orbintv:
 	@echo Running $@
 	$(EXEC) orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
 	$(EXEC) orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
-
+	@bsf orb1v.out
+	@bsf orb2v.out
 
 orblist:
 	@echo Running $@
