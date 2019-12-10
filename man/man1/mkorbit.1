@@ -1,4 +1,4 @@
-.TH MKORBIT 1NEMO "2 March 1992" 
+.TH MKORBIT 1NEMO "10 December 2019"
 .SH NAME
 mkorbit \- make an orbit with initial conditions
 .SH SYNOPSIS
@@ -34,13 +34,17 @@ Initial value of velocity along x-axis [default: not used]
 \fBvy=\fIy-velocity\fP
 Initial value of velocity along y-axis [default: not used]
 .TP
-\fBe=\fIenergy\fP
+\fBetot=\fIenergy\fP
 Energy of the orbit. If no value is given, the program assumes
 that all phase space coordinates will be used. If a value for
 the energy is given, one of the phase space velocities may be
 left out, and will be calculated. In this case the potential
 where the orbit is calculated in, must also be given, see next
 3 parameters [default: not used].
+.TP
+\fBlz=\fP
+The sign of \fBlz\fP will determine sense of rotation if
+only X or Y is given with etot.
 .TP
 \fBpotname=\fIname\fP
 name of file of the \fIpotential(5NEMO)\fP descriptor, 
@@ -74,4 +78,5 @@ xx-jul-87	V1.0: Created:	PJT
 4-May-88	V2.1: keywords e,potential etc. implemented	PJT
 2-Jun-88	V2.2: new filestruct, no code change	PJT
 2-Mar-92	V2.3: new NEMO 2.x	PJT
+10-dec-2019	V4.4: implemented PHI/ACC storage; simplified orbit launching	PJT
 .fi
