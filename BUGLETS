@@ -1,16 +1,13 @@
-* this file is called BUGLETS, it used to be called BUGS anymore until
-  this so-called MacOSX unix clone came around and decided it cannot 
-  handle case sensitive file/directory names. Cygwin isn't much better
-  (they all depend on a weaker FS, vfat and HFS+ which cannot handle
-  such names)
+
 
 * active issues are now moved to https://github.com/teuben/nemo/issues
 
+
 * this is the TODO list for the 4.1 release
 
-- falcon for bash !
 - default configure gives yapp.ps, but should check if pgplot is natively there
 - is rman partially broken on U18?
+       PolyglotMan v3.2 of $Date: 2003/07/26 19:00:48 $
 - fix up bsf ? might need label= to override input pipe
 - finish populating bsf in Testfile's
 - some notebooks for associated stuff
@@ -20,7 +17,8 @@
 - is there rman -> rst ?
 
 
-* Below here just old stuff, 
+
+* Below here old stuff - some are still relevant
 
 
 - install on machines where IRAF's f77 is in the path before the 
@@ -42,10 +40,6 @@
 	- FORLIBS get crt1.o or something, and this is not needed,
 	and will cause linkers to fail. It needs to be removed
 	from the $NEMOLIB/makedefs 
-
-* LFS seems to work, but keep an eye open on e.g.
-	http://www.suse.de/~aj/linux_lfs.html
-  for an outline of the problems
 
 - large objects (> 2GB or > 4GB), specifically snapshots, can be limited
   in size of they use private calls to allocate() without making sure the
@@ -114,16 +108,6 @@
 - fie:  ifgt(%1,0,log(%1),-10) doesn't work,e.g. seems to work in nemoinp
   but not via ccdmath/tabmath, e.g.
    echo -10 | tabmath - - 'ifgt(%1,0,log(%1),%1)'
-
-
-- cygwin
-     mathfns.h   :  rlog2 needs to be #if 0'd because of the macro cygwin is using
-     falcON/make.defs:  no -ldl needed
-	(also the gcc 3.3 with const in falcON/inc/public/nsam.h is needed)
-     falcON/src/public/tool.cc: std::isnan(t)) commented out, doesn't seem to exist
-
-     in addition, tools like mknemo won't copy the executable to $NEMOBIN/ since
-     it doesn't know about the .exe  extension thatg cygwin is using
 
 - x86_64:  our configure doesn't always seem to recognize /usr/X11R6/lib64 should be used
   instead of /usr/X11R6/lib ....
