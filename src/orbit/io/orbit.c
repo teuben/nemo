@@ -22,6 +22,7 @@
  *   1-mar-03   V3.3  added stuff for iom_err			pjt
  *  25-jul-13   V4.0  added support for key                     pjt
  *  12-nov-2015 V5.0  some support for split Pos/Vel            pjt
+ *  10-dec-2019 V5.1  optional support for PHI/ACC              pjt
  *------------------------------------------------------------------------------
  */
 
@@ -37,7 +38,7 @@
 
 void write_orbit (stream outstr, orbitptr optr)
 {
-    /* No history written here, user should do this on his own */
+    /* No history written here, user should do this */
     put_set (outstr,OrbitTag);
         put_set (outstr,ParametersTag);
             put_data (outstr,NdimTag,    IntType, &(Ndim(optr)),   0);
@@ -60,6 +61,13 @@ void write_orbit (stream outstr, orbitptr optr)
                                 TimePath(optr), Nsteps(optr), 0);
             put_data (outstr,PhasePathTag,RealType, 
                                 PhasePath(optr), Nsteps(optr), 2, Ndim(optr), 0);
+#ifdef ORBIT_PHI
+	    put_data (outstr,PhiPathTag,RealType,
+		      PhiPath(optr), Nsteps(optr), 0);
+	    put_data (outstr,AccPathTag,RealType,
+		      AccPath(optr), Nsteps(optr), Ndim(optr), 0);
+	    
+#endif	    
         put_tes (outstr,PathTag);
     put_tes (outstr,OrbitTag);
 }
@@ -136,6 +144,12 @@ int read_orbit (stream instr, orbitptr *optr)
                       TimePath(*optr), Nsteps(*optr), 0);
             get_data (instr,PhasePathTag,RealType, 
                       PhasePath(*optr), Nsteps(*optr), 2, Ndim(*optr), 0);
+#ifdef ORBIT_PHI
+            get_data (instr,PhiPathTag,    RealType, 
+                      PhiPath(*optr), Nsteps(*optr), 0);
+            get_data (instr,AccPathTag,RealType, 
+		      AccPath(*optr), Nsteps(*optr), Ndim(*optr), 0);
+#endif	    
         get_tes (instr,PathTag);
     get_tes (instr,OrbitTag);
     return 1;
@@ -171,6 +185,10 @@ int allocate_orbit(orbitptr *optr, int ndim, int nsteps)
     dprintf (2,"   Timepath allocated @ %x\n",TimePath(*optr));
     PhasePath(*optr) = (real* ) allocate(nsteps*ndim*2*sizeof(real));
     dprintf (2,"  Phasepath allocated @ %x\n",PhasePath(*optr));
+#ifdef ORBIT_PHI
+    PhiPath(*optr) = (real *) allocate(nsteps*sizeof(real));
+    AccPath(*optr) = (real* ) allocate(nsteps*ndim*sizeof(real));
+#endif    
     Size(*optr) = ndim*nsteps;
     MAXsteps(*optr) = nsteps;  /* ??? */
 
@@ -207,6 +225,12 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
             Uorb(optr,i) = Uorb(iptr,i);
             Vorb(optr,i) = Vorb(iptr,i);
             Worb(optr,i) = Worb(iptr,i);
+#ifdef ORBIT_PHI	    
+	    Porb(optr,i) = Porb(iptr,i);
+	    AXorb(optr,i)= AXorb(iptr,i);
+	    AYorb(optr,i)= AYorb(iptr,i);
+	    AYorb(optr,i)= AYorb(iptr,i);
+#endif
         }
 }
 
@@ -258,7 +282,7 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
 string defv[] = {
         "name=???\n   Filename",
         "mode=w\n     R or W",
-        "VERSION=1.2\n 24-jul-2013 pjt",
+        "VERSION=1.3\n 10-dec-2019 pjt",
         NULL,
 };
 

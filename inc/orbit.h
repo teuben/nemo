@@ -16,11 +16,14 @@
  *  11-apr-95    V3.1b no more ARGS, included more header files here
  *   1-mar-03    V3.3  added iom_err, errors in the integrals of motion
  *  25-jul-13    V4.0  added Key
+ *  10-dec-2019  V4.1  added optional PHI and ACC (for BOOM)
  */
 
 #include <filestruct.h>
 #include <potential.h>
 #include <history.h>
+
+#define ORBIT_PHI
 
 typedef struct {
         int   ndim;
@@ -34,6 +37,10 @@ typedef struct {
         int   maxsteps;
         real  *time;
         real  *phase;
+#ifdef ORBIT_PHI
+        real  *phi;
+        real  *acc;
+#endif  
 	a_potential pot;
 } orbit, *orbitptr;
 
@@ -50,6 +57,8 @@ typedef struct {
 #define PhasePath(optr) ((optr)->phase)
 #define PosPath(optr)   ((optr)->phase)
 #define VelPath(optr)   ((optr)->phase+Ndim(optr))
+#define PhiPath(optr)   ((optr)->phi)
+#define AccPath(optr)   ((optr)->acc)
 #define Potential(optr) ((optr)->pot)
 
 /*      a few dangerous (does not check for ndim) access functions */
@@ -79,6 +88,10 @@ typedef struct {
 #define Uorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)))
 #define Vorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+1))
 #define Worb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+2))
+#define Porb(optr,i)    (*(PhiPath(optr)+(i)))
+#define AXorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)))
+#define AYorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+1))
+#define AZorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+2))
 
 #define PotName(optr)   (Potential(optr).name)
 #define PotPars(optr)   (Potential(optr).pars)
@@ -108,6 +121,8 @@ typedef struct {
 #define     PhasePathTag        "PhasePath"
 #define     PosPathTag          "PosPath"
 #define     VelPathTag          "VelPath"
+#define     PhiPathTag          "PhiPath"
+#define     AccPathTag          "AccPath"
 
 
 
