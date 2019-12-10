@@ -493,13 +493,23 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     if(3-extA > At) At = 3-extA;                // gamma_0 for potential
     double dmdlr = mt[0] * extA;                // dM_e/dlnr assuming power law
     spline<double> Sext(lr,mt,&dmdlr);
+    int pjt = 0;                                // warn if pjt becomes non-0
     for(int i=0; i!=n; ++i) {
       Sext(lr[i], &(rh[i]));                    // G*rho = d(G*M)/dlnr
       rh[i] /= FPi * cube(r[i]);                //       / (4 Pi r^3)
+      DebugInfo(9,"PJT: %d %g %g\n", i, r[i], rh[i]);
+#if 0      
       if(!(rh[i]>0))
-	falcON_THROW("HaloPotential: external Rh(%g)=%20.16g",
-	      r[i],rh[i]);
+	falcON_THROW("HaloPotential: external Rh(%g)=%20.16g i=%d n=%d",
+		     r[i],rh[i],i,n);
+#else
+      if (rh[i] < 0) {                          // dunno why this is now
+	if (pjt==0) pjt=i;                      // needed; float/double?
+	rh[i] = 0.0;
+      }
+#endif      
     }
+    if (pjt) falcON_Warning("HaloModel: PJT patched at %d/%d\n",pjt,n);
     DebugInfo(4,"HaloPotential: M_mono(<%g)=%g\n",r[n1],mt[n1]);
   }
   // 2.2 make mt hold the total cumulative mass and rh the total density
