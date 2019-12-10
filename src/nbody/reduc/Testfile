@@ -19,7 +19,7 @@ all:	snap.in hack.out $(BIN)
 snap.in:
 	@echo Creating $@
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
-	@bsf cube.in
+	@bsf snap.in
 
 cube.in: snap.in
 	@echo Creating $@
