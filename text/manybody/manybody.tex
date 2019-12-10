@@ -60,7 +60,7 @@
 % ???  2010
 {
 
-\date{{\small Version 2.0} \\
+\date{{\small Version 2.0a} \\
       {\small Spring 2010} \\
       {\small Last document revised: \today} \\ 
       {\small \tt URL: http://www.astro.umd.edu/nemo/manybody/} \\
@@ -514,8 +514,8 @@ treats forces with the Ahmad-Cohen neighbor scheme (see Ahmed Cohen 1973).
 
   # File: examples/ex3
   1% mkplummer p100 100 seed=123
-
-  2% runbody1 in=p100 outdir=run1 nbody=100
+                                          # example is now wrong, units are code (virial) now  2(sqrt(2))
+  2% runbody1 in=p100 outdir=run1 
 
        N  NRAND    ETA   DELTAT   TCRIT   QE        EPS
 
@@ -549,8 +549,6 @@ treats forces with the Ahmad-Cohen neighbor scheme (see Ahmed Cohen 1973).
 
 \end{verbatim}\normalsize
 
-Here you are also witnessing a current quirk of this wrapper: 
-Although the number of bodies is known from the input file, it has to be re-specified.
 
 Notice that at T=0 two binaries were already found, in fact star 92 was
 involved in both binaries.
