@@ -14,6 +14,7 @@
 #
 
 set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.10-MacOSX-x86_64.sh
 set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh
 set msh   = $mc3:t
 set dir   = `pwd`/anaconda3
