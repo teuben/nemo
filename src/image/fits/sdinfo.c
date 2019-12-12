@@ -2,6 +2,7 @@
  * sample program to use cfitsio on SDFITS files
  *
  * 23-nov-2019   PJT       written
+ * 11-dec-2019
  *
  * Benchmark 6 N2347 files:  2.4"
  *
@@ -13,22 +14,20 @@
 #include <moment.h>
 #include <mdarray.h>
 
+#include <fitsio.h>  
+#include <longnam.h>
+
 string defv[] = {
     "in=???\n            Input SDFITS  fits file(s)",
     "stats=t\n           Doing simple stats",
     "mom=2\n             Highest moment for stats",
-    "VERSION=0.2\n       23-nov-2019 PJT",
+    "cols=\n             Column names to track",
+    "VERSION=0.3\n       11-dec-2019 PJT",
     NULL,
 };
 
 string usage = "sdfits info and bench";
 
-#if defined(HAVE_LIBCFITSIO)
-# include <fitsio.h>  
-# include <longnam.h>
-#else
-#error CFITSIO not available or properly configured
-#endif
 
   // inline
 float muladd(float x, float a, float b) {
@@ -38,19 +37,22 @@ float muladd(float x, float a, float b) {
 void nemo_main(void)
 {
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
-    int status, fmode, ii, jj, i, j, colnum,data_col;
+    int status, fmode, ii, jj, i, j, k, colnum,data_col;
     long int nrows;
-    int ncols, nchan, nfiles;
+    int ncols, nchan, nfiles, found;
     string fname = getparam("in"), *fnames;
     string *colnames;
     char template[64];
     char keyword[FLEN_KEYWORD], colname[FLEN_VALUE], data_fmt[FLEN_VALUE];
     bool Qstats = getbparam("stats");
     int mom = getiparam("mom");
+    string *colcheck = burststring(getparam("cols"),", ");
+    int ncolcheck = xstrlen(colcheck, sizeof(string))-1;
 
     fnames = burststring(fname,", ");
     nfiles = xstrlen(fnames, sizeof(string)) -1;
     dprintf(0,"Found %d files\n",nfiles);
+    dprintf(0,"Found %d cols to check\n",ncolcheck);
 
     for (j=0; j<nfiles; j++) {
       fname = fnames[j];
@@ -68,11 +70,11 @@ void nemo_main(void)
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
       colnames = (string *) allocate(ncols * sizeof(string));
       data_col = -1;
-      for (i=0; i<ncols; i++) {
+      for (i=0; i<ncols; i++) {    // loop over all columns to find the DATA column
 	ii = i + 1;
 	fits_make_keyn("TTYPE", ii, keyword, &status);
 	fits_read_key(fptr, TSTRING, keyword, colname, NULL, &status);
-	//colnames[i] = scopy(colname);
+	colnames[i] = scopy(colname);
 	dprintf(1,"%s = %s\n",keyword,colname);
 	if (streq(colname,"DATA")) {
 	  data_col = ii;
@@ -81,11 +83,24 @@ void nemo_main(void)
 	  nchan = atoi(data_fmt);
 	  dprintf(1,"DATA in column %d  nchan=%d\n",data_col,nchan);
 	}
+      } //for(i)
+      dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d\n",fname,nrows,ncols,nchan);
+
+      for (k=0; k<ncolcheck; ++k) {
+	for (i=0, found=0; i<ncols; ++i) {
+	  if (streq(colnames[i],colcheck[k])) {
+	    found = 1;
+	    fits_make_keyn("TFORM", i+1, keyword, &status);
+	    fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &status);	
+	    dprintf(0,"Found %s in column %d   fmt=%s\n",colnames[i],i+1,data_fmt);
+	  }
+	}
+	if (ncolcheck>0 && found==0) warning("Did not find %s",colcheck[k]);
       }
-      dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d\n",fname,nrows,ncols,nchan);      
+      
       int anynul = 0;
 
-#define ONEDIM
+      //#define ONEDIM
       
 #ifdef ONEDIM
       float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
@@ -112,25 +127,25 @@ void nemo_main(void)
 	  //sum += muladd(data[i], 1.0, 0.0);     // 2.1"
 	  //sum += data2[0][i];
 	  //sum += data1[i];                          // 1.6"
-	  //accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
-	}
+	  !accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
+	}//for(i)
 #else	
 	for (ii=0; ii<nrows; ii++) {                  // empty loop: 1.1"
 	  for (jj=0; jj<nchan; jj++) {
-	    sum += data2[ii][jj];                         // 3.1"
-	    //accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
+	    //sum += data2[ii][jj];                         // 3.1"
+	    accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
 	  }
 	}
 #endif	
 	dprintf(0,"mean: %g\n", sum / nmax);
 	if (mom > 1)
-	  printf("Mean: %g   Dispersion: %g Min: %g Max: %g\n",
-	       mean_moment(&m), sigma_moment(&m),
-	       min_moment(&m), max_moment(&m));
+	  printf("Mean: %g   Dispersion: %g Min: %g Max: %g   N: %d\n",
+		 mean_moment(&m), sigma_moment(&m),
+		 min_moment(&m), max_moment(&m), n_moment(&m));
 	else if (mom > 0)
-	  printf("Mean: %g   Dispersion: %g Min: %g Max: %g\n",
-	       mean_moment(&m), -1.0,
-	       min_moment(&m), max_moment(&m));
-      }
-    }
+	  printf("Mean: %g   Dispersion: %g Min: %g Max: %g   N: %d\n",
+		 mean_moment(&m), -1.0,
+		 min_moment(&m), max_moment(&m), n_moment(&m));
+      }//if(Qstats)
+    }//for(j) loop over files
 }
