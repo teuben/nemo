@@ -1,4 +1,4 @@
-.TH MKORBIT 1NEMO "10 December 2019"
+.TH MKORBIT 1NEMO "11 December 2019"
 .SH NAME
 mkorbit \- make an orbit with initial conditions
 .SH SYNOPSIS
@@ -62,6 +62,20 @@ all programs). The remaining parameters are used by the
 name of an optional datafile to the potential descriptor.
 This might be an N-body snapshot or table of spline fit
 coefficients etc. [default: none].
+.SH EXAMPLES
+To fully specify an orbit without the need for a potential
+.nf
+  % mkorbit orb1.dat 1 0 0  0 1 0
+.fi
+one can specifiy a potential, which simplifies using it in \fIorbint(1NEMO)\fP as the
+potential parameters do not need to be specified again:
+.nf
+  % mkorbit orb2.dat 1 0 0  0 1 0 potname=plummer potpars=0,2.0,0.3
+.fi
+or specify a launch point on the X or Y axis, and an energy, but here the potential is required:
+.nf
+  % mkorbit orb3.dat x=1 e=-1.4 potname=plummer potpars=0,2.0,0.3
+.fi
 .SH "SEE ALSO"
 stoo(1NEMO), potlist(1NEMO), orblist(1NEMO), mkgalorbit(1NEMO), mk2body(1NEMO), potential(5NEMO)
 .SH AUTHOR

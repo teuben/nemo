@@ -6,20 +6,20 @@ orbsos \- tabulate the SOS coordinates of an orbit
 \fBorbsos in=\fPorbit  [parameter=value]
 .SH DESCRIPTION
 \fBorbsos\fP will compute the Surface of Section (SOS) coordinates
-from an orbit. Currently one can only do this for 2D orbits, in the
+of an orbit. Currently one can only do this for 2D orbits in the
 x-y plane. There is an option to compute the X-VX or Y-VY SOS
 coordinates.
 .PP
-The output is a simple ascii table with 4 columns: number, time,
-position and velocity. Example of use with \fPtabplot(1NEMO)\fP
+The output is a simple ascii table with 4 columns: crossing number,
+time, position and velocity. Example of use with \fPtabplot(1NEMO)\fP
 .nf
-	% orbsos orbit.out x | tabplot - 3 4 xlab=x ylab=vx
-	% orbsos orbit.out y | tabplot - 3 4 xlab=y ylab=vy
-	% orbsos orbit.out x,y | tabplot - 3 4 xlab=x,y ylab=vx,vy
+  % orbsos orbit.out x  | tabplot - 3 4 xlab=x   ylab=vx
+  % orbsos orbit.out y  | tabplot - 3 4 xlab=y   ylab=vy
+  % orbsos orbit.out xy | tabplot - 3 4 xlab=x,y ylab=vx,vy
 .fi
 .PP
-\fIorbsos\fP can be useful in locating unknown orbital families. 
-Finding periodic orbits can be automated, but is easier through
+\fIorbsos\fP can be useful in locating orbital families and study
+ergodicity. Finding periodic orbits can be automated, but is easier through
 programs like \fIperorb(1NEMO)\fP and \fIhenyey(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
@@ -28,9 +28,10 @@ given:
 \fBin=\fIin-file\fP
 Input file, which must be an \fIorbit(5NEMO)\fP. [No default].
 .TP
-\fBmode=x|y|x,y|
+\fBmode=x|y|xy|
 Mode to tabulate. \fBx\fP computes the \fIx-vx\fP, and \fBy\fP
-computes the \fIy-vy\fP SOS coordinates.
+computes the \fIy-vy\fP SOS coordinates. These are computed while
+the orbit is crossing the y or x axis resp.
 [default: \fBx\fP].
 .TP
 \fBpabs=t|f\fP
@@ -45,19 +46,21 @@ position axis.
 [Default: \fBf\fP]
 .TP
 \fBsymm=t|f\fP
-Treat the potential symmetrically. This is normally true, but an example
-where you will need \fBsymm=f\fP is the Henon Heiles potential. See EXAMPLES below.
+Treat the potential symmetrically, which means that crossing an axis in the
+opposite direction means the SOS coordinated can be inverted.
+This is normally true but an example
+where you will need \fBsymm=f\fP is the Henon-Heiles potential. See EXAMPLES below.
 .SH EXAMPLES
-Here is an example of reproducing figure 4 and 6 in Henon & Heiles (1964) classic paper:
+Here is an example of reproducing Figures 4 and 6 in Henon & Heiles (1964) classic paper:
 .nf
 # Fig 2 shows the equipotential contours
 potccd - hh64 x=-1:1:0.01 y=-1:1:0.01 | ccdplot - 0.01,0.0417,0.0833,0.1250,0.1667
 
-# regular orbit as in Fig 4
+# Fig 4 show a regular orbit 
 mkorbit - y=-0.22 e=1/12.0 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |\
     orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
 
-# ergodic orbit like in Fig 5
+# Fig 5 shows an ergodic orbit 
 mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 4000000 dt=0.01 |\
     orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5 
 
@@ -66,7 +69,7 @@ mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |\
     orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
 .fi
 .SH "SEE ALSO"
-perorb(1NEMO)
+perorb(1NEMO), orbit(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
