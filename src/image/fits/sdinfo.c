@@ -1,10 +1,12 @@
 /*
  * sample program to use cfitsio on SDFITS files
+ * benchmark some low level math
  *
  * 23-nov-2019   PJT       written
  * 11-dec-2019   PJT       mdarray reduction example
  *
  * Benchmark 6 N2347 files:  2.4"
+ * dims=5 for NGC5291:       3.7ms 
  *
  * 
  */
@@ -22,8 +24,9 @@ string defv[] = {
     "stats=f\n           Doing simple stats",
     "mom=2\n             Highest moment for stats",
     "cols=\n             Column names to track - or names of the dimensions if given",
-    "dims=\n             Dimensions to reduce",
+    "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4",
     "proc=\n             Reduction procedure (PS,FS,NOD,TP)",
+    "bench=1\n           How many times to run benchmark",
     "VERSION=0.4\n       13-dec-2019 PJT",
     NULL,
 };
@@ -35,6 +38,63 @@ string usage = "sdfits info and bench reduction procedure";
 float muladd(float x, float a, float b) {
     return x*a + b;
 }
+
+
+real dcmeantsys(int ndata, real *calon, real *caloff, real tcal)
+{
+  int nedge = ndata/10;
+  int i;
+  real tsys, sum1 = 0.0,  sum2 = 0.0;
+  static int count = 0;
+
+  for (i=nedge; i<ndata-nedge; i++) {
+    sum1 += caloff[i];
+    sum2 += (calon[i] - caloff[i]);
+  }
+  if (sum2 == 0.0)
+    tsys = tcal;
+  else
+    tsys = tcal*sum1/sum2 + tcal/2.0;
+  dprintf(1,"tsys=%g  %d %d %d\n",tsys,ndata,nedge,++count);
+  return tsys;
+}
+
+void ta(int ndata, real *sig, real *ref, real tsys, real *ta)
+{
+  int i;
+
+  for (i=0; i<ndata; i++)
+    ta[i] = tsys * (sig[i]/ref[i] - 1.0);
+}
+
+void ta2(int ndata, real *sig1, real *sig2, real *ref1, real *ref2, real tsys, real *ta)
+{
+  int i;
+
+  for (i=0; i<ndata; i++)
+    ta[i] = tsys * ((sig1[i]+sig2[i])/(ref1[i]+ref2[i]) - 1.0);
+  dprintf(1,"Ta(2) %g\n",ta[0]);
+}
+
+void average(int nvec, int ndata, real **data, real *ave)
+{
+  int i, j;
+
+  for (i=0; i<ndata; i++) ave[i] = 0;
+  for (j=0; j<nvec; j++)
+    for (i=0; i<ndata; i++)
+      ave[i] += data[j][i];
+  for (i=0; i<ndata; i++) ave[i] /= nvec;  
+}
+
+void average2(int ndata, real *data1, real *data2, real *ave)
+{
+  int i, j;
+
+  for (i=0; i<ndata; i++)
+    ave[i] = 0.5*(data1[i]+data2[i]);
+}
+
 
 void nemo_main(void)
 {
@@ -52,6 +112,8 @@ void nemo_main(void)
     string *colcheck = burststring(getparam("cols"),", ");
     int ncolcheck = xstrlen(colcheck, sizeof(string))-1;
     int anynul = 0;
+    int bench = getiparam("bench");
+    real tsys;
 
     fnames = burststring(fname,", ");
     nfiles = xstrlen(fnames, sizeof(string)) -1;
@@ -163,17 +225,34 @@ void nemo_main(void)
 
 	
       } else {
-	warning("PS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
 
 	if (ndims == 5) {
+	  /* test case for NGC5291 with dims=2,11,2,2,4                                   */
+	  warning("PS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
 	  /*                                 scan    sig     pol     int     cal     chan */
 	  mdarray6 data6 = allocate_mdarray6(dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
 	  mdarray4 data4 = allocate_mdarray4(dims[4],        dims[2],dims[1],        nchan);
+	  mdarray3 data3 = allocate_mdarray3(dims[4],        dims[2],                nchan);
+	  mdarray2 data2 = allocate_mdarray2(                dims[2],                nchan);
+	  mdarray1 data1 = allocate_mdarray1(                                        nchan);	  
 	  double nulval = 0.0;
-	  //fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan, &nulval, &data5[0][0][0][0][0], &anynul, &status);
-	  dprintf(0,"DATA5 %g\n",data6[0][0][0][0][0][0]);
+	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
+	  int frc = fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
+	  dprintf(0,"DATA6 %g %g %g  (%d)\n",
+		  data6[0][0][0][0][0][0],
+		  data6[0][0][0][0][0][nchan-1],
+		  data6[0][0][0][0][1][0],frc);
+
+	  
+	  
 	  int i0,i1,i2,i3,i4;
-	  real *s0,*s1,*s2,*s3;
+	  real *s0,*s1,*s2,*s3, *s4;
+
+	  while (bench--) {	  
+
+
+	  
+	  // calibration
 	  for (i4=0; i4<dims[4]; ++i4) {  //scan
 	    for (i2=0; i2<dims[2]; ++i2) { // pol
 	      for (i1=0; i1<dims[1]; ++i1) { // int
@@ -181,13 +260,57 @@ void nemo_main(void)
 		s1 = data6[i4][0][i2][i1][1];        // sig_caloff
 		s2 = data6[i4][1][i2][i1][0];        // ref_calon
 		s3 = data6[i4][1][i2][i1][1];        // ref_caloff
+		// tsys = dcmeantsys(nchan, s0, s1, 1.2);
+		tsys = dcmeantsys(nchan, s2, s3, 1.4);
+		// stuff this away into data4[i4][i2][i1]
+		s4 = data4[i4][i2][i1];
+		ta2(nchan, s0, s1, s2, s3, tsys, s4);
 	      }
 	    }
 	  }
-	}
-	
+	  
+	  // time averaging
+	  real **s5 = (real **) allocate(sizeof(dims[1]*sizeof(real *)));
+	  for (i4=0; i4<dims[4]; ++i4) {  //scan
+	    for (i2=0; i2<dims[2]; ++i2) { // pol
+	      for (i1=0; i1<dims[1]; ++i1) { // int
+		s5[i1] = data4[i4][i2][i1];
+	      }
+	      average(dims[1],nchan,s5,data3[i4][i2]);
+	    }
+	  }
 
-      }
+	  // scan averaging
+	  real **s6 = (real **) allocate(sizeof(dims[4]*sizeof(real *)));	  
+	  for (i2=0; i2<dims[2]; ++i2) { // pol
+	    for (i4=0; i4<dims[4]; ++i4) // scan
+	      s6[i4] = data3[i4][i2];
+	    average(dims[4],nchan,s6,data2[i2]);
+	  }
+	  
+	  // pol averaging
+	  average2(nchan,data2[0],data2[1],data1);
 
+	  } // bench
+
+
+	  // and voila, we have a spectrum
+#if 0
+	  for (i=0; i<nchan; i++)
+	    printf("%d %g\n",i,data1[i]);
+#endif	  
+
+	  // free up
+	  free_mdarray6(data6,dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
+	  free_mdarray4(data4,dims[4],        dims[2],dims[1],        nchan);
+	  free_mdarray3(data3,dims[4],        dims[2],                nchan);
+	  free_mdarray2(data2,                dims[2],                nchan);
+	  free_mdarray1(data1,                                        nchan);	  
+	  
+	  
+	} else // ndims==5
+	  warning("nothing to do for ndims=%d",ndims);
+      } // ndims > 0
     }//for(j) loop over files
 }
+
