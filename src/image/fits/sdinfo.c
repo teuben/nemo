@@ -26,8 +26,9 @@ string defv[] = {
     "cols=\n             Column names to track - or names of the dimensions if given",
     "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4",
     "proc=\n             Reduction procedure (PS,FS,NOD,TP)",
+    "nchan=\n            Override the nchan derived from the data",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.4\n       13-dec-2019 PJT",
+    "VERSION=0.5\n       14-dec-2019 PJT",
     NULL,
 };
 
@@ -141,10 +142,8 @@ void nemo_main(void)
       fits_get_num_rows(fptr, &nrows, &status);
       fits_get_num_cols(fptr, &ncols, &status);
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
-      if (nsize>0 && nrows != nsize) {
+      if (nsize>0 && nrows != nsize)
 	warning("nrows=%d nsize=%d",nrows,nsize);
-	if (nsize > nrows) error("cannot continue");
-      }
 	
       colnames = (string *) allocate(ncols * sizeof(string));
       data_col = -1;
@@ -164,7 +163,7 @@ void nemo_main(void)
       } //for(i)
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d\n",fname,nrows,ncols,nchan);
 
-      if (ndims == 0) {
+      if (ndims == 0) {  
 
 	for (k=0; k<ncolcheck; ++k) {
 	  for (i=0, found=0; i<ncols; ++i) {
@@ -177,16 +176,18 @@ void nemo_main(void)
 	  }
 	  if (ncolcheck>0 && found==0) warning("Did not find %s",colcheck[k]);
 	}
-	//#define ONEDIM
+#define ONEDIM
 #ifdef ONEDIM
+	// just one long 1dim array
 	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
 	float nulval = 0.0;
-	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan, &nulval, data1, &anynul, &status);
+	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
 	dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
 #else
+	// waterfall type data
 	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
 	double nulval = 0.0;
-	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan, &nulval, &data2[0][0], &anynul, &status);
+	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
 	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
 #endif
 
@@ -198,10 +199,10 @@ void nemo_main(void)
 	  ini_moment(&m,mom,0);
 #ifdef ONEDIM
 	  for (i=0; i<nmax; i++) {                  // empty loop: 1.1"
-	    //sum += muladd(data[i], 1.0, 0.0);     // 2.1"
-	    //sum += data2[0][i];
-	    //sum += data1[i];                          // 1.6"
-	    accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
+	    if (mom==0)
+	      sum += data1[i];                          // 1.6"
+	    else
+	      accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
 	  }//for(i)
 #else
 	  for (ii=0; ii<nrows; ii++)                 // empty loop: 1.1"
@@ -226,12 +227,15 @@ void nemo_main(void)
 	
       } else {
 
+	if (hasvalue("nchan")) {
+	  nchan = getiparam("nchan");
+	  warning("Re-using the dims analysis with nchan=%d",nchan);
+	}
+
 	if (ndims == 5) {
 	  /* test case for NGC5291 with dims=2,11,2,2,4                                   */
 	  warning("PS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
 	  /*                                 scan    sig     pol     int     cal     chan */
-
-	  
 	  mdarray6 data6 = allocate_mdarray6(dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
 	  mdarray4 data4 = allocate_mdarray4(dims[4],        dims[2],dims[1],        nchan);
 	  mdarray3 data3 = allocate_mdarray3(dims[4],        dims[2],                nchan);
@@ -239,6 +243,7 @@ void nemo_main(void)
 	  mdarray1 data1 = allocate_mdarray1(                                        nchan);	  
 	  double nulval = 0.0;
 	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
+	  // make sure nsize <= nrows
 	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nsize, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
 	  dprintf(0,"DATA6 %g %g %g\n",
 		  data6[0][0][0][0][0][0],
@@ -323,7 +328,8 @@ void nemo_main(void)
 	  free_mdarray3(data3,dims[4],        dims[2],                nchan);
 	  free_mdarray2(data2,                dims[2],                nchan);
 	  free_mdarray1(data1,                                        nchan);	  
-	  
+	} else if (ndims == 7) {	  // NOD example
+	  warning("NOD masochism example here?");
 	} else // ndims==5
 	  warning("nothing to do for ndims=%d",ndims);
       } // ndims > 0
