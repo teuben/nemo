@@ -80,11 +80,11 @@ void average(int nvec, int ndata, real **data, real *ave)
 {
   int i, j;
 
-  for (i=0; i<ndata; i++) ave[i] = 0;
-  for (j=0; j<nvec; j++)
-    for (i=0; i<ndata; i++)
-      ave[i] += data[j][i];
-  for (i=0; i<ndata; i++) ave[i] /= nvec;  
+  for (i=0; i<ndata; ++i) ave[i] = 0;
+  for (j=0; j<nvec; ++j)
+    for (i=0; i<ndata; ++i)
+      ave[i] += data[j][i];  // invalid read
+  for (i=0; i<ndata; ++i) ave[i] /= nvec;  
 }
 
 void average2(int ndata, real *data1, real *data2, real *ave)
@@ -94,7 +94,6 @@ void average2(int ndata, real *data1, real *data2, real *ave)
   for (i=0; i<ndata; i++)
     ave[i] = 0.5*(data1[i]+data2[i]);
 }
-
 
 void nemo_main(void)
 {
@@ -142,8 +141,11 @@ void nemo_main(void)
       fits_get_num_rows(fptr, &nrows, &status);
       fits_get_num_cols(fptr, &ncols, &status);
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
-      if (nsize>0 && nrows != nsize)
+      if (nsize>0 && nrows != nsize) {
 	warning("nrows=%d nsize=%d",nrows,nsize);
+	if (nsize > nrows) error("cannot continue");
+      }
+	
       colnames = (string *) allocate(ncols * sizeof(string));
       data_col = -1;
       for (i=0; i<ncols; i++) {    // loop over all columns to find the DATA column
@@ -187,8 +189,6 @@ void nemo_main(void)
 	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan, &nulval, &data2[0][0], &anynul, &status);
 	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
 #endif
-	fits_close_file(fptr, &status);            /* close the file */
-	fits_report_error(stderr, status);     /* print out any error messages */
 
 	if (Qstats) {
 	  float sum = 0.0;
@@ -201,16 +201,16 @@ void nemo_main(void)
 	    //sum += muladd(data[i], 1.0, 0.0);     // 2.1"
 	    //sum += data2[0][i];
 	    //sum += data1[i];                          // 1.6"
-	    !accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
+	    accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
 	  }//for(i)
-#else	
-	  for (ii=0; ii<nrows; ii++) {                  // empty loop: 1.1"
-	    for (jj=0; jj<nchan; jj++) {
-	      //sum += data2[ii][jj];                         // 3.1"
-	      accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
-	    }
-	  }
-#endif	
+#else
+	  for (ii=0; ii<nrows; ii++)                 // empty loop: 1.1"
+	    for (jj=0; jj<nchan; jj++)
+	      if (mom==0)
+		sum += data2[ii][jj];                         // 3.1"
+	      else
+		accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
+#endif
 	  dprintf(0,"mean: %g\n", sum / nmax);
 	  if (mom > 1)
 	    printf("Mean: %g   Dispersion: %g Min: %g Max: %g   N: %d\n",
@@ -230,6 +230,8 @@ void nemo_main(void)
 	  /* test case for NGC5291 with dims=2,11,2,2,4                                   */
 	  warning("PS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
 	  /*                                 scan    sig     pol     int     cal     chan */
+
+	  
 	  mdarray6 data6 = allocate_mdarray6(dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
 	  mdarray4 data4 = allocate_mdarray4(dims[4],        dims[2],dims[1],        nchan);
 	  mdarray3 data3 = allocate_mdarray3(dims[4],        dims[2],                nchan);
@@ -237,20 +239,17 @@ void nemo_main(void)
 	  mdarray1 data1 = allocate_mdarray1(                                        nchan);	  
 	  double nulval = 0.0;
 	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
-	  int frc = fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
-	  dprintf(0,"DATA6 %g %g %g  (%d)\n",
+	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nsize, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
+	  dprintf(0,"DATA6 %g %g %g\n",
 		  data6[0][0][0][0][0][0],
 		  data6[0][0][0][0][0][nchan-1],
-		  data6[0][0][0][0][1][0],frc);
+		  data6[0][0][0][0][1][0]);
 
-	  
-	  
+
 	  int i0,i1,i2,i3,i4;
 	  real *s0,*s1,*s2,*s3, *s4;
 
 	  while (bench--) {	  
-
-
 	  
 	  // calibration
 	  for (i4=0; i4<dims[4]; ++i4) {  //scan
@@ -260,45 +259,65 @@ void nemo_main(void)
 		s1 = data6[i4][0][i2][i1][1];        // sig_caloff
 		s2 = data6[i4][1][i2][i1][0];        // ref_calon
 		s3 = data6[i4][1][i2][i1][1];        // ref_caloff
-		// tsys = dcmeantsys(nchan, s0, s1, 1.2);
 		tsys = dcmeantsys(nchan, s2, s3, 1.4);
-		// stuff this away into data4[i4][i2][i1]
 		s4 = data4[i4][i2][i1];
 		ta2(nchan, s0, s1, s2, s3, tsys, s4);
 	      }
 	    }
 	  }
 	  
-	  // time averaging
-	  real **s5 = (real **) allocate(sizeof(dims[1]*sizeof(real *)));
-	  for (i4=0; i4<dims[4]; ++i4) {  //scan
-	    for (i2=0; i2<dims[2]; ++i2) { // pol
-	      for (i1=0; i1<dims[1]; ++i1) { // int
-		s5[i1] = data4[i4][i2][i1];
-	      }
-	      average(dims[1],nchan,s5,data3[i4][i2]);
-	    }
-	  }
+	  if (TRUE) {   // one shot averaging over time,scan,pol
 
-	  // scan averaging
-	  real **s6 = (real **) allocate(sizeof(dims[4]*sizeof(real *)));	  
-	  for (i2=0; i2<dims[2]; ++i2) { // pol
-	    for (i4=0; i4<dims[4]; ++i4) // scan
-	      s6[i4] = data3[i4][i2];
-	    average(dims[4],nchan,s6,data2[i2]);
-	  }
+	    // averaging over int,pol,scan
+	    real **s5 = (real **) allocate(dims[1]*dims[2]*dims[4]*sizeof(real *));
+	    i = 0;
+	    for (i4=0; i4<dims[4]; ++i4) {  //scan
+	      for (i2=0; i2<dims[2]; ++i2) { // pol
+		for (i1=0; i1<dims[1]; ++i1) { // int
+		  s5[i++] = data4[i4][i2][i1];
+		}
+	      }
+	    }
+	    average(dims[1]*dims[2]*dims[4],nchan,s5,data1);
+	    
+	  } else {  // averaging on 3 levels
 	  
-	  // pol averaging
-	  average2(nchan,data2[0],data2[1],data1);
+	    // time averaging
+	    dprintf(0,"time averaging with %d\n",dims[1]);
+	    real **s5 = (real **) allocate(2*dims[1]*sizeof(real *));
+	    for (i4=0; i4<dims[4]; ++i4) {  //scan
+	      for (i2=0; i2<dims[2]; ++i2) { // pol
+		for (i1=0; i1<dims[1]; ++i1) { // int
+		  s5[i1] = data4[i4][i2][i1];            // invalid write
+		}
+		average(dims[1],nchan,s5,data3[i4][i2]);  // invalid read
+	      }
+	    }
+
+	    // scan averaging
+	    real **s6 = (real **) allocate(dims[4]*sizeof(real *));
+	    for (i2=0; i2<dims[2]; ++i2) { // pol
+	      dprintf(0,"pol %d\n",i2);
+	      for (i4=0; i4<dims[4]; ++i4) // scan
+		s6[i4] = data3[i4][i2];
+	      average(dims[4],nchan,s6,data2[i2]);
+	    }
+	  
+	    // pol averaging
+	    average2(nchan,data2[0],data2[1],data1);
+	  }
 
 	  } // bench
 
 
 	  // and voila, we have a spectrum
-#if 0
-	  for (i=0; i<nchan; i++)
-	    printf("%d %g\n",i,data1[i]);
-#endif	  
+	  real sum = 0.0;
+	  for (i=0; i<nchan; i++) {
+	    sum += data1[i];
+	    //printf("%d %g\n",i,data1[i]);
+          }
+  	  printf("sum=%g\n",sum);
+
 
 	  // free up
 	  free_mdarray6(data6,dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
@@ -307,10 +326,13 @@ void nemo_main(void)
 	  free_mdarray2(data2,                dims[2],                nchan);
 	  free_mdarray1(data1,                                        nchan);	  
 	  
-	  
 	} else // ndims==5
 	  warning("nothing to do for ndims=%d",ndims);
       } // ndims > 0
+	  
+      fits_close_file(fptr, &status);            /* close the file */
+      fits_report_error(stderr, status);     /* print out any error messages */
+	  
     }//for(j) loop over files
 }
 
