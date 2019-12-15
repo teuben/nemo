@@ -1,0 +1,36 @@
+.TH WCS 5NEMO "15 December 2019"
+.SH NAME
+wcs \- World Coordinate Systems
+.SH SYNOPSIS
+\fBwcs\fP [parameter=value]
+.SH DESCRIPTION
+\fBwcs\fP is the World Coordinate System.
+.SH POLARIZATION
+Polarization is an exceptional case, since it's enumerated (XX, YY, LL, etc.), but
+the community has assigned integer values such that a usual NAXIS,CRPIX,CRVAL,CDELT,CTYPE
+can be used. This is the AIPS/FITS convention.
+.nf
+.t +1i +1i
+1	I	Standard Stoked Unpolarized
+2	Q
+3	U
+4	V
+-1	RR	Right-right circular
+-2	LL
+-3	RL
+-4	LR
+-5	XX	X parallel linear
+-6	YY
+-7	XY
+-8	YX
+.fi
+.SH SEE ALSO
+wcs(1NEMO), worldpos(3NEMO), ccdsky(1NEMO), ccdfits(1NEMO), impos(1MIRIAD), 
+xy2sky(1WCSTOOLS), sky2xy(1WCSTOOLS)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+15-dec-2019	written		PJT
+.fi
