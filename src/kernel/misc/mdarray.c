@@ -109,6 +109,19 @@ mdarray7 allocate_mdarray7(int n7,int n6,int n5,int n4,int n3,int n2,int n1)
   return x;
 }
 
+mdarray8 allocate_mdarray8(int n8,int n7,int n6,int n5,int n4,int n3,int n2,int n1)
+{
+  mdarray8 x = (mdarray8)allocate(sizeof(mdarray8)*n8);
+  int i;
+  if (top == 0)
+    p = (real *) allocate(sizeof(real)*n1*n2*n3*n4*n5*n6*n7*n8);
+  top++;
+  for (i=0;i<n8;i++)
+    x[i] = allocate_mdarray7(n7,n6,n5,n4,n3,n2,n1);
+  top--;
+  return x;
+}
+
 void free_mdarray1(mdarray1 x, int n1)
 {
   if (top==0) free(x);
@@ -180,6 +193,17 @@ void free_mdarray7(mdarray7 x, int n7, int n6, int n5, int n4, int n3, int n2, i
   free(x);
 }
 
+void free_mdarray8(mdarray8 x, int n8, int n7, int n6, int n5, int n4, int n3, int n2, int n1)
+{
+  int i;
+  if (top==0) free(x[0][0][0][0][0][0][0]);
+  top++;
+  for (i=0;i<n8;i++)
+    free_mdarray7(x[i],n7,n6,n5,n4,n3,n2,n1);
+  top--;
+  free(x);
+}
+
 
 
 /* =============================================================================== */
@@ -194,13 +218,13 @@ string defv[] = {
   "static=f\n       Benchmark on a static array",
   "transpose=f\n    Transpose a 2D array",
   "axb=f\n          Test an Ax=b",
-  "VERSION=2.3\n    30-jul-2013 PJT",
+  "VERSION=2.4\n    13-dec-2019 PJT",
   NULL,
 };
 
 string usage = "testing nested multidimensional arrays in C";
 
-init1(int *dim,mdarray1 x, bool flip)
+init1(int *dim, mdarray1 x, bool flip)
 {
   int i;
 
@@ -209,7 +233,7 @@ init1(int *dim,mdarray1 x, bool flip)
   
 }
 
-work1(int *dim,mdarray1 x, bool flip)
+work1(int *dim, mdarray1 x, bool flip)
 {
   int i;
   real sum=0;
@@ -220,7 +244,7 @@ work1(int *dim,mdarray1 x, bool flip)
 }
 
 
-init2(int *dim,mdarray2 x,bool flip)
+init2(int *dim, mdarray2 x,bool flip)
 {
   int i,j;
 
@@ -235,7 +259,7 @@ init2(int *dim,mdarray2 x,bool flip)
   }
 }
 
-work2(int *dim,mdarray2 x,bool flip)
+work2(int *dim, mdarray2 x,bool flip)
 {
   int i,j;
   real sum=0;
@@ -252,7 +276,25 @@ work2(int *dim,mdarray2 x,bool flip)
   dprintf(1,"sum2=%g\n",sum);
 }
 
-init3(int *dim,mdarray3 x, bool flip)
+show2(int *dim, mdarray2 x)
+{
+  int i,j, nsize = 1;
+  real *p;
+  for (i=0; i<2; i++)  nsize *= dim[i];
+  
+  for (j=0; j<dim[1]; j++)
+    for (i=0; i<dim[0]; i++)
+      printf("%g ",x[j][i]);
+  printf("\n");
+
+  p = &x[0][0];
+  for (i=0; i<nsize; i++)
+    printf("%g ",p[i]);
+  printf("\n");
+}
+
+
+init3(int *dim, mdarray3 x, bool flip)
 {
   int i,j,k;
 
@@ -270,7 +312,7 @@ init3(int *dim,mdarray3 x, bool flip)
   }
 }
 
-work3(int *dim,mdarray3 x, bool flip)
+work3(int *dim, mdarray3 x, bool flip)
 {
   int i,j,k;
   real sum=0;
@@ -288,6 +330,25 @@ work3(int *dim,mdarray3 x, bool flip)
   }
   dprintf(1,"sum3=%g\n",sum);
 }
+
+show3(int *dim, mdarray3 x)
+{
+  int i,j,k, nsize = 1;
+  real *p;
+  for (i=0; i<3; i++)  nsize *= dim[i];
+  
+  for (k=0; k<dim[2]; k++)
+    for (j=0; j<dim[1]; j++)
+      for (i=0; i<dim[0]; i++)
+	printf("%g ",x[k][j][i]);
+  printf("\n");
+
+  p = &x[0][0][0];
+  for (i=0; i<nsize; i++)
+    printf("%g ",p[i]);
+  printf("\n");
+}
+
 
 sinit3(int *dim, real x[][4][4], bool flip)
 {
@@ -325,7 +386,7 @@ swork3(int *dim, real x[][4][4], bool flip)
   dprintf(1,"sum3=%g\n",sum);
 }
 
-init4(int *dim,mdarray4 x, bool flip)
+init4(int *dim, mdarray4 x, bool flip)
 {
   int i,j,k,l;
 
@@ -344,7 +405,7 @@ init4(int *dim,mdarray4 x, bool flip)
   }
 }
 
-work4(int *dim,mdarray4 x, bool flip)
+work4(int *dim, mdarray4 x, bool flip)
 {
   int i,j,k,l;
   real sum=0;
@@ -365,7 +426,7 @@ work4(int *dim,mdarray4 x, bool flip)
   dprintf(1,"sum4=%g\n",sum);
 }
 
-work5(int *dim,mdarray5 x, bool flip)
+work5(int *dim, mdarray5 x, bool flip)
 {
   int i,j,k,l,m;
 
@@ -386,7 +447,7 @@ work5(int *dim,mdarray5 x, bool flip)
   }
 }
 
-work6(int *dim,mdarray6 x, bool flip)
+work6(int *dim, mdarray6 x, bool flip)
 {
   int i,j,k,l,m,n;
 
@@ -409,7 +470,7 @@ work6(int *dim,mdarray6 x, bool flip)
   }
 }
 
-work7(int *dim,mdarray7 x, bool flip)
+work7(int *dim, mdarray7 x, bool flip)
 {
   int i,j,k,l,m,n,o;
 
@@ -489,6 +550,7 @@ nemo_main()
   real a7[3][3][3][3][3][3][3];
   real *p;
   int i1,i2,i3,i4, nd;
+  int nsize;
 
   mdarray1 x1;
   mdarray2 x2, x2t;
@@ -601,9 +663,12 @@ nemo_main()
   }
 
   printf("Working with ndim=%d MDArray",ndim);
-  for (i=ndim-1; i>=0; i--)
+  nsize = 1;
+  for (i=ndim-1; i>=0; i--) {
     printf("[%d]",dim[i]);
-  printf("\n");
+    nsize *= dim[i];
+  }
+  printf("  Total size %d\n",nsize);
 
   if (ndim==1) {
     x1 = allocate_mdarray1(dim[0]);
@@ -618,6 +683,7 @@ nemo_main()
       init2(dim,x2,flip);
       work2(dim,x2,flip);
     }
+    show2(dim,x2);
     if (free) free_mdarray2(x2,dim[1],dim[0]);
   } else if (ndim==3) {
     if (statbench) {
@@ -632,6 +698,7 @@ nemo_main()
 	init3(dim,x3,flip);
 	work3(dim,x3,flip);
       }
+      show3(dim,x3);      
       if (free) free_mdarray3(x3,dim[2],dim[1],dim[0]);
     }
   } else if (ndim==4) {
@@ -653,6 +720,8 @@ nemo_main()
     x7 = allocate_mdarray7(dim[6],dim[5],dim[4],dim[3],dim[2],dim[1],dim[0]);
     work7(dim,x7,flip);
     if (free) free_mdarray7(x7,dim[6],dim[5],dim[4],dim[3],dim[2],dim[1],dim[0]);
+  } else if (ndim==8) {
+    warning("not written, but it's supported");
   } else
     error("dimension %d not supported yet (MDMAXDIM=%d)",ndim,MDMAXDIM);
 }
