@@ -5,8 +5,8 @@
  * 23-nov-2019   PJT       written
  * 11-dec-2019   PJT       mdarray reduction example
  *
- * Benchmark 6 N2347 files:  2.4"
- * dims=5 for NGC5291:       3.7ms 
+ * Benchmark 6 N2347 files:  2.4"  (this is with mom=0 stats)
+ * dims=5 for NGC5291:       31-35ms (depending in 1 or 3 levels)
  *
  * 
  */
@@ -266,7 +266,7 @@ void nemo_main(void)
 	    }
 	  }
 	  
-	  if (TRUE) {   // one shot averaging over time,scan,pol
+	  if (FALSE) {   // one shot averaging over time,scan,pol
 
 	    // averaging over int,pol,scan
 	    real **s5 = (real **) allocate(dims[1]*dims[2]*dims[4]*sizeof(real *));
@@ -283,8 +283,7 @@ void nemo_main(void)
 	  } else {  // averaging on 3 levels
 	  
 	    // time averaging
-	    dprintf(0,"time averaging with %d\n",dims[1]);
-	    real **s5 = (real **) allocate(2*dims[1]*sizeof(real *));
+	    real **s5 = (real **) allocate(dims[1]*sizeof(real *));
 	    for (i4=0; i4<dims[4]; ++i4) {  //scan
 	      for (i2=0; i2<dims[2]; ++i2) { // pol
 		for (i1=0; i1<dims[1]; ++i1) { // int
@@ -297,7 +296,6 @@ void nemo_main(void)
 	    // scan averaging
 	    real **s6 = (real **) allocate(dims[4]*sizeof(real *));
 	    for (i2=0; i2<dims[2]; ++i2) { // pol
-	      dprintf(0,"pol %d\n",i2);
 	      for (i4=0; i4<dims[4]; ++i4) // scan
 		s6[i4] = data3[i4][i2];
 	      average(dims[4],nchan,s6,data2[i2]);
