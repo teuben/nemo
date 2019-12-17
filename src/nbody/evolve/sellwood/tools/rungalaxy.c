@@ -12,6 +12,7 @@
  *       7-mar-2006     V2.0    no need for snap2ini
  *                      V2.1    also write output snap
  *      17-sep-2013     V2.2    new run interface
+ *      17-dec-2019     V3.0    force this only runs the old galaxy13
  *
  * 
  *  @TODO: this program should run in SinglePrecision, since galaxy does
@@ -23,7 +24,9 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
+#include <unfio.h>
 #include <run.h>
+
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -45,12 +48,12 @@ string defv[] = {
     "grid=33,33,33\n  number of grid cells in (x,y,z,)",
     "format=%g\n      format for pos,vel for galaxy.ini",
     "header=\n        If given, use this for unfio header/trailer size",
-    "exe=galaxy\n     name of GALAXY executable",
-    "VERSION=2.2a\n   18-sep-2013 PJT",
+    "exe=galaxy13\n   name of GALAXY13 executable",
+    "VERSION=3.0\n    17-dec-2019 PJT",
     NULL,
 };
 
-string usage = "frontend to run Sellwood's galaxy code";
+string usage = "frontend to run Sellwood's galaxy13 code";
 
 string cvsid="$Id$";
 
