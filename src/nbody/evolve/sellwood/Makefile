@@ -1,4 +1,6 @@
 #	Makefile for NEMO/src/nbody/evolve/sellwood
+#       this is an old version (V1.3) of the galaxy code.
+#       See comments in $NEMO/usr/sellwood how to install a newer release.
 include $(NEMOLIB)/makedefs
 #
 
