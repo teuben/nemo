@@ -536,7 +536,9 @@ dox/html/index.html:	utils/inc/tupel.h \
 			dox/falcON.dox
 			doxygen dox/falcON.dox
 
-doxu		:	dox/html/index.html
+#doxu		:	dox/html/index.html
+doxu		:
+	@echo Not creating doxygen anymore
 
 view_dox	:	doxu
 			firefox dox/html/index.html
