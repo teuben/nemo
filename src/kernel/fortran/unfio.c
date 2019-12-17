@@ -20,6 +20,7 @@
  *    8-may-08  support for header=0
  *   25-feb-09  added unfwrite()
  *   21-may-11  allow swap on write
+ *   17-dec-19  more proper prototypes
  *   
  * 
  *   TODO: with a keyword like ssize=4::20,8::10,1::100
@@ -32,8 +33,6 @@
 
 static bool do_swap;    /* (re)set in a call to unfswap() */
 static bool do_swap_write = FALSE;
-
-extern void bswap(void *vdat, int len, int cnt);
 
 #ifdef UNFIO_HDR_SIZE
 static int hdr_size = UNFIO_HDR_SIZE;   /* g77 uses 4, gfortran uses 8 */
@@ -126,7 +125,7 @@ int unfscan(stream fp)
  *          pointed to by 'buf'. Fatal error if buffer not big enough.
  */
 
-int unfread(stream fp, char *buf, int bufsize)
+int unfread(stream fp, void *buf, int bufsize)
 {
     int n, size, size1;
     long long lsize, lsize1;
@@ -188,7 +187,7 @@ int unfread(stream fp, char *buf, int bufsize)
  *       but needs item size
  */
 
-int unfwrite(stream fp, char *buf, int bufsize)
+int unfwrite(stream fp, void *buf, int bufsize)
 {
     int n, size;
     long long lsize;
@@ -247,7 +246,7 @@ string defv[] = {
         "maxbuf=10000\n     buffersize in bytes, to read a block",
 	"swap=f\n           swapped read?",
 	"header=\n          if needed, force header size of fortran unformatted files (0, 4 or 8)",
-        "VERSION=2.5\n	    8-may-08 PJT",
+        "VERSION=2.6\n	    17-dec-2019 PJT",
         NULL,
 };
 
