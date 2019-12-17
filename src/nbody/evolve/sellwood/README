@@ -1,0 +1,3 @@
+This is Sellwood's old version, released ~2004. The last release was Version 1.3 (aka galaxy13),
+and had been superseded by GALAXY15. See install notes in $NEMO/usr/sellwood, and the
+$NEMO/src/scripts/mknemo.d/galaxy15 script that could be useful to get you started.
