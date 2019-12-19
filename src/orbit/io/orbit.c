@@ -145,10 +145,12 @@ int read_orbit (stream instr, orbitptr *optr)
             get_data (instr,PhasePathTag,RealType, 
                       PhasePath(*optr), Nsteps(*optr), 2, Ndim(*optr), 0);
 #ifdef ORBIT_PHI
-            get_data (instr,PhiPathTag,    RealType, 
+	    if (get_tag_ok(instr, PhiPathTag)) {
+	      get_data (instr,PhiPathTag,    RealType, 
                       PhiPath(*optr), Nsteps(*optr), 0);
-            get_data (instr,AccPathTag,RealType, 
+	      get_data (instr,AccPathTag,RealType, 
 		      AccPath(*optr), Nsteps(*optr), Ndim(*optr), 0);
+	    }
 #endif	    
         get_tes (instr,PathTag);
     get_tes (instr,OrbitTag);
@@ -244,7 +246,11 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     int i, kount;
     char fmt[256];
 
+#ifdef ORBIT_PHI    
+    sprintf(fmt,"%%d %s %s %s %s %s %s %s  %s %s %s %s\n",f,f,f,f,f,f,f,f,f,f,f);
+#else    
     sprintf(fmt,"%%d %s %s %s %s %s %s %s\n",f,f,f,f,f,f,f);
+#endif    
         
     dprintf (0,"Total number of steps = %d\n",Nsteps(optr));
     dprintf (0,"Mass = %f \n",Masso(optr));
@@ -266,9 +272,17 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     for (i=0; i<Nsteps(optr); i++) {
         if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
             if (kount++ == 0)
+#ifdef ORBIT_PHI
                 printf (fmt,
-                    i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
-                      Uorb(optr,i),Vorb(optr,i),Worb(optr,i));
+			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
+			Uorb(optr,i),Vorb(optr,i),Worb(optr,i));
+#else	      
+                printf (fmt,
+			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
+			Uorb(optr,i),Vorb(optr,i),Worb(optr,i),
+			Porb(optr,i),
+			AXorb(optr,i),AYorb(optr,i),AZorb(optr,i));
+#endif	    
             if (kount==n)
                 kount=0;
         }
@@ -280,8 +294,8 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
 #include <getparam.h>
 
 string defv[] = {
-        "name=???\n   Filename",
-        "mode=w\n     R or W",
+        "name=???\n    Filename",
+        "mode=w\n      R or W",
         "VERSION=1.3\n 10-dec-2019 pjt",
         NULL,
 };
