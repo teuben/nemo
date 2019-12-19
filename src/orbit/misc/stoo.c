@@ -148,7 +148,7 @@ int read_snap()
 	  dprintf(0,"read_snap: Found first snapshot with %d bodies\n",nobj);
 	  first = FALSE;
 	} 
-	dprintf(0,"."); fflush(stderr);
+	dprintf(1,"."); fflush(stderr);
 	if (nobj>MOBJ)
 	  error ("read_snap: not enough declared space to get data");
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
