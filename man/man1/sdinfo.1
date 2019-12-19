@@ -1,15 +1,17 @@
-.TH SDINFO 1NEMO "23 November 2019"
+.TH SDINFO 1NEMO "18 December 2019"
 .SH NAME
-sdinfo \- sdfits info 
+sdinfo \- sdfits (BINTABLE) info and benchmark
 .SH SYNOPSIS
 \fBsdinfo\fP [parameter=value]
 .SH DESCRIPTION
-\fBsdinfo\fP list some tabular properties of an SDFITS file, and has some
-options to benchmark some basic operations
+\fBsdinfo\fP list some tabular properties of an SDFITS (and some dialects) file, and has 
+options to benchmark some basic operations.
 .PP
 SDFITS files have a BINTABLE extension named "SINGLE DISH", and is used to store
-single dish spectra and all associated variables. This particular program was only
-written to provide some size info and various baseline benchmarks.
+single dish spectra and all associated variables. This program was only
+written to provide size info and can run a few basic benchmarks. A few known dialects
+to this are known:  "CIMAFITS" (Arecibo) and "MATRIX" (30m/CLASS), the latter designates
+the spectrum via a "SPECTRUM" column name, instead of the more common "DATA" column name.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -19,10 +21,36 @@ Input SDFITS fits file. Multiple files can be given as well, as a space or comma
 No default.
 .TP
 \fBstats=t|f\fP
-If true, some basic statistics will be computed.
+If true, some basic statistics will be computed. You also need this option
+if a row (see row= below) is output.
 .TP
 \fBmom=\fP\fI
-Maximum moment some statistics will be computed. [2].
+Maximum moment some statistics will be computed. mom=0 will just sum, and be much faster than
+general moment computation. [2].
+.TP
+\fBcols=\fP
+Column names to track. Currently it just gives the column number and format used.  Default: not used.
+.TP
+\fBdims=\fP
+A list of dimensions how the data-block should be processed. The procedure of processing is
+set by the \fBproc=\fP keyword.  For example dims=2,11,2,2,4  Default: not used.
+.TP
+\fBproc=\fP
+The procedure of processing can be set with this. Currently only one specific example
+(see EXAMPLES below) for ngc5291 is implemented. Options would be PS (Position Switching),
+FS (frequency switching), NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever.
+.TP
+\fBnchan=\fP
+Override the number of channels found in the data. Some dataset will find nchan=0 and it will
+be useful to set this here.
+.TP
+\fBrow=\fP
+If used, this row (0 being the first) will be output as an ascii spectrum. This spectrum has two
+columns: channel number (0 being the first) and the spectrum value, native units.
+.TP
+\fBbench=\fP
+How many times the procedure should be processed. This will only re-execute the procedure,
+not the alloc/free that are needed for this. Using 0 will bypass the procedure. Default: 1
 .SH EXAMPLES
 The following example takes all fits files matching a particular pattern and summarize their contents.
 .nf
@@ -30,7 +58,29 @@ The following example takes all fits files matching a particular pattern and sum
     sdinfo in=@dirin.lis
 
 AGBT15B_287_35.raw.vegas.A.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_35.raw.vegas.B.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_35.raw.vegas.C.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_39.raw.vegas.A.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.B.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
+AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
+
+.fi
+Here is a benchmark of the ngc5291 example:
+.nf
+    time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
+    ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col = 7
+    ### nemo Debug Info: DATA6 3.71521 0.0366262 3.30351     1.42437
+    ### nemo Debug Info: CPU_USAGE sdinfo : 3.09    3.04 0.04  0.00 0.00  1803498650
+    real    0m3.095s
+    user    0m3.047s
+    sys     0m0.048s
+
+.fi
+
+Here is a way to plot a spectrum:
+.nf
+    sdinfo ngc5291.fits t row=11 | tabplot - 
 .fi
 .SH SEE ALSO
 scanfits(1NEMO), fitshead(1NEMO)
@@ -43,5 +93,7 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-23-Nov-19	V0.1 Created	PJT
+23-Nov-2019	V0.1 Created	PJT
+14-dec-2019	V0.4 dimension analysis w/ n5291	PJT
+18-dec-2019	V0.7 Handle CIMAFITS and MATRIX extensions	PJT
 .fi
