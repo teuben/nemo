@@ -28,7 +28,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
   "nsteps=10000\n		max orbit length allocated",
-  "VERSION=3.1a\n		12-nov-2015 PJT",
+  "VERSION=3.1b\n		19-dec-2019 PJT",
   NULL,
 };
 
@@ -148,7 +148,7 @@ int read_snap()
 	  dprintf(0,"read_snap: Found first snapshot with %d bodies\n",nobj);
 	  first = FALSE;
 	} 
-	printf("."); fflush(stdout);
+	dprintf(0,"."); fflush(stderr);
 	if (nobj>MOBJ)
 	  error ("read_snap: not enough declared space to get data");
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
