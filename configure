@@ -10974,7 +10974,7 @@ if test -d "$NEMODAT"; then
   echo "*** you probably should source $NEMO/nemo_end"
 fi
 
-ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh"
+ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -11674,6 +11674,7 @@ do
     "nemo-config") CONFIG_FILES="$CONFIG_FILES nemo-config" ;;
     "nemo_start.csh") CONFIG_FILES="$CONFIG_FILES nemo_start.csh" ;;
     "nemo_start.sh") CONFIG_FILES="$CONFIG_FILES nemo_start.sh" ;;
+    "nemo_start.py") CONFIG_FILES="$CONFIG_FILES nemo_start.py" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
