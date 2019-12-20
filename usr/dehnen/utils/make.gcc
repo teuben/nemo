@@ -70,7 +70,7 @@ OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 ifeq ($(NO_ARCH_NATIVE),1)
-   ARCH_NATIVE = ""
+   ARCH_NATIVE =
 else
    ARCH_NATIVE = -march=native
 endif
