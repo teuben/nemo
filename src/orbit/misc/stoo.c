@@ -12,6 +12,7 @@
  *	18-apr-95       V2.6 
  *      25-jul-2013     V3.0 allow multiple orbits output;
  *      11-nov-2015     V3.1 now the efficient way
+ *      19-dec-2019     V3.2 deal with ACC/PHI
  */
 
 #include <stdinc.h>
@@ -28,7 +29,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
   "nsteps=10000\n		max orbit length allocated",
-  "VERSION=3.1b\n		19-dec-2019 PJT",
+  "VERSION=3.2\n		19-dec-2019 PJT",
   NULL,
 };
 
@@ -47,6 +48,8 @@ int    norb;                    /* number of orbits to extract */
 real   tsnap;			/* time of snapshot */
 real   mass[MOBJ];
 real   phase[MOBJ][2][NDIM];
+real   phi[MOBJ];
+real   acc[MOBJ][NDIM];
 int    key[MOBJ];
 int    isel[MOBJ];              /* select for output orbit? */
 bool   Qtime, Qmass, Qkey;
@@ -100,6 +103,12 @@ void nemo_main()
 	Uorb(optr[j],i) = phase[ibody][1][0];	
 	Vorb(optr[j],i) = phase[ibody][1][1];	
 	Worb(optr[j],i) = phase[ibody][1][2];
+#ifdef ORBIT_PHI
+	Porb(optr[j],i) = phi[ibody];
+	AXorb(optr[j],i) = acc[ibody][0];
+	AYorb(optr[j],i) = acc[ibody][1];
+	AZorb(optr[j],i) = acc[ibody][2];
+#endif
       }
       i++;
       for (j=0; j<norb; j++)
@@ -184,6 +193,10 @@ int read_snap()
 	   dprintf(1,"added ordinal keys\n");
 	   for (i=0; i<nobj; i++) key[i] = i;
 	 }
+#ifdef ORBIT_PHI
+	 get_data(instr,PotentialTag,RealType,phi,nobj,0);
+	 get_data(instr,AccTag,RealType,acc,nobj,NDIM,0);
+#endif	 
       get_tes(instr,ParticlesTag);
     get_tes(instr,SnapShotTag);
 
