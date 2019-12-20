@@ -1,0 +1,65 @@
+#  -*- python -*-
+#
+#  @WARNING@
+#
+#  this file can be copied into your python site-packages, or somewhere where
+#  the command "import nemo_start" will work. This will modify your environment
+#  such that NEMO commands are accessible to python as if $PATH had been properly
+#  set in the parent shell (which may be absent)
+
+import os
+
+def _check_add(envvar, value, prepend=True):
+    """
+    """
+    if envvar in os.environ:
+        if prepend:
+            os.environ[envvar] = value+':'+os.environ[envvar]
+        else:
+            os.environ[envvar] = os.environ[envvar]+value+':'
+    else:
+        os.environ[envvar] = value
+
+if not 'NEMO' in os.environ:
+    _NEMO       = '@NEMO@'
+
+    line = open('%s/VERSION' % _NEMO).readlines()[0]
+    print("Loading NEMO=%s  VERSION %s" % (_NEMO,line.strip()))
+
+    # _PGPLOT_DIR = '@PGPLOT_DIR@'
+
+    _check_add('PATH',              '%s/bin' % _NEMO)
+    _check_add('LD_LIBRARY_PATH',   '%s/lib' % _NEMO)   # ? opt/lib ?
+    _check_add('DYLD_LIBRARY_PATH', '%s/lib' % _NEMO)   # ? opt/lib ?
+
+    os.environ['NEMO']     = '%s'                 % _NEMO 
+    os.environ['NEMOBIN']  = '%s/bin'             % _NEMO           # ? opt/bin ?
+    os.environ['NEMOLIB']  = '%s/lib'             % _NEMO
+    os.environ['BTRPATH']  = '.:%s/obj/bodytrans' % _NEMO
+    os.environ['POTPATH']  = '.:%s/obj/potential:%s/obj/acc' % (_NEMO,_NEMO)
+    os.environ['YAPP']     = '@YAPP_DEF@'
+    os.environ['NEMOHOST'] = '@NEMOHOST@'
+    
+    
+    #export NEMOOBJ=$NEMO/obj
+    #export NEMODOC=$NEMO/man/doc
+    #export NEMODAT=$NEMO/data
+    #export NEMOINC=$NEMO/inc
+
+    #export NEMOSRC=$NEMO/src
+    #    
+#    export ACCPATH=.:$NEMO/obj/potential:$NEMO/obj/acc
+#    export MANIPPATH=.:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
+#    export NEMOVER=`cat $NEMO/VERSION`
+#    export NEMOSYS=`uname -s`
+#    export NEMOSITE=`hostname`
+
+
+# export PYTHONPATH=$NEMO/py/modules
+# export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
+# falcON : todo
+# source $FALCON/falcON_start.sh
+
+
+else:
+    print("NEMO is already loaded")
