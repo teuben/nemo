@@ -69,8 +69,14 @@ OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 \
 		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
+ifeq ($(NO_ARCH_NATIVE),1)
+   ARCH_NATIVE =
+else
+   ARCH_NATIVE = -march=native
+endif
+
 ifneq ($(OSTYPE),Darwin)
-OPTFLAGS	+= -rdynamic -march=native 
+OPTFLAGS	+= -rdynamic $(ARCH_NATIVE)
 endif
 
 # these are actually to be set
