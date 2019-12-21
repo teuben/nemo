@@ -19,12 +19,12 @@ all:	snap.in $(BIN)
 snap.in:
 	@echo Creating snap.in
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
-	@bsf snap.in
+	@bsf snap.in '0.0140845 0.896875 -4.6523 4.80925 71'
 
 snapxyz: snap.in
 	@echo Running $*
 	$(EXEC) snapxyz snap.in -  color=i | $(EXEC) tsf -  ; nemo.coverage snapxyz.c
-	@snapxyz snap.in -  color=i | bsf - 
+	@snapxyz snap.in -  color=i | bsf - '1.04652e-17 0.966872 -4.6523 4.80925 61' label=snapxyz
 
 p64.out:
 	$(EXEC) mkplummer p64.a $(NBODY) seed=123

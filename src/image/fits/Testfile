@@ -24,7 +24,7 @@ ccd.in:
 	@echo Creating $@
 #	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
 	$(EXEC) ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1
-	@bsf ccd.in	
+	@bsf ccd.in '41.644 31.2134 0 93 115'
 
 map001.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | $(EXEC) ccdfits - map001.fits ; nemo.coverage ccdfits.c
@@ -53,7 +53,7 @@ fitsccd: ccdfits
 	$(EXEC) fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
 	@echo Testing ccd-fits-ccd with "FIE=$(FIE)"
 	$(EXEC) ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
-	@bsf ccd.out	
+	@bsf ccd.out '41.6266 31.2366 -1 93 115'
 
 scanfits: ccdfits
 	@echo Running $@
