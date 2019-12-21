@@ -168,7 +168,7 @@ cleanup:
 	    cat $testdir/bsf-fail.log
 	    echo BSF regressions that are not OK: `grep OK $testdir/bsf-fail.log | wc -l`
 	endif
-	echo If you have any unsolved problems, this file should be sent to the teuben@astro.umd.edu
+	echo If you have any unsolved problems, this file should be saved.
         head -1 $testdir/$log
         tail -1 $testdir/$log
 	
