@@ -21,11 +21,13 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**$(P)+(abs(%y-31.5))**$(P))" size=64,64,1
+	@bsf ccd.in '1.70886 0.707985 0 10.3526 4111'
 
 N = 2
 ccdmom.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
+	@bsf ccdmom.in	'1.65217 2.37026 0 7 23'
 
 
 ccdplot: ccd.in

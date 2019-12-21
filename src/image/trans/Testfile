@@ -17,12 +17,12 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
-	@bsf ccd.in
+	@bsf ccd.in '14.3933 15.6202 0 42 40'
 	
 ccd3.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd3.in "fie=10*%x+sqrt(%y)+%z*%z"  size=5,5,5 ; nemo.coverage ccdmath.c
-	@bsf ccd3.in	
+	@bsf ccd3.in '24.7475 16.8428 0 58 140'	
 
 ccdmath: ccd.in
 	@echo Running $@

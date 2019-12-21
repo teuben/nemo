@@ -19,7 +19,7 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-	@bsf ccd.in	
+	@bsf ccd.in '41.644 31.2134 0 93 115'
 
 ccdprint: ccd.in
 	@echo Running $@
