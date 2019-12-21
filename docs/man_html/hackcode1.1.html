@@ -118,27 +118,29 @@ out=- needs to be part of a pipe. </dd>
 ,
 <a href='directcode.1.html'>directcode(1NEMO)</a>
 , <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
- 
+ <br>
+<pre>https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
+Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
+</pre>
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
-This code is the very original
-1986 (NEMO) version of the Barnes &amp; Hut  treecode and only kept in NEMO
-for that reason. It is not the most  efficient treecode (see e.g. <a href='treecode.1.html'><i>treecode(1NEMO)</i></a>
-
-and <a href='gyrfalcON.1.html'><i>gyrfalcON(1NEMO)</i></a>
- for improved versions), and also suffers from the
- Warren &amp; Salmon imploding galaxy bug. <p>
-When a <b>restart</b> is specified, values
-must be given for <b>ALL</b> legal parameters which do not take default values.
-<p>
+This code is the very original 1986 (NEMO) version of the Barnes &amp; Hut
+ treecode and only kept in NEMO for that reason. It is not the most  efficient
+treecode (see e.g. <a href='treecode.1.html'><i>treecode(1NEMO)</i></a>
+ and <a href='gyrfalcON.1.html'><i>gyrfalcON(1NEMO)</i></a>
+ for improved versions),
+and also suffers from the  Warren &amp; Salmon imploding galaxy bug. <p>
+When a <b>restart</b>
+is specified, values must be given for <b>ALL</b> legal parameters which do not
+take default values. <p>
 <i>continue=</i> does not seem to work. Use <i>restart=</i> 
 <h2><a name='sect6' href='#toc6'>Benchmark</a></h2>
-Running <b>hackcode1</b>
-with all default parameters will integrate a 128 body plummer sphere for
-64 timesteps to time 2 with softening 0.05 and critical opening angle 1
-and a seed of 123. Assuming the standard portable &rsquo;ran3&rsquo; from NumRec is being
-used in <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
-, we get the following  initial and final printout:
-<br>
+Running
+<b>hackcode1</b> with all default parameters will integrate a 128 body plummer
+sphere for 64 timesteps to time 2 with softening 0.05 and critical opening
+angle 1 and a seed of 123. Assuming the standard portable &rsquo;ran3&rsquo; from NumRec
+is being used in <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
+, we get the following  initial and final
+printout: <br>
 <pre>  tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
  0.000   -0.2675   -0.5434      3864         9        20      0.00
           cm pos   -0.0000    0.0000    0.0000
@@ -167,8 +169,7 @@ usr/josh/treecode<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp
 6-mar-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;added link to export version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-mar-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 major code cleanup for MacOS and prototypes<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-jul-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 removed debug=, added log=  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-</pre>old bench10240 3.652u 0.002s 0:03.65 100.0%    0+0k 0+0io 0pf+0w new bench10240
-4.688u 0.003s 0:04.69 99.7%     0+0k 0+0io 0pf+0w <p>
+</pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
