@@ -46,13 +46,14 @@ else
 
     time directcode nbody=$nbody0 out=d0 seed=123 help=c                                      >& bench.directcode.log
     time hackcode1 nbody=$nbody1  out=h0 seed=123 help=c                                      >& bench.hackcode1.log
-    time mkplummer p0 $nbody2 seed=123; time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 help=c   >& bench.gyrfalcon.log
+    time mkplummer p0 $nbody2 seed=123 help=c                                                 >& bench.mkplummer.log
+    time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 help=c                                       >& bench.gyrfalcon.log
     time mkspiral s0 $nbody3 nmodel=40 seed=123 help=c                                        >& bench.mkspiral.log
     time ccdmath "" c0 'ranu(0,1)' size=$size seed=123; time ccdpot c0 . help=c               >& bench.ccdpot.log
 
     if ($bench) then
-        bsf d0 test="0.00012533 0.417791 -1.60699 2 196006"
-	bsf h0 test="3.43013e-05 0.418305 -1.72565 2 647590"
+        bsf d0 test="8.81856e-05 0.417853 -1.60699 2 195941"
+	bsf h0 test="3.05666e-05 0.418326 -1.72565 2 647525"
 	bsf p0 test="1.39507e-05 0.732358 -21.724 16.8652 71681"
 	bsf p1 test="2.79024e-05 0.732249 -21.724 16.8652 143362"
 	bsf s0 test="-1.5474e-05 0.325705 -0.999995 0.99999 280000040"
