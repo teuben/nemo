@@ -22,7 +22,8 @@ string defv[] = {
   "fmt=%g\n              output format for floating point values",
   "eps=\n                Accuracy comparison (not implemented)",
   "label=\n              Override the in= filename in reporting",
-  "VERSION=1.0\n         10-dec-2019 PJT ",
+  "ignore=cputime\n      Items to ignore in checksum",
+  "VERSION=1.1\n         21-dec-2019 PJT ",
   NULL,
 };
 
@@ -32,6 +33,8 @@ string cvsid="$Id$";
 
 local stream instr;	
 local Moment m;
+
+local string ignore = "cputime";
 
 /* local functions */
 void   accum_item   (string);
@@ -47,6 +50,7 @@ void nemo_main()
   string infile = getparam("in");
   string fmt = getparam("fmt");
   string test = getparam("test");
+  string ignore = getparam("ignore");
   string label;
   char fmt4[32];
   char current[128];
@@ -139,10 +143,16 @@ void accum_data(string tag, string type, int *dims)
     } else if (streq(type, FloatType)) {    /*   floating point? */
       rv = (real) *((float *) dp);
       dp += sizeof(float);
-      accum_moment(&m,rv,1.0);
+      if (streq(tag,ignore))
+	  dprintf(1,"Ignoring %s = %g\n",tag,rv);
+      else
+	  accum_moment(&m,rv,1.0);
     } else if (streq(type, DoubleType)) {   /*   double numbers? */
       rv = (real) *((double *) dp);      
-      accum_moment(&m,rv,1.0);
+      if (streq(tag,ignore))
+	  dprintf(1,"Ignoring %s = %g\n",tag,rv);
+      else
+	  accum_moment(&m,rv,1.0);
       dp += sizeof(double);
     } else
       error("accum_data: type %s unknown", type);
