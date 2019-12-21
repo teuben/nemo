@@ -70,9 +70,11 @@ void nemo_main(void)
 
 void startrun(void)
 {
-  infile = getparam("in");			/* set I/O file names       */
+  int seed = init_xrandom(getparam("seed")); /*  set random generator */
+
+  infile = getparam("in");		/* set I/O file names       */
   outfile = getparam("out");
-  options = getparam("options");		/* set control options      */
+  options = getparam("options");	/* set control options      */
   
   if (hasvalue("in"))
     inputdata(infile);			/*     read inital data     */
@@ -80,7 +82,6 @@ void startrun(void)
     nbody = getiparam("nbody");		/*     get nbody parameter  */
     if (nbody < 1)			/*     is value absurd?     */
       error("invalid nbody=%d",nbody);
-    init_xrandom(getparam("seed"));	/*     set random generator */
     testdata(getbparam("cencon"));	/*     make test model      */
   }
   freq = getdparam("freq");		/*   get various parameters */
