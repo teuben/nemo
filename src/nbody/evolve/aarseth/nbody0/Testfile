@@ -31,16 +31,19 @@ nbody0.in:
 	$(EXEC) mkplummer nbody0.in $(NBODY) seed=123
 	echo "$(NBODY),$(ETA),$(DELTAT),$(TCRIT),$(EPS2),$(RESET)"        > nbody0.tab
 	$(EXEC) snapprint nbody0.in m,x,y,z,vx,vy,vz                      >> nbody0.tab
+	@bsf nbody0.in '0.0140845 0.896875 -4.6523 4.80925 71'
 
 nbody0:	nbody0.in
 	@echo Running $@
 	$(EXEC) nbody0 nbody0.in nbody0.out tcrit=$(TCRIT) > nbody0.log 2>&1
 	$(EXEC) snaptrim nbody0.out - times=$(TCRIT) | tsf -
+	@bsf nbody0.out '0.0281791 0.943951 -4.80019 5.59113 639'
 
 nbody00:	nbody0.in
 	@echo Running $@
 	$(EXEC) nbody00 nbody0.in nbody00.out tcrit=$(TCRIT) > nbody00.log 2>&1
 	$(EXEC) snaptrim nbody00.out - times=$(TCRIT) | tsf -
+	@bsf nbody00.out '0.0281791 0.943951 -4.80019 5.59113 639'	
 
 nbody0_ff:	nbody0.in
 	@echo Running $@
