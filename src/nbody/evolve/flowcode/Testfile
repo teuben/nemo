@@ -45,6 +45,6 @@ flowcode: bench.in
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log
-	@bsf bench.dat '-0.0198539 0.678724 -1.95706 1.98711 4354'
+	@bsf bench.dat '-0.0200055 0.681308 -1.95706 1.98711 4321'
 
 

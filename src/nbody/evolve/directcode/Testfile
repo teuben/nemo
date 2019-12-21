@@ -25,5 +25,5 @@ directcode:
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log
-	@bsf bench.dat '0.00206071 0.390706 -1.22155 2 10534'
+	@bsf bench.dat '0.00207274 0.391917 -1.22155 2 10469'
 

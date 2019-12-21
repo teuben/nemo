@@ -34,10 +34,10 @@ otos:
 	$(EXEC) potcode snap1.in snap3.out plummer freq=10 tstop=1 freqout=10 mode=5  > orb3.log
 	$(EXEC) potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4  > orb4.log
 	@bsf snap1.in '0.285714 0.451754 0 1 7'
-	@bsf snap1.out '0.0990123 0.413027 -1.03153 1.03153 485'
-	@bsf snap2.out '0.0977812 0.409197 -1 1 485'
-	@bsf snap3.out '0.0975953 0.409614 -1 1 485'
-	@bsf snap4.out '0.0977268 0.40934 -1 1 485'
+	@bsf snap1.out '0.10131 0.417513 -1.03153 1.03153 474'
+	@bsf snap2.out '0.10005 0.413643 -1 1 474'
+	@bsf snap3.out '0.0998601 0.414066 -1 1 474'
+	@bsf snap4.out '0.0999947 0.413788 -1 1 474'
 	
 	
 orbint: orb1.in orbint2

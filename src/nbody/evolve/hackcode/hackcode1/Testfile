@@ -23,6 +23,6 @@ hackcode1:
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log
-	@bsf bench.dat '0.00195036 0.390693 -1.22753 2 10534'
+	@bsf bench.dat '0.00196205 0.391904 -1.22753 2 10469'
 
 
