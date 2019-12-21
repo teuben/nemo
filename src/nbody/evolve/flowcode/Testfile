@@ -24,6 +24,7 @@ bench.in:	vrtm51.c
 	  seed=123 \
 	  rmin=1 rmax=2 pitch=0.1 \
 	  $(PAR1)
+	@bsf bench.in '-0.0541432 0.69194 -1.9487 1.97097 701'
 
 vrtm51.c:
 	@echo Copying vrtm51.c locally
@@ -44,5 +45,6 @@ flowcode: bench.in
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log
+	@bsf bench.dat '-0.0199399 0.678713 -1.95655 1.99285 4354'
 
 
