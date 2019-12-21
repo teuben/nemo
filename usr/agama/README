@@ -1,0 +1,19 @@
+
+The AGAMA library is a collection of tools for constructing and
+analyzing models of galaxies. It computes gravitational potential and
+forces, performs orbit integration and analysis, and can convert
+between position/velocity and action/angle coordinates. It offers a
+framework for finding best-fit parameters of a model from data and
+self-consistent multi-component galaxy models, and contains useful
+auxiliary utilities such as various mathematical routines. The core of
+the library is written in C++, and there are Python and Fortran
+interfaces. AGAMA may be used as a plugin for the stellar-dynamical
+software packages galpy (ascl:1411.008), AMUSE (ascl:1107.007), and
+NEMO (ascl:1010.051).
+
+Code site:  https://github.com/GalacticDynamics-Oxford/Agama
+Described in:  https://ui.adsabs.harvard.edu/abs/2019MNRAS.482.1525V
+ASCL ID:  1805.008
+
+
+See also:  TACT, SMILE, Forstrand (https://arxiv.org/abs/1912.04288)
