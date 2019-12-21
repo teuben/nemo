@@ -2,7 +2,7 @@
 
 include $(NEMOLIB)/makedefs
 
-BINS = hello1 hello2 poisson heated_plate_openmp poisson_mpi
+BINS = hello1 hello2 heated_plate_openmp poisson_mpi
 
 all:  $(BINS)
 
@@ -23,11 +23,14 @@ bench: $(BINS)
 heated_plate_openmp:
 	$(CC) $(CFLAGS) -fopenmp -o heated_plate_openmp heated_plate_openmp.c $(NEMO_LIBS)
 
+bench2:
+	./heated_plate_openmp nprocs=4
+
 
 # https://people.sc.fsu.edu/~jburkardt/c_src/poisson_mpi/poisson_mpi.c
 
 poisson_mpi:
 	mpicc poisson_mpi.c -o poisson_mpi -lm
 
-bench2:
+bench3:
 	time mpirun -np 4 ./poisson_mpi 512
