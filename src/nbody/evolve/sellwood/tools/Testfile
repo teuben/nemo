@@ -18,8 +18,10 @@ all: $(BIN)
 
 
 run1.in:
-	mkplummer run1.in $(NBODY)
+	mkplummer run1.in $(NBODY) seed=$(NBODY)
+	
 
 rungalaxy:	 run1.in
 	$(EXEC) rungalaxy in=run1.in outdir=run1
 	tsf run1/galaxy.snap
+	@bsf run1/galaxy.snap '-0.105414 0.49662 -1.71432 1.40336 2103'
