@@ -39,12 +39,12 @@ flowcode: bench.in
 	@echo Running $@
 	@rm -f bench.dat bench.log
 	$(EXEC) flowcode in=bench.in out=bench.dat \
-		freq=200 tstop=1 \
+		freq=200 tstop=1 seed=123 \
 		$(PAR1)  $(PAR2) \
 		> bench.log; nemo.coverage flowcode.c
 	@head -14 bench.log
 	@echo "..."
 	@tail -8 bench.log
-	@bsf bench.dat '-0.0199399 0.678713 -1.95655 1.99285 4354'
+	@bsf bench.dat '-0.0198539 0.678724 -1.95706 1.98711 4354'
 
 
