@@ -36,6 +36,8 @@ gyrfalcON:
 	@echo To view lagrangian radii, redo test with larger TSTOP=$(TSTOP) and plot:
 	@echo tabplot p1024.tab  1 2:10 line=1,1
 	@echo tabplot p1024.tab2 1 2:10 line=1,1
+	@bsf p1024.out '0.00817902 1.20758 -15.9955 39.5529 14338'
+	@bsf p1024.out2 '0.00796088 1.20788 -15.9955 39.5529 14338'
 
 #   now do some work on manipulators
 
