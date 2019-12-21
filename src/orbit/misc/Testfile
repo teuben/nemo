@@ -67,8 +67,8 @@ orbintv:
 	@echo Running $@
 	$(EXEC) orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
 	$(EXEC) orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
-	@bsf orb1v.out '0.949343 2.26243 -2.46954 10 714'
-	@bsf orb2v.out '0.949343 2.26243 -2.46954 10 714'
+	@bsf orb1v.out '0.606289 1.86465 -2.46954 10 1118'
+	@bsf orb2v.out '0.606289 1.86465 -2.46954 10 1118'
 
 orblist:
 	@echo Running $@
