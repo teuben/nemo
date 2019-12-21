@@ -80,28 +80,28 @@ spline fit coefficients etc. [default: none - use default from input orbit].
 </dd>
 
 <dt><b>mode=<i>int_mode</i></b> </dt>
-<dd>Specify the integration mode. Any one of <b>euler</b>, <b>leapfrog1</b>,
-<b>leapfrog2</b> or <b>rk4</b> can be given. [Default: <b>rk4</b>]. </dd>
+<dd>Specify the integration mode. Any one of <b>euler</b>, <b>leapfrog</b>,
+<b>rk2</b>, or <b>rk4</b> can be given. [Default: <b>rk4</b>]. </dd>
 
 <dt><b>eta=</b> </dt>
-<dd>Relative error allowed
-in energy conservation. Integration is terminated if the relative error
-(|dE/E|) is too large. By default not used. </dd>
+<dd>Relative error allowed in
+energy conservation. Integration is terminated if the relative error (|dE/E|)
+is too large. By default not used. </dd>
 
 <dt><b>variable=t|f</b> </dt>
-<dd>Use variable timesteps?
-If so, the error control parameter <b>eta=</b> needs to be specified. Also note
-that not all integration methods support variable timesteps. Default: <b>f</b>.
-</dd>
+<dd>Use variable timesteps? If
+so, the error control parameter <b>eta=</b> needs to be specified. Also note that
+not all integration methods support variable timesteps. Default: <b>f</b>. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example launches a particle from the Y axis (at y=1)
-in the X direction (speed 0.4) in a plummer potential. Although the 6D initial
-conditions are fully specified, so a potential (potname=) is not needed,
-it is tagged along with the orbit, such that the orbint integrator will
-use it. The integrated orbit is then passed on to a simple plotting program,
-which plots an X-Y  view of this 2D orbit. <br>
+The
+following example launches a particle from the Y axis (at y=1) in the X
+direction (speed 0.4) in a plummer potential. Although the 6D initial conditions
+are fully specified, so a potential (potname=) is not needed, it is tagged
+along with the orbit, such that the orbint integrator will use it. The integrated
+orbit is then passed on to a simple plotting program, which plots an X-Y
+ view of this 2D orbit. <br>
 <pre>mkorbit - x=0 y=1 z=0 vx=0.4 vy=0 vz=0 potname=plummer |\
      orbint - - nsteps=10000 dt=0.05 ndiag=1000 |\
      orbplot -

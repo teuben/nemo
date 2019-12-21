@@ -9,20 +9,23 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-sdinfo - sdfits info  
+sdinfo - sdfits (BINTABLE) info and benchmark 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>sdinfo</b> [parameter=value] 
+<b>sdinfo</b> [parameter=value]
+
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>sdinfo</b>
-list some tabular properties of an SDFITS file, and has some options to
-benchmark some basic operations <p>
-SDFITS files have a BINTABLE extension
-named "SINGLE DISH", and is used to store single dish spectra and all associated
-variables. This particular program was only written to provide some size
-info and various baseline benchmarks. 
+<b>sdinfo</b> list some tabular properties of an SDFITS (and some dialects)
+file, and has  options to benchmark some basic operations. <p>
+SDFITS files
+have a BINTABLE extension named "SINGLE DISH", and is used to store single
+dish spectra and all associated variables. This program was only written
+to provide size info and can run a few basic benchmarks. A few known dialects
+to this are known:  "CIMAFITS" (Arecibo) and "MATRIX" (30m/CLASS), the
+latter designates the spectrum via a "SPECTRUM" column name, instead of
+the more common "DATA" column name. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The following parameters are
+recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
@@ -32,20 +35,71 @@ this. No default. </dd>
 
 <dt><b>stats=t|f</b> </dt>
 <dd>If true, some basic statistics will be computed.
-</dd>
+You also need this option if a row (see row= below) is output. </dd>
 
 <dt><b>mom=</b><i> </i></dt>
-<dd>Maximum moment some statistics will be computed. [2]. </dd>
+<dd>Maximum
+moment some statistics will be computed. mom=0 will just sum, and be much
+faster than general moment computation. [2]. </dd>
+
+<dt><b>cols=</b> </dt>
+<dd>Column names to track.
+Currently it just gives the column number and format used.  Default: not
+used. </dd>
+
+<dt><b>dims=</b> </dt>
+<dd>A list of dimensions how the data-block should be processed. The
+procedure of processing is set by the <b>proc=</b> keyword.  For example dims=2,11,2,2,4
+ Default: not used. </dd>
+
+<dt><b>proc=</b> </dt>
+<dd>The procedure of processing can be set with this.
+Currently only one specific example (see EXAMPLES below) for ngc5291 is
+implemented. Options would be PS (Position Switching), FS (frequency switching),
+NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever. </dd>
+
+<dt><b>nchan=</b> </dt>
+<dd>Override
+the number of channels found in the data. Some dataset will find nchan=0
+and it will be useful to set this here. </dd>
+
+<dt><b>row=</b> </dt>
+<dd>If used, this row (0 being
+the first) will be output as an ascii spectrum. This spectrum has two columns:
+channel number (0 being the first) and the spectrum value, native units.
+</dd>
+
+<dt><b>bench=</b> </dt>
+<dd>How many times the procedure should be processed. This will only
+re-execute the procedure, not the alloc/free that are needed for this. Using
+0 will bypass the procedure. Default: 1 </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following
-example takes all fits files matching a particular pattern and summarize
-their contents. <br>
+The following example takes
+all fits files matching a particular pattern and summarize their contents.
+<br>
 <pre>    ls *.?.fits &gt; dirin.lis
     sdinfo in=@dirin.lis
 AGBT15B_287_35.raw.vegas.A.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_35.raw.vegas.B.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_35.raw.vegas.C.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
+AGBT15B_287_39.raw.vegas.A.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.B.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
+AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
+</pre>Here is a benchmark of the ngc5291 example: <br>
+<pre>    time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
+    ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col
+= 7
+    ### nemo Debug Info: DATA6 3.71521 0.0366262 3.30351     1.42437
+    ### nemo Debug Info: CPU_USAGE sdinfo : 3.09    3.04 0.04  0.00 0.00  1803498650
+    real    0m3.095s
+    user    0m3.047s
+    sys     0m0.048s
+</pre>
+<p> Here is a way to plot a spectrum: <br>
+<pre>    sdinfo ngc5291.fits t row=11 | tabplot - 
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='scanfits.1.html'>scanfits(1NEMO)</a>
@@ -60,7 +114,9 @@ src/image/fits
 Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
-<pre>23-Nov-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>23-Nov-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 dimension analysis w/ n5291<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 Handle CIMAFITS and MATRIX extensions<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
