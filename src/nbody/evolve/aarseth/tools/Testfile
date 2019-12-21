@@ -34,6 +34,9 @@ u3tos:
 	@mkplummer run2/test1 $(NBODY) seed=123
 	@snaptrim run2/out3.dat run2/test2 times=0
 	@snapcmp run2/test1 run2/test2
+	@bsf run2.p '0.0140845 0.896875 -4.6523 4.80925 71'
+	@bsf run2/test1 '0.0140845 0.896875 -4.6523 4.80925 71'
+	@bsf run2/test2 '0.0140845 0.896875 -4.6523 4.80925 71'
 
 #	this only tests nbody1, no data conversion routines
 
@@ -55,13 +58,15 @@ nbody2:
 	@echo OOPS: Running runbody2 testrun for NBODY2 not implemented yet
 
 runbody1:
-	runbody1                     outdir=run2a nbody=25 tcrit=0 kz=0,0,1,1 > run2a.log
-	u3tos    in=run2a/OUT3       out=run2a/input.snap
-	runbody1                     outdir=run2b nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run2b.log
-	runbody1 in=run2a/input.snap outdir=run2c nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run2c.log
-	u3tos    in=run2b/OUT3 out=run2b/out.snap
-	u3tos    in=run2c/OUT3 out=run2c/out.snap
-	snapcmp run2b/out.snap  run2c/out.snap
+	runbody1                     outdir=run1a nbody=25 tcrit=0 kz=0,0,1,1 > run1a.log
+	u3tos    in=run1a/OUT3       out=run1a/input.snap
+	runbody1                     outdir=run1b nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run1b.log
+	runbody1 in=run1a/input.snap outdir=run1c nbody=25 tcrit=10 kz=0,0,1,1 deltat=1 > run1c.log
+	u3tos    in=run1b/OUT3 out=run1b/out.snap
+	u3tos    in=run1c/OUT3 out=run1c/out.snap
+	snapcmp run1b/out.snap  run1c/out.snap
+	@bsf run1b/out.snap '0.0710862 1.96997 -16.4179 28.2864 1936'
+	@bsf run1c/out.snap '0.0956777 1.94312 -17.7717 28.2847 1936'
 
 runbody2:
 	runbody2                     outdir=run2a nbody=25 tcrit=0 kz=0,0,1,1 > run2a.log
@@ -71,6 +76,8 @@ runbody2:
 	u3tos    in=run2b/OUT3 out=run2b/out.snap
 	u3tos    in=run2c/OUT3 out=run2c/out.snap
 	snapcmp run2b/out.snap  run2c/out.snap
+	@bsf run2b/out.snap '0.108572 1.9612 -16.3498 28.2851 1936'
+	@bsf run2c/out.snap '-0.195435 7.1402 -42.454 45.7344 1936'
 
 
 runbody4:
@@ -81,3 +88,5 @@ runbody4:
 	u3tos    in=run4b/OUT3 out=run4b/out.snap mode=4
 	u3tos    in=run4c/OUT3 out=run4c/out.snap mode=4
 	snapcmp run4b/out.snap  run4c/out.snap
+	@bsf run4b/out.snap '-39.3365 1445.22 -53238.1 12.727 1356'
+	@bsf run4c/out.snap '-39.4594 1450.66 -53438.8 14.2074 1356'
