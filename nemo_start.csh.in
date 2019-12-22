@@ -59,7 +59,7 @@ else
  if ($status) setenv MANPATH $NEMO/man:$MANPATH
 endif
 
-setenv MANPATH ${MANPATH}:${NEMO}/usr/dehnen/falcON/man
+# setenv MANPATH ${MANPATH}:${NEMO}/usr/dehnen/falcON/man  - manually copied into $NEMO/man
 
 
 # Set various 'external' things we sometimes need, but only if not set
