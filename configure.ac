@@ -122,6 +122,14 @@ if test "$ok" = "yes"; then
   # FFLAGS="$CFLAGS $flags"
 fi
 
+AC_ARG_ENABLE(native, [  --enable-native         optimize for native CPU], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+  flags="-march=native"
+  CFLAGS="$CFLAGS $flags"
+  CXXFLAGS="$CXXFLAGS $flags"
+  FFLAGS="$CFLAGS $flags"
+fi
+
 AC_MSG_CHECKING(which precision NEMO is going to use)
 prec_flag=""
 AC_ARG_ENABLE(single, [  --enable-single         single-precision], ok=$enableval, ok=no)

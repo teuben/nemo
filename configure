@@ -740,6 +740,7 @@ ac_user_opts='
 enable_option_checking
 enable_debug
 enable_pedantic
+enable_native
 enable_single
 enable_float
 enable_double
@@ -1416,6 +1417,7 @@ Optional Features:
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
   --enable-pedantic       compile for pedantic gcc
+  --enable-native         optimize for native CPU
   --enable-single         single-precision
   --enable-float          single-precision
   --enable-double         double-precision
@@ -5526,6 +5528,20 @@ if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
   # FFLAGS="$CFLAGS $flags"
+fi
+
+# Check whether --enable-native was given.
+if test "${enable_native+set}" = set; then :
+  enableval=$enable_native; ok=$enableval
+else
+  ok=no
+fi
+
+if test "$ok" = "yes"; then
+  flags="-march=native"
+  CFLAGS="$CFLAGS $flags"
+  CXXFLAGS="$CXXFLAGS $flags"
+  FFLAGS="$CFLAGS $flags"
 fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking which precision NEMO is going to use" >&5
