@@ -20,4 +20,6 @@ bodytrans:
 	$(EXEC) bodytrans 'sqrt(x*x+y*y)>0' int
 	$(EXEC) bodytrans 'sqrt(x*x+y*y)>1' int
 	$(EXEC) bodytrans 'sqrt(x*x+y*y)>2' int
-
+	mkplummer - 128 seed=128 |\
+	    snapmass - - 'sqrt(x*x+y*y)' |\
+	    bsf - '0.00111483 0.691696 -6.34556 6.87197 897'
