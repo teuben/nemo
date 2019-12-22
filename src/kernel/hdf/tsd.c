@@ -25,9 +25,9 @@
 #include <filestruct.h>
 #include <history.h>
 
-#ifdef INC_HDF
+//#if defined(HAVE_HDF)
 #include <hdf.h> 	/* some conflicts with nemo include files */
-#endif
+//#endif
 
 string defv[] = {
     "in=???\n			Input file (HDF SD)",
@@ -53,14 +53,18 @@ string cvsid="$Id$";
 local int rank, shape[MAXRANK], run[MAXRANK], old_shape[MAXRANK];
 local char label[256], unit[256], fmt[256], coordsys[256];
 
+local void scan_sd(string infile);
 
+extern void hdf_type_info(int type, char *msg);     // see hdf_info.c
+
+  
 void nemo_main()
 {
     scan_sd(getparam("in"));
 }
 
 #ifndef MULTI_FILE
-scan_sd(string infile)		/* this is the fancy new version */
+void scan_sd(string infile)		/* this is the fancy new version */
 {
     float **dump, **coord;
     int i, j, k, ret, old_size, size, type, nsds, old_rank;
@@ -218,7 +222,7 @@ scan_sd(string infile)		/* this is the fancy new version */
 
 #define DFACC_RDONLY 1
 
-scan_sd(string infile)
+void scan_sd(string infile)
 {
     int id, sds, n, i, j, k, ret, size, type, na, nd;
     char name[256];
