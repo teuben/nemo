@@ -277,6 +277,7 @@ void nemo_main(void)
   int ntest = getiparam("ntest");
   int iwork = getiparam("work");
   int nprocs= getiparam("nprocs");
+  int test1 = 10, test2=20, test3[test2][test1];   // in C99 this is now allowed
   real sum;
   int i1,i2,i3,i4;
 
@@ -293,7 +294,10 @@ void nemo_main(void)
   dprintf(0,"Using OMP with nprocs=%d (or use OMP_NUM_THREADS)\n",nprocs);
 #else  
   dprintf(0,"Using single CPU\n");
-#endif  
+#endif
+
+  /* C99 now does it the way I wanted it to work */
+  dprintf(1,"test3: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",test3,test3[0],&test3[0][0],&test3[0][1],test3[1],&test3[1][0]);
 
   if (ndim != 4) error("ndim=4 for now");
 
