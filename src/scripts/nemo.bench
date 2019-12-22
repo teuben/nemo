@@ -12,7 +12,7 @@ set nbody2 = 10240
 set nbody3 = 1000000
 set size   = 256
 set clean  = 1
-set bsf    = 1
+set bsf    = 0
 
 foreach a ($*)
   set $a
@@ -58,6 +58,8 @@ else
 	bsf p1 test="2.79024e-05 0.732249 -21.724 16.8652 143362"
 	bsf s0 test="-1.5474e-05 0.325705 -0.999995 0.99999 280000040"
 	bsf c0 test="0.500602 0.288034 0 1 65551"
+    else
+        echo Skipping BSF testing.  Use bsf=1 to enable this.
     endif
     
     grep CPU_USAGE bench.*.log
