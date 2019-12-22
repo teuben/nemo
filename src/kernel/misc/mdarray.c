@@ -3,6 +3,7 @@
  *          cannot be used in a multi-threaded environment
  *
  * See also: Iliffe Vector
+ *           Shortridge ADASS 2019 proceedings - https://github.com/KnaveAndVarlet/ADASS2019
  *
  * Note:  MDMAXDIM defines the highest dimension we've implemented (currently 7)
  *        see mdarray.h
