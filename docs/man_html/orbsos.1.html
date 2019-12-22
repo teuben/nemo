@@ -9,41 +9,42 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-orbsos - compute SOS coordinates from an orbit 
+orbsos - tabulate the SOS coordinates of an orbit 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>orbsos in=</b>orbit
  [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>orbsos</b> will compute the Surface of Section
-(SOS) coordinates from an orbit. Currently one can only do this for 2D orbits,
+(SOS) coordinates of an orbit. Currently one can only do this for 2D orbits
 in the x-y plane. There is an option to compute the X-VX or Y-VY SOS coordinates.
 <p>
-The output is a simple ascii table with 4 columns: number, time, position
-and velocity. Example of use with <a href='tabplot.1.html'>tabplot(1NEMO)</a>
+The output is a simple ascii table with 4 columns: crossing number, time,
+position and velocity. Example of use with <a href='tabplot.1.html'>tabplot(1NEMO)</a>
  <br>
-<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out x | tabplot - 3 4 xlab=x ylab=vx
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out y | tabplot - 3 4 xlab=y ylab=vy
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;% orbsos orbit.out x,y | tabplot - 3 4 xlab=x,y ylab=vx,vy
+<pre>  % orbsos orbit.out x  | tabplot - 3 4 xlab=x   ylab=vx
+  % orbsos orbit.out y  | tabplot - 3 4 xlab=y   ylab=vy
+  % orbsos orbit.out xy | tabplot - 3 4 xlab=x,y ylab=vx,vy
 </pre><p>
-<i>orbsos</i> can be useful in locating unknown orbital families.  Finding periodic
-orbits can be automated, but is easier through programs like <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
-
-and <a href='henyey.1.html'><i>henyey(1NEMO)</i></a>
+<i>orbsos</i> can be useful in locating orbital families and study ergodicity.
+Finding periodic orbits can be automated, but is easier through programs
+like <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
+ and <a href='henyey.1.html'><i>henyey(1NEMO)</i></a>
 . 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>Input file, which must
-be an <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+<dd>Input
+file, which must be an <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
 . [No default]. </dd>
 
-<dt><b>mode=x|y|x,y| </b></dt>
-<dd>Mode to tabulate. <b>x</b> computes
-the <i>x-vx</i>, and <b>y</b> computes the <i>y-vy</i> SOS coordinates. [default: <b>x</b>]. </dd>
+<dt><b>mode=x|y|xy| </b></dt>
+<dd>Mode to tabulate.
+<b>x</b> computes the <i>x-vx</i>, and <b>y</b> computes the <i>y-vy</i> SOS coordinates. These are computed
+while the orbit is crossing the y or x axis resp. [default: <b>x</b>]. </dd>
 
 <dt><b>pabs=t|f</b> </dt>
 <dd>Compute
@@ -54,23 +55,46 @@ for non-rotating potentials. [Default: <b>f</b>] </dd>
 <dd>Compute absolute values
 in the surface of section velocity coordinate? Usually useful, as a surface
 of section is symmetric w.r.t. to the position axis. [Default: <b>f</b>] </dd>
+
+<dt><b>symm=t|f</b> </dt>
+<dd>Treat
+the potential symmetrically, which means that crossing an axis in the opposite
+direction means the SOS coordinated can be inverted. This is normally true
+but an example where you will need <b>symm=f</b> is the Henon-Heiles potential.
+See EXAMPLES below. </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+Here is an example of reproducing Figures 4
+and 6 in Henon &amp; Heiles (1964) classic paper: <br>
+<pre># Fig 2 shows the equipotential contours
+potccd - hh64 x=-1:1:0.01 y=-1:1:0.01 | ccdplot - 0.01,0.0417,0.0833,0.1250,0.1667
+# Fig 4 show a regular orbit 
+mkorbit - y=-0.22 e=1/12.0 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |
+    orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
+# Fig 5 shows an ergodic orbit 
+mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 4000000 dt=0.01 ||
+    orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5 
+# same ergodic orbit like in Fig 5, but with twice the accuracy of integration
+mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |
+    orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
+</pre>
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='perorb.1.html'>perorb(1NEMO)</a>
-
-
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+, <a href='orbit.3.html'>orbit(3NEMO)</a>
+ 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>~/src/orbit/misc <tt> </tt>&nbsp;<tt> </tt>&nbsp;orbsos.c
 </pre>
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre> 9-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-mar-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added mode= and documented  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-dec-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added pabs= and vabs=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+9-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3 add symm=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -80,10 +104,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

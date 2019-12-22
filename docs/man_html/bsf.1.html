@@ -18,35 +18,43 @@ file
 for all the floating point values in a structured file, which can then
 be used against previously obtained number in an effort to assert proper
 regression. <p>
-The output will <i>mean, rms, min, max</i> and <i>number of points</i>. 
+The output will <i>mean, rms, min, max</i> and <i>number of points</i>. <p>
+This
+program can be used by users who want to provide some regression in their
+NEMO scripts. See EXAMPLES below. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters are
+recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file name [???] </dd>
+<dd>input file name
+[???] </dd>
+
+<dt><b>test=</b><i>test-string</i> </dt>
+<dd>If given, this is the resulting string that should
+have been obtained. Default: none </dd>
 
 <dt><b>fmt=</b><i>C-fmtP </i></dt>
 <dd>C-Format string for the 4 floating
 point values output.  [%g] </dd>
 
-<dt><b>test=</b><i>test-string</i> </dt>
-<dd>If given, this is the resulting
-string that should have been obtained. Default: none </dd>
-
 <dt><b>eps=</b> </dt>
-<dd>In some next version
-this accuracy parameter can control if the regression numbers need to agree
-within some fraction. Default: not used and not implemented. </dd>
+<dd>In some next version this accuracy parameter
+can control if the regression numbers need to agree within some fraction.
+Default: not used and not implemented. </dd>
+
+<dt><b>label=</b><i>label-string</i> </dt>
+<dd>By default the
+input file name is reported, but with label= you can override this. Particularly
+useful when unix pipes are used. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here
-are some examples of the stats of the masses and phase space coordinates
-of a plummer sphere with 10 particles and seed=123. The last example is
-to show that the output of %g (the default) and %f do differ. <br>
+Here are some examples of the stats
+of the masses and phase space coordinates of a plummer sphere with 10 particles
+and seed=123. The last example is to show that the output of %g (the default)
+and %f do differ. <br>
 <pre>    mkplummer - 10 seed=123 | bsf -
     0.0140845 0.896875 -4.6523 4.80925 71
     
@@ -70,7 +78,8 @@ NEMO/src/kernel/io
 Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
-<pre>24-Nov-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>24-Nov-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+10-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 finalized with label=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

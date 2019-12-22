@@ -51,55 +51,71 @@ velocity along x-axis [default: not used] </dd>
 <dd>Initial value of
 velocity along y-axis [default: not used] </dd>
 
-<dt><b>e=<i>energy</i></b> </dt>
-<dd>Energy of the orbit. If
-no value is given, the program assumes that all phase space coordinates
+<dt><b>etot=<i>energy</i></b> </dt>
+<dd>Energy of the orbit.
+If no value is given, the program assumes that all phase space coordinates
 will be used. If a value for the energy is given, one of the phase space
 velocities may be left out, and will be calculated. In this case the potential
 where the orbit is calculated in, must also be given, see next 3 parameters
 [default: not used]. </dd>
 
+<dt><b>lz=</b> </dt>
+<dd>The sign of <b>lz</b> will determine sense of rotation
+if only X or Y is given with etot. </dd>
+
 <dt><b>potname=<i>name</i></b> </dt>
 <dd>name of file of the <a href='potential.5.html'><i>potential(5NEMO)</i></a>
- descriptor,
- in case it is needed [default: none]. </dd>
+
+descriptor,  in case it is needed [default: none]. </dd>
 
 <dt><b>potpars=<i>par-list</i></b> </dt>
-<dd>List of parameters
-to the potential descriptor. The first parameter MUST be the pattern speed
-in the x-y plane, (although rotating frames of reference are not supported
-in all programs). The remaining parameters are used by the <i>inipotential()</i>
-routine in the potential descriptor. [default: none - let them be defined
-by routine itself]. </dd>
+<dd>List
+of parameters to the potential descriptor. The first parameter MUST be the
+pattern speed in the x-y plane, (although rotating frames of reference are
+not supported in all programs). The remaining parameters are used by the
+<i>inipotential()</i> routine in the potential descriptor. [default: none - let
+them be defined by routine itself]. </dd>
 
 <dt><b>potfile=<i>name</i></b> </dt>
-<dd>name of an optional datafile to the potential
-descriptor. This might be an N-body snapshot or table of spline fit coefficients
-etc. [default: none]. </dd>
+<dd>name of an optional datafile
+to the potential descriptor. This might be an N-body snapshot or table of
+spline fit coefficients etc. [default: none]. </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+To fully specify an
+orbit without the need for a potential <br>
+<pre>  % mkorbit orb1.dat 1 0 0  0 1 0
+</pre>one can specifiy a potential, which simplifies using it in <a href='orbint.1.html'><i>orbint(1NEMO)</i></a>
+
+as the potential parameters do not need to be specified again: <br>
+<pre>  % mkorbit orb2.dat 1 0 0  0 1 0 potname=plummer potpars=0,2.0,0.3
+</pre>or specify a launch point on the X or Y axis, and an energy, but here the
+potential is required: <br>
+<pre>  % mkorbit orb3.dat x=1 e=-1.4 potname=plummer potpars=0,2.0,0.3
+</pre>
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='stoo.1.html'>stoo(1NEMO)</a>
 , <a href='potlist.1.html'>potlist(1NEMO)</a>
 , <a href='orblist.1.html'>orblist(1NEMO)</a>
+, <a href='mkgalorbit.1.html'>mkgalorbit(1NEMO)</a>
 ,
-<a href='mkgalorbit.1.html'>mkgalorbit(1NEMO)</a>
-, <a href='mk2body.1.html'>mk2body(1NEMO)</a>
+<a href='mk2body.1.html'>mk2body(1NEMO)</a>
 , <a href='potential.5.html'>potential(5NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter Teuben
-
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Peter Teuben 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>~/src/orbit/io  <tt> </tt>&nbsp;<tt> </tt>&nbsp;mkorbit.c
 </pre>
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>xx-jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created:<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 4-May-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1: keywords e,potential etc. implemented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-Jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2: new filestruct, no code change<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-Mar-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.3: new NEMO 2.x<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+10-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.4: implemented PHI/ACC storage; simplified orbit launching<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -109,10 +125,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>
