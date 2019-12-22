@@ -194,6 +194,24 @@ fi
 AC_SUBST(XLIBS)
 AC_SUBST(XINCS)
 
+
+CFITSIO_INC=""
+CFITSIO_LIB=""
+AC_CHECK_HEADERS([fitsio.h])
+AC_CHECK_HEADERS([/opt/include/fitsio.h],[CFITSIO_INC=-I/opt/include])
+AC_CHECK_HEADERS([/local/include/fitsio.h],[CFITSIO_INC=-I/local/include])
+AC_CHECK_LIB(cfitsio,ffopen,[CFITSIO_LIB="-lcfitsio"])
+AC_SUBST(CFITSIO_INC)
+AC_SUBST(CFITSIO_LIB)
+
+dnl                HDF5 is usually in a weird place, e.g. /usr/lib/x86_64-linux-gnu/hdf5/serial   /usr/include/hdf5/serial
+HDF5_INC=""
+HDF5_LIB=""
+AC_CHECK_HEADERS([hdf5.h])
+AC_CHECK_LIB(hdf5,H5open,[HDF5_LIB="-lhdf5"])
+AC_SUBST(HDF5_INC)
+AC_SUBST(HDF5_LIB)
+
 dnl ---------------------------------------------------------------------
 dnl 3D Graphics Libraries (see also vis5d's configure.in)
 dnl Or:  AX_CHECK_GL
@@ -564,6 +582,8 @@ dnl   This section also allows --with-cfitsio-prefix to point to the
 dnl   source code tree, since that is where the *.a and *.h files live
 
 
+dnl PJT
+
 AC_ARG_ENABLE(cfitsio, [  --enable-cfitsio        use CFITSIO, instead of local fits I/O routines], ok=$enableval, ok=no)
 
 if test "$ok" = "yes"; then
@@ -616,13 +636,13 @@ if test "$ok" = "yes"; then
     fi
   fi
 else
-  CFITSIO_INC=""
-  CFITSIO_LIB=""
+  CFITSIOINC=""
+  CFITSIOLIB=""
   AC_MSG_WARN([CFITSIO disabled])
 fi
 
-AC_SUBST(CFITSIO_INC)
-AC_SUBST(CFITSIO_LIB)
+AC_SUBST(CFITSIOINC)
+AC_SUBST(CFITSIOLIB)
 
 dnl##--------------------------------------------------------------------
 
