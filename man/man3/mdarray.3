@@ -6,7 +6,7 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 .B
 #include <mdarray.h>
 .PP
-.B #define MDMAXDIM    7 
+.B #define MDMAXDIM    8
 .PP
 .B typedef real     *mdarray1;   /* vector */
 .B typedef mdarray1 *mdarray2;   /* matrix */
@@ -108,7 +108,7 @@ To quote the FFTW manual: \fPusing it will cause FFTW to die a painful death\fP
 (referring to such dynamic arrays)
 .SH SEE ALSO
 .nf
-vectmath(3NEMO)
+vectmath(3NEMO), mdbench(1NEMO)
 nrutil.c (Numerical Recipes) for an alternative approach
 GSL: http://www.gnu.org/software/gsl/manual/html_node/Matrices.html (cf. \fIvalarray\fP in C++)
 http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html
@@ -127,4 +127,5 @@ Peter Teuben
 .ta +1i +4i
 5-may-03	Created   	PJT
 19-feb-06	Allocate actually memory sequentually	PJT
+dec-2019	Increased MDMAXDIM to 8		PJT
 .fi
