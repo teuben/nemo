@@ -12,7 +12,7 @@ set nbody2 = 10240
 set nbody3 = 1000000
 set size   = 256
 set clean  = 1
-set bench  = 1
+set bsf    = 1
 
 foreach a ($*)
   set $a
@@ -21,7 +21,7 @@ end
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2019-11-24) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
+echo "NEMOBENCH: (2019-12-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -51,7 +51,7 @@ else
     time mkspiral s0 $nbody3 nmodel=40 seed=123 help=c                                        >& bench.mkspiral.log
     time ccdmath "" c0 'ranu(0,1)' size=$size seed=123; time ccdpot c0 . help=c               >& bench.ccdpot.log
 
-    if ($bench) then
+    if ($bsf) then
         bsf d0 test="8.81856e-05 0.417853 -1.60699 2 195941"
 	bsf h0 test="3.05666e-05 0.418326 -1.72565 2 647525"
 	bsf p0 test="1.39507e-05 0.732358 -21.724 16.8652 71681"
