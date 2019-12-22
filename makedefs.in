@@ -48,6 +48,9 @@ CXX = @CXX@
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
 
+HDF5_INC = @HDF5_INC@
+HDF5_LIB = @HDF5_LIB@
+
 #  PVM library
 
 PVM_INC = @PVM_INC@
