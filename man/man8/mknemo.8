@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "11 April 2019"
+.TH MKNEMO 8NEMO "22 December 2019"
 .SH NAME
 mknemo \- attempt to find NEMO (and related) programs and install them
 .SH SYNOPSIS
@@ -48,6 +48,22 @@ to be updated. (\fI** doc files not maintained anymore **\fP)
   -g        use gmake, instead of make
   -v        more verbose, it will report version and cvsid of program (deprecated)
 .fi
+.SH MAKEDEFS
+All compile flags and libraries that are used should have been configured in the $NEMOLIB/makedefs file.
+Here are some critical programs that you could use to test if that specific library was properly referenced
+in makedefs:
+.nf
+.ta +1i
+cfitsio		sdfits  (no test data present in NEMO)
+gsl
+hdf4		tsd (no test data present in NEMO) - hdf.h
+hdf5		eaglesnap (but needs install in $NEMO/usr/eagle)
+miriad
+pgplot		via YAPP_PGPLOT
+png		via YAPP_PGPLOT
+pvm
+fftw
+.fi
 .SH EXAMPLES
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 .nf 
@@ -68,6 +84,7 @@ Peter Teuben
 $NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
 $NEMOLIB/NEMORC		environment variables
 $NEMOLIB/makedefs	make variables
+./LocalMakedef		optional override makedefs
 $NEMOLIB/libnemo.a	main NEMO library
 $NEMOLIB/yapp*.o	various device drivers
 $NEMO/src          	source tree searched for programs/directories
@@ -84,4 +101,5 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 16-dec-03	V1.5: added -l flag, also cloned sbin/mkstarlab	PJT
 11-jun-04	V2.4: added -a flag	PJT
 11-apr-2019	V4.0: git based
+dec-2019	document critical binaries	PJT
 .fi
