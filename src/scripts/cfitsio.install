@@ -12,18 +12,18 @@
 #  11-aug-11    for 3280
 #  14-may-12    for 3300
 #  26-apr-13    the latest is now always available
+#  24-dec-2019  ftp is now http
 # 
 # TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
 if ($?NEMO == 0) set NEMO=`pwd`
 
-#			 	.. command line keywords ..
-set src=$NEMO/local/cfitsio 
-set prefix=$NEMO
-#set version=3310
-set version=_latest
+#			   	   .. command line keywords ..
+set src     = $NEMO/local/cfitsio 
+set prefix  = $NEMO
+set version = _latest 
 
-#				.. parse command line ..
+#				   .. parse command line ..
 foreach arg ($*)
    set check = `echo $argv[1] | awk -F= '{print NF}'`
    if ("$check" == 1) break
@@ -36,11 +36,9 @@ if (! -e $src) then
   echo or:
   echo " cd $NEMO/local"
   echo " wget ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio$version.tar.gz"
+  echo " wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio$version.tar.gz"
   echo " tar zxf cfitsio$version.tar.gz"
   echo " ../src/scripts/cfitsio.install"
-  echo "Alternatively you can also try curl:"
-  echo " curl ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio$version.tar.gz | tar zxf -"
-  echo "CCfits:  http://heasarc.gsfc.nasa.gov/docs/software/fitsio/ccfits/CCfits-1.6.tar.gz"
   exit 1
 endif
 
