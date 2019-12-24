@@ -657,6 +657,8 @@ X_LIBS
 X_PRE_LIBS
 X_CFLAGS
 XMKMF
+MAKEDIRS
+MAKELIBS
 MAKE
 RANLIB
 SET_MAKE
@@ -5765,6 +5767,14 @@ if test "${enable_falcon+set}" = set; then :
 else
   enable_falcon=yes
 fi
+
+if test "$enable_falcon" = "yes"; then
+  MAKELIBS="corelibs dehnen"
+else
+  MAKELIBS="corelibs"
+fi
+MAKEDIRS="src usr"
+
 
 
 
