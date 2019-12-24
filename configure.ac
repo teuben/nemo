@@ -1,13 +1,29 @@
 dnl configure.ac:
 dnl Process this file with autoconf to produce a new configure script
-dnl if it has changed. See also the Makefile in $NEMO  how to automate
-dnl this.
-dnl http://www-106.ibm.com/developerworks/linux/library/l-debcon.html
+dnl if it has changed. 
+dnl
+dnl https://autotools.io/index.html
+dnl     aclocal --print
+dnl will show which m4's are present and used
+dnl git clone https://github.com/autoconf-archive/autoconf-archive
 dnl ---------------------------------------------------------------------------------
 
-AC_INIT(nemo_start.csh.in)
+AC_INIT(nemo_start.sh.in)
 
 AC_MSG_CHECKING([NEMO config])
+
+
+AC_CONFIG_MACRO_DIR([m4])
+dnl AC_CONFIG_MACRO_DIRS - for future autoconf 2.70 ?
+m4_include([m4/hdf5.m4])
+dnl m4_include([m4/ax_lib_hdf5.m4])
+m4_include([m4/ax_f77_cmain_fflags.m4])
+m4_include([m4/ax_f77_func_mangle.m4])
+m4_include([m4/gsl.m4])
+dnl ax_lib_readline.m4
+dnl ax_mpi.m4
+dnl ax_pkg_swig.m4
+dnl ax_prog_python_version.m4
 
 AC_CONFIG_HEADER([config.h:config.h.in])
 
@@ -50,9 +66,18 @@ done
 
 dnl ----                Architecture stuff we need to know
 AC_CANONICAL_HOST
-echo "Found CANONICAL_HOST = $host_os"
-   
-dnl ---                 sizeof various data types (used to be AC_CHECK_SIZEOF())
+echo "Found CANONICAL_HOST = $host_os or $host "
+AC_CANONICAL_BUILD
+echo "Found CANONICAL_BUILD = $build"
+AC_CANONICAL_TARGET
+echo "Found CANONICAL_TARGET = $target"
+
+
+dnl AC_ARG_ENABLE(option-name, help-string, action-if-present, action-if-not-present)
+dnl AC_ARG_WITH
+dnl AC_SEARCH_LIBS(function, libraries-list, action-if-found, action-if-not-found, extra-libraries)
+
+dnl ---                 sizeof various data types 
 AC_CHECK_SIZEOF(float)
 AC_CHECK_SIZEOF(double)
 AC_CHECK_SIZEOF(long double)
@@ -171,7 +196,6 @@ else
 fi
 
 
-dnl check FFTW configure
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
 
 AC_ARG_WITH(mesa, [  --with-mesa             force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
@@ -195,22 +219,45 @@ AC_SUBST(XLIBS)
 AC_SUBST(XINCS)
 
 
-CFITSIO_INC=""
-CFITSIO_LIB=""
-AC_CHECK_HEADERS([fitsio.h])
-AC_CHECK_HEADERS([/opt/include/fitsio.h],[CFITSIO_INC=-I/opt/include])
-AC_CHECK_HEADERS([/local/include/fitsio.h],[CFITSIO_INC=-I/local/include])
-AC_CHECK_LIB(cfitsio,ffopen,[CFITSIO_LIB="-lcfitsio"])
-AC_SUBST(CFITSIO_INC)
-AC_SUBST(CFITSIO_LIB)
+dnl CFITSIO_INC=""
+dnl CFITSIO_LIB=""
+dnl AC_CHECK_HEADERS([fitsio.h])
+dnl AC_CHECK_HEADERS([/opt/include/fitsio.h],[CFITSIO_INC=-I/opt/include])
+dnl AC_CHECK_HEADERS([/local/include/fitsio.h],[CFITSIO_INC=-I/local/include])
+dnl AC_CHECK_LIB(cfitsio,ffopen,[CFITSIO_LIB="-lcfitsio"])
+dnl AC_SUBST(CFITSIO_INC)
+dnl AC_SUBST(CFITSIO_LIB)
 
-dnl                HDF5 is usually in a weird place, e.g. /usr/lib/x86_64-linux-gnu/hdf5/serial   /usr/include/hdf5/serial
-HDF5_INC=""
-HDF5_LIB=""
-AC_CHECK_HEADERS([hdf5.h])
-AC_CHECK_LIB(hdf5,H5open,[HDF5_LIB="-lhdf5"])
-AC_SUBST(HDF5_INC)
-AC_SUBST(HDF5_LIB)
+dnl HDF5 is sometimes in a weird place, e.g. /usr/lib/x86_64-linux-gnu/hdf5/serial   /usr/include/hdf5/serial
+dnl AX_LIB_HDF5()
+
+dnl AX_LIB_HDF5([serial])
+
+dnl
+dnl
+dnl PKG_CHECK_MODULES(HDF5, [hdf5-serial],
+dnl			[AC_MSG_NOTICE([pkg-config hdf5-serial])],
+dnl			[AC_MSG_ERROR([hdf5-serial not found])]
+dnl			)			       
+dnl
+
+dnl PKG_CHECK_MODULES([HDF5], [hdf5-serial],[have_hdf5="yes"],[have_hdf5="no"])
+dnl AC_SUBST([have_hdf5])
+
+dnl 
+dnl PKG_CHECK_MODULES(HDF5, [hdf5-serial],
+dnl 			[AC_MSG_NOTICE([pkg-config hdf5-serial])],
+dnl 			[PKG_CHECK_MODULES(HDF5, [hdf5],
+dnl 						 [AC_MSG_NOTICE([pkg-config hdf5-serial])],
+dnl 						 [HDF5_CFLAGS=""
+dnl 						  HDF5_LIB="-lhdf5"
+dnl 						  AC_MSG_NOTICE([falling back to -lhdf5])
+dnl 						  ]
+
+
+AC_SUBST([HDF5_CFLAGS])
+AC_SUBST([HDF5_LIBS])
+
 
 dnl ---------------------------------------------------------------------
 dnl 3D Graphics Libraries (see also vis5d's configure.in)
@@ -260,52 +307,6 @@ if test -z "$GLLIBS"; then
                 OPT_UTILS="$OPT_UTILS listfonts"
         fi
 fi
-# Finally, look for PEX (crufty old 3d extensions for X):
-# (do these even work in Vis5d anymore?)
-if test -z "$GLLIBS"; then
-        # first, check for possible include & lib directory locations:
-        if test -d /usr/lib/PEX5/utilities; then
-                CPPFLAGS="$CPPFLAGS -I/usr/lib/PEX5/utilities"
-        elif test -d /opt/graphics/PEX5/include/X11R6; then
-                CPPFLAGS="$CPPFLAGS -I/opt/graphics/PEX5/include/X11R6"
-        fi
-        if test -d /opt/graphics/PEX5/lib; then
-                LDFLAGS="$LDFLAGS -L/opt/graphics/PEX5/lib"
-        fi
-
-        # now, check for the actual library:
-        save_LDFLAGS="$LDFLAGS"; LDFLAGS="$LDFLAGS $X_LIBS"
-        AC_CHECK_LIB(PEX5, PEXInitialize, GLLIBS="$X_LIBS -lPEX5", :, $XLIBS)
-        LDFLAGS="$save_LDFLAGS"
-
-        if test -n "$GLLIBS"; then
-                # finally, look for the pexut.a library
-                AC_MSG_CHECKING([for pexut.a library])
-                if test -z "$PEXUT_LIB"; then
-                        if test -r /usr/lib/PEX5/utilities/pexut.a; then
-                                PEXUT_LIB="/usr/lib/PEX5/utilities/pexut.a"
-                        elif test -r /var/opt/PEX5/pexut.a; then
-                                PEXUT_LIB="/var/opt/PEX5/pexut.a"
-                        fi
-                fi
-                AC_MSG_RESULT(${PEXUT_LIB-no})
-                if test -z "$PEXUT_LIB"; then
-                        AC_MSG_WARN([pexut.a is required when using PEX])
-                        GLLIBS=""
-                elif test -r "$PEXUT_LIB"; then
-                        GLLIBS="$PEXUT_LIB $GLLIBS"
-                else
-                        # this could happen if the user specified a bogus
-                        # PEXUT_LIB environment variable:
-                        AC_MSG_ERROR([$PEXUT_LIB is not readable])
-
-                fi
-        fi
-
-        if test -n "$GLLIBS"; then
-                AC_DEFINE(HAVE_PEX)
-        fi
-fi
 
 if test -z "$GLLIBS"; then
         echo "****************************************************"
@@ -340,11 +341,10 @@ LIBS="$save_LIBS"
 
 dnl ---------------------------------------------------------------------
 
-dnl also check FFTW configure
 dnl TODO: allow to choose a compiler, e.g. --with-fortran=f90   (setenv F77)
 
 if test "$enable_fortran" = "yes"; then
-  AC_MSG_CHECKING(whether we have a FORTRAN 77 compiler)
+  AC_MSG_CHECKING([whether we have a FORTRAN 77 compiler])
   AC_CHECK_PROGS(F77, gfortran g77 g95 ifort ifc xlf xlf77 fl32 fort77 fc cf77 frt f90 xlf90)
   AC_PROG_F77
   if test -n "$F77"; then
@@ -375,7 +375,7 @@ else
 fi
 
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
-ACX_F77_CMAIN_FFLAGS([],[AC_MSG_WARN([problems fortran-c interface])])
+dnl ACX_F77_CMAIN_FFLAGS([AC_MSG_WARN([pjt])],[AC_MSG_WARN([problems fortran-c interface])])
 AX_F77_CMAIN_FFLAGS([AC_MSG_WARN([f77 cmain ok])],[AC_MSG_WARN([problems fortran-c interface])])
 dnl ACX_F77_CMAIN_FFLAGS([],[])
 
@@ -387,7 +387,6 @@ $CC  -o src/kernel/fortran/hdr_size src/kernel/fortran/hdr_size.c
 UNFIO_HDR_SIZE=`src/kernel/fortran/hdr_size one.dat`
 AC_MSG_RESULT([$UNFIO_HDR_SIZE])
 AC_DEFINE_UNQUOTED(UNFIO_HDR_SIZE,$UNFIO_HDR_SIZE,[Fortran unformatted I/O header size])
-
 
 dnl MacOS (darwin) needs -lcc_dynamic, might need /sw stuff from FINK
 dnl Only linux wants -rdynamic, for dlopen()
@@ -543,13 +542,14 @@ AC_SUBST(DSO_LINK)
 dnl ---------------------------------------------------------------------
 
 
-AC_MSG_CHECKING(whether we have HDF)
+AC_MSG_CHECKING(whether we have HDF4)
 AC_ARG_WITH(hdf-prefix, 
-        [  --with-hdf-prefix=PFX     Prefix where HDF was installed], 
+        [  --with-hdf-prefix=PFX     Prefix where HDF4 was installed], 
         hdf_config_prefix="$withval", 
         hdf_config_prefix="/usr")
 dnl			this assumes people will use include <hdf.h>, not <hdf/hdf.h>
-dnl                     on Fedora, you will find HDF4 in /usr/{include,lib}/hdf 
+dnl                     on Fedora, you will find HDF4 in /usr/{include,lib}/hdf
+dnl                     HDF5 uses hdf5.h  :-)
 hdf=$hdf_config_prefix
 for dir in $hdf $hdf/include $hdf/hdf $hdf/include/hdf
     do
@@ -583,6 +583,8 @@ dnl   source code tree, since that is where the *.a and *.h files live
 
 
 dnl PJT
+CFITSIO_INC=""
+CFITSIO_LIB=""
 
 AC_ARG_ENABLE(cfitsio, [  --enable-cfitsio        use CFITSIO, instead of local fits I/O routines], ok=$enableval, ok=no)
 
@@ -641,30 +643,12 @@ else
   AC_MSG_WARN([CFITSIO disabled])
 fi
 
-AC_SUBST(CFITSIOINC)
-AC_SUBST(CFITSIOLIB)
+AC_SUBST(CFITSIO_INC)
+AC_SUBST(CFITSIO_LIB)
 
-dnl##--------------------------------------------------------------------
 
-AC_MSG_CHECKING(almost whether we have LAM/MPI)
-AC_MSG_RESULT(not yet)
 
-dnl##--------------------------------------------------------------------
 
-AC_MSG_CHECKING(whether we have PVM_ROOT and PVM_ARCH)
-
-if test -d "$PVM_ROOT"; then
-  PVM_LIB="-L$PVM_ROOT/lib/$PVM_ARCH -lpvm3 -lgpvm3"
-  PVM_INC="-I$PVM_ROOT/include"
-  AC_MSG_RESULT(yes)
-else
-  PVM_LIB=""
-  PVM_INC=""
-  AC_MSG_RESULT(no)
-fi
-AC_SUBST(PVM_LIB)
-AC_SUBST(PVM_INC) 
-dnl##--------------------------------------------------------------------
 
 AC_MSG_CHECKING(whether we have MIRIAD)
 if test -d "$MIR"; then
@@ -699,34 +683,6 @@ else
 fi
 AC_SUBST(MIRIAD_INC)
 AC_SUBST(MIRIAD_LIB)
-
-dnl##--------------------------------------------------------------------
-dnl##
-dnl## GSL  (GNU Scientific Library)
-dnl##
-dnl##  also need to find out a way to replace -lgslcblas with -lcblas
-dnl##  or if ATLAS has been installed, with -lcblas -latlas
-dnl## --  Also note the -DHAVE_GSL is a bit of a kludge, since i cannot
-dnl## --  figure out how to do this properly through config.h
-dnl##--------------------------------------------------------------------
-
-
-AC_ARG_ENABLE(gsl, [  --enable-gsl            use GSL], ok=$enableval, ok=no)
-
-if test "$ok" = "yes"; then
-  AM_PATH_GSL(0.9.2, ok=yes, ok=no)
-  if test "$ok" = "yes"; then
-    GSL_CFLAGS="$GSL_CFLAGS -DHAVE_GSL"
-    AC_DEFINE(HAVE_LIBGSL)
-  else
-    AC_MSG_WARN([could not find GSL library])
-  fi
-else
-  AC_MSG_WARN([GSL disabled])
-fi
-
-AC_SUBST(GSL_CFLAGS)
-AC_SUBST(GSL_LIBS)
 
 dnl##-----------------------------------------------------------------------
 dnl##
@@ -819,6 +775,10 @@ AC_CHECK_LIB(c, strtoull)
 
 AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
+
+AC_SEARCH_LIBS([dlopen], [dl dld], [], [
+  AC_MSG_ERROR([unable to find the dlopen() function])
+])
 
 
 dnl AC_CHECK_LIB(utils, main)
@@ -919,6 +879,7 @@ output from the command
 
 Users need to source the nemo_start.(c)sh file in their shell to
 enable NEMO commands and set up the NEMO environment.
+If there any compile or linkings problems, check out \$NEMOLIB/makedefs
 -------------------------------------------------------------------------
 "
 
