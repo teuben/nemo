@@ -73,16 +73,16 @@ MIRIAD_LIB = @MIRIAD_LIB@
 #	GSL
 #GSL_CFLAGS = @GSL_CFLAGS@
 #GSL_LIBS   = @GSL_LIBS@
-GSL_CFLAGS = ""
-GSL_LIBS   = ""
+GSL_CFLAGS = 
+GSL_LIBS   = 
 
 #	FFTW
 #       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
 #       [actually still not used yet]
 #FFTW_CFLAGS = @FFTW_CFLAGS@
 #FFTW_LIBS   = @FFTW_LIBS@
-FFTW_CFLAGS = ""
-FFTW_LIBS   = ""
+FFTW_CFLAGS =
+FFTW_LIBS   =
 
 
 #	READLINE
