@@ -582,7 +582,7 @@ PACKAGE_STRING=
 PACKAGE_BUGREPORT=
 PACKAGE_URL=
 
-ac_unique_file="nemo_start.csh.in"
+ac_unique_file="nemo_start.sh.in"
 # Factoring default headers for most tests.
 ac_includes_default="\
 #include <stdio.h>
@@ -628,15 +628,10 @@ LIBOBJS
 RDL_LIBS
 TCL_LIBS
 TCL_CFLAGS
-GSL_LIBS
-GSL_CFLAGS
-GSL_CONFIG
 MIRIAD_LIB
 MIRIAD_INC
-PVM_INC
-PVM_LIB
-CFITSIOLIB
-CFITSIOINC
+CFITSIO_LIB
+CFITSIO_INC
 HDF_LIB
 HDF_INC
 DSO_LINK
@@ -653,10 +648,8 @@ ac_ct_F77
 FFLAGS
 F77
 GLLIBS
-HDF5_LIB
-HDF5_INC
-CFITSIO_LIB
-CFITSIO_INC
+HDF5_LIBS
+HDF5_CFLAGS
 XINCS
 XLIBS
 X_EXTRA_LIBS
@@ -685,6 +678,10 @@ CPPFLAGS
 LDFLAGS
 CFLAGS
 CC
+target_os
+target_vendor
+target_cpu
+target
 host_os
 host_vendor
 host_cpu
@@ -752,6 +749,7 @@ enable_mixed
 enable_gcov
 enable_lfs
 enable_fortran
+enable_falcon
 with_mesa
 with_hdf
 with_ccmalloc
@@ -763,10 +761,6 @@ with_hdf_prefix
 enable_cfitsio
 with_cfitsio_prefix
 with_miriad_prefix
-enable_gsl
-with_gsl_prefix
-with_gsl_exec_prefix
-enable_gsltest
 enable_flogger
 enable_tcl
 enable_readline
@@ -1408,6 +1402,7 @@ X features:
 System types:
   --build=BUILD     configure for building on BUILD [guessed]
   --host=HOST       cross-compile to build programs to run on HOST [BUILD]
+  --target=TARGET   configure for building compilers for TARGET [HOST]
 _ACEOF
 fi
 
@@ -1429,10 +1424,9 @@ Optional Features:
   --enable-gcov           gnu coverage tool
   --enable-lfs            large-file-size (files over 2GB)
   --disable-fortran       don't use any Fortran
+  --disable-falcon        enable falcON
   --enable-png            force the use of PNG for pgplot
   --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
-  --enable-gsl            use GSL
-  --disable-gsltest       Do not try to compile and run a test GSL program
   --enable-flogger        use Flogger
   --enable-tcl            use TCL
   --enable-readline       use READLINE
@@ -1447,12 +1441,10 @@ Optional Packages:
   --with-dso              use DSO linking
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
-  --with-hdf-prefix=PFX     Prefix where HDF was installed
+  --with-hdf-prefix=PFX     Prefix where HDF4 was installed
   --with-cfitsio-prefix=PFX
                           CFITSIO installation prefix (default: $cfdefault)
   --with-miriad-prefix=PFX    Root directory where MIRIAD was installed
-  --with-gsl-prefix=PFX   Prefix where GSL is installed (optional)
-  --with-gsl-exec-prefix=PFX Exec prefix where GSL is installed (optional)
   --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, ..)
 
 Some influential environment variables:
@@ -2032,6 +2024,90 @@ fi
 
 } # ac_fn_cxx_try_compile
 
+# ac_fn_f77_try_compile LINENO
+# ----------------------------
+# Try to compile conftest.$ac_ext, and return whether this succeeded.
+ac_fn_f77_try_compile ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext
+  if { { ac_try="$ac_compile"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_compile") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_f77_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest.$ac_objext; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_f77_try_compile
+
+# ac_fn_f77_try_link LINENO
+# -------------------------
+# Try to link conftest.$ac_ext, and return whether this succeeded.
+ac_fn_f77_try_link ()
+{
+  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
+  rm -f conftest.$ac_objext conftest$ac_exeext
+  if { { ac_try="$ac_link"
+case "(($ac_try" in
+  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
+  *) ac_try_echo=$ac_try;;
+esac
+eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
+$as_echo "$ac_try_echo"; } >&5
+  (eval "$ac_link") 2>conftest.err
+  ac_status=$?
+  if test -s conftest.err; then
+    grep -v '^ *+' conftest.err >conftest.er1
+    cat conftest.er1 >&5
+    mv -f conftest.er1 conftest.err
+  fi
+  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
+  test $ac_status = 0; } && {
+	 test -z "$ac_f77_werror_flag" ||
+	 test ! -s conftest.err
+       } && test -s conftest$ac_exeext && {
+	 test "$cross_compiling" = yes ||
+	 test -x conftest$ac_exeext
+       }; then :
+  ac_retval=0
+else
+  $as_echo "$as_me: failed program was:" >&5
+sed 's/^/| /' conftest.$ac_ext >&5
+
+	ac_retval=1
+fi
+  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
+  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
+  # interfere with the next link command; also delete a directory that is
+  # left behind by Apple's compiler.  We do this before executing the actions.
+  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
+  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
+  as_fn_set_status $ac_retval
+
+} # ac_fn_f77_try_link
+
 # ac_fn_c_check_header_mongrel LINENO HEADER VAR INCLUDES
 # -------------------------------------------------------
 # Tests whether HEADER exists, giving a warning if it cannot be compiled using
@@ -2118,90 +2194,6 @@ fi
   eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
 
 } # ac_fn_c_check_header_mongrel
-
-# ac_fn_f77_try_compile LINENO
-# ----------------------------
-# Try to compile conftest.$ac_ext, and return whether this succeeded.
-ac_fn_f77_try_compile ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext
-  if { { ac_try="$ac_compile"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_compile") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_f77_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest.$ac_objext; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_f77_try_compile
-
-# ac_fn_f77_try_link LINENO
-# -------------------------
-# Try to link conftest.$ac_ext, and return whether this succeeded.
-ac_fn_f77_try_link ()
-{
-  as_lineno=${as_lineno-"$1"} as_lineno_stack=as_lineno_stack=$as_lineno_stack
-  rm -f conftest.$ac_objext conftest$ac_exeext
-  if { { ac_try="$ac_link"
-case "(($ac_try" in
-  *\"* | *\`* | *\\*) ac_try_echo=\$ac_try;;
-  *) ac_try_echo=$ac_try;;
-esac
-eval ac_try_echo="\"\$as_me:${as_lineno-$LINENO}: $ac_try_echo\""
-$as_echo "$ac_try_echo"; } >&5
-  (eval "$ac_link") 2>conftest.err
-  ac_status=$?
-  if test -s conftest.err; then
-    grep -v '^ *+' conftest.err >conftest.er1
-    cat conftest.er1 >&5
-    mv -f conftest.er1 conftest.err
-  fi
-  $as_echo "$as_me:${as_lineno-$LINENO}: \$? = $ac_status" >&5
-  test $ac_status = 0; } && {
-	 test -z "$ac_f77_werror_flag" ||
-	 test ! -s conftest.err
-       } && test -s conftest$ac_exeext && {
-	 test "$cross_compiling" = yes ||
-	 test -x conftest$ac_exeext
-       }; then :
-  ac_retval=0
-else
-  $as_echo "$as_me: failed program was:" >&5
-sed 's/^/| /' conftest.$ac_ext >&5
-
-	ac_retval=1
-fi
-  # Delete the IPA/IPO (Inter Procedural Analysis/Optimization) information
-  # created by the PGI compiler (conftest_ipa8_conftest.oo), as it would
-  # interfere with the next link command; also delete a directory that is
-  # left behind by Apple's compiler.  We do this before executing the actions.
-  rm -rf conftest.dSYM conftest_ipa8_conftest.oo
-  eval $as_lineno_stack; ${as_lineno_stack:+:} unset as_lineno
-  as_fn_set_status $ac_retval
-
-} # ac_fn_f77_try_link
 
 # ac_fn_c_check_type LINENO TYPE VAR INCLUDES
 # -------------------------------------------
@@ -2615,6 +2607,92 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking NEMO config" >&5
 $as_echo_n "checking NEMO config... " >&6; }
 
+
+
+# ===========================================================================
+#   https://www.gnu.org/software/autoconf-archive/ax_f77_cmain_fflags.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_F77_CMAIN_FFLAGS([ACTION-IF-SUCCEED], [ACTION-IF-FAIL])
+#
+# DESCRIPTION
+#
+#   This macro figures out if extra Fortran compiler flags are required in
+#   order to use the Fortran linker to link programs where the main()
+#   function is defined via C (or other language). On some systems, notably
+#   the Alpha with Compaq compilers, the Fortran libraries have their own
+#   main() function which must be disabled.
+#
+#   Runs ACTION-IF-SUCCEED if successful, and ACTION-IF-FAIL if not. Defines
+#   the output variable F77_CMAIN_FFLAGS to any discovered flags. (If
+#   ACTION-IF-FAIL is not specified, defaults to halting with an error.)
+#
+#   This macro is especially useful in conjunction with automake, since by
+#   default automake uses $F77 to link programs mixing C and Fortran,
+#   leading to a link error on some systems. In this case, you should set
+#   the FFLAGS for that program to include F77_CMAIN_FFLAGS.
+#
+# LICENSE
+#
+#   Copyright (c) 2008 Steven G. Johnson <stevenj@alum.mit.edu>
+#
+#   This program is free software: you can redistribute it and/or modify it
+#   under the terms of the GNU General Public License as published by the
+#   Free Software Foundation, either version 3 of the License, or (at your
+#   option) any later version.
+#
+#   This program is distributed in the hope that it will be useful, but
+#   WITHOUT ANY WARRANTY; without even the implied warranty of
+#   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General
+#   Public License for more details.
+#
+#   You should have received a copy of the GNU General Public License along
+#   with this program. If not, see <https://www.gnu.org/licenses/>.
+#
+#   As a special exception, the respective Autoconf Macro's copyright owner
+#   gives unlimited permission to copy, distribute and modify the configure
+#   scripts that are the output of Autoconf when processing the Macro. You
+#   need not follow the terms of the GNU General Public License when using
+#   or distributing such scripts, even though portions of the text of the
+#   Macro appear in them. The GNU General Public License (GPL) does govern
+#   all other use of the material that constitutes the Autoconf Macro.
+#
+#   This special exception to the GPL applies to versions of the Autoconf
+#   Macro released by the Autoconf Archive. When you make and distribute a
+#   modified version of the Autoconf Macro, you may extend this special
+#   exception to the GPL to apply to your modified version as well.
+
+#serial 6
+
+# This is what autoupdate's m4 run will expand.  It fires
+# the warning (with _au_warn_XXX), outputs it into the
+# updated configure.ac (with AC_DIAGNOSE), and then outputs
+# the replacement expansion.
+
+
+# This is an auxiliary macro that is also run when
+# autoupdate runs m4.  It simply calls m4_warning, but
+# we need a wrapper so that each warning is emitted only
+# once.  We break the quoting in m4_warning's argument in
+# order to expand this macro's arguments, not AU_DEFUN's.
+
+
+# Finally, this is the expansion that is picked up by
+# autoconf.  It tells the user to run autoupdate, and
+# then outputs the replacement expansion.  We do not care
+# about autoupdate's warning because that contains
+# information on what to do *after* running autoupdate.
+
+
+
+
+
+
+
+
+
 ac_config_headers="$ac_config_headers config.h:config.h.in"
 
 
@@ -2642,6 +2720,7 @@ for i in bin lib obj local; do
    mkdir $i
  fi
 done
+
 
 ac_aux_dir=
 for ac_dir in "$srcdir" "$srcdir/.." "$srcdir/../.."; do
@@ -2743,7 +2822,51 @@ IFS=$ac_save_IFS
 case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
-echo "Found CANONICAL_HOST = $host_os"
+echo "Found CANONICAL_HOST = $host_os or $host or $host_cpu"
+
+echo "Found CANONICAL_BUILD = $build"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking target system type" >&5
+$as_echo_n "checking target system type... " >&6; }
+if ${ac_cv_target+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "x$target_alias" = x; then
+  ac_cv_target=$ac_cv_host
+else
+  ac_cv_target=`$SHELL "$ac_aux_dir/config.sub" $target_alias` ||
+    as_fn_error $? "$SHELL $ac_aux_dir/config.sub $target_alias failed" "$LINENO" 5
+fi
+
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_target" >&5
+$as_echo "$ac_cv_target" >&6; }
+case $ac_cv_target in
+*-*-*) ;;
+*) as_fn_error $? "invalid value of canonical target" "$LINENO" 5;;
+esac
+target=$ac_cv_target
+ac_save_IFS=$IFS; IFS='-'
+set x $ac_cv_target
+shift
+target_cpu=$1
+target_vendor=$2
+shift; shift
+# Remember, the first character of IFS is used to create $*,
+# except with old shells:
+target_os=$*
+IFS=$ac_save_IFS
+case $target_os in *\ *) target_os=`echo "$target_os" | sed 's/ /-/g'`;; esac
+
+
+# The aliases save the names the user supplied, while $host etc.
+# will get canonicalized.
+test -n "$target_alias" &&
+  test "$program_prefix$program_suffix$program_transform_name" = \
+    NONENONEs,x,x, &&
+  program_prefix=${target_alias}-
+echo "Found CANONICAL_TARGET = $target"
+
+
 
 ac_ext=c
 ac_cpp='$CPP $CPPFLAGS'
@@ -5636,6 +5759,13 @@ else
   enable_fortran=yes
 fi
 
+# Check whether --enable-falcon was given.
+if test "${enable_falcon+set}" = set; then :
+  enableval=$enable_falcon; enable_falcon=$enableval
+else
+  enable_falcon=yes
+fi
+
 
 
 # Check whether --with-mesa was given.
@@ -6363,140 +6493,13 @@ fi
 
 
 
-CFITSIO_INC=""
-CFITSIO_LIB=""
-for ac_header in fitsio.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "fitsio.h" "ac_cv_header_fitsio_h" "$ac_includes_default"
-if test "x$ac_cv_header_fitsio_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_FITSIO_H 1
-_ACEOF
-
-fi
-
-done
-
-for ac_header in /opt/include/fitsio.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "/opt/include/fitsio.h" "ac_cv_header__opt_include_fitsio_h" "$ac_includes_default"
-if test "x$ac_cv_header__opt_include_fitsio_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE__OPT_INCLUDE_FITSIO_H 1
-_ACEOF
- CFITSIO_INC=-I/opt/include
-fi
-
-done
-
-for ac_header in /local/include/fitsio.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "/local/include/fitsio.h" "ac_cv_header__local_include_fitsio_h" "$ac_includes_default"
-if test "x$ac_cv_header__local_include_fitsio_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE__LOCAL_INCLUDE_FITSIO_H 1
-_ACEOF
- CFITSIO_INC=-I/local/include
-fi
-
-done
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for ffopen in -lcfitsio" >&5
-$as_echo_n "checking for ffopen in -lcfitsio... " >&6; }
-if ${ac_cv_lib_cfitsio_ffopen+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lcfitsio  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char ffopen ();
-int
-main ()
-{
-return ffopen ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_cfitsio_ffopen=yes
-else
-  ac_cv_lib_cfitsio_ffopen=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cfitsio_ffopen" >&5
-$as_echo "$ac_cv_lib_cfitsio_ffopen" >&6; }
-if test "x$ac_cv_lib_cfitsio_ffopen" = xyes; then :
-  CFITSIO_LIB="-lcfitsio"
-fi
 
 
 
 
-HDF5_INC=""
-HDF5_LIB=""
-for ac_header in hdf5.h
-do :
-  ac_fn_c_check_header_mongrel "$LINENO" "hdf5.h" "ac_cv_header_hdf5_h" "$ac_includes_default"
-if test "x$ac_cv_header_hdf5_h" = xyes; then :
-  cat >>confdefs.h <<_ACEOF
-#define HAVE_HDF5_H 1
-_ACEOF
 
-fi
 
-done
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for H5open in -lhdf5" >&5
-$as_echo_n "checking for H5open in -lhdf5... " >&6; }
-if ${ac_cv_lib_hdf5_H5open+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lhdf5  $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char H5open ();
-int
-main ()
-{
-return H5open ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_hdf5_H5open=yes
-else
-  ac_cv_lib_hdf5_H5open=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdf5_H5open" >&5
-$as_echo "$ac_cv_lib_hdf5_H5open" >&6; }
-if test "x$ac_cv_lib_hdf5_H5open" = xyes; then :
-  HDF5_LIB="-lhdf5"
-fi
 
 
 
@@ -6906,97 +6909,6 @@ fi
                 $as_echo "#define HAVE_SGI_GL 1" >>confdefs.h
 
                 OPT_UTILS="$OPT_UTILS listfonts"
-        fi
-fi
-# Finally, look for PEX (crufty old 3d extensions for X):
-# (do these even work in Vis5d anymore?)
-if test -z "$GLLIBS"; then
-        # first, check for possible include & lib directory locations:
-        if test -d /usr/lib/PEX5/utilities; then
-                CPPFLAGS="$CPPFLAGS -I/usr/lib/PEX5/utilities"
-        elif test -d /opt/graphics/PEX5/include/X11R6; then
-                CPPFLAGS="$CPPFLAGS -I/opt/graphics/PEX5/include/X11R6"
-        fi
-        if test -d /opt/graphics/PEX5/lib; then
-                LDFLAGS="$LDFLAGS -L/opt/graphics/PEX5/lib"
-        fi
-
-        # now, check for the actual library:
-        save_LDFLAGS="$LDFLAGS"; LDFLAGS="$LDFLAGS $X_LIBS"
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PEXInitialize in -lPEX5" >&5
-$as_echo_n "checking for PEXInitialize in -lPEX5... " >&6; }
-if ${ac_cv_lib_PEX5_PEXInitialize+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ac_check_lib_save_LIBS=$LIBS
-LIBS="-lPEX5 $XLIBS $LIBS"
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-/* Override any GCC internal prototype to avoid an error.
-   Use char because int might match the return type of a GCC
-   builtin and then its argument prototype would still apply.  */
-#ifdef __cplusplus
-extern "C"
-#endif
-char PEXInitialize ();
-int
-main ()
-{
-return PEXInitialize ();
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-  ac_cv_lib_PEX5_PEXInitialize=yes
-else
-  ac_cv_lib_PEX5_PEXInitialize=no
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-LIBS=$ac_check_lib_save_LIBS
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_PEX5_PEXInitialize" >&5
-$as_echo "$ac_cv_lib_PEX5_PEXInitialize" >&6; }
-if test "x$ac_cv_lib_PEX5_PEXInitialize" = xyes; then :
-  GLLIBS="$X_LIBS -lPEX5"
-else
-  :
-fi
-
-        LDFLAGS="$save_LDFLAGS"
-
-        if test -n "$GLLIBS"; then
-                # finally, look for the pexut.a library
-                { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pexut.a library" >&5
-$as_echo_n "checking for pexut.a library... " >&6; }
-                if test -z "$PEXUT_LIB"; then
-                        if test -r /usr/lib/PEX5/utilities/pexut.a; then
-                                PEXUT_LIB="/usr/lib/PEX5/utilities/pexut.a"
-                        elif test -r /var/opt/PEX5/pexut.a; then
-                                PEXUT_LIB="/var/opt/PEX5/pexut.a"
-                        fi
-                fi
-                { $as_echo "$as_me:${as_lineno-$LINENO}: result: ${PEXUT_LIB-no}" >&5
-$as_echo "${PEXUT_LIB-no}" >&6; }
-                if test -z "$PEXUT_LIB"; then
-                        { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: pexut.a is required when using PEX" >&5
-$as_echo "$as_me: WARNING: pexut.a is required when using PEX" >&2;}
-                        GLLIBS=""
-                elif test -r "$PEXUT_LIB"; then
-                        GLLIBS="$PEXUT_LIB $GLLIBS"
-                else
-                        # this could happen if the user specified a bogus
-                        # PEXUT_LIB environment variable:
-                        as_fn_error $? "$PEXUT_LIB is not readable" "$LINENO" 5
-
-                fi
-        fi
-
-        if test -n "$GLLIBS"; then
-                $as_echo "#define HAVE_PEX 1" >>confdefs.h
-
         fi
 fi
 
@@ -7675,6 +7587,7 @@ else
   as_fn_error $? "failed to compile fortran test program" "$LINENO" 5
 fi
 
+
 ac_f77_mangle_type=unknown
 
 ac_ext=c
@@ -7933,90 +7846,6 @@ $as_echo "$as_me: WARNING: problems fortran-c interface" >&2;}
 	    else
 		F77_CMAIN_FFLAGS="$ax_cv_f77_cmain_fflags"
 	    fi
-
-	    ;;
-    esac
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for f77 flags to use C main function" >&5
-$as_echo_n "checking for f77 flags to use C main function... " >&6; }
-if ${ax_cv_f77_cmain_fflags+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  ax_cv_f77_cmain_fflags="unknown"
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-int main(void) { return 0; }
-_ACEOF
-if ac_fn_c_try_compile "$LINENO"; then :
-  mv conftest.$ac_objext conftest_cmain.$ac_objext
-else
-  ax_cv_f77_cmain_fflags=error
-fi
-rm -f core conftest.err conftest.$ac_objext conftest.$ac_ext
-ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-if test "x$ax_cv_f77_cmain_fflags" != xerror; then
-    ac_ext=f
-ac_compile='$F77 -c $FFLAGS conftest.$ac_ext >&5'
-ac_link='$F77 -o conftest$ac_exeext $FFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_f77_compiler_gnu
-
-    ax_save_LIBS=$LIBS
-    LIBS="conftest_cmain.$ac_objext $LIBS"
-    ax_save_FFLAGS=$FFLAGS
-    for ax_flag in none -nofor_main; do
-	case $ax_flag in
-	    none) FFLAGS=$ax_save_FFLAGS ;;
-	    *)    FFLAGS="$ax_save_FFLAGS $ax_flag" ;;
-	esac
-	cat > conftest.$ac_ext <<_ACEOF
-
-      subroutine foobar()
-      return
-      end
-
-_ACEOF
-if ac_fn_f77_try_link "$LINENO"; then :
-  ax_cv_f77_cmain_fflags=$ax_flag; break
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext;
-    done
-    FFLAGS=$ax_save_FFLAGS
-    LIBS=$ax_save_LIBS
-    ac_ext=c
-ac_cpp='$CPP $CPPFLAGS'
-ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
-ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
-ac_compiler_gnu=$ac_cv_c_compiler_gnu
-
-fi
-fi
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ax_cv_f77_cmain_fflags" >&5
-$as_echo "$ax_cv_f77_cmain_fflags" >&6; }
-    case $ax_cv_f77_cmain_fflags in
-	error|unknown)
-	    F77_CMAIN_FFLAGS=""
-	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: problems fortran-c interface" >&5
-$as_echo "$as_me: WARNING: problems fortran-c interface" >&2;}
-	    ;;
-	*)
-	    if test "x$ax_cv_f77_cmain_fflags" = xnone; then
-		F77_CMAIN_FFLAGS=""
-	    else
-		F77_CMAIN_FFLAGS="$ax_cv_f77_cmain_fflags"
-	    fi
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: f77 cmain ok" >&5
 $as_echo "$as_me: WARNING: f77 cmain ok" >&2;}
 	    ;;
@@ -8036,7 +7865,6 @@ $as_echo "$UNFIO_HDR_SIZE" >&6; }
 cat >>confdefs.h <<_ACEOF
 #define UNFIO_HDR_SIZE $UNFIO_HDR_SIZE
 _ACEOF
-
 
 
 if test "$GCC" = "yes"; then
@@ -8225,8 +8053,8 @@ fi
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we have HDF" >&5
-$as_echo_n "checking whether we have HDF... " >&6; }
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we have HDF4" >&5
+$as_echo_n "checking whether we have HDF4... " >&6; }
 
 # Check whether --with-hdf-prefix was given.
 if test "${with_hdf_prefix+set}" = set; then :
@@ -8264,6 +8092,8 @@ fi
 
 
 
+CFITSIO_INC=""
+CFITSIO_LIB=""
 
 # Check whether --enable-cfitsio was given.
 if test "${enable_cfitsio+set}" = set; then :
@@ -8278,7 +8108,7 @@ if test "$ok" = "yes"; then
   { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we have CFITSIO" >&5
 $as_echo_n "checking whether we have CFITSIO... " >&6; }
 
-  cfdefault=/usr/local
+  cfdefault=/usr
 
 
 # Check whether --with-cfitsio-prefix was given.
@@ -8304,13 +8134,17 @@ fi
         if test -f ${dir}/fitsio.h ; then
           CFITSIO_INC="-I${dir}"
           incdir="$dir"
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $incdir (valid)" >&5
+$as_echo "$incdir (valid)" >&6; }
           break;
         fi
       done
 
     if test -n "$CFITSIO_INC"; then
-      for dir in $cdir/lib $cdir
+      for dir in $cdir/lib $cdir $cdir/lib/$host_cpu-$host_os
         do
+	  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $dir" >&5
+$as_echo "$dir" >&6; }
           if test -f ${dir}/libcfitsio.a ; then
             CFITSIO_LIB="${dir}/libcfitsio.a"
             break;
@@ -8342,26 +8176,6 @@ fi
 
 
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking almost whether we have LAM/MPI" >&5
-$as_echo_n "checking almost whether we have LAM/MPI... " >&6; }
-{ $as_echo "$as_me:${as_lineno-$LINENO}: result: not yet" >&5
-$as_echo "not yet" >&6; }
-
-
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking whether we have PVM_ROOT and PVM_ARCH" >&5
-$as_echo_n "checking whether we have PVM_ROOT and PVM_ARCH... " >&6; }
-
-if test -d "$PVM_ROOT"; then
-  PVM_LIB="-L$PVM_ROOT/lib/$PVM_ARCH -lpvm3 -lgpvm3"
-  PVM_INC="-I$PVM_ROOT/include"
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-else
-  PVM_LIB=""
-  PVM_INC=""
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
 
 
 
@@ -8409,278 +8223,6 @@ $as_echo "no" >&6; }
         { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not find MIRIAD library..." >&5
 $as_echo "$as_me: WARNING: could not find MIRIAD library..." >&2;}
 fi
-
-
-
-
-
-# Check whether --enable-gsl was given.
-if test "${enable_gsl+set}" = set; then :
-  enableval=$enable_gsl; ok=$enableval
-else
-  ok=no
-fi
-
-
-if test "$ok" = "yes"; then
-
-
-# Check whether --with-gsl-prefix was given.
-if test "${with_gsl_prefix+set}" = set; then :
-  withval=$with_gsl_prefix; gsl_prefix="$withval"
-else
-  gsl_prefix=""
-fi
-
-
-# Check whether --with-gsl-exec-prefix was given.
-if test "${with_gsl_exec_prefix+set}" = set; then :
-  withval=$with_gsl_exec_prefix; gsl_exec_prefix="$withval"
-else
-  gsl_exec_prefix=""
-fi
-
-# Check whether --enable-gsltest was given.
-if test "${enable_gsltest+set}" = set; then :
-  enableval=$enable_gsltest;
-else
-  enable_gsltest=yes
-fi
-
-
-  if test "x${GSL_CONFIG+set}" != xset ; then
-     if test "x$gsl_prefix" != x ; then
-         GSL_CONFIG="$gsl_prefix/bin/gsl-config"
-     fi
-     if test "x$gsl_exec_prefix" != x ; then
-        GSL_CONFIG="$gsl_exec_prefix/bin/gsl-config"
-     fi
-  fi
-
-  # Extract the first word of "gsl-config", so it can be a program name with args.
-set dummy gsl-config; ac_word=$2
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
-$as_echo_n "checking for $ac_word... " >&6; }
-if ${ac_cv_path_GSL_CONFIG+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  case $GSL_CONFIG in
-  [\\/]* | ?:[\\/]*)
-  ac_cv_path_GSL_CONFIG="$GSL_CONFIG" # Let the user override the test with a path.
-  ;;
-  *)
-  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
-for as_dir in $PATH
-do
-  IFS=$as_save_IFS
-  test -z "$as_dir" && as_dir=.
-    for ac_exec_ext in '' $ac_executable_extensions; do
-  if as_fn_executable_p "$as_dir/$ac_word$ac_exec_ext"; then
-    ac_cv_path_GSL_CONFIG="$as_dir/$ac_word$ac_exec_ext"
-    $as_echo "$as_me:${as_lineno-$LINENO}: found $as_dir/$ac_word$ac_exec_ext" >&5
-    break 2
-  fi
-done
-  done
-IFS=$as_save_IFS
-
-  test -z "$ac_cv_path_GSL_CONFIG" && ac_cv_path_GSL_CONFIG="no"
-  ;;
-esac
-fi
-GSL_CONFIG=$ac_cv_path_GSL_CONFIG
-if test -n "$GSL_CONFIG"; then
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $GSL_CONFIG" >&5
-$as_echo "$GSL_CONFIG" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-fi
-
-
-  min_gsl_version=0.9.2
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for GSL - version >= $min_gsl_version" >&5
-$as_echo_n "checking for GSL - version >= $min_gsl_version... " >&6; }
-  no_gsl=""
-  if test "$GSL_CONFIG" = "no" ; then
-    no_gsl=yes
-  else
-    GSL_CFLAGS=`$GSL_CONFIG --cflags`
-    GSL_LIBS=`$GSL_CONFIG --libs`
-
-    gsl_major_version=`$GSL_CONFIG --version | \
-           sed 's/^\([0-9]*\).*/\1/'`
-    if test "x${gsl_major_version}" = "x" ; then
-       gsl_major_version=0
-    fi
-
-    gsl_minor_version=`$GSL_CONFIG --version | \
-           sed 's/^\([0-9]*\)\.\{0,1\}\([0-9]*\).*/\2/'`
-    if test "x${gsl_minor_version}" = "x" ; then
-       gsl_minor_version=0
-    fi
-
-    gsl_micro_version=`$GSL_CONFIG --version | \
-           sed 's/^\([0-9]*\)\.\{0,1\}\([0-9]*\)\.\{0,1\}\([0-9]*\).*/\3/'`
-    if test "x${gsl_micro_version}" = "x" ; then
-       gsl_micro_version=0
-    fi
-
-    if test "x$enable_gsltest" = "xyes" ; then
-      ac_save_CFLAGS="$CFLAGS"
-      ac_save_LIBS="$LIBS"
-      CFLAGS="$CFLAGS $GSL_CFLAGS"
-      LIBS="$LIBS $GSL_LIBS"
-
-      rm -f conf.gsltest
-      if test "$cross_compiling" = yes; then :
-  echo $ac_n "cross compiling; assumed OK... $ac_c"
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-
-char* my_strdup (const char *str);
-
-char*
-my_strdup (const char *str)
-{
-  char *new_str;
-
-  if (str)
-    {
-      new_str = (char *)malloc ((strlen (str) + 1) * sizeof(char));
-      strcpy (new_str, str);
-    }
-  else
-    new_str = NULL;
-
-  return new_str;
-}
-
-int main (void)
-{
-  int major = 0, minor = 0, micro = 0;
-  int n;
-  char *tmp_version;
-
-  system ("touch conf.gsltest");
-
-  /* HP/UX 9 (%@#!) writes to sscanf strings */
-  tmp_version = my_strdup("$min_gsl_version");
-
-  n = sscanf(tmp_version, "%d.%d.%d", &major, &minor, &micro) ;
-
-  if (n != 2 && n != 3) {
-     printf("%s, bad version string\n", "$min_gsl_version");
-     exit(1);
-   }
-
-   if (($gsl_major_version > major) ||
-      (($gsl_major_version == major) && ($gsl_minor_version > minor)) ||
-      (($gsl_major_version == major) && ($gsl_minor_version == minor) && ($gsl_micro_version >= micro)))
-     {
-       exit(0);
-     }
-   else
-     {
-       exit(1);
-     }
-}
-
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-
-else
-  no_gsl=yes
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
-       CFLAGS="$ac_save_CFLAGS"
-       LIBS="$ac_save_LIBS"
-     fi
-  fi
-  if test "x$no_gsl" = x ; then
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-     ok=yes
-  else
-     { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
-$as_echo "no" >&6; }
-     if test "$GSL_CONFIG" = "no" ; then
-       echo "*** The gsl-config script installed by GSL could not be found"
-       echo "*** If GSL was installed in PREFIX, make sure PREFIX/bin is in"
-       echo "*** your path, or set the GSL_CONFIG environment variable to the"
-       echo "*** full path to gsl-config."
-     else
-       if test -f conf.gsltest ; then
-        :
-       else
-          echo "*** Could not run GSL test program, checking why..."
-          CFLAGS="$CFLAGS $GSL_CFLAGS"
-          LIBS="$LIBS $GSL_LIBS"
-          cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-#include <stdio.h>
-
-int
-main ()
-{
- return 0;
-  ;
-  return 0;
-}
-_ACEOF
-if ac_fn_c_try_link "$LINENO"; then :
-   echo "*** The test program compiled, but did not run. This usually means"
-          echo "*** that the run-time linker is not finding GSL or finding the wrong"
-          echo "*** version of GSL. If it is not finding GSL, you'll need to set your"
-          echo "*** LD_LIBRARY_PATH environment variable, or edit /etc/ld.so.conf to point"
-          echo "*** to the installed location  Also, make sure you have run ldconfig if that"
-          echo "*** is required on your system"
-	  echo "***"
-          echo "*** If you have an old version installed, it is best to remove it, although"
-          echo "*** you may also be able to get things to work by modifying LD_LIBRARY_PATH"
-else
-   echo "*** The test program failed to compile or link. See the file config.log for the"
-          echo "*** exact error that occured. This usually means GSL was incorrectly installed"
-          echo "*** or that you have moved GSL since it was installed. In the latter case, you"
-          echo "*** may want to edit the gsl-config script: $GSL_CONFIG"
-fi
-rm -f core conftest.err conftest.$ac_objext \
-    conftest$ac_exeext conftest.$ac_ext
-          CFLAGS="$ac_save_CFLAGS"
-          LIBS="$ac_save_LIBS"
-       fi
-     fi
-#     GSL_CFLAGS=""
-#     GSL_LIBS=""
-     ok=no
-  fi
-
-
-  rm -f conf.gsltest
-
-  if test "$ok" = "yes"; then
-    GSL_CFLAGS="$GSL_CFLAGS -DHAVE_GSL"
-    $as_echo "#define HAVE_LIBGSL 1" >>confdefs.h
-
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not find GSL library" >&5
-$as_echo "$as_me: WARNING: could not find GSL library" >&2;}
-  fi
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: GSL disabled" >&5
-$as_echo "$as_me: WARNING: GSL disabled" >&2;}
-fi
-
 
 
 
@@ -9211,6 +8753,67 @@ _ACEOF
 
 fi
 	# Dynamic linking for HP-UX
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for library containing dlopen" >&5
+$as_echo_n "checking for library containing dlopen... " >&6; }
+if ${ac_cv_search_dlopen+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_func_search_save_LIBS=$LIBS
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char dlopen ();
+int
+main ()
+{
+return dlopen ();
+  ;
+  return 0;
+}
+_ACEOF
+for ac_lib in '' dl dld; do
+  if test -z "$ac_lib"; then
+    ac_res="none required"
+  else
+    ac_res=-l$ac_lib
+    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
+  fi
+  if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_search_dlopen=$ac_res
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext
+  if ${ac_cv_search_dlopen+:} false; then :
+  break
+fi
+done
+if ${ac_cv_search_dlopen+:} false; then :
+
+else
+  ac_cv_search_dlopen=no
+fi
+rm conftest.$ac_ext
+LIBS=$ac_func_search_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_dlopen" >&5
+$as_echo "$ac_cv_search_dlopen" >&6; }
+ac_res=$ac_cv_search_dlopen
+if test "$ac_res" != no; then :
+  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+
+else
+
+  as_fn_error $? "unable to find the dlopen() function" "$LINENO" 5
+
+fi
+
 
 
 
@@ -11108,8 +10711,8 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
-	    PGPLOT_DIR='\$NEMOLIB'
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
 	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using dollar" >&5
 $as_echo "$as_me: WARNING: using dollar" >&2;}
 	    echo $PGPLOT_DIR
@@ -12431,6 +12034,7 @@ output from the command
 
 Users need to source the nemo_start.(c)sh file in their shell to
 enable NEMO commands and set up the NEMO environment.
+If there any compile or linkings problems, check out \$NEMOLIB/makedefs
 -------------------------------------------------------------------------
 "
 
