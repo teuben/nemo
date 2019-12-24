@@ -16,6 +16,7 @@ AC_MSG_CHECKING([NEMO config])
 
 AC_CONFIG_MACRO_DIR([m4])
 dnl AC_CONFIG_MACRO_DIRS - for future autoconf 2.70 ?
+m4_include([m4/csh.m4])
 dnl m4_include([m4/hdf5.m4])
 dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
@@ -107,6 +108,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
+AC_PROG_CSH
 dnl next ones seems to force linking with FC, and we have F77 as well
 dnl AC_PROG_FC
 dnl AC_FC_WRAPPERS

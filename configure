@@ -2611,6 +2611,15 @@ $as_echo_n "checking NEMO config... " >&6; }
 
 
 
+#
+# NEMO still needs csh for many scripts
+#
+# @todo   add a --with-csh flag so it overrides this error, just in case....
+#
+
+
+
+
 # ===========================================================================
 #   https://www.gnu.org/software/autoconf-archive/ax_f77_cmain_fflags.html
 # ===========================================================================
@@ -5553,6 +5562,20 @@ esac
 else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the (t)csh shell" >&5
+$as_echo_n "checking for the (t)csh shell... " >&6; }
+  if test -f /bin/csh; then
+     have_csh="yes"
+  else
+     have_csh="no"
+  fi
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_csh" >&5
+$as_echo "$have_csh" >&6; }
+  if test "$have_csh" = "no"; then
+     as_fn_error $? "/bin/csh is required" "$LINENO" 5
+  fi
+
 
 
 test "$program_prefix" != NONE &&
