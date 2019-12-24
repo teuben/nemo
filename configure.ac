@@ -20,7 +20,7 @@ dnl m4_include([m4/hdf5.m4])
 dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
 m4_include([m4/ax_f77_func_mangle.m4])
-m4_include([m4/gsl.m4])
+dnl m4_include([m4/gsl.m4])
 dnl ax_lib_readline.m4
 dnl ax_mpi.m4
 dnl ax_pkg_swig.m4
@@ -200,6 +200,7 @@ fi
 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
+AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON], enable_falcon=$enablehval, enable_mesa=yes)
 
 AC_ARG_WITH(mesa, [  --with-mesa             force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
 AC_ARG_WITH(hdf,  [  --with-hdf              force the use of HDF], with_hdf=$withval, with_hdf=maybe)
@@ -849,8 +850,8 @@ case $yapp_name in
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
-	    YAPP_LIBS='-L\$NEMOLIB'" -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
-	    PGPLOT_DIR='\$NEMOLIB'
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
 	    AC_MSG_WARN(using dollar)
 	    echo $PGPLOT_DIR
 	    echo $NEMOLIB
