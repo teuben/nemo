@@ -1,0 +1,6 @@
+#
+# disable optimization for this code, it will hang on linux
+#
+
+
+FFLAGS = -g
