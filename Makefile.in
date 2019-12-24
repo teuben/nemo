@@ -99,10 +99,10 @@ SHELL = /bin/bash
 help:   install
 
 install:
-	@echo "There is install because NEMO build in place. The usual procedure is"
+	@echo "There is no install because NEMO is build in place. The usual procedure is"
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
-	@echo "      make build             -- build1: postconfig  build2: libs  build3: bins"
+	@echo "      make build             -- build1: postconfig  build2: libs  build3: bins  build4: mknemo"
 	@echo "      make check             -- the testsuite"
 	@echo "      make bench             -- the benchmark"
 	@echo ""
