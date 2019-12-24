@@ -200,7 +200,15 @@ fi
 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
-AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON],          enable_falcon=$enableval, enable_falcon=yes)
+AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON],enable_falcon=$enableval, enable_falcon=yes)
+if test "$enable_falcon" = "yes"; then
+  MAKELIBS="corelibs dehnen"
+else
+  MAKELIBS="corelibs"
+fi
+MAKEDIRS="src usr"
+AC_SUBST(MAKELIBS)
+AC_SUBST(MAKEDIRS)
 
 AC_ARG_WITH(mesa, [  --with-mesa             force the use of Mesa instead of other graphics libs], with_mesa=$withval, with_mesa=maybe)
 AC_ARG_WITH(hdf,  [  --with-hdf              force the use of HDF], with_hdf=$withval, with_hdf=maybe)
