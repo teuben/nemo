@@ -4,7 +4,7 @@
 #    diff $NEMO/makedefs $NEMOLIB
 #  ((the one in $NEMO is the configure generated one that gets copied))
 #  ((to $NEMOLIB via the "make config_extra" command during the))
-#  (("make postconfig" step of the install))
+#  (("make build1" step of the install))
 
 #  DSO linking: might need to wrap offending libraries 
 #       -Wl,--no-as-needed -lX11 -Wl,-as-needed
@@ -48,19 +48,20 @@ CXX = @CXX@
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
 
-HDF5_INC = @HDF5_INC@
-HDF5_LIB = @HDF5_LIB@
-
-#  PVM library
-
-PVM_INC = @PVM_INC@
-PVM_LIB = @PVM_LIB@
+#  HDF5 library
+# --with-hdf5-incdir=   --with-hdf5-libdir=
+#HDF5_INC = `pkg-config --cflags hdf5`
+#HHD5_LIB = `pkg-config --libs hdf5`
+HDF5_INC = @HDF5_CFLAGS@
+HDF5_LIB = @HDF5_LIBS@
 
 #  PNG library
+#PNG_LIB = `pkg-config --libs libpng`
 PNG_LIB = @PNG_LIB@
 
 #  CFITSIO library
-
+#CFITSIO_INC = `pkg-config --cflags cfitsio`
+#CFITSIO_LIB = `pkg-config --libs cfitsio`
 CFITSIO_INC = @CFITSIO_INC@
 CFITSIO_LIB = @CFITSIO_LIB@
 
@@ -70,14 +71,18 @@ MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
 #	GSL
-GSL_CFLAGS = @GSL_CFLAGS@
-GSL_LIBS   = @GSL_LIBS@
+#GSL_CFLAGS = @GSL_CFLAGS@
+#GSL_LIBS   = @GSL_LIBS@
+GSL_CFLAGS = ""
+GSL_LIBS   = ""
 
 #	FFTW
 #       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
 #       [actually still not used yet]
-FFTW_CFLAGS = @FFTW_CFLAGS@
-FFTW_LIBS   = @FFTW_LIBS@
+#FFTW_CFLAGS = @FFTW_CFLAGS@
+#FFTW_LIBS   = @FFTW_LIBS@
+FFTW_CFLAGS = ""
+FFTW_LIBS   = ""
 
 
 #	READLINE
@@ -124,7 +129,7 @@ NEMO_LIBSPP = -L$(NEMOLIB) -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
-XLIBS = @XLIBS@
+XLIBS  = @XLIBS@
 
 #			generic compile flags for C,Fortran,Linker
 # If you must absolutely be pedantic, the following gnu compiler flags are the recommended ones
