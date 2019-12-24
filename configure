@@ -741,6 +741,7 @@ SHELL'
 ac_subst_files=''
 ac_user_opts='
 enable_option_checking
+with_csh
 enable_debug
 enable_pedantic
 enable_native
@@ -1437,6 +1438,7 @@ Optional Features:
 Optional Packages:
   --with-PACKAGE[=ARG]    use PACKAGE [ARG=yes]
   --without-PACKAGE       do not use PACKAGE (same as --with-PACKAGE=no)
+  --with-csh              bypass test for csh requirement
   --with-mesa             force the use of Mesa instead of other graphics libs
   --with-hdf              force the use of HDF
   --with-ccmalloc         use CCMALLOC for malloc
@@ -2613,8 +2615,8 @@ $as_echo_n "checking NEMO config... " >&6; }
 
 #
 # NEMO still needs csh for many scripts
-#
-# @todo   add a --with-csh flag so it overrides this error, just in case....
+#      but with the flag --without-csh you can bypass this test
+#      but ... YMMV
 #
 
 
@@ -5563,17 +5565,28 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking for the (t)csh shell" >&5
-$as_echo_n "checking for the (t)csh shell... " >&6; }
-  if test -f /bin/csh; then
-     have_csh="yes"
-  else
-     have_csh="no"
-  fi
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_csh" >&5
+
+
+# Check whether --with-csh was given.
+if test "${with_csh+set}" = set; then :
+  withval=$with_csh; with_csh=$withval
+else
+  with_csh=yes
+fi
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for the (t)csh shell $with_csh" >&5
+$as_echo_n "checking for the (t)csh shell $with_csh... " >&6; }
+  if test "$with_csh" = "yes"; then
+     if test -f /bin/csh; then
+        have_csh="yes"
+     else
+        have_csh="no"
+     fi
+     { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_csh" >&5
 $as_echo "$have_csh" >&6; }
-  if test "$have_csh" = "no"; then
-     as_fn_error $? "/bin/csh is required" "$LINENO" 5
+     if test "$have_csh" = "no"; then
+        as_fn_error $? "/bin/csh is required" "$LINENO" 5
+     fi
   fi
 
 
