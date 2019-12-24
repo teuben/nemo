@@ -193,6 +193,17 @@ the baryon fraction is 5-15%, but on either side can increase quite significantl
 due to what looks like highler collapse factors in the DM. The histogram is that of
 the gas at z=20.
 
+<hr>
+
+<h2> Installation </h2>
+Currently a default NEMO installation will not give you the <B>eaglesnap</B> command. Assuming you
+have HDF5 installed, this is most likely the route to success:
+<pre>
+  cd $NEMO/usr/eagle
+  make install
+  mknemo eaglesnap
+</pre>
+but it may also require some other tweaking. Version 4.2 of NEMO should fully resolve this.
 
 <P>
   
