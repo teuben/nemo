@@ -1,4 +1,4 @@
-VERSION = NEMO V4.1 24-nov-2019 PJT
+VERSION = NEMO V4.2 24-dec-2019 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -39,15 +39,19 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 #  Currently accepted are:
 #	src 		- standard export (NEMO expects install targets)
 #	usr		- user contributions (have their own install methods)
-MAKEDIRS = src 
+#MAKEDIRS = src usr
+#MAKELIBS = corelibs dehnen
+MAKEDIRS = @MAKEDIRS@
+MAKELIBS = @MAKELIBS@
+
 
 ################################################################################
 # The following files/directories will be saved to a tar file
 # and used in incremental export tar files (Nightly/export.csh)
 # SRC is to select subsections of the whole src tree
 # To get all of NEMO, choose SRC=src usr (see e.g. tarkernel below)
+# --deprecated--
 #
-# @todo   this can go for 4.0
 SRC = src
 USR =
 #
@@ -527,7 +531,7 @@ cleanall:
 cleansrc:
 	(cd src; $(MAKE) clean)
 
-libs:	corelibs dehnen
+libs:	$(MAKELIBS)
 	@echo Done at `date`
 
 # gyrfalcON
