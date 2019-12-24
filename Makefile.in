@@ -465,7 +465,6 @@ python: anaconda3
 
 python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
-	# cp nemo_start.py /tmp
 
 anaconda3:
 	src/scripts/install_anaconda3
@@ -572,8 +571,10 @@ check:
 checklog:
 	cat `ls -tr tmp/test*/testsuite.log | tail -1`
 
+TIME = /usr/bin/time
+
 bench:
-	(source nemo_start.sh; time src/scripts/nemo.bench bsf=1)
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
 
 #
 TEST=""
