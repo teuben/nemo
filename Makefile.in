@@ -527,7 +527,8 @@ cleanall:
 cleansrc:
 	(cd src; $(MAKE) clean)
 
-libs:	corelibs dehnen
+# libs:	corelibs dehnen
+libs:	corelibs 
 	@echo Done at `date`
 
 # gyrfalcON
