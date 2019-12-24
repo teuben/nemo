@@ -17,8 +17,6 @@
 #                                       Things via configure
 export          NEMO=@NEMO@
 export      NEMOHOST=@NEMOHOST@
-export          YAPP=@YAPP_DEF@
-export    PGPLOT_DIR=@PGPLOT_DIR@
 
 #  				        Basic derived environment variables
 export NEMOLIB=$NEMO/lib
@@ -35,6 +33,9 @@ export MANIPPATH=.:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 export NEMOVER=`cat $NEMO/VERSION`
 export NEMOSYS=`uname -s`
 export NEMOSITE=`hostname`
+
+export YAPP=@YAPP_DEF@
+export PGPLOT_DIR=@PGPLOT_DIR@
 
 
 if [ -z "$MANPATH" ]; then

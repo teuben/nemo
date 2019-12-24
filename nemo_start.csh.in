@@ -16,8 +16,6 @@
 #                                       Things via configure
 setenv NEMO          @NEMO@
 setenv NEMOHOST      @NEMOHOST@
-setenv YAPP          @YAPP_DEF@
-setenv PGPLOT_DIR    @PGPLOT_DIR@
 
 #  				        Basic derived environment variables
 setenv NEMOLIB     $NEMO/lib
@@ -35,6 +33,8 @@ setenv NEMOVER   `cat $NEMO/VERSION`
 setenv NEMOSYS   `uname -s`
 setenv NEMOSITE  `hostname`
 
+setenv YAPP          @YAPP_DEF@
+setenv PGPLOT_DIR    @PGPLOT_DIR@
 
 #   MANPATH isn't so standard as you may think....
 #	Ultrix doesn't handle MANPATH
