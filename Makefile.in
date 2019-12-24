@@ -99,7 +99,7 @@ SHELL = /bin/bash
 help:   install
 
 install:
-	@echo "There is no official single step install from the root menu"
+	@echo "There is install because NEMO build in place. The usual procedure is"
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
 	@echo "      make build             -- build1: postconfig  build2: libs  build3: bins"
@@ -107,13 +107,8 @@ install:
 	@echo "      make bench             -- the benchmark"
 	@echo ""
 	@echo "After this, users will need to source the nemo_start.(c)sh file"
-	@echo "Some new python support via nemo_start.py"
+	@echo "There is also some new python support via nemo_start.py"
 
-
-help1:
-	@echo ""
-	@echo "There is no default make in NEMO. For installation"
-	@echo "guidelines use 'make install' or read the INSTALL file"
 
 help2:
 	@echo ""
