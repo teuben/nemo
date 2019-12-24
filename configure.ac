@@ -8,6 +8,7 @@ dnl will show which m4's are present and used
 dnl git clone https://github.com/autoconf-archive/autoconf-archive
 dnl ---------------------------------------------------------------------------------
 
+AC_PREREQ(2.69)
 AC_INIT(nemo_start.sh.in)
 
 AC_MSG_CHECKING([NEMO config])
@@ -15,7 +16,7 @@ AC_MSG_CHECKING([NEMO config])
 
 AC_CONFIG_MACRO_DIR([m4])
 dnl AC_CONFIG_MACRO_DIRS - for future autoconf 2.70 ?
-m4_include([m4/hdf5.m4])
+dnl m4_include([m4/hdf5.m4])
 dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
 m4_include([m4/ax_f77_func_mangle.m4])
@@ -64,9 +65,11 @@ for i in bin lib obj local; do
  fi
 done
 
+dnl CMAKE_FIND_BINARY
+
 dnl ----                Architecture stuff we need to know
 AC_CANONICAL_HOST
-echo "Found CANONICAL_HOST = $host_os or $host "
+echo "Found CANONICAL_HOST = $host_os or $host or $host_cpu"
 AC_CANONICAL_BUILD
 echo "Found CANONICAL_BUILD = $build"
 AC_CANONICAL_TARGET
@@ -104,7 +107,7 @@ AC_PROG_INSTALL
 AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
-dnl next ones seems to force linking with FC
+dnl next ones seems to force linking with FC, and we have F77 as well
 dnl AC_PROG_FC
 dnl AC_FC_WRAPPERS
 
@@ -592,7 +595,7 @@ if test "$ok" = "yes"; then
 
   AC_MSG_CHECKING(whether we have CFITSIO)
 
-  cfdefault=/usr/local
+  cfdefault=/usr
  
   AC_ARG_WITH(cfitsio-prefix, AC_HELP_STRING([--with-cfitsio-prefix=PFX],
         [CFITSIO installation prefix (default: $cfdefault)]),
@@ -613,13 +616,15 @@ if test "$ok" = "yes"; then
         if test -f ${dir}/fitsio.h ; then
           CFITSIO_INC="-I${dir}"
           incdir="$dir"
+	  AC_MSG_RESULT($incdir (valid))	  
           break;
         fi
       done
                                                                                 
     if test -n "$CFITSIO_INC"; then
-      for dir in $cdir/lib $cdir
+      for dir in $cdir/lib $cdir $cdir/lib/$host_cpu-$host_os
         do
+	  AC_MSG_RESULT($dir)
           if test -f ${dir}/libcfitsio.a ; then
             CFITSIO_LIB="${dir}/libcfitsio.a"
             break;
