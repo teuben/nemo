@@ -3,6 +3,7 @@
 # a quick hack   - May 2010
 # some changed dir structure   - Jan 2013
 # install_prefix added           Jun 2018
+# added NEMO/opt check           Dec 2019
 #
 # g77:        -lfrtbegin -lg2c
 # gfortran:   -lgfortran
@@ -15,7 +16,7 @@ set dir=$NEMO/usr/jcl/unsio
 # for linux
 set args=""
 
-if (-e $NEMO/opt/include/hdf5.h) then
+if (-e $NEMO/opt/include/-hdf5.h) then
   echo Found HDF5 under NEMO/opt
   set h5=(-DHDF5_INCLUDE_DIRS=$NEMO/opt/include -DHDF5_CXX_LIBRARIES=$NEMO/lib)
 else
@@ -23,6 +24,7 @@ else
 endif
 
 if (-e $dir) then
+  rm -rf $dir/build
   mkdir -p $dir/build
   cd $dir/build
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
@@ -34,6 +36,9 @@ if (-e $dir) then
   cd build
   cmake ..
   make
+  make install
+  # this seems to help
+  make 
   make install
 else
   echo mknemo.d: $dir does not exist
