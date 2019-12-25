@@ -2,20 +2,30 @@
 #
 # a quick hack   - May 2010
 # some changed dir structure   - Jan 2013
+# install_prefix added           Jun 2018
 #
 # g77:        -lfrtbegin -lg2c
 # gfortran:   -lgfortran
+
+# ubuntu requirements: swig	python-numpy	libhdf5-dev	libsqlite3-dev
+
 
 set dir=$NEMO/usr/jcl/unsio
 
 # for linux
 set args=""
 
+if (-e $NEMO/opt/include/hdf5.h) then
+  echo Found HDF5 under NEMO/opt
+  set h5=(-DHDF5_INCLUDE_DIRS=$NEMO/opt/include -DHDF5_CXX_LIBRARIES=$NEMO/lib)
+else
+  set h5=()
+endif
 
 if (-e $dir) then
   mkdir -p $dir/build
   cd $dir/build
-  cmake ..
+  cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
   make
   make install 
   # new python stuff (13 march 2014)
