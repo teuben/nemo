@@ -638,6 +638,8 @@ DSO_LINK
 MATH_LIBS
 LOADOBJ_LIBS
 LOADOBJ_MACH
+PLPLOT_LIBS
+PLPLOT_CFLAGS
 PGPLOT_DIR
 PNG_LIB
 MACOS_LIBS
@@ -760,6 +762,9 @@ with_dso
 with_x
 enable_png
 with_pgplot_prefix
+enable_plplot
+with_plplot_libdir
+with_plplot_incdir
 with_hdf_prefix
 enable_cfitsio
 with_cfitsio_prefix
@@ -1429,6 +1434,7 @@ Optional Features:
   --disable-fortran       don't use any Fortran
   --disable-falcon        enable falcON
   --enable-png            force the use of PNG for pgplot
+  --enable-plplot         Activate PLPlot library (default = yes)
   --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
   --enable-flogger        use Flogger
   --enable-tcl            use TCL
@@ -1445,6 +1451,11 @@ Optional Packages:
   --with-dso              use DSO linking
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
+  --with-plplot-libdir=<PLPlot library path>
+                          Provide an alternative path to the PLPlot library
+  --with-plplot-incdir=<PLPlot include dir>
+                          Provide an alternative path to the PLPlot include
+                          directory
   --with-hdf-prefix=PFX     Prefix where HDF4 was installed
   --with-cfitsio-prefix=PFX
                           CFITSIO installation prefix (default: $cfdefault)
@@ -2697,6 +2708,9 @@ $as_echo_n "checking NEMO config... " >&6; }
 # then outputs the replacement expansion.  We do not care
 # about autoupdate's warning because that contains
 # information on what to do *after* running autoupdate.
+
+
+
 
 
 
@@ -5585,7 +5599,7 @@ $as_echo_n "checking for the (t)csh shell $with_csh... " >&6; }
      { $as_echo "$as_me:${as_lineno-$LINENO}: result: $have_csh" >&5
 $as_echo "$have_csh" >&6; }
      if test "$have_csh" = "no"; then
-        as_fn_error $? "/bin/csh is required" "$LINENO" 5
+        as_fn_error $? "/bin/csh is required - you can bypass with --without-csh (YMMV)" "$LINENO" 5
      fi
   fi
 
@@ -8010,6 +8024,244 @@ else
 	{ $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: could not find PGPLOT library in 2nd: $pgplot_config_prefix" >&5
 $as_echo "$as_me: WARNING: could not find PGPLOT library in 2nd: $pgplot_config_prefix" >&2;}
 fi
+
+
+
+# Check whether --enable-plplot was given.
+if test "${enable_plplot+set}" = set; then :
+  enableval=$enable_plplot; { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+fi
+
+
+# Check whether --with-plplot-libdir was given.
+if test "${with_plplot_libdir+set}" = set; then :
+  withval=$with_plplot_libdir;
+fi
+
+
+# Check whether --with-plplot-incdir was given.
+if test "${with_plplot_incdir+set}" = set; then :
+  withval=$with_plplot_incdir;
+fi
+
+
+################# handle the PLPlot library (graphic plots) ##################
+if test "$enable_plplot" != "no"; then
+
+
+
+PLPLOT_LIBS=""
+OLIBS="$LIBS"
+LIBS=""
+
+acx_plplot_ok=yes
+acx_plplotpkg_ok=no
+if test x$with_plplot_incdir = x && test x$with_plplot_libdir = x; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: checking for PLPlot pkg-config info" >&5
+$as_echo_n "checking for PLPlot pkg-config info... " >&6; }
+  if pkg-config --exists plplotd; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    PLPLOT_CFLAGS=`pkg-config --cflags plplotd`
+    PLPLOT_LIBS=`pkg-config --libs plplotd`
+
+$as_echo "#define PLPLOT_H \"plplot.h\"" >>confdefs.h
+
+
+$as_echo "#define PLPLOTP_H \"plplotP.h\"" >>confdefs.h
+
+    acx_plplotpkg_ok=yes
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+  fi
+fi
+if test x$acx_plplotpkg_ok = xno; then
+  if test x$with_plplot_incdir = x; then
+    ac_fn_c_check_header_mongrel "$LINENO" "plplot.h" "ac_cv_header_plplot_h" "$ac_includes_default"
+if test "x$ac_cv_header_plplot_h" = xyes; then :
+  acx_plplothead_ok=yes
+else
+  acx_plplothead_ok=no
+fi
+
+
+    if test x$acx_plplothead_ok = xyes; then
+
+$as_echo "#define PLPLOT_H \"plplot.h\"" >>confdefs.h
+
+
+$as_echo "#define PLPLOTP_H \"plplotP.h\"" >>confdefs.h
+
+    else
+      ac_fn_c_check_header_mongrel "$LINENO" "plplot/plplot.h" "ac_cv_header_plplot_plplot_h" "$ac_includes_default"
+if test "x$ac_cv_header_plplot_plplot_h" = xyes; then :
+  acx_plplothead_ok=yes
+else
+  acx_plplothead_ok=no
+fi
+
+
+      if test x$acx_plplothead_ok = xyes; then
+
+$as_echo "#define PLPLOT_H \"plplot/plplot.h\"" >>confdefs.h
+
+
+$as_echo "#define PLPLOTP_H \"plplot/plplotP.h\"" >>confdefs.h
+
+      else
+        acx_plplot_ok=no
+      fi
+    fi
+  else
+    as_ac_Header=`$as_echo "ac_cv_header_$with_plplot_incdir/plplot.h" | $as_tr_sh`
+ac_fn_c_check_header_mongrel "$LINENO" "$with_plplot_incdir/plplot.h" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"; then :
+  acx_plplothead_ok=yes
+else
+  acx_plplothead_ok=no
+fi
+
+
+    if test x$acx_plplothead_ok = xyes; then
+
+$as_echo "#define PLPLOT_H \"plplot.h\"" >>confdefs.h
+
+
+$as_echo "#define PLPLOTP_H \"plplotP.h\"" >>confdefs.h
+
+     PLPLOT_CFLAGS="-I$with_plplot_incdir"
+    else
+      acx_plplot_ok=no
+    fi
+  fi
+  if test x$with_plplot_libdir = x; then
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for c_plinit in -lplplotd" >&5
+$as_echo_n "checking for c_plinit in -lplplotd... " >&6; }
+if ${ac_cv_lib_plplotd_c_plinit+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lplplotd  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char c_plinit ();
+int
+main ()
+{
+return c_plinit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_plplotd_c_plinit=yes
+else
+  ac_cv_lib_plplotd_c_plinit=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_plplotd_c_plinit" >&5
+$as_echo "$ac_cv_lib_plplotd_c_plinit" >&6; }
+if test "x$ac_cv_lib_plplotd_c_plinit" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPLPLOTD 1
+_ACEOF
+
+  LIBS="-lplplotd $LIBS"
+
+else
+  acx_plplot_ok=no
+fi
+
+    PLPLOT_LIBS="-lplplotd"
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking for c_plinit in -lplplotd" >&5
+$as_echo_n "checking for c_plinit in -lplplotd... " >&6; }
+if ${ac_cv_lib_plplotd_c_plinit+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lplplotd -L$with_plplot_libdir $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+#ifdef __cplusplus
+extern "C"
+#endif
+char c_plinit ();
+int
+main ()
+{
+return c_plinit ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"; then :
+  ac_cv_lib_plplotd_c_plinit=yes
+else
+  ac_cv_lib_plplotd_c_plinit=no
+fi
+rm -f core conftest.err conftest.$ac_objext \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_plplotd_c_plinit" >&5
+$as_echo "$ac_cv_lib_plplotd_c_plinit" >&6; }
+if test "x$ac_cv_lib_plplotd_c_plinit" = xyes; then :
+  cat >>confdefs.h <<_ACEOF
+#define HAVE_LIBPLPLOTD 1
+_ACEOF
+
+  LIBS="-lplplotd $LIBS"
+
+else
+  acx_plplot_ok=no
+fi
+
+    PLPLOT_LIBS="-L$with_plplot_libdir -lplplotd"
+  fi
+fi
+
+LIBS="$OLIBS"
+if test x$acx_plplot_ok = xyes; then
+
+
+
+$as_echo "#define HAVE_PLPLOT 1" >>confdefs.h
+
+  use_plplot="yes"
+    LIBS="$LIBS $PLPLOT_LIBS"
+else
+  use_plplot="no"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: PLPlot library not found/incomplete! Plotting deactivated." >&5
+$as_echo "$as_me: WARNING: PLPlot library not found/incomplete! Plotting deactivated." >&2;}
+fi
+
+
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: Plotting deactivated by user." >&5
+$as_echo "$as_me: WARNING: Plotting deactivated by user." >&2;}
+fi
+
+
 
 
 

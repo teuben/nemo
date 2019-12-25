@@ -21,6 +21,7 @@ dnl m4_include([m4/hdf5.m4])
 dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
 m4_include([m4/ax_f77_func_mangle.m4])
+m4_include([m4/acx_plplot.m4])
 dnl m4_include([m4/gsl.m4])
 dnl ax_lib_readline.m4
 dnl ax_mpi.m4
@@ -492,6 +493,35 @@ if test x$pgplot_config_prefix != x; then
 else
 	AC_MSG_WARN([could not find PGPLOT library in 2nd: $pgplot_config_prefix])
 fi
+
+
+dnl ---------------------------------------------------------------------
+
+AC_ARG_ENABLE(plplot,
+        [AS_HELP_STRING([--enable-plplot],
+        [Activate PLPlot library (default = yes)])],
+        AC_MSG_RESULT([yes]),
+        AC_MSG_RESULT([no]))
+AC_ARG_WITH(plplot-libdir,
+        [AS_HELP_STRING([--with-plplot-libdir=<PLPlot library path>],
+        [Provide an alternative path to the PLPlot library])])
+AC_ARG_WITH(plplot-incdir,
+        [AS_HELP_STRING([--with-plplot-incdir=<PLPlot include dir>],
+        [Provide an alternative path to the PLPlot include directory])])
+
+################# handle the PLPlot library (graphic plots) ##################
+if test "$enable_plplot" != "no"; then
+  ACX_PLPLOT($with_plplot_libdir,$with_plplot_incdir,
+    [use_plplot="yes"]
+    [LIBS="$LIBS $PLPLOT_LIBS"],
+    [use_plplot="no"]
+    AC_MSG_WARN([PLPlot library not found/incomplete! Plotting deactivated.]))
+else
+  AC_MSG_WARN([Plotting deactivated by user.])
+fi
+
+dnl     [AM_CPPFLAGS="$AM_CPPFLAGS $PLPLOT_CFLAGS"]
+
 
 dnl ---------------------------------------------------------------------
 
