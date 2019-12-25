@@ -1,0 +1,19 @@
+#! /bin/csh -f
+#
+#  Install HDF5 within NEMO
+#
+#
+#  25-dec-2019  drafted
+#
+
+if ($?NEMO == 0) set NEMO=`pwd`
+
+
+cd $NEMO/local
+wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.14/src/hdf-4.2.14.tar.gz
+tar zxf hdf-4.2.14.tar.gz
+cd hdf-4.2.14
+
+./configure --prefix=$NEMO/opt
+make
+make install 
