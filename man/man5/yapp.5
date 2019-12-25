@@ -1,4 +1,4 @@
-.TH YAPP 5NEMO "6 July 2001"
+.TH YAPP 5NEMO "24 December 2019"
 .SH NAME
 yapp \- Yet Another Plotting Package
 .SH DESCRIPTION
@@ -140,6 +140,21 @@ For X windows drivers (e.g. /xs and /xw) a number of X resources are used
 pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
 pgxwin.Win.iconGeometry: +X+Y
 
+.fi
+.SH PLPLOT
+Like PGPLOT, PLPLOT can also pick different graphics output devices, specified via the usual yapp= system
+keyword, followed by a filename for the non-interactive devices.
+Here are a few, though specifying yapp=help should give the list of currently compiled
+devices.  For a full list see e.g.
+http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html
+.nf
+.ta +1i
+png,FILE.png	PNG
+pdfcairo,FILE.pdf	PDF (cairo)
+pdf,FILE.pdf	PDF (Haru)
+svg,FILE.svg	SVG
+xwin
+tk
 .fi
 .SH FILES
 .nf
