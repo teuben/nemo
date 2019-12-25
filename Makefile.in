@@ -295,14 +295,6 @@ targit0:
 	tar zcf nemo_git.tar.gz nemo_git
 
 
-# deprecated
-tarfile:
-	@echo NEMO=$(NEMO)
-	@echo A tar file FILE=$(FILE) will be created.
-	@echo -n Hang on ...
-	tar -cf $(FILE) $(EXPORTA)
-	@echo ... All done!
-
 # autoconf/GIT based export
 #
 
@@ -377,34 +369,6 @@ test2:
 	@echo "<A HREF=ftp://ftp.astro.umd.edu/pub/nemo/$(NEMOTAR).gz> $(NEMOTAR).gz </A>"  > $(WWWDIR)/lastftp
 	@echo "(`date`)" >> $(WWWDIR)/lastftp
 
-tarkernel:
-	@echo KERNEL+SCRIPTS only for small bootstrap
-	@$(MAKE) tarfile ASCIIDIRS="inc src/kernel src/scripts" FILE=kernel.tar
-	@$(COMPRESS) kernel.tar
-	@echo All done
-	@ls -l kernel.tar*
-
-tarnbody:
-	@echo NBODY only 
-	@$(MAKE) tarfile ASCIIDIRS="src/nbody" FILE=nbody.tar
-	@$(COMPRESS) nbody.tar
-	@echo All done
-	@ls -l nbody.tar*
-
-tarorbit:
-	@echo ORBIT only 
-	@$(MAKE) tarfile ASCIIDIRS="src/orbit" FILE=orbit.tar
-	@$(COMPRESS) orbit.tar
-	@echo All done
-	@ls -l orbit.tar*
-
-tarbima: 
-	$(MAKE) tarfile FILE=checker.tar \
-	 "ASCIIDIRS=inc usr/bima\
-	  src/Makefile src/kernel/Makefile \
-	  src/kernel/io src/kernel/core src/kernel/misc src/scripts \
-	  src/tools/unproto"
-
 
 ##############################################################################
 #	Some helpful non-NEMO targets
@@ -429,17 +393,18 @@ pgplot:
 cfitsio:
 	src/scripts/cfitsio.install
 
+hdf4:
+	src/scripts/hdf4.install
+
+hdf5:
+	src/scripts/hdf5.install
+
+
 # deprecated: superseded by glnemo2
 vogl:
 	src/scripts/nemo.vogl
 
-#	END
 
-configure_ps:
-	./configure --with-yapp=ps
-
-configure_pgplot:
-	./configure --with-yapp=pgplot --with-pgplot-prefix=/usr/lib
 
 build:   build1 build2 build3 build4
 
@@ -460,6 +425,7 @@ build4:
 	@echo 'Continue with "make check"'
 
 
+# the exact python method under development
 
 python: anaconda3
 
@@ -468,6 +434,8 @@ python_setup: nemo_start.py
 
 anaconda3:
 	src/scripts/install_anaconda3
+
+
 
 helpconfig:
 	@echo config, configure, config_extra, config_clean
@@ -525,6 +493,7 @@ cleanall:
 cleansrc:
 	(cd src; $(MAKE) clean)
 
+# via configure it will select:    MAKELIBS = corelibs dehnen     
 libs:	$(MAKELIBS)
 	@echo Done at `date`
 
