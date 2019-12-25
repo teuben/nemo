@@ -1,6 +1,7 @@
 /*
  * YAPP: Yet Another Plotting Package. - calling PLPLOT package 
  *       See also:  http://plplot.sourceforge.net/ 
+ *                  https://github.com/PLplot/PLplot   (a mirror)
  *
  *	8-oct-94  Created - note: need -DYAPP_LONG since plinit() is
  *		  used by both NEMO and the PLPLOT library
@@ -11,6 +12,7 @@
  *  
  *     25-oct-03  various fixed for the new CVS 5.x series of plplot
  *     11-oct-07  compile option to use the double instead of float
+ *   24-dec-2019  Trying PLplot-5.15.0 (june 2019) - fixed plwid -> plwidth
  *
  *  ToDo: colors
  *        fix the --without-double requirement
@@ -20,15 +22,16 @@
 
  
 #include <stdinc.h>
+#include <extstring.h>
 #include <yapp.h>
 
 /*   we don't want to use NEMO's real, since we may want to mix & match */
 #if 1
  typedef double pl_real;
-local char *pl_nemoreal = "nemo: pl_real = double";
+ local char *pl_nemoreal = "nemo: pl_real = double";
 #else
  typedef float  pl_real;
-local char *pl_nemoreal = "nemo: pl_real = float";
+l ocal char *pl_nemoreal = "nemo: pl_real = float";
 #endif
 
 /* we use the c_ versions since NEMO uses the same namespace ... */
@@ -51,7 +54,7 @@ extern void c_plschr(pl_real, pl_real);
 extern void c_plend(void);
 extern void c_plfontld(int);
 extern void c_pllsty(int);
-extern void c_plwid(int);
+extern void c_plwidth(int);
 extern void c_plcol0(int);
 extern void c_plcol1(pl_real);
 extern void c_plsori(int);
@@ -74,7 +77,7 @@ local int ncolors=0;
 local pl_real red[MAXCOLOR];		/* RGB color tables		    */
 local pl_real blue[MAXCOLOR];
 local pl_real green[MAXCOLOR];
-local cms_rgbsetup();
+local int cms_rgbsetup(void);
 #else
 #define MAXCOLOR 0
 #endif
@@ -83,7 +86,7 @@ local cms_rgbsetup();
  * PLINIT: initalize the plotting package.
  */
 
-plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
+int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
     pl_real width, height, x1,x2,y1,y2, zero, one;
     int   dummy, nx, ny, npldev;
@@ -145,7 +148,7 @@ plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
  * PLSWAP: does nothing.
  */
 
-plswap() { }
+int plswap() { }
 
 /*
  * PLXSCALE, PLYSCALE: transform from usr to plotting coordinates.
@@ -166,10 +169,10 @@ real plyscale(real x, real y)
  * PLLTYPE: select line width and dot-dash pattern.
  */
 
-plltype(int lwid, int lpat)
+int plltype(int lwid, int lpat)
 {
     if (lwid > 0) 
-	c_plwid(lwid);			/* set line width */
+	c_plwidth(lwid);		/* set line width */
     if (lpat > 0)
 	c_pllsty(lpat);			/* set line style */
 }
@@ -178,7 +181,7 @@ plltype(int lwid, int lpat)
  * PLLINE, PLMOVE, PLPOINT: plot lines, moves, and points.
  */
 
-plline(real x, real y)
+int plline(real x, real y)
 {
     pl_real xp,yp;
 
@@ -189,14 +192,14 @@ plline(real x, real y)
 
 }
 
-plmove(real x, real y)
+int plmove(real x, real y)
 {
    pl_real xp,yp;
 
    xcur=x; ycur=y;          /* RECALC !! */
 }
 
-plpoint(real x, real y)
+int plpoint(real x, real y)
 {
     int n=0,istyle=0;           /* just a dot */
     pl_real xp,yp;
@@ -209,7 +212,7 @@ plpoint(real x, real y)
  * PLCIRCLE, PLCROSS, PLBOX: plot various symbols.
  */
 
-plcircle(real x, real y, real r)
+int plcircle(real x, real y, real r)
 {
     int npnts, i;
     real theta;
@@ -222,7 +225,7 @@ plcircle(real x, real y, real r)
     }
 }
 
-plcross(real x, real y, real s)
+int plcross(real x, real y, real s)
 {
     if (s > 0.0) {
         plmove(x - s, y);
@@ -238,7 +241,7 @@ plcross(real x, real y, real s)
     }
 }
 
-plbox(real x, real y, real s)
+int plbox(real x, real y, real s)
 {
     if (s > 0.0) {
         plmove(x - s, y - s);
@@ -263,7 +266,7 @@ plbox(real x, real y, real s)
 
 static pl_real fjust = 0.0;   /* pgplot default: left justified */
 
-pljust(int jus)          /* -1, 0, 1 for left, mid, right just */
+int pljust(int jus)          /* -1, 0, 1 for left, mid, right just */
 {
     fjust = (jus < -1 ? 0.0 : (jus > 1 ? 1.0 : 0.5));
 }
@@ -272,7 +275,7 @@ pljust(int jus)          /* -1, 0, 1 for left, mid, right just */
  * PLTEXT: plot a text string.
  */
 
-pltext(string msg, real x, real y, real hgt, real ang)
+int pltext(string msg, real x, real y, real hgt, real ang)
 {
     pl_real dx, dy, xp, yp;
 
@@ -289,7 +292,7 @@ pltext(string msg, real x, real y, real hgt, real ang)
  * PLFLUSH: output any pending graphics.
  */
 
-plflush() 
+int plflush() 
 { 
 
 }
@@ -298,7 +301,7 @@ plflush()
  * PLFRAME: advance to next frame.
  */
 
-plframe()
+int plframe()
 {
     c_pladv(0);
 }
@@ -309,12 +312,12 @@ plframe()
 
 #define ONEMIN (60 * 1000 * 1000)
 
-plstop()
+int plstop()
 {
     c_plend();
 }
 
-pl_matrix(real *frame,int nx,int ny,
+int pl_matrix(real *frame,int nx,int ny,
 	  real xmin,real ymin,real cell,real fmin,real fmax,real findex, real blankval)
 {
     real x,y,f,grayscale,ds;
@@ -324,19 +327,19 @@ pl_matrix(real *frame,int nx,int ny,
     return(0);
 }
 
-pl_screendump(string fname)
+int pl_screendump(string fname)
 {
   warning("pl_screendump(%s): Not implemented for yapp_plplot",fname);
 }
 
-local bell()
+local void bell(void)
 {
     int ring=7;
     putchar(ring);
     putchar('\n');		/* send a line feed to flush the buffer */
 }
 
-pl_getpoly(float *x, float *y, int n)
+int pl_getpoly(float *x, float *y, int n)
 {
     int nn, delay, loc, k, symbol;
     float xold,yold, xnew,ynew;
@@ -424,7 +427,7 @@ pl_getpoly(float *x, float *y, int n)
 #define LIGHT_GRAY	14
 #define	WHITE   	15
 
-local cms_rgbsetup()
+local int cms_rgbsetup(void)
 {
   ncolors = WHITE+1;
   /* default PGPLOT  colors: although, defined here, plpalette is not called */
@@ -508,6 +511,7 @@ void pllut(string fname, bool compress)
     int ncolors, nskip=0;
     real red[MAXCOLOR], green[MAXCOLOR], blue[MAXCOLOR];
     pl_real r, g, b, r_old, g_old, b_old;
+    float fr, fg, fb;
     char line[256];
 
     if (fname==NULL || *fname == 0) return;
@@ -516,7 +520,8 @@ void pllut(string fname, bool compress)
     while (fgets(line,256,cstr)) {
        if(ncolors>=MAXCOLOR) error("(%d/%d): Too many colors in %s",
               ncolors+1, MAXCOLOR, fname);
-       sscanf(line,"%f %f %f",&r, &g, &b);
+       sscanf(line,"%f %f %f",&fr, &fg, &fb);
+       r=fr;  g=fg; b=fb;
        if (NOCOLOR(r) || NOCOLOR(g) || NOCOLOR(b)) {
           warning("Skipping RGB=%f %f %f",r,g,b);
 	  continue;
