@@ -73,8 +73,10 @@ GSL_INC =
 GSL_LIB =
 
 #	PLPLOT
-PLPLOT_INC = 
-PLPLOT_LIB = 
+#PLPLOT_INC = -I/usr/include/plplot
+#PLPLOT_LIB = -lplplot
+PLPLOT_INC = @PLPLOT_CFLAGS@
+PLPLOT_LIB = @PLPLOT_LIBS@
 
 #	FFTW
 #       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
