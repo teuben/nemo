@@ -3,6 +3,7 @@
  *
  *	This implements all yapp calls as dummy stubs - they don't
  *	do anything, but just gets you going linking.
+ *
  */
 
 #include <stdinc.h>
@@ -18,11 +19,10 @@ int plswap()
 { return 0;}
 
 real plxscale(real x, real y)
-{ return 1.0;}
+{ return 0;}
 
 real plyscale(real x, real y)
-{ return 1.0;}
-
+{ return 0;}
 
 int plltype(int lwid, int lpat)
 { return 0;}
