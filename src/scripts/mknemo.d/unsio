@@ -16,7 +16,7 @@ set dir=$NEMO/usr/jcl/unsio
 # for linux
 set args=""
 
-if (-e $NEMO/opt/include/-hdf5.h) then
+if (-e $NEMO/opt/include/hdf5.h) then
   echo Found HDF5 under NEMO/opt
   set h5=(-DHDF5_INCLUDE_DIRS=$NEMO/opt/include -DHDF5_CXX_LIBRARIES=$NEMO/lib)
 else
