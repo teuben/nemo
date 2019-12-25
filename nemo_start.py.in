@@ -3,9 +3,12 @@
 #  @WARNING@
 #
 #  this file can be copied into your python site-packages, or somewhere where
-#  the command "import nemo_start" will work. This will modify your environment
+#  then the python command "import nemo_start" will work. This will modify your environment
 #  such that NEMO commands are accessible to python as if $PATH had been properly
-#  set in the parent shell (which may be absent)
+#  set in the parent shell (which may be absent), and a few other environment variables
+#  that the runtime needs.
+#
+# @todo finish this with all the variable needed
 
 import os
 
@@ -35,29 +38,20 @@ if not 'NEMO' in os.environ:
     os.environ['NEMO']     = '%s'                 % _NEMO 
     os.environ['NEMOBIN']  = '%s/bin'             % _NEMO           # ? opt/bin ?
     os.environ['NEMOLIB']  = '%s/lib'             % _NEMO
+    os.environ['NEMOOBJ']  = '%s/obj'             % _NEMO    
     os.environ['BTRPATH']  = '.:%s/obj/bodytrans' % _NEMO
-    os.environ['POTPATH']  = '.:%s/obj/potential:%s/obj/acc' % (_NEMO,_NEMO)
+    os.environ['POTPATH']  = '.:%s/obj/potential:%s/obj/acc'             % (_NEMO,_NEMO)
+    os.environ['ACCPATH']  = '.:%s/obj/manip:%s/usr/dehnen/falcON/manip' % (_NEMO,_NEMO)
     os.environ['YAPP']     = '@YAPP_DEF@'
     os.environ['NEMOHOST'] = '@NEMOHOST@'
     
     
-    #export NEMOOBJ=$NEMO/obj
-    #export NEMODOC=$NEMO/man/doc
-    #export NEMODAT=$NEMO/data
-    #export NEMOINC=$NEMO/inc
-
-    #export NEMOSRC=$NEMO/src
-    #    
-#    export ACCPATH=.:$NEMO/obj/potential:$NEMO/obj/acc
 #    export MANIPPATH=.:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 #    export NEMOVER=`cat $NEMO/VERSION`
 #    export NEMOSYS=`uname -s`
 #    export NEMOSITE=`hostname`
 
-
-# export PYTHONPATH=$NEMO/py/modules
-# export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
-# falcON : todo
+# export PYTHONPATH=$NEMO/py/modules              # ??  do we still need this
 # source $FALCON/falcON_start.sh
 
 
