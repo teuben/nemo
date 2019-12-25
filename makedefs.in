@@ -40,11 +40,7 @@ CXX = @CXX@
 
 # common examples:
 #HDF_INC=-I/local/include -I/usr/local/include -I/usr/include/hdf
-#
-# Might need to add something like:   -L/local/lib -R /local/lib
-# if your solaris system requires that
 #HDF_LIB=-ldf -ljpeg -lz -lsz
-
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
 
@@ -71,18 +67,22 @@ MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
 #	GSL
-#GSL_CFLAGS = @GSL_CFLAGS@
-#GSL_LIBS   = @GSL_LIBS@
-GSL_CFLAGS = 
-GSL_LIBS   = 
+#GSL_INC = @GSL_CFLAGS@
+#GSL_LIB = @GSL_LIBS@
+GSL_INC = 
+GSL_LIB =
+
+#	PLPLOT
+PLPLOT_INC = 
+PLPLOT_LIB = 
 
 #	FFTW
 #       -lfftw3, or -lfftw3f or -lfftw3l (depending on precision library, for float or long double)
 #       [actually still not used yet]
 #FFTW_CFLAGS = @FFTW_CFLAGS@
 #FFTW_LIBS   = @FFTW_LIBS@
-FFTW_CFLAGS =
-FFTW_LIBS   =
+FFTW_INC = 
+FFTW_LIB =
 
 
 #	READLINE
@@ -112,8 +112,6 @@ F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
 #  the definition triggered for pl_real in yapp_plplot.c !! this is not automated yet
 #  via configure.
 YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
-
-# Solaris 2.6+: -R /opt/SUNWspro/lib -L/opt/SUNWspro/lib -lF77 -lM77 -lV77 -lsunmath  
 
 ## C compiler:
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
