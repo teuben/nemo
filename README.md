@@ -31,8 +31,9 @@ Packages we optionally use:
 	 unsio
 	 uns_project
 
-See README.install for installation guidelines. In it's simplest the following commands may work
-(use the .sh or .csh version depending on your $SHELL):
+See README.install for installation guidelines. In its simplest form
+the following commands may work (use the .sh or .csh version depending
+on your $SHELL):
 
 	 wget https://teuben.github.io/nemo/install_nemo
 	 chmod +x install_nemo
@@ -57,7 +58,18 @@ enabled:
 	 ./install_nemo brew=1
 	 source nemo/nemo_start.sh
 
-There are some examples of NEMO scripts and figures on https://teuben.github.io/nemo/examples/
+If you have used MacPorts, I may owe you another hint.
+
+At the simplest level, the installation uses an autoconf based scheme:
+
+         git clone https://github.com/teuben/nemo
+	 cd nemo
+         ./configure ...
+         make build
+         source nemo_start.sh
+
+One NEMO has been installed, here are
+some examples of scripts and figures: https://teuben.github.io/nemo/examples/
 
 
 
