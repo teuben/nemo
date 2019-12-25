@@ -18,8 +18,11 @@ set dir=$NEMO/usr/jcl/unsio
 # for linux
 set args=""
 
+# wrapper compiler: h5cc h5pcc
+
 if (-e $NEMO/opt/include/hdf5.h) then
   echo Found HDF5 under NEMO/opt
+  # HDF5_LIBRARIES
   set h5=(-DHDF5_INCLUDE_DIRS=$NEMO/opt/include -DHDF5_CXX_LIBRARIES=$NEMO/lib)
 else
   set h5=()
@@ -32,9 +35,7 @@ if (-e $dir) then
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
   make
   make install
-  make
-  make install
-  # new python stuff (13 march 2014)
+  # new python stuff (13 march 2014) - now done internally, this can go
   cd ../py
   if (-e CMakeLists.txt) then
     mkdir -p build
@@ -45,6 +46,6 @@ if (-e $dir) then
   endif
 else
   echo "mknemo.d: $dir does not exist; try"
-  echo "    cd $NEMO/usr/jcl; make unsio"
+  echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
 endif
 
