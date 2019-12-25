@@ -1,5 +1,7 @@
 #! /bin/csh -f
 #
+# A fresh clean install of unsio and the python tools associated with it
+#
 # a quick hack   - May 2010
 # some changed dir structure   - Jan 2013
 # install_prefix added           Jun 2018
@@ -29,18 +31,20 @@ if (-e $dir) then
   cd $dir/build
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
   make
-  make install 
-  # new python stuff (13 march 2014)
-  cd ../py
-  mkdir -p build
-  cd build
-  cmake ..
+  make install
   make
   make install
-  # this seems to help
-  make 
-  make install
+  # new python stuff (13 march 2014)
+  cd ../py
+  if (-e CMakeLists.txt) then
+    mkdir -p build
+    cd build
+    cmake ..
+    make
+    make install
+  endif
 else
-  echo mknemo.d: $dir does not exist
+  echo "mknemo.d: $dir does not exist; try"
+  echo "    cd $NEMO/usr/jcl; make unsio"
 endif
 
