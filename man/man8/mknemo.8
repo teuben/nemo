@@ -55,14 +55,15 @@ in makedefs:
 .nf
 .ta +1i
 cfitsio		sdfits  (no test data present in NEMO)
-gsl
+fftw		-
+gsl		-
 hdf4		tsd (no test data present in NEMO) - hdf.h
 hdf5		eaglesnap (but needs install in $NEMO/usr/eagle)
-miriad
+miriad		-
 pgplot		via YAPP_PGPLOT
+plplot		via YAPP_PLPLOT
 png		via YAPP_PGPLOT
-pvm
-fftw
+yapp		tabhist
 .fi
 .SH EXAMPLES
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
