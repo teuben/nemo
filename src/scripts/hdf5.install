@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/bash
 #
 #  Install HDF5 within NEMO
 #
@@ -6,7 +6,7 @@
 #  25-dec-2019  drafted
 #
 
-if ($?NEMO == 0) set NEMO=`pwd`
+# if ($?NEMO == 0) set NEMO=`pwd`
 
 
 cd $NEMO/local
