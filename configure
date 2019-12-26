@@ -11072,7 +11072,7 @@ $as_echo "$as_me: WARNING: using HDF5 from opt" >&2;}
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using CFITSIO from opt" >&5
 $as_echo "$as_me: WARNING: using CFITSIO from opt" >&2;}
-  endif
+  fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: not using opt" >&5
 $as_echo "$as_me: WARNING: not using opt" >&2;}

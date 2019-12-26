@@ -938,7 +938,7 @@ if test "$with_opt" = "yes"; then
     AC_SUBST(CFITSIO_INC)
     AC_SUBST(CFITSIO_LIB)
     AC_MSG_WARN(using CFITSIO from opt)
-  endif
+  fi
 else
   AC_MSG_WARN(not using opt)
 fi
