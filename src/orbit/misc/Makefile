@@ -12,7 +12,7 @@ INCFILES =
 SRCFILES = dopri5.c dop853.c 
 OBJFILES=  dopri5.o dop853.o
 LOBJFILES= $L(dopri5.o) $L(dop853.o)
-BINFILES = orbfour orbint orbintv orbplot otos perorb stoo orbsos orbstat orblist
+BINFILES = orbfour orbint orbintv orbplot otos perorb stoo orbsos orbstat orblist orboom
 TESTFILES=  orbdim orblist
 
 help:
@@ -62,7 +62,7 @@ nemo_sublibs:
 
 nemo_bin: nemo_subbins $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
-	rm -f *.o
+	rm -f *.o 
 
 bins: $(BINFILES)
 	mv $(BINFILES) $(NEMOBIN)
@@ -85,4 +85,7 @@ tests: $(TESTFILES)
 
 orbplot: orbplot.c
 	$(CC) $(CFLAGS) -o orbplot orbplot.c $(NEMO_LIBS) $(YAPPLIB) $(EL) 
+
+orboom: orboom.c
+	$(CC) $(CFLAGS) -o orboom orboom.c $(NEMO_LIBS) $(EL) 
 
