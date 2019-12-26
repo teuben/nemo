@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/bash
 #
 #  Install CFITSIO for NEMO
 #  See also:
@@ -16,9 +16,11 @@
 # 
 # TODO:   needs to add  -D_FILE_OFFSET_BITS=64   on e.g.linux if you want large file support
 
-if ($?NEMO == 0) set NEMO=`pwd`
+# if ($?NEMO == 0) set NEMO=`pwd`
 
 
+# as of some revisions before this, they only maintain latest,
+# but we don't know what version this is. hence wildcard. could fail over time.
 
 wget http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
 tar zxf cfitsio_latest.tar.gz
