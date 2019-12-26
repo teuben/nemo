@@ -911,20 +911,34 @@ AC_SUBST(YAPP_NAME)
 AC_SUBST(YAPP_LIBS)
 AC_SUBST(YAPP_DEF)
 
+dnl --------------------------------- override some local essentials via $NEMO/opt ? ------
+
 if test "$with_opt" = "yes"; then
-  HDF_INC=
-  HDF_LIB="-ldf -ljpeg -lz"
-  HDF5_INC=
-  HDF5_LIB="-lhdf5"
-  CFITSIO_INC=
-  CFITSIO_LIB="-lcfitsio"
-  AC_SUBST(HDF_INC)
-  AC_SUBST(HDF_LIB)
-  AC_SUBST(HDF5_INC)
-  AC_SUBST(HDF5_LIB)
-  AC_SUBST(CFITSIO_INC)
-  AC_SUBST(CFITSIO_LIB)
-  AC_MSG_WARN(using opt)
+  #
+  inc=$NEMO/opt/include
+  if test -f $inc/hdf.h; then
+    HDF_INC=
+    HDF_LIB="-ldf -ljpeg -lz"
+    AC_SUBST(HDF_INC)
+    AC_SUBST(HDF_LIB)
+    AC_MSG_WARN(using HDF4 from opt)
+  fi
+  #
+  if test -f $inc/hdf5.h; then
+    HDF5_INC=
+    HDF5_LIB="-lhdf5"
+    AC_SUBST(HDF5_INC)
+    AC_SUBST(HDF5_LIB)
+    AC_MSG_WARN(using HDF5 from opt)
+  fi
+  #
+  if test -f $inc/fitsio.h; then
+    CFITSIO_INC=
+    CFITSIO_LIB="-lcfitsio"
+    AC_SUBST(CFITSIO_INC)
+    AC_SUBST(CFITSIO_LIB)
+    AC_MSG_WARN(using CFITSIO from opt)
+  endif
 else
   AC_MSG_WARN(not using opt)
 fi
@@ -946,7 +960,7 @@ output from the command
      make install
 
 Users need to source the nemo_start.(c)sh file in their shell to
-enable NEMO commands and set up the NEMO environment.
+enable NEMO commands and set up their NEMO environment.
 If there any compile or linkings problems, check out \$NEMOLIB/makedefs
 -------------------------------------------------------------------------
 "
