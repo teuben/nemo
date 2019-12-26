@@ -390,14 +390,15 @@ makeindex:
 pgplot:
 	src/scripts/pgplot.install png=$(PNG) gif=$(GIF)
 
+#       some of the essentials that can be installed in $NEMO/opt
 cfitsio:
-	src/scripts/cfitsio.install
+	(source nemo_start.sh ; src/scripts/cfitsio.install)
 
 hdf4:
-	src/scripts/hdf4.install
+	(source nemo_start.sh ; src/scripts/hdf4.install)
 
 hdf5:
-	src/scripts/hdf5.install
+	(source nemo_start.sh ; src/scripts/hdf5.install)
 
 
 # deprecated: superseded by glnemo2
