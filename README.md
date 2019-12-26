@@ -68,7 +68,7 @@ At the simplest level, the installation uses an autoconf based scheme:
          make build
          source nemo_start.sh
 
-One NEMO has been installed, here are
+Once NEMO has been installed, here are
 some examples of scripts and figures: https://teuben.github.io/nemo/examples/
 
 
