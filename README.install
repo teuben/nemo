@@ -1,7 +1,27 @@
 Preconditions to Installation
 =============================
 
-To build NEMO you will need to install a few packages
+To build the basics of NEMO you need compilers (C/C++/Fortran).  C is essential,
+C++ and Fortran highly recommended.  You will also need the usual build tools
+(make, csh)
+
+C		essential
+C++		highly recommended
+Fortran    	highly recommended
+csh		essential (some scripts are still in csh)
+make 		essential
+cmake		highly recommended
+pgplot    	recommended for yapp_pgplot
+cfitsio		recommended for some tools
+hdf4     	recommended for some tools
+hdf5		recommended for some tools
+python3		recommended
+swig
+
+Depending on your packaging tools (apt, yum, brew, port, ....) these are hidden under
+various package names
+
+
 
 -gfortran
 -libx11-dev
