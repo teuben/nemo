@@ -16,16 +16,6 @@
 NEMO_CFLAGS1 = @DSO_LINK@
 
 
-
-# we could actually also define a set of NEMO, and derived, variables, such that the build
-# system does not need to source nemo_start
-# NEMO = @NEMO@
-# NEMOLIB = $(NEMO)/lib
-# NEMOBIN = $(NEMO)/bin
-# NEMOOBJ = $(NEMO)/obj
-# NEMOINC = $(NEMO)/inc
-
-
 # handy for recursion
 @SET_MAKE@
 
@@ -36,9 +26,7 @@ FC  = @F77@
 F77 = @F77@
 CXX = @CXX@
 
-# HDF library
-
-# common examples:
+# HDF4 library
 #HDF_INC=-I/local/include -I/usr/local/include -I/usr/include/hdf
 #HDF_LIB=-ldf -ljpeg -lz -lsz
 HDF_INC = @HDF_INC@
@@ -48,8 +36,8 @@ HDF_LIB = @HDF_LIB@
 # --with-hdf5-incdir=   --with-hdf5-libdir=
 #HDF5_INC = `pkg-config --cflags hdf5`
 #HHD5_LIB = `pkg-config --libs hdf5`
-HDF5_INC = @HDF5_CFLAGS@
-HDF5_LIB = @HDF5_LIBS@
+HDF5_INC = @HDF5_INC@
+HDF5_LIB = @HDF5_LIB@
 
 #  PNG library
 #PNG_LIB = `pkg-config --libs libpng`
@@ -62,7 +50,6 @@ CFITSIO_INC = @CFITSIO_INC@
 CFITSIO_LIB = @CFITSIO_LIB@
 
 #  MIRIAD library
-#	(could also depend on $(MIR) and $(MIRLIB) if you don't like these)
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
@@ -121,8 +108,10 @@ YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 ## Fortran compiler
 #  some older gnu compilers may still need -fno-globals
 
-NEMO_CFLAGS = @NEMO_CFLAGS@ -I$(NEMOINC) -I$(NEMOLIB) -I$(NEMO)/opt/include @XINCS@ $(GSL_CFLAGS) $(MACH) $(NEMO_CFLAGS1)
-NEMO_FFLAGS = @NEMO_FFLAGS@
+INC_FLAGS = -I$(NEMOINC) -I$(NEMOLIB) -I$(NEMO)/opt/include @HDF_INC@ @HDF5_INC@ @XINCS@
+
+NEMO_CFLAGS = @NEMO_CFLAGS@  $(MACH) $(NEMO_CFLAGS1) $(INC_FLAGS)
+NEMO_FFLAGS = @NEMO_FFLAGS@  $(INC_FLAGS)
 NEMO_LDFLAGS = 
 NEMO_LIBS   = -L$(NEMOLIB) -L$(NEMO)/opt/lib          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
 NEMO_LIBSPP = -L$(NEMOLIB) -L$(NEMO)/opt/lib -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
@@ -137,7 +126,7 @@ XLIBS  = @XLIBS@
 # PEDFLAG="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align  -Wwrite-strings -Wnested-externs  -fshort-enums -fno-common -Dinline= -g -O4"
 #   optimization only
 
-OPT = @CFLAGS@
+OPT  = @CFLAGS@
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
 #   for shared libaries
@@ -145,7 +134,7 @@ CCSHARED = @CCSHARED@
 #   everything 
 CFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
 FFLAGS  = $(OPT) $(CCSHARED) $(NEMO_FFLAGS)
-LDFLAGS = $(OPT)            $(NEMO_LDFLAGS)
+LDFLAGS = $(OPT)             $(NEMO_LDFLAGS)
 CPPFLAGS = @CPPFLAGS@
 
 RANLIB = @RANLIB@
