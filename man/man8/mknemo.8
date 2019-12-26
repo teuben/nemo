@@ -22,23 +22,20 @@ the script will be more complex.
 Next, within the $NEMO/src (optionally also the $NEMO/usr tree) a
 source file \fIprogram.c\fP (or C++ or Fortran) is looked for, which is
 compiled with a local \fBMakefile\fP (or a template
-if none is available).  \fPtsf\fP is an example of this type of
-program.
+if none is available).  \fItsf\fP is an example of this type of
+program, but also more specialized plotting programs
+such as \fIsnapplot\fP or \fIorboom\fP, which need
+an extra 3rd party library.
 .PP
 Finally, if still no source code is found,
 a directory with the name \fIprogram\fP is searched for, 
 and a local Makefile is then used to install the \fIprogram\fP.
-\fBhackcode1\fP is am example of this type of program.
-.PP
-After the binary is moved over to \fB$NEMOBIN\fP, the script
-\fImkpdoc\fP is called to see if the \fIdoc(5)\fP file needs 
-to be updated. (\fI** doc files not maintained anymore **\fP)
+\fBhackcode1\fP is an example of this type of program.
 .SH "OPTIONS"
 .nf
   -c CODE   search for CODE.c to set the directory for target(s)
   -n N      selection of N-th element from unresolved list [1]
   -s DIR    root directory to start search [$NEMO/src]
-  -a        also search $NEMO/usr 
   -r        remove lockfile before starting
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
@@ -46,25 +43,31 @@ to be updated. (\fI** doc files not maintained anymore **\fP)
   -u        update your NEMO git tree before (re)making
   -l        recompile the library before (re)making 
   -g        use gmake, instead of make
+  -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
+  -D        show special projects from the mknemo.d directory
 .fi
 .SH MAKEDEFS
 All compile flags and libraries that are used should have been configured in the $NEMOLIB/makedefs file.
 Here are some critical programs that you could use to test if that specific library was properly referenced
 in makedefs:
 .nf
-.ta +1i
-cfitsio		sdfits  (no test data present in NEMO)
-fftw		-
-gsl		-
-hdf4		tsd (no test data present in NEMO) - hdf.h
-hdf5		eaglesnap (but needs install in $NEMO/usr/eagle)
-miriad		-
-pgplot		via YAPP_PGPLOT
-plplot		via YAPP_PLPLOT
-png		via YAPP_PGPLOT
-yapp		tabhist
+.ta +2i
+heated_plate_openmp	openmp
+cfitsio	        	sdfits  (no test data present in NEMO)
+fftw	        	-
+gsl	        	-
+hdf4	        	tsd (no test data present in NEMO) - hdf.h
+hdf5	        	orboom eaglesnap (but needs install in $NEMO/usr/eagle)
+miriad	        	-
+pgplot	        	via YAPP_PGPLOT
+plplot	          	via YAPP_PLPLOT
+png	         	via YAPP_PGPLOT
+yapp	        	tabhist
 .fi
+If any of these fail for obvious reasons,
+you can try and fix them by rerunning configure and comparing
+$NEMOLIB/makedefs with $NEMO/makedefs, or simply editing $NEMOLIB/makedefs directly.
 .SH EXAMPLES
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 .nf 
@@ -76,14 +79,13 @@ rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\
 galaxy15	Sellwood's GALAXY V15.x
 .fi
 .SH "SEE ALSO"
-mkbin(8NEMO)
+mkbin(8NEMO) [depracated]
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
 .ta +3.0i
 $NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
-$NEMOLIB/NEMORC		environment variables
 $NEMOLIB/makedefs	make variables
 ./LocalMakedef		optional override makedefs
 $NEMOLIB/libnemo.a	main NEMO library
