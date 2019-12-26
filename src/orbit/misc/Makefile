@@ -87,5 +87,5 @@ orbplot: orbplot.c
 	$(CC) $(CFLAGS) -o orbplot orbplot.c $(NEMO_LIBS) $(YAPPLIB) $(EL) 
 
 orboom: orboom.c
-	$(CC) $(CFLAGS) -o orboom orboom.c $(NEMO_LIBS) $(EL) 
+	$(CC) $(CFLAGS) $(HDF5_INC) -o orboom orboom.c $(NEMO_LIBS) $(HDF5_LIB) $(EL) 
 
