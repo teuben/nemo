@@ -621,6 +621,8 @@ ac_includes_default="\
 
 ac_header_list=
 ac_subst_vars='LTLIBOBJS
+HDF5_LIB
+HDF5_INC
 YAPP_DEF
 YAPP_LIBS
 YAPP_NAME
@@ -759,6 +761,7 @@ with_mesa
 with_hdf
 with_ccmalloc
 with_dso
+with_opt
 with_x
 enable_png
 with_pgplot_prefix
@@ -1449,6 +1452,7 @@ Optional Packages:
   --with-hdf              force the use of HDF
   --with-ccmalloc         use CCMALLOC for malloc
   --with-dso              use DSO linking
+  --with-opt              use opt for essentials
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-plplot-libdir=<PLPlot library path>
@@ -5858,6 +5862,15 @@ if test "${with_dso+set}" = set; then :
 else
   with_dso=no
 fi
+
+
+# Check whether --with-opt was given.
+if test "${with_opt+set}" = set; then :
+  withval=$with_opt; with_opt=$withval
+else
+  with_opt=no
+fi
+
 
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
@@ -11030,9 +11043,30 @@ $as_echo "$YAPP_NAME" >&6; }
 
 
 
+if test "$with_opt" = "yes"; then
+  HDF_INC=
+  HDF_LIB="-ldf -ljpeg -lz"
+  HDF5_INC=
+  HDF5_LIB="-lhdf5"
+  CFITSIO_INC=
+  CFITSIO_LIB="-lcfitsio"
+
+
+
+
+
+
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using opt" >&5
+$as_echo "$as_me: WARNING: using opt" >&2;}
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: not using opt" >&5
+$as_echo "$as_me: WARNING: not using opt" >&2;}
+fi
+
+
+
 if test -d "$NEMODAT"; then
   echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
-  echo "*** you probably should source $NEMO/nemo_end"
 fi
 
 ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py"

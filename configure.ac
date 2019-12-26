@@ -219,6 +219,9 @@ AC_ARG_WITH(ccmalloc,
 		  [  --with-ccmalloc         use CCMALLOC for malloc], with_ccmalloc=$withval, with_ccmalloc=no)
 AC_ARG_WITH(dso,
 		  [  --with-dso              use DSO linking], with_dso=$withval, with_dso=no)
+AC_ARG_WITH(opt, 
+		  [  --with-opt              use opt for essentials], with_opt=$withval, with_opt=no)
+		  
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
@@ -908,9 +911,28 @@ AC_SUBST(YAPP_NAME)
 AC_SUBST(YAPP_LIBS)
 AC_SUBST(YAPP_DEF)
 
+if test "$with_opt" = "yes"; then
+  HDF_INC=
+  HDF_LIB="-ldf -ljpeg -lz"
+  HDF5_INC=
+  HDF5_LIB="-lhdf5"
+  CFITSIO_INC=
+  CFITSIO_LIB="-lcfitsio"
+  AC_SUBST(HDF_INC)
+  AC_SUBST(HDF_LIB)
+  AC_SUBST(HDF5_INC)
+  AC_SUBST(HDF5_LIB)
+  AC_SUBST(CFITSIO_INC)
+  AC_SUBST(CFITSIO_LIB)
+  AC_MSG_WARN(using opt)
+else
+  AC_MSG_WARN(not using opt)
+fi
+AC_SUBST(MATH_LIBS)
+
+
 if test -d "$NEMODAT"; then
   echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
-  echo "*** you probably should source $NEMO/nemo_end"
 fi
 
 AC_CONFIG_FILES(Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py)
