@@ -121,8 +121,8 @@ tipsysnap: tipsysnap.c
 # This needs:  (cd $NEMO/usr/eagle; make install)
 # @todo  this needs to be done  via configure
 #        the current HDF5_LIB and HDF5_INC are not good enough
-H_FLAGS = `pkg-config --cflags hdf5`
-H_LIBS  = `pkg-config --libs hdf5`
+#H_FLAGS = `pkg-config --cflags hdf5`
+#H_LIBS  = `pkg-config --libs hdf5`
 
 eaglesnap: eaglesnap.c
-	$(CC) $(CFLAGS) $(H_FLAGS) -o eaglesnap eaglesnap.c -lread_eagle $(H_LIBS) $(NEMO_LIBS)
+	$(CC) $(CFLAGS) $(HDF5_INC) -o eaglesnap eaglesnap.c -lread_eagle $(HDF5_LIB) $(NEMO_LIBS)
