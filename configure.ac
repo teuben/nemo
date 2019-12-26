@@ -922,6 +922,8 @@ if test "$with_opt" = "yes"; then
     AC_SUBST(HDF_INC)
     AC_SUBST(HDF_LIB)
     AC_MSG_WARN(using HDF4 from opt)
+  else
+    AC_MSG_WARN(no HDF4 in opt)
   fi
   #
   if test -f $inc/hdf5.h; then
@@ -930,6 +932,8 @@ if test "$with_opt" = "yes"; then
     AC_SUBST(HDF5_INC)
     AC_SUBST(HDF5_LIB)
     AC_MSG_WARN(using HDF5 from opt)
+  else
+    AC_MSG_WARN(no HDF5 in opt)    
   fi
   #
   if test -f $inc/fitsio.h; then
@@ -938,6 +942,8 @@ if test "$with_opt" = "yes"; then
     AC_SUBST(CFITSIO_INC)
     AC_SUBST(CFITSIO_LIB)
     AC_MSG_WARN(using CFITSIO from opt)
+  else
+    AC_MSG_WARN(no CFITSIO in opt)    
   fi
 else
   AC_MSG_WARN(not using opt)

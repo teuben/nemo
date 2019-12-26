@@ -11054,6 +11054,9 @@ if test "$with_opt" = "yes"; then
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using HDF4 from opt" >&5
 $as_echo "$as_me: WARNING: using HDF4 from opt" >&2;}
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no HDF4 in opt" >&5
+$as_echo "$as_me: WARNING: no HDF4 in opt" >&2;}
   fi
   #
   if test -f $inc/hdf5.h; then
@@ -11063,6 +11066,9 @@ $as_echo "$as_me: WARNING: using HDF4 from opt" >&2;}
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using HDF5 from opt" >&5
 $as_echo "$as_me: WARNING: using HDF5 from opt" >&2;}
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no HDF5 in opt" >&5
+$as_echo "$as_me: WARNING: no HDF5 in opt" >&2;}
   fi
   #
   if test -f $inc/fitsio.h; then
@@ -11072,6 +11078,9 @@ $as_echo "$as_me: WARNING: using HDF5 from opt" >&2;}
 
     { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: using CFITSIO from opt" >&5
 $as_echo "$as_me: WARNING: using CFITSIO from opt" >&2;}
+  else
+    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no CFITSIO in opt" >&5
+$as_echo "$as_me: WARNING: no CFITSIO in opt" >&2;}
   fi
 else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: not using opt" >&5
