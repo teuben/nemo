@@ -1,0 +1,41 @@
+.TH ORBOOM 1NEMO "26 Dec 2019"
+.SH NAME
+orboom \- Transform an orbit and ODM into 'BOOM' HDF [testing]
+.SH SYNOPSIS
+\fBorboom\fP [parameter=value]
+.SH DESCRIPTION
+This program is under development for the BOOM project. It will take
+some combination input of a simulation (series of snapshots),
+orbit(s) and ODM's  [to be determined] and turn them into a BOOM hdf
+for further analysis outside of NEMO.  
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input orbit []
+.TP
+\fBodm=\fP
+Input ODM (an image) []   
+.TP
+\fBout=\fP
+Output boom HDF [junk.hdf]    
+.TP
+\fBndim=\fP
+2 or 3 dimensional [3]   
+.SH EXAMPLES
+The current version just writes a junk.hdf file to test the compilation
+workflow.
+.SH SEE ALSO
+snapshot(5NEMO), orbit(5NEMO), image(5NEMO)
+.SH FILES
+.nf
+src/orbit/misc - source code
+.fi
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Dec-19	V0.2 Created	PJT
+.fi
