@@ -422,7 +422,7 @@ build3:
 	@echo 'Continue with "make build4"'
 
 build4:
-	(source nemo_start.sh ; mknemo tsf tabhist)
+	(source nemo_start.sh ; mknemo tsf tabhist tsd orboom sdinfo)
 	@echo 'Continue with "make check"'
 
 
