@@ -63,7 +63,7 @@ If you have used MacPorts, I may owe you another hint.
 At the simplest level, the installation uses an autoconf based scheme:
 
          git clone https://github.com/teuben/nemo
-	 cd nemo
+         cd nemo
          ./configure ...
          make build
          source nemo_start.sh
