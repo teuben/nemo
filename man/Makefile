@@ -71,4 +71,4 @@ chara:
 
 #    updates the docs tree for https://teuben.github.io/nemo/
 docs:
-	./make_html 
+	./make_html ../docs/man_html/
