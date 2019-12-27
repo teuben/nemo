@@ -19,7 +19,9 @@ Output file (ignored for now) []
 New order of output cube (0=first dimension) [0,1,2]
 .TP
 \fBdims=\fP
-Dimensions of the cube [10,20,30]   
+Dimensions of the cube. The first listed dimension is the
+one fastest running in memory.  In C we use row-major,
+so data[30][20][10] in this case.   [10,20,30]   
 .TP
 \fBseed=\fP
 Random seed for [0,1] in the created cube [123]
@@ -38,6 +40,8 @@ time ccdreorder . . dims=400,400,400  iter=8   order=0,1,2  #  1.71
 time ccdreorder . . dims=400,400,400  iter=8   order=2,1,0  #  7.27
 time ccdreorder . . dims=800,800,800  iter=1   order=0,1,2  #  7.46
 time ccdreorder . . dims=800,800,800  iter=1   order=2,1,0  # 26.62
+
+time ccdreorder  . . dims=11,10000,1000 order=0,2,1 help=cm iter=10  #  11.0
 .fi
 See also "make bench1" in NEMO/src/image/trans
 .SH AUTHOR
