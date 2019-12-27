@@ -9,13 +9,16 @@ a time averaged density distribution in 2D or 3D, whatever appropriate. From
 these, via a Schwarzschild technique, the density could be re-constructed.
 3) a surface of section, although this only makes sense in 2D.
 .PP
-We normally output the data in \fBhdf5\fP format
+We normally output the data in \fBhdf5\fP format, but
+in \fIorboom(1NEMO)\fP there is an option to
+store in NEMO's \fIfilestruct(5NEMO)\fP format.
 .PP
-This format is really a hybrid of an \fIorbit(5NEMO)\fP,
+This format is really a hybrid of an \fIorbit(5NEMO)\fP and an \fIimage(5NEMO)\fP.
 \fP
 .SH DATA
 Briefly the HDF layout is as follows
 .nf
+
   BOOM, Np
   Particle[0]
     Nd
@@ -23,6 +26,7 @@ Briefly the HDF layout is as follows
     Orbit:Nt,t,x,y,u,v,
     SOSx:Ns,t,p,q
     SOSy:Ns,t,p,q
+    
 .fi
 Here is the output of h5dump -n
 .nf
