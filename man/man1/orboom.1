@@ -1,4 +1,4 @@
-.TH ORBOOM 1NEMO "27 Dec 2019"
+.TH ORBOOM 1NEMO "27 December 2019"
 .SH NAME
 orboom \- Transform an orbit and ODM into 'BOOM' HDF [still testing]
 .SH SYNOPSIS
@@ -6,43 +6,45 @@ orboom \- Transform an orbit and ODM into 'BOOM' HDF [still testing]
 .SH DESCRIPTION
 This program is under development for the BOOM project. It will take
 some combination input of a simulation (series of snapshots),
-orbit(s) and ODM's  [to be determined] and turn them into a BOOM hdf
-for further analysis outside of NEMO.  
+orbit(s) and ODM's  [all to be determined] and turn them into a BOOM hdf
+for further analysis outside of NEMO.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
-\fBin=\fP
+\fBin=\fP\fIsnapshot\fP
 Input snapshot simulation. No default.
 .TP
 \fBout=\fP
-Output BOOM file. Currently NEMO  
+Output BOOM file. Currently NEMO (see hdf= below). No default.
 .TP
-\fBndim=\fP
+\fBndim=2|3\fP
 2 or 3 dimensional. Not implemented. [3]
 .TP
-\fBmode=2|3\fP
-2 or 3 dimensional. Not implemented. [3]
+\fBmode=0|1|2|3\fP
+1,2,3 are for testing. use 0 for proper output. This option will also
+likely disappear at version 1.0 [0]
 .TP
 \fBsize=\fP
 Half the size of the ODM box, meaning the X, Y and Z coordinates
-are gridded from -size:size. This also implies we only compute
+of the orbit are gridded from -size:size. This also implies we only compute
 square cubes [2].
 .TP
 \fBnpix=\fP
-Number of pixels along any of the X, Y or Z axes. The same pixels
+Number of pixels along the X, Y or Z axes. Same number pixels
 in all dimensions. [32]
 .TP
-\fBtimes=\fP
-What times to select. Currently all. The code is limited to 10,000.
+\fBtimes=\fP\fIt0:t1,t2:t3,...\fP
+What times to select for output.  which is of the form, eg, "1.0:1.5,2.5,3.0".
+Currently all. The code is limited to 10,000.
 .TP
 \fBnsteps=\fP
 If not given, the input file will be scanned first. Not implemented yet.
 .TP
-\fBbody=\fP
+\fBiqbody=\fP
 If set, only this body will be output. This is useful for debugging.
 .TP
-\fBhdf=f|t\fP
+\fBhdf=t|f\fP
 Output file format in HDF ?  If not, NEMO format will be used.
 Currently only NEMO format is supported. [f]
 .SH EXAMPLES
@@ -64,8 +66,8 @@ Of course there two other ways to select that same orbit (11th one in this examp
 from a simulation, but both methods need a patch for more efficiency:
 .nf
 
-   stoo p100.out - ibody=10 | tsf -     [this one is currently broken]q
-   snapcopy p100.out - select=i==10 ibody=10 | snapmerge - - | snapplot -
+   stoo p100.out - ibody=10 | tsf -     [this one is currently broken]
+   snapcopy p100.out - select=i==10 ibody=10 | snapmerge - - | snapplot -    [ibody not working yet]
    
 .fi
 The latter one is useful to view a 3D orbit with
