@@ -27,7 +27,7 @@ string usage = "Convert NBODY unit-4 file to snapshot";
 
 string cvsid="$Id$";
 
-#define SIZEPP  36      /* 36 bytes per particle on fort.4 */
+#define SIZEPP  36      /* 36 bytes per particle on fort.4 = 28 data + 8 header */
 
 extern int nemo_file_size(string);
 
@@ -61,9 +61,9 @@ void nemo_main(void)
     outstr = stropen(getparam("out"),"w");
     put_history(outstr);
 
-    mass  = (float *)  allocate(nbody*sizeof(float));
+    mass  = (float *) allocate(nbody*sizeof(float));
     pos   = (float *) allocate(nbody*sizeof(float)*3);
-    vel   = (float *)  allocate(nbody*sizeof(float)*3);
+    vel   = (float *) allocate(nbody*sizeof(float)*3);
 
     nb4get_(&nbody,mass,pos,vel);
     if (nbody==0) error("Some error on unit 4");
