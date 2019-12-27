@@ -77,8 +77,9 @@ environment variable (in upper case!). Program keywords can be
 abbreviated to uniqueness.
 .PP
 Examples: Consider the program \fImkplummer\fP, a program which creates
-an N-body realization of a Plummer sphere:
-To get online help, one types:
+an N-body realization of a Plummer sphere
+To get online help, one types (we included three legacy program options,
+--man, --help, --version):
 .nf
         \fIman mkplummer\fP
 	\fPmkplummer --man\fP
@@ -90,7 +91,11 @@ and to get various types of inline help:
         \fImkplummer help='?'\fP
 	\fPmkplummer --help\fP
 	\fPmkplummer -h\fP		
-	
+.fi
+and to get the version:
+.nf
+	\fPmkplummer help=V\fP
+	\fPmkplummer --version\fP
 .fi
 Note the literal quotes around the question-mark needed if you use
 a regular Unix shell as interface.
