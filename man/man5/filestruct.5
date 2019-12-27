@@ -78,15 +78,17 @@ little/big endian machines. Otherwise,
 data on disk exist in the host format, and no effort has been made to make
 it machine independant (e.g. IEEE floating points and twos-compliment
 integers). This is however expected in some future release.
+.SH ZENO FORMAT
+The \fIzeno(1NEMO)\fP package also used this format, but there are some
+subtle differences to be described.
 .SH FILES
 .nf
 .ta +2.0i
-~/src/uNEMO        	a limited NEMO-I/O only library (libunemo.a)
 ~/src/kernel/io   	filesecret.[ch] filestruct.h
 ~/inc              	filestruct.h
 .fi
 .SH SEE ALSO
-tsf(1NEMO), rsf(1NEMO), csf(1NEMO), filestruct(3NEMO)
+tsf(1NEMO), rsf(1NEMO), csf(1NEMO), filestruct(3NEMO), zeno(1NEMO)
 .SH AUTHOR
 Joshua Barnes, Lyman Hurd, Peter Teuben
 .SH UPDATE HISTORY
@@ -100,4 +102,5 @@ xx-xxx-87	V2.0 new types, operators, external fmt  	JEB
 20-nov-90	V2.2a merged old man page from Lyman into this one 	PJT
 16-may-92	V3.0 finalized random access                        	PJT
 6-jul -01	documented the new uNEMO   	PJT
+27-dec-2019	documented ZENO		PJT
 .fi
