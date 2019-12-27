@@ -97,3 +97,14 @@ ccdplot:  ccdplot.c
 ccdgoat:  ccdgoat.c
 	$(CC) $(CFLAGS) -o ccdgoat ccdgoat.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
+
+
+bench1:
+	$(TIME) ccdreorder . . dims=100,100,100  iter=512 order=0,1,2 help=cm
+	$(TIME) ccdreorder . . dims=100,100,100  iter=512 order=2,1,0 help=cm
+	$(TIME) ccdreorder . . dims=200,200,200  iter=64  order=0,1,2 help=cm
+	$(TIME) ccdreorder . . dims=200,200,200  iter=64  order=2,1,0 help=cm
+	$(TIME) ccdreorder . . dims=400,400,400  iter=8   order=0,1,2 help=cm
+	$(TIME) ccdreorder . . dims=400,400,400  iter=8   order=2,1,0 help=cm
+	$(TIME) ccdreorder . . dims=800,800,800  iter=1   order=0,1,2 help=cm
+	$(TIME) ccdreorder . . dims=800,800,800  iter=1   order=2,1,0 help=cm
