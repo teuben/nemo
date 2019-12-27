@@ -18,35 +18,42 @@ programs thematically, and \fIindex(1NEMO)\fP, which lists them
 alphabetically (CAVEAT: these pages are often out of date).
 .PP
 \fBNEMO\fP is very much integrated into the Unix(tm) operating system,
-so users are expected to use standard Unix or Local commands as glue
+so users are expected to use standard Unix commands as glue
 between the various tasks (cat, ls, rm, cp, awk, mongo, sm, \fIetc.\fP).
 Understanding of shell scripting (sh,csh,python,perl,...) can be
 very useful. Several example shell scripts exist in the source code
-to demonstrate how experiments can be orchestrated.
+to demonstrate how experiments can be orchestrated. We use
+mostly csh, bash and python. Yes, csh too.
 .SH GETTING STARTED
 What you need to do to set yourself up for \fBNEMO\fP:
 .PP
 The easiest way is to add the appropriate line to your \fI.cshrc\fP or
 \fI.bashrc\fP file:
 .nf
-        \fIsource $NEMO/nemo-start.csh\fP
-or
-        \fIsource $NEMO/nemo-start.sh\fP
+        \fIsource $NEMO/nemo_start.sh\fP
+or for the die hards
+        \fIsource $NEMO/nemo_start.ssh\fP
 .fi
 .PP
 If you need more control over your environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
-or consult one of your local or remote friendly NEMO users.
+or consult one of your local friendly NEMO users.
 .SH HOW TO RUN NEMO PROGRAMS
 NEMO programs can be run just as any other command in Unix, in that sense
-NEMO is nothing more than an extension of Unix.
+NEMO is nothing more than an extension of Unix. NEMO programs usually
+read and/or write files, though these files can in most circumstances
+be replaced with a dash to designate a unix pipe, e.g.
+.nf
+     mkplummer - 10 | snapprint -
+.fi
 .PP
 NEMO programs all work by using a series of \fIkeyword=value\fP pairs
 on the commandline.
 If the order of the supplied keywords is the same as the
 program expects them, the \fIkeyword=\fP part can be omitted, simply to save
-keystrokes.  There is a consistent ordering of keywords in most programs
-that allows experienced users to use such (and other) shortcuts.
+some keystrokes.  There is a consistent ordering of keywords in most programs
+that allows experienced users to use such (and other) shortcuts. Python uses
+the same principle with the un-named arguments.
 (e.g. \fBin=\fP the first one, \fBout=\fP the second one etc.). Keywords
 can be used in minimum match, but this is not recommended for shell
 scripts. To make shell scripts robust, it is recommended you add the \fIkeyword=\fP
@@ -62,7 +69,7 @@ use are \fI help=\fP and \fIyapp=\fP, and to a lesser degree
 inline aid from a program. There is also online help on a 
 program, for which unix \fIman(1)\fP command (or any of it's derived friends)
 is normally used. The \fIyapp=\fP sets the graphics device used by
-programs who use a graphics device. You system manager may have given
+programs who use a graphics device. You \fInemo_start\fP may have given
 you a default.
 .PP
 Each \fBsystem\fP keyword can be defaulted by setting it's equivalent
@@ -74,12 +81,16 @@ an N-body realization of a Plummer sphere:
 To get online help, one types:
 .nf
         \fIman mkplummer\fP
+	\fPmkplummer --man\fP
 .fi
 and to get various types of inline help:
 .nf
         \fImkplummer help=\fP
         \fImkplummer help=h\fP
         \fImkplummer help='?'\fP
+	\fPmkplummer --help\fP
+	\fPmkplummer -h\fP		
+	
 .fi
 Note the literal quotes around the question-mark needed if you use
 a regular Unix shell as interface.
@@ -95,18 +106,21 @@ on files (notably \fBin=\fP, \fBout=\fP, as long as
 \fIstropen(3NEMO)\fP is used) can use standard piped I/O by using
 the dash (\fB-\fP) to name the keyword, e.g.
 .nf
-    mkplummer - 100 | tsf -
+    mkplummer - 10 | snapprint
 .fi
-would create a snapshot of 100 bodies on the fly, and display it to the
-user using \fBtsf\fP. The alternative would have been
+would create a snapshot of 10 bodies on the fly, and print
+positions and velocities to the user using \fBsnapprint\fP.
+The alternative would have been
 .nf
-    mkplummer out=tmp nbody=100
-    tsf in=tmp
+    mkplummer out=tmp nbody=10
+    snapprint in=tmp
     rm tmp
 .fi
 .SH HOW TO RUN non-NEMO PROGRAMS
 Over the times NEMO has incoorporated a number of non-NEMO programs,
-with varying degrees of input parameter schemes. For a number of
+with varying degrees of input parameter schemes. Some via
+parameter files, some interactive input, some a command line interface
+alien to NEMO. For a number of
 them a unified NEMO frontend was developed, usually those programs start
 with the prefix \fBrun\fP. For example, \fBbulgerot\fP comes with
 \fBrunbulgerot\fP. Since often such programs have a hardcoded name
@@ -119,7 +133,7 @@ in
 \fIrungalaxy(1NEMO)\fP,
 \fIrunscfm(1NEMO)\fP,
 \fIrunqumond(1NEMO)\fP,
-and others.
+and some others.
 .PP
 You will find a few common user keywords for this:
 \fBoutdir=\fP is always a required keyword, and needs to
@@ -131,9 +145,16 @@ assumed to be in the standard Unix search path ($PATH).
 Although these run* programs use a fairly common method to run
 the non-NEMO programs, they have not all been unified
 as is proposed in \fIrun(3NEMO)\fP.
+.SH PROGRAMMING
+You may need to do some sherlocking here.
+You have probably seen the configure.ac and makedefs file.
+The $NEMOLIB/makedefs is the active file.  The \fImknemo(8NEMO)\fP
+will help you (re)compile programs, though
+\fIbake(8NEMO)\fP can do a better job in a local directory.
 .SH SEE ALSO
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
-nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(1NEMO), run(3NEMO), pipestatus(l)
+nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(1NEMO), run(3NEMO), mknemo(8NEMO),
+pipestatus(l)
 .SH AUTHOR
 Peter Teuben
 .SH FURTHER INFORMATION
