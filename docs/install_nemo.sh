@@ -7,6 +7,7 @@
 
 opt=1
 nemo=nemo
+python=0
 
 for arg in $*; do\
    export $arg
@@ -15,6 +16,7 @@ done
 echo "Using: "
 echo "  opt=$opt"
 echo "  nemo=$nemo"
+echo "  python=$python"
 echo ""
 
 
@@ -27,31 +29,39 @@ cd $nemo
 
 #                        when opt=1 it will first compile these packages in $NEMO/opt and use them
 if test $opt = 1; then
-  ./configure
-  make hdf4
-  make hdf5
-  make cfitsio
-  ./configure --with-opt
-fi  
+    ./configure
+    make hdf4
+    make hdf5
+    make cfitsio
+    ./configure --with-opt
+    opt="--with-opt"
+else
+    opt=""
+fi
 
-# pick a configure
+if test $python = 1; then
+    make python
+    source python_start.sh
+fi    
 
-#./configure                       # ok, this will pick yapp_ps
-#./configure --with-yapp=pgplot --disable-falcon
-#./configure --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
-#./configure --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
-#./configure --enable-debug --with-yapp=pgplot
-#./configure --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib    --enable-single    # one failure nbody/init
-#./configure  --with-yapp=pgplot --with-pgplot-prefix=/usr/lib 
-./configure --enable-native
-#./configure --disable-falcon
-#./configure --enable-cfitsio --with-cfitsio-prefix=/usr
-#./configure --with-yapp=plplot --disable-falcon
-#./configure --with-opt
+# pick a configure (remember to use $opt)
+
+#./configure $opt                       # ok, this will pick yapp_ps
+#./configure $opt --with-yapp=pgplot --disable-falcon
+#./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
+#./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
+#./configure $opt --enable-debug --with-yapp=pgplot
+#./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib    --enable-single    # one failure nbody/init
+#./configure $opt --with-yapp=pgplot --with-pgplot-prefix=/usr/lib 
+#./configure $opt --enable-native
+#./configure $opt --disable-falcon
+#./configure $opt --enable-cfitsio --with-cfitsio-prefix=/usr
+#./configure $opt --with-yapp=plplot --disable-falcon
+#./configure $opt --with-opt
 
 
 # on a mac:
-#./configure --without-csh 
+#./configure $opt --without-csh 
 
 
 # and/or re-configure
