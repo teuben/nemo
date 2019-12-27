@@ -6,19 +6,21 @@
 #  the old (csh) script "nemo_install" is still available to guide you for some problems
 
 opt=1
-
+nemo=nemo
 
 date0=$(date)
 
-rm -rf nemo
-git clone https://github.com/teuben/nemo
-cd nemo
+rm -rf $nemo
+git clone https://github.com/teuben/nemo $nemo
+cd $nemo
 
 
 #                        when opt=1 it will first compile these packages in $NEMO/opt and use them
 if test $opt = 1; then
   ./configure
-  make hdf4 hdf5 cfitsio
+  make hdf4
+  make hdf5
+  make cfitsio
   ./configure --with-opt
 fi  
 
