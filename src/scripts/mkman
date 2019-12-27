@@ -3,13 +3,13 @@
 # Silly program that creates a first other manual page from the inline
 # help file
 #
-set version="1.2  24-jan-00 PJT"
+set version="1.3  26-dec-2019 PJT"
 
 if ($#argv == 0) then
   echo "Usage: $0 [-section] name"
   echo "Version: $version"
   echo ""
-  echo "Creates a barebone manual page on stdout from a NEMO inline help file help=h."
+  echo "Creates a barebone Unix man page on stdout from a NEMO inline help file help=h."
   echo "You probably want to edit this file after creation."
   echo "Using a different section, one can also generate a template for"
   echo "other than level 1 man pages from existing programs"
@@ -62,5 +62,5 @@ echo "mkman"
 echo ".SH UPDATE HISTORY"
 echo ".nf"
 echo ".ta +1.0i +4.0i"
-echo "$ddmmyy	V0.0 Created by mkman	NEMO"
+echo "$ddmmyy	V0.0 Created by mkman	NEMO/$USER"
 echo ".fi"
