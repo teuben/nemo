@@ -35,17 +35,11 @@ if (-e $dir) then
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
   make
   make install
-  # new python stuff (13 march 2014) - now done internally, this can go
-  cd ../py
-  if (-e CMakeLists.txt) then
-    mkdir -p build
-    cd build
-    cmake ..
-    make
-    make install
-  endif
 else
   echo "mknemo.d: $dir does not exist; try"
   echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
 endif
 
+echo Warning:  python interface is not yet installed. See $NEMO/usr/jcl/unsio/py/INSTALL
+echo Basically:   pip install python-unsio
+ecoh but consult your local python installation before blindly doing this.
