@@ -23,7 +23,7 @@ bench: $(BINS)
 heated_plate_openmp:
 	$(CC) $(CFLAGS) -fopenmp -o heated_plate_openmp heated_plate_openmp.c $(NEMO_LIBS)
 
-bench2:
+bench2: heated_plate_openmp
 	./heated_plate_openmp nprocs=4
 
 
