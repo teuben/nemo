@@ -121,3 +121,7 @@ html:
 
 # 		-ps_images \
 
+pdf:
+	pdflatex nemo
+	pdflatex nemo
+	pdflatex nemo
