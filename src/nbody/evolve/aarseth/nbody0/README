@@ -26,3 +26,7 @@ Later additions:
 (jan-2000) The fortran-C interfaces have been converted to F77_FUNC macros, for which
            you need NEMO.
 (feb-2004) Added an option to do better timestep control (e.g. for figure8 orbit)
+
+(sep-2018) Loaded ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody0/nbody0.f as nbody0_sja.f
+           Described as "Compact fourth-order Hermite block-step code."
+           See also https://www.ast.cam.ac.uk/~sverre/web/pages/nbody.htm
