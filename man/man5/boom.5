@@ -1,0 +1,105 @@
+.TH BOOM 5NEMO "26 Dec 2019"
+.SH NAME
+boom \- Format to describe multiple aspects of an orbit
+.SH DESCRIPTION
+This format grew out of the BOOM project. We want to describe
+an orbit in multiple ways:  1) a simple list of positions and velocities,
+optionally the potential and forces along the path. 2) an orbit density map,
+a time averaged density distribution in 2D or 3D, whatever appropriate. From
+these, via a Schwarzschild technique, the density could be re-constructed.
+3) a surface of section, although this only makes sense in 2D.
+.PP
+We normally output the data in \fBhdf5\fP format
+.PP
+This format is really a hybrid of an \fIorbit(5NEMO)\fP,
+\fP
+.SH DATA
+Briefly the HDF layout is as follows
+.nf
+  BOOM, Np
+  Particle[0]
+    Nd
+    ODM:Nx,Ny,map,xmin,xmax,ymin,ymax
+    Orbit:Nt,t,x,y,u,v,
+    SOSx:Ns,t,p,q
+    SOSy:Ns,t,p,q
+.fi
+Here is the output of h5dump -n
+.nf
+HDF5 "boom.hdf" {
+FILE_CONTENTS {
+ group      /
+ dataset    /BOOM
+ dataset    /Np
+ group      /particle0
+ dataset    /particle0/Nd
+ group      /particle0/odm
+ dataset    /particle0/odm/Nx
+ dataset    /particle0/odm/Ny
+ dataset    /particle0/odm/map
+ dataset    /particle0/odm/xmax
+ dataset    /particle0/odm/xmin
+ dataset    /particle0/odm/ymax
+ dataset    /particle0/odm/ymin
+ group      /particle0/orbit
+ dataset    /particle0/orbit/Nt
+ dataset    /particle0/orbit/t
+ dataset    /particle0/orbit/u
+ dataset    /particle0/orbit/v
+ dataset    /particle0/orbit/x
+ dataset    /particle0/orbit/y
+ group      /particle0/sosx
+ dataset    /particle0/sosx/Ns
+ dataset    /particle0/sosx/p
+ dataset    /particle0/sosx/q
+ dataset    /particle0/sosx/t
+ group      /particle0/sosy
+ dataset    /particle0/sosy/Ns
+ dataset    /particle0/sosy/p
+ dataset    /particle0/sosy/q
+ dataset    /particle0/sosy/t
+ group      /particle1
+ dataset    /particle1/Nd
+ group      /particle1/odm
+ dataset    /particle1/odm/Nx
+ dataset    /particle1/odm/Ny
+ dataset    /particle1/odm/map
+ dataset    /particle1/odm/xmax
+ dataset    /particle1/odm/xmin
+ dataset    /particle1/odm/ymax
+ dataset    /particle1/odm/ymin
+ group      /particle1/orbit
+ dataset    /particle1/orbit/Nt
+ dataset    /particle1/orbit/t
+ dataset    /particle1/orbit/u
+ dataset    /particle1/orbit/v
+ dataset    /particle1/orbit/x
+ dataset    /particle1/orbit/y
+ group      /particle1/sosx
+ dataset    /particle1/sosx/Ns
+ dataset    /particle1/sosx/p
+ dataset    /particle1/sosx/q
+ dataset    /particle1/sosx/t
+ group      /particle1/sosy
+ dataset    /particle1/sosy/Ns
+ dataset    /particle1/sosy/p
+ dataset    /particle1/sosy/q
+ dataset    /particle1/sosy/t
+ dataset    /potname
+ dataset    /potpars
+ }
+}
+.fi
+.SH FILES
+.nf
+src/orbit/misc - source code
+.fi
+.SH SEE ALSO
+orboom(1NEMO), orbint(1NEMO), snapgrid(1NEMO), orbsos(1NEMO), h5dump(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+26-Dec-19	V0.2 Created	PJT
+.fi
