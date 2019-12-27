@@ -23,7 +23,7 @@ string defv[] = {
   "npix=32\n           Number of pixels along box vertex",
   "times=all\n         Which times to use from the snapshot [not yet]",
   "body=\n             If set, only select this body for the orbit (0=first)",
-  "VERSION=0.4\n       27-dec-2019 XYZ",
+  "VERSION=0.5\n       27-dec-2019 XYZ",
   NULL,
 };
 
@@ -44,7 +44,7 @@ void crtatt(string fin);   // 3
 int xbox(real x, real size, int npix)
 {
   int ix = (int) floor((x+size)/(2*size)*npix);
-  dprintf(0,"%g %d    %g %d\n",ix,x,size,npix);
+  //dprintf(0,"%g %d    %g %d\n",ix,x,size,npix);
   if (-size < x && x < size)
     return ix;
   // return (int) floor((x-size)/npix);
@@ -143,17 +143,23 @@ void scandata(string fin, string fout)
       Uorb(optr, j) = Vel(btab[j])[0];
       Vorb(optr, j) = Vel(btab[j])[1];
       Worb(optr, j) = Vel(btab[j])[2];
+#ifdef ORBIT_PHI
+      Porb(optr, j)  = Phi(btab[j]);
+      AXorb(optr, j) = Acc(btab[j])[0];
+      AYorb(optr, j) = Acc(btab[j])[1];
+      AZorb(optr, j) = Acc(btab[j])[2];
+#endif      
 
-      ix = xbox(Pos(btab[j])[0],  size, npix);     // simple ODM
+      ix = xbox(Pos(btab[j])[0],  size, npix);     // simple ODM coordinates
       if (ix<0) continue;
       iy = xbox(Pos(btab[j])[1],  size, npix);
       if (iy<0) continue;
       iz = xbox(Pos(btab[j])[2],  size, npix);
       if (iz<0) continue;
       CubeValue(iptr,ix,iy,iz) += 1.0;   // could imagine a better normalization
-    }
+    } // j
     dmin = dmax = CubeValue(iptr,0,0,0);
-    for(ix=0; ix<npix; ix++)           // clear the image
+    for(ix=0; ix<npix; ix++)             // get dmin,dmax of the ODM
     for(iy=0; iy<npix; iy++)
       for(iz=0; iz<npix; iz++) {
 	if (CubeValue(iptr,ix,iy,iz) < dmin) dmin = CubeValue(iptr,ix,iy,iz);
@@ -161,11 +167,12 @@ void scandata(string fin, string fout)
       }
     MapMin(iptr) = dmin;
     MapMax(iptr) = dmax;
-    dprintf(0,"MapMin/Max: %g %g\n",dmin,dmax);
+    if (dmax == 0.0)
+      dprintf(0,"MapMin/Max: %g %g for body %d\n",dmin,dmax,i);
 
     write_orbit(outstr,optr);
     write_image(outstr,iptr);
-  }
+  } // i
   strclose(outstr);
 }
 
