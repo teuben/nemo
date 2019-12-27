@@ -161,6 +161,9 @@
 /* Define if you have the cfitsio library (-lcfitsio).  */
 #undef HAVE_LIBCFITSIO
 
+/* Define if you have the hdf5 library */
+#undef HAVE_HDF5
+
 /* Define if you have the vogl library (-lvogl).  */
 #undef HAVE_LIBVOGL
 
