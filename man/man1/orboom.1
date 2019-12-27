@@ -1,6 +1,6 @@
-.TH ORBOOM 1NEMO "26 Dec 2019"
+.TH ORBOOM 1NEMO "27 Dec 2019"
 .SH NAME
-orboom \- Transform an orbit and ODM into 'BOOM' HDF [testing]
+orboom \- Transform an orbit and ODM into 'BOOM' HDF [still testing]
 .SH SYNOPSIS
 \fBorboom\fP [parameter=value]
 .SH DESCRIPTION
@@ -13,19 +13,63 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input orbit []
-.TP
-\fBodm=\fP
-Input ODM (an image) []   
+Input snapshot simulation. No default.
 .TP
 \fBout=\fP
-Output boom HDF [junk.hdf]    
+Output BOOM file. Currently NEMO  
 .TP
 \fBndim=\fP
-2 or 3 dimensional [3]   
+2 or 3 dimensional. Not implemented. [3]
+.TP
+\fBmode=2|3\fP
+2 or 3 dimensional. Not implemented. [3]
+.TP
+\fBsize=\fP
+Half the size of the ODM box, meaning the X, Y and Z coordinates
+are gridded from -size:size. This also implies we only compute
+square cubes [2].
+.TP
+\fBnpix=\fP
+Number of pixels along any of the X, Y or Z axes. The same pixels
+in all dimensions. [32]
+.TP
+\fBtimes=\fP
+What times to select. Currently all. The code is limited to 10,000.
+.TP
+\fBnsteps=\fP
+If not given, the input file will be scanned first. Not implemented yet.
+.TP
+\fBbody=\fP
+If set, only this body will be output. This is useful for debugging.
+.TP
+\fBhdf=f|t\fP
+Output file format in HDF ?  If not, NEMO format will be used.
+Currently only NEMO format is supported. [f]
 .SH EXAMPLES
-The current version just writes a junk.hdf file to test the compilation
-workflow.
+The current version just writes NEMO Orbit/Image file.  To extract
+a certain orbit or image, here is an example
+.nf
+   #   create a BOOM file
+   mkplummer p100 100 seed=100
+   gyrfalcON  p100 p100.out step=0.1 tstop=10 eps=0.025 kmax=8 give=mxvap
+   orboom p100.out p100.boom
+
+   #   look at an orbit, an ODM, and a projected ODM along the Z axis
+   csf p100.boom - Orbit 11 | orbplot -
+   csf p100.boom - Image 11 | ccdfits - p100_10.fits
+   csf p100.boom - Image 11 | ccdmom - - | ccdfits - p100_10_mom0.fits
+   
+.fi
+Of course there two other ways to select that same orbit (11th one in this example)
+from a simulation, but both methods need a patch for more efficiency:
+.nf
+
+   stoo p100.out - ibody=10 | tsf -     [this one is currently broken]q
+   snapcopy p100.out - select=i==10 ibody=10 | snapmerge - - | snapplot -
+   
+.fi
+The latter one is useful to view a 3D orbit with
+\fIsnapplot3(1NEMO)\fP or \fIglnemo2(1NEMO)\fP
 .SH SEE ALSO
 boom(5NEMO), h5dump(1), orbint(1NEMO), orbsos(1NEMO), snapgrid(1NEMO)
 .fi
