@@ -32,32 +32,34 @@ the user want finite mass particles and a perfectly centered set of particles.
 Note this particle distribution is only useful for display, e.g. spiral structure
 in a Longitude-Velocity diagram, and should not be integrated with programs
 like <a href='hackcode3.1.html'><i>hackcode3(1NEMO)</i></a>
-. 
+. <p>
+<b>mkspiral</b> is also used in the standard benchmark as
+to measure disk I/O speed on a file just over 2GB. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following
+parameters are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>out=<i>out_file</i></b> </dt>
-<dd>The data are written
-to this file in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
-  format [no default]. </dd>
+<dt><b>out=<i>out_file</i></b>
+</dt>
+<dd>The data are written to this file in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
+  format [no default].
+</dd>
 
 <dt><b>ndisk=<i>num_bodies</i></b> </dt>
-<dd>Number
-of disk particles [default: <b>2048</b>] </dd>
+<dd>Number of disk particles [default: <b>2048</b>] </dd>
 
-<dt><b>potname=<i>potential_name</i></b> </dt>
-<dd>name of the potential,
-see $NEMO/obj/potential for the current repository. The user can supply
-his own, see <a href='potential.5.html'>potential(5NEMO)</a>
+<dt><b>potname=<i>potential_name</i></b>
+</dt>
+<dd>name of the potential, see $NEMO/obj/potential for the current repository.
+The user can supply his own, see <a href='potential.5.html'>potential(5NEMO)</a>
 . [default: <b>plummer</b>]. </dd>
 
-<dt><b>potpars=<i>pot_pars</i></b> </dt>
-<dd>Paramaters
-to the user supplied potential. The number of parameters depends on the
-potential supplied, the first parameter is reserved for a pattern speed
-in future implementation. [default: not supplied, parameters as defined
+<dt><b>potpars=<i>pot_pars</i></b>
+</dt>
+<dd>Paramaters to the user supplied potential. The number of parameters depends
+on the potential supplied, the first parameter is reserved for a pattern
+speed in future implementation. [default: not supplied, parameters as defined
 by <a href='potential.5.html'>potential(5)</a>
 ]. </dd>
 

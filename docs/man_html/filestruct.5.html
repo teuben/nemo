@@ -81,22 +81,26 @@ endian machines. Otherwise, data on disk exist in the host format, and no
 effort has been made to make it machine independant (e.g. IEEE floating points
 and twos-compliment integers). This is however expected in some future release.
 
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<h2><a name='sect5' href='#toc5'>Zeno Format</a></h2>
+The <a href='zeno.1.html'><i>zeno(1NEMO)</i></a>
+ package also used this format, but there are
+some subtle differences to be described. 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
-<pre>~/src/uNEMO        <tt> </tt>&nbsp;<tt> </tt>&nbsp;a limited NEMO-I/O only library (libunemo.a)
-~/src/kernel/io   <tt> </tt>&nbsp;<tt> </tt>&nbsp;filesecret.[ch] filestruct.h
+<pre>~/src/kernel/io   <tt> </tt>&nbsp;<tt> </tt>&nbsp;filesecret.[ch] filestruct.h
 ~/inc              <tt> </tt>&nbsp;<tt> </tt>&nbsp;filestruct.h
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
 , <a href='csf.1.html'>csf(1NEMO)</a>
 , <a href='filestruct.3.html'>filestruct(3NEMO)</a>
- 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Joshua
-Barnes, Lyman Hurd, Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+, <a href='zeno.1.html'>zeno(1NEMO)</a>
+
+
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Joshua Barnes, Lyman Hurd, Peter Teuben 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>dark-ages<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 precurser (filestr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 xx-apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 basic operators     <tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
@@ -106,6 +110,7 @@ xx-xxx-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new types, operators, external fmt
 20-nov-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2a merged old man page from Lyman into this one <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 finalized random access                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-jul -01<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented the new uNEMO   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented ZENO<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -116,10 +121,11 @@ xx-xxx-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new types, operators, external fmt
 <li><a name='toc2' href='#sect2'>Format</a></li>
 <li><a name='toc3' href='#sect3'>Description</a></li>
 <li><a name='toc4' href='#sect4'>Experimental Features</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Zeno Format</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

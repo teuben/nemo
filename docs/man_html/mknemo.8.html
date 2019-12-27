@@ -29,21 +29,18 @@ package name, in which case the script will be more complex. <p>
 Next, within
 the $NEMO/src (optionally also the $NEMO/usr tree) a source file <i>program.c</i>
 (or C++ or Fortran) is looked for, which is compiled with a local <b>Makefile</b>
-(or a template if none is available).  tsf is an example of this type of
-program. <p>
-Finally, if still no source code is found, a directory with the
-name <i>program</i> is searched for,  and a local Makefile is then used to install
-the <i>program</i>. <b>hackcode1</b> is am example of this type of program. <p>
-After the binary
-is moved over to <b>$NEMOBIN</b>, the script <i>mkpdoc</i> is called to see if the <a href='doc.5.html'><i>doc(5)</i></a>
-
-file needs  to be updated. (<i>** doc files not maintained anymore **</i>) 
+(or a template if none is available).  <i>tsf</i> is an example of this type of
+program, but also more specialized plotting programs such as <i>snapplot</i> or
+<i>orboom</i>, which need an extra 3rd party library. <p>
+Finally, if still no source
+code is found, a directory with the name <i>program</i> is searched for,  and
+a local Makefile is then used to install the <i>program</i>. <b>hackcode1</b> is an example
+of this type of program. 
 <h2><a name='sect3' href='#toc3'>Options</a></h2>
 <br>
 <pre>  -c CODE   search for CODE.c to set the directory for target(s)
   -n N      selection of N-th element from unresolved list [1]
   -s DIR    root directory to start search [$NEMO/src]
-  -a        also search $NEMO/usr 
   -r        remove lockfile before starting
   -d        also make doc file (only for true NEMO programs)
   -t        cleanup after having made the binaries
@@ -51,26 +48,47 @@ file needs  to be updated. (<i>** doc files not maintained anymore **</i>)
   -u        update your NEMO git tree before (re)making
   -l        recompile the library before (re)making 
   -g        use gmake, instead of make
+  -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
+  -D        show special projects from the mknemo.d directory
 </pre>
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
-<br>
+<h2><a name='sect4' href='#toc4'>Makedefs</a></h2>
+All compile flags and libraries that are used should have been
+configured in the $NEMOLIB/makedefs file. Here are some critical programs
+that you could use to test if that specific library was properly referenced
+in makedefs: <br>
+<pre>heated_plate_openmp<tt> </tt>&nbsp;<tt> </tt>&nbsp;openmp
+cfitsio<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;sdfits  (no test data present in NEMO)
+fftw<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
+gsl<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
+hdf4<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;tsd (no test data present in NEMO) - hdf.h
+hdf5<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;orboom eaglesnap (but needs install in $NEMO/usr/eagle)
+miriad<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
+pgplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;via YAPP_PGPLOT
+plplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;          <tt> </tt>&nbsp;<tt> </tt>&nbsp;via YAPP_PLPLOT
+png<tt> </tt>&nbsp;<tt> </tt>&nbsp;         <tt> </tt>&nbsp;<tt> </tt>&nbsp;via YAPP_PGPLOT
+yapp<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;tabhist
+</pre>If any of these fail for obvious reasons, you can try and fix them by rerunning
+configure and comparing $NEMOLIB/makedefs with $NEMO/makedefs, or simply
+editing $NEMOLIB/makedefs directly. 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+Here are some examples of the
+non-default control files in $NEMO/src/scripts/mknemo.d: <br>
 <pre>firstn    <tt> </tt>&nbsp;<tt> </tt>&nbsp;the very first (?) nbody code
 glnemo2   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics
 gyrfalcON   <tt> </tt>&nbsp;<tt> </tt>&nbsp;falcON tools (gyrfalcON, mkplum, the acc&rsquo;s and manip&rsquo;s)
 rotcur    <tt> </tt>&nbsp;<tt> </tt>&nbsp;rotcur program (there is also a confusing rotcur potential(5NEMO))
 galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.x
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='mkbin.8.html'>mkbin(8NEMO)</a>
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='bake.8.html'>bake(8NEMO)</a>
+, <a href='mkbin.8.html'>mkbin(8NEMO)</a>
  
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>$NEMO/src/scripts/mknemo.d<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory with non-default control files for mknemo
-$NEMOLIB/NEMORC<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;environment variables
 $NEMOLIB/makedefs<tt> </tt>&nbsp;<tt> </tt>&nbsp;make variables
 $NEMOLIB/libnemo.a<tt> </tt>&nbsp;<tt> </tt>&nbsp;main NEMO library
 $NEMOLIB/yapp*.o<tt> </tt>&nbsp;<tt> </tt>&nbsp;various device drivers
@@ -78,7 +96,7 @@ $NEMO/src          <tt> </tt>&nbsp;<tt> </tt>&nbsp;source tree searched for prog
 $NEMO/adm/install/mknemo.log<tt> </tt>&nbsp;<tt> </tt>&nbsp;logfile of all previous installs done
 $NEMO/adm/install/mknemo.lock<tt> </tt>&nbsp;<tt> </tt>&nbsp;lockfile, to prevent multiple usage
 </pre>
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>21-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: doc created       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added lockfile     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -87,6 +105,7 @@ $NEMO/adm/install/mknemo.lock<tt> </tt>&nbsp;<tt> </tt>&nbsp;lockfile, to preven
 16-dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5: added -l flag, also cloned sbin/mkstarlab<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-jun-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4: added -a flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0: git based
+dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;document critical binaries<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -96,11 +115,12 @@ $NEMO/adm/install/mknemo.lock<tt> </tt>&nbsp;<tt> </tt>&nbsp;lockfile, to preven
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Options</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Makedefs</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

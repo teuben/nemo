@@ -152,19 +152,34 @@ PGPLOT_PS_DRAW_BBOX
 <pre>pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
 pgxwin.Win.iconGeometry: +X+Y
 </pre>
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<h2><a name='sect5' href='#toc5'>Plplot</a></h2>
+Like PGPLOT, PLPLOT can also pick different graphics output devices,
+specified via the usual yapp= system keyword, followed by a filename for
+the non-interactive devices. Here are a few, though specifying yapp=help
+should give the list of currently compiled devices.  For a full list see
+e.g. <a href='http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html'>http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html</a>
+
+<br>
+<pre>png,FILE.png<tt> </tt>&nbsp;<tt> </tt>&nbsp;PNG
+pdfcairo,FILE.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (cairo)
+pdf,FILE.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (Haru)
+svg,FILE.svg<tt> </tt>&nbsp;<tt> </tt>&nbsp;SVG
+xwin
+tk
+</pre>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>NEMO/src/kernel/yapp<tt> </tt>&nbsp;<tt> </tt>&nbsp;various yapp_* implementations
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Joshua E. Barnes, Peter Teuben 
-<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='catps.1.html'>catps(1NEMO)</a>
 , <a href='catpgps.1.html'>catpgps(1NEMO)</a>
 ,
 <a href='yapp.3.html'>yapp(3NEMO)</a>
  
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>16-aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;document written - some are premature!<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-nov-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;yapp_suntools added             <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -181,10 +196,11 @@ Joshua E. Barnes, Peter Teuben
 <li><a name='toc2' href='#sect2'>Available Yapp Versions</a></li>
 <li><a name='toc3' href='#sect3'>Bugs</a></li>
 <li><a name='toc4' href='#sect4'>Pgplot</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>See Also</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Plplot</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

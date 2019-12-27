@@ -26,57 +26,69 @@ thematically, and <a href='index.1.html'><i>index(1NEMO)</i></a>
 , which lists them  alphabetically (CAVEAT:
 these pages are often out of date). <p>
 <b>NEMO</b> is very much integrated into the
-Unix(tm) operating system, so users are expected to use standard Unix or
-Local commands as glue between the various tasks (cat, ls, rm, cp, awk,
-mongo, sm, <i>etc.</i>). Understanding of shell scripting (sh,csh,python,perl,...)
-can be very useful. Several example shell scripts exist in the source code
-to demonstrate how experiments can be orchestrated. 
+Unix(tm) operating system, so users are expected to use standard Unix commands
+as glue between the various tasks (cat, ls, rm, cp, awk, mongo, sm, <i>etc.</i>).
+Understanding of shell scripting (sh,csh,python,perl,...) can be very useful.
+Several example shell scripts exist in the source code to demonstrate how
+experiments can be orchestrated. We use mostly csh, bash and python. Yes,
+csh too. 
 <h2><a name='sect2' href='#toc2'>Getting Started</a></h2>
-What
-you need to do to set yourself up for <b>NEMO</b>: <p>
-The easiest way is to add the
-appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file: <br>
-<pre>        source $NEMO/nemo-start.csh
-or
-        source $NEMO/nemo-start.sh
+What you need to do to set yourself up for <b>NEMO</b>:
+<p>
+The easiest way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i>
+file: <br>
+<pre>        source $NEMO/nemo_start.sh
+or for the die hards
+        source $NEMO/nemo_start.ssh
 </pre><p>
 If you need more control over your environment, there are other methods
 described elsewhere (The <i>NEMO Users/Programmers Guide</i>, Appendix A), or
-consult one of your local or remote friendly NEMO users. 
-<h2><a name='sect3' href='#toc3'>How to Run Nemo
-Programs</a></h2>
-NEMO programs can be run just as any other command in Unix, in
-that sense NEMO is nothing more than an extension of Unix. <p>
-NEMO programs
-all work by using a series of <i>keyword=value</i> pairs on the commandline. If
-the order of the supplied keywords is the same as the program expects them,
-the <i>keyword=</i> part can be omitted, simply to save keystrokes.  There is a
-consistent ordering of keywords in most programs that allows experienced
-users to use such (and other) shortcuts. (e.g. <b>in=</b> the first one, <b>out=</b> the
-second one etc.). Keywords can be used in minimum match, but this is not
-recommended for shell scripts. To make shell scripts robust, it is recommended
-you add the <i>keyword=</i> part for all but the first one or two. <p>
-NEMO programs
-make a distinction between <b>program</b> keywords (keywords unique to a program)
-and <b>system</b>  keywords (a fixed set of keywords that each NEMO program understands).
+consult one of your local friendly NEMO users. 
+<h2><a name='sect3' href='#toc3'>How to Run Nemo Programs</a></h2>
+NEMO
+programs can be run just as any other command in Unix, in that sense NEMO
+is nothing more than an extension of Unix. NEMO programs usually read and/or
+write files, though these files can in most circumstances be replaced with
+a dash to designate a unix pipe, e.g. <br>
+<pre>     mkplummer - 10 | snapprint -
+</pre><p>
+NEMO programs all work by using a series of <i>keyword=value</i> pairs on the
+commandline. If the order of the supplied keywords is the same as the program
+expects them, the <i>keyword=</i> part can be omitted, simply to save some keystrokes.
+ There is a consistent ordering of keywords in most programs that allows
+experienced users to use such (and other) shortcuts. Python uses the same
+principle with the un-named arguments. (e.g. <b>in=</b> the first one, <b>out=</b> the second
+one etc.). Keywords can be used in minimum match, but this is not recommended
+for shell scripts. To make shell scripts robust, it is recommended you add
+the <i>keyword=</i> part for all but the first one or two. <p>
+NEMO programs make a
+distinction between <b>program</b> keywords (keywords unique to a program) and
+<b>system</b>  keywords (a fixed set of keywords that each NEMO program understands).
  The system keywords that you are likely to use are <i> help=</i> and <i>yapp=</i>, and
 to a lesser degree  <i>debug=</i> and <i>error=</i>.  The <i>help=</i> gives various types of
  inline aid from a program. There is also online help on a  program, for
 which unix <a href='man.1.html'><i>man(1)</i></a>
  command (or any of it&rsquo;s derived friends) is normally used.
 The <i>yapp=</i> sets the graphics device used by programs who use a graphics
-device. You system manager may have given you a default. <p>
+device. You <i>nemo_start</i> may have given you a default. <p>
 Each <b>system</b> keyword
 can be defaulted by setting it&rsquo;s equivalent environment variable (in upper
 case!). Program keywords can be abbreviated to uniqueness. <p>
 Examples: Consider
 the program <i>mkplummer</i>, a program which creates an N-body realization of
-a Plummer sphere: To get online help, one types: <br>
+a Plummer sphere To get online help, one types (we included three legacy
+program options, --man, --help, --version): <br>
 <pre>        man mkplummer
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --man
 </pre>and to get various types of inline help: <br>
 <pre>        mkplummer help=
         mkplummer help=h
         mkplummer help=&rsquo;?&rsquo;
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --help
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer -h<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;
+</pre>and to get the version: <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer help=V
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --version
 </pre>Note the literal quotes around the question-mark needed if you use a regular
 Unix shell as interface. The first <i>help=</i> reminds you of the order of the
 program keywords and their default values. The second form, <i>help=h</i> prints
@@ -88,38 +100,48 @@ to prevent large amounts of disk access. Most keywords that operate  on
 files (notably <b>in=</b>, <b>out=</b>, as long as <a href='stropen.3.html'><i>stropen(3NEMO)</i></a>
  is used) can use standard
 piped I/O by using the dash (<b>-</b>) to name the keyword, e.g. <br>
-<pre>    mkplummer - 100 | tsf -
-</pre>would create a snapshot of 100 bodies on the fly, and display it to the
-user using <b>tsf</b>. The alternative would have been <br>
-<pre>    mkplummer out=tmp nbody=100
-    tsf in=tmp
+<pre>    mkplummer - 10 | snapprint
+</pre>would create a snapshot of 10 bodies on the fly, and print positions and
+velocities to the user using <b>snapprint</b>. The alternative would have been
+<br>
+<pre>    mkplummer out=tmp nbody=10
+    snapprint in=tmp
     rm tmp
 </pre>
 <h2><a name='sect4' href='#toc4'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
 Over the times NEMO has incoorporated a number
-of non-NEMO programs, with varying degrees of input parameter schemes. For
-a number of them a unified NEMO frontend was developed, usually those programs
-start with the prefix <b>run</b>. For example, <b>bulgerot</b> comes with <b>runbulgerot</b>.
-Since often such programs have a hardcoded name for input and/or output
-files, one simple way to be able to run  them in parallel without stepping
-on filenames, is the use of a clean run directory.  Example of this can
-be found in  <a href='runbulgerot.1.html'><i>runbulgerot(1NEMO)</i></a>
+of non-NEMO programs, with varying degrees of input parameter schemes. Some
+via parameter files, some interactive input, some a command line interface
+alien to NEMO. For a number of them a unified NEMO frontend was developed,
+usually those programs start with the prefix <b>run</b>. For example, <b>bulgerot</b>
+comes with <b>runbulgerot</b>. Since often such programs have a hardcoded name
+for input and/or output files, one simple way to be able to run  them in
+parallel without stepping on filenames, is the use of a clean run directory.
+ Example of this can be found in  <a href='runbulgerot.1.html'><i>runbulgerot(1NEMO)</i></a>
 , <a href='runbody1.1.html'><i>runbody1(1NEMO)</i></a>
-, <a href='rungalaxy.1.html'><i>rungalaxy(1NEMO)</i></a>
-, <a href='runscfm.1.html'><i>runscfm(1NEMO)</i></a>
 ,
-<a href='runqumond.1.html'><i>runqumond(1NEMO)</i></a>
-, and others. <p>
-You will find a few common user keywords for
-this: <b>outdir=</b> is always a required keyword, and needs to be a non-existing
-directory in which the data is written. For some programs there is an <b>exe=</b>
-keyword, in order to change the name of the non-NEMO program to be run. This
-is always assumed to be in the standard Unix search path ($PATH). <p>
-Although
-these run* programs use a fairly common method to run the non-NEMO programs,
-they have not all been unified as is proposed in <a href='run.3.html'><i>run(3NEMO)</i></a>
+<a href='rungalaxy.1.html'><i>rungalaxy(1NEMO)</i></a>
+, <a href='runscfm.1.html'><i>runscfm(1NEMO)</i></a>
+, <a href='runqumond.1.html'><i>runqumond(1NEMO)</i></a>
+, and some others. <p>
+You
+will find a few common user keywords for this: <b>outdir=</b> is always a required
+keyword, and needs to be a non-existing directory in which the data is written.
+For some programs there is an <b>exe=</b> keyword, in order to change the name
+of the non-NEMO program to be run. This is always assumed to be in the standard
+Unix search path ($PATH). <p>
+Although these run* programs use a fairly common
+method to run the non-NEMO programs, they have not all been unified as is
+proposed in <a href='run.3.html'><i>run(3NEMO)</i></a>
 . 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>Programming</a></h2>
+You may need to do some sherlocking here.
+You have probably seen the configure.ac and makedefs file. The $NEMOLIB/makedefs
+is the active file.  The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
+ will help you (re)compile programs,
+though <a href='bake.8.html'><i>bake(8NEMO)</i></a>
+ can do a better job in a local directory. 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='index.1.html'>index(1NEMO)</a>
 ,
 <a href='programs.8.html'>programs(8NEMO)</a>
@@ -132,26 +154,27 @@ they have not all been unified as is proposed in <a href='run.3.html'><i>run(3NE
 , <a href='getparam.3.html'>getparam(3NEMO)</a>
 , <a href='run.1.html'>run(1NEMO)</a>
 , <a href='run.3.html'>run(3NEMO)</a>
-, <a href='pipestatus.l.html'>pipestatus(l)</a>
-
-
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+, <a href='mknemo.8.html'>mknemo(8NEMO)</a>
+,
+<a href='pipestatus.l.html'>pipestatus(l)</a>
+ 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Further Information</a></h2>
-The <i>NEMO Users/Programmers Guide</i>
-contains most of the information you need to get down to the guts of the
-system. <p>
+<h2><a name='sect8' href='#toc8'>Further Information</a></h2>
+The <i>NEMO Users/Programmers
+Guide</i> contains most of the information you need to get down to the guts
+of the system. <p>
 Various <a href='man.1.html'><i>man(1NEMO)</i></a>
  pages explain <a href='programs.1.html'>programs(1)</a>
-, subroutine <a href='libraries.3.html'>libraries(3)</a>
-
-file <a href='formats.5.html'>formats(5)</a>
+, subroutine
+<a href='libraries.3.html'>libraries(3)</a>
+ file <a href='formats.5.html'>formats(5)</a>
  and system <a href='management.8.html'>management(8)</a>
 . <p>
 NEMO homepage <a href='http://www.astro.umd.edu/nemo.'><i>http://www.astro.umd.edu/nemo</i>.</a>
 
 
-<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+<h2><a name='sect9' href='#toc9'>Bugs</a></h2>
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these changes
 if they should. Keeping good cross references in the manual pages might
@@ -166,10 +189,11 @@ it is derived from the code itself. <p>
 <li><a name='toc2' href='#sect2'>Getting Started</a></li>
 <li><a name='toc3' href='#sect3'>How to Run Nemo Programs</a></li>
 <li><a name='toc4' href='#sect4'>HOW TO RUN non-NEMO PROGRAMS</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Further Information</a></li>
-<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc5' href='#sect5'>Programming</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Further Information</a></li>
+<li><a name='toc9' href='#sect9'>Bugs</a></li>
 </ul>
 </body>
 </html>

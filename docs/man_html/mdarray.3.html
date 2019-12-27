@@ -14,7 +14,7 @@ memory
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;mdarray.h&gt;
-#define MDMAXDIM    7 
+#define MDMAXDIM    8
 typedef real     *mdarray1;   /* vector */typedef
 mdarray1 *mdarray2;   /* matrix */typedef mdarray2 *mdarray3;   /* tensor
 */typedef mdarray3 *mdarray4;   /* hyper tensor */...
@@ -90,7 +90,7 @@ manual: using it will cause FFTW to die a painful death (referring to such
 dynamic arrays) 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <br>
-<pre>vectmath(3NEMO)
+<pre>vectmath(3NEMO), mdbench(1NEMO)
 nrutil.c (Numerical Recipes) for an alternative approach
 GSL: http://www.gnu.org/software/gsl/manual/html_node/Matrices.html (cf. valarray
 in C++)
@@ -108,6 +108,7 @@ Peter Teuben
 <br>
 <pre>5-may-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-feb-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;Allocate actually memory sequentually<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;Increased MDMAXDIM to 8<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
