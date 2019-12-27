@@ -424,8 +424,9 @@ build3:
 	(source nemo_start.sh ; $(MAKE) bins)
 	@echo 'Continue with "make build4"'
 
+BINS4 = tsf tabhist tsd orboom sdinfo
 build4:
-	(source nemo_start.sh ; mknemo tsf tabhist tsd orboom sdinfo)
+	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 
 
