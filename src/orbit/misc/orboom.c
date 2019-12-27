@@ -1,5 +1,5 @@
 /*
- *   Transform an orbit and ODM into "BOOM" HDF
+ *   Transform an orbit and ODM into "BOOM" NEMO file or HDF
  */
 
 #include <nemo.h>
@@ -16,14 +16,16 @@
 
 string defv[] = {
   "in=???\n            Input snapshot series",
-  "out=???\n           Output BOOM",
+  "out=???\n           Output BOOM file",
   "ndim=3\n            2 or 3 dimensional",
   "mode=0\n            0, 1, 2, 3",
   "size=2\n            Box will be from -size : size",
-  "npix=32\n           Number of pixels along box vertex",
-  "times=all\n         Which times to use from the snapshot [not yet]",
+  "npix=32\n           Number of pixels along (cube) box axes",
+  "times=all\n         Which times to use from the snapshot [not yet implemented]",
+  "nsteps=\n           This will scan the snapshots first (not yet implemented)",
   "body=\n             If set, only select this body for the orbit (0=first)",
-  "VERSION=0.5\n       27-dec-2019 XYZ",
+  "hdf=f\n             Outut format - Not implemented yet",
+  "VERSION=0.6\n       27-dec-2019 PJT",
   NULL,
 };
 
@@ -67,7 +69,7 @@ void nemo_main()
     crtatt(fin);
 }
 
-
+// @todo    scan once and then determine MAXSNAP as variable
 #define MAXSNAP 10000
 
 void scandata(string fin, string fout)
@@ -134,27 +136,29 @@ void scandata(string fin, string fout)
     for(iz=0; iz<npix; iz++)
       CubeValue(iptr,ix,iy,iz) = 0.0;
 
-
+    Key(optr) = i;
     for (j=0; j<nsnap; j++) {          // assemble an orbit
+      bp = btab[j] + i;
       Torb(optr, j) = tsnaps[j];
-      Xorb(optr, j) = Pos(btab[j])[0];
-      Yorb(optr, j) = Pos(btab[j])[1];
-      Zorb(optr, j) = Pos(btab[j])[2];
-      Uorb(optr, j) = Vel(btab[j])[0];
-      Vorb(optr, j) = Vel(btab[j])[1];
-      Worb(optr, j) = Vel(btab[j])[2];
+
+      Xorb(optr, j) = Pos(bp)[0];
+      Yorb(optr, j) = Pos(bp)[1];
+      Zorb(optr, j) = Pos(bp)[2];
+      Uorb(optr, j) = Vel(bp)[0];
+      Vorb(optr, j) = Vel(bp)[1];
+      Worb(optr, j) = Vel(bp)[2];
 #ifdef ORBIT_PHI
-      Porb(optr, j)  = Phi(btab[j]);
-      AXorb(optr, j) = Acc(btab[j])[0];
-      AYorb(optr, j) = Acc(btab[j])[1];
-      AZorb(optr, j) = Acc(btab[j])[2];
+      Porb(optr, j)  = Phi(bp);
+      AXorb(optr, j) = Acc(bp)[0];
+      AYorb(optr, j) = Acc(bp)[1];
+      AZorb(optr, j) = Acc(bp)[2];
 #endif      
 
-      ix = xbox(Pos(btab[j])[0],  size, npix);     // simple ODM coordinates
+      ix = xbox(Pos(bp)[0],  size, npix);     // simple ODM coordinates
       if (ix<0) continue;
-      iy = xbox(Pos(btab[j])[1],  size, npix);
+      iy = xbox(Pos(bp)[1],  size, npix);
       if (iy<0) continue;
-      iz = xbox(Pos(btab[j])[2],  size, npix);
+      iz = xbox(Pos(bp)[2],  size, npix);
       if (iz<0) continue;
       CubeValue(iptr,ix,iy,iz) += 1.0;   // could imagine a better normalization
     } // j
