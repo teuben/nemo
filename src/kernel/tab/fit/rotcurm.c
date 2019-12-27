@@ -3,7 +3,8 @@
  *
  *	f = p0 * (x/p1) / (1+(x/p1)**p2)**(1/p2)
  *
- * 4-jul-2019	created 
+ * 4-jul-2019	created
+ * 9-jul-2019   args..... this is the same as the "core" function in rotcurshape
  */
 
 #include <stdinc.h>
