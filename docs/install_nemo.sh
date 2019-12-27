@@ -8,6 +8,16 @@
 opt=1
 nemo=nemo
 
+for arg in $*; do\
+   export $arg
+done
+
+echo "Using: "
+echo "  opt=$opt"
+echo "  nemo=$nemo"
+echo ""
+
+
 date0=$(date)
 
 rm -rf $nemo
