@@ -96,7 +96,7 @@ WWWDIR = $(NEMO)/local/www
 SHELL = /bin/bash
 
 # this should remain the first target in this Makefile, so a default "make" invocation goes here
-help:   install
+help:   install lsb
 
 install:
 	@echo "There is no install because NEMO is build in place. The usual procedure is"
@@ -108,6 +108,9 @@ install:
 	@echo ""
 	@echo "After this, users will need to source the nemo_start.(c)sh file"
 	@echo "There is also some new python support via nemo_start.py"
+
+lsb:
+	@lsb_release -a
 
 
 help2:
