@@ -23,7 +23,7 @@ string defv[] = {
   "npix=32\n           Number of pixels along (cube) box axes",
   "times=all\n         Which times to use from the snapshot [not yet implemented]",
   "nsteps=\n           This will scan the snapshots first (not yet implemented)",
-  "body=\n             If set, only select this body for the orbit (0=first)",
+  "ibody=-1\n          If >= 0, only select this body for the orbit (0=first)",
   "hdf=f\n             Outut format - Not implemented yet",
   "VERSION=0.6\n       27-dec-2019 PJT",
   NULL,
@@ -36,7 +36,7 @@ string cvsid="$Id:$";
 //https://support.hdfgroup.org/ftp/HDF5/examples/src-html/c.html
 // this combines h5_crtdat.c h5_rdwt.c h5_crtatt.c
 
-void scandata(string fin, string fout); // 0
+void scandata(string fin, string fout, bool Qhdf); // 0
 void crtdat(string fout);  // 1
 void rdwt(string fin);     // 2
 void crtatt(string fin);   // 3
@@ -53,14 +53,16 @@ int xbox(real x, real size, int npix)
   return -1;
 }
 
+
 void nemo_main()
 {
   string fin = getparam("in");
   string fout = getparam("out");
   int mode = getiparam("mode");
+  bool Qhdf = getbparam("hdf");
 
   if (mode==0) {
-    scandata(fin,fout);
+    scandata(fin,fout,Qhdf);
   } else if (mode==1)
     crtdat(fin);
   else if (mode==2)
@@ -72,15 +74,22 @@ void nemo_main()
 // @todo    scan once and then determine MAXSNAP as variable
 #define MAXSNAP 10000
 
-void scandata(string fin, string fout)
+#ifndef TIMEFUZZ
+#  define TIMEFUZZ  0.001
+#endif
+
+void scandata(string fin, string fout, bool Qhdf)
 {
   stream instr = stropen(fin,"r");
   stream outstr = stropen(fout,"w");
+  string times = getparam("times");
   real tsnap, tsnaps[MAXSNAP];
   Body *bp, *btab[MAXSNAP];
   int nbody0 = 0, nbody, bits;
   real sum;
   int i, j, nsnap = 0;
+
+  if (Qhdf) warning("HDF output not avaiable yet. Deal with NEMO for now");
 
   for (i=0; i<MAXSNAP; i++) btab[i] = NULL;
   
@@ -95,10 +104,14 @@ void scandata(string fin, string fout)
       continue;       /* just skip it's probably a diagnostics */
     if ((bits & TimeBit) == 0)
       tsnap = 0.0;
+    if (!streq(times,"all") && !within(tsnap,times,TIMEFUZZ)) {
+      dprintf(1,"Skipping %g\n",tsnap);
+      continue;
+    }
     if (nbody0==0) nbody0 = nbody;
     if (nbody0 != nbody)
       error("Cannot process snapshots with changing nbody (%d,%d)",nbody0,nbody);
-    dprintf(1,"Processing %g\n",tsnap);
+    dprintf(1,"Adding %g\n",tsnap);
     tsnaps[nsnap] = tsnap;
     nsnap++;
     if (nsnap == MAXSNAP) {
@@ -117,19 +130,18 @@ void scandata(string fin, string fout)
   real size = getrparam("size");
 
   imageptr iptr;
-  int ix,iy,iz, iorb = -1;
+  int ix,iy,iz, ibody;
   real dmin, dmax;
   create_cube (&iptr, npix, npix, npix);
   Dx(iptr) = Dy(iptr) = Dz(iptr) = size / npix;
   Xmin(iptr) = Ymin(iptr) = Zmin(iptr) = -size;
-  if (hasvalue("body")) {
-    iorb = getiparam("body");
-    dprintf(0,"Only processing body %d\n",iorb);
-  }
+  ibody = getiparam("ibody");
+  if (ibody >= 0)
+    dprintf(0,"Only processing body %d\n",ibody);
   
   for (i=0; i<nbody0; i++) {    // loop over all bodies
 
-    if (iorb >= 0 && iorb != i) continue;
+    if (ibody >= 0 && ibody != i) continue;
     
     for(ix=0; ix<npix; ix++)           // clear the image
     for(iy=0; iy<npix; iy++)
@@ -161,7 +173,7 @@ void scandata(string fin, string fout)
       iz = xbox(Pos(bp)[2],  size, npix);
       if (iz<0) continue;
       CubeValue(iptr,ix,iy,iz) += 1.0;   // could imagine a better normalization
-    } // j
+    } // j (the # steps)
     dmin = dmax = CubeValue(iptr,0,0,0);
     for(ix=0; ix<npix; ix++)             // get dmin,dmax of the ODM
     for(iy=0; iy<npix; iy++)
@@ -172,11 +184,12 @@ void scandata(string fin, string fout)
     MapMin(iptr) = dmin;
     MapMax(iptr) = dmax;
     if (dmax == 0.0)
-      dprintf(0,"MapMin/Max: %g %g for body %d\n",dmin,dmax,i);
+      warning("MapMax 0 for body %d\n",i);
 
     write_orbit(outstr,optr);
     write_image(outstr,iptr);
-  } // i
+    reset_history();
+  } // i (the # particles)
   strclose(outstr);
 }
 
