@@ -18,7 +18,7 @@
  *      28-feb-14   3.3 added tab=
  *      25-aug-14   3.5 added maxpos=, fixed duplicate header, so format='ascii.commented_header'
  *                      works in astropy
- *
+ *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
  */
 
 #include <stdinc.h>
@@ -46,7 +46,7 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.5a\n 23-feb-2019 PJT",
+    "VERSION=3.5b\n 26-dec-2019 PJT",
     NULL,
 };
 
@@ -145,6 +145,7 @@ nemo_main()
     if (Qtorben) Qmedian = TRUE;
     if (Qmedian || Qrobust || Qtorben) {
       ndat = nx*ny*nz;
+      dprintf(1,"Need spare array size %d\n",ndat);
       data = (real *) allocate(ndat*sizeof(real));
     }
 
@@ -172,10 +173,17 @@ nemo_main()
 
       ini_moment(&m,maxmom,ndat);
       ngood = 0;
+#if 0
+      // not working yet
+      #pragma omp parallel \
+	shared(ngood, nx,ny,nz, iptr,wptr,m, xmin,xmax,bad,Qhalf,Qmin,Qmax,Qbad,Qw,data,tabstr,Qmedian) \
+        private(i,j,k,x,w)
+      #pragma omp for
+#endif      
       for (k=0; k<nz; k++) {
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
-            x =  CubeValue(iptr,i,j,k);
+            x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,k]
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
