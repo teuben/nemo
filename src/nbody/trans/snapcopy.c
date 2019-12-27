@@ -8,6 +8,7 @@
  *       1-apr-01          d    compiler warning
  *      13-feb-04       V1.1f    silenced more compiler warnings (shetty bug?)
  *      15-nov-06        1.2    set time to 0 if it was absent     PJT/AP
+ *    27-dec-2019        1.3    special case body= selection
  *
  *	BUG: should optionally copy other sets within the snapshot
  *	     set, e.g. diagnostics and story
@@ -24,7 +25,7 @@
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
 
-#include <bodytrans.h>
+#include <bodytransc.h>
 
 string defv[] = {
     "in=???\n           Input snapshot",
@@ -33,7 +34,8 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "VERSION=1.2\n      20-feb-04 PJT",
+    "body=-1\n          One body to select (not implemented yet)",
+    "VERSION=1.3\n      27-dec-2019 PJT",
     NULL,
 };
 
@@ -52,6 +54,7 @@ void nemo_main(void)
     Body   *btab = NULL, *bpi, *bpo;
     int    i, nbody, nout, nreject, bitsi, bitso, vis, visnow, vismax;
     bool   Qall;
+    int    ibody = getiparam("ibody");
     iproc_body sfunc;
 
     times = getparam("times");
