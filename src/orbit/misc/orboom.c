@@ -41,10 +41,13 @@ void crtatt(string fin);   // 3
 
 
 //  make sure we got the 0.5 pixel thing right here , see snapgrid
-int xbox(real x, int size, int npix)
+int xbox(real x, real size, int npix)
 {
+  int ix = (int) floor((x+size)/(2*size)*npix);
+  dprintf(0,"%g %d    %g %d\n",ix,x,size,npix);
   if (-size < x && x < size)
-    return (int) floor((x-size)/npix);
+    return ix;
+  // return (int) floor((x-size)/npix);
   return -1;
 }
 
@@ -158,6 +161,7 @@ void scandata(string fin, string fout)
       }
     MapMin(iptr) = dmin;
     MapMax(iptr) = dmax;
+    dprintf(0,"MapMin/Max: %g %g\n",dmin,dmax);
 
     write_orbit(outstr,optr);
     write_image(outstr,iptr);
