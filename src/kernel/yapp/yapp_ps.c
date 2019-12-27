@@ -19,13 +19,16 @@
  *					   and plcolor (but this ought to do color too) + friends
  *                                         allow yapp.ps to be overwritten; others not
  *                              20 jun 01  debug level now 1
+ *         3.3  PJT             15-jun-2018 prototypes
  */
 
-#define VERSIONID "Version 3.2d 20-jun-01 PJT"
+#define VERSIONID "Version 3.3 15-jun-2018 PJT"
 
 #include <stdinc.h>
+//#include <yapp.h>
 
-extern string yapp_string;
+extern string yapp_string;	/* a kludge, see: getparam.c */
+extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
 
 /* Scaling and layout parameters. */
 
@@ -79,12 +82,12 @@ local float green[MAXCOLOR];
 
 static real xscale(real x);
 static real yscale(real y);
-static prolog(real dx, real dy);
-static trailer(void);
-static begpage(void);
-static endpage(void);
-static begpath(void);
-static endpath(void);
+static void prolog(real dx, real dy);
+static void trailer(void);
+static void begpage(void);
+static void endpage(void);
+static void begpath(void);
+static void endpath(void);
 
 extern string date_id(void);                    /* date id */
 
@@ -171,7 +174,7 @@ plstop()
       sprintf(cmd,"lpr %s; rm -f %s",yappfile, yappfile);
       dprintf(0,"%s\n",cmd);
       system(cmd);
-    }
+    } 
 }
 
 /*
@@ -416,7 +419,7 @@ pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
     warning("pl_contour: not yet implemented for yapp_ps");
 }
 
-pl_cursor(float *x,float *y, char *c)      
+int pl_cursor(float *x,float *y, char *c)      
 {
  return 0;
 }
@@ -444,7 +447,7 @@ local real yscale(real y)
  * PROLOG: output prolog, make ready to begin 1st page.
  */
 
-local prolog(real dx, real dy)
+local void prolog(real dx, real dy)
 {
     int llx, lly, urx, ury;
 
@@ -493,7 +496,7 @@ local prolog(real dx, real dy)
  * TRAILER: output trailer.
  */
 
-local trailer()
+local void trailer(void)
 {
     fprintf(psst, "%%%%Trailer\n");
     fprintf(psst, "%%%%Pages: %d\n", npage);
@@ -503,7 +506,7 @@ local trailer()
  * BEGPAGE: start new output page.
  */
 
-local begpage()
+local void begpage(void)
 {
     if (yappstat == OPENPAGE) {
 	npage++;
@@ -517,7 +520,7 @@ local begpage()
  * ENDPAGE: finish output page.
  */
 
-local endpage()
+local void endpage(void)
 {
     if (yappstat == OPENPATH) {
 	fprintf(psst, "showpage\n");
@@ -530,7 +533,7 @@ local endpage()
  * BEGPATH: start path specification.
  */
 
-local begpath()
+local void begpath(void)
 {
     if (yappstat == OPENPATH) {
 	fprintf(psst, "np\n");
@@ -543,7 +546,7 @@ local begpath()
  * ENDPATH: terminate path specification.
  */
 
-local endpath()
+local void endpath(void)
 {
     if (yappstat == DRAWPATH) {
 	fprintf(psst, "st\n");
