@@ -55,10 +55,11 @@ fi
 #./configure $opt --with-yapp=pgplot --with-pgplot-prefix=/usr/lib 
 #./configure $opt --enable-native
 #./configure $opt --disable-falcon
+#./configure $opt --with-openmp
 #./configure $opt --enable-cfitsio --with-cfitsio-prefix=/usr
 #./configure $opt --with-yapp=plplot --disable-falcon
 #./configure $opt --with-opt
-
+./configure $opt
 
 # on a mac:
 #./configure $opt --without-csh 
