@@ -1,9 +1,9 @@
 #! /bin/csh -f
 #
 #   A NEMO CPU benchmark - 
-#  	it will excersize a few typical Nbody codes and use an
+#  	it will exersice a few typical NEMO codes and use an
 #	average. The baseline was a pentium-600 where each integrator
-#	would take about 30 seconds
+#	would take about 30 seconds, and before the 2GB size test.
 #
 set tmp    = bench$$
 set nbody0 = 3072
