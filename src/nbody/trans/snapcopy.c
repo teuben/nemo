@@ -34,7 +34,7 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "body=-1\n          One body to select (not implemented yet)",
+    "ibody=-1\n         One body to select (not implemented yet)",
     "VERSION=1.3\n      27-dec-2019 PJT",
     NULL,
 };
