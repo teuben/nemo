@@ -79,6 +79,22 @@ boom(5NEMO), h5dump(1), orbint(1NEMO), orbsos(1NEMO), snapgrid(1NEMO)
 .nf
 src/orbit/misc - source code
 .fi
+.SH COMPILATION
+Although \fBorboom\fP compiles via the Makefile (and mknemo), this is the first program in NEMO that
+combines all three major objects: SnapShot, Orbit and Image, as well as links with
+a 3rd party library (hdf5). Linking with hdf5 may require
+some configure tricks, or simply editing $NEMOLIB/makedefs. Here are some sample commands to help
+you with this:
+.nf
+
+   pkg-config --libs hdf5
+   h5cc -showconfig
+   dpkg --list | grep hdf5    (debian/ubuntu)
+   dpkg -L libhdf5-dev        (debian/ubuntu)
+   rpm -qa | grep hdf5        (redhat/centos)
+   rpm -ql hdf5-devel         (redhat/centos)
+
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
