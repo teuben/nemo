@@ -221,7 +221,14 @@ AC_ARG_WITH(dso,
 		  [  --with-dso              use DSO linking], with_dso=$withval, with_dso=no)
 AC_ARG_WITH(opt, 
 		  [  --with-opt              use opt for essentials], with_opt=$withval, with_opt=no)
-		  
+AC_ARG_WITH(openmp,
+		  [  --with-openmp           use OMP directives], with_openmp=$withval, with_openmp=no)
+
+if test $with_openmp = "yes"; then
+  CFLAGS="$CFLAGS -fopenmp"
+  CXXFLAGS="$CXXFLAGS -fopenmp"
+  FFLAGS="$CFLAGS -fopenmp"
+fi
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff

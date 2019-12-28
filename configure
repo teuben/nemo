@@ -762,6 +762,7 @@ with_hdf
 with_ccmalloc
 with_dso
 with_opt
+with_openmp
 with_x
 enable_png
 with_pgplot_prefix
@@ -1453,6 +1454,7 @@ Optional Packages:
   --with-ccmalloc         use CCMALLOC for malloc
   --with-dso              use DSO linking
   --with-opt              use opt for essentials
+  --with-openmp           use OMP directives
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-plplot-libdir=<PLPlot library path>
@@ -5872,6 +5874,19 @@ else
 fi
 
 
+# Check whether --with-openmp was given.
+if test "${with_openmp+set}" = set; then :
+  withval=$with_openmp; with_openmp=$withval
+else
+  with_openmp=no
+fi
+
+
+if test $with_openmp = "yes"; then
+  CFLAGS="$CFLAGS -fopenmp"
+  CXXFLAGS="$CXXFLAGS -fopenmp"
+  FFLAGS="$CFLAGS -fopenmp"
+fi
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
 $as_echo_n "checking for X... " >&6; }
