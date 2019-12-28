@@ -1,10 +1,27 @@
-.TH YAPP 1NEMO "03 July 2019"
+.TH YAPP 1NEMO "27 December 2019"
 .SH NAME
 yapp \- simple scripting interface to yapp
 .SH SYNOPSIS
 \fByapp\fP [parameter=value]
 .SH DESCRIPTION
-This allows you to write a script calling yapp functions.
+YAPP (Yet Another Plotting Package) is the plotting interface for most NEMO programs. The \fByapp=\fP
+program
+keyword (see \fIgetparam(3NEMO)\fP and \fInemo(1NEMO)\fP) controls how the selected yapp library
+uses it for graphics output. For example for the \fIyapp_ps\fP driver it designates the PS filename,
+which usually defaults to \fByapp.ps\fP but can be changed
+.nf
+      yapp=fig2.ps
+.fi
+and with the versatile \fIyapp_pgplot\fP interface the output can be redirected to
+a larger number of interactive and non-interacive devices, e.g.
+.nf
+	yapp=3/xs
+	yapp=fig4.ps/ps
+	yapp=color.ps/cps
+.fi
+.PP
+However to write scripts in a portable way (semi-automatically switching devices) and incrementing figure
+numbers in case there are more than one, can be a bit challenging.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -13,10 +30,11 @@ is also given:
 Override for yapp= system keyword (*** = default)
 .TP
 \fBlayout=\fP
-Optional layout file []    
-.SH EXAMPLES
-In the case of a yapp device that can switch between graphics output, here is a
-csh-example in the PGPLOT version of yapp, how to auto-increment your output devices:
+Optional layout file []
+.SH CSH EXAMPLES
+In the case of a yapp device that can switch between graphics output, here is an awkward
+csh-example (csh does not have functions)
+with the PGPLOT_YAPP driver , how to auto-increment your output devices:
 .nf
 #  before the script starts, assign two variables and initialize the $yapp
 set yapps = yapp%d.ps/vcps    # yapp printf string (%d/xs, yapp%d.ps/vcps)
@@ -29,12 +47,37 @@ tabplot .... yapp=$yapp
 set yapp=`printf $yapps $yappn` ; @ yappn++
 
 .fi
+So each time a new figure is made, the \fBset yapp=\fP line needs to be cloned. Awkward. Lets see
+how this works in (BA)SH:
+.SH SH EXAMPLES
+Life in bash is simpler, since it allows functions, although they don't return
+values, they simply need to echo something. For example this function can deal with
+YAPP_PGPLOT and YAPP_PS:
+.nf
+yapp() {
+  if test $yapp = "xs"; then
+     echo $1/$yapp
+  elif test $yapp = "_ps"; then
+     echo fig$1.ps
+  else
+     echo fig$1.$yapp/$yapp
+  fi
+}
+.fi
+with this definition your code can simply do things like
+.nf
+   yapp=xs                 # pick 'xs', 'ps', 'png', '_ps'
+   echo yapp=$(yapp 11)    # this should diplay a nice yapp= formatted line
+.fi
 .SH SEE ALSO
+printf(1), yapp(3NEMO), yapp(5NEMO)
 .SH FILES
+$NEMO/src/tutor/main/main.sh
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-03-Jul-19	V0.0 Created by mkman	NEMO
+03-Jul-19	Created		PJT
+27-dec-2019	added bash example	PJT
 .fi
