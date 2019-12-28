@@ -1,10 +1,5 @@
 #! /bin/csh -f
 #
-#  P600/     116.510u 17.390s 2:41.66 82.8%     0+0k 0+0io 778435pf+0w            ~2004
-# P1600/
-#    i7/     125.240u 25.740s 2:52.00 87.7%	0+0k 239968+895168io 785pf+0w      2017
-#            172.416u 15.444s 3:22.60 92.7%	0+0k 197896+1088264io 618pf+0w
-#
 #  History:     29-mar-2004   for NEMO V3.2
 #                4-may-2004   various new keywords and cfitsio optional install
 #               30-jul-2004   optional cfitsio install
@@ -23,6 +18,7 @@
 #                8-aug-2018   add ubuntu option (Jason Lammers) if you start from a virgin ubuntu
 #               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
 #                7-may-2019   add centos=1 option to get a redhat flavor
+#               11-dec-2019   add python= option
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -49,8 +45,8 @@ set glnemo      = 1             # compile glnemo2
 set unsio       = 0             # compile unsio and uns_project
 set falcon      = 1             # Dehnen's falcon environment
 set gsl         = 0             # add GSL library
-set hdf         = 1             # use HDF library, if present
-set png         = 0             # add png for pgplot (can easily break other programs in NEMO)
+set hdf         = 1             # use HDF library (not used)
+set png         = 0             # add png for our internal pgplot
 set gif         = 1             # add gi/pp/wd drivers (they use %ref/%val) for pgplot - not for gfortran <= 41
 set single      = 0             # singe or double (default) precision
 set all         = 1		# make all binaries , or just the one for the testsuite?
@@ -64,11 +60,13 @@ set yapp        = (/null)	# set a YAPP device during the install
                   	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
 set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3450.tar.gz   
 set cfitsio     = 0             # disable for formal release since there are some problems
-set debug       = 1             # compile in debug mode (not implemented)
+set debug       = 0             # compile in debug mode 
 set test        = 1             # also run testsuite at the end
+set bench       = 1             # also run bench at the end
 set pedantic    = 0             # compile in pedantic mode
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
+set python      = 0             # 1 means also install an anaconda in $NEMO (only for linux)
 
 set unames      = `uname -s`    # supported are: Darwin, Linux
 
@@ -244,6 +242,7 @@ if ($png)      set copts=($copts --enable-png)
 if ($cfitsio)  set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single)   set copts=($copts --enable-single)
 if ($debug)    set copts=($copts --enable-debug)
+if ($native)   set copts=($copts --enable-native)
 if ($pedantic) set copts=($copts --enable-pedantic)
 if ($dso == 0) set copts=($copts --without-dso)
 if ($pgplot)   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
@@ -321,6 +320,11 @@ if ($unsio) then
   if ($status) echo "### Error: uns_project build problem".  
 endif
 
+if ($python) then
+  echo "Installing anaconda - only works for linux"
+  src/scripts/install_anaconda3 
+endif
+
 rehash
 
 if ($test) then
@@ -330,6 +334,10 @@ if ($test) then
   else
     src/scripts/testsuite -b
   endif
+endif  
+
+if ($bench) then
+  time src/scripts/nemo.bench
 endif  
 
 echo All done.
