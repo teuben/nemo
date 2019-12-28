@@ -6,6 +6,11 @@
 #  ((to $NEMOLIB via the "make config_extra" command during the))
 #  (("make build1" step of the install))
 
+#  Note that the falcON tools (e.g. gyrfalcON) do not use this file.
+#  See the $NEMO/usr/dehnen/utils/make.* files to figure out how
+#  to tune these tools. Walter did a pretty darn good job, see if you
+#  beat that!
+
 #  DSO linking: might need to wrap offending libraries 
 #       -Wl,--no-as-needed -lX11 -Wl,-as-needed
 #  instead of 
