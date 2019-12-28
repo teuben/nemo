@@ -19,6 +19,7 @@
 #               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
 #                7-may-2019   add centos=1 option to get a redhat flavor
 #               11-dec-2019   add python= option
+#               27-dec-2018   add native= and openmp=
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -64,6 +65,7 @@ set debug       = 0             # compile in debug mode
 set test        = 1             # also run testsuite at the end
 set bench       = 1             # also run bench at the end
 set pedantic    = 0             # compile in pedantic mode
+set openmp      = 0             # compile with -fopenmp
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
 set python      = 0             # 1 means also install an anaconda in $NEMO (only for linux)
@@ -243,6 +245,7 @@ if ($cfitsio)  set copts=($copts --enable-cfitsio --with-cfitsio-prefix=`pwd`)
 if ($single)   set copts=($copts --enable-single)
 if ($debug)    set copts=($copts --enable-debug)
 if ($native)   set copts=($copts --enable-native)
+if ($openmp)   set copts=($copts --with-openmp)
 if ($pedantic) set copts=($copts --enable-pedantic)
 if ($dso == 0) set copts=($copts --without-dso)
 if ($pgplot)   set copts=($copts --with-yapp=pgplot --with-pgplot-prefix=`pwd`/lib)
