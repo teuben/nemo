@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.6i 23-nov-2019 PJT"
+#define GETPARAM_VERSION_ID  "3.7 29-dec-2019 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -227,6 +227,15 @@
 #include <unistd.h>
 #include <ctype.h>
 
+
+//#if defined(ENABLE_OPENMP)
+#if _OPENMP
+#include <omp.h>
+#else
+typedef int omp_int_t;
+inline omp_int_t omp_get_thread_num() { return 0;}
+inline omp_int_t omp_get_max_threads() { return 1;}
+#endif
 
 #if defined(TCL7)
 # include <tcl.h>
@@ -738,6 +747,9 @@ void initparam(string argv[], string defv[])
             warning("No VERSION keyword");
     }
 #endif
+
+    // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
+    dprintf(1,"omp_get_max_threads() -> %d\n", omp_get_max_threads());
     initparam_out();
 #ifndef __MINGW32__
     clock1 = times(&tms1);
