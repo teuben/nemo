@@ -1,0 +1,104 @@
+.TH RUNLPVI 1NEMO "29 December 2019"
+.SH NAME
+runlpvi \- NEMO front end for LP-VIcode
+.SH SYNOPSIS
+\fBrunlpvi\fP [parameter=value]
+.SH DESCRIPTION
+\fBrunlpvi\fP is a NEMO front-end to the LP-VIcode, which computes
+a set of chaos indicators for (galactic) orbits.
+.PP
+Compiling and Running the original \fILP-VIcode\fP requires 4 actions:
+.PP
+1) provice a "PAV" fortran coded file with use your Potential, Acceleration and
+Variationals and include it in the code, and compile it
+.PP
+2) write an initial conditions file (4,5,6 or 7 values on the line). We
+only support 4 or 6 at the moment. (see \tBtstop=\fP below)
+.PP
+3) write a input parameter file. Need 20 lines.
+.PP
+4) write a parameter file in which NDIM is defined (the rest seems not important)
+.PP
+This is sufficiently complex to make running many examples cumbersome, hence
+the \fIrunlpvi\fP NEMO interface.
+.SH PARAMETERS
+.TP 20
+\fBoutdir=\fP
+Output run directory (required) 
+.TP 20
+\fBposvel=\fP
+Initial conditions (4 or 6 values). This implies only one orbit
+can be computed, but in a future version multiples should work too
+as the original LP-VIcode can
+.TP
+\fBprefix=\fP
+Prefix for output files [lyap011]   
+.TP
+\fBdt=\fP
+Integration step [0.01]     
+.TP
+\fBtstop=\fP
+Time of integration. In a future version multiple orbits
+can have different integration times, which means they need
+to be specified at the end of the \fBposvel=\fP sequence.
+[1]    
+.TP
+\fBscreen=\fP
+Screen output? [1]     
+.TP
+\fBorbit=\fP
+Orbit output? [0]     
+.TP
+\fBci=\fP
+CI indictors: LIs, SALI, GALIs, SD & SSNs, RLI & LImax, MEGNO & SElLCE, FLI & OFLI.
+0=don't compute, 1=output for all t, 2=output only last value
+.TP
+\fBnstep=\fP
+Nr. of steps between outputs (when orbit or indicators are = 1)
+[1] 
+.TP
+\fBdev=\fP
+Initial dev. vectors (0 = at random, 1 = random orthonormal, 2=fixed)
+[1]
+.TP
+\fBsali=\fP
+SALI & potential(t): normal saturation (=0) or restart
+[1]
+.TP\fBndim=\fP
+Not used yet, but might be needed if we allow multiple orbits and optional tstop's.
+.TP
+\fBexe=\fP
+Name of the fortran executable [LP-VIcode]
+.SH EXAMPLES
+The \fIlogarithm2\fP example from the manual can be run as follows:
+.nf
+
+  runlpvi run1 posvel=0.2,0.34,0.5,0.1235 prefix=log dt=0.05 tstop=25000 orbit=1 ci=1::7 nstep=20
+  tabplot run1/log.orb 2 3 -0.5 0.5 -0.5 0.5
+
+.fi
+followed with some pure NEMO orbits:
+.nf
+
+  mkorbit run1/orb.in 0.2 0.34 0 0.5 0.1235 0 potname=log potpars=0,2,0,0.7
+  orbint run1/orb.in run1/orb.out  50000 0.05 ndiag=10000
+  orbplot run1/orb.out xrange=-0.5:0.5 yrange=-0.5:0.5
+  
+.fi
+and it becomes obvious the integrator in \fBorbint\fP cannot handle a 0 core radius for box orbits.
+.SH SEE ALSO
+orbdim(1NEMO)
+.PP
+.nf
+http://lp-vicode.fcaglp.unlp.edu.ar/
+http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf
+.fi
+.SH FILES
+NEMO/usr/lpvi
+.SH AUTHOR
+Peter Teuben (runlpvi)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+29-Dec-19	V0.1 Created	PJT
+.fi
