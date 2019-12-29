@@ -58,7 +58,7 @@ form, eg, "1.0:1.5,2.5,3.0". Currently all. The code is limited to 10,000. </dd>
 <dd>If not given, the input file will be scanned first. Not implemented yet.
 </dd>
 
-<dt><b>iqbody=</b> </dt>
+<dt><b>ibody=</b> </dt>
 <dd>If set, only this body will be output. This is useful for debugging.
 </dd>
 
@@ -103,9 +103,22 @@ not working yet]
 <br>
 <pre>src/orbit/misc - source code
 </pre>
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Compilation</a></h2>
+Although <b>orboom</b> compiles via the Makefile (and mknemo), this
+is the first program in NEMO that combines all three major objects: SnapShot,
+Orbit and Image, as well as links with a 3rd party library (hdf5). Linking
+with hdf5 may require some configure tricks, or simply editing $NEMOLIB/makedefs.
+Here are some sample commands to help you with this: <br>
+<pre>   pkg-config --libs hdf5
+   h5cc -showconfig
+   dpkg --list | grep hdf5    (debian/ubuntu)
+   dpkg -L libhdf5-dev        (debian/ubuntu)
+   rpm -qa | grep hdf5        (redhat/centos)
+   rpm -ql hdf5-devel         (redhat/centos)
+</pre>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>26-Dec-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -120,8 +133,9 @@ Peter Teuben
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>Compilation</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>
