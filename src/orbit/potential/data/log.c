@@ -63,13 +63,19 @@ void inipotential (int *npar, double *par, char *name)
 
 void potential_double (int *ndim, double *pos, double *acc, double *pot, double *time)
 {
-    double rad, f;
+    double f;
+    double rad = r2;
     int    i;
-	
-    for (i=0, rad=r2; i<*ndim; i++)
+    
+    //#pragma omp 
+    //#pragma omp parallel for reduction(+:rad)
+    for (i=0; i<*ndim; i++)
         rad += sqr(pos[i])*iq2[i];
     *pot = mor * log(rad);
     f = -2.0*mor/rad;
+    
+    //#pragma omp parallel shared(ndim,acc,f,pos,iq2) private(i)
+    //#pragma omp for
     for (i=0; i<*ndim; i++)
         acc[i] = f*pos[i]*iq2[i];
 }
