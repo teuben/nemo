@@ -749,7 +749,7 @@ void initparam(string argv[], string defv[])
 #endif
 
     // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
-    dprintf(1,"omp_get_max_threads() -> %d\n", omp_get_max_threads());
+    dprintf(1,"omp_get_max_threads() -> %d  [OMP_NUM_THREADS]\n", omp_get_max_threads());
     initparam_out();
 #ifndef __MINGW32__
     clock1 = times(&tms1);
