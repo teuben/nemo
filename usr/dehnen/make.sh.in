@@ -1,0 +1,12 @@
+#  environment variables for the install of falcON
+#  this file is controlled by NEMO's configure since Version 4.2 (dec 2019)
+
+
+# if you want --with-native:
+# NO_ARCH_NATIVE=0
+
+# if you want --fopenmp
+# OPENMP=1
+
+# if you get "undefined symbol: GOMP_parallel"
+# may need to add -lgomp as NEMO needs for the body/pot plugins
