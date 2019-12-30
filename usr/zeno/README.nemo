@@ -1,22 +1,24 @@
 
-1) go to http://www.ifa.hawaii.edu/~barnes/software.html
-   fetch the main release (010 now)
-        http://www.ifa.hawaii.edu/~barnes/zeno/zeno.010.tar.gz
-   fetch the update (none now)
-   edit the MAC or LINUX portion in our local version zeno.rc
-   source zeno.rc
-   make -f Zeno
-   set path=($ZENOPATH/bin $path)
-   rehash
+See http://www.ifa.hawaii.edu/~barnes/software.html for info on the
+latest releases.  ZENO is also maintained in github now, and this is
+the preferred way to install it within NEMO. See the Makefile for a
+few targets to help you with the install.
 
+If this all works, and you have the preconditions (gsl, mpicc) you
+should be able to do:
 
-2) follow the now older instructions in $NEMO/src/scripts/zeno.install
-   --now deprecated--
+       	  make zeno
+	  ln -s zeno_jeb zeno
+	  source zeno_start.sh
+	  cd zeno
+	  make -f Zeno 
+
+Consult the zeno/Instructions for troubleshooting.   It will also
+download my zeno_pjt fork, just in case.
+
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
-and may not be doing exactly the same thing.
+and may not be doing exactly the same thing. mkorbit is the major one that
+I know about.
 
-
-git clone https://github.com/joshuabarnes/zeno/
-cd zeno
-make -f Zeno
+ - Peter Teuben,    dec 2019
