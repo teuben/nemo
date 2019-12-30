@@ -24,7 +24,7 @@
 string defv[] = {
     "outdir=???\n        Output run directory (required)",
     "posvel=???\n        Initial conditions (4 or 6 values)",
-    "prefix=lyap011\n    Prefix for output files",
+    "prefix=log\n        Prefix for output files",
     "dt=0.01\n           Integration step",
     "tstop=1\n           Time of integration",
     "screen=1\n          Screen output?",
@@ -37,12 +37,13 @@ string defv[] = {
     "ndim=\n             Not used yet, but might be needed if posvel ambiguous",
     "exe=LP-VIcode\n     Name of the fortran executable",
 
-    "VERSION=0.1\n       29-dec-2019 PJT",
+    "VERSION=0.2\n       29-dec-2019 PJT",
     NULL,
 };
 
 string usage="NEMO front end for LP-VIcode";
 
+#define MAXCI 7
 
 void nemo_main(void)
 {
@@ -55,6 +56,7 @@ void nemo_main(void)
     string fname;
     char dname[256], runcmd[256];
     real posvel[6];
+    int nci, ci[MAXCI];
     stream ostr, datstr, histr;
 
     npv = nemoinpr(getparam("posvel"),posvel,6);
@@ -64,6 +66,10 @@ void nemo_main(void)
       ndim = 2;
     else
       error("Need (multiple of) 4 or 6 values for posvel");
+
+    nci = nemoinpi(getparam("ci"),ci,MAXCI);
+    if (nci<0) error("Error ci=");
+    for (i=nci; i<MAXCI; ++i) ci[i] = 0;
 
     run_mkdir(rundir);
     run_cd(rundir);
@@ -108,7 +114,7 @@ void nemo_main(void)
     fprintf(ostr,"%d %d\n",getiparam("screen"),getiparam("orbit"));
     fprintf(ostr,"# \n");
     fprintf(ostr,"# \n");
-    fprintf(ostr,"%d %d %d %d %d %d %d\n",0,0,0,0,0,0,0);
+    fprintf(ostr,"%d %d %d %d %d %d %d\n",ci[0],ci[1],ci[2],ci[3],ci[4],ci[5],ci[6]);
     fprintf(ostr,"# \n");
     fprintf(ostr,"%d\n",getiparam("nstep"));
     fprintf(ostr,"# \n");
