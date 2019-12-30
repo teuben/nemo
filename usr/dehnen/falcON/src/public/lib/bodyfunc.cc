@@ -183,7 +183,7 @@ namespace {
 #ifdef __DARWIN_UNIX03
 	     " -L$FALCONLIB -lfalcON -L$FALCON/utils/lib -lWDutils"
 #endif
-	     " >& %s.log",
+	     " > %s.log 2>&1",
 	     COMPILER,
 	     fname,fname,(flags? flags : " "),falcON_path,falcON_path,fname);
     DebugInfo(2,"now compiling using the following command\n   %s\n",cmmd);
@@ -208,7 +208,7 @@ namespace {
     // delete files /tmp/fname.* UNLESS debug(debug_depth)
     if(delete_f && !debug(debug_depth) && fname && fname[0]) {
       char cmmd[512];
-      SNprintf(cmmd,512,"rm -f /tmp/%s.* >& /dev/null",fname);
+      SNprintf(cmmd,512,"rm -f /tmp/%s.* > /dev/null 2>&1",fname);
       DebugInfo(4,"executing \"%s\"\n",cmmd);
       system(cmmd);
     }
@@ -289,19 +289,19 @@ namespace {
       SNprintf(fullfile,STR_LENGTH,"%s/%s",dir,file);   // falcONlib/subdir/file
       // make sure falcONlib/subdir/ exists!
       char cmmd[STR_LENGTH];
-      SNprintf(cmmd,STR_LENGTH,"cd %s >& /dev/null",falcONlib);
+      SNprintf(cmmd,STR_LENGTH,"cd %s > /dev/null 2>&1",falcONlib);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
-      SNprintf(cmmd,STR_LENGTH,"cd %s/%s >& /dev/null",falcONlib,subdir);
+      SNprintf(cmmd,STR_LENGTH,"cd %s/%s > /dev/null 2>&1",falcONlib,subdir);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) {
 	DebugInfo(debug_depth,"BF_database: no directory %s/%s;"
 		  " try to make it\n", falcONlib,subdir);
-	SNprintf(cmmd,STR_LENGTH,"mkdir %s/%s >& /dev/null",falcONlib,subdir);
+	SNprintf(cmmd,STR_LENGTH,"mkdir %s/%s > /dev/null 2>&1",falcONlib,subdir);
 	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
 
-	SNprintf(cmmd,STR_LENGTH,"chmod 777 %s/%s >& /dev/null",
+	SNprintf(cmmd,STR_LENGTH,"chmod 777 %s/%s > /dev/null 2>&1",
 		 falcONlib,subdir);
 	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) throw(DataBaseErr(message("cannot %s",cmmd)));
@@ -383,7 +383,7 @@ namespace {
     int counter() throw(DataBaseErr) {             // R: valid function counter 
       char cmmd[STR_LENGTH];
       // check for existence of backup-file
-      SNprintf(cmmd,STR_LENGTH,"ls %s.bak >& /dev/null",fullfile);
+      SNprintf(cmmd,STR_LENGTH,"ls %s.bak > /dev/null 2>&1",fullfile);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(!system(cmmd)) throw DataBaseErr(message("file %s/%s.bak exists"));
       char fbak[STR_LENGTH];
@@ -421,7 +421,7 @@ namespace {
       if(locked) {
 	char cmmd[STR_LENGTH];
 	SNprintf(cmmd,STR_LENGTH,
-		 "mv %s.bak %s >& /dev/null; chmod 666 %s >& /dev/null",
+		 "mv %s.bak %s > /dev/null 2>&1; chmod 666 %s > /dev/null 2>&1",
 		 fullfile,fullfile,fullfile);
 	DebugInfo(10,"executing \"%s\"\n",cmmd);
 	if(system(cmmd)) falcON_Warning("problems unlocking database\n");
@@ -442,8 +442,8 @@ namespace {
     {
       if(!locked) throw DataBaseErr("not locked, cannot put()");
       char cmmd[STR_LENGTH];
-      SNprintf(cmmd,STR_LENGTH,"cp /tmp/%s.so %s/%s.so >& /dev/null; "
-	       "chmod 444 %s/%s.so >& /dev/null",
+      SNprintf(cmmd,STR_LENGTH,"cp /tmp/%s.so %s/%s.so > /dev/null 2>&1; "
+	       "chmod 444 %s/%s.so > /dev/null 2>&1",
 	       fname,dir,func,dir,func);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd))
@@ -451,14 +451,14 @@ namespace {
 				  fname));
       char fbak[STR_LENGTH];
       SNprintf(fbak,STR_LENGTH,"%s.bak",fullfile);
-      SNprintf(cmmd,STR_LENGTH,"chmod 600 %s >& /dev/null",fbak);
+      SNprintf(cmmd,STR_LENGTH,"chmod 600 %s > /dev/null 2>&1",fbak);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
       std::ofstream file;
       if(!open_to_append(file,fbak) )
 	throw DataBaseErr(message("cannot open file %s",fbak));
       file  <<expr<<' '<<type<<' '<<npar<<' '<<need<<' '<<func<<std::endl;
-      SNprintf(cmmd,STR_LENGTH,"chmod 000 %s >& /dev/null",fbak);
+      SNprintf(cmmd,STR_LENGTH,"chmod 000 %s > /dev/null 2>&1",fbak);
       DebugInfo(10,"executing \"%s\"\n",cmmd);
       if(system(cmmd)) throw DataBaseErr(message("cannot %s",cmmd));
     }
