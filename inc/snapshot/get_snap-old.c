@@ -89,8 +89,8 @@ int *ifptr;			/* pointer to input bit flags */
 	} else
 	  error("Cannot find Nobj or NBody in snapshot");
 	if (*btptr != NULL && nbody > *nbptr)	/* bigger than expected? */
-	    error("get_snap_parameters: %s = %d is too big\n",
-		  NobjTag, nbody);
+	    error("get_snap_parameters: %s = %d is too big now %d\n",
+		  NobjTag, nbody, *nbptr);
 	*nbptr = nbody;				/* set input value */
 	if (get_tag_ok(instr, TimeTag)) {	/* time data specified? */
 	    get_data_coerced(instr, TimeTag, RealType, tsptr, 0);
