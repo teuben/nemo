@@ -25,6 +25,11 @@ contains a timestamp of that creation.
 <A NAME=4_1_2>
 <H2> 4.1.2:  in progress </H2>
 <UL>
+  <LI> A frontend to the
+    <A HREF=http://lp-vicode.fcaglp.unlp.edu.ar/>LP-VIcode</A>, which computes a series of chaos indicators
+for orbits, is available as
+<A HREF=man_html/runlpvi.1.html>runlpvi</A>
+  <LI> (29-dec-2019) Each NEMO program can now use openmp calls, but I continue to be frustrated how hard it is to speed things up.
   <LI> (26-dec-2019) Some overhaul of the autoconf based configure/make system. For HDF4, HDF5 and CFITSIO there are now direct install methods
     which install these packages under $NEMO/opt.
     This also bypasses a lot of the issues of non-standard installation paths
