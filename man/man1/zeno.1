@@ -1,10 +1,14 @@
-.TH ZENO 1NEMO "22 February 2019"
+.TH ZENO 1NEMO "30 December 2019"
 .SH SYNOPSIS
 \fBprogram [key1=]val1 [key2=]val2 .\!.\!.
 .SH DESCRIPTION
-\fBZENO\fP is Josh Barnes' version of NEMO. The code is largely 
-derived from NEMO. The binary datafiles, via \fIflestruct(3NEMO)\fP
+\fBZENO\fP is Josh Barnes' version of NEMO. The code is 
+derived from NEMO, with a common ancestor around 1988.
+The binary datafiles, via \fIflestruct(3NEMO)\fP
 are largely compatible.
+.PP
+When installed, ZENO adds about 130 executables via $ZENOPATH/bin.
+Within NEMO, a user would source the $NEMO/usr/zeno/zeno_start.sh script.
 .PP
 .SH EXAMPLES
 A \fIsnapshot(5NEMO)\fP created with ZENO has Position and Velocity, as well
@@ -23,15 +27,16 @@ As highlighted in the example, a ZENO snapshot uses \fINBody\fP instead of NEMO'
 as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted.
 .PP
 NEMO's \fIpotential(5NEMO)\fP are similar to ZENO's \fIgspmodels\fP, where the latter also allows for adding
-potentials (much harder in NEMO).
+potentials (much harder in NEMO).  falcON has simular tools to add potentials.
 .PP
 NEMO has no real support for SPH (though some tags in snapshot's are supported)
 .PP
-ZENO has not plotting such as NEMO's yapp
+ZENO has no plotting such as NEMO's yapp
 .SH FILES
 .nf
-.ta +2i
-$NEMO/usr/zeno		instructions how to install
+.ta +3i
+$NEMO/usr/zeno			directory, with instructions how to install
+$NEMO/usr/zeno/zeno_start.sh	startup script
 .fi
 .SH SEE ALSO
 nemo(1NEMO)
