@@ -14,4 +14,4 @@ export ZENO_SAFE_SELECT="true"
 export ZENO_MSG_OPTION="all"
 
 
-export PATH=$ZENOPATH:$PATH
+export PATH=$ZENOPATH/bin:$PATH
