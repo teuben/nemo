@@ -9,94 +9,116 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-runlpvi - NEMO front end for LP-VIcode 
+runlpvi - NEMO front end for the LP-VIcode 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>runlpvi</b> [parameter=value]
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>runlpvi</b> is a NEMO front-end to the LP-VIcode, which computes a
-set of chaos indicators for (galactic) orbits. <p>
-Compiling and Running the
-original <i>LP-VIcode</i> requires 4 actions: <p>
-1) provice a "PAV" fortran coded
-file with use your Potential, Acceleration and Variationals and include
-it in the code, and compile it <p>
+set of chaos indicators for (galactic) orbits. The main documentation can
+be found online in their manual <a href='http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf.'>http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf.</a>
+
+Here we review the particulars of the NEMO user interface, see also EXAMPLES
+below for some of the NEMO examples. <p>
+Compiling and Running the original
+<i>LP-VIcode</i> requires 4 actions: <p>
+1) provide a "PAV" fortran coded file with
+use your Potential, Acceleration and Variationals and include it in the
+code, and compile it. Note that in the current implementation both the potential
+and its parameters are specified in the executable, and unlike NEMO&rsquo;s potname/potpars
+interface cannot be changed. <p>
 2) write an initial conditions file (4,5,6
-or 7 values on the line). We only support 4 or 6 at the moment. (see tBtstop=
+or 7 values on the line). We only support 4 or 6 at the moment. (see <b>tstop=</b>
 below) <p>
-3) write a input parameter file. Need 20 lines. <p>
-4) write a parameter
-file in which NDIM is defined (the rest seems not important) <p>
-This is sufficiently
-complex to make running many examples cumbersome, hence the <i>runlpvi</i> NEMO
-interface. 
+3) write a input parameter file. Needs to be 20 lines, including
+comments. This needs to be named <b>LP-VIcode.in</b>. <p>
+4) write a parameter file in
+which NDIM is defined (the rest seems not important) This needs to be named
+<b>LP-VIcode.par</b>. <p>
+This is sufficiently complex to make running many examples
+cumbersome, hence the <i>runlpvi</i> NEMO interface, which takes care of items
+2-4.  Linking the LP-VIcode is left as an exercize to the reader. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 
 <dl>
 
-<dt><b>outdir=</b> </dt>
-<dd>Output run directory (required)  </dd>
+<dt><b>outdir=</b>
+</dt>
+<dd>Output run directory, which must not exist yet. (required)  </dd>
 
 <dt><b>posvel=</b> </dt>
 <dd>Initial
-conditions (4 or 6 values). This implies only one orbit can be computed,
-but in a future version multiples should work too as the original LP-VIcode
-can </dd>
+conditions (4 or 6 values). Curently only one orbit can be computed, but
+in a future version multiples should work too as the original LP-VIcode.
+</dd>
 
 <dt><b>prefix=</b> </dt>
-<dd>Prefix for output files [lyap011]    </dd>
+<dd>Prefix for output files.  The name is not very important, as all
+files are in a new directory.  The extensions are described in the manual,
+but in brief are: <i>.ene</i>, <i>.orb</i>,  <i>.lyap</i>, <i>.sali</i>, <i>.gali</i>, <i>.sd</i>,  <i>.ssn</i>, <i>.rli</i>, <i>.megno</i>, and
+<i>.fli</i>. [log] </dd>
 
 <dt><b>dt=</b> </dt>
-<dd>Integration step [0.01]
-     </dd>
+<dd>Integration step [0.01]      </dd>
 
 <dt><b>tstop=</b> </dt>
-<dd>Time of integration. In a future version multiple orbits can
-have different integration times, which means they need to be specified
-at the end of the <b>posvel=</b> sequence. [1]     </dd>
+<dd>Time of integration. In
+a future version multiple orbits can have different integration times,
+which means they need to be specified at the end of the <b>posvel=</b> sequence.
+[1]     </dd>
 
 <dt><b>screen=</b> </dt>
-<dd>Screen output? [1] 
-    </dd>
+<dd>Screen output? [1]      </dd>
 
 <dt><b>orbit=</b> </dt>
 <dd>Orbit output? [0]      </dd>
 
-<dt><b>ci=</b> </dt>
-<dd>CI indictors: LIs, SALI, GALIs, SD
-&amp; SSNs, RLI &amp; LImax, MEGNO &amp; SElLCE, FLI &amp; OFLI. 0=don&rsquo;t compute, 1=output for
-all t, 2=output only last value </dd>
+<dt><b>ci=</b>
+</dt>
+<dd>CI indictors: LIs, SALI, GALIs, SD &amp; SSNs, RLI &amp; LImax, MEGNO &amp; SElLCE, FLI
+&amp; OFLI. 0=don&rsquo;t compute, 1=output for all t, 2=output only last value </dd>
 
-<dt><b>nstep=</b> </dt>
-<dd>Nr. of steps between outputs (when
-orbit or indicators are = 1) [1]  </dd>
+<dt><b>nstep=</b>
+</dt>
+<dd>Nr. of steps between outputs (when orbit or indicators are = 1) [1]  </dd>
 
-<dt><b>dev=</b> </dt>
-<dd>Initial dev. vectors (0 = at random,
-1 = random orthonormal, 2=fixed) [1] </dd>
+<dt><b>dev=</b>
+</dt>
+<dd>Initial dev. vectors (0 = at random, 1 = random orthonormal, 2=fixed) [1]
+</dd>
 
 <dt><b>sali=</b> </dt>
-<dd>SALI &amp; potential(t): normal saturation
-(=0) or restart [1]  Not used yet, but might be needed if we allow multiple
-orbits and optional tstop&rsquo;s. </dd>
+<dd>SALI &amp; potential(t): normal saturation (=0) or restart [1]  Not used
+yet, but might be needed if we allow multiple orbits and optional tstop&rsquo;s.
+</dd>
 
 <dt><b>exe=</b> </dt>
-<dd>Name of the fortran executable [LP-VIcode]
-</dd>
+<dd>Name of the fortran executable [LP-VIcode] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The <i>logarithm2</i> example from the manual can be run as follows: <br>
+The <i>logarithm2</i> example
+from the manual can be run as follows: (2nd CI for the moment is 0, some
+error): <br>
 <pre>  runlpvi run1 posvel=0.2,0.34,0.5,0.1235 prefix=log dt=0.05 tstop=25000 orbit=1
-ci=1::7 nstep=20
+ci=1,0,1::5 nstep=20
   tabplot run1/log.orb 2 3 -0.5 0.5 -0.5 0.5
-</pre>followed with some pure NEMO orbits: <br>
+</pre>which took about 35sec CPU. We follow with some pure NEMO orbits with the
+same initial conditions and potential: <br>
 <pre>  mkorbit run1/orb.in 0.2 0.34 0 0.5 0.1235 0 potname=log potpars=0,2,0,0.7
   orbint run1/orb.in run1/orb.out  50000 0.05 ndiag=10000
-  orbplot run1/orb.out xrange=-0.5:0.5 yrange=-0.5:0.5
   
 </pre>and it becomes obvious the integrator in <b>orbint</b> cannot handle a 0 core
-radius for box orbits. 
+radius for box orbits. To show both method agree try this loop/tube orbit:
+<br>
+<pre>  mkorbit run2.in x=0.8 lz=1 e=1 potname=log potpars=0,0.5,0,0.7 
+  orbint  run2.in - 2000 0.01 ndiag=200 | orbplot - yapp=2/xs 
+  orblist run2.in
+  #&gt;&gt; 0 0 0.8 0 0 0 1.56406 0  0 -1e+30 1e+30 7.35388e+188
+  runlpvi run2 posvel=0.8,0,0,1.56406 prefix=log dt=0.01 tstop=20 orbit=1
+ci=1::7 nstep=20
+  tabplot run2/log.orb 2 3 -2 2 -2 2  line=1,1 yapp=1/xs
+</pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='orbdim.1.html'>orbdim(1NEMO)</a>
  <p>

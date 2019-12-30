@@ -142,34 +142,38 @@ is z, pos[2] is not used) <br>
 </pre>
 <h2><a name='sect7' href='#toc7'>Environment</a></h2>
 The environment variable <b>POTPATH</b> can be used to search for potentials
-in other than the local directory.  
-<h2><a name='sect8' href='#toc8'>Caveat</a></h2>
-Since the old format did not use
-_float or _double, there will be some potentials with no _float support,
-since _double is the default if  not present in the symbol table. For C/C++
-routines authors are recommended to either split their potential() in a
-potential_double() and potential_float(), or rename potential() to potential_double()
-and include &lt;potential_float.h&gt; (available for NEMO 3.2.2 and above) to have
-_float call  _double (the penalty for this is about 4%). 
-<h2><a name='sect9' href='#toc9'>See Also</a></h2>
+in other than the local directory. 
+<h2><a name='sect8' href='#toc8'>Other</a></h2>
+See also the "pav" format used in
+the LP-VI code (Carpintero et al.  ascl1501.007) 
+<h2><a name='sect9' href='#toc9'>Caveat</a></h2>
+Since the old format
+did not use _float or _double, there will be some potentials with no _float
+support, since _double is the default if  not present in the symbol table.
+For C/C++ routines authors are recommended to either split their potential()
+in a potential_double() and potential_float(), or rename potential() to
+potential_double() and include &lt;potential_float.h&gt; (available for NEMO 3.2.2
+and above) to have _float call  _double (the penalty for this is about
+4%). 
+<h2><a name='sect10' href='#toc10'>See Also</a></h2>
 <a href='get_potential.3.html'>get_potential(3NEMO)</a>
-,
-<a href='orbit.5.html'>orbit(5NEMO)</a>
+, <a href='orbit.5.html'>orbit(5NEMO)</a>
 , <a href='acceleration.5.html'>acceleration(5NEMO)</a>
 , <a href='manipulator.5.html'>manipulator(5NEMO)</a>
-, <a href='flowcode.1.html'>flowcode(1NEMO)</a>
 ,
-<a href='mkflowdisk.1.html'>mkflowdisk(1NEMO)</a>
+<a href='flowcode.1.html'>flowcode(1NEMO)</a>
+, <a href='mkflowdisk.1.html'>mkflowdisk(1NEMO)</a>
 , <a href='vpotcode.1.html'>vpotcode(1NEMO)</a>
  
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect11' href='#toc11'>Files</a></h2>
+<h2><a name='sect11' href='#toc11'>Author</a></h2>
+Peter Teuben
+
+<h2><a name='sect12' href='#toc12'>Files</a></h2>
 <br>
 <pre>~/src/orbit/potential   potential.c, potential.h potentialf.c
 ~/text/manuals      <tt> </tt>&nbsp;<tt> </tt>&nbsp;potential.inc (latex description)
 </pre>
-<h2><a name='sect12' href='#toc12'>Update History</a></h2>
+<h2><a name='sect13' href='#toc13'>Update History</a></h2>
 <br>
 <pre>13-Jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Original created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-Apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0: added parameter &rsquo;name&rsquo; for hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -194,11 +198,12 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>Flow Potentials</a></li>
 <li><a name='toc6' href='#sect6'>Meridional Plane in Axisymmetric Potentials</a></li>
 <li><a name='toc7' href='#sect7'>Environment</a></li>
-<li><a name='toc8' href='#sect8'>Caveat</a></li>
-<li><a name='toc9' href='#sect9'>See Also</a></li>
-<li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>Files</a></li>
-<li><a name='toc12' href='#sect12'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>Other</a></li>
+<li><a name='toc9' href='#sect9'>Caveat</a></li>
+<li><a name='toc10' href='#sect10'>See Also</a></li>
+<li><a name='toc11' href='#sect11'>Author</a></li>
+<li><a name='toc12' href='#sect12'>Files</a></li>
+<li><a name='toc13' href='#sect13'>Update History</a></li>
 </ul>
 </body>
 </html>
