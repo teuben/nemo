@@ -45,7 +45,7 @@ string defv[] = {
 string usage="NEMO front end for LP-VIcode";
 
 #define MAXCI 7
-#define MAXORB 20
+#define MAXORB 1000
 
 void nemo_main(void)
 {
