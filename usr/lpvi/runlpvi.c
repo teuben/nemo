@@ -2,6 +2,7 @@
  *  runlpvi:   NEMO frontend for LP-VIcode 
  *	
  *  29-dec-2019  V0.1  initial draft                  PJT
+ *                0.3  multiple orbits in posvel=
  *
  *  See also http://lp-vicode.fcaglp.unlp.edu.ar/
  *
@@ -37,13 +38,14 @@ string defv[] = {
     "ndim=\n             Not used yet, but might be needed if posvel ambiguous",
     "exe=LP-VIcode\n     Name of the fortran executable",
 
-    "VERSION=0.2\n       29-dec-2019 PJT",
+    "VERSION=0.3\n       30-dec-2019 PJT",
     NULL,
 };
 
 string usage="NEMO front end for LP-VIcode";
 
 #define MAXCI 7
+#define MAXORB 20
 
 void nemo_main(void)
 {
@@ -55,17 +57,22 @@ void nemo_main(void)
     string rundir = getparam("outdir");
     string fname;
     char dname[256], runcmd[256];
-    real posvel[6];
+    real posvel[MAXORB*7];
     int nci, ci[MAXCI];
     stream ostr, datstr, histr;
 
-    npv = nemoinpr(getparam("posvel"),posvel,6);
-    if (npv==6)
-      ndim = 3;
-    else if (npv==4)
-      ndim = 2;
+    if (hasvalue("ndim"))
+      ndim = getiparam("ndim");
     else
-      error("Need (multiple of) 4 or 6 values for posvel");
+      ndim = -1;
+
+    npv = nemoinpr(getparam("posvel"),posvel,MAXORB*7);
+    if (npv==6 && ndim<0)
+      ndim = 3;
+    else if (npv==4 && ndim<0)
+      ndim = 2;
+    else if (ndim<0) 
+      error("Need (multiple of) 4 or 6 values for posvel, or specifiy ndim=");
 
     nci = nemoinpi(getparam("ci"),ci,MAXCI);
     if (nci<0) error("Error ci=");
@@ -93,8 +100,10 @@ void nemo_main(void)
     // assume 1 orbit for now, no tstop per orbit
 
     ostr = stropen(datfile,"w");
-    for (i=0; i<npv; ++i)
+    for (i=0; i<npv; ++i) {
+      if (i>0 && i%(ndim*2)==0) fprintf(ostr,"\n");
       fprintf(ostr,"%f ",posvel[i]);
+    }
     fprintf(ostr,"\n");
     strclose(ostr);
 
