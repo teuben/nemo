@@ -6,37 +6,8 @@
 #    tsf,rsf,csf	pretty much the same
 #    mkorbit		totally  different
 #
-# See also:   $NEMO/usr/zeno   for a now more formal approach.
-#
-
-set url1=http://www.ifa.hawaii.edu/~barnes/zeno/zeno.009.tar.gz
-set url2=http://www.ifa.hawaii.edu/~barnes/zeno/zeno.009.tar.gz
 
 
-echo This script does not install ZENO directly, for now read the comments
-echo But grab the following file
-echo $url1 $url2
-#echo And you will also need the source code of Numerical Recipes
+echo See $NEMO/usr/zeno:
 
-# Installation:   (you need a source code tree for Numerical Recipes V2)
-
-#  mkdir $NEMO/usr/zeno
-#  cd $NEMO/usr/zeno
-#  wget ... zeno19dec06.tar.gz
-#  tar zxf zeno19dec06.tar.gz
-#  mkdir inc bin
-#  cp $NUMRECDIR/other/nrutil.h lib/nrec
-#  cp $NUMRECDIR/recipes/...    lib/nrec
-#  beschb.c  eigsrt.c  golden.c bessik.c  gammln.c  jacobi.c chebev.c  gammp.c   nrutil.c  gser.c gcf.c
-#  source ZENORC
-#  make -f ZENO reset_all install_all
-#
-
-#ZENORC is not in the tar file, if not, use this:
-#+++
-#setenv ZENOPATH `pwd`
-#setenv CCFLAGS "-I$ZENOPATH/inc -DLINUX -L$ZENOPATH/lib"
-#setenv LDFLAGS "-L$ZENOPATH/lib"
-#set path=(. $ZENOPATH/bin $path)
-#rehash
-#---
+ls $NEMO/usr/zeno   
