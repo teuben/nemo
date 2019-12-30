@@ -3,10 +3,10 @@
 
 
 # if you want --with-native:
-# NO_ARCH_NATIVE=0
+#export NO_ARCH_NATIVE=0
 
 # if you want --fopenmp
-# OPENMP=1
+#export OPENMP=1
 
 # if you get "undefined symbol: GOMP_parallel"
 # may need to add -lgomp as NEMO needs for the body/pot plugins
