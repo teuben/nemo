@@ -962,7 +962,7 @@ if test -d "$NEMODAT"; then
   echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
 fi
 
-AC_CONFIG_FILES(Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py)
+AC_CONFIG_FILES(Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py usr/dehnen/utils/make.sh)
 AC_OUTPUT
 
 echo "

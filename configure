@@ -11108,7 +11108,7 @@ if test -d "$NEMODAT"; then
   echo "*** Warning: NEMO=$NEMO, maybe you are running NEMO already"
 fi
 
-ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py"
+ac_config_files="$ac_config_files Makefile makedefs nemo-config nemo_start.csh nemo_start.sh nemo_start.py usr/dehnen/utils/make.sh"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -11809,6 +11809,7 @@ do
     "nemo_start.csh") CONFIG_FILES="$CONFIG_FILES nemo_start.csh" ;;
     "nemo_start.sh") CONFIG_FILES="$CONFIG_FILES nemo_start.sh" ;;
     "nemo_start.py") CONFIG_FILES="$CONFIG_FILES nemo_start.py" ;;
+    "usr/dehnen/utils/make.sh") CONFIG_FILES="$CONFIG_FILES usr/dehnen/utils/make.sh" ;;
 
   *) as_fn_error $? "invalid argument: \`$ac_config_target'" "$LINENO" 5;;
   esac
