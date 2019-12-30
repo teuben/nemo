@@ -1,4 +1,4 @@
-.TH RUNLPVI 1NEMO "29 December 2019"
+.TH RUNLPVI 1NEMO "30 December 2019"
 .SH NAME
 runlpvi \- NEMO front end for the LP-VIcode
 .SH SYNOPSIS
@@ -36,9 +36,9 @@ the LP-VIcode is left as an exercize to the reader.
 Output run directory, which must not exist yet. (required) 
 .TP 20
 \fBposvel=\fP
-Initial conditions (4 or 6 values). Curently only one orbit
-can be computed, but in a future version multiples should work too
-as the original LP-VIcode.
+Initial conditions (4 or 6 values). Multiple orbits can be given now, but without
+individual times. The \fBndim=\fP is then required.  A hardcoded maximum is
+1000. No default.
 .TP
 \fBprefix=\fP
 Prefix for output files.  The name is not very important, as all files are
@@ -126,5 +126,6 @@ Peter Teuben (runlpvi)
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-29-Dec-19	V0.1 Created	PJT
+29-dec-2019	V0.1 Created	PJT
+30-dec-2019	V0.3 posvel= now allows multiple orbits	PJT
 .fi
