@@ -30,8 +30,9 @@ string defv[] = {
 
     "mass=0\n		Total mass of disk (0 means no masses supplied)",
     "seed=0\n		Usual random number seed",
-    "sign=1\n           Sign of Z-angular momentum vector of disk",
+    "sign=1\n           Sign of Z-angular momentum vector of disk (1=counterclock)",
     "launch=y\n         Launch from Y or X axis",
+    "maxlz=t\n          Try and find only the maxlz orbits per energy/radius",
     "headline=\n	Text headline for output",
     "VERSION=0.1\n	31-dec-2019 PJT",
     NULL,
@@ -55,9 +56,8 @@ local proc potential;
 
 extern double xrandom(double,double), grandom(double,double);
 
-local real took(real);
 local void writegalaxy(string name, string headline, bool Qmass);
-local void testdisk(void);
+local void testdisk0(int ilaunch);
   
 local real mysech2(real z)
 {
@@ -95,6 +95,7 @@ void nemo_main()
     real time = 0.0;
     int ilaunch, jlaunch;
     string launch = getparam("launch");
+    bool Qmaxlz = getbparam("maxlz");
 
     if (streq(launch,"x"))
       ilaunch = 0;
@@ -133,7 +134,12 @@ void nemo_main()
     Qangle = FALSE;
     Qenergy = FALSE;
     Qabs = FALSE;
-    testdisk();
+    if (Qmaxlz) {
+      warning("Special test: only maxlz orbits");
+      testdisk0(ilaunch);
+    } else {
+      error("mode not implemented yet");
+    }
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
 
@@ -166,108 +172,43 @@ void writegalaxy(string name, string headline, bool Qmass)
  * density test disk.  
  */
 
-void testdisk(void)
+void testdisk0(int ilaunch)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
     real  dv_r, dv_t, sint, cost, theta_0, vrandom;
     real sigma_r, sigma_t, sigma_z;
     vector acc_i;
-    int i, ncirc, ndim=NDIM;
+    int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
 
 
-    
 
     disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
     theta_i = xrandom(0.0, TWO_PI);
     t = 0;    /* dummy time ; we do not support variable time */
-    for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop all stars */
+    pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
+    for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
 	if (ndisk == 1)
 	  r_i = rmin;
 	else
 	  r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
-	if (Qangle) {
-	  theta_i += TWO_PI/ndisk;
-	} else {
-	  theta_i = xrandom(0.0, TWO_PI);
-	}
-        cost = cos(theta_i);
-        sint = sin(theta_i);
-	Pos(dp)[0] = pos_d[0] = r_i * cost;		/* set positions */
-	Pos(dp)[1] = pos_d[1] = r_i * sint;
-	Pos(dp)[2] = pos_d[2] = 0.0;                    /* it's a DISK ! */
-        (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
+	pos_d[ilaunch] = r_i;
+        (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
-	/* now cheat and rotate slower away from the plane */
 
-#if 1
-	if (Qabs) {
-	  sigma_r = grandom(0.0,frac[0]);
-	  sigma_t = grandom(0.0,frac[1]);
-	  sigma_z = grandom(0.0,frac[2]);
-	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	  Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
-	  Vel(dp)[1] += sint*sigma_r + cost*sigma_t;
-	} else {
-	  do {                         /* iterate, if needed, to get vrandom */
-	    sigma_r = grandom(0.0,frac[0]*vcir_i);
-	    sigma_t = grandom(0.0,frac[1]*vcir_i);
-	    sigma_z = grandom(0.0,frac[2]*vcir_i);
-	    dv_t = sigma_t;
-	    dv_r = sigma_r * took(r_i) ;
-	    vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
-	    if (vrandom > vcir_i) ncirc++;
-	  } while (Qenergy &&  vrandom > vcir_i);
-	  vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
-	  dv_r += vrad;
-	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	  Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
-	  Vel(dp)[1] += sint*dv_r + cost*dv_t;
-	}
-#else
-	sigma_r = grandom(0.0,frac[0]*vcir_i);
-	sigma_t = grandom(0.0,frac[1]*vcir_i);
-	sigma_z = grandom(0.0,frac[2]*vcir_i);
-	dv_t = sigma_t;
-	dv_r = sigma_r * took(r_i) ;
-
-	/* Qenergy only uses radial motion: thus preserving the 
-	 * guiding center for epicycles ?? (Olling 2003)
-	 */
-
-	if (Qenergy)
-	  vcir_i = sqrt((vcir_i-dv_r)*(vcir_i+dv_r));
-	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	Vel(dp)[0] += cost*dv_r;
-	Vel(dp)[1] += sint*dv_r;
-	if (!Qenergy) {
-	  Vel(dp)[0] += -sint*dv_t;
-	  Vel(dp)[1] +=  cost*dv_t;
-	}
-
-#endif
-	Vel(dp)[2] = sigma_z;
+	Pos(dp)[0]         = pos_d[0];
+	Pos(dp)[1]         = pos_d[1];
+	Pos(dp)[2]         = pos_d[2];
+	Vel(dp)[ilaunch]   = 0.0;
+	Vel(dp)[1-ilaunch] = vcir_i * jz_sign * (1 - 2*ilaunch);   // 
+	Vel(dp)[2]         = 0.0;
 	/* store potential and total energy for debugging */
 	Phi(dp) = pot_d;
 	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
     }
-    if (ncirc) dprintf(0,"Had to respin random %d times\n",ncirc);
-}
-
-
-/*   
- *   2*omega/kappa; from spline interpolation.....
- */
-
-real took(real r)
-{
-    return  1.0;
 }
