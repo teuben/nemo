@@ -1,0 +1,80 @@
+.TH MKDISKFEL 1NEMO "13 December 2017"
+.SH NAME
+mkdisk \- set up a test disk in a spherical potential filling f(E,Lz)
+.SH SYNOPSIS
+\fBmkdiskfel out=\fPsnapshot [parameters=values ...]
+.SH DESCRIPTION
+\fImkdiskfel\fP sets up a disk of test particles launched from a specific
+axis (\fBx\fP or \fBy\fP)
+in the gravitational potential of a user-supplied potential (in
+\fIpotential(5NEMO)\fP format), in order to get a reasonable sample
+of all possible orbits in the allowed phase space of bound orbits.
+.PP
+The initial condition will look boring, and will need to be integrated
+with programs such as \fIpotcode(1NEMO)\fP.
+.PP
+Some of the parameters below are still from its clone, mkdisk, and/or
+have not been added.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword is also
+given:
+.TP 25
+\fBout=\fIout_file\fP
+The data are written to this file in \fIsnapshot(5NEMO)\fP 
+format . Currently the potential and total energy are stored in the
+Potential and Aux slots of the snapshot. [no default].
+.TP
+\fBnbody=\fInum_bodies\fP
+Number of bodies particles [default: \fB2048\fP]
+.TP
+\fBpotname=\fIpotential_name\fP
+name of the potential, see \fB$NEMOOBJ/potential\fP for the current
+object repository. The user can supply his own, see \fIpotential(5NEMO)\fP.
+[no default].
+.TP
+\fBpotpars=\fIpot_pars\fP
+Paramaters to the user supplied potential. The number of parameters
+depends on the potential supplied, the first parameter is reserved
+for the pattern speed.
+[default: not supplied, parameters as defined by potential(5)].
+.TP
+\fBpotfile=\fIpot_data\fP
+Optional data file(s) to the user supplied potential. 
+The number of files depends
+on the potential supplied.
+[default: not supplied, or datafile(s) defined by potential(5)].
+.TP
+\fBrmin=\fImin_disk_radius\fP
+Inner cutoff radius of test-particle disk. [Default: \fB0\fP].
+.TP
+\fBrmax=\fImax_disk_radius\fP
+Outer cutoff radius of test-particle disk. [Default: \fB1\fP].
+.TP
+\fBmass=\fItot_mass\fP
+Total mass of the disk. The default total mass is 0, since this is a
+testdisk. Since there are a few programs that will not like mass-less
+particles, this keyword can be used, or \fIsnapmass\fP
+will have to be used before further action is taken.
+[default: \fB0\fP].
+\fBseed=\fIrandom_seed\fP
+Use random number seed. If 0 is given, a random number is generated
+from the time of the day. [default: \fB0\fP].
+.TP
+\fBsign=-1|1\fP
+Sign of the angular momentum. 1 means counter clockwise rotation in the
+XY-plane (in case you were wondering, 
+our galaxy has sign=-1). [Default: \fB1\fP].
+.TP
+\fBlaunch=x|y\fP
+Launch axis. Since all orbits are in the X-Y plane, the options here
+are \fBx\fP or \fBy\fP.
+.TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.SH "SEE ALSO"
+mkdisk(1NEMO), mktestdisk(1NEMO), orbint(1NEMO), potcode(1NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +4.5i
+31-dec-2019	V0.1  drafted during the Top-2000	PJT
+.fi
