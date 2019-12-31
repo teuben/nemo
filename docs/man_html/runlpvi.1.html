@@ -16,9 +16,9 @@ runlpvi - NEMO front end for the LP-VIcode
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>runlpvi</b> is a NEMO front-end to the LP-VIcode, which computes a
 set of chaos indicators for (galactic) orbits. The main documentation can
-be found online in their manual <a href='http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf.'>http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf.</a>
+be found online in their manual <a href='http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf'>http://www.fcaglp.unlp.edu.ar/LP-VIcode/manual-LPVIcodeKaosv1.0.2.pdf</a>
 
-Here we review the particulars of the NEMO user interface, see also EXAMPLES
+. Here we review the particulars of the NEMO user interface, see also EXAMPLES
 below for some of the NEMO examples. <p>
 Compiling and Running the original
 <i>LP-VIcode</i> requires 4 actions: <p>
@@ -48,22 +48,22 @@ cumbersome, hence the <i>runlpvi</i> NEMO interface, which takes care of items
 
 <dt><b>posvel=</b> </dt>
 <dd>Initial
-conditions (4 or 6 values). Curently only one orbit can be computed, but
-in a future version multiples should work too as the original LP-VIcode.
-</dd>
+conditions (4 or 6 values). Multiple orbits can be given now, but without
+individual times. The <b>ndim=</b> is then required.  A hardcoded maximum is 1000.
+No default. </dd>
 
 <dt><b>prefix=</b> </dt>
-<dd>Prefix for output files.  The name is not very important, as all
-files are in a new directory.  The extensions are described in the manual,
-but in brief are: <i>.ene</i>, <i>.orb</i>,  <i>.lyap</i>, <i>.sali</i>, <i>.gali</i>, <i>.sd</i>,  <i>.ssn</i>, <i>.rli</i>, <i>.megno</i>, and
-<i>.fli</i>. [log] </dd>
+<dd>Prefix for output files.  The name is not very important,
+as all files are in a new directory.  The extensions are described in the
+manual, but in brief are: <i>.ene</i>, <i>.orb</i>,  <i>.lyap</i>, <i>.sali</i>, <i>.gali</i>, <i>.sd</i>,  <i>.ssn</i>, <i>.rli</i>, <i>.megno</i>,
+and <i>.fli</i>. [log] </dd>
 
 <dt><b>dt=</b> </dt>
 <dd>Integration step [0.01]      </dd>
 
 <dt><b>tstop=</b> </dt>
-<dd>Time of integration. In
-a future version multiple orbits can have different integration times,
+<dd>Time of integration.
+In a future version multiple orbits can have different integration times,
 which means they need to be specified at the end of the <b>posvel=</b> sequence.
 [1]     </dd>
 
@@ -132,7 +132,8 @@ NEMO/usr/lpvi
 Peter Teuben (runlpvi) 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
-<pre>29-Dec-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>29-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+30-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 posvel= now allows multiple orbits<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
