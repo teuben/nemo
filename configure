@@ -661,8 +661,10 @@ X_LIBS
 X_PRE_LIBS
 X_CFLAGS
 XMKMF
+falcon_OPENMP
 MAKEDIRS
 MAKELIBS
+falcon_NO_NATIVE
 MAKE
 RANLIB
 SET_MAKE
@@ -5727,7 +5729,12 @@ if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
   FFLAGS="$CFLAGS $flags"
+  falcon_NO_NATIVE=0
+else
+  falcon_NO_NATIVE=1
 fi
+
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking which precision NEMO is going to use" >&5
 $as_echo_n "checking which precision NEMO is going to use... " >&6; }
@@ -5886,7 +5893,11 @@ if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
   CXXFLAGS="$CXXFLAGS -fopenmp"
   FFLAGS="$CFLAGS -fopenmp"
+  falcon_OPENMP="OPENMP"
+else
+  falcon_OPENMP="noOPENMP"
 fi
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for X" >&5
 $as_echo_n "checking for X... " >&6; }

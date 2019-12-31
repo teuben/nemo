@@ -159,7 +159,12 @@ if test "$ok" = "yes"; then
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
   FFLAGS="$CFLAGS $flags"
+  falcon_NO_NATIVE=0
+else
+  falcon_NO_NATIVE=1
 fi
+AC_SUBST(falcon_NO_NATIVE)
+
 
 AC_MSG_CHECKING(which precision NEMO is going to use)
 prec_flag=""
@@ -228,7 +233,11 @@ if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
   CXXFLAGS="$CXXFLAGS -fopenmp"
   FFLAGS="$CFLAGS -fopenmp"
+  falcon_OPENMP="OPENMP"
+else
+  falcon_OPENMP="noOPENMP"
 fi
+AC_SUBST(falcon_OPENMP)
 
 dnl ---------------------------------------------------------------------
 dnl             Check for basic X windows stuff
