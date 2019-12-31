@@ -2,6 +2,8 @@
  * YAPP: Yet Another Plotting Package.
  *
  *      15-jun-2018:    cloned off yapp_pgplot                PJT
+ *
+ *  Linking will need:    -lgiza -lpgplot
  */
 
 #include <stdinc.h>
