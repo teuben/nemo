@@ -230,7 +230,7 @@ void testdisk1(int ilaunch)
     nout = 0;
     dp = disk;
     for (i = 0; i < ndisk2; ++i) {	/* loop over all radii */
-      dprintf(0,"p_j=%g r_i=%g\n",p_j,r_i);
+      dprintf(1,"p_j=%g r_i=%g\n",p_j,r_i);
       r_i = rmin + i * (rmax - rmin) / (ndisk2 - 1.0);
       for (j = 0; j < ndisk2; ++j) {	/* loop over all potentials */
 	p_j = pmin + j * (pmax - pmin) / (ndisk2 - 1.0);
