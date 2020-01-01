@@ -21,6 +21,13 @@ swig
 Depending on your packaging tools (apt, yum, brew, port, ....) these are hidden under
 various package names
 
+dpkg -L pgplot5
+dpkg -S /usr/include/cpgplot.h
+
+rpm -ql pgplot
+rpm -qf /usr/lib64/libpgplot.so.5.2.2
+
+
 
 
 -gfortran
