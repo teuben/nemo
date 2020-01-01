@@ -73,11 +73,17 @@ Try and find only the maxlz orbits per energy/radius.
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
 .SH EXAMPLES
-Although an X-Y plot looks boring, a phase plot is not:
+An Y-VX phase plot (the only non-zero coordinate in the initial conditions for launch=y) can be created
+as follows for the circular orbits and the full "f(E,L)" type:
 .nf
-  mkdiskfel - maxlz=t | snapplot - xvar=y yvar=vx
-  mkdiskfel - maxlz=f | snapplot - xvar=y yvar=vx
+
+  mkdiskfel - maxlz=t | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=1/xs
+  mkdiskfel -         | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=2/xs
+  mkdiskfel -         | snapplot - xvar=etot yvar='-y*vx' xrange=-1:0.2 yrange=0:1 yapp=3/xs
+
 .fi
+
+the last example represents the true f(E,Lz) sampling.
 .SH "SEE ALSO"
 mkdisk(1NEMO), mktestdisk(1NEMO), orbint(1NEMO), potcode(1NEMO)
 .SH "UPDATE HISTORY"
