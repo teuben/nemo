@@ -3,30 +3,18 @@
 * active issues are now moved to https://github.com/teuben/nemo/issues
 
 
-* this is the TODO list for the 4.1 release
+* this is the TODO list for the 4.2 release
 
 - default configure gives yapp.ps, but should check if pgplot is natively there
 - is rman partially broken on U18?
        PolyglotMan v3.2 of $Date: 2003/07/26 19:00:48 $
-- fix up bsf ? might need label= to override input pipe
-- finish populating bsf in Testfile's
-- some notebooks for associated stuff
 - ACOM example? - NO
-- no default dox building for dehnen, it fails too often
-- fix mkhalo ?
 - is there rman -> rst ?
 
 
 
 * Below here old stuff - some are still relevant
 
-
-- install on machines where IRAF's f77 is in the path before the 
-  system version: you will need to
-	setenv F77 g77
-  or whichever appropriate. the IRAF script will cause various
-  fortran-c link schemes to fail.
-  The install_nemo script now does that.
 
 - gcc3:  when using c++ NEMO's "string" will now collide with the 
          default C++ type 'string'....
@@ -35,11 +23,6 @@
 	bad prototyping of the "proc" functions. This will be fixed,
 	and is also needed in preparation for NEMO V5 when a C++ compiler
 	will be the default compiler. 
-
-- install on darwin:
-	- FORLIBS get crt1.o or something, and this is not needed,
-	and will cause linkers to fail. It needs to be removed
-	from the $NEMOLIB/makedefs 
 
 - large objects (> 2GB or > 4GB), specifically snapshots, can be limited
   in size of they use private calls to allocate() without making sure the
