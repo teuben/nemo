@@ -3,6 +3,7 @@
  *              try to fill f(E,L) to some degree
  *	
  *       V0.1   - 31-dec-2019   drafted from mkdisk        PJT
+ *        0.4   -  1-jan-2020   sampling in E-r space      PJT
  *
  */
 
@@ -34,7 +35,7 @@ string defv[] = {
     "launch=y\n         Launch from Y or X axis",
     "maxlz=f\n          Try and find only the maxlz orbits per energy/radius",
     "headline=\n	Text headline for output",
-    "VERSION=0.3\n	1-jan-2020 PJT",
+    "VERSION=0.4\n	1-jan-2020 PJT",
     NULL,
 };
 
@@ -44,9 +45,6 @@ local real rmin, rmax, mass;
 local real pmin, pmax;
 local real emin, emax;
 local int  jz_sign;
-local bool Qangle;
-local bool Qenergy;
-local bool Qabs;
 
 local int ndisk;
 local Body *disk;
@@ -60,41 +58,13 @@ local void writegalaxy(string name, string headline, bool Qmass);
 local void testdisk0(int ilaunch);
 local void testdisk1(int ilaunch);
 
-local real mysech2(real z)
-{
-  real y = exp(z);
-  return sqr(2.0/(y+1.0/y));
-}
-
-local real pick_z(real z0)
-{
-  real z = frandom(-6.0,6.0,mysech2) * z0;
-  return z;
-}
-
-local real pick_dv(real r, real z, real z0)
-{
-#ifdef OLD_BURKERT  
-  real dv = 1 - (1 + (z/z0) * tanh(z/z0))*(z0/r);
-#else
-  //real dv = tanh(z/z0);
-  //dv = sqrt(1 - ABS(dv));
-  real dv = ABS(z/z0);
-  //dv = sqrt(exp(-dv));
-  dv = exp(-dv);
-#endif  
-  dprintf(1,"PJT %g %g %g\n",r,z,dv);
-  return dv;
-}
-
 void nemo_main()
 {
     bool Qmass;
-    int nfrac, seed, nz, ndim=3;
-    real z0[2];
+    int seed, ndim=3;
     real pos[3], acc[3], pot;
     real time = 0.0;
-    int ilaunch, jlaunch;
+    int ilaunch;
     string launch = getparam("launch");
     bool Qmaxlz = getbparam("maxlz");
 
@@ -104,7 +74,6 @@ void nemo_main()
       ilaunch = 1;
     else
       error("Launch must be x or y");
-    jlaunch = 1 - ilaunch;    // swap X and Y
     
     rmin = getdparam("rmin");
     rmax = getdparam("rmax");
@@ -133,14 +102,13 @@ void nemo_main()
         Qmass=TRUE;
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
-    if (Qmaxlz) {
-      warning("Special test: sampling only maxlz orbits");
+    if (Qmaxlz)
       testdisk0(ilaunch);
-    } else
+    else
       testdisk1(ilaunch);      
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
-
+
 /*
  * WRITEGALAXY: write galaxy model to output.
  */
@@ -159,31 +127,27 @@ void writegalaxy(string name, string headline, bool Qmass)
         bits = MassBit | PhaseSpaceBit | TimeBit;
     else
         bits = PhaseSpaceBit | TimeBit;
-    bits |= AuxBit;
     bits |= AccelerationBit;
     bits |= PotentialBit;
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
     strclose(outstr);
 }
-
-/*
- * TESTDISK: use forces due to a potential to make a uniform
- * density test disk.  
- */
 
+//
+//  only 'maxlz' orbits
+//
+
 void testdisk0(int ilaunch)
 {
     Body *dp;
-    real r_i, vcir_i, pot_i, t;
+    real r_i, vcir_i, pot_i, t= 0.0;
     vector acc_i;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
 
-
-
     disk = (Body *) allocate(ndisk * sizeof(Body));
-    t = 0; 
     pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
+    
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
 	r_i = rmin + i * (rmax - rmin) / (ndisk - 1.0);
@@ -198,30 +162,32 @@ void testdisk0(int ilaunch)
 	Vel(dp)[ilaunch]   = 0.0;
 	Vel(dp)[1-ilaunch] = vcir_i * jz_sign * (1 - 2*ilaunch);   // 
 	Vel(dp)[2]         = 0.0;
-	Phi(dp)    = pot_d;
-	Acc(dp)[0] = acc_d[0];
-	Acc(dp)[1] = acc_d[1];
-	Acc(dp)[2] = acc_d[2];
-	Aux(dp)    = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Phi(dp)            = pot_d;
+	Acc(dp)[0]         = acc_d[0];
+	Acc(dp)[1]         = acc_d[1];
+	Acc(dp)[2]         = acc_d[2];
     }
 }
 
+//
+//  full sampling of f(E,Lz) but via E,
+//
+
 void testdisk1(int ilaunch)
 {
     Body *dp;
-    real r_i, p_j, vcir_i, pot_i, t, v2;
+    real r_i, p_j, v2, t = 0.0;
     int  ndisk2, nout;
     vector acc_i;
     
     int i, j, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
 
-    dprintf(0,"Pmin/max: %g %g\n",pmin,pmax);
+    dprintf(1,"Pmin/max: %g %g\n",pmin,pmax);
     ndisk2 = (int) sqrt((double)ndisk);
-    dprintf(0,"ndisk by side: %d\n",ndisk2);
+    dprintf(0,"Sampling uniformly in E-r 2D ndisk2=%d\n",ndisk2);
 
     disk = (Body *) allocate(ndisk * sizeof(Body));
-    t = 0;   
     pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
 
     nout = 0;
@@ -244,11 +210,10 @@ void testdisk1(int ilaunch)
 	Vel(dp)[ilaunch]   = 0.0;
 	Vel(dp)[1-ilaunch] = sqrt(v2) * jz_sign * (1 - 2*ilaunch);   // barbatruuk
 	Vel(dp)[2]         = 0.0;
-	Phi(dp)    = pot_d;
-	Acc(dp)[0] = acc_d[0];
-	Acc(dp)[1] = acc_d[1];
-	Acc(dp)[2] = acc_d[2];
-	Aux(dp)    = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Phi(dp)            = pot_d;
+	Acc(dp)[0]         = acc_d[0];
+	Acc(dp)[1]         = acc_d[1];
+	Acc(dp)[2]         = acc_d[2];
 	dp++;
       }
     }
