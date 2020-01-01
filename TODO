@@ -1,12 +1,19 @@
-  - a new CVS branch is dealing with a better definition of		
+- NEMO, ZENO and falcON have too many small differences
+  falcON uses Position/Velocity
+  NEMO uses PhaseSpace
+
+- a new CVS branch is dealing with a better definition of		
     images, basically doing FORDEF instead of CDEF.
     CDEF has always been a bad idea... given that most our
     image work is via FITS
 
-  - objects > 2GB or 4GB have issues, since allocate() deals 
-    with int, not size_t. That's being addressed in 3.2.5
-    (May 2007)
-    [fixed now]
+- making galaxy models is a special art which deserves a special
+  section:
+
+    mkdisk
+    mkexpdisk
+    magalie
+    mkkd95
 
 MacOSX problems: (a special macosx.html web page dedicated to this)
     See:     http://bima.astro.umd.edu/nemo/macosx.html
@@ -22,28 +29,6 @@ MacOSX problems: (a special macosx.html web page dedicated to this)
   - src/nbody/evolve/aarseth/nbody0/Makefile
 	need to activate F77LIBS to include -lcc_dynamic (10.3 ?)
         but sometimes you to take it out again...... (10.4 ?)
-
-  - directcode doesn't compile since it was derived from an earlier
-    release of hackcode1 with the multiple externs included by the
-    linker
-
-  - xyzview is too slow to be useful, we should recode it such that
-    OpenGL (and thus Mesa) can be linked. This would also remove the
-    immediate need for vogl.
-    -> now superseded by glnemo2
-
-  - one case had gcc in /usr/bin but g77 in /usr/local/bin, and not in
-    the path -> pgplot didn't get build.
-
-  - the sitation with compilers can be painful. Always make sure you
-    have the correct Xcode installed, and then choose:
-
-	- /usr/local/bin      from hpc.sourceforge.com
-	- /sw/bin             fink
-	- /opt/local/bin      darwinports
-
-    For most of them you will either need to set your $PATH correctly and/or
-    setenv CC, CXX and F77 to the full path of the compilers.
 
 GCC4 problems: (as tested on FC3/FC4)
   - pgplot: needs a gfortran_gcc4.conf file for now
@@ -80,63 +65,8 @@ general things for 3.2.x
 	if compilers are in non-standard locations, and
 	export LC_ALL=C
 	if you're working on a non-english linux OS
-  - get a mini-NEMO going (Dehnen, BIMA/CARMA)
-  * remove environment variables from NEMORC.local that are needed in Makefiles
-    and move them into makedefs
   - use some kind of global MAXBODY where we often use different values
 	**mostly done**
-
-  - gyrfalcON: still has some compiler dependant problems, is also hardcoded for
-    the GNU compiler (g++) and assumes Linux tools. Not mac friendly, though
-    a patch exists now.
-
-     The new version (V3.0.5; 22-mar-2006) has the one between []
-     On intel architecture:
-	
-	3.2.2	ok   [ok]
-
-	3.3.2	ok
-	3.3.4	ok   [ok]
-	3.3.6	ok
-
-	3.4.1   fail
-	3.4.2	fail 	non-constant `(Ky + M2)' cannot be used as template argument
-	3.4.3	ok   [ok]
-	3.4.5	ok
-
-	4.0.0	ok   [ok]
-	4.0.2	ok
-
-	4.1.0	fail  [fail]  falcON::fieldset::fieldset(falcON::fieldbit)
-                      might need to remove -ffast-math if you get segfaults
-	4.1.1   ok
- 	4.1.2   ok
-
-     For MacOSX a bit more work is needed, since isnan() and isinf() are not known?
-	add:	-Wno-long-double
-	remove:	-rdynamic
-     On my 10.3.9:
-	gcc3    3.1 20021003 (build 1256)                   -- isinf/isnan  problem
-	gcc ->  3.3 20030304 (Apple Computer, build 1495)   -- isinf/isnan  problem
-     On somebody's 10.4.5:
-	gcc -> 4.0.0 (build 4061)			    template problem??
-	gcc-3.3 -> build 1809				    ok
-
-
-     On solaris  mkdir is called with --parents and --mode=
-		 they need to be -p -m $(PUBLICMODE)
-                 and solaris flags to figure out
-
-     Also:
-	inc/tupel.cc:51: error: `std::isinf' has not been declared
-	inc/tupel.cc:52: error: `std::isnan' has not been declared
-
-     On mac as well as solaris: what's the way to enable STATIC compile,
-	since the default is dynamic and doesn't work well on sun4 and darwin?
-     doxygen may be absent, so you may need to use "make -i" instead
-
-
- - need a gyrfalcON testsuite section
 
  -  falcON/utils install uses some linux dialect:
 
@@ -167,28 +97,19 @@ general things for 3.2.x
 
 --------------------------------------------------------------------------------
 
-some other help on configure:
+some other help on configure: [1998]
 	http://www.airs.com/ian/configure/
 	
 code & line coverage: (gcov, lcov)
   http://ltp.sourceforge.net/coverage/lcov.php
   
-- use cfortran?  cfitsio also uses it.
-
-- gyrfalcON uses potentials in such a way that only potential_float
-  is looked for ???
-
-- compile under cygwin
-    - macro usage of some math function?  real rlog2(real); 
-
-- fix problems when replacing gnu make with pmake
+- use cfortran?  cfitsio also uses it. [1998]
 
 - unsio (and possibly a few more modules) won't link if e.g. pgplot was enabled
   with png. are some interfaces not cleanly separated?  maybe via yapp_pgplot ?
 
 - if the code has to be C++ friendly, i.e. the nemo_main() be compiled
   by c++, but the rest with CC,  all extern's must be wrapped in
-
 
   #if defined(__cplusplus)
   extern "C" {
@@ -287,16 +208,6 @@ DYLD_LIBRARY_PATH (osx) vs. -rpath-link (linux) vs. LD_LIBRARY_PATH
 ==  
 
 on mac a few minor issues w/ gyrfalcON:
- - inc/public/forces.cc:462: error: 'uint' has not been declared
-   uint must be unsigned
-
- - src/public/lib/sample.cc:146: error: no matching function for call to 'isnan(double&)'
-   should be std::isnan()
-
- - /usr/include/rpc/xdr.h:153: error: conflicting declaration 'typedef struct __rpc_xdr XDR'
-   need to #include <rpc/rpc.h> here
-
-    
 
 	YES: gcc -dynamiclib -o libtest.dylib -dylib t.o
 
@@ -371,7 +282,7 @@ git tricks
    git checkout FILE
 
    this will silently overwrite your modified FILE with the
-   original version
+   original version!!!
 
  
 4) working with another remote upstream
