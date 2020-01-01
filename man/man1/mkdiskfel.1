@@ -13,7 +13,10 @@ The initial condition will thus look very boring,
 and after an integration with programs such as  \fIpotcode(1NEMO)\fP
 and further analysis things will make more sense.
 .PP
-For testing there is an option to only populate particles on the 
+For testing there is an option to only populate particles on a "maxlz" orbit. For
+symmetric potentials these are the closed loop orbits, for core-harmonic but
+non-axisymmetric these approach the loop orbits outside the core, but of course
+cannot follow the bifurcation within the core.  Need a cute figure to show this.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -73,21 +76,27 @@ Try and find only the maxlz orbits per energy/radius.
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
 .SH EXAMPLES
-An Y-VX phase plot (the only non-zero coordinate in the initial conditions for launch=y) can be created
-as follows for the circular orbits and the full "f(E,L)" type:
+Plotting the initial conditions in a few phase-plot types for both a "maxlz" orbits alone, and the
+more fully samples phase space is done as follows. The first three are the "maxlz" orbits:
 .nf
 
-  mkdiskfel - maxlz=t | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=1/xs
-  mkdiskfel -         | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=2/xs
-  mkdiskfel -         | snapplot - xvar=etot yvar='-y*vx' xrange=-1:0.2 yrange=0:1 yapp=3/xs
+  mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=1/xs
+  mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=etot yvar=jtot xrange=-1:-0.2 yrange=0:1.6 yapp=2/xs
+  mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=y  yvar=etot xrange=0:2 yrange=-1:-0.2 yapp=3/xs  
+
+  mkdiskfel - 2048 rmin=0.1 rmax=2          | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=11/xs
+  mkdiskfel - 2048 rmin=0.1 rmax=2          | snapplot - xvar=etot yvar=jtot xrange=-1:-0.2 yrange=0:1.6 yapp=12/xs
+  mkdiskfel - 2048 rmin=0.1 rmax=2          | snapplot - xvar=y  yvar=etot xrange=0:2 yrange=-1:-0.2 yapp=13/xs  
 
 .fi
-
-the last example represents the true f(E,Lz) sampling for this configuration.
+where in the last plot (13) you can clearly see the uniform sampling in E-r space.
+.PP
+In the example below we explore non-axisymmetric potentials.
 .SH "SEE ALSO"
 mkdisk(1NEMO), mktestdisk(1NEMO), orbint(1NEMO), potcode(1NEMO)
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.5i +4.5i
 31-dec-2019	V0.1  drafted during the Top-2000	PJT
+1-jan-2019	V0.4  finished sampling in E-r space	PJT
 .fi
