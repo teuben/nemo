@@ -34,7 +34,7 @@ string defv[] = {
     "launch=y\n         Launch from Y or X axis",
     "maxlz=f\n          Try and find only the maxlz orbits per energy/radius",
     "headline=\n	Text headline for output",
-    "VERSION=0.2\n	31-dec-2019 PJT",
+    "VERSION=0.3\n	1-jan-2020 PJT",
     NULL,
 };
 
@@ -160,20 +160,21 @@ void writegalaxy(string name, string headline, bool Qmass)
     else
         bits = PhaseSpaceBit | TimeBit;
     bits |= AuxBit;
+    bits |= AccelerationBit;
     bits |= PotentialBit;
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
     strclose(outstr);
 }
-
+
 /*
  * TESTDISK: use forces due to a potential to make a uniform
  * density test disk.  
  */
-
+
 void testdisk0(int ilaunch)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, vcir_i, pot_i, t;
+    real r_i, vcir_i, pot_i, t;
     vector acc_i;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
@@ -181,20 +182,15 @@ void testdisk0(int ilaunch)
 
 
     disk = (Body *) allocate(ndisk * sizeof(Body));
-    rmin2 = rmin * rmin;
-    rmax2 = rmax * rmax;
-    t = 0;    /* dummy time ; we do not support variable time */
+    t = 0; 
     pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
 	Mass(dp) = mass;
-	if (ndisk == 1)
-	  r_i = rmin;
-	else
-	  r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
+	r_i = rmin + i * (rmax - rmin) / (ndisk - 1.0);
 	pos_d[ilaunch] = r_i;
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);
         SETV(acc_i,acc_d);
-	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
+	vcir_i = sqrt(r_i * ABS(acc_d[ilaunch]));
 
 	Pos(dp)[0]         = pos_d[0];
 	Pos(dp)[1]         = pos_d[1];
@@ -202,13 +198,14 @@ void testdisk0(int ilaunch)
 	Vel(dp)[ilaunch]   = 0.0;
 	Vel(dp)[1-ilaunch] = vcir_i * jz_sign * (1 - 2*ilaunch);   // 
 	Vel(dp)[2]         = 0.0;
-	/* store potential and total energy for debugging */
-	Phi(dp) = pot_d;
-	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Phi(dp)    = pot_d;
+	Acc(dp)[0] = acc_d[0];
+	Acc(dp)[1] = acc_d[1];
+	Acc(dp)[2] = acc_d[2];
+	Aux(dp)    = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
     }
 }
-
-
+
 void testdisk1(int ilaunch)
 {
     Body *dp;
@@ -238,7 +235,7 @@ void testdisk1(int ilaunch)
 	pos_d[ilaunch] = r_i;
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);
 	v2 = 2*(p_j - pot_d);
-	if (v2 < 0) continue;
+	if (v2 < 0) continue;     // outside CZV
 	nout++;
 
 	Pos(dp)[0]         = pos_d[0];
@@ -247,9 +244,11 @@ void testdisk1(int ilaunch)
 	Vel(dp)[ilaunch]   = 0.0;
 	Vel(dp)[1-ilaunch] = sqrt(v2) * jz_sign * (1 - 2*ilaunch);   // barbatruuk
 	Vel(dp)[2]         = 0.0;
-	/* store potential and total energy for debugging */
-	Phi(dp) = pot_d;
-	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Phi(dp)    = pot_d;
+	Acc(dp)[0] = acc_d[0];
+	Acc(dp)[1] = acc_d[1];
+	Acc(dp)[2] = acc_d[2];
+	Aux(dp)    = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
 	dp++;
       }
     }
