@@ -1,4 +1,4 @@
-.TH MKDISKFEL 1NEMO "13 December 2017"
+.TH MKDISKFEL 1NEMO "31 December 2019"
 .SH NAME
 mkdisk \- set up a test disk in a spherical potential filling f(E,Lz)
 .SH SYNOPSIS
@@ -9,12 +9,11 @@ axis (\fBx\fP or \fBy\fP)
 in the gravitational potential of a user-supplied potential (in
 \fIpotential(5NEMO)\fP format), in order to get a reasonable sample
 of all possible orbits in the allowed phase space of bound orbits.
+The initial condition will thus look very boring,
+and after an integration with programs such as  \fIpotcode(1NEMO)\fP
+and further analysis things will make more sense.
 .PP
-The initial condition will look boring, and will need to be integrated
-with programs such as \fIpotcode(1NEMO)\fP.
-.PP
-Some of the parameters below are still from its clone, mkdisk, and/or
-have not been added.
+For testing there is an option to only populate particles on the 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -28,8 +27,7 @@ Potential and Aux slots of the snapshot. [no default].
 Number of bodies particles [default: \fB2048\fP]
 .TP
 \fBpotname=\fIpotential_name\fP
-name of the potential, see \fB$NEMOOBJ/potential\fP for the current
-object repository. The user can supply his own, see \fIpotential(5NEMO)\fP.
+name of the \fIpotential(5NEMO)\fP.
 [no default].
 .TP
 \fBpotpars=\fIpot_pars\fP
@@ -48,7 +46,7 @@ on the potential supplied.
 Inner cutoff radius of test-particle disk. [Default: \fB0\fP].
 .TP
 \fBrmax=\fImax_disk_radius\fP
-Outer cutoff radius of test-particle disk. [Default: \fB1\fP].
+Outer cutoff radius of test-particle disk. [Default: \fB2\fP].
 .TP
 \fBmass=\fItot_mass\fP
 Total mass of the disk. The default total mass is 0, since this is a
@@ -69,8 +67,17 @@ our galaxy has sign=-1). [Default: \fB1\fP].
 Launch axis. Since all orbits are in the X-Y plane, the options here
 are \fBx\fP or \fBy\fP.
 .TP
+\fBmaxlz=t|f\fP
+Try and find only the maxlz orbits per energy/radius. 
+.TP
 \fBheadline=\fImessage\fP
 Text headline for output file [default: not used].
+.SH EXAMPLES
+Although an X-Y plot looks boring, a phase plot is not:
+.nf
+  mkdiskfel - maxlz=t | snapplot - xvar=y yvar=vx
+  mkdiskfel - maxlz=f | snapplot - xvar=y yvar=vx
+.fi
 .SH "SEE ALSO"
 mkdisk(1NEMO), mktestdisk(1NEMO), orbint(1NEMO), potcode(1NEMO)
 .SH "UPDATE HISTORY"
