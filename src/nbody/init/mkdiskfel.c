@@ -24,7 +24,7 @@ string defv[] = {
     "potpars=\n         Parameters to potential",
     "potfile=\n         Optional data file with potential",
     "rmin=0\n		Inner disk radius",
-    "rmax=1\n		Outer cutoff radius",
+    "rmax=2\n		Outer cutoff radius",
     "emin=\n            Emin, if Used",
     "emax=\n            Emax, if Used",
 
@@ -32,15 +32,16 @@ string defv[] = {
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk (1=counterclock)",
     "launch=y\n         Launch from Y or X axis",
-    "maxlz=t\n          Try and find only the maxlz orbits per energy/radius",
+    "maxlz=f\n          Try and find only the maxlz orbits per energy/radius",
     "headline=\n	Text headline for output",
-    "VERSION=0.1\n	31-dec-2019 PJT",
+    "VERSION=0.2\n	31-dec-2019 PJT",
     NULL,
 };
 
 string usage="set up a test disk in a spherical potential filling f(E,Lz)";
 
 local real rmin, rmax, mass;
+local real pmin, pmax;
 local real emin, emax;
 local int  jz_sign;
 local bool Qangle;
@@ -48,7 +49,6 @@ local bool Qenergy;
 local bool Qabs;
 
 local int ndisk;
-local real frac[NDIM], vrad;
 local Body *disk;
 
 local proc potential;
@@ -58,7 +58,8 @@ extern double xrandom(double,double), grandom(double,double);
 
 local void writegalaxy(string name, string headline, bool Qmass);
 local void testdisk0(int ilaunch);
-  
+local void testdisk1(int ilaunch);
+
 local real mysech2(real z)
 {
   real y = exp(z);
@@ -110,14 +111,15 @@ void nemo_main()
     ndisk = getiparam("nbody");
 
     potential = get_potential(getparam("potname"),
-                    getparam("potpars"), getparam("potfile"));
+			      getparam("potpars"),
+			      getparam("potfile"));
     pos[0] = pos[1] = pos[2] = 0.0;
     pos[ilaunch] = rmin;
-    (*potential)(&ndim,pos,acc,&pot,&time);
-    dprintf(0,"Potential at rmin=%g: %g\n",rmin,pot);    
+    (*potential)(&ndim,pos,acc,&pmin,&time);
+    dprintf(0,"Potential at rmin=%g: %g\n",rmin,pmin);
     pos[ilaunch] = rmax;
-    (*potential)(&ndim,pos,acc,&pot,&time);
-    dprintf(0,"Potential at rmax=%g: %g\n",rmax,pot);    
+    (*potential)(&ndim,pos,acc,&pmax,&time);
+    dprintf(0,"Potential at rmax=%g: %g\n",rmax,pmax);
 
 
     jz_sign = getiparam("sign");
@@ -131,15 +133,11 @@ void nemo_main()
         Qmass=TRUE;
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
-    Qangle = FALSE;
-    Qenergy = FALSE;
-    Qabs = FALSE;
     if (Qmaxlz) {
-      warning("Special test: only maxlz orbits");
+      warning("Special test: sampling only maxlz orbits");
       testdisk0(ilaunch);
-    } else {
-      error("mode not implemented yet");
-    }
+    } else
+      testdisk1(ilaunch);      
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
 }
 
@@ -175,9 +173,7 @@ void writegalaxy(string name, string headline, bool Qmass)
 void testdisk0(int ilaunch)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
-    real  dv_r, dv_t, sint, cost, theta_0, vrandom;
-    real sigma_r, sigma_t, sigma_z;
+    real rmin2, rmax2, r_i, vcir_i, pot_i, t;
     vector acc_i;
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
@@ -187,7 +183,6 @@ void testdisk0(int ilaunch)
     disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
-    theta_i = xrandom(0.0, TWO_PI);
     t = 0;    /* dummy time ; we do not support variable time */
     pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
@@ -211,4 +206,53 @@ void testdisk0(int ilaunch)
 	Phi(dp) = pot_d;
 	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
     }
+}
+
+
+void testdisk1(int ilaunch)
+{
+    Body *dp;
+    real r_i, p_j, vcir_i, pot_i, t, v2;
+    int  ndisk2, nout;
+    vector acc_i;
+    
+    int i, j, ndim=NDIM;
+    double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
+
+    dprintf(0,"Pmin/max: %g %g\n",pmin,pmax);
+    ndisk2 = (int) sqrt((double)ndisk);
+    dprintf(0,"ndisk by side: %d\n",ndisk2);
+
+    disk = (Body *) allocate(ndisk * sizeof(Body));
+    t = 0;   
+    pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
+
+    nout = 0;
+    dp = disk;
+    for (i = 0; i < ndisk2; ++i) {	/* loop over all radii */
+      dprintf(0,"p_j=%g r_i=%g\n",p_j,r_i);
+      r_i = rmin + i * (rmax - rmin) / (ndisk2 - 1.0);
+      for (j = 0; j < ndisk2; ++j) {	/* loop over all potentials */
+	p_j = pmin + j * (pmax - pmin) / (ndisk2 - 1.0);
+	
+	pos_d[ilaunch] = r_i;
+        (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);
+	v2 = 2*(p_j - pot_d);
+	if (v2 < 0) continue;
+	nout++;
+
+	Pos(dp)[0]         = pos_d[0];
+	Pos(dp)[1]         = pos_d[1];
+	Pos(dp)[2]         = pos_d[2];
+	Vel(dp)[ilaunch]   = 0.0;
+	Vel(dp)[1-ilaunch] = sqrt(v2) * jz_sign * (1 - 2*ilaunch);   // barbatruuk
+	Vel(dp)[2]         = 0.0;
+	/* store potential and total energy for debugging */
+	Phi(dp) = pot_d;
+	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	dp++;
+      }
+    }
+    dprintf(0,"Found %d/%d within CZV\n",nout,ndisk);
+    ndisk = nout;
 }
