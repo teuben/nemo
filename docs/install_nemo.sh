@@ -19,6 +19,9 @@ echo "  nemo=$nemo"
 echo "  python=$python"
 echo ""
 
+# safet
+echo Sleep 5 seconds....;     sleep 5
+
 
 date0=$(date)
 
@@ -46,7 +49,7 @@ fi
 
 # pick a configure (remember to use $opt)
 
-#./configure $opt                       # ok, this will pick yapp_ps
+#./configure $opt
 #./configure $opt --with-yapp=pgplot --disable-falcon
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
@@ -55,11 +58,11 @@ fi
 #./configure $opt --with-yapp=pgplot --with-pgplot-prefix=/usr/lib 
 #./configure $opt --enable-native
 #./configure $opt --disable-falcon
-#./configure $opt --with-openmp
+./configure $opt --with-openmp --enable-native
 #./configure $opt --enable-cfitsio --with-cfitsio-prefix=/usr
 #./configure $opt --with-yapp=plplot --disable-falcon
 #./configure $opt --with-opt
-./configure $opt
+
 
 # on a mac:
 #./configure $opt --without-csh 
