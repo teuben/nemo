@@ -1,6 +1,6 @@
 /*
  * BODYTRANSC.H: 
- *         this nasty trick is need for nemo_main users
+ *         this nasty trick is needed for nemo_main users
  *         since direct bodytrans.h macros can interfere with
  *         your variable names
  *
