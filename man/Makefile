@@ -64,6 +64,11 @@ fortune: nemo-fortunes.dat
 nemo-fortunes.dat: nemo-fortunes
 	strfile nemo-fortunes nemo-fortunes.dat
 
+#    Reminder how to make a PS file from a man page
+
+MAN = tsf.1
+ps: $(MAN)
+	groff -man -Tps $(MAN) > man.ps
 
 #    Peter's update for the website
 chara:
