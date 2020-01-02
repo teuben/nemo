@@ -85,6 +85,7 @@ int read_orbit (stream instr, orbitptr *optr)
 
     get_history(instr);     /* always scan for history; allow sandwiched */
 
+    // @todo if Orbit not found, continue until one if found or EOF
     if (!get_tag_ok (instr,OrbitTag))
         return 0;                      /* not another orbit available */
         
