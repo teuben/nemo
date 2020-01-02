@@ -22,10 +22,11 @@ string defv[] = {
   "size=2\n            Box will be from -size : size",
   "npix=32\n           Number of pixels along (cube) box axes",
   "times=all\n         Which times to use from the snapshot [not yet implemented]",
-  "nsteps=\n           This will scan the snapshots first (not yet implemented)",
+  "nsteps=10000\n      Max timesteps to allocate",
   "ibody=-1\n          If >= 0, only select this body for the orbit (0=first)",
+  "odm=t\n             Produce an ODM",
   "hdf=f\n             Outut format - Not implemented yet",
-  "VERSION=0.6\n       27-dec-2019 PJT",
+  "VERSION=0.7\n       2-jan-2020 PJT",
   NULL,
 };
 
@@ -83,15 +84,21 @@ void scandata(string fin, string fout, bool Qhdf)
   stream instr = stropen(fin,"r");
   stream outstr = stropen(fout,"w");
   string times = getparam("times");
-  real tsnap, tsnaps[MAXSNAP];
-  Body *bp, *btab[MAXSNAP];
+  bool Qodm = getbparam("odm");
+  int nsteps = getiparam("nsteps");
+  real tsnap, *tsnaps; // [MAXSNAP]
+  Body *bp, **btab;    // [MAXSNAP];
   int nbody0 = 0, nbody, bits;
   real sum;
   int i, j, nsnap = 0;
 
   if (Qhdf) warning("HDF output not avaiable yet. Deal with NEMO for now");
 
-  for (i=0; i<MAXSNAP; i++) btab[i] = NULL;
+  tsnaps = (real *) allocate(nsteps * sizeof(real));
+  btab = (Body **) allocate(nsteps * sizeof(Body *));
+  
+  //for (i=0; i<MAXSNAP; i++) btab[i] = NULL;
+  for (i=0; i<nsteps; i++) btab[i] = NULL;
   
   dprintf(0,"scanning %s\n",fin);
   get_history(instr);
@@ -114,11 +121,11 @@ void scandata(string fin, string fout, bool Qhdf)
     dprintf(1,"Adding %g\n",tsnap);
     tsnaps[nsnap] = tsnap;
     nsnap++;
-    if (nsnap == MAXSNAP) {
-      warning("Can only handle %d snapshots",MAXSNAP);
+    if (nsnap == nsteps) {    
+      warning("Can only handle %d snapshots",nsteps);
       break;
     }
-  }
+  } // scanning all snapshots
 
   dprintf(0,"Found %d snapshots with %d bodies each\n",nsnap,nbody0);
 
@@ -166,28 +173,32 @@ void scandata(string fin, string fout, bool Qhdf)
       AZorb(optr, j) = Acc(bp)[2];
 #endif      
 
-      ix = xbox(Pos(bp)[0],  size, npix);     // simple ODM coordinates
-      if (ix<0) continue;
-      iy = xbox(Pos(bp)[1],  size, npix);
-      if (iy<0) continue;
-      iz = xbox(Pos(bp)[2],  size, npix);
-      if (iz<0) continue;
-      CubeValue(iptr,ix,iy,iz) += 1.0;   // could imagine a better normalization
-    } // j (the # steps)
-    dmin = dmax = CubeValue(iptr,0,0,0);
-    for(ix=0; ix<npix; ix++)             // get dmin,dmax of the ODM
-    for(iy=0; iy<npix; iy++)
-      for(iz=0; iz<npix; iz++) {
-	if (CubeValue(iptr,ix,iy,iz) < dmin) dmin = CubeValue(iptr,ix,iy,iz);
-	if (CubeValue(iptr,ix,iy,iz) > dmax) dmax = CubeValue(iptr,ix,iy,iz);
+      if (Qodm) {
+	ix = xbox(Pos(bp)[0],  size, npix);     // simple ODM coordinates
+	if (ix<0) continue;
+	iy = xbox(Pos(bp)[1],  size, npix);
+	if (iy<0) continue;
+	iz = xbox(Pos(bp)[2],  size, npix);
+	if (iz<0) continue;
+	CubeValue(iptr,ix,iy,iz) += 1.0;   // could imagine a better normalization
       }
-    MapMin(iptr) = dmin;
-    MapMax(iptr) = dmax;
-    if (dmax == 0.0)
-      warning("MapMax 0 for body %d\n",i);
-
+    } // j (the # steps)
+    if (Qodm) {
+      dmin = dmax = CubeValue(iptr,0,0,0);
+      for(ix=0; ix<npix; ix++)             // get dmin,dmax of the ODM
+	for(iy=0; iy<npix; iy++)
+	  for(iz=0; iz<npix; iz++) {
+	    if (CubeValue(iptr,ix,iy,iz) < dmin) dmin = CubeValue(iptr,ix,iy,iz);
+	    if (CubeValue(iptr,ix,iy,iz) > dmax) dmax = CubeValue(iptr,ix,iy,iz);
+	  }
+      MapMin(iptr) = dmin;
+      MapMax(iptr) = dmax;
+      if (dmax == 0.0)
+	warning("MapMax 0 for body %d\n",i);
+    }
     write_orbit(outstr,optr);
-    write_image(outstr,iptr);
+    if (Qodm)
+      write_image(outstr,iptr);
     reset_history();
   } // i (the # particles)
   strclose(outstr);
