@@ -102,6 +102,21 @@ you with this:
    rpm -ql hdf5-devel         (redhat/centos)
 
 .fi
+.SH MEMORY USAGE
+\fBorboom\fP is an example of a program that does a transpose of a matrix, which in some
+parts of the parameter space can cause issues. Essentially it does
+.nf
+	SNAP(Na,Np,Nt) -> BOOM(Na,Nt,Np)
+.fi
+with of order
+.nf
+	Na = 11
+	Np = 10,000
+	Nt = 10,000
+.fi
+which at 8 bytes per real means about 8GB.
+We have a benchmark to time just this operation, for which the example command will be
+written down here at some point.   There is also the I/O component.
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
