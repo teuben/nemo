@@ -6,6 +6,7 @@
  *     24-may-92  V1.1a added <potential.h>                             PJT
  *     30-dec-93  V1.2 added pabs,vabs=t|f                              PJT
  *    9-dec-2019  V1.3 symm option to deal with e.g. hh64               PJT
+ *    2-jan-2020  V1.4 process all orbits, not just the first           PJT
  *
  */
 
@@ -22,7 +23,7 @@ string defv[] = {
     "pabs=f\n           Show absolute values of positions?",
     "vabs=f\n           Show absolute values of velocities?",
     "symm=t\n           Symmetric potential?",
-    "VERSION=1.3a\n  	11-dec-2019 PJT",
+    "VERSION=1.4\n  	2-jan-2020 PJT",
     NULL,
 };
 
@@ -57,8 +58,8 @@ void nemo_main(void)
     vabs = getbparam("vabs");
     symm = getbparam("symm");
     
-    read_orbit(instr,&optr);
-    sos2(optr,symm,pabs,vabs);
+    while (read_orbit(instr,&optr))
+      sos2(optr,symm,pabs,vabs);
     strclose(instr);
 }
 
