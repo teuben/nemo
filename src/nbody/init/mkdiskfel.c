@@ -35,7 +35,7 @@ string defv[] = {
     "launch=y\n         Launch from Y or X axis",
     "maxlz=f\n          Try and find only the maxlz orbits per energy/radius",
     "headline=\n	Text headline for output",
-    "VERSION=0.4\n	1-jan-2020 PJT",
+    "VERSION=0.5\n	2-jan-2020 PJT",
     NULL,
 };
 
@@ -57,10 +57,11 @@ extern double xrandom(double,double), grandom(double,double);
 local void writegalaxy(string name, string headline, bool Qmass);
 local void testdisk0(int ilaunch);
 local void testdisk1(int ilaunch);
+local void testdisk2(int ilaunch);
 
 void nemo_main()
 {
-    bool Qmass;
+    bool Qmass, Qfixe;
     int seed, ndim=3;
     real pos[3], acc[3], pot;
     real time = 0.0;
@@ -90,6 +91,17 @@ void nemo_main()
     (*potential)(&ndim,pos,acc,&pmax,&time);
     dprintf(0,"Potential at rmax=%g: %g\n",rmax,pmax);
 
+    if (hasvalue("emin")) {
+      emin = getrparam("emin");
+      emax = getrparam("emax");
+      if (emin < emax)
+	warning("Different emin/emax not yet supported, assuming emin=%g",emin);
+      if (emin < pmin) error("emin=%g  <  pmin=%g",emin,pmin);
+      if (emin > pmax) error("emin=%g  >  pmax=%g",emin,pmax);
+      Qfixe = TRUE;
+    } else
+      Qfixe = FALSE;
+
 
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
@@ -104,6 +116,8 @@ void nemo_main()
     dprintf(1,"Seed=%d\n",seed);
     if (Qmaxlz)
       testdisk0(ilaunch);
+    else if (Qfixe)
+      testdisk2(ilaunch);
     else
       testdisk1(ilaunch);      
     writegalaxy(getparam("out"), getparam("headline"), Qmass);
@@ -216,6 +230,49 @@ void testdisk1(int ilaunch)
 	Acc(dp)[2]         = acc_d[2];
 	dp++;
       }
+    }
+    dprintf(0,"Found %d/%d within CZV\n",nout,ndisk);
+    ndisk = nout;
+}
+
+//
+//  All orbits with given energy (emin)
+//
+
+void testdisk2(int ilaunch)
+{
+    Body *dp;
+    real r_i, vcir_i, pot_i, v2, t= 0.0;
+    vector acc_i;
+    int i, nout, ndim=NDIM;
+    double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
+
+    warning("new option");
+
+    disk = (Body *) allocate(ndisk * sizeof(Body));
+    pos_d[0] =  pos_d[1] =  pos_d[2] = 0.0;
+
+    nout = 0;
+    for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
+	Mass(dp) = mass;
+	r_i = rmin + i * (rmax - rmin) / (ndisk - 1.0);
+	pos_d[ilaunch] = r_i;
+        (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);
+
+	v2 = 2*(emin- pot_d);
+	if (v2 < 0) break;     // outside CZV
+	nout++;
+
+	Pos(dp)[0]         = pos_d[0];
+	Pos(dp)[1]         = pos_d[1];
+	Pos(dp)[2]         = pos_d[2];
+	Vel(dp)[ilaunch]   = 0.0;
+	Vel(dp)[1-ilaunch] = sqrt(v2) * jz_sign * (1 - 2*ilaunch);   // 
+	Vel(dp)[2]         = 0.0;
+	Phi(dp)            = pot_d;
+	Acc(dp)[0]         = acc_d[0];
+	Acc(dp)[1]         = acc_d[1];
+	Acc(dp)[2]         = acc_d[2];
     }
     dprintf(0,"Found %d/%d within CZV\n",nout,ndisk);
     ndisk = nout;

@@ -51,6 +51,14 @@ Inner cutoff radius of test-particle disk. [Default: \fB0\fP].
 \fBrmax=\fImax_disk_radius\fP
 Outer cutoff radius of test-particle disk. [Default: \fB2\fP].
 .TP
+\fBemin=\fImin_energy\fP
+Minimum energy of orbits. If a value if given, this currently
+triggers emax=emin and all orbits will be sampled at this
+energy. 
+.TP
+\fBemax=\fImax_energy\fP
+Maximum energy of orbits.
+.TP
 \fBmass=\fItot_mass\fP
 Total mass of the disk. The default total mass is 0, since this is a
 testdisk. Since there are a few programs that will not like mass-less
@@ -77,7 +85,7 @@ Try and find only the maxlz orbits per energy/radius.
 Text headline for output file [default: not used].
 .SH EXAMPLES
 Plotting the initial conditions in a few phase-plot types for both a "maxlz" orbits alone, and the
-more fully samples phase space is done as follows. The first three are the "maxlz" orbits:
+more fully samples phase space is done as follows. The first three are the "maxlz" (circular) orbits:
 .nf
 
   mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=y yvar=-vx xrange=0:2 yrange=0:1.6 yapp=1/xs
@@ -98,5 +106,6 @@ mkdisk(1NEMO), mktestdisk(1NEMO), orbint(1NEMO), potcode(1NEMO)
 .nf
 .ta +1.5i +4.5i
 31-dec-2019	V0.1  drafted during the Top-2000	PJT
-1-jan-2019	V0.4  finished sampling in E-r space	PJT
+1-jan-2020	V0.4  finished sampling in E-r space	PJT
+2-jan-2020	V0.5  added emin= option to sample orbits at one energy		PJT
 .fi
