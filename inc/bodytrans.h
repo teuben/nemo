@@ -54,7 +54,7 @@ extern iproc_body btitrans(string expr);
 
 #define phi   Phi(b)
 
-#define acc   Acc(b)
+//#define acc   Acc(b)
 #define ax    Acc(b)[0]
 #define ay    Acc(b)[1]
 #if defined(THREEDIM)

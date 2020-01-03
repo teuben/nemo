@@ -26,40 +26,40 @@
 #define ORBIT_PHI
 
 typedef struct {
-        int   ndim;
-        int   coordsys;
-	int   size;
-        real  mass;
-        real  *iom;
-        real  *iom_err;
-        int   key;
-        int   nsteps;
-        int   maxsteps;
-        real  *time;
-        real  *phase;
+        int     _ndim;
+        int     _coordsys;
+	int     _size;
+        real    _mass;
+        realptr _iom;
+        realptr _iom_err;
+        int     _key;
+        int     _nsteps;
+        int     _maxsteps;
+        realptr _time;
+        realptr _phase;
 #ifdef ORBIT_PHI
-        real  *phi;
-        real  *acc;
+        realptr _phi;
+        realptr _acc;
 #endif  
-	a_potential pot;
+	a_potential _pot;
 } orbit, *orbitptr;
 
-#define Ndim(optr)      ((optr)->ndim)
-#define CoordSys(optr)  ((optr)->coordsys)
-#define Size(optr)      ((optr)->size)
-#define Masso(optr)     ((optr)->mass)
-#define Key(optr)       ((optr)->key)
-#define IOM(optr)       ((optr)->iom)
-#define IOMERR(optr)    ((optr)->iom_err)
-#define Nsteps(optr)    ((optr)->nsteps)
-#define MAXsteps(optr)  ((optr)->maxsteps)
-#define TimePath(optr)  ((optr)->time)
-#define PhasePath(optr) ((optr)->phase)
-#define PosPath(optr)   ((optr)->phase)
-#define VelPath(optr)   ((optr)->phase+Ndim(optr))
-#define PhiPath(optr)   ((optr)->phi)
-#define AccPath(optr)   ((optr)->acc)
-#define Potential(optr) ((optr)->pot)
+#define Ndim(optr)      ((optr)->_ndim)
+#define CoordSys(optr)  ((optr)->_coordsys)
+#define Size(optr)      ((optr)->_size)
+#define Masso(optr)     ((optr)->_mass)
+#define Key(optr)       ((optr)->_key)
+#define IOM(optr)       ((optr)->_iom)
+#define IOMERR(optr)    ((optr)->_iom_err)
+#define Nsteps(optr)    ((optr)->_nsteps)
+#define MAXsteps(optr)  ((optr)->_maxsteps)
+#define TimePath(optr)  ((optr)->_time)
+#define PhasePath(optr) ((optr)->_phase)
+#define PosPath(optr)   ((optr)->_phase)
+#define VelPath(optr)   ((optr)->_phase+Ndim(optr))
+#define PhiPath(optr)   ((optr)->_phi)
+#define AccPath(optr)   ((optr)->_acc)
+#define Potential(optr) ((optr)->_pot)
 
 /*      a few dangerous (does not check for ndim) access functions */
 

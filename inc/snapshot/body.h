@@ -9,15 +9,15 @@
 #define _body_h_dens
 
 typedef struct {
-    real   mass;		/* mass of body			    */
-    vector phase[2];		/* phase-space coordinates	    */
-    real   phi;			/* gravitational potential	    */
-    vector acc;			/* gravitational acceleration	    */
-    real   aux;			/* misc. real value assoc. w. body  */
-    int    key;			/* misc. int. value assoc. w. body  */
+    real   _mass;		/* mass of body			    */
+    vector _phase[2];		/* phase-space coordinates	    */
+    real   _phi;		/* gravitational potential	    */
+    vector _acc;	 	/* gravitational acceleration	    */
+    real   _aux;		/* misc. real value assoc. w. body  */
+    int    _key;		/* misc. int. value assoc. w. body  */
 #ifdef _body_h_dens
-    real   dens;		/* density associated w. body       */
-    real   eps;                 /* softening length w. body         */
+    real   _dens;		/* density associated w. body       */
+    real   _eps;                /* softening length w. body         */
 #endif
 } body;
 
@@ -27,17 +27,17 @@ typedef real (*btrproc)(body *, real, int);
 
 #define Body     body
 
-#define Mass(b)  ((b)->mass)
-#define Phase(b) ((b)->phase)
-#define Pos(b)   ((b)->phase[0])
-#define Vel(b)   ((b)->phase[1])
-#define Phi(b)   ((b)->phi)
-#define Acc(b)   ((b)->acc)
-#define Aux(b)   ((b)->aux)
-#define Key(b)   ((b)->key)
+#define Mass(b)  ((b)->_mass)
+#define Phase(b) ((b)->_phase)
+#define Pos(b)   ((b)->_phase[0])
+#define Vel(b)   ((b)->_phase[1])
+#define Phi(b)   ((b)->_phi)
+#define Acc(b)   ((b)->_acc)
+#define Aux(b)   ((b)->_aux)
+#define Key(b)   ((b)->_key)
 #ifdef _body_h_dens
-#define Dens(b)  ((b)->dens)
-#define Eps(b)   ((b)->eps)
+#define Dens(b)  ((b)->_dens)
+#define Eps(b)   ((b)->_eps)
 #endif
 
 #endif
