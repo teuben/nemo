@@ -1,4 +1,4 @@
-.TH ORBSOS 1NEMO "9 December 2019"
+.TH ORBSOS 1NEMO "2 January 2020"
 .SH NAME
 orbsos \- tabulate the SOS coordinates of an orbit
 .SH SYNOPSIS
@@ -68,8 +68,20 @@ mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 4000000 dt=0.01 |\
 mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |\
     orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
 .fi
+.PP
+Instead of looking at one orbit, using \fImkdiskfel(1NEMO)\fP to create
+initial conditions,and \fIpotcode(1NEMO)\fP as an integrator, the following
+example shows how to get a whole series of orbits in one SOS:
+.nf
+
+  mkdiskfel d3 100 rmax=2 potname=log potpars=0,1,1,0.7 emin=2
+  potcode d3 d3.out potname=log potpars=0,1,1,0.7 freqout=64 tstop=1000
+  orboom d3.out d3.boom odm=f nsteps=100000
+  orbsos d3.boom  | tabplot - 3 4 
+
+.fi
 .SH "SEE ALSO"
-perorb(1NEMO), orbit(3NEMO)
+perorb(1NEMO), orbint(1NEMO), mkorbit(1NEMO), mkdiskfel(1NEMO), potcode(1NEMO), orbit(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
@@ -84,4 +96,5 @@ Peter Teuben
 22-mar-92	V1.1 added mode= and documented  	PJT
 30-dec-93	V1.2 added pabs= and vabs=	PJT
 9-dec-2019	V1.3 add symm=	PJT
+2-jan-2020	added examples
 .fi
