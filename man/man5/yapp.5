@@ -134,12 +134,19 @@ PGPLOT_PS_DRAW_BBOX
 
 .fi
 For X windows drivers (e.g. /xs and /xw) a number of X resources are used
-(see \fIxrd(1)\fP), e.g.
+(see \fIxrdb(1)\fP), e.g.
 .nf
 
+!       settings for pgplot
 pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
 pgxwin.Win.iconGeometry: +X+Y
 
+.fi
+if you store them in a file ~/.Xdefaults, they can be merged into your X session as follows, after you make sure
+any old pgplot xwin_server has been killed:
+.nf
+    xkill pgxwin_server
+    xrdb -merge ~/.Xdefaults
 .fi
 .SH PLPLOT
 Like PGPLOT, PLPLOT can also pick different graphics output devices, specified via the usual yapp= system
