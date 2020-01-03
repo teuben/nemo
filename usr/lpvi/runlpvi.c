@@ -33,12 +33,12 @@ string defv[] = {
     "ci=0,0,0,0,0,0,0\n  CI indictors:  LIs, SALI, GALIs, SD & SSNs, RLI & LImax, MEGNO & SElLCE, FLI & OFLI",
     "nstep=1\n           Steps until Output",
     "dev=1\n             Initial dev. vectors (0 = at random, 1 = random orthonormal, 2=fixed)",
-    "sali=1\n            SALI & potential(t): normal saturation (=0) or restart dev. vectors (=1)",
+    "sali=0\n            SALI & potential(t): normal saturation (=0) or restart dev. vectors (=1)",
 
     "ndim=\n             Not used yet, but might be needed if posvel ambiguous",
     "exe=LP-VIcode\n     Name of the fortran executable",
 
-    "VERSION=0.3\n       30-dec-2019 PJT",
+    "VERSION=0.3\n       3-jan-2012 PJT",
     NULL,
 };
 
