@@ -1,6 +1,6 @@
 .TH MKDISKFEL 1NEMO "31 December 2019"
 .SH NAME
-mkdisk \- set up a test disk in a spherical potential filling f(E,Lz)
+mkdiskfel \- set up a test disk in a spherical potential filling f(E,Lz)
 .SH SYNOPSIS
 \fBmkdiskfel out=\fPsnapshot [parameters=values ...]
 .SH DESCRIPTION
@@ -65,7 +65,8 @@ testdisk. Since there are a few programs that will not like mass-less
 particles, this keyword can be used, or \fIsnapmass\fP
 will have to be used before further action is taken.
 [default: \fB0\fP].
-\fBseed=\fIrandom_seed\fP
+.TP
+\fBseed=\fP\fIrandom_seed\fP
 Use random number seed. If 0 is given, a random number is generated
 from the time of the day. [default: \fB0\fP].
 .TP
