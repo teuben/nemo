@@ -17,60 +17,66 @@ orboom - Transform an orbit and ODM into &rsquo;BOOM&rsquo; HDF [still testing]
 This program is under development for the
 BOOM project. It will take some combination input of a simulation (series
 of snapshots), orbit(s) and ODM&rsquo;s  [all to be determined] and turn them
-into a BOOM hdf for further analysis outside of NEMO. 
+into a BOOM hdf for further analysis outside of NEMO. <p>
+For the ODM (Orbit
+Density Map) some the gridding parameters are a simple cube, so we only
+need number of pixels and box size. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The following parameters are
+recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b><i>snapshot</i>
-</dt>
-<dd>Input snapshot simulation. No default. </dd>
+<dt><b>in=</b><i>snapshot</i> </dt>
+<dd>Input
+snapshot simulation. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output BOOM file. Currently NEMO
-(see hdf= below). No default. </dd>
+<dd>Output BOOM file. Currently NEMO (see
+hdf= below). No default. </dd>
 
 <dt><b>ndim=2|3</b> </dt>
-<dd>2 or 3 dimensional. Not implemented.
-[3] </dd>
+<dd>2 or 3 dimensional. Not implemented. [3] </dd>
 
-<dt><b>mode=0|1|2|3</b> </dt>
-<dd>1,2,3 are for testing. use 0 for proper output. This option
-will also likely disappear at version 1.0 [0] </dd>
+<dt><b>mode=0|1|2|3</b>
+</dt>
+<dd>1,2,3 are for testing. use 0 for proper output. This option will also likely
+disappear at version 1.0 [0] </dd>
 
 <dt><b>size=</b> </dt>
-<dd>Half the size of the
-ODM box, meaning the X, Y and Z coordinates of the orbit are gridded from
--size:size. This also implies we only compute square cubes [2]. </dd>
+<dd>Half the size of the ODM box, meaning
+the X, Y and Z coordinates of the orbit are gridded from -size:size. This
+also implies we only compute square cubes [2]. </dd>
 
 <dt><b>npix=</b> </dt>
-<dd>Number
-of pixels along the X, Y or Z axes. Same number pixels in all dimensions.
-[32] </dd>
+<dd>Number of pixels along
+the X, Y or Z axes. Same number pixels in all dimensions. [32] </dd>
 
-<dt><b>times=</b><i>t0:t1,t2:t3,...</i> </dt>
-<dd>What times to select for output.  which is of the
-form, eg, "1.0:1.5,2.5,3.0". Currently all. The code is limited to 10,000. </dd>
-
-<dt><b>nsteps=</b>
+<dt><b>times=</b><i>t0:t1,t2:t3,...</i>
 </dt>
-<dd>If not given, the input file will be scanned first. Not implemented yet.
-</dd>
+<dd>What times to select for output.  which is of the form, eg, "1.0:1.5,2.5,3.0".
+Currently all. The code is limited to 10,000. </dd>
 
-<dt><b>ibody=</b> </dt>
-<dd>If set, only this body will be output. This is useful for debugging.
-</dd>
+<dt><b>nsteps=</b> </dt>
+<dd>Allocate space how
+many snapshots (orbit steps) we need. No options for scanning yet. </dd>
+
+<dt><b>ibody=</b>
+</dt>
+<dd>If set, only this body will be output. This is useful for debugging. </dd>
+
+<dt><b>odm=t|f</b>
+</dt>
+<dd>Output ODM? </dd>
 
 <dt><b>hdf=t|f</b> </dt>
-<dd>Output file format in HDF ?  If not, NEMO format will be used. Currently
-only NEMO format is supported. [f] </dd>
+<dd>Output file format in HDF ?  If not, NEMO format will
+be used. Currently only NEMO format is supported. [f] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The current version just writes
-NEMO Orbit/Image file.  To extract a certain orbit or image, here is an
-example <br>
+The current
+version just writes NEMO Orbit/Image file.  To extract a certain orbit or
+image, here is an example <br>
 <pre>   #   create a BOOM file
    mkplummer p100 100 seed=100
    gyrfalcON  p100 p100.out step=0.1 tstop=10 eps=0.025 kmax=8 give=mxvap
@@ -116,11 +122,25 @@ Here are some sample commands to help you with this: <br>
    rpm -qa | grep hdf5        (redhat/centos)
    rpm -ql hdf5-devel         (redhat/centos)
 </pre>
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Memory Usage</a></h2>
+<b>orboom</b> is an example of a program that does a transpose of
+a matrix, which in some parts of the parameter space can cause issues. Essentially
+it does <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;SNAP(Na,Np,Nt) -&gt; BOOM(Na,Nt,Np)
+</pre>with of order <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;Na = 11
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;Np = 10,000
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;Nt = 10,000
+</pre>which at 8 bytes per real means about 8GB. We have a benchmark to time just
+this operation, for which the example command will be written down here
+at some point.   There is also the I/O component. 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update
+History</a></h2>
 <br>
-<pre>26-Dec-19<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>26-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 Added nsteps= and odm= PJT
 </pre><p>
 
 <hr><p>
@@ -134,8 +154,9 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
 <li><a name='toc7' href='#sect7'>Compilation</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>Memory Usage</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

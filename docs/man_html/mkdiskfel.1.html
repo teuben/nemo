@@ -9,7 +9,7 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mkdisk - set up a test disk in a spherical potential filling f(E,Lz)
+mkdiskfel - set up a test disk in a spherical potential filling f(E,Lz)
 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkdiskfel out=</b>snapshot [parameters=values ...] 
@@ -70,37 +70,49 @@ user supplied potential.  The number of files depends on the potential supplied.
 </dt>
 <dd>Outer cutoff radius of test-particle disk. [Default: <b>2</b>]. </dd>
 
-<dt><b>mass=<i>tot_mass</i></b> </dt>
-<dd>Total
-mass of the disk. The default total mass is 0, since this is a testdisk.
-Since there are a few programs that will not like mass-less particles, this
-keyword can be used, or <i>snapmass</i> will have to be used before further action
-is taken. [default: <b>0</b>]. <b>seed=<i>random_seed</i></b> Use random number seed. If 0 is given,
-a random number is generated from the time of the day. [default: <b>0</b>]. </dd>
+<dt><b>emin=<i>min_energy</i></b> </dt>
+<dd>Minimum
+energy of orbits. If a value if given, this currently triggers emax=emin
+and all orbits will be sampled at this energy.  </dd>
 
-<dt><b>sign=-1|1</b>
+<dt><b>emax=<i>max_energy</i></b> </dt>
+<dd>Maximum
+energy of orbits. </dd>
+
+<dt><b>mass=<i>tot_mass</i></b> </dt>
+<dd>Total mass of the disk. The default total
+mass is 0, since this is a testdisk. Since there are a few programs that
+will not like mass-less particles, this keyword can be used, or <i>snapmass</i>
+will have to be used before further action is taken. [default: <b>0</b>]. </dd>
+
+<dt><b>seed=</b><i>random_seed</i>
 </dt>
-<dd>Sign of the angular momentum. 1 means counter clockwise rotation in the
-XY-plane (in case you were wondering,  our galaxy has sign=-1). [Default:
-<b>1</b>]. </dd>
+<dd>Use random number seed. If 0 is given, a random number is generated from
+the time of the day. [default: <b>0</b>]. </dd>
+
+<dt><b>sign=-1|1</b> </dt>
+<dd>Sign of the angular momentum. 1
+means counter clockwise rotation in the XY-plane (in case you were wondering,
+ our galaxy has sign=-1). [Default: <b>1</b>]. </dd>
 
 <dt><b>launch=x|y</b> </dt>
-<dd>Launch axis. Since all orbits are in the X-Y plane, the options
-here are <b>x</b> or <b>y</b>. </dd>
+<dd>Launch axis. Since all orbits
+are in the X-Y plane, the options here are <b>x</b> or <b>y</b>. </dd>
 
 <dt><b>maxlz=t|f</b> </dt>
-<dd>Try and find only the maxlz orbits per energy/radius.
- </dd>
+<dd>Try and find
+only the maxlz orbits per energy/radius.  </dd>
 
 <dt><b>headline=<i>message</i></b> </dt>
-<dd>Text headline for output file [default: not used]. </dd>
+<dd>Text headline
+for output file [default: not used]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Plotting
-the initial conditions in a few phase-plot types for both a "maxlz" orbits
-alone, and the more fully samples phase space is done as follows. The first
-three are the "maxlz" orbits: <br>
+Plotting the initial conditions
+in a few phase-plot types for both a "maxlz" orbits alone, and the more
+fully samples phase space is done as follows. The first three are the "maxlz"
+(circular) orbits: <br>
 <pre>  mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=y yvar=-vx xrange=0:2
 yrange=0:1.6 yapp=1/xs
   mkdiskfel - 2048 rmin=0.1 rmax=2  maxlz=t | snapplot - xvar=etot yvar=jtot
@@ -115,19 +127,20 @@ xrange=-1:-0.2 yrange=0:1.6 yapp=12/xs
 xrange=0:2 yrange=-1:-0.2 yapp=13/xs  
 </pre>where in the last plot (13) you can clearly see the uniform sampling in
 E-r space. <p>
-In the example below we explore non-axisymmetric potentials. 
-<h2><a name='sect5' href='#toc5'>See
-Also</a></h2>
+In the example below we explore non-axisymmetric potentials, non-rotating.
+
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
 , <a href='mktestdisk.1.html'>mktestdisk(1NEMO)</a>
 , <a href='orbint.1.html'>orbint(1NEMO)</a>
 , <a href='potcode.1.html'>potcode(1NEMO)</a>
- 
-<h2><a name='sect6' href='#toc6'>Update
-History</a></h2>
+
+
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>31-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1  drafted during the Top-2000<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-1-jan-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4  finished sampling in E-r space<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+1-jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4  finished sampling in E-r space<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5  added emin= option to sample orbits at one energy<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

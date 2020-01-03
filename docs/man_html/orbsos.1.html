@@ -78,9 +78,24 @@ mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 4000000 dt=0.01 ||
 # same ergodic orbit like in Fig 5, but with twice the accuracy of integration
 mkorbit - y=0.6 e=0.125 lz=-1 potname=hh64 | orbint - - 8000000 dt=0.005 |
     orbsos -  y symm=f | tabplot - 3 4  -0.5 0.7 -0.5 0.5
+</pre><p>
+Instead of looking at one orbit, using <a href='mkdiskfel.1.html'><i>mkdiskfel(1NEMO)</i></a>
+ to create initial
+conditions,and <a href='potcode.1.html'><i>potcode(1NEMO)</i></a>
+ as an integrator, the following example shows
+how to get a whole series of orbits in one SOS: <br>
+<pre>  mkdiskfel d3 100 rmax=2 potname=log potpars=0,1,1,0.7 emin=2
+  potcode d3 d3.out potname=log potpars=0,1,1,0.7 freqout=64 tstop=1000
+  orboom d3.out d3.boom odm=f nsteps=100000
+  orbsos d3.boom  | tabplot - 3 4 
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='perorb.1.html'>perorb(1NEMO)</a>
+, <a href='orbint.1.html'>orbint(1NEMO)</a>
+, <a href='mkorbit.1.html'>mkorbit(1NEMO)</a>
+, <a href='mkdiskfel.1.html'>mkdiskfel(1NEMO)</a>
+,
+<a href='potcode.1.html'>potcode(1NEMO)</a>
 , <a href='orbit.3.html'>orbit(3NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
@@ -95,6 +110,7 @@ Peter Teuben
 22-mar-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added mode= and documented  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-dec-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added pabs= and vabs=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3 add symm=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added examples
 </pre><p>
 
 <hr><p>

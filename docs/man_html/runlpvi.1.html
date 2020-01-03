@@ -88,18 +88,21 @@ which means they need to be specified at the end of the <b>posvel=</b> sequence.
 </dd>
 
 <dt><b>sali=</b> </dt>
-<dd>SALI &amp; potential(t): normal saturation (=0) or restart [1]  Not used
-yet, but might be needed if we allow multiple orbits and optional tstop&rsquo;s.
-</dd>
+<dd>SALI &amp; potential(t): normal saturation (=0) or restart [1] </dd>
+
+<dt><b>ndim=</b> </dt>
+<dd>Not
+used yet, but might be needed if we allow multiple orbits and optional
+tstop&rsquo;s. </dd>
 
 <dt><b>exe=</b> </dt>
 <dd>Name of the fortran executable [LP-VIcode] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The <i>logarithm2</i> example
-from the manual can be run as follows: (2nd CI for the moment is 0, some
-error): <br>
+The <i>logarithm2</i>
+example from the manual can be run as follows: (2nd CI for the moment is
+0, some error): <br>
 <pre>  runlpvi run1 posvel=0.2,0.34,0.5,0.1235 prefix=log dt=0.05 tstop=25000 orbit=1
 ci=1,0,1::5 nstep=20
   tabplot run1/log.orb 2 3 -0.5 0.5 -0.5 0.5

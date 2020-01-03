@@ -147,10 +147,16 @@ PGPLOT_IDENT<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<
 corner
 PGPLOT_PS_DRAW_BBOX
 </pre>For X windows drivers (e.g. /xs and /xw) a number of X resources are used
-(see <a href='xrd.1.html'><i>xrd(1)</i></a>
+(see <a href='xrdb.1.html'><i>xrdb(1)</i></a>
 ), e.g. <br>
-<pre>pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
+<pre>!       settings for pgplot
+pgxwin.Win.geometry: WIDTHxHEIGHT+X+Y
 pgxwin.Win.iconGeometry: +X+Y
+</pre>if you store them in a file ~/.Xdefaults, they can be merged into your X
+session as follows, after you make sure any old pgplot xwin_server has
+been killed: <br>
+<pre>    xkill pgxwin_server
+    xrdb -merge ~/.Xdefaults
 </pre>
 <h2><a name='sect5' href='#toc5'>Plplot</a></h2>
 Like PGPLOT, PLPLOT can also pick different graphics output devices,
