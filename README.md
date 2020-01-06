@@ -70,6 +70,7 @@ At the simplest level, the installation uses an autoconf based scheme:
 
 Once NEMO has been installed, here are
 some examples of scripts and figures: https://teuben.github.io/nemo/examples/
+or look at an example ipython notebook https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 
 
 
