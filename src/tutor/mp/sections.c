@@ -6,14 +6,14 @@
 #include <nemo.h>
 
 string defv[] = {
-  "nmax=10000\n        array size is square of this",
-  "iter=10\n           each block",
+  "nmax=1000\n         array size will be square of this",
+  "iter=10\n           how many times to iterate each block",
   "seed=123\n          seed for xrandom",
-  "VERSION=0.0\n       29-Dec-2019 XYZ",
+  "VERSION=0.1\n       7-jan-2020 PJT",
   NULL,
 };
 
-string usage="TEMPLATE program usage -- fill in yourself";
+string usage="benchmark openmp overhead of starting a tast via sections";
 
 string cvsid="$Id:$";
 
