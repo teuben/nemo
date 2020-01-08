@@ -10,9 +10,9 @@ MAN1FILES =
 MAN3FILES = 
 MAN5FILES = 
 INCFILES = 
-SRCFILES = table.c gettab.c tabselect.c funtab.c getaline.c pytable.c
-OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o pytable.o
-LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o) $L(pytable.o)
+SRCFILES = table.c gettab.c tabselect.c funtab.c getaline.c pyplot.c
+OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o pyplot.o
+LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o) $L(pyplot.o)
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab meanmed \
 	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend \
 	   tabstat
