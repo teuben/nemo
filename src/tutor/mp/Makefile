@@ -34,3 +34,7 @@ poisson_mpi:
 
 bench3:
 	time mpirun -np 4 ./poisson_mpi 512
+
+# takes about 25" in single mode
+bench4:
+	time ./sections iter=10000
