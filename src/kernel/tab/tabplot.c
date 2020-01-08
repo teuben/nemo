@@ -42,6 +42,7 @@
  *       9-oct-06      d : Implemented the dxcol= and dycol=
  *       8-apr-11      e : fixed dycol reference bug
  *      22-aug-2018 V3.1 : print commented line if bin= causes an empty bin
+ *       8-jan-2020 V4.0 : template python option
  */
 
 /* TODO:
@@ -57,6 +58,7 @@
 #include <axis.h>
 #include <layout.h>
 #include <table.h>
+#include <pyplot.h>
 #include <moment.h>
                     /* undefined values trick !!!  MACHINE DEP  !!! */
 #ifdef SINGLEPREC
@@ -104,7 +106,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
-    "VERSION=3.1a\n	 4-apr-2019 PJT",
+    "pyplot=\n           Template python plotting script",
+    "VERSION=4.0\n	 8-jan-2020 PJT",
     NULL
 };
 
@@ -173,6 +176,13 @@ local void setrange(real *rval, string rexp);
 void nemo_main(void)
 {
     setparams();
+
+    if (hasvalue("pyplot")) {
+      stream pstr = pyplot_init(getparam("pyplot"));
+      pyplot_plot(pstr, input, xcol, ycol, dycol, xrange, yrange);
+      pyplot_close(pstr);
+    }
+      
 
     instr = stropen (input,"r");
     read_data();

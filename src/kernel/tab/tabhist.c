@@ -47,6 +47,7 @@
  *      23-apr-13   6.2b  use compute_robust_mean               pjt
  *       7-aug-13   6.3   optional numrec routines              pjt
  *      15-jan-14   6.4   add MAD option
+ *       8-jan-2019 7.0   add pyplot= options                  PJT
  *                
  * 
  * TODO:
@@ -68,6 +69,7 @@
 #include <axis.h>
 #include <mdarray.h>
 #include <table.h>
+#include <pyplot.h>
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
@@ -97,7 +99,8 @@ string defv[] = {
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
-    "VERSION=6.4a\n		  24-nov-2019 PJT",
+    "pyplot=\n                    Template python plotting script",    
+    "VERSION=7.0\n		  8-jan-2020 PJT",
     NULL
 };
 
@@ -180,6 +183,11 @@ extern void minmax(int n, real *x, real *xmin, real *xmax);
 void nemo_main(void)
 {
     setparams();			/* read the parameters */
+    if (hasvalue("pyplot")) {
+      stream pstr = pyplot_init(getparam("pyplot"));
+      pyplot_hist(pstr, input, col, xrange,nsteps);
+      pyplot_close(pstr);
+    }
     read_data();
     histogram();
 }
