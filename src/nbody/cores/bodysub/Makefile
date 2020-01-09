@@ -9,7 +9,7 @@ SRC = bti_0.c bti_1.c bti_i.c bti_key.c btr_0.c btr_1.c btr_aux.c \
        btr_glon.c btr_glat.c btr_mul.c btr_mub.c \
        btr_xsky.c btr_ysky.c
 
-OBJ  = $(SRC:.c=.o)
+OBJ  = $(SRC:.c=.so)
 
 INC = bodytrans.h
 
