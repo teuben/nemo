@@ -11,8 +11,7 @@
 /* loadobj(pathname);                                          */
 /***************************************************************/
 
-void loadobj(pathname)
-string pathname;
+void loadobj(string pathname)
 {
   warning("loadobjNULL(loadobj): no dynamic object loader");
 }
@@ -20,8 +19,7 @@ string pathname;
 /* fn = findfn(fnname);                                        */
 /***************************************************************/
 
-proc findfn(fnname)
-string fnname;
+proc findfn(string fnname)
 {
   error("loadobjNULL(findfn): no dynamic object loader");
 }
@@ -32,8 +30,7 @@ string fnname;
 /* mysymbols(progname);                                        */
 /***************************************************************/
 
-void mysymbols(progname)
-string progname;
+void mysymbols(string progname)
 {
   warning("loadobjNULL(findfn): no dynamic object loader");
 }
