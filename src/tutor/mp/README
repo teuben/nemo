@@ -4,7 +4,13 @@ If compiled with openmp, NEMO will show this when debug=1 is used:
    ### nemo Debug Info: omp_get_max_threads() -> 8  [OMP_NUM_THREADS]
 otherwise it would not show this.
 
-Some examples of usage
+Some examples of usage:
+
+sections
+--------
+   This program uses the "#pragma sections" as well as for
+   It also seems to shows that multiple sections cannot split up the for loop,
+
 
 OMP_NUM_THREADS=4 sections iter=10000
 27.81user 0.00system 0:13.89elapsed 200%CPU (0avgtext+0avgdata 18172maxresident)k
