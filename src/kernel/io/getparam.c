@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7 29-dec-2019 PJT"
+#define GETPARAM_VERSION_ID  "3.7a 5-jan-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -231,6 +231,7 @@
 //#if defined(ENABLE_OPENMP)
 #if _OPENMP
 #include <omp.h>
+local double omp_t1, omp_t2;
 #else
 typedef int omp_int_t;
 inline omp_int_t omp_get_thread_num() { return 0;}
@@ -750,6 +751,16 @@ void initparam(string argv[], string defv[])
 
     // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
     dprintf(1,"omp_get_max_threads() -> %d  [OMP_NUM_THREADS]\n", omp_get_max_threads());
+#if _OPENMP
+#pragma omp parallel
+    {
+      if (omp_get_thread_num() == 0) 
+	if (omp_get_num_threads() > 1) dprintf(1,"Using OpenMP with %d threads\n", omp_get_num_threads());
+      
+      omp_t1 = omp_get_wtime(); //start stop-watch
+    }
+#endif
+
     initparam_out();
 #ifndef __MINGW32__
     clock1 = times(&tms1);
@@ -779,6 +790,14 @@ local void initparam_out()
 void finiparam()
 {
     int i, n=0;
+
+#if _OPENMP
+#pragma omp parallel
+    {
+      omp_t2 = omp_get_wtime();//stop stop-watch
+    }
+    dprintf(1,"Elapsed time: %g sec\n",omp_t2-omp_t1);	//print stopped time
+#endif
 #ifndef __MINGW32__
     if (report_cpu) report('c');
     if (report_mem) report('m');
