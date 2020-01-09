@@ -10,7 +10,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: csh
-      run:  sudo apt install csh gfortran pgplot5 -y
+      run:  sudo apt install csh gfortran pgplot5 libhdf4-dev libhdf5-dev libcfitsio-dev -y
     - name: autoconf
       run:  autoconf
     - name: configure
