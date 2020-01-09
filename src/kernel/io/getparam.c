@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7a 5-jan-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7b 8-jan-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -541,7 +541,7 @@ void initparam(string argv[], string defv[])
             if (i > maxkeys) error("Too many un-named arguments");
 	    if (streq(argv[i],"-man") || streq(argv[i],"--man")) {
 	      sprintf(cmd,"man %s",progname);
-	      system(cmd);
+	      (void) system(cmd);
 	      local_exit(0);
 	      /*NOTREACHED*/
             } else if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
@@ -749,9 +749,8 @@ void initparam(string argv[], string defv[])
     }
 #endif
 
+#if _OPENMP    
     // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
-    dprintf(1,"omp_get_max_threads() -> %d  [OMP_NUM_THREADS]\n", omp_get_max_threads());
-#if _OPENMP
 #pragma omp parallel
     {
       if (omp_get_thread_num() == 0) 
@@ -759,9 +758,12 @@ void initparam(string argv[], string defv[])
       
       omp_t1 = omp_get_wtime(); //start stop-watch
     }
+#else
+    dprintf(1,"No OMP_NUM_THREADS used\n");
 #endif
-
+    
     initparam_out();
+    
 #ifndef __MINGW32__
     clock1 = times(&tms1);
 #endif
@@ -1371,7 +1373,7 @@ local string get_macro(char *mname)
     }
 
     fstr = stropen(mname,"r");      /* open macro file (guaranteed ok)     */
-    fread(mp,sizeof(char),(unsigned)n,fstr);    /* oops, unix only here ?? */
+    (void) fread(mp,sizeof(char),(unsigned)n,fstr);    /* oops, unix only here ?? */
     strclose(fstr);                 /* file is read in 'as is' in binary   */
     mp[n] = 0;  /* terminate - since mp could point anywhere */
 
