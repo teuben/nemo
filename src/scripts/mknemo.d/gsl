@@ -1,0 +1,17 @@
+#! /bin/bash
+#
+
+version=2.6
+
+cd $NEMO/local
+
+if [ ! -f gsl-$version.tar.gz ]; then
+   wget ftp://ftp.gnu.org/gnu/gsl/gsl-$version.tar.gz
+fi   
+tar zxf gsl-$version.tar.gz
+cd gsl-$version
+./configure --prefix=$NEMO/opt
+make
+make install
+
+echo Installed version=$version
