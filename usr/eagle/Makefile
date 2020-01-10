@@ -1,4 +1,12 @@
 
+PDIRS = read_eagle martini
+
+all:
+	@echo $(PDIRS) pull
+
+pull: $(PDIRS)
+	for i in $(PDIRS); do\
+	(cd $$i; git pull); done
 
 read_eagle:
 	git clone https://github.com/jchelly/read_eagle
