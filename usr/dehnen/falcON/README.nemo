@@ -19,7 +19,6 @@ Differences from Dehnen's distribution:
 Also check the following files used to aid installing falcON tools:
 	Makefile.nemo
 	$NEMO/src/scripts/mknemo.d/gyrfalcON	
-	$NEMO/src/scripts/test_a_new_nemo_cvs
-	$NEMO/AAA_SOURCE_ME
+	$NEMO/docs/install_nemo
 	
 
