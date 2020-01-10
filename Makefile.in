@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 24-dec-2019 PJT
+VERSION = NEMO V4.2 9-jan-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
