@@ -1,0 +1,19 @@
+#! /bin/bash
+#
+
+#   version is hidden in the filename
+version=7.1
+
+cd $NEMO/local
+
+if [ ! -f wcslib.tar.bz2 ]; then
+   wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
+fi
+tar jxf wcslib.tar.bz2
+#cd wcslib-*
+cd wcslib-$version
+./configure --prefix=$NEMO/opt
+make
+make install
+
+echo Installed version=$version

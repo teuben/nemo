@@ -1,0 +1,17 @@
+#! /bin/bash
+#
+
+version=3.3.8
+
+cd $NEMO/local
+
+if [ ! -f fftw-$version.tar.gz ]; then
+   wget  http://www.fftw.org/fftw-$version.tar.gz
+fi   
+tar zxf fftw-$version.tar.gz
+cd fftw-$version
+./configure --prefix=$NEMO/opt
+make
+make install
+
+echo Installed version=$version

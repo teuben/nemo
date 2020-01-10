@@ -1,0 +1,18 @@
+#! /bin/bash
+
+# version is hidden in the filename
+version=3.47
+
+cd $NEMO/local
+
+if [ ! -f cfitsio_latest.tar.gz ]; then
+  wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
+fi  
+tar zxf cfitsio_latest.tar.gz
+cd cfitsio-*
+./configure --prefix=$NEMO/opt
+make
+make install
+
+
+echo Installed version=$version
