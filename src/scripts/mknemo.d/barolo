@@ -29,10 +29,18 @@
 cd $NEMO/local
 
 echo "Make sure you have installed (via mknemo or otherwise): wcslib cfitsio fftw"
-#  mknemo wcslib
-#  mknemo cfitsio
-3  mknemo fftw
 
+if [ ! -e $NEMO/opt/include/wclib ]; then
+   mknemo wcslib
+fi
+
+if [ ! -e $NEMO/opt/include/fitsio.h ]; then
+   mknemo cfitsio
+fi
+
+if [ ! -e $NEMO/opt/include/fftw3.h ]; then
+   mknemo fftw
+fi
 
 if [ ! -d Bbarolo ]; then
   git clone https://github.com/editeodoro/Bbarolo
