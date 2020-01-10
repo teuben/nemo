@@ -392,19 +392,19 @@ makeindex:
 	@echo "Installing makeindex utility for LaTeX manuals"	(cd $(NEMO)/src/tools/makeindex;\
 	 $(MAKE);mv indexsrc/index $(NEMOBIN)/makeindex;$(MAKE) clean)
 
-#	internal PGPLOT install
+#	internal PGPLOT install (not recommended anymore)
 pgplot:
 	src/scripts/pgplot.install png=$(PNG) gif=$(GIF)
 
 #       some of the essentials that can be installed in $NEMO/opt
 cfitsio:
-	(source nemo_start.sh ; src/scripts/cfitsio.install)
+	(source nemo_start.sh ; src/scripts/mknemo.d/cfitsio)
 
 hdf4:
-	(source nemo_start.sh ; src/scripts/hdf4.install)
+	(source nemo_start.sh ; src/scripts/mknemo.d/hdf4)
 
 hdf5:
-	(source nemo_start.sh ; src/scripts/hdf5.install)
+	(source nemo_start.sh ; src/scripts/mknemo.d/hdf5)
 
 
 # deprecated: superseded by glnemo2
