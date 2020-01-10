@@ -19,7 +19,7 @@
 #    make
 #    make install
 #
-# See example below.
+# They are now installed via 'mknemo' as well.
 #
 # An example of package install for Ubuntu: (actually not checked yet)
 #
@@ -28,34 +28,12 @@
 
 cd $NEMO/local
 
-#                 Warning: version numbers, in particular for fftw, will change
-#                          and will break this script. fix it manually
-if (1) then
-  wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
-  tar jxf wcslib.tar.bz2
-  cd wcslib-*
-  ./configure --prefix=$NEMO/opt
-  make
-  make install
-  cd ..
-
-  wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
-  tar zxf cfitsio_latest.tar.gz
-  cd cfitsio-*
-  ./configure --prefix=$NEMO/opt
-  make
-  make install
-  cd ..
-
-  wget  http://www.fftw.org/fftw-3.3.8.tar.gz
-  tar zxf fftw-3.3.8.tar.gz
-  cd fftw-3.3.8
-  ./configure --prefix=$NEMO/opt
-  make
-  make install
-  cd ..
+echo Make sure you have installed (via mknemo or otherwise): wcslib cfitsio fftw
+if (0) then
+  mknemo wcslib
+  mknemo cfitsio
+  mknemo fftw
 endif
-
 
 if (! -d Bbarolo) then
   git clone https://github.com/editeodoro/Bbarolo
