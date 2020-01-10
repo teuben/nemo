@@ -1,4 +1,4 @@
-#! /bin/csh -f
+#! /bin/bash
 #
 #   mknemo build helper for BBarolo (ok, I call it barolo here)
 #
@@ -28,16 +28,15 @@
 
 cd $NEMO/local
 
-echo Make sure you have installed (via mknemo or otherwise): wcslib cfitsio fftw
-if (0) then
-  mknemo wcslib
-  mknemo cfitsio
-  mknemo fftw
-endif
+echo "Make sure you have installed (via mknemo or otherwise): wcslib cfitsio fftw"
+#  mknemo wcslib
+#  mknemo cfitsio
+3  mknemo fftw
 
-if (! -d Bbarolo) then
+
+if [ ! -d Bbarolo ]; then
   git clone https://github.com/editeodoro/Bbarolo
-endif  
+fi
 cd Bbarolo
 git pull
 ./configure --prefix=$NEMO/opt --with-cfitsio=$NEMO/opt --with-wcslib=$NEMO/opt --with-fftw3=$NEMO/opt
