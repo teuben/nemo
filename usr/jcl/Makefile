@@ -2,7 +2,8 @@
 
 PDIRS = unsio uns_projects glnemo2
 
-all:   
+all:
+	@echo $(PDIRS) pull
 
 unsio:
 	git clone https://gitlab.lam.fr/jclamber/unsio
@@ -14,6 +15,6 @@ glnemo2:
 	git clone https://gitlab.lam.fr/jclamber/glnemo2.git
 
 
-pull:
+pull: $(PDIRS)
 	for i in $(PDIRS); do\
 	(cd $$i; git pull); done
