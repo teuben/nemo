@@ -19,7 +19,8 @@
 #               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
 #                7-may-2019   add centos=1 option to get a redhat flavor
 #               11-dec-2019   add python= option
-#               27-dec-2018   add native= and openmp=
+#               27-dec-2019   add native= and openmp=  - getting this ready for NEMO V4.2 (the decadal version?)
+#                9-jan-2019   new mknemo installs
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -58,13 +59,12 @@ set git_giza    = https://github.com/teuben/giza
 set git_giza    = https://github.com/danieljprice/giza
 set branch      = ()		# use a GIT branch?
 set yapp        = (/null)	# set a YAPP device during the install
-                  	        # point to the compressed tar file for CFITSIO (e.g. cfitsio2490.tar.gz)
-set cfitsio     = ftp://heasarc.gsfc.nasa.gov/software/fitsio/c/cfitsio3450.tar.gz   
 set cfitsio     = 0             # disable for formal release since there are some problems
 set debug       = 0             # compile in debug mode 
 set test        = 1             # also run testsuite at the end
 set bench       = 1             # also run bench at the end
 set pedantic    = 0             # compile in pedantic mode
+set native      = 0             # compile in -match=native mode
 set openmp      = 0             # compile with -fopenmp
 set make        = make          # make, gmake, pmake, bmake, ....
 set cmake       = 0             # 1= build internally
@@ -170,7 +170,8 @@ endif
 
 if ($clean) then
   if (-e $nemo) then
-    echo Cleaning old nemo=$nemo directory
+    echo Cleaning old nemo=$nemo directory, sleep 5 seconds first
+    sleep 5
     rm -rf $nemo
   endif
 endif
@@ -210,21 +211,9 @@ if ($giza && $reuse == 0) then
 endif
 
 if ($cfitsio != 0) then
- if (! -e $cfitsio) then
-   echo Attempting to find/retrieve $cfitsio
-   wget -q $cfitsio
-   set cfitsio=`pwd`/$cfitsio:t
- endif
- if (-e $cfitsio) then
-  echo Installing bootstrapping cfitsio
-  if (! -e include) ln -s inc include
-  (cd local; tar zxf $cfitsio)
-  src/scripts/cfitsio.install >& install.cfitsio.log
-  echo cfitsio installed with STATUS=$status
-  set cfitsio=1
- else
-  set cfitsio=0
- endif
+ src/scripts/mknemo.d/cfitsio >& install.cfitsio.log
+ echo cfitsio installed with STATUS=$status
+ set cfitsio=1
 endif
 
 
@@ -345,6 +334,6 @@ endif
 
 echo All done.
 echo ""
-echo "bash users:  source $nemo/nemo_start.sh  to activate NEMO in your shell"
-echo "tcsh users:  source $nemo/nemo_start.csh to activate NEMO in your shell"
+echo "(ba)sh users:  source $nemo/nemo_start.sh  to activate NEMO in your shell"
+echo "(t)csh users:  source $nemo/nemo_start.csh to activate NEMO in your shell"
 
