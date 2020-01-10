@@ -173,7 +173,7 @@ if (1) then
 endif
 
 if ($D) then
-  ls $NEMO/src/scripts/mknemo.d  | egrep -v README
+  ls $NEMO/src/scripts/mknemo.d  | egrep -v '(README|*~)'
   rm -f $lockfile >& /dev/null
   exit 0
 endif
