@@ -42,4 +42,4 @@ endif
 
 echo Warning:  python interface is not yet installed. See $NEMO/usr/jcl/unsio/py/INSTALL
 echo Basically:   pip install python-unsio
-ecoh but consult your local python installation before blindly doing this.
+echo but consult your local python installation before blindly doing this.
