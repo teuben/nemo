@@ -19,8 +19,10 @@ if (-e $dir) then
   cd $dir/build
   cmake ..
   make
-  make install 
+  make install
 else
   echo mknemo.d: $dir does not exist
 endif
 
+
+echo  pip install python-unsiotools -U

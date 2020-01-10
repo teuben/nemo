@@ -2,7 +2,9 @@
 #
 # A fresh clean install of unsio and the python tools associated with it
 #
-# a quick hack   - May 2010
+# https://projets.lam.fr/projects/unsio/wiki/InstallationL
+#
+# a quick hack                 - May 2010
 # some changed dir structure   - Jan 2013
 # install_prefix added           Jun 2018
 # added NEMO/opt check           Dec 2019
@@ -12,6 +14,14 @@
 
 # ubuntu requirements: swig	python-numpy	libhdf5-dev	libsqlite3-dev
 
+
+#  -DCMAKE_INSTALL_PREFIX=<dir>          installation directory [${NEMO}]
+#  -DCMAKE_BUILD_TYPE=<Debug|Release>    build type [Debug]
+#  -DBUILD_SHARED_LIBS=<TRUE|FALSE>      shared or static libraries [TRUE]
+#  -DCMAKE_DISABLE_FORTRAN=1
+
+
+Here are different scenarios :
 
 set dir=$NEMO/usr/jcl/unsio
 
@@ -42,4 +52,4 @@ endif
 
 echo Warning:  python interface is not yet installed. See $NEMO/usr/jcl/unsio/py/INSTALL
 echo Basically:   pip install python-unsio
-ecoh but consult your local python installation before blindly doing this.
+echo but consult your local python installation before blindly doing this.
