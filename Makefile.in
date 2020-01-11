@@ -155,6 +155,7 @@ dirs:
 	fi); done
 	@if [ -d $(NEMOTARS) ]; then \
 	    echo 'Symlink tar'; \
+	    rm tar; \
 	    ln -s $(NEMOTARS) tar; \
 	else \
 	    echo 'No tar symlink'; \
