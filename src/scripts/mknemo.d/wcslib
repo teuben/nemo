@@ -6,6 +6,9 @@ version=7.1
 
 cd $NEMO/local
 
+if [ -f $NEMO/tar/wcslib.tar.bz2 ]; then
+   ln -s $NEMO/tar/wcslib.tar.bz2
+fi   
 if [ ! -f wcslib.tar.bz2 ]; then
    wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
 fi
