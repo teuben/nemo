@@ -8,11 +8,22 @@
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
+version=1.10.6
+
+
+
+if [ -f $NEMO/tar/hdf5-$version.tar.gz ]; then
+   ln -s $NEMO/tar/hdf5-$version.tar.gz
+fi   
+if [ ! -f hdf5-$version.tar.gz ]; then
+   wget  http://www.fftw.org/hdf5-$version.tar.gz
+fi
+
 
 cd $NEMO/local
-wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz
-tar zxf hdf5-1.10.6.tar.gz
-cd hdf5-1.10.6
+wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/fftw-$version.tar.gz
+tar zxf fftw-$version.tar.gz
+cd fftw-$version
 
 ./configure --prefix=$NEMO/opt
 make

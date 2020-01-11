@@ -8,11 +8,21 @@
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
+version=4.2.14
+
 
 cd $NEMO/local
-wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.14/src/hdf-4.2.14.tar.gz
-tar zxf hdf-4.2.14.tar.gz
-cd hdf-4.2.14
+
+if [ -f $NEMO/tar/hdf-$version.tar.gz ]; then
+   ln -s $NEMO/tar/hdf-$version.tar.gz
+fi   
+if [ ! -f hdf-$version.tar.gz ]; then
+   wget  http://www.fftw.org/hdf-$version.tar.gz
+fi
+
+wget https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.14/src/hdf-$version.tar.gz
+tar zxf hdf-$version.tar.gz
+cd hdf-$version
 
 ./configure --prefix=$NEMO/opt
 make
