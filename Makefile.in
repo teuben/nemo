@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 9-jan-2020 PJT
+VERSION = NEMO V4.2 11-jan-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -43,7 +43,7 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 #MAKELIBS = corelibs dehnen
 MAKEDIRS = @MAKEDIRS@
 MAKELIBS = @MAKELIBS@
-
+NEMOTARS = @NEMOTARS@
 
 ################################################################################
 # The following files/directories will be saved to a tar file
@@ -153,6 +153,12 @@ dirs:
 	    touch $$i; \
 	    chmod a+w $$i; \
 	fi); done
+	@if [ -d $(NEMOTARS) ]; then \
+	    echo 'Symlink tar'; \
+	    ln -s $(NEMOTARS) tar; \
+	else \
+	    echo 'No tar symlink'; \
+	fi
 	@if [ ! -d include ]; then \
 	    ln -s inc include; \
 	fi
@@ -167,7 +173,7 @@ dirs:
 	@if [ ! -f $(MOTD) ]; then \
             echo Creating $(MOTD) file on `date`; \
             echo "***********************************************" > $(MOTD);\
-            echo "Nemo Release 3 ($(VERSION)) installed: " >> $(MOTD);\
+            echo "Nemo Release 4 ($(VERSION)) installed: " >> $(MOTD);\
 	    echo "  NEMOVER = $(NEMOVER)" >> $(MOTD); \
 	    echo "  `date` on `whoami`@`hostname`" >> $(MOTD); \
             echo "***********************************************">> $(MOTD);\

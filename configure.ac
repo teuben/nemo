@@ -892,6 +892,17 @@ AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod s
 
 AC_C_BIGENDIAN
 
+dnl -- tar file caching?
+
+tar_dir="../tar"
+AC_ARG_WITH(tar,
+	[  --with-tar=TARDIR       cache directory for tar files for opt install],
+	tar_dir="$withval",
+	tar_dir="$tar_default")
+
+NEMOTARS="$(readlink -f $tar_dir)"
+AC_SUBST(NEMOTARS)
+
 dnl -- some final YAPP stuff
 
 AC_ARG_WITH(yapp,

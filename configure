@@ -626,6 +626,7 @@ HDF5_INC
 YAPP_DEF
 YAPP_LIBS
 YAPP_NAME
+NEMOTARS
 LIBOBJS
 RDL_LIBS
 TCL_LIBS
@@ -779,6 +780,7 @@ enable_flogger
 enable_tcl
 enable_readline
 enable_largefile
+with_tar
 with_yapp
 '
       ac_precious_vars='build_alias
@@ -1468,6 +1470,7 @@ Optional Packages:
   --with-cfitsio-prefix=PFX
                           CFITSIO installation prefix (default: $cfdefault)
   --with-miriad-prefix=PFX    Root directory where MIRIAD was installed
+  --with-tar=TARDIR       cache directory for tar files for opt install
   --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, ..)
 
 Some influential environment variables:
@@ -11025,6 +11028,20 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
      as_fn_error $? "unknown endianness
  presetting ac_cv_c_bigendian=no (or yes) will help" "$LINENO" 5 ;;
  esac
+
+
+
+tar_dir="../tar"
+
+# Check whether --with-tar was given.
+if test "${with_tar+set}" = set; then :
+  withval=$with_tar; tar_dir="$withval"
+else
+  tar_dir="$tar_default"
+fi
+
+
+NEMOTARS="$(readlink -f $tar_dir)"
 
 
 
