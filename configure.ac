@@ -894,13 +894,14 @@ AC_C_BIGENDIAN
 
 dnl -- tar file caching?
 
-tar_dir="../tar"
+tar_default="../tar"
 AC_ARG_WITH(tar,
 	[  --with-tar=TARDIR       cache directory for tar files for opt install],
 	tar_dir="$withval",
 	tar_dir="$tar_default")
 
 NEMOTARS="$(readlink -f $tar_dir)"
+AC_MSG_RESULT(Using NEMOTARS=$NEMOTARS)
 AC_SUBST(NEMOTARS)
 
 dnl -- some final YAPP stuff

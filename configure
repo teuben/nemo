@@ -11031,7 +11031,7 @@ $as_echo "#define AC_APPLE_UNIVERSAL_BUILD 1" >>confdefs.h
 
 
 
-tar_dir="../tar"
+tar_default="../tar"
 
 # Check whether --with-tar was given.
 if test "${with_tar+set}" = set; then :
@@ -11042,6 +11042,8 @@ fi
 
 
 NEMOTARS="$(readlink -f $tar_dir)"
+{ $as_echo "$as_me:${as_lineno-$LINENO}: result: Using NEMOTARS=$NEMOTARS" >&5
+$as_echo "Using NEMOTARS=$NEMOTARS" >&6; }
 
 
 
