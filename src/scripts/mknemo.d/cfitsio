@@ -14,7 +14,7 @@ fi
 tar zxf cfitsio_latest.tar.gz
 cd cfitsio-*
 ./configure --prefix=$NEMO/opt
-make
+make -j
 make install
 
 
