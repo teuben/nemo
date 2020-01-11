@@ -2,8 +2,6 @@
 #
 #  Install an anaconda3 (or miniconda3) python.
 #
-#  It is adviced to install this *after* NEMO has been installed
-#
 #  An alternative is to set up a special conda environment for NEMO, e.g.
 #
 #     conda create -n nemo1 python=x.x -y
@@ -25,7 +23,11 @@ foreach arg ($*)
   set $arg
 end
 
-if (! -e $msh) wget $mc3
+if (-e $NEMO/tar/$msh) then
+  ln -s $NEMO/tar/$msh
+else if (! -e $msh) then
+  wget $mc3
+endif  
 bash $msh -b -p $dir
 
 setenv PATH "$dir/bin:$PATH"
