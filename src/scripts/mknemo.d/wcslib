@@ -16,7 +16,7 @@ tar jxf wcslib.tar.bz2
 #cd wcslib-*
 cd wcslib-$version
 ./configure --prefix=$NEMO/opt
-make
+make -j
 make install
 
 echo Installed version=$version

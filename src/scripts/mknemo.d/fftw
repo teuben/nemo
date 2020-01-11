@@ -15,7 +15,7 @@ fi
 tar zxf fftw-$version.tar.gz
 cd fftw-$version
 ./configure --prefix=$NEMO/opt
-make
+make -j
 make install
 
 echo Installed version=$version

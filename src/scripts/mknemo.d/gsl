@@ -16,7 +16,7 @@ fi
 tar zxf gsl-$version.tar.gz
 cd gsl-$version
 ./configure --prefix=$NEMO/opt
-make
+make -j
 make install
 
 echo Installed version=$version

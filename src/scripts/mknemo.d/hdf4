@@ -25,5 +25,5 @@ tar zxf hdf-$version.tar.gz
 cd hdf-$version
 
 ./configure --prefix=$NEMO/opt
-make
+make -j
 make install 
