@@ -22,6 +22,10 @@ zeno_pjt:
 	git clone https://github.com/teuben/zeno zeno_pjt
 	(cd zeno_pjt; git co teuben1)
 
+#  install
+install:
+	(cd zeno; make -f Zeno install_all)
+
 #  optional install of gsl in $NEMO/opt
 gsl:
-	$(NEMO)/src/scripts/gsl.install
+	mknemo gsl
