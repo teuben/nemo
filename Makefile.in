@@ -44,6 +44,8 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 MAKEDIRS = @MAKEDIRS@
 MAKELIBS = @MAKELIBS@
 NEMOTARS = @NEMOTARS@
+#MKNEMOS  = hdf4 hdf5 cfitsio fftw wcslib gsl
+MKNEMOS  = 
 
 ################################################################################
 # The following files/directories will be saved to a tar file
@@ -130,6 +132,11 @@ help2:
 	@echo MAKE=$(MAKE) MFLAGS=$(MFLAGS)
 	@echo ""
 	@echo "Additional help targets: helpfind, helptar"
+
+mknemos:
+	@for mkn in $(MKNEMOS); do \
+	mknemo $$mkn;\
+	done
 
 # make sure all directories and files are present before install can take place
 dirs: 
@@ -423,7 +430,7 @@ vogl:
 build:   build1 build2 build3 build4
 
 build1:
-	(source nemo_start.sh ; $(MAKE) postconfig)
+	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
 	@echo 'Continue with "make build2"'
 
 build2:
