@@ -21,8 +21,6 @@
 #  -DCMAKE_DISABLE_FORTRAN=1
 
 
-Here are different scenarios :
-
 set dir=$NEMO/usr/jcl/unsio
 
 # for linux
