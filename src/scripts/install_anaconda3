@@ -1,6 +1,7 @@
 #! /bin/csh -f
 #
-#  Install an anaconda3 (or miniconda3) python.
+#  Install an anaconda3 (or miniconda3) python. A full install takes about 2 mins,
+#  assuming you have the .sh file
 #
 #  An alternative is to set up a special conda environment for NEMO, e.g.
 #
@@ -9,6 +10,8 @@
 #     conda install -n nemo1 [package]
 #     source deactivate
 #     conda remove -n nemo1 -all
+#
+#  but this has not been experimented with.
 #
 
 set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
@@ -23,7 +26,7 @@ foreach arg ($*)
   set $arg
 end
 
-if (-e $NEMO/tar/$msh) then
+if (-e $NEMO/tar/$msh && ! -e $msh) then
   ln -s $NEMO/tar/$msh
 else if (! -e $msh) then
   wget $mc3
@@ -35,7 +38,7 @@ setenv PATH "$dir/bin:$PATH"
 conda update -y conda
 pip install --upgrade pip
 
-# write the sourcable shell startup files
+# write the source-able shell startup files
 
 echo "set path = ($dir/bin "'$path); rehash'  >> python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         >> python_start.sh
