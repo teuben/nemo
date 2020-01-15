@@ -130,12 +130,6 @@ if ($centos) then
    
 endif
 
-#	pick another GNU compiler (this is rather astromake specific of course)
-if ($gcc != 0) then
-   source /astromake/astromake_start
-   astroload -v $gcc gcc
-endif
-
 if ($?CC  == 0)  setenv CC  gcc
 if ($?CXX == 0)  setenv CXX g++
 if ($?F77 == 0)  setenv F77 g77
@@ -254,8 +248,8 @@ echo configure $copts  >& install.config.log
 ./configure  $copts   >>& install.config.log
 echo nemo_start
 source nemo_start.csh
-echo postconfig
-$make postconfig
+echo build1
+$make build1
 rehash
 
 
