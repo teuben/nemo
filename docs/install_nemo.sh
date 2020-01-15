@@ -14,6 +14,9 @@
 #
 #  In full version (opt=1 python=1) this script takes about 13 mins
 #  A simple version without falcON and any benchmarks takes about 2 mins
+#  pgplot opt=0 python=0   5'30"
+#  pgplot opt=0 python=1   6'15"
+#  pgplot opt=1 python=1  14'00" 
 
 echo "install_nemo.sh -- Version 11-jan-2020"
 
