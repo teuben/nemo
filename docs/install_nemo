@@ -121,6 +121,10 @@ if ($ubuntu) then
 endif
 
 
+# Recipes for installing PGPLOT
+# 1. download proper http://download1.rpmfusion.org/nonfree/el/updates/testing/8/x86_64/
+# 2. rpm -Uvh rpmfusion-nonfree-release*rpm
+#
 # CENTOS7:
 # https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-devel-5.2.2-35.el7.x86_64.rpm
 # https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-5.2.2-35.el7.x86_64.rpm
