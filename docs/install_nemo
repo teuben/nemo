@@ -124,7 +124,16 @@ endif
 # CENTOS7:
 # https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-devel-5.2.2-35.el7.x86_64.rpm
 # https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-5.2.2-35.el7.x86_64.rpm
-# 
+#
+# Centos8:
+# dnf install git gcc-gfortran make tcsh gcc-c++ cmake libXext-devel
+
+# FEDORA31
+# sudo yum install gfortran g++ csh make
+# http://download1.rpmfusion.org/nonfree/fedora/releases/31/Everything/x86_64/os/Packages/p/pgplot-5.2.2-46.fc31.x86_64.rpm
+# or install the rpmfusion-nonfree-release-stable rpm after which 'dnf install pgplot' will install pgplot
+# dnf install libXext-devel
+# the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
 
 if ($centos) then
    sudo yum install -y cmake
