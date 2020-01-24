@@ -18,6 +18,7 @@ make build1 build2 build3 build4 > install.build.log   2>&1
 #
 cd ../../..
 dpkg-deb --build $NEMO
+# fakeroot dpkg-deb --build $NEMO
 #
 #
 echo Now issue: sudo dpkg --install $NEMO.deb
