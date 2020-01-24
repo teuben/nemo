@@ -11,8 +11,10 @@ cp -a opt/nemo_4.2/src/scripts/DEBIAN .
 # cp ../postinst DEBIAN
 #
 cd opt/$NEMO
-./configure --with-yapp=pgplot
-make build1 build2 build3 build4 > install.build.log 2>&1 
+echo configure
+./configure --with-yapp=pgplot   > install.config.log  2>&1
+echo build1 build2 build3 build4 
+make build1 build2 build3 build4 > install.build.log   2>&1 
 #
 cd ../../..
 dpkg-deb --build $NEMO
