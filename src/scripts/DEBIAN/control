@@ -12,4 +12,3 @@ Description: NEMO Stellar Dynamics Toolbox
    methods (hdf5, cfitsio, python etc.) but those can
    also be tried after.
    This version of NEMO has only a pgplot dependancy
-   
