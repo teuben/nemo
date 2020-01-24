@@ -1,0 +1,10 @@
+Package: nemo
+Version: 4.2
+Architecture: all
+Essential: no
+Priority: optional
+Depends: pgplot5
+Maintainer: Peter Teuben
+Description: NEMO Stellar Dynamics Toolbox
+
+
