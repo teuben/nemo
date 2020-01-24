@@ -6,7 +6,8 @@ echo postinst: rewriting NEMO=$NEMO
 cd $NEMO
 ./configure --with-yapp=pgplot > install.opt.log 2>&1
 
-# update the symlink /opt/nemo 
+# update the symlink /opt/nemo
+echo postinst: updating /opt/nemo
 cd ../..
 rm -f /opt/nemo
 ln -s $NEMO nemo
