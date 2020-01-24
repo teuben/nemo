@@ -10,4 +10,4 @@ cd $NEMO
 echo postinst: updating /opt/nemo
 cd ../..
 rm -f /opt/nemo
-ln -s $NEMO nemo
+ln -s $NEMO /opt/nemo
