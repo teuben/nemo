@@ -3,8 +3,13 @@ Version: 4.2
 Architecture: amd64
 Essential: no
 Priority: optional
-Depends: pgplot5, csh
+Depends: pgplot5, csh, gfortran, g++, gcc
 Maintainer: Peter Teuben
 Homepage: https://github.com/teuben/nemo
 Description: NEMO Stellar Dynamics Toolbox
    Users will need to source the nemo_start.sh file
+   There are also many optional packages and install
+   methods (hdf5, cfitsio, python etc.) but those can
+   also be tried after.
+   This version of NEMO has only a pgplot dependancy
+   
