@@ -1,1 +1,5 @@
-echo postinst
+NEMO=/opt/nemo_4.2
+echo postinst: rewriting NEMO=$NEMO
+cd $NEMO
+echo
+./configure --with-yapp=pgplot > install.opt.log 2>&1
