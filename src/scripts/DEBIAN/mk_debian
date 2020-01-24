@@ -1,0 +1,21 @@
+#
+NEMO=nemo_4.2
+rm -rf $NEMO
+#
+mkdir $NEMO
+cd $NEMO
+mkdir opt
+git clone https://github.com/teuben/nemo opt/$NEMO
+rm -rf opt/$NEMO/.git
+cp -a opt/nemo_4.2/src/scripts/DEBIAN .
+# cp ../postinst DEBIAN
+#
+cd opt/$NEMO
+./configure --with-yapp=pgplot
+make build1 build2 build3 build4 > install.build.log 2>&1 
+#
+cd ../../..
+dpkg-deb --build $NEMO
+#
+#
+echo Now issue: sudo dpkg --install $NEMO.deb
