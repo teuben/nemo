@@ -1,10 +1,11 @@
 Package: nemo
 Version: 4.2
-Architecture: all
+Architecture: amd64
 Essential: no
 Priority: optional
-Depends: pgplot5
+Depends: pgplot5, csh
 Maintainer: Peter Teuben
+Homepage: https://github.com/teuben/nemo
 Description: NEMO Stellar Dynamics Toolbox
 
-
+Users will need to source the nemo_start.sh file
