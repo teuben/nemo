@@ -1,28 +1,31 @@
 #
 NEMO=nemo_4.2
-rm -rf $NEMO
+
 #
-mkdir $NEMO
-cd $NEMO
+echo Starting with a clean astro$NEMO
+rm -rf astro$NEMO
+mkdir astro$NEMO
+cd astro$NEMO
+
+#
 mkdir opt
 git clone https://github.com/teuben/nemo opt/$NEMO
-# rm -rf opt/$NEMO/.git
-cp -a opt/nemo_4.2/src/scripts/DEBIAN .
-# cp ../postinst DEBIAN
+cp -a opt/$NEMO/src/scripts/DEBIAN .
 #
 cd opt/$NEMO
-echo configure
+echo configure ...
 ./configure --with-yapp=pgplot   > install.config.log  2>&1
-echo build1 build2 build3 build4 
-make build1 build2 build3 build4 > install.build.log   2>&1 
+echo build ... 
+make build                       > install.build.log   2>&1
+
 #
 cd ../../..
-dpkg-deb --build $NEMO
+dpkg-deb --build astro$NEMO
 # fakeroot dpkg-deb --build $NEMO
 #
 #
-echo Now issue: sudo dpkg --install $NEMO.deb
 
+echo Now issue: sudo dpkg --install astro$NEMO.deb
 
 # lsb_release -i
 # lsb_release -r
