@@ -2,10 +2,11 @@
   falcON uses Position/Velocity
   NEMO uses PhaseSpace
 
-- a new CVS branch is dealing with a better definition of		
+- a new CVS, now git, branch is dealing with a better definition of		
     images, basically doing FORDEF instead of CDEF.
     CDEF has always been a bad idea... given that most our
     image work is via FITS
+    This branch is now very old from CVS.
 
 - making galaxy models is a special art which deserves a special
   section:
@@ -13,7 +14,18 @@
     mkdisk
     mkexpdisk
     magalie
-    mkkd95
+    mkkd95	(GalactICS)
+
+
+  Made-to-measure modelling of observed galaxy dynamics
+  Jo Bovy, Daisuke Kawata, Jason A. S. Hunt
+
+   PRIMAL  (Hunt et al)
+
+   NMAGIC
+
+   Syer & Tremaine  2009
+   https://ui.adsabs.harvard.edu/abs/1996MNRAS.282..223S/abstract
 
 MacOSX problems: (a special macosx.html web page dedicated to this)
     See:     http://bima.astro.umd.edu/nemo/macosx.html
