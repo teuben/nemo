@@ -6,7 +6,7 @@ mkdir $NEMO
 cd $NEMO
 mkdir opt
 git clone https://github.com/teuben/nemo opt/$NEMO
-rm -rf opt/$NEMO/.git
+# rm -rf opt/$NEMO/.git
 cp -a opt/nemo_4.2/src/scripts/DEBIAN .
 # cp ../postinst DEBIAN
 #
@@ -21,3 +21,9 @@ dpkg-deb --build $NEMO
 #
 #
 echo Now issue: sudo dpkg --install $NEMO.deb
+
+
+# lsb_release -i
+# lsb_release -r
+# uname -p        ->  x86_64
+# amd64
