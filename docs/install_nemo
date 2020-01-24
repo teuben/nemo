@@ -101,16 +101,18 @@ endif
 
 if ($ubuntu) then
    sudo apt update
+   sudo apt install time
    sudo apt install build-essential -y
    sudo apt install gcc -y
    sudo apt install g++ -y
    sudo apt install gfortran -y
    # clang ???
-   # xorg-dev ? does the next 3 ?
-   sudo apt install libx11-dev -y
-   sudo apt install libxt-dev -y
-   sudo apt install libxext-dev -y
-   sudo apt install libcairo2-dev -y
+   sudo apt install xorg-dev
+   # xorg took care of the next 3
+   #sudo apt install libx11-dev -y
+   #sudo apt install libxt-dev -y
+   #sudo apt install libxext-dev -y
+   #sudo apt install libcairo2-dev -y
    sudo apt install cmake -y
    sudo apt install pgplot5 -y
    sudo apt install wcslib-dev -y
