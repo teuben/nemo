@@ -1,0 +1,9 @@
+This is an example of a DEBIAN build specification.
+
+control:        description + dependancies
+preinst:        preinstall script, empty now
+postinst:       postinstall script, will need to rewrite $NEMO=/opt/nemo_version, a kludge
+mk_debian:      my example script to build a deb file
+
+Note this is still fhard coded for version 4.2 and "all" architectures.  This would need to be 
+changed for various debian/ubuntu/.... flavors, e.g 4.2-ubuntu18.04 for amd64
