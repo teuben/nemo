@@ -1,5 +1,18 @@
+#! /bin/bash
+#
 NEMO=/opt/nemo_4.2
+
+#
 echo postinst: rewriting NEMO=$NEMO
 cd $NEMO
-echo
 ./configure --with-yapp=pgplot > install.opt.log 2>&1
+
+# update the symlink /opt/nemo
+echo postinst: updating /opt/nemo
+cd ../..
+rm -f /opt/nemo
+ln -s $NEMO /opt/nemo
+
+# report usage
+echo "Users can now load nemo with:    source /opt/nemo/nemo_start.sh"
+

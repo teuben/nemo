@@ -19,8 +19,8 @@
 #               22-feb-2019   add brew=1 option to use pgplot from Homebrew (our pgplot also works)
 #                7-may-2019   add centos=1 option to get a redhat flavor
 #               11-dec-2019   add python= option
-#               27-dec-2019   add native= and openmp=  - getting this ready for NEMO V4.2 (the decadal version?)
-#                9-jan-2019   new mknemo installs
+#               27-dec-2019   add native= and openmp=  - getting this ready for NEMO V4.2 
+#                9-jan-2019   new style mknemo installs
 #
 #
 #  Example of usage if you do git development to test your other git release before you've pushed this one:
@@ -101,16 +101,18 @@ endif
 
 if ($ubuntu) then
    sudo apt update
+   sudo apt install time
    sudo apt install build-essential -y
    sudo apt install gcc -y
    sudo apt install g++ -y
    sudo apt install gfortran -y
    # clang ???
-   # xorg-dev ? does the next 3 ?
-   sudo apt install libx11-dev -y
-   sudo apt install libxt-dev -y
-   sudo apt install libxext-dev -y
-   sudo apt install libcairo2-dev -y
+   sudo apt install xorg-dev
+   # xorg took care of the next 3
+   #sudo apt install libx11-dev -y
+   #sudo apt install libxt-dev -y
+   #sudo apt install libxext-dev -y
+   #sudo apt install libcairo2-dev -y
    sudo apt install cmake -y
    sudo apt install pgplot5 -y
    sudo apt install wcslib-dev -y
@@ -124,19 +126,15 @@ endif
 # Recipes for installing PGPLOT
 # 1. download proper http://download1.rpmfusion.org/nonfree/el/updates/testing/8/x86_64/
 # 2. rpm -Uvh rpmfusion-nonfree-release*rpm
-#
-# CENTOS7:
-# https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-devel-5.2.2-35.el7.x86_64.rpm
-# https://www.rpmfind.net/linux/rpmfusion/nonfree/el/updates/7/x86_64/p/pgplot-5.2.2-35.el7.x86_64.rpm
+# 3. dnf install pgplot
+# Or google for "centos 8 pgplot" and download the RPM's
 #
 # Centos8:
 # dnf install git gcc-gfortran make tcsh gcc-c++ cmake libXext-devel
+#             libtirpc-devel
 
 # FEDORA31
-# sudo yum install gfortran g++ csh make
-# http://download1.rpmfusion.org/nonfree/fedora/releases/31/Everything/x86_64/os/Packages/p/pgplot-5.2.2-46.fc31.x86_64.rpm
-# or install the rpmfusion-nonfree-release-stable rpm after which 'dnf install pgplot' will install pgplot
-# dnf install libXext-devel
+# sudo yum install gfortran g++ csh make libXext-devel
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
 
 if ($centos) then

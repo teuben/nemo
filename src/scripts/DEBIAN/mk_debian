@@ -1,11 +1,20 @@
+#! /bin/bash
 #
+# The build procedure for debian flavors The I use is as follows:
+# - run this script, it will create a astronemo_VERSION_ARCH.deb file
+# 
+#
+# 
+
 NEMO=nemo_4.2
+ARCH=amd
 
 #
-echo Starting with a clean astro$NEMO
-rm -rf astro$NEMO
-mkdir astro$NEMO
-cd astro$NEMO
+debname=astro${NEMO}_${ARCH}
+echo Starting with a clean $debname
+rm -rf $debname
+mkdir $debname
+cd $debname
 
 #
 mkdir opt
@@ -20,12 +29,12 @@ make build                       > install.build.log   2>&1
 
 #
 cd ../../..
-dpkg-deb --build astro$NEMO
-# fakeroot dpkg-deb --build $NEMO
+dpkg-deb --build $debname
+# fakeroot dpkg-deb --build $debname
 #
 #
 
-echo Now issue: sudo dpkg --install astro$NEMO.deb
+echo Now issue: sudo dpkg --install $debname.deb
 
 # lsb_release -i
 # lsb_release -r
