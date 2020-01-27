@@ -1,15 +1,13 @@
 .\" pjt 
-.TH PROGRAMS 8NEMO "4 March 2006"
+.TH PROGRAMS 8NEMO "26 Jan 2020"
 .SH NAME
 programs \- list of currently available nemo(1NEMO) commands, ordered thematically
 .SH DESCRIPTION
-These are the tasks currently available under to run under NEMO. They are a
-collection of program to do N-body calculations and
-some simple 2/3-D image processing, connected with the N-body calculations.
-If program names are preceded by a dash (\fB-\fP) they 
-do not have NEMO's user interface
-and are sometimes not even found in NEMO's bin area on disk (usually referred
-to as $NEMOBIN). Program names ending on a star (\fB*\fP) 
+These are some of the tasks currently available under to run under NEMO. 
+If a program name is preceded by a dash (\fB-\fP) they 
+do not have NEMO's \fIgetparam(3NEMO)\fP user interface
+and are sometimes not even found in $NEMOBIN.
+Program names ending on a star (\fB*\fP) 
 are available under this and sometimes more wildcard names (e.g. snapplot and 
 snapplot_ps)
 Program names ending in a 
@@ -31,18 +29,12 @@ cookbook	a quick list of what to do to run (e.g.) treecode on the 205 [8]
 tricks    	useful tricks and bug detours [8]
 orbit   	overview what orbit utilities are planned [0]
 .fi
-.SH "2. UTILITY TASKS"
+.SH "2. UTILITY"
 .nf
 .ta +2.0i
+mknemo		compile NEMO progams, out of directory
 nemoshow    	check environment, show NEMO system variables/keywords
-.\" -nemonews      	check if there is NEMO news
-.\" -nemobugs    	check if there are any bug reports within NEMO
-.\" -nemonew      	add new_additions comments
-.\" -nemobug     	add new_bugs bug reports
--cc       	special program or shell script needed in some UNIX flavors
--make      	special program or shell script needed in some UNIX flavors
-.\" -update     	combine multiple source files for CYBER 205's UPDATE
--keyval   	display value in a 'keyword=value' string
+nemoman		create a template man pages from a compiled program
 nemoinp  	test parsing of numbers
 units        	units conversion utility
 .fi
@@ -73,7 +65,7 @@ unfio    	access fortran unformatted I/O files
 units       	units conversion utility
 wcs       	(astronomical) world coordinate system transformations
 .fi
-.SH "4. N-BODY REALIZATORS"
+.SH "4. N-BODY REALIZATIONS"
 .nf
 .ta +2.0i
 anisot    	create distribution function table for anistropic spherical models
@@ -115,12 +107,9 @@ galaxy		3D FFT N-body code
 scfm		N-body integrator using the self-consistent field method
 -mass99		SPH code
 .fi
-.SH "6. PLOTTING, PRINTING and HARD COPIES"
+.SH "6. PLOTTING, PRINTING"
 .nf
 .ta +2.0i
---sm    	interactive graphics utility (sun/x windows)
---mongo     	interactive graphics utility (sun (color) windows)
---gnuplot  	interactive function plotter 
 snapdiagplot*	diagnosis of an N-body run
 snapplot*	display N-body snapshot file
 snapplot3	display N-body snapshot file
@@ -137,7 +126,7 @@ plarrow_ps	plot an arrow in postscript
 pltext_ps	plot text in postscript
 -movie,movie_sv	display screendumps in orderly fashion
 mkcolor  	create color table
-.SH "7. 2D IMAGE UTILITIES"
+.SH "7. 2D and 3D IMAGE UTILITIES"
 .nf
 .ta +2.0i
 snapccd     	construct CCD velocity-moment image from an N-body snapshot
@@ -247,6 +236,7 @@ tablsqfit    	general linear least squares fitting of tabular data
 tabhist  	histogram plotter
 snaprect	diaganolize moment-of-inertia of snapshot
 rotcur      	fit kinematic parameters from velocity field
+rotcurshape
 ccdvel    	create theoretical velocity field
 rotcurves	rotation curve of a composite potentials
 snapfit  	fit a (6D) snapshot to a (3D) data cube
@@ -265,11 +255,6 @@ wcs       	(astronomical) world coordinate system transformations
 .fi
 .SH AUTHOR
 Peter Teuben
-.SH FILES
-.nf
-.ta +3.0i
-~teuben/nemodoc 	original manual page
-.fi
 .SH "SEE ALSO"
 .nf
 index(1NEMO), software(8NEMO)
@@ -283,5 +268,4 @@ index(1NEMO), software(8NEMO)
 16-dec-88	..	PJT
 10-feb-90	..	PJT
 4-mar-92	updated	PJT
-
 .fi
