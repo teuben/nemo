@@ -3,11 +3,11 @@
 # The build procedure for debian flavors The I use is as follows:
 # - run this script, it will create a astronemo_VERSION_ARCH.deb file
 # 
-#
+# Examples:     "glnemo2 1.11.0-1.ubuntu18.04" and "amd64"
 # 
 
 NEMO=nemo_4.2
-ARCH=amd
+ARCH=amd64
 
 #
 debname=astro${NEMO}_${ARCH}
