@@ -138,9 +138,10 @@ endif
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
 
 if ($centos) then
+   sudo yum groupinstall 'Development Tools'
    sudo yum install -y cmake
    sudo yum install -y libXext-devel
-   
+   sudo yum install curl file git tcsh
 endif
 
 if ($?CC  == 0)  setenv CC  gcc
