@@ -1077,7 +1077,7 @@ double p[];
 #ifdef POSIX
 #include <sys/time.h>
 #include <sys/resource.h>
-#include <sys/rusage.h>
+//#include <sys/rusage.h>
 
 #ifdef __hpux
 #include <sys/syscall.h>
@@ -1133,6 +1133,10 @@ double p[];
 #include <unistd.h>
 #include <limits.h>
 #include <sys/times.h>
+
+#ifndef CLK_TCK
+#define CLK_TCK 100
+#endif
 
 struct tms tms;
 
