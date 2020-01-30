@@ -54,6 +54,19 @@ works on monochrome SUN workstations,
 it's best on a color monitor. The trick to remember is to use the \fB-yflip\fP
 switch, or click on the Y button, because  our fits interface has a problem
 obviously...
+.SH PIPES and SHARED MEMORY
+NEMO encourages you to use pipes where serial operations make sense (see also \fItee(1)\fP).
+However on Linux, assuming you have enough memory, using /dev/shm will sacrifice your memory to store
+data temporarely and could speed up your I/O dominated workflow. Here is a simple example:
+.nf
+       mkdir /dev/shm/$USER
+       cd /dev/shm/$USER
+       mkspiral s000 1000000 nmodel=40
+.fi
+The example of \fImkspiral(1NEMO)\fP is taken from the NEMO \fIbench(5NEMO)\fP suite, but this example
+is actually not very I/O dominated.
+.SH SEE ALSO
+nemo(1NEMO), bench(5NEMO), tee(1)
 .SH AUTHOR
 Peter Teuben.
 .SH "UPDATE HISTORY"
@@ -63,4 +76,5 @@ Peter Teuben.
 5-mar-89	tabccd added         	PJT
 6-mar-89	ds added          	PJT
 9-oct-90	fixed some typos	PJT
+jan-2020	added pipe/shm		PJT
 .fi

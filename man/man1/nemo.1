@@ -1,11 +1,13 @@
-.TH NEMO 1NEMO "26 October 2013"
-.SH SYNOPSIS
-.nf
-\fBprogram [key1=]val1 [key2=]val2 .\!.\!.
-\fBrunprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
-\fBrun program\fP ...
-.fi
+.TH NEMO 1NEMO "26 January 2020"
+.SH NAME
+nemo, astronemo \- outline the NEMO package
 .SH DESCRIPTION
+\fBnemo\fP is a computer package, there is no program with that name. On linux
+there is also the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
+.PP
+\fBastronemo\fP is the name you may find in some package managers. If you google the name
+\fInemo\fP, you will find a lot of computer related tools with that name.
+.PP
 \fBNEMO\fP is a \fIStellar Dynamics Toolbox\fP for users and
 programmers. It has various
 programs to create, integrate and analyze N-body systems. In addition
@@ -15,27 +17,40 @@ data reduction packages.
 .PP
 A good start is the manual page \fIprograms(8NEMO)\fP, which lists
 programs thematically, and \fIindex(1NEMO)\fP, which lists them 
-alphabetically (CAVEAT: these pages are often out of date).
+alphabetically (CAVEAT: these pages are not well maintained).
 .PP
 \fBNEMO\fP is very much integrated into the Unix(tm) operating system,
 so users are expected to use standard Unix commands as glue
-between the various tasks (cat, ls, rm, cp, awk, mongo, sm, \fIetc.\fP).
-Understanding of shell scripting (sh,csh,python,perl,...) can be
-very useful. Several example shell scripts exist in the source code
+between the various tasks (cat, ls, rm, cp, awk, sm, \fIetc.\fP).
+Understanding of shell scripting (sh, csh, python, perl, \fIetc.\fP) can be
+very useful. Several example shell scripts exist in the source tree
 to demonstrate how experiments can be orchestrated. We use
-mostly csh, bash and python. Yes, csh too.
+mostly csh, bash and python. Yes, csh too, even though csh is considered
+harmful now.
+
+.SH SYNOPSIS
+.nf
+\fBprogram --help\fP
+\fBprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
+\fBrunprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
+\fBrun program\fP ...
+.fi
+
 .SH GETTING STARTED
 What you need to do to set yourself up for \fBNEMO\fP:
 .PP
 The easiest way is to add the appropriate line to your \fI.cshrc\fP or
-\fI.bashrc\fP file:
+\fI.bashrc\fP file. For example
 .nf
-        \fIsource $NEMO/nemo_start.sh\fP
+
+        \fBsource /opt/nemo/nemo_start.sh\fP
+	
 or for the die hards
-        \fIsource $NEMO/nemo_start.ssh\fP
+
+        \fBsource /opt/nemo/nemo_start.ssh\fP
 .fi
 .PP
-If you need more control over your environment, there are other methods
+If you need more control over your NEMO environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
 or consult one of your local friendly NEMO users.
 .SH HOW TO RUN NEMO PROGRAMS
@@ -44,6 +59,7 @@ NEMO is nothing more than an extension of Unix. NEMO programs usually
 read and/or write files, though these files can in most circumstances
 be replaced with a dash to designate a unix pipe, e.g.
 .nf
+
      mkplummer - 10 | snapprint -
 .fi
 .PP
@@ -69,33 +85,34 @@ use are \fI help=\fP and \fIyapp=\fP, and to a lesser degree
 inline aid from a program. There is also online help on a 
 program, for which unix \fIman(1)\fP command (or any of it's derived friends)
 is normally used. The \fIyapp=\fP sets the graphics device used by
-programs who use a graphics device. You \fInemo_start\fP may have given
-you a default.
+programs who use a graphics device. Your \fInemo_start\fP
+environment may have given you a default. \fBYAPP=/xs\fP is a common default
+if the yapp_pgplot interface is used.
 .PP
 Each \fBsystem\fP keyword can be defaulted by setting it's equivalent
 environment variable (in upper case!). Program keywords can be
 abbreviated to uniqueness.
 .PP
 Examples: Consider the program \fImkplummer\fP, a program which creates
-an N-body realization of a Plummer sphere
+an N-body realization of a Plummer sphere.
 To get online help, one types (we included three legacy program options,
 --man, --help, --version):
 .nf
         \fIman mkplummer\fP
-	\fPmkplummer --man\fP
+        \fPmkplummer --man\fP
 .fi
 and to get various types of inline help:
 .nf
+        \fImkplummer --help\fP
+        \fImkplummer -h\fP		
         \fImkplummer help=\fP
         \fImkplummer help=h\fP
         \fImkplummer help='?'\fP
-	\fPmkplummer --help\fP
-	\fPmkplummer -h\fP		
 .fi
 and to get the version:
 .nf
-	\fPmkplummer help=V\fP
-	\fPmkplummer --version\fP
+        \fImkplummer help=V\fP
+        \fImkplummer --version\fP
 .fi
 Note the literal quotes around the question-mark needed if you use
 a regular Unix shell as interface.
@@ -105,13 +122,13 @@ prints out a small one-line reminder what each keyword means. The last
 form \fIhelp='?'\fP lists various options the user interface understands,
 this one is not program dependant.
 .PP
-If you chain NEMO programs, pipes can be a very efficient way to
-prevent large amounts of disk access. Most keywords that operate 
+If you chain NEMO programs, pipes can be a very efficient way to stream
+data and/or prevent large amounts of disk access. Most keywords that operate 
 on files (notably \fBin=\fP, \fBout=\fP, as long as
 \fIstropen(3NEMO)\fP is used) can use standard piped I/O by using
 the dash (\fB-\fP) to name the keyword, e.g.
 .nf
-    mkplummer - 10 | snapprint
+    mkplummer - 10 | snapprint -
 .fi
 would create a snapshot of 10 bodies on the fly, and print
 positions and velocities to the user using \fBsnapprint\fP.
@@ -169,7 +186,7 @@ the information you need to get down to the guts of the system.
 Various \fIman(1NEMO)\fP pages explain programs(1), subroutine libraries(3)
 file formats(5) and system management(8).
 .PP
-NEMO homepage \fIhttp://www.astro.umd.edu/nemo\fP.
+NEMO homepage \fIhttp://www.astro.umd.edu/nemo\fP and github page \fIhttps://github.com/teuben/nemo\fP.
 .SH BUGS
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these

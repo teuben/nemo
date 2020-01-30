@@ -3,7 +3,7 @@
 #
 if ( $#argv == 0 ) then
   echo "Usage: $0 progname key1=def1 ..."
-  echo "version 26-dec-2019"
+  echo "version 24-jan-2012"
   echo "Write template NEMO program based on keywords and default values"
   echo "Output will be in a file progname.c, which cannot be overwritten"
   
@@ -73,4 +73,5 @@ echo "All done, $name created. You can compile it using the command"
 echo "        bake $prog"
 echo "  or:   mknemo $prog"
 echo "When done, don't forget to create a template man page:"
-echo '        $NEMO/src/scripts/mkman' "$prog > $prog.1"
+echo '        $NEMO/src/scripts/mkman' "$prog > "'$NEMO'"/man/man1/$prog.1"
+echo '//      $NEMO/src/scripts/mkman' "$prog > "'$NEMO'"/man/man1/$prog.1"  >> $name

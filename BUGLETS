@@ -1,6 +1,7 @@
 
 
 * active issues are now moved to https://github.com/teuben/nemo/issues
+* Some TODO's also here:   https://github.com/teuben/nemo/projects/1
 
 
 * this is the TODO list for the 4.2 release
@@ -8,8 +9,13 @@
 - default configure gives yapp.ps, but should check if pgplot is natively there
 - is rman partially broken on U18?
        PolyglotMan v3.2 of $Date: 2003/07/26 19:00:48 $
-- ACOM example? - NO
 - is there rman -> rst ?
+- more solid examples of openmp
+
+
+
+
+
 
 
 

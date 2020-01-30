@@ -2,7 +2,13 @@
 #
 #  sample script to convert a binary res file from Sellwood's binary 'res'
 #  format to a NEMO snapshot
+#  For V1.3 unfio shows two blocks, One 8 byte header with (time,nbody),
+#  and a single dump of (mass,pos,vel)
 #
+#  For GALAXY15 the manual Section 13.4.1 describes the structure of the 'res'
+#  file. Don't know yet if it is compatible with GALAXY V1.3
+#
+
 if ($#argv <  2) then
   echo "Usage: $0 file n1 [n2 ...]"
   echo "Extract the n1-th, n2-th, ... snapshot from a .res file"
