@@ -9,7 +9,7 @@ L = $(NEMOLIB)/libnemo.a
 
 # Files etc. in this directory
 
-BINFILES = cpu-bench_f cpu-bench_d big big8 offt offt8
+BINFILES = cpu-bench_f cpu-bench_d big big8 offt offt8 flops
 
 #	update the library: direct comparison with modules inside L
 help:
@@ -21,6 +21,9 @@ clean:
 
 all:	$(BINFILES)
 
+flops:	flops.c
+	$(CC) -DPOSIX1 $(CFLAGS) -o flops flops.c -lm
+
 cpu-bench_f:
 	$(CC) -DSINGLEPREC $(CFLAGS) -o cpu-bench_f  cpu-bench.c $(NEMO_LIBS)
 
@@ -29,8 +32,9 @@ cpu-bench_d:
 
 
 bench:	$(BINFILES)
-	time cpu-bench_f > cpu-bench_f.log
-	time cpu-bench_d > cpu-bench_d.log
+	time ./cpu-bench_f > cpu-bench_f.log
+	time ./cpu-bench_d > cpu-bench_d.log
+	time ./flops 
 
 bench8:	big big8 offt offt64
 	@./big | wc
