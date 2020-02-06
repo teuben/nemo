@@ -70,15 +70,35 @@ file using <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  works on monochrome SUN workstations, it&rsquo;s best on a color monitor. The
 trick to remember is to use the <b>-yflip</b> switch, or click on the Y button,
 because  our fits interface has a problem obviously... 
-<h2><a name='sect2' href='#toc2'>Author</a></h2>
-Peter Teuben.
-
-<h2><a name='sect3' href='#toc3'>Update History</a></h2>
+<h2><a name='sect2' href='#toc2'>PIPES and SHARED MEMORY</a></h2>
+NEMO
+encourages you to use pipes where serial operations make sense (see also
+<a href='tee.1.html'><i>tee(1)</i></a>
+). However on Linux, assuming you have enough memory, using /dev/shm
+will sacrifice your memory to store data temporarely and could speed up
+your I/O dominated workflow. Here is a simple example: <br>
+<pre>       mkdir /dev/shm/$USER
+       cd /dev/shm/$USER
+       mkspiral s000 1000000 nmodel=40
+</pre>The example of <a href='mkspiral.1.html'><i>mkspiral(1NEMO)</i></a>
+ is taken from the NEMO <a href='bench.5.html'><i>bench(5NEMO)</i></a>
+ suite,
+but this example is actually not very I/O dominated. 
+<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+<a href='nemo.1.html'>nemo(1NEMO)</a>
+,
+<a href='bench.5.html'>bench(5NEMO)</a>
+, <a href='tee.1.html'>tee(1)</a>
+ 
+<h2><a name='sect4' href='#toc4'>Author</a></h2>
+Peter Teuben. 
+<h2><a name='sect5' href='#toc5'>Update History</a></h2>
 <br>
 <pre>18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 5-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabccd added         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;ds added          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed some typos<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added pipe/shm<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -86,8 +106,10 @@ Peter Teuben.
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Author</a></li>
-<li><a name='toc3' href='#sect3'>Update History</a></li>
+<li><a name='toc2' href='#sect2'>PIPES and SHARED MEMORY</a></li>
+<li><a name='toc3' href='#sect3'>See Also</a></li>
+<li><a name='toc4' href='#sect4'>Author</a></li>
+<li><a name='toc5' href='#sect5'>Update History</a></li>
 </ul>
 </body>
 </html>

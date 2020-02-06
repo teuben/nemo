@@ -49,36 +49,37 @@ used. </dd>
 
 <dt><b>dims=</b> </dt>
 <dd>A list of dimensions how the data-block should be processed. The
-procedure of processing is set by the <b>proc=</b> keyword.  For example dims=2,11,2,2,4
- Default: not used. </dd>
+procedure of processing is set by the <b>proc=</b> keyword.  For example dims=2,11,2,2,4.
+  The product of the dimensions should be NAXIS2 (or less than) from the
+BINTABLE. Default: not used. </dd>
 
 <dt><b>proc=</b> </dt>
-<dd>The procedure of processing can be set with this.
-Currently only one specific example (see EXAMPLES below) for ngc5291 is
-implemented. Options would be PS (Position Switching), FS (frequency switching),
-NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever. </dd>
-
-<dt><b>nchan=</b> </dt>
-<dd>Override
-the number of channels found in the data. Some dataset will find nchan=0
-and it will be useful to set this here. </dd>
-
-<dt><b>row=</b> </dt>
-<dd>If used, this row (0 being
-the first) will be output as an ascii spectrum. This spectrum has two columns:
-channel number (0 being the first) and the spectrum value, native units.
+<dd>The procedure of processing can be set
+with this. Currently only one specific example (see EXAMPLES below) for
+ngc5291 is implemented. Options would be PS (Position Switching), FS (frequency
+switching), NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever.
 </dd>
 
+<dt><b>nchan=</b> </dt>
+<dd>Override the number of channels found in the data. Some dataset will
+find nchan=0 and it will be useful to set this here. This number is related
+to NAXIS1 in the BINTABLE. </dd>
+
+<dt><b>row=</b> </dt>
+<dd>If used, this row (0 being the first) will
+be output as an ascii spectrum. This spectrum has two columns: channel number
+(0 being the first) and the spectrum value, native units. </dd>
+
 <dt><b>bench=</b> </dt>
-<dd>How many times the procedure should be processed. This will only
-re-execute the procedure, not the alloc/free that are needed for this. Using
-0 will bypass the procedure. Default: 1 </dd>
+<dd>How many
+times the procedure should be processed. This will only re-execute the procedure,
+not the alloc/free that are needed for this. Using 0 will bypass the procedure.
+Default: 1 </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example takes
-all fits files matching a particular pattern and summarize their contents.
-<br>
+The following example takes all fits files matching
+a particular pattern and summarize their contents. <br>
 <pre>    ls *.?.fits &gt; dirin.lis
     sdinfo in=@dirin.lis
 AGBT15B_287_35.raw.vegas.A.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
