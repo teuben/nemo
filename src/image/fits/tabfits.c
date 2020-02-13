@@ -13,6 +13,7 @@
  *      1-jan-04        c: get_line check return value
  *     18-may-06        d: fix for too long comment lines        pjt
  *      7-nov-2013  V3.3  added scale=                           pjt
+ *     13-feb-2020  V3.4  promote COMMENT and HISTORY for Wolfire pjt
  *
  * todo:  read one more line, check if file is done!!
  *        if header contains NAXIS, NAXIS1,...., nx=,ny=,nz= is still needed
@@ -33,7 +34,7 @@ string defv[] = {
     "nz=\n              Z-Size of data, or else specify NAXIS3 in header",
     "nmax=100000\n      Allocation space for piped I/O",
     "scale=1.0\n        Scale factor to multiply data by",
-    "VERSION=3.3\n	7-nov-2013 PJT",
+    "VERSION=3.4\n	13-feb-2020 PJT",
     NULL,
 };
 
@@ -48,7 +49,7 @@ string cvsid="$Id$";
 #define MAX_LINELEN  16384
 #endif
 
-int get_key(char *line, char *key, char *value);
+int get_key(char *line, char *key, char *value, int *his);
 
 void init_data(int);
 double get_next_data(int);
@@ -61,11 +62,11 @@ static  double scale;
 void nemo_main()
 {
     stream outstr;
-    int nmax, nx, ny, nz, i, j, k, ierr, naxis[3], nheader=0;
+    int nmax, nx, ny, nz, i, j, k, ierr, naxis[3], nheader=0, his;
     real rmin, rmax, dval;
     string name = getparam("in");
     int dcol = getiparam("dcol");
-    char namex[32], namey[32], namez[32], key[32], value[80];
+    char namex[32], namey[32], namez[32], key[80], value[80];
     FITS *fitsfile = NULL;
     float rvalue, rdata[MAXDAT];
 
@@ -95,13 +96,13 @@ void nemo_main()
         if (get_line(instr, line) < 0)     /* EOF */
 	  break;
 
-        if (!get_key(line,key,value)) {                /*   check if comment is # key = value */
+        if (!get_key(line,key,value,&his)) {                /*   check if comment is # key = value */
             dprintf(0,"Read %d header lines\n",nheader);
 	    break;
 	}
         nheader++;
         
-        dprintf(0,"HEADER: %-8s = %s\n",key,value);
+        dprintf(1,"HEADER: %-8s = %s\n",key,value);
         if (streq(key,"NAXIS1")) {
             nx = naxis[0] = atoi(value);
         } else if (streq(key,"NAXIS2")) {
@@ -116,6 +117,9 @@ void nemo_main()
             fitwrhdr(fitsfile,key,rvalue);		/* casting problem ??*/
         } else if (strncmp(key,"CTYPE",5)==0) {
             fitwrhd(fitsfile,key,value);
+	} else if (his) {
+	  // HISTORY or COMMENT
+	  fitwra(fitsfile,key,value);
         } else if (*key) {
             /* write keyword verbose */
             /* fitwrhda(fitsfile,key,value); */
@@ -182,20 +186,20 @@ void nemo_main()
     fitclose(fitsfile);
 }
 
-int get_key(char *line, char *key, char *value)
+int get_key(char *line, char *key, char *value, int *his)
 {
     char *cp = line, *lkey=key, *lvalue=value;
-    int has_equals;
 
     *key = 0;                               /* initialize no keyword */
     *value = 0;                             /* and no value part */
+    *his = 0;
 
     if (cp==0) return 1;
     while (isspace(*cp))                    /* skip leading whitespace */
         cp++;
     if (cp==0) return 1;                    /* if only whitespace, done */
     
-    if (*cp == '#')			    /* expect a comment for header */
+    if (*cp == '#')			    /* expect a comment for header lines */
 	cp++;    
     else
     	return 0;                           /* if not, return bad line */
@@ -205,15 +209,27 @@ int get_key(char *line, char *key, char *value)
 
     while (!isspace(*cp) && *cp != '=')     /* grab the keyword */
         *lkey++ = *cp++;
-    while (isspace(*cp))
-        cp++;        
+    
+    while (isspace(*cp))                    /* skip over more potential whitespace */
+        cp++;
+    
     if (*cp == '=')			
         *lkey = 0;			    /* terminate keyword */
     else {
-        *key = 0;			    /* no keyword */
-        return 1;
+        *lkey = 0;			    /* terminate keyword */	  
+        dprintf(2,"PJT [%s]\n",key);
+	if (streq(key,"COMMENT") || streq(key,"HISTORY")) {
+	  *his = 1;
+	} else {
+	  *key = 0;			    /* no keyword */
+	  return 1;
+	}
     }
-    while (isspace(*cp) || *cp == '=')      /* skip whitespace around '=' */
+    if (*his == 0)
+      while (isspace(*cp) || *cp == '=')      /* skip whitespace around '=' */
+        cp++;
+    else
+      while (isspace(*cp))                    /* skip whitespace */
         cp++;
     while (*cp)                             /* grab the value */
         *value++ = *cp++;
@@ -226,9 +242,9 @@ int get_key(char *line, char *key, char *value)
 }
 
 
-static active_row = 0;
-static active_col = 0;
-static icol = 0;
+static int active_row = 0;
+static int active_col = 0;
+static int icol = 0;
 
 void init_data(int dcol)
 {
