@@ -1,15 +1,15 @@
-.TH TABFITS 1NEMO "7 November 2013"
+.TH TABFITS 1NEMO "13 February 2020"
 .SH NAME
-tabfits \- convert tables into FITS images
+tabfits \- convert ascii table into FITS images
 .SH SYNOPSIS
 \fBtabfits\fP [parameter=value]
 .SH DESCRIPTION
 \fBtabfits\fP converts table-like files to FITS HDUs. Headers in the
-table are optional, but should
-be #-comment lines before the numeric data start. 
+table are optional, but should be the usual #-comment lines before the
+real numeric data start. 
 The data can be either taken
 from one specific column, or read continuesly from all columns,
-discarding any structure in the data.
+discarding any structure in the data, i.e. reading it row by row.
 The image size is given as 
 parameters \fBnx=\fP, \fBny=\fP and \fBnz=\fP, on the
 command line, or else obtained from the header from the
@@ -18,7 +18,7 @@ usual FITS-like NAXISn keywords.
 For a proper astronomical WCS you will need to make sure that your
 FITS style header (see EXAMPLES below) has the correct
 CTYPE (see e.g. worldpos(3NEMO)). The default is currently
-observer unfriendly.
+observer unfriendly (theory friendly).
 .PP
 It is currently not possible to interchange the axes, you have to use 
 \fIccdflip(1NEMO)\fP for this.
@@ -27,7 +27,8 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input table file. No default.
+Input table file with options commented directives for fits header
+conversion. No default.
 .TP
 \fBout=\fP
 Output fits file. No default.
@@ -61,6 +62,7 @@ Default: \fBf\fP.
 All non-standard fits header keywords are copied verbosely, so be sure
 to follow the FITS rules in their formatting.
 .SH EXAMPLES
+Here is an example of an input table:
 .nf
 # NAXIS1  =   25
 # NAXIS2  =   29
@@ -106,5 +108,6 @@ Peter Teuben
 5-jan-99	V2.0a fixed header formatting bug	PJT
 9-jul-00	V3.1 allow dcol=0	PJT
 21-sep-05	V4.0 add wcs= to deal with real astronomers (lost?)	PJT
-7-nov-2013	V3.3 add scale= 	PJT 
+7-nov-2013	V3.3 add scale= 	PJT
+13-feb-2020	V3.4 promote COMMENT and HISTORY from commented header	PJT
 .fi
