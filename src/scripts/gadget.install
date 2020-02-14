@@ -1,5 +1,7 @@
 #! /bin/csh -f
 #
+#  THIS SCRIPT IS DEPRECATED - use "mknemo gadget2"
+#
 #  (somewhat linux centric) example self-contained install script for Gadget and all the needed 
 #  companion libraries on a single processor machine; 
 #  you probably want to edit this file, or use the commandline parameters,
@@ -39,12 +41,16 @@ set hdf_base=ftp://ftp.ncsa.uiuc.edu/HDF/HDF5/current/src/
 set lam_base=http://www.lam-mpi.org/download/files/
 set gadget_base=http://www.mpa-garching.mpg.de/gadget/
 
-set fftw=fftw-2.1.5.tar.gz 
-set gsl=gsl-1.12.tar.gz
-set hdf=hdf5-1.8.3.tar.gz
+#set fftw=fftw-2.1.5.tar.gz
+set fftw=fftw-3.3.8.tar.gz 
+#set gsl=gsl-1.12.tar.gz
+set gsl=gsl-2.6.tar.gz
+#set hdf=hdf5-1.8.3.tar.gz
+set hdf=hdf5-1.10.6.tar.gz
 set lam=lam-7.1.4.tar.gz
 #set lam=lam-7.1.5b1.tar.gz
-set gadget=gadget-2.0.3.tar.gz
+#set gadget=gadget-2.0.3.tar.gz
+set gadget=gadget-2.0.7.tar.gz
 
 set prefix=`pwd`/opt
 set manybody=0
