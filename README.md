@@ -60,17 +60,19 @@ enabled:
 
 If you have used MacPorts, I may owe you another hint.
 
-At the simplest level, the installation uses an autoconf based scheme:
+At the simplest level, the installation uses an autoconf based scheme. Here is an example assuming
+you have the PGPLOT library installed:
 
          git clone https://github.com/teuben/nemo
          cd nemo
-         ./configure ...
+         ./configure --with-yapp=pgplot
          make build
          source nemo_start.sh
 
 Once NEMO has been installed, here are
 some examples of scripts and figures: https://teuben.github.io/nemo/examples/
-or look at an example ipython notebook https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
+or look at an example ipython notebook
+https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 
 
 

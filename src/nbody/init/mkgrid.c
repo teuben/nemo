@@ -3,12 +3,14 @@
  *	
  *	20-dec-05  V1.0 created,		 					JJF
  *             entirely based on mkcube V1.0b by PJT
+ *      13-feb-2020 V1.1     prototypes + typo fix      PJT
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -20,7 +22,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "size=1.0\n     Size of cube",
     "zerocm=f\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.0a\n 24-jan-06 JJF",
+    "VERSION=1.1\n  13-feb-2020 JJF",
     NULL,
 };
 
@@ -35,9 +37,12 @@ local bool zerocm;
 local Body *btab;
 local int ngrid, nbody;
 
+void writegalaxy(string name, string headline);
+void mkgrid(void);
+void centersnap(body *btab, int nb);
 
 
-void nemo_main()
+void nemo_main(void)
 {
     int seed;
 
@@ -55,9 +60,7 @@ void nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(name, headline)
-string name;
-string headline;
+void writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -75,7 +78,7 @@ string headline;
  * MKGRID: Cubic grid
  */
 
-mkgrid()
+void mkgrid()
 {
     Body *bp;
     real rmin3, rmax3, r_i, theta_i, phi_i, mass_i, delta;
@@ -88,7 +91,7 @@ mkgrid()
     for (bp=btab, i = 0; i < nbody; bp++, i++) {
                 Mass(bp) = mass_i;
 		Phase(bp)[0][0] =  rmin + j* delta;
-cvsid		Phase(bp)[0][1] =  rmin + k* delta;
+		Phase(bp)[0][1] =  rmin + k* delta;
 		Phase(bp)[0][2] =  rmin + l* delta;
 		Phase(bp)[1][0] =  0.0;
 		Phase(bp)[1][1] =  0.0;
@@ -101,9 +104,7 @@ cvsid		Phase(bp)[0][1] =  rmin + k* delta;
         centersnap(btab,nbody);
 }
 
-centersnap(btab, nb)
-Body *btab;
-int nb;
+void centersnap(Body *btab, int nb)
 {
     real mtot;
     vector cmphase[2], tmp;

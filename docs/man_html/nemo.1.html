@@ -8,43 +8,56 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
-<h2><a name='sect0' href='#toc0'>Synopsis</a></h2>
+<h2><a name='sect0' href='#toc0'>Name</a></h2>
+nemo, astronemo - outline the NEMO package 
+<h2><a name='sect1' href='#toc1'>Description</a></h2>
+<b>nemo</b> is a computer
+package, there is no program with that name. On linux there is also the
+<i>nemo</i> file manager, which is a fork of <i>nautilus</i>. <p>
+<b>astronemo</b> is the name you
+may find in some package managers. If you google the name <i>nemo</i>, you will
+find a lot of computer related tools with that name. <p>
+<b>NEMO</b> is a <i>Stellar Dynamics
+Toolbox</i> for users and programmers. It has various programs to create, integrate
+and analyze N-body systems. In addition there are various tools to operate
+on images, tables and orbits, including FITS files to export/import to/from
+other astronomical data reduction packages. <p>
+A good start is the manual page
+<a href='programs.8.html'><i>programs(8NEMO)</i></a>
+, which lists programs thematically, and <a href='index.1.html'><i>index(1NEMO)</i></a>
+, which
+lists them  alphabetically (CAVEAT: these pages are not well maintained).
+<p>
+<b>NEMO</b> is very much integrated into the Unix(tm) operating system, so users
+are expected to use standard Unix commands as glue between the various
+tasks (cat, ls, rm, cp, awk, sm, <i>etc.</i>). Understanding of shell scripting
+(sh, csh, python, perl, <i>etc.</i>) can be very useful. Several example shell scripts
+exist in the source tree to demonstrate how experiments can be orchestrated.
+We use mostly csh, bash and python. Yes, csh too, even though csh is considered
+harmful now. 
+<p> 
+<h2><a name='sect2' href='#toc2'>Synopsis</a></h2>
 <br>
-<pre>program [key1=]val1 [key2=]val2 .!.!.
+<pre>program --help
+program [key1=]val1 [key2=]val2 .!.!.
 runprogram [key1=]val1 [key2=]val2 .!.!.
 run program ...
 </pre>
-<h2><a name='sect1' href='#toc1'>Description</a></h2>
-<b>NEMO</b> is a <i>Stellar Dynamics Toolbox</i> for users and programmers.
-It has various programs to create, integrate and analyze N-body systems.
-In addition there are various tools to operate on images, tables and orbits,
-including FITS files to export/import to/from other astronomical data reduction
-packages. <p>
-A good start is the manual page <a href='programs.8.html'><i>programs(8NEMO)</i></a>
-, which lists programs
-thematically, and <a href='index.1.html'><i>index(1NEMO)</i></a>
-, which lists them  alphabetically (CAVEAT:
-these pages are often out of date). <p>
-<b>NEMO</b> is very much integrated into the
-Unix(tm) operating system, so users are expected to use standard Unix commands
-as glue between the various tasks (cat, ls, rm, cp, awk, mongo, sm, <i>etc.</i>).
-Understanding of shell scripting (sh,csh,python,perl,...) can be very useful.
-Several example shell scripts exist in the source code to demonstrate how
-experiments can be orchestrated. We use mostly csh, bash and python. Yes,
-csh too. 
-<h2><a name='sect2' href='#toc2'>Getting Started</a></h2>
-What you need to do to set yourself up for <b>NEMO</b>:
-<p>
-The easiest way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i>
-file: <br>
-<pre>        source $NEMO/nemo_start.sh
+<p> 
+<h2><a name='sect3' href='#toc3'>Getting Started</a></h2>
+What you need to do to set yourself up for <b>NEMO</b>: <p>
+The easiest
+way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file. For example
+<br>
+<pre>        source /opt/nemo/nemo_start.sh
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;
 or for the die hards
-        source $NEMO/nemo_start.ssh
+        source /opt/nemo/nemo_start.ssh
 </pre><p>
-If you need more control over your environment, there are other methods
+If you need more control over your NEMO environment, there are other methods
 described elsewhere (The <i>NEMO Users/Programmers Guide</i>, Appendix A), or
 consult one of your local friendly NEMO users. 
-<h2><a name='sect3' href='#toc3'>How to Run Nemo Programs</a></h2>
+<h2><a name='sect4' href='#toc4'>How to Run Nemo Programs</a></h2>
 NEMO
 programs can be run just as any other command in Unix, in that sense NEMO
 is nothing more than an extension of Unix. NEMO programs usually read and/or
@@ -70,25 +83,26 @@ to a lesser degree  <i>debug=</i> and <i>error=</i>.  The <i>help=</i> gives var
 which unix <a href='man.1.html'><i>man(1)</i></a>
  command (or any of it&rsquo;s derived friends) is normally used.
 The <i>yapp=</i> sets the graphics device used by programs who use a graphics
-device. You <i>nemo_start</i> may have given you a default. <p>
+device. Your <i>nemo_start</i> environment may have given you a default. <b>YAPP=/xs</b>
+is a common default if the yapp_pgplot interface is used. <p>
 Each <b>system</b> keyword
 can be defaulted by setting it&rsquo;s equivalent environment variable (in upper
 case!). Program keywords can be abbreviated to uniqueness. <p>
 Examples: Consider
 the program <i>mkplummer</i>, a program which creates an N-body realization of
-a Plummer sphere To get online help, one types (we included three legacy
+a Plummer sphere. To get online help, one types (we included three legacy
 program options, --man, --help, --version): <br>
 <pre>        man mkplummer
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --man
+        mkplummer --man
 </pre>and to get various types of inline help: <br>
-<pre>        mkplummer help=
+<pre>        mkplummer --help
+        mkplummer -h<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;
+        mkplummer help=
         mkplummer help=h
         mkplummer help=&rsquo;?&rsquo;
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --help
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer -h<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;
 </pre>and to get the version: <br>
-<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer help=V
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer --version
+<pre>        mkplummer help=V
+        mkplummer --version
 </pre>Note the literal quotes around the question-mark needed if you use a regular
 Unix shell as interface. The first <i>help=</i> reminds you of the order of the
 program keywords and their default values. The second form, <i>help=h</i> prints
@@ -96,11 +110,12 @@ out a small one-line reminder what each keyword means. The last form <i>help=&rs
 lists various options the user interface understands, this one is not program
 dependant. <p>
 If you chain NEMO programs, pipes can be a very efficient way
-to prevent large amounts of disk access. Most keywords that operate  on
-files (notably <b>in=</b>, <b>out=</b>, as long as <a href='stropen.3.html'><i>stropen(3NEMO)</i></a>
- is used) can use standard
-piped I/O by using the dash (<b>-</b>) to name the keyword, e.g. <br>
-<pre>    mkplummer - 10 | snapprint
+to stream data and/or prevent large amounts of disk access. Most keywords
+that operate  on files (notably <b>in=</b>, <b>out=</b>, as long as <a href='stropen.3.html'><i>stropen(3NEMO)</i></a>
+ is
+used) can use standard piped I/O by using the dash (<b>-</b>) to name the keyword,
+e.g. <br>
+<pre>    mkplummer - 10 | snapprint -
 </pre>would create a snapshot of 10 bodies on the fly, and print positions and
 velocities to the user using <b>snapprint</b>. The alternative would have been
 <br>
@@ -108,7 +123,7 @@ velocities to the user using <b>snapprint</b>. The alternative would have been
     snapprint in=tmp
     rm tmp
 </pre>
-<h2><a name='sect4' href='#toc4'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
+<h2><a name='sect5' href='#toc5'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
 Over the times NEMO has incoorporated a number
 of non-NEMO programs, with varying degrees of input parameter schemes. Some
 via parameter files, some interactive input, some a command line interface
@@ -134,14 +149,14 @@ Although these run* programs use a fairly common
 method to run the non-NEMO programs, they have not all been unified as is
 proposed in <a href='run.3.html'><i>run(3NEMO)</i></a>
 . 
-<h2><a name='sect5' href='#toc5'>Programming</a></h2>
+<h2><a name='sect6' href='#toc6'>Programming</a></h2>
 You may need to do some sherlocking here.
 You have probably seen the configure.ac and makedefs file. The $NEMOLIB/makedefs
 is the active file.  The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
  will help you (re)compile programs,
 though <a href='bake.8.html'><i>bake(8NEMO)</i></a>
  can do a better job in a local directory. 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='index.1.html'>index(1NEMO)</a>
 ,
 <a href='programs.8.html'>programs(8NEMO)</a>
@@ -158,9 +173,9 @@ though <a href='bake.8.html'><i>bake(8NEMO)</i></a>
 ,
 <a href='pipestatus.l.html'>pipestatus(l)</a>
  
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Further Information</a></h2>
+<h2><a name='sect9' href='#toc9'>Further Information</a></h2>
 The <i>NEMO Users/Programmers
 Guide</i> contains most of the information you need to get down to the guts
 of the system. <p>
@@ -171,29 +186,30 @@ Various <a href='man.1.html'><i>man(1NEMO)</i></a>
  file <a href='formats.5.html'>formats(5)</a>
  and system <a href='management.8.html'>management(8)</a>
 . <p>
-NEMO homepage <a href='http://www.astro.umd.edu/nemo.'><i>http://www.astro.umd.edu/nemo</i>.</a>
+NEMO homepage <a href='http://www.astro.umd.edu/nemo'><i>http://www.astro.umd.edu/nemo</i></a>
 
-
-<h2><a name='sect9' href='#toc9'>Bugs</a></h2>
-Since programs are being modified, and extended fairly regularly, 
-manual pages for related programs do not always know about these changes
-if they should. Keeping good cross references in the manual pages might
-help. However, the <b>help=</b> description should always be up to date, since
-it is derived from the code itself. <p>
+and github page <i>https://github.com/teuben/nemo</i>. 
+<h2><a name='sect10' href='#toc10'>Bugs</a></h2>
+Since programs are being
+modified, and extended fairly regularly,  manual pages for related programs
+do not always know about these changes if they should. Keeping good cross
+references in the manual pages might help. However, the <b>help=</b> description
+should always be up to date, since it is derived from the code itself. <p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
-<li><a name='toc0' href='#sect0'>Synopsis</a></li>
+<li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Getting Started</a></li>
-<li><a name='toc3' href='#sect3'>How to Run Nemo Programs</a></li>
-<li><a name='toc4' href='#sect4'>HOW TO RUN non-NEMO PROGRAMS</a></li>
-<li><a name='toc5' href='#sect5'>Programming</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Further Information</a></li>
-<li><a name='toc9' href='#sect9'>Bugs</a></li>
+<li><a name='toc2' href='#sect2'>Synopsis</a></li>
+<li><a name='toc3' href='#sect3'>Getting Started</a></li>
+<li><a name='toc4' href='#sect4'>How to Run Nemo Programs</a></li>
+<li><a name='toc5' href='#sect5'>HOW TO RUN non-NEMO PROGRAMS</a></li>
+<li><a name='toc6' href='#sect6'>Programming</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Further Information</a></li>
+<li><a name='toc10' href='#sect10'>Bugs</a></li>
 </ul>
 </body>
 </html>
