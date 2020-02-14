@@ -1,8 +1,8 @@
-.TH GADGET1 1NEMO "17 March 2006"
+.TH GADGET 1NEMO "14 February 2020"
 .SH NAME
-gadget \-  parallelized cosmological treecode with SPH
+gadget \-  parallelized cosmological treecode with SPH (version 2)
 .SH SYNOPSIS
-\fBgadget\fP 
+\fBGadget2 param-file\fP 
 .SH DESCRIPTION
 \fBgadget\fP is a freely available code for cosmological N-body/SPH
 simulations on massively parallel computers with distributed
@@ -41,6 +41,8 @@ that helps installing the package. It needs a small set of libraries
 pre-installed, which this scripts takes care of. By using the keyword
 \fBprefix=$NEMO\fP it can be made to fit within the NEMO environment.
 .PP
+An updated (2020) version uses the \fImknemo(1NEMO)\fP command
+.PP
 Note that for each style of gadget a special Makefile is used to
 compile this executable. Examples can be found in
 Gadget-2.0/Gadget2/parameterfiles/
@@ -64,6 +66,8 @@ script, and runs a galaxy-galaxy N=60,000 collision:
    P4/64/3000            3292.062u 7.109s 55:05.93 99.7%
    G5/1600               4263.6u  51.5s 1:19:07.64 90.8%
 
+.SH FILES
+NEMO/usr/gadget - placeholder for install and benchmarks
 .SH SEE ALSO
 snapgadget(1NEMO), gadgetsnap(1NEMO), snapshot(5NEMO)
 .PP
@@ -81,4 +85,5 @@ Volker Springel
 15-mar-2000	V1.0 original fortran version released (Y2K compliant!)
 1-may-2005	V2.0 rewritten in C++
 17-mar-2006	a first document in NEMO
+14-feb-2020	some notes after mknemo install option
 .fi
