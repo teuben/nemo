@@ -1,0 +1,35 @@
+#! /bin/bash
+#
+#  older version of FFTW, GADGET2 needs this
+
+version=2.1.5
+mpi=1
+
+cd $NEMO/local
+
+if [ -f $NEMO/tar/fftw-$version.tar.gz ]; then
+   ln -s $NEMO/tar/fftw-$version.tar.gz
+fi   
+if [ ! -f fftw-$version.tar.gz ]; then
+   wget  http://www.fftw.org/fftw-$version.tar.gz
+fi
+
+tar zxf fftw-$version.tar.gz
+cd fftw-$version
+./configure --prefix=$NEMO/opt
+make -j
+make install
+
+# gadget2 needs these versions of FFTW2 as well
+if [ $mpi == 1 ]; then
+    ./configure --enable-mpi --enable-type-prefix --prefix=$NEMO/opt
+    make -j
+    make install
+    make clean
+    ./configure --enable-mpi --enable-type-prefix --prefix=$NEMO/opt --enable-float
+    make -j
+    make install
+fi
+
+
+echo Installed version=$version
