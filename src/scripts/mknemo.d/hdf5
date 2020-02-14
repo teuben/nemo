@@ -14,8 +14,8 @@ mversion=1.10
 
 cd $NEMO/local
 
-if [ -f $NEMO/tar/hdf5-$version.tar.gz ]; then
-   ln -s $NEMO/tar/hdf5-$version.tar.gz
+if [ -f $NEMO/tars/hdf5-$version.tar.gz ]; then
+   ln -s $NEMO/tars/hdf5-$version.tar.gz
 fi   
 if [ ! -f hdf5-$version.tar.gz ]; then
    wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$mversion/hdf5-$version/src/hdf5-$version.tar.gz    

@@ -5,8 +5,8 @@ version=3.47
 
 cd $NEMO/local
 
-if [ -f $NEMO/tar/cfitsio_latest.tar.gz ]; then
-  ln -s $NEMO/tar/cfitsio_latest.tar.gz
+if [ -f $NEMO/tars/cfitsio_latest.tar.gz ]; then
+  ln -s $NEMO/tars/cfitsio_latest.tar.gz
 fi
 if [ ! -f cfitsio_latest.tar.gz ]; then
   wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz

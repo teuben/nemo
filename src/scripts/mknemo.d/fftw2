@@ -7,8 +7,8 @@ mpi=1
 
 cd $NEMO/local
 
-if [ -f $NEMO/tar/fftw-$version.tar.gz ]; then
-   ln -s $NEMO/tar/fftw-$version.tar.gz
+if [ -f $NEMO/tars/fftw-$version.tar.gz ]; then
+   ln -s $NEMO/tars/fftw-$version.tar.gz
 fi   
 if [ ! -f fftw-$version.tar.gz ]; then
    wget  http://www.fftw.org/fftw-$version.tar.gz

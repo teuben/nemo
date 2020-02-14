@@ -7,8 +7,8 @@ cd $NEMO/local
 
 
 
-if [ -f $NEMO/tar/gsl-$version.tar.gz ]; then
-   ln -s $NEMO/tar/gsl-$version.tar.gz
+if [ -f $NEMO/tars/gsl-$version.tar.gz ]; then
+   ln -s $NEMO/tars/gsl-$version.tar.gz
 fi   
 if [ ! -f gsl-$version.tar.gz ]; then
    wget ftp://ftp.gnu.org/gnu/gsl/gsl-$version.tar.gz

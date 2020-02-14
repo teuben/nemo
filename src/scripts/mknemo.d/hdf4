@@ -13,8 +13,8 @@ version=4.2.14
 
 cd $NEMO/local
 
-if [ -f $NEMO/tar/hdf-$version.tar.gz ]; then
-   ln -s $NEMO/tar/hdf-$version.tar.gz
+if [ -f $NEMO/tars/hdf-$version.tar.gz ]; then
+   ln -s $NEMO/tars/hdf-$version.tar.gz
 fi   
 if [ ! -f hdf-$version.tar.gz ]; then
    wget https://support.hdfgroup.org/ftp/HDF/releases/HDF$version/src/hdf-$version.tar.gz
