@@ -30,7 +30,7 @@ fi
 tar zxf $gadget
 
 dir=Gadget-$version
-ln -s Gadget-$vesion Gadget
+ln -s Gadget-$version Gadget
 cd $dir/Gadget2
 for problem in cluster galaxy gassphere lcdm_gas;
 do
