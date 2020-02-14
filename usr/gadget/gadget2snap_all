@@ -1,0 +1,13 @@
+#! /bin/bash
+#
+#   typical use for the benchmark:
+#          ../gadget2snap_all snap.all snapshot_*
+#
+
+out=$1
+shift
+
+for g in $*;
+do
+    gadgetsnap $g - | csf - - SnapShot >> $out
+done	 
