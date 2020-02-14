@@ -1,0 +1,48 @@
+#! /bin/bash 
+#
+#
+#  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
+#  For NEMO suport, see  http://www.astro.umd.edu/nemo/
+#                        notably gadgetsnap and snapgadget
+#
+#  You will need to "mknemo gsl fftw2 hdf5" and make sure mpicc exists
+#  (e.g. via LAM/LAM-MPI)
+#
+#  This script supersedes the old src/scripts/gadget.install
+#
+#  $Id$
+
+version=2.0.7
+gadget=gadget-$version.tar.gz
+url=https://wwwmpa.mpa-garching.mpg.de/gadget/
+
+cd $NEMO/usr/gadget
+
+
+if [ -f $NEMO/tars/$gadget ]; then
+   ln -s $NEMO/tars/$gadget
+fi   
+if [ ! -f $gadget ]; then
+   wget $url/$gadget
+fi
+
+
+tar zxf $gadget
+
+dir=Gadget-$version
+ln -s Gadget-$vesion Gadget
+cd $dir/Gadget2
+for problem in cluster galaxy gassphere lcdm_gas;
+do
+    make -f parameterfiles/$problem.Makefile clean
+    make -f parameterfiles/$problem.Makefile \
+	    CC=mpicc OPTIMIZE="-O3 -Wall" \
+	    GSL_INCL= GSL_LIBS=  \
+	    FFTW_INCL=-I$NEMO/opt/include  FFTW_LIBS=-L$NEMO/opt/lib \
+	    MPICHLIB= \
+	    HDF5INCL=-I$NEMO/opt/include HDF5LIB="-lhdf5 -lz" 
+    cp Gadget2 $NEMOBIN/Gadget2.$problem
+done
+
+
+
