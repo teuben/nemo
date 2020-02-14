@@ -20,6 +20,8 @@ galaxy:
 	); \
 	lamwipe
 	ls Gadget/galaxy
+	@echo Save the last snapshot in galaxy_snap.last
+	gadgetsnap Gadget/galaxy/snapshot_007 Gadget/galaxy/galaxy_snap.last
 
 # compare the results with another integrator in NEMO
 galaxy_bench:
