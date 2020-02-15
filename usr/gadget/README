@@ -28,4 +28,7 @@ time mpirun -np 2 Gadget2.galaxy  Gadget2/parameterfiles/galaxy.param >& galaxy.
 #        np=6              0.001u 0.004s  9:16.66 0.0%
 #        np=8              0.000u 0.002s  7:49.30 0.0%
 # i7-8550U CPU @ 1.80GHz [peter's T480]
-#        np=8           2418.58u  8.54s  10:57.44 369%CPU
+#        np=1            815.15u   1.44s  13:36.23 100%CPU
+#        np=2            987.92u   2.00s   8:14.77 200%CPU
+#        np=4           1366.44u   3.76s   5:42.55 399%CPU
+#        np=8           2817.10u 303.74s   6:37.57 784%CPU
