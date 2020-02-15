@@ -140,8 +140,8 @@ void nemo_main()
   DIVVS(w_pos,w_pos,w_sum);
   printf("Npoints:    %d\n",cnt);
   printf("DataMinMax: %g %g\n",dmin,dmax);
-  printf("Min at:     %d %d (0 based)\n",ixmin,iymin);
-  printf("Max at:     %d %d\n",ixmax,iymax);
+  printf("Min at:     %d %d (1 based)\n",ixmin+1,iymin+1);
+  printf("Max at:     %d %d\n",ixmax+1,iymax+1);
   printf("Mean:       %g\n",mean_moment(&m));
   if (nbpos==2)
     printf("Median:     %g\n",median_moment(&m));
@@ -150,8 +150,11 @@ void nemo_main()
   printf("ImSize:     %d %d %d\n",nx,ny,nz);
   printf("Center:     %g %g %g %s\n",w_pos[0], w_pos[1], w_pos[2],
 	 Qwcs ? "[wcs]" : "[grid]");
-  printf("BLOB:  %d %d   %g %g %g %g %g\n",
-	 ixmax+1,iymax+1, w_pos[0]+1, w_pos[1]+1,median_moment(&m), show_moment(&m,1) - cnt * median_moment(&m));
+  printf("BLOB:  %d %d  %g %g %d   %g %g %g\n",
+	 ixmax+1,iymax+1, w_pos[0]+1, w_pos[1]+1, box,
+	 median_moment(&m),
+	 dmax,
+	 show_moment(&m,1) - cnt * median_moment(&m));
 
   /* based on this center, compute quadrupole moments */
 
