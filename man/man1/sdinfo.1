@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "18 December 2019"
+.TH SDINFO 1NEMO "29 January 2019"
 .SH NAME
 sdinfo \- sdfits (BINTABLE) info and benchmark
 .SH SYNOPSIS
@@ -33,7 +33,8 @@ Column names to track. Currently it just gives the column number and format used
 .TP
 \fBdims=\fP
 A list of dimensions how the data-block should be processed. The procedure of processing is
-set by the \fBproc=\fP keyword.  For example dims=2,11,2,2,4  Default: not used.
+set by the \fBproc=\fP keyword.  For example dims=2,11,2,2,4.   The product
+of the dimensions should be NAXIS2 (or less than) from the BINTABLE. Default: not used.
 .TP
 \fBproc=\fP
 The procedure of processing can be set with this. Currently only one specific example
@@ -42,7 +43,7 @@ FS (frequency switching), NOD (nodding), TP (total power). NOT IMPLEMENTED YET, 
 .TP
 \fBnchan=\fP
 Override the number of channels found in the data. Some dataset will find nchan=0 and it will
-be useful to set this here.
+be useful to set this here. This number is related to NAXIS1 in the BINTABLE.
 .TP
 \fBrow=\fP
 If used, this row (0 being the first) will be output as an ascii spectrum. This spectrum has two
