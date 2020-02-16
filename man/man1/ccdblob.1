@@ -12,7 +12,7 @@ work in crowded fields.
 The current draft version is based off \fIccdshape(1NEMO)\fP and thus inherits some keywords and output
 that may disappear or change meaning.
 .PP
-Output values are currently 1-based.
+Pixel coordinates are 1-based.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -30,7 +30,7 @@ Box size to use around pos [32]
 Use only values above clip [] 
 .TP
 \fBwcs=\fP
-Use WCS of the cube (else use integer
+Use WCS of the cube (else use pixel coordinates)
 .TP
 \fBradecvel=\fP
 Split the RA/DEC from VEL [f]  
@@ -41,7 +41,7 @@ Weights by intensity [t]
 \fBcross=\fP
 Use cross correlations between X and Y to
 .SH EXAMPLES
-Analysing some Betelgeuse images from a crummy all sky camera:
+Analysing some Betelgeuse images from an all-sky camera:
 .nf
 
 % fitsccd ASC/MASN-01/archive/201601/20160102/IMG00700.FIT - | ccdblob - 724,305
@@ -61,5 +61,5 @@ Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-15-Feb-20	V0.1 Created	PJT
+15-feb-2020	V0.1 Created	PJT
 .fi
