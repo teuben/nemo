@@ -1,0 +1,53 @@
+.TH SNAPKEY 1NEMO "17 Feb 2020"
+.SH NAME
+snapkey \- (re)assign keys to a snapshot
+.SH SYNOPSIS
+\fBsnapkey\fP [parameter=value]
+.SH DESCRIPTION
+Assign (new) key to a snapshot.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input (snapshot) file [???]    
+.TP
+\fBout=\fP
+output (snapshot) file [???]    
+.TP
+\fBkeys=\fP
+Manually supply all keys []   
+.TP
+\fBkeyfile=\fP
+ascii table with keys []   -- not implemented yet
+.SH EXAMPLES
+The following example assign different keys to the particles, e.g. for glnemo2 select=
+.nf
+
+    mkplummer snap1  200
+    snapkey snap1 snap2 2::100,1::100
+    snapsort snap2 snap3 key
+    snapkstat snap3
+	->   select=0:99,100:199
+    glnemo snap3 select=0:99,100:199
+
+    glnemo snap3 `snapkstat snap3`
+    
+.fi
+Although the \fBkeyfile=\fP does not work yet, the following NEMO command line trick also works,
+following this example:
+.nf
+
+    nemoinp 2::100,1::100 > key1
+    snapkey snap1 snap2 @key1
+    snapsort snap2 snap3
+.fi
+.SH SEE ALSO
+snapmask(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-feb-2020	V0.1 quick hack		PJT
+.fi
