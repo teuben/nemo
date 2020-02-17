@@ -25,7 +25,7 @@ string defv[] = {
     "out=???\n                output (snapshot) file",
     "keys=\n                  Manually supply all keys",
     "keyfile=\n		      ascii table with keys",
-    "VERSION=0.1\n            17-feb-2020 PJT",
+    "VERSION=0.2\n            17-feb-2020 PJT",
     NULL,
 };
 
@@ -81,9 +81,6 @@ void nemo_main(void)
         } else             
             error("bad flow logic");
 
-        for (bp=btab, i=0, mtot=0.0; i<nbody; bp++,i++)            
-            mtot += Mass(bp);
-        dprintf(0,"Total mass: %g\n",mtot);
 	bits |= KeyBit;    /* turn mass bit on anyways */
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
