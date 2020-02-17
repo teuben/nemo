@@ -1,7 +1,5 @@
 #
 
-
-
 standard galaxy benchmark on single processor : 60000 particles 2019 steps
 --------------------------------------------------------------------------
 
@@ -32,3 +30,8 @@ time mpirun -np 2 Gadget2.galaxy  Gadget2/parameterfiles/galaxy.param >& galaxy.
 #        np=2            987.92u   2.00s   8:14.77 200%CPU
 #        np=4           1366.44u   3.76s   5:42.55 399%CPU
 #        np=8           2817.10u 303.74s   6:37.57 784%CPU
+# Xeon(R) CPU E31280 @ 3.50GHz
+#        np=4           1400.219u  2.211s  5:51.58 398.8%
+
+
+issue:    runs with np=1, np=2, np=4 etc. do not give the same results.
