@@ -23,7 +23,7 @@ string defv[] = {
     "in=???\n       Input file name",
     "sort=f\n       Sort masses before processing?",    
     "species=100\n  Maximum number of species",
-    "VERSION=0.1\n  17-feb-2020 PJT",
+    "VERSION=0.2\n  17-feb-2020 PJT",
     NULL,
 };
 
@@ -63,7 +63,7 @@ void nemo_main(void)
     scount = -1;
     for (i=0, bp = btab; bp < btab+nbody; i++, bp++) {
         if (Key(bp) != mold) {
-           printf("%d %d:%d  = %d Key= %g TotKey= %g CumKey= %g\n",
+	   dprintf(1,"%d %d:%d  = %d Key= %g TotKey= %g CumKey= %g\n",
                 scount+1, iold, i-1, i-iold,mold, mtot, mcum);
 	   nsp[scount+1] = i-iold;
            scount++;
@@ -77,7 +77,7 @@ void nemo_main(void)
             mcum += Key(bp);
         }
     }
-    printf("%d %d:%d = %d Key= %g TotKey= %g CumKey= %g\n",
+    dprintf(1,"%d %d:%d = %d Key= %g TotKey= %g CumKey= %g\n",
                 scount+1, iold, i-1, i-iold, mold, mtot, mcum);
     nsp[scount+1] = i-iold;
     scount++;
@@ -85,7 +85,7 @@ void nemo_main(void)
     scount++;
 
     if (!Qsort) {
-      printf("# Found %d species:\n",scount);
+      dprintf(0,"# Found %d key species:\n",scount);
       printf("select=");
       
       iold = 0;
