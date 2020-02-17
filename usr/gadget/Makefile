@@ -13,12 +13,10 @@ install:
 
 # benchmarks 
 galaxy:
-	lamboot ;\
 	( cd Gadget;\
 	  mkdir -p galaxy;\
 	  $(TIME) mpirun -np $(NP) Gadget2.galaxy Gadget2/parameterfiles/galaxy.param > galaxy.log;\
-	); \
-	lamwipe
+	)
 	ls Gadget/galaxy
 	@echo Save the last snapshot in galaxy_snap.last
 	gadgetsnap Gadget/galaxy/snapshot_007 Gadget/galaxy/galaxy_snap.last
