@@ -1,0 +1,65 @@
+.TH CCDBLOB 1NEMO "15 February 2020"
+.SH NAME
+ccdblob \- properties of a blob in an image
+.SH SYNOPSIS
+\fBccdblob\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdblob\fP computes some properties of a blob ("star") in an image. With given rough pixel coordinates
+and a box size, it will determine the peak, shape and flux of the blob, assuming the background signal (box
+needs to be big enough for this) is well characterised by the median value. This current algorithm thus does not
+work in crowded fields.
+.PP
+The current draft version is based off \fIccdshape(1NEMO)\fP and thus inherits some keywords and output
+that may disappear or change meaning.
+.PP
+Pixel coordinates are 1-based.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file [???]    
+.TP
+\fBpos=\fP
+(x,y) position, or use max in map []
+.TP
+\fBbox=\fP
+Box size to use around pos [32] 
+.TP
+\fBclip=\fP
+Use only values above clip [] 
+.TP
+\fBwcs=\fP
+Use WCS of the cube (else use pixel coordinates)
+.TP
+\fBradecvel=\fP
+Split the RA/DEC from VEL [f]  
+.TP
+\fBweight=\fP
+Weights by intensity [t]    
+.TP
+\fBcross=\fP
+Use cross correlations between X and Y to
+.SH EXAMPLES
+Analysing some Betelgeuse images from an all-sky camera:
+.nf
+
+% fitsccd ASC/MASN-01/archive/201601/20160102/IMG00700.FIT - | ccdblob - 724,305
+ BLOB 726 305  724.573 305.38 32   6546 42731 139121
+
+.fi
+Where the BLOB line lists the peak position (pixels are 1-based), followed
+by an intensity weighted position, the box size around the estimated center,
+followed by the median, peak and total blob flux (corrected for the median
+background).
+.SH SEE ALSO
+ccdstat(1NEMO), image(5NEMO)
+.SH FILES
+src/image/misc/ccdblob.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+15-feb-2020	V0.1 Created	PJT
+.fi

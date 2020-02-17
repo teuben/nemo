@@ -9,22 +9,23 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabfits - convert tables into FITS images 
+tabfits - convert ascii table into FITS images 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabfits</b> [parameter=value]
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabfits</b> converts table-like files to FITS HDUs. Headers in the
-table are optional, but should be #-comment lines before the numeric data
-start.  The data can be either taken from one specific column, or read continuesly
-from all columns, discarding any structure in the data. The image size is
-given as  parameters <b>nx=</b>, <b>ny=</b> and <b>nz=</b>, on the command line, or else obtained
-from the header from the usual FITS-like NAXISn keywords. <p>
-For a proper astronomical
-WCS you will need to make sure that your FITS style header (see EXAMPLES
-below) has the correct CTYPE (see e.g. <a href='worldpos.3.html'>worldpos(3NEMO)</a>
-). The default is currently
-observer unfriendly. <p>
+table are optional, but should be the usual #-comment lines before the real
+numeric data start.  The data can be either taken from one specific column,
+or read continuesly from all columns, discarding any structure in the data,
+i.e. reading it row by row. The image size is given as  parameters <b>nx=</b>, <b>ny=</b>
+and <b>nz=</b>, on the command line, or else obtained from the header from the
+usual FITS-like NAXISn keywords. <p>
+For a proper astronomical WCS you will need
+to make sure that your FITS style header (see EXAMPLES below) has the correct
+CTYPE (see e.g. <a href='worldpos.3.html'>worldpos(3NEMO)</a>
+). The default is currently observer unfriendly
+(theory friendly). <p>
 It is currently not possible to interchange the axes,
 you have to use  <a href='ccdflip.1.html'><i>ccdflip(1NEMO)</i></a>
  for this. 
@@ -35,48 +36,49 @@ are recognized in any order if the keyword is also given:
 
 <dt><b>in=</b> </dt>
 <dd>Input table
-file. No default. </dd>
+file with options commented directives for fits header conversion. No default.
+</dd>
 
 <dt><b>out=</b> </dt>
 <dd>Output fits file. No default. </dd>
 
 <dt><b>dcol=</b> </dt>
-<dd>Column for data.
-Use 0 if all data (columns) are to be read continuesly. [0] </dd>
+<dd>Column for data. Use 0 if all data
+(columns) are to be read continuesly. [0] </dd>
 
 <dt><b>nx=</b> </dt>
-<dd>X-Size of
-data, or else specify in the ascii header as NAXIS1 </dd>
+<dd>X-Size of data, or else specify
+in the ascii header as NAXIS1 </dd>
 
 <dt><b>ny=</b> </dt>
-<dd>Y-Size of data,
-or else specify in the ascii header as NAXIS2 </dd>
+<dd>Y-Size of data, or else specify in the
+ascii header as NAXIS2 </dd>
 
 <dt><b>nz=</b> </dt>
-<dd>Z-Size of data, or else
-specify in the ascii header as NAXIS3. </dd>
+<dd>Z-Size of data, or else specify in the ascii
+header as NAXIS3. </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>Allocation space for piped
-I/O. </dd>
+<dd>Allocation space for piped I/O. </dd>
 
 <dt><b>scale=</b> </dt>
-<dd>Scale factor by which all incoming data are multiplied for output
-in the fits file. Default: 1 </dd>
+<dd>Scale factor
+by which all incoming data are multiplied for output in the fits file. Default:
+1 </dd>
 
 <dt><b>wcs=t|f</b> </dt>
-<dd>Enforce a proper FITS style WCS definition.
-For this the FITS header description (see ) will need to have a valid CTYPE1
-and CTYPE2 to properly handle the sky coordinates. There is no mechanism
-to handle spectral axes. Default: <b>f</b>. </dd>
+<dd>Enforce a proper FITS style WCS definition. For this the FITS header
+description (see ) will need to have a valid CTYPE1 and CTYPE2 to properly
+handle the sky coordinates. There is no mechanism to handle spectral axes.
+Default: <b>f</b>. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-All non-standard fits header keywords
-are copied verbosely, so be sure to follow the FITS rules in their formatting.
-
+All non-standard fits header keywords are copied verbosely,
+so be sure to follow the FITS rules in their formatting. 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-<br>
+Here is
+an example of an input table: <br>
 <pre># NAXIS1  =   25
 # NAXIS2  =   29
 # NAXIS3  =    1 
@@ -121,7 +123,8 @@ Peter Teuben
 5-jan-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0a fixed header formatting bug<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-jul-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1 allow dcol=0<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-sep-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0 add wcs= to deal with real astronomers (lost?)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-7-nov-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.3 add scale= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
+7-nov-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.3 add scale= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+13-feb-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.4 promote COMMENT and HISTORY from commented header<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
