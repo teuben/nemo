@@ -14,6 +14,7 @@ is also advertised.
 
 A related package, ZENO, was spun off NEMO V1, and is still maintained by Josh Barnes. Two
 other packages that geneologically came after NEMO are StarLab and AMUSE
+(see also https://ascl.net)
 
 	 NEMO:      ascl:1010.051
 	 ZENO:      ascl:1102.027 (see also $NEMO/usr/zeno)
