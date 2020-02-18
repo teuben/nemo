@@ -25,7 +25,8 @@ string defv[] = {
     "out=???\n                output (snapshot) file",
     "keys=\n                  Manually supply all keys",
     "keyfile=\n		      ascii table with keys",
-    "VERSION=0.2\n            17-feb-2020 PJT",
+    "key=\n                   bodytrans expression",
+    "VERSION=0.3\n            17-feb-2020 PJT",
     NULL,
 };
 
@@ -36,25 +37,24 @@ string cvsid="$Id$";
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 #define MAXNBODY        100000
 
-extern real_proc getrfunc(string , string , string , int *);
+extern btiproc btitrans(string);
+
 
 void nemo_main(void)
 {
-    stream instr, inmassstr, outstr, ccdstr;
-    real   tsnap, tsnapmass, mass_star, mtot, mrange[2], norm;
-    real   xpos, ypos, xmin, ymin, idx, idy;
+    stream instr, outstr, tabstr;
+    real   tsnap;
     Body  *btab = NULL, *bp;
-    Body  *bmasstab = NULL, *bmassp;
-    imageptr iptr = NULL;
-    int i, n, nbody, nbodymass, bits, bitsmass, seed, ix, iy;
-    rproc_body  bfunc;
-    real_proc   mfunc;
+    int i, n, nbody, bits;
     int keys[MAXNBODY], nkeys;
-    bool  Qnorm, first = TRUE;
-
+    bool  first = TRUE;
+    btiproc   kfunc = NULL;
+ 
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
     nkeys = nemoinpi(getparam("keys"),keys,MAXNBODY);
+    if (hasvalue("key"))
+      kfunc = btitrans(getparam("key"));
 
     for(;;) {
 					/* input main data */
@@ -78,8 +78,11 @@ void nemo_main(void)
 	if (nkeys > 0) {
 	  for (bp=btab, i=0; bp<btab+nbody; bp++, i++)
 	    Key(bp) = keys[i];
-        } else             
-            error("bad flow logic");
+        } else if (kfunc != NULL) {
+	  for (bp=btab, i=0; bp<btab+nbody; bp++, i++)
+	    Key(bp) = (*kfunc)(bp,tsnap,i);
+	} else
+            error("no keys assigned");
 
 	bits |= KeyBit;    /* turn mass bit on anyways */
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
