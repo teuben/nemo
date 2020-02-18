@@ -12,10 +12,13 @@ is also advertised.
 		hooks into manybody.org modules starlab and partiview
    * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
-A related package, ZENO, was spun off NEMO V1, and is still maintained by Josh Barnes.
+A related package, ZENO, was spun off NEMO V1, and is still maintained by Josh Barnes. Two
+other packages that geneologically came after NEMO are StarLab and AMUSE
 
 	 NEMO:      ascl:1010.051
 	 ZENO:      ascl:1102.027 (see also $NEMO/usr/zeno)
+	 STARLAB:   ascl:1010.076
+	 AMUSE:     ascl:1107.007
 
 Packages we optionally use:
 
