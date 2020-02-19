@@ -1,16 +1,21 @@
-.TH TSF 1NEMO "14 June 2002"
+.TH TSF 1NEMO "19 February 2020"
 .SH NAME
 tsf \- type a structured file
 .SH SYNOPSIS
 \fBtsf in=\fPfile [parameter=value] .\|.\|.
 .SH DESCRIPTION
 \fItsf\fP types the contents of a structured binary file
-(see \fIfilestruct\fP(3NEMO)) on the standard output.
+(see \fIfilestruct\fP(3NEMO)) in a human readable form
+on the standard output.
 The type, tag, dimensions (if any) and contents of all items are listed.
 The contents of \fICharType\fP items are printed directly; 
 \fIFloatType\fP and \fIDoubleType\fP
 items are printed in floating-point notation; all other types are printed in 
-octal for portability reasons. XML format can optionally be selected.
+octal for portability reasons (see \fBoctal=\fP below).
+\fIXML\fP format can optionally be selected as well, but this is not been well
+exercised. A \fIjson\fP mode has been considered.
+.PP
+
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
@@ -18,12 +23,13 @@ The following parameters are recognized.
 Input data is read from \fIfile\fP, which must be a structured binary file.
 No default.
 .TP
-\fBmaxprec==t|f\fP
+\fBmaxprec=t|f\fP
 If true, print float and double item data with maximum precision.
 [Default: \fBf\fP].
 .TP
 \fBmaxline=\fP\fIlines\fP
 Limits the number of lines of data typed for each item to \fIlines\fP.
+See \fBallline=\fP below.
 [Default: \fB4\fP].
 .TP
 \fBallline=t|f\fP
@@ -67,6 +73,32 @@ An example of converting all double precision numbers to single
 precision in a NEMO file:
 .nf
     % tsf in=double.dat out=float.dat convert=d2f
+
+.fi
+And here is an N-body snapshot of a Plummer sphere with 10 particles:
+.nf
+
+    mkplummer - 10 | tsf -
+
+char Headline[35] "init_xrandom: seed used 1582131517"
+char History[27] "mkplummer - 10 VERSION=3.0"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] 0.394003 -1.98053 -0.836643 -0.466656 
+      0.0439966 0.367178 -0.0762312 -0.0201540 0.0852010 0.238130 
+      0.344608 0.379148 0.173722 0.311941 0.0433718 0.405117 0.747783 
+      -0.555947 -0.778804 -0.580657 0.537069 -0.101942 0.0555890 
+      . . .
+  tes
+tes
+
 .fi
 .SH BUGS
 The algorithm for implementing \fBmaxline\fP is crude.
