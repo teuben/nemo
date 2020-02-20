@@ -13,6 +13,8 @@
    size=256
   clean=1
     bsf=0
+   time=/usr/bin/time
+   help=help=cm
 
 for arg in $*; do\
    export $arg
@@ -29,10 +31,6 @@ echo `date`
 
 echo 'Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint'
 
-
-time=/usr/bin/time
-help=help=cm
-
 echo -n .;
 echo -n d;$time directcode nbody=$nbody0 out=d0 seed=123 $help                                      > bench.directcode.log  2>&1
 echo -n h;$time hackcode1 nbody=$nbody1  out=h0 seed=123 $help                                      > bench.hackcode1.log   2>&1
@@ -40,10 +38,11 @@ echo -n m;$time mkplummer p0 $nbody2 seed=123 $help                             
 echo -n g;$time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 $help                                       > bench.gyrfalcon.log   2>&1
 echo -n p;$time potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer $help                    > bench.potcode.log     2>&1
 echo -n m;$time mkspiral s0 $nbody3 nmodel=40 seed=123 $help                                        > bench.mkspiral.log    2>&1
-echo -n c;$time ccdmath "" c0 'ranu(0,1)' size=$size seed=123; echo -n c; $time ccdpot c0 c1 $help  > bench.ccdpot.log      2>&1
+echo -n c;$time ccdmath "" c0 'ranu(0,1)' size=$size seed=123 > bench.ccdpot.log 2>&1; echo -n c; $time ccdpot c0 c1 $help  >> bench.ccdpot.log      2>&1
 echo -n m;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                                           > bench.mkorbit.log     2>&1
 echo -n o;$time orbint o0 o1 nsteps=10000000 dt=0.001 nsave=\$nsteps/100 $help                      > bench.orbint.log      2>&1
-echo -n .;
+echo -n .; 
+echo ""
 
 if [ $bsf == 1 ]; then
     bsf d0 test="8.81856e-05 0.417853 -1.60699 2 195941"           label="d0 directcode"
