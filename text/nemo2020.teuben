@@ -9,7 +9,7 @@ git intro, including pull request from a branch
 
   or get it from your own fork (recommended)
 
-- useful settings for your ~/.gitconfig file (edit it, or used these commands)
+- useful settings for your ~/.gitconfig file (edit it manually, or used these git commands)
 
   git config --global user.name  "Mona Lisa"
   git config --global user.email "mona@lisa.com"
@@ -20,7 +20,7 @@ git intro, including pull request from a branch
   and the upstream is mine. The example here is for the user 'astroumd'
 
   git remote rename origin upstream
-  git remote add origin   https://github.com/astroumd/nemo
+  git remote add    origin https://github.com/astroumd/nemo
 
 - show the origin (should be you) and upstream (should be me)
 
@@ -30,18 +30,18 @@ git intro, including pull request from a branch
 - work on a branch in your repo
 
   git branch b1
-  git checkout b1
+  git checkout b1                        # 'git checkout -b b1' is shortcut for these two
   <edit files, and add/commit them>
-  git push -u origin b1
+  git push -u origin b1                  # only first time '-u origin b1' is needed
 
 - do some more editing and push it
 
-  git checkout b1
-  <edit and commit files>
-  git push
+  git checkout b1                        # make sure we're on the b1 branch
+  <edit and commit files>                # do your stuff
+  git push                               # now you only need "git push" from the b1 branch
 
 - go to your github.com and select the 'b1' branch, and submit a pull request (PR)
-  you should see the branch selector on the left.
+  you should see the branch selector on the left, the row just before all the files are listed
 
 - once the upstream person (me) has merged this PR, you should get it back in your
   master. 
@@ -63,16 +63,14 @@ git intro, including pull request from a branch
   git checkout b1
   git merge master
 
-
 - now your repo (locally and on github) is back in sync with the 'upstream'
 
 - use a branch from your collaborator to test out their features in your repo
-  before an impending merge. Again we are using the "astroumd" user
+  before an impending merge. Again we are using the "astroumd" user.
 
-  git remote add astroumd https://github.com/astroumd/nemo       # set pointer
-  git checkout -b astroumd-test123                               # put it on my branch
-  git pull astroumd test123                                      # get their branch
-
+  git remote add astroumd https://github.com/astroumd/nemo   # set name for this repo
+  git checkout -b astroumd-test123                           # will put it on my branch
+  git pull astroumd test123                                  # get their test123 branch 
 
 - Some articles on workflows:
   astropy:
