@@ -3,11 +3,13 @@ UMD student work progress "NEMO 2020"
 
 git intro, including pull request from a branch
 ===============================================
-- getting nemo:
+- getting NEMO:
 
   git clone https://github.com/teuben/nemo
 
   or get it from your own fork (recommended)
+
+  git clone https://github.com/YOUR_GITHUB_NAME/nemo
 
 - useful settings for your ~/.gitconfig file (edit it manually, or used these git commands)
 
@@ -15,7 +17,7 @@ git intro, including pull request from a branch
   git config --global user.email "mona@lisa.com"
   git config --global credential.helper "cache --timeout 100000"
 
-- in case you didn't get nemo from your own github created fork, you will need to
+- in case you didn't get NEMO from your own github created fork, you will need to
   switch around your git origin and upstream, such that origin is now yours
   and the upstream is mine. The example here is for the user 'astroumd'
 
@@ -70,7 +72,21 @@ git intro, including pull request from a branch
 
   git remote add astroumd https://github.com/astroumd/nemo   # set name for this repo
   git checkout -b astroumd-test123                           # will put it on my branch
-  git pull astroumd test123                                  # get their test123 branch 
+  git pull astroumd test123                                  # get their test123 branch
+
+
+- to recap: if you have a fork of NEMO and need to align it back to mine, this should work
+  in your repo
+
+  git remote add upstream https://github.com/teuben/nemo
+  git checkout master
+  git fetch upstream
+  git merge upstream/master
+  git status
+  git push
+
+  this also ensures that your github version is in sync with mine.
+  Again, be sure to edit files on a branch, not on the master.
 
 - Some articles on workflows:
   astropy:
