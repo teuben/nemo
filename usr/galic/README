@@ -1,0 +1,57 @@
+Compiling the code:
+
+Of course you should read the GalIC/README file, but here is some Ubuntu
+notes how to do this within NEMO. Adapt where needed.
+
+
+1) You will need MPI installed
+
+      apt install openmpi-bin openmpi-common libopenmpi-dev
+
+   If you install mpich instead, this may have an impact on 4) below
+      
+2) You will need gsl installed
+
+      apt install libgsl-dev
+
+   or internally to NEMO:
+
+      mknemo gsl
+      
+3) create two system files for compiling:
+
+- cp Template-Makefile.systype Makefile.systype
+  edit it to comment out the line containing
+      #SYSTYPE="Ubuntu"
+
+- cp Template-Config.sh Config.sh
+  edit it to ensure the HDF5 is commented out
+      #HAVE_HDF5 
+
+4) Edit their GalIC/Makefile , i needed this for my openmpi
+   
+
+#MPICHLIB = -lmpich
+MPICHLIB =
+
+
+5) Now make it:
+
+    make CC=mpicc
+    cp GalIC $NEMOBIN
+
+   I also copied the GalIC executable to $NEMOBIN
+
+
+
+Running the code and a benchmark
+--------------------------------
+
+
+time mpirun -np 4 GalIC Model_B1.param
+took 151m (605m  user, 29s sys)
+
+Only B1,B2,H1,H2,H3,H4 seem to work. The rest crashes.
+GalIC  Model_M1.param
+
+Not enough memory in mymalloc_fullinfo() to allocate 19940.4 MB for variable 'P'
