@@ -3,6 +3,8 @@
 #   typical use for the benchmark:
 #          ../gadget2snap_all snap.all snapshot_*
 #
+#   the crazy csf selection is only needed for some NEMO tools that don't like
+#   it when history is embedded.....  
 
 out=$1
 shift
@@ -11,3 +13,4 @@ for g in $*;
 do
     gadgetsnap $g - | csf - - SnapShot >> $out
 done	 
+ 
