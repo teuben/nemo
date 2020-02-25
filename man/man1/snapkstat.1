@@ -1,0 +1,37 @@
+.TH SNAPKSTAT 1NEMO "17 Feb 2020"
+.SH NAME
+snapkstat \- report some statistics of the keys in a snapshot
+.SH SYNOPSIS
+\fBsnapkstat\fP [parameter=value]
+.SH DESCRIPTION
+This hack was produced merely to provide a convenient way to call \fIglnemo2(1NEMO)\fP
+for a complex select= based on the keys in a snapshot.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name [???]    
+.TP
+\fBsort=\fP
+Sort before processing?. Probably should not be used. [f]   
+.TP
+\fBspecies=\fP
+Maximum number of species [100]
+.SH EXAMPLES
+To use different colors for different groups of particles in glnemo, the select= keyword
+is used, but has to be manually supplied.
+.nf
+     snapkey snap1 snap2 @keyfile
+     snapsort snap2 snap3 key
+     glnemo snap3 select=`snapkstat snap3`
+.fi
+.SH SEE ALSO
+snapmstat(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-Feb-20	V0.2 quick hack		PJT
+.fi

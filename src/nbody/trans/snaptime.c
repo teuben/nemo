@@ -3,6 +3,7 @@
  *	
  *      15-nov-2006      cloned from snapcopy but never committed    PJT
  *      30-apr-2008      committed
+ *      24-feb-2020      option to not give out= and report times
  */
 
 #include <stdinc.h>
@@ -18,13 +19,13 @@
 
 string defv[] = {
   "in=???\n           Input snapshot",
-  "out=???\n          Output snapshot",
+  "out=\n             Output snapshot",
   "time=0.0\n         Time to set",
-  "VERSION=0.1\n      30-apr-08 PJT",
+  "VERSION=0.2\n      24-feb-2020 PJT",
   NULL,
-};
+}; 
 
-string usage="copy an N-body snapshot with a new time";
+string usage="copy an N-body snapshot with a new time, or report times in snapshot";
 
 
 void nemo_main(void)
@@ -37,11 +38,13 @@ void nemo_main(void)
 
   tsnap0 = getdparam("time");
   instr = stropen(getparam("in"), "r");
-  outstr = stropen(getparam("out"), "w");
+  if (hasvalue("out")) {
+    outstr = stropen(getparam("out"), "w");
+    put_history(outstr);		
+  } else
+    outstr = NULL;
 
   get_history(instr);
-  put_history(outstr);		
-
   for (;;) {                /* grab each snapshot */
     get_history(instr);		/* skip over stuff we can forget */
     if (!get_tag_ok(instr, SnapShotTag))
@@ -50,8 +53,12 @@ void nemo_main(void)
     if ((bitsi & MassBit) == 0 && (bitsi & PhaseSpaceBit) == 0) {
       continue;       /* just skip */
     }
+    if (outstr == NULL) {
+      printf("%g\n",tsnap);
+      continue;
+    }
     put_snap(outstr, &btab, &nbody, &tsnap0, &bitsi);
     nsnap++;
   }
-  if (nsnap > 1) warning("%d snapshots were given time=%g",nsnap,tsnap0);
+  if (outstr && nsnap > 1) warning("%d snapshots were given time=%g",nsnap,tsnap0);
 }

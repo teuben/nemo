@@ -1,79 +1,67 @@
-#! /bin/csh -f
+#! /bin/bash
 #
 #   A NEMO CPU benchmark - 
 #  	it will exersice a few typical NEMO codes and use an
 #	average. The baseline was a pentium-600 where each integrator
 #	would take about 30 seconds, and before the 2GB size test.
 #
-set tmp    = bench$$
-set nbody0 = 3072
-set nbody1 = 10240
-set nbody2 = 10240
-set nbody3 = 1000000
-set size   = 256
-set clean  = 1
-set bsf    = 0
+    tmp=bench$$
+ nbody0=3072
+ nbody1=10240
+ nbody2=10240
+ nbody3=1000000
+   size=256
+  clean=1
+    bsf=0
+   time=/usr/bin/time
+   help=help=cm
 
-foreach arg ($*)
-  set $arg
-end
+for arg in $*; do\
+   export $arg
+done
 
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2019-12-27) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
+echo "NEMOBENCH: (2020-02-19) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
 
 
-if (0) then
-    echo 'Needs:  mkplummer nbody0 hackcode1 gyrfalcON'
+echo 'Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint'
 
-    echo -n "mkplummer:  "
-    time mkplummer out=nbody1.in nbody=$nbody1 seed=123 >& mkplummer.log
-    echo -n "nbody0:     "
-    time nbody0 in=nbody1.in out=nbody1.out1 >& nbody0.log
-    echo -n "hackcode1:  "
-    time hackcode1 in=nbody1.in out=nbody1.out2 tstop=10 >& hackcode1.log
-    #echo -n "gyrfalcON:   "
-    time gyrfalcON in=nbody1.in out=nbody1.out3 >& gyrfalcON.log 
-    echo -n "scfm:       "
-    time runscfm in=`pwd`/nbody1.in outdir=nbody1.run nsteps=300 >& scfm.log
+echo -n .;
+echo -n d;$time directcode nbody=$nbody0 out=d0 seed=123 $help                                      > bench.directcode.log  2>&1
+echo -n h;$time hackcode1 nbody=$nbody1  out=h0 seed=123 $help                                      > bench.hackcode1.log   2>&1
+echo -n m;$time mkplummer p0 $nbody2 seed=123 $help                                                 > bench.mkplummer.log   2>&1
+echo -n g;$time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 $help                                       > bench.gyrfalcon.log   2>&1
+echo -n p;$time potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer $help                    > bench.potcode.log     2>&1
+echo -n m;$time mkspiral s0 $nbody3 nmodel=40 seed=123 $help                                        > bench.mkspiral.log    2>&1
+echo -n c;$time ccdmath "" c0 'ranu(0,1)' size=$size seed=123 > bench.ccdpot.log 2>&1; echo -n c; $time ccdpot c0 c1 $help  >> bench.ccdpot.log      2>&1
+echo -n m;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                                           > bench.mkorbit.log     2>&1
+echo -n o;$time orbint o0 o1 nsteps=10000000 dt=0.001 nsave=\$nsteps/100 $help                      > bench.orbint.log      2>&1
+echo -n .; 
+echo ""
 
+if [ $bsf == 1 ]; then
+    bsf d0 test="8.81856e-05 0.417853 -1.60699 2 195941"           label="d0 directcode"
+    bsf h0 test="3.05666e-05 0.418326 -1.72565 2 647525"           label="h0 hackcode1 "
+    bsf p0 test="1.39507e-05 0.732358 -21.724 16.8652 71681"       label="p0 mkplummer "
+    bsf p1 test="2.79024e-05 0.732249 -21.724 16.8652 143362"      label="p1 gyrfalcON "
+    bsf p2 test="0.00133797 0.803715 -21.724 16.8652 1303477"      label="p2 potcode   "
+    bsf s0 test="-1.5474e-05 0.325705 -0.999995 0.99999 280000040" label="s0 mkspiral  "
+    bsf c1 test="-380.858 47.8493 -454.976 1 65551"                label="c1 ccdpot    "
+    bsf o1 test="451.755 1679.97 -1.0452 10000 1118"               label="o1 orbint    "
 else
-    echo 'Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint'
-
-    time directcode nbody=$nbody0 out=d0 seed=123 help=cm                                      >& bench.directcode.log
-    time hackcode1 nbody=$nbody1  out=h0 seed=123 help=cm                                      >& bench.hackcode1.log
-    time mkplummer p0 $nbody2 seed=123 help=cm                                                 >& bench.mkplummer.log
-    time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 help=cm                                       >& bench.gyrfalcon.log
-    time potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer help=cm                    >& bench.potcode.log
-    time mkspiral s0 $nbody3 nmodel=40 seed=123 help=cm                                        >& bench.mkspiral.log
-    time ccdmath "" c0 'ranu(0,1)' size=$size seed=123; time ccdpot c0 c1 help=cm              >& bench.ccdpot.log
-    time mkorbit o0 x=1 e=1 lz=1 potname=log help=cm                                           >& bench.mkorbit.log
-    time orbint o0 o1 nsteps=10000000 dt=0.001 nsave=\$nsteps/100 help=cm                      >& bench.orbint.log
-
-    if ($bsf) then
-        bsf d0 test="8.81856e-05 0.417853 -1.60699 2 195941"           label="d0 directcode"
-	bsf h0 test="3.05666e-05 0.418326 -1.72565 2 647525"           label="h0 hackcode1 "
-	bsf p0 test="1.39507e-05 0.732358 -21.724 16.8652 71681"       label="p0 mkplummer "
-	bsf p1 test="2.79024e-05 0.732249 -21.724 16.8652 143362"      label="p1 gyrfalcON "
-	bsf p2 test="0.00133797 0.803715 -21.724 16.8652 1303477"      label="p2 potcode   "
-	bsf s0 test="-1.5474e-05 0.325705 -0.999995 0.99999 280000040" label="s0 mkspiral  "
-	bsf c1 test="-380.858 47.8493 -454.976 1 65551"                label="c1 ccdpot    "
-	bsf o1 test="451.755 1679.97 -1.0452 10000 1118"               label="o1 orbint    "
-    else
-        echo Skipping BSF testing.  Use bsf=1 to enable this.
-    endif
+    echo Skipping BSF testing.  Use bsf=1 to enable this.
+fi
     
-    grep CPU_USAGE bench.*.log
+grep CPU_USAGE bench.*.log
 
-    if ($clean) then
-       echo "Cleaning $tmp (use clean=0 to prevent this)"
-       cd ..
-       rm -rf $tmp
-    endif
+if [ $clean == 1 ]; then
+   echo "Cleaning $tmp (use clean=0 to prevent this)"
+   cd ..
+   rm -rf $tmp
+fi
     
-endif
-

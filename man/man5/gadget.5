@@ -1,0 +1,62 @@
+.TH GADGET 5NEMO "23 February 2020"
+.SH NAME
+gadget \- binary format for N-body snapshot files
+.SH DESCRIPTION
+\fIgadget\fP is the format used by Springel's \fIgadget(1NEMO)\fP code,
+and several other packages and code know how to read and write such files.
+These are either \fIgadget binary\fP files (a 256 byte header, followed
+by a number of families of particles (stars, halo, gas, etc.).
+.PP
+There is also a HDF implementation
+.PP
+Some description in \fIgadgetsnap(1NEMO)\fP.
+.SH EXAMPLES
+Since gadget binary files have the structure of a Fortran unformatted file, the \fIunfio(1NEMO)\fP program
+can display the top level structure, e.g. the following two commands are identical
+.nf
+
+unfio ICs/galaxy_bigeendian.dat swap=t
+unfio ICs/galaxy_littleendian.dat
+  ### nemo Debug Info: 1   256
+  ### nemo Debug Info: 2   720000
+  ### nemo Debug Info: 3   720000
+  ### nemo Debug Info: 4   240000
+
+.fi
+whereas of course much more information can be seen with gadgetsnap:
+.nf
+
+gadgetsnap ICs/galaxy_littleendian.dat - | snapmstat -
+  0 0:39999  = 40000 Mass= 0.00104634 TotMas= 41.8535 CumMas= 41.8535
+  1 40000:59999 = 20000 Mass= 0.00023252 TotMas= 4.65039 CumMas= 46.5039
+  # Found 2 species:
+  select=0:39999,40000:59999 
+
+.fi
+Or here an example to split the two galaxies:
+.nf
+
+gadgetsnap ICs/galaxy_littleendian.dat - | snapmask - - 0:19999,40000:49999     | snapcenter - gal1
+gadgetsnap ICs/galaxy_littleendian.dat - | snapmask - - 20000:39999,50000:59999 | snapcenter - gal2
+
+.fi
+and here a funny analysis, draw your own conclusions:
+.nf
+
+snaprect gal1 gal1r
+snaprect gal2 gal2r
+snapcmp gal1r gal2r
+  # time  Min  Qlow Median Qhigh  Max   Mean Sigma
+  # obs=r
+  0   2.57303e-07 3.97679e-06 6.6571e-06 1.38556e-05 4.10978e-05  9.74949e-06 7.71154e-06
+
+.fi
+.SH "SEE ALSO"
+gadget(1NEMO), gadgetsnap(1NEMO), gadget2pcs(1NEMO), gadget1t2(1NEMO), snapshot(5NEMO), unfio(1NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +2.0i +2.0i
+22-feb-2020	placeholder written 	PJT
+.fi

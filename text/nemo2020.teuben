@@ -1,0 +1,103 @@
+UMD student work progress "NEMO 2020"
+-------------------------------------
+
+git intro, including pull request from a branch
+===============================================
+- getting NEMO:
+
+  git clone https://github.com/teuben/nemo
+
+  or get it from your own fork (recommended)
+
+  git clone https://github.com/YOUR_GITHUB_NAME/nemo
+
+- useful settings for your ~/.gitconfig file (edit it manually, or used these git commands)
+
+  git config --global user.name  "Mona Lisa"
+  git config --global user.email "mona@lisa.com"
+  git config --global credential.helper "cache --timeout 100000"
+
+- in case you didn't get NEMO from your own github created fork, you will need to
+  switch around your git origin and upstream, such that origin is now yours
+  and the upstream is mine. The example here is for the user 'astroumd'
+
+  git remote rename origin upstream
+  git remote add    origin https://github.com/astroumd/nemo
+
+- show the origin (should be you) and upstream (should be me)
+
+  git config --local remote.origin.url
+  git config --local remote.upstream.url
+
+- work on a branch in your repo
+
+  git branch b1
+  git checkout b1                        # 'git checkout -b b1' is shortcut for these two
+  <edit files, and add/commit them>
+  git push -u origin b1                  # only first time '-u origin b1' is needed
+
+- do some more editing and push it
+
+  git checkout b1                        # make sure we're on the b1 branch
+  <edit and commit files>                # do your stuff
+  git push                               # now you only need "git push" from the b1 branch
+
+- go to your github.com and select the 'b1' branch, and submit a pull request (PR)
+  you should see the branch selector on the left, the row just before all the files are listed
+
+- once the upstream person (me) has merged this PR, you should get it back in your
+  master. 
+
+  git checkout master
+  git fetch upstream
+  git merge upstream/master
+  git status
+  git push
+
+- Your 'b1' branch can be deleted if you wish. 
+
+  git checkout master
+  git branch -D b1
+  git push origin --delete b1
+
+  but you could also sync it with the master and continue using it for the next PR.
+
+  git checkout b1
+  git merge master
+
+- now your repo (locally and on github) is back in sync with the 'upstream'
+
+- use a branch from your collaborator to test out their features in your repo
+  before an impending merge. Again we are using the "astroumd" user.
+
+  git remote add astroumd https://github.com/astroumd/nemo   # set name for this repo
+  git checkout -b astroumd-test123                           # will put it on my branch
+  git pull astroumd test123                                  # get their test123 branch
+
+
+- to recap: if you have a fork of NEMO and need to align it back to mine, this should work
+  in your repo
+
+  git remote add upstream https://github.com/teuben/nemo
+  git checkout master
+  git fetch upstream
+  git merge upstream/master
+  git status
+  git push
+
+  this also ensures that your github version is in sync with mine.
+  Again, be sure to edit files on a branch, not on the master.
+
+- Some articles on workflows:
+  astropy:
+    http://docs.astropy.org/en/stable/development/workflow/development_workflow.html
+  atlassion tutorials:
+    https://www.atlassian.com/git/tutorials/comparing-workflows
+    https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+    
+  Other git intros:
+    http://physics.mnstate.edu/craig/git-novice-pyastro/
+
+  Some GUI tips:
+    https://www.sitepoint.com/quick-tip-sync-your-fork-with-the-original-without-the-cli/
+

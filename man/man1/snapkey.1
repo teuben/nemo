@@ -1,0 +1,71 @@
+.TH SNAPKEY 1NEMO "17 February 2020"
+.SH NAME
+snapkey \- (re)assign keys to a snapshot
+.SH SYNOPSIS
+\fBsnapkey\fP [parameter=value]
+.SH DESCRIPTION
+Assign (new) key to a snapshot. The current version was a quick hack, and can initialize
+the key using a series of integers using the \fBkeys=\fP keyword. The more
+flexible \fBkey=\fP keyword allows for more 
+complex \fIbodytrans(3NEMO)\fP expressions.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input (snapshot) file [???]    
+.TP
+\fBout=\fP
+output (snapshot) file [???]    
+.TP
+\fBkeys=\fP
+Manually supply all keys. Needs to be exactly the same amount as
+the number of particles in the snapshot. 
+.TP
+\fBkeyfile=\fP
+ascii table with keys []   -- not implemented yet
+.TP
+\fBkey=\fP
+General \fIbodytrans(3NEMO)\fP integer expression computing the key.
+.SH EXAMPLES
+The following example assigns different keys to the particles, using a
+\fInemoinp(3NEMO)\fP style :: notation:
+.nf
+
+    mkplummer snap1  200
+    snapkey snap1 snap2 2::100,1::100
+    snapsort snap2 snap3 key
+    snapkstat snap3
+	->   select=0:99,100:199
+    glnemo snap3 select=0:99,100:199
+or:
+    glnemo snap3 `snapkstat snap3`
+    
+.fi
+Although the \fBkeyfile=\fP does not work yet, the following NEMO command line trick also works,
+following this example:
+.nf
+
+    nemoinp 2::100,1::100 > key1
+    snapkey snap1 snap2 @key1
+    snapsort snap2 snap3
+.fi
+An example using \fIskid\fP:
+.nf
+    mkplummer p100 100
+    snapstack p100 p100 p200 10,0,0 -2,0,0
+    snaptipsy p200 p200.tipsy
+    skid -tau 1 -o p200.a < p200.tipsy
+    tail +2 p200.a.grp > p200.keys
+    snapkey p200 - @p200.keys | snapsort - p200k key
+    glnemo2 p200k `snapkstat p200k`
+.fi
+.SH SEE ALSO
+snapkstat(1NEMO), snapmstat(1NEMO), snapmask(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+17-feb-2020	V0.1 quick hack		PJT
+.fi
