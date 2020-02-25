@@ -1,7 +1,8 @@
 #! /bin/bash 
 #
 #   create animated gif from a set of PNG's
-#   Warning: seems to run out of memory after about 290 images
+#   Warning: seems to run out of memory after about 290 images in full size,
+#   for 512x512 size all 400 in my example worked fine.
 
 
 file=p10ks.out
