@@ -120,6 +120,8 @@ if ($ubuntu) then
    sudo apt install libgsl-dev -y
    sudo apt install libfftw3-dev -y
    sudo apt install libcfitsio-dev -y
+   # for hdf4
+   sudo apt install flex bison libjpeg -y
 endif
 
 
@@ -136,6 +138,8 @@ endif
 # FEDORA31
 # sudo yum install gfortran g++ csh make libXext-devel
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
+# missing <rpc/rpc.h>            libtirpc-devel didn't work
+# 
 
 if ($centos) then
    sudo yum groupinstall 'Development Tools'
