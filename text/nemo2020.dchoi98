@@ -14,8 +14,9 @@ In NEMO we have these codes
     mkdisk
     mkexpdisk
     magalie
-    mkkd95      (GalactICS)
+    mkkd95      (GalactICS) - ascl:1109.011
 
+Papers:
 
   Made-to-measure modelling of observed galaxy dynamics
   Jo Bovy, Daisuke Kawata, Jason A. S. Hunt
@@ -33,3 +34,11 @@ GalIC
   $NEMO/usr/galic
 
 
+
+gadget2 ascl:0003.001
+  https://ascl.net/0003.001
+  $NEMO/usr/gadget
+
+  Has initial conditions in the ICs directory in gadget2, see
+      'man 5 gadget'
+  for examples.
