@@ -58,13 +58,23 @@ Running the code and a benchmark
 
 
 time mpirun -np 4 GalIC Model_B1.param
-    laptop  i7-8550U CPU @ 1.80GHz         151m (605m  user, 29s sys)  NP=4
-                                           171m (1228m user, 43s sys)  NP=8
-    desktop i7-3820  CPU @ 3.60GHz         132m (529m  user,  2s sys)  NP=4
+    laptop  i7-8550U CPU @ 1.80GHz             151m (605m  user, 29s sys)  NP=4
+                                               171m (1228m user, 43s sys)  NP=8
+    desktop i7-3820  CPU @ 3.60GHz             132m (529m  user,  2s sys)  NP=4
+            Xeon(R) CPU E5-2623 v4 @ 2.60GHz    76m (606m  user,  4s sys)  NP=8   Model_B1b
+36362.681u 4.607s 1:15:53.55 798.6%
 
+- The code uses a random number generator that in its current form doesn't
+  enable running with the same random number seed. Thus
+  
 
+- Only B1,B2,H1,H2,H3,H4 seem to work. The rest crashes.
 
-Only B1,B2,H1,H2,H3,H4 seem to work. The rest crashes.
 GalIC  Model_M1.param
 
 Not enough memory in mymalloc_fullinfo() to allocate 19940.4 MB for variable 'P'
+
+You can also get this message:
+
+There are not enough slots available in the system to satisfy the 16 slots
+that were requested by the application
