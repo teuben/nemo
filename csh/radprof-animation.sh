@@ -30,7 +30,10 @@ yapp=gif
 #yapp=png
 n=0
 for t in $times; do
-    snaptrim $file - times=$t timefuzz=$fuzz | snapdens - - | snapprint  - r,aux | tabmath - - 'log(%1),log(%2)' all |\
+    snaptrim $file - times=$t timefuzz=$fuzz |\
+	snapdens - - |\
+	snapprint  - r,aux |\
+	tabmath - - 'log(%1),log(%2)' all |\
 	tabplot - xmin=$xmin xmax=$xmax ymin=$ymin ymax=$ymax headline=$t yapp=$(yapp $n) 
     #snaptrim $file - times=$t timefuzz=$fuzz | hackdens - - write_at_phi=t | snapprint  - r,phi | tabmath - - 'log(%1),log(%2)' all | tabplot -
     n=$(expr $n + 1)
@@ -39,5 +42,6 @@ for t in $times; do
 done
 
 
+echo 'Possible commands to make an animation:'
 echo 'convert -delay 20 -loop 0 fig0*png test.gif'
- 	 
+echo 'ffmpeg -r 60 -f image2 -s 1920x1080 -i fig%04d.png -vcodec libx264 -crf 25  -pix_fmt yuv420p test.mp4'
