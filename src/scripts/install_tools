@@ -1,0 +1,93 @@
+#! /bin/bash
+#
+
+
+#  install the basic tools NEMO would need for installation
+#  based on which command is present...
+
+#  apt-get   Debian, Ubuntu, and Mint 
+#  yum       RHEL, CentOS, and Fedora 
+#  pacman    Arch Linux and Manjaro
+#  zypper    SUSE    
+
+
+kernel=0
+
+
+for arg in $*; do
+   export $arg
+done
+
+
+echo kernel=$kernel
+
+try=$(which port)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    echo Not Yet Implemented
+fi
+
+try=$(which brew)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    echo Not Yet Implemented
+fi
+
+
+
+try=$(which apt-get)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    #apt-get update
+    apt-get install build-essential -y
+    apt-get install gcc g++ gfortran -y
+    # clang ???
+    apt-get install xorg-dev
+    # xorg took care of the next 3
+    #apt install libx11-dev -y
+    #apt install libxt-dev -y
+    #apt install libxext-dev -y
+    #apt install libcairo2-dev -y
+    apt-get install time cmake -y
+    apt-get install pgplot5 -y
+    apt-get install libhdf4-dev libhdf5-dev hdf5-tools -y
+    apt-get install wcslib-dev libgsl-dev libfftw3-dev libcfitsio-dev -y
+    # for hdf4
+    apt-get install flex bison libjpeg -y
+    # useful for some bare tools
+    apt-get install autoconf libjpeg -y
+    
+    [ $kernel = 1 ] && sudo apt-get linux-headers-$(uname -r) -y
+    exit 0
+fi
+
+
+try=$(which yum)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    yum groupinstall 'Development Tools'
+    yum install git gcc-gfortran make tcsh gcc-c++ cmake libXext-devel
+    [ $kernel = 1 ] && yum install "kernel-devel-uname-r == $(uname -r)"
+    exit 0
+fi
+
+
+try=$(which pacman)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    pacman -S base-devel
+    [ $kernel = 1 ] && pacman -S linux-headers
+    exit 0
+fi
+
+
+try=$(which zypper)
+if [ ! -z "$try" ]; then
+    echo Using $try
+    zypper install --type pattern devel_basis
+    [ $kernel = 1 ] && zypper install kernel-devel
+    exit 0
+fi
+
+
+echo No appropriate tool found to update your system
