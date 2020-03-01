@@ -9,27 +9,39 @@
 #  You can also use this script to shortcut network installs by cloning
 #  off a local nemo.git tree and use caching of optional tar files.
 #
+#  The script has a number of key=val optional keywords. Their defaults
+#  are listed below in the code.
+#
 #  opt=1          uses MKNEMOS=hdf4 hdf5 cfitsio fftw wcslib gsl
 #  python=1       uses an anaconda3 install within $NEMO
+#  ...
 #
-#  In full version (opt=1 python=1) this script takes about 13 mins
-#  A simple version without falcON and any benchmarks takes about 2 mins
-#  pgplot opt=0 python=0   5'30"
-#  pgplot opt=0 python=1   6'15"
-#  pgplot opt=1 python=1  14'00" 
+#  In full version (opt=1 python=1) this script takes about 14 mins
+#  A simple version without falcON and any checks and benchmarks takes about 2 mins
+#   opt=0 python=0 falcon=0                  1'50"
+#   opt=0 python=0 falcon=0 mknemos=cfitsio  2'13"
+#   opt=0 python=0                           5'30"
+#   opt=0 python=1                           6'15"
+#   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh -- Version 11-jan-2020"
+echo "install_nemo.sh -- Version 1-mar-2020"
 
 opt=1
 nemo=nemo
 python=0
 url=https://github.com/teuben/nemo
+mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl
+falcon=1
+yapp=pgplot
+check=1
+bench=1
 
 # indirect git clone via nemo.git for faster testing
+# bootstrap with:    git clone https://github.com/teuben/nemo nemo.git
 if [ -d nemo.git ]; then
-  (cd nemo.git; git pull)
-  nemo=nemo42
   url=file://`pwd`/nemo.git
+  echo Found local nemo.git - using this as $url
+  (cd nemo.git; git pull)
 else
   echo "Using a direct git clone. You can can activate local hacking with:"
   echo "      git clone $url nemo.git"
@@ -40,10 +52,15 @@ for arg in $*; do\
 done
 
 echo "Using: "
-echo "  opt=$opt"
 echo "  nemo=$nemo"
+echo "  opt=$opt"
+echo "  mknemos=$mknemos"
 echo "  python=$python"
 echo "  url=$url"
+echo "  falcon=$falcon"
+echo "  yapp=$yapp"
+echo "  check=$check"
+echo "  bench=$bench"
 echo ""
 
 # safety
@@ -64,12 +81,18 @@ cd $nemo
 #                        when opt=1 it will first compile these packages in $NEMO/opt and use them
 #                        it needs a bootstrap configure/build1
 if test $opt = 1; then
-    make build1 MKNEMOS="hdf4 hdf5 cfitsio fftw wcslib gsl"
+    mknemos=`echo $mknemos | sed 's/,/ /g'`
+    make build1 MKNEMOS="$mknemos"
     opt="--with-opt"
 else
     echo "Skipping optional installs (opt=0)"
     opt=""
 fi
+
+if test $falcon = 0; then
+    opt="$opt --disable-falcon"
+fi
+
 
 if test $python = 1; then
     make build1
@@ -77,13 +100,13 @@ if test $python = 1; then
     source python_start.sh
 else
     echo No python install
-fi    
+fi
+
+   
 
 # pick a configure
 
-#./configure $opt
-#./configure $opt --with-yapp=ps
-./configure $opt --with-yapp=pgplot
+./configure $opt --with-yapp=$yapp
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
 #./configure $opt --enable-debug --with-yapp=pgplot
@@ -111,8 +134,8 @@ make build2
 make build3
 make build4
 
-make check
-make bench
+[ $check = 1 ] && make check
+[ $bench = 1 ] && make bench
 
 date1=$(date)
 
