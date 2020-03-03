@@ -47,7 +47,8 @@
  *      23-apr-13   6.2b  use compute_robust_mean               pjt
  *       7-aug-13   6.3   optional numrec routines              pjt
  *      15-jan-14   6.4   add MAD option
- *       8-jan-2019 7.0   add pyplot= options                  PJT
+ *       8-jan-2020 7.0   add pyplot= options                   PJT
+ *       2-mar-2020 7.1   add norm= for cumulative, fix bin bug PJT
  *                
  * 
  * TODO:
@@ -89,6 +90,7 @@ string defv[] = {
     "gauss=t\n			  Overlay gaussian plot?",
     "residual=t\n		  Overlay residual data-gauss(fit)",
     "cumul=f\n                    Override and do cumulative histogram instead",
+    "norm=f\n                     Normalize to 1 for cumulative?",
     "median=t\n			  Compute median too (can be time consuming)",
     "torben=f\n                   Compute median using Torben median method",
     "robust=f\n                   Compute robust median",
@@ -100,7 +102,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.0\n		  8-jan-2020 PJT",
+    "VERSION=7.1\n		  2-mar-2020 PJT",
     NULL
 };
 
@@ -144,6 +146,7 @@ local bool   Qgauss;                    /* gaussian overlay ? */
 local bool   Qresid;                    /* gaussian residual overlay ? */
 local bool   Qtab;                      /* table output ? */
 local bool   Qcumul;                    /* cumulative histogram ? */
+local bool   Qnorm;                     /* normalize cum histogram ? */
 local bool   Qmedian;			/* compute median also ? */
 local bool   Qtorben;                   /* new median method */
 local bool   Qrobust;                   /* compute robust median also ? */
@@ -205,7 +208,7 @@ local void setparams()
     if (hasvalue("out")) outstr=stropen(getparam("out"),"w");
     else outstr = NULL;
 
-    nsteps = nemoinpd(getparam("bins"),bins,MAXHIST+1) - 1;
+    nsteps = nemoinpd(getparam("bins"),bins,MAXHIST+1) - 1;   //  bins[0] .... bins[nsteps]
     if (nsteps == 0) {
       Qbin = FALSE;
       Qmin = hasvalue("xmin");
@@ -222,7 +225,8 @@ local void setparams()
       Qmax = TRUE;
       xrange[0] = hasvalue("xmin") ?  getdparam("xmin") : bins[0];
       xrange[1] = hasvalue("xmax") ?  getdparam("xmax") : bins[nsteps];
-      warning("new mode: manual bins=%s",getparam("bins"));
+      warning("new mode: manual bins=%s  nbins=%d",getparam("bins"),nsteps);
+      dprintf(0,"xrange=%g : %g\n",xrange[0],xrange[1]);
     } else
       error("no proper usage for bins=%s",getparam("bins"));
     Qauto = (!Qmin || !Qmax) ;
@@ -241,6 +245,7 @@ local void setparams()
         Qgauss=Qresid=FALSE;
         ylog=FALSE;
     }
+    Qnorm = getbparam("norm");    
     Qmedian = getbparam("median");
     Qtorben = getbparam("torben");
     if (Qtorben) Qmedian=FALSE;
@@ -330,7 +335,8 @@ local void read_data()
 local void histogram(void)
 {
   int i,j,k, l, kmin, kmax, lcount = 0;
-  real count[MAXHIST], under, over;
+  real count[MAXHIST];
+  int under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
   real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, median;
   real rmean, rsigma, rrange[2];
@@ -361,6 +367,7 @@ local void histogram(void)
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
+      // dprintf(0,"%d %g -> %d\n",i,x[i],k);
     } else {
       if (xmax != xmin)
 	k = (int) floor((x[i]-xmin)/(xmax-xmin)*nsteps);
@@ -551,6 +558,12 @@ local void histogram(void)
   
   kmax *= 1.1;		/* add 10% */
   if (Qcumul) kmax = npt;
+  if (Qnorm) {
+    for (k=0; k<nsteps; k++) {
+      count[k] /= npt;
+    }
+    maxcount = 1.0;
+  }
   if (maxcount>0)		/* force scaling by user ? */
     kmax=maxcount;	
   
@@ -595,19 +608,31 @@ local void histogram(void)
   pljust(1);
   pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
   pljust(-1);     /* return to left just */
-  
-  xdat=xmin;
-  dx=(xmax-xmin)/nsteps;
-  plmove(xtrans(xmin),ytrans(0.0));
-  for (k=0; k<nsteps; k++) {	/* nsteps= */
-    xplt = xtrans(xdat);
-    yplt = ytrans((real)count[k]);
-    plline (xplt,yplt);
-    xdat += dx;
-    xplt = xtrans(xdat);
-    plline (xplt,yplt);	
+
+  if (Qbin) {
+    plmove(xtrans(bins[0]),ytrans(0.0));
+    for (k=0; k<nsteps; k++) {	/* nsteps= */
+      xplt = xtrans(bins[k]);
+      yplt = ytrans((real)count[k]);
+      plline (xplt,yplt);
+      xplt = xtrans(bins[k+1]);
+      plline (xplt,yplt);	
+    }
+    plline(xplt,ytrans(0.0));
+  } else {
+    xdat=xmin;
+    dx=(xmax-xmin)/nsteps;
+    plmove(xtrans(xmin),ytrans(0.0));
+    for (k=0; k<nsteps; k++) {	/* nsteps= */
+      xplt = xtrans(xdat);
+      yplt = ytrans((real)count[k]);
+      plline (xplt,yplt);
+      xdat += dx;
+      xplt = xtrans(xdat);
+      plline (xplt,yplt);	
+    }
+    plline(xplt,ytrans(0.0));
   }
-  plline(xplt,ytrans(0.0));
   
   for (i=0; i<nxcoord; i++) {
     plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
@@ -714,14 +739,13 @@ local iproc getsort(string name)
 
 /* index into an array --- stolen from velfit.c */
 
-local
-int ring_index(int n, real *r, real rad)
+local int ring_index(int n, real *r, real rad)
 {
   int i;
   
   if (r[0] < r[1]) {
     if (rad < r[0]) return -1;
-    if (rad > r[n-1]) return -2;
+    if (rad > r[n]) return -2;
     for (i=0;i<n;i++)
       if (rad >= r[i] && rad < r[i+1]) return i;
     error("ring_index: should never gotten here %g in [%g : %g]",
