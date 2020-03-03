@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "16 January 2014"
+.TH TABHIST 1NEMO "2 March 2020"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -98,6 +98,10 @@ Plot a cumulative histogram instead. If set, the keywords gauss, residual,
 and ylog are automatically re-set to false.  
 [Default: \fBf\fP].
 .TP
+\fBnorm=t|f\fP
+Normalize the cumulative histogram to 1. By default the maxcount is used.
+[Default: \fBf\fP].
+.TP
 \fBmedian=t|f\fP
 Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
@@ -165,5 +169,6 @@ xx-mar-88	V1.0: created          	PJT
 1-jun-10	6.0: bins= now allowed to have manual edges	PJT
 22-aug-12	6.2: added torben= option for fast large-N median	PJT
 16-jan-14	6.4: added mad= 	PJT
+2-mar-2020	7.1: added norm=	PJT
 .fi
 
