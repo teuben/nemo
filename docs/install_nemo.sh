@@ -36,6 +36,22 @@ yapp=pgplot
 check=1
 bench=1
 
+help() {
+    echo This is a simple install script for NEMO
+    echo Optional parameters are key=val, defaults are:
+    echo
+    echo opt=$opt
+    echo nemo=$nemo
+    echo python=$python
+    echo url=$url
+    echo mknemos=$mknemos
+    echo falcon=$falcon
+    echo yapp=$yapp
+    echo check=$check
+    echo bench=$bench
+}
+
+
 # indirect git clone via nemo.git for faster testing
 # bootstrap with:    git clone https://github.com/teuben/nemo nemo.git
 if [ -d nemo.git ]; then
@@ -48,7 +64,11 @@ else
 fi  
 
 for arg in $*; do\
-   export $arg
+  if test $arg == --help || test $arg == -h; then
+    help
+    exit 0
+  fi
+  export $arg
 done
 
 echo "Using: "
