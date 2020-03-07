@@ -1,0 +1,18 @@
+.TH SDFITS 5NEMO "6 March 2020"
+.SH NAME
+sdfits \- fits standard for Single Dish data
+.SH DESCRIPTION
+\fISDFITS\fP is a proposed standard for Single Dish data. It used
+the BINTABLE convention, where the spectral-data and meta-data
+are stored in the BINTABLE columns.
+.PP
+There are some dialects for SDFITS: "CIMAFITS"  (Arecibo) and "MATRIX" (30m/CLASS),
+the latter designates the spectrum via a "SPECTRUM" column name, instead
+of the more common "DATA" column name.
+.SH SEE ALSO
+scanfits(1NEMO), sdinfo(1NEMO), fits(5NEMO)
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+6-mar-2020	man written	PJT
+.fi
