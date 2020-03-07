@@ -13,6 +13,7 @@
 #   BASH interactive shell uses ~/.bashrc     
 #        login shell       uses ~/.bash_login (or .bash_profile)
 #   Note Linux uses the interactive shell, Mac uses the login shell
+#   ZSH users should also be able to ued this file.
 #
 #                                       Things via configure
 export          NEMO=@NEMO@
