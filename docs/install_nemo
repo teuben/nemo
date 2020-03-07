@@ -122,6 +122,8 @@ if ($ubuntu) then
    sudo apt install libcfitsio-dev -y
    # for hdf4
    sudo apt install flex bison libjpeg -y
+   # useful for some bare tools
+   sudo apt install autoconf libjpeg -y
 endif
 
 
@@ -132,8 +134,9 @@ endif
 # Or google for "centos 8 pgplot" and download the RPM's
 #
 # Centos8:
-# dnf install git gcc-gfortran make tcsh gcc-c++ cmake libXext-devel
+# sudo dnf install git gcc-gfortran make tcsh gcc-c++ cmake libXext-devel
 #             libtirpc-devel
+# sudo yum groupinstall 'Development Tools'
 
 # FEDORA31
 # sudo yum install gfortran g++ csh make libXext-devel
