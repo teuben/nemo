@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "6 April 2017"
+.TH CCDFITS 1NEMO "12 March 2020"
 .SH NAME
 ccdfits \- convert an image to a fits file 
 .SH SYNOPSIS
@@ -82,18 +82,16 @@ Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are
 written last.
 Default: t
 .TP
-\fIndim=\fP
-If used, this will be the value of NAXIS written to the FITS file. Only
-useful of \fBdummy=f\fP and your FITS reader still cannot handle 
-dummy trailing axes.
-Default: not used.
-.TP
 \fInfill=0\fP
 Number of dummy comment lines to add to a fits header to test I/O routines.
 Default: 0
 .TP
 \fIndim=\fP
-If specified, testing if only that many dimensions need to be written.
+This is a hack. If used, this will be the value of NAXIS written to the FITS file. Only
+useful of \fBdummy=f\fP and your FITS reader still cannot handle 
+dummy trailing axes. For \fBndim=4\fP the axis will be labeled
+as \fISTOKES\fP, which is useful for packages such as CASA.
+Default: not used.
 .TP
 \fIselect=1\fP
 Select this image (1 being the first) to grab in an file
