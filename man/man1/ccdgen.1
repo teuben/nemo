@@ -1,4 +1,4 @@
-.TH CCDGEN 1NEMO "31 January 2012"
+.TH CCDGEN 1NEMO "12 March 2020"
 .SH NAME
 ccdgen \- create or add objects to an image
 .SH SYNOPSIS
@@ -24,8 +24,8 @@ map is generated.
 Output file, in standard \fIimage(5NEMO)\fP format. No default.     
 .TP
 \fBobject=\fP
-Object type. Valid are flat, exp, gauss, bar, spiral, noise, test. See below for
-an explanation and their parameters. Default: flat
+Object type. Valid are flat, exp, gauss, bar, spiral, noise, test, blobs.
+See below for an explanation and their parameters. Default: flat
 .TP
 \fBspar=\fP
 Parameters for this object. The first parameter is often the peak 
@@ -34,6 +34,10 @@ complex geometries and require more parameters. The meaning
 of the peak value can be modified by setting \fBtotflux=t\fP
 (see below). The defaults are defined per object, but
 are typically 1,1...
+.br
+For certain objects, the multiple objects can be given, and the sequence
+of parameters can be repeated. Currently \fBobject=blobs\fP has this
+option for 3D cubes.
 .TP
 \fBcenter=\fP
 Center of object (in 0-based pixel coordinates). The lower left corner
@@ -92,6 +96,7 @@ spiral	A.exp(-r/h)	A,h,k,p,m,r0,p0
 ferrers	A.(1-r^2)^p	A,h,e,b,p (h=size of bar, p=power to 1-r^2)
 isothermal	A.(1+r^2)^p	A,h,p
 test	x+10y+100z	-
+blobs	A,x,y,z,size	they can be repeated for many blobs
 \fImaybe to be implemented\fP:
 
 j1x	J1(x)/x
@@ -142,6 +147,7 @@ non-integer, e.g. p=2.0001, the negative arm becomes 0.
 Here's how to make a simple barred galaxy by adding an exponential disk and
 a (smaller) exponential bar:
 .nf
+
 ccdgen out=- object=exp spar=1,40 pa=60 inc=45 size=256 |\\
  ccdgen - bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
 
@@ -153,6 +159,20 @@ come out in degrees for the conversion to FITS, viz.:
 ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600 |\\
  ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\\
  ccdfits - bar.fits radecvel=t
+
+.fi
+and the option to fill your cube with some random blobs and noise is a bit more involved:
+.nf
+
+nemoinp 1:100 |\\
+  tabmath - - 'ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)' all > b100.tab
+
+ccdgen "" - blobs @b100.tab size=128,128,128 |\\
+  ccdgen - - noise 0,0.02 |\\
+  ccdsmooth - - 5   |\\
+  ccdsky - -  |\\
+  ccdfits - junk2.fits radecvel=t ndim=4
+
 .fi
 .SH SEE ALSO
 ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
@@ -167,4 +187,5 @@ Peter Teuben
 6-jan-05	V0.7 added (many features and) factor=	PJT
 8-jan-05	V0.8 add #arms parameter to spiral	PJT
 31-jan-12	V0.9 added object=test	PJT
+12-mar-2020	V1.0 added object=blobs		PJT
 .fi
