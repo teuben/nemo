@@ -7,6 +7,7 @@
  *      8-jan-05        V0.8: add m!=2 multi-arm spirals
  *      5-aug-11        V0.9: object = test
  *     15-oct-2014      V0.10:  object=noise now can do 3D
+ *     12-mar-2020      V1.0    object=blobs in 3D
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
@@ -42,7 +43,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=0.10\n  15-oct-2014 PJT",
+  "VERSION=1.0\n   11-mar-2020 PJT",
   NULL,
 };
 
@@ -55,7 +56,7 @@ string cvsid = "$Id$";
 #endif
 
 #define MAXIMAGE 20
-#define MAXPAR  20
+#define MAXPAR  32768           /* max in nemoinp */
 
 imageptr iptr;	                /* pointers to (input) image */
 
@@ -91,6 +92,7 @@ local void object_comet(int npars, real *pars);
 local void object_jet(int npars, real *pars);
 local void object_shell(int npars, real *pars);
 local void object_point(int npars, real *pars);
+local void object_blobs(int ndim, int npars, real *pars);
 
 extern string *burststring(string,string);
 
@@ -105,6 +107,7 @@ void nemo_main ()
   string  object;
   string  headline;
   int seed = init_xrandom(getparam("seed"));
+  int ndim;
 
   object = getparam("object");
   npar = nemoinpr(getparam("spar"),spar,MAXPAR);
@@ -138,16 +141,20 @@ void nemo_main ()
     case 1:			/*  nx[,nx,1] */
       size[1] = size[0];
       size[2] = 1;
+      ndim = 2;
       break;
     case 2:			/*  nx,ny[,1] */
       size[2] = 1;
+      ndim = 2;
       break;
     case 3:			/*  nx,ny,nz  */
+      ndim = 3;
       break;
     case 0:			/*  [10,10,1] */
       dprintf(0,"Cannot have no size, default 10 assumed\n");
       size[0] = size[1] = 10;
       size[2] = 1;
+      ndim = 2;
       break;
     default:			/* --- some error --- */
       error("Syntax error in size keyword\n");
@@ -202,6 +209,8 @@ void nemo_main ()
     object_point(npar,spar);
   else if (streq(object,"test"))
     object_test(npar,spar);
+  else if (streq(object,"blobs"))
+    object_blobs(ndim,npar,spar);
   else
     error("Unknown object %g",object);
   
@@ -228,7 +237,7 @@ local void do_create(int nx, int ny, int nz)
     badvalues = 0;		/* count number of bad operations */
 
     if (nz > 0) {
-      warning("cube");
+      // warning("cube");
       if (!create_cube (&iptr, nx, ny, nz))	/* create default empty image */
         error("Could not create 3D image from scratch");
 #if 0      
@@ -677,4 +686,47 @@ local void object_point(int npars, real *pars)
   if (npars == 0) error("object=point requires a value");
 
   MapValue(iptr,i,j) = factor*MapValue(iptr,i,j) + pars[0];
+}
+
+
+local void object_blobs(int ndim, int npars, real *pars)
+{
+  int x0, ix, nx = Nx(iptr);
+  int y0, iy, ny = Ny(iptr);
+  int z0, iz, nz = Ny(iptr);
+  int i, j, k;
+  int npar = 5;  // peak, x, y, z, s
+  int ns, ib, nblobs = npars/npar;
+  real pk, s0, dx, dy, dz, arg;
+
+  if (npars == 0) error("object=blobs requires a value");
+  if (npars % npar != 0) error("object=blobs not commensurate to npar=%d",npar);
+  if (ndim != 3) error("object=blobs not yet coded for 2d");
+
+  dprintf(1,"Found %d blobs\n",nblobs);
+
+  for (ib=0; ib<nblobs; ib++) {
+    pk =      pars[ib*npar + 0];
+    x0 = (int)pars[ib*npar + 1];
+    y0 = (int)pars[ib*npar + 2];
+    z0 = (int)pars[ib*npar + 3];
+    s0 =      pars[ib*npar + 4];
+    ns = (int) (5*s0);
+    dprintf(1,"%d  %g  %d %d %d %g\n",ib,pk,x0,y0,z0,s0);
+
+    for (ix=x0-ns; ix<=x0+ns; ix++) {
+      if (ix<0 || ix>=nx) continue;
+      dx = ix-x0;
+      for (iy=y0-ns; iy<=y0+ns; iy++) {
+	if (iy<0 || iy>=ny) continue;
+	dy = iy-y0;
+	for (iz=z0-ns; iz<=z0+ns; iz++) {
+	  if (iz<0 || iz>=nz) continue;	  
+	  dz = iz-z0;
+	  arg = (dx*dx + dy*dy + dz*dz)/(s0*s0);
+	  CubeValue(iptr,ix,iy,iz) += pk * exp(-arg);
+	}//iz
+      }//iy
+    }//iz
+  }//ib
 }
