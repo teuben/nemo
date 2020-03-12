@@ -20,7 +20,6 @@
 #  -DBUILD_SHARED_LIBS=<TRUE|FALSE>      shared or static libraries [TRUE]
 #  -DCMAKE_DISABLE_FORTRAN=1
 
-
 set dir=$NEMO/usr/jcl/unsio
 
 # for linux
@@ -36,17 +35,23 @@ else
   set h5=()
 endif
 
-if (-e $dir) then
+if ( ! -e ${dir} ) then
+  #echo "mknemo.d: $dir does not exist; try"
+  #echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
+  # we clone first time
+  cd $NEMO/usr/jcl
+  git clone https://gitlab.lam.fr/jclamber/unsio
+endif
+
+if ( -e $dir ) then
   rm -rf $dir/build
   mkdir -p $dir/build
   cd $dir/build
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..
   make
   make install
-else
-  echo "mknemo.d: $dir does not exist; try"
-  echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
 endif
+
 
 echo Warning:  python interface is not yet installed. See $NEMO/usr/jcl/unsio/py/INSTALL
 echo Basically:   pip install python-unsio
