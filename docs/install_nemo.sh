@@ -24,10 +24,11 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh -- Version 1-mar-2020"
+echo "install_nemo.sh:  Version 1.1 -- 11-mar-2020"
 
 opt=1
 nemo=nemo
+branch=master
 python=0
 url=https://github.com/teuben/nemo
 mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl
@@ -42,6 +43,7 @@ help() {
     echo
     echo opt=$opt
     echo nemo=$nemo
+    echo branch=$branch
     echo python=$python
     echo url=$url
     echo mknemos=$mknemos
@@ -73,6 +75,7 @@ done
 
 echo "Using: "
 echo "  nemo=$nemo"
+echo "  branch=$branch"
 echo "  opt=$opt"
 echo "  mknemos=$mknemos"
 echo "  python=$python"
@@ -96,6 +99,7 @@ date0=$(date)
 rm -rf $nemo
 git clone $url $nemo
 cd $nemo
+git checkout $branch
 ./configure 
 
 #                        when opt=1 it will first compile these packages in $NEMO/opt and use them
