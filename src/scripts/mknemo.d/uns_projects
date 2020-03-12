@@ -13,11 +13,21 @@ set dir=$NEMO/usr/jcl/uns_projects
 # for linux
 set args=""
 
+#check unsio is installed
+if (! -f ${NEMOLIB}64/libunsio.so && ! -f ${NEMOLIB}/libunsio.so ) then
+	mknemo -r unsio
+endif
+
+if (! -e $dir) then
+  cd $NEMO/usr/jcl
+  git clone https://gitlab.lam.fr/jclamber/uns_projects
+endif
 
 if (-e $dir) then
+  rm -rf $dir/build
   mkdir -p $dir/build
   cd $dir/build
-  cmake ..
+  cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
   make
   make install
 else
