@@ -1,0 +1,16 @@
+# yum groupinstall 'Development Tools'
+
+git 
+gcc-gfortran 
+make 
+tcsh 
+gcc-c++ 
+cmake 
+libXext-devel
+
+# pgplot not available 
+# Recipes for installing PGPLOT
+# 1. download proper http://download1.rpmfusion.org/nonfree/el/updates/testing/8/x86_64/
+# 2. rpm -Uvh rpmfusion-nonfree-release*rpm
+# 3. dnf install pgplot
+# Or google for "centos 8 pgplot" and download the RPM's
