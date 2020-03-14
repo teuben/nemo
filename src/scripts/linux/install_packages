@@ -1,0 +1,12 @@
+#! /usr/bin/env bash
+#
+# ubuntu:  sudo apt install $(./install_packages ubuntu18.04)
+# centos:  yum install
+
+
+#
+list=$1
+
+for p in $(grep -v ^# $list); do
+  echo $p
+done
