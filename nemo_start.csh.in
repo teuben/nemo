@@ -159,6 +159,8 @@ if (-e $NEMO/usr/zeno/ZENORC)  source $NEMO/usr/zeno/ZENORC
 if (-e $NEMO/nemo_local.csh)   source $NEMO/nemo_local.csh
 if (-e $HOME/.nemo_local.csh)  source $HOME/.nemo_local.csh
 
+if (-e $NEMO/python_start.csh) source $NEMO/python_start.csh
+
 
 set path = ( $NEMOBIN $NEMO/opt/bin $path )
 rehash

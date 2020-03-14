@@ -83,6 +83,9 @@ test -f $NEMO/usr/zeno/ZENORC   &&     echo "No ZENO support for bash yet"
 test -f $NEMO/nemo_local.sh     &&     source $NEMO/nemo_local.sh
 test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 
+# optional python
+test -f $NEMO/python_start.sh   &&     source $NEMO/python_start.sh
+
 # optional dot check?
 export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 
