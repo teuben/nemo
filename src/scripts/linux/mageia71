@@ -1,0 +1,10 @@
+# https://www.mageia.org/en/
+
+lib64xext-devel 
+cmake 
+gcc-++ 
+gcc-gfortran 
+git 
+tcsh 
+
+# no pgplot?
