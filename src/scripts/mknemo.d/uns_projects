@@ -28,9 +28,11 @@ if (-e $dir) then
   mkdir -p $dir/build
   cd $dir/build
   cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
-  make
-  make install
-else
+  make -i
+  make -i install
+  #  somehow a few binaries from usr/jcl/uns_projects/build/bin were not copied to $NEMOBIN
+  cp uns_projects/build/bin/* $NEMOBIN
+
   echo mknemo.d: $dir does not exist
 endif
 
