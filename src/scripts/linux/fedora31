@@ -1,0 +1,21 @@
+#
+gfortran
+g++
+csh
+make
+libXext-devel
+
+# the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
+# missing <rpc/rpc.h>            libtirpc-devel didn't work
+
+tcsh
+wget
+
+# if you use pgplot w/ xwindows  (Xext seems not needed, except configure wants it)
+# xorg-x11-proto-devel
+# libX11-devel
+libXext-devel
+# if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
+libhdf-devel
+# /usr/lib   and /usr/include/cfitsio
+cfitsio-devel
