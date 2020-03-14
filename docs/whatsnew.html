@@ -23,15 +23,22 @@ contains a timestamp of that creation.
 
 
 <A NAME=4_2_0>
-<H2> 4.2.0:  in progress </H2>
+<H2> 4.2.0:  in progress (a.k.a. the Corona release) </H2>
 <UL>
+  <LI> (13-mar-2020) fixed the  <B>mknemo uns_projects</B> install, which now
+    installs both
+    unsio and uns_projects.  After this the following command may be an amusing screensaver
+    <pre>
+      mkspiral - nbody=10000| gyrfalcON - - step=0 eps=0.05 kmax=6 logfile=/dev/null | uns_density - - all | glnemo2 - all play=t
+      </pre>
+
   <LI> (14-feb-2020) resurrected an easier install of
      <A HREF=man_html/gadget.1.html>gadget2</A>
     via mknemo, added a galaxy benchmark
     
-  <LI> <A HREF=man_html/snapmstat.1.html>snapmstat</A>b
+  <LI> <A HREF=man_html/snapmstat.1.html>snapmstat</A>
     now computes the <b>select=</b> string for
-    <A HREF=man_html/glnemo2.1.html>glnemo2</A>b    
+    <A HREF=man_html/glnemo2.1.html>glnemo2</A>    
     to help visualizing complex systems with many mass species 
   <LI> Moved more package install scripts into mknemo.d, where they can use the new tar
     caching (hdf4, hdf5, cfitsio, gsl, fftw, wcslib) scheme
