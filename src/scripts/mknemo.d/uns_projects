@@ -31,7 +31,7 @@ if (-e $dir) then
   make -i
   make -i install
   #  somehow a few binaries from usr/jcl/uns_projects/build/bin were not copied to $NEMOBIN
-  cp uns_projects/build/bin/* $NEMOBIN
+  cp bin/* $NEMOBIN
 
   echo mknemo.d: $dir does not exist
 endif
