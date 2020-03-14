@@ -1,11 +1,11 @@
-VERSION = NEMO V4.2 23-jan-2020 PJT
+VERSION = NEMO V4.2 13-mar-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
 ################################################################################
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
-.PHONY:  INSTALL install
+.PHONY:  INSTALL install scripts
 
 
 # The following subdirectories (1&2) are needed for installation, although only
