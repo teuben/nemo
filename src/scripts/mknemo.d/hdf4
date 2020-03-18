@@ -9,16 +9,14 @@
 # if ($?NEMO == 0) set NEMO=`pwd`
 
 version=4.2.14
+wget=wgetc
 
+for arg in $*; do
+  export $arg
+done
 
 cd $NEMO/local
-
-if [ -f $NEMO/tars/hdf-$version.tar.gz ]; then
-   ln -s $NEMO/tars/hdf-$version.tar.gz
-fi   
-if [ ! -f hdf-$version.tar.gz ]; then
-   wget https://support.hdfgroup.org/ftp/HDF/releases/HDF$version/src/hdf-$version.tar.gz
-fi
+$wget https://support.hdfgroup.org/ftp/HDF/releases/HDF$version/src/hdf-$version.tar.gz
 
 tar zxf hdf-$version.tar.gz
 cd hdf-$version
