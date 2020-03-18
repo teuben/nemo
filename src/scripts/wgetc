@@ -1,0 +1,56 @@
+#! /usr/bin/env bash
+#
+#    this is a simple replacement of "wget <somefile>"
+#    that by default uses caching and making a symlink
+#    to the cache
+#    If your system doesn't have wget, but has curl,
+#    it will use curl
+#    Born in the coronavirus era being on slow home internet
+#
+#    Thus the 'c' in 'wgetc' is a hybrid of curl and cache
+#
+#    Note wget preserves the timestamp of the remote file
+#         curl does not.
+
+echo "wgetc - version 1.0  17-mar-2020"
+
+wget=""
+for w in /usr/local/bin/wget /opt/local/bin/wget /usr/bin/wget; do
+    #       darwin brew        darwin port           linux
+    if [ -e $w ]; then
+	wget=$w
+	break
+    fi
+done
+
+cdir=$HOME/.wget-cache
+
+if [ ! -d $cdir ]; then
+    echo Creating $cdir
+    mkdir $cdir
+    echo Created by $0 > $cdir/README
+fi
+
+
+for url in $*; do
+    file=$(basename $url)    
+    if [ -e $file ]; then
+	echo $file already exists, skipping
+	continue
+    fi
+    if [ ! -e $cdir/$file ]; then
+	if [ ! -z $wget ]; then
+	    echo $wget $url -O $cdir/$file	    
+	    $wget $url -O $cdir/$file
+	else
+	    echo curl $url -o $cdir/$file	    
+	    curl $url -o $cdir/$file
+	fi
+	echo $url >> $cdir/HISTORY
+    fi
+    if [ -e $cdir/$file ]; then
+	echo Creating symlink to $cdir/$file
+	ln -s $cdir/$file
+	continue
+    fi
+done
