@@ -3,15 +3,15 @@
 
 #   version is hidden in the filename
 version=7.1
+wget=wgetc
 
+for arg in $*; do
+  export $arg
+done
+ 
 cd $NEMO/local
+$wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
 
-if [ -f $NEMO/tars/wcslib.tar.bz2 ]; then
-   ln -s $NEMO/tars/wcslib.tar.bz2
-fi   
-if [ ! -f wcslib.tar.bz2 ]; then
-   wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
-fi
 tar jxf wcslib.tar.bz2
 #cd wcslib-*
 cd wcslib-$version
