@@ -2,6 +2,8 @@
 
 include $(NEMOLIB)/makedefs
 
+WGET = wget
+
 URL1 = ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz
 URL2 = https://github.com/nbodyx/Nbody6ppGPU
 
@@ -16,7 +18,7 @@ install:	install_nbody6 install_nbody6++ install_nbody6++.avx
 
 
 nbody6:
-	wget $(URL1)
+	$(WGET) $(URL1)
 	(mkdir nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
 
 
