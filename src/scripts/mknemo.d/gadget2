@@ -15,17 +15,14 @@
 version=2.0.7
 gadget=gadget-$version.tar.gz
 url=https://wwwmpa.mpa-garching.mpg.de/gadget/
+wget=wgetc
+
+for arg in $*; do
+  export $arg
+done
 
 cd $NEMO/usr/gadget
-
-
-if [ -f $NEMO/tars/$gadget ]; then
-   ln -s $NEMO/tars/$gadget
-fi   
-if [ ! -f $gadget ]; then
-   wget $url/$gadget
-fi
-
+$wget $url/$gadget
 
 tar zxf $gadget
 
