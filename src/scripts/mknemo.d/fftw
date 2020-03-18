@@ -2,15 +2,14 @@
 #
 
 version=3.3.8
+wget=wgetc
 
+for arg in $*; do
+  export $arg
+done
+    
 cd $NEMO/local
-
-if [ -f $NEMO/tars/fftw-$version.tar.gz ]; then
-   ln -s $NEMO/tars/fftw-$version.tar.gz
-fi   
-if [ ! -f fftw-$version.tar.gz ]; then
-   wget  http://www.fftw.org/fftw-$version.tar.gz
-fi
+$wget http://www.fftw.org/fftw-$version.tar.gz
 
 tar zxf fftw-$version.tar.gz
 cd fftw-$version
