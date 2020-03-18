@@ -2,15 +2,15 @@
 
 # version is hidden in the filename
 version=3.47
+wget=wgetc
+
+for arg in $*; do
+  export $arg
+done
 
 cd $NEMO/local
+$wgetc  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
 
-if [ -f $NEMO/tars/cfitsio_latest.tar.gz ]; then
-  ln -s $NEMO/tars/cfitsio_latest.tar.gz
-fi
-if [ ! -f cfitsio_latest.tar.gz ]; then
-  wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
-fi  
 tar zxf cfitsio_latest.tar.gz
 cd cfitsio-*
 ./configure --prefix=$NEMO/opt
