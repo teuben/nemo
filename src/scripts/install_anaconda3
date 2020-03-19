@@ -20,17 +20,14 @@ set mc3   = https://repo.anaconda.com/archive/Anaconda3-2019.10-Linux-x86_64.sh
 set msh   = $mc3:t
 set dir   = `pwd`/anaconda3
 set opt   = 1
+set wget  = wgetc
 
 # you better know what you are doing here
 foreach arg ($*)
   set $arg
 end
 
-if (-e $NEMO/tar/$msh && ! -e $msh) then
-  ln -s $NEMO/tar/$msh
-else if (! -e $msh) then
-  wget $mc3
-endif  
+wgetc $mc3
 bash $msh -b -p $dir
 
 setenv PATH "$dir/bin:$PATH"

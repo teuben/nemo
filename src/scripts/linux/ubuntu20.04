@@ -1,0 +1,36 @@
+# general
+time
+build-essential
+gcc
+g++
+gfortran
+# clang ???
+xorg-dev
+# xorg took care of the next 3
+#sudo apt install libx11-dev -y
+#sudo apt install libxt-dev -y
+#sudo apt install libxext-dev -y
+#sudo apt install libcairo2-dev -y
+git
+tcsh
+cmake
+pgplot5 
+wcslib-dev 
+libhdf4-dev libhdf5-dev hdf5-tools 
+libgsl-dev
+libfftw3-dev
+libcfitsio-dev
+# for hdf4
+flex bison libjpeg-dev
+# useful for some bare tools
+autoconf
+
+# fom the amuse build system
+build-essential gfortran python-dev
+libopenmpi-dev openmpi-bin
+libgsl-dev cmake libfftw3-3 libfftw3-dev
+libgmp3-dev libmpfr6 libmpfr-dev
+libhdf5-serial-dev hdf5-tools
+
+# for uns_projects
+libboost-dev
