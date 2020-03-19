@@ -53,6 +53,8 @@ foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
   if (-d $dir) then
     echo Installing with pip install $dir
     (cd $dir ; pip install -e .)
+  else
+    echo Skipping pip install -e $dir
   endif
 end
 
