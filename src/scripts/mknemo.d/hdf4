@@ -4,7 +4,12 @@
 #
 #
 #  25-dec-2019  drafted
+#     mar-2020  wgetc
 #
+#  On a mac you may see build failures due to a missing libjpeg
+#  hdf4 needs jpeg and z (-ldf -ljpeg -lz)
+#
+#          ?? brew install jpeg    (didn't work for me)
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
@@ -24,3 +29,4 @@ cd hdf-$version
 ./configure --prefix=$NEMO/opt
 make -j
 make install 
+
