@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7b 8-jan-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7c 18-mar-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -541,8 +541,7 @@ void initparam(string argv[], string defv[])
             if (i > maxkeys) error("Too many un-named arguments");
 	    if (streq(argv[i],"-man") || streq(argv[i],"--man")) {
 	      sprintf(cmd,"man %s",progname);
-	      (void) system(cmd);
-	      local_exit(0);
+	      local_exit( system(cmd) );
 	      /*NOTREACHED*/
             } else if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
 		       streq(argv[i],"-h") || streq(argv[i],"help")) {
@@ -705,8 +704,8 @@ void initparam(string argv[], string defv[])
 
     if (help_string) {
       /* also patch printhelp if you add characters to this strpbrk check */
-      if (      strpbrk(help_string,"oiapdqntkvhmc?")!=NULL ||
-              ( strpbrk(help_string,"oiapdqntkvhmc?")==NULL && 
+      if (      strpbrk(help_string,"oiapdqntkvhmcM?")!=NULL ||
+              ( strpbrk(help_string,"oiapdqntkvhmcM?")==NULL && 
                 strpbrk(help_string,"0123456789")==NULL
 		) )
 	printhelp(help_string);     /* give some help and possibly */
@@ -1037,7 +1036,8 @@ local void printhelp(string help)
 {
     string *bp;
     int i, numl;
-
+    char cmd[128];
+    
     dprintf(1,"printhelp: help_string=%s\n",help);
 
     if (strchr(help,'?')) {
@@ -1055,6 +1055,7 @@ local void printhelp(string help)
 	printf("  o       >> show the output key names\n");
 	printf("  c       >> show cpu usage at the end of the run\n");
 	printf("  m       >> show memory usage at the end of the run\n");
+	printf("  M       >> man page (same as -man and --man)\n");
 	printf("  I       >> cvs id\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
@@ -1107,7 +1108,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucm")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucmM")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
@@ -1116,7 +1117,7 @@ local void printhelp(string help)
         newline(1);
         if (strpbrk(help,"oapdqntvkzu")==NULL) {
 	  local_exit(0);
-            /*NOTREACHED*/
+	  /*NOTREACHED*/
         }
     }
 
@@ -1156,6 +1157,12 @@ local void printhelp(string help)
 	warning("No output keys defined for this program");
       }
       local_exit(0);
+      /*NOTREACHED*/
+    }
+
+    if (strchr(help,'M')) {    
+      sprintf(cmd,"man %s",progname);
+      local_exit( system(cmd) );
       /*NOTREACHED*/
     }
 
@@ -1357,7 +1364,7 @@ local string get_macro(char *mname)
 {
 #if defined(MACROREAD)
     char *cp, *mp;
-    int n;
+    int n, n1;
     stream fstr;    
 
     if (*mname != '@')  return mname;
@@ -1373,7 +1380,8 @@ local string get_macro(char *mname)
     }
 
     fstr = stropen(mname,"r");      /* open macro file (guaranteed ok)     */
-    (void) fread(mp,sizeof(char),(unsigned)n,fstr);    /* oops, unix only here ?? */
+    n1 = fread(mp,sizeof(char),(unsigned)n,fstr);    /* oops, unix only here ?? */
+    if (n1 != n) error("error reading macro file \"%s\"\n",mname); /* should never happen */
     strclose(fstr);                 /* file is read in 'as is' in binary   */
     mp[n] = 0;  /* terminate - since mp could point anywhere */
 
