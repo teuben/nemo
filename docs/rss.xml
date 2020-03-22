@@ -22,7 +22,7 @@ nemo_4_1_0
 many small fixes, improved installation for bash
 </description>
 <link>
-https://teuben.github.io/nemo/
+https://teuben.github.io/nemo/whatsnew.html#4_1_0
 </link>
 </item>
 
@@ -36,7 +36,7 @@ nemo_4_0_0
 Moved NEMO from CVS to GIT - hosted by github.com. Tagnames are "git tag --list"
 </description>
 <link>
-https://teuben.github.io/nemo/
+https://teuben.github.io/nemo/whatsnew.html#4_0_0
 </link>
 </item>
 
