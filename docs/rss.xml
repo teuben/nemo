@@ -33,7 +33,7 @@ nemo_4_0_0
 </title>
 <description>
  (1-jan-2018 a.k.a. the ESO release) 
-Moved NEMO from CVS to GIT - hosted by github.com. Tagnames are "git tag --list"
+Moved NEMO from CVS to GIT - hosted by GITHUB.
 </description>
 <link>
 https://teuben.github.io/nemo/whatsnew.html#4_0_0
