@@ -13,11 +13,25 @@ http://www.astro.umd.edu/nemo/nemo.rss
 
 <item>
 <title>
+nemo_4_1_0
+</title>
+<description>
+ (10-dec-2010 a.k.a. the IAS release)
+many small fixes, improved installation for bash
+</description>
+<link>
+http://https://teuben.github.io/nemo/
+</link>
+</item>
+
+
+<item>
+<title>
 nemo_4_0_0
 </title>
 <description>
- (1-jan-2018) 
-Moved NEMO from CVS to GIT - hosted by github.com
+ (1-jan-2018 a.k.a. the ESO release) 
+Moved NEMO from CVS to GIT - hosted by github.com. Tagnames are "git tag --list"
 </description>
 <link>
 http://https://teuben.github.io/nemo/
