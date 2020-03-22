@@ -19,7 +19,7 @@ nemo_4_1_0
 </title>
 <description>
  (10-dec-2010 a.k.a. the IAS release)
-many small fixes, improved installation for bash
+many small fixes, improved installation script. csh and sh friendly.
 </description>
 <link>
 https://teuben.github.io/nemo/whatsnew.html#4_1_0
@@ -33,7 +33,7 @@ nemo_4_0_0
 </title>
 <description>
  (1-jan-2018 a.k.a. the ESO release) 
-Moved NEMO from CVS to GIT - hosted by GITHUB.
+Moved NEMO from CVS to GIT - hosted on GITHUB.
 </description>
 <link>
 https://teuben.github.io/nemo/whatsnew.html#4_0_0
