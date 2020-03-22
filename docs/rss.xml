@@ -2,12 +2,14 @@
 <rss version="2.0">
 
 <channel>
-<title>NEMO software updates</title>
+<title>NEMO software</title>
 <description>
-Software updates from the NEMO package are summarized here.
+  Software updates from the NEMO package are summarized here.
+  The full description is on the NEMO whatsnew page on
+  https://teuben.github.io/nemo/whatsnew.html
 </description>
 <link>
-http://www.astro.umd.edu/nemo/nemo.rss
+  https://teuben.github.io/nemo/rss.xml
 </link>
 
 
@@ -20,7 +22,7 @@ nemo_4_1_0
 many small fixes, improved installation for bash
 </description>
 <link>
-http://https://teuben.github.io/nemo/
+https://teuben.github.io/nemo/
 </link>
 </item>
 
@@ -34,7 +36,7 @@ nemo_4_0_0
 Moved NEMO from CVS to GIT - hosted by github.com. Tagnames are "git tag --list"
 </description>
 <link>
-http://https://teuben.github.io/nemo/
+https://teuben.github.io/nemo/
 </link>
 </item>
 
