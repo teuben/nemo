@@ -11,6 +11,20 @@ http://www.astro.umd.edu/nemo/nemo.rss
 </link>
 
 
+<item>
+<title>
+nemo_4_0_0
+</title>
+<description>
+ (1-jan-2018) 
+Moved NEMO from CVS to GIT - hosted by github.com
+</description>
+<link>
+http://https://teuben.github.io/nemo/
+</link>
+</item>
+
+
 
 <item>
 <title>
