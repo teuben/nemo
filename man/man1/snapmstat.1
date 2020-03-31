@@ -53,7 +53,10 @@ for example:
 .nf
 
 # Found 6 species:
-select=0:7999,8000:11999,12000:17999,18000:25999,26000:29999,30000:35999 
+select=0:7999,8000:11999,12000:17999,18000:25999,26000:29999,30000:35999
+
+# example to view all particle species by a different color
+glnemo2 snap.out $(snapmstat snap.out | grep select=)
 
 .fi
 
