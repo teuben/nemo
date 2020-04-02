@@ -32,3 +32,6 @@ libgsl-dev cmake libfftw3-3 libfftw3-dev
 libgmp3-dev libmpfr6 libmpfr-dev
 libhdf5-serial-dev hdf5-tools
 
+
+# for ds9
+xpa-tools saods9
