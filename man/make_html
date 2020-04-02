@@ -45,13 +45,13 @@ foreach d ($manlevels)
     #(rman -f HTML -r '%s.%s.html' $file  >  html/$base.html ) >>& $log
     (rman -f HTML -r '%s.%s.html' $file |sed 's/\.1NEMO/\.1/g'|sed 's/\.3NEMO/\.3/g'|sed 's/\.5NEMO/\.5/g'|sed 's/\.6NEMO/\.6/g'|sed 's/\.8NEMO/\.8/g'|sed 's/\.lNEMO/\.l/g' > html/$base.html ) >>& $log
  end
- (make_man.csh $d > html/index$d.html) >>& $log
+ (./make_man.csh $d > html/index$d.html) >>& $log
  if ($status) echo Some error during make_man, inspect your $log
 end
 
 echo "Running make_whatis"
-(make_whatis.csh > html/whatis.html) >>& $log
-if ($status) echo Some error during make_whatit, inspect your $log
+(./make_whatis.csh > html/whatis.html) >>& $log
+if ($status) echo Some error during make_whatis, inspect your $log
 
 set o=html/index.html
 
