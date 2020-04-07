@@ -17,35 +17,39 @@ snaptime - copy an N-body snapshot with a new time
 Copies snapshot(s) while resetting time.  It will warn if more
 than one snapshot is found. Use <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
  if selections on time are
-needed. 
+needed. <p>
+If no output file is given, it will report all the input times of
+the snapshots that have particle data. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if
-the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b> </dt>
+<dt><b>in=</b><i>snap_file</i>
+</dt>
 <dd>Input snapshot [???]      </dd>
 
-<dt><b>out=</b> </dt>
-<dd>Output snapshot
-[???]      </dd>
+<dt><b>out=</b><i>snap_file</i> </dt>
+<dd>Output snapshot [???]      </dd>
 
-<dt><b>time=</b> </dt>
+<dt><b>time=</b>
+</dt>
 <dd>Time to set [0.0]     </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='snapcopy.1.html'>snapcopy(1NEMO)</a>
 , <a href='snapmask.1.html'>snapmask(1NEMO)</a>
-
-
+ 
 <h2><a name='sect5' href='#toc5'>Files</a></h2>
+NEMO/src/nbody/trans/snaptime.c
 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>30-Apr-08<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Finally committed<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-feb-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 add option to leave out= blank to report times<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

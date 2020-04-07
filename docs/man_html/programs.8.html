@@ -13,12 +13,11 @@ programs - list of currently available <a href='nemo.1.html'>nemo(1NEMO)</a>
  commands, ordered
 thematically 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
-These are the tasks currently available under to
-run under NEMO. They are a collection of program to do N-body calculations
-and some simple 2/3-D image processing, connected with the N-body calculations.
-If program names are preceded by a dash (<b>-</b>) they  do not have NEMO&rsquo;s user
-interface and are sometimes not even found in NEMO&rsquo;s bin area on disk (usually
-referred to as $NEMOBIN). Program names ending on a star (<b>*</b>)  are available
+These are some of the tasks currently available
+under to run under NEMO.  If a program name is preceded by a dash (<b>-</b>) they
+ do not have NEMO&rsquo;s <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+ user interface and are sometimes not
+even found in $NEMOBIN. Program names ending on a star (<b>*</b>)  are available
 under this and sometimes more wildcard names (e.g. snapplot and  snapplot_ps)
 Program names ending in a  questionmark (<b>?</b>) are not available yet, but
 we&rsquo;re thinking of making them. Check the future-plan <a href='software.8.html'><i>software(8NEMO)</i></a>
@@ -37,12 +36,11 @@ cookbook<tt> </tt>&nbsp;<tt> </tt>&nbsp;a quick list of what to do to run (e.g.)
 tricks    <tt> </tt>&nbsp;<tt> </tt>&nbsp;useful tricks and bug detours [8]
 orbit   <tt> </tt>&nbsp;<tt> </tt>&nbsp;overview what orbit utilities are planned [0]
 </pre>
-<h2><a name='sect3' href='#toc3'>2. Utility Tasks</a></h2>
+<h2><a name='sect3' href='#toc3'>2. Utility</a></h2>
 <br>
-<pre>nemoshow    <tt> </tt>&nbsp;<tt> </tt>&nbsp;check environment, show NEMO system variables/keywords
--cc       <tt> </tt>&nbsp;<tt> </tt>&nbsp;special program or shell script needed in some UNIX flavors
--make      <tt> </tt>&nbsp;<tt> </tt>&nbsp;special program or shell script needed in some UNIX flavors
--keyval   <tt> </tt>&nbsp;<tt> </tt>&nbsp;display value in a &rsquo;keyword=value&rsquo; string
+<pre>mknemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;compile NEMO progams, out of directory
+nemoshow    <tt> </tt>&nbsp;<tt> </tt>&nbsp;check environment, show NEMO system variables/keywords
+nemoman<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;create a template man pages from a compiled program
 nemoinp  <tt> </tt>&nbsp;<tt> </tt>&nbsp;test parsing of numbers
 units        <tt> </tt>&nbsp;<tt> </tt>&nbsp;units conversion utility
 </pre>
@@ -72,7 +70,7 @@ unfio    <tt> </tt>&nbsp;<tt> </tt>&nbsp;access fortran unformatted I/O files
 units       <tt> </tt>&nbsp;<tt> </tt>&nbsp;units conversion utility
 wcs       <tt> </tt>&nbsp;<tt> </tt>&nbsp;(astronomical) world coordinate system transformations
 </pre>
-<h2><a name='sect5' href='#toc5'>4. N-body Realizators</a></h2>
+<h2><a name='sect5' href='#toc5'>4. N-body Realizations</a></h2>
 <br>
 <pre>anisot    <tt> </tt>&nbsp;<tt> </tt>&nbsp;create distribution function table for anistropic spherical models
 mkommod   <tt> </tt>&nbsp;<tt> </tt>&nbsp;anisotropic velocity distribution (Merritt)
@@ -112,12 +110,9 @@ galaxy<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;3D FFT N-b
 scfm<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;N-body integrator using the self-consistent field method
 -mass99<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPH code
 </pre>
-<h2><a name='sect7' href='#toc7'>6. PLOTTING, PRINTING and HARD COPIES</a></h2>
+<h2><a name='sect7' href='#toc7'>6. Plotting, Printing</a></h2>
 <br>
-<pre>--sm    <tt> </tt>&nbsp;<tt> </tt>&nbsp;interactive graphics utility (sun/x windows)
---mongo     <tt> </tt>&nbsp;<tt> </tt>&nbsp;interactive graphics utility (sun (color) windows)
---gnuplot  <tt> </tt>&nbsp;<tt> </tt>&nbsp;interactive function plotter 
-snapdiagplot*<tt> </tt>&nbsp;<tt> </tt>&nbsp;diagnosis of an N-body run
+<pre>snapdiagplot*<tt> </tt>&nbsp;<tt> </tt>&nbsp;diagnosis of an N-body run
 snapplot*<tt> </tt>&nbsp;<tt> </tt>&nbsp;display N-body snapshot file
 snapplot3<tt> </tt>&nbsp;<tt> </tt>&nbsp;display N-body snapshot file
 trakplot*<tt> </tt>&nbsp;<tt> </tt>&nbsp;display N-body snapshot file (cumulative)
@@ -133,7 +128,7 @@ plarrow_ps<tt> </tt>&nbsp;<tt> </tt>&nbsp;plot an arrow in postscript
 pltext_ps<tt> </tt>&nbsp;<tt> </tt>&nbsp;plot text in postscript
 -movie,movie_sv<tt> </tt>&nbsp;<tt> </tt>&nbsp;display screendumps in orderly fashion
 mkcolor  <tt> </tt>&nbsp;<tt> </tt>&nbsp;create color table
-7. 2d Image Utilities
+7. 2D and 3D IMAGE UTILITIES
 snapccd     <tt> </tt>&nbsp;<tt> </tt>&nbsp;construct CCD velocity-moment image from an N-body snapshot
 snapgrid<tt> </tt>&nbsp;<tt> </tt>&nbsp;general image constructor from snapshot
 snapsmooth*<tt> </tt>&nbsp;<tt> </tt>&nbsp;variable smoothing of an N-body snapshot to an image
@@ -234,6 +229,7 @@ fitsccd  <tt> </tt>&nbsp;<tt> </tt>&nbsp;read a (fits) image file from disk
 tabhist  <tt> </tt>&nbsp;<tt> </tt>&nbsp;histogram plotter
 snaprect<tt> </tt>&nbsp;<tt> </tt>&nbsp;diaganolize moment-of-inertia of snapshot
 rotcur      <tt> </tt>&nbsp;<tt> </tt>&nbsp;fit kinematic parameters from velocity field
+rotcurshape
 ccdvel    <tt> </tt>&nbsp;<tt> </tt>&nbsp;create theoretical velocity field
 rotcurves<tt> </tt>&nbsp;<tt> </tt>&nbsp;rotation curve of a composite potentials
 snapfit  <tt> </tt>&nbsp;<tt> </tt>&nbsp;fit a (6D) snapshot to a (3D) data cube
@@ -250,16 +246,12 @@ tabpairs<tt> </tt>&nbsp;<tt> </tt>&nbsp;analyze interaction histories of stars i
 </pre>
 <h2><a name='sect18' href='#toc18'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect19' href='#toc19'>Files</a></h2>
-<br>
-<pre>~teuben/nemodoc <tt> </tt>&nbsp;<tt> </tt>&nbsp;original manual page
-</pre>
-<h2><a name='sect20' href='#toc20'>See Also</a></h2>
+<h2><a name='sect19' href='#toc19'>See Also</a></h2>
 <br>
 <pre>index(1NEMO), software(8NEMO)
 The NEMO Users/Programmers Manual
 </pre>
-<h2><a name='sect21' href='#toc21'>Update History</a></h2>
+<h2><a name='sect20' href='#toc20'>Update History</a></h2>
 <br>
 <pre>16-Mar-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;created    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 7-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;..another update<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -274,12 +266,12 @@ The NEMO Users/Programmers Manual
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
 <li><a name='toc2' href='#sect2'>1. GENERAL INFORMATION (only doc/man)</a></li>
-<li><a name='toc3' href='#sect3'>2. Utility Tasks</a></li>
+<li><a name='toc3' href='#sect3'>2. Utility</a></li>
 <li><a name='toc4' href='#sect4'>3. Data Conversion</a></li>
-<li><a name='toc5' href='#sect5'>4. N-body Realizators</a></li>
+<li><a name='toc5' href='#sect5'>4. N-body Realizations</a></li>
 <li><a name='toc6' href='#sect6'>5. N-body Integrators</a></li>
-<li><a name='toc7' href='#sect7'>6. PLOTTING, PRINTING and HARD COPIES</a></li>
-<li><a name='toc8' href='#sect8'>7. 2d Image Utilities</a></li>
+<li><a name='toc7' href='#sect7'>6. Plotting, Printing</a></li>
+<li><a name='toc8' href='#sect8'>7. 2D and 3D IMAGE UTILITIES</a></li>
 <li><a name='toc9' href='#sect9'>8. Orbit Utilities</a></li>
 <li><a name='toc10' href='#sect10'>9. Manipulation</a></li>
 <li><a name='toc11' href='#sect11'>10. Combination</a></li>
@@ -290,9 +282,8 @@ The NEMO Users/Programmers Manual
 <li><a name='toc16' href='#sect16'>16. Starlab</a></li>
 <li><a name='toc17' href='#sect17'>17. Astronomy</a></li>
 <li><a name='toc18' href='#sect18'>Author</a></li>
-<li><a name='toc19' href='#sect19'>Files</a></li>
-<li><a name='toc20' href='#sect20'>See Also</a></li>
-<li><a name='toc21' href='#sect21'>Update History</a></li>
+<li><a name='toc19' href='#sect19'>See Also</a></li>
+<li><a name='toc20' href='#sect20'>Update History</a></li>
 </ul>
 </body>
 </html>

@@ -14,37 +14,49 @@ snapkey - (re)assign keys to a snapshot
 <b>snapkey</b> [parameter=value]
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Assign (new) key to a snapshot. 
+Assign (new) key to a snapshot. The current version was a quick
+hack, and can initialize the key using a series of integers using the <b>keys=</b>
+keyword. The more flexible <b>key=</b> keyword allows for more  complex <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
+
+expressions. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The following parameters are recognized in any order
+if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input (snapshot)
-file [???]     </dd>
+<dd>input (snapshot) file [???]     </dd>
 
-<dt><b>out=</b> </dt>
+<dt><b>out=</b>
+</dt>
 <dd>output (snapshot) file [???]     </dd>
 
 <dt><b>keys=</b> </dt>
-<dd>Manually supply
-all keys []    </dd>
+<dd>Manually supply all keys. Needs to
+be exactly the same amount as the number of particles in the snapshot. 
+</dd>
 
 <dt><b>keyfile=</b> </dt>
-<dd>ascii table with keys []   -- not implemented yet
-</dd>
+<dd>ascii table with keys []   -- not implemented yet </dd>
+
+<dt><b>key=</b> </dt>
+<dd>General <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
+
+integer expression computing the key. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example assign different keys to the particles, e.g.
-for glnemo2 select= <br>
+The following example assigns
+different keys to the particles, using a <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+ style :: notation:
+<br>
 <pre>    mkplummer snap1  200
     snapkey snap1 snap2 2::100,1::100
     snapsort snap2 snap3 key
     snapkstat snap3
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;-&gt;   select=0:99,100:199
     glnemo snap3 select=0:99,100:199
+or:
     glnemo snap3 &lsquo;snapkstat snap3&lsquo;
     
 </pre>Although the <b>keyfile=</b> does not work yet, the following NEMO command line
@@ -52,6 +64,14 @@ trick also works, following this example: <br>
 <pre>    nemoinp 2::100,1::100 &gt; key1
     snapkey snap1 snap2 @key1
     snapsort snap2 snap3
+</pre>An example using <i>skid</i>: <br>
+<pre>    mkplummer p100 100
+    snapstack p100 p100 p200 10,0,0 -2,0,0
+    snaptipsy p200 p200.tipsy
+    skid -tau 1 -o p200.a &lt; p200.tipsy
+    tail +2 p200.a.grp &gt; p200.keys
+    snapkey p200 - @p200.keys | snapsort - p200k key
+    glnemo2 p200k &lsquo;snapkstat p200k&lsquo;
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapkstat.1.html'>snapkstat(1NEMO)</a>

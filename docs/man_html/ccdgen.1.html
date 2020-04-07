@@ -39,8 +39,8 @@ are recognized in any order if the keyword is also given:
 
 <dt><b>object=</b>
 </dt>
-<dd>Object type. Valid are flat, exp, gauss, bar, spiral, noise, test. See below
-for an explanation and their parameters. Default: flat </dd>
+<dd>Object type. Valid are flat, exp, gauss, bar, spiral, noise, test, blobs.
+See below for an explanation and their parameters. Default: flat </dd>
 
 <dt><b>spar=</b> </dt>
 <dd>Parameters
@@ -48,19 +48,22 @@ for this object. The first parameter is often the peak  value, and the second
 one a scale length. Some object have more complex geometries and require
 more parameters. The meaning of the peak value can be modified by setting
 <b>totflux=t</b> (see below). The defaults are defined per object, but are typically
-1,1... </dd>
+1,1... <br>
+For certain objects, the multiple objects can be given, and the sequence
+of parameters can be repeated. Currently <b>object=blobs</b> has this option for
+3D cubes. </dd>
 
 <dt><b>center=</b> </dt>
-<dd>Center of object (in 0-based pixel coordinates). The lower left
-corner is counted as (0,0) here. Default: mapcenter. </dd>
+<dd>Center of object (in 0-based pixel coordinates). The lower
+left corner is counted as (0,0) here. Default: mapcenter. </dd>
 
 <dt><b>size=</b> </dt>
-<dd>Mapsize. It is
-allowed to have a different size in X and Y. </dd>
+<dd>Mapsize. It
+is allowed to have a different size in X and Y. </dd>
 
 <dt><b>cell=</b> </dt>
-<dd>Cellsize [1]      *not
-used yet* </dd>
+<dd>Cellsize [1]     
+*not used yet* </dd>
 
 <dt><b>pa=</b> </dt>
 <dd>Position Angle of disk in which the object lives. Counted
@@ -112,6 +115,7 @@ spiral<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp
 ferrers<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.(1-r^2)^p<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h,e,b,p (h=size of bar, p=power to 1-r^2)
 isothermal<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.(1+r^2)^p<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h,p
 test<tt> </tt>&nbsp;<tt> </tt>&nbsp;x+10y+100z<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
+blobs<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,x,y,z,size<tt> </tt>&nbsp;<tt> </tt>&nbsp;they can be repeated for many blobs
 maybe to be implemented:
 j1x<tt> </tt>&nbsp;<tt> </tt>&nbsp;J1(x)/x
 comet<tt> </tt>&nbsp;<tt> </tt>&nbsp;2d proj
@@ -171,6 +175,16 @@ units come out in degrees for the conversion to FITS, viz.: <br>
 |\
  ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\
  ccdfits - bar.fits radecvel=t
+</pre>and the option to fill your cube with some random blobs and noise is a
+bit more involved: <br>
+<pre>nemoinp 1:100 |\
+  tabmath - - &rsquo;ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)&rsquo;
+all &gt; b100.tab
+ccdgen "" - blobs @b100.tab size=128,128,128 |\
+  ccdgen - - noise 0,0.02 |\
+  ccdsmooth - - 5   |\
+  ccdsky - -  |\
+  ccdfits - junk2.fits radecvel=t ndim=4
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
@@ -188,6 +202,7 @@ Peter Teuben
 6-jan-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added (many features and) factor=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-jan-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 add #arms parameter to spiral<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-jan-12<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 added object=test<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+12-mar-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 added object=blobs<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

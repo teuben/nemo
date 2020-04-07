@@ -58,99 +58,104 @@ along X-axis to include  [default: autoscaling on maximum of datapoints].
 <dt><b>bins=<i>n_bins</i></b> </dt>
 <dd>If one number is given, it is the number of (equal size) bins
 between  min and max.  If more than one number is given, they are the bin
-edges (thus one more than the number of bins need to be supplied). [default:
-<b>16</b>]. </dd>
+edges (thus one more than the number of bins need to be supplied). One rule
+of thumb is that the number of bins be the square root of the number of
+values. [default: <b>16</b>]. </dd>
 
 <dt><b>maxcount=<i>count</i></b> </dt>
-<dd>Maximum count value per bin plotted along the Y-axis
-[default: autoscaling]. </dd>
+<dd>Maximum count value per bin plotted
+along the Y-axis [default: autoscaling]. </dd>
 
 <dt><b>nmax=<i>max_lines</i></b> </dt>
-<dd>Maximum number of lines allowed to
-read from datafile, if the data comes from a pipe as supposed from file.
- A regular file will use the number of lines in the file as default. [Default:
-<b>0</b>]. </dd>
+<dd>Maximum number of
+lines allowed to read from datafile, if the data comes from a pipe as supposed
+from file.  A regular file will use the number of lines in the file as default.
+[Default: <b>0</b>]. </dd>
 
 <dt><b>ylog=t|f</b> </dt>
-<dd>Take log of Y-axis? This option is really redundant, since <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
+<dd>Take log of Y-axis? This option is really redundant,
+since <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
+ can handle any transformation [default: <b>f</b>]. </dd>
 
-can handle any transformation [default: <b>f</b>]. </dd>
-
-<dt><b>xlab=<i>x-label</i></b> </dt>
-<dd>Label along the
-X-axis [default: <b>value</b>]. </dd>
+<dt><b>xlab=<i>x-label</i></b>
+</dt>
+<dd>Label along the X-axis [default: <b>value</b>]. </dd>
 
 <dt><b>ylab=<i>y-label</i></b> </dt>
-<dd>Label along the Y-axis [default: <b>N</b> or
-<b>log(N)</b>]. </dd>
+<dd>Label along the Y-axis
+[default: <b>N</b> or <b>log(N)</b>]. </dd>
 
 <dt><b>headline=<i>text</i></b> </dt>
-<dd>Random verbiage, will be plotted along right top
-of plot for identification [default: none]. The left top will contain the
-filename <i>infile</i>. </dd>
+<dd>Random verbiage, will be plotted along
+right top of plot for identification [default: none]. The left top will
+contain the filename <i>infile</i>. </dd>
 
 <dt><b>tab=t|f</b> </dt>
-<dd>Table output? If false, a plot using your current
-<a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
- device will be given. If true, a simple ascii version of a histogram
-is shown. The default choice of <b>bins=16</b> keeps all the information on a simple
-80*24 screen. [Default: <b>f</b>] </dd>
+<dd>Table output? If false, a plot using
+your current <a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
+ device will be given. If true, a simple ascii version
+of a histogram is shown. The default choice of <b>bins=16</b> keeps all the information
+on a simple 80*24 screen. [Default: <b>f</b>] </dd>
 
 <dt><b>gauss=t|f</b> </dt>
-<dd>If true, plot output will contain a
-gaussian fit. The "best" gaussian fit is the one that has the same mean,
-dispersion and integrated area as the data. [Default: <b>t</b>]. </dd>
+<dd>If true, plot output will
+contain a gaussian fit. The "best" gaussian fit is the one that has the
+same mean, dispersion and integrated area as the data. [Default: <b>t</b>]. </dd>
 
-<dt><b>residual=t|f</b> </dt>
-<dd>If
-true, the residual (data - fit) will be plotted as a dashed line. [Default:
+<dt><b>residual=t|f</b>
+</dt>
+<dd>If true, the residual (data - fit) will be plotted as a dashed line. [Default:
 <b>t</b>]. </dd>
 
 <dt><b>cumul=t|f</b> </dt>
 <dd>Plot a cumulative histogram instead. If set, the keywords gauss,
 residual, and ylog are automatically re-set to false.   [Default: <b>f</b>]. </dd>
 
-<dt><b>median=t|f</b>
+<dt><b>norm=t|f</b>
 </dt>
-<dd>Compute median too? This can be timeconsuming for large numbers of points.
-[Default: <b>t</b>]. </dd>
-
-<dt><b>torben=t|f</b> </dt>
-<dd>Fast median calculator in case N is large. No sort
-will be used, but instead an iterative O(N) method will be used. [Default:
-<b>f</b>]. <b>robust=t|f</b> Use a robust estimator to remove outliers before taking statistics
-again. [Default: <b>f</b>]. </dd>
-
-<dt><b>mad=t|f</b>  </dt>
-<dd>Also compute the Mean Absolute Deviation (MAD).
+<dd>Normalize the cumulative histogram to 1. By default the maxcount is used.
 [Default: <b>f</b>]. </dd>
 
+<dt><b>median=t|f</b> </dt>
+<dd>Compute median too? This can be timeconsuming for
+large numbers of points. [Default: <b>t</b>]. </dd>
+
+<dt><b>torben=t|f</b> </dt>
+<dd>Fast median calculator in
+case N is large. No sort will be used, but instead an iterative O(N) method
+will be used. [Default: <b>f</b>]. <b>robust=t|f</b> Use a robust estimator to remove outliers
+before taking statistics again. [Default: <b>f</b>]. </dd>
+
+<dt><b>mad=t|f</b>  </dt>
+<dd>Also compute the Mean
+Absolute Deviation (MAD). [Default: <b>f</b>]. </dd>
+
 <dt><b>dual=t|f</b> </dt>
-<dd>Dual pass over the data, subtracting the mean. This
-can be important if the data have a large average value with a small spread
-around the mean. Notice that in this mode the mean is subtracted but never
-added to the min/max/mean/median etc.  Default: f </dd>
+<dd>Dual pass over the data,
+subtracting the mean. This can be important if the data have a large average
+value with a small spread around the mean. Notice that in this mode the
+mean is subtracted but never added to the min/max/mean/median etc.  Default:
+f </dd>
 
 <dt><b>nsigma=<i> </i></b></dt>
-<dd>Delete points
-more than nsigma times the sigma from the mean. After each point sigma and
-mean are recomputed. [Default: none] </dd>
+<dd>Delete points more than nsigma times the sigma from the mean.
+After each point sigma and mean are recomputed. [Default: none] </dd>
 
-<dt><b>sort=</b><i>sort_mode</i> </dt>
+<dt><b>sort=</b><i>sort_mode</i>
+</dt>
 <dd></dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-Points that fall
-exactly on the boundary of a bin, are added to the right side. Another way
-of saying is that a cell includes the left side, but is open ended on the
-right side, i.e. [---). Note this behavior is exactly opposite that of SM&rsquo;s behavior,
-which was used to compare results. 
+Points that fall exactly on the boundary of a bin, are added to the
+right side. Another way of saying is that a cell includes the left side,
+but is open ended on the right side, i.e. [---). Note this behavior is exactly
+opposite that of SM&rsquo;s behavior, which was used to compare results. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
-, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 ,
-<a href='tabstat.1.html'>tabstat(1NEMO)</a>
+<a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='tabstat.1.html'>tabstat(1NEMO)</a>
 , <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
  <p>
 <a href='http://vostat.org'>http://vostat.org</a>
@@ -184,6 +189,7 @@ Teuben
 1-jun-10<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.0: bins= now allowed to have manual edges<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-aug-12<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.2: added torben= option for fast large-N median<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-jan-14<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.4: added mad= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-mar-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.1: added norm=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 

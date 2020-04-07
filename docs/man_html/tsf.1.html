@@ -16,78 +16,101 @@ tsf - type a structured file
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tsf</i> types the contents of a structured binary file (see <a href='filestruct.3.html'><i>filestruct</i>(3NEMO)</a>
 )
-on the standard output. The type, tag, dimensions (if any) and contents
-of all items are listed. The contents of <i>CharType</i> items are printed directly;
- <i>FloatType</i> and <i>DoubleType</i> items are printed in floating-point notation;
-all other types are printed in  octal for portability reasons. XML format
-can optionally be selected. 
-<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized.
+in a human readable form on the standard output. The type, tag, dimensions
+(if any) and contents of all items are listed. The contents of <i>CharType</i>
+items are printed directly;  <i>FloatType</i> and <i>DoubleType</i> items are printed
+in floating-point notation; all other types are printed in  octal for portability
+reasons (see <b>octal=</b> below). <i>XML</i> format can optionally be selected as well,
+but this is not been well exercised. A <i>json</i> mode has been considered. <p>
 
+<p> 
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+The
+following parameters are recognized. 
 <dl>
 
 <dt><b>in=</b><i>file</i> </dt>
-<dd>Input data is read from <i>file</i>, which must be a structured binary
-file. No default. </dd>
+<dd>Input data is read from <i>file</i>,
+which must be a structured binary file. No default. </dd>
 
-<dt><b>maxprec==t|f</b> </dt>
-<dd>If true, print float and double item data with
-maximum precision. [Default: <b>f</b>]. </dd>
+<dt><b>maxprec=t|f</b> </dt>
+<dd>If true, print
+float and double item data with maximum precision. [Default: <b>f</b>]. </dd>
 
-<dt><b>maxline=</b><i>lines</i> </dt>
-<dd>Limits the number of lines
-of data typed for each item to <i>lines</i>. [Default: <b>4</b>]. </dd>
+<dt><b>maxline=</b><i>lines</i>
+</dt>
+<dd>Limits the number of lines of data typed for each item to <i>lines</i>. See <b>allline=</b>
+below. [Default: <b>4</b>]. </dd>
 
 <dt><b>allline=t|f</b> </dt>
-<dd>Print all
-lines, it overrides any value of <b>maxline</b>. If xml format selected, allline
-will always be set to t. [Default: <b>f</b>]. </dd>
+<dd>Print all lines, it overrides any value of
+<b>maxline</b>. If xml format selected, allline will always be set to t. [Default:
+<b>f</b>]. </dd>
 
 <dt><b>indent=</b><i>set-indent</i> </dt>
-<dd>Amount to indent
-contents of item-sets. [Default: <b>2</b>]. </dd>
+<dd>Amount to indent contents of item-sets. [Default: <b>2</b>].
+</dd>
 
 <dt><b>margin=</b><i>right-margin</i> </dt>
-<dd>Righthand margin for
-output. Set this to a high value to prevent possible string problems if
-file needs to be read by <i>rsf</i>. [Default: <b>72</b>]. </dd>
+<dd>Righthand margin for output. Set this to a high value
+to prevent possible string problems if file needs to be read by <i>rsf</i>. [Default:
+<b>72</b>]. </dd>
 
 <dt><b>item=</b><i>item-name</i> </dt>
-<dd>select only this
-item for output. Default: all items selected. </dd>
+<dd>select only this item for output. Default: all items selected.
+</dd>
 
 <dt><b>xml=t|f</b> </dt>
-<dd>Output in xml mode?
- If not, old-style human readable tsf mode is selected. [Default: <b>f</b>]. </dd>
+<dd>Output in xml mode?  If not, old-style human readable tsf mode is
+selected. [Default: <b>f</b>]. </dd>
 
-<dt><b>octal=t|f</b>
-</dt>
-<dd>Output of (short/long) integers in octal? Old versions used to exchange
-integer information in octal, we have now switched by default to decimal
-(more human readable). By using  <b>octal=t</b> you can force this program back
-in the old mode. If take output of tsf to be read into rsf, you now need
-to force octal=t. [Default: <b>f</b>]. </dd>
+<dt><b>octal=t|f</b> </dt>
+<dd>Output of (short/long) integers in octal?
+Old versions used to exchange integer information in octal, we have now
+switched by default to decimal (more human readable). By using  <b>octal=t</b>
+you can force this program back in the old mode. If take output of tsf to
+be read into rsf, you now need to force octal=t. [Default: <b>f</b>]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='ls.1v.html'>ls(1v)</a>
-, <a href='file.1.html'>file(1)</a>
+,
+<a href='file.1.html'>file(1)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
 , <a href='csf.1.html'>csf(1NEMO)</a>
-,
-<a href='qsf.1.html'>qsf(1NEMO)</a>
+, <a href='qsf.1.html'>qsf(1NEMO)</a>
 , <a href='bsf.1.html'>bsf(1NEMO)</a>
 , <a href='filestruct.3.html'>filestruct(3NEMO)</a>
-. 
-<h2><a name='sect5' href='#toc5'>Debug</a></h2>
-<b>debug=2</b> reports values of
-<i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
 .
 
+<h2><a name='sect5' href='#toc5'>Debug</a></h2>
+<b>debug=2</b> reports values of <i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For
+<i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
+. 
 <h2><a name='sect6' href='#toc6'>Example</a></h2>
-An example of converting all double precision numbers to single
-precision in a NEMO file: <br>
+An example of converting
+all double precision numbers to single precision in a NEMO file: <br>
 <pre>    % tsf in=double.dat out=float.dat convert=d2f
+</pre>And here is an N-body snapshot of a Plummer sphere with 10 particles: <br>
+<pre>    mkplummer - 10 | tsf -
+char Headline[35] "init_xrandom: seed used 1582131517"
+char History[27] "mkplummer - 10 VERSION=3.0"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] 0.394003 -1.98053 -0.836643 -0.466656 
+      0.0439966 0.367178 -0.0762312 -0.0201540 0.0852010 0.238130 
+      0.344608 0.379148 0.173722 0.311941 0.0433718 0.405117 0.747783 
+      -0.555947 -0.778804 -0.580657 0.537069 -0.101942 0.0555890 
+      . . .
+  tes
+tes
 </pre>
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>
 The algorithm for implementing <b>maxline</b> is crude. <p>

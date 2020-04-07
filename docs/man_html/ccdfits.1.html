@@ -104,28 +104,25 @@ smart scaling placing the object at a computed distance. [Default: <b>f</b>]. </
 <dd>Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are written
 last. Default: t </dd>
 
-<dt><i>ndim=</i> </dt>
-<dd>If used, this will be the value of NAXIS written
-to the FITS file. Only useful of <b>dummy=f</b> and your FITS reader still cannot
-handle  dummy trailing axes. Default: not used. </dd>
-
 <dt><i>nfill=0</i> </dt>
-<dd>Number of dummy comment
-lines to add to a fits header to test I/O routines. Default: 0 </dd>
+<dd>Number of dummy comment lines to add to a fits
+header to test I/O routines. Default: 0 </dd>
 
 <dt><i>ndim=</i> </dt>
-<dd>If
-specified, testing if only that many dimensions need to be written. </dd>
+<dd>This is a hack. If used, this
+will be the value of NAXIS written to the FITS file. Only useful of <b>dummy=f</b>
+and your FITS reader still cannot handle  dummy trailing axes. For <b>ndim=4</b>
+the axis will be labeled as <i>STOKES</i>, which is useful for packages such as
+CASA. Default: not used. </dd>
 
-<dt><i>select=1</i>
-</dt>
-<dd>Select this image (1 being the first) to grab in an file with multiple
-Image&rsquo;s. [Default: 1] </dd>
+<dt><i>select=1</i> </dt>
+<dd>Select this image (1 being the first) to
+grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To convert an image to unsigned 16 bit integers
-use the following math: <br>
+To convert an
+image to unsigned 16 bit integers use the following math: <br>
 <pre>        a = "(a &lt; 0 ? a+65536 : a)" 
 </pre>or using <i>ccdmath</i>: <br>
 <pre>        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
