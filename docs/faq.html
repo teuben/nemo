@@ -1,0 +1,102 @@
+<HTML>
+<!-- A comment -->
+<HEAD>
+<TITLE> NEMO FAQ </TITLE>
+</HEAD>
+
+<BODY>
+<CENTER>
+<H1>	An F.A.Q. </H1>
+</CENTER>
+
+
+<H1> Using NEMO </H1>
+<OL>
+<LI> <b> How do i get NEMO started/loaded </b>
+<br>
+Either add to your .cshrc C-shell startup file, or interactively
+use the command
+<pre>
+	source /NEMO/nemo_start
+</pre>
+or where-ever the root directory of NEMO may be. But it should contain
+the C-shell compatible NEMO startup commands. 
+
+<LI> <b> Help, how do i get help </b>
+<br>
+Most NEMO programs have (standard unix) manual pages, but each program
+can also describe itself using the help= system keyword. And there
+is of course the web
+<pre>
+    % man programs
+    % man index
+    % man snapplot				(or whatever program)
+    % ghostview $NEMO/text/manuals/nemo.ps
+    % tsf help=					(or whatever program)
+    % tsf help=\?				(or whatever program)
+    % http://www.astro.umd.edu/nemo
+    % mailto:nemo@astro.umd.edu
+<LI>
+</OL>
+<H1> Installing NEMO </H1>
+
+<OL>
+<LI> <b> I have an installation of nemo which, for some reason, I want
+to re-compile with a version of gcc which is not in the standard 
+path. How can I do this? Can I avoid re-installing nemo from
+scratch?</b>
+<br>
+You could just edit the macros CC, CXX and FC in the $NEMOLIB/makedefs file,
+but when you ran configure, it probably also constructed lots of other macros in 
+that file. So, basically, the procedure would be:
+<pre>
+    cd $NEMO
+    configure  <options-to-configure>
+    make postconfig
+    diff NEMORC.local NEMORC.gen            <-- study the differences and see if relevant
+    source NEMORC.local                     do this if you decided to edit it via NEMORC.gen
+    make libs                               recompile library, study install.log if it's ok
+    src/scripts/testsuite -b                recompile a bunch of basic binaries
+    mknemo <programs>                       recompile other programs you may need
+</pre>
+
+
+</OL>
+<H1> Programming NEMO </H1>
+<OL>
+<LI> <b> Compiling and adding a "standard" program </b>
+<br>
+<pre>
+    % cd $NEMO/src/.....        (choose some reasonable place)
+    % edit program.c
+    % bake program          	(local build)
+or
+    % mknemo program        	(compiles and copies to $NEMOBIN)
+</pre>
+<LI> <b> Adding something new (but "standard") to the library </b>
+<pre>
+    % cd $NEMO/src/.....        (choose some reasonable place)
+    % edit Makefile             (add the .o file to the object list)
+    % make install              (compile and put in $NEMOLIB/libnemo.a)
+</pre>
+<LI>
+</OL>
+
+<pre>
+
+Q:is there a noclobber option:
+A:no, error=1 could help, but bad idea probably
+</pre>
+
+<hr>
+<P>
+This page was last modified on
+<!--#config timefmt="%d-%h-%Y" -->
+<!--#echo var="LAST_MODIFIED" -->
+by <A HREF=mailto:teuben@astro.umd.edu>teuben@astro.umd.edu</A>.
+
+
+</BODY>
+
+</HTML>
+
