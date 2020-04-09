@@ -13,6 +13,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <mdarray.h>
 
 #include <snapshot/snapshot.h>
@@ -27,7 +28,7 @@ string defv[] = {
     "central=f\n        add the central mass also as 1st point?",
     "grow=t\n           grow number of points per ring to keep a constant density",
     "headline=\n	verbiage for output",
-    "VERSION=0.5\n	3-jun-10 PJT",
+    "VERSION=0.5a\n	9-apr-2010 PJT",
     NULL,
 };
 
@@ -54,9 +55,11 @@ local string headline;
 local bool Qgrow;
 
 void makering(int n, int k, real radius);
+void makecenter(real m);
+void writesnap(int n);
 
 
-void nemo_main()
+void nemo_main(void)
 {
     int i, nrad, n;
 
@@ -115,14 +118,14 @@ void makering(int n, int k, real radius)
   }
 }
 
-makecenter(real m)
+void makecenter(real m)
 {
   mass[0] = m;
   CLRV(phase[0][0]);
   CLRV(phase[0][1]);
 }
 
-writesnap(int n)
+void writesnap(int n)
 {
     int cs = CSCode(Cartesian, NDIM, 2);
     static bool first = TRUE;
