@@ -6,23 +6,36 @@
 
 <BODY>
 <CENTER>
-<H1>	An F.A.Q. </H1>
+<H1>	Frequently Asked Questions </H1>
 </CENTER>
 
 
 <H1> Using NEMO </H1>
 <OL>
-<LI> <b> How do i get NEMO started/loaded </b>
-<br>
-Either add to your .cshrc C-shell startup file, or interactively
-use the command
-<pre>
-	source /NEMO/nemo_start
-</pre>
-or where-ever the root directory of NEMO may be. But it should contain
-the C-shell compatible NEMO startup commands. 
 
-<LI> <b> Help, how do i get help </b>
+  <LI> <b> I get "command not found" for all NEMO commands </b>
+    <br>
+
+    There are two possible causes:
+    <br>
+    If <b>all</b> commands fails, for
+    example <b>mkplummer</b>, the NEMO environment was not added to your shell.
+    So  most likely you need to <b>source</b> the <b>nemo_start.sh</b> file,
+    for example
+    <pre>
+      source /opt/nemo/nemo_start.sh
+    </pre>
+    If your case is a less common command, you <i>might</i> be able to install
+    this on-the-fly with the <b>mknemo</b> command, for example
+    <pre>
+      mknemo mktt72
+    </pre>
+    would (re)compile the <b>mktt72</b> command
+      
+    <br>
+    <br>
+    
+<LI> <b> Help, how do I get help </b>
 <br>
 Most NEMO programs have (standard unix) manual pages, but each program
 can also describe itself using the help= system keyword. And there
@@ -41,25 +54,27 @@ is of course the web
 <H1> Installing NEMO </H1>
 
 <OL>
+  <LI> <b> How do I install NEMO </b>
+    <br>
+  Of course there are many variations, but the following commands should get you
+  something basic:
+  <pre>
+    git clone https://github.com/teuben/nemo
+    cd nemo
+    ./configure
+    make build
+    make check
+    make bench
+    source nemo_start.sh
+  </pre>
+  the script <b>$NEMO/docs/install_nemo.sh</b> has many options to set up some more advanced installations.
+  
 <LI> <b> I have an installation of nemo which, for some reason, I want
 to re-compile with a version of gcc which is not in the standard 
 path. How can I do this? Can I avoid re-installing nemo from
 scratch?</b>
 <br>
-You could just edit the macros CC, CXX and FC in the $NEMOLIB/makedefs file,
-but when you ran configure, it probably also constructed lots of other macros in 
-that file. So, basically, the procedure would be:
-<pre>
-    cd $NEMO
-    configure  <options-to-configure>
-    make postconfig
-    diff NEMORC.local NEMORC.gen            <-- study the differences and see if relevant
-    source NEMORC.local                     do this if you decided to edit it via NEMORC.gen
-    make libs                               recompile library, study install.log if it's ok
-    src/scripts/testsuite -b                recompile a bunch of basic binaries
-    mknemo <programs>                       recompile other programs you may need
-</pre>
-
+TBD
 
 </OL>
 <H1> Programming NEMO </H1>
