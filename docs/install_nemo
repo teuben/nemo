@@ -121,9 +121,9 @@ if ($ubuntu) then
    sudo apt install libfftw3-dev -y
    sudo apt install libcfitsio-dev -y
    # for hdf4
-   sudo apt install flex bison libjpeg -y
+   sudo apt install flex bison libjpeg-dev -y
    # useful for some bare tools
-   sudo apt install autoconf libjpeg -y
+   sudo apt install autoconf  -y
 endif
 
 
