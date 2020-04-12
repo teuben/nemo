@@ -107,7 +107,7 @@ if ($ubuntu) then
    sudo apt install g++ -y
    sudo apt install gfortran -y
    # clang ???
-   sudo apt install xorg-dev
+   sudo apt install xorg-dev -y
    # xorg took care of the next 3
    #sudo apt install libx11-dev -y
    #sudo apt install libxt-dev -y
