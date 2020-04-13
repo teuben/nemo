@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7c 18-mar-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7d 13-apr-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1338,6 +1338,8 @@ local void printusage(string *defv)
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,
 	    "Insufficient parameters, try 'help=', 'help=?' or 'help=h' or 'man %s',\n", progname);
+    fprintf(stderr,
+	    "Online documentation might be here: https://teuben.github.io/nemo/man_html/%s.1.html\n", progname);
 	    
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Usage: %s", progname);
