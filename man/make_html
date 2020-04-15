@@ -11,6 +11,10 @@
 #
 #  I personally prefer gman (a Gnome utility), though tkman and xman
 #  are also not bad
+#
+#  Another option is mandoc:
+#      mandoc -Thtml -Ostyle=mandoc.css,man=%N.%S.html < man1/tsf.1 > tsf.1.html
+#  but this does (not yet) add the URLs we patch it with
 
 if ($#argv == 0) then
   set copy=0
