@@ -40,7 +40,7 @@ export PGPLOT_DIR=@PGPLOT_DIR@
 
 
 if [ -z "$MANPATH" ]; then
-  export MANPATH=$NEMO/man
+  export MANPATH=$NEMO/man:$(manpath)
 else
   export MANPATH=$NEMO/man:$MANPATH
 fi
