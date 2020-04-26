@@ -4,14 +4,17 @@
 # - run this script, it will create a astronemo_VERSION_ARCH.deb file
 # 
 # Examples:     "glnemo2 1.11.0-1.ubuntu18.04" and "amd64"
-# 
+#                glnemo2-1.20.0-RC1.ubuntu20.04.x86_64.deb
+
+if [ ! -e $NEMO/VERSION ]; then
+    echo NEMO environment not loaded
+    exit 1
+fi
 
 NEMO=nemo_$(cat $NEMO/VERSION)
 ARCH=$(uname -p)
 OS=$(lsb_release -s -i)$(lsb_release -s -r)
 
-# Examples:    glnemo2-1.20.0-RC1.ubuntu20.04.x86_64.deb
-#
 #
 debname=astro${NEMO}_${OS}_${ARCH}
 echo Starting with a clean $debname
