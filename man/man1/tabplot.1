@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "10 October 2006"
+.TH TABHIST 1NEMO "26 April 2020"
 .SH NAME
 tabplot \- general table plotter
 .SH SYNOPSIS
@@ -164,8 +164,12 @@ Should the layout file be called first or last ?
 .TP
 \fBreadline=t|f\fP
 After all batch plotting is done, should an interactive layout annotator
-(see also \fIlayout(5NEMO)\fP) be called. 
+(see also \fIlayout(5NEMO)\fP) be called.
 [\fBf\fP]
+.TP
+\fBpyplot=\fP
+If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
+Default: none.
 .SH SEE ALSO
 tabhist(1NEMO), snapplot(1NEMO)
 .SH BUGS
@@ -227,4 +231,5 @@ Peter Teuben
 2-dec-05	V2.9 implemented missing many-to-one plotting mode	PJT
 20-dec-05	V3.0 added xscale,yscale and started dxcol,dycol. Fixed xbin= bug	PJT
 10-oct-06	V3.0e finished dxcol=, dycol=	PJT
+8-jan-2020	V4.0 added pyplot=	PJT
 .fi

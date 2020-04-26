@@ -130,6 +130,10 @@ Delete points more than nsigma times the sigma from the mean. After each
 point sigma and mean are recomputed. [Default: none]
 .TP
 \fBsort=\fP\fIsort_mode\fP
+.TP
+\fBpyplot=\fP
+If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
+Default: none.
 .SH BUGS
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
@@ -169,6 +173,7 @@ xx-mar-88	V1.0: created          	PJT
 1-jun-10	6.0: bins= now allowed to have manual edges	PJT
 22-aug-12	6.2: added torben= option for fast large-N median	PJT
 16-jan-14	6.4: added mad= 	PJT
+8-jan-2020	7.0: added pyplot=	PJT
 2-mar-2020	7.1: added norm=	PJT
 .fi
 
