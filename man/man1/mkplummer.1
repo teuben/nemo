@@ -51,7 +51,8 @@ so that the cumulative mass at \fIrfrac\fP is \fImfrac\fP).
 \fBseed=\fP\fIinteger\fP
 seed for the random number generator (default: a value 0, which will
 be converted into a unique new value using UNIX's clock time, in
-seconds since once-upon-a-time-in-the-seventies).
+seconds since once-upon-a-time-in-the-seventies). See also
+\fIxrandom(1NEMO)\fP.
 .TP
 \fBtime=\fP\fItime\fP
 Time at which the snapshot applies (default: \fItime\fP=0.0).
@@ -113,7 +114,7 @@ a Salpeter mass spectrum with
   % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 .fi
 .SH SEE ALSO
-snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO)
+snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP
