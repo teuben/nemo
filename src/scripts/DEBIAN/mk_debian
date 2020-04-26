@@ -6,11 +6,14 @@
 # Examples:     "glnemo2 1.11.0-1.ubuntu18.04" and "amd64"
 # 
 
-NEMO=nemo_4.2
-ARCH=amd64
+NEMO=nemo_$(cat $NEMO/VERSION)
+ARCH=$(uname -p)
+OS=$(lsb_release -s -i)$(lsb_release -s -r)
 
+# Examples:    glnemo2-1.20.0-RC1.ubuntu20.04.x86_64.deb
 #
-debname=astro${NEMO}_${ARCH}
+#
+debname=astro${NEMO}_${OS}_${ARCH}
 echo Starting with a clean $debname
 rm -rf $debname
 mkdir $debname
