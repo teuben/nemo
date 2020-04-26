@@ -1339,7 +1339,7 @@ local void printusage(string *defv)
     fprintf(stderr,
 	    "Insufficient parameters, try 'help=', 'help=?' or 'help=h' or 'man %s',\n", progname);
     fprintf(stderr,
-	    "Online documentation might be here: https://teuben.github.io/nemo/man_html/%s.1.html\n", progname);
+	    "Formatted man page might also be here: https://teuben.github.io/nemo/man_html/%s.1.html\n", progname);
 	    
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Usage: %s", progname);
