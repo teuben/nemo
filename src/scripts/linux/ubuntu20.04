@@ -24,6 +24,8 @@ libcfitsio-dev
 flex bison libjpeg-dev
 # useful for some bare tools
 autoconf
+# man html making
+rman
 
 # fom the amuse build system
 build-essential gfortran python-dev
@@ -34,3 +36,4 @@ libhdf5-serial-dev hdf5-tools
 
 # for uns_projects
 libboost-dev
+libsqlite3-dev 
