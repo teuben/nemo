@@ -3,7 +3,7 @@ Version: 4.2
 Architecture: amd64
 Essential: no
 Priority: optional
-Depends: pgplot5, csh, gfortran, g++, gcc
+Depends: pgplot5, tcsh, gfortran, g++, gcc
 Maintainer: Peter Teuben
 Homepage: https://github.com/teuben/nemo
 Description: NEMO Stellar Dynamics Toolbox
