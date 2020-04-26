@@ -1,5 +1,5 @@
 Package: astronemo
-Version: 4.2
+Version: 4.2-pre
 Architecture: amd64
 Essential: no
 Priority: optional
