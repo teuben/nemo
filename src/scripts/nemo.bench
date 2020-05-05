@@ -57,7 +57,6 @@ else
     echo Skipping BSF testing.  Use bsf=1 to enable this.
 fi
     
-grep CPU_USAGE bench.*.log
 cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
 
 if [ $clean == 1 ]; then
