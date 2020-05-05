@@ -123,6 +123,7 @@ if ($ubuntu) then
    # for hdf4
    sudo apt install flex bison libjpeg-dev -y
    # useful for some bare tools
+
    sudo apt install autoconf -y
 endif
 

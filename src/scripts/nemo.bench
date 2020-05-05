@@ -23,7 +23,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-02-19) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
+echo "NEMOBENCH: (2020-05-05) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -57,7 +57,7 @@ else
     echo Skipping BSF testing.  Use bsf=1 to enable this.
 fi
     
-grep CPU_USAGE bench.*.log
+cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
 
 if [ $clean == 1 ]; then
    echo "Cleaning $tmp (use clean=0 to prevent this)"

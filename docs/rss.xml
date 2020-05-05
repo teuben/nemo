@@ -2,7 +2,7 @@
 <rss version="2.0">
 
 <channel>
-<title>NEMO software</title>
+<title>NEMO</title>
 <description>
   Software updates from the NEMO package are summarized here.
   The full description is on the NEMO whatsnew page on
@@ -11,6 +11,23 @@
 <link>
   https://teuben.github.io/nemo/rss.xml
 </link>
+
+
+
+<item>
+<title>
+nemo_4_1_7
+</title>
+<description>
+ (12-apr-2020)
+ This is a pre-release of NEMO V4.2, a.k.a. the Corona release, as we all work from home.
+ Fixed the nemo_start python module for the falcON tools.
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_2_0
+</link>
+</item>
+
 
 <item>
 <title>

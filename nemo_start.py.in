@@ -52,8 +52,15 @@ if not 'NEMO' in os.environ:
 #    export NEMOSITE=`hostname`
 
 # export PYTHONPATH=$NEMO/py/modules              # ??  do we still need this
-# source $FALCON/falcON_start.sh
+# 
 
-
+    # falcON  @todo check missing items from $FALCON/falcON_start.sh
+    _FALCON = '@NEMO@' + '/usr/dehnen/falcON'
+    os.environ['FALCON'] = _FALCON
+    _check_add('PATH',              '%s/bin'       % _FALCON)    
+    _check_add('LD_LIBRARY_PATH', '%s/lib'         % _FALCON)
+    _check_add('LD_LIBRARY_PATH', '%s/utils/lib'   % _FALCON)
+    _check_add('DYLD_LIBRARY_PATH', '%s/lib'       % _FALCON)
+    _check_add('DYLD_LIBRARY_PATH', '%s/utils/lib' % _FALCON)
 else:
     print("NEMO is already loaded")

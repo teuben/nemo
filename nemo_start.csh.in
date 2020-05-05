@@ -36,27 +36,10 @@ setenv NEMOSITE  `hostname`
 setenv YAPP          @YAPP_DEF@
 setenv PGPLOT_DIR    @PGPLOT_DIR@
 
-#   MANPATH isn't so standard as you may think....
-#	Ultrix doesn't handle MANPATH
-#	IRIX is also particular about MANPATH
-#       Linux needs to have their stuff added back in if none present
 if ($?MANPATH == 0) then
- if (-e /etc/man.config) then
-   # this works on linux redhat and mandrake....
-   set _mandirs=(`grep -w ^MANPATH /etc/man.config | awk '{print $2}'`)
- else
-   # try something else 'sensible'
-   set _mandirs=(/usr/man /usr/share/man /usr/local/man /local/man /opt/man /opt/SUNWspro/man /usr/openwin/man)
- endif
- setenv MANPATH $NEMO/man
- foreach _mandir ($_mandirs)
-   if (-e $_mandir) then
-      setenv MANPATH ${MANPATH}:$_mandir
-   endif
- end
+ setenv MANPATH $NEMO/man:`manpath`
 else
- echo $MANPATH | grep -s $NEMO/man  >& /dev/null
- if ($status) setenv MANPATH $NEMO/man:$MANPATH
+ setenv MANPATH $NEMO/man:$MANPATH
 endif
 
 # setenv MANPATH ${MANPATH}:${NEMO}/usr/dehnen/falcON/man  - manually copied into $NEMO/man
