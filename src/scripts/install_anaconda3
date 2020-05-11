@@ -48,7 +48,9 @@ if ($opt == 0) exit 0
 
 # http://projets.lam.fr/projects/unsio/
 # install a default via pip
-pip install unsio uns_projects
+# pip install unsio uns_projects
+pip install python-unsio python-unsiotools
+
 # but then install the developers version if these directories exist
 foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
   if (-d $dir) then
