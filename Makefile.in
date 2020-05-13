@@ -569,6 +569,9 @@ TIME = /usr/bin/time
 bench:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
 
+bench0:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)
+
 #
 TEST=""
 reinstall:

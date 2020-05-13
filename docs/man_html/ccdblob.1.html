@@ -14,49 +14,50 @@ ccdblob - properties of a blob in an image
 <b>ccdblob</b> [parameter=value]
 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdblob</b> computes some properties of a blob ("star") in an image.
-With given rough pixel coordinates and a box size, it will determine the
-peak, shape and flux of the blob, assuming the background signal (box needs
-to be big enough for this) is well characterised by the median value. This
-current algorithm thus does not work in crowded fields. <p>
-The current draft
-version is based off <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
- and thus inherits some keywords and
-output that may disappear or change meaning. <p>
-Pixel coordinates are 1-based.
-
+<b>ccdblob</b> is a poor man&rsquo;s source extractor and  computes some properties
+of a blob ("star") in an image. With given rough pixel coordinates and a
+box size, it will determine the peak, shape and flux of the blob, assuming
+the background signal (box needs to be big enough for this) is well characterised
+by the median value. This current algorithm thus does not work in crowded
+fields. <p>
+The current draft version is based off <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
+ and thus
+inherits some keywords and output that may disappear or change meaning.
+<p>
+Pixel coordinates are 1-based. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+The following parameters are recognized
+in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input image file [???]     </dd>
+<dd>Input NEMO image file [???]
+    </dd>
 
 <dt><b>pos=</b> </dt>
-<dd>(x,y) position, or use
-max in map [] </dd>
+<dd>(x,y) position, or use max in map. Integers, and are 1-based. []
+</dd>
 
 <dt><b>box=</b> </dt>
 <dd>Box size to use around pos [32]  </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Use only values
-above clip []  </dd>
+<dd>Use only values above clip
+[]  </dd>
 
 <dt><b>wcs=</b> </dt>
 <dd>Use WCS of the cube (else use pixel coordinates) </dd>
 
-<dt><b>radecvel=</b>
-</dt>
-<dd>Split the RA/DEC from VEL [f]   </dd>
+<dt><b>radecvel=</b> </dt>
+<dd>Split
+the RA/DEC from VEL [f]   </dd>
 
 <dt><b>weight=</b> </dt>
 <dd>Weights by intensity [t]     </dd>
 
-<dt><b>cross=</b>
-</dt>
-<dd>Use cross correlations between X and Y to </dd>
+<dt><b>cross=</b> </dt>
+<dd>Use
+cross correlations between X and Y to </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
