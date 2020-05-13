@@ -13,22 +13,29 @@
 #
 #  but this has not been experimented with.
 #
+#  May-2020        os=Linux/MacOSX
 
-set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set mc3   = https://repo.anaconda.com/archive/Anaconda3-2020.02-MacOSX-x86_64.sh
-set mc3   = https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+set url   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-MacOSX-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-%s-x86_64.sh
 
-set msh   = $mc3:t
 set dir   = `pwd`/anaconda3
 set opt   = 1
 set wget  = wgetc
+set os    = `uname -s`
 
 # you better know what you are doing here
 foreach arg ($*)
   set $arg
 end
 
-wgetc $mc3
+if ($os == Darwin) set os = Darwin
+
+set mc3 = `printf $url $os`
+set msh = $mc3:t
+
+$wget $mc3
 bash $msh -b -p $dir
 
 setenv PATH "$dir/bin:$PATH"
@@ -41,6 +48,7 @@ pip install --upgrade pip
 echo "set path = ($dir/bin "'$path); rehash'  >> python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         >> python_start.sh
 
+echo Created python_start files for you
 
 if ($opt == 0) exit 0
 
@@ -91,3 +99,5 @@ pip install amuse
 #  libgmp3-dev libmpfr6 libmpfr-dev \
 #  libhdf5-serial-dev hdf5-tools \
 #  git
+
+echo Reminder: also created python_start files for you
