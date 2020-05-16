@@ -64,71 +64,72 @@ so that the cumulative mass at <i>rfrac</i> is <i>mfrac</i>). </dd>
 <dd>seed for the
 random number generator (default: a value 0, which will be converted into
 a unique new value using UNIX&rsquo;s clock time, in seconds since once-upon-a-time-in-the-seventies).
-</dd>
+See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
+. </dd>
 
 <dt><b>time=</b><i>time</i> </dt>
-<dd>Time at which the snapshot applies (default: <i>time</i>=0.0). </dd>
+<dd>Time at which the snapshot applies (default:
+<i>time</i>=0.0). </dd>
 
-<dt><b>zerocm=t|f</b>
-</dt>
+<dt><b>zerocm=t|f</b> </dt>
 <dd>Reset center of mass to zero? [default: <b>t</b>]. </dd>
 
-<dt><b>scale=</b><i>scale_factor</i> </dt>
-<dd>A scale factor
-or scale to virial units (M=G=-4E=1). Use -1 for virial units, and 1 to get
-a model in structural (natural) units. Note: large scale factors means small
-systems with large velocity disperson. [Default: <b>-1</b>]. </dd>
-
-<dt><b>quit=<i>level</i></b> </dt>
-<dd>Level of
-quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet [default: <b>0</b>]. </dd>
-
-<dt><b>massname=<i>name</i></b>
+<dt><b>scale=</b><i>scale_factor</i>
 </dt>
-<dd>Identification of the mass spectrum. It is normally only a function of mass,
-so <b>n(m)</b> will suffice. If nothing specified, all stars will have the same
-mass (total mass M=1). [default: not used]. </dd>
+<dd>A scale factor or scale to virial units (M=G=-4E=1). Use -1 for virial units,
+and 1 to get a model in structural (natural) units. Note: large scale factors
+means small systems with large velocity disperson. [Default: <b>-1</b>]. </dd>
 
-<dt><b>massexpr=<i>expr</i></b> </dt>
-<dd>Expression for
-the mass-spectrum. In addition to the mass <i>m</i> from the <b>massname</b> it may contain
-any variables contained in the  <b>masspars</b> to be specified next. [default:
-<b>pow(m,p)</b>]. </dd>
+<dt><b>quit=<i>level</i></b>
+</dt>
+<dd>Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet [default:
+<b>0</b>]. </dd>
+
+<dt><b>massname=<i>name</i></b> </dt>
+<dd>Identification of the mass spectrum. It is normally only
+a function of mass, so <b>n(m)</b> will suffice. If nothing specified, all stars
+will have the same mass (total mass M=1). [default: not used]. </dd>
+
+<dt><b>massexpr=<i>expr</i></b>
+</dt>
+<dd>Expression for the mass-spectrum. In addition to the mass <i>m</i> from the <b>massname</b>
+it may contain any variables contained in the  <b>masspars</b> to be specified
+next. [default: <b>pow(m,p)</b>]. </dd>
 
 <dt><b>masspars=<i>pars</i></b> </dt>
-<dd>List of parameters and their values. They can be
-used by name in the <b>massexpr</b> specified before. [default: <b>p,0.0</b>]. </dd>
+<dd>List of parameters and their values.
+They can be used by name in the <b>massexpr</b> specified before. [default: <b>p,0.0</b>].
+</dd>
 
-<dt><b>massrange=<i>mlow,mhigh</i></b>
-</dt>
-<dd>Valid massrange. A lower and higher cutoff must be supplied. The massrange
-has arbitrary units, since all masses will be rescaled to set the total
-mass M=1. [default: <b>1,1</b>]. </dd>
+<dt><b>massrange=<i>mlow,mhigh</i></b> </dt>
+<dd>Valid massrange. A lower and higher cutoff must be
+supplied. The massrange has arbitrary units, since all masses will be rescaled
+to set the total mass M=1. [default: <b>1,1</b>]. </dd>
 
 <dt><b>headline=</b><i>string</i> </dt>
-<dd>Optional headline, which is written
-as the first item in the snapshot file, the next item being the snapshot
-itself. [default: not used]. </dd>
+<dd>Optional headline,
+which is written as the first item in the snapshot file, the next item
+being the snapshot itself. [default: not used]. </dd>
 
 <dt><b>nmodel=</b><i>integer</i> </dt>
-<dd>Number of models to generate.
-Although mostly meant for benchmarks, generating more then 1 model can
-be useful to process very large snapshots (which won&rsquo;t fit in memory) in
-a serialized fashion. See also <i>snapsplit</i>.  Default: <b>1</b>. </dd>
+<dd>Number of
+models to generate. Although mostly meant for benchmarks, generating more
+then 1 model can be useful to process very large snapshots (which won&rsquo;t
+fit in memory) in a serialized fashion. See also <i>snapsplit</i>.  Default: <b>1</b>. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-A non-delta function
-mass-spectrum will not create a properly virialized system yet. See <a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
-
-<p>
-For very large (&gt;1000) ratio in the mass ranges the spline interpolation,
-used in <a href='frandom.3.html'><i>frandom(3NEMO)</i></a>
-, can fail using a valid [0,1] range. 
+A
+non-delta function mass-spectrum will not create a properly virialized system
+yet. See <a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
+ <p>
+For very large (&gt;1000) ratio in the mass ranges
+the spline interpolation, used in <a href='frandom.3.html'><i>frandom(3NEMO)</i></a>
+, can fail using a valid
+[0,1] range. 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-mkplummer
-can also be used to create a plummer sphere with a mass spectrum, e.g. a
-Salpeter mass spectrum with <br>
+mkplummer can also be used to create a plummer sphere
+with a mass spectrum, e.g. a Salpeter mass spectrum with <br>
 <pre>  % mkplummer salpeter.dat 10000 massname=&rsquo;n(m)&rsquo; massexpr=&rsquo;pow(m,p)&rsquo; masspars=p,-2.35
 massrange=0.1,10
 </pre>
@@ -140,13 +141,14 @@ massrange=0.1,10
 ,
 <a href='mkplum.1.html'>mkplum(1NEMO)</a>
 , <a href='mcluster.1.html'>mcluster(1NEMO)</a>
+, <a href='xrandom.3.html'>xrandom(3NEMO)</a>
  <p>
-H.C.Plummer (1911), <i>MNRAS</i>, <b>71</b>, 460. <p>
-S.J. Aarseth,
-M. Henon and R.  Wielen (1974),  <i>Astron. and Astrophys.<b> 37</b></i>, p. 183. <p>
-A.H.W. Kuepper,
-Th. Maschberger, P. Kroupa and H. Baumgardt, 2011, MNRAS, 417, 2300 (McLuster)
-
+H.C.Plummer (1911), <i>MNRAS</i>,
+<b>71</b>, 460. <p>
+S.J. Aarseth, M. Henon and R.  Wielen (1974),  <i>Astron. and Astrophys.<b>
+37</b></i>, p. 183. <p>
+A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt, 2011,
+MNRAS, 417, 2300 (McLuster) 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Piet Hut (Peter Teuben) 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
