@@ -6,6 +6,10 @@ mktabdisk \- set up a (r,d,v,s) table driven test disk
 .SH DESCRIPTION
 \fBmktabdisk\fP creates an idealized test disk with a given tabular form of density,
 circular velocity and velocity dispersion. It can also optionally compute the asymmetric drift correction.
+.PP
+The Asymmetric Drift Corrections are split in threee: a density, velocity and dispersion related component.
+They are linear, but recall they are added (or subtracted) in quadrature, so we print the sign of the correction
+as well. See EXAMPLES below.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -26,7 +30,7 @@ Inner disk radius (rmin from table) []
 Outer cutoff radius (rmax from table) [] 
 .TP
 \fBmass=\fP
-Rescale total mass to this? []  
+Rescale total mass to this?. By default not scaled, if a positive value given, this will be the total mass.
 .TP
 \fBseed=\fP
 Usual random number seed [0]   
@@ -35,7 +39,7 @@ Usual random number seed [0]
 Sign of Z-angular momentum vector of disk [1]
 .TP
 \fBadc=\fP
-Produce a table of Asymmetric Drift Corrections [t]
+Produce a table of Asymmetric Drift Corrections [f]
 .TP
 \fBheadline=\fP
 Text headline for output []   
@@ -46,16 +50,24 @@ and constant velocity dispersion at 10% of the peak velocity
 
      nemoinp 0:5:0.2 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.1' > tab1
      mktabdisk tab1 . adc=true
-     
-     0.2  0.818731   0.196116 0.1  -0.00200093 0.000210941 0
-     0.4  0.67032    0.371391 0.1  -0.00399934 0.000683727 0
-     0.6  0.548812   0.514496 0.1  -0.00600024 0.00132394  0
+     0.2  0.818731   0.196116  0.1  -0.0447318 0.0145238 0
+     0.4  0.67032    0.371391  0.1  -0.0632403 0.0261482 0
+     0.6  0.548812   0.514496  0.1  -0.0774612 0.036386  0
      ...
-     4.6  0.0100518  0.977176 0.1  -0.046004   0.00477442  0
-     4.8  0.00822975 0.97898  0.1  -0.0479744  0.00479202  0
-     5    0.00673795 0.980581 0.1  -0.0501164  0.00480735  0
+     4.6  0.0100518  0.977176  0.1  -0.214485  0.0690972 0
+     4.8  0.00822975 0.97898   0.1  -0.219031  0.0692244 0
+     5    0.00673795 0.980581  0.1  -0.223867  0.0693351 0
 
      rad  den        vel      sig   adc_den    adc_vel     adc_sig
+     
+.fi
+or a colorful plot with various velocitie components plotted, and where the V/sigma < 1 in the nuclear region
+.nf
+
+     nemoinp 0:7:0.1 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.4-0.3*%1/(1+%1)' > tab2
+     mktabdisk tab2 . adc=true > tab2.adc
+     tabplot tab2.adc 1 3,4,5,6,7 0 8 -0.4 1.2 line=1,1,1,1,1,2 color=3,4,2,3,4 ycoord=0 xcoord=1
+
 .fi
 .SH SEE ALSO
 mkdisk(1NEMO), snapshot(5NEMO)
