@@ -1,0 +1,70 @@
+.TH MKTABDISK 1NEMO "16 May 2020"
+.SH NAME
+mktabdisk \- set up a (r,d,v,s) table driven test disk
+.SH SYNOPSIS
+\fBmktabdisk\fP [parameter=value]
+.SH DESCRIPTION
+\fBmktabdisk\fP creates an idealized test disk with a given tabular form of density,
+circular velocity and velocity dispersion. It can also optionally compute the asymmetric drift correction.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input table (radius,density,velocity,dispersion) [???]    
+.TP
+\fBout=\fP
+Output file name (snapshot) [???]   
+.TP
+\fBnbody=\fP
+Number of disk particles [2048]   
+.TP
+\fBrmin=\fP
+Inner disk radius (rmin from table) [] 
+.TP
+\fBrmax=\fP
+Outer cutoff radius (rmax from table) [] 
+.TP
+\fBmass=\fP
+Rescale total mass to this? []  
+.TP
+\fBseed=\fP
+Usual random number seed [0]   
+.TP
+\fBsign=\fP
+Sign of Z-angular momentum vector of disk [1]
+.TP
+\fBadc=\fP
+Produce a table of Asymmetric Drift Corrections [t]
+.TP
+\fBheadline=\fP
+Text headline for output []   
+.SH EXAMPLES
+Here is an example of producing a simple exponential disk in a isothermal halo rotation curve
+and constant velocity dispersion at 10% of the peak velocity
+.nf
+
+     nemoinp 0:5:0.2 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.1' > tab1
+     mktabdisk tab1 . adc=true
+     
+     0.2  0.818731   0.196116 0.1  -0.00200093 0.000210941 0
+     0.4  0.67032    0.371391 0.1  -0.00399934 0.000683727 0
+     0.6  0.548812   0.514496 0.1  -0.00600024 0.00132394  0
+     ...
+     4.6  0.0100518  0.977176 0.1  -0.046004   0.00477442  0
+     4.8  0.00822975 0.97898  0.1  -0.0479744  0.00479202  0
+     5    0.00673795 0.980581 0.1  -0.0501164  0.00480735  0
+
+     rad  den        vel      sig   adc_den    adc_vel     adc_sig
+.fi
+.SH SEE ALSO
+mkdisk(1NEMO), snapshot(5NEMO)
+.SH FILES
+src/nbody/init/mktabdisk.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+16-May-20	V0.1 drafted	PJT
+.fi
