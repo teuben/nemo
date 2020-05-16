@@ -30,7 +30,7 @@ string defv[] = {
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=t\n            Produce a table of Asymmetric Drift Corrections",
     "headline=\n	Text headline for output",
-    "VERSION=0.1\n	16-may-2020 PJT",
+    "VERSION=0.2\n	16-may-2020 PJT",
     NULL,
 };
 
@@ -52,38 +52,10 @@ local real *rad, *den, *vel, *sig, *dencoef, *velcoef, *sigcoef;
 extern double xrandom(double,double), grandom(double,double);
 extern int nemo_file_lines(string,int);
 
-local real took(real);
 local void readtable(string name, bool Qadc);
 local void writegalaxy(string name, string headline);
 local void testdisk(real mass);
   
-local real mysech2(real z)
-{
-  real y = exp(z);
-  return sqr(2.0/(y+1.0/y));
-}
-
-local real pick_z(real z0)
-{
-  real z = frandom(-6.0,6.0,mysech2) * z0;
-  return z;
-}
-
-local real pick_dv(real r, real z, real z0)
-{
-#ifdef OLD_BURKERT  
-  real dv = 1 - (1 + (z/z0) * tanh(z/z0))*(z0/r);
-#else
-  //real dv = tanh(z/z0);
-  //dv = sqrt(1 - ABS(dv));
-  real dv = ABS(z/z0);
-  //dv = sqrt(exp(-dv));
-  dv = exp(-dv);
-#endif  
-  dprintf(1,"PJT %g %g %g\n",r,z,dv);
-  return dv;
-}
-
 void nemo_main()
 {
     int nfrac, seed, nz;
@@ -181,8 +153,6 @@ void writegalaxy(string name, string headline)
     outstr = stropen(name, "w");
     put_history(outstr);
     bits = MassBit | PhaseSpaceBit | TimeBit;
-    bits |= AuxBit;
-    bits |= PotentialBit;
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
     strclose(outstr);
 }
@@ -197,9 +167,8 @@ void testdisk(real totmas)
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
     real  dv_r, dv_t, sint, cost, theta_0, vrandom;
-    real sigma_r, sigma_t, sigma_z;
-    vector acc_i;
-    int i, ncirc, ndim=NDIM;
+    real den_i, vel_i, sig_i;
+    int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
     real totmas1 = 0.0;
 
@@ -208,74 +177,35 @@ void testdisk(real totmas)
     rmax2 = rmax * rmax;
     theta_i = xrandom(0.0, TWO_PI);
     t = 0;    /* dummy time ; we do not support variable time */
-    for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop all stars */
-	Mass(dp) = mass;
-	if (ndisk == 1)
+    for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop all stars */
+	if (ndisk == 1)   // ensure uniform distribution in r^2, but random in angles
 	  r_i = rmin;
 	else
 	  r_i = sqrt(rmin2 + i * (rmax2 - rmin2) / (ndisk - 1.0));
 	theta_i = xrandom(0.0, TWO_PI);
         cost = cos(theta_i);
         sint = sin(theta_i);
-	Pos(dp)[0] = pos_d[0] = r_i * cost;		/* set positions */
-	Pos(dp)[1] = pos_d[1] = r_i * sint;
-	Pos(dp)[2] = pos_d[2] = 0.0;                    /* it's a DISK ! */
-        //(*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d); /* get forces    */
-        SETV(acc_i,acc_d);
-	vcir_i = sqrt(r_i * absv(acc_i));               /* v^2 / r = force */
-#if 1
-	do {                         /* iterate, if needed, to get vrandom */
-	    sigma_r = grandom(0.0,frac[0]*vcir_i);
-	    sigma_t = grandom(0.0,frac[1]*vcir_i);
-	    sigma_z = grandom(0.0,frac[2]*vcir_i);
-	    dv_t = sigma_t;
-	    dv_r = sigma_r * took(r_i) ;
-	    vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
-	    if (vrandom > vcir_i) ncirc++;
-	} while (vrandom > vcir_i);
-	vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
-	dv_r += vrad;
-	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
-	Vel(dp)[1] += sint*dv_r + cost*dv_t;
-#else
-	sigma_r = grandom(0.0,frac[0]*vcir_i);
-	sigma_t = grandom(0.0,frac[1]*vcir_i);
-	sigma_z = grandom(0.0,frac[2]*vcir_i);
-	dv_t = sigma_t;
-	dv_r = sigma_r * took(r_i) ;
+	
+	den_i = seval(r_i, rad, den, dencoef, nrad);		      
+	vel_i = seval(r_i, rad, vel, velcoef, nrad);		      
+	sig_i = seval(r_i, rad, sig, sigcoef, nrad);
 
-	/* Qenergy only uses radial motion: thus preserving the 
-	 * guiding center for epicycles ?? (Olling 2003)
-	 */
+	Mass(dp) = den_i;
+	totmas1 += Mass(dp);
 
-	if (Qenergy)
-	  vcir_i = sqrt((vcir_i-dv_r)*(vcir_i+dv_r));
-	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	Vel(dp)[0] += cost*dv_r;
-	Vel(dp)[1] += sint*dv_r;
-	if (!Qenergy) {
-	  Vel(dp)[0] += -sint*dv_t;
-	  Vel(dp)[1] +=  cost*dv_t;
-	}
+	Pos(dp)[0] = r_i * cost;	          	/* set positions */
+	Pos(dp)[1] = r_i * sint;
+	Pos(dp)[2] = 0.0;                               /* it's a DISK ! */
 
-#endif
-	Vel(dp)[2] = sigma_z;
-	/* store potential and total energy for debugging */
-	Phi(dp) = pot_d;
-	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Vel(dp)[0] = -vel_i * sint * jz_sign;           // circular orbits
+	Vel(dp)[1] =  vel_i * cost * jz_sign;
+	Vel(dp)[0] += grandom(0.0, sig_i);              // isotropic vel dispersion
+	Vel(dp)[1] += grandom(0.0, sig_i);
+	Vel(dp)[2] = 0.0;
     }
-    if (ncirc) dprintf(0,"Had to respin random %d times\n",ncirc);
+    if (totmas > 0) {
+      for (dp=disk, i = 0; i < ndisk; dp++, i++)
+	Mass(dp) /= totmas1;
+    }
 }
 
-
-/*   
- *   2*omega/kappa; from spline interpolation.....
- */
-
-real took(real r)
-{
-    return  1.0;
-}
