@@ -28,7 +28,7 @@ string defv[] = {
     "mass=\n		Rescale total mass to this?",
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
-    "adc=t\n            Produce a table of Asymmetric Drift Corrections",
+    "adc=f\n            Produce a table of Asymmetric Drift Corrections",
     "headline=\n	Text headline for output",
     "VERSION=0.2\n	16-may-2020 PJT",
     NULL,
@@ -55,6 +55,7 @@ extern int nemo_file_lines(string,int);
 local void readtable(string name, bool Qadc);
 local void writegalaxy(string name, string headline);
 local void testdisk(real mass);
+local real ssqrt(real x);
   
 void nemo_main()
 {
@@ -132,7 +133,7 @@ void readtable(string name, bool Qadc)
       adcden = 1.0 * sig2 * rad[i] * ddendr / den[i];
       adcvel = 0.5 * sig2 * (1 - rad[i] * dveldr / vel[i]);
       adcsig = 2.0 * sig2 * rad[i] * sig[i] * dsigdr;
-      printf("%g  %g %g %g  %g %g %g\n",rad[i],den[i],vel[i],sig[i],adcden,adcvel,adcsig);
+      printf("%g  %g %g %g  %g %g %g\n",rad[i],den[i],vel[i],sig[i],ssqrt(adcden),ssqrt(adcvel),ssqrt(adcsig));
     }
   }
 }
@@ -209,3 +210,9 @@ void testdisk(real totmas)
     }
 }
 
+real ssqrt(real x)
+{
+  if (x==0) return x;
+  if (x < 0) return -sqrt(-x);
+  return sqrt(x);
+}
