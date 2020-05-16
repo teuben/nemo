@@ -25,25 +25,27 @@ contains a timestamp of that creation.
 <A NAME=4_2_0>
 <H2> 4.2.0:  in progress (a.k.a. the Corona release) </H2>
 <UL>
+  <LI> (16-may-2020)  new program <A HREF=man_html/mktabdisk.1.html>mktabdisk</A> to make fake disks to simulate observe PPV cubes
 
   <LI> (11-may-2020) benchmark streamlined:
 <pre>    
   $ /usr/bin/time src/scripts/nemo.bench
   NEMOBENCH: (2020-05-05) bench129749 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 tmp=bench129749
-  CPU_USAGE ccdpot : 11.94    11.93 0.00  0.00 0.00  1718371453
-  CPU_USAGE directcode : 4.02    4.01 0.00  0.00 0.00  1718369452
-  CPU_USAGE gyrfalcON : 2.49    2.48 0.00  0.00 0.00  1718370096
-  CPU_USAGE hackcode1 : 2.41    2.39 0.01  0.00 0.00  1718369854
-  CPU_USAGE mkorbit : 0.00    0.00 0.00  0.00 0.00  1718372647
-  CPU_USAGE mkplummer : 0.01    0.00 0.00  0.00 0.00  1718370095
-  CPU_USAGE mkspiral : 8.17    5.90 2.23  0.00 0.00  1718370635
-  CPU_USAGE orbint : 1.16    1.15 0.00  0.00 0.00  1718372647
-  CPU_USAGE potcode : 2.90    2.89 0.00  0.00 0.00  1718370345
+  CPU_USAGE ccdpot :     11.94   11.93 0.00  0.00 0.00  1718371453
+  CPU_USAGE directcode :  4.02    4.01 0.00  0.00 0.00  1718369452
+  CPU_USAGE gyrfalcON :   2.49    2.48 0.00  0.00 0.00  1718370096
+  CPU_USAGE hackcode1 :   2.41    2.39 0.01  0.00 0.00  1718369854
+  CPU_USAGE mkorbit :     0.00    0.00 0.00  0.00 0.00  1718372647
+  CPU_USAGE mkplummer :   0.01    0.00 0.00  0.00 0.00  1718370095
+  CPU_USAGE mkspiral :    8.17    5.90 2.23  0.00 0.00  1718370635
+  CPU_USAGE orbint :      1.16    1.15 0.00  0.00 0.00  1718372647
+  CPU_USAGE potcode :     2.90    2.89 0.00  0.00 0.00  1718370345
   Cleaning bench129749 (use clean=0 to prevent this)
   30.83user 2.53system 0:33.39elapsed 99%CPU (0avgtext+0avgdata 174280maxresident)k
   0inputs+4413976outputs (0major+509968minor)pagefaults 0swaps
 </pre>
-  
+although this is on my T480 Lenovo laptop (i7-8550U CPU @ 1.80GHz) I have yet to see any desktop being
+to beat this.
   <LI> (26-apr-2020) tabplot and tabhist have a new <b>pyplot=</b> keyword to write a template starting point for matplotlib plotting
   <LI> (24-apr-2020) Experimental <A HREF=https://www.astro.umd.edu/~teuben/nemo/deb/>debian packages for NEMO</A>
   <LI> (23-apr-2020) small fix for Ubuntu 20.04 LTS
