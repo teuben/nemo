@@ -4,6 +4,8 @@
  *	
  *       16-mar-2020   Cloned off mkdisk  - Peter Teuben
  *
+ *
+ *   @todo    decide is vel or vobs should be the velocity in the snapshot
  */
 
 #include <stdinc.h>
@@ -25,16 +27,16 @@ string defv[] = {
     "nbody=2048\n	Number of disk particles",
     "rmin=\n		Inner disk radius (rmin from table)",
     "rmax=\n		Outer cutoff radius (rmax from table)",
-    "mass=\n		Rescale total mass to this?",
+    "mass=1.0\n		Rescale total mass to this?",
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=f\n            Produce a table of Asymmetric Drift Corrections",
     "headline=\n	Text headline for output",
-    "VERSION=0.2\n	16-may-2020 PJT",
+    "VERSION=0.3\n	16-may-2020 PJT",
     NULL,
 };
 
-string usage="set up a (r,d,v,s) table driven test disk";
+string usage="create a test disk with density, circular velocity and dispersion given by a table";
 
 local real rmin, rmax, mass;
 local int  jz_sign;
@@ -67,6 +69,7 @@ void nemo_main()
 
     rmin = (hasvalue("rmin") ? getdparam("rmin") : rad[0]);
     rmax = (hasvalue("rmax") ? getdparam("rmax") : rad[nrad-1]);
+    dprintf(0,"%d radii in table\n",nrad);
     dprintf(0,"rmin/max = %g %g\n",rmin,rmax);
     
     ndisk = getiparam("nbody");
@@ -74,19 +77,15 @@ void nemo_main()
     jz_sign = getiparam("sign");
     if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
 
-    if (hasvalue("mass"))
-      mass = getdparam("mass");
-    else
-      mass = -1.0;
-
+    mass = getdparam("mass");
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
     testdisk(mass);
     writegalaxy(getparam("out"),getparam("headline"));
 }
 
-/* READTABLE:  read table
- *
+/*
+ * READTABLE:  read (R,D,V,S) table
  */
 
 void readtable(string name, bool Qadc)
@@ -95,7 +94,7 @@ void readtable(string name, bool Qadc)
   real *coldat[4];
   real adcden, adcvel, adcsig;
   real ddendr, dveldr, dsigdr;
-  real sig2;
+  real sig2,vobs;
   int i, nmax;
   stream instr;
   
@@ -125,7 +124,9 @@ void readtable(string name, bool Qadc)
   spline(sigcoef, rad, sig, nrad);
 
   if (Qadc) {
-    for (i=1; i<nrad; i++) {    // skip first point, assuming it's (0,0)
+    printf("# R    D       V         S     adc_D      adc_V    adc_S       vobs\n");
+    for (i=0; i<nrad; i++) {    // skip first point, assuming it's (0,0)
+      if (rad[i]==0) continue;
       ddendr = spldif(rad[i], rad, den, dencoef, nrad);
       dveldr = spldif(rad[i], rad, vel, velcoef, nrad);
       dsigdr = spldif(rad[i], rad, sig, sigcoef, nrad);
@@ -133,7 +134,9 @@ void readtable(string name, bool Qadc)
       adcden = 1.0 * sig2 * rad[i] * ddendr / den[i];
       adcvel = 0.5 * sig2 * (1 - rad[i] * dveldr / vel[i]);
       adcsig = 2.0 * sig2 * rad[i] * sig[i] * dsigdr;
-      printf("%g  %g %g %g  %g %g %g\n",rad[i],den[i],vel[i],sig[i],ssqrt(adcden),ssqrt(adcvel),ssqrt(adcsig));
+      vobs = vel[i]*vel[i] + adcden + adcvel + adcsig;
+      vobs = vobs > 0 ?  sqrt(vobs) : 0.0;
+      printf("%g  %g %g %g  %g %g %g  %g\n",rad[i],den[i],vel[i],sig[i],ssqrt(adcden),ssqrt(adcvel),ssqrt(adcsig),vobs);
     }
   }
 }
