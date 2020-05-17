@@ -1,82 +1,97 @@
 .TH MKTABDISK 1NEMO "16 May 2020"
 .SH NAME
-mktabdisk \- set up a (r,d,v,s) table driven test disk
+mktabdisk \- create a test disk with density, circular velocity and dispersion given by a table
 .SH SYNOPSIS
 \fBmktabdisk\fP [parameter=value]
 .SH DESCRIPTION
 \fBmktabdisk\fP creates an idealized test disk with a given tabular form of density,
-circular velocity and velocity dispersion. It can also optionally compute the asymmetric drift correction.
+circular velocity and velocity dispersion as function of radius.
+It can also optionally compute the asymmetric drift correction.
 .PP
-The Asymmetric Drift Corrections are split in threee: a density, velocity and dispersion related component.
+For clarity the
+Asymmetric Drift Correction output is split in three: a density, velocity and dispersion related component.
 They are linear, but recall they are added (or subtracted) in quadrature, so we print the sign of the correction
-as well. See EXAMPLES below.
+as well. See EXAMPLES below. The three are (many references in the literature with some assumptions of
+isotropicity):
+.nf
+
+     adc_D^2 = S^2 dlnD/dlnR
+     adc_V^2 = S^2 (1-dlnV/dlnR) / 2
+     adc_S_2 = S^2 dS^2/dlnR
+     
+.fi
+Normally only the \fIadc_V^2\fP term increases the rotation curve, the other two act like an outward bound force, and
+subtract from the rotation curve to give the observed streaming velocity.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input table (radius,density,velocity,dispersion) [???]    
+Input table (radius,density,velocity,dispersion). No default.
 .TP
 \fBout=\fP
-Output file name (snapshot) [???]   
+Output file name in standard \fIsnapshot(5NEMO)\fP format.
 .TP
 \fBnbody=\fP
 Number of disk particles [2048]   
 .TP
 \fBrmin=\fP
-Inner disk radius (rmin from table) [] 
+Inner disk radius [min radius from table]
 .TP
 \fBrmax=\fP
-Outer cutoff radius (rmax from table) [] 
+Outer cutoff radius [max radius from table]
 .TP
 \fBmass=\fP
-Rescale total mass to this?. By default not scaled, if a positive value given, this will be the total mass.
+Rescale total mass to this?. By default not scaled, if a positive value given,
+this will be the total mass [1.0]
 .TP
 \fBseed=\fP
-Usual random number seed [0]   
+Usual random number seed, see also \fIxrandom(1NEMO)\fP [0]   
 .TP
 \fBsign=\fP
-Sign of Z-angular momentum vector of disk [1]
+Sign of Z-angular momentum vector of disk. +1 means counter clock wise. [1]
 .TP
-\fBadc=\fP
-Produce a table of Asymmetric Drift Corrections [f]
+\fBadc=t|f\fP
+Produce a table of Asymmetric Drift Corrections. If choosen, a simple ascii table
+with 7 columns is printed: \fIrad, den (D), vel (V), sig (S), adc_D, adc_V, adc_S, vobs\fP [f]
 .TP
 \fBheadline=\fP
-Text headline for output []   
+Text headline for output.
 .SH EXAMPLES
-Here is an example of producing a simple exponential disk in a isothermal halo rotation curve
-and constant velocity dispersion at 10% of the peak velocity
+Here is an example of producing the ADC table of an exponential disk with an isothermal halo rotation curve
+and constant velocity dispersion at 10% of the peak velocity:
 .nf
 
      nemoinp 0:5:0.2 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.1' > tab1
      mktabdisk tab1 . adc=true
-     0.2  0.818731   0.196116  0.1  -0.0447318 0.0145238 0
-     0.4  0.67032    0.371391  0.1  -0.0632403 0.0261482 0
-     0.6  0.548812   0.514496  0.1  -0.0774612 0.036386  0
+     # R  D          V         S    adc_D      adc_V     adc_S  Vobs
+     0.2  0.818731   0.196116  0.1  -0.0447318 0.0145238 0      0.191498
+     0.4  0.67032    0.371391  0.1  -0.0632403 0.0261482 0      0.3669
+     0.6  0.548812   0.514496  0.1  -0.0774612 0.036386  0      0.509931
      ...
-     4.6  0.0100518  0.977176  0.1  -0.214485  0.0690972 0
-     4.8  0.00822975 0.97898   0.1  -0.219031  0.0692244 0
-     5    0.00673795 0.980581  0.1  -0.223867  0.0693351 0
+     4.6  0.0100518  0.977176  0.1  -0.214485  0.0690972 0      0.955847
+     4.8  0.00822975 0.97898   0.1  -0.219031  0.0692244 0      0.956671
+     5.0  0.00673795 0.980581  0.1  -0.223867  0.0693351 0      0.957199
 
-     rad  den        vel      sig   adc_den    adc_vel     adc_sig
-     
 .fi
-or a colorful plot with various velocitie components plotted, and where the V/sigma < 1 in the nuclear region
+or a colorful plot with various velocity components plotted, and where the V/sigma < 1 in the nuclear region
 .nf
 
-     nemoinp 0:7:0.1 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.4-0.3*%1/(1+%1)' > tab2
+     nemoinp 0.001,0.1:15:0.1 | tabmath - - 'exp(-%1),%1/sqrt(1+%1**2),0.4-0.3*%1/(1+%1)' > tab2
      mktabdisk tab2 . adc=true > tab2.adc
-     tabplot tab2.adc 1 3,4,5,6,7 0 8 -0.4 1.2 line=1,1,1,1,1,2 color=3,4,2,3,4 ycoord=0 xcoord=1
+     tabplot tab2.adc 1 3,4,5,6,7,8 0 16 -0.5 1.1 line=1,1,1,1,1,2 color=3,4,2,3,4,3 ycoord=0 xcoord=1
 
 .fi
+.SH CAVEATS
+The current version distributes particles regularly by radius, but randomnly in angle.
 .SH SEE ALSO
 mkdisk(1NEMO), snapshot(5NEMO)
 .SH FILES
-src/nbody/init/mktabdisk.c
+$NEMO/src/nbody/init/mktabdisk.c
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-16-May-20	V0.1 drafted	PJT
+16-may-2020	V0.1 drafted	PJT
 .fi
