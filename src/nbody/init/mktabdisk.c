@@ -31,8 +31,9 @@ string defv[] = {
     "seed=0\n		Usual random number seed",
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=f\n            Produce a table of Asymmetric Drift Corrections",
+    "mode=1\n           1: regular r, random angles   2: cartesian",
     "headline=\n	Text headline for output",
-    "VERSION=0.3\n	16-may-2020 PJT",
+    "VERSION=0.4\n	17-may-2020 PJT",
     NULL,
 };
 
@@ -56,7 +57,8 @@ extern int nemo_file_lines(string,int);
 
 local void readtable(string name, bool Qadc);
 local void writegalaxy(string name, string headline);
-local void testdisk(real mass);
+local void testdisk1(real mass);
+local void testdisk2(real mass);
 local real ssqrt(real x);
   
 void nemo_main()
@@ -64,6 +66,7 @@ void nemo_main()
     int nfrac, seed, nz;
     real z0[2];
     bool Qadc = getbparam("adc");
+    int mode = getiparam("mode");
 
     readtable(getparam("in"), Qadc);
 
@@ -80,7 +83,12 @@ void nemo_main()
     mass = getdparam("mass");
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
-    testdisk(mass);
+    if (mode==1)
+      testdisk1(mass);
+    else if (mode==2)
+      testdisk2(mass);
+    else
+      error("no mode=%d",mode);
     writegalaxy(getparam("out"),getparam("headline"));
 }
 
@@ -166,7 +174,68 @@ void writegalaxy(string name, string headline)
  * density test disk.  
  */
 
-void testdisk(real totmas)
+void testdisk2(real totmas)
+{
+    Body *dp;
+    real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
+    real  dv_r, dv_t, sint, cost, theta_0, vrandom;
+    real den_i, vel_i, sig_i;
+    int i, j, ndim=NDIM;
+    double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
+    real x, y, dr, r2, totmas1 = 0.0;
+    int n2 = ndisk * 1.27;     // *4/pi square vs. circle
+    int n1 = (int) sqrt(n2);
+
+    warning("cartesian grid");    
+
+    disk = (Body *) allocate(n2 * sizeof(Body));
+    dprintf(0,"Allocate space for %d, linear is %d\n",n2,n1);
+
+    dr = 2*rmax /(n1-1);
+    rmin2 = rmin * rmin;
+    rmax2 = rmax * rmax;
+    t = 0;    /* dummy time ; we do not support variable time */
+    dp = disk;
+    ndisk = 0;
+    for (i = 0; i < n1; i++) {
+      x = -rmax + i*dr;
+      for (j = 0; j < n1; j++) {
+	y = -rmax + j*dr;
+	r2 = x*x + y*y;
+	if (r2 < rmin2 || r2 > rmax2) continue;
+	r_i = sqrt(r2);
+        cost = x / r_i;
+        sint = y / r_i;
+	
+	den_i = seval(r_i, rad, den, dencoef, nrad);		      
+	vel_i = seval(r_i, rad, vel, velcoef, nrad);		      
+	sig_i = seval(r_i, rad, sig, sigcoef, nrad);
+
+	Mass(dp) = den_i;
+	totmas1 += Mass(dp);
+
+	Pos(dp)[0] = x;
+	Pos(dp)[1] = y;
+	Pos(dp)[2] = 0.0;                               /* it's a DISK ! */
+
+	Vel(dp)[0] = -vel_i * sint * jz_sign;           // circular orbits
+	Vel(dp)[1] =  vel_i * cost * jz_sign;
+	Vel(dp)[0] += grandom(0.0, sig_i);              // isotropic vel dispersion
+	Vel(dp)[1] += grandom(0.0, sig_i);
+	Vel(dp)[2] = 0.0;
+	
+	dp++;
+	ndisk++;
+      } // j
+    } // i
+    dprintf(0,"Found %d between rmin and rmax\n",ndisk);
+    if (totmas > 0) {
+      for (dp=disk, i = 0; i < ndisk; dp++, i++)
+	Mass(dp) /= totmas1;
+    }
+}
+
+void testdisk1(real totmas)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
@@ -175,6 +244,8 @@ void testdisk(real totmas)
     int i, ndim=NDIM;
     double pos_d[NDIM], acc_d[NDIM], pot_d, time_d = 0.0;
     real totmas1 = 0.0;
+
+    warning("regular in radius, random in angle");
 
     disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
