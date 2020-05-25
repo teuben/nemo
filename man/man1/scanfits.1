@@ -192,13 +192,14 @@ If a keyword \fBDATExxxx\fP is present, and it matches the pattern
 "dd/mm/yy", it will be transformed to "yyyy-mm-dd", which makes the
 file Y2K compliant.  FYI: the unix \fIdate(1)\fP
 command produces Y2K compliant
-with \fBdate +%Y-%m-%dT%H:%M:%S\fP. The old style
-is done with  \fBdate +%d/%m/%y\fB.
+with \fBdate +%Y-%m-%dT%H:%M:%S.%N\fP, where the subsecond \fB.%N\fP portion is optional.
+The old style is done with  \fBdate +%d/%m/%y\fB,  which does not sort lexically.
 .TP
 \fBUNY2K\fP
 If a keyword \fBDATExxxx\fP is present, and it matches the pattern
 "yyyy-mm-dd", it will be transformed to "dd/mm/yy", which makes the
 file non-Y2K compliant. This might help you getting by some old readers.
+Highly discouraged of course.
 .TP
 \fBDECORDER\fP
 If the keyword \fBDECORDER\fP is present, and it has a value \fBT\fP,
