@@ -188,36 +188,38 @@ anything that does not have an &rsquo;=&rsquo; in column 9 are not affected. </d
 keyword <b>DATExxxx</b> is present, and it matches the pattern "dd/mm/yy", it
 will be transformed to "yyyy-mm-dd", which makes the file Y2K compliant. 
 FYI: the unix <a href='date.1.html'><i>date(1)</i></a>
- command produces Y2K compliant with <b>date +%Y-%m-%dT%H:%M:%S</b>.
-The old style is done with  <b>date +%d/%m/%y<b>. </dd>
+ command produces Y2K compliant with <b>date +%Y-%m-%dT%H:%M:%S.%N</b>,
+where the subsecond <b>.%N</b> portion is optional. The old style is done with 
+<b>date +%d/%m/%y<b>,  which does not sort lexically. </dd>
 
 <dt><b>UNY2K</b></b></b> </dt>
 <dd>If a keyword <b>DATExxxx</b>
 is present, and it matches the pattern "yyyy-mm-dd", it will be transformed
 to "dd/mm/yy", which makes the file non-Y2K compliant. This might help you
-getting by some old readers. </dd>
+getting by some old readers. Highly discouraged of course. </dd>
 
 <dt><b>DECORDER</b> </dt>
-<dd>If the keyword <b>DECORDER</b> is present,
-and it has a value <b>T</b>, it will replace this keyword by a COMMENT and set
-a flag such that of all data the bytes are byte swapped when read (or copied)
-according to <i>abs(BITPIX)</i>. </dd>
+<dd>If the
+keyword <b>DECORDER</b> is present, and it has a value <b>T</b>, it will replace this
+keyword by a COMMENT and set a flag such that of all data the bytes are
+byte swapped when read (or copied) according to <i>abs(BITPIX)</i>. </dd>
 
 <dt><b>IRAF0</b> </dt>
-<dd>Replace the FITS keyword <b>HISTORY</b> by <b>COMMENT</b>.
-This has been proven useful to be able to see al that information by the
-<i>iraf</i> program <i>imhead</i>.  </dd>
+<dd>Replace
+the FITS keyword <b>HISTORY</b> by <b>COMMENT</b>. This has been proven useful to be able
+to see al that information by the <i>iraf</i> program <i>imhead</i>.  </dd>
 
 <dt><b>PROMOTE</b> </dt>
-<dd>Replace the first FITS keyword <b>XTENSION</b> with
-<b>SIMPLE = T</b>, so an extension is promoted to become the primary HDU. Of course
-this only makes sense if you are extracting single HDUs, e.g. via the <b>hdu=</b>
-or <b>split=t</b> options. </dd>
+<dd>Replace
+the first FITS keyword <b>XTENSION</b> with <b>SIMPLE = T</b>, so an extension is promoted
+to become the primary HDU. Of course this only makes sense if you are extracting
+single HDUs, e.g. via the <b>hdu=</b> or <b>split=t</b> options. </dd>
 </dl>
 
 <h2><a name='sect5' href='#toc5'>Processing Order</a></h2>
-With all the possible editing capabilities,
-it is important to  know the processing order: <br>
+With all
+the possible editing capabilities, it is important to  know the processing
+order: <br>
 <pre>        select the valid HDU&rsquo;s, 0=all (hdu=)
         delete header items by pattern matching (delete=)
         keep header items by pattern matching (keep=)
