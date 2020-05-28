@@ -46,7 +46,7 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.5b\n 26-dec-2019 PJT",
+    "VERSION=3.5c\n 28-may-2020 PJT",
     NULL,
 };
 
@@ -87,7 +87,7 @@ nemo_main()
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
-    real nu, nppb = getdparam("nppb");
+    real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
     int ndat = 0;
@@ -103,6 +103,14 @@ nemo_main()
     nx = Nx(iptr);	
     ny = Ny(iptr);
     nz = Nz(iptr);
+    if (Beamx(iptr)>0 && Beamy(iptr)>0) {
+      // 1.13309 = pi/(4*ln(2))
+      nppb0 = 1.13309 * Beamx(iptr) * Beamy(iptr) / (Dx(iptr)*Dy(iptr));
+      nppb0 = ABS(nppb0);
+      dprintf(1,"nppb = %g\n",nppb0);
+    } else
+      nppb0 = 1.0;
+    
     dprintf(1,"# data order debug:  %f %f\n",Frame(iptr)[0], Frame(iptr)[1]);
     if (hasvalue("tab")) tabstr = stropen(getparam("tab"),"w");
 
@@ -221,6 +229,7 @@ nemo_main()
 	printf ("Mean and dispersion    : %f %f\n",mean,sigma);
 	printf ("Skewness and kurtosis  : %f %f\n",skew,kurt);
 	printf ("Sum and Sum%s  : %f %f\n",slabel,sum,sum*sov);   /* align trick */
+	printf ("Points per beam (map)  : %g\n",nppb0);
 	if (Qmedian) {
 	  if (Qtorben) {
 	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
