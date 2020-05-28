@@ -75,15 +75,27 @@ Z-angular momentum vector of disk. +1 means counter clock wise. [1] </dd>
 table with 7 columns is printed: <i>rad, den (D), vel (V), sig (S), adc_D,
 adc_V, adc_S, vobs</i> [f] </dd>
 
-<dt><b>headline=</b> </dt>
-<dd>Text headline for output. </dd>
+<dt><b>mode=</b> </dt>
+<dd>Select mode of initial conditions. 1: regular
+in Radius, but random in Theta. <b>nbody=</b> will be exact. 2: cartesian grid,
+but keeping within <b>rmax</b>.  <b>nbody=</b> will be approximate. [1]. </dd>
+
+<dt><b>sigmaz=</b> </dt>
+<dd>Scaling
+factor by which the vertical velocity dispersions are computed compared
+to the (isotropic) planar. Remember this is a toy model. The default is 3D
+isotropic, but use <b>sigmaz=0</b> if you want a truly planar disk in all phase
+space coordinates  [1]. </dd>
+
+<dt><b>headline=</b><i>message</i> </dt>
+<dd>Text headline for output file [default:
+not used]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here
-is an example of producing the ADC table of an exponential disk with an
-isothermal halo rotation curve and constant velocity dispersion at 10%
-of the peak velocity: <br>
+Here is an example of producing the ADC table of an exponential
+disk with an isothermal halo rotation curve and constant velocity dispersion
+at 10% of the peak velocity: <br>
 <pre>     nemoinp 0:5:0.2 | tabmath - - &rsquo;exp(-%1),%1/sqrt(1+%1**2),0.1&rsquo; &gt; tab1
      mktabdisk tab1 . adc=true
      # R  D          V         S    adc_D      adc_V     adc_S  Vobs
@@ -117,6 +129,7 @@ Peter Teuben
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>16-may-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 drafted<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-may-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 add sigmaz=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

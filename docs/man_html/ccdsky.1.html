@@ -79,11 +79,17 @@ See also Wright(2006). WMAP-9 values: H=71,0.27,0.73 (2011?), Planck-1 values:
 H=67.15,0.317,0.683 (2013) [Default:  71,0.27,0.73] </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Viewing a model
-at a distance 1 pc, where 1 length unit represents 1 AU, the coordinates
-need to be multiplied by 0.000277785 in order for FITS to view them in the
-correct angular size of 1 arcsec.  <br>
+<h2><a name='sect4' href='#toc4'>H</a></h2>
+It will be amusing to see
+the evolution of H: <br>
+<pre>WMAP-9 (2011)<tt> </tt>&nbsp;<tt> </tt>&nbsp;71<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.27<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.73
+Planck (2013)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.15<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.317<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.683
+Planck (2018)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.66<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.3111<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.6889
+</pre>
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+Viewing a model at a distance 1 pc, where 1 length unit represents
+1 AU, the coordinates need to be multiplied by 0.000277785 in order for
+FITS to view them in the correct angular size of 1 arcsec.  <br>
 <pre>% ccdsky d=1,pc r=1,AU v=1,km/s
 d=1 pc
 r=1 AU
@@ -134,12 +140,32 @@ vscale=1000
 iscale=1
 Mass(HI) = 7.25098e+11  
 Mass(H2) = 3.22675e+10  (alpha=4.3; includes 1.36 He contribution)
+</pre>compare this with the (selected) output for <b>gnuastro</b>&rsquo;s <a href='astcosmiccal.1.html'><i>astcosmiccal(1)</i></a>
+ program:
+<br>
+<pre>  % astcosmiccal  --H0=67.7 --olambda=0.693 --omatter=0.307 -z2.19
+  CosmicCalculator (GNU Astronomy Utilities) 0.11
+Universe now
+ ------------
+ - Age of Universe now (Ga*):                             13.844296
+ - Critical density now (g/cm^3):                         8.610662e-30
+ - Proper distance to z (Mpc):                            5592.995113
+ - Angular diameter distance to z (Mpc):                  1753.290004
+ - Tangential distance covered by 1 arcsec at z (Kpc):    8.500190
+ - Luminosity distance to z (Mpc):                        17841.654411
+ - Distance modulus at z (no unit):                       46.257176
+ - Conversion to absolute magnitude (no unit):            44.997699
+Universe at desired redshift z
+ ------------------------------
+ - Age of Universe at z (Ga*):                            3.017860
+ - Look-back time to z (Ga*):                             10.826436
+ - Critical density at z (g/cm^3):                        9.177897e-29
 </pre>
-<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 Although the conversion from an observed HI flux to mass is not
 too controversial (sans optical depth effects), the conversion  from CO
 to a mass is still under debate. We use the value 2e20 cm-2/K km/s. 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
 ,
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
@@ -154,13 +180,15 @@ to a mass is still under debate. We use the value 2e20 cm-2/K km/s.
 (E.Wright) <p>
 <a href='http://www.astro.ucla.edu/~wright/CosmoCalc.html'>http://www.astro.ucla.edu/~wright/CosmoCalc.html</a>
  <i> The CosmoCalc website</i>
+<p>
+<a href='https://ascl.net/gnuastro'>https://ascl.net/gnuastro</a>
+ 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
+NEMO/src/image/trans<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdsky.c - source code
 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
-NEMO/src/image/trans<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdsky.c - source code 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update
-History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>17-Aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 23-aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added sdv=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -176,12 +204,13 @@ History</a></h2>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>H</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

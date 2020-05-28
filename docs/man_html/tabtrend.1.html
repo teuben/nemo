@@ -32,18 +32,22 @@ given:
 <dt><b>xcol=</b> </dt>
 <dd>Column(s) to use [1] </dd>
 
-<dt><b>cumul=t|f</b>
+<dt><b>nmax=</b>
 </dt>
-<dd>Cumulative, instead of differences.  Default: false </dd>
+<dd>max size if a pipe [100000]   </dd>
 
-<dt><b>nmax=</b> </dt>
-<dd>max size if a
-pipe [100000]   </dd>
+<dt><b>cumul=t|f</b> </dt>
+<dd>Cumulative, instead of differences.
+ Default: false </dd>
+
+<dt><b>orig=t|f</b> </dt>
+<dd>Also show the original column (if selected it will
+be shown <i>after</i> the trend column  [f] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Create 10000 numbers gaussian distributed with
-dispersion 1, observe the following: <br>
+Create 10000 numbers gaussian
+distributed with dispersion 1, observe the following: <br>
 <pre>set n = 10000
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 |                             tabhist
 - 1 -2 2 nmax=$n
@@ -83,6 +87,7 @@ History</a></h2>
 <pre>26-Nov-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;finally documented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;better examples<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-jun-2016<tt> </tt>&nbsp;<tt> </tt>&nbsp;added cumul=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+26-may-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added orig=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
