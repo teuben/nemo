@@ -1,4 +1,4 @@
-.TH MKTABDISK 1NEMO "16 May 2020"
+.TH MKTABDISK 1NEMO "27 May 2020"
 .SH NAME
 mktabdisk \- create a test disk with density, circular velocity and dispersion given by a table
 .SH SYNOPSIS
@@ -55,8 +55,19 @@ Sign of Z-angular momentum vector of disk. +1 means counter clock wise. [1]
 Produce a table of Asymmetric Drift Corrections. If choosen, a simple ascii table
 with 7 columns is printed: \fIrad, den (D), vel (V), sig (S), adc_D, adc_V, adc_S, vobs\fP [f]
 .TP
-\fBheadline=\fP
-Text headline for output.
+\fBmode=\fP
+Select mode of initial conditions.
+1: regular in Radius, but random in Theta. \fBnbody=\fP will be exact.
+2: cartesian grid, but keeping within \fBrmax\fP.  \fBnbody=\fP will be approximate.
+[1].
+.TP
+\fBsigmaz=\fP
+Scaling factor by which the vertical velocity dispersions are computed compared to the (isotropic) planar.
+Remember this is a toy model. The default is 3D isotropic, but use
+\fBsigmaz=0\fP if you want a truly planar disk in all phase space coordinates  [1].
+.TP
+\fBheadline=\fP\fImessage\fP
+Text headline for output file [default: not used].
 .SH EXAMPLES
 Here is an example of producing the ADC table of an exponential disk with an isothermal halo rotation curve
 and constant velocity dispersion at 10% of the peak velocity:
@@ -94,4 +105,5 @@ Peter Teuben
 .nf
 .ta +1.0i +4.0i
 16-may-2020	V0.1 drafted	PJT
+27-may-2020	V0.5 add sigmaz=	PJT
 .fi
