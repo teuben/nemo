@@ -30,7 +30,8 @@ axes coordinates.
 \fBd=#,[unit]\fP
 Distance to your object, and optionally a unit.  
 AU, pc, Kpc, Mpc, and Gpc are allowed. You can also specify a dimensionless
-number 'z', in which case the special cosmology calculator is used. 
+number 'z', in which case the special cosmology calculator is used. Or if you know
+the recession speed and assume a Hubble constant, d=4500/69,Mpc
 [default: 1,pc]    
 .TP
 \fBr=#,[unit]\fP
@@ -63,6 +64,14 @@ a flat universe (WV=0) is used. See also Wright(2006).
 WMAP-9 values: H=71,0.27,0.73 (2011?),
 Planck-1 values: H=67.15,0.317,0.683 (2013)
 [Default:  71,0.27,0.73]
+.SH H
+It will be amusing to see the evolution of H:
+.nf
+.ta +2i +1i  +1i +1i
+WMAP-9 (2011)	71	0.27	0.73
+Planck (2013)	67.15	0.317	0.683
+Planck (2018)	67.66	0.3111	0.6889
+.fi
 .SH EXAMPLES
 Viewing a model at a distance 1 pc, where 1 length unit represents 1 AU,
 the coordinates need to be multiplied by 0.000277785 in order for FITS
@@ -101,6 +110,58 @@ and you should see a bar (possibly with a sign error position angle)
 of about 1 arcmin in length, in an 8 arcmin field. Notice that
 \fIccdfits(1NEMO)\fP also has various options to specify a WCS
 which can override the one set by \fIccdgen(1NEMO)\fP.
+.PP
+Here is a cosmological example:
+.nf
+
+% ccdsky H=67.7,0.307,0.693   d=2.19,z
+-------------------------------------------------------------
+For H_o = 67.7  Omega_M = 0.31 Omega_vac = 0.69 z = 2.190
+It is now 13.830 Gyr since the Big Bang.
+The age at redshift z was 3.012 Gyr.
+The light travel time was 10.818 Gyr.
+The comoving radial distance, which goes into Hubbles law, is 5592.2 Mpc or 18.239 Gly
+The comoving volume within redshift z is 732.530 Gpc^3.
+The angular size distance D_A is 1753.026 Mpc or 5.718 Gly.
+This gives a scale of 8.499  kpc/arcsec
+The luminosity distance D_L is 17839.0 Mpc or 58.183 Gly.
+The distance modulus, m-M, is 46.26
+-------------------------------------------------------------
+d=2.19 z  [3635.8 Mpc]
+r=1 AU
+v=1 km/s
+SdV=1 Jy.km/s
+rscale=1.5846e-13  [ 5.70457e-10 arcsec   5.70457e-07 mas]
+vscale=1000
+iscale=1
+Mass(HI) = 7.25098e+11  
+Mass(H2) = 3.22675e+10  (alpha=4.3; includes 1.36 He contribution)
+
+.fi
+compare this with the (selected) output for \fBgnuastro\fP's
+\fIastcosmiccal(1)\fP program:
+.nf
+  % astcosmiccal  --H0=67.7 --olambda=0.693 --omatter=0.307 -z2.19
+  CosmicCalculator (GNU Astronomy Utilities) 0.11
+
+Universe now
+ ------------
+ - Age of Universe now (Ga*):                             13.844296
+ - Critical density now (g/cm^3):                         8.610662e-30
+ - Proper distance to z (Mpc):                            5592.995113
+ - Angular diameter distance to z (Mpc):                  1753.290004
+ - Tangential distance covered by 1 arcsec at z (Kpc):    8.500190
+ - Luminosity distance to z (Mpc):                        17841.654411
+ - Distance modulus at z (no unit):                       46.257176
+ - Conversion to absolute magnitude (no unit):            44.997699
+
+Universe at desired redshift z
+ ------------------------------
+ - Age of Universe at z (Ga*):                            3.017860
+ - Look-back time to z (Ga*):                             10.826436
+ - Critical density at z (g/cm^3):                        9.177897e-29
+
+.fi
 .SH CAVEATS
 Although the conversion from an observed HI flux to mass is not
 too controversial (sans optical depth effects), the conversion 
@@ -112,6 +173,8 @@ ccdgen(1NEMO), ccdmath(1NEMO), ccd2vel(1NEMO), ccdfits(1NEMO), snapscale(1NEMO),
 http://arxiv.org/abs/astro-ph/0609593  \fIA Cosmology Calculator for the Web\fP (E.Wright)
 .PP
 http://www.astro.ucla.edu/~wright/CosmoCalc.html \fI The CosmoCalc website\fP
+.PP
+https://ascl.net/gnuastro
 .SH FILES
 NEMO/src/image/trans	ccdsky.c - source code
 .SH AUTHOR
