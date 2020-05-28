@@ -32,9 +32,9 @@ string defv[] = {
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=f\n            Produce a table of Asymmetric Drift Corrections",
     "mode=1\n           1: regular r, random angles   2: cartesian",
-    "sigmaz=0.0\n       Factor for sigma_z",
+    "sigmaz=1.0\n       Factor for sigma_z",
     "headline=\n	Text headline for output",
-    "VERSION=0.5\n	27-may-2020 PJT",
+    "VERSION=0.6\n	27-may-2020 PJT",
     NULL,
 };
 
