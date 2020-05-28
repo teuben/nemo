@@ -3,6 +3,7 @@
  *          
  *   12-may-05   Created quick & dirty for CARMA               PJT
  *   15-jun-2016 cumul= option
+ *   23-may-2020 orig=T/F option
  *                        
  * 
  * TODO:
@@ -27,7 +28,8 @@ string defv[] = {
     "xcol=1\n			  Column(s) to use",
     "nmax=100000\n                max size if a pipe",
     "cumul=f\n                    cumulative instead?",
-    "VERSION=0.2\n		  15-jun-2016 PJT",
+    "orig=f\n                     show original column as well?",
+    "VERSION=0.3\n		  23-may-2020 PJT",
     NULL
 };
 
@@ -58,6 +60,7 @@ local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
 
 local bool   Qcumul;
+local bool   Qorig;
 
 
 local void setparams(void);
@@ -91,6 +94,7 @@ local void setparams()
     instr = stropen (input,"r");
 
     Qcumul = getbparam("cumul");
+    Qorig = getbparam("orig");
 }
 
 
@@ -115,9 +119,13 @@ local void trend_data(void)
   int i,j;
 
   for (i=1; i<npt; i++) {
-    for (j=0; j<ncol;  j++)
-      printf("%g ",coldat[j][i]-coldat[j][i-1]);
-    printf("\n");
+    for (j=0; j<ncol;  j++) {
+      if (Qorig)
+	printf("%g %g ",coldat[j][i]-coldat[j][i-1],coldat[j][i-1]);
+      else
+	printf("%g ",coldat[j][i]-coldat[j][i-1]);
+      printf("\n");
+    }
   }
 }
 
