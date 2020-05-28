@@ -1,4 +1,4 @@
-.TH TABTREND 1NEMO "15 June 2016"
+.TH TABTREND 1NEMO "26 May 2020"
 .SH NAME
 tabtrend \- difference rows from previous rows
 .SH SYNOPSIS
@@ -20,11 +20,14 @@ Input file name. No default.
 \fBxcol=\fP
 Column(s) to use [1]
 .TP
+\fBnmax=\fP
+max size if a pipe [100000]  
+.TP
 \fBcumul=t|f\fP
 Cumulative, instead of differences.  Default: false
 .TP
-\fBnmax=\fP
-max size if a pipe [100000]  
+\fBorig=t|f\fP
+Also show the original column (if selected it will be shown \fIafter\fP the trend column  [f]
 .SH EXAMPLES
 Create 10000 numbers gaussian distributed with dispersion 1, observe the following:
 .nf
@@ -54,8 +57,9 @@ tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
-.ta +1.0i +4.0i
+.ta +1.0i +1.0i +4i
 26-Nov-2012	finally documented	PJT
 13-oct-2014	better examples		PJT
 15-jun-2016	added cumul=		PJT
+26-may-2020	added orig=		PJT
 .fi
