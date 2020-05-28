@@ -32,14 +32,15 @@ string defv[] = {
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=f\n            Produce a table of Asymmetric Drift Corrections",
     "mode=1\n           1: regular r, random angles   2: cartesian",
+    "sigmaz=0.0\n       Factor for sigma_z",
     "headline=\n	Text headline for output",
-    "VERSION=0.4\n	17-may-2020 PJT",
+    "VERSION=0.5\n	27-may-2020 PJT",
     NULL,
 };
 
 string usage="create a test disk with density, circular velocity and dispersion given by a table";
 
-local real rmin, rmax, mass;
+local real rmin, rmax, mass, sigmaz;
 local int  jz_sign;
 
 
@@ -74,6 +75,8 @@ void nemo_main()
     rmax = (hasvalue("rmax") ? getdparam("rmax") : rad[nrad-1]);
     dprintf(0,"%d radii in table\n",nrad);
     dprintf(0,"rmin/max = %g %g\n",rmin,rmax);
+
+    sigmaz = getdparam("sigmaz");
     
     ndisk = getiparam("nbody");
 
@@ -186,12 +189,13 @@ void testdisk2(real totmas)
     int n2 = ndisk * 1.27;     // *4/pi square vs. circle
     int n1 = (int) sqrt(n2);
 
-    warning("cartesian grid");    
 
     disk = (Body *) allocate(n2 * sizeof(Body));
     dprintf(0,"Allocate space for %d, linear is %d\n",n2,n1);
 
     dr = 2*rmax /(n1-1);
+    warning("cartesian grid,  dr=%g",dr);    
+    
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
     t = 0;    /* dummy time ; we do not support variable time */
@@ -222,7 +226,7 @@ void testdisk2(real totmas)
 	Vel(dp)[1] =  vel_i * cost * jz_sign;
 	Vel(dp)[0] += grandom(0.0, sig_i);              // isotropic vel dispersion
 	Vel(dp)[1] += grandom(0.0, sig_i);
-	Vel(dp)[2] = 0.0;
+	Vel(dp)[2] = sigmaz * grandom(0.0, sig_i);
 	
 	dp++;
 	ndisk++;
@@ -276,13 +280,17 @@ void testdisk1(real totmas)
 	Vel(dp)[1] =  vel_i * cost * jz_sign;
 	Vel(dp)[0] += grandom(0.0, sig_i);              // isotropic vel dispersion
 	Vel(dp)[1] += grandom(0.0, sig_i);
-	Vel(dp)[2] = 0.0;
+	Vel(dp)[2] = sigmaz * grandom(0.0, sig_i);
     }
     if (totmas > 0) {
       for (dp=disk, i = 0; i < ndisk; dp++, i++)
 	Mass(dp) /= totmas1;
     }
 }
+
+/*
+ *  signed sqrt, useful for display
+ */
 
 real ssqrt(real x)
 {
