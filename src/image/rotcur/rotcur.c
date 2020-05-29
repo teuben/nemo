@@ -274,6 +274,7 @@ nemo_main()
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
     if (beam[0] > 0 && beam[1] > 0)
       factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+      //  should this not be pi/(4ln2) ???
     else
       factor = 1.0;
     dprintf(0,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
