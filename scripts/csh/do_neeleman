@@ -1,0 +1,84 @@
+#! /usr/bin/env bash
+#
+#      Neeleman et al. (2020)     https://www.nature.com/articles/s41586-020-2276-y
+#      ccdsky d=4.2603,z   H=70,0.3,0.7         ->  6.767  kpc/arcsec
+
+# expose some variables for tkrun
+#> SCALE rd=1.4    0:3:0.1
+#> SCALE rv=0.12   0:3:0.01
+#> SCALE sig=80    0:100:5
+#> SCALE rms=0     0:1:0.001
+#> SCALE beam=1.3  0:2:0.1
+#> SCALE inc=42    30:50:1
+
+#               Parameters  (default are the ones from Neeleman's paper)
+model=10
+   rd=1.4       # kpc (i think 1.75 fits better if you compare figure 6)
+   rv=0.12      # kpc
+   v0=272       # km/s
+  sig=80        # km/s
+  rms=0         # add some noise to the channels before smoothing
+ beam=1.3       # kpc (fwhm)  [0.19"]
+vbeam=0         # no smoothing   just binning in 25 km/s
+  inc=42        # deg
+   nr=65        # pixels in X and Y (range -8:8), we will get 0.25 kpc bins
+   nv=33        # pixels in V (range -400:400), we need 25 km/s bins
+nbody=1000000   # number of test particles
+   
+#               Command Line Argument parsing
+for arg in $*; do\
+  export $arg
+done
+
+#               No changes below here please
+out=model.$model
+rm -f $out.*
+
+#               Create the ADC table
+nemoinp 0.001,0.01:4:0.01 |\
+     tabmath - - "exp(-%1/$rd),2*$v0/pi*atan(%1/$rv),$sig" |\
+     mktabdisk - . adc=t > $out.adc
+
+#               Create a simulation snapshot and raw PPV cube
+nemoinp 0.001,0.01:4:0.01 |\
+     tabmath - - "exp(-%1/$rd),2*$v0/pi*atan(%1/$rv),$sig" |\
+     mktabdisk - - nbody=$nbody rmax=4 mode=2 sigmaz=1 |\
+     snaprotate - $out.snap $inc x 
+snapgrid $out.snap $out.ccd xrange=-8:8 yrange=-8:8 zrange=-400:400  nx=$nr ny=$nr nz=$nv
+
+#               Smooth the cube
+ccdmath $out.ccd - "%1+rang(0,$rms)" |\
+     ccdsmooth -  - gauss=$beam dir=xy |\
+     ccdsmooth - $out.smooth gauss=$vbeam dir=z
+
+#               Extract various products
+ccdslice $out.smooth $out.maj.pv y "($nr-1)/2+1"
+ccdslice $out.smooth $out.min.pv x "($nr-1)/2+1"
+ccdstat $out.smooth planes=0 > $out.cubestats
+ccdmom $out.smooth $out.mom0 mom=0
+ccdmom $out.smooth $out.mom1 mom=1 rngmsk=t
+ccdmom $out.smooth $out.mom2 mom=2
+ccdprint $out.mom0 x= y="($nr-1)/2+1" newline=t label=x > $out.den
+ccdprint $out.mom1 x= y="($nr-1)/2+1" newline=t label=x | tabmath - - %1,-%2 all > $out.vel
+ccdprint $out.mom2 x= y="($nr-1)/2+1" newline=t label=x > $out.sig
+tabplot $out.den  1 2 0 4 0     headline=Figure-6 line=1,1 point=2,0.1 yapp=1/xs  xcoord=2.6
+tabplot $out.vel  1 2 0 4 0     headline=rotcur   line=1,1 point=2,0.1 yapp=2/xs 
+tabplot $out.sig  1 2 0 4 0 160 headline=Figure-5 line=1,1 point=2,0.1 yapp=3/xs
+
+cnt=0.000001,0.00001,0.0001,0.0002
+ccdplot $out.maj.pv power=0.4 contour=$cnt headline=Figure-1b yapp=4/xs
+ccdplot $out.min.pv power=0.4 contour=$cnt headline=Figure-1b yapp=5/xs
+
+ccdmom $out.smooth - axis=1  |\
+   ccdmom - - axis=2 |\
+   ccdprint - x= y= z= newline=t > $out.spectrum
+tabplot $out.spectrum 0 1 line=1,1 point=2,0.1 yapp=6/xs   
+
+tabplot $out.adc 1 3,4,5,6,7,8 0 8 -100 400 line=1,1,1,1,1,2 color=3,4,2,3,4,3 ycoord=0  yapp=7/xs
+
+tabplot $out.cubestats 2 3,4,7 color=2,2,3 line=1,1 point=2,0.1 ycoord=0 yapp=8/xs
+
+# example rotcurshape:
+rotcurshape $out.mom1 units=arcmin,1 radii=0,150 pa=90 inc=$inc vsys=0 fixed=pa,inc,xpos,ypos,vsys \
+	    rotcur1="arctan,$v0,60*$rv,1,1"   > $out.rotcurshape
+tail $out.rotcurshape
