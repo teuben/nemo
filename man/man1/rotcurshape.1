@@ -1,4 +1,4 @@
-.TH ROTCURSHAPE 1NEMO "30 January 2008"
+.TH ROTCURSHAPE 1NEMO "28 May 2020"
 .SH NAME
 rotcurshape \- fit parameters to a velocity field using shaped rotation curves in a co-planar disk
 .SH SYNOPSIS
@@ -276,6 +276,7 @@ plummer	v0,a    	v=v0*x/(1+x^2)^(3/4)			-
 core1	v0,a      	v=v0*x/(1+x)				-
 core2	v0,a    	v=v0*x/(1+x^2)^(1/2)			-
 core	v0,a,c  	v=v0*x/(1+x^c)^(1/c)			-
+arctan	c0,a		v=2*v0/pi*arctan(x)			-
 poly	v0,a,p2,.. 	v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N) 	a needs to be fixed !
 iso	v0,a    	v=v0*sqrt(1-atan(x)/x)			-
 exp 	v0,a    	v=v0*(1-exp(-x))                 	-
@@ -391,4 +392,5 @@ Peter Teuben
 26-may-04	1.2e fixed sqrt(n) bug in sigma, improved nsigma>0 iterations	PJT
 13-jun-04	1.3: added fit= option to save a fitted map	PJT
 30-jan-08	1.4: with new rotcurtab minor overhaul of code	PJT
+28-may-20	added arctan	PJT
 .fi

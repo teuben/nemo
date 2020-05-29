@@ -26,6 +26,7 @@
  *              13-jan-05 :    b  rachel mode: inc=0 -> cosi=sini=1.0 to get circles    pjt
  *              26-may-05 :    d  fixed bad NFW bug (used v^2, not v)                   pjt
  *              30-jan-08   1.4   shapes in rotcurs.c in library now                    pjt
+ *              28-may-20   
  *
  *
  ******************************************************************************/
@@ -94,7 +95,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4c\n  10-jul-2019 PJT",
+    "VERSION=1.4d\n  28-may-2020 PJT",
     NULL,
 };
 
@@ -360,6 +361,14 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_plummer;
+      } else if (streq(sp[0],"arctan")) {
+	if (nsp != 4) error("arctan needs 2 parameters");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[nmod] = rotcur_arctan;
       } else if (streq(sp[0],"core1")) {
 	if (nsp != 4) error("core1 needs 2 parameters");
 	npar[nmod] = 2;

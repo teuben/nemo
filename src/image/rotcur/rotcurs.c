@@ -6,6 +6,7 @@
 
 /* a bunch of rotation curves and parameter derivatives */
 
+static int debug_rotcurs = 1;
 
 real rotcur_flat(real r, int n, real *p, real *d)
 {
@@ -104,6 +105,20 @@ real rotcur_tanh(real r, int np, real *p, real *d)
   dvdx = sqr(sech(x));
 }
 #endif
+
+
+real rotcur_arctan(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real y =  2/PI*atan(x);
+
+  d[0] = y;
+  d[1] = p[0]/p[1] * 2/PI / (1+x*x);
+  return p[0] * y;
+  
+}
+
+
 
 /*
  * softened iso-thermal sphere: (a.k.a. pseudo-isothermal)
