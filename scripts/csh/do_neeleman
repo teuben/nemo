@@ -77,7 +77,7 @@ rotcurshape $out.mom1 units=arcmin,1 radii=0,240 pa=90 inc=$inc vsys=0 fixed=pa,
 	    rotcur1="arctan,$v0,60*$rv,0,1"   > $out.rotcurshape
 
 
-pedit model0_3dfit.par FITSFILE=$out.fits OUTFOLDER=$out.3dfit INC=$inc > $out.3dfit.par
+pedit $NEMODAT/Bbarolo/model0_3dfit.par FITSFILE=$out.fits OUTFOLDER=$out.3dfit INC=$inc > $out.3dfit.par
 BBarolo -p $out.3dfit.par > $out.3dfit.log
 
 
