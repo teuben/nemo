@@ -1,0 +1,26 @@
+.TH PEDIT 8NEMO "30 May 2020"
+.SH NAME	
+pedit \- parameter editing on a file
+.SH SYNOPSIS
+.PP
+\fBpedit \fI[options] parfile key=val ...\fP 
+.SH DESCRIPTION
+\fIpedit\fP helps you create a new parameter file based on
+a template by replacing the values of selected parameters.
+The result is shown on \fIstdout\fP.
+.SH EXAMPLES
+.nf
+   pedit $NEMODAT/Bbarolo/model0_3dfit.par FITSFILE=out.fits OUTFOLDER=out.3dfit INC=40 > qout.3dfit.par
+.fi
+.SH "SEE ALSO"
+nemo(1NEMO)
+.SH AUTHOR
+Peter Teuben
+$NEMO/src/scripts/pedit         	python script
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+jul-2019	created				PJT
+30-may-2020	finally documented       	PJT
+.fi
