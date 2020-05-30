@@ -1,0 +1,28 @@
+FITSFILE    model0.fits
+OUTFOLDER   model0.3dfit
+
+3DFIT       true
+
+// recommended 2-3 pixels, but not 1
+NRADII      16
+RADSEP      15
+VSYS        0
+XPOS        33
+YPOS        33
+VROT        270
+VDISP       80
+INC         42
+PA          90
+Z0          0
+DENS        1
+VRAD        0
+// Normalization type (NONE didn't work, perhaps bug, LOCAL needs to be used)
+NORM        LOCAL
+// Mask (needs to be NONE, not SEARCH, since we have no noise)
+MASK        NONE
+// Free parameters  VROT INC PA VDISP ...
+FREE        VROT VDISP
+// Instrumental spectral broadening (we usually have none)
+LINEAR      0
+// default is false
+ADRIFT      false
