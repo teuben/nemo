@@ -681,7 +681,7 @@ stream  lunpri;       /* LUN for print output */
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
-    if (*nring != 2) error("radii=: Need two radii for a disk");
+    if (*nring != 2) error("radii=rmin,rmax: Need two radii");
     *vsys = getdparam("vsys");
     n = nemoinpr(getparam("pa"),pan,ring);
     if (n<1) error("pa=: need at least one position angle (%d)",n);
