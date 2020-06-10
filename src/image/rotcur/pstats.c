@@ -9,6 +9,8 @@
  * For (the default) box between -1 and 1  and N=2 (so Delta V = 2)
  * k = 0.25, which can be derived from first principles.
  * For N large k = 1/sqrt(12), which can also be derived analytically.
+ *
+ * This C program is about 10 times faster than the equivalent python script
  */
 
 #include <nemo.h>
@@ -16,12 +18,12 @@
 
 string defv[] = {
     "n=10000\n        number of experiments",
-    "k=2\n            number of samples in FWHM",
+    "k=2\n            number of samples between -1 and 1",
     "eps=0.01\n       normalized noise (1/SNR)",
-    "gauss=-1\n       if used, this is the gaussian sigma",
-    "seed=0\n         random seed",
+    "gauss=-1\n       if positive, this is the gaussian sigma (=FWHM/2.355)",
     "hanning=f\n      Hanning smooth?",
-    "VERSION=0.2\n    10-Jun-2020 XYZ",
+    "seed=0\n         random seed",
+    "VERSION=0.3\n    10-Jun-2020 XYZ",
     NULL,
 };
 
@@ -47,7 +49,7 @@ void nemo_main()
 
   // gaussian?
   if (gauss > 0) gauss = 2*gauss*gauss;
-  dprintf(0,"gauss %g\n",gauss);
+  dprintf(1,"gauss %g\n",gauss);
   
   // get X array
   dx = 2.0 / (k-1);
@@ -83,7 +85,7 @@ void nemo_main()
   vm = mean_moment(&m1);
   vs = sigma_moment(&m1);
   k1 = vs / sqrt(k) / eps / (2.0/(k-1));
-  printf("# %d %d %g  %d %g %g   %g %d\n",n,k,eps,n_moment(&m1), vm, vs, k1, seed);
+  printf("%d %d %g %g  %g %g   %g %d\n",n,k,eps, getrparam("gauss"), vm, vs, k1, seed);
 }
 
 
