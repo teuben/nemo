@@ -37,3 +37,10 @@ https://github.com/chriskiehl/Gooey    Turn (almost) any Python command line pro
 
 https://github.com/MikeTheWatchGuy/PySimpleGUI    
   See also https://opensource.com/article/18/8/pysimpleguia    
+
+https://github.com/benjaminbolling/DynaGUI
+  A Dynamic Graphical User Interface package, which gives users a method
+  to construct temporary, permanent and/or a set of GUI:s for users in a
+  simple and fast manner combined with diagnostics tools (with advance 1D
+  and 2D plotting methods). 
+
