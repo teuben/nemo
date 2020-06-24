@@ -21,7 +21,7 @@ string defv[] = {
   "in=???\n	              Input file (snapshot)",
   "times=all\n                Times of snapshot",
   "pos=f\n                    Show x,y,z as well?",
-  "VERSION=0.1\n	      24-jun-2020 PJT",
+  "VERSION=0.2\n	      24-jun-2020 PJT",
   NULL,
 };
 
@@ -36,25 +36,19 @@ real distance(int ndim, real *x1, real *x2);
 
 void nemo_main(void)
 {
-  stream instr, tabstr;
+  stream instr;
   real   tsnap, ekin, etot, dr, r, rv, v, vr, vt, aux, d, d0;
-  real   varmin[MAXOPT], varmax[MAXOPT];
-  real   var0[MAXOPT], var1[MAXOPT], var2[MAXOPT];
-  real   mean[MAXOPT*MAXK];
-  mdarray2 xmean, x;
-  string headline=NULL, options, times, mnmxmode;
+  string headline=NULL, options, times;
   Body *btab = NULL, *bp1, *bp2;
-  bool   Qmin, Qmax, Qmean, Qsig, Qtime, Qpos;
-  int i, j, j0, k, n, nbody, bits, nsep, isep, ndim, ParticlesBit, *idx, nmean;
-
+  bool   Qtime, Qpos;
+  int i, j, j0, k, n, nbody, bits, ParticlesBit, ndim;
 
   instr = stropen(getparam("in"), "r");	/* open input file */
-
   times = getparam("times");
   Qpos = getbparam("pos");
+  ParticlesBit = PhaseSpaceBit ;
   
   get_history(instr);                 /* read history */
-
   for(;;) {                /* repeating until first or all times are read */
     get_history(instr);
     if (!get_tag_ok(instr, SnapShotTag))
