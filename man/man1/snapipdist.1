@@ -1,0 +1,41 @@
+.TH SNAPIPDIST 1NEMO "24 June 2020"
+.SH NAME
+snapipdist \- some stats on interparticle distance
+.SH SYNOPSIS
+\fBsnapipdist\fP [parameter=value]
+.SH DESCRIPTION
+This program will  brute force compute for each particle the distance to the nearest particle. It will report
+the two particle ID's (0..N-1) and the distance. Optionally the input coordinates can also be reported.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot) [???]    
+.TP
+\fBtimes=\fP
+Times of snapshot [all]    
+.TP
+\fBpos=t|f\fP
+Show x,y,z as well? [f]   
+.SH EXAMPLES
+If you want a sorted list of the nearest particle distance, sort the 3rd column:
+.nf
+
+mkplummer - 4 seed=123 | snapipdist - | sort -n +2
+2 3 0.345923
+3 2 0.345923
+0 3 1.08003
+1 2 4.58542
+
+.fi
+which shows that particles 2 and 3 are close neighbors.
+.SH SEE ALSO
+snapstat(1NEMO), snapkmean(1NEMO), snapshot(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+24-Jun-20	V0.2 Created		PJT
+.fi
