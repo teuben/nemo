@@ -5,6 +5,7 @@
  *     22-jan-95    fixed real=float problems
  *     20-jun-01    gcc3
  *     15-mar-05    proper real_proc for c++
+ *     29-jun-2020  MAXN cleanup in TESTBED
  *
  */
 
@@ -12,6 +13,7 @@
 #include <stdinc.h>
 #include <grid.h>
 
+// Linear Grid
 void inil_grid(
     Grid *g,
     int n,
@@ -30,6 +32,7 @@ void inil_grid(
     g->g = NULL;
 }
 
+// Array grid
 void inia_grid(
     Grid *g,
     int n,
@@ -58,6 +61,7 @@ void inia_grid(
     g->gmax = a[n-1];
 }
 
+// Procedure Grid
 void inip_grid(
     Grid *g,
     int n,
@@ -82,28 +86,28 @@ int index_grid(
     int imin, imax, idx = 0;
 
     switch (g->mode) {
-      case GRID_PROC:
-                        x = (*g->f)(x);
-      case GRID_LINEAR:
+    case GRID_PROC:
+                      x = (*g->f)(x);
+    case GRID_LINEAR:
       
-                        if (x < g->gmin || x > g->gmax) return -1;
-                        idx = (int) floor(  (x- g->gmin)/g->dg );
-                        if (idx==g->n) idx--;   /* right edge exception */
-                        break;
-      case GRID_ARRAY:
-      			if (g->up) {
-	                    if (x < g->gmin || x > g->gmax) return -1;
-	                } else {
-	                    if (x < g->gmax || x > g->gmin) return -1;
-			}
-                        imin = 0;
-                        imax = g->n;
-                        error("grid_array not implemented yet");
-                        break;
-      default:
-                        error("illegal grid mode %d",g->mode);
-                        idx = -1;
-                        break;
+                      if (x < g->gmin || x > g->gmax) return -1;
+		      idx = (int) floor(  (x- g->gmin)/g->dg );
+		      if (idx==g->n) idx--;   /* right edge exception */
+		      break;
+    case GRID_ARRAY:
+                      if (g->up) {
+			if (x < g->gmin || x > g->gmax) return -1;
+		      } else {
+			if (x < g->gmax || x > g->gmin) return -1;
+		      }
+		      imin = 0;
+		      imax = g->n;
+		      error("grid_array not implemented yet");
+		      break;
+    default:
+                      error("illegal grid mode %d",g->mode);
+		      idx = -1;
+		      break;
     }
     return idx;
 }
@@ -116,23 +120,23 @@ real value_grid(
     real f;
 	
     switch (g->mode) {
-      case GRID_PROC:
-      case GRID_LINEAR:
-            		return g->gmin + x * g->dg;
-      case GRID_ARRAY:
-			if (x<0) error("Cannot look extrapolate left");
-			if (x> (real)g->n) error("Cannot look extrapolate right");
-			idx = (int) floor(x);
-			if (idx==g->n) return g->g[idx-1];	/* right edge */
+    case GRID_PROC:
+    case GRID_LINEAR:
+            	      return g->gmin + x * g->dg;
+    case GRID_ARRAY:
+		      if (x<0) error("Cannot look extrapolate left");
+		      if (x> (real)g->n) error("Cannot look extrapolate right");
+		      idx = (int) floor(x);
+		      if (idx==g->n) return g->g[idx-1];	/* right edge */
 #if 0
-			f = remainder(x,1.0)/ABS(g->g[idx+1] - g->g[idx]);
+		      f = remainder(x,1.0)/ABS(g->g[idx+1] - g->g[idx]);
 #else
-			f = 0.0;
-			error("grid.c: need to implement remainder(real,real)");
+		      f = 0.0;
+		      error("grid.c: need to implement remainder(real,real)");
 #endif
-			return f * g->g[idx] + (1-f)*g->g[idx+1];
+		      return f * g->g[idx] + (1-f)*g->g[idx+1];
       default:
-                        error("illegal grid mode %d",g->mode);
+	              error("illegal grid mode %d",g->mode);
     }
     return 0.0; /* never reached */
 }
@@ -149,28 +153,30 @@ string defv[] = {
 	"proc=\n	Procedure (not implemented)",
         "x=\n           Value(s) to return grid index(s) for",
 	"i=\n		Index(s) to return grid value(s) for",
-	"VERSION=1.0\n	5-nov-93 PJT",
+	"VERSION=1.1\n	29-jun-2020 PJT",
 	NULL,
 };
 
+#ifndef MAXN
 #define MAXN  1000
+#endif
 
-nemo_main()
+void nemo_main(void)
 {
     real a[MAXN], x[MAXN];
     int n, i;
     Grid g;
 
     if (hasvalue("linear")) {
-         if (nemoinpr(getparam("linear"),a,3) != 3) error("Linear Parsing");
-         n = (int) a[0];
-         inil_grid(&g,n,a[1],a[2]);
+        if (nemoinpr(getparam("linear"),a,3) != 3) error("Linear Parsing");
+        n = (int) a[0];
+        inil_grid(&g,n,a[1],a[2]);
     } else if (hasvalue("array")) {
-         n = nemoinpr(getparam("array"),a,MAXN);
-         if (n<0) error("Array parsing");
-         inia_grid(&g,n,a);
+        n = nemoinpr(getparam("array"),a,MAXN);
+        if (n<0) error("Array parsing");
+        inia_grid(&g,n,a);
     } else if (hasvalue("proc"))
-         error("proc= not implemented");
+        error("proc= not implemented");
     else error("Need one of: linear=, array=, proc=");
 
     n = nemoinpr(getparam("x"),x,MAXN);
