@@ -1,4 +1,5 @@
 #            sudo dnf instal $*
+#                 dnf list installed
 gfortran
 g++
 csh
