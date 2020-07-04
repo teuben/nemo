@@ -1,0 +1,25 @@
+.TH FAKE 8NEMO "3 July 2020"
+.SH NAME
+fake \- creating fake data
+.SH DESCRIPTION
+For many problems you may need to start with fake data, and since there
+are so many programs in NEMO that can do this, here we list a few common
+ones to get you started.  Much of this information is of course present
+in the many man pages and manuals, this is just another place to get
+you started. See also \fIdata(5NEMO)\fP for some prepared data file.
+.SH EXAMPLES
+A few types of tables:
+.nf
+
+    nemoinp 1:1000 | tabmath - - rang(0,1) > tab1
+    mkplummer - 1000 | snapprint - > tab2
+.fi
+.SH "SEE ALSO"
+nemoinp(1NEMO), data(5NEMO)
+.SH AUTHOR
+Peter Teuben
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+3-jul-2020	drafted		PJT
+.fi
