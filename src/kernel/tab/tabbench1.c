@@ -1,12 +1,15 @@
 /*
- *     Benchmark some common table operations
+ *     Benchmark some common table I/O operations
  *
  *      3-jul-2020  V0.1    drafted
  */
 
-//    nbody=1000000      (for 10M there is a bug)
-//    mkplummer - $nbody | snapprint - > p1M.tab format=%20.16f
-//    tabtranspose p1M.tab p1Mt.tab $nbody
+//1    nbody=1000000      (for 10M there is a bug)
+//2    mkplummer - $nbody | snapprint - format=%20.16f    > p1M.tab
+//3    /usr/bin/time tabbench1 p1M.tab .
+//4    /usr/bin/time tabtranspose p1M.tab p1Mt.tab $nbody
+//5    /usr/bin/time tabbench1 p1Mt.tab .
+
 
 #include <stdinc.h>
 #include <getparam.h>
@@ -20,8 +23,7 @@ string defv[] = {
     NULL,
 };
 
-
-string usage="table benchmark";
+string usage="table I/O benchmark";
 
 #ifndef MAX_LINELEN 
 #define MAX_LINELEN  2048
