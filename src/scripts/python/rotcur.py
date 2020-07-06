@@ -133,9 +133,9 @@ def region_ds9(data,ds9,scale=0.0083333*30):
     maj = r / scale
     min = r*np.cos(inc/degrad) / scale
     if False:
-	print "Center: ",xpos,ypos
-	print "PA,INC: ",pa,inc
-	print "Radius: ",r
+        print("Center: ",xpos,ypos)
+        print("PA,INC: ",pa,inc)
+        print("Radius: ",r)
     r1='global color=green dashlist=8 3 width=1 font="helvetica 10 normal roman" select=1 highlite=1 dash=0 fixed=0 edit=1 move=1 delete=1 include=1 source=1\n'
     r2='image\n'
     #
@@ -145,11 +145,11 @@ def region_ds9(data,ds9,scale=0.0083333*30):
     fp.write(r1)
     fp.write(r2)
     for i in range(len(data)):
-	r3='ellipse(%f,%f,%f,%f,%f) # color=black width=2\n' % (xpos[i],ypos[i],min[i],maj[i],pa[i])
-	print r3
-	fp.write(r3)
+        r3='ellipse(%f,%f,%f,%f,%f) # color=black width=2\n' % (xpos[i],ypos[i],min[i],maj[i],pa[i])
+        print(r3)
+        fp.write(r3)
     fp.close()
-    print data
+    print(data)
 
 def region_cgdisp(data,ds9,scale=0.0083333):
     """ create an overlay file for miriad::cgdisp 
@@ -162,6 +162,6 @@ if __name__ == "__main__":
     data = rotcurtab(name)
     plot1(data,name,efactor=3.0,rmax=rmax)
     n = len(data)
-    print "Found %d rings" % n
+    print("Found %d rings" % n)
     m = 1
     region_ds9(data[0:n:m],'ds9.reg')
