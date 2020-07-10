@@ -22,7 +22,8 @@ string defv[] = {
   "times=all\n                Times of snapshot",
   "pos=f\n                    Show x,y,z as well?",
   "key=f\n                    Use key instead of ordinal ID (0...)",
-  "VERSION=0.4\n	      25-jun-2020 PJT",
+  "fmt=%g\n                   Output format of distance",
+  "VERSION=0.5\n	      10-jul-2020 PJT",
   NULL,
 };
 
@@ -40,6 +41,7 @@ void nemo_main(void)
   stream instr;
   real   tsnap, ekin, etot, dr, r, rv, v, vr, vt, aux, d, d0;
   string headline=NULL, options, times;
+  string fmt = getparam("fmt");
   Body *btab = NULL, *bp1, *bp2;
   bool   Qtime, Qpos, Qkey;
   int i, j, j0, k, n, nbody, bits, ParticlesBit, ndim;
@@ -74,9 +76,10 @@ void nemo_main(void)
 	dprintf(1,"%d %d %g %g\n",j,i,d,d0);
       }
       if (Qkey)
-	printf("%d %d %g",Key(btab+i),Key(btab+j0),sqrt(d0));
+	printf("%d %d ",Key(btab+i),Key(btab+j0));
       else
-	printf("%d %d %g",i,j0,sqrt(d0));
+	printf("%d %d ",i,j0);
+      printf(fmt,sqrt(d0));
       if (Qpos)
 	printf(" %g %g %g\n",Pos(btab+i)[0], Pos(btab+i)[1], Pos(btab+i)[2]);
       else
