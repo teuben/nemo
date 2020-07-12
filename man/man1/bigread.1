@@ -1,0 +1,70 @@
+.TH BIGREAD 1NEMO "11 July 2020"
+.SH NAME
+bigread \- measured buffered read speed
+.SH SYNOPSIS
+\fBbigread\fP [parameter=value]
+.SH DESCRIPTION
+This program reads a file in fixed sized blocks, choosen by the user, and reports the average
+speed (MB/sec) for each block.  This is purely based on the system cpu clock, not the user
+cpu clock.
+.PP
+This curious statement about a QLC drive
+made me write this program:  \fIThe read speed is about
+2000MB/sec, but with a full cache, or after about 140GB, the read speed
+goes down to 185MB/sec.\fP   I'm sure it will come in handy one day.
+.PP
+You may thus find out that depending on the buffer size the read speed is fast in the beginning,
+but then later drops.
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file [???]     
+.TP
+\fBbufsize=\fP
+Buffer size, in (1024 sytle) GB [1].
+.TP
+\fBmode\fP
+The cputime2(mode):  0:usr 1:sys (from \fItimes(2)\fP or 2:clock from \fIclock(2)\fP.
+[1]
+.SH EXAMPLES
+Here are a few examples how to create large (binary) files in NEMO,
+with size 2GB, 20GB and 200GB resp. Pick your poison:
+.nf
+
+    mkspiral s1 1000000 nmodel=40  
+    mkspiral s2 1000000 nmodel=400 
+    mkspiral s3 1000000 nmodel=4000
+
+.fi
+and to time them
+.nf
+
+  bigread s2 0.1
+  bigread s3 1
+  
+.fi
+For benchmarking sometimes you want to make sure the I/O cache is empty. On linux the following command will do this:
+(as root)
+.nf
+
+     sync ; sync; sync; 
+     sudo echo 1 > /proc/sys/vm/drop_caches
+     sync ; sync; sync;
+     
+.fi
+.SH CAVEATS
+Obviously, making bufsize (which is in GB) too large, you can find out how well your swap performs.
+.SH SEE ALSO
+dd(1), clock(2), mkspiral(1NEMO)
+.SH FILES
+NEMO/src/kernel/io/bigread.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-Jul-20	V0.1 created	PJT
+.fi
