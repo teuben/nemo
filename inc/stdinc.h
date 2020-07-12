@@ -45,6 +45,7 @@
  * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
  * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
  * 11-dec-09    tinkering with halfp                                PJT
+ *    jul-20    add cputime2()                                      PJT
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -569,6 +570,7 @@ extern bool scanopt(string, string);
 
 /* core/cputime.c */
 extern double cputime(void);
+extern double cputime2(int mode);
 
 /* core/burststring.c */
 string *burststring(string lst, string sep);

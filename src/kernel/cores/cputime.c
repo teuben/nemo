@@ -43,7 +43,7 @@
 
 static long clk_tck = 0;
 
-double cputime()
+double cputime2(int mode)
 {
     struct tms buffer;
     clock_t pt = 0;
@@ -58,12 +58,20 @@ double cputime()
     pt = clock();
 #endif
     dprintf(4,"cputool: times: usr=%ld sys=%ld clock=%ld\n",buffer.tms_utime, buffer.tms_stime,pt);
-#if 1
-    return buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
-#else
-    return pt/( (double)CLOCKS_PER_SEC*60.0);
-#endif
+
+    if (mode == 0)
+        return buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
+    else if (mode == 1)
+        return buffer.tms_stime / ((double)CLK_TCK * 60.0);       /* return minutes */
+    else if (mode == 2)
+        return pt/( (double)CLOCKS_PER_SEC*60.0);
 }
+
+double cputime()
+{
+  return cputime2(0);
+}
+
 
 /* Now some routines that some fortran users like:
  * ETIME returns the elapsed runtime in seconds for the calling process.
