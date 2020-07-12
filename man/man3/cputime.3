@@ -1,4 +1,4 @@
-.TH CPUTIME 3NEMO "28 August 2012"
+.TH CPUTIME 3NEMO "11 July 2020"
 .SH NAME
 cputime, etime, dtime - routines to time your code
 .SH SYNOPSIS
@@ -6,12 +6,15 @@ cputime, etime, dtime - routines to time your code
 .B #include <stdinc.h>
 .PP
 .B double cputime(void);
+.B double cputime2(int mode)
 .B float etime(float *tarray);
 .B float dtime(float *tarray);
 .PP
 .fi
 .SH DESCRIPTION
-\fIcputime\fP returns the CPU time in minutes. 
+\fIcputime\fP returns the CPU time in minutes. \fIcputime2\fP allows a mode
+to be passed, which time is requested.  mode=0,1:  user and sys time
+from \fItimes(2)\fP, and mode=2 from \fIclock(2)\fP.
 .PP
 Two old FORTRAN routines, \fIetime\fP and \fIdtime\fP 
 can be compiled into this code, if not available on the
@@ -38,4 +41,5 @@ Peter Teuben
 .nf
 .ta +1i +4i
 28-aug-2012	finally documented	PJT
+11-jul-2020	added cputime2(mode)	PJT
 .fi
