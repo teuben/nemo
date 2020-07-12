@@ -14,7 +14,7 @@
 #   nov-2010            report special things it can do
 #   mar-2019            git instead of cvs
 #   nov-2019            maintain tasklist descriptions
-#   jul-2020            -L to allow incremental library update.
+#   jul-2020            -l to allow incremental library update, -L to force new lib
 #
 #
 #  todo:    bug not doing cvs update when new mknemo detected ?
@@ -197,14 +197,16 @@ if ($u) then
 endif
 
 # force compile all
-if ($l) then
+if ($L) then
+  set l=0
   (cd $NEMO; $make libs)
 endif
 
 # only compile what's been updated
-if ($L) then
+if ($l) then
   (cd $NEMO/src; $make install)
 endif
+
 
 foreach f ($argv)
  if (X$f:e != X) then
