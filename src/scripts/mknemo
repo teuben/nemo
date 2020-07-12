@@ -14,12 +14,13 @@
 #   nov-2010            report special things it can do
 #   mar-2019            git instead of cvs
 #   nov-2019            maintain tasklist descriptions
+#   jul-2020            -L to allow incremental library update.
 #
 #
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 4.3 9-jan-2020"
+set version="MKNEMO Version 4.4 12-jul-2020"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -66,6 +67,7 @@ set post_tidy=""
 set pre_tidy=""
 set u=0
 set l=0
+set L=0
 set a=0
 set v=0
 set go=0
@@ -97,6 +99,11 @@ loop:
   case -l:
     shift argv
     set l=1
+    set go=1
+    breaksw
+  case -L:
+    shift argv
+    set L=1
     set go=1
     breaksw
   case -g:
@@ -189,8 +196,14 @@ if ($u) then
   endif
 endif
 
+# force compile all
 if ($l) then
   (cd $NEMO; $make libs)
+endif
+
+# only compile what's been updated
+if ($L) then
+  (cd $NEMO/src; $make install)
 endif
 
 foreach f ($argv)
