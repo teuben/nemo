@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "22 December 2019"
+.TH MKNEMO 8NEMO "12 July 2020"
 .SH NAME
 mknemo \- attempt to find NEMO (and related) programs and install them
 .SH SYNOPSIS
@@ -41,7 +41,8 @@ and a local Makefile is then used to install the \fIprogram\fP.
   -t        cleanup after having made the binaries
   -T        cleanup before making the binaries
   -u        update your NEMO git tree before (re)making
-  -l        recompile the library before (re)making 
+  -l        update the library before (re)making
+  -L        force recompile the library before (re)making
   -g        use gmake, instead of make
   -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
@@ -107,5 +108,6 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 11-jun-04	V2.4: added -a flag	PJT
 11-apr-2019	V4.0: git based
 dec-2019	document critical binaries	PJT
+jul-2020	added -L options, switch -L and -l meaning	PJT
 .fi
-
+
