@@ -11,7 +11,7 @@ string defv[] = {
     "in=???\n        Input file",
     "bufsize=1\n     Buffer size, in (1024 sytle) GB",
     "mode=1\n        cputime2(mode)    0:usr 1:sys 2:clock",
-    "VERSION=0.1\n   11-jul-2020 PJT",
+    "VERSION=0.2\n   11-jul-2020 PJT",
     NULL,
 };
 
@@ -26,7 +26,7 @@ void nemo_main()
   size_t bufsize = (size_t) (getrparam("bufsize") * 1024 * 1024 * 1024);
   size_t nread;
   stream instr = stropen(getparam("in"),"r");
-  int mode = getiparam("cputime");
+  int mode = getiparam("mode");
   double t0, t1;
   int i,n;
   char *buffer;
