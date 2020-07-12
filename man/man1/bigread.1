@@ -1,4 +1,4 @@
-.TH BIGREAD 1NEMO "11 July 2020"
+.TH BIGREAD 1NEMO "12 July 2020"
 .SH NAME
 bigread \- measured buffered read speed
 .SH SYNOPSIS
@@ -6,9 +6,9 @@ bigread \- measured buffered read speed
 .SH DESCRIPTION
 This program reads a file in fixed sized blocks, choosen by the user, and reports the average
 speed (MB/sec) for each block.  This is purely based on the system cpu clock, not the user
-cpu clock.
+cpu clock (which is usually 0).
 .PP
-This curious statement about a QLC drive
+A curious statement about a QLC drive
 made me write this program:  \fIThe read speed is about
 2000MB/sec, but with a full cache, or after about 140GB, the read speed
 goes down to 185MB/sec.\fP   I'm sure it will come in handy one day.
@@ -24,9 +24,9 @@ is also given:
 Input file [???]     
 .TP
 \fBbufsize=\fP
-Buffer size, in (1024 sytle) GB [1].
+Buffer size, in (1024 style) GB [1].
 .TP
-\fBmode\fP
+\fBmode=0|1|2\fP
 The cputime2(mode):  0:usr 1:sys (from \fItimes(2)\fP or 2:clock from \fIclock(2)\fP.
 [1]
 .SH EXAMPLES
@@ -42,9 +42,19 @@ with size 2GB, 20GB and 200GB resp. Pick your poison:
 and to time them
 .nf
 
-  bigread s2 0.1
-  bigread s3 1
-  
+    /usr/bin/time bigread s1 0.1
+   0 602.353
+   1 1706.67
+   2 1706.67
+   ...
+   18 1280
+   19 1024
+   20 1470.61
+   ### nemo Debug Info: End-time 1.73 sec
+   Speed: n=21 min=602.353 max=1706.67 mean=1313.52 median=1280 rms=284.617
+   0.00user 1.74system 0:02.17elapsed 80%CPU (0avgtext+0avgdata 107296maxresident)k
+   4375016inputs+0outputs (0major+26364minor)pagefaults 0swaps
+
 .fi
 For benchmarking sometimes you want to make sure the I/O cache is empty. On linux the following command will do this:
 (as root)
@@ -56,9 +66,20 @@ For benchmarking sometimes you want to make sure the I/O cache is empty. On linu
      
 .fi
 .SH CAVEATS
+Benchmarking I/O operations on a linux (unix) system can be very tricky to understand. Here is an example of reading
+from a file vs. from a pipe:
+.nf  
+
+    bigread s1 0.1
+    cat s1 | bigread - 0.1
+.fi
+.PP
 Obviously, making bufsize (which is in GB) too large, you can find out how well your swap performs.
+.PP
+For debug=1 the output also contains the \fItimers(3NEMO)\fP, which is much harder to interpret on
+a mult-tasking system.
 .SH SEE ALSO
-dd(1), clock(2), mkspiral(1NEMO)
+dd(1), clock(2), cputime(3NEMO), mkspiral(1NEMO)
 .SH FILES
 NEMO/src/kernel/io/bigread.c
 .SH AUTHOR
