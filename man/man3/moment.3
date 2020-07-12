@@ -1,4 +1,4 @@
-.TH MOMENT 3NEMO "23 June 2016"
+.TH MOMENT 3NEMO "12 July 2020"
 .SH NAME
 ini_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment,
@@ -32,6 +32,8 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 .PP
 .B void compute_robust_moment(m);
 .B int n_robust_moment(m);
+.B real min_robust_moment(m);
+.B real max_robust_moment(m);
 .B real mean_robust_moment(m);
 .B real median_robust_moment(m);
 .B real sigma_robust_moment(m);
@@ -143,4 +145,5 @@ Peter Teuben
 24-apr-13	documented robust statistics	PJT
 16-jan-14	added MAD	PJT
 11-jun-14	clarified MAD and MARD (the old MAD was really MARD)	PJT
+12-jul-20	added min/max for robust moment		PJT
 .fi

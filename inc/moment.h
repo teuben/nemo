@@ -42,6 +42,8 @@ real max_moment (Moment *);
 
 void compute_robust_moment(Moment *);   /* call this first to grab the next 4 values */
 int  n_robust_moment(Moment *);
+real min_robust_moment(Moment *);
+real max_robust_moment(Moment *);
 real mean_robust_moment(Moment *);
 real sigma_robust_moment(Moment *);
 real median_robust_moment(Moment *);

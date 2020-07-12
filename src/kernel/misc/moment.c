@@ -17,6 +17,7 @@
  *  15-jan-14   add MAD (mean absolute deviation)
  *  11-jun-14   MAD is really median absolute deviation?  MAD0 for now the old mean
  *              is that MARD (mean absolute relative difference)
+ *  12-jul-20   add min/max for robust
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -185,6 +186,8 @@ real mean_moment(Moment *m)
  * @todo these temp variables should be stored inside the Moment structure
  */
 
+static real  last_min_robust_moment    = -1;
+static real  last_max_robust_moment    = -1;
 static real  last_mean_robust_moment   = -1;
 static real  last_sigma_robust_moment  = -1;
 static real  last_median_robust_moment = -1;
@@ -213,6 +216,8 @@ void compute_robust_moment(Moment *m)
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+  last_min_robust_moment    = min_moment(&tmp);
+  last_max_robust_moment    = max_moment(&tmp);
   last_mean_robust_moment   = mean_moment(&tmp);
   last_sigma_robust_moment  = sigma_moment(&tmp);
   last_median_robust_moment = median_moment(&tmp);
@@ -230,6 +235,15 @@ int n_robust_moment(Moment *m)
 real mean_robust_moment(Moment *m)
 {
   return last_mean_robust_moment;
+}
+
+real min_robust_moment(Moment *m)
+{
+  return last_min_robust_moment;
+}
+real max_robust_moment(Moment *m)
+{
+  return last_max_robust_moment;
 }
 
 real median_robust_moment(Moment *m)
