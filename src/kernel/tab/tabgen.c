@@ -7,10 +7,10 @@
 string defv[] = {
     "out=???\n     Output table",
     "nr=10\n       Number of rows",
-    "nc=10\n       Number of columns",
+    "nc=5\n        Number of columns",
     "mode=0\n      Mode",
     "seed=123\n    Random seed",
-    "VERSION=0.1\n 12-Jul-2020 XYZ",
+    "VERSION=0.2\n 13-Jul-2020 XYZ",
     NULL,
 };
 
