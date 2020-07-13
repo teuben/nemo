@@ -25,6 +25,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <potential.h>
 #include <spline.h>
 
@@ -52,7 +53,7 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
     "linear=t\n           Linear or Logarithmic spiral?",
-    "VERSION=1.9\n	  11-aug-09 PJT",
+    "VERSION=1.9a\n	  13-jul-2020 PJT",
     NULL,
 };
 
@@ -76,8 +77,10 @@ extern double xrandom(double, double);
 extern double grandom(double, double);
 
 local void inittables(void);
+local void writegalaxy(stream outstr);
+local void testdisk(int n);
 
-nemo_main()
+void nemo_main(void)
 {
     stream outstr;
     
@@ -148,7 +151,7 @@ local void inittables()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(stream outstr)
+void writegalaxy(stream outstr)
 {
     real tsnap = 0.0;
     int bits = MassBit | PhaseSpaceBit | TimeBit;
@@ -161,7 +164,7 @@ writegalaxy(stream outstr)
  * density test disk.  
  */
 
-testdisk(int n)
+void testdisk(int n)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i, sigma_i;
@@ -183,7 +186,7 @@ testdisk(int n)
     else                            /* fxied width spiral */
         gau = SPa * atan(2*SPw/(rmin+rmax)) * sqrt(TWO_PI);
     unifrac = uni / (uni+gau);
-    dprintf(0,"fraction of particles in disk = %f (%d)\n",unifrac,n);
+    dprintf(1,"fraction of particles in disk = %f (%d)\n",unifrac,n);
     if (Qsigma > 0)  
       warning("hot disk, sigma=%g,%g,%g",sigma[0],sigma[1],sigma[2]);
 
