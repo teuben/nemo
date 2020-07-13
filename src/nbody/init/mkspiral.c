@@ -216,7 +216,7 @@ void testdisk(int n)
         (*potential)(&ndim,pos_d,acc_d,&pot_d,&time_d);      /* get forces    */
         SETV(acc_i,acc_d);
 	vcir_i = sqrt(r_i * absv(acc_i));
-        dprintf(1,"r=%g vcir=%g acc=%g %g\n",r_i,vcir_i,acc_i[0],acc_i[1]);
+        dprintf(2,"r=%g vcir=%g acc=%g %g\n",r_i,vcir_i,acc_i[0],acc_i[1]);
         if (Qsigma) {
 	    sigma_i = sigma[0] + sigma[1]*exp(-r_i/sigma[2]);
 	    if (sigmator < 0) {
