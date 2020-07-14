@@ -16,6 +16,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -37,11 +38,11 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
   "rejection=f\n  Use rejection technique to seed the 'grid'",
   "nbody=\n       Use this instead of NX*NY*NZ if rejection is used",
   "headline=\n    Random verbiage",
-  "VERSION=0.7\n  19-nov-06 PJT",
+  "VERSION=0.7a\n 14-jul-2020 PJT",
   NULL,
 };
 
-string usage = "create a cosmology cube of equal massive stars";
+string usage = "create a cosmology cube of equal mass particles";
 
 string cvsid="$Id$";
 
