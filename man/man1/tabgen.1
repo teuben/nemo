@@ -1,34 +1,60 @@
-.TH TABGEN 1NEMO "12 July 2020"
+.TH TABGEN 1NEMO "14 July 2020"
 .SH NAME
-tabgen \- Create a table with random numbers
+tabgen \- Create a table with uniform or gaussian random numbers 
 .SH SYNOPSIS
 \fBtabgen\fP [parameter=value]
 .SH DESCRIPTION
-Table with uniformly ditributed numbers between 0 and 1.
+Create a table with random numbers. Either uniformly ditributed numbers between 0 and 1,
+or from a gaussian (normal) distribution with mean 0 and sigma 1.  See \fBmode=\fP below.
+.PP
+The number or rows and columns can be arbitrarely large.
+.PP
+Using \fBmode=-1\fP
+random numbers are generated but not output, in effect allowing a benchmark.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBout=\fP
-Output table [???]     
+Output ascii table [???]     
 .TP
 \fBnr=\fP
 Number of rows [10]    
 .TP
 \fBnc=\fP
 Number of columns [10]    
-.TP 20
+.TP
 \fBmode=\fP
-Mode. Not implemented yet. [0]      
+Mode. 0=uniform   1=normal   -1: uniform, but no output  []
 .TP 
 \fBseed=\fP
-Random seed [123]     
+Random seed [123]
+.TP
+\fBfmt=\fP
+The \fIprintf(3)\fP style format specifier. [%g]
+.SH PERFORMANCE
+On a typical 2020 machine it takes 0.23 seconds to create and output 1M random numbers,
+however most of the time is the output function. Using mode=-1 you can test the speed
+of just producing random numbers. About 95% of the time is spent in \fIprintf(3)\fP,
+as can be seen with this benchmark:
+.nf
+
+    /usr/bin/time tabgen . 10000 10000 -1
+    1.38user 0.29system 0:01.68elapsed 99%CPU
+    
+    /usr/bin/time tabgen . 10000 10000 0
+    28.60user 0.14system 0:28.77elapsed 99%CPU
+    
+.fi
+The raw production of random numbers is thus about 72 Mrups (same speed as numpy.random.normal),
+where the Linpack benchmark claims this machine runs at 50 GFlops.
 .SH SEE ALSO
-tabmath(1NEMO)
+tabmath(1NEMO), xrandom(3NEMO), printf(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
-12-Jul-20	V0.1 Created	PJT
+12-Jul-2020	V0.1 Created	PJT
+14-jul-2020	V0.3 mode= implemented	PJT
 .fi
