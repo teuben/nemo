@@ -1,17 +1,18 @@
-.TH BIGREAD 1NEMO "12 July 2020"
+.TH BIGREAD 1NEMO "13 July 2020"
 .SH NAME
-bigread \- measured buffered read speed
+bigread \- measure big buffered read speed of large files
 .SH SYNOPSIS
 \fBbigread\fP [parameter=value]
 .SH DESCRIPTION
 This program reads a file in fixed sized blocks, choosen by the user, and reports the average
 speed (MB/sec) for each block.  This is purely based on the system cpu clock, not the user
-cpu clock (which is usually 0).
+cpu clock (which is usually 0). The intent is to measure large blocked file I/O.
 .PP
 A curious statement about a QLC drive
 made me write this program:  \fIThe read speed is about
 2000MB/sec, but with a full cache, or after about 140GB, the read speed
-goes down to 185MB/sec.\fP   I'm sure it will come in handy one day.
+goes down to 185MB/sec.\fP The \fItruth\fP is far more complex, but perhaps this program
+will come in handy one day.
 .PP
 You may thus find out that depending on the buffer size the read speed is fast in the beginning,
 but then later drops.
@@ -79,7 +80,7 @@ Obviously, making bufsize (which is in GB) too large, you can find out how well 
 For debug=1 the output also contains the \fItimers(3NEMO)\fP, which is much harder to interpret on
 a mult-tasking system.
 .SH SEE ALSO
-dd(1), clock(2), cputime(3NEMO), mkspiral(1NEMO)
+dd(1), clock(2), iotop(1), bonnie++(1), iozone3(1), cputime(3NEMO), mkspiral(1NEMO)
 .SH FILES
 NEMO/src/kernel/io/bigread.c
 .SH AUTHOR
