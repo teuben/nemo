@@ -1,6 +1,12 @@
 /*
- * Various ansi prototypes for tables
+ *  various support for table I/O
+ *
+ *  Additional support is given via burststring.c and extstring.c
+ *
  */
+
+#ifndef _h_table
+#define _h_table
  
 /* getaline.c */
 char *getaline(stream);
@@ -17,3 +23,29 @@ void parse(int, string, double *, int);
 void strinsert(string, string, int);
 int iscomment(string);
 
+
+/* table, *tableptr:
+   a structure containing a table - new 2020 style
+
+*/
+   
+typedef struct {
+  int  mode;        // I/O mode  (streaming, all-in-memory, ...)
+  int  type;        // type of table (SSV, TSV, CSV, ....)
+  int    nr;        // number of rows
+  int    nc;        // number of coulumns
+
+  string name;      // filename, if used
+  stream str;       // stream, if used
+
+  string *lines;    // pointer to 'nr' lines (depending on mode)
+} table, *tableptr;
+
+//int write_image  ( stream, imageptr );
+//int read_image   ( stream, imageptr * );
+//int free_image   ( imageptr );
+//int create_image ( imageptr *, int, int );
+//int create_cube  ( imageptr *, int, int, int );
+//int copy_image   ( imageptr, imageptr *);
+
+#endif
