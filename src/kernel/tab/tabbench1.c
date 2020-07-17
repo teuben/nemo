@@ -11,6 +11,8 @@
 //5    /usr/bin/time tabbench1 p1Mt.tab .
 
 
+#include <stdlib.h>
+#include <ctype.h>
 #include <stdinc.h>
 #include <getparam.h>
 
@@ -32,24 +34,42 @@ string usage="table I/O benchmark";
 void nemo_main(void)
 {
     stream istr, ostr;
-    char line[MAX_LINELEN];
+    char *line;
     int nmax,  *select = NULL;
-    int nout, next = 0;
+    int nout, next = 0, counter = 0;
     int    i, j;
     string iname = getparam("in");
+    string oname = getparam("out");
+    size_t buffer_size = MAX_LINELEN, bufflen;
+
+    line = malloc((MAX_LINELEN) * sizeof(char));
 
     dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
+    dprintf(0, "Input File: %s\n", iname);
+    dprintf(0, "Output File: %s\n", oname);
+    dprintf(0, "Name: %s\n", usage);
 
     istr = stropen(getparam("in"),"r");
     ostr = stropen(getparam("out"),"w");
 
     i = 0;
-    while (fgets(line,MAX_LINELEN,istr) != NULL) {
-        i++;
-	fputs(line,ostr);
+    
+    while (getline(&line, &(buffer_size), istr) != -1) {
+        counter = 0;
+        while(isspace(line[counter]) != 0) {
+            ++counter;
+        }
+
+        if (line[counter] != '#' && line[counter] != '/' && line[counter] != '!') {
+            i++;
+	        fputs(line,ostr);
+        }
     }
+
     strclose(istr);
     strclose(ostr);
+    free(line);
+    line = NULL;
     dprintf(0,"Read %d lines\n",i);
 }
 

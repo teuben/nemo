@@ -8,6 +8,7 @@
 #include <table.h>
 #include <extstring.h>
 #include <ctype.h>
+#include <string.h>
 
 string defv[] = { 
     "in=???\n           input file name(s)",
@@ -65,7 +66,7 @@ local void do_work()
     words[n] = burststring(lines[n]," ,\t");
     k = xstrlen(words[n],sizeof(string))-1;
     kmin = (kmin < 0 ?  k :  MIN(kmin,k));
-    dprintf(5,"%d: %s\n",k, lines[n]);
+    dprintf(0,"%d: %s\n",k, lines[n]);
     n++;
   }
   nmax = n;
@@ -74,11 +75,33 @@ local void do_work()
 
 local void do_output()
 {
-  int i, j;
+  int i, j, max_spaces = 0, count_spaces;
+  int max_space[nmax];
+
+  for (j = 0; j < nmax; ++j) {
+    for (i = 0; i < kmin; ++i) {
+      if ((int)strlen(words[j][i]) > max_spaces) {
+        max_spaces = (int)strlen(words[j][i]);
+      }
+    }
+    /* fprintf(outstr, "%d\n", max_spaces); */
+    max_space[j] = max_spaces;
+    max_spaces = 0;
+  }
+
+  /* for (j = 0; j < nmax; ++j) {
+    fprintf(outstr, "%d\n", max_space[j]);
+  } */
 
   for (i=0; i<kmin; i++) {
-    for (j=0; j<nmax; j++)
+    for (j=0; j<nmax; j++) {
       fprintf(outstr,"%s ",words[j][i]);
+      for (count_spaces = 0; count_spaces < max_space[j] - (int)strlen(words[j][i]); ++count_spaces) {
+        fprintf(outstr, " ");
+      }
+    }
     fprintf(outstr,"\n");
   }
 }
+
+
