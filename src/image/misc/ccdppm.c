@@ -21,9 +21,10 @@ string defv[] = {
     "min=\n         Minimum overrride",
     "max=\n         Maximum overrride",
     "bad=\n         Use this as masking value to ignore data",
+    "power=1\n      Gamma factor applied to input data",
     "lut=\n         optional selection of a lut from NEMODAT/lut",
-    "8bit=f\n       24bit or 8bit",
-    "VERSION=1.1\n  6-jul-04 PJT",
+    "8bit=t\n       24bit or 8bit",
+    "VERSION=1.2\n  17-jul-2020 PJT",
     NULL,
 };
 
@@ -46,7 +47,7 @@ int  get_lut(string, int, real*, real*, real*);
 void nemo_main()
 {
   int  i, j, red, green, blue;
-  real x, xmin, xmax, bad, low;
+  real x, xmin, xmax, bad, low, power;
   bool Qmin, Qmax, Qbad, Q8bit;
   
   instr = stropen (getparam("in"), "r");
@@ -54,6 +55,10 @@ void nemo_main()
   strclose(instr);
   outstr = stropen(getparam("out"), "w");
   Q8bit = getbparam("8bit");
+  power = getrparam("power");
+
+  if (!Q8bit) warning("24bit not working yet");
+
   
   nx = Nx(iptr);	
   ny = Ny(iptr);
@@ -99,6 +104,17 @@ void nemo_main()
 	if (Qbad && x==bad) MapValue(iptr,i,j) = low;
       }
     }
+  }
+
+  if (power != 1.0) {
+    for (j=0; j<ny; j++) {
+      for (i=0; i<nx; i++) {
+	x =  MapValue(iptr,i,j);
+	MapValue(iptr,i,j) = pow((x-xmin)/(xmax-xmin), power);
+      }
+    }
+    xmin = 0;
+    xmax = 1;
   }
   
   fprintf(outstr,"P6\n%d %d\n255\n",nx,ny);

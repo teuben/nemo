@@ -1,4 +1,4 @@
-.TH CCDPPM 1NEMO "17 December 2003"
+.TH CCDPPM 1NEMO "19 July 2020"
 .SH NAME
 ccdppm \- convert image to a PPM file, with optional color cable
 .SH SYNOPSIS
@@ -36,6 +36,12 @@ the minimum.
 Use this as masking value to ignore data. By default no data is 
 considered bad.
 .TP
+\fBpower=\fP
+The gamma factor \fBp\fP applied to the input \fBx\fP,
+i.e. \fIy = ((x-xmin)/(xmax-xmin))**p\fP. 
+Use \fIccdmath(1NEMO)\fP for other transfer functions..
+[1].
+.TP
 \fBlut=\fP
 optional selection of a lut from NEMODAT/lut. Currently the full path
 to the file must be given. By default it will be using a grey scale
@@ -47,10 +53,17 @@ the normally 24bit ppms to 8bit images and not 'loose' any colors
 in the conversion. 
 [\fBfalse\fP].
 .SH EXAMPLES
-Here is an example to take the 5th plane from a fits file into a 24bit PPM file:
+Here is an example to take the 5th plane from a fits file into a PPM file:
 .nf
     % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
 .fi
+Converting to other image formats, while also resizing it (including upscaling):
+.nf
+    % convert p1.ppm -resize 256x256 p1.jpg
+.fi
+.SH CAVEATS
+Each pixel from the input image is converted to an output PPM. The \fIImageMagick(1)\fP toolset
+can be used to upscale the image count, or convert to other formats,such as JPG, PNG etc.
 .SH SEE ALSO
 fitstiff(1NEMO), lut(5NEMO)
 .SH FILES
