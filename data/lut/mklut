@@ -1,0 +1,48 @@
+#! /usr/bin/env python
+#
+#    pip install cmasher
+#
+#  To test a colormap:
+#      mklut pepper > pepper.lut
+#      ccdmath "" - %x size=512,512 | ccdppm - - lut=pepper.lut > pepper.ppm
+#
+#  History:
+#    20-jul-2020    written        Peter Teuben
+#
+
+
+import sys
+import matplotlib.pyplot as plt
+
+try:
+    import cmasher as cmr
+    Qcmr = True
+except:
+    print("No cmasher present, try:")
+    print("    pip install cmasher")
+    Qcmr = False
+
+
+if len(sys.argv) == 1:
+    print("Usage %s colormap_name")
+    print("See e.g. https://cmasher.readthedocs.io/user/cmap_overviews/mpl_cmaps.html")
+    sys.exit(0)
+    
+colormap_name = sys.argv[1]    
+
+# @ todo:   deal with LinearSegmentedColormap
+# cmap = plt.get_cmap('autumn_r')
+# cmaplist = [cmap(i) for i in range(cmap.N)]
+
+try:
+    cmap = plt.get_cmap(colormap_name)
+except:
+    try:
+        cmap = plt.get_cmap('cmr.%s' % colormap_name)
+    except:
+        print("No known colormap %s" % colormap_name)
+        sys.exit(1)
+
+for i in range(cmap.N):
+    rgb = cmap(i)
+    print(rgb[0], rgb[1], rgb[2])
