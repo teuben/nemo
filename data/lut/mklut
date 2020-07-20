@@ -18,8 +18,9 @@ try:
     import cmasher as cmr
     Qcmr = True
 except:
-    print("No cmasher present, try:")
-    print("    pip install cmasher")
+    #print("No cmasher present, try:")
+    #print("    pip install cmasher")
+    #print("Contiuing with the default mpl")
     Qcmr = False
 
 
@@ -30,19 +31,19 @@ if len(sys.argv) == 1:
     
 colormap_name = sys.argv[1]    
 
-# @ todo:   deal with LinearSegmentedColormap
-# cmap = plt.get_cmap('autumn_r')
-# cmaplist = [cmap(i) for i in range(cmap.N)]
-
 try:
     cmap = plt.get_cmap(colormap_name)
 except:
     try:
         cmap = plt.get_cmap('cmr.%s' % colormap_name)
     except:
-        print("No known colormap %s" % colormap_name)
+        print("# No known colormap %s, valid ones are:" % colormap_name)
+        cmaps = plt.colormaps()
+        for cmap in cmaps:
+            print(cmap)
+        print("# These are the %d currently known colormaps" % len(cmaps))
         sys.exit(1)
 
 for i in range(cmap.N):
     rgb = cmap(i)
-    print(rgb[0], rgb[1], rgb[2])
+    print("%f %f %f" % (rgb[0], rgb[1], rgb[2]))
