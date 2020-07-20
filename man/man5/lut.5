@@ -24,6 +24,8 @@ An example of reading the Red, Green and Blue responses:
   if (ncolors != 256) error("Problem %d reading %s",ncolors,fn);
 
 .fi
+which means the odd looking formatting of the LUT files have no significance
+in NEMO (or matplotlib). GIPSY might care. TBD.
 .SH EXAMPLES
 The \fBds9\fP image display server can read the GIPSY lut
 .PP
@@ -37,7 +39,7 @@ Here's an example
 .fi
 though if you know your python root, you can also find them, see FILES below.
 .SH SEE ALSO
-ccdppm(1NEMO)
+ccdppm(1NEMO), ccdmath(1NEMO)
 .PP
 cmasher (cmr):  https://github.com/1313e/CMasher
 .PP
@@ -47,7 +49,7 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
-NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut
+$NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut. mklut script also lives here.
 PYTHONROOT/lib/python3.7/site-packages/cmasher/colormaps/	cmasher "lut" files
 .fi
 .SH "UPDATE HISTORY"
