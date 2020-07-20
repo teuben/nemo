@@ -1,4 +1,4 @@
-.TH LUT 5NEMO "17 December 2003" 
+.TH LUT 5NEMO "20 July 2020"
 .SH NAME
 lut \- GIPSY 256 color lookup table
 .SH DESCRIPTION
@@ -6,6 +6,9 @@ lut \- GIPSY 256 color lookup table
 the colors Red, Green and Blue resp, scaled between 0.0 and 1.0,
 for 256 responses between a datamin and datamax (normally taken
 as 0 to 255.
+.PP
+The \fBcmasher\fP color tables are also stores in the same RGB format,
+except more free format.
 .SH FORMAT
 An example of reading the Red, Green and Blue responses:
 .nf
@@ -23,18 +26,34 @@ An example of reading the Red, Green and Blue responses:
 .fi
 .SH EXAMPLES
 The \fBds9\fP image display server can read the GIPSY lut
+.PP
+The cmasher python module can be used to generate new LUT's from matplotlib.
+Here's an example
+.nf
+
+     $NEMODAT/lut/mklut pepper > pepper.lut
+     ccdmath "" - %x size=512,512 | ccdppm - - lut=pepper.lut > pepper.ppm
+
+.fi
+though if you know your python root, you can also find them, see FILES below.
 .SH SEE ALSO
 ccdppm(1NEMO)
+.PP
+cmasher (cmr):  https://github.com/1313e/CMasher
+.PP
+colormaps:  https://cmasher.readthedocs.io/user/cmap_overviews/mpl_cmaps.html
 .SH AUTHOR
 Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
 NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut
+PYTHONROOT/lib/python3.7/site-packages/cmasher/colormaps/	cmasher "lut" files
 .fi
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i
-17-dec-03	documentation written (100 years Wright flight)    	PJT
+17-dec-2003	documentation written (100 years Wright flight)    	PJT
+20-jul-2020	cmasher docs (lunar landing day)	PJT
 .fi
 
