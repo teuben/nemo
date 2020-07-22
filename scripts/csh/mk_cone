@@ -1,7 +1,7 @@
 #! /bin/csh -f
 #
 # to get a rotating disk:    mk_cone vscale=1 outflow=0 cone=90
-# the disk= blends in a true disk so you can see both
+# the disk= blends in a true disk so you can see both the outflow cones and the disk
 #
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
@@ -23,9 +23,7 @@ foreach _arg ($*)
 end
 
 rm -f $out.*
-
-
-mkdisk $out.0 10000 mass=$disk potname=log potpars=0,1,0.5 rmax=2 >& /dev/null
+mkdisk $out.0 $nbody mass=$disk potname=log potpars=0,1,0.5 rmax=2 >& /dev/null
 
 if ($mirror == 0) then
   mkdisk - $nbody mass=1 |\
@@ -36,7 +34,7 @@ if ($mirror == 0) then
 
     cat $out.0 $out.1 |\
     snapmerge - - |\
-    snaprotate - - $incd x > tmp.snap
+    snaprotate - - $incd x > $out.snap
 else
   mkdisk - $nbody mass=1 |\
     snapscale - - vscale=$vscale |\
@@ -49,26 +47,25 @@ else
     snapfold - - theta=90-$cone fill=$fill |\
     snapscale - - rscale=1,1,-1 |\
     snaprotate - $out.2 $inc,$pa xz    
+
   cat $out.0 $out.1 $out.2 |\
     snapmerge - - |\
-    snaprotate - - $incd x > tmp.snap
+    snaprotate - - $incd x > $out.snap
 endif
 
-
-set svar=0.01
-
-snapgrid tmp.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
-snapgrid tmp.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
-snapgrid tmp.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
+set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
+snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
+snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
+snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
    ccdfits - $out.fits radecvel=t debug=-1
-
-
 
 xpaset -p ds9 frame frameno 1
 nds9 $out.vel
 xpaset -p ds9 frame frameno 2
 nds9 $out.den
 xpaset -p ds9 frame frameno 3
+nds9 $out.fits
+xpaset -p ds9 frame frameno 4
 nds9 $out.fits
 
 
