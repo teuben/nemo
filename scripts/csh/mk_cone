@@ -3,8 +3,8 @@
 # to get a rotating disk:    mk_cone vscale=1 outflow=0 cone=90
 # the disk= blends in a true disk so you can see both
 #
-#     2018      written at ESO
-#     2020      expanded with a disk and indep. geometry for Alberto to play with
+#     nov-2018      written at ESO
+#     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set vscale  = 0         #> SCALE vscale=0     -2:2:0.1
@@ -46,7 +46,8 @@ else
   mkdisk - $nbody mass=1 |\
     snapscale - - vscale=$vscale |\
     snapspin - - omega=$outflow outflow=t|\
-    snapfold - - theta=$cone-90 fill=$fill |\
+    snapfold - - theta=90-$cone fill=$fill |\
+    snapscale - - rscale=1,1,-1 |\
     snaprotate - $out.2 $inc,$pa xz    
   cat $out.0 $out.1 $out.2 |\
     snapmerge - - |\
