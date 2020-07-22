@@ -1,0 +1,45 @@
+.TH SNAPNEAR 1NEMO "22 July 2020"
+.SH NAME
+snapnear \- find a near point in a snapshot
+.SH SYNOPSIS
+\fBsnapnear\fP [parameter=value]
+.SH DESCRIPTION
+For a given set of body variables, display the phase space coordinates of the closest one
+matching.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file (snapshot) [???]    
+.TP 
+\fBvals=\fP
+Values of the things to compare [] 
+.TP 
+\fBoptions=\fP
+Things to compare [x,y,z]    
+.TP 
+\fBtimes=\fP
+Times to select snapshot [all]   
+.SH EXAMPLES
+Here is a contrived example of finding the last particle
+.nf
+
+   mkplummer - 100 seed=123 | snapnear - -0.65,-0.93,-1.81
+   -0.654517 -0.925513 -1.80847 0.145817 -0.27767 0.298678 99 0.00654808
+
+.fi
+A better way would be to output a snapshot sorted by the distance, viz.
+.nf
+   snapnear snap - 0,0,0 | snapprint - | head -1
+.fi
+.SH CAVEAT
+.SH SEE ALSO
+.SH FILES
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+22-Jul-20	V0.1 Drafted		PJT
+.fi
