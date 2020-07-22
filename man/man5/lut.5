@@ -38,8 +38,13 @@ Here's an example
 
 .fi
 though if you know your python root, you can also find them, see FILES below.
+.PP
+In \fIds9(1)\fP you can load a LUT as follows from the menu tree:
+.nf
+       color -> colormap parameters  -> file -> load colormap
+.fi
 .SH SEE ALSO
-ccdppm(1NEMO), ccdmath(1NEMO)
+ccdppm(1NEMO), ccdmath(1NEMO), ds9(1)
 .PP
 cmasher (cmr):  https://github.com/1313e/CMasher
 .PP
@@ -49,8 +54,9 @@ Peter Teuben
 .SH FILES
 .nf
 .ta +2.5i
-$NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut. mklut script also lives here.
-PYTHONROOT/lib/python3.7/site-packages/cmasher/colormaps/	cmasher "lut" files
+$NEMODAT/lut	data files, mirrored from GIPSY's $gip_dat/lut. 
+$NEMODAT/lut/mklut	script to create a LUT from matplotlib/cmasher colormaps
+PYTHONROOT/lib/python3.7/site-packages/cmasher/colormaps/	advanced cmasher "lut" files
 .fi
 .SH "UPDATE HISTORY"
 .nf
