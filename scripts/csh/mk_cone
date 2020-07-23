@@ -18,15 +18,19 @@ set fill    = f         #> RADIO fill=f       t,f
 set disk    = 0         #> RADIO disk=0       0,1/100,1/10,1,,10,100,1000,10000
 set out = cone1         #> ENTRY out=cone1
 
+set rmin = 0.1
+set rmax = 1
+set rc   = 0.1
+
 foreach _arg ($*)
     set $_arg
 end
 
 rm -f $out.*
-mkdisk $out.0 $nbody mass=$disk potname=log potpars=0,1,0.5 rmax=2 >& /dev/null
+mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=2 >& /dev/null
 
 if ($mirror == 0) then
-  mkdisk - $nbody mass=1 |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
     snapspin - - omega=$outflow outflow=t|\
     snapfold - - theta=90-$cone fill=$fill |\
@@ -36,12 +40,12 @@ if ($mirror == 0) then
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
 else
-  mkdisk - $nbody mass=1 |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
     snapspin - - omega=$outflow outflow=t|\
     snapfold - - theta=90-$cone fill=$fill |\
     snaprotate - $out.1 $inc,$pa xz    
-  mkdisk - $nbody mass=1 |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
     snapspin - - omega=$outflow outflow=t|\
     snapfold - - theta=90-$cone fill=$fill |\
@@ -67,5 +71,6 @@ xpaset -p ds9 frame frameno 3
 nds9 $out.fits
 xpaset -p ds9 frame frameno 4
 nds9 $out.fits
-
+xpaset -p ds9 frame frameno 5
+nds9 $out.fits
 
