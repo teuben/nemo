@@ -1,0 +1,61 @@
+#! /usr/bin/env python
+#
+#  Lists an 3-column RGB colormap from matplotlib for for use in programs
+#  such as GIPSY, NEMO, ds9.
+#
+#
+#  To test a colormap in NEMO :
+#      mklut pepper > pepper.lut
+#      ccdmath "" - %x size=512,512 | ccdppm - - lut=pepper.lut > pepper.ppm
+#
+#  In ds9 the colormap can be read in via:
+#      color -> colormap parameters  -> file -> load colormap
+#
+#  Optionally 
+#      pip install cmasher
+#  to get more advanced color maps
+#
+#  History:
+#    20-jul-2020    written        Peter Teuben
+#
+
+
+import sys
+import matplotlib.pyplot as plt
+
+if len(sys.argv) == 1:
+    sys.stderr.write("Usage %s [cmr.]CMAP\n" % sys.argv[0])
+    sys.stderr.write("  Write out a 3-column RGB table from a matplotlib colormap\n")
+    sys.stderr.write("  See e.g. https://cmasher.readthedocs.io/user/cmap_overviews/mpl_cmaps.html\n")
+    sys.stderr.write("  for advanced colormaps\n")
+    sys.stderr.write("  The prefix 'cmr.' is optional, it will try CMAP with and without\n")
+    sys.exit(0)
+
+try:
+    import cmasher as cmr
+except:
+    sys.stderr.write("No cmasher present, try:\n")
+    sys.stderr.write("    pip install cmasher\n")
+    sys.stderr.write("Continuing with the default mpl\n")
+
+    
+colormap_name = sys.argv[1]    
+
+try:
+    cmap = plt.get_cmap(colormap_name)
+    sys.stderr.write("Found %s\n" % colormap_name)
+except:
+    try:
+        cmap = plt.get_cmap('cmr.%s' % colormap_name)
+        sys.stderr.write("Found cmr.%s\n" % colormap_name)        
+    except:
+        print("# No known colormap %s, valid ones are:" % colormap_name)
+        cmaps = plt.colormaps()
+        for cmap in cmaps:
+            print(cmap)
+        print("# These are the %d currently known colormaps" % len(cmaps))
+        sys.exit(1)
+
+for i in range(cmap.N):
+    rgb = cmap(i)
+    print("%f %f %f" % (rgb[0], rgb[1], rgb[2]))

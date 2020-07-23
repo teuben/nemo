@@ -81,7 +81,9 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
+
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -578,6 +580,12 @@ string *burst0string(string lst, string sep);
 string *burst2string(string lst, string sep);
 void freestrings(string *strptr);
 int splitstring(int maxout, string out[], string lst, string sep);
+
+/* core/file_size.c */
+int nemo_file_size(char *name);
+int nemo_file_time(char *name);
+int nemo_file_lines(char *name, int deflen);
+ 
 
 
 /*

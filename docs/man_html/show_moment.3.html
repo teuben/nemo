@@ -24,33 +24,33 @@ kurtosis_moment(m)real h3_moment(m)real h4_moment(m)real mad_moment(m)real
 mard_moment(m)
 real min_moment(m);real max_moment(m);
 void compute_robust_moment(m);int
-n_robust_moment(m);real mean_robust_moment(m);real median_robust_moment(m);real
-sigma_robust_moment(m);
-Moment *m;int mom, ndat;real x, w;</pre>
+n_robust_moment(m);real min_robust_moment(m);real max_robust_moment(m);real
+mean_robust_moment(m);real median_robust_moment(m);real sigma_robust_moment(m);
+Moment
+*m;int mom, ndat;real x, w;</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>moment</i>
-is a set of functions to compute the moments of  a set of real values,
-but also keep track of the datamin and datamax. The routines are written
-in C but in  an object-oriented fashion as to try and keep the use from
-the internal data-structures. The <b>Moment</b> can (and should) be treated as an
-opaque datastructure. All information should be obtained through the interface
-routines described below. <p>
-If only a datamin/max is needed, setting <b>mom&lt;0</b>
-can be used to prevent the more expensive moment calculations.  <p>
-Moving or
-running averages (or moments) can be done by supplying <b>ndat&gt;0</b> to ini_moment.
-It will keep a memory of the last <b>ndat</b> data values and the moments now
-become running moments. <p>
-Note that the <i>median_moment</i> can only be used in
-<b>x</b> (the weights are ignored) and moving moment where <b>ndat&gt;0</b>. <p>
-<b>mean_moment</b> returns
-the mean value, where <b>sigma_moment</b> returns the square root of the variance
-<p>
-<b>robust_moment&rsquo;s</b> can also be computed. These are based on an algorithm to
-remove the outliers. It first computes the distance between the 1st and
-3rd quartile, then removes all points further than 1.5 times that distance
-from the 1st and  3rd quartile. After calling <b>compute_robust_moment</b>, the
-mean, median and sigma can be retrieved as those computations are done
+<i>moment</i> is a set of functions to compute
+the moments of  a set of real values, but also keep track of the datamin
+and datamax. The routines are written in C but in  an object-oriented fashion
+as to try and keep the use from the internal data-structures. The <b>Moment</b>
+can (and should) be treated as an opaque datastructure. All information
+should be obtained through the interface routines described below. <p>
+If only
+a datamin/max is needed, setting <b>mom&lt;0</b> can be used to prevent the more expensive
+moment calculations.  <p>
+Moving or running averages (or moments) can be done
+by supplying <b>ndat&gt;0</b> to ini_moment. It will keep a memory of the last <b>ndat</b>
+data values and the moments now become running moments. <p>
+Note that the <i>median_moment</i>
+can only be used in <b>x</b> (the weights are ignored) and moving moment where
+<b>ndat&gt;0</b>. <p>
+<b>mean_moment</b> returns the mean value, where <b>sigma_moment</b> returns the
+square root of the variance <p>
+<b>robust_moment&rsquo;s</b> can also be computed. These are
+based on an algorithm to remove the outliers. It first computes the distance
+between the 1st and 3rd quartile, then removes all points further than
+1.5 times that distance from the 1st and  3rd quartile. After calling <b>compute_robust_moment</b>,
+the mean, median and sigma can be retrieved as those computations are done
 in a temporary Moment structure. Caveat: for large datasets and/or moving
 moments,  robust_moment&rsquo;s can become expensive because of the need for sorting
 to get the quartiles. <p>
@@ -118,6 +118,7 @@ Peter Teuben
 24-apr-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented robust statistics<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-jan-14<tt> </tt>&nbsp;<tt> </tt>&nbsp;added MAD<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-jun-14<tt> </tt>&nbsp;<tt> </tt>&nbsp;clarified MAD and MARD (the old MAD was really MARD)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+12-jul-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;added min/max for robust moment<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre> <p>
 
 <hr><p>

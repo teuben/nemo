@@ -18,12 +18,15 @@
 string defv[] = {
     "in=???\n       Input image filename",
     "out=???\n      Output PPM filename",
-    "min=\n         Minimum overrride",
-    "max=\n         Maximum overrride",
+    "min=\n         Minimum override",
+    "max=\n         Maximum override",
     "bad=\n         Use this as masking value to ignore data",
+    "power=1\n      Gamma factor applied to input data",
+    "mean=\n        Mean value for ASINH scaling",
+    "sigma=\n       Sigma value for ASINH scaling",
     "lut=\n         optional selection of a lut from NEMODAT/lut",
-    "8bit=f\n       24bit or 8bit",
-    "VERSION=1.1\n  6-jul-04 PJT",
+    "8bit=t\n       8bit?  (or 24bit) [not implemented]",
+    "VERSION=1.3\n  19-jul-2020 PJT",
     NULL,
 };
 
@@ -46,14 +49,22 @@ int  get_lut(string, int, real*, real*, real*);
 void nemo_main()
 {
   int  i, j, red, green, blue;
-  real x, xmin, xmax, bad, low;
-  bool Qmin, Qmax, Qbad, Q8bit;
+  real x, xmin, xmax, bad, low, power, mean, sigma, slope;
+  bool Qmin, Qmax, Qbad, Q8bit, Qasinh;
   
   instr = stropen (getparam("in"), "r");
   read_image (instr,&iptr);
   strclose(instr);
   outstr = stropen(getparam("out"), "w");
   Q8bit = getbparam("8bit");
+  power = getrparam("power");
+  Qasinh = hasvalue("mean") && hasvalue("sigma");
+  if (Qasinh) {
+    mean = getrparam("mean");
+    sigma = getrparam("sigma");
+  }
+
+  if (!Q8bit) warning("24bit not working yet");
   
   nx = Nx(iptr);	
   ny = Ny(iptr);
@@ -84,9 +95,11 @@ void nemo_main()
 	if (!Qmax && x>xmax) xmax=x;
       }
     }
+    dprintf(0,"Auto-scaling, xmin=%g xmax=%g\n",xmin,xmax);
   }
   
   if (Qbad) {                              /* loop over data to flag bad data */
+    dprintf(0,"Flag bad data\n");
     if (xmin<0)
       low = 2*xmin;
     else if (xmin>0)
@@ -100,6 +113,32 @@ void nemo_main()
       }
     }
   }
+
+  if (Qasinh) {                          /* if requested, apply the ASINH scaling */
+    dprintf(0,"Using ASINH scaling with mean=%g sigma=%g\n",mean,sigma);
+    slope = 1.0/asinh(xmax-xmin);
+    for (j=0; j<ny; j++) {
+      for (i=0; i<nx; i++) {
+	x =  MapValue(iptr,i,j);
+	MapValue(iptr,i,j) = asinh((x-mean)/sigma);
+      }
+    }
+    xmin = 0;
+    xmax = 1;
+  }
+
+  if (power != 1.0) {                   /* if requested, apply a gamma factor */
+    dprintf(0,"Using gamma factor power=%g scaling\n",power);
+    slope = 1.0/(xmax-xmin);    
+    for (j=0; j<ny; j++) {
+      for (i=0; i<nx; i++) {
+	x =  MapValue(iptr,i,j);
+	MapValue(iptr,i,j) = pow(slope*(x-xmin), power);
+      }
+    }
+    xmin = 0;
+    xmax = 1;
+  }
   
   fprintf(outstr,"P6\n%d %d\n255\n",nx,ny);
   for (j=ny-1; j>=0; j--) {
@@ -111,6 +150,7 @@ void nemo_main()
       fputc(blue,outstr);
     }
   }
+  strclose(outstr);
 }
 
 int  get_lut(string fn, int n, real *r, real *g, real *b)

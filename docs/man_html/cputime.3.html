@@ -12,28 +12,33 @@
 cputime, etime, dtime - routines to time your code 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
-<pre>#include &lt;stdinc.h&gt;double cputime(void);float etime(float *tarray);float dtime(float
-*tarray);
+<pre>#include &lt;stdinc.h&gt;double cputime(void);double cputime2(int mode)float etime(float
+*tarray);float dtime(float *tarray);
 </pre>
 <h2><a name='sect2' href='#toc2'></b>Description</a></h2>
-<i>cputime</i> returns the CPU time in minutes.  <p>
-Two old FORTRAN
-routines, <i>etime</i> and <i>dtime</i>  can be compiled into this code, if not available
-on the local system (-DETIME): <p>
-<i>etime</i> returns the elapsed runtime in seconds
-for the calling process. <p>
-<i>dtime</i> returns the elapsed time since the last call
-to dtime, or the start of execution on the first call. The returned argument
-tarray contains user time in the first element  and  system  time  in 
-the second element.  Elapsed time, the returned value, is the  sum  of 
-user  and  system time. 
+<i>cputime</i> returns the CPU
+time in minutes. <i>cputime2</i> allows a mode to be passed, which time is requested.
+ mode=0,1:  user and sys time from <a href='times.2.html'><i>times(2)</i></a>
+, and mode=2 from <a href='clock.2.html'><i>clock(2)</i></a>
+. <p>
+Two
+old FORTRAN routines, <i>etime</i> and <i>dtime</i>  can be compiled into this code,
+if not available on the local system (-DETIME): <p>
+<i>etime</i> returns the elapsed
+runtime in seconds for the calling process. <p>
+<i>dtime</i> returns the elapsed time
+since the last call to dtime, or the start of execution on the first call.
+The returned argument tarray contains user time in the first element  and
+ system  time  in  the second element.  Elapsed time, the returned value,
+is the  sum  of  user  and  system time. 
 <h2><a name='sect3' href='#toc3'>See Also</a></h2>
 <a href='timers.3.html'>timers(3NEMO)</a>
 , <a href='times.2.html'>times(2)</a>
+,
+<a href='clock.2.html'>clock(2)</a>
  
 <h2><a name='sect4' href='#toc4'>Author</a></h2>
-Peter Teuben
-
+Peter Teuben 
 <h2><a name='sect5' href='#toc5'>Files</a></h2>
 <br>
 <pre>~/src/kernel/cores<tt> </tt>&nbsp;<tt> </tt>&nbsp;cputime.c
@@ -41,6 +46,7 @@ Peter Teuben
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>28-aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;finally documented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+11-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added cputime2(mode)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

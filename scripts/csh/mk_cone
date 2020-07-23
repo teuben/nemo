@@ -1,0 +1,107 @@
+#! /bin/csh -f
+#
+# to get a rotating disk:    mk_cone vscale=1 outflow=0 cone=90
+# the disk= blends in a true disk so you can see both the outflow cones and the disk
+#
+#     nov-2018      written at ESO
+#     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
+
+set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
+set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
+set vscale  = 0.9       #> SCALE vscale=0.9   -2:2:0.1
+set outflow = 0.4       #> SCALE outflow=0.4  0:2:0.1
+set flow    = flat      #> RADIO flow=flat    flat,rise,fall
+set cone    = 30        #> SCALE cone=30      0:90:1
+set inc     = 0         #> SCALE inc=0        0:90:1
+set pa      = 0         #> SCALE pa=0         0:360:1
+set incd    = 80        #> SCALE incd=80      0:90:1
+set mirror  = 1         #> RADIO mirror=1     0,1
+set fill    = f         #> RADIO fill=f       t,f
+set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,,10,100,1000,10000
+set out = cone1         #> ENTRY out=cone1
+
+#  parameters not in the GUI
+set rmax = 1
+set rc   = 0.1
+
+foreach _arg ($*)
+    set $_arg
+end
+
+# in Bae_2016_ApJ_828_97.pdf there is nice diagram (Figure 1+2) explaining their parameters.
+# the main difference is that we only use "incd" for the disk, we don't rotate the disk
+# so "pad=90" fixed really.
+# The pa/inc of the cone is defined w.r.t. the disk, which can then be inclined after.
+# Here are the variables from the paper:
+#   i_bicone   (for the cone)
+#   PA_bicone
+#   i_dust     (for the disk)
+#   PA_dust
+#   theta_in   (half cone opening angle)
+# they use 3 different velocity profiles:
+#   - linear (which we have here)
+#   - linear decrease (inverse of previous)
+#   - constant
+
+rm -f $out.*
+mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=2 >& /dev/null
+
+if ($flow == flat) then
+    echo 0 $outflow   > $out.flow
+    echo 1 $outflow  >> $out.flow
+else if ($flow == rise) then
+    echo 0 0          > $out.flow
+    echo 1 $outflow  >> $out.flow
+else if ($flow == fall) then
+    echo 0 $outflow   > $out.flow
+    echo 1 0         >> $out.flow
+else
+    echo No valid $floa
+    exit 0
+endif    
+
+if ($mirror == 0) then
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+    snapscale - - vscale=$vscale |\
+    snapspin - - omega=$outflow rotcur=$out.flow outflow=t|\
+    snapfold - - theta=90-$cone fill=$fill |\
+    snaprotate - $out.1 $inc,$pa xz
+
+    cat $out.0 $out.1 |\
+    snapmerge - - |\
+    snaprotate - - $incd x > $out.snap
+else
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+    snapscale - - vscale=$vscale |\
+    snapspin - - rotcur=$out.flow outflow=t|\
+    snapfold - - theta=90-$cone fill=$fill |\
+    snaprotate - $out.1 $inc,$pa xz    
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+    snapscale - - vscale=$vscale |\
+    snapspin - - rotcur=$out.flow outflow=t|\
+    snapfold - - theta=90-$cone fill=$fill |\
+    snapscale - - rscale=1,1,-1 |\
+    snaprotate - $out.2 $inc,$pa xz    
+
+  cat $out.0 $out.1 $out.2 |\
+    snapmerge - - |\
+    snaprotate - - $incd x > $out.snap
+endif
+
+set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
+snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
+snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
+snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
+   ccdfits - $out.fits radecvel=t debug=-1
+
+xpaset -p ds9 frame frameno 1
+nds9 $out.vel
+xpaset -p ds9 frame frameno 2
+nds9 $out.den
+xpaset -p ds9 frame frameno 3
+nds9 $out.fits
+xpaset -p ds9 frame frameno 4
+nds9 $out.fits
+xpaset -p ds9 frame frameno 5
+nds9 $out.fits
+

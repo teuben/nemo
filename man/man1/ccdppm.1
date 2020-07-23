@@ -1,17 +1,34 @@
-.TH CCDPPM 1NEMO "17 December 2003"
+.TH CCDPPM 1NEMO "19 July 2020"
 .SH NAME
-ccdppm \- convert image to a PPM file, with optional color cable
+ccdppm \- convert image to a PPM file, with optional color cable and ASINH scaling
 .SH SYNOPSIS
 \fBccdppm\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdppm\fP converts a NEMO image to a 24bit PPM file.
-A color table can be optionally added, also in 8bit mode.
+\fBccdppm\fP converts a NEMO \fIimage(5NEMO)\fP to an 8/24bit PPM file.
+A color table can be optionally added.
 .PP
 ppm files are probably the most versatile output graphics 
 format, since it is very easy to write (no special library
 is needed) and they can be easily converted to other formats
 (gif, jpg,....) and are understood by most image processing
-systems.
+systems. See e.g. the \fIImageMagick(1)\fP toolset.
+.PP
+Although the \fPpower=\fP keyword can provide a simple
+gamma factor type scaling, for astronomical data with a lot of pixels
+with noise and some weak signal (positive, or negative!)
+it is often useful
+to use the "asinh" scaling, so clearly see both the structure
+near the noise, as well as all the signal. Use the \fBmean=\fP
+and \fPsigma=\fP parameters to activate the ASINH scaling.
+.nf
+     Out = slope*asinh((In-mean)/sigma))
+.fi
+where the \fIslope\fP is computed such that the minimum and maximum
+are 0 and 1 resp.  Use \fIccdstat(1NEMO)\fP to find good values for
+the mean and sigma, with its optional keyword \fBrobust=t\fP.
+.PP
+For certain types of objects (e.g. galaxies) the
+ASINH scaling can be enhanced by also using power=0.5.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -25,16 +42,32 @@ taken. See \fIccdsub(5NEMO)\fP to select a plane. No default.
 Output PPM filename. No default.
 .TP
 \fBmin=\fP
-Overrride data minimum used in scaling. By default it will look for
+Override data minimum used in scaling. By default it will look for
 the minimum.
 .TP
 \fBmax=\fP
-Overrride data maximum used in scaling. By default it will look for
+Override data maximum used in scaling. By default it will look for
 the minimum.
 .TP
 \fBbad=\fP
 Use this as masking value to ignore data. By default no data is 
 considered bad.
+.TP
+\fBpower=\fP
+The gamma factor \fBpower\fP applied to the input \fBx\fP,
+i.e. \fIy = ((x-xmin)/(xmax-xmin))**power\fP. 
+Use \fIccdmath(1NEMO)\fP for other transfer functions..
+[1].
+.TP
+\fBmean=\fP
+If supplied (and power= as well),
+this will activate the ASINH scaling.
+
+[not supplied]
+.TP
+\fBpower=\fP
+If supplied (and mean= as well),
+this will activate the ASINH scaling. [not supplied]
 .TP
 \fBlut=\fP
 optional selection of a lut from NEMODAT/lut. Currently the full path
@@ -47,12 +80,32 @@ the normally 24bit ppms to 8bit images and not 'loose' any colors
 in the conversion. 
 [\fBfalse\fP].
 .SH EXAMPLES
-Here is an example to take the 5th plane from a fits file into a 24bit PPM file:
+Here is an example to take the 5th plane from a fits file into a PPM file:
 .nf
-    % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
+
+   % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
+
 .fi
+Converting to other image formats, while also resizing it (including upscaling):
+.nf
+
+   % convert p1.ppm -resize 256x256 p1.jpg
+   % fitsccd fpC-000094-g2-0446.fit - | ccdppm - - power=0.2 | convert - try.jpg
+
+.fi
+And using \fIccdstat(1NEMO)\fP and some trial and error picking the right mean/sigma/power :
+.nf
+
+   % fitsccd fpC-000094-g2-0446.fit - | ccdppm - try.ppm mean=1073 sigma=150 power=0.4
+
+.nf
+.SH CAVEATS
+Each pixel from the input image is converted to an output PPM. The \fIImageMagick(1)\fP toolset
+can be used to upscale the image count, or convert to other formats,such as JPG, PNG etc.
 .SH SEE ALSO
-fitstiff(1NEMO), lut(5NEMO)
+ccdrgb(1NEMO), fitstiff(1NEMO), lut(5NEMO)
+.PP
+ASINH scaling Lupton et al. (2004) - https://ui.adsabs.harvard.edu/abs/2004PASP..116..133L/abstract
 .SH FILES
 $NEMODAT/lut   :  repository of \fIlut(5NEMO)\fP color lookup tables.
 .SH AUTHOR
