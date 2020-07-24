@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7d 13-apr-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7e 24-jul-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -1733,7 +1733,7 @@ bool getbparam(string par)
     int  nret;
 
     val = getparam(par);                        /* obtain value of param */
-#if !defined(NEMOINP)
+#if 1
     if (*val=='.') val++;                       /* catch .TRUE. .FALSE. */
     if (strchr("1tTyYjJ", *val) != NULL)        /* is value true? */
         return TRUE;
@@ -1743,6 +1743,7 @@ bool getbparam(string par)
     error("getbparam: %s=%s not bool", par, val);
     return 0;   /*turboc*/
 #else
+    // does not make sense to parse this via NEMOINP
     nret = nemoinpb(val,&bpar,1);
     if (nret < 0)
         error("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
