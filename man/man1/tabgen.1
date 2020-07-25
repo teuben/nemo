@@ -1,16 +1,20 @@
-.TH TABGEN 1NEMO "14 July 2020"
+.TH TABGEN 1NEMO "25 July 2020"
 .SH NAME
-tabgen \- Create a table with uniform or gaussian random numbers 
+tabgen \- Create an ASCII table with (random) values
 .SH SYNOPSIS
 \fBtabgen\fP [parameter=value]
 .SH DESCRIPTION
-Create a table with random numbers. Either uniformly ditributed numbers between 0 and 1,
-or from a gaussian (normal) distribution with mean 0 and sigma 1.  See \fBmode=\fP below.
+Create a table with (random) numbers. Either uniformly ditributed numbers between 0 and 1,
+from a gaussian (normal) distribution with mean 0 and sigma 1, 
+a constant value, or a linearly increasing value (0, 1, 2, ...). See \fBmode=\fP below.
 .PP
-The number or rows and columns can be arbitrarely large.
+The number or rows and columns can be arbitrarely large, but not all \fItable(5NEMO)\fP
+programs in NEMO will be able to deal with large columns or rows. Usually rows
+can be managed with the \fBnmax=\fP keyword, but columns is hidden deeper and not under
+user control.
 .PP
-Using \fBmode=-1\fP
-random numbers are generated but not output, in effect allowing a benchmark.
+Using \fBmode < 0\fP
+numbers are generated but not output, in effect allowing a benchmark. 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -25,7 +29,9 @@ Number of rows [10]
 Number of columns [5]    
 .TP
 \fBmode=\fP
-Mode. 0=uniform   1=normal   -1: uniform, but no output  []
+The distribution of numbers: 1=uniform   2=normal   3=constant  4=linear
+< 0 : no output, but the
+absolute value determines which distribution of numbers  [1]
 .TP 
 \fBseed=\fP
 Random seed [123]
@@ -34,7 +40,7 @@ Random seed [123]
 The \fIprintf(3)\fP style format specifier. [%g]
 .SH PERFORMANCE
 On a typical 2020 machine it takes 0.23 seconds to create and output 1M random numbers,
-however most of the time is the output function. Using mode=-1 you can test the speed
+however most of the time is the output function. Using mode < 0 you can test the speed
 of just producing random numbers. About 95% of the time is spent in \fIprintf(3)\fP,
 as can be seen with this benchmark:
 .nf
@@ -42,14 +48,27 @@ as can be seen with this benchmark:
     /usr/bin/time tabgen . 10000 10000 -1
     1.38user 0.29system 0:01.68elapsed 99%CPU
     
-    /usr/bin/time tabgen . 10000 10000 0
+    /usr/bin/time tabgen . 10000 10000 1
     28.60user 0.14system 0:28.77elapsed 99%CPU
     
 .fi
 The raw production of random numbers is thus about 72 Mrups (same speed as numpy.random.normal),
 where the Linpack benchmark claims this machine runs at 50 GFlops.
+.PP
+Generating a sequence of numbers is relatively slow in tabgen. To generate 10M numbers is slow compared
+ot the standard unix tool \fIseq(1)\fP:
+.nf
+
+    /usr/bin/time tabgen - 10000000 1 4 fmt=%-10.f > tab2
+    9.89user 0.07system 0:09.97elapsed 99%CPU
+
+    /usr/bin/time seq 10000000 > tab2
+    0.19user 0.22system 0:00.42elapsed 98%CPU
+    
+.fi
+which is most likely the more complex operations of a floating point \fIfprintf(3)\fP.
 .SH SEE ALSO
-tabmath(1NEMO), xrandom(3NEMO), printf(3NEMO)
+seq(1), tabmath(1NEMO), xrandom(3NEMO), printf(3NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
@@ -57,4 +76,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 12-Jul-2020	V0.1 Created	PJT
 14-jul-2020	V0.3 mode= implemented	PJT
+25-jul-2020	V0.4 changed meaning of mode=	PJT
 .fi
