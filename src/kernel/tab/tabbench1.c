@@ -1,27 +1,29 @@
 /*
- *     Benchmark some common table I/O operations
+ *     Benchmark some common table I/O operations - see also tabbench2
  *
  *      3-jul-2020  V0.1    drafted
+ *     24-jul-2020  V0.2    use getline - Sathvik Ravi
  */
 
-//1    nbody=1000000      (for 10M there is a bug)
-//2    mkplummer - $nbody | snapprint - format=%20.16f    > p1M.tab
-//3    /usr/bin/time tabbench1 p1M.tab .
-//4    /usr/bin/time tabtranspose p1M.tab p1Mt.tab $nbody
-//5    /usr/bin/time tabbench1 p1Mt.tab .
+//1    tabgen tab1 1000000   3
+//1    tabgen tab2 10000000  3
+//1    tabgen tab3 100000000 3
+//1    /usr/bin/time tabbench1 tab1 .
+
+//2    /usr/bin/time tabtranspose p1M.tab p1Mt.tab $nbody
+//2    /usr/bin/time tabbench1 p1Mt.tab .
 
 
-#include <stdlib.h>
-#include <ctype.h>
 #include <stdinc.h>
+#include <ctype.h>
 #include <getparam.h>
-#include "table.h"
+#include <table.h>
 
 string defv[] = {
     "in=???\n	       input file",
     "out=???\n         output file",
-    "nmax=10000\n      Default max allocation",
-    "mode=1\n          Benchmark mode",
+    "nmax=10000\n      Default max allocation (in a pipe)",
+    "mode=1\n          Benchmark mode (not used yet)",
     "VERSION=0.2\n     24-jul-2020 PJT",
     NULL,
 };
@@ -41,23 +43,22 @@ void nemo_main(void)
     int *select = NULL;
     int nout, next = 0, counter = 0;
     int    i, j;
+    int nmax = getiparam("nmax");
     string input = getparam("in");
     string output = getparam("out");
     size_t buffer_size = MAX_LINELEN, bufflen;
 
     line = malloc((MAX_LINELEN) * sizeof(char));
-    nmax = nemo_file_lines();
+    nmax = nemo_file_lines(input,nmax);
 
     dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
-    dprintf(0, "Input File: %s\n", input);
-    dprintf(0, "Output File: %s\n", output);
-    dprintf(0, "Name: %s\n", usage);
+    dprintf(1, "Input File: %s\n", input);
+    dprintf(1, "Output File: %s\n", output);
 
     istr = stropen(getparam("in"),"r");
     ostr = stropen(getparam("out"),"w");
 
     i = 0;
-    
     while (getline(&line, &(buffer_size), istr) != -1) {
         counter = 0;
         while(isspace(line[counter]) != 0) {
@@ -65,13 +66,14 @@ void nemo_main(void)
         }
 
         if (line[counter] != '#' && line[counter] != '/' && line[counter] != '!') {
-            i++;
-	        fputs(line,ostr);
+	    i++;
+	    fputs(line,ostr);
         }
     }
 
     strclose(istr);
     strclose(ostr);
+    
     free(line);
     line = NULL;
     dprintf(0,"Read %d lines\n",i);
