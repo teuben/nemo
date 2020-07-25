@@ -59,7 +59,6 @@ void nemo_main(void)
 
     i = 0;
     while (getline(&line, &(buffer_size), istr) != -1) {
-#if 1
         counter = 0;
         while(isspace(line[counter]) != 0) {
             ++counter;
@@ -68,12 +67,6 @@ void nemo_main(void)
 	    i++;
 	    fputs(line,ostr);
         }
-#else	
-	i++;
-#endif
-#if 1
-	fputs(line,ostr);
-#endif
     }
 
     strclose(istr);
