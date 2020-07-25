@@ -1,6 +1,10 @@
 /*
  *     Benchmark some common table I/O operations
  *
+ *     -  2" to read all lines using getline()
+ *     - 22" to break them using nemoinpr()
+ *     -  6" to use dofie()
+ *
  *     24-jul-2020  V0.1    drafted
  *     25-jul-2020  V0.2    cleaned up
  */
@@ -14,7 +18,7 @@ string defv[] = {
     "out=???\n         output file",
     "mode=1\n          Benchmark mode",
     "nmax=10000\n      Default max allocation",
-    "VERSION=0.2\n     3-jul-2020 PJT",
+    "VERSION=0.3\n     25-jul-2020 PJT",
     NULL,
 };
 
@@ -53,7 +57,10 @@ void nemo_main(void)
     sum = 0.0;
     linelen = 0;
     if (mode <= 0) {
-      dprintf(0,"Just reading/writing\n");
+      if (mode < 0)
+	dprintf(0,"Just reading\n");
+      else
+	dprintf(0,"Just reading and writing\n");
       //while (fgets(line,MAX_LINELEN,istr) != NULL)
       while (getline(&line, &linelen, istr) != -1) {
 	nlines++;
@@ -102,3 +109,8 @@ void nemo_main(void)
 //  1 24.0 24.3    24.0 27.6 25.7 26.3 27.4 26.9 24.4 25.6 28.8 28.6
 //  2 25.9 26.4    28.9 27.7 28.1 26.1 27.5 28.0 27.7 28.5 28.6 
 //  3 28.0         32.4 32.7 33.2 31.6 28.3 28.1 33.4 33.6 34.4
+
+// e.g. tabgen tab3    80 sec ->  34 MB/sec ( low level I/O :   435 MB/sec )
+
+// T480  2.8 4.8 34.5 35.4 42.9
+// X1Y4  1.9 3.1 28.6 28.6 34.4 (about 20% more for fie vs. compiled)
