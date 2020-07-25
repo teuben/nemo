@@ -1,9 +1,10 @@
 /*
  *     Benchmark some common table I/O operations
  *
- *     -  2" to read all lines using getline()
+ *     -  2" to read all lines using getline()  [100M benchmark see below]
  *     - 22" to break them using nemoinpr()
  *     -  6" to use dofie()
+ *     - for same size file, longer lines (thus fewer to read) is more efficient
  *
  *     24-jul-2020  V0.1    drafted
  *     25-jul-2020  V0.2    cleaned up
