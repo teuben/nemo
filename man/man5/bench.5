@@ -120,6 +120,13 @@ where the last two instances were just re-running the same command, but
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the 
 wall clock time is more likely to properly account for the I/O overhead time.
+.PP
+Other industry benchmarks:
+.nf
+    Geekbench 5 (very wide variety of compute workloads - baseline is i3-8100)
+    Linpack   (focus on floating point operations - Gflops)
+    SPEC CPU 2017 benchmark - 
+.fi
 .SH  OTHERS
 A few other manual pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
 .nf
