@@ -2,12 +2,15 @@
  *     Benchmark some common table I/O operations
  *
  *     -  2" to read all lines using getline()  [100M benchmark see below]
- *     - 22" to break them using nemoinpr()
+ *     - 22" to break them using nemoinpr()  [this operation is several times slower in numpy]
+ *                    (x,y,z) = np.loadtxt("tab3").T
  *     -  6" to use dofie()
+ *     - < 1" using sqrt() - hard to measure it's too fast
  *     - for same size file, longer lines (thus fewer to read) is more efficient
  *
  *     24-jul-2020  V0.1    drafted
  *     25-jul-2020  V0.2    cleaned up
+ *                  V0.4    test strtok() based parsing
  */
 
 
@@ -16,10 +19,10 @@
 
 string defv[] = {
     "in=???\n	       input file",
-    "out=???\n         output file",
+    "out=\n            output file",
     "mode=1\n          Benchmark mode",
-    "nmax=10000\n      Default max allocation",
-    "VERSION=0.3\n     25-jul-2020 PJT",
+    "nmax=10000\n      Default max allocation (not used)",
+    "VERSION=0.4\n     25-jul-2020 PJT",
     NULL,
 };
 
@@ -33,6 +36,25 @@ string usage="table I/O benchmark";
 
 extern int inifie(string);
 extern void dofie(real *, int *, real *, real *);
+
+// testing another method of parsing
+// NEMO's burststring() based version is 59" compared to 92" in this strtok() based version
+// Q: is there a fancy sscanf method possible?
+local int nemoinprt(char *line,real *par, int npar)
+{
+  char *token = strtok(line," ,");
+  int ntok = 0;
+
+  while (token != NULL) {
+    par[ntok++] = atof(token);
+    token = strtok(NULL," ,");
+  }
+  return ntok;
+}
+
+// pick the standard or local testing version in nemoinprt using gettok()
+#define my_nemoinpr nemoinpr
+//#define my_nemoinpr nemoinprt
 
 void nemo_main(void)
 {
@@ -71,13 +93,13 @@ void nemo_main(void)
         dprintf(0,"nemoinp to split line\n");      
         while (getline(&line, &linelen, istr) != -1) {
 	  nlines++;
-	  npar = nemoinpr(line,par,MAXPAR);	
+	  npar = my_nemoinpr(line,par,MAXPAR);	
 	}
     } else if (mode == 2) {
         dprintf(0,"nemoinp + sqrt()\n");            
         while (getline(&line, &linelen, istr) != -1) {	  
 	  nlines++;
-	  npar = nemoinpr(line,par,MAXPAR);	
+	  npar = my_nemoinpr(line,par,MAXPAR);	
 	  retval = sqrt(par[0]*par[0] + par[1]*par[1] + par[2]*par[2]);
 	  sum += retval;	  
 	}
@@ -85,7 +107,7 @@ void nemo_main(void)
         dprintf(0,"nemoinp + fie(sqrt())\n");                  
         while (getline(&line, &linelen, istr) != -1) {	        
 	  nlines++;
-	  npar = nemoinpr(line,par,MAXPAR);	
+	  npar = my_nemoinpr(line,par,MAXPAR);	
 	  dofie(par,&one,&retval,&errval);
 	  sum += retval;	  
 	}
