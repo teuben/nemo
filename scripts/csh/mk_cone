@@ -75,11 +75,13 @@ else
     snapscale - - vscale=$vscale |\
     snapspin - - rotcur=$out.flow outflow=t|\
     snapfold - - theta=90-$cone fill=$fill |\
+    snapshift - - 0,0,-$rmin |\
     snaprotate - $out.1 $inc,$pa xz    
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
     snapspin - - rotcur=$out.flow outflow=t|\
     snapfold - - theta=90-$cone fill=$fill |\
+    snapshift - - 0,0,-$rmin |\
     snapscale - - rscale=1,1,-1 |\
     snaprotate - $out.2 $inc,$pa xz    
 
