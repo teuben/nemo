@@ -15,6 +15,7 @@
 #include <ctype.h>
 #include <stdinc.h>
 #include <getparam.h>
+#include "table.h"
 
 string defv[] = {
     "in=???\n	       input file",
@@ -26,6 +27,8 @@ string defv[] = {
 };
 
 string usage="table I/O benchmark";
+int     nmax;                           /* # lines in file */
+int     kmin;                           /* # columns to transpsse */
 
 #ifndef MAX_LINELEN 
 #define MAX_LINELEN  2048
@@ -35,18 +38,19 @@ void nemo_main(void)
 {
     stream istr, ostr;
     char *line;
-    int nmax,  *select = NULL;
+    int *select = NULL;
     int nout, next = 0, counter = 0;
     int    i, j;
-    string iname = getparam("in");
-    string oname = getparam("out");
+    string input = getparam("in");
+    string output = getparam("out");
     size_t buffer_size = MAX_LINELEN, bufflen;
 
     line = malloc((MAX_LINELEN) * sizeof(char));
+    nmax = nemo_file_lines();
 
     dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
-    dprintf(0, "Input File: %s\n", iname);
-    dprintf(0, "Output File: %s\n", oname);
+    dprintf(0, "Input File: %s\n", input);
+    dprintf(0, "Output File: %s\n", output);
     dprintf(0, "Name: %s\n", usage);
 
     istr = stropen(getparam("in"),"r");
