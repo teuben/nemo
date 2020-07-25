@@ -120,15 +120,42 @@ where the last two instances were just re-running the same command, but
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the 
 wall clock time is more likely to properly account for the I/O overhead time.
-.SH  OTHERS
+.SH  "OTHERS"
 A few other manual pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
 .nf
 .ta +1i
 \fICGS(1NEMO)\fP
 \fIscfm(1NEMO)\fP
 .fi
+.SH "TABBENCH"
+A few table I/O benchmarks are available. The benchmark uses a 100M row dataset with 3 columns,
+representing X,Y,Z, of which the radius R=sqrt(X^2+Y^2+Z^2) is computed in a few ways. This file
+is about 2 GB in size.
+Of course reading the table is all dependent on the HDD/SDD, but in the case described here
+this was a fast SSD, and took 2sec to read.
+.nf
+
+    /usr/bin/time tabgen tab3 100000000 3
+    /usr/bin/time tabbench2 . mode=-1
+    
+.nf
+this bench will need to be repeated for mode=0,1,2,3 to estimate the different components as they
+are added to the workflow. The \fItabgen(1NEMO)\fP is dominated by
+drawing random numbers and writing them using \fIprintf(3)\fP , which is slow.
+
+.nf
+    80   writing, using tabgen
+    2    reading in tabbench2
+    22   parsing in numbers  [np.loadtxt takes 748 sec!!!]
+    6    using \fIfie(3NEMO)\fP to compute radii
+    1    using np.sqrt(), and presumably C's sqrt() as well
+    
+.fi
+.SH "CONSIDERATIONS"
+Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
+or even \fBout=.\fP to use a sink. This does however mean that 
 .SH "SEE ALSO"
-gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO),
+gyrfalcON(1NEMO), data(5NEMO), tabgen(1NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO),
 triple(1NEMO), accudate(lNEMO)
 .SH AUTHOR
 Peter Teuben
