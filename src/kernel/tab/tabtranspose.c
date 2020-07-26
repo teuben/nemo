@@ -14,7 +14,7 @@ string defv[] = {
     "in=???\n           input file name(s)",
     "out=???\n          output file name",
     "align=f\n          align the columns?",
-    "nmax=10000\n       max space (needed if data in pipe)",
+    "nmax=0\n           max space (needed if data in pipe)",
     "VERSION=1.1\n      24-jul-2020 PJT",
     NULL
 };
@@ -57,6 +57,7 @@ local void setparams(void)
     alignment = getbparam("align");
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
+    
     lines = (string *) allocate (nmax * sizeof(string));
     words = (string **) allocate (nmax * sizeof(string *));
 }
@@ -67,7 +68,11 @@ local void do_work(void)
 
   kmin = -1;    /* keep track of min number of columns */
 
-  while ( (n < nmax) && (lines[n] = getaline(instr)) != NULL) {
+  while ( (lines[n] = getaline(instr)) != NULL) {
+    if (n == nmax) {
+      warning("Too many lines, change nmax=");
+      break;
+    }
     if (*lines[n] == '#') continue;
     words[n] = burststring(lines[n]," ,\t");
     k = xstrlen(words[n],sizeof(string))-1;
