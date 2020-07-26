@@ -1,13 +1,25 @@
-.TH BENCH 5NEMO "27 December 2019"
+.TH BENCH 5NEMO "25 July 2020"
 .SH NAME
-bench \- NEMO benchmarks in NemoStones
-.SH DESCRIPTION
-Nemo Benchmarks (a.k.a. NemoStones)
+bench \- NEMO benchmarks
+.SH SYNOPSIS
+/usr/bin/time $NEMO/src/scripts/nemo.bench bsf=1
+.SH RESULTS
+Reported are with the fastest settings on the machine . Times given in CPU seconds:
+.nf
+.ta 1.0i 1.5i 3.5i
+i5-10210U CPU @ 1.60GHz		29.4 	X1Y4
+i7-8550U CPU @ 1.80GHz		40.6 	T480 (1600)
+i7-3630QM CPU @ 2.40GHz		76.2	T530 (1200)
+.fi
+.SH NEW DESCRIPTION
+The 
+.SH OLD DESCRIPTION
+An older benchmark focused on a few N-body codes only:
 .PP
 \fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
 quadrupole corrections, for 10240 particles and 64 timesteps.
 \fBbench2\fP tests a more modern Treecode, this one is the
-O(N) version from Dehnen (2002?). Again 64 timesteps.
+O(N) version from Dehnen (2002). Again 64 timesteps.
 \fBbench0\fP has been added to compare a tree code with a 
 direct N-body code, also 64 timesteps, but now for fewer particles to prevent
 the benchmark to dominate the whole series.
