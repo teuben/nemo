@@ -1,6 +1,6 @@
 .TH SNAPNEAR 1NEMO "22 July 2020"
 .SH NAME
-snapnear \- find a near point in a snapshot
+snapnear \- find a particle nearest to a given point in a snapshot
 .SH SYNOPSIS
 \fBsnapnear\fP [parameter=value]
 .SH DESCRIPTION
@@ -14,7 +14,7 @@ is also given:
 Input file (snapshot) [???]    
 .TP 
 \fBvals=\fP
-Values of the things to compare [] 
+Values of the things to compare. The number of \fBvals=\fP must match the number of \fBoptions=\fP given
 .TP 
 \fBoptions=\fP
 Things to compare [x,y,z]    
@@ -29,12 +29,14 @@ Here is a contrived example of finding the last particle
    -0.654517 -0.925513 -1.80847 0.145817 -0.27767 0.298678 99 0.00654808
 
 .fi
-A better way would be to output a snapshot sorted by the distance, viz.
+A possible future change: a better way would be to output a snapshot sorted by the distance. This way using
+\fIsnapmask(1NEMO)\fP could also be used  to select the most nearby, or for example the 10 most nearby and average their properties, etc.
 .nf
-   snapnear snap - 0,0,0 | snapprint - | head -1
+   snapnear snap - 0,0,0 | snapprint - | head -4
 .fi
 .SH CAVEAT
 .SH SEE ALSO
+snapprint(1NEMO), snapmask(1NEMO), snapshot(5NEMO)
 .SH FILES
 .SH AUTHOR
 Peter Teuben

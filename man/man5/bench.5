@@ -1,18 +1,56 @@
-.TH BENCH 5NEMO "27 December 2019"
+.TH BENCH 5NEMO "25 July 2020"
 .SH NAME
-bench \- NEMO benchmarks in NemoStones
-.SH DESCRIPTION
-Nemo Benchmarks (a.k.a. NemoStones)
+bench \- NEMO benchmarks
+.SH SYNOPSIS
+/usr/bin/time $NEMO/src/scripts/nemo.bench bsf=1
+.SH RESULTS
+Reported are user time in CPU seconds:
+.nf
+.ta +2.5i +0.5i
+
+Intel Core i9-9900X	25.8	geminid 1214 / 9467
+i5-10210U CPU @ 1.60GHz	29.4 	X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz	37.1	terra 777 / 10213
+i7-8550U CPU @ 1.80GHz	40.6 	T480 (1600) 696 / 1935
+Xeon E-2186G 3.80GHz	52.6 	aurora 1313 / 6721
+i7-3820 CPU @ 3.60GHz	??/67.5 	dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50GHz	??/70.3 	chara 828 / 3117
+i7-3630QM CPU @ 2.40GHz	76.2 	T530 (1200) 762 / 3006 
+Xeon(R) E5-2623 v4 @ 2.60GHz	42.1/79.4 	kraken 782 / 5800
+Xeon(R) X5550  @ 2.67GHz	115.4	sdp 566 / 3938
+.fi
+.SH NEW DESCRIPTION
+The following tasks are run in the standard NEMO bench:
+.nf
+
+\fIdirectcode nbody=3072 out=d0 seed=123 
+hackcode1 nbody=10240  out=h0 seed=123 
+mkplummer p0 10240 seed=123 
+gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05
+potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer
+mkspiral s0 $nbody3 nmodel=40 seed=123 
+ccdmath "" c0 'ranu(0,1)' size=256 seed=123
+ccdpot c0 c1 
+mkorbit o0 x=1 e=1 lz=1 potname=log
+orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000\fP
+
+.fi
+In addition each data file that is produced is checksummed and compared
+to a baseline version using \fIbsf(1NEMO)\fP.
+
+.SH OLD DESCRIPTION
+An older benchmark focused on a few N-body codes only:
 .PP
 \fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
 quadrupole corrections, for 10240 particles and 64 timesteps.
 \fBbench2\fP tests a more modern Treecode, this one is the
-O(N) version from Dehnen (2002?). Again 64 timesteps.
+O(N) version from Dehnen (2002). Again 64 timesteps.
 \fBbench0\fP has been added to compare a tree code with a 
 direct N-body code, also 64 timesteps, but now for fewer particles to prevent
 the benchmark to dominate the whole series.
 \fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
 \fBbench4\fP benchmarks an image operation.
+\fBbench5\fP benchmarks an orbit calculation.
 .SH DATA
 Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
 .ta +1i
@@ -29,17 +67,17 @@ and the data :
 .nf
 .ta +3i
 bench0 (directcode)
-       I5/7200@2.5       47.7 
+       I5/7200@2.5	47.7 
        I7/3630QM@3.6	174.2  (nemo2: 
        I7/3770@3.5	152.6
-       P4/3.0            342.7
-       G5/2.0            472.8
-       AMD-opt64/2.0     300.3
-       AMD-ath64/2.0     888.7
-       P4/2.8 w/cygwin   365.9
-       x86_64/3.0        516.4
-       x86_64/3.2        480.6
-       sparcv9+vis/0.36 3048.2
+       P4/3.0	342.7
+       G5/2.0	472.8
+       AMD-opt64/2.0	300.3
+       AMD-ath64/2.0	888.7
+       P4/2.8 w/cygwin	365.9
+       x86_64/3.0	516.4
+       x86_64/3.2	480.6
+       sparcv9+vis/0.36	3048.2
 
 bench1 (hackcode1)
        I5/2.5            2.2
@@ -120,19 +158,54 @@ where the last two instances were just re-running the same command, but
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the 
 wall clock time is more likely to properly account for the I/O overhead time.
-.SH  OTHERS
-A few other manual pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
+.SH  "OTHERS"
+A few other man pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
 .nf
 .ta +1i
 \fICGS(1NEMO)\fP
 \fIscfm(1NEMO)\fP
 .fi
+.PP
+Other industry benchmarks:
+.nf
+    Geekbench 5 (very wide variety of compute workloads - baseline is i3-8100)
+    Linpack   (focus on floating point operations - Gflops)
+    SPEC CPU 2017 ($$$) benchmark - 
+.fi
+.SH "TABBENCH"
+The table I/O benchmark uses a 100M row dataset with 3 columns,
+representing X,Y,Z of which the radius R=sqrt(X^2+Y^2+Z^2) is computed. This table
+is about 2.7 GB in size.
+Of course reading the table is all dependent on the HDD/SDD, but in the case described here
+this was a fast SSD, and took 2 sec to read, or just over 1000 MB/sec.
+.nf
+
+    /usr/bin/time tabgen tab3 100000000 3
+    /usr/bin/time tabbench2 . mode=-1
+    
+.nf
+this bench will need to be repeated for mode=0,1,2,3 to estimate the different components as they
+are added to the workflow. The \fItabgen(1NEMO)\fP is dominated by
+drawing random numbers and writing them using \fIprintf(3)\fP , which is slow.
+
+.nf
+    80s   writing, using tabgen
+     2s   reading in tabbench2
+    22s   parsing in numbers  [np.loadtxt takes 748 sec!!!]
+     6s   using \fIfie(3NEMO)\fP to compute radii
+     1s   using np.sqrt(), and presumably C's sqrt() as well
+    
+.fi
+.SH "CONSIDERATIONS"
+Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
+or even \fBout=.\fP to use a sink. This does however mean that 
 .SH "SEE ALSO"
-gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO),
-triple(1NEMO), accudate(lNEMO)
-.SH AUTHOR
+gyrfalcON(1NEMO), data(5NEMO), tabgen(1NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO), triple(1NEMO), accudate(lNEMO), bsf(1NEMO)
+.PP
+https://browser.geekbench.com/processor-benchmarks
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/data   	standard repository area for data files.
@@ -144,8 +217,9 @@ Peter Teuben
 26-nov-03	finally added some data		PJT
 17-feb-04	added bench0 comparison  	PJT
 31-mar-05	added some cygwin numbers, fixed input	PJT
-6-may-11    added i7 and SHMEM/HDD comparison   PJT
+6-may-11	added i7 and SHMEM/HDD comparison   PJT
 27-sep-13	added caveats	PJT
 6-jan-2018	updated for V4, more balanced benchmarks	PJT
 27-dec-2019	nemo.bench; updated with potcode and orbint; now 10 tasks	PJT
+26-jul-2020	added timings for recent machines/ added geekbench5	PJT
 .fi

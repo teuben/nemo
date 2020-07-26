@@ -1,5 +1,5 @@
 /*
- *  TABGEN:     table with random numbers
+ *  TABGEN:     generate a table with (random) numbers, purely for benchmarking
  */
 
 #include <nemo.h>
@@ -8,18 +8,31 @@ string defv[] = {
     "out=???\n     Output table",
     "nr=10\n       Number of rows",
     "nc=5\n        Number of columns",
-    "mode=0\n      Mode (0=uniform, 1=normal)",
+    "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear)",
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
-    "VERSION=0.3\n 14-Jul-2020 XYZ",
+    "VERSION=0.4\n 25-jul-2020 PJT",
     NULL,
 };
 
-string usage="Create a table with random numbers";
+string usage="Create a table with (random) numbers";
 
 string cvsid="$Id:$";
 
 typedef real (*my_real_proc)(real,real);
+
+local real constant(real c1, real c2)
+{
+  return c2;
+}
+
+local real linear(real c1, real c2)
+{
+  static real count = 0;
+  count = count + 1;
+  return count;
+}
+
 
 void nemo_main()
 {
@@ -27,6 +40,7 @@ void nemo_main()
   int i, nr = getiparam("nr");
   int j, nc = getiparam("nc");
   int mode = getiparam("mode");
+  int amode = ABS(mode);
   int seed = init_xrandom(getparam("seed"));
   char fmt[64];
   real x;
@@ -36,10 +50,20 @@ void nemo_main()
 
   sprintf(fmt,"%s ",getparam("fmt"));
 
-  if (mode <= 0)
+  if (amode == 1) {
+    dprintf(1,"Uniform values between 0 and 1\n");
     my_random = xrandom;
-  else
+  } else if (amode == 2) {
+    dprintf(1,"Uniform values between 0 and 1\n");
     my_random = grandom;
+  } else if (amode == 3) {
+    dprintf(1,"Uniform values between 0 and 1\n");
+    my_random = constant;
+  } else if (amode == 4) {
+    dprintf(1,"Uniform values between 0 and 1\n");
+    my_random = linear;
+  } else
+    error("Illegal mode=%d",mode);
 
   if (mode < 0) {
     // only produce random numbers, testing production rate
@@ -47,7 +71,7 @@ void nemo_main()
     int k=0;
     for (i=0; i<nr; i++)
       for (j=0; j<nc; j++)
-	x[k++] = xrandom(0.0,1.0);
+	x[k++] = my_random(0.0,1.0);
   } else
     // output to file as well
     for (i=0; i<nr; i++) {

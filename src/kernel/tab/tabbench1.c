@@ -8,6 +8,7 @@
 //1    tabgen tab1 1000000   3
 //1    tabgen tab2 10000000  3
 //1    tabgen tab3 100000000 3
+//1    tabgen tab4 3 100000000
 //1    /usr/bin/time tabbench1 tab1 .
 
 //2    /usr/bin/time tabtranspose p1M.tab p1Mt.tab $nbody
@@ -22,15 +23,13 @@
 string defv[] = {
     "in=???\n	       input file",
     "out=???\n         output file",
-    "nmax=10000\n      Default max allocation (in a pipe)",
     "mode=1\n          Benchmark mode (not used yet)",
-    "VERSION=0.2\n     24-jul-2020 PJT",
+    "nmax=10000\n      Default max number of lines (in a pipe)",
+    "VERSION=0.3\n     25-jul-2020 PJT",
     NULL,
 };
 
 string usage="table I/O benchmark";
-int     nmax;                           /* # lines in file */
-int     kmin;                           /* # columns to transpsse */
 
 #ifndef MAX_LINELEN 
 #define MAX_LINELEN  2048
@@ -42,11 +41,11 @@ void nemo_main(void)
     char *line;
     int *select = NULL;
     int nout, next = 0, counter = 0;
-    int    i, j;
+    size_t i;
     int nmax = getiparam("nmax");
     string input = getparam("in");
     string output = getparam("out");
-    size_t buffer_size = MAX_LINELEN, bufflen;
+    size_t buffer_size = MAX_LINELEN;
 
     line = malloc((MAX_LINELEN) * sizeof(char));
     nmax = nemo_file_lines(input,nmax);
@@ -64,7 +63,6 @@ void nemo_main(void)
         while(isspace(line[counter]) != 0) {
             ++counter;
         }
-
         if (line[counter] != '#' && line[counter] != '/' && line[counter] != '!') {
 	    i++;
 	    fputs(line,ostr);
@@ -76,6 +74,7 @@ void nemo_main(void)
     
     free(line);
     line = NULL;
-    dprintf(0,"Read %d lines\n",i);
+    dprintf(0,"Read %ld lines\n",i);
+    dprintf(0,"Longest line: %d\n",buffer_size);
 }
 
