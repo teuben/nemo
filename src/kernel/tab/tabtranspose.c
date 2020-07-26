@@ -1,6 +1,8 @@
 /*
  * TABTRANSPOSE: transpose a table the lazy way (the whole table in memory)
  *
+ *
+ *  @todo    burststring() is used, which limits # columns to 2048.  Use strtok() ?
  */
 
 #include <stdinc.h>
@@ -70,7 +72,7 @@ local void do_work(void)
     words[n] = burststring(lines[n]," ,\t");
     k = xstrlen(words[n],sizeof(string))-1;
     kmin = (kmin < 0 ?  k :  MIN(kmin,k));
-    dprintf(0,"%d: %s\n",k, lines[n]);
+    dprintf(2,"%d: %s\n",k, lines[n]);
     n++;
   }
 
@@ -84,9 +86,9 @@ local void do_output(void)
   int max_space[nmax];
 
   if (alignment) {
-    dprintf(0, "The alignment parameter is true\n"); 
+    dprintf(1, "The alignment parameter is true\n"); 
   } else {
-    dprintf(0, "The alignment parameter is false\n");
+    dprintf(1, "The alignment parameter is false\n");
   }
 
   if (alignment) {
