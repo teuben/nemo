@@ -1,4 +1,4 @@
-.TH SNAPFOLDE 1NEMO "23 March 2018"
+.TH SNAPFOLDE 1NEMO "28 July 2020"
 .SH NAME
 snapfold \- fold a thin disk N-body snapshot file into a cone along Z axis
 .SH SYNOPSIS
@@ -24,7 +24,14 @@ Default: 0.0
 \fBfill=t|f\fP
 Fill the cone?  Otherwise it will be a thin wall.
 Default: false
-
+.TP
+\fBview=0,1,-1\fP
+Limit the view of the cone. view=0 shows the whole cone, view=1 shows the front side (towards
+the -Y axis)
+view=-1 the backside (towards the +Y axis).
+The value of 1+|view| will actually determine the opening angle
+in the plane of the visible part.
+[0]
 .SH EXAMPLES
 Here is an example creating a tilted cone with outflow
 .nf
@@ -64,4 +71,5 @@ $NEMO/scripts/csh/mk_cone - expanded example of a disk with one or two outflow c
 20-nov-2017	V0.1 a quick hack to make a cone (at ESO)	PJT
 22-mar-2018	V0.3 add fill=	PJT
 22-jul-2020	note the new mk_cone script	PJT
+28-jul-2020	V0.4 allow the cone to shrink in angle as well (view=)		PJT
 .fi
