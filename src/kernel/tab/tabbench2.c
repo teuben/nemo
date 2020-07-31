@@ -40,21 +40,63 @@ extern void dofie(real *, int *, real *, real *);
 // testing another method of parsing
 // NEMO's burststring() based version is 59" compared to 92" in this strtok() based version
 // Q: is there a fancy sscanf method possible?
-local int nemoinprt(char *line,real *par, int npar)
+//    input :   *line
+//    input :   *par
+//    input :   npar elements of par[npar]
+//    output:   ntok (number of parsed values)
+//    On ouput  par[ntok] values are filled
+
+typedef struct lls {
+  //char *token;
+  real val;
+  struct lls *next;
+} lls;
+
+
+//local int nemoinprt(char *line, real **par, int *npar)
+  
+// in tokenize npar is irrelevant, and it can return ntok > npar
+local int nemoinprt(char *line, real *par, int npar)
 {
+  //           &       &
+  //    'AAA   BBB     CCCC'
+  //     *  0  *  0
   char *token = strtok(line," ,");
   int ntok = 0;
+  lls first, last;
+  real *value;   //   value[0] , value[1], .... value[ntok-1]
+
+
+  /*      tokenize and build linked list */
+
+  //first.val = atof(token);
+  //first.next = NULL;
 
   while (token != NULL) {
+    if (ntok == npar) {
+      error("too many");
+      return ntok;
+    }
     par[ntok++] = atof(token);
     token = strtok(NULL," ,");
   }
+
+
+  /* walk through the list of ntok elements , allocate *value
+     and place the token pointers here
+  */
+  value = (real *) allocate(ntok * sizeof(real));
+
+
+  /* if ntok <= npar; fill those elements of the par[] */
+  /* put warning if not , and only fill first npar */
+  
   return ntok;
 }
 
 // pick the standard or local testing version in nemoinprt using gettok()
-#define my_nemoinpr nemoinpr
-//#define my_nemoinpr nemoinprt
+//#define my_nemoinpr nemoinpr
+#define my_nemoinpr nemoinprt
 
 void nemo_main(void)
 {
@@ -126,6 +168,12 @@ void nemo_main(void)
 // tabgen tab3 100000000 3
 // tabgen tab4 3 100000000
 //
+//      /usr/bin/time tabbench2 tab2 . -1
+//      /usr/bin/time tabbench2 tab2 . 0
+//      /usr/bin/time tabbench2 tab2 . 1
+//      /usr/bin/time tabbench2 tab2 . 2
+//      /usr/bin/time tabbench2 tab2 . 3
+
 // fgets method on tab3:
 // -1               1.9  1.9  2.0  
 //  0               3.2  3.1  3.1
