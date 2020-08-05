@@ -4,10 +4,18 @@
 #    plus line contents
 #    optionally strip off comment(s)
 #
+# alternatives to single line or range of lines
+#     sed -n '13p' file.txt
+#     sed -n '20,25p' lines.txt
+#     head -25 file_name | tail +20
+#     awk 'NR==5' lines.txt
+#     awk 'NR>=20 && NR<=25' lines.txt
+#
 #    <1992         original csh script   - Peter Teuben
 #     jul-2012     replaced with python
 #     aug-2016     add -s flag
-#     jun-2020     python3
+#     jun-2020     python3 
+#     aug-2020     note alternatives; performance unknown
 
 import os, sys
 
