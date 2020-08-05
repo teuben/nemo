@@ -7,6 +7,8 @@
 #  To test a colormap in NEMO :
 #      mklut pepper > pepper.lut
 #      ccdmath "" - %x size=512,512 | ccdppm - - lut=pepper.lut > pepper.ppm
+#  or if you have a fits file
+#      fitsccd my.fits - | ccdppm - - lut=pepper.lut > my.pepper.ppm
 #
 #  In ds9 the colormap can be read in via:
 #      color -> colormap parameters  -> file -> load colormap
@@ -14,6 +16,8 @@
 #  Optionally 
 #      pip install cmasher
 #  to get more advanced color maps
+#
+#  @todo seaborn: does it have more colormaps?
 #
 #  History:
 #    20-jul-2020    written        Peter Teuben
