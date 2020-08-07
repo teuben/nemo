@@ -52,7 +52,7 @@ typedef struct lls {
   real val;
   struct lls *next;
 } lls;
-
+static real sum = 0;
 
 //local int nemoinprt(char *line, real **par, int *npar)
   
@@ -64,8 +64,9 @@ local int nemoinprt(char *line, real *par, int npar)
   //     *  0  *  0
   char *token = strtok(line," ,");
   int ntok = 0;
-  lls first, last;
-  real *value;   //   value[0] , value[1], .... value[ntok-1]
+  lls *currq, *prev = NULL;
+  static real *value;   //   value[0] , value[1], .... value[ntok-1]
+  static int nvalue = 0;
 
 
   /*      tokenize and build linked list */
@@ -78,15 +79,33 @@ local int nemoinprt(char *line, real *par, int npar)
       error("too many");
       return ntok;
     }
-    par[ntok++] = atof(token);
-    token = strtok(NULL," ,");
+    //par[ntok++] = atof(token);
+    //token = strtok(NULL," ,");
+    curr = (lls *) allocate(sizeof(lls));
+    curr->val = atof(token);
+    sum += curr->val;
+    curr->next = NULL;
+
+    prev = curr;
+    curr = curr->next;
+    ++ntok;
+
+    token = strtok(NULL, " ,");
   }
 
 
   /* walk through the list of ntok elements , allocate *value
      and place the token pointers here
   */
-  value = (real *) allocate(ntok * sizeof(real));
+  if (nvalue == 0) {
+    nvalue = ntok;
+    value = (real *) allocate(ntok * sizeof(real));
+  } else if (ntok > nvalue) {
+    nvalue = ntok;
+    value = (real *) reallocate (value, ntok * sizeof(real));
+  }
+      
+
 
 
   /* if ntok <= npar; fill those elements of the par[] */
@@ -96,8 +115,8 @@ local int nemoinprt(char *line, real *par, int npar)
 }
 
 // pick the standard or local testing version in nemoinprt using gettok()
-//#define my_nemoinpr nemoinpr
-#define my_nemoinpr nemoinprt
+#define my_nemoinpr nemoinpr
+//#define my_nemoinpr nemoinprt
 
 void nemo_main(void)
 {
@@ -108,7 +127,7 @@ void nemo_main(void)
     int    npar, one = 1;
     size_t nlines;
     string iname = getparam("in");
-    real par[MAXPAR], retval, errval, sum;
+    real par[MAXPAR], retval, errval;
     int mode = getiparam("mode");
     size_t linelen = MAX_LINELEN;
     //char line[MAX_LINELEN];
