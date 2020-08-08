@@ -1,0 +1,18 @@
+#! /bin/csh -f
+#
+#   Convert a man page to a pdf
+#
+#   (see also an earlier script 'manlaser'
+#
+# to get txt files of your man page (without all the ^H^_ stuff)
+#  groff -t -e -mandoc -Tascii manpage.1 | col -bx > manpage.txt
+# to get high quality ps files:
+#  groff -t -e -mandoc -Tps manpage.1 > manpage.ps
+# or try
+#  groff -man -Tps manpage.1 > manpage.ps
+
+foreach file ($*)
+  if (-e $file) then
+    groff -man -Tpdf $file > $file.pdf
+  endif
+end
