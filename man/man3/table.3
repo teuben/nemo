@@ -1,44 +1,149 @@
-.TH TABLE 3NEMO "12 July 2003"
+.TH TABLE 3NEMO "9 August 2020"
 .SH NAME
-get_atable, get_ftable, get_line, parse, strinsert \- table manipulator routines
+table_open, table_md2, table_close - new table manipulation routines (\fIdrafted\fP)
+.PP
+get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator routines
 .SH SYNOPSIS
 .nf
-.B #include <stdinc.h>
+.B #include <table.h>
+.B #include <mdarray.h>
 .PP
-.B int get_atable(instr,ncol,colnr,coldat,ndat)
-.B stream instr;
-.B int ncol;    
-.B int colnr[]; 
-.B real *coldat[];
-.B int ndat;      
+.B table *table_open(string fname, int rowbufsize, ? int maxrow);
+.B mdarray2 table_md2(table *t);
+.B void table_read(table *t);
+.B string *table_comments(table *t);
+.B void table_reset(table *t);
+.B void table_close(table *t);
 .PP
-.B int get_ftable(instr,ncol,colpos,colfmt,coldat,ndat)
-.B stream instr;  
-.B int ncol;      
-.B int colpos[];  
-.B string *colfmt[];
-.B real *coldat[];  
-.B int ndat;        
+.B int table_nrows(table *t);
+.B int table_ncols(table *t);
+.B void table_set_valid_rows(int nrows, int *rows)
+.B void table_set_valid_cols(int ncols, int *cols)
 .PP
-.B int get_line (instr, line)
-.B stream instr;
-.B char *line;
+.B int table_next_row(table *t)   
+.B int table_next_rows(table *t)  
+.B int table_next_rowi(table *t)
+.B int table_next_rowr(table *t)
+.B string table_line(table *t)
 .PP
-.B int parse(linenr, line, dat, ndat)
-.B int linenr;
-.B char *line;
-.B double *dat;
-.B int ndat;
+.B string table_cols(table *t, int col)
+.B int  table_coli(table *t, int col)
+.B real table_colr(table *t, int col)
 .PP
-.B int strinsert(a, b, n)
-.B char *a;
-.B char *b;
-.B int n;
+.B string *table_colsp(table *t, int col) 
+.B int *table_colip(table *t, int col)
+.B real *table_colrp(table *t, int col)
 .PP
-.B int iscomment(line)
-.B char *line;
+.B string table_row(table *t, int row)
+.B string *table_rowsp(table *t, int row)
+.B int *table_rowip(table *t, int row)
+.B real *table_rowrp(table *t, int row)
+.PP
+.B void table_set_ncols(int ncols) 
+.PP
+.I Old:
+.PP
+.B int get_atable(strean instr,int ncol,int *colnr,real *coldat,int ndat)
+.PP
+.B int get_ftable(stream instr,int ncol,int *colpos,string *colfmt,real *coldat,int ndat) // check
+.PP
+.B int get_line (string instr, char *line)
+.PP
+.B int parse(int linenr, char *line, double *dat, int ndat)
+.PP
+.B int strinsert(char *a, char *b, int n)
+.PP
+.B int iscomment(char *line)
 .fi
 .SH DESCRIPTION
+A new \fItable\fP interface was introduced in Summer 2020 to create a more uniform and scaleable
+table ASCII system. This will have no limit on number of columns, line length or number or rows,
+perhaps at a slight cost of performance. It should also detect automatically if they have
+Space Separated Values (SSV), Comma Separated Values (CSV) or Tab Separated Values (TSV).
+.PP
+.B table_open
+opens a file for reading. The returned \fItable *\fP pointer is used in all subsequent table_ routines.
+The
+.B rowbufsize
+controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
+means the whole table will be read in memory, a value of \fB1\fP will read the table line
+by line.  Values larger than 1 are planned, but not yet supported.
+.B maxrow
+used to be in the old system a lot, but we can probably live without it. It normally is only
+needed when the input file is a pipe and the whole file needs to be read, which is now supported.
+.B table_md2
+is a convenient way to convert an ascii table immediately into a two dimensional \fImdarray(3NEMO)\fP.
+With
+.B table_read
+the whole table is read into memory. Any comment lines at the start of the file will saved in a special
+\fIcomment\fP set of lines, which can be extracted with
+.B table_comments.
+Finally
+.B table_close
+access to the table can be closed and any associated memory will be freed. In addition
+.B table_reset
+can be used to reset array access (more on that later), in the case it needs to be re-read.
+For arrays that are processed in streaming mode (e.g. \fIfilename="-"\fP) this will result in an error.
+.PP
+Once a table has been fully read into memory,
+.B table_nrows
+returns the number of rows, and 
+.B table_ncols
+the number of columns. By using
+.B table_set_valid_rows
+and/or
+.B table_set_valid_cols
+rows and/or columns can be selected for conversion, and this will also define the new value for
+.I nrows
+and
+.I ncols.
+When
+.B table_reset
+is called, these values are reset to their original value.
+.PP
+If the table is parsed line by line, some routines will not be accessible, since the table is not
+in memory. 
+.PP
+Using
+.B table_next_row
+a new line can be read. This will return -1 upon end of file, 0 when the line is blank or contains
+no data, though could contain comments (e.g. lines with # ! or ;), and 1 when a line
+was read. No parsing will be done. If parsing is done, the line will be tokenized
+in identical types (\fBs\fPtring, \fBi\fPnt or \fBr\fPeal), with resp.
+.B table_next_rows
+,
+.B table_next_rowi,
+or
+.B table_next_rowr.
+The last line is always stored internally, and a pointer to the string can be retrieved with
+.B table_line
+for more refined user parsing.
+.PP
+Depending on with which of the three types the line was parsed, column elements can be retrieved with
+.B table_cols,
+.B table_coli,
+or
+.B table_colr.
+and if the whole table was available in memory, columns can also be retrieved in full via
+.B table_colsp,
+.B table_colip,
+or
+.B table_colrp
+.PP
+The currently parsed row can in full be retrieved with (again, depending on type)
+.B table_rowsp,
+.B table_rowip,
+or
+.B table_rowrp
+where the row number is ignored if the table is parsed row by row.
+.PP
+Possible future routines are
+.B table_set_ncols
+to cover the case where a row can span multiple lines. By default each line is a row in the table.
+
+.PP
+The original \fIlegacy table routines\fP remain available:
+.PP
 Both \fIget_atable\fP
 and \fIget_ftable\fP parse an ascii table, pointed by the \fIinstr\fP stream,
 into \fIncol\fP columns and up to \fIndat\fP rows of \fBreal\fP numbers
@@ -78,6 +183,7 @@ corresponding entry in \fIcoldat\fP is set as such.
 .PP
 The \fIget_line(3)\fP gets the next line from a stream \fIinstr\fP, stored
 into \fIline\fP. It returns the length of the string read, 0 if end of file.
+This routine is deprecated, the standard \fIgetline(3)\fP should be used.
 .PP
 \fIparse\fP parses the character string in \fIline\fP into the double array
 \fPdat\fP, which has at most \fIndat\fP entries. Parsing means that 
@@ -90,11 +196,65 @@ characters of \fIa\fP.
 .PP
 \fIiscomment\fP returns 1 if the line appears to be a comment
 (starts with ';', '#', '!' or a blank/newline)
+.SH EXAMPLES - DRAFTED
+Some examples drafted, based on the new API presented.
+.PP
+An example reading in a full table into a two dimensional mdarray2, and
+adding 1 to each element:
+.nf
+
+    table *t = table_open(filename, 0, 0);
+    ncols = table_ncols(t);
+    nrows = table_nrows(t);
+    mdarray2 d2 = table_md2(t);
+    table_close(t);
+    
+    for (int i=0; i<nrows; i++)
+    for (int j=0; j<ncols; j++)
+        d2[i][j] += 1.0;
+	
+.fi
+and here is an example of reading the table line by line, without any parsing,
+but removing comment lines
+
+.nf
+    table *t = table_open(filename, 1, 0);
+    int nrows = 0;
+    while ( (n=table_next_row(t)) >= 0) {
+	if (n > 0) {
+	    nrows++	
+	    printf("%s\\n", table_line(t));
+	}
+    }
+    table_close(t);
+    dprintf(0,"Read %d lines\\n",nrows);
+    
+.fi
+and dealing (and preserving) comments while reading in the whole table:
+.nf
+
+    table *t = table_open(filename, 0, 0);
+    //? table_read(t);
+    int nrows = table_nrows(t);
+    
+    string *sp = table_comments(t);
+    while (*sp)
+      printf("%s\n",*sp++);
+
+    for (int j=0; j<nrows; j++)
+	real *rp = table_rowrp(t, j);
+
+    table_close(t);
+
+.fi
+
 .SH DIAGNOSTICS
-Low-level catastrophies (eg, parsing errors, wrong delimiters)
-generate messages via \fIerror\fP(3NEMO).
+Low-level catastrophies (eg, bad filenames, parsing errors, wrong delimiters)
+generate messages via \fIerror(3NEMO)\fP.
 .SH SEE ALSO
-table(5NEMO)
+mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(3NEMO), table(5NEMO)
+.PP
+https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
 .SH FILES
 .nf
 .ta +2.0i
@@ -109,4 +269,5 @@ xx-sep-88	V1.0 written	PJT
 6-aug-92	documented get_Xtable functions  	PJT
 1-sep-95	added iscomment()	PJT
 12-jul-03	fixed reading large table buffereing	PJT
+aug-2020	designing new table system	Sathvik/PJT
 .fi
