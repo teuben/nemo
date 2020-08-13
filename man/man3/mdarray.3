@@ -28,15 +28,18 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 .SH DESCRIPTION
 \fImdarray\fP offers a uniform way to allocate and free multi-dimensional
 (real) C-style arrays. Up to MDMAXDIM (defined via the header file) 
-dimensions are available. Actually data memory is guarenteed to be
-sequentually in memory, as they are with static multidimensional arrays.
+dimensions are available. Actual data memory is guarenteed to be
+sequentually in memory, as they are with static multidimensional arrays. This
+makes it easy to overlay them with traditional languages such a Fortran (with the
+caution of row-major and column-major differences).
 .PP
 Arrays are stored in row major order, if rows vary most rapidly in memory. 
 For example in
 .nf
    double matrix a[20][10];
 .fi
-the right-most index (10) varies most rapidly in memory, exactly like static C arrays.
+the right-most index (10) varies most rapidly in memory, exactly like static C arrays,
+but opposite those of fortan. The matching fortran array would be a(10,20) in this case.
 .PP
 Example of use: ( b = A.x)
 .nf
