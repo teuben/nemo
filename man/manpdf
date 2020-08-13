@@ -10,6 +10,11 @@
 #  groff -t -e -mandoc -Tps manpage.1 > manpage.ps
 # or try
 #  groff -man -Tps manpage.1 > manpage.ps
+#
+# See also:
+#     mandoc mandoc -T pdf -man manpage.1  > manpage.1.pdf
+#          but doesn't look at good.
+#     pandoc - doesn't seem to read man files, it can create them
 
 foreach file ($*)
   if (-e $file) then
