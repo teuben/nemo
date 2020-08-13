@@ -248,13 +248,26 @@ and dealing (and preserving) comments while reading in the whole table:
 
 .fi
 
+.SH XSV
+.nf
+cat AAPL.csv | xsv table | head -2
+cat AAPL.csv | xsv slice -i 1 | xsv table
+cat AAPL.csv | xsv slice -i 1 | xsv flatten
+cat AAPL.csv | xsv count
+
+
+.fi
+
 .SH DIAGNOSTICS
 Low-level catastrophies (eg, bad filenames, parsing errors, wrong delimiters)
 generate messages via \fIerror(3NEMO)\fP.
 .SH SEE ALSO
 mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(3NEMO), table(5NEMO)
 .PP
+.nf
+https://github.com/BurntSushi/xsv
 https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+.fi
 .SH FILES
 .nf
 .ta +2.0i
