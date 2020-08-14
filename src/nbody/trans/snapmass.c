@@ -14,6 +14,7 @@
  *	 8-sep-01       a   init_xrandom
  *      29-aug-06       c   prototypes for frandom() and getrfunc() properly used
  *      12-jul-2019     2.2 added ccd=
+ *      14-aug-2020     2.3 allow Aux to be used
  *
  */
 #include <stdinc.h>
@@ -44,7 +45,8 @@ string defv[] = {
     "seed=0\n                 Random seed",
     "ccd=\n                   Input CCD with mapvalues that represent mass",
     "norm=\n                  Normalization value for the total mass (if used)",
-    "VERSION=2.2\n            12-jul-2019 PJT",
+    "aux=f\n                  Store in Aux instead?",
+    "VERSION=2.3\n            14-aug-2020 PJT",
     NULL,
 };
 
@@ -68,10 +70,12 @@ void nemo_main(void)
     rproc_body  bfunc;
     real_proc   mfunc;
     bool  Qnorm, first = TRUE;
+    bool Qaux = getbparam("aux");
+    string what = (Qaux ? strdup("aux") : strdup("mass"));
 
     instr = stropen(getparam("in"), "r");
     if (hasvalue("mass")) {
-        dprintf(0,"Using a bodytrans mass expression\n");
+        dprintf(0,"Using a bodytrans %s expression\n", what);
         bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
         mfunc = NULL;
         inmassstr = NULL;
@@ -152,15 +156,27 @@ void nemo_main(void)
         if (inmassstr) {
 	    if (nbody==nbodymass)
 	        for (bp=btab, bmassp=bmasstab; bp<btab+nbody; bp++, bmassp++)
-	            Mass(bp) = Mass(bmassp);
+		  if (Qaux)
+		    Aux(bp) = Mass(bmassp);
+		  else
+		    Mass(bp) = Mass(bmassp);
 	    else
 	        for (bp=btab, bmassp=bmasstab; bp<btab+nbody; bp++)
+		  if (Qaux)
+	            Aux(bp) = Mass(bmassp);
+		  else
 	            Mass(bp) = Mass(bmassp);
         } else if (bfunc) {
             for (bp=btab, i=0; i<nbody; bp++,i++)
+	      if (Qaux)
+                Aux(bp) = bfunc(bp, tsnap, i);
+	      else
                 Mass(bp) = bfunc(bp, tsnap, i);
         } else if (mfunc) {
             for (bp=btab, i=0; i<nbody; bp++,i++)
+	      if (Qaux)
+	        Aux(bp) = frandom(mrange[0], mrange[1], mfunc);
+	      else
 	        Mass(bp) = frandom(mrange[0], mrange[1], mfunc);
 	} else if (iptr) {
 	    for (bp=btab, i=0; i<nbody; bp++,i++) {
@@ -169,22 +185,33 @@ void nemo_main(void)
 	      ix = (int) floor(xpos);            /* cell index:   0 .. nx-1 */
 	      iy = (int) floor(ypos);
 	      if (ix<0 || iy<0 || ix>=Nx(iptr) || iy>=Ny(iptr))
+		if (Qaux)
+      		  Aux(bp) = 0.0;
+		else
       		  Mass(bp) = 0.0;
 	      else
+		if (Qaux)
+		  Aux(bp) = MapValue(iptr,ix,iy);
+		else
 		  Mass(bp) = MapValue(iptr,ix,iy);
 	    }
         } else             
             error("bad flow logic");
 
         for (bp=btab, i=0, mtot=0.0; i<nbody; bp++,i++)            
-            mtot += Mass(bp);
-        dprintf(0,"Total mass: %g\n",mtot);
+	  mtot += (Qaux ? Aux(bp) : Mass(bp));
+        dprintf(0,"Total %s: %g\n", what , mtot);
         if (Qnorm) {
-            dprintf(0,"Rescaling total mass to %g\n",norm);
+	  dprintf(0,"Rescaling total %s to %g\n", what , norm);
             for (bp=btab, i=0; i<nbody; bp++,i++)
+	      if (Qaux)
+                Aux(bp) *= norm/mtot;
+	      else
                 Mass(bp) *= norm/mtot;
         }
 	bits |= MassBit;    /* turn mass bit on anyways */
+	if (Qaux)
+	  bits |= AuxBit;
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
 
