@@ -1,4 +1,4 @@
-.TH SNAPMASS 1NEMO "30 July 1997"
+.TH SNAPMASS 1NEMO "14 August 2020"
 .SH NAME
 snapmass \- add or modify masses in a snapshot
 .SH SYNOPSIS
@@ -63,6 +63,9 @@ seconds since  once-upon-a-time-in-the-seventies).
 New total mass required for normalization. By default the masses are not
 scaled. See also \fIsnapscale(1NEMO)\fP.
 [Default: not used].
+.TP
+\fBaux=t|f\fP
+Store the "mass" in the Aux slot of a \fIsnapshot(5NEMO)\fP. [false]
 .SH SEE ALSO
 snapmstat(1NEMO), snapscale(1NEMO), bodytrans(3NEMO)
 .SH AUTHOR 
@@ -81,4 +84,5 @@ Peter Teuben
 13-may-91	V1.3: helpvec + doc added	PJT
 29-may-97	V2.0: mass{name,expr,pars,range} from mkplummer 	PJT
 30-jul-97	V2.1: added norm=           	PJT
+14-aug-2020	V2.3: add aux=		PJT
 .fi
