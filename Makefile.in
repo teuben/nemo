@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 13-mar-2020 PJT
+VERSION = NEMO V4.2 17-aug-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -457,7 +457,7 @@ python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
 
 anaconda3:
-	src/scripts/install_anaconda3
+	(source nemo_start.sh ; src/scripts/install_anaconda3)
 
 
 
