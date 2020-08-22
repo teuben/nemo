@@ -16,6 +16,11 @@ should be able to do:
 Consult the zeno/Instructions for troubleshooting.   It will also
 download my zeno_pjt fork, just in case.
 
+For Ubuntu this is what I needed:
+
+    sudo apt install libgsl-dev openmpi-bin freeglut3-dev
+
+
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
 and may not be doing exactly the same thing. mkorbit is the major one that
