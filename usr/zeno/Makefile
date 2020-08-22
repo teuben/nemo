@@ -29,3 +29,11 @@ install:
 #  optional install of gsl in $NEMO/opt
 gsl:
 	mknemo gsl
+
+
+idkit:  identikit2
+
+identikit2:
+	wget http://www.ifa.hawaii.edu/faculty/barnes/research/identikit/identikit2.tar
+	mkdir identikit2
+	(cd identikit2; tar xf ../identikit2.tar)
