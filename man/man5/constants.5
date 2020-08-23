@@ -10,15 +10,15 @@ Here we tabulate some convenience values we often use in astronomy
 2.7182818	e, math
 57.295780	Degrees per radian (180/pi)
 206264.81	Arcseconds (3600*180/pi)
-2.35482		2*sqrt(2*ln(2)) - the FWHM/sigma of a gaussian (\fIccdsmooth(1NEMO)\fP)
-1.13309		Number of points per beam = 1.13309 * (FWHM/PIXEL)^2  = pi/(4*ln(2))   (\fIccdstat(1NEMO)\fP)
-3.26		pc/ly 
+2.35482		2*sqrt(2*ln(2)) - the FWHM/sigma of a gaussian 
+1.13309		Number of points per beam = 1.13309 * (FWHM/PIXEL)^2  = pi/(4*ln(2))
+3.26163		pc/ly 
 
-6.6743e-11	Grav constant in MKS units
+6.6743e-11	G, grav constant in MKS units
 299792.458	c, speed of light, in km/s
-3.155693e7	seconds in a year
+3.155693e7	yr, seconds in a year
 149597870.700	AU, in km, as per IAU 2009 resolution B2
-3.085678e15	pc, defined as 648000/AU, as per IAU 2015 resolution B2, in km
+3.08567758e13	pc, defined as 648000/pi*AU, as per IAU 2015 resolution B2, in km
 1.989e30	Solar Mass, in kg
 5.974e24	Earth Mass, in kg
 6378.1		Earth Radius, in km
@@ -31,7 +31,7 @@ Here we tabulate some convenience values we often use in astronomy
 Galactic constants such as distance to the galactic center (8.5 kpc) or orbital speed of LSR (220 km/s) , are still subject
 to change.
 .SH "SEE ALSO"
-data(5NEMO)
+ccdstat(1NEMO), ccdsmooth(1NEMO), units(5NEMO), data(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
