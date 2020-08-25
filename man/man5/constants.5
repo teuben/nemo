@@ -1,4 +1,4 @@
-.TH CONSTANTS 5NEMO "22 August 2020"
+.TH CONSTANTS 5NEMO "25 August 2020"
 .SH NAME
 constants \- list of useful constants 
 .SH DESCRIPTION
@@ -9,9 +9,9 @@ Here we tabulate some convenience values we often use in astronomy
 3.1415926	pi, math
 2.7182818	e, math
 57.295780	Degrees per radian (180/pi)
-206264.81	Arcseconds (3600*180/pi)
-2.35482		2*sqrt(2*ln(2)) - the FWHM/sigma of a gaussian 
-1.13309		Number of points per beam = 1.13309 * (FWHM/PIXEL)^2  = pi/(4*ln(2))
+206264.81	Arcseconds per Radian (3600*180/pi)
+2.35482		STOF = 2*sqrt(2*ln(2)) - the FWHM/sigma of a gaussian 
+1.13309		BOF (beam oversampling factor) = 1.13309 * (FWHM/PIXEL)^2  = pi/(4*ln(2))
 3.26163		pc/ly 
 
 6.6743e-11	G, grav constant in MKS units
@@ -28,10 +28,9 @@ Here we tabulate some convenience values we often use in astronomy
 0.4638		earth rotation speed at equator, km/s
 .fi
 .SH CAVEATS
-Galactic constants such as distance to the galactic center (8.5 kpc) or orbital speed of LSR (220 km/s) , are still subject
-to change.
+Galactic constants such as distance to the galactic center (8.5 kpc) or orbital speed of LSR (220 km/s) , are still subject to change.  See also \fImkgalorbit(1NEMO)\fP.
 .SH "SEE ALSO"
-ccdstat(1NEMO), ccdsmooth(1NEMO), units(5NEMO), data(5NEMO)
+ccdstat(1NEMO), ccdsmooth(1NEMO), mkgalorbit(1NEMO), units(5NEMO), data(5NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
