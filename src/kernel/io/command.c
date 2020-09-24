@@ -24,7 +24,9 @@ extern int nemo_file_lines(string, int);
 
 #define VALID_TYPES "irs."
 
+#if (MIR_READLINE==1)
 static int todo_readline=0;
+#endif
 static char prompt[64];
 
 /*
