@@ -1,0 +1,3 @@
+.\"   include file, to be used as:   .so man1/parameters
+The following parameters are recognized; they may be given in any order
+if the keyword is also given. Use --help to confirm this man page is up to date.
