@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 17-aug-2020 PJT
+VERSION = NEMO V4.2 15-oct-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -566,7 +566,9 @@ checklog:
 
 TIME = /usr/bin/time
 
-bench:
+bench:   bench0
+
+bench1:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
 
 bench0:
