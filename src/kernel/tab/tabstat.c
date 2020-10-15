@@ -7,6 +7,7 @@
  * 	 2-mar-01   V1.2    added sum to the output			   pjt
  *      24-jan-12   V1.4    also report min/max in sigma from mean         pjt
  *      16-jan-13   V1.5    added MAD                                      pjt
+ *      10-oct-20   V1.7    ansi                                           pjt
  *
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
@@ -15,7 +16,7 @@
 #include <stdinc.h>	
 #include <getparam.h>
 #include <moment.h>
-
+#include <table.h>
 
 #define MAXCOL  256
 #define MAXCOORD 16
@@ -33,7 +34,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "nmax=100000\n       maximum number of data to be read if pipe",
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
-    "VERSION=1.5\n	 16-jan-2014 PJT",
+    "VERSION=1.7\n	 10-oct-2020 PJT",
     NULL
 };
 
@@ -63,12 +64,17 @@ local int    method;
 local bool   Qmin, Qmax;
 local real   xmin, xmax;
 
-void setparams(), stat_data();
+extern void sortptr (real *x ,int *idx, int n);
 
 #define SWAP(a,b)   {real _t; _t=a; a=b; b=_t;}
 
+void setparams(void);
+void read_data(void);
+void stat_data(void);
+void out(string fmt);
+
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();
 
@@ -77,7 +83,7 @@ nemo_main()
     stat_data();
 }
 
-void setparams()
+void setparams(void)
 {
     int  j;
    
@@ -108,7 +114,7 @@ void setparams()
     method = getiparam("method");
 }
 
-read_data()
+void read_data(void)
 {
     real *coldat[1+MAXCOL];
     int i, j, colnr[1+MAXCOL];
@@ -129,7 +135,7 @@ read_data()
 }
 
 
-void stat_data()
+void stat_data(void)
 {
     int i, j, ndat, imax, kmin, kmax;
     real median, mean, sigma, d, dmax, fac;
@@ -316,7 +322,7 @@ void stat_data()
 }
 
 
-out(string fmt)
+void out(string fmt)
 {
     printf(outfmt,fmt);   
 }

@@ -49,6 +49,7 @@
  *      15-jan-14   6.4   add MAD option
  *       8-jan-2020 7.0   add pyplot= options                   PJT
  *       2-mar-2020 7.1   add norm= for cumulative, fix bin bug PJT
+ *      10-oct-2020 7.2   using median()                        PJT
  *                
  * 
  * TODO:
@@ -179,6 +180,11 @@ extern real median_torben(int n, real *x, real xmin, real xmax);
 extern int  nemo_file_lines(string fname, int nmax);
 
 extern void minmax(int n, real *x, real *xmin, real *xmax);
+
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+
 
 
 /****************************** START OF PROGRAM **********************/
@@ -336,9 +342,9 @@ local void histogram(void)
 {
   int i,j,k, l, kmin, kmax, lcount = 0;
   real count[MAXHIST];
-  int under, over;
+  int under, over, n1, n3;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-  real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, median;
+  real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, tm;
   real rmean, rsigma, rrange[2];
   Moment m;
   
@@ -480,15 +486,16 @@ local void histogram(void)
   dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
   dprintf (0,"h3 and h4            : %g %g\n", h3, h4);
   if (Qmedian) {
-    
-    if (npt % 2) 
-      median = x[(npt-1)/2];
-    else
-      median = 0.5 * (x[npt/2] + x[npt/2-1]);
-    dprintf (0,"Median               : %g\n",median);
+    q2 = smedian(npt,x);
+    q1 = smedian_q1(npt,x);
+    q3 = smedian_q3(npt,x);
+    tm = (q1 + 2*q2 + q3 ) / 4.0;
+    dprintf (0,"Median (Q2)          : %g\n",q2);
+    dprintf (0,"Q1,Q2,Q3             : %g %g %g\n",q1,q2,q3);    
+    dprintf (0,"TriMean              : %g\n",q2);
   } else if (Qtorben) {
-    median = median_torben(npt,x,xmin,xmax);
-    dprintf (0,"Median_torben        : %g\n",median);
+    q2 = median_torben(npt,x,xmin,xmax);
+    dprintf (0,"Median_torben        : %g\n",q2);
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
   if (Qrobust) {
