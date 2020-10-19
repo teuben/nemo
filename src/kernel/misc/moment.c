@@ -18,6 +18,7 @@
  *  11-jun-14   MAD is really median absolute deviation?  MAD0 for now the old mean
  *              is that MARD (mean absolute relative difference)
  *  12-jul-20   add min/max for robust
+ *  10-oct-20   median improvement via inline sort
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -33,9 +34,13 @@
 #define sum3 m->sum[3]
 #define sum4 m->sum[4]
 
-extern real median(int,real*);
-extern real median_q1(int,real*);
-extern real median_q3(int,real*);
+/* median.c */
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+extern real pmedian(int,real*);
+extern real pmedian_q1(int,real*);
+extern real pmedian_q3(int,real*);
 
 void ini_moment(Moment *m, int mom, int ndat)
 {
@@ -195,6 +200,26 @@ static int   last_n_robust_moment      = -1;
 static real  last_robust_range[2];
 
 
+local int compar_real(const void *va, const void *vb)
+{
+  real *a = (real *) va;
+  real *b = (real *) vb;
+  return *a < *b ? -1 : *a > *b ? 1 : 0;
+}
+
+local real get_median(int n, real *x)
+{
+  dprintf(1,"get_median: n=%d\n",n);
+
+  qsort(x,n,sizeof(real),compar_real);
+  if (n % 2)
+    return  x[(n-1)/2];
+  else
+    return 0.5 * (x[n/2] + x[n/2-1]);
+}
+
+
+
 void compute_robust_moment(Moment *m)
 {
   int i,n;
@@ -205,9 +230,16 @@ void compute_robust_moment(Moment *m)
   if (m->ndat==0)
     error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
   n = MIN(m->n, m->ndat);
-  m2 = median(n,m->dat);
-  m1 = median_q1(n,m->dat);
-  m3 = median_q3(n,m->dat);
+#if 0
+  m2 = pmedian(n,m->dat);
+  m1 = pmedian_q1(n,m->dat);
+  m3 = pmedian_q3(n,m->dat);
+#else
+  get_median(n,m->dat);    // sort, but this will destroy the weights array
+  m2 = smedian(n,m->dat);
+  m1 = smedian_q1(n,m->dat);
+  m3 = smedian_q3(n,m->dat);  
+#endif  
   iqr = m3-m1;
   dlo = m1 - frob*iqr;   /* perhaps better if this 1.5 factor */
   dhi = m3 + frob*iqr;   /* should depend on the # datapoints */
@@ -216,6 +248,7 @@ void compute_robust_moment(Moment *m)
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+
   last_min_robust_moment    = min_moment(&tmp);
   last_max_robust_moment    = max_moment(&tmp);
   last_mean_robust_moment   = mean_moment(&tmp);
@@ -269,7 +302,7 @@ real median_moment(Moment *m)
     error("median_moment cannot be computed with ndat=%d",m->ndat);
   dprintf(1,"median_moment: n=%d ndat=%d\n",m->n, m->ndat);
   n = MIN(m->n, m->ndat);
-  return median(n,m->dat);
+  return smedian(n,m->dat);
 }
 
 

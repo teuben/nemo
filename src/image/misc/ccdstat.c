@@ -19,6 +19,7 @@
  *      25-aug-14   3.5 added maxpos=, fixed duplicate header, so format='ascii.commented_header'
  *                      works in astropy
  *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
+ *    11-oct-2020   3.7 optimized memory usage, speed up median computation
  */
 
 #include <stdinc.h>
@@ -46,7 +47,7 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.5c\n 28-may-2020 PJT",
+    "VERSION=3.7\n  10-oct-2020 PJT",
     NULL,
 };
 
@@ -69,19 +70,20 @@ double size;				/* size of frame (square) */
 double cell;				/* cell or pixel size (square) */
 int *planes = NULL;                     /* selected planes , if used */
 
-real get_median(int n, real *x);
+real get_median(int n, real *x);        /* uses an in place sort */
 
-extern real median(int,real*);
-extern real median_q1(int,real*);
-extern real median_q3(int,real*);
-
+/* median.c */
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+extern real median_torben(int n, real *x, real xmin, real xmax);
 
-nemo_main()
+void nemo_main(void)
 {
     int  i, j, k, ki;
     real x, y, z, xmin, xmax, mean, sigma, skew, kurt,  bad, w, *data;
     real dmin, dmax;
-    real sum, sov, q1, q2, q3;
+    real sum, sov, q1, q2, q3, tm;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
@@ -191,7 +193,7 @@ nemo_main()
       for (k=0; k<nz; k++) {
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
-            x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,k]
+            x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -232,24 +234,27 @@ nemo_main()
 	printf ("Points per beam (map)  : %g\n",nppb0);
 	if (Qmedian) {
 	  if (Qtorben) {
-	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
+	    printf ("Median Torben          : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
 	  } else {
-	    printf ("Median                : %f\n",get_median(ngood,data));
-	    q2 = median(ngood,data);
-	    q1 = median_q1(ngood,data);
-	    q3 = median_q3(ngood,data);
-	    printf ("Q1,Q2,Q3              : %f %f %f\n",q1,q2,q3);
+	    printf ("Median                 : %f\n",get_median(ngood,data));  // in-place sort
+	    q2 = smedian(ngood,data);                                         // slow if not in-place sorted before
+	    q1 = smedian_q1(ngood,data);
+	    q3 = smedian_q3(ngood,data);
+	    tm = (q1 + 2*q2 + q3 ) / 4.0;
+	    printf ("Q1,Q2,Q3               : %f %f %f\n",q1,q2,q3);
+	    printf ("TriMean                : %f\n",tm);
 	  }
-#if 1
-	  if (ndat>0)
-	    printf ("MedianL               : %f\n",median_moment(&m));
+#if 0
+	  if (ndat>0)  // very slow
+	    printf ("MedianL                : %f\n",median_moment(&m));       // slow
 #endif
 	}
 	if (Qrobust) {
 	  compute_robust_moment(&m);
-	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
-	  printf ("Sigma Robust          : %f\n",sigma_robust_moment(&m));
-	  printf ("Median Robust         : %f\n",median_robust_moment(&m));
+	  printf ("N Robust               : %d\n",n_robust_moment(&m));
+	  printf ("Mean Robust            : %f\n",mean_robust_moment(&m));
+	  printf ("Sigma Robust           : %f\n",sigma_robust_moment(&m));
+	  printf ("Median Robust          : %f\n",median_robust_moment(&m));
 	}
 
 	if (Qmmcount) {
@@ -269,6 +274,8 @@ nemo_main()
 	}
 	printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
       }
+
+      free_moment(&m);
 
     } else {             /* treat each plane seperately */
 
@@ -351,17 +358,20 @@ nemo_main()
 #endif
 	printf("\n");
       } /* ki */
+      free_moment(&m);
     }
 }
 
 
-/* 
+/*   @todo:   this could be placed in median.c?
  *   local version of a median. The one in moment.c and median.c are sorting
  *   pointers , this one sorts the data 
  */
 
-int compar_real(real *a, real *b)
+int compar_real(const void *va, const void *vb)
 {
+  real *a = (real *) va;
+  real *b = (real *) vb;
   return *a < *b ? -1 : *a > *b ? 1 : 0;
 }
 

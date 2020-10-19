@@ -11,15 +11,55 @@
 
 #include <stdinc.h>
 
-static int *ix=NULL;
+// variables needed for the pmedian* functions that used a pointer array
 static int nix=0;
+static int *ix=NULL;
 
 static int last_n = 0;
 static real *last_x = NULL;
 
 extern     void sortptr(real *x, int *ix, int n);
 
-real median(int n, real *x)
+// sorted array versions 
+
+real smedian(int n, real *x)
+{
+    if (n <= 0) error("median: n=%d",n);
+    if (x == 0) error("median: x=NULL");
+
+    if (n % 2)
+        return x[(n-1)/2];
+    else
+        return  0.5*(x[n/2] + x[n/2-1]);
+}
+
+real smedian_q1(int n, real *x)
+{
+  int n1;
+  if (n>4) {
+    n1=(n+1)/4;
+    return x[n1];
+  } else
+    error("smedian_q1: too few points");
+
+}
+
+real smedian_q3(int n, real *x)
+{
+  int n3;
+  if (n>4) {
+    n3=((n+1)*3)/4;
+    return x[n3];
+  } else
+    error("smedian_q1: too few points");
+
+}
+
+
+// pointer array versions
+
+
+real pmedian(int n, real *x)
 {
     if (n <= 0) error("median: n=%d",n);
     if (x == 0) error("median: x=NULL");
@@ -48,7 +88,7 @@ real median(int n, real *x)
    this code will thus not run in MP mode
 */
 
-real median_q1(int n, real *x)
+real pmedian_q1(int n, real *x)
 {
   int n1;
   if (last_n==0) error("No previous median()");
@@ -60,7 +100,7 @@ real median_q1(int n, real *x)
     error("median_q1: too few points");
 
 }
-real median_q3(int n, real *x)
+real pmedian_q3(int n, real *x)
 {
   int n3;
   if (last_n==0) error("No previous median()");
@@ -74,6 +114,7 @@ real median_q3(int n, real *x)
 }
 
 
+// future ?
  
 void init_median(int size)
 {
