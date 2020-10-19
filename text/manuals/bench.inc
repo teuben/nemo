@@ -44,6 +44,8 @@ Machine        	      & cpu-sec/step & code        & comments \\
 &&& \\ \hline
 
 i5-1135G6 @ 4.2 GHz          & 0.000089 & hackcode1 & 2020 laptop \\
+i7-8550U @ 4 GHz             & 0.000178 & hackcode1 & 2018 laptop \\
+i7-3630QM @ 3.4 GHz          & 0.000177 & hackcode1 & 2014 laptop \\
 i70-870 @ 2.93 GHz	     & 0.00030 & hackcode1 & 2010 desktop \\
 core 2 duo @ 2.0 GHz	     & 0.0012 & hackcode1 & 2007 laptop \\
 Dec-alpha		     & 0.0042 & hackcode1 & -O4 -fast \\
