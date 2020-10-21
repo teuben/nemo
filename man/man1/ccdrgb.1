@@ -1,4 +1,4 @@
-.TH CCDRGB 1NEMO "10 May 2010"
+.TH CCDRGB 1NEMO "18 July 2020"
 .SH NAME
 ccdrgb \- create composite RGB color images from multiple input images
 .SH SYNOPSIS
@@ -23,17 +23,18 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin1=\fP
-Input image(s) [???]     
-.TP 20
+Input \fIRed\fP image [???]     
+.TP
 \fBin2=\fP
-Input image(s) [???]     
-.TP 20
+Input \fIGreen\fP image [???]     
+.TP
 \fBin3=\fP
-Input image(s) []     
-.TP 20
+Input \fIBlue\fP image.  If none supplied, the middle channel
+is computing from the other two, using \fBc=\fP.
+.TP
 \fBout=\fP
 Output image file [???]    
-.TP 20
+.TP
 \fBc=\fP
 color composition index RGB=(A, B+c*A, B) if only 2 images
 are used. [0.5] 
@@ -48,7 +49,7 @@ Range in image 2.
 Range in image 3.
 .SH EXAMPLES
 .SH SEE ALSO
-ccdmath(1NEMO)
+ccdmath(1NEMO), ccdppm(1NEMO)
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
