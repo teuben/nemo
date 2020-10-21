@@ -1,4 +1,4 @@
-.TH TABDMS 1NEMO "25 September 2013"
+.TH TABDMS 1NEMO "17 July 2020"
 .SH NAME
 tabdms \- Convert to HMS/DMS tables
 .SH SYNOPSIS
@@ -8,6 +8,11 @@ tabdms \- Convert to HMS/DMS tables
 HMS/DMS format. 
 .PP
 Currently the format is fixed.
+.PP
+There is little controversie about DMS, these are numbers between -180 or 180, or 0 to 360. In fact, the
+program does not care about the absolute value, any number will do.
+.PP
+HMS is more complicated, since the 24h system is used as well as the 360deg. 
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -66,8 +71,7 @@ echo 12:00:00 12:00:00 | tabdms - - fromhms=1 fromdms=2
 12 180
 .fi
 .SH LIMITATIONS
-The code is compiled with a maximum number of columns, MAXCOL, typically
-256.
+The code is compiled with a maximum number of columns, MAXCOL, typically 256.
 .SH SEE ALSO
 tabmath(1NEMO), nemoinp(1NEMO), nemoinpx(3NEMO)
 .SH FILES
@@ -79,4 +83,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 24-Jan-00	V0.4 doc written	PJT
 25-sep-13	V0.8 added fromdms=	PJT
+17-jul-20	clarifications	PJT
 .fi
