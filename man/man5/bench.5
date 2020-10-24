@@ -6,7 +6,9 @@ bench \- NEMO benchmarks
 .SH RESULTS
 Reported are user time in CPU seconds:
 .nf
-.ta +2.5i +0.5i
+.ta +3.5i +1.5i
+
+i7-4930K CPU @ 3.40GHz
 
 Intel Core i5-1135G7	20.9	XPS13 1460 / 
 Intel Core i9-9900X	25.8	geminid 1214 / 9467
@@ -159,6 +161,9 @@ where the last two instances were just re-running the same command, but
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the 
 wall clock time is more likely to properly account for the I/O overhead time.
+.PP
+Rule of thumb: always run a benchmark a few times to see if a hot CPU slows
+down the benchmark. If I/O is cached. Other tasks are interfering.
 .SH  "OTHERS"
 A few other man pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
 .nf
