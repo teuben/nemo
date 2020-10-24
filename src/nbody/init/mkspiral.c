@@ -31,6 +31,7 @@
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
+//#include <snapshot/barebody.h>
 #include <snapshot/put_snap.c>
 
 string defv[] = {
@@ -53,7 +54,8 @@ string defv[] = {
     "nmodel=1\n           number of models",
     "headline=\n	  text headline for output ",
     "linear=t\n           Linear or Logarithmic spiral?",
-    "VERSION=1.9a\n	  13-jul-2020 PJT",
+    "test=0\n             0=real disk  1=low cpu garbage disk",
+    "VERSION=1.10\n	  24-oct-2020 PJT",
     NULL,
 };
 
@@ -68,6 +70,7 @@ local real SPa, SPk, SPw;     /* spiral parameters */
 local real width;
 local real totmass;
 local bool Qlinear;
+local int  testmode;
 
 local Body *disk = NULL;
 
@@ -78,7 +81,10 @@ extern double grandom(double, double);
 
 local void inittables(void);
 local void writegalaxy(stream outstr);
-local void testdisk(int n);
+local void testdisk0(int n);
+local void testdisk1(int n);
+local void testdisk2(int n);
+local void testdisk3(int n);
 
 void nemo_main(void)
 {
@@ -95,6 +101,7 @@ void nemo_main(void)
     sigmator = getrparam("sigmator");
     totmass = getdparam("mass");
     Qlinear = getbparam("linear");
+    testmode = getiparam("test");
     
     SPa = getdparam("a");
     SPk = - getdparam("k");	/* corrected for rot counter clock wise */
@@ -107,6 +114,7 @@ void nemo_main(void)
         width = SPw;
     init_xrandom(getparam("seed"));
     if (sigmator<1) inittables();
+    if (testmode > 0) warning("garbage test disk mode %d",testmode);
 
     outstr = stropen(getparam("out"), "w");
     put_history(outstr);
@@ -114,8 +122,15 @@ void nemo_main(void)
 	set_headline(getparam("headline"));
     
     while (nmodel--) {
-        testdisk(nmodel);
-        writegalaxy(outstr);
+      switch (testmode) {
+      case 0: testdisk0(nmodel); break; 
+      case 1: testdisk1(nmodel); break; 
+      case 2: testdisk2(nmodel); break;
+      case 3: testdisk3(nmodel); break;
+	
+      default: break;
+      }
+      writegalaxy(outstr);
     }
     strclose(outstr);
     free(disk);
@@ -164,10 +179,10 @@ void writegalaxy(stream outstr)
  * density test disk.  
  */
 
-void testdisk(int n)
+void testdisk0(int n)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, msph_i, vcir_i, pot_i, mass_i, sigma_i;
+    real rmin2, rmax2, r_i, theta_i,vcir_i, mass_i, sigma_i;
     real uni, gau, unifrac, f;
     real cost, sint, Aoort, omega, kappa, sigma_t;
     vector acc_i;
@@ -237,4 +252,51 @@ void testdisk(int n)
 	Phase(dp)[1][1] =   sign * (vcir_i+sigma_t) * cost + sigma_i * sint;
 	Phase(dp)[1][2] = 0.0;
     }
+}
+
+/*
+ * a garbage disk with as little CPU used as possible
+ * meant to calibrate disk I/O factor
+ */
+
+void testdisk1(int n)
+{
+    Body *dp;
+    int i;
+
+    if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
+
+    for (dp=disk, i = 0; i < ndisk; dp++, i++) {
+        Mass(dp) = 1.0;
+ 	Phase(dp)[0][0] = xrandom(-1.0,1.0);
+	Phase(dp)[0][1] = xrandom(-1.0,1.0);
+	Phase(dp)[0][2] = 0.0;
+	Phase(dp)[1][0] = xrandom(-1.0,1.0);
+	Phase(dp)[1][1] = xrandom(-1.0,1.0);
+	Phase(dp)[1][2] = 0.0;
+    }
+}
+
+
+void testdisk2(int n)
+{
+    Body *dp;
+    int i;
+
+    if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
+
+    for (dp=disk, i = 0; i < ndisk; dp++, i++) {
+        Mass(dp) = 1.0;
+ 	Phase(dp)[0][0] = 1.0;
+	Phase(dp)[0][1] = 1.0;
+	Phase(dp)[0][2] = 0.0;
+	Phase(dp)[1][0] = 1.0;
+	Phase(dp)[1][1] = 1.0;
+	Phase(dp)[1][2] = 0.0;
+    }
+}
+
+void testdisk3(int n)
+{
+    if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
 }
