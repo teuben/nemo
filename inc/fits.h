@@ -2,6 +2,7 @@
  *  definitions and declarations for nemo's FITS.C
  *  22-feb-94  ansi- and C++ safe
  *  10-aug-09  size_t instead of int for 2GB+ files
+ *  25-oct-20  add hdu counter
  */
 
 #ifndef _fits_h_
@@ -126,6 +127,7 @@ static struct arglist {
 /*      The fits structure to hold primary header */
 
 typedef struct fits_header {
+    int hdu;            /* keep track with HDU this is (1 being the first) */
     /* Optionally we could store the buffer in the first structure too... */
     char *buffer;       /* pointer to exact header copy */
     size_t buflen;      /* current length of buffer */

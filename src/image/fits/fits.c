@@ -1132,7 +1132,7 @@ int fts_phead(fits_header *fh, string *print)
     printf("__________________________________________________________\n");
     printf("______________________ FITS HEADER _______________________\n");
     if (fh->xtension) {         /* primary header ? */
-      printf("Standard eXTENSION header: %s\n",fh->xtension);
+      printf("Standard eXTENSION header %d: %s\n",fh->hdu,fh->xtension);
     } else {
       printf("Primary header: ");
       switch(fh->simple) {
@@ -1254,8 +1254,11 @@ int fts_phead(fits_header *fh, string *print)
     dsize = fts_dsize(fh);
     printf("headersize = %d bytes = %d %d-records\n",
             fh->hlen, (fh->hlen - 1)/ftsblksiz_i + 1, ftsblksiz_i);
-    printf("datasize = %ld bytes = %ld %d-records\n",
+    if (dsize > 0) 
+      printf("datasize = %ld bytes = %ld %d-records\n",
             dsize, (dsize-1)/ftsblksiz_i + 1, ftsblksiz_i);
+    else
+      printf("datasize = 0 bytes = 0 %d-records\n", ftsblksiz_i);
     printf("__________________________________________________________\n");
 
     return 1;
