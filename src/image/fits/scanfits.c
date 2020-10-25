@@ -54,7 +54,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "blocking=1,1\n  	   Two blocking factors (blocksize/2880) for i&o",
     "select=header,data\n  Select header, data, ...?",
     "split=f\n             Split fits file into HDU pieces '<out>.#'",
-    "VERSION=1.8b\n        15-oct-99 PJT",
+    "VERSION=1.8c\n        25-oct-2020 PJT",
     NULL,
 };
 
@@ -113,6 +113,8 @@ nemo_main()
 	
     for (i=1;;i++) {			             /* loop over all HDU's */
        fts_zero(&fh);			             /* reset header */
+       fh.hdu = i;                                   /* keep track of HDU (1=first) */
+       
        n = fts_rhead(&fh,instr);	              /* read header */
        if (n<0)				              /* if no data (EOF) .. */
           break;			              /* ... quit */
