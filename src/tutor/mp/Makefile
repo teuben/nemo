@@ -44,7 +44,7 @@ bench4:
 # scaling from https://stackoverflow.com/questions/19780554/what-limits-scaling-in-this-simple-openmp-program
 
 scaling:
-	gcc scaling.c -fopenmp -O3    -o scaling
+	gcc scaling.c -std=c99 -fopenmp -O3    -o scaling
 
 bench5: scaling
 	OMP_NUM_THREADS=1 $(TIME) ./scaling
