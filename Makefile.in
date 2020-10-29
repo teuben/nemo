@@ -568,11 +568,15 @@ TIME = /usr/bin/time
 
 bench:   bench0
 
+bench0:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)
+
 bench1:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
 
-bench0:
-	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)
+bench2:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=1)
+
 
 #
 TEST=""
