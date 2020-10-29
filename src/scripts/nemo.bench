@@ -26,19 +26,20 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-10-25) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2020-10-28) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
 
 if [ $mode == 1 ]; then
+    @rm -f s0
     echo Special series of mkspiral benchmarks
-    $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123          ; rm s0
-    $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 
-    $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=1  
-    $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=2  
-    $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=3  
-    $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123 test=3   ; rm s0
+    echo -n "# D 0 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123          ; rm s0
+    echo -n "# . 0 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 
+    echo -n "# . 1 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=1  
+    echo -n "# . 2 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=2  
+    echo -n "# . 3 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=3  
+    echo -n "# D 3 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123 test=3   ; rm s0
     exit 0
 fi
 
