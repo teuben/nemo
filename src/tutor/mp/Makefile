@@ -48,9 +48,8 @@ bench4:
 scaling:
 	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling
 
+ONT=1 2 4 8
 bench5: scaling
-	OMP_NUM_THREADS=1 $(TIME) ./scaling
-	OMP_NUM_THREADS=2 $(TIME) ./scaling
-	OMP_NUM_THREADS=4 $(TIME) ./scaling
-	OMP_NUM_THREADS=8 $(TIME) ./scaling
-
+	@echo ONT=$(ONT)
+	-@for i in $(ONT); do\
+	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./scaling); done
