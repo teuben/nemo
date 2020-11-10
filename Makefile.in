@@ -577,6 +577,9 @@ bench1:
 bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=1)
 
+bench5:
+	(cd src/tutor/mp; $(MAKE) bench5)
+
 
 #
 TEST=""
