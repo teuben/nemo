@@ -32,7 +32,7 @@ echo `uname -a`
 echo `date`
 
 if [ $mode == 1 ]; then
-    @rm -f s0
+    rm -f s0
     echo Special series of mkspiral benchmarks
     echo -n "# D 0 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123          ; rm s0
     echo -n "# . 0 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 
