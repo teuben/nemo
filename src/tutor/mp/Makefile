@@ -1,5 +1,7 @@
 #
 
+CC = gcc
+
 TIME = /usr/bin/time
 
 include $(NEMOLIB)/makedefs
@@ -12,10 +14,10 @@ clean:
 	rm -f $(BINS)
 
 hello1:
-	gcc -fopenmp -O3  -o hello1 hellomp.c  -lm
+	$(CC) -fopenmp -O3  -o hello1 hellomp.c  -lm
 
 hello2:
-	gcc          -O3  -o hello2 hellomp.c  -lm
+	$(CC)          -O3  -o hello2 hellomp.c  -lm
 
 bench: $(BINS)
 	$(TIME) ./hello1
@@ -44,7 +46,7 @@ bench4:
 # scaling from https://stackoverflow.com/questions/19780554/what-limits-scaling-in-this-simple-openmp-program
 
 scaling:
-	gcc scaling.c -std=c99 -fopenmp -O3    -o scaling
+	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling
 
 bench5: scaling
 	OMP_NUM_THREADS=1 $(TIME) ./scaling
