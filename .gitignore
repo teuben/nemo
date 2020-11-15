@@ -44,6 +44,22 @@ src/nbody/evolve/hackcode/hackcode1/hackforce_qp
 src/nbody/evolve/sellwood/code1/galaxy
 src/nbody/evolve/sellwood/code1/galaxy.a
 
+# more
+install.config.log
+install.distclean.log
+install.glnemo2.log
+install.pgplot.log
+local/
+nemo-config
+nemo_start.py
+src/nbody/evolve/sellwood/code1/galaxy13
+src/nbody/glnemo/src/.moc/
+src/nbody/glnemo/src/Users/
+tars
+usr/boily/magalie/magalie.exe
+usr/dehnen/utils/inc/inc
+usr/dehnen/utils/make.sh
+
 # ignore Denhen's directories
 usr/dehnen/falcON/acc/
 usr/dehnen/falcON/bin/

@@ -1,0 +1,82 @@
+# -*- makefile -*-
+#
+# sets library sub-directory and flags for clang compiler
+# to be included by makefile 
+#
+-include make.sh
+
+EXT             := .clang
+CXX             := clang++
+CC              := clang
+FC              := gfortran
+
+PLATFORM 	:= $(shell uname -m)
+#
+# Detect GCC version
+#
+empty:=
+space:= $(empty) $(empty)
+
+# detect OSTYPE (Linux or Darwin) 
+OSTYPE := $(shell uname)
+ostype:
+	@echo "OSTYPE = " $(OSTYPE)
+# set following variable to 1 if gcc > 700
+API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
+
+STDAPI=-std=c++03
+
+# warning flags
+ifdef LIMITED_WARNINGS
+WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security 
+else
+WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security
+endif
+ifndef TBBROOT
+ifdef WDutilsDevel
+WARNING		+= -Wold-style-cast
+endif
+endif
+#WARNING		+= -Wno-unknown-pragmas
+
+# it seem that coverage (to be combined with gcov) does not work for openmp)
+#ifdef WDutilsDevel
+#PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
+#endif
+# general optimisation and warning flags
+OPTFLAGS	:= -mfpmath=sse \
+		$(WARNING) -O2 -fPIC \
+		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
+
+ifeq ($(NO_ARCH_NATIVE),1)
+   ARCH_NATIVE =
+else
+   ARCH_NATIVE = -march=native
+endif
+
+ifneq ($(OSTYPE),Darwin)
+OPTFLAGS	+= -rdynamic $(ARCH_NATIVE)
+endif
+
+# these are actually to be set
+CFLAGS		:= $(OPTFLAGS)
+
+WARNING		+= -Woverloaded-virtual
+OPTFLAGS	+= -Woverloaded-virtual
+
+ifdef CXX11
+CXXFLAGS	:= -std=c++11 $(OPTFLAGS)
+else
+CXXFLAGS	:= $(STDAPI) $(OPTFLAGS)
+endif
+
+ifdef OPENMP
+CXXFLAGS	+= -fopenmp
+CFLAGS		+= -fopenmp
+LDFLAGS		:= -shared -fopenmp $(PROFLAGS)
+else
+LDFLAGS		:= -shared $(PROFLAGS)
+endif
+
+# end
+

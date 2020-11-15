@@ -81,6 +81,11 @@ LIMITED_WARNINGS	:= -Wextra -Winit-self
 -include ../utils/make.gcc
 endif
 
+# clang compiler
+ifeq ($(COMPILER),clang)
+-include ../utils/make.clang
+endif
+
 # Portland group compiler
 ifeq ($(COMPILER),pgi)
 -include ../utils/make.pgi

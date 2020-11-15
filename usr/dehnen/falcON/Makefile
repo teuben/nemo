@@ -24,9 +24,12 @@ endif
 # this should be set by a configure file
 #
 
+ifeq ($(COMPILER),)
 COMPILER		:= gcc#		# GNU compiler g++
+endif
 #COMPILER		:= icc#		# intel compiler icpc
 #COMPILER		:= clang#	# llvm compiler clang++
+
 
 #
 # 3 activate options (some only apply to proprietary and private versions)
