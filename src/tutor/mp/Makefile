@@ -45,11 +45,11 @@ bench4:
 
 # scaling from https://stackoverflow.com/questions/19780554/what-limits-scaling-in-this-simple-openmp-program
 
-scaling:
+scaling: scaling.c
 	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling
 
 ONT=1 2 4 8
 bench5: scaling
-	@echo ONT=$(ONT)
+	@echo OMP_NUM_THREADS ONT=$(ONT)
 	-@for i in $(ONT); do\
 	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./scaling); done
