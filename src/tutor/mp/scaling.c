@@ -1,4 +1,6 @@
 // Compile with: gcc scaling.c -std=c99 -fopenmp -O3                                                                                               
+// See also discussion on:
+//    https://stackoverflow.com/questions/19780554/what-limits-scaling-in-this-simple-openmp-program
 
 #include <stdio.h>
 #include <stdint.h>
