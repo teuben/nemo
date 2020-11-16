@@ -10,7 +10,7 @@ int main(){
   double sum=0.;
 #pragma omp parallel for reduction(+:sum)
   for(uint64_t u=umin; u<umax; u++)
-    sum+=1./u/u;
+    sum+=1./(u*u);   //  1./u/u takes about 2x longer on intel
   printf("%e\n", sum);
 
 }
