@@ -28,16 +28,16 @@ STDAPI=-std=c++03
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security 
+WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member
 else
-WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security
+WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
 WARNING		+= -Wold-style-cast
 endif
 endif
-#WARNING		+= -Wno-unknown-pragmas
+#WARNING		+= -Wno-unknown-pragmas 
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
