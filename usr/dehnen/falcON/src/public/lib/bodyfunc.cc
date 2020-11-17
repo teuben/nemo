@@ -192,12 +192,13 @@ namespace {
 	std::cerr<<"could not compile temporary file /tmp/"<<fname<<".cc:\n";
 	char show[512];
 	SNprintf(show,512,"more /tmp/%s.cc > /dev/stderr",fname);
-	system(show);
+  int rr;
+	rr=system(show);
 	std::cerr<<"\nwith the command\n\""<<cmmd<<"\".\n"
 		 <<"Here is the output from the compiler:\n\n";
 	SNprintf(show,512,"more /tmp/%s.log > /dev/stderr",fname);
 	std::cerr<<'\n';
-	system(show);
+	rr=system(show);
       }
       throw BfErr(message("could not compile expression; "
 			  "perhaps it contains a syntax error"));
@@ -210,7 +211,7 @@ namespace {
       char cmmd[512];
       SNprintf(cmmd,512,"rm -f /tmp/%s.* > /dev/null 2>&1",fname);
       DebugInfo(4,"executing \"%s\"\n",cmmd);
-      system(cmmd);
+      int rr=system(cmmd);
     }
   }
   //----------------------------------------------------------------------------
