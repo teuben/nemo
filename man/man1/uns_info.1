@@ -1,0 +1,75 @@
+.TH uns_info 1NEMO "March 17, 2020"
+.SH NAME
+uns_info \- Print information about UNS snapshot file like tsf nemo programs
+.SH SYNOPSIS
+\fBuns_info in=\fPin_file  [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIuns_info\fP reads a compatible UNS snapshot and print
+information of its content.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIuns input file snapshot\fP
+give as input a compatible UNS file snapshot (Nemo, Gadget, Ramses...)
+Default: \fIrequired\fP.
+.TP
+\fBselect=\fP\fIselect-particles\fP
+Select particles. Set of particles must be selected using the ":" range operator, separated by a comma. 
+E.g. select=0:9,10:19 would select two sets of 10 particles, or by
+component (gas,halo,stars,bulge,disk,bndry) for Gadget/Ramses
+files. E.g. select=gas,stars 
+[all]
+.TP
+\fBdisplay=\fP\fIboolean\fP
+if true display first elements of arrays, nbody otherwise [t]
+.TP
+\fBbits=\fP\fIsring\fP
+select which physical quantities to display.  Here is the list of differents
+values:
+  'm'  mass
+  'x'  position
+  'v'  velolcity
+  'p'  potential
+  'a'  acceleration
+  'e'  softening
+  'k'  keys array (from nemo)
+  'X'  aux array  (from nemo)
+  'R'  density
+  'I'  particles's Id
+  'U'  Internal energy
+  'M'  metallicity
+  'A'  stars's age
+  'H'  hsml
+  'T'  temperature
+
+  ex: bits=mRH will display positions, densities and hsml if they exist
+  
+  (see also :
+https://projets.lam.fr/projects/unsio/wiki/UnsioVariablesUtilisation#How-to-select-data-at-loading)
+[all]
+.TP
+\fBfloat=\fP\fIboolean\fP
+use true to display in float format, or false to display in
+double [t]
+.TP
+\fBmaxline=\fP\fIinteger\fP
+diplay # max lines per components [2]
+.TP
+\fBtimes=\fP\fItime-range\fP
+Select time [all]
+.TP
+\fBverbose=\fP\fIflag\fP
+If true, give some verbose output [t].
+.TP
+.SH SEE ALSO
+tsf(1NEMO), uns_projects(1NEMO), snapshot(5NEMO)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
+.SH AUTHOR
+Jean-Charles LAMBERT
+.SH HISTORY
+.nf
+.ta +1i +4i
+17-Mar-20	V2.2 manual created	JCL
+.fi
+

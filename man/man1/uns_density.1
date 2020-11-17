@@ -1,0 +1,66 @@
+.TH uns_density 1NEMO "March 17, 2020"
+.SH NAME
+uns_density \- estimate mass density based on distance to Kth neighbour, add distance to the kth neighbours
+.SH SYNOPSIS
+\fBuns_density in=\fPin_file \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIuns_density\fP reads a compatible UNS snapshot, estimate mass
+density based on distance to Kth neighbour, add distance to the kth
+neighbours, and save it in a NEMO format file. It computes very
+quickly density by using falcON library from Walter Dehnen (WD). It works
+like density program (WD) but accepts UNS input snapshot, plus 2
+differents method to estimate density, making it more versatile.
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIuns input file snapshot\fP
+give as input a compatible UNS file snapshot (Nemo, Gadget, Ramses...)
+Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Output NEMO file name. You can give a filename or "-" (to pipe with
+another NEMO program). Default: \fIrequired\fP.
+.TP
+\fBselect=\fP\fIselect-particles\fP
+Select particles. Set of particles must be selected using the ":" range operator, separated by a comma. 
+E.g. select=0:9,10:19 would select two sets of 10 particles, or by
+component (gas,halo,stars,bulge,disk,bndry) for Gadget/Ramses
+files. E.g. select=gas,stars . Default: \fIrequired\fP.
+.TP
+\fBm=\fP\fImethod\fP
+select method to approximate density, 0:used by density program (WD),
+1:used by hackdens program [0]
+.TP
+\fBK=\fP\fInumber of neighbours\fP
+select number of neighbours to approximate density [32]
+.TP
+\fBN=\fP\fIorder\fP
+order of Ferrers kernel [1]
+.TP
+\fBncrit=\fP\fvalue\fP
+ncrit value, if empty=max(1,K/4) []
+.TP
+\fBtimes=\fP\fItime-range\fP
+Select time [all]
+.TP
+\fBfirst=\fP\fIboolean\fP
+if true, add a trailing number to the first output file [f]
+.TP
+\fBoffset=\fP\fItime offset\fP
+ +/- time offset between two consecutives snapshots [0.01]
+.TP
+\fBverbose=\fP\fIflag\fP
+If true, give some verbose output [t].
+.TP
+.SH SEE ALSO
+falcON(1falcON), hackdens(1NEMO), uns_projects(1NEMO), snapshot(5NEMO)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
+.SH AUTHOR
+Jean-Charles LAMBERT
+.SH HISTORY
+.nf
+.ta +1i +4i
+17-Mar-20	V2.0 manual created	JCL
+.fi
+
