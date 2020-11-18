@@ -16,14 +16,16 @@
 #  May-2020        os=Linux/MacOSX
 
 set url   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-MacOSX-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.02-%s-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-%s-x86_64.sh
 
 set dir   = `pwd`/anaconda3
 set opt   = 1
 set wget  = wgetc
 set os    = `uname -s`
+
+set amuse = 0
 
 # you better know what you are doing here
 foreach arg ($*)
@@ -60,14 +62,18 @@ if ($opt == 0) exit 0
 pip install python-unsio python-unsiotools
 
 # but then install the developers version if these directories exist
-foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
-  if (-d $dir) then
-    echo Installing with pip install $dir
-    (cd $dir ; pip install -e .)
-  else
-    echo Skipping pip install -e $dir
-  endif
-end
+if ($?NEMO) then
+  foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
+    if (-d $dir) then
+      echo Installing with pip install $dir
+      (cd $dir ; pip install -e .)
+    else
+      echo Skipping pip install -e $dir
+    endif
+  end
+else
+  echo Warning:  no NEMO, skipping those components
+endif
 
 # https://github.com/adrn/gala
 # conda install astro-gala --channel conda-forge
@@ -90,8 +96,10 @@ pip install yt
 # https://amusecode.github.io/getting-started
 #   pip install numpy nose docutils mpi4py h5py
 #   pip install scipy astropy jupyter pandas seaborn
-pip install amuse-framework
-pip install amuse
+if ($amuse) then
+  pip install amuse-framework
+  pip install amuse
+endif  
 
 
 # ubuntu packages for amuse:
