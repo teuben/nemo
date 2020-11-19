@@ -51,16 +51,16 @@
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
     "out=???\n          output file name",
-    "newcol=\n          formula for new column (fie notation)",
-    "delcol=\n          columns to skip while writing",
+    "newcol=\n          formula for new column(s) (fie notation)",
+    "delcol=\n          columns to skip while writing, use all for all",
     "selfie=\n          select rows using fie notation",
     "format=%g\n        format for new output columns",
     "select=all\n	Select lines (not implemented)",
     "seed=0\n           Initial random number",
     "colname=\n         (unchecked) commented column names to add into output",
     "comments=f\n       Pass through comments?",
-    "refie=f\n          Re-FIE each output column",
-    "VERSION=3.5a\n     26-jul-2016 PJT",
+    "refie=f\n          Re-FIE each output column (not used)",
+    "VERSION=3.5b\n     19-nov-2020 PJT",
     NULL
 };
 
@@ -97,10 +97,15 @@ local string *burstfie(string);
 local void tab2space(char *);
 
 extern  string *burststring(string, string);
+extern  int inifie(string);
+extern void dofie(real *, int *, real *, real *);
+extern void dmpfie(void);
+extern int savefie(int);
+extern int loadfie(int);
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main(void)
 {
     int i;
 
@@ -211,7 +216,7 @@ local void convert(int ninput, stream *instr, stream outstr)
         dprintf(3,"LINE: (%s)\n",line);
         if (iscomment(line)) {
 	  if (Qcomment)
-	    fprintf(outstr,"\n",line);
+	    fprintf(outstr,"%s\n",line);
 	  continue;
 	}
         nlines++;
