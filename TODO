@@ -318,3 +318,46 @@ git tricks
 
    git remote rename origin teuben
    git remote add origin https://github.com/astroumd/pgplot
+
+==
+
+ANSI-C:
+
+https://gcc.gnu.org/onlinedocs/gcc-9.3.0/gcc/Standards.html#C-Language
+
+NEMO was developed in 1986/7, using the SunOSx cc compiler. This was
+several years before ANSI-C was ratified. The famous K&R V1 book was our
+bible. Although slowly migrated,there are still many snippets of code
+that violate the standard. Sometimes you will find this version
+referred to as the K&R version of C.
+
+C89:
+gcc can compile with this using:   -ansi, -std=c89 or -std=iso9899:1990
+and if you add -pedantic it will display all the ansi violations
+
+C99:
+The next major revision was C99 ,  -std=c99 or -std=iso9899:1999.
+https://gcc.gnu.org/c99status.html
+
+C11:
+-std=c11 or -std=iso9899:2011.
+
+C2X:
+What will be in the future. Here are some hints:
+http://www.open-std.org/jtc1/sc22/wg14/www/docs/n2494.pdf
+
+
+In 2020 we started to really go over the code
+
+c/clang
+  inline
+  VLA?s
+  
+
+Bad habits that need to change:
+- real ->  float or double
+- int      is there code that assumes it's 32bit?
+- proc,rproc,iproc
+- bool     we use TRUE and FALSE a lot.
+
+1.6.1.1    arrays are not pointers
