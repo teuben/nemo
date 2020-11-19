@@ -51,8 +51,8 @@
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
     "out=???\n          output file name",
-    "newcol=\n          formula for new column (fie notation)",
-    "delcol=\n          columns to skip while writing",
+    "newcol=\n          formula for new column(s) (fie notation)",
+    "delcol=\n          columns to skip while writing, use all for all",
     "selfie=\n          select rows using fie notation",
     "format=%g\n        format for new output columns",
     "select=all\n	Select lines (not implemented)",
