@@ -229,6 +229,13 @@ AC_ARG_WITH(opt,
 AC_ARG_WITH(openmp,
 		  [  --with-openmp           use OMP directives], with_openmp=$withval, with_openmp=no)
 
+AC_ARG_WITH(std,
+		  [  --with-std              use this -std=], with_std=$withval, with_std=default)
+
+if test $with_std != "default"; then
+  CFLAGS="$CFLAGS -std=$with_std"
+fi
+
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
   CXXFLAGS="$CXXFLAGS -fopenmp"
