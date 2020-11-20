@@ -28,7 +28,7 @@ static int todo_readline=0;
 #endif
 static char prompt[64];
 
-extern string strdup(string);    //C99
+extern string strdup(string);    //C99    _XOPEN_SOURCE ??
 
 /*
  *
