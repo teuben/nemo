@@ -1,11 +1,11 @@
 NEMO is a toolbox for stellar dynamics, particle simulations, stellar orbits,
 image processing and tabular data manipulation. Documentation is maintained
-in the github pages, https://teuben.github.io/nemo 
+in the github pages, https://teuben.github.io/nemo
 
 This is the 4th major release of NEMO,  and although data are compatible
-with earlier releases, source code may need to be tweaked a
+with earlier releases, old source code may need to be tweaked a
 bit to compile and link in the newer releases. Some compatibility with ZENO
-is also advertised. Here's some history of NEMO:
+is also advertised. A brief history of NEMO:
 
    * NEMO V1:	IAS release (Barnes, Hut & Teuben, 1987)
    * NEMO V2:	UMD release (Teuben, 1994)
@@ -22,7 +22,7 @@ other packages that geneologically came after NEMO are StarLab and AMUSE
 	 STARLAB:   ascl:1010.076
 	 AMUSE:     ascl:1107.007
 
-Packages we optionally use (often installed in $NEMO/opt via code in $NEMO/local):
+Packages we optionally use (sometimes installed in $NEMO/opt via code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
@@ -39,14 +39,14 @@ Packages we optionally use (often installed in $NEMO/opt via code in $NEMO/local
 See README.install for installation guidelines. One way to install
 NEMO is using the install_nemo script:
 
-	 wget https://teuben.github.io/nemo/install_nemo
-	 chmod +x install_nemo
-	 ./install_nemo
+	 wget https://teuben.github.io/nemo/install_nemo.sh
+	 chmod +x install_nemo.sh
+	 ./install_nemo.sh
 	 source nemo/nemo_start.sh
 
-Some tools you will need to have pre-installed: At minimum a C/C++/Fortran
+Tools you will need to have pre-installed: A C/C++/Fortran
 compiler, (t)csh, and git. Use your local package manager to
-install those before you attempt to run the install_nemo script. For
+install those before you attempt to run the **install_nemo** script. For
 example, on a fresh Ubuntu distro, you're likely going to need to
 install two packages before running the install script, and triggering
 a few more using the ubuntu=1 flag, viz.
@@ -79,6 +79,7 @@ Once NEMO has been installed, here are
 some examples of scripts and figures: https://teuben.github.io/nemo/examples/
 or look at an example ipython notebook
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
+for something completely different.
 
 
 
