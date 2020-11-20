@@ -52,9 +52,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <limits.h>
-#define MAXPATHLEN      PATH_MAX
-
 #if 0
 extern int unlink (string);		/* POSIX ??? unistd.h */
 extern int dup (int);			/* POSIX ??? unistd.h */
