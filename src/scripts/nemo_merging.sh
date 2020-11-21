@@ -2,8 +2,10 @@
 #
 #      create two NEMO trees, nemo1 and nemo2, and prepare some merging scenarios
 #      preferably do this in a clean directory
-#      set the mode= to controlr
-
+#      set the mode= to control what scenario fits you best.
+#
+#      Usage:   the url1/2=, b1/2= and mode= can all be changed via cmdline
+#
 
 #    Set the two repo's
 url1=https://github.com/teuben/nemo
