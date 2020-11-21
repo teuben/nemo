@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7e 24-jul-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7f 20-nov-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -227,6 +227,9 @@
 #include <unistd.h>
 #include <ctype.h>
 
+extern int fileno(FILE *stream);     //C99   _POSIX_C_SOURCE 
+char *strdup(const char *s);         //C99   _XOPEN_SOURCE >= 500
+int putenv(char *string);            //C99   _XOPEN_SOURCE
 
 //#if defined(ENABLE_OPENMP)
 #if _OPENMP
