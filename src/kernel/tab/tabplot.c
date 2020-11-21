@@ -107,7 +107,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.0\n	 8-jan-2020 PJT",
+    "VERSION=4.0a\n	 21-nov-2020 PJT",
     NULL
 };
 
@@ -164,7 +164,7 @@ local bool Qreadlines;
 
 void setparams(), plot_data();
 
-extern real median(int, real *);
+extern real smedian(int, real *);
 extern int nemo_file_lines(string, int);
 
 local real  xtrans(real),  ytrans(real);    /* WC -> cmXY */
@@ -652,8 +652,8 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 	  yp[ip]  = mean_moment(&my);
 	  yps[ip] = sigma_moment(&my);
 	  if (Qmedian) {
-	    xp[ip] = median(i-iold, &x[iold]);
-	    yp[ip] = median(i-iold, &y[iold]);
+	    xp[ip] = smedian(i-iold, &x[iold]);
+	    yp[ip] = smedian(i-iold, &y[iold]);
 	  }
         } else
             zbin++;     /* count bins with no data */
