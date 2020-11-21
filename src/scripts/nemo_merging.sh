@@ -22,6 +22,14 @@ b2=c++_nemo
 mode=0
 
 
+# ============================================================================================
+
+#    Poor man's command line parser
+for arg in $*; do\
+  export $arg
+done
+
+
 #   ---                  grab both repos
 git clone $url1 nemo1
 git clone $url2 nemo2
