@@ -103,7 +103,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.1\n		  2-mar-2020 PJT",
+    "VERSION=7.1a\n		  20-nov-2020 PJT",
     NULL
 };
 
@@ -340,11 +340,11 @@ local void read_data()
 
 local void histogram(void)
 {
-  int i,j,k, l, kmin, kmax, lcount = 0;
+  int i,j,k, l, kmax, lcount = 0;
   real count[MAXHIST];
-  int under, over, n1, n3;
+  int under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-  real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, tm;
+  real mean, sigma, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, mad=0;
   real rmean, rsigma, rrange[2];
   Moment m;
   
@@ -489,7 +489,7 @@ local void histogram(void)
     q2 = smedian(npt,x);
     q1 = smedian_q1(npt,x);
     q3 = smedian_q3(npt,x);
-    tm = (q1 + 2*q2 + q3 ) / 4.0;
+    // tm = (q1 + 2*q2 + q3 ) / 4.0;
     dprintf (0,"Median (Q2)          : %g\n",q2);
     dprintf (0,"Q1,Q2,Q3             : %g %g %g\n",q1,q2,q3);    
     dprintf (0,"TriMean              : %g\n",q2);
@@ -704,11 +704,10 @@ typedef struct sortmode {
  
 #define SortName(x)  x->name
 #define SortProc(x)  x->fie
- 
- 
+
 /* List of externally available sort routines */
  
-/* extern int qsort();         /* Standard Unix : stdlib.h */
+// extern int qsort();         /* Standard Unix : stdlib.h */
 /* or:  void qsort(void *base, size_t nmemb, size_t size,
  *                 int(*compar)(const void *, const void *));
  */
@@ -718,6 +717,7 @@ typedef struct sortmode {
 #endif
 
 local sortmode smode[] = {
+    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
 #ifdef FLOGGER
     "bubble",   bubble_sort,        /* cute flogger routines */
     "heap",     heap_sort,
@@ -726,7 +726,6 @@ local sortmode smode[] = {
     "quick",    quick_sort,
     "shell",    shell_sort,
 #endif
-    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
     NULL, NULL,
 };
                                                                                 
@@ -760,6 +759,6 @@ local int ring_index(int n, real *r, real rad)
   } else {
     error("reverse indexing not yet implemented");
   }
-
+  return -1;  /* NEVER REACHED */
 }
 
