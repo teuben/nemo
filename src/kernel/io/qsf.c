@@ -13,6 +13,8 @@
 #include <getparam.h>
 #include <filestruct.h>
 
+extern int fileno(FILE *stream);    //C99   _POSIX_C_SOURCE
+
 string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "in=???\n                     input file name to test",
     "VERSION=1.0c\n		  6-jun-08 PJT ",
@@ -23,7 +25,7 @@ string usage = "check if a file is a structured file";
 
 string cvsid="$Id$";
 
-nemo_main()
+void nemo_main(void)
 {
     string in = getparam("in");
     stream str= stropen(in,"r");
