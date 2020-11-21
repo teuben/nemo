@@ -52,6 +52,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
+extern int fileno(FILE *stream);     //C99   _POSIX_C_SOURCE 
+extern int mkstemp(char *template);  //C99 _XOPEN_SOURCE >= 500
+extern FILE *popen(const char *command, const char *type);  //C99 _POSIX_C_SOURCE >= 2
+extern FILE *fopen(const char *pathname, const char *mode); //C99 _POSIX_C_SOURCE 
+extern FILE *fdopen(int fd, const char *mode);              //C99 _POSIX_C_SOURCE
+
 #if 0
 extern int unlink (string);		/* POSIX ??? unistd.h */
 extern int dup (int);			/* POSIX ??? unistd.h */
