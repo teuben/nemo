@@ -10,6 +10,9 @@
  */
 
 #include <stdinc.h>
+#include <extstring.h>    
+
+char *strdup(const char *s);   //C99   _XOPEN_SOURCE >= 500
 
 #define IDF_COMMENT "c"
 #define IDF_REAL    "r"
@@ -117,7 +120,7 @@ string testidf[] = {
 
 string usage = "IDF I/O routine tester";
 
-nemo_main()
+void nemo_main(void)
 {
   stream istr;
   float fval;
