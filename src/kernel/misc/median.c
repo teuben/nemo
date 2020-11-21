@@ -229,6 +229,6 @@ real median_wirth(int n, real  *x)
     return kth_smallest(n, x,   n/2);      /* odd, picks the middle */
   else
     return kth_smallest(n, x,   n/2 - 1);  /* even, a slight cheat */
-  /* never reached */
+  /* NEVER REACHED */
   return x[0];
 }
