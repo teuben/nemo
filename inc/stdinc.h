@@ -103,6 +103,7 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #if STDC_HEADERS
 #include <string.h>
+#include <strings.h>
 #else
 # ifndef HAVE_STRCHR
 #   define strchr  index
