@@ -14,7 +14,7 @@
 static int bypass = -1;
 static double cpu0;
 
-extern double cputime(void);
+extern int fileno(FILE *);  //C99   _POSIX_C_SOURCE
 
 int progress(double dtime, string fmt, ...)
 {
