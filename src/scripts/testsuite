@@ -13,6 +13,7 @@
 #   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
 #    6-aug-06   look for Testfile's in usr tree also (-u will disable)
 #   26-nov-19   add bsf tests if not OK
+#   21-nov-20   check if any executables did not compile
 #
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did
@@ -159,6 +160,11 @@ cleanup:
     if ($show || $query) then
         set clean=1
     else
+        grep 'not found' tmp/test2213110/testsuite.log | sort | uniq > $testdir/not-found.log
+	if (! -z $testdir/not-found.log) then
+	    echo FAIL : The following programs were not found:
+	    cat $testdir/not-found.log
+	endif
         echo Results in $testdir/$log
 	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
 	if (-z $testdir/bsf-fail.log) then
