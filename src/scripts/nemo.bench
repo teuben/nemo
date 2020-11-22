@@ -75,9 +75,9 @@ cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
 
 echo Processor:
 unames=$(uname -s)
-if [ $unames == Linux ]; then
+if [[ $unames == Linux ]]; then
     lscpu | grep 'Model name:' | awk -F: '{print $2}'
-elif [ $uname == Darwin ]; then
+elif [[ $uname == Darwin ]]; then
     sysctl -n machdep.cpu.brand_string
 fi
 	   
