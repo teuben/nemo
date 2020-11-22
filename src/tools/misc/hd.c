@@ -38,7 +38,7 @@ void page();
 void xlate(CHAR *cbuf, int ccount, CHAR *fbuf);
 
 
-void main(int argc, CHAR *argv[])
+int main(int argc, CHAR *argv[])
 {
 
     FILE *fp, *nextfile();
