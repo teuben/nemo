@@ -361,3 +361,7 @@ Bad habits that need to change:
 - bool     we use TRUE and FALSE a lot.
 
 1.6.1.1    arrays are not pointers
+
+Current compilers versions:
+  Ubuntu 20.04    gcc 9.3.0-17         clang 10.0.0
+  Mac 10.15.7     gcc 9.2.0_3 (brew)   clang 11.0.0
