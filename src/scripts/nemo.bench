@@ -26,7 +26,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-10-28) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2020-11-22) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -72,6 +72,15 @@ else
 fi
     
 cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
+
+echo Processor:
+set unames = `uname -s`
+if [ $unames == Linux]; then
+    lscpu | grep 'Model name:' | awk -F: '{print $2}'
+elif [ $uname == Darwin]; then
+    sysctl -n machdep.cpu.brand_string
+fi
+	   
 
 if [ $clean == 1 ]; then
    echo "Cleaning $tmp (use clean=0 to prevent this)"
