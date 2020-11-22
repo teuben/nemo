@@ -107,7 +107,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.0a\n	 20-nov-2020 PJT",
+    "VERSION=4.0b\n	 21-nov-2020 PJT",
     NULL
 };
 
@@ -663,11 +663,12 @@ void rebin_data (int n, real *x, real *y, int nbin, real *xbin, int np, real *xp
 	  }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab)
+	if(Qtab) {
 	    if (n_moment(&mx))    /* print non-zero bins */
 	      printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
             else
 	      printf("# 0\n");    /* comment line for empty bin */
+	}
         iold = i;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
@@ -755,7 +756,7 @@ void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, rea
         plltype(1,1);
     }
     
-    if (errorbars && 0x0001) {
+    if (errorbars & 0x0001) {
         dprintf(0,"Trying X binning errors\n");
         for (i=0; i<np; i++) {
             if (xps[i] == NaN || xp[i] == NaN)
@@ -766,7 +767,7 @@ void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, rea
             plline (xtrans(p2), ytrans(yp[i]));
         }
     }
-    if (errorbars && 0x0002) {
+    if (errorbars & 0x0002) {
         dprintf(0,"Trying Y binning errors\n");
         for (i=0; i<np; i++) {
             if (yps[i] == NaN || yp[i] == NaN)
