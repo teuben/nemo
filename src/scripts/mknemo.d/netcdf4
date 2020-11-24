@@ -26,4 +26,6 @@ cd netcdf-c-$version
 ./configure --prefix=$NEMO/opt --disable-netcdf-4
 
 make -j
-make install 
+make install
+
+echo netcdf $version  `date` >> $NEMO/opt/mknemo.log

@@ -19,3 +19,5 @@ make install
 
 
 echo Installed version=$version
+
+echo cfitsio $version `date` >> $NEMO/opt/mknemo.log

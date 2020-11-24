@@ -26,3 +26,5 @@ cd hdf5-$version
 ./configure --prefix=$NEMO/opt
 make -j
 make install 
+
+echo hdf5 $version `date` >> $NEMO/opt/mknemo.log

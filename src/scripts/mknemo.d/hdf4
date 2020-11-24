@@ -30,3 +30,4 @@ cd hdf-$version
 make -j
 make install 
 
+echo hdf4 $version `date` >> $NEMO/opt/mknemo.log

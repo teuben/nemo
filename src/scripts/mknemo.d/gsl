@@ -18,3 +18,5 @@ make -j
 make install
 
 echo Installed version=$version
+
+echo gsl $version `date` >> $NEMO/opt/mknemo.log

@@ -20,3 +20,5 @@ make -j
 make install
 
 echo Installed version=$version
+
+echo wcslib $version `date` >> $NEMO/opt/mknemo.log
