@@ -1,0 +1,29 @@
+#! /bin/bash
+#
+#  Install netCDF4 within NEMO
+#  wget https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-c-4.7.4.tar.gz
+#  git clone http://github.com/Unidata/netcdf-c netcdf-c 
+#
+#  24-nov-2020  drafted
+#
+
+# if ($?NEMO == 0) set NEMO=`pwd`
+
+version=4.7.4
+wget=wgetc
+
+for arg in $*; do
+  export $arg
+done
+    
+cd $NEMO/local
+$wget https://www.unidata.ucar.edu/downloads/netcdf/ftp/netcdf-c-$version.tar.gz
+
+tar zxf netcdf-c-$version.tar.gz
+cd netcdf-c-$version
+
+#   compile without HDF5
+./configure --prefix=$NEMO/opt --disable-netcdf-4
+
+make -j
+make install 
