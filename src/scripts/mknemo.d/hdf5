@@ -9,7 +9,7 @@
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
-version=1.10.6
+version=1.10.7      # 11-sep-2020
 mversion=1.10
 wget=wgetc
 
