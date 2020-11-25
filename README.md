@@ -31,6 +31,7 @@ Packages we optionally use (sometimes installed in $NEMO/opt via code in $NEMO/l
 	 gyrfalcON: ascl:1402.031 (included with NEMO)
 	 HDF4
 	 HDF5       https://www.hdfgroup.org
+	 netcdf4
 	 gsl
 	 plplot
 	 unsio
