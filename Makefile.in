@@ -443,7 +443,9 @@ build3:
 	(source nemo_start.sh ; $(MAKE) bins)
 	@echo 'Continue with "make build4"'
 
-BINS4 = tsf tabhist tsd orboom sdinfo
+#       Advanced build examples that require opt=1 during the build.
+#       normally not needed
+BINS4 = tsf tabhist tsd orboom sdinfo lmtinfo
 build4:
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'

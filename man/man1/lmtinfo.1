@@ -1,0 +1,29 @@
+.TH LMTINFO 1NEMO "25 November 2020"
+.SH NAME
+lmtinfo \- netCDF4 info and bench reduction procedures
+.SH SYNOPSIS
+\fBlmtinfo\fP [parameter=value]
+.SH DESCRIPTION
+\fBlmtinfo\fP should mirror the functionality of \fIsdinfo(1NEMO)\fP
+and read in some LMT single dish spectral line data, to summarize
+contents, and perform some baseline benchmarks to keep python
+competative.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input netCDF4 file, no default.
+.SH EXAMPLES
+Currently not much is displayed.
+.SH SEE ALSO
+ncdump(1), sdinfo(1NEMO)
+.SH FILES
+src/image/cdf/lmtinfo.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+25-Nov-20	V0.1 Created	PJT
+.fi
