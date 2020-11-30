@@ -1,0 +1,76 @@
+.TH CCDZSHIFT 1NEMO "30 November 2020"
+.SH NAME
+ccdzshift\- re-align spectra from a cube based on a reference Z map
+.SH SYNOPSIS
+\fBccdzshift\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdzshift\fP re-align all spectra in a cube based on a reference map of where a reference
+Z value (\fIvelicity\fP) centroid should be. The shift is towards the center of the cube.
+.PP
+The current version is optimized for galaxy cubes, where everything is velocity based, and
+searching for low density gas in the outer regions. Another
+application is high-Z frequency based, and stack based on certain spectral lines and look for a
+signal.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image cube.
+No default.
+.TP
+\fBmap=\fP
+Z reference map. The values
+.TP
+\fBout=\fP
+Re-aligned output cube. No default.
+.TP
+\fBwcs=0|1|2\fP
+0=use 0-based pixel 1=use 1-based pixel 2=use WCS
+.TP
+\fBnearest=t|f\fP
+Shift spectra using nearest pixel, or interpolate? [t]
+.TP
+\fBcenter=\fP
+If given, this pixel will be the reference centroid of the cube. Although this gives
+the option to crop a large cube to a smaller one to contain the final signal, it will
+corrupt the WCS.
+.SH EXAMPLES
+Following along the example in \fIccdvel(1NEMO)\fP we have make an
+example with a falling density in the outer parts to see how much
+can be recovered using stacking (shifting) and integrating in elliptical
+rings. Some noise is added to ensure the outer regions to ensure the line
+is buried in the noise, unless the signal is stacked/integrated in rings:
+.nf
+
+  # make lookup tables
+  nemoinp 0:120:5 > map1.radt
+  tabmath map1.radt map1.dent  "exp(-%1/20)" all
+  tabmath map1.radt map1.velt  "%1/sqrt(40+%1*%1)" all
+
+
+  # velocity and density
+  ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=45 inc=60 size=256 vsys=10
+  ccdvel out=map1.den radii=@map1.radt vrot=@map1.dent pa=45 inc=60 size=256 amp=t
+
+  # cube with and without noise
+  velcube invel=map1.vel inden=map1.den out=map1.cube sigdefault=0.1 zrange=8:12 nz=200 
+  velcube invel=map1.vel inden=map1.den out=- sigdefault=0.1 zrange=8:12 nz=200 | ccdmath - map1n.cube '%1+rang(0,0.001)'
+
+  # shifted cubes (adding noise back where it was lost due to the shift)
+  ccdzshift map1.cube  map1.vel  map2.cube
+  ccdzshift map1n.cube map1.vel  - |  ccdmath -map2n.cube 'ifeq(%1,0,%1+rang(0,0.001),%1)'
+
+.fi
+A more realistic example would be to use observational data
+.SH SEE ALSO
+nemoinp(1NEMO), tabmath(1NEMO), ccdvel(1NEMO), ccdmath(1NEMO), velcube(1NEMO), image(5NEMO)
+.SH FILES
+NEMO/src/image/trans/ccdzshift.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-Nov-20	V0.1 drafted w/ example		PJT
+.fi
