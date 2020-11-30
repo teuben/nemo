@@ -37,7 +37,8 @@ int main ( int argc, char *argv[] )
   double error;
   double exact = 0.49936338107645674464;
   int i;
-  int n = 10000000;
+//  int n = 10000000;
+  int n = 1000000000;
   double total;
   double wtime;
   double x;

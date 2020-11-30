@@ -117,6 +117,7 @@ if ($ubuntu) then
    sudo apt install pgplot5 -y
    sudo apt install wcslib-dev -y
    sudo apt install libhdf4-dev libhdf5-dev hdf5-tools -y
+   sudo apt install libnetcdf-dev netcdf-bin -y
    sudo apt install libgsl-dev -y
    sudo apt install libfftw3-dev -y
    sudo apt install libcfitsio-dev -y

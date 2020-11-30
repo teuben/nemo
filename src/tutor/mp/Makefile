@@ -53,3 +53,14 @@ bench5: scaling
 	@echo OMP_NUM_THREADS ONT=$(ONT)
 	-@for i in $(ONT); do\
 	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./scaling); done
+
+
+quad_openmp: quad_openmp.c
+	gcc -fopenmp quad_openmp.c -o quad_openmp
+
+bench6:  quad_openmp
+	@echo OMP_NUM_THREADS ONT=$(ONT)
+	-@for i in $(ONT); do\
+	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./quad_openmp); done
+
+
