@@ -1,0 +1,57 @@
+.TH CCDELLINT 1NEMO "1 December 2020"
+.SH NAME
+ccdellint \- integrate in elliptical rings
+.SH SYNOPSIS
+\fBccdellint\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdellint\fP integrates a Position-Position-Velocity (PPV) cube in elliptical rings,
+reducing it to a Radius-Velocity (RV) image.
+.PP
+This program should also be able to handle 2D images, in which case the output is
+a 1D image, or table. Not tested yet.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input data cube. No default.   
+.TP
+\fBradii=\fP
+radii of the ring boundaries (Nring+1) [] 
+.TP
+\fBpa=\fP
+position angle of disk [0]   
+.TP
+\fBinc=\fP
+inclination angle of disk [45]   
+.TP
+\fBvsys=\fP
+systemic velocity [0]     
+.TP
+\fBcenter=\fP
+rotation center (mapcenter if left blank, 0,0=lower left)
+.TP
+\fBblank=\fP
+Value of the blank pixel to be ignored
+.TP
+\fBnorm=\fP
+Normalize RV image to number of pixels in
+.TP
+\fBout=\fP
+RV image []     
+.TP
+\fBtab=\fP
+Optional output table []    
+.SH EXAMPLES
+soon
+.SH SEE ALSO
+ccdzshift(1NEMO), image(5NEMO)
+.SH FILES
+NEMO/src/image/misc/ccdellint.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+30-nov-2020	V0.1 drafted	PJT
+.fi
