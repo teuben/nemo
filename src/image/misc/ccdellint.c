@@ -9,7 +9,6 @@
 
 #include <nemo.h>
 #include <image.h>
-#include <moment.h>
 
 string defv[] = {
   "in=???\n       input velocity field",
@@ -22,12 +21,12 @@ string defv[] = {
   "norm=t\n       Normalize RV image to number of pixels in ring",
   "out=\n         RV image",
   "tab=\n         Optional output table",
-  "VERSION=0.1\n  30-nov-2020 PJT",
+  "VERSION=0.2\n  1-dec-2020 PJT",
   NULL,
 };
 
 
-string usage="various mapping functions on velocity fields";
+string usage="integrate map/cube in elliptical rings";
 
 string cvsid="$Id$";
 
@@ -41,8 +40,6 @@ imageptr denptr = NULL, velptr = NULL, outptr = NULL;
 
 real rad[MAXRING];
 int nrad;
-
-Moment dmom[MAXRING];
 
 int  pixe[MAXRING];
 real vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
@@ -75,6 +72,7 @@ int ring_index(int n, real *r, real rad)
   for (i=0;i<n;i++)
     if (rad >= r[i] && rad < r[i+1]) return i;
   error("ring_index: should never gotten here %g in [%g : %g]",	rad,r[0],r[n-1]);
+  return -1;
 }
 
 void nemo_main(void)
@@ -84,7 +82,6 @@ void nemo_main(void)
   real vr, wt, dx, dy, xmin, ymin, rmin, rmax, ave, tmp, rms;
   real sincosi, cos2i, tga, dmin, dmax, dval, dr, area, fsum1, fsum2;
   int i, j, k, nx, ny, nz, ir, nring, nundf, nout, nang, nsum;
-  Moment m;
   bool Qnorm = getbparam("norm");
 
   velstr = stropen(getparam("in"),"r");
@@ -93,6 +90,8 @@ void nemo_main(void)
   nx = Nx(velptr);
   ny = Ny(velptr);
   nz = Nz(velptr);
+  dprintf(0,"Image %d x %d x %d pixels = %g x %g x %g size\n",
+	  nx,ny,nz, nx*Dx(velptr), ny*Dy(velptr), nz*Dz(velptr));
 
 
   if (hasvalue("tab")) {
@@ -111,8 +110,13 @@ void nemo_main(void)
   Yref(outptr) = Zref(velptr);
   Ymin(outptr) = Zmin(velptr);
   Dy(outptr)   = Dz(velptr);
-  Namex(outptr)= strdup("deg");
-  Namey(outptr)= strdup(Namez(velptr));
+  if (Namez(velptr)) {
+    Namex(outptr)= strdup("deg");
+    Namey(outptr)= strdup(Namez(velptr));
+  } else {
+    Namex(outptr)= strdup("R");
+    Namey(outptr)= strdup("Z");
+  }
     
   outstr = stropen(getparam("out"), "w");
     
@@ -197,20 +201,7 @@ void nemo_main(void)
   /* report on the rings */
 
   if (Qtab) {
-    fprintf(tabstr,"# r m0 m1 m2 Npoints\n");    
-    nsum = 0;
-    for (i=0; i<nring; i++) {
-      r = 0.5*(rad[i] + rad[i+1]);
-      dr = rad[i+1] - rad[i];
-      area = PI*(sqr(rad[i+1]) - sqr(rad[i]));
-
-      real m0 = sum_moment(&dmom[i]);
-      real m1 = mean_moment(&dmom[i]);
-      real m2 = sigma_moment(&dmom[i]);
-      int  n0 = n_moment(&dmom[i]);
-      if (n0 > 0)
-	fprintf(tabstr,"%g   %g %g %g %d\n", r, m0, m1, m2, n0);
-    }
+    dprintf(0,"tab= not implemented yet");
   }
   dprintf(0,"Nundf=%d/%d Nout=%d Nang=%d (sum=%d)\n",
 	  nundf,nx*ny,nout,nang,nout+nundf+nang);
