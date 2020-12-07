@@ -4,6 +4,7 @@
  *	28-jan-98	0.2a   isolated beta functions in numrec
  *      12-jan-99     0.3 - cloned off tabcmp for images
  *      29-sep-01     0.3a - don't fatal if two images identical
+ *       5-dec-2020   0.4 - plotting
  */
 
 #include <stdinc.h>
@@ -17,8 +18,13 @@ string defv[] = {
     "in2=???\n		Second image dataset",
     "xmin=\n            In case minimum used (need both minmax)",
     "xmax=\n            In case maximum used (need both minmax)",
-    "bins=16\n          Bins (number in min-max range, or boundaries)",
-    "VERSION=0.3a\n	29-sep-01 PJT",
+    "ymin=\n            Min",
+    "ymax=\n            Max",
+    "mode=0\n           Output mode  0: table  1=histo 2=d1 vs. d2 3=....",
+    "bins=\n            Select histogram of in1-in2 with these #bins",
+    "tab=\n             Output table",
+    "test=f\n           Report on F/T/test",
+    "VERSION=0.4\n	5-dec-2020 PJT",
     NULL,
 };
 
@@ -45,9 +51,9 @@ void avevar(real data[], unsigned long n, real *ave, real *var);
 
 extern real betai(real a, real b, real x);
 
-nemo_main()
+void nemo_main(void)
 {
-    int i, j, k, npt, npt1, npt2, nsteps;
+    int i, j, k, l, npt, npt1, npt2, nsteps, mode = getiparam("mode");
     real xrange[2];
     real *x1 = NULL, *x2 = NULL;
     real t, f, tu, tp, tprob, fprob, tuprob, tpprob;
@@ -56,67 +62,121 @@ nemo_main()
     string input2 = getparam("in2");
     stream instr1, instr2;
     imageptr iptr1=NULL, iptr2=NULL;
-    bool Qauto;
+    real *d1, *d2;
+    bool Qauto, Qminmax, Qtest = getbparam("test");
 
+    Qminmax = hasvalue("xmin") && hasvalue("xmax");
+    if (Qminmax) {
+      xmin = getdparam("xmin");
+      xmax = getdparam("xmax");
+    }
 
     instr1 = stropen(input1,"r");
     instr2 = stropen(input2,"r");
 
-    read_image(instr1, &iptr1);
     read_image(instr2, &iptr2);
+    read_image(instr1, &iptr1);
 
     x1 = Frame(iptr1);      
     x2 = Frame(iptr2);
     npt1 = Nx(iptr1) * Ny(iptr1) * Nz(iptr1);
     npt2 = Nx(iptr2) * Ny(iptr2) * Nz(iptr2);
-    
-    
-    /* find min max from both cubes */
-    xmin = xmax = CubeValue(iptr1,0,0,0);
-    for (k=0; k<Nz(iptr1); k++)
-        for (j=0; j<Ny(iptr1); j++)
-            for (i=0; i<Nx(iptr1); i++) {
-                xmin = MIN(xmin, CubeValue(iptr1,i,j,k));
-                xmax = MAX(xmax, CubeValue(iptr1,i,j,k));
-            }
-    for (k=0; k<Nz(iptr2); k++)
-        for (j=0; j<Ny(iptr2); j++)
-            for (i=0; i<Nx(iptr2); i++) {
-                xmin = MIN(xmin, CubeValue(iptr2,i,j,k));
-                xmax = MAX(xmax, CubeValue(iptr2,i,j,k));
-            }
-    dprintf(0,"[Datamin/max found: %g %g]\n",xmin,xmax);
+    if (npt1 != npt2)
+        error("fornow--Images differ in size: %d != %d", npt1, npt2);
 
-
-    nsteps=getiparam("bins");
-    if (nsteps > MAXHIST)
-        error("bins=%d too large; MAXHIST=%d",nsteps,MAXHIST);
-    if (hasvalue("xmin") && hasvalue("xmax")) {
-        Qauto=FALSE;
-        xrange[0] = getdparam("xmin");
-        xrange[1] = getdparam("xmax");
-        dprintf (2,"fixed plotrange %g : %g\n",xrange[0],xrange[1]);
-        if (xrange[0] >= xrange[1]) error("Need xmin < xmax");
+    if (Qminmax) {
+      d1 = (real *) allocate(npt1*sizeof(real));
+      d2 = (real *) allocate(npt2*sizeof(real));
+      for (i=0, l=0; i<npt1; i++) {
+	if (x1[i]==0.0 || x2[i]==0.0) continue;
+	if (xmin<x1[i]<xmax || xmin<x2[i]<xmax) {
+	  d1[l] = x1[i];
+	  d2[l] = x2[i];
+	  l++;
+	}
+      }
+      npt = l;
+      dprintf(0,"Found %d/%d between %g %g\n",npt,npt1,xmin,xmax);      
     } else {
-        Qauto=TRUE;
-        dprintf (2,"auto plotscaling\n");
+      /* find min max from both cubes */
+      xmin = xmax = CubeValue(iptr1,0,0,0);
+      for (k=0; k<Nz(iptr1); k++)
+        for (j=0; j<Ny(iptr1); j++)
+	  for (i=0; i<Nx(iptr1); i++) {
+	    xmin = MIN(xmin, CubeValue(iptr1,i,j,k));
+	    xmax = MAX(xmax, CubeValue(iptr1,i,j,k));
+	  }
+      for (k=0; k<Nz(iptr2); k++)
+        for (j=0; j<Ny(iptr2); j++)
+	  for (i=0; i<Nx(iptr2); i++) {
+	    xmin = MIN(xmin, CubeValue(iptr2,i,j,k));
+	    xmax = MAX(xmax, CubeValue(iptr2,i,j,k));
+	  }
+      dprintf(0,"[Datamin/max found: %g %g]\n",xmin,xmax);
+      d1 = x1;
+      d2 = x2;
+      npt = npt1;
     }
 
-    /* first do a series of raw comparisons on the complete two maps */
-    
-    ftest(x1, npt1, x2, npt2, &f, &fprob);
-    printf("F-test: f=%g  prob=%g\n",f,fprob);
+    /* raw comparisons on the two maps */
+    if (Qminmax && Qtest) {
+      ftest(d1, npt, d2, npt, &f, &fprob);
+      printf("F-test: f=%g  prob=%g\n",f,fprob);
 
-    ttest(x1, npt1, x2, npt2, &t, &tprob);
-    printf("T-test: t=%g  prob=%g\n",t,tprob);
+      ttest(d1, npt, d2, npt , &t, &tprob);
+      printf("T-test: t=%g  prob=%g\n",t,tprob);
 
-    tutest(x1, npt1, x2, npt2, &tu, &tuprob);
-    printf("TU-test: tu=%g  prob=%g\n",tu,tuprob);
+      tutest(d1, npt, d2, npt, &tu, &tuprob);
+      printf("TU-test: tu=%g  prob=%g\n",tu,tuprob);
 
-    if (npt1 == npt2) {
+      tptest(d1, d2, npt, &tp, &tpprob);
+      printf("TP-test: tp=%g  prob=%g\n",tp,tpprob);
+    } else if (Qtest) {
+      ftest(x1, npt1, x2, npt2, &f, &fprob);
+      printf("F-test: f=%g  prob=%g\n",f,fprob);
+
+      ttest(x1, npt1, x2, npt2, &t, &tprob);
+      printf("T-test: t=%g  prob=%g\n",t,tprob);
+
+      tutest(x1, npt1, x2, npt2, &tu, &tuprob);
+      printf("TU-test: tu=%g  prob=%g\n",tu,tuprob);
+
+      if (npt1 == npt2) {
         tptest(x1, x2, npt1, &tp, &tpprob);
         printf("TP-test: tp=%g  prob=%g\n",tp,tpprob);
+      }
     }
+
+    if (hasvalue("bins")) {
+      nsteps=getiparam("bins");
+      if (nsteps > MAXHIST)
+        error("bins=%d too large; MAXHIST=%d",nsteps,MAXHIST);
+      dprintf(0,"Histogram with bins=%d\n",nsteps);
+    } else {
+      xrange[0] = xmin;
+      xrange[1] = xmax;
+    }
+
+    if (hasvalue("tab")) {
+      dprintf(0,"Output table mode=%d\n",mode);
+      stream tstr = stropen(getparam("tab"),"w");
+
+      if (mode == 0) {                       //   0: d1-d2 (histogram)
+	for (i=0; i<npt; i++)
+	  fprintf(tstr,"%g\n",d1[i]-d2[i]);
+      } else if (mode == 1) {                //   1: d1, d2
+	for (i=0; i<npt; i++)
+	  fprintf(tstr,"%g %g\n",d1[i],d2[i]);
+      } else if (mode == 2) {                //   2: d1, d1-d2
+	for (i=0; i<npt; i++)
+	  fprintf(tstr,"%g %g\n",d1[i],d1[i]-d2[i]);
+      } else if (mode == 3) {                //   3: d1, 2*(d1-d2)/(d1+d2)
+	for (i=0; i<npt; i++)
+	  fprintf(tstr,"%g %g\n",d1[i],2*(d1[i]-d2[i])/(d1[i]+d2[i]));
+      }
+      strclose(tstr);
+    }
+      
 
 }
 
