@@ -19,9 +19,9 @@ set tab2 = $NEMO/etc/tasklist
 
 cat $tab1 $tab2 | sort | uniq > tasklist.tmp
 mv tasklist.tmp tasklist
+mv $tab2 $tab2.`date +%Y-%m-%dT%H:%M:%S`
 
-
-# testing a piece of CITATION.cff style output, the codemeta.json is a little tougher in awk
+# testing a piece of CITATION.cff style output, the codemeta.json is a little more work in awk
 if (0) then
    awk '{printf("- name: %s\n",$1); printf("  description: ");for(i=2;i<=NF;++i) printf(" %s",$i); printf("\n")}' tasklist
 endif   
