@@ -20,6 +20,7 @@
  *                      works in astropy
  *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
  *    11-oct-2020   3.7 optimized memory usage, speed up median computation
+ *     4-dec-2020   3.8 qac mode
  */
 
 #include <stdinc.h>
@@ -47,7 +48,8 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.7\n  10-oct-2020 PJT",
+    "qac=f\n        QAC mode listing mean,rms,min,max",
+    "VERSION=3.8\n  4-dec-2020 PJT",
     NULL,
 };
 
@@ -83,12 +85,13 @@ void nemo_main(void)
     int  i, j, k, ki;
     real x, y, z, xmin, xmax, mean, sigma, skew, kurt,  bad, w, *data;
     real dmin, dmax;
-    real sum, sov, q1, q2, q3, tm;
+    real sum, sov, q1, q2, q3, tm, sumn, sump;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
+    bool Qac = getbparam("qac");
     real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
@@ -183,6 +186,7 @@ void nemo_main(void)
 
       ini_moment(&m,maxmom,ndat);
       ngood = 0;
+      sumn = sump = 0.0;
 #if 0
       // not working yet
       #pragma omp parallel \
@@ -194,6 +198,10 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
+	    if (Qac) {
+	      if (x<0) sumn += x;
+	      if (x>0) sump += x;
+	    }
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -225,6 +233,15 @@ void nemo_main(void)
 	  skew = skewness_moment(&m);
 	if (maxmom > 3)
 	  kurt = kurtosis_moment(&m);
+
+	if (Qac) {
+	  real flux = 0.0;
+	  real sratio = (sump+sumn)/(sump-sumn);
+	  printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+		 getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
+		 flux, sratio);
+	  return;
+	}
 	
 	printf ("Number of points       : %d\n",n_moment(&m));
 	printf ("Min and Max            : %f %f\n",min_moment(&m), max_moment(&m));

@@ -81,7 +81,7 @@ void   change_indent(int);
 #define BUFLEN   512
 
 
-void nemo_main()
+void nemo_main(void)
 {
     string *tags;
 
@@ -382,7 +382,7 @@ bool outstr(string str)
     return (allline || (curline < maxline));
 }
 
-void end_line()
+void end_line(void)
 {
     printf("\n");
     curcoll = curline = 0;
