@@ -8,6 +8,16 @@ gcc-c++
 cmake 
 libXext-devel
 
+#    enable EPEL for the optional packages
+# sudo yum -y install epel-release
+# sudo yum repolist
+# dnf config-manager --set-enabled PowerTools
+
+netcdf-devel
+cfitsio-devel
+hdf5-devel
+hdf-devel
+
 # pgplot not available 
 # Recipes for installing PGPLOT
 # 1. download proper http://download1.rpmfusion.org/nonfree/el/updates/testing/8/x86_64/
