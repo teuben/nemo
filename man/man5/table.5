@@ -1,4 +1,4 @@
-.TH TABLE 5NEMO "4 June 2003"
+.TH TABLE 5NEMO "6 August 2020"
 .SH NAME
 table \- (ASCII) table format
 .SH DESCRIPTION
@@ -98,10 +98,30 @@ RA	Dec
 12:00	-30.0
 15	60:00:30.4
 .fi
+
+.PP
+The ECVS (Enhanced Character Separated Values) is extension to the generic ascii table
+format, except it has a commented YAML header encoding the units, and one extra
+\fIannoying\fP row with column names:
+.nf
+
+# %ECSV 0.9
+# ---
+# datatype:
+# - {name: a, unit: m / s, datatype: int64, format: '%03d'}
+# - {name: b, unit: km, datatype: int64, description: This is column b}
+a b
+001 2
+004 3
+
+.fi
+
 .SH "SEE ALSO"
 nemoinp(1NEMO), tabcomment(1NEMO), table(3NEMO), awk(1), paste(1), ffe(1)
 .PP
-ffe (flat file extractor): http://ff-extractor.sourceforge.net/
+FFE: (flat file extractor): http://ff-extractor.sourceforge.net/
+.PP
+ECSV: https://github.com/astropy/astropy-APEs/blob/master/APE6.rst
 .SH "AUTHOR"
 Peter Teuben
 .SH "UPDATE HISTORY"
