@@ -40,7 +40,7 @@ HDF_LIB = @HDF_LIB@
 #  HDF5 library:  -lhdf5
 # --with-hdf5-incdir=   --with-hdf5-libdir=
 #HDF5_INC = `pkg-config --cflags hdf5`
-#HHD5_LIB = `pkg-config --libs hdf5`
+#HDF5_LIB = `pkg-config --libs hdf5`
 HDF5_INC = @HDF5_INC@
 HDF5_LIB = @HDF5_LIB@
 
