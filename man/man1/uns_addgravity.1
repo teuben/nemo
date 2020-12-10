@@ -1,0 +1,88 @@
+.TH uns_addgravity "March 17, 2020"
+
+.SH name
+uns_addgravity \- adds gravity to a snapshot; using falcON (public version)
+
+.SH synopsis
+\fBuns_addgravity\fP [parameter=value]
+
+.SH description
+\fBuns_addgravity\fP it's based on addgravity program by Walter Dehnen
+(WD). It uses Walter Dehnen's force algorithm of complexity
+O(N) (\fBfalcON\fP), to add the gravitational potential and
+accelerations to an \fBUNS snapshots\fP.
+
+.SH parameters
+
+.TP 12
+\fBin=\fP\fIfile\fP
+Input snapshots are read from \fIfile\fP, which must an UNS
+snapshot format (NEMO, Gadget1/2/3, Ramses, etc..). If \fIfile\fP=-, input is expected from stdin,
+useful for piping data from another program. Default: \fBrequired\fP
+.TP
+\fBout=\fP\fIfile\fP
+Snapshots are written in NEMO snapshot format to \fIfile\fP with same
+body data as the input plus acceleration and potential.  Default:
+\fBrequired\fP.
+.TP
+\fBselect=\fP\fIselect-particles\fP
+Select particles. Set of particles must be selected using the ":" range operator, separated by a comma. 
+E.g. select=0:9,10:19 would select two sets of 10 particles, or by
+component (gas,halo,stars,bulge,disk,bndry) for Gadget/Ramses
+files. E.g. select=gas,stars . Default: \fIrequired\fP.
+.TP
+\fBtimes=\fP\fItime range(s)\fP
+Range(s) of simulation times, for which snapshots shall be processed.
+Default: \fBall\fP.
+.TP
+\fBeps=\fP\fIval\fP
+The (globally constant) softening length is set to \fIval\fP. For
+details, see documentation in the user guide. Default: \fB0.05\fP.
+.TP
+\fBkernel=\fP\fInum\fP
+The softening kernel is taken to be the P\fInum\fP kernel (see the
+documentation in the user guide). Default: \fB1\fP.
+.TP
+\fBtheta=\fP\fIval\fP
+The tolerance parameter for \fBfalcON\fP is set to \fIval\fP. It is
+recommended to stick to the default or smaller value, but see the
+discussion in the \fBfalcON\fP user guide Default: \fB0.6\fP.
+.TP
+\fBncrit=\fP\fInum\fP
+In building the tree, a cell containg \fInum\fP bodies or less is not
+splitted. Default: \fB6\fP.
+.TP
+\fBfirst=\fP\fIboolean\fP
+if true, add a trailing number to the first output file [f]
+.TP
+\fBoffset=\fP\fItime offset\fP
+ +/- time offset between two consecutives snapshots [0.01]
+.TP
+\fBverbose=\fP\fIflag\fP
+If true, give some verbose output [t].
+
+.SH see also
+addgravity(1falcON) gyrfalcON(1falcON), getgravity(1falcON)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
+.PP
+.nf
+Dehnen, W., 2000, ApJ, 536, L39
+Dehnen, W., 2002, JCP, 179, 27
+
+.fi
+.SH files
+.ta +3i
+.nf
+falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
+.fi
+.SH author
+.nf
+Jean-Charles LAMBERT
+.SH update history of this man page
+.nf
+.ta +1.0i +2.0i
+17-Mar-20	first version of manual  JCL
+.fi
+
+

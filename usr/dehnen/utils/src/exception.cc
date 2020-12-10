@@ -192,7 +192,7 @@ WDutils::RunInfo::RunInfo()
       _m_tbb_size = _m_tbb_proc;
     }
   } 
-  catch(WDutils::exception ex) { WDutils_RETHROW(ex); }
+  catch(WDutils::exception& ex) { WDutils_RETHROW(ex); }
 }
 //
 void WDutils::RunInfo::set_omp(int 

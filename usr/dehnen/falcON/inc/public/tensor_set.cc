@@ -731,7 +731,7 @@ namespace falcON {
       }
       tX sv add(symset3D<ORDER,X>&C, const X*v, D_ARG)
       {
-	symset3D<ORDER,X>&F;
+	symset3D<ORDER,X>&F();
 	ass(F,v,ARG_D);
 	C += F;
       }
