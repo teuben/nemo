@@ -21,7 +21,7 @@ libgsl-dev
 libfftw3-dev
 libcfitsio-dev
 libplplot-dev
-libnetcdf-dev
+libnetcdf-dev netcdf-bin
 # for hdf4
 flex bison libjpeg-dev
 # useful for some bare tools
