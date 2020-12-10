@@ -37,7 +37,7 @@ CXX = @CXX@
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
 
-#  HDF5 library
+#  HDF5 library:  -lhdf5
 # --with-hdf5-incdir=   --with-hdf5-libdir=
 #HDF5_INC = `pkg-config --cflags hdf5`
 #HHD5_LIB = `pkg-config --libs hdf5`
@@ -48,23 +48,29 @@ HDF5_LIB = @HDF5_LIB@
 #PNG_LIB = `pkg-config --libs libpng`
 PNG_LIB = @PNG_LIB@
 
-#  CFITSIO library
+#  CFITSIO library: -lcfitsio
 #CFITSIO_INC = `pkg-config --cflags cfitsio`
 #CFITSIO_LIB = `pkg-config --libs cfitsio`
 CFITSIO_INC = @CFITSIO_INC@
 CFITSIO_LIB = @CFITSIO_LIB@
 
+#  NETCDF4 library: -lnetcdf
+#NETCDF_INC = `pkg-config --cflags netcdf`
+#NETCDF_LIB = `pkg-config --libs netcdf`
+NETCDF_INC = @NETCDF_INC@
+NETCDF_LIB = @NETCDF_LIB@
+
 #  MIRIAD library
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
-#	GSL
+#  GSL library:   -lgsl -lgslcblas -lm
 #GSL_INC = @GSL_CFLAGS@
 #GSL_LIB = @GSL_LIBS@
 GSL_INC = 
 GSL_LIB =
 
-#	PLPLOT
+#	PLPLOT: -lplplot
 #PLPLOT_INC = -I/usr/include/plplot
 #PLPLOT_LIB = -lplplot
 PLPLOT_INC = @PLPLOT_CFLAGS@
