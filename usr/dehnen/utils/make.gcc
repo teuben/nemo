@@ -31,7 +31,7 @@ GCCVERSION += 00
 # Remove spaces from the version number
 GCCVERSION := $(subst $(space),$(empty),$(GCCVERSION))
 # Crop the version number to 3 decimals.
-GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-3)
+GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-4)
 #$(warning $(GCCVERSION))
 gccversion:
 	@echo "GCC version = " $(GCCVERSION)
