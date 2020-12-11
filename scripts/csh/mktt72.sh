@@ -47,6 +47,8 @@ mktt72 - nbody=$nbody radius=0.1:1:"0.1*2*pi/$nbody" mass=4.0 central=t eps=0.2 
 snaprotate $run.1 $run.1r theta=$inc,$pa order=yz
 snapstack $run.1r $run.2 $run.3 5,2,0 -1,0,0  zerocm=t
 
+#  confirm the initial conditions have 0 energy
+snapcopy run1.3 - 'm>0' | snapstat - exact=t all=t > $run.3.log
 
 /usr/bin/time hackcode1 $run.3 $run.4 eps=0.2 freqout=10 freq=100 tstop=$tstop > $run.4.log
 
