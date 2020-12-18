@@ -51,6 +51,8 @@ CRVALn	value of the coordinate at the reference pixel
 CRPIXn	the reference pixel (often in range 1..NAXISn)
 CDELTn	increment per pixel
 CTYPEn	coordinate type (an ascii string)
+DATE-OBS	Observing date: new Y2K format "yyyy-mm-ddThh:mm:ss"
+TIME-OBS	Observing time, "hh:mm:ss", deprecated after new Y2K
 .PP
 HISTORY  	history records (no '=' needed)
 COMMENT  	comment cards (no '=' needed)
@@ -65,6 +67,16 @@ can always be computed from the following formula:
 where \fIm\fP is the value of NAXIS. This size must of course be rounded
 up to the nearest multiple of 2880 bytes. After this, either there is no
 more information on the medium, or another HDU can be read.
+.SH TIME
+The old DATE-OBS format (with the Y2K problem) was yy-dd-mm, and some
+files might have a corresponding TIME-OBS keyword, hh:mm:ss. The new
+format follows the ISO format, obtained with the unix date command
+as follows:
+.nf
+    date +%Y-%m-%dT%H:%M:%S.%N
+    2020-12-18T13:15:49.648961250
+.fi
+and this should be the new format (with as many sub-second digits as are needed).
 .SH COORDINATE SYSTEMS
 World Coordinate Systems are described in detail in
 draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled
@@ -106,7 +118,8 @@ AIT  0  Hammer-Aitoff
 MOL  0  Molweide                             
 CSC  0  Cobe Quadrilateralized Spherical Cube  
 QSC  0  Quadrilateralized Spherical Cube     
-TSC  0  Tangential Spherical Cube           
+TSC  0  Tangential Spherical Cube
+SFL
 .fi
 .SH SEE ALSO
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
@@ -118,4 +131,5 @@ fitsio(3NEMO), fits(3NEMO), image(5NEMO)
 20-mar-90	Nemo's FITS I/O library is being tested  	PJT
 3-jul-94	doc updated with PCOUNT/GCOUNT	PJT
 28-sep-01	experimental bitpix 64 added	PJT
+18-dec-20	y2k date-obs reminder	PJT
 .fi
