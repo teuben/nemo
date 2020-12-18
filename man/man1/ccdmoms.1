@@ -4,8 +4,11 @@ ccdmoms \- moment along a set of images
 .SH SYNOPSIS
 \fBccdmoms\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdmoms\fP acts somewhat similar to \fIccdmom(1NEMO)\fP with axis=4, where this axis represents
-the files in the input list. One can sum, taken the mean, dispersion etc. along a set of images.
+\fBccdmoms\fP acts somewhat similar to \fIccdmom(1NEMO)\fP with a fourth axis, which runs over the input
+files. One can sum, taken the mean, dispersion etc. along this set of images. Weights can also be given
+for each image.
+.PP
+Each image
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -25,15 +28,18 @@ Scalar weights per image [1]
 .TP
 \fBaxis=\fP
 WCS axis values of the images in case the mom= requires this. By default they
-are assigned 0,1,2,.... Not implemented yet.
+are assigned 0,1,2,.... (not implemented yet)
 .TP 
 \fBwin=\fP
-Input image weights, one per input (not implemented yet)
+Optional input image weights, one per input file (not implemented yet)
+.TP
+\fBsigma=t|f\fP
+Are the weights still SIGMA (t), or straight weights (f)  [f]
 .SH EXAMPLES
 Taking an average of N images:
 .nf
 
-   ccdmoms  im1,im2,im3,im4  im_mean  mom=-1
+   ccdmoms  in=im1,im2,im3,im4  out=imm  mom=1
 .fi
 .SH SEE ALSO
 ccdmom(1NEMO), ccdmath(1NEMO), image(5NEMO)
