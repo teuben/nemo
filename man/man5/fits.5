@@ -96,7 +96,8 @@ Some common coordinate system projection types:
 ___ __  ___________________________________
 AZP 90  Zenithal perspective                
 TAN 90  Gnomic (AZP w/ mu = 0)             
-SIN 90  Orthographic (AZP w/ mu = infty)  
+SIN 90  Orthographic (AZP w/ mu = infty)
+NCP 90  North celestial pole (special case of SIN) 
 STG 90  Stereographic (AZP w/ mu = 1)      
 ARC 90  Zenithal equidistant                 
 ZPN 90  Zenithal polynomial                 
@@ -112,14 +113,14 @@ COE 90  Conical equal-area
 COO 90  Conical orthomorphic                
 BON 90  Bonne's equal area                  
 PCO  0  Polyconic                            
-GLS  0  Sinusoidal                           
+SFL  0  Sanson-Flamsteed
+GLS  0  GLobal Sinusoidal (Similar to SFL)                          
 PAR  0  Parabolic                            
-AIT  0  Hammer-Aitoff                        
+AIT  0  Hammer-Aitoff equal area all-sky                       
 MOL  0  Molweide                             
 CSC  0  Cobe Quadrilateralized Spherical Cube  
 QSC  0  Quadrilateralized Spherical Cube     
 TSC  0  Tangential Spherical Cube
-SFL
 .fi
 .SH SEE ALSO
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
