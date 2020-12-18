@@ -6,25 +6,24 @@ ccdmoms \- moment along a set of images
 .SH DESCRIPTION
 \fBccdmoms\fP acts somewhat similar to \fIccdmom(1NEMO)\fP with a fourth axis, which runs over the input
 files. One can sum, taken the mean, dispersion etc. along this set of images. Weights can also be given
-for each image.
-.PP
-Each image
+for each image, either as a scalar, or as a map.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input image files [???]    
-.TP 20
+Input image files, in \fIimage(5NEMO)\fP format, separated by comma's. No default.
+.TP
 \fBout=\fP
-Output image file [???]    
+Output image file. No default.
 .TP 
 \fBmom=\fP
-Moment to take (0=sum,1=mean loc,2=disp loc,3=peak loc,4=peak mom1,-1=mean)
+Moment to take (0=sum,1=mean,2=disp,-1=median)
 Default: -1 (mean value)
 .TP 
 \fBweights=\fP
-Scalar weights per image [1]
+Scalar weights, one per image. By default all the same. The RMS per image can
+also be give, in which case \fBsigma=t\fP (see below) needs to be set.
 .TP
 \fBaxis=\fP
 WCS axis values of the images in case the mom= requires this. By default they
