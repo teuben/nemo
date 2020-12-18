@@ -1,0 +1,48 @@
+.TH CCDMOMS 1NEMO "15 December 2020"
+.SH NAME
+ccdmoms \- moment along a set of images
+.SH SYNOPSIS
+\fBccdmoms\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdmoms\fP acts somewhat similar to \fIccdmom(1NEMO)\fP with axis=4, where this axis represents
+the files in the input list. One can sum, taken the mean, dispersion etc. along a set of images.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image files [???]    
+.TP 20
+\fBout=\fP
+Output image file [???]    
+.TP 
+\fBmom=\fP
+Moment to take (0=sum,1=mean loc,2=disp loc,3=peak loc,4=peak mom1,-1=mean)
+Default: -1 (mean value)
+.TP 
+\fBweights=\fP
+Scalar weights per image [1]
+.TP
+\fBaxis=\fP
+WCS axis values of the images in case the mom= requires this. By default they
+are assigned 0,1,2,.... Not implemented yet.
+.TP 
+\fBwin=\fP
+Input image weights, one per input (not implemented yet)
+.SH EXAMPLES
+Taking an average of N images:
+.nf
+
+   ccdmoms  im1,im2,im3,im4  im_mean  mom=-1
+.fi
+.SH SEE ALSO
+ccdmom(1NEMO), ccdmath(1NEMO), image(5NEMO)
+.SH FILES
+NEMO/src/image/misc/ccdmoms.c
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+15-Dec-20	V0.1 Drafted	PJT
+.fi
