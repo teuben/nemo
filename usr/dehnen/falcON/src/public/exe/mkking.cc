@@ -164,7 +164,7 @@ void falcON::main() falcON_THROWING
       try {
 	if(q) KM.random(Ran(0), Ran(1), r, v);
 	else  KM.random(Ran( ), Ran( ), r, v);
-      } catch(WDutils::exception E) {
+      } catch(WDutils::exception& E) {
 	if(++errors > 1000)
 	    falcON_Error("exceeding 1000 errors \"%s\" in sampling\n", text(E));
 	again = true;

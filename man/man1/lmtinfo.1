@@ -8,16 +8,68 @@ lmtinfo \- netCDF4 info and bench reduction procedures
 and read in some LMT single dish spectral line data, to summarize
 contents, and perform some baseline benchmarks to keep python
 competative.
+.PP
+\fBncdump\fP is a program that comes with the netCDF4 distribution,
+display a netCDF file to text form (CDL). This format can in return
+be converted back to netCDF format with the \fIncgen(1)\fP program,
+much like the \fItsf(1NEMO)\fP and \fIrsf(1NEMO)\fP pair of programs
+in NEMO.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 Input netCDF4 file, no default.
+.SH WARNING
+Within the HDF5 distribution there is also an \fBncdump\fP program,
+which seems to work on \fIifproc\fP data, but not on \fIroach\fP.
 .SH EXAMPLES
-Currently not much is displayed.
+Currently not much is displayed. Here are some sample values via \fBncdum\fP
+.nf
+
+ Header.Source.SourceName = "IRC+10216" ;
+ Header.Source.Epoch = 2000 ;
+ Header.Source.Az = 6.2842931200157, 6.2842931200157 ;
+ Header.Source.El = 1.45923390362304, 1.45923390362304 ;
+ Header.Source.Ra = 2.56544535942834, 2.56544535942834 ;
+ Header.Source.Dec = 0.231758198937406, 0.231758198937406 ;
+
+ Header.TimePlace.LST = 2.36279197218322 ;
+ Header.TimePlace.UTDate = 2018.8753210874 ;
+ Header.TimePlace.UT1 = 3.09256434074434 ;
+ Header.TimePlace.ObsLongitude = -1.69846024688166 ;
+ Header.TimePlace.ObsLatitude = 0.331369173683427 ;
+ Header.TimePlace.ObsElevation = 4.64 ;
+
+ Header.IfProc.CalObsNum = 79447 ;
+
+
+ Header.Mode.numchannels = 2048 ;
+ Header.Mode.roach_num = 0 ;
+ Header.Telescope.ObsNum = 79447 ;
+ Header.Telescope.source_name = "IRC+10216" ;
+ Header.Telescope.obspgm = "Cal" ;
+ Header.Telescope.obspgm = "Map" ;
+
+
+.fi
+.SH DATA
+LMT sequia data is organized in a \fBifprof\fP and the
+four \fPspectrometer/roach[0-3]\fP directories. Viz.
+.nf
+
+  ifproc/ifproc_2019-10-31_085778_00_0001.nc
+  spectrometer/roach3/roach3_85778_0_1_Region_J-K_2019-10-31_073122.nc
+  spectrometer/roach1/roach1_85778_0_1_Region_J-K_2019-10-31_073122.nc
+  spectrometer/roach2/roach2_85778_0_1_Region_J-K_2019-10-31_073122.nc
+  spectrometer/roach0/roach0_85778_0_1_Region_J-K_2019-10-31_073122.nc
+
+.fi
+.SH CAVEATS
+For unknown reason \fBlmtinfo\fP works fine on ifproc data, but core-dumps/fails
+on spectrometer data. The \fBncdump\fP program works fine though.
 .SH SEE ALSO
-ncdump(1), sdinfo(1NEMO)
+ncdump(1), ncgen(1), sdinfo(1NEMO)
 .SH FILES
 src/image/cdf/lmtinfo.c
 .SH AUTHOR

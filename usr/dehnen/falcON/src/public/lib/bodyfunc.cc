@@ -192,12 +192,13 @@ namespace {
 	std::cerr<<"could not compile temporary file /tmp/"<<fname<<".cc:\n";
 	char show[512];
 	SNprintf(show,512,"more /tmp/%s.cc > /dev/stderr",fname);
-	system(show);
+  int rr;
+	rr=system(show);
 	std::cerr<<"\nwith the command\n\""<<cmmd<<"\".\n"
 		 <<"Here is the output from the compiler:\n\n";
 	SNprintf(show,512,"more /tmp/%s.log > /dev/stderr",fname);
 	std::cerr<<'\n';
-	system(show);
+	rr=system(show);
       }
       throw BfErr(message("could not compile expression; "
 			  "perhaps it contains a syntax error"));
@@ -210,7 +211,7 @@ namespace {
       char cmmd[512];
       SNprintf(cmmd,512,"rm -f /tmp/%s.* > /dev/null 2>&1",fname);
       DebugInfo(4,"executing \"%s\"\n",cmmd);
-      system(cmmd);
+      int rr=system(cmmd);
     }
   }
   //----------------------------------------------------------------------------
@@ -261,7 +262,7 @@ namespace {
     try {
       while(*in)
 	simple_parse(in,to,toUP,npar);
-    } catch(ParseErr E) { throw E; }
+    } catch(ParseErr& E) { throw E; }
   }
   //////////////////////////////////////////////////////////////////////////////
   //                                                                          //
@@ -531,7 +532,7 @@ namespace {
       SNprintf(ffile,FNAME_SIZE,"/tmp/%s.so",fname);
       loadobj(ffile);
       need = get_type_and_need(type,ftype,expr);
-    } catch(BfErr E) {
+    } catch(BfErr& E) {
       delete_files(fname);
       throw E;
     }
@@ -810,7 +811,7 @@ namespace {
 	need |= get_type_and_need(stype[s],ftypesub,sexpr[s]);
 	if(soper[s] == 1) need |= fieldset::m;
       }
-    } catch (BfErr E) {
+    } catch (BfErr& E) {
       delete_files(fname);
       throw E;
     }
@@ -1044,7 +1045,7 @@ namespace {
     try {
       for(int s=sub-1; s>0; --s)
 	make_sub(file,s);
-    } catch(ParseErr E) {
+    } catch(ParseErr& E) {
       throw BfErr(message("parse error: %s",text(E)));
     }
     file  <<"}\n"
@@ -1111,7 +1112,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
-  catch(DataBaseErr E) {
+  catch(DataBaseErr& E) {
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
@@ -1131,16 +1132,16 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     get_type(TYPE,NEED,Pexpr);
     FUNC = make_func(Pexpr,TypeName(TYPE),fname,funcname);
   }
-  catch(ParseErr E) {
+  catch(ParseErr& E) {
     if(BD) falcON_DEL_O(BD);
     throw exception("bodyfunc::bodyfunc(): parse error: %s",text(E));
   }
-  catch(BfErr E) {
+  catch(BfErr& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     throw exception("bodyfunc::bodyfunc(): %s",text(E));
   }
-  catch(exception E) {
+  catch(exception& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     throw E;
@@ -1150,7 +1151,7 @@ bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
     if(FUNC != 0 && funcname) {
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
-      } catch(DataBaseErr E) {
+      } catch(DataBaseErr& E) {
 	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }
@@ -1172,7 +1173,7 @@ bool bodyfunc::print_db(std::ostream&out)
   try {
     BF_database BD("bodyfunc","BFNAMES");
     return BD.printinfo(out);
-  } catch(DataBaseErr E) {
+  } catch(DataBaseErr& E) {
     return false;
   }
 }
@@ -1323,7 +1324,7 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     funcname = ffunc;
   }
   // 1.E database error occured, we cannot use it at all
-  catch(DataBaseErr E) {
+  catch(DataBaseErr& E) {
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
@@ -1357,16 +1358,16 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     FUNC = make_func(fname,funcname);
   }
   // 2.E catch errors in making new function
-  catch(ParseErr E) {
+  catch(ParseErr& E) {
     if(BD) falcON_DEL_O(BD);
     throw exception("bodiesfunc::bodiesfunc(): parse error: %s",text(E));
   }
-  catch(BfErr E) {
+  catch(BfErr& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     throw exception("bodiesfunc::bodiesfunc(): %s",text(E));
   }
-  catch(exception E) {
+  catch(exception& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     throw E;
@@ -1376,7 +1377,7 @@ bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
     if(FUNC != 0 && funcname) {
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
-      } catch(DataBaseErr E) {
+      } catch(DataBaseErr& E) {
 	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }
@@ -1391,7 +1392,7 @@ bool bodiesfunc::print_db(std::ostream&out)
   try {
     BF_database BD("bodiesfunc","BFNAMES");
     return BD.printinfo(out);
-  } catch(DataBaseErr E) {
+  } catch(DataBaseErr& E) {
     return false;
   }
 }
@@ -1661,7 +1662,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     funcname = ffunc;
   }
   // 2.E database error occured, we cannot use it at all
-  catch(DataBaseErr E) {
+  catch(DataBaseErr& E) {
     if(BD) falcON_DEL_O(BD);
     funcname = 0;
     BD = 0;
@@ -1681,16 +1682,16 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     get_type(TYPE,NEED,Pexpr);
     FUNC = make_method(Pexpr,TypeName(TYPE),fname,funcname);
   }
-  catch(ParseErr E) {
+  catch(ParseErr& E) {
     if(BD) falcON_DEL_O(BD);
     falcON_THROW("bodiesmethod::bodiesmethod(): parse error: %s",text(E));
   }
-  catch(BfErr E) {
+  catch(BfErr& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     falcON_THROW("bodiesmethod::bodiesmethod(): %s",text(E));
   }
-  catch(exception E) {
+  catch(exception& E) {
     if(BD) falcON_DEL_O(BD);
     delete_files(fname);
     throw E;
@@ -1700,7 +1701,7 @@ falcON::bodiesmethod::bodiesmethod(const char  *oexpr) falcON_THROWING
     if(FUNC != 0 && funcname) {
       try {
 	BD->put(fname,funcname,nexpr,TYPE,NPAR,NEED);
-      } catch(DataBaseErr E) {
+      } catch(DataBaseErr& E) {
 	DebugInfo(debug_depth,"database problems: %s,",text(E));
       }
     }

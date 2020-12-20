@@ -7,7 +7,10 @@ make
 libXext-devel
 
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
-# missing <rpc/rpc.h>            libtirpc-devel didn't work
+# missing <rpc/rpc.h>            libtirpc-devel didn't work - now works (dec 2020)
+
+libtirpc-devel 
+
 
 tcsh
 wget

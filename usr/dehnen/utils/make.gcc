@@ -31,7 +31,7 @@ GCCVERSION += 00
 # Remove spaces from the version number
 GCCVERSION := $(subst $(space),$(empty),$(GCCVERSION))
 # Crop the version number to 3 decimals.
-GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-3)
+GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-4)
 #$(warning $(GCCVERSION))
 gccversion:
 	@echo "GCC version = " $(GCCVERSION)
@@ -50,9 +50,9 @@ endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel

@@ -184,7 +184,7 @@ bodies::block::block(unsigned no,                  // I: our No
     set_data_void(f,0);
   try {
     add_fields(bits);
-  } catch(exception E) {
+  } catch(exception& E) {
     del_fields(fieldset::all);
     for(fieldbit f; f; ++f)
       del_field(f);
@@ -724,7 +724,7 @@ void bodies::set_data(const unsigned N[bodytype::NUM]) falcON_THROWING
 	BLOCK[NBLK++] = b;
       }
     }
-  } catch(falcON::exception E) {
+  } catch(falcON::exception& E) {
     del_data();
     falcON_RETHROW(E);
   }
@@ -1992,7 +1992,7 @@ double bodies::read_gadget(const char*fname,
       falcON_THROW("bodies::read_gadget(): "
 		   "file \"%s\" not a gadget data file\n",file);
     }
-    catch(exception E) { falcON_RETHROW(E); }
+    catch(exception& E) { falcON_RETHROW(E); }
     if(swap && debug(1))
       DebugInfo("bodies::read_gadget(): need to swap bytes ...\n");
     nfile = header->num_files;
@@ -2019,7 +2019,7 @@ double bodies::read_gadget(const char*fname,
 	falcON_THROW("bodies::read_gadget(): "
 		     "file \"%s\" not a gadget data file\n",file);
     }
-    catch(exception E) { falcON_RETHROW(E); }
+    catch(exception& E) { falcON_RETHROW(E); }
     if(swap && debug(1))
       DebugInfo("bodies::read_gadget(): need to swap bytes ...\n");
     nfile = header->num_files;
@@ -2158,7 +2158,7 @@ double bodies::read_gadget(const char*fname,
 	  falcON_THROW("bodies::read_gadget(): "
 		       "file \"%s\" not a gadget data file\n",file);
       }
-      catch(exception E) { falcON_RETHROW(E); }
+      catch(exception& E) { falcON_RETHROW(E); }
       if(swap_old != swap)
 	falcON_THROW("bodies::read_gadget(): different endianess "
 		     "amongst data files for the same snapshot\n");

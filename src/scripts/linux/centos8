@@ -7,6 +7,17 @@ tcsh
 gcc-c++ 
 cmake 
 libXext-devel
+libtirpc-devel
+
+#    enable EPEL for the optional packages
+# sudo yum -y install epel-release
+# sudo yum repolist
+# dnf config-manager --set-enabled PowerTools
+
+netcdf-devel
+cfitsio-devel
+hdf5-devel
+hdf-devel
 
 # pgplot not available 
 # Recipes for installing PGPLOT
@@ -14,3 +25,10 @@ libXext-devel
 # 2. rpm -Uvh rpmfusion-nonfree-release*rpm
 # 3. dnf install pgplot
 # Or google for "centos 8 pgplot" and download the RPM's
+
+
+# Dec 2020:     how to upgrade to Centos 8 stream
+# sudo dnf update
+# sudo dnf install centos-release-stream
+# sudo dnf distro-sync
+

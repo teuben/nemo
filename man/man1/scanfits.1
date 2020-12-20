@@ -5,7 +5,7 @@ scanfits \- scan a fits file, optionally extract and convert.
 .PP
 \fBscanfits in=\fPfits_file  [parameter=value]
 .SH DESCRIPTION
-\fIscanfits\fP reads a FITS file from disk. It scans the header for
+\fIscanfits\fP reads a FITS file. It scans the header for
 various FITS (mis)interpretations, and reports on bad behaviour.
 Some of it can be fixed, in which case the header and/or data
 can be output to a file. It is also possible to insert new card
@@ -18,7 +18,11 @@ HDU's in a file, you can select them by number, 1 being the first.
 Since scanfits can only process disk FITS files, FITS files on
 tape have to be extracted using \fIdd(1)\fP or
 similar programs. See also notes in \fIccdfits(1NEMO)\fP how 
-to process fits files from tape. 
+to process fits files from tape.
+.PP
+This program was written while the author was on the first FITS panel.
+The cfitsio suite is now also providing a FITS checker
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is 
 also given:
@@ -238,6 +242,11 @@ or
 where the latter example does not contain trailing blanks anymore.
 .SH "SEE ALSO"
 ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO)
+.PP
+.nf
+https://heasarc.gsfc.nasa.gov/fitsio/
+https://fits.gsfc.nasa.gov/fits_verify.html
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH FILES
