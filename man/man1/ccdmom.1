@@ -16,6 +16,9 @@ To get the intensity weighted shape of an object using the moments
 of inertia, use \fIccdshape(1NEMO)\fP.
 .PP
 Continuum subtraction is needed for reliable moments where applicable.
+.PP
+If moments needs to be taken across many images, like cubes with axis=4,
+use \fIccdmoms(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -119,7 +122,7 @@ is printed to stdout. Currently only implemented along the Z direction, hence X 
 some future time it may also support spectra along Y or X, but most advanced features are only
 implemented along axis=3. Default: none
 .SH SEE ALSO
-pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), mom2cube(1NEMO), image(5NEMO)
+pvtrace(1NEMO), ccdmoms(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), mom2cube(1NEMO), image(5NEMO)
 .SH CAVEATS
 Cannot compute straight moments, e.g. the 2nd moment along an axis, such
 as e.g. \fIsnapgrid\fP can do. This 

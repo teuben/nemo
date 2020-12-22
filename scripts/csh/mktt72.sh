@@ -7,23 +7,24 @@
 #    - add example to get snapfit to work (self-consistency check)
 #    - recode the parameters to match the 16 input parameters that indentikit advocates
 #
-#
+# version: 20-nov-2020
 
 set -x
 
 #            parameters for the script that can be overriden via the commandline
-run=run1
-box=2
-nbody=100
-nx=64
+run=run1        # basename of the files belonging to this simulation
+nbody=100       # number of bodies in the first ring
+tstop=10        # stop time of the integration
+box=2           # boxsize for gridding (-box:box)
+nx=64           # number of pixels in X, Y and Z
 
-rscale=0.25
-vscale=0.5
-theta=60
-axis=y
+rscale=0.25     # R scale, also to check if snapfit will find it
+vscale=0.5      # V scale, also to check if snapfit will find it
+theta=60        # angle
+axis=y          # axis
 
-inc=0
-pa=0
+inc=0           # inclination 
+pa=0            # position angle
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do\
@@ -46,8 +47,10 @@ mktt72 - nbody=$nbody radius=0.1:1:"0.1*2*pi/$nbody" mass=4.0 central=t eps=0.2 
 snaprotate $run.1 $run.1r theta=$inc,$pa order=yz
 snapstack $run.1r $run.2 $run.3 5,2,0 -1,0,0  zerocm=t
 
+#  confirm the initial conditions have 0 energy
+snapcopy run1.3 - 'm>0' | snapstat - exact=t all=t > $run.3.log
 
-/usr/bin/time hackcode1 $run.3 $run.4 eps=0.2 freqout=10 freq=100 tstop=10 > $run.4.log
+/usr/bin/time hackcode1 $run.3 $run.4 eps=0.2 freqout=10 freq=100 tstop=$tstop > $run.4.log
 
 
 

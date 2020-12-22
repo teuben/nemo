@@ -172,7 +172,7 @@ int n_moment(Moment *m)
 
 real sum_moment(Moment *m)
 {
-    return sum0;   /* BAD BOY: should this not be sum1 ?? */
+    return sum1;
 }
 
 real mean_moment(Moment *m)

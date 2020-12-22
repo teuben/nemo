@@ -113,7 +113,7 @@ void nemo_main()
     else if (nbox != 4) 
       error("Need 4 integers box=xmin,ymin,xmax,ymax");
     if (nbox>0) warning("New feature box= not fully tested");  /* > 2GP files wrong? */
-    dprintf(0,"npl=%d nbox=%d\n",npl,nbox);
+    dprintf(1,"npl=%d nbox=%d\n",npl,nbox);
     mode = getparam("mode");
     blankval = getparam("blank");
     Qblank = (*blankval != 0);
