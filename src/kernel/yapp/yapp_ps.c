@@ -20,9 +20,10 @@
  *                                         allow yapp.ps to be overwritten; others not
  *                              20 jun 01  debug level now 1
  *         3.3  PJT             15-jun-2018 prototypes
+ *                              22-dec-2020 back to a pragmatic 20cm scale, make Helvetica default font
  */
 
-#define VERSIONID "Version 3.3 15-jun-2018 PJT"
+#define VERSIONID "Version 3.3a 22-dec-2020 PJT"
 
 #include <stdinc.h>
 //#include <yapp.h>
@@ -32,7 +33,7 @@ extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
 
 /* Scaling and layout parameters. */
 
-#define PTCM  (72.0 / 2.54)			/* points per cm */
+#define PTCM  (72.0 / 2.45872)			/* points per cm where 1inch=2.54cm*/
 
 #define XRANGE	(20.0 * PTCM)			/* width of user area */
 #define YRANGE  (25.0 * PTCM)			/* height of user area */
@@ -65,7 +66,7 @@ local real uxmin, uymin;			/* origin of user c.s. */
 #define DEFWIDTH  0.5				/* default line width */
 #define DEFLTYPE  1				/* default line type */
 #define DEFJUST  -1				/* default text just'n */
-#define YAPPFONT  "Times-Roman"			/* font used by pltext */
+#define YAPPFONT  "Helvetica"			/* font used by pltext */
 
 local real width;				/* line width in pts */
 local int ltype;				/* line type: solid, etc */
