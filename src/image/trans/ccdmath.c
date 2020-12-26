@@ -24,6 +24,7 @@
  *      19-jun-03       3.1  allow %w, %r for 2d/3d radii; allow crpix offset     PJT
  *      26-aug-04       3.2  fix bad error in setting crpix for cube generation   PJT
  *      10-may-05       3.2a use the wcs routines that have moved to wcsio.c      PJT
+ *      25-dec-2020     3.3  allow a map to replicated its 3rd dimension OTF      PJT
  *
  *       because of the float/real conversions and
  *       to eliminate excessive memory usage, operations 'fie' are
@@ -48,7 +49,8 @@ string defv[] = {
   "crval=\n        Override/Set crval (0,0,0)",
   "cdelt=\n        Override/Set cdelt (1,1,1)",
   "seed=0\n        Random seed",
-  "VERSION=3.2b\n  24-nov-2019 PJT",
+  "replicate=f\n   Allow files in 2D to replicate along 3rd dimension",
+  "VERSION=3.3\n   25-dec-2020 PJT",
   NULL,
 };
 
@@ -65,13 +67,14 @@ string cvsid="$Id$";
 imageptr iptr[MAXIMAGE];	/* pointers to (input) images */
 int      nimage;                /* actual number of input images */
 bool     mapgen = FALSE;	/* no input files: create from scratch ? */
+bool     q2d[MAXIMAGE];         /* replicate 3rd axis of this image */
 
 #define MAXNAX 3
 
 double crval[MAXNAX], crpix[MAXNAX], cdelt[MAXNAX];
 int nwcs = 0;
 
-
+bool Qrepl;
 
 local int set_axis(string var, int n, double *xvar, double defvar);
 local int fie_remap(char *fie, bool map_create);
@@ -94,6 +97,7 @@ void nemo_main ()
     int     size[3], nx, ny, nz;        /* size of scratch map */
     int     noper;                      /* number of images needed from oper */
 
+    Qrepl = getbparam("replicate");
     init_xrandom(getparam("seed"));
     nwcs += set_axis(getparam("crpix"),MAXNAX,crpix,1.0);
     nwcs += set_axis(getparam("crval"),MAXNAX,crval,0.0);
@@ -153,9 +157,12 @@ void nemo_main ()
                 error ("Input map %d does have different Nx\n",nimage);
             if (Ny(iptr[nimage]) != Ny(iptr[nimage-1]))
                 error ("Input map %d does have different Ny\n",nimage);
-            if (Nz(iptr[nimage]) != Nz(iptr[nimage-1]))
-                error ("Input map %d does have different Nz\n",nimage);
-        }
+            if (Nz(iptr[nimage]) != Nz(iptr[nimage-1])) {
+	      if (!Qrepl)
+                error ("Input map %d does have different Nz=%d\n",nimage,Nz(iptr[nimage]));
+	    }
+        } 
+	q2d[nimage] = (Qrepl && Nz(iptr[nimage])==1);
         strclose(instr[nimage]);        /* close input file */
         nimage++;
     }
@@ -326,8 +333,12 @@ local void do_combine()
     for (ix=0; ix<nx; ix++) {
         for (k=0; k<nimage; k++) {       /* prepare input column buffer */
             offset = ny*k;
-            for (iy=0; iy<ny; iy++)
+            for (iy=0; iy<ny; iy++) {
+	      if (q2d[k])
+                fin[iy+offset] = CubeValue(iptr[k],ix,iy,0);
+	      else
                 fin[iy+offset] = CubeValue(iptr[k],ix,iy,iz);
+	    }
         }
         dofien (fin, ny, fout, 0.0); /* do the work --- see: nemofie.3 */
         for (iy=0; iy<ny; iy++) {             /* write buffer back to map-0 */
