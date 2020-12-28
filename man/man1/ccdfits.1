@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "12 March 2020"
+.TH CCDFITS 1NEMO "27 December 2020"
 .SH NAME
 ccdfits \- convert an image to a fits file 
 .SH SYNOPSIS
@@ -11,6 +11,12 @@ format on disk.
 .PP
 An experimental version of this program that uses the standard
 \fIcfitsio(3)\fP library is known as \fIccdfitsio(1NEMO)\fP.
+.PP
+A peculiar option is the use of the \fBfitshead=\fP keyword. In this mode
+the header of the output fits file will be replaced with that of the
+filename in the  \fBfitshead=\fP keyword. This is dangerous, the it is the
+responsility of the user to ensure the dimension and BITPIX of the two
+are the same.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -96,6 +102,10 @@ Default: not used.
 \fIselect=1\fP
 Select this image (1 being the first) to grab in an file
 with multiple Image's. [Default: 1]
+.TP
+\fIfitshead=\fP
+If used, the header of this fitsfile will be used instead of the
+one from the converted input image. Default; not used.
 .SH EXAMPLES
 To convert an image to unsigned 16 bit integers use the following math:
 .nf
@@ -189,4 +199,5 @@ apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
 4-jan-04	V5.2 docomented the recent changes to crval/cdelt/crpix=	PJT
 20-jun-09	V5.4 added select= to grab not the first image  	PJT
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true	PJT
+27-dec-2020	V6.3 added fitshead=	PJT
 .fi
