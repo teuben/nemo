@@ -1,4 +1,4 @@
-.TH CCDSUB 1NEMO "8 June 2013"
+.TH CCDSUB 1NEMO "24 December 2020"
 .SH NAME
 ccdsub \- sub/average of an image, and optionally reorder axes.
 .SH SYNOPSIS
@@ -28,7 +28,8 @@ Output image file
 .TP
 \fBx=\fP
 X coordinates to select. 
-Valid numbers are 1..nx. By default all will be selected.
+Valid numbers are 1..nx. By default all will be selected. See also
+\fBcenterbox\fP below.
 .TP
 \fBy=\fP
 Y coordinates to select.
@@ -45,7 +46,13 @@ Number X to aver (size remains same)
 Number Y to aver (size remains same) 
 .TP
 \fBnzaver=\fP
-Number Y to aver (size remains same) 
+Number Y to aver (size remains same)
+.TP
+\fBcenterbox=\fP
+Up to three values (between 0 and 1) to take that fraction of that axis for subsetting
+the cube. Using this option will override the corresponding x=, y= and/or z=. Any
+axis not specified will inherit the corresponding x=, y= or z=.
+Default: not used.
 .TP
 \fBdummy=t|f\fP
 Write out dummy axes as well? [true]
@@ -74,4 +81,5 @@ Peter Teuben
 17-jun-03	WCS for simple subsetting	PJT
 9-apr-09	V1.6 replace skip= with dummy=, fix bug nzaver=  	PJT
 18-jun-09	V2.0a fixed bug when Z size if different from XY	PJT
+24-dec-2020	V2.4  add centerbox=	PJT
 .fi

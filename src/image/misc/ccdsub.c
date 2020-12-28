@@ -31,10 +31,11 @@ string defv[] = {
   "nxaver=1\n	  Number X to aver (size remains same)",
   "nyaver=1\n	  Number Y to aver (size remains same)",
   "nzaver=1\n	  Number Z to aver (size remains same)",
+  "centerbox=\n   xf,yf,zf - if given, use this centered fraction of this axis",
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.3\n  8-jan-2018 PJT",
+  "VERSION=2.4\n  24-dec-2020 PJT",
   NULL,
 };
 
@@ -59,13 +60,15 @@ local void ax_swap_xz(imageptr iptr);
 #define LOOP(i,n)     for(i=0;i<n;i++)
 #define CV(p,i,j,k)   CubeValue(p,i,j,k)
 
-void nemo_main()
+void nemo_main(void)
 {
     stream  instr, outstr;
     int     nx, ny, nz;        /* size of scratch map */
     int     nx1,ny1,nz1;
     int     nxaver, nyaver,nzaver;
     int     i,j,k, i0,j0,k0, i1,j1,k1, l;
+    int     ncb, n1,n2;
+    real    centerbox[3];
     imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
     real    sum, tmp, zzz;
     real    *row;
@@ -85,16 +88,53 @@ void nemo_main()
     nz1 = nemoinpi(getparam("z"),iz,MAXDIM);
     if (nx1<0 || ny1<0 || nz1<0) error("Error parsing x,y,z=");
     Qsample = nx1>0 || ny1>0 || nz1>0;
-    if (Qsample) warning("Sampling will be done");
+
+    ncb = nemoinpr(getparam("centerbox"),centerbox,3);
 
     read_image( instr, &iptr);
 
     nx = Nx(iptr);	                   /* old cube size */
     ny = Ny(iptr);      
-    nz = Nz(iptr);      
+    nz = Nz(iptr);
+    
+    if (ncb > 0) {               // See if centerbox was used
+      Qsample = TRUE;
+      //warning("Using centerbox %d",ncb);
+      if (ncb>0) {
+	n1 = (int)rint(0.5*nx*(1 - centerbox[0]));
+	n2 = (int)rint(0.5*nx*(1 + centerbox[0]));
+	if (n1<1) n1=1;
+	dprintf(1,"x: %d:%d\n",n1,n2);
+	nx1 = n2-n1+1;
+	for (i=0; i<nx1; i++)
+	  ix[i] = i + n1;
+      }
+      if (ncb>1) {
+	n1 = (int)rint(0.5*ny*(1 - centerbox[1]));
+	n2 = (int)rint(0.5*ny*(1 + centerbox[1]));
+	if (n1<1) n1=1;	
+	dprintf(1,"y: %d:%d\n",n1,n2);	
+	ny1 = n2-n1+1;
+	for (i=0; i<ny1; i++)
+	  iy[i] = i + n1;
+      }
+      if (ncb>2) {
+	n1 = (int)rint(0.5*nz*(1 - centerbox[2]));
+	n2 = (int)rint(0.5*nz*(1 + centerbox[2]));
+	if (n1<1) n1=1;	
+	dprintf(1,"z: %d:%d\n",n1,n2);	
+	nz1 = n2-n1+1;
+	for (i=0; i<nz1; i++)
+	  iz[i] = i + n1;
+      }
+    }
+    if (Qsample) warning("Sampling will be done");
+    
     nx1 = ax_index("x",nx,nx1,ix);         /* initialize new cube axes */
     ny1 = ax_index("y",ny,ny1,iy);         /* before any reordering */
     nz1 = ax_index("z",nz,nz1,iz);
+    dprintf(1,"old nx,y,z: %d %d %d\n",nx ,ny ,nz );    
+    dprintf(1,"new nx,y,z: %d %d %d\n",nx1,ny1,nz1);
 
     Qreorder = hasvalue("reorder");
     if (Qreorder) {
