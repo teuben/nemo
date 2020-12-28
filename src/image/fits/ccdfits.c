@@ -88,7 +88,7 @@ string defv[] = {
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
-        "VERSION=6.2\n   1-aug-2019 PJT",
+        "VERSION=6.2a\n  17-dec-2020 PJT",
         NULL,
 };
 
@@ -396,8 +396,8 @@ void write_fits(string name,imageptr iptr)
       fitwrhdr(fitsfile,"RESTFRQ",restfreq);  
 
       if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
-      fitwrhdr(fitsfile,"RESTFREQ",restfreq);
-      //
+      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
+
       fitwrhda(fitsfile,"CUNIT1","deg");
       fitwrhda(fitsfile,"CUNIT2","deg");
       if (Qfreq)
@@ -442,8 +442,10 @@ void write_fits(string name,imageptr iptr)
         fitwrhda(fitsfile,"AUTHOR","NEMO");
         fitwrhda(fitsfile,"OBSERVER","NEMO");
     }
+
+    // @todo    fix this like date +%Y-%m-%dT%H:%M:%S.%N
+    fitwrhda(fitsfile,"DATE-OBS","2015-06-14T15:42:02.319999");
     
-    // DATE-OBS= '2015-06-14T15:42:02.319999'
     
     if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
