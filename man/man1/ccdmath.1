@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "23 August 2017" 
+.TH CCDMATH 1NEMO "25 December  2020"
 .SH NAME
 ccdmath \- map arithmetic using function expressions
 .SH SYNOPSIS
@@ -61,6 +61,11 @@ image, however, by using all 3 keywords
 seed for the random number generator (default: a value 0, which will
 be converted into a unique new value using UNIX's clock time, in
 seconds since once-upon-a-time-in-the-seventies).
+.TP
+\fBreplicate=t|f\fB
+Normally each input image needs to be of the same shape. Setting \fBreplicate=t\fP
+will allow the 3rd axis of a 2D map to be replicated in order for the \fBfie=\fP
+expression to be parsed. Default: false
 .SH EXAMPLE
 Create a 'difference' map from two input maps:
 .nf
@@ -126,5 +131,6 @@ src/image/trans  	ccdmath.c ccdmath.1
 1-mar-03	V3.0: set/change the WCS				PJT
 19-jun-03	V3.1: allow %w and %r, and use offset from crpix	PJT
 25-aug-04	V3.2: fixed error in setting crpix (off by 2!)		PJT
+25-dec-2020	V3.3: add replicate=	PJT
 .fi
 
