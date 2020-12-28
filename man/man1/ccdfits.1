@@ -14,9 +14,11 @@ An experimental version of this program that uses the standard
 .PP
 A peculiar option is the use of the \fBfitshead=\fP keyword. In this mode
 the header of the output fits file will be replaced with that of the
-filename in the  \fBfitshead=\fP keyword. This is dangerous, the it is the
-responsility of the user to ensure the dimension and BITPIX of the two
-are the same.
+filename in the  \fBfitshead=\fP keyword. This is dangerous, it is the
+responsility of the user to ensure the dimensions (NAXIS,1,2,3) and BITPIX of the
+two are the same, or else an illegal FITS file will be created.
+The program \fIscanfits(1NEMO)\fP is used behind the scenes to achieve
+this feat.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -177,7 +179,7 @@ You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
  $!
 .fi
 .SH "SEE ALSO"
-ccdsky(1NEMO), ccdfitsio(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+ccdsky(1NEMO), ccdfitsio(1NEMO), scanfits(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
 .SH AUTHOR
 Peter Teuben
 .SH FILES
