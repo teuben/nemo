@@ -43,7 +43,8 @@
  *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
  *       8-apr-17   6.0  new approach inheriting a new WCS
  *      14-jun-19   6.0a correct VSYS when in freq=t mode, fix cdelt1 in one common case
- *      19-jun-10   6.1  Output now in km/s
+ *      19-jun-19   6.1  Output now in km/s
+ *      27-dec-20   6.3  fitshead= header template keyword 
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -88,7 +89,8 @@ string defv[] = {
 	"ndim=\n         Testing if only that many dimensions need to be written",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
-        "VERSION=6.2\n   1-aug-2019 PJT",
+	"fitshead=\n     If used, the header of this file is used instead",
+        "VERSION=6.3\n   27-dec-2020 PJT",
         NULL,
 };
 
@@ -114,6 +116,7 @@ bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;             /* write dummy axes ? */
 bool Qblank;
+bool Qfitshead; 
 real blankval;
 int  nrefaxis, refaxis[4];
 bool Qrefaxis[4];
@@ -145,6 +148,34 @@ void nemo_main()
   strclose(instr);                           /* close image file */
   write_fits(getparam("out"),iptr);          /* write fits file */
   free_image(iptr);
+
+  // output file needs to get the header of fitshead=
+  // this is a big hack, with little error checking on size matching
+  // so the fits file could be illegal
+  if (Qfitshead) {
+    warning("Replacing header from %s",getparam("fitshead"));
+    
+    static char fnh[32], fnd[32], cmd[256];
+#if 0    
+    strcpy(fnh,"tmp.head");
+    strcpy(fnd,"tmp.data");
+#else
+    sprintf(fnh,"tmp_%d.head",getpid());
+    sprintf(fnd,"tmp_%d.data",getpid());
+#endif
+    sprintf(cmd,"scanfits in=%s out=%s select=header", getparam("fitshead"), fnh);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"scanfits in=%s out=%s select=data",   getparam("out"),       fnd);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"cat %s %s > %s", fnh, fnd, getparam("out"));
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"rm %s %s", fnh, fnd);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+  }
 }
 
 void setparams(void)
@@ -180,6 +211,7 @@ void setparams(void)
   Qfreq     = getbparam("freq");
   Qblank    = hasvalue("blank");
   if (Qblank) blankval = getrparam("blank");
+  Qfitshead = hasvalue("fitshead");
 
   
   Qrefmap = hasvalue("refmap");
