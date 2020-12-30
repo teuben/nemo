@@ -18,19 +18,21 @@ data reduction packages.
 A good start is the manual page \fIprograms(8NEMO)\fP, which lists
 programs thematically, and \fIindex(1NEMO)\fP, which lists them 
 alphabetically (CAVEAT: these pages are not well maintained).
-.PP
+
+.SH NEMO vs. UNIX
+
 \fBNEMO\fP is very much integrated into the Unix(tm) operating system,
 so users are expected to use standard Unix commands as glue
 between the various tasks (cat, ls, rm, cp, awk, sm, \fIetc.\fP).
 Understanding of shell scripting (sh, csh, python, perl, \fIetc.\fP) can be
-very useful. Several example shell scripts exist in the source tree
+very useful. for NEMO as well.
+Several example shell scripts exist in the source tree
 to demonstrate how experiments can be orchestrated. We use
 mostly csh, bash and python. Yes, csh too, even though csh is considered
 harmful now.
-
-.SH NEMO vs. UNIX
-NEMO is well integrated into the Unix philosophy, but with some quirks. Here are some important ones
-for those new to NEMO:
+.PP
+Here are some useful reminders of using NEMO when you are familiar
+with the unix style of command line tools, piping etc.:
 
 .nf
 
@@ -41,7 +43,7 @@ for those new to NEMO:
 
 - NEMO can use pipes efficiently:
     = The UNIX stdin and stdout are represented with a dash (-), so piping can become a little awkward
-    = The UNIX /dev/null is represented with a dot (.), like a black hold sucking everything
+    = The UNIX /dev/null is represented with a dot (.), like a black hole sucking up everything
 .fi
 
 .SH SYNOPSIS
@@ -63,7 +65,7 @@ The easiest way is to add the appropriate line to your \fI.cshrc\fP or
 	
 or for the die hards
 
-        \fBsource /opt/nemo/nemo_start.ssh\fP
+        \fBsource /opt/nemo/nemo_start.csh\fP
 .fi
 .PP
 If you need more control over your NEMO environment, there are other methods
