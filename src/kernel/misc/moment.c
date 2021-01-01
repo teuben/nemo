@@ -319,6 +319,8 @@ real sigma_moment(Moment *m)
     return sqrt(tmp);
 }
 
+// MARD = Mean Absolute Relative Difference
+
 real mard_moment(Moment *m)
 {
   real mean, x;
