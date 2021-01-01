@@ -15,11 +15,12 @@ pgplot    	recommended for yapp_pgplot
 cfitsio		recommended for some tools
 hdf4     	recommended for some tools
 hdf5		recommended for some tools
+netcdf          recommended for some tools
 python3		recommended
 swig
 boost           recommended (for uns_projects)
 
-Depending on your packaging tools (apt, yum, brew, port, ....) these are hidden under
+Depending on your packaging tools (apt, yum, dnf, brew, port, ....) these are hidden under
 various package names
 
 dpkg -L pgplot5
@@ -30,6 +31,7 @@ rpm -ql pgplot
 rpm -qf /usr/lib64/libpgplot.so.5.2.2
 rpm -qa
 
+See examples of package names in $NEMO/src/scripts/linux
 
 
 -gfortran
