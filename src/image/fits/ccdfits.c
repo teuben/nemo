@@ -57,6 +57,7 @@
 
 
 #include <stdinc.h>
+#include <time.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
@@ -90,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3a\n   27-dec-2020 PJT",
+        "VERSION=6.3b\n  5-jan-2021 PJT",
         NULL,
 };
 
@@ -128,6 +129,7 @@ FLOAT ref_crval[4] = {0,0,0,1},
 char  ref_ctype[4][80], ref_cunit[4][80];
 FLOAT restfreq;
 real  vsys;
+real  equinox = 2000.0;
 
 void setparams(void);
 void write_fits(string,imageptr);
@@ -394,7 +396,7 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       } else {
-	fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);    
+	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
 	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
 	if (ndim>2) {
 	  if (Qfreq)
@@ -464,6 +466,10 @@ void write_fits(string name,imageptr iptr)
     fitwrhdr(fitsfile,"DATAMAX",mapmax);
     fitwrhda(fitsfile,"ORIGIN",origin);
     fitwrhda(fitsfile,"SPECSYS","LSRK");     /* spectral reference frame */
+    fitwrhda(fitsfile,"RADECSYS","FK5");     // ICRS or FK5
+    fitwrhdr(fitsfile,"EQUINOX", equinox);   //
+    warning("Using FK5/2000");
+    
     
 
     cp = getenv("USER");                                /* AUTHOR */
@@ -475,8 +481,20 @@ void write_fits(string name,imageptr iptr)
         fitwrhda(fitsfile,"OBSERVER","NEMO");
     }
 
-    // @todo    fix this like date +%Y-%m-%dT%H:%M:%S.%N
-    fitwrhda(fitsfile,"DATE-OBS","2015-06-14T15:42:02.319999");
+    if (1) {                // DATE-OBS is "now"
+      char toutstr[200];
+      time_t t;
+      struct tm *tmp;
+      const char *fmt = "%Y-%m-%dT%H:%M:%S";
+
+      t = time(NULL);
+      tmp = localtime(&t);
+      if (tmp==NULL) error("localtime failed");
+      if (strftime(toutstr, sizeof(toutstr), fmt, tmp) == 0)
+	error("strftime returned 0");
+    
+      fitwrhda(fitsfile,"DATE-OBS",toutstr);
+    }
     
     
     if (object)                                        /* OBJECT */
