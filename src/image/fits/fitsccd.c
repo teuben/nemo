@@ -67,8 +67,8 @@ string defv[] = {
     "bzero=0\n          Offset conversion factor in raw mode (0)",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.1\n	18-feb-2015 PJT",
+    "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
+    "VERSION=5.2\n	6-jan-2021 PJT",
     NULL,
 };
 
