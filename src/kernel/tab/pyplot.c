@@ -38,9 +38,11 @@ void pyplot_plot(stream str, string tabname, int *xcol, int *ycol, int *dycol, r
   fprintf(str,"tab1 = '%s'\n",tabname);
   fprintf(str,"data1 = np.loadtxt(tab1).T\n");
   fprintf(str,"print(data1.shape)\n");
-  fprintf(str,"plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n"); 
+  fprintf(str,"#plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n");
+  fprintf(str,"plt.figure()\n"); 
   fprintf(str,"plt.plot(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
   fprintf(str,"plt.scatter(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
+  fprintf(str,"#plt.errorbar(data1[%d],data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1,dycol[0]-1);  
   fprintf(str,"plt.xlabel('X')\n");
   fprintf(str,"plt.ylabel('Y')\n");
   fprintf(str,"#plt.xlim([0,1])\n");
@@ -57,7 +59,8 @@ void pyplot_hist(stream str, string tabname, int *xcol, real *xrange, int bins)
   fprintf(str,"tabname = '%s'\n",tabname);
   fprintf(str,"data = np.loadtxt(tabname).T\n");
   fprintf(str,"print(data.shape)\n");
-  fprintf(str,"plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n");   
+  fprintf(str,"#plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n");   
+  fprintf(str,"plt.figure()\n");
   fprintf(str,"plt.hist(data[%d],%d)\n",xcol[0]-1,bins);
   fprintf(str,"plt.xlabel('X')\n");
   fprintf(str,"plt.ylabel('N')\n");
