@@ -103,6 +103,8 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <extstring.h>
+#include <table.h>
 #include <image.h>
 
 /*     Set this appropriate if you want to use NumRec's mrqmin() based engine */
@@ -151,7 +153,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.14a\n 18-jan-2021 PJT",
+    "VERSION=2.14b\n 18-jan-2021 PJT",
     NULL,
 };
 
@@ -196,12 +198,12 @@ void vcor_s1(real *c, real *p, real *vd, real *dn);
 
 
 
-int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
+void rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
 	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
 	   int *inh, int *fitmode, real *nsigma, stream lunpri);
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
 	   real elp4[], int cor[], int *npt, real *rms, int fitmode, real nsigma, bool useflag, stream lunres);
-int perform_out(int h, real p[6], int n, real q);
+void perform_out(int h, real p[6], int n, real q);
 void rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], real res[], int npt[], real factor);
@@ -209,7 +211,7 @@ void stat2(real a[], int n, real *mean, real *sig);
 void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
 	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, bool useflag);
 real bmcorr(real xx[2], real p[], int l, int m);
-int perform_init(real *p, real *c);
+void perform_init(real *p, real *c);
 
 typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
@@ -217,6 +219,7 @@ typedef void (*my_proc3)(real *, real *, real *, real *);
  
 extern int nllsqfit(real *xdat, int xdim, real *ydat, real *wdat, real *ddat, int ndat, real *fpar, real *epar, int *mpar, int npar, real tol, int its, real lab, my_proc1 f, my_proc2 df);
 
+extern int match(string, string, int *); // not used currently
 
 my_proc1 vobs;
 my_proc2 vobsd;
@@ -224,7 +227,7 @@ my_proc3 vcor;			/* pointers to the correct functions */
 
 
 /******************************************************************************/
-nemo_main()
+void nemo_main(void)
 {
     int  ier;            /* error return code */
     int  ifit=0;         /* counter for number of succesful fits */
@@ -357,7 +360,7 @@ nemo_main()
  *    LUNPRI   integer          LUN for print output
  */
 
-rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,inh,fitmode,nsigma,lunpri)
+void rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,inh,fitmode,nsigma,lunpri)
 int  *wpow;           /* weighting function to be applied */
 int  ring, *nring;    /* max. number of rings and wanted number of rings */
 int  mask[];          /* mask to define free and fixed parameters */
@@ -401,7 +404,7 @@ stream  lunpri;       /* LUN for print output */
       read_image(velstr,&velptr);                 /* get data */
       copy_image(velptr,&resptr);
       if (Qreuse) {
-	create_image_mask(velptr,&maskptr);
+	create_image_mask(&velptr,&maskptr);
 	for (i=0; i<Nx(maskptr); i++)
 	for (j=0; j<Ny(maskptr); j++)
 	  MapValue(maskptr,i,j) = TRUE;
@@ -1004,7 +1007,7 @@ stream lunres;   /* file for residuals */
     return ier;
 } /* rotfit */
 
-perform_out(int h,real *p,int n,real q)
+void perform_out(int h,real *p,int n,real q)
 {
 /*  FORMAT(1H ,I4,4X,3(F7.2,2X),F5.2,2X,2(F7.2,2X),I5,2X,F8.3) eq.fortran */
     printf(" %4d    %7.2f  %7.2f  %7.2f  %5.2f  %7.2f  %7.2f  %5d  %8.3f\n",
@@ -1544,7 +1547,7 @@ void vcor_s1(real *c,real *p,real *vd,real *dn)
 }
 
 
-perform_init(real *p,real *c)
+void perform_init(real *p,real *c)
 {
     vs=p[0];                 /* systemic velocity */
     vc=p[1];                 /* circular velocity */
