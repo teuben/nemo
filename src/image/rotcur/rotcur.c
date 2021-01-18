@@ -70,6 +70,7 @@
  *               4-oct-03   2.11 added option to use the WWB73 method     PJT
  *              25-may-04       a    fixed sqrt(N) problem in sigma estimate for nsigma    PJT
  *               2-jun-04   2.12 finally implemented the reuse= option     PJT
+ *               5-jun-20   2.13 add wtmap= keyword                        PJT
  *
  ******************************************************************************
  *
@@ -134,6 +135,7 @@ string defv[] = {
     "ellips=\n       Parameters for which to plot error ellips",
     "beam=\n         Beam (arcsec) for beam correction [no correction]",
     "dens=\n         Image containing containing density map",
+    "wtmap=\n        Weight map (should be mom0*mom0/mom2)",
     "tab=\n          If specified, this output table is used in append mode",
     "resid=\n        Output of residuals in a complicated plot",
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
@@ -147,7 +149,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.12c\n 1-jul-2016 PJT",
+    "VERSION=2.13\n  5-jun-2020 PJT",
     NULL,
 };
 
@@ -156,7 +158,7 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 string cvsid="$Id$";
 
 
-imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable */
+imageptr denptr, velptr, resptr, wtmapptr;    /* pointers to Images, if applicable */
 image_maskptr   maskptr;
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
@@ -370,9 +372,10 @@ stream  lunpri;       /* LUN for print output */
     string *inputs;
     int iret, i, j, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
-    stream velstr, denstr;
+    stream velstr, denstr, wtmapstr;
     string *burststring(), *fmode;
     bool Qdens, scanopt();
+    bool Qwtmap;
     real *coldat[4];
     int colnr[4];
 
@@ -388,7 +391,8 @@ stream  lunpri;       /* LUN for print output */
     if (lunpri) fprintf(lunpri," velocity field file : %s (%s)\n",input,
 			Qimage ? "image" : "ascii table");
 
-    velstr = stropen(input,"r");                /* open velocity field */   
+    velstr = stropen(input,"r");                /* open velocity field */
+    Qwtmap = hasvalue("wtmap");
     Qdens = hasvalue("dens");                /* check if density given */
     if (Qimage) {                          /* get data from an image */
       read_image(velstr,&velptr);                 /* get data */
@@ -491,6 +495,15 @@ stream  lunpri;       /* LUN for print output */
       grid[1]=dy=1.0;
       pamp=0.0;
     }
+    if (Qwtmap) {
+      input = getparam("wtmap");
+      if (lunpri) fprintf(lunpri," weight map file      : %s\n", input);
+      wtmapstr = stropen(input,"r");
+      read_image(wtmapstr,&wtmapptr);
+      strclose(wtmapstr);
+      warning("Using special weight map for weights now");      
+    } else
+      wtmapstr = NULL;
 
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
     if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
@@ -502,7 +515,8 @@ stream  lunpri;       /* LUN for print output */
             denstr = stropen(input,"r");
     	    read_image(denstr,&denptr);
 	    strclose(denstr);
-	    warning("Using density map for weights now");
+	    if (!Qwtmap) 
+	      warning("Using density map for weights now");
          } else {
             warning("beam defined, but no real beam correction used");
             if (lunpri) fprintf(lunpri,"  beam: %g %g\n",beam[0],beam[1]);
@@ -1190,7 +1204,9 @@ bool  useflag;
 	      dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
 	      if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
 		dprintf(5," ** adding this point\n");
-		if (denptr) 
+		if (wtmapptr)
+		  wi = MapValue(wtmapptr,l,m);
+	        else if (denptr) 
 		  wi = MapValue(denptr,l,m);
 		else
 		  wi=1.0;                /* calculate weight of this point */
