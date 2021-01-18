@@ -71,6 +71,8 @@
  *              25-may-04       a    fixed sqrt(N) problem in sigma estimate for nsigma    PJT
  *               2-jun-04   2.12 finally implemented the reuse= option     PJT
  *               5-jun-20   2.13 add wtmap= keyword                        PJT
+ *              19-jan-21   2.14 revert back to old beam factor error calculation     PJT
+ *
  *
  ******************************************************************************
  *
@@ -149,7 +151,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.13\n  5-jun-2020 PJT",
+    "VERSION=2.14a\n 18-jan-2021 PJT",
     NULL,
 };
 
@@ -275,8 +277,9 @@ nemo_main()
 
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
     if (beam[0] > 0 && beam[1] > 0)
-      factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
-      //  should this not be pi/(4ln2) ???
+      // factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+      factor = sqrt(1.13309*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */      
+      //  should this not be pi/(4ln2) = 1.13309 ???
     else
       factor = 1.0;
     dprintf(0,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
