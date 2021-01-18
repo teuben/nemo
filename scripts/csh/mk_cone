@@ -19,6 +19,7 @@ set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
 set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,,10,100,1000,10000
+set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
 set out = cone1         #> ENTRY out=cone1
 
 #  parameters not in the GUI
@@ -91,7 +92,7 @@ else
     snaprotate - - $incd x > $out.snap
 endif
 
-set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
+#set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
 snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
 snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
