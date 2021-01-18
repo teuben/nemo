@@ -1,4 +1,4 @@
-.TH ROTCUR 1NEMO "7 June 2020"
+.TH ROTCUR 1NEMO "18 January 2021"
 .SH NAME
 rotcur \- fit parameters to velocity field using tilted rings
 .SH SYNOPSIS
@@ -154,7 +154,7 @@ and minor axis, position angle of the one sigma deviation ellipse.
 [Default: not used]
 .TP
 \fBbeam\fP=
-The beam size (FWHM) for beam correction. One or two numbers required.
+The beam size (FWHM, in arcsec) for beam correction. One or two numbers required.
 Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction].
@@ -296,13 +296,20 @@ though and study the output.
 Errorbars quoted in the table are only an estimate since the beam
 size is not known. Multiply these numbers by the square root
 of the number of pixels per beam to get a more realistic estimate.
-If the beamsize, \fBbeam=\fP, is given, the formulae of Sicking (1997) is used
-to correct the errors for:
+If the beamsize, \fBbeam=\fP, is given, the formulae of Sicking (1997) was
+previously used to correct the errors for:
 .nf
 
 	factor = sqrt(4.PI.B_x.B_y/(D_x.D_y))
 
 .fi
+but this is clearly too large, instead
+.nf
+
+	factor = sqrt(PI/(4ln2).B_x.B_y/(D_x.D_y))
+
+.fi
+is now used.
 .PP
 Sign of the pixelsize \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
 image is assumed. See also the \fBreuse=\fP keyword.
@@ -346,4 +353,5 @@ P. J. Teuben (NEMO C version)
 30-jan-03	V2.10: allow tables to use error in velocity	PJT
 2-jun-04	V2.12: finally implemented the reuse= option	PJT
 6-jun-20	V2.13: added wtmap=	PJT
+18-jan-21	V2.14: beam error factor back to standard, not Sicking	PJT
 .fi
