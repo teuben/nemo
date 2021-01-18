@@ -256,6 +256,7 @@ int write_image  ( stream, imageptr );
 int read_image   ( stream, imageptr * );
 int free_image   ( imageptr );
 int create_image ( imageptr *, int, int );
+int create_image_mask ( imageptr *, image_maskptr *);
 int create_cube  ( imageptr *, int, int, int );
 int copy_image   ( imageptr, imageptr *);
 
