@@ -54,14 +54,17 @@
  *  20-jul-02      a  fix error message if too many array elements   pjt
  *   6-feb-03   V2.0  add phases and fourier components to vel's for Rahul    pjt
  *  11-sep-03   V2.1  add intpol=    PJT
+ *  30-nov-20   V2.2  fixes when in= template given; cleanup for ansi     PJT
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <image.h>
+#include <table.h>
 
 string defv[] = {
         "out=???\n      Output file name (an image)",
@@ -100,7 +103,7 @@ string defv[] = {
 	"in=\n          Template 2D image for cube generation",
 	"intpol=linear\n Interpolation: linear or constant",
 	"headline=\n	Optional random verbiage",
-        "VERSION=2.1\n  11-sep-03 PJT",
+        "VERSION=2.2\n  30-nov-2020 PJT",
         NULL,
 };
 
@@ -156,8 +159,10 @@ local real my_image(real, real);
 
 extern double grandom(double,double);
 
+void setparams(void);
+
 
-nemo_main ()
+void nemo_main(void)
 {
     setparams();
     outstr = stropen(getparam("out"),"w");
@@ -169,7 +174,7 @@ nemo_main ()
     strclose(outstr);
 }
 
-setparams()
+void setparams(void)
 {
     int i,n, ifix, colnr[MAXCOL];
     real *coldat[MAXCOL];
@@ -177,13 +182,7 @@ setparams()
     string intpol;
 
     Qcube = hasvalue("in");
-    if (Qcube) {
-      warning("New experimental CUBE mode");
-      tstr = stropen(getparam("in"),"r");
-      read_image(tstr,&iptr);
-      strclose(tstr);
-    }
-
+ 
     out_mode = 1;       /* fix to 'sky -> gal plane' mode */
 
     switch ( nemoinpi(getparam("size"),size,3) ) {  /* MAPSIZE */
@@ -238,6 +237,7 @@ setparams()
        default:                 /* --- some error --- */
                 error("Syntax error in blc= keyword");
     }
+
 
     if (hasvalue("rotcurfit")) {  /* if table given: override all other */
 
@@ -355,45 +355,62 @@ setparams()
         }
     }
 
+    if (Qcube) {
+      warning("New experimental CUBE mode");
+      tstr = stropen(getparam("in"),"r");
+      read_image(tstr,&iptr);
+      strclose(tstr);
 
-   noise = getdparam("noise");
-   init_xrandom(getparam("seed"));
-   aspiral = getdparam("aspiral");
-   pspiral = getdparam("pspiral");
-   kspiral = -getdparam("kspiral");	/* positive = trailing arms */
-   nspiral = getdparam("nspiral");
-   vrotfac = aspiral * cos(pspiral*RPD);
-   vexpfac = aspiral * sin(pspiral*RPD);
-   theta0 = getdparam("tspiral") * RPD;
+      size[0] = Nx(iptr);
+      size[1] = Ny(iptr);
+      size[2] = 1;
 
-   /* set for convenience */
+      cell[0] = -Dx(iptr);
+      cell[1] = Dy(iptr);
+      cell[2] = Dz(iptr);
+      Qcube = FALSE;
+    }
+    
 
-   rmin = rad_i[0];
-   rmax = rad_i[nrad-1];
 
-   /* output to user */
-   printf("Mapsize: %d * %d * %d\n",size[0],size[1],size[2]);
-   printf("Cell size: %g * %g * %g\n",cell[0],cell[1],cell[2]);
-   printf("Center: %g * %g pixels\n",center[0],center[1]);
-   printf("BLC: %g %g\n",blc[0],blc[1]);
-   printf("Systemic velocity: %g\n",vsys);
+    noise = getdparam("noise");
+    init_xrandom(getparam("seed"));
+    aspiral = getdparam("aspiral");
+    pspiral = getdparam("pspiral");
+    kspiral = -getdparam("kspiral");	/* positive = trailing arms */
+    nspiral = getdparam("nspiral");
+    vrotfac = aspiral * cos(pspiral*RPD);
+    vexpfac = aspiral * sin(pspiral*RPD);
+    theta0 = getdparam("tspiral") * RPD;
 
-   for (n=1; n<nrad; n++)
+    /* set for convenience */
+
+    rmin = rad_i[0];
+    rmax = rad_i[nrad-1];
+
+    /* output to user */
+    printf("Mapsize: %d * %d * %d\n",size[0],size[1],size[2]);
+    printf("Cell size: %g * %g * %g\n",cell[0],cell[1],cell[2]);
+    printf("Center: %g * %g pixels\n",center[0],center[1]);
+    printf("BLC: %g %g\n",blc[0],blc[1]);
+    printf("Systemic velocity: %g\n",vsys);
+    
+    for (n=1; n<nrad; n++)
       if (rad_i[n] < rad_i[n-1]) error("Radii not sorted (@%d: %g < %g)",
 				       n,rad_i[n] < rad_i[n-1]);
 
-   if (hasvalue("headline")) set_headline(getparam("headline"));
+    if (hasvalue("headline")) set_headline(getparam("headline"));
 
-   Qamp = getbparam("amp");
-
-   intpol = getparam("intpol");
-   if (*intpol == 'l')
-     Qlinear = TRUE;
-   else if (*intpol == 'c')
-     Qlinear = FALSE;
-   else
-     error("intpol=%s should be l(inear) or c(onstant)",intpol);
-}
+    Qamp = getbparam("amp");
+    
+    intpol = getparam("intpol");
+    if (*intpol == 'l')
+      Qlinear = TRUE;
+    else if (*intpol == 'c')
+      Qlinear = FALSE;
+    else
+      error("intpol=%s should be l(inear) or c(onstant)",intpol);
+} /* setparams */
 
 
 /*
@@ -447,14 +464,17 @@ local void vel_create_1(stream outstr)
 	    x = dx*(i-x0) + blc[0];        /* (x,y) are w.r.t. center */
 	    for (k=0; k<nz; k++)
 	      CubeValue(vptr,i,j,k) = undef;       /* set to 'undefined' */
-            
+
             r = sqrt(sqr(x)+sqr(y));        /* get projected radius on sky */
+	    // dprintf(0,"PJT %d %d %g %g  %g %g\n",i,j,x,y,r,rmax);
             if (r > rmax) continue;          /*  certainly outside disk */
 
             delta1 = e[0] = radius(rad_i[0], sinp[0], cosp[0], cosi[0], x, y);
             n = nrad-1;
             delta2 = e[n] = radius(rad_i[n], sinp[n], cosp[n], cosi[n], x, y);
             if (delta1*delta2 > 0) continue;        /* not in disk at all ? */
+
+	    dprintf(1,"PJT %d %d %g %g  %g %g   %g %g\n",i,j,x,y,r,rmax, delta1, delta2);
 
             for (n=1, nr=-1; n<nrad; n++) {    /* find in which 'ring' (x,y) is */
                 e[n] = radius(rad_i[n], sinp[n], cosp[n], cosi[n], x, y);
