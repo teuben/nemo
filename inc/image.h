@@ -272,4 +272,8 @@ void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,            i
 void wcs_i2f(image *iptr, 	     int ndim, double *crpix, double *crval, double *cdelt);
 
 
+/* get_nan.c */
+void get_nanf(float *x);
+void get_nand(double *x);
+
 #endif
