@@ -1,11 +1,12 @@
 #! /usr/bin/csh -f
 #
 #  Installing GIPSY from https://www.astro.rug.nl/~gipsy/installation/installation64.html
-#  This requires too much reading in my opinion.  If your precondition are correct,
-#  and for me that's on Ubuntu, this script will automate it.
+#  This requires too much reading in my opinion.  If your preconditions are correct,
+#  and for me that's on Ubuntu, this script will automate the install.
+#  If NEMO is loaded , this will be in $NEMO/opt/gipsy, else in your current dir.
 #
 #  After installation, you have about 234MB under the GIPSY root directory
-#  This script should take about 5 minutes to install on a typical 2020 laptop
+#  This script should take about 3 minutes to install on a typical 2020 laptop
 
 if ($?NEMO) then
     mkdir -p $NEMO/opt/gipsy
@@ -14,6 +15,7 @@ endif
 
 
 echo sudo apt install gcc gfortran tcsh libxt-dev libncurses-dev libncurses-dev xaw3dg xaw3dg-dev libxaw7-dev -y
+echo pip install https://www.astro.rug.nl/software/kapteyn/kapteyn-3.0.tar.gz
 echo See also:  https://www.astro.rug.nl/~gipsy/installation/installation64.html
 echo Sleeping for 5 seconds, then proceeding in `pwd`
 sleep 5
