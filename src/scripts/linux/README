@@ -28,9 +28,8 @@ libraries are needed as well
 
 1) C,C++,Fortran compiler
 2) tcsh
-3) cvs
-   cvsutils
-4) doxygen
+3) git
+4) doxygen 
 
 
 xorg-x11-proto-devel-7.2-9.fc7
