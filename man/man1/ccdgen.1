@@ -174,6 +174,19 @@ ccdgen "" - blobs @b100.tab size=128,128,128 |\\
   ccdfits - junk2.fits radecvel=t ndim=4
 
 .fi
+Here is an example of making a new data section (in this case just noise)
+by stealing the header from existing \fIfits(5NEMO)\fP file. 
+In \fIbash\fP notation:
+.nf
+
+  fitshead NGC5194_91112.fits > tmp.fitshead
+  nx=$(grep NAXIS1 tmp.fitshead|awk '{print $3}')
+  ny=$(grep NAXIS2 tmp.fitshead|awk '{print $3}')
+  nz=$(grep NAXIS3 tmp.fitshead|awk '{print $3}')
+  ccdgen in= out=- object=noise spar=0,1 size=$nx,$ny,$nz |\\
+     ccdfits - noise.fits fitshead=NGC5194_91112.fits
+  
+.fi
 .SH SEE ALSO
 ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
 .SH FILES
