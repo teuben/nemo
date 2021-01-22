@@ -21,8 +21,10 @@ echo Sleeping for 5 seconds, then proceeding in `pwd`
 sleep 5
 
 # Step 0: Download the source
+url=ftp://ftp.astro.rug.nl/gipsy/gipsy64/src/gipsy64python3_src.tar.gz
 setenv gip_root `\pwd`
-curl ftp://ftp.astro.rug.nl/gipsy/gipsy64/src/gipsy64python3_src.tar.gz  | tar zxf -
+curl $url | tar zxf -
+# wget $url -O -  | tar zxf -
 
 # Installation step 1: Clients file
 cd $gip_root/sys 
