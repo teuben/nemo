@@ -91,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3b\n  5-jan-2021 PJT",
+        "VERSION=6.3c\n  21-jan-2021 PJT",
         NULL,
 };
 
@@ -252,10 +252,10 @@ static string ctypes[4] = { "CTYPE1",   "CTYPE2",   "CTYPE3",   "CTYPE4"};
 static string cdelts[4] = { "CDELT1",   "CDELT2",   "CDELT3",   "CDELT4"};
 static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
 static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
-static string radeves[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
-static string radevet[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
-//static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
-//static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
+static string radevrs[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
+static string radevrt[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
+static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"}; // careful
+static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"}; // careful
 static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
@@ -410,15 +410,15 @@ void write_fits(string name,imageptr iptr)
 
     if (Qradecvel) {
       if (streq(proj,"SIN")) {
-	ctype1_name = radeves[p[0]];
-	ctype2_name = radeves[p[1]];
-	ctype3_name = Qfreq ? radefrs[p[2]] : radeves[p[2]];
-	ctype4_name = radeves[p[3]];
+	ctype1_name = radevrs[p[0]];
+	ctype2_name = radevrs[p[1]];
+	ctype3_name = Qfreq ? radefrs[p[2]] : radevrs[p[2]];
+	ctype4_name = radevrs[p[3]];
       } else if (streq(proj,"TAN")) {
-	ctype1_name = radevet[p[0]];
-	ctype2_name = radevet[p[1]];
-	ctype3_name = Qfreq ? radefrt[p[2]] : radevet[p[2]];	
-	ctype4_name = radevet[p[3]];
+	ctype1_name = radevrt[p[0]];
+	ctype2_name = radevrt[p[1]];
+	ctype3_name = Qfreq ? radefrt[p[2]] : radevrt[p[2]];	
+	ctype4_name = radevrt[p[3]];
       } else
 	error("Illegal projection scheme %s",proj);
 
@@ -443,7 +443,7 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
       else
 	fitwrhda(fitsfile,"BUNIT","JY/PIXEL");        /* if we have no beam */
-      fitwrhda(fitsfile,"TELESCOP","NEMO");  
+      fitwrhda(fitsfile,"TELESCOP","NEMO");
       
     } else {
       if (Qrefmap) {
@@ -468,7 +468,8 @@ void write_fits(string name,imageptr iptr)
     fitwrhda(fitsfile,"SPECSYS","LSRK");     /* spectral reference frame */
     fitwrhda(fitsfile,"RADECSYS","FK5");     // ICRS or FK5
     fitwrhdr(fitsfile,"EQUINOX", equinox);   //
-    warning("Using FK5/2000");
+    // warning("Using FK5/2000");
+    // we don't need VELREF=257
     
     
 
