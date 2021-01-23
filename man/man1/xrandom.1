@@ -132,6 +132,16 @@ geometric              p
 hypergeometric         n1 n2 nt
 logarithmic            sigma
 .fi
+.SH RANDOM
+Random numbers can be seeded using the \fIseed=\fP keyword.  There are also Unix ways to do this. Here are a few (using bash notation):
+.nf
+
+echo $RANDOM
+echo $$
+shuf -i 1-100 -n 5
+awk -v n=5 -v seed="$RANDOM" 'BEGIN {srand(seed); for(i=0; i<n; ++i) printf("%.3f\\n",rand())}'
+
+.fi
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
