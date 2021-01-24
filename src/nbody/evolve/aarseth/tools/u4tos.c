@@ -11,6 +11,7 @@
 #include <getparam.h>
 #include <filestruct.h>
 #include <history.h>
+#include <unfio.h>
 #include <snapshot/snapshot.h>
 #include "nbody_io.h"
 
