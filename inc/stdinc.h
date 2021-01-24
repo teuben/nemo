@@ -83,6 +83,7 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 #include <stdlib.h>
 #include <unistd.h>
 #include <errno.h>
+#include <limits.h>  
 
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
@@ -102,6 +103,7 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #if STDC_HEADERS
 #include <string.h>
+#include <strings.h>
 #else
 # ifndef HAVE_STRCHR
 #   define strchr  index
@@ -629,11 +631,6 @@ extern bool within(double val, string range, double fuzz);
 }
 #endif
 
-/* for tables: (ought to go into maxsizes.h) */
-
-#ifndef MAXLINES
-#define MAXLINES 10000
-#endif
 
 /* for solaris compiler SC4.2, doesn't appear to know HUGE .... */
 /* should fit double and single precision floating point        */

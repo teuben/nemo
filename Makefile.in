@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 15-oct-2020 PJT
+VERSION = NEMO V4.2 21-nov-2020 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -105,7 +105,7 @@ install:
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
 	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
-	@echo "      make build2            -- 2: libs + falcon"
+	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
 	@echo "      make build4            -- 4: mknemo build reconfirmation"
 	@echo "      make check             -- the testsuite"
@@ -433,7 +433,7 @@ build:   build1 build2 build3 build4
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
-	@echo 'Continue with "make build2"'
+	@echo 'Continue with "make build2 (or build2a build2b)"'
 
 build2:
 	(source nemo_start.sh ; $(MAKE) libs)
@@ -522,6 +522,12 @@ cleansrc:
 # via configure it will select:    MAKELIBS = corelibs dehnen     
 libs:	$(MAKELIBS)
 	@echo Done at `date`
+
+build2a:  corelibs
+	@echo Done at `date` - continue with build2b or build3
+
+build2b:  dehnen
+	@echo Done at `date` - continue with build3
 
 # gyrfalcON
 dehnen:

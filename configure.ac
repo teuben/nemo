@@ -144,10 +144,10 @@ fi
 
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-  flags="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
-  flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
-  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O4"
-  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wclobbered -Wuninitialized"
+  flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
+  flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
+  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
+  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
   # FFLAGS="$CFLAGS $flags"
@@ -228,6 +228,13 @@ AC_ARG_WITH(opt,
 		  [  --with-opt              use opt for essentials], with_opt=$withval, with_opt=no)
 AC_ARG_WITH(openmp,
 		  [  --with-openmp           use OMP directives], with_openmp=$withval, with_openmp=no)
+
+AC_ARG_WITH(std,
+		  [  --with-std              use this -std=], with_std=$withval, with_std=default)
+
+if test $with_std != "default"; then
+  CFLAGS="$CFLAGS -D_GNU_SOURCE -std=$with_std"
+fi
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
