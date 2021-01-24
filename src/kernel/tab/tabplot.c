@@ -107,7 +107,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.0a\n	 21-nov-2020 PJT",
+    "VERSION=4.0b\n	 23-jan-2021 PJT",
     NULL
 };
 
@@ -162,7 +162,14 @@ local plcommand *layout;
 local bool layout_first;
 local bool Qreadlines;
 
-void setparams(), plot_data();
+void setparams(void);
+void read_data(void);
+void plot_data(void);
+void rebin_data(int n, real *x, real *y, int nbin, real *xbin, int np, real *xp, real *yp, real *xps, real *yps);
+void plot_points(int np, real xp[], real yp[], real dx[], real dy[], real xps[], real yps[], real pstyle, real psize, int lwidth, int lstyle, int color, int errorbars);
+void parse_pairsi(string key, int *pairs, int nycol);
+void parse_pairsr(string key, real *pairs, int nycol);
+double my_sqrt(double x);
 
 extern real smedian(int, real *);
 extern int nemo_file_lines(string, int);
@@ -189,7 +196,7 @@ void nemo_main(void)
     plot_data();
 }
 
-void setparams()
+void setparams(void)
 {
     char *smin,*smax;
     int  i, j;
@@ -343,7 +350,7 @@ void setparams()
 #define MVAL 		 64
 #define MLINELEN	512
 
-read_data()
+void read_data(void)
 {
     real *coldat[1+MAXCOL];
     int i, j, k, colnr[1+MAXCOL];
@@ -420,7 +427,7 @@ read_data()
 }
 
 
-void plot_data()
+void plot_data(void)
 {
     int    i, j, k;
     real xcur, ycur, edge;
@@ -611,9 +618,7 @@ double my_sqrt(double x)
  *      It is assumed that the X-data are sorted
  */
  
-rebin_data (n,x,y, nbin,xbin, np, xp, yp,  xps, yps)
-int n, nbin, np;
-real *x, *y, *xbin, *xp, *yp, *xps, *yps;
+void rebin_data (int n, real *x, real *y, int nbin, real *xbin, int np, real *xp, real *yp,  real *xps, real *yps)
 {
     int    i, j, ip, iold=0, zbin=0;
     Moment mx, my;
@@ -657,17 +662,18 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 	  }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab)
+	if(Qtab) {
 	    if (n_moment(&mx))    /* print non-zero bins */
 	      printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
             else
 	      printf("# 0\n");    /* comment line for empty bin */
+	}
         iold = i;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
     if(i<n) warning("%d points right of last bin",i);
     if (nbin>0)
-        return 0;      /* done with variable bins */
+        return;      /* done with variable bins */
 
     nbin = -nbin;       /* make it positive for fixed binning */
     for (i=0, ip=0; i<n;ip++) {       /* loop over all points */
@@ -695,9 +701,8 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
  *      X,Y Points with value NaN are skipped, as well as their errorbars
  */
  
-plot_points (np, xp, yp, dx, dy, xps, yps, pstyle, psize, lwidth, lstyle, color, errorbars)
-int np, lwidth, lstyle, color, errorbars;
-real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
+void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, real *yps,
+		  real pstyle, real psize, int lwidth, int lstyle, int color, int errorbars)
 {
     int i, ipstyle;
     real p1, p2;
@@ -750,7 +755,7 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
         plltype(1,1);
     }
     
-    if (errorbars && 0x0001) {
+    if (errorbars & 0x0001) {
         dprintf(0,"Trying X binning errors\n");
         for (i=0; i<np; i++) {
             if (xps[i] == NaN || xp[i] == NaN)
@@ -761,7 +766,7 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
             plline (xtrans(p2), ytrans(yp[i]));
         }
     }
-    if (errorbars && 0x0002) {
+    if (errorbars & 0x0002) {
         dprintf(0,"Trying Y binning errors\n");
         for (i=0; i<np; i++) {
             if (yps[i] == NaN || yp[i] == NaN)
@@ -842,10 +847,7 @@ local void setrange(real *rval, string rexp)
 
 
 
-parse_pairsi(key, pairs, nycol)
-string key;
-int *pairs;
-int nycol;
+void parse_pairsi(string key, int *pairs, int nycol)
 {
     int n, i;
 
@@ -856,10 +858,7 @@ int nycol;
 
 }
 
-parse_pairsr(key, pairs, nycol)
-string key;
-real *pairs;
-int nycol;
+void parse_pairsr(string key, real *pairs, int nycol)
 {
     int n, i;
     real r1, r2;
