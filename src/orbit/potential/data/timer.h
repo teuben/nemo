@@ -43,8 +43,8 @@ static const char* timers = "adiabatic, saturate, quasi-linear, linear";
 /*
  * timer functions (assume t > t0)
  */
-inline double square_double(double x) { return x*x; }
-inline float  square_float (float  x) { return x*x; }
+static inline double square_double(double x) { return x*x; }
+static inline float  square_float (float  x) { return x*x; }
 /*
  *      3   5    5   3    15       1           t - t0
  * A = --- x  - --- x  + ---- x + ---;  x = 2 -------- - 1;
@@ -52,7 +52,7 @@ inline float  square_float (float  x) { return x*x; }
  *
  * for t in [t0,t0+tau]
  */
-inline double adiabatic_double(double t) {
+static inline double adiabatic_double(double t) {
   register double xi, xq;
   if(t >= t1d) return 1.;
   xi  = 2*(t-t0d)*itaud-1;
@@ -61,7 +61,7 @@ inline double adiabatic_double(double t) {
   return xi + 0.5;
 }
 
-inline float adiabatic_float(float t) {
+static inline float adiabatic_float(float t) {
   register float xi, xq;
   if(t >= t1f) return 1.f;
   xi  = 2*(t-t0f)*itauf-1;
@@ -74,11 +74,11 @@ inline float adiabatic_float(float t) {
  * A = 1 - exp(--------);
  *               tau
  */
-inline double saturate_double(double t) {
+static inline double saturate_double(double t) {
   return 1.  - exp((t0d-t)*itaud);
 }
 
-inline float saturate_float(float t) {
+static inline float saturate_float(float t) {
   return 1.f - expf((t0f-t)*itauf);
 }
 /*
@@ -86,11 +86,11 @@ inline float saturate_float(float t) {
  * A = sqrt( x  + 1 ) - 1;  x = --------;
  *                                tau
  */
-inline double quasilinear_double(double t) {
+static inline double quasilinear_double(double t) {
   return sqrt(square_double((t-t0d)*itaud)+1.)-1.;
 }
 
-inline float quasilinear_float(float t) {
+static inline float quasilinear_float(float t) {
   return sqrtf(square_float((t-t0f)*itauf)+1.f)-1.f;
 }
 /*
@@ -98,17 +98,17 @@ inline float quasilinear_float(float t) {
  * A = x = --------;
  *           tau
  */
-inline double linear_double(double t) {
+static inline double linear_double(double t) {
   return t<t0d? 0. : (t-t0d)*itaud;
 }
 
-inline float inear_float(float t) {
+static inline float linear_float(float t) {
   return t<t0f? 0. : (t-t0f)*itauf;
 }
 /*
  * routines to be used in externally linkable potentials
  */
-inline void init_timer(int    index,
+static inline void init_timer(int    index,
 		       double t0,
 		       double tau)
 {
@@ -121,7 +121,7 @@ inline void init_timer(int    index,
 			" defaulting to index=0 [=adiabatic]\n",index);
 }
 
-inline double timer_double(double t)
+static inline double timer_double(double t)
 {
   if (t <= t0d) return 0.;
   switch(timer) {
@@ -132,7 +132,7 @@ inline double timer_double(double t)
   }
 }
 
-inline float timer_float(float t)
+static inline float timer_float(float t)
 {
   if (t <= t0f) return 0.f;
   switch(timer) {
