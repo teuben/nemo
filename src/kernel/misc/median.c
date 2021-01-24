@@ -10,6 +10,7 @@
  */
 
 #include <stdinc.h>
+#include <limits.h>
 
 // variables needed for the pmedian* functions that used a pointer array
 static int nix=0;
@@ -39,8 +40,11 @@ real smedian_q1(int n, real *x)
   if (n>4) {
     n1=(n+1)/4;
     return x[n1];
-  } else
+  } else {
     error("smedian_q1: too few points");
+    return INT_MIN;
+  }
+    
 
 }
 
@@ -50,9 +54,10 @@ real smedian_q3(int n, real *x)
   if (n>4) {
     n3=((n+1)*3)/4;
     return x[n3];
-  } else
+  } else {
     error("smedian_q1: too few points");
-
+    return INT_MIN;
+  }
 }
 
 
@@ -96,8 +101,10 @@ real pmedian_q1(int n, real *x)
   if (n>4) {
     n1=(n+1)/4;
     return(x[ix[n1]]);
-  } else
+  } else {
     error("median_q1: too few points");
+    return INT_MIN;
+  }
 
 }
 real pmedian_q3(int n, real *x)
@@ -108,8 +115,10 @@ real pmedian_q3(int n, real *x)
   if (n>4) {
     n3=((n+1)*3)/4;
     return(x[ix[n3]]);
-  } else
+  } else {
     error("median_q1: too few points");
+    return INT_MIN;
+  }
 
 }
 
@@ -229,6 +238,6 @@ real median_wirth(int n, real  *x)
     return kth_smallest(n, x,   n/2);      /* odd, picks the middle */
   else
     return kth_smallest(n, x,   n/2 - 1);  /* even, a slight cheat */
-  /* never reached */
+  /* NEVER REACHED */
   return x[0];
 }

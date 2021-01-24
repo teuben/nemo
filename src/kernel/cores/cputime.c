@@ -29,7 +29,9 @@
 
 #define TRY_CLOCK
 // test  LINUX doesn't do CLK_TCK correct anymore?
+#ifndef CLK_TCK
 #define CLK_TCK 100
+#endif
 
 /*  CLK_TCK is typically 100, in g++ CLK_TCK isn't known, uses CLOCK_PER_SEC, else fail */
 
@@ -47,6 +49,7 @@ double cputime2(int mode)
 {
     struct tms buffer;
     clock_t pt = 0;
+    double return_flag;
 
     if (clk_tck == 0) {
       clk_tck = sysconf(_SC_CLK_TCK);
@@ -60,11 +63,12 @@ double cputime2(int mode)
     dprintf(4,"cputool: times: usr=%ld sys=%ld clock=%ld\n",buffer.tms_utime, buffer.tms_stime,pt);
 
     if (mode == 0)
-        return buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
+        return_flag = buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
     else if (mode == 1)
-        return buffer.tms_stime / ((double)CLK_TCK * 60.0);       /* return minutes */
+        return_flag = buffer.tms_stime / ((double)CLK_TCK * 60.0);       /* return minutes */
     else if (mode == 2)
         return pt/( (double)CLOCKS_PER_SEC*60.0);
+    return 0.0;    /* NEVER REACHED */
 }
 
 double cputime()

@@ -39,7 +39,7 @@ int error_level = 0;	   /* yuck, but this needs to be globally visible */
 local proc cleanup=NULL;   /* if not NULL this points to error cleanup proc */
 local int error_count=0;
 local int exit_level=0;
-local int last_errno=0;
+//local int last_errno=0;
 
 static void report_errno(void)
 {

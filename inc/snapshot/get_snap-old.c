@@ -581,7 +581,7 @@ stream instr;
   Body *btab = NULL;
   int nbody = 0;
   real tsnap;
-  real bits;
+  int bits;
   
   get_history(instr);
   if (!get_tag_ok(instr, SnapShotTag))
