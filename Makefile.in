@@ -112,6 +112,7 @@ install:
 	@echo "      make bench             -- the benchmark"
 	@echo ""
 	@echo "After this, users will need to source the nemo_start.(c)sh file"
+	@echo "Local variations go in nemo_local.(c)sh and ~/.nemo_local.(c)sh"
 	@echo "There is also some new python support via nemo_start.py"
 
 lsb:
