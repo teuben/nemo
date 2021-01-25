@@ -5899,7 +5899,7 @@ fi
 if test "${with_std+set}" = set; then :
   withval=$with_std; with_std=$withval
 else
-  with_std=default
+  with_std=c99
 fi
 
 

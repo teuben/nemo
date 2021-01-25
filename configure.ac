@@ -230,7 +230,7 @@ AC_ARG_WITH(openmp,
 		  [  --with-openmp           use OMP directives], with_openmp=$withval, with_openmp=no)
 
 AC_ARG_WITH(std,
-		  [  --with-std              use this -std=], with_std=$withval, with_std=default)
+		  [  --with-std              use this -std=], with_std=$withval, with_std=c99)
 
 if test $with_std != "default"; then
   CFLAGS="$CFLAGS -D_GNU_SOURCE -std=$with_std"
