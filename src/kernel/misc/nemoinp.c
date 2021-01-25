@@ -364,6 +364,7 @@ double natof(char *expr)
     return atof("nan");
 
   n = nemoinpd(expr,&x,1);
+  if (n!=1) warning("Parsing %s",expr);
   return x;
 }
 
@@ -371,6 +372,7 @@ int natoi(char *expr)
 {
   int x, n;
   n = nemoinpi(expr,&x,1);
+  if (n!=1) warning("Parsing %s",expr);  
   return x;
 }
 
@@ -387,7 +389,7 @@ string defv[] = {
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.10c\n	23-feb-2019 PJT",
+    "VERSION=1.10d\n	24-jan-2021 PJT",
     NULL,
 };
 
