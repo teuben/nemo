@@ -456,7 +456,7 @@ build4:
 
 # the exact python method under development
 
-python: anaconda3 testpython
+python: anaconda3
 
 python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
