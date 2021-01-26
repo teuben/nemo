@@ -137,6 +137,7 @@ help2:
 
 # optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
+	@echo MKNEMOS=$(MKNEMOS)
 	@for mkn in $(MKNEMOS); do \
 	echo mknemo $$mkn;\
 	mknemo $$mkn > install_mknemo_$$mkn.log 2>&1;\
