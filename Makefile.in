@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 21-nov-2020 PJT
+VERSION = NEMO V4.2 24-jan-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -454,10 +454,13 @@ build4:
 
 # the exact python method under development
 
-python: anaconda3
+python: anaconda3 testpython
 
 python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
+
+testpython:
+	(source nemo_start.sh; cd src/scripts/python; make tests)
 
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
@@ -565,7 +568,7 @@ testsuite:
 	@echo ISSUE the following command:
 	@echo 'src/scripts/testsuite -b'
 
-check:
+check: 
 	(source nemo_start.sh; src/scripts/testsuite)
 	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
