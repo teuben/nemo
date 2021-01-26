@@ -14,5 +14,5 @@ clean:
 	rm -f p100
 
 tests:
-	-@for p in $(TESTS); do\
+		@for p in $(TESTS); do\
 	(echo $$p; ./$$p > /dev/null); done
