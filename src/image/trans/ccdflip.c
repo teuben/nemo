@@ -21,7 +21,7 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output file",
 	"flip=x\n       Flip in x,y  or allow xy for square images",
-	"VERSION=1.3\n  17-jun-2019 PJT",
+	"VERSION=1.3a\n  27-jan-2021 PJT",
 	NULL,
 };
 
@@ -70,6 +70,8 @@ void nemo_main()
     outstr = stropen(getparam("out"), "w");
 
     read_image( instr, &iptr);
+    if (Axis(iptr) > 0)
+      warning("WCS is not changed, only values flipped");
 
     nx = Nx(iptr);	
     ny = Ny(iptr);
