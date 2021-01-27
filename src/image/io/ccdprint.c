@@ -34,7 +34,7 @@ string defv[] = {
   "pixel=f\n          Labels in Pixel or Physical coordinates?",
   "pair=f\n           Should input (x,y,z) be paired up",
   "seq=0\n            Print a sequence using access shortcut",
-  "VERSION=1.6\n      15-oct-2011 PJT",
+  "VERSION=1.7\n      26-jan-2021 PJT",
   NULL,
 };
 
@@ -46,7 +46,7 @@ int ini_array(string key, int *dat, int ndat, int offset);
 void myprintf(string fmt, real v);
 
 
-nemo_main()
+void nemo_main(void)
 {
     int     *ix, *iy, *iz, i, j, k, j1, l, nx, ny, nz, nxpos, nypos, nzpos, offset, nlcount=0;
     int     nmax;
@@ -79,7 +79,6 @@ nemo_main()
       for (i=0; i<seq; i++) printf("%g\n",data[i]);
       stop(0);
     }
-    
     
     nx = Nx(iptr);	                        /* cube dimensions */
     ny = Ny(iptr);
@@ -116,7 +115,7 @@ nemo_main()
 
     for (k=0; k<nzpos; k++) {				/* loop over all planes */
         if (Qpair) break;
-        z = Zmin(iptr) + iz[k] * Dz(iptr);
+        z = Zmin(iptr) + (iz[k]-Zref(iptr)) * Dz(iptr);
         if (!newline && zlabel) {
             printf("plane Z = ");
 	    myprintf(fmt, Qpixel ? (real)k : z);
@@ -126,11 +125,11 @@ nemo_main()
         for (j1=0; j1<nypos; j1++) {			/* loop over all rows */
 	    if (Qpair && nypos > 1) j1 = l;
 	    j = Qyrev ? nypos-1-j1 : j1;
-            y = Ymin(iptr) + iy[j] * Dy(iptr);
+            y = Ymin(iptr) + (iy[j]-Yref(iptr)) * Dy(iptr);
             if (j==(nypos-1) && !newline && xlabel) {    /* pr. row of X coords */
 	      if (ylabel) printf(" Y\\X ");     /* ? how to get correct length ? */
 	      for (i=0; i<nxpos; i++) {
-		x = Xmin(iptr) + ix[i] * Dx(iptr);
+		x = Xmin(iptr) + (ix[i]-Xref(iptr)) * Dx(iptr);
 		myprintf(fmt, Qpixel ? (real)i : x);
 	      }
 	      printf("\n\n");
@@ -144,7 +143,7 @@ nemo_main()
   	        if (Qpair && nxpos > 1) i = l;
                 f = CubeValue(iptr,ix[i],iy[j],iz[k]);
                 if (newline) {
-                    x = Xmin(iptr) + ix[i] * Dx(iptr);
+		  x = Xmin(iptr) + (ix[i]-Xref(iptr)) * Dx(iptr);
                     if (xlabel) myprintf(fmt,Qpixel ? (real)i : x);
                     if (ylabel) myprintf(fmt,Qpixel ? (real)j : y);
                     if (zlabel) myprintf(fmt,Qpixel ? (real)k : z);
@@ -176,7 +175,7 @@ nemo_main()
     strclose(instr);
 }
 
-ini_array(
+int ini_array(
 	  string key,             /* keyword */
 	  int *dat,               /* array */
 	  int ndat,               /* length of array */
