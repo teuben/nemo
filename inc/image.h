@@ -252,6 +252,7 @@ typedef struct {
 #define     MapTag		"Map"
 #define     MapValuesTag	"MapValues"
 
+int minmax_image ( imageptr );
 int write_image  ( stream, imageptr );
 int read_image   ( stream, imageptr * );
 int free_image   ( imageptr );
