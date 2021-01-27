@@ -30,9 +30,9 @@
 #include <image.h>
 #include <grid.h>
 
-#ifdef INC_HDF
+//#ifdef INC_HDF
 #include <hdf.h> 	/* some conflicts with nemo include files */
-#endif
+//#endif
 
 string defv[] = {
     "in=???\n			Input file (HDF SD)",
@@ -46,7 +46,7 @@ string defv[] = {
     "periodic=t\n               Attempt to fill the plan by cloning the wedge N times",
     "z=0\n                      Select a z-slice (0=first) from the RPZ cube if NZ > 1",
     "order=zpr\n                Order of HDF axes",
-    "VERSION=0.5\n		26-oct-06 PJT",
+    "VERSION=0.5a\n		26-jan-2021 PJT",
     NULL,
 };
 

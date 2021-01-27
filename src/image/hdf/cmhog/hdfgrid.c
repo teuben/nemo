@@ -37,9 +37,9 @@
 #include <image.h>
 #include <grid.h>
 
-#ifdef INC_HDF
+//#ifdef INC_HDF
 #include <hdf.h> 	/* some conflicts with nemo include files */
-#endif
+//#endif
 
 string defv[] = {
     "in=???\n			Input file (HDF SD)",
@@ -57,7 +57,7 @@ string defv[] = {
     "phi1=0\n                   Shift THETA values first (*test*)",
     "scale2=1\n                 Scale THETA values after shift (*test*)",
     "phi3=0\n                   Shift THETA values after scale (*test*)",
-    "VERSION=2.1\n		15-dec-04 PJT",
+    "VERSION=2.1a\n		26-jan-2021 PJT",
     NULL,
 };
 
@@ -107,7 +107,7 @@ void nemo_main()
     sumphi3 = getdparam("phi3");
     nsds = DFSDndatasets(infile);
     if (nsds<0) 
-        error("%s is probably not an HDF scientific dataset",infile);
+      error("%s is probably not an HDF scientific dataset [%d]",infile,nsds);
     dprintf(1,"Found %d scientific data set%s in %s\n",
             nsds,(nsds > 1 ? "s" : ""),infile);
     if (hasvalue("zvar")) {
