@@ -28,7 +28,7 @@ string cvsid="$Id$";
 
 extern string *burststring(string,string);
 
-nemo_main()
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     string *filename;
