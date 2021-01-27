@@ -34,7 +34,11 @@ string usage="takes slices from a cube";
 static int need_init_minmax = 1;
 static real new_min, new_max;
 
-nemo_main()
+void new_minmax(real ival);
+void slice(imageptr i, imageptr o, int mode, int *planes);
+
+
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
@@ -82,7 +86,7 @@ nemo_main()
     strclose(outstr);
 }
 
-new_minmax(real ival) 
+void new_minmax(real ival) 
 {
   if (need_init_minmax) {
     need_init_minmax = 0;
@@ -94,10 +98,12 @@ new_minmax(real ival)
   }
 }
 
-slice(imageptr i, imageptr o, int mode, int *planes)
+void slice(imageptr i, imageptr o, int mode, int *planes)
 {
     int x, y, z, iz;
     real ival;
+
+    warning("Code not converted to fix reference pixel value");
 
     if (mode==X_SLICE) {
         for(iz=0; iz<Nz(o); iz++) {
