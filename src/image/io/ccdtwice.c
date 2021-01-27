@@ -27,7 +27,7 @@ string defv[] = {
     "dup=t\n        duplicate or interpolate?",
     "wcs=t\n        Retain WCS borders?",
     "ndim=2\n       2D or 3D duplication",
-    "VERSION=2.0a\n 26-jan-2021 PJT",
+    "VERSION=2.1\n  26-jan-2021 PJT",
     NULL,
 };
 
@@ -102,6 +102,9 @@ void slice2(imageptr i, imageptr o, int n, real factor, bool Qwcs)
       Dx(o) = Dx(i)*fac;
       Dy(o) = Dy(i)*fac;
     }
+    Xref(o) = Xref(i);
+    Yref(o) = Yref(i);
+    Axis(o) = Axis(i);
     MapMin(o) = MapMin(i) * factor;
     MapMax(o) = MapMax(i) * factor;
 }
@@ -119,6 +122,9 @@ void slice3(imageptr i, imageptr o, int n, real factor)
     Ymin(o) = Ymin(i);
     Dx(o) = Dx(i)*fac;
     Dy(o) = Dy(i)*fac;
+    Xref(o) = Xref(i);
+    Yref(o) = Yref(i);
+    Axis(o) = Axis(i);
     MapMin(o) = MapMin(i) * factor;
     MapMax(o) = MapMax(i) * factor;
 }
