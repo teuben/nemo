@@ -69,7 +69,7 @@ local real string_real(string,string);
 float *expand_array(float *a, int size, int n, int *idx);
 
 
-void nemo_main()
+void nemo_main(void)
 {
   float **image, **coord, *buffer, *rads, *phis, *phisf, rad, phi, phi_orig, 
     dmin, dmax, phi1, phi2, rad1, rad2;
