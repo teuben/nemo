@@ -49,7 +49,7 @@ void write_fits(string,imageptr);
 void fits_error( int status);
 
 
-void nemo_main()
+void nemo_main(void)
 {
     setparams();                               /* set cmdln par's */
     instr = stropen (getparam("in"), "r");     /* open image file */
@@ -125,7 +125,7 @@ void fits_error( int status)
 
 
 #else
-nemo_main()
+void nemo_main(void)
 {
     error("CFITSIO library not available");
 }
