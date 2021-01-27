@@ -21,6 +21,8 @@
  *
  *  todo
  *     - near an edge, normalization is done with full beam, so the signal tapers off....
+ *
+ *  moffat:   https://ui.adsabs.harvard.edu/abs/1969A%26A.....3..455M/abstract
  */
 
 #include <stdinc.h>
@@ -81,19 +83,19 @@ int    mode;                            /* special edge smoothing modes */
 bool   Qbad;                            /* ignore smoothing for */
 real   bad;                             /* this value */
 
-void setparams(), smooth_it();
+void setparams(), smooth_it(), wiener();
 int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
 
 void make_gauss_beam(char *sdir);
 void make_moffat_beam(char *sdir);
 
 
-void nemo_main ()
+void nemo_main(void)
 {
     setparams();			/* set par's in globals */
 
-    instr = stropen (infile, "r");
-    read_image (instr,&iptr);
+    instr = stropen(infile, "r");
+    read_image(instr,&iptr);
 				/* set some global paramters */
     nx = Nx(iptr);	
     ny = Ny(iptr);
@@ -107,7 +109,7 @@ void nemo_main ()
 
     if(hasvalue("gauss"))
         make_gauss_beam(getparam("dir"));
-    else if (hasvalue("moffat")) {    /*  http://adsabs.harvard.edu/abs/1969A%26A.....3..455M */
+    else if (hasvalue("moffat")) {  
 	moffat_fwhm = getrparam("moffat");
         moffat_beta = getrparam("beta");
 	moffat_alpha = moffat_fwhm / (2*sqrt(pow(2.0,1.0/moffat_beta)-1));
@@ -115,12 +117,12 @@ void nemo_main ()
 	make_moffat_beam(getparam("dir"));
     }
 
-    outstr = stropen (outfile,"w");
+    outstr = stropen(outfile,"w");
     if (hasvalue("wiener"))
       wiener();
     else
       smooth_it();
-    write_image (outstr,iptr);
+    write_image(outstr,iptr);
 
     strclose(instr);
     strclose(outstr);
@@ -421,13 +423,12 @@ int    nx, ny, nz, nb, ix, iy;
 
 
 
-int wiener(void)
+void wiener(void)
 {
 #if 0
   imageptr itmp = NULL;
   int ix, iy, ixd, iyd; ix1, iy1;
-
-
+  
   itmp = create_image(iptr,nx,ny);
 
   for (iz=0; iz< nz; iz++) {
@@ -447,16 +448,14 @@ int wiener(void)
 	    sumii += MapValue(iptr,ix1,iy1,iz) * MapValue(iptr,ix1,iy1,iz);
 	    
 	    
-	
-    
-
-    for (iy=0; iy<ny; iy++)
+	    for (iy=0; iy<ny; iy++)
       for (ix=0; ix<nx; ix++)   	
           brightness = CubeValue(iptr,ix,iy,iz);
 	  total += brightness;
           m_max = MAX(m_max, brightness);
           m_min = MIN(m_min, brightness);
-    }
-
+	  
+#else
+	  error("wiener not implmented");
 #endif
 }
