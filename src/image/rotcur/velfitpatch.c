@@ -11,6 +11,7 @@
 #include <nemo.h>
 #include <image.h>
 #include <spline.h>
+#include <lsq.h>
 
 string defv[] = {
   "in=???\n       input velocity field",
@@ -20,7 +21,7 @@ string defv[] = {
   "blank=0.0\n    Blank Value in velocity field to skip",
   "mode=xy\n      Output mode (xy derivates, vs. gp (gradient/position angle)",
   "tab=\n         If given, tabular output file name",
-  "VERSION=0.4\n  26-jul-2015 PJT",
+  "VERSION=0.4a\n 26-jan-2021 PJT",
   NULL,
 };
 
@@ -34,7 +35,7 @@ void xy2rt(real *sol);
 
 imageptr velptr = NULL, outptr0 = NULL, outptr1 = NULL, outptr2 = NULL;
 
-nemo_main()
+void nemo_main()
 {
   bool Qsample, Qtab, Qout, Qxy;
   stream velstr, tabstr, outstr0, outstr1, outstr2;
