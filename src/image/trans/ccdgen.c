@@ -178,6 +178,7 @@ void nemo_main(void)
   Xref(iptr) = center[0];
   Yref(iptr) = center[1];
   Zref(iptr) = 0.0;
+  Axis(iptr) = 1;
   dprintf(0,"%s: center pixel: %g %g\n",object,center[0],center[1]);
   surface = Dx(iptr)*Dy(iptr);
   surface = ABS(surface);
@@ -214,6 +215,8 @@ void nemo_main(void)
     object_blobs(ndim,npar,spar);
   else
     error("Unknown object %g",object);
+
+  minmax_image(iptr);
   
   outstr = stropen (getparam("out"),"w");  /* open output file first ... */
   if (hasvalue("headline"))
@@ -221,6 +224,7 @@ void nemo_main(void)
   write_image (outstr,iptr);         /* write image to file */
   strclose(outstr);
 }
+
 
 /*
  *  create new map from scratch, using %x and %y as position parameters 
