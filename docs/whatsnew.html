@@ -32,7 +32,8 @@ Although there is still a raging virus, it's just time to wrap this up this rele
 given the large number of updates.
 <UL>
   <LI> (jan-2021) CCD images should now all be using a reference pixel, where in the
-    old code (0,0,0) was hardcoded.
+    old code (0,0,0) was hardcoded and Axis=0. Images should now have Axis=1, otherwise
+    code was not converted yet.
   <LI> (jan-2021) new programs:  ccdmoms, ccdellint, lmtinfo, ccdzshift
   <LI> Code made C99 clean, mostly.
   <LI> (oct-2020) new programs:  tabgen, snapnear, bigread, snapipdist
