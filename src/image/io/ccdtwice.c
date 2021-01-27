@@ -27,7 +27,7 @@ string defv[] = {
     "dup=t\n        duplicate or interpolate?",
     "wcs=t\n        Retain WCS borders?",
     "ndim=2\n       2D or 3D duplication",
-    "VERSION=2.0\n  20-jul-2012 PJT",
+    "VERSION=2.0a\n 26-jan-2021 PJT",
     NULL,
 };
 
@@ -35,7 +35,7 @@ string usage="duplicate a 2D image";
 
 void slice2(imageptr i, imageptr o,  int n, real factor, bool Qwcs);
 
-nemo_main()
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
