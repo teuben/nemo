@@ -992,7 +992,7 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         range[1] = natof(cp);
     range[2] = (range[1]-range[0])/(real)n;       /* step */
     if (range[2] < 0)
-      warning("%s: This axis %d has negative step",rexp,n);
+      warning("%s: This axis n=%d has negative step %g, you must be an observer",rexp,n,range[2]);
     cp = strchr(cp,',');
     if (cp)
         *beam = natof(++cp);                  /* convolution beam */
