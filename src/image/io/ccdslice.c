@@ -17,7 +17,7 @@ string defv[] = {	/* keywords + help string for user interface */
     "out=???\n      Output filename (image)",
     "zvar=z\n       Slice variable (x,y,z)",
     "zrange=\n      Slices to select (1..n<zvar>)",
-    "VERSION=1.0a\n 29-dec-01 PJT",
+    "VERSION=1.0b\n 27-jan-2021 PJT",
     NULL,
 };
 
@@ -49,6 +49,8 @@ void nemo_main(void)
     instr = stropen (getparam("in"),"r");	/* get stream */
     read_image (instr,&iptr);               /* read image */
     strclose(instr);                        /* close image file */
+
+    if (Axis(iptr)) warning("axis=1 not supported yet");
 
     zvar = getparam("zvar");
     if (streq(zvar,"x")) {
