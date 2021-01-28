@@ -4,6 +4,8 @@
  *	24-jun-2020	V0.1 Q&D     PJT
  */
 
+//   @todo    remove paired duplicates    (i,j) and (j,i)
+
 #include <stdinc.h>
 #include <getparam.h>
 #include <moment.h>
