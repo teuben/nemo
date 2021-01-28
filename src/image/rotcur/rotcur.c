@@ -153,7 +153,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.14b\n 18-jan-2021 PJT",
+    "VERSION=2.14c\n 23-jan-2021 PJT",
     NULL,
 };
 
@@ -404,7 +404,7 @@ stream  lunpri;       /* LUN for print output */
       read_image(velstr,&velptr);                 /* get data */
       copy_image(velptr,&resptr);
       if (Qreuse) {
-	create_image_mask(&velptr,&maskptr);
+	create_image_mask(velptr,&maskptr);
 	for (i=0; i<Nx(maskptr); i++)
 	for (j=0; j<Ny(maskptr); j++)
 	  MapValue(maskptr,i,j) = TRUE;

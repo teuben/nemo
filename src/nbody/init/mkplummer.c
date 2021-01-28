@@ -66,7 +66,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0\n            5-nov-2018 PJT",
+    "VERSION=3.0a\n           24-jan-2021 PJT",
     NULL,
 };
 
@@ -83,13 +83,13 @@ void nemo_main(void)
 {
     bool    zerocm;
     int     nbody, seed, bits, quiet, i, j, n, nmodel, mode;
-    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale, rsum;
+    real    snap_time, rfrac, mfrac, mlow, mrange[2], scale;
     Body    **btab, *bp;
     stream  outstr;
     string  massname;
     char    hisline[80], sseed[80];
     rproc   mfunc;
-    rproc_body   r2func, v2func, vzfunc;
+    rproc_body   r2func, v2func;
     Grid    gr2;
     int     ngr2, ir2;
     Moment  mgv2[MAXNGR2],  mgvz[MAXNGR2];
@@ -122,7 +122,6 @@ void nemo_main(void)
 
     r2func = btrtrans("r2");
     v2func = btrtrans("v2");
-    vzfunc = btrtrans("vz");
 
     if (mode>0) outstr = stropen(getparam("out"), "w");
 
@@ -166,7 +165,6 @@ void nemo_main(void)
     }
 
     for (i=0; i<nmodel; i++) {
-      rsum = 0.0;
       for (j=0; j<ngr2; j++) {
 	reset_moment(&mgv2[j]);
 	reset_moment(&mgvz[j]);
@@ -267,7 +265,7 @@ rproc mf;
 {
     register int  i;
     real  mtot;
-    real  radius;		/* absolute value of position vector      */
+    real  radius=0.0;		/* absolute value of position vector      */
     real  velocity;		/* absolute value of velocity vector      */
     real  theta, phi;		/* direction angles of above vectors      */
     real  x, y;		        /* for use in rejection technique         */

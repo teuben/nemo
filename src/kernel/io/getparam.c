@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7e 24-jul-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7f 20-nov-2020 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -566,7 +566,7 @@ void initparam(string argv[], string defv[])
 	      free(keys[j].val);
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
-	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
+	    } else if ((j=set_indexed(name,&idx))) {       /* enter indexed keywords */
 	      // process this indexed keyword
 #if 1
 	      addindexed(j,argv[i],idx);
@@ -771,7 +771,7 @@ void initparam(string argv[], string defv[])
 local void initparam_out()
 {
   int nout = -1;
-  if (outdefv && *outdefv)
+  if (*outdefv)                                   
      nout = xstrlen(outdefv, sizeof(string));     /* count # params + progname */  
   /*  
    * here comes 
@@ -1529,9 +1529,11 @@ bool updparam(string name)
  *  GETPARAMSTAT
  */
 
-int getparamstat(string name) {
+/*Function commented out to silence warning*/
+
+/*int getparamstat(string name) {
   error("getparamstat is a ZENO feature, not implemented in NEMO yet");
-}
+}*/
 
 
 
@@ -1892,8 +1894,8 @@ local void setparam (string par, string val, string prompt)
 #if 0
         if (gets(line) == NULL) error("Null input");
 #else
-        // if (fgets(line,80,stdin) == NULL) error("Null input");
-	error("Can't do prompting anymore until fgets() is fixed");
+    if (fgets(line,80,stdin) == NULL) error("Null input");
+	//error("Can't do prompting anymore until fgets() is fixed");
 #endif
         val = line;
     }
@@ -2289,7 +2291,7 @@ local int set_indexed(string name, int *idx)
   cp = &key[strlen(key)-1];
   if (!isdigit(*cp)) return 0;      /* definitely not indexed */
   while (isdigit(*cp))              /* work backwords through all digits */
-    *cp--;
+    cp--;                        
   cp++;                           
   strcpy(keyidx,cp);
   *idx = atoi(keyidx);

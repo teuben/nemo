@@ -13,7 +13,9 @@
 #pragma message "GCC compiler >= 4.5.0"
 #pragma message "Gfortran has its own main() function..." 
 #else
-#pragma message "GCC compiler <= 4.5.0" __GNUC__
+#define STRINGIZE(x) "GCC compiler <= 4.5.0" #x
+#define SSTRINGIZE(x) STRINGIZE(x)
+#pragma message (SSTRINGIZE(__GNUC__))
 void f_setarg(int argc, char ** argv);
 void f_setsig();
 void f_init();

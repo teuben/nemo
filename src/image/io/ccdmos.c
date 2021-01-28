@@ -18,7 +18,7 @@ string defv[] = {
   "nx=\n          Number of rows",
   "ny=\n          Number of columns",
   "onefile=f\n    All images in one file?",
-  "VERSION=1.0\n  1-jul-05 PJT",
+  "VERSION=1.0a\n 27-jan-2021 PJT",
   NULL,
 };
 
@@ -26,9 +26,8 @@ string usage="mosaic a regular pattern of images";
 
 string cvsid="$Id$";
 
-extern string *burststring(string,string);
 
-nemo_main()
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     string *filename;
@@ -57,6 +56,7 @@ nemo_main()
       for (ix=0; ix<nx; ix++, n++) {
 	instr = stropen (filename[n],"r");
 	read_image (instr,&iptr);               /* read image */
+	if (Axis(iptr) == 1) warning("axis=1 for %s",filename[n]);
 	strclose(instr);                        /* close image file */
 	if (n==0) {
 	  nx1 = Nx(iptr);

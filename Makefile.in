@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 15-oct-2020 PJT
+VERSION = NEMO V4.2 24-jan-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -105,13 +105,14 @@ install:
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
 	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
-	@echo "      make build2            -- 2: libs + falcon"
+	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
 	@echo "      make build4            -- 4: mknemo build reconfirmation"
 	@echo "      make check             -- the testsuite"
 	@echo "      make bench             -- the benchmark"
 	@echo ""
 	@echo "After this, users will need to source the nemo_start.(c)sh file"
+	@echo "Local variations go in nemo_local.(c)sh and ~/.nemo_local.(c)sh"
 	@echo "There is also some new python support via nemo_start.py"
 
 lsb:
@@ -136,8 +137,10 @@ help2:
 
 # optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
+	@echo MKNEMOS=$(MKNEMOS)
 	@for mkn in $(MKNEMOS); do \
-	mknemo $$mkn;\
+	echo mknemo $$mkn;\
+	mknemo $$mkn > install_mknemo_$$mkn.log 2>&1;\
 	done
 
 # make sure all directories and files are present before install can take place
@@ -433,7 +436,7 @@ build:   build1 build2 build3 build4
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
-	@echo 'Continue with "make build2"'
+	@echo 'Continue with "make build2 (or build2a build2b)"'
 
 build2:
 	(source nemo_start.sh ; $(MAKE) libs)
@@ -457,6 +460,9 @@ python: anaconda3
 
 python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
+
+testpython:
+	(source nemo_start.sh; cd src/scripts/python; make tests)
 
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
@@ -523,6 +529,12 @@ cleansrc:
 libs:	$(MAKELIBS)
 	@echo Done at `date`
 
+build2a:  corelibs
+	@echo Done at `date` - continue with build2b or build3
+
+build2b:  dehnen
+	@echo Done at `date` - continue with build3
+
 # gyrfalcON
 dehnen:
 	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
@@ -558,7 +570,7 @@ testsuite:
 	@echo ISSUE the following command:
 	@echo 'src/scripts/testsuite -b'
 
-check:
+check: 
 	(source nemo_start.sh; src/scripts/testsuite)
 	@echo 'Continue with "make checklog" (if you see any FAILS)'
 

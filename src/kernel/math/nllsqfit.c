@@ -308,7 +308,7 @@ static int getvec(
       }
       matrix2[j][j] = 1.0 + labda;              /* scaled value on diagonal */
    }
-   if (r = invmat( )) return( r );              /* invert matrix inplace */
+   if ((r = invmat( ))) return( r );              /* invert matrix inplace */
    for (i = 0; i < npar; i++) epar[i] = fpar[i];
    for (j = 0; j < nfree; j++) {                /* loop to calculate ... */
       dj = 0.0;                                 /* correction vector */

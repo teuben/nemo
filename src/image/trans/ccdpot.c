@@ -30,7 +30,7 @@ string defv[] = {
 	"gravc=1\n      Gravitational Constant",
 	"report=0\n     report if this number cells done (0=none)",
 	"nbench=1\n     benchmark number for N^4 convolution",
-	"VERSION=0.5\n  13-apr-05 PJT",
+	"VERSION=0.6\n  26-jan-2021 PJT",
 	NULL,
 };
 
@@ -77,6 +77,10 @@ void nemo_main()
     Dy(optr) = Dy(iptr);
     Xmin(optr) = Xmin(iptr);
     Ymin(optr) = Ymin(iptr);
+    Xref(optr) = Xref(iptr);
+    Yref(optr) = Yref(iptr);
+    Axis(optr) = Axis(iptr);
+    
 
     /* create and set kernel image (only 1 quadrant needed) */
 

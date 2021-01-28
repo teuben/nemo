@@ -1,10 +1,13 @@
 #! /bin/bash
 #
-#  Install HDF5 within NEMO
+#  Install HDF4 within NEMO
 #
 #
 #  25-dec-2019  drafted
 #     mar-2020  wgetc
+#     jan-2021  ubuntu
+#
+#  ubuntu:   sudo apt install flex bison libjpeg-dev
 #
 #  On a mac you may see build failures due to a missing libjpeg
 #  hdf4 needs jpeg and z (-ldf -ljpeg -lz)

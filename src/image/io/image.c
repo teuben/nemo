@@ -108,6 +108,32 @@ static void set_iarray(imageptr iptr)
 #endif
 }
 
+
+/*
+ *  MINMX_IMAGE: set and Min/Max of an image/cube
+ *
+ */
+
+int minmax_image (imageptr iptr)
+{
+  real *data = Frame(iptr);
+  real dmin = data[0];
+  real dmax = dmin;
+  
+  int i, n = Nx(iptr)*Nx(iptr)*Nz(iptr);
+  
+  for (i=1; i<n; i++) {
+    if (data[i] < dmin) dmin = data[i];
+    if (data[i] > dmax) dmax = data[i];    
+  }
+  dprintf(0,"MinMax: %g %g\n",dmin,dmax);
+
+  MapMin(iptr) = dmin;
+  MapMax(iptr) = dmax;
+  return 0;
+}
+
+  
 /*
  *  WRITE_IMAGE: writes out a matrix, including header, in binary format
  *

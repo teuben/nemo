@@ -51,11 +51,13 @@
 
 #include <stdinc.h>
 #include <unistd.h>
+#include <sys/types.h>
 #include <strlib.h>
 #include <filestruct.h>
 #include <extstring.h>
 #include "filesecret.h"
 #include <stdarg.h>
+
 
 extern int convert_d2f(int, double *, float  *);
 extern int convert_f2d(int, float  *, double *);

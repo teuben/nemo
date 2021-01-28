@@ -21,11 +21,46 @@ contains a timestamp of that creation.
 <hr>
 -->
 
+<A NAME=4_2_1>
+<H2> 4.2.1:  in github</H2>
+<UL>
+  <LI> ...
+</UL>
 
 <A NAME=4_2_0>
-<H2> 4.2.0:  in progress (a.k.a. the Corona release) </H2>
+<H2> 4.2.0:  28-jan-2021 (a.k.a. the Corona release) </H2>
+
+Although there is still a raging virus, it's just time to wrap this up this release
+given the large number of updates.
 <UL>
-  <LI> new programs:  tabgen, snapnear, bigread, snapipdist
+  <LI> (28-jan-2021) latest benchmark on the fastest laptop I have:
+    <pre>
+   $ /usr/bin/time src/scripts/nemo.bench 
+   NEMOBENCH: (2020-11-22) bench3555175 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 bsf=0 tmp=bench3555175
+   Linux XPS13 5.6.0-1042-oem #46-Ubuntu SMP Thu Jan 7 00:51:04 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+   Wed 27 Jan 2021 10:47:32 PM EST
+   Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint
+   Skipping BSF testing. Use bsf=1 to enable this.
+   CPU_USAGE ccdpot :     6.21    6.20 0.00  0.00 0.00  1770905191
+   CPU_USAGE directcode : 3.20    3.19 0.00  0.00 0.00  1770903670
+   CPU_USAGE gyrfalcON :  2.39    2.38 0.00  0.00 0.00  1770904169
+   CPU_USAGE hackcode1 :  1.77    1.76 0.00  0.00 0.00  1770903991
+   CPU_USAGE mkorbit :    0.00    0.00 0.00  0.00 0.00  1770905812
+   CPU_USAGE mkplummer :  0.01    0.00 0.00  0.00 0.00  1770904168
+   CPU_USAGE mkspiral :   5.72    4.02 1.69  0.00 0.00  1770904618
+   CPU_USAGE orbint :     0.86    0.84 0.00  0.00 0.00  1770905812
+   CPU_USAGE potcode :    2.09    2.08 0.00  0.00 0.00  1770904408
+   Processor:  11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
+   20.55user 1.93system 0:22.52elapsed 99%CPU (0avgtext+0avgdata 174444maxresident)k
+   1032inputs+4413992outputs (1major+510675minor)pagefaults 0swaps
+</pre>
+
+  <LI> (jan-2021) CCD images should now all be using a reference pixel, where in the
+    old code (0,0,0) was hardcoded and Axis=0. Images should now have Axis=1, otherwise
+    code was not converted yet.
+  <LI> (jan-2021) new programs:  ccdmoms, ccdellint, lmtinfo, ccdzshift
+  <LI> Code made C99 clean, mostly.
+  <LI> (oct-2020) new programs:  tabgen, snapnear, bigread, snapipdist
     new script;  mk_cone, mklut
   <LI> (30-may-2020)  the command <B>mknemo barolo</B> attempts to install the
     <A HREF=https://editeodoro.github.io/Bbarolo/>BBarolo</A> program for rotation curve analysis of 3D cubes.
@@ -57,7 +92,6 @@ although this is on my T480 Lenovo laptop (i7-8550U CPU @ 1.80GHz) I have yet to
 to beat this.
   <LI> (26-apr-2020) tabplot and tabhist have a new <b>pyplot=</b> keyword to write a template starting point for matplotlib plotting
   <LI> (24-apr-2020) Experimental <A HREF=https://www.astro.umd.edu/~teuben/nemo/deb/>debian packages for NEMO</A>
-  <LI> (23-apr-2020) small fix for Ubuntu 20.04 LTS
   <LI> (23-apr-2020) small fix for Ubuntu 20.04 LTS
   <LI> (10-apr-2020) the <A HREF=faq.html>FAQ</A> has been revived.
   <LI> (21-mar-2020) RSS feed re-instated. Now using https://teuben.github.io/nemo/rss.xml

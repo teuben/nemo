@@ -17,7 +17,7 @@ string defv[] = {	/* keywords + help string for user interface */
     "out=???\n      Output filename (image)",
     "zvar=z\n       Slice variable (x,y,z)",
     "zrange=\n      Slices to select (1..n<zvar>)",
-    "VERSION=1.0a\n 29-dec-01 PJT",
+    "VERSION=1.0b\n 27-jan-2021 PJT",
     NULL,
 };
 
@@ -34,7 +34,11 @@ string usage="takes slices from a cube";
 static int need_init_minmax = 1;
 static real new_min, new_max;
 
-nemo_main()
+void new_minmax(real ival);
+void slice(imageptr i, imageptr o, int mode, int *planes);
+
+
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
@@ -45,6 +49,8 @@ nemo_main()
     instr = stropen (getparam("in"),"r");	/* get stream */
     read_image (instr,&iptr);               /* read image */
     strclose(instr);                        /* close image file */
+
+    if (Axis(iptr)) warning("axis=1 not supported yet");
 
     zvar = getparam("zvar");
     if (streq(zvar,"x")) {
@@ -82,7 +88,7 @@ nemo_main()
     strclose(outstr);
 }
 
-new_minmax(real ival) 
+void new_minmax(real ival) 
 {
   if (need_init_minmax) {
     need_init_minmax = 0;
@@ -94,10 +100,12 @@ new_minmax(real ival)
   }
 }
 
-slice(imageptr i, imageptr o, int mode, int *planes)
+void slice(imageptr i, imageptr o, int mode, int *planes)
 {
     int x, y, z, iz;
     real ival;
+
+    warning("Code not converted to fix reference pixel value");
 
     if (mode==X_SLICE) {
         for(iz=0; iz<Nz(o); iz++) {

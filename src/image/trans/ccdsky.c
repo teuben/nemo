@@ -17,6 +17,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <extstring.h>
 #include <image.h>
 
 #include <mks.h>
@@ -186,7 +187,7 @@ real efactor(string u1, string u2)
 
 
 
-void nemo_main()
+void nemo_main(void)
 {
     stream  instr, outstr;
     int     ix, iy, iz, nx, ny, nz, nc;
@@ -250,7 +251,7 @@ void nemo_main()
     if (hasvalue("in") && hasvalue("out")) {      /* patch image if needed */
       instr = stropen(getparam("in"), "r");
       read_image( instr, &iptr);
-      Xmin(iptr) *= rscale;
+      Xmin(iptr) *= rscale;   // @todo   review these when Xref != 0
       Ymin(iptr) *= rscale;
       Zmin(iptr) *= vscale;
       Dx(iptr) *= rscale;
@@ -259,6 +260,7 @@ void nemo_main()
       Beamx(iptr) *= rscale;
       Beamy(iptr) *= rscale;
       Beamz(iptr) *= vscale;
+      // Xref,Yref,Zref no need to change
       if (iscale != 1.0) {
 	nx = Nx(iptr);
 	ny = Ny(iptr);

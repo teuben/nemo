@@ -43,8 +43,7 @@ void nemo_main()
   int amode = ABS(mode);
   int seed = init_xrandom(getparam("seed"));
   char fmt[64];
-  real x;
-  my_real_proc my_random;
+  my_real_proc my_random = NULL;
 
   dprintf(1,"seed=%d\n",seed);
 

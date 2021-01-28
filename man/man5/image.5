@@ -1,4 +1,4 @@
-.TH IMAGE 5NEMO "7 May 2013"
+.TH IMAGE 5NEMO "27 January 2021"
 .SH NAME
 image \- binary format for 2D and 3D image/cube files
 .SH SYNOPSIS
@@ -43,21 +43,21 @@ typedef struct {
     real   *frame;	 /* pointer to datablock */
     real   **matrix;     /* 2D special case: pointers to pointers */
     real   ***cube;      /* 3D special case: ptr to ptr to ptr's  */
-    int    axis;         /* axis type (0=old, no ref; 1=with ref */
+    int    axis;         /* axis type (0=old, no ref pixel; 1=with Xref */
     int    nx;		 /* number of pixels along x-axis */
     int    ny;		 /* number of pixels along y-axis */
     int    nz;           /* number of pixels along z-axis */
-    real   xmin;	 /* x-value belonging to first x-pixel */
-    real   ymin;	 /* y-value belonging to first y-pixel */
-    real   zmin;	 /* z-value belonging to first z-pixel */
+    real   xmin;	 /* x-value belonging to reference x-pixel */
+    real   ymin;	 /* y-value belonging to reference y-pixel */
+    real   zmin;	 /* z-value belonging to reference z-pixel */
     real   dx;		 /* step in x-pixel */
     real   dy;		 /* step in y_pixel */
     real   dz;		 /* step in z_pixel */
-    real   xref;         /* reference pixel in X */
+    real   xref;         /* reference pixel in X (0 the first) */
     real   yref;         /* reference pixel in Y */
     real   zref;         /* reference pixel in Z */
-    real   map_min;		/* minimum map value */
-    real   map_max;		/* maximum map value */
+    real   map_min; 	/* minimum map value */
+    real   map_max;	/* maximum map value */
     int    beamtype;		/* type of beam used for beam smoothing */
     real   beamx;		/* beamwidth along x (if used) */
     real   beamy;		/* beamwidth along y (if used) */
@@ -142,13 +142,14 @@ In ForDef mode:
 The current default images (axis=0) have their original at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no
 freedom in the location of the reference pixel, it's (0,0).
-For axis=1 (only a few programs now support it, notably
+For axis=1 (most programs now support it, notably
 \fIccdfits(1NEMO)\fP and \fIfitsccd(1NEMO)\fP) this limitation
 will go away, but only simple cartesian coordinate systems are
-supported.
+supported. There is no astronomical WCS support, other than
+labeling it. Perhaps this will be for a future axis=2.
 .SH "FUTURE EXPANSIONS"
 Code could be modified to use dynamem(3NEMO). Allows more flexable
-use by addressing image[i][j] instead of slower macros MapValue(iptr,i,j)
+use by addressing image[i][j] instead of slower (?) macros MapValue(iptr,i,j)
 .SH "SEE ALSO"
 snapshot(5NEMO), image(3NEMO), tsf(1NEMO), mdarray(3NEMO)
 .SH AUTHOR
@@ -171,4 +172,5 @@ Peter Teuben
 19-may-03	improved documentation	PJT
 8-may-04	V5.0: added reference pixel for axis type 1	PJT
 7-may-13	added benchmark example
+27-jan-2021	noted axis=1 now becoming standard	PJT
 .fi

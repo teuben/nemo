@@ -144,6 +144,7 @@ LOPT = @LDFLAGS@
 CCSHARED = @CCSHARED@
 #   everything 
 CFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
+CXXFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
 FFLAGS  = $(OPT) $(CCSHARED) $(NEMO_FFLAGS)
 LDFLAGS = $(OPT)             $(NEMO_LDFLAGS)
 CPPFLAGS = @CPPFLAGS@
@@ -164,14 +165,14 @@ RANLIB = @RANLIB@
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 
 .cc.o:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -c $<
 
 .c.so:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
 
 .cc.so:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
 
 .f.so:
@@ -185,7 +186,7 @@ RANLIB = @RANLIB@
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 .cc:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBSPP) $(LOCAL_LIB) $(FORLIBS) $(EL)
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBSPP) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 .o:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.o $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)

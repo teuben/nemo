@@ -257,4 +257,5 @@ real rotcur_disk1(real r, int np, real *p, real *d)
 #if 0
   error("disk1 not implemented yet");
 #endif
+  return 0;
 }

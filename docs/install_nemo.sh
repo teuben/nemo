@@ -24,7 +24,7 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh:  Version 1.1 -- 24-nov-2020"
+echo "install_nemo.sh:  Version 1.2 -- 26-jan-2021"
 
 opt=1
 nemo=nemo
@@ -158,8 +158,10 @@ make build2
 make build3
 make build4
 
-[ $check = 1 ] && make check
-[ $bench = 1 ] && make bench
+[ $python = 1 ] && make testpython
+[ $check  = 1 ] && make check
+[ $bench  = 1 ] && make bench
+
 
 date1=$(date)
 

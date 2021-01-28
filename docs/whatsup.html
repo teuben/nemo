@@ -8,16 +8,19 @@
 
 <H1> What's Up in NEMO </H1>
 
+
 Ideas.....and things we're working on. This is really old, we're now maintaining a more active
 list on <A HREF='Github Projets'>https://github.com/teuben/nemo/projects</A>, but there are
-possibly some useful things in here too that could be considered.
+possibly some useful things in here too that could be considered. See also
+<A HREF=https://github.com/teuben/nemo/issues>Github Issues</A>.
+
 
 <HR>
 
 <H2> Currently working on </H2>
 <UL>
   <LI> python support
-  <LI> omp support (-fopenmp)
+  <LI> omp support (-fopenmp): --enable
   <LI> switch the default matrix definition from C based to Fortran based, to better match
     FITS I/O. There is a branch MATDEF (from CVS times) where this is developed.
 <LI> moving from MAKE to CMAKE?   [jcl]  
@@ -76,7 +79,6 @@ possibly some useful things in here too that could be considered.
     <A HREF=man_html/mkspiral.1.html>mkspiral</A>) 
     and processed independantly. Useful
     for Monte-Carlo simulations.
-<LI> WWW [now via github pages in $NEMO/docs]
 </UL>
 
 <H2> Considering work on  </H2>
@@ -84,9 +86,6 @@ possibly some useful things in here too that could be considered.
 <LI> yapp_generic - binds multiple yapp's into one (cf. yapp_pgplot),
 	in particular for yapp_x and yapp_ps
 <LI> tk interface ala Khoros/Cantata and Mirtool [abandoned]
-<LI> using GNU make (gmake). This would (eventually) make it impossible
-	to install NEMO without gmake. It would become part of the
-	installation procedure. [note CMAKE query]
 <LI> better image data-structure, e.g. allowing dynamic typing, and 
 	better random access for big images/cubes.
 <LI> support for non-homogenous snapshots (e.g. SPH, Tipsy "3S")

@@ -285,8 +285,9 @@ static union {
 
 /* some systems have these already defined....but we need them here*/
 /* as long as these are not out of bounds with your local machine  */
+#ifndef MAXFLOAT
 #define MAXFLOAT        1.2e+37  /* cray */
-#define MINFLOAT        0.8e-37  /* cray */
+#endif
 #define MAXSHORT        32767.5  /* cray */
 #define MINSHORT       -32768.5
 #define MAXINT     2147483647.5  /* cray */

@@ -25,11 +25,6 @@
 #include <sys/stat.h>
 
 #include <unistd.h>     
-#include <limits.h>
-
-#ifndef MAXPATHLEN
-#define MAXPATHLEN    PATH_MAX
-#endif
 
 #define DIR_SEP       '/'
 /***************************************************************/

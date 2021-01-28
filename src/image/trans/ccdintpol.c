@@ -19,6 +19,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
+#include <lsq.h>
 
 string defv[] = {
   "in=???\n       Input image file",
@@ -26,7 +27,7 @@ string defv[] = {
   "bad=0.0\n	  Value of a bad pixel to be patched",
   "goodx=\n       array of coluns in X that have good values (0=first)",
   "goody=\n       array of rows in Y that have good values (0=first)",
-  "VERSION=0.2\n  29-oct-03 PJT",
+  "VERSION=0.2a\n 27-jan-2021 PJT",
   NULL,
 };
 
@@ -37,7 +38,7 @@ local bool good_fit(int), lin_fit(int);
 local real best_fit(void);
 
 #define NLSQ  3
-#define MAXN  256
+#define MAXRC  256
 
 
 
@@ -49,7 +50,7 @@ void nemo_main(void)
   int      i,j, di, dj;
   imageptr iptr=NULL, iptr1=NULL;      /* pointer to images */
   real     crit = getdparam("bad");
-  int      irrx[MAXN],  irry[MAXN];         /* good rows and columns */
+  int      irrx[MAXRC],  irry[MAXRC];         /* good rows and columns */
   int      nok, nbad, nirrx, nirry;
   int      ix,iy, i0,i1,j0,j1;
   
@@ -63,8 +64,8 @@ void nemo_main(void)
   copy_image(iptr,&iptr1);
   outstr = stropen(getparam("out"), "w");
 
-  nirrx = nemoinpi(getparam("goodx"),irrx,MAXN);
-  nirry = nemoinpi(getparam("goody"),irry,MAXN);
+  nirrx = nemoinpi(getparam("goodx"),irrx,MAXRC);
+  nirry = nemoinpi(getparam("goody"),irry,MAXRC);
 
   if (nirrx == 0) {      /* if no goodx given, try to find them  */
     for (j=0; j<ny; j++) { 
