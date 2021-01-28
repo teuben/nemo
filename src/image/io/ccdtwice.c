@@ -27,7 +27,7 @@ string defv[] = {
     "dup=t\n        duplicate or interpolate?",
     "wcs=t\n        Retain WCS borders?",
     "ndim=2\n       2D or 3D duplication",
-    "VERSION=2.1\n  26-jan-2021 PJT",
+    "VERSION=2.1a\n 27-jan-2021 PJT",
     NULL,
 };
 
@@ -56,6 +56,7 @@ void nemo_main(void)
     instr = stropen (getparam("in"),"r");	/* get stream */
     read_image (instr,&iptr);               /* read image */
     strclose(instr);                        /* close image file */
+    if (Axis(iptr)) warning("axis=1 not supported");
 
     nx = n*Nx(iptr);
     ny = n*Ny(iptr);
@@ -109,6 +110,7 @@ void slice2(imageptr i, imageptr o, int n, real factor, bool Qwcs)
     MapMax(o) = MapMax(i) * factor;
 }
 
+// not used yet
 void slice3(imageptr i, imageptr o, int n, real factor)
 {
     int x, y, z, iz;
