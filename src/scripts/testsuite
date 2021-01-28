@@ -160,7 +160,7 @@ cleanup:
     if ($show || $query) then
         set clean=1
     else
-        grep 'not found' tmp/test2213110/testsuite.log | sort | uniq > $testdir/not-found.log
+        grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
 	if (! -z $testdir/not-found.log) then
 	    echo FAIL : The following programs were not found:
 	    cat $testdir/not-found.log
