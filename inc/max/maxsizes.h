@@ -24,12 +24,29 @@
 #define MAX_LINELEN  16384
 #endif
 
+/* for tables: (ought to go into maxsizes.h) */
+
+#ifndef MAXLINES
+#define MAXLINES 10000
+#endif
+
+
 
 /* getfunc.c */
 
 #ifndef MAXN
 #define MAXN  16384
 #endif
+
+//                    PATH_MAX via limits.h normally
+#ifndef MAXPATHLEN
+#ifdef PATH_MAX
+#define MAXPATHLEN PATH_MAX
+#else
+#define MAXPATHLEN 4096
+#endif
+#endif
+
 
 /* math/nllsqfit.c:#define MAXPAR  32  */
 

@@ -766,6 +766,7 @@ with_ccmalloc
 with_dso
 with_opt
 with_openmp
+with_std
 with_x
 enable_png
 with_pgplot_prefix
@@ -1459,6 +1460,7 @@ Optional Packages:
   --with-dso              use DSO linking
   --with-opt              use opt for essentials
   --with-openmp           use OMP directives
+  --with-std              use this -std=
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-plplot-libdir=<PLPlot library path>
@@ -5711,10 +5713,10 @@ else
 fi
 
 if test "$ok" = "yes"; then
-  flags="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
-  flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
-  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O4"
-  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wclobbered -Wuninitialized"
+  flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
+  flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
+  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
+  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
   # FFLAGS="$CFLAGS $flags"
@@ -5891,6 +5893,19 @@ else
   with_openmp=no
 fi
 
+
+
+# Check whether --with-std was given.
+if test "${with_std+set}" = set; then :
+  withval=$with_std; with_std=$withval
+else
+  with_std=c99
+fi
+
+
+if test $with_std != "default"; then
+  CFLAGS="$CFLAGS -D_GNU_SOURCE -std=$with_std"
+fi
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"

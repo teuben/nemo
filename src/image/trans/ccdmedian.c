@@ -29,7 +29,7 @@ string defv[] = {
 	"fraction=0.5\n Fraction of positive image values in subtract mode",
 	"mode=median\n  Mode: median, average, subtract",
 	"torben=f\n     Median method",
-	"VERSION=0.8\n  12-jun-2013 PJT",
+	"VERSION=0.9\n  26-jan-2021 PJT",
 	NULL,
 };
 
@@ -132,7 +132,11 @@ void nemo_main()
     Xmin(optr) = Xmin(iptr);
     Ymin(optr) = Ymin(iptr);
     Zmin(optr) = Zmin(iptr);
-
+    Xref(optr) = Xref(iptr);
+    Yref(optr) = Yref(iptr);
+    Zref(optr) = Zref(iptr);
+    Axis(optr) = Axis(iptr);
+    
     if (nstep > 1) {
       warning("Cheat mode nstep=%d",nstep);
 

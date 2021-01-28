@@ -1,0 +1,8 @@
+#
+# grep -v ^# nemo_local.template | awk     '{print "# export ",$1}'    > nemo_local.sh
+# grep -v ^# nemo_local.template | awk -F= '{print "# setenv ",$1,$2}' > nemo_local.csh
+#
+# Keep these in $NEMO, or if more appropriate in $HOME/.nemo_local.(c)sh
+#
+#  xps13: otherwise -march=native causes compiler to fail since tiger lake is not known
+NO_ARCH_NATIVE=1

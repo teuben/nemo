@@ -51,7 +51,7 @@ int run_popen1(string exe, string file)
 {
   FILE *fp = popen(exe,"w");
   if (fp==NULL) return 1;
-  fprintf(fp,file);        /* has no args */
+  fprintf(fp,"%s",file);
   fclose(fp);
   return 0;
 }
@@ -59,8 +59,9 @@ int run_popen1(string exe, string file)
 #ifdef TESTBED
 
 
-nemo_main()
+void nemo_main(void)
 {
-  warning("nothing here yet");
+  dprintf(0,"wc on hello:");
+  run_popen1("wc","hello");
 }
 #endif

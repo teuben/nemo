@@ -18,6 +18,7 @@
  *      21-nov-03   adding clock() for testing, using sysconf to get clk_tck;
  *      15-mar-05   fallback to CLOCKS_PER_SEC for g++
  *       7-nov-18   CLK_TCK erroneously at 1000000 now?
+ *      24-jan-21   fix return value
  *	
  */
 
@@ -29,7 +30,9 @@
 
 #define TRY_CLOCK
 // test  LINUX doesn't do CLK_TCK correct anymore?
+#ifndef CLK_TCK
 #define CLK_TCK 100
+#endif
 
 /*  CLK_TCK is typically 100, in g++ CLK_TCK isn't known, uses CLOCK_PER_SEC, else fail */
 
@@ -43,10 +46,15 @@
 
 static long clk_tck = 0;
 
+// mode=0  user time   (same as cputime())
+//      1  sys time
+//      2  times()
+
 double cputime2(int mode)
 {
     struct tms buffer;
     clock_t pt = 0;
+    double return_flag = 0.0;
 
     if (clk_tck == 0) {
       clk_tck = sysconf(_SC_CLK_TCK);
@@ -60,11 +68,12 @@ double cputime2(int mode)
     dprintf(4,"cputool: times: usr=%ld sys=%ld clock=%ld\n",buffer.tms_utime, buffer.tms_stime,pt);
 
     if (mode == 0)
-        return buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
+        return_flag = buffer.tms_utime / ((double)CLK_TCK * 60.0);       /* return minutes */
     else if (mode == 1)
-        return buffer.tms_stime / ((double)CLK_TCK * 60.0);       /* return minutes */
+        return_flag = buffer.tms_stime / ((double)CLK_TCK * 60.0);       /* return minutes */
     else if (mode == 2)
         return pt/( (double)CLOCKS_PER_SEC*60.0);
+    return return_flag;
 }
 
 double cputime()
@@ -84,6 +93,7 @@ double cputime()
  */
 
 #if defined(ETIME)
+static int nemo_etime = 1;
 float etime(float *tarr)
 {
     struct tms buffer;
@@ -113,20 +123,26 @@ float dtime(float *tarr)
     }
     return tarr[0] + tarr[1];
 }
+#else
+static int nemo_etime = 0;
 #endif
 
 /*===========================================================================*/
 
 #if defined(TESTBED)
 
-main(int ac,char *av[])
+int main(int ac,char *av[])
 {
     int i,j,k, imax=10, jmax=10, kmax=10;
     double x=1,y=2,z=3;
+    float tarr1[2], tarr2[2], t1,t2,t1a,t2a;
     
     if (ac>1) imax=atoi(av[1]);
     if (ac>2) jmax=atoi(av[2]);
     if (ac>3) kmax=atoi(av[3]);
+
+    t1 = etime(tarr1);
+    t2 = dtime(tarr2);
     
     for(i=0; i<imax;i++) {
        y += sqrt(z);
@@ -139,6 +155,15 @@ main(int ac,char *av[])
     }
     printf("CPU time = %f min for %d*%d*%d -> %g CLK_TCK=%d\n",
 	cputime(),imax,jmax,kmax,x+y+z,CLK_TCK);
+    printf("cputime2: %g %g %g\n",
+	   cputime2(0),cputime2(1),cputime2(2));
+    printf("nemo_etime=%d\n",nemo_etime);
+    t1a = etime(tarr1);
+    t2a = dtime(tarr2);
+    printf("etime/dtime: %g %g\n",t1,t2);
+    printf("etime/dtime: %g %g\n",t1a,t2a);
+    
+    return 0;
 }
 
 #endif
@@ -165,7 +190,7 @@ string defv[] =  {
 
 string usage="cpu benchmark of sorts";
 
-nemo_main()
+void nemo_main(void)
 {
     int cnt = getiparam("count") * 1000;
     string mode = getparam("mode");

@@ -14,6 +14,7 @@
 #include <getparam.h>
 #include <filefn.h>
 #include <run.h>
+#include <history.h>
 
 #include <sys/types.h>
 #include <fcntl.h>
@@ -42,7 +43,7 @@ string usage="Self Consistent Field Method N-body code";
 
 string cvsid="$Id$";
 
-nemo_main()
+void nemo_main()
 {
     string exefile = "scfm.exe";
     string parfile = "SCFPAR";

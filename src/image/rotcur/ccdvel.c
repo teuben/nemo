@@ -103,7 +103,7 @@ string defv[] = {
 	"in=\n          Template 2D image for cube generation",
 	"intpol=linear\n Interpolation: linear or constant",
 	"headline=\n	Optional random verbiage",
-        "VERSION=2.2\n  30-nov-2020 PJT",
+        "VERSION=2.3\n  26-jan-2021 PJT",
         NULL,
 };
 
@@ -551,6 +551,10 @@ local void vel_create_1(stream outstr)
     Xmin(vptr) = blc[0];
     Ymin(vptr) = blc[1];
     Zmin(vptr) = blc[2];
+    Xref(vptr) = center[0];
+    Yref(vptr) = center[1];
+    Zref(vptr) = center[2];
+    Axis(vptr) = 1;
 
     if (n>0) warning("%d/%d cells with no signal",n,nx*ny*nz);
     printf("Min and max in map: %g %g\n",m_min,m_max);
@@ -698,6 +702,10 @@ local void  vel_create_2(stream outstr)
     Dy(vptr) = cell[1];
     Xmin(vptr) = blc[0];
     Ymin(vptr) = blc[1];
+    Xref(vptr) = center[0];
+    Yref(vptr) = center[1];
+    Axis(vptr) = 1;
+    
     write_image (outstr,vptr);      /* write out the velocity field */
 }
 

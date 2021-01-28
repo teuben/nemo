@@ -43,7 +43,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=1.0\n   11-mar-2020 PJT",
+  "VERSION=1.1\n   26-jan-2021 PJT",
   NULL,
 };
 
@@ -68,7 +68,7 @@ int nwcs = 0;
 real spar[MAXPAR];
 int npar;
 
-real pa,inc,center[2];
+real pa,inc,center[3];
 real sinp, cosp, sini, cosi;
 
 bool Qtotflux;
@@ -94,10 +94,8 @@ local void object_shell(int npars, real *pars);
 local void object_point(int npars, real *pars);
 local void object_blobs(int ndim, int npars, real *pars);
 
-extern string *burststring(string,string);
-
 
-void nemo_main ()
+void nemo_main(void)
 {
   string  fnames;
   stream  instr;                      /* input file (optional) */
@@ -177,6 +175,10 @@ void nemo_main ()
     center[0] = (Nx(iptr)-1)/2.0;     /* 0 based center= */
     center[1] = (Ny(iptr)-1)/2.0;
   }
+  Xref(iptr) = center[0];
+  Yref(iptr) = center[1];
+  Zref(iptr) = 0.0;
+  Axis(iptr) = 1;
   dprintf(0,"%s: center pixel: %g %g\n",object,center[0],center[1]);
   surface = Dx(iptr)*Dy(iptr);
   surface = ABS(surface);
@@ -213,6 +215,8 @@ void nemo_main ()
     object_blobs(ndim,npar,spar);
   else
     error("Unknown object %g",object);
+
+  minmax_image(iptr);
   
   outstr = stropen (getparam("out"),"w");  /* open output file first ... */
   if (hasvalue("headline"))
@@ -220,6 +224,7 @@ void nemo_main ()
   write_image (outstr,iptr);         /* write image to file */
   strclose(outstr);
 }
+
 
 /*
  *  create new map from scratch, using %x and %y as position parameters 

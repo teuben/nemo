@@ -237,7 +237,7 @@ local proc bodytrans(string type, string expr, string fname)
         if (system(cmmd) != 0) {
 #if defined(SAVE_OBJ)
             sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
-            system(cmmd);
+            (void)system(cmmd);
 #endif
             error("bodytrans(): could not compile expr=%s",expr);
 	}
@@ -272,7 +272,7 @@ local proc bodytrans(string type, string expr, string fname)
 	    dprintf(2,"cmd: %s\n",cmmd);
             if (system(cmmd) != 0) {
                 sprintf(cmmd,"rm -f %s",edbbak);    /* end file locking */
-                system(cmmd);
+                (void)system(cmmd);
                 error("bodytrans(): could not copy");
             } else
                 end_bt();       /* end the file locking */
@@ -383,7 +383,7 @@ local string put_bt(string expr,char type,string file)
     }
     if (fpo!=NULL && i==MAXTRY) {
         sprintf(line,"ls -l %s",edbbak);
-        system(line);
+        (void)system(line);
 	dprintf(0,"Warning: bodytrans(5) expression %s not saved\n",expr);
 	Qflock = 1;	/* flag that file was still locked by someone */
         sprintf(line,"bt%c__%d",type,++funcmpld);
@@ -429,9 +429,9 @@ local void end_bt(void)
 {
 #if defined(SAVE_OBJ)
     if (!Qflock) {
-       unlink(edb);
-       link(edbbak,edb);
-       unlink(edbbak);
+      (void)unlink(edb);
+      (void)link(edbbak,edb);
+      (void)unlink(edbbak);
     }
 #endif
 }
@@ -560,7 +560,7 @@ string defv[] = {
     "alias=\n		Filename to save expression in (bt<TYPE>_<ALIAS>)",
     "btnames=\n		BTNAMES filename to regenerate .so files",
     "show=f\n           show all existing bodytrans in the system",
-    "VERSION=3.3\n	2-aug-06 PJT",
+    "VERSION=3.3a\n	23-jan-2021 PJT",
     NULL,
 };
 

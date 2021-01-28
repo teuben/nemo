@@ -1,0 +1,23 @@
+#! /bin/bash
+#
+#  ubuntu package:   libcairo2-dev
+#
+#  old one:  wget http://cairographics.org/releases/cairo-1.8.10.tar.gz
+
+
+url=https://github.com/danieljprice/giza
+
+for arg in $*; do
+  export $arg
+done
+    
+cd $NEMO/local
+git clone $url giza
+cd giza
+
+./configure --prefix=$NEMO/opt
+
+make -j
+make install
+
+echo cairo git `date` >> $NEMO/opt/mknemo.log

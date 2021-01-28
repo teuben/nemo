@@ -38,6 +38,7 @@ int my_func(int m, int n, double *x, double *fvec, double **dvec, void *private_
     dyda[i+1] = old_d[i];
   dprintf(2,"my_func(%d): x=%g y=%g a[1]=%g a[2]=%g\n",na,x,*y,a[1],a[2]);
 #endif
+return 0;
 }
 
 

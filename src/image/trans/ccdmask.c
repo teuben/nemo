@@ -12,13 +12,14 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <strlib.h>
+#include <extstring.h>
 #include <image.h>
 
 string defv[] = {
   "in=???\n        Input file(s), separated by comma's (optional)",
   "out=???\n       Output file",
   "clip=0.0\n      Clip level(s) for each input file",
-  "VERSION=0.2\n   29-may-2013 PJT",
+  "VERSION=0.2a\n  26-jan-2021 PJT",
   NULL,
 };
 
@@ -32,7 +33,6 @@ string cvsid="$Id$";
 
 #define MAXIMAGE 64
 
-extern string *burststring(string,string);
 
 imageptr iptr, optr;              /* images */
 
