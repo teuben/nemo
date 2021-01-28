@@ -19,8 +19,9 @@
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
  *
- *  todo
+ *  @todo
  *     - near an edge, normalization is done with full beam, so the signal tapers off....
+ *     - alternatively, allow option for periodic boundary smoothing
  */
 
 #include <stdinc.h>
@@ -83,6 +84,7 @@ real   bad;                             /* this value */
 
 void setparams(), smooth_it();
 int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
+local int wiener(void);
 
 void make_gauss_beam(char *sdir);
 void make_moffat_beam(char *sdir);
