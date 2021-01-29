@@ -46,7 +46,7 @@ string defv[] = {
 	"beta=4.765\n           beta parameter for the moffat function",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=3.4\n          29-jun-2016 PJT",
+	"VERSION=3.4a\n         28-jan-2021 PJT",
 	NULL,
 };
 
@@ -86,7 +86,6 @@ real   bad;                             /* this value */
 
 void setparams(), smooth_it(), wiener();
 int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
-local int wiener(void);
 
 void make_gauss_beam(char *sdir);
 void make_moffat_beam(char *sdir);
