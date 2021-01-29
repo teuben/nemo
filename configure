@@ -750,6 +750,7 @@ ac_user_opts='
 enable_option_checking
 with_csh
 enable_debug
+enable_clang
 enable_pedantic
 enable_native
 enable_single
@@ -1432,6 +1433,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
+  --enable-clang          use clang compiler
   --enable-pedantic       compile for pedantic gcc
   --enable-native         optimize for native CPU
   --enable-single         single-precision
@@ -5703,6 +5705,18 @@ if test "$ok" = "yes"; then
         FFLAGS="-g"
         LDFLAGS="-g"
         # should we define DEBUG too?
+fi
+
+# Check whether --enable-clang was given.
+if test "${enable_clang+set}" = set; then :
+  enableval=$enable_clang; ok=$enableval
+else
+  ok=no
+fi
+
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang"
 fi
 
 # Check whether --enable-pedantic was given.
@@ -11079,6 +11093,21 @@ case $yapp_name in
         ps)
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
+          ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using dollar" >&5
+$as_echo "$as_me: WARNING: C using dollar" >&2;}
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using" >&5
+$as_echo "$as_me: WARNING: C using" >&2;}
+	  fi
+	  YAPP_DEF="/xs"
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then

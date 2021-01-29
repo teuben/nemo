@@ -142,6 +142,12 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
+AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang"
+fi
+
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
   flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
@@ -925,6 +931,19 @@ case $yapp_name in
         ps)
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
+          ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    AC_MSG_WARN(C using dollar)
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    AC_MSG_WARN(C using, external to NEMO, classic)
+	  fi
+	  YAPP_DEF="/xs"
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
