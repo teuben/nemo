@@ -319,6 +319,13 @@ targit0:
 	git clone $(GIT2) nemo_git/local/pgplot
 	tar zcf nemo_git.tar.gz nemo_git
 
+upstream:
+	-git remote add upstream https://github.com/teuben/nemo
+	@echo Reminder, to sync with the upsteam:
+	@echo "  git checkout master"
+	@echo "  git fetch upstream"
+	@echo "  git merge upstream/master"
+	@echo "  git status"
 
 # autoconf/GIT based export
 #
