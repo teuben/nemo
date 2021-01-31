@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 #
 #  Taken from:   https://scicomp.aalto.fi/triton/examples/python/python_openmp/python_openmp/
-#
+#  E.g.
+#  export OMP_PROC_BIND=true
+#  export OMP_NUM_THREADS=4
+
 import os
 from time import time
 import numpy as np
