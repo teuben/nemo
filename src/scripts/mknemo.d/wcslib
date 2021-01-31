@@ -11,9 +11,9 @@ done
  
 cd $NEMO/local
 $wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
+version=$(tar jtf wcslib.tar.bz2 | head -1 | awk -F/ '{print $1}' | sed s/wcslib-//)
 
 tar jxf wcslib.tar.bz2
-version=$(echo wcslib-* | sed s/wcslib-//)
 cd wcslib-$version
 ./configure --prefix=$NEMO/opt
 make -j
