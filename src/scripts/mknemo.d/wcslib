@@ -2,7 +2,7 @@
 #
 
 #   version is sadly hidden in the filename
-version=7.3.1
+version=7.4
 wget=wgetc
 
 for arg in $*; do
@@ -13,7 +13,7 @@ cd $NEMO/local
 $wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
 
 tar jxf wcslib.tar.bz2
-version=$(echo wcslib-*.*.* | sed s/wcslib-//)
+version=$(echo wcslib-* | sed s/wcslib-//)
 cd wcslib-$version
 ./configure --prefix=$NEMO/opt
 make -j
