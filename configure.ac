@@ -253,12 +253,14 @@ fi
 AC_SUBST(falcon_OPENMP)
 
 dnl ---------------------------------------------------------------------
-dnl             Check for basic X windows stuff
+dnl             Check for basic X windows stuff : AC_PATH_XTRA -> X_CFLAGS and X_LIBS
 AC_PATH_X
 AC_PATH_XTRA
 XINCS="$X_CFLAGS"
 if test -d /usr/X11R6/lib64; then
   XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11R6/lib64 -lXext -lX11 $X_EXTRA_LIBS"
+elif test -d /usr/X11/lib; then
+  XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11/lib -lXext -lX11 $X_EXTRA_LIBS"
 else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
