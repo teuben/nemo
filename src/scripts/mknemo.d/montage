@@ -1,0 +1,16 @@
+#! /bin/bash
+#
+#   mknemo build helper for montage
+#
+#
+
+cd $NEMO/local
+
+if [ ! -d Montage ]; then
+  git clone https://github.com/Caltech-IPAC/Montage
+fi
+cd Montage
+git pull
+make 
+# bizarre, there is no prefix= or make install...
+mv bin/* ../../opt/bin/
