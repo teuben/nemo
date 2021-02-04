@@ -24,16 +24,16 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh:  Version 1.2 -- 26-jan-2021"
+echo "install_nemo.sh:  Version 1.3 -- 4-feb-2021"
 
-opt=1
+opt=0
 nemo=nemo
 branch=master
 python=0
 url=https://github.com/teuben/nemo
 mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4
 falcon=1
-yapp=pgplot
+yapp=ps
 check=1
 bench=1
 
