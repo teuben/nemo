@@ -12,3 +12,7 @@ NO_ARCH_NATIVE=@falcon_NO_NATIVE@
 
 # if you get "undefined symbol: GOMP_parallel"
 # may need to add -lgomp as NEMO needed for the body/pot plugins 
+
+
+GCC = @CC@
+GPP = @CXX@
