@@ -1,5 +1,9 @@
 #! /usr/bin/env bash
+#! /usr/local/bin/bash
 #! /bin/bash
+
+#  System Integrity Protection:
+#  bash from the system won't import them, /usr/local/bin is ok 
 
 echo SHELL=$SHELL
 echo NEMO=$NEMO
