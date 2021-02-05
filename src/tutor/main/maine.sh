@@ -10,3 +10,6 @@ echo DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 # this script works ok with invoked with /usr/local/bin/bash
 #
 # export DYLD_LIBRARY_PATH=/usr/lib
+
+export NEMO=test1
+export DYLD_LIBRARY_PATH=/usr/lib
