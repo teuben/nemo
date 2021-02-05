@@ -1,15 +1,24 @@
+#
+#! /usr/local/bin/bash
 #! /usr/bin/env bash
 #! /bin/bash
 
+#  my frustating experience with SIP on a mac once my rogue laptop was updated to 10.15.7
+
 echo SHELL=$SHELL
-echo NEMO=$NEMO
 echo DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 
-# on mac with a native bash 3.x on mac 10.15.7 rthis fails
-# brew install bash  installed a mor modern 5.1 in /usr/local/bin
-# this script works ok with invoked with /usr/local/bin/bash
+#  if you source this script, the DYLD variable should now be visible in your parent shell.
+#  If you then run the script
+#             ./sip.sh
+#  the outcome depends on the first line in the script....
 #
-# export DYLD_LIBRARY_PATH=/usr/lib
-
-export NEMO=test1
+#      1.   #                                   you are fine (i don't yet understand this one)
+#      2.   #! /usr/local/bin/bash              you are fine
+#      3.   #! /usr/bin/env bash                you are SIP'd because a system tool filters is
+#      4.   #! /bin/bash                        you are SIP'd because a system tool filters is
+#
 export DYLD_LIBRARY_PATH=/usr/lib
+
+
+#  This is for bash, the results for a csh style script is the same.
