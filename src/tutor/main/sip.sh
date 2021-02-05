@@ -20,5 +20,4 @@ echo DYLD_LIBRARY_PATH=$DYLD_LIBRARY_PATH
 #
 export DYLD_LIBRARY_PATH=/usr/lib
 
-
 #  This is for bash, the results for a csh style script is the same.
