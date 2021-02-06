@@ -666,6 +666,7 @@ falcon_OPENMP
 MAKEDIRS
 MAKELIBS
 falcon_NO_NATIVE
+NO_SHARED_LIBS
 MAKE
 RANLIB
 SET_MAKE
@@ -750,6 +751,7 @@ ac_user_opts='
 enable_option_checking
 with_csh
 enable_debug
+enable_shared
 enable_clang
 enable_pedantic
 enable_native
@@ -1433,6 +1435,7 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
+  --enable-shared        enable shared libraries? (only for falcON)
   --enable-clang          use clang compiler
   --enable-pedantic       compile for pedantic gcc
   --enable-native         optimize for native CPU
@@ -5706,6 +5709,20 @@ if test "$ok" = "yes"; then
         LDFLAGS="-g"
         # should we define DEBUG too?
 fi
+
+# Check whether --enable-shared was given.
+if test "${enable_shared+set}" = set; then :
+  enableval=$enable_shared; ok=$enableval
+else
+  ok=no
+fi
+
+if test "$ok" = "yes"; then
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
+fi
+
 
 # Check whether --enable-clang was given.
 if test "${enable_clang+set}" = set; then :

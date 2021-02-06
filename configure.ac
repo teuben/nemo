@@ -142,6 +142,14 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
+AC_ARG_ENABLE(shared, [  --enable-shared        enable shared libraries? (only for falcON)], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
+fi
+AC_SUBST(NO_SHARED_LIBS)
+
 AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
         CC="clang"
