@@ -1,4 +1,4 @@
-#! /bin/csh 
+#! /bin/csh -f
 ################################################################################
 # 
 #  DO NOT EDIT, unless this is the source version falcON/doc/mkgalaxy
