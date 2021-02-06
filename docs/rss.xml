@@ -13,6 +13,27 @@
 </link>
 
 
+<item>
+<title>
+nemo_4_2_1
+</title>
+<description>
+ (6-feb-2021)
+NEMO V4.2, the Corona version, was released last week. Many many fixes and
+ additions, also revived the mac again, as the most recent versions
+ use SIP (System Integrity Protection), for which shared libraries had
+ to be disabled. The clang based Xcode compiler now fails on falcON,
+ so you will need to use the gnu compiler via brew (or port), e.g.
+ <pre>
+   CC=gcc-10 CXX=g++-10 ./configure ...
+   make build check bench
+ </pre>
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_2_1
+</link>
+</item>
 
 <item>
 <title>
