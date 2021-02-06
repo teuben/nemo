@@ -10,6 +10,9 @@ NO_ARCH_NATIVE=@falcon_NO_NATIVE@
 # if you want --fopenmp it should say "OPENMP=1"
 @falcon_OPENMP@=1
 
+# do or don't do shared libs. by default no, because of SIP on mac
+NO_SHARED_LIBS=@NO_SHARED_LIBS@
+
 # if you get "undefined symbol: GOMP_parallel"
 # may need to add -lgomp as NEMO needed for the body/pot plugins 
 
