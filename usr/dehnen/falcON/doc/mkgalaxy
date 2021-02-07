@@ -416,15 +416,15 @@ endif
 ## $name.s      required  & deleted   snapshot: initial bulge + halo           #
 ## $name.sym    generated & deleted   snapshot: symmetrised $name.s            #
 ## $name.grow   generated             logfile of gyrfalcON run                 #
-## $name.S      generated             snapshot: final bulge + halo             #
+## $name.S2     generated             snapshot: final bulge + halo             #
 ##                                                                             #
 ################################################################################
 echo "mkgalaxy: 2  Growing the full disc potential"
 
 ################################################################################
 ## sanity check
-if(-f $name.S) then
-    echo "ERROR [mkgalaxy]: file $name.S already exists."
+if(-f $name.S2) then
+    echo "ERROR [mkgalaxy]: file $name.S2 already exists."
     exit
 endif
 
@@ -462,19 +462,19 @@ if( $debug > 0 ) then
     echo "========================================" >> $name.err
     echo "mkgalaxy: issuing command:\
     gyrfalcON in=$name.sym logfile=$name.grow                 \
-    out=$name.S step=$tend tstop=$tend startout=f             \
+    out=$name.S2 step=$tend tstop=$tend startout=f             \
     kmax=$kmax Nlev=$Nlev fac=$fac fph=$fph eps=-1 give=mxve  \
     accname=Monopole accpars=0,$tgrow accfile=$name.prm       \
     manipname=symmetrize_pairs debug=$debug >>& $name.err" >> $name.err
     echo >> $name.err
 endif
 gyrfalcON in=$name.sym logfile=$name.grow                     \
-    out=$name.S step=$tend tstop=$tend startout=f             \
+    out=$name.S2 step=$tend tstop=$tend startout=f             \
     kmax=$kmax Nlev=$Nlev fac=$fac fph=$fph eps=-1 give=mxve  \
     accname=Monopole accpars=0,$tgrow accfile=$name.prm       \
     manipname=symmetrize_pairs debug=$debug >>& $name.err
 
-if(! -f $name.S) then
+if(! -f $name.S2) then
     echo "ERROR [mkgalaxy]: could not adjust halo & bulge to full disc; see also file $name.err."
     exit
 endif
@@ -491,7 +491,7 @@ rm -f $name.s $name.sym $name.prm >& /dev/null
 
 ################################################################################
 ## make sure $spheroid gives the file with the final spheroids
-set spheroid=$name.S
+set spheroid=$name.S2
 set skip=0
 
 ################################################################################
