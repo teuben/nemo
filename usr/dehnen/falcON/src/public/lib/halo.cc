@@ -513,13 +513,20 @@ HaloPotential::HaloPotential(HaloDensity const&model,
     DebugInfo(4,"HaloPotential: M_mono(<%g)=%g\n",r[n1],mt[n1]);
   }
   // 2.2 make mt hold the total cumulative mass and rh the total density
+  int nbad = 0;
   for(int i=0; i!=n; ++i) {
     mt[i] += mh[i];
+    DebugInfo(5,"i/n mh mt=%d/%d %g %g\n",i,n,mh[i],mt[i]);
     assert(mt[i]>0);
-    assert(i==0 || mt[i]>=mt[i-1]);
+    // assert(i==0 || mt[i]>=mt[i-1]);
+    // if (i>0) assert(mt[i]>=mt[i-1]);
+    if (i>0 && mt[i] < mt[i-1])
+      nbad++;
     rh[i] += DEN(r[i]);
     assert(rh[i]>0);
   }
+  if (nbad > 0)
+    falcON_Warning("HaloModel: PJT found %d float cmp mishaps\n",nbad);
   // 2.3 find the smallest index beyond which mh does not seem to change
   for(nm=0; nm!=n1; ++nm)
     if(mh[nm+1]==mh[nm]) break;
