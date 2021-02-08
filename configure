@@ -1435,18 +1435,18 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
-  --enable-shared        enable shared libraries? (only for falcON)
+  --disable-shared        disable shared libraries? (needed for falcON on MAC)
   --enable-clang          use clang compiler
   --enable-pedantic       compile for pedantic gcc
   --enable-native         optimize for native CPU
   --enable-single         single-precision
   --enable-float          single-precision
-  --enable-double         double-precision
+  --enable-double         double-precision (default)
   --enable-mixed          mixed-precision
   --enable-gcov           gnu coverage tool
   --enable-lfs            large-file-size (files over 2GB)
   --disable-fortran       don't use any Fortran
-  --disable-falcon        enable falcON
+  --disable-falcon        disable falcON
   --enable-png            force the use of PNG for pgplot
   --enable-plplot         Activate PLPlot library (default = yes)
   --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
@@ -5718,9 +5718,9 @@ else
 fi
 
 if test "$ok" = "yes"; then
-  NO_SHARED_LIBS=0
-else
   NO_SHARED_LIBS=1
+else
+  NO_SHARED_LIBS=0
 fi
 
 

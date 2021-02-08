@@ -142,11 +142,11 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
-AC_ARG_ENABLE(shared, [  --enable-shared        enable shared libraries? (only for falcON)], ok=$enableval, ok=no)
+AC_ARG_ENABLE(shared, [  --disable-shared        disable shared libraries? (needed for falcON on MAC)], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
-  NO_SHARED_LIBS=0
-else
   NO_SHARED_LIBS=1
+else
+  NO_SHARED_LIBS=0
 fi
 AC_SUBST(NO_SHARED_LIBS)
 
@@ -190,7 +190,7 @@ AC_ARG_ENABLE(float,  [  --enable-float          single-precision], ok=$enableva
 if test "$ok" = "yes"; then
 	prec_flag="-DSINGLEPREC"
 fi
-AC_ARG_ENABLE(double, [  --enable-double         double-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(double, [  --enable-double         double-precision (default)], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DDOUBLEPREC"
 fi
@@ -222,7 +222,7 @@ fi
 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
-AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON],enable_falcon=$enableval, enable_falcon=yes)
+AC_ARG_ENABLE(falcon, [  --disable-falcon        disable falcON],enable_falcon=$enableval, enable_falcon=yes)
 if test "$enable_falcon" = "yes"; then
   MAKELIBS="corelibs dehnen"
 else

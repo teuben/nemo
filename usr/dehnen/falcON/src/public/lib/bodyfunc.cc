@@ -173,8 +173,10 @@ namespace {
 #endif
 #if   defined(__INTEL_COMPILER)
 	     " -ip -xHost -fpic -falign-functions -openmp -g -Wall"
+
+	     // 	     	     " -march=native -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
 #elif defined(__GNUC__)
-	     " -march=native -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
+	     " -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
 	     " -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -fPIC"
 	     " -fopenmp -funroll-loops -fforce-addr"
 #else
