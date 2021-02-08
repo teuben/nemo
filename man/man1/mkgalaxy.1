@@ -82,11 +82,34 @@ set debug=2          # debug level used to run all falcON programs
 .fi
 
 .SH EXAMPLE
-The script take a fair amount of CPU. Here is an example with 12000 stars in the halo, and
+The script take a fair amount of CPU. Here is an example with 12000
+stars in the halo, and
 2000 in the disk (which is 1/100 of the script defaults):
 .nf
-   mkgalaxy name=gal1 Nh=12000 Nd=2000
+/usr/bin/time mkgalaxy name=gal1
+mkgalaxy:    building a N-body model of a disc galaxy
+mkgalaxy: 0  starting falcON and setting parameters
+mkgalaxy: 1  Building the initial spheroid models
+mkgalaxy:    creating the initial halo with N=600000 in file gal2.h
+mkgalaxy:    creating the initial bulge with N=20000 in file gal2.b
+mkgalaxy:    stacking initial halo and bulge in file gal2.s
+mkgalaxy: 2  Growing the full disc potential
+mkgalaxy:    symmetrize initial spheroid snapshot (and doubling body number)
+mkgalaxy:    start simulation to grow disc potential from monopole
+mkgalaxy:    (log output into gal2.grow) ...
+mkgalaxy: 3  Populating the disc
+mkgalaxy:    extracting bulge into file gal2.b (needed for bulge potential)
+mkgalaxy:    extracting halo into file gal2.h (needed for halo potential)
+mkgalaxy:    creating the initial disc with N=200000 in file gal2.d
+mkgalaxy:    stacking all components into file gal2.snp
+mkgalaxy:    finished. snapshots generated:
+             gal2.snp: complete galaxy model ready to use
+4586.25user 94.47system 1:18:01elapsed 99%CPU 
+
+
 .fi
+
+Stage 3 takes a long time.
 
 .SH SEE ALSO
 mkkd95(1NEMO), magalie(1NEMO), mkgalaxy2(1NEMO)
