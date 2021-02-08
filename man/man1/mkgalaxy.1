@@ -86,7 +86,7 @@ The script take a fair amount of CPU. Here is an example with 12000
 stars in the halo, and
 2000 in the disk (which is 1/100 of the script defaults):
 .nf
-/usr/bin/time mkgalaxy name=gal1
+% /usr/bin/time mkgalaxy name=gal1
 mkgalaxy:    building a N-body model of a disc galaxy
 mkgalaxy: 0  starting falcON and setting parameters
 mkgalaxy: 1  Building the initial spheroid models
@@ -105,6 +105,14 @@ mkgalaxy:    stacking all components into file gal2.snp
 mkgalaxy:    finished. snapshots generated:
              gal2.snp: complete galaxy model ready to use
 4586.25user 94.47system 1:18:01elapsed 99%CPU 
+
+% snapmstat gal2.snp
+
+0 0:199999       =  200000 Mass= 5.32538e-06 TotMas= 1.06508 CumMas=  1.06508
+1 200000:239999  =   40000 Mass= 5e-06       TotMas= 0.2     CumMas=  1.26508
+2 240000:1439999 = 1200000 Mass= 2e-05       TotMas= 24      CumMas= 25.2651
+# Found 3 species:
+select=0:199999,200000:239999,240000:1439999 
 
 
 .fi
