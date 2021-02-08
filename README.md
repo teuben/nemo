@@ -37,48 +37,39 @@ Packages we optionally use (sometimes installed in $NEMO/opt via code in $NEMO/l
 	 unsio
 	 uns_project
 
-See README.install for installation guidelines. One way to install
-NEMO is using the install_nemo script:
-
-	 wget https://teuben.github.io/nemo/install_nemo.sh
-	 chmod +x install_nemo.sh
-	 ./install_nemo.sh
-	 source nemo/nemo_start.sh
-
 Tools you will need to have pre-installed: A C/C++/Fortran
-compiler, (t)csh, and git. Use your local package manager to
-install those before you attempt to run the **install_nemo** script. For
-example, on a fresh Ubuntu distro, you're likely going to need to
-install two packages before running the install script, and triggering
-a few more using the ubuntu=1 flag, viz.
-
-	 sudo apt install tcsh git
- 	 ./install_nemo ubuntu=1
+compiler, (t)csh, and git.  For graphics it's probably
+useful to have pgplot, but the default ps driver works
+fine just to get started quickly.
 
 
-And you don't have wget (e.g. MacOSX) use curl to get that script.
-E.g. on a Mac where you have installed Homebrew with pgplot, this
-should get you a working NEMO with plotting enabled:
 
-	 curl -O https://teuben.github.io/nemo/install_nemo
-	 chmod +x install_nemo
-	 ./install_nemo brew=1
-	 source nemo/nemo_start.sh
-
-If you have used MacPorts, I may owe you another hint.
-
-At the simplest level, the installation uses an autoconf based scheme. Here is an example assuming
-you have the PGPLOT library installed:
+There are a few ways to install NEMO.  Although there are
+some install scripts, and there is the README.install file
+for background information, here is the basic method
+for most Linux distros (assuming you have the preconditions):
 
          git clone https://github.com/teuben/nemo
          cd nemo
          ./configure --with-yapp=pgplot
-         make build
+         make build 
          source nemo_start.sh
 
-Once NEMO has been installed, here are
-some examples of scripts and figures: https://teuben.github.io/nemo/examples/
-or look at an example ipython notebook
+On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
+awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
+work (there are other ways to install tools on a mac,but don't get me started):
+
+         git clone https://github.com/teuben/nemo
+         cd nemo
+         CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
+         make build 
+         source nemo_start.sh
+
+
+
+Once NEMO has been installed, here are some examples of scripts and
+figures: https://teuben.github.io/nemo/examples/ or look at an example
+ipython notebook
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
