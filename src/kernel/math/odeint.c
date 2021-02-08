@@ -16,8 +16,8 @@
 
 #define sign(x,s) (((s)>0) ? (x) : (-(x)))	/* fortran definition */
  
-extern  int     kmax, kount;			/* used for history record */
-extern  double  dxsav, xp[100], yp[10][100];	/* of the integration */
+local  int     kmax, kount;			/* used for history record */
+local  double  dxsav, xp[100], yp[10][100];	/* of the integration */
       /* kmax (and dxsav if kmax>0) must be initialized in calling routine */
 
 
