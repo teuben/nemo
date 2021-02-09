@@ -9,7 +9,7 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-uns2uns a universal converting tool for UNS snapshots. 
+uns2uns - a universal converting tool for UNS snapshots. 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>uns2uns
@@ -34,8 +34,8 @@ There are two kinds of nbody file structure:
 range of indexes (ex 0:999 for the disk and 1000:9999  for the halo).  <br>
  </dd>
 
-<dt>- <b>component</b> file structure (<i>CFS</i>), like GADGET, where data are identified
-by </dt>
+<dt>- <b>component</b> file structure (<i>CFS</i>), like GADGET or RAMSES where data are
+identified by </dt>
 <dd>  component name (disk, gas, halo, stars, bulge, bndry).<br>
  </dd>
 </dl>
@@ -46,33 +46,34 @@ The following parameters are recognized.
 
 <dt><b>in=</b><i>uns input file</i> </dt>
 <dd>Currently,
-the following input files are supported: Nemo,Gadget 2 &amp; 1, list of files,
-sqlite3 uns data base </dd>
+the following input files are supported: Nemo, Gadget3, Gadget2, Gadget1,
+RAMSES, list of files, sqlite3 uns data base </dd>
 
 <dt><b>out=</b><i>uns output file</i> </dt>
-<dd>Output data will be written to
-<i>out_file</i> in the format type specified from the parameter <b>type=</b> </dd>
+<dd>Output
+data will be written to <i>out_file</i> in the format type specified from the
+parameter <b>type=</b> </dd>
 
-<dt><b>select=</b><i>input/output
-particles selection</i> </dt>
-<dd>this parameter select the input particles which will
-be saved in the output file. There are several possible syntax. It can be
-a range of index (RFS input, ex: select=0:999,3000:4000 ) or a list of
-components (CFS input, ex: select=disk,stars), separated by coma. 
-<p> There
-are a special syntax when in=RFS and out=CFS (ex Nemo to Gadget conversion),
-which is : select=comp1@range+comp2@range (ex: select=gas@0:1000+disk@300:400).
-For more details, see EXAMPLES below. </dd>
+<dt><b>select=</b><i>input/output particles selection</i> </dt>
+<dd>this parameter
+select the input particles which will be saved in the output file. There
+are several possible syntax. It can be a range of index (RFS input, ex:
+select=0:999,3000:4000 ) or a list of components (CFS input, ex: select=disk,stars),
+separated by coma. 
+<p> There are a special syntax when in=RFS and out=CFS (ex
+Nemo to Gadget conversion), which is : select=comp1@range+comp2@range (ex:
+select=gas@0:1000+disk@300:400). For more details, see EXAMPLES below. </dd>
 
-<dt><b>type=</b><i>uns type format</i> </dt>
-<dd>we specify here
-the type of the output file. Currently, the following output files are supported:
-nemo, gadget2 </dd>
+<dt><b>type=</b><i>uns
+type format</i> </dt>
+<dd>we specify here the type of the output file. Currently, the
+following output files are supported: nemo, gadget2, gadget3 </dd>
 
-<dt><b>bits=</b><i>physical quantities to saved</i> </dt>
-<dd>If this parameter is left
-blank, then all physical quantities will be saved, this is the default
-behaviour. Here is the list of differents values:   &rsquo;m&rsquo;  mass<br>
+<dt><b>bits=</b><i>physical
+quantities to saved</i> </dt>
+<dd>If this parameter is left blank, then all physical
+quantities will be saved, this is the default behaviour. Here is the list
+of differents values:   &rsquo;m&rsquo;  mass<br>
    &rsquo;x&rsquo;  position<br>
    &rsquo;v&rsquo;  velolcity<br>
    &rsquo;p&rsquo;  potential<br>
@@ -89,7 +90,10 @@ behaviour. Here is the list of differents values:   &rsquo;m&rsquo;  mass<br>
    &rsquo;T&rsquo;  temperature<br>
  
 <p>   ex: bits=xRH will save positions, densities and hsml<br>
- 
+   <br>
+   (see also : <br>
+ https://projets.lam.fr/projects/unsio/wiki/UnsioVariablesUtilisation#How-to-select-data-at-loading)
+
 <p> </dd>
 </dl>
 
@@ -143,12 +147,21 @@ output files will have a trailing number.
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='uns_info.1.html'>uns_info(1NEMO)</a>
  
-<p> 
+<dl>
+
+<dt><a href='https://projets.lam.fr/projects/unsio/wiki'>https://projets.lam.fr/projects/unsio/wiki</a>
+
+</dt>
+<dd>
+<p> </dd>
+</dl>
+
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Jean-Charles LAMBERT 
 <h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>05-Jul-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;JCL
+17-Mar-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 bugs fixed<tt> </tt>&nbsp;<tt> </tt>&nbsp;JCL
 </pre>
 <p> <p>
 

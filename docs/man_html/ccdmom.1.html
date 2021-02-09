@@ -25,28 +25,31 @@ To get the intensity weighted shape of
 an object using the moments of inertia, use <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
 . <p>
 Continuum subtraction
-is needed for reliable moments where applicable. 
+is needed for reliable moments where applicable. <p>
+If moments needs to be
+taken across many images, like cubes with axis=4, use <a href='ccdmoms.1.html'><i>ccdmoms(1NEMO)</i></a>
+. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
-<dt><b>in=</b>
-</dt>
+<dt><b>in=</b> </dt>
 <dd>Input image file. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output image file. No default. </dd>
+<dd>Output image file. No default.
+</dd>
 
 <dt><b>axis=</b> </dt>
-<dd>Axis
-to take moment along (1=x 2=y 3=z). Unless <b>keep=</b>, this axis will be reduced.
-[Default: <b>3</b>] </dd>
+<dd>Axis to take moment along (1=x 2=y 3=z). Unless <b>keep=</b>, this axis will
+be reduced. [Default: <b>3</b>] </dd>
 
 <dt><b>mom=</b> </dt>
-<dd>Moment to take along the selected axis. For convenience
-referring to the selected axis as "<i>velocity</i>" we have the following moments:
-<br>
+<dd>Moment to take along the selected axis. For
+convenience referring to the selected axis as "<i>velocity</i>" we have the following
+moments: <br>
 <pre>0<tt> </tt>&nbsp;<tt> </tt>&nbsp;total emission
 1<tt> </tt>&nbsp;<tt> </tt>&nbsp;mean velocity
 2<tt> </tt>&nbsp;<tt> </tt>&nbsp;sigma, the velocity dispersion (FWHM = 2.355 * sigma)
@@ -136,22 +139,23 @@ axis=3. Default: none </dd>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='pvtrace.1.html'>pvtrace(1NEMO)</a>
+, <a href='ccdmoms.1.html'>ccdmoms(1NEMO)</a>
 , <a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
-, <a href='ccdrt.1.html'>ccdrt(1NEMO)</a>
 ,
-<a href='ccdshape.1.html'>ccdshape(1NEMO)</a>
+<a href='ccdrt.1.html'>ccdrt(1NEMO)</a>
+, <a href='ccdshape.1.html'>ccdshape(1NEMO)</a>
 , <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
 , <a href='mom2cube.1.html'>mom2cube(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Cannot
-compute straight moments, e.g. the 2nd moment along an axis, such as e.g. <i>snapgrid</i>
-can do. This  program only computes user friendly numbers (sum, mean, dispersion)
-and gives special meaning to negative values of mom= and axis=. 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/image/misc/ccdmom.c
 
+
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+Cannot compute straight moments, e.g. the 2nd moment along an axis,
+such as e.g. <i>snapgrid</i> can do. This  program only computes user friendly numbers
+(sum, mean, dispersion) and gives special meaning to negative values of
+mom= and axis=. 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
+src/image/misc/ccdmom.c 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>

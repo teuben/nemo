@@ -49,9 +49,14 @@ of character strings, booleans, and possible multi-dimensional arrays of
 data.  This data may be structured in a hierarchical form similar to the
 Unix directory structure, although there are additional constraints imposed
 by the essentially linear nature of the storage media. <p>
-The external data
-format (visualized by an otherwise non-existing <b>struct _disk_item</b>) is a
-tagged list of data <i>item</i>s,  each containing a magic number (also containing
+In modern parlor,
+the format resembles XML but where the data are stores in binary form. Libraries
+such as <a href='netcdf.3.html'><i>netcdf(3)</i></a>
+ and HDF5 overlap in ideas in this NEMO library. When NEMO
+was developed, in 1986, these libraries were not available yet. <p>
+The external
+data format (visualized by an otherwise non-existing <b>struct _disk_item</b>)
+is a tagged list of data <i>item</i>s,  each containing a magic number (also containing
 information if the item is a single number or an array), a tag name for
 identification and search purposes,  a data type and optionally a dimension
 followed by a contiguous data  stream. Certain data types (such as <b>set</b>s)
