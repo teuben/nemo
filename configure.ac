@@ -142,11 +142,11 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
-AC_ARG_ENABLE(shared, [  --disable-shared        disable shared libraries? (needed for falcON on MAC)], ok=$enableval, ok=no)
+AC_ARG_ENABLE(shared, [  --disable-shared        disable shared libraries? (needed for falcON on MAC)], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
-  NO_SHARED_LIBS=1
-else
   NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
 fi
 AC_SUBST(NO_SHARED_LIBS)
 
