@@ -39,42 +39,49 @@ given:
 
 <dt><b>x=</b> </dt>
 <dd>X coordinates
-to select.  Valid numbers are 1..nx. By default all will be selected. </dd>
+to select.  Valid numbers are 1..nx. By default all will be selected. See also
+<b>centerbox</b> below. </dd>
 
 <dt><b>y=</b> </dt>
-<dd>Y coordinates
-to select. Valid numbers are 1..ny. By default all will be selected. </dd>
+<dd>Y coordinates to select. Valid numbers are 1..ny. By default
+all will be selected. </dd>
 
 <dt><b>z=</b> </dt>
-<dd>Z coordinates
-to select. Valid numbers are 1..nz. By default all will be selected. </dd>
+<dd>Z coordinates to select. Valid numbers are 1..nz. By
+default all will be selected. </dd>
 
-<dt><b>nxaver=</b>
-</dt>
-<dd>Number X to aver (size remains same)  </dd>
+<dt><b>nxaver=</b> </dt>
+<dd>Number X to aver (size remains same)
+ </dd>
 
 <dt><b>nyaver=</b> </dt>
-<dd>Number Y to aver (size remains
-same)  </dd>
-
-<dt><b>nzaver=</b> </dt>
 <dd>Number Y to aver (size remains same)  </dd>
 
-<dt><b>dummy=t|f</b> </dt>
-<dd>Write out
-dummy axes as well? [true] </dd>
+<dt><b>nzaver=</b> </dt>
+<dd>Number Y to aver
+(size remains same) </dd>
+
+<dt><b>centerbox=</b> </dt>
+<dd>Up to three values (between 0 and 1) to
+take that fraction of that axis for subsetting the cube. Using this option
+will override the corresponding x=, y= and/or z=. Any axis not specified
+will inherit the corresponding x=, y= or z=. Default: not used. </dd>
+
+<dt><b>dummy=t|f</b>
+</dt>
+<dd>Write out dummy axes as well? [true] </dd>
 
 <dt><b>reorder=xyz</b> </dt>
-<dd>New order of axes after all previous
-actions have been taken. The default is no reordering, i.e. keep it in <b>xyz</b>
-order. To reverse only the X and Y axis, <b>reorder=yxz</b> is needed. </dd>
+<dd>New order of axes after
+all previous actions have been taken. The default is no reordering, i.e. keep
+it in <b>xyz</b> order. To reverse only the X and Y axis, <b>reorder=yxz</b> is needed.
+</dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To
-reorder a cube from xyz to zxy and back to xyz, the 2nd step will have
-a perhaps non-intuitive axis reordering, since it refers to the new "zxy"
-order: <br>
+To reorder a cube from xyz to zxy and back to xyz, the 2nd step
+will have a perhaps non-intuitive axis reordering, since it refers to the
+new "zxy" order: <br>
 <pre>    ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
@@ -93,6 +100,7 @@ Peter Teuben
 17-jun-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;WCS for simple subsetting<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-apr-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 replace skip= with dummy=, fix bug nzaver=  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-jun-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0a fixed bug when Z size if different from XY<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-dec-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4  add centerbox=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

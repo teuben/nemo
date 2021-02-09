@@ -32,23 +32,24 @@ However to write scripts in a portable way (semi-automatically switching
 devices) and incrementing figure numbers in case there are more than one,
 can be a bit challenging. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+ The following parameters are recognized;
+they may be given in any order if the keyword is also given. Use --help to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>name=</b> </dt>
-<dd>Override for yapp= system
-keyword (*** = default) </dd>
+<dd>Override for yapp= system keyword
+(*** = default) </dd>
 
 <dt><b>layout=</b> </dt>
 <dd>Optional layout file [] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Csh Examples</a></h2>
-In
-the case of a yapp device that can switch between graphics output, here
-is an awkward csh-example (csh does not have functions) with the PGPLOT_YAPP
-driver , how to auto-increment your output devices: <br>
+In the case
+of a yapp device that can switch between graphics output, here is an awkward
+csh-example (csh does not have functions) with the PGPLOT_YAPP driver ,
+how to auto-increment your output devices: <br>
 <pre>#  before the script starts, assign two variables and initialize the $yapp
 set yapps = yapp%d.ps/vcps    # yapp printf string (%d/xs, yapp%d.ps/vcps)
 set yappn = 1                 # first yapp number

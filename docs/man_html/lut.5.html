@@ -14,10 +14,12 @@ lut - GIPSY 256 color lookup table
 <i>lut</i> files are simple ASCII
 tables with 3 columns, representing the colors Red, Green and Blue resp,
 scaled between 0.0 and 1.0, for 256 responses between a datamin and datamax
-(normally taken as 0 to 255. 
+(normally taken as 0 to 255. <p>
+The <b>cmasher</b> color tables are also stores in
+the same RGB format, except more free format. 
 <h2><a name='sect2' href='#toc2'>Format</a></h2>
-An example of reading the Red, Green
-and Blue responses: <br>
+An example of reading
+the Red, Green and Blue responses: <br>
 <pre>  real *coldat[3], *r, *g, *b;
   int ncolors, colnum[3];
   stream instr = stropen(fn,"r");
@@ -26,22 +28,45 @@ and Blue responses: <br>
   colnum[2] = 3;    coldat[2] = b = (real *) allocate(256*sizeof(real));
   ncolors = get_atable(instr,3,colnum,coldat,256);
   if (ncolors != 256) error("Problem %d reading %s",ncolors,fn);
-</pre>
+</pre>which means the odd looking formatting of the LUT files have no significance
+in NEMO (or matplotlib). GIPSY might care. TBD. 
 <h2><a name='sect3' href='#toc3'>Examples</a></h2>
-The <b>ds9</b> image display server can read the GIPSY lut 
+The <b>ds9</b> image display
+server can read the GIPSY lut <p>
+The cmasher python module can be used to
+generate new LUT&rsquo;s from matplotlib. Here&rsquo;s an example <br>
+<pre>     $NEMODAT/lut/mklut pepper &gt; pepper.lut
+     ccdmath "" - %x size=512,512 | ccdppm - - lut=pepper.lut &gt; pepper.ppm
+</pre>though if you know your python root, you can also find them, see FILES
+below. <p>
+In <a href='ds9.1.html'><i>ds9(1)</i></a>
+ you can load a LUT as follows from the menu tree: <br>
+<pre>       color -&gt; colormap parameters  -&gt; file -&gt; load colormap
+</pre>
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='ccdppm.1.html'>ccdppm(1NEMO)</a>
+, <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='ds9.1.html'>ds9(1)</a>
+ <p>
+cmasher (cmr):  <a href='https://github.com/1313e/CMasher'>https://github.com/1313e/CMasher</a>
+
+<p>
+colormaps:  <a href='https://cmasher.readthedocs.io/user/cmap_overviews/mpl_cmaps.html'>https://cmasher.readthedocs.io/user/cmap_overviews/mpl_cmaps.html</a>
 
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
-<pre>NEMODAT/lut<tt> </tt>&nbsp;<tt> </tt>&nbsp;data files, mirrored from GIPSY&rsquo;s $gip_dat/lut
+<pre>$NEMODAT/lut<tt> </tt>&nbsp;<tt> </tt>&nbsp;data files, mirrored from GIPSY&rsquo;s $gip_dat/lut. 
+$NEMODAT/lut/mklut<tt> </tt>&nbsp;<tt> </tt>&nbsp;script to create a LUT from matplotlib/cmasher colormaps
+PYTHONROOT/lib/python3.7/site-packages/cmasher/colormaps/<tt> </tt>&nbsp;<tt> </tt>&nbsp;advanced cmasher
+"lut" files
 </pre>
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
-<pre>17-dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;documentation written (100 years Wright flight)    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>17-dec-2003<tt> </tt>&nbsp;<tt> </tt>&nbsp;documentation written (100 years Wright flight)    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;cmasher docs (lunar landing day)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 

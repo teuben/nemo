@@ -27,16 +27,35 @@ A good start is the manual page
 , which lists programs thematically, and <a href='index.1.html'><i>index(1NEMO)</i></a>
 , which
 lists them  alphabetically (CAVEAT: these pages are not well maintained).
-<p>
-<b>NEMO</b> is very much integrated into the Unix(tm) operating system, so users
-are expected to use standard Unix commands as glue between the various
-tasks (cat, ls, rm, cp, awk, sm, <i>etc.</i>). Understanding of shell scripting
-(sh, csh, python, perl, <i>etc.</i>) can be very useful. Several example shell scripts
-exist in the source tree to demonstrate how experiments can be orchestrated.
-We use mostly csh, bash and python. Yes, csh too, even though csh is considered
-harmful now. 
+
 <p> 
-<h2><a name='sect2' href='#toc2'>Synopsis</a></h2>
+<h2><a name='sect2' href='#toc2'>NEMO vs. UNIX</a></h2>
+
+<p> <b>NEMO</b> is very much integrated into the Unix(tm) operating
+system, so users are expected to use standard Unix commands as glue between
+the various tasks (cat, ls, rm, cp, awk, sm, <i>etc.</i>). Understanding of shell
+scripting (sh, csh, python, perl, <i>etc.</i>) can be very useful. for NEMO as well.
+Several example shell scripts exist in the source tree to demonstrate how
+experiments can be orchestrated. We use mostly csh, bash and python. Yes,
+csh too, even though csh is considered harmful now. <p>
+Here are some useful
+reminders of using NEMO when you are familiar with the unix style of command
+line tools, piping etc.: 
+<p> <br>
+<pre>- programs use a set of key=value command line arguments, minimum match
+works, but you cannot repeat keywords
+    = the --help or help=h are ways to get inline help from a program and
+remind you of the keyword names
+    = keyword values can be math expressions (see nemoinp(1NEMO))
+    = the UNIX man(1) command will get offline help
+- NEMO can use pipes efficiently:
+    = The UNIX stdin and stdout are represented with a dash (-), so piping
+can become a little awkward
+    = The UNIX /dev/null is represented with a dot (.), like a black hole
+sucking up everything
+</pre>
+<p> 
+<h2><a name='sect3' href='#toc3'>Synopsis</a></h2>
 <br>
 <pre>program --help
 program [key1=]val1 [key2=]val2 .!.!.
@@ -44,7 +63,7 @@ runprogram [key1=]val1 [key2=]val2 .!.!.
 run program ...
 </pre>
 <p> 
-<h2><a name='sect3' href='#toc3'>Getting Started</a></h2>
+<h2><a name='sect4' href='#toc4'>Getting Started</a></h2>
 What you need to do to set yourself up for <b>NEMO</b>: <p>
 The easiest
 way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file. For example
@@ -52,12 +71,12 @@ way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file.
 <pre>        source /opt/nemo/nemo_start.sh
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;
 or for the die hards
-        source /opt/nemo/nemo_start.ssh
+        source /opt/nemo/nemo_start.csh
 </pre><p>
 If you need more control over your NEMO environment, there are other methods
 described elsewhere (The <i>NEMO Users/Programmers Guide</i>, Appendix A), or
 consult one of your local friendly NEMO users. 
-<h2><a name='sect4' href='#toc4'>How to Run Nemo Programs</a></h2>
+<h2><a name='sect5' href='#toc5'>How to Run Nemo Programs</a></h2>
 NEMO
 programs can be run just as any other command in Unix, in that sense NEMO
 is nothing more than an extension of Unix. NEMO programs usually read and/or
@@ -123,7 +142,7 @@ velocities to the user using <b>snapprint</b>. The alternative would have been
     snapprint in=tmp
     rm tmp
 </pre>
-<h2><a name='sect5' href='#toc5'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
+<h2><a name='sect6' href='#toc6'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
 Over the times NEMO has incoorporated a number
 of non-NEMO programs, with varying degrees of input parameter schemes. Some
 via parameter files, some interactive input, some a command line interface
@@ -149,14 +168,14 @@ Although these run* programs use a fairly common
 method to run the non-NEMO programs, they have not all been unified as is
 proposed in <a href='run.3.html'><i>run(3NEMO)</i></a>
 . 
-<h2><a name='sect6' href='#toc6'>Programming</a></h2>
+<h2><a name='sect7' href='#toc7'>Programming</a></h2>
 You may need to do some sherlocking here.
 You have probably seen the configure.ac and makedefs file. The $NEMOLIB/makedefs
 is the active file.  The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
  will help you (re)compile programs,
 though <a href='bake.8.html'><i>bake(8NEMO)</i></a>
  can do a better job in a local directory. 
-<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='index.1.html'>index(1NEMO)</a>
 ,
 <a href='programs.8.html'>programs(8NEMO)</a>
@@ -173,9 +192,9 @@ though <a href='bake.8.html'><i>bake(8NEMO)</i></a>
 ,
 <a href='pipestatus.l.html'>pipestatus(l)</a>
  
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Further Information</a></h2>
+<h2><a name='sect10' href='#toc10'>Further Information</a></h2>
 The <i>NEMO Users/Programmers
 Guide</i> contains most of the information you need to get down to the guts
 of the system. <p>
@@ -189,7 +208,7 @@ Various <a href='man.1.html'><i>man(1NEMO)</i></a>
 NEMO homepage <a href='http://www.astro.umd.edu/nemo'><i>http://www.astro.umd.edu/nemo</i></a>
 
 and github page <i>https://github.com/teuben/nemo</i>. 
-<h2><a name='sect10' href='#toc10'>Bugs</a></h2>
+<h2><a name='sect11' href='#toc11'>Bugs</a></h2>
 Since programs are being
 modified, and extended fairly regularly,  manual pages for related programs
 do not always know about these changes if they should. Keeping good cross
@@ -201,15 +220,16 @@ should always be up to date, since it is derived from the code itself. <p>
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Synopsis</a></li>
-<li><a name='toc3' href='#sect3'>Getting Started</a></li>
-<li><a name='toc4' href='#sect4'>How to Run Nemo Programs</a></li>
-<li><a name='toc5' href='#sect5'>HOW TO RUN non-NEMO PROGRAMS</a></li>
-<li><a name='toc6' href='#sect6'>Programming</a></li>
-<li><a name='toc7' href='#sect7'>See Also</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Further Information</a></li>
-<li><a name='toc10' href='#sect10'>Bugs</a></li>
+<li><a name='toc2' href='#sect2'>NEMO vs. UNIX</a></li>
+<li><a name='toc3' href='#sect3'>Synopsis</a></li>
+<li><a name='toc4' href='#sect4'>Getting Started</a></li>
+<li><a name='toc5' href='#sect5'>How to Run Nemo Programs</a></li>
+<li><a name='toc6' href='#sect6'>HOW TO RUN non-NEMO PROGRAMS</a></li>
+<li><a name='toc7' href='#sect7'>Programming</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Further Information</a></li>
+<li><a name='toc11' href='#sect11'>Bugs</a></li>
 </ul>
 </body>
 </html>
