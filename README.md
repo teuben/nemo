@@ -45,14 +45,14 @@ fine just to get started quickly.
 
 
 There are a few ways to install NEMO.  Although there are
-some install scripts, and there is the README.install file
+some install scripts with many options, and there is the README.install file
 for background information, here is the basic method
 for most Linux distros (assuming you have the preconditions):
 
          git clone https://github.com/teuben/nemo
          cd nemo
          ./configure --with-yapp=pgplot
-         make build 
+         make build check bench 
          source nemo_start.sh
 
 On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
@@ -62,7 +62,7 @@ work (there are other ways to install tools on a mac,but don't get me started):
          git clone https://github.com/teuben/nemo
          cd nemo
          CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
-         make build 
+         make build check bench
          source nemo_start.sh
 
 
