@@ -14,10 +14,10 @@
 #include <moment.h>
 
 string defv[] = {
-  "in=???\n           Input filename",
-  "x=0\n              Pixel in X to print (0=1st pixel)",
-  "y=0\n              Pixel in Y to print",
-  "VERSION=0.1\n      11-feb-2021 PJT",
+  "in=???\n          Input filename",
+  "x=\n              Pixel in X to print (0=1st pixel)",
+  "y=\n              Pixel in Y to print",
+  "VERSION=0.2\n     11-feb-2021 PJT",
   NULL,
 };
 
@@ -46,8 +46,14 @@ void nemo_main(void)
     nx = Nx(iptr);	
     ny = Ny(iptr);
     nz = Nz(iptr);
-    ix = getiparam("x");
-    iy = getiparam("y");
+    if (!hasvalue("x"))
+      ix = nx/2;
+    else
+      ix = getiparam("x");
+    if (!hasvalue("y"))
+      iy = ny/2;
+    else
+      iy = getiparam("y");
 
     for (iz=0, f1=0; iz<nz; iz++) {
         z = Zmin(iptr) + (iz-Zref(iptr)) * Dz(iptr);
@@ -58,7 +64,8 @@ void nemo_main(void)
 	if (iz>0) accum_moment(&m2, f-f1, 1.0);
 	f1 = f;
     }
-    dprintf(0,"#  %g %g    %g %g\n",
+    printf("# %d %d mean/sig  %g %g    %g %g\n", 
+	   ix, iy,
 	   mean_moment(&m1), sigma_moment(&m1),
  	   mean_moment(&m2), sigma_moment(&m2));
 }
