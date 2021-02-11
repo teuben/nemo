@@ -64,9 +64,10 @@ void nemo_main(void)
 	if (iz>0) accum_moment(&m2, f-f1, 1.0);
 	f1 = f;
     }
-    printf("# %d %d mean/sig  %g %g    %g %g\n", 
+    printf("# %d %d mean/sig  %g %g    %g %g   %g\n", 
 	   ix, iy,
 	   mean_moment(&m1), sigma_moment(&m1),
- 	   mean_moment(&m2), sigma_moment(&m2));
+ 	   mean_moment(&m2), sigma_moment(&m2),
+	   sigma_moment(&m2)/sigma_moment(&m1)/sqrt(2));
 }
 
