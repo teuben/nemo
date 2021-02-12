@@ -26,7 +26,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-11-22) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2020-02-12) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
