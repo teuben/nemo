@@ -1,0 +1,62 @@
+.TH CCDSPEC 1NEMO "11 February 2021"
+.SH NAME
+ccdspec \- print spectrum at a grid point in an image cube
+.SH SYNOPSIS
+\fBccdspec\fP [parameter=value]
+.SH DESCRIPTION
+\fBccdspec\fP list the spectrum (see also \fIsnapprint(1NEMO)\fP for
+more flexible options). 
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input filename. No default.
+.TP
+\fBx=\fP
+Pixel in X to print (0=1st pixel). By default it uses the center of the map.
+.TP
+\fBy=\fP
+Pixel in Y to print.
+.SH EXAMPLES
+Here is an example creating a spectrum with uncorrelated noise.
+The stats mentioned in the comments
+last line ar the pixel position, and mean/sigma for the signal, and
+the differential spectrum. The last number is the
+ratio of the two sigma and sqrt(2), which for normal gaussian noise should be 1.
+.nf
+
+ccdgen "" - noise 0,1 size=1,1,8000 seed=123 |  ccdspec - | tail -3
+7998 -1.06975
+7999 0.944338
+# 0 0 mean/sig  0.00102038 1.00182    9.94952e-05 1.41469   0.998513
+
+.fi
+although \fPtabhist(1NEMO)\fP with \fBmedian=f\fP gives the same
+.nf
+
+ccdgen "" - noise 0,1 size=1,1,8000 seed=123 |  ccdspec - | tabhist - 2  median=f
+Mean and dispersion  : 0.00102037 1.00182 0.0112014
+Diff mean and disp   : 9.94952e-05 1.41469 0.998513
+
+.fi
+and if an extra smoothing is done, the correlation is less than one
+.nf
+
+ccdgen "" - noise 0,1 size=1,1,8000 seed=123 | ccdsmooth - - dir=z | ccdspec - | tail -3
+7998 -0.151399
+7999 0.204732
+# 0 0 mean/sig  0.000986234 0.616406    4.92386e-05 0.49548   0.568387
+
+.fi
+.SH SEE ALSO
+ccdgen(1NEMO), ccdprint(1NEMO), tabhist(1NEMO), tabtrend(1NEMO)
+.SH FILES
+src/image/io	
+.SH AUTHOR
+Peter Teuben
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-Feb-2021	V0.3 Created Q&D	PJT
+.fi
