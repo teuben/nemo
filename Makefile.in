@@ -4,6 +4,8 @@ VERSION = NEMO V4.2 24-jan-2021 PJT
 #       do not edit, it is derived from Makefile.in
 ################################################################################
 
+SHELL = /bin/bash
+
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
 .PHONY:  INSTALL install scripts
 
@@ -94,8 +96,6 @@ WWWDIR = $(NEMO)/local/www
 # INSTALL:
 #	----------Installation starts here------------
 # make sure you're in $(NEMO) from here
-
-SHELL = /bin/bash
 
 # this should remain the first target in this Makefile, so a default "make" invocation goes here
 help:   install lsb
