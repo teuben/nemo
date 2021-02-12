@@ -29,46 +29,46 @@ Although <i>structured files</i> can always be read when they were created on
 a byte swapped machine, <i>csf</i> can also be used to create a file in which
 the bytes are not swapped. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized;
-they may be given in any order if the keyword is also given. 
+ The following parameters are recognized;
+they may be given in any order if the keyword is also given. Use --help to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>in</b>=<i>in-file</i> </dt>
-<dd>Input
-file, must be in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
- format [no default]. </dd>
+<dd>Input file, must be in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
+
+format [no default]. </dd>
 
 <dt><b>out</b>=<i>out-file</i> </dt>
-<dd>Output
-file, will be in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
- format [no default]. </dd>
+<dd>Output file, will be in <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
+
+format [no default]. </dd>
 
 <dt><b>item</b>=<i>item-list</i> </dt>
-<dd>List
-of top level items, separated by comma&rsquo;s or spaces, to be copied. If none
-are provided, all items are selected. Note that the  <i>item-list</i> will be case
-sensitive. [default: -blank-]. </dd>
+<dd>List of top level items, separated by
+comma&rsquo;s or spaces, to be copied. If none are provided, all items are selected.
+Note that the  <i>item-list</i> will be case sensitive. [default: -blank-]. </dd>
 
-<dt><b>select</b>=<i>select-list</i> </dt>
-<dd>List of numbers (1 being the
-first) that are select for  copying, after the above mentioned item-name
-selection (from the <b>item=</b> keyword) has been applied. If none are provided,
-all are copied. [default: -blank-]. </dd>
+<dt><b>select</b>=<i>select-list</i>
+</dt>
+<dd>List of numbers (1 being the first) that are select for  copying, after
+the above mentioned item-name selection (from the <b>item=</b> keyword) has been
+applied. If none are provided, all are copied. [default: -blank-]. </dd>
 
-<dt><b>convert</b>=<i>convert-list</i> </dt>
-<dd>List of conversions
-to make, separated by comma&rsquo;s or spaces. Each conversion is of the format
-<i>from</i>2<i>to</i>, where both the <i>from</i> and <i>to</i> part are any of: <b>d</b> (double), <b>f</b> (float),
-<b>h</b>  (half precision) , <b>l</b> (long), <b>i</b> (int) or <b>s</b> (short).  [Default: -blank-].
-</dd>
+<dt><b>convert</b>=<i>convert-list</i>
+</dt>
+<dd>List of conversions to make, separated by comma&rsquo;s or spaces. Each conversion
+is of the format <i>from</i>2<i>to</i>, where both the <i>from</i> and <i>to</i> part are any of: <b>d</b>
+(double), <b>f</b> (float), <b>h</b>  (half precision) , <b>l</b> (long), <b>i</b> (int) or <b>s</b> (short).
+ [Default: -blank-]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveat</a></h2>
-Some of the conversions in <b>convert=</b> are not supported or are in danger
-of loosing more than just precision. 
+Some of the conversions in <b>convert=</b> are not supported
+or are in danger of loosing more than just precision. 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An image with too much data-history
-can be cut by only copying the <i>Image</i> items: <br>
+An image with
+too much data-history can be cut by only copying the <i>Image</i> items: <br>
 <pre>   % csf in=map1.ccd out=map2.ccd select=Image
 </pre>
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>

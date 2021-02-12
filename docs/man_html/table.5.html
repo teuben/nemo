@@ -86,8 +86,9 @@ arcmin|----------|deg    |deg   |arcsrc|mag|mag|
 3.2269|0430200121|00 13 36.46|+72 29 29.8|0.2|12.50|0.34|0
 ]]&gt;&lt;/CSV&gt;&lt;/DATA&gt;
 &lt;/TABLE&gt;
-</pre><p>
-The starbase format (http://cfa-www.harvard.edu/~john/starbase/starbase.html)
+</pre>
+<p> <p>
+The starbase format (http://tdc-www.harvard.edu/software/catalogs/starbase/starbase.5.html)
 also uses a TAB to separate columns, and uses a simple header to name the
 columns, example: <br>
 <pre>RA<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dec
@@ -96,6 +97,20 @@ columns, example: <br>
 12:00<tt> </tt>&nbsp;<tt> </tt>&nbsp;-30.0
 15<tt> </tt>&nbsp;<tt> </tt>&nbsp;60:00:30.4
 </pre>
+<p> <p>
+The ECVS (Enhanced Character Separated Values) is extension to the generic
+ascii table format, except it has a commented YAML header encoding the
+units, and one extra <i>annoying</i> row with column names: <br>
+<pre># %ECSV 0.9
+# ---
+# datatype:
+# - {name: a, unit: m / s, datatype: int64, format: &rsquo;%03d&rsquo;}
+# - {name: b, unit: km, datatype: int64, description: This is column b}
+a b
+001 2
+004 3
+</pre>
+<p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='nemoinp.1.html'>nemoinp(1NEMO)</a>
 , <a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
@@ -104,10 +119,18 @@ columns, example: <br>
 , <a href='paste.1.html'>paste(1)</a>
 ,
 <a href='ffe.1.html'>ffe(1)</a>
- <br>
-<pre>ffe (flat file extractor): http://ff-extractor.sourceforge.net/
-AuthorPeter Teuben Update History
-1-feb-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;document created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+ <p>
+FFE: (flat file extractor): <a href='http://ff-extractor.sourceforge.net/'>http://ff-extractor.sourceforge.net/</a>
+ <p>
+ECSV:
+<a href='https://github.com/astropy/astropy-APEs/blob/master/APE6.rst'>https://github.com/astropy/astropy-APEs/blob/master/APE6.rst</a>
+ 
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
+Peter Teuben
+
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<br>
+<pre>1-feb-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;document created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-oct-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;some more docs on other table formats<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 

@@ -26,14 +26,17 @@ x, int n4, int n3, int n2, int n1);...</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mdarray</i> offers a uniform
 way to allocate and free multi-dimensional (real) C-style arrays. Up to MDMAXDIM
-(defined via the header file)  dimensions are available. Actually data memory
+(defined via the header file)  dimensions are available. Actual data memory
 is guarenteed to be sequentually in memory, as they are with static multidimensional
-arrays. <p>
-Arrays are stored in row major order, if rows vary most rapidly
-in memory.  For example in <br>
+arrays. This makes it easy to overlay them with traditional languages such
+a Fortran (with the caution of row-major and column-major differences). <p>
+Arrays
+are stored in row major order, if rows vary most rapidly in memory.  For
+example in <br>
 <pre>   double matrix a[20][10];
 </pre>the right-most index (10) varies most rapidly in memory, exactly like static
-C arrays. <p>
+C arrays, but opposite those of fortan. The matching fortran array would
+be a(10,20) in this case. <p>
 Example of use: ( b = A.x) <br>
 <pre>    mdarray1 x = allocate_mdarray1(10);      /*  x[10]     */
     mdarray2 A = allocate_mdarray2(20,10);   /*  A[20][10] */

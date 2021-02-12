@@ -24,6 +24,8 @@ contains a timestamp of that creation.
 <A NAME=4_2_1>
 <H2> 4.2.1:  in github</H2>
 <UL>
+  <LI> (8-feb-2021) back to previous default: shared libs remains enabled by default, so on a mac you will need to use
+    --disable-shared now.
   <LI> (6-feb-2021) major issue on recent Mac:  latest (clang 11.0.0)) Xcode does not compile gyrfalcON anymore,
     but brew based gcc-10 (10.2.0) works. More importantly, the SIP implementation causes shared libraries to not work
     in scripts, or any system that will then filter out $DYLD_LIBRARY_PATH.   Thus the default is now that

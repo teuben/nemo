@@ -9,80 +9,217 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-get_atable, get_ftable, get_line, parse, strinsert - table manipulator
-routines 
+table_open, table_md2, table_close - new table manipulation routines
+(<i>drafted</i>) <p>
+get_atable, get_ftable, get_line, parse, strinsert - legacy table
+manipulator routines 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
-<pre>#include &lt;stdinc.h&gt;int get_atable(instr,ncol,colnr,coldat,ndat)stream instr;int
-ncol;    int colnr[]; real *coldat[];int ndat;      
-int get_ftable(instr,ncol,colpos,colfmt,coldat,ndat)stream
-instr;  int ncol;      int colpos[];  string *colfmt[];real *coldat[];
- int ndat;        
-int get_line (instr, line)stream instr;char *line;
+<pre>#include &lt;table.h&gt;#include &lt;mdarray.h&gt;table *table_open(string fname, int rowbufsize,
+? int maxrow);mdarray2 table_md2(table *t);void table_read(table *t);string
+*table_comments(table *t);void table_reset(table *t);void table_close(table
+*t);
+int table_nrows(table *t);int table_ncols(table *t);void table_set_valid_rows(int
+nrows, int *rows)void table_set_valid_cols(int ncols, int *cols)
+int table_next_row(table
+*t)   int table_next_rows(table *t)  int table_next_rowi(table *t)int table_next_rowr(table
+*t)string table_line(table *t)
+string table_cols(table *t, int col)int 
+table_coli(table *t, int col)real table_colr(table *t, int col)
+string *table_colsp(table
+*t, int col) int *table_colip(table *t, int col)real *table_colrp(table
+*t, int col)
+string table_row(table *t, int row)string *table_rowsp(table
+*t, int row)int *table_rowip(table *t, int row)real *table_rowrp(table
+*t, int row)
+void table_set_ncols(int ncols) 
+Old:
+int get_atable(strean instr,int
+ncol,int *colnr,real *coldat,int ndat)
+int get_ftable(stream instr,int ncol,int
+*colpos,string *colfmt,real *coldat,int ndat) // check
+int get_line (string
+instr, char *line)
+int parse(int linenr, char *line, double *dat, int ndat)
 int
-parse(linenr, line, dat, ndat)int linenr;char *line;double *dat;int ndat;
-int
-strinsert(a, b, n)char *a;char *b;int n;
-int iscomment(line)char *line;</pre>
+strinsert(char *a, char *b, int n)
+int iscomment(char *line)</pre>
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Both
-<i>get_atable</i> and <i>get_ftable</i> parse an ascii table, pointed by the <i>instr</i> stream,
-into <i>ncol</i> columns and up to <i>ndat</i> rows of <b>real</b> numbers into memory. The input
-table may contain comment lines, as well as columns which are not numbers.
-Badly parsed lines are simply skipped. Other common parameters to both routines
- are <i>coldat, ncol</i> and <i>ndat</i>: <i>coldat</i> is an array of <i>ncol</i> pointers to  previously
-allocated data, each of them <i>ndat</i> <b>real</b> elements. The number of valid rows
-read is then returned. If this number is negative, it means more data is
-available, but could not be read because  <i>ndat</i> was exhausted. Upon the next
-call <i>ndat</i> must be set to negative, to recover the last line read on the
-previous call, and continue reading the table without missing a line. CAVEAT:
-this only works if <i>instr</i> has not changed.  <p>
-<i>get_atable</i> parses the table in
-free format. <i>colnr</i> an array of length <i>ncol</i> of the column numbers to read
-(1 being the first column), If any of the <i>colnr</i> is 0, it is  interpreted
-as referring to the line number in the original input file (including/excluding
-comment and empty lines),  1 being the first line, and the corresponding
-entry in <i>coldat</i> is set as such. Columns are separated by whitespace or commas.
+A
+new <i>table</i> interface was introduced in Summer 2020 to create a more uniform
+and scaleable table ASCII system. This will have no limit on number of columns,
+line length or number or rows, perhaps at a slight cost of performance.
+It should also detect automatically if they have Space Separated Values
+(SSV), Comma Separated Values (CSV) or Tab Separated Values (TSV). <p>
+<b>table_open</b>
+opens a file for reading. The returned <i>table *</i> pointer is used in all subsequent
+table_ routines. The <b>rowbufsize</b> controls how many lines from the table are
+allowed in internal buffers. A value of <b>0</b> means the whole table will be
+read in memory, a value of <b>1</b> will read the table line by line.  Values larger
+than 1 are planned, but not yet supported. <b>maxrow</b> used to be in the old
+system a lot, but we can probably live without it. It normally is only needed
+when the input file is a pipe and the whole file needs to be read, which
+is now supported. <b>table_md2</b> is a convenient way to convert an ascii table
+immediately into a two dimensional <a href='mdarray.3.html'><i>mdarray(3NEMO)</i></a>
+. With <b>table_read</b> the whole
+table is read into memory. Any comment lines at the start of the file will
+saved in a special <i>comment</i> set of lines, which can be extracted with <b>table_comments.</b>
+Finally <b>table_close</b> access to the table can be closed and any associated
+memory will be freed. In addition <b>table_reset</b> can be used to reset array
+access (more on that later), in the case it needs to be re-read. For arrays
+that are processed in streaming mode (e.g. <i>filename="-"</i>) this will result
+in an error. <p>
+Once a table has been fully read into memory, <b>table_nrows</b> returns
+the number of rows, and  <b>table_ncols</b> the number of columns. By using <b>table_set_valid_rows</b>
+and/or <b>table_set_valid_cols</b> rows and/or columns can be selected for conversion,
+and this will also define the new value for <i>nrows</i> and <i>ncols.</i> When <b>table_reset</b>
+is called, these values are reset to their original value. <p>
+If the table
+is parsed line by line, some routines will not be accessible, since the
+table is not in memory.  <p>
+Using <b>table_next_row</b> a new line can be read. This
+will return -1 upon end of file, 0 when the line is blank or contains no
+data, though could contain comments (e.g. lines with # ! or ;), and 1 when
+a line was read. No parsing will be done. If parsing is done, the line will
+be tokenized in identical types (<b>s</b>tring, <b>i</b>nt or <b>r</b>eal), with resp. <b>table_next_rows</b>
+, <b>table_next_rowi,</b> or <b>table_next_rowr.</b> The last line is always stored internally,
+and a pointer to the string can be retrieved with <b>table_line</b> for more refined
+user parsing. <p>
+Depending on with which of the three types the line was parsed,
+column elements can be retrieved with <b>table_cols,</b> <b>table_coli,</b> or <b>table_colr.</b>
+and if the whole table was available in memory, columns can also be retrieved
+in full via <b>table_colsp,</b> <b>table_colip,</b> or <b>table_colrp</b> <p>
+The currently parsed
+row can in full be retrieved with (again, depending on type) <b>table_rowsp,</b>
+<b>table_rowip,</b> or <b>table_rowrp</b> where the row number is ignored if the table
+is parsed row by row. <p>
+Possible future routines are <b>table_set_ncols</b> to cover
+the case where a row can span multiple lines. By default each line is a
+row in the table. 
+<p> <p>
+The original <i>legacy table routines</i> remain available:
 <p>
-<i>get_ftable</i> parses the table in fixed format. <i>colpos</i> is an array with  positions
-in the rows to start reading (1 being the first position), <i>colfmt</i> an array
-of pointers to the format string used to parse a <b>real</b> number (note <b>real</b>
-normally requires <i>%lf</i>). If any of the <i>colpos</i> is 0, it is interpreted as
-referring to the line  number in the original input file (including comment
-lines), 1 being the first line, and the corresponding entry in <i>coldat</i> is
-set as such. <p>
+Both <i>get_atable</i> and <i>get_ftable</i> parse an ascii table, pointed by the <i>instr</i>
+stream, into <i>ncol</i> columns and up to <i>ndat</i> rows of <b>real</b> numbers into memory.
+The input table may contain comment lines, as well as columns which are
+not numbers. Badly parsed lines are simply skipped. Other common parameters
+to both routines  are <i>coldat, ncol</i> and <i>ndat</i>: <i>coldat</i> is an array of <i>ncol</i>
+pointers to  previously allocated data, each of them <i>ndat</i> <b>real</b> elements.
+The number of valid rows read is then returned. If this number is negative,
+it means more data is available, but could not be read because  <i>ndat</i> was
+exhausted. Upon the next call <i>ndat</i> must be set to negative, to recover the
+last line read on the previous call, and continue reading the table without
+missing a line. CAVEAT: this only works if <i>instr</i> has not changed.  <p>
+<i>get_atable</i>
+parses the table in free format. <i>colnr</i> an array of length <i>ncol</i> of the column
+numbers to read (1 being the first column), If any of the <i>colnr</i> is 0, it
+is  interpreted as referring to the line number in the original input file
+(including/excluding comment and empty lines),  1 being the first line,
+and the corresponding entry in <i>coldat</i> is set as such. Columns are separated
+by whitespace or commas. <p>
+<i>get_ftable</i> parses the table in fixed format. <i>colpos</i>
+is an array with  positions in the rows to start reading (1 being the first
+position), <i>colfmt</i> an array of pointers to the format string used to parse
+a <b>real</b> number (note <b>real</b> normally requires <i>%lf</i>). If any of the <i>colpos</i> is
+0, it is interpreted as referring to the line  number in the original input
+file (including comment lines), 1 being the first line, and the corresponding
+entry in <i>coldat</i> is set as such. <p>
 The <a href='get_line.3.html'><i>get_line(3)</i></a>
- gets the next line from a stream <i>instr</i>, stored
-into <i>line</i>. It returns the length of the string read, 0 if end of file. <p>
-<i>parse</i>
-parses the character string in <i>line</i> into the double array dat, which has
-at most <i>ndat</i> entries. Parsing means that  <b>%n</b> refers to column <b>n</b> in the character
-string (<b>n</b> must be larger than 0. Also <b>%0</b> may be referenced, meaning the
-current line number, to be entered in the argument <i>linenr</i>. <p>
-<i>strinsert</i> inserts
-the string <i>b</i> into <i>a</i>, replacing <i>n</i> characters of <i>a</i>. <p>
-<i>iscomment</i> returns 1 if
-the line appears to be a comment (starts with &rsquo;;&rsquo;, &rsquo;#&rsquo;, &rsquo;!&rsquo; or a blank/newline)
+ gets the next line from
+a stream <i>instr</i>, stored into <i>line</i>. It returns the length of the string read,
+0 if end of file. This routine is deprecated, the standard <a href='getline.3.html'><i>getline(3)</i></a>
+ should
+be used. <p>
+<i>parse</i> parses the character string in <i>line</i> into the double array
+dat, which has at most <i>ndat</i> entries. Parsing means that  <b>%n</b> refers to column
+<b>n</b> in the character string (<b>n</b> must be larger than 0. Also <b>%0</b> may be referenced,
+meaning the current line number, to be entered in the argument <i>linenr</i>. <p>
+<i>strinsert</i>
+inserts the string <i>b</i> into <i>a</i>, replacing <i>n</i> characters of <i>a</i>. <p>
+<i>iscomment</i> returns
+1 if the line appears to be a comment (starts with &rsquo;;&rsquo;, &rsquo;#&rsquo;, &rsquo;!&rsquo; or a blank/newline)
 
-<h2><a name='sect3' href='#toc3'>Diagnostics</a></h2>
-Low-level catastrophies (eg, parsing errors, wrong delimiters)
-generate messages via <a href='error.3.html'><i>error</i>(3NEMO)</a>
+<h2><a name='sect3' href='#toc3'>Examples - Drafted</a></h2>
+Some examples drafted, based on the new API presented.
+<p>
+An example reading in a full table into a two dimensional mdarray2, and
+adding 1 to each element: <br>
+<pre>    table *t = table_open(filename, 0, 0);
+    ncols = table_ncols(t);
+    nrows = table_nrows(t);
+    mdarray2 d2 = table_md2(t);
+    table_close(t);
+    
+    for (int i=0; i&lt;nrows; i++)
+    for (int j=0; j&lt;ncols; j++)
+        d2[i][j] += 1.0;
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;
+</pre>and here is an example of reading the table line by line, without any parsing,
+
+<p>but removing comment lines 
+<p> <br>
+<pre>    table *t = table_open(filename, 1, 0);
+    int nrows = 0;
+    while ( (n=table_next_row(t)) &gt;= 0) {
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;if (n &gt; 0) {
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;    nrows++<tt> </tt>&nbsp;<tt> </tt>&nbsp;
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;    printf("%s\n", table_line(t));
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;}
+    }
+    table_close(t);
+    dprintf(0,"Read %d lines\n",nrows);
+    
+</pre>and dealing (and preserving) comments while reading in the whole table:
+<br>
+<pre>    table *t = table_open(filename, 0, 0);
+    //? table_read(t);
+    int nrows = table_nrows(t);
+    
+    string *sp = table_comments(t);
+    while (*sp)
+      printf("%s0,*sp++);
+    for (int j=0; j&lt;nrows; j++)
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;real *rp = table_rowrp(t, j);
+    table_close(t);
+</pre>
+<p> 
+<h2><a name='sect4' href='#toc4'>Xsv</a></h2>
+<br>
+<pre>cat AAPL.csv | xsv table | head -2
+cat AAPL.csv | xsv slice -i 1 | xsv table
+cat AAPL.csv | xsv slice -i 1 | xsv flatten
+cat AAPL.csv | xsv count
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Diagnostics</a></h2>
+Low-level catastrophies (eg, bad filenames, parsing errors,
+wrong delimiters) generate messages via <a href='error.3.html'><i>error(3NEMO)</i></a>
 . 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='table.5.html'>table(5NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='mdarray.3.html'>mdarray(3NEMO)</a>
+,
+<a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
+, <a href='burststring.3.html'>burststring(3NEMO)</a>
+, <a href='fits.3.html'>fits(3NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
+ <p>
+<br>
+<pre>https://github.com/BurntSushi/xsv
+https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+</pre>
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>src/kernel/tab  <tt> </tt>&nbsp;<tt> </tt>&nbsp;table.c gettab.c
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>xx-sep-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-aug-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented get_Xtable functions  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 1-sep-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;added iscomment()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-jul-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed reading large table buffereing<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+aug-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;designing new table system<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sathvik/PJT
 </pre><p>
 
 <hr><p>
@@ -91,11 +228,13 @@ Peter Teuben
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Diagnostics</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Examples - Drafted</a></li>
+<li><a name='toc4' href='#sect4'>Xsv</a></li>
+<li><a name='toc5' href='#sect5'>Diagnostics</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

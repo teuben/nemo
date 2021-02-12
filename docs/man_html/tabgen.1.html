@@ -9,67 +9,86 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabgen - Create a table with uniform or gaussian random numbers  
+tabgen - Create an ASCII table with (random) values 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tabgen</b>
-[parameter=value] 
+<b>tabgen</b> [parameter=value]
+
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Create a table with random numbers. Either
-uniformly ditributed numbers between 0 and 1, or from a gaussian (normal)
-distribution with mean 0 and sigma 1.  See <b>mode=</b> below. <p>
-The number or rows
-and columns can be arbitrarely large. <p>
-Using <b>mode=-1</b> random numbers are generated
-but not output, in effect allowing a benchmark. 
+Create a table with (random) numbers. Either uniformly ditributed
+numbers between 0 and 1, from a gaussian (normal) distribution with mean
+0 and sigma 1,  a constant value, or a linearly increasing value (0, 1,
+2, ...). See <b>mode=</b> below. <p>
+The number or rows and columns can be arbitrarely
+large, but not all <a href='table.5.html'><i>table(5NEMO)</i></a>
+ programs in NEMO will be able to deal with
+large columns or rows. Usually rows can be managed with the <b>nmax=</b> keyword,
+but columns is hidden deeper and not under user control. <p>
+Using <b>mode &lt; 0</b> numbers
+are generated but not output, in effect allowing a benchmark.  
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
-<dt><b>out=</b>
-</dt>
+<dt><b>out=</b> </dt>
 <dd>Output ascii table [???]      </dd>
 
 <dt><b>nr=</b> </dt>
 <dd>Number of rows [10]     </dd>
 
-<dt><b>nc=</b> </dt>
-<dd>Number of
-columns [5]     </dd>
+<dt><b>nc=</b>
+</dt>
+<dd>Number of columns [5]     </dd>
 
 <dt><b>mode=</b> </dt>
-<dd>Mode. 0=uniform   1=normal   -1: uniform, but no output
- [] </dd>
+<dd>The distribution of numbers: 1=uniform
+  2=normal   3=constant  4=linear &lt; 0 : no output, but the absolute value
+determines which distribution of numbers  [1] </dd>
 
 <dt><b>seed=</b> </dt>
 <dd>Random seed [123] </dd>
 
-<dt><b>fmt=</b> </dt>
+<dt><b>fmt=</b>
+</dt>
 <dd>The <a href='printf.3.html'><i>printf(3)</i></a>
- style format specifier. [%g]
-</dd>
+ style format specifier. [%g] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Performance</a></h2>
-On a typical 2020 machine it takes 0.23 seconds to create and
-output 1M random numbers, however most of the time is the output function.
-Using mode=-1 you can test the speed of just producing random numbers. About
-95% of the time is spent in <a href='printf.3.html'><i>printf(3)</i></a>
-, as can be seen with this benchmark:
-<br>
+On a typical 2020
+machine it takes 0.23 seconds to create and output 1M random numbers, however
+most of the time is the output function. Using mode &lt; 0 you can test the
+speed of just producing random numbers. About 95% of the time is spent in
+<a href='printf.3.html'><i>printf(3)</i></a>
+, as can be seen with this benchmark: <br>
 <pre>    /usr/bin/time tabgen . 10000 10000 -1
     1.38user 0.29system 0:01.68elapsed 99%CPU
     
-    /usr/bin/time tabgen . 10000 10000 0
+    /usr/bin/time tabgen . 10000 10000 1
     28.60user 0.14system 0:28.77elapsed 99%CPU
     
 </pre>The raw production of random numbers is thus about 72 Mrups (same speed
 as numpy.random.normal), where the Linpack benchmark claims this machine
-runs at 50 GFlops. 
+runs at 50 GFlops. <p>
+Generating a sequence of numbers is relatively slow in
+tabgen. To generate 10M numbers is slow compared ot the standard unix tool
+<a href='seq.1.html'><i>seq(1)</i></a>
+: <br>
+<pre>    /usr/bin/time tabgen - 10000000 1 4 fmt=%-10.f &gt; tab2
+    9.89user 0.07system 0:09.97elapsed 99%CPU
+    /usr/bin/time seq 10000000 &gt; tab2
+    0.19user 0.22system 0:00.42elapsed 98%CPU
+    
+</pre>which is most likely the more complex operations of a floating point <a href='fprintf.3.html'><i>fprintf(3)</i></a>
+.
+
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='tabmath.1.html'>tabmath(1NEMO)</a>
+<a href='seq.1.html'>seq(1)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='xrandom.1.html'>xrandom(1NEMO)</a>
 , <a href='xrandom.3.html'>xrandom(3NEMO)</a>
-, <a href='printf.3.html'>printf(3NEMO)</a>
+, <a href='printf.3.html'>printf(3)</a>
 
 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
@@ -78,6 +97,7 @@ Peter Teuben
 <br>
 <pre>12-Jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 mode= implemented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+25-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 changed meaning of mode=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

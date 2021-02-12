@@ -9,76 +9,109 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-ccdppm - convert image to a PPM file, with optional color cable 
+ccdppm - convert image to a PPM file, with optional color cable and
+ASINH scaling 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>ccdppm</b>
-[parameter=value] 
+<b>ccdppm</b> [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdppm</b> converts a NEMO image to a 24bit PPM
-file. A color table can be optionally added, also in 8bit mode. <p>
-ppm files
-are probably the most versatile output graphics  format, since it is very
-easy to write (no special library is needed) and they can be easily converted
-to other formats (gif, jpg,....) and are understood by most image processing
-systems. 
+<b>ccdppm</b> converts
+a NEMO <a href='image.5.html'><i>image(5NEMO)</i></a>
+ to an 8/24bit PPM file. A color table can be optionally
+added. <p>
+ppm files are probably the most versatile output graphics  format,
+since it is very easy to write (no special library is needed) and they
+can be easily converted to other formats (gif, jpg,....) and are understood
+by most image processing systems. See e.g. the <a href='ImageMagick.1.html'><i>ImageMagick(1)</i></a>
+ toolset. <p>
+Although
+the power= keyword can provide a simple gamma factor type scaling, for
+astronomical data with a lot of pixels with noise and some weak signal
+(positive, or negative!) it is often useful to use the "asinh" scaling,
+so clearly see both the structure near the noise, as well as all the signal.
+Use the <b>mean=</b> and sigma= parameters to activate the ASINH scaling. <br>
+<pre>     Out = slope*asinh((In-mean)/sigma))
+</pre>where the <i>slope</i> is computed such that the minimum and maximum are 0 and
+1 resp.  Use <a href='ccdstat.1.html'><i>ccdstat(1NEMO)</i></a>
+ to find good values for the mean and sigma,
+with its optional keyword <b>robust=t</b>. <p>
+For certain types of objects (e.g. galaxies)
+the ASINH scaling can be enhanced by also using power=0.5. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order
-if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>Input image filename. Must be a <a href='image.5.html'><i>image(5NEMO)</i></a>
-.
-Currently the 3rd dimension is ignored, and for datacubes the first slice
-is taken. See <a href='ccdsub.5.html'><i>ccdsub(5NEMO)</i></a>
- to select a plane. No default. </dd>
+. Currently the 3rd
+dimension is ignored, and for datacubes the first slice is taken. See <a href='ccdsub.5.html'><i>ccdsub(5NEMO)</i></a>
+
+to select a plane. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output PPM
-filename. No default. </dd>
+<dd>Output PPM filename. No default. </dd>
 
 <dt><b>min=</b> </dt>
-<dd>Overrride data minimum used in scaling. By default
-it will look for the minimum. </dd>
+<dd>Override
+data minimum used in scaling. By default it will look for the minimum. </dd>
 
-<dt><b>max=</b> </dt>
-<dd>Overrride data maximum used in scaling.
-By default it will look for the minimum. </dd>
+<dt><b>max=</b>
+</dt>
+<dd>Override data maximum used in scaling. By default it will look for the minimum.
+</dd>
 
 <dt><b>bad=</b> </dt>
-<dd>Use this as masking value
-to ignore data. By default no data is  considered bad. </dd>
+<dd>Use this as masking value to ignore data. By default no data is  considered
+bad. </dd>
+
+<dt><b>power=</b> </dt>
+<dd>The gamma factor <b>power</b> applied to the input <b>x</b>, i.e. <i>y = ((x-xmin)/(xmax-xmin))**power</i>.
+ Use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
+ for other transfer functions.. [1]. </dd>
+
+<dt><b>mean=</b> </dt>
+<dd>If supplied
+(and power= as well), this will activate the ASINH scaling. 
+<p> [not supplied]
+</dd>
+
+<dt><b>power=</b> </dt>
+<dd>If supplied (and mean= as well), this will activate the ASINH scaling.
+[not supplied] </dd>
 
 <dt><b>lut=</b> </dt>
-<dd>optional selection
-of a lut from NEMODAT/lut. Currently the full path to the file must be given.
-By default it will be using a grey scale (red=green=blue). </dd>
+<dd>optional selection of a lut from NEMODAT/lut. Currently
+the full path to the file must be given. By default it will be using a grey
+scale (red=green=blue). </dd>
 
 <dt><b>8bit=t|f</b> </dt>
-<dd>Force
-up to 256 discrete colors. This can be useful if you want to convert the
-normally 24bit ppms to 8bit images and not &rsquo;loose&rsquo; any colors in the conversion.
- [<b>false</b>]. </dd>
+<dd>Force up to 256 discrete colors. This can
+be useful if you want to convert the normally 24bit ppms to 8bit images
+and not &rsquo;loose&rsquo; any colors in the conversion.  [<b>false</b>]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example to take the 5th plane from a fits file
-into a 24bit PPM file: <br>
-<pre>    % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
-</pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='fitstiff.1.html'>fitstiff(1NEMO)</a>
-, <a href='lut.5.html'>lut(5NEMO)</a>
- 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-$NEMODAT/lut   :  repository of
-<a href='lut.5.html'><i>lut(5NEMO)</i></a>
- color lookup tables. 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+Here is an
+example to take the 5th plane from a fits file into a PPM file: <br>
+<pre>   % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
+</pre>Converting to other image formats, while also resizing it (including upscaling):
 <br>
-<pre>17-Dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created (100 year Wright first flight anniversary)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>   % convert p1.ppm -resize 256x256 p1.jpg
+   % fitsccd fpC-000094-g2-0446.fit - | ccdppm - - power=0.2 | convert - try.jpg
+</pre>And using <a href='ccdstat.1.html'><i>ccdstat(1NEMO)</i></a>
+ and some trial and error picking the right mean/sigma/power
+: <br>
+<pre>   % fitsccd fpC-000094-g2-0446.fit - | ccdppm - try.ppm mean=1073 sigma=150 power=0.4
+
+CaveatsEach pixel from the input image is converted to an output PPM. The
+ImageMagick(1) toolset can be used to upscale the image count, or convert
+to other formats,such as JPG, PNG etc. See Alsoccdrgb(1NEMO), fitstiff(1NEMO),
+lut(5NEMO) ASINH scaling Lupton et al. (2004) - https://ui.adsabs.harvard.edu/abs/2004PASP..116..133L/abstract
+
+Files$NEMODAT/lut   :  repository of lut(5NEMO) color lookup tables. AuthorPeter
+Teuben Update History
+17-Dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created (100 year Wright first flight anniversary)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -89,10 +122,11 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>
