@@ -15,9 +15,9 @@ scanfits - scan a fits file, optionally extract and convert.
 <b>scanfits
 in=</b>fits_file  [parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>scanfits</i> reads a FITS file from
-disk. It scans the header for various FITS (mis)interpretations, and reports
-on bad behaviour. Some of it can be fixed, in which case the header and/or
+<i>scanfits</i> reads a FITS file. It
+scans the header for various FITS (mis)interpretations, and reports on
+bad behaviour. Some of it can be fixed, in which case the header and/or
 data can be output to a file. It is also possible to insert new card images
 in a header. <p>
 FITS Header-Data Unit&rsquo;s (HDU) can be extracted individually by
@@ -28,121 +28,125 @@ process disk FITS files, FITS files on tape have to be extracted using
 <a href='dd.1.html'><i>dd(1)</i></a>
  or similar programs. See also notes in <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  how  to process
-fits files from tape.  
+fits files from tape. <p>
+This program was written while the author was on the
+first FITS panel. The cfitsio suite is now also providing a FITS checker
+
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is  also given: 
+The following parameters are recognized in any order if the
+keyword is  also given: 
 <dl>
 
 <dt><b>in=<i>fits-infile</i></b> </dt>
-<dd>input file, in
-<a href='fits.5.html'><i>fits(5)</i></a>
- format. The input fits file is allowed to have many HDU&rsquo;s. [no default].
- </dd>
+<dd>input file, in <a href='fits.5.html'><i>fits(5)</i></a>
+ format. The
+input fits file is allowed to have many HDU&rsquo;s. [no default].  </dd>
 
-<dt><b>out=<i>fits-outfile</i></b> </dt>
+<dt><b>out=<i>fits-outfile</i></b>
+</dt>
 <dd>output file, in <a href='fits.5.html'><i>fits(5)</i></a>
- format. If <b>split=t</b> this is the
-basename of the output filename. The basename can contain a standard <a href='printf.3.html'><i>printf(3)</i></a>
+ format. If <b>split=t</b> this is the basename of the output
+filename. The basename can contain a standard <a href='printf.3.html'><i>printf(3)</i></a>
+ expression (e.g. <i>try%d.fits</i>),
+in which case the HDU will be automatically encoded in the output filename(s).
+If no filename is given, the input fits  file is only scanned, and a summary
+of the selected HDU&rsquo;s is presented (see also <b>print=</b>). The header can also
+be fixed up (see <b>delete=</b>, <b>keep=</b>, <b>insert=</b> and <b>fix=</b> below),  though the data
+cannot be modified,  but it is guaranteed that the size of the data portion
+on disk will be a multiple of the logical block size  (<i>blocking * 2880</i>,
+see below), even if the last did not have this.  [default: none]. </dd>
 
-expression (e.g. <i>try%d.fits</i>), in which case the HDU will be automatically
-encoded in the output filename(s). If no filename is given, the input fits
- file is only scanned, and a summary of the selected HDU&rsquo;s is presented
-(see also <b>print=</b>). The header can also be fixed up (see <b>delete=</b>, <b>keep=</b>,
-<b>insert=</b> and <b>fix=</b> below),  though the data cannot be modified,  but it is
-guaranteed that the size of the data portion on disk will be a multiple
-of the logical block size  (<i>blocking * 2880</i>, see below), even if the last
-did not have this.  [default: none]. </dd>
-
-<dt><b>hdu=<i>integer_list</i></b> </dt>
-<dd>List of HDU&rsquo;s of the
-FITS file that need to be processed. (<i> Note: currently only one at a time
-can be processed</i>) Using a value of 0 will cause all HDU&rsquo;s (the whole fits
-file) to be read. [default: <b>0</b>]. </dd>
+<dt><b>hdu=<i>integer_list</i></b>
+</dt>
+<dd>List of HDU&rsquo;s of the FITS file that need to be processed. (<i> Note: currently
+only one at a time can be processed</i>) Using a value of 0 will cause all
+HDU&rsquo;s (the whole fits file) to be read. [default: <b>0</b>]. </dd>
 
 <dt><b>delete=<i>pattern</i></b> </dt>
-<dd>A list of patterns can be
-given, separated by comma&rsquo;s. Note that no spaces can be used: a space is
- considered part of the pattern. Each of these is matched against the card
-images. If a match is found, that particular card images is deleted by blanking
-the card.  Blank lines can then be deleted from the FITS header using <b>fix=BLANK</b>,
-see below. The list can be empty, in which case no action is undertaken.
-Note that only one of <b>keep=</b> and <b>delete=</b> can be given. [default: none]. </dd>
+<dd>A list
+of patterns can be given, separated by comma&rsquo;s. Note that no spaces can be
+used: a space is  considered part of the pattern. Each of these is matched
+against the card images. If a match is found, that particular card images
+is deleted by blanking the card.  Blank lines can then be deleted from the
+FITS header using <b>fix=BLANK</b>, see below. The list can be empty, in which
+case no action is undertaken. Note that only one of <b>keep=</b> and <b>delete=</b> can
+be given. [default: none]. </dd>
 
-<dt><b>keep=<i>pattern</i></b>
+<dt><b>keep=<i>pattern</i></b> </dt>
+<dd>A list of patterns can be given,
+separated by comma&rsquo;s. Each of these is matched against the card images. When
+all the card images have been scanned, only the ones which were part of
+the <i>keep</i> patterns will not be blanked out. Blank lines can subsequently
+be deleted from the header by using  <b>fix=BLANK</b>, see below. The list can
+be empty, in which case no action is undertaken. Note that only one of <b>keep=</b>
+and <b>delete=</b> can be given. <i>Note: </i>Be careful when using this keyword, and
+that the required keywords are not deleted this way. [default: none]. </dd>
+
+<dt><b>insert=</b><i>hfile</i>
 </dt>
-<dd>A list of patterns can be given, separated by comma&rsquo;s. Each of these is matched
-against the card images. When all the card images have been scanned, only
-the ones which were part of the <i>keep</i> patterns will not be blanked out. Blank
-lines can subsequently be deleted from the header by using  <b>fix=BLANK</b>,
-see below. The list can be empty, in which case no action is undertaken.
-Note that only one of <b>keep=</b> and <b>delete=</b> can be given. <i>Note: </i>Be careful when
-using this keyword, and that the required keywords are not deleted this
-way. [default: none]. </dd>
+<dd>A list of files with (currently valid FITS header format) header  cards,
+which will be inserted *as is* just before the END keyword in the above
+selected HDU&rsquo;s. Note that these insertions are done after any of the above
+mentioned  optional <b>keep</b>, <b>delete</b>, <b>fix</b> etc. To get an example file, extract
+an editable ASCII header with e.g. <i>fitshead</i>, or see the example below.  <i>NOTE</i>:
+The lines need to be exactly 80 characters wide, any lines shorter than
+this will be blankfilled according to the FITS rules, and any lines wider
+than 80 will be cut. [Default: none]. </dd>
 
-<dt><b>insert=</b><i>hfile</i> </dt>
-<dd>A list of files with (currently valid
-FITS header format) header  cards, which will be inserted *as is* just
-before the END keyword in the above selected HDU&rsquo;s. Note that these insertions
-are done after any of the above mentioned  optional <b>keep</b>, <b>delete</b>, <b>fix</b> etc.
-To get an example file, extract an editable ASCII header with e.g. <i>fitshead</i>,
-or see the example below.  <i>NOTE</i>: The lines need to be exactly 80 characters
-wide, any lines shorter than this will be blankfilled according to the
-FITS rules, and any lines wider than 80 will be cut. [Default: none]. </dd>
-
-<dt><b>fix=<i>options</i></b>
-</dt>
-<dd>List of fixes, separated by comma&rsquo;s. Possible options are: <b>ING, TUCSON, LF,
-BLANK, ZERO, DECORDER, FIRST, LAST, Y2K, UNY2K</b>  and <b>IRAF0</b>.  For an description
-see the section FIXES below. The list can be empty, in which case no fixes
-are applied. [default: none]. </dd>
+<dt><b>fix=<i>options</i></b> </dt>
+<dd>List of fixes, separated
+by comma&rsquo;s. Possible options are: <b>ING, TUCSON, LF, BLANK, ZERO, DECORDER,
+FIRST, LAST, Y2K, UNY2K</b>  and <b>IRAF0</b>.  For an description see the section
+FIXES below. The list can be empty, in which case no fixes are applied. [default:
+none]. </dd>
 
 <dt><b>print=<i>pattern</i></b> </dt>
-<dd>A list of patterns with which
-a FITS keyword (really: the first 8 characters on a FITS card image) begins.
-For these keywords the value or HISTORY/COMMENT is printed on  lines starting
-with a <b>#</b> symbol. Different header sections are separated with the <b>##</b> symbol
-in the first column. Note that is either <b>keep=</b> or <b>delete=</b> has been used,
-the blanked header cards cannot be seen anymore via the <b>print=</b> keyword.
-Note that printout is only active in scanmode. If an output file is created,
-this keyword is not active. [Default: not used]. </dd>
+<dd>A list of patterns with which a FITS keyword (really:
+the first 8 characters on a FITS card image) begins. For these keywords
+the value or HISTORY/COMMENT is printed on  lines starting with a <b>#</b> symbol.
+Different header sections are separated with the <b>##</b> symbol in the first
+column. Note that is either <b>keep=</b> or <b>delete=</b> has been used, the blanked
+header cards cannot be seen anymore via the <b>print=</b> keyword. Note that printout
+is only active in scanmode. If an output file is created, this keyword is
+not active. [Default: not used]. </dd>
 
 <dt><b>blocking=<i>factor</i></b> </dt>
-<dd>Positive
-integer that denotes the blocking factor with which the input  file was
-written. The second number is the blocking factor for output. If the second
-number if not supplied, it is taken the same as the first one. The blocking
-factor is the multiple of blocks of 2880 bytes with which  the data is
-to be read/written. The FITS standard allows the blocking factor to be from
-1 to 10. <i>Be aware that datafiles that need a blocking factor larger than
-1, may not need it once the data is written to disk.</i> [default: <b>1,1</b>]. </dd>
+<dd>Positive integer that denotes
+the blocking factor with which the input  file was written. The second number
+is the blocking factor for output. If the second number if not supplied,
+it is taken the same as the first one. The blocking factor is the multiple
+of blocks of 2880 bytes with which  the data is to be read/written. The
+FITS standard allows the blocking factor to be from 1 to 10. <i>Be aware that
+datafiles that need a blocking factor larger than 1, may not need it once
+the data is written to disk.</i> [default: <b>1,1</b>]. </dd>
 
-<dt><b>select=header|data</b>
-</dt>
-<dd>Select <b>data</b>, <b>header</b> or both (separated by comma&rsquo;s) for output. [Default:
-<b>header,data</b>]. </dd>
+<dt><b>select=header|data</b> </dt>
+<dd>Select <b>data</b>,
+<b>header</b> or both (separated by comma&rsquo;s) for output. [Default: <b>header,data</b>].
+</dd>
 
 <dt><b>split=t|f</b> </dt>
-<dd>Boolean (t/f) to designate that when an output file
-is selected  (<b>out=</b>) AND multiple files to be copied (<b>file=0</b>) the output
-file is split into it&rsquo;s &lsquo;&lsquo;file&rsquo;&rsquo; components. The <i>fits-outfile</i> name will then be
-a base filename, and the program generates its own numeric extension. [Default:
-<b>false</b>]. </dd>
+<dd>Boolean (t/f) to designate that when an output file is selected
+ (<b>out=</b>) AND multiple files to be copied (<b>file=0</b>) the output file is split
+into it&rsquo;s &lsquo;&lsquo;file&rsquo;&rsquo; components. The <i>fits-outfile</i> name will then be a base filename,
+and the program generates its own numeric extension. [Default: <b>false</b>]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Fixes</a></h2>
-This is a list of the currently supported fixes for the header.
-Each of them is applied in the order as  they appear in the <b>fix=</b> keyword.
-Their names have to be supplied in full, separated by commas. No spaces.
-
+This
+is a list of the currently supported fixes for the header. Each of them
+is applied in the order as  they appear in the <b>fix=</b> keyword. Their names
+have to be supplied in full, separated by commas. No spaces. 
 <dl>
 
 <dt><b>ING</b> </dt>
-<dd>Isaac Newton Group (ING) uses 9 blanks in the first column, followed
-by the word <b>ING</b>, followed by a space, after which an ING specific keywords
-start. If you want to promote these to regular keywords, a shift of 13 characters
-to the left does the job. The 13 rightmost characters in the card image
-are  set to blank. </dd>
+<dd>Isaac Newton
+Group (ING) uses 9 blanks in the first column, followed by the word <b>ING</b>,
+followed by a space, after which an ING specific keywords start. If you
+want to promote these to regular keywords, a shift of 13 characters to
+the left does the job. The 13 rightmost characters in the card image are
+ set to blank. </dd>
 
 <dt><b>TUCSON</b> </dt>
 <dd>Certain FITS files coming out of NRAO TUCSON have
@@ -240,7 +244,11 @@ or
 <a href='dd.1.html'>dd(1)</a>
 , <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='fitshead.1.html'>fitshead(1NEMO)</a>
- 
+ <p>
+<br>
+<pre>https://heasarc.gsfc.nasa.gov/fitsio/
+https://fits.gsfc.nasa.gov/fits_verify.html
+</pre>
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>

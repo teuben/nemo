@@ -21,42 +21,53 @@ The final effect give the illusion that the object has been colored by
 density. The rendering that you  get, looks like the one you get with glnemo2(see
 man glnemo2) on gas particles. <p>
 The computation of all gaussian is multithreaded
-and the number of threads used can be selected from the command line. It
-requires BOOST thread api for compilation. 
+and the number of threads used can be selected from the command line. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized. 
+The
+following parameters are recognized. 
 <dl>
 
 <dt><b>in=</b><i>uns input file</i> </dt>
-<dd>Currently, the following input files are
-supported: Nemo,Gadget 2 &amp; 1, list of files </dd>
+<dd>Currently, the following
+input files are supported: Nemo regular, Nemo piped, Gadget3, Gadget2,
+Gadget1, Ramses, list of files </dd>
 
 <dt><b>select=</b><i>select-particles</i> </dt>
+<dd>Select particles.
+Sets of particles must be selected using the : range operator, separated
+by a comma.  E.g. select=0:9,10:19 would select two sets of 10 particles,
+or by component (gas,halo,stars,bulge,disk,bndry) [all] </dd>
+
+<dt><b>prop=</b>roperties
+to display (metal,age,temp,rho) </dt>
+<dd>In case of structured snapshots like Gagdet
+or Ramses, you can select the properties you want to display (metal,age,temp,rho).
+By default it displays accumulated density of particles in the light of
+see. </dd>
+
+<dt><b>psort=</b>sort properties </dt>
+<dd>sort properties according to 0:none, 1:min, 2:max.
+The default is [0] no sorting.  </dd>
+
+<dt><b>dev=</b><i>output-image-file</i> </dt>
+<dd>you specify here the
+output name of the image which will be automatically saved in GIF format.
+If you give only the character &rsquo;?&rsquo;, PGPLOT will ask you, interactively, in
+which format you would like to save the image [?] </dd>
+
+<dt><b>times=</b><i>time-range</i> </dt>
 <dd>Select
-particles. Sets of particles must be selected using the : range operator,
-separated by a comma.  E.g. select=0:9,10:19 would select two sets of 10 particles,
-or by component (gas,halo,stars,bulge,disk,bndry) [all]  </dd>
-
-<dt><b>dev=</b><i>output-image-file</i>
-</dt>
-<dd>you specify here the output name of the image which will be automatically
-saved in GIF format. If you give only the character &rsquo;?&rsquo;, PGPLOT will ask you,
-interactively, in which format you would like to save the image [?] </dd>
-
-<dt><b>times=</b><i>time-range</i>
-</dt>
-<dd>Select time [all]      </dd>
+time [all]      </dd>
 
 <dt><b>range=</b><i>range-for-all-axis</i> </dt>
-<dd>give the same range for all
-x,y and z axis. [-range:range], default none. </dd>
+<dd>give the same range for all x,y and
+z axis. [-range:range], default none. </dd>
 
 <dt><b>xrange=</b><i>x-axis-range</i> </dt>
-<dd>Range of 
-values  for  the  X  axis,  specified with a pair of numbers separated
-  by  a  colon.   The  default  range  is [-35.0:35.0]. </dd>
+<dd>Range of  values 
+for  the  X  axis,  specified with a pair of numbers separated   by  a
+ colon.   The  default  range  is [-35.0:35.0]. </dd>
 
 <dt><b>yrange=</b><i>y-axis-range</i> </dt>
 <dd></dd>
@@ -80,6 +91,22 @@ you want to display particles in ZY plan. Default is [f]. </dd>
 <dt><b>com=</b><i>center-of-mass?</i>
 </dt>
 <dd>center according to center if mass. Default is [t]. </dd>
+
+<dt><b>hsml=</b><i>use hydro smooth
+length</i> </dt>
+<dd>Use hydro smooth length if exists, default [f] false </dd>
+
+<dt><b>cb=</b><i>toggle color
+map</i> </dt>
+<dd>default is false [f] </dd>
+
+<dt><b>cmap=</b><i>select color map</i> </dt>
+<dd>available color maps 0:rainbow,
+1:heat, 2:gray, default is [0] </dd>
+
+<dt><b>itf=</b><i>image transfer function</i> </dt>
+<dd>image transer
+function 0:linear, 1:logarithmic, 2:square-root, default [1] </dd>
 
 <dt><b>sview=</b><i>single-display-view?</i>
 </dt>
@@ -128,19 +155,22 @@ computation [2] </dd>
 <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='glnemo2.1.html'>glnemo2(1NEMO)</a>
+, <a href='uns_projects.1.html'>uns_projects(1NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-
 <dl>
 
-<dt>Jean-Charles LAMBERT
+<dt><a href='https://projets.lam.fr/projects/unsio/wiki'>https://projets.lam.fr/projects/unsio/wiki</a>
+
 </dt>
 <dd></dd>
 </dl>
 
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
+Jean-Charles LAMBERT 
 <h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>09-Nov-10<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 public release<tt> </tt>&nbsp;<tt> </tt>&nbsp;JCL
+17-Mar-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 bugs fixes<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;JCL
 </pre>
 <p> <p>
 

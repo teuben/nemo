@@ -185,6 +185,17 @@ ccdgen "" - blobs @b100.tab size=128,128,128 |\
   ccdsmooth - - 5   |\
   ccdsky - -  |\
   ccdfits - junk2.fits radecvel=t ndim=4
+</pre>Here is an example of making a new data section (in this case just noise)
+by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ file.  In <i>bash</i> notation:
+<br>
+<pre>  fitshead NGC5194_91112.fits &gt; tmp.fitshead
+  nx=$(grep NAXIS1 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  ny=$(grep NAXIS2 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  nz=$(grep NAXIS3 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  ccdgen in= out=- object=noise spar=0,1 size=$nx,$ny,$nz |\
+     ccdfits - noise.fits fitshead=NGC5194_91112.fits
+  
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>

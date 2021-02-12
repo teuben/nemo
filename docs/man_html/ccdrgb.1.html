@@ -31,42 +31,45 @@ are recognized in any order if the keyword is also given:
 <dl>
 
 <dt><b>in1=</b> </dt>
-<dd>Input image(s)
-[???]      </dd>
+<dd>Input <i>Red</i>
+image [???]      </dd>
 
 <dt><b>in2=</b> </dt>
-<dd>Input image(s) [???]      </dd>
+<dd>Input <i>Green</i> image [???]      </dd>
 
 <dt><b>in3=</b> </dt>
-<dd>Input image(s) []      </dd>
+<dd>Input <i>Blue</i> image.
+ If none supplied, the middle channel is computing from the other two,
+using <b>c=</b>. </dd>
 
-<dt><b>out=</b>
-</dt>
+<dt><b>out=</b> </dt>
 <dd>Output image file [???]     </dd>
 
 <dt><b>c=</b> </dt>
-<dd>color composition index RGB=(A, B+c*A, B)
-if only 2 images are used. [0.5]  </dd>
+<dd>color composition index RGB=(A,
+B+c*A, B) if only 2 images are used. [0.5]  </dd>
 
 <dt><b>range1=</b> </dt>
-<dd>Range in image 1 to map. By default
-the full ranges are used.  </dd>
+<dd>Range in image 1 to map.
+By default the full ranges are used.  </dd>
 
 <dt><b>range2=</b> </dt>
 <dd>Range in image 2. </dd>
 
 <dt><b>range3=</b> </dt>
-<dd>Range in image
-3. </dd>
+<dd>Range
+in image 3. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='ccdppm.1.html'>ccdppm(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben 
+Peter Teuben
+
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>8-jun-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ancient version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

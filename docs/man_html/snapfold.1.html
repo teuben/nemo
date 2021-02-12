@@ -37,40 +37,54 @@ must be in snapshot format. </dd>
 
 <dt><b>fill=t|f</b> </dt>
 <dd>Fill the cone?
- Otherwise it will be a thin wall. Default: false 
-<p> </dd>
+ Otherwise it will be a thin wall. Default: false </dd>
+
+<dt><b>view=0,1,-1</b> </dt>
+<dd>Limit the view
+of the cone. view=0 shows the whole cone, view=1 shows the front side (towards
+the -Y axis) view=-1 the backside (towards the +Y axis). The value of 1+|view|
+will actually determine the opening angle in the plane of the visible part.
+[0] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example
-creating a tilted cone with outflow <br>
+Here is an example creating a tilted cone with outflow <br>
 <pre>  set nbody = 10000
   set vscale = 0
   set outflow = 1.0
   set cone = 30
   set inc = 30
   
-</pre>where ... <br>
-<pre>  mkdisk - 10000 mass=1 |\
+</pre>here vscale controls how much rotation is left, and outflow how much radial
+outflow. cone is the opening angle of the outflow, which points to the observer,
+but inc will incline it from the sky/disk plane. <br>
+<pre>  mkdisk - $nbody mass=1 |\
     snapscale - - vscale=$vscale |\
     snapspin - - omega=$outflow outflow=t|\
     snapfold - - theta=90-$cone |\
     snaprotate - - $inc y |\
     snapgrid - $out.vel moment=-1
-</pre>
-<p> 
+    
+</pre>In this example the outflow is perpendicular to a disk, which is not in
+this example. A more expaned version is in the script <b>mk_cone</b>. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
-, <a href='snapspin.1.html'>snapspin(1NEMO)</a>
+,
+<a href='snapspin.1.html'>snapspin(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter
-Teuben 
-<h2><a name='sect7' href='#toc7'>History</a></h2>
+Peter Teuben 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+$NEMO/src/nbody/trans/snapfill.c
+$NEMO/scripts/csh/mk_cone - expanded example of a disk with one or two outflow
+cones 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
-<pre>20-nov-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 a quick hack to make a cone<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>20-nov-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 a quick hack to make a cone (at ESO)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-mar-2018<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 add fill=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+22-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;note the new mk_cone script<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+28-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 allow the cone to shrink in angle as well (view=)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -83,7 +97,8 @@ Teuben
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>History</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

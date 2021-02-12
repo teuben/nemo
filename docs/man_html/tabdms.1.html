@@ -16,57 +16,62 @@ tabdms - Convert to HMS/DMS tables
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabdms</b> replaces selected column(s) from a table to their HMS/DMS
 format.  <p>
-Currently the format is fixed. 
+Currently the format is fixed. <p>
+There is little controversie about
+DMS, these are numbers between -180 or 180, or 0 to 360. In fact, the program
+does not care about the absolute value, any number will do. <p>
+HMS is more
+complicated, since the 24h system is used as well as the 360deg.  
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file
-name, an ascii table. No Default. </dd>
+<dd>input file name, an ascii table. No Default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output file name, an ascii table. No
-Default. </dd>
+<dd>output file
+name, an ascii table. No Default. </dd>
 
 <dt><b>todms=</b> </dt>
-<dd>list of columns (1..) to convert to dms.  Negative columns
-should be used if the format is to be interpreted as ".DMS" instead of the
-default "D.MS".  The D ins DMS is normally assumed to be modulo 360. Default:
-none. </dd>
+<dd>list of columns (1..) to convert to
+dms.  Negative columns should be used if the format is to be interpreted
+as ".DMS" instead of the default "D.MS".  The D ins DMS is normally assumed
+to be modulo 360. Default: none. </dd>
 
 <dt><b>tohms=</b> </dt>
-<dd>list of columns (1..) to convert to hms. Negative columns should
-be used if the format is to be interpreted as ".HMS" instead of the default
-"H.MS". The H ins HMS is normally assumed to be modulo 24. Default: none. </dd>
-
-<dt><b>fromhms=</b>
-</dt>
-<dd>A list of columns (1..) to convert from hms to degrees (or seconds) [none]
-</dd>
+<dd>list of columns (1..) to convert to
+hms. Negative columns should be used if the format is to be interpreted
+as ".HMS" instead of the default "H.MS". The H ins HMS is normally assumed
+to be modulo 24. Default: none. </dd>
 
 <dt><b>fromhms=</b> </dt>
-<dd>A list of columns (1..) to convert from dms to seconds (or seconds)
-[none] </dd>
+<dd>A list of columns (1..) to convert
+from hms to degrees (or seconds) [none] </dd>
+
+<dt><b>fromhms=</b> </dt>
+<dd>A list of columns (1..)
+to convert from dms to seconds (or seconds) [none] </dd>
 
 <dt><b>separator=</b> </dt>
-<dd>separator between output D-M-S.S  [Default: <b>:</b>] </dd>
+<dd>separator
+between output D-M-S.S  [Default: <b>:</b>] </dd>
 
 <dt><b>format=</b> </dt>
-<dd>Format
-statement for columns converted by fromhms= and fromdms= [Default: <b>%g</b>]
-</dd>
+<dd>Format statement for columns
+converted by fromhms= and fromdms= [Default: <b>%g</b>] </dd>
 
 <dt><b>scale=</b> </dt>
-<dd>Scaling factor applied to degrees. If you want seconds, use 3600
-here. For radians, use <b>pi/180</b>. [Default: <b>1</b>] </dd>
+<dd>Scaling factor
+applied to degrees. If you want seconds, use 3600 here. For radians, use
+<b>pi/180</b>. [Default: <b>1</b>] </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example
-prints out the 4 possible ways to convert the number "12.51" to DMS or HMS:
-<br>
+The following example prints out the 4 possible
+ways to convert the number "12.51" to DMS or HMS: <br>
 <pre>% echo 11.51 11.51 11.51 11.51 11.51 | tabdms - - todms=1,-2 tohms=3,-4
 11:30:36.000 11:183:35:60.000 11:30:36.000 11:12:14:24.000 11.51 
 </pre>Column 1 in .DMS, 2 as D.MS, 3 as .HMS, 4 as H.MS and 5 is the original column
@@ -91,6 +96,7 @@ Peter Teuben
 <br>
 <pre>24-Jan-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 doc written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-sep-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 added fromdms=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-jul-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;clarifications<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

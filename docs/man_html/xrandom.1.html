@@ -138,9 +138,17 @@ geometric              p
 hypergeometric         n1 n2 nt
 logarithmic            sigma
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect6' href='#toc6'>Random</a></h2>
+Random numbers can be seeded using the <i>seed=</i> keyword.  There are also
+Unix ways to do this. Here are a few (using bash notation): <br>
+<pre>echo $RANDOM
+echo $$
+shuf -i 1-100 -n 5
+awk -v n=5 -v seed="$RANDOM" &rsquo;BEGIN {srand(seed); for(i=0; i&lt;n; ++i) printf("%.3f\n",rand())}&rsquo;
+</pre>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>26-Nov-96<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 turned TESTBED into a TOOLBOX program<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-apr-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;example
@@ -157,8 +165,9 @@ Peter Teuben
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Gsl</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Random</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

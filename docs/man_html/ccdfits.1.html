@@ -23,30 +23,38 @@ The input must be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
 An experimental version of this program that
 uses the standard <a href='cfitsio.3.html'><i>cfitsio(3)</i></a>
  library is known as <a href='ccdfitsio.1.html'><i>ccdfitsio(1NEMO)</i></a>
-. 
+. <p>
+A peculiar
+option is the use of the <b>fitshead=</b> keyword. In this mode the header of the
+output fits file will be replaced with that of the filename in the  <b>fitshead=</b>
+keyword. This is dangerous, it is the responsility of the user to ensure
+the dimensions (NAXIS,1,2,3) and BITPIX of the two are the same, or else
+an illegal FITS file will be created. The program <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
+ is used
+behind the scenes to achieve this feat. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=<i>image-file</i></b> </dt>
+<dt><b>in=<i>image-file</i></b>
+</dt>
 <dd>input file, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format [no default]. </dd>
 
-<dt><b>out=<i>fits-file</i></b>
-</dt>
-<dd>output file, will be in <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+<dt><b>out=<i>fits-file</i></b> </dt>
+<dd>output file,
+will be in <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format [no default]. </dd>
 
 <dt><b>bitpix=<i>number</i></b> </dt>
-<dd>Bitpix
-applied for scaling. Options are 16, 32 or -32.  [default: -32]. </dd>
+<dd>Bitpix applied
+for scaling. Options are 16, 32 or -32.  [default: -32]. </dd>
 
-<dt><b>scale=<i>number</i></b>
-</dt>
-<dd>Scaling factors for CDELT keyword. If the second or third number is omitted,
-it is repeated from the previous number. [default: <b>1,1,1</b>]. </dd>
+<dt><b>scale=<i>number</i></b> </dt>
+<dd>Scaling
+factors for CDELT keyword. If the second or third number is omitted, it
+is repeated from the previous number. [default: <b>1,1,1</b>]. </dd>
 
 <dt><b>iscale=<i>bscale,bzero</i></b>
 </dt>
@@ -118,11 +126,16 @@ CASA. Default: not used. </dd>
 <dt><i>select=1</i> </dt>
 <dd>Select this image (1 being the first) to
 grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
+
+<dt><i>fitshead=</i> </dt>
+<dd>If used, the
+header of this fitsfile will be used instead of the one from the converted
+input image. Default; not used. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To convert an
-image to unsigned 16 bit integers use the following math: <br>
+To convert an image to unsigned 16
+bit integers use the following math: <br>
 <pre>        a = "(a &lt; 0 ? a+65536 : a)" 
 </pre>or using <i>ccdmath</i>: <br>
 <pre>        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
@@ -182,16 +195,18 @@ the following command procedure on VMS (Bob Hanisch, ST ScI): <br>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='ccdfitsio.1.html'>ccdfitsio(1NEMO)</a>
+, <a href='scanfits.1.html'>scanfits(1NEMO)</a>
 , <a href='snapccd.1.html'>snapccd(1NEMO)</a>
-, <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 ,
-<a href='iofits.1.html'>iofits(1NEMO)</a>
+<a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='iofits.1.html'>iofits(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
 , <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
+Peter
+Teuben 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>~/src/pjt/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits.c ccdfits.1
@@ -209,6 +224,7 @@ apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 refer
 4-jan-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.2 docomented the recent changes to crval/cdelt/crpix=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-jun-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.4 added select= to grab not the first image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-dec-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.3 added fitshead=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
