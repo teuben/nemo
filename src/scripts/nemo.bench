@@ -77,8 +77,10 @@ echo Processor:
 unames=$(uname -s)
 if [[ $unames == Linux ]]; then
     lscpu | grep 'Model name:' | awk -F: '{print $2}'
-elif [[ $uname == Darwin ]]; then
+elif [[ $unames == Darwin ]]; then
     sysctl -n machdep.cpu.brand_string
+else
+    echo Unknown CPU for $unames
 fi
 	   
 
