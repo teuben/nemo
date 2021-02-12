@@ -46,7 +46,7 @@ string defv[] = {
 	"beta=4.765\n           beta parameter for the moffat function",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=3.4a\n         28-jan-2021 PJT",
+	"VERSION=3.4b\n         12-feb-2021 PJT",
 	NULL,
 };
 
@@ -59,7 +59,7 @@ string usage = "smooth image cube in XYZ";
 string	infile, outfile;			/* file names */
 stream  instr, outstr;				/* file streams */
 
-#define MSIZE  8196		      /* maximum # pixels along one dimension */
+#define MSIZE  100000   	      /* maximum # pixels along selected dimension */
 #define MSMOOTH 101 		    /* maximum full beam-size (has to be odd) */
 	              /* because of symmetry, you could try and be smart here */
 
@@ -69,6 +69,8 @@ real   xmin,ymin,zmin,dx,dy,dz;
 real   size;				/* size of frame (square) */
 real   cell;				/* cell or pixel size (square) */
 int    nxw=0, nyw=0, nzw=0;             /* wiener filter size */
+
+real   c[MSIZE];                        /* temporary buffer for convolution */
 
 real   smooth[MSMOOTH];			/* full 1D beam */
 int    lsmooth;				/* actual smoothing length */
@@ -330,7 +332,6 @@ int convolve_x (a, iy, iz, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, iy, iz;
 {
-	real c[MSIZE];
 	int    ix, jx, kx, offset;
 	
 	if (nx>MSIZE) {
@@ -362,7 +363,6 @@ int convolve_y (a, ix, iz, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, ix, iz;
 {
-	real c[MSIZE];
 	int    iy, jy, ky, offset;
 	
 	if (ny>MSIZE) {
@@ -394,7 +394,6 @@ int convolve_z (a, ix, iy, nx, ny, nz, b, nb)
 real *a, b[];
 int    nx, ny, nz, nb, ix, iy;
 {
-	real c[MSIZE];
 	int    iz, jz, kz, offset;
 	
 	if (nz>MSIZE) {
