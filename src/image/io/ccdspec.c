@@ -17,7 +17,7 @@ string defv[] = {
   "in=???\n          Input filename",
   "x=\n              Pixel in X to print (0=1st pixel)",
   "y=\n              Pixel in Y to print",
-  "VERSION=0.2\n     11-feb-2021 PJT",
+  "VERSION=0.3\n     11-feb-2021 PJT",
   NULL,
 };
 
@@ -58,7 +58,7 @@ void nemo_main(void)
     for (iz=0, f1=0; iz<nz; iz++) {
         z = Zmin(iptr) + (iz-Zref(iptr)) * Dz(iptr);
 	f = CubeValue(iptr,ix,iy,iz);
-	printf("%g %g   %g\n", z, f, f-f1);
+	printf("%g %g\n", z, f);
 	// moment analysis on the value and the difference from previous
 	accum_moment(&m1, f, 1.0);
 	if (iz>0) accum_moment(&m2, f-f1, 1.0);
