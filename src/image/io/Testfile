@@ -1,6 +1,6 @@
 DIR = src/image/io
-BIN = ccddump ccdprint
-NEED = $(BIN) ccdmath
+BIN = ccddump ccdprint ccdspec
+NEED = $(BIN) ccdmath ccdgen
 
 help:
 	@echo $(DIR)
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in
+	@rm -f ccd.in ccd3.in
 
 NBODY = 10
 
@@ -21,6 +21,11 @@ ccd.in:
 	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
 	@bsf ccd.in '41.644 31.2134 0 93 115'
 
+ccd3.in:
+	@echo Creating $@
+	$(EXEC) ccdgen out=ccd3.in object=noise spar=0,1  size=10,10,100 seed=123
+	@bsf ccd3.in '0.00961965 1.00606 -3.8169 4.5 10015'
+
 ccdprint: ccd.in
 	@echo Running $@
 	$(EXEC) ccdprint ccd.in x= y= format=%7.3f; nemo.coverage ccdprint.c
@@ -28,3 +33,6 @@ ccdprint: ccd.in
 ccddump: ccd.in
 	@echo Running $@
 	$(EXEC) ccddump ccd.in . ; nemo.coverage ccddump.c
+
+ccdspec: ccd3.in
+	 ccdspec ccd3.in | tail -3
