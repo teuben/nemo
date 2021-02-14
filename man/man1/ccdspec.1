@@ -1,0 +1,86 @@
+.TH CCDSPEC 1NEMO "13 February 2021"
+
+.SH NAME
+ccdspec \- print spectrum at a grid point in an image cube
+
+.SH SYNOPSIS
+\fBccdspec\fP [parameter=value]
+
+.SH DESCRIPTION
+\fBccdspec\fP prints the spectrum (see also \fIsnapprint(1NEMO)\fP for
+more flexible options) to stdout, with a commented line that adds some statistics on
+the standard deviation of the series and that of the differentials.
+It also computes \fIsigma_diff/sigma/sqrt(2)\fP, which should be 1 if
+the spectrum is normal and uncorrelated noise. In general
+smoothing  and/or a signal will lower this value.
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input filename. No default.
+.TP
+\fBx=\fP
+Pixel in X to print (0=1st pixel). By default it uses the center of the map.
+.TP
+\fBy=\fP
+Pixel in Y to print.
+.TP
+\fBz=\fP
+Pixel range in Z to select. By default all pixels are selected.
+.TP
+\fBscale=\fP\fIfac1,fac2\fP
+Output scaling factors for the spectral axis (\fIfac1\fP) and cube value (\fIfac2\fP).
+Note the mean/sigma output will also be scaled by \fIfac2\fP.
+[Default: 1,1]
+
+.SH EXAMPLES
+Here is an example creating a spectrum with uncorrelated noise.
+The stats mentioned in the commented
+last line ar the pixel position and length of spectral axis,
+and mean/sigma for the signal, and
+mean/sigma he differential spectrum. The last number is the
+ratio of the two sigma and sqrt(2), which for normal gaussian noise should be 1.
+.nf
+
+% ccdgen "" - noise 0,1 size=1,1,8000 seed=123 |  ccdspec - | tail -3
+7998 -1.06975
+7999 0.944338
+# 0 0 8000 mean/sig  0.00102038 1.00182    9.94952e-05 1.41469   0.998513
+
+.fi
+although \fPtabhist(1NEMO)\fP with \fBmedian=f\fP gives the same stats
+.nf
+
+% ccdgen "" - noise 0,1 size=1,1,8000 seed=123 |  ccdspec - | tabhist - 2  median=f
+Mean and dispersion  : 0.00102037 1.00182 0.0112014
+Diff mean and disp   : 9.94952e-05 1.41469 0.998513
+
+.fi
+and if an extra hanning smoothing is done, the correlation is less than one
+(sqrt(1/3)):
+.nf
+
+% ccdgen "" - noise 0,1 size=1,1,8000 seed=123 | ccdsmooth - - dir=z | ccdspec - | tail -3
+7998 -0.151399
+7999 0.204732
+# 0 0 8000 mean/sig  0.000986234 0.616406    4.92386e-05 0.49548   0.568387
+
+.fi
+
+
+.SH SEE ALSO
+ccdgen(1NEMO), ccdprint(1NEMO), tabhist(1NEMO), tabtrend(1NEMO)
+
+.SH FILES
+src/image/io	
+
+.SH AUTHOR
+Peter Teuben
+
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+11-Feb-2021	V0.3 Created Q&D	PJT
+.fi

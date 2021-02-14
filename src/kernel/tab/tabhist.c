@@ -50,6 +50,7 @@
  *       8-jan-2020 7.0   add pyplot= options                   PJT
  *       2-mar-2020 7.1   add norm= for cumulative, fix bin bug PJT
  *      10-oct-2020 7.2   using median()                        PJT
+ *      11-feb-2021 7.3   added diff mean & disp                PJT
  *                
  * 
  * TODO:
@@ -103,7 +104,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.1a\n		  20-nov-2020 PJT",
+    "VERSION=7.3\n		  11-feb-2021 PJT",
     NULL
 };
 
@@ -345,8 +346,9 @@ local void histogram(void)
   int under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
   real mean, sigma, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, mad=0;
+  real meand, sigmad;
   real rmean, rsigma, rrange[2];
-  Moment m;
+  Moment m, md;
   
   dprintf (0,"read %d values\n",npt);
   dprintf (0,"min and max value in column(s)  %s: %g  %g\n",getparam("xcol"),xmin,xmax);
@@ -369,7 +371,8 @@ local void histogram(void)
     count[k] = 0;		/* init histogram */
   under = over = 0;
   
-  ini_moment(&m, 4, Qrobust||Qmad ? npt : 0);
+  ini_moment(&m,  4, Qrobust||Qmad ? npt : 0);
+  ini_moment(&md, 4, Qrobust||Qmad ? npt : 0);  
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
@@ -387,18 +390,25 @@ local void histogram(void)
     count[k] = count[k] + 1;
     dprintf (4,"%d : %f %d\n",i,x[i],k);
     accum_moment(&m,x[i],1.0);
+    if (i>0) {
+      accum_moment(&md,x[i]-x[i-1],1.0);
+      //printf("%d %g %g\n",i,x[i],x[i]-x[i-1]);
+    }
+    
   }
   if (under > 0) error("bug: under = %d",under);
   if (over  > 0) error("bug: over = %d",over);
   under = Nunder;
   over  = Nover;
 
-  mean = mean_moment(&m);
-  sigma = sigma_moment(&m);
-  skew = skewness_moment(&m);
-  kurt = kurtosis_moment(&m);
-  h3 = h3_moment(&m);
-  h4 = h4_moment(&m);
+  mean   = mean_moment(&m);
+  sigma  = sigma_moment(&m);
+  meand  = mean_moment(&md);
+  sigmad = sigma_moment(&md);
+  skew   = skewness_moment(&m);
+  kurt   = kurtosis_moment(&m);
+  h3     = h3_moment(&m);
+  h4     = h4_moment(&m);
   if (Qmad) mad = mad_moment(&m);
 
   if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
@@ -481,6 +491,10 @@ local void histogram(void)
     dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
   else
     dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
+  if (!Qmedian) {
+    real sratio = sigmad/sqrt(2)/sigma;
+    dprintf(0,"Diff mean and disp   : %g %g %g\n", meand, sigmad, sratio);
+  }
 
   if (Qmad)  dprintf (0,"MAD                  : %g\n",mad);
   dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
@@ -598,7 +612,6 @@ local void histogram(void)
   }
   
 #ifdef YAPP
-  /*	PLOTTING */	
   plinit("***",0.0,20.0,0.0,20.0);
 
   xplot[0] = xmin;
