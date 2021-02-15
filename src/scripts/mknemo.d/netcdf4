@@ -38,9 +38,9 @@ if [[ $version == git ]]; then
 fi
 
 #   compile without HDF5 (not recommended)
-# ./configure --prefix=$NEMO/opt --disable-netcdf-4
+./configure --prefix=$NEMO/opt --disable-netcdf-4
 #   or with HDF5
-/configure --prefix=$NEMO/opt 
+# ./configure --prefix=$NEMO/opt 
 
 make clean
 make -j
