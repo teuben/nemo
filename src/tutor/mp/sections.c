@@ -19,12 +19,16 @@ string usage="benchmark openmp overhead of starting a test via sections";
 string cvsid="$Id:$";
 
 /*
-e benchmark program:
+ benchmark program:
+     /usr/bin/time sections mode=3 iter=0 n=100000000
 
 n * iter scales the CPU, but for small n you can see the caching effect.
 Small:   0.40 Gop
 Large:   1.20
-Elarge   2.53   (memory starts to fill uip)
+Elarge   2.53   (memory starts to fill up?    1 Gx=28"
+
+lma:    3.40 n=100M iter=10     (1G-xrandom = 21")
+        1.00 n=1000 iter=1M
 */
   
 
