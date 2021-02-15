@@ -49,6 +49,7 @@ void nemo_main()
   int n2 = n;
   int n3 = n;
   int mode = getiparam("mode");
+  real t0, t1;
   real *x1 = (real *) allocate(n1*sizeof(double));
   real *x2 = (real *) allocate(n2*sizeof(double));
   real *x3 = (real *) allocate(n3*sizeof(double));
@@ -60,6 +61,8 @@ void nemo_main()
     x2[i] = xrandom(0.0,1.0);
   }
 
+  
+  t0 = cputime();
   if (mode==0) {
     dprintf(0,"mode=0: vanilla sections\n");    
     #pragma omp parallel sections
@@ -83,6 +86,8 @@ void nemo_main()
     work3(n1,x1,x2,x3,iter1);    
   } else
     error("mode=%d not implemented yet",mode);
+  t1 = cputime();
+  dprintf(0,"CPU time=%f  %f\n",(t1-t0)*60, t0*60);
 }
 
 void work3(int n, real *x, real *y, real *z, int iter)
