@@ -16,16 +16,21 @@
 #             -c : pick comment character?
 #             -m : mode (e.g. using '=' between key and val)
 
+version = "17-feb-2021"
 
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: %s [options] parfile a=1 f=\"'a.fits'\" > parfile.new" % sys.argv[0])
+    print("Usage: %s parfile [options] a=1 f=\"'a.fits'\" > parfile.new" % sys.argv[0])
+    print("Version: %s" % version)
+    print("Options:    -e     use bash style key=val");
+    print("            -o     overwrite input parfile");
     sys.exit(1)
 
 
 filename = sys.argv[1]
 eqmode   = False
+owmode   = False
 
 kv = {}
 
@@ -33,12 +38,23 @@ for keyval in sys.argv[2:]:
     if keyval=='-e':
         eqmode = True
         continue
+    if keyval=='-o':
+        owmode = True
+        continue
+    
     ieq = keyval.find('=')
     key = keyval[:ieq]
     val = keyval[ieq+1:]
     kv[key] = val
 
-lines = open(filename).readlines()
+fp = open(filename)
+lines = fp.readlines()
+fp.close()
+
+if owmode:
+    print("Overwriting %s" % filename)
+    fp = open(filename,"w")
+
 
 for line in lines:
     line = line.strip()
@@ -46,21 +62,28 @@ for line in lines:
     if len(w) > 1:
         if w[0] in kv:
             if eqmode:
-                print("%s = %s" % (w[0],kv[w[0]]))
+                oline = "%s = %s" % (w[0],kv[w[0]])
             else:
-                print("%s   %s" % (w[0],kv[w[0]]))
+                oline = "%s   %s" % (w[0],kv[w[0]])
         else:
-            print(line.strip())
+            oline = line
     else:
         if eqmode:
             w=line.split('=')
             if len(w)==2:
                 if w[0] in kv:
-                    print("%s=%s" % (w[0],kv[w[0]]))
+                    oline = "%s=%s" % (w[0],kv[w[0]])
                 else:
-                    print("%s" % line)
+                    oline = line
             else:
-                print("%s" % line)
+                oline = line
         else:
-            print(line.strip())        
+            oline = line
+    if owmode:
+        fp.write("%s\n" % oline)
+    else:
+        print(oline)
         
+
+if owmode:
+    fp.close()
