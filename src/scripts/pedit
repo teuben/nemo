@@ -1,8 +1,13 @@
 #! /usr/bin/env python
 #
-#   parameter editor for "keyword    value"  parameter files
+#   parameter editor for "keyword    value"
+#                     or "keyword=value"
+#   parameter files
 #
-#   Usage:   pedit [options] pfile a=1 f="'a.fits'"
+#   Usage:   pedit pfile [options] a=1 f="'a.fits'"
+#
+#   Options:
+#            -e      bash style keyword=value
 #
 #
 #   @todo   error checking
@@ -25,6 +30,9 @@ eqmode   = False
 kv = {}
 
 for keyval in sys.argv[2:]:
+    if keyval=='-e':
+        eqmode = True
+        continue
     ieq = keyval.find('=')
     key = keyval[:ieq]
     val = keyval[ieq+1:]
@@ -33,6 +41,7 @@ for keyval in sys.argv[2:]:
 lines = open(filename).readlines()
 
 for line in lines:
+    line = line.strip()
     w = line.split()
     if len(w) > 1:
         if w[0] in kv:
@@ -43,5 +52,15 @@ for line in lines:
         else:
             print(line.strip())
     else:
-        print(line.strip())        
+        if eqmode:
+            w=line.split('=')
+            if len(w)==2:
+                if w[0] in kv:
+                    print("%s=%s" % (w[0],kv[w[0]]))
+                else:
+                    print("%s" % line)
+            else:
+                print("%s" % line)
+        else:
+            print(line.strip())        
         
