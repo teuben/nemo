@@ -26,7 +26,7 @@ snap.in:
 
 snapccd: snap.in
 	@echo Running $@
-	$(EXEC) snapccd snap.in - | bsf - test='0.0551174 1.19733 -1.96875 25.6 4111' ; nemo.coverage snapccd.c
+	$(EXEC) snapccd snap.in - | bsf - test='0.0713999 1.38289 0 31.5 4111' ; nemo.coverage snapccd.c
 
 snapgrid: snap.in
 	@echo Running $@

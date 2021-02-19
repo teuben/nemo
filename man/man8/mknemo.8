@@ -77,8 +77,11 @@ firstn    	the very first (?) nbody code
 glnemo2   	glnemo graphics
 gyrfalcON   	falcON tools (gyrfalcON, mkplum, the acc's and manip's)
 rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\fP)
-galaxy15	Sellwood's GALAXY V15.x
+galaxy15	Sellwood's GALAXY V15.
+cfitsio		CFITSIO library
 .fi
+For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and being
+built with --prefix=$NEMO/opt.
 .SH "SEE ALSO"
 bake(8NEMO), mkbin(8NEMO)
 .SH AUTHOR
@@ -96,6 +99,8 @@ $NEMOLIB/yapp*.o	various device drivers
 $NEMO/src          	source tree searched for programs/directories
 $NEMO/adm/install/mknemo.log	logfile of all previous installs done
 $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
+$NEMO/local/<package>		source of a <package>
+$NEMO/opt/{bin,include,lib}	--prefix location of <package> binaries and headers for public use
 .fi
 .SH "UPDATE HISTORY"
 .nf
