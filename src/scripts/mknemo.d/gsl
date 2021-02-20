@@ -1,5 +1,6 @@
 #! /bin/bash
 #
+#  see also    https://github.com/ampl/gsl
 
 version=2.6
 wget=wgetc

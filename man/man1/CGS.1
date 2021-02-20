@@ -1,4 +1,4 @@
-.TH CSG 1NEMO "27 May 2006"
+.TH CSG 1NEMO "20 February 2021"
 .SH NAME
 CGS, runCGS\-  Collisionless Galactic Simulator N-body code
 .SH SYNOPSIS
@@ -198,9 +198,10 @@ G5/1.6	218.5 (g77 3.5.0)
 AMD64/	130.3 (g77 3.4.2)
 Xeon-X5660@2.80GHz	79.4 (gfortran_4.4.7 -O3) - gaia
 i7-8550U @ 1.80GHz	43.4 (gfortran_7.3.0 -O3) - T480
-i7-3820 CPU @ 3.60GHz	52.5 (gfortran_4.4.7 -O3) - dante
-i7-3820 CPU @ 3.60GHz	31.7 (ifort_12.1.0 -O3) - dante
-
+i7-3820  @ 3.60GHz	52.5 (gfortran_4.4.7 -O3) - dante
+i7-3820  @ 3.60GHz	31.7 (ifort_12.1.0 -O3) - dante
+i5-1135G7 @ 2.40GHz	26.0 (gfortran 9.2.0 -O3) - XPS13
+i5-1135G7 @ 2.40GHz	13.4 (flang 7.0.1 -O3) - XPS13
 .fi
 You can run the command either as:
 .nf
@@ -208,9 +209,10 @@ You can run the command either as:
 or
    % time CGS
 .fi
+Adding \fBnemo=t\fP (the default) would add about 15%.
 .SH DATA CONVERSION
-If output \fIsnapshot(5NEMO)\fP are requested, CGS will create a file \fBfort.90\fP, which can be converted
-to NEMO's \fIsnapshot(5NEMO)\fP, viz.
+If output \fIsnapshot(5NEMO)\fP are requested, CGS will create a file \fBfort.90\fP,
+which can be converted to NEMO's \fIsnapshot(5NEMO)\fP, viz.
 .nf
    tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 .fi
