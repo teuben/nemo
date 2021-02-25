@@ -196,13 +196,13 @@ void nemo_main(void)
         warning("No swapped output file created");
         outstr = NULL;
     }
-    if (Qmemcpy)
+    if (Qmemcpy) {
       if (len != 8) {
 	warning("Cannot do memcpy, len=%d, needs to be 8",len);
 	Qmemcpy = FALSE;
-      } else
+      } else 
 	warning("memcpy mode");
-
+    }
     instr = stropen(fname,"r");
     cnt = nemo_file_size(fname);         /* size of the file in bytes */
 
