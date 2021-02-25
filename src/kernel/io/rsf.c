@@ -361,7 +361,7 @@ void safe_read_short(stream fp, short *word)
 {
     int temp;
 
-    if (fscanf(fp, "%ho", &temp) == EOF)
+    if (fscanf(fp, "%ho", (unsigned short *) &temp) == EOF)
 	error("read_short: EOF found");
     *word = ((short) temp);
 }
