@@ -2,6 +2,9 @@
 include $(NEMOLIB)/makedefs
 #FFLAGS = -O
 #FC = f77
+
+TIME = /usr/bin/time 
+
 #	some linux versions need $(NEMOLIB)/etime.o here
 LIBS =
 
@@ -37,6 +40,12 @@ print:
 clean:
 	\rm -f core nbody1 *.o
 
+p1280:
+	mkplummer p1280 1280
+
+bench: p1280
+	rm -rf run_bench
+	$(TIME) runbody1 p1280 run_bench deltat=0.1 tcrit=10 > bench.log 
 
 nmax:   .dummy
 
