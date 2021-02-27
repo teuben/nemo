@@ -17,7 +17,8 @@ string defv[] = {	/* keywords + help string for user interface */
     "out=???\n      Output filename (image)",
     "zvar=z\n       Slice variable (x,y,z)",
     "zrange=\n      Slices to select (1..n<zvar>)",
-    "VERSION=1.0b\n 27-jan-2021 PJT",
+    "zslabs=\n      Zmin,Zmax pairs in WCS to select",
+    "VERSION=1.1\n  27-feb-2021 PJT",
     NULL,
 };
 
@@ -36,13 +37,14 @@ static real new_min, new_max;
 
 void new_minmax(real ival);
 void slice(imageptr i, imageptr o, int mode, int *planes);
-
+int get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real amin, real da);
 
 void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
     int planes[MAXPLANE], mode, i;
+    real slabs[MAXPLANE];
     string zvar;
     int nx, ny, nz;
 
@@ -71,11 +73,18 @@ void nemo_main(void)
     } else 
         error("Illegal slice axis %s, must be x,y,z",zvar);
 
-
     if (hasvalue("zrange")) {
         nz = nemoinpi(getparam("zrange"),planes,MAXPLANE);
         if (nz<1) 
             error("Bad syntax %d for zrange=%s",nz,getparam("zrange"));
+    } else if (hasvalue("zslabs")) {
+        nz = nemoinpr(getparam("zslabs"),slabs,MAXPLANE);
+        if (nz<1) 
+            error("Bad syntax %d for zrange=%s",nz,getparam("zslabs"));
+	if (mode == Z_SLICE) {
+	  nz = get_planes(nz,slabs, planes, Nz(iptr), Xref(iptr), Zmin(iptr), Dz(iptr));
+	} else
+	  error("mode not implemented for slabs");
     } else {
         for (i=0; i<nz; i++)
             planes[i] = i+1;
@@ -174,3 +183,39 @@ void slice(imageptr i, imageptr o, int mode, int *planes)
     MapMin(o) = new_min;
     MapMax(o) = new_max;
 }
+
+
+int get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real amin, real da)
+{
+  int i0, i1, i, j, nz = 0;
+  real axis_min, axis_max;
+
+  axis_min = -aref*da + amin;
+  axis_max = (na-1-aref)*da + amin;
+  dprintf(0,"Axis min/max: %g %g\n",axis_min,axis_max);
+  
+  if (nslabs%2) error("Not an even number of slab values");
+
+  for (i=0; i<nslabs; i+=2) {
+    i0 = (int) ((slabs[i]  -amin)/da + aref);
+    i1 = (int) ((slabs[i+1]-amin)/da + aref);
+    if (i0<0) {
+      warning("%d < 0: ",i0);
+      i0=0;
+    }
+    if (i1>=na) {
+      warning("%d >= %d: ",i1,na);
+      i1=na-1;
+    }
+    dprintf(0,"slab %g %g -> %d %d\n",slabs[i],slabs[i+1],i0,i1);
+    if (i0<i1)
+      for (j=i0; j<=i1; j++)
+	planes[nz++] = j;
+    else
+      for (j=i1; j<=i0; j++)
+	planes[nz++] = j;
+  }
+  dprintf(0,"Total planes: %d\n",nz);
+  return nz;
+}
+  
