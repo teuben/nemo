@@ -184,6 +184,12 @@ as the default will not suffice anymore.
 Note that requesting tcript=10 you will see the final snapshot written at time=28.2843
 because the crossing time is about 2.828 and tcrit is measured in terms of crossing times,
 as opposed to code times for the default run with kz(15)=1.
+.SH BENCHMARK
+The command
+.nf
+     make bench
+.fi
+will run a standard 1280 body plummer sphere benchark to T=10.
 .SH CAVEATS
 \fBnbody1\fP still uses the old-style individual time-steps with force polynomials, not the
 \fIimproved\fP hermite integrater that is embedded in later versions of the NBODYx series. However,
