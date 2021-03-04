@@ -169,6 +169,9 @@ bizarre reasons this keyword can be used to trigger reading
 a weight column in tabular input mode (\Bimagemode=\fP).
 [Default: required if a beam is supplied].
 .TP
+\fBwtmap\fP=\fIwt_image\fP
+If given, the weights (like 1/RMS^2) of the pixels.
+.TP
 \fBtab\fP=
 If specified, this output table is used in \fIappend\fP mode!
 This table can be piped through \fItabcomment(1NEMO)\fP and 
@@ -233,7 +236,7 @@ in column 3, and optional errors in the radial velocity in column 4
 [Default: t]
 .TP
 \fBwwb73=t|f\fP
-Use a simpler WWB73 linear method of fitting? [false]
+Use a simpler WWB73 (Warner, Wright, Baldwin 1973) linear method of fitting? [false]
 .SH AWK
 The standard output is normally not very useful; it displays, for each
 iteration, the run of parameters plus the number of points and mean
@@ -323,6 +326,7 @@ gal(AIPS), rocur(AIPS), velfitpatch(1NEMO)
 TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
 pPXF: http://www-astro.physics.ox.ac.uk/~mxc/idl/#ppxf
 Begeman(1989):  1989A+A...223...47B
+Warner, Wright, Baldwin (1973): 1973MNRAS.163..163W
 GBKFIT: http://supercomputing.swin.edu.au/projects/gbkfit/
 2DBAT:  https://ascl.net/2dbat
 .fi
