@@ -290,7 +290,7 @@ string defv[] = {
 
 string usage="YAPP interpreter";
 
-nemo_main()
+void nemo_main()
 {
     if (getbparam("init"))
         plinit("***",0.0,20.0,0.0,20.0);
