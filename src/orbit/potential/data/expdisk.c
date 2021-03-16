@@ -19,7 +19,7 @@
 #include <stdinc.h>                     /* standard Nemo include */
 #include <potential_float.h>
 
-local double omega = 0.0;           /* just put to zero until implemented */
+local double omega = 0.0;       /* just put to zero until implemented */
 local double mass = 1.0;	/* total mass */
 local double a = 1.0;		/* scale lenght */
 
@@ -56,7 +56,7 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     x = 0.5*alpha*r;
 
     if (r2==0.0) {
-        *pot = 0.0;			/* a lie though */
+        *pot = -mass;
         for (i=0; i<*ndim; i++)
             acc[i] = 0.0;
     } else {
