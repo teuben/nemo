@@ -28,35 +28,58 @@ local double g_mass = 1.0;
 local double g_sigma = 1.0;
 local double g_q = 1.0;         // discarded for now
 local double g_p = 1.0;         // discarded for now
+local double accuracy = 1e-7;
+local int    g_debug = 0;
 
-local double s2,s3;
+local double r2,s2,s3,eps;
+
+#define MAX_STEPS 32
+
+local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc);		     
+
+local double oblate(double t) {
+  return exp(-t*t*r2/(2*s2))/sqrt(1-eps*t*t);
+}
 
 void inipotential (int *npar, double *par, string name)
 {
     int n;
 
     n = *npar;
-    if (n>0) omega = par[0];
-    if (n>1) g_mass = par[1];
+    if (n>0) omega   = par[0];
+    if (n>1) g_mass  = par[1];
     if (n>2) g_sigma = par[2];
-    if (n>3) warning("gauss: npar=%d only up to 3 parameters accepted",n);
+    if (n>3) g_p     = par[3];
+    if (n>4) g_q     = par[4];
+    if (n>5) warning("gauss: npar=%d only up to 5 parameters accepted",n);
 
     dprintf (1,"INIPOTENTIAL Gauss: \n");
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  mass, sigma = %f %f \n",g_mass,g_sigma);
+    dprintf (1,"  mass, sigma = %f %f %f %f\n",g_mass,g_sigma,g_p,g_q);
 	
     par[0] = omega;
     s2 = sqrt(2);
     s3 = sqrt(PI);
+    eps = 1 - g_q*g_q;
+
+    if (eps > 0 && g_p < 1) error("potname gauss: triaxial case not implemented");
+
 }
 
 
-void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
+void potential_double(int *ndim,double *pos,double *acc,double *pot,double *time)
 {
-  double r2, r, tmp, x;
+  double r, tmp, x;
 
   r2 = pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2];
-  
+
+  if (eps>0) {   // oblate case
+    *pot = -g_mass / g_sigma * sqrt(2/PI) * romberg(oblate,0.0,1.0,30,accuracy);
+    // sorry, forces too difficult now, use potccd
+    acc[0] = acc[1] = acc[2] = 0;
+    return;
+  }
+
   if (r2 == 0) {
     *pot = -g_mass / g_sigma * sqrt(2/PI);
     acc[0] = acc[1] = acc[2] = 0;
@@ -78,3 +101,49 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
   acc[2] = tmp*pos[2];
 }
 
+/* adapted from https://en.wikipedia.org/wiki/Romberg's_method */
+ 
+local void dump_row(size_t i, double *R) {
+  printf("R[%2zu] = ", i);
+  for (size_t j = 0; j <= i; ++j)
+    printf("%f ", R[j]);
+  printf("\n");
+}
+ 
+
+local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc) {
+  double R1[MAX_STEPS], R2[MAX_STEPS];  // buffers
+  double *Rp = &R1[0], *Rc = &R2[0];    // Rp is previous row, Rc is current row
+  double h = (b-a);                     // step size
+  Rp[0] = (f(a) + f(b))*h*.5;           // first trapezoidal step
+
+  if (g_debug) dump_row(0, Rp);
+  
+  for (size_t i = 1; i < max_steps; ++i) {
+    h /= 2.;
+    double c = 0;
+    size_t ep = 1 << (i-1); //2^(n-1)
+    for (size_t j = 1; j <= ep; ++j) {
+      c += f(a+(2*j-1)*h);
+    }
+    Rc[0] = h*c + .5*Rp[0]; //R(i,0)
+
+    for (size_t j = 1; j <= i; ++j) {
+      double n_k = pow(4, j);
+      Rc[j] = (n_k*Rc[j-1] - Rp[j-1])/(n_k-1); // compute R(i,j)
+    }
+
+    // Dump ith row of R, R[i,i] is the best estimate so far
+    if (g_debug) dump_row(i, Rc);
+
+    if (i > 1 && fabs(Rp[i-1]-Rc[i]) < acc) {
+      return Rc[i-1];
+    }
+
+    // swap Rn and Rc as we only need the last row
+    double *rt = Rp;
+    Rp = Rc;
+    Rc = rt;
+  }
+  return Rp[max_steps-1]; // return our best guess
+}
