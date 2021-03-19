@@ -1,4 +1,4 @@
-.TH POTCCD 1NEMO "26 February 2003"
+.TH POTCCD 1NEMO "19 March 2021"
 .SH NAME
 potccd \- Create an image with potentials or densities from a potential
 .SH SYNOPSIS
@@ -10,6 +10,10 @@ standard \fIimage(5NEMO)\fP format. It is also possible to store the
 Poissonian density, either 2D or 3D. For this numerical derivatives
 of the force field are used, and hence a small difference step needs to
 be given.
+.PP
+A potential stored on a grid could be a good approach when the potential
+is expensive to compute, though in orbit calculations this could limit
+the exact conservation of the integrals of motion such as energy.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
