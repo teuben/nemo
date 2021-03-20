@@ -32,7 +32,8 @@ string defv[] = {
     "dr=\n          Differential step for (Poisson) density map",
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=2.0\n  16-mar-2021 PJT",
+    "nder=1\n       1: use force der   2: use twice potential der for density",
+    "VERSION=2.1\n  19-mar-2021 PJT",
     NULL,
 };
 
@@ -48,7 +49,7 @@ local potproc_double mypot;    /* pointer to potential calculator function */
 void nemo_main(void)
 {
     int    i, nx,ny,nz, ix,iy,iz, stepx, stepy, stepz, nsteps;
-    double pos[3],acc[3],pot,den,dr,da[3],time;
+    double pos[3],acc[3],pot,pot0,den,dr,da[3],time;
     double xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
     double ax,ay,az,epot;
     double fourpi = FOUR_PI;
@@ -57,6 +58,7 @@ void nemo_main(void)
     string mode = getparam("mode");
     int idim, ndim, maxdim = 3, first=1, idx = 0;
     int axis = 0; // new WCS system
+    int nder = getiparam("nder");
     imageptr iptr;
     stream ostr;
 
@@ -82,7 +84,7 @@ void nemo_main(void)
     ndim = getiparam("ndim");
     if (hasvalue("dr")) {
         dr = getdparam("dr");
-        dprintf(0,"%dD-Poisson density map with delta-r=%g\n",ndim,dr);
+        dprintf(0,"%dD-Poisson density map with delta-r=%g and nder=%d\n",ndim,dr,nder);
     } else
         dr = -1.0;
     time = getdparam("t");
@@ -146,15 +148,29 @@ void nemo_main(void)
 	  pos[0] = xarr[ix];
 	  (*mypot)(&maxdim,pos,acc,&pot,&time);
 	  if (dr > 0.0) {                                 /* Poisson */
-	    den = 0.0;
-	    for (idim=0; idim<ndim; idim++) {
-	      pos[idim] += dr;
-	      (*mypot)(&maxdim,pos,acc,&pot,&time);
-	      den -= acc[idim];
-	      pos[idim] -= 2*dr;
-	      (*mypot)(&maxdim,pos,acc,&pot,&time);
-	      den += acc[idim];
-	      pos[idim] += dr;
+	    if (nder==1) {
+	      den = 0.0;
+	      for (idim=0; idim<ndim; idim++) {
+		pos[idim] += dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den -= acc[idim];
+		pos[idim] -= 2*dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += acc[idim];
+		pos[idim] += dr;
+	      }
+	    } else {
+	      den = -2*ndim*pot;
+	      for (idim=0; idim<ndim; idim++) {
+		pos[idim] += dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += pot;
+		pos[idim] -= 2*dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += pot;
+		pos[idim] += dr;
+	      }
+	      den = den/dr;
 	    }
 	    pot = den/dr;
 	  } else if (idx==0) {                                        /* Potential */
