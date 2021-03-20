@@ -1,0 +1,16 @@
+#! /bin/bash
+#
+
+if [ $# -eq 0 ]; then
+    echo Usage $0 cmd
+    exit 0
+fi
+
+log=/tmp/nemobench$$.log
+log=/tmp/nemobench.log
+
+echo NEMOBENCH: $* >> $log
+/usr/bin/time $* >> $log 2>&1
+echo -n "NEMOBENCH: $1 "
+tail -2 $log |grep elapsed
+
