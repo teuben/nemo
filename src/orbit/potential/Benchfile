@@ -1,11 +1,9 @@
-DIR = src/orbit/potential
-BENCH = bench0 bench0d bench1 bench2
-
-TIME = /usr/bin/time
-
-
-BIN = potccd
-NEED = $(BIN) 
+DIR       = src/orbit/potential
+BENCH     = bench0 bench0d bench1 bench2 bench3
+BENCHDATA = bench1.ccd
+LOG       = /tmp/nemobench.log
+BIN       = potccd
+NEED      = $(BIN) 
 
 
 help:
@@ -15,19 +13,28 @@ need:
 	@echo $(NEED)
 clean:
 	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
 
-all:    $(BENCH)
+all:    $(BENCHDATA) $(BENCH) 
+
+bench1.ccd:
+	@rm -rf bench1.ccd
+	@potccd bench1.ccd plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2 >> $(LOG) 2>&1
+
+
+DR = 0.05
 
 bench0:
-	nemobench potccd . plummer x=-5:5:0.025 y=-5:5:0.025 z=-5:5:0.025
+	nemobench potccd . plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2
 
 bench0d:
-	nemobench potccd . plummer x=-5:5:0.025 y=-5:5:0.025 z=-5:5:0.025 mode=den dr=0.001 nder=2
+	nemobench potccd . plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2 mode=den dr=0.001 nder=2
 
 bench1:
-	nemobench potccd . gauss 0,1,1 1 x=-5:5:0.05 y=-5:5:0.05 z=-5:5:0.05
+	nemobench potccd . gauss 0,1,1 1 x=-5:5:$(DR) y=-5:5:$(DR) z=-5:5:$(DR)
 
 bench2:
-	nemobench potccd . gauss 0,1,1,1,0.5 x=-5:5:0.05 y=-5:5:0.05 z=-5:5:0.05
+	nemobench potccd . gauss 0,1,1,1,0.5 x=-5:5:$(DR) y=-5:5:$(DR) z=-5:5:$(DR)
 
-
+bench3:
+	nemobench ccdpot bench1.ccd .
