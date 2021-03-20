@@ -1,5 +1,6 @@
 #! /bin/bash
 #
+#   typically called via a Benchfile
 
 if [ $# -eq 0 ]; then
     echo Usage $0 cmd
