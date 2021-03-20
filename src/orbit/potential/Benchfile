@@ -1,0 +1,33 @@
+DIR = src/orbit/potential
+BENCH = bench0 bench0d bench1 bench2
+
+TIME = /usr/bin/time
+
+
+BIN = potccd
+NEED = $(BIN) 
+
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+
+all:    $(BENCH)
+
+bench0:
+	nemobench potccd . plummer x=-5:5:0.025 y=-5:5:0.025 z=-5:5:0.025
+
+bench0d:
+	nemobench potccd . plummer x=-5:5:0.025 y=-5:5:0.025 z=-5:5:0.025 mode=den dr=0.001 nder=2
+
+bench1:
+	nemobench potccd . gauss 0,1,1 1 x=-5:5:0.05 y=-5:5:0.05 z=-5:5:0.05
+
+bench2:
+	nemobench potccd . gauss 0,1,1,1,0.5 x=-5:5:0.05 y=-5:5:0.05 z=-5:5:0.05
+
+
