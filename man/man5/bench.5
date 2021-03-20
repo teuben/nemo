@@ -1,9 +1,11 @@
 .TH BENCH 5NEMO "8 November 2020"
-.SH NAME
+.SH "NAME"
 bench \- NEMO benchmarks
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 /usr/bin/time $NEMO/src/scripts/nemo.bench bsf=1
-.SH RESULTS
+
+.SH "RESULTS"
 Reported are user time in CPU seconds:
 .nf
 .ta +3.5i +1.5i
@@ -22,7 +24,8 @@ i7-3630QM CPU @ 2.40GHz	76.2 	T530 (1200) 762 / 3006
 Xeon(R) E5-2623 v4 @ 2.60GHz	42.1/79.4 	kraken 782 / 5800
 Xeon(R) X5550  @ 2.67GHz	115.4	sdp 566 / 3938
 .fi
-.SH NEW DESCRIPTION
+
+.SH "NEW DESCRIPTION"
 The following tasks are run in the standard NEMO bench:
 .nf
 
@@ -41,7 +44,7 @@ orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000\fP
 In addition each data file that is produced is checksummed and compared
 to a baseline version using \fIbsf(1NEMO)\fP.
 
-.SH OLD DESCRIPTION
+.SH "OLD DESCRIPTION"
 An older benchmark focused on a few N-body codes only:
 .PP
 \fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
@@ -54,7 +57,30 @@ the benchmark to dominate the whole series.
 \fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
 \fBbench4\fP benchmarks an image operation.
 \fBbench5\fP benchmarks an orbit calculation.
-.SH DATA
+
+.SH "OLDEST BENCH"
+At the inception of NEMO there was no real benchmark, so for a while (while computers
+were still slow) we used the default \fIhackcode1(1NEMO)\fP setting, where 128 particles
+in virial equilibrium are integrated for 64 timesteps:
+.nf
+      /usr/bin/time hackcode1 tstop=2  > /dev/null
+.fi
+
+The standard NEMO benchmark of the treecode integration is to run
+{\tt hackcode1} \index{hackcode1(1)}
+without any parameters.  It will generate a spherical
+stellar system in virial equilibrium with 128 particles, and
+integrate it for 64 timesteps ({\tt tol=1 eps=0.05}).   
+In Table~\ref{t:bench1} the  amount
+of CPU (in seconds) needed for {\bf one} timestep is listed
+in column 2. When not otherwise mentioned,
+the code used is the standard NEMO {\tt hackcode1} with
+default compilation on the machine quoted. Note that one can often
+obtain significant performance increase (factor of 2 on some sparc
+architectures) by studying the native compiler and
+in particular its optimization options.
+
+.SH "DATA"
 Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
 .ta +1i
 .nf
@@ -128,7 +154,8 @@ bench4 (ccdpot)
        I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
 
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 Defining and running a benchmark can be very tricky stuff. It might be
 important to separate disk I/O from CPU usage.   The unix \fItime(1)\fP 
 command can be a help. The output from bash::time is a bit different
