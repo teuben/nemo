@@ -19,7 +19,14 @@
  * $$
  *    \Phi = -  {  M  \over R } erf({ {R}\over{\sigma\sqrt{2}}})
  * $$
- */                     
+ */
+
+
+// benchmark:
+// /usr/bin/time potccd ccd1.pot gauss 0,1,1,1,0.1 x=-5:5:0.1 y=-5:5:0.1 z=-5:5:0.1
+// #   6.87user 0.01system 0:06.88elapsed 99%CPU
+// /usr/bin/time potccd ccd1.den gauss 0,1,1,1,0.1 x=-5:5:0.1 y=-5:5:0.1 z=-5:5:0.1 mode=den dr=0.001 nder=2
+// #  48.23user 0.01system 0:48.28elapsed 99%CPU 
   
 #include <stdinc.h>
  
@@ -31,14 +38,14 @@ local double g_p = 1.0;         // discarded for now
 local double accuracy = 1e-7;
 local int    g_debug = 0;
 
-local double r2,s2,s3,eps;
+local double r2,z2,s2,s3,eps,delta;
 
 #define MAX_STEPS 32
 
 local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc);		     
 
 local double oblate(double t) {
-  return exp(-t*t*r2/(2*s2))/sqrt(1-eps*t*t);
+  return exp(-t*t*(r2+z2/(1-eps*t*t))/(2*s2)) / sqrt(1-eps*t*t);
 }
 
 void inipotential (int *npar, double *par, string name)
@@ -55,11 +62,12 @@ void inipotential (int *npar, double *par, string name)
 
     dprintf (1,"INIPOTENTIAL Gauss: \n");
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf (1,"  mass, sigma = %f %f %f %f\n",g_mass,g_sigma,g_p,g_q);
+    dprintf (1,"  mass, sigma, p, q = %f %f %f %f\n",g_mass,g_sigma,g_p,g_q);
 	
     par[0] = omega;
     s2 = sqrt(2);
     s3 = sqrt(PI);
+    delta = 1 - g_p*g_p;
     eps = 1 - g_q*g_q;
 
     if (eps > 0 && g_p < 1) error("potname gauss: triaxial case not implemented");
@@ -71,14 +79,16 @@ void potential_double(int *ndim,double *pos,double *acc,double *pot,double *time
 {
   double r, tmp, x;
 
-  r2 = pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2];
-
-  if (eps>0) {   // oblate case
+  if (eps>0) {   // oblate case in the z=0 plane
+    r2 = pos[0]*pos[0] + pos[1]*pos[1];
+    z2 = pos[2]*pos[2];
     *pot = -g_mass / g_sigma * sqrt(2/PI) * romberg(oblate,0.0,1.0,30,accuracy);
     // sorry, forces too difficult now, use potccd
     acc[0] = acc[1] = acc[2] = 0;
     return;
   }
+
+  r2 = pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2];
 
   if (r2 == 0) {
     *pot = -g_mass / g_sigma * sqrt(2/PI);
