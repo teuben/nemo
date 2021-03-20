@@ -10,26 +10,27 @@ nemobench COMMAND
 .fi
 
 .SH "DESCRIPTION"
-There are several methods to
+There are several methods to compare the performance of NEMO on different processors or environments:
 
 .RS 4
 .IP 1.
 The command \fBmake bench\fP from the $NEMO directory runs a standard benchmark of a dozen or zo
-selected NEMO programs.  It should run in about 30 seconds on more ~2020 type computers.
+selected NEMO programs.  It should run in about 30 seconds on more ~2020 typical computer. 
 
 .IP 2.
 Various \fBBenchfile\fP scattered through the $NEMO source tree contain benchmarks
 
 .IP 3.
+Selected man pages have some examples. Over time these should be moved into the Benchfile in
+the source directory where this program is maintained.
 
-.RE
+.RE 4.
 
 .SH "RESULTS"
-Reported are user time in CPU seconds:
+Here are the results of the "make bench" benchmark. The time is the user CPU time. If two values
+are listed after the processor, these are the Geekbench5 values.
 .nf
 .ta +3.5i +1.5i
-
-i7-4930K CPU @ 3.40GHz
 
 Intel Core i5-1135G7	16.4	XPS13 1460 / 
 Intel Core i9-9900X	25.8	geminid 1214 / 9467
@@ -44,7 +45,11 @@ Xeon(R) E5-2623 v4 @ 2.60GHz	42.1/79.4 	kraken 782 / 5800
 Xeon(R) X5550  @ 2.67GHz	115.4	sdp 566 / 3938
 .fi
 
-.SH NEW DESCRIPTION
+Keep in mind for most of these a default compilation was used.  Some benchmarks are known
+to be able to improved by up to a factor of two with selected compiler and options change.
+
+
+.SH "NEW DESCRIPTION"
 The following tasks are run in the standard NEMO bench:
 .nf
 
@@ -76,6 +81,28 @@ the benchmark to dominate the whole series.
 \fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
 \fBbench4\fP benchmarks an image operation.
 \fBbench5\fP benchmarks an orbit calculation.
+
+.SH "OLDEST BENCH"
+At the inception of NEMO there was no real benchmark, so for a while (while computers
+were still slow) we used the default \fIhackcode1(1NEMO)\fP setting, where 128 particles
+in virial equilibrium are integrated for 64 timesteps:
+.nf
+      /usr/bin/time hackcode1 tstop=2  > /dev/null
+.fi
+
+The standard NEMO benchmark of the treecode integration is to run
+{\tt hackcode1} \index{hackcode1(1)}
+without any parameters.  It will generate a spherical
+stellar system in virial equilibrium with 128 particles, and
+integrate it for 64 timesteps ({\tt tol=1 eps=0.05}).   
+In Table~\ref{t:bench1} the  amount
+of CPU (in seconds) needed for {\bf one} timestep is listed
+in column 2. When not otherwise mentioned,
+the code used is the standard NEMO {\tt hackcode1} with
+default compilation on the machine quoted. Note that one can often
+obtain significant performance increase (factor of 2 on some sparc
+architectures) by studying the native compiler and
+in particular its optimization options.
 
 .SH "DATA"
 Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
