@@ -1,8 +1,11 @@
-.TH CCDPOT 1NEMO "17 March 2021"
+.TH CCDPOT 1NEMO "19 March 2021"
+
 .SH NAME
 ccdpot \- potential of an infinitesimally thin disk
+
 .SH SYNOPSIS
 \fBccdpot\fP [parameter=value]
+
 .SH DESCRIPTION
 Computes the potential in the plane of an infinitesimally thin
 disk. The method used
@@ -22,6 +25,7 @@ distance |p-P| is measured in pixels.
 .PP
 A faster way is to use FFT's, as described by
 Hockney & Eastwood (1978), and implemented in MIRIAD's potfft program.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -46,11 +50,14 @@ Default: 0 (meaning no progress report)
 Set this to how often the integral is computed, in order for fast
 versions (small maps) to get accurate timings on fast machines.
 [Default: 1]
+
 .SH UNITS
 As an example, if units are 1e10Msun and kpc, Gravc = 43007.1 (see
 \fIunits(1NEMO)\fP, the potential
+
 .SH SEE ALSO
 potential(GIPSY), potfft(MIRIAD), rotcurves(1NEMO), units(1NEMO), image(5NEMO)
+
 .SH TIMING
 Since for each of the N^2 pixels, all other N^2 pixels will
 be interrogated, this algorithm is O(N^4). In practice you
@@ -58,8 +65,10 @@ will find it to be more like O(N^5). The code precomputes
 a kernel, which is simplified if we can assume the pixel
 size in X and Y are the same. If not, the program will
 currently probably compute it terribly wrong.
+
 .SH AUTHOR
 Peter Teuben  (loosely based on Roelof Bottema's POTENTIAL code)
+
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i

@@ -1,8 +1,11 @@
 .TH POTCCD 1NEMO "19 March 2021"
+
 .SH NAME
 potccd \- Create an image with potentials or densities from a potential
+
 .SH SYNOPSIS
 \fBpotccd\fP [parameter=value]
+
 .SH DESCRIPTION
 \fIpotccd\fP stores the potential values of a potential descriptor 
 (see \fPpotential(5NEMO)\fP) on a regular grid in
@@ -14,6 +17,10 @@ be given.
 A potential stored on a grid could be a good approach when the potential
 is expensive to compute, though in orbit calculations this could limit
 the exact conservation of the integrals of motion such as energy.
+.PP
+Irregular grids are not forbidden (see \fBx=,y=,z=\fP) but the
+\fIimage(5NEMO)\fP WCS descriptor will then be invalid.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -55,9 +62,18 @@ are used to compute Poissonian densities.
 \fBndim=\fP
 Number of dimensions used in Poissonian density computation. Should
 be 2 or 3. 
+.TP
+\fBnder=1|2\fP
+Normally the density (\fBmode=den\fP) is derived by first derivatives
+of the forces, but for some potentials the force was never implemented
+(e.g. \fBpotname=gauss\fP).  In this case the 2nd derivative of the
+potential will be needed, hence \fBnder=2\fP.
+Default: 1
+
 .SH BUGS
 With \fBndim=2\fP the Z-coordinate is not ignored, and hence may
 give meaningless results if forces depend on Z.
+
 .SH EXAMPLES
 First a somewhat obscure way in to create a map of an arbitrary function
 using the \fBpotname=rotcur\fP lookup table. It will use
@@ -73,14 +89,40 @@ radial profile of the function "f(x)=1/sqrt(4+x)" on a grid from
 .fi
 If the functional form is know, \fIccdmath(1NEMO)\fP will perhaps
 do better, if not a little more involved to type.
+.PP
+Here is an example of an orbit integration in the analytical plummer potential,
+and in two gridded versions of the potential.
+
+.nf
+% mkorbit o1 1 1 0 -0.5 0 0 potname=plummer
+etot: -0.452350
+
+% orbint o1 - 10000 0.01 ndiag=10000 | orblist - | tail -1
+Energy conservation: 2.05084e-11
+10000 100 -1.11384 -0.266207 0 0.557843 -0.315574 0
+
+% potccd ccd1 plummer x=-2:2:0.01 y=-2:2:0.01
+% orbint o1 - 10000 0.01 ndiag=10000 potname=ccd potfile=ccd1 | orblist - | tail -1
+Energy conservation: 0.0050378
+10000 100 -1.3835 -0.156784 0 0.408364 -0.319573 0
+
+% potccd ccd2 plummer x=-2:2:0.0025 y=-2:2:0.0025
+% orbint o1 - 10000 0.01 ndiag=10000 potname=ccd potfile=ccd2 | orblist - | tail -1
+Energy conservation: 0.00073957
+10000 100 -1.18841 -0.23806 0 0.518358 -0.3183 0
+.fi
+
 .SH SEE ALSO
 potlist(1NEMO), image(5NEMO), potential(3NEMO), potential(5NEMO)
+
 .SH AUTHOR
 Peter Teuben
+
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 10-Jun-92	V1.0 Created       	PJT
 30-mar-94	V1.1 added density options (dr=, ndim=)	PJT
 12-sep-02	V1.2 added mode=	PJT
+19-mar-2021	V2.1 added nder=	PJT
 .fi
