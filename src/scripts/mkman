@@ -1,9 +1,11 @@
 #! /bin/csh -f
 #
-# Silly program that creates a first other manual page from the inline
+# Silly program that creates a first order manual page from the inline
 # help file
 #
 # see also the help2man program https://www.gnu.org/software/help2man/
+#
+# https://unix.stackexchange.com/questions/34516/can-i-create-a-man-page-for-a-script
 #
 set version="1.3  16-mar-2020 PJT"
 

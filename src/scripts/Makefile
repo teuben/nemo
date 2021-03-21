@@ -3,9 +3,9 @@
 include $(NEMOLIB)/makedefs
 
 
-SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version \
+SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
-	wgetc
+	wgetc 
 MAKES = Makefile.lib 
 
 help:
