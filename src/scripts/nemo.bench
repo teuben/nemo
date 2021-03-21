@@ -26,7 +26,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-02-12) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2021-03-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -40,6 +40,32 @@ if [ $mode == 1 ]; then
     echo -n "# . 2 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=2  
     echo -n "# . 3 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=3  
     echo -n "# D 3 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123 test=3   ; rm s0
+    exit 0
+fi
+
+if [ $mode == 2 ]; then
+    echo 'Equal CPU time per code, no output files to check'
+    echo 'Times:  directcode hackcode1 [mkplummer] gyrfalcON potcode [mkorbit] orbint'    
+    echo -n .;
+    echo -n d;$time directcode nbody=$nbody0 out=. seed=123 $help                                   > bench2.directcode.log  2>&1
+    echo -n h;$time hackcode1 nbody=$nbody1  out=. seed=123 $help                                   > bench2.hackcode1.log   2>&1
+    echo -n m;$time mkplummer p0 $nbody2 seed=123 $help                                             > bench.mkplummer.log    2>&1
+    echo -n g;$time gyrfalcON p0 . kmax=6 tstop=2 eps=0.05 $help                                    > bench2.gyrfalcon.log   2>&1
+    echo -n p;$time potcode p0 . freqout=10 freq=1000 tstop=2 potname=plummer $help                 > bench2.potcode.log     2>&1
+    echo -n m;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                                       > bench.mkorbit.log      2>&1
+    echo -n o;$time orbint o0 . nsteps=10000000 dt=0.001 nsave=\$nsteps/100 $help                   > bench2.orbint.log      2>&1
+    echo -n .; 
+    echo ""
+
+    cat bench2.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+    column -t cpu_usage.log
+
+    if [ $clean == 1 ]; then
+	echo "Cleaning $tmp (use clean=0 to prevent this)"
+	cd ..
+	rm -rf $tmp
+    fi
+
     exit 0
 fi
 
@@ -72,7 +98,7 @@ else
 fi
     
 cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
-column -t :  cpu_usage.log
+column -t  cpu_usage.log
 
 echo -n "Processor: "
 unames=$(uname -s)
