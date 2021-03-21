@@ -10,11 +10,14 @@
  *      19-jul-02  V2.0 cleaned up the code a bit, provided potential scale factor     PJT
  *      13-aug-02  V3.0 reworked WCS issues due to ported FITS files from e.g. miriad's potfft
  *       6-sep-02  V3.1 some flexibility in the interpolation method                     PJT
+ *      17-mar-2021 V4.0   use new WCS is Axis=1
  *
  *  Note: astronomical images often have Dx<0 (Right Ascension increases
  *        to the left)....
  * 
- *  ToDo:  potential is just given from the nearest(?) pixel, no interpolation done yet
+ *  @todo:  potential is just given from the nearest(?) pixel, no interpolation done yet
+ *
+ *  @todo:  fix for WCS with axis=1
  *
  */
 
@@ -47,7 +50,7 @@
 #include <filestruct.h>
 #include <image.h>
 
-#define CCD_VERSION "ccd V3.1a 17-jun-05"
+#define CCD_VERSION "ccd V4.0 17-mar-2021"
 
 local double   omega = 0.0;
 local double   iscale = 1.0;
@@ -92,6 +95,7 @@ void inipotential (int *npar, double par[], char *name)
 
     potstr = stropen (name, "r");          /* open the image */
     read_image (potstr,&iptr);              /* read the image */
+    //if (Axis(iptr) != 0) warning("Axis %d not yet supported",Axis(iptr));
     if (iscale != 1.0) {
       int i,j;
       for (j=0; j<Ny(iptr); j++)
@@ -108,8 +112,13 @@ void inipotential (int *npar, double par[], char *name)
     idx = 1.0/dx;
     idy = 1.0/dy;
     if (!Qcen) {
-      xmin = Xmin(iptr);
-      ymin = Ymin(iptr);
+      if (Axis(iptr) == 0) {
+	xmin = Xmin(iptr);
+	ymin = Ymin(iptr);
+      } else {
+	xmin = Xmin(iptr) - Xref(iptr)*Dx(iptr);
+	ymin = Ymin(iptr) - Yref(iptr)*Dy(iptr);
+      }
     } else {
       xmin = -xcen*dx;
       ymin = -ycen*dy;
