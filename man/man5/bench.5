@@ -5,34 +5,37 @@ bench \- various NEMO benchmarks
 
 .SH "SYNOPSIS"
 .nf
-/usr/bin/time $NEMO/src/scripts/nemo.bench bsf=0
+/usr/bin/time $NEMO/src/scripts/nemo.bench
+make -f Benchfile clean all
 nemobench COMMAND
 .fi
 
 .SH "DESCRIPTION"
 There are several methods to compare the performance of NEMO on different processors or environments:
 
-.RS 4
+.RS 2
 .IP 1.
-The command \fBmake bench\fP from the $NEMO directory runs a standard benchmark of a dozen or zo
-selected NEMO programs.  It should run in about 30 seconds on more ~2020 typical computer. 
+The command \fBmake bench\fP from the $NEMO directory runs a standard benchmark of about a dozen 
+selected NEMO programs.  It should run in about 30 seconds on a ~2020 computer. A short
+table (see below in RESULTS) lists results from some recent computers.
 
 .IP 2.
-Various \fBBenchfile\fP scattered through the $NEMO source tree contain benchmarks
+Various \fBBenchfile\fP filles scattered through the $NEMO source tree contain benchmarks. There is
+no  wrapper like "make check" has for Testfile's
 
 .IP 3.
 Selected man pages have some examples. Over time these should be moved into the Benchfile in
-the source directory where this program is maintained.
+the source directory where this program is maintained. Some are mentioned below in this man page.
 
-.RE 4.
 
 .SH "RESULTS"
 Here are the results of the "make bench" benchmark. The time is the user CPU time. If two values
-are listed after the processor, these are the Geekbench5 values.
+are listed after the machine name, these are the Geekbench5 values.
 .nf
 .ta +3.5i +1.5i
 
-Intel Core i5-1135G7	16.4	XPS13 1460 / 
+Intel Core i5-1135G7	15.4	XPS13 1460 /
+AMD EPYC 7302 @ 3.0GHz	23.9	lma 1000/ 28000
 Intel Core i9-9900X	25.8	geminid 1214 / 9467
 i5-10210U CPU @ 1.60GHz	29.4 	X1Y4  1029 / 3194
 Xeon(R) Silver 4114 @ 2.20GHz	37.1	terra 777 / 10213
@@ -46,12 +49,13 @@ Xeon(R) X5550  @ 2.67GHz	115.4	sdp 566 / 3938
 .fi
 
 Keep in mind for most of these a default compilation was used.  Some benchmarks are known
-to be able to improved by up to a factor of two with selected compiler and options change.
+to be able to improved by up to a factor of two with selected compiler and options changes.
 
 
-.SH "NEW DESCRIPTION"
+.PP
 The following tasks are run in the standard NEMO bench:
 .nf
+
 
 \fIdirectcode nbody=3072 out=d0 seed=123 
 hackcode1 nbody=10240  out=h0 seed=123 
@@ -66,118 +70,35 @@ orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000\fP
 
 .fi
 In addition each data file that is produced is checksummed and compared
-to a baseline version using \fIbsf(1NEMO)\fP.
+to a baseline version using \fIbsf(1NEMO)\fP if the argument
+\fBbsf=1\fP is added.
 
-.SH "OLD DESCRIPTION"
-An older benchmark focused on a few N-body codes only:
-.PP
-\fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
-quadrupole corrections, for 10240 particles and 64 timesteps.
-\fBbench2\fP tests a more modern Treecode, this one is the
-O(N) version from Dehnen (2002). Again 64 timesteps.
-\fBbench0\fP has been added to compare a tree code with a 
-direct N-body code, also 64 timesteps, but now for fewer particles to prevent
-the benchmark to dominate the whole series.
-\fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
-\fBbench4\fP benchmarks an image operation.
-\fBbench5\fP benchmarks an orbit calculation.
 
 .SH "OLDEST BENCH"
-At the inception of NEMO there was no real benchmark, so for a while (while computers
-were still slow) we used the default \fIhackcode1(1NEMO)\fP setting, where 128 particles
+At the inception of NEMO in 1986 there was no real benchmark, so for a while (as computers
+were relatively slow still) we used the default \fIhackcode1(1NEMO)\fP setting, where 128 particles
 in virial equilibrium are integrated for 64 timesteps:
 .nf
+
       /usr/bin/time hackcode1 tstop=2  > /dev/null
 .fi
 
-The standard NEMO benchmark of the treecode integration is to run
-{\tt hackcode1} \index{hackcode1(1)}
-without any parameters.  It will generate a spherical
-stellar system in virial equilibrium with 128 particles, and
-integrate it for 64 timesteps ({\tt tol=1 eps=0.05}).   
-In Table~\ref{t:bench1} the  amount
-of CPU (in seconds) needed for {\bf one} timestep is listed
-in column 2. When not otherwise mentioned,
-the code used is the standard NEMO {\tt hackcode1} with
-default compilation on the machine quoted. Note that one can often
-obtain significant performance increase (factor of 2 on some sparc
-architectures) by studying the native compiler and
-in particular its optimization options.
+.PP
+On a Sun 3/50 (our development machine) this took about 5 seconds per step.
+Now, nearly 35 years later, my laptop runs this about 50,000 times faster.
+Looking in more detail at the original NEMO manual:
 
-.SH "DATA"
-Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
+.nf
 .ta +1i
-.nf
-\fBbench0\fP:	\fItime directcode nbody=10240\fP
-\fBbench1\fP:	\fItime hackcode1 nbody=10240\fP
-\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05\fB
-\fBbench3\fP:	\fItime mkspiral s000 1000000 nmodel=40\fP
-\fBbench4\fP:	\fIccdmath "" - 'ranu(0,1)' size=128 | ccdpot - . help=c\fB
-.fi
-.PP
-and the data :
-.PP
-.nf
-.ta +3i
-bench0 (directcode)
-       I5/7200@2.5	47.7 
-       I7/3630QM@3.6	174.2  (nemo2: 
-       I7/3770@3.5	152.6
-       P4/3.0	342.7
-       G5/2.0	472.8
-       AMD-opt64/2.0	300.3
-       AMD-ath64/2.0	888.7
-       P4/2.8 w/cygwin	365.9
-       x86_64/3.0	516.4
-       x86_64/3.2	480.6
-       sparcv9+vis/0.36	3048.2
-
-bench1 (hackcode1)
-       I5/2.5            2.2
-       I7/3.6		14.0  (nemo2: 1.2 - 3.6)  5.1
-       I7/3.5		 4.4
-       P4/3.0           13.4
-       G5/2.0           13.1
-       AMD-opt64/2.0     9.36
-       AMD-ath64/2.0    17.45
-       P4/2.8 w/cygwin  15.1
-       x86_64/3.0       11.7
-       x86_64/3.2       10.7
-       sparcv9+vis/0.36 81.5
-
-bench2 (gyrfalcON)
-       I5/2.5            2.5
-       I7/3.6		 8.1  (nemo2)  2.948 3.19 5.09
-       I7/3.6		31.2  (?)
-       P4/3.0           10.8
-       G5/2.0           21.0
-       AMD-opt64/2.0     8.1
-       AMD-ath64/2.0     8.9
-       P4/2.8 w/cygwin  45.5
-       x86_64/3.2        8.6
-       sparcv9+vis/0.36 85.1  
-
-bench3 (mkspiral)
-       I5/2.5    5.4u   1.6s
-       I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
-	        10.760u 0.832s 0:20.33 57.0%
-       I7/3.5	7.112u 1.520 0:09.37 98.5%
-       P4/3.0	22.890u  5.980s 1:45.63 27.3%
-       G5/2.0	28.400u 24.660s 1:05.41 81.1% 
-       AMD-opt64/2.0	18.540u 10.921s 0:56.93 51.7% 
-       AMD-ath64/2.0	29.311u 10.353s 0:59.88 66.2% (SATA)
-       P4/2.8	25.541u 8.081s 0:59.98 56.0% (S/ATA)
-       P4/2.8 w/cygwin	276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
-       x86_64/3.0       21.651u 8.897s 0:48.05 63.5%    0+0k 0+0io 0pf+0w
-       x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
-       i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
-       i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
-
-bench4 (ccdpot)
-       I5/2.5   11.9
-       I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
+                       cpu/steps
+sun 3/60:  20 MHz	2.28        
+i5-1135G7: 4200 MHz	0.0000875   
 
 .fi
+Despite that the cpu was 210 times faster, the code ran 26,000 faster. A very impressive
+factor of 120 improvement in chip and possibly some compiler technology. The NEMO users
+guide has an appendix in which this benchmark is listed for a variety of computers
+since 1986.
 
 .SH "CAVEATS"
 Defining and running a benchmark can be very tricky stuff. It might be
@@ -258,7 +179,7 @@ drawing random numbers and writing them using \fIprintf(3)\fP , which is slow.
 
 .SH "CONSIDERATIONS"
 Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
-or even \fBout=.\fP to use a sink. This does however mean that 
+or even \fBout=.\fP to use a sink. 
 
 .SH "SEE ALSO"
 gyrfalcON(1NEMO), data(5NEMO), tabgen(1NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO), triple(1NEMO), accudate(lNEMO), bsf(1NEMO), nemobench(8NEMO)
@@ -271,20 +192,21 @@ Peter Teuben
 .SH "FILES"
 .nf
 .ta +2.5i
-~/data   	standard repository area for data files.
+$NEMO/data   	standard repository area for (small) data files.
 Benchfile	A Makefile that can orchestrate series of benchmarks
+/tmp/nemobench.log	The \fBnemobench\fP keeps logfile
 .fi
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.2i +5.0i
 12-may-97	created  	PJT
 26-nov-03	finally added some data		PJT
 17-feb-04	added bench0 comparison  	PJT
 31-mar-05	added some cygwin numbers, fixed input	PJT
-6-may-11	added i7 and SHMEM/HDD comparison   PJT
+6-may-11	added i7 and SHMEM/HDD comparison	PJT
 27-sep-13	added caveats	PJT
-6-jan-2018	updated for V4, more balanced benchmarks	PJT
-27-dec-2019	nemo.bench; updated with potcode and orbint; now 10 tasks	PJT
-26-jul-2020	added timings for recent machines/ added geekbench5	PJT
+6-jan-2018	updated for V4, more balanced benchmarks 	PJT
+27-dec-2019	nemo.bench; updated with potcode and orbint	PJT
+26-jul-2020	added timings / added geekbench5 	PJT
 .fi
