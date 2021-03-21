@@ -71,7 +71,8 @@ else
     echo Skipping BSF testing.  Use bsf=1 to enable this.
 fi
     
-cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
+cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+column -t :  cpu_usage.log
 
 echo -n "Processor: "
 unames=$(uname -s)
