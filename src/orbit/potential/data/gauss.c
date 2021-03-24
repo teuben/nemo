@@ -1,7 +1,7 @@
 /*
  * gauss.c:  (spherical) gauss potential
  *
- *      19-mar-2021    spring break in covid time... while reading Cappelleri 2002
+ *      19-mar-2021    spring break in covid time... while reading Cappellari 2002
  *
  */
 
