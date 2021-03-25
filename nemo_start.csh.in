@@ -153,3 +153,5 @@ setenv FALCON $NEMO/usr/dehnen/falcON
 source $FALCON/falcON_start.csh
 
 
+# aliases
+alias ni nemoinp
