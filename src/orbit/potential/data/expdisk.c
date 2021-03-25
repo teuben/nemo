@@ -9,28 +9,33 @@
  * {\bf potname=expdisk
  *	 potpars={\it $\Omega,M,a$}}
  *
- * Exponential disk (BT, pp.77)
+ * Exponential disk (BT, pp.77 or BT2008 pp.100)
  * $$
  * \Phi = - {M \over r_d} x \left[ I_0(x)K_1(x) - I_1(x)K_0(x) \right]
+ * $$
+ *
+ * $$
+ *     M = 2 \pi \Sigma_0 r_d
+ * $$
+ * and
+ * $$
+ *     \Sigma = \Sigma_0 e^{-r/r_d}
  * $$
  */
  
  
-#include <stdinc.h>                     /* standard Nemo include */
+#include <stdinc.h>             
 #include <potential_float.h>
 
 local double omega = 0.0;       /* just put to zero until implemented */
 local double mass = 1.0;	/* total mass */
-local double a = 1.0;		/* scale lenght */
+local double a = 1.0;		/* scale length */
 
 local double alpha;
 
 extern double bessi0(double), bessk0(double), bessi1(double), bessk1(double);
 
-void inipotential (npar, par, name)
-int    *npar;
-double par[];
-char *name;
+void inipotential (int *npar, double *par, char *name)
 {
     if (*npar>0) omega = par[0];
     if (*npar>1) mass = par[1];
