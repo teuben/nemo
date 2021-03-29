@@ -35,6 +35,7 @@
  *                           after Tremaines nice lecture
  *      10-dec-2019     V4.2 Add optional Phi/Acc to output     PJT
  *                           but not implemented for all cases - also fixed pattern speed bug
+ *      21-mar-2021     V4.3 optional tstop which override nsteps  PJT
  *                           
  *
  */
@@ -57,7 +58,8 @@ string defv[] = {
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=4.2\n        10-dec-2019 PJT",
+    "tstop=\n             If given, this overrides nsteps=",
+    "VERSION=4.3\n        21-mar-2021 PJT",
     NULL,
 };
 
@@ -160,11 +162,19 @@ void setparams()
     infile = getparam("in");
     outfile = getparam("out");
 
-    nsteps = getiparam("nsteps");
     dt = getdparam("dt");
+    if (hasvalue("tstop")) {
+      nsteps = (int) (getdparam("tstop")/dt);
+      nsave  = (int) (getdparam("nsave")/dt);
+      if (nsave < 1) nsave=1;
+      ndiag  = (int) (getdparam("ndiag")/dt);      
+      dprintf(0,"Using nsteps,nsave,ndiag=%d  %d %d\n",nsteps,nsave,ndiag);
+    } else {
+      nsteps = getiparam("nsteps");
+      nsave=getiparam("nsave");
+      ndiag=getiparam("ndiag");
+    }
     dt2 = 0.5*dt;
-    ndiag=getiparam("ndiag");
-    nsave=getiparam("nsave");
     Qvar = getbparam("variable");
     if (hasvalue("eta")) 
       eta = getdparam("eta");

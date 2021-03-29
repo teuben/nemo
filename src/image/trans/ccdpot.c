@@ -30,7 +30,7 @@ string defv[] = {
 	"gravc=1\n      Gravitational Constant",
 	"report=0\n     report if this number cells done (0=none)",
 	"nbench=1\n     benchmark number for N^4 convolution",
-	"VERSION=0.6\n  26-jan-2021 PJT",
+	"VERSION=0.7\n  18-mar-2021 PJT",
 	NULL,
 };
 
@@ -50,10 +50,11 @@ void nemo_main()
     int     nx, ny;
     int     i,j,k,l,k1,l1;
     real    sum, val, add, d, dx,dy,gravc = getdparam("gravc");
+    real    m_min, m_max;
     imageptr iptr=NULL, optr, dptr;
     int     report = getiparam("report");
     int     nbench = getiparam("nbench");
-    int     count = 0;
+    int     count;
 
     if (nbench < 1) error("Bad value nbench=%d",nbench);
 
@@ -98,11 +99,11 @@ void nemo_main()
     */
 
     while (nbench--) {
+      count = 0;
       for (j=0; j<ny; j++) {
 	for (i=0; i<nx; i++) {
 	  sum = 0.0;
-	  count++;
-	  if (report && count % report == 0) {
+	  if (report && ++count % report == 0) {
 	    printf("%3d%% done\r", (int) (100*count/(nx*ny)));
 	    fflush(stdout);
 	  }
@@ -115,7 +116,13 @@ void nemo_main()
 	  }
 	  CVO(i,j) = -sum*gravc;     /* note that this is now in the correct units */
 	}
-      } 
+      }
+      m_min = m_max = CVO(0,0);
+      for (j=0; j<ny; j++)
+	for (i=0; i<nx; i++) {
+	  m_min = MIN(CVO(i,j),m_min);
+	  m_max = MAX(CVO(i,j),m_max);
+	}
       write_image(outstr, optr);
     }
 }

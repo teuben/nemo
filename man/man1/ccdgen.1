@@ -1,8 +1,11 @@
 .TH CCDGEN 1NEMO "12 March 2020"
+
 .SH NAME
 ccdgen \- create or add objects to an image
+
 .SH SYNOPSIS
 \fBccdgen\fP \fBout=\fP\fIimage-file\fP [parameter=value]
+
 .SH DESCRIPTION
 \fBccdgen\fP creates or modified (2D) images by 
 adding simple parameterized two-dimensional objects. For arbitrary
@@ -12,6 +15,7 @@ An added feature is that the objects can be added as if they are
 in a "galactic" disk with given inclination and position angle. The
 default is a "face-on" view (\fBinc=0\fP). 
 No corrections for brightness due to inclination are made however.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -84,9 +88,12 @@ Random seed [0]
 .TP
 \fBheadline=\fP
 Random verbiage added to the image. Default: none
-.SH OBJECTS
+
+.SH OBJECT
+The \fBobject=\fP keyword allows for the following objects, and \fBspar=\fP for their parameters
 .nf
-.ta +1i +1.5i
+.ta +1i +2.5i
+OBJECT	-		SPAR
 flat	A		A
 exp	A.exp(-r/h)	A,h
 gauss	A.exp(-r^2/(2h^2))	A,h
