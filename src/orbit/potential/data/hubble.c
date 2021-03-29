@@ -1,6 +1,6 @@
 /*
  * hubble.c: modified triaxial hubble potential
- *           See also BT, p.40
+ *           See also BT87, p.40 (BT2008, p.66)
  *             
  *
  *	7-mar-92  happy gcc2.0 - pjt
@@ -92,6 +92,12 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
     
     for (i=0; i<*ndim; i++)
         r2 += eps[i]*SQR(pos[i]);
+    if (r2 == 0) {
+      *pot = -gr;
+      acc[0] = acc[1] = acc[2] = 0.0;
+      return;
+    }
+    
     r2 /= hubble_radius;            /* make it dimensionless */
     
     r=sqrt(r2);

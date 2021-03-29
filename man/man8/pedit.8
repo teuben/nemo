@@ -1,16 +1,27 @@
-.TH PEDIT 8NEMO "30 May 2020"
+.TH PEDIT 8NEMO "17 February 2021"
 .SH NAME	
 pedit \- parameter editing on a file
 .SH SYNOPSIS
 .PP
-\fBpedit \fI[options] parfile key=val ...\fP 
+\fBpedit \fI parfile [options] key=val ...\fP 
 .SH DESCRIPTION
 \fIpedit\fP helps you create a new parameter file based on
 a template by replacing the values of selected parameters.
 The result is shown on \fIstdout\fP.
+.SH FLAGS
+.TP 10
+-e
+This will assume the lines are bash style key=val (no spaces allowed)
+.TP
+-o
+This will overwrite
 .SH EXAMPLES
 .nf
-   pedit $NEMODAT/Bbarolo/model0_3dfit.par FITSFILE=out.fits OUTFOLDER=out.3dfit INC=40 > qout.3dfit.par
+   % pedit $NEMODAT/Bbarolo/model0_3dfit.par FITSFILE=out.fits OUTFOLDER=out.3dfit INC=40 > qout.3dfit.par
+
+   % pedit lmtoy_79448.rc -e -o slice=[-100,100]
+   Overwriting lmtoy_79448.rc
+
 .fi
 .SH "SEE ALSO"
 nemo(1NEMO)
@@ -20,7 +31,8 @@ $NEMO/src/scripts/pedit         	python script
 .fi
 .SH "UPDATE HISTORY"
 .nf
-.ta +1i +4i
+.ta +1i +1i
 jul-2019	created				PJT
 30-may-2020	finally documented       	PJT
+17-feb-2021	options after parfile,	added -e, -o	PJT
 .fi

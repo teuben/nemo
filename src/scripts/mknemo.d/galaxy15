@@ -2,7 +2,7 @@
 #
 #  Jerry Sellwood's new GALAXY (V1.5) version
 #  note this will overwrite the old (v1.3) galaxy executable in $NEMOBIN
-
+#  Ubuntu packages:   openmpi-bin pgplot5
 
 #  GALAXY15 is about 8944 KB, 1042 files
 set dir=$NEMO/usr/sellwood/GALAXY15
@@ -16,6 +16,7 @@ if (! -e $dir) then
    exit 0
 endif
 
+echo Working in $dir
 cd $dir
 
 # libraries
@@ -36,11 +37,22 @@ set bins=(analys cold compress corrplt dfiter dflook dmp2pcs estfreq gadget2pcs 
 # may not work for you.....
        #  libpng-config --libs
        #  x86_64-pc-linux-gnu-pkg-config --libs x11
+
+set sys_lib = "-lgfortran -lpng16 -L/usr/X11R6/lib64 -L/usr/lib64 -lX11"
+
 echo "###     Working on SRC/progs"
-if (1) then
-  (cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
-else
-  (cd SRC/progs;  make pgplot_lib=/usr/lib/libpgplot.a; make clean)
+
+set ok=0
+foreach l (/usr/lib/libpgplot.a $NEMOLIB/libpgplot.a)
+  if (-e $l) then
+    echo Found PGPLOT in $l
+    (cd SRC/progs;  make pgplot_lib=$l sys_lib="$sys_lib" ; make clean)
+    set ok=1
+    break
+  endif
+end
+if ($ok == 0) then
+  echo Warning; no libpgplot.a found
 endif
 
 # if you need mpi versions:

@@ -31,7 +31,7 @@ rpm -ql pgplot
 rpm -qf /usr/lib64/libpgplot.so.5.2.2
 rpm -qa
 
-See examples of package names in $NEMO/src/scripts/linux
+See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/brew (for Mac too)
 
 
 -gfortran
@@ -90,7 +90,7 @@ the basic scheme is more one of (except commands are different and
 detailed below!!!):
 
 	configure   
-	make build1 build2 build3 build4
+	make build
 	source nemo_start.sh
 
 It may be handy to pre-install a few libraries and packages on your
@@ -109,6 +109,13 @@ or
       -DCMAKE_INSTALL_PREFIX=$NEMO/opt ..
       make
       make install
+
+We generally now support this via the mknemo script, e.g.
+
+      mknemo cfitsio
+
+would compile cfitsio under $NEMO/opt, which all Makefiles when building
+NEMO programs use to compile and link.
 
 Preconditions for INSTALLATION
 ==============================

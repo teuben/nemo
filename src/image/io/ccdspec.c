@@ -19,7 +19,7 @@ string defv[] = {
   "y=\n              Pixel in Y to print",
   "z=\n              Pixel range in Z select (2 values, or none for all pixels)",
   "scale=1,1\n       Scaling factors for the two columns",
-  "VERSION=0.4\n     12-feb-2021 PJT",
+  "VERSION=0.5\n     12-feb-2021 PJT",
   NULL,
 };
 
@@ -84,9 +84,9 @@ void nemo_main(void)
 	if (iz>0) accum_moment(&m2, f-f1, 1.0);
 	f1 = f;
     }
-    printf("# %d %d %d mean/sig  %g %g    %g %g   %g\n", 
+    printf("# %d %d %d min/mean/sig/max  %g %g %g %g    %g %g   %g\n", 
 	   ix, iy, zr[1]-zr[0]+1,
-	   mean_moment(&m1), sigma_moment(&m1),
+	   min_moment(&m1), mean_moment(&m1), sigma_moment(&m1), max_moment(&m1),
  	   mean_moment(&m2), sigma_moment(&m2),
 	   sigma_moment(&m2)/sigma_moment(&m1)/sqrt(2));
 }
