@@ -1,7 +1,7 @@
 /*
  * gauss.c:  (spherical) gauss potential
  *
- *      19-mar-2021    spring break in covid time... while reading Cappelleri 2002
+ *      19-mar-2021    spring break in covid time... while reading Cappellari 2002
  *
  */
 
@@ -36,6 +36,7 @@ local double g_q = 1.0;   // discarded, but we do allow oblate
 local double g_p = 1.0;
 local double accuracy = 1e-7;
 local int    g_debug = 0;
+local int    need_warning = 1;
 
 local double r2,z2,s2,s3,eps,del;
 
@@ -82,7 +83,10 @@ void potential_double(int *ndim,double *pos,double *acc,double *pot,double *time
     r2 = pos[0]*pos[0] + pos[1]*pos[1];
     z2 = pos[2]*pos[2];
     *pot = -g_mass / g_sigma * sqrt(2/PI) * romberg(oblate,0.0,1.0,30,accuracy);
-    // sorry, forces too difficult now, use potccd
+    if (need_warning) {
+      warning("gauss.c: oblate q=%g case has no forces computed yet, only potential",g_q);
+      need_warning = 0;
+    }
     acc[0] = acc[1] = acc[2] = 0;
     return;
   }

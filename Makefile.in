@@ -521,7 +521,7 @@ clean:
 	@echo ""
 	@echo '"make distclean" would remove NEMORC.local as well as'
 	@echo ""
-	@echo $(CHEDKDIR2)
+	@echo $(CHECKDIR2)
 
 distclean: config_clean cleansrc
 	@echo Cleaning as much as one can to simulate a distribution

@@ -25,6 +25,7 @@
  *      	   b 13-sep-01  better prototype for proc
  *             V1.7   7-jul-02  added format=
  *                 a  9-jan-03  more C++ friendly
+ *             V2.0  24-mar-2021    allow using dr= nder to use to use numerical derivates in potential
  */
 
 #include <stdinc.h>
@@ -53,6 +54,7 @@ string defv[] = {
     "mode=velocity\n     Output mode: {velocity, omega, lv}",
     "n=2\n               Resonance (Omega +/- Kappa/n) to plot if mode=omega",
     "r0l=1,90,0:1:0.1\n  Solar radius and longitude in lv-mode; sample radii",
+    "dr=\n               If given, forces come from dPhi/dr",
     "plot=t\n            Make Plot (t|f)?",
     "tab=f\n             Make table (t|f)?",
     "format=%f\n         Format for table output",
@@ -61,7 +63,7 @@ string defv[] = {
     "headline=\n         Optional plot label for identification",
     "in=\n               Optional input rotation curve table",
     "cols=1,2\n          Columns for r, v, dr, dv (use 0 when not present)",
-    "VERSION=1.7a\n      9-jan-03 PJT",
+    "VERSION=2.0\n       24-mar-2021 PJT",
     NULL,
 };
 
@@ -75,6 +77,7 @@ potproc_double mypot1, mypot2, mypot3, mypot4;
 
 real xplot[2], yplot[2];
 char plotmsg[256];
+real dr = -1;
 
 
 local real xtrans(real), ytrans(real);
@@ -89,6 +92,8 @@ extern int get_atable(stream ,int, int *, real **, int);
 extern void lsq_zero(int n, real *mat, real *vec);
 extern void lsq_accum(int n, real *mat, real *vec, real *a, real w);
 extern void lsq_solve(int n, real *mat, real *vec, real *sol);
+
+local void get_acc(potproc_double mypot1, int *ndim, double *pos, double *acc, double *pot, double *time, int dir, double dr);
 
 
 void nemo_main()
@@ -126,6 +131,8 @@ void nemo_main()
         ndat = read_table(instr,MAXPT,inrad,invel,inrade,invele,cols);
         strclose(instr);
     }
+    if (hasvalue("dr"))
+      dr = getrparam("dr");
     
     mypot1 = get_potential(getparam("name1"),getparam("pars1"),getparam("file1"));
     omega = get_pattern();
@@ -194,6 +201,7 @@ void nemo_main()
         if (mypot1) {
             CLRV(acc);
             (*mypot1) (&ndim,pos,acc,&pot,&time);
+	    if (dr>0) get_acc(mypot1, &ndim, pos, acc, &pot, &time, dir, dr);
             vel1[i] = -rad[i] * acc[dir];
             vel[i] += vel1[i];
             vel1[i] = sqrt(vel1[i]);        
@@ -447,6 +455,21 @@ real xtrans(real x)
 real ytrans(real y)
 {
     return  2.0 + 16.0*(y-yplot[0])/(yplot[1]-yplot[0]);
+}
+
+void get_acc(potproc_double mypot, int *ndim, double *pos, double *acc, double *pot, double *time, int dir, double dr)
+{
+  real pos1[NDIM], acc1[NDIM], pot1, pot2;
+  int i;
+
+  SETV(pos1,pos);
+  pos1[dir] = pos[i] + 0.5*dr;
+  (*mypot)(ndim,pos1,acc1,&pot1,time);
+  pos1[dir] = pos[i] - 0.5*dr;  
+  (*mypot)(ndim,pos1,acc1,&pot2,time);
+  CLRV(acc);   // @todo    do we really want to ignore the non-dir's ?
+  acc[dir] = (pot2-pot1)/dr;
+  return;
 }
 		   
 
