@@ -1,0 +1,30 @@
+DIR       = src/nbody/init
+BENCH     = bench0
+BENCHDATA = bench1.snap
+LOG       = /tmp/nemobench.log
+BIN       = mkplummer
+NEED      = $(BIN) 
+
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+
+NBODY = 10000000
+
+bench0:
+	nemobench mkplummer . nbody=$(NBODY)
+
+bench1:
+	@rm -rf bench1.snap
+	nemobench mkplummer bench1.snap nbody=$(NBODY)
+
+#  xps13:  3.13" -> 172 MB/sec
