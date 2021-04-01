@@ -11,6 +11,7 @@
  *       4-dec-01       also compute min/max
  *      12-sep-02       optionally output a force                       pjt
  *	22-oct-02       also allow ar,at                                pjt
+ *      16-mar-2021     axis=1 proper WCS                               PJT
  */
 
 #include <stdinc.h>
@@ -31,7 +32,8 @@ string defv[] = {
     "dr=\n          Differential step for (Poisson) density map",
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
-    "VERSION=1.5b\n 7-jun-09 PJT",
+    "nder=1\n       1: use force der   2: use twice potential der for density",
+    "VERSION=2.1\n  19-mar-2021 PJT",
     NULL,
 };
 
@@ -47,7 +49,7 @@ local potproc_double mypot;    /* pointer to potential calculator function */
 void nemo_main(void)
 {
     int    i, nx,ny,nz, ix,iy,iz, stepx, stepy, stepz, nsteps;
-    double pos[3],acc[3],pot,den,dr,da[3],time;
+    double pos[3],acc[3],pot,pot0,den,dr,da[3],time;
     double xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
     double ax,ay,az,epot;
     double fourpi = FOUR_PI;
@@ -55,6 +57,8 @@ void nemo_main(void)
     char *fmt, s[20], pfmt[256];
     string mode = getparam("mode");
     int idim, ndim, maxdim = 3, first=1, idx = 0;
+    int axis = 0; // new WCS system
+    int nder = getiparam("nder");
     imageptr iptr;
     stream ostr;
 
@@ -80,7 +84,7 @@ void nemo_main(void)
     ndim = getiparam("ndim");
     if (hasvalue("dr")) {
         dr = getdparam("dr");
-        dprintf(0,"%dD-Poisson density map with delta-r=%g\n",ndim,dr);
+        dprintf(0,"%dD-Poisson density map with delta-r=%g and nder=%d\n",ndim,dr,nder);
     } else
         dr = -1.0;
     time = getdparam("t");
@@ -116,9 +120,25 @@ void nemo_main(void)
     Dx(iptr) = (nx > 1 ? xarr[1]-xarr[0] : 0.0);
     Dy(iptr) = (ny > 1 ? yarr[1]-yarr[0] : 0.0);
     Dz(iptr) = (nz > 1 ? zarr[1]-zarr[0] : 0.0);
-    Xmin(iptr) = xarr[0];
-    Ymin(iptr) = yarr[0];
-    Zmin(iptr) = zarr[0];
+
+    axis = 1;
+    Axis(iptr) = axis;
+    if (axis == 0) {
+      Xmin(iptr) = xarr[0];
+      Ymin(iptr) = yarr[0];
+      Zmin(iptr) = zarr[0];
+      Xref(iptr) = 0.0;
+      Yref(iptr) = 0.0;
+      Zref(iptr) = 0.0;
+    } else {
+      warning("new experimental axis=1 code with possibly shady WCS");
+      Xmin(iptr) = 0.0;
+      Ymin(iptr) = 0.0;
+      Zmin(iptr) = 0.0;
+      Xref(iptr) = nx/2.0;  // find where 0 is
+      Yref(iptr) = ny/2.0;
+      Zref(iptr) = 0.0;
+    }
 
     for (iz=0; iz<nz; iz++) {
       pos[2] = zarr[iz];
@@ -128,15 +148,29 @@ void nemo_main(void)
 	  pos[0] = xarr[ix];
 	  (*mypot)(&maxdim,pos,acc,&pot,&time);
 	  if (dr > 0.0) {                                 /* Poisson */
-	    den = 0.0;
-	    for (idim=0; idim<ndim; idim++) {
-	      pos[idim] += dr;
-	      (*mypot)(&maxdim,pos,acc,&pot,&time);
-	      den -= acc[idim];
-	      pos[idim] -= 2*dr;
-	      (*mypot)(&maxdim,pos,acc,&pot,&time);
-	      den += acc[idim];
-	      pos[idim] += dr;
+	    if (nder==1) {
+	      den = 0.0;
+	      for (idim=0; idim<ndim; idim++) {
+		pos[idim] += dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den -= acc[idim];
+		pos[idim] -= 2*dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += acc[idim];
+		pos[idim] += dr;
+	      }
+	    } else {
+	      den = -2*ndim*pot;
+	      for (idim=0; idim<ndim; idim++) {
+		pos[idim] += dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += pot;
+		pos[idim] -= 2*dr;
+		(*mypot)(&maxdim,pos,acc,&pot,&time);
+		den += pot;
+		pos[idim] += dr;
+	      }
+	      den = den/dr;
 	    }
 	    pot = den/dr;
 	  } else if (idx==0) {                                        /* Potential */

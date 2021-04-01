@@ -7,9 +7,10 @@
 #include <stdint.h>
 
 string defv[] = {
-    "umin=1\n    Starting value",
-    "umax=10000000000\n   Ending",    // not working
-    "VERSION=1\n  24-jan-2021 PJT",
+    "umin=1\n             Starting value",
+    "umax=10000\n          sqrt of Ending",   
+    "umax2=0\n            Non-parallel loop",
+    "VERSION=1.1\n        13-mar-2021 PJT",
      NULL,
 };
 
@@ -18,14 +19,24 @@ string usage="NEMO version of the scaling program";
 
 void nemo_main(void)
 {
-  const uint64_t umin=getlparam("umin");
-  const uint64_t umax=10000000000LL;
-  //const uint64_t umax=getlparam("umax");
+  int umin4 = getiparam("umin");
+  int umax4 = getiparam("umax");
+  int umax2 = getiparam("umax2");
+  uint64_t umin = (uint64_t) umin4 * (uint64_t) umin4;
+  uint64_t umax = (uint64_t) umax4 * (uint64_t) umax4;
+
   double sum=0.0;
   dprintf(0,"scaling2: umin=%ld umax=%ld\n",umin,umax);
 #pragma omp parallel for reduction(+:sum)
   for(uint64_t u=umin; u<umax; u++)
     sum+=1./(u*u);   //  1./u/u takes about 2x longer on intel
-  printf("%g\n", sum);
+  printf("sum=%g\n", sum);
+  if (umax2 > 0) {
+        sum=0.0;
+	umax = (uint64_t) umax2 * (uint64_t) umax2;
+	for(uint64_t u=umin; u<umax; u++)
+	    sum+=1./(u*u); 
+        printf("sum2=%g\n", sum);	
+   }
 
 }

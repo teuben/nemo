@@ -1,5 +1,7 @@
 #! /bin/csh -f
 #
+# see also https://unix.stackexchange.com/questions/34516/can-i-create-a-man-page-for-a-script
+#
 set prog=$0
 
 foreach a ($*)

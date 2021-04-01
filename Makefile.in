@@ -326,6 +326,7 @@ upstream:
 	@echo "  git fetch upstream"
 	@echo "  git merge upstream/master"
 	@echo "  git status"
+	@echo "Always make sure you work in a branch, to keep your local master same as upstream"
 
 # autoconf/GIT based export
 #
@@ -520,7 +521,7 @@ clean:
 	@echo ""
 	@echo '"make distclean" would remove NEMORC.local as well as'
 	@echo ""
-	@echo $(CHEDKDIR2)
+	@echo $(CHECKDIR2)
 
 distclean: config_clean cleansrc
 	@echo Cleaning as much as one can to simulate a distribution
@@ -596,7 +597,10 @@ bench1:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
 
 bench2:
-	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=1)
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
+
+bench3:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=3)
 
 bench5:
 	(cd src/tutor/mp; $(MAKE) bench5)

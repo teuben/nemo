@@ -4,6 +4,7 @@
  *   12-may-05   Created quick & dirty for CARMA               PJT
  *   15-jun-2016 cumul= option
  *   23-may-2020 orig=T/F option
+ *   17-mar-2021 add first= option
  *                        
  * 
  * TODO:
@@ -18,6 +19,7 @@
 #include <getparam.h>
 #include <moment.h>
 #include <yapp.h>
+#include <table.h>
 #include <axis.h>
 #include <mdarray.h>
 
@@ -29,7 +31,8 @@ string defv[] = {
     "nmax=100000\n                max size if a pipe",
     "cumul=f\n                    cumulative instead?",
     "orig=f\n                     show original column as well?",
-    "VERSION=0.3\n		  23-may-2020 PJT",
+    "first=f\n                    add first row?",
+    "VERSION=0.4\n		  17-mar-2021 PJT",
     NULL
 };
 
@@ -61,6 +64,7 @@ local int    npt;			/* actual number of points */
 
 local bool   Qcumul;
 local bool   Qorig;
+local bool   Qfirst;
 
 
 local void setparams(void);
@@ -72,7 +76,7 @@ local void cumul_data(void);
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();			/* read the parameters */
     read_data();
@@ -95,6 +99,7 @@ local void setparams()
 
     Qcumul = getbparam("cumul");
     Qorig = getbparam("orig");
+    Qfirst = getbparam("first");
 }
 
 
@@ -117,6 +122,16 @@ local void read_data()
 local void trend_data(void)
 {
   int i,j;
+
+  for (j=0; j<ncol;  j++) {  
+    if (Qfirst) {
+      if (Qorig)
+	printf("%g %g ",coldat[j][0],coldat[j][0]);
+      else
+	printf("%g ",coldat[j][0]);
+      printf("\n");       
+    }
+  }
 
   for (i=1; i<npt; i++) {
     for (j=0; j<ncol;  j++) {

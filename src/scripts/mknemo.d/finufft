@@ -1,0 +1,31 @@
+#! /bin/csh -f
+#
+#   this looks like a useful library, but there is no use for this in NEMO yet.
+#
+
+set url=https://github.com/flatironinstitute/finufft
+set version=git
+
+
+# fedora:    sudo yum install      make gcc gcc-c++ fftw-devel libgomp
+# ubuntu:    sudo apt-get install  make build-essential libfftw3-dev
+
+
+cd $NEMO/local
+
+if (-d finufft) then
+    cd finufft
+    git pull
+else
+    git clone $url
+    cd finufft
+endif
+
+
+make clean lib
+cp lib-static/libfinufft.a $NEMO/opt/lib
+cp include/*               $NEMO/opt/include
+
+echo Installed version=$version
+
+echo finufft $version `date` >> $NEMO/opt/mknemo.log
