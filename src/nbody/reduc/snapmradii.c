@@ -9,6 +9,7 @@
  *	25-mar-97     a  fixed for SINGLEPREC				pjt
  *      10-mar-04  V1.4  add log=                                       pjt
  *      27-jul-05   1.5  added sort=                                    pjt
+ *       1-apr-21   1.6  deal with no masses in snapshot for Tjeerd     pjt
  *
  *  Bug: if the massfractions are too close such that there
  *       are bins withouth mass, this algorithm fails
@@ -31,7 +32,7 @@ string defv[] = {
     "tab=f\n			Full table of r,m(r) ? ",
     "log=f\n                    Print radii in log10() ? ",
     "sort=r\n                   Observerble to sort masses by",
-    "VERSION=1.5\n              27-jul-05 PJT",
+    "VERSION=1.6\n              1-apr-2021 PJT",
     NULL,
 };
 
@@ -80,7 +81,12 @@ void nemo_main()
         snapsort(btab,nbody,tsnap,sortptr);/* sort; hides radius in aux */
         for (bp=btab, tmass=0.0; bp<btab+nbody; bp++)
             tmass += Mass(bp);
-        if (tmass == 0.0) error("No masses available in this snapshot");
+        if (tmass == 0.0) {
+	  warning("No masses available in this snapshot- using equal masses");
+	  tmass = 1.0;
+	  for (bp=btab;  bp<btab+nbody; bp++)
+	    Mass(bp) = 1.0/nbody;
+	}
         k=0;  
         fmass=mf[0]*tmass;
         mold=0.0;
