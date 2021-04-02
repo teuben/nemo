@@ -16,11 +16,13 @@
  *         nov-93       adding some CTEX comments
  *         jun-97       prototypes to make it compile for NEMO 2.4
  *         nov-01       minor cleanup to make it compile for NEMO 3.x
+ *         apr-21       cleanup for NEMO 4.x (C99)
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <table.h>
 #include <math.h>
 
 string defv[] = {
@@ -40,7 +42,7 @@ string defv[] = {
    "radcol=1\n         (in=) column # where to get radii",
    "denscol=2\n        (in=) column # where to get densities",
    "masscol=0\n        (in=) column # where to get cum. masses (optional)",
-   "VERSION=1.3b\n     7-nov-01 PJT",
+   "VERSION=1.3d\n     2-apr-2021 PJT",
    NULL,
 };
 
@@ -61,8 +63,30 @@ double  dxsav, xp[100], yp[10][100];    /* integration is needed */
 static double gravconst = 1.0;
 
 
+void gauleg(double abscis[], double weight[], int ngauss);
+void plummer(double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+void devauc(double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+void jaffe(double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+void hernquist(double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+void calcpot_mass(double radius[], double dens[], double poten[], double emint[], int nrad);
+void calcpot_dens(double radius[], double dens[], double poten[], double emint[], int nrad);
+void king(double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+double func(double w, double y[], double yprime[]);
+double rho(double w);
+void read_file(stream instr, double radius[], double dens[], double poten[], double emint[], double thdis[], int nrad, double b);
+int dverk(int *n, int (*fcn)(void), double *x, double *y, double *xend, double *tol, int *ind, double *c, int *nw, double *w, int *ier);
 
-nemo_main()
+// IMSL and emulators
+extern void icsccu (real *x, real *y, int nx, real *c, int ic, int ier);
+extern void dcsevu (real *x, real *y, int nx, real *c, int ic, real *u, real *ds, int m1, real *dss, int m2, int ier);
+extern int odeint (double *ystart, int nvar, double x1, double x2,double eps,double h1, double hmin, int *nok, int *nbad,
+		   int (*derivs)(double, double*, double*),
+		   int (*rkqc)());
+
+// void rkqc(double *y, double *dydx, int n, double *x, double htry, double eps, double *yscal, double *hdid, double *hnext,int (*derivs)())
+
+
+void nemo_main()
 {
 #if defined(DYNAM)      
         double *poten, *radius, *distr, *dens, *dens1, *emint, *distr2, *value;
@@ -81,7 +105,6 @@ nemo_main()
 	int idens, idens1, ipoten, ivalue, iaux1, iaux2, iaux3;
 	int njump, ngauss, i, ier, idistr, j, npri, nsec;
 	int ndistr;
-	int gauleg(), icsccu(), dcsevu(), plummer(), king(), devauc(), jaffe();
 	stream outstr, fstr;
         string fname, model;
 
@@ -218,11 +241,11 @@ nemo_main()
  */
 
     for (i=0; i<nrad; i++)
-        dens1[i] = dens[i] * (1.0 + sqr(b * radius[i]));
+      dens1[i] = dens[i] * (1.0 + sqr(b * radius[i]));
 
 /*
  * 
- *         Now prepare the interpolation subroutine for the density as
+ *      Now prepare the interpolation subroutine for the density as
  *      a function of the potential
  * 
  */
@@ -240,20 +263,20 @@ nemo_main()
  * 
  */
     for (i=0, idistr=0; i<nrad; i += njump, idistr++) {
-        index[idistr] = i;
-        qplus[idistr] = poten[i];
-        width =  - qplus[idistr];
+      index[idistr] = i;
+      qplus[idistr] = poten[i];
+      width =  - qplus[idistr];
 /*
  * 
  *         lower limit of integration and width of the interval
  * 
  */
-        value[idistr] = 0.0;
-        distr2[idistr] = 0.0;
-        if(i == (nrad-1))
-            break;			/* DONE !! */
-	for (j=0; j<ngauss; j++)
-            aux1[j] = qplus[idistr] + abscis[j] * width;
+      value[idistr] = 0.0;
+      distr2[idistr] = 0.0;
+      if(i == (nrad-1))
+	break;			/* DONE !! */
+      for (j=0; j<ngauss; j++)
+	aux1[j] = qplus[idistr] + abscis[j] * width;
 /*
  * 
  *      AUX1  now contains the abscissae of the points where the function
@@ -261,36 +284,33 @@ nemo_main()
  *      AUX3  those of the second derivative.
  * 
  */
-        npri = ngauss;
-        nsec = ngauss;
-        dcsevu(poten, dens1, nrad, cdens1, idens1, 
-                		aux1, aux2, npri, aux3, nsec, ier);
+      npri = ngauss;
+      nsec = ngauss;
+      dcsevu(poten, dens1, nrad, cdens1, idens1, aux1, aux2, npri, aux3, nsec, ier);
 /*
  * 
  *         values available; sum up for the integral
  * 
  */
-        for (j=0; j<ngauss; j++) {
-            value[idistr] += aux2[j] * weight[j];
-            distr2[idistr] += aux3[j] * weight[j];
-        }
+      for (j=0; j<ngauss; j++) {
+	value[idistr] += aux2[j] * weight[j];
+	distr2[idistr] += aux3[j] * weight[j];
+      }
 /*CTEX
  *         Finally, we need to 
  *         correct for the scale and for the factor
  *         $ {\sqrt{2} \over 4 \pi}$.
  * 
  */
-        value[idistr] *= sqrt(2*width) / (4 * PI*PI);
-        distr2[idistr] *= sqrt(2*width) / (4 * PI*PI);  /* PJT TEST */
+      value[idistr] *= sqrt(2*width) / (4 * PI*PI);
+      distr2[idistr] *= sqrt(2*width) / (4 * PI*PI);  /* PJT TEST */
 /*
  * 
  *         fill in the vectors reporting density, mass and theoretical
  *      distr funct at selected points
  * 
  */
-#if 0 
- 	printf ("(%d %d): %f %f\n",i,idistr,value[idistr],distr2[idistr]);
-#endif
+      if (i<10) dprintf (1,"(%d %d): %f %f\n",i,idistr,value[idistr],distr2[idistr]);
     } /* for (i,idistr) */
     ndistr = idistr+1;		/* FORTRAN AND C differ one here */
     printf (" distribution function computed with ndistr=%d\n",ndistr);
@@ -350,15 +370,12 @@ nemo_main()
  * 
  */
 
-gauleg( abscis, weight, ngauss)
-double abscis[];
-double weight[];
-int ngauss;
+void gauleg(double *abscis, double *weight, int ngauss)
 {
     double x[NGAUTO], w[NGAUTO], z, p1, p2, p3, pp, z1;
     int n, m, i, j;
 
-    dprintf(0,"gauleg ... creating abscis\n");
+    dprintf(0,"gauleg ... creating %d abscis\n", ngauss);
     n = 2 * ngauss;
 
     m = (n + 1) / 2;
@@ -394,19 +411,12 @@ int ngauss;
                 p1, p2);
 }
 
-int plummer(radius, dens, poten, emint, thdis, nrad, b)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+
+void plummer(double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
     double rmax, sigma, r0, rstep, rhocen, thdis0, qtrue, qqq;
     int i, idens = nrad;
     static int nexp = 2;
-    int calcpot_mass();
 
     printf("Creating tables for Plummer model\n");
 
@@ -419,8 +429,7 @@ double b;
     printf ("Creating radius and dens for Plummer\n");
     for (i=0; i<nrad; i++) {
         radius[i] = pow((double)i, (double)nexp) * rstep;
-        dens[i] = rhocen / 
-                  pow(1.0 + sqr(radius[i]) / sqr(r0), 2.5);
+        dens[i] = rhocen / pow(1.0 + sqr(radius[i]) / sqr(r0), 2.5);
         dprintf (3,"(%d) radius,dens=%f %f\n",i,radius[i],dens[i]);
     }
 /*
@@ -449,39 +458,20 @@ double b;
     printf("               b = %f\n",b);
 }
 
-int devauc(radius, dens, poten, emint, thdis, nrad, b)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+void devauc(double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
     error("De Vaucouleurs models not implemented yet");
 }
 
-int jaffe(radius, dens, poten, emint, thdis, nrad, b)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+void jaffe(double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
+    // BT2008 4.53
     error("Jaffe models not implemented");
 }
 
-int hernquist(radius, dens, poten, emint, thdis, nrad, b)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+void hernquist(double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
+    // BT2008 4.51
     error("Hernquist models not implemented");
 }
 
@@ -520,12 +510,7 @@ double b;
  * 
  */
  
-int calcpot_mass(radius, dens, poten, emint, nrad)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-int nrad;
+void calcpot_mass(double *radius, double *dens, double *poten, double *emint, int nrad)
 {
 #if defined(DYNAM)
     double *cdens;
@@ -536,7 +521,6 @@ int nrad;
     double a0, a1, a2, a3, a4, b0, b1, b2, b3;
     double b4, b5, rout, emtot, poten0;
     int ier, i;
-    int icsccu();
     static int idens = 0;
 
     if (idens < nrad) {
@@ -615,7 +599,7 @@ int nrad;
     } /* for (i=1;) */
     rout = radius[nrad - 1];
     emtot = emint[nrad - 1];
-    poten0 =  - poten[nrad - 1];
+    poten0 =  -poten[nrad - 1];
     printf ("Last potential (for renorm) = %f\n",poten0);
 /*
  * 
@@ -636,7 +620,7 @@ int nrad;
  *	output:	poten,dens	
  */
  
-int calcpot_dens(radius, dens, poten, emint, nrad)
+void calcpot_dens(radius, dens, poten, emint, nrad)
 double radius[];
 double dens[];
 double poten[];
@@ -646,21 +630,13 @@ int nrad;
     error("calcpot_dens: not implemented yet");
 }
 
-double w0;
-double rho0;
+local double w0;
+local double rho0;
 
-int king (radius, dens, poten, emint, thdis, nrad, b)
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+void king(double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
-    double yy[2], wk[9][2], comm[24], emtot, rc, wstep, tol;
+    double yy[2], wk[9*2], comm[24], emtot, rc, wstep, tol;
     double w, wend, sigma, rhocen, thdis0;
-    double func(), rho();
     int i, neqs, ind, nwk, ie;
 
     w0 = getdparam("w0");           /* dimensionless central potential */
@@ -677,51 +653,49 @@ double b;
  *         first solve for the unscaled model (depending on  W0  only)
  * 
  */
-        neqs = 2;
-        yy[0] = 0.0;
-        yy[1] = 2.0 / 3.0;
-        tol = 1.e-6;
-        ind = 1;
-        nwk = 2;
-        w = w0;
-        radius[0] = 0.0;
-        dens[0] = 1.0;
-        emint[0] = 0.0;
-
-        for (i=1; i<nrad; i++) {
-                wend = poten[i];
-		dverk (&neqs, func, &w, yy, &wend, &tol, &ind, comm,
-			&nwk, wk, &ie);
-                radius[i] = sqrt(yy[0]);
-                dens[i] = rho(w) / rho0;
-                emint[i] = 2.0 * yy[0] * sqrt(yy[0]) / yy[1];
-        }
+    neqs = 2;
+    yy[0] = 0.0;
+    yy[1] = 2.0 / 3.0;
+    tol = 1.e-6;
+    ind = 1;
+    nwk = 2;
+    w = w0;
+    radius[0] = 0.0;
+    dens[0] = 1.0;
+    emint[0] = 0.0;
+    
+    for (i=1; i<nrad; i++) {
+      wend = poten[i];
+      dverk (&neqs, func, &w, yy, &wend, &tol, &ind, comm, &nwk, wk, &ie);
+      radius[i] = sqrt(yy[0]);
+      dens[i]   = rho(w) / rho0;
+      emint[i]  = 2.0 * yy[0] * sqrt(yy[0]) / yy[1];
+      if (i<10) dprintf(1,"king: %g %g %g   w=%g\n",radius[i],dens[i],emint[i],w);
+    }
 /*
  * 
  *      now find the scaling factors (from the core radius, given, and the
  *      total mass) and calculate the theoretical ISOTROPIC distr func
  * 
  */
-        sigma = sqrt( gravconst * emtot / rc / emint[((nrad) - (1))] );
-        rhocen = (9.0 * sqr(sigma)) / (FOUR_PI * gravconst * sqr(rc));
-        thdis0 = 9.0 / (FOUR_PI * gravconst * sqr(rc) * 
-        		sigma * FOUR_PI * sqrt(2.0) * rho0);
+    sigma = sqrt( gravconst * emtot / rc / emint[((nrad) - (1))] );
+    rhocen = (9.0 * sqr(sigma)) / (FOUR_PI * gravconst * sqr(rc));
+    thdis0 = 9.0 / (FOUR_PI * gravconst * sqr(rc) * 
+		    sigma * FOUR_PI * sqrt(2.0) * rho0);
 
-	printf ("King model w0=%f M rc sigma rhocen= %f %f %f %f b=%f\n",
-		w0, emtot, rc, sigma, rhocen, b);
-
-	for (i=0; i<nrad; i++)
-        {
-                radius[i] = radius[i] * rc;
-                emint[i] = emint[i] * 
-                	sqr(sigma) * rc / gravconst;
-                dens[i] = dens[i] * rhocen;
-                thdis[i] = thdis0 * (exp(- poten[i] ) - 1);
-                poten[i] = poten[i] * sqr(sigma);
-        }
+    printf ("King model w0=%f M rc sigma rhocen= %f %f %f %f b=%f\n",
+	    w0, emtot, rc, sigma, rhocen, b);
+ 
+    for (i=0; i<nrad; i++) {
+      radius[i] = radius[i] * rc;
+      emint[i]  = emint[i] * sqr(sigma) * rc / gravconst;
+      dens[i]   = dens[i] * rhocen;
+      thdis[i]  = thdis0 * (exp(- poten[i] ) - 1);
+      poten[i]  = poten[i] * sqr(sigma);
+    }
 }
 
-/* NOTE that the parameter 'n' has been left out in this C-version */
+/* NOTE that the parameter 'n' has been left out in this C-version, it's always 2 here */
 
 /*CTEX
  * 
@@ -735,29 +709,23 @@ double b;
  * 
  */
 
-double func(w, y, yprime)
-double w;
-double y[];
-double yprime[];
+double func(double w, double *y, double *yprime)
 {
-    double rho();
-
-    yprime[0] = y[1];
-    if (y[0] > 1.e-8)
-        yprime[1] = 1.50 * y[1] * y[1] * (1.0 - 1.5 * y[1] * 
-                	rho(w) / rho0) / y[0];
-    if (y[0] <= 1.e-8)
-        yprime[1] = 0.40 * (1.0 + pow(-w0, 1.5) / rho0);
+  yprime[0] = y[1];
+  if (y[0] > 1.e-8)
+    yprime[1] = 1.50 * y[1] * y[1] * (1.0 - 1.5 * y[1] * rho(w) / rho0) / y[0];
+  if (y[0] <= 1.e-8)
+    yprime[1] = 0.40 * (1.0 + pow(-w0, 1.5) / rho0);
 /*CTEX
  * 
- *         Despite the apparent singularity in the first form, the
+ *      Despite the apparent singularity in the first form, the
  *      differential equation - with the right initial conditions - has a
  *      regular solution.  The second statement amounts to saying that
  * $$
  *                       X" = - (2/5) rho'(w0)/rho(w0)
  * $$ 
  */
-    return(0.0);
+  return 0.0;   // dummy, values are returned in yprime
 }
 
 
@@ -789,19 +757,18 @@ double yprime[];
  * $$ 
  */
 
-double rho(w)
-double w;
+double rho(double w)
 {
-    double Frho, y;
-    static double coeff = 0.88622692550;
-
-    Frho = 0.0;
-    if (w > 0.0)
-       return(Frho);
-
-    y = sqrt(-w);
-    Frho = exp(w) * coeff * erf(y) - y - 2.0 * pow(y, 3.0) / 3.0;
-    return(Frho);
+  double Frho, y;
+  static double coeff = 0.88622692550;
+  
+  Frho = 0.0;
+  if (w > 0.0)
+    return Frho;
+  
+  y = sqrt(-w);
+  Frho = exp(w) * coeff * erf(y) - y - 2.0 * pow(y, 3.0) / 3.0;
+  return Frho;
 }
 
 
@@ -809,15 +776,7 @@ double w;
 #define MAXLIN 256
 #define MAXCOL 64
 
-int read_file (instr, radius, dens, poten, emint, thdis, nrad, b)
-stream instr;
-double radius[];
-double dens[];
-double poten[];
-double emint[];
-double thdis[];
-int nrad;
-double b;
+void read_file (stream instr, double *radius, double *dens, double *poten, double *emint, double *thdis, int nrad, double b)
 {
     int i, n, nlines, nval, radcol, denscol, masscol;
     char line[MAXLIN];
@@ -882,34 +841,28 @@ double b;
  
 #define NMAX 10
 
-int dverk (n, fcn, x, y, xend, tol, ind, c, nw, w, ier)
-double *x, *y, *xend, *tol, *c, *w;
-int *n, *ind, *nw, *ier;
-int (*fcn)();
+int dverk (int *n, int (*fcn)(), double *x, double *y, double *xend, double *tol, int *ind, double *c, int *nw, double *w, int *ier)
 {
-    double ystart[NMAX], x1, x2, eps, h1, hmin, nok, nbad;
-    int rkqc();
-    int i, nvar;
+    double ystart[NMAX], x1, x2, eps, h1, hmin;
+    int i, nvar, nok, nbad;
+    extern int rkqc();
 
-    if (*ind != 1)
-		error("dverk: IMSL simulator requires IND=1\n");
-    if (*nw != *n)
-		error("dverk: IMSL simulator requires NW=N?\n");
-    if (*n > NMAX)
-		error("dverk: IMSL simulator, recompile with NMAX = %d\n",*n); 
+    if (*ind != 1) error("dverk: IMSL simulator requires IND=1\n");
+    if (*nw != *n) error("dverk: IMSL simulator requires NW=N?\n");
+    if (*n > NMAX) error("dverk: IMSL simulator,recompile with NMAX >= %d\n",*n); 
 
     nvar = *n;
     x1 = *x;
     x2 = *xend;
-    for (i=0; i<*n; i++)
-		ystart[i] = y[i];
+    for (i=0; i<nvar; i++)
+        ystart[i] = y[i];
     eps = *tol;
     h1 = (x2-x1)/20.0;		/* try 20 steps */
     hmin = 0.0;
 
-    odeint(ystart,n,x1,x2,eps,h1,&nok,&nbad,fcn,rkqc);
+    odeint(ystart,nvar,x1,x2,eps,h1,hmin,&nok,&nbad,fcn,rkqc);
     *x = *xend;
 
     *ier = 0;
-    return(0);
+    return 0;
 }
