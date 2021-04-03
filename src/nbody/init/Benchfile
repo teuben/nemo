@@ -1,5 +1,5 @@
 DIR       = src/nbody/init
-BENCH     = bench0
+BENCH     = bench0 bench1
 BENCHDATA = bench1.snap
 LOG       = /tmp/nemobench.log
 BIN       = mkplummer
