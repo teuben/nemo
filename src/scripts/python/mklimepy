@@ -1,5 +1,9 @@
 #! /usr/bin/env python
 #
+# See also
+#   https://github.com/mgieles/limepy.
+# Or install via:
+#   pip install astro-limepy
 
 import os
 import numpy as np
@@ -15,9 +19,7 @@ if True:
 else:
    # 
    W0, rh = 5, 3
-   k = limepy(W0, 1, M=1e5, rh=rh)
-
-
+   k = limepy(W0, 1, M=1.0, rh=rh)
 
 ic = sample(k, N=nbody, verbose=True)
 s = np.concatenate((ic.m, ic.x, ic.y, ic.z, ic.vx, ic.vy, ic.vz))
@@ -30,3 +32,5 @@ if True:
    os.system(cmd)
 else:
    print("popen not coded yet")
+
+print("%s created with %d bodies" % (snap1,nbody))
