@@ -1,0 +1,22 @@
+TkRun $Id$
+Running wish -f ./mk_cone.tk
+my_run:
+Assuming NEMO file cone1.vel
+Assuming NEMO file cone1.den
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+my_run:
+Assuming NEMO file cone1.vel
+Assuming NEMO file cone1.den
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+my_run:
+Assuming NEMO file cone1.vel
+Assuming NEMO file cone1.den
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+Assuming fits cone1.fits
+my_save:
+my_exit:
