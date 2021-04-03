@@ -36,7 +36,7 @@ string defv[] = {
    "sigma=0.53192304\n Plummer : vel. disp.?",
    "r0=0.58904862\n    Plummer : scale length",
    "w0=1\n             King : dimensionless central potential",
-   "emtot=-1\n         King :",
+   "emtot=1\n          King : ?",
    "rc=1\n             King : core radius",
    "in=\n              optional (ascii) data file with r,rho stored",
    "radcol=1\n         (in=) column # where to get radii",
@@ -666,11 +666,12 @@ void king(double *radius, double *dens, double *poten, double *emint, double *th
     
     for (i=1; i<nrad; i++) {
       wend = poten[i];
+      if (i<10) dprintf(1,"king: %d %g \n",i,wend);
       dverk (&neqs, func, &w, yy, &wend, &tol, &ind, comm, &nwk, wk, &ie);
       radius[i] = sqrt(yy[0]);
       dens[i]   = rho(w) / rho0;
       emint[i]  = 2.0 * yy[0] * sqrt(yy[0]) / yy[1];
-      if (i<10) dprintf(1,"king: %g %g %g   w=%g\n",radius[i],dens[i],emint[i],w);
+      dprintf(1,"king: %d %g %g %g   w=%g\n",i,radius[i],dens[i],emint[i],w);
     }
 /*
  * 
@@ -678,7 +679,7 @@ void king(double *radius, double *dens, double *poten, double *emint, double *th
  *      total mass) and calculate the theoretical ISOTROPIC distr func
  * 
  */
-    sigma = sqrt( gravconst * emtot / rc / emint[((nrad) - (1))] );
+    sigma = sqrt( gravconst * emtot / rc / emint[nrad-1] );
     rhocen = (9.0 * sqr(sigma)) / (FOUR_PI * gravconst * sqr(rc));
     thdis0 = 9.0 / (FOUR_PI * gravconst * sqr(rc) * 
 		    sigma * FOUR_PI * sqrt(2.0) * rho0);
@@ -716,6 +717,8 @@ double func(double w, double *y, double *yprime)
     yprime[1] = 1.50 * y[1] * y[1] * (1.0 - 1.5 * y[1] * rho(w) / rho0) / y[0];
   if (y[0] <= 1.e-8)
     yprime[1] = 0.40 * (1.0 + pow(-w0, 1.5) / rho0);
+  dprintf(3,"func: %g  %g %g   %g %g\n",
+	  w,y[0],y[1],yprime[0],yprime[1]);
 /*CTEX
  * 
  *      Despite the apparent singularity in the first form, the
@@ -862,6 +865,9 @@ int dverk (int *n, int (*fcn)(), double *x, double *y, double *xend, double *tol
 
     odeint(ystart,nvar,x1,x2,eps,h1,hmin,&nok,&nbad,fcn,rkqc);
     *x = *xend;
+    for (i=0; i<nvar; i++)
+        y[i] = ystart[i];
+    
 
     *ier = 0;
     return 0;
