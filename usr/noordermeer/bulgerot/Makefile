@@ -11,7 +11,8 @@ PROGRAM       = bulgerot
 
 SRCS          = bulgerot.f
 
- 
+TIME = /usr/bin/time
+
 $(PROGRAM):     $(OBJS)  $(MAKEFILE) 
 		$(FC) $(LDFLAGS)  $(SRCS)    -o $(PROGRAM)
 
@@ -26,12 +27,12 @@ install: all
 
 # classic fortran version
 bench: all
-	time ./bulgerot < bulgerot.in
+	$(TIME) ./bulgerot < bulgerot.in
 	-diff sersic0.dat sersic1.dat
 
 # this is the bench with nemo frontend
 bench0:
-	time runbulgerot bench0 galaxy=sersic:n=1
+	$(TIME) runbulgerot bench0 galaxy=sersic:n=1
 	diff sersic0.dat bench0/bulgerot.dat
 
 # use this for older compilers who still write out the E format for REAL*8
