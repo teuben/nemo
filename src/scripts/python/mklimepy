@@ -1,0 +1,32 @@
+#! /usr/bin/env python
+#
+
+import os
+import numpy as np
+from limepy import limepy, sample
+
+nbody=10000
+tab1 = 'limepy.txt'
+snap1 = 'limepy.snap'
+
+if True:
+   # plummer
+   k = limepy(0.001, 3.499, M=1,G=1, rv=16./(3*np.pi))
+else:
+   # 
+   W0, rh = 5, 3
+   k = limepy(W0, 1, M=1e5, rh=rh)
+
+
+
+ic = sample(k, N=nbody, verbose=True)
+s = np.concatenate((ic.m, ic.x, ic.y, ic.z, ic.vx, ic.vy, ic.vz))
+s1 = s.reshape(7,nbody).T
+
+if True:
+   np.savetxt(tab1,s1)
+   cmd = 'tabtos in=%s out=%s block1=m,pos,vel nbody=%d; rm %s' % (tab1,snap1,nbody,tab1)
+   print("CMD:",cmd)
+   os.system(cmd)
+else:
+   print("popen not coded yet")
