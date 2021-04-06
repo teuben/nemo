@@ -80,6 +80,11 @@ derived. For <b>n=4</b> the two UHR can be determined etc. [Default: <b>2</b>] <
 the line of sight) to calculate radial velocity for. <i> Experimental, only
 in <b>lv</b></i> mode </dd>
 
+<dt><b>dr=</b> </dt>
+<dd>If given, the forces along the selected cardinal direction
+(see <b>dir=</b>) will be computed via a first order numerical derivative from
+two points  </dd>
+
 <dt><b>plot=t|f</b> </dt>
 <dd>Select viewing in form of a plot. [Default: <b>t</b>] </dd>
 
@@ -134,7 +139,7 @@ not present in the data, although radius and velocity must always be present.
 , <a href='ROTMAS.1GIPSY.html'>ROTMAS(1GIPSY)</a>
  <p>
 <br>
-<pre>galfit: http://users.ociw.edu/peng/work/galfit/galfit.html
+<pre>galfit: https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html
 galphot: http://www.astro-wise.org/portal/howtos/man_howto_galphot/man_howto_galphot.shtml
 </pre>
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
@@ -170,6 +175,7 @@ Peter Teuben
 12-nov-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 added n=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-apr-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 search for lindblad resonances if omega&gt;0<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 7-jul-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 added format=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+mar-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added dr= to allow for forceless potentials<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

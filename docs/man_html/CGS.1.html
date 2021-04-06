@@ -8,12 +8,15 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 CGS, runCGS-  Collisionless Galactic Simulator N-body code 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>CGS</b>
  <p>
 <b>runCGS</b>  [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>CGS</i>  (Collisionless Galactic Simulator)
 is a spherical harmonics Particle-Mesh code originally presented by van
@@ -38,7 +41,7 @@ detailed code description can be found in Trenti M. (2005),   PhD Thesis,
 Scuola Normale Superiore Pisa (Italy) [mainly Chapter 3]. A copy of the
 thesis is in $NEMO/usr/trenti/CGS/doc/. 
 <p> 
-<h2><a name='sect3' href='#toc3'>Parameter</a></h2>
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 There are the NEMO command
 line parameters for <b>runCGS</b>: 
 <dl>
@@ -131,12 +134,15 @@ full absolute path needs to be supplied here. [Default: CGS.exe] </dd>
 </dt>
 <dd>Should the snapshot data be converted to NEMO format? If so, the ASCII
 snapshot is removed. NOTE: Using this option requires extra diskspace. Default:
-[<b>t</b>] </dd>
+[<b>t</b>] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 <br>
-<pre>PARAMETER.DAT<tt> </tt>&nbsp;<tt> </tt>&nbsp;basic input parameters (see below for details)
+<pre>$NEMO/usr/trenti/CGS/doc/PhDthesis.pdf file - documentation
+$NEMO/usr/trenti/CGS/doc/2005AAP...433...57T.pdf - paper
+PARAMETER.DAT<tt> </tt>&nbsp;<tt> </tt>&nbsp;basic input parameters (see below for details)
 initPOS.dat<tt> </tt>&nbsp;<tt> </tt>&nbsp;input positions if flag=3
 initVEL.dat<tt> </tt>&nbsp;<tt> </tt>&nbsp;input velocities if flag=3
 init_virial.dat<tt> </tt>&nbsp;<tt> </tt>&nbsp;input virial ratio if flag=2
@@ -174,11 +180,13 @@ Sample <i>PARAMETER.DAT</i> initialization file (the default benchmark): <br>
  0.01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;!MAX ALLOWED DT --&gt; MDT
  0.001<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;!MIN ALLOWED DT
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 The following example uses runCGS to run the standard benchmark:
 <br>
 <pre>   % runCGS out=bench1 
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Compilation</a></h2>
 Note that various parameters (maximum grid size, maximum number
 of particles) are hardcoded during compilation, though easily changed in
@@ -190,6 +198,7 @@ common.blk:<tt> </tt>&nbsp;<tt> </tt>&nbsp;parameter(LMAX=7)        <tt> </tt>&n
 common.blk:<tt> </tt>&nbsp;<tt> </tt>&nbsp;parameter(NCE=28)        <tt> </tt>&nbsp;<tt> </tt>&nbsp;Max number of Spherical Harmonics Coefficients
 (do not modify)
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>Benchmarks</a></h2>
 The standard benchmark is 40000 particles and runs for 832 steps.
 The user CPU is listed (in sec) in the 2nd column.  <br>
@@ -200,17 +209,23 @@ G5/1.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;218.5 (g77 3.5.0)
 AMD64/<tt> </tt>&nbsp;<tt> </tt>&nbsp;130.3 (g77 3.4.2)
 Xeon-X5660@2.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;79.4 (gfortran_4.4.7 -O3) - gaia
 i7-8550U @ 1.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;43.4 (gfortran_7.3.0 -O3) - T480
-i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;52.5 (gfortran_4.4.7 -O3) - dante
-i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;31.7 (ifort_12.1.0 -O3) - dante
+i7-3820  @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;52.5 (gfortran_4.4.7 -O3) - dante
+i7-3820  @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;31.7 (ifort_12.1.0 -O3) - dante
+i5-1135G7 @ 2.40GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;26.0 (gfortran 9.2.0 -O3) - XPS13
+i5-1135G7 @ 2.40GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;13.4 (flang 7.0.1 -O3) - XPS13
 </pre>You can run the command either as: <br>
-<pre>   % time runCGS out=bench1 nemo=f
+<pre>   % make bench2
+   which is
+   % /usr/bin/time runCGS out=bench1 nemo=f
 or
-   % time CGS
-</pre>
+   % /usr/bin/time CGS
+</pre>Adding <b>nemo=t</b> (the default) would add about 15%. 
+<p> 
 <h2><a name='sect8' href='#toc8'>Data Conversion</a></h2>
-If output <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- are requested, CGS will create
-a file <b>fort.90</b>, which can be converted to NEMO&rsquo;s <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+If output
+<a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ are requested, CGS will create a file <b>fort.90</b>, which can
+be converted to NEMO&rsquo;s <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 , viz. <br>
 <pre>   tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 </pre>
@@ -222,6 +237,7 @@ The gravitation constant is 4.4971, which is appropriate for a galactic
 scale system where the units (see also <a href='units.5.html'><i>units(5NEMO)</i></a>
 ) are 10^11 solar mass,
 10 kpc and 10^8 years. This gives a unit of velocity of about 97.8 km/s. 
+<p> 
 <h2><a name='sect10' href='#toc10'>See
 Also</a></h2>
 <a href='scfm.1.html'>scfm(1NEMO)</a>
@@ -239,16 +255,20 @@ van Albada, T.S. (1982), MNRAS, 201, 939. Dissipationless galaxy formation
 and the R to the 1/4-power law 
 van Albada, T.S. &amp; van Gorkum, J.H. (1977) A&amp;A,54,121. Experimental Stellar Dynamics
 for Systems with Axial Symmetry
-</pre>
+</pre>The first two listed papers by Trenti can be found with the code distribution,
+see also FILES. 
+<p> 
 <h2><a name='sect11' href='#toc11'>Author</a></h2>
-Michele Trenti &amp; Tjeerd van Albada (NEMO adaptation: Peter Teuben)
-
+Michele Trenti &amp; Tjeerd van Albada (NEMO adaptation:
+Peter Teuben) 
+<p> 
 <h2><a name='sect12' href='#toc12'>Credit</a></h2>
-Any scientific publication or presentation which has benefited from
-using CGS should quote the paper <br>
+Any scientific publication or presentation which has
+benefited from using CGS should quote the paper <br>
 <pre>   Trenti, M. Bertin, G. and van Albada, T.S. (2005) A&amp;A 433, 57
-</pre>(please find this paper and the PhDthesis.pdf file in the subdirectory CGS/doc).
-
+</pre>
+<p> 
+<p> 
 <h2><a name='sect13' href='#toc13'>History</a></h2>
 <br>
 <pre>2003<tt> </tt>&nbsp;<tt> </tt>&nbsp;original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;M. Trenti &amp; T.van Albada
@@ -264,7 +284,7 @@ using CGS should quote the paper <br>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Parameter</a></li>
+<li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Files</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>Compilation</a></li>
