@@ -176,7 +176,7 @@ namespace {
 
 	     // 	     	     " -march=native -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
 #elif defined(__GNUC__)
-	     " -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
+	     " -ggdb3"
 	     " -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -fPIC"
 	     " -fopenmp -funroll-loops -fforce-addr"
 #else
