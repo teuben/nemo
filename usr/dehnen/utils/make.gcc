@@ -3,7 +3,7 @@
 # sets library sub-directory and flags for gcc compiler
 # to be included by makefile 
 #
--include $(FALCON)/utils/make.sh
+-include make.sh
 
 ifndef GCC
 GCC		:= gcc
