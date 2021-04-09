@@ -3,14 +3,14 @@
  *
  *      19-mar-2021    spring break in covid time... while reading Cappellari 2002
  *                     https://ui.adsabs.harvard.edu/abs/2002MNRAS.333..400C
+ *
  */
 
 /*CTEX
  *	{\bf potname=gauss
  *       potpars={\it $\Omega,M,\sigma,p,q$}}
  *
- *  Gauss potential (e.g. Cappellari 2002 from the MGE formalism).  For the spherical case
- *  (cases with P and q < 1 will be considered another time)
+ *  Gauss potential (e.g. Cappellari 2002 from the MGE formalism).  For the spherical case:
  *
  * $$
  *    \rho = { M \over {(\sigma \sqrt{2\pi})}^3  }   e^{- {R^2}\over{2\sigma^2}}
@@ -33,16 +33,17 @@
 local double omega = 0.0;
 local double g_mass = 1.0;
 local double g_sigma = 1.0;
-local double g_q = 1.0;         // discarded for now
-local double g_p = 1.0;         // discarded for now
+local double g_q = 1.0;   // discarded, but we do allow oblate
+local double g_p = 1.0;
 local double accuracy = 1e-7;
 local int    g_debug = 0;
+local int    need_warning = 1;
 
-local double r2,z2,s2,s3,eps,delta;
+local double r2,z2,s2,s3,eps,del;
 
 #define MAX_STEPS 32
 
-local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc);		     
+local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc);
 
 // function needed to integrate (between 0 and 1) in order to get the potential an oblate MGE for given (r2,z2,eps)
 local double oblate(double t) {
@@ -68,7 +69,7 @@ void inipotential (int *npar, double *par, string name)
     par[0] = omega;
     s2 = sqrt(2);
     s3 = sqrt(PI);
-    delta = 1 - g_p*g_p;
+    del = 1 - g_p*g_p;
     eps = 1 - g_q*g_q;
 
     if (eps > 0 && g_p < 1) error("potname gauss: triaxial case not implemented");
@@ -84,10 +85,15 @@ void potential_double(int *ndim,double *pos,double *acc,double *pot,double *time
     r2 = pos[0]*pos[0] + pos[1]*pos[1];
     z2 = pos[2]*pos[2];
     *pot = -g_mass / g_sigma * sqrt(2/PI) * romberg(oblate,0.0,1.0,30,accuracy);
-    // sorry, forces too difficult now, use potccd
+    if (need_warning) {
+      warning("gauss.c: oblate q=%g case has no forces computed yet, only potential",g_q);
+      need_warning = 0;
+    }
     acc[0] = acc[1] = acc[2] = 0;
     return;
   }
+
+  // below is the spherical case
 
   r2 = pos[0]*pos[0] + pos[1]*pos[1] + pos[2]*pos[2];
 

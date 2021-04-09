@@ -1,15 +1,19 @@
-.TH TABLST 1NEMO "1 December 1988" 
-.SH NAME
+.TH TABLST 1NEMO "1 December 1988"
+
+.SH "NAME"
 tablst \- list a (binary) table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBtablst in=\fPtable-file \fBset=\fPset-name \fBcol=\fPcolname(s) [parameter=value] ...
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItablst\fP lists columns of a table. The table may as well be in standard
 binary (\fIfilestruct(5NEMO)\fP) format as in standard ascii format.
 When no binary table is found, it assumes the data is in standard ascii,
 and lists the appropriate columns.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -41,14 +45,24 @@ meaning every \fIstride\fPth line will be shown, starting at line number
 .TP
 \fBformat=\fIexpression\fP
 Format with which the column is displayed [\fB%f\fP].
-.SH SEE ALSO
+
+.SH "EXAMPLES"
+
+.nf
+tablst $NEMODAT/plum.dat OsipkovMerrittModel Radius,Mass,Potential,DistFunc
+.fi
+
+.SH "SEE ALSO"
 various tab* programs
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 27-Oct-88	V1.0 created	PJT
 4-Nov-88	V1.0a set= keyword can be left empty	PJT
 1-dec-88	V1.1 also allow ascii file	PJT
+2-apr-21	add EXAMPLE
 .fi

@@ -1,5 +1,14 @@
 (the name of this directory "csh" is a misnomer, they are examples in
-a variety of shells)
+a variety of shells by now)
 
 
-Various examples of NEMO scripts.
+Various examples of NEMO scripts. There are some very old scripts
+from the 20th century which no doubt would need some work.
+
+
+exp1.sh      various spherical models, show mass radii plots for optional cooling
+mk_cone      rotating disk with conical outflow - 3D viewing; uses "tkrun"
+mkplummer.sh example of using getopt in a bash script
+mktt72.sh    Toomre & Toomre 1972 setup
+do_neeleman  rotation curves of very beamsmeared galaxies
+

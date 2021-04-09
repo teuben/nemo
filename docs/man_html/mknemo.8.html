@@ -79,11 +79,14 @@ non-default control files in $NEMO/src/scripts/mknemo.d: <br>
 glnemo2   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics
 gyrfalcON   <tt> </tt>&nbsp;<tt> </tt>&nbsp;falcON tools (gyrfalcON, mkplum, the acc&rsquo;s and manip&rsquo;s)
 rotcur    <tt> </tt>&nbsp;<tt> </tt>&nbsp;rotcur program (there is also a confusing rotcur potential(5NEMO))
-galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.x
-</pre>
+galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.
+cfitsio<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;CFITSIO library
+</pre>For a 3rd party library system type library, such as cfitsio, the sources
+will be under $NEMO/local, and being built with --prefix=$NEMO/opt. 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='bake.8.html'>bake(8NEMO)</a>
-, <a href='mkbin.8.html'>mkbin(8NEMO)</a>
+,
+<a href='mkbin.8.html'>mkbin(8NEMO)</a>
  
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
@@ -98,6 +101,9 @@ $NEMOLIB/yapp*.o<tt> </tt>&nbsp;<tt> </tt>&nbsp;various device drivers
 $NEMO/src          <tt> </tt>&nbsp;<tt> </tt>&nbsp;source tree searched for programs/directories
 $NEMO/adm/install/mknemo.log<tt> </tt>&nbsp;<tt> </tt>&nbsp;logfile of all previous installs done
 $NEMO/adm/install/mknemo.lock<tt> </tt>&nbsp;<tt> </tt>&nbsp;lockfile, to prevent multiple usage
+$NEMO/local/&lt;package&gt;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;source of a &lt;package&gt;
+$NEMO/opt/{bin,include,lib}<tt> </tt>&nbsp;<tt> </tt>&nbsp;--prefix location of &lt;package&gt; binaries and headers
+for public use
 </pre>
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
