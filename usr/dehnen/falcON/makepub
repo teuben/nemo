@@ -179,7 +179,7 @@ ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)bodyfunc.o:	$(bodyfunc_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(NBDYFLAGS) -DCOMPILER='"$(GPP)"'
+			$(MAKE_OBJ) $(NBDYFLAGS) -DCOMPILER='"$(CXX)"'
 endif
 $(LIB)neighbours.o:	$(neighbours_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
