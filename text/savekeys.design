@@ -5,11 +5,22 @@ The idea is to not only be able to set input parameters to a program,
 the ones that control the program and its output, but also have
 output parameters be set, that can be used in programs along the pipe.
 
+To take a example from python, where one often does:
+
+     v = foo(p1, p1)
+     w = bar(v['a1'], v['a2'])
+
+So in NEMO, which uses the shell, there is no such easy construct.
+Imagine NEMO to have a pool of variables, controlled by $NEMOVAR
+(e.g. ~/.nemovar)
+
 
 An example of internal parameters re-use within a program:
 (there often is not a good reason for this)
 
    snapgrid in=snap.dat out=ccd.dat nx=200 ny=\$nx
+   or 
+   snapgrid in=snap.dat out=ccd.dat nx=200 ny='$nx'
 
 An example of keyword macro files:
 
@@ -19,8 +30,7 @@ An example of keyword macro files:
 
 
 
-
-New safekeys:
+New safekeys:   (nemovar is the new name)
 
 
 Each program, like the string defv[] array, will need to define an array
@@ -66,3 +76,6 @@ you to propagate information among hosts in a transparent fashion
 you want to create a uniform environment on numerous machines.
 
 
+
+---
+could memcached be used ?
