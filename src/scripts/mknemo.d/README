@@ -1,2 +1,10 @@
 Each executable that follows non-standard procedures to be installed,
 should have a corresponding shell script in this directory.
+
+Under normal circumstances you should also be able to try out alternative
+install methods, e.g.
+
+	 ./gsl git=1
+
+to install the git based version of GSL, instead of the standard one pointed
+to by the version= keyword in the nemo.d/gsl script
