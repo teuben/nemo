@@ -1,8 +1,8 @@
 /*
  * gauss.c:  (spherical) gauss potential
  *
- *      19-mar-2021    spring break in covid time... while reading Cappelleri 2002
- *
+ *      19-mar-2021    spring break in covid time... while reading Cappellari 2002
+ *                     https://ui.adsabs.harvard.edu/abs/2002MNRAS.333..400C
  */
 
 /*CTEX
@@ -44,6 +44,7 @@ local double r2,z2,s2,s3,eps,delta;
 
 local double romberg(double (*f)(double), double a, double b, size_t max_steps, double acc);		     
 
+// function needed to integrate (between 0 and 1) in order to get the potential an oblate MGE for given (r2,z2,eps)
 local double oblate(double t) {
   return exp(-t*t*(r2+z2/(1-eps*t*t))/(2*s2)) / sqrt(1-eps*t*t);
 }
