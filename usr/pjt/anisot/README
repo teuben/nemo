@@ -1,5 +1,8 @@
-Here are the programs by which one should be able to make the $NEMODAT DF tables,
-based off an example nking program (Josh) and a never finalized version anisot program (Stefano)
+Here are the programs by which one should be able to make the $NEMODAT
+DF tables, based off an example nking program (Josh) and a never
+finalized version anisot program (Stefano)
+
+Apparently code conversion from Fortran to C was done via fortrix, and this was a pain.
 
 As of this writing (April 2021) this code compiles, but hasn't been tested what works.
 
