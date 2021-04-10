@@ -648,6 +648,7 @@ PNG_LIB
 MACOS_LIBS
 CCSHARED
 F77_CMAIN_FFLAGS
+FC
 FLIBS
 ac_ct_F77
 FFLAGS
@@ -7916,6 +7917,9 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no FORTRAN compiler" >&5
 $as_echo "$as_me: WARNING: no FORTRAN compiler" >&2;}
 fi
+
+FC=$F77
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for f77 flags to use C main function" >&5
 $as_echo_n "checking for f77 flags to use C main function... " >&6; }
