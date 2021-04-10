@@ -3,7 +3,6 @@
 #  make variables for the install of falcON
 #  this file is controlled by NEMO's configure since Version 4.2 (dec 2019)
 
-
 # if you want --enable-native it should say "NO_ARCH_NATIVE=0"
 NO_ARCH_NATIVE=@falcon_NO_NATIVE@
 
@@ -23,3 +22,5 @@ GPP = @CXX@
 # set these, though they often get refined again in the make.COMPILER files
 CC  = @CC@
 CXX = @CXX@
+FC  = @FC@
+
