@@ -3,7 +3,7 @@
 # sets library sub-directory and flags for gcc compiler
 # to be included by makefile 
 #
--include make.sh
+include ../utils/make.sh
 
 ifndef GCC
 GCC		:= gcc
@@ -14,7 +14,7 @@ endif
 EXT             := .gcc
 CXX             := $(GPP)
 CC              := $(GCC)
-FC              := gfortran
+FC              := $(FC)
 
 PLATFORM 	:= $(shell uname -m)
 #
