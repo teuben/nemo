@@ -18,6 +18,13 @@ in \fICGS(1NEMO)\fP:
     @ads 2005A&A...433...57T
 .fi
 
+This reference should then be resolvable via the ADS on:
+
+.nf
+    https://ui.adsabs.harvard.edu/abs/2005A&A...433...57T
+.fi
+
+
 The idea is that (apart from using \fIgrep(1)\fP) we will have tools that extract
 these doxygen-like tags and summarize them. Currently the man page entries will
 have to manually followed up in the usual "FILES" section of the man page to find the
@@ -35,6 +42,16 @@ publishing in AAS journals:
 
 The \fIname\fP of a code is not always uniquely determined, but a growing list is available on 
 https://github.com/teuben/ascl-tools/blob/master/asclKeywords.txt
+
+.SH "OTHERS"
+There are at least two other code and paper linking mechanisms that are in practice:
+.PP
+In \fBamuse\fP each contributed code as the metadata containing a reference to the
+original author.
+.PP
+In \fPastropy\fP the \fBastropy.__citation__\fP returns a string containing the \fIbibtex\fP
+entry
+
 
 .SH "SEE ALSO"
 CGS(1NEMO), runbulgerot(1NEMO)
