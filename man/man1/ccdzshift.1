@@ -1,17 +1,24 @@
-.TH CCDZSHIFT 1NEMO "30 November 2020"
-.SH NAME
-ccdzshift\- re-align spectra from a cube based on a reference Z map
-.SH SYNOPSIS
+.TH CCDZSHIFT 1NEMO "13 April 2021"
+
+.SH "NAME"
+ccdzshift\- re-align (stack) spectra from a cube based on a reference Z map
+
+.SH "SYNOPSIS"
 \fBccdzshift\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdzshift\fP re-align all spectra in a cube based on a reference map of where a reference
-Z value (\fIvelicity\fP) centroid should be. The shift is towards the center of the cube.
+Z value (\fIvelocity\fP) centroid should be. The shift is towards the center of the cube. In
+some sense this is like stacking spectra, except in this stage it will keep all spectra in their
+respective pixels. Another step is needed (e.g. \fIccdmom(1NEMO)\fP) to produce a truly single
+stacked spectrum.
 .PP
 The current version is optimized for galaxy cubes, where everything is velocity based, and
 searching for low density gas in the outer regions. Another
 application is high-Z frequency based, and stack based on certain spectral lines and look for a
 signal.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -20,22 +27,24 @@ Input image cube.
 No default.
 .TP
 \fBmap=\fP
-Z reference map. The values
+Z reference map. The values in the map must correspond to the WCS values of the Z axis of the input cube.
+No default.
 .TP
 \fBout=\fP
 Re-aligned output cube. No default.
 .TP
 \fBwcs=0|1|2\fP
-0=use 0-based pixel 1=use 1-based pixel 2=use WCS
+0=use 0-based pixel 1=use 1-based pixel 2=use WCS [2]
 .TP
 \fBnearest=t|f\fP
-Shift spectra using nearest pixel, or interpolate? [t]
+Shift spectra using nearest pixel, or a more expensive interpolate? [t]
 .TP
 \fBcenter=\fP
 If given, this pixel will be the reference centroid of the cube. Although this gives
 the option to crop a large cube to a smaller one to contain the final signal, it will
 corrupt the WCS.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Following along the example in \fIccdvel(1NEMO)\fP we have make an
 example with a falling density in the outer parts to see how much
 can be recovered using stacking (shifting) and integrating in elliptical
@@ -44,10 +53,12 @@ is buried in the noise, unless the signal is stacked/integrated in rings:
 .nf
 
   # make lookup tables
-  nemoinp 0:120:5 > map1.radt
+  nemoinp 0:140:5 > map1.radt
   tabmath map1.radt map1.dent  "exp(-%1/20)" all
   tabmath map1.radt map1.velt  "%1/sqrt(40+%1*%1)" all
 
+  # plot the density (red in pgplot) and velocity (green in pgplot) vs. radius
+  paste map1.radt map1.dent map1.velt | tabplot - 1 2,3 color=2,3 line=2,1
 
   # velocity and density
   ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=45 inc=60 size=256 vsys=10
@@ -55,16 +66,70 @@ is buried in the noise, unless the signal is stacked/integrated in rings:
 
   # cube with and without noise
   velcube invel=map1.vel inden=map1.den out=map1.cube sigdefault=0.1 zrange=8:12 nz=200 
-  velcube invel=map1.vel inden=map1.den out=- sigdefault=0.1 zrange=8:12 nz=200 | ccdmath - map1n.cube '%1+rang(0,0.001)'
+  velcube invel=map1.vel inden=map1.den out=- sigdefault=0.1 zrange=8:12 nz=200 |\\
+	ccdmath - map1n.cube '%1+rang(0,0.001)'
 
   # shifted cubes (adding noise back where it was lost due to the shift)
   ccdzshift map1.cube  map1.vel  map2.cube
-  ccdzshift map1n.cube map1.vel  - |  ccdmath -map2n.cube 'ifeq(%1,0,%1+rang(0,0.001),%1)'
+  ccdzshift map1n.cube map1.vel  - |\\
+	ccdmath - map2n.cube 'ifeq(%1,0,%1+rang(0,0.001),%1)'
+
+  ccdellint map2.cube  0:200:2 pa=45 inc=60 vsys=10 center=128,128 out=map2.rv
+  ccdellint map2n.cube 0:200:2 pa=45 inc=60 vsys=10 center=128,128 out=map2n.rv
+  ccdellint map2n.cube 0:200:2 pa=45 inc=60 vsys=10 center=128,128 out=map2m.rv norm=f
+
+  ccdmom map2n.rv - axis=2 mom=0 | ccdprint - x= newline=t label=x  |\\
+	tabmath - - '%1,log(%2)' all | tabplot - 1 2 color=2 point=2,0.1 line=1,1 xcoord=140
+  ccdmom map2n.rv - axis=2 mom=1 | ccdprint - x= newline=t label=x  |\\
+	tabplot - 1 2 color=2 point=2,0.1 line=1,1 ymin=9 ymax=11 xcoord=140
+  ccdmom map2n.rv - axis=2 mom=2 | ccdprint - x= newline=t label=x  |\\
+	tabplot - 1 2 color=2 point=2,0.1 line=1,1 ymin=0 ymax=2  xcoord=140
+  # this mom=2 plot has lots of NaN's at radii
 
 .fi
-A more realistic example would be to use observational data
+A more realistic example would be to use observational data. Lets say we have a cube, and a velocity field. First recifying the cube,
+then averaging all emission along the RA (x) and DEC (y) axis, we get a single spectrum along z, plotted using
+\fItabplot(1NEMO)\fP:
+
+.nf
+
+  ccdmom ngc6503.ccd ngc6503vel.ccd mom=1 rngmsk=t clip=0.002
+  ccdzshift ngc6503.ccd ngc6503vel.ccd ngc6503_0.ccd
+  ccdmom ngc6503_0.ccd - axis=1 |\\
+	ccdmom - - axis=2 |\\
+	ccdprint - x= y= z= |\\
+	tabplot - 0 1 line=1,1 ycoord=0 point=2,0.05
+  nds9 ngc6503_0.ccd
+
+.fi
+
+.SH CAVEAT
+It is assumed the Z axis is in velocity, a Frequency or Wavelength axis is not supported. You will need to convert to a velocity axis
+in another package. We give two examples, the first one in MIRIAD:
+.nf
+
+  fits in=ngc6503.fits out=ngc6503.mir op=xyin
+  velsw in=ngc6503.mir axis=VRAD
+  fits in=ngc6503.mir out=ngc6503vrad.fits op=xyout
+  fitsccd ngc6503vrad.fits - | ccdhead -
+     Z-range:   261.861 -196.743
+     MinMax:    -0.00315721 0.0169835
+.nf     
+
+
+and one in CASA, which delivers in m/s
+
+.nf
+
+  importfits('ngc6503.fits','ngc6503.im')
+  exportfits('ngc6503.im','ngc6503vrad.fits',velocity=True)
+  fitsccd ngc6503vrad.fits - | ccdhead -
+      Z-range:   261861 -196743
+      MinMax:    -0.00315721 0.0169835
+
+.fi
 .SH SEE ALSO
-nemoinp(1NEMO), tabmath(1NEMO), ccdvel(1NEMO), ccdmath(1NEMO), velcube(1NEMO), image(5NEMO)
+nemoinp(1NEMO), tabmath(1NEMO), ccdvel(1NEMO), ccdmath(1NEMO), ccdmom(1NEMO), ccdsub(1NEMO), velcube(1NEMO), image(5NEMO)
 .SH FILES
 NEMO/src/image/trans/ccdzshift.c
 .SH AUTHOR
