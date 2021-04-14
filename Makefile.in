@@ -447,11 +447,11 @@ build1:
 	@echo 'Continue with "make build2 (or build2a build2b)"'
 
 build2:
-	(source nemo_start.sh ; $(MAKE) libs)
+	(source nemo_start.sh ; $(MAKE) -j libs)
 	@echo 'Continue with "make build3"'
 
 build3:
-	(source nemo_start.sh ; $(MAKE) bins)
+	(source nemo_start.sh ; $(MAKE) -j bins)
 	@echo 'Continue with "make build4"'
 
 #       Advanced build examples that require opt=1 during the build.
@@ -547,11 +547,11 @@ build2b:  dehnen
 
 # gyrfalcON
 dehnen:
-	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
+	-(cd usr/dehnen; $(MAKE) -i -j clean all) >> install.log 2>&1 
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	-(cd src;$(MAKE) -i clean install) > install.log 2>&1 
+	-(cd src;$(MAKE) -i -j clean install) > install.log 2>&1 
 
 slib:
 	(cd $(NEMOLIB); \
@@ -560,8 +560,8 @@ slib:
 
 bins:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log	
-	cd src;$(MAKE) -i bins >> ../install.log 2>&1 
-	cd usr;$(MAKE) -i bins >> ../install.log 2>&1 
+	cd src;$(MAKE) -i -j bins >> ../install.log 2>&1 
+	cd usr;$(MAKE) -i -j bins >> ../install.log 2>&1 
 	@echo Done at `date`
 
 missingbins:
