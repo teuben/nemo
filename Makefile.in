@@ -440,7 +440,7 @@ vogl:
 
 
 
-build:   build1 build2 build3 build4
+build:   build1 build2 build3
 
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
@@ -516,6 +516,7 @@ clean:
 	@echo '2) "make cleanall" would remove' 
 	@echo ""
 	@echo $(CLEAN)
+	@echo and clean the falcON related directories
 	@echo ""
 	@echo '3) "make cleansrc" would clean the src tree (of .o files and such)'
 	@echo ""
@@ -529,6 +530,7 @@ distclean: config_clean cleansrc
 
 cleanall:
 	rm -rf $(CLEAN)
+	$(MAKE) -C $(NEMO)/usr/dehnen clean
 
 cleansrc:
 	(cd src; $(MAKE) clean)
