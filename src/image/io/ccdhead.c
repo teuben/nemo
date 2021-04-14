@@ -14,7 +14,7 @@
 
 string defv[] = {
   "in=???\n       Input image filename",
-  "VERSION=1.3\n  27-jan-2021 PJT",
+  "VERSION=1.3a\n 14-apr-2021 PJT",
   NULL,
 };
 
@@ -30,7 +30,7 @@ void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
 void nemo_main()
 {
     imageptr iptr=NULL, optr=NULL;
-    string *filename;
+    string filename;
     stream instr, outstr;
     int i, j, i0, j0, nfiles;
     int nx, ny, nx1, ny1, ix, iy, n;
@@ -69,6 +69,7 @@ void nemo_main()
 	     Zmin(iptr)+(Nz(iptr)-1)*Dz(iptr)/2);
       printf("X-range:   %g %g\n", xmin,xmax);
       printf("Y-range:   %g %g\n", ymin,ymax);
+      printf("Z-range:   %g %g\n", zmin,zmax);      
     }
     printf("MinMax:    %g %g\n", MapMin(iptr), MapMax(iptr));
 }
