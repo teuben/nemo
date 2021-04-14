@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 24-jan-2021 PJT
+VERSION = NEMO V4.2 14-apr-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -447,7 +447,7 @@ build1:
 	@echo 'Continue with "make build2 (or build2a build2b)"'
 
 build2:
-	(source nemo_start.sh ; $(MAKE) -j libs)
+	(source nemo_start.sh ; $(MAKE) libs)
 	@echo 'Continue with "make build3"'
 
 build3:
@@ -547,7 +547,7 @@ build2b:  dehnen
 
 # gyrfalcON
 dehnen:
-	-(cd usr/dehnen; $(MAKE) -i -j clean all) >> install.log 2>&1 
+	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
