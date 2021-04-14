@@ -5735,6 +5735,8 @@ fi
 if test "$ok" = "yes"; then
         CC="clang"
         CXX="clang"
+	FC="flang"
+	F77="flang"
 fi
 
 # Check whether --enable-pedantic was given.
