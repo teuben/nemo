@@ -55,6 +55,11 @@ for most Linux distros (assuming you have the preconditions):
          make build check bench 
          source nemo_start.sh
 
+If you plan to modify code and submit pull request, the github CLI is recommended
+instead of cloning the upstream:
+
+         gh repo fork https://github.com/teuben/nemo
+
 On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
 awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
 work (there are other ways to install tools on a mac,but don't get me started):
