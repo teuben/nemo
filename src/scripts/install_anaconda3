@@ -33,7 +33,7 @@ foreach arg ($*)
   set $arg
 end
 
-if ($os == Darwin) set os = Darwin
+if ($os == Darwin) set os = MacOSX
 
 set mc3 = `printf $url $os`
 set msh = $mc3:t

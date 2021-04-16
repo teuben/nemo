@@ -53,6 +53,8 @@ CRVALn<tt> </tt>&nbsp;<tt> </tt>&nbsp;value of the coordinate at the reference p
 CRPIXn<tt> </tt>&nbsp;<tt> </tt>&nbsp;the reference pixel (often in range 1..NAXISn)
 CDELTn<tt> </tt>&nbsp;<tt> </tt>&nbsp;increment per pixel
 CTYPEn<tt> </tt>&nbsp;<tt> </tt>&nbsp;coordinate type (an ascii string)
+DATE-OBS<tt> </tt>&nbsp;<tt> </tt>&nbsp;Observing date: new Y2K format "yyyy-mm-ddThh:mm:ss"
+TIME-OBS<tt> </tt>&nbsp;<tt> </tt>&nbsp;Observing time, "hh:mm:ss", deprecated after new Y2K
 
 HISTORY  <tt> </tt>&nbsp;<tt> </tt>&nbsp;history records (no &rsquo;=&rsquo; needed)
 COMMENT  <tt> </tt>&nbsp;<tt> </tt>&nbsp;comment cards (no &rsquo;=&rsquo; needed)
@@ -64,11 +66,19 @@ be computed from the following formula: <br>
 </pre>where <i>m</i> is the value of NAXIS. This size must of course be rounded up to
 the nearest multiple of 2880 bytes. After this, either there is no more
 information on the medium, or another HDU can be read. 
-<h2><a name='sect3' href='#toc3'>Coordinate Systems</a></h2>
-World
-Coordinate Systems are described in detail in draft by E.W. Greisen and M.
-Calabretta (AIPS memo 99?) titled <i>Representations of Celestial Coordinates
-in FITS</i>. <p>
+<h2><a name='sect3' href='#toc3'>Time</a></h2>
+The old DATE-OBS
+format (with the Y2K problem) was yy-dd-mm, and some files might have a corresponding
+TIME-OBS keyword, hh:mm:ss. The new format follows the ISO format, obtained
+with the unix date command as follows: <br>
+<pre>    date +%Y-%m-%dT%H:%M:%S.%N
+    2020-12-18T13:15:49.648961250
+</pre>and this should be the new format (with as many sub-second digits as are
+needed). 
+<h2><a name='sect4' href='#toc4'>Coordinate Systems</a></h2>
+World Coordinate Systems are described in detail
+in draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled <i>Representations
+of Celestial Coordinates in FITS</i>. <p>
 Some common coordinate systems: <br>
 <pre>LINEAR          Simple linear coordinate system
 RA, DEC         Equatorial  (followed by a projection type)
@@ -80,7 +90,8 @@ Some common coordinate system projection types: <br>
 ___ __  ___________________________________
 AZP 90  Zenithal perspective                
 TAN 90  Gnomic (AZP w/ mu = 0)             
-SIN 90  Orthographic (AZP w/ mu = infty)  
+SIN 90  Orthographic (AZP w/ mu = infty)
+NCP 90  North celestial pole (special case of SIN) 
 STG 90  Stereographic (AZP w/ mu = 1)      
 ARC 90  Zenithal equidistant                 
 ZPN 90  Zenithal polynomial                 
@@ -96,15 +107,16 @@ COE 90  Conical equal-area
 COO 90  Conical orthomorphic                
 BON 90  Bonne&rsquo;s equal area                  
 PCO  0  Polyconic                            
-GLS  0  Sinusoidal                           
+SFL  0  Sanson-Flamsteed
+GLS  0  GLobal Sinusoidal (Similar to SFL)                          
 PAR  0  Parabolic                            
-AIT  0  Hammer-Aitoff                        
+AIT  0  Hammer-Aitoff equal area all-sky                       
 MOL  0  Molweide                             
 CSC  0  Cobe Quadrilateralized Spherical Cube  
 QSC  0  Quadrilateralized Spherical Cube     
-TSC  0  Tangential Spherical Cube           
+TSC  0  Tangential Spherical Cube
 </pre>
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
 , <a href='fitsccd.1.html'>fitsccd(1NEMO)</a>
 , <a href='fitssnap.1.html'>fitssnap(1NEMO)</a>
@@ -114,12 +126,13 @@ TSC  0  Tangential Spherical Cube
 , <a href='fits.3.html'>fits(3NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>30-may-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;written  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-mar-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;Nemo&rsquo;s FITS I/O library is being tested  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 3-jul-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;doc updated with PCOUNT/GCOUNT<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-sep-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;experimental bitpix 64 added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-dec-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;y2k date-obs reminder<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -128,9 +141,10 @@ TSC  0  Tangential Spherical Cube
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
 <li><a name='toc2' href='#sect2'>Keywords</a></li>
-<li><a name='toc3' href='#sect3'>Coordinate Systems</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Time</a></li>
+<li><a name='toc4' href='#sect4'>Coordinate Systems</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Update History</a></li>
 </ul>
 </body>
 </html>

@@ -1,5 +1,5 @@
 .\" pjt 
-.TH PROGRAMS 8NEMO "26 Jan 2020"
+.TH PROGRAMS 8NEMO "6 February 2021"
 .SH NAME
 programs \- list of currently available nemo(1NEMO) commands, ordered thematically
 .SH DESCRIPTION
@@ -15,6 +15,8 @@ questionmark (\fB?\fP) are not available yet, but we're thinking of making them.
 Check the future-plan
 \fIsoftware(8NEMO)\fP document to see if anyone is working on them
 yet.
+.PP
+This thematic style was inspired by GIPSY.
 .SH "1. GENERAL INFORMATION (only doc/man)"
 .nf
 .ta +2.0i
@@ -27,16 +29,15 @@ usage205	a very short an simple instruction list for CYBER 205 users [8]
 usageeta10	some comments on ETA-10 usage [8]
 cookbook	a quick list of what to do to run (e.g.) treecode on the 205 [8]
 tricks    	useful tricks and bug detours [8]
-orbit   	overview what orbit utilities are planned [0]
 .fi
 .SH "2. UTILITY"
 .nf
 .ta +2.0i
 mknemo		compile NEMO progams, out of directory
-nemoshow    	check environment, show NEMO system variables/keywords
+-nemoshow    	check environment, show NEMO system variables/keywords
 nemoman		create a template man pages from a compiled program
 nemoinp  	test parsing of numbers
-units        	units conversion utility
+units        	units conversion utility (unix)
 .fi
 .SH "3. DATA CONVERSION"
 .nf
@@ -70,6 +71,7 @@ wcs       	(astronomical) world coordinate system transformations
 .ta +2.0i
 anisot    	create distribution function table for anistropic spherical models
 mkommod   	anisotropic velocity distribution (Merritt)
+mkplum		plummer model (falcON)
 mkplummer	plummer model 
 mkdisk  	uniform disk of test-particles in external potential
 mkspiral	uniform disk of test-particles with logarithmic spiral
@@ -85,6 +87,7 @@ mkisosph	isothermal sphere
 mkmestel	Mestel disk
 mktestdisk	toy program
 mkkd95		Kuijken-Dubinski-95 composite disk-bulge-halo model
+mkgalaxy	McMillan/Dehnen composite galaxy models (falcON)
 magalie		Boily et al. composite disk-bulge-halo model
 .fi
 .SH "5. N-BODY INTEGRATORS"
@@ -228,6 +231,7 @@ fitstab  	convert fits table to ascii table
 snapfits	convert a snapshot file to a fits file
 ccdfits     	write a fits file to disk
 fitsccd  	read a (fits) image file from disk
+sdinfo		info and benchmarking SDFITS files
 .fi
 .SH "15. MODEL FITTING and ANALYSIS"
 .nf

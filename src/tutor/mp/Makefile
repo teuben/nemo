@@ -64,3 +64,7 @@ bench6:  quad_openmp
 	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./quad_openmp); done
 
 
+bench7: python_openmp.py
+	@echo OMP_NUM_THREADS ONT=$(ONT)
+	-@for i in $(ONT); do\
+	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ./python_openmp.py); done

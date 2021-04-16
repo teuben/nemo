@@ -7,6 +7,8 @@
 /*    adapted for NEMO for Koda's SPH and Josh' treecode1                   */
 /****************************************************************************/
 
+// see src/nbody/cores/pickpnt.c for original
+
 #include "stdinc.h"
 #include "mathfns.h"
 
@@ -14,7 +16,7 @@
  * PICKSHELL: pick point on shell.
  */
 
-void pickshell(real *vec, int ndim, double rad)
+void pickshell1(real *vec, int ndim, double rad)
 {
     real rsq, rscale;
     int i;
@@ -35,7 +37,7 @@ void pickshell(real *vec, int ndim, double rad)
  * PICKBALL: pick point within ball.
  */
 
-void pickball(real *vec, int ndim, double rad)
+void pickball1(real *vec, int ndim, double rad)
 {
     real rsq;
     int i;
@@ -55,7 +57,7 @@ void pickball(real *vec, int ndim, double rad)
  * PICKBOX: pick point within box.
  */
 
-void pickbox(real *vec, int ndim, double size)
+void pickbox1(real *vec, int ndim, double size)
 {
     int i;
 

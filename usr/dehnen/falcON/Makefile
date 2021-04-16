@@ -147,8 +147,14 @@ falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs)
 $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
+
+ifeq ($(NO_SHARED_LIBS),0)
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
+else
+$(LIB)lib$(LIBNAME).so:
+			@echo Skipping lib$(LIBNAME).so:
+endif
 
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 

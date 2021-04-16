@@ -110,7 +110,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_CSH
-dnl next ones seems to force linking with FC, and we have F77 as well
+dnl next ones seems to force linking with FC, and we have F77 as well, for now, FC=F77
 dnl AC_PROG_FC
 dnl AC_FC_WRAPPERS
 
@@ -140,6 +140,22 @@ if test "$ok" = "yes"; then
         FFLAGS="-g"
         LDFLAGS="-g"
         # should we define DEBUG too?
+fi
+
+AC_ARG_ENABLE(shared, [  --disable-shared        disable shared libraries? (needed for falcON on MAC)], ok=$enableval, ok=yes)
+if test "$ok" = "yes"; then
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
+fi
+AC_SUBST(NO_SHARED_LIBS)
+
+AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang"
+	FC="flang"
+	F77="flang"
 fi
 
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
@@ -176,7 +192,7 @@ AC_ARG_ENABLE(float,  [  --enable-float          single-precision], ok=$enableva
 if test "$ok" = "yes"; then
 	prec_flag="-DSINGLEPREC"
 fi
-AC_ARG_ENABLE(double, [  --enable-double         double-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(double, [  --enable-double         double-precision (default)], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DDOUBLEPREC"
 fi
@@ -208,7 +224,7 @@ fi
 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
-AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON],enable_falcon=$enableval, enable_falcon=yes)
+AC_ARG_ENABLE(falcon, [  --disable-falcon        disable falcON],enable_falcon=$enableval, enable_falcon=yes)
 if test "$enable_falcon" = "yes"; then
   MAKELIBS="corelibs dehnen"
 else
@@ -247,12 +263,14 @@ fi
 AC_SUBST(falcon_OPENMP)
 
 dnl ---------------------------------------------------------------------
-dnl             Check for basic X windows stuff
+dnl             Check for basic X windows stuff : AC_PATH_XTRA -> X_CFLAGS and X_LIBS
 AC_PATH_X
 AC_PATH_XTRA
 XINCS="$X_CFLAGS"
 if test -d /usr/X11R6/lib64; then
   XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11R6/lib64 -lXext -lX11 $X_EXTRA_LIBS"
+elif test -d /usr/X11/lib; then
+  XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11/lib -lXext -lX11 $X_EXTRA_LIBS"
 else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
@@ -414,6 +432,9 @@ else
   fortran=no
   AC_MSG_WARN([no FORTRAN compiler])
 fi
+
+FC=$F77
+AC_SUBST(FC)
 
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 dnl ACX_F77_CMAIN_FFLAGS([AC_MSG_WARN([pjt])],[AC_MSG_WARN([problems fortran-c interface])])
@@ -925,6 +946,19 @@ case $yapp_name in
         ps)
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
+          ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    AC_MSG_WARN(C using dollar)
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    AC_MSG_WARN(C using, external to NEMO, classic)
+	  fi
+	  YAPP_DEF="/xs"
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then

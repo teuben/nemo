@@ -10,9 +10,11 @@
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 anisot - tabulate models for spherical galaxies 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>anisot <b>out=</b></b>out_file
 [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>anisot</i> generates tables from which other
 programs (e.g. <b>mkommod</b>) can generate N-body realizations of a spherical  system
@@ -30,47 +32,47 @@ model <i>has not been implemented yet</i>. <p>
 The method used is to compute, from
 given density as a function of radius, the density as a function of potential,
 after which Eddingtons inversion formula (an Abel integral equation, see
-also eq. (4-140a) in Binney &amp; Tremaine, 1987) is used to compute the distribution
-function at the energies at which the radii were given. The density/energy
- has been modified to incoorporate anisotropic models a la Osipkov-Merrit
-(for details see pp.239 in Binney &amp; Tremaine, 1987). 
+also eq. (4-140a) in Binney &amp; Tremaine, 1987, or 4-46a in BT2008) is used to
+compute the distribution function at the energies at which the radii were
+given. The density/energy  has been modified to incoorporate anisotropic
+models a la Osipkov-Merrit (for details see pp.239 in Binney &amp; Tremaine, 1987,
+or pp.297 in BT2008) 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized. 
+The following parameters are recognized. 
 <dl>
 
-<dt><b>out=</b><i>out_file</i> </dt>
-<dd>Write output table in binary form
-to <i>out_file</i>, which will contain an <b>OsipkovMerrittModel</b> data set. A utility
-program  <a href='tablst.1.html'><i>tablst(1NEMO)</i></a>
- can be used to get a table for plotting purposes.
-[no default]. </dd>
+<dt><b>out=</b><i>out_file</i>
+</dt>
+<dd>Write output table in binary form to <i>out_file</i>, which will contain an <b>OsipkovMerrittModel</b>
+data set. A utility program  <a href='tablst.1.html'><i>tablst(1NEMO)</i></a>
+ can be used to get a table for
+plotting purposes. [no default]. </dd>
 
 <dt><b>model=<i>name</i></b> </dt>
-<dd>Which model to use. Possible options are <b>plummer,
-king, devauc, jaffe</b>. [default: <b>plummer</b>, but see also keyword <b>in=</b> below)].
-</dd>
+<dd>Which model to use. Possible options
+are <b>plummer, king, devauc, jaffe</b>. [default: <b>plummer</b>, but see also keyword
+<b>in=</b> below)]. </dd>
 
 <dt><b>rmax=<i>r_max</i></b> </dt>
-<dd>Radius at which to cutoff the model. The potential value at this
-edge is assumed zero. Some models may ignore this parameter. [default: <b>100</b>].
-</dd>
+<dd>Radius at which to cutoff the model. The potential
+value at this edge is assumed zero. Some models may ignore this parameter.
+[default: <b>100</b>]. </dd>
 
 <dt><b>b=<i>b</i></b> </dt>
-<dd>Anisotropy parameter (inverse anisotropy radius) [default: <b>0</b>]. </dd>
+<dd>Anisotropy parameter (inverse anisotropy radius) [default:
+<b>0</b>]. </dd>
 
-<dt><b>nrad=</b><i>n_rad</i>
+<dt><b>nrad=</b><i>n_rad</i> </dt>
+<dd>Number of radii to use for numerical integration [default:
+<b>512</b>]. </dd>
+
+<dt><b>njump=</b><i>n_jump</i> </dt>
+<dd>Stride through integration tables to generate the output
+table. The size of output table will be <i>n_rad/n_stride</i>. [default: <b>1</b>]. </dd>
+
+<dt><b>ngauss=<i>n_gauss</i></b>
 </dt>
-<dd>Number of radii to use for numerical integration [default: <b>512</b>]. </dd>
-
-<dt><b>njump=</b><i>n_jump</i>
-</dt>
-<dd>Stride through integration tables to generate the output table. The size
-of output table will be <i>n_rad/n_stride</i>. [default: <b>1</b>]. </dd>
-
-<dt><b>ngauss=<i>n_gauss</i></b> </dt>
-<dd>Number
-of points used for Gauss-Legendre integrations [default: <b>48</b>] </dd>
+<dd>Number of points used for Gauss-Legendre integrations [default: <b>48</b>] </dd>
 
 <dt><b>sigma=<i>sigma</i></b>
 </dt>
@@ -108,30 +110,43 @@ where density is stored [default: <b>2</b>]. </dd>
 <dd>Column number
 in <i>in-file</i> where cumulative mass is stored.  Currently not used, but future
 expansion allows usage of a <b>masscol</b>  instead of a <b>denscol</b>  [default: <b>0</b>].
-</dd>
+
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+
+<p> <br>
+<pre>anisot plum.dat rmax=10
+tablst plum.dat OsipkovMerrittModel Radius,Density,Mass,Potential,DistFunc
+mkommos plum.dat plum.snap 10000
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='mkommod.1.html'>mkommod(1NEMO)</a>
 , <a href='plummer.1.html'>plummer(1NEMO)</a>
 , <a href='tablst.1.html'>tablst(1NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
-~pjt/nbody/anisot.c
+<p> 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
+$NEMO/usr/pjt/anisot.c
 
-<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
-King models currently don&rsquo;t work anymore ... (did they ever?). The  integration
-interface needs to be checked (PJT) <p>
+<p> 
+<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
+King models not verified in detail. <p>
 The absolute value of the distribution
-function <i>f</i> in  Plummer models is wrong.  I don&rsquo;t know  why this is yet. Doesn&rsquo;t
-matter for mkanmod though. 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update</a></h2>
+function <i>f</i> in  Plummer models is wrong.  Doesn&rsquo;t matter for mkomod though.
+
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter Teuben, Stefano Casertano 
+<p> 
+<h2><a name='sect9' href='#toc9'>Update</a></h2>
 <br>
 <pre>4-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created                 <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-oct-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 in= added + bug removed  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-sep-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 got rid of fortranish stuff<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-apr-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3c - resurrected and fixed up king model<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -141,11 +156,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Bugs</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Bugs</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update</a></li>
 </ul>
 </body>
 </html>

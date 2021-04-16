@@ -1,0 +1,4 @@
+#
+
+list:
+	brew list --formula

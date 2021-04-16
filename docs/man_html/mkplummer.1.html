@@ -115,25 +115,46 @@ being the snapshot itself. [default: not used]. </dd>
 <dd>Number of
 models to generate. Although mostly meant for benchmarks, generating more
 then 1 model can be useful to process very large snapshots (which won&rsquo;t
-fit in memory) in a serialized fashion. See also <i>snapsplit</i>.  Default: <b>1</b>. </dd>
+fit in memory) in a serialized fashion. See also <i>snapsplit</i>.  Default: <b>1</b>. 
+<p>
+</dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-A
-non-delta function mass-spectrum will not create a properly virialized system
-yet. See <a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
+A non-delta function mass-spectrum will not create a properly virialized
+system yet. See <a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
  <p>
-For very large (&gt;1000) ratio in the mass ranges
-the spline interpolation, used in <a href='frandom.3.html'><i>frandom(3NEMO)</i></a>
-, can fail using a valid
-[0,1] range. 
+For very large (&gt;1000) ratio in the mass
+ranges the spline interpolation, used in <a href='frandom.3.html'><i>frandom(3NEMO)</i></a>
+, can fail using
+a valid [0,1] range. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-mkplummer can also be used to create a plummer sphere
-with a mass spectrum, e.g. a Salpeter mass spectrum with <br>
+mkplummer can also be used to create a plummer
+sphere with a mass spectrum, e.g. a Salpeter mass spectrum with <br>
 <pre>  % mkplummer salpeter.dat 10000 massname=&rsquo;n(m)&rsquo; massexpr=&rsquo;pow(m,p)&rsquo; masspars=p,-2.35
 massrange=0.1,10
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Benchmarks</a></h2>
+The default benchmark (see Benchfile) creates a 10,000,000 snapshot
+in double precision, with and without writing to a local file: <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;make -f Benchfile bench0 bench1
+   or
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;/usr/bin/time mkplummer . 10000000
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;/usr/bin/time mkplummer bench1.snap 10000000
+</pre>with some sample CPU for bench0: <br>
+<pre>   xps13       3.1s  or 171 MB/s
+   t480        4.9s  or  72 MB/s
+</pre>the time difference betweeen bench0 and bench1 can be interpreted as the
+time needed to write 535MB (for 10M particles) 
+<p> 
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+NEMO/src/nbody/init/mkplummer.c
+
+<p> 
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='snapvirial.1.html'>snapvirial(1NEMO)</a>
 , <a href='mkplummer.3.html'>mkplummer(3NEMO)</a>
 , <a href='snapmass.1.html'>snapmass(1NEMO)</a>
@@ -149,13 +170,16 @@ S.J. Aarseth, M. Henon and R.  Wielen (1974),  <i>Astron. and Astrophys.<b>
 37</b></i>, p. 183. <p>
 A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt, 2011,
 MNRAS, 417, 2300 (McLuster) 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Piet Hut (Peter Teuben) 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>~/src/nbody/init<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer.c
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>23-Apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1.0: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
 10-Jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1.1: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
@@ -167,3 +191,4 @@ xx-Mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0: full new snapshot version<tt> </t
 11-apr-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.8: added nmodel=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-sep-10<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.9: clarified rfrac and allow rfrac&lt;0<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-dec-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented mcluster<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+29-mar-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;benchmark<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

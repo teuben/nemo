@@ -137,16 +137,16 @@ XLIBS  = @XLIBS@
 # PEDFLAG="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align  -Wwrite-strings -Wnested-externs  -fshort-enums -fno-common -Dinline= -g -O4"
 #   optimization only
 
-OPT  = @CFLAGS@
+COPT = @CFLAGS@
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
 #   for shared libaries
 CCSHARED = @CCSHARED@
 #   everything 
-CFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
-CXXFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
-FFLAGS  = $(OPT) $(CCSHARED) $(NEMO_FFLAGS)
-LDFLAGS = $(OPT)             $(NEMO_LDFLAGS)
+CFLAGS   = $(COPT) $(CCSHARED) $(NEMO_CFLAGS)
+CXXFLAGS = $(COPT) $(CCSHARED) $(NEMO_CFLAGS)
+FFLAGS   = $(FOPT) $(CCSHARED) $(NEMO_FFLAGS)
+LDFLAGS  = $(LOPT)             $(NEMO_LDFLAGS)
 CPPFLAGS = @CPPFLAGS@
 
 RANLIB = @RANLIB@

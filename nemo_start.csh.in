@@ -10,7 +10,7 @@
 #   or site installation
 #            $NEMO/nemo_local.csh
 #   
-#   CSH users can place this in their ~/.cshrc file
+#   CSH users can place this in their ~/.cshrc file (or ~/.tcshrc)
 
 
 #                                       Things via configure
@@ -153,3 +153,5 @@ setenv FALCON $NEMO/usr/dehnen/falcON
 source $FALCON/falcON_start.csh
 
 
+# aliases
+alias ni nemoinp

@@ -1,5 +1,5 @@
-/* mkgalaxy.c : a NEMOfied version of the 'galaxy' program used in
- *              in Xscreensaver 
+/* mkgalaxy2.c : a NEMOfied version of the 'galaxy' program used in
+ *               in Xscreensaver 
  *
  * Originally done by Uli Siegmund <uli@wombat.okapi.sub.org> on Amiga
  *   for EGS in Cluster
@@ -35,6 +35,7 @@
  *            <joukj@crys.chem.uva.nl>
  *
  * 13-may-02: (V2.0) NEMO-fied                   by Peter Teuben
+ *  7-feb-2021:    renamed to mkgalaxy2 to avoid colliding w/ falcON's mkgalaxy script
  */
 
 #include <nemo.h>
@@ -52,11 +53,11 @@ string  defv[] = {
   "nstars=1000\n          Number of stars per galaxy",
   "ncolors=4\n            Number of colors",
   "galsize=0.15,0.25\n    Range in galaxy sizes",
-  "size=2                 Size of the universe",
+  "size=2\n               Size of the universe",
   "niters=7500\n          Number of iterations",
   "zerocm=t\n             Centrate snapshot (t/f)?",
   "headline=\n	          Verbiage for output",
-  "VERSION=2.0\n          13-may-02 PJT",
+  "VERSION=3.0\n          7-feb-2021 PJT",
   NULL,
 };
 
@@ -104,7 +105,7 @@ typedef struct {                    /* universe */
 
 static Universe universes[1];
 
-nemo_main()
+void nemo_main()
 {
   Universe   *u = &universes[0];
   int         i, j, seed;

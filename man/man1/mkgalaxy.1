@@ -1,40 +1,165 @@
-.TH MKGALAXY 1NEMO "11 May 2002"
+.TH mkgalaxy 1falcON "7 February 2021"
+
 .SH NAME
-mkgalaxy - create spinning galaxies (xscreensaver)
-.SH SYNOPSIS
-.B mkgalaxy
+\fBmkgalaxy\fP \- McMillan-Dehnen composite Disk-Bulge-Halo models
+
+.SH synopsis
+\fBmkgalaxy\fP name=basename [parameter=value]
+
+
 .SH DESCRIPTION
-\fImkgalaxy\fP creates random initial conditions for spinning galaxies,
-taken straight from the famous Xscreensaver(1) program.
+
+Script for constructing N-body initial conditions for a disc galaxy 
+according to McMillan and Dehnen (2007, MNRAS, 378, 541).
+.PP
+For more detailed documentation see mkgalaxy_user_guide.pdf 
+
 .SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
-.TP 25
-\fBout=\fP\fIsnapfile\fP
-.TP
-\fBnbody=\fP\fIinteger\fP
-Number of particles
-.TP
-\fBseed=\fP\fIinteger\fP
-seed for the random number generator. The default (0) the unix time clock
-will be used. Default: 0
+The following description of the
+parameters is taken verbatim from the script, and explain
+the optional parameters. Only \fBname=\fP\fIbasename\fP is required.
+.PP
+If \fBspheroid=\fP\fIfilename\fP is given,
+it is assumed to contain halo & bulge adjusted to disc, so it
+can skip steps 1 and 2. The user must ensure that the parameters match!
+.nf
+
+################################################################################
+## body numbers (note that for $Mb>0 the bulge will also add bodies)
+set Nh=1200000       # number of bodies in halo
+set Nd=200000        # number of disc bodies
+
+################################################################################
+## disc parameters
+set Md=1             # disc mass
+set Rd=1             # disc scale radius
+set Zd=0.1           # disc scale height (rho \propto sech^2(z/Zd))
+set Rsig=0           # if non-zero, rad. vel. disp. sigma \propto exp(-R/Rsig)
+set Rdmax=4.5        # maximum disc radius
+set Q=1.2            # Toomre's Q (const if Rsig=0, else value Q(Rsig)
+set Nbpo=50          # number of disc bodies sampled per orbit
+set ni=4             # number of iterations in disc sampling
+set epsd=0.01        # gravitational softening length for disc bodies
+
+################################################################################
+## halo parameters
+set Mh=24            # halo mass 
+set innerh=7/9       # halo inner logarithmic density slope
+set outerh=31/9      # halo outer logarithmic density slope
+set etah=4/9         # halo transition exponent
+set Rcoreh=0         # halo core radius
+set Rscaleh=
+set Rh=6             # halo scale length
+set Rth=60           # halo truncation radius
+set betah=0          # halo anisotropy parameter
+set r_ah=0           # halo anisotropy radius; 0 maps to infinity
+set epsh=0.02        # gravitational softening length for halo bodies
+
+################################################################################
+## bulge parameters
+set Mb=0.2           # bulge mass
+set innerb=1         # bulge inner density exponent
+set outerb=4         # bulge outer density exponent
+set etab=1           # bulge transition exponent
+set Rtb=0            # bulge truncation radius
+set Rcoreb=0         # bulge core radius
+set Rb=0.2           # bulge scale radius
+set betab=0          # bulge anisotropy parameter
+set r_ab=0           # bulge anisotropy radius; 0 maps to infinity
+
+################################################################################
+## Parameters controlling code
+set kmax=3           # maximum timestep = 2^-kmax
+set kmin=7           # minimum timestep = 2^-kmin
+set fac=0.01         # time step control: tau < fac/|acc|
+set fph=0.04         # time step control: tau < fph/|phi|
+set tgrow=40         # Disc growth time
+set seed=1           # seed for RNGs
+set nmax=12          # maximum radial "quantum number" in potential expansion
+set lmax=8           # maximum angular "quantum number" in potential expansion
+set debug=2          # debug level used to run all falcON programs
+
+.fi
+
+.SH EXAMPLE
+The script take a fair amount of CPU. Here is an example with 12000
+stars in the halo, and
+2000 in the disk (which is 1/100 of the script defaults):
+.nf
+% /usr/bin/time mkgalaxy name=gal1
+mkgalaxy:    building a N-body model of a disc galaxy
+mkgalaxy: 0  starting falcON and setting parameters
+mkgalaxy: 1  Building the initial spheroid models
+mkgalaxy:    creating the initial halo with N=600000 in file gal2.h
+mkgalaxy:    creating the initial bulge with N=20000 in file gal2.b
+mkgalaxy:    stacking initial halo and bulge in file gal2.s
+mkgalaxy: 2  Growing the full disc potential
+mkgalaxy:    symmetrize initial spheroid snapshot (and doubling body number)
+mkgalaxy:    start simulation to grow disc potential from monopole
+mkgalaxy:    (log output into gal2.grow) ...
+mkgalaxy: 3  Populating the disc
+mkgalaxy:    extracting bulge into file gal2.b (needed for bulge potential)
+mkgalaxy:    extracting halo into file gal2.h (needed for halo potential)
+mkgalaxy:    creating the initial disc with N=200000 in file gal2.d
+mkgalaxy:    stacking all components into file gal2.snp
+mkgalaxy:    finished. snapshots generated:
+             gal2.snp: complete galaxy model ready to use
+4586.25user 94.47system 1:18:01elapsed 99%CPU 
+
+% snapmstat gal2.snp
+
+0 0:199999       =  200000 Mass= 5.32538e-06 TotMas= 1.06508 CumMas=  1.06508
+1 200000:239999  =   40000 Mass= 5e-06       TotMas= 0.2     CumMas=  1.26508
+2 240000:1439999 = 1200000 Mass= 2e-05       TotMas= 24      CumMas= 25.2651
+# Found 3 species:
+select=0:199999,200000:239999,240000:1439999 
+
+
+.fi
+
+Stage 3 takes a long time.
+
 .SH SEE ALSO
-.BR X (1),
-.BR xscreensaver (1),
-.BR xlock (1)
+mkkd95(1NEMO), magalie(1NEMO), mkgalaxy2(1NEMO)
+.PP
+https://ui.adsabs.harvard.edu/abs/2007MNRAS.378..541M/abstract
+.SH FILES
+$FALCON/doc     mkgalaxy, mkgalaxy_user_guide.pdf
+.nf
+file         status                content/meaning                         
+-------------------------------------------------------------------------- 
+
+1. Building the initial spheroid models                                    
+
+$name.prm    generated             accfile for "Monopole"                  
+$name.h      generated & deleted   snapshot: initial halo                  
+$name.b      generated & deleted   snapshot: initial bulge                 
+$name.s      generated             snapshot: initial bulge + halo          
+
+2.  Growing the full disc potential                                         
+
+$name.prm    required  & deleted   accfile for "Monopole"                  
+$name.s      required  & deleted   snapshot: initial bulge + halo          
+$name.sym    generated & deleted   snapshot: symmetrised $name.s           
+$name.grow   generated             logfile of gyrfalcON run                
+$name.S2     generated             snapshot: final bulge + halo
+
+3,  Populating the disc                                                      
+
+$spheroid    required              snapshot: final bulge + halo             
+$name.d      generated & deleted   snapshot: initial disc                   
+$name.snp    generated             snapshot: final disc + bulge + halo      
+
+.fi
+
 .SH AUTHOR
-Original Amiga version by Uli Siegmund <uli@wombat.okapi.sub.org>
- for EGS in Cluster.
+ Paul McMillan, Walter Dehnen (2007-2010)
 
-Ported from Cluster/EGS to C/Intuition by Harald Backert.
+.SH HISTORY
+.nf
+.ta +1.0i +2.0i
+2007  original version   (PM/WD)
+7-feb-2021 Fixes for name collision on Mac   PJT
+.fi
 
-Ported to X11 and xlockmore by 
-Hubert Feyrer <hubert.feyrer@rz.uni-regensburg.de>, 30-Sep-94.
 
-Modified by David Bagley <bagleyd@bigfoot.com>, 23-Oct-94.
-
-Modified by Dave Mitchell <davem@magnet.com>, 7-Apr-97.
-
-Ability to run standalone or with \fIxscreensaver\fP added by 
-Jamie Zawinski <jwz@jwz.org>, 10-May-97.
-
-NEMO program by Peter Teuben <teuben@astro.umd.edu>, 11-may-2002.

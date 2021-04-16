@@ -16,3 +16,8 @@ the compilation could fail if some libraries GL/glut.h cannot be found. In that 
 grab that library from http://freeglut.sourceforge.net/ or use your package manager
 to install it.  E.g on ubuntu 10.10 you will need freeglut3-dev, ie.
     dpkg -i freeglut3-dev
+
+on ubuntu20:  sudo apt-get install libglfw3-dev
+
+for sphinx i needed:  sudo apt-get install breathe-doc
+or for your python:   pip install breathe

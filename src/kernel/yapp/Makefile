@@ -30,7 +30,8 @@ LIBSUNTOOLS = -Bdynamic -lcore -lsunwindow -lpixrect
 LIBMONGO    = /usr/local/lib/libmongo.a $(LIBSUNVIEW) $(FORLIBS)
 #LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBSUNVIEW) -lX11 $(FORLIBS)
 # linux:
-LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBX) $(FORLIBS)
+#LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBX) $(FORLIBS)
+LIBPGPLOT   = -lpgplot $(LIBX) $(FORLIBS)
 #LIBPLPLOT   = -lplplotftk -ltk -litcl -ltcl $(LIBX) -lieee -lm -lf2c
 LIBPLPLOT   = -lplplot -ltk -ltcl  $(LIBX)
 # -lieee -lm

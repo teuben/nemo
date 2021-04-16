@@ -8,11 +8,14 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdgen - create or add objects to an image 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdgen</b> <b>out=</b><i>image-file</i>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdgen</b> creates or <a href='modified.2D.html'>modified (2D)</a>
  images by
@@ -23,6 +26,7 @@ An added feature is that the objects can be
 added as if they are in a "galactic" disk with given inclination and position
 angle. The default is a "face-on" view (<b>inc=0</b>).  No corrections for brightness
 due to inclination are made however. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
 are recognized in any order if the keyword is also given: 
@@ -101,12 +105,15 @@ the output would equal the input. Default: 1 </dd>
 
 <dt><b>headline=</b> </dt>
 <dd>Random verbiage added to the image.
-Default: none </dd>
+Default: none 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Objects</a></h2>
-<br>
-<pre>flat<tt> </tt>&nbsp;<tt> </tt>&nbsp;A<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;A
+<h2><a name='sect4' href='#toc4'>Object</a></h2>
+The <b>object=</b> keyword allows for the following objects,
+and <b>spar=</b> for their parameters <br>
+<pre>OBJECT<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPAR
+flat<tt> </tt>&nbsp;<tt> </tt>&nbsp;A<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;A
 exp<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
 gauss<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r^2/(2h^2))<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
 bar<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h,e,b   (e=1-minor/major   b=bar position angle w.r.t. disk)
@@ -185,6 +192,17 @@ ccdgen "" - blobs @b100.tab size=128,128,128 |\
   ccdsmooth - - 5   |\
   ccdsky - -  |\
   ccdfits - junk2.fits radecvel=t ndim=4
+</pre>Here is an example of making a new data section (in this case just noise)
+by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ file.  In <i>bash</i> notation:
+<br>
+<pre>  fitshead NGC5194_91112.fits &gt; tmp.fitshead
+  nx=$(grep NAXIS1 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  ny=$(grep NAXIS2 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  nz=$(grep NAXIS3 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
+  ccdgen in= out=- object=noise spar=0,1 size=$nx,$ny,$nz |\
+     ccdfits - noise.fits fitshead=NGC5194_91112.fits
+  
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
@@ -212,7 +230,7 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Objects</a></li>
+<li><a name='toc4' href='#sect4'>Object</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>

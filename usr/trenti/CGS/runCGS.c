@@ -39,19 +39,18 @@ string defv[] = {
     "nemo=t\n        convert data to NEMO and cleanup ASCII",
     "options=\n      Optional output:  phi(potential), acc (forces) [not implemented yet]",
     "exe=CGS.exe\n   name of CGS executable",
-    "VERSION=2.1a\n  9-apr-2019 PJT",
+    "VERSION=2.1b\n  20-feb-2021 PJT",
     NULL,
 };
 
 string usage = "NEMO frontend to run CGS";
-
 string cvsid="$Id$";
 
 
 
 void nemo_main()
 {
-  int i, nbody, flag;
+  int i, sret, nbody, flag;
   real scale, dt, dtout, dtlog, tstop; 
   real virial = getrparam("virial");
   bool Qnemo = getbparam("nemo");
@@ -72,10 +71,10 @@ void nemo_main()
     flag = 3;       /* discard the flag= parameter, fix it here */
     sprintf(command,"snapprint %s x,y,z    > %s/%s",infile,rundir,"initPOS.dat");
     dprintf(0,">>> %s\n",command);
-    system(command);
+    sret = system(command);
     sprintf(command,"snapprint %s vx,vy,vz > %s/%s",infile,rundir,"initVEL.dat");
     dprintf(0,">>> %s\n",command);
-    system(command);
+    sret = system(command);
     sprintf(command,"cat %s/%s | wc -l",rundir,"initVEL.dat");
     datstr = popen(command,"r");
     if (fgets(line,256,datstr) == 0) {
@@ -134,7 +133,7 @@ void nemo_main()
     else
       sprintf(command,"tabtos fort.90 snap.out nbody,time skip,pos,vel; %s fort.90",rmcmd);
     dprintf(0,">>> %s\n",command);
-    system(command);
+    sret = system(command);
   }
   
 }

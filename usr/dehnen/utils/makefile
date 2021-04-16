@@ -155,11 +155,17 @@ RL			:= ranlib
 $(LIB)libWDutils.a	:	$(LIBOBJECTS)
 				$(AR) $@ $?
 				$(RL) $@
+ifeq ($(NO_SHARED_LIBS),0)
 $(LIB)libWDutils.so	:	$(LIBOBJECTS)
 				$(CXX) $^ $(LDFLAGS) $(LINKLIBS) -o $@
+else
+$(LIB)libWDutils.so	:	$(LIBOBJECTS)
+				@echo Skipping libWDutils.so
+endif
 
 library			:	$(LIBT) $(LIB)libWDutils.a \
 					$(LIB)libWDutils.so
+
 
 # -------------
 # test routines

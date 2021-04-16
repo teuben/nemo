@@ -26,12 +26,12 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-11-22) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2021-03-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
 
-if [ $mode == 1 ]; then
+if [ $mode == 2 ]; then
     rm -f s0
     echo Special series of mkspiral benchmarks
     echo -n "# D 0 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123          ; rm s0
@@ -40,6 +40,38 @@ if [ $mode == 1 ]; then
     echo -n "# . 2 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=2  
     echo -n "# . 3 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=3  
     echo -n "# D 3 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123 test=3   ; rm s0
+    exit 0
+fi
+
+if [ $mode == 3 ]; then
+    echo 'Equal CPU time per code, no output files to check'
+    echo 'Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode'
+    t1=4.28
+    t2=5.64
+    t3=7.89
+    t4=787400.0
+    t5=6.66
+    echo "Tstop: $t1 $t2 $t3 $t4 $t5 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz]"
+    echo -n .;
+    echo -n 1;$time directcode nbody=$nbody0 out=. tstop=$t1 seed=123 $help                 > bench2.directcode.log  2>&1
+    echo -n .;$time mkplummer p0 $nbody2 seed=123 $help                                     > bench.mkplummer.log    2>&1
+    echo -n 2;$time gyrfalcON p0 . kmax=6 tstop=$t2 eps=0.05 $help                          > bench2.gyrfalcon.log   2>&1
+    echo -n 3;$time hackcode1 nbody=$nbody1  out=. seed=123 tstop=$t3 $help                 > bench2.hackcode1.log   2>&1
+    echo -n .;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                               > bench.mkorbit.log      2>&1
+    echo -n 4;$time orbint o0 . tstop=$t4 dt=0.01 nsave=\$tstop ndiag=\$tstop/100 $help    > bench2.orbint.log      2>&1
+    echo -n 5;$time potcode p0 . freqout=10 freq=1000 tstop=$t5 potname=plummer $help       > bench2.potcode.log     2>&1
+    echo -n .; 
+    echo ""
+
+    cat bench2.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+    column -t cpu_usage.log
+
+    if [ $clean == 1 ]; then
+	echo "Cleaning $tmp (use clean=0 to prevent this)"
+	cd ..
+	rm -rf $tmp
+    fi
+
     exit 0
 fi
 
@@ -71,14 +103,17 @@ else
     echo Skipping BSF testing.  Use bsf=1 to enable this.
 fi
     
-cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE
+cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+column -t  cpu_usage.log
 
-echo Processor:
+echo -n "Processor: "
 unames=$(uname -s)
 if [[ $unames == Linux ]]; then
     lscpu | grep 'Model name:' | awk -F: '{print $2}'
-elif [[ $uname == Darwin ]]; then
+elif [[ $unames == Darwin ]]; then
     sysctl -n machdep.cpu.brand_string
+else
+    echo Unknown CPU for $unames
 fi
 	   
 

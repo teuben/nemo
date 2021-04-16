@@ -3,68 +3,188 @@
 
 <html>
 <head>
-<title>MKGALAXY(1NEMO) manual page</title>
+<title>mkgalaxy(1falcON) manual page</title>
 </head>
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mkgalaxy - create spinning galaxies (xscreensaver) 
-<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
+<b>mkgalaxy</b> - McMillan-Dehnen composite Disk-Bulge-Halo models 
+<p> 
+<h2><a name='sect1' href='#toc1'>synopsis</a></h2>
 <b>mkgalaxy</b>
-
+name=basename [parameter=value] 
+<p> 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>mkgalaxy</i> creates random initial conditions for spinning galaxies,
-taken straight from the famous <a href='Xscreensaver.1.html'>Xscreensaver(1)</a>
- program. 
+
+<p> Script for constructing N-body
+initial conditions for a disc galaxy  according to McMillan and Dehnen
+(2007, MNRAS, 378, 541). <p>
+For more detailed documentation see mkgalaxy_user_guide.pdf
+ 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized; they may be given in any order. 
-<dl>
+The following description of the parameters is taken verbatim
+from the script, and explain the optional parameters. Only <b>name=</b><i>basename</i>
+is required. <p>
+If <b>spheroid=</b><i>filename</i> is given, it is assumed to contain halo
+&amp; bulge adjusted to disc, so it can skip steps 1 and 2. The user must ensure
+that the parameters match! <br>
+<pre>################################################################################
+## body numbers (note that for $Mb&gt;0 the bulge will also add bodies)
+set Nh=1200000       # number of bodies in halo
+set Nd=200000        # number of disc bodies
+################################################################################
+## disc parameters
+set Md=1             # disc mass
+set Rd=1             # disc scale radius
+set Zd=0.1           # disc scale height (rho propto sech^2(z/Zd))
+set Rsig=0           # if non-zero, rad. vel. disp. sigma propto exp(-R/Rsig)
+set Rdmax=4.5        # maximum disc radius
+set Q=1.2            # Toomre&rsquo;s Q (const if Rsig=0, else value Q(Rsig)
+set Nbpo=50          # number of disc bodies sampled per orbit
+set ni=4             # number of iterations in disc sampling
+set epsd=0.01        # gravitational softening length for disc bodies
+################################################################################
+## halo parameters
+set Mh=24            # halo mass 
+set innerh=7/9       # halo inner logarithmic density slope
+set outerh=31/9      # halo outer logarithmic density slope
+set etah=4/9         # halo transition exponent
+set Rcoreh=0         # halo core radius
+set Rscaleh=
+set Rh=6             # halo scale length
+set Rth=60           # halo truncation radius
+set betah=0          # halo anisotropy parameter
+set r_ah=0           # halo anisotropy radius; 0 maps to infinity
+set epsh=0.02        # gravitational softening length for halo bodies
+################################################################################
+## bulge parameters
+set Mb=0.2           # bulge mass
+set innerb=1         # bulge inner density exponent
+set outerb=4         # bulge outer density exponent
+set etab=1           # bulge transition exponent
+set Rtb=0            # bulge truncation radius
+set Rcoreb=0         # bulge core radius
+set Rb=0.2           # bulge scale radius
+set betab=0          # bulge anisotropy parameter
+set r_ab=0           # bulge anisotropy radius; 0 maps to infinity
+################################################################################
+## Parameters controlling code
+set kmax=3           # maximum timestep = 2^-kmax
+set kmin=7           # minimum timestep = 2^-kmin
+set fac=0.01         # time step control: tau &lt; fac/|acc|
+set fph=0.04         # time step control: tau &lt; fph/|phi|
+set tgrow=40         # Disc growth time
+set seed=1           # seed for RNGs
+set nmax=12          # maximum radial "quantum number" in potential expansion
+set lmax=8           # maximum angular "quantum number" in potential expansion
+set debug=2          # debug level used to run all falcON programs
+</pre>
+<p> 
+<h2><a name='sect4' href='#toc4'>Example</a></h2>
+The script take a fair amount of CPU. Here is an example with 12000
+stars in the halo, and 2000 in the disk (which is 1/100 of the script defaults):
+<br>
+<pre>% /usr/bin/time mkgalaxy name=gal1
+mkgalaxy:    building a N-body model of a disc galaxy
+mkgalaxy: 0  starting falcON and setting parameters
+mkgalaxy: 1  Building the initial spheroid models
+mkgalaxy:    creating the initial halo with N=600000 in file gal2.h
+mkgalaxy:    creating the initial bulge with N=20000 in file gal2.b
+mkgalaxy:    stacking initial halo and bulge in file gal2.s
+mkgalaxy: 2  Growing the full disc potential
+mkgalaxy:    symmetrize initial spheroid snapshot (and doubling body number)
+mkgalaxy:    start simulation to grow disc potential from monopole
+mkgalaxy:    (log output into gal2.grow) ...
+mkgalaxy: 3  Populating the disc
+mkgalaxy:    extracting bulge into file gal2.b (needed for bulge potential)
+mkgalaxy:    extracting halo into file gal2.h (needed for halo potential)
+mkgalaxy:    creating the initial disc with N=200000 in file gal2.d
+mkgalaxy:    stacking all components into file gal2.snp
+mkgalaxy:    finished. snapshots generated:
+             gal2.snp: complete galaxy model ready to use
+4586.25user 94.47system 1:18:01elapsed 99%CPU 
+% snapmstat gal2.snp
+0 0:199999       =  200000 Mass= 5.32538e-06 TotMas= 1.06508 CumMas=  1.06508
+1 200000:239999  =   40000 Mass= 5e-06       TotMas= 0.2     CumMas=  1.26508
+2 240000:1439999 = 1200000 Mass= 2e-05       TotMas= 24      CumMas= 25.2651
+# Found 3 species:
+select=0:199999,200000:239999,240000:1439999 
+</pre>
+<p> Stage 3 takes a long time. 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<a href='mkkd95.1.html'>mkkd95(1NEMO)</a>
+, <a href='magalie.1.html'>magalie(1NEMO)</a>
+, <a href='mkgalaxy2.1.html'>mkgalaxy2(1NEMO)</a>
 
-<dt><b>out=</b><i>snapfile</i>
-</dt>
-<dd></dd>
-
-<dt><b>nbody=</b><i>integer</i> </dt>
-<dd>Number of particles </dd>
-
-<dt><b>seed=</b><i>integer</i> </dt>
-<dd>seed for the random number
-generator. The default (0) the unix time clock will be used. Default: 0 </dd>
-</dl>
-
-<h2><a name='sect4' href='#toc4'>See
-Also</a></h2>
-<a href='X.1.html'><b>X</b>(1)</a>
-, <a href='xscreensaver.1.html'><b>xscreensaver</b>(1)</a>
-, <a href='xlock.1.html'><b>xlock</b>(1)</a>
+<p>
+<a href='https://ui.adsabs.harvard.edu/abs/2007MNRAS.378..541M/abstract'>https://ui.adsabs.harvard.edu/abs/2007MNRAS.378..541M/abstract</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Original Amiga version by Uli
-Siegmund &lt;uli@wombat.okapi.sub.org&gt;  for EGS in Cluster.<br>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
+$FALCON/doc
+    mkgalaxy, mkgalaxy_user_guide.pdf <br>
+<pre>file         status                content/meaning                    
+    
+-------------------------------------------------------------------------- 
+1. Building the initial spheroid models                                
+   
+$name.prm    generated             accfile for "Monopole"              
+   
+$name.h      generated &amp; deleted   snapshot: initial halo               
+  
+$name.b      generated &amp; deleted   snapshot: initial bulge              
+  
+$name.s      generated             snapshot: initial bulge + halo      
+   
+2.  Growing the full disc potential                                    
+    
+$name.prm    required  &amp; deleted   accfile for "Monopole"               
+  
+$name.s      required  &amp; deleted   snapshot: initial bulge + halo       
+  
+$name.sym    generated &amp; deleted   snapshot: symmetrised $name.s         
  
-<p> Ported from Cluster/EGS to C/Intuition by Harald Backert. 
-<p> Ported to X11
-and xlockmore by  Hubert Feyrer &lt;hubert.feyrer@rz.uni-regensburg.de&gt;, 30-Sep-94.
-
-<p> Modified by David Bagley &lt;bagleyd@bigfoot.com&gt;, 23-Oct-94. 
-<p> Modified by Dave
-Mitchell &lt;davem@magnet.com&gt;, 7-Apr-97. 
-<p> Ability to run standalone or with <i>xscreensaver</i>
-added by  Jamie Zawinski &lt;jwz@jwz.org&gt;, 10-May-97. 
-<p> NEMO program by Peter Teuben
-&lt;teuben@astro.umd.edu&gt;, 11-may-2002. <p>
+$name.grow   generated             logfile of gyrfalcON run            
+   
+$name.S2     generated             snapshot: final bulge + halo
+3,  Populating the disc                                               
+      
+$spheroid    required              snapshot: final bulge + halo       
+     
+$name.d      generated &amp; deleted   snapshot: initial disc               
+   
+$name.snp    generated             snapshot: final disc + bulge + halo 
+    
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
+ Paul McMillan, Walter Dehnen (2007-2010)<br>
+ 
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
+<br>
+<pre>2007  original version   (PM/WD)
+7-feb-2021 Fixes for name collision on Mac   PJT
+</pre>
+<p> 
+<p> <p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
-<li><a name='toc1' href='#sect1'>Synopsis</a></li>
+<li><a name='toc1' href='#sect1'>synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc4' href='#sect4'>Example</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

@@ -4,6 +4,8 @@
 
 set dir=$NEMO/usr/trenti/CGS
 
+echo CGS: Working in $dir
+
 if (-e $dir) then
   cd $dir
   make install

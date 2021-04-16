@@ -32,7 +32,7 @@ string defv[] = {
   "scale=1\n        Scale image values",
   "H=71,0.27,0.73\n Hubble Constant, in case [d] is 'z', with optional WM and WV",
   "nsteps=1000\n    Integrations steps in the cosmo code (accuracy)",
-  "VERSION=3.0a\n   16-mar-2013 PJT",
+  "VERSION=3.0b\n   9-apr-2021 PJT",
   NULL,
 };
 
@@ -385,7 +385,7 @@ void CC(real z, int n, int verbose)
   /*  tangential comoving distance */
 
   ratio = 1.00;
-  x = sqrt(abs(WK))*DCMR;
+  x = sqrt(fabs(WK))*DCMR;
   if (x > 0.1) {
     if (WK > 0) 
       ratio =  0.5*(exp(x)-exp(-x))/x ;
@@ -408,7 +408,7 @@ void CC(real z, int n, int verbose)
   /* comoving volume computation */
 
   ratio = 1.00;
-  x = sqrt(abs(WK))*DCMR;
+  x = sqrt(fabs(WK))*DCMR;
   if (x > 0.1) {
     if (WK > 0) 
       ratio = (0.125*(exp(2.*x)-exp(-2.*x))-x/2.)/(x*x*x/3.);

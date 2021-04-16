@@ -21,10 +21,52 @@ contains a timestamp of that creation.
 <hr>
 -->
 
-<A NAME=4_2_1>
-<H2> 4.2.1:  in github</H2>
+<A NAME=4_2_2>
+<H2> 4.2.2:  in github</H2>
 <UL>
-  <LI> ...
+  <LI> (15-apr-2021) Trying out a new automated <A HREF=man_html/bibcode.html>bibcode</A> listing which summarized and links
+    all codes in NEMO that have refereed papers on <A HREF=https://ui.adsabs.harvard.edu/>ADS</A>
+    (as opposed to <A HREF=https://paperswithcode.com>Papers with Code</A>)
+  <LI> (7-apr-2021) Apple's long SIP arm reared it's ugly head again, a side effect of the MAC fix caused
+    falcon's bodyfun to fail on linux. should be fixed now.
+  <LI> Benchfile introduced, with a function similar to the Testfile, all parallel to the Makefile
+  <LI> The "make bench3" command will now run 5 nbody codes, each tuned to take 5sec cpu on an i5-1135G7
+   <pre>
+     $ /usr/bin/time src/scripts/nemo.bench mode=3
+     NEMOBENCH: (2021-03-21) bench3566979 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 bsf=0 tmp=bench3566979
+     Linux XPS13 5.6.0-1048-oem #52-Ubuntu SMP Thu Feb 18 11:37:00 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+     Fri 09 Apr 2021 08:44:36 PM EDT
+     Equal CPU time per code, no output files to check
+     Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode
+     Tstop: 4.28 5.64 7.89 787400.0 6.66 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz]
+     .1.23.45.
+     CPU_USAGE  directcode  :  5.00  5.00  0.00  0.00  0.00  1840028621
+     CPU_USAGE  gyrfalcON   :  4.97  4.96  0.00  0.00  0.00  1840029122
+     CPU_USAGE  hackcode1   :  5.01  5.00  0.00  0.00  0.00  1840029619
+     CPU_USAGE  orbint      :  5.04  5.04  0.00  0.00  0.00  1840030121
+     CPU_USAGE  potcode     :  5.04  5.02  0.01  0.00  0.00  1840030625
+     Cleaning bench3566979 (use clean=0 to prevent this)
+     25.07user 0.02system 0:25.09elapsed 100%CPU (0avgtext+0avgdata 7084maxresident)k
+     72inputs+4040outputs (3major+6909minor)pagefaults 0swaps
+   </pre>
+   If you run this on older or newer machines, you will most likely see a divergence in speed ratios between the different programs.
+</UL>
+
+
+<A NAME=4_2_1>
+<H2> 4.2.1:  12-feb-2021</H2>
+<UL>
+  <LI> (12-feb-2021) wrapped up the MAC SIP issues (or so I thought)
+  <LI> (11-feb-2021) added new program 
+        <A HREF=man_html/ccdspec.1.html>ccdspec</A> 
+    with a simple correlation statistic to assess normalcy
+  <LI> (8-feb-2021) back to previous default: shared libs remains enabled by default, so on a mac you will need to use
+    --disable-shared now.
+  <LI> (6-feb-2021) major issue on recent Mac:  latest (clang 11.0.0)) Xcode does not compile gyrfalcON anymore,
+    but brew based gcc-10 (10.2.0) works. More importantly, the SIP implementation causes shared libraries to not work
+    in scripts, or any system that will then filter out $DYLD_LIBRARY_PATH.   Thus the default is now that
+    shared libraries will not be made. Use --enable-shared if you want it back (e.g. on linux). Note that the NEMO
+    library has not worked in shared library mode for a while.
 </UL>
 
 <A NAME=4_2_0>
@@ -41,18 +83,18 @@ given the large number of updates.
    Wed 27 Jan 2021 10:47:32 PM EST
    Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint
    Skipping BSF testing. Use bsf=1 to enable this.
-   CPU_USAGE ccdpot :     6.21    6.20 0.00  0.00 0.00  1770905191
-   CPU_USAGE directcode : 3.20    3.19 0.00  0.00 0.00  1770903670
-   CPU_USAGE gyrfalcON :  2.39    2.38 0.00  0.00 0.00  1770904169
-   CPU_USAGE hackcode1 :  1.77    1.76 0.00  0.00 0.00  1770903991
-   CPU_USAGE mkorbit :    0.00    0.00 0.00  0.00 0.00  1770905812
-   CPU_USAGE mkplummer :  0.01    0.00 0.00  0.00 0.00  1770904168
-   CPU_USAGE mkspiral :   5.72    4.02 1.69  0.00 0.00  1770904618
-   CPU_USAGE orbint :     0.86    0.84 0.00  0.00 0.00  1770905812
-   CPU_USAGE potcode :    2.09    2.08 0.00  0.00 0.00  1770904408
+   CPU_USAGE directcode : 2.35    2.35 0.00  0.00 0.00  1750203216
+   CPU_USAGE gyrfalcON :  1.75    1.75 0.00  0.00 0.00  1750203579
+   CPU_USAGE hackcode1 :  1.26    1.26 0.00  0.00 0.00  1750203452
+   CPU_USAGE mkorbit :    0.00    0.00 0.00  0.00 0.00  1750204776
+   CPU_USAGE mkplummer :  0.01    0.00 0.00  0.00 0.00  1750203578
+   CPU_USAGE mkspiral :   4.26    3.09 1.16  0.00 0.00  1750203905
+   CPU_USAGE orbint :     0.64    0.64 0.00  0.00 0.00  1750204777
+   CPU_USAGE potcode :    1.49    1.49 0.00  0.00 0.00  1750203755
    Processor:  11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
-   20.55user 1.93system 0:22.52elapsed 99%CPU (0avgtext+0avgdata 174444maxresident)k
-   1032inputs+4413992outputs (1major+510675minor)pagefaults 0swaps
+   Cleaning bench927512 (use clean=0 to prevent this)
+   15.08user 1.32system 0:16.40elapsed 100%CPU (0avgtext+0avgdata 174172maxresident)k
+
 </pre>
 
   <LI> (jan-2021) CCD images should now all be using a reference pixel, where in the
@@ -129,7 +171,10 @@ for orbits, is available as
 </UL>
   
 <A NAME=4_1_0>
-<H2> 4.1.0:  10 December 2019 (a.k.a. the IAS release) </H2>
+  <H2> 4.1.0:  10 December 2019 (a.k.a. the IAS release) </H2>
+
+  Inspired by a visit to the IAS, including a presentation, this was released before the drive back to DC.
+  
 <UL>
   <LI> Added the <A HREF=https://github.com/teuben/nemo/blob/master/src/orbit/potential/data/hh64.c>
     Henon Heiles 1964 potential</A>, another Princeton contribution to the field!
@@ -155,7 +200,10 @@ for orbits, is available as
 </UL>
 
 <A NAME=4_0_0>
-<H2> 4.0.0:  1 January 2018 (a.k.a. the ESO release) </H2>
+  <H2> 4.0.0:  1 January 2018 (a.k.a. the ESO release) </H2>
+
+  During my mini-sabattical at ESO found some time to switch from CVS to GIT.
+  
 <UL>
 <LI> conversion of our source code based in CVS to GIT. Source on
   <A HREF=https://github.com/teuben/nemo>  https://github.com/teuben/nemo</A>, docs now served via github pages on

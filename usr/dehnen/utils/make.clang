@@ -3,7 +3,7 @@
 # sets library sub-directory and flags for clang compiler
 # to be included by makefile 
 #
--include make.sh
+include ../utils/make.sh
 
 EXT             := .clang
 CXX             := clang++

@@ -93,32 +93,35 @@ EOF_BULGEROT
 </pre>
 <h2><a name='sect5' href='#toc5'>Benchmark</a></h2>
 The default benchmark will produce a logfile of which the header
-and tail end should look as follows: <br>
+and tail end should look as follows (where at 2.5 kpc the rotation curve
+is 235.148 km/s) <br>
 <pre>#    radius     intensity      density         mass        velocity   
 
 #    (kpc)      (kg/m^2)       (kg/m^3)       (Msun)        (km/s)     
     2.490000  0.224088D-20  0.827590D-40  0.323728D+09  0.235621D+02
     2.500000  0.182313D-20  0.671960D-40  0.323728D+09  0.235148D+02
-@inferno:   219.102u 0.000s 3:39.28 99.9%     gcc      3.4.6  i7-3820 CPU @ 3.60GHz
-@inferno:   167.281u 0.000s 2:47.42 99.9%     gfortran 4.4.7  i7-3820 CPU @ 3.60GHz
-@nemo2:      77.328u 0.004s 1:17.50 99.7%     gfortran 4.7.3  i7-3630QM CPU @
-2.40GHz
+@inferno:   219.102u 0.000s 3:39.28 99.9%     gcc      3.4.6  i7-3820 @ 3.60GHz
+@inferno:   167.281u 0.000s 2:47.42 99.9%     gfortran 4.4.7  i7-3820  @ 3.60GHz
+@nemo2:      77.328u 0.004s 1:17.50 99.7%     gfortran 4.7.3  i7-3630QM @ 2.40GHz
+@xps13:      43.85u  0.00s  0:43.85 100%      gfortran 9.3.0  i5-1135G7 @ 2.40GHz
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='rotcurves.1.html'>rotcurves(1NEMO)</a>
 , <a href='potential.5.html'>potential(5NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
  <p>
-<a href='http://adsabs.harvard.edu/abs/2008MNRAS.385.1359N'>http://adsabs.harvard.edu/abs/2008MNRAS.385.1359N</a>
+<a href='https://ui.adsabs.harvard.edu/abs/2008MNRAS.385.1359N'>https://ui.adsabs.harvard.edu/abs/2008MNRAS.385.1359N</a>
 
  (Noordermeer, E. 2008, MNRAS, 385, 1359) 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect7' href='#toc7'>Ads</a></h2>
+@ads 2008MNRAS.385.1359N 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 <p>
 NEMO/usr/noordermeer/bulgerot/<tt> </tt>&nbsp;<tt> </tt>&nbsp;bulgerot.f
 runbulgerot.c 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Edo Noordermeer (NEMO interface: Peter Teuben) 
-<h2><a name='sect9' href='#toc9'>Update
+<h2><a name='sect10' href='#toc10'>Update
 History</a></h2>
 <br>
 <pre>2007?     <tt> </tt>&nbsp;<tt> </tt>&nbsp;V1 original fortran release as bulgerot<tt> </tt>&nbsp;<tt> </tt>&nbsp;EN
@@ -135,9 +138,10 @@ History</a></h2>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Benchmark</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>Ads</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

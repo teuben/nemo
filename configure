@@ -648,6 +648,7 @@ PNG_LIB
 MACOS_LIBS
 CCSHARED
 F77_CMAIN_FFLAGS
+FC
 FLIBS
 ac_ct_F77
 FFLAGS
@@ -666,6 +667,7 @@ falcon_OPENMP
 MAKEDIRS
 MAKELIBS
 falcon_NO_NATIVE
+NO_SHARED_LIBS
 MAKE
 RANLIB
 SET_MAKE
@@ -750,6 +752,8 @@ ac_user_opts='
 enable_option_checking
 with_csh
 enable_debug
+enable_shared
+enable_clang
 enable_pedantic
 enable_native
 enable_single
@@ -1432,16 +1436,18 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
+  --disable-shared        disable shared libraries? (needed for falcON on MAC)
+  --enable-clang          use clang compiler
   --enable-pedantic       compile for pedantic gcc
   --enable-native         optimize for native CPU
   --enable-single         single-precision
   --enable-float          single-precision
-  --enable-double         double-precision
+  --enable-double         double-precision (default)
   --enable-mixed          mixed-precision
   --enable-gcov           gnu coverage tool
   --enable-lfs            large-file-size (files over 2GB)
   --disable-fortran       don't use any Fortran
-  --disable-falcon        enable falcON
+  --disable-falcon        disable falcON
   --enable-png            force the use of PNG for pgplot
   --enable-plplot         Activate PLPlot library (default = yes)
   --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
@@ -5705,6 +5711,34 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
+# Check whether --enable-shared was given.
+if test "${enable_shared+set}" = set; then :
+  enableval=$enable_shared; ok=$enableval
+else
+  ok=yes
+fi
+
+if test "$ok" = "yes"; then
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
+fi
+
+
+# Check whether --enable-clang was given.
+if test "${enable_clang+set}" = set; then :
+  enableval=$enable_clang; ok=$enableval
+else
+  ok=no
+fi
+
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang"
+	FC="flang"
+	F77="flang"
+fi
+
 # Check whether --enable-pedantic was given.
 if test "${enable_pedantic+set}" = set; then :
   enableval=$enable_pedantic; ok=$enableval
@@ -6603,6 +6637,8 @@ fi
 XINCS="$X_CFLAGS"
 if test -d /usr/X11R6/lib64; then
   XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11R6/lib64 -lXext -lX11 $X_EXTRA_LIBS"
+elif test -d /usr/X11/lib; then
+  XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11/lib -lXext -lX11 $X_EXTRA_LIBS"
 else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
@@ -7883,6 +7919,9 @@ else
   { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: no FORTRAN compiler" >&5
 $as_echo "$as_me: WARNING: no FORTRAN compiler" >&2;}
 fi
+
+FC=$F77
+
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for f77 flags to use C main function" >&5
 $as_echo_n "checking for f77 flags to use C main function... " >&6; }
@@ -11079,6 +11118,21 @@ case $yapp_name in
         ps)
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
+          ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using dollar" >&5
+$as_echo "$as_me: WARNING: C using dollar" >&2;}
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using" >&5
+$as_echo "$as_me: WARNING: C using" >&2;}
+	  fi
+	  YAPP_DEF="/xs"
           ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then

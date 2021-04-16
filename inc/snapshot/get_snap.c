@@ -1,4 +1,4 @@
-
+#include <history.h>
 #ifdef NEWIO
 #include <snapshot/get_snap-ran.c>
 #else

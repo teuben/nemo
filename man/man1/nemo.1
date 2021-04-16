@@ -1,6 +1,12 @@
-.TH NEMO 1NEMO "26 December 2020"
+.\"
+.\"  This entry NEMO man page should hyperlink to most/all man pages....
+.\"
+
+.TH NEMO 1NEMO "17 March 2021"
+
 .SH NAME
 nemo, astronemo \- outline the NEMO package
+
 .SH DESCRIPTION
 \fBnemo\fP is a computer package, there is no program with that name. On linux
 there is also the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
@@ -36,17 +42,22 @@ with the unix style of command line tools, piping etc.:
 
 .nf
 
-- programs use a set of key=value command line arguments, minimum match works, but you cannot repeat keywords
-    = the --help or help=h are ways to get inline help from a program and remind you of the keyword names
+- programs use a set of key=value command line arguments,
+  minimum match works, but you cannot repeat keywords
+    = the --help or help=h are ways to get inline help from a program
+      and remind you of the keyword names
     = keyword values can be math expressions (see \fInemoinp(1NEMO)\fP)
     = the UNIX \fIman(1)\fP command will get offline help
 
 - NEMO can use pipes efficiently:
-    = The UNIX stdin and stdout are represented with a dash (-), so piping can become a little awkward
-    = The UNIX /dev/null is represented with a dot (.), like a black hole sucking up everything
+    = The UNIX stdin and stdout are represented with a dash (-),
+      so using pipes can become a little awkward
+    = The UNIX /dev/null is represented with a dot (.),
+      like a black hole sucking up everything
 .fi
 
 .SH SYNOPSIS
+
 .nf
 \fBprogram --help\fP
 \fBprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
@@ -63,7 +74,8 @@ The easiest way is to add the appropriate line to your \fI.cshrc\fP or
 
         \fBsource /opt/nemo/nemo_start.sh\fP
 	
-or for the die hards
+or for the die hard (t)csh users we still have
+
 
         \fBsource /opt/nemo/nemo_start.csh\fP
 .fi
@@ -71,6 +83,7 @@ or for the die hards
 If you need more control over your NEMO environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
 or consult one of your local friendly NEMO users.
+
 .SH HOW TO RUN NEMO PROGRAMS
 NEMO programs can be run just as any other command in Unix, in that sense
 NEMO is nothing more than an extension of Unix. NEMO programs usually
@@ -156,7 +169,9 @@ The alternative would have been
     snapprint in=tmp
     rm tmp
 .fi
+
 .SH HOW TO RUN non-NEMO PROGRAMS
+
 Over the times NEMO has incoorporated a number of non-NEMO programs,
 with varying degrees of input parameter schemes. Some via
 parameter files, some interactive input, some a command line interface
@@ -185,18 +200,40 @@ assumed to be in the standard Unix search path ($PATH).
 Although these run* programs use a fairly common method to run
 the non-NEMO programs, they have not all been unified
 as is proposed in \fIrun(3NEMO)\fP.
+
+.SH HELP on GIPSY and MIRIAD
+Some NEMO programs refer to non-NEMO programs in the "man" style. For example
+\fIccdpot(1NEMO)\fP refers to \fIpotential(GIPSY)\fP and
+\fIpotfft(MIRIAD)\fP. If those packages are in your shell environment,
+the following commands should give their version of the online help:
+.nf
+
+      man -l  $MIRDOC/man/man1/potfft.1
+
+      more $gip_root/tsk/potential.dc1
+.fi
+
 .SH PROGRAMMING
 You may need to do some sherlocking here.
-You have probably seen the configure.ac and makedefs file.
-The $NEMOLIB/makedefs is the active file.  The \fImknemo(8NEMO)\fP
-will help you (re)compile programs, though
+You have probably seen the $NEMO/configure.ac and $NEMO/makedefs file,
+though the $NEMOLIB/makedefs is the active file.  The \fImknemo(8NEMO)\fP script
+will help you (re)compile programs, though sometimes
 \fIbake(8NEMO)\fP can do a better job in a local directory.
+
 .SH SEE ALSO
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
 nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(1NEMO), run(3NEMO), mknemo(8NEMO),
+mkman(8NEMO), template(8NEMO),
 pipestatus(l)
+
+.nf
+https://www.unix.com/man-page-repository.php - Man Page Repository
+https://man7.org/linux/man-pages/man1/man.1.html - The Linux man-pages project
+.fi
+
 .SH AUTHOR
 Peter Teuben
+
 .SH FURTHER INFORMATION
 The \fINEMO Users/Programmers Guide\fP contains most of
 the information you need to get down to the guts of the system.
@@ -205,9 +242,20 @@ Various \fIman(1NEMO)\fP pages explain programs(1), subroutine libraries(3)
 file formats(5) and system management(8).
 .PP
 NEMO homepage \fIhttp://www.astro.umd.edu/nemo\fP and github page \fIhttps://github.com/teuben/nemo\fP.
+
 .SH BUGS
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these
 changes if they should. Keeping good cross references in the manual
 pages might help. However, the \fBhelp=\fP description should always
-be up to date, since it is derived from the code itself.
+be up to date, since it is derived from the code itself. And there
+is always https://github.com/teuben/nemo/issues
+
+.SH HISTORY
+.ta +1i +4i
+.nf
+1986		V1 Initial Development	Barnes/Hut/Teuben
+1994		V2 UMD release	Teuben
+2001		V3 UMD release using CVS	Teuben
+2017		V4 UMD release using git	Teuben
+.fi

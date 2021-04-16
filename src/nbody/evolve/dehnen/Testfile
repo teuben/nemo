@@ -1,5 +1,5 @@
 DIR = src/nbody/evolve/dehnen
-BIN = gyrfalcON mkhalo
+BIN = gyrfalcON mkhalo s2s
 NEED = $(BIN) snapscale snapmradii
 
 help:
@@ -15,7 +15,7 @@ clean:
 NBODY = 10
 TSTOP = 2
 
-all: gyrfalcON mkhalo
+all: gyrfalcON mkhalo s2s
 
 gyrfalcON:
 	@echo Running $@
@@ -42,9 +42,14 @@ gyrfalcON:
 #   now do some work on manipulators
 
 #   mkgalaxy is a script that composites galaxies.  The script should be installed in $NEMOBIN
+#   the default run will have 1.4M particles and take a 70-90 minutes to compute, too long
+#   for the testsuite.
 
 mkgalaxy:
 	$(EXEC) mkgalaxy name=test-mkgalaxy
 
 mkhalo:
 	$(EXEC) mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60 r_c=0 b=0 r_a=0 seed=1 eps=0.02 giveF=f accname=Halo accpars=0,0.2,0.2,1,4,1,0,0  debug=2 > mkhalo1.log 
+
+s2s:
+	$(EXEC) s2s p1024.in p1024.out3 filter='i<#0' params=512

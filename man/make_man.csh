@@ -26,7 +26,8 @@ echo -n "<A HREF=index5.html>man5</A>,"
 echo -n "<A HREF=index6.html>man6</A>,"
 echo -n "<A HREF=index8.html>man8</A>,"
 echo -n "<A HREF=indexl.html>manl</A>,"
-echo -n "<A HREF=whatis.html>whatis</A>]".
+echo -n "<A HREF=whatis.html>whatis</A>,".
+echo -n "<A HREF=bibcode.html>bibcode</A>]".
 echo "</CENTER>"
 echo "<H1>Nemo Reference Manual($sec)</H1>"
 echo "Created on `hostname`: `date` <P>"

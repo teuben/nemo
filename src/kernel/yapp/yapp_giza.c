@@ -14,23 +14,10 @@ extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
 
 /* make COLOR and PG6 (short names only) now the defaults */
 
-#define COLOR
 #define PG6
+#include "fpgplot.h"
 
-#ifdef PG6
-#define  pgbegin_  pgbeg_
-#define  pgcurse_  pgcurs_
-#define  pglabel_  pglab_
-#define  pgmtext_  pgmtxt_
-#define  pgncurse_ pgncur_
-#define  pgpaper_  pgpap_
-#define  pgpoint_  pgpt_
-#define  pgptext_  pgptxt_
-#define  pgvport_  pgsvp_
-#define  pgvsize_  pgvsiz_
-#define  pgvstand_ pgvstd_
-#define  pgwindow_ pgswin_
-#endif
+#define COLOR
 
 local real   dxymax;    /* size of user window */
 local int    iterm;     /* terminal number */
@@ -434,7 +421,7 @@ int pl_screendump(string fname)
   return 0;
 }
 
-local bell()
+void local bell()
 {
     int ring=7;
     putchar(ring);
@@ -542,7 +529,7 @@ int pl_cursor(real *x, real *y, char *c)
 #define LIGHT_GRAY	14
 #define	WHITE   	15
 
-local cms_rgbsetup()
+local void cms_rgbsetup()
 {
   ncolors = WHITE+1;
   /* default PGPLOT  colors: although, defined here, plpalette is not called */
