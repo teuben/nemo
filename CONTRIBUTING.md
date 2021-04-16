@@ -1,0 +1,166 @@
+# Dependencies
+
+Building NEMO requires following minimum dependencies:
+
+* Unix tools, such as: make, csh, bash, git
+* C/C++/Fortran compiler
+* pgplot (optional, but highly recommended)
+
+# git
+
+There are two ways you could have obtained the NEMO source code:
+
+1. You cloned from the *upstream* : https://github.com/teuben/nemo . This is fine
+if you just want to compile and run, but not ideal if you make modifications and
+want to shared them back to the *upstream* via a *pull request* (PR). You
+can however "repair" your local repo, discussed below.
+
+2. You forked nemo from that upstream, and cloned it locally from the
+repo in your own github account. This is the ideal method, but you
+will still need to set the *upstream* manually if you used
+github.com. See also the **gh** command below for an even better way.
+
+3. Sadly on github.com you will also find a nemo.zip copy of the repo
+that does actually work fine, except it's a frozen snapshot and cannot
+be efficiently used to collaborate. However, if you cannot install git,
+this is probably the only way to bootstrap yourself. For example
+https://github.com/teuben/nemo/archive/refs/heads/master.zip, which
+will create a directory *nemo-master*. If you need another branch,
+
+Familiarize yourself with the concept of a pull request on github. There
+are some links at the bottom of this document.
+
+
+
+## gh:   github CLI
+
+You can safely skip this section if you work via github.com, though the **gh** command
+described here is by far the fastest and easiest way to work with the github ecosystem.
+
+A relatively new addition to github is called "github CLI", which is the command
+**gh** through which many github.com actions can now be run from terminal commands.
+Besides [installing](https://cli.github.com/manual/installation)
+it once, you also need to once authenticate via your github account:
+
+      gh auth login
+
+after which you could create your own fork, and a clone locally in just one step:
+
+      gh repo fork https://github.com/teuben/nemo
+
+If all is well, the following commands should show the correct *origin* and *upstream*:
+
+      git config --local remote.upstream.url
+          >>> git@github.com:teuben/nemo.git
+      git config --local remote.origin.url
+          >>> git@github.com:YOURNAME/nemo.git
+
+None of these should be blank!
+
+## 2. Cloning your personal fork
+
+If you have cloned your fork
+
+      git clone https://github.com/YOURNAME/nemo
+
+you only need to set the upstream:
+
+      git remote add    upstream https://github.com/teuben/nemo
+
+## 1. Cloning the official upstream
+
+If you happen to have cloned the official *upstream*
+
+      git clone https://github.com/teuben/nemo
+
+then things are a bit more complicated, because you should have cloned your
+fork. However, the following commands will fix this
+(assuming you went to github.com and made that fork):
+
+      git remote rename origin upstream
+      git remote add    origin https://github.com/YOURNAME/nemo
+
+Again, the **gh** command now gives  single line shortcut to all this.
+
+## Keeping your clone in sync
+
+You should regularly make sure your local master branch
+is in sync with the upstream master branch. This allows you
+to work in local branches, and be up to date by branching off the
+tip of the upstream master branch.
+
+      git checkout master
+      git fetch upstream
+      git merge upstream/master
+      git status
+      git push
+
+## Working in a branch
+
+A typical example, using a branchname **b1**
+
+      git branch b1
+      git checkout b1
+      <<<edit/add your files; test them; commit them>>
+      git push -u origin b1
+
+Now you can issue a pull request on this branch **b1**.
+
+You can even delete a branch, once it has been accepted as a pull request and merged
+back in the upstream.
+
+      git checkout master
+      git branch -D b1
+      git push origin --delete b1
+
+# Tests
+
+From top level in NEMO there are a few basics regression tests and benchmarks:
+
+      make check
+      make bench
+      make bench3
+
+The **check** depends on the many **Testfile** sprinkled throughout NEMO.  Although
+you can now find a few **Benchfile** as well, they have not been put under a top level
+target, so the current bench is hardcoded via a script **src/scripts/nemo.bench**.
+
+# Debugging
+
+Most applications are built using variables defined in the $NEMOLIB/makedefs file. So
+some hacking is allowed by directly editing this file, with the caveat you are then
+bypassing the **configure** step of the install, which also does modify some other files.
+Notably the **falcON** package has some extra dependancies that start with configure.
+
+NEMO uses recursive Makefiles, and many things (see google) have been written why they
+are bad.
+
+## Debuggging NEMO applications
+
+Consult the local Makefile of the application. You should be able to override the compiler (CC, CXX, FC)
+and options. If the application was integrated into NEMO, there should be a line
+
+      include $(NEMOLIB)/makedefs
+
+in that Makefile.
+
+
+An example:
+
+      cd $NEMO/usr/trenti/CGS
+      make clean install FC=flang FFLAGS=-O3
+      make bench2
+
+would create an alternate (and as it happens twice as fast as with gfortran) of the CGS integrator.
+
+
+# References
+
+Some references on git and git workflows:
+
+* https://docs.github.com/en/github/getting-started-with-github/fork-a-repo.
+* http://docs.astropy.org/en/stable/development/workflow/development_workflow.html
+* https://www.atlassian.com/git/tutorials/comparing-workflows
+* https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
+* http://physics.mnstate.edu/craig/git-novice-pyastro/
+* https://www.sitepoint.com/quick-tip-sync-your-fork-wit
