@@ -25,20 +25,19 @@ that does actually work fine, except it's a frozen snapshot and cannot
 be efficiently used to collaborate. However, if you cannot install git,
 this is probably the only way to bootstrap yourself. For example
 https://github.com/teuben/nemo/archive/refs/heads/master.zip, which
-will create a directory *nemo-master*. If you need another branch,
+will create a directory *nemo-master*. This also works for other branches.
 
 Familiarize yourself with the concept of a pull request on github. There
 are some links at the bottom of this document.
 
 
-
 ## gh:   github CLI
 
-You can safely skip this section if you work via github.com, though the **gh** command
+You can safely skip this section if you prefer to work via github.com, though the **gh** command
 described here is by far the fastest and easiest way to work with the github ecosystem.
 
-A relatively new addition to github is called "github CLI", which is the command
-**gh** through which many github.com actions can now be run from terminal commands.
+A relatively new addition to github is called "github CLI", which is implemented via the command
+**gh** through which many github.com actions can now be run as terminal commands.
 Besides [installing](https://cli.github.com/manual/installation)
 it once, you also need to once authenticate via your github account:
 
@@ -80,7 +79,9 @@ fork. However, the following commands will fix this
       git remote rename origin upstream
       git remote add    origin https://github.com/YOURNAME/nemo
 
-Again, the **gh** command now gives  single line shortcut to all this.
+Again, the **gh** command now gives a single line shortcut to all this:
+
+      gh repo fork https://github.com/teuben/nemo
 
 ## Keeping your clone in sync
 
@@ -104,7 +105,9 @@ A typical example, using a branchname **b1**
       <<<edit/add your files; test them; commit them>>
       git push -u origin b1
 
-Now you can issue a pull request on this branch **b1**.
+Now you can issue a pull request on this branch **b1**.  There is a way to do this
+via the **gh pr** command sequence. More about that in a future revision of this
+document.
 
 You can even delete a branch, once it has been accepted as a pull request and merged
 back in the upstream.
