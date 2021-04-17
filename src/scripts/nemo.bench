@@ -18,6 +18,7 @@
     bsf=0
    time=/usr/bin/time
    help=help=cm
+   ften=1
 
 for arg in $*; do\
    export $arg
@@ -26,10 +27,20 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2021-03-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2021-04-17) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
+
+if [ $mode == 10 ]; then
+    for bf in $(find $NEMO/src -name Benchfile) $(find $NEMO/usr -name Benchfile); do
+	echo ===========================================================
+	echo Benchfile $bf
+	make  -f $bf bench10 FTEN=$ften
+    done
+    echo ===========================================================
+    exit 0
+fi
 
 if [ $mode == 2 ]; then
     rm -f s0
