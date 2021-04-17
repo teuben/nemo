@@ -1,4 +1,6 @@
-IR       = usr/trenti/CGS
+# -*- makefile -*-
+
+DIR       = usr/trenti/CGS
 BENCH     = bench10
 BENCHDATA = 
 LOG       = /tmp/nemobench.log
