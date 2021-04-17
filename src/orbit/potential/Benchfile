@@ -6,9 +6,10 @@ BENCHDATA = bench1.ccd
 LOG       = /tmp/nemobench.log
 BIN       = potccd
 NEED      = $(BIN) 
+FTEN      = 1
 
 POTNAME   = gauss
-POTPARS   = 0,1,1
+POTPARS   = 0,1,1,1,0.25
 DR        = 0.05
 
 help:
@@ -46,5 +47,6 @@ bench3:
 	nemobench ccdpot bench1.ccd .
 
 
+R10=9.45
 bench10:
-	nemobench potccd . $(POTNAME) $(POTPARS) x=0:10:$(DR) y=0:10:$(DR) z=0:10:$(DR)
+	nemobench potccd . $(POTNAME) $(POTPARS) x=0:9.5:"$(DR)/$(FTEN)**(1/3)" y=0:9.5:"$(DR)/$(FTEN)**(1/3)" z=0:9.5:"$(DR)/$(FTEN)**(1/3)"
