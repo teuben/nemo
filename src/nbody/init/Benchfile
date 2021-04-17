@@ -1,10 +1,12 @@
+# -*- makefile -*-
+
 DIR       = src/nbody/init
 BENCH     = bench0 bench1
 BENCHDATA = bench1.snap
 LOG       = /tmp/nemobench.log
 BIN       = mkplummer
 NEED      = $(BIN) 
-
+FTEN      = 1
 
 help:
 	@echo $(DIR)
@@ -31,3 +33,10 @@ bench1:
 	@echo bench1.snap: 535MB for nbody=10M MBODY=$(MBODY)
 
 #  xps13:  3.13" -> 172 MB/sec
+
+
+
+bench10:
+	nemobench mkplummer . nbody="34700000*$(FTEN)"  seed=123
+
+
