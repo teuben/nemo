@@ -604,6 +604,9 @@ bench2:
 bench3:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=3)
 
+bench10:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
+
 bench5:
 	(cd src/tutor/mp; $(MAKE) bench5)
 
