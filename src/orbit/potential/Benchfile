@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 DIR       = src/orbit/potential
 BENCH     = bench0 bench0d bench1 bench2 bench3
 BENCHDATA = bench1.ccd
@@ -5,6 +7,9 @@ LOG       = /tmp/nemobench.log
 BIN       = potccd
 NEED      = $(BIN) 
 
+POTNAME   = gauss
+POTPARS   = 0,1,1
+DR        = 0.05
 
 help:
 	@echo $(DIR)
@@ -22,7 +27,8 @@ bench1.ccd:
 	@potccd bench1.ccd plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2 >> $(LOG) 2>&1
 
 
-DR = 0.05
+
+
 
 bench0:
 	nemobench potccd . plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2
@@ -38,3 +44,7 @@ bench2:
 
 bench3:
 	nemobench ccdpot bench1.ccd .
+
+
+bench10:
+	nemobench potccd . $(POTNAME) $(POTPARS) x=0:10:$(DR) y=0:10:$(DR) z=0:10:$(DR)
