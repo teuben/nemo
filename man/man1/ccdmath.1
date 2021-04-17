@@ -104,6 +104,7 @@ from the mean:
 .fi
 .SH TIMING
 Performance on Rigel (SUN 3/160, 16Mhz):
+
 .nf
 .ta +1i +2i +2i
 100 * 100	rang: 5.8"	+: 3.4"  	sqrt: 2.6"
@@ -111,15 +112,25 @@ Performance on Rigel (SUN 3/160, 16Mhz):
 300 * 300	rang: 51.8"	+: 31.3"	sqrt: 23.8"
 512 * 512	rang: 152.7"	+: 88.4"	sqrt: 64.2"
 .fi
+
+For some historic amusement, this
+512^2 \fIrang\fP benchmark measured in 1989  took 153s. On a 2021 laptop
+this same benchmark took 0.81/64". Scaling this it means 12,000 times
+faster, in 32 years of evolution of hardware. This was a 4.2GHz i5-1135G7.
+
+
 .SH "SEE ALSO"
 fie(3NEMO), image(5NEMO), tsf(1NEMO), ccdgen(1NEMO), ccdsky(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/image/trans  	ccdmath.c ccdmath.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
