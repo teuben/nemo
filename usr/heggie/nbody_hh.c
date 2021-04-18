@@ -12,7 +12,7 @@
  * Slight modifications for NEMO
  *    - added a Makefile for NEMO integration
  *
- *
+@ads 2003gmbp.book.....H
  */
 
 #include <stdio.h>
