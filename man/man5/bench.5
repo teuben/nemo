@@ -186,15 +186,15 @@ so it should be highly parallizable:
 .nf
     nbody=10000000
     /usr/bin/time mkplummer . $nbody
-    \fB8.77user 1.13system 0:09.90elapsed 99%CPU\fP
+    \fB2.80user 0.45system 0:03.26elapsed 99%CPU\fP
     
     echo mkplummer . $nbody  > run.txt
     echo mkplummer . $nbody >> run.txt
     /usr/bin/time parallel --jobs 1 < run.txt
-    \fB17.72user 2.36system 0:20.07elapsed 100%CPU\fP
+    \fB5.89user 0.83system 0:06.71elapsed 100%CPU\fP
     
     /usr/bin/time parallel --jobs 2 < run.txt
-    \fB17.50user 2.49system 0:10.11elapsed 197%CPU\fP
+    \fB6.00user 0.79system 0:03.44elapsed 197%CPU\fP
 .fi
 
 which follows Amdahl's law close to 100%!
