@@ -4,6 +4,9 @@
 #   to: 
 # stem: https://ui.adsabs.harvard.edu/abs/
 
+# @todo  s/\.1NEMO/\.1/g   and also for 3,5,6,8,l
+
+
 BEGIN {
     url = "https://ui.adsabs.harvard.edu/abs"
 }
