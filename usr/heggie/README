@@ -6,6 +6,10 @@ https://ui.adsabs.harvard.edu/abs/2003gmbp.book.....H
 
 BIBCODE:  2003gmbp.book.....H
 
+Historic notes:
+  nbody.m      Original version, written by D. Heggie (help by Chris Eilbeck?)
+  nbody.c      Version provided by Simon Portegies Zwart
+  nbody_hh.c   SPZ's version, with a simple CLI, adopted by Peter Teuben
 
 
 Benchmark is 1024 particles , 10 dumps, tstop=1.0
