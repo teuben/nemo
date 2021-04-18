@@ -9,9 +9,12 @@ BIBCODE:  2003gmbp.book.....H
 
 
 Benchmark is 1024 particles , 10 dumps, tstop=1.0
+Compilation default is "gcc -g -O2"
 
 CPU          sec
 
 X5550       21.40
+E31280      16.51
+i7-3820     15.43
 i7-8550U     6.49
 i5-1135G7    3.94
