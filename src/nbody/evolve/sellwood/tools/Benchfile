@@ -13,6 +13,7 @@ clean:
 	@rm -fr run1.in run1
 
 NBODY = 1000
+TSTOP = 10
 
 all: $(BIN)
 
@@ -23,7 +24,8 @@ bench1.in:
 
 # old sparc 20 steps (tstop=1) took 4.7"
 # new i5-11
-
+ 
 bench1:	 bench1.in
 	 rm -rf bench1.run
-	 nemobench rungalaxy in=bench1.in outdir=bench1.run tstop=10
+	 nemobench rungalaxy in=bench1.in outdir=bench1.run tstop=$(TSTOP)
+	
