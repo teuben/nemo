@@ -52,11 +52,18 @@ Center c.o.m. ? [t]
 Text headline for output. By default not used.
 .SH EXAMPLES
 Here is a default n=16 sphere, first using the NEMO random number generator, and then the von Hoerner ran57 method:
-.nf
-mkvh60 . 16 seed=123
-### nemo Debug Info: virial radius: 0.871889    v2=0.757276   ek=9.47819
 
-mkvh60 . 16 seed57=0.580128
+.nf
+\fBmkvh60 . 16 seed=123\fP
+### nemo Debug Info: virial radius: 0.740663    v2=0.821627   ek=0.218607 ep=0.632879   K=1.44753
+### nemo Debug Info: snapvscale: 1.20313
+
+\fBmkvh60 . 16 seed57=0.580128\fP
+### nemo Debug Info: SvH seed=0.580128
+### nemo Debug Info: von Hoerner seed57=0.580128 first ran=0.548496
+### nemo Debug Info: virial radius: 0.759762    v2=0.811234   ek=0.261934 ep=0.616969   K=1.17772
+### nemo Debug Info: snapvscale: 1.08523
+
 .fi
 .SH SEE ALSO
 mkhomsph(1NEMO), snapshot(1NEMO)
