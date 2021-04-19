@@ -298,9 +298,9 @@ void nemo_main()
 
   if (Q57) {
     real seed57 = getrparam("seed57");
-    dprintf(0,"von Hoerner seed57=%g first ran=%g\n",seed57,ran_svh57(seed57));
+    dprintf(0,"von Hoerner seed57=%g first ran=%.9f\n",seed57,ran_svh57(seed57));
     for (i=0; i<n; i++)
-      printf("%g\n",ran_svh57(0.0));
+      printf("%.9f\n",ran_svh57(0.0));
     return;
   }
   
