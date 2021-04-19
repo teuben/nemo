@@ -23,7 +23,7 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       NEMO's Random number seed (if used)",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=0.1\n  18-apr-2021 PJT",
+    "VERSION=0.2\n  19-apr-2021 PJT",
     NULL,
 };
 
@@ -46,6 +46,7 @@ extern double ran_svh57(double);
 void writegalaxy(string name, string headline);
 void mksphere(void);
 void centersnap(body *btab, int nb);
+void snapvscale(body *btab, int nb, double vscale);
 double get_vr(body *btab, int nb);
 double get_ek(Body *btab, int nb);
 
@@ -109,18 +110,33 @@ void mksphere(void)
 	Mass(bp) = mass_i;
 
 	if (Q57) {
-	  error("seed57 method not implemented yet");
+	  // positions
+	  r_i = pow(ran_svh57(0.0),ot);
+	  theta_i = acos(2.0*ran_svh57(0.0) - 1.0);
+	  phi_i = ran_svh57(0.0) * TWO_PI;
+	  Phase(bp)[0][0] = r_i * sin(theta_i) * cos(phi_i);
+	  Phase(bp)[0][1] = r_i * sin(theta_i) * sin(phi_i);
+	  Phase(bp)[0][2] = r_i * cos(theta_i);
+
+	  // velocities, same procedure as positions
+	  r_i = pow(ran_svh57(0.0),ot);
+	  theta_i = acos(2.0*ran_svh57(0.0) - 1.0);
+	  phi_i = ran_svh57(0.0) * TWO_PI;
+	  Phase(bp)[1][0] = r_i * sin(theta_i) * cos(phi_i);
+	  Phase(bp)[1][1] = r_i * sin(theta_i) * sin(phi_i);
+	  Phase(bp)[1][2] = r_i * cos(theta_i);
+
 	} else {
-	  /* positions */
-	  r_i = pow(i/(nbody-1.0),ot);
+	  // positions
+	  r_i = pow(xrandom(0.0,1.0),ot);
 	  theta_i = acos(xrandom(-1.0,1.0));
 	  phi_i = xrandom(0.0,TWO_PI);
 	  Phase(bp)[0][0] = r_i * sin(theta_i) * cos(phi_i);
 	  Phase(bp)[0][1] = r_i * sin(theta_i) * sin(phi_i);
 	  Phase(bp)[0][2] = r_i * cos(theta_i);
 
-	  /* velocities, same procedure as positions */
-	  r_i = pow(i/(nbody-1.0),ot);
+	  // velocities, same procedure as positions
+	  r_i = pow(xrandom(0.0,1.0),ot);
 	  theta_i = acos(xrandom(-1.0,1.0));
 	  phi_i = xrandom(0.0,TWO_PI);
 	  Phase(bp)[1][0] = r_i * sin(theta_i) * cos(phi_i);
@@ -129,12 +145,18 @@ void mksphere(void)
 	}
 	
     }
+    // center the snapshot (you almost never want to skip this)
+    if (zerocm)
+        centersnap(btab,nbody);
+
+    // rescale so it's in global virial equilibrium
     double rv = get_vr(btab,nbody);
     double v2 = 1/sqrt(2*rv);
     double ek = get_ek(btab,nbody);
-    dprintf(0,"virial radius: %g    v2=%g   ek=%g\n",rv,v2,ek);
-    if (zerocm)
-        centersnap(btab,nbody);
+    double ep = 0.5*(nbody-1)/(nbody*rv);
+    double K = ep/(2*ek);
+    dprintf(0,"virial radius: %g    v2=%g   ek=%g ep=%g   K=%g\n",rv,v2,ek,ep,K);
+    snapvscale(btab, nbody, sqrt(K));
     
 }
 
@@ -163,6 +185,18 @@ void centersnap(Body *btab, int nb)
     }
 }
 
+void snapvscale(Body *btab, int nb, real vscale)
+{
+    real mtot;
+    vector cmphase[2], tmp;
+    Body *bp;
+
+    dprintf(0,"snapvscale: %g\n",vscale);
+
+    for (bp = btab; bp < btab + nb; bp++)
+      SMULVS(Phase(bp)[1], vscale);
+}
+
 double get_vr(Body *btab, int nb)
 {
   real sum;
@@ -186,6 +220,6 @@ double get_ek(Body *btab, int nb)
   sum = 0.0;
   for (bp = btab; bp < btab + nb; bp++)
     sum += dotvp(Phase(bp)[1], Phase(bp)[1]);
-  return sum;
+  return sum/2.0/nb;
 }
 
