@@ -12,5 +12,9 @@ all:  $(BINS)
 clean:
 	rm -f $(BINS)
 
+install: $(BINS)
+	cp $(BINS) $(NEMOBIN)
+
 epic5: epic5.f
 	$(FC) $(FFLAGS) -o epic5 epic5.f $(LIBS)
+
