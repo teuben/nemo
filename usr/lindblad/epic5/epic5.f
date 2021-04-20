@@ -11,7 +11,7 @@ C     with an arbitrary perturbing potential. Radial velocities are given for
 C     chosen lines of sight.
 C     For theory and description see Per A.B. Lindblad, thesis Stockholm 
 C     Observatory 1996, Chapt. 2.2 and Paper V (Lindblad & Lindblad 1994, 
-C     PASPC 66, p.29), and the "EPIC5 manual".
+C     ASPC 66, p.29), and the "EPIC5 manual".
 C
 C     Input parameters must be given in a parameter file with the following
 C     content (file names with max 10 characters):
@@ -67,6 +67,9 @@ C     window):
 C         gv pgplot.ps and print the desired plots
 C
 C     EPIC first version written by P O Lindblad & P A B Lindblad 1993.08.11
+C     This code has later been modified by P O Lindblad, N. Pi–ol-Ferrer, and K Fathi
+C
+C     Major modification history includes
 C     EPIC5 version 2011.05.05 --> write in EPIRV VX and VY
 C     EPIC5 version 2011.05.16 --> plotting densities over perturbing potential
 C     EPIC5 version 2011.05.17 --> introduced parameter NRAD
@@ -74,17 +77,20 @@ C     EPIC5 version 2011.05.29 --> plotting omega vs kappa and omega/kappa vs ra
 C     EPIC5 version 2011.06.06 --> plotting the density wave wavelenght vs radius, overplotting 4*dr, which is the allowed limit for the wavelenght.
 C     EPIC5 version 2011.06.16 --> making possible plotting in ps format with colour and without names and dates and time (removing CALL PGIDEN)
 C     EPIC5 version 2011.06.29 --> Change the scales on axis in plot omega vs kappa. 
-C     EPIC5 version 2011.07.11 --> Change in order to allow to rotate in counterclock and clock - wise. Remove plot of wavelenght of
-C                                  spiral arms if there is no spiral in the potential.
+C     EPIC5 version 2011.07.11 --> Change in order to allow to rotate in counterclock and clock - wise. 
+C     EPIC5 version 2011.07.11 --> Remove plot of wavelenght of spiral arms if there is no spiral in the potential.
 C     EPIC5 version 2011.09.07 --> Introduce of the parameter BLAMBDA=LAMBDA/KAPPA
-C     EPIC5 version 2011.09.08 --> Correct LAMBDA definition in order to take into account a clock-wise rotation. Remove the question about the direction in the rotation.
+C     EPIC5 version 2011.09.08 --> Correct LAMBDA definition in order to take into account a clock-wise rotation. 
+C     EPIC5 version 2011.09.08 --> Remove the question about the direction in the rotation.
 C     EPIC5 version 2011.09.09 --> Introduce the linear interpolation for BLAMBDA.
 C     EPIC5 version 2011.09.29 --> Change of units in plot OMEGAT-KAPPAT/2 vs R. Change of xrange and yrange in plot KAPPAT vs
 C                                  OMEGAT. Add of points in the orbit plot. Choose to plot the damping coeffiencient LAMBDA vs 
 C                                  RADIUS before plotting orbits.
-C     EPIC5 version 2011.10.03 --> Change of the dependency of the damping coefficient. Now it is just lineal, introducing its 
-C                                  values at OILR and OLR.
-C     EPIC5 version 2012.02.01 --> Remove plot of density wave wavelenght versus radia from input plots.
+C     EPIC5 version 2011.10.03 --> Change of the dependency of the damping coefficient. Now it is just linear, introducing its values at OILR and OLR.
+C     EPIC5 version 2012.02.01 --> Remove plot of density wave wavelenght versus radia from input plots. Final major modification.
+C
+C     For further details email kambiz@astro.su.se
+C
 C***************************************************************************
       USE PARAMS
       IMPLICIT NONE
@@ -141,7 +147,7 @@ C***************************************************************************
       WRITE(*,*) '** defined according to the sign of the pattern    **'
       WRITE(*,*) '** speed (positive: counter clock wise rotation,   **'
       WRITE(*,*) '** negative: clock wise rotation).                 **'
-      WRITE(*,*) '** Version 2012.02.01                              **'
+      WRITE(*,*) '** EPIC5 Version 2012.02.01                              **'
       WRITE(*,*) '*****************************************************'
 
 C Read parameter file
@@ -731,7 +737,7 @@ C***********************************************************************
 
       SUBROUTINE INTPOT(R,M,TAB,VALUE)
 C***********************************************************************
-C     Interpolates within twodimensional potential tables to a given R
+C     Interpolates within two-dimensional potential tables to a given R
 C***********************************************************************
 
       USE PARAMS
@@ -1015,7 +1021,7 @@ C********************************************************************
 C*** This subroutine reads given input files, and plots the 
 C*** potentials, rotation curve, resonance positions,radial and 
 C*** tangential forces.                                       
-C*** First written by P.A.B. Lindblad		920503                    
+C*** First version of this subroutine was written by P.A.B. Lindblad in 1992-05-03                  
 C********************************************************************
       USE PARAMS
       IMPLICIT NONE
@@ -1383,7 +1389,7 @@ C Test
       SUBROUTINE RESONANCE
 C***********************************************************************
 C** This routine computes the positions of the resonances.           ***
-C** First written by P.A.B. Lindblad        920311                   ***
+C** First version of this subroutine was written by P.A.B. Lindblad in 1992-03-11                 ***
 C***********************************************************************
 
       USE PARAMS
@@ -1543,7 +1549,7 @@ C Search for resonances
       SUBROUTINE RESPLOT
 C***********************************************************************
 C** This routine plots the positions of the resonances.              ***
-C** First written by P.A.B. Lindblad        920311                   ***
+C** First version of this subroutine was written by P.A.B. Lindblad in 1992-03-11     ***
 C***********************************************************************
 
       USE PARAMS
@@ -1769,7 +1775,6 @@ c      ENDDO
       SUBROUTINE BARPOTC
 C****************************************************************
 C*** This routine plots the perturbing potential components.  ***
-C*** Written by P.A.B. Lindblad        920507                 ***
 C****************************************************************
 
       USE PARAMS
@@ -1834,7 +1839,7 @@ C******************************************************************
 C** This subroutine plots the axisymmetric radial force from the***
 C** rotation curve. RADFO=FRAD**2/R, and the radial forces due  ***
 C** to the perturbing fourier components.                       ***
-C** First written by P.A.B. Lindblad        920501              ***
+C** First version of this subroutine was written by P.A.B. Lindblad in 1992-05-01              ***
 C******************************************************************
 
       USE PARAMS
@@ -1992,7 +1997,7 @@ C Take the derivatives of the last N - N+2 points in the array
 C******************************************************************
 C** This subroutine plots the tangential force from the tables  ***
 C** containing the perturbing potential.                        ***
-C** First written by P.A.B. Lindblad        920501              ***
+C** First version of this subroutine was written by P.A.B. Lindblad in 1992-05-01              ***
 C******************************************************************
 
       USE PARAMS
