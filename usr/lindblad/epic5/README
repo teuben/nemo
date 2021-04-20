@@ -1,0 +1,23 @@
+EPIC5 (written in Fortran, it uses PGPLOT routines)
+
+- To compile the code you need to type once ./cepic5_fin
+- After doing this once, just run it typing ./epic5_fin
+- If needed, the relevant PGPLOT routines may be included in the compiled program by:
+ 
+ gfortran -o epic5_fin EPIC5_fin.f /usr/lib/libpgplot.a /usr/lib/libpng.a -lX11
+
+
+If you have any question, find any error or have any suggestion, please contact Nuria Pinol Ferrer: npi@astro.su.se
+
+
+EXAMPLE
+- INPUT file: epar
+- rotational curve: vrot
+- Perturbing potential (given its Fourier decomposition): perpot
+- Pattern speed (km/s/kpc): -18 
+- Damping coefficients at OILR and OLR (km/s/kpc): 7    7
+- Corotation softening (km/s/kpc):    5.00
+- Minimum radius (kpc): 0.01
+- radius step (kpc): 0.5
+- Maximum radius (kpc): 22.
+- Number of THETA values: 32
