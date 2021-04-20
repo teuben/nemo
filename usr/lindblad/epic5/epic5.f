@@ -147,7 +147,7 @@ C***************************************************************************
       WRITE(*,*) '** defined according to the sign of the pattern    **'
       WRITE(*,*) '** speed (positive: counter clock wise rotation,   **'
       WRITE(*,*) '** negative: clock wise rotation).                 **'
-      WRITE(*,*) '** EPIC5 Version 2012.02.01                              **'
+      WRITE(*,*) '** EPIC5 Version 2012.02.01                        **'
       WRITE(*,*) '*****************************************************'
 
 C Read parameter file
@@ -1677,7 +1677,7 @@ C Plot the rotation curve
       CALL PGENV(0.,XMAX,0.,YMAX,0,0)
  21   CALL PGLABEL('Radius (kpc)',
      &   'Velocity (km/s)','ROTATION CURVE')
- 24   !CALL PGIDEN 
+c 24   !CALL PGIDEN 
       CALL PGMOVE(R(1),abs(FRAD(1)))
       DO I = 2,NFRAD
             CALL PGDRAW(R(I),abs(FRAD(I)))
@@ -1725,7 +1725,7 @@ C Plot the THM
      &   'PHASE SHIFT (rad)','PHASE SHIFT')
       R(1)=0.
       DO M=1, MMAX     
- 34   !CALL PGIDEN 
+c 34   !CALL PGIDEN 
       CALL PGMOVE(R(1),THMN(1,M))
         DO I = 2,NPER
            R(I)=(I-1)*DRP
@@ -1747,7 +1747,7 @@ C      CALL PGENV(0.,XMAX,YMIN,YMAX,0,0)
 C      CALL PGLABEL('Radius (kpc)',
 C     &   '\(0637) (kpc)','Wavelenght')
       R(1)=0.
-!      CALL PGIDEN 
+c      CALL PGIDEN 
 C      CALL PGMOVE(R(1),WAVEL(1))
 C      DO I = 1,NPER
  
@@ -1918,7 +1918,7 @@ C      if (minval(rfo).lt.ymin) ymin=minval(rfo)
       CALL PGENV(0.,XMAX,YMIN,YMAX,0,0)
  41   CALL PGLABEL('Radius (kpc)',
      &             'Radial force ','RADIAL FORCES ALONG PA -90 DEGR')
- 44   !CALL PGIDEN 
+c 44   !CALL PGIDEN 
 
 C Start with the axisym. force
 
@@ -1974,8 +1974,9 @@ C array A, and put the derivatives in array A1.
 
 C Take the derivatives at all points from M to N
 
-      DO 1 J=MM,NN
-    1 A1(J)=(-A(J-3)+9.*(A(J-2)-A(J+2))-45.*(A(J-1)-A(J+1 ))+A(J+3))/H60
+      DO J=MM,NN
+      A1(J)=(-A(J-3)+9.*(A(J-2)-A(J+2))-45.*(A(J-1)-A(J+1 ))+A(J+3))/H60
+      ENDDO
 
 C Take the derivatives of the last N - N+2 points in the array
 
@@ -2060,7 +2061,7 @@ C Plot the forces
       CALL PGENV(0.,XMAX,YMIN,YMAX,0,0)
  51   CALL PGLABEL('Radius (kpc)',
      &  'Tangential force ','TANGENTIAL FORCES ALONG PA -45 DEGR')
- 54   !CALL PGIDEN 
+c 54   !CALL PGIDEN 
 
       DO M=1,MMAX
         CALL PGMOVE(RADI(1),TANFO(1,M))
