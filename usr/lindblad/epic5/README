@@ -1,13 +1,12 @@
 EPIC5 (written in Fortran, it uses PGPLOT routines)
 
-- To compile the code you need to type once ./cepic5_fin
-- After doing this once, just run it typing ./epic5_fin
-- If needed, the relevant PGPLOT routines may be included in the compiled program by:
- 
- gfortran -o epic5_fin EPIC5_fin.f /usr/lib/libpgplot.a /usr/lib/libpng.a -lX11
+- See the unix manual page ("man epic5" in NEMO) for some help
+  how to run.
 
-
-If you have any question, find any error or have any suggestion, please contact Nuria Pinol Ferrer: npi@astro.su.se
+- To compile:
+     make epic5
+  and consult the Makefile if the variables are correct. Notably the LIBS=-lpgplot
+  could need to be different in your environment.
 
 
 EXAMPLE
