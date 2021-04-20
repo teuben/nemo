@@ -30,3 +30,6 @@ Later additions:
 (sep-2018) Loaded ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody0/nbody0.f as nbody0_sja.f
            Described as "Compact fourth-order Hermite block-step code."
            See also https://www.ast.cam.ac.uk/~sverre/web/pages/nbody.htm
+(apr-2021) Noted the name is nbody0h4.f, not nbody0_sja.f - I change the maxnbody
+           hardcoded as 50 to 256, e.g. as follows:
+	   cat nbody0_sja.f  | sed 's/50)/256)/g' > nbody0_256.f
