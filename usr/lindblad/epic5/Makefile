@@ -7,10 +7,21 @@ LIBS = -lpgplot
 
 BINS = epic5
 
-all:  $(BINS)
+DUMMY = EPIRV EPIDEN EPITEST
+
+all:  $(BINS) $(DUMMY)
 
 clean:
 	rm -f $(BINS)
+
+EPIRV:
+	touch $@
+
+EPIDEN:
+	touch $@
+
+EPITEST:
+	touch $@
 
 install: $(BINS)
 	cp $(BINS) $(NEMOBIN)
