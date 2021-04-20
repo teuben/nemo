@@ -1,0 +1,187 @@
+.TH EPIC5 1NEMO "20 April 2021"
+.SH NAME
+epic5 \-  lindblad orbits in ovally perturbed potentials
+
+.SH "SYNOPSIS"
+\fBepic5\fP
+.PP
+\fBepibin\fP
+
+.SH "DESCRIPTION"
+\fBepic5\fP computes positions, velocities and densities along closed
+orbits of interstellar matter, including frictional forces, in a galaxy 
+with an arbitrary perturbing potential. Radial velocities are given for 
+chosen lines of sight.
+
+The direction of rotation is defined according to the sign of the
+pattern speed (positive: counter clock wise rotation, negative: clock
+wise rotation).
+
+
+.PP
+For theory and description see Per A.B. Lindblad, thesis Stockholm 
+Observatory 1996, Chapt. 2.2 and Paper V (Lindblad & Lindblad 1994, 
+ASPC 66, p.29), and the "EPIC5 manual".
+.PP
+\fBepibin\fP ... bins the LOS velocities from EPIRV. Cannot contain
+more than 200 points at the moment. (not compiling yet)
+
+.SH "RUNNING"
+Running \fBepic5\fP is very different from running a NEMO program. All input
+has to be given interactively on the commandline, and at a number of places
+you can re-run an option and stay within the program "forever".
+The first question will be the name of the input
+parameter file. An example, \fBepar\fP is supplied with
+the package. Three output files (EPIRV, EPIDEN, EPITEST) need to be present
+so the program can write on top.
+.PP
+\fBParameter file:\fP
+Input parameters must be given in a parameter file with the following
+content (file names are a string with max 10 characters):
+.nf
+
+    Name of file with rotation curve                    ('VFILE')
+    Name of file with perturbing potential              ('BFILE')
+    Pattern velocity in km/s/kpc                        (OMEGAP)
+    Coefficient of friction at 0 kpc                    (BLAMBD0)
+    Coefficient of friction at RMAX kpc                 (BLAMBDf)
+    Soft corotation coefficient in km/s/kpc             (EOMEG)
+    Minimum value for R in the computations in kpc      (R0)
+    Interval of R in the computations in kpc            (DR)
+    Maximum value for R in the computations in kpc      (RMAX)
+    Number of THETA values (<60) for each R             (NTHETA)
+.fi
+
+The rotation curve and the perturbing potential are both ascii files:
+.PP
+'VFILE' must have the following format:
+.nf
+    NFRAD DRFRAD
+    FRAD(I), (I=1,NFRAD)
+.fi
+
+where NFRAD (<NRAD) is the number of velocities and DRFRAD is the
+radial increment between velocities in the rotation curve, and FRAD the 
+velocities. The first point, I=1, corresponds to a radius R = 0.
+.PP
+'BFILE' must have the following format:
+.nf
+    NPER DRP MMAX NTH NC
+    AMPC(M), (M=1,10) 
+    AMPS(M), (M=1,10)
+    for M=1,MMAX:
+       CP(I,M) (I=1,NPER)
+       SP(I,M) (I=1,NPER)
+.fi
+.PP
+where NPER (<NRAD) is the number of values and DRP the increment 
+between values for the perturbing potential. CP(I,M) and SP(I,M)  
+are amplitudes of the COS(M*THETA) resp. SIN(M*THETA) components of 
+of the Fourier development the perturbing potential. AMPC(M) and 
+AMPS(M) are factors with which these amplitudes will be multiplied. 
+MMAX (<10) is the maximum M value in the development of the potential. 
+NTH (<100) and NC are the number of THETA values and contours for 
+potential plotting.
+.PP
+Positions and densities will be listed in file \fBEPIDEN\fP
+and plotted in file \fBdensity.ps\fP.
+Positions, x and y velocities will be listed in file \fBEPIRV\fP
+and plotted in file \fBvelocity.ps\fP
+.PP
+Test values are written in file \fBEPITEST\fP.
+
+.SH "EXAMPLE"
+With the example epar, vrot and perpot file, here is the kind of dialog you may encounter.Boldface is user input
+
+.nf
+% \fBepic5\fP
+ Parameter file: 
+\fBepar \fP
+ ARE PARAMETERS CORRECT ? (y/n):
+\fBy\fP
+ Perturbing potential ? (y/n) :
+\fBy\fP
+ SEE THE INPUT PLOTS ? (y/n):
+\fBy\fP
+ RMAX =   22.0 ? (y/n):
+\fBy\fP
+ PERTURBING POTENTIAL:
+ Graphics device/type (? to see list, default /NULL): 
+\fB/xs\fP
+ TOTAL POTENTIAL:
+ Graphics device/type (? to see list, default /NULL): 
+\fB/xs\fP
+ REMAINING INPUT PLOTS ? (y/n):
+\fBn\fP
+ COMPUTE ORBITS ? (y/n):
+\fBy\fP
+ PRINT THIS PLOT ? (y/n):
+\fBy\fP
+ CHANGE RMAX (  22.0)? (y/n): 
+\fBn\fP
+ PLOT DENSITIES ? (y/n):
+\fBy\fP
+ NUMBER OF CONTOURS?:
+\fB2\fP
+ CONTOURS?:
+\fB0.1,1\fP
+ PLOT DENSITIES WITH PERTURBING POTENTIAL? (y/n):
+\fBn\fP
+ PLOT DENSITIES ? (y/n):
+\fBn\fP
+ GIVE POSITION ANGLE OF LINE OF NODES (BAR=90,TO QUIT   WRITE 360 OR MORE):
+\fB45\fP
+ CONTOUR INTERVAL (KM/S)?:
+\fB20\fP
+ GIVE POSITION ANGLE OF LINE OF NODES (BAR=90,TO QUIT   WRITE 360 OR MORE):
+\fB999\fP
+
+.fi
+
+.SH "CAVEATS"
+The epic5.pdf manual is not available (yet)
+.PP
+There is a unix IRC client with the same name, see \fIepic5(1)\fP. But we were here first, so there.
+
+.SH "FILES"
+.nf
+.ta +2i
+$NEMO/usr/lindblad/epic5	code distribution
+
+epar	input parameter file for \fBepic5\f
+vfile		rotation curve (1st filename in epar) ("vrot")
+bfile		perturbing potential file (2nd filename in epar) ("perpot")
+EPIRV		written (23) - but must exist to bootstrap
+EPIDEN		written (22) - but must exist to bootstrap
+EPITEST		written (25) - but must exist to bootstrap
+density.ps	pgplot file produced by \fBepic5\fP
+velocity.ps	pgplot file produced by \fBepic5\fP
+orbits.ps	pgplot file produced by \fBepic5\fP
+
+histogram.ps	produced by \fBepibin\fP
+.fi
+
+.SH "SEE ALSO"
+tabplot(1NEMO), 
+.PP
+https://ui.adsabs.harvard.edu/abs/1994ASPC...66...29L/abstract -
+\fIKinematics of Interstellar Matter in a Barred Potential in the Epicyclic Approximation\fP
+(EPIC V1)
+.PP
+https://ui.adsabs.harvard.edu/abs/2012MNRAS.421.1089P/abstract - 
+\fIAnalytic gas orbits in an arbitrary rotating galactic potential using the linear epicyclic approximation\fP
+(EPIC V5)
+
+.SH "ADS"
+@ads 2012MNRAS.421.1089P
+
+.SH "AUTHOR"
+Bertil Lindblad, Per Olaf Lindblad (1996), +Nuria, +Kambiz (2012 adaptations), +Peter (2021 distribution)
+
+.SH "HISTORY"
+.nf
+.ta +1i +4i
+11-aug-1993	First version (P.O. Lindblad & P.A.B. Lindblad)
+2011-2012	Modification by P.O,Lindblad, N. Pirol-Ferrer and K Fathi (see source code)
+apr-2021	Adapted for NEMO	PJT
+.fi
