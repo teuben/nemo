@@ -88,8 +88,8 @@ C                                  OMEGAT. Add of points in the orbit plot. Choo
 C                                  RADIUS before plotting orbits.
 C     EPIC5 version 2011.10.03 --> Change of the dependency of the damping coefficient. Now it is just linear, introducing its values at OILR and OLR.
 C     EPIC5 version 2012.02.01 --> Remove plot of density wave wavelenght versus radia from input plots. Final major modification.
-C
-C     For further details email kambiz@astro.su.se
+C     EPIC5 version 2021.04.20 --> Compiled for gfortran v9
+       
 C
 C***************************************************************************
       USE PARAMS
@@ -178,7 +178,7 @@ C Read parameter file
    20 FORMAT(A1)
    21 FORMAT(A,F7.2,A)
    22 FORMAT(A,3F6.2,A)
-      WRITE(*,*) 'CORRECT PARAMETERS ? (y/n):'
+      WRITE(*,*) 'ARE PARAMETERS CORRECT ? (y/n):'
       READ(*,20)Y
       IF (Y.EQ.'Y'.OR.Y.EQ.'y') GOTO 60
       WRITE(*,*) 'New parameter file ? (y/n): '
