@@ -22,6 +22,8 @@ be processed by NEMO after
 .nf
 	\fBzcat r001.data.Z | atos - r001.dat\fP
 .fi
+See also the \fItcppipe(1NEMO)\fP program to read the data over
+a pipe from another machine.
 .PP
 Some N-body programs, which are capable of handling a series of snapshots,
 and selecting them using the \fBtimes=\fP keyword, are not able to
@@ -44,16 +46,11 @@ to write a \fIfits(5NEMO)\fP format file.
 Check also the tabccd shell script, if available, or perhaps someone
 wrote it in C already. It calls awk, atos and snapgrid.
 .PP
-The \fIds(1LOCAL)\fP program, written by Bill Sebok, is one of the external 
-programs
-which can be used to display images. \fIds\fP can understand a variety of
-image file formats, of which the \fIfits(5NEMO)\fP is best suited for our needs.
+The \fIds9(1)\fP program is one of the external programs
+which can be used to display images. \fIds9\fP can understand a
+variety of FITS compression standards.
 Transform your image to a fits file using \fIccdfits(1NEMO)\fP, and use 
-ds on that fits file. Although \fIds(1L)\fP 
-works on monochrome SUN workstations,
-it's best on a color monitor. The trick to remember is to use the \fB-yflip\fP
-switch, or click on the Y button, because  our fits interface has a problem
-obviously...
+ds on that fits file. 
 .SH PIPES and SHARED MEMORY
 NEMO encourages you to use pipes where serial operations make sense (see also \fItee(1)\fP).
 However on Linux, assuming you have enough memory, using /dev/shm will sacrifice your memory to store
