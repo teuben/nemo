@@ -147,7 +147,8 @@ C***************************************************************************
       WRITE(*,*) '** defined according to the sign of the pattern    **'
       WRITE(*,*) '** speed (positive: counter clock wise rotation,   **'
       WRITE(*,*) '** negative: clock wise rotation).                 **'
-      WRITE(*,*) '** EPIC5 Version 2012.02.01                        **'
+      WRITE(*,*) '** For more details:            man epic5          **'
+      WRITE(*,*) '** EPIC5 Version 2021.05.20                        **'
       WRITE(*,*) '*****************************************************'
 
 C Read parameter file
