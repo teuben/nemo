@@ -24,13 +24,22 @@ contains a timestamp of that creation.
 <A NAME=4_2_2>
 <H2> 4.2.2:  in github</H2>
 <UL>
-  <LI> (19-apr-2021) Added new program
-    <A HREF=man_html/mkvh60.1.html>mkvh60</A> and added von Hoerner's 1957 random number generator to create this style
+  <LI> (20-apr-2021) Added new historic program
+    <A HREF=man_html/epic5.1.html>epic5</A> to compute Lindblad orbits in an oval potential.
+    The original idea is outlined in
+    <a href=https://ui.adsabs.harvard.edu/abs/1994ASPC...66...29L> 1994ASPC...66...29L</A>
+    and the final code presented in
+    <A HREF=https://ui.adsabs.harvard.edu/abs/2012MNRAS.421.1089P> 2012MNRAS.421.1089P </A>.
+
+  <LI> (19-apr-2021) Added new historic program
+    <A HREF=man_html/mkvh60.1.html>mkvh60</A> and added von Hoerner's 1957 (!) random number generator to create this style
     of homogeneous spheres. See <A HREF=https://ui.adsabs.harvard.edu/abs/1960ZA.....50..184V>1960ZA.....50..184V</A>
+
   <LI> (15-apr-2021) Trying out a new automated <A HREF=man_html/bibcode.html>bibcode</A> listing which summarized and links
     all codes in NEMO that have refereed papers on <A HREF=https://ui.adsabs.harvard.edu/>ADS</A>
     (as opposed to <A HREF=https://paperswithcode.com>Papers with Code</A>)
-  <LI> (7-apr-2021) Apple's long SIP arm reared it's ugly head again, a side effect of the MAC fix caused
+
+<LI> (7-apr-2021) Apple's long SIP arm reared it's ugly head again, a side effect of the MAC fix caused
     falcon's bodyfun to fail on linux. should be fixed now.
   <LI> Benchfile introduced, with a function similar to the Testfile, all parallel to the Makefile
   <LI> The "make bench3" command will now run 5 nbody codes, each tuned to take 5sec cpu on an i5-1135G7
