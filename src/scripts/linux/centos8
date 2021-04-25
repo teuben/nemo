@@ -32,3 +32,4 @@ hdf-devel
 # sudo dnf install centos-release-stream
 # sudo dnf distro-sync
 
+parallel-20190922-1
