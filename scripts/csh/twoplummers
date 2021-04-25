@@ -1,14 +1,14 @@
 #! /bin/bash
 #
-#    A tail of two Plummers:   collision or collapse?
+#    A tale of two Plummers:   collision or collapse?
 #
 #    See e.g.:
-#              van Albaba       https://ui.adsabs.harvard.edu/abs/1982MNRAS.201..939V/abstract
-#              Villumsen        https://ui.adsabs.harvard.edu/abs/1982MNRAS.199..493V/abstract
-#              McGlynn          https://ui.adsabs.harvard.edu/abs/1984ApJ...281...13M/abstract
-#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1985ApJ...295..374A/abstract
-#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1986ApJ...307...97A/abstract
-#              Makino & Hut     https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
+#              van Albaba       https://ui.adsabs.harvard.edu/abs/1982MNRAS.201..939V
+#              Villumsen        https://ui.adsabs.harvard.edu/abs/1982MNRAS.199..493V
+#              McGlynn          https://ui.adsabs.harvard.edu/abs/1984ApJ...281...13M
+#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1985ApJ...295..374A
+#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1986ApJ...307...97A
+#              Makino & Hut     https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M
 #
 # version: 25-apr-2021
 
