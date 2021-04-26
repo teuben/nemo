@@ -10,7 +10,10 @@
 #              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1986ApJ...307...97A
 #              Makino & Hut     https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M
 #
-# version: 25-apr-2021
+#    Example benchmark, with all default parameters:
+#      i5-1135G7         545.63user 0.19system 9:05.86elapsed 99%CPU
+#
+# version: 25-apr-
 
 set -x
 
@@ -32,7 +35,10 @@ for arg in $*; do
   export $arg
 done
 
-# @todo check for existence
+if [ -d $run ]; then
+    echo Run directory run=$run already exists
+    exit 1
+fi
 mkdir -p $run
 cd $run
 
@@ -45,7 +51,9 @@ snapstack p1 p1 p3 deltar=$dr,$dy,0 deltav=-$dv,0,0 zerocm=t
 
 gyrfalcON p3 p3.out tstop=$tstop step=$step eps=0.05 kmax=8 give=mxvp > p3.log
 
-exit 0
 
-snapmradii p3.out 
-snapplot p3.out  xrange=-16:16 yrange=-2:2 xvar=x yvar=vx   color=etot crange=0:1
+tabplot p3.log yapp=fig1.ps/vps >> p3.log 2>&1
+tabtrend p3.log 2 | tabhist - yapp=fig2.ps/vps >> p3.log 2>&1
+snapmradii p3.out 0.1:0.9:0.1 | tee p3.mrad | tabplot - 1 2:10 line=1,1 yapp=fig3.ps/vps >> p3.log 2>&1
+
+#snapplot p3.out  xrange=-16:16 yrange=-2:2 xvar=x yvar=vx   color=etot crange=0:1 yapp=fig3.ps/vps 
