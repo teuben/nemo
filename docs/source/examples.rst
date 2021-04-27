@@ -116,3 +116,28 @@ N-body integrator based on the Barnes
 algorithm\footnote{see also their paper in: Nature, Vol. 324, pp 446 (1986).}:
 \index{hackcode1(1)}
 
+Images
+------
+
+more coming
+
+
+Tables
+------
+
+more coming
+
+Potential
+---------
+
+more coming
+
+Orbits
+------
+
+more coming
+
+Exchanging data
+---------------
+
+more coming

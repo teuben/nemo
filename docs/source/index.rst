@@ -10,15 +10,27 @@ Welcome to NEMO's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+.. math::
 
-Developing
-----------
+   \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
+
+
+User: Developing
+----------------
 .. toctree::
    :maxdepth: 2
 
    intro
-   filestr	      
+   filestr
    examples
+   glossary
+
+Programmer: developing
+----------------------
+.. toctree::
+   :maxdepth: 2
+
+   glossary
 
 	      
 Background on RST
@@ -70,9 +82,14 @@ There are three equivalents: ``code``, ``sourcecode``, and ``code-block``.
 
 .. code:: python
 
+   # some python code
    import os
    print(help(os))
-
+   if True:
+      print("yes")
+   else:
+      print("no")
+   
 .. sourcecode::
 
   # Equivalent
@@ -81,10 +98,15 @@ There are three equivalents: ``code``, ``sourcecode``, and ``code-block``.
 
   # Equivalent
 
-.. code-block::
+.. code-block:: bash
 
-  1% ls
 
+   # some bash code
+   if [ -e /tmp ]; then
+      echo "You have /tmp"
+   fi
+		
+		
 ------
 Tables
 ------
