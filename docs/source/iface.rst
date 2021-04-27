@@ -2,8 +2,7 @@
 
 User Interface
 ==============
-\myfile{iface.inc}
-\mylabel{c:iface}
+
 
 A NEMO program is invoked just as any other application program under
 the operating system.  Of course you must have modified your shell
