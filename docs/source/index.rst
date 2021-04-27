@@ -10,10 +10,19 @@ Welcome to NEMO's documentation!
    :maxdepth: 2
    :caption: Contents:
 
-----
+-----
 Lists
-----
+-----
 - Bullet are made like this
+- A link to the  `NEMO <https://github.com/teuben/nemo>`_ repo, or
+  `github pages <https://teuben.github.io/nemo/>`_.
+- Links to the man pages:
+  `github <https://teuben.github.io/nemo/man_html/index.html>`_ or
+  `local  <../../../man_html/index.html>`_
+- Links to some old examples:
+  `github <https://teuben.github.io/nemo/examples/index.html>`_ or
+  `local  <../../../examples/index.html>`_
+  
 - Point levels must be consistent
     * Sub-bullets
         + Sub-sub-bullets
