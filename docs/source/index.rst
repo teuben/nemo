@@ -13,21 +13,31 @@ Welcome to NEMO's documentation!
 For Users
 ---------
 
+Here we do this....
+
 .. toctree::
+   :numbered:
    :maxdepth: 2
 
    intro
-   .. iface
+   iface
    filestr
    examples
    potctex
+   using
    glossary
 
 For Programmers
 ---------------
+
+Here we do that....
+
+
 .. toctree::
+   :numbered:
    :maxdepth: 2
 
+   install
    rst
 
 Indices and tables

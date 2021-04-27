@@ -70,8 +70,19 @@ There are three equivalents: ``code``, ``sourcecode``, and ``code-block``.
    if [ -e /tmp ]; then
       echo "You have /tmp"
    fi
-		
-		
+
+------
+Images
+------
+
+Here is an image ...
+
+.. image::  ../examples/eagle_1.png
+
+from the eagle example.
+
+
+
 ------
 Tables
 ------
