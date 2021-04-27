@@ -20,6 +20,7 @@ For Users
    .. iface
    filestr
    examples
+   potctex
    glossary
 
 For Programmers
