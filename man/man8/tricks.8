@@ -62,7 +62,8 @@ data temporarely and could speed up your I/O dominated workflow. Here is an exam
 .fi
 The example of \fImkspiral(1NEMO)\fP is taken from the NEMO \fIbench(5NEMO)\fP suite, but this example
 is actually not very I/O dominated. The variable $XDG_RUNTIME_DIR can also be used, or $TMPDIR,
-depending on your system configuration.
+depending on your system configuration. Another option is using the \fImktemp(1)\fP command,
+e.g. \fBmktemp tmp.XXXXXXXX\fB
 .PP
 Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
 .PP

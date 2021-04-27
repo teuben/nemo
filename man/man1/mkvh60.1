@@ -66,6 +66,24 @@ Here is a default n=16 sphere, first using the NEMO random number generator, and
 ### nemo Debug Info: snapvscale: 1.08523
 
 .fi
+
+.SH SEED57
+The \fBseed57=\fP keyword is the seed for the revived ran_svh57() \fIZufallzahl\fP random number generator.
+My interpretation of eq.(44) in 1960ZA.....50..184V is : (code in python)
+
+.nf
+  x = seed57      # between 0.57 and 0.91
+  while True:
+    x2 = x*x
+    if x2 < xlo:
+      xnew = x2 + 0.32
+    else:
+      xnew = x2
+    ran = int(('%.12f' % xnew)[5:])/1e9     # print out with 9 digits
+    print(ran)
+    x = xnew
+.fi    
+
 .SH SEE ALSO
 mkhomsph(1NEMO), firstn(1NEMO), snapshot(1NEMO)
 .PP

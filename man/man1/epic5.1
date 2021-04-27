@@ -58,7 +58,10 @@ content (file names are a string with max 10 characters):
     Number of THETA values (<60) for each R             (NTHETA)   32
 .fi
 
-The rotation curve and the perturbing potential are both ascii files:
+The rotation curve and the perturbing potential are both ascii files,
+but in the "annoying" fortran style with wrapped lines that do not
+allow to go over 80 (or so) characters. See \fBperpot.py\fP for examples
+how to process them.
 .PP
 The 'VFILE' must have the following format:
 .nf

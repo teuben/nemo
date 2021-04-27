@@ -153,7 +153,7 @@ AC_SUBST(NO_SHARED_LIBS)
 AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
         CC="clang"
-        CXX="clang"
+        CXX="clang++"
 	FC="flang"
 	F77="flang"
 fi
