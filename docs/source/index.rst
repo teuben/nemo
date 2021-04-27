@@ -10,6 +10,21 @@ Welcome to NEMO's documentation!
    :maxdepth: 2
    :caption: Contents:
 
+
+Developing
+----------
+.. toctree::
+   :maxdepth: 2
+
+   intro
+   filestr	      
+   examples
+
+	      
+Background on RST
+=================
+	      
+
 -----
 Lists
 -----
@@ -22,6 +37,12 @@ Lists
 - Links to some old examples:
   `github <https://teuben.github.io/nemo/examples/index.html>`_ or
   `local  <../../../examples/index.html>`_
+
+- Links to some Restructuredtext RST guides:
+    * https://sphinx-tutorial.readthedocs.io/step-1/
+    * https://www.writethedocs.org/guide/writing/reStructuredText/
+    * https://thomas-cokelaer.info/tutorials/sphinx/rest_syntax.html
+    
   
 - Point levels must be consistent
     * Sub-bullets
@@ -60,6 +81,10 @@ There are three equivalents: ``code``, ``sourcecode``, and ``code-block``.
 
   # Equivalent
 
+.. code-block::
+
+  1% ls
+
 ------
 Tables
 ------
@@ -73,10 +98,31 @@ Tables
 +--------+--------+--------+
 
 Math
-----------------
+----
+
+Some example math, taken from latex
+
 .. math::
 
    \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
+
+
+Organization
+============
+
+This is the start of a chapter, which will contain sections, below which subsections. maybe even deeper.
+
+
+MySection
+---------
+
+And inside a section we will allow subsections.
+
+
+MySubSection
+~~~~~~~~~~~~
+
+and do we need more in NEMO?
 
 
 
