@@ -1,41 +1,40 @@
 Introduction
 ============
 
-NEMO is a collection of programs, running under a standard UNIX 
-shell\footnote{We will assume some basic knowledge of the UNIX operating
-system}, capable of running various stellar dynamical
-codes and related utilities (initialization, analysis, gridding, orbits).  
-It can be
-thought of as a collection of various ``groups'' (packages) 
-of programs, a group being defined by their common file structure.
+NEMO is a collection of programs, running under a standard UNIX shell,
+capable of running various stellar dynamical codes and related
+utilities (initialization, analysis, gridding, orbits).  It can be
+thought of as a collection of various ``groups'' (packages) of
+programs, a group being defined by their common file structure.
 
-% A
-% common low level file structure is defined, which is then shared by all
-% groups.  This lowest file structure eventually interacts directly with
-% the data on disk.
+.. A % common low level file structure is defined, which is then shared by all
+   groups.  This lowest file structure eventually interacts directly with
+   the data on disk.
 
 In addition, a common user interface is defined with which the user
 communicates with a program.
 
-% 
-% There are also experimental 
-% master control programs available, their operation similar to the
-% ones used in so many other astronomical data reduction packages,
-% ({\it e.g.}  
-% AIPS\index{AIPS}, and MIDAS\index{MIDAS}
-% ).
-% For Sun workstations a sunview (windows) based 
-% menu interface is available under
-% the name {\tt mirtool} \index{mirtool, shell} and an
-% {\tt AIPS}-like interface, under the\index{miriad, shell} name\index{miriad} 
-% {\tt miriad}, which works on any UNIX platform.
+.. There are also experimental 
+   master control programs available, their operation similar to the
+   ones used in so many other astronomical data reduction packages,
+   ({\it e.g.}  
+   AIPS\index{AIPS}, and MIDAS\index{MIDAS}
+   ).
+   For Sun workstations a sunview (windows) based 
+   menu interface is available under
+   the name {\tt mirtool} \index{mirtool, shell} and an
+   {\tt AIPS}-like interface, under the\index{miriad, shell} name\index{miriad} 
+   {\tt miriad}, which works on any UNIX platform.
 
 User interfaces will be described in much more detail in the next chapter and 
 Appendix~\ref{a:iface}.
 
 In order to run NEMO programs, your UNIX environment has to be modified
 slightly.  This is normally done in the form of a few additions to a
-startup file ({\tt .cshrc} or {\tt .login} \index{.cshrc} \index{.login}
+startup file (``.cshrc`` or ``.login``
+
+.. \index{.cshrc} \index{.login}
+
 if you use the C-shell).  Appendix~\ref{a:setup} gives a full
 description. 
 
@@ -109,7 +108,7 @@ The third part of the manual is the programmers manual:
 Chapter~\ref{c:progr} is for the more adventurous user who wants to
 modify or extend NEMO. 
 
-% Some rules are given to increase the chance of upgrade survival. 
+..  Some rules are given to increase the chance of upgrade survival. 
 
 The last part of the manual are Appendices with a large variety of
 reference information.
