@@ -92,10 +92,10 @@ Glossary
   structured file
       The binary data NEMO writes is in a
       hierarchical structured format. Programs like
-      `tsf  <../../../man_html/tsf.1.html>`_
-      `rsf  <../../../man_html/rsf.1.html>`_,
+      `tsf  <https://teuben.github.io/nemo/man_html/tsf.1.html>`_
+      `rsf  <https://teuben.github.io/nemo/man_html/rsf.1.html>`_,
       and 
-      `csf  <../../../man_html/csf.1.html>`_
+      `csf  <https://teuben.github.io/nemo/man_html/csf.1.html>`_
       perform general and basic I/O functions on
       such files. They are hierarchical structured sets.
 

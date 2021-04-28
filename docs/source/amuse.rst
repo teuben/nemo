@@ -22,7 +22,7 @@ Differences
 - **Units**:
   NEMO uses numbers, and units are implied. Most programs use virial units where G=1, a few programs
   (e.g. galaxy, nbodyX) use other units. The
-  `units(1NEMO)  <../../../man_html/units.1.html>`_
+  `units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_
   tries to explain.
   AMUSE (optionally?) attaches units to numbers , using a python trick, e.g.
 

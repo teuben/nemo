@@ -95,9 +95,9 @@ Units
 -----
 
 Perhaps better to refer to a few man pages we have on this:
-`units(1NEMO)  <../../../man_html/units.1.html>`_ ,
-`units(5NEMO)  <../../../man_html/units.5.html>`_ , and
-`constants(5NEMO)  <../../../man_html/constants.5.html>`_ .
+`units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_ ,
+`units(5NEMO)  <https://teuben.github.io/nemo/man_html/units.5.html>`_ , and
+`constants(5NEMO)  <https://teuben.github.io/nemo/man_html/constants.5.html>`_ .
 
 
 
