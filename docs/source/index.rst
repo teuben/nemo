@@ -13,7 +13,7 @@ Welcome to NEMO's documentation!
 For Users
 ---------
 
-Here we do this....
+.. todo::  This is a draft started on April 27.  There are many todo's in this manual.
 
 .. toctree::
    :numbered:
@@ -22,6 +22,7 @@ Here we do this....
    intro
    iface
    filestr
+   .. graphics	      
    examples
    potctex
    using
@@ -38,6 +39,10 @@ Here we do that....
    :maxdepth: 2
 
    install
+   .. coordsys	      
+   .. trouble
+   .. history
+   todo	      
    rst
 
 Indices and tables
