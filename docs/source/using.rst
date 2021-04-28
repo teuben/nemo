@@ -4,7 +4,7 @@ Using NEMO
 ==========
 
 In order to use NEMO programs, NEMO will need to modify your
-shell environment
+shell environment, for exampl
 
 
 .. code-block:: bash
