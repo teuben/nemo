@@ -104,7 +104,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.3\n		  11-feb-2021 PJT",
+    "VERSION=7.3a\n		  26-apr-2021 PJT",
     NULL
 };
 
@@ -292,7 +292,7 @@ local void read_data()
       coldat[i] = md2[i];
     npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
     if (npt == -nmax) {
-    	warning("Could only read %d data",nmax);
+    	warning("Could only read %d data, use nmax=",nmax);
     	npt = nmax;
     }
     if (scale != 1.0) {

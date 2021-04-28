@@ -15,10 +15,11 @@ if you just want to compile and run, but not ideal if you make modifications and
 want to shared them back to the *upstream* via a *pull request* (PR). You
 can however "repair" your local repo, discussed below, and still submit a PR.
 
-2. You forked NEMO from the *upstream*, and cloned it locally from the
-repo in your own github account. This is the ideal method, but you
-will still need to set the *upstream* manually if you used
-github.com. See also the **gh** command below for an even better way.
+2. You (forked)[https://guides.github.com/activities/forking/] NEMO
+from the *upstream*, and cloned it locally from the repo in your own
+github account. This is the ideal method, but you will still need to
+set the *upstream* manually if you used github.com. See also the
+**gh** command below for an even better way.
 
 3. Sadly on github.com you will also find a **zip** copy of the repo
 that does actually work fine, except it's a frozen snapshot and cannot
@@ -107,7 +108,12 @@ here is a typical example, using a branchname **b1**
 
       git branch b1
       git checkout b1
-      <<<edit/add your files; test them; commit them>>
+      
+          ## edit/add your files; test them; commit them, e.g.
+	  git commit -m "my comment"  existing_file
+	  git add new_file
+	  git commit -m "my command"  new_file
+          
       git push -u origin b1
 
 Now you can issue a pull request on this branch **b1**.  There is a way to do this

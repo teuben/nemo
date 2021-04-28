@@ -251,6 +251,7 @@ string defv[] = {
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
     "offset=0.0\n   Offset of distribution from 0",
+    "seed57=\n      If used, this is von Hoerners 1957 seed (0.57 .. 0.91)",
 #ifdef HAVE_GSL
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
@@ -274,6 +275,7 @@ string defaults[] = {
 #define MAXPARS 5
 
 static bool check(string, string, string, int, int);
+extern double ran_svh57(double);
 
 void nemo_main()
 {
@@ -285,6 +287,7 @@ void nemo_main()
   bool   Qreport = getbparam("report");
   bool   Qtab = getbparam("tab");
   bool   Qbench;
+  bool   Q57 = hasvalue("seed57");
   string *sp, ran_name;
   Moment mom;
   real   offset = getdparam("offset");
@@ -292,6 +295,15 @@ void nemo_main()
   
   n = getiparam("n");
   m = getiparam("m");
+
+  if (Q57) {
+    real seed57 = getrparam("seed57");
+    dprintf(0,"von Hoerner seed57=%g first ran=%.9f\n",seed57,ran_svh57(seed57));
+    for (i=0; i<n; i++)
+      printf("%.9f\n",ran_svh57(0.0));
+    return;
+  }
+  
   seed = init_xrandom(getparam("seed"));
   Qbench = (n==4 && seed==1);
   

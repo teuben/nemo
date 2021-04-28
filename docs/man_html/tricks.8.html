@@ -9,11 +9,11 @@
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tricks - some tricks (and bugs) when using NEMO 
+tricks - some unix tricks when using NEMO 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
-One can use
-<a href='cat.1.html'><i>cat(1)</i></a>
- to catenate structured binary files, e.g. <br>
+One can use <a href='cat.1.html'><i>cat(1)</i></a>
+
+to catenate structured binary files, e.g. <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;cat r001a.dat &gt;&gt;r001.dat
 </pre><p>
 To copy structured binary files between machines of different binary format,
@@ -31,24 +31,26 @@ and on the other machine:
 will be used. This may be saved in compressed format also, and can be processed
 by NEMO after <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;zcat r001.data.Z | atos - r001.dat
-</pre><p>
-Some N-body programs, which are capable of handling a series of snapshots,
-and selecting them using the <b>times=</b> keyword, are not able to handle subsequent
-snapshots which are larger than the first one. In fact,  unpredictable things
-may happen, although usually it results in a core because of illegal memory
-access. There are two solutions. The program can be recompiled, by using
-a <b>-DREALLOC</b> flag or <b>#define</b> it in the source code. The second solution is
-to prepend the datafile with a large enough &rsquo;dummy&rsquo; file. <p>
-To display a scatter
-diagram in the form of a contour map, convert the two columns to a snapshot
-by calling them &rsquo;x&rsquo; and &rsquo;y&rsquo; coordinates. Remaining phase space coordinates are
-unimportant. Set masses to 1, and use the <a href='atos.1.html'><i>atos(1NEMO)</i></a>
- format. A program like
-<a href='awk.1.html'><i>awk(1)</i></a>
+</pre>See also the <a href='tcppipe.1.html'><i>tcppipe(1NEMO)</i></a>
+ program to read the data over a pipe from another
+machine. <p>
+Some N-body programs, which are capable of handling a series of
+snapshots, and selecting them using the <b>times=</b> keyword, are not able to
+handle subsequent snapshots which are larger than the first one. In fact,
+ unpredictable things may happen, although usually it results in a core
+because of illegal memory access. There are two solutions. The program can
+be recompiled, by using a <b>-DREALLOC</b> flag or <b>#define</b> it in the source code.
+The second solution is to prepend the datafile with a large enough &rsquo;dummy&rsquo;
+file. <p>
+To display a scatter diagram in the form of a contour map, convert
+the two columns to a snapshot by calling them &rsquo;x&rsquo; and &rsquo;y&rsquo; coordinates. Remaining
+phase space coordinates are unimportant. Set masses to 1, and use the <a href='atos.1.html'><i>atos(1NEMO)</i></a>
+
+format. A program like <a href='awk.1.html'><i>awk(1)</i></a>
  can write the file for <a href='atos.1.html'><i>atos(1NEMO)</i></a>
 , then <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
- creates
-a <a href='image.5.html'><i>image(5NEMO)</i></a>
+
+creates a <a href='image.5.html'><i>image(5NEMO)</i></a>
  file, which can be optionally smoothed using <a href='ccdsmooth.1.html'><i>ccdsmooth(1NEMO)</i></a>
 
 and displayed with <a href='ccdplot.1.html'><i>ccdplot(1NEMO)</i></a>
@@ -58,42 +60,72 @@ programs, use <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
  format file. Check also
 the tabccd shell script, if available, or perhaps someone wrote it in C
 already. It calls awk, atos and snapgrid. <p>
-The <a href='ds.1LOCAL.html'><i>ds(1LOCAL)</i></a>
- program, written
-by Bill Sebok, is one of the external  programs which can be used to display
-images. <i>ds</i> can understand a variety of image file formats, of which the
-<a href='fits.5.html'><i>fits(5NEMO)</i></a>
- is best suited for our needs. Transform your image to a fits
+The <a href='ds9.1.html'><i>ds9(1)</i></a>
+ program is one of the
+external programs which can be used to display images. <i>ds9</i> can understand
+a variety of FITS compression standards. Transform your image to a fits
 file using <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
-, and use  ds on that fits file. Although <a href='ds.1L.html'><i>ds(1L)</i></a>
-
- works on monochrome SUN workstations, it&rsquo;s best on a color monitor. The
-trick to remember is to use the <b>-yflip</b> switch, or click on the Y button,
-because  our fits interface has a problem obviously... 
-<h2><a name='sect2' href='#toc2'>PIPES and SHARED MEMORY</a></h2>
-NEMO
-encourages you to use pipes where serial operations make sense (see also
-<a href='tee.1.html'><i>tee(1)</i></a>
-). However on Linux, assuming you have enough memory, using /dev/shm
-will sacrifice your memory to store data temporarely and could speed up
-your I/O dominated workflow. Here is a simple example: <br>
+, and use  ds on that fits file.  
+<h2><a name='sect2' href='#toc2'>PIPES and SHARED
+MEMORY</a></h2>
+NEMO encourages you to use pipes where serial operations make sense
+(see also <a href='tee.1.html'><i>tee(1)</i></a>
+). However on Linux, assuming you have enough memory, using
+/dev/shm will sacrifice your memory to store data temporarely and could
+speed up your I/O dominated workflow. Here is an example: <br>
 <pre>       mkdir /dev/shm/$USER
        cd /dev/shm/$USER
        mkspiral s000 1000000 nmodel=40
 </pre>The example of <a href='mkspiral.1.html'><i>mkspiral(1NEMO)</i></a>
  is taken from the NEMO <a href='bench.5.html'><i>bench(5NEMO)</i></a>
  suite,
-but this example is actually not very I/O dominated. 
-<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+but this example is actually not very I/O dominated. The variable $XDG_RUNTIME_DIR
+can also be used, or $TMPDIR, depending on your system configuration. <p>
+Using
+<a href='tcppipe.1.html'><i>tcppipe(1NEMO)</i></a>
+ one can read data produced on other machines <p>
+<a href='zrun.1.html'><i>zrun(1)</i></a>
+ can
+uncompress on the fly, by prepending it to the command <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;zrun fitsccd ngc6503.fits.gz - | tsf -
+</pre><p>
+<a href='pee.1.html'><i>pee(1)</i></a>
+ is tee for pipes <p>
+<a href='sponge.1.html'><i>sponge(1)</i></a>
+ soaks up standard input and writes to
+a file <p>
+<a href='vipe.1.html'><i>vipe(1)</i></a>
+ edits a pipe using your editor,e.g. <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;command1 | vipe | command2
+</pre>
+<h2><a name='sect3' href='#toc3'>Parallel</a></h2>
+Most programs in NEMO are still single-core, but many current machines
+have a number of cores. If a program only uses a fraction of the memory
+on the machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ program can be used to spread the load,
+e.g. <br>
+<pre>       echo mkplummer . 10000 &gt; run.txt
+       echo mkplummer . 10000 &gt;&gt; run.txt
+       parallel --jobs 2 &lt; run.txt
+</pre>
+<p>which will run both jobs in parallel 
+<p> 
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
+, <a href='bench.5.html'>bench(5NEMO)</a>
 ,
-<a href='bench.5.html'>bench(5NEMO)</a>
-, <a href='tee.1.html'>tee(1)</a>
+<a href='tee.1.html'>tee(1)</a>
+, <a href='pee.1.html'>pee(1)</a>
 , <a href='netcat.1.html'>netcat(1)</a>
+, <a href='zrun.1.html'>zrun(1)</a>
+, <a href='parallel.1.html'>parallel(1)</a>
+, <a href='sponge.1.html'>sponge(1)</a>
+, <a href='vipe.1.html'>vipe(1)</a>
  
-<h2><a name='sect4' href='#toc4'>Author</a></h2>
-Peter Teuben. 
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
+Peter
+Teuben. 
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 5-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabccd added         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -108,9 +140,10 @@ jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added pipe/shm<tt> </tt>&nbsp;<tt> </tt>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
 <li><a name='toc2' href='#sect2'>PIPES and SHARED MEMORY</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Author</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Parallel</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc6' href='#sect6'>Update History</a></li>
 </ul>
 </body>
 </html>

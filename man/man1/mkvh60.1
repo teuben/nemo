@@ -1,0 +1,103 @@
+.TH MKVH60 1NEMO "19 April 2021"
+.SH NAME
+mkvh60 \- create a uniform sphere of equal mass stars using von Hoerner's 1960 recipe
+.SH SYNOPSIS
+\fBmkvh60\fP [parameter=value]
+.SH DESCRIPTION
+Sebastian von Hoerner (1960ZA.....50..184V) describes - in beautiful German -
+four steps how his equal mass virialized homogenous
+sphere was constructed. It also uses a random number generator he himself designed. Here's my interpretation
+of these steps:
+.RS 5
+.IP 1.
+Get random numbers between 0 and 1 (see ran_svh57(3NEMO)).
+.IP 2.
+Ensure positions and velocities are uniformly distributed
+in a sphere of radius 1 (in both x,y,z and vx,vy,vz)
+.IP 3.
+Shift center of mass to exactly 0.0
+.IP 4.
+Rescale velocities such that the virial (2Ek/Ep) is exactly 1.0
+.RE
+
+Note that the velocities would not be gaussian if my interpretation is correct (cf. his eq.(22) and (71)), thus
+the initial conditions are not in the final phase space configuration, yet the models are fun to play with.
+.PP
+Since the simulations were done on the Siemens 2002 computer, with about 2000 FLOPS,
+the number of particles was limited to 16 in his 1960 paper, though his followup paper in 1963
+discussed the case nbody=25!
+.PP
+The seed is special in von Hoerner. It is a random number between 0.57 and 0.91, and uses is own 1957 method,
+implemented in \fIran_svh57(3NEMO)\fP. By default this code will use NEMO's default random numbers,
+set by \fBseed=\fP, however if \fBseed57\fP is given, his code is used. See also \fIxrandom(1NEMO)\fP.
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBout=\fP
+Output file name, in standard \fIsnapshot(5NEMO)\fP format. No default.
+.TP
+\fBnbody=\fP
+Number of particles [16]    
+.TP
+\fBseed57=\fP
+Von Hoerners 1957 seed, must be (0.57 - 0.91). Default: not used.
+.TP
+\fBseed=\fP
+NEMO's Random number seed, if used. [0] 
+.TP
+\fBzerocm=\fP
+Center c.o.m. ? [t]    
+.TP
+\fBheadline=\fP
+Text headline for output. By default not used.
+.SH EXAMPLES
+Here is a default n=16 sphere, first using the NEMO random number generator, and then the von Hoerner ran57 method:
+
+.nf
+\fBmkvh60 . 16 seed=123\fP
+### nemo Debug Info: virial radius: 0.740663    v2=0.821627   ek=0.218607 ep=0.632879   K=1.44753
+### nemo Debug Info: snapvscale: 1.20313
+
+\fBmkvh60 . 16 seed57=0.580128\fP
+### nemo Debug Info: SvH seed=0.580128
+### nemo Debug Info: von Hoerner seed57=0.580128 first ran=0.548496
+### nemo Debug Info: virial radius: 0.759762    v2=0.811234   ek=0.261934 ep=0.616969   K=1.17772
+### nemo Debug Info: snapvscale: 1.08523
+
+.fi
+
+.SH SEED57
+The \fBseed57=\fP keyword is the seed for the revived ran_svh57() \fIZufallzahl\fP random number generator.
+My interpretation of eq.(44) in 1960ZA.....50..184V is : (code in python)
+
+.nf
+  x = seed57      # between 0.57 and 0.91
+  while True:
+    x2 = x*x
+    if x2 < xlo:
+      xnew = x2 + 0.32
+    else:
+      xnew = x2
+    ran = int(('%.12f' % xnew)[5:])/1e9     # print out with 9 digits
+    print(ran)
+    x = xnew
+.fi    
+
+.SH SEE ALSO
+mkhomsph(1NEMO), firstn(1NEMO), snapshot(1NEMO)
+.PP
+.nf
+Z.f.Astrophys. 50, 184, 1960  (1960ZA.....50..184V)
+2001ASPC..228...11V  \fIHow it all started\fP
+Siemens 2002 computer: https://dl.acm.org/doi/10.1145/1458043.1458076
+.fi
+.SH FILES
+src/nbody/init
+.SH AUTHOR
+Sebastian von Hoerner (1960), Peter Teuben (NEMO re-implementation)
+.SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+19-Apr-2021	V0.1 Created	PJT
+.fi

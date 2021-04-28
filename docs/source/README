@@ -1,0 +1,27 @@
+This is the sphinx tree for NEMO documentation, meant to replace the old latex manual.
+
+Developers will need more modules in their python environment, e.g.
+
+   pip install -r $NEMO/docs/requirements.txt
+
+Here are a few workflow ideas:
+   
+
+to test html tree:
+   make html
+   open _build/html/index.html
+ or:
+   (cd build_/html; python3 -m http.server)
+   # open browser on:   http://0.0.0.0:8000/
+
+to test single html:
+   make singlehtml
+   open _build/singlehtml/index.html
+
+to test pdf:
+   make latexpdf
+   open _build/latex/nemo.pdf
+
+to test man:
+   make man
+   man -l _build/man/nemo.1

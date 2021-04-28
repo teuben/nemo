@@ -1,6 +1,6 @@
 .TH TRICKS 8NEMO "6 March 1989"
 .SH NAME
-tricks \- some tricks (and bugs) when using NEMO
+tricks \- some unix tricks when using NEMO
 .SH DESCRIPTION
 One can use \fIcat(1)\fP to catenate structured binary files, e.g.
 .nf
@@ -22,6 +22,8 @@ be processed by NEMO after
 .nf
 	\fBzcat r001.data.Z | atos - r001.dat\fP
 .fi
+See also the \fItcppipe(1NEMO)\fP program to read the data over
+a pipe from another machine.
 .PP
 Some N-body programs, which are capable of handling a series of snapshots,
 and selecting them using the \fBtimes=\fP keyword, are not able to
@@ -44,29 +46,53 @@ to write a \fIfits(5NEMO)\fP format file.
 Check also the tabccd shell script, if available, or perhaps someone
 wrote it in C already. It calls awk, atos and snapgrid.
 .PP
-The \fIds(1LOCAL)\fP program, written by Bill Sebok, is one of the external 
-programs
-which can be used to display images. \fIds\fP can understand a variety of
-image file formats, of which the \fIfits(5NEMO)\fP is best suited for our needs.
+The \fIds9(1)\fP program is one of the external programs
+which can be used to display images. \fIds9\fP can understand a
+variety of FITS compression standards.
 Transform your image to a fits file using \fIccdfits(1NEMO)\fP, and use 
-ds on that fits file. Although \fIds(1L)\fP 
-works on monochrome SUN workstations,
-it's best on a color monitor. The trick to remember is to use the \fB-yflip\fP
-switch, or click on the Y button, because  our fits interface has a problem
-obviously...
+ds on that fits file. 
 .SH PIPES and SHARED MEMORY
 NEMO encourages you to use pipes where serial operations make sense (see also \fItee(1)\fP).
 However on Linux, assuming you have enough memory, using /dev/shm will sacrifice your memory to store
-data temporarely and could speed up your I/O dominated workflow. Here is a simple example:
+data temporarely and could speed up your I/O dominated workflow. Here is an example:
 .nf
        mkdir /dev/shm/$USER
        cd /dev/shm/$USER
        mkspiral s000 1000000 nmodel=40
 .fi
 The example of \fImkspiral(1NEMO)\fP is taken from the NEMO \fIbench(5NEMO)\fP suite, but this example
-is actually not very I/O dominated.
+is actually not very I/O dominated. The variable $XDG_RUNTIME_DIR can also be used, or $TMPDIR,
+depending on your system configuration. Another option is using the \fImktemp(1)\fP command,
+e.g. \fBmktemp tmp.XXXXXXXX\fB
+.PP
+Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
+.PP
+\fIzrun(1)\fP can uncompress on the fly, by prepending it to the command
+.nf
+	zrun fitsccd ngc6503.fits.gz - | tsf -
+.fi
+.PP
+\fIpee(1)\fP is tee for pipes
+.PP
+\fIsponge(1)\fP soaks up standard input and writes to a file
+.PP
+\fIvipe(1)\fP edits a pipe using your editor,e.g.
+.nf
+	command1 | vipe | command2
+.fi
+.SH PARALLEL
+Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
+uses a fraction of the memory on the machine, the GNU \fIparallel(1)\fP program can be used to spread the load,
+e.g.
+.nf
+       echo mkplummer . 10000 > run.txt
+       echo mkplummer . 10000 >> run.txt
+       parallel --jobs 2 < run.txt
+.fi
+which will run both jobs in parallel
+
 .SH SEE ALSO
-nemo(1NEMO), bench(5NEMO), tee(1), netcat(1)
+nemo(1NEMO), bench(5NEMO), tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)
 .SH AUTHOR
 Peter Teuben.
 .SH "UPDATE HISTORY"
