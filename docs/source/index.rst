@@ -13,7 +13,7 @@ Welcome to NEMO's documentation!
 For Users
 ---------
 
-.. todo::  This is a draft started on April 27.  There are many todo's in this manual.
+.. todo::  This draft started on April 27.  There are many todo's in this manual, even missing ones!!
 
 .. toctree::
    :numbered:
@@ -25,24 +25,13 @@ For Users
    .. graphics	      
    examples
    potctex
-   amuse	      
    using
-   glossary
-
-For Programmers
----------------
-
-Here we do that....
-
-
-.. toctree::
-   :numbered:
-   :maxdepth: 2
-
    install
+   amuse	      
    coordsys	      
    trouble
    .. history
+   glossary
    todo	      
    rst
 
