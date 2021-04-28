@@ -24,6 +24,7 @@ Here we do this....
    filestr
    examples
    potctex
+   amuse	      
    using
    glossary
 
