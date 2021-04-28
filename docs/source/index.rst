@@ -39,8 +39,8 @@ Here we do that....
    :maxdepth: 2
 
    install
-   .. coordsys	      
-   .. trouble
+   coordsys	      
+   trouble
    .. history
    todo	      
    rst
