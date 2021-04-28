@@ -61,8 +61,10 @@ parameters must be given in a parameter file with the following content
     Maximum value for R in the computations in kpc      (RMAX)     22
     Number of THETA values (&lt;60) for each R             (NTHETA)   32
 </pre>
-<p> The rotation curve and the perturbing potential are both ascii files:
-<p>
+<p> The rotation curve and the perturbing potential are both ascii files,
+but in the "annoying" fortran style with wrapped lines that do not allow
+to go over 80 (or so) characters. See <b>perpot.py</b> for examples how to process
+them. <p>
 The &rsquo;VFILE&rsquo; must have the following format: <br>
 <pre>    NFRAD DRFRAD
     FRAD(I), (I=1,NFRAD)
