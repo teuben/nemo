@@ -80,13 +80,15 @@ speed up your I/O dominated workflow. Here is an example: <br>
  is taken from the NEMO <a href='bench.5.html'><i>bench(5NEMO)</i></a>
  suite,
 but this example is actually not very I/O dominated. The variable $XDG_RUNTIME_DIR
-can also be used, or $TMPDIR, depending on your system configuration. <p>
-Using
-<a href='tcppipe.1.html'><i>tcppipe(1NEMO)</i></a>
- one can read data produced on other machines <p>
+can also be used, or $TMPDIR, depending on your system configuration. Another
+option is using the <a href='mktemp.1.html'><i>mktemp(1)</i></a>
+ command, e.g. <b>mktemp tmp.XXXXXXXX<b> <p>
+Using <a href='tcppipe.1.html'><i>tcppipe(1NEMO)</i></b></b></a>
+
+one can read data produced on other machines <p>
 <a href='zrun.1.html'><i>zrun(1)</i></a>
- can
-uncompress on the fly, by prepending it to the command <br>
+ can uncompress on
+the fly, by prepending it to the command <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;zrun fitsccd ngc6503.fits.gz - | tsf -
 </pre><p>
 <a href='pee.1.html'><i>pee(1)</i></a>
