@@ -119,25 +119,27 @@ algorithm\footnote{see also their paper in: Nature, Vol. 324, pp 446 (1986).}:
 Images
 ------
 
-more coming
+.. todo:: examples/Images
 
 
 Tables
 ------
 
-more coming
+.. todo:: examples/Tables
+
 
 Potential
 ---------
 
-more coming
+.. todo:: examples/Potential
 
 Orbits
 ------
 
-more coming
+.. todo:: examples/Orbits
+
 
 Exchanging data
 ---------------
 
-more coming
+.. todo:: examples/Exchanging Data

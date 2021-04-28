@@ -1,6 +1,8 @@
 Example Potentials
 ==================
 
+.. todo::  potentials auto-build from source code ???
+
 In the latex manual this chapter is derived from the code. We thus need a new ``crst`` script
 that produces this.   Needs to handled embedded math, such as :math:`\frac{ \sum_{t=0}^{N}f(t,k) }{N}`
 as well as by itself:
