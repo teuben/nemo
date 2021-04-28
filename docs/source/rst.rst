@@ -1,6 +1,6 @@
-Background on RST
-=================
-	      
+RST reminders
+=============
+	
 
 -----
 Lists
@@ -102,25 +102,7 @@ Some example math, taken from latex
 
 .. math::
 
-   \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
-
-
-Organization
-============
-
-This is the start of a chapter, which will contain sections, below which subsections. maybe even deeper.
-
-
-MySection
----------
-
-And inside a section we will allow subsections.
-
-
-MySubSection
-~~~~~~~~~~~~
-
-and do we need more in NEMO?
+   \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} 
 
 
 
