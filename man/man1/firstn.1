@@ -1,4 +1,4 @@
-.TH FIRSTN 1NEMO "9 March 2004"
+.TH FIRSTN 1NEMO "19 April 2021"
 .SH NAME
 firstn - von Hoerners first N-body code
 .SH SYNOPSIS
@@ -35,19 +35,32 @@ KZ5 - control parameter what kind of input data are generated.
 .TP
 Q - Initial virial ratio (1  meant 2T/W=1)
 .TP
-ISCALE - 
+ISCALE -
+
+.SH EXAMPLES
+The following parameter file should create the kind of spheres von Hoerner was using in his 1960 paper:
+.nf
+
+16 12.0 0.0 1.0 10.0
+1.0 1.0 1.0 0
+0.5 0
+
+.fi
+It should be noted in the 1960 paper N=4,8,10,12,16 were used, in the 1963 followup paper N=25 was used.
+Computational time should scale N^4 per relaxation time.
+
 .SH PERFORMANCE
-CPU should  scale as N^2. Here are some numbers 
+CPU should  scale as N^2. Here are some numbers from "make bench":
 .nf
 .ta +1i +1i +1i
 N	cpu"	cpu"
-	?	p4/1600/gcc	ifort
+	?	p4/1600/gcc	ifort   i5-1135G7
 
-16	2.9	2.2	0.79
-32	62.0	33.2	19.0
-64	93.4	27.8	84.2
-128	642.6	108.4	75.1
-256	n/a	834.3	746.5
+16	2.9	2.2	0.79	0.23
+32	62.0	33.2	19.0	1.67
+64	93.4	27.8	84.2	16.11
+128	642.6	108.4	75.1	8.25
+256	n/a	834.3	746.5	44.8
 .fi
 .SH CAVEATS
 This historic code is meant to be educational.
@@ -58,7 +71,8 @@ This historic code is meant to be educational.
 ~/usr/aarseth/firstn	original
 .fi
 .SH SEE ALSO
-nbody0(1NEMO)
+nbody0(1NEMO), mkvh60(1NEMO)
+
 .nf
 Z.f.Astrophys. 50, 184, 1960
 Z.f.Astrophys. 57, 47, 1963 
@@ -76,4 +90,5 @@ S. von Hoerner (original), Sverre Aarseth (21st century adaptation)
 .ta +1i +4i
 dec-2000	version from Aarseth			       	PJT
 9-mar-04	man page written 				PJT
+19-apr-21	reference to mkvh60	PJT
 .fi
