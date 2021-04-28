@@ -94,7 +94,11 @@ the right orientation and velocity field (with an arbitrary rotation curve of co
 Units
 -----
 
-.. todo:: See man page ?
+Perhaps better to refer to a few man pages we have on this:
+`units(1NEMO)  <../../../man_html/units.1.html>`_ ,
+`units(5NEMO)  <../../../man_html/units.5.html>`_ , and
+`constants(5NEMO)  <../../../man_html/constants.5.html>`_ .
+
 
 
 
