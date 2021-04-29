@@ -39,7 +39,7 @@ local Moment m;
 
 
 
-nemo_main()
+void nemo_main()
 {
   int i,n;
   int maxpnt = getiparam("maxpnt");

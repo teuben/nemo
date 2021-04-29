@@ -178,7 +178,7 @@ string defv[] = {
 
 string usage="Function Table lookup";
 
-nemo_main()
+void nemo_main()
 {
     FunctionTable *ftp;
     string fmt1, fmode = getparam("mode");
