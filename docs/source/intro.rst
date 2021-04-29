@@ -78,7 +78,7 @@ package, and extend your NEMO environment.
 
 The remaining chapters of this first part of the manual outline various
 concepts that you will find necessary to work with NEMO.
-Chapter~\ref{c:iface} outlines the user interface (commandline, shells
+Chapter :ref:`iface` outlines the user interface (commandline, shells
 etc.), details  are deferred to Appendix~\ref{a:iface}.
 Chapter~\ref{c:filestr} explains how data is stored on disk and can be
 manipulated, including the concept of function descriptors in NEMO.

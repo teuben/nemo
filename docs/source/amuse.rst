@@ -2,7 +2,7 @@ AMUSE and NEMO
 ==============
 
 AMUSE (Astrophysical Multipurpose Software Environment) originates some ideas
-from it predecessors: ACS, StarLab and NEMO, but uses the python language.
+from it spredecessors: ACS, StarLab and NEMO, but uses the python language.
 Another feature of AMUSE is that
 python is also the *glue* shell between legacy codes that can orchestrate
 simulations taking components from different codes.
@@ -17,13 +17,14 @@ Differences
 -----------
 
 - **Shell**:
-  NEMO uses Unix shell, AMUSE python (ipython, jupyter, ...). 
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...). 
 
 - **Units**:
-  NEMO uses numbers, and units are implied. Most programs use virial units where G=1, a few programs
-  (e.g. galaxy, nbodyX) use other units. The
+  NEMO uses dimensionless values, and units are implied. 
+  Most programs actually use virial units where G=1, but there are a few programs
+  (e.g. galaxy, nbodyX) that use other units. The
   `units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_
-  tries to explain.
+  tries to help you converting.
   AMUSE (optionally?) attaches units to numbers , using a python trick, e.g.
 
 .. code-block::

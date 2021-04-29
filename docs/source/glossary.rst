@@ -50,7 +50,7 @@ Glossary
 
   miriad
       Another astronomical data reduction package,
-      from which we have borrowed\index{miriad} some user interfaces
+      from which we have borrowed some user interfaces
       ({\tt miriad} and {\tt mirtool}) which are plug-compatible with
       our command-line syntax.
 
@@ -60,7 +60,7 @@ Glossary
       or end with ``{\tt orb}''.
 
   pixel
-      PIXEL
+      PIXEL/voxel
 
   
 
@@ -71,7 +71,7 @@ Glossary
 
   program keyword
       Keywords that are defined by the
-      program only. They can be seen by using the {\tt help=} keyword
+      program only. They can be seen by using the **help=** keyword
       (in itself being a system keyword).
 
   review
@@ -86,7 +86,7 @@ Glossary
 
   snapshot
       Dataformat used in NEMO to represent an
-      N-body system. Most programs that handle {\it snapshot}'s in
+      N-body system. Many programs that handle {\it snapshot}'s in
       NEMO start or end with ``{\tt snap}''.
 
   structured file
@@ -97,18 +97,19 @@ Glossary
       and 
       `csf  <https://teuben.github.io/nemo/man_html/csf.1.html>`_
       perform general and basic I/O functions on
-      such files. They are hierarchical structured sets.
+      such files. They are hierarchical structured sets, much like
+      how binary XML files would look.
 
   system keyword
       Global keyword that every NEMO
       program knows about, and are not listed in the (program)
-      keywords that can be seen by issuing e.g. {\tt help=} (in itself
+      keywords that can be seen by issuing e.g. **help=** (in itself
       being a system keyword).
 
   yapp
       ``Yet Another Plotting Package'', the library
       definition that is used by all programs that produce graphics
-      output. It is kept very simple. The {\tt yapp=} system keyword
+      output. It is kept very simple. The **yapp=** system keyword
       controls the graphics device definitions/capabilities.
 
 
