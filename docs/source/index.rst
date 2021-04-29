@@ -22,13 +22,20 @@ For Users
    intro
    iface
    filestr
-   .. graphics	      
+   graphics	      
    examples
-   potctex
+   .. potential.inc, image.inc
    using
+   .. setup
    install
+   .. progr
+   .. refs
+   .. aiface
+   potname
    amuse	      
-   coordsys	      
+   coordsys
+   .. dirs
+   .. gls
    trouble
    .. history
    glossary
