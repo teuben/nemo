@@ -232,152 +232,136 @@ environment variable is absent.
 
 
 
-- \item[{\bf BELL}]  If BELL is set (1), a number of user-interface routines
-become noisy. The default is 0.
-\index{BELL, environment}
+- **BELL**
+  If BELL is set (1), a number of user-interface routines
+  become noisy. The default is 0.
 
-- \item[{\bf BTRPATH}]    List of directories where {\it bodytrans(3NEMO)}
-functions can be stored for retrieval. 
-The default is {\tt /usr/nemo/obj/bodytrans}.
-Normally set to {\tt ".:\$NEMOOBJ/bodytrans"} in {\tt NEMORC}.
-\index{BTRPATH, environment}
+- **BTRPATH**
+  List of directories where {\it bodytrans(3NEMO)}
+  functions can be stored for retrieval. 
+  The default is {\tt /usr/nemo/obj/bodytrans}.
+  Normally set to {\tt ".:\$NEMOOBJ/bodytrans"} in {\tt NEMORC}.
 
-- \item[{\bf CFLAGS}]    Options for the C compiler for on-the fly
-compilations under NEMO V2. Not used for NEMO V3.
-See e.g. {\it bodytrans(1NEMO)}. When not set, no
-compilation options used. When set, some make(1) implementations
-will also use it when the environment is imported. 
-\index{CFLAGS, environment}
+- **DEBUG**
+  Debug level, must be between 0 and 9. The higher the
+  number, the more debug output appear on {\it stderr}. The default is
+  0. See {\it getparam(3NEMO)}. DEBUG is also used as system keyword,
+  in which case the environment variable is ignored.
 
-- \item[{\bf DEBUG}]  Debug level, must be between 0 and 9. The higher the
-number, the more debug output appear on {\it stderr}. The default is
-0. See {\it getparam(3NEMO)}. DEBUG is also used as system keyword,
-in which case the environment variable is ignored.
-\index{DEBUG, environment} \index{debug=, system keyword}
+- **EDITOR**
+  Editor used when helplevel 4 is included. 
+  The default is {\tt vi} (see {\it vi(1)}). 
+  See also {\it getparam(3NEMO)}.
 
-- \item[{\bf EDITOR}] Editor used when helplevel 4 is included. 
-The default is {\tt vi} (see {\it vi(1)}). 
-See also {\it getparam(3NEMO)}.
-\index{EDITOR, environment}
+- **ERROR** Error level for irrecoverable errors. If this environment
+  variable is present, and its numeric value is positive, this is the
+  number of times that such fatal error calls are bypassed; 
+  after that the the program really stops. See also {\it getparam(3NEMO)}.
 
-- \item[{\bf ERROR}] Error level for irrecoverable errors. If this environment
-variable is present, and its numeric value is positive, this is the
-number of times that such fatal error calls are bypassed; 
-after that the the program really stops. See also {\it getparam(3NEMO)}.
-\index{ERROR, environment}
 
-- \item[{\bf FLOAT\_OPTION}] Used by Sun3s native {\it cc(1)} compiler
-which floating point unit to use. Options are, amongst
-others, {\tt ffpa, f68881}. This environment variable has to be 
-turned off on Sun4s.
-\index{FLOAT-OPTION, environment}
+- **HELP**
+  Help level, can be any combination of numerically
+  adding 0, 1, 2, and 4, and any combination 
+  of '?', 'a', 'h', 'p', 'd', 'q', 't' and 'n'. See {\it getparam(3NEMO)}. 
+  HELP is also used as system keyword, 
+  in which case the environment variable is ignored. The numeric 
+  part of the help string should come first.
 
-- \item[{\bf HELP}]   Help level, can be any combination of numerically
-adding 0, 1, 2, and 4, and any combination 
-of '?', 'a', 'h', 'p', 'd', 'q', 't' and 'n'. See {\it getparam(3NEMO)}. 
-HELP is also used as system keyword, 
-in which case the environment variable is ignored. The numeric 
-part of the help string should come first.
-\index{HELP, environment} \index{help=, system keyword}
 
-- \item[{\bf HISTORY}]    Setting it to 0 causes history data NOT to be
-written, the default is 1 (see {\it getparam(3NEMO)}). A few
-old programs may use the keyword {\tt amnesia=} for this.
-\index{HISTORY, environment}
+- **HISTORY**
+  Setting it to 0 causes history data NOT to be
+  written, the default is 1 (see {\it getparam(3NEMO)}). A few
+  old programs may use the keyword {\tt amnesia=} for this.
 
-- \item[{\bf HOSTTYPE}]   In case of multiCPU environment, which has to
-be served from the same {\tt NEMORC}  and/or {\tt .cshrc} file, this
-variable will have the CPU type in it, {\it e.g.} {\tt sun3} or
-{\tt sun4}, which are used to break up the {\tt bin},
-{\tt lib} and {\tt obj} directories. It is also used in some
-Makefiles.
-\index{HOSTTYPE, environment}
 
-- \item[{\bf INCLUDE}] List of directories from where to include
-NEMO header files when compiling. Used by \index{cc, script}
-the {\it mycc(1NEMO)} preprocessor and some cc-scripts.
-This environment variable is not actively used anymore. {\it --deprecated--}
-\index{INCLUDE, environment}
+- **HOSTTYPE**
+  In case of multiCPU environment, which has to
+  be served from the same {\tt NEMORC}  and/or {\tt .cshrc} file, this
+  variable will have the CPU type in it, {\it e.g.} {\tt sun3} or
+  {\tt sun4}, which are used to break up the {\tt bin},
+  {\tt lib} and {\tt obj} directories. It is also used in some
+  Makefiles.
 
-- \item[{\bf LIBRARY}] List of directories used to resolve
-NEMO library references in the compile/link command.
-Used by the {\it mycc(1NEMO)} preprocessor and some
-cc-scripts.
-This environment variable is not actively used anymore. {\it --deprecated--}
-\index{LIBRARY, environment}
 
-- \item[{\bf MANPATH}]  Used by UNIX to be able to address more than one
-area of manual pages. Normally set to {\tt \$NEMO/man:/usr/man}
-by the {\tt NEMORC} file. Does not work in Ultrix 3.0, \index{Ultrix}
-but perhaps the {\tt -P} switch may be used.
-\index{MANPATH, environment}
+- **MANPATH**
+  Used by UNIX to be able to address more than one
+  area of manual pages. Normally set to {\tt \$NEMO/man:/usr/man}
+  by the {\tt NEMORC} file. Does not work in Ultrix 3.0, \index{Ultrix}
+  but perhaps the {\tt -P} switch may be used.
 
-- \item[{\bf NEMO}]   The root directory for NEMO. Normally the only
-environment variable which a user has to define himself, 
-in his {\tt .cshrc} startup file. No default.
-\index{NEMO, environment}
 
-- \item[{\bf NEMOBIN}]    Directory where nemo's binaries live, defined
-in {\tt NEMORC}. No default. 
-\index{NEMOBIN, environment}
+- **NEMO**
+  The root directory for NEMO. Normally the only
+  environment variable which a user has to define himself, 
+  in his {\tt .cshrc} startup file. No default.
 
-\item[{\bf NEMODOC}]    Directory where the *.doc files for mirtool
-and miriad shell should be looked for. The system default
-is {\tt \$NEMO/man/doc}, set by NEMORC. No default.
-\index{NEMODOC, environment}
 
-- \item[{\bf NEMODEF}]    Directory where keyword files from 
-{\tt mirtool/miriad } are stored/retrieved. The default is 
-the current directory.
-\index{NEMODEF, environment}
+- **NEMOBIN**
+  Directory where nemo's binaries live, defined
+  in {\tt NEMORC}. No default. 
 
-- \item[{\bf NEMOLIB}]    Directory where nemo's libraries live.
-Normally set by \index{NEMOLIB, environment}. No default.
-{\tt NEMORC}. 
 
-- \item[{\bf NEMOLOG}]    Filename used as logfile for tasks submitted
-through {\tt nemotool}.
-\index{NEMOLOG, environment}
+- **NEMODOC**
+  Directory where the *.doc files for mirtool
+  and miriad shell should be looked for. The system default
+  is {\tt \$NEMO/man/doc}, set by NEMORC. No default.
 
-- \item[{\bf NEMOOBJ}]    Directory were (binary) object files live. They
-are used by a variety of nemo programs, and generally do not 
-concern the user. Usually set by {\tt NEMORC}.
-\index{NEMOOBJ, environment}
 
-- \item[{\bf NEMOPATH}]   Same as NEMO, but kept for historical reasons.
-It is normally defined in the {\tt NEMORC} file. {\it --deprecated--}
-\index{NEMOPATH, environment}
+- **NEMODEF**
+  Directory where keyword files from 
+  {\tt mirtool/miriad } are
+  stored/retrieved. The default is 
+  the current directory.
 
-- \item[{\bf NEMOSITE}]    The site name, which is also an alias used
-in case the import/export features with the central site are to
-be maintained.
-\index{NEMOSITE, environment}
 
-- \item[{\bf PATH}]   UNIX search-path for executables,
-normally set in your own shell startup file (.cshrc or .login). 
-Should contain NEMOBIN early in the path definition,
-before /usr/bin and /bin to redefine the cc and make programs.
-See Appendix~\ref{a:setup}
-\index{PATH, environment}
+- **NEMOLIB**
+  Directory where nemo's libraries live.
+  Normally set by \index{NEMOLIB, environment}. No default.
 
-- \item[{\bf POTPATH}]    List of directories where {\it potential(5NEMO)}
-functions can be stored. The default is {\tt /usr/nemo/obj/potential}.
-\index{POTPATH, environment}
+- **NEMOLOG**
+  Filename used as logfile for tasks submitted
+  through {\tt nemotool}.
 
-- \item[{\bf REVIEW}]   If this variable is set, the REVIEW section is
-entered before the program is run. [default: not set or 0]
-\index{REVIEW, environment}
 
-- \item[{\bf YAPP}] Yapp graphics output device.
-Usage depends which {\it yapp(3NEMO)} the program was linked
-with. See also {\it getparam(3NEMO)} and {\it yapp(5NEMO)}.
-YAPP is also used as system keyword, 
-in which case the environment variable is ignored.
-\index{YAPP, environment} \index{yapp, system keyword}
+- **NEMOOBJ**
+  Directory were (binary) object files live. They
+  are used by a variety of nemo programs, and generally do not 
+  concern the user. Usually set by {\tt NEMORC}.
 
-- \item[{\bf YAPPLIB}] Libraries needed to link
-a program which the default YAPP graphics device. No default.
-\index{YAPPLIB, environment}
+
+- **NEMOPATH**
+  Same as NEMO, but kept for historical reasons.
+  It is normally defined in the {\tt NEMORC} file. {\it --deprecated--}
+
+
+- **NEMOSITE**
+  The site name, which is also an alias used
+  in case the import/export features with the central site are to
+  be maintained.
+
+
+- **PATH**
+  UNIX search-path for executables,
+  normally set in your own shell startup file (.cshrc or .login). 
+  Should contain NEMOBIN early in the path definition,
+  before /usr/bin and /bin to redefine the cc and make programs.
+  See Appendix~\ref{a:setup}
+
+- **POTPATH**
+  List of directories where {\it potential(5NEMO)}
+  functions can be stored. The default is {\tt /usr/nemo/obj/potential}.
+
+
+- **REVIEW**
+  If this variable is set, the REVIEW section is
+  entered before the program is run. [default: not set or 0]
+
+- **YAPP**
+  Yapp graphics output device.
+  Usage depends which {\it yapp(3NEMO)} the program was linked
+  with. See also {\it getparam(3NEMO)} and {\it yapp(5NEMO)}.
+  YAPP is also used as system keyword, 
+  in which case the environment variable is ignored.
 
 
 
