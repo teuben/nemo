@@ -4,16 +4,32 @@
 
 version=2.6
 wget=wgetc
+url=https://git.savannah.gnu.org/git/gsl.git
+git=0
 
 for arg in $*; do
   export $arg
 done
 
-cd $NEMO/local
-$wget ftp://ftp.gnu.org/gnu/gsl/gsl-$version.tar.gz
+set -x
 
-tar zxf gsl-$version.tar.gz
-cd gsl-$version
+cd $NEMO/local
+
+if [ $git == 1 ]; then
+    if [ -d gsl ]; then
+        cd gsl
+        git pull
+    else
+	git clone $url
+	cd gsl
+    fi
+    autoconf
+else
+    $wget ftp://ftp.gnu.org/gnu/gsl/gsl-$version.tar.gz
+    tar zxf gsl-$version.tar.gz
+    cd gsl-$version
+fi
+
 ./configure --prefix=$NEMO/opt
 make -j
 make install

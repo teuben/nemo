@@ -11,6 +11,8 @@
 
 version=1.10.7      # 11-sep-2020
 mversion=1.10
+url=https://github.com/HDFGroup/hdf5
+
 wget=wgetc
 
 for arg in $*; do

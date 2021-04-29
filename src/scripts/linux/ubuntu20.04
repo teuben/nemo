@@ -40,3 +40,6 @@ libhdf5-serial-dev hdf5-tools
 libboost-dev
 libsqlite3-dev 
 libccfits0v5
+
+#
+parallel

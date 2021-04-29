@@ -7,8 +7,9 @@ if [ $# -eq 0 ]; then
     exit 0
 fi
 
-log=/tmp/nemobench$$.log
-log=/tmp/nemobench.log
+log=/tmp/nemobench$$.log                 # per process
+log=/tmp/nemobench.log                   # global
+log=$XDG_RUNTIME_DIR/nemobench.log       # per session
 
 echo NEMOBENCH: $* >> $log
 /usr/bin/time $* >> $log 2>&1

@@ -1,4 +1,8 @@
 #
+CC = gcc
+CFLAGS = -g -O2
+
+TIME = /usr/bin/time
 
 help:
 	@echo "Heggie & Hut 2003 : The Gravitational Million-Body Problem"
@@ -10,6 +14,7 @@ nbody_hh: nbody_hh.c
 
 bench:
 	@echo Benchmark
+	$(TIME) ./nbody_hh 1024 10 1.0
 
 clean:
-	rm *.o nbody_hh
+	rm -f *.o nbody_hh

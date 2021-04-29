@@ -13,8 +13,9 @@ echo -n "<A HREF=index3.html>man3</A>,"
 echo -n "<A HREF=index5.html>man5</A>,"
 echo -n "<A HREF=index6.html>man6</A>,"
 echo -n "<A HREF=index8.html>man8</A>,"
-echo -n "<A HREF=indexl.html>manl</A>".
-echo -n "<A HREF=whatis.html>whatis</A>]".
+echo -n "<A HREF=indexl.html>manl</A>,"
+echo -n "<A HREF=whatis.html>whatis</A>,"
+echo -n "<A HREF=bibcode.html>bibcode</A>]"
 echo "</CENTER>"
 
 echo "<H1>NEMO Whatis Manual Reference  </H1>"

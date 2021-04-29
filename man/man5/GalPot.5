@@ -1,7 +1,9 @@
 .TH GALPOT 5NEMO "8 November 2008"
-.SH NAME
+
+.SH "NAME"
 GalPot \- galactic potential descriptor
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 The \fIGalPot\fP potential (\fBpotname=GalPot\fP) describes the Milky Way
 potential as published in Dehnen & Binney (1998). A number of standard
 models have been implemented via datafiles in $NEMODAT/GalPot.
@@ -10,8 +12,10 @@ The Dehnen & Binney model contains three components: a disk, bulge and halo.
 The disk is made up of three components: ISM, thin and thick stellar disk,
 each of them a double (in R and |z|) exponential disk.
 The bulge and halo are both parameterized flattened spheroids.
+
 .SH "UNITS"
 There are two implementations of GalPot in falcON:
+
 .SH "UNITS-1"
 Taken from falcON/src/public/acc/GalPot.cc:
 .nf
@@ -30,6 +34,7 @@ The implied size of Newton's constant G are
 G = 1                 here                                                
 G = 4.49865897 E-12   in GalPot units                                     
 .fi
+
 .SH "UNITS-2"
 Taken from falcON/inc/acc/GalPot.h
 .nf
@@ -51,6 +56,7 @@ G             4.49865897 E-12 kpc^3/Myr^2/Msun
 4 Pi G        5.65318158 E-11 kpc^3/Myr^2/Msun                              
 
 .fi
+
 .SH "STANDARD MODELS"
 1-4 are their standard models. 2a-i and 4a-i are deviations from standard model 2 and 4.
 .nf
@@ -97,25 +103,33 @@ pot.10
 pot.20
 pot.40
 .fi
+
 .SH "EXAMPLES"
 .nf
   % potlist GalPot potfile=$NEMODAT/GalPot/pot.1 x=1
 .fi
 .SH "ENVIRONMENT"
 The environment variable \fBACCPATH\fP can be used to search for accelerations
-in other than the local directory. 
+in other than the local directory.
+
 .SH "SEE ALSO"
 acceleration(3NEMO), potential(5NEMO)
 .nf
 1998MNRAS.294..429D : \fIMass models of the Milky Way\fP : Dehnen, Walter; Binney, James 
 .fi
+
+.SH "ADS"
+@ads 1998MNRAS.294..429D
+
 .SH "AUTHOR"
-Walter Dehnen 
+Walter Dehnen
+
 .SH "FILES"
 .nf
 .ta +2.5i
 $NEMODAT/GalPot		directory with GalPot descriptors
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i

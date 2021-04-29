@@ -1,11 +1,14 @@
 .TH CSG 1NEMO "20 February 2021"
-.SH NAME
+
+.SH "NAME"
 CGS, runCGS\-  Collisionless Galactic Simulator N-body code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBCGS\fP 
 .PP
 \fBrunCGS\fP  [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fICGS\fP  (Collisionless Galactic Simulator) is a spherical harmonics Particle-Mesh code
 originally presented by van Albada (1982), and recently partially rewritten and improved
 by Michele Trenti.
@@ -29,7 +32,7 @@ A detailed code description can be found in Trenti M. (2005),
 PhD Thesis, Scuola Normale Superiore Pisa (Italy)
 [mainly Chapter 3]. A copy of the thesis is in $NEMO/usr/trenti/CGS/doc/.
 
-.SH PARAMETER
+.SH "PARAMETERS"
 There are the NEMO command line parameters for \fBrunCGS\fP:
 .TP 24
 \fBout=\fP\fIdirectory\fP
@@ -123,9 +126,14 @@ the full absolute path needs to be supplied here.
 \fBnemo=t|f\fP
 Should the snapshot data be converted to NEMO format? If so, the ASCII snapshot
 is removed. NOTE: Using this option requires extra diskspace. Default: [\fBt\fP]
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
+$NEMO/usr/trenti/CGS/doc/PhDthesis.pdf file - documentation
+$NEMO/usr/trenti/CGS/doc/2005AAP...433...57T.pdf - paper
+
+
 PARAMETER.DAT	basic input parameters (see below for details)
 
 initPOS.dat	input positions if \fBflag=3\fP
@@ -169,12 +177,14 @@ Sample \fIPARAMETER.DAT\fP initialization file (the default benchmark):
  0.01				!MAX ALLOWED DT --> MDT
  0.001				!MIN ALLOWED DT
 .fi
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following example uses runCGS to run the standard benchmark:
 .nf
    % runCGS out=bench1 
 .fi
-.SH COMPILATION
+
+.SH "COMPILATION"
 Note that various parameters (maximum grid size, maximum number of particles)
 are hardcoded during compilation, though easily changed in the right file:
 .nf
@@ -186,7 +196,8 @@ common.blk:	parameter(LMAX=7)        	Legendre Polynomials (do not modify)
 common.blk:	parameter(NCE=28)        	Max number of Spherical Harmonics Coefficients (do not modify)
 
 .fi
-.SH BENCHMARKS
+
+.SH "BENCHMARKS"
 The standard benchmark is 40000 particles and runs for 832 steps. The user CPU is listed (in sec)
 in the 2nd column. 
 .nf
@@ -212,21 +223,23 @@ or
    % /usr/bin/time CGS
 .fi
 Adding \fBnemo=t\fP (the default) would add about 15%.
-.SH DATA CONVERSION
+
+.SH "DATA CONVERSION"
 If output \fIsnapshot(5NEMO)\fP are requested, CGS will create a file \fBfort.90\fP,
 which can be converted to NEMO's \fIsnapshot(5NEMO)\fP, viz.
 .nf
    tabtos $old/fort.90 snap90 nbody,time skip,pos,vel,acc,phi
 .fi
 
-.SH UNITS
+.SH "UNITS"
 Although all particles are equally massive (by the nature of the code),
 the total mass of the system can be choosen as an input parameter. The
 gravitation constant is 4.4971, which is appropriate for a galactic
 scale system where the units (see also \fIunits(5NEMO)\fP) are
 10^11 solar mass, 10 kpc and 10^8 years. This gives a unit of velocity
 of about 97.8 km/s.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 scfm(1NEMO), quadcode(1NEMO), snapshot(5NEMO), units(1NEMO), units(5NEMO)
 .PP
 .nf
@@ -234,16 +247,25 @@ Trenti, M. (2005), PhD Thesis, Pisa (see Chapter 3 for many details on the code)
 Trenti, M. Bertin, G. and van Albada, T.S. (2005) A&A 433, 57
 van Albada, T.S. (1982), MNRAS, 201, 939. \fIDissipationless galaxy formation and the R to the 1/4-power law\fP 
 van Albada, T.S. & van Gorkum, J.H. (1977) A&A,54,121. \fIExperimental Stellar Dynamics for Systems with Axial Symmetry\fP
+
 .fi
-.SH AUTHOR
+The first two listed papers by Trenti can be found with the code distribution, see also FILES.
+
+.SH "ADS"
+@ads  2005A&A...433...57T
+
+.SH "AUTHOR"
 Michele Trenti & Tjeerd van Albada (NEMO adaptation: Peter Teuben)
-.SH CREDIT
+
+.SH "CREDIT"
 Any scientific publication or presentation which has benefited from using CGS should quote the paper
 .nf
    Trenti, M. Bertin, G. and van Albada, T.S. (2005) A&A 433, 57
 .fi
-(please find this paper and the PhDthesis.pdf file in the subdirectory CGS/doc).
-.SH HISTORY
+
+
+
+.SH "HISTORY"
 .nf
 .ta +1i +3i
 2003	original version	M. Trenti & T.van Albada

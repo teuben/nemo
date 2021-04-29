@@ -1,0 +1,25 @@
+A few of the smaller input files from https://nbabel.org/input
+They vary in size from N=16 to N=16384, in powers of 2
+
+
+Direct links:  
+   http://nbabel.org/files/input/inputFilesSmall.tar.gz    (for N=16..1024)
+   http://nbabel.org/files/input/inputFilesBig.tar.gz      (for N=2048..16384)
+
+
+NOTE: the original input files have an extra blank line in the file.
+
+This means the NEMO command
+
+      tabtos input16 input16.snap block1=skip,mass,pos,vel
+
+will fail.   If you remove the last line, e.g. using
+
+      sed -i '$d' input16
+
+it will work. You can also explicitly use nbody=, and the conversion
+will succeed, even though it complains about the short 2nd snapshot
+
+      tabtos input16 input16.snap block1=skip,mass,pos,vel nbody=16
+   
+

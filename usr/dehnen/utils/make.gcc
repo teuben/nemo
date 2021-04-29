@@ -3,7 +3,7 @@
 # sets library sub-directory and flags for gcc compiler
 # to be included by makefile 
 #
--include $(FALCON)/utils/make.sh
+include ../utils/make.sh
 
 ifndef GCC
 GCC		:= gcc
@@ -14,7 +14,7 @@ endif
 EXT             := .gcc
 CXX             := $(GPP)
 CC              := $(GCC)
-FC              := gfortran
+FC              := $(FC)
 
 PLATFORM 	:= $(shell uname -m)
 #
@@ -67,7 +67,7 @@ endif
 #PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
 #endif
 # general optimisation and warning flags
-# OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 \
+# OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 
 OPTFLAGS	:= -mfpmath=sse \
 		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)

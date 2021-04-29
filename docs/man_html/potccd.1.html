@@ -8,11 +8,14 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 potccd - Create an image with potentials or densities from a potential
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>potccd</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>potccd</i> stores the potential
 values of a potential descriptor  (see <a href='potential.5.html'>potential(5NEMO)</a>
@@ -20,88 +23,129 @@ values of a potential descriptor  (see <a href='potential.5.html'>potential(5NEM
 in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. It is also possible to store the Poissonian
 density, either 2D or 3D. For this numerical derivatives of the force field
-are used, and hence a small difference step needs to be given. 
+are used, and hence a small difference step needs to be given. <p>
+A potential
+stored on a grid could be a good approach when the potential is expensive
+to compute, though in orbit calculations this could limit the exact conservation
+of the integrals of motion such as energy. <p>
+Irregular grids are not forbidden
+(see <b>x=,y=,z=</b>) but the <a href='image.5.html'><i>image(5NEMO)</i></a>
+ WCS descriptor will then be invalid.
+
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters are recognized in any order if the
+keyword is also given: 
 <dl>
 
 <dt><b>out=</b> </dt>
 <dd>Output file (image). No default. </dd>
 
 <dt><b>potname=</b> </dt>
-<dd>Name of the <a href='potential.5.html'><i>potential(5NEMO)</i></a>
-.
-No default </dd>
+<dd>Name
+of the <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+. No default </dd>
 
 <dt><b>potpars=</b> </dt>
-<dd>Parameters for the potential. </dd>
+<dd>Parameters for the potential.
+</dd>
 
 <dt><b>potfile=</b> </dt>
-<dd>Any optional
-data file associated with the potential. </dd>
+<dd>Any optional data file associated with the potential. </dd>
 
 <dt><b>x=</b> </dt>
-<dd>X-coordinate(s) to test potential
-at. This should be a regular array, e.g. 1:10:0.2. Default: 0. </dd>
+<dd>X-coordinate(s)
+to test potential at. This should be a regular array, e.g. 1:10:0.2. Default:
+0. </dd>
 
 <dt><b>y=</b> </dt>
-<dd>Y-coordinate(s)
-to test potential at. Default: 0. </dd>
+<dd>Y-coordinate(s) to test potential at. Default: 0. </dd>
 
 <dt><b>z=</b> </dt>
-<dd>Z-coordinate(s) to test potential at.
-Default: 0. </dd>
+<dd>Z-coordinate(s) to
+test potential at. Default: 0. </dd>
 
 <dt><b>t=</b> </dt>
 <dd>Time to test potential at    </dd>
 
-<dt><b>mode=pot|ax|ay|az|ar|at|den</b> </dt>
-<dd>Output
-mode. Choices are potential, accelerations in X, Y or Z, and density (which
-needs dr&gt;0). Default: <b>pot</b>. </dd>
+<dt><b>mode=pot|ax|ay|az|ar|at|den</b>
+</dt>
+<dd>Output mode. Choices are potential, accelerations in X, Y or Z, and density
+(which needs dr&gt;0). Default: <b>pot</b>. </dd>
 
 <dt><b>dr=</b> </dt>
-<dd>Difference step used to compute numerical force
-derivates that are used to compute Poissonian densities.  </dd>
+<dd>Difference step used to compute numerical
+force derivates that are used to compute Poissonian densities.  </dd>
 
 <dt><b>ndim=</b> </dt>
-<dd>Number of
-dimensions used in Poissonian density computation. Should be 2 or 3.  </dd>
+<dd>Number
+of dimensions used in Poissonian density computation. Should be 2 or 3. 
+</dd>
+
+<dt><b>nder=1|2</b> </dt>
+<dd>Normally the density (<b>mode=den</b>) is derived by first derivatives
+of the forces, but for some potentials the force was never implemented
+(e.g. <b>potname=gauss</b>).  In this case the 2nd derivative of the potential will
+be needed, hence <b>nder=2</b>. Default: 1 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-With
-<b>ndim=2</b> the Z-coordinate is not ignored, and hence may give meaningless results
-if forces depend on Z. 
+With <b>ndim=2</b> the Z-coordinate is
+not ignored, and hence may give meaningless results if forces depend on
+Z. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-First a somewhat obscure way in to create
-a map of an arbitrary function using the <b>potname=rotcur</b> lookup table. It
-will use a spline interpolation, and if <b>mode=pot</b> is used, the "potential"
-is actually the "rotation curve" itself, since in general one cannot easily
-compute the potential from a rotation curve without knowing the full geometry.
-Here is an example how to create a smooth radial profile of the function
-"f(x)=1/sqrt(4+x)" on a grid from -10..10: <br>
+First a somewhat obscure way in to create a map of an arbitrary
+function using the <b>potname=rotcur</b> lookup table. It will use a spline interpolation,
+and if <b>mode=pot</b> is used, the "potential" is actually the "rotation curve"
+itself, since in general one cannot easily compute the potential from a
+rotation curve without knowing the full geometry. Here is an example how
+to create a smooth radial profile of the function "f(x)=1/sqrt(4+x)" on
+a grid from -10..10: <br>
 <pre>    % nemoinp 0:10 | tabmath - - &rsquo;1/(sqrt(4+%1)&rsquo; &gt; map0.tab
     % potccd map0 rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
 </pre>If the functional form is know, <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
  will perhaps do better,
-if not a little more involved to type. 
+if not a little more involved to type. <p>
+Here is an example of an orbit integration
+in the analytical plummer potential, and in two gridded versions of the
+potential. 
+<p> <br>
+<pre>% mkorbit o1 1 1 0 -0.5 0 0 potname=plummer
+etot: -0.452350
+% orbint o1 - 10000 0.01 ndiag=10000 | orblist - | tail -1
+Energy conservation: 2.05084e-11
+10000 100 -1.11384 -0.266207 0 0.557843 -0.315574 0
+% potccd ccd1 plummer x=-2:2:0.01 y=-2:2:0.01
+% orbint o1 - 10000 0.01 ndiag=10000 potname=ccd potfile=ccd1 | orblist - |
+tail -1
+Energy conservation: 0.0050378
+10000 100 -1.3835 -0.156784 0 0.408364 -0.319573 0
+% potccd ccd2 plummer x=-2:2:0.0025 y=-2:2:0.0025
+% orbint o1 - 10000 0.01 ndiag=10000 potname=ccd potfile=ccd2 | orblist - |
+tail -1
+Energy conservation: 0.00073957
+10000 100 -1.18841 -0.23806 0 0.518358 -0.3183 0
+</pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='potlist.1.html'>potlist(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
-,
-<a href='potential.3.html'>potential(3NEMO)</a>
+, <a href='potential.3.html'>potential(3NEMO)</a>
 , <a href='potential.5.html'>potential(5NEMO)</a>
- 
+
+
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>10-Jun-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-mar-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added density options (dr=, ndim=)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-sep-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added mode=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-mar-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 added nder=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

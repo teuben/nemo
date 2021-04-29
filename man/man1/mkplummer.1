@@ -17,6 +17,8 @@ isotropic, and is a polytrope of index n = 5.
 See also Aarseth et al. (1974) and Plummer (1911)
 .PP
 There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
+.PP
+For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 25
@@ -100,20 +102,44 @@ generating more then 1 model can be useful to process very large
 snapshots (which won't fit in memory) in a serialized fashion. See
 also \fIsnapsplit\fP. 
 Default: \fB1\fP.
-.SH BUGS
+
+.SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
 .PP
 For very large (>1000) ratio in the mass ranges the spline
 interpolation, used in \fIfrandom(3NEMO)\fP, can fail
 using a valid [0,1] range.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
 a Salpeter mass spectrum with
 .nf
   % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 .fi
-.SH SEE ALSO
+
+.SH "BENCHMARKS"
+The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double precision,
+with and without writing to a local file:
+.nf
+	make -f Benchfile bench0 bench1
+   or
+	/usr/bin/time mkplummer . 10000000
+	/usr/bin/time mkplummer bench1.snap 10000000
+.fi
+with some sample CPU for bench0:
+.nf
+   xps13       3.1s  or 171 MB/s
+   t480        4.9s  or  72 MB/s
+.fi
+the time difference betweeen bench0 and bench1 can be interpreted as
+the time needed to write 535MB (for 10M particles)
+
+
+.SH "FILES"
+NEMO/src/nbody/init/mkplummer.c
+
+.SH "SEE ALSO"
 snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
@@ -122,13 +148,19 @@ S.J. Aarseth, M. Henon and R.  Wielen (1974),
 \fIAstron. and Astrophys.\fB 37\fP, p. 183.
 .PP
 A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt, 2011, MNRAS, 417, 2300 (McLuster)
-.SH AUTHOR
+
+.SH "ADS"
+@ads 1974A&A....37..183A
+
+.SH "AUTHOR"
 Piet Hut (Peter Teuben)
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/nbody/init	mkplummer.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
@@ -142,3 +174,4 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 11-apr-05	V2.8: added nmodel=	PJT
 15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
 2-dec-2017	documented mcluster	PJT
+29-mar-2021	benchmark	PJT

@@ -110,7 +110,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_CSH
-dnl next ones seems to force linking with FC, and we have F77 as well
+dnl next ones seems to force linking with FC, and we have F77 as well, for now, FC=F77
 dnl AC_PROG_FC
 dnl AC_FC_WRAPPERS
 
@@ -153,7 +153,9 @@ AC_SUBST(NO_SHARED_LIBS)
 AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
         CC="clang"
-        CXX="clang"
+        CXX="clang++"
+	FC="flang"
+	F77="flang"
 fi
 
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
@@ -430,6 +432,9 @@ else
   fortran=no
   AC_MSG_WARN([no FORTRAN compiler])
 fi
+
+FC=$F77
+AC_SUBST(FC)
 
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 dnl ACX_F77_CMAIN_FFLAGS([AC_MSG_WARN([pjt])],[AC_MSG_WARN([problems fortran-c interface])])
