@@ -27,7 +27,7 @@ as they clearly show the structure of NEMO to a first time user:
 
 - The *N-body group*
   is defined by a common file structure of *snapshots*.
-  \index{snapshot, data group} In this group we find various programs
+  In this group we find various programs
   to create N-body systems (spherical, disk), methods to compute the
   gravitational field (softened Newtonian, hierarchical, Fourier
   expansion), and time-integrators (leapfrog, Runge-Kutta).  Many
@@ -47,17 +47,17 @@ as they clearly show the structure of NEMO to a first time user:
   *images*, i.e. two dimensional
   rectangular pixel arrays with a 'value' defined for every pixel.
   Actually an image may also have a third axis, although this axis
-  often has a slightly different meaning ({\it e.g.} Doppler velocity
-  \index{Doppler velocity}).  It is possible to generate arbitrary
+  often has a slightly different meaning ({\it e.g.} Doppler velocity.
+  It is possible to generate arbitrary
   two-(and three-) dimensional images from snapshots, FITS files
-  \index{FITS} of such images can be created, which can then be
+  of such images can be created, which can then be
   exported to other familiar astronomical data reduction packages.
   There exists a variety of programs in the astronomical community to
   manipulate data through FITS format.
 
 - The *table group* appears quite commonly among application
   programs in all of the above mentioned groups.  Most of the time it
-  is a simple ASCII file \index{table, data group} in the form of a
+  is a simple ASCII file in the form of a
   matrix of numbers (like a spreadsheet).  A few programs in NEMO can
   manipulate, display and plot such table files, although there are
   many superior programs and packages outside of NEMO available with

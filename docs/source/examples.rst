@@ -133,13 +133,21 @@ Potential
 
 .. todo:: examples/Potential
 
-Orbits
-------
 
-.. todo:: examples/Orbits
+
+.. include:: orbit.rst
+
 
 
 Exchanging data
 ---------------
 
 .. todo:: examples/Exchanging Data
+
+
+
+.. include:: potential.rst
+
+.. include:: image.rst
+
+

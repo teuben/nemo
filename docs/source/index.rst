@@ -24,7 +24,6 @@ For Users
    filestr
    graphics	      
    examples
-   .. potential.inc, image.inc
    using
    .. setup
    install
