@@ -8,7 +8,7 @@ should be ready to go through some real examples  Some of the examples
 below are short versions of shell scripts\footnote{where applicable, the
 examples in this chapter are written in the C-shell language}
 available online in one of the directories
-(check {\tt \$NEMO/csh} and perhaps {\tt \$NEMOBIN}).
+(check ``$NEMO/scripts`` and ``NEMOBIN``).
 The manual pages
 {\it programs(8NEMO)} and {\it intro(1NEMO)}
 are useful to find (and cross-reference) programs
@@ -26,13 +26,13 @@ collision between two spherical "galaxies" and do some simple analysis.
 Setting it up
 ~~~~~~~~~~~~~
 
-In Chapter~\ref{c:filestr} we already used {\tt mkplummer} to create 
+In Chapter~\ref{c:filestr} we already used ``mkplummer`` to create 
 a Plummer model;
 
-here we shall use the program {\tt mkommod} ("MaKe an Osipkov-Merritt
-MODel") 
+here we shall use the program ``mkommod``
+("MaKe an Osipkov-Merritt MODel") 
 to make two random N-body realizations of a King model 
-with dimensionless central potential $W_c = 7$ and 100 particles each. 
+with dimensionless central potential :math:`W_c = 7` and 100 particles each. 
 The small number of particles is solely for the purpose of getting
 results within a reasonable time. Adjust it to whatever you can afford
 on your CPU and test your patience and integrator
@@ -54,7 +54,7 @@ in: {\it The use of supercomputers in stellar
 dynamics} ed. Hut & McMillan
 Springer 1987, pp.233}
 the models have
-to be rescaled using {\tt snapscale}:
+to be rescaled using ``snapscale``:
 
 .. code-block::
 
@@ -63,9 +63,9 @@ to be rescaled using {\tt snapscale}:
 
 In the case that your user interface was not compiled with the 
 {\bf NEMOINP}\footnote{This can be found out by 
-using the program nemoinp(1NEMO) or {\tt help=?}.}
+using the program nemoinp(1NEMO) or ``help=?``.}
 directive, the {\tt vscale} expression has to be calculated by you,
-{\it i.e.} {\tt vscale=0.707107}. Also note the use of the quotes in
+{\it i.e.} ``vscale=0.707107``. Also note the use of the quotes in
 the expression, to prevent the shell to give special meaning to
 the parenthesis, which are shell {\bf meta} characters.
 
@@ -87,7 +87,7 @@ This second galaxy needs to be rescaled too, if you want virial units:
 
 
 We then set up the collision by stacking the two snapshots, albeit with
-a relative displacement in phase space.  The program {\tt snapstack} was exactly
+a relative displacement in phase space.  The program ``snapstack`` was exactly
 written for this purpose:
 
 
@@ -99,7 +99,7 @@ written for this purpose:
 The galaxies are initially separated by 4 unit length and approaching
 each other with a velocity consistent with infall from infinity
 (parabolic encounter). The particles assembled in the data file
-{\tt i001.dat} are now ready to be integrated.
+``i001.dat`` are now ready to be integrated.
 
 To look at the initials conditions we could use:
 

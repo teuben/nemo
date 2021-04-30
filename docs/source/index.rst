@@ -14,6 +14,8 @@ For Users
 ---------
 
 .. todo::  This draft started on April 27.  There are many todo's in this manual, even missing ones!!
+   Other information available on `github pages <https://teuben.github.io/nemo/>`_ and
+   `github <https://github.com/teuben/nemo>`_ .
 
 .. toctree::
    :numbered:

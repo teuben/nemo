@@ -1,3 +1,5 @@
+.. _graphics:
+
 Graphics and Image Display
 ==========================
 
