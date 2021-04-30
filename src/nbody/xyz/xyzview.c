@@ -13,6 +13,7 @@
  *                       with orbit=
  *      19-may-00  V2.3  if input is SnapShot, autoconvert to PointData
  *      10-dec-03  V3.0  added movie=t|f option
+ *     april-2021        c99 + prototypes
  *
  *
  *  Bugs: VOGL has an event stack which is only one deep, reason
@@ -75,7 +76,7 @@ string defv[] = {
     "maxframe=500\n             Maximum frames for movie storage",
     "orbit=\n                   Select this point/star always visible",
     "movie=f\n                  If true, start loading all frames",
-    "VERSION=3.0a\n		17-jul-05 PJT",
+    "VERSION=3.0b\n		30-apr-2021 PJT",
     NULL,
 };
 
@@ -92,9 +93,45 @@ bool get_xyz(), handle_que();
 extern string *burststring();
 extern int xstrlen();
 
+//  c99
+int init_display(void);
+int setcolors(string map);
+bool get_xyz(int save);
+int plot_points(void);
+int set_view(void);
+int drawbox(void);
+int drawside(void);
+int end_view(void);
+int plottext(void);
+int set_transform(void);
+bool handle_que(void);
+int mouse(void);
+int bell(char *msg);
+int debug(void);
+int zerokey(void);
+int leftkey(void);
+int middlekey(void);
+int rightkey(void);
+int lbutton(void);
+int mbutton(void);
+int rbutton(void);
+int returnkey(void);
+int spacekey(void);
+int loadkey(void);
+int nextkey(void);
+int previouskey(void);
+int loadframe(void);
+int moviekey(void);
+int boxkey(void);
+int help(void);
+int ringbell(void);
+int noborder(void);
+int setvaluator(int dev, int j, int k, int l);
+
+
 static bool Qmovie;
 
-nemo_main()
+void nemo_main()
 {
     Qmovie = getbparam("movie");
     init_display();
@@ -582,7 +619,7 @@ debug()	    /* VOGL only */
 {
     permanent bool keydown = FALSE;
     keydown = !keydown;
-    if (!keydown) return;
+    if (!keydown) return 0;
 
     printf("________________________________________________________\n");
     printf("Program: %s\n",getargv0());
@@ -626,7 +663,7 @@ lbutton()
     ldown = ! ldown;
     if (movie) {
 	if (iframe>0) iframe--;
-        return;
+        return 0;
     }
     if (ldown) {
 	xcur = xlast + xorig + xsize/2;
@@ -664,7 +701,7 @@ rbutton()
     rdown = ! rdown;
     if (movie) {
 	if (iframe<nframe-1) iframe++;
-        return;
+        return 0;
     }
 #ifdef XYZVEL
     if (rdown) {
@@ -782,9 +819,9 @@ loadframe()
 {
     permanent int lastframe = -1;
 
-    if (lastframe == iframe) return;
+    if (lastframe == iframe) return 0;
     dprintf(1,"Loading frame %d\n",iframe);
-    if (iframe < 0 || iframe >=  nframe) return;
+    if (iframe < 0 || iframe >=  nframe) return 0;
     npoint = saved[iframe].npoint;
     tpoint = saved[iframe].tpoint;
     ctab = saved[iframe].ctab;
@@ -804,7 +841,7 @@ moviekey()
         if (nframe<2) {
             warning("You have not loaded enough frames; use K or L");
             movie = FALSE;
-            return;
+            return 0;
         }
         printf("MOVIE-mode (nframe=%d) is now: %s\n", nframe, 
                                               movie ? "on" : "off");
@@ -826,7 +863,7 @@ help()
     permanent bool keydown = FALSE;
 
     keydown = !keydown;
-    if (!keydown) return;
+    if (!keydown) return 0;
 
     p("ESC          quit                Q       quit\n");
     p("SPACE        next frame          H       help\n");
