@@ -10,8 +10,8 @@ examples in this chapter are written in the C-shell language}
 available online in one of the directories
 (check {\tt \$NEMO/csh} and perhaps {\tt \$NEMOBIN}).
 The manual pages
-{\it programs(8NEMO)} and {\it intro(1NEMO)} \index{programs(8)}
-\index{intro(1)} are useful to find (and cross-reference) programs
+{\it programs(8NEMO)} and {\it intro(1NEMO)}
+are useful to find (and cross-reference) programs
 if you're a bit lost. Each program manual should also 
 have some references to closely related programs.
 
@@ -28,10 +28,10 @@ Setting it up
 
 In Chapter~\ref{c:filestr} we already used {\tt mkplummer} to create 
 a Plummer model;
-\index{Plummer, model}
+
 here we shall use the program {\tt mkommod} ("MaKe an Osipkov-Merritt
-MODel") \index{Osipkov-Merritt, models} \index{Merritt - see Osipkov}
-to make two random N-body realizations of a King model \index{King, models}
+MODel") 
+to make two random N-body realizations of a King model 
 with dimensionless central potential $W_c = 7$ and 100 particles each. 
 The small number of particles is solely for the purpose of getting
 results within a reasonable time. Adjust it to whatever you can afford
@@ -44,16 +44,16 @@ on your CPU and test your patience and integrator
               
 
 
-These models are produced in so-called RMS-units \index{units, rms}
+These models are produced in so-called RMS-units
 in which the
 gravitational constant G=1, the total mass M=1, and binding energy E=--1/2.
 In case you would like virial units
 \footnote{Virial units are the preferred units, see also:
-Heggie\index{Heggie D.} \& Mathieu\index{Mathieu R.}, E=--1/4,
+Heggie & Mathieu, E=--1/4,
 in: {\it The use of supercomputers in stellar
-dynamics} ed. Hut\index{Hut P} \& McMillan\index{McMillan S}, 
+dynamics} ed. Hut & McMillan
 Springer 1987, pp.233}
-the models have\index{virial, units}\index{rms, units}
+the models have
 to be rescaled using {\tt snapscale}:
 
 .. code-block::
@@ -115,6 +115,35 @@ Integration using hackcode1
 We then run the collision for 20 time units, with the standard
 N-body integrator based on the Barnes  "hierarchical tree" 
 algorithm\footnote{see also their paper in: Nature, Vol. 324, pp 446 (1986).}:
+
+.. code-block::
+
+    7% hackcode1 in=i001.dat out=r001.dat tstop=20 freqout=2 \
+       freq=40 eps=0.05 tol=0.7 options=mass,phase,phi > r001.log
+
+The integration frequency relates to the integration timestep as {\tt
+freq} = $1/\Delta t$, the softening length {\tt eps} = $\epsilon$, and
+opening angle or tolerance {\tt tol} = $\theta$.  A major output of
+masses, positions and potentials of all particles is done every {\tt
+1/freqout} = 0.5 time units, which corresponds to about 1/5 of a
+crossing time.  The standard output of the calculation is diverted to a
+file {\tt r001.log} for convenience.  This is an (ASCII) listing,
+containing useful statistics of the run, such as the efficiency of the
+force calculation, conserved quantities etc.  Some of this information
+is also stored in diagnostic sets in the structured binary 
+output file {\tt r001.dat}. 
+
+
+
+
+As an exercise, compare the output of the following two commands:
+
+.. code-block::
+
+    8% more r001.log
+    9% tsf r001.dat | more
+
+
 
 Display and Initial Analysis
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -387,6 +416,15 @@ the search path such that the local working directory is searched before
 the system one (in {\tt \$NEMOOBJ/bodytrans}).
 
 .. \subsection{Movies}
+
+Advanced Analysis
+~~~~~~~~~~~~~~~~~
+
+Generating models
+~~~~~~~~~~~~~~~~~
+
+Handling large datasets
+~~~~~~~~~~~~~~~~~~~~~~~
 
 
 Images
