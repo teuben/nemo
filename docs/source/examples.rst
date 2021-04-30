@@ -203,7 +203,6 @@ it is possible to save such compiled expressions object files under
 a new name. 
 
 .. list-table:: Some precompiled *bodytrans* expressions
-   :widths: 25 25 50
    :header-rows: 1
       
    * - name
