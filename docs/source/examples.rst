@@ -52,9 +52,9 @@ In case you would like virial units
 Heggie\index{Heggie D.} \& Mathieu\index{Mathieu R.}, E=--1/4,
 in: {\it The use of supercomputers in stellar
 dynamics} ed. Hut\index{Hut P} \& McMillan\index{McMillan S}, 
-Springer 1987, pp.233}\index{units, virial}
+Springer 1987, pp.233}
 the models have\index{virial, units}\index{rms, units}
-to be rescaled using {\tt snapscale}:\index{snapscale(1)}
+to be rescaled using {\tt snapscale}:
 
 .. code-block::
 
@@ -68,9 +68,9 @@ directive, the {\tt vscale} expression has to be calculated by you,
 {\it i.e.} {\tt vscale=0.707107}. Also note the use of the quotes in
 the expression, to prevent the shell to give special meaning to
 the parenthesis, which are shell {\bf meta} characters.
-\index{meta, shell characters}
 
-The second galaxy is made in a similar way\index{mkommod(1)}, with
+
+The second galaxy is made in a similar way, with
 a different seed of course:
 
 .. code-block::
@@ -88,7 +88,7 @@ This second galaxy needs to be rescaled too, if you want virial units:
 
 We then set up the collision by stacking the two snapshots, albeit with
 a relative displacement in phase space.  The program {\tt snapstack} was exactly
-written for this purpose:\index{snapstack(1)}
+written for this purpose:
 
 
 .. code-block::
@@ -113,10 +113,282 @@ Integration using hackcode1
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We then run the collision for 20 time units, with the standard
-N-body integrator based on the Barnes 
-\index{Barnes J.} \& Hut \index{Hut P.} "hierarchical tree" 
+N-body integrator based on the Barnes  "hierarchical tree" 
 algorithm\footnote{see also their paper in: Nature, Vol. 324, pp 446 (1986).}:
-\index{hackcode1(1)}
+
+Display and Initial Analysis
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+As described in the previous subsection, ``hackcode1`` writes various
+diagnostics
+in the output file. A summary of conservation of energy and center-of-mass
+motion can be graphically displayed using ``snapdiagplot``:
+
+.. code-block::
+
+    10% snapdiagplot in=r001.dat
+
+The program ``snapplot`` displays the evolution of the particle
+distribution, in projection;
+
+.. code-block::
+
+    11% snapplot in=r001.dat
+
+
+Depending on the actual graphics (*yapp*)
+interface of snapplot,
+you may have to hit the RETURN key, push a MOUSE BUTTON or just
+WAIT to advance from one to the next frame.
+
+The ``snapplot`` program has a very powerful tool built into it
+which makes it possible to display any *projection* the user wants.
+
+As an example consider:
+
+.. code-block::
+
+    12% snapplot in=r001.dat xvar=r yvar="x*vy-y*vx" xrange=0:10 yrange=-2:2 \
+                 "visib=-0.2<z&&z<0.2&&i%2==0"
+
+    
+plots the angular momentum of the particles along the z axis,
+:math:`J_z = x.v_y - y.v_x` ,
+against their radius, :math:`r`, but only for the even numbered particles,
+(i%2==0) within
+a distance of 0.2 of the X-Y plane (:math:`-0.2<z && z<0.2`).
+Again note that some of the expressions are within quotes, to prevent
+the shell of giving them a special meaning. 
+
+The {\tt xvar}, {\tt yvar} and {\tt visib} expressions are fed to the
+C compiler (during runtime!) and the resulting object file is then
+dynamically loaded 
+into the program for 
+execution\footnote{loadobj, the dynamic object loader, 
+does not works on all UNIX implementations}.
+The expressions must contain legal C expressions and depending
+on their nature must return a value in the context of the
+program. {\it E.g.} {\tt xvar} and {\tt yvar} must return a 
+real value, whereas {\tt visib} must return a boolean (false/true or
+0/non-0) value. This should be explained in the manual page of the
+corresponding programs.
+
+In the context of snapshots, the expression can contain 
+basic body variables which
+are understood to the *bodytrans(3NEMO)* routine.
+The real
+variables {\tt x, y, z, vx, vy, vz} are the cartesian phase-space
+coordinates, {\tt t} the time,
+{\tt m} the mass, {\tt phi} the potential,
+{\tt ax,ay,az} the cartesian acceleration and {\tt aux} 
+some auxiliary information.
+The integer variables are
+{\tt i}, the index of the particle in the snapshot (0 being the
+first one in the usual C tradition) and {\tt key}, another
+spare slot.
+
+
+For convenience a number of expressions have already been pre-compiled
+(see also Table \ref{t:bodytrans}),
+*e.g.* the radius  r= :math:`\sqrt{x^2+y^2+z^2}` = ``sqrt(x*x+y*y+z*z)``,
+and velocity v = :math:`\sqrt{v_x^2+v_y^2+v_z^2}` = ``sqrt(vx*vx+vy*vy+vz*vz)``. Note that {\tt r} and
+{\tt v} themselves cannot be used in expressions, only the basic
+body variables listed above can be used in an expression. 
+
+When you need a complex expression that has be used over and
+over again, it is handy to be able to store these expression under
+an alias for later retrieval. 
+With the program {\tt bodytrans}
+it is possible to save such compiled expressions object files under
+a new name. 
+
+.. list-table:: Some precompiled *bodytrans* expressions
+   :widths: 25 25 50
+   :header-rows: 1
+      
+   * - name
+     - type
+     - expression
+   * - 0
+     - int
+     - ``0``
+   * - 1
+     - int
+     - ``1``
+   * - i
+     - int
+     - ``i``
+   * - key
+     - int
+     - ``key`` (see also *real* version below)
+   * - 0
+     - real
+     - ``0.0``
+   * - 1
+     - real
+     - ``1.0``
+   * - r
+     - real
+     - ``sqrt(x*x+y*y+z*z)``
+   * -
+     -
+     -  or: :math:`|\rvec|`
+   * - ar
+     - real
+     - ``sqrt(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)``
+   * - ar
+     - real
+     - ``(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)`` or: (\rvec$\cdot$\avec)/$|$\rvec$|$ \\
+   * - aux
+     - real
+     - ``aux``
+   * - ax
+     - real
+     - ``ax``
+   * - ay
+     - real
+     - ``ay``
+   * - az
+     - real
+     - ``az``
+   * - etot
+     - real
+     - ``phi+0.5*(vx*vx+vy*vy+vz*vz)`` or: $\phi$ + \vvec$^2$/2 \\
+   * - i
+     - real
+     - ``i``
+   * - jtot
+     - real
+     - ``sqrt(sqr(x*vy-y*vx)+sqr(y*vz-z*vy)+sqr(z*vx-x*vz))``  or: $|$\rvec$\times$\vvec$|$ \\
+   * - key
+     - real
+     - ``key``  (see also **int**} version above)
+   * - m
+     - real
+     - ``m``
+   * - phi
+     - real 
+     - ``phi``
+   * - r
+     - real
+     - ``sqrt(x*x+y*y+z*z)``
+   * - 
+     -
+     - or: $|$\rvec$|$ \\
+   * - t
+     - real
+     - ``t``
+   * - v
+     - real
+     - ``sqrt(vx*vx+vy*vy+vz*vz)``
+   * - 
+     - 
+     -  or: $|$\vvec$|$ 
+   * - vr
+     - real
+     - ``(x*vx+y*vy+z*vz)/sqrt(x*x+y*y+z*z)``
+   * - 
+     -
+     - or:  or: (\rvec$\cdot$\vvec)/$|$\rvec$|$ 
+   * - vt
+     - real
+     - ``sqrt((vx*vx+vy*vy+vz*vz)-sqr(x*vx+y*vy+z*vz)/(x*x+y*y+z*z))``
+   * - 
+     -
+     - or: $\sqrt{}$(\vvec$^2$-(\rvec$\cdot$\vvec)$^2$/$|$\rvec$|^2$)\\
+   * - vx 
+     - real
+     - ``vx``
+   * - vy
+     - real
+     - ``vy``
+   * - vz
+     - real
+     - ``vz``
+   * - x
+     - real
+     - ``x``
+   * - y
+     - real
+     - ``y``
+   * - z
+     - real
+     - ``z``
+   * - glon
+     - real
+     - :math:`l` , ``atan2(y,x)*180/PI``              [-180,180] 
+   * - glat
+     - real
+     - :math:`b` , ``atan2(z,sqrt(x*x+y*y))*180/PI``  [-90,90] 
+   * - mul
+     - real
+     - ``(-vx\sin{l} + vx\cos{l})/r``
+   * - mub
+     - real
+     - :math:`(-vx\cos{l}\sin{b} - vy\sin{l}\sin{b}+vz\cos{b})/r`
+   * - xait
+     - real
+     - Aitoff projection x [-2,2] T.B.A.
+   * - yait
+     - real
+     - Aitoff projection y [-1,1] T.B.A.
+
+As usual an example:
+
+.. code-block::
+
+    13% bodytrans expr="x*vy-y*vz" type=real file=jz
+
+saves the expression for the angular momentum in a real
+valued bodytrans expression file, {\tt btr\_jz.o} which can in future programs
+be referenced as {\tt expr=jz} (whenever a real-valued bodytrans
+expression is required), {\it e.g.}
+
+.. code-block::
+
+    14% snapplot i001.dat xvar=r yvar=jz xrange=0:5
+
+Alternatively, one can handcode a {\it bodytrans} function, compile it,
+and reference it locally. This is useful when you have truly complicated
+expressions that do not easily write themselves down on the commandline.
+The $(x,y)$ AITOFF projection are an example of
+this. For example, consider the following code in a (local working directory)
+file {\tt btr\_r2.c}:
+
+
+.. code-block::
+
+    #include <bodytrans.h>
+
+    real btr_r2(b,t,i)
+    Body *b;
+    real t;
+    int  i;
+    {
+        return sqrt(x*x + y*y);
+    }
+
+By compiling this:
+
+.. code-block::
+
+    15% cc -c btr_r2.c
+
+an object file {\tt btr\_r2.o} is created in the local directory,
+which could be used in any real-valued bodytrans expression:
+
+.. code-block::
+
+    16% snapplot i001.dat xvar=r2 yvar=jz xrange=0:5
+
+For this your environment variable {\bf BTRPATH}
+must have been set to include the local working directory,
+designated by a dot.  Normally your NEMO system manager will have set
+the search path such that the local working directory is searched before
+the system one (in {\tt \$NEMOOBJ/bodytrans}).
+
+.. \subsection{Movies}
+
 
 Images
 ------
