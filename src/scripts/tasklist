@@ -1,3 +1,4 @@
+anisot compute anisotropic distribution function tables
 atos convert ASCII N-body file to binary format
 bigread measured buffered read speed
 bodytrans bodytrans manipulator
@@ -16,6 +17,7 @@ ccdintpol image bi-linear interpolation
 ccdmath image arithmetic and wcs
 ccdmedian median filter of an image
 ccdmom moment along an axis of an image
+ccdmoms (weighted) moment along a set of images
 ccdpatch patch up regions from polygon/shapes
 ccdplot display an image using contours and/or gray-scales
 ccdppm convert image to a PPM file, with optional color cable
@@ -26,7 +28,6 @@ ccdsharp3 enhance/sharpen an image cube
 ccdsky lazy sky scaling (cosmology) calculator
 ccdslice takes slices from a cube
 ccdsmooth smooth image cube in XYZ
-ccdstack re-align a cube Z dimension based on a ZMAP (stacking)
 ccdstat basic statistics of an image, optional chi2 calculation
 ccdsub sub/average of an image, with reorder option
 ccdtrace interpolate a set of coordinates from an image
