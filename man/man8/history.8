@@ -1,0 +1,74 @@
+.TH HISTORY 8NEMO "17 April 2021"
+
+.SH "NAME"
+history \- a brief history of NEMO
+
+.SH "DESCRIPTION"
+\fINEMO\fP was initially developed in 1986/87 at the Institute for Advanced
+Study (Princeton) by Barnes, Hut, and Teuben. These a few of my personal
+notes and reflections on its history.
+
+.PP
+Say something about ZENO, StarLab, ASC and AMUSE, as they are geneologically
+related to NEMO.
+
+.SH "STARLAB"
+Taken from the starlab history description:
+.PP
+To some extent, Starlab is modeled on NEMO, a stellar dynamics
+software environment developed during the 1980s at the Institute for
+Advanced Study, in large part by Josh Barnes, with input from Peter
+Teuben and Piet Hut. Starlab differs from NEMO mainly in its use of
+UNIX pipes, rather than temporary files, its use of tree structures
+rather than arrays to represent N-body systems, and its guarantee of
+data conservation in piping. The first Starlab version was written by
+Piet Hut at Tokyo University in 1989, in the C language. in 1992, Piet
+Hut, Jun Makino and Steve McMillan adapted the package to C++, and
+developed its the central engine, Kira, for integrating stellar orbits
+with individual time steps. Subsequently, Simon Portegies Zwart
+contributed his SeBa package for stellar evolution, which is directly
+linked with Kira.
+
+.SH "AMUSE"
+Geneologically AMUSE could be considered the grand-child of NEMO. 
+
+.SH "SEE ALSO"
+.nf
+.ta +1in
+ZENO:	http://www.ifa.hawaii.edu/faculty/barnes/software.html
+starlab:	http://www.sns.ias.edu/~starlab/   http://www.manybody.org/manybody/starlab.html
+ASC:	http://www.artcompsci.org/
+AMUSE:	https://amusecode.github.io/
+.fi
+
+If you want to read up on N-body calculations, here are some selected reviews:
+.nf
+.ta +2i
+
+Hockney & Eastwood	Computer Simulation Using Particles, Adam Hilger, New York (1989).
+
+Sellwood	https://ui.adsabs.harvard.edu/abs/1987ARA%26A..25..151S The art of N-body building.
+Sellwood	https://ui.adsabs.harvard.edu/abs/1997ASPC..123..215S   Galaxy Dynamics by N-Body Simulation
+von Hoerner	https://ui.adsabs.harvard.edu/abs/2001ASPC..228...11V   How it All Started
+Dubinki		https://ui.adsabs.harvard.edu/abs/2008NJPh...10l5002D   Visualizing astrophysical N-body systems 
+Dehnen & Read	https://ui.adsabs.harvard.edu/abs/2011EPJP..126...55D   N-body simulations of gravitational dynamics
+.fi
+
+and comparing N-body models between different codes is discussed in a few papers. some of the data
+are also discussed in \fIdata(5NEMO)\fP
+
+.nf
+Pythagoras Three Body Problem - https://ui.adsabs.harvard.edu/abs/1967AJ.....72..876S
+IAU 25-body problem - Lecar 1968
+Santa Barbare Cluster Problem 
+Hozumi & Hernquist - https://ui.adsabs.harvard.edu/abs/1995ApJ...440...60H
+.fi
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1i +4i
+17-apr-2021	initial notes	PJT
+.fi

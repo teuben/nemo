@@ -18,6 +18,7 @@ The units program converts quantities expression in various
 scales to  their equivalents in other scales.  The units program can only
 handle multiplicative (linear) scale changes.  This means it cannot convert
 Centigrade to Fahrenheit, for example. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
 are recognized in any order if the keyword is also given: 
@@ -48,7 +49,9 @@ the <b>mul</b> is always shown first, irrespective of the order given. [Default:
 
 <dt><b>quiet=t|f</b> </dt>
 <dd>Be quiet in interactive mode? [Default: <b>t</b>]    <i>NOTE: interactive
-mode not implemented</i> </dd>
+
+<p>mode not implemented</i> 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
@@ -154,6 +157,7 @@ tides)
 1e11.M    10.kpc ~97.8.km/s   4.497        0.22237         1e8.yr  (galaxy)
 1e10.M     1.kpc     1.km/s   43007.1                              (GADGET)
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Memorizable Conversions</a></h2>
 <br>
 <pre>1 pc<tt> </tt>&nbsp;<tt> </tt>&nbsp;3.086e18 cm
@@ -164,46 +168,54 @@ tides)
 1 km/s      <tt> </tt>&nbsp;<tt> </tt>&nbsp;1.023 pc per million year
 1 arcsec/yr<tt> </tt>&nbsp;<tt> </tt>&nbsp;4.74 km/s at 1 pc
 1 arcsec        4.848 pc/Mpc_distance
-</pre>
+</pre>See also <a href='constants.5.html'><i>constants(5NEMO)</i></a>
+ for some other constants. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>
 <p>
-The effect of including a &rsquo;/&rsquo; in a prefix is surprising. <p>
-Exponents entered
-by the user can be only one digit. <p>
-The user must use | to indicate division
-of numbers and / to indicate division of symbols.  This distinction should
-not be necessary. <p>
-The program contains various arbitrary limits on the length
-of the units converted and on the length of the data file. 
+The effect of including
+a &rsquo;/&rsquo; in a prefix is surprising. <p>
+Exponents entered by the user can be only
+one digit. <p>
+The user must use | to indicate division of numbers and / to indicate
+division of symbols.  This distinction should not be necessary. <p>
+The program
+contains various arbitrary limits on the length of the units converted
+and on the length of the data file. 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='expr.1.html'>expr(1)</a>
-,
-<a href='units.5.html'>units(5NEMO)</a>
+, <a href='units.5.html'>units(5NEMO)</a>
 , <a href='nemoinp.1.html'>nemoinp(1NEMO)</a>
- <p>
-NIST: <a href='http://physics.nist.gov/cuu/Constants/index.html'>http://physics.nist.gov/cuu/Constants/index.html</a>
-
- <p>
-NIST: <a href='http://physics.nist.gov/PhysRefData/contents.html'>http://physics.nist.gov/PhysRefData/contents.html</a>
- <p>
-FRINK: <a href='http://futureboy.homeip.net/frinkdocs/'>http://futureboy.homeip.net/frinkdocs/</a>
 
 <p>
-units calculator: <a href='http://www.astro.wisc.edu/~dolan/constants/calc.html'>http://www.astro.wisc.edu/~dolan/constants/calc.html</a>
+NIST: <a href='http://physics.nist.gov/cuu/Constants/index.html'>http://physics.nist.gov/cuu/Constants/index.html</a>
+  <p>
+NIST: <a href='http://physics.nist.gov/PhysRefData/contents.html'>http://physics.nist.gov/PhysRefData/contents.html</a>
+
+<p>
+FRINK: <a href='http://futureboy.homeip.net/frinkdocs/'>http://futureboy.homeip.net/frinkdocs/</a>
  <p>
-Granot,
-<i>Scaling relations between numerical simulations and physical systems they
-representP,  <a href='http://arxiv.org/pdf/1111.6865v1'>http://arxiv.org/pdf/1111.6865v1</a>
- 
-<h2><a name='sect9' href='#toc9'></i>Files</a></h2>
+units calculator: <a href='http://www.astro.wisc.edu/~dolan/constants/calc.html'>http://www.astro.wisc.edu/~dolan/constants/calc.html</a>
+
+<p>
+Granot, <i>Scaling relations between numerical simulations and physical systems
+they representP,  <a href='http://arxiv.org/pdf/1111.6865v1'>http://arxiv.org/pdf/1111.6865v1</a>
+ <p>
+<a href='https://en.wikipedia.org/wiki/N-body_units'>https://en.wikipedia.org/wiki/N-body_units</a>
+
+</i>
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>$NEMODAT/units.lib - the standard units library 
 /usr/lib/units     - original units library from units(1)
-</pre>
+</pre>Sadly, the modified units.c with the NEMO interface has been lost 
+<p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
-Adrian Mariano (adrian@u.washington.edu or mariano@geom.umn.edu) 
-<h2><a name='sect11' href='#toc11'>Update
-History</a></h2>
+Adrian
+Mariano (adrian@u.washington.edu or mariano@geom.umn.edu) 
+<p> 
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>14-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;AM
 21-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 Conversion to nemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

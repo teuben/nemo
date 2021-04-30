@@ -4,6 +4,7 @@
  *      19-mar-2021    spring break in covid time... while reading Cappellari 2002
  *                     https://ui.adsabs.harvard.edu/abs/2002MNRAS.333..400C
  *
+ @ads 2002MNRAS.333..400C
  */
 
 /*CTEX

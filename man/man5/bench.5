@@ -177,6 +177,28 @@ drawing random numbers and writing them using \fIprintf(3)\fP , which is slow.
     
 .fi
 
+.SH "PARALLEL"
+The GNU \fIparallel(1)\fP
+tool can be of great use if your tasks are pure single core and you have enough cores (most laptops have at least 4 these days)
+and memory to fit your tasks.   As an example, here is something contrived using \fImkplummer(1NEMO)\fP that does not write to disk,
+so it should be highly parallizable:
+
+.nf
+    nbody=10000000
+    /usr/bin/time mkplummer . $nbody
+    \fB2.80user 0.45system 0:03.26elapsed 99%CPU\fP
+    
+    echo mkplummer . $nbody  > run.txt
+    echo mkplummer . $nbody >> run.txt
+    /usr/bin/time parallel --jobs 1 < run.txt
+    \fB5.89user 0.83system 0:06.71elapsed 100%CPU\fP
+    
+    /usr/bin/time parallel --jobs 2 < run.txt
+    \fB6.00user 0.79system 0:03.44elapsed 197%CPU\fP
+.fi
+
+which follows Amdahl's law close to 100%!
+
 .SH "CONSIDERATIONS"
 Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
 or even \fBout=.\fP to use a sink. 

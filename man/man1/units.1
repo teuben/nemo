@@ -8,22 +8,23 @@ The units program converts quantities expression in various scales to
 their equivalents in other scales.  The units program can only
 handle multiplicative (linear) scale changes.  This means
 it cannot convert Centigrade to Fahrenheit, for example.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBfrom=\fP\fIunit_from\fP.
 Unit to convert from. No default.
-.TP 20
+.TP
 \fBto=\fP\fIunit_to\fP
 Unit to convert to. No default.
-.TP 20
+.TP
 \fBunit=\fP\fIunit_file\fP
 Units database file. Multiple files can be given, separated by commas.
 A search path "\fB.:$NEMODAT\fP" is employed, so a local
 file is always tried before a file in \fB$NEMODAT\fP.
 Default: \fBunits.lib\fP.
-.TP 20
+.TP
 \fBshow=mul|div\fP
 Option to select the multiplicative or it's inverse
 factor you need to convert from \Iunit_from\fP to \fIunit_to\fP, i.e.
@@ -36,10 +37,11 @@ You can also select to show both, although
 the \fBmul\fP is always shown first, irrespective of
 the order given.
 [Default: \fBmul\fP].
-.TP 20
+.TP
 \fBquiet=t|f\fP
 Be quiet in interactive mode? [Default: \fBt\fP]   
 \fINOTE: interactive mode not implemented\fP
+
 .SH EXAMPLES
 It takes about 977 km/s to make one kpc in 10^6 yr:
 .nf
@@ -174,6 +176,7 @@ unit systems, recalling that G*m/(r*v*v) is dimensionless:
 1e10.M     1.kpc     1.km/s   43007.1                              (GADGET)
 
 .fi
+
 .SH MEMORIZABLE CONVERSIONS
 .nf
 .ta +2i
@@ -186,7 +189,9 @@ unit systems, recalling that G*m/(r*v*v) is dimensionless:
 1 arcsec/yr	4.74 km/s at 1 pc
 1 arcsec        4.848 pc/Mpc_distance
 .fi
-.SH BUGS
+See also \fIconstants(5NEMO)\fP for some other constants.
+
+.SH "BUGS"
 .LP
 The effect of including a '/' in a prefix is surprising.
 .LP
@@ -211,14 +216,20 @@ units calculator: http://www.astro.wisc.edu/~dolan/constants/calc.html
 .PP
 Granot, \fIScaling relations between numerical simulations and physical systems they represent\P, 
 http://arxiv.org/pdf/1111.6865v1
-.SH FILES
+.PP
+https://en.wikipedia.org/wiki/N-body_units
+
+.SH "FILES"
 .nf
 $NEMODAT/units.lib - the standard units library 
 /usr/lib/units     - original units library from units(1)
 .fi
-.SH AUTHOR
+Sadly, the modified units.c with the NEMO interface has been lost
+
+.SH "AUTHOR"
 Adrian Mariano (adrian@u.washington.edu or mariano@geom.umn.edu)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 14-jul-93	V1.0 Original version	AM
