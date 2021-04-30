@@ -15,13 +15,16 @@ clean:
 	rm -f $(BINS)
 
 EPIRV:
-	touch $@
+	@echo Creating dummy file $@ for running epic5
+	@touch $@
 
 EPIDEN:
-	touch $@
+	@echo Creating dummy file $@ for running epic5
+	@touch $@
 
 EPITEST:
-	touch $@
+	@echo Creating dummy file $@ for running epic5
+	@touch $@
 
 install: $(BINS)
 	cp $(BINS) $(NEMOBIN)
