@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 14-apr-2021 PJT
+VERSION = NEMO V4.2 30-apr-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -326,7 +326,7 @@ upstream:
 	@echo "  git fetch upstream"
 	@echo "  git merge upstream/master"
 	@echo "  git status"
-	@echo "Always make sure you work in a branch, to keep your local master same as upstream"
+	@echo "Always make sure you work in a branch, to keep your local master same as upstream/master"
 
 # autoconf/GIT based export
 #
