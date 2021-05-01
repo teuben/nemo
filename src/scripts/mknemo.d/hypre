@@ -21,7 +21,9 @@ cd $NEMO/local
 
 
 if [ $git == 1 ]; then
-    git clone $url hypre
+    if [ ! -d hypre ]; then
+	git clone $url hypre
+    fi
     version=git
 else
     echo no non-git
@@ -29,7 +31,9 @@ else
 fi    
 
 cd hypre
+git pull
 
+cd src
 ./configure --prefix=$NEMO/opt
 
 make clean
