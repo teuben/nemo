@@ -425,6 +425,52 @@ Generating models
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~
 
+One of NEMOs weaknesses is also it's strong point: programs must
+generally be able to fit all their data in (virtual) memory.
+Although programs usually free memory associated with data
+that is not needed anymore, there is a very clear maximum
+to the number of particles it can handle in a snapshot. By 
+default\footnote{one can recompile NEMO in single precision and define
+{\tt body.h} with less wastefull members}
+a particle takes up about 100 bytes, which limits the size of a 
+snapshots on workstations.
+
+It may happen that your data was generated on a machine which had
+a lot more memory
+then the machine you want to analyze your data on.
+As long as you have the diskspace, and as long as you don't need
+programs that cannot operate on data in serial mode, there is
+a solution to this problem. Instead of keeping all 
+particles in one snapshot, they are stored in several snapshots
+of (equal number of) bodies, and as long as all snapshots have the same
+time and are stored back to back, most programs that can
+operate serially, will do this properly and know about it.
+Of course it's best to split the snapshots on the machine with
+more memory
+
+.. code-block::
+
+    % snapsplit in=run1.out out=run1s.out nbody=10000
+
+
+If it is just one particular program (e.g. snapgrid
+that needs a lot of extra memory, the following may work:
+
+.. code-block::
+
+    % snapsplit in=run1.out out=- nbody=1000 times=3.5 |\
+        snapgrid in=- out=run1.ccd nx=1000 ny=1000 stack=t
+
+
+Using *tcppipe(1NEMO)* one can also pipe data from the machine with large memory (A)
+to your workstation with smaller memory (B), as can be demonstrate with the following
+code snippet:
+
+.. code-block::
+
+    A% mkplummer - 1000 | tcppipe
+    B% tcppipe A | tsf -
+
 
 Images
 ------

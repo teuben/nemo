@@ -1,3 +1,4 @@
+.. _orbit:
 
 Orbits
 ------
@@ -17,7 +18,7 @@ order, but all at the same time.
 Since orbits will be computed in an analytical potential, we assume for
 the remainder of this section that you have familiarized yourself with
 how to supply potentials to orbit integrator programs. They all share
-the same triple ``{\tt potname=, potpars=, potfile=}'' keyword
+the same triple ``potname=, potpars=, potfile=`` keyword
 interface, as described in Section \ref{s:potential}. Many
 examples of the tricky {\tt potpars=} keyword are given in Appendix
 \ref{a:potential}.
@@ -27,7 +28,7 @@ Initializing
 There are a few programs with which orbits can be initialized:
 
 
-- {\bf mkorbit} is the most straightforward program. You can give
+- **mkorbit** is the most straightforward program. You can give
   simply give it all 6 phase space coordinates, and an orbit file
   consisting of this one point is generated. It is also possible to give
   the potential in which the particle is to move, and 5 phase space
@@ -117,7 +118,7 @@ Integration
 - **henyey** also finds periodic orbits, but uses Henyey's 
   method\footnote{see also van Albada \& Sanders, (1982, MNRAS, 201, 303)}.
   This program has however not been released to the public version of
-  NEMO.
+  NEMO, and in fact it seem the source code was lost.
 
 
 Display
@@ -152,7 +153,7 @@ Analysis
    1000 -0.687107 1 0.999958 0.746764 0.746611 0.2 3.83111e-09
 
 
-- {\bf orbfour} performs a variety of fourier analysis on the
+- **orbfour** performs a variety of fourier analysis on the coordinates
 
 .. code-block::
 
@@ -199,16 +200,16 @@ will plot either a Y-VY or X-VX surface of section.
 .. caption{Surface of Section for sample orbit 1 ({\tt orb1.long})}
 
 
-- {\bf orbdim}
+- **orbdim**
   computes the dimensionality of an orbit, i.e.  how
   many integrals of motions it has.  Although it requires very long
   integration times to accurately compute this, it is completely
   automatic, and does not require an analysis like that for a surface of
   section (which is also graphic).  It is based on an interesting paper
-  by Carnevali \& Santangelo (1984. ApJ 281 473-476).
+  by Carnevali & Santangelo (1984, ApJ 281 473-476).
 
 
-- {\bf otos} transforms an orbit back into a snapshot, thereby giving you
+- **otos** transforms an orbit back into a snapshot, thereby giving you
   the much richer set of analysis tools that are available for
   {\it snapshot}'s.
 
