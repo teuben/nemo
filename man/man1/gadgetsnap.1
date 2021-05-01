@@ -21,7 +21,11 @@ at the time can be processed.
 Output file (snapshot format). No default.
 .TP 
 \fBswap=\fP
-Force swaping bytes for other-endian machines [f] 
+Force swaping bytes for other-endian machines [f]
+.TP
+\fBreorder=t|f\fP
+Call reorder? This brings particles back into the order of their ID's.
+[Default: f]
 .TP 
 \fBheader=|4|8\fP
 Size of the header uses in unformatted fortran data. This used to be 4,

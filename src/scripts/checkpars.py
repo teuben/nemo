@@ -3,9 +3,12 @@
 # ptewell@terpmail.umd.edu
 # 
 # apr 15 2021: First Version
+# apr 30 2021: Stopped flagging files w/o help=h
+#              Added -v verbose flag
+import re, os, subprocess, getopt, sys
 
-import re, os
-from sys import breakpointhook
+# Global flags
+VERBOSE = False # If True prints man & help outputs for bad files
 
 def get_man_matches(file):
     try:
@@ -35,18 +38,21 @@ def get_man_matches(file):
     return man_matches
 
 def get_help_matches(file):
-    try:
-        help_out = os.popen(file+" help=h").read() # Read help output
-    except:
-        return None
+    help_out = os.popen(file+" help=h").read() # Read help output
 
     # Grab keywords
     help_matches = []
     for line in help_out.splitlines():
         keyword = line.split()[0]
-        help_matches.append(keyword) if keyword != "VERSION" else breakpointhook
+        if keyword != "VERSION": 
+            help_matches.append(keyword) 
+        else: 
+            break
     
     return help_matches
+
+def help_exists(file):
+    return True if "VERSION" in subprocess.getoutput(file+" help=h") else False
 
 def checkMan():
     files_read, files_read_names = 0, []
@@ -57,18 +63,26 @@ def checkMan():
     for file in tasklist:
         file = file.split()[0]
 
-        # Check if the commands and the order they appear in match
-        # Using a try catch in case some files have no matching man
-        man_out = get_man_matches(file)
-        help_out = get_help_matches(file)
+        # Ignoring files with no help=h output
+        if help_exists(file):
+            files_read+=1
+            files_read_names.append(file)
 
-        # Flag a file as bad if their keywords don't match or if one of then unsuccesfully ran
-        if man_out != help_out or not(man_out and help_out):
-            bad_files+=1
-            bad_file_names.append(file)
+            # Check if the commands and the order they appear in match
+            # Using a try catch in case some files have no matching man
+            man_out = get_man_matches(file)
+            help_out = get_help_matches(file)
 
-        files_read+=1
-        files_read_names.append(file)
+            # Flag a file as bad if their keywords don't match or if one of then unsuccesfully ran
+            if man_out != help_out or not(man_out and help_out):
+                bad_files+=1
+                bad_file_names.append(file)
+
+                if VERBOSE:
+                    print(file)
+                    print(man_out)
+                    print(help_out)
+                    print()	
     
     print("Files with help=h & man mismatches")
     print("Files read: " + str(files_read))
@@ -79,8 +93,7 @@ def checkMan():
     return files_read_names
 
 def checkBin(tasklist):
-    files_read = 0
-    bad_files, bad_file_names = 0, []
+    files_read, bad_files, bad_file_names = 0,0,[]
     binlist = open("src/scripts/bins.list")
 
     for file in binlist:
@@ -96,14 +109,25 @@ def checkBin(tasklist):
     print("Bad files: " + str(bad_file_names))
 
 def main():
+    # Read in flags
+    global VERBOSE
+    argv = sys.argv[1:]
+
+    try:
+        opts, args = getopt.getopt(argv,"v")
+    except:
+        print("getopt error")
+
+    for opt, arg in opts:
+        if opt in ['-v']:
+            VERBOSE = True
+
     # Change working directory
     os.chdir("..")
     os.chdir("..")
 
     # Run tests
-    tasklist = checkMan()
-    print()
-    checkBin(tasklist)
+    checkMan()
 
 if __name__ == "__main__":
     main()
