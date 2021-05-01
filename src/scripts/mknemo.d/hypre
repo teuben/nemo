@@ -1,0 +1,39 @@
+#! /bin/bash
+#
+#  HYPRE: Scalable Linear Solvers and Multigrid Methods
+#
+#  Villumsen's code needs it
+#
+#  1-may-2021  drafted
+#
+
+# if ($?NEMO == 0) set NEMO=`pwd`
+
+git=1
+url=https://github.com/hypre-space/hypre
+
+for arg in $*; do
+  export $arg
+done
+
+    
+cd $NEMO/local
+
+
+if [ $git == 1 ]; then
+    git clone $url hypre
+    version=git
+else
+    echo no non-git
+    exit 1
+fi    
+
+cd hypre
+
+./configure --prefix=$NEMO/opt
+
+make clean
+make -j
+make install
+
+echo hypre $version  `date` >> $NEMO/opt/mknemo.log
