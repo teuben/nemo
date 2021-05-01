@@ -5,12 +5,11 @@ Examples
 
 Now that we have a reasonable idea how NEMO is structured and used, we
 should be ready to go through some real examples  Some of the examples
-below are short versions of shell scripts\footnote{where applicable, the
-examples in this chapter are written in the C-shell language}
+below are short versions of shell scripts
 available online in one of the directories
-(check ``$NEMO/scripts`` and ``NEMOBIN``).
+(check ``$NEMO/scripts`` and ``$NEMOBIN``).
 The manual pages
-{\it programs(8NEMO)} and {\it intro(1NEMO)}
+*programs(8NEMO)* and *intro(1NEMO)*
 are useful to find (and cross-reference) programs
 if you're a bit lost. Each program manual should also 
 have some references to closely related programs.
