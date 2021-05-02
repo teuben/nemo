@@ -68,7 +68,8 @@ endif
 #endif
 # general optimisation and warning flags
 # OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 
-OPTFLAGS	:= -mfpmath=sse \
+#OPTFLAGS	:= -mfpmath=sse 
+OPTFLAGS	:= \
 		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
