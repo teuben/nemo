@@ -249,8 +249,11 @@ AC_ARG_WITH(std,
 		  [  --with-std              use this -std=], with_std=$withval, with_std=c99)
 
 if test $with_std != "default"; then
-  CFLAGS="$CFLAGS -D_GNU_SOURCE -std=$with_std"
+  STDFLAG="-D_GNU_SOURCE -std=$with_std"
+else
+  STDFLAG=""
 fi
+AC_SUBST(STDFLAG)
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"

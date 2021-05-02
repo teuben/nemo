@@ -138,14 +138,14 @@ XLIBS  = @XLIBS@
 #   optimization only
 #PEFFLAG = -Werror-implicit-function-declaration -Wimplicit-int -Wimplicit-function-declaration
 #PEDFLAG = --warn-no-implicit-function-declaration
-PEFFLAG = -Wimplicit-int -Wimplicit-function-declaration
-COPT = @CFLAGS@ $(PEDFLAG)
+PEDFLAG = -Wimplicit-int -Wimplicit-function-declaration @STDFLAG@
+COPT = @CFLAGS@ 
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
 #   for shared libaries
 CCSHARED = @CCSHARED@
 #   everything 
-CFLAGS   = $(COPT) $(CCSHARED) $(NEMO_CFLAGS)
+CFLAGS   = $(COPT) $(CCSHARED) $(NEMO_CFLAGS) $(PEDFLAG)
 CXXFLAGS = $(COPT) $(CCSHARED) $(NEMO_CFLAGS)
 FFLAGS   = $(FOPT) $(CCSHARED) $(NEMO_FFLAGS)
 LDFLAGS  = $(LOPT)             $(NEMO_LDFLAGS)

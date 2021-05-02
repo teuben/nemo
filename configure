@@ -664,6 +664,7 @@ X_PRE_LIBS
 X_CFLAGS
 XMKMF
 falcon_OPENMP
+STDFLAG
 MAKEDIRS
 MAKELIBS
 falcon_NO_NATIVE
@@ -5734,7 +5735,7 @@ fi
 
 if test "$ok" = "yes"; then
         CC="clang"
-        CXX="clang"
+        CXX="clang++"
 	FC="flang"
 	F77="flang"
 fi
@@ -5938,8 +5939,11 @@ fi
 
 
 if test $with_std != "default"; then
-  CFLAGS="$CFLAGS -D_GNU_SOURCE -std=$with_std"
+  STDFLAG="-D_GNU_SOURCE -std=$with_std"
+else
+  STDFLAG=""
 fi
+
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
