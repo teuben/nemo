@@ -136,8 +136,10 @@ XLIBS  = @XLIBS@
 # (see GSL users guide - appendix A)
 # PEDFLAG="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align  -Wwrite-strings -Wnested-externs  -fshort-enums -fno-common -Dinline= -g -O4"
 #   optimization only
-
-COPT = @CFLAGS@
+#PEFFLAG = -Werror-implicit-function-declaration -Wimplicit-int -Wimplicit-function-declaration
+#PEDFLAG = --warn-no-implicit-function-declaration
+PEFFLAG = -Wimplicit-int -Wimplicit-function-declaration
+COPT = @CFLAGS@ $(PEDFLAG)
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
 #   for shared libaries
