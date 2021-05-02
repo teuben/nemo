@@ -38,7 +38,7 @@ void page();
 void xlate(CHAR *cbuf, int ccount, CHAR *fbuf);
 
 
-void main(int argc, CHAR *argv[])
+int main(int argc, CHAR *argv[])
 {
 
     FILE *fp, *nextfile();
@@ -46,7 +46,7 @@ void main(int argc, CHAR *argv[])
     while ( (fp = nextfile(argc, argv)) != NULL )   /* while more files */
         while (dumpline(fp))        /* while more data */
             if (!--linel) page();   /* if at end of page, page eject */
-    exit(0);
+    return 0;
 
 } /* main */
 
