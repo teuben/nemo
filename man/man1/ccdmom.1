@@ -1,8 +1,10 @@
-.TH CCDMOM 1NEMO "3 April 2018"
+.TH CCDMOM 1NEMO "1 May 2021"
 .SH NAME
 ccdmom \- moment or accumulate along an axis of an image
+
 .SH SYNOPSIS
 \fBccdmom\fP [parameter=value]
+
 .SH DESCRIPTION
 \fBccdmom\fP takes special moments (in position, or image intensity)
 along an axis of an image/cube. 
@@ -19,6 +21,7 @@ Continuum subtraction is needed for reliable moments where applicable.
 .PP
 If moments needs to be taken across many images, like cubes with axis=4,
 use \fIccdmoms(1NEMO)\fP.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -72,13 +75,6 @@ The \fBmom=\fP keyword is ignored, and the input and output datasets will
 now have the same shape and dimension. 
 [Default: \fBf\fP]
 .TP
-** \fBclip=\fP **
-Exclude pixels with values in the range -clip to clip. Default: 0
-.TP
-** \fBrngmsk=t|f\fP **
-Don't assign a 1st moment if the value results in a value outside the
-range of the axis. This can easily happen for noisy data. Default: false.
-.TP
 \fBoper=\fP
 If supplied, this is an extra operator supplied to the input file and output file,
 to create the final output file. This is to prevent having to type two commands
@@ -97,12 +93,13 @@ For \fBmom=3,30-34\fP where it finds the peak, this allows you to find the N-th
 peak instead of the first. This is achieved by visiting each peak, and assigning
 a peak membership downwards from the peak and then finding the next one.
 .TP
-\fBintegrate=t|f\fP
-When using mom=0 the signal is summed along an axis, you can either just sum
-the numbers (this used to be the old default), or integrate, ie. multiply
-the sum by the cell-size along that axis. This is now the default, to make
-it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
+** \fBclip=\fP **
+Exclude pixels with values in the range -clip to clip. Default: 0
 .TP
+** \fBrngmsk=t|f\fP **
+Don't assign a 1st moment if the value results in a value outside the
+range of the axis. This can easily happen for noisy data. Default: false.
+
 \fBabs=t|f\fP
 Use absolute values of the intensities for weights to a moment analysis. This is
 useful for low S/N data where at the wings a sign change can bias the moments.
@@ -115,6 +112,14 @@ Mask out values below zero for mom=30,31,32 (**experimental**)
 \fBcontsub=t|f\fP
 Fake a continuum subtraction for mom=30,31,32  (**experimental**)
 [t]
+.TP
+\fBintegrate=t|f\fP
+When using mom=0 the signal is summed along an axis, you can either just sum
+the numbers (this used to be the old default), or integrate, ie. multiply
+the sum by the cell-size along that axis. This is now the default, to make
+it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
+.TP
+
 .TP
 \fBpos=\fP\fI[ix0,iy0]\fP
 If used, this should contain two (zero-based) pixel coordinates, at which position a spectrum
