@@ -24,7 +24,7 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh:  Version 1.3 -- 4-feb-2021"
+echo "install_nemo.sh:  Version 1.4 -- 2-may-2021"
 
 opt=0
 nemo=nemo
@@ -36,6 +36,7 @@ falcon=1
 yapp=ps
 check=1
 bench=1
+bench5=0
 
 help() {
     echo This is a simple install script for NEMO
@@ -51,6 +52,7 @@ help() {
     echo yapp=$yapp
     echo check=$check
     echo bench=$bench
+    echo bench5=$bench5
 }
 
 
@@ -84,6 +86,7 @@ echo "  falcon=$falcon"
 echo "  yapp=$yapp"
 echo "  check=$check"
 echo "  bench=$bench"
+echo "  bench5=$bench5"
 echo ""
 
 # safety
@@ -161,6 +164,7 @@ make build4
 [ $python = 1 ] && make testpython
 [ $check  = 1 ] && make check
 [ $bench  = 1 ] && make bench
+[ $bench5 = 1 ] && make bench5
 
 
 date1=$(date)
