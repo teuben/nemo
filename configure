@@ -5736,8 +5736,10 @@ fi
 if test "$ok" = "yes"; then
         CC="clang"
         CXX="clang++"
-	FC="flang"
-	F77="flang"
+	#FC="flang"
+	#F77="flang"
+	FC="gfortran"
+	F77="gfortran"
 fi
 
 # Check whether --enable-pedantic was given.

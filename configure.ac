@@ -154,8 +154,10 @@ AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enablev
 if test "$ok" = "yes"; then
         CC="clang"
         CXX="clang++"
-	FC="flang"
-	F77="flang"
+	#FC="flang"
+	#F77="flang"
+	FC="gfortran"
+	F77="gfortran"
 fi
 
 AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
