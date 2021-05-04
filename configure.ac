@@ -160,16 +160,17 @@ if test "$ok" = "yes"; then
 	F77="gfortran"
 fi
 
-AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
+AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for lots of pedantics], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
   flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
   flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
   flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
   flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
-  CFLAGS="$CFLAGS $flags"
-  CXXFLAGS="$CXXFLAGS $flags"
-  # FFLAGS="$CFLAGS $flags"
+  PFLAGS="-Wimplicit-int -Werror-implicit-function-declaration"
+else
+  PFLAGS="-Wall"
 fi
+AC_SUBST(PFLAGS)
 
 AC_ARG_ENABLE(native, [  --enable-native         optimize for native CPU], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then

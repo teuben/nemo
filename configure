@@ -668,6 +668,7 @@ STDFLAG
 MAKEDIRS
 MAKELIBS
 falcon_NO_NATIVE
+PFLAGS
 NO_SHARED_LIBS
 MAKE
 RANLIB
@@ -1439,7 +1440,7 @@ Optional Features:
   --enable-debug          compile for debugging
   --disable-shared        disable shared libraries? (needed for falcON on MAC)
   --enable-clang          use clang compiler
-  --enable-pedantic       compile for pedantic gcc
+  --enable-pedantic       compile for lots of pedantics
   --enable-native         optimize for native CPU
   --enable-single         single-precision
   --enable-float          single-precision
@@ -5754,10 +5755,11 @@ if test "$ok" = "yes"; then
   flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
   flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
   flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
-  CFLAGS="$CFLAGS $flags"
-  CXXFLAGS="$CXXFLAGS $flags"
-  # FFLAGS="$CFLAGS $flags"
+  PFLAGS="-Wimplicit-int -Werror-implicit-function-declaration"
+else
+  PFLAGS="-Wall"
 fi
+
 
 # Check whether --enable-native was given.
 if test "${enable_native+set}" = set; then :
