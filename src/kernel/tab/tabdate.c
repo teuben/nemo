@@ -14,6 +14,7 @@
 #include <ctype.h>
 /* #define _XOPEN_SOURCE /* glibc2 needs this */
 #include <time.h>
+#include <table.h>
 
 extern string *burststring(string, string);
 
@@ -25,7 +26,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "dcol=0\n           Column for date conversion (0=whole line)",
     "time0=\n           If given, reference input times w.r.t this time (format2=%s)",
     "scale=1\n          Scale factor output seconds are divided by when time0 used" 
-    "VERSION=0.3\n      4-apr-09 PJT",
+    "VERSION=0.3a\n     4-may-2021 PJT",
     NULL
 };
 
@@ -50,7 +51,11 @@ string time0 = 0;
 bool need_time0 = FALSE;
 bool use_scale = FALSE;
 
-nemo_main()
+local int convert(stream instr, stream outstr);
+
+
+
+void nemo_main()
 {
   format1 = getparam("format1");
   if (hasvalue("time0"))  {
@@ -71,7 +76,7 @@ nemo_main()
   convert(instr,outstr);
 }
 
-convert(stream instr, stream outstr)
+int convert(stream instr, stream outstr)
 {
   char   line[MAX_LINELEN];          /* input linelength */
   int  nlines, nwords, nskip;
