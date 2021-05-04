@@ -31,10 +31,6 @@ Output snapshot. If a \fIprintf(3)\fP-like format specification
 is used.
 No default.
 .TP
-\fBtimes=\fP
-Times to select. 
-default: \fIall\fP.
-.TP
 \fBnbody=\fP
 Size of one snapshot . At least one of \fBnbody=\fP and
 \fBnsnap=\fP needs to be given. 
@@ -43,6 +39,11 @@ No default.
 \fBnsnap=\fP
 Number of pieces to cut a snapshot into.
 No default.
+.TP
+\fBtimes=\fP
+Times to select. 
+default: \fIall\fP.
+
 .SH EXAMPLE
 The following example splits a 1000 body snapshot in pieces of 250 bodies, and views
 the 2nd piece:

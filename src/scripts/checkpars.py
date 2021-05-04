@@ -6,11 +6,13 @@
 # apr 30 2021: Stopped flagging files w/o help=h
 #              Added -v verbose flag
 # may 4 2021:  Fixed regex bug
+
 import re, os, subprocess, getopt, sys
 
 # Global flags
 VERBOSE = False # If True prints man & help outputs for bad files
 TASKLIST = "tasklist"
+
 
 def get_man_matches(file):
     try:

@@ -24,14 +24,14 @@ in the galactic coordinate system. There is no formal definition of a spatial XY
 system, other than Z=0 being the galactic plane. So, where to put the sun if
 the galactic center is (0,0,0) is purely by convention. It so happens that 
 (-R0,0,0) is convenient since galactic longitude and latitude can be
-easily expressed as $atan2(y,x)$ and $atan2(z,\sqrt{x^2+y^2})$ resp. 
+easily expressed as ``atan2(y,x)`` and ``atan2(z,sqrt{x^2+y^2})`` resp. 
 
 - mkspiral, mkdisk
 
 These programs use 
-the {\tt sign=} keyword to set the sign of the angular moment vector. Positive
+the ``sign=`` keyword to set the sign of the angular moment vector. Positive
 means thus counter-clockwise rotation in this convention. Of course with
-tools like {\tt snapscale} and {\tt snaprotate} snapshots can always be
+tools like ``snapscale`` and ``snaprotate`` snapshots can always be
 re-arranged to fit any schema.
 
 
@@ -53,10 +53,10 @@ If kinematic information is also known,
 the convention is to use the position angle of the receding
 side of the galaxy. The inclination still has an ambiguity, which could
 be used to differentiate based on which is the near and far side, but this would
-result in values outside the commonly used $0..90$ range. Thus the sense
+result in values outside the commonly used 0..90 range. Thus the sense
 of rotation (sign of the angular momentum)
 is a more natural way, with
-again {\tt sign=-1} for counter-clockwise rotating (as seen for us projected on
+again ``sign=-1`` for counter-clockwise rotating (as seen for us projected on
 the sky)
 
 ..    \epsfbox{galaxyrot.eps}
@@ -97,7 +97,7 @@ Units
 Perhaps better to refer to a few man pages we have on this:
 `units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_ ,
 `units(5NEMO)  <https://teuben.github.io/nemo/man_html/units.5.html>`_ , and
-`constants(5NEMO)  <https://teuben.github.io/nemo/man_html/constants.5.html>`_ .
+`constants(5NEMO) <https://teuben.github.io/nemo/man_html/constants.5.html>`_ .
 
 
 

@@ -16,9 +16,6 @@ The following parameters are recognized.
 Input data is read from \fIsnap_file\fP, which must be in
 \fIsnapshot\fP(5NEMO) format.  Default: \fIrequired\fP.
 .TP
-\fBtimes=\fP\fItime_range\fP
-Only frames within \fItime_range\fP will be analyzed.  Default: \fBall\fP.
-.TP
 \fBweight=\fP\fIbody_weight\fP
 Expression used to compute the weight of each body.
 See \fIbodytrans\fP(1NEMO) for the form of \fIbody_weight\fP.
@@ -29,6 +26,10 @@ If \fIcutoff_radius\fP is greater than zero, only particles within
 \fIcutoff_radius\fP of the \fIbody_weight\fPed centroid will be used
 to compute the final diagnostics.
 Default: \fB0.0\fP.
+.TP
+\fBtimes=\fP\fItime_range\fP
+Only frames within \fItime_range\fP will be analyzed.  Default: \fBall\fP.
+
 .SH SEE ALSO
 snapinert(1NEMO), snaprect(1NEMO), snapplot(1NEMO), snapshot(5NEMO)
 .SH AUTHOR

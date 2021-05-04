@@ -77,3 +77,24 @@ typedef struct {
 global int nbody;		/* number of bodies simulated */
 
 global body bodytab[MBODY];	/* array representing state */
+
+
+extern int diffuse(body *btab, int nb, int ndim, real sigma);
+extern int dissipate(body *btab, int nb, int ndim, real *dr, real eta, real grid);
+/* orbstep.c */
+void initstep(bodyptr btab, int nb, real *tptr, proc force);
+void orbstep(bodyptr btab, int nb, real *tptr, proc force, real dt, int mode);
+void rkstep(bodyptr btab, int nb, real *tptr, proc force, real dt, real atmp1[]);
+void pcstep(bodyptr btab, int nb, real *tptr, proc force, real dt);
+void eulerstep(bodyptr btab, int nb, real *tptr, proc force, real dt);
+void modeulerstep(bodyptr btab, int nb, real *tptr, proc force, real dt);
+void leapfrogstep(bodyptr btab, int nb, real *tptr, proc force, real dt);
+void rk4step(bodyptr btab, int nb, real *tptr, proc force, real dt);
+void epistep(bodyptr btab, int nb, real *tptr, proc force, real dt, int mode);
+/* code_io.c */
+void inputdata(void);
+void initoutput(void);
+void stopoutput(void);
+void output(void);
+void savestate(string file);
+void restorestate(string file);
