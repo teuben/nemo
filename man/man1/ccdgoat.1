@@ -18,19 +18,17 @@ the program will swap the galactic quadrants such that they are
 ordered 4,3,2 to 1. 
 No default
 .TP
-\fBtemp=\fP
-Temperature (in map units, presumable K) to measure isotherms at
-for \fIVdiff\fP. Default: 1.
-.TP
 \fBvel=\fP
 Velocity cutoff (in map units, presumably km/s but 
 some maps may use m/s if derived from FITS) for \fINdiff\fP table. Default: 0
 .TP
+\fBtemp=\fP
+Temperature (in map units, presumable K) to measure isotherms at
+for \fIVdiff\fP. Default: 1.
+.TP
 \fBmode=\fP
 Mode {\fBgoat, int, vdiff, diffmap\fP}. Default: \fBgoat\fP
-.TP
-\fBout=\fP\fIout_image\fP
-Output dataset, required for \fBmode=diffmap\fP.
+
 .SH EXAMPLES
 An example of plotting vdiff from fits file, given in m/s, but plotting
 at a fixed scale in km/s

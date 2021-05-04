@@ -30,6 +30,6 @@ jobs:
       run: make check checklog
     - name: make bench
       run: make bench
-    - name: make bench3
-      run: make bench3
+    - name: make bench5
+      run: make bench5
     

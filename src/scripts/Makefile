@@ -60,3 +60,9 @@ mycc:	mycc.c
 scripts: $(SCRIPTS)
 	cp $? $(NEMOBIN)
 	cp Makefile.lib $(NEMOLIB)/Makefile
+
+
+checkpars:
+	python checkpars.py -v > checkpars.log
+	@grep ^'Files read'      checkpars.log
+	@grep ^'Bad files found' checkpars.log

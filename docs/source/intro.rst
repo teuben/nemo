@@ -12,9 +12,10 @@ programs, a group being defined by their common file structure.
    the data on disk.
 
 A common (command line) user interface is defined with which the user
-communicates with a program.
-User interfaces will be described in much more detail in the next chapter
-:ref:`iface` and  Appendix~\ref{a:iface}.  
+communicates with a program, described in more detail in the next chapter
+:ref:`iface`.
+   
+..   and  Appendix~\ref{a:iface}.  
 
 In order to run NEMO programs, your shell environment has to be modified.
 See :ref:`using` on how to setup NEMO.
@@ -23,17 +24,17 @@ elsewhere.
 
 
 Let us first give you an overview of the various *groups* of programs,
-as they clearly show the structure of NEMO to a first time user:
+as they clearly show the structure of NEMO:
 
 - The *N-body group*
   is defined by a common file structure of *snapshots*.
   In this group we find various programs
-  to create N-body systems (spherical, disk), methods to compute the
+  to create N-body systems (spherical, elliptical, disk), methods to compute the
   gravitational field (softened Newtonian, hierarchical, Fourier
   expansion), and time-integrators (leapfrog, Runge-Kutta).  Many
   utilities exist to manipulate, analyze and display these data.
 
-- The *orbit group* is defined by a common file structure of
+- The *Orbit group* is defined by a common file structure of
   *orbits*.  It is mainly intended to
   calculate the path of an individual orbit in a static potential and
   then analyze it.  This group is closely related to the before
@@ -41,21 +42,21 @@ as they clearly show the structure of NEMO to a first time user:
   with each other.  For example, it is possible to freeze the
   potential of an N-body snapshot, and calculate the path of a
   specific star in it, now conserving energy exactly. Or to extract
-  the path of a selected star, and extract an orbit from it.
+  the path of a selected star in a simulation, and extract an orbit from it.
 
-- The *image group* is defined by a common file structure of
+- The *Image group* is defined by a common file structure of
   *images*, i.e. two dimensional
   rectangular pixel arrays with a 'value' defined for every pixel.
   Actually an image may also have a third axis, although this axis
-  often has a slightly different meaning ({\it e.g.} Doppler velocity.
+  often has a slightly different meaning *e.g.* Doppler velocity.
   It is possible to generate arbitrary
   two-(and three-) dimensional images from snapshots, FITS files
   of such images can be created, which can then be
   exported to other familiar astronomical data reduction packages.
   There exists a variety of programs in the astronomical community to
-  manipulate data through FITS format.
+  manipulate data through the FITS format.
 
-- The *table group* appears quite commonly among application
+- The *Table group* appears quite commonly among application
   programs in all of the above mentioned groups.  Most of the time it
   is a simple ASCII file in the form of a
   matrix of numbers (like a spreadsheet).  A few programs in NEMO can
@@ -63,10 +64,10 @@ as they clearly show the structure of NEMO to a first time user:
   many superior programs and packages outside of NEMO available with
   similar functionality. It is mostly through these table files that
   we leave the NEMO environment, and persue analysis in a different
-  environment/package.  The obvious advantage of storing tables in
+  environment.  The obvious advantage of storing tables in
   binary form is the self-documenting nature of NEMO's binary
   files. For historical reasons, most tables are displayed and created
-  in ASCII, though you will find a few binary tables in NEMO.
+  in ASCII, though you will find a few binary tables as well.
 
 
 More groups and intermediate file structures are readily defined, as
@@ -76,13 +77,13 @@ the need arises.  In Chapter \ref{c:progr} we
 will detail some 'rules' how to incorporate/add new software into the
 package, and extend your NEMO environment. 
 
-The remaining chapters of this first part of the manual outline various
+The remaining chapters of this manual outline various
 concepts that you will find necessary to work with NEMO.
 Chapter :ref:`iface` outlines the user interface (commandline, shells
 etc.), details  are deferred to Appendix~\ref{a:iface}.
-Chapter~\ref{c:filestr} explains how data is stored on disk and can be
+Chapter :ref:`filestr` explains how data is stored on disk and can be
 manipulated, including the concept of function descriptors in NEMO.
-Chapter~\ref{c:graphics} details how data can be
+Chapter :ref:`graphics` details how data can be
 graphically displayed, either using NEMO itself or external programs.
 
 The second part of the manual is a cookbook: Chapter~\ref{c:examples}

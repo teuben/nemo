@@ -27,16 +27,16 @@ is also searched [No default].
 The exponential disk is written to \fIout_file\fP 
 in \fIsnapshot(5NEMO)\fP format. [No default]
 .TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles for the disk. Only used when \fItest_file\fP not
+provided.
+[Default: \fB1024\fP].
+.TP
 \fBtest=\fP\fItest_file\fP
 Optional input snapshot file. If provided, the particles 
 in this file are used to define the positions. The keyword \fBnbody\fP
 is then not used, but taken from this input file.
 [default: \fInot-used\fP].
-.TP
-\fBnbody=\fP\fInum_bodies\fP
-Number of particles for the disk. Only used when \fItest_file\fP not
-provided.
-[Default: \fB1024\fP].
 .TP
 \fBrmin=\fP\fIdisk_cutoff\fP
 Inner cutoff radius of disk. [Default: \fB0.0\fP].

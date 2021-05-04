@@ -58,7 +58,7 @@ local proc  pot;
 void setparams(void);
 void force(bodyptr btab, int nb, real time);
 void force1(bodyptr btab, int nb, real time);
-extern int initstep(bodyptr btab, int nb, real *tptr, proc force);
+// extern int initstep(bodyptr btab, int nb, real *tptr, proc force);
 
 void nemo_main()
 {

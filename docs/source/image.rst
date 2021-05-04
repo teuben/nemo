@@ -79,11 +79,11 @@ Galactic Velocity Fields
 
 As an example, a
 special section is devoted here to the analysis of 
-galactic \index{commandlines, maximum length}\index{macro files}
+galactic
 velocity fields.\footnote{In this example
-shell variables such as {\tt set r=`nemoinp 0:60`} have been
+shell variables such as ``r=$(nemoinp 0:60)`` have been
 replaced with the more portable macro files like
-{\tt @tmp.r}. Although the example uses {\tt 0:60} and works
+``@tmp.r``. Although the example uses ``0:60`` and works
 fine in the shell the example was used under, increasing the
 number to 256 would fail because of overflowing the maximum
 characters allowed on the commandline}
@@ -115,7 +115,7 @@ The following programs are available:
 
 Since rotcurshape computes a residual velocity field, one can easily
 create nice model velocity fields from any selected shape by 
-``fitting'' a rotation curve shape to a velocity field of all 0s
+*fitting* a rotation curve shape to a velocity field of all 0s
 and keeping all parameters fixed to the requested values:
 
 .. code-block::

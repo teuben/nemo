@@ -4,10 +4,12 @@ Glossary
 .. glossary::
 
 
+  accelleration
+      Dataformat 
 
   bodytrans
       Dataformat that is used to
-      perform\index{bodytrans} arbitrary operations on expression
+      perform arbitrary operations on expression
       variables used in snapshot's.
 
   ccd
@@ -15,21 +17,20 @@ Glossary
       images start or end with ``ccd``.
 
   ECSV
-    (Enhanced Character Separated Values) a popular
-    self-describing ascii table format popularized by astropy
+      (Enhanced Character Separated Values) a popular
+      self-describing ASCII table format popularized by astropy
 
   
-
   fie
       Most expressions that you give to program
-      keywords\index{keywords, program}\index{program keywords} are
-      parsed by {\it nemofie} and eventually ``fie``. (Nomenclature
-      borrowed from\index{GIPSY} GIPSY)
+      keywords are
+      parsed by *nemofie* and eventually ``fie``. (Nomenclature
+      borrowed from\GIPSY)
 
   FITS
       ``Flexible Interchange Transport System'', a
       standard dataformat used to interchange data between
-      machines. Commonly used for images.\index{FITS}
+      machines. Commonly used for images.
 
   FWHM
       (Full Width Half Max): the effective resolution of the
@@ -40,34 +41,32 @@ Glossary
   history
       Each NEMO dataset normally contains a data
       history in the form of of history items at the beginnging of the
-      dataset.\index{hisf}\index{history, data} They are normally kept
+      dataset. They are normally kept
       track of by the data processing programs, and can be displayed
-      with the program {\tt hisf}.
+      with the program ``hisf``.
 
   image
       Dataformat in NEMO, used to represent 2- and
-      3-D images/data cubes. See also {\bf ccd}.
+      3-D images/data cubes. See also :term:`ccd`.
 
   miriad
       Another astronomical data reduction package,
       from which we have borrowed some user interfaces
-      ({\tt miriad} and {\tt mirtool}) which are plug-compatible with
+      which are plug-compatible with
       our command-line syntax.
 
   orbit
       Dataformat in NEMO used to represent a
       stellar orbit; most programs in NEMO which handle orbits start
-      or end with ``{\tt orb}''.
+      or end with *orb*.
 
   pixel
-      PIXEL/voxel
-
-  
+      PIXEL/voxel: an area in 2D or 3D representing
 
   potential
       Dataformat in NEMO used to represent a
       potential; most programs in NEMO which handle potentials start
-      or end with ``{\tt pot}''.
+      or end with *pot*. Related are the :term:`accelleration`
 
   program keyword
       Keywords that are defined by the
@@ -76,7 +75,7 @@ Glossary
 
   review
       A small user interface that pops up when a
-      program is interrupted. Type {\tt quit} to exit it, or {\tt ?}
+      program is interrupted. Type ``quit`` to exit it, or ``?``
       for help. This feature of the user interface may not be
       installed in your version.
 
@@ -87,7 +86,7 @@ Glossary
   snapshot
       Dataformat used in NEMO to represent an
       N-body system. Many programs that handle {\it snapshot}'s in
-      NEMO start or end with ``{\tt snap}''.
+      NEMO start or end with *snap*.
 
   structured file
       The binary data NEMO writes is in a
@@ -105,6 +104,11 @@ Glossary
       program knows about, and are not listed in the (program)
       keywords that can be seen by issuing e.g. **help=** (in itself
       being a system keyword).
+
+  table
+      A table consists of rows and columns of values, numbers or text.
+      Most commonly stored in ASCII. Less well defined, it is one of the
+      four data types in NEMO.
 
   yapp
       ``Yet Another Plotting Package'', the library

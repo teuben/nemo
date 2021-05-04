@@ -44,7 +44,7 @@ macro. An expression was expected to be
 true at this point in the program. Program exits when
 this was not the case. An infamous failed assertion
 is {\tt file load.c line 91} or thereabouts, part
-of the {\tt hackcode1} N-body integrator. Two
+of the ``hackcode1`` N-body integrator. Two
 particles were too close (or on top of each other)
 such that space could not be subdivided within
 32 levels of the oct tree. There is no good solution to this problem.
@@ -90,7 +90,7 @@ Apparently it was not.
 It is possible that the non-portable dynamic object loader (loadobj.c)
 indeed proves to be non-portable here. Either you requested a wrong
 file, which is not in object format, or this UNIX version has
-a different object file structure. \index{loadobj}
+a different object file structure. 
 {\bf Cure:} a lot of hacking in loadobj.c, assuming no pilot error.
 
 
@@ -104,8 +104,8 @@ was not linked in by the calling program. Find out in which filestructure
 your invoked program falls, and add appropriate dummy code to the library
 function. {\it E.g.} in the case of {\it potential(5NEMO)} data files,
 you might have to add a specific math function to
-{\tt \$NEMO/inc/mathlinker.h}, or add some coding to the
-end of {\tt \$NEMO/src/orbit/potential/potential.c} and rebuild the
+``$NEMO/inc/mathlinker.h``, or add some coding to the
+end of ``$NEMO/src/orbit/potential/potential.c`` and rebuild the
 appropriate {\it orbit(1/3NEMO)} library/commands. The standard UNIX utility
 {\it nm(1)} help finding all undefined symbols in an object file. Cross
 check this with the executable.
@@ -130,7 +130,7 @@ in loadobj.c.
 ``makecell:       need more than XX cells; increase fcells=``
 
 This is actually sort of a pilot error, but may sound a bit obscure to a beginning
-user. Space for cells used in the hackcode  \index{hackcode1(1)}
+user. Space for cells used in the hackcode  
 force calculation is
 allocated dynamically, as well as for the particles. 'fcells'
 is the ratio of allocated
@@ -153,22 +153,19 @@ executable format the dynamic object loader thinks it should have.
 
 ``No man entry for XXX.Y``
 
+``No manual entry for XXX``
+
 No online manual page for this, although perhaps
-the MANPATH \index{MANPATH, environment} environment variable
+the MANPATH  environment variable
 has not been properly set, or your UNIX version does not support
 multiple man-root directories, in which case consult the manual
-page of man(1). The SUN OS does, as well as BSD 4.3 (?). Perhaps
-a special man-script/alias with an extra {\tt -M} flag needs to
-be installed in this case if MANPATH is not supported.
-See also the lpath\index{lpath, environment} variable on some
-systems. % lpath, as reported by John Hibbard, 18 nov 91
-
+page of man(1). 
 
 ``put_snap_XXX:   not implemented``
 
 Here 'XXX' may be 'key' or 'aux' or something else.
 You have an old version of the code, while the datastructure of the
-snapshot has an 'XXX' (You may confirm this with {\it tsf(1NEMO)}. 
+snapshot has an 'XXX' (You may confirm this with ``tsf``.
 Recompile the program with a more recent
 version of 
 $\langle$snapshot/put\_snap.c$\rangle$ and possibly 
@@ -286,7 +283,7 @@ environment variable is absent.
 - **MANPATH**
   Used by UNIX to be able to address more than one
   area of manual pages. Normally set to {\tt \$NEMO/man:/usr/man}
-  by the {\tt NEMORC} file. Does not work in Ultrix 3.0, \index{Ultrix}
+  by the {\tt NEMORC} file. Does not work in Ultrix 3.0, 
   but perhaps the {\tt -P} switch may be used.
 
 
@@ -316,7 +313,7 @@ environment variable is absent.
 
 - **NEMOLIB**
   Directory where nemo's libraries live.
-  Normally set by \index{NEMOLIB, environment}. No default.
+  Normally set by NEMO. No default.
 
 - **NEMOLOG**
   Filename used as logfile for tasks submitted

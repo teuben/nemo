@@ -11,11 +11,7 @@
 
 #define ECONS  1		/* flag energy conservation */
 
-diffuse (btab, nb, ndim, sigma)
-Body *btab;
-int   nb;
-int   ndim;
-real  sigma;
+int diffuse (Body *btab, int   nb, int   ndim, real  sigma)
 {
     real p, s, c, vx, vy;
     Body *b;
