@@ -106,7 +106,8 @@ local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
 
-
+extern int minmax(int n, real *array, real *amin, real *amax);
+
 /****************************** START OF PROGRAM **********************/
 
 local int compar_real(real *a, real *b)
