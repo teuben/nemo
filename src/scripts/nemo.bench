@@ -54,8 +54,8 @@ if [ $mode == 2 ]; then
     exit 0
 fi
 
-if [ $mode == 3 ]; then
-    echo 'Equal CPU time per code, no output files to check'
+if [ $mode == 5 ]; then
+    echo 'Equal 5sec CPU time per code, no output files to check'
     echo 'Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode treecode1'
     t1=4.28
     t2=5.64

@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 14-apr-2021 PJT
+VERSION = NEMO V4.2 30-apr-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -326,7 +326,7 @@ upstream:
 	@echo "  git fetch upstream"
 	@echo "  git merge upstream/master"
 	@echo "  git status"
-	@echo "Always make sure you work in a branch, to keep your local master same as upstream"
+	@echo "Always make sure you work in a branch, to keep your local master same as upstream/master"
 
 # autoconf/GIT based export
 #
@@ -601,14 +601,11 @@ bench1:
 bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
 
-bench3:
-	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=3)
+bench5:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5)
 
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
-
-bench5:
-	(cd src/tutor/mp; $(MAKE) bench5)
 
 
 #

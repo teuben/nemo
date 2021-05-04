@@ -15,11 +15,10 @@ Glossary
       images start or end with ``ccd``.
 
   ECSV
-    (Enhanced Character Separated Values) a popular
-    self-describing ascii table format popularized by astropy
+      (Enhanced Character Separated Values) a popular
+      self-describing ASCII table format popularized by astropy
 
   
-
   fie
       Most expressions that you give to program
       keywords\index{keywords, program}\index{program keywords} are
@@ -62,7 +61,6 @@ Glossary
   pixel
       PIXEL/voxel
 
-  
 
   potential
       Dataformat in NEMO used to represent a
@@ -105,6 +103,11 @@ Glossary
       program knows about, and are not listed in the (program)
       keywords that can be seen by issuing e.g. **help=** (in itself
       being a system keyword).
+
+  table
+      A table consists of rows and columns of values, numbers or text.
+      Most commonly stored in ASCII. Less well defined, it is one of the
+      four data types in NEMO.
 
   yapp
       ``Yet Another Plotting Package'', the library

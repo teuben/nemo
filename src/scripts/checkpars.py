@@ -5,10 +5,12 @@
 # apr 15 2021: First Version
 # apr 30 2021: Stopped flagging files w/o help=h
 #              Added -v verbose flag
+# may 4 2021:  Fixed regex bug
 import re, os, subprocess, getopt, sys
 
 # Global flags
 VERBOSE = False # If True prints man & help outputs for bad files
+TASKLIST = "tasklist"
 
 def get_man_matches(file):
     try:
@@ -21,7 +23,7 @@ def get_man_matches(file):
     man_matches = []
 
     for line in man_doc.readlines():
-        if re.search(r'.TP',line): # If we encounter a .TP, scan next line for a command
+        if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
             scan_flag = True
         elif scan_flag:
             match = re.findall(r'\\f[a-zA-Z][a-zA-Z]+[0-9]*',line)
@@ -80,8 +82,8 @@ def checkMan():
 
                 if VERBOSE:
                     print(file)
-                    print(man_out)
-                    print(help_out)
+                    print("man: "+str(man_out))
+                    print("help: "+str(help_out))
                     print()	
     
     print("Files with help=h & man mismatches")
@@ -119,7 +121,7 @@ def main():
         print("getopt error")
 
     for opt, arg in opts:
-        if opt in ['-v']:
+        if opt in ["-v"]:
             VERBOSE = True
 
     # Change working directory
