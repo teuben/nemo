@@ -19,6 +19,7 @@
 
 #include <stdinc.h> 
 #include <getparam.h>
+#include <table.h>
 
 #if HAVE_GSL
 #include <gsl/gsl_errno.h>
@@ -54,7 +55,7 @@ string cvsid="$Id$";
 #define MAXZERO     64
 #define MAXDATA  16384
 
-nemo_main()
+void nemo_main()
 {
     int colnr[2];
     real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
@@ -85,7 +86,7 @@ nemo_main()
     Qy = hasvalue("y");
     fmt = getparam("format");
     sprintf(fmt2,"%s %s",fmt,fmt);
-    sprintf(fmt1," %s",fmt,fmt);
+    sprintf(fmt1,"%s %s",fmt,fmt);
     dprintf(1,"Using format=\"%s\"\n",fmt2);
     Qxall = (Qx && streq("all",getparam("x")));
     Qyall = (Qy && streq("all",getparam("y")));

@@ -15,7 +15,7 @@
 void myerror(string msg,string p1);
 bool readline(string buf, stream str);
 
-main(int argc, string argv[])
+int main(int argc, string argv[])
 {
     int i;
     stream s;
@@ -46,6 +46,7 @@ main(int argc, string argv[])
 	    }
 	fclose(s);
     }
+	return 0;
 }
 
 bool readline(string buf, stream str)

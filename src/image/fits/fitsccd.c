@@ -414,7 +414,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
  *  the _nan routines should supply this
  */
 
-is_feq(int *ia, int *ib)
+int is_feq(int *ia, int *ib)
 {
   int r;
 #if 0

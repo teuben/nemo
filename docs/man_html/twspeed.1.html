@@ -65,12 +65,17 @@ format [no default]. </dd>
 
 <dt><b>step=</b> </dt>
 <dd>Slit width in pixels [1] </dd>
+
+<dt><b>window=</b>
+</dt>
+<dd>Window functions (0=none, ..) [0] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here
-is an example creating a rotating bar at pattern speed 1, inclining it
-by 30 degrees,and measuring a pattern speed of 0.5 (omega*sin(inc)): <br>
+Here is an example creating a
+rotating bar at pattern speed 1, inclining it by 30 degrees,and measuring
+a pattern speed of 0.5 (omega*sin(inc)): <br>
 <pre>% mkdisk disk1 10000 harmonic mass=1
 % snapscale disk1 disk2 rscale=1,0.5,0 vscale=0
 % snapspin disk2 disk3 omega=1

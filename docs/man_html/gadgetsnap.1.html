@@ -35,21 +35,26 @@ No default, and currently only one file at the time can be processed. </dd>
 
 <dt><b>swap=</b> </dt>
 <dd>Force swaping bytes for
-other-endian machines [f]  </dd>
+other-endian machines [f] </dd>
+
+<dt><b>reorder=t|f</b> </dt>
+<dd>Call reorder? This brings particles
+back into the order of their ID&rsquo;s. [Default: f] </dd>
 
 <dt><b>header=|4|8</b> </dt>
-<dd>Size of the header uses in unformatted
-fortran data. This used to be 4, but modern compilers (e.g. gfortran) may
-very well use 8. By default it is not specified, and the value determined
-to be the correct one during install (UNFIO_HDR_SIZE) is used. This keyword
-can thus be used to force another value. </dd>
+<dd>Size of the header
+uses in unformatted fortran data. This used to be 4, but modern compilers
+(e.g. gfortran) may very well use 8. By default it is not specified, and the
+value determined to be the correct one during install (UNFIO_HDR_SIZE)
+is used. This keyword can thus be used to force another value. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example converts
-a standard sample dataset <i>lcdm_gas.dat</i> from the directory <b>$GADGET_DIR/ICs</b>
-to a NEMO snapshot file, and piped into <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
- for a quick look: <br>
+The
+following example converts a standard sample dataset <i>lcdm_gas.dat</i> from the
+directory <b>$GADGET_DIR/ICs</b> to a NEMO snapshot file, and piped into <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
+
+for a quick look: <br>
 <pre>% gadgetsnap lcdm_gas.dat - swap=t | tsf -
 reading &lsquo;lcdm_gas.dat.intel&rsquo; ...
 Header:
