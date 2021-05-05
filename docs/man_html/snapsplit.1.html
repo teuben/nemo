@@ -42,22 +42,23 @@ the keyword is also given:
 snapshot. If a <a href='printf.3.html'><i>printf(3)</i></a>
 -like format specification is used. No default. </dd>
 
-<dt><b>times=</b>
+<dt><b>nbody=</b>
 </dt>
-<dd>Times to select.  default: <i>all</i>. </dd>
-
-<dt><b>nbody=</b> </dt>
-<dd>Size of one snapshot . At least one
-of <b>nbody=</b> and <b>nsnap=</b> needs to be given.  No default. </dd>
+<dd>Size of one snapshot . At least one of <b>nbody=</b> and <b>nsnap=</b> needs to be given.
+ No default. </dd>
 
 <dt><b>nsnap=</b> </dt>
-<dd>Number of pieces
-to cut a snapshot into. No default. </dd>
+<dd>Number of pieces to cut a snapshot into. No default. </dd>
+
+<dt><b>times=</b>
+</dt>
+<dd>Times to select.  default: <i>all</i>. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-The following example splits a
-1000 body snapshot in pieces of 250 bodies, and views the 2nd piece: <br>
+The following example splits a 1000
+body snapshot in pieces of 250 bodies, and views the 2nd piece: <br>
 <pre>  % mkplummer p1000 1000
   % snapsplit p1000 p1000.split nbody=250
   % snapplot p1000.split times=#2

@@ -130,11 +130,12 @@ unfio $file "$n*2" float maxbuf=100000 |\\
 .fi
 .SH BENCHMARKS
 1000 particles on a 32**3 cube integrating for 20 steps took 4.77\" on
-a sparc Ultra-2.
+a sparc Ultra-2. (1997?)
 .PP
 2021 update: 200 steps on an i5-1135G7 took 3.7\" using the default gfortran, only a factor
 13 speedup from the 2004 results. However, compiling with flang (FFLAGS=-O3), 200 steps took
 0.22\", a remarkable speedup of 16 over gfortran.
+
 .SH SEE ALSO
 rungalaxy(1NEMO), unfio(1NEMO), snapshot(5NEMO)
 .PP
@@ -144,6 +145,9 @@ James (1977, J Comp Phys v25, p71).
 Sellwood (1997, in "Computational Astrophysics" ed Clarke & West, ASP Conf series v123, p215) 
 http://www.physics.rutgers.edu/galaxy   (full 2014 version; V1.5 and later)
 .fi
+
+.SH ADS
+@ads 2014arXiv1406.6606S
 .SH AUTHOR
 Jerry Sellwood
 .SH HISTORY

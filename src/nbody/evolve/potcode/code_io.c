@@ -20,15 +20,13 @@
 
 #include <snapshot/put_snap.c>
 
-local diagnostics(void);
+local void diagnostics(void);
 
-void savestate(string file);
-void restorestate(string file);
 /*
  * INPUTDATA: read initial conditions from input file.
  */
 
-inputdata()
+void inputdata()
 {
     stream instr;
     bodyptr btab, bp;
@@ -63,7 +61,7 @@ local stream outstr = NULL;		/* output stream pointer */
 
 local stream quadstr = NULL;		/* quadrupole field output */
 
-initoutput()
+void initoutput()
 {
     printf("\n%s\n\n", headline);               /* headline log stream      */
     if (*outfile != 0) {                        /* output file given?       */
@@ -87,7 +85,7 @@ initoutput()
  * STOPOUTPUT: finish up after a run.
  */
 
-stopoutput()
+void stopoutput()
 {
     if (outstr != NULL)
         strclose(outstr);
@@ -110,7 +108,7 @@ local vector cmphase[2];	/* center of mass coordinates */
 
 local bool firstmass = TRUE;	/* set if masses have yet to be output */
 
-output()
+void output()
 {
     double cputime();
     int k, bits;
@@ -161,7 +159,7 @@ output()
  * DIAGNOSTICS: compute set of dynamical diagnostics.
  */
 
-local diagnostics(void)
+local void diagnostics(void)
 {
     int i;
     register bodyptr p;

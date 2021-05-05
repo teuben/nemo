@@ -1,0 +1,105 @@
+.TH RVSTACK 1NEMO "5 May 2021"
+
+.SH "NAME"
+rvstack \- Extract Radius-Velocity diagram from a data cube for later stacking
+
+.SH "SYNOPSIS"
+\fBrvstack\fP in=cube out=map [parameter=value]
+
+.SH "DESCRIPTION"
+This program takes all points within a (narrow) cone around the major or minor
+axis of an assumed galaxy data cube, and
+construct a Radius-Velocity diagram, centered on the galaxy in position
+and velocity.  It will properly stack the two sides of the galaxy, so the radial coordinate
+will run from 0 to some Rmax.  In velocity it will run from some Vmin to some Vmax,
+but always expecting positive rotation and positive outflow, assuming the
+position angles are correctly set.
+.PP
+Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
+.PP
+Options exist to scale the Radius and Velocity to different units, such that
+many galaxies can be stacked in physical space, to increase the change to detect
+a signal.
+.PP
+You can also select to only construct the signal from one side of the galaxy. See \fBside=\fP below.
+.PP
+Points along an arc are all accumalated (technically: averaged), and placed on the same radial grid
+as the pixel size in the input data cube. We might need some trick next neighbor smoothing
+in order for pixels near the center to have a value.
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP\fIimage_cube\fP
+input data cube [No default]
+.TP
+\fBout=\fP\fIimage_map\fP
+output R-V map. Not implemented yet. It currently prints out a table for inspection.
+.TP
+\fBpa=\fP
+position angle of the receding side of disk [0]   
+.TP
+\fBpan=\fP
+position angle of the near side of disk, or where you would expect the outflow.
+Normally this would be 90 degrees away from the kinematic major axis from
+\fBpa=\fP. [90]
+.TP
+\fBinc=\fP
+inclination angle of disk [45]
+.TP
+\fBvsys=\fP
+systemic velocity [0]   
+.TP
+\fBcenter=\fP\fIxpos,ypos\fP
+rotation center (mapcenter if left blank, 0,0=lower left) - \fI@todo: what about crpix?\fP
+.TP
+\fBangle=\fP
+angle around major or minor axis around which points are accumulated
+into the R-V plot. [Default: 10]
+.TP
+\fBblank=\fP
+Value of the blank pixel to be ignored.
+.TP
+\fBrscale=\fP
+Scaling factor for radius. This would be more used to stack galaxies based on a KPC scaling,
+or an Re scaling, not geometry, see \fBgscale=\fP below.  [Default: 1]
+.TP
+\fBvscale=\fP
+Scaling factor for velocity. This would be more used to stack galaxies based on a mass scaling,
+not geometry, see \fBgscale=\fP below. [Default: 1]
+.TP
+\fBgscale=f|t\fP
+Scale for inclination based geometry. Rotation is scaled by 1/sin(i), outflow by 1/cos(i).
+Radius is not scaled for rotation, but by 1/cos(i) for outflow.   [Default: f]
+.TP
+\fBmode=r|o\fP
+Select output mode: rotation (r) or outflow (o).   For rotation, points around \fBpa=\fP are
+selected, for outflow, points around \fBpan=\fP. [Default: r]
+.TP
+\fBside=0|-1|1\fP
+By default it will stack both sides, but this option will allow you to stack one or the other
+side. [Default: 0]
+
+.SH "EXAMPLES"
+An example using our standard NGC 6503 cube given in km/s velocity units.
+
+.nf
+   pvstack ngc6503.ccd ngc6503-r.pv  pa=120 pan=120-90 inc=70 vsys=27 center=164,123 mode=rotation
+   pvstack ngc6503.ccd ngc6503-o.pv  pa=120 pan=120-90 inc=70 vsys=27 center=164,123 mode=outflow
+.fi
+
+.SH "SEE ALSO"
+ccdstack(1NEMO)
+
+.SH "FILES"
+src/image/rotcur
+
+.SH "AUTHOR"
+Peter Teuben
+
+SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+5-May-21	V0.1 Draft	PJT
+.fi

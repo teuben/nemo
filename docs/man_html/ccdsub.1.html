@@ -76,12 +76,16 @@ will inherit the corresponding x=, y= or z=. Default: not used. </dd>
 all previous actions have been taken. The default is no reordering, i.e. keep
 it in <b>xyz</b> order. To reverse only the X and Y axis, <b>reorder=yxz</b> is needed.
 </dd>
+
+<dt><b>moving=t|f</b> </dt>
+<dd>Moving average in n{x,y,z}aver= ? [f] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To reorder a cube from xyz to zxy and back to xyz, the 2nd step
-will have a perhaps non-intuitive axis reordering, since it refers to the
-new "zxy" order: <br>
+To reorder a cube
+from xyz to zxy and back to xyz, the 2nd step will have a perhaps non-intuitive
+axis reordering, since it refers to the new "zxy" order: <br>
 <pre>    ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
 </pre>
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>

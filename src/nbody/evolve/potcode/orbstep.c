@@ -56,7 +56,7 @@ local void moveaccel(bodyptr btab, int nb)
 
 local int nstep = 0;	/* integration step counter */
 
-initstep(btab, nb, tptr, force)
+void initstep(btab, nb, tptr, force)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* initial time */
@@ -71,7 +71,7 @@ proc force;		/* acceleration calculation */
  * ORBSTEP: integrate the orbit of a set of bodies.
  */
 
-orbstep(btab, nb, tptr, force, dt, mode)
+void orbstep(btab, nb, tptr, force, dt, mode)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -108,7 +108,7 @@ int mode;		/* select integration algorithm */
 /*
  * RKSTEP: (some kind of) Runge-Kutta step
  */
-rkstep(btab, nb, tptr, force, dt, atmp1)
+void rkstep(btab, nb, tptr, force, dt, atmp1)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -168,7 +168,7 @@ real atmp1[];		/* scratch accelerations */
 /* 
  * PCSTEP: Predictor-Corrector step
  */
-pcstep(btab, nb, tptr, force, dt)
+void pcstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -210,7 +210,7 @@ real dt;		/* integration time step */
     *tptr += dt;				/* advance time */
 }
 
-eulerstep(btab, nb, tptr, force, dt)
+void eulerstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -233,7 +233,7 @@ real dt;		/* integration time step */
     *tptr += dt;
 }
 
-modeulerstep(btab, nb, tptr, force, dt)
+void modeulerstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -261,7 +261,7 @@ real dt;		/* integration time step */
     *tptr += dt;
 }
 
-leapfrogstep(btab, nb, tptr, force, dt)
+void leapfrogstep(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -298,7 +298,7 @@ real dt;		/* integration time step */
 }
 
 
-rk4step(btab, nb, tptr, force, dt)
+void rk4step(btab, nb, tptr, force, dt)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -356,7 +356,7 @@ real dt;		/* integration time step */
 }
 
 
-epistep(btab, nb, tptr, force, dt, mode)
+void epistep(btab, nb, tptr, force, dt, mode)
 bodyptr btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */

@@ -63,7 +63,7 @@ string defv[] = {
     "headline=\n         Optional plot label for identification",
     "in=\n               Optional input rotation curve table",
     "cols=1,2\n          Columns for r, v, dr, dv (use 0 when not present)",
-    "VERSION=2.0\n       24-mar-2021 PJT",
+    "VERSION=2.0a\n      2-may-2021 PJT",
     NULL,
 };
 
@@ -419,13 +419,13 @@ void nemo_main()
         if (Qin && Qvel) {           /* if input file with velocities */
             for (i=0; i<ndat; i++)
                 plbox(xtrans(inrad[i]),ytrans(invel[i]),symsize);
-            if (cols[3]>0) {        /* if error bars in radius */
+            if (cols[2]>0) {        /* if error bars in radius */
                 for (i=0; i<ndat; i++) {
                     plmove(xtrans(inrad[i]-inrade[i]),ytrans(invel[i]));
                     plline(xtrans(inrad[i]+inrade[i]),ytrans(invel[i]));
                 }
             }
-            if (cols[4]>0) {        /* if error bars in velocity */
+            if (cols[3]>0) {        /* if error bars in velocity */
                 for (i=0; i<ndat; i++) {
                     plmove(xtrans(inrad[i]),ytrans(invel[i]-invele[i]));
                     plline(xtrans(inrad[i]),ytrans(invel[i]+invele[i]));
