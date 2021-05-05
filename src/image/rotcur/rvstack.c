@@ -14,16 +14,18 @@
 
 string defv[] = {
   "in=???\n       input velocity field",
+  "out=\n         output (not implemented)",
   "pa=0\n         position angle of receiding side of disk",
+  "pan=90\n       position angle of near side of disk",
   "inc=45\n       inclination angle of disk",
   "vsys=0\n       systemic velocity to subtract",
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
-  "pan=90\n       position angle of near side of disk",
   "angle=10\n     (small) angle around major or minor axis",
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "rscale=1\n     Scaling factor for radius",
   "gscale=f\n     Scale radius and velocity by the appropriate geometric sin/cos factor",
-  "mode=rot\n     Rotation or Outflow",
+  "mode=rot\n     Rotation (r) or Outflow (o) ",
+  "side=0\n       Both (0), or positive (1) or negative (-1) side",
   "VERSION=0.1\n  5-may-2021 PJT",
   NULL,
 };
