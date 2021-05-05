@@ -131,6 +131,10 @@ unfio $file "$n*2" float maxbuf=100000 |\\
 .SH BENCHMARKS
 1000 particles on a 32**3 cube integrating for 20 steps took 4.77\" on
 a sparc Ultra-2.
+.PP
+2021 update: 200 steps on an i5-1135G7 took 3.7\" using the default gfortran, only a factor
+13 speedup from the 2004 results. However, compiling with flang (FFLAGS=-O3), 200 steps took
+0.22\", a remarkable speedup of 16 over gfortran.
 .SH SEE ALSO
 rungalaxy(1NEMO), unfio(1NEMO), snapshot(5NEMO)
 .PP
