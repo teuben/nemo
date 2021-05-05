@@ -1,0 +1,54 @@
+.TH RVSTACK 1NEMO "5 May 2021"
+.SH NAME
+rvstack \- Exact Radius-Velocity diagrams for later stacking
+.SH SYNOPSIS
+\fBrvstack\fP [parameter=value]
+.SH DESCRIPTION
+This program takes all points within a (narrow) angle of the major or minor
+axis of a galaxy, and construct a PV-diagram, centered on 
+
+.SH PARAMETERS
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input velocity field [???]    
+.TP
+\fBpa=\fP
+position angle of the receding side of disk [0]   
+.TP
+\fBinc=\fP
+inclination angle of disk [45]
+.TP
+\fBpan=\fP
+position angle of the near side of disk [0]   
+.TP
+\fBvsys=\fP
+systemic velocity to subtract [0]   
+.TP
+\fBcenter=\fP
+rotation center (mapcenter if left blank, 0,0=lower left)
+.TP
+\fBangle=\fP
+angle around major or minor axis [0] 
+.TP
+\fBblank=\fP
+Value of the blank pixel to be ignored
+.TP
+\fBrscale=\fP
+Scaling factor for radius. [1]
+.SH EXAMPLES
+An example:
+   pvstack ngc6503cube pa=120 inc=70 pan=120+90 mode=rotation
+   pvstack ngc6503cube pa=120 inc=70 pan=120+90 mode=outflow
+.SH SEE ALSO
+ccdstack(1NEMO)
+.SH FILES
+src/image/rotcur
+.SH AUTHOR
+Peter Teuben
+SH UPDATE HISTORY
+.nf
+.ta +1.0i +4.0i
+5-May-21	V0.1 Draft	PJT
+.fi
