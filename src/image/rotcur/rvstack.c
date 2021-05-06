@@ -152,9 +152,9 @@ void nemo_main()
 	    continue;
 	}
       }
-      r = sqrt(x*x + y*y) * rscale;
       
       for (k=0; k<nz; k++) {                  // loop over spectral point
+	r = sqrt(x*x + y*y) * rscale;
 	v = (k-zpos)*dz;
 	v *= vmul;
 	v *= vscale;
@@ -181,7 +181,6 @@ void nemo_main()
 	    
 	MapValue(outptr,ir,iv) += CubeValue(velptr,i,j,k);
 	MapValue(sumptr,ir,iv) += 1.0;
-	
       } // k
     } // i
   } // j
