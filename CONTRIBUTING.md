@@ -104,7 +104,8 @@ tip of this upstream master branch.
 ## Working in a branch
 
 Assuming your own master is in sync with the upstream master,
-here is a typical example, using a branchname **b1**
+here is a typical example, using a branchname **b1**, or
+something more descriptive:
 
       git branch b1
       git checkout b1
@@ -133,7 +134,7 @@ From the top level directory in NEMO there are a few basics regression tests and
 
       make check
       make bench
-      make bench3
+      make bench5
 
 The **check** target depends on the many **Testfile** files sprinkled throughout NEMO.  Although
 you can now find a few **Benchfile** files as well, they have not been put under a top level
