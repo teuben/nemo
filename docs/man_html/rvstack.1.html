@@ -10,7 +10,7 @@
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-rvstack - Extract Radius-Velocity diagram from a data cube for later
+rvstack - extract Radius-Velocity diagram from a data cube for later
 
 <p>stacking 
 <p> 
@@ -20,61 +20,62 @@ rvstack - Extract Radius-Velocity diagram from a data cube for later
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 This
 program takes all points within a (narrow) cone around the major or minor
-axis of an assumed galaxy data cube, and construct a Radius-Velocity diagram,
-centered on the galaxy in position and velocity.  It will properly stack
-the two sides of the galaxy, so the radial coordinate will run from 0 to
-some Rmax.  In velocity it will run from some Vmin to some Vmax, but always
-expecting positive rotation and positive outflow, assuming the position
-angles are correctly set. <p>
-Weak signal rotation and/or bulk outflow could
-be detected this way, but we offer no guarentee. <p>
-Options exist to scale
-the Radius and Velocity to different units, such that many galaxies can
-be stacked in physical space, to increase the change to detect a signal.
+axis of an assumed galaxy disk data cube, and construct a Radius-Velocity
+diagram (like a Pos-Vel diagram), centered on the galaxy in position and
+velocity.  It will properly stack the two sides of the galaxy, so the radial
+coordinate will run from 0 to some Rmax.  In velocity it will run from some
+Vmin to some Vmax, but always expecting positive rotation and positive
+outflow, assuming the position angles are correctly set.  <p>
+Weak signal rotation
+and/or bulk outflow could be detected this way, but we offer no guarentee.
+If you have many like-minded galaxies, stacking these images may beat the
+noise down much more. <p>
+Options exist to scale the Radius and Velocity to
+different units, such that many galaxies can be stacked in physical space,
+as opposed to angular space. See <b>rscale=</b> and <b>vscale=</b>. <p>
+You can also select
+to only construct the signal from one side of the galaxy. See <b>side=</b> below.
 <p>
-You can also select to only construct the signal from one side of the galaxy.
-See <b>side=</b> below. <p>
-Points along an arc are all accumalated (technically: averaged),
-and placed on the same radial grid as the pixel size in the input data
-cube. We might need some trick next neighbor smoothing in order for pixels
-near the center to have a value. 
+Points along an arc are all accumulated (technically: averaged), and placed
+on the same radial grid as the pixel size in the input data cube. We might
+need some trick next neighbor smoothing in order for pixels near the center
+to have a value. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+ The following parameters are recognized in
+order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>image_cube</i> </dt>
-<dd>input
-data cube [No default] </dd>
+<dd>input data cube,
+in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
+ format. [No default] </dd>
 
 <dt><b>out=</b><i>image_map</i> </dt>
-<dd>output R-V map. Not implemented yet.
-It currently prints out a table for inspection. </dd>
+<dd>output R-V map.
+Not implemented yet. It currently prints out a table for inspection. </dd>
 
-<dt><b>pa=</b> </dt>
-<dd>position angle of the
-receding side of disk [0]    </dd>
-
-<dt><b>pan=</b> </dt>
-<dd>position angle of the near side of disk,
-or where you would expect the outflow. Normally this would be 90 degrees
-away from the kinematic major axis from <b>pa=</b>. [90] </dd>
+<dt><b>pa=</b>
+</dt>
+<dd>position angle of the receding side of disk (with mode=rotation) or position
+angle of the near side of disk, or where you would expect the outflow (for
+mode=outflow). </dd>
 
 <dt><b>inc=</b> </dt>
-<dd>inclination angle
-of disk [45] </dd>
+<dd>inclination angle of the disk [45] </dd>
 
 <dt><b>vsys=</b> </dt>
-<dd>systemic velocity [0]    </dd>
+<dd>systemic velocity
+[0]    </dd>
 
 <dt><b>center=</b><i>xpos,ypos</i> </dt>
-<dd>rotation center
-(mapcenter if left blank, 0,0=lower left) - <i>@todo: what about crpix?</i> </dd>
+<dd>rotation center (0,0=lower left). If not supplied,
+the reference pixel will be used. Default: reference pixel. </dd>
 
-<dt><b>angle=</b>
-</dt>
-<dd>angle around major or minor axis around which points are accumulated into
+<dt><b>angle=</b> </dt>
+<dd>small
+angle around major or minor axis around which points are accumulated into
 the R-V plot. [Default: 10] </dd>
 
 <dt><b>blank=</b> </dt>
@@ -82,13 +83,13 @@ the R-V plot. [Default: 10] </dd>
 </dd>
 
 <dt><b>rscale=</b> </dt>
-<dd>Scaling factor for radius. This would be more used to stack galaxies
+<dd>Scaling factor for radius. This would be used to stack galaxies
 based on a KPC scaling, or an Re scaling, not geometry, see <b>gscale=</b> below.
  [Default: 1] </dd>
 
 <dt><b>vscale=</b> </dt>
-<dd>Scaling factor for velocity. This would be more used
-to stack galaxies based on a mass scaling, not geometry, see <b>gscale=</b> below.
+<dd>Scaling factor for velocity. This would be  used to
+stack galaxies based on a mass scaling, not geometry, see <b>gscale=</b> below.
 [Default: 1] </dd>
 
 <dt><b>gscale=f|t</b> </dt>
@@ -109,27 +110,39 @@ side. [Default: 0]
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-An example using our standard NGC 6503 cube
-given in km/s velocity units. 
-<p> <br>
-<pre>   pvstack ngc6503.ccd ngc6503-r.pv  pa=120 pan=120+90 inc=70 vsys=27 center=164,123
-mode=rotation
-   pvstack ngc6503.ccd ngc6503-o.pv  pa=120 pan=120+90 inc=70 vsys=27 center=164,123
-mode=outflow
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+No geometric correction is made based on the
+angle in the disk. This could become a future option <p>
+A wedge has the disadvantage
+the the noise decreases inversely proportional to the sqrt(radius) 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+An
+example using our standard NGC 6503 cube given in km/s velocity units. 
+<p>
+<br>
+<pre>  rm junk?
+  rvstack ngc6503.ccd junk1 pa=120 inc=70 vsys=27 center=164,123 rscale=3600
+angle=10 mode=r
+  rvstack ngc6503.ccd junk2 pa=30  inc=70 vsys=27 center=164,123 rscale=3600
+angle=10 mode=o 
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdstack.1.html'>ccdstack(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
  
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/image/rotcur 
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<p> SH
-"UPDATE HISTORY" <br>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter
+
+<p>Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<br>
 <pre>5-May-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Draft<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
@@ -140,10 +153,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>
