@@ -1,20 +1,18 @@
 /*
- * RVSTACK:  Exact Radius-Velocity diagrams for later stacking
+ * RVSTACK:  exact Radius-Velocity diagrams for later stacking
  *
- *  See also:     https://github.com/jbjolly/LineStacker
- *                jbjolly/LineStacker     Jolyy JV et al 2020
+ *  See also:     https://github.com/jbjolly/LineStacker      Jolyy JV et al 2020
  *
- *    5-may-2021  PJT  Drafted
+ *    5-may-2021  PJT  Drafted, first working version
  *
  */
 
 #include <nemo.h>
 #include <image.h>
-#include <spline.h>
 
 string defv[] = {
-  "in=???\n       input velocity field",
-  "out=\n         output (not implemented)",
+  "in=???\n       input cube",
+  "out=???\n      output R-V-map",
   "pa=0\n         position angle of receiding side of disk",
   "pan=90\n       position angle of near side of disk",
   "inc=45\n       inclination angle of disk",
@@ -23,32 +21,21 @@ string defv[] = {
   "angle=10\n     (small) angle around major or minor axis",
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "rscale=1\n     Scaling factor for radius",
+  "vscale=1\n     Scaling factor for velocity",
   "gscale=f\n     Scale radius and velocity by the appropriate geometric sin/cos factor",
   "mode=rot\n     Rotation (r) or Outflow (o) ",
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
-  "VERSION=0.1\n  5-may-2021 PJT",
+  "tab=f\n        Write a test table?",
+  "VERSION=0.2\n  6-may-2021 PJT",
   NULL,
 };
 
-string usage="Exact Radius-Velocity diagrams for later stacking";
+string usage="exact Radius-Velocity diagrams for later stacking";
 
 string cvsid="$Id$";
 
 
-#define MAXRING    4096
-
-
-bool Qwwb73;
-bool Qden = FALSE;
-bool Qout = FALSE;
-bool Qtab = FALSE;
-imageptr denptr = NULL, velptr = NULL, outptr = NULL;
-
-real rad[MAXRING];
-int nrad;
-
-real pixe[MAXRING], flux[MAXRING], vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
-real vrot[MAXRING], radius[MAXRING], coeff[3*MAXRING];
+imageptr velptr = NULL, outptr = NULL, sumptr = NULL;
 
 real pa, pan, inc, vsys, xpos, ypos, zpos;
 real undf;
@@ -57,22 +44,31 @@ real undf;
 void nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
-  real center[2], cospa, sinpa, cosi, sini, sint, cost, costmin, 
-    x, y, v, xt, yt, r, den, vrot_s, dvdr_s, vmul, phi, dphi;
-  real vr, wt, frang, dx, dy, dz, xmin, ymin, rmin, rmax, fsum, ave, tmp, rms;
-  real angle = 0.5*getdparam("angle");
-  real sincosi, cos2i, tga, dmin, dmax, dval, vmod;
-  int i, j, k, nx, ny, nz, ir, nring, nundf, nout, nang, nsum, coswt;
-  string outmode;
-  int mode = -1;
-  bool Qrot = TRUE;
+  real center[2], cospa, sinpa, cosi, sini, sint, cost,
+    x, y, v, xt, yt, r, vmul, phi, dphi;
+  real vr, wt, frang, dx, dy, dz;
+  real angle ;
+  real rscale = getrparam("rscale");
+  real vscale = getrparam("vscale");
+  int  side   = getiparam("side");
+  real dmin, dmax;
+  int i, j, k, nx, ny, nz, nundf, nout, nang;
+  int ir, iv;
+  string mode;
+  bool Qrot;
+  bool gscale = getbparam("gscale");
+  bool Qtab = getbparam("tab");
 
   velstr = stropen(getparam("in"),"r");
   read_image(velstr,&velptr);
-
   nx = Nx(velptr);
   ny = Ny(velptr);
-  nz = Ny(velptr);
+  nz = Nz(velptr);
+
+  outstr = stropen(getparam("out"),"w");
+
+  mode = getparam("mode");
+  Qrot = (*mode == 'r');
 
   if (hasvalue("center")) {
     if (nemoinpd(getparam("center"),center,2) != 2)
@@ -80,81 +76,132 @@ void nemo_main()
     xpos = center[0];
     ypos = center[1];
   } else {
-    xpos = (Nx(velptr)-1.0)/2.0;
-    ypos = (Ny(velptr)-1.0)/2.0;
+    xpos = Xref(velptr);   // reference pixel
+    ypos = Yref(velptr);
   }
-  pa = getdparam("pa");
-  pan = getdparam("pan");
-  inc = getdparam("inc");
+  pa = getdparam("pa") * PI/180;
+  pan = getdparam("pan") * PI/180;
+  inc = getdparam("inc") * PI/180;
+  angle = getdparam("angle") * PI/180 * 0.5;
   vsys = getdparam("vsys");
   undf = getdparam("blank");
 
-  cospa   = cos(pa*PI/180.0);
-  sinpa   = sin(pa*PI/180.0);
-  sini    = sin(inc*PI/180.0);
-  cosi    = cos(inc*PI/180.0);
-  costmin = sin(frang*PI/180.0);
-  sincosi = sini*cosi;
-  cos2i   = cosi*cosi;
+  cospa = cos(pa);
+  sinpa = sin(pa);
+  sini  = sin(inc);
+  cosi  = cos(inc);
     
   nundf = nout = nang = 0;
 
-  ymin = Ymin(velptr);
-  xmin = Xmin(velptr);
-  dx = Dx(velptr);       dx = ABS(dx);    dx = -dx;
-  dy = Dy(velptr);       dy = ABS(dy);
+  dx = Dx(velptr);    
+  dy = Dy(velptr);    
   dz = Dz(velptr);
 
-  dmin = dmax = vsys;
-  zpos = nz/2.0;       // figure out where vsys is
+  zpos = (vsys - Zmin(velptr)) / Dz(velptr) + Zref(velptr);
 
-  
-  
+  dprintf(0,"cube:   %d,%d,%d\n",nx,ny,nz);
+  dprintf(0,"center: %g,%g,%g\n",xpos,ypos,zpos);
 
-  /* loop over the map, accumulating data for fitting process */
+  create_image(&outptr, nx/2, nz);
+  Xmin(outptr) = 0.0;
+  Xref(outptr) = 0.0;
+  Dx(outptr)   = ABS(Dx(velptr)) * rscale;
+  Namex(outptr)= "Radius";
+  Namey(outptr)= "Velocity";
+  Ymin(outptr) = 0.0;
+  Yref(outptr) = Ny(outptr)/2.0;
+  Dy(outptr)   = ABS(Dz(velptr)) * vscale;
+  create_image(&sumptr, nx, nz);
+  dprintf(0,"Output map: %d x %d    %g %g %g x %g %g %g\n",
+	  Nx(outptr), Ny(outptr),
+	  Xmin(outptr), Dx(outptr), Xref(outptr),
+	  Ymin(outptr), Dy(outptr), Yref(outptr));
+	 
 
-  for (j=0; j<ny; j++) {
+  for (j=0; j<ny; j++) {       // loop over all points in the map
     y = (j-ypos)*dy;
     for (i=0; i<nx; i++) {
-      if (MapValue(velptr,i,j) == undf) {
-	nundf++;
-	if (Qout) MapValue(outptr,i,j) = undf;
-	continue;
-      }
       x = (i-xpos)*dx;
-      yt = x*sinpa + y*cospa;
-      xt = x*cospa - y*sinpa;
       
-      phi = atan2(y,x) * 180/PI;
+      phi = atan2(-x,y);       // astronomical convention of PA
 
-      if (Qrot) {
+      if (Qrot) {              // rotation
 	dphi = phi - pa;
-	dphi = ABS(phi);
-	if (dphi < angle)
+	dphi = SYM_ANGLE(dphi);
+	if (ABS(dphi) < angle && (side >=0) ) 
 	  vmul = 1.0;
 	else {
-	  continue;  // for now
+	  dphi += PI;
+	  dphi = SYM_ANGLE(dphi);	  
+	  if (ABS(dphi) < angle && (side <=0))
+	    vmul = -1.0;
+	  else
+	    continue;
 	}
-      } else {
+      } else {                  // outflow
 	dphi = phi - pan;
-	dphi = ABS(phi);
-	if (dphi < angle)
+	dphi = SYM_ANGLE(dphi);	
+	if (ABS(dphi) < angle && (side >=0)) 
 	  vmul = 1.0;
 	else {
-	  continue; // for now
+	  dphi += PI;
+	  dphi = SYM_ANGLE(dphi);	  
+	  if (ABS(dphi) < angle && (side <= 0))
+	    vmul = -1.0;
+	  else
+	    continue;
 	}
       }
-
-      r = sqrt(x*x + y*y);
+      r = sqrt(x*x + y*y) * rscale;
       
-
-      for (k=0; k<nz; k++) {
-	v = (k-zpos)*dz - vsys;
+      for (k=0; k<nz; k++) {                  // loop over spectral point
+	v = (k-zpos)*dz;
 	v *= vmul;
-	printf("%g %g  %g    %d %d %g\n", r,v,CubeValue(velptr,i,j,k),i,j,dphi);
+	v *= vscale;
+	if (gscale) {
+	  if (Qrot)
+	    v /= sini;
+	  else {
+	    r /= cosi;
+	    v /= cosi;
+	  }
+	}
+	ir = (int) (r/Dx(outptr));
+	iv = (int) (((v-Ymin(outptr))/Dy(outptr)) + Yref(outptr));
+	
+	if (Qtab && (k == (int)zpos))
+	  printf("%d   %g %g  %g    %d %d %g   %d %d\n",nang, r,v,CubeValue(velptr,i,j,k),i,j,dphi,ir,iv);
+
+	if (ir >= Nx(outptr)) continue;
+	if (iv >= Ny(outptr)) continue;
+	if (ir < 0) continue;	
+	if (iv < 0) continue;
+
+	nang++;
+	    
+	MapValue(outptr,ir,iv) += CubeValue(velptr,i,j,k);
+	MapValue(sumptr,ir,iv) += 1.0;
+	
       } // k
     } // i
   } // j
+
+  dmin = MapMax(velptr);
+  dmax = MapMin(velptr);
+  dprintf(0,"old Cube minmax: %g %g\n", dmax, dmin);
+  
+  for (j=0; j<Ny(outptr); j++)
+    for (i=0; i<Nx(outptr); i++)
+      if (MapValue(sumptr,i,j) > 0) {
+	MapValue(outptr,i,j) /= MapValue(sumptr,i,j);
+	if (MapValue(outptr,i,j) > dmax) dmax = MapValue(outptr,i,j);
+	if (MapValue(outptr,i,j) < dmin) dmin = MapValue(outptr,i,j);
+      }
+  MapMin(outptr) = dmin;
+  MapMax(outptr) = dmax;
+  dprintf(0,"new Map  minmax: %g %g\n", dmin, dmax);  
+  dprintf(0,"%d points selected\n", nang);
+  write_image(outstr,outptr);
 
 }
 
