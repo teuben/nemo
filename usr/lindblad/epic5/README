@@ -1,12 +1,17 @@
 EPIC5 (written in Fortran, it uses PGPLOT routines)
 
-- See the unix manual page ("man epic5" in NEMO) for some help
-  how to run.
-
 - To compile:
-     make epic5
+     make epic5 install
   and consult the Makefile if the variables are correct. Notably the LIBS=-lpgplot
   could need to be different in your environment.
+
+
+- See the unix manual page ("man epic5" in NEMO) for some help
+  how to run.   
+
+  The example in the man page is interactive, but
+  can be reproduced too-quick-to-see using
+     epic5 < epic5.stdin
 
 
 EXAMPLE
