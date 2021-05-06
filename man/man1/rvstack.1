@@ -7,14 +7,15 @@ rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
 \fBrvstack\fP in=cube out=map [parameter=value]
 
 .SH "DESCRIPTION"
-This program takes all points within a (narrow) cone around the major or minor
+\fBrvstack\fP takes all points within a (narrow) wedge around the major or minor
 axis of an assumed galaxy disk data cube, and
-construct a Radius-Velocity diagram (like a Pos-Vel diagram),
+construct a Radius-Velocity diagram,
 centered on the galaxy in position
-and velocity.  It will properly stack the two sides of the galaxy, so the radial coordinate
+and velocity.  It will stack the two sides of the galaxy (but see also \fBside=\fP),
+so the radial coordinate
 will run from 0 to some Rmax.  In velocity it will run from some Vmin to some Vmax,
 but always expecting positive rotation and positive outflow, assuming the
-position angles are correctly set. 
+position angle is correctly set. 
 .PP
 Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
 If you have many like-minded galaxies, stacking these images may beat the noise down much more.
@@ -22,6 +23,18 @@ If you have many like-minded galaxies, stacking these images may beat the noise 
 Options exist to scale the Radius and Velocity to different units, such that
 many galaxies can be stacked in physical space, as opposed to angular space. See
 \fBrscale=\fP and \fBvscale=\fP.
+.PP
+When \fBgscale=t\fP is set, the coordinates are scaled as follows:
+.nf
+.ta +2i
+
+Rotation	Outflow
+--------	-------
+R		R/cos(i)
+V/sin(i)	V/cos(i)
+
+.fn
+this will likely leave some gaps in radius and velocity. See discussion below.
 .PP
 You can also select to only construct the signal from one side of the galaxy. See \fBside=\fP below.
 .PP
@@ -36,12 +49,14 @@ in order for pixels near the center to have a value.
 input data cube, in standard \fIimage(5NEMO)\fP format. [No default]
 .TP
 \fBout=\fP\fIimage_map\fP
-output R-V map. Not implemented yet. It currently prints out a table for inspection.
+output R-V map. [No default]
 .TP
 \fBpa=\fP
-position angle of the receding side of disk (with mode=rotation) or
-position angle of the near side of disk, or where you would expect the outflow
-(for mode=outflow).
+position angle along which the wedge is taken. This is normally 
+the receding side (with mode=rotation) or
+the minor axis near side (for mode=outflow), in order get a positive velocity signal in the RV map.
+Only when \fBgscale=t\fP is set, will there be a difference how the radius and velocity
+are scaled.
 .TP
 \fBinc=\fP
 inclination angle of the disk [45]
@@ -54,11 +69,11 @@ rotation center (0,0=lower left). If not supplied, the reference pixel will be u
 Default: reference pixel.
 .TP
 \fBangle=\fP
-small angle around major or minor axis around which points are accumulated
+angle around major or minor axis around which points are accumulated
 into the R-V plot. [Default: 10]
 .TP
 \fBblank=\fP
-Value of the blank pixel to be ignored.
+Value of the blank pixel to be ignored. Not yet used.
 .TP
 \fBrscale=\fP
 Scaling factor for radius. This would be used to stack galaxies based on a KPC scaling,
@@ -85,29 +100,36 @@ No geometric correction is made based on the angle in the disk. This could becom
 option
 .PP
 A wedge has the disadvantage the the noise decreases inversely proportional to the sqrt(radius)
+.PP
+The gaps in radius and/or velocity produced with \fBgscale=t\fP can be a nuisance. For stacking
+many images, this should disappear, but otherwise some smoothing/interpolation might be needed.
+Not implemented.
 
 .SH "EXAMPLES"
 An example using our standard NGC 6503 cube given in km/s velocity units.
 
 .nf
-  rm junk?
-  rvstack ngc6503.ccd junk1 pa=120 inc=70 vsys=27 center=164,123 rscale=3600 angle=10 mode=r
-  rvstack ngc6503.ccd junk2 pa=30  inc=70 vsys=27 center=164,123 rscale=3600 angle=10 mode=o 
 
+  rvstack ngc6503.ccd rvma.ccd pa=-60 inc=75 vsys=27 center=164,123 rscale=3600 
+  rvstack ngc6503.ccd rvmi.ccd pa=30  inc=75 vsys=27 center=164,123 rscale=3600 
 
 .fi
 
 .SH "SEE ALSO"
-ccdstack(1NEMO), image(5NEMO)
+ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO)
 
 .SH "FILES"
 src/image/rotcur
-
+.PP
+.nf
+https://www.cv.nrao.edu/fits/data/samples/cubes/ngc6503.fits  (old 1983 VLA data)
+https://...   (TBD - new data)
+.fi
 .SH "AUTHOR"
 Peter Teuben
 
-SH "UPDATE HISTORY"
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-5-May-21	V0.1 Draft	PJT
+6-May-21	V0.4 First working version	PJT
 .fi
