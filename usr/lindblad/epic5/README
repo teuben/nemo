@@ -1,5 +1,8 @@
 EPIC5 (written in Fortran, it uses PGPLOT routines)
 
+- this is the 2021 version, which is part of NEMO in
+  https://github.com/teuben/nemo   in usr/lindblad/epics5
+
 - See the unix manual page ("man epic5" in NEMO) for some help
   how to run.
 
