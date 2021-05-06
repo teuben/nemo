@@ -25,7 +25,8 @@ string defv[] = {
   "mode=rot\n     Rotation (r) or Outflow (o) ",
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
   "tab=f\n        Write a test table?",
-  "VERSION=0.3\n  6-may-2021 PJT",
+  "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
+  "VERSION=0.4\n  6-may-2021 PJT",
   NULL,
 };
 
@@ -57,7 +58,10 @@ void nemo_main()
   bool Qrot;
   bool gscale = getbparam("gscale");
   bool Qtab = getbparam("tab");
-  bool Qran = FALSE;    // hack tom wiggle cube pixels to avoid blank map pixels when gscale=True
+  real jiggle = getrparam("jiggle");
+
+  if (jiggle > 0)
+    warning("jiddle this is an experiment, it seems not to be useful");
 
   velstr = stropen(getparam("in"),"r");
   read_image(velstr,&velptr);
@@ -100,15 +104,16 @@ void nemo_main()
 
   dprintf(0,"cube:   %d,%d,%d\n",nx,ny,nz);
   dprintf(0,"center: %g,%g,%g\n",xpos,ypos,zpos);
+  dprintf(0,"cdelt:  %g,%g,%g\n",dx,dy,dz);
 
   create_image(&outptr, nx, nz);
-  Xmin(outptr) = 0.0;
-  Xref(outptr) = 0.0;
+  Xmin(outptr) = 0.0; 
+  Xref(outptr) = -0.5;
   Dx(outptr)   = ABS(Dx(velptr)) * rscale;
-  Namex(outptr)= "Radius";
-  Namey(outptr)= "Velocity";
+  Namex(outptr)= "RADIUS";
+  Namey(outptr)= Namez(velptr);
   Ymin(outptr) = 0.0;
-  Yref(outptr) = Ny(outptr)/2.0;
+  Yref(outptr) = (Ny(outptr)+1)/2.0;
   Dy(outptr)   = ABS(Dz(velptr)) * vscale;
   create_image(&sumptr, nx, nz);
   dprintf(0,"Output map: %d x %d    %g %g %g x %g %g %g\n",
@@ -117,16 +122,19 @@ void nemo_main()
 	  Ymin(outptr), Dy(outptr), Yref(outptr));
 	 
 
-  for (j=0; j<ny; j++) {       // loop over all points in the map
+  for (j=0; j<ny; j++) {         // loop over all points in the map
     y = (j-ypos)*dy;
-    if (Qran) y += grandom(0,dy);
+    if (jiggle>0) y += grandom(0,jiggle*dy);
     for (i=0; i<nx; i++) {
       x = (i-xpos)*dx;
-      if (Qran) x += grandom(0,dy);      
-      
-      phi = atan2(-x,y);       // astronomical convention of PA
+      if (jiggle>0) x += grandom(0,jiggle*dy);      
 
-      if (Qrot) {              // rotation
+      if (dx > 0)
+	phi = atan2(-x,y);       // math (ccdgen can create these)
+      else
+	phi = atan2(x,y);        // astronomical convention of PA
+	
+      if (Qrot) {                // rotation
 	dphi = phi - pa;
 	dphi = SYM_ANGLE(dphi);
 	if (ABS(dphi) < angle && (side >=0) ) 
@@ -139,7 +147,7 @@ void nemo_main()
 	  else
 	    continue;
 	}
-      } else {                  // outflow
+      } else {                   // outflow
 	dphi = phi - pa;
 	dphi = SYM_ANGLE(dphi);	
 	if (ABS(dphi) < angle && (side >=0)) 
@@ -157,7 +165,7 @@ void nemo_main()
       for (k=0; k<nz; k++) {                  // loop over spectral point
 	r = sqrt(x*x + y*y) * rscale;
 	v = (k-zpos)*dz;
-	if (Qran) v+= grandom(0,dz);
+	if (jiggle>0) v+= grandom(0,jiggle*dz);
 	v *= vmul;
 	v *= vscale;
 	if (gscale) {
@@ -201,7 +209,8 @@ void nemo_main()
   MapMin(outptr) = dmin;
   MapMax(outptr) = dmax;
   dprintf(0,"new Map  minmax: %g %g\n", dmin, dmax);  
-  dprintf(0,"%d points selected\n", nang);
+  dprintf(0,"%d points selected for %s mode and %s geometry scaled\n",
+	  nang, Qrot? "rotation" : "outflow", gscale ? "with" : "not");
   write_image(outstr,outptr);
 
 }
