@@ -13,8 +13,7 @@
 string defv[] = {
   "in=???\n       input cube",
   "out=???\n      output R-V-map",
-  "pa=0\n         position angle of receiding side of disk",
-  "pan=90\n       position angle of near side of disk",
+  "pa=0\n         position angle of disk",
   "inc=45\n       inclination angle of disk",
   "vsys=0\n       systemic velocity to subtract",
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
@@ -26,7 +25,7 @@ string defv[] = {
   "mode=rot\n     Rotation (r) or Outflow (o) ",
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
   "tab=f\n        Write a test table?",
-  "VERSION=0.2\n  6-may-2021 PJT",
+  "VERSION=0.3\n  6-may-2021 PJT",
   NULL,
 };
 
@@ -58,6 +57,7 @@ void nemo_main()
   bool Qrot;
   bool gscale = getbparam("gscale");
   bool Qtab = getbparam("tab");
+  bool Qran = FALSE;    // hack tom wiggle cube pixels to avoid blank map pixels when gscale=True
 
   velstr = stropen(getparam("in"),"r");
   read_image(velstr,&velptr);
@@ -80,7 +80,6 @@ void nemo_main()
     ypos = Yref(velptr);
   }
   pa = getdparam("pa") * PI/180;
-  pan = getdparam("pan") * PI/180;
   inc = getdparam("inc") * PI/180;
   angle = getdparam("angle") * PI/180 * 0.5;
   vsys = getdparam("vsys");
@@ -102,7 +101,7 @@ void nemo_main()
   dprintf(0,"cube:   %d,%d,%d\n",nx,ny,nz);
   dprintf(0,"center: %g,%g,%g\n",xpos,ypos,zpos);
 
-  create_image(&outptr, nx/2, nz);
+  create_image(&outptr, nx, nz);
   Xmin(outptr) = 0.0;
   Xref(outptr) = 0.0;
   Dx(outptr)   = ABS(Dx(velptr)) * rscale;
@@ -120,8 +119,10 @@ void nemo_main()
 
   for (j=0; j<ny; j++) {       // loop over all points in the map
     y = (j-ypos)*dy;
+    if (Qran) y += grandom(0,dy);
     for (i=0; i<nx; i++) {
       x = (i-xpos)*dx;
+      if (Qran) x += grandom(0,dy);      
       
       phi = atan2(-x,y);       // astronomical convention of PA
 
@@ -139,7 +140,7 @@ void nemo_main()
 	    continue;
 	}
       } else {                  // outflow
-	dphi = phi - pan;
+	dphi = phi - pa;
 	dphi = SYM_ANGLE(dphi);	
 	if (ABS(dphi) < angle && (side >=0)) 
 	  vmul = 1.0;
@@ -156,6 +157,7 @@ void nemo_main()
       for (k=0; k<nz; k++) {                  // loop over spectral point
 	r = sqrt(x*x + y*y) * rscale;
 	v = (k-zpos)*dz;
+	if (Qran) v+= grandom(0,dz);
 	v *= vmul;
 	v *= vscale;
 	if (gscale) {
