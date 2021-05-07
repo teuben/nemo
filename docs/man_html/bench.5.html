@@ -48,10 +48,10 @@ below in this man page.
 </dl>
 </blockquote>
 
-<h2><a name='sect3' href='#toc3'>Results</a></h2>
+<h2><a name='sect3' href='#toc3'>Bench</a></h2>
 Here are the results of the "make bench"
 benchmark. The time is the user CPU time. If two values are listed after
-the machine name, these are the Geekbench5 values. <br>
+the machine name, these are the GeekBench5 values. <br>
 <pre>Intel Core i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;15.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;XPS13 1460 /
 AMD EPYC 7302 @ 3.0GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;lma 1000/ 28000
 Intel Core i9-9900X<tt> </tt>&nbsp;<tt> </tt>&nbsp;25.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;geminid 1214 / 9467
@@ -71,7 +71,7 @@ compiler and options changes.
 <p> 
 <p> <p>
 The following tasks are run in the standard
-NEMO bench: <br>
+NEMO bench, for details see the src/scripts/nemo.bench  script. <br>
 <pre>directcode nbody=3072 out=d0 seed=123 
 hackcode1 nbody=10240  out=h0 seed=123 
 mkplummer p0 10240 seed=123 
@@ -87,13 +87,40 @@ to a baseline version using <a href='bsf.1.html'><i>bsf(1NEMO)</i></a>
  if the argument <b>bsf=1</b> is added. 
 <p>
 
+<h2><a name='sect4' href='#toc4'>Nemobench5</a></h2>
+The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs a number
+(currently 6) N-body codes all calibrated to take 5.0 seconds on an i5-1135G7
+in turbo mode (4.2GHz). The NEMOBENCH5 rating is defined as 5000 divided
+by the average of those CPU times. Thus the i5-1135G7 has a score of 1000.
+ This definition can be adjusted to 10s runs when the time comes that processors
+run too fast, there is a parameter internal to the nemo.bench <br>
+<pre>M1 (Macbook Air)    <tt> </tt>&nbsp;<tt> </tt>&nbsp;1269<tt> </tt>&nbsp;<tt> </tt>&nbsp;1750 / 7xxxx
+Intel Core i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;1000<tt> </tt>&nbsp;<tt> </tt>&nbsp;XPS13 1460 /
+AMD EPYC 7302 @ 3.0GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;630<tt> </tt>&nbsp;<tt> </tt>&nbsp;lma 1000/ 28000
+Intel Core i9-9900X<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;geminid 1214 / 9467
+i5-10210U CPU @ 1.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;732 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;terra 777 / 10213
+i7-8550U CPU @ 1.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;548 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T480 (1600) 696 / 1935
+Xeon E-2186G 3.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;- <tt> </tt>&nbsp;<tt> </tt>&nbsp;aurora 1313 / 6721
+i7-3820QM @ 2.70 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;498<tt> </tt>&nbsp;<tt> </tt>&nbsp;MacBookPro (Retina, Mid 2012)
+i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;414 <tt> </tt>&nbsp;<tt> </tt>&nbsp;dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;- <tt> </tt>&nbsp;<tt> </tt>&nbsp;chara 828 / 3117
+i7-3630QM CPU @ 2.40GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;429 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T530 (1200) 762 / 3006 
+Xeon(R) E5-2623 v4 @ 2.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;kraken 782 / 5800
+Xeon(R) X5550  @ 2.67GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;256<tt> </tt>&nbsp;<tt> </tt>&nbsp;sdp 566 / 3938
+</pre>
 <p> 
-<h2><a name='sect4' href='#toc4'>Oldest Bench</a></h2>
-At the inception of NEMO in 1986 there was no real benchmark,
-so for a while (as computers were relatively slow still) we used the default
-<a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
- setting, where 128 particles in virial equilibrium are
-integrated for 64 timesteps: <br>
+<h2><a name='sect5' href='#toc5'>Bench10</a></h2>
+Not really implemented, but this will be benchmarks orchestrated
+via the <b>Benchfile</b>&rsquo;s found in the source tree. 
+<p> 
+<h2><a name='sect6' href='#toc6'>Oldest Bench</a></h2>
+At the inception
+of NEMO in 1986 there was no real benchmark, so for a while (as computers
+were relatively slow still) we used the default <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
+ setting,
+where 128 particles in virial equilibrium are integrated for 64 timesteps:
+<br>
 <pre>      /usr/bin/time hackcode1 tstop=2  &gt; /dev/null
 </pre>
 <p> <p>
@@ -109,7 +136,7 @@ very impressive factor of 120 improvement in chip and possibly some compiler
 technology. The NEMO users guide has an appendix in which this benchmark
 is listed for a variety of computers since 1986. 
 <p> 
-<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
 Defining and running
 a benchmark can be very tricky stuff. It might be important to separate
 disk I/O from CPU usage.   The unix <a href='time.1.html'><i>time(1)</i></a>
@@ -143,7 +170,7 @@ Rule of thumb: always run a benchmark a few times to see if a hot
 CPU slows down the benchmark. If I/O is cached. Other tasks are interfering.
 
 <p> 
-<h2><a name='sect6' href='#toc6'> "others"</a></h2>
+<h2><a name='sect8' href='#toc8'> "others"</a></h2>
 A few other man pages in NEMO also maintain their own list how
 its program compares under different compilers/options/cpu options: <br>
 <pre>CGS(1NEMO)
@@ -155,7 +182,7 @@ Other industry benchmarks: <br>
     SPEC CPU 2017 ($$$) benchmark - 
 </pre>
 <p> 
-<h2><a name='sect7' href='#toc7'>Tabbench</a></h2>
+<h2><a name='sect9' href='#toc9'>Tabbench</a></h2>
 The table I/O benchmark uses a 100M row dataset with 3 columns,
 representing X,Y,Z of which the radius R=sqrt(X^2+Y^2+Z^2) is computed. This
 table is about 2.7 GB in size. Of course reading the table is all dependent
@@ -178,43 +205,68 @@ drawing random numbers and writing them using printf(3) , which is slow.
     
 </pre>
 <p> 
-<h2><a name='sect8' href='#toc8'>Considerations</a></h2>
-Most programs that need an output file, can use <b>out=-</b> to
-pass the data into a standard Unix pipe, or even <b>out=.</b> to use a sink.  
+<h2><a name='sect10' href='#toc10'>Parallel</a></h2>
+The GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ tool can be of great use if your tasks are
+pure single core and you have enough cores (most laptops have at least
+4 these days) and memory to fit your tasks.   As an example, here is something
+contrived using <a href='mkplummer.1.html'><i>mkplummer(1NEMO)</i></a>
+ that does not write to disk, so it should
+be highly parallizable: 
+<p> <br>
+<pre>    nbody=10000000
+    /usr/bin/time mkplummer . $nbody
+    2.80user 0.45system 0:03.26elapsed 99%CPU
+    
+    echo mkplummer . $nbody  &gt; run.txt
+    echo mkplummer . $nbody &gt;&gt; run.txt
+    /usr/bin/time parallel --jobs 1 &lt; run.txt
+    5.89user 0.83system 0:06.71elapsed 100%CPU
+    
+    /usr/bin/time parallel --jobs 2 &lt; run.txt
+    6.00user 0.79system 0:03.44elapsed 197%CPU
+</pre>
+<p> which follows Amdahl&rsquo;s law close to 100%! 
 <p> 
-<h2><a name='sect9' href='#toc9'>See
-Also</a></h2>
+<h2><a name='sect11' href='#toc11'>Considerations</a></h2>
+Most programs
+that need an output file, can use <b>out=-</b> to pass the data into a standard
+Unix pipe, or even <b>out=.</b> to use a sink.  
+<p> 
+<h2><a name='sect12' href='#toc12'>See Also</a></h2>
 <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
 , <a href='data.5.html'>data(5NEMO)</a>
-, <a href='tabgen.1.html'>tabgen(1NEMO)</a>
+,
+<a href='tabgen.1.html'>tabgen(1NEMO)</a>
 , <a href='mkspiral.1.html'>mkspiral(1NEMO)</a>
 , <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
-,
-<a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
+, <a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
 , <a href='nbody1.1.html'>nbody1(1NEMO)</a>
-, <a href='scfm.1.html'>scfm(1NEMO)</a>
+,
+<a href='scfm.1.html'>scfm(1NEMO)</a>
 , <a href='CGS.1.html'>CGS(1NEMO)</a>
 , <a href='triple.1.html'>triple(1NEMO)</a>
-,
-<a href='accudate.l.html'>accudate(lNEMO)</a>
+, <a href='accudate.l.html'>accudate(lNEMO)</a>
 , <a href='bsf.1.html'>bsf(1NEMO)</a>
 , <a href='nemobench.8.html'>nemobench(8NEMO)</a>
- <p>
-<a href='https://browser.geekbench.com/processor-benchmarks'>https://browser.geekbench.com/processor-benchmarks</a>
 
+<p>
 
+<p><a href='https://browser.geekbench.com/processor-benchmarks'>https://browser.geekbench.com/processor-benchmarks</a>
+ 
 <p> 
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
+<h2><a name='sect13' href='#toc13'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect11' href='#toc11'>Files</a></h2>
+<h2><a name='sect14' href='#toc14'>Files</a></h2>
 <br>
-<pre>$NEMO/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for (small) data files.
+<pre>$NEMO/src/scripts/nemo.bench<tt> </tt>&nbsp;<tt> </tt>&nbsp;Script uses by make bench/bench5/bench10
+$NEMO/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for (small) data files.
 Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series of benchmarks
 /tmp/nemobench.log<tt> </tt>&nbsp;<tt> </tt>&nbsp;The nemobench keeps logfile
 </pre>
 <p> 
-<h2><a name='sect12' href='#toc12'>Update History</a></h2>
+<h2><a name='sect15' href='#toc15'>Update History</a></h2>
 <br>
 <pre>12-may-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-nov-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;finally added some data<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -233,16 +285,19 @@ Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series 
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Results</a></li>
-<li><a name='toc4' href='#sect4'>Oldest Bench</a></li>
-<li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'> "others"</a></li>
-<li><a name='toc7' href='#sect7'>Tabbench</a></li>
-<li><a name='toc8' href='#sect8'>Considerations</a></li>
-<li><a name='toc9' href='#sect9'>See Also</a></li>
-<li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>Files</a></li>
-<li><a name='toc12' href='#sect12'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Bench</a></li>
+<li><a name='toc4' href='#sect4'>Nemobench5</a></li>
+<li><a name='toc5' href='#sect5'>Bench10</a></li>
+<li><a name='toc6' href='#sect6'>Oldest Bench</a></li>
+<li><a name='toc7' href='#sect7'>Caveats</a></li>
+<li><a name='toc8' href='#sect8'> "others"</a></li>
+<li><a name='toc9' href='#sect9'>Tabbench</a></li>
+<li><a name='toc10' href='#sect10'>Parallel</a></li>
+<li><a name='toc11' href='#sect11'>Considerations</a></li>
+<li><a name='toc12' href='#sect12'>See Also</a></li>
+<li><a name='toc13' href='#sect13'>Author</a></li>
+<li><a name='toc14' href='#sect14'>Files</a></li>
+<li><a name='toc15' href='#sect15'>Update History</a></li>
 </ul>
 </body>
 </html>

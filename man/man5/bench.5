@@ -1,4 +1,4 @@
-.TH BENCH 5NEMO "1 May 2021"
+.TH BENCH 5NEMO "4 May 2021"
 
 .SH "NAME"
 bench \- various NEMO benchmarks
@@ -28,9 +28,9 @@ Selected man pages have some examples. Over time these should be moved into the 
 the source directory where this program is maintained. Some are mentioned below in this man page.
 
 
-.SH "RESULTS"
+.SH "BENCH"
 Here are the results of the "make bench" benchmark. The time is the user CPU time. If two values
-are listed after the machine name, these are the Geekbench5 values.
+are listed after the machine name, these are the GeekBench5 values.
 .nf
 .ta +3.5i +1.5i
 
@@ -53,7 +53,8 @@ to be able to improved by up to a factor of two with selected compiler and optio
 
 
 .PP
-The following tasks are run in the standard NEMO bench:
+The following tasks are run in the standard NEMO bench, for details see the
+src/scripts/nemo.bench  script.
 .nf
 
 
@@ -73,29 +74,33 @@ In addition each data file that is produced is checksummed and compared
 to a baseline version using \fIbsf(1NEMO)\fP if the argument
 \fBbsf=1\fP is added.
 
-.SH "BENCH5"
-The BENCH5 benchmark (cd $NEMO;make bench5) runs a number (currently 6) N-body codes all calibrated to
-take about 5 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMO5 rating
-is taken as 5000 divided by the average of those run times. Thus the i5-1135G7 has
-a score of 1000.
+.SH "NEMOBENCH5"
+The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs a number (currently 6) N-body codes all calibrated to
+take 5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating
+is defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7 has
+a score of 1000.  This definition can be adjusted to 10s runs when the time comes that processors
+run too fast, there is a parameter internal to the nemo.bench
 .nf
 
-M1 (tested 4 codes only)	1310	4codes 1750 /
+M1 (Macbook Air)    	1269	1750 / 7xxxx
 Intel Core i5-1135G7	1000	XPS13 1460 /
-AMD EPYC 7302 @ 3.0GHz	-	lma 1000/ 28000
+AMD EPYC 7302 @ 3.0GHz	630	lma 1000/ 28000
 Intel Core i9-9900X	-	geminid 1214 / 9467
-i5-10210U CPU @ 1.60GHz	- 	X1Y4  1029 / 3194
+i5-10210U CPU @ 1.60GHz	732 	X1Y4  1029 / 3194
 Xeon(R) Silver 4114 @ 2.20GHz	-	terra 777 / 10213
 i7-8550U CPU @ 1.80GHz	548 	T480 (1600) 696 / 1935
 Xeon E-2186G 3.80GHz	- 	aurora 1313 / 6721
-i7-3820 CPU @ 3.60GHz	- 	dante 833 / 3693
+i7-3820QM @ 2.70 GHz	498	MacBookPro (Retina, Mid 2012)
+i7-3820 CPU @ 3.60GHz	414 	dante 833 / 3693
 Xeon(R) CPU E3-1280 @ 3.50GHz	- 	chara 828 / 3117
 i7-3630QM CPU @ 2.40GHz	429 	T530 (1200) 762 / 3006 
 Xeon(R) E5-2623 v4 @ 2.60GHz	-	kraken 782 / 5800
-Xeon(R) X5550  @ 2.67GHz	-	sdp 566 / 3938
+Xeon(R) X5550  @ 2.67GHz	256	sdp 566 / 3938
 .fi
 
-
+.SH "BENCH10"
+Not really implemented, but this will be benchmarks orchestrated via the \fBBenchfile\fP's
+found in the source tree.
 
 .SH "OLDEST BENCH"
 At the inception of NEMO in 1986 there was no real benchmark, so for a while (as computers
@@ -236,7 +241,8 @@ Peter Teuben
 
 .SH "FILES"
 .nf
-.ta +2.5i
+.ta +3.5i
+$NEMO/src/scripts/nemo.bench	Script uses by make bench/bench5/bench10
 $NEMO/data   	standard repository area for (small) data files.
 Benchfile	A Makefile that can orchestrate series of benchmarks
 /tmp/nemobench.log	The \fBnemobench\fP keeps logfile

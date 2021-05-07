@@ -29,10 +29,6 @@ recognized.
 in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
  format.  Default: <i>required</i>. </dd>
 
-<dt><b>times=</b><i>time_range</i> </dt>
-<dd>Only frames
-within <i>time_range</i> will be analyzed.  Default: <b>all</b>. </dd>
-
 <dt><b>weight=</b><i>body_weight</i> </dt>
 <dd>Expression
 used to compute the weight of each body. See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
@@ -43,6 +39,11 @@ of <i>body_weight</i>. Default: <b>1.0</b>. </dd>
 <dd>If <i>cutoff_radius</i> is greater
 than zero, only particles within <i>cutoff_radius</i> of the <i>body_weight</i>ed centroid
 will be used to compute the final diagnostics. Default: <b>0.0</b>. </dd>
+
+<dt><b>times=</b><i>time_range</i>
+</dt>
+<dd>Only frames within <i>time_range</i> will be analyzed.  Default: <b>all</b>. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
