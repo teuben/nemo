@@ -10,6 +10,13 @@ int nemoinpi (expr,ioutv,nout)
 int nemoinpl (expr,loutv,nout)
 int nemoinpb (expr,boutv,nout)
 int nemoinpx (expr,doutv,nout)
+
+int nemorinpi (string var, int    *xvar,  int n, int    defvar, bool repeated)
+int nemorinpd (string var, double *xvar,  int n, double defvar, bool repeated)
+int nemorinpf (string var, float  *xvar,  int n, float  defvar, bool repeated)
+int nemorinpl (string var, long   *xvar,  int n, long   defvar, bool repeated)
+int nemorinpb (string var, int    *xvar,  int n, bool   defvar, bool repeated)
+
 double natof(expr)
 int  natoi(expr)
 
@@ -55,6 +62,10 @@ The only exception to \fIherinp(3NEMO)\fP parsing is \fInemoinpx\fP,
 which parses a string in \fBd:m:s.s\fP format, returning the number(s)
 in fractional degrees. For h:m:s conversion, the user is responsible for
 the extra factor of 15 between d:m:s and h:m:s.
+.PP
+The \fInemorinpX\fP routines were added to allow for filling exactly
+\fBn\fP values with \fBdefval\fP (repeated=FALSE) or with the last used
+value (repeated=TRUE)
 .SH OPERATORS
 The following operators are known:
 .nf
@@ -172,4 +183,5 @@ xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 31-may-01	added natof/natoi	PJT
 4-mar-03	1.9 added nemoinpx()	PJT
 28-jan-04	recognize nan's in natof	PJT
+jan-2005	added nemorinpX	PJT
 .fi
