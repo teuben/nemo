@@ -13,16 +13,16 @@ with no domain knowledge.
 * NEMO uses a Unix like directory tree, with a few common 3 and 4 letter
   names (src, usr, man, etc, bin, lib, opt, obj, tmp, docs, data, local)
 
-* email (1987), shar, CVS (2000) and now git (2017) have been the tools to deal with CME
-  and sharing the code. Every since its inception in 1986 we have been sharing the
-  code and absorbed new codes from collaborators.
+* We use git (github) as a CME
+   * since its inception we have been sharing the code and absorbed new codes from collaborators.
+   * We started out with email (1987) and share, then moved to CVS in 2000, and finally
+     to git in 2017.
+   * issues (for bug reports) and pull requests are the preferred way to collaborate
 
 * installing NEMO occurs in place, we used **configure** to track down the system
   dependent portions (or force them), and a set of **make build** steps will compile
   and build tools. There is no **install** step, so users will need to modify their
   *shell environment* to take advantage of the new tools.
-
-* bug reports are handled via github and pull requests
 
 * In terms of documentation there are the unix manual (``man``) pages, very hyperlinked,
   and the old *Users and Programmers Guide* (in latex).  The man pages are still used,
