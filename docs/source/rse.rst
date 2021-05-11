@@ -49,28 +49,29 @@ with no domain knowledge.
 
 
 * Q: If you want to redesign the package, what would you do?
+   * writing the core in C was probably good. Portability of C++ is now better. Even our conversion to C99 is not complete.
+   * add unit tests, now they are distributed in local Testfile and "make testXXX"
+   * better autoconf and/or cmake based install built from the ground up
+   * integration in other than bash, eg. python or other high level scripting (julia?)
 
 
-* Q: What steps did you take to make the results reproducible?
-  pick some numeric and differ up to N digits (the BSF function)
+* a number of peculiar data (e.g. rotcur.5), and benchmark (CPU wise, but also "24+1" body)
 
-* Q: How do you manage dependencies?
-  hierarchical Makefile + configure, pretty old tech stuff
+* Q: What are lessons learned to keep this code going?
 
+* Q: How many users are using it? There is probably a small core group, and there is good competition from python based
+  environments (yt, amuse, galpy, gala, pynbody). In philosphy. `AMUSE <https://amusecode.github.io/>`_ comes closest
+  to NEMO.
 
-* and number of peculiar data (e.g. rotcur.5), and benchmark (CPU wise, but also "24+1" body)
-
-* While the topic of a legacy code is interesting and NEMO seems to be a
-  well-used tool in the community, the abstract is very short. 
-  What are lessons learned to keep this code going? How many
-  users are using it? How many citations are there?
-
+* Q: How many citations are there?
+  This is the sad story about legacy software. Only recently ADS and ASCL make it possible to track software.
 
 * Some innovative aspects of NEMO perhaps not seen widely used:
-    * connect code with papers via an `ADS bibcode <https://ui.adsabs.harvard.edu/help/actions/bibcode>`_.
-      See our `bibcode <https://teuben.github.io/nemo/man_html/bibcode.html>`_ table
-    * help= vs. man and **checkpars**
-    * loadobj:   body, potential, ...
-    * scattered Testfile to pick up tests for "make check" (like a Makefile)
-    * scattered Benchfile to pick up benchmarks for "make bench10" (like a Makefile)
-    * *surely there must be more*  
+   * connect code with papers via an `ADS bibcode <https://ui.adsabs.harvard.edu/help/actions/bibcode>`_.
+     See our `bibcode <https://teuben.github.io/nemo/man_html/bibcode.html>`_ table
+   * help= vs. man and **checkpars**
+   * loadobj:   body, potential, ...
+   * scattered Testfile to pick up tests for "make check" (like a Makefile)
+   * scattered Benchfile to pick up benchmarks for "make bench10" (like a Makefile)
+   * the use of the **bsf** tool to check reproducible to N digits.
+   * *surely there must be more*  
