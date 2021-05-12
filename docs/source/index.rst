@@ -42,6 +42,7 @@ For Users
    trouble
    .. history
    glossary
+   rse
    todo	      
    rst
 
