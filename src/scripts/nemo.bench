@@ -28,7 +28,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2021-04-27) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2021-05-12) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -79,11 +79,15 @@ if [ $mode == 5 ]; then
 
     cat bench2.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
     column -t cpu_usage.log
+    cpu_mean=$(awk '{print $4}' cpu_usage.log   | tabstat - | grep mean: | awk '{print $2}')
+    echo NEMOBENCH5 score:   $(nemoinp 5000/$cpu_mean)
 
     if [ $clean == 1 ]; then
 	echo "Cleaning $tmp (use clean=0 to prevent this)"
 	cd ..
 	rm -rf $tmp
+    else
+	echo 
     fi
 
     exit 0

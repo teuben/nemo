@@ -1,7 +1,9 @@
 .TH DATA 5NEMO "18 April 2021"
-.SH NAME
+
+.SH "NAME"
 data \- list of various data files in $NEMODAT
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Various data files may have been supplied with the NEMO version
 you have running, and can be found in the directory \fB$NEMODAT\fP.
 The convention for filename extensions is that \fIascii\fP files
@@ -17,7 +19,8 @@ program \fImkommod\fP.
 The environment variable \fBNEMODAT\fP is defined as part of your normal
 NEMO setup, programs sometimes use this as a default directory
 to search  for data.
-.SH DATA FILES
+
+.SH "DATA"
 .nf
 .ta +1.5i
 iau25.dat	Standard IAU 25-body problem (M. Lecar, Bull.Astr. 3, 91. 1968)
@@ -39,8 +42,9 @@ starlab/cube10.dyn	example starlab data (dyn): [mkcube -n 10 -s 123]
 
 archive     	Archive of interesting N-body simulations
         	        (usually a symbolic link to a large local disk)
+			
 .SH "SEE ALSO"
-snapshot(5NEMO), image(5NEMO), tsf(1NEMO)
+snapshot(5NEMO), image(5NEMO), tsf(1NEMO), rotcur(5NEMO)
 .PP
 \fIA comparison of eleven numerical integrations of the same gravitational 25 body
 problem\fP,
@@ -54,9 +58,11 @@ http://arxiv.org/abs/1303.0181 - \fIThree Classes of Newtonian Three-Body Planar
 https://yt-project.org/data/ - sample datasets for testing
 .PP
 https://nbabel.org  - orbit integrator problem in many languages
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/data   	standard repository area for data files.

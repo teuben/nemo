@@ -80,6 +80,11 @@ Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
 .nf
 	command1 | vipe | command2
 .fi
+.PP
+\fIpv(1)\fP monitors the progress of data through a pipe, e.g.
+.nf
+        mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
+.fi
 .SH PARALLEL
 Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
 uses a fraction of the memory on the machine, the GNU \fIparallel(1)\fP program can be used to spread the load,

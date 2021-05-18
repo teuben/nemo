@@ -1,12 +1,12 @@
 .TH CCDGEN 1NEMO "12 March 2020"
 
-.SH NAME
+.SH "NAME"
 ccdgen \- create or add objects to an image
 
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 \fBccdgen\fP \fBout=\fP\fIimage-file\fP [parameter=value]
 
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 \fBccdgen\fP creates or modified (2D) images by 
 adding simple parameterized two-dimensional objects. For arbitrary
 expressions use \fIccdmath(1NEMO)\fP instead. 
@@ -16,9 +16,8 @@ in a "galactic" disk with given inclination and position angle. The
 default is a "face-on" view (\fBinc=0\fP). 
 No corrections for brightness due to inclination are made however.
 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file (optional) to be added to the output file. Default: none,
@@ -89,7 +88,7 @@ Random seed [0]
 \fBheadline=\fP
 Random verbiage added to the image. Default: none
 
-.SH OBJECT
+.SH "OBJECT"
 The \fBobject=\fP keyword allows for the following objects, and \fBspar=\fP for their parameters
 .nf
 .ta +1i +2.5i
@@ -150,7 +149,7 @@ even and gets higher. For odd values of p you will again have a positive and neg
 spiral, and as p gets larger, the arms get narrower.   By making sure \fBp\fP becomes
 non-integer, e.g. p=2.0001, the negative arm becomes 0.
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 Here's how to make a simple barred galaxy by adding an exponential disk and
 a (smaller) exponential bar:
 .nf
@@ -194,13 +193,21 @@ In \fIbash\fP notation:
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
 .fi
-.SH SEE ALSO
+
+.SH "CAVEATS"
+Seting the WCS is not working well. There is cell=, there is crpix,cdelt,crval
+
+
+.SH "SEE ALSO"
 ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
-.SH FILES
+
+.SH "FILES"
 src/image/trans
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 4-Jan-05	V0.1 Created	PJT
