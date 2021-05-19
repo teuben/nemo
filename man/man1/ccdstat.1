@@ -1,10 +1,13 @@
 .TH CCDSTAT 1NEMO "4 December 2020"
-.SH NAME
+
+.SH "NAME"
 ccdstat \- statistics (1st through 4th moment) and chi2
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBccdstat in=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdstat\fP calculates all moments (up to fourth order) of the values
 in an image/cube, 
 and calculate some human understandable numbers (mean, dispersion, skewness,
@@ -22,7 +25,8 @@ as well as the number of independant points per beam (\fBnppb\fP):
 .fi
 where N is the number of non-bad values in the map. The input 
 map is now assumed to contain a dimensionless \fI(obs-mod)/sigma\fP
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -83,6 +87,21 @@ Setting this to false, will not ignore that cell width. [Default : t]
 Sorting routine (not activated yet) 
 Flux not implemented yet. [
 Default: f]
+.TP
+\fBplanes=-1|0|start:end:step\fP
+Either the whole cube is taken as one (-1, the default),
+or planes can be selected.  0 means all planes, if a
+start:end:step is selected, only those planes are. Step defaults to 1.
+Default: -1
+.TP
+\fBtab=\fP
+If a table output filename is given, data values are written here. otherwise
+on screen.
+.TP
+\fBqac=t|f\fP
+If selected, a QAC listing is selected. This gives the mean, rms, min and max.
+[Default: f]
+
 .SH "EXAMPLE"
 .nf
   % ccdstat image.ccd min=-2
@@ -112,15 +131,19 @@ Generating a map from scratch
 chi2= 1.03431
 df= 98
 .fi
+
 .SH "SEE ALSO"
 snapccd(1NEMO), image(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/image/misc	ccdstat.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
