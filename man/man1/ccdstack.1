@@ -29,7 +29,14 @@ Scalar weight per image [1 for all] []
 Are the weights still SIGMA (t), or straight
 .TP
 \fBbad=\fP
-Bad value to ignore [0]   
+Bad value to ignore [0]
+.TP
+\fBwcs=t|f\fP
+Use the WCS to re-sample for stacking in the WCS of the first image.
+If not set, images are stacked "as is". If WCS is set, you can thus
+stack images of unequal size. Pixels falling outside that of the first
+image are simply ignored.
+[Default: t]
 
 .SH "EXAMPLES"
 none
