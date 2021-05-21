@@ -19,14 +19,14 @@ string defv[] = {
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "angle=10\n     (small) angle around major or minor axis",
   "blank=0.0\n    Value of the blank pixel to be ignored",
-  "rscale=1\n     Scaling factor for radius",
-  "vscale=1\n     Scaling factor for velocity",
+  "rscale=1\n     Scaling factor for radius (for output)",
+  "vscale=1\n     Scaling factor for velocity (for output)",
   "gscale=f\n     Scale radius and velocity by the appropriate geometric sin/cos factor",
   "mode=rot\n     Rotation (r) or Outflow (o) ",
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
   "tab=f\n        Write a test table?",
   "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
-  "VERSION=0.4\n  6-may-2021 PJT",
+  "VERSION=0.5\n  21-may-2021 PJT",
   NULL,
 };
 
@@ -115,6 +115,7 @@ void nemo_main()
   Ymin(outptr) = 0.0;
   Yref(outptr) = (Ny(outptr)+1)/2.0;
   Dy(outptr)   = ABS(Dz(velptr)) * vscale;
+  Axis(outptr) = 1;
   create_image(&sumptr, nx, nz);
   dprintf(0,"Output map: %d x %d    %g %g %g x %g %g %g\n",
 	  Nx(outptr), Ny(outptr),
