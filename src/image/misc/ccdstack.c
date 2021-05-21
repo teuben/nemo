@@ -19,12 +19,13 @@ string defv[] = {
   "weight=\n      Scalar weight per image [1 for all]",
   "sigma=f\n      Are the weights still SIGMA (t), or straight weights (f)",
   "bad=0\n        Bad value to ignore",
-  "VERSION=0.1\n  21-may-2021 PJT",
+  "wcs=t\n        Use WCS to sample",
+  "VERSION=0.2\n  21-may-2021 PJT",
   NULL,
 };
 
 string usage = "stack images, with simple gridding option if WCS differs";
-string cvsid="$Id$";
+string cvsid = "$Id$";
 
 
 #ifndef HUGE
@@ -38,6 +39,7 @@ real iwt[MAXIMAGE];             /* scalar weight per image */
 real     badval;
 int      nimage;                /* actual number of input images */
 bool     Qsigma;
+bool     Qwcs;
 
 local void do_combine(void);
 
@@ -53,8 +55,10 @@ void nemo_main ()
     int     i, j, k, l, n;
 
     Qsigma = getbparam("sigma");
+    Qwcs   = getbparam("wcs");
     badval = getrparam("bad");
 
+    
     fnames = burststring(getparam("in"), ", ");  /* input file names */
     nimage = xstrlen(fnames, sizeof(string)) - 1;
     if (nimage > MAXIMAGE) error("Too many images %d > %d", nimage, MAXIMAGE);
@@ -97,7 +101,11 @@ local void do_combine()
 {
     double m_min, m_max;
     real  *fin, *win, fout;
+    real   x,xmin,xref,dx;
+    real   y,ymin,yref,dy;
+    real   z,zmin,zref,dz;
     int    k, l, ix, iy, iz, nx, ny, nz, offset;
+    int    ix1,iy1,iz1;
     int    badvalues;
     imageptr wptr;
     
@@ -108,13 +116,44 @@ local void do_combine()
     ny = Ny(iptr[0]);
     nz = Nz(iptr[0]);
 
+    xmin = Xmin(iptr[0]);  xref = Xref(iptr[0]);  dx = Dx(iptr[0]);
+    ymin = Ymin(iptr[0]);  yref = Yref(iptr[0]);  dy = Dy(iptr[0]);
+    zmin = Zmin(iptr[0]);  zref = Zref(iptr[0]);  dz = Dz(iptr[0]);    
+    //  x = (ix - xref) * dx + xmin
+    // ix = (x-xmin) / dx    + xref
+    if (Qwcs)
+      dprintf(0,"Images stacked in the WCS of the first image");
+    else
+      dprintf(0,"Images stacked in image index");
+    
     create_cube(&wptr, nx, ny, nx);
         
     for (l=1; l<nimage; l++) {
       dprintf(0,"Adding image %d\n",l);
-      for (iz=0; iz<Nz(iptr[l]); iz++)
-	for (iy=0; iy<Ny(iptr[l]); iy++)
+      for (iz=0; iz<Nz(iptr[l]); iz++) {
+	if (Qwcs) {
+	  z = (iz-zref) * dz + zmin;
+	  iz1 = (int) ((z-Zmin(iptr[l]))/Dz(iptr[l]) + Zref(iptr[l]));
+	  //dprintf(0,"z %d %d\n",iz,iz1);	   	   
+	} else
+	  iz1 = iz;
+	if (iz1<0 || iz1>=nz) continue;
+	for (iy=0; iy<Ny(iptr[l]); iy++) {
+	  if (Qwcs) {
+	    y = (iy-yref) * dy + ymin;
+	    iy1 = (int) ((y-Ymin(iptr[l]))/Dy(iptr[l]) + Yref(iptr[l]));
+	    //dprintf(0,"y %d %d\n",iy,iy1);	    
+	  } else
+	    iy1 = iy;
+	  if (iy1<0 || iy1>=ny) continue;	  
 	  for (ix=0; ix<Nx(iptr[l]); ix++) {
+	    if (Qwcs) {
+	      x = (ix-xref) * dx + xmin;
+	      ix1 = (int) ((x-Xmin(iptr[l]))/Dx(iptr[l]) + Xref(iptr[l]));
+	      //dprintf(0,"x %d %d\n",ix,ix1);
+	    } else
+	      ix1 = ix;
+	    if (ix1<0 || ix1>=nx) continue;	    
 	    if (l==1) {  // initialize first time around
 	      if (CubeValue(iptr[0],ix,iy,iz) == badval)
 		CubeValue(wptr,ix,iy,iz) = 0.0;
@@ -122,11 +161,12 @@ local void do_combine()
 		CubeValue(wptr,ix,iy,iz) = 1.0;		
 	    } // accumulate
 	    if (CubeValue(iptr[l],ix,iy,iz) != badval) {
-	      CubeValue(iptr[0],ix,iy,iz) += CubeValue(iptr[l],ix,iy,iz);
-	      CubeValue(wptr,ix,iy,iz) += 1.0;
+	      CubeValue(iptr[0],ix1,iy1,iz1) += CubeValue(iptr[l],ix,iy,iz);
+	      CubeValue(wptr,ix1,iy1,iz1) += 1.0;
 	    } 
-	  }
-      
+	  } // ix
+	} // iy
+      } // iz
     }
     for (iz=0; iz<nz; iz++)
       for (iy=0; iy<ny; iy++)
