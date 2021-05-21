@@ -1,0 +1,50 @@
+.TH CCDSTACK 1NEMO "21 May 2021"
+
+.SH "NAME"
+ccdstack \- stack images
+
+.SH "SYNOPSIS"
+\fBccdstack\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBccdstat\fP stacks images and takes their mean, allowing for the WCS to be different.
+The current re-sampling method is simple:  the first image inherits the WCS for the
+output stacked image, all other images compute in which pixel of the first image this
+pixel would contribute. No other gridding or convolution is done yet (but probably should).
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image files, first image sets the WCS.
+.TP
+\fBout=\fP
+Output image file [???]    
+.TP
+\fBweight=\fP
+Scalar weight per image [1 for all] []
+.TP
+\fBsigma=\fP
+Are the weights still SIGMA (t), or straight
+.TP
+\fBbad=\fP
+Bad value to ignore [0]   
+
+.SH "EXAMPLES"
+none
+
+.SH "SEE ALSO"
+ccdmoms(1NEMO), rvstack(1NEMO)
+
+.SH "FILES"
+src/image/misc
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+21-May-21	V0.1 Drafted	PJT
+.fi
