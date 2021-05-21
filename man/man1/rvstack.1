@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "5 May 2021"
+.TH RVSTACK 1NEMO "21 May 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
@@ -84,7 +84,8 @@ Scaling factor for velocity. This would be  used to stack galaxies based on a ma
 not geometry, see \fBgscale=\fP below. [Default: 1]
 .TP
 \fBgscale=f|t\fP
-Scale for inclination based geometry. Rotation is scaled by 1/sin(i), outflow by 1/cos(i).
+A boolean if to scale for (inclination based) geometry. If selected,
+rotation is scaled by 1/sin(i), outflow by 1/cos(i).
 Radius is not scaled for rotation, but by 1/cos(i) for outflow.   [Default: f]
 .TP
 \fBmode=r|o\fP
@@ -96,10 +97,14 @@ By default it will stack both sides, but this option will allow you to stack one
 side. [Default: 0]
 
 .SH "CAVEATS"
+Code is still under developement.
+.PP
 No geometric correction is made based on the angle in the disk. This could become a future
 option
 .PP
-A wedge has the disadvantage the the noise decreases inversely proportional to the sqrt(radius)
+A wedge has the disadvantage the the noise decreases inversely proportional to the sqrt(radius),
+but has a \fImatched-filter\fP approach to a conic outflow. An alternative would be to have
+an option for \fBangle=\fP to be replaced with \fBwidth=\fP.
 .PP
 The gaps in radius and/or velocity produced with \fBgscale=t\fP can be a nuisance. For stacking
 many images, this should disappear, but otherwise some smoothing/interpolation might be needed.
