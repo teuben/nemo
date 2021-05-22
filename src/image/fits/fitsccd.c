@@ -65,10 +65,11 @@ string defv[] = {
     "crval=0,0,0\n      Coordinates of reference pixel in raw mode (0)",
     "bscale=1\n         Scale conversion factor in raw mode (1)",
     "bzero=0\n          Offset conversion factor in raw mode (0)",
+    "zscale=1\n         Scaling for Z axis",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.2\n	6-jan-2021 PJT",
+    "VERSION=5.3\n	21-mar-2021 PJT",
     NULL,
 };
 
@@ -78,7 +79,7 @@ string cvsid="$Id$";
 
 #define MAXPLANES 2048
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int, FLOAT *, FLOAT *);
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axis, real zscale, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
 FITS *rawopen(string name, string status, int naxis, int *nsize);
 void print_axis(int axis, int naxis, real crpix, real crval, real cdelt);
@@ -92,6 +93,7 @@ void nemo_main()
     int nbox, box[4], i0, j0;
     int nbval=0;
     real bval_out, rmin, rmax, tmp, fbval;
+    real zscale = getrparam("zscale");
     FLOAT *buffer, *bp, bval_in;  /* fitsio- is in FLOAT !!! */
     FLOAT fdata_min, fdata_max, fnan;
     int mir_nan = -1;    /* MIRIAD's FITS NaN */
@@ -149,7 +151,7 @@ void nemo_main()
     if (iptr==NULL) error("No memory to allocate image");
 
     if (streq(mode,"fits")) {
-      make_fitheader(fitsfile,iptr,Qrel,Qout,axistype, &fdata_min, &fdata_max);
+      make_fitheader(fitsfile,iptr,Qrel,Qout,axistype,zscale, &fdata_min, &fdata_max);
       dprintf(1,"Datamin/max read: %g - %g\n",fdata_min, fdata_max);
     } else if (streq(mode,"raw"))
       make_rawheader(fitsfile,iptr,Qrel);
@@ -314,7 +316,7 @@ void print_axis(int axis, int naxis, real crpix, real crval, real cdelt)
  */
 
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axistype,
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axistype, real zscale,
 		    FLOAT *data_min, FLOAT *data_max)
 {
     int nz, tmpi, i, j;
@@ -326,14 +328,14 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
 
     fitrdhdr(fitsfile,"CRVAL1",&tmpr,0.0); Xmin(iptr) = tmpr;
     fitrdhdr(fitsfile,"CRVAL2",&tmpr,0.0); Ymin(iptr) = tmpr;
-    fitrdhdr(fitsfile,"CRVAL3",&tmpr,0.0); Zmin(iptr) = tmpr;
+    fitrdhdr(fitsfile,"CRVAL3",&tmpr,0.0); Zmin(iptr) = tmpr * zscale;
     if (Qrel) {
       Xmin(iptr) = Ymin(iptr) = Zmin(iptr) = 0.0;
     }
 
     fitrdhdr(fitsfile,"CDELT1",&tmpr,1.0); Dx(iptr)=tmpr;
     fitrdhdr(fitsfile,"CDELT2",&tmpr,1.0); Dy(iptr)=tmpr;
-    fitrdhdr(fitsfile,"CDELT3",&tmpr,1.0); Dz(iptr)=tmpr;
+    fitrdhdr(fitsfile,"CDELT3",&tmpr,1.0); Dz(iptr)=tmpr * zscale;
     for (i=1; i<=3; i++)
       for (j=1; j<=3; j++) {
 	sprintf(cdname,"CD%d_%d",i,j);
@@ -414,7 +416,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
  *  the _nan routines should supply this
  */
 
-is_feq(int *ia, int *ib)
+int is_feq(int *ia, int *ib)
 {
   int r;
 #if 0
