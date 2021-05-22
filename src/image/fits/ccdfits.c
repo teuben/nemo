@@ -304,6 +304,8 @@ void write_fits(string name,imageptr iptr)
     bmaj = Beamx(iptr);
     bmin = Beamy(iptr);
     bpa  = 0.0;        /* only spherical beams for now */
+    if (strlen(object) == 0)
+      object = Object(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */

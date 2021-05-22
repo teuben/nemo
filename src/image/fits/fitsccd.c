@@ -387,6 +387,12 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     fitrdhda(fitsfile,"CTYPE2",ctype,"");
     Namey(iptr) = scopy(ctype);
 
+    if (fitexhd(fitsfile,"OBJECT")) {
+      fitrdhda(fitsfile,"OBJECT",ctype,"");
+      Object(iptr) = scopy(ctype);
+    }
+    
+
     if (nz>1) {
            fitrdhda(fitsfile,"CTYPE3",ctype,"");
 	   Namez(iptr) = scopy(ctype);
