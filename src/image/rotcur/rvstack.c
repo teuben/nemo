@@ -5,6 +5,8 @@
  *
  *    5-may-2021  PJT  Drafted, first working version
  *
+ * @todo  with rescale or gscale, what should be done with a Jy/beam style option
+ *
  */
 
 #include <nemo.h>
