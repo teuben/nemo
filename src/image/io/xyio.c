@@ -144,6 +144,10 @@ image *xyopen(int *handle, string name, string status, int naxis, int *axes)
             Unit(iptr) = get_string(str,UnitTag);
           else
             Unit(iptr) = NULL;
+          if (get_tag_ok(str,ObjectTag))             /* object  */
+            Object(iptr) = get_string(str,ObjectTag);
+          else
+            Object(iptr) = NULL;
           read_matdef = get_string(str,StorageTag);
 	  if (!streq(read_matdef,matdef[idef]))
              dprintf(0,"read_image: StorageTag = %s, compiled with %s\n",
@@ -188,6 +192,8 @@ image *xyopen(int *handle, string name, string status, int naxis, int *axes)
             put_string (str,NamezTag,Namez(iptr));
       	  if (Unit(iptr))
             put_string (str,UnitTag,Unit(iptr));
+      	  if (Object(iptr))
+            put_string (str,ObjectTag,Object(iptr));
           put_string(str,StorageTag,matdef[idef]);
         put_tes(str, ParametersTag);
         put_set(str, MapTag);
