@@ -75,8 +75,8 @@ void nemo_main()
       printf("Z-range:   %g %g\n", zmin,zmax);      
     }
     printf("MinMax:    %g %g\n", MapMin(iptr), MapMax(iptr));
-    if (Unit(iptr))    printf("Unit:    %s\n", Unit(iptr));
-    if (Object(iptr))  printf("Object:  %s\n", Object(iptr));
+    if (Unit(iptr))    printf("Unit:      %s\n", Unit(iptr));
+    if (Object(iptr))  printf("Object:    %s\n", Object(iptr));
 
 }
 
