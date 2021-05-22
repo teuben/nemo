@@ -1,7 +1,7 @@
-.TH CCDSTACK 1NEMO "21 May 2021"
+.TH CCDSTACK 1NEMO "22 May 2021"
 
 .SH "NAME"
-ccdstack \- stack images
+ccdstack \- stack images, with simple gridding option if WCS differs
 
 .SH "SYNOPSIS"
 \fBccdstack\fP [parameter=value]
@@ -20,10 +20,10 @@ is also given:
 Input image files, first image sets the WCS.
 .TP
 \fBout=\fP
-Output image file [???]    
+Output image file. No default.
 .TP
 \fBweight=\fP
-Scalar weight per image [1 for all] []
+Scalar weight per image [1 for all].
 .TP
 \fBsigma=\fP
 Are the weights still SIGMA (t), or straight
@@ -32,17 +32,21 @@ Are the weights still SIGMA (t), or straight
 Bad value to ignore [0]
 .TP
 \fBwcs=t|f\fP
-Use the WCS to re-sample for stacking in the WCS of the first image.
+Use the WCS to re-sample for stacking with the WCS of the first image.
 If not set, images are stacked "as is". If WCS is set, you can thus
 stack images of unequal size. Pixels falling outside that of the first
 image are simply ignored.
 [Default: t]
 
 .SH "EXAMPLES"
-none
+Since the first image determines the WCS of the output image, it can be
+also be used as a template by setting its image values to 0. 
+\fIccdgen(1NEMO)\fP can be used for this.
+
 
 .SH "SEE ALSO"
-ccdmoms(1NEMO), rvstack(1NEMO)
+ccdmoms(1NEMO), rvstack(1NEMO), ccdmath(1NEMO), ccdborder(1NEMO), ccdgen(1NEMO),
+image(5NEMO)
 
 .SH "FILES"
 src/image/misc
