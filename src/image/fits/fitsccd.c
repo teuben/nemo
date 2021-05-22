@@ -69,7 +69,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.3\n	21-mar-2021 PJT",
+    "VERSION=5.3a\n	22-may-2021 PJT",
     NULL,
 };
 
