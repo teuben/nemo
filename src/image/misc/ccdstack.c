@@ -20,7 +20,7 @@ string defv[] = {
   "sigma=f\n      Are the weights still SIGMA (t), or straight weights (f)",
   "bad=0\n        Bad value to ignore",
   "wcs=t\n        Use WCS to sample",
-  "VERSION=0.2\n  21-may-2021 PJT",
+  "VERSION=0.3\n  21-may-2021 PJT",
   NULL,
 };
 
@@ -132,33 +132,33 @@ local void do_combine()
       dprintf(0,"Adding image %d\n",l);
       for (iz=0; iz<Nz(iptr[l]); iz++) {
 	if (Qwcs) {
-	  z = (iz-zref) * dz + zmin;
-	  iz1 = (int) ((z-Zmin(iptr[l]))/Dz(iptr[l]) + Zref(iptr[l]));
-	  //dprintf(0,"z %d %d\n",iz,iz1);	   	   
+	  z = (iz-Zref(iptr[l])) * Dz(iptr[l]) + Zmin(iptr[l]);
+	  iz1 = (int) ((z-zmin)/dz + zref);
+	  dprintf(0,"z %d %d\n",iz,iz1);	   	   
 	} else
 	  iz1 = iz;
 	if (iz1<0 || iz1>=nz) continue;
 	for (iy=0; iy<Ny(iptr[l]); iy++) {
 	  if (Qwcs) {
-	    y = (iy-yref) * dy + ymin;
-	    iy1 = (int) ((y-Ymin(iptr[l]))/Dy(iptr[l]) + Yref(iptr[l]));
+	    y = (iy-Yref(iptr[l])) * Dy(iptr[l]) + Ymin(iptr[l]);
+	    iy1 = (int) ((y-ymin)/dy + yref);
 	    //dprintf(0,"y %d %d\n",iy,iy1);	    
 	  } else
 	    iy1 = iy;
 	  if (iy1<0 || iy1>=ny) continue;	  
 	  for (ix=0; ix<Nx(iptr[l]); ix++) {
 	    if (Qwcs) {
-	      x = (ix-xref) * dx + xmin;
-	      ix1 = (int) ((x-Xmin(iptr[l]))/Dx(iptr[l]) + Xref(iptr[l]));
+	      x = (ix-Xref(iptr[l])) * Dx(iptr[l]) + Xmin(iptr[l]);	      
+	      ix1 = (int) ((x-xmin)/dx + xref);
 	      //dprintf(0,"x %d %d\n",ix,ix1);
 	    } else
 	      ix1 = ix;
 	    if (ix1<0 || ix1>=nx) continue;	    
 	    if (l==1) {  // initialize first time around
-	      if (CubeValue(iptr[0],ix,iy,iz) == badval)
-		CubeValue(wptr,ix,iy,iz) = 0.0;
+	      if (CubeValue(iptr[0],ix1,iy1,iz1) == badval)
+		CubeValue(wptr,ix1,iy1,iz1) = 0.0;
 	      else
-		CubeValue(wptr,ix,iy,iz) = 1.0;		
+		CubeValue(wptr,ix1,iy1,iz1) = 1.0;		
 	    } // accumulate
 	    if (CubeValue(iptr[l],ix,iy,iz) != badval) {
 	      CubeValue(iptr[0],ix1,iy1,iz1) += CubeValue(iptr[l],ix,iy,iz);
