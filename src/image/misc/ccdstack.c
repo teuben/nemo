@@ -2,6 +2,9 @@
  * CCDSTACK: stack images, with simple gridding option
  *
  *   21-may-2021:    derived from ccdmoms, but should not need to allocate MAXIMAGE, just use 2
+ *
+ *  @todo    for wcs=t, each source pixel should have an option to be convolved  and spread
+ *           into the destination image. See fwhm= keyword
  */
 
 
@@ -20,11 +23,12 @@ string defv[] = {
   "sigma=f\n      Are the weights still SIGMA (t), or straight weights (f)",
   "bad=0\n        Bad value to ignore",
   "wcs=t\n        Use WCS to sample",
-  "VERSION=0.3\n  21-may-2021 PJT",
+  "fwhm=\n        FWHM of the convolution filter in each dimension",
+  "VERSION=0.3a\n 23-may-2021 PJT",
   NULL,
 };
 
-string usage = "stack images, with simple gridding option if WCS differs";
+string usage = "stack images, with simple gridding and convolution option if WCS differs";
 string cvsid = "$Id$";
 
 
@@ -52,7 +56,14 @@ void nemo_main ()
     stream  outstr;                     /* output file */
     int     size[3], nx, ny, nz;        /* size of scratch map */
     int     noper;                      /* number of images needed from oper */
-    int     i, j, k, l, n;
+    int     i, j, k, l, n, nc;
+    real    fwhm[3];                    /* convolution filter for each image dimension */
+    
+
+    if (hasvalue("fwhm")) {
+      warning("No convolution supported yet");
+      nc = nemoinpr(getparam("fwhm"),fwhm,3);
+    }
 
     Qsigma = getbparam("sigma");
     Qwcs   = getbparam("wcs");
