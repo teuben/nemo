@@ -757,6 +757,7 @@ void initparam(string argv[], string defv[])
 	int mt = omp_get_max_threads();
 	dprintf(1,"NT=%d MT=%d\n",nt,mt);
 	if (mt > 1) dprintf(1,"Using OpenMP with %d threads\n", mt);
+	np_openmp = mt;
       }
       
       omp_t1 = omp_get_wtime(); //start stop-watch
