@@ -27,6 +27,7 @@
  *  19-oct-11    V8.0 optional intelligent array from Karma, see USE_IARRAY
  *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
+ *  22-may-21         added Object
  */
 #ifndef _h_image
 #define _h_image
@@ -106,6 +107,7 @@ typedef struct {
     string namey;
     string namez;
     string unit;        /* units (could be a NULL) */
+    string object;      /* object name */
     real   time;	/* time tag */
     string storage;	/* array stored in Fortran or C definition */
     image_mask *mask;   /* optional image mask */
@@ -166,6 +168,7 @@ typedef struct {
 #define Namey(iptr)     ((iptr)->namey)
 #define Namez(iptr)     ((iptr)->namez)
 #define Unit(iptr)      ((iptr)->unit)
+#define Object(iptr)    ((iptr)->object)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
@@ -245,6 +248,7 @@ typedef struct {
 #define     NameyTag		"Namey"
 #define     NamezTag		"Namez"
 #define     UnitTag             "Unit"
+#define     ObjectTag           "Object"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
 #define     AxisTag             "Axis"

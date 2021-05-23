@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7f 20-nov-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7g 22-may-2021 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -752,8 +752,13 @@ void initparam(string argv[], string defv[])
     // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
 #pragma omp parallel
     {
-      if (omp_get_thread_num() == 0) 
-	if (omp_get_num_threads() > 1) dprintf(1,"Using OpenMP with %d threads\n", omp_get_num_threads());
+      if (omp_get_thread_num() == 0) {
+	int nt = omp_get_num_threads();
+	int mt = omp_get_max_threads();
+	dprintf(1,"NT=%d MT=%d\n",nt,mt);
+	if (mt > 1) dprintf(1,"Using OpenMP with %d threads\n", mt);
+	np_openmp = mt;
+      }
       
       omp_t1 = omp_get_wtime(); //start stop-watch
     }
@@ -2965,9 +2970,10 @@ local void set_np(string arg)
     } else {
       np_openmp = atoi(arg);
       dprintf(0,"%s\n",np_env);
-#if 0
+#if _OPENMP      
       /* on linux the putenv (or even setenv) don't seem to work */
       /* forcing me to use omp_set_num_threads()                 */
+      dprintf(1,"np_openmp: %d\n",np_openmp);
       omp_set_num_threads(np_openmp);
 #endif
     }

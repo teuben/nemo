@@ -1,9 +1,12 @@
-.TH CCDFITS 1NEMO "27 December 2020"
+.TH CCDFITS 1NEMO "22 May 2021"
+
 .SH NAME
 ccdfits \- convert an image to a fits file 
+
 .SH SYNOPSIS
 .PP
 \fBccdfits in=\fPimage \fBout=\fPfits [parameter=value]
+
 .SH DESCRIPTION
 \fBccdfits\fP writes a fits file to disk. The input must be in 
 \fIimage(5NEMO)\fP format, the output will be in standard \fIfits(5NEMO)\fP
@@ -19,9 +22,9 @@ responsility of the user to ensure the dimensions (NAXIS,1,2,3) and BITPIX of th
 two are the same, or else an illegal FITS file will be created.
 The program \fIscanfits(1NEMO)\fP is used behind the scenes to achieve
 this feat.
+
 .SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+.so man1/parameters
 .TP 20
 \fBin=\fIimage-file\fP
 input file, in \fIimage(5NEMO)\fP format [no default].
@@ -43,7 +46,8 @@ Scaling factors for intensity (should only be used for BITPIX > 0)
 [default: \fB1,0\fP].
 .TP
 \fBobject=\fIname\fP
-Name of your object/image [default: none].
+Name of your object/image. By default, the Object name inherited
+from the original. [default: none].
 .TP
 \fBcomment=\fIcomments\fP
 Comment using the COMMENT keyword. [default: none]
@@ -108,6 +112,7 @@ with multiple Image's. [Default: 1]
 \fIfitshead=\fP
 If used, the header of this fitsfile will be used instead of the
 one from the converted input image. Default; not used.
+
 .SH EXAMPLES
 To convert an image to unsigned 16 bit integers use the following math:
 .nf
@@ -125,6 +130,7 @@ since the data is never needed. You can see \fIscanfits(1NEMO)\fP for this:
 	scanfits in=cube.fits out=cube.fitshdr select=header
 	ccdfits ... refmap=cube.fitshdr ...
 .fi
+
 .SH FITS TAPES
 For historic amusement:
 .PP
@@ -178,15 +184,19 @@ You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
  $ purge 'P1'
  $!
 .fi
+
 .SH "SEE ALSO"
 ccdsky(1NEMO), ccdfitsio(1NEMO), scanfits(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+
 .SH AUTHOR
 Peter Teuben
+
 .SH FILES
 .nf
 .ta +2.0i
 ~/src/pjt/image  	ccdfits.c ccdfits.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -202,4 +212,5 @@ apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
 20-jun-09	V5.4 added select= to grab not the first image  	PJT
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true	PJT
 27-dec-2020	V6.3 added fitshead=	PJT
+22-may-2021	V6.3d:  object inherited from Image	PJT
 .fi

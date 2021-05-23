@@ -1,8 +1,11 @@
 .TH XRANDOM 1NEMO "9 October 2012"
+
 .SH NAME
 xrandom \- Return seed for random numbers and optionally random numbers
+
 .SH SYNOPSIS
 \fBxrandom\fP [parameter=value]
+
 .SH DESCRIPTION
 \fBxrandom\fP returns a seed that can be used to random number generators,
 and optionally random numbers drawn from a uniform or gaussian (normal)
@@ -11,6 +14,7 @@ have a mean of 0 and a dispersion of 1.
 .PP
 If compiled with GSL, random number generator types 
 can be selected, as well as many more distribution types.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -23,6 +27,7 @@ and 2 for the current pid (see \fIgetpid(2)\fP).  If GSL is implemented
 the seed value can be optionally followed by the random number 
 generator type (default: mt19937). See \fIxrandom(3)\fP for more
 details.
+.TP 
 \fBn=\fP
 Number of random numbers to draw 
 [Default: 0].
@@ -50,11 +55,18 @@ Offset of distribution from 0. Default: 0.0
 \fBgsl=\fP
 Name of the random number distribution requested. They follow the name convention
 of the same-name functions \fIgsl_random_xxx\fP in the \fIgsl(3)\fP library.
+Only available if compiled with GSL.
 No default.
 .TP
 \fBpars=\fP
 Parameters belonging to the selected \fBgsl\fP name. They need to match
 exactly (0, 1, 2 or 3 currently). No default.
+.TP
+\fBseed57=\fP
+This quaint option will activate von Hoerner's 1957 algorithm of drawing random numbers.
+It needs a seed between 0.57 and 0.91. See also \fImkvh60(1NEMO)\fP.
+Default: not used.
+
 .SH EXAMPLES
 Here is an example script, \fBgrandom.csh\fP, 
 to test if the error in the mean scales

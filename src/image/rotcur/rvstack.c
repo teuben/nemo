@@ -28,7 +28,7 @@ string defv[] = {
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
   "tab=f\n        Write a test table?",
   "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
-  "VERSION=0.6\n  21-may-2021 PJT",
+  "VERSION=0.6a\n 22-may-2021 PJT",
   NULL,
 };
 
@@ -118,6 +118,7 @@ void nemo_main()
   Yref(outptr) = (Ny(outptr)-1)/2.0;
   Dy(outptr)   = ABS(Dz(velptr)) * vscale;
   Axis(outptr) = 1;
+  Object(outptr) =   Object(velptr);
   create_image(&sumptr, nx, nz);
   dprintf(0,"Output map: %d x %d    %g %g %g x %g %g %g\n",
 	  Nx(outptr), Ny(outptr),
