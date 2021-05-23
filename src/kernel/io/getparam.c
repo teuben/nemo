@@ -2970,7 +2970,7 @@ local void set_np(string arg)
     } else {
       np_openmp = atoi(arg);
       dprintf(0,"%s\n",np_env);
-#if 1
+#if _OPENMP      
       /* on linux the putenv (or even setenv) don't seem to work */
       /* forcing me to use omp_set_num_threads()                 */
       dprintf(1,"np_openmp: %d\n",np_openmp);
