@@ -65,3 +65,12 @@ ccdstack: gauss1 gauss2
 	@echo Running $@
 	$(EXEC) ccdstack gauss1,gauss2 - | $(EXEC) ccdstat -
 	$(EXEC) ccdstack gauss2,gauss1 - | $(EXEC) ccdstat -
+
+ccdstacktest:
+	rm -f p1 ccd1 ccd2 ccd3 ccd12 ccd21
+	mkplummer p1 100000	
+	snapgrid p1 ccd1 xrange=0:1 yrange=0:1  nx=16 ny=16
+	snapgrid p1 ccd2 xrange=-1:0 yrange=-1:0  nx=16 ny=16
+	ccdgen "" ccd3 spar=0 size=64,64 cdelt=4/64,4/64
+	ccdstack ccd3,ccd1,ccd2 ccd12
+	ccdstack ccd3,ccd2,ccd1 ccd21
