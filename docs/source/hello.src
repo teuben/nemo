@@ -1,0 +1,20 @@
+#include <stdinc.h>              /* standard (NEMO) definitions */
+#include <getparam.h>                         /* user interface */
+
+string defv[] = {       /* standard keywords and default values */
+    "verbose=true\n            Verbosity level (t|f)",  /* key1 */
+    "VERSION=1.2\n             25-may-92 PJT",          /* key2 */
+    NULL,               /* standard terminator of defv[] vector */
+};
+
+string usage = "Example NEMO program 'hello'";	  /* usage text */
+
+nemo_main ()              /* standard start of any NEMO program */
+{
+    bool verbose;                  /* declaration of local var. */
+
+    verbose = getbparam("verbose");         /* get that keyword */
+    printf("Hello NEMO!\n");                /* do some work ... */
+    if (verbose)                            /* and perhaps more */
+        printf("Bye then.\n");
+}
