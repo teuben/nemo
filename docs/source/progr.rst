@@ -1,6 +1,10 @@
 NEMO Programmers Guide: an Introduction
 =======================================
 
+.. warning::
+   May 24, 2021: This section was just translated from latex and has many old NEMO habits
+   that do not exist anymore.
+
 In this section an introduction is
 given how to write programs within
 the NEMO environment.  It is based on
