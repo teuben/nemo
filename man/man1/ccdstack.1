@@ -1,4 +1,4 @@
-.TH CCDSTACK 1NEMO "22 May 2021"
+.TH CCDSTACK 1NEMO "23 May 2021"
 
 .SH "NAME"
 ccdstack \- stack images, with simple gridding option if WCS differs
@@ -37,11 +37,30 @@ If not set, images are stacked "as is". If WCS is set, you can thus
 stack images of unequal size. Pixels falling outside that of the first
 image are simply ignored.
 [Default: t]
+.TP
+\fBfwhm=\fP
+If given, these are the convolution FWHM kernels in each dimension of the
+input images. It only makes sense to use this is \fBwcs=t\fP is used.
+\fINot Implemented Yet\fP.
+
 
 .SH "EXAMPLES"
 Since the first image determines the WCS of the output image, it can be
 also be used as a template by setting its image values to 0. 
 \fIccdgen(1NEMO)\fP can be used for this.
+.PP
+Here is a contrived example of mosaicing two fields in a Plummer sphere
+projection. It will generate a template with all 0 values (which don't
+contribute to the stack), and adding in the two fields:
+.nf
+    mkplummer p1 100000
+    snapgrid p1 ccd1 xrange=0:1 yrange=0:1    nx=16 ny=16
+    snapgrid p1 ccd2 xrange=-1:0 yrange=-1:0  nx=16 ny=16
+    ccdgen "" ccd3 spar=0 size=64,64 cdelt=4/64,4/64
+    ccdstack ccd3,ccd1,ccd2 ccd12
+    ccdstack ccd3,ccd2,ccd1 ccd21
+.fi
+
 
 
 .SH "SEE ALSO"
