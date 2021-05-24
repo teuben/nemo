@@ -1,18 +1,11 @@
 NEMO Programmers Guide: an Introduction
 =======================================
 
-.. warning::
-   May 24, 2021: This section was just translated from latex and has many old NEMO habits
-   that do not exist anymore.
-
-In this section an introduction is
-given how to write programs within
-the NEMO environment.  It is based on
-an original report *NEMO: Elementary Mechanics Observatory*
-by Joshua Barnes (1986).
+In this section an introduction is given how to write programs within
+the NEMO environment.  It is based on an original report *NEMO:
+Elementary Mechanics Observatory* by Joshua Barnes (1986).
  
-
-To the application programmer NEMO consists of a set of macro
+To the application programmer NEMO consists of a set of (C) macro
 definitions and object libraries, designed for numerical work in general
 and stellar dynamics in particular.  A basic knowledge how to program in
 C, and use the local operating system to get the job done, is assumed. 
@@ -23,22 +16,21 @@ The NEMO Programming Environment
 --------------------------------
 
 The modifications necessary to your UNIX environment in order to
-access NEMO are 
-extensively described in Appendix~\ref{a:setup}.
-This not only applies
-to a user, but also to the application programmer, although for the
-latter the
-{\bf static} environment is to be preferred here.
-Relevant environment variables are described in Appendix~\ref{s-envvar}
+access NEMO are extensively described elsewhere.  This not only
+applies to a user, but also to the application programmer.
 
 In summary, the essential changes to your environment consist of
-one simple additions to your local shell (.csh or .sh - like) startup file :
+one simple additions to your local shell startup file
+or you can do it interactively in your shell (be it sh or csh like).
 
-- source the startup file ``$NEMO/nemo_start.sh`` (or its ``csh`` equivalent),
-  where ``$NEMO`` is something you will need to obtain from the person
-  who installed NEMO.  If it was prepackaged in Ubuntu, it should
-  be ``NEMO=/opt/nemo``.
+.. code-block::
 
+      % source /opt/nemo/nemo_start.sh
+   or
+      % source /opt/nemo/nemo_start.csh
+
+where the location of NEMO=/opt/nemo is something that will likely
+be different for you.
 
 
 The NEMO Macro Packages
@@ -51,14 +43,15 @@ code would need references like:
 
 .. code-block::
 
-    #include <nemo.h>
+    #include <nemo.h>              // this will include a few basic core NEMO include files
     #include <snapshot/body.h>
     #include <snapshot/get_snap.c>
 
 Some of the macro packages are merely function prototypes, to
 facilitate modern C compilers (we strive to follow the C99 standard),
 and  have associated object code in libraries in ``$NEMOLIB`` and programs
-need to be linked with the appropriate ones.
+need to be linked with the appropriate libraries (normally controlled
+via a Makefile).
 
 
 stdinc.h
@@ -67,9 +60,9 @@ stdinc.h
 The macro package ``stdinc.h`` provides all basic
 definitions that ALL of NEMO's code must include as the first include
 file.  It also replaces the often used {\tt stdio.h} include file in C
-programs.  The {\tt stdinc.h} include file will provide us with a way to
+programs.  The ``stdinc.h`` include file will provide us with a way to
 standardize on future expansions, and make code more
-machine/implementation independent ({\it e.g.} POSIX.1\index{POSIX.1}).  In
+machine/implementation independent (*e.g.* POSIX.1).  In
 addition, it defines a more logical standard for C notation.  For
 example, the normal C practice of using pointers to character for
 pointer to byte, or integer for bool, tends to encourage a degree of
@@ -78,94 +71,83 @@ sloppy programming, which can be hard to understand at a later date.
 A few of the basic definitions in this package:
 
 
-- \item[$\bullet$ {\tt NULL}:]
- macro for 0, used to distinguish null characters and null pointers.
-This is often already defined by {\tt stdio.h}.\index{NULL}
-There is potential trouble when NULL has been set to 
-{\tt (void *)0}, \verb+'\0'+ is OK though. Example on IBM's AIX operating
-system.
+- ``NULL``:
+  macro for 0, used to distinguish null characters and null pointers.
+  This is often already defined by ``stdio.h``.
 
 
+- ``bool``:
+  typedef for ``short int`` or ``char``,
+  used to specify boolean data. See also next item.
+  NOTE: the *curses* library also defines ``bool``, and this
+  made us change from ``short int`` to the more space
+  saving ``char``.
 
-- \item[$\bullet$ {\tt bool}:]
-  typedef for {\tt short int} or {\tt char},
-  used to specify boolean\index{bool} data. See also next item.
-  \footnote{The {\it curses} library also defines {\tt bool}, and this
-  made us change from {\tt short int} to {\tt char}}.
+- ``TRUE, FALSE``:
+  macros for 1 and 0, respectively, following normal C conventions.
 
-- \item[$\bullet$ {\tt TRUE, FALSE}:] 
-  macros for 1 and 0, respectively, following normal C 
-  conventions.\index{TRUE}\index{FALSE}
+- ``byte``:
+  typedef for ``unsigned char``, used to specify byte-sized data.
 
-- \item[$\bullet$ {\tt byte}:]
-  typedef for {\tt unsigned char}, used to specify byte-sized data.
-  \index{byte}
+- ``string``:
+  typedef for ``char *``, used to point to strings. Don`t use
+  ``string`` for pointers you increment, decrement or explicitly
+  follow (using *); such pointers are really ``char *``.
 
-- \item[$\bullet$ {\tt string}:]
-  typedef for {\tt char *}, used to point to strings. Don't use
-  {\tt string} for pointers you increment, decrement or explicitly
-  follow (using *); such pointers are really {\tt char *}.
-  \index{string}
 
-- \item[$\bullet$ {\tt real, realptr}:]
+- ``real, realptr``:
   typedef for {\tt float} or {\tt double} ({\tt float *} or {\tt double *},
   respectively), depending on the use of the {\tt SINGLEPREC} flag. 
-  The default is {\tt double}. \index{real}\index{realptr}
+  The default is {\tt double}. 
 
-- \item[$\bullet$ {\tt proc, iproc, rproc}:] 
+- ``proc, iproc, rproc``: 
   typedefs for pointers to procedures (void functions), integer-valued
   functions and real-valued functions respectively. 
   % This always confusing issue will become clear later on.
-  \index{iproc} \index{rproc}\index{proc}
 
-- \item[$\bullet$ {\tt local, permanent}:]
+- ``local, permanent``:
   macros for {\tt static}. Use {\tt local} when declaring variables or
   functions within a file to be local to that file. They will not appear
   in the symbol table be usable as external symbols. Use 
   {\tt permanent} within  a function, to retain their value upon
-  subsequent re-entries in that function.\index{local}\index{permanent}
+  subsequent re-entries in that function.
 
-- \item[$\bullet$ {\tt PI, TWO\_PI, FOUR\_PI, HALF\_PI, FRTHRD\_PI}:]
-  macros for $\pi$, $2\pi$, $4\pi$, $\pi/2$ and $4\pi/3$, 
-  respectively.\index{PI}
+- ``PI, TWO_PI, FOUR_PI, HALF_PI, FRTHRD_PI``:]
+  macros for :math:`\pi`, :math:`2\pi`,  :math:`4\pi`,  :math:`4\pi/3`, 
+  respectively.
 
-- \item[$\bullet$ {\tt ABS(x), SGN(x)}:]  
-  macros for absolute value and sign of {\tt x}, irrespective of the 
-  type of {\tt x}.\index{ABS}\index{SGN}. Beware of side effects.
+- ``ABS(x), SGN(x)``:
+  macros for absolute value and sign of ``x``, irrespective of the 
+  type of ``x``. Beware of side effects, it's a macro!
 
-- \item[$\bullet$ {\tt MAX(x,y), MIN(x,y)}:]
-  macros for the maximum and minimum of {\tt x,y}, irrespective of the
-  type of {\tt x,y}.\index{MAX}\index{MIN}
-  Beware of side effects.
+- ``MAX(x,y), MIN(x,y)``:
+  macros for the maximum and minimum of ``x,y``, irrespective of the
+  type of ``x,y``. Again, beware of side effects.
 
-- \item[$\bullet$ {\tt stream}:]
-  typedef for {\tt FILE *}. They are mostly used with the NEMO
-  functions {\tt stropen} and {\tt strclose}, which are functionally
-  similar to {\it fopen(3)} and {\it fclose(3)}, plus some added 
-  NEMO quirks. \index{stream}  (see section~\ref{ss-filestr} below)
-
+- ``stream``:
+  typedef for ``FILE *``. They are mostly used with the NEMO
+  functions ``stropen`` and ``strclose``, which are functionally
+  similar to *fopen(3)* and *fclose(3)*, plus some added 
+  NEMO quircks like (named) pipes and the dot (.) ``/dev/null`` file.
 
 
 getparam.h
 ~~~~~~~~~~
 
-The command line syntax described earlier in Chapter~\ref{c:iface}
+The command line syntax 
 is implemented by a small set of functions used by all conforming
 NEMO programs.  A few function calls generally suffice to get the values
 of the input parameters.  A number of more
-complex parsing routines are also available, to be discussed in the
-next subsection.
+complex parsing routines are also available, to be discussed below.
 
 First of all, a NEMO program must define which 
-{\bf program keywords}\index{program keywords}\index{keywords, program}
-it will 
-recognize. For this purpose it must define an array of {\tt string}s
+**program keywords** it will 
+recognize. For this purpose it must define an array of *string*s
 with the names and the default values for the keywords, and optionally,
 but STRONGLY recommended,
-a one line help string for that keyword: \index{getparam.h}
+a one line help string for that keyword:
 
 .. code-block::
-
 
     #include <nemo.h>       /*   every NEMO module needs this  */
 
@@ -179,31 +161,39 @@ a one line help string for that keyword: \index{getparam.h}
     string usage = "example program";   /* def. of the usage line */
 
 
-\index{defv, string} \index{help, -string in keywords}
-The ``{\it keyword=value}'' and ``{\it help}'' part of the string must be
-separated by a newline symbol ({\tt $\backslash$n}). If no 
-newline\index{newline, help} is present,
-as was the case in earlier releases, no help 
-string is available.\footnote{ZENO\index{ZENO} uses a different technique: ...}
+The *keyword=value* and *help* part of the string must be
+separated by a newline symbol (``\n``). If no 
+newline is present,
+as was the case in NEMO's first release, no help 
+string is available.
+ZENO uses a slightly different technique, where strings starting with ``;``
+are the help string. The example before would
+
+.. code-block::
+
+    string defv[] = {      "; example program",
+        "in=???",          ";Input file (a snapshot)",
+        "n=10",            ";Number of particles to view",
+        "VERSION=1.1",     ";14-jul-89 - 200th Bastille Day - PJT",
+        NULL,
+    };
+
+You can see the first string is actually the same as NEMO's *usage* string.
+   
   
-\index{help, keywords}
-The {\tt 'help=h'} command
-line option displays the ``{\it help}'' part of string during
-execution of the program for quick inline reference.\index{inline, help}
-The ``{\it usage}'' part defines a string that is used as a one
+The ``help=h`` command line option displays the *help* part of string during
+execution of the program for quick inline reference.
+The *usage* part defines a string that is used as a one
 line reminder what the program does. It's used by the various
-invocations of the user interface.\index{usage, string}
+invocations of the user interface.
   
 The first thing a NEMO program does, is comparing the command
 line arguments of the program (commonly called
-{\tt string argv[]} in a C program) 
+``string argv[]`` in a C program) 
 with this default vector of ``{\it keyword=value}''
-strings ({\tt string defv[]}), and replace
+strings (``string defv[]``), and replace
 appropriate reset values for later retrieval. This is done by calling
-{\tt initparam}\footnote{It secretly assumes that {\tt argv[]} is
-NULL terminated, which is not guaranteed on all UNIX 
-implementations}\index{initparam} as the first step in your MAIN
-program:
+``initparam`` as the first step in your MAIN program:
 
 .. code-block::
 
@@ -214,18 +204,18 @@ program:
 
 
 It also checks if keywords which do not have a default
-value ({\it i.e.} were given ``{\tt ???}'') 
+value (*i.e.* were given ``???``) 
 have really been given a proper 
 value on the command line, if keywords are not specified twice, 
 enters values of the system keywords etc.
 
 There is a better alternative to define the main part of a NEMO program:
-by renaming the main entry point {\tt main()} to 
-{\tt nemo\_main()} \index{nemo\_main}, without any arguments, and
-calling the array of strings with default '{\it key=val}'s
-{\tt string defv[]}, the linker will automatically include
-the proper startup code ({\tt initparam(argv,defv)}), the worker routine {\tt
-nemo\_main()} itself, and the stop code ({\tt finiparam()}). 
+by renaming the main entry point ``main()`` to 
+``nemo_main()``, without any arguments, and
+calling the array of strings with default *key=val*'s
+``string defv[]``, the linker will automatically include
+the proper startup code (``initparam(argv,defv)``), the worker routine
+``nemo_main()`` itself, and the stop code (``finiparam()``). 
 The above section of code would then be replaced by a mere:
 
 .. code-block::
@@ -234,22 +224,24 @@ The above section of code would then be replaced by a mere:
     {
         . . .
 
-
 This has the obvious advantage that various NEMO related 
 administrative details
 are now hidden from the application programmers, and occur automatically.
-Remember that standard {\tt main()} already shields the application
+Remember that standard ``main()`` already shields the application
 programmer from a number of tedious setups (e.g. {\it stdio} etc.).
-Within NEMO we have taken this one step further.
-The example given later in Section~\ref{ss-example} also uses the
-technique of calling the main entry point {\tt nemo\_main()}.
+Within NEMO we have taken this one step further. A recent example that
+was added to ``nemo_main`` is the management  of the number of processors
+in an OpenMP enhanced computing mode.
+
 
 Once the user interface has been initialized, keyword values may be obtained at
-any point during execution of the program by calling {\tt getparam()},
-which returns a string\footnote{note that ANSI rules say
-you can't write to this location in memory if they are direct references
-to {\tt string defv[]}; this is something that may well be fixed in a future
-release}:
+any point during execution of the program by calling ``getparam()``,
+which returns a string
+
+.. note::
+   ANSI rules say you can't write to this location in memory if
+   they are direct references ``string defv[]``;
+   this is something that may well be fixed in a future release.
 
 .. code-block::
 
@@ -257,12 +249,10 @@ release}:
         printf(" You really mean zero or octal?\n");
 
 
-There is a whole family of {\tt getXparam()} \index{getXparam, parsing}
-\index{parsing, getXparam} functions which 
-parse\footnote{Depending on compiler switches at installation
-the getXparam parsing includes full expressions} the
-string in a value of one of the basic C types {\tt int, long, bool,}
-and {\tt real}. It returns that value in that type: 
+There is a whole family of ``getXparam()`` functions which 
+parse the
+string in a value of one of the basic C types ``int, long, bool,``
+and ``real``. It returns that value in that type: 
 
 .. code-block::
 
@@ -276,8 +266,7 @@ and {\tt real}. It returns that value in that type:
     }
 
 
-Finally, there is a macro called {\tt getargv0()}, which returns
-\index{getargv0, program name} \index{program name, getargv0}
+Finally, there is a macro called ``getargv0()``, which returns
 the name of the calling program, mostly used for identification:
 
 .. code-block::
@@ -286,34 +275,39 @@ the name of the calling program, mostly used for identification:
         error("%s: early quit", getargv0());
 
 This is very useful in library routines, who normally would not be
-able to know who called them. Actually, NEMO's {\tt error} function
+able to know who called them. Actually, NEMO's ``error`` function
 already uses this technique, since it cannot know the name of the
 program by whom it was called.
-The {\tt error} function prints a message, and exits the 
-program\index{error(3)}.
+The ``error`` function prints a message, and exits the 
+program.
 
 More detailed information can also be found in the appropriate manual
-page: {\it getparam(3NEMO)} and {\it error(3NEMO)}.
+page: *getparam(3NEMO)* and *error(3NEMO)*.
+
+
+.. warning::
+   May 24, 2021: The text below here in this chapter has not been latex->rst sanitized
+
+
 
 Advanced User Interface and String Parsing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Here we describe {\it setparam} to add some interactive capabilities in
-\index{setparam} a standard way to NEMO.  Values of keywords should only
-be accessed and modified \index{keywords, modifying} this way.  Since
+Here we describe *setparam* to add some interactive capabilities in
+a standard way to NEMO.  Values of keywords should only
+be accessed and modified this way.  Since
 keywords are initialized/stored within the source code, most compilers
 will store their values in a read-only part of data area in the
 executable image.  Editing them may cause unpredictable behavior. 
 
 If a keyword string contains an array of items of the same type, 
-one can use either {\tt nemoinpX} or 
-{\tt getXrange}, \index{parsing, nemoinpX}\index{parsing, getXrange}
-\index{nemoinpX, parsing}\index{getXrange, parsing}
+one can use either ``nemoinpX`` or 
+``getXrange``, 
 depending if you know how many items to expect in the string.
-The {\tt getXrange} routines will allocate a new array which will contain
+The ``getXrange`` routines will allocate a new array which will contain
 the items of the parsed string. If you do already have a
 declared array, and know that all items will fit in there, the
-{\tt nemoinpX} routines will suffice.
+``nemoinpX`` routines will suffice.
 
 An example of usage:
 
@@ -603,7 +597,7 @@ Section \ref{ss:snapshot}}:
 
     strclose(instr);    
 
-This method of ``filtering'' a data input stream clearly opens up many
+This method of *filtering* a data input stream clearly opens up many
 ways of developing general-purpose programs. Also note that the 
 {\tt bool} routine {\tt get\_tag\_ok()} can be used to control the
 flow of the program, as {\tt get\_set()} would call {\tt error()} when
@@ -926,18 +920,15 @@ We encourage authors to have a MINIMUM set of sections in a man-page as
 listed below. The ones with a '*' are considered somewhat less 
 important:
 
-- \item[{\bf NAME}]
-                  the name of the beast.
+- \item[{\bf NAME}] the name of the beast.
 - \item[{\bf SYNOPSIS}]
-                  command line format or function prototype, include
-                    files needed etc.
+  command line format or function prototype, include
+  files needed etc.
 - \item[{\bf DESCRIPTION}]
-                  maybe a few lines of what it does, or not does.
+  maybe a few lines of what it does, or not does.
 - \item[{\bf PARAMETERS}]
-                  description of parameters, their meaning and default values.
-        This usually applies to programs only.
-
-  
+  description of parameters, their meaning and default values.
+  This usually applies to programs only.
 -   \item[{\bf EXAMPLES}]
                 (*) in case non-trivial, but recommended anyhow
 -   \item[{\bf DEBUG}]
@@ -955,7 +946,7 @@ important:
 -   \item[{\bf LIMITATIONS}]
                  (*) does it have any obvious limitations?
 -   \item[{\bf AUTHOR}]
-                  who wrote it (a little credit is in its place) and/or who
+                who wrote it (a little credit is in its place) and/or who
                 is responsible.
 -   \item[{\bf FILES}]
            (*) in case non-trivial
