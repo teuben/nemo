@@ -6,13 +6,13 @@
 # apr 30 2021: Stopped flagging files w/o help=h
 #              Added -v verbose flag
 # may 4 2021:  Fixed regex bug
+# may 6 2021:  -h flag added
 
 import re, os, subprocess, getopt, sys
 
 # Global flags
 VERBOSE = False # If True prints man & help outputs for bad files
-TASKLIST = "tasklist"
-
+HELP = False
 
 def get_man_matches(file):
     try:
@@ -30,7 +30,7 @@ def get_man_matches(file):
         elif scan_flag:
             match = re.findall(r'\\f[a-zA-Z][a-zA-Z]+[0-9]*',line)
             if not match: # If the .TP isn't followed by a command, flag file as bad
-                return None
+                return 'Non-conformant'
             else:
                 man_matches.append(match[0])
             scan_flag = False
@@ -86,7 +86,7 @@ def checkMan():
                     print(file)
                     print("man: "+str(man_out))
                     print("help: "+str(help_out))
-                    print()	
+                    print() 
     
     print("Files with help=h & man mismatches")
     print("Files read: " + str(files_read))
@@ -112,19 +112,32 @@ def checkBin(tasklist):
     print("Bad files found: " + str(bad_files))
     print("Bad files: " + str(bad_file_names))
 
-def main():
-    # Read in flags
+def readFlags():
     global VERBOSE
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv,"v")
+        opts, args = getopt.getopt(argv,"vhf")
+        for opt, arg in opts:
+            if opt in ["-v"]:
+                VERBOSE = True
+            elif opt in ["-h"]:
+                HELP = True
     except:
         print("getopt error")
 
-    for opt, arg in opts:
-        if opt in ["-v"]:
-            VERBOSE = True
+def help():
+    print("checkpars V1.3")
+    print("-v           prints help and man keywords for mismatched files")
+    print("-f <file>    allows you to specify tasklist to scan")
+    print("-h           prints help page")
+
+def main():
+    readFlags()
+
+    if HELP: # Prints help and exits
+        help()
+        return
 
     # Change working directory
     os.chdir("..")

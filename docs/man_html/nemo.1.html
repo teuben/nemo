@@ -19,31 +19,33 @@ a computer package, there is no program with that name. On linux there is
 also the <i>nemo</i> file manager, which is a fork of <i>nautilus</i>. <p>
 <b>astronemo</b> is the
 name you may find in some package managers. If you google the name <i>nemo</i>,
-you will find a lot of computer related tools with that name. <p>
-<b>NEMO</b> is a
-<i>Stellar Dynamics Toolbox</i> for users and programmers. It has various programs
-to create, integrate and analyze N-body systems. In addition there are various
-tools to operate on images, tables and orbits, including FITS files to
-export/import to/from other astronomical data reduction packages. <p>
-A good
-start is the manual page <a href='programs.8.html'><i>programs(8NEMO)</i></a>
-, which lists programs thematically,
-and <a href='index.1.html'><i>index(1NEMO)</i></a>
-, which lists them  alphabetically (CAVEAT: these pages
-are not well maintained). 
+you will find a lot of computer related tools with that name. We also adopted
+this name in <a href='https://astronemo.readthedocs.io/en/latest/.'><i>https://astronemo.readthedocs.io/en/latest/</i>.</a>
+ <p>
+<b>NEMO</b> is a <i>Stellar
+Dynamics Toolbox</i> for users and programmers. It has various programs to create,
+integrate and analyze N-body systems. In addition there are various tools
+to operate on images, tables and orbits, including FITS files to export/import
+to/from other astronomical data reduction packages. <p>
+A good start is the
+manual page <a href='programs.8.html'><i>programs(8NEMO)</i></a>
+, which lists programs thematically, and <a href='index.1.html'><i>index(1NEMO)</i></a>
+,
+which lists them  alphabetically (CAVEAT: these pages are not well maintained).
+
 <p> 
 <h2><a name='sect2' href='#toc2'>NEMO vs. UNIX</a></h2>
 
-<p> <b>NEMO</b> is very much integrated into
-the Unix(tm) operating system, so users are expected to use standard Unix
-commands as glue between the various tasks (cat, ls, rm, cp, awk, sm, <i>etc.</i>).
-Understanding of shell scripting (sh, csh, python, perl, <i>etc.</i>) can be very
-useful. for NEMO as well. Several example shell scripts exist in the source
-tree to demonstrate how experiments can be orchestrated. We use mostly csh,
-bash and python. Yes, csh too, even though csh is considered harmful now.
-<p>
-Here are some useful reminders of using NEMO when you are familiar with
-the unix style of command line tools, piping etc.: 
+<p> <b>NEMO</b> is very much integrated into the Unix(tm) operating
+system, so users are expected to use standard Unix commands as glue between
+the various tasks (cat, ls, rm, cp, awk, sm, <i>etc.</i>). Understanding of shell
+scripting (sh, csh, python, perl, <i>etc.</i>) can be very useful. for NEMO as well.
+Several example shell scripts exist in the source tree to demonstrate how
+experiments can be orchestrated. We use mostly csh, bash and python. Yes,
+csh too, even though csh is considered harmful now. <p>
+Here are some useful
+reminders of using NEMO when you are familiar with the unix style of command
+line tools, piping etc.: 
 <p> <br>
 <pre>- programs use a set of key=value command line arguments,
   minimum match works, but you cannot repeat keywords
@@ -62,6 +64,7 @@ the unix style of command line tools, piping etc.:
 
 <p> <br>
 <pre>program --help
+program help=h
 program [key1=]val1 [key2=]val2 .!.!.
 runprogram [key1=]val1 [key2=]val2 .!.!.
 run program ...
@@ -237,17 +240,19 @@ file <a href='formats.5.html'>formats(5)</a>
 . <p>
 NEMO homepage <a href='http://www.astro.umd.edu/nemo'><i>http://www.astro.umd.edu/nemo</i></a>
 
-and github page <i>https://github.com/teuben/nemo</i>. 
+and github page <i>https://github.com/teuben/nemo</i>. <p>
+readthedocs page:  <a href='https://astronemo.readthedocs.io/en/latest/'><i>https://astronemo.readthedocs.io/en/latest/</i></a>
+
+
 <p> 
 <h2><a name='sect12' href='#toc12'>Bugs</a></h2>
-Since programs are being
-modified, and extended fairly regularly,  manual pages for related programs
-do not always know about these changes if they should. Keeping good cross
-references in the manual pages might help. However, the <b>help=</b> description
-should always be up to date, since it is derived from the code itself. And
+Since programs are being modified, and extended fairly regularly,
+ manual pages for related programs do not always know about these changes
+if they should. Keeping good cross references in the manual pages might
+help. However, the <b>help=</b> description should always be up to date, since
+it is derived from the code itself. And there is always <a href='https://github.com/teuben/nemo/issues'>https://github.com/teuben/nemo/issues</a>
 
-<p>there is always <a href='https://github.com/teuben/nemo/issues'>https://github.com/teuben/nemo/issues</a>
- 
+
 <p> 
 <h2><a name='sect13' href='#toc13'>History</a></h2>
 <br>

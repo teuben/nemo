@@ -21,3 +21,7 @@ on ubuntu20:  sudo apt-get install libglfw3-dev
 
 for sphinx i needed:  sudo apt-get install breathe-doc
 or for your python:   pip install breathe
+
+2) simplest:    this is an example of the similarly named problem in rebound/examples/simplest,
+   but now with an example Makefile that can compile your problem outside of the rebound
+   source tree.

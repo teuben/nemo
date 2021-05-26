@@ -8,7 +8,7 @@
 
 string defv[] = {
     "umin=1\n             Starting value",
-    "umax=10000\n          sqrt of Ending",   
+    "umax=10000\n         sqrt of Ending",   
     "umax2=0\n            Non-parallel loop",
     "VERSION=1.1\n        13-mar-2021 PJT",
      NULL,
@@ -24,6 +24,9 @@ void nemo_main(void)
   int umax2 = getiparam("umax2");
   uint64_t umin = (uint64_t) umin4 * (uint64_t) umin4;
   uint64_t umax = (uint64_t) umax4 * (uint64_t) umax4;
+  extern int np_openmp;  // this is a cheat; see getparam.c
+
+  dprintf(0,"omp_get_num_procs() -> %d\n",np_openmp);
 
   double sum=0.0;
   dprintf(0,"scaling2: umin=%ld umax=%ld\n",umin,umax);
@@ -37,6 +40,8 @@ void nemo_main(void)
 	for(uint64_t u=umin; u<umax; u++)
 	    sum+=1./(u*u); 
         printf("sum2=%g\n", sum);	
-   }
+  }
+  //dprintf(0,"cputime: %g %g sec\n",60*cputime2(0), 60*cputime2(2));
+  
 
 }

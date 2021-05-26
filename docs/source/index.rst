@@ -31,7 +31,7 @@ For Users
    using
    .. setup
    install
-   .. progr
+   progr
    .. refs
    .. aiface
    potname

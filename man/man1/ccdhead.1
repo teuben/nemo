@@ -1,0 +1,48 @@
+.TH CCDHEAD 1NEMO "22 May 2021"
+
+.SH "NAME"
+ccdhead \- print out image header
+
+.SH "SYNOPSIS"
+\fBccdhead\fP [parameter=value]
+
+.SH "DESCRIPTION"
+Print out a simple header, mostly for the WCS.
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image filename [???]    
+
+.SH "EXAMPLES"
+Sample output
+.nf
+Size:      97 108 1
+Cell:      0.8774 20 1
+AXIS=1:
+LL-Corner: 0.4387 -1070 0
+TR-Corner: 84.6691 1070 0
+X-range:   0 85.1078
+Y-range:   -1080 1080
+Z-range:   -0.5 0.5
+MinMax:    -0.02891 0.0308046
+.fi
+Note that the LL and RR corner are the centers of the pixel, whereas X-Y-Z range runs all the way to the
+pixel edge. They should differ by cell/2 size.
+
+.SH "SEE ALSO"
+tsf(1NEMO)
+
+.SH "FILES"
+src/image/io
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+22-May-21	V1.4 man page finally written	PJT
+.fi

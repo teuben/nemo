@@ -1,7 +1,7 @@
-.TH ROTCUR 5NEMO "11 May 2021"
+.TH ROTCUR 5NEMO "20 May 2021"
 
 .SH "NAME"
-rotcur \- parameters for some frequently used galaxies
+rotcur \- geometric parameters for some galaxies
 
 .SH "DESCRIPTION"
 
@@ -9,24 +9,33 @@ For a few standard galaxies we list their geometric parameters. Programs
 such as \fIrotcur(1NEMO)\fP will need these.
 
 .PP
-In the table below the center of rotation is listed in decimal RA/DEC,
+In the table below the center of rotation is listed in RA/DEC,
 as well as the VLSR (in km/s), followed by the Inclination and
 the kinematic major axis (as defined by the receding side), and the
-near minor axis. If the galaxy has a bar, it's position angle
-is also listed.
+near side minor axis. If the galaxy has a bar, it's position angle
+is also listed, both of these relative to the (kinematic) PA.
 
 
 .SH "DATA"
+A few galaxies, biased what PJT has worked on.
 .nf
 .ta +1i +1.5i +1.5i +0.7i +0.7i +1.0i +1.0i +1.0i
 galaxy	RA(J2000)	DEC(J2000)	VLSR	INC	PA_kin	PA_near	PA_bar
+-    -	rotation	center		km/s	deg	deg	d-deg	d-deg
 	
 NGC253	00:47:33.134	-25:17:19.68	241	79.8	233	-90	+15:
 NGC253	00:47:35.2	-25:17:07.6	241	76.4	230	
 
-NGC6503	xxx     	xxxxxxxxx	25	75	-60	+90	xxx
+NGC1097
+
+NGC1530
 
 NGC2347	109.016250	64.710800	4387	50.2	189.1	-90	n/a
+
+NGC1365
+
+NGC6503	xxx     	xxxxxxxxx	25	75	-60	+90	xxx
+
 
 
 .SH "SEE ALSO"

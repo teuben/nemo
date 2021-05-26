@@ -105,4 +105,4 @@ Some example math, taken from latex
    \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} 
 
 
-
+or inline  :math: `c^2 = a^2 + b^2`

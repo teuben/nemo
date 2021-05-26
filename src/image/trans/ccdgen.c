@@ -43,7 +43,7 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=1.1\n   26-jan-2021 PJT",
+  "VERSION=1.1a\n  22-may-2021 PJT",
   NULL,
 };
 
@@ -169,8 +169,11 @@ void nemo_main(void)
       crpix[2] = (nz-1)/2.0;
     }
 #endif
-
   }
+
+  if (!Object(iptr))
+    Object(iptr) = scopy(object);
+  
   if (ncen==0) {   /* fix center if it has not been set yet */
     center[0] = (Nx(iptr)-1)/2.0;     /* 0 based center= */
     center[1] = (Ny(iptr)-1)/2.0;

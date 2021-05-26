@@ -11,9 +11,9 @@ Models are not stable of course, but fun to play with or to study
 collapse and violent relaxtion. More serious homogeneous models
 can be found in \fImkhom(1NEMO)\fP. Friedman & Polyachenko (1986?, Part I)
 discuss how to make equilibrium models.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBout=\fIout_file\fP
 The data are written to this file in \fISnapShot(5NEMO)\fP 
@@ -30,7 +30,7 @@ Outer cutoff radius of the sphere. The default values of \fBrmin=0\fP and \fBrma
 give a virial radius of 1.0
 [Default: \fB1.2\fP].
 .TP
-\fB2t/w=\fIratio\fP
+\fB2t/w=\fP
 Virial ratio which measures deviation from virial equilibrium
 (two times the ratio of kinetic to potential energy, \fB2t/w\fP
 must be positive).  Only accurate for a homogenous sphere

@@ -4,10 +4,10 @@
 
 .TH NEMO 1NEMO "17 March 2021"
 
-.SH NAME
+.SH "NAME"
 nemo, astronemo \- outline the NEMO package
 
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 \fBnemo\fP is a computer package, there is no program with that name. On linux
 there is also the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
 .PP
@@ -26,7 +26,7 @@ A good start is the manual page \fIprograms(8NEMO)\fP, which lists
 programs thematically, and \fIindex(1NEMO)\fP, which lists them 
 alphabetically (CAVEAT: these pages are not well maintained).
 
-.SH NEMO vs. UNIX
+.SH "NEMO vs. UNIX"
 
 \fBNEMO\fP is very much integrated into the Unix(tm) operating system,
 so users are expected to use standard Unix commands as glue
@@ -57,7 +57,21 @@ with the unix style of command line tools, piping etc.:
       like a black hole sucking up everything
 .fi
 
-.SH SYNOPSIS
+.SH "MAN PAGES"
+You are reading a man page, and since NEMO is using standard unix man pages, the man command
+has a lot of powerful ways to find the information (short of using grep on the 800+
+$NEMO/man/manX/*.* files):
+
+.nf
+   apropos keyword
+   man -M $NEMO/man -k .
+   man -f keyword                        also: program help=u
+   man --regex <pattern>                 man --regex ".*network$"
+   man -S <section_ID> <keyword>
+   man -wK <keyword>
+.fi
+
+.SH "SYNOPSIS"
 
 .nf
 \fBprogram --help\fP
@@ -67,7 +81,7 @@ with the unix style of command line tools, piping etc.:
 \fBrun program\fP ...
 .fi
 
-.SH GETTING STARTED
+.SH "GETTING STARTED"
 What you need to do to set yourself up for \fBNEMO\fP:
 .PP
 The easiest way is to add the appropriate line to your \fI.cshrc\fP or
@@ -86,7 +100,7 @@ If you need more control over your NEMO environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
 or consult one of your local friendly NEMO users.
 
-.SH HOW TO RUN NEMO PROGRAMS
+.SH "HOW TO RUN NEMO PROGRAMS"
 NEMO programs can be run just as any other command in Unix, in that sense
 NEMO is nothing more than an extension of Unix. NEMO programs usually
 read and/or write files, though these files can in most circumstances
@@ -172,7 +186,7 @@ The alternative would have been
     rm tmp
 .fi
 
-.SH HOW TO RUN non-NEMO PROGRAMS
+.SH "HOW TO RUN non-NEMO PROGRAMS"
 
 Over the times NEMO has incoorporated a number of non-NEMO programs,
 with varying degrees of input parameter schemes. Some via
@@ -203,7 +217,7 @@ Although these run* programs use a fairly common method to run
 the non-NEMO programs, they have not all been unified
 as is proposed in \fIrun(3NEMO)\fP.
 
-.SH HELP on GIPSY and MIRIAD
+.SH "HELP on GIPSY and MIRIAD"
 Some NEMO programs refer to non-NEMO programs in the "man" style. For example
 \fIccdpot(1NEMO)\fP refers to \fIpotential(GIPSY)\fP and
 \fIpotfft(MIRIAD)\fP. If those packages are in your shell environment,
@@ -215,14 +229,14 @@ the following commands should give their version of the online help:
       more $gip_root/tsk/potential.dc1
 .fi
 
-.SH PROGRAMMING
+.SH "PROGRAMMING"
 You may need to do some sherlocking here.
 You have probably seen the $NEMO/configure.ac and $NEMO/makedefs file,
 though the $NEMOLIB/makedefs is the active file.  The \fImknemo(8NEMO)\fP script
 will help you (re)compile programs, though sometimes
 \fIbake(8NEMO)\fP can do a better job in a local directory.
 
-.SH SEE ALSO
+.SH "SEE ALSO"
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
 nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(1NEMO), run(3NEMO), mknemo(8NEMO),
 mkman(8NEMO), template(8NEMO), history(8NEMO),
@@ -233,10 +247,10 @@ https://www.unix.com/man-page-repository.php - Man Page Repository
 https://man7.org/linux/man-pages/man1/man.1.html - The Linux man-pages project
 .fi
 
-.SH AUTHOR
+.SH "AUTHOR"
 Peter Teuben
 
-.SH FURTHER INFORMATION
+.SH "FURTHER INFORMATION"
 The \fINEMO Users/Programmers Guide\fP contains most of
 the information you need to get down to the guts of the system.
 .PP
@@ -247,7 +261,7 @@ NEMO homepage \fIhttp://www.astro.umd.edu/nemo\fP and github page \fIhttps://git
 .PP
 readthedocs page:  \fIhttps://astronemo.readthedocs.io/en/latest/\fP
 
-.SH BUGS
+.SH "BUGS"
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these
 changes if they should. Keeping good cross references in the manual
@@ -255,7 +269,7 @@ pages might help. However, the \fBhelp=\fP description should always
 be up to date, since it is derived from the code itself. And there
 is always https://github.com/teuben/nemo/issues
 
-.SH HISTORY
+.SH "HISTORY"
 .ta +1i +4i
 .nf
 1986		V1 Initial Development	Barnes/Hut/Teuben
