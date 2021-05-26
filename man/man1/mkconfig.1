@@ -3,7 +3,8 @@
 mkconfig \- make a static configuration of particles.
 .SH SYNOPSIS
 \fBmkconfig out=\fPin_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImkconfig\fP creates a configuration of particles with specified
 shape in position space and zero velocities.
 .SH PARAMETERS
@@ -12,15 +13,15 @@ The following parameters are recognized:
 \fBout=\fP\fIout_file\fP
 Output file,  in \fIsnapshot\fP format.  Default: \fIrequired\fP.
 .TP
+\fBnbody=\fP\fInum_bodies\fP
+Number of particles in configuration.  Default: \fB512\fP.
+.TP
 \fBshape=\fP\fIconfiguration\fP
 Name of configuration to generate; currently \fBshell\fP, \fBball\fP,
 \fBcusp\fP, \fBline\fP, or \fBring\fP.  Default: \fBshell\fP.
 .TP
 \fBradius=\fP\fIconfig_radius\fP
 Specify size of configuration.  Default: \fB1.0\fP.
-.TP
-\fBnbody=\fP\fInum_bodies\fP
-Number of particles in configuration.  Default: \fB512\fP.
 .TP
 \fBseed=\fP\fIrandom_seed\fP
 Seed used to initialize random number generator. Default: \fB123\fP.

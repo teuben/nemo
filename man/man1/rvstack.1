@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "21 May 2021"
+.TH RVSTACK 1NEMO "23 May 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
@@ -13,15 +13,16 @@ construct a Radius-Velocity diagram,
 centered on the galaxy in position
 and velocity.  It will stack the two sides of the galaxy (but see also \fBside=\fP),
 so the radial coordinate
-will run from 0 to some Rmax.  In velocity it will run from some Vmin to some Vmax,
+will run from 0 to some Rmax.  In velocity it will run from some -Vmax to Vmax,
 but always expecting positive rotation and positive outflow, assuming the
 position angle is correctly set. 
 .PP
 Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
 If you have many like-minded galaxies, stacking these images may beat the noise down much more.
+See \fIccdstack(1NEMO)\fP.
 .PP
 Options exist to scale the Radius and Velocity to different units, such that
-many galaxies can be stacked in physical space, as opposed to angular space. See
+many galaxies can be stacked in physical space, as opposed to observed space. See
 \fBrscale=\fP and \fBvscale=\fP.
 .PP
 When \fBgscale=t\fP is set, the coordinates are scaled as follows:
@@ -34,9 +35,10 @@ R		R/cos(i)
 V/sin(i)	V/cos(i)
 
 .fi
-this will likely leave some gaps in radius and velocity. See discussion below.
+this will likely leave some gaps in radius and velocity. See CAVEATS below.
 .PP
-You can also select to only construct the signal from one side of the galaxy. See \fBside=\fP below.
+You can also select to only construct the signal from one side of the galaxy.
+See \fBside=\fP below.
 .PP
 Points along an arc are all accumulated (technically: averaged), and placed on the same radial grid
 as the pixel size in the input data cube. We might need some trick next neighbor smoothing
@@ -70,14 +72,17 @@ Default: reference pixel.
 .TP
 \fBangle=\fP
 angle around major or minor axis around which points are accumulated
-into the R-V plot. [Default: 10]
+into the R-V plot. For high inclination galaxies rotation would argue for
+a smaller angle, while outflow can deal with larger angles. And vice versa
+for low inclination galaxies.  [Default: 10]
 .TP
 \fBblank=\fP
 Value of the blank pixel to be ignored. Not yet used.
 .TP
 \fBrscale=\fP
-Scaling factor for radius. This would be used to stack galaxies based on a KPC scaling,
-or an Re scaling, not geometry, see \fBgscale=\fP below.  [Default: 1]
+Scaling factor for radius. This would be used to stack galaxies based on a physical
+\fPkpc\fP scaling,
+or an \fBRe\fP scaling, not geometry, see \fBgscale=\fP below.  [Default: 1]
 .TP
 \fBvscale=\fP
 Scaling factor for velocity. This would be  used to stack galaxies based on a mass scaling,
@@ -95,9 +100,14 @@ selected, for outflow, points around \fBpan=\fP. [Default: r]
 \fBside=0|-1|1\fP
 By default it will stack both sides, but this option will allow you to stack one or the other
 side. [Default: 0]
-
+.TP
+\fBtab=t|f\fP
+(debugging) write a test table.  [Default: f]
+.TP
+\fBjiggle=t|f\fP
+Debugging spreading signal. Don't use.
 .SH "CAVEATS"
-Code is still under developement.
+Code is still under developement, in particular dealing with units is unresolved.
 .PP
 No geometric correction is made based on the angle in the disk. This could become a future
 option
@@ -107,7 +117,8 @@ but has a \fImatched-filter\fP approach to a conic outflow. An alternative would
 an option for \fBangle=\fP to be replaced with \fBwidth=\fP.
 .PP
 The gaps in radius and/or velocity produced with \fBgscale=t\fP can be a nuisance. For stacking
-many images, this should disappear, but otherwise some smoothing/interpolation might be needed.
+many images, for example using \fIccdstack(1NEMO)\fP,
+this should disappear, but otherwise some smoothing/interpolation might be needed.
 Not implemented.
 
 .SH "EXAMPLES"
@@ -117,6 +128,9 @@ An example using our standard NGC 6503 cube given in km/s velocity units.
 
   rvstack ngc6503.ccd rvma.ccd pa=-60 inc=75 vsys=27 center=164,123 rscale=3600 
   rvstack ngc6503.ccd rvmi.ccd pa=30  inc=75 vsys=27 center=164,123 rscale=3600 
+
+  rvstack ngc6503_83.ccd rvma_83.ccd pa=-60 inc=75 vsys=27 center=129,128 rscale=3600 
+  rvstack ngc6503_83.ccd rvmi_83.ccd pa=30  inc=75 vsys=27 center=129,128 rscale=3600 
 
 .fi
 

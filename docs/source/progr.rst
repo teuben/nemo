@@ -1,15 +1,22 @@
-NEMO Programmers Guide: an Introduction
-=======================================
+Programmers Guide
+=================
 
 In this section an introduction is given how to write programs within
 the NEMO environment.  It is based on an original report *NEMO:
 Elementary Mechanics Observatory* by Joshua Barnes (1986).
- 
+
 To the application programmer NEMO consists of a set of (C) macro
 definitions and object libraries, designed for numerical work in general
 and stellar dynamics in particular.  A basic knowledge how to program in
 C, and use the local operating system to get the job done, is assumed. 
 If you know how to work with *Makefile*'s, even better. 
+
+We start by looking at a typical *Hello Nemo* program:
+
+.. include:: hello.src
+   :literal:
+
+ 
 
 
 The NEMO Programming Environment
@@ -167,7 +174,7 @@ newline is present,
 as was the case in NEMO's first release, no help 
 string is available.
 ZENO uses a slightly different technique, where strings starting with ``;``
-are the help string. The example before would
+are the help string. This example in ZENO would look as follows:
 
 .. code-block::
 
@@ -179,6 +186,8 @@ are the help string. The example before would
     };
 
 You can see the first string is actually the same as NEMO's *usage* string.
+The current NEMO *getparam* package is able to parse both NEMO and ZENO style
+``defv[]`` initializers.
    
   
 The ``help=h`` command line option displays the *help* part of string during
@@ -190,7 +199,7 @@ invocations of the user interface.
 The first thing a NEMO program does, is comparing the command
 line arguments of the program (commonly called
 ``string argv[]`` in a C program) 
-with this default vector of ``{\it keyword=value}''
+with this default vector of *keyword=value*
 strings (``string defv[]``), and replace
 appropriate reset values for later retrieval. This is done by calling
 ``initparam`` as the first step in your MAIN program:
@@ -220,7 +229,7 @@ The above section of code would then be replaced by a mere:
 
 .. code-block::
 
-    nemo_main()
+    void nemo_main()
     {
         . . .
 
@@ -285,11 +294,6 @@ More detailed information can also be found in the appropriate manual
 page: *getparam(3NEMO)* and *error(3NEMO)*.
 
 
-.. warning::
-   May 24, 2021: The text below here in this chapter has not been latex->rst sanitized
-
-
-
 Advanced User Interface and String Parsing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -321,6 +325,11 @@ An example of usage:
     nyret = nemoinpd(getparam("y"), y, NYMAX);
 
     nxret = getdrange(getparam("x"), &x, &nxmax);
+
+
+   
+.. warning::
+   May 24, 2021: The text below here in this chapter has not been latex->rst sanitized
 
 
 In the first call the number of elements to be parsed
