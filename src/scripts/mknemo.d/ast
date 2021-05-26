@@ -1,0 +1,7 @@
+#
+
+# http://starlink.eao.hawaii.edu/starlink/AST
+
+# pip install starlink-pyast
+
+url=https://github.com/Starlink/ast/releases/download/v9.2.4/ast-9.2.4.tar.gz
