@@ -32,7 +32,7 @@ given:
 The data are written to this file in \fISnapShot(5NEMO)\fP 
 format [no default].
 .TP
-\fBndisk=\fInum_bodies\fP
+\fBnbody=\fInum_bodies\fP
 Number of disk particles [default: \fB2048\fP]
 .TP
 \fBpotname=\fIpotential_name\fP
@@ -56,6 +56,9 @@ Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
 .TP
 \fBrmax=\fImax_disk_radius\fP
 Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
+.TP
+\fBmass=\fP
+Total mass of the disk. [Default: 0]
 .TP
 \fBa=\fIratio\fP
 Ratio of maximum spiral perturbation w.r.t. base disk. [default: \fB1\fP].
@@ -101,13 +104,13 @@ is used. Default: 1
 \fBnmodel=\fP\fIn_models\fP
 Number of output models. [Default: \fB1\fP].
 .TP
+\fBheadline=\fImessage\fP
+Text headline for output file [default: not used].
+.TP
 \fBlinear=t|f\fP
 Should the spiral be linear or logarithmic. Although spiral galaxies are
 mostly logarithmic, for historic reasons the default here is linear.
 [Default: \fBt\fP]
-.TP
-\fBheadline=\fImessage\fP
-Text headline for output file [default: not used].
 .TP
 \fBtest=\fItest-mode\fP
 The mode for testing.   test=0 gives the normal test disk;  test=1 the 2D coordinates are uniform random (-1,1);
