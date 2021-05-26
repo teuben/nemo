@@ -4,8 +4,9 @@ snapcenter - translate snapshot data to coordinates centered on
 subset of bodies
 .SH SYNOPSIS
 \fBsnapcenter in=\fPsnap-file \fBout=\fPsnap-file [parameter=value] .\|.\|.
-.SH DESCRIPTION
-\fIsnapcenter\fP translates the phase-space data in an input snapshot
+
+.SH "DESCRIPTION"
+\fIsnapcenter\fP shifts the phase-space data from an input snapshot
 file to a coordinate system centered on an arbitrary subset of bodies.
 More precisely, real-valued weights are specified for each body,
 and used to compute a weighted phase-space centroid, which becomes the
@@ -13,9 +14,10 @@ new origin of the coordinate system.
 .PP
 Alternatively a new snapshot with a single particle of total mass and these
 new center-of-mass coordintes can be produced.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
-.TP 24
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
 \fBin=\fP\fIsnap-file\fP
 Input data is read from \fIsnap-file\fP, which must be in snapshot format.
 No default.
@@ -24,17 +26,17 @@ No default.
 Output data is written to \fIsnap-file\fP.
 No default.
 .TP
-\fBtimes=\fP\fItime-range\fP
-Only data frames with time values within \fItime-range\fP, which
-is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
-[Default: \fBall\fP].
-.TP
 \fBweight=\fP\fIexpression\fP
 The value of \fIexpression\fP is used to compute the centroid.
 \fIexpression\fP is a real-valued C language expression over the
 real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBm\fP, \fBt\fP, and the integer value \fBi\fP.
 [Default \fB1\fP].
+.TP
+\fBtimes=\fP\fItime-range\fP
+Only data frames with time values within \fItime-range\fP, which
+is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
+[Default: \fBall\fP].
 .TP
 \fPreport=t|f\fP
 Report the center of mass coordinates. These are 2*NDIM numbers,
@@ -50,6 +52,7 @@ pipe.
 Write output center of mass (COM) as a single body with total mass
 and COM coordinates as computed from \fBweight=\fP.
 [Default: \fBf\fP].
+
 .SH SEE ALSO
 snapcenterp(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .PP
@@ -58,8 +61,10 @@ W.L.Sweatman - (1993) MNRAS 261, 497. 1993MNRAS.261..497S
 Picard,A. and Johnston, H.M. - (1994) A&A, 76.
 .PP
 Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225
+
 .SH AUTHOR
 Joshua E. Barnes.
+
 .SH UPDATE HISTORY
 .ta +1i +4i
 .nf

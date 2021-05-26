@@ -3,41 +3,46 @@
 mksphere \- construct an arbitrary spherical mass distribution
 .SH SYNOPSIS
 \fBmksphere\fP \fBout=\fP \fBnbody=\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmksphere\fP creates a spherical mass distribution consistent
 with a user supplied density profile.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 Output file name, in standard \fIsnapshot(5NEMO)\fP format. No default.
-.TP 20
+.TP 
 \fBnbody=\fP
 Number of particles, no default.
-.TP 20
+.TP
 \fBradii=\fP
 Radii in sphere. Must be given in ascending order, but can be any
 \fInemoinp(3NEMO)\fP expression, e.g. 0:10:0.1. 
-.TP 20
+.TP 
 \fBdensity=\fP
 Associated densities at given radii. If fewer densities are given
 than radii, the last entered density will repeat.
-.TP 20
+.TP
+\fBalpha\fP
+If given, rho=radius^{-alpha} power law [Default: none]
+.TP 
 \fBseed=\fP
 Seed for the random number generator. [Default: 0]
-.TP 20
+.TP
 \fBzerocm=\fP
 Center the snapshot after creation?     [Default: \fBt\fP]
-.TP 20
+.TP
 \fBrmin=\fP
 minimum radius, if to override from radii. Default first radius.
-.TP 20
+.TP
 \fBrmax=\fP
 maximum radius, if to override from radii. Default last radius.
-.TP 20
+.TP
 \fBheadline=\fP
 Verbiage for output. Default none.
+
 .SH SEE ALSO
 snapscale(1NEMO), snapadd(1NEMO), snapshot(5NEMO)
 .SH TODO
