@@ -10,15 +10,14 @@ the disk format. The popular memory (object) models,
 and how they interact with persistent data on disk, are discussed in
 Chapter~\ref{c:progr}}.
 Most of the data handled by NEMO is in the form of a
-specially designed\footnote{note this was back in 1986, well before XML was conceived}
-XML-like binary format, 
+specially designed 
+XML-like binary format (well before XML was conceived)
 although exceptions like ASCII files/tables will also be discussed. 
-Ample examples
-illustrate creation, manipulation and data transfer.
+Ample examples illustrate creation, manipulation and data transfer.
 We close this chapter with a few examples of function descriptions, 
 a dataformat that make use of
-the native object file format of your operating system ({\it a.out(5)}
-and {\it dlopen(3)}).
+the native object file format of your operating system
+(*a.out(5)* and *dlopen(3)*).
 
 Binary Structured Files
 -----------------------
@@ -28,7 +27,7 @@ structure, which can be viewed as a sequence of tagged data items.  Special
 symbols are defined to group these items hierarchically into sets.  Data items
 are typically scalar values or homogeneous arrays constructed from
 elementary C data types, but the programmer can also add more complex
-structures, such as C's {\tt struct} structure definition, or any user
+structures, such as C's ``struct`` structure definition, or any user
 defined data structure. In this last case tagging by type is not 
 possible anymore, and support for a machine independent format
 is not guaranteed. Using such constructs is not recommended if the
@@ -36,36 +35,28 @@ data needs to be portable accross platforms.
 
 The hierarchical structure of a binary file in this general format can
 be viewed in human-readable format at the terminal using a special 
-program, {\tt tsf} 
-\index{tsf(1)} ("{\it type structured file}").
-Its counterpart, {\tt rsf} \index{rsf(1)}
-("{\it read structured file}"),
+program, ``tsf`` ("*type structured file*").
+Its counterpart, ``rsf`` ("*read structured file*"),
 converts such human-readable files (in that special ASCII Structured
-File format, or\index{ASF, Ascii Structured File} ASF)
-into binary structured files 
-(BSF)\index{BSF, Binary Structured File}.
+File format (ASF) into binary structured files (BSF).
 In principle it is hence
 possible to transfer data files between different types of computers
-using {\tt rsf} and {\tt tsf} (see examples in Section~\ref{s:exch-data}).
-\footnote{Note however that currently NEMO's binary files have some limited support
-for machine-independancies, e.g. simple endian swap.
-Some portability notes about this can be found in Appendix~\ref{sifs}}
+using ``rsf`` and ``tsf`` (see examples in Section~\ref{s:exch-data}).
 
 Let us start with a small example: With the NEMO
-program {\tt mkplummer} we first create an
-N-body realization of a spherical Plummer model:\index{mkplummer(1)}
-\index{Plummer, model}
+program ``mkplummer`` we first create an
+N-body realization of a spherical Plummer model:
 
 .. code-block::
 
     1% mkplummer i001.dat 1024
 
 
-Note that we made use of the shortcut that {\tt out=} and {\tt nbody=}
-are the first two program \index{keywords, program} keywords, and they
+Note that we made use of the shortcut that ``out=`` and ``nbody=``
+are the first two *program keywords*, and they
 were assigned their value by position rather than by associated name.
-We can now display the contents of the binary file {\tt i001.dat} with {\tt
-tsf}\index{tsf}:
+We can now display the contents of the binary file ``i001.dat`` with
+``tsf``:
 
 .. code-block::
 
@@ -95,28 +86,27 @@ tsf}\index{tsf}:
 
 
 This is an example of a data-file from the N-body group, and consists of
-a single {\it snapshot} \index{snapshot} at time=0.0.  This snapshot,
+a single *snapshot* at time=0.0.  This snapshot,
 with 1024 bodies with double precision masses and full 6 dimensional
 phase space coordinates, totals 57606 bytes, whereas a straight dump of
-only the essential information would have been 57344 bytes, a mere 0.5\%
-overhead.  The overhead will be larger with small amounts of data, {\it
-e.g.} diagnostics in an N-body simulation, or small N-body snapshots. 
+only the essential information would have been 57344 bytes, a mere 0.5%
+overhead.  The overhead will be larger with small amounts of data,
+*e.g.* diagnostics in an N-body simulation, or small N-body snapshots. 
 
-Besides some parameters in the '{\tt Parameters}' set, it consists
-of a '{\tt Particles}' set, where (along the type of coordinate system)
+Besides some parameters in the ``Parameters`` set, it consists
+of a ``Particles`` set, where (along the type of coordinate system)
 all the masses and phase space coordinates of all particles
 are defined. Note the convention of integers starting with
-a '{\tt 0}' in octal\index{octal}
-representation. This is done for portability
+a ``0`` in octal representation. This is done for portability
 reasons.
 
-A remark about online help\index{help, online}:
-NEMO also uses the {\it man(5)} format\index{man, manual pages}
+A comment about **online** help:
+NEMO uses the Unix *man(5)* format
 for more detailed online help, 
-although the inline help (system {\tt help=} keyword)
-\index{help, inline} is most of the times sufficient enough
+although the **inline** help (system ``help=`` keyword)
+is most of the times sufficient enough
 to remind a novice user of the keywords and their meaning.
-The {\tt man} command is a last resort, if more detailed information
+The ``man`` command is a last resort, if more detailed information
 and examples are needed. 
 
 .. code-block::
@@ -126,7 +116,7 @@ and examples are needed.
 
 Note that, since the online manual page is a different file from the
 source code, information in the manual page can easily get outdated, and
-the \index{help, inline}inline ({\tt help=}) help, although very brief,
+the inline (``help=``) help, although very brief,
 is more likely to be up to date since it is generated from the source
 code (executable) itself:
 
@@ -150,7 +140,7 @@ code (executable) itself:
 Pipes
 -----
 
-In the UNIX operating system pipes\index{pipes} can be very
+In the UNIX operating system pipes can be very
 effectively used to pass information from one process to 
 another. One of the well known textbook examples is how one
 gets a list of misspelled (or unknown) words from a document:
@@ -162,18 +152,17 @@ gets a list of misspelled (or unknown) words from a document:
 
 NEMO programs can also pass data via UNIX pipes, although with a
 slightly different syntax: a dataset that is going to be part of a pipe
-(either input or output) has to be designated with  the {\tt -}
-(``dash'') symbol for their filename.
+(either input or output) has to be designated with  the ``-``
+(*dash*) symbol for their filename.
 Also, and this is very important, the receiving task
-at the other end of the pipe should get data from only one source
-of course. If
-the task at the sending end of the pipe wants to send binary data over
-that pipe, but in addition the same task would also write ``normal''
+at the other end of the pipe should get data from only one source.
+If the task at the sending end of the pipe wants to send binary data over
+that pipe, but in addition the same task would also write *normal*
 standard
 output, the pipe would be corrupted with two incompatible sources of
 data. An example of this is the program 
-{\tt snapcenter}\index{snapcenter}. The keyword {\tt report} must be set to
-{\tt false} instead, which is actually the default now.
+``snapcenter``. The keyword ``report`` must be set to
+``false`` instead, which is actually the default now.
 So, for example, the output of a previous N-body
 integration is re-centered on it's center of mass, and subsequently
 rectified and stacked into a single image as follows:
@@ -187,8 +176,8 @@ rectified and stacked into a single image as follows:
         snapgrid - r001.sum stack=t
 
 
-If the keyword {\tt report=f} would not have been set properly,
-{\tt snaprect}\index{snaprect}
+If the keyword ``report=f`` would not have been set properly,
+``snaprect``
 would not have been able to process it's convoluted
 input. Some other examples
 are discussed in Section~\ref{ss:data}.
@@ -198,84 +187,61 @@ are discussed in Section~\ref{ss:data}.
 History of Data Reduction
 -------------------------
 
-Most programs\footnote{notable exceptions are basic programs
-like {\tt tsf}, {\tt rsf}, {\tt csf} and {\tt hisf}}
+Most programs
 in NEMO will automatically keep track of the history of
 their data-files in a self-describing and self-documenting
-way.\index{history} If a program modifies an input file and produces an
+way. If a program modifies an input file and produces an
 output file, it will prepend the
 command-line with which it was invoked to its data history.  The
 data history is normally located at the beginning of a data file. 
-Comments entered using the frequently used program keyword {\tt
-headline=} will also appear in the history section of your data file. 
-\index{HISTORY, environment}
+Comments entered using the frequently used program keyword
+``headline=`` will also appear in the history section of your data file. 
 
 
-A utility, {\tt hisf} \index{hisf(1)}
+A utility, ``hisf``
 can be used to display the history of a data-file. 
 This utility can also be used to create a pure history file (without any
-data) by using the optional {\tt out=} and {\tt text=} keywords.  Of
-course {\tt tsf} \index{tsf(1)}
-could also be used by scanning its output for the string\index{headline}
-{\tt History} or {\tt Headline}:
+data) by using the optional ``out=`` and ``text=`` keywords.  Of
+course ``tsf``
+could also be used by scanning its output for the string
+``History`` or ``Headline``:
 
 .. code-block::
 
     5% tsf r001.dat | grep History
 
 
-which shows that {\tt tsf}, together with it's counterpart {\tt rsf} has
-virtually
-the same functionality as {\tt hisf}. 
-\footnote{HISTORIC NOTE: To prevent data files having a history written
-into them an environment variable {\bf HISTORY} must be set to 0.  This
-dates back from older times when not all programs could  properly handle
-data files with embedded history items properly. Also note there is no
-associated system keyword with {\bf HISTORY}. It is expected that this
-feature will disappear, {\it i.e.} history is always forcefully written
-into the data files, unless the user interface ({\tt
-getparam.o}\index{getparam} in {\tt libnemo.a}\index{libnemo}) was
-explicitly compiled with  \index{user interface, getparam} the HISTORY
-disabled.}
-
-% Again, use {\it man(1)} to get more information on {\tt hisf}. 
-
+which shows that ``tsf``, together with it's counterpart ``rsf`` has
+virtually the same functionality as ``hisf``. 
 
 
 Table format
 ------------
 
-\mylabel{s-table}
 Many programs are capable of producing standard output in (ASCII)
-tabular format.  \index{table, files}
+tabular format.
 The output can be gathered into a file using
-standard UNIX I/O redirection.  In the example \index{radprof(1)}
+standard UNIX I/O redirection.  In the example 
 
 .. code-block::
 
     6% radprof r001.dat tab=true > r001.tab
 
 
-the file {\tt r001.tab} will contain (amongst others) columns with
-surface density and radius from the snapshot {\tt r001.dat}.  These
-(ASCII) 'table' files can be used by various programs for further
+the file ``r001.tab`` will contain (amongst others) columns with
+surface density and radius from the snapshot ``r001.dat``.  These
+(ASCII) *table* files can be used by various programs for further
 display and analysis.  NEMO also has a few programs for this purpose
-available ({\it e.g..} {\tt tabhist} \index{tabhist(1)}
-for analysis and histogram
-plotting, {\tt tablsqfit} \index{tablsqfit(1)} 
+available (*e.g.*} ``tabhist`` for analysis and histogram
+plotting, ``tablsqfit``
 for checking correlations between two columns and
-{\tt tabmath} \index{tabmath(1)} for general table handling).  
-% Commercial packages such as (S)Mongo \index{mongo} \index{sm}
-% and Lotus 1-2-3 \index{Lotus 1-2-3}
-% may also come in very handy here and easily read table files.
+``tabmath`` for general table handling.
 The manual 
 pages of the relevant NEMO programs should inform you how to get nice
 tabular output, but sometimes it is also necessary to write a shell/awk
-\index{awk, script}\index{shell, script}
-script or parser to do the job. {\it Note: the {\tt tab=} keyword
-hints at the existence of such features}.
+script or parser to do the job.
 
-A usefull (public domain) program {\it redir(1NEMO)}\index{redirection}
+A usefull (open source domain) program *redir(1NEMO)*
 has been included in NEMO\footnote{see also the {\tt tpipe} tool}
 to be\index{tpipe}
 able split the two standard UNIX output channels {\it stdout} and
@@ -287,21 +253,20 @@ able split the two standard UNIX output channels {\it stdout} and
     7% redir -e debug.out tsf r001.dat debug=2
 
 
-would run the {\tt tsf} command, but redirecting the
-{\it stderr} standard error output to a file {\tt stderr.out}. There are
+would run the ``tsf`` command, but redirecting the
+*stderr* standard error output to a file ``stderr.out``. There are
 ways in the C-shell to do the same thing, but they are
-clumsy and hard to remember. In the bourne 
-shell ({\tt /bin/sh})\index{bourne shell} this is accomplished much
-easier:
+clumsy and hard to remember. In the bourne/bash
+shell this is accomplished much easier:
 
 .. code-block::
 
-    7$ tsf r001.dat debug=2 2>debug.out
+    7$ tsf r001.dat debug=2  2>debug.out
 
 
 One last word of caution regarding tables: tables can also be used
 very effectively in pipes, for example take the first example,
-and pipe the output into {\tt tabplot} to get a quick look 
+and pipe the output into ``tabplot`` to get a quick look 
 at the profile:
 
 .. code-block::
@@ -309,10 +274,10 @@ at the profile:
     8% snapprint r001.dat r | tabhist - 
 
 
-If the snapshot contains more than 10,000 points, {\tt tabhist} cannot
+If the snapshot contains more than 10,000 points, ``tabhist`` cannot
 read the remainer of the file, since the default maximum number
-of libes for reading from pipes\index{pipe, limiting lines}
-is set by a keyword {\tt nmax=10000}. To properly read all lines, you
+of libes for reading from pipes
+is set by a keyword ``nmax=10000``. To properly read all lines, you
 have to know (or estimate) the number of lines. In 
 the other case where the input is a regular file, table programs
 are always able to find the correct amount to allocate for their
@@ -324,9 +289,14 @@ Dynamically Loadable Functions
 
 A very peculiar data file format encountered in NEMO is that of the 
 function descriptors. They present themselves to the user through
-one or more keywords, and in reality point to a compiled\index{loadobj}
-piece of code that will get loaded by NEMO (using {\tt loadobj(3NEMO)}).
+one or more keywords, and in reality point to a compiled
+piece of code that will get loaded by NEMO (using *loadobj(3NEMO)*).
 We currently have 4 of these in NEMO:
+
+
+.. warning::
+   Below this marker latex conversion and cleanup not done yet
+
 
 Potential Descriptors
 ~~~~~~~~~~~~~~~~~~~~~
