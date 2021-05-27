@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 DIR = src/nbody/evolve/aarseth/tools
 BIN = nbody1 u3tos runbody4
 NEED = $(BIN) mkplummer snaptrim snapcmp runbody1 nbody1 stou4 u3tos
