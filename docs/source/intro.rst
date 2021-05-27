@@ -12,7 +12,7 @@ programs, a group being defined by their common file structure.
    the data on disk.
 
 A common (command line) user interface is defined with which the user
-communicates with a program, described in more detail in the next chapter
+communicates with a program, described in more detail in the 
 :ref:`iface`.
    
 ..   and  Appendix~\ref{a:iface}.  
@@ -73,7 +73,7 @@ as they clearly show the structure of NEMO:
 More groups and intermediate file structures are readily defined, as
 NEMO is also an excellent development system.  We encourage users to define 
 their own (or extend existing) data structures as 
-the need arises.  In Chapter \ref{c:progr} we
+the need arises.  In :ref:`progr` we
 will detail some 'rules' how to incorporate/add new software into the
 package, and extend your NEMO environment. 
 
@@ -86,11 +86,12 @@ manipulated, including the concept of function descriptors in NEMO.
 Chapter :ref:`graphics` details how data can be
 graphically displayed, either using NEMO itself or external programs.
 
-The second part of the manual is a cookbook: Chapter~\ref{c:examples}
+The second part of the manual is a cookbook: :ref:`examples`
 gives a variety of examples of use.
 
-The third part of the manual is the programmers manual:
-Chapter~\ref{c:progr} is for the more adventurous user who wants to
+The third part of the manual is the
+:ref:`progr`
+is for the more adventurous user who wants to
 modify or extend NEMO. 
 
 ..  Some rules are given to increase the chance of upgrade survival. 
