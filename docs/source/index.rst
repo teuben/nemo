@@ -33,7 +33,7 @@ For Users
    install
    progr
    .. refs
-   .. aiface
+   aiface
    potname
    amuse	      
    coordsys
