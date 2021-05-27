@@ -1,3 +1,5 @@
+.. _progr:
+
 Programmers Guide
 =================
 
