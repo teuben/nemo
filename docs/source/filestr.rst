@@ -8,7 +8,7 @@ data\footnote{Programmers are always free to choose any format they like
 in memory - this is usally hidden from the users.  What we mean here is
 the disk format. The popular memory (object) models,
 and how they interact with persistent data on disk, are discussed in
-Chapter~\ref{c:progr}}.
+:ref:`progr`.
 Most of the data handled by NEMO is in the form of a
 specially designed 
 XML-like binary format (well before XML was conceived)
