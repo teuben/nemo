@@ -5,14 +5,15 @@
 # apr 15 2021: First Version
 # apr 30 2021: Stopped flagging files w/o help=h
 #              Added -v verbose flag
-# may 4 2021:  Fixed regex bug
-# may 6 2021:  -h flag added
+# may 6  2021: -h flag added
+# may 29 2021: -f flag added
 
 import re, os, subprocess, getopt, sys
 
 # Global flags
 VERBOSE = False # If True prints man & help outputs for bad files
 HELP = False
+TASKLIST = "src/scripts/tasklist"
 
 def get_man_matches(file):
     try:
@@ -61,7 +62,7 @@ def help_exists(file):
 def checkMan():
     files_read, files_read_names = 0, []
     bad_files, bad_file_names = 0,[]
-    tasklist = open("src/scripts/tasklist")
+    tasklist = open(TASKLIST)
 
     # Iterate over tasklist
     for file in tasklist:
@@ -113,16 +114,18 @@ def checkBin(tasklist):
     print("Bad files: " + str(bad_file_names))
 
 def readFlags():
-    global VERBOSE
+    global VERBOSE, HELP, TASKLIST
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv,"vhf")
+        opts, args = getopt.getopt(argv,"vhf:")
         for opt, arg in opts:
             if opt in ["-v"]:
                 VERBOSE = True
             elif opt in ["-h"]:
                 HELP = True
+            elif opt in ["-f"]:
+                TASKLIST = arg
     except:
         print("getopt error")
 
@@ -148,3 +151,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    
