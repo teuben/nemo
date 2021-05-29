@@ -85,7 +85,7 @@ def checkMan():
                 if VERBOSE:
                     print(file)
                     print("man: "+str(man_out))
-                    print("help: "+str(help_out))
+                    print("bin: "+str(help_out))
                     print() 
     
     print("Files with help=h & man mismatches")
