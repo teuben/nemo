@@ -242,13 +242,13 @@ has the following to offer:
 -->
 
 <OL>
- <LI> Here is the now recommended GIT based installation.
+ <LI> Here is the now recommended GIT based installation in a bash shell:
 
 <PRE>
-	 %1 wget https://teuben.github.io/nemo/install_nemo
-	 %2 chmod +x install_nemo
-	 %3 ./install_nemo nemo=$HOME/opt/nemo
-	 %4 source $HOME/opt/nemo/nemo_start.csh
+	 %1 wget https://teuben.github.io/nemo/install_nemo.sh
+	 %2 chmod +x install_nemo.sh
+	 %3 ./install_nemo,sh nemo=$HOME/opt/nemo
+	 %4 source $HOME/opt/nemo/nemo_start.sh
      
 </PRE>
 
@@ -257,29 +257,8 @@ if you don't have the wget program, get something
 similar that can download this script, e.g. curl, or just your favorite browser.
 You can of course pick the
 location of NEMO to be anywhere, but we picked $HOME/opt/nemo in this example.
-In the 4th step it also assumed you
-were using the C-shell. If you are a bash user, source the nemo_start.sh script
-instead!
 
 
- <LI> A tar file from our ftp server may also work. 
-   Here is an example using 
-<PRE>
-        %1 wget  ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz
-           or
-	%1 curl ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz | tar zxf -
-	
-	%2 tar zxf nemo_git.tar.gz 
-
-		# wget could need --active-ftp, since --passive-ftp is default
-		# curl has a similar option, --ftp-pasv
-
-        %3 cd nemo_git
-	%4 git pull                # optional if you don't need any updates
-	%5 docs/install_nemo nemo=. reuse=1
-</PRE>
-    and you should have a working NEMO with PGPLOT as the plotting
-    engine.
    <LI> There are a number of optional libraries you will need to install
      if you want to use every possible program or option in NEMO. If this is you
      first time using NEMO, we recommend you to skip this unless you need a specific
@@ -313,11 +292,6 @@ instead!
         don't support anymore. You will be on your own here.
         
    
-<LI>    Some old <A HREF=macosx.html>MacOSX related installation notes</A>,
-	although the regular installation method should work fine as long
-  as you have compilers and various external libraries (notably X11) installed.
-
-
  <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nbody0.tar.gz>
         Aarseth's nbody0</A>. Although the source code is 
 	taken directly from NEMO, the Makefile contains 
@@ -344,19 +318,7 @@ instead!
  <LI> <A HREF=optional.html> optional software</A> that can be installed
 	to enrich NEMO (this is where you find links to PGPLOT, HDF, CFITSIO etc.)
 
- <LI>  The <A HREF=http://www.randomfactory.com/>
-	Linux for Astronomy </A> CD-ROM contains a release of NEMO. Also
-  	check <A HREF=lfa.html>latest LFA comments</A>. 
 </OL>
-
-Difficulties during installation are most likely resolved by consulting
-the $NEMO/README.install file.
-<P>
-If you download NEMO, we ask that you register the software, you can also
-optionally be notified of new releases, but please:
-<A HREF=mailto:nemo@astro.umd.edu>Send us an email!</A>
-
-
 
 <H2><img src=red.ball.gif alt="*">
     <A NAME=others> Other Software </A></H2>
