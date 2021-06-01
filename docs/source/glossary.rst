@@ -1,3 +1,5 @@
+.. _glossary::
+
 Glossary
 --------
 
@@ -36,6 +38,10 @@ Glossary
       (Full Width Half Max): the effective resolution of the
       beam if normally given in **FITS** keywords BMAJ,BMIN,BPA.  The
       term **resolution** is used interchangeably.
+
+  GIPSY
+      The Groningen Image Processing System. A number of concepts in NEMO, and
+      a few routines, have been taken liberally from GIPSY.
   
 
   history
@@ -103,7 +109,7 @@ Glossary
       Global keyword that every NEMO
       program knows about, and are not listed in the (program)
       keywords that can be seen by issuing e.g. **help=** (in itself
-      being a system keyword).
+      being a system keyword). This concept originated in GIPSY
 
   table
       A table consists of rows and columns of values, numbers or text.

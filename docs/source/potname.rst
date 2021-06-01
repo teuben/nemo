@@ -1,5 +1,5 @@
-Potentials
-==========
+Potentials and Accellerations
+=============================
 
 Here we lists a number of potentials, taken from
 from CTEX comments in the
@@ -30,3 +30,25 @@ Mostly **G=1**, unless otherwise mentioned.
 .. todo::  potentials auto-build from source code ???
    
 .. include:: potctex.rst
+
+Accellerations
+--------------
+
+This is a falcON addition. They are defined in ``$FALCON/src/public/acc``,
+where their list (for installation) is defined in ``$FALCON/makepub``.
+
+
+For a new potential, say ``GasPotential.cc``, add to ``$FALCON/makepub``:
+
+.. code-block::
+
+   acc_pub         :=
+                         ...
+                         $(ACC)GasPotential.so
+
+and a proper dependency as well:
+
+.. code-block::
+
+   $(ACC)GasPotential.so: $(SACC)GasPotential.cc $(ACCT) $(defacc_h) $(makefiles)
+                          $(MAKE_ACC)

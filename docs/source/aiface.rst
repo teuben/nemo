@@ -1,14 +1,16 @@
 .. _aiface:
 
-The User Interface
-==================
+The User Interface (Reference)
+==============================
 
+.. todo::  section needs to be merged with the previous one
+   
 This Appendix overviews the basic command-line interface of NEMO programs. 
 
 Every NEMO program accepts input through a user supplied parameter list
-of {\it 'keyword=value'} arguments. In addition to these 
+of *keyword=value* arguments. In addition to these program specific
 **program keywords**,
-there are a number of globally defined **system keywords**,
+there are a number of system wide  defined **system keywords**,
 known to every NEMO program.
 
 Program keywords
@@ -28,7 +30,8 @@ System keywords
 
 The 'hidden' system keywords, although overridden by 
 any program defined counterpart, can also be set by an 
-equivalent environment variable (in upper case), and are:
+equivalent environment variable (in upper case).
+
 
 
 - **help=** Sets the help level to a program. As with all
@@ -120,6 +123,7 @@ equivalent environment variable (in upper case), and are:
     The procedure in NEMO to update a {\tt .doc} file would be:
 
 .. code-block::
+
          % program help=t > $NEMODOC/program.doc
      or:
          % mktool program
