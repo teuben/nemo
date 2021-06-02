@@ -6,7 +6,7 @@
 #
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
-#     jun-2021      fix missing sign=
+#     jun-2021      fix missing sign=; add noise
 
 #   rmin:    the cone starts at rmin in the Z=0 plane
 #   vscale   setting this > 0 will give the outflow some rotation as well
@@ -34,6 +34,7 @@ set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
 set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,10,100,1000,10000
 set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
+set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
 set out     = cone1     #> ENTRY out=cone1
 
 #  parameters not in the GUI
@@ -106,18 +107,23 @@ else
     snaprotate - - $incd x > $out.snap
 endif
 
-#set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
+#   svar: add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
 snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
+ccdfits $out.den $out.den.fits radecvel=t >& /dev/null
+ccdfits $out.vel $out.vel.fits radecvel=t >& /dev/null
+
 snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
+   ccdmath - - "%1+rang(0,$noise)" |\
    ccdfits - $out.fits radecvel=t debug=-1
 
 xpaset -p ds9 frame frameno 1
-nds9 $out.vel
+nds9 $out.vel.fits
 xpaset -p ds9 frame frameno 2
-nds9 $out.den
+nds9 $out.den.fits
 
 #  load the same cube 3 times, so locally you will need to Cube -> Axis Order -> 1,2,3  1,3,2 and 2,3,1
+#  to get the different types of PP or PV slices
 xpaset -p ds9 frame frameno 3
 nds9 $out.fits
 xpaset -p ds9 frame frameno 4
