@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "23 May 2021"
+.TH RVSTACK 1NEMO "1 June 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
@@ -8,29 +8,31 @@ rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
 
 .SH "DESCRIPTION"
 \fBrvstack\fP takes all points within a (narrow) wedge around the major or minor
-axis of an assumed galaxy disk data cube, and
+axis of an assumed galaxy disk data cube, and stacks these data to
 construct a Radius-Velocity diagram,
-centered on the galaxy in position
-and velocity.  It will stack the two sides of the galaxy (but see also \fBside=\fP),
-so the radial coordinate
-will run from 0 to some Rmax.  In velocity it will run from some -Vmax to Vmax,
-but always expecting positive rotation and positive outflow, assuming the
-position angle is correctly set. 
+centered on the galaxy in position and velocity.
+It will also stack the two sides of the galaxy (but see also \fBside=\fP),
+so the radial coordinate will run from 0 to some Rmax.
+In velocity it will run from some -Vmax to Vmax,
+but always expecting positive rotation around the Z axis,
+and positive outflow along the Z axis, assuming the
+position angle of the galactic disk is correctly set. 
 .PP
 Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
 If you have many like-minded galaxies, stacking these images may beat the noise down much more.
-See \fIccdstack(1NEMO)\fP.
 .PP
 Options exist to scale the Radius and Velocity to different units, such that
 many galaxies can be stacked in physical space, as opposed to observed space. See
 \fBrscale=\fP and \fBvscale=\fP.
+.PP
+See also \fIccdstack(1NEMO)\fP for the final stacking operation.
 .PP
 When \fBgscale=t\fP is set, the coordinates are scaled as follows:
 .nf
 .ta +2i
 
 Rotation	Outflow
---------	-------
+--------	---------
 R		R/cos(i)
 V/sin(i)	V/cos(i)
 
@@ -89,9 +91,11 @@ Scaling factor for velocity. This would be  used to stack galaxies based on a ma
 not geometry, see \fBgscale=\fP below. [Default: 1]
 .TP
 \fBgscale=f|t\fP
-A boolean if to scale for (inclination based) geometry. If selected,
+A boolean if to scale for (inclination and position angle based) geometry. If selected,
 rotation is scaled by 1/sin(i), outflow by 1/cos(i).
-Radius is not scaled for rotation, but by 1/cos(i) for outflow.   [Default: f]
+Radius is not scaled for rotation, but by 1/cos(i) for outflow.
+Small position angle based corrections are also applied.
+[Default: f]
 .TP
 \fBmode=r|o\fP
 Select output mode: rotation (r) or outflow (o).   For rotation, points around \fBpa=\fP are
@@ -110,7 +114,7 @@ Debugging spreading signal. Don't use.
 Code is still under developement, in particular dealing with units is unresolved.
 .PP
 No geometric correction is made based on the angle in the disk. This could become a future
-option
+option. Or see the geom=t|f being played with
 .PP
 A wedge has the disadvantage the the noise decreases inversely proportional to the sqrt(radius),
 but has a \fImatched-filter\fP approach to a conic outflow. An alternative would be to have
@@ -120,7 +124,9 @@ The gaps in radius and/or velocity produced with \fBgscale=t\fP can be a nuisanc
 many images, for example using \fIccdstack(1NEMO)\fP,
 this should disappear, but otherwise some smoothing/interpolation might be needed.
 Not implemented.
-
+.PP
+Outflow is hard-coded as outflow along the Z axis. What should the off-axis relationship
+be? Conical?
 .SH "EXAMPLES"
 An example using our standard NGC 6503 cube given in km/s velocity units.
 
@@ -135,7 +141,7 @@ An example using our standard NGC 6503 cube given in km/s velocity units.
 .fi
 
 .SH "SEE ALSO"
-ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO)
+ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO), rotcur(5NEMO)
 .PP
 https://github.com/jbjolly/LineStacker
 
@@ -153,5 +159,6 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
-6-May-21	V0.4 First working version	PJT
+6-May-2021	V0.4 First working version	PJT
+31-may-2021	V0.7 better geometry correction	PJT
 .fi
