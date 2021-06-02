@@ -7,7 +7,7 @@
 #
 # https://unix.stackexchange.com/questions/34516/can-i-create-a-man-page-for-a-script
 #
-set version="1.3  16-mar-2020 PJT"
+set version="1.4  22-may-2021 PJT"
 
 if ($#argv == 0) then
   echo "Usage: $0 [-section] name"
@@ -41,30 +41,39 @@ set ddmmyy=`date '+%d-%h-%y'`
 echo '.\" This man pages created with '$0
 echo '.\" Remove these comment lines when editing for the final version'
 echo ".TH $uname ${section}NEMO "'"'"$ddmmmyyyy"'"'
-echo ".SH NAME"
+echo
+echo '.SH "NAME"'
 if ($section == 1) then
   echo "$lname \- `$lname help=uq`"
 else
   echo "$lname \- "
 endif
-echo ".SH SYNOPSIS"
+echo
+echo '.SH "SYNOPSIS"'
 if ($section == 1) then
   echo "\fB$lname\fP [parameter=value]"
 endif
-echo ".SH DESCRIPTION"
+echo
+echo '.SH "DESCRIPTION"'
 echo "No description available. This manual page was created by mkman"
 if ($section == 1) then
-  echo ".SH PARAMETERS"
+  echo  
+  echo '.SH "PARAMETERS"'
   echo "The following parameters are recognized in any order if the keyword"
   echo "is also given:"
   $lname help=h | awk '{ printf(".TP 20\n\\fB%s=\\fP\n%s %s %s %s %s %s %s %s\n",$1,$3,$4,$5,$6,$7,$8,$9,$10)}'
 endif
-echo ".SH EXAMPLES"
-echo ".SH SEE ALSO"
-echo ".SH FILES"
-echo ".SH AUTHOR"
+echo
+echo '.SH "EXAMPLES"'
+echo
+echo '.SH "SEE ALSO"'
+echo
+echo '.SH "FILES"'
+echo
+echo '.SH "AUTHOR"'
 echo "mkman"
-echo ".SH UPDATE HISTORY"
+echo
+echo '.SH "UPDATE HISTORY"'
 echo ".nf"
 echo ".ta +1.0i +4.0i"
 echo "$ddmmyy	V0.0 Created by mkman	NEMO/$USER"

@@ -28,6 +28,7 @@ ccdsharp3 enhance/sharpen an image cube
 ccdsky lazy sky scaling (cosmology) calculator
 ccdslice takes slices from a cube
 ccdsmooth smooth image cube in XYZ
+ccdstack stack images, with simple gridding option if WCS differs
 ccdstat basic statistics of an image, optional chi2 calculation
 ccdsub sub/average of an image, with reorder option
 ccdtrace interpolate a set of coordinates from an image
@@ -94,6 +95,7 @@ potq query a NEMO potential in the XY plane
 potrot query a NEMO potential in the XY plane, and derive a rotation curve 
 potsf find potential parameters in a structured file
 pstats profile stats helper
+rvstack exact Radius-Velocity diagrams for later stacking
 rotcurshape nonlinear fit of kinematical parameters to the velocity field of a coplanar disk
 rotcurtab prints a table of a rotation curve
 rotcurves display rotation curve of composite potentials

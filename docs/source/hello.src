@@ -1,0 +1,19 @@
+#include <nemo.h>                         /* standard (NEMO) definitions */
+
+string defv[] = {       /* standard keywords and default values and help */
+    "n=10\n                    Number of interations",           /* key1 */
+    "VERSION=1.2\n             25-may-1992 PJT",                 /* key2 */
+    NULL,               /* standard terminator of defv[] vector          */
+};
+
+string usage = "Example NEMO program 'hello'";	      /* usage help text */
+
+void nemo_main()                   /* standard start of any NEMO program */
+{
+    int n = getiparam("n");                          /* get n            */
+    
+    printf("Hello NEMO!\n");                         /* do some work ... */
+    if (n < 0)                                       /* deal with fatal  */
+       error("n=%d is now allowed, need >0",n);      /* errors           */
+}
+	

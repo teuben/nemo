@@ -91,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3c\n  21-jan-2021 PJT",
+        "VERSION=6.3d\n  22-may-2021 PJT",
         NULL,
 };
 
@@ -304,6 +304,8 @@ void write_fits(string name,imageptr iptr)
     bmaj = Beamx(iptr);
     bmin = Beamy(iptr);
     bpa  = 0.0;        /* only spherical beams for now */
+    if (strlen(object) == 0)
+      object = Object(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */

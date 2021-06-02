@@ -1,7 +1,9 @@
 .TH TRICKS 8NEMO "6 March 1989"
-.SH NAME
-tricks \- some unix tricks when using NEMO
-.SH DESCRIPTION
+
+.SH "NAME"
+tricks \- some Unix tricks when using NEMO
+
+.SH "FILES: COMPRESSION AND SUCH"
 One can use \fIcat(1)\fP to catenate structured binary files, e.g.
 .nf
 	\fBcat r001a.dat >>r001.dat\fP
@@ -50,10 +52,12 @@ The \fIds9(1)\fP program is one of the external programs
 which can be used to display images. \fIds9\fP can understand a
 variety of FITS compression standards.
 Transform your image to a fits file using \fIccdfits(1NEMO)\fP, and use 
-ds on that fits file. 
-.SH PIPES and SHARED MEMORY
+ds on that fits file.
+
+.SH "PIPES and SHARED MEMORY"
 NEMO encourages you to use pipes where serial operations make sense (see also \fItee(1)\fP).
-However on Linux, assuming you have enough memory, using /dev/shm will sacrifice your memory to store
+However on Linux, assuming you have enough memory, using /dev/shm (or anything that uses
+\fItmpfs(1)\fP)   will sacrifice your memory to store
 data temporarely and could speed up your I/O dominated workflow. Here is an example:
 .nf
        mkdir /dev/shm/$USER
@@ -85,7 +89,8 @@ Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
 .nf
         mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
 .fi
-.SH PARALLEL
+
+.SH "PARALLEL and OpenMP"
 Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
 uses a fraction of the memory on the machine, the GNU \fIparallel(1)\fP program can be used to spread the load,
 e.g.
@@ -95,11 +100,28 @@ e.g.
        parallel --jobs 2 < run.txt
 .fi
 which will run both jobs in parallel
+.PP
+Although NEMO can be configured using \fB--with-openmp\fP to take advantage of multi-cores OpenMP
+computing, there are really no programs in NEMO taking advantage of this yet.
+However, programs using \fInemo_main()\fP
+should be aware of the user interface implications of controlling how many cores are used:
+.nf
 
-.SH SEE ALSO
+   0.  the number of cores as per omp_get_num_procs().  We actually take a short-cut and use
+       omp_get_max_threads() since it listens to OMP_NUM_THREADS (see next item)
+       [the user has no control over this]
+   1.  setting the environment variable OMP_NUM_THREADS to the (max) number of cores it will use
+   2.  using the \fBnp=\fP system keyword will override any possible setting of OMP_NUM_THREADS
+       in the step before.
+   
+.fi   
+
+.SH "SEE ALSO"
 nemo(1NEMO), bench(5NEMO), tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben.
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
@@ -108,4 +130,5 @@ Peter Teuben.
 6-mar-89	ds added          	PJT
 9-oct-90	fixed some typos	PJT
 jan-2020	added pipe/shm		PJT
+may-2021	OpenMP			PJT
 .fi

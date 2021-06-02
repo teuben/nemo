@@ -1,10 +1,24 @@
 #! /bin/csh -f
 #
-# to get a rotating disk:    mk_cone vscale=1 outflow=0 cone=90
+# to get a rotating disk:    ./mk_cone vscale=1 outflow=0 cone=90
 # the disk= blends in a true disk so you can see both the outflow cones and the disk
+# Make sure "ds9" has been launched before this script is run, as 5 frame are sent to ds9
 #
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
+#     jun-2021      fix missing sign=; add noise
+
+#   rmin:    the cone starts at rmin in the Z=0 plane
+#   vscale   setting this > 0 will give the outflow some rotation as well
+#   outflow  outflow
+#   flow
+#   view     0 = optically thin   1=only see front   (-1 only see back)
+#   incd     inc of disk
+#   inc      inc of cone w.r.t. disk (disk is always along X axis)
+#   pa       pa of cone w.r.t. disk
+#   mirror   1=have both sides
+#   fill     t=cone is filled  f=cone is hollow
+#   svar     smoothing
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
@@ -18,9 +32,10 @@ set view    = 0         #> RADIO view=0       -1,0,1
 set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
-set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,,10,100,1000,10000
+set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,10,100,1000,10000
 set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
-set out = cone1         #> ENTRY out=cone1
+set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
+set out     = cone1     #> ENTRY out=cone1
 
 #  parameters not in the GUI
 set rmax = 1
@@ -75,13 +90,13 @@ if ($mirror == 0) then
 else
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
-    snapspin - - rotcur=$out.flow outflow=t|\
+    snapspin - - rotcur=$out.flow outflow=t sign=1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snapshift - - 0,0,-$rmin |\
     snaprotate - $out.1 $inc,$pa xz    
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
-    snapspin - - rotcur=$out.flow outflow=t|\
+    snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snapshift - - 0,0,-$rmin |\
     snapscale - - rscale=1,1,-1 |\
@@ -92,16 +107,23 @@ else
     snaprotate - - $incd x > $out.snap
 endif
 
-#set svar=0.01    # add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
+#   svar: add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
 snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
+ccdfits $out.den $out.den.fits radecvel=t >& /dev/null
+ccdfits $out.vel $out.vel.fits radecvel=t >& /dev/null
+
 snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
+   ccdmath - - "%1+rang(0,$noise)" |\
    ccdfits - $out.fits radecvel=t debug=-1
 
 xpaset -p ds9 frame frameno 1
-nds9 $out.vel
+nds9 $out.vel.fits
 xpaset -p ds9 frame frameno 2
-nds9 $out.den
+nds9 $out.den.fits
+
+#  load the same cube 3 times, so locally you will need to Cube -> Axis Order -> 1,2,3  1,3,2 and 2,3,1
+#  to get the different types of PP or PV slices
 xpaset -p ds9 frame frameno 3
 nds9 $out.fits
 xpaset -p ds9 frame frameno 4

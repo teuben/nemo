@@ -31,6 +31,7 @@
  *   4-aug-11   V7.2 fixed various map2_image/map3_image mistakes        PJT
  *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
  *  13-feb-13   V8.1 added region and sub_image()                        PJT
+ *  22-may-21   V8.2 deal with Object
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -171,6 +172,8 @@ int write_image (stream outstr, imageptr iptr)
          put_string (outstr,NamezTag,Namez(iptr));
       if (Unit(iptr))
          put_string (outstr,UnitTag,Unit(iptr));
+      if (Object(iptr))
+   	 put_string(outstr,ObjectTag,Object(iptr));
       put_data (outstr,TimeTag,  RealType, &(Time(iptr)), 0);
       put_string(outstr,StorageTag,matdef[idef]);
       put_data (outstr,AxisTag,  IntType, &(Axis(iptr)), 0);
@@ -272,6 +275,10 @@ int read_image (stream instr, imageptr *iptr)
                 Unit(*iptr) = get_string(instr,UnitTag);
             else
                 Unit(*iptr) = NULL;
+            if (get_tag_ok(instr,ObjectTag))             /* object  */
+  	        Object(*iptr) = get_string(instr,ObjectTag);
+            else
+                Object(*iptr) = NULL;
             if (get_tag_ok(instr,TimeTag))             /* time  */
    	    	get_data_coerced (instr,TimeTag, RealType, &(Time(*iptr)), 0);
    	    else
@@ -369,6 +376,7 @@ int create_image (imageptr *iptr, int nx, int ny)
     Namey(*iptr) = NULL;
     Namez(*iptr) = NULL;
     Unit(*iptr)  = NULL;        /* no units */
+    Object(*iptr) = NULL;
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
     Axis(*iptr) = 0;
@@ -428,6 +436,8 @@ int copy_image (imageptr iptr, imageptr *optr)
   Namex(*optr) = mystrcpy(Namex(iptr));
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
+  Unit(*optr)  = mystrcpy(Unit(iptr));
+  Object(*optr) = mystrcpy(Object(iptr));
   Xref(*optr) = Xref(iptr);
   Yref(*optr) = Yref(iptr);
   Zref(*optr) = Zref(iptr);
@@ -473,6 +483,8 @@ int sub_image (imageptr iptr, regionptr rptr, imageptr *optr)
   Namex(*optr) = mystrcpy(Namex(iptr));
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
+  Unit(*optr) = mystrcpy(Unit(iptr));
+  Object(*optr) = mystrcpy(Object(iptr));
   Xref(*optr) = Xref(iptr) + ix0;
   Yref(*optr) = Yref(iptr) + iy0;
   Zref(*optr) = Zref(iptr) + iz0;
@@ -524,6 +536,7 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Namey(*iptr) = NULL;
     Namez(*iptr) = NULL;
     Unit(*iptr)  = NULL;        /* no units */
+    Object(*iptr) = NULL;
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
     Axis(*iptr) = 0;
@@ -681,6 +694,7 @@ void ini_matrix(imageptr *iptr, int nx, int ny)
   Namey(*iptr) = NULL;
   Namez(*iptr) = NULL;
   Unit(*iptr)  = NULL;        /* no units */
+  Object(*iptr) = NULL;
   Mask(*iptr)  = NULL;
 
   set_iarray(*iptr);

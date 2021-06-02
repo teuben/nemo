@@ -1,4 +1,5 @@
-This directory contains manuals:
+This directory contains manuals, but it has been converted from Latex to RST in May 2021.
+See $NEMO/src/source
 
 	Makefile	aid in making (la)tex based manuals
 	README		this file	

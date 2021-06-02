@@ -3,24 +3,24 @@
 Using NEMO
 ==========
 
-In order to use NEMO programs, NEMO will need to modify your
-shell environment, for exampl
-
+In order to use NEMO, you will need to modify your
+shell environment, for example in the ``bash`` shell
+this could be
 
 .. code-block:: bash
 
 	source /opt/nemo/nemo_start.sh
 
-for users of the ``bash`` or ``zsh`` shell, and assuming NEMO
-was installed in ``/opt/nemo/``
+assuming NEMO was installed in ``/opt/nemo/``, and
 
 .. code-block:: bash
 
 	source /opt/nemo/nemo_start.csh
 
-for users of the ``csh`` or ``tcsh`` shell.
+for users of a ``csh`` like shell. Normally the ``source``
+line would be added to your ``~/.bashrc`` or ``/.cshrc`` file.
 
-After this the following commands should work:
+After this the following commands should work for you
 
 .. code-block:: bash
 
@@ -38,8 +38,13 @@ write permission in $NEMO:
 .. code-block:: bash
 
    mknemo -u tsf
-   tsf --help
+   mknemo -h
+   man mknemo		
 
-and an updated version should now be available (check the ``VERSION=`` default)
+and an updated version should now be available (check the value of the ``VERSION=``
+value in the output of ``--help``).
+
+Writing NEMO program programs is covered in :ref:`progr`, or see
+also :ref:`install`.
 
 	

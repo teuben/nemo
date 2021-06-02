@@ -8,7 +8,11 @@ User Interface
    we differentiate between  :term:`program keyword` and :term:`system keyword`
 
 A NEMO program is invoked just as any other application program under
-the operating system.  
+the operating system, entering its name from a Unix shell, for example:
+
+.. code-block::
+
+    mkplummer
 
 In the first section the keyword interface is explained. 
 Subsequently, we will explain some of the more advanced concepts of this
@@ -28,7 +32,9 @@ Program Keywords
 ~~~~~~~~~~~~~~~~
 
 .. note::
-   The **help=h** *system keyword* gives a nice overview of the *program keywords*
+   The **help=h** *system keyword* gives a nice overview of the *program keywords*.
+   Since it is so common, using **--help** invoke the default **help=** showing
+   the program keywords and their defaults.
 
 The most basic user interface is formed by the command line interface.
 Every NEMO program accepts input through a list
@@ -448,7 +454,8 @@ caveat, here are various help options:
 
 - The old manual, the *The NEMO User and Programmers Guide*,
     contains information on a wide level, aimed at beginners
-    as well as advanced users. The manual is also available in html.
+    as well as advanced users, and at is being coverted to this RST
+    manual, outdated.
 
 - This manual, in **reStructuredText** might be available in many different formats
     

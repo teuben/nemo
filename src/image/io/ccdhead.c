@@ -3,6 +3,7 @@
  *
  *      27-apr-2011   Created , finally
  *      27-jan-2021   fixed for axis=1
+ *      21-may-2021   fixed LL/RR coordinates
  */
 
 
@@ -14,7 +15,7 @@
 
 string defv[] = {
   "in=???\n       Input image filename",
-  "VERSION=1.3a\n 14-apr-2021 PJT",
+  "VERSION=1.4\n  21-may-2021 PJT",
   NULL,
 };
 
@@ -50,7 +51,8 @@ void nemo_main()
     if (Axis(iptr) == 0) {
       printf("AXIS=0:\n");
       printf("LL-Corner: %g %g %g\n", Xmin(iptr), Ymin(iptr), Zmin(iptr));
-      printf("TR-Corner: %g %g %g\n", Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr),
+      printf("TR-Corner: %g %g %g\n",
+	     Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr),
 	     Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr),
 	     Zmin(iptr)+(Nz(iptr)-1)*Dz(iptr));
       printf("X-range:   %g %g\n", xmin,xmax);
@@ -59,19 +61,23 @@ void nemo_main()
     } else {
       printf("AXIS=1:\n");
       printf("LL-Corner: %g %g %g\n",
-	     Xmin(iptr)-(Nx(iptr)-1)*Dx(iptr)/2,
-	     Ymin(iptr)-(Ny(iptr)-1)*Dy(iptr)/2,
-	     Zmin(iptr)-(Nz(iptr)-1)*Dz(iptr)/2);
+	     xmin + Dx(iptr)/2,
+	     ymin + Dy(iptr)/2,
+	     zmin + Dz(iptr)/2);
 	     
       printf("TR-Corner: %g %g %g\n",
-	     Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr)/2,
-	     Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr)/2,
-	     Zmin(iptr)+(Nz(iptr)-1)*Dz(iptr)/2);
+	     xmax - Dx(iptr)/2,
+	     ymax - Dy(iptr)/2,
+	     zmax - Dz(iptr)/2);
+
       printf("X-range:   %g %g\n", xmin,xmax);
       printf("Y-range:   %g %g\n", ymin,ymax);
       printf("Z-range:   %g %g\n", zmin,zmax);      
     }
     printf("MinMax:    %g %g\n", MapMin(iptr), MapMax(iptr));
+    if (Unit(iptr))    printf("Unit:      %s\n", Unit(iptr));
+    if (Object(iptr))  printf("Object:    %s\n", Object(iptr));
+
 }
 
 

@@ -50,7 +50,7 @@ string defv[] = {
 #else
     "kz=0 0 1 0 1 0 5 0 0 0  0 0 0 0 1 0 0 0 3 0  1 0 2 0 1 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0\n",
 #endif
-      "Non-zero options for alternative paths (see below)\n"
+      "     Non-zero options for alternative paths (see below)\n"
       "       1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).\n"
       "       2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
       "       3  Basic data on unit 3 at output (freq. NFIX; >1: cluster + tail).\n"
@@ -139,7 +139,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.6\n    21-feb-2019 PJT",
+    "VERSION=0.6a\n   27-may-2021 PJT",
     NULL,
 };
 

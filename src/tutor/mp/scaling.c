@@ -8,7 +8,7 @@
 int main(){
 
   const uint64_t umin=1;
-  const uint64_t umax=10000000000LL;
+  const uint64_t umax=4000000000LL;    //   4->5 already causes overflow
   double sum=0.;
 #pragma omp parallel for reduction(+:sum)
   for(uint64_t u=umin; u<umax; u++)

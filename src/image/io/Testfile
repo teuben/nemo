@@ -1,5 +1,5 @@
 DIR = src/image/io
-BIN = ccddump ccdprint ccdspec
+BIN = ccddump ccdprint ccdspec ccdhead
 NEED = $(BIN) ccdmath ccdgen
 
 help:
@@ -36,3 +36,6 @@ ccddump: ccd.in
 
 ccdspec: ccd3.in
 	 ccdspec ccd3.in | tail -3
+
+ccdhead: ccd.in
+	 ccdhead ccd.in
