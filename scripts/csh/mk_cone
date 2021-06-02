@@ -6,7 +6,19 @@
 #
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
-#     jun-2021      fix missing sign= 
+#     jun-2021      fix missing sign=
+
+#   rmin:    the cone starts at rmin in the Z=0 plane
+#   vscale   setting this > 0 will give the outflow some rotation as well
+#   outflow  outflow
+#   flow
+#   view     0 = optically thin   1=only see front   (-1 only see back)
+#   incd     inc of disk
+#   inc      inc of cone w.r.t. disk (disk is always along X axis)
+#   pa       pa of cone w.r.t. disk
+#   mirror   1=have both sides
+#   fill     t=cone is filled  f=cone is hollow
+#   svar     smoothing
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
