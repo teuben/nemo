@@ -26,9 +26,10 @@ string defv[] = {
   "gscale=f\n     Scale radius and velocity by the appropriate geometric sin/cos factor",
   "mode=rot\n     Rotation (r) or Outflow (o) ",
   "side=0\n       Both (0), or positive (1) or negative (-1) side",
+  // "geom=f\n       Off axis Geometric correction as well?",
   "tab=f\n        Write a test table?",
   "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
-  "VERSION=0.6a\n 22-may-2021 PJT",
+  "VERSION=0.7\n  31-may-2021 PJT",
   NULL,
 };
 
@@ -46,10 +47,10 @@ real undf;
 void nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
-  real center[2], cospa, sinpa, cosi, sini, sint, cost,
-    x, y, v, xt, yt, r, vmul, phi, dphi;
+  real center[2], cospa, sinpa, cosi, sini, sint, cost, sinp, cosp,
+    x, y, v, xt, yt, r, vmul, phi, dphi, theta;
   real vr, wt, frang, dx, dy, dz;
-  real angle ;
+  real angle;
   real rscale = getrparam("rscale");
   real vscale = getrparam("vscale");
   int  side   = getiparam("side");
@@ -59,6 +60,8 @@ void nemo_main()
   string mode;
   bool Qrot;
   bool gscale = getbparam("gscale");
+  // bool Qgeom = getbparam("geom";)
+  bool Qgeom = gscale;
   bool Qtab = getbparam("tab");
   real jiggle = getrparam("jiggle");
 
@@ -134,7 +137,7 @@ void nemo_main()
       if (jiggle>0) x += grandom(0,jiggle*dy);      
 
       if (dx > 0)
-	phi = atan2(-x,y);       // math (ccdgen can create these)
+	phi = atan2(-x,y);       // math convention (ccdgen can create these)
       else
 	phi = atan2(x,y);        // astronomical convention of PA
 	
@@ -165,21 +168,30 @@ void nemo_main()
 	    continue;
 	}
       }
+      // gather some geometry correction factors (theta in the plane, phi on the sky)
+      cost = cos(atan(tan(dphi)/cosi));
+      sinp = sin(dphi);
+      cosp = cos(dphi);
       
-      for (k=0; k<nz; k++) {                  // loop over spectral point
+      
+      for (k=0; k<nz; k++) {                  // loop over spectral points
 	r = sqrt(x*x + y*y) * rscale;
 	v = (k-zpos)*dz;
 	if (jiggle>0) v+= grandom(0,jiggle*dz);
 	v *= vmul;
 	v *= vscale;
 	if (gscale) {
-	  if (Qrot)
+	  if (Qrot) {
 	    v /= sini;
-	  else {
+	    if (Qgeom) {
+	      v /= cost;
+	      r *= sqrt(cosp*cosp+sinp*sinp/(cosi*cosi));
+	    }
+	  } else {
 	    r /= cosi;
 	    v /= cosi;
-	  }
-	}
+	  } // Qrot
+	} // gscale 
 	ir = (int) (r/Dx(outptr));
 	iv = (int) (((v-Ymin(outptr))/Dy(outptr)) + Yref(outptr));
 	
