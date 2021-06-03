@@ -29,14 +29,11 @@ string defv[] = {
   // "geom=f\n       Off axis Geometric correction as well?",
   "tab=f\n        Write a test table?",
   "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
-  "VERSION=0.8\n  2-jun-2021 PJT",
+  "VERSION=0.8a\n 3-jun-2021 PJT",
   NULL,
 };
 
-string usage="exact Radius-Velocity diagrams for later stacking";
-
-string cvsid="$Id$";
-
+string usage="extract Radius-Velocity diagram from a data cube with selected stacking";
 
 imageptr velptr = NULL, outptr = NULL, sumptr = NULL;
 
@@ -48,7 +45,7 @@ void nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, sint, cost, sinp, cosp,
-    x, y, v, xt, yt, r, vmul, phi, dphi, theta;
+       x, y, v, xt, yt, r, vmul, phi, dphi, theta;
   real vr, wt, frang, dx, dy, dz;
   real angle;
   real rscale = getrparam("rscale");
@@ -81,7 +78,7 @@ void nemo_main()
 
   if (hasvalue("center")) {
     if (nemoinpd(getparam("center"),center,2) != 2)
-      error("not enuf for center=");
+      error("need two values for center=");
     xpos = center[0];
     ypos = center[1];
   } else {
@@ -168,13 +165,16 @@ void nemo_main()
 	    continue;
 	}
       }
-      // gather some geometry correction factors (theta in the plane, phi on the sky)
+      // gather some geometric correction factors (theta in the plane, phi on the sky)
       cost = cos(atan(tan(dphi)/cosi));
       sinp = sin(dphi);
       cosp = cos(dphi);
       
-      
       for (k=0; k<nz; k++) {                  // loop over spectral points
+	if (CubeValue(velptr,i,j,k) == undf) {
+	  nundf++;
+	  continue;
+	}
 	r = sqrt(x*x + y*y) * rscale;
 	v = (k-zpos)*dz;
 	if (jiggle>0) v+= grandom(0,jiggle*dz);
@@ -188,7 +188,7 @@ void nemo_main()
 	      r *= sqrt(cosp*cosp+sinp*sinp/(cosi*cosi));
 	    }
 	  } else {
-	    r /= cosi;
+	    r /= sini;  // note no geom correction
 	    v /= cosi;
 	  } // Qrot
 	} // gscale 

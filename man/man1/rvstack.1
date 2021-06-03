@@ -1,7 +1,7 @@
-.TH RVSTACK 1NEMO "2 June 2021"
+.TH RVSTACK 1NEMO "3 June 2021"
 
 .SH "NAME"
-rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
+rvstack \- extract Radius-Velocity diagram from a data cube with selected stacking
 
 .SH "SYNOPSIS"
 \fBrvstack\fP in=cube out=map [parameter=value]
@@ -10,37 +10,40 @@ rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
 \fBrvstack\fP takes all points within a (narrow) wedge around the major or minor
 axis of an assumed galaxy disk data cube, and stacks these data to
 construct a Radius-Velocity diagram,
-centered on the galaxy in position and velocity.
-It will also stack the two sides of the galaxy (see also \fBside=\fP),
-so the radial coordinate will run from 0 to some Rmax.
-In velocity it will run from some -Vmax to Vmax,
-but always expecting positive rotation around the Z axis,
+centered on the galaxy in position and velocity. The intent is to show the rotation
+curve along the major axis, and (Z-axis) outflow along the minor axis.
+
+By default it will stack the two sides of the galaxy (see also \fBside=\fP),
+so the radial coordinate will run from 0 to some Rmax, and 
+in velocity it will run from some -Vmax to Vmax.
+This is done in such a way as to expecting positive rotation around the Z axis,
 and positive outflow along the Z axis, assuming the
-position angle of the galactic disk is correctly set. 
+position angle has been correctly set: \fBpa\fP of receding side for rotation, and
+receding (near) side for outflow.
 .PP
 Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
 If you have many like-minded galaxies, stacking these images may beat the noise down much more.
+See also \fIccdstack(1NEMO)\fP for the subsequent stacking  of images produced with
+\fBrvstack\fP.
 .PP
 Options exist to scale the Radius and Velocity to different units, such that
 many galaxies can be stacked in physical space, as opposed to observed space. See
 \fBrscale=\fP and \fBvscale=\fP.
 .PP
-See also \fIccdstack(1NEMO)\fP for the final stacking operation.
 .PP
-When \fBgscale=t\fP is set, the coordinates are scaled as follows:
+When \fBgscale=t\fP is set, the coordinates are geometrically corrected as follows:
 .nf
-.ta +2i
+.ta +2.5i
 
-Rotation	Outflow
---------	---------
-R		R/cos(i)
-V/sin(i)	V/cos(i)
+Rotation		Outflow
+--------		---------
+R			R/sin(inc)
+V/sin(inc)/cos(theta)	V/cos(inc)
 
 .fi
+where \fBtheta\fP is the position angle away from the major axis in the plane of the galaxy.
+The radius \fBR\fP has been corrected for this as well.
 this will likely leave some gaps in radius and velocity. See CAVEATS below.
-.PP
-You can also select to only construct the signal from one side of the galaxy.
-See \fBside=\fP below.
 .PP
 Points along an arc are all accumulated (technically: averaged), and placed on the same radial grid
 as the pixel size in the input data cube. We might need some trick next neighbor smoothing
@@ -58,7 +61,7 @@ output R-V map. [No default]
 \fBpa=\fP
 position angle along which the wedge is taken. This is normally 
 the \fBmajor axis receding side\fP (with mode=rotation) or
-the \fBminor axis far side\fP (for mode=outflow), in order get a positive velocity signal in the RV map.
+the \fBminor axis near side\fP (for mode=outflow), in order get a positive velocity signal in the RV map.
 Only when \fBgscale=t\fP is set, will there be a difference how the radius and velocity
 are scaled.
 .TP
@@ -73,13 +76,11 @@ rotation center (0,0=lower left). If not supplied, the reference pixel will be u
 Default: reference pixel.
 .TP
 \fBangle=\fP
-angle around major or minor axis around which points are accumulated
-into the R-V plot. For high inclination galaxies rotation would argue for
-a smaller angle, while outflow can deal with larger angles. And vice versa
-for low inclination galaxies.  [Default: 10]
+full angle around the position angle \fBpa=\fP around which points are accumulated
+into the R-V plot.  [Default: 10]
 .TP
 \fBblank=\fP
-Value of the blank pixel to be ignored. Not yet used.
+Value of the blank pixel to be ignored. [Default: 0.0]
 .TP
 \fBrscale=\fP
 Scaling factor for radius. This would be used to stack galaxies based on a physical
@@ -98,11 +99,10 @@ Small position angle based corrections are also applied.
 [Default: f]
 .TP
 \fBmode=r|o\fP
-Select output mode: rotation (r) or outflow (o).   For rotation, points around \fBpa=\fP are
-selected, for outflow, points around \fBpan=\fP. [Default: r]
+Select output mode: rotation (r) or outflow (o).   [Default: r]
 .TP
 \fBside=0|-1|1\fP
-By default it will stack both sides, but this option will allow you to stack one or the other
+By default it will stack both sides (0), but this option will allow you to stack one (1) or the other (-1)
 side. [Default: 0]
 .TP
 \fBtab=t|f\fP
@@ -112,9 +112,6 @@ side. [Default: 0]
 Debugging spreading signal. Don't use.
 .SH "CAVEATS"
 Code is still under developement, in particular dealing with units is unresolved.
-.PP
-No geometric correction is made based on the angle in the disk. This could become a future
-option. Or see the geom=t|f being played with
 .PP
 A wedge has the disadvantage the the noise decreases inversely proportional to the sqrt(radius),
 but has a \fImatched-filter\fP approach to a conic outflow. An alternative would be to have
@@ -141,14 +138,15 @@ An example using our standard NGC 6503 cube given in km/s velocity units.
 .fi
 
 .SH "SEE ALSO"
-ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO), rotcur(5NEMO)
+ccdstack(1NEMO), ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO), rotcur(5NEMO)
 .PP
 https://github.com/jbjolly/LineStacker
 
 .SH "FILES"
-src/image/rotcur
-.PP
 .nf
+src/image/rotcur/rvstack.c
+scripts/csh/mk_cone - example script to create PPV cubr of disk + cone outflow along Z
+
 https://www.cv.nrao.edu/fits/data/samples/cubes/ngc6503.fits  (old 1983 VLA data)
 https://...   (TBD - new data)
 .fi
@@ -158,8 +156,8 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.50i +4.0i
 6-May-2021	V0.4 First working version	PJT
 31-may-2021	V0.7 better geometry correction	PJT
-2-jun-2021	V0.8 siwtch to using far side	PJT
+3-jun-2021	V0.8a clarify near/far side choice	PJT
 .fi
