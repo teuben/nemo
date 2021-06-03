@@ -125,7 +125,11 @@ unfio $file "$n*2" float maxbuf=100000 |\
 </pre>
 <h2><a name='sect6' href='#toc6'>Benchmarks</a></h2>
 1000 particles on a 32**3 cube integrating for 20 steps took
-4.77 a sparc Ultra-2. (1997?) 
+4.77 a sparc Ultra-2. (1997?) <p>
+2021 update: 200 steps on an i5-1135G7 took 3.7
+13 speedup from the 2004 results. However, compiling with flang (FFLAGS=-O3),
+
+<p>200 steps took 0.22 
 <p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='rungalaxy.1.html'>rungalaxy(1NEMO)</a>

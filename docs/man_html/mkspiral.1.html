@@ -46,7 +46,7 @@ parameters are recognized in any order if the keyword is also given:
   format [no default].
 </dd>
 
-<dt><b>ndisk=<i>num_bodies</i></b> </dt>
+<dt><b>nbody=<i>num_bodies</i></b> </dt>
 <dd>Number of disk particles [default: <b>2048</b>] </dd>
 
 <dt><b>potname=<i>potential_name</i></b>
@@ -77,61 +77,65 @@ radius of test-particle disk. [Default: <b>0.0</b>]. </dd>
 <dd>Outer cutoff
 radius of test-particle disk. [Default: <b>1.0</b>]. </dd>
 
+<dt><b>mass=</b> </dt>
+<dd>Total mass of the disk.
+[Default: 0] </dd>
+
 <dt><b>a=<i>ratio</i></b> </dt>
-<dd>Ratio of maximum spiral
-perturbation w.r.t. base disk. [default: <b>1</b>]. </dd>
+<dd>Ratio of maximum spiral perturbation w.r.t. base disk.
+[default: <b>1</b>]. </dd>
 
 <dt><b>k=<i>inv_rad</i></b> </dt>
-<dd>Wavenumber of the spiral
-pattern, such that <b>2.pi.k.r</b> is the phase of the spiral density maximum.  Positive
-<b></b> means trailing spiral pattern. (note that this is defined in term of <b>sign=</b>,
-see below) [default: <b>1</b>].  </dd>
+<dd>Wavenumber of the spiral pattern, such that <b>2.pi.k.r</b>
+is the phase of the spiral density maximum.  Positive <b></b> means trailing spiral
+pattern. (note that this is defined in term of <b>sign=</b>, see below) [default:
+<b>1</b>].  </dd>
 
 <dt><b>w=<i>width</i></b> </dt>
-<dd>Width of the spiral arm along a galactic
-circle. Depending on the next keyword this width is either is degrees along
-a galactic circle if that is to be  constant, or in length units if the
-width of the spiral is to be constant. [default: <b>15</b>]. </dd>
+<dd>Width of the spiral arm along a galactic circle. Depending on
+the next keyword this width is either is degrees along a galactic circle
+if that is to be  constant, or in length units if the width of the spiral
+is to be constant. [default: <b>15</b>]. </dd>
 
 <dt><b>angular=t|f</b> </dt>
-<dd>Is the width
-of the spiral defined in angular terms, in which case the physical real
-width linearly increases with distance from the galactic center, or is
-is constant as a function of radius. [default: <b>t</b>, i.e. defined in angular
-terms]. </dd>
+<dd>Is the width of the spiral defined
+in angular terms, in which case the physical real width linearly increases
+with distance from the galactic center, or is is constant as a function
+of radius. [default: <b>t</b>, i.e. defined in angular terms]. </dd>
 
 <dt><b>seed=<i>random_seed</i></b> </dt>
-<dd>Use random number seed. A zero seed will generate
-a system-time dependant seed. [default: <b>0</b>]. </dd>
+<dd>Use
+random number seed. A zero seed will generate a system-time dependant seed.
+[default: <b>0</b>]. </dd>
 
 <dt><b>sign=-1|+1</b> </dt>
-<dd>Sign of the angular moment
-vector. Positive means counter-clock wise  rotation. Not </dd>
+<dd>Sign of the angular moment vector. Positive means
+counter-clock wise  rotation. Not </dd>
 
 <dt><b>sigma=</b><i>s1,s2,s3</i> </dt>
-<dd>Velocity
-dispersion (isotropic) in the X-Y plane, plus optionally an offset and exponential
-dropoff: s = s1 + s2 * exp(-r/s3). Default: 0 </dd>
+<dd>Velocity dispersion (isotropic)
+in the X-Y plane, plus optionally an offset and exponential dropoff: s =
+s1 + s2 * exp(-r/s3). Default: 0 </dd>
 
 <dt><b>sigmator=</b> </dt>
-<dd>The ratio of the
-tangential to radial velocity dispersion. By default 1, but if you need
-realistic values, our local solar neighbor measures about 0.5 but the best
-self-consistent (despite these models are NOT) estimate can be set by using
-the value -1, in which case 0.5*kappa/omega is used. Default: 1 </dd>
+<dd>The ratio of the tangential to
+radial velocity dispersion. By default 1, but if you need realistic values,
+our local solar neighbor measures about 0.5 but the best self-consistent
+(despite these models are NOT) estimate can be set by using the value -1,
+in which case 0.5*kappa/omega is used. Default: 1 </dd>
 
-<dt><b>nmodel=</b><i>n_models</i>
-</dt>
-<dd>Number of output models. [Default: <b>1</b>]. </dd>
-
-<dt><b>linear=t|f</b> </dt>
-<dd>Should the spiral be linear
-or logarithmic. Although spiral galaxies are mostly logarithmic, for historic
-reasons the default here is linear. [Default: <b>t</b>] </dd>
+<dt><b>nmodel=</b><i>n_models</i> </dt>
+<dd>Number
+of output models. [Default: <b>1</b>]. </dd>
 
 <dt><b>headline=<i>message</i></b> </dt>
-<dd>Text headline
-for output file [default: not used]. </dd>
+<dd>Text headline for output
+file [default: not used]. </dd>
+
+<dt><b>linear=t|f</b> </dt>
+<dd>Should the spiral be linear or logarithmic.
+Although spiral galaxies are mostly logarithmic, for historic reasons the
+default here is linear. [Default: <b>t</b>] </dd>
 
 <dt><b>test=<i>test-mode</i></b> </dt>
 <dd>The mode for testing.

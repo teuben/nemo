@@ -13,6 +13,7 @@ mkconfig - make a static configuration of particles.
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkconfig
 out=</b>in_file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkconfig</i> creates a configuration
 of particles with specified shape in position space and zero velocities.
@@ -25,46 +26,45 @@ The following parameters are recognized:
 <dd>Output
 file,  in <i>snapshot</i> format.  Default: <i>required</i>. </dd>
 
+<dt><b>nbody=</b><i>num_bodies</i> </dt>
+<dd>Number of
+particles in configuration.  Default: <b>512</b>. </dd>
+
 <dt><b>shape=</b><i>configuration</i> </dt>
-<dd>Name of
-configuration to generate; currently <b>shell</b>, <b>ball</b>, <b>cusp</b>, <b>line</b>, or <b>ring</b>. 
-Default: <b>shell</b>. </dd>
+<dd>Name of configuration
+to generate; currently <b>shell</b>, <b>ball</b>, <b>cusp</b>, <b>line</b>, or <b>ring</b>.  Default: <b>shell</b>.
+</dd>
 
 <dt><b>radius=</b><i>config_radius</i> </dt>
-<dd>Specify size of configuration.  Default:
-<b>1.0</b>. </dd>
+<dd>Specify size of configuration.  Default: <b>1.0</b>. </dd>
 
-<dt><b>nbody=</b><i>num_bodies</i> </dt>
-<dd>Number of particles in configuration.  Default: <b>512</b>.
-</dd>
+<dt><b>seed=</b><i>random_seed</i>
+</dt>
+<dd>Seed used to initialize random number generator. Default: <b>123</b>. </dd>
 
-<dt><b>seed=</b><i>random_seed</i> </dt>
-<dd>Seed used to initialize random number generator. Default:
-<b>123</b>. </dd>
-
-<dt><b>mass=</b><i>total_mass</i> </dt>
+<dt><b>mass=</b><i>total_mass</i>
+</dt>
 <dd>Total mass of the system . Default: <b>1</b>. </dd>
 
-<dt><b>zerocm=</b><i>zero_cm_flag</i>
-</dt>
-<dd>If set, translate origin to center of mass of configuration. Default: <b>false</b>.
-</dd>
+<dt><b>zerocm=</b><i>zero_cm_flag</i> </dt>
+<dd>If set, translate
+origin to center of mass of configuration. Default: <b>false</b>. </dd>
 
-<dt><b>headline=</b><i>message</i> </dt>
+<dt><b>headline=</b><i>message</i>
+</dt>
 <dd>Message prepended to <i>out_file</i>. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='mkconfig.1.html'>mkconfig(1NEMO)</a>
+, <a href='snapfold.1.html'>snapfold(1NEMO)</a>
 ,
-<a href='snapfold.1.html'>snapfold(1NEMO)</a>
-, <a href='mkommod.1.html'>mkommod(1NEMO)</a>
+<a href='mkommod.1.html'>mkommod(1NEMO)</a>
 , <a href='mk2body.1.html'>mk2body(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
-Joshua
-E. Barnes 
+Joshua E. Barnes 
 <h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>2-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;document created?<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB

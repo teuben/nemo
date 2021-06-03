@@ -60,7 +60,21 @@ line tools, piping etc.:
       like a black hole sucking up everything
 </pre>
 <p> 
-<h2><a name='sect3' href='#toc3'>Synopsis</a></h2>
+<h2><a name='sect3' href='#toc3'>Man Pages</a></h2>
+You are reading a man page, and since NEMO is using standard
+unix man pages, the man command has a lot of powerful ways to find the
+information (short of using grep on the 800+ $NEMO/man/manX/*.* files):
+
+<p> <br>
+<pre>   apropos keyword
+   man -M $NEMO/man -k .
+   man -f keyword                        also: program help=u
+   man --regex &lt;pattern&gt;                 man --regex ".*network$"
+   man -S &lt;section_ID&gt; &lt;keyword&gt;
+   man -wK &lt;keyword&gt;
+</pre>
+<p> 
+<h2><a name='sect4' href='#toc4'>Synopsis</a></h2>
 
 <p> <br>
 <pre>program --help
@@ -70,7 +84,7 @@ runprogram [key1=]val1 [key2=]val2 .!.!.
 run program ...
 </pre>
 <p> 
-<h2><a name='sect4' href='#toc4'>Getting Started</a></h2>
+<h2><a name='sect5' href='#toc5'>Getting Started</a></h2>
 What you need to do to set yourself up for <b>NEMO</b>: <p>
 The easiest
 way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file. For example
@@ -84,7 +98,7 @@ If you need more control over your NEMO environment, there are other methods
 described elsewhere (The <i>NEMO Users/Programmers Guide</i>, Appendix A), or
 consult one of your local friendly NEMO users. 
 <p> 
-<h2><a name='sect5' href='#toc5'>How to Run Nemo Programs</a></h2>
+<h2><a name='sect6' href='#toc6'>How to Run Nemo Programs</a></h2>
 NEMO
 programs can be run just as any other command in Unix, in that sense NEMO
 is nothing more than an extension of Unix. NEMO programs usually read and/or
@@ -151,7 +165,7 @@ velocities to the user using <b>snapprint</b>. The alternative would have been
     rm tmp
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
+<h2><a name='sect7' href='#toc7'>HOW TO RUN non-NEMO PROGRAMS</a></h2>
 
 <p> Over the times NEMO has incoorporated a number
 of non-NEMO programs, with varying degrees of input parameter schemes. Some
@@ -179,7 +193,7 @@ method to run the non-NEMO programs, they have not all been unified as is
 proposed in <a href='run.3.html'><i>run(3NEMO)</i></a>
 . 
 <p> 
-<h2><a name='sect7' href='#toc7'>HELP on GIPSY and MIRIAD</a></h2>
+<h2><a name='sect8' href='#toc8'>HELP on GIPSY and MIRIAD</a></h2>
 Some NEMO programs refer
 to non-NEMO programs in the "man" style. For example <a href='ccdpot.1.html'><i>ccdpot(1NEMO)</i></a>
  refers
@@ -190,7 +204,7 @@ help: <br>
       more $gip_root/tsk/potential.dc1
 </pre>
 <p> 
-<h2><a name='sect8' href='#toc8'>Programming</a></h2>
+<h2><a name='sect9' href='#toc9'>Programming</a></h2>
 You may need to do some sherlocking here. You have probably
 seen the $NEMO/configure.ac and $NEMO/makedefs file, though the $NEMOLIB/makedefs
 is the active file.  The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
@@ -199,7 +213,7 @@ programs, though sometimes <a href='bake.8.html'><i>bake(8NEMO)</i></a>
  can do a better job in a local directory.
 
 <p> 
-<h2><a name='sect9' href='#toc9'>See Also</a></h2>
+<h2><a name='sect10' href='#toc10'>See Also</a></h2>
 <a href='index.1.html'>index(1NEMO)</a>
 , <a href='programs.8.html'>programs(8NEMO)</a>
 , <a href='tricks.8.html'>tricks(8NEMO)</a>
@@ -224,10 +238,10 @@ programs, though sometimes <a href='bake.8.html'><i>bake(8NEMO)</i></a>
 https://man7.org/linux/man-pages/man1/man.1.html - The Linux man-pages project
 </pre>
 <p> 
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
+<h2><a name='sect11' href='#toc11'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect11' href='#toc11'>Further Information</a></h2>
+<h2><a name='sect12' href='#toc12'>Further Information</a></h2>
 The <i>NEMO Users/Programmers Guide</i>
 contains most of the information you need to get down to the guts of the
 system. <p>
@@ -245,7 +259,7 @@ readthedocs page:  <a href='https://astronemo.readthedocs.io/en/latest/'><i>http
 
 
 <p> 
-<h2><a name='sect12' href='#toc12'>Bugs</a></h2>
+<h2><a name='sect13' href='#toc13'>Bugs</a></h2>
 Since programs are being modified, and extended fairly regularly,
  manual pages for related programs do not always know about these changes
 if they should. Keeping good cross references in the manual pages might
@@ -254,7 +268,7 @@ it is derived from the code itself. And there is always <a href='https://github.
 
 
 <p> 
-<h2><a name='sect13' href='#toc13'>History</a></h2>
+<h2><a name='sect14' href='#toc14'>History</a></h2>
 <br>
 <pre>1986<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1 Initial Development<tt> </tt>&nbsp;<tt> </tt>&nbsp;Barnes/Hut/Teuben
 1994<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2 UMD release<tt> </tt>&nbsp;<tt> </tt>&nbsp;Teuben
@@ -268,17 +282,18 @@ it is derived from the code itself. And there is always <a href='https://github.
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
 <li><a name='toc2' href='#sect2'>NEMO vs. UNIX</a></li>
-<li><a name='toc3' href='#sect3'>Synopsis</a></li>
-<li><a name='toc4' href='#sect4'>Getting Started</a></li>
-<li><a name='toc5' href='#sect5'>How to Run Nemo Programs</a></li>
-<li><a name='toc6' href='#sect6'>HOW TO RUN non-NEMO PROGRAMS</a></li>
-<li><a name='toc7' href='#sect7'>HELP on GIPSY and MIRIAD</a></li>
-<li><a name='toc8' href='#sect8'>Programming</a></li>
-<li><a name='toc9' href='#sect9'>See Also</a></li>
-<li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>Further Information</a></li>
-<li><a name='toc12' href='#sect12'>Bugs</a></li>
-<li><a name='toc13' href='#sect13'>History</a></li>
+<li><a name='toc3' href='#sect3'>Man Pages</a></li>
+<li><a name='toc4' href='#sect4'>Synopsis</a></li>
+<li><a name='toc5' href='#sect5'>Getting Started</a></li>
+<li><a name='toc6' href='#sect6'>How to Run Nemo Programs</a></li>
+<li><a name='toc7' href='#sect7'>HOW TO RUN non-NEMO PROGRAMS</a></li>
+<li><a name='toc8' href='#sect8'>HELP on GIPSY and MIRIAD</a></li>
+<li><a name='toc9' href='#sect9'>Programming</a></li>
+<li><a name='toc10' href='#sect10'>See Also</a></li>
+<li><a name='toc11' href='#sect11'>Author</a></li>
+<li><a name='toc12' href='#sect12'>Further Information</a></li>
+<li><a name='toc13' href='#sect13'>Bugs</a></li>
+<li><a name='toc14' href='#sect14'>History</a></li>
 </ul>
 </body>
 </html>

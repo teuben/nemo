@@ -20,6 +20,11 @@ int nemoinpi (expr,ioutv,nout)
 int nemoinpl (expr,loutv,nout)
 int nemoinpb (expr,boutv,nout)
 int nemoinpx (expr,doutv,nout)
+int nemorinpi (string var, int    *xvar,  int n, int    defvar, bool repeated)
+int nemorinpd (string var, double *xvar,  int n, double defvar, bool repeated)
+int nemorinpf (string var, float  *xvar,  int n, float  defvar, bool repeated)
+int nemorinpl (string var, long   *xvar,  int n, long   defvar, bool repeated)
+int nemorinpb (string var, int    *xvar,  int n, bool   defvar, bool repeated)
 double natof(expr)
 int  natoi(expr)
 char *expr;
@@ -60,10 +65,13 @@ The only exception to <a href='herinp.3.html'><i>herinp(3NEMO)</i></a>
 
 parsing is <i>nemoinpx</i>,  which parses a string in <b>d:m:s.s</b> format, returning
 the number(s) in fractional degrees. For h:m:s conversion, the user is responsible
-for the extra factor of 15 between d:m:s and h:m:s. 
+for the extra factor of 15 between d:m:s and h:m:s. <p>
+The <i>nemorinpX</i> routines
+were added to allow for filling exactly <b>n</b> values with <b>defval</b> (repeated=FALSE)
+or with the last used value (repeated=TRUE) 
 <h2><a name='sect3' href='#toc3'>Operators</a></h2>
-The following
-operators are known: <br>
+The following operators
+are known: <br>
 <pre>+<tt> </tt>&nbsp;<tt> </tt>&nbsp;addition
 -<tt> </tt>&nbsp;<tt> </tt>&nbsp;subtraction
 *<tt> </tt>&nbsp;<tt> </tt>&nbsp;multiplication
@@ -174,6 +182,7 @@ xx-feb-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;nemoinp made archaic - must now call ne
 31-may-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;added natof/natoi<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 4-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.9 added nemoinpx()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-jan-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;recognize nan&rsquo;s in natof<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+jan-2005<tt> </tt>&nbsp;<tt> </tt>&nbsp;added nemorinpX<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre> <p>
 
 <hr><p>

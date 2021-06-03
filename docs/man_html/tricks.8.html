@@ -8,12 +8,14 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tricks - some unix tricks when using NEMO 
-<h2><a name='sect1' href='#toc1'>Description</a></h2>
-One can use <a href='cat.1.html'><i>cat(1)</i></a>
-
-to catenate structured binary files, e.g. <br>
+tricks - some Unix tricks when using NEMO 
+<p> 
+<h2><a name='sect1' href='#toc1'>Files: Compression and Such</a></h2>
+One
+can use <a href='cat.1.html'><i>cat(1)</i></a>
+ to catenate structured binary files, e.g. <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;cat r001a.dat &gt;&gt;r001.dat
 </pre><p>
 To copy structured binary files between machines of different binary format,
@@ -65,14 +67,17 @@ The <a href='ds9.1.html'><i>ds9(1)</i></a>
 external programs which can be used to display images. <i>ds9</i> can understand
 a variety of FITS compression standards. Transform your image to a fits
 file using <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
-, and use  ds on that fits file.  
+, and use  ds on that fits file. 
+<p> 
 <h2><a name='sect2' href='#toc2'>PIPES and SHARED
 MEMORY</a></h2>
 NEMO encourages you to use pipes where serial operations make sense
 (see also <a href='tee.1.html'><i>tee(1)</i></a>
 ). However on Linux, assuming you have enough memory, using
-/dev/shm will sacrifice your memory to store data temporarely and could
-speed up your I/O dominated workflow. Here is an example: <br>
+/dev/shm (or anything that uses <a href='tmpfs.1.html'><i>tmpfs(1)</i></a>
+)   will sacrifice your memory
+to store data temporarely and could speed up your I/O dominated workflow.
+Here is an example: <br>
 <pre>       mkdir /dev/shm/$USER
        cd /dev/shm/$USER
        mkspiral s000 1000000 nmodel=40
@@ -104,33 +109,51 @@ a file <p>
  monitors the progress of data through a pipe, e.g. <br>
 <pre>        mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
 </pre>
-<h2><a name='sect3' href='#toc3'>Parallel</a></h2>
-Most programs in NEMO are still single-core, but many current machines
-have a number of cores. If a program only uses a fraction of the memory
-on the machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
- program can be used to spread the load,
-e.g. <br>
+<p> 
+<h2><a name='sect3' href='#toc3'>PARALLEL and OpenMP</a></h2>
+Most programs in NEMO are still single-core, but many
+current machines have a number of cores. If a program only uses a fraction
+of the memory on the machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ program can be used to
+spread the load, e.g. <br>
 <pre>       echo mkplummer . 10000 &gt; run.txt
        echo mkplummer . 10000 &gt;&gt; run.txt
        parallel --jobs 2 &lt; run.txt
+</pre>which will run both jobs in parallel <p>
+Although NEMO can be configured using
+<b>--with-openmp</b> to take advantage of multi-cores OpenMP computing, there are
+really no programs in NEMO taking advantage of this yet. However, programs
+using <i>nemo_main()</i> should be aware of the user interface implications of
+controlling how many cores are used: <br>
+<pre>   0.  the number of cores as per omp_get_num_procs().  We actually take
+a short-cut and use
+       omp_get_max_threads() since it listens to OMP_NUM_THREADS (see next
+item)
+       [the user has no control over this]
+   1.  setting the environment variable OMP_NUM_THREADS to the (max) number
+of cores it will use
+   2.  using the np= system keyword will override any possible setting of
+OMP_NUM_THREADS
+       in the step before.
+   
 </pre>
-<p>which will run both jobs in parallel 
 <p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
 , <a href='bench.5.html'>bench(5NEMO)</a>
-,
-<a href='tee.1.html'>tee(1)</a>
+, <a href='tee.1.html'>tee(1)</a>
 , <a href='pee.1.html'>pee(1)</a>
 , <a href='netcat.1.html'>netcat(1)</a>
 , <a href='zrun.1.html'>zrun(1)</a>
-, <a href='parallel.1.html'>parallel(1)</a>
+,
+<a href='parallel.1.html'>parallel(1)</a>
 , <a href='sponge.1.html'>sponge(1)</a>
 , <a href='vipe.1.html'>vipe(1)</a>
  
+<p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter
-Teuben. 
+Peter Teuben. 
+<p> 
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
@@ -138,15 +161,16 @@ Teuben.
 6-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;ds added          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed some typos<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added pipe/shm<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;OpenMP<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
-<li><a name='toc1' href='#sect1'>Description</a></li>
+<li><a name='toc1' href='#sect1'>Files: Compression and Such</a></li>
 <li><a name='toc2' href='#sect2'>PIPES and SHARED MEMORY</a></li>
-<li><a name='toc3' href='#sect3'>Parallel</a></li>
+<li><a name='toc3' href='#sect3'>PARALLEL and OpenMP</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Author</a></li>
 <li><a name='toc6' href='#sect6'>Update History</a></li>

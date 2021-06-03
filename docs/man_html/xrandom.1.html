@@ -8,11 +8,14 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 xrandom - Return seed for random numbers and optionally random numbers
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>xrandom</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>xrandom</b> returns a seed that
 can be used to random number generators, and optionally random numbers
@@ -21,6 +24,7 @@ are between 0 and 1, gaussian numbers  have a mean of 0 and a dispersion
 of 1.  <p>
 If compiled with GSL, random number generator types  can be selected,
 as well as many more distribution types. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
 are recognized in any order if the keyword is also given: 
@@ -36,7 +40,10 @@ current pid (see <a href='getpid.2.html'><i>getpid(2)</i></a>
 ).  If GSL is implemented the seed value can be
 optionally followed by the random number  generator type (default: mt19937).
 See <a href='xrandom.3.html'><i>xrandom(3)</i></a>
- for more details. <b>n=</b> Number of random numbers to draw  [Default:
+ for more details. </dd>
+
+<dt><b>n=</b> </dt>
+<dd>Number of random numbers to draw  [Default:
 0]. </dd>
 
 <dt><b>m=</b> </dt>
@@ -63,18 +70,25 @@ numbers [t] </dd>
 <dd>Name
 of the random number distribution requested. They follow the name convention
 of the same-name functions <i>gsl_random_xxx</i> in the <a href='gsl.3.html'><i>gsl(3)</i></a>
- library. No default.
-</dd>
+ library. Only available
+if compiled with GSL. No default. </dd>
 
 <dt><b>pars=</b> </dt>
-<dd>Parameters belonging to the selected <b>gsl</b> name. They need to match
-exactly (0, 1, 2 or 3 currently). No default. </dd>
+<dd>Parameters belonging to the selected
+<b>gsl</b> name. They need to match exactly (0, 1, 2 or 3 currently). No default.
+</dd>
+
+<dt><b>seed57=</b> </dt>
+<dd>This quaint option will activate von Hoerner&rsquo;s 1957 algorithm of
+drawing random numbers. It needs a seed between 0.57 and 0.91. See also <a href='mkvh60.1.html'><i>mkvh60(1NEMO)</i></a>
+.
+Default: not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example
-script, <b>grandom.csh</b>,  to test if the error in the mean scales as 1/sqrt(N):
-<br>
+Here is an example script, <b>grandom.csh</b>,  to test
+if the error in the mean scales as 1/sqrt(N): <br>
 <pre>#! /bin/csh -f
 #
 #       n1: sample size 

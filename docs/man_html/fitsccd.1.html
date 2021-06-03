@@ -107,29 +107,32 @@ from raw data to internal data. It is only used in <i>raw</i> mode. [Default: <b
 <dd>Offset constant from raw data to internal data. It is only used
 in <i>raw</i> mode. [Default: <b>0</b>]. </dd>
 
-<dt><b>blank=</b>blank_value </dt>
-<dd>If a magic value from the input
-dataset needs to be  replaced in the output image, give that value here.
-It is not yet possible to use the FITS <b>BLANK</b> keyword for this. [Default:
-not used]. </dd>
+<dt><b>zscale=</b> </dt>
+<dd>Scaling for the Z axis. [Default: 1] </dd>
+
+<dt><b>blank=</b>blank_value
+</dt>
+<dd>If a magic value from the input dataset needs to be  replaced in the output
+image, give that value here. It is not yet possible to use the FITS <b>BLANK</b>
+keyword for this. [Default: not used]. </dd>
 
 <dt><b>relcoords=f|t</b> </dt>
-<dd>Use relative coordinates instead of absolute coordinates?
- [false] </dd>
+<dd>Use relative coordinates
+instead of absolute coordinates?  [false] </dd>
 
 <dt><b>axistype=0|1</b> </dt>
-<dd>Old style (0) or new style with crpix-type header <a href='information.1.html'>information
-(1)</a>
- passed through. Default: 0 </dd>
+<dd>Old style (0) or
+new style with crpix-type header <a href='information.1.html'>information (1)</a>
+ passed through. Default:
+0 </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Foreign Formats</a></h2>
 An <i>AIPS</i> dataset... <p>
-An <i>IRAF</i> dataset...
-<p>
-A <i>GIPSY</i> dataset uses offset=0 and bitpix=-32. Dataset name  normally has
-extension ".IMAGE". Use the GIPSY  program <i>gds</i> or <i>header</i> to find out relevant
-header parameters. <br>
+An <i>IRAF</i> dataset... <p>
+A <i>GIPSY</i> dataset uses offset=0
+and bitpix=-32. Dataset name  normally has extension ".IMAGE". Use the GIPSY
+ program <i>gds</i> or <i>header</i> to find out relevant header parameters. <br>
 <pre>    % fitsccd in=10.IMAGE out=10.ccd mode=raw offset=0 bitpix=-32 ...
 </pre><p>
 A <i>MIRIAD</i> dataset is converted using an offset of 4 bytes and bitpix of

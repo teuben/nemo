@@ -101,66 +101,66 @@ the N-th peak instead of the first. This is achieved by visiting each peak,
 and assigning a peak membership downwards from the peak and then finding
 the next one. </dd>
 
-<dt>** <b>clip=</b> ** </dt>
-<dd>Exclude pixels with values in the range -clip to
-clip. Default: 0 </dd>
+<dt><b>clip=</b> </dt>
+<dd>Exclude pixels with values in the range -clip to clip.
+Default: 0 </dd>
 
-<dt>** <b>rngmsk=t|f</b> ** </dt>
-<dd>Don&rsquo;t assign a 1st moment if the value results
-in a value outside the range of the axis. This can easily happen for noisy
-data. Default: false. 
-<p> <b>abs=t|f</b> Use absolute values of the intensities for
-weights to a moment analysis. This is useful for low S/N data where at the
-wings a sign change can bias the moments. It is assumed the data have been
-continuum subtracted. </dd>
+<dt><b>rngmsk=t|f</b> </dt>
+<dd>Don&rsquo;t assign a 1st moment if the value results in a
+value outside the range of the axis. This can easily happen for noisy data.
+Default: false. </dd>
+
+<dt><b>abs=t|f</b> </dt>
+<dd>Use absolute values of the intensities for weights
+to a moment analysis. This is useful for low S/N data where at the wings
+a sign change can bias the moments. It is assumed the data have been continuum
+subtracted. </dd>
 
 <dt><b>zero=t|f</b> </dt>
-<dd>Mask out values below zero for mom=30,31,32
-(**experimental**) [f] </dd>
+<dd>Mask out values below zero for mom=30,31,32 (**experimental**)
+[f] </dd>
 
 <dt><b>contsub=t|f</b> </dt>
-<dd>Fake a continuum subtraction for mom=30,31,32
- (**experimental**) [t] </dd>
+<dd>Fake a continuum subtraction for mom=30,31,32  (**experimental**)
+[t] </dd>
 
 <dt><b>integrate=t|f</b> </dt>
-<dd>When using mom=0 the signal is summed
-along an axis, you can either just sum the numbers (this used to be the
-old default), or integrate, ie. multiply the sum by the cell-size along that
-axis. This is now the default, to make it more consistent with the new units
-in <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
-. 
-<p></dd>
+<dd>When using mom=0 the signal is summed along an axis, you
+can either just sum the numbers (this used to be the old default), or integrate,
+ie. multiply the sum by the cell-size along that axis. This is now the default,
+to make it more consistent with the new units in <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
+. </dd>
 
-<dt> <b>pos=</b><i>[ix0,iy0]</i> </dt>
-<dd>If used, this should contain two (zero-based)
-pixel coordinates, at which position a spectrum is printed to stdout. Currently
-only implemented along the Z direction, hence X and Y. At some future time
-it may also support spectra along Y or X, but most advanced features are
-only implemented along axis=3. Default: none </dd>
+<dt><b>pos=</b><i>[ix0,iy0]</i>
+</dt>
+<dd>If used, this should contain two (zero-based) pixel coordinates, at which
+position a spectrum is printed to stdout. Currently only implemented along
+the Z direction, hence X and Y. At some future time it may also support
+spectra along Y or X, but most advanced features are only implemented along
+axis=3. Default: none </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='pvtrace.1.html'>pvtrace(1NEMO)</a>
 , <a href='ccdmoms.1.html'>ccdmoms(1NEMO)</a>
+, <a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
 ,
-<a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
-, <a href='ccdrt.1.html'>ccdrt(1NEMO)</a>
+<a href='ccdrt.1.html'>ccdrt(1NEMO)</a>
 , <a href='ccdshape.1.html'>ccdshape(1NEMO)</a>
 , <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
 , <a href='mom2cube.1.html'>mom2cube(1NEMO)</a>
-,
-<a href='image.5.html'>image(5NEMO)</a>
- 
+, <a href='image.5.html'>image(5NEMO)</a>
+
+
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Cannot compute straight moments, e.g. the 2nd moment
-along an axis, such as e.g. <i>snapgrid</i> can do. This  program only computes user
-friendly numbers (sum, mean, dispersion) and gives special meaning to negative
-values of mom= and axis=. 
+Cannot compute straight moments, e.g. the 2nd moment along an axis,
+such as e.g. <i>snapgrid</i> can do. This  program only computes user friendly numbers
+(sum, mean, dispersion) and gives special meaning to negative values of
+mom= and axis=. 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 src/image/misc/ccdmom.c 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben
-
+Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>09-jun-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

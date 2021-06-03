@@ -28,13 +28,14 @@ angle. The default is a "face-on" view (<b>inc=0</b>).  No corrections for brigh
 due to inclination are made however. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file
-(optional) to be added to the output file. Default: none, map is generated.
+<dd>Input
+file (optional) to be added to the output file. Default: none, map is generated.
 </dd>
 
 <dt><b>out=</b> </dt>
@@ -204,17 +205,31 @@ by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+Seting the WCS is not working well. There is cell=, there is crpix,cdelt,crval
+
+<p> 
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 , <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<p> <p>
+<a href='https://github.com/GalSim-developers/GalSim'>https://github.com/GalSim-developers/GalSim</a>
+
+<p>
+There are also good simulators in starlab  and amuse 
+<p> 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 src/image/trans
 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>4-Jan-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-jan-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added (many features and) factor=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -232,10 +247,11 @@ Peter Teuben
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Object</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>
