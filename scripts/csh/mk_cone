@@ -1,8 +1,9 @@
 #! /bin/csh -f
 #
-# to get a rotating disk:    ./mk_cone vscale=1 outflow=0 cone=90
+# to get a rotating disk:    ./mk_cone vscale=1 outflow=0 cone=90 out=disk1
 # the disk= blends in a true disk so you can see both the outflow cones and the disk
 # Make sure "ds9" has been launched before this script is run, as 5 frame are sent to ds9
+#
 #
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
@@ -19,6 +20,7 @@
 #   mirror   1=have both sides
 #   fill     t=cone is filled  f=cone is hollow
 #   svar     smoothing
+#   mass     this is the mass ratio of the disk to a half cone
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
@@ -32,14 +34,16 @@ set view    = 0         #> RADIO view=0       -1,0,1
 set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
-set disk    = 1         #> RADIO disk=1       0,1/100,1/10,1,10,100,1000,10000
+set disk    = 1         #> RADIO disk=1       0,1/1000,1/100,1/10,1,10,100,1000,10000
 set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
 set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
 set out     = cone1     #> ENTRY out=cone1
 
 #  parameters not in the GUI
-set rmax = 1
-set rc   = 0.1
+set rmaxd = 2
+set rmax  = 1
+set rc    = 0.1
+set n     = 128
 
 foreach _arg ($*)
     set $_arg
@@ -60,8 +64,12 @@ end
 #   - linear decrease (inverse of previous)
 #   - constant
 
+
 rm -f $out.*
-mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=2 >& /dev/null
+
+
+# the disk rotates counterclock wise, kinematic major axis -X, and the near side is along the +Y axis.
+mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=$rmaxd >& /dev/null
 
 if ($flow == flat) then
     echo 0 $outflow   > $out.flow
@@ -78,9 +86,10 @@ else
 endif    
 
 if ($mirror == 0) then
+  # only one cone
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
-    snapspin - - omega=$outflow rotcur=$out.flow outflow=t|\
+    snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snaprotate - $out.1 $inc,$pa xz
 
@@ -88,15 +97,16 @@ if ($mirror == 0) then
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
 else
+  # one cone on each side
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
-    snapspin - - rotcur=$out.flow outflow=t sign=1 |\
+    snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snapshift - - 0,0,-$rmin |\
     snaprotate - $out.1 $inc,$pa xz    
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
-    snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
+    snapspin - - rotcur=$out.flow outflow=t sign=1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snapshift - - 0,0,-$rmin |\
     snapscale - - rscale=1,1,-1 |\
@@ -108,12 +118,12 @@ else
 endif
 
 #   svar: add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
-snapgrid $out.snap $out.vel moment=-1 nx=128 ny=128 svar=$svar >& /dev/null
-snapgrid $out.snap $out.den moment=0  nx=128 ny=128 svar=$svar >& /dev/null
+snapgrid $out.snap $out.vel moment=-1 nx=$n ny=$n svar=$svar >& /dev/null
+snapgrid $out.snap $out.den moment=0  nx=$n ny=$n svar=$svar >& /dev/null
 ccdfits $out.den $out.den.fits radecvel=t >& /dev/null
 ccdfits $out.vel $out.vel.fits radecvel=t >& /dev/null
 
-snapgrid $out.snap - nx=128 ny=128 nz=64 zrange=-2:2 svar=$svar |\
+snapgrid $out.snap - nx=$n ny=$n nz=$n/2 zrange=-2:2 svar=$svar |\
    ccdmath - - "%1+rang(0,$noise)" |\
    ccdfits - $out.fits radecvel=t debug=-1
 
@@ -131,3 +141,8 @@ nds9 $out.fits
 xpaset -p ds9 frame frameno 5
 nds9 $out.fits
 
+if (0) then
+  fitsccd $out.fits - | rvstack - $out.rvmo.ccd pa=90+90  inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=0
+  xpaset -p ds9 frame frameno 6
+  nds9 $out.rvmo.ccd
+endif
