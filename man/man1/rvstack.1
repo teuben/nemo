@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "1 June 2021"
+.TH RVSTACK 1NEMO "2 June 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
@@ -11,7 +11,7 @@ rvstack \- extract Radius-Velocity diagram from a data cube for later stacking
 axis of an assumed galaxy disk data cube, and stacks these data to
 construct a Radius-Velocity diagram,
 centered on the galaxy in position and velocity.
-It will also stack the two sides of the galaxy (but see also \fBside=\fP),
+It will also stack the two sides of the galaxy (see also \fBside=\fP),
 so the radial coordinate will run from 0 to some Rmax.
 In velocity it will run from some -Vmax to Vmax,
 but always expecting positive rotation around the Z axis,
@@ -57,8 +57,8 @@ output R-V map. [No default]
 .TP
 \fBpa=\fP
 position angle along which the wedge is taken. This is normally 
-the receding side (with mode=rotation) or
-the minor axis near side (for mode=outflow), in order get a positive velocity signal in the RV map.
+the \fBmajor axis receding side\fP (with mode=rotation) or
+the \fBminor axis far side\fP (for mode=outflow), in order get a positive velocity signal in the RV map.
 Only when \fBgscale=t\fP is set, will there be a difference how the radius and velocity
 are scaled.
 .TP
@@ -161,4 +161,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 6-May-2021	V0.4 First working version	PJT
 31-may-2021	V0.7 better geometry correction	PJT
+2-jun-2021	V0.8 siwtch to using far side	PJT
 .fi

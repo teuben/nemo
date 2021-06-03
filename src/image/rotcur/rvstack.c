@@ -29,7 +29,7 @@ string defv[] = {
   // "geom=f\n       Off axis Geometric correction as well?",
   "tab=f\n        Write a test table?",
   "jiggle=0\n     Jiggle pixels by this amount to fill gaps when gscale set  **TEST**",
-  "VERSION=0.7\n  31-may-2021 PJT",
+  "VERSION=0.8\n  2-jun-2021 PJT",
   NULL,
 };
 
@@ -158,12 +158,12 @@ void nemo_main()
 	dphi = phi - pa;
 	dphi = SYM_ANGLE(dphi);	
 	if (ABS(dphi) < angle && (side >=0)) 
-	  vmul = 1.0;
+	  vmul = -1.0;
 	else {
 	  dphi += PI;
 	  dphi = SYM_ANGLE(dphi);	  
 	  if (ABS(dphi) < angle && (side <= 0))
-	    vmul = -1.0;
+	    vmul = 1.0;
 	  else
 	    continue;
 	}
