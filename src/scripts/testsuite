@@ -14,10 +14,12 @@
 #    6-aug-06   look for Testfile's in usr tree also (-u will disable)
 #   26-nov-19   add bsf tests if not OK
 #   21-nov-20   check if any executables did not compile
+#    4-jun-21   always keep a local testsuite.log
 #
 #
-# BUG:  -b  does not remove executable, so you never know if new binary did
-#		not compile
+# BUG:  -b  does not remove executable, so you never know if new binary did not compile
+
+set version="4-jun-2021"
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
@@ -108,6 +110,7 @@ onintr cleanup
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
 echo "TESTSUITE started `date`"                                        > $log
+echo "TESTSUITE version $version"                                     >> $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
 #   using $NEMO instead of $NEMO/src really makes it run slow on solaris
@@ -145,7 +148,7 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($local) pushd $testfile:h >& /dev/null
     make -f $testfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-        echo " Problems"
+        echo " FAIL"
     else
         echo " OK"
     endif
@@ -165,7 +168,8 @@ cleanup:
 	    echo FAIL : The following programs were not found:
 	    cat $testdir/not-found.log
 	endif
-        echo Results in $testdir/$log
+        echo "Results in $testdir/$log"
+	echo "A local copy in $NEMO/$log is kept as well."
 	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
 	if (-z $testdir/bsf-fail.log) then
 	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
@@ -177,6 +181,8 @@ cleanup:
 	echo If you have any unsolved problems, this file should be saved.
         head -1 $testdir/$log
         tail -1 $testdir/$log
+
+	cp $testdir/$log $NEMO/$log
 	
     endif
 
