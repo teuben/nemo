@@ -3,10 +3,9 @@
 Filestructure
 =============
 
-This chapter gives an overview of the file structure of persistent
-data\footnote{Programmers are always free to choose any format they like
-in memory - this is usally hidden from the users.  What we mean here is
-the disk format. The popular memory (object) models,
+Here we give an overview of the file structure of NEMO's persistent
+data stored on disk.
+The popular memory (object) models,
 and how they interact with persistent data on disk, are discussed in
 :ref:`progr`.
 Most of the data handled by NEMO is in the form of a
@@ -14,13 +13,17 @@ specially designed
 XML-like binary format (well before XML was conceived)
 although exceptions like ASCII files/tables will also be discussed. 
 Ample examples illustrate creation, manipulation and data transfer.
-We close this chapter with a few examples of function descriptions, 
+We also mention a few examples of function descriptors, 
 a dataformat that make use of
 the native object file format of your operating system
-(*a.out(5)* and *dlopen(3)*).
+(*a.out(5)* and *dlopen(3)*) that are dynamically loaded during runtime.
 
 Binary Structured Files
 -----------------------
+
+.. note::
+   There is also a program called **bsf**, which benchmarks a regression value
+   of the floating point values in the file.
 
 Most of the data files used by NEMO share a common low level binary file
 structure, which can be viewed as a sequence of tagged data items.  Special
@@ -242,11 +245,7 @@ tabular output, but sometimes it is also necessary to write a shell/awk
 script or parser to do the job.
 
 A usefull (open source domain) program *redir(1NEMO)*
-has been included in NEMO\footnote{see also the {\tt tpipe} tool}
-to be\index{tpipe}
-able split the two standard UNIX output channels {\it stdout} and
-{\it stderr} to separate files. \index{stdout} \index{stderr}
-\index{redir}
+has been included in NEMO
 
 .. code-block::
 
@@ -262,7 +261,6 @@ shell this is accomplished much easier:
 .. code-block::
 
     7$ tsf r001.dat debug=2  2>debug.out
-
 
 One last word of caution regarding tables: tables can also be used
 very effectively in pipes, for example take the first example,
@@ -294,70 +292,61 @@ piece of code that will get loaded by NEMO (using *loadobj(3NEMO)*).
 We currently have 4 of these in NEMO:
 
 
-.. warning::
-   Below this marker latex conversion and cleanup not done yet
-
 
 Potential Descriptors
 ~~~~~~~~~~~~~~~~~~~~~
 
-The potential
-\index{potential descriptor} \index{orbit} descriptor is used in orbit
+The potential descriptor is used in orbit
 calculations and a few N-body programs.  These are actually binary
 object files (hence extremely system dependent!!), and 
-used by the dynamic object loader \index{dynamic loader, loadobj}
+used by the dynamic object loader
 during runtime. Potentials are 
-supplied to NEMO programs as an input variable ({\it i.e.} a set of 
-keywords\footnote{Normally called {\tt potname=, potpars=} 
-and {\tt potfile=}, but see also {\tt rotcurves}}).
+supplied to NEMO programs as an input variable (*i.e.* a set of 
+keywords, normally called ``potname=``, ``potpars=`` and ``potfile=``.
 For this, a mechanism is needed to dynamically load 
 the code which calculates the potential. This is done by a
 dynamic object loader that comes with NEMO. 
 If a program needs a potential, and it is present in the
-default repository ({\tt \$POTPATH} 
-or \index{POTPATH, environment}
-{\tt \$NEMOOBJ/potential}), it is
+default repository (``$POTPATH`` or {``$NEMOOBJ/potential``), it is
 directly loaded into memory by this dynamic object loader. 
-If only a source file is present, {\it
-e.g.} in the current directory, it is compiled on the fly \index{compile
-on the fly} and then loaded.  The source code can be written
+If only a source file is present,
+*e.g.* in the current directory, it is compiled on the fly 
+and then loaded.  The source code can be written
 in C or FORTRAN.  Rules and more information
-can be found in {\it potential(3NEMO)} and {\it
-potential(5NEMO)} The program {\it potlist(1NEMO)} \index{potlist(1)}
-can be used to test potential descriptors. See Section~\ref{s:potential}
-for examples.
+can be found in *potential(3NEMO)* and *potential(5NEMO)*
+The program *potlist(1NEMO)* 
+can be used to test potential descriptors. 
 
 Bodytrans Functions
 ~~~~~~~~~~~~~~~~~~~
 
 Another family of object files used by the dynamic
-object loader are the {\it bodytrans(5NEMO)} functions. These were
+object loader are the *bodytrans(5NEMO)* functions. These were
 actually the first one of this kind introduced in NEMO.
 They are functions generated from expressions containing body-variables
 (mass, position, potential, time, ordinal number etc.).  They frequently occur
 in programs where it is desirable to have an arbitrary
 expression of body variables
-{\it e.g.}  plotting and printing programs, sorting program etc.
+*e.g.*  plotting and printing programs, sorting program etc.
 Expressions which are not in the standard repository (currently 
-{\tt \$BTRPATH} 
-or \index{BTRPATH, environment}
-{\tt \$NEMOOBJ/bodytrans}) will 
+``$BTRPATH`` or ``$NEMOOBJ/bodytrans``) will 
 be generated on the fly and saved for later use. 
-\index{bodytrans(1)} The program {\it bodytrans(1NEMO)} is available
+The program *bodytrans(1NEMO)* is available
 to test and save new expressions. Examples are given in 
 Section~\ref{s-dispanal}, a table of the 
 precompiled ones are in Table~\ref{t:bodytrans}.
 
+
 Nonlinear Least Squares Fitting Functions
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The program {\tt tabnllsqfit} can fit (linear or non-linear, depending
+The program *tabnllsqfit(1NEMO)* can fit (linear or non-linear, depending
 on the parameters) a function to a set of datapoints from an ASCII table.
-The keyword {\tt fit=} describes the model (e.g. a line, plane, gaussian, circle,
+The keyword ``fit=`` describes the model (*e.g.* a line, plane, gaussian, circle,
 etc.), of which a few common ones have been pre-compiled with the program.
 In that sense this is different from the previous two function descriptors,
 which always get loaded from a directory with precompiled object files.
-The keyword {\tt load=} can be used to feed a user defined function to
+The keyword ``load=`` can be used to feed a user defined function to
 this program. The manual page has a lot more details.
 
 Rotation Curves Fitting Functions
@@ -367,5 +356,5 @@ Very similar to the Nonlinear Least Squares Fitting Functions are the
 Rotation Curves Fitting Functions, except they are peculiar to the
 1- and 2-dimensional rotation curves one find in galaxies as the 
 result of a projected circular streaming model. The program
-{\tt rotcurshape} is the only program that uses these functions, the
+*rotcurshape(1NEMO)* is the only program that uses these functions, the
 manual page has a lot more details.

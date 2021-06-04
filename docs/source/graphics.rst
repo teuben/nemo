@@ -5,14 +5,14 @@ Graphics and Image Display
 
 NEMO programs also need to display their data of course.
 We shall make
-a distinction between {\it graphics} and {\it image} data.  A simple but
-flexible {\it graphics} interface has been defined in NEMO and is used
-extensively in programs.  
+a distinction between *graphics* and *image* data.  A simple but
+flexible *graphics* interface has been defined in NEMO and is used
+extensively in programs that need such output.
 
-To display {\it image} data we rely mostly (but see {\tt ccdplot})
+To display *image* data we rely mostly (but see *ccdplot(1NEMO)*)
 on external software.
-Often images would need to be copied to a FITS file for this (but see 
-{\tt nds9}).
+Often images would need to be copied to a FITS file for this
+(but see ``nds9``).
 
 
 The YAPP graphics interface
@@ -21,13 +21,13 @@ The YAPP graphics interface
 The programs in NEMO which use graphics are rather simple and allow no
 interactive processing, except perhaps for a simple 'hit-the-return-key'
 or 'push-a-mouse-button' between successive plots or actions.  A very
-simple interface (API) was defined ({\bf yapp}, Yet Another Plotting Package)
-with basic plot functions.  \index{yapp}
+simple interface (API) was defined (**yapp**, Yet Another Plotting Package)
+with basic plot functions.  
 There are currently a few yapp implementations
 available, such as a postscript-only device, and pgplot.  
 If your output device is not supported by the ones available
 in the current yapp directory
-({\tt \$NEMO/src/kernel/yapp}), you have to write a new one!  A
+(``$NEMO/src/kernel/yapp``), you have to write a new one!  A
 reasonably experienced programmer writes a functional yapp-interface in
 a few hours.
 
@@ -55,7 +55,15 @@ variable).  \index{yapp=, system keyword} \index{YAPP, environment} See
 also Appendix~\ref{a:iface}. 
 
 However, despite these grim sounding words, we currently
-almost exclusively use the PGPLOT implementation\index{pgplot} of yapp.
+almost exclusively use the PGPLOT implementation of yapp.
+
+pyplot=: python matplotlib
+--------------------------
+
+An experimental ``pyplot=`` keyword has been added to
+``tabplot`` and ``tabhist``, which creates a simple python script
+that reproduces (to some degree) what those program intended to do.
+The intent is that these can be edited and made more functional.
 
 General Graphics Display
 ------------------------
@@ -74,13 +82,13 @@ Binary tables need to be converted to ASCII of course.
 Image Display Interface
 -----------------------
 
-Data in {\it image(5NEMO)} format \index{image(5)} can be transferred in
-{\it fits(5NEMO)} format and subsequently displayed and analyzed within
+Data in *image(5NEMO)* format can be transferred in
+*fits(5NEMO)* format and subsequently displayed and analyzed within
 any astronomical image processing system.  They are generally much
 better equipped to display and manipulate data of this kind of format. 
 A number of standalone display programs can also understand FITS
-format.  \index{fits(5)} An excellent example of this is 
-{\it ds9(1L)}, although it understands FITS files, can be used in
+format.  An excellent example of this is 
+*ds9(1)*, although it understands FITS files, can be used in
 a client-server setting and NEMO image files can be directly sent
 to the display server (a temporary fits file is created, which
 can have drawbacks):
