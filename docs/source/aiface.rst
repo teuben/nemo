@@ -122,16 +122,9 @@ equivalent environment variable (in upper case).
     Is mainly intended to be used by scripts such as {\tt mktool}. 
     The procedure in NEMO to update a {\tt .doc} file would be:
 
-.. code-block::
+    .. code-block::
 
          % program help=t > $NEMODOC/program.doc
-     or:
-         % mktool program
-
-     
-
-  if the script {\tt mktool} has been\index{mktool}
-  installed\footnote{Obviously this is priviliges to NEMO superusers only}
 
   - ``q``
     quit, do not start program. Useful when the helpstring contains
@@ -147,30 +140,29 @@ equivalent environment variable (in upper case).
 
 
 - **debug=**  Changes the debug output level.  
-  \index{debug=, system keyword} \index{DEBUG, environment}
   The higher the debug
   level, the more output can appear on the standard error output device
-  {\tt stderr}.  The default value is either 0 or the value set by the
-  {\bf DEBUG} environment variable.  The use of the {\tt debug=} keyword
+  ``stderr``.  The default value is either 0 or the value set by the
+  **DEBUG** environment variable.  The use of the ``debug=`` keyword
   will override your default setting.  A value of '0' for debug 
   may still show some warning messages.  Setting debug to 
   -1 will prevent even those warning/debug messages.  Legal values are 0
-  through 9.  Values of {\bf DEBUG} higher than 9 are for system experts
-  usage only.  You may get some weird screen output. Values larger than
+  through 9.  Values of **DEBUG** higher than 9 are not used, or
+  you may get some weird screen output. Values larger than
   5 cause an error to coredump, which can then be used with debug utilities
-  like {\it abd(1)} and {\it dbx(1)}.
+  like *abd(1)* and *gdb(1)*.
 
 - **error=** Specifies how many times the fatal error routine can be
-  bypassed\index{error=, system keyword}. The {\bf ERROR} environment
+  bypassed. The **ERROR** environment
   variable can also be set for this. The default, if neither of them
   present, is 0.
 
 - **yapp=** Defines the device to which graphics output is send. 
   Currently only interpreted for a limited number of yapp devices.  
-  \index{YAPP, environment} \index{yapp=, system keyword} Some yapp
-  devices do not even listen to this keyword.  Check {\it yapp(5NEMO)} or
+  Some yapp
+  devices do not even listen to this keyword.  Check *yapp(5NEMO)* or
   your local NEMO guru which one is installed.  The default device is
-  either 0 or the value set by the {\bf YAPP} environment variable.
+  either 0 or the value set by the **YAPP** environment variable.
 
 - **np=**  Defines the number of processors (e.g. in an OpenMP setting)
   that can be used. This would override the OMP_NUM_THREADS environment
@@ -222,11 +214,14 @@ list gives an overview of some of the available devices
 See also manual pages such as *getparam(3NEMO)* and
 *yapp(5NEMO)*
 
-The REVIEW section (deprecated)
--------------------------------
+The REVIEW section
+------------------
 
-By setting the {\bf REVIEW} environment variable a NEMO program is 
-always put into the REVIEW \index{REVIEW} \index{interrupting a program}
+.. warning::
+   This option will likely be deprecated. By default it is not enabled.
+
+By setting the **REVIEW** environment variable a NEMO program is 
+always put into the REVIEW
 section just before the start of the actual execution of
 the program (the end of the {\it initparam(3NEMO)} routine). 
 This functionality is quite similar to using the helplevel
@@ -274,9 +269,6 @@ the following commands are understood:
 
 - \item{{\bf !cmd}}
   Pass a command {\tt cmd} to the shell.
-
-%\item{{\bf HOTKEY}}
-% Abort the program badly, possibly generating a coredump.
 
 - \item{{\bf go,continue}}
   Continue execution of the program.

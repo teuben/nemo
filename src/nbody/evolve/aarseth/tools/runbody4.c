@@ -46,9 +46,9 @@ string defv[] = {
     "zmbar=0.5\n      mean mass of system, in solar units",
 
 #if 0
-    "kz=0 1 0 0 1 0 1 0 0 0  0 0 0 1 1 1 0 0 3 4  1 0 2 0 0 1 0 0 0 1  0 0 0 0 0 0 1 0 0 0\n",
+    "kz=0 1 0 0 1 0 1 0 0 0  0 0 0 1 1 1 0 0 3 4  1 0 2 0 0 1 0 0 0 1  0 0 0 0 0 0 1 0 0 0\n"
 #else
-    "kz=0 0 1 0 1 0 5 0 0 0  0 0 0 0 1 0 0 0 3 0  1 0 2 0 1 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0\n",
+    "kz=0 0 1 0 1 0 5 0 0 0  0 0 0 0 1 0 0 0 3 0  1 0 2 0 1 2 0 0 0 2  0 0 0 0 0 0 1 0 0 0\n"
 #endif
       "     Non-zero options for alternative paths (see below)\n"
       "       1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).\n"
@@ -139,7 +139,7 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.6a\n   27-may-2021 PJT",
+    "VERSION=0.6b\n   4-jun-2021 PJT",
     NULL,
 };
 
