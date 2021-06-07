@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "3 June 2021"
+.TH RVSTACK 1NEMO "6 June 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube with selected stacking
@@ -16,13 +16,13 @@ curve along the major axis, and (Z-axis) outflow along the minor axis.
 By default it will stack the two sides of the galaxy (see also \fBside=\fP),
 so the radial coordinate will run from 0 to some Rmax, and 
 in velocity it will run from some -Vmax to Vmax.
-This is done in such a way as to expecting positive rotation around the Z axis,
+This is done in such a way as to expect positive rotation around the Z axis,
 and positive outflow along the Z axis, assuming the
 position angle has been correctly set: \fBpa\fP of receding side for rotation, and
 receding (near) side for outflow.
 .PP
 Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
-If you have many like-minded galaxies, stacking these images may beat the noise down much more.
+If you have many like-minded galaxies, stacking these images may beat the noise down even more.
 See also \fIccdstack(1NEMO)\fP for the subsequent stacking  of images produced with
 \fBrvstack\fP.
 .PP
@@ -43,7 +43,7 @@ V/sin(inc)/cos(theta)	V/cos(inc)
 .fi
 where \fBtheta\fP is the position angle away from the major axis in the plane of the galaxy.
 The radius \fBR\fP has been corrected for this as well.
-this will likely leave some gaps in radius and velocity. See CAVEATS below.
+this can leave some gaps in radius and velocity. See CAVEATS below.
 .PP
 Points along an arc are all accumulated (technically: averaged), and placed on the same radial grid
 as the pixel size in the input data cube. We might need some trick next neighbor smoothing
@@ -53,7 +53,9 @@ in order for pixels near the center to have a value.
 .so man1/parameters
 .TP 20
 \fBin=\fP\fIimage_cube\fP
-input data cube, in standard \fIimage(5NEMO)\fP format. [No default]
+input data cube, in standard \fIimage(5NEMO)\fP format. The third axis must be velocity, or at least
+match the units used in the \fBvlsr=\fP keyword below.
+[No default]
 .TP
 \fBout=\fP\fIimage_map\fP
 output R-V map. [No default]
@@ -62,7 +64,7 @@ output R-V map. [No default]
 position angle along which the wedge is taken. This is normally 
 the \fBmajor axis receding side\fP (with mode=rotation) or
 the \fBminor axis near side\fP (for mode=outflow), in order get a positive velocity signal in the RV map.
-Only when \fBgscale=t\fP is set, will there be a difference how the radius and velocity
+When \fBgscale=t\fP is set, will there be a difference how the radius and velocity
 are scaled.
 .TP
 \fBinc=\fP
@@ -72,7 +74,7 @@ inclination angle of the disk [45]
 systemic velocity [0]   
 .TP
 \fBcenter=\fP\fIxpos,ypos\fP
-rotation center (0,0=lower left). If not supplied, the reference pixel will be used.
+rotation center (in pixel units, where 0,0=lower left). If not supplied, the reference pixel will be used.
 Default: reference pixel.
 .TP
 \fBangle=\fP
@@ -83,9 +85,8 @@ into the R-V plot.  [Default: 10]
 Value of the blank pixel to be ignored. [Default: 0.0]
 .TP
 \fBrscale=\fP
-Scaling factor for radius. This would be used to stack galaxies based on a physical
-\fPkpc\fP scaling,
-or an \fBRe\fP scaling, not geometry, see \fBgscale=\fP below.  [Default: 1]
+Scaling factor for radius. This would be used to stack galaxies based on some physical
+(e.g. \fPkpc\fP) scaling, not geometry, see \fBgscale=\fP below.  [Default: 1]
 .TP
 \fBvscale=\fP
 Scaling factor for velocity. This would be  used to stack galaxies based on a mass scaling,
@@ -95,7 +96,7 @@ not geometry, see \fBgscale=\fP below. [Default: 1]
 A boolean if to scale for (inclination and position angle based) geometry. If selected,
 rotation is scaled by 1/sin(i), outflow by 1/cos(i).
 Radius is not scaled for rotation, but by 1/cos(i) for outflow.
-Small position angle based corrections are also applied.
+Small position angle in the disk plane ("theta") based corrections are also applied.
 [Default: f]
 .TP
 \fBmode=r|o\fP
@@ -123,7 +124,7 @@ this should disappear, but otherwise some smoothing/interpolation might be neede
 Not implemented.
 .PP
 Outflow is hard-coded as outflow along the Z axis. What should the off-axis relationship
-be? Conical?
+be? Conical? No theta correction applied here, as we don't have a model like we have for rotation.
 .SH "EXAMPLES"
 An example using our standard NGC 6503 cube given in km/s velocity units.
 
@@ -137,6 +138,12 @@ An example using our standard NGC 6503 cube given in km/s velocity units.
 
 .fi
 
+Here is an example made with \fBmk_cone\fP
+.nf
+    $NEMO/scripts/csh/mk_cone out=cone2 rmin=0 vscale=0 outflow=0.5 cone=10 flow=rise noise=1
+    
+.fi
+
 .SH "SEE ALSO"
 ccdstack(1NEMO), ccdzshift(1NEMO), ccdmath(1NEMO), image(5NEMO), rotcur(5NEMO)
 .PP
@@ -145,7 +152,7 @@ https://github.com/jbjolly/LineStacker
 .SH "FILES"
 .nf
 src/image/rotcur/rvstack.c
-scripts/csh/mk_cone - example script to create PPV cubr of disk + cone outflow along Z
+scripts/csh/mk_cone - example script to create PPV cubr of disk + conic outflow along Z
 
 https://www.cv.nrao.edu/fits/data/samples/cubes/ngc6503.fits  (old 1983 VLA data)
 https://...   (TBD - new data)
@@ -157,7 +164,7 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.50i +4.0i
-6-May-2021	V0.4 First working version	PJT
+6-may-2021	V0.4 First working version	PJT
 31-may-2021	V0.7 better geometry correction	PJT
 3-jun-2021	V0.8a clarify near/far side choice	PJT
 .fi
