@@ -8,6 +8,7 @@
 # may 6  2021: -h flag added
 # may 29 2021: -f flag added
 
+
 import re, os, subprocess, getopt, sys
 
 # Global flags
@@ -143,8 +144,7 @@ def main():
         return
 
     # Change working directory
-    os.chdir("..")
-    os.chdir("..")
+    os.chdir(os.environ['NEMO'])
 
     # Run tests
     checkMan()
