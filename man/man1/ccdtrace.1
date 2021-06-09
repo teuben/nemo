@@ -3,7 +3,8 @@
 ccdtrace \- interpolate a set of coordinates from an image
 .SH SYNOPSIS
 \fBccdtrace\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdtrace\fP takes a set of (X,Y) coordinates, in the form
 of an ascii \fItable(1NEMO)\fP, and interpolates them from an
 \fIimage(1NEMO)\fP. The output will also be in standard table
@@ -11,9 +12,9 @@ format. The input coordinate must be in the physical coordinates
 of the input image, as defined by Xmin/Ymin/Dx/Dy coordinates
 (see \fItsf(1NEMO)\fP to view them). Sky image copied via
 FITS can sometimes have unexpected units. See also \fIfits(5NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP\fIimage\fP
 Input Image(5NEMO) file. Currently only 2D images are supported,
@@ -41,7 +42,14 @@ native units. Default: f
 \fBwcs=t|f\fP
 By default, the table is assumed to be in WCS (the units used in the image),
 but with wcs=f you can use pixel coordinates.
-.SH FILES
+.TP
+\fBdx=\fP
+Optional X offset added to table. [Default: 0]
+.TP
+\fBdy=\fP
+Optional Y offset added to table. [Default: 0]
+
+.SH "FILES"
 src/nbody/evolve/flowcode/ccdtrace.c
 .SH SEE ALSO
 ccdprint(1NEMO), tsf(1NEMO), image(5NEMO), fits(5NEMO), ccdfits(1NEMO)
