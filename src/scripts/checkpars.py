@@ -29,12 +29,12 @@ def get_man_matches(file):
     for line in man_doc.readlines():
         if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
             scan_flag = True
-        elif scan_flag:
-            match = re.findall(r'\\f[a-zA-Z][a-zA-Z]+[0-9]*',line)
+        elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
+            match = re.findall(r'\\fB[\w|#]*=',line)
             if not match: # If the .TP isn't followed by a command, flag file as bad
                 return 'Non-conformant'
             else:
-                man_matches.append(match[0])
+                man_matches.append(match[0][:-1])
             scan_flag = False
         
     # Transform man data for comparison
@@ -49,11 +49,12 @@ def get_help_matches(file):
     # Grab keywords
     help_matches = []
     for line in help_out.splitlines():
-        keyword = line.split()[0]
-        if keyword != "VERSION": 
-            help_matches.append(keyword) 
-        else: 
-            break
+        if(line[0] != ' '): # Make sure the line doesn't start with a space
+            keyword = line.split()[0]
+            if keyword != "VERSION":
+                help_matches.append(keyword) 
+            else: 
+                break
     
     return help_matches
 
