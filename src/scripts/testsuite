@@ -148,7 +148,7 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
 	echo -n TESTSUITE: "FAIL" $testfile:h
 	echo ""
     else
-	echo -n TESTSUITE: "OK" $testfile:h
+	echo -n TESTSUITE: "OK  " $testfile:h
 	echo ""
     endif
     if ($local) popd >& /dev/null
