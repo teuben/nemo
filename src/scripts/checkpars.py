@@ -32,7 +32,7 @@ def get_man_matches(file):
         elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
             match = re.findall(r'\\fB[\w|#]*=',line)
             if not match: # If the .TP isn't followed by a command, flag file as bad
-                return 'Non-conformant'
+                return 'Non-conformant: ' + line
             else:
                 man_matches.append(match[0][:-1])
             scan_flag = False
@@ -152,4 +152,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-    
