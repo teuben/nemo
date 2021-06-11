@@ -1,4 +1,4 @@
-.TH RVSTACK 1NEMO "6 June 2021"
+.TH RVSTACK 1NEMO "9 June 2021"
 
 .SH "NAME"
 rvstack \- extract Radius-Velocity diagram from a data cube with selected stacking
@@ -9,29 +9,30 @@ rvstack \- extract Radius-Velocity diagram from a data cube with selected stacki
 .SH "DESCRIPTION"
 \fBrvstack\fP takes all points within a (narrow) wedge around the major or minor
 axis of an assumed galaxy disk data cube, and stacks these data to
-construct a Radius-Velocity diagram,
+construct a two-dimensional \fIRadius-Velocity map\fP,
 centered on the galaxy in position and velocity. The intent is to show the rotation
-curve along the major axis, and (Z-axis) outflow along the minor axis.
+curve along the major axis, or (Z-axis) outflow along the minor axis. If there
+is signal at negative velocities, either there are leading spiral arms, or there
+is inflow.
 
 By default it will stack the two sides of the galaxy (see also \fBside=\fP),
 so the radial coordinate will run from 0 to some Rmax, and 
 in velocity it will run from some -Vmax to Vmax.
-This is done in such a way as to expect positive rotation around the Z axis,
-and positive outflow along the Z axis, assuming the
-position angle has been correctly set: \fBpa\fP of receding side for rotation, and
-receding (near) side for outflow.
+This is done in such a way as to expect positive rotation around the Z-axis,
+or a positive outflow along the Z axis. For this the
+position angle (\fBpa=\fP) has been correctly set to the major axis / receding side for rotation,
+and minox axis / receding (near) side for outflow.
 .PP
-Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee.
+Weak signal rotation and/or bulk outflow could be detected this way, but we offer no guarentee!
 If you have many like-minded galaxies, stacking these images may beat the noise down even more.
-See also \fIccdstack(1NEMO)\fP for the subsequent stacking  of images produced with
-\fBrvstack\fP.
+For subsequent stacking \fIccdstack(1NEMO)\fP will need to be used.
 .PP
 Options exist to scale the Radius and Velocity to different units, such that
-many galaxies can be stacked in physical space, as opposed to observed space. See
+objects can be stacked in a physical space, as opposed to observed space. See
 \fBrscale=\fP and \fBvscale=\fP.
 .PP
 .PP
-When \fBgscale=t\fP is set, the coordinates are geometrically corrected as follows:
+When \fBgscale=t\fP is set, the coordinates are geometrically corrected as well, as follows:
 .nf
 .ta +2.5i
 
@@ -43,7 +44,7 @@ V/sin(inc)/cos(theta)	V/cos(inc)
 .fi
 where \fBtheta\fP is the position angle away from the major axis in the plane of the galaxy.
 The radius \fBR\fP has been corrected for this as well.
-this can leave some gaps in radius and velocity. See CAVEATS below.
+This can leave some gaps in radius and velocity. See CAVEATS below.
 .PP
 Points along an arc are all accumulated (technically: averaged), and placed on the same radial grid
 as the pixel size in the input data cube. We might need some trick next neighbor smoothing
@@ -111,6 +112,7 @@ side. [Default: 0]
 .TP
 \fBjiggle=t|f\fP
 Debugging spreading signal. Don't use.
+
 .SH "CAVEATS"
 Code is still under developement, in particular dealing with units is unresolved.
 .PP
@@ -125,6 +127,7 @@ Not implemented.
 .PP
 Outflow is hard-coded as outflow along the Z axis. What should the off-axis relationship
 be? Conical? No theta correction applied here, as we don't have a model like we have for rotation.
+
 .SH "EXAMPLES"
 An example using our standard NGC 6503 cube given in km/s velocity units.
 
