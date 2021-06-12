@@ -60,52 +60,52 @@ Values equal the undefined value (currently 0.0) are ignored in the
 fit. See \fIccdmath(1NEMO)\fP or \fIfitsccd(1NEMO)\fP on how to
 create a velocity field with such undefined values (see also
 EXAMPLES below).
-.SH PARAMETERS
+.SH "PARAMETERS"
 The following parameters are known (those with ** are still here
 since we cloned this program off rotcur, but are likely to be slashed or
 (re)implemented):
 .TP 25
-\fBin\fP=\fIv_image|xyv_tab|rv_tab\fP
+\fBin=\fP\fIv_image|xyv_tab|rv_tab\fP
 Input velocity field map, normally in \fIimage(5NEMO)\fP format.
 Input data can also be a table, see \fBimagemode=\fP and \fBrotcurmode=\fP below
 how to control the input table.
 No default.
 .TP
-\fBradii\fP=\fIr0,r1\fP
+\fBradii=\fP\fIr0,r1\fP
 Inner and outer radius of the disk to fit (in arcsec).
 For images, the \fBunits=\fP keyword can be used to
 scale your physical units in the header to ``human readable'' units
 (arcsec). By default the whole disk will be used.
 .TP
-\fBpa\fP=\fIpa\fP
+\fBpa=\fP\fIpa\fP
 Kinematic position angle (in degrees) of the disk (i.e. receding side).
 Angles can be 0..360 or -180..180.
 .TP
-\fBinc\fP=\fIinc\fP
+\fBinc=\fP\fIinc\fP
 Inclination (degrees) of the disk. Angles can be 0..90.
 .TP
-\fBvsys\fP=\fIv0\fP
+\fBvsys=\fP\fIv0\fP
 Systemic velocity.
 .TP
-\fBcenter\fP=\fIx0,y0\fP
+\fBcenter=\fP\fIx0,y0\fP
 Rotation center (grid units w.r.t. lower left corner being
 0,0 for NEMO maps). Two numbers are required. For tabular input
 the units must be the same as those used in the table.
 Default: center of map.
 .TP
-\fBfrang\fP=
+\fBfrang=\fP
 free angle around minor axis (degrees), in the plane of
 the galaxy, from which data is excluded from
 the fit (thus the total cone size of ignored data around
 the minor axis is 2*\fBfrang\fP)
 [Default: \fB0.0\fP].
 .TP
-\fBside\fP=
+\fBside=\fP
 Choose the side of the galaxy to fit the velocity field to.
 Valid options are \fBreceding\fP, \fBapproaching\fP 
 or \fBboth\fP side(s). [Default: \fBboth\fP].
 .TP
-\fBweight\fP=
+\fBweight=\fP
 Choice of geometric weighting function with which points are weighed into
 the least squares solution as a function of galactic angle away
 from the major axis. Valid options are: \fBuniform\fP, \fBcosine\fP,
@@ -113,38 +113,38 @@ and \fBcos-squared\fP.  If a density is given (see \fBdens=\fP),
 the weight function is multiplied by this geometric weight factor.
 [Default: \fBuniform\fP].
 .TP
-\fBfixed\fP=
+\fBfixed=\fP
 List of disk geometry parameters to be kept fixed during the fit.
 Choose any of the
 following: \fBvsys,pa,inc,xpos,ypos\fP, although \fBall\fP can also
 be use to fix all geometric parameters.
 [Default: none, i.e. all parameters free]
 .TP
-** \fBellips\fP=
+** \fBellips=\fP
 The names of two parameters for which to calculate an error ellips. 
 (see \fBfixed=\fP). For the two parameters it shows the major
 and minor axis, position angle of the one sigma deviation ellipse.
 [Default: not used]
 .TP
-** \fBbeam\fP=
+** \fBbeam=\fP
 The beam size (FWHM) for beam correction. One or two numbers required.
 Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction]. ** See CAVEATS below **
 .TP
-\fBdens\fP=\fIimage_den\fP
+\fBdens=\fP\fIimage_den\fP
 Image containing the density. Currently only used as an additional
 weight factor. If a map of velocity dispersions would be available,
 a density map would need to be contstructed from its inverse square,
 i.e. dens=1/sigma^2.
 Default: not used.
 .TP
-\fBtab\fP=
+\fBtab=\fP
 If specified, this output table is used in \fIappend\fP mode!
 **deprecated**
 [Default: not used].
 .TP
-\fBresid\fP=
+\fBresid=\fP
 Residuals (OBS-FIT) if specified. If the input file was a table
 (see also \fBimagemode=\fP), this will contain a listing of X, 
 Y, Velocity and Residual Velocities in the disk, else
@@ -160,16 +160,16 @@ residuals [the default], or the fitted map. If the fit is selected,
 the mask values are ignored and the map is filled with the fitted values.
 [Default: \fBf\fP]
 .TP
-\fBtol\fP=
+\fBtol=\fP
 Tolerance for convergence of \fInllsqfit\fP [Default: \fB0.001\fP].
 .TP
-\fBlab\fP=
+\fBlab=\fP
 Mixing parameter for \fInllsqfit\fP [Default: \fB0.001\fP]
 .TP
-\fBitmax\fP=
+\fBitmax=\fP
 Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
 .TP
-\fBunits\fP=
+\fBunits=\fP
 Units of input axes for radius and velocity. Valid options are
 \fBdeg, arcmin, arcsec, rad\fP for radius.
 A numeric value can also be given,
@@ -232,7 +232,8 @@ see rotcur1
 \fBrotcur5=\fP\fIname5...\fP
 see rotcur1.  The final composite rotation curve will be the sum
 (in quadrature) of up to these 5 components.
-.SH ROTCUR FUNCTIONS
+
+.SH "ROTCUR FUNCTIONS"
 A \fIrotcur\fP function needs to provide a routine that returns
 a rotation curve, as well as all of its partial derivates w.r.t.
 the parameters. Most rotation curve shapes have two parameters,

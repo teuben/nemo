@@ -5,14 +5,16 @@
 # apr 15 2021: First Version
 # apr 30 2021: Stopped flagging files w/o help=h
 #              Added -v verbose flag
-# may 4 2021:  Fixed regex bug
-# may 6 2021:  -h flag added
+# may 6  2021: -h flag added
+# may 29 2021: -f flag added
+
 
 import re, os, subprocess, getopt, sys
 
 # Global flags
 VERBOSE = False # If True prints man & help outputs for bad files
 HELP = False
+TASKLIST = "src/scripts/tasklist"
 
 def get_man_matches(file):
     try:
@@ -27,12 +29,12 @@ def get_man_matches(file):
     for line in man_doc.readlines():
         if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
             scan_flag = True
-        elif scan_flag:
-            match = re.findall(r'\\f[a-zA-Z][a-zA-Z]+[0-9]*',line)
+        elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
+            match = re.findall(r'\\fB[\w|#]*=',line)
             if not match: # If the .TP isn't followed by a command, flag file as bad
-                return 'Non-conformant'
+                return 'Non-conformant: ' + line
             else:
-                man_matches.append(match[0])
+                man_matches.append(match[0][:-1])
             scan_flag = False
         
     # Transform man data for comparison
@@ -47,11 +49,12 @@ def get_help_matches(file):
     # Grab keywords
     help_matches = []
     for line in help_out.splitlines():
-        keyword = line.split()[0]
-        if keyword != "VERSION": 
-            help_matches.append(keyword) 
-        else: 
-            break
+        if(line[0] != ' '): # Make sure the line doesn't start with a space
+            keyword = line.split()[0]
+            if keyword != "VERSION":
+                help_matches.append(keyword) 
+            else: 
+                break
     
     return help_matches
 
@@ -61,7 +64,7 @@ def help_exists(file):
 def checkMan():
     files_read, files_read_names = 0, []
     bad_files, bad_file_names = 0,[]
-    tasklist = open("src/scripts/tasklist")
+    tasklist = open(TASKLIST)
 
     # Iterate over tasklist
     for file in tasklist:
@@ -113,16 +116,18 @@ def checkBin(tasklist):
     print("Bad files: " + str(bad_file_names))
 
 def readFlags():
-    global VERBOSE
+    global VERBOSE, HELP, TASKLIST
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv,"vhf")
+        opts, args = getopt.getopt(argv,"vhf:")
         for opt, arg in opts:
             if opt in ["-v"]:
                 VERBOSE = True
             elif opt in ["-h"]:
                 HELP = True
+            elif opt in ["-f"]:
+                TASKLIST = arg
     except:
         print("getopt error")
 
@@ -140,8 +145,7 @@ def main():
         return
 
     # Change working directory
-    os.chdir("..")
-    os.chdir("..")
+    os.chdir(os.environ['NEMO'])
 
     # Run tests
     checkMan()

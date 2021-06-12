@@ -3,7 +3,8 @@
 ccdvel \- create a velocity field; grid or retrace
 .SH SYNOPSIS
 \fBccdvel out=\fPvelfie [parameters=values ...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIccdvel\fP creates a model velocity field for a disk with material
 in circular orbits. The user supplies the
 program with a table of a rotation curve (see also
@@ -53,80 +54,81 @@ as
 .fi
 though this would suggest the local velocity ellipsoid to be
 isotropic (cf. Binney & Tremaine ....)
-.SH PARAMETERS
-The following parameters are recognized:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
-\fBout\fP=\fIimage_out\fP
+\fBout=\fP\fIimage_out\fP
 Output velocity field map, will be in \fIimage(5NEMO)\fP format.
 No default.
 .TP
-\fBradii\fP=\fIr1,r2,...\fP
+\fBradii=\fP\fIr1,r2,...\fP
 Radii (arcsec). Note they must be sorted by increasing radius.
 The default is taken from the \fIrotcur_table\fP table below, or
 from this keyword.
 .TP
-\fBvrot\fP=\fIv1,v2,...\fP
+\fBvrot=\fP\fIv1,v2,...\fP
 Array of rotation velocities, one for each radius,
 If less than the number of radii is
 given, the trailing ones are filled with the last supplied value.
 The default values from the \fIrotcur_table\fP table below can be also 
 be overridden with this keyword.
 .TP
-\fBvexp\fP=\fIv1,v2,...\fP
+\fBvexp=\fP\fIv1,v2,...\fP
 Array of expansion velocities, one for each radius.
 If less than the number of radii is
 given, the trailing ones are filled with the last supplied value.
 Default: 0
 .TP
-\fBinc\fP=\fIi1,i2,...\fP
+\fBinc=\fP\fIi1,i2,...\fP
 Array of inclinations (degrees), one for each radius.
 The default values from the \fIrotcur_table\fP table below can be also 
 be overridden with this keyword.
 .TP
-\fBpa\fP=\fIp1,p2,...\fP
+\fBpa=\fP\fIp1,p2,...\fP
 Array of  position angles (degrees), one for each radius.
 The default values from the \fIrotcur_table\fP table below can be also 
 be overridden with this keyword.
 .TP
-\fBphrot\fP=\fIp1,p2,p3,...\fP
+\fBphrot=\fP\fIp1,p2,p3,...\fP
 Array of rotation phase angles (degrees), one for each radius. Don't
 use this right now. Default: 0
 .TP
-\fBphexp\fP=\fIp1,p2,p3,...\fP
+\fBphexp=\fP\fIp1,p2,p3,...\fP
 Array of expansion phase angles (degrees), one for each radius, for
 the modulation of the expansion velocities.
 .TP
-\fBmrot\fP=\fIm\fP
+\fBmrot=\fP\fIm\fP
 Fourier mode for the rotation speed modulation. Currently not a good
 idea to use this, since we would modulate the whole rotation,
 not a tiny bit on top of rotation. Use mexp=,phexp=.
 Default: 0
 .TP
-\fBmexp\fP=\fIm\fP
+\fBmexp=\fP\fIm\fP
 Fourier mode for the expansion speed modulation. 
 Default: 0
 .TP
-\fBsize\fP=\fInx,ny\fP
+\fBsize=\fP\fInx,ny\fP
 Size of map, up to two numbers.
 If one number supplied, the map will be
 square.  Note that in NEMO (0-based) coordinates, the center of rotation will
 be at \fI((nx-1)/2,(ny-1)/2)\fP. [Default: \fB128\fP].
 .TP
-\fBcell\fP=\fIdx,dy\fP
+\fBcell=\fP\fIdx,dy\fP
 Cell size, up to two numbers.
 If one number supplied, the cells will be
 square. [Default: \fB1\fP].
 .TP
-\fBcenter\fP=\fIx0,y0\fP
+\fBcenter=\fP\fIx0,y0\fP
 Rotation center (grids with lower left corner being 0,0). 
 Default: center of map if \fIrotcur_table\fP is not used, else
 the \fIcenter_ring\fP entry from the \fIrotcur_table\fP. 
 .TP
-\fBblc\fP=\fIxmin,ymin\fP
+\fBblc=\fP\fIxmin,ymin\fP
 Lower left corner of the grid.
 Default: 0,0.
 .TP
-\fBvsys\fP=\fIvsys\fP
+\fBvsys=\fP\fIvsys\fP
 Systemic velocity. 
 Default: \fB0\fP if \fIrotcur_table\fP is not used, else
 the \fIcenter_ring\fP entry from the \fIrotcur_table\fP.
@@ -167,7 +169,8 @@ for \fBconstant\fP the starting value of ring is used. Default: \fBlinear\fP.
 .TP
 \fBheadline=\fP\fIcomments\fP
 Random verbiage added to the output image [Default: none].
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 A velocity field in a file \fImap1\fP is fitted with \fIrotcur\fP, 
 starting at the outskirts of the galaxy, 100", and working on inwards
 to 10", the table is commented to feed it into \fIccdvel\fP

@@ -13,9 +13,9 @@ optionally leave out the contour values.
 .PP
 3D images cannot be plotted, but data files that 
 contain multiple 2D images are plotted in succession.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, must be in \fIImage(5)\fP format. 
@@ -57,24 +57,37 @@ obtained from mapheader].
 Range in y to plot. See \fBxrange\fP.
 \fIWarning: BUG, don't used\fP
 .TP
-\fIheadline=\fP
+\fBheadline=\fP
 optional header above plot  [Default: not used]
 .TP
-\fItab=\fP
+\fBtab=\fP
 Output table of contour segments. Default not used.
 .TP
-\fIformat=\fP
+\fBformat=\fP
 Format for above table [Default: %g]
 .TP
-\fIcmode=\fP
+\fBcmode=\fP
 Contour mode (0=orginal 1=pgplot) [Default: 0]
 .TP
-\fIblankval=\fP
+\fBblankval=\fP
 if used, use this as blankval. Default not used.
 .TP
-\fIltype=\fP
+\fBltype=\fP
 width and type for contour. Default: 1,1
-.SH EXAMPLES
+.TP
+\fBxlab=\fP
+(override) Label along X-axis
+.TP
+\fBylab=\fP
+(override) Label along Y-axis
+.TP
+\fBxscale=\fP
+Scale all X values by this
+.TP
+\fByscale=\fP
+Scale all Y values by this
+
+.SH "EXAMPLES"
 .nf
 .ta +3i
 \fBccdplot foo.dat contour=1:10:0.5\fP	contour map only

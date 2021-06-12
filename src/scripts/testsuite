@@ -140,17 +140,20 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
         end
         continue
     endif
-    echo -n TESTSUITE: $testfile:h
+#    echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
     if ($local) pushd $testfile:h >& /dev/null
     make -f $testfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-        echo " Problems"
+	echo -n TESTSUITE: "FAIL" $testfile:h
+	echo ""
     else
-        echo " OK"
+	echo -n TESTSUITE: "OK  " $testfile:h
+	echo ""
     endif
     if ($local) popd >& /dev/null
 end
+
 echo "TESTSUITE   ended `date`"                                       >> $log
 
 cleanup:

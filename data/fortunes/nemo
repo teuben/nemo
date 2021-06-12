@@ -5,16 +5,21 @@ can be
 	mkplummer p10 10
 
 If you want to find out the order of the keywords, use the "help=" option
+or the multi-line "help=h"
 %
 A unix pipe becomes a '-' in NEMO:
 
 	mkplummer - 10 | tsf -
 
 where the first '-' denotes 'stdout', and the second 'stdin'.
+%
+The unix /dev/null as a "sink" becomes a '.' in NEMO, for example
+
+        mkplummer . 10
 
 %
 Numbered file descriptors can also be used in NEMO, but only sh shells
-(such as bash) support these, csh do not. Example:
+(such as bash) support these, csh like shells do not. Example:
 
 	mkplummer p1 10
 	mkplummer p2 10
@@ -23,6 +28,8 @@ Numbered file descriptors can also be used in NEMO, but only sh shells
 but remember that 0,1, and 2 are reserved for stdin, stdout and stderr.
 This scheme makes it possible to write much more complex pipes and tee's
 than the usual simple shell examples one sees.
+
+The "redir" command (if installed) can also be useful.
 %
 A nemo file can also be a URL, e.g.
 
@@ -31,12 +38,19 @@ A nemo file can also be a URL, e.g.
 There are two kinds on help:
 Online help:		man mkplummer
 Inline help:		mkplummer help=h
+
+and there is no guarentee they are in sync.  We have a script "checkpars.py"
+that checks if they are in sync.
 %
 The 'mknemo' command makes a very easy to recompile, or even update your
 NEMO with new programs.
 	mknemo 
-%
+
 For complicated procedures, the mknemo command uses a control file in
 $NEMO/src/scripts/mknemo.d. E.g.
 	mknemo gyrfalcON
+
+The -u flag will update ("git pull") your NEMO before the program is
+recompiled.  See -h for other options.
+	
 

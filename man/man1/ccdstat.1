@@ -27,8 +27,7 @@ where N is the number of non-bad values in the map. The input
 map is now assumed to contain a dimensionless \fI(obs-mod)/sigma\fP
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword is also
-given:
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIImage(5)\fP format [no default]
@@ -37,7 +36,7 @@ input file, in \fIImage(5)\fP format [no default]
 If given, all values below this value are ignored in the statistics. 
 By default no lower limit is used.
 .TP
-\fPmax=\fImax_value\fP
+\fBmax=\fP\fImax_value\fP
 If given, all values above this value are ignored in the statistics.
 By default no upper limit is used.
 .TP

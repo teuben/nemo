@@ -1,4 +1,4 @@
-.TH RUNBODY1 1NEMO "9 February 2019"
+.TH RUNBODY1 1NEMO "4 June 2021"
 .SH NAME
 runbody1, nbody1 \- (frontend to) Aarseth N-body code
 .SH SYNOPSIS
@@ -139,6 +139,13 @@ variables. Only new runs are currently supported.
 .TP
 \fBtcomp=\fP
 not supposed to be used, but counts max computing time alotted.
+.TP
+\fBKZ#=\fP
+Special indexed keyword to override \fBkz=\fP, for example KZ4=1.
+.TP
+\fPexe=\fP
+Name of the (fortran) executable to run. [Default: nbody1]
+
 .SH BUGS
 Scaling can cause output to become out of bounds.
 .PP

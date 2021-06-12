@@ -29,9 +29,9 @@ the mean and sigma, with its optional keyword \fBrobust=t\fP.
 .PP
 For certain types of objects (e.g. galaxies) the
 ASINH scaling can be enhanced by also using power=0.5.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input image filename. Must be a \fIimage(5NEMO)\fP. Currently the
@@ -56,16 +56,14 @@ considered bad.
 \fBpower=\fP
 The gamma factor \fBpower\fP applied to the input \fBx\fP,
 i.e. \fIy = ((x-xmin)/(xmax-xmin))**power\fP. 
-Use \fIccdmath(1NEMO)\fP for other transfer functions..
-[1].
+Use \fIccdmath(1NEMO)\fP for other transfer functions..  [1].
 .TP
 \fBmean=\fP
 If supplied (and power= as well),
 this will activate the ASINH scaling.
-
 [not supplied]
 .TP
-\fBpower=\fP
+\fBsigma=\fP
 If supplied (and mean= as well),
 this will activate the ASINH scaling. [not supplied]
 .TP
@@ -77,9 +75,9 @@ to the file must be given. By default it will be using a grey scale
 \fB8bit=t|f\fP
 Force up to 256 discrete colors. This can be useful if you want to convert
 the normally 24bit ppms to 8bit images and not 'loose' any colors
-in the conversion. 
-[\fBfalse\fP].
-.SH EXAMPLES
+in the conversion.    [Default: false].
+
+.SH "EXAMPLES"
 Here is an example to take the 5th plane from a fits file into a PPM file:
 .nf
 
