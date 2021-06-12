@@ -1,13 +1,13 @@
 .TH CCDFITS 1NEMO "22 May 2021"
 
-.SH NAME
+.SH "NAME"
 ccdfits \- convert an image to a fits file 
 
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 .PP
 \fBccdfits in=\fPimage \fBout=\fPfits [parameter=value]
 
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 \fBccdfits\fP writes a fits file to disk. The input must be in 
 \fIimage(5NEMO)\fP format, the output will be in standard \fIfits(5NEMO)\fP
 format on disk.
@@ -23,7 +23,7 @@ two are the same, or else an illegal FITS file will be created.
 The program \fIscanfits(1NEMO)\fP is used behind the scenes to achieve
 this feat.
 
-.SH PARAMETERS
+.SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fIimage-file\fP
@@ -59,29 +59,29 @@ Use CD matrix instead of CDELT? [t/f]. Default: f.
 Blocking factor (multiplicity of blocksize in terms of 2880 bytes) used
 when writing the fits file. [default: \fB1\fP].
 .TP
-\fPrefmap=\fP
+\fBrefmap=\fP
 Reference map or cube (a fits file) from which the WCS is inherited. 
 It has to match the output cube which is created. \fIDeprecated\fP.
 By default none is used. 
 .TP
-\fIcrpix=\fP
+\fBcrpix=\fP
 Use these pixels (2 or 3 need to be given, depending if a map or cube
 is output) as reference pixel, instead of the one defined in the
 reference map. By default not used.
 .TP
-\fIcrval=\fP
+\fBcrval=\fP
 Use these values (2 or 3 need to be given, depending if a map or cube
 is output) as value at the reference pixel, 
 instead of the one defined in the reference map or defined
 by the input. By default not used.
 .TP
-\fIcdelt=\fP
+\fBcdelt=\fP
 Use these values (2 or 3 need to be given, depending if a map or cube
 is output) as pixel increments,
 instead of the one defined in the reference map or defined
 by the input. By default not used.
 .TP
-\fIradecvel=t|f\fP
+\fBradecvel=t|f\fP
 If no reference map used, this can be used to enforce a more reasonable
 axis descriptor (RA/DEC/VEL) for astronomical data packages which 
 cannot handle theory data too well (e.g. miriad, karma etc.). We also
@@ -89,31 +89,31 @@ add CUNITn and BUNIT (albeit in JY/PIXEL). See also \fIccdsky(1NEMO)\fP
 for a smart scaling placing the object at a computed distance.
 [Default: \fBf\fP].
 .TP
-\fIdummy=t|f\fP
+\fBdummy=t|f\fP
 Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are
 written last.
 Default: t
 .TP
-\fInfill=0\fP
+\fBnfill=0\fP
 Number of dummy comment lines to add to a fits header to test I/O routines.
 Default: 0
 .TP
-\fIndim=\fP
+\fBndim=\fP
 This is a hack. If used, this will be the value of NAXIS written to the FITS file. Only
 useful of \fBdummy=f\fP and your FITS reader still cannot handle 
 dummy trailing axes. For \fBndim=4\fP the axis will be labeled
 as \fISTOKES\fP, which is useful for packages such as CASA.
 Default: not used.
 .TP
-\fIselect=1\fP
+\fBselect=1\fP
 Select this image (1 being the first) to grab in an file
 with multiple Image's. [Default: 1]
 .TP
-\fIfitshead=\fP
+\fBfitshead=\fP
 If used, the header of this fitsfile will be used instead of the
 one from the converted input image. Default; not used.
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 To convert an image to unsigned 16 bit integers use the following math:
 .nf
         a = "(a < 0 ? a+65536 : a)" 
@@ -131,8 +131,8 @@ since the data is never needed. You can see \fIscanfits(1NEMO)\fP for this:
 	ccdfits ... refmap=cube.fitshdr ...
 .fi
 
-.SH FITS TAPES
-For historic amusement:
+.SH "FITS TAPES"
+For historic amusement, but completely irrelevant for the 21st Century:
 .PP
 In the old days (somewhere before the 90s) there were actually
 software systems that could only directly read FITS files from
@@ -186,7 +186,8 @@ You could also try the following command procedure on VMS (Bob Hanisch, ST ScI):
 .fi
 
 .SH "SEE ALSO"
-ccdsky(1NEMO), ccdfitsio(1NEMO), scanfits(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
+ccdsky(1NEMO), ccdfitsio(1NEMO), scanfits(1NEMO), snapccd(1NEMO), ccdmath(1NEMO), iofits(1NEMO),
+image(5NEMO), fits(5NEMO), dd(1)
 
 .SH AUTHOR
 Peter Teuben
