@@ -16,37 +16,37 @@ interaction, using 1/r -> 1/(r-eps), where eps=3GM/c^2.
 The following parameters are recognized; they may be given in any order
 if supplied with their keyword.
 .TP 24
-\fBin\fP=\fIin-file\fP
+\fBin=\fP\fIin-file\fP
 If given, initial conditions will be read from \fIin-file\fP in
 snapshot format.
 At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
 .TP
-\fBout\fP=\fIout-file\fP
+\fBout=\fP\fIout-file\fP
 If given, results are written to \fIout-file\fP in snapshot format.
 .TP
-\fBnbody\fP=\fInbody-value\fP
+\fBnbody=\fP\fInbody-value\fP
 Number of bodies for test data, generated only if none of
 \fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
 Default is \fB128\fP.
 .TP
-\fBseed\fP=\fIrandom-seed\fP
+\fBseed=\fP\fIrandom-seed\fP
 Random number seed used in generating initial conditions.
 Default is \fB123\fP.
 .TP
-\fBcencon\fP=\fIcencon-flag\fP
+\fBcencon=\fP\fIcencon-flag\fP
 If \fBtrue\fP, generate centrally concentrated test system.
 Default is \fBfalse\fP.
 .TP
-\fBfreq\fP=\fIinteg-freq\fP
+\fBfreq=\fP\fIinteg-freq\fP
 Inverse time-step, to be used with a leap-frog integrator.
 Default is \fB32.0\fP (32 steps per unit time).
 .TP
-\fBeps\fP=\fIsoft-length\fP
+\fBeps=\fP\fIsoft-length\fP
 Force softening parameter. If a negative value is given, the potential
 is turned into a pseudo-Newtonian one with the meaning of -eps = 3GM/c^2.
 Default is \fB0.05\fP.
 .TP
-\fBoptions\fP=\fIoption-string\fP
+\fBoptions=\fP\fIoption-string\fP
 Miscellaneous control options, specified as a comma-separated list
 of keywords.
 Currently recognized keywords are:
@@ -58,15 +58,15 @@ are always output.  It also seems that the reset_time and new_tout
 options have not been implemented yet.
 Default: \fBmass,phase\fP.
 .TP
-\fBtstop\fP=\fIstop-time\fP
+\fBtstop=\fP\fIstop-time\fP
 Time to stop integration in N-body model units.
 Default is \fB2.0\fP.
 .TP
-\fBfreqout\fP=\fIout-freq\fP
+\fBfreqout=\fP\fIout-freq\fP
 Frequency of major N-body data outputs.
 Default is \fB4.0\fP (4 frames per unit time).
 .TP
-\fBminor_freqout\fP=\fIout-freq\fP
+\fBminor_freqout=\fP\fIout-freq\fP
 Frequency of minor diagnostic outputs.
 If this frequency is not a simple fraction of \fBfreq\fP (see above),
 the program can waiste significant amounts of time.
@@ -76,6 +76,7 @@ Default is \fB32.0\fP (32 diagnostic measurements per unit time).
 Value for the gravitational constant. Although normally 1 in N-body units
 (see also \fIunits(1NEMO)\fP), this allows you to work in more natural units.
 [Default: 1]
+
 .SH CAVEATS
 Using eps<0 to activate the pseudo-Newtonian option does not change
 the units, all units need to be absorbed into eps. For example, for given

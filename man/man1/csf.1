@@ -24,34 +24,35 @@ in which the bytes are not swapped.
 .SH PARAMETERS
 .so man1/parameters
 .TP 24
-\fBin\fP=\fIin-file\fP
+\fBin=\fP\fIin-file\fP
 Input file, must be in \fIfilestruct(5NEMO)\fP format
 [no default].
 .TP
-\fBout\fP=\fIout-file\fP
+\fBout=\fP\fIout-file\fP
 Output file, will be in \fIfilestruct(5NEMO)\fP format
 [no default].
 .TP
-\fBitem\fP=\fIitem-list\fP
+\fBitem=\fP\fIitem-list\fP
 List of top level items, separated by comma's or spaces, to be copied.
 If none are provided, all items are selected. Note that the 
 \fIitem-list\fP will be case sensitive.
 [default: -blank-].
 .TP
-\fBselect\fP=\fIselect-list\fP
+\fBselect=\fP\fIselect-list\fP
 List of numbers (1 being the first) that are select for 
 copying, after the above mentioned item-name selection
 (from the \fBitem=\fP keyword) has been applied.
 If none are provided, all are copied.
 [default: -blank-].
 .TP
-\fBconvert\fP=\fIconvert-list\fP
+\fBconvert=\fP\fIconvert-list\fP
 List of conversions to make, separated by comma's or spaces. Each conversion
 is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
 \fIto\fP part are any of: \fBd\fP (double), \fBf\fP (float), \fBh\fP 
 (half precision) ,
 \fBl\fP (long), \fBi\fP (int) or \fBs\fP (short). 
 [Default: -blank-].
+
 .SH CAVEAT
 Some of the conversions in \fBconvert=\fP
 are not supported or are in danger of loosing more than just precision.
