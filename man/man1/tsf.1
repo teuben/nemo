@@ -68,7 +68,8 @@ ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEM
 \fBdebug=2\fP reports values of \fIMaxSetLen\fP
 as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 An example of converting all double precision numbers to single
 precision in a NEMO file:
 .nf
@@ -100,6 +101,16 @@ set SnapShot
 tes
 
 .fi
+
+.SH TLDR
+Show contents of a binary structured file in brief format
+
+% tsf {{path/to/file}}
+
+Show contents of a binary structured file, all lines, and full precision
+
+% tsf {{path/to/file}} True allline=t
+
 .SH BUGS
 The algorithm for implementing \fBmaxline\fP is crude.
 .PP
@@ -116,4 +127,5 @@ xx-apr-88	V2.0 new filestruct package	JEB
 9-dec-90	V2.3 helpvec and other minor things	PJT
 21-mar-01	V2.7 experimental xml output option	PJT
 14-jun-02	V3.0 added octal=, but default output of integers is now decimal	PJT
+21-jun-21	experimenting with a TLDR section	PJT
 .fi

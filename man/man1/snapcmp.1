@@ -44,7 +44,7 @@ observable \fBobs\fP on this ``differenced particle''. Otherwise,
 \fBobs\fP is evaluated for each particle, and the results are
 differenced.  Default: \fBtrue\fP.
 .TP
-\fBrelative\fP\fI=flag\fP
+\fBrelative=\fP\fIflag\fP
 If \fIflag\fP is true, the differenced observable is divided by the
 value of \fBobs\fP computed from the particle in \fIsnap_file1\fP.
 Otherwise, the differenced observable is used.  Default: \fBfalse\fP.
@@ -52,6 +52,7 @@ Otherwise, the differenced observable is used.  Default: \fBfalse\fP.
 \fBlog=t|f\fP
 Show (10-base) logarithms of the values instead of their linear values
 Default: false.
+
 .SH SEE ALSO
 snapcmphist(1NEMO), snapdiff(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .SH FILES

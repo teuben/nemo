@@ -66,7 +66,7 @@ dimension of the hyper-plane fit (\fBfit=plane\fP). 0 would fit
 a constant. 0 and 1 would have the same meaning in both the
 \fBplane\fP and \fBpoly\fP cases [Default: \fB0\fP].
 .TP
-\fPout=\fIfilename\fP
+\fBout=\fP\fIfilename\fP
 Optional output filename (only active under certain options)
 where the data and residuals are stored.
 Column 1, 2 and 3 will contain the X, Y and residuals F(X)-Y
@@ -75,7 +75,7 @@ release will also store the errors (if it was given, see
 keyword \fBdycol\fP above) in the 4th column.
 [default: empty, no output file created].
 .TP
-\fPnsigma=\fIsigma_factor\fP
+\fBnsigma=\fIsigma_factor\fP
 A positive number will delete points more than \fIsigma_factor\fP from the fit,
 and fit again. [Default: \fB-1\fP].
 .TP
@@ -96,6 +96,7 @@ The fitting mode in which \fImpfit(3NEMO)\fP is used. 0=no errors.
 \fBtab=t|f\fP
 Output results in simple tabular format.
 Default: false.
+
 .SH EXAMPLE
 Here is an example of creating an on-the-fly table with a straight
 line, with some added noise and random weights between 1 and 2:

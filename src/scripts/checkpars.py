@@ -12,13 +12,14 @@
 import re, os, subprocess, getopt, sys
 
 # Global flags
-VERBOSE = False # If True prints man & help outputs for bad files
-HELP = False
+VERBOSE  = False # If True prints man & help outputs for bad files
+HELP     = False
 TASKLIST = "src/scripts/tasklist"
+MANROOT  = "man"
 
 def get_man_matches(file):
     try:
-        man_doc = open("man/man1/"+file+".1", "r") # Read man file
+        man_doc = open(MANROOT + "/man1/"+file+".1", "r") # Read man file
     except:
         return None
 
@@ -143,9 +144,6 @@ def main():
     if HELP: # Prints help and exits
         help()
         return
-
-    # Change working directory
-    os.chdir(os.environ['NEMO'])
 
     # Run tests
     checkMan()
