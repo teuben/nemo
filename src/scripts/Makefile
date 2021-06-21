@@ -63,12 +63,6 @@ scripts: $(SCRIPTS)
 
 
 checkpars:
-<<<<<<< HEAD
-	./checkpars.py  -v     > checkpars.log
-	@grep ^'Files read'      checkpars.log
-	@grep ^'Bad files found' checkpars.log
-=======
 	(cd ../../; src/scripts/checkpars.py -v)  > checkpars.log
 	@grep ^'Files read'         checkpars.log
 	@grep ^'Bad files found'    checkpars.log
->>>>>>> 9b5c4e3f4dedd6cdf15e3b2c2bf54e5800d04b15
