@@ -144,9 +144,6 @@ def main():
         help()
         return
 
-    # Change working directory
-    os.chdir(os.environ['NEMO'])
-
     # Run tests
     checkMan()
 
