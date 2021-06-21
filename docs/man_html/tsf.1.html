@@ -89,7 +89,8 @@ to force octal=t. [Default: <b>f</b>]. </dd>
 <i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
 .
 
-<h2><a name='sect6' href='#toc6'>Example</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
 An example of converting all double precision numbers to single
 precision in a NEMO file: <br>
 <pre>    % tsf in=double.dat out=float.dat convert=d2f
@@ -114,15 +115,24 @@ set SnapShot
   tes
 tes
 </pre>
-<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
-The algorithm for implementing <b>maxline</b> is crude. <p>
-If <b>indent=</b> and <b>margin=</b>
-are choosen too large, resp. too small, they can bump into each other and
-cause illegable output, which cannot be read by <i>rsf</i> either. 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
-Joshua
-E. Barnes. 
-<h2><a name='sect9' href='#toc9'>History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Tldr</a></h2>
+Show contents of a binary structured file in brief format 
+<p> % tsf {{path/to/file}}
+
+<p> Show contents of a binary structured file, all lines, and full precision
+
+<p> % tsf {{path/to/file}} True allline=t 
+<p> 
+<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+The algorithm for implementing
+<b>maxline</b> is crude. <p>
+If <b>indent=</b> and <b>margin=</b> are choosen too large, resp. too
+small, they can bump into each other and cause illegable output, which
+cannot be read by <i>rsf</i> either. 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
+Joshua E. Barnes. 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>xx-xxx-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
@@ -140,10 +150,11 @@ xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&n
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Debug</a></li>
-<li><a name='toc6' href='#sect6'>Example</a></li>
-<li><a name='toc7' href='#sect7'>Bugs</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>History</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>Tldr</a></li>
+<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>
