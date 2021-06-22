@@ -14,7 +14,7 @@
 import os, sys
 
 def my_match(word1, word2):
-    """   when is word2 equal or or inside or word1
+    """   when is word2 equal or inside of word1
           (e.g. word1 could contain quotes)
     """
     if word1.find(word2) < 0:
