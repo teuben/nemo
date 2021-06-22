@@ -21,14 +21,15 @@ a certain ``box'' size (\fBcell\fP)), and turn it into mean orbital motion.
 .PP
 Orbits can also be diffused: at regular intervals the velocity vector 
 can be rotated over a randomly gaussian distributed angle (\fBsigma\fP).
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized; they may be given in any order.
 .TP 24
-\fBin\fP=\fIin-file\fP
+\fBin=\fP\fIin-file\fP
 Initial conditions will be read from \fIin-file\fP in snapshot format
 [default: none - but is required].
 .TP
-\fBout\fP=\fIout-file\fP
+\fBout=\fP\fIout-file\fP
 If given, results are written to \fIout-file\fP in snapshot format
 [default: empty, no snapshot output file produced].
 .TP
@@ -36,7 +37,7 @@ If given, results are written to \fIout-file\fP in snapshot format
 name of file of \fIpotential(5NEMO)\fP descriptor 
 [no default].
 .TP
-\fPpotpars=\fIpar-list\fP
+\fBpotpars=\fIpar-list\fP
 List of parameters to the potential descriptor. The first
 parameter must be the pattern speed in the x-y plane
 (rotating frames of reference are not 
@@ -50,11 +51,11 @@ name of an optional datafile to the potential descriptor.
 This might be an N-body snapshot or list of spline fit
 coefficients etc. [default: none].
 .TP
-\fBfreq\fP=\fIinteg-freq\fP
+\fBfreq=\fP\fIinteg-freq\fP
 Inverse time-step, to be used with the time integrator.
 [Default: \fB64.0\fP (64 steps per unit time)].
 .TP
-\fBmode\fP=\fImode-number\fP
+\fBmode=\fP\fImode-number\fP
 Integration mode number: 
 0=Euler, 
 1=PC (Predictor Corrector),
@@ -64,19 +65,19 @@ Integration mode number:
 5=LeapFrog.
 [default: \fB4\fp].
 .TP
-\fBtstop\fP=\fIstop-time\fP
+\fBtstop=\fP\fIstop-time\fP
 Time to stop integration in N-body model units.
 Default is \fB2.0\fP.
 .TP
-\fBfreqout\fP=\fIout-freq\fP
+\fBfreqout=\fP\fIout-freq\fP
 Frequency of major N-body data outputs.
 Default is \fB4.0\fP (4 frames per unit time).
 .TP
-\fBminor_freqout\fP=\fIout-freq\fP
+\fBminor_freqout=\fP\fIout-freq\fP
 Frequency of minor diagnostic outputs.
 Default is \fB32.0\fP (32 diagnostic measurements per unit time).
 .TP
-\fBoptions\fP=\fIoption-string\fP
+\fBoptions=\fP\fIoption-string\fP
 Miscellaneous control options, specified as a comma-separated list
 of keywords.
 Currently recognized keywords are:
@@ -87,17 +88,17 @@ output mass, potential (density really)
 acceleration data and auxilliary (the deflection angle from diffusion is
 stored here) with major data outputs.
 .TP
-\fBeta\fP=\fIloss-fraction\fP
+\fBeta=\fP\fIloss-fraction\fP
 *** Fraction of random energy that is dissipated
 [Default: \fB0.0\fP].
 .TP
-\fBcell\fP=\fIbox-size\fP
+\fBcell=\fP\fIbox-size\fP
 *** Cell size in which dissipation is performed after every timestep.
 Dissipation is current performed on a cartesian grid, in which 
 cells are square (2D) or a cube (3D).
 [Default: \fB0.1\fP].
 .TP
-\fBrmax\fP=\fImax_box-size\fP
+\fBrmax=\fP\fImax_box-size\fP
 *** Maximum size of the "box" (actually cube) within which dissipation
 is performed. If a negative number is given, the box is allow to grow
 as large as is needed, though this may consume a lot of memory.
@@ -112,25 +113,26 @@ rotated with a gaussian distributed value with rms \fIfheat*velsig\fP.
 This in effect gives a dissipation dependant heating source. See also
 \fBsigma=\fP, which is position independant. [Default: \fB0\fP].
 .TP
-\fBsigma\fP=\fIangle\fP
+\fBsigma=\fP\fIangle\fP
 Diffusion angle, gaussian distributed with this sigma, about which
 each velocity vector is rotated after each timestep. Diffusion
 is used only when \fIsigma > 0\fP.
 [Default: \fB0\fP].
 .TP
-\fBfreqdiff\fP=\fIdiffusion-out-freq\fP
+\fBfreqdiff=\fP\fIdiffusion-out-freq\fP
 Frequency of diffusion. Currently the same diffusion angle is used
 between changes, instead of during a single integration step
 Default is the same as the integration frequency (\fBfreq=\fP).
 .TP
-\fBseed\fP=\fIrandom-seed\fP
+\fBseed=\fP\fIrandom-seed\fP
 Random number seed, only used when diffusion (\fBsigma=\fP) is used.
 0 must be used to get the random seed from the time of the day.
 [Default: \fB0\fP].
 .TP
-\fBheadline\fP=
+\fBheadline=\fP
 Identifying text for this run. Default: not used.
-.SH BUGS
+
+.SH "BUGS"
 RK, PC and PC1 don't work in rotating potentials - use EULER or RK4.
 .PP
 Since \fBcell\fP is a fixed number throughout the execution,

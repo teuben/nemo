@@ -19,8 +19,9 @@ See also Aarseth et al. (1974) and Plummer (1911)
 There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
 .PP
 For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBout=\fP\fIsnapfile\fP
 Output data is written into \fIsnapfile\fP, in standard snapshot format.
@@ -69,7 +70,7 @@ Note: large scale factors means small systems with large velocity
 disperson.
 [Default: \fB-1\fP].
 .TP
-\fBquit=\fIlevel\fP
+\fBquiet=\fIlevel\fP
 Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet
 [default: \fB0\fP].
 .TP
@@ -102,6 +103,14 @@ generating more then 1 model can be useful to process very large
 snapshots (which won't fit in memory) in a serialized fashion. See
 also \fIsnapsplit\fP. 
 Default: \fB1\fP.
+.TP
+\fBmode=0|1|2\fP
+The processing mode, purely for debugging.
+0=no data written.
+1=data written, but no extra analysis.
+2=data written, and extra analysis done.
+[Default: 1].
+
 
 .SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
