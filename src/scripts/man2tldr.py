@@ -1,6 +1,11 @@
 #! /usr/bin/env python
 #
-#  See also https://github.com/tldr-pages/tldr/issues/6154
+#  Extract the TLDR markdown information from a man page
+#  Typical usage:
+#       man2tldr.py tsf.1 > ../tldr/tsf.md
+#  where tsf.md will be 0-length if there is no TLDR section
+#
+#  See also discussion in https://github.com/tldr-pages/tldr/issues/6154
 #
 # 21-jun-2021  quick hack - PJT 
 #
