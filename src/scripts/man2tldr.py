@@ -40,12 +40,17 @@ def checkMan(file):
             words = line.split()
             name = words[0]
             desc = words[2:]
-            print("# %s" % name)
-            print(" ")
-            print("> %s" % ' '.join(desc))
-            print(" ")
             have_name = False
+            print_name = False
         elif have_tldr:
+            # first write the header
+            if not print_name:
+                print("# %s" % name)
+                print(" ")
+                print("> %s" % ' '.join(desc))
+                print(" ")
+                print_name = True
+            # then the TLDR section
             # this needs an alternate re-formatting, TBD. Just for show now
             # alternatively, the TLDR is already in the expected format 
             print(line)
