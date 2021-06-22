@@ -14,13 +14,18 @@
 import os, sys
 
 def my_match(word1, word2):
-    # fix this for quotes
-    if word1 == word2:
-        return True
-    return  False
+    """   when is word2 equal or or inside or word1
+          (e.g. word1 could contain quotes)
+    """
+    if word1.find(word2) < 0:
+        return False
+    return True
 
 
 def checkMan(file):
+    """   extract the TLDR section of the man page
+          formatted in markdown style
+    """
     have_name = False
     have_tldr = False
     lines = open(file).readlines()
