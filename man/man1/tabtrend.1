@@ -10,6 +10,7 @@ values, creating a new column that is thus one row shorter.
 Note that for a gaussian signal, 
 differencing subsequent elements will create a distribution
 with a noise sqrt(2) larger than the input signal.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -28,6 +29,10 @@ Cumulative, instead of differences.  Default: false
 .TP
 \fBorig=t|f\fP
 Also show the original column (if selected it will be shown \fIafter\fP the trend column  [f]
+.TP
+\fBfirst=t|f\fP
+Add the first row?  [Default: f]
+
 .SH EXAMPLES
 Create 10000 numbers gaussian distributed with dispersion 1, observe the following:
 .nf
