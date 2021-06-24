@@ -3,6 +3,7 @@
 rotcurves \- rotation curve of a composite potential
 .SH SYNOPSIS
 \fBrotcurves name1=\fIpotential\fP [parameter=value] .\|.\|.
+
 .SH DESCRIPTION
 \fIrotcurves\fP  computes the rotation curve of a composite mass model.
 Each component must be supplied in the form of a potential (see
@@ -19,6 +20,7 @@ In case a true rotation curve is requested (\fBmode=velocity\fP) the table
 contains \fIr, v, v1, v2, ...\fP, whereas the Lindblad option
 with \fBmode=omega\fP tabulates \fIr, v, omega, kappa, omega+kappa/2,
 omega-kappa/2\fP.
+
 .SH PARAMETERS
 The following parameters are recognized:
 .TP 24
@@ -33,7 +35,35 @@ Parameters for first potential. Defaults as defined by the potential itself.
 Optional file for first potential. Defaults as defined by the 
 potential itself.
 .TP
-<etc> for \fBname2, name3, name4\fP.
+\fBname2=\fP
+See name1= for second potential
+.TP
+\fBpars2=\fP
+See pars1=
+.TP
+\fBfile2=\fP
+See file1=
+
+.TP
+\fBname3=\fP
+See name1= for third potential
+.TP
+\fBpars3=\fP
+See pars1=
+.TP
+\fBfile3=\fP
+See file1=
+
+.TP
+\fBname4=\fP
+See name1= for fourth potential
+.TP
+\fBpars4=\fP
+See pars1=
+.TP
+\fBfile4=\fP
+See file1=
+
 .br
 NOTE that because of the specific code implementation, you cannot re-use the same potential,
 since they share their static code data.
@@ -108,6 +138,7 @@ are optional, and if provided error bars will be plotted on top of the data.
 A 0 can be used if an column is not present in the data, although radius
 and velocity must always be present.
 [Default: \fB1,2\fP].
+
 .SH "SEE ALSO"
 potrot(1NEMO), potlist(1NEMO), runbulgerot(1NEMO), potential(5NEMO), perorb(1NEMO), ROTMAS(1GIPSY)
 .PP
@@ -115,6 +146,7 @@ potrot(1NEMO), potlist(1NEMO), runbulgerot(1NEMO), potential(5NEMO), perorb(1NEM
 galfit: https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html
 galphot: http://www.astro-wise.org/portal/howtos/man_howto_galphot/man_howto_galphot.shtml
 .fi
+
 .SH BUGS
 Sometimes Lindblad diagrams require more resolution in radius near the 
 center, so \fBradii=0.0001,0.001,0.01,0.02:1:0.02\fP may do a better job
@@ -134,8 +166,10 @@ Potentials (name1,2,....) cannot be re-used. Since \fIloadobj(3NEMO)\fP is used
 to load the potentials, their static code data is shared. One possible solution
 would be to make a physical copy of the .so file from $NEMOOBJ/potential
 in the local directory with different names
+
 .SH AUTHOR
 Peter Teuben
+
 .SH FILES
 .nf
 .ta +3.0i

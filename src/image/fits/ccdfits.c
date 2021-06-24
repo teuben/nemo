@@ -91,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3d\n  22-may-2021 PJT",
+        "VERSION=6.3e\n  24-jun-2021 PJT",
         NULL,
 };
 
@@ -440,7 +440,7 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
 	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or km/s */
-      fitwrhda(fitsfile,"CUNIT4","");
+      //fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
       else

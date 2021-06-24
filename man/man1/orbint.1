@@ -18,7 +18,8 @@ rotation axis defined along the Z-axis.
 Integrations backwards in time can be achieved by setting dt<0, since no
 stop time is given, but the number of steps is used to terminate
 the integration.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -79,7 +80,11 @@ Use variable timesteps? If so, the error control parameter
 \fBeta=\fP needs to be specified. Also note that not all integration
 methods support variable timesteps.
 Default: \fBf\fP.
-.SH EXAMPLES
+.TP
+\fBtstop=\fP
+If given, this will override \fBnsteps=\fP. Default: not used.
+
+.SH "EXAMPLES"
 The following example launches a particle from the Y axis (at y=1)
 in the X direction (speed 0.4) in a plummer potential. Although
 the 6D initial conditions are fully specified, so a potential

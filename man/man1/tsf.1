@@ -1,9 +1,12 @@
 .TH TSF 1NEMO "19 February 2020"
-.SH NAME
+
+.SH "NAME"
 tsf \- type a structured file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtsf in=\fPfile [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItsf\fP types the contents of a structured binary file
 (see \fIfilestruct\fP(3NEMO)) in a human readable form
 on the standard output.
@@ -16,7 +19,7 @@ octal for portability reasons (see \fBoctal=\fP below).
 exercised. A \fIjson\fP mode has been considered.
 .PP
 
-.SH PARAMETERS
+.SH "PARAMETERS"
 .so man1/parameters
 .TP 24
 \fBin=\fP\fIfile\fP
@@ -62,13 +65,16 @@ by default to decimal (more human readable). By using
 mode. If take output of tsf to be read into rsf, you now
 need to force octal=t.
 [Default: \fBf\fP].
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEMO).
-.SH DEBUG
+
+.SH "DEBUG"
 \fBdebug=2\fP reports values of \fIMaxSetLen\fP
 as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 An example of converting all double precision numbers to single
 precision in a NEMO file:
 .nf
@@ -100,15 +106,27 @@ set SnapShot
 tes
 
 .fi
-.SH BUGS
+
+.SH "TLDR"
+- Show contents of a binary structured file in brief format
+
+tsf {{file}}
+
+- Show contents of a binary structured file, showing all lines, and in full precision
+
+tsf {{file}} True allline=t
+
+.SH "BUGS"
 The algorithm for implementing \fBmaxline\fP is crude.
 .PP
 If \fBindent=\fP and \fBmargin=\fP are choosen too large, resp. too
 small, they can bump into each other and cause illegable output, which
 cannot be read by \fIrsf\fP either.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes.
-.SH HISTORY
+
+.SH "HISTORY"
 .ta +1i +4i
 .nf
 xx-xxx-86	V1.0 original version	JEB
@@ -116,4 +134,5 @@ xx-apr-88	V2.0 new filestruct package	JEB
 9-dec-90	V2.3 helpvec and other minor things	PJT
 21-mar-01	V2.7 experimental xml output option	PJT
 14-jun-02	V3.0 added octal=, but default output of integers is now decimal	PJT
+21-jun-21	experimenting with a TLDR section	PJT
 .fi

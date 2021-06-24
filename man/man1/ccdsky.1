@@ -15,9 +15,9 @@ distance (in AU, pc, kpc, mpc, z, ...) and unit size (in AU, pc, kpc, mpc, ....)
 the object. This will give you the scaling factors for length and velocities.
 .PP 
 When the distance is given in z, Wright's (2006) cosmology calculator is used.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Optional input image file. Must be in \fIimage(5NEMO)\fP format.
@@ -64,7 +64,13 @@ a flat universe (WV=0) is used. See also Wright(2006).
 WMAP-9 values: H=71,0.27,0.73 (2011?),
 Planck-1 values: H=67.15,0.317,0.683 (2013)
 [Default:  71,0.27,0.73]
-.SH H
+.TP
+\fBnsteps=\fP
+Max. number of integration steps in the cosmo code to achieve accuracy.
+[Default: 1000]
+
+
+.SH "H"
 It will be amusing to see the evolution of H:
 .nf
 .ta +2i +1i  +1i +1i
@@ -72,7 +78,9 @@ WMAP-9 (2011)	71	0.27	0.73
 Planck (2013)	67.15	0.317	0.683
 Planck (2018)	67.66	0.3111	0.6889
 .fi
-.SH EXAMPLES
+
+
+.SH "EXAMPLES"
 Viewing a model at a distance 1 pc, where 1 length unit represents 1 AU,
 the coordinates need to be multiplied by 0.000277785 in order for FITS
 to view them in the correct angular size of 1 arcsec. 
