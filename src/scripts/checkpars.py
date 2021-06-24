@@ -8,7 +8,6 @@
 # may 6  2021: -h flag added
 # may 29 2021: -f flag added
 
-
 import re, os, subprocess, getopt, sys
 
 # Global flags
@@ -30,7 +29,7 @@ def get_man_matches(file):
         if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
             scan_flag = True
         elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
-            match = re.findall(r'\\fB[\w|#]*=',line)
+            match = re.findall(r'\\fB[\w|#|/]*=',line)
             if not match: # If the .TP isn't followed by a command, flag file as bad
                 return 'Non-conformant: ' + line
             else:
