@@ -13,29 +13,38 @@ import re, os, subprocess, getopt, sys
 # Global flags
 VERBOSE  = False # If True prints man & help outputs for bad files
 HELP     = False
-TASKLIST = "src/scripts/tasklist"
-MANROOT  = "man"
+TASKLIST = 'src/scripts/tasklist'
+MANROOT  = 'man'
 
 def get_man_matches(file):
     try:
-        man_doc = open(MANROOT + "/man1/"+file+".1", "r") # Read man file
+        man_doc = open(MANROOT + '/man1/'+file+'.1', 'r') # Read man file
     except:
         return None
 
     # Get man matches
+    containsParameters = False # True when .SH PARAMETERS is encountered
     scan_flag = False
     man_matches = []
 
     for line in man_doc.readlines():
-        if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
-            scan_flag = True
-        elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
-            match = re.findall(r'\\fB[\w|#|/]*=',line)
-            if not match: # If the .TP isn't followed by a command, flag file as bad
-                return 'Non-conformant: ' + line
-            else:
-                man_matches.append(match[0][:-1])
-            scan_flag = False
+        # Scan for .SH PARAMETERS
+        if re.search(r'\.SH',line[:3]) and re.search(r'PARAMETERS',line[3:]) and not containsParameters:
+            containsParameters = True
+        elif re.search(r'\.SH',line) and containsParameters:
+            return man_matches
+
+        # Scans parameters
+        if containsParameters:
+            if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
+                scan_flag = True
+            elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
+                match = re.findall(r'\\fB[\w|#|/]*=',line)
+                if not match: # If the .TP isn't followed by a command, flag file as bad
+                    return 'Non-conformant: ' + line
+                else:
+                    man_matches.append(match[0][:-1])
+                scan_flag = False
         
     # Transform man data for comparison
     man_matches = [match[3:] for match in man_matches]
@@ -44,14 +53,14 @@ def get_man_matches(file):
     return man_matches
 
 def get_help_matches(file):
-    help_out = os.popen(file+" help=h").read() # Read help output
+    help_out = os.popen(file+' help=h').read() # Read help output
 
     # Grab keywords
     help_matches = []
     for line in help_out.splitlines():
         if(line[0] != ' '): # Make sure the line doesn't start with a space
             keyword = line.split()[0]
-            if keyword != "VERSION":
+            if keyword != 'VERSION':
                 help_matches.append(keyword) 
             else: 
                 break
@@ -59,7 +68,7 @@ def get_help_matches(file):
     return help_matches
 
 def help_exists(file):
-    return True if "VERSION" in subprocess.getoutput(file+" help=h") else False
+    return True if 'VERSION' in subprocess.getoutput(file+' help=h') else False
 
 def checkMan():
     files_read, files_read_names = 0, []
@@ -87,21 +96,21 @@ def checkMan():
 
                 if VERBOSE:
                     print(file)
-                    print("man: "+str(man_out))
-                    print("bin: "+str(help_out))
+                    print('man: '+str(man_out))
+                    print('bin: '+str(help_out))
                     print() 
     
-    print("Files with help=h & man mismatches")
-    print("Files read: " + str(files_read))
-    print("Bad files found: " + str(bad_files))
-    print("Bad files: " + str(bad_file_names))
+    print('Files with help=h & man mismatches')
+    print('Files read: ' + str(files_read))
+    print('Bad files found: ' + str(bad_files))
+    print('Bad files: ' + str(bad_file_names))
 
     tasklist.close()
     return files_read_names
 
 def checkBin(tasklist):
     files_read, bad_files, bad_file_names = 0,0,[]
-    binlist = open("src/scripts/bins.list")
+    binlist = open('src/scripts/bins.list')
 
     for file in binlist:
         file = file.rstrip()
@@ -110,32 +119,32 @@ def checkBin(tasklist):
             bad_file_names.append(file)
         files_read+=1
         
-    print("Bin files with no matching tasklist file:")
-    print("Files read: " + str(files_read))
-    print("Bad files found: " + str(bad_files))
-    print("Bad files: " + str(bad_file_names))
+    print('Bin files with no matching tasklist file:')
+    print('Files read: ' + str(files_read))
+    print('Bad files found: ' + str(bad_files))
+    print('Bad files: ' + str(bad_file_names))
 
 def readFlags():
     global VERBOSE, HELP, TASKLIST
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv,"vhf:")
+        opts, args = getopt.getopt(argv,'vhf:')
         for opt, arg in opts:
-            if opt in ["-v"]:
+            if opt in ['-v']:
                 VERBOSE = True
-            elif opt in ["-h"]:
+            elif opt in ['-h']:
                 HELP = True
-            elif opt in ["-f"]:
+            elif opt in ['-f']:
                 TASKLIST = arg
     except:
-        print("getopt error")
+        print('getopt error')
 
 def help():
-    print("checkpars V1.3")
-    print("-v           prints help and man keywords for mismatched files")
-    print("-f <file>    allows you to specify tasklist to scan")
-    print("-h           prints help page")
+    print('checkpars V1.3')
+    print('-v           prints help and man keywords for mismatched files')
+    print('-f <file>    allows you to specify tasklist to scan')
+    print('-h           prints help page')
 
 def main():
     readFlags()
@@ -147,5 +156,5 @@ def main():
     # Run tests
     checkMan()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     main()
