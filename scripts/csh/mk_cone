@@ -26,6 +26,7 @@
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
+set rmax    = 1         #> SCALE rmax=1       0:2:0.1
 set vscale  = 0.9       #> SCALE vscale=0.9   -2:2:0.1
 set outflow = 0.4       #> SCALE outflow=0.4  0:2:0.1
 set flow    = flat      #> RADIO flow=flat    flat,rise,fall
@@ -43,9 +44,9 @@ set out     = cone1     #> ENTRY out=cone1
 
 #  parameters not in the GUI
 set rmaxd = 2
-set rmax  = 1
 set rc    = 0.1
 set n     = 128
+set scale = 1/60,1/60,100     # model units are arcmin, 100 km/s
 
 foreach _arg ($*)
     set $_arg
@@ -123,13 +124,14 @@ endif
 snapgrid $out.snap $out.vel moment=-1 nx=$n ny=$n svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=$n ny=$n svar=$svar >& /dev/null
 snapgrid $out.snap $out.sig moment=-2 nx=$n ny=$n svar=$svar >& /dev/null
-ccdfits $out.den $out.den.fits radecvel=t >& /dev/null
-ccdfits $out.vel $out.vel.fits radecvel=t >& /dev/null
-ccdfits $out.sig $out.sig.fits radecvel=t >& /dev/null
+ccdfits $out.den $out.den.fits scale=$scale radecvel=t >& /dev/null
+ccdfits $out.vel $out.vel.fits scale=$scale radecvel=t >& /dev/null
+ccdfits $out.sig $out.sig.fits scale=$scale radecvel=t >& /dev/null
 
-snapgrid $out.snap - nx=$n ny=$n nz=$n/2 zrange=-2:2 svar=$svar |\
+snapgrid $out.snap - nx=$n ny=$n nz=$n/2 zrange=-2:2 |\
    ccdmath - - "%1+rang(0,$noise)" |\
-   ccdfits - $out.fits radecvel=t debug=-1
+   ccdsmooth - - gauss=$svar |\
+   ccdfits - $out.fits scale=$scale radecvel=t debug=-1
 
 xpaset -p ds9 frame frameno 1
 nds9 $out.vel.fits
