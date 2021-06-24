@@ -4,7 +4,8 @@ ccdsmooth \- smoothing of an image map (2D or 3D)
 .SH SYNOPSIS
 .PP
 \fBccdsmooth in=\fPimage \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIccdsmooth\fP will smooth an image cube through a simple direct convolution
 (no FFT). The smoothing beam must be circular/spherical, or smoothing
 must be done independantly per coordinate by calling \fIccdsmooth\fP
@@ -12,9 +13,9 @@ multiple times using the \fBdir=\fP keyword (see below).
 .PP
 For more artistic versions of a smoothing operation, such as added
 noise and diffraction spikes for bright stars, see \fIccddiffract(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIImage(5)\fP format [no default]
@@ -57,16 +58,41 @@ Input pixel value which to skip in smoothing.
 \fBcut=\fIcutoff_value\fP
 Value at which to cutoff the gaussian beam. 
 [Default: \fB0.01\fP]
-.SH "SEE ALSO"
-ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
-.SH TIMING
+
+.SH "EXAMPLES"
+Here is an example to compute the noise of an image with unity noise that has been smoothed
+with a beam/pixel (B/P) ratio of 2.0 :
+.nf
+
+  ccdgen "" -  noise 0,1 size=1000,1000 seed=123 | ccdsmooth - - 2.0 | ccdstat - | grep dispersion
+  Mean and dispersion    : -0.000116 0.334048
+
+.fi
+with the following table showing the resulting RMS for a few values of the B/P ratio
+.nf
+
+B/P     RMS
+---    -----
+0.0    1.000
+1.0    0.796
+2.0    0.334
+3.0    0.223
+4.0    0.168
+5.0    0.1367
+6.0    0.1160
+7.0    0.1012
+8.0    0.0917
+.fi
+
+.SH "TIMING"
 .nf
 .ta +1.0i
 With 68881 on SUN 3/50 (~16Mhz) and 200*200 map - old program (pre-V2.1)
 Nbeam=17	54s
 Nbeam=33	98s
 Nbeam=47	140s
-.SH HANNING
+
+.SH "HANNING"
 The following are the weights needed in smooth= for subsequent hanning smoothings:
 .nf
 1: 0.25,0.5,0.25
@@ -84,17 +110,25 @@ Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))).
 5: 0.01116455,0.04166667,0.08333333,0.125,0.15550212,0.16666667,0.15550212,0.125,0.08333333,0.04166667,0.01116455
 .fi
 which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp.
-.SH BUGS
+
+.SH "BUGS"
 Smoothing a map which has already been smoothed will result in an incorrect
 header - this would be a simple sum of squares, if the beams are aligned with the axis.
-.SH AUTHOR
+
+.SH "SEE ALSO"
+ccdgen(1NEMO),
+ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/image/trans     	ccdsmooth.c
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 29-jun-87	V1.0: Created as module from CCD program	PJT
@@ -104,4 +138,5 @@ src/image/trans     	ccdsmooth.c
  5-feb-89	V2.2: general 3D smoothing                	PJT
 11-sep-91	some additional comments                	PJT
 12-mar-98	V3.1: added cut=, fixed fwhm=0.0         	PJT
+23-jun-21	add EXAMPLE with smoothing noise		PJT
 .fi
