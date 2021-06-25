@@ -12,6 +12,9 @@ import aplpy
 
 basename = sys.argv[1]
 
+slicex = 64
+slicey = 64
+slicev = 32
 
 fig = plt.figure(figsize=(11, 8))
 
@@ -39,21 +42,21 @@ gc3.tick_labels.hide()
 
 # cube slices
 
-gc4 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,4), slices=[32])
+gc4 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,4), slices=[slicev])
 gc4.show_colorscale(cmap='gist_heat')
 gc4.show_colorscale()
 gc4.set_title("XY slice")
 gc4.axis_labels.hide()
 gc4.tick_labels.hide()
 
-gc5 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,5), slices=[64], dimensions=[0,2])
+gc5 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,5), slices=[slicey], dimensions=[0,2])
 gc5.show_colorscale(cmap='gist_heat')
 gc5.show_colorscale()
 gc5.set_title("XV slice")
 gc5.axis_labels.hide()
 gc5.tick_labels.hide()
 
-gc6 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,6), slices=[64], dimensions=[1,2])
+gc6 = aplpy.FITSFigure(basename + ".fits", figure=fig, subplot=(3,3,6), slices=[slicex], dimensions=[1,2])
 gc6.show_colorscale(cmap='gist_heat')
 gc6.show_colorscale()
 gc6.set_title("YV slice")
