@@ -22,7 +22,7 @@
 #   mirror   1=have both sides
 #   fill     t=cone is filled  f=cone is hollow
 #   svar     smoothing
-#   mass     this is the mass ratio of the disk to a half cone
+#   mass     this is the mass ratio of the disk to a half cone   (@todo  allow 0..1 )
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
@@ -46,7 +46,7 @@ set out     = cone1     #> ENTRY out=cone1
 set rmaxd = 2
 set rc    = 0.1
 set n     = 128
-set scale = 1/60,1/60,100     # model units are arcmin, 100 km/s
+set scale = -1/60,1/60,100     # model units are arcmin, 100 km/s
 
 foreach _arg ($*)
     set $_arg
@@ -120,6 +120,10 @@ else
     snaprotate - - $incd x > $out.snap
 endif
 
+# @todo
+#   snapgrid:    doesn't do beam if svar used
+#                cdelt1 is positive
+
 #   svar: add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
 snapgrid $out.snap $out.vel moment=-1 nx=$n ny=$n svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=$n ny=$n svar=$svar >& /dev/null
@@ -153,10 +157,12 @@ nds9 $out.fits
 #   the far side is at pa=180, the kin. major at 90.
 if (1) then
   fitsccd $out.fits - | rvstack - $out.rvma.ccd pa=90     inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=r
+  ccdfits  $out.rvma.ccd $out.rvma.fits
   xpaset -p ds9 frame frameno 7
   nds9 $out.rvma.ccd
 
   fitsccd $out.fits - | rvstack - $out.rvmi.ccd pa=90+90  inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=o
+  ccdfits  $out.rvmi.ccd $out.rvmi.fits  
   xpaset -p ds9 frame frameno 8
   nds9 $out.rvmi.ccd
 endif
