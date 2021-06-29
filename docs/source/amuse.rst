@@ -2,10 +2,11 @@ AMUSE and NEMO
 ==============
 
 AMUSE (Astrophysical Multipurpose Software Environment) originates some ideas
-from it spredecessors: ACS, StarLab and NEMO, but uses the python language.
+from its predecessors: ACS, StarLab and NEMO, but uses the python language.
 Another feature of AMUSE is that
 python is also the *glue* shell between legacy codes that can orchestrate
-simulations taking components from different codes.
+simulations taking components from different codes, whereas in NEMO legacy codes
+have a NEMO CLI interface, at best.
 
 For seasoned
 `AMUSE <https://amuse.readthedocs.io/en/latest>`_
