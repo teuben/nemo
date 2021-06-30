@@ -16,7 +16,8 @@ Glossary
 
   ccd
       Synonymous for image; most programs in NEMO which handle
-      images start or end with ``ccd``.
+      images start or end with ``ccd``, e.g.
+      ``ccdfits``, ``fitsccd``, ``ccdmath``.
 
   ECSV
       (Enhanced Character Separated Values) a popular

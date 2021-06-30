@@ -10,18 +10,18 @@ with no domain knowledge.
   the years has tried to absorb good modern SE habbits to make the project
   sustainable and grow
 
-* NEMO uses a Unix like directory tree, with a few common 3 and 4 letter
+* NEMO uses a Unix like directory tree, with a few familiar 3 and 4 letter
   names (src, usr, man, etc, bin, lib, opt, obj, tmp, docs, data, local)
 
-* We use git (github) as a CME
-   * since its inception we have been sharing the code and absorbed new codes from collaborators.
-   * We started out with email (1987) and share, then moved to CVS in 2000, and finally
-     to git in 2017.
+* We now use git (on github):
+   * since its inception in 1986 we have been sharing the code and absorbed new codes from collaborators.
+   * We started out with email (1987) and *shar*, then moved to *CVS* in 2000, and finally
+     to *git* in 2017, hosted on github for the moment
    * issues (for bug reports) and pull requests are the preferred way to collaborate
 
-* installing NEMO occurs in place, we used **configure** to track down the system
+* installing NEMO occurs in place, we use **configure** to track down the system
   dependent portions (or force them), and a set of **make build** steps will compile
-  and build tools. There is no **install** step, so users will need to modify their
+  and build NEMO. There is no **install** step, so users will need to modify their
   *shell environment* to take advantage of the new tools.
 
 * In terms of documentation there are the unix manual (``man``) pages, very hyperlinked,
@@ -73,5 +73,5 @@ with no domain knowledge.
    * loadobj:   body, potential, ...
    * scattered Testfile to pick up tests for "make check" (like a Makefile)
    * scattered Benchfile to pick up benchmarks for "make bench10" (like a Makefile)
-   * the use of the **bsf** tool to check reproducible to N digits.
+   * the use of the **bsf** tool to check reproducability to N digits.
    * *surely there must be more*  

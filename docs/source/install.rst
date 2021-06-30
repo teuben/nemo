@@ -3,7 +3,7 @@
 Installation
 ============
 
-Installation is normally done via github. Here is a top level example, just 3 lines in
+Installation is normally done via github. Here is a simple example, just 3 lines in
 your (bash) shell:
 
 .. code-block:: bash
@@ -12,10 +12,12 @@ your (bash) shell:
    bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1
    source  $HOME/opt/nemo/nemo_start.sh
 
-where the arguments to the ``install_nemo.sh`` script are optional, but given to show some
-often use non-defaults. See that script for more details.
+where the arguments to the
+`install_nemo.sh <https://github.com/teuben/nemo/blob/master/docs/install_nemo.sh>`_
+script are optional, but a few are
+given to show some often use non-defaults. See that script for more details.
 
-A more manual install can be:
+A more manual install, bypassing this script, can be:
 
 .. code-block:: bash
 
@@ -53,14 +55,18 @@ of for *cmake* based packages
 
       -DCMAKE_INSTALL_PREFIX=$NEMO/opt
 
+as NEMO generally adds the $NEMO/opt tree search for include and library files.
+
 For some packages this has been automated using the ``mknemo`` command, described in
 the next section.
 
 mknemo
 ------
 
-Using the ``mknemo`` script a number of supported libraries that
-are often used can be compiled within ``$NEMO/opt``, as described
+Although the ``mknemo`` script was intended to quickly compile a NEMO program, without the
+need to know where the source code lives, it is also used to aid the installation
+of a number of supported libraries that
+can be used by NEMO. They are compiled within ``$NEMO/opt``, as described
 in the previous section. The supporting scripts are generally
 located ``$NEMO/src/scripts/mknemo.d``.
 

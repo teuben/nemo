@@ -17,7 +17,7 @@ assuming NEMO was installed in ``/opt/nemo/``, and
 
 	source /opt/nemo/nemo_start.csh
 
-for users of a ``csh`` like shell. Normally the ``source``
+for users of a ``csh`` like shell. Normally this
 line would be added to your ``~/.bashrc`` or ``/.cshrc`` file.
 
 After this the following commands should work for you
@@ -33,7 +33,7 @@ Updating NEMO
 Although a full update is out of scope for the discussion here, a common case is
 when a program is not available, or a collaborator had made a new or updated program
 available via github.  The following procedure generally works, assuming you have
-write permission in $NEMO:
+write permission in the ``$NEMO`` directory tree:
 
 .. code-block:: bash
 
