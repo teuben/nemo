@@ -422,6 +422,27 @@ Advanced Analysis
 Generating models
 ~~~~~~~~~~~~~~~~~
 
+Using Unix pipes
+~~~~~~~~~~~~~~~~
+
+In most cases a NEMO file can be replaced by a pipe (usually via
+``in=-`` and ``out=-``), therefor limiting the need to write
+files. Here is an example of plotting the measured and expected
+surface brightness of a homogeneous sphere of 1,000,000 particles and
+unit mass and unit radius:
+
+.. code-block::
+
+    % mkconfig - 1000000 ball seed=0 |\
+        snapgrid - - nx=800 ny=800  |\
+        ccdellint - 0:1.1:0.01 inc=0 out=- |\
+        ccdprint - x=  newline=t label=x |\
+        tabmath - - '1.5/pi*sqrt(1-%1**2)' |\
+        tabplot -  1 2,3 color=2,3 line=0,0,1,1 point=2,0.1,0,0 \
+            xlab="Radius" ylab="Surface Brightness"  headline="mkconfig ball" yapp=ball.png/png
+
+.. image:: ../figures/ball.png
+
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~
 
