@@ -11,8 +11,10 @@ Welcome to NEMO's documentation!
 
 
 .. todo::  This draft started on April 27, it is an updated version of the old (latex)
-   NEMO users and programmers guide. We hope to have this converted sometime in June.
-   Other online entry points in NEMO are: `github pages <https://teuben.github.io/nemo/>`_ and
+   NEMO users and programmers guide. We hope to have this converted sometime in this Summer
+	   when version 4.3 is blessed.
+   Other online entry points in NEMO are:
+   `github pages <https://teuben.github.io/nemo/>`_ and
    `github code <https://github.com/teuben/nemo>`_ .  We also keep an index to
    `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_.
 
