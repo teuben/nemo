@@ -425,21 +425,28 @@ Generating models
 Using Unix pipes
 ~~~~~~~~~~~~~~~~
 
-In most cases a NEMO file can be replaced by a pipe (usually via
-``in=-`` and ``out=-``), therefor limiting the need to write
+In most cases a NEMO file can be used in a pipe (usually via
+``in=-`` and ``out=-``), therefore limiting the need to write
 files. Here is an example of plotting the measured and expected
-surface brightness of a homogeneous sphere of 1,000,000 particles and
+surface brightness of a homogeneous sphere of 1,000,000 particles with
 unit mass and unit radius:
 
 .. code-block::
-
+   :linenos:
+   :emphasize-lines: 3,5
+   
     % mkconfig - 1000000 ball seed=0 |\
         snapgrid - - nx=800 ny=800  |\
         ccdellint - 0:1.1:0.01 inc=0 out=- |\
         ccdprint - x=  newline=t label=x |\
         tabmath - - '1.5/pi*sqrt(1-%1**2)' |\
         tabplot -  1 2,3 color=2,3 line=0,0,1,1 point=2,0.1,0,0 \
-            xlab="Radius" ylab="Surface Brightness"  headline="mkconfig ball" yapp=ball.png/png
+          xlab="Radius" ylab="Surface Brightness" headline="mkconfig shape=ball" yapp=ball.png/png
+
+A few comments on the highlighted lines:  In **line 3** the ``out=`` keyword is not the second keyword,
+hence the explicit way it was written with the ``out=-``.
+In **line 5** the expected surface brightness expression is added as the 3rd column to the table in the pipe,
+then passed on for a quick and dirty plot (shown below).
 
 .. image:: ../figures/ball.png
 
