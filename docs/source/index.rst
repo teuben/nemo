@@ -34,7 +34,8 @@ Welcome to NEMO's documentation!
    progr
    .. refs
    potname
-   amuse	      
+   amuse
+   zeno
    coordsys
    .. dirs
    .. gls

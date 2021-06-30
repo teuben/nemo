@@ -84,7 +84,7 @@ real rotcur_core(real r, int np, real *p, real *d)
 
   d[0] = x / y;
   d[1] = -p[0]*d[0]/(p[1]*q);
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* CForm[D[(1+x^c)^(-1/c),c]]  */
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* in mathematica:    CForm[D[(1+x^c)^(-1/c),c]]  */
   d[2] *= p[0] * x;
   return p[0] * d[0];
 }
