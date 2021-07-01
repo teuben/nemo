@@ -55,7 +55,7 @@ we are using, in practice you would use a subset of them, but never leave
 out the NAME section.
 
 .SH "PARAMETERS"
-This list of options is usually added in case of a \fIlevel(1)\fP program
+.so man1/parameters
 .TP 25
 \fBin1=\fIsnap1\fP
 Input data is read from \fIsnap1\fP, which must be in \fISnapShot(5)\fP
@@ -64,6 +64,21 @@ format.
 \fBin2=\fIsnap2\fP
 Input data is read from \fIsnap2\fP, which must be in \fISnapShot(5)\fP
 format.
+.TP
+\fBflag=t|f\fP
+a boolean flag
+.TP
+\fBrange=\fP\fIstart:end\fP
+A min_max range.
+.TP
+\fBlevels=\fP\fIs1:e1:d1,s2:e2:d2,...\fP
+many levels using nemoinp
+
+.PP
+On the design of keyword names and order: \fBin=\fP and \fBout=\fP should ideally
+appear first, with reasonable defaults for all other keywords for a standard run.
+Also note that the \fBkey=\fP is in boldface. Anything after that is optional, can be literal
+(boldface) or implied (italics).
 
 .SH "LIST OF FUNCTIONS"
 .sp 10
