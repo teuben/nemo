@@ -43,11 +43,8 @@ def get_man_matches(file):
                 if not match: # If the .TP isn't followed by a command, flag file as bad
                     return 'Non-conformant: ' + line
                 else:
-                    man_matches.append(match[0][:-1])
+                    man_matches.append(match[0][3:-1])
                 scan_flag = False
-        
-    # Transform man data for comparison
-    man_matches = [match[3:] for match in man_matches]
 
     man_doc.close()
     return man_matches
