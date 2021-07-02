@@ -24,7 +24,7 @@ ccdppm convert image to a PPM file, with optional color cable
 ccdprint print values at gridpoints of an image
 ccdrgb create composite RGB color images from multiple input images
 ccdrow hacking rows of an image for CLASSy
-ccdsharp3 enhance/sharpen an image cube
+ccdsharp enhance/sharpen an image cube
 ccdsky lazy sky scaling (cosmology) calculator
 ccdslice takes slices from a cube
 ccdsmooth smooth image cube in XYZ
@@ -147,7 +147,6 @@ snapplot   plot particle positions from a snapshot file
 snapplot plot particle positions from a snapshot file
 snapplotv plot particle positions from a snapshot file
 snappot add analytical potentials/forces to an N-body system
-snapprint   tabulate a snapshot
 snapprint tabulate a snapshot
 snaprect rectify a snapshot using selected particles and weight
 snaprotate rotate a snapshot
@@ -173,8 +172,6 @@ snapvirial rescale snapshot for re-virialization
 snapvratio compute various global virials (clausius, newton)
 snapxyz Convert snapshot to xyzc data
 tab2xml Select columns from a table and convert to VOTable/XML
-tabbench1 table I/O benchmark
-tabbench2 table I/O benchmark
 tabcomment Add comments to a table, or comments certain lines
 tabdate Convert a date/time column
 tabdms Convert to HMS/DMS tables

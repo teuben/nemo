@@ -17,15 +17,15 @@ tree structure, and hence in effect produce a restricted N-body code.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
-\fBin\fP=\fIin-file\fP
+\fBin=\fP\fIin-file\fP
 If given, initial conditions will be read from \fIin-file\fP in
 snapshot format.
 At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
 .TP
-\fBout\fP=\fIout-file\fP
+\fBout=\fP\fIout-file\fP
 If given, results are written to \fIout-file\fP in snapshot format.
 .TP
-\fBrestart\fP=\fIstate-file\fP
+\fBrestart=\fP\fIstate-file\fP
 If given, the system state will be read from \fIstate-file\fP.
 New values are accepted for the following parameters:
 \fBout\fP, \fBsave\fP, \fBeps\fP, \fBtol\fP, \fBoptions\fP,
@@ -33,46 +33,46 @@ New values are accepted for the following parameters:
 and \fBdebug\fP.
 At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
 .TP
-\fBcontinue\fP=\fIstate-file\fP
+\fBcontinue=\fP\fIstate-file\fP
 If given, the system state will be read from \fIstate-file\fP.
 New values are accepted for the following parameters:
 \fBout\fP, \fBsave\fP, and \fBdebug\fP.
 At most one of \fBin\fP, \fBrestart\fP, or \fBcontinue\fP may be specified.
 .TP
-\fBsave\fP=\fIstate-file\fP
+\fBsave=\fP\fIstate-file\fP
 If given, the system state will be saved in \fIstate-file\fP after each
 timestep.
 .TP
-\fBnbody\fP=\fInbody-value\fP
+\fBnbody=\fP\fInbody-value\fP
 Number of bodies for test data, generated only if none of
 \fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
 Default is \fB128\fP.
 .TP
-\fBseed\fP=\fIrandom-seed\fP
+\fBseed=\fP\fIrandom-seed\fP
 Random number seed used in generating initial conditions.
 Default is \fB123\fP.
 .TP
-\fBcencon\fP=\fIcencon-flag\fP
+\fBcencon=\fP\fIcencon-flag\fP
 If \fBtrue\fP, generate centrally concentrated test system.
 Default is \fBfalse\fP.
 .TP
-\fBfreq\fP=\fIinteg-freq\fP
+\fBfreq=\fP\fIinteg-freq\fP
 Inverse time-step, to be used with a leap-frog integrator.
 Default is \fB32.0\fP (32 steps per unit time).
 .TP
-\fBeps\fP=\fIsoft-length\fP
+\fBeps=\fP\fIsoft-length\fP
 Force softening parameter.
 Default is \fB0.05\fP.
 .TP
-\fBtol\fP=\fItheta-value\fP
+\fBtol=\fP\fItheta-value\fP
 Opening-angle tolerence parameter.
 Default is \fB1.0\fP.
 .TP
-\fBfcells\fP=\fIfcells-value\fP
+\fBfcells=\fP\fIfcells-value\fP
 Ratio of cells to bodies, used when allocating cells.
 Default is \fB0.75\fP.
 .TP
-\fBoptions\fP=\fIoption-string\fP
+\fBoptions=\fP\fIoption-string\fP
 Miscellaneous control options, specified as a comma-separated list
 of keywords.
 Currently recognized keywords are:
@@ -84,21 +84,21 @@ are always output.  It also seems that the reset_time and new_tout
 options have not been implemented yet.
 Default: \fBmass,phase\fP.
 .TP
-\fBtstop\fP=\fIstop-time\fP
+\fBtstop=\fP\fIstop-time\fP
 Time to stop integration in N-body model units.
 Default is \fB2.0\fP.
 .TP
-\fBfreqout\fP=\fIout-freq\fP
+\fBfreqout=\fP\fIout-freq\fP
 Frequency of major N-body data outputs.
 Default is \fB4.0\fP (4 frames per unit time).
 .TP
-\fBminor_freqout\fP=\fIout-freq\fP
+\fBminor_freqout=\fP\fIout-freq\fP
 Frequency of minor diagnostic outputs.
 If this frequency is not a simple fraction of \fBfreq\fP (see above),
 the program can waiste significant amounts of time.
 Default is \fB32.0\fP (32 diagnostic measurements per unit time).
 .TP
-\fBlog\fP=\fIlogfile\fP
+\fBlog=\fP\fIlogfile\fP
 Output filename for log. 
 Default is standard output (\fB-\fP). Can also use \fBlog=.\fP to make it disappear
 in case your out=- needs to be part of a pipe.
