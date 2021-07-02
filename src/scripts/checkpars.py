@@ -36,14 +36,14 @@ def get_man_matches(file):
 
         # Scans parameters
         if containsParameters:
-            if re.search(r'\.TP',line): # If we encounter a .TP, scan next line for a command
+            if re.search(r'^\.TP',line): # If we encounter a .TP, scan next line for a command
                 scan_flag = True
             elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
-                match = re.findall(r'\\fB[\w|#|/]*=',line)
+                match = re.findall(r'\\fB([\w|#|/]*)=',line)
                 if not match: # If the .TP isn't followed by a command, flag file as bad
                     return 'Non-conformant: ' + line
                 else:
-                    man_matches.append(match[0][3:-1])
+                    man_matches.append(match[0])
                 scan_flag = False
 
     man_doc.close()
