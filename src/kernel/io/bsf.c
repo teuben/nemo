@@ -78,10 +78,10 @@ void nemo_main()
 
   if (hasvalue("test")) {
     if (streq(current,test))
-      printf("BSF %s: %s OK\n",label,current);
+      printf("BSF %s: OK %s\n",label,current);
     else {
-      printf("BSF %s: %s FAIL\n",label,current);
-      printf("BSF %s: %s expected\n",label,test);
+      printf("BSF %s: FAIL %s\n",label,current);
+      printf("BSF %s: EXPECT %s\n",label,test);
     }
   } else {
     printf("BSF %s: %s\n",label,current);
