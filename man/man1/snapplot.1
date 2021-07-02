@@ -23,40 +23,40 @@ In the \fByt\fP package this is known as \fIPhasePlot\fP.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
-\fBin\*e\fP\fIsnap-file\fP
+\fBin=\fP\fIsnap-file\fP
 Input data is read from \fIsnap-file\fP, which must be in snapshot format.
 .TP
-\fBtimes\*e\fP\fItime-range\fP
+\fBtimes=\fP\fItime-range\fP
 Only plot frames with time values within \fItime-range\fP,
 which is of the form, eg, "1.0:1.5,2.5,3.0".
 The default is "all".
 .TP
-\fBxvar\*e\fP\fIx-expression\fP
+\fBxvar=\fP\fIx-expression\fP
 The value of \fIx-expression\fP is plotted along the X axis.
 \fIx-expression\fP is a real-valued C language expression over the
 real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBt\fP, and the integer value \fBi\fP.
 The default is \fBx\fP.
 .TP
-\fBxlabel\*e\fP\fIx-axis-label\fP
+\fBxlabel=\fP\fIx-axis-label\fP
 Label for the X axis.
 The default is the expression given for \fBxvar\fP.
 .TP
-\fBxrange\*e\fP\fIx-axis-range\fP
+\fBxrange=\fP\fIx-axis-range\fP
 Range of values for the X axis, specified either as a single number
 (in which case the lower bound is zero) or a pair of numbers separated
 by a colon.
 The default range is \fB-2.0:2.0\fP.
 .TP
-\fByvar\*e\fP\fIy-expression\fP
+\fByvar=\fP\fIy-expression\fP
 See above.
 The default is \fBy\fP.
 .TP
-\fBylabel\*e\fP\fIy-axis-label\fP
+\fBylabel=\fP\fIy-axis-label\fP
 .TP
-\fByrange\*e\fP\fIy-axis-range\fP
+\fByrange=\fP\fIy-axis-range\fP
 .TP
-\fBvisib\*e\fP\fIexpression\fP
+\fBvisib=\fP\fIexpression\fP
 Determines the visibility of particles.
 \fIexpression\fP is a integer expression in the above variables;
 only points with non-zero values are plotted. Particles are plotted
@@ -65,27 +65,27 @@ thus this keyword can be used to re-arrange the plotting order
 on screen (useful if colors are used).
 The default is \fB1\fP.
 .TP
-\fBpsize\*e\fP\fIexpression\fP
+\fBpsize=\fP\fIexpression\fP
 Determines the point type and size.
 \fIexpression\fP is a real expression in the above variables;
 zero means plot a point, positive (negative) means plot a circle (cross)
 with size controled by absolute value.
 The default is \fB0\fP.
 .TP
-\fBcolor\*e\fP\fIexpression\fP
+\fBcolor=\fP\fIexpression\fP
 Determines the point color.
 \fIexpression\fP is a real expression in the above variables;
 values between 0 and 1 produce a sequence of saturated colors starting
 with red, running through the spectrum, and wrapping back to red.
 The default is \fB0\fP.
 .TP
-\fBcrange\*e\fP\fIcolor-range\fP
+\fBcrange=\fP\fIcolor-range\fP
 Range of colors that should be mapped. Below and above these ranges
 the \fIyapp(3NEMO)\fP plotting layer may determine the visibility
 of the points.
 The default range is \fB0:1\fP.
 .TP
-\fBtrak\*e\fP\fBt|f\fP
+\fBtrak=\fP\fBt|f\fP
 
 .SH TRANSFORMATIONS
 \fIsnapplot\fP handles arbitrary C expressions by invoking the compiler,
@@ -111,16 +111,16 @@ Plot snapshot file "r100.dat" frame-by-frame, with default transformations:
 Plot radius vs radial velocity at times 2.0 through 6.0:
 .RS
 .nf
-% \fBsnapplot r100.dat xvar\*er xrange\*e0:2 yvar\*evr times\*e2:6\fP
+% \fBsnapplot r100.dat xvar=r xrange=0:2 yvar=vr times=2:6\fP
 .fi
 .RE
 Plot binding energy vs angular momentum, showing only the
 first 1000 particles:
 .RS
 .nf
-% \fBsnapplot r100.dat xvar\*eetot xrange\*e-4:0 \\
-\ \ xlabel\*e"Binding energy" yvar\*ejtot yrange\*e0:0.8 \\
-\ \ ylabel\*e"Angular momentum" visib\*e"i < 1000"\fP
+% \fBsnapplot r100.dat xvar=etot xrange=-4:0 \\
+\ \ xlabel="Binding energy" yvar=jtot yrange=0:0.8 \\
+\ \ ylabel="Angular momentum" visib="i < 1000"\fP
 .fi
 .RE
 NB: this last example assumes that "r100.dat" includes potential
