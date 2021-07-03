@@ -7,9 +7,9 @@ orblist \- list an orbit
 .SH DESCRIPTION
 \fBorblist\fP will list the time, the X, Y, Z positions and 
 VX, VY, VZ velocities of an orbit.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIorbit(5NEMO)\fP format [no default]
@@ -19,8 +19,15 @@ stride through the data. \fBn=2\fP would list only
 the even timesteps.
 [default: \fB1\fP].
 .TP
+\fBmaxsteps=\fP
+Maximum number of steps allowed [10000]
+.TP
 \fBformat=\fIformat\fP
 format to be used for printing [default: \fB%f\fP].
+.TP
+\fBmode=\fP
+Output:  o,t,p,v (not used) [t,p,v]
+
 .SH "SEE ALSO"
 tsf(1NEMO), potential(5NEMO), newton0(1NEMO)
 .SH AUTHOR
