@@ -42,10 +42,11 @@ string defv[] = {
     "eta=0\n		  fractional dissipation per timestep",
     "cell=0.1\n		  cell size",
     "rmax=-1\n            Maximum allowed gridsize -rmax:rmax in all directions",
+    "fheat=0\n            diffusion measure (not implemented)",
     "sigma=0\n            diffusion angle (degrees) per timestep",
     "seed=0\n		  random seed",
     "headline=PotCode\n   random mumble for humans",
-    "VERSION=5.1a\n       5-sep-09 PJT",
+    "VERSION=5.2\n        2-jul-2021 PJT",
     NULL,
 };
 
