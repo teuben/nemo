@@ -29,16 +29,16 @@ def get_man_matches(file):
 
     for line in man_doc.readlines():
         # Scan for .SH PARAMETERS
-        if re.search(r'\.SH',line[:3]) and re.search(r'PARAMETERS',line[3:]) and not containsParameters:
+        if re.search(r'^\.SH PARAMETERS$',line) and not containsParameters:
             containsParameters = True
-        elif re.search(r'\.SH',line) and containsParameters:
+        elif re.search(r'^\.SH',line) and containsParameters:
             return man_matches
 
         # Scans parameters
         if containsParameters:
             if re.search(r'^\.TP',line): # If we encounter a .TP, scan next line for a command
                 scan_flag = True
-            elif scan_flag: #\\fB(\w|#)*= \\f[a-zA-Z][a-zA-Z]+[0-9]*
+            elif scan_flag:
                 match = re.findall(r'\\fB([\w|#|/]*)=',line)
                 if not match: # If the .TP isn't followed by a command, flag file as bad
                     return 'Non-conformant: ' + line
@@ -104,22 +104,6 @@ def checkMan():
 
     tasklist.close()
     return files_read_names
-
-def checkBin(tasklist):
-    files_read, bad_files, bad_file_names = 0,0,[]
-    binlist = open('src/scripts/bins.list')
-
-    for file in binlist:
-        file = file.rstrip()
-        if not file in tasklist:
-            bad_files+=1
-            bad_file_names.append(file)
-        files_read+=1
-        
-    print('Bin files with no matching tasklist file:')
-    print('Files read: ' + str(files_read))
-    print('Bad files found: ' + str(bad_files))
-    print('Bad files: ' + str(bad_file_names))
 
 def readFlags():
     global VERBOSE, HELP, TASKLIST
