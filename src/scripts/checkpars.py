@@ -29,7 +29,7 @@ def get_man_matches(file):
 
     for line in man_doc.readlines():
         # Scan for .SH PARAMETERS
-        if re.search(r'^\.SH PARAMETERS$',line) and not containsParameters:
+        if re.search(r'^\.SH (PARAMETERS|"PARAMETERS")$',line) and not containsParameters:
             containsParameters = True
         elif re.search(r'^\.SH',line) and containsParameters:
             return man_matches
