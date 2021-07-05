@@ -1,9 +1,12 @@
 .TH SNAPCOPY 1NEMO "26 September 1989"
-.SH NAME
+
+.SH "NAME"
 snapcopy - copy particles of snapshot subject to conditions
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapcopy in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapcopy\fP copies an N-body system from \fBin\fP to \fBout\fP,
 subjecting the individual particles to certain conditions.
 .PP
@@ -17,8 +20,9 @@ the user to edit snapshots using polygonic areas in 2D projections
 of 6D-phase space using the snapplot-interface. It requires a
 special version of \fIyapp(3NEMO)\fP, which may not be implemented
 on all systems.
-.SH PARAMETERS
-The following parameters are recognized:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fIin_file\fP
 input file, in \fIsnapshot\fP(5NEMO) format.  [Default: none.]
@@ -46,15 +50,22 @@ recognize data in single precision format. [default: \fBdouble\fP].
 \fBkeep=\fIitems-list\fP
 List of items to keep in the snapshot. The list may contain
 any of \fBtime,mass,phase,phi,acc,aux\fP and \fBkey\fP.
+.TP
+\fBibody=\fP
+One body to select (not implemented yet)
+
 .SH "SEE ALSO"
 snapsort(1NEMO), snapmask(1NEMO), snapplotedit(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/pjt/nbody   	snapcopy.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
