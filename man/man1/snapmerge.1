@@ -13,9 +13,16 @@ is also given:
 .TP 20
 \fBin=\fP
 Input file, must be  in snapshot format [no default].
-.TP 20
+.TP
 \fBout=\fP
 output file name, will be in snapshot format [no default].
+.TP
+\fBnbody=\fP
+Size of one (or more) snapshot(s) [] 
+.TP
+\fBnsnap=\fP
+Number of pieces to cut a snapshot into
+
 .SH BUGS
 Since \fIget_snap(3NEMO)\fP needs nearly twice the amount of memory
 to hold a snapshot, \fIsnapmerge\fP tends to run out of memory
