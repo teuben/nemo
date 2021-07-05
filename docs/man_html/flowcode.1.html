@@ -30,16 +30,17 @@ IMPLEMENTED - see <a href='potcode.1.html'><i>potcode(1NEMO)</i></a>
 Orbits can also be diffused: at regular
 intervals the velocity vector  can be rotated over a randomly gaussian
 distributed angle (<b>sigma</b>). 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized;
 they may be given in any order. 
 <dl>
 
-<dt><b>in</b>=<i>in-file</i> </dt>
+<dt><b>in=</b><i>in-file</i> </dt>
 <dd>Initial conditions will be read
 from <i>in-file</i> in snapshot format [default: none - but is required]. </dd>
 
-<dt><b>out</b>=<i>out-file</i>
+<dt><b>out=</b><i>out-file</i>
 </dt>
 <dd>If given, results are written to <i>out-file</i> in snapshot format [default: empty,
 no snapshot output file produced]. </dd>
@@ -49,7 +50,7 @@ no snapshot output file produced]. </dd>
 
 descriptor  [no default]. </dd>
 
-<dt>potpars=<i>par-list</i> </dt>
+<dt><b>potpars=<i>par-list</i></b> </dt>
 <dd>List of parameters to the potential
 descriptor. The first parameter must be the pattern speed in the x-y plane
 (rotating frames of reference are not  supported for all integration modes).
@@ -62,29 +63,29 @@ potential descriptor. [default: none - let them be defined by routine itself].
 This might be an N-body snapshot or list of spline fit coefficients etc.
 [default: none]. </dd>
 
-<dt><b>freq</b>=<i>integ-freq</i> </dt>
+<dt><b>freq=</b><i>integ-freq</i> </dt>
 <dd>Inverse time-step, to be used with the time
 integrator. [Default: <b>64.0</b> (64 steps per unit time)]. </dd>
 
-<dt><b>mode</b>=<i>mode-number</i> </dt>
+<dt><b>mode=</b><i>mode-number</i> </dt>
 <dd>Integration
 mode number:  0=Euler,  1=PC (Predictor Corrector), 2=modified PC, 3=Runge-Kutta
 (JEB modified), 4=4th order Runge-Kutta, 5=LeapFrog. [default: <b>4]. </dd>
 
-<dt><b>tstop</b></b>=<i>stop-time</i>
+<dt><b>tstop=</b></b><i>stop-time</i>
 </dt>
 <dd>Time to stop integration in N-body model units. Default is <b>2.0</b>. </dd>
 
-<dt><b>freqout</b>=<i>out-freq</i>
+<dt><b>freqout=</b><i>out-freq</i>
 </dt>
 <dd>Frequency of major N-body data outputs. Default is <b>4.0</b> (4 frames per unit
 time). </dd>
 
-<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dt><b>minor_freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of minor diagnostic outputs. Default
 is <b>32.0</b> (32 diagnostic measurements per unit time). </dd>
 
-<dt><b>options</b>=<i>option-string</i>
+<dt><b>options=</b><i>option-string</i>
 </dt>
 <dd>Miscellaneous control options, specified as a comma-separated list of keywords.
 Currently recognized keywords are: <b>reset_time</b>: when reading initial data,
@@ -93,11 +94,11 @@ set <i>tnow</i> to zero; <b>new_tout</b>: when restarting, set new output times;
 and auxilliary (the deflection angle from diffusion is stored here) with
 major data outputs. </dd>
 
-<dt><b>eta</b>=<i>loss-fraction</i> </dt>
+<dt><b>eta=</b><i>loss-fraction</i> </dt>
 <dd>*** Fraction of random energy that
 is dissipated [Default: <b>0.0</b>]. </dd>
 
-<dt><b>cell</b>=<i>box-size</i> </dt>
+<dt><b>cell=</b><i>box-size</i> </dt>
 <dd>*** Cell size in which dissipation
 is performed after every timestep. Dissipation is current performed on a
 cartesian grid, in which  cells are <a href='square.2D.html'>square (2D)</a>
@@ -105,7 +106,7 @@ cartesian grid, in which  cells are <a href='square.2D.html'>square (2D)</a>
 . [Default:
 <b>0.1</b>]. </dd>
 
-<dt><b>rmax</b>=<i>max_box-size</i> </dt>
+<dt><b>rmax=</b><i>max_box-size</i> </dt>
 <dd>*** Maximum size of the "box" (actually cube) within
 which dissipation is performed. If a negative number is given, the box is
 allow to grow as large as is needed, though this may consume a lot of memory.
@@ -120,25 +121,26 @@ a gaussian distributed value with rms <i>fheat*velsig</i>. This in effect gives
 a dissipation dependant heating source. See also <b>sigma=</b>, which is position
 independant. [Default: <b>0</b>]. </dd>
 
-<dt><b>sigma</b>=<i>angle</i> </dt>
+<dt><b>sigma=</b><i>angle</i> </dt>
 <dd>Diffusion angle, gaussian distributed
 with this sigma, about which each velocity vector is rotated after each
 timestep. Diffusion is used only when <i>sigma &gt; 0</i>. [Default: <b>0</b>]. </dd>
 
-<dt><b>freqdiff</b>=<i>diffusion-out-freq</i>
+<dt><b>freqdiff=</b><i>diffusion-out-freq</i>
 </dt>
 <dd>Frequency of diffusion. Currently the same diffusion angle is used between
 changes, instead of during a single integration step Default is the same
 as the integration frequency (<b>freq=</b>). </dd>
 
-<dt><b>seed</b>=<i>random-seed</i> </dt>
+<dt><b>seed=</b><i>random-seed</i> </dt>
 <dd>Random number seed,
 only used when diffusion (<b>sigma=</b>) is used. 0 must be used to get the random
 seed from the time of the day. [Default: <b>0</b>]. </dd>
 
-<dt><b>headline</b>= </dt>
+<dt><b>headline=</b> </dt>
 <dd>Identifying text for
-this run. Default: not used. </dd>
+this run. Default: not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>

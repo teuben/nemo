@@ -13,6 +13,7 @@ ccdfill - patch up the holes in an image
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdfill</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdfill</b> patches up the holes in an image. <p>
 Currently a simple
@@ -21,68 +22,79 @@ The size of this area can be choosen by the user. <p>
 This procedure will obviously
 not conserve flux (see also <b>all=t</b> below), and has to be used with caution.
 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+ The following parameters are recognized in order; they may
+be given in any order if the keyword is also given. Use --help to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>in_ccd</i> </dt>
 <dd>Input <a href='image.3.html'><i>image(3NEMO)</i></a>
- file. No default. </dd>
+ file. No default.
+</dd>
 
-<dt><b>out=</b><i>out_ccd</i>
-</dt>
+<dt><b>out=</b><i>out_ccd</i> </dt>
 <dd>Output image file. No default. </dd>
 
 <dt><b>n=</b> </dt>
-<dd>Number of neighbor cells at one side to
-use in interpolation/fit. The total number of cells used in the fit will
-hence be at most <b>4*n*(n+1)</b> (this already excludes the central pixel, n=1
-uses 8 cells, n=2  uses 24 etc.) [Default: <b>1</b>]. </dd>
+<dd>Number of neighbor cells at
+one side to use in interpolation/fit. The total number of cells used in
+the fit will hence be at most <b>4*n*(n+1)</b> (this already excludes the central
+pixel, n=1 uses 8 cells, n=2  uses 24 etc.) [Default: <b>1</b>]. </dd>
 
 <dt><b>bad=</b><i>zvalue</i> </dt>
-<dd>Value in the map
-that should be patched. [Default: <b>0.0</b>]. </dd>
+<dd>Value
+in the map that should be patched. [Default: <b>0.0</b>]. </dd>
 
 <dt><b>all=t|f</b> </dt>
-<dd>Normally only bad pixels are
-patches. By setting <b>all=t</b> all pixels are re-fitted with a planar fit, effectively
-smoothing the map. This will obviously not conserve flux, where applicaple,
-and should be used with caution. Default: f </dd>
+<dd>Normally only bad
+pixels are patches. By setting <b>all=t</b> all pixels are re-fitted with a planar
+fit, effectively smoothing the map. This will obviously not conserve flux,
+where applicaple, and should be used with caution. Default: f </dd>
 
 <dt><b>m=</b> </dt>
-<dd>Minimum number of neighbors
-needed to allow a fit. Normally 3 is enough, though this tends to add to
-edges. 4 would be more conservative, in which case iter&gt;1 can be used. Default:
-4 </dd>
+<dd>Minimum
+number of neighbors needed to allow a fit. Normally 3 is enough, though
+this tends to add to edges. 4 would be more conservative, in which case
+iter&gt;1 can be used. Default: 4 </dd>
 
 <dt><b>iter=</b> </dt>
-<dd>Minimum number of iterations.  0 is also an allowed value, in which
-case the image will just be copied unmodified. Default: 1 </dd>
+<dd>Minimum number of iterations.  0 is also
+an allowed value, in which case the image will just be copied unmodified.
+Default: 1 </dd>
+
+<dt><b>xmirror=t|f</b> </dt>
+<dd>Use points mirrored in X to get near a border. [Default:
+f] </dd>
+
+<dt><b>ymirror=t|f</b> </dt>
+<dd>Use points mirrored in Y to get near a border. [Default: f]
+</dd>
 
 <dt><b>spike=</b> </dt>
-<dd>If given,
-for each point in the map, if a point deviates more than <b>spike</b> from all
-it&rsquo;s 4 non-bad direct neighbors, this value will be reset to <b>bad</b> before the
-actually filling will take place. Default: none (not applied) </dd>
+<dd>If given, for each point in the map, if a point deviates more than
+<b>spike</b> from all it&rsquo;s 4 non-bad direct neighbors, this value will be reset
+to <b>bad</b> before the actually filling will take place. Default: none (not applied)
+
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-With
-m=3 you will see some singular matrix warnings, and patched values will
-be bogus. It is better to set m=4 for those cases. <p>
-Edge effects will occur
-for large values of iter, use with caution. Really  a better bi-linear interpolation
-is needed. See also  <a href='ccdintpol.1.html'><i>ccdintpol(1NEMO)</i></a>
- if your irregulaties are regular enough.
-
+With m=3 you will see some singular matrix warnings, and patched
+values will be bogus. It is better to set m=4 for those cases. <p>
+Edge effects
+will occur for large values of iter, use with caution. Really  a better
+bi-linear interpolation is needed. See also  <a href='ccdintpol.1.html'><i>ccdintpol(1NEMO)</i></a>
+ if your irregulaties
+are regular enough. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='image.3.html'>image(3NEMO)</a>
 , <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 , <a href='ccdsmooth.1.html'>ccdsmooth(1NEMO)</a>
-, <a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
-
-
+,
+<a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
+ 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>

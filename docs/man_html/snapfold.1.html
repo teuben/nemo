@@ -19,6 +19,7 @@ folds the positions and velocities of an N-body snapshot file representing
 a thin disk. The disk can be folded up to a cone around the +Z axis, or
 down to a cone around the -Z axis. Fold angle (<b>theta=</b>) must thus  be between
 -90 and +90. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized; they may
 be given in any order. 
@@ -35,20 +36,26 @@ must be in snapshot format. </dd>
 <dt><b>theta=</b><i>x-angle</i> </dt>
 <dd>Fold Angle (in degrees). Default: 0.0 </dd>
 
-<dt><b>fill=t|f</b> </dt>
-<dd>Fill the cone?
- Otherwise it will be a thin wall. Default: false </dd>
+<dt><b>select=</b> </dt>
+<dd>Select the vectors
+for rotation. Normally you want to select all vectors. [pos,vel,acc] </dd>
 
-<dt><b>view=0,1,-1</b> </dt>
-<dd>Limit the view
-of the cone. view=0 shows the whole cone, view=1 shows the front side (towards
-the -Y axis) view=-1 the backside (towards the +Y axis). The value of 1+|view|
-will actually determine the opening angle in the plane of the visible part.
-[0] </dd>
+<dt><b>fill=t|f</b>
+</dt>
+<dd>Fill the cone?  Otherwise it will be a thin wall. Default: false </dd>
+
+<dt><b>view=0,1,-1</b>
+</dt>
+<dd>Limit the view of the cone. view=0 shows the whole cone, view=1 shows the
+front side (towards the -Y axis) view=-1 the backside (towards the +Y axis).
+The value of 1+|view| will actually determine the opening angle in the plane
+of the visible part. [0] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example creating a tilted cone with outflow <br>
+Here is an example creating a tilted cone
+with outflow <br>
 <pre>  set nbody = 10000
   set vscale = 0
   set outflow = 1.0

@@ -33,50 +33,52 @@ velocity consistent with rotation. The supplied potential should be axisymmetric
 and numerical derivatives are used to calculate the  angular, radial and
 vertical frequencies such that the orbital motions can be solved for analytically.
 from their guidance center. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized;
-they may be given in any order. 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in</b>=<i>in-file</i> </dt>
-<dd>Initial conditions will be read
-from <i>in-file</i> in snapshot format [default: none - but is required]. </dd>
-
-<dt><b>out</b>=<i>out-file</i>
-</dt>
-<dd>If given, results are written to <i>out-file</i> in snapshot format [default: empty,
-no snapshot output file produced]. </dd>
-
-<dt><b>potname=</b><i>name</i> </dt>
-<dd>name of file of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
-
-descriptor  [default: <b>harmonic</b>]. </dd>
-
-<dt>potpars=<i>par-list</i> </dt>
-<dd>List of parameters to the
-potential descriptor. The first parameter must be the pattern speed in the
-x-y plane, although rotating frames of reference are not yet supported. The
-remaining parameters are used by the <i>_inipotential()</i> routine in the potential
-descriptor. [default: none - let them be defined by routine itself]. </dd>
-
-<dt><b>potfile=<i>file-name</i></b>
-</dt>
-<dd>name of an optional datafile to the potential descriptor. This might be
-an N-body snapshot or list of spline fit coefficients etc. [default: none].
+<dt><b>in=</b><i>in-file</i> </dt>
+<dd>Initial conditions
+will be read from <i>in-file</i> in snapshot format [default: none - but is required].
 </dd>
 
-<dt><b>save</b>=<i>state-file</i> </dt>
-<dd>If given, the system state will be saved in <i>state-file</i> after
-each timestep. Useful for some recovery after system crashes. </dd>
+<dt><b>out=</b><i>out-file</i> </dt>
+<dd>If given, results are written to <i>out-file</i> in snapshot format
+[default: empty, no snapshot output file produced]. </dd>
 
-<dt><b>freq</b>=<i>integ-freq</i>
+<dt><b>potname=</b><i>name</i> </dt>
+<dd>name of
+file of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ descriptor  [default: <b>harmonic</b>]. </dd>
+
+<dt><b>potpars=</b><i>par-list</i>
 </dt>
-<dd>Inverse time-step, to be used with the time integrator. [Default: <b>64.0</b> (64
-steps per unit time)]. </dd>
+<dd>List of parameters to the potential descriptor. The first parameter must
+be the pattern speed in the x-y plane, although rotating frames of reference
+are not yet supported. The remaining parameters are used by the <i>_inipotential()</i>
+routine in the potential descriptor. [default: none - let them be defined
+by routine itself]. </dd>
 
-<dt><b>mode</b>=<i>mode-number</i> </dt>
-<dd>Integration modes, must be a number:
-<br>
+<dt><b>potfile=<i>file-name</i></b> </dt>
+<dd>name of an optional datafile to the
+potential descriptor. This might be an N-body snapshot or list of spline
+fit coefficients etc. [default: none]. </dd>
+
+<dt><b>save=</b><i>state-file</i> </dt>
+<dd>If given, the system
+state will be saved in <i>state-file</i> after each timestep. Useful for some recovery
+after system crashes. </dd>
+
+<dt><b>freq=</b><i>integ-freq</i> </dt>
+<dd>Inverse time-step, to be used with the
+time integrator. [Default: <b>64.0</b> (64 steps per unit time)]. </dd>
+
+<dt><b>mode=</b><i>mode-number</i>
+</dt>
+<dd>Integration modes, must be a number: <br>
 <pre>0=Euler (kick and drift at same time)
 1=PC (Predictor Corrector) algorithm, 
 2=modified PC algorithm, 
@@ -88,31 +90,31 @@ steps per unit time)]. </dd>
 -2=special epicyclic motion, shows only epi motion
 </pre>[default: <b>3]. </dd>
 
-<dt><b>tstop</b></b>=<i>stop-time</i> </dt>
+<dt><b>tstop=</b></b><i>stop-time</i> </dt>
 <dd>Time to stop integration in N-body model units.
 Default is <b>2.0</b>. </dd>
 
-<dt><b>freqout</b>=<i>out-freq</i> </dt>
+<dt><b>freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of major N-body data outputs. Default
 is <b>4.0</b> (4 frames per unit time). </dd>
 
-<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dt><b>minor_freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of minor
 diagnostic outputs. Default is <b>32.0</b> (32 diagnostic measurements per unit
 time). </dd>
 
-<dt><b>options</b>=<i>option-string</i> </dt>
+<dt><b>options=</b><i>option-string</i> </dt>
 <dd>Miscellaneous control options, specified as
 a comma-separated list of keywords. Currently recognized keywords are: <b>reset_time</b>:
 when reading initial data, set <i>tnow</i> to zero; <b>new_tout</b>: when restarting,
 set new output times; <b>mass</b>, <b>phi</b>, <b>acc</b>: output mass, potential, acceleration
 data with major data outputs. </dd>
 
-<dt><b>eta</b>=<i>loss-fraction</i> </dt>
+<dt><b>eta=</b><i>loss-fraction</i> </dt>
 <dd>Fraction of random energy
 that is dissipated [Default: <b>0.0</b>]. </dd>
 
-<dt><b>cell</b>=<i>box-size</i> </dt>
+<dt><b>cell=</b><i>box-size</i> </dt>
 <dd>Cell size in which dissipation
 is performed after every timestep. Dissipation is current performed on a
 cartesian grid, in which  cells are <a href='square.2D.html'>square (2D)</a>
@@ -120,7 +122,7 @@ cartesian grid, in which  cells are <a href='square.2D.html'>square (2D)</a>
 . [Default:
 <b>0.1</b>]. </dd>
 
-<dt><b>rmax</b>=<i>max_box-size</i> </dt>
+<dt><b>rmax=</b><i>max_box-size</i> </dt>
 <dd>Maximum size of the "box" (actually cube) within which
 dissipation is performed. If a negative number is given, the box is allow
 to grow as large as is needed, though this may consume a lot of memory.
@@ -135,19 +137,20 @@ a gaussian distributed value with rms <i>fheat*velsig</i>. This in effect gives
 a dissipation dependant heating source. See also <b>sigma=</b>, which is position
 independant. [Default: <b>0</b>]. </dd>
 
-<dt><b>sigma</b>=<i>angle</i> </dt>
+<dt><b>sigma=</b><i>angle</i> </dt>
 <dd>Diffusion angle, gaussian distributed
 with this sigma, about which each velocity vector is rotated after each
 timestep. [Default: <b>0</b>]. </dd>
 
-<dt><b>seed</b>=<i>random-seed</i> </dt>
+<dt><b>seed=</b><i>random-seed</i> </dt>
 <dd>Random number seed, only used when
 diffusion (<b>sigma=</b>) is used. 0 must be used to get the random seed from the
 time of the day. [Default: <b>0</b>]. </dd>
 
-<dt><b>headline</b>= </dt>
+<dt><b>headline=</b> </dt>
 <dd>Identifying text for this run. Default:
-not used. </dd>
+not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
@@ -157,6 +160,7 @@ Since <b>cell</b> is a fixed number throughout the execution, is doesn&rsquo;t
 deal well with systems who&rsquo;s lenght-scale changes, in particular, expanding
 systems will allocate more and more space to hold the dissipation grid.
 
+<p> 
 <h2><a name='sect5' href='#toc5'>Dissipation</a></h2>
 Various schemes of dissipation can be invoked. Here&rsquo;s one, see
 also Lin &amp; Pringle (1974): <p>
@@ -200,6 +204,7 @@ Peter Teuben
 5-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.0 added mode=-1 to "integrate" orbits numerically on epicyclic orbits<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-jul-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;(V5.1) compute guiding center<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/RPO
 12-aug-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.1 added leapfrog and modified euler<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+2-jul-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.2 fheat added, but not implemented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

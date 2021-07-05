@@ -27,19 +27,20 @@ rotation axis defined along the Z-axis. <p>
 Integrations backwards in time can
 be achieved by setting dt&lt;0, since no stop time is given, but the number
 of steps is used to terminate the integration. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The following
+parameters are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=<i>in-file</i></b> </dt>
-<dd>input
-file, in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+<dt><b>in=<i>in-file</i></b>
+</dt>
+<dd>input file, in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
  format [no default] </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will
-be in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+<dd>output file,
+will be in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
  format [no default] </dd>
 
 <dt><b>nsteps=<i>number</i></b> </dt>
@@ -92,13 +93,18 @@ is too large. By default not used. </dd>
 <dd>Use variable timesteps? If
 so, the error control parameter <b>eta=</b> needs to be specified. Also note that
 not all integration methods support variable timesteps. Default: <b>f</b>. </dd>
+
+<dt><b>tstop=</b>
+</dt>
+<dd>If given, this will override <b>nsteps=</b>. Default: not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The
-following example launches a particle from the Y axis (at y=1) in the X
-direction (speed 0.4) in a plummer potential. Although the 6D initial conditions
-are fully specified, so a potential (potname=) is not needed, it is tagged
+The following
+example launches a particle from the Y axis (at y=1) in the X direction
+(speed 0.4) in a plummer potential. Although the 6D initial conditions are
+fully specified, so a potential (potname=) is not needed, it is tagged
 along with the orbit, such that the orbint integrator will use it. The integrated
 orbit is then passed on to a simple plotting program, which plots an X-Y
  view of this 2D orbit. <br>

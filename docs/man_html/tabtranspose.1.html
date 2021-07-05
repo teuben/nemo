@@ -18,29 +18,27 @@ tabtranspose - transpose a table
 become the columns. Comment lines are skipped. <p>
 Lines can be arbitrarly long.
 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+The following parameters are recognized in any order if the
+keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>input file name. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output file name. No
-default. </dd>
-
-<dt><b>align=t|f</b> </dt>
-<dd>Align the column on output </dd>
+<dd>output file
+name. No default.     </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>max space (needed if
-data in pipe) [10000] </dd>
+<dd>max space (needed if data in pipe) [10000] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Using <b>tabtranspose</b> twice will result in the
-same file: <br>
+Using
+<b>tabtranspose</b> twice will result in the same file: <br>
 <pre>  tabgen tab00 10 10
   tabtranspose tab00 - | tabtranspose - tab00n
   diff tab00 tab00n

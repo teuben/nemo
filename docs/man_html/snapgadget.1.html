@@ -8,6 +8,7 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 <b>snapgadget</b> [parameter=value] 
+<p> 
 <h2><a name='sect0' href='#toc0'>Description</a></h2>
 <b>snapgadget</b> converts  data from
 standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
@@ -21,19 +22,21 @@ way snapshot&rsquo;s are handled. <p>
 Some programs (e.g. AHF) that need proper cosmological
 information in a gadget header, will need these explicitly passed via a
 set of parameters (see below). 
+<p> 
 <h2><a name='sect1' href='#toc1'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file (snapshot format).
-No default. </dd>
+<dd>Input file (snapshot
+format). No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file (gadget format).  Each  snapshot is placed in
-its own file, and "%t" is replaced with the time of the snapshot (useful
-for times=all). No default. </dd>
+<dd>Output file (gadget format).  Each  snapshot is
+placed in its own file, and "%t" is replaced with the time of the snapshot
+(useful for times=all). No default. </dd>
 
 <dt><b>N=</b><i>Nhalo,Ndisk,Nbulge,Nstars</i> </dt>
 <dd>Nhalo,Ndisk,Nbulge,Nstars
@@ -54,41 +57,45 @@ possible to have different masses per component. Default: not used. </dd>
 <dd>Force swaping
 bytes for other-endian machines [f]  <b>z=</b> Current Redshift [0]     </dd>
 
+<dt><b>z=</b> </dt>
+<dd>Current
+redshift [0] </dd>
+
 <dt><b>box=</b> </dt>
-<dd>Box
-size (Mpc/h) [128]    </dd>
+<dd>Box size (Mpc/h) [128]    </dd>
 
 <dt><b>omega0=</b> </dt>
-<dd>Omega_0 [1]      </dd>
+<dd>Omega_0 [0.3]      </dd>
 
-<dt><b>lambda=</b> </dt>
-<dd>OmegaLambda [1]
-     </dd>
+<dt><b>lambda0=</b>
+</dt>
+<dd>OmegaLambda0 [0.7]      </dd>
 
 <dt><b>h=</b> </dt>
 <dd>HubbleParam [0.75]      </dd>
 </dl>
 
 <h2><a name='sect2' href='#toc2'>Caveat</a></h2>
-There is an option to run gadget in
-double precision mode, their output files  may not be compatible with this
-version of the program. 
+There is an option
+to run gadget in double precision mode, their output files  may not be
+compatible with this version of the program. 
 <h2><a name='sect3' href='#toc3'>See Also</a></h2>
 <a href='gadgetsnap.1.html'>gadgetsnap(1NEMO)</a>
-, <a href='nemo2gadget.1.html'>nemo2gadget(1NEMO)</a>
-, <a href='gadget2nemo.1.html'>gadget2nemo(1NEMO)</a>
 ,
-<a href='uns2uns.1.html'>uns2uns(1NEMO)</a>
+<a href='nemo2gadget.1.html'>nemo2gadget(1NEMO)</a>
+, <a href='gadget2nemo.1.html'>gadget2nemo(1NEMO)</a>
+, <a href='uns2uns.1.html'>uns2uns(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-, <a href='gadget.5.html'>gadget(5NEMO)</a>
+,
+<a href='gadget.5.html'>gadget(5NEMO)</a>
  <p>
 <a href='http://www.mpa-garching.mpg.de/gadget/'>http://www.mpa-garching.mpg.de/gadget/</a>
-
-
+ 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
-Jeremy Bailin 
+Jeremy Bailin
+
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>8-sep-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;J.Bailin

@@ -36,6 +36,7 @@ case where the user has supplied no free parameters, the residuals are
 still computed correctly. <p>
 This routine can also be used to plot the function,
 although only in 1D cases, see <b>x=</b>. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are
 recognized in any order if the keyword is also given: 
@@ -84,13 +85,13 @@ implemented are <i>line</i>, <i>plane</i>, <i>poly</i>, <i>gauss1d</i>, <i>loren
 dimension of the hyper-plane fit (<b>fit=plane</b>). 0 would fit a constant.  [Default:
 <b>0</b>]. </dd>
 
-<dt>out=<i>filename</i> </dt>
+<dt><b>out=</b><i>filename</i> </dt>
 <dd>Optional output filename where the data and residuals are
 stored. The first few columns contain the X and Y columns, the last column
 contains the residual Y-F(X). See an example below how to plot the data with
 a model fit overlayed. [default: no output file created]. </dd>
 
-<dt>nsigma=<i>sigma_factor</i>
+<dt><b>nsigma=<i>sigma_factor</i></b>
 </dt>
 <dd>A positive number will delete points more than <i>sigma_factor</i> from the fit,
 and fit again. Multiple values can be given here, in which case multiple
@@ -131,23 +132,23 @@ file was being read from a pipe. If not, the routine <a href='file_lines.3.html'
  is
 used to allocate space for the table. [Default: <b>10000</b>]. </dd>
 
-<dt><b>tol</b>= </dt>
+<dt><b>tol=</b> </dt>
 <dd>Tolerance for
 convergence of <i>nllsqfit</i> [Default: <b>0.0</b>]. </dd>
 
-<dt><b>lab</b>= </dt>
+<dt><b>lab=</b> </dt>
 <dd>Mixing parameter for <i>nllsqfit</i>
 [Default: <b>0.0</b> for linear, <b>0.1</b> for non-linear fits]. </dd>
 
-<dt><b>itmax</b>= </dt>
+<dt><b>itmax=</b> </dt>
 <dd>Maximum number of
 allowed <i>nllsqfit</i> iterations [Default: <b>50</b>] </dd>
 
-<dt><b>format</b>= </dt>
+<dt><b>format=</b> </dt>
 <dd>Output format. Default
 %g </dd>
 
-<dt><b>bootstrap</b>= </dt>
+<dt><b>bootstrap=</b> </dt>
 <dd>Number of bootstrap samples to take to estimate the error
 in the parameters. Output off all parameters and their errors are on one
 line containing the word bootstrap. Parameters and their errors are output
@@ -163,7 +164,8 @@ in pairs. Default:0 </dd>
 , NumRec uses
 their <i>mrqfit</i> and MINPACK uses <a href='mpfit.3.html'><i>mpfit(3NEMO)</i></a>
 .  Only first character is used,
-case insensitive.  [Default: <b>g</b>] </dd>
+case insensitive.  [Default: <b>g</b>] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Fit Parameters</a></h2>

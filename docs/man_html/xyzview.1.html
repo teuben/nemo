@@ -8,11 +8,14 @@
 <body bgcolor='white'>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 xyzview - Display 3-D point (velocity) and time data  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>xyzview</b>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>xyzview</i> is an program with which 3-D point
 data can be interactively displayed. It was initially developed on an SGI
@@ -22,116 +25,119 @@ on most unix platforms) is quite an acceptable alternative if you don&rsquo;t
 have an SGI workstation.   <p>
 It can also create a set of shadow particles
 that represent the orbit of a selected star (see <b>orbit=</b>). 
-<h2><a name='sect3' href='#toc3'>Interactive Keys/Mouse
-Buttons</a></h2>
+<p> 
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+The
+following parameters are recognized in any order if the keyword is also
+given: 
+<dl>
+
+<dt><b>in=</b> </dt>
+<dd>Point data to display. This file must be in <b>xyzc</b> or <b>xyzuvwc</b> format,
+usually created with <a href='snapxyz.1.html'><i>snapxyz(1NEMO)</i></a>
+. No default. </dd>
+
+<dt><b>times=</b> </dt>
+<dd>Range of times to
+display. [Default: <b>all</b>]. </dd>
+
+<dt><b>scale=</b> </dt>
+<dd>Scale factor for data. </dd>
+
+<dt><b>nfast=</b> </dt>
+<dd>Max number of
+points to draw in fast mode. </dd>
+
+<dt><b>showbox=</b> </dt>
+<dd>Draw a cube, scale units high. </dd>
+
+<dt><b>maxpoint=</b>
+</dt>
+<dd>Process at least this many points. </dd>
+
+<dt><b>colormap=</b> </dt>
+<dd>File with color table (binary)
+. Default: no colormap. </dd>
+
+<dt><b>fullscreen=</b> </dt>
+<dd>Use full screen (no border). [Default:
+<i>false</i>].  </dd>
+
+<dt><b>position=</b> </dt>
+<dd>If given, set screen position.  </dd>
+
+<dt><b>aspect=</b> </dt>
+<dd>If given, set
+aspect ratio. </dd>
+
+<dt><b>noborder=</b> </dt>
+<dd>Disable drawing window border. </dd>
+
+<dt><b>textsize=</b> </dt>
+<dd>Size of
+text in points. Default: 20 </dd>
+
+<dt><b>ident=</b> </dt>
+<dd>ID message for display. </dd>
+
+<dt><b>viewfile=</b> </dt>
+<dd>Output
+viewing parameters      </dd>
+
+<dt><b>maxframe=</b> </dt>
+<dd>Maximum number of frames to store for
+movies. [1000] </dd>
+
+<dt><b>orbit=</b> </dt>
+<dd>Star number (0=first) to be selected to view the complete
+orbit of. This is done by creating pseudo-particles, and hence is somewhat
+memory consumptive if a lot of snapshots are used. If this option is used,
+all particles are loaded automatically. [Default: -1] </dd>
+
+<dt><b>movie=t|f</b> </dt>
+<dd>If set, snapshots
+from subsequent times will be automatically loaded. This  is equivalent
+to hitting the &rsquo;l&rsquo; (load all frames) as soon as the first snapshot would
+have been loaded. Default: false. 
+<p> </dd>
+</dl>
+
+<h2><a name='sect4' href='#toc4'>Interactive Keys/Mouse Buttons</a></h2>
 
 <dl>
 
 <dt>ESC </dt>
-<dd>quit </dd>
+<dd>quit
+</dd>
 
 <dt>SPACE </dt>
 <dd>advance to next frame </dd>
 
 <dt>RETURN </dt>
-<dd>write <b>viewfile</b> with
-viewing parameters </dd>
-
-<dt>LEFTMOUSE  </dt>
-<dd>Viewing angles (xrot,yrot) are controlled
-by  the X and Y cursor position.  In most VOGL library versions you will
-have to depress the &rsquo;1&rsquo; key to get the same effect as on the SGI. </dd>
-
-<dt>MIDDLEMOUSE
-</dt>
-<dd>Viewing scene (z viewing distance and field of view) are controlled by
-the X and Y cursor position. In most VOGL library versions you will have
-to depress the &rsquo;2&rsquo; key to get the same effect as on the SGI. </dd>
-
-<dt>RIGHTMOUSE </dt>
-<dd>Velocity
-vectors (vscale and vskip) are controlled by the X and Y cursor position.
- In most VOGL library versions you will have to depress the &rsquo;3&rsquo; key to get
-the same effect as on the SGI. </dd>
-</dl>
-
-<h2><a name='sect4' href='#toc4'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
-<dl>
-
-<dt><b>in=</b> </dt>
-<dd>Point data to display. This
-file must be in <b>xyzc</b> or <b>xyzuvwc</b> format, usually created with <a href='snapxyz.1.html'><i>snapxyz(1NEMO)</i></a>
-.
-No default. </dd>
-
-<dt><b>times=</b> </dt>
-<dd>Range of times to display. [Default: <b>all</b>]. </dd>
-
-<dt><b>scale=</b> </dt>
-<dd>Scale
-factor for data. </dd>
-
-<dt><b>nfast=</b> </dt>
-<dd>Max number of points to draw in fast mode. </dd>
-
-<dt><b>showbox=</b>
-</dt>
-<dd>Draw a cube, scale units high. </dd>
-
-<dt><b>maxpoint=</b> </dt>
-<dd>Process at least this many points.
+<dd>write <b>viewfile</b> with viewing parameters
 </dd>
 
-<dt><b>colormap=</b> </dt>
-<dd>File with color table (binary) . Default: no colormap. </dd>
+<dt>LEFTMOUSE  </dt>
+<dd>Viewing angles (xrot,yrot) are controlled by  the X and Y cursor
+position.  In most VOGL library versions you will have to depress the &rsquo;1&rsquo;
+key to get the same effect as on the SGI. </dd>
 
-<dt><b>fullscreen=</b>
-</dt>
-<dd>Use full screen (no border). [Default: <i>false</i>].  </dd>
+<dt>MIDDLEMOUSE </dt>
+<dd>Viewing scene (z viewing
+distance and field of view) are controlled by the X and Y cursor position.
+In most VOGL library versions you will have to depress the &rsquo;2&rsquo; key to get
+the same effect as on the SGI. </dd>
 
-<dt><b>position=</b> </dt>
-<dd>If given, set screen
-position.  </dd>
+<dt>RIGHTMOUSE </dt>
+<dd>Velocity vectors (vscale and vskip)
+are controlled by the X and Y cursor position.  In most VOGL library versions
+you will have to depress the &rsquo;3&rsquo; key to get the same effect as on the SGI.
 
-<dt><b>aspect=</b> </dt>
-<dd>If given, set aspect ratio. </dd>
-
-<dt><b>noborder=</b> </dt>
-<dd>Disable drawing
-window border. </dd>
-
-<dt><b>textsize=</b> </dt>
-<dd>Size of text in points. Default: 20 </dd>
-
-<dt><b>ident=</b> </dt>
-<dd>ID message
-for display. </dd>
-
-<dt><b>viewfile=</b> </dt>
-<dd>Output viewing parameters      </dd>
-
-<dt><b>maxframe=</b> </dt>
-<dd>Maximum
-number of frames to store for movies. [1000] </dd>
-
-<dt><b>orbit=</b> </dt>
-<dd>Star number (0=first)
-to be selected to view the complete orbit of. This is done by creating pseudo-particles,
-and hence is somewhat memory consumptive if a lot of snapshots are used.
-If this option is used, all particles are loaded automatically. [Default:
--1] </dd>
-
-<dt><b>movie=t|f</b> </dt>
-<dd>If set, snapshots from subsequent times will be automatically
-loaded. This  is equivalent to hitting the &rsquo;l&rsquo; (load all frames) as soon as
-the first snapshot would have been loaded. Default: false. </dd>
+<p> </dd>
 </dl>
 
 <h2><a name='sect5' href='#toc5'>Colors</a></h2>
-The standard
-color indices on the SGI GL are: <br>
+The standard color indices on the SGI GL are: <br>
 <pre>BLACK           0   (background)
 RED             1
 GREEN           2
@@ -216,8 +222,8 @@ Josh Barnes (original), Peter Teuben (animations, orbit viewing)
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Interactive Keys/Mouse Buttons</a></li>
-<li><a name='toc4' href='#sect4'>Parameters</a></li>
+<li><a name='toc3' href='#sect3'>Parameters</a></li>
+<li><a name='toc4' href='#sect4'>Interactive Keys/Mouse Buttons</a></li>
 <li><a name='toc5' href='#sect5'>Colors</a></li>
 <li><a name='toc6' href='#sect6'>Bugs</a></li>
 <li><a name='toc7' href='#sect7'>Example</a></li>

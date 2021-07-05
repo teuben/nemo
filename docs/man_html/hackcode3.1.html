@@ -29,62 +29,62 @@ The following parameters
 are recognized; they may be given in any order. 
 <dl>
 
-<dt><b>in</b>=<i>in-file</i> </dt>
+<dt><b>in=</b><i>in-file</i> </dt>
 <dd>If given, initial
 conditions will be read from <i>in-file</i> in snapshot format. At most one of <b>in</b>,
 <b>restart</b>, or <b>continue</b> may be specified. </dd>
 
-<dt><b>out</b>=<i>out-file</i> </dt>
+<dt><b>out=</b><i>out-file</i> </dt>
 <dd>If given, results are
 written to <i>out-file</i> in snapshot format. Note as of version 1.4 only the non-rigid
 particles are output. </dd>
 
-<dt><b>restart</b>=<i>state-file</i> </dt>
+<dt><b>restart=</b><i>state-file</i> </dt>
 <dd>If given, the system state will
 be read from <i>state-file</i>. New values are accepted for the following parameters:
 <b>out</b>, <b>save</b>, <b>eps</b>, <b>tol</b>, <b>options</b>, <b>fcells</b>, <b>tstop</b>, <b>freqout</b>, <b>minor_freqout</b>, and
 <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
 
-<dt><b>continue</b>=<i>state-file</i>
+<dt><b>continue=</b><i>state-file</i>
 </dt>
 <dd>If given, the system state will be read from <i>state-file</i>. New values are accepted
 for the following parameters: <b>out</b>, <b>save</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>,
 or <b>continue</b> may be specified. </dd>
 
-<dt><b>save</b>=<i>state-file</i> </dt>
+<dt><b>save=</b><i>state-file</i> </dt>
 <dd>If given, the system state
 will be saved in <i>state-file</i> after each timestep. </dd>
 
-<dt><b>nbody</b>=<i>nbody-value</i> </dt>
+<dt><b>nbody=</b><i>nbody-value</i> </dt>
 <dd>Number
 of bodies for test data, generated only if none of <b>in</b>, <b>restart</b>, or <b>continue</b>
 are specified. Default is <b>128</b>. </dd>
 
-<dt><b>seed</b>=<i>random-seed</i> </dt>
+<dt><b>seed=</b><i>random-seed</i> </dt>
 <dd>Random number seed used in
 generating initial conditions. Default is <b>123</b>. </dd>
 
-<dt><b>cencon</b>=<i>cencon-flag</i> </dt>
+<dt><b>cencon=</b><i>cencon-flag</i> </dt>
 <dd>If <b>true</b>,
 generate centrally concentrated test system. Default is <b>false</b>. </dd>
 
-<dt><b>freq</b>=<i>integ-freq</i>
+<dt><b>freq=</b><i>integ-freq</i>
 </dt>
 <dd>Inverse time-step, to be used with a leap-frog integrator. Default is <b>32.0</b>
 (32 steps per unit time). </dd>
 
-<dt><b>eps</b>=<i>soft-length</i> </dt>
+<dt><b>eps=</b><i>soft-length</i> </dt>
 <dd>Force softening parameter. Default
 is <b>0.05</b>. </dd>
 
-<dt><b>tol</b>=<i>theta-value</i> </dt>
+<dt><b>tol=</b><i>theta-value</i> </dt>
 <dd>Opening-angle tolerence parameter. Default is <b>1.0</b>. </dd>
 
-<dt><b>fcells</b>=<i>fcells-value</i>
+<dt><b>fcells=</b><i>fcells-value</i>
 </dt>
 <dd>Ratio of cells to bodies, used when allocating cells. Default is <b>0.75</b>. </dd>
 
-<dt><b>options</b>=<i>option-string</i>
+<dt><b>options=</b><i>option-string</i>
 </dt>
 <dd>Miscellaneous control options, specified as a comma-separated list of keywords.
 Currently recognized keywords are: <b>reset_time</b>: when reading initial data,
@@ -92,37 +92,37 @@ set <i>tnow</i> to zero; <b>new_tout</b>: when restarting, set new output times;
 <b>phi</b>, <b>acc</b>: output mass, potential, acceleration data with major data outputs.
 </dd>
 
-<dt><b>nrigid</b>=<i>nrigid</i> </dt>
+<dt><b>nrigid=</b><i>nrigid</i> </dt>
 <dd>The first <i>nrigid</i> particles are taken as rigid. [default: <b>0</b>]
 </dd>
 
-<dt><b>tstop</b>=<i>stop-time</i> </dt>
+<dt><b>tstop=</b><i>stop-time</i> </dt>
 <dd>Time to stop integration in N-body model units. Default is
 <b>2.0</b>. </dd>
 
-<dt><b>freqout</b>=<i>out-freq</i> </dt>
+<dt><b>freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of major N-body data outputs. Default is <b>4.0</b>
 (4 frames per unit time). </dd>
 
-<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dt><b>minor_freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of minor diagnostic
 outputs. If this frequency is not a simple fraction of <b>freq</b> (see above),
 the program can waiste significant amounts of time. Default is <b>32.0</b> (32 diagnostic
 measurements per unit time). </dd>
 
-<dt><b>potname</b>=<i>pot_name<i> </i></i></dt>
+<dt><b>potname=</b><i>pot_name<i> </i></i></dt>
 <dd>Descriptor name for <a href='potential.5.html'>potential(5)</a>
 .
 [default: none]. </dd>
 
-<dt><b>potpars</b>=<i>parameters</i> </dt>
+<dt><b>potpars=</b><i>parameters</i> </dt>
 <dd>Parameters for <a href='potential.5.html'>potential(5)</a>
 . The first
 one is normally reserverd for  pattern speed, and is now set to 0.0. If a
 name for the potential is given, and no parameters are given here, intrinsic
 defaults are used. [default: none]. </dd>
 
-<dt><b>potfile</b>=<i>file</i> </dt>
+<dt><b>potfile=</b><i>file</i> </dt>
 <dd>Optional additional filename
 for <a href='potential.5.html'>potential(5)</a>
 . For historic reasons the  parameter list in <b>potpars</b> can
@@ -130,14 +130,16 @@ only contain numbers. If for any reason it also needs a character string
 (often a filename associated with the potential), the <b>potfile</b> parameter
 is used. [default: none]. </dd>
 
-<dt><b>debug</b>=<i>debug-flag</i> </dt>
+<dt><b>hdebug=</b><i>debug-flag</i> </dt>
 <dd>Debugging switch; generates lots
-of output. Default is <b>false</b>. </dd>
+of output. Default is <b>false</b>. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='newton0.1.html'>newton0(1NEMO)</a>
 . 
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs/Limitations</a></h2>
 When
 a <b>restart</b> is specified, values must be given for <b>ALL</b> legal parameters which

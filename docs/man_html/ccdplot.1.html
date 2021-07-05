@@ -22,9 +22,11 @@ this though), or optionally leave out the contour values. <p>
 3D images cannot
 be plotted, but data files that  contain multiple 2D images are plotted
 in succession. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any
-order if the keyword is also given: 
+ The following parameters are recognized in order;
+they may be given in any order if the keyword is also given. Use --help to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
@@ -70,27 +72,43 @@ BUG, don&rsquo;t used</i> </dd>
 <dd>Range in y to plot. See <b>xrange</b>. <i>Warning: BUG,
 don&rsquo;t used</i> </dd>
 
-<dt><i>headline=</i> </dt>
+<dt><b>headline=</b> </dt>
 <dd>optional header above plot  [Default: not used] </dd>
 
-<dt><i>tab=</i>
+<dt><b>tab=</b>
 </dt>
 <dd>Output table of contour segments. Default not used. </dd>
 
-<dt><i>format=</i> </dt>
+<dt><b>format=</b> </dt>
 <dd>Format for above
 table [Default: %g] </dd>
 
-<dt><i>cmode=</i> </dt>
+<dt><b>cmode=</b> </dt>
 <dd>Contour mode (0=orginal 1=pgplot) [Default:
 0] </dd>
 
-<dt><i>blankval=</i> </dt>
+<dt><b>blankval=</b> </dt>
 <dd>if used, use this as blankval. Default not used. </dd>
 
-<dt><i>ltype=</i> </dt>
+<dt><b>ltype=</b> </dt>
 <dd>width
 and type for contour. Default: 1,1 </dd>
+
+<dt><b>xlab=</b> </dt>
+<dd>(override) Label along X-axis </dd>
+
+<dt><b>ylab=</b>
+</dt>
+<dd>(override) Label along Y-axis </dd>
+
+<dt><b>xscale=</b> </dt>
+<dd>Scale all X values by this </dd>
+
+<dt><b>yscale=</b>
+</dt>
+<dd>
+<p>Scale all Y values by this 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>

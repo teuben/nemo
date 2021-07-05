@@ -54,7 +54,7 @@ Default: <b>0.0</b>. </dd>
 <dd>Only frames within <i>time_range</i> will be analyzed.
  Default: <b>all</b>. </dd>
 
-<dt><b>shell</b>=<i>r_min,r_max</i> </dt>
+<dt><b>shell=</b><i>r_min,r_max</i> </dt>
 <dd>Two <i>radii</i> are expected here. They define
 an ellipsoidal shell within which the (modified) inertia tensor is computed
 and iterated. Default: all particles. </dd>
@@ -78,13 +78,14 @@ is also applied. It only makes sense to use this option if <i>max_iters</i> &gt;
 <dt><b>test=</b><i>snap_file</i> </dt>
 <dd>If a filename is given, it is expected to be
 a snapshot. The first snapshot in this file is used to rectify all selected
-snapshots from the inputfile. Default: none. </dd>
+snapshots from the inputfile. Default: none. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-During iterations, the printed
-output contains momentary eigenvectors and angles, not the cumulative ones.
-
+During iterations, the
+printed output contains momentary eigenvectors and angles, not the cumulative
+ones. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
 , <a href='snapinert.1.html'>snapinert(1NEMO)</a>

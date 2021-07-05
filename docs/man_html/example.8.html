@@ -10,12 +10,12 @@
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-example - example skeleton file for manual writers 
+example - example skeleton file for man page writers 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-This section
-should  contain a short synopis of the command including its options and
-arguments. In case of main <a href='programs.1.html'>programs (1)</a>
+This
+section should  contain a short synopis of the command including its options
+and arguments. In case of main <a href='programs.1.html'>programs (1)</a>
  one could say: <p>
 <b>snapadd in1=</b>snap1
 <b>in2=</b>snap2 <b>out=</b>snapo [<b>cut=</b>cutoff] <p>
@@ -24,12 +24,14 @@ In case of library <a href='routines.3.html'>routines (3)</a>
 probably look like: <p>
 <br>
 <pre>#include &lt;example.h&gt;
-void example(msg)char *msg;</pre>
+void example(const char *msg);</pre>
+<p></b> You can also put comments
+in a man page that won&rsquo;t show up.  
 <p> 
 <h2><a name='sect2' href='#toc2'>Side Effects</a></h2>
-This should list
-if there are any expected external variables or routines which will be
-moderated: <p>
+This should list if there
+are any expected external variables or routines which will be moderated:
+<p>
 <br>
 <pre>extern int nobj;extern int mass[MOBJ];extern int phase[MOBJ][6];</pre>
 <p> 
@@ -59,23 +61,40 @@ are using, in practice you would use a subset of them, but never leave
 out the NAME section. 
 <p> 
 <h2><a name='sect7' href='#toc7'>Parameters</a></h2>
-This list of options is usually added in
-case of a <a href='level.1.html'><i>level(1)</i></a>
- program 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in1=<i>snap1</i></b> </dt>
-<dd>Input data is read from <i>snap1</i>, which
-must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
+<dd>Input data is read
+from <i>snap1</i>, which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
  format. </dd>
 
 <dt><b>in2=<i>snap2</i></b> </dt>
-<dd>Input data is read from <i>snap2</i>,
-which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
- format. 
+<dd>Input data is
+read from <i>snap2</i>, which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
+ format. </dd>
+
+<dt><b>flag=t|f</b> </dt>
+<dd>a boolean
+flag </dd>
+
+<dt><b>range=</b><i>start:end</i> </dt>
+<dd>A min_max range. </dd>
+
+<dt><b>levels=</b><i>s1:e1:d1,s2:e2:d2,...</i> </dt>
+<dd>many levels
+
+<p>using nemoinp 
 <p> </dd>
 </dl>
-
+<p>
+On the design of keyword names and order: <b>in=</b> and <b>out=</b> should
+ideally appear first, with reasonable defaults for all other keywords for
+a standard run. Also note that the <b>key=</b> is in boldface. Anything after that
+is optional, can be literal (boldface) or implied (italics). 
+<p> 
 <h2><a name='sect8' href='#toc8'>List of Functions</a></h2>
 <p>
 <br>

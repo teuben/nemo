@@ -107,38 +107,48 @@ selected. [Default: <b>f</b>]. </dd>
 <dd>Compute median too? This can be timeconsuming
 for large numbers of points. [Default: <b>t</b>].  </dd>
 
-<dt><b>median=</b> </dt>
-<dd>If used, use this as
-blankval. Default: none. </dd>
+<dt><b>nsigma=<i> </i></b></dt>
+<dd>Delete points more than
+nsigma times the sigma from the mean. Also known as sigma-clipping. After
+each point sigma and mean are recomputed. [Default: none]  </dd>
+
+<dt><b>xcoord=</b> </dt>
+<dd>Draw
+additional vertical coordinate lines along these X values. By default, not
+used. </dd>
+
+<dt><b>sort=</b><i>sort_mode</i> </dt>
+<dd>Sort mode {qsort;...} [qsort] </dd>
 
 <dt><b>dual=t|f</b> </dt>
-<dd>Dual pass over the data, subtracting the
-mean. This can be important if the data have a large average value with
-a small spread around the mean. Notice that in this mode the mean is subtracted
-but never added to the min/max/mean/median etc.  Default: f </dd>
+<dd>Dual pass over the
+data, subtracting the mean. This can be important if the data have a large
+average value with a small spread around the mean. Notice that in this mode
+the mean is subtracted but never added to the min/max/mean/median etc. 
+Default: f </dd>
 
-<dt><b>nsigma=<i> </i></b></dt>
-<dd>Delete
-points more than nsigma times the sigma from the mean. Also known as sigma-clipping.
-After each point sigma and mean are recomputed. [Default: none]  </dd>
+<dt><b>blankval=</b> </dt>
+<dd>If used, use this as blankval. Default: none. </dd>
 
-<dt><b>sort=</b><i>sort_mode</i>
+<dt><b>scale=</b>
 </dt>
-<dd></dd>
+<dd>Scale factor for data [1] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-Points that fall exactly on the boundary of a bin, are added to the
-right side. Another way of saying is that a cell includes the left side,
-but is open ended on the right side, i.e. [---). Note this behavior is exactly
-opposite that of SM&rsquo;s behavior, which was used to compare results. 
+Points that fall exactly on the boundary
+of a bin, are added to the right side. Another way of saying is that a cell
+includes the left side, but is open ended on the right side, i.e. [---). Note
+this behavior is exactly opposite that of SM&rsquo;s behavior, which was used
+to compare results. 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tabhist.1.html'>tabhist(1NEMO)</a>
-,
-<a href='ccdstat.1.html'>ccdstat(1NEMO)</a>
+, <a href='ccdstat.1.html'>ccdstat(1NEMO)</a>
  
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben 
+Peter Teuben
+
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>~/src/image/misc<tt> </tt>&nbsp;<tt> </tt>&nbsp;sources
