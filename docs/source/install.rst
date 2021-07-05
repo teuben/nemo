@@ -28,7 +28,15 @@ A more manual install, bypassing this script, can be:
    source nemo_start.sh
 
 
+On a Mac with their new SIP protection, the ``--disable-shared`` flag needs to be added
 
+.. code-block:: bash
+
+   git clone https://github.com/teuben/nemo
+   cd nemo
+   ./configure --with-yapp=pgplot --disable-shared
+   make build check bench bench5
+   source nemo_start.sh
 
    
 
