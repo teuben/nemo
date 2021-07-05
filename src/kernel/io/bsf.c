@@ -84,7 +84,7 @@ void nemo_main()
       printf("BSF: EXPECT %s %s\n",test,label);
     }
   } else {
-    printf("BSF %s: %s\n",label,current);
+    printf("BSF: %s %s\n",current,label);
   }
 }
 
