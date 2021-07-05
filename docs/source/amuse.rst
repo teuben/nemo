@@ -49,6 +49,12 @@ will look more familiar.   In pure **astropy** it might look as follows:
    m = 1.0 * u.solMass
    m2 = m.to(u.kg).value
 
+- **Community Code**:
+  Both packages maintain a tight connection to legacy software and community codes. You can find
+  them in 
+  **$AMUSE/src/amuse/community** and
+  **$NEMO/usr**
+  resp.
 
 Examples
 --------
@@ -110,3 +116,5 @@ some. Or if you just need a few modules, install them individually, e.g.
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
+
+
