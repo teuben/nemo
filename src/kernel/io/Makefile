@@ -1,5 +1,5 @@
 #	Makefile for NEMO/src/kernel/io
-include $(NEMOLIB)/makedefs
+  include $(NEMOLIB)/makedefs
 
 #	sub-directories to be visited, in the order given here
 #DIRS = 
