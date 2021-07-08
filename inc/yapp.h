@@ -41,6 +41,7 @@ extern int pl_frame      (void);
 extern int pl_getpoly    (float *,float *,int);
 extern int pl_cursor     (real *, real *, char *);
 extern int pl_matrix     (real *,int,int,real,real,real,real,real,real,real);
+extern int pl_contour    (real *,int,int, int, real *);
 
 #ifdef __cplusplus
 }

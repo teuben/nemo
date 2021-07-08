@@ -67,56 +67,13 @@ real my_asinh(real x)     {
 
 /* 'asinh' see also: 1999AJ....118.1406L  */
 
-int write_dump(stream outstr, imageptr iptr, char *mode, char *option, char *range, int swap);
-int write_dump_byte(stream outstr, imageptr iptr, real omin, real omax, int outmode);
-int write_dump_float(stream outstr, imageptr iptr, int outmode, int swap);
-int write_dump_double(stream outstr, imageptr iptr, int outmode, int swap);
+void write_dump(stream outstr, imageptr iptr, char *mode, char *option, char *range, int swap);
+void write_dump_byte(stream outstr, imageptr iptr, real omin, real omax, int outmode);
+void write_dump_float(stream outstr, imageptr iptr, int outmode, int swap);
+void write_dump_double(stream outstr, imageptr iptr, int outmode, int swap);
 int get_range(char *s, real *a, real *b);
 
-nemo_main()
-{
-  imageptr iptr=NULL;
-  stream instr, outstr;
-  string scale;
-
-  Qsm = getbparam("sm");
-
-  instr = stropen (getparam("in"),"r");	/* get stream */
-  read_image (instr,&iptr);               /* read image */
-  strclose(instr);                        /* close image file */
-
-  p_gamma = getrparam("gamma");
-  p_b     = getrparam("b");
-  scale = getparam("scale");
-  if (streq(scale,"linear")) {
-    dprintf(0,"linear scaling\n");
-    my_scale = my_linear;
-  } else if (streq(scale,"sqrt")) {
-    dprintf(0,"sqrt scaling\n");
-    my_scale = my_sqrt;
-  } else if (streq(scale,"square")) {
-    dprintf(0,"square scaling\n");
-    my_scale = my_sqr;
-  } else if (streq(scale,"mid")) {
-    dprintf(0,"mid scaling, gamma=%g\n",p_gamma);
-    my_scale = my_mid;
-  } else if (streq(scale,"gamma")) {
-    dprintf(0,"gamma scaling, gamma=%g\n",p_gamma);
-    my_scale = my_gamma;
-  } else if (streq(scale,"asinh")) {
-    dprintf(0,"asinh scaling, b=%g\n",p_b);
-    my_scale = my_asinh;
-  } else
-    error("unknown scale=%s",scale);
-  
-  outstr = stropen(getparam("out"),"w");
-  write_dump(outstr, iptr,
-	     getparam("mode"),getparam("type"),
-	     getparam("range"),getbparam("swap"));
-  strclose(outstr);
-}
-
-int write_dump(stream outstr, imageptr iptr, 
+void write_dump(stream outstr, imageptr iptr, 
 	       char *mode, char *option, char *range, int swap) 
 {
   int  outmode=0;
@@ -157,7 +114,7 @@ int write_dump(stream outstr, imageptr iptr,
     error ("Unknown option %s",option);
 }
 
-int write_dump_byte(stream outstr, imageptr iptr, 
+void write_dump_byte(stream outstr, imageptr iptr, 
 		    real omin, real omax, int outmode) 
 {
   real z, scale, offset;
@@ -209,7 +166,7 @@ int write_dump_byte(stream outstr, imageptr iptr,
 }
 
 
-int write_dump_float(stream outstr, imageptr iptr, 
+void write_dump_float(stream outstr, imageptr iptr, 
 		     int outmode, int swap)
 
 {
@@ -253,7 +210,7 @@ int write_dump_float(stream outstr, imageptr iptr,
   }
 }
             
-int write_dump_double(stream outstr, imageptr iptr, 
+void write_dump_double(stream outstr, imageptr iptr, 
 		      int outmode, int swap)
 {
     int   ix, iy, iz, nx, ny, nz, nlen;
@@ -283,7 +240,7 @@ int write_dump_double(stream outstr, imageptr iptr,
 }
             
     
-get_range(char *s, real *a, real *b)
+int get_range(char *s, real *a, real *b)
 {
   char *cp;
 
@@ -302,3 +259,45 @@ get_range(char *s, real *a, real *b)
   return 1;
 }
 
+void nemo_main()
+{
+  imageptr iptr=NULL;
+  stream instr, outstr;
+  string scale;
+
+  Qsm = getbparam("sm");
+
+  instr = stropen (getparam("in"),"r");	/* get stream */
+  read_image (instr,&iptr);               /* read image */
+  strclose(instr);                        /* close image file */
+
+  p_gamma = getrparam("gamma");
+  p_b     = getrparam("b");
+  scale = getparam("scale");
+  if (streq(scale,"linear")) {
+    dprintf(0,"linear scaling\n");
+    my_scale = my_linear;
+  } else if (streq(scale,"sqrt")) {
+    dprintf(0,"sqrt scaling\n");
+    my_scale = my_sqrt;
+  } else if (streq(scale,"square")) {
+    dprintf(0,"square scaling\n");
+    my_scale = my_sqr;
+  } else if (streq(scale,"mid")) {
+    dprintf(0,"mid scaling, gamma=%g\n",p_gamma);
+    my_scale = my_mid;
+  } else if (streq(scale,"gamma")) {
+    dprintf(0,"gamma scaling, gamma=%g\n",p_gamma);
+    my_scale = my_gamma;
+  } else if (streq(scale,"asinh")) {
+    dprintf(0,"asinh scaling, b=%g\n",p_b);
+    my_scale = my_asinh;
+  } else
+    error("unknown scale=%s",scale);
+  
+  outstr = stropen(getparam("out"),"w");
+  write_dump(outstr, iptr,
+	     getparam("mode"),getparam("type"),
+	     getparam("range"),getbparam("swap"));
+  strclose(outstr);
+}

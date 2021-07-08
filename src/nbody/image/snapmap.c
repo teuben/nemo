@@ -19,6 +19,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <strlib.h>
+#include <extstring.h>
 
 #include <snapshot/body.h>      /* snapshot's */
 #include <snapshot/snapshot.h>
@@ -104,50 +105,16 @@ extern rproc   btrtrans(string);
 local void setparams(void);
 local void compfuncs(void);
 local int read_snap(void);
-local int allocate_image(void);
-local int clear_image(void);
-local int bin_data(int ivar);
-local int free_snap(void);
-local int rescale_data(int ivar);
+local void allocate_image();
+local void clear_image();
+local void bin_data(int ivar);
+local void free_snap();
+local void rescale_data(int ivar);
 local int xbox(real x);
 local int ybox(real y);
 local int zbox(real z);
 local real odepth(real tau);
-local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
-
-
-nemo_main ()
-{
-    int i;
-    
-    setparams();                /* set from user interface */
-    compfuncs();                /* get expression functions */
-    allocate_image();		/* make space for image(s) */
-    if (Qstack) clear_image();	/* clear the images */
-    while (read_snap())	{                   /* read next N-body snapshot */
-        for (i=0; i<nvar; i++) {
-            if (!Qstack) {
-            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
-		clear_image();
-	    }
-            bin_data(i);	            /* bin and accumulate */
-            if (!Qstack) {                  /* if multiple images: */
-	      rescale_data(i);            /* rescale */
-	      write_image(outstr,iptr);   /* and write them out */
-	      if (i==0) reset_history();  /* clean history */
-            }
-        }
-        free_snap();
-    }
-    if (Qstack) {
-      rescale_data(0);                    /* and rescale before ... */
-      write_image (outstr,iptr);	    /* write the image */
-    }
-
-    strclose(instr);
-    strclose(outstr);
-}
-
+local void setaxis(string rexp, real range[3], int n, int *edge, real *beam);
 
 void wcs(real *x, real *y)
 {
@@ -325,7 +292,7 @@ int read_snap()
 
 #define CV(i)  (MapValue(i,ix,iy))
 
-allocate_image()
+void allocate_image()
 {
     create_image(&iptr,nx,ny);
     if (iptr==NULL) error("No memory to allocate first image");
@@ -365,7 +332,7 @@ allocate_image()
     Beamy(iptr) = 0.0;
 }
 
-clear_image()
+void clear_image()
 {
   int ix,iy;
 
@@ -387,7 +354,7 @@ typedef struct point {
 local Point **map =NULL;
 
 
-bin_data(int ivar)
+void bin_data(int ivar)
 {
   real brightness, x, y, z, z0, t,sum;
   real expfac, fac, sfac, flux, emtau, depth;
@@ -509,13 +476,13 @@ bin_data(int ivar)
 }
 
 
-free_snap()
+void free_snap()
 {
   free(btab);         /* free snapshot */
   btab = NULL;        /* and make sure it can realloc at next get_snap() */
 }    
 
-rescale_data(int ivar)
+void rescale_data(int ivar)
 {
   real m_min, m_max, brightness, total, x, y, z, b, sum0, sum1;
   int    i, j, k, ix, iy, iz, nneg, ndata;
@@ -627,7 +594,7 @@ int ybox(real y)
  *             -1           if no beam
  * 
  */
-setaxis (string rexp, real range[3], int n, int *edge, real *beam)
+void setaxis (string rexp, real range[3], int n, int *edge, real *beam)
 {
     char *cp;
     
@@ -656,4 +623,36 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         *beam = natof(++cp);                  /* convolution beam */
     else
         *beam = -1.0;                        /* any number < 0 */
+}
+
+void nemo_main()
+{
+    int i;
+    
+    setparams();                /* set from user interface */
+    compfuncs();                /* get expression functions */
+    allocate_image();		/* make space for image(s) */
+    if (Qstack) clear_image();	/* clear the images */
+    while (read_snap())	{                   /* read next N-body snapshot */
+        for (i=0; i<nvar; i++) {
+            if (!Qstack) {
+            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
+		clear_image();
+	    }
+            bin_data(i);	            /* bin and accumulate */
+            if (!Qstack) {                  /* if multiple images: */
+	      rescale_data(i);            /* rescale */
+	      write_image(outstr,iptr);   /* and write them out */
+	      if (i==0) reset_history();  /* clean history */
+            }
+        }
+        free_snap();
+    }
+    if (Qstack) {
+      rescale_data(0);                    /* and rescale before ... */
+      write_image (outstr,iptr);	    /* write the image */
+    }
+
+    strclose(instr);
+    strclose(outstr);
 }

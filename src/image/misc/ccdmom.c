@@ -70,7 +70,7 @@ local real peak_spectrum(int n, real *spec, int p);
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero);
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
-local int  peak_assign(int n, real *data, int *mask);
+local void  peak_assign(int n, real *data, int *mask);
 local bool out_of_range(real *clip, real x);
 local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
@@ -693,7 +693,7 @@ static inline int outside(real x,int i0,int i1) {
   return 1;
 }
 
-local int peak_assign(int n, real *d, int *s)
+local void peak_assign(int n, real *d, int *s)
 {
   int i;
   real p;

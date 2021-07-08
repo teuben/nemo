@@ -26,6 +26,7 @@
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
 #include <image.h>
+#include <history.h>
 
 string defv[] = {
 	"in=???\n			input filename (a snapshot)",
@@ -72,24 +73,8 @@ local char *axname[] = {               /* axnames */
         "x", "y", "z", "vx", "vy", "vz"
     }; 
 
-
-nemo_main ()
-{
-	setparams();                    /* stuff command line [pars] */
 
-	instr = stropen (infile, "r");
-	outstr = stropen (outfile,"w");
-
-	read_snap();			/* read N-body data */
-	allocate_image();		/* make space for image */
-	bin_data();			/* do the heavy work */
-	write_image (outstr,iptr);	/* write the image */
-
-	strclose(instr);
-	strclose(outstr);
-}
-
-setparams()
+void setparams()
 {
 	string  tmpstr;
 	int	tmpint;
@@ -141,7 +126,7 @@ setparams()
         }
 }
 
-read_snap()
+int read_snap()
 {				
     int    i;
     real   imass;    
@@ -181,7 +166,7 @@ read_snap()
     return 1; 
 }
 
-allocate_image()
+void allocate_image()
 {
     create_image (&iptr,nsize,nsize);       /* force square image */
     if (iptr==NULL) {
@@ -215,7 +200,7 @@ allocate_image()
     Namez(iptr) = axname[5];
 }
 
-bin_data()
+void bin_data()
 {
     real xsky, ysky, vrad;
     real m_min, m_max, brightness, inv_surden, total;
@@ -290,4 +275,18 @@ bin_data()
 
 }
 
+void nemo_main ()
+{
+	setparams();                    /* stuff command line [pars] */
 
+	instr = stropen (infile, "r");
+	outstr = stropen (outfile,"w");
+
+	read_snap();			/* read N-body data */
+	allocate_image();		/* make space for image */
+	bin_data();			/* do the heavy work */
+	write_image (outstr,iptr);	/* write the image */
+
+	strclose(instr);
+	strclose(outstr);
+}

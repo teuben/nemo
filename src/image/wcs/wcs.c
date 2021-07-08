@@ -27,7 +27,74 @@ string usage = "coordinate transforms";
 
 bool is_sexa(string);
 
-nemo_main() 
+void to_hms(double dval, int *dd, int *mm, double *ss)
+{
+  int sign = SGN(dval);
+  dval = ABS(dval)/15.0;
+  *dd = (int) floor(dval);
+  dval = (dval-(*dd))*60.0;
+  *mm = (int) floor(dval);
+  *ss = (dval-(*mm))*60.0;
+  *dd *= sign;
+}
+
+void to_dms(double dval, int *dd, int *mm, double *ss)
+{
+  int sign = SGN(dval);
+  dval = ABS(dval);
+  *dd = (int) floor(dval);
+  dval = (dval-(*dd))*60.0;
+  *mm = (int) floor(dval);
+  *ss = (dval-(*mm))*60.0;
+  *dd *= sign;
+}
+
+
+
+
+/*
+ * 	interface to the Public Domain worldpos/xypix routines
+ */
+
+int worldpos(double xpix, double ypix, double xref, double yref,
+      double xrefpix, double yrefpix, double xinc, double yinc, double rot,
+      char *type, double *xpos, double *ypos);
+
+int xypix(double xpos, double ypos, double xref, double yref, 
+      double xrefpix, double yrefpix, double xinc, double yinc, double rot,
+      char *type, double *xpix, double *ypix);
+
+
+int my_worldpos(double *pix,double *ref,double *refpix,double *inc,
+            double rot,string proj,double *pos)
+{
+    return worldpos(pix[0],pix[1], ref[0],ref[1], refpix[0],refpix[1],
+        inc[0],inc[1], rot, proj, &pos[0], &pos[1]);
+}
+
+int my_xypix(double *pos,double *ref,double *refpix,double *inc,
+            double rot,string proj,double *pix)
+{
+    return xypix(pos[0],pos[1], ref[0],ref[1], refpix[0],refpix[1],
+        inc[0],inc[1], rot, proj, &pix[0], &pix[1]);
+}
+
+void strtoupper(char *text)
+{
+    char *cp = text;
+    while (*cp) {
+        if (islower(*cp)) *cp = toupper(*cp);
+        cp++;
+    }
+}
+
+bool is_sexa(string s) 
+{
+  char *cp = strchr(s, ':');
+  return (cp != 0);
+}
+    
+void nemo_main() 
 {
     double pix[2], pos[2], ref[2], refpix[2], inc[2], rot, ss, *outval;
     char proj[10];
@@ -109,74 +176,6 @@ nemo_main()
     }
     printf("\n");
 }
-
-to_hms(double dval, int *dd, int *mm, double *ss)
-{
-  int sign = SGN(dval);
-  dval = ABS(dval)/15.0;
-  *dd = (int) floor(dval);
-  dval = (dval-(*dd))*60.0;
-  *mm = (int) floor(dval);
-  *ss = (dval-(*mm))*60.0;
-  *dd *= sign;
-}
-
-to_dms(double dval, int *dd, int *mm, double *ss)
-{
-  int sign = SGN(dval);
-  dval = ABS(dval);
-  *dd = (int) floor(dval);
-  dval = (dval-(*dd))*60.0;
-  *mm = (int) floor(dval);
-  *ss = (dval-(*mm))*60.0;
-  *dd *= sign;
-}
-
-
-
-
-/*
- * 	interface to the Public Domain worldpos/xypix routines
- */
-
-int worldpos(double xpix, double ypix, double xref, double yref,
-      double xrefpix, double yrefpix, double xinc, double yinc, double rot,
-      char *type, double *xpos, double *ypos);
-
-int xypix(double xpos, double ypos, double xref, double yref, 
-      double xrefpix, double yrefpix, double xinc, double yinc, double rot,
-      char *type, double *xpix, double *ypix);
-
-
-int my_worldpos(double *pix,double *ref,double *refpix,double *inc,
-            double rot,string proj,double *pos)
-{
-    return worldpos(pix[0],pix[1], ref[0],ref[1], refpix[0],refpix[1],
-        inc[0],inc[1], rot, proj, &pos[0], &pos[1]);
-}
-
-int my_xypix(double *pos,double *ref,double *refpix,double *inc,
-            double rot,string proj,double *pix)
-{
-    return xypix(pos[0],pos[1], ref[0],ref[1], refpix[0],refpix[1],
-        inc[0],inc[1], rot, proj, &pix[0], &pix[1]);
-}
-
-strtoupper(char *text)
-{
-    char *cp = text;
-    while (*cp) {
-        if (islower(*cp)) *cp = toupper(*cp);
-        cp++;
-    }
-}
-
-bool is_sexa(string s) 
-{
-  char *cp = strchr(s, ':');
-  return (cp != 0);
-}
-    
 
 #ifdef NEMO
 #include "worldpos.c"

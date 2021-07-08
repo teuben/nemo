@@ -20,7 +20,7 @@ string defv[] = {
 
 local plcommand *layout;
 
-nemo_main()
+void nemo_main()
 {
     int i, j, ip, np, nc;
     string name, dumpfile, headline;

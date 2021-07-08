@@ -37,7 +37,7 @@ string defv[] = {
 
 string usage="TESTBED scanopt";
 
-nemo_main()
+void nemo_main()
 {
     string opt, key;
     bool verbose = getbparam("verbose");

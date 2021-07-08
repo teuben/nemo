@@ -22,6 +22,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <fits.h>
+#include <extstring.h>
 
 string defv[] = {			/* Standard NEMO keyword+help */
     "in=???\n              Input fits files or template for list",

@@ -9,7 +9,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <image.h>
-
+#include <table.h>
 
 string defv[] = {
     "in=???\n		Input sig (table) file",
@@ -26,6 +26,16 @@ string usage = "convert (WASP sig)tables into images";
 #if !defined(MAX_LINELEN)
 #define MAX_LINELEN 10000
 #endif
+
+/* darn gipsy doesn't like tab's */
+
+void patch_line(char *line)
+{
+    while (*line) {
+        if (*line == '\t') *line = ' ';
+        line++;
+    }
+}
 
 void nemo_main()
 {
@@ -87,14 +97,4 @@ void nemo_main()
     
     write_image(outstr,iptr);
     strclose(outstr);
-}
-
-/* darn gipsy doesn't like tab's */
-
-patch_line(char *line)
-{
-    while (*line) {
-        if (*line == '\t') *line = ' ';
-        line++;
-    }
 }

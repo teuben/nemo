@@ -145,7 +145,7 @@ string usage="Arbitrary Expression Parser tabulator";
 #define MAXN  16384
 #endif
 
-nemo_main()
+void nemo_main()
 {
     int i, j, k, ndim, nvar, nx, ny, nz;
     real x[MAXN], y[MAXN], z[MAXN];

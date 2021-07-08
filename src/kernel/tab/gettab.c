@@ -249,42 +249,36 @@ string usage = "extract real table from a table";
 #ifndef MAX_COL
 #define MAX_COL 256
 #endif
-
-nemo_main()
-{
-    stream instr, outstr;
-    int ndat;
-
-    instr = stropen(getparam("in"),"r");
-    ndat = getiparam("nmax");
-
-    if (hasvalue("colnr")) {                /* free format */
-
-        if (hasvalue("colpos")) warning("Ignoring colpos=");
-        outstr = stropen(getparam("out"),"w");
-
-        do_a(instr, outstr, ndat, getparam("colnr"),
-             getparam("fmt"));
-
-    } else if (hasvalue("colpos")) {        /* fixed format */
-
-        if (hasvalue("colnr")) warning("Ignoring colnr=");
-        outstr = stropen(getparam("out"),"w");
-
-        do_f(instr, outstr, ndat, getparam("colpos"), getparam("colfmt"),
-             getparam("fmt"));
-
-    } else
-        error("Neither colpos= nor colnr= has been supplied");
-}
-
 
 local string colfmt[MAX_COL];    /* output format */
 local int    coli[MAX_COL];      /* fits either colnr or colpos */
 local int    fmt[MAX_COL];       /* format for output */
 local real  *coldat[MAX_COL];    /* pointers to data */
 
-do_a(instr, outstr, ndat, scolnr, sfmt)
+void my_alloc(ncol, ndat)
+int ncol, ndat;
+{
+    int i;
+
+    if (ncol > MAX_COL) error("my_alloc: Too many columns");
+
+    for (i=0; i<ncol; i++)
+        coldat[i] = (real *) allocate(ndat * sizeof(real));
+
+}
+
+void my_free(ncol, ndat)
+int ncol, ndat;
+{
+    int i;
+
+    if (ncol > MAX_COL) error("my_free: Too many columns");
+
+    for (i=0; i<ncol; i++)
+        free ((char *)coldat[i]);
+}
+
+void do_a(instr, outstr, ndat, scolnr, sfmt)
 stream instr, outstr;
 int ndat;
 string scolnr, sfmt;
@@ -297,7 +291,7 @@ string scolnr, sfmt;
     error("free format not implemented");
 }
 
-do_f(instr, outstr, ndat, scolpos, scolfmt, sfmt)
+void do_f(instr, outstr, ndat, scolpos, scolfmt, sfmt)
 stream instr, outstr;
 int ndat;
 string scolpos, scolfmt, sfmt;
@@ -332,29 +326,34 @@ string scolpos, scolfmt, sfmt;
     my_free(ncol,ndat);
 }
 
-my_alloc(ncol, ndat)
-int ncol, ndat;
+void nemo_main()
 {
-    int i;
+    stream instr, outstr;
+    int ndat;
 
-    if (ncol > MAX_COL) error("my_alloc: Too many columns");
+    instr = stropen(getparam("in"),"r");
+    ndat = getiparam("nmax");
 
-    for (i=0; i<ncol; i++)
-        coldat[i] = (real *) allocate(ndat * sizeof(real));
+    if (hasvalue("colnr")) {                /* free format */
 
-}
+        if (hasvalue("colpos")) warning("Ignoring colpos=");
+        outstr = stropen(getparam("out"),"w");
 
-my_free(ncol, ndat)
-int ncol, ndat;
-{
-    int i;
+        do_a(instr, outstr, ndat, getparam("colnr"),
+             getparam("fmt"));
 
-    if (ncol > MAX_COL) error("my_free: Too many columns");
+    } else if (hasvalue("colpos")) {        /* fixed format */
 
-    for (i=0; i<ncol; i++)
-        free ((char *)coldat[i]);
-}
-
+        if (hasvalue("colnr")) warning("Ignoring colnr=");
+        outstr = stropen(getparam("out"),"w");
+
+        do_f(instr, outstr, ndat, getparam("colpos"), getparam("colfmt"),
+             getparam("fmt"));
+
+    } else
+        error("Neither colpos= nor colnr= has been supplied");
+}
+
 /* 
  *  convert fortran fmt statement to one in c, if possible
  *

@@ -64,7 +64,7 @@ string usage="scan fits files, optionally repair (and output) them";
 extern bool scanopt(string, string);
 extern string *burststring(string, string);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     int    i, n, nfile, blocking[2];

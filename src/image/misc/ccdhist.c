@@ -106,15 +106,9 @@ local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
 
-
-/****************************** START OF PROGRAM **********************/
+extern int minmax(int n, real *array, real *amin, real *amax);
 
-nemo_main()
-{
-    setparams();			/* read the parameters */
-    read_data();
-    histogram();
-}
+/****************************** START OF PROGRAM **********************/
 
 local int compar_real(real *a, real *b)
 {
@@ -574,7 +568,7 @@ typedef struct sortmode {
  
 /* List of externally available sort routines */
  
-/* extern int qsort();         /* Standard Unix : stdlib.h */
+/* extern int qsort();          Standard Unix : stdlib.h */
 /* or:  void qsort(void *base, size_t nmemb, size_t size,
  *                 int(*compar)(const void *, const void *));
  */
@@ -633,7 +627,14 @@ int ring_index(int n, real *r, real rad)
 	  rad,r[0],r[n-1]);
   } else {
     error("reverse indexing not yet implemented");
+    //Must return a value in this path.
   }
 
 }
 
+void nemo_main()
+{
+    setparams();			/* read the parameters */
+    read_data();
+    histogram();
+}

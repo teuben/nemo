@@ -107,39 +107,25 @@ local real xtrans(real), ytrans(real);
 void lineto(real, real, real, real);
 
 extern int contour(real*, int, int, real*, int, real, real, real, real, proc);
+extern void contour_setdef(int, real);
 
-
-nemo_main()
+/*******  stolen from snapplot.c **********/
+
+void setrange(real *rval, string rexp)
 {
-  int n = 0;
-  setparams();                    /* set globals */
-
-  instr = stropen (infile, "r");
-  plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
-  while (read_image(instr,&iptr)) {   /* loop while more images found */
-    dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
-    nx=Nx(iptr);			
-    ny=Ny(iptr);
-    nz=Nz(iptr);
-    if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
-    xmin=Xmin(iptr);
-    ymin=Ymin(iptr);
-    dx=Dx(iptr) * xscale;
-    dy=Dy(iptr) * yscale;
-    xsize = nx * dx;
-    ysize = ny * dy;
-    if (n>0) {
-      sleep(1);
-      plframe();
-    }
-    plot_map();                                 /* plot the map */
-    n++;
-  }
-  plstop();                                   /* end of yapp */
-  strclose(instr);
+    char  *cptr;
+	
+    cptr = strchr(rexp, ':');
+    if (cptr != NULL) {
+        rval[0] = atof(rexp);
+        rval[1] = atof(cptr+1);
+    } else {
+        rval[0] = 0.0;
+        rval[1] = atof(rexp);
+    } 
 }
 
-setparams()
+void setparams()
 {
 	string  tmpstr;
 	int	tmpint, i;
@@ -148,7 +134,7 @@ setparams()
 
 	cntstr = getparam ("contour");	/* get contour levels */
 	if (*cntstr==0) {
-/*	    ncntval = 0;		/* this will cause a grayscale plot */
+/*	    ncntval = 0;	     this will cause a grayscale plot */
 	    gray=TRUE;
 	} else {
 	    ncntval = nemoinpr(getparam("contour"),cntval,MCNTVAL);
@@ -205,7 +191,7 @@ setparams()
             
 }
 
-plot_map ()
+void plot_map ()
 {
     real m_range, brightness, dcm;
     real m_min, m_max;
@@ -348,21 +334,33 @@ void lineto(real x1, real y1, real x2, real y2)
     plmove (xtrans(x1),ytrans(y1));
     plline (xtrans(x2),ytrans(y2));
 }
-		
-/*******  stolen from snapplot.c **********/
-
-setrange(real *rval, string rexp)
+					
+void nemo_main()
 {
-    char  *cptr;
-	
-    cptr = strchr(rexp, ':');
-    if (cptr != NULL) {
-        rval[0] = atof(rexp);
-        rval[1] = atof(cptr+1);
-    } else {
-        rval[0] = 0.0;
-        rval[1] = atof(rexp);
-    } 
-}
-					
-					
+  int n = 0;
+  setparams();                    /* set globals */
+
+  instr = stropen (infile, "r");
+  plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
+  while (read_image(instr,&iptr)) {   /* loop while more images found */
+    dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
+    nx=Nx(iptr);			
+    ny=Ny(iptr);
+    nz=Nz(iptr);
+    if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
+    xmin=Xmin(iptr);
+    ymin=Ymin(iptr);
+    dx=Dx(iptr) * xscale;
+    dy=Dy(iptr) * yscale;
+    xsize = nx * dx;
+    ysize = ny * dy;
+    if (n>0) {
+      sleep(1);
+      plframe();
+    }
+    plot_map();                                 /* plot the map */
+    n++;
+  }
+  plstop();                                   /* end of yapp */
+  strclose(instr);
+}	
