@@ -46,7 +46,7 @@ string defv[] = {		/* keywords/default values/help */
   "stack=f\n		  Stack all selected snapshots?",
   "proj=\n                Sky projection (SIN,TAN,ARC,NCP,GLS,MER,AIT)",
   "emax=10\n              Maximum exp smoothing parameter",
-  "VERSION=2.0\n	  8-may-11 PJT",
+  "VERSION=2.1\n	  23-sep-2021 PJT",
   NULL,
 };
 
@@ -54,7 +54,6 @@ string usage="grid a snapshot into a 2D map";
 
 string cvsid="$Id$";
 
-#define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
 #define MAXVAR	  16		/* max evar's */
 
@@ -115,6 +114,41 @@ local int ybox(real y);
 local int zbox(real z);
 local real odepth(real tau);
 local void setaxis(string rexp, real range[3], int n, int *edge, real *beam);
+
+
+
+void nemo_main()
+{
+    int i;
+    
+    setparams();                /* set from user interface */
+    compfuncs();                /* get expression functions */
+    allocate_image();		/* make space for image(s) */
+    if (Qstack) clear_image();	/* clear the images */
+    while (read_snap())	{                   /* read next N-body snapshot */
+        for (i=0; i<nvar; i++) {
+            if (!Qstack) {
+            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
+		clear_image();
+	    }
+            bin_data(i);	            /* bin and accumulate */
+            if (!Qstack) {                  /* if multiple images: */
+	      rescale_data(i);            /* rescale */
+	      write_image(outstr,iptr);   /* and write them out */
+	      if (i==0) reset_history();  /* clean history */
+            }
+        }
+        free_snap();
+    }
+    if (Qstack) {
+      rescale_data(0);                    /* and rescale before ... */
+      write_image (outstr,iptr);	    /* write the image */
+    }
+
+    strclose(instr);
+    strclose(outstr);
+}
+
 
 void wcs(real *x, real *y)
 {
@@ -623,36 +657,4 @@ void setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         *beam = natof(++cp);                  /* convolution beam */
     else
         *beam = -1.0;                        /* any number < 0 */
-}
-
-void nemo_main()
-{
-    int i;
-    
-    setparams();                /* set from user interface */
-    compfuncs();                /* get expression functions */
-    allocate_image();		/* make space for image(s) */
-    if (Qstack) clear_image();	/* clear the images */
-    while (read_snap())	{                   /* read next N-body snapshot */
-        for (i=0; i<nvar; i++) {
-            if (!Qstack) {
-            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
-		clear_image();
-	    }
-            bin_data(i);	            /* bin and accumulate */
-            if (!Qstack) {                  /* if multiple images: */
-	      rescale_data(i);            /* rescale */
-	      write_image(outstr,iptr);   /* and write them out */
-	      if (i==0) reset_history();  /* clean history */
-            }
-        }
-        free_snap();
-    }
-    if (Qstack) {
-      rescale_data(0);                    /* and rescale before ... */
-      write_image (outstr,iptr);	    /* write the image */
-    }
-
-    strclose(instr);
-    strclose(outstr);
 }
