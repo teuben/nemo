@@ -55,7 +55,7 @@ def get_help_matches(file):
     # Grab keywords
     help_matches = []
     for line in help_out.splitlines():
-        if(line[0] != ' '): # Make sure the line doesn't start with a space
+        if(not line[0].isspace()): # Make sure the line doesn't start with a space
             keyword = line.split()[0]
             if keyword != 'VERSION':
                 help_matches.append(keyword) 
