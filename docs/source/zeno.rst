@@ -18,11 +18,19 @@ For the benefit of NEMO users, ZENO can usually be installed as follows:
 
    cd $NEMO/usr/zeno
    make zeno
+
+This will currently download two repos:   zeno_jeb and zeno_pjt. Pick one by
+using a symlink to become the official one for the install:
+
+.. code-block::
+
    ln -s zeno_pjt zeno
    source zeno_start.sh
    cd zeno
    make -f Zeno
 
-Notice that this will install two versions of the ZENO source tree, and with
-a symbolic link one of them needs to be picked to be there official one.
+Now various ZENO commands are available:
 
+.. code-block::
+
+   ls $ZENOPATH/bin
