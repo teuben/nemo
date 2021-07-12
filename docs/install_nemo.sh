@@ -107,6 +107,7 @@ git checkout $branch
 
 #                        when opt=1 it will first compile these packages in $NEMO/opt and use them
 #                        it needs a bootstrap configure/build1
+#                        Consider this a NEMOSDK (cf. http://www.astro.wisc.edu/~townsend/static.php?ref=mesasdk)
 if test $opt = 1; then
     mknemos=`echo $mknemos | sed 's/,/ /g'`
     make build1 MKNEMOS="$mknemos"
