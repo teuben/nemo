@@ -104,7 +104,6 @@ For the benefit of NEMO users, AMUSE can usually be installed *easily* as follow
 
    pip install amuse
 
-
 but this can take a while as it finds the right dependencies and needs to compile
 some. Or will also easily fail if you have not set up MPI or other tools needed.
 
@@ -115,7 +114,6 @@ the AMUSE frame work and then the selected module(s):
 
    pip install amuse-framework
    pip install amuse-seba amuse-brutus
-
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
