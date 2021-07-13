@@ -18,7 +18,14 @@ Differences
 -----------
 
 - **Shell**:
-  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...). 
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).
+
+- **Community Code**:
+  Both packages maintain a tight connection to legacy software and community codes. You can find
+  them in 
+  **$AMUSE/src/amuse/community** and
+  **$NEMO/usr**
+  resp.
 
 - **Units**:
   NEMO uses dimensionless values, and units are implied. 
@@ -49,12 +56,6 @@ will look more familiar.   In pure **astropy** it might look as follows:
    m = 1.0 * u.solMass
    m2 = m.to(u.kg).value
 
-- **Community Code**:
-  Both packages maintain a tight connection to legacy software and community codes. You can find
-  them in 
-  **$AMUSE/src/amuse/community** and
-  **$NEMO/usr**
-  resp.
 
 Examples
 --------
@@ -96,7 +97,7 @@ And in AMUSE the following python session can do something similar:
    plotter.splot(plummer.position.value_in(units.parsec))
 
 Installation
-~~~~~~~~~~~~
+------------
 
 For the benefit of NEMO users, AMUSE can usually be installed *easily* as follows:
 
@@ -105,7 +106,9 @@ For the benefit of NEMO users, AMUSE can usually be installed *easily* as follow
    pip install amuse
 
 but this can take a while as it finds the right dependencies and needs to compile
-some. Or will also easily fail if you have not set up MPI or other tools needed.
+massive amounts of code. Some of these can easily fail if you don't have the correct
+`prerequisites <https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html>`_
+(e.g. MPI).
 
 A potentially faster way is to first install
 the AMUSE frame work and then the selected module(s):
