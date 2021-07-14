@@ -54,7 +54,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "blocking=1,1\n  	   Two blocking factors (blocksize/2880) for i&o",
     "select=header,data\n  Select header, data, ...?",
     "split=f\n             Split fits file into HDU pieces '<out>.#'",
-    "VERSION=1.8c\n        25-oct-2020 PJT",
+    "VERSION=1.8d\n        13-jul-2021 PJT",
     NULL,
 };
 
@@ -64,7 +64,7 @@ string usage="scan fits files, optionally repair (and output) them";
 extern bool scanopt(string, string);
 extern string *burststring(string, string);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     int    i, n, nfile, blocking[2];
@@ -118,7 +118,7 @@ nemo_main()
        n = fts_rhead(&fh,instr);	              /* read header */
        if (n<0)				              /* if no data (EOF) .. */
           break;			              /* ... quit */
-       if (outstr) dprintf(0,"Working on FITS file %d\n",i);
+       if (outstr) dprintf(1,"Working on FITS file %d\n",i);
        fts_dhead(&fh,deletes);                     /* delete= headers */
        fts_khead(&fh,keep);                        /* keep= headers */
        fts_ihead(&fh,insert);                      /* insert= headers */

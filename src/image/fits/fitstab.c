@@ -26,7 +26,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "maxrow=20000\n        Max row numbers to select",
     "random=f\n            Force random group?",
     "fnl=0\n               Frequency of newlines",
-    "VERSION=1.5\n         10-nov-05 PJT",
+    "VERSION=1.5a\n        13-jul-2021 PJT",
     NULL,
 };
 
@@ -71,7 +71,7 @@ void nemo_main()
        n = fts_rhead(&fh,instr);	               /* read header */
        if (n<0)				              /* if no data (EOF) .. */
           break;			              /* ... quit */
-       dprintf(0,"Working on FITS file %d\n",i);
+       dprintf(1,"Working on FITS file %d\n",i);
 
        if ((nfile==0 || nfile==i)) {			/* if right file */
 	 if (Qrg)

@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 30-apr-2021 PJT
+VERSION = NEMO V4.2 12-jul-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -7,7 +7,7 @@ VERSION = NEMO V4.2 30-apr-2021 PJT
 SHELL = /bin/bash
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
-.PHONY:  INSTALL install scripts
+.PHONY:  INSTALL install scripts docs
 
 
 # The following subdirectories (1&2) are needed for installation, although only
@@ -218,6 +218,10 @@ dirs:
 	fi
 	@echo "OK, all main directories and files should be there now"
 	@echo Done at `date`
+
+docs:
+	(cd docs/source; make html)
+	@echo open docs/source/_build/html/index.html
 
 # @todo: deprecate?
 pjt:
