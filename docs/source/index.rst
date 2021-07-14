@@ -24,7 +24,6 @@ Welcome to NEMO's documentation!
 
    intro
    iface
-   aiface
    filestr
    graphics	      
    examples
