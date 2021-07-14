@@ -1,4 +1,4 @@
-.. _glossary::
+.. _glossary:
 
 Glossary
 --------
@@ -31,7 +31,7 @@ Glossary
       borrowed from\GIPSY)
 
   FITS
-      ``Flexible Interchange Transport System'', a
+      "Flexible Interchange Transport System", a
       standard dataformat used to interchange data between
       machines. Commonly used for images.
 
@@ -118,7 +118,7 @@ Glossary
       four data types in NEMO.
 
   yapp
-      ``Yet Another Plotting Package'', the library
+      "Yet Another Plotting Package", the library
       definition that is used by all programs that produce graphics
       output. It is kept very simple. The **yapp=** system keyword
       controls the graphics device definitions/capabilities.

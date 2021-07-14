@@ -18,7 +18,14 @@ Differences
 -----------
 
 - **Shell**:
-  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...). 
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).
+
+- **Community Code**:
+  Both packages maintain a tight connection to legacy software and community codes. You can find
+  them in 
+  **$AMUSE/src/amuse/community** and
+  **$NEMO/usr**
+  resp.
 
 - **Units**:
   NEMO uses dimensionless values, and units are implied. 
@@ -90,23 +97,28 @@ And in AMUSE the following python session can do something similar:
    plotter.splot(plummer.position.value_in(units.parsec))
 
 Installation
-~~~~~~~~~~~~
+------------
 
-For the benefit of NEMO users, AMUSE can usually be installed easily as follows:
+For the benefit of NEMO users, AMUSE can usually be installed *easily* as follows:
+
+.. code-block::
+
+   pip install amuse
+
+but this can take a while as it finds the right dependencies and needs to compile
+massive amounts of code. Some of these can easily fail if you don't have the correct
+`prerequisites <https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html>`_
+(e.g. MPI).
+
+A potentially faster way is to first install
+the AMUSE frame work and then the selected module(s):
 
 .. code-block::
 
    pip install amuse-framework
-   pip install amuse
-
-the second step can take a while as it finds the right dependencies and needs to compile
-some. Or if you just need a few modules, install them individually, e.g.
-
-
-.. code-block::
-
-   pip install amuse-seba
-
+   pip install amuse-seba amuse-brutus
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
+
+

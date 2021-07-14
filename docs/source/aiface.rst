@@ -235,7 +235,7 @@ own local database, in order for modified keywords to take effect.
 This does not hold for the system keywords, whose new value is always
 correctly interpreted by the program.
 
-In the REVIEW section the prompt is {\bf ``REVIEW''} and
+In the REVIEW section the prompt is **REVIEW** and
 the following commands are understood:
 
 - \item{{\bf exit, quit, end}}
