@@ -43,6 +43,7 @@ Welcome to NEMO's documentation!
    .. gls
    trouble
    .. history
+   codes
    glossary
    rse
    todo	      
