@@ -1,0 +1,28 @@
+#! /bin/bash
+#
+#   query which pgplot devices exist; return the first valid one
+#
+
+
+if [ "$#" -eq 0 ]; then
+    echo Query which yapp_pgplot devices exist.
+    echo Typical values to check:  png, ps, gif
+    exit 0
+fi
+
+tmp=/tmp/yapp$$
+
+echo circle 10 10 1 > $tmp.yapp
+
+for arg in $*; do
+    yapp - $tmp.yapp yapp=$tmp.$arg/$arg > $tmp.log 2>&1
+    if [ -e $tmp.$arg ]; then
+	echo $arg
+	rm $tmp.*
+	exit 0
+    fi
+done
+
+# cleanup
+rm $tmp.*
+exit 1

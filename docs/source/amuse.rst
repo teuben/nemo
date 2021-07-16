@@ -96,6 +96,9 @@ And in AMUSE the following python session can do something similar:
    plotter = Gnuplot.Gnuplot()
    plotter.splot(plummer.position.value_in(units.parsec))
 
+The AMUSE manual has some
+`NEMO I/O examples <https://amuse.readthedocs.io/en/latest/reference/fileformat.html#nemo>`_.
+
 Installation
 ------------
 

@@ -18,13 +18,17 @@ Welcome to NEMO's documentation!
    `github code <https://github.com/teuben/nemo>`_ .  We also keep an index to
    `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_.
 
+   We also keep a local copy of
+   `readthedocs on astroumd <https://www.astro.umd.edu/~teuben/nemo/readthedocs/html>`_.
+   as sometimes  https://astronemo.readthedocs.io is not being updated.	   
+	   
+
 .. toctree::
    :numbered:
    :maxdepth: 2
 
    intro
    iface
-   aiface
    filestr
    graphics	      
    examples
@@ -41,6 +45,7 @@ Welcome to NEMO's documentation!
    .. gls
    trouble
    .. history
+   codes
    glossary
    rse
    todo	      

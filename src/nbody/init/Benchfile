@@ -27,6 +27,10 @@ MBODY = 10
 bench0:
 	nemobench mkplummer . nbody="$(MBODY)*1000000"
 
+abench1:  bench1.snap
+
+#bench1.snap:
+
 bench1:
 	@rm -rf bench1.snap
 	nemobench mkplummer bench1.snap nbody="$(MBODY)*1000000"

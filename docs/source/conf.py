@@ -23,7 +23,7 @@ copyright = '2021, teuben'
 author = 'teuben'
 
 # The full version, including alpha/beta/rc tags
-release = '1.0'
+release = '4.3'
 
 
 # -- General configuration ---------------------------------------------------

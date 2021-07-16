@@ -9,6 +9,9 @@ We also keep a
 `zeno manual page <https://teuben.github.io/nemo/man_html/zeno.1.html>`_
 highlighting some differences.
 
+.. warning::
+   Adding ZENO to NEMO will result in some programs that have duplicated names.
+
 Installation
 ~~~~~~~~~~~~
 
