@@ -311,7 +311,7 @@ See also `ASCL <https://ascl.net>`_.
       Also usable via :term:`NEMO`  
 
 
-A large number of these codes can also be found by searching on ASCL:
+A large number of these codes can also be found by searching on ASCL, for example:
 https://ascl.net/code/search/dynamics
 and
 https://ascl.net/code/search/hermite
