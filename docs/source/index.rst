@@ -20,6 +20,8 @@ Welcome to NEMO's documentation!
 
    We also keep a local copy of
    `readthedocs on astroumd <https://www.astro.umd.edu/~teuben/nemo/readthedocs/html>`_.
+   as sometimes  https://astronemo.readthedocs.io is not being updated.	   
+	   
 
 .. toctree::
    :numbered:
