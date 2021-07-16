@@ -104,6 +104,9 @@ See also `ASCL <https://ascl.net>`_.
   JSPAM
       Interacting galaxies modeller
 
+  limepy
+      Lowered Isothermal Model Explorer in PYthon
+
   MARTINI
       Mock spatially resolved spectral line observations of simulated galaxies
       Also usable via :term:`NEMO`
@@ -206,6 +209,9 @@ See also `ASCL <https://ascl.net>`_.
    
   VINE
       A numerical code for simulating astrophysical systems using particles
+
+  yt
+      Visualization package
 
   ZENO
       Barnes version that was derived from NEMO V1.
