@@ -465,6 +465,9 @@ build4:
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 
+rebuild: config.status
+	./config.status
+	$(MAKE) build
 
 # the exact python method under development
 
