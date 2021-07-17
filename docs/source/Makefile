@@ -19,6 +19,6 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
-pjt:
+pjt: html
 	rsync -av _build/html  chara:public_html/nemo/readthedocs
 	@echo https://www.astro.umd.edu/~teuben/nemo/readthedocs/html
