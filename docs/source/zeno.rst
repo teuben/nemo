@@ -1,5 +1,5 @@
-ZENO and NEMO
-=============
+ZENO
+----
 
 
 `ZENO <http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html>`_

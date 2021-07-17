@@ -1,7 +1,7 @@
 .. _iface:
 
-User Interface
-==============
+User Interface (*)
+==================
 
 .. note::
    The command line user interface is a series of *keyword=value* pairs, where

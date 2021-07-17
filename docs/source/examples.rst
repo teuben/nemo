@@ -1,7 +1,7 @@
 .. _examples:
 
-Examples
-========
+Examples (*)
+============
 
 Now that we have a reasonable idea how NEMO is structured and used, we
 should be ready to go through some real examples  Some of the examples

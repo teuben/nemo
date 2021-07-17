@@ -1,5 +1,5 @@
-AMUSE and NEMO
-==============
+AMUSE
+-----
 
 AMUSE (Astrophysical Multipurpose Software Environment) originates some ideas
 from its predecessors: ACS, StarLab and NEMO, but uses the python language.
@@ -15,7 +15,7 @@ how to achieve the same task in NEMO and AMUSE.
 
 
 Differences
------------
+~~~~~~~~~~~
 
 - **Shell**:
   NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).
@@ -57,11 +57,8 @@ will look more familiar.   In pure **astropy** it might look as follows:
    m2 = m.to(u.kg).value
 
 
-Examples
---------
-
-Creating a Plummer sphere
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Examples: Creating a Plummer sphere
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here we create a Plummer sphere, in virial units, in NEMO, and display an X-VX projection on the sky
 in a shell session:
@@ -100,7 +97,7 @@ The AMUSE manual has some
 `NEMO I/O examples <https://amuse.readthedocs.io/en/latest/reference/fileformat.html#nemo>`_.
 
 Installation
-------------
+~~~~~~~~~~~~
 
 For the benefit of NEMO users, AMUSE can usually be installed *easily* as follows:
 

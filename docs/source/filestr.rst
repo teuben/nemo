@@ -1,7 +1,7 @@
 .. _filestr:
 
-Filestructure
-=============
+Filestructure (*)
+=================
 
 Here we give an overview of the file structure of NEMO's persistent
 data stored on disk.

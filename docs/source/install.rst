@@ -3,6 +3,9 @@
 Installation
 ============
 
+Installation from github
+------------------------
+
 Installation is normally done via github. Here is a simple example, just 3 lines in
 your (bash) shell:
 
@@ -38,7 +41,17 @@ On a Mac with their new SIP protection, the ``--disable-shared`` flag needs to b
    make build check bench bench5
    source nemo_start.sh
 
-   
+
+Rebuilding
+----------
+
+If you have an existing installation, but many things have change, this is probably the preferred method:
+
+   cd $NEMO
+   git pull
+   make rebuild
+
+as it will preserve the possibly peculiar options for configure that you passed the first time it was installed.
 
 Advanced Installation
 ---------------------
@@ -72,11 +85,12 @@ mknemo
 ------
 
 Although the ``mknemo`` script was intended to quickly compile a NEMO program, without the
-need to know where the source code lives, it is also used to aid the installation
+need to know where the source code lives. It is also used to aid the installation
 of a number of supported libraries that
-can be used by NEMO. They are compiled within ``$NEMO/opt``, as described
+can be used by NEMO. They are compiled within ``$NEMO/local``, and will be installed
+in ``$NEMO/opt``, as described
 in the previous section. The supporting scripts are generally
-located ``$NEMO/src/scripts/mknemo.d``.
+located ``$NEMO/src/scripts/mknemo.d`` for you to examine.
 
 Examples:
 

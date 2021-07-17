@@ -1,7 +1,7 @@
 .. _progr:
 
-Programmers Guide
-=================
+Programmers Guide (*)
+=====================
 
 In this section an introduction is given how to write programs within
 the NEMO environment.  It is based on an original report *NEMO:
