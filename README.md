@@ -71,7 +71,11 @@ work (there are other ways to install tools on a mac,but don't get me started):
          make build check bench
          source nemo_start.sh
 
+To rebuild NEMO to ensure you have all updates:
 
+	     cd $NEMO
+		 git pull
+		 make rebuild
 
 Once NEMO has been installed, here are some examples of scripts and
 figures: https://teuben.github.io/nemo/examples/ or look at an example
