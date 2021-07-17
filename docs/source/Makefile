@@ -19,6 +19,7 @@ help:
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
 
+# PJT keeps a private version because he doesn't trust the cloud (and has been proven right in July 2021)
 pjt: html
 	rsync -av _build/html  chara:public_html/nemo/readthedocs
 	@echo https://www.astro.umd.edu/~teuben/nemo/readthedocs/html
