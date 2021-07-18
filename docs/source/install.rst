@@ -12,7 +12,7 @@ your (bash) shell:
 .. code-block:: bash
 
    wget https://teuben.github.io/nemo/install_nemo.sh
-   bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1
+   bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1 python=1
    source  $HOME/opt/nemo/nemo_start.sh
 
 where the arguments to the
@@ -27,7 +27,7 @@ A more manual install, bypassing this script, can be:
    git clone https://github.com/teuben/nemo
    cd nemo
    ./configure --with-yapp=pgplot
-   make build check bench bench5
+   make build check bench bench5 python
    source nemo_start.sh
 
 
@@ -102,3 +102,59 @@ Examples:
 The :ref:`progr` will give some advanced examples how to
 deal with other libraries, and writing your own programs
 or one of the plugins.
+
+python
+------
+
+With so many useful python packages around, and so many different methods
+(anaconda, cond, venv etc.), we will not recommend a method, as this will
+likely depend on your own situation. The installation examples below
+should give you enough information how to adapt it for your python
+installation.  It goes without saying (this is 2021) we only support
+python3.
+
+However, if you install python from within NEMO, there will be a
+``$NEMO/anaconda3`` directory, that gets automatically activated once
+NEMO is loaded. Here is how you can install that version:
+
+.. code-block::
+
+      cd $NEMO
+      make python
+
+This will install a few python modules we often wind up using:
+**amuse-framework**,
+**amuse-galactics**,
+**amuse-gadget2**,
+**amuse-bhtree**,
+**astromartini**,
+**gala**,
+**galpy**,
+**pynbody**,
+**python-unsio**,
+**python-unsiotools**,
+and
+**yt**
+
+For a number of these we have small test scripts to see if they are functional:
+
+.. code-block::
+
+      cd $NEMO/src/scripts/python
+      make tests
+   
+
+For the cases where you want some control and be in developer mode, we
+suggest the recommended practice of placing the code in ``$NEMO/local``,
+as can be seen in the example below
+
+
+.. code-block::
+
+      cd $NEMO/local
+      git clone https://github.com/webbjj/clustertools
+      pip install -e clustertools
+
+
+For a few packages, we have a few existing examples in the ``$NEMO/usr`` tree
+(e.g. amuse, martini, unsio and uns_projects)

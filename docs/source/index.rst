@@ -37,13 +37,13 @@ Welcome to NEMO's documentation!
    .. setup
    install
    progr
-   refs
    potname
    coordsys
    .. dirs
    .. gls
    trouble
    .. history
+   refs
    codes
    glossary
    rse

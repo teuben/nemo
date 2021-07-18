@@ -29,10 +29,10 @@ List of Related Codes
       | http://www.artcompsci.org/
 
   agama
-      analysis code for galaxy models. 
+      Action-based galaxy modeling framework.
       Also usable via :term:`NEMO`
-      | `ASCL 1805.008 <http://ascl.net/1805.008>`_.  
-
+      | http://ascl.net/1805.008
+  
   AMIGA
       Adaptive Mesh Investigations of Galaxy Assembly
       | http://ascl.net/1007.006
@@ -50,7 +50,7 @@ List of Related Codes
       | https://ascl.net/1206.005
   
   bonsai
-      In AMUSE
+      N-body GPU tree-code, in AMUSE.
       | http://ascl.net/1212.001
   
   brutus
@@ -178,7 +178,7 @@ List of Related Codes
   
   MARTINI
       Mock spatially resolved spectral line observations of simulated galaxies
-      Also usable via :term:`NEMO`, see examples.
+      Also usable via :term:`NEMO`, see `example <https://teuben.github.io/nemo/examples/eagle.html>`_.
       | http://ascl.net/1911.005
       
   mcluster
@@ -267,12 +267,16 @@ List of Related Codes
       | http://ascl.net/1403.002
   
   pynbody
-      N-Body/SPH analysis for python. https://ascl.net/1305.002
+      N-Body/SPH analysis for python. 
       | http://ascl.net/1305.002
 
   QYMSYM
       A GPU-accelerated hybrid symplectic integrator
       | https://ascl.net/1210.028
+
+  RAMSES
+      A new N-body and hydrodynamical code 
+      | https://ascl.net/1011.007
   
   Raga
       Monte Carlo simulations of gravitational dynamics of non-spherical stellar systems
@@ -327,6 +331,10 @@ List of Related Codes
   TPI
       Test Particle Integrator
       | http://ascl.net/1909.004
+
+  UNSIO
+      Universal Nbody Snapshot I/O - 
+      See `examples <https://teuben.github.io/nemo/examples/uns.html>`_.
       
   VINE
       A numerical code for simulating astrophysical systems using particles
@@ -351,3 +359,16 @@ https://ascl.net/code/search/orbit
 and
 https://ascl.net/code/search/nbody.
 The last time this list was cross-checked was ... 16-jul-2021.
+
+
+Categories
+----------
+
+Such a niche list of codes made me wonder what kind of meta-data we could use to
+categorize such dynamics codes, but then perhaps along the lines of the
+`Unified Astronomy Thesaurus <https://github.com/astrothesaurus>`_ project.
+
+
+dynamics - nbody, orbit, integrator, sph, hydro, analysis, integrator
+
+
