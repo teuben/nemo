@@ -481,6 +481,7 @@ testpython:
 
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
+	(source nemo_start.sh ; pip3 freeze > pip_freeze.log)
 
 
 
