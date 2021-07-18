@@ -5,7 +5,7 @@ References
 
 Here are some references.
 We also keep a list of
-`papers with code in NEMO <https://teuben.github.io/nemo/man_html/bibcode.html>`_.
+`codes with papers in NEMO <https://teuben.github.io/nemo/man_html/bibcode.html>`_.
 
 
 *A Hierarchical O(N log N) Force-Calculation* -
