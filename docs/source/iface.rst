@@ -5,7 +5,8 @@ User Interface (*)
 
 .. note::
    The command line user interface is a series of *keyword=value* pairs, where
-   we differentiate between  :term:`program keyword` and :term:`system keyword`
+   we differentiate between  :term:`program keyword` and :term:`system keyword`.
+   The ``--help`` or ``help=`` options will describe the keywords.
 
 A NEMO program is invoked just as any other application program under
 the operating system, entering its name from a Unix shell, for example:

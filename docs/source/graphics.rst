@@ -3,6 +3,10 @@
 Graphics and Image Display (*)
 ==============================
 
+.. note::
+   Most NEMO graphics programs select their graphics output with
+   the ``yapp=`` system keyword.
+
 NEMO programs also need to display their data of course.
 Here we will make a distinction between *graphics* and *image* data.
 A simple but flexible *graphics* interface has been defined in NEMO and is used

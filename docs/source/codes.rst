@@ -7,11 +7,16 @@ Here we attempt to summarize some codes used in stellar dynamics that are simila
 We only tend to list codes that are (publically) available. SPH/hydro codes are not included
 in this list.   See also `ASCL <https://ascl.net>`_ to find more codes.
 
+First we start off with some expanded examples on a few specific codes:
+
 .. include:: amuse.rst
 
+.. include:: martini.rst
+
+.. include:: clustertools.rst
+   
 .. include:: zeno.rst
 
-.. include:: clustertools.rst   
 
 
 List of Related Codes
@@ -24,25 +29,25 @@ List of Related Codes
 
 
   ACS
-      The Art of Computational Science,How to build a computational lab. In C++ and ruby.
+      *The Art of Computational Science - How to build a computational lab.* In C++ and ruby.
       With ideas from NEMO and StarLab.
       | http://www.artcompsci.org/
 
   agama
-      Action-based galaxy modeling framework.
-      Also usable via :term:`NEMO`
+      *Action-based galaxy modeling framework*.
+      Also usable via ``$NEMO/usr/agama``.
       | http://ascl.net/1805.008
   
   AMIGA
-      Adaptive Mesh Investigations of Galaxy Assembly
+      *Adaptive Mesh Investigations of Galaxy Assembly*.
       | http://ascl.net/1007.006
   
   AMUSE
-      Astrophysical Multipurpose Software Environment
+      *Astrophysical Multipurpose Software Environment*. Also usable via ``$NEMO/usr/amuse``.
       | http://ascl.net/1107.007
 
   arepo
-      Cosmological magnetohydrodynamical moving-mesh simulation code
+      *Cosmological magnetohydrodynamical moving-mesh simulation code*.
       | http://ascl.net/1909.010
 
   bhint
@@ -50,7 +55,7 @@ List of Related Codes
       | https://ascl.net/1206.005
   
   bonsai
-      N-body GPU tree-code, in AMUSE.
+      N-body GPU tree-code, in :term:`AMUSE`.
       | http://ascl.net/1212.001
   
   brutus
@@ -85,19 +90,21 @@ List of Related Codes
       | http://ascl.net/1208.011 	
    
   fractal
-      Villumsen
+      *A parallel high resolution Poisson solver for an arbitrary distribution of particles*.
+      | https://github.com/jensvvillumsen/Fractal 
 
   gadgetX
-      Where X=1,2,3,4
+      *A Code for Cosmological Simulations of Structure Formation*.
+      Several versions available, X=1,2,3,4.   gadget2 also available via ``$NEMO/usr/gadget``.
       | http://ascl.net/0003.001 	
 
   Gala
-      Galactic astronomy and gravitational dynamics
+      *Galactic astronomy and gravitational dynamics*.
       | http://ascl.net/1302.011
   
   galaxy
-      Sellwood
-      Also usable via :term:`NEMO`  with the **rungalaxy** interface.
+      *N-body simulation software for isolated, collisionless stellar systems*.
+      The older version still usable via :term:`NEMO`  with the **rungalaxy** interface.
       | http://ascl.net/1904.002
   
   galpy
@@ -133,15 +140,15 @@ List of Related Codes
       | http://ascl.net/1402.031 	
   
   hermite
-      In AMUSE
+      In :term:`AMUSE`.
 
   HiGPUs
-      Hermite's N-body integrator running on Graphic Processing Units
+      *Hermite's N-body integrator running on Graphic Processing Units*.  Part of :term:`AMUSE`.
       | https://ascl.net/1207.002
    
   
   HUAYNO
-      Hierarchically split-Up AstrophYsical N-body sOlver N-body code. Part of AMUSE
+      Hierarchically split-Up AstrophYsical N-body sOlver N-body code. Part of :term:`AMUSE`.
       | http://ascl.net/2102.019
   
   Hydra
@@ -178,7 +185,7 @@ List of Related Codes
   
   MARTINI
       Mock spatially resolved spectral line observations of simulated galaxies
-      Also usable via :term:`NEMO`, see `example <https://teuben.github.io/nemo/examples/eagle.html>`_.
+      Also usable via ``$NEMO/usr/martini``, see `example <https://teuben.github.io/nemo/examples/eagle.html>`_.
       | http://ascl.net/1911.005
       
   mcluster
@@ -191,7 +198,7 @@ List of Related Codes
       | http://ascl.net/1201.001
       
   mercury
-      In AMUSE A software package for orbital dynamics
+      *A software package for orbital dynamics*. In :term:`AMUSE`.
       | http://ascl.net/1209.010
 
   MYRIAD
@@ -235,7 +242,7 @@ List of Related Codes
       | http://ascl.net/1102.001
       
   octgrav
-      in AMUSE
+      in :term:`AMUSE`.
       | http://ascl.net/1010.048
 
   partiview
@@ -301,7 +308,7 @@ List of Related Codes
       | http://ascl.net/1507.005
   
   smalln
-      in AMUSE
+      in :term:`AMUSE`.
       | http://ascl.net/1106.012
   
   smile

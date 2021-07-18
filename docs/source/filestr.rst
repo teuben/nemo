@@ -3,6 +3,10 @@
 Filestructure (*)
 =================
 
+.. note::
+   NEMO stores its persistent data in binary files, which under most circumstances
+   can also be used in a Unix pipe by using the ``-`` symbol.
+
 Here we give an overview of the file structure of NEMO's persistent
 data stored on disk.
 The popular memory (object) models,
