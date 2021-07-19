@@ -3,7 +3,12 @@
 Using NEMO
 ==========
 
+.. note::
+   The ``nemo_start.(c)sh`` file needs to be sourced to set up your shell environment
+   for using NEMO.
+
 In order to use NEMO, you will need to modify your
+==================================================
 shell environment, for example in the ``bash`` shell
 this could be
 
