@@ -3,11 +3,12 @@
 Related Codes (*)
 =================
 
-Here we attempt to summarize some codes used in stellar dynamics that are similar to NEMO.
-We only tend to list codes that are (publically) available. SPH/hydro codes are not included
-in this list.   See also `ASCL <https://ascl.net>`_ to find more codes.
+Here we summarize some codes used in stellar dynamics that are similar to NEMO.
+We only list codes that are (publically) available. SPH/hydro codes are currently
+not included.   See also `ASCL <https://ascl.net>`_ to find more codes.
 
-First we start off with some expanded examples on a few specific codes:
+First we start off with some expanded examples on a few specific codes
+that have a tighter connection to NEMO:
 
 .. include:: amuse.rst
 

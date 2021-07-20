@@ -5,7 +5,8 @@ Filestructure (*)
 
 .. note::
    NEMO stores its persistent data in binary files, which under most circumstances
-   can also be used in a Unix pipe by using the ``-`` symbol.
+   can also be used in a Unix pipe by using the ``-`` symbol. The ``tsf`` program
+   will show the contents of such files in more human readable form.
 
 Here we give an overview of the file structure of NEMO's persistent
 data stored on disk.

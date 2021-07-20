@@ -3,11 +3,14 @@
 Installation
 ============
 
+.. note::
+   NEMO is available on https://github.com/teuben/nemo
+
 Installation from github
 ------------------------
 
 Installation is normally done via github. Here is a simple example, just 3 lines in
-your (bash) shell:
+your (bash) shell, using a configurable helper script:
 
 .. code-block:: bash
 
@@ -31,7 +34,9 @@ A more manual install, bypassing this script, can be:
    source nemo_start.sh
 
 
-On a Mac with their new SIP protection, the ``--disable-shared`` flag needs to be added
+On a Mac with their new
+`SIP protection <https://macpaw.com/how-to/disable-enable-system-integrity-protection>`_,
+the ``--disable-shared`` flag needs to be added
 
 .. code-block:: bash
 
@@ -40,6 +45,8 @@ On a Mac with their new SIP protection, the ``--disable-shared`` flag needs to b
    ./configure --with-yapp=pgplot --disable-shared
    make build check bench bench5
    source nemo_start.sh
+
+Disabling SIP is not recommended.		
 
 
 Rebuilding

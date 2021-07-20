@@ -1,13 +1,16 @@
 Introduction
 ============
 
-For the user
-NEMO is a collection of programs, running under a standard UNIX shell,
-capable of running various stellar dynamical codes and related
-utilities (initialization, analysis, gridding, orbits).  It can be
-thought of as a collection of various *groups* (packages) of
-programs, a group being defined by their common file structure, described
-below.
+.. note::
+   NEMO is a toolbox with many programs to perform various stellar dynamics
+   functions.
+
+For the user NEMO is a collection of programs, running under a
+standard UNIX shell, capable of running various stellar dynamical
+codes and related utilities (initialization, analysis, gridding,
+orbits).  It can be thought of as a collection of various *groups*
+(packages) of programs, a group being defined by their common file
+structure, described below.
 
 .. A % common low level file structure is defined, which is then shared by all
    groups.  This lowest file structure eventually interacts directly with
@@ -68,20 +71,18 @@ Here are the main *groups* of programs, clearly showing the structure of NEMO:
   in ASCII, though you will find a few binary tables as well.
 
 
-More groups and file structures are readily defined, as
-NEMO is also an excellent development system.  We encourage users to define 
-their own (or extend existing) data structures as 
-the need arises.  In :ref:`progr` we
-will detail some 'rules' how to incorporate/add new software into the
-package, and extend your NEMO environment. 
+More groups and file structures are readily defined, as NEMO is also
+an excellent development system.  We encourage users to define their
+own (or extend existing) data structures as the need arises.  In
+:ref:`progr` we will detail some 'rules' how to incorporate/add new
+software into the package, and extend your own NEMO environment.
 
-The remaining chapters of this manual outline various
-concepts that you will find necessary to work with NEMO.
-The :ref:`iface` outlines the user interface (commandline, shells
-etc.). NEMO stores most information in files, and 
-:ref:`filestr` explains how data is stored on disk and can be
-manipulated, including the concept of function descriptors in NEMO.
-In :ref:`graphics` we details how data can be
-graphically displayed, either using NEMO itself or programs outside
-of NEMO.
+The remaining chapters of this manual outline various concepts that
+you will find necessary to work with NEMO.  The :ref:`iface` outlines
+the user interface (commandline, shells etc.). NEMO stores most
+data in files, and :ref:`filestr` explains how data is stored
+on disk and can be manipulated, including the concept of function
+descriptors in NEMO.  In :ref:`graphics` we details how data can be
+graphically displayed, either using NEMO itself or programs outside of
+NEMO.
 
