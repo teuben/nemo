@@ -99,7 +99,15 @@ e.g.
        echo mkplummer . 10000 >> run.txt
        parallel --jobs 2 < run.txt
 .fi
-which will run both jobs in parallel
+which will run both jobs in parallel.
+.PP
+One can also use the \fB-j\fP flag of \fBmake\fP of running commands in parallel. Similar to the run.txt file
+created here, a well crafted Runfile can be created, and with
+.nf
+       make -f Runfile -j 2
+.fi
+should achieve the same result.
+
 .PP
 Although NEMO can be configured using \fB--with-openmp\fP to take advantage of multi-cores OpenMP
 computing, there are really no programs in NEMO taking advantage of this yet.
