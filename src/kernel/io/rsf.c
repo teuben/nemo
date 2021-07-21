@@ -28,8 +28,6 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
 
 string usage = "Read an ascii structured file into binary structured file";
 
-string cvsid="$Id$";
-
 /* local functions */
 
 bool parse_line (stream, string, string, int *, byte **);

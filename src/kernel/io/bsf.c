@@ -29,8 +29,6 @@ string defv[] = {
 
 string usage="benchmark stats on all floating point values in a (binary) structured file";
 
-string cvsid="$Id$";
-
 local stream instr;	
 local Moment m;
 
