@@ -77,7 +77,7 @@ Images
 
 Here is an image ...
 
-..  .. image::  ../examples/eagle_1.png
+.. image::  ../examples/eagle_1.png
 
 from the eagle example.
 

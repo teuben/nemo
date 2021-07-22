@@ -432,7 +432,7 @@ hence the explicit way it was written with the ``out=-``.
 In **line 5** the expected surface brightness expression is added as the 3rd column to the table in the pipe,
 then passed on for a quick and dirty plot (shown below).
 
-..  .. image:: ../figures/ball.png
+.. image:: ../figures/ball.png
 
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~
