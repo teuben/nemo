@@ -95,6 +95,7 @@ def help_exists(file):
 def check_u():
     files_read, files_read_names = 0, []
     bad_files, bad_file_names = 0,[]
+    failed_reads, failed_reads_names = 0, []
     tasklist = open(TASKLIST)
 
     # Iterate over tasklist
@@ -120,11 +121,16 @@ def check_u():
                     print('man: '+str(man_out))
                     print('bin: '+str(help_out))
                     print() 
-    
+        else:
+            bad_files+=1
+            bad_file_names.append(file)
+
     print('Files with help=u & man mismatches')
     print('Files read: ' + str(files_read))
     print('Bad files found: ' + str(bad_files))
     print('Bad files: ' + str(bad_file_names))
+    print('Failed to read: ' + str(failed_reads))
+    print('Failed files: ' + str(failed_reads_names))
 
     tasklist.close()
     return files_read_names
@@ -169,7 +175,7 @@ def checkMan():
     print('Bad files found: ' + str(bad_files))
     print('Bad files: ' + str(bad_file_names))
     print('Failed to read: ' + str(failed_reads))
-    print()
+    print('Failed files: ' + str(failed_reads_names))
 
     tasklist.close()
     return files_read_names
