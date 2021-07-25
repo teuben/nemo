@@ -2,11 +2,12 @@
 # Author: Parker Tewell
 # ptewell@terpmail.umd.edu
 # 
-# apr 15 2021: First Version
-# apr 30 2021: Stopped flagging files w/o help=h
-#              Added -v verbose flag
-# may 6  2021: -h flag added
-# may 29 2021: -f flag added
+# apr  15 2021: First Version
+# apr  30 2021: Stopped flagging files w/o help=h
+#               Added -v verbose flag
+# may  6  2021: -h flag added
+# may  29 2021: -f flag added
+# july 22 2021: -u flag added
 
 import re, os, subprocess, getopt, sys
 
@@ -94,6 +95,7 @@ def help_exists(file):
 def check_u():
     files_read, files_read_names = 0, []
     bad_files, bad_file_names = 0,[]
+    failed_reads, failed_reads_names = 0, []
     tasklist = open(TASKLIST)
 
     # Iterate over tasklist
@@ -119,11 +121,16 @@ def check_u():
                     print('man: '+str(man_out))
                     print('bin: '+str(help_out))
                     print() 
-    
+        else:
+            bad_files+=1
+            bad_file_names.append(file)
+
     print('Files with help=u & man mismatches')
     print('Files read: ' + str(files_read))
     print('Bad files found: ' + str(bad_files))
     print('Bad files: ' + str(bad_file_names))
+    print('Failed to read: ' + str(failed_reads))
+    print('Failed files: ' + str(failed_reads_names))
 
     tasklist.close()
     return files_read_names
@@ -131,6 +138,7 @@ def check_u():
 def checkMan():
     files_read, files_read_names = 0, []
     bad_files, bad_file_names = 0,[]
+    failed_reads, failed_reads_names = 0, []
     tasklist = open(TASKLIST)
 
     # Iterate over tasklist
@@ -157,11 +165,17 @@ def checkMan():
                     print('man: '+str(man_out))
                     print('bin: '+str(help_out))
                     print() 
-    
+        else:
+            # If the help page doesn't exist then the program isn't a NEMO program
+            failed_reads+=1
+            failed_reads_names.append(file)
+
     print('Files with help=h & man mismatches')
     print('Files read: ' + str(files_read))
     print('Bad files found: ' + str(bad_files))
     print('Bad files: ' + str(bad_file_names))
+    print('Failed to read: ' + str(failed_reads))
+    print('Failed files: ' + str(failed_reads_names))
 
     tasklist.close()
     return files_read_names
