@@ -4,9 +4,10 @@
 # or via tkrun:              tkrun ./mk_cone
 #
 # the disk= blends in a true disk so you can see both the outflow cones and the disk
-# Make sure "ds9" has been launched before this script is run, as 5 frame are sent to ds9
+# Make sure "ds9" has been launched before this script is run, as many frames are sent to ds9
+# is the 'ds9' is selected in mode=. Alternatively, pick mode=plot
 #
-#
+# Some History:
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
 #     jun-2021      fix missing sign=; add noise
@@ -37,7 +38,7 @@ set view    = 0         #> RADIO view=0       -1,0,1
 set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
-set disk    = 1         #> RADIO disk=1       0,1/1000,1/100,1/10,1,10,100,1000,10000
+set disk    = 1         #> RADIO disk=1       0,1/1000,1/100,1/10,1,10,100,1000,10000,inf
 set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
 set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
 set out     = cone1     #> ENTRY out=cone1
@@ -74,6 +75,12 @@ rm -f $out.*
 set do_ds9=`echo $mode | grep -c ds9`
 set do_plt=`echo $mode | grep -c plot`
 
+# special case:
+if ($disk == "inf") then
+  set disk=1
+  set mirror=-1
+endif  
+
 # the disk rotates counterclock wise, kinematic major axis -X, and the near side is along the +Y axis.
 mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=$rmaxd >& /dev/null
 
@@ -102,7 +109,7 @@ if ($mirror == 0) then
     cat $out.0 $out.1 |\
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
-else
+else if ($mirror == 1) then
   # one cone on each side
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
@@ -121,6 +128,9 @@ else
   cat $out.0 $out.1 $out.2 |\
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
+else
+  echo Skipping making a cone
+  snaprotate $out.0 $out.snap $incd x
 endif
 
 # @todo
@@ -154,14 +164,14 @@ fitsccd $out.fits - |\
 
 if ($do_ds9) then   
     xpaset -p ds9 frame frameno 1
-    nds9 $out.vel.fits
-    xpaset -p ds9 frame frameno 2
     nds9 $out.den.fits
+    xpaset -p ds9 frame frameno 2
+    nds9 $out.vel.fits
     xpaset -p ds9 frame frameno 3
     nds9 $out.sig.fits
 
 #  load the same cube 3 times, so locally you will need to Cube -> Axis Order -> 1,2,3  1,3,2 and 2,3,1
-#  to get the different types of PP or PV slices
+#  to get the different types of PV slices
     xpaset -p ds9 frame frameno 4
     nds9 $out.fits
     xpaset -p ds9 frame frameno 5
