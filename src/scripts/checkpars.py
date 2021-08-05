@@ -185,7 +185,7 @@ def readFlags():
     argv = sys.argv[1:]
 
     try:
-        opts, args = getopt.getopt(argv,'vhf:')
+        opts, args = getopt.getopt(argv,'vhuf:')
         for opt, arg in opts:
             if opt in ['-v']:
                 VERBOSE = True
@@ -196,7 +196,7 @@ def readFlags():
             elif opt in ['-u']:
                 PARSE_U = True
     except:
-        print('getopt error')
+        print('failed to read flag')
 
 def help():
     print('checkpars V1.3')
