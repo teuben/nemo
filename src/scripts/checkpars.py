@@ -16,7 +16,7 @@ VERBOSE  = False # If True prints man & help outputs for bad files
 HELP     = False
 TASKLIST = 'src/scripts/tasklist'
 MANROOT  = 'man'
-PARSE_U    = False # If True uses help=u instead of help=h
+PARSE_U  = False # If True uses help=u instead of help=h
 
 def get_man_matches(file):
     try:
@@ -118,8 +118,8 @@ def check_u():
 
                 if VERBOSE:
                     print(file)
-                    print('man: '+str(man_out))
-                    print('bin: '+str(help_out))
+                    print('man: '+str(man_out).rstrip())
+                    print('bin: '+str(help_out).rstrip())
                     print() 
         else:
             bad_files+=1
@@ -181,7 +181,7 @@ def checkMan():
     return files_read_names
 
 def readFlags():
-    global VERBOSE, HELP, TASKLIST
+    global VERBOSE, HELP, TASKLIST, PARSE_U
     argv = sys.argv[1:]
 
     try:
@@ -189,11 +189,11 @@ def readFlags():
         for opt, arg in opts:
             if opt in ['-v']:
                 VERBOSE = True
-            elif opt in ['-h']:
+            if opt in ['-h']:
                 HELP = True
-            elif opt in ['-f']:
+            if opt in ['-f']:
                 TASKLIST = arg
-            elif opt in ['-u']:
+            if opt in ['-u']:
                 PARSE_U = True
     except:
         print('failed to read flag')
