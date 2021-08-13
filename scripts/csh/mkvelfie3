@@ -61,7 +61,7 @@ echo Creating homogeneous disk with $nbody particles times
 
 
 mkdisk out=- nbody=$nbody seed=$seed \
-       potname=rotcur0 potpars=0,$r0,$v0 mass=1 sign=-1 frac=$frac rmax=$rmax |\
+       potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$frac rmax=$rmax debug=1 |\
     snapmass - - "mass=exp(-r/$re)" |\
     snaprotate - $run.20 "$inc,$pa" yz
 
