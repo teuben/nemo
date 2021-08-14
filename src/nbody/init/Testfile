@@ -1,6 +1,6 @@
 DIR = src/nbody/init
-BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral magalie
-NEED = $(BIN) bsf tsf snapprint
+BIN = snapenter mkplummer mkexpdisk real mkommod mkhomsph mkspiral magalie mktabdisk
+NEED = $(BIN) bsf tsf snapprint tabmath nemoinp
 
 help:
 	@echo $(DIR)
@@ -11,7 +11,7 @@ need:
 clean:
 	@echo Cleaning $(DIR)
 	@rm -f snapenter.in snapenter.out snapenter.cmp mkplummer.out mkexpdisk.out
-	@rm -f mkhomsph.out mkommod.out mkspiral.out magalie.out
+	@rm -f mkhomsph.out mkommod.out mkspiral.out magalie.out mktabdisk.out mktabdisk.tab
 
 NBODY = 10
 
@@ -58,6 +58,14 @@ mkexpdisk:
 	$(EXEC) mkexpdisk mkexpdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
 	$(EXEC) tsf mkexpdisk.out
 	@bsf mkexpdisk.out test="0.0135151 0.39335 -1.19916 0.857764 71"
+
+mktabdisk:
+	@echo Running $@
+	nemoinp 0.001,0.01:4:0.01 |\
+	     tabmath - - "exp(-%1),400/pi*atan(%1/0.1),50" > mktabdisk.tab
+	$(EXEC) mktabdisk mktabdisk.tab mktabdisk.out $(NBODY) seed=123 ; nemo.coverage mkexpdisk.c
+	$(EXEC) tsf mktabdisk.out
+	@bsf mktabdisk.out test="0.757501 82.4069 -284.984 218.881 71"
 
 mkommod:
 	@echo Running $@
