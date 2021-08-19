@@ -10,7 +10,10 @@ fi
 log=/tmp/nemobench$$.log                 # per process
 log=/tmp/nemobench.log                   # global
 log=$XDG_RUNTIME_DIR/nemobench.log       # per session
-
+if [ ! -f "$1" ]; then
+    echo -n "NEMOBENCH: FAIL" >> $log
+    exit 0
+fi
 echo NEMOBENCH: $* >> $log
 /usr/bin/time $* >> $log 2>&1
 echo -n "NEMOBENCH: $1 "
