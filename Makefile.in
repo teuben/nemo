@@ -465,6 +465,9 @@ build4:
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 
+rebuild: config.status
+	./config.status
+	$(MAKE) build
 
 # the exact python method under development
 
@@ -478,6 +481,7 @@ testpython:
 
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
+	(source nemo_start.sh ; pip3 freeze > pip_freeze.log)
 
 
 

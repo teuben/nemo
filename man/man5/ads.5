@@ -1,15 +1,15 @@
 .TH ADS 5NEMO "10 April 2021"
 
 .SH "NAME"
-ads \- bibcode for code papers on ADS using @ads
+ads \- bibcode for code papers on ADS using a @ads markup
 
 .SH "SYNOPSIS"
 grep ^@ads $NEMO/man/man1/*.1
 
 .SH "DESCRIPTION"
 In 2021 we have started to use the \fB@ads\fP doxygen-like marker
-in man pages and source code to link a code with a paper using their
-\fBbibcode\fP. There are plenty
+in man pages and source code to link a code with a paper using their 
+\fBADS bibcode\fP. There are plenty
 of examples in NEMO of codes we keep, that have a corresponding paper 
 where code may not be easily available anymore. The first one we did is
 in \fICGS(1NEMO)\fP:
@@ -42,6 +42,10 @@ publishing in AAS journals:
 
 The \fIname\fP of a code is not always uniquely determined, but a growing list is available on 
 https://github.com/teuben/ascl-tools/blob/master/asclKeywords.txt
+
+.PP
+
+An alternative could be a \fB@doi\fB, which for the CGS would be:   10.1051/0004-6361:20041705
 
 .SH "OTHERS"
 There are at least two other code and paper linking mechanisms that are in practice:

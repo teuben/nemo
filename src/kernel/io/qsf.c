@@ -22,8 +22,6 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
 
 string usage = "check if a file is a structured file";
 
-string cvsid="$Id$";
-
 void nemo_main(void)
 {
     string in = getparam("in");

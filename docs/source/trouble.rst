@@ -1,5 +1,5 @@
-Troubleshooting
-===============
+Troubleshooting (*)
+===================
 
 Fatal errors are caught by most NEMO programs by calling the function
 *error*;

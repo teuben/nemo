@@ -2,7 +2,7 @@
 
 DIR       = src/nbody/init
 BENCH     = bench0 bench1
-BENCHDATA = bench1.snap
+BENCHDATA = 
 LOG       = /tmp/nemobench.log
 BIN       = mkplummer
 NEED      = $(BIN) 
@@ -26,10 +26,6 @@ MBODY = 10
 
 bench0:
 	nemobench mkplummer . nbody="$(MBODY)*1000000"
-
-abench1:  bench1.snap
-
-#bench1.snap:
 
 bench1:
 	@rm -rf bench1.snap

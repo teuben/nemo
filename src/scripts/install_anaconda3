@@ -20,6 +20,7 @@ set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
 set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
 set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-%s-x86_64.sh
 set url   = https://repo.anaconda.com/archive/Anaconda3-2020.11-%s-x86_64.sh
+set url   = https://repo.anaconda.com/archive/Anaconda3-2021.05-%s-x86_64.sh
 
 set dir   = `pwd`/anaconda3
 set opt   = 1
@@ -89,18 +90,24 @@ pip install galpy
 pip install pynbody
 
 # https://github.com/kyleaoman/martini
+#
 pip install astromartini
 
 # https://github.com/yt-project/yt
+#
 pip install yt
 
+# https://amusecode.github.io/getting-started
+#
+pip install amuse-framework
+# and a few simple starter packages
+pip install amuse-galactics amuse-gadget2 amuse-bhtree
 
 # Installing AMUSE takes a LONG LONG time, so by default this is not installed at first
-# https://amusecode.github.io/getting-started
+# It also needs a lot more packages (see below)
 #   pip install numpy nose docutils mpi4py h5py
 #   pip install scipy astropy jupyter pandas seaborn
 if ($amuse) then
-  pip install amuse-framework
   pip install amuse
 endif  
 

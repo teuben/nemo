@@ -1,7 +1,7 @@
 .. _progr:
 
-Programmers Guide
-=================
+Programmers Guide (*)
+=====================
 
 In this section an introduction is given how to write programs within
 the NEMO environment.  It is based on an original report *NEMO:
@@ -101,13 +101,13 @@ A few of the basic definitions in this package:
 - ``string``:
   typedef for ``char *``, used to point to strings. Don`t use
   ``string`` for pointers you increment, decrement or explicitly
-  follow (using *); such pointers are really ``char *``.
+  follow (using ``*``); such pointers are really ``char *``.
 
 
 - ``real, realptr``:
-  typedef for {\tt float} or {\tt double} ({\tt float *} or {\tt double *},
-  respectively), depending on the use of the {\tt SINGLEPREC} flag. 
-  The default is {\tt double}. 
+  typedef for ``float`` or ``double`` (``float *`` or ``double *``,
+  respectively), depending on the use of the ``SINGLEPREC`` flag. 
+  The default is ``double``. 
 
 - ``proc, iproc, rproc``: 
   typedefs for pointers to procedures (void functions), integer-valued

@@ -1071,6 +1071,7 @@ local void printhelp(string help)
 	printf("  8       reserved\n");
 	printf(" 16       reserved\n");
         printf(" VERSION_ID = %s\n",GETPARAM_VERSION_ID);
+	printf(" GIT version = %s\n", version_h);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
 	showsystem();
