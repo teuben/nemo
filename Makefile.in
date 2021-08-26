@@ -592,6 +592,9 @@ check:
 	(source nemo_start.sh; src/scripts/testsuite)
 	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
+benchtest:
+	(source nemo_start.sh; src/scripts/benchsuite)
+	@echo 'Testing Benchsuite: Success!'
 # show the latest testsuite build log
 checklog:
 	cat `ls -tr tmp/test*/testsuite.log | tail -1`
