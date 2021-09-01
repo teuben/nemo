@@ -3,24 +3,12 @@
 #  this script will find Testfile's and create a testsuite from it
 #  Note that it will run in a directory $NEMO/tmp/test$$
 #
-#   22-mar-97   Orinally written                    Peter Teuben
-#   19-dec-99   -i added (doesn't seem to work?)
-#    6-apr-01   -f added
-#   20-jun-01   -b added
-#   17-jul-01   kludge hackforce, and rotcur
-#   15-feb-03   nemo.coverage 
-#   29-mar-04   documented -b; email now to teuben@astro.umd.edu
-#   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
-#    6-aug-06   look for Testfile's in usr tree also (-u will disable)
-#   26-nov-19   add bsf tests if not OK
-#   21-nov-20   check if any executables did not compile
-#
-#
+#   22-jul-21   Cloned off testsuite                Vanday Bundu
 # BUG:  -b  does not remove executable, so you never know if new binary did
 #		not compile
 
-set testdir=$NEMO/tmp/test$$
-set log=testsuite.log
+set benchdir=$NEMO/tmp/test$$
+set log=benchsuite.log
 alias test 'make -f Testfile'
 
 set norun=0
@@ -92,41 +80,42 @@ foreach arg ($*)
 end
 
 if ($bootstrap) then
-  set blog=/tmp/testsuite_b.log
-  echo Rebuilding testsuite executables, hang on.....see $blog 
-  (cd $NEMO/src/scripts; ./need -m `./testsuite -s`; mknemo -c history hisf; mknemo -n 1 rotcur; mknemo -n 1 hackforce) >& $blog
+  set blog=/tmp/benchsuite_b.log
+  echo Rebuilding benchsuite executables, hang on.....see $blog 
+  (cd $NEMO/src/scripts; ./need -m `./bench/8ju-suite -s`; mknemo -c history hisf; mknemo -n 1 rotcur; mknemo -n 1 hackforce) >& $blog
 endif
 
-mkdir $testdir
-pushd $testdir >& /dev/null
+mkdir $benchdir
+pushd $benchdir >& /dev/null
 
 set tdir=src
 if ($usr) set tdir=src,usr
 
-onintr cleanup
+# onintr cleanup
 
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
-echo "TESTSUITE started `date`"                                        > $log
+echo "BENCHSUITE started `date`"                                        > $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
 #   using $NEMO instead of $NEMO/src really makes it run slow on solaris
 
-foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
+foreach benchfile (`find $NEMO/{$tdir} -name Benchfile -print | sort`)
     if ($norun) then
-        echo $testfile
+        echo $benchfile
         continue
+	
     endif
     if ($clean) then
-        (cd $testfile:h ; make -f Testfile clean)
+        (cd $benchfile:h ; make -f Benchfile clean)
         continue
     endif
     if ($show) then
-        (cd $testfile:h ; make -f Testfile need)
+        (cd $benchfile:h ; make -f Benchfile need)
         continue
     endif
     if ($query) then
-        foreach bin (`cd $testfile:h ; make -f Testfile need`)
+        foreach bin (`cd $benchfile:h ; make -f Benchfile need`)
             if (! -e $NEMOBIN/$bin) then
                 echo $NEMOBIN/$bin does not exist
                 if ($install) then
@@ -142,50 +131,50 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     endif
 #    echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
-    if ($local) pushd $testfile:h >& /dev/null
-    make -f $testfile clean all  $options EXEC="$exec"                >>& $log
+    if ($local) pushd $benchfile:h >& /dev/null
+    make -f $benchfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-	echo -n TESTSUITE: "FAIL" $testfile:h
+	echo -n BENCHSUITE: "FAIL" $benchfile:h
 	echo ""
     else
-	echo -n TESTSUITE: "OK  " $testfile:h
+	echo -n BENCHSUITE: "OK  " $benchfile:h
 	echo ""
     endif
     if ($local) popd >& /dev/null
 end
 
-echo "TESTSUITE   ended `date`"                                       >> $log
+echo "BENCHSUITE   ended `date`"                                       >> $log
 
-cleanup:
+# cleanup:
 
-    popd >& /dev/null
+#    popd >& /dev/null
 
-    if ($show || $query) then
-        set clean=1
-    else
-        grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
-	if (! -z $testdir/not-found.log) then
-	    echo FAIL : The following programs were not found:
-	    cat $testdir/not-found.log
-	endif
-        echo Results in $testdir/$log
-	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
-	if (-z $testdir/bsf-fail.log) then
-	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
-	else
-	    echo BSF regression results that failed:
-	    cat $testdir/bsf-fail.log
-	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
-	endif
-	echo If you have any unsolved problems, this file should be saved.
-        head -1 $testdir/$log
-        tail -1 $testdir/$log
+#    if ($show || $query) then
+#        set clean=1
+#    else
+#        grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
+#	if (! -z $testdir/not-found.log) then
+#	    echo FAIL : The following programs were not found:
+#	    cat $testdir/not-found.log
+#	endif
+        echo Results in $benchdir/$log
+#	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
+#	if (-z $testdir/bsf-fail.log) then
+#	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
+#	else
+#	    echo BSF regression results that failed:
+#	    cat $testdir/bsf-fail.log
+#	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
+#	endif
+#	echo If you have any unsolved problems, this file should be saved.
+#        head -1 $testdir/$log
+#        tail -1 $testdir/$log
 	
-    endif
+#    endif
 
-    if ($cleanup || $clean) then
-        rm -rf $testdir
-    endif
+#    if ($cleanup || $clean) then
+#        rm -rf $testdir
+#    endif
 
 
     exit 0
