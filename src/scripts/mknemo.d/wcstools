@@ -1,0 +1,28 @@
+#! /bin/bash
+#   See http://tdc-www.harvard.edu/wcstools/
+#
+#   example file:     http://tdc-www.harvard.edu/software/wcstools/wcstools-3.9.6.tar.gz
+#
+#   note it contains a private (static) library of wcslib
+#
+url=http://tdc-www.harvard.edu/software/wcstools/wcstools-%s.tar.gz
+version=3.9.6
+wget=wgetc
+
+for arg in $*; do
+  export $arg
+done
+ 
+cd $NEMO/local
+file=$(printf $url $version)
+$wget  $file
+
+tar zxf wcstools-$version.tar.gz
+cd wcstools-$version
+make -j
+cp -a bin/*         $NEMO/opt/bin
+#cp -a man/man1/*    $NEMO/man/man1
+
+echo Installed version=$version
+
+echo wcstools $version `date` >> $NEMO/opt/mknemo.log
