@@ -1,1 +1,8 @@
 original name: worldpos	- imported
+
+several versions might exist:
+
+1)   wcstools:
+
+     http://tdc-www.harvard.edu/wcstools/   
+     in the directory wcslib/worldpos.c   (but this is old K&R style code)

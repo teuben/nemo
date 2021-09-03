@@ -66,7 +66,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0a\n           24-jan-2021 PJT",
+    "VERSION=3.0b\n           2-sep-2021 PJT",
     NULL,
 };
 
@@ -110,6 +110,11 @@ void nemo_main(void)
     massname = getparam("massname");
     nmodel = getiparam("nmodel");
     mode = getiparam("mode");
+
+    if (nbody < 1) error("Illegal number of bodies: %d",nbody);
+    if (mfrac < 0 || mfrac > 1) error("Illegal mfrac=%g",mfrac);
+    if (rfrac <= 0) error("Illegal rfrac=%g",rfrac);
+    
     if (*massname) {
         mysymbols(getargv0());
         n=1;
