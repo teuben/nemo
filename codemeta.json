@@ -36,6 +36,6 @@
             "id": "PLACEHOLDER: Add DOI (https://doi.org/xxxxxx) here"
         }
     ],
-    "version": "4.0.1",
+    "version": "4",
     "license": "PLACEHOLDER: Add license (ideally as a URL to the SPDX page - e.g. https://spdx.org/licenses/MIT.html) here"
 }
