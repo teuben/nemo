@@ -132,7 +132,7 @@ real rotcur_chung(real r, int np, real *p, real *d)
   real y =  atan(x1) + x2;
 
   d[0] = y;
-  d[1] = p[0]/p[1] / (1+x1*x1) + p[0]/p[2]
+  d[1] = p[0]/p[1] / (1+x1*x1) + p[0]/p[2];
   return p[0] * y;
   
 }
