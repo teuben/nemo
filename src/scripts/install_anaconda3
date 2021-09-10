@@ -97,6 +97,10 @@ pip install astromartini
 #
 pip install yt
 
+# http://galpak3d.univ-lyon1.fr/
+# optional: PyFFTW,  MPDAF, EMCEE , PyMultinest
+pip install galpak
+
 # https://amusecode.github.io/getting-started
 #
 pip install amuse-framework

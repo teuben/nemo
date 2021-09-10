@@ -118,6 +118,25 @@ real rotcur_arctan(real r, int np, real *p, real *d)
   
 }
 
+/*
+ * https://astrohchung.com/project/mangarc/
+ *    v(r) = V_0 * (tanh(r/R1) + r/R2)
+ */
+
+
+
+real rotcur_chung(real r, int np, real *p, real *d)
+{
+  real x1 = r/p[1];
+  real x2 = r/p[2];
+  real y =  atan(x1) + x2;
+
+  d[0] = y;
+  d[1] = p[0]/p[1] / (1+x1*x1) + p[0]/p[2];
+  return p[0] * y;
+  
+}
+
 
 
 /*
