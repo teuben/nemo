@@ -33,6 +33,14 @@ string cvsid="$Id$";
 
 extern string *burststring(string, string);
 
+void nemo_main()
+{
+    if (hasvalue("out"))
+        convert_to_header();
+    else
+        read_fits_header();
+}
+
 void read_fits_header()
 {
     stream instr, outstr;
@@ -120,12 +128,4 @@ void convert_to_header()
 
     strclose(instr);
     strclose(outstr);
-}
-
-void nemo_main()
-{
-    if (hasvalue("out"))
-        convert_to_header();
-    else
-        read_fits_header();
 }
