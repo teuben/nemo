@@ -51,110 +51,14 @@ string cvsid="$Id$";
 #endif
 
 int get_key(char *line, char *key, char *value, int *his);
-
-void init_data(int);
-double get_next_data(int);
+void init_data(int dcol);
+double get_next_data(int dcol);
 
 static  char line[MAX_LINELEN];
 static  double data[MAXCOL];
 static  stream instr;
 static  double scale;
 
-int get_key(char *line, char *key, char *value, int *his)
-{
-    char *cp = line, *lkey=key, *lvalue=value;
-
-    *key = 0;                               /* initialize no keyword */
-    *value = 0;                             /* and no value part */
-    *his = 0;
-
-    if (cp==0) return 1;
-    while (isspace(*cp))                    /* skip leading whitespace */
-        cp++;
-    if (cp==0) return 1;                    /* if only whitespace, done */
-    
-    if (*cp == '#')			    /* expect a comment for header lines */
-	cp++;    
-    else
-    	return 0;                           /* if not, return bad line */
-    	
-    while (isspace(*cp))                    /* skip leading whitespace before key */
-        cp++;  
-
-    while (!isspace(*cp) && *cp != '=')     /* grab the keyword */
-        *lkey++ = *cp++;
-    
-    while (isspace(*cp))                    /* skip over more potential whitespace */
-        cp++;
-    
-    if (*cp == '=')			
-        *lkey = 0;			    /* terminate keyword */
-    else {
-        *lkey = 0;			    /* terminate keyword */	  
-        dprintf(2,"PJT [%s]\n",key);
-	if (streq(key,"COMMENT") || streq(key,"HISTORY")) {
-	  *his = 1;
-	} else {
-	  *key = 0;			    /* no keyword */
-	  return 1;
-	}
-    }
-    if (*his == 0)
-      while (isspace(*cp) || *cp == '=')      /* skip whitespace around '=' */
-        cp++;
-    else
-      while (isspace(*cp))                    /* skip whitespace */
-        cp++;
-    while (*cp)                             /* grab the value */
-        *value++ = *cp++;
-    *value = 0;
-
-    if (strlen(key) > 8) warning("key %s too long for FITS",key);
-
-    return 1;
-  
-}
-
-
-static int active_row = 0;
-static int active_col = 0;
-static int icol = 0;
-
-void init_data(int dcol)
-{
-    int ierr;
-
-    ierr=nemoinpd(line,data,MAXCOL);
-    if (ierr < 1) error("badly formatted line: \"%s\" err=%d\n", line,ierr);
-    if (dcol >= ierr) error("Not enough columns in data: %d < %d",ierr,dcol);
-    
-    active_col = ierr;
-    active_row = 1;
-    icol = 0;
-
-}
-
-double get_next_data(int dcol)
-{
-    if (!active_row && !active_col) {
-        while(1) {
-            if (get_line(instr, line) <= 0)
-            	error("No more data available");
-            if (line[0]!='#') break;
-        }
-        init_data(dcol);
-    }
-
-    if (dcol>=0) {
-        active_row = active_col = 0;
-        return data[dcol];
-    } else {
-	active_col--;
-	active_row = 0;
-	return data[icol++];
-    }
-    
-}
 
 void nemo_main()
 {
@@ -281,4 +185,100 @@ void nemo_main()
     }
     dprintf(0,"MinMax in map: %g - %g\n",rmin,rmax);    
     fitclose(fitsfile);
+}
+
+int get_key(char *line, char *key, char *value, int *his)
+{
+    char *cp = line, *lkey=key, *lvalue=value;
+
+    *key = 0;                               /* initialize no keyword */
+    *value = 0;                             /* and no value part */
+    *his = 0;
+
+    if (cp==0) return 1;
+    while (isspace(*cp))                    /* skip leading whitespace */
+        cp++;
+    if (cp==0) return 1;                    /* if only whitespace, done */
+    
+    if (*cp == '#')			    /* expect a comment for header lines */
+	cp++;    
+    else
+    	return 0;                           /* if not, return bad line */
+    	
+    while (isspace(*cp))                    /* skip leading whitespace before key */
+        cp++;  
+
+    while (!isspace(*cp) && *cp != '=')     /* grab the keyword */
+        *lkey++ = *cp++;
+    
+    while (isspace(*cp))                    /* skip over more potential whitespace */
+        cp++;
+    
+    if (*cp == '=')			
+        *lkey = 0;			    /* terminate keyword */
+    else {
+        *lkey = 0;			    /* terminate keyword */	  
+        dprintf(2,"PJT [%s]\n",key);
+	if (streq(key,"COMMENT") || streq(key,"HISTORY")) {
+	  *his = 1;
+	} else {
+	  *key = 0;			    /* no keyword */
+	  return 1;
+	}
+    }
+    if (*his == 0)
+      while (isspace(*cp) || *cp == '=')      /* skip whitespace around '=' */
+        cp++;
+    else
+      while (isspace(*cp))                    /* skip whitespace */
+        cp++;
+    while (*cp)                             /* grab the value */
+        *value++ = *cp++;
+    *value = 0;
+
+    if (strlen(key) > 8) warning("key %s too long for FITS",key);
+
+    return 1;
+  
+}
+
+
+static int active_row = 0;
+static int active_col = 0;
+static int icol = 0;
+
+void init_data(int dcol)
+{
+    int ierr;
+
+    ierr=nemoinpd(line,data,MAXCOL);
+    if (ierr < 1) error("badly formatted line: \"%s\" err=%d\n", line,ierr);
+    if (dcol >= ierr) error("Not enough columns in data: %d < %d",ierr,dcol);
+    
+    active_col = ierr;
+    active_row = 1;
+    icol = 0;
+
+}
+
+double get_next_data(int dcol)
+{
+    if (!active_row && !active_col) {
+        while(1) {
+            if (get_line(instr, line) <= 0)
+            	error("No more data available");
+            if (line[0]!='#') break;
+        }
+        init_data(dcol);
+    }
+
+    if (dcol>=0) {
+        active_row = active_col = 0;
+        return data[dcol];
+    } else {
+	active_col--;
+	active_row = 0;
+	return data[icol++];
+    }
+    
 }
