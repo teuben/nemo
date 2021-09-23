@@ -43,6 +43,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <strlib.h>
+#include <extstring.h>
 
 #include <snapshot/body.h>      /* snapshot's */
 #include <snapshot/snapshot.h>
@@ -146,45 +147,6 @@ local int ybox(real y);
 local int zbox(real z);
 local real odepth(real tau);
 local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
-
-
-void nemo_main (void)
-{
-    int i;
-    
-    setparams();                /* set from user interface */
-    compfuncs();                /* get expression functions */
-    allocate_image();		/* make space for image(s) */
-    if (Qstack) clear_image();	/* clear the images */
-    if (Qstack && Qdepth) 
-      error("stack=t and depth analysis cannot be used together, use snapmerge first");
-    while (read_snap())	{                   /* read next N-body snapshot */
-        for (i=0; i<nvar; i++) {
-            if (!Qstack) {
-            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
-		clear_image();
-	    }
-            bin_data(i);	            /* bin and accumulate */
-            if (!Qstack) {                  /* if multiple images: */
-	      if (Qdepth||Qint)
-		los_data();
-	      rescale_data(i);            /* rescale */
-	      write_image(outstr,iptr);   /* and write them out */
-	      if (i==0) reset_history();  /* clean history */
-            }
-        }
-        free_snap();
-    }
-    if (Qstack) {
-      if (Qdepth||Qint)
-	los_data();
-      rescale_data(0);                    /* and rescale before ... */
-      write_image (outstr,iptr);	    /* write the image */
-    }
-
-    strclose(instr);
-    strclose(outstr);
-}
 
 
 void wcs(real *x, real *y)
@@ -998,4 +960,42 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         *beam = natof(++cp);                  /* convolution beam */
     else
         *beam = -1.0;                        /* any number < 0 */
+}
+
+void nemo_main (void)
+{
+    int i;
+    
+    setparams();                /* set from user interface */
+    compfuncs();                /* get expression functions */
+    allocate_image();		/* make space for image(s) */
+    if (Qstack) clear_image();	/* clear the images */
+    if (Qstack && Qdepth) 
+      error("stack=t and depth analysis cannot be used together, use snapmerge first");
+    while (read_snap())	{                   /* read next N-body snapshot */
+        for (i=0; i<nvar; i++) {
+            if (!Qstack) {
+            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
+		clear_image();
+	    }
+            bin_data(i);	            /* bin and accumulate */
+            if (!Qstack) {                  /* if multiple images: */
+	      if (Qdepth||Qint)
+		los_data();
+	      rescale_data(i);            /* rescale */
+	      write_image(outstr,iptr);   /* and write them out */
+	      if (i==0) reset_history();  /* clean history */
+            }
+        }
+        free_snap();
+    }
+    if (Qstack) {
+      if (Qdepth||Qint)
+	los_data();
+      rescale_data(0);                    /* and rescale before ... */
+      write_image (outstr,iptr);	    /* write the image */
+    }
+
+    strclose(instr);
+    strclose(outstr);
 }
