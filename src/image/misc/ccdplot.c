@@ -109,7 +109,42 @@ void lineto(real, real, real, real);
 extern int contour(real*, int, int, real*, int, real, real, real, real, proc);
 extern void contour_setdef(int, real);
 
-/*******  stolen from snapplot.c **********/
+void setrange(real *rval, string exp);
+void setparams(void);
+void plot_map(void);
+void lineto(real x1, real y1, real x2, real y2);
+
+
+void nemo_main()
+{
+  int n = 0;
+  setparams();                    /* set globals */
+
+  instr = stropen (infile, "r");
+  plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
+  while (read_image(instr,&iptr)) {   /* loop while more images found */
+    dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
+    nx=Nx(iptr);			
+    ny=Ny(iptr);
+    nz=Nz(iptr);
+    if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
+    xmin=Xmin(iptr);
+    ymin=Ymin(iptr);
+    dx=Dx(iptr) * xscale;
+    dy=Dy(iptr) * yscale;
+    xsize = nx * dx;
+    ysize = ny * dy;
+    if (n>0) {
+      sleep(1);
+      plframe();
+    }
+    plot_map();                                 /* plot the map */
+    n++;
+  }
+  plstop();                                   /* end of yapp */
+  strclose(instr);
+}	
+
 
 void setrange(real *rval, string rexp)
 {
@@ -335,32 +370,3 @@ void lineto(real x1, real y1, real x2, real y2)
     plline (xtrans(x2),ytrans(y2));
 }
 					
-void nemo_main()
-{
-  int n = 0;
-  setparams();                    /* set globals */
-
-  instr = stropen (infile, "r");
-  plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
-  while (read_image(instr,&iptr)) {   /* loop while more images found */
-    dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
-    nx=Nx(iptr);			
-    ny=Ny(iptr);
-    nz=Nz(iptr);
-    if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
-    xmin=Xmin(iptr);
-    ymin=Ymin(iptr);
-    dx=Dx(iptr) * xscale;
-    dy=Dy(iptr) * yscale;
-    xsize = nx * dx;
-    ysize = ny * dy;
-    if (n>0) {
-      sleep(1);
-      plframe();
-    }
-    plot_map();                                 /* plot the map */
-    n++;
-  }
-  plstop();                                   /* end of yapp */
-  strclose(instr);
-}	
