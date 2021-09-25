@@ -31,7 +31,7 @@ string defv[] = {
     "row=\n              Show spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.8\n       29-feb-2020 PJT",
+    "VERSION=0.9\n       24-sep-2021 PJT",
     NULL,
 };
 
@@ -108,10 +108,19 @@ void average2(int ndata, real *data1, real *data2, real *ave)
     ave[i] = 0.5*(data1[i]+data2[i]);
 }
 
+/* find a string in an array of strings; return -1 if not found */
+
+int keyindex(int ncols, string *colnames, string keyword)
+{
+  for (int i=0; i<ncols; i++)
+    if (streq(colnames[i],keyword)) return i;
+  return -1;
+}
+
 void nemo_main(void)
 {
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
-    int status, fmode, ii, jj, i, j, k, colnum, data_col, tcal_col;
+    int status, fmode, ii, jj, i, j, k, colnum, data_col;
     long int nrows;
     int ncols, nchan, nfiles, found, row;
     string fname = getparam("in"), *fnames;
@@ -162,16 +171,17 @@ void nemo_main(void)
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
       if (nsize>0 && nrows != nsize)
 	warning("nrows=%d nsize=%d",nrows,nsize);
+
 	
       colnames = (string *) allocate(ncols * sizeof(string));
       data_col = -1;
-      tcal_col = -1;
       for (i=0; i<ncols; i++) {    // loop over all columns to find the DATA column, awkward
 	ii = i + 1;
 	fits_make_keyn("TTYPE", ii, keyword, &status);
 	fits_read_key(fptr, TSTRING, keyword, colname, NULL, &status);
 	colnames[i] = scopy(colname);
 	dprintf(1,"%s = %s\n",keyword,colname);
+	// DATA is special since we need to get the number of channels from TFORM
 	if (streq(colname,"DATA") || streq(colname,"SPECTRUM")) {  // classic SDFITS or CLASS FITS
 	  data_col = ii;
 	  fits_make_keyn("TFORM", ii, keyword, &status);
@@ -179,11 +189,17 @@ void nemo_main(void)
 	  nchan = atoi(data_fmt);
 	  dprintf(1,"DATA in column %d  nchan=%d\n",data_col,nchan);
 	}
-	if (streq(colname,"TCAL")) tcal_col = ii;
       } //for(i)
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d\n",fname,nrows,ncols,nchan);
-      if (tcal_col < 0)
-	warning("No TCAL, cannot calibrate, all values assumed 1.0");
+      int col_tcal = keyindex(ncols, colnames, "TCAL") + 1;
+      int col_cal  = keyindex(ncols, colnames, "CAL") + 1;
+      int col_sig  = keyindex(ncols, colnames, "SIG") + 1;
+      int col_fdnum = keyindex(ncols, colnames, "FDNUM") + 1;
+      int col_ifnum = keyindex(ncols, colnames, "IFNUM") + 1;
+      int col_plnum = keyindex(ncols, colnames, "PLNUM") + 1;
+      dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
+	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
+      
       if (hasvalue("nchan")) {
 	nchan = getiparam("nchan");
 	warning("Overriding with nchan=%d",nchan);
@@ -282,9 +298,9 @@ void nemo_main(void)
 	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
 	  // make sure nsize <= nrows
 	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nsize, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
-	  if (tcal_col < 0)
+	  if (col_tcal < 0)
 	    for(i=0; i<nsize; i++) tcal[i] = 1.0;
-	  fits_read_col(fptr, TDOUBLE, tcal_col, 1, 1,       nsize, &nulval, tcal, &anynul, &status);	  
+	  fits_read_col(fptr, TDOUBLE, col_tcal, 1, 1,       nsize, &nulval, tcal, &anynul, &status);	  
 	  // should also read the TCAL column
 	  dprintf(0,"DATA6 %g %g %g     %g\n",
 		  data6[0][0][0][0][0][0],
