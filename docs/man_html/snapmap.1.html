@@ -6,6 +6,7 @@
 <title>SNAPMAP(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -24,63 +25,64 @@ an <a href='image.5.html'><i>image(5NEMO)</i></a>
 , with optional astronomical projection for direct comparision
 with true astronomical images. There are a number of ways implemented to
 "grid" the particles: mean value, with or without gaussian or cone weighting,
-and forms of linear interpolation. <p>
+and forms of linear interpolation. These functions are also known as "kriging".
+<p>
 Use <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
- instead to grid datacubes
-(e.g. X-Y-Z), or if you need various styles of line of sight integrations. <b>snapmap</b>
-is more appropriate to obtain well interpolated maps from <i>irregularly sampled</i>
-data where the input mapping <i>I(x,y)</i> is still a smooth function, although
-good results can also be ontained by averaging the values (the default
-mode) or using a smoothing length <i>svar=<b>. 
+ instead to grid datacubes (e.g. X-Y-Z), or if you need
+various styles of line of sight integrations. <b>snapmap</b> is more appropriate
+to obtain well interpolated maps from <i>irregularly sampled</i> data where the
+input mapping <i>I(x,y)</i> is still a smooth function, although good results
+can also be ontained by averaging the values (the default mode) or using
+a smoothing length <i>svar=<b>. 
 <h2><a name='sect3' href='#toc3'></b></i>Parameters</a></h2>
-The following parameters
-are recognized: 
+The following parameters are recognized:
+
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format.
-Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.
- [no default]. </dd>
+ format. Multiple snapshots
+can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.  [no default].
+</dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
 <dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
- format. Note
-that multiple <b>times</b> and/or multiple <b>evar</b>&rsquo;s will produce multiple images
-in this file. [no default]. </dd>
+ format. Note that multiple
+<b>times</b> and/or multiple <b>evar</b>&rsquo;s will produce multiple images in this file. [no
+default]. </dd>
 
 <dt><b>times=</b><i>t1:t2,t3,..</i> </dt>
-<dd>Selection of the times of snapshots
-to be selected for gridding. For <b>stack=t</b> all snapshots will be co-added into
-one image, however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can
-request multiple output images. [Default: <b>all</b>]. </dd>
+<dd>Selection of the times of snapshots to be selected
+for gridding. For <b>stack=t</b> all snapshots will be co-added into one image,
+however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can request multiple
+output images. [Default: <b>all</b>]. </dd>
 
 <dt><b>xrange=<i>xb:xe</i></b> </dt>
-<dd>Range in <b>xvar</b>
-to bin. Note these are the outer edges, not their cell centers. [default:
-<b>-2:2</b>]. </dd>
+<dd>Range in <b>xvar</b> to bin. Note these
+are the outer edges, not their cell centers. [default: <b>-2:2</b>]. </dd>
 
-<dt><b>yrange=<i>xb:xe</i></b> </dt>
+<dt><b>yrange=<i>xb:xe</i></b>
+</dt>
 <dd>Range in <b>yvar</b> to bin [default: <b>-2:2</b>]. </dd>
 
-<dt><b>xvar=</b><i>x-expression</i>
-</dt>
-<dd>The value of <i>x-expression</i> is gridded along the X axis. [default: <b>x</b>]. </dd>
+<dt><b>xvar=</b><i>x-expression</i> </dt>
+<dd>The value of <i>x-expression</i>
+is gridded along the X axis. [default: <b>x</b>]. </dd>
 
-<dt><b>yvar=</b><i>y-expression</i>
-</dt>
-<dd>The value of <i>y-expression</i> is gridded along the Y axis. [default: <b>y</b>]. </dd>
+<dt><b>yvar=</b><i>y-expression</i> </dt>
+<dd>The value of
+<i>y-expression</i> is gridded along the Y axis. [default: <b>y</b>]. </dd>
 
-<dt><b>evar=<i>e1,e2,...</i></b>
-</dt>
-<dd>Variable(s) to denote the emissivity per particle.  Multiple expressions,
-separated by commas, can be given, each of them generating a separate image
-in  a single multi-image output file. [default: <b>m</b>]. </dd>
+<dt><b>evar=<i>e1,e2,...</i></b> </dt>
+<dd>Variable(s)
+to denote the emissivity per particle.  Multiple expressions, separated
+by commas, can be given, each of them generating a separate image in  a
+single multi-image output file. [default: <b>m</b>]. </dd>
 
 <dt><b>svar=<i>smoothing</i></b> </dt>
-<dd>Variable
-to denote gaussian weighting size in X and Y. Note this is the gaussian
-sigma, not the FWHM (FMHW = 2.355 * sigma). Only used if <b>mode=mean</b>.  </dd>
+<dd>Variable to denote
+gaussian weighting size in X and Y. Note this is the gaussian sigma, not
+the FWHM (FMHW = 2.355 * sigma). Only used if <b>mode=mean</b>.  </dd>
 
 <dt><b>sfunc=<i>smoothing-function</i></b>
 </dt>
@@ -165,10 +167,12 @@ Here&rsquo;s a simple example using NEMO&rsquo;s pipes: <br>
 , <a href='ccdmerge.1.html'>ccdmerge(1NEMO)</a>
 , <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
- 
+ <p>
+kiging programs
+such as <i>lmtgridder</i> and <i>gbtgridder</i> take single dish pointings and create
+a map from them. 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter
-Teuben 
+Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>src/nbody/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapmap.c
