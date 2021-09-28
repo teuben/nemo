@@ -299,14 +299,20 @@ void nemo_main(void)
 	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
 	float nulval = 0.0;
 	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
-	dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	if (nrows > 1)
+	  dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	else
+	  dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
 #else
 	// waterfall type data
 	dprintf(0,"TWODIM: get Waterfall\n");
 	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
 	double nulval = 0.0;
 	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
-	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	if (nrows > 1)
+	  dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	else
+	  dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);	  
 #endif
 
 	if (Qstats) {
