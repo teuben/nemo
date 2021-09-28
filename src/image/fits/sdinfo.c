@@ -117,6 +117,16 @@ int keyindex(int ncols, string *colnames, string keyword)
   return -1;
 }
 
+void minmaxi(int n, int *data, int *data_min, int *data_max)
+{
+  *data_min = *data_max = data[0];
+  for (int i=1; i<n; i++) {
+    if (data[i] < *data_min) *data_min = data[i];
+    if (data[i] > *data_max) *data_max = data[i];
+  }
+}
+
+
 //
 
 double *get_column_dbl(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
@@ -265,6 +275,24 @@ void nemo_main(void)
       dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
 	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
 
+
+      int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
+      int *ifnum_data = get_column_int(fptr, "IFNUM", nrows, ncols, colnames);
+      int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
+      int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);   // can be absent
+      
+      int fd_min, fd_max, if_min, if_max, pl_min, pl_max;
+      minmaxi(nrows, fdnum_data, &fd_min, &fd_max);
+      minmaxi(nrows, ifnum_data, &if_min, &if_max);
+      minmaxi(nrows, plnum_data, &pl_min, &pl_max);
+      printf("FDNUM: %d %d\n", fd_min, fd_max);
+      printf("IFNUM: %d %d\n", if_min, if_max);
+      printf("PLNUM: %d %d\n", pl_min, pl_max);
+      printf("INT: @ 0x%d\n", int_data);
+
+
+
+      
       if (hasvalue("nchan")) {
 	nchan = getiparam("nchan");
 	warning("Overriding with nchan=%d",nchan);
