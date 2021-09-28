@@ -31,7 +31,7 @@ string defv[] = {
     "row=\n              Show spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.9\n       29-sep-2021 PJT",
+    "VERSION=0.9\n       27-sep-2021 PJT",
     NULL,
 };
 
@@ -116,6 +116,16 @@ int keyindex(int ncols, string *colnames, string keyword)
     if (streq(colnames[i],keyword)) return i;
   return -1;
 }
+
+void minmaxi(int n, int *data, int *data_min, int *data_max)
+{
+  *data_min = *data_max = data[0];
+  for (int i=1; i<n; i++) {
+    if (data[i] < *data_min) *data_min = data[i];
+    if (data[i] > *data_max) *data_max = data[i];
+  }
+}
+
 
 //
 
@@ -265,6 +275,24 @@ void nemo_main(void)
       dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
 	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
 
+
+      int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
+      int *ifnum_data = get_column_int(fptr, "IFNUM", nrows, ncols, colnames);
+      int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
+      int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);   // can be absent
+      
+      int fd_min, fd_max, if_min, if_max, pl_min, pl_max;
+      minmaxi(nrows, fdnum_data, &fd_min, &fd_max);
+      minmaxi(nrows, ifnum_data, &if_min, &if_max);
+      minmaxi(nrows, plnum_data, &pl_min, &pl_max);
+      printf("FDNUM: %d %d\n", fd_min, fd_max);
+      printf("IFNUM: %d %d\n", if_min, if_max);
+      printf("PLNUM: %d %d\n", pl_min, pl_max);
+      printf("INT: @ 0x%d\n", int_data);
+
+
+
+      
       if (hasvalue("nchan")) {
 	nchan = getiparam("nchan");
 	warning("Overriding with nchan=%d",nchan);
@@ -299,20 +327,14 @@ void nemo_main(void)
 	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
 	float nulval = 0.0;
 	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
-	if (nrows > 1)
-	  dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
-	else
-	  dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
+	dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
 #else
 	// waterfall type data
 	dprintf(0,"TWODIM: get Waterfall\n");
 	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
 	double nulval = 0.0;
 	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
-	if (nrows > 1)
-	  dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
-	else
-	  dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);	  
+	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
 #endif
 
 	if (Qstats) {
