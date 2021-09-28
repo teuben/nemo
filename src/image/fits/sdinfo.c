@@ -5,6 +5,7 @@
  * 23-nov-2019   PJT       written
  * 11-dec-2019   PJT       mdarray reduction example
  * 29-feb-2020   PJT       verbose, raw I/O
+ * 28-sep-2021   PJT       better cfitsio usage, report more SDFITS properties
  *
  * Benchmark 6 N2347 files:  2.4"  (this is with mom=0 stats)
  * dims=5 for NGC5291:       31-35ms (depending in 1 or 3 levels)
@@ -31,7 +32,7 @@ string defv[] = {
     "row=\n              Show spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.9\n       27-sep-2021 PJT",
+    "VERSION=0.9\n       28-sep-2021 PJT",
     NULL,
 };
 
@@ -127,7 +128,7 @@ void minmaxi(int n, int *data, int *data_min, int *data_max)
 }
 
 
-//
+// 
 
 double *get_column_dbl(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
 {
@@ -327,14 +328,20 @@ void nemo_main(void)
 	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
 	float nulval = 0.0;
 	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
-	dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	if (nrows > 1)
+	  dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	else
+	  dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
 #else
 	// waterfall type data
 	dprintf(0,"TWODIM: get Waterfall\n");
 	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
 	double nulval = 0.0;
 	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
-	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	if (nrows > 1)
+	  dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	else
+	  dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);	  
 #endif
 
 	if (Qstats) {
