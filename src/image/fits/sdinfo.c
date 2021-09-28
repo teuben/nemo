@@ -123,7 +123,7 @@ double *get_column_dbl(fitsfile *fptr, char *colname, int nrows, int ncols, char
 {
   int col = keyindex(ncols, colnames, colname) + 1;
   if (col < 1) return NULL;
-  double *data = (double *) malloc(nrows * sizeof(double));
+  double *data = (double *) allocate(nrows * sizeof(double));
   double nulval = 0.0;
   int anynul;
   int fstatus = 0;
@@ -136,7 +136,7 @@ int *get_column_int(fitsfile *fptr, char *colname, int nrows, int ncols, char **
 {
   int col = keyindex(ncols, colnames, colname) + 1;
   if (col < 1) return NULL;
-  int *data = (int *) malloc(nrows * sizeof(int));
+  int *data = (int *) allocate(nrows * sizeof(int));
   int nulval = 0;
   int anynul;
   int fstatus = 0;
@@ -151,14 +151,14 @@ char **get_column_str(fitsfile *fptr, char *colname, int nrows, int ncols, char 
   int fstatus = 0;
   int col = keyindex(ncols, colnames, colname) + 1;
   if (col < 1) return NULL;
-  char **data = (char **) malloc(nrows * sizeof(char *));
+  char **data = (char **) allocate(nrows * sizeof(char *));
   // find the string length of this keyword
   fits_make_keyn("TFORM", col, keyword, &fstatus);
   fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &fstatus);	
   int slen = atoi(data_fmt);  // 1 extra for terminating 0
   printf("DATA in column %d  slen=%d\n",col,slen);
   // allocate the full block of chars for slen*nrows 
-  char *vals = (char *) malloc(nrows*(slen+1)*sizeof(char));
+  char *vals = (char *) allocate(nrows*(slen+1)*sizeof(char));
   for (int i=0; i<nrows; i++)
     data[i] = &vals[(slen+1)*i];
   char *nulval = "\0";
@@ -185,7 +185,7 @@ void nemo_main(void)
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
     int status, fmode, ii, jj, i, j, k, colnum, data_col;
     long int nrows;
-    int ncols, nchan, nfiles, found, row;
+    int ncols, nchan, nfiles, found, row, nhdus;
     string fname = getparam("in"), *fnames;
     string *colnames;
     int nsize, ndims, dims[MDMAXDIM];
@@ -229,6 +229,8 @@ void nemo_main(void)
 	fits_report_error(stderr, status);  /* print out any error messages */	
 	continue;
       }
+      fits_get_num_hdus(fptr, &nhdus, &status);
+      dprintf(1,"%s : Nhdus: %d\n",fname,nhdus);
       fits_get_num_rows(fptr, &nrows, &status);
       fits_get_num_cols(fptr, &ncols, &status);
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
