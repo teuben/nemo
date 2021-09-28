@@ -1,3 +1,5 @@
+# "minimum"  sudo apt install build-essential gfortran xorg-dev git tcsh cmake pgplot5
+#
 # general
 time
 build-essential
