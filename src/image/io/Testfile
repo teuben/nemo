@@ -32,9 +32,11 @@ ccdprint: ccd.in
 
 ccddump: ccd.in
 	@echo Running $@
+	$(EXEC) ccddump ccd.in;
 	$(EXEC) ccddump ccd.in . ; nemo.coverage ccddump.c
 
 ccdspec: ccd3.in
+	 ccdspec ccd3.in
 	 ccdspec ccd3.in | tail -3
 
 ccdhead: ccd.in

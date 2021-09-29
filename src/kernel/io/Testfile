@@ -36,10 +36,12 @@ tsf:
 
 csf:
 	@echo Running csf
+	$(EXEC) csf rsf.out csf.out MySet
 	$(EXEC) csf rsf.out csf.out MySet		; nemo.coverage csf.c
 	$(EXEC) csf rsf.out - MyD | $(EXEC) tsf - maxprec=t	; nemo.coverage csf.c tsf.c
 	$(EXEC) csf rsf.out - MyD convert=d2f | $(EXEC) tsf - maxprec=t ; nemo.coverage csf.c tsf.c
 	$(EXEC) csf rsf.out - MyF | $(EXEC) tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+	
 # oops,there is a problem here, can't do this
 #	csf rsf.out - MyF convert=f2d | tsf - maxprec=t
 	$(EXEC) tsf csf.out				; nemo.coverage tsf.c
@@ -50,5 +52,6 @@ bsf:
 
 hisf:
 	@echo Running hisf
+	$(EXEC) hisf csf.out
 	$(EXEC) hisf csf.out				; nemo.coverage history.c
 

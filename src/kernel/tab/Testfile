@@ -26,6 +26,7 @@ tabmath: tab.in
 
 tabplot:
 	@echo Running $@
+	$(EXEC) tabplot -;
 	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - ; nemo.coverage tabplot.c
 
 NMAX = 100000
