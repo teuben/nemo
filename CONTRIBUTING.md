@@ -15,7 +15,7 @@ if you just want to compile and run, but not ideal if you make modifications and
 want to shared them back to the *upstream* via a *pull request* (PR). You
 can however "repair" your local repo, discussed below, and still submit a PR.
 
-2. You (forked)[https://guides.github.com/activities/forking] NEMO
+2. You (forked)[https://guides.github.com/activities/forking/] NEMO
 from the *upstream*, and cloned it locally from the repo in your own
 github account. This is the ideal method, but you will still need to
 set the *upstream* manually if you used github.com. See also the
@@ -59,7 +59,7 @@ If all is well, the following commands should show the correct *origin* and *ups
 
 None of these should be blank!
 
-## 1. Cloning your personal fork
+## 2. Cloning your personal fork
 
 If you have cloned your fork
 
@@ -71,7 +71,7 @@ you only need to set the upstream:
 
 and you are ready for creating a PR.
 
-## 2. Cloning the official upstream
+## 1. Cloning the official upstream
 
 If you happened to have cloned the official *upstream*
 
@@ -104,8 +104,7 @@ tip of this upstream master branch.
 ## Working in a branch
 
 Assuming your own master is in sync with the upstream master,
-here is a typical example, using a branchname **b1**, or
-something more descriptive:
+here is a typical example, using a branchname **b1**
 
       git branch b1
       git checkout b1
@@ -128,13 +127,30 @@ back in the upstream, it is really not needed anymore:
       git branch -D b1
       git push origin --delete b1
 
+## Memorable git options
+
+1.  Show all files modified in a branch AAA 
+
+      git diff master...AAA --name-status --diff-filter=M
+
+2.  When was a branch created
+
+      git show --summary `git merge-base AAA master`
+      gitk --all --select-commit=`git merge-base foo master`
+
+3. To see which files belonged in a commit, find the sha (e.g. via "git log" or "git log file" if 
+   you know the file that belonged to it), then
+
+     git diff-tree --no-commit-id --name-only -r SHA
+ 
+
 # Tests
 
 From the top level directory in NEMO there are a few basics regression tests and benchmarks:
 
       make check
       make bench
-      make bench5
+      make bench3
 
 The **check** target depends on the many **Testfile** files sprinkled throughout NEMO.  Although
 you can now find a few **Benchfile** files as well, they have not been put under a top level
