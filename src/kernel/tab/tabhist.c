@@ -99,12 +99,16 @@ string defv[] = {
     "mad=f\n                      Compute Mean Absoluted Deviation",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
+#ifndef FLOGGER
     "sort=qsort\n                 Sort mode {qsort;...}",
+#else
+    "sort=qsort\n                 Sort mode {qsort, bubble, heap, insert, merge, quick, shell}",
+#endif
     "dual=f\n                     Dual pass for large number",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.3a\n		  26-apr-2021 PJT",
+    "VERSION=7.3b\n		  30-oct-2021 PJT",
     NULL
 };
 
