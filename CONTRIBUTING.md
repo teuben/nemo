@@ -142,7 +142,6 @@ back in the upstream, it is really not needed anymore:
    you know the file that belonged to it), then
 
      git diff-tree --no-commit-id --name-only -r SHA
- 
 
 # Tests
 
