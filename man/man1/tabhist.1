@@ -130,10 +130,14 @@ Delete points more than nsigma times the sigma from the mean. After each
 point sigma and mean are recomputed. [Default: none]
 .TP
 \fBsort=\fP\fIsort_mode\fP
+Default:  qsort.   If flogger is enabled additional sorting modes are available:
+bubble, heap, insert, merge, quick, shell.
 .TP
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
 Default: none.
+.SH FLOGGER
+There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
 .SH BUGS
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
