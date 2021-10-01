@@ -108,7 +108,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.3b\n		  30-oct-2021 PJT",
+    "VERSION=7.3b\n		  30-sep-2021 PJT",
     NULL
 };
 
