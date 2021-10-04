@@ -168,13 +168,13 @@ char **get_column_str(fitsfile *fptr, char *colname, int nrows, int ncols, char 
   fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &fstatus);	
   int slen = atoi(data_fmt);  // 1 extra for terminating 0
   printf("DATA in column %d  slen=%d\n",col,slen);
-  // allocate the full block of chars for slen*nrows 
+  // allocate the full block of chars for (slen+1)*nrows
   char *vals = (char *) allocate(nrows*(slen+1)*sizeof(char));
   for (int i=0; i<nrows; i++)
     data[i] = &vals[(slen+1)*i];
   char *nulval = "\0";
   int anynul;
-  fits_read_col_str(fptr,       col, 1, 1, nrows, nulval, data, &anynul, &fstatus);  
+  fits_read_col_str(fptr, col, 1, 1, nrows, nulval, data, &anynul, &fstatus);  
   if (anynul) printf("get_column %s -> %d null's\n", colname, anynul);  
   return data;
 }
@@ -282,14 +282,40 @@ void nemo_main(void)
       int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
       int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);   // can be absent
       
-      int fd_min, fd_max, if_min, if_max, pl_min, pl_max;
+      int fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max;
       minmaxi(nrows, fdnum_data, &fd_min, &fd_max);
       minmaxi(nrows, ifnum_data, &if_min, &if_max);
       minmaxi(nrows, plnum_data, &pl_min, &pl_max);
       printf("FDNUM: %d %d\n", fd_min, fd_max);
       printf("IFNUM: %d %d\n", if_min, if_max);
       printf("PLNUM: %d %d\n", pl_min, pl_max);
-      printf("INT: @ 0x%d\n", int_data);
+      if (int_data) {
+	minmaxi(nrows, int_data, &int_min, &int_max);
+	printf("INT:   %d %d\n", int_min, int_max);	
+      }
+      char **sig_data = get_column_str(fptr, "SIG", nrows, ncols, colnames);
+      char **cal_data = get_column_str(fptr, "CAL", nrows, ncols, colnames);
+      int nsig=0, ncal=0;
+      if (sig_data && cal_data) {
+	nsig = ncal = 1;
+	for (i=1; i<nrows; i++)
+	  if (sig_data[i][0] != sig_data[0][0]) {
+	    printf("ODD SIG %d %s %s\n",i,sig_data[0],sig_data[i]);
+	    nsig++;
+	    break;
+	  }
+	for (i=1; i<nrows; i++)
+	  if (cal_data[i][0] != cal_data[0][0]) {
+	    printf("ODD CAL %d %s %s\n",i,cal_data[0],cal_data[i]);	    
+	    ncal++;
+	    break;
+	  }
+      }
+      printf("SIG:   %d  %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
+      printf("CAL:   %d  %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+
+      for (i=0; i<nrows; i++)
+	printf("SIGCAL %d '%s' '%s'\n", i, sig_data[i], cal_data[i]);
 
 
 
