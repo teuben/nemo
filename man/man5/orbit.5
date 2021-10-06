@@ -1,4 +1,4 @@
-.TH ORBIT 5NEMO "24 July 2013"
+.TH ORBIT 5NEMO "6 October 2021"
 .SH NAME
 orbit \- binary format for stellar orbits 
 .SH SYNOPSIS
@@ -13,9 +13,11 @@ orbit \- binary format for stellar orbits
 the general binary
 structured fileformat as described in \fIfilestruct(3NEMO)\fP.
 It is accompanied by a package of functions that make the calculation,
-display and analysis of simple stellar orbits a simpler task.
+display and analysis of 2- and 3D stellar orbits a simpler task.
 .SH FORMAT
 .nf
+#define ORBIT_PHI
+
 typedef struct {
 	int   ndim;
 	int   coordsys;
@@ -27,6 +29,10 @@ typedef struct {
 	int   nsteps;
 	real  *time;
 	real  *phase;
+#ifdef ORBIT_PHI
+	realptr _phi;
+	realptr _acc;
+#endif  
 	a_potential pot;
 } orbit, *orbitptr;
 .fi
@@ -64,6 +70,10 @@ General access macro's are available by including \fBorbit.h\fP.
 #define Uorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)))
 #define Vorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+1))
 #define Worb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+2))
+#define Porb(optr,i)    (*(PhiPath(optr)+(i)))
+#define AXorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)))
+#define AYorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+1))
+#define AZorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+2))
 
 #define PotName(optr)   (Potential(optr).name)
 #define PotPars(optr)   (Potential(optr).pars)
@@ -89,4 +99,5 @@ src/orbit/io	orbit.c
 6-dec-93	V3.x: added maxsteps for re-allocation	PJT
 1-mar-03	V3.3: added iom_error	PJT
 24-jul-13	V4.0: added key		PJT
+6-oct-21	V5.x: split Pos/Vel; support for PHI/ACC	PJT
 .fi
