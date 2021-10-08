@@ -12,6 +12,10 @@ import aplpy
 
 basename = sys.argv[1]
 
+if not os.path.isfile(basename + ".fits"):
+    print("Unknown basename %s, the file %s does not exist" % (basename, basename+ ".fits"))
+    sys.exit(1)
+
 slicex = 64
 slicey = 64
 slicev = 32
