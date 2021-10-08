@@ -22,6 +22,7 @@ stream pyplot_init(string fname)
   fprintf(str,"import sys\n");
   fprintf(str,"import numpy as np\n");
   fprintf(str,"import matplotlib.pyplot as plt\n");
+  fprintf(str,"# plt.style.use(\"grayscale\")\n");
   fprintf(str,"\n");
   return str;
 }
