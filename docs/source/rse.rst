@@ -22,7 +22,8 @@ with no domain knowledge.
 * installing NEMO occurs in place, we use **configure** to track down the system
   dependent portions (or force them), and a set of **make build** steps will compile
   and build NEMO. There is no **install** step, so users will need to modify their
-  *shell environment* to take advantage of the new tools.
+  *shell environment* to take advantage of the new tools.  There is no support for
+  a build tree that's different from the source tree.
 
 * In terms of documentation there are the unix manual (``man``) pages, very hyperlinked,
   and the old *Users and Programmers Guide* (in latex).  The man pages are still used,
