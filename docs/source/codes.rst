@@ -272,7 +272,7 @@ List of Related Codes
   
   pyfalcon
       Python interface for :term:`gyrfalcON`  
-      | http://ascl.net/1403.002
+      | https://github.com/GalacticDynamics-Oxford/pyfalcon
   
   pynbody
       N-Body/SPH analysis for python. 
