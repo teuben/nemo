@@ -324,6 +324,11 @@ $(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) $(NBDYFLAGS)
+$(ACC)GasPotential.so:		$(SACC)GasPotential.cc $(ACCT) $(defacc_h) $(makefiles)
+				$(MAKE_ACC)
+$(ACC)GPDehnen.so:		$(SACC)GPDehnen.cc $(ACCT) $(defacc_h) $(makefiles)
+				$(MAKE_ACC)
+
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
@@ -339,7 +344,10 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)PotExp.so \
 				$(ACC)Shrink.so \
 				$(ACC)SoftKernel.so \
-				$(ACC)LogPot.so
+				$(ACC)LogPot.so \
+				$(ACC)GasPotential.so \
+				$(ACC)GPDehnen.so
+
 endif
 
 # -----
