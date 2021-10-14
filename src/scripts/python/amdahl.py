@@ -1,7 +1,7 @@
 #! /usr/bin/env python
 #
 #  Amdahl's law:   a fraction of the code can be parallized
-#  Output are, for each N
+#  Output are, for each N (where N is number of processors)
 #       r_u,  r_e, f_p
 #  where both r_u (user_ratio) and r_e (elapsed_ratio) should ideally
 #  be 1, else there is overhead of running in parallel, and
@@ -13,9 +13,10 @@
 #  
 #
 #  nov 22, 2020:   first version
-#  jan 31, 2021:   cleanup up, generalized for files that contain
-#                  N <time_output>
+#  jan 31, 2021:   cleanup up, generalized for files that contains the following output 
+#                  N <usr/bin/time_output>
 #                  1 15.16user 0.00system 0:15.18elapsed   99%CPU
+#                  2 
 import sys, os
 
 def par(u1,e1,np,un,en):
