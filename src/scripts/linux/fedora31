@@ -25,7 +25,7 @@ hdf5-devel
 # /usr/lib64   and /usr/include/cfitsio
 cfitsio-devel
 
-# for lmtinfo
+# f
 netcdf-devel
 
 
