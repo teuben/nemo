@@ -178,6 +178,7 @@ namespace {
 #elif defined(__GNUC__)
 	     " -mfpmath=sse -mpreferred-stack-boundary=4 -ggdb3"
 	     " -Wall -Wextra -Winit-self -Wshadow -Woverloaded-virtual -fPIC"
+	     " -std=c++11"
 	     " -fopenmp -funroll-loops -fforce-addr"
 #else
 	     " -fpic -openmp -g"
