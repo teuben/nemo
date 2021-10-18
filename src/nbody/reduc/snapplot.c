@@ -23,6 +23,7 @@
  *          b 23-may-01 setrange() now using nemoinp()			  PJT
  *          c 7-oct-02  atof->natof					  pjt
  *      V3.5  9-oct-03  finally able to read the new snapshot(5NEMO) style PJT
+ *      V3.5b  11-oct-21 C99 build                                         PPT
  */
 
 #include <stdinc.h>
@@ -35,6 +36,7 @@
 #include <loadobj.h>
 #include <yapp.h>
 #include <axis.h>
+#include <history.h>
 
 #ifdef HAVE_LIBPGPLOT
 #define COLOR
@@ -68,7 +70,7 @@ string defv[] = {
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
     "trak=\n                      alternative for trakplot (t|f)",
-    "VERSION=3.5a\n		  15-apr-05 PJT",
+    "VERSION=3.5b\n		  14-oct-2021 PPT",
     NULL,
 };
 
@@ -110,6 +112,16 @@ local real *auxptr = NULL;
 real xtrans(real), ytrans(real);
 
 local bool scansnap(void);
+
+/*Function Prototypes*/
+void setparams();
+void compfuncs();
+void setcolors();
+void plotbox();
+void plotsnap();
+void scrdump(int frameno);
+void setrange(real *rval, string rexp);
+void setticks(real tiks[], int *ntik, string tikstr);
 
 #ifndef FRAMEDELAY
 #  define FRAMEDELAY 1
@@ -176,7 +188,7 @@ nemo_main()
     plstop();
 }
 
-setparams()
+void setparams()
 {
     trakflag = (strncmp(tail(getargv0()), "trak", 4) == 0);
     if (hasvalue("trak"))       /* override name of executable */
@@ -239,7 +251,7 @@ string rexp;
     rval[2] = rval[1] - rval[0];
 }
 #else
-setrange(real *rval, string rexp)
+void setrange(real *rval, string rexp)
 {
     char *cptr, *tmpstr;
     double dpar;
@@ -269,7 +281,7 @@ setrange(real *rval, string rexp)
 extern btrproc btrtrans(string);	/* in reality: rproc */
 extern btiproc btitrans(string);	/* in reality: iproc */
 
-compfuncs()
+void compfuncs()
 {
     xfunc = btrtrans(xvar);
     yfunc = btrtrans(yvar);
@@ -284,7 +296,7 @@ compfuncs()
 
 #define MAXCOL  256
 
-setcolors()
+void setcolors()
 {
     stream cstr;
     int ncolors;
@@ -404,7 +416,7 @@ bool scansnap(void)
     return TRUE;
 }
 
-plotbox()
+void plotbox()
 {
     char msg[128];
     int nticks;
@@ -459,10 +471,7 @@ plotbox()
     }
 }
 
-setticks(tiks, ntik, tikstr)
-real tiks[];
-int *ntik;
-string tikstr;
+void setticks(real tiks[], int *ntik, string tikstr)
 {
 #if 0
     /* this section has memory leak; allocate, but never free's */
@@ -478,7 +487,7 @@ string tikstr;
 #endif
 }
 
-plotsnap()
+void plotsnap()
 {
     real t, *mp, *psp, *pp, *ap, *acp;
     int vismax, visnow, i, vis, icol;
@@ -604,8 +613,7 @@ real ytrans( real y )
     return ybox[0] + ybox[2] * (y - yrange[0]) / yrange[2];
 }
 
-scrdump(frameno)
-int frameno;
+void scrdump(int frameno)
 {
     char s[64];
 
