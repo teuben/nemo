@@ -1,9 +1,12 @@
 .TH ELLIPSE 1NEMO "27 August 2003"
-.SH NAME
+
+.SH "NAME"
 ellipse \- ellipse (de)projection properties
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBellipse\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBellipse\fP de-projects ellipses, and computes the intrinsic properties,
 and vice versa. It also computes kinematic properties, assuming flow is
 along the ellipses, such as the kinematic minor axis (the major axis
@@ -13,7 +16,8 @@ defined with this routine.
 Apart from giving the eccentricity of the ellipse ("bar") in the disk,
 and the inclination of the disk, the two angles in this routine are
 \fBtheta\fP and \fBphi\fP, of which only one needs to be given.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -52,7 +56,8 @@ Number of monte carlo to perform to compute an error term. [0]
 .TP
 \fBseed=\fP
 Seed for random number generator. [0]
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here for a set of apparent position angles w.r.t. line of notes, and given
 apparent b/a and inc, the intrinsic b/a, angle between bar and line of nodes
 and the (sky plane) kinematic major axis (assumed perpendicular to the 
@@ -69,18 +74,23 @@ b/a inc phi    b/a'    theta   phi_kin
 0.3 45 28    0.343591 39.2183 -42.5507
 0.3 45 30    0.335325 41.4834 -41.2693
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 For the stick formulae (a= used) only projection is done.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 .nf
 Skillman et al. A&A 198, 33 (1988), p39.
-Arnaboldi et al. 1995AJ....110..199A
+Arnaboldi et al. 1995AJ....110..199A \fIKinematics of the Ionized Gas in NGC 253 \fP
 .fi
-.SH FILES
+
+.SH "FILES"
 src/orbit/misc	ellipse.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 fall-1986	V0.0 formulae derived for Skillman et al paper	PJT
