@@ -32,7 +32,7 @@ extern real plyscale     (real,real);
 
                                         	/* -DCOLOR or perhaps stubbed */
 extern void plcolor      (int);
-extern int  plncolor     (void);
+extern int  plncolors    (void);
 extern void plpalette    (real*,real*,real*,int);
                                                 /* non_standard */ 
 extern int pl_interp     (string);
