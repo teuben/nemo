@@ -24,14 +24,15 @@ tabmath: tab.in
 	@echo Running $@
 	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
 
-tabplot:
+tabplot: tab.in
 	@echo Running $@
-	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - ; nemo.coverage tabplot.c
+	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)' | $(EXEC) tabplot tab.out ; nemo.coverage tabplot.c
 
 NMAX = 100000
 
 tabhist:
 	@echo Running $*
+	$(EXEC) tabhist tab.in ;
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
 
@@ -77,7 +78,7 @@ tabtrend:
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
 
 #   testing object loading load= in tabnlsqfit from the fit/ directory
-fitmyline_local:
+kofitmyline_local:
 	(cd fit; make -f $(NEMOLIB)/Makefile.lib myline.so)
 	tabnllsqfit tab.out
 	tabnllsqfit tab.out load=fit/myline.so par=1,1
