@@ -12,7 +12,8 @@ value. The result is an
 \fIimage(5NEMO)\fP, with optional astronomical projection for direct
 comparision with true astronomical images. There are a number of ways
 implemented to "grid" the particles: mean value, with or without gaussian
-or cone weighting, and forms of linear interpolation.
+or cone weighting, and forms of linear interpolation. These functions are
+also known as "kriging".
 .PP 
 Use \fIsnapgrid(1NEMO)\fP instead to grid datacubes (e.g. X-Y-Z), or
 if you need various styles of
@@ -135,6 +136,8 @@ separate images. If you want them in a single image cube, use
 .fi
 .SH "SEE ALSO"
 snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdmerge(1NEMO), ccdsky(1NEMO), image(5NEMO)
+.PP
+kiging programs such as \fIlmtgridder\fP and \fIgbtgridder\fP take single dish pointings and create a map from them.
 .SH AUTHOR
 Peter Teuben
 .SH FILES

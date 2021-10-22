@@ -6,6 +6,7 @@
 <title>POTCCD(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -77,32 +78,36 @@ test potential at. Default: 0. </dd>
 <dd>Difference step used to compute numerical
 force derivates that are used to compute Poissonian densities.  </dd>
 
+<dt><b>omega=</b> </dt>
+<dd>Use
+this instead of any returned pattern speed. Default: not used, the first
+parameter in <b>potpars=</b> is used. </dd>
+
 <dt><b>ndim=</b> </dt>
-<dd>Number
-of dimensions used in Poissonian density computation. Should be 2 or 3. 
-</dd>
+<dd>Number of dimensions used in Poissonian
+density computation. Should be 2 or 3.  </dd>
 
 <dt><b>nder=1|2</b> </dt>
-<dd>Normally the density (<b>mode=den</b>) is derived by first derivatives
-of the forces, but for some potentials the force was never implemented
-(e.g. <b>potname=gauss</b>).  In this case the 2nd derivative of the potential will
-be needed, hence <b>nder=2</b>. Default: 1 
+<dd>Normally the density (<b>mode=den</b>)
+is derived by first derivatives of the forces, but for some potentials
+the force was never implemented (e.g. <b>potname=gauss</b>).  In this case the 2nd
+derivative of the potential will be needed, hence <b>nder=2</b>. Default: 1 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-With <b>ndim=2</b> the Z-coordinate is
-not ignored, and hence may give meaningless results if forces depend on
-Z. 
+With
+<b>ndim=2</b> the Z-coordinate is not ignored, and hence may give meaningless results
+if forces depend on Z. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-First a somewhat obscure way in to create a map of an arbitrary
-function using the <b>potname=rotcur</b> lookup table. It will use a spline interpolation,
-and if <b>mode=pot</b> is used, the "potential" is actually the "rotation curve"
-itself, since in general one cannot easily compute the potential from a
-rotation curve without knowing the full geometry. Here is an example how
-to create a smooth radial profile of the function "f(x)=1/sqrt(4+x)" on
-a grid from -10..10: <br>
+First a somewhat obscure way in to create
+a map of an arbitrary function using the <b>potname=rotcur</b> lookup table. It
+will use a spline interpolation, and if <b>mode=pot</b> is used, the "potential"
+is actually the "rotation curve" itself, since in general one cannot easily
+compute the potential from a rotation curve without knowing the full geometry.
+Here is an example how to create a smooth radial profile of the function
+"f(x)=1/sqrt(4+x)" on a grid from -10..10: <br>
 <pre>    % nemoinp 0:10 | tabmath - - &rsquo;1/(sqrt(4+%1)&rsquo; &gt; map0.tab
     % potccd map0 rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
 </pre>If the functional form is know, <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>

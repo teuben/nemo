@@ -23,13 +23,11 @@ string defv[] = {
   "eps=\n                Accuracy comparison (not implemented)",
   "label=\n              Override the in= filename in reporting",
   "ignore=cputime\n      Items to ignore in checksum",
-  "VERSION=1.1\n         21-dec-2019 PJT ",
+  "VERSION=1.1\n         05-jul-2021 VMB ",
   NULL,
 };
 
 string usage="benchmark stats on all floating point values in a (binary) structured file";
-
-string cvsid="$Id$";
 
 local stream instr;	
 local Moment m;
@@ -78,13 +76,13 @@ void nemo_main()
 
   if (hasvalue("test")) {
     if (streq(current,test))
-      printf("BSF %s: %s OK\n",label,current);
+      printf("BSF: OK     %s %s\n",current,label);
     else {
-      printf("BSF %s: %s FAIL\n",label,current);
-      printf("BSF %s: %s expected\n",label,test);
+      printf("BSF: FAIL   %s %s\n",current,label);
+      printf("BSF: EXPECT %s %s\n",test,label);
     }
   } else {
-    printf("BSF %s: %s\n",label,current);
+    printf("BSF: %s %s\n",current,label);
   }
 }
 

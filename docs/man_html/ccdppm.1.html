@@ -6,6 +6,7 @@
 <title>CCDPPM(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -36,64 +37,67 @@ Use the <b>mean=</b> and sigma= parameters to activate the ASINH scaling. <br>
 with its optional keyword <b>robust=t</b>. <p>
 For certain types of objects (e.g. galaxies)
 the ASINH scaling can be enhanced by also using power=0.5. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use --help to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>Input image filename. Must be a <a href='image.5.html'><i>image(5NEMO)</i></a>
-. Currently the 3rd
-dimension is ignored, and for datacubes the first slice is taken. See <a href='ccdsub.5.html'><i>ccdsub(5NEMO)</i></a>
-
-to select a plane. No default. </dd>
+. Currently the
+3rd dimension is ignored, and for datacubes the first slice is taken. See
+<a href='ccdsub.5.html'><i>ccdsub(5NEMO)</i></a>
+ to select a plane. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output PPM filename. No default. </dd>
+<dd>Output PPM filename. No
+default. </dd>
 
 <dt><b>min=</b> </dt>
-<dd>Override
-data minimum used in scaling. By default it will look for the minimum. </dd>
+<dd>Override data minimum used in scaling. By default it will look
+for the minimum. </dd>
 
-<dt><b>max=</b>
-</dt>
-<dd>Override data maximum used in scaling. By default it will look for the minimum.
-</dd>
+<dt><b>max=</b> </dt>
+<dd>Override data maximum used in scaling. By default it
+will look for the minimum. </dd>
 
 <dt><b>bad=</b> </dt>
-<dd>Use this as masking value to ignore data. By default no data is  considered
-bad. </dd>
+<dd>Use this as masking value to ignore data.
+By default no data is  considered bad. </dd>
 
 <dt><b>power=</b> </dt>
-<dd>The gamma factor <b>power</b> applied to the input <b>x</b>, i.e. <i>y = ((x-xmin)/(xmax-xmin))**power</i>.
- Use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
- for other transfer functions.. [1]. </dd>
+<dd>The gamma factor <b>power</b> applied
+to the input <b>x</b>, i.e. <i>y = ((x-xmin)/(xmax-xmin))**power</i>.  Use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
+
+for other transfer functions..  [1]. </dd>
 
 <dt><b>mean=</b> </dt>
+<dd>If supplied (and power= as well),
+this will activate the ASINH scaling. [not supplied] </dd>
+
+<dt><b>sigma=</b> </dt>
 <dd>If supplied
-(and power= as well), this will activate the ASINH scaling. 
-<p> [not supplied]
+(and mean= as well), this will activate the ASINH scaling. [not supplied]
 </dd>
 
-<dt><b>power=</b> </dt>
-<dd>If supplied (and mean= as well), this will activate the ASINH scaling.
-[not supplied] </dd>
-
 <dt><b>lut=</b> </dt>
-<dd>optional selection of a lut from NEMODAT/lut. Currently
-the full path to the file must be given. By default it will be using a grey
-scale (red=green=blue). </dd>
+<dd>optional selection of a lut from NEMODAT/lut. Currently the full path
+to the file must be given. By default it will be using a grey scale (red=green=blue).
+</dd>
 
 <dt><b>8bit=t|f</b> </dt>
-<dd>Force up to 256 discrete colors. This can
-be useful if you want to convert the normally 24bit ppms to 8bit images
-and not &rsquo;loose&rsquo; any colors in the conversion.  [<b>false</b>]. </dd>
+<dd>Force up to 256 discrete colors. This can be useful if you want
+to convert the normally 24bit ppms to 8bit images and not &rsquo;loose&rsquo; any colors
+in the conversion.    [Default: false]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an
-example to take the 5th plane from a fits file into a PPM file: <br>
+Here is an example to take
+the 5th plane from a fits file into a PPM file: <br>
 <pre>   % fitsccd cube.fits - | ccdsub - - z=4 | ccdppm - plane4.ppm lut=$NEMODAT/lut/ronekers.lut
 </pre>Converting to other image formats, while also resizing it (including upscaling):
 <br>

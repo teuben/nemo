@@ -1,5 +1,5 @@
-Troubleshooting
-===============
+Troubleshooting (*)
+===================
 
 Fatal errors are caught by most NEMO programs by calling the function
 *error*;
@@ -201,7 +201,7 @@ have the executable present.
 
 
 You tried to pass an expression with parentheses, but since the
-UNIX shell gives them special meaning, you need to ``escape'' them
+UNIX shell gives them special meaning, you need to *escape* them
 from the shell, e.g.
 
 .. code-block:: bash
@@ -301,7 +301,7 @@ environment variable is absent.
 - **NEMODOC**
   Directory where the *.doc files for mirtool
   and miriad shell should be looked for. The system default
-  is {\tt \$NEMO/man/doc}, set by NEMORC. No default.
+  is ``$NEMO/man/doc``, set by NEMORC. No default.
 
 
 - **NEMODEF**
@@ -317,18 +317,18 @@ environment variable is absent.
 
 - **NEMOLOG**
   Filename used as logfile for tasks submitted
-  through {\tt nemotool}.
+  through ``nemotool``.
 
 
 - **NEMOOBJ**
   Directory were (binary) object files live. They
   are used by a variety of nemo programs, and generally do not 
-  concern the user. Usually set by {\tt NEMORC}.
+  concern the user. Usually set by ``NEMORC``.
 
 
 - **NEMOPATH**
   Same as NEMO, but kept for historical reasons.
-  It is normally defined in the {\tt NEMORC} file. {\it --deprecated--}
+  It is normally defined in the ``NEMORC`` file. *--deprecated--*
 
 
 - **NEMOSITE**
@@ -345,8 +345,8 @@ environment variable is absent.
   See Appendix~\ref{a:setup}
 
 - **POTPATH**
-  List of directories where {\it potential(5NEMO)}
-  functions can be stored. The default is {\tt /usr/nemo/obj/potential}.
+  List of directories where *potential(5NEMO)*
+  functions can be stored. The default is ``/usr/nemo/obj/potential``.
 
 
 - **REVIEW**

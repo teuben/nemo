@@ -1,5 +1,6 @@
 .TH SNAPGADGET 1NEMO "23 June 2011"
 \fBsnapgadget\fP [parameter=value]
+
 .SH DESCRIPTION
 \fBsnapgadget\fP converts  data
 from standard \fIsnapshot(5NEMO)\fP format into
@@ -13,9 +14,9 @@ are handled.
 Some programs (e.g. AHF) that need proper cosmological information
 in a gadget header, will need these explicitly passed via
 a set of parameters (see below).
+
 .SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file (snapshot format). No default.
@@ -45,14 +46,17 @@ Force swaping bytes for other-endian machines [f]
 \fBz=\fP
 Current Redshift [0]    
 .TP
+\fBz=\fP
+Current redshift [0]
+.TP
 \fBbox=\fP
 Box size (Mpc/h) [128]   
 .TP
 \fBomega0=\fP
-Omega_0 [1]     
+Omega_0 [0.3]     
 .TP
-\fBlambda=\fP
-OmegaLambda [1]     
+\fBlambda0=\fP
+OmegaLambda0 [0.7]     
 .TP
 \fBh=\fP
 HubbleParam [0.75]     

@@ -5,6 +5,7 @@
  * 23-nov-2019   PJT       written
  * 11-dec-2019   PJT       mdarray reduction example
  * 29-feb-2020   PJT       verbose, raw I/O
+ * 28-sep-2021   PJT       better cfitsio usage, report more SDFITS properties
  *
  * Benchmark 6 N2347 files:  2.4"  (this is with mom=0 stats)
  * dims=5 for NGC5291:       31-35ms (depending in 1 or 3 levels)
@@ -31,7 +32,7 @@ string defv[] = {
     "row=\n              Show spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.8\n       29-feb-2020 PJT",
+    "VERSION=0.9\n       28-sep-2021 PJT",
     NULL,
 };
 
@@ -108,17 +109,99 @@ void average2(int ndata, real *data1, real *data2, real *ave)
     ave[i] = 0.5*(data1[i]+data2[i]);
 }
 
+/* find a string in an array of strings; return -1 if not found */
+
+int keyindex(int ncols, string *colnames, string keyword)
+{
+  for (int i=0; i<ncols; i++)
+    if (streq(colnames[i],keyword)) return i;
+  return -1;
+}
+
+void minmaxi(int n, int *data, int *data_min, int *data_max)
+{
+  *data_min = *data_max = data[0];
+  for (int i=1; i<n; i++) {
+    if (data[i] < *data_min) *data_min = data[i];
+    if (data[i] > *data_max) *data_max = data[i];
+  }
+}
+
+
+// 
+
+double *get_column_dbl(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
+{
+  int col = keyindex(ncols, colnames, colname) + 1;
+  if (col < 1) return NULL;
+  double *data = (double *) allocate(nrows * sizeof(double));
+  double nulval = 0.0;
+  int anynul;
+  int fstatus = 0;
+  fits_read_col(fptr, TDOUBLE, col, 1, 1, nrows, &nulval, data, &anynul, &fstatus);
+  if (anynul) printf("get_column %s -> %d null's\n", colname, anynul);  
+  return data;
+}
+
+int *get_column_int(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
+{
+  int col = keyindex(ncols, colnames, colname) + 1;
+  if (col < 1) return NULL;
+  int *data = (int *) allocate(nrows * sizeof(int));
+  int nulval = 0;
+  int anynul;
+  int fstatus = 0;
+  fits_read_col(fptr, TINT, col, 1, 1, nrows, &nulval, data, &anynul, &fstatus);
+  if (anynul) printf("get_column %s -> %d null's\n", colname, anynul);
+  return data;
+}
+
+char **get_column_str(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
+{
+  char keyword[FLEN_KEYWORD], data_fmt[FLEN_VALUE];
+  int fstatus = 0;
+  int col = keyindex(ncols, colnames, colname) + 1;
+  if (col < 1) return NULL;
+  char **data = (char **) allocate(nrows * sizeof(char *));
+  // find the string length of this keyword
+  fits_make_keyn("TFORM", col, keyword, &fstatus);
+  fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &fstatus);	
+  int slen = atoi(data_fmt);  // 1 extra for terminating 0
+  printf("DATA in column %d  slen=%d\n",col,slen);
+  // allocate the full block of chars for (slen+1)*nrows
+  char *vals = (char *) allocate(nrows*(slen+1)*sizeof(char));
+  for (int i=0; i<nrows; i++)
+    data[i] = &vals[(slen+1)*i];
+  char *nulval = "\0";
+  int anynul;
+  fits_read_col_str(fptr, col, 1, 1, nrows, nulval, data, &anynul, &fstatus);  
+  if (anynul) printf("get_column %s -> %d null's\n", colname, anynul);  
+  return data;
+}
+
+void iferror(fitsfile *fptr, int fstatus)
+{
+  if (fstatus) {
+    printf("status=%d\n",fstatus);
+    fits_close_file(fptr, &fstatus);
+    fits_report_error(stderr, fstatus);
+    exit(fstatus);
+  }
+}
+
+
+
 void nemo_main(void)
 {
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
-    int status, fmode, ii, jj, i, j, k, colnum, data_col, tcal_col;
+    int status, fmode, ii, jj, i, j, k, colnum, data_col;
     long int nrows;
-    int ncols, nchan, nfiles, found, row;
+    int ncols, nchan, nfiles, found, row, nhdus;
     string fname = getparam("in"), *fnames;
     string *colnames;
     int nsize, ndims, dims[MDMAXDIM];
     char template[64];
-    char keyword[FLEN_KEYWORD], colname[FLEN_VALUE], data_fmt[FLEN_VALUE];
+    char keyword[FLEN_KEYWORD], colname[FLEN_VALUE], data_fmt[FLEN_VALUE], tdim[FLEN_VALUE];
     bool Qstats = getbparam("stats");
     bool Qraw = getbparam("raw");
     int mom = getiparam("mom");
@@ -157,37 +240,97 @@ void nemo_main(void)
 	fits_report_error(stderr, status);  /* print out any error messages */	
 	continue;
       }
+      fits_get_num_hdus(fptr, &nhdus, &status);
+      dprintf(1,"%s : Nhdus: %d\n",fname,nhdus);
       fits_get_num_rows(fptr, &nrows, &status);
       fits_get_num_cols(fptr, &ncols, &status);
       dprintf(1,"%s : Nrows: %d   Ncols: %d\n",fname,nrows,ncols);
       if (nsize>0 && nrows != nsize)
 	warning("nrows=%d nsize=%d",nrows,nsize);
+
 	
       colnames = (string *) allocate(ncols * sizeof(string));
       data_col = -1;
-      tcal_col = -1;
       for (i=0; i<ncols; i++) {    // loop over all columns to find the DATA column, awkward
 	ii = i + 1;
 	fits_make_keyn("TTYPE", ii, keyword, &status);
 	fits_read_key(fptr, TSTRING, keyword, colname, NULL, &status);
 	colnames[i] = scopy(colname);
-	dprintf(1,"%s = %s\n",keyword,colname);
+	fits_make_keyn("TFORM", ii, keyword, &status);
+	fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &status);
+	// DATA is special since we need to get the number of channels from TFORM
 	if (streq(colname,"DATA") || streq(colname,"SPECTRUM")) {  // classic SDFITS or CLASS FITS
 	  data_col = ii;
-	  fits_make_keyn("TFORM", ii, keyword, &status);
-	  fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &status);	
 	  nchan = atoi(data_fmt);
-	  dprintf(1,"DATA in column %d  nchan=%d\n",data_col,nchan);
+	  dprintf(2,"DATA in column %d  nchan=%d\n",data_col,nchan);
 	}
-	if (streq(colname,"TCAL")) tcal_col = ii;
+	dprintf(1,"%3d:  %-16s %s\n",ii,colname,data_fmt);
       } //for(i)
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d\n",fname,nrows,ncols,nchan);
-      if (tcal_col < 0)
-	warning("No TCAL, cannot calibrate, all values assumed 1.0");
+      int col_tcal = keyindex(ncols, colnames, "TCAL") + 1;
+      int col_cal  = keyindex(ncols, colnames, "CAL") + 1;
+      int col_sig  = keyindex(ncols, colnames, "SIG") + 1;
+      int col_fdnum = keyindex(ncols, colnames, "FDNUM") + 1;
+      int col_ifnum = keyindex(ncols, colnames, "IFNUM") + 1;
+      int col_plnum = keyindex(ncols, colnames, "PLNUM") + 1;
+      dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
+	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
+
+
+      int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
+      int *ifnum_data = get_column_int(fptr, "IFNUM", nrows, ncols, colnames);
+      int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
+      int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);   // can be absent
+      
+      int fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max;
+      minmaxi(nrows, fdnum_data, &fd_min, &fd_max);
+      minmaxi(nrows, ifnum_data, &if_min, &if_max);
+      minmaxi(nrows, plnum_data, &pl_min, &pl_max);
+      printf("FDNUM: %d %d\n", fd_min, fd_max);
+      printf("IFNUM: %d %d\n", if_min, if_max);
+      printf("PLNUM: %d %d\n", pl_min, pl_max);
+      if (int_data) {
+	minmaxi(nrows, int_data, &int_min, &int_max);
+	printf("INT:   %d %d\n", int_min, int_max);	
+      }
+      char **sig_data = get_column_str(fptr, "SIG", nrows, ncols, colnames);
+      char **cal_data = get_column_str(fptr, "CAL", nrows, ncols, colnames);
+      int nsig=0, ncal=0;
+      if (sig_data && cal_data) {
+	nsig = ncal = 1;
+	for (i=1; i<nrows; i++)
+	  if (sig_data[i][0] != sig_data[0][0]) {
+	    printf("ODD SIG %d %s %s\n",i,sig_data[0],sig_data[i]);
+	    nsig++;
+	    break;
+	  }
+	for (i=1; i<nrows; i++)
+	  if (cal_data[i][0] != cal_data[0][0]) {
+	    printf("ODD CAL %d %s %s\n",i,cal_data[0],cal_data[i]);	    
+	    ncal++;
+	    break;
+	  }
+      }
+      printf("SIG:   %d  %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
+      printf("CAL:   %d  %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+
+      for (i=0; i<nrows; i++)
+	printf("SIGCAL %d '%s' '%s'\n", i, sig_data[i], cal_data[i]);
+
+
+
+      
       if (hasvalue("nchan")) {
 	nchan = getiparam("nchan");
 	warning("Overriding with nchan=%d",nchan);
       }
+      char **tdim_data = (char **) allocate(nrows * sizeof(char **));
+      fits_make_keyn("TDIM", data_col, keyword, &status);      
+      int col_tdim = keyindex(ncols, colnames, keyword) + 1;
+      char *nulvals = "\0";
+      tdim_data[0] = tdim;
+      fits_read_col_str(fptr, col_tdim, 1, 1, 1, nulvals, tdim_data, &anynul, &status);
+      dprintf(0,"DATA keyword %s = %s\n",keyword, tdim);
 
       if (Qraw) ndims = -1;
 
@@ -211,14 +354,20 @@ void nemo_main(void)
 	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
 	float nulval = 0.0;
 	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
-	dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	if (nrows > 1)
+	  dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	else
+	  dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
 #else
 	// waterfall type data
 	dprintf(0,"TWODIM: get Waterfall\n");
 	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
 	double nulval = 0.0;
 	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
-	dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	if (nrows > 1)
+	  dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	else
+	  dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);	  
 #endif
 
 	if (Qstats) {
@@ -282,9 +431,9 @@ void nemo_main(void)
 	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
 	  // make sure nsize <= nrows
 	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nsize, &nulval, &data6[0][0][0][0][0][0], &anynul, &status);
-	  if (tcal_col < 0)
+	  if (col_tcal < 0)
 	    for(i=0; i<nsize; i++) tcal[i] = 1.0;
-	  fits_read_col(fptr, TDOUBLE, tcal_col, 1, 1,       nsize, &nulval, tcal, &anynul, &status);	  
+	  fits_read_col(fptr, TDOUBLE, col_tcal, 1, 1,       nsize, &nulval, tcal, &anynul, &status);	  
 	  // should also read the TCAL column
 	  dprintf(0,"DATA6 %g %g %g     %g\n",
 		  data6[0][0][0][0][0][0],

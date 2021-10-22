@@ -6,23 +6,25 @@
 <title>ADS(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-ads - bibcode for code papers on ADS using @ads 
+ads - bibcode for code papers on ADS using a @ads markup 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-grep ^@ads
+grep
 
-<p>$NEMO/man/man1/*.1 
+<p>^
+<p>@ads $NEMO/man/man1/*.1 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-In 2021 we have started to use the <b>@ads</b> doxygen-like
-marker in man pages and source code to link a code with a paper using their
-<b>bibcode</b>. There are plenty of examples in NEMO of codes we keep, that have
-a corresponding paper  where code may not be easily available anymore. The
-first one we did is in <a href='CGS.1.html'><i>CGS(1NEMO)</i></a>
+In 2021 we have started to use the <b>@ads</b>
+doxygen-like marker in man pages and source code to link a code with a paper
+using their  <b>ADS bibcode</b>. There are plenty of examples in NEMO of codes
+we keep, that have a corresponding paper  where code may not be easily
+available anymore. The first one we did is in <a href='CGS.1.html'><i>CGS(1NEMO)</i></a>
 : 
 <p> <br>
 <pre>    @ads 2005A&amp;A...433...57T
@@ -50,6 +52,10 @@ by its <i>name</i>, as suggested in the AASTeX guide for  publishing in AAS jour
 is available on  <a href='https://github.com/teuben/ascl-tools/blob/master/asclKeywords.txt'>https://github.com/teuben/ascl-tools/blob/master/asclKeywords.txt</a>
 
 
+<p> <p>
+
+<p> An alternative could be a <b>@doi<b>, which for the CGS would be:   10.1051/0004-6361:20041705
+</b></b>
 <p> 
 <h2><a name='sect3' href='#toc3'>Others</a></h2>
 There are at least two other code and paper linking mechanisms that

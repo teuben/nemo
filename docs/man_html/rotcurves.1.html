@@ -6,6 +6,7 @@
 <title>ROTCURVES(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -13,41 +14,72 @@ rotcurves - rotation curve of a composite potential
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>rotcurves
 name1=<i>potential</i></b> [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>rotcurves</i>  computes the rotation
-curve of a composite mass model. Each component must be supplied in the
-form of a potential (see <a href='potential.5.html'><i>potential(5NEMO)</i></a>
-) from which the forces determine
-a rotation curves assuming centrifugal balance. Optionally a Lindblad diagram
-can be selected for viewing using <b>mode=omega</b>, and the location of Lindblad
- resonances is determined. A choice is also given between a plot and a table
-for further processing. An experimental LV option can be used for radial
-velocity table along the line of sight distance. <p>
-In case a true rotation
-curve is requested (<b>mode=velocity</b>) the table contains <i>r, v, v1, v2, ...</i>, whereas
-the Lindblad option with <b>mode=omega</b> tabulates <i>r, v, omega, kappa, omega+kappa/2,
-omega-kappa/2</i>. 
+<i>rotcurves</i>  computes the
+rotation curve of a composite mass model. Each component must be supplied
+in the form of a potential (see <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+) from which the forces
+determine a rotation curves assuming centrifugal balance. Optionally a Lindblad
+diagram can be selected for viewing using <b>mode=omega</b>, and the location
+of Lindblad  resonances is determined. A choice is also given between a
+plot and a table for further processing. An experimental LV option can be
+used for radial velocity table along the line of sight distance. <p>
+In case
+a true rotation curve is requested (<b>mode=velocity</b>) the table contains <i>r,
+v, v1, v2, ...</i>, whereas the Lindblad option with <b>mode=omega</b> tabulates <i>r, v,
+omega, kappa, omega+kappa/2, omega-kappa/2</i>. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized: 
+The following parameters
+are recognized: 
 <dl>
 
-<dt><b>name1=<i>potname</i></b>
-</dt>
+<dt><b>name1=<i>potname</i></b> </dt>
 <dd>Name of first potential, in standard <a href='potential.5EMO.html'><i>potential(5EMO)</i></a>
- format. No default
-allowed. </dd>
+
+format. No default allowed. </dd>
 
 <dt><b>pars1=<i>potpars</i></b> </dt>
-<dd>Parameters for first potential. Defaults as defined
-by the potential itself. </dd>
+<dd>Parameters for first potential.
+Defaults as defined by the potential itself. </dd>
 
 <dt><b>file1=<i>potfile</i></b> </dt>
-<dd>Optional file for first potential.
-Defaults as defined by the  potential itself. </dd>
+<dd>Optional file
+for first potential. Defaults as defined by the  potential itself. </dd>
 
-<dt>&lt;etc&gt; for <b>name2, name3, name4</b>.
+<dt><b>name2=</b>
 </dt>
-<dd><br>
+<dd>See name1= for second potential </dd>
+
+<dt><b>pars2=</b> </dt>
+<dd>See pars1= </dd>
+
+<dt><b>file2=</b> </dt>
+<dd>See file1= 
+<p> </dd>
+
+<dt><b>name3=</b>
+</dt>
+<dd>See name1= for third potential </dd>
+
+<dt><b>pars3=</b> </dt>
+<dd>See pars1= </dd>
+
+<dt><b>file3=</b> </dt>
+<dd>See file1= 
+<p> </dd>
+
+<dt><b>name4=</b>
+</dt>
+<dd>See name1= for fourth potential </dd>
+
+<dt><b>pars4=</b> </dt>
+<dd>See pars1= </dd>
+
+<dt><b>file4=</b> </dt>
+<dd>See file1= 
+<p> <br>
 NOTE that because of the specific code implementation, you cannot re-use
 the same potential, since they share their static code data. </dd>
 
@@ -126,7 +158,8 @@ here in which columns the radius, velocity, error in radius and error in
 velocity can be found. The error columns are optional, and if provided error
 bars will be plotted on top of the data. A 0 can be used if an column is
 not present in the data, although radius and velocity must always be present.
-[Default: <b>1,2</b>]. </dd>
+[Default: <b>1,2</b>]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
@@ -142,6 +175,7 @@ not present in the data, although radius and velocity must always be present.
 <pre>galfit: https://users.obs.carnegiescience.edu/peng/work/galfit/galfit.html
 galphot: http://www.astro-wise.org/portal/howtos/man_howto_galphot/man_howto_galphot.shtml
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 Sometimes Lindblad diagrams require more resolution in radius near
 the  center, so <b>radii=0.0001,0.001,0.01,0.02:1:0.02</b> may do a better job than
@@ -158,10 +192,14 @@ resonances in <b>mode=omega</b>. <p>
 Potentials (name1,2,....) cannot be re-used. Since <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
 
 is used to load the potentials, their static code data is shared. One possible
-solution would be to make a physical copy of the .so file from $NEMOOBJ/potential
-in the local directory with different names 
+
+<p>solution would be to make a physical copy of the .so file from $NEMOOBJ/potential
+
+<p>in the local directory with different names 
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>~/src/orbit/potential   rotcurves.c

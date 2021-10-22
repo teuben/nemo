@@ -6,6 +6,7 @@
 <title>SNAPMASK(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -46,25 +47,29 @@ of bodies in any of the snapshots to be copied. The keyword <b>keyoffset</b> (se
 below) can be used to correct to keyvalues to be output. Example: "<b>0:1000:10,2000:3000:10</b>".
 [default:all]. </dd>
 
-<dt><b>keyfile=<i>keyfile</i></b> </dt>
-<dd>Filename which is assumed to have a key field
-used to mask the particles to be copied. [default: not used]. </dd>
+<dt><b>times=</b> </dt>
+<dd>The times select string. By default all times are selected.
+</dd>
 
-<dt><b>keyoffset=<i>offset</i></b>
-</dt>
-<dd>Offset applied to the output key. This offset is a temporary hack until
-more programs make use of the key field. The <i>offset</i> is applied before it
-is compared with the key field in the above mentioned <i>keyfile</i>. E.g. An input
-file <i>snap-in</i> with 10 bodies is compared with a keyfile <i>snap-key</i> with 5 bodies
-numbered 5:9 and  ... - Don&rsquo;t use this option, still under development. </dd>
+<dt><b>keyfile=<i>keyfile</i></b> </dt>
+<dd>Filename which is assumed to have a key field used to mask
+the particles to be copied. [default: not used]. </dd>
+
+<dt><b>keyoffset=<i>offset</i></b> </dt>
+<dd>Offset
+applied to the output key. This offset is a temporary hack until more programs
+make use of the key field. The <i>offset</i> is applied before it is compared with
+the key field in the above mentioned <i>keyfile</i>. E.g. An input file <i>snap-in</i> with
+10 bodies is compared with a keyfile <i>snap-key</i> with 5 bodies numbered 5:9
+and  ... - Don&rsquo;t use this option, still under development. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-The
-<b>select=</b> keyword can easily become very long, longer than an interactive
-shell allows. You might see a  <i>"word too long"</i> error message in this case.
-One solution is to write the numbers into a simple table and use the construct
-<br>
+The <b>select=</b>
+keyword can easily become very long, longer than an interactive shell allows.
+You might see a  <i>"word too long"</i> error message in this case. One solution
+is to write the numbers into a simple table and use the construct <br>
 <pre>    snapmask in=... out=... select=@particles.tab
 </pre>where <b>particles.tab</b> is an ASCII file with a single column of all selected
 particles. 

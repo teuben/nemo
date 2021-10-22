@@ -1,10 +1,13 @@
 #! /bin/csh -f
 #
 # to get a rotating disk:    ./mk_cone vscale=1 outflow=0 cone=90 out=disk1
+# or via tkrun:              tkrun ./mk_cone
+#
 # the disk= blends in a true disk so you can see both the outflow cones and the disk
-# Make sure "ds9" has been launched before this script is run, as 5 frame are sent to ds9
+# Make sure "ds9" has been launched before this script is run, as many frames are sent to ds9
+# is the 'ds9' is selected in mode=. Alternatively, pick mode=plot
 #
-#
+# Some History:
 #     nov-2018      written at ESO
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
 #     jun-2021      fix missing sign=; add noise
@@ -20,10 +23,11 @@
 #   mirror   1=have both sides
 #   fill     t=cone is filled  f=cone is hollow
 #   svar     smoothing
-#   mass     this is the mass ratio of the disk to a half cone
+#   mass     this is the mass ratio of the disk to a half cone   (@todo  allow 0..1 )
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
+set rmax    = 1         #> SCALE rmax=1       0:2:0.1
 set vscale  = 0.9       #> SCALE vscale=0.9   -2:2:0.1
 set outflow = 0.4       #> SCALE outflow=0.4  0:2:0.1
 set flow    = flat      #> RADIO flow=flat    flat,rise,fall
@@ -34,16 +38,17 @@ set view    = 0         #> RADIO view=0       -1,0,1
 set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
-set disk    = 1         #> RADIO disk=1       0,1/1000,1/100,1/10,1,10,100,1000,10000
+set disk    = 1         #> RADIO disk=1       0,1/1000,1/100,1/10,1,10,100,1000,10000,inf
 set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
 set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
 set out     = cone1     #> ENTRY out=cone1
+set mode    = ds9       #> CHECK mode=ds9     ds9,plot
 
 #  parameters not in the GUI
 set rmaxd = 2
-set rmax  = 1
 set rc    = 0.1
 set n     = 128
+set scale = -1/60,1/60,100     # model units are arcmin, 100 km/s
 
 foreach _arg ($*)
     set $_arg
@@ -67,6 +72,14 @@ end
 
 rm -f $out.*
 
+set do_ds9=`echo $mode | grep -c ds9`
+set do_plt=`echo $mode | grep -c plot`
+
+# special case:
+if ($disk == "inf") then
+  set disk=1
+  set mirror=-1
+endif  
 
 # the disk rotates counterclock wise, kinematic major axis -X, and the near side is along the +Y axis.
 mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=$rmaxd >& /dev/null
@@ -96,7 +109,7 @@ if ($mirror == 0) then
     cat $out.0 $out.1 |\
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
-else
+else if ($mirror == 1) then
   # one cone on each side
   mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
     snapscale - - vscale=$vscale |\
@@ -115,34 +128,65 @@ else
   cat $out.0 $out.1 $out.2 |\
     snapmerge - - |\
     snaprotate - - $incd x > $out.snap
+else
+  echo Skipping making a cone
+  snaprotate $out.0 $out.snap $incd x
 endif
+
+# @todo
+#   snapgrid:    doesn't do beam if svar used
+#                cdelt1 is positive
 
 #   svar: add a bit of smoothing.   In these defaults pixelsize=4/128 = 0.03
 snapgrid $out.snap $out.vel moment=-1 nx=$n ny=$n svar=$svar >& /dev/null
 snapgrid $out.snap $out.den moment=0  nx=$n ny=$n svar=$svar >& /dev/null
-ccdfits $out.den $out.den.fits radecvel=t >& /dev/null
-ccdfits $out.vel $out.vel.fits radecvel=t >& /dev/null
+snapgrid $out.snap $out.sig moment=-2 nx=$n ny=$n svar=$svar >& /dev/null
+ccdfits $out.den $out.den.fits scale=$scale radecvel=t >& /dev/null
+ccdfits $out.vel $out.vel.fits scale=$scale radecvel=t >& /dev/null
+ccdfits $out.sig $out.sig.fits scale=$scale radecvel=t >& /dev/null
 
-snapgrid $out.snap - nx=$n ny=$n nz=$n/2 zrange=-2:2 svar=$svar |\
+snapgrid $out.snap - nx=$n ny=$n nz=$n/2 zrange=-2:2 |\
    ccdmath - - "%1+rang(0,$noise)" |\
-   ccdfits - $out.fits radecvel=t debug=-1
+   ccdsmooth - - gauss=$svar |\
+   ccdfits - $out.fits scale=$scale radecvel=t debug=-1
 
-xpaset -p ds9 frame frameno 1
-nds9 $out.vel.fits
-xpaset -p ds9 frame frameno 2
-nds9 $out.den.fits
+#   example of a R-V diagram along the major and minor axis.
+#   the far side is at pa=180, the kin. major at 90.
+
+fitsccd $out.fits - |\
+   rvstack - - pa=90     inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=r |\
+   ccdfits -  $out.rvma.fits
+
+fitsccd $out.fits - |\
+   rvstack - - pa=90+90  inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=o |\
+   ccdfits  - $out.rvmi.fits  
+   
+
+if ($do_ds9) then   
+    xpaset -p ds9 frame frameno 1
+    nds9 $out.den.fits
+    xpaset -p ds9 frame frameno 2
+    nds9 $out.vel.fits
+    xpaset -p ds9 frame frameno 3
+    nds9 $out.sig.fits
 
 #  load the same cube 3 times, so locally you will need to Cube -> Axis Order -> 1,2,3  1,3,2 and 2,3,1
-#  to get the different types of PP or PV slices
-xpaset -p ds9 frame frameno 3
-nds9 $out.fits
-xpaset -p ds9 frame frameno 4
-nds9 $out.fits
-xpaset -p ds9 frame frameno 5
-nds9 $out.fits
-
-if (0) then
-  fitsccd $out.fits - | rvstack - $out.rvmo.ccd pa=90+90  inc=$incd vsys=0 center=$n/2,$n/2 rscale=3600 mode=0
-  xpaset -p ds9 frame frameno 6
-  nds9 $out.rvmo.ccd
+#  to get the different types of PV slices
+    xpaset -p ds9 frame frameno 4
+    nds9 $out.fits
+    xpaset -p ds9 frame frameno 5
+    nds9 $out.fits
+    xpaset -p ds9 frame frameno 6
+    nds9 $out.fits
+    
+    xpaset -p ds9 frame frameno 7
+    nds9 $out.rvma.fits
+    xpaset -p ds9 frame frameno 8
+    nds9 $out.rvmi.fits
 endif
+
+if ($do_plt) then
+  ./plot_gal3d.py $out
+endif
+
+echo MODE=$mode $do_ds9 $do_plt

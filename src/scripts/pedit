@@ -15,13 +15,16 @@
 #             -g : grep like function
 #             -c : pick comment character?
 #             -m : mode (e.g. using '=' between key and val)
+#           implement an option (-g ?) to match on something, then replace the
+#              first value. Example taken from Tracy, where he had files like
+#              "1.234  =  RC  = some text about this"
 
 version = "17-feb-2021"
 
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: %s parfile [options] a=1 f=\"'a.fits'\" > parfile.new" % sys.argv[0])
+    print("Usage: %s parfile [options] a=1 f=\"'a.fits'\" [> parfile.new]" % sys.argv[0])
     print("Version: %s" % version)
     print("Options:    -e     use bash style key=val");
     print("            -o     overwrite input parfile");

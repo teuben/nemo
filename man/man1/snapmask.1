@@ -32,6 +32,9 @@ The keyword \fBkeyoffset\fP (see below) can be used to correct to
 keyvalues to be output.
 Example: "\fB0:1000:10,2000:3000:10\fP". [default:all].
 .TP
+\fBtimes=\fP
+The times select string. By default all times are selected.
+.TP
 \fBkeyfile=\fIkeyfile\fP
 Filename which is assumed to have a key field used to mask the particles
 to be copied. [default: not used].
@@ -43,6 +46,7 @@ before it is compared with the key field in the above mentioned \fIkeyfile\fP.
 E.g. An input file \fIsnap-in\fP with 10 bodies is compared with a
 keyfile \fIsnap-key\fP with 5 bodies numbered 5:9 and  ...
 - Don't use this option, still under development.
+
 .SH EXAMPLE
 The \fBselect=\fP keyword can easily become very long, longer than an interactive
 shell allows. You might see a  \fI"word too long"\fP error message in this case.

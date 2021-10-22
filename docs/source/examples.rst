@@ -1,18 +1,16 @@
 .. _examples:
 
-Examples
-========
+Examples (*)
+============
 
 Now that we have a reasonable idea how NEMO is structured and used, we
-should be ready to go through some real examples  Some of the examples
-below are short versions of shell scripts
-available online in one of the directories
-(check ``$NEMO/scripts`` and ``$NEMOBIN``).
-The manual pages
-*programs(8NEMO)* and *intro(1NEMO)*
-are useful to find (and cross-reference) programs
-if you're a bit lost. Each program manual should also 
-have some references to closely related programs.
+should be ready to go through some real examples Some of the examples
+below are short versions of scripts available online in one of the
+directories (check ``$NEMO/scripts`` and ``$NEMOBIN``).  The manual
+pages *programs(8NEMO)* and *intro(1NEMO)* are useful to find (and
+cross-reference) programs if you're a bit lost. Each program manual
+should also have some references to closely related programs,
+in the "SEE ALSO" section.
 
 
 N-body experiments
@@ -25,33 +23,29 @@ collision between two spherical "galaxies" and do some simple analysis.
 Setting it up
 ~~~~~~~~~~~~~
 
-In Chapter~\ref{c:filestr} we already used ``mkplummer`` to create 
-a Plummer model;
-
-here we shall use the program ``mkommod``
-("MaKe an Osipkov-Merritt MODel") 
+In :ref:`filestr` we already used ``mkplummer`` to create a Plummer model;
+so here we shall use the program ``mkommod``
+(*"MaKe an Osipkov-Merritt MODel"*) 
 to make two random N-body realizations of a King model 
 with dimensionless central potential :math:`W_c = 7` and 100 particles each. 
 The small number of particles is solely for the purpose of getting
 results within a reasonable time. Adjust it to whatever you can afford
-on your CPU and test your patience and integrator
-(see Appendix~\ref{a:bench} benchmarks).
+on your CPU and test your patience and integrator.
 
 .. code-block::
 
-    1% mkommod in=$NEMODAT/k7isot.dat out=tmp1 nbody=100 seed=280158
+    1% mkommod in=$NEMODAT/k7isot.dat out=tmp1 nbody=100 seed=123
               
 
-
-These models are produced in so-called RMS-units
-in which the
-gravitational constant G=1, the total mass M=1, and binding energy E=--1/2.
+These models are produced in so-called RMS-units in which the
+gravitational constant :math:`G=1`, the total mass :math:`M=1`, and binding energy
+:math:`E=-1/2`.
 In case you would like virial units
-\footnote{Virial units are the preferred units, see also:
-Heggie & Mathieu, E=--1/4,
-in: {\it The use of supercomputers in stellar
-dynamics} ed. Hut & McMillan
-Springer 1987, pp.233}
+(see also:
+Heggie & Mathieu, :math:`E=-1/4`,
+in: *The use of supercomputers in stellar
+dynamics* ed. Hut & McMillan
+Springer 1987, pp.233)
 the models have
 to be rescaled using ``snapscale``:
 
@@ -60,21 +54,16 @@ to be rescaled using ``snapscale``:
     2% snapscale in=tmp1 out=tmp1s rscale=2 "vscale=1/sqrt(2.0)"
 
 
-In the case that your user interface was not compiled with the 
-{\bf NEMOINP}\footnote{This can be found out by 
-using the program nemoinp(1NEMO) or ``help=?``.}
-directive, the {\tt vscale} expression has to be calculated by you,
-{\it i.e.} ``vscale=0.707107``. Also note the use of the quotes in
-the expression, to prevent the shell to give special meaning to
-the parenthesis, which are shell {\bf meta} characters.
-
+Note the use of the quotes in the expression, to prevent the shell to
+give special meaning to the parenthesis, which are shell **meta**
+characters.
 
 The second galaxy is made in a similar way, with
-a different seed of course:
+a different seed:
 
 .. code-block::
 
-    3% mkommod in=$NEMODAT/k7isot.dat out=tmp2 nbody=100 seed=130159
+    3% mkommod in=$NEMODAT/k7isot.dat out=tmp2 nbody=100 seed=987
 
 
 This second galaxy needs to be rescaled too, if you want virial units:
@@ -83,7 +72,6 @@ This second galaxy needs to be rescaled too, if you want virial units:
 .. code-block::
 
     4% snapscale in=tmp2 out=tmp2s rscale=2 "vscale=1/sqrt(2.0)"
-
 
 We then set up the collision by stacking the two snapshots, albeit with
 a relative displacement in phase space.  The program ``snapstack`` was exactly
@@ -113,27 +101,24 @@ Integration using hackcode1
 
 We then run the collision for 20 time units, with the standard
 N-body integrator based on the Barnes  "hierarchical tree" 
-algorithm\footnote{see also their paper in: Nature, Vol. 324, pp 446 (1986).}:
+algorith:
 
 .. code-block::
 
     7% hackcode1 in=i001.dat out=r001.dat tstop=20 freqout=2 \
        freq=40 eps=0.05 tol=0.7 options=mass,phase,phi > r001.log
 
-The integration frequency relates to the integration timestep as {\tt
-freq} = $1/\Delta t$, the softening length {\tt eps} = $\epsilon$, and
-opening angle or tolerance {\tt tol} = $\theta$.  A major output of
-masses, positions and potentials of all particles is done every {\tt
-1/freqout} = 0.5 time units, which corresponds to about 1/5 of a
+The integration frequency relates to the integration timestep as
+``freq=40``, the softening length ``eps=0.05``, and
+opening angle or tolerance ``tol=$\theta$``.  A major output of
+masses, positions and potentials of all particles is done every
+``1/freqout = 0.5`` time units, which corresponds to about 1/5 of a
 crossing time.  The standard output of the calculation is diverted to a
-file {\tt r001.log} for convenience.  This is an (ASCII) listing,
+file ``r001.log`` for convenience.  This is an (ASCII) listing,
 containing useful statistics of the run, such as the efficiency of the
 force calculation, conserved quantities etc.  Some of this information
 is also stored in diagnostic sets in the structured binary 
-output file {\tt r001.dat}. 
-
-
-
+output file ``r001.dat``. 
 
 As an exercise, compare the output of the following two commands:
 
@@ -157,15 +142,16 @@ motion can be graphically displayed using ``snapdiagplot``:
     10% snapdiagplot in=r001.dat
 
 The program ``snapplot`` displays the evolution of the particle
-distribution, in projection;
+distribution, in projection (in the **yt** package this is called
+a phase plot):
 
 .. code-block::
 
     11% snapplot in=r001.dat
 
 
-Depending on the actual graphics (*yapp*)
-interface of snapplot,
+Depending on the actual graphics (*yapp*) interface snapplot
+was compiled with, 
 you may have to hit the RETURN key, push a MOUSE BUTTON or just
 WAIT to advance from one to the next frame.
 
@@ -183,17 +169,15 @@ As an example consider:
 plots the angular momentum of the particles along the z axis,
 :math:`J_z = x.v_y - y.v_x` ,
 against their radius, :math:`r`, but only for the even numbered particles,
-(i%2==0) within
-a distance of 0.2 of the X-Y plane (:math:`-0.2<z && z<0.2`).
+(``i%2==0``) within
+a distance of ``0.2`` of the X-Y plane (:math:`-0.2<z && z<0.2`).
 Again note that some of the expressions are within quotes, to prevent
 the shell of giving them a special meaning. 
 
-The {\tt xvar}, {\tt yvar} and {\tt visib} expressions are fed to the
+The ``xvar``, ``yvar`` and ``visib`` expressions are fed to the
 C compiler (during runtime!) and the resulting object file is then
-dynamically loaded 
-into the program for 
-execution\footnote{loadobj, the dynamic object loader, 
-does not works on all UNIX implementations}.
+dynamically loaded into the program for 
+execution.
 The expressions must contain legal C expressions and depending
 on their nature must return a value in the context of the
 program. {\it E.g.} {\tt xvar} and {\tt yvar} must return a 
@@ -421,6 +405,34 @@ Advanced Analysis
 
 Generating models
 ~~~~~~~~~~~~~~~~~
+
+Using Unix pipes
+~~~~~~~~~~~~~~~~
+
+In most cases a NEMO file can be used in a pipe (usually via
+``in=-`` and ``out=-``), therefore limiting the need to write
+files. Here is an example of plotting the measured and expected
+surface brightness of a homogeneous sphere of 1,000,000 particles with
+unit mass and unit radius:
+
+.. code-block::
+   :linenos:
+   :emphasize-lines: 3,5
+   
+    % mkconfig - 1000000 ball seed=0 |\
+        snapgrid - - nx=800 ny=800  |\
+        ccdellint - 0:1.1:0.01 inc=0 out=- |\
+        ccdprint - x=  newline=t label=x |\
+        tabmath - - '1.5/pi*sqrt(1-%1**2)' |\
+        tabplot -  1 2,3 color=2,3 line=0,0,1,1 point=2,0.1,0,0 \
+          xlab="Radius" ylab="Surface Brightness" headline="mkconfig shape=ball" yapp=ball.png/png
+
+A few comments on the highlighted lines:  In **line 3** the ``out=`` keyword is not the second keyword,
+hence the explicit way it was written with the ``out=-``.
+In **line 5** the expected surface brightness expression is added as the 3rd column to the table in the pipe,
+then passed on for a quick and dirty plot (shown below).
+
+.. image:: ../figures/ball.png
 
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~

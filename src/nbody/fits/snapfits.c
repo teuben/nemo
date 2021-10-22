@@ -43,20 +43,7 @@ static char *comments[] = {NULL, NULL};        /* place to save ONE comment */
 #define MAXNEEDS 10
 static int needs[MAXNEEDS];     /* 0=mass, 1=pos, 2=vel 3=phi, 4=acc */
 
-
-nemo_main(void)
-{
-    instr = stropen (getparam ("in"), "r");     /* open snapshot */
-    get_history(instr);
-    get_snap(instr,&btab,&nbody,&tnow,&bits);
-    strclose(instr);
-
-    outstr = stropen(getparam("out"), "w");
-    w_header(outstr,&fh,nbody,getparam("options"),getparam("comment"));
-    w_data(outstr,&fh,nbody,btab);
-}
-
-need_pars(string options)
+int need_pars(string options)
 {
     int i, ntot;
     bool scanopt();
@@ -85,7 +72,7 @@ need_pars(string options)
     return(ntot);
 }
 
-w_header(stream ostr,struct fits_header *fh, int nbody, char *options,char *comment)
+void w_header(stream ostr,struct fits_header *fh, int nbody, char *options,char *comment)
 {   
     static int naxis[1] = { 0 };    /* random groups ! */
     int i, n, ni;
@@ -136,7 +123,7 @@ w_header(stream ostr,struct fits_header *fh, int nbody, char *options,char *comm
     fts_whead(fh,ostr);      /* write the header */
 }
 
-w_data(stream ostr,struct fits_header *fh,int nbody,Body *btab)
+void w_data(stream ostr,struct fits_header *fh,int nbody,Body *btab)
 {
     int i, nw, need_mass,need_pos,need_vel, ntot, isize;
     Body *bp;
@@ -172,3 +159,4 @@ w_data(stream ostr,struct fits_header *fh,int nbody,Body *btab)
        fts_wdata(fh,ostr,1,&null);
     
 }
+

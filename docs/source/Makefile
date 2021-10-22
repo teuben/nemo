@@ -18,3 +18,11 @@ help:
 # "make mode" option.  $(O) is meant as a shortcut for $(SPHINXOPTS).
 %: Makefile
 	@$(SPHINXBUILD) -M $@ "$(SOURCEDIR)" "$(BUILDDIR)" $(SPHINXOPTS) $(O)
+
+# PJT keeps a private version because he doesn't trust the cloud (and has been proven right in July 2021)
+pjt: lastmod html
+	rsync -av _build/html  chara:public_html/nemo/readthedocs
+	@echo https://www.astro.umd.edu/~teuben/nemo/readthedocs/html
+
+lastmod:
+	echo "Last modified `date`" > $(SOURCEDIR)/lastmod.rst

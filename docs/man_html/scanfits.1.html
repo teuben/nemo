@@ -6,6 +6,7 @@
 <title>SCANFITS(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -34,14 +35,15 @@ first FITS panel. The cfitsio suite is now also providing a FITS checker
 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the
-keyword is  also given: 
+ The following parameters are recognized in order; they may
+be given in any order if the keyword is also given. Use --help to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>fits-infile</i></b> </dt>
 <dd>input file, in <a href='fits.5.html'><i>fits(5)</i></a>
- format. The
-input fits file is allowed to have many HDU&rsquo;s. [no default].  </dd>
+ format.
+The input fits file is allowed to have many HDU&rsquo;s. [no default].  </dd>
 
 <dt><b>out=<i>fits-outfile</i></b>
 </dt>
@@ -130,100 +132,107 @@ the data is written to disk.</i> [default: <b>1,1</b>]. </dd>
 <dd>Boolean (t/f) to designate that when an output file is selected
  (<b>out=</b>) AND multiple files to be copied (<b>file=0</b>) the output file is split
 into it&rsquo;s &lsquo;&lsquo;file&rsquo;&rsquo; components. The <i>fits-outfile</i> name will then be a base filename,
-and the program generates its own numeric extension. [Default: <b>false</b>]. </dd>
+and the program generates its own numeric extension. [Default: <b>false</b>]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Fixes</a></h2>
 This
 is a list of the currently supported fixes for the header. Each of them
 is applied in the order as  they appear in the <b>fix=</b> keyword. Their names
-have to be supplied in full, separated by commas. No spaces. 
+have to be supplied in full, separated by commas. No spaces. <br>
+
 <dl>
 
-<dt><b>ING</b> </dt>
-<dd>Isaac Newton
-Group (ING) uses 9 blanks in the first column, followed by the word <b>ING</b>,
-followed by a space, after which an ING specific keywords start. If you
-want to promote these to regular keywords, a shift of 13 characters to
-the left does the job. The 13 rightmost characters in the card image are
- set to blank. </dd>
-
-<dt><b>TUCSON</b> </dt>
-<dd>Certain FITS files coming out of NRAO TUCSON have
-card images starting with <b>SINGLDSH</b>. The next 10 characters are used for
-another level of identification, and at position 19 the actual FITS-like
-keyword starts. By using this option the FITS keyword starting at position
-19 is promoted to a real FITS keyword, by  shifting those 18 positions
-to the left. The 18 rightmost  characters in the card image are set to blank.
+<dt> <b>ING</b> </dt>
+<dd>Isaac Newton Group (ING) uses 9 blanks in the first column, followed
+by the word <b>ING</b>, followed by a space, after which an ING specific keywords
+start. If you want to promote these to regular keywords, a shift of 13 characters
+to the left does the job. The 13 rightmost characters in the card image
+are  set to blank. <br>
 </dd>
 
-<dt><b>LF</b> </dt>
+<dt> <b>TUCSON</b> </dt>
+<dd>Certain FITS files coming out of NRAO TUCSON have card images starting
+with <b>SINGLDSH</b>. The next 10 characters are used for another level of identification,
+and at position 19 the actual FITS-like keyword starts. By using this option
+the FITS keyword starting at position 19 is promoted to a real FITS keyword,
+by  shifting those 18 positions to the left. The 18 rightmost  characters
+in the card image are set to blank. <br>
+</dd>
+
+<dt> <b>LF</b> </dt>
 <dd>Character 80 (the last one) in each header card image is patched with
 a linefeed (newline) (<i>hexadecimal 0x0A</i>).  This is useful to edit the header
 with an ASCII editor on UNIX. It would normally be used with <b>options=header</b>.
 See also <a href='fitshead.1.html'><i>fitshead(1NEMO)</i></a>
- if you don&rsquo;t want to see trailing blanks. </dd>
+ if you don&rsquo;t want to see trailing blanks. <br>
+</dd>
 
-<dt><b>BLANK</b>
-</dt>
-<dd>Delete all card images which are completeley blank. This is often the result
-of either old style FITS files, or when card images had been blanked before
-with <b>delete=</b><i>pattern</i> or <b>keep=</b><i>pattern</i>  Since the <i>fix</i> is applied<br>
+<dt> <b>BLANK</b> </dt>
+<dd>Delete all card images which are completeley blank. This is often
+the result of either old style FITS files, or when card images had been
+blanked before with <b>delete=</b><i>pattern</i> or <b>keep=</b><i>pattern</i>  Since the <i>fix</i> is applied<br>
  <i>after</i> the <i>blank</i> only one run of scanfits is needed to blank out and delete
-certain card  images, e.g. <b>scanfits in out delete=ING fix=BLANK</b>. </dd>
+certain card  images, e.g. <b>scanfits in out delete=ING fix=BLANK</b>. <br>
+</dd>
 
-<dt><b>ZERO</b> </dt>
-<dd>Replace
-all zero&rsquo;s in the header by blanks. </dd>
+<dt> <b>ZERO</b> </dt>
+<dd>Replace all zero&rsquo;s in the header by blanks. <br>
+</dd>
 
-<dt><b>FIRST</b> </dt>
-<dd>Retain only the first keyword if
-they occur multiple times in the header. The other card images are blanked.
-HISTORY and COMMENT and anything that does not have an &rsquo;=&rsquo; in column 9 are
-not affected. </dd>
+<dt> <b>FIRST</b> </dt>
+<dd>Retain only the first keyword if they occur multiple times in the
+header. The other card images are blanked. HISTORY and COMMENT and anything
+that does not have an &rsquo;=&rsquo; in column 9 are not affected. <br>
+</dd>
 
-<dt><b>LAST</b> </dt>
-<dd>Retain only the last keyword if they occur multiple times
-in the header. The other card images are blanked. HISTORY and COMMENT and
-anything that does not have an &rsquo;=&rsquo; in column 9 are not affected. </dd>
+<dt> <b>LAST</b> </dt>
+<dd>Retain only the last keyword if they occur multiple times in the
+header. The other card images are blanked. HISTORY and COMMENT and anything
+that does not have an &rsquo;=&rsquo; in column 9 are not affected. <br>
+</dd>
 
-<dt><b>Y2K</b> </dt>
-<dd>If a
-keyword <b>DATExxxx</b> is present, and it matches the pattern "dd/mm/yy", it
-will be transformed to "yyyy-mm-dd", which makes the file Y2K compliant. 
-FYI: the unix <a href='date.1.html'><i>date(1)</i></a>
+<dt> <b>Y2K</b> </dt>
+<dd>If a keyword <b>DATExxxx</b> is present, and it matches the pattern "dd/mm/yy",
+it will be transformed to "yyyy-mm-dd", which makes the file Y2K compliant.
+ FYI: the unix <a href='date.1.html'><i>date(1)</i></a>
  command produces Y2K compliant with <b>date +%Y-%m-%dT%H:%M:%S.%N</b>,
 where the subsecond <b>.%N</b> portion is optional. The old style is done with 
-<b>date +%d/%m/%y<b>,  which does not sort lexically. </dd>
+<b>date +%d/%m/%y<b>,  which does not sort lexically. <br>
+</dd>
 
-<dt><b>UNY2K</b></b></b> </dt>
-<dd>If a keyword <b>DATExxxx</b>
-is present, and it matches the pattern "yyyy-mm-dd", it will be transformed
-to "dd/mm/yy", which makes the file non-Y2K compliant. This might help you
-getting by some old readers. Highly discouraged of course. </dd>
+<dt> <b>UNY2K</b></b></b> </dt>
+<dd>If a keyword <b>DATExxxx</b> is present, and it matches the pattern "yyyy-mm-dd",
+it will be transformed to "dd/mm/yy", which makes the file non-Y2K compliant.
+This might help you getting by some old readers. Highly discouraged of course.
+<br>
+</dd>
 
-<dt><b>DECORDER</b> </dt>
-<dd>If the
-keyword <b>DECORDER</b> is present, and it has a value <b>T</b>, it will replace this
-keyword by a COMMENT and set a flag such that of all data the bytes are
-byte swapped when read (or copied) according to <i>abs(BITPIX)</i>. </dd>
+<dt> <b>DECORDER</b> </dt>
+<dd>If the keyword <b>DECORDER</b> is present, and it has a value <b>T</b>, it
+will replace this keyword by a COMMENT and set a flag such that of all
+data the bytes are byte swapped when read (or copied) according to <i>abs(BITPIX)</i>.
+<br>
+</dd>
 
-<dt><b>IRAF0</b> </dt>
-<dd>Replace
-the FITS keyword <b>HISTORY</b> by <b>COMMENT</b>. This has been proven useful to be able
-to see al that information by the <i>iraf</i> program <i>imhead</i>.  </dd>
+<dt> <b>IRAF0</b> </dt>
+<dd>Replace the FITS keyword <b>HISTORY</b> by <b>COMMENT</b>. This has been proven
+useful to be able to see al that information by the <i>iraf</i> program <i>imhead</i>.
+ <br>
+</dd>
 
-<dt><b>PROMOTE</b> </dt>
-<dd>Replace
-the first FITS keyword <b>XTENSION</b> with <b>SIMPLE = T</b>, so an extension is promoted
-to become the primary HDU. Of course this only makes sense if you are extracting
-single HDUs, e.g. via the <b>hdu=</b> or <b>split=t</b> options. </dd>
+<dt> <b>PROMOTE</b> </dt>
+<dd>Replace the first FITS keyword <b>XTENSION</b> with <b>SIMPLE = T</b>, so an
+extension is promoted to become the primary HDU. Of course this only makes
+sense if you are extracting single HDUs, e.g. via the <b>hdu=</b> or <b>split=t</b> options.
+
+<p> </dd>
 </dl>
 
 <h2><a name='sect5' href='#toc5'>Processing Order</a></h2>
-With all
-the possible editing capabilities, it is important to  know the processing
-order: <br>
+With all the possible editing capabilities, it is important
+to  know the processing order: <br>
 <pre>        select the valid HDU&rsquo;s, 0=all (hdu=)
         delete header items by pattern matching (delete=)
         keep header items by pattern matching (keep=)

@@ -1,4 +1,4 @@
-.. _glossary::
+.. _glossary:
 
 Glossary
 --------
@@ -7,32 +7,36 @@ Glossary
 
 
   accelleration
-      Dataformat 
+      Dataformat used in the :term:`falcon`
 
   bodytrans
       Dataformat that is used to
       perform arbitrary operations on expression
-      variables used in snapshot's.
+      variables used in snapshot's. 
 
   ccd
       Synonymous for image; most programs in NEMO which handle
-      images start or end with ``ccd``.
+      images start or end with ``ccd``, e.g.
+      ``ccdfits``, ``fitsccd``, ``ccdmath``.
 
   ECSV
       (Enhanced Character Separated Values) a popular
       self-describing ASCII table format popularized by astropy
 
+  falcon
+      A subpackage in NEMO that hosts the gyrfalcON code.
   
   fie
       Most expressions that you give to program
       keywords are
       parsed by *nemofie* and eventually ``fie``. (Nomenclature
-      borrowed from\GIPSY)
+      borrowed from :term:`GIPSY`)
 
   FITS
-      ``Flexible Interchange Transport System'', a
+      "Flexible Interchange Transport System", a
       standard dataformat used to interchange data between
-      machines. Commonly used for images.
+      machines. Commonly used for images, but has since its inception
+      be modified to store tables as well.
 
   FWHM
       (Full Width Half Max): the effective resolution of the
@@ -117,7 +121,7 @@ Glossary
       four data types in NEMO.
 
   yapp
-      ``Yet Another Plotting Package'', the library
+      "Yet Another Plotting Package", the library
       definition that is used by all programs that produce graphics
       output. It is kept very simple. The **yapp=** system keyword
       controls the graphics device definitions/capabilities.

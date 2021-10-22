@@ -24,7 +24,7 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh:  Version 1.4 -- 2-may-2021"
+echo "install_nemo.sh:  Version 1.5 -- 9-sep-2021"
 
 opt=0
 nemo=nemo
@@ -33,10 +33,10 @@ python=0
 url=https://github.com/teuben/nemo
 mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4
 falcon=1
-yapp=ps
+yapp=auto
 check=1
-bench=1
-bench5=0
+bench=0
+bench5=1
 
 help() {
     echo This is a simple install script for NEMO
@@ -129,11 +129,16 @@ else
     echo No python install
 fi
 
+if [ $yapp = "auto" ]; then
+    with_yapp=""
+else
+    with_yapp="--with-yapp=$yapp"
+fi
    
 
 # pick a configure
 
-./configure $opt --with-yapp=$yapp
+./configure $opt $with_yapp
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
 #./configure $opt --enable-debug --with-yapp=pgplot

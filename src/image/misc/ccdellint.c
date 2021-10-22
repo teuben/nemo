@@ -191,8 +191,10 @@ void nemo_main(void)
   if (Qnorm)
     for (i=0; i<nring; i++)
       if (pixe[i] > 0)
-	for (k=0; k<nz; k++)
+	for (k=0; k<nz; k++) {
 	  MapValue(outptr,i,k) = MapValue(outptr,i,k) / pixe[i];
+	  //printf("%d %d  %g\n",i,k,MapValue(outptr,i,k));
+	}
   
 
   /* output R-V image */

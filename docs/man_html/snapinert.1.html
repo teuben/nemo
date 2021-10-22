@@ -6,6 +6,7 @@
 <title>SNAPINERT(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -46,21 +47,22 @@ in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
  <i>time-range</i>,  which is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
 [default: all]. </dd>
 
-<dt><b>weight</b>=<i>expression</i> </dt>
+<dt><b>weight=</b><i>expression</i> </dt>
 <dd>The value of <i>expression</i> is  used  to compute
 the center of the coordinate and also the momentum of inertia. <i>expression</i>
 is a real-valued C language  expression over  the  real  values x, y, z,
 vx, vy, vz, phi, m, t, and  the  integer value i.  [default : 1] </dd>
 
-<dt><b>per_weight=<i>t|f</i></b>
+<dt><b>per_weight=</b><i>t|f</i>
 </dt>
 <dd>Logical if the result is  weight-normalized. [default: t]. </dd>
 
-<dt><b>tab=<i>t|f</i></b> </dt>
+<dt><b>tab=</b><i>t|f</i> </dt>
 <dd>Usually
 <b>snapinert</b> gives the result in a (barely) human-readable format. This option
 forces all values printed in one line, so that other programs such as MONGO,
-TABMATH(NEMO1) and AWK can easily access it. [default: f]. </dd>
+TABMATH(NEMO1) and AWK can easily access it. [default: f]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>

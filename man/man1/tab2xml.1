@@ -8,12 +8,13 @@ tabcols \- Select columns, and output a VOTable (xml) file
 the columns in VOTable format.
 .PP
 To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input ascii table. No default.
+.TP
 \fBout=\fP
 output VOTable. No default.
 .TP
@@ -25,7 +26,8 @@ the same order as given with this keyword. First column is 1.
 .TP
 \fBcolnames=\fP
 Column names. Not implemented yet.
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 Here are two examples of converting a table, first the whole table with
 default column names, then one selecting columns and giving them proper names
 .nf

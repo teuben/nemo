@@ -1,11 +1,12 @@
-AMUSE and NEMO
-==============
+AMUSE
+-----
 
 AMUSE (Astrophysical Multipurpose Software Environment) originates some ideas
-from it spredecessors: ACS, StarLab and NEMO, but uses the python language.
+from its predecessors: ACS, StarLab and NEMO, but uses the python language.
 Another feature of AMUSE is that
 python is also the *glue* shell between legacy codes that can orchestrate
-simulations taking components from different codes.
+simulations taking components from different codes, whereas in NEMO legacy codes
+have a NEMO CLI interface, at best.
 
 For seasoned
 `AMUSE <https://amuse.readthedocs.io/en/latest>`_
@@ -14,10 +15,17 @@ how to achieve the same task in NEMO and AMUSE.
 
 
 Differences
------------
+~~~~~~~~~~~
 
 - **Shell**:
-  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...). 
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).
+
+- **Community Code**:
+  Both packages maintain a tight connection to legacy software and community codes. You can find
+  them in 
+  **$AMUSE/src/amuse/community** and
+  **$NEMO/usr**
+  resp.
 
 - **Units**:
   NEMO uses dimensionless values, and units are implied. 
@@ -49,11 +57,8 @@ will look more familiar.   In pure **astropy** it might look as follows:
    m2 = m.to(u.kg).value
 
 
-Examples
---------
-
-Creating a Plummer sphere
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Examples: Creating a Plummer sphere
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Here we create a Plummer sphere, in virial units, in NEMO, and display an X-VX projection on the sky
 in a shell session:
@@ -88,24 +93,32 @@ And in AMUSE the following python session can do something similar:
    plotter = Gnuplot.Gnuplot()
    plotter.splot(plummer.position.value_in(units.parsec))
 
+The AMUSE manual has some
+`NEMO I/O examples <https://amuse.readthedocs.io/en/latest/reference/fileformat.html#nemo>`_.
+
 Installation
 ~~~~~~~~~~~~
 
-For the benefit of NEMO users, AMUSE can usually be installed easily as follows:
+For the benefit of NEMO users, AMUSE can usually be installed *easily* as follows:
+
+.. code-block::
+
+   pip install amuse
+
+but this can take a while as it finds the right dependencies and needs to compile
+massive amounts of code. Some of these can easily fail if you don't have the correct
+`prerequisites <https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html>`_
+(e.g. MPI).
+
+A potentially faster way is to first install
+the AMUSE frame work and then the selected module(s):
 
 .. code-block::
 
    pip install amuse-framework
-   pip install amuse
-
-the second step can take a while as it finds the right dependencies and needs to compile
-some. Or if you just need a few modules, install them individually, e.g.
-
-
-.. code-block::
-
-   pip install amuse-seba
-
+   pip install amuse-seba amuse-brutus
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
+
+

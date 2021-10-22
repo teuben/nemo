@@ -13,8 +13,8 @@ is also advertised. A brief history of NEMO:
 		hooks into manybody.org modules starlab and partiview
    * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
-A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes. Two
-other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
+A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes. 
+Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 (see also https://ascl.net for code references):
 
 	 NEMO:      ascl:1010.051
@@ -23,7 +23,7 @@ other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 	 ACS:       https://artcompsci.org
 	 AMUSE:     ascl:1107.007
 
-Packages we optionally use (sometimes installed in $NEMO/opt via code in $NEMO/local):
+Packages we optionally use (sometimes also installed in $NEMO/opt via its code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
@@ -37,6 +37,7 @@ Packages we optionally use (sometimes installed in $NEMO/opt via code in $NEMO/l
 	 plplot
 	 unsio
 	 uns_project
+	 wcstools
 
 Tools you will need to have pre-installed: A C/C++/Fortran
 compiler, (t)csh, and git.  For graphics it's probably
@@ -44,40 +45,42 @@ useful to have pgplot, but the default ps driver works
 fine just to get started quickly.
 
 
-
-There are a few ways to install NEMO.  Although there are
+There are different ways to install NEMO.  Although there are
 some install scripts with many options, and there is the README.install file
-for background information, here is the basic method
+for background information. Here is the basic method
 for most Linux distros (assuming you have the preconditions):
 
          git clone https://github.com/teuben/nemo
          cd nemo
          ./configure --with-yapp=pgplot
-         make build check bench 
+         make build check bench5
          source nemo_start.sh
 
 If you plan to modify code and submit pull request, the github CLI is recommended
-instead of cloning the upstream:
+instead of cloning the upstream (see also [CONTRIBUTING.md](CONTRIBUTING.md)
 
          gh repo fork https://github.com/teuben/nemo
 
 On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
 awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
-work (there are other ways to install tools on a mac,but don't get me started):
+work (there are other ways to install tools on a mac, but don't get me started):
 
          git clone https://github.com/teuben/nemo
          cd nemo
          CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
-         make build check bench
+         make build check bench5
          source nemo_start.sh
 
+To rebuild NEMO to ensure you have all updates:
 
+	     cd $NEMO
+		 git pull
+		 make rebuild
 
 Once NEMO has been installed, here are some examples of scripts and
 figures: https://teuben.github.io/nemo/examples/ or look at an example
 ipython notebook
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
-
 
 

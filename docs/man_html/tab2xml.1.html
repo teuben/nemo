@@ -6,6 +6,7 @@
 <title>TAB2XML(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -20,14 +21,19 @@ To select lines, use <a href='tablines.1.html'><i>tablines(1NEMO)</i></a>
 
 or <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 . 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+ The following parameters are recognized in
+order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>input ascii table. No default.
-<b>out=</b> output VOTable. No default. </dd>
+</dd>
+
+<dt><b>out=</b> </dt>
+<dd>output VOTable. No default. </dd>
 
 <dt><b>col=</b> </dt>
 <dd>list of columns to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
@@ -37,12 +43,13 @@ will be in exactly the same order as given with this keyword. First column
 is 1. [all]     </dd>
 
 <dt><b>colnames=</b> </dt>
-<dd>Column names. Not implemented yet. </dd>
+<dd>Column names. Not implemented yet. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-Here are
-two examples of converting a table, first the whole table with default
+Here
+are two examples of converting a table, first the whole table with default
 column names, then one selecting columns and giving them proper names <br>
 <pre>    tab2xml a.tab a1.xml
     tab2xml a.tab a2.xml col=4,8:10 colnames=z,ax,ay,az

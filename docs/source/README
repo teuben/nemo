@@ -1,4 +1,6 @@
 This is the sphinx tree for NEMO documentation, meant to replace the old latex manual.
+You will need an account on https://readthedocs.org/ and set up automatic building
+from the NEMO github repo.
 
 Developers will need more modules in their python environment, e.g.
 

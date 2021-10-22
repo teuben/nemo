@@ -27,7 +27,7 @@ real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBm\fP, \fBt\fP, and the integer value \fBi\fP.
 [Default \fBm\fP].
 .TP
-\fPreport=t|f\fP
+\fBreport=t|f\fP
 Report the center of mass coordinates. These are 2*NDIM numbers,
 position and velocity, of the new center of mass in the old
 coordinates.
@@ -37,7 +37,7 @@ will get merged, and become illegable for the next program in the
 pipe.
 [Default: \fBt\fP].
 .TP
-\fPone=t|f\fP
+\fBone=t|f\fP
 Write output center of mass (COM) as a single body with total mass
 and COM coordinates as computed from \fBweight=\fP.**not active**
 [Default: \fBf\fP].
@@ -57,6 +57,7 @@ Fraction of particles to consider in the potential finding algorithm [0.5]
 \fBiter=\fP
 Maximum number of iterations to use. If the \fBeta\fP stop criterion
 did not converge, this criterion will stop the iterations. [10]
+
 .SH SEE ALSO
 snapshift(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .PP

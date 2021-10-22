@@ -27,32 +27,8 @@ char *defv[] = {
 string usage="LV diagram diagnostics (PJT)";
 
 
-
-nemo_main()
-{
-    stream  instr;
-    imageptr iptr = NULL;
-    real vel, temp;
-    string mode;
-    bool scanopt();
-
-    instr = stropen(getparam("in"), "r");     /* get file name and open file */
-    read_image( instr, &iptr);                /* read image */
-    strclose(instr);                          /* close file */
-    check_image(instr,iptr);
-    mode = getparam("mode");
-    if (scanopt(mode,"goat")) {
-        vel = getdparam("vel");
-        goat(iptr, vel);                         /* make table */
-    } else if (scanopt(mode,"int")) {
-        integral(iptr);
-    } else if (scanopt(mode,"vdiff")) {
-        temp = getdparam("temp");
-        vdiff(iptr,temp);
-    } else
-        error("Wrong mode: choose any of {goat, int, vdiff}");
-}
-check_image(iptr)
+void check_image(instr, iptr)
+stream instr;
 imageptr iptr;
 {
 }
@@ -62,7 +38,7 @@ imageptr iptr;
  *	   above +vel, in 2nd and 3rd take it all, since its outside
  *	   solar circle
  */
-goat(iptr, vel)
+void goat(iptr, vel)
 imageptr iptr;
 real vel;
 {
@@ -78,7 +54,7 @@ real vel;
     ivel = (int)  ( (vel-Ymin(iptr))/Dy(iptr) );        /* Vel cutoff pixel */
     if (ivel<0 || ivel>=ny) {
         warning("vel=%f not inside range of Y-axis(ivel=%d)",vel,ivel);
-        return(0);
+        //return(0);
     } else
 	dprintf(0,"ivel = %d\n",ivel);
     phi = 0.5 * nx * Dx(iptr) + Xmin(iptr);             /* first long. point */
@@ -123,7 +99,7 @@ real vel;
  *            column densities for direct comparison of asymmetries
  */
 
-integral(iptr)
+void integral(iptr)
 imageptr iptr;
 {
     int  ix, iy, nx, ny, ivel, ix1,iy1;
@@ -154,7 +130,7 @@ imageptr iptr;
  *   VDIFF: compute the vdiff's of N and S
  */
 
-vdiff(iptr,t)
+void vdiff(iptr,t)
 imageptr iptr;
 real t;
 {
@@ -203,3 +179,27 @@ real t;
     }
 }
 
+void nemo_main()
+{
+    stream  instr;
+    imageptr iptr = NULL;
+    real vel, temp;
+    string mode;
+    bool scanopt();
+
+    instr = stropen(getparam("in"), "r");     /* get file name and open file */
+    read_image( instr, &iptr);                /* read image */
+    strclose(instr);                          /* close file */
+    check_image(instr,iptr);
+    mode = getparam("mode");
+    if (scanopt(mode,"goat")) {
+        vel = getdparam("vel");
+        goat(iptr, vel);                         /* make table */
+    } else if (scanopt(mode,"int")) {
+        integral(iptr);
+    } else if (scanopt(mode,"vdiff")) {
+        temp = getdparam("temp");
+        vdiff(iptr,temp);
+    } else
+        error("Wrong mode: choose any of {goat, int, vdiff}");
+}

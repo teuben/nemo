@@ -84,7 +84,7 @@ real rotcur_core(real r, int np, real *p, real *d)
 
   d[0] = x / y;
   d[1] = -p[0]*d[0]/(p[1]*q);
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* CForm[D[(1+x^c)^(-1/c),c]]  */
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* in mathematica:    CForm[D[(1+x^c)^(-1/c),c]]  */
   d[2] *= p[0] * x;
   return p[0] * d[0];
 }
@@ -114,6 +114,25 @@ real rotcur_arctan(real r, int np, real *p, real *d)
 
   d[0] = y;
   d[1] = p[0]/p[1] * 2/PI / (1+x*x);
+  return p[0] * y;
+  
+}
+
+/*
+ * https://astrohchung.com/project/mangarc/
+ *    v(r) = V_0 * (tanh(r/R1) + r/R2)
+ */
+
+
+
+real rotcur_chung(real r, int np, real *p, real *d)
+{
+  real x1 = r/p[1];
+  real x2 = r/p[2];
+  real y =  atan(x1) + x2;
+
+  d[0] = y;
+  d[1] = p[0]/p[1] / (1+x1*x1) + p[0]/p[2];
   return p[0] * y;
   
 }

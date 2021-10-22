@@ -6,6 +6,7 @@
 <title>TRICKS(8NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -119,12 +120,18 @@ spread the load, e.g. <br>
 <pre>       echo mkplummer . 10000 &gt; run.txt
        echo mkplummer . 10000 &gt;&gt; run.txt
        parallel --jobs 2 &lt; run.txt
-</pre>which will run both jobs in parallel <p>
-Although NEMO can be configured using
-<b>--with-openmp</b> to take advantage of multi-cores OpenMP computing, there are
-really no programs in NEMO taking advantage of this yet. However, programs
-using <i>nemo_main()</i> should be aware of the user interface implications of
-controlling how many cores are used: <br>
+</pre>which will run both jobs in parallel. <p>
+One can also use the <b>-j</b> flag of <b>make</b>
+of running commands in parallel. Similar to the run.txt file created here,
+a well crafted Runfile can be created, and with <br>
+<pre>       make -f Runfile -j 2
+</pre>should achieve the same result. 
+<p> <p>
+Although NEMO can be configured using <b>--with-openmp</b>
+to take advantage of multi-cores OpenMP computing, there are really no programs
+in NEMO taking advantage of this yet. However, programs using <i>nemo_main()</i>
+should be aware of the user interface implications of controlling how many
+cores are used: <br>
 <pre>   0.  the number of cores as per omp_get_num_procs().  We actually take
 a short-cut and use
        omp_get_max_threads() since it listens to OMP_NUM_THREADS (see next
@@ -138,7 +145,12 @@ OMP_NUM_THREADS
    
 </pre>
 <p> 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Slurm</a></h2>
+
+<p> slurm is a popular package you will find on large computer clusters.
+
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
 , <a href='bench.5.html'>bench(5NEMO)</a>
 , <a href='tee.1.html'>tee(1)</a>
@@ -151,10 +163,10 @@ OMP_NUM_THREADS
 , <a href='vipe.1.html'>vipe(1)</a>
  
 <p> 
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben. 
 <p> 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 5-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabccd added         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -171,9 +183,10 @@ may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;OpenMP<tt> </tt>&nbsp;<tt> </tt>&nbsp;<t
 <li><a name='toc1' href='#sect1'>Files: Compression and Such</a></li>
 <li><a name='toc2' href='#sect2'>PIPES and SHARED MEMORY</a></li>
 <li><a name='toc3' href='#sect3'>PARALLEL and OpenMP</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Slurm</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

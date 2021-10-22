@@ -6,6 +6,7 @@
 <title>CCDSKY(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -26,19 +27,21 @@ and unit size (in AU, pc, kpc, mpc, ....) of the object. This will give you
 the scaling factors for length and velocities. <p>
 When the distance is given
 in z, Wright&rsquo;s (2006) cosmology calculator is used. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use --help to confirm this man page is up to date. 
+
 <dl>
 
-<dt><b>in=</b>
-</dt>
+<dt><b>in=</b> </dt>
 <dd>Optional input image file. Must be in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output image
-file, only required if an input image is given.  Will be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
+<dd>Output
+image file, only required if an input image is given.  Will be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
 
 format, with optionally scaled image values and axes coordinates. </dd>
 
@@ -77,15 +80,23 @@ followed by the WM (Omega(matter)) and WV (Omega(vacuum)), for different
 cosmologies. If only H0 and WM are given, a flat universe (WV=0) is used.
 See also Wright(2006). WMAP-9 values: H=71,0.27,0.73 (2011?), Planck-1 values:
 H=67.15,0.317,0.683 (2013) [Default:  71,0.27,0.73] </dd>
+
+<dt><b>nsteps=</b> </dt>
+<dd>Max. number of integration
+steps in the cosmo code to achieve accuracy. [Default: 1000] 
+<p> 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>H</a></h2>
-It will be amusing to see
-the evolution of H: <br>
+It will
+be amusing to see the evolution of H: <br>
 <pre>WMAP-9 (2011)<tt> </tt>&nbsp;<tt> </tt>&nbsp;71<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.27<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.73
 Planck (2013)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.15<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.317<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.683
 Planck (2018)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.66<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.3111<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.6889
 </pre>
+<p> 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 Viewing a model at a distance 1 pc, where 1 length unit represents
 1 AU, the coordinates need to be multiplied by 0.000277785 in order for

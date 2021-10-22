@@ -8,6 +8,7 @@ snapfold \- fold a thin disk N-body snapshot file into a cone along Z axis
 N-body snapshot file representing a thin disk. The disk can be folded
 up to a cone around the +Z axis, or down to a cone around the -Z axis.
 Fold angle (\fBtheta=\fP) must thus  be between -90 and +90.
+
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -21,6 +22,9 @@ Output data is written to \fIsnap-file\fP.
 Fold Angle (in degrees).
 Default: 0.0
 .TP
+\fBselect=\fP
+Select the vectors for rotation. Normally you want to select all vectors. [pos,vel,acc]
+.TP
 \fBfill=t|f\fP
 Fill the cone?  Otherwise it will be a thin wall.
 Default: false
@@ -32,6 +36,7 @@ view=-1 the backside (towards the +Y axis).
 The value of 1+|view| will actually determine the opening angle
 in the plane of the visible part.
 [0]
+
 .SH EXAMPLES
 Here is an example creating a tilted cone with outflow
 .nf

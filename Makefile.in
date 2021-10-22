@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 30-apr-2021 PJT
+VERSION = NEMO V4.2 2-sep-2021 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -7,7 +7,7 @@ VERSION = NEMO V4.2 30-apr-2021 PJT
 SHELL = /bin/bash
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
-.PHONY:  INSTALL install scripts
+.PHONY:  INSTALL install scripts docs
 
 
 # The following subdirectories (1&2) are needed for installation, although only
@@ -218,6 +218,10 @@ dirs:
 	fi
 	@echo "OK, all main directories and files should be there now"
 	@echo Done at `date`
+
+docs:
+	(cd docs/source; make html)
+	@echo open docs/source/_build/html/index.html
 
 # @todo: deprecate?
 pjt:
@@ -461,6 +465,9 @@ build4:
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 
+rebuild: config.status
+	./config.status
+	$(MAKE) build
 
 # the exact python method under development
 
@@ -474,6 +481,7 @@ testpython:
 
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
+	(source nemo_start.sh ; pip3 freeze > pip_freeze.log)
 
 
 
@@ -584,13 +592,23 @@ check:
 	(source nemo_start.sh; src/scripts/testsuite)
 	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
+benchtest:
+	(source nemo_start.sh; src/scripts/benchsuite)
+	@echo 'Testing Benchsuite: Success!'
+
 # show the latest testsuite build log
 checklog:
 	cat `ls -tr tmp/test*/testsuite.log | tail -1`
 
+# check help/man consistency after a build
+checkpars:
+	src/scripts/checkpars.py -v > checkpars.log
+	@grep ^'Files read'           checkpars.log
+	@grep ^'Bad files found'      checkpars.log
+
 TIME = /usr/bin/time
 
-bench:   bench0
+bench:   benchtest
 
 bench0:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)

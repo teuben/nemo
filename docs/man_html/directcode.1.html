@@ -6,6 +6,7 @@
 <title>DIRECTCODE1(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -28,39 +29,39 @@ following parameters are recognized; they may be given in any order if
 supplied with their keyword. 
 <dl>
 
-<dt><b>in</b>=<i>in-file</i> </dt>
+<dt><b>in=</b><i>in-file</i> </dt>
 <dd>If given, initial conditions will
 be read from <i>in-file</i> in snapshot format. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b>
 may be specified. </dd>
 
-<dt><b>out</b>=<i>out-file</i> </dt>
+<dt><b>out=</b><i>out-file</i> </dt>
 <dd>If given, results are written to <i>out-file</i> in
 snapshot format. </dd>
 
-<dt><b>nbody</b>=<i>nbody-value</i> </dt>
+<dt><b>nbody=</b><i>nbody-value</i> </dt>
 <dd>Number of bodies for test data, generated
 only if none of <b>in</b>, <b>restart</b>, or <b>continue</b> are specified. Default is <b>128</b>. </dd>
 
-<dt><b>seed</b>=<i>random-seed</i>
+<dt><b>seed=</b><i>random-seed</i>
 </dt>
 <dd>Random number seed used in generating initial conditions. Default is <b>123</b>.
 </dd>
 
-<dt><b>cencon</b>=<i>cencon-flag</i> </dt>
+<dt><b>cencon=</b><i>cencon-flag</i> </dt>
 <dd>If <b>true</b>, generate centrally concentrated test system.
 Default is <b>false</b>. </dd>
 
-<dt><b>freq</b>=<i>integ-freq</i> </dt>
+<dt><b>freq=</b><i>integ-freq</i> </dt>
 <dd>Inverse time-step, to be used with a leap-frog
 integrator. Default is <b>32.0</b> (32 steps per unit time). </dd>
 
-<dt><b>eps</b>=<i>soft-length</i> </dt>
+<dt><b>eps=</b><i>soft-length</i> </dt>
 <dd>Force
 softening parameter. If a negative value is given, the potential is turned
 into a pseudo-Newtonian one with the meaning of -eps = 3GM/c^2. Default is
 <b>0.05</b>. </dd>
 
-<dt><b>options</b>=<i>option-string</i> </dt>
+<dt><b>options=</b><i>option-string</i> </dt>
 <dd>Miscellaneous control options, specified as a
 comma-separated list of keywords. Currently recognized keywords are: <b>reset_time</b>:
 when reading initial data, set <i>tnow</i> to zero; <b>new_tout</b>: when restarting,
@@ -69,15 +70,15 @@ data with major data outputs. The phase space coordinates are always output.
  It also seems that the reset_time and new_tout options have not been implemented
 yet. Default: <b>mass,phase</b>. </dd>
 
-<dt><b>tstop</b>=<i>stop-time</i> </dt>
+<dt><b>tstop=</b><i>stop-time</i> </dt>
 <dd>Time to stop integration in N-body
 model units. Default is <b>2.0</b>. </dd>
 
-<dt><b>freqout</b>=<i>out-freq</i> </dt>
+<dt><b>freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of major N-body data
 outputs. Default is <b>4.0</b> (4 frames per unit time). </dd>
 
-<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dt><b>minor_freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency
 of minor diagnostic outputs. If this frequency is not a simple fraction
 of <b>freq</b> (see above), the program can waiste significant amounts of time.
@@ -88,7 +89,8 @@ Default is <b>32.0</b> (32 diagnostic measurements per unit time). </dd>
 for the gravitational constant. Although normally 1 in N-body units (see
 also <a href='units.1.html'><i>units(1NEMO)</i></a>
 ), this allows you to work in more natural units. [Default:
-1] </dd>
+1] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>

@@ -24,6 +24,7 @@
 #include <getparam.h>
 #include <fitsio_nemo.h>
 #include <ctype.h>
+#include <table.h>
 
 string defv[] = {
     "in=???\n		Input sig (table) file",
@@ -50,14 +51,14 @@ string cvsid="$Id$";
 #endif
 
 int get_key(char *line, char *key, char *value, int *his);
-
-void init_data(int);
-double get_next_data(int);
+void init_data(int dcol);
+double get_next_data(int dcol);
 
 static  char line[MAX_LINELEN];
 static  double data[MAXCOL];
 static  stream instr;
 static  double scale;
+
 
 void nemo_main()
 {
@@ -281,4 +282,3 @@ double get_next_data(int dcol)
     }
     
 }
-

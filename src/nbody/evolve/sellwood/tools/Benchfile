@@ -1,6 +1,7 @@
 DIR = src/nbody/evolve/sellwood/tools
 BIN = rungalaxy
 NEED = $(BIN) mkplummer galaxy tsf
+BENCH = bench1
 
 help:
 	@echo $(DIR)
@@ -15,7 +16,7 @@ clean:
 NBODY = 1000
 TSTOP = 10
 
-all: $(BIN)
+all: $(BENCH)
 
 
 bench1.in:
@@ -28,4 +29,4 @@ bench1.in:
 bench1:	 bench1.in
 	 rm -rf bench1.run
 	 nemobench rungalaxy in=bench1.in outdir=bench1.run tstop=$(TSTOP)
-	
+	 rm -rf bench1.in

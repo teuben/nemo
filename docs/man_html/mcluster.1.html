@@ -6,13 +6,17 @@
 <title>MCLUSTER(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mcluster, mcluster_sse - make a star cluster 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 mcluster -[N|M|P|W|R|r|c|g|S|D|T|Q|C|A|O|G|o|f|a|m|B|b|p|s|t|e|Z|X|V|x|u|h|?]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>McLuster</i> is a program that can be used to either set up initial
 conditions for N-body computations or, alternatively, to generate artificial
@@ -83,100 +87,100 @@ transition    </dd>
 
 <dt>-Q &lt;value&gt;
 </dt>
-<dd>virial ratio                                      </dd>
+<dd>virial ratio (Q=0.5 is virial equilibrium) </dd>
 
 <dt>-C &lt;0|1|3|5&gt; </dt>
-<dd>code; 0= Nbody6,
-1= Nbody4, 3= table of stars, 5= Nbody6++ </dd>
+<dd>code; 0= Nbody6, 1= Nbody4,
+3= table of stars, 5= Nbody6++ </dd>
 
 <dt>-A &lt;value&gt; </dt>
-<dd>dtadj in N-body units
-</dd>
+<dd>dtadj in N-body units </dd>
 
 <dt>-O &lt;value&gt; </dt>
-<dd>deltat in N-body units                            </dd>
+<dd>deltat
+in N-body units                            </dd>
 
 <dt>-G &lt;0|1&gt; </dt>
-<dd>GPU usage;
-0= no GPU, 1= use GPU                    </dd>
+<dd>GPU usage; 0= no GPU, 1=
+use GPU                    </dd>
 
 <dt>-o &lt;name&gt; </dt>
-<dd>output name of cluster
-model                       </dd>
+<dd>output name of cluster model        
+              </dd>
 
 <dt>-f &lt;0|1|2|3|4&gt; </dt>
-<dd>IMF; 0= no IMF, 1= Kroupa (2001), 
-            2= user defined, 3= Kroupa (2001) with optimal sampling, 4=
-L3 IMF (Maschberger 2012))                            </dd>
+<dd>IMF; 0= no IMF, 1= Kroupa (2001),              2=
+user defined, 3= Kroupa (2001) with optimal sampling, 4= L3 IMF (Maschberger
+2012))                            </dd>
 
 <dt>-a &lt;value&gt; </dt>
-<dd>IMF slope;
-for user defined IMF, may be used       multiple times, from low mass to
-high mass;        for L3 IMF use three times for alpha, beta and mu) </dd>
+<dd>IMF slope; for user defined IMF,
+may be used       multiple times, from low mass to high mass;        for
+L3 IMF use three times for alpha, beta and mu) </dd>
 
-<dt>-m
-&lt;value&gt; </dt>
-<dd>IMF mass limits, has to be used multiple times     (at least twice),
-from low mass to high mass [Msun] </dd>
+<dt>-m &lt;value&gt; </dt>
+<dd>IMF mass limits,
+has to be used multiple times     (at least twice), from low mass to high
+mass [Msun] </dd>
 
 <dt>-B &lt;number&gt; </dt>
-<dd>number of binary systems   
-                     </dd>
+<dd>number of binary systems                         </dd>
 
-<dt>-b &lt;value&gt; </dt>
-<dd>binary fraction, specify either B or b   
-       </dd>
+<dt>-b
+&lt;value&gt; </dt>
+<dd>binary fraction, specify either B or b           </dd>
 
 <dt>-p &lt;0|1|2|3&gt; </dt>
-<dd>binary pairing, 0= random, 1= ordered for M&gt;5.0 Msun, 2= random
-but separate pairing for M&gt;5.0 Msun) 3= random but uniform distribution of
-mass ratio (0.1&lt;q&lt;1.0) for M&gt;5.0 Msun) </dd>
+<dd>binary pairing,
+0= random, 1= ordered for M&gt;5.0 Msun, 2= random but separate pairing for
+M&gt;5.0 Msun) 3= random but uniform distribution of mass ratio (0.1&lt;q&lt;1.0) for
+M&gt;5.0 Msun) </dd>
 
 <dt>-s &lt;number&gt; </dt>
-<dd>seed for randomization; 0= randomize
-by timer    </dd>
+<dd>seed for randomization; 0= randomize by timer    </dd>
 
-<dt>-t &lt;0|1|2|3&gt; </dt>
-<dd>tidal field; 0= no tidal field, 1= near-field,   2= point-mass,
-3= Milky-Way potential            </dd>
+<dt>-t &lt;0|1|2|3&gt;
+</dt>
+<dd>tidal field; 0= no tidal field, 1= near-field,   2= point-mass, 3= Milky-Way
+potential            </dd>
 
 <dt>-e &lt;value&gt; </dt>
-<dd>epoch for stellar evolution [Myr]
-                </dd>
+<dd>epoch for stellar evolution [Myr]        
+        </dd>
 
 <dt>-Z &lt;value&gt; </dt>
 <dd>metallicity [0.0001-0.03, 0.02 = solar]           </dd>
 
-<dt>-X
-&lt;value&gt; </dt>
-<dd>galactocentric radius vector, use 3x, [pc]        </dd>
+<dt>-X &lt;value&gt; </dt>
+<dd>galactocentric
+radius vector, use 3x, [pc]        </dd>
 
 <dt>-V &lt;value&gt; </dt>
-<dd>cluster
-velocity vector, use 3x, [km/s]           </dd>
+<dd>cluster velocity vector, use
+3x, [km/s]           </dd>
 
 <dt>-x &lt;value&gt; </dt>
-<dd>specify external (gas)
-Plummer potential, use 4x,  1. gas mass [Msun], 2. Plummer radius [pc]  
-       3. decay time for gas expulsion [Myr], 4. delay     time for start
-of gas expulsion [Myr]              </dd>
+<dd>specify external (gas) Plummer potential,
+use 4x,  1. gas mass [Msun], 2. Plummer radius [pc]          3. decay time
+for gas expulsion [Myr], 4. delay     time for start of gas expulsion [Myr]
+             </dd>
 
 <dt>-u &lt;0|1&gt; </dt>
-<dd>output units; 0= Nbody, 1= astrophysical
-           </dd>
+<dd>output units; 0= Nbody, 1= astrophysical            </dd>
 
-<dt>-h </dt>
-<dd>display this help                                        
-</dd>
+<dt>-h
+</dt>
+<dd>display this help                                         </dd>
 
 <dt>-? </dt>
-<dd>display this help                                        </dd>
+<dd>display this
+help                                        </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-McLuster
-can be run from the command line by passing arguments to the code which
-specify the desired cluster, e.g., <br>
+McLuster can be run
+from the command line by passing arguments to the code which specify the
+desired cluster, e.g., <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;mcluster -N1000 -R2.0 -P0
 </pre>would give a cluster with a Plummer profile and a half-mass radius of 2
 pc, consisting of 1000 stars. For parameters which are not specified default
@@ -207,15 +211,18 @@ results: <br>
 Non-standard install via "mknemo mcluster" 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
-
-<p>
-Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS, 417, 2300
-"Mass segregation and fractal substructure in young massive clusters: 
-(I) the McLuster code and method calibration" <p>
+,
+plumix(1 <p>
+Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS,
+417, 2300 "Mass segregation and fractal substructure in young massive clusters:
+ (I) the McLuster code and method calibration" <p>
 Kroupa P., 2008, LNP, 760,
 181 <p>
 <a href='https://github.com/ahwkuepper/mcluster'>https://github.com/ahwkuepper/mcluster</a>
- 
+ <p>
+<a href='http://www.ascl.net/Plumix'>http://www.ascl.net/Plumix</a>
+    2008MNRAS.385.1673S
+
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Andreas H.W. Kuepper 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>

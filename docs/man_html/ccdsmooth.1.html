@@ -6,6 +6,7 @@
 <title>CCDSMOOTH(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -14,19 +15,22 @@ ccdsmooth - smoothing of an image map (2D or 3D)
 <p>
 <b>ccdsmooth in=</b>image
 <b>out=</b>image [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>ccdsmooth</i> will smooth an image cube
-through a simple direct convolution (no FFT). The smoothing beam must be
-circular/spherical, or smoothing must be done independantly per coordinate
+<i>ccdsmooth</i> will smooth an image
+cube through a simple direct convolution (no FFT). The smoothing beam must
+be circular/spherical, or smoothing must be done independantly per coordinate
 by calling <i>ccdsmooth</i> multiple times using the <b>dir=</b> keyword (see below).
 <p>
 For more artistic versions of a smoothing operation, such as added noise
 and diffraction spikes for bright stars, see <a href='ccddiffract.1.html'><i>ccddiffract(1NEMO)</i></a>
 . 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use --help to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
@@ -71,18 +75,34 @@ smoothing. [Default: not used] </dd>
 
 <dt><b>cut=<i>cutoff_value</i></b> </dt>
 <dd>Value at which to cutoff
-the gaussian beam.  [Default: <b>0.01</b>] </dd>
+the gaussian beam.  [Default: <b>0.01</b>] 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='ccdfill.1.html'>ccdfill(1NEMO)</a>
-, <a href='ccddiffract.1.html'>ccddiffract(1NEMO)</a>
-,
-<a href='snapccd.1.html'>snapccd(1NEMO)</a>
-, <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
-, <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
-, <a href='image.5.html'>image(5NEMO)</a>
- 
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+Here is an example to compute
+the noise of an image with unity noise that has been smoothed with a beam/pixel
+(B/P) ratio of 2.0 : <br>
+<pre>  ccdgen "" -  noise 0,1 size=1000,1000 seed=123 | ccdsmooth - - 2.0 | ccdstat
+- | grep dispersion
+  Mean and dispersion    : -0.000116 0.334048
+</pre>with the following table showing the resulting RMS for a few values of
+the B/P ratio <br>
+<pre>B/P     RMS
+---    -----
+0.0    1.000
+1.0    0.796
+2.0    0.334
+3.0    0.223
+4.0    0.168
+5.0    0.1367
+6.0    0.1160
+7.0    0.1012
+8.0    0.0917
+</pre>caveat:   this does not follow the expected (?) 1/sqrt(1.1309)/(B/P) 
+<p> sigma_smooth
+= -0.133 + 1.52 / beam 
+<p> 
 <h2><a name='sect5' href='#toc5'>Timing</a></h2>
 <br>
 <pre>With 68881 on SUN 3/50 (~16Mhz) and 200*200 map - old program (pre-V2.1)
@@ -105,18 +125,33 @@ Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))).
 4: 0.0190983,0.0690983,0.1309017,0.1809017,0.2,0.1809017,0.1309017,0.0690983,0.0190983
 5: 0.01116455,0.04166667,0.08333333,0.125,0.15550212,0.16666667,0.15550212,0.125,0.08333333,0.04166667,0.01116455
 </pre>which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>
-Smoothing a
-map which has already been smoothed will result in an incorrect header
+Smoothing
+a map which has already been smoothed will result in an incorrect header
 - this would be a simple sum of squares, if the beams are aligned with the
 axis. 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
+, <a href='ccdfill.1.html'>ccdfill(1NEMO)</a>
+, <a href='ccddiffract.1.html'>ccddiffract(1NEMO)</a>
+, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
+,
+<a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
+, <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
+ 
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Files</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>src/image/trans     <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdsmooth.c
 </pre>
-<h2><a name='sect10' href='#toc10'>Update History</a></h2>
+<p> 
+<h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
 <pre>29-jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created as module from CCD program<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-Jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: improved &rsquo;struct&rsquo; filestructure      <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -125,6 +160,7 @@ Peter Teuben
  5-feb-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2: general 3D smoothing                <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-sep-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;some additional comments                <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1: added cut=, fixed fwhm=0.0         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+23-jun-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;add EXAMPLE with smoothing noise<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -134,13 +170,14 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Timing</a></li>
 <li><a name='toc6' href='#sect6'>Hanning</a></li>
 <li><a name='toc7' href='#sect7'>Bugs</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Files</a></li>
-<li><a name='toc10' href='#sect10'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Files</a></li>
+<li><a name='toc11' href='#sect11'>History</a></li>
 </ul>
 </body>
 </html>

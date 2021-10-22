@@ -6,13 +6,17 @@
 <title>TSF(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tsf - type a structured file 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tsf in=</b>file [parameter=value] ...
-
+<b>tsf in=</b>file [parameter=value]
+... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tsf</i> types the contents of a structured binary file (see <a href='filestruct.3.html'><i>filestruct</i>(3NEMO)</a>
 )
@@ -71,7 +75,8 @@ this item for output. Default: all items selected. </dd>
 integer information in octal, we have now switched by default to decimal
 (more human readable). By using  <b>octal=t</b> you can force this program back
 in the old mode. If take output of tsf to be read into rsf, you now need
-to force octal=t. [Default: <b>f</b>]. </dd>
+to force octal=t. [Default: <b>f</b>]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
@@ -84,14 +89,16 @@ to force octal=t. [Default: <b>f</b>]. </dd>
 , <a href='bsf.1.html'>bsf(1NEMO)</a>
 , <a href='filestruct.3.html'>filestruct(3NEMO)</a>
 . 
+<p> 
 <h2><a name='sect5' href='#toc5'>Debug</a></h2>
-<b>debug=2</b> reports values of
-<i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
-.
-
-<h2><a name='sect6' href='#toc6'>Example</a></h2>
-An example of converting all double precision numbers to single
-precision in a NEMO file: <br>
+<b>debug=2</b> reports values
+of <i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> and <i>MaxVecDim</i> see
+<a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
+. 
+<p> 
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
+An example of converting all double precision numbers
+to single precision in a NEMO file: <br>
 <pre>    % tsf in=double.dat out=float.dat convert=d2f
 </pre>And here is an N-body snapshot of a Plummer sphere with 10 particles: <br>
 <pre>    mkplummer - 10 | tsf -
@@ -114,21 +121,34 @@ set SnapShot
   tes
 tes
 </pre>
-<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
-The algorithm for implementing <b>maxline</b> is crude. <p>
-If <b>indent=</b> and <b>margin=</b>
-are choosen too large, resp. too small, they can bump into each other and
-cause illegable output, which cannot be read by <i>rsf</i> either. 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
-Joshua
-E. Barnes. 
-<h2><a name='sect9' href='#toc9'>History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Tldr</a></h2>
+- Show contents of a binary structured file in brief format 
+<p> tsf {{file}}
+
+<p> - Show contents of a binary structured file, showing all lines, and in
+
+<p>full precision 
+<p> tsf {{file}} True allline=t 
+<p> 
+<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+The algorithm for implementing
+<b>maxline</b> is crude. <p>
+If <b>indent=</b> and <b>margin=</b> are choosen too large, resp. too
+small, they can bump into each other and cause illegable output, which
+cannot be read by <i>rsf</i> either. 
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
+Joshua E. Barnes. 
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>xx-xxx-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 9-dec-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.3 helpvec and other minor things<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-mar-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.7 experimental xml output option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-jun-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added octal=, but default output of integers is now decimal<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+21-jun-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;experimenting with a TLDR section<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -140,10 +160,11 @@ xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&n
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Debug</a></li>
-<li><a name='toc6' href='#sect6'>Example</a></li>
-<li><a name='toc7' href='#sect7'>Bugs</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>History</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>Tldr</a></li>
+<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>

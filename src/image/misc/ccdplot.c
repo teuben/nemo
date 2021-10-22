@@ -107,9 +107,15 @@ local real xtrans(real), ytrans(real);
 void lineto(real, real, real, real);
 
 extern int contour(real*, int, int, real*, int, real, real, real, real, proc);
+extern void contour_setdef(int, real);
 
-
-nemo_main()
+void setrange(real *rval, string exp);
+void setparams(void);
+void plot_map(void);
+void lineto(real x1, real y1, real x2, real y2);
+
+
+void nemo_main()
 {
   int n = 0;
   setparams();                    /* set globals */
@@ -137,9 +143,24 @@ nemo_main()
   }
   plstop();                                   /* end of yapp */
   strclose(instr);
+}	
+
+
+void setrange(real *rval, string rexp)
+{
+    char  *cptr;
+	
+    cptr = strchr(rexp, ':');
+    if (cptr != NULL) {
+        rval[0] = atof(rexp);
+        rval[1] = atof(cptr+1);
+    } else {
+        rval[0] = 0.0;
+        rval[1] = atof(rexp);
+    } 
 }
 
-setparams()
+void setparams()
 {
 	string  tmpstr;
 	int	tmpint, i;
@@ -148,7 +169,7 @@ setparams()
 
 	cntstr = getparam ("contour");	/* get contour levels */
 	if (*cntstr==0) {
-/*	    ncntval = 0;		/* this will cause a grayscale plot */
+/*	    ncntval = 0;	     this will cause a grayscale plot */
 	    gray=TRUE;
 	} else {
 	    ncntval = nemoinpr(getparam("contour"),cntval,MCNTVAL);
@@ -205,7 +226,7 @@ setparams()
             
 }
 
-plot_map ()
+void plot_map ()
 {
     real m_range, brightness, dcm;
     real m_min, m_max;
@@ -348,21 +369,4 @@ void lineto(real x1, real y1, real x2, real y2)
     plmove (xtrans(x1),ytrans(y1));
     plline (xtrans(x2),ytrans(y2));
 }
-		
-/*******  stolen from snapplot.c **********/
-
-setrange(real *rval, string rexp)
-{
-    char  *cptr;
-	
-    cptr = strchr(rexp, ':');
-    if (cptr != NULL) {
-        rval[0] = atof(rexp);
-        rval[1] = atof(cptr+1);
-    } else {
-        rval[0] = 0.0;
-        rval[1] = atof(rexp);
-    } 
-}
-					
 					

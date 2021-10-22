@@ -3,7 +3,8 @@
 ccdfill \- patch up the holes in an image
 .SH SYNOPSIS
 \fBccdfill\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdfill\fP patches up the holes in an image.
 .PP
 Currently a simple 2-dimensional planar fit is done to the
@@ -12,9 +13,9 @@ can be choosen by the user.
 .PP
 This procedure will obviously not conserve flux (see also
 \fBall=t\fP below), and has to be used with caution.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP\fIin_ccd\fP
 Input \fIimage(3NEMO)\fP file.
@@ -54,11 +55,18 @@ Minimum number of iterations.  0 is also an allowed value, in which
 case the image will just be copied unmodified.
 Default: 1
 .TP
+\fBxmirror=t|f\fP
+Use points mirrored in X to get near a border. [Default: f]
+.TP
+\fBymirror=t|f\fP
+Use points mirrored in Y to get near a border. [Default: f]
+.TP
 \fBspike=\fP
 If given, for each point in the map, if a point deviates more than \fBspike\fP from
 all it's 4 non-bad direct neighbors, this value will be reset to \fBbad\fP before the actually
 filling will take place. Default: none (not applied)
-.SH CAVEATS
+
+.SH "CAVEATS"
 With m=3 you will see some singular matrix warnings, and patched values
 will be bogus. It is better to set m=4 for those cases.
 .PP

@@ -8,6 +8,7 @@ tabtranspose \- transpose a table
 columns. Comment lines are skipped.
 .PP
 Lines can be arbitrarly long.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -17,12 +18,14 @@ input file name. No default.
 .TP
 \fBout=\fP
 output file name. No default.
-.TP
-\fBalign=t|f\fP
-Align the column on output
+." .TP
+." \fBalign=t|f\fP
+." Align the column on output
+." 
 .TP
 \fBnmax=\fP
 max space (needed if data in pipe) [10000]
+
 .SH EXAMPLES
 Using \fBtabtranspose\fP twice will result in the same file:
 .nf

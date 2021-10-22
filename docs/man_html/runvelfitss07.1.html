@@ -6,6 +6,7 @@
 <title>RUNVELFITSS07(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -26,86 +27,87 @@ by setting <a href='flags.4.html'><b>flags(4)</b></a>
  (see <b>flags=</b> below). The code is usually not well converging when
 fitting both. For more details and a full explanation of the parameters,
 see  Spekkens and Sellwood (2007ApJ...664..204S) and the Users Guide on the
-VELFIT website. 
+VELFIT website. <p>
+It should be noted that velfit has been superseded by diskfit.
+
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any
-order if the keyword is also given: 
+The following parameters are recognized in any order if the keyword
+is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input velocity field. The first
-4 lines are completely ignored, each subsequent data line must be X,Y,V,DV
-in 4F10.2 format. Note X is positive to the west. Up to 50,000 points can
-be read in the default compilation. No default. </dd>
+<dd>input velocity field. The first 4 lines are completely
+ignored, each subsequent data line must be X,Y,V,DV in 4F10.2 format. Note
+X is positive to the west. Up to 50,000 points can be read in the default
+compilation. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output model field. No
-default. </dd>
+<dd>output model field. No default. </dd>
 
 <dt><b>par=</b> </dt>
-<dd>output parameter file. No default. </dd>
+<dd>output parameter
+file. No default. </dd>
 
 <dt><b>center=</b><i>xc,yc</i> </dt>
-<dd>center of velocity
-field. Note X is positive to the west  [0,0]. </dd>
+<dd>center of velocity field. Note X is positive
+to the west  [0,0]. </dd>
 
 <dt><b>vsys=</b> </dt>
-<dd>systemic velocity [0]
-     </dd>
+<dd>systemic velocity [0]      </dd>
 
 <dt><b>pa=</b> </dt>
-<dd>(kinematic) position angle of disk (E of N), the usual convention
-applies where this means the receding side of the disk [0] </dd>
+<dd>(kinematic) position
+angle of disk (E of N), the usual convention applies where this means the
+receding side of the disk [0] </dd>
 
 <dt><b>inc=</b> </dt>
-<dd>inclination
-angle of disk [0]    </dd>
+<dd>inclination angle of disk [0]    </dd>
 
-<dt><b>rmsism=</b> </dt>
+<dt><b>rmsism=</b>
+</dt>
 <dd>ISM turbulence [0]      </dd>
 
-<dt><b>flags=</b><i>f1,f2,f3,f4,f5,f6</i>
-</dt>
-<dd>Siz flags which to be fitted/done: geom (inc and pa), center, vsys, radial
-(m=0),  lobsides/bisymmetric (m=1,2...), error estimates. [1,1,1,0,0,0] </dd>
+<dt><b>flags=</b><i>f1,f2,f3,f4,f5,f6</i> </dt>
+<dd>Siz flags which to be fitted/done:
+geom (inc and pa), center, vsys, radial (m=0),  lobsides/bisymmetric (m=1,2...),
+error estimates. [1,1,1,0,0,0] </dd>
 
-<dt><b>m=</b>
-</dt>
-<dd>harmonic order of bar perturbation (1 or 2). [2] </dd>
+<dt><b>m=</b> </dt>
+<dd>harmonic order of bar perturbation (1
+or 2). [2] </dd>
 
 <dt><b>seed=</b> </dt>
-<dd>Random Seed [-50]
-     </dd>
+<dd>Random Seed [-50]      </dd>
 
 <dt><b>bootstrap=</b> </dt>
-<dd>Number of bootstrap samples if errors (<a href='flags.6.html'><b>flags(6)</b></a>
- set) are
-calculated.  Note using bootstrap will result in a large runtime. [200] </dd>
+<dd>Number of bootstrap samples
+if errors (<a href='flags.6.html'><b>flags(6)</b></a>
+ set) are calculated.  Note using bootstrap will result
+in a large runtime. [200] </dd>
 
-<dt><b>j=</b>
-</dt>
-<dd>correlation length, in case bootstrap is used [1.0] </dd>
+<dt><b>j=</b> </dt>
+<dd>correlation length, in case bootstrap is used
+[1.0] </dd>
 
 <dt><b>rcirc=</b> </dt>
-<dd>Radius beyond
-which no non-circular rmotions fitted [50] </dd>
+<dd>Radius beyond which no non-circular rmotions fitted [50] </dd>
 
-<dt><b>radii=</b><i>rmin:rmax:step</i> </dt>
-<dd>Ring Radii
-at which velocity field components are are extracted. </dd>
+<dt><b>radii=</b><i>rmin:rmax:step</i>
+</dt>
+<dd>Ring Radii at which velocity field components are are extracted. </dd>
 
 <dt><b>exe=</b> </dt>
-<dd>name of VELFITSS07
-executable. It will have to be found in the user&rsquo;s $PATH. Note that although
-the original name of the SS07 is <i>velfit</i>, this conflicts with <a href='velfit.1.html'><i>velfit(1NEMO)</i></a>
-
-and within NEMO we normally rename the SS07 version fo <i>velfitss07</i>.  [velfitss07]
-   </dd>
+<dd>name
+of VELFITSS07 executable. It will have to be found in the user&rsquo;s $PATH. Note
+that although the original name of the SS07 is <i>velfit</i>, this conflicts with
+<a href='velfit.1.html'><i>velfit(1NEMO)</i></a>
+ and within NEMO we normally rename the SS07 version fo <i>velfitss07</i>.
+ [velfitss07]    </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The standard example from the Users Guide can be run as follows
-(note we are more free to pick a directory): <br>
+The standard example from the Users Guide can
+be run as follows (note we are more free to pick a directory): <br>
 <pre>runvelfitss07 examp.vels examp1.m examp1.p vsys=500 pa=80 inc=60 radii=2.5:50:2.5
 </pre>of which you can find the results in Figure 7. and the next 3 examples from
 the Users Guide are run as follows: <br>

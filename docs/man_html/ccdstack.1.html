@@ -6,6 +6,7 @@
 <title>CCDSTACK(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -56,19 +57,23 @@ that of the first image are simply ignored. [Default: t] </dd>
 <dt><b>fwhm=</b> </dt>
 <dd>If given,
 these are the convolution FWHM kernels in each dimension of the input images.
-It only makes sense to use this is <b>wcs=t</b> is used. <i>Not Implemented Yet</i>. 
-<p> 
-<p>
-</dd>
+It only makes sense to use this is <b>wcs=t</b> is used. <i>Not Implemented Yet</i>. </dd>
+
+<dt><b>flux=0|1</b>
+</dt>
+<dd>Conserve <a href='flux.1.html'>flux (1)</a>
+ or not (0) in each dimension. Not implemented yet. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Since the first image determines the WCS of the output image, it
-can be also be used as a template by setting its image values to 0.  <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
-
-can be used for this. <p>
-Here is a contrived example of mosaicing two fields
-in a Plummer sphere projection. It will generate a template with all 0 values
+Since
+the first image determines the WCS of the output image, it can be also
+be used as a template by setting its image values to 0.  <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
+ can
+be used for this. <p>
+Here is a contrived example of mosaicing two fields in
+a Plummer sphere projection. It will generate a template with all 0 values
 (which don&rsquo;t contribute to the stack), and adding in the two fields: <br>
 <pre>    mkplummer p1 100000
     snapgrid p1 ccd1 xrange=0:1 yrange=0:1    nx=16 ny=16

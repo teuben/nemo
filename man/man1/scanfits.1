@@ -23,9 +23,8 @@ to process fits files from tape.
 This program was written while the author was on the first FITS panel.
 The cfitsio suite is now also providing a FITS checker
 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is 
-also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIfits-infile\fP
 input file, in \fIfits(5)\fP format. The input fits file is allowed
@@ -136,13 +135,14 @@ multiple files to be copied (\fBfile=0\fP) the output file is split into
 it's ``file'' components. The \fIfits-outfile\fP name will then be a base
 filename, and the program generates its own numeric extension.
 [Default: \fBfalse\fP].
+
 .SH "FIXES"
 This is a list of the currently supported fixes for the header.
 Each of them is applied in the order as 
 they appear in the \fBfix=\fP keyword. Their
 names have to be supplied in full, separated by commas. No spaces.
 .TP 20
-\fBING\fP
+ \fBING\fP
 Isaac Newton Group (ING) uses 9 blanks in the first column,
 followed by the word \fBING\fP, followed by a space, after
 which an ING specific keywords start. If you want to promote
@@ -150,7 +150,7 @@ these to regular keywords, a shift of 13 characters to the left
 does the job. The 13 rightmost characters in the card image are 
 set to blank.
 .TP 20
-\fBTUCSON\fP
+ \fBTUCSON\fP
 Certain FITS files coming out of NRAO TUCSON have card images
 starting with \fBSINGLDSH\fP. The next 10 characters are used for
 another level of identification, and at position 19 the actual
@@ -159,7 +159,7 @@ starting at position 19 is promoted to a real FITS keyword, by
 shifting those 18 positions to the left. The 18 rightmost 
 characters in the card image are set to blank.
 .TP
-\fBLF\fP
+ \fBLF\fP
 Character 80 (the last one) in each header card image
 is patched with a linefeed (newline) (\fIhexadecimal 0x0A\fP). 
 This is useful to edit the header with an ASCII editor on UNIX.
@@ -167,7 +167,7 @@ It would normally be used with \fBoptions=header\fP.
 See also \fIfitshead(1NEMO)\fP if you don't want to see
 trailing blanks.
 .TP
-\fBBLANK\fP
+ \fBBLANK\fP
 Delete all card images which are completeley blank. This is often the
 result of either old style FITS files, or when card images had been
 blanked before with \fBdelete=\fP\fIpattern\fP or \fBkeep=\fP\fIpattern\fP
@@ -176,22 +176,22 @@ blanked before with \fBdelete=\fP\fIpattern\fP or \fBkeep=\fP\fIpattern\fP
 out and delete certain card 
 images, e.g. \fBscanfits in out delete=ING fix=BLANK\fP.
 .TP
-\fBZERO\fP
+ \fBZERO\fP
 Replace all zero's in the header by blanks.
 .TP
-\fBFIRST\fP
+ \fBFIRST\fP
 Retain only the first keyword if they occur multiple times in the header.
 The other card images are blanked.
 HISTORY and COMMENT and anything that does not have an '=' in column 9
 are not affected.
 .TP
-\fBLAST\fP
+ \fBLAST\fP
 Retain only the last keyword if they occur multiple times in the header.
 The other card images are blanked.
 HISTORY and COMMENT and anything that does not have an '=' in column 9
 are not affected.
 .TP
-\fBY2K\fP
+ \fBY2K\fP
 If a keyword \fBDATExxxx\fP is present, and it matches the pattern
 "dd/mm/yy", it will be transformed to "yyyy-mm-dd", which makes the
 file Y2K compliant.  FYI: the unix \fIdate(1)\fP
@@ -199,29 +199,30 @@ command produces Y2K compliant
 with \fBdate +%Y-%m-%dT%H:%M:%S.%N\fP, where the subsecond \fB.%N\fP portion is optional.
 The old style is done with  \fBdate +%d/%m/%y\fB,  which does not sort lexically.
 .TP
-\fBUNY2K\fP
+ \fBUNY2K\fP
 If a keyword \fBDATExxxx\fP is present, and it matches the pattern
 "yyyy-mm-dd", it will be transformed to "dd/mm/yy", which makes the
 file non-Y2K compliant. This might help you getting by some old readers.
 Highly discouraged of course.
 .TP
-\fBDECORDER\fP
+ \fBDECORDER\fP
 If the keyword \fBDECORDER\fP is present, and it has a value \fBT\fP,
 it will replace this keyword by a COMMENT and set a flag such that
 of all data the bytes are byte swapped when read (or copied) according
 to \fIabs(BITPIX)\fP.
 .TP
-\fBIRAF0\fP
+ \fBIRAF0\fP
 Replace the FITS keyword \fBHISTORY\fP by \fBCOMMENT\fP. This has been
 proven useful to be able to see al that information by the \fIiraf\fP
 program \fIimhead\fP. 
 .TP
-\fBPROMOTE\fP
+ \fBPROMOTE\fP
 Replace the first FITS keyword \fBXTENSION\fP with \fBSIMPLE = T\fP, so
 an extension is promoted to become the primary HDU. Of course this only
 makes sense if you are extracting single HDUs, e.g. via the
 \fBhdu=\fP or \fBsplit=t\fP options.
-.SH PROCESSING ORDER
+
+.SH "PROCESSING ORDER"
 With all the possible editing capabilities, it is important to 
 know the processing order:
 .nf

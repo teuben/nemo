@@ -5,7 +5,7 @@ include $(NEMOLIB)/makedefs
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
-	wgetc 
+	wgetc yapp_query
 MAKES = Makefile.lib 
 
 help:
@@ -63,6 +63,6 @@ scripts: $(SCRIPTS)
 
 
 checkpars:
-	python checkpars.py -v > checkpars.log
-	@grep ^'Files read'      checkpars.log
-	@grep ^'Bad files found' checkpars.log
+	(cd ../../; src/scripts/checkpars.py -v)  > checkpars.log
+	@grep ^'Files read'         checkpars.log
+	@grep ^'Bad files found'    checkpars.log
