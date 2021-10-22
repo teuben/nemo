@@ -3,7 +3,8 @@
 tsf \- type a structured file
 .SH SYNOPSIS
 \fBtsf in=\fPfile [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItsf\fP types the contents of a structured binary file
 (see \fIfilestruct\fP(3NEMO)) in a human readable form
 on the standard output.
@@ -16,7 +17,7 @@ octal for portability reasons (see \fBoctal=\fP below).
 exercised. A \fIjson\fP mode has been considered.
 .PP
 
-.SH PARAMETERS
+.SH "PARAMETERS"
 .so man1/parameters
 .TP 24
 \fBin=\fP\fIfile\fP
@@ -68,7 +69,8 @@ ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEM
 \fBdebug=2\fP reports values of \fIMaxSetLen\fP
 as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 An example of converting all double precision numbers to single
 precision in a NEMO file:
 .nf
@@ -100,7 +102,17 @@ set SnapShot
 tes
 
 .fi
-.SH BUGS
+
+.SH "TLDR"
+list brief contents of a binary structured file
+
+% tsf {{path/to/file}}
+
+list more
+
+% tsf {{path/to/file}}
+
+.SH "BUGS"
 The algorithm for implementing \fBmaxline\fP is crude.
 .PP
 If \fBindent=\fP and \fBmargin=\fP are choosen too large, resp. too
