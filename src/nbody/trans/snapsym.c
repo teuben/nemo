@@ -18,29 +18,13 @@ string defv[] = {
     "in=???\n	    Input file name",
     "out=???\n	    Output file name",
     "mode=\n        (TBD) mode of symmetry",
-    "VERSION=0.1\n  23-oct-2021 PJT",
+    "VERSION=0.2\n  23-oct-2021 PJT",
     NULL,
 };
 
 string usage="symmetrize a snapshot";
 
-#define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
-bool uscalar(real x)
-{
-    return x==1.0;
-}
-
-bool uvector(vector v)
-{
-    register int i;
-
-    for (i=0; i<NDIM; i++)
-        if(v[i] != 1.0) return FALSE;
-    return TRUE;
-}
-
-
 void nemo_main()
 {
   stream instr, outstr;
@@ -52,7 +36,7 @@ void nemo_main()
   
   instr = stropen(getparam("in"), "r");   /* open files */
   outstr = stropen(getparam("out"), "w");
-
+
   get_history(instr);
   put_history(outstr);		
   for (;;) {
@@ -63,7 +47,7 @@ void nemo_main()
     if ((bits & MassBit) == 0 && (bits & PhaseSpaceBit) == 0) {
       continue;       /* just skip it's probably a diagnostics */
     }
-    dprintf (1,"Symmetrizing snapshot at time= %f bits=0x%x\n",tsnap,bits);
+    dprintf (1,"Symmetrizing snapshot at time= %f nbody= %d bits=0x%x\n",tsnap,nbody,bits);
     bits8  = (MassBit | PhaseSpaceBit);
     nbody8 = 8*nbody;
     btab8  = (Body *) allocate(nbody8*sizeof(Body));
