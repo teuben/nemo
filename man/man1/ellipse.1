@@ -16,6 +16,9 @@ defined with this routine.
 Apart from giving the eccentricity of the ellipse ("bar") in the disk,
 and the inclination of the disk, the two angles in this routine are
 \fBtheta\fP and \fBphi\fP, of which only one needs to be given.
+.PP
+For some input parameters an array is allowed to create an output table,
+which can then be easily plotted.
 
 .SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
@@ -74,7 +77,11 @@ b/a inc phi    b/a'    theta   phi_kin
 0.3 45 28    0.343591 39.2183 -42.5507
 0.3 45 30    0.335325 41.4834 -41.2693
 .fi
-
+and here a plot that shows how the axis ratio of a 0.5 bar changes as the bar angle
+changes, for fixed inclincation of 20 degrees:
+.nf
+   %  ellipse 0.5 1:89:1 20 | tabplot - 2 4 line=1,1
+.fi   
 .SH "CAVEATS"
 For the stick formulae (a= used) only projection is done.
 
