@@ -1,0 +1,28 @@
+#! /bin/bash
+
+# version is hidden in the filename
+version=0.16
+wget=wget
+check=0
+
+for arg in $*; do
+  export $arg
+done
+
+cd $NEMO/local
+$wget  http://ftp.gnu.org/gnu/gnuastro/gnuastro-latest.tar.gz
+
+tar zxf gnuastro_latest.tar.gz
+version=$(echo gnuastro-*.* | sed s/gnuastro-//)
+cd gnuastro-$version
+./configure --prefix=$NEMO/opt
+make -j
+if [ $check = 1 ]; then
+    make check -j
+fi
+make install
+
+
+echo Installed version=$version
+
+echo gnuastro $version `date` >> $NEMO/opt/mknemo.log
