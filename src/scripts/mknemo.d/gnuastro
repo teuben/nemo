@@ -5,7 +5,7 @@
 
 # version is hidden in the filename
 version=0.16
-wget=wget
+wget=wgetc
 check=0
 
 for arg in $*; do
