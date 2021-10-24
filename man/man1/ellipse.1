@@ -1,4 +1,4 @@
-.TH ELLIPSE 1NEMO "27 August 2003"
+.TH ELLIPSE 1NEMO "20 October 2021"
 
 .SH "NAME"
 ellipse \- ellipse (de)projection properties
@@ -73,6 +73,29 @@ b/a inc phi    b/a'    theta   phi_kin
 0.3 45 26    0.351921 36.8805 -43.7464
 0.3 45 28    0.343591 39.2183 -42.5507
 0.3 45 30    0.335325 41.4834 -41.2693
+.fi
+
+Here is an example of creating a bar in a disk, and viewing the sky projection. The example
+is taken from NGC 253 (see also \fIrotcur(5NEMO)\fP):
+
+.nf
+
+# disk
+r_d=2
+pa_d=230
+inc_d=76
+
+# bar
+a_b=1
+b_b=0.25
+pa_b=18
+
+mkconfig - 361 ring $a_b | snapscale - - rscale=$b_b,1,0 | snaprotate - bar0  $pa_b,$inc_d,$pa_d zyz
+mkconfig - 361 ring $r_d | snaprotate - disk0 $inc_d,$pa_d yz
+
+snapadd disk0,bar0 - | snapplot - 
+
+
 .fi
 
 .SH "CAVEATS"
