@@ -1,4 +1,4 @@
-.TH ELLIPSE 1NEMO "20 October 2021"
+.TH ELLIPSE 1NEMO "23 October 2021"
 
 .SH "NAME"
 ellipse \- ellipse (de)projection properties
@@ -16,6 +16,9 @@ defined with this routine.
 Apart from giving the eccentricity of the ellipse ("bar") in the disk,
 and the inclination of the disk, the two angles in this routine are
 \fBtheta\fP and \fBphi\fP, of which only one needs to be given.
+.PP
+For some input parameters an array is allowed to create an output table,
+which can then be easily plotted.
 
 .SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
@@ -75,28 +78,39 @@ b/a inc phi    b/a'    theta   phi_kin
 0.3 45 30    0.335325 41.4834 -41.2693
 .fi
 
+and here a plot that shows how the axis ratio of a 0.5 bar changes as the bar angle
+changes, for fixed inclincation of 20 degrees:
+.nf
+   %  ellipse 0.5 1:89:1 20 | tabplot - 2 4 line=1,1
+.fi   
+
+
+
+
 Here is an example of creating a bar in a disk, and viewing the sky projection. The example
 is taken from NGC 253 (see also \fIrotcur(5NEMO)\fP):
 
 .nf
 
 # disk
-r_d=2
-pa_d=230
-inc_d=76
+  r_d=2
+  pa_d=230
+  inc_d=76
 
 # bar
-a_b=1
-b_b=0.25
-pa_b=18
+  a_b=1
+  b_b=0.25
+  pa_b=18
+  
+# create bar and disk
+  mkconfig - 361 ring $a_b | snapscale - - rscale=$b_b,1,0 | snaprotate - bar0  $pa_b,$inc_d,$pa_d zyz
+  mkconfig - 361 ring $r_d | snaprotate - disk0 $inc_d,$pa_d yz
 
-mkconfig - 361 ring $a_b | snapscale - - rscale=$b_b,1,0 | snaprotate - bar0  $pa_b,$inc_d,$pa_d zyz
-mkconfig - 361 ring $r_d | snaprotate - disk0 $inc_d,$pa_d yz
-
-snapadd disk0,bar0 - | snapplot - 
-
+# add, and plot the two ellipses
+  snapadd disk0,bar0 - | snapplot - 
 
 .fi
+
 
 .SH "CAVEATS"
 For the stick formulae (a= used) only projection is done.
