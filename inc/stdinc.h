@@ -46,6 +46,8 @@
  * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
  * 11-dec-09    tinkering with halfp                                PJT
  *    jul-20    add cputime2()                                      PJT
+ *    oct-21    deal with error() in the GNU C library              PJT
+ *              programs linking with e.g. gnuastro will otherwise barf
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -457,6 +459,14 @@ void set_mpi_rank(int rank);
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
 
+/*  GNU C library has error.h with error(int,int,string,...) */
+#define error   nemo_error
+#define fatal   nemo_fatal  
+#define warning nemo_warning
+#define recover nemo_recover
+#define stop    nemo_stop  
+
+
 /* prints error message (printf-style) to stderr and exits (via nemo_exit) */
 void error(string, ...);
 /* void errorn(string, ...);   not implemented, commented out WD 10-09-2008 */
@@ -515,7 +525,7 @@ dprintf_pter get_dprintf(const_string, int);
 #endif
 
 /* eprintf is ZENO's "warning" */
-#define eprintf warning
+#define eprintf nemo_warning
 
 /* core/allocate.c */
 
