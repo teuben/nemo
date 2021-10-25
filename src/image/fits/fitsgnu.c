@@ -1,11 +1,21 @@
+/*
+ *     FITSGNU:    a demo program showing how NEMO and gnuastro can be linked
+ *
+ *      25-oct-2021    Demo created after the ADASS gnuastro tutorial & chat with Mohammad
+ *
+ *   @todo    doesn't handle errors like wrong HDU elegantly, it coredumps
+ *
+ */
+
+
 #include <nemo.h>
 #include <gnuastro/fits.h>
 
 
 string defv[] = {
     "in=???\n           Input fits file",
-    "hdu=0\n            The HDU number to pick (0 is the first)",
-    "VERSION=0.2\n      25-oct-2021 PJT",
+    "hdu=0\n            The HDU number (or EXTNAME) to pick (0 is the first)",
+    "VERSION=0.3\n      25-oct-2021 PJT",
     NULL,
 };
 
