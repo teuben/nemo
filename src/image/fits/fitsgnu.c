@@ -30,7 +30,7 @@ void nemo_main(void)
   double sum=0.0f;
   gal_data_t *image;
   char *filename = getparam("in");
-  char *hdu = getparam("hdu");          // counter intuitive, why is not this an int?
+  char *hdu = getparam("hdu");   
 
   /* Read `img.fits' (HDU: 1) as a float32 array. */
   image=gal_fits_img_read_to_type(filename, hdu, GAL_TYPE_FLOAT32, -1, 1);
