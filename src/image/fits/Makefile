@@ -130,3 +130,11 @@ ccd_cfitsio.o:		ccd_cfitsio.c
 
 
 fitsio_nemo.o:	fitsio.c fitsio_nemo.c
+
+# demo version of linking NEMO and gnuastro
+GNUASTRO_INC =
+GNUASTRO_LIB = -lgnuastro
+fitsgnu: fitsgnu.c 
+	$(CC) $(CFLAGS) $(GNUASTRO_INC) -o fitsgnu fitsgnu.c $(NEMO_LIBS) $(GNUASTRO_LIB) $(EL)
+
+
