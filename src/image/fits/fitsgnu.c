@@ -4,8 +4,8 @@
 
 string defv[] = {
     "in=???\n           Input fits file",
-    "hdu=1\n            The HDU number to pick",
-    "VERSION=0.1\n      25-oct-2021 PJT",
+    "hdu=0\n            The HDU number to pick (0 is the first)",
+    "VERSION=0.2\n      25-oct-2021 PJT",
     NULL,
 };
 
@@ -35,11 +35,8 @@ void nemo_main(void)
   for(i=0; i<image->size; ++i)
     sum += farray[i];
 
-
   /* Report the sum. */
-  printf("Sum of values in %s (hdu %s) is: %f\n",
-         filename, hdu, sum);
-
+  printf("Sum of values in %s (hdu %s) is: %f\n", filename, hdu, sum);
 
   /* Clean up and return. */
   gal_data_free(image);
