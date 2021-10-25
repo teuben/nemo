@@ -85,6 +85,12 @@ pip install gala
 #
 pip install galpy
 
+# https://github.com/GalacticDynamics-Oxford/Agama
+#
+pip install agama
+
+
+
 # https://github.com/pynbody/pynbody
 #
 pip install pynbody
