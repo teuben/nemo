@@ -75,6 +75,7 @@ as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
 
 .SH "EXAMPLES"
+
 An example of converting all double precision numbers to single
 precision in a NEMO file:
 .nf
@@ -108,6 +109,15 @@ tes
 .fi
 
 .SH "TLDR"
+
+list brief contents of a binary structured file
+
+% tsf {{path/to/file}}
+
+list more
+
+% tsf {{path/to/file}}
+
 - Show contents of a binary structured file in brief format
 
 tsf {{file}}
@@ -115,6 +125,7 @@ tsf {{file}}
 - Show contents of a binary structured file, showing all lines, and in full precision
 
 tsf {{file}} True allline=t
+
 
 .SH "BUGS"
 The algorithm for implementing \fBmaxline\fP is crude.

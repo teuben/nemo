@@ -1,0 +1,45 @@
+.TH SNAPSYM 1NEMO "23 October 2021"
+
+.SH "NAME"
+snapsym \- symmetrize a snapshot
+
+.SH "SYNOPSIS"
+\fBsnapsym\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBsnapsym\fP symmetrizes a snapshot by placing each particular at a number of positions and velocities
+as described by the type of symmetry requested.  This will increase the size of the snapshot N-fold,
+with a N-type symmetry.
+.PP
+Currently only a rotation-around-Z symmetry is supported, which means each particle is rotated through
+the 4 quadrants, plus mirrored in Z
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input file name [???]    
+.TP
+\fBout=\fP
+Output file name [???]    
+.TP
+\fBmode=\fP
+Not implemented yet.
+
+.SH "EXAMPLES"
+
+.SH "SEE ALSO"
+snapcopy(1NEMO), snapsquash(1NEMO), snapspin(1NEMO)
+
+.SH "FILES"
+src/nbody/trans
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+23-Oct-21	V0.1 Created	PJT
+.fi

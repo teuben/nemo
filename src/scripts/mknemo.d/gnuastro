@@ -1,0 +1,32 @@
+#! /bin/bash
+#
+# minimum packages needed:     gsl, wcslib   (ubuntu:  libgsl-dev  wcslib-dev)
+# optional:
+
+# version is hidden in the filename
+version=0.16
+wget=wgetc
+check=0
+
+for arg in $*; do
+  export $arg
+done
+
+cd $NEMO/local
+$wget  http://ftp.gnu.org/gnu/gnuastro/gnuastro-latest.tar.gz
+
+tar zxf gnuastro-latest.tar.gz
+version=$(ls -d gnuastro-* | grep -v latest | sed s/gnuastro-//)
+echo VERSION=$version
+cd gnuastro-$version
+./configure --prefix=$NEMO/opt
+make -j
+if [ $check = 1 ]; then
+    make check -j
+fi
+make install
+
+
+echo Installed version=$version
+
+echo gnuastro $version `date` >> $NEMO/opt/mknemo.log
