@@ -1,23 +1,26 @@
 Research Software Engineering
 =============================
 
-NEMO was rooted in Unix, and can be called legacy, there has been a
-constant change in the software engineering (SE) aspects it was and is
-using. This page hopes to summarize those, especially useful for those
-with no domain knowledge.
+NEMO was rooted with a Unix philosopy, and by now can be called
+legacy. There has been a constant change in the software engineering
+(SE) aspects it was using. This page hopes to summarize those,
+especially useful for those with no domain knowledge. We also highlight
+a few peculiar aspects.
 
 * Like many research programming projects, NEMO grew organically but over
   the years has tried to absorb good modern SE habbits to make the project
-  sustainable and grow
+  sustainable and organically grow.
 
 * NEMO uses a Unix like directory tree, with a few familiar 3 and 4 letter
   names (src, usr, man, etc, bin, lib, opt, obj, tmp, docs, data, local)
 
-* We now use git (on github):
-   * since its inception in 1986 we have been sharing the code and absorbed new codes from collaborators.
-   * We started out with email (1987) and *shar*, then moved to *CVS* in 2000, and finally
+* We use git (on github):
+   * since its inception in 1986 we have been sharing the code and absorbed new codes
+     from collaborators
+   * We started out with email (1987) and *shar* files, then moved to *CVS* in 2000, and finally
      to *git* in 2017, hosted on github for the moment
    * issues (for bug reports) and pull requests are the preferred way to collaborate
+   * projects (in github) discuss a few ideas we have where changes could be expected
 
 * installing NEMO occurs in place, we use **configure** to track down the system
   dependent portions (or force them), and a set of **make build** steps will compile
@@ -29,10 +32,11 @@ with no domain knowledge.
   and the old *Users and Programmers Guide* (in latex).  The man pages are still used,
   but also made available via html (see https://teuben.github.io/nemo/man_html/index1.html),
   and the newer sphinx based documentation shared on https://astronemo.readthedocs.io.
+  There is also the experimental TLDR suport and the classic "motd" via the **fortune**
+  program.
 
 
 * Q: Could you explain the software development lifecycle that you use in this project?
-
 
 
 * Q: Is the package modularized enough to be improved by other software engineers without knowing the domain knowledge?
@@ -55,7 +59,6 @@ with no domain knowledge.
    * better autoconf and/or cmake based install built from the ground up
    * integration in other than bash, eg. python or other high level scripting (julia?)
 
-
 * a number of peculiar data (e.g. rotcur.5), and benchmark (CPU wise, but also "24+1" body)
 
 * Q: What are lessons learned to keep this code going?
@@ -70,9 +73,12 @@ with no domain knowledge.
 * Some innovative aspects of NEMO perhaps not seen widely used:
    * connect code with papers via an `ADS bibcode <https://ui.adsabs.harvard.edu/help/actions/bibcode>`_.
      See our `bibcode <https://teuben.github.io/nemo/man_html/bibcode.html>`_ table
-   * help= vs. man and **checkpars**
+   * help= vs. man and **checkpars** 
    * loadobj:   body, potential, ...
+   * data are binary, but name and type tagged and hierarchical, a bit like binary XML if you like. The **tsf** program
+     will show the contents of such files in a more human readable format
    * scattered Testfile to pick up tests for "make check" (like a Makefile)
-   * scattered Benchfile to pick up benchmarks for "make bench10" (like a Makefile)
-   * the use of the **bsf** tool to check reproducability to N digits.
+   * scattered Benchfile to pick up benchmarks for "make bench" (like a Makefile)
+   * the use of the **bsf** program to check reproducability to N digits.
+   * the user of - (dash) for files in a pipe, and . (dot) for the last pipe (like /dev/null)
    * *surely there must be more*  
