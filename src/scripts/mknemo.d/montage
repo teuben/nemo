@@ -4,6 +4,7 @@
 #
 #
 
+
 cd $NEMO/local
 
 if [ ! -d Montage ]; then
@@ -11,6 +12,12 @@ if [ ! -d Montage ]; then
 fi
 cd Montage
 git pull
+version=$(git log -1 --format=%cd)
+ 
 make 
 # bizarre, there is no prefix= or make install...
-mv bin/* ../../opt/bin/
+mv bin/* $NEMO/opt/bin/
+
+echo Installed version=$version
+
+echo montage '"'$version'"' `date` >> $NEMO/opt/mknemo.log
