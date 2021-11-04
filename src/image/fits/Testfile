@@ -57,11 +57,13 @@ fitsccd: ccdfits
 
 scanfits: ccdfits
 	@echo Running $@
+	$(EXEC) scanfits fits.in;
 	$(EXEC) scanfits fits.in	; nemo.coverage scanfits.c
 
 
 fitsglue: map001.fits map002.fits map003.fits
 	@echo Running $@
+	$(EXEC) fitsglue map%03d.fits cube.fits inlist=1:3;
 	$(EXEC) fitsglue map%03d.fits cube.fits inlist=1:3 ; nemo.coverage fitsglue.c
 	$(EXEC) fitshead map001.fits | grep DATA; nemo.coverage fitshead.c
 	$(EXEC) fitshead map002.fits | grep DATA

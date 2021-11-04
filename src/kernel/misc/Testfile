@@ -8,7 +8,7 @@ help:
 need:
 	@echo $(NEED)
 
-all:	xrandom nemoinp
+all:	xrandom nemoinp linreg
 
 clean: 
 	@echo Cleaning $(DIR)
@@ -17,6 +17,7 @@ clean:
 xrandom:
 	@echo Running xrandom
 	@echo uniform seed=5 n=5
+	$(EXEC) xrandom seed=5 n=5 report=t;
 	$(EXEC) xrandom seed=5 n=5 report=t		; nemo.coverage xrandom.c
 	@echo gauss seed=5 n=5
 	$(EXEC) xrandom seed=5 n=5 gauss=t report=t	; nemo.coverage xrandom.c
@@ -45,5 +46,5 @@ nemoinp:
 	
 
 linreg:
-	@nemoinp 1:10 | tabmath - - '%1+rang(0,0.5)' seed=123 > linreg.tab
+	@nemoinp 1:10 | tabmath - - '%1+rang(0,0.5)' seed=123 > linreg.tab;
 	$(EXEC) linreg linreg.tab

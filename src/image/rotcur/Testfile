@@ -83,7 +83,7 @@ rotcurshape: map1.vel
 
 rotcurtab:
 	$(EXEC) rotcurtab radii=0:5 rotcur1=linear,1 rotcur2=core,1,2,3; nemo.coverage rotcurtab.c
-
+	$(EXEC) rotcurtab radii=0:5 rotcur1=linear,1 rotcur2=core,1,2,3;
 velfit:  map1.vel
 	$(EXEC) velfit in=map1.vel radii=$(R) pa=$(PA) inc=$(INC) out=map2.vel
 PA = 30
