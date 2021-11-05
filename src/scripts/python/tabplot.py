@@ -8,8 +8,11 @@
 #  http://stackoverflow.com/questions/5260593/is-there-a-command-line-tool-for-data-visualization-and-analysis
 #
 import sys
+import matplotlib
 import matplotlib.pyplot as pyplot
 # import mpld3
+
+matplotlib.rcParams['axes.formatter.useoffset'] = False
 
 #pyplot.ioff()
 
