@@ -109,11 +109,11 @@ install:
 	@echo "      make build3            -- 3: bins"
 	@echo "      make build4            -- 4: mknemo build reconfirmation"
 	@echo "      make check             -- the testsuite"
-	@echo "      make bench             -- the benchmark"
+	@echo "      make bench5            -- the NEMOBENCH5 benchmark"
+	@echo "      source nemo_start.sh   -- after this NEMO can be used in the shell"
+	@echo "                                similar ones' exist for csh and python"
 	@echo ""
-	@echo "After this, users will need to source the nemo_start.(c)sh file"
 	@echo "Local variations go in nemo_local.(c)sh and ~/.nemo_local.(c)sh"
-	@echo "There is also some new python support via nemo_start.py"
 
 lsb:
 	@lsb_release -a
