@@ -107,7 +107,7 @@ install:
 	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
 	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
-	@echo "      make build4            -- 4: mknemo build reconfirmation"
+	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced)"
 	@echo "      make check             -- the testsuite"
 	@echo "      make bench5            -- the NEMOBENCH5 benchmark"
 	@echo "      source nemo_start.sh   -- after this NEMO can be used in the shell"
