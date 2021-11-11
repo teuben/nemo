@@ -1,3 +1,4 @@
+
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
       tabfilter tabtrend gauss1d gauss2d meanmed tabstat
@@ -19,25 +20,28 @@ all:	tab.in $(BIN) fitmyline
 tab.in:
 	@echo Creating $@
 	$(EXEC) nemoinp 1:100 > tab.in
-
-tabmath: tab.in
+tab.out:
+	@echo Creating $@
+	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c 
+tabmath: tab.out
 	@echo Running $@
-	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
+	
 
 tabplot: tab.in
 	@echo Running $@
-	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)' | $(EXEC) tabplot tab.out ; nemo.coverage tabplot.c
+	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot tab.out ; nemo.coverage tabplot.c
 
 NMAX = 100000
 
 tabhist:
 	@echo Running $*
-	$(EXEC) tabhist tab.in ;
+	$(EXEC) tabhist tab.out ; nemo.coverage tabhist.c
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
 
 tabstat:
 	@echo Running $*
+	tabstat tab.in; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - nmax=-$(NMAX); nemo.coverage tabstat.c
 	
@@ -45,28 +49,34 @@ tabstat:
 
 meanmed:
 	@echo Running $*
+	meanmed tab.in; nemo.coverage meanmed.c
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) meanmed - ; nemo.coverage meanmed.c
 
 
 tabspline:
 	@echo Running $*
+	tabspline tab.out y=2; nemo.coverage tabspline.c
 	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1*%1' | $(EXEC) tabspline - y=2;  nemo.coverage tabspline.c
 
 tablsqfit:
 	@echo Running $*
+	tablsqfit tab.out; nemo.coverage tablsqfit.c
 	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1+rang(0,0.1)' seed=123 | $(EXEC) tablsqfit - ; nemo.coverage tablsqfit.c
 
 tablsqfit_gsl:
 	@echo Running $*
+	tablsqfit_gsl tab.out; nemo.coverage tablsqfit.c
 	$(EXEC) nemoinp 1:2:0.001 | $(EXEC) tabmath - - '%1+rang(0,0.1)' seed=123 | $(EXEC) tablsqfit_gsl - ; nemo.coverage tablsqfit.c
 
 tabnllsqfit:
 	@echo Running $*
+	tabnllsqfit tab.out 
 	$(EXEC) nemoinp 1:100 | $(EXEC) tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
 		$(EXEC) tabnllsqfit - fit=gauss1d par=4,1,50,10; nemo.coverage tabnllsqfit.c
 
 tabdate:
 	@echo Running $*
+	tabdate tab.in test.out %s %c
 	@echo 1000000000 | $(EXEC) tabdate - - %s %c
 
 tabfilter:
@@ -75,17 +85,13 @@ tabfilter:
 
 tabtrend:
 	@echo Running $*
+	tabtrend tab.in; nemo.coverage tabtrend.c
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
 
-#   testing object loading load= in tabnlsqfit from the fit/ directory
-kofitmyline_local:
-	(cd fit; make -f $(NEMOLIB)/Makefile.lib myline.so)
-	tabnllsqfit tab.out
-	tabnllsqfit tab.out load=fit/myline.so par=1,1
 
 #   testsuite 
 fitmyline:
-	tabnllsqfit tab.out
+	tabnllsqfit tab.out; nemo.coverage tabnllsqfit.c
 	tabnllsqfit tab.out load=$(NEMOOBJ)/fit/myline.so par=1,1
 
 SIZE=4
