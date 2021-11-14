@@ -49,7 +49,7 @@ string defv[] = {
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
-    "VERSION=3.8\n  4-dec-2020 PJT",
+    "VERSION=3.8a\n 14-nov-2021 PJT",
     NULL,
 };
 
@@ -85,7 +85,7 @@ void nemo_main(void)
     int  i, j, k, ki;
     real x, y, z, xmin, xmax, mean, sigma, skew, kurt,  bad, w, *data;
     real dmin, dmax;
-    real sum, sov, q1, q2, q3, tm, sumn, sump;
+    real sum, sov, q1, q2, q3, tm;
     Moment m;
     bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
@@ -186,7 +186,6 @@ void nemo_main(void)
 
       ini_moment(&m,maxmom,ndat);
       ngood = 0;
-      sumn = sump = 0.0;
 #if 0
       // not working yet
       #pragma omp parallel \
@@ -198,10 +197,6 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
-	    if (Qac) {
-	      if (x<0) sumn += x;
-	      if (x>0) sump += x;
-	    }
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -236,10 +231,9 @@ void nemo_main(void)
 
 	if (Qac) {
 	  real flux = 0.0;
-	  real sratio = (sump+sumn)/(sump-sumn);
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
 		 getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
-		 flux, sratio);
+		 flux, sratio_moment(&m));
 	  return;
 	}
 	
