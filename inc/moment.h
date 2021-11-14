@@ -13,6 +13,7 @@ typedef struct moment {
     real *sum;		    /* mom+1 length array with moment^{0..mom} sums */
     bool *msk;              /* optional mask (@todo) */
     real datamin, datamax;  /* min & max of data */
+    real sumn, sump;        /* separate sum of negative and positive numbers */
 } Moment, *MomentPtr; 
 
 void ini_moment   (Moment *, int, int);		/* allocates */
@@ -31,6 +32,7 @@ real sigma_moment (Moment *);	/* computes weighted dispersion around mean (mom=-
 real rms_moment   (Moment *);	/* computes rms */
 real mad_moment   (Moment *);   /* MAD  = median absolute deviation */
 real mard_moment  (Moment *);	/* MARD = mean absolute relative difference */
+real sratio_moment(Moment *);   /* sratio = (sump+sumn)/(sump-sumn) */
 
 real skewness_moment (Moment *);	/* computes special 3rd moment (mom=-3) */
 real kurtosis_moment (Moment *);	/* computes special 4th moment (mom=-4) */
