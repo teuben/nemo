@@ -48,6 +48,7 @@
 /* TODO:
  *     - automatic scaling with dxcol and/or dycol 
  *     - also allow nxcol>1 and nycol=1 ??
+ *     - allow a step=-1,0,1 like matplotlib's step function with pre,mid,post
  */
 
 /**************** INCLUDE FILES ********************************/ 
