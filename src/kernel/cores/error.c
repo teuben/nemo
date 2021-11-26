@@ -26,6 +26,8 @@
  *      06-jun-08 V1.8c  nemo_exit                              wd
  *      12-jun-08 V1.8d  report MPI proc                        wd
  *      16-sep-08 V1.8e  removed nemo_exit (see stdinc.h)       wd
+ *      25-oct-21 V2.0   renamed error -> nemo_error (and others) to deal with linking with GNU C library    PJT
+ * 
  */
 
 #include <stdinc.h>
@@ -64,7 +66,7 @@ extern bool mpi_proc;   /* dprintf.c */
 extern int  mpi_rank;   /* dprintf.c */
 /* End changes WD 12/06/2008 */
 
-void error(string fmt, ...)
+void nemo_error(string fmt, ...)
 {
     va_list ap;
 
@@ -105,7 +107,7 @@ void error(string fmt, ...)
     }                               /* and proceed as if nothing happened */
 }
 
-void fatal(string fmt, ...)
+void nemo_fatal(string fmt, ...)
 {
     va_list ap;
 
@@ -129,7 +131,7 @@ void fatal(string fmt, ...)
     abort();                        /* nasty, but writes a core dump and dies */
 }
 
-void warning(string fmt, ...)
+void nemo_warning(string fmt, ...)
 {
     va_list ap;
 
@@ -156,7 +158,7 @@ void warning(string fmt, ...)
 
 
 
-void recover(proc cl)
+void nemo_recover(proc cl)
 {
     if (cl)
 	dprintf(1,"Setting recoverable error\n");
@@ -166,7 +168,7 @@ void recover(proc cl)
 }
 
 
-void stop(int lev)
+void nemo_stop(int lev)
 {
     if (lev<0)
         if (error_count++ < error_level) {

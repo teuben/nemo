@@ -8072,7 +8072,7 @@ if test -d "$PGPLOT_DIR"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, found \$PGPLOT_DIR=$PGPLOT_DIR" >&5
 $as_echo "yes, found \$PGPLOT_DIR=$PGPLOT_DIR" >&6; }
 else
-    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot
+    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot  /usr/share/pgplot /usr/lib/pgplot5
     do
         if test -f $dir/grfont.dat; then
             pgplot_dir="$dir"

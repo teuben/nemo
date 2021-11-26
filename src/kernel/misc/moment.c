@@ -19,6 +19,7 @@
  *              is that MARD (mean absolute relative difference)
  *  12-jul-20   add min/max for robust
  *  10-oct-20   median improvement via inline sort
+ *  14-nov-21   add sratio
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -60,7 +61,9 @@ void ini_moment(Moment *m, int mom, int ndat)
       m->idat = -1;
       m->dat = (real *) allocate(ndat*sizeof(real));
       m->wgt = (real *) allocate(ndat*sizeof(real));
-    } 
+    }
+
+    m->sumn = m->sump = 0.0;
 }
 
 void free_moment(Moment *m)
@@ -89,6 +92,8 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
+    if (x<0) m->sumn += x;
+    if (x>0) m->sump += x;
     if (m->ndat > 0) {                   /* if moving moments .... */
       if (m->idat < 0)                        /* first time around */
 	m->idat=0;  
@@ -111,6 +116,7 @@ void accum_moment(Moment *m, real x, real w)
 
       m->dat[m->idat] = x;
       m->wgt[m->idat] = w;
+
     }
 }
 
@@ -134,6 +140,8 @@ void decr_moment(Moment *m, real x, real w)
         m->sum[i] -= sum;
         sum *= x;
     }
+    if (x<0) m->sumn -= x;
+    if (x>0) m->sump -= x;
 }
 
 void reset_moment(Moment *m)
@@ -145,6 +153,7 @@ void reset_moment(Moment *m)
     if (m->mom < 0) return;
     for (i=0; i <= m->mom; i++)
         m->sum[i] = 0.0;
+    m->sumn = m->sump = 0;
 }
 
 real show_moment(Moment *m, int mom)
@@ -173,6 +182,11 @@ int n_moment(Moment *m)
 real sum_moment(Moment *m)
 {
     return sum1;
+}
+
+real sratio_moment(Moment *m)
+{
+    return (m->sump + m->sumn)/(m->sump - m->sumn);
 }
 
 real mean_moment(Moment *m)

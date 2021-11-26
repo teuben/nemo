@@ -12,14 +12,14 @@ There are two ways you could have obtained the NEMO source code:
 
 1. You cloned from the *upstream* : https://github.com/teuben/nemo . This is fine
 if you just want to compile and run, but not ideal if you make modifications and
-want to shared them back to the *upstream* via a *pull request* (PR). You
+want to share them back to the *upstream* via a *pull request* (PR). You
 can however "repair" your local repo, discussed below, and still submit a PR.
 
-2. You (forked)[https://guides.github.com/activities/forking] NEMO
+2. You (forked)[https://guides.github.com/activities/forking/] NEMO
 from the *upstream*, and cloned it locally from the repo in your own
 github account. This is the ideal method, but you will still need to
 set the *upstream* manually if you used github.com. See also the
-**gh** command below for an even better way.
+**gh** command below for an even easier way.
 
 3. Sadly on github.com you will also find a **zip** copy of the repo
 that does actually work fine, except it's a frozen snapshot and cannot
@@ -27,7 +27,7 @@ be efficiently used to collaborate. However, if you cannot install git,
 this is probably the only way to bootstrap yourself. For example
 https://github.com/teuben/nemo/archive/refs/heads/master.zip, which
 will create a directory *nemo-master*. Other branches are available
-through similar zip file.
+through similar zip file construct.
 
 Familiarize yourself with the concept of a pull request on github. There
 are some links at the bottom of this document.
@@ -57,11 +57,11 @@ If all is well, the following commands should show the correct *origin* and *ups
       git config --local remote.origin.url
           >>> git@github.com:YOURNAME/nemo.git
 
-None of these should be blank!
+None of these should be blank though!
 
-## 1. Cloning your personal fork
+## 2. Cloning your personal fork
 
-If you have cloned your fork
+If you have cloned your own fork
 
       git clone https://github.com/YOURNAME/nemo
 
@@ -69,9 +69,9 @@ you only need to set the upstream:
 
       git remote add    upstream https://github.com/teuben/nemo
 
-and you are ready for creating a PR.
+and you are ready for creating a PR (from a branch of course).
 
-## 2. Cloning the official upstream
+## 1. Cloning the official upstream
 
 If you happened to have cloned the official *upstream*
 
@@ -93,7 +93,7 @@ Again, the **gh** command now gives a single line shortcut to all this:
 You should regularly make sure your local master branch
 is in sync with the upstream master branch. This allows you
 to work in local branches, and be up to date by branching off the
-tip of this upstream master branch.
+tip of this upstream master branch. Here's a recipe for that:
 
       git checkout master
       git fetch upstream
@@ -104,8 +104,7 @@ tip of this upstream master branch.
 ## Working in a branch
 
 Assuming your own master is in sync with the upstream master,
-here is a typical example, using a branchname **b1**, or
-something more descriptive:
+here is a typical example, using a branchname **b1**
 
       git branch b1
       git checkout b1
@@ -119,7 +118,8 @@ something more descriptive:
 
 Now you can issue a pull request on this branch **b1**.  There is a way to do this
 via the **gh pr** command sequence. More about that in a future revision of this
-document. 
+document. For now, use the github.com web interface
+ 
 
 You can even delete a branch, once it has been accepted as a pull request and merged
 back in the upstream, it is really not needed anymore:
@@ -128,13 +128,31 @@ back in the upstream, it is really not needed anymore:
       git branch -D b1
       git push origin --delete b1
 
+Which even allows you to re-use that branch name.
+
+## Memorable git options
+
+1.  Show all files modified in a branch AAA 
+
+      git diff master...AAA --name-status --diff-filter=M
+
+2.  When was a branch created
+
+      git show --summary `git merge-base AAA master`
+      gitk --all --select-commit=`git merge-base foo master`
+
+3. To see which files belonged in a commit, find the sha (e.g. via "git log" or "git log file" if 
+   you know the file that belonged to it), then
+
+     git diff-tree --no-commit-id --name-only -r SHA
+
 # Tests
 
 From the top level directory in NEMO there are a few basics regression tests and benchmarks:
 
       make check
       make bench
-      make bench5
+      make bench3
 
 The **check** target depends on the many **Testfile** files sprinkled throughout NEMO.  Although
 you can now find a few **Benchfile** files as well, they have not been put under a top level

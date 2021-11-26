@@ -23,6 +23,7 @@
  *  25-jul-13   V4.0  added support for key                     pjt
  *  12-nov-2015 V5.0  some support for split Pos/Vel            pjt
  *  10-dec-2019 V5.1  optional support for PHI/ACC              pjt
+ *   5-oct-2021 V5.2  fix for 3D orbits and printing PHI/ACC    pjt
  *------------------------------------------------------------------------------
  */
 
@@ -152,6 +153,7 @@ int read_orbit (stream instr, orbitptr *optr)
                       PhiPath(*optr), Nsteps(*optr), 0);
 	      get_data (instr,AccPathTag,RealType, 
 		      AccPath(*optr), Nsteps(*optr), Ndim(*optr), 0);
+	      dprintf(2,"Found Phi/Acc %g %g\n", PhiPath(*optr)[0], AccPath(*optr)[0]); 
 	    }
 #endif	    
         get_tes (instr,PathTag);
@@ -233,7 +235,7 @@ void copy_orbit(orbitptr iptr, orbitptr optr)
 	    Porb(optr,i) = Porb(iptr,i);
 	    AXorb(optr,i)= AXorb(iptr,i);
 	    AYorb(optr,i)= AYorb(iptr,i);
-	    AYorb(optr,i)= AYorb(iptr,i);
+	    AZorb(optr,i)= AZorb(iptr,i);
 #endif
         }
 }
@@ -249,8 +251,8 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     char fmt7[256];
     char fmt11[256];
 
-    sprintf(fmt7, "%%d %s %s %s %s %s %s %s  %s %s %s %s\n",f,f,f,f,f,f,f, f,f,f,f);
-    sprintf(fmt11,"%%d %s %s %s %s %s %s %s\n",             f,f,f,f,f,f,f);
+    sprintf(fmt11, "%%d %s %s %s %s %s %s %s  %s %s %s %s\n",f,f,f,f,f,f,f, f,f,f,f);
+    sprintf(fmt7  ,"%%d %s %s %s %s %s %s %s\n",             f,f,f,f,f,f,f);
         
     dprintf (0,"Total number of steps = %d\n",Nsteps(optr));
     dprintf (0,"Mass = %f \n",Masso(optr));
@@ -266,6 +268,11 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     for (i=0; i<Ndim(optr); i++)
         dprintf (0," %f ",*(IOMERR(optr)+i));
     dprintf (0," )\n");
+#ifdef ORBIT_PHI
+    dprintf (0,"ORBIT_PHI enabled %g %g\n",PhiPath(optr)[0], Porb(optr,0));
+#else
+    dprintf (0,"ORBIT_PHI disabled\n");    
+#endif
     dprintf (0,"Potential: Name: %s Pars: %s File: %s\n",
         PotName(optr), PotPars(optr), PotFile(optr));
     kount = 0;
@@ -273,15 +280,15 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
         if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
             if (kount++ == 0)
 #ifdef ORBIT_PHI
-                printf (fmt7,
-			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
-			Uorb(optr,i),Vorb(optr,i),Worb(optr,i));
-#else	      
                 printf (fmt11,
 			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
 			Uorb(optr,i),Vorb(optr,i),Worb(optr,i),
 			Porb(optr,i),
-			AXorb(optr,i),AYorb(optr,i),AZorb(optr,i));
+			AXorb(optr,i),AYorb(optr,i),AZorb(optr,i));	      
+#else	      
+                printf (fmt7,
+			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
+			Uorb(optr,i),Vorb(optr,i),Worb(optr,i));
 #endif	    
             if (kount==n)
                 kount=0;

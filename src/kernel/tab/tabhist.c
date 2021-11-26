@@ -99,12 +99,17 @@ string defv[] = {
     "mad=f\n                      Compute Mean Absoluted Deviation",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
+#ifndef FLOGGER
     "sort=qsort\n                 Sort mode {qsort;...}",
-    "dual=f\n                     Dual pass for large number",
+#else
+    "sort=qsort\n                 Sort mode {qsort, bubble, heap, insert, merge, quick, shell}",
+#endif
+    "dual=f\n                     Dual pass for large numbers",
+    "qac=f\n                      QAC mode listing mean,rms,min,max",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.3a\n		  26-apr-2021 PJT",
+    "VERSION=7.4\n		  14-nov-2021 PJT",
     NULL
 };
 
@@ -155,6 +160,7 @@ local bool   Qrobust;                   /* compute robust median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
 local bool   Qmad;                      /* MAD ? */
+local bool   Qac;                       /* QAC output mode for stats */
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
@@ -259,6 +265,7 @@ local void setparams()
     Qrobust = getbparam("robust");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
+    Qac = getbparam("qac");
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
@@ -526,6 +533,13 @@ local void histogram(void)
 	fprintf(outstr,"%g %d\n",x[i],i+1);
       }
     }
+  }
+  if (Qac) {
+    real flux = 0.0;
+    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+	   input, mean, sigma, min_moment(&m), max_moment(&m),
+	   flux, sratio_moment(&m));
+    
   }
   
   if (lcount > 0) {

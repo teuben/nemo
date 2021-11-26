@@ -4,6 +4,7 @@
  *   0.2  4-nov-02    original                  PJT
  *   0.3 23-apr-03    added phi_kin to try M51's oval           PJT
  *   0.4 27-aug-03    mode to compute errors in bar length from stick formulae     PJT
+ *   0.4a 13-oct-2021 ansi code cleanup       PJT
  *
  */
 
@@ -13,17 +14,17 @@
 #include <mathfns.h>
 
 string defv[] = {
-  "ba=???\n      Axis ratio of bar",
-  "inc=???\n     Inclination of galaxy",
-  "phi=\n        Angle between bar and disk in sky plane ",
-  "theta=\n      Angle between bar and disk in galax plane",
-  "a=\n          Bar length (only used for stick formulae)",
-  "dba=0.0\n     Error term in b/a, if determined",
-  "dphi=0.0\n    Error term in phi, if determined",
-  "da=0.0\n      Error term in a, if determined (only for stick formulae)",
-  "nsim=0\n      Number of monte carlo to perform to compute an error term",
-  "seed=0\n      Seed for random number generator",
-  "VERSION=0.4\n 27-aug-03 PJT",
+  "ba=???\n       Axis ratio of bar",
+  "inc=???\n      Inclination of galaxy",
+  "phi=\n         Angle between bar and disk in sky plane ",
+  "theta=\n       Angle between bar and disk in galaxy plane",
+  "a=\n           Bar length (only used for stick formulae)",
+  "dba=0.0\n      Error term in b/a, if determined",
+  "dphi=0.0\n     Error term in phi, if determined",
+  "da=0.0\n       Error term in a, if determined (only for stick formulae)",
+  "nsim=0\n       Number of monte carlo to perform to compute an error term",
+  "seed=0\n       Seed for random number generator",
+  "VERSION=0.4a\n 13-oct-2021 PJT",
   NULL,
 };
 
@@ -67,19 +68,23 @@ void  project(double ba, double inc, double theta, double *ba1,  double *phi) {
 }
 
 
-nemo_main()
+void nemo_main()
 {
   bool Qtheta = hasvalue("theta");
   bool Qphi = hasvalue("phi");
   bool Qstick = hasvalue("a");
-  bool Qerrba;
+  // bool Qerrba;
   int nsim = getiparam("nsim");
   int seed = init_xrandom(getparam("seed"));
   double ba[MAXP], inc[MAXP], ang[MAXP], x,y,z, a,a1, t1,t2,t3;
-  double dba, da;
+  double da;
   int nba, ninc, nang;
   int i,j,k;
-  string fmt="%g";
+  double dphi = getdparam("dphi");
+  double dba = getdparam("dba");
+  
+  // string fmt="%g";
+  dprintf(1,"seed=%d\n",seed);
 
   nba = nemoinpd(getparam("ba"),ba,MAXP);
   ninc = nemoinpd(getparam("inc"),inc,MAXP);
@@ -105,7 +110,6 @@ nemo_main()
 	    double sini = sin(inc[j]*RPD);
 	    double cosp = cos(ang[i]*RPD);
 	    double sinp = sin(ang[i]*RPD);
-	    double dphi = getdparam("dphi");
 	    x = sqrt(cosp*cosp+sinp*sinp/(cosi*cosi));
 	    a1 = a*x;
 	    t1 = cosp*sinp;
@@ -142,8 +146,6 @@ nemo_main()
 	for (j=0; j<ninc; j++)
 	  for (k=0; k<nba; k++) {
 	    if (nsim > 0) {
-	      double dba = getdparam("dba");
-	      double dphi = getdparam("dphi");
 	      int l;
 	      for (l=0; l<nsim; l++) {
 		deproject(ba[k]+grandom(0.0,dba),inc[j],ang[i]+grandom(0.0,dphi),&x,&y,&z);

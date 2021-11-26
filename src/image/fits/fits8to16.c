@@ -18,7 +18,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
 string usage="convert 8bit fits image to a 16bit fits image";
 
 
-nemo_main()
+void nemo_main()
 {
   stream instr, outstr;
   int    i, n, nfile, blocking[2];

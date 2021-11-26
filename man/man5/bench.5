@@ -79,11 +79,18 @@ The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs a number (currently 6) N-bo
 take 5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating
 is defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7 has
 a score of 1000.  This definition can be adjusted to 10s runs when the time comes that processors
-run too fast, there is a parameter internal to the nemo.bench
+run too fast, there is a parameter internal to the nemo.bench script.
 .nf
 
-M1 (Macbook Air)    	1269	1750 / 7xxxx
+
+i9-12900H		-	n/a 1851
+M1-Max			-	n/a 1785
+i7-12800H		-	n/a 1654
+i9-11980HK		-	n/a 1616
+M1 (Macbook Air)    	1269	n/a 1750 / 7xxxx
+i7-11800H		-	n/a 1474
 Intel Core i5-1135G7	1000	XPS13 1460 /
+AMD threadripper 3960x	896	AlexBox
 AMD EPYC 7302 @ 3.0GHz	630	lma 1000/ 28000
 Intel Core i9-9900X	-	geminid 1214 / 9467
 Xeon Gold 5218 @ 2.30GHz	761	unity/node99 1100 / 8610

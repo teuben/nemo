@@ -1,9 +1,13 @@
 #! /bin/csh -f
 #
 #  mkvelfie3:    make a velocity field with double smoothing and noise
+#                originally written for EDGE simulations
 #
+#  See also mkgalcube
+#
+#  Grid is defined from -range:range  [8], but the disk has radius of "rmax" [6]
+#  Units are generally converted to mean arcmin
 #  
-#  needs NEMO
 #
 
 #  parameters, can be changed by the user via the commandline
@@ -124,6 +128,7 @@ ccdmom $run.32 - axis=1 mom=0 |\
   tabcomment - - punct=f delete=t > $run.spec
 
 # export for barolo or so, in decent units (could also use ccdsky)
+# this way the input spatial scale is in arcmin and km/s
 ccdfits $run.32 $run.fits radecvel=t scale=1/60.0,1/60.0,1000.0 vsys=1000
 # rotcur
 

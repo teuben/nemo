@@ -512,7 +512,7 @@ if test -d "$PGPLOT_DIR"; then
     pgplot_dir="$PGPLOT_DIR"
     AC_MSG_RESULT([yes, found \$PGPLOT_DIR=$PGPLOT_DIR])
 else
-    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot 
+    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot  /usr/share/pgplot /usr/lib/pgplot5
     do
         if test -f $dir/grfont.dat; then
             pgplot_dir="$dir"

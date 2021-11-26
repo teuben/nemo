@@ -44,3 +44,8 @@ Binney, J. and Tremaine, S.
 *Astrophysical Recipes - The art of AMUSE* -
 Simon Portegies Zwart and Steve McMillan
 IOP Publishing, Bristol, UK, 2018
+
+Code Comparison Papers
+----------------------
+
+.. todo:: add a section papers which do code comparisons, there are a number of them by now, starting with the IAU-25 body problem.

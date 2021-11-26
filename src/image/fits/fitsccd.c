@@ -69,7 +69,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.3a\n	22-may-2021 PJT",
+    "VERSION=5.3b\n	12-nov-2021 PJT",
     NULL,
 };
 
@@ -357,6 +357,10 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
       fitrdhdr(fitsfile,"CRPIX3",&tmpr,1.0); crpix3 = tmpr;
     } else
       crpix3 = 0.0;
+
+    // no support for BPA yet
+    fitrdhdr(fitsfile,"BMAJ",&tmpr,1.0); Beamx(iptr) = tmpr;
+    fitrdhdr(fitsfile,"BMIN",&tmpr,1.0); Beamy(iptr) = tmpr;
 
     if (!Qout) {
       print_axis(1, Nx(iptr), crpix1, Xmin(iptr), Dx(iptr));

@@ -8,7 +8,7 @@
  *      24-jan-12   V1.4    also report min/max in sigma from mean         pjt
  *      16-jan-13   V1.5    added MAD                                      pjt
  *      10-oct-20   V1.7    ansi                                           pjt
- *
+ *      16-nov-21   V1.8    added qac= and robust=                         pjt
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
  */
@@ -34,7 +34,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "nmax=100000\n       maximum number of data to be read if pipe",
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
-    "VERSION=1.7\n	 10-oct-2020 PJT",
+    "bad=\n              Skip this bad value if one is given",
+    "robust=f\n          robust stats?",
+    "qac=f\n             QAC mode listing mean,rms,min,max",
+    "VERSION=1.8\n	 16-nov-2021 PJT",
     NULL
 };
 
@@ -55,6 +58,10 @@ local int   *ix;
 local bool   Qmedian;
 local bool   Qverbose;
 local bool   Qmad;
+local bool   Qac;
+local bool   Qrobust;
+local bool   Qbad;
+local real   badval;
 local int    nmax;				/* lines to allocate */
 local int    width;
 local char   outfmt[20];
@@ -99,6 +106,8 @@ void setparams(void)
     Qverbose = getbparam("verbose");
     Qmedian = getbparam("median");
     Qmad = getbparam("mad");
+    Qac = getbparam("qac");
+    Qrobust = getbparam("robust");
     if (hasvalue("width")) {
         width = getiparam("width");
         sprintf(outfmt,"%%%ds",width);
@@ -106,8 +115,10 @@ void setparams(void)
         sprintf(outfmt,"%%s");
     Qmin = hasvalue("xmin");
     Qmax = hasvalue("xmax");
+    Qbad = hasvalue("bad");
     if (Qmin) xmin = getrparam("xmin");
     if (Qmax) xmax = getrparam("xmax");
+    if (Qbad) badval = getrparam("bad");
     dprintf(1,"format=%s\n",outfmt);
     fsigma = getrparam("nsigma");
     iter = getiparam("iter");
@@ -139,20 +150,41 @@ void stat_data(void)
 {
     int i, j, ndat, imax, kmin, kmax;
     real median, mean, sigma, d, dmax, fac;
+    real rmean, rsigma, rrange[2];
     char fmt[20];
     
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
 
     ndat = 0;
-    if (Qmad) ndat = npt;
+    if (Qmad || Qac || Qrobust) ndat = npt;
 
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
         ini_moment(&m[j],4,ndat);
         for (i=0; i<npt; i++) {
+	  if (Qbad && x[j][i]==badval) continue;
 	  if (Qmin && x[j][i]<xmin) continue;
 	  if (Qmax && x[j][i]>xmax) continue;
 	  accum_moment(&m[j],x[j][i],1.0);
         }
+    }
+
+    if (Qac) {
+      for (j=0; j<nxcol; j++) {
+	if (Qrobust) {
+	  compute_robust_moment(&m[j]);
+	  rmean  = mean_robust_moment(&m[j]);
+	  rsigma = sigma_robust_moment(&m[j]);
+	  robust_range(&m[j], rrange);
+	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
+		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
+		 rrange[0], rrange[1], 0.0, sratio_moment(&m[j]), n_robust_moment(&m[j]));
+	} else
+	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
+		 input, mean_moment(&m[j]), sigma_moment(&m[j]),
+		 min_moment(&m[j]), max_moment(&m[j]),
+		 0.0, sratio_moment(&m[j]),n_moment(&m[j]));
+      }
+      return;
     }
 
     do {                                /* iteration loop to reject outliers */

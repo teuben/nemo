@@ -33,7 +33,7 @@ string cvsid="$Id$";
 
 extern string *burststring(string, string);
 
-nemo_main()
+void nemo_main()
 {
     if (hasvalue("out"))
         convert_to_header();
@@ -41,7 +41,7 @@ nemo_main()
         read_fits_header();
 }
 
-read_fits_header()
+void read_fits_header()
 {
     stream instr, outstr;
     int    i,n,nfile, sel_data, sel_head, blocking, counter;
@@ -78,7 +78,7 @@ read_fits_header()
 
 #define MAXLEN 256
 
-convert_to_header()
+void convert_to_header()
 {
     stream instr, outstr;
     char line[MAXLEN+1];

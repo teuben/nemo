@@ -10,19 +10,21 @@ such as \fIrotcur(1NEMO)\fP and \fIrvstack(1NEMO)\fP will need these.
 
 .PP
 In the table below the center of rotation is listed in RA/DEC,
-as well as the VLSR (in km/s), followed by the Inclination and
+as well as the VLSR (in km/s), followed by the inclination and
 the kinematic major axis (as defined by the receding side), and the
 near side minor axis (receding velocities if outflow along Z axis).
-If the galaxy has a bar, it's position angle
+If the galaxy has a bar, it's relative position angle
 is also listed, both of these relative to the (kinematic) PA, add these
 numbers to get the PA of that feature.
-
+.PP
+As always in astronomy, position angles are measures from North,
+counterclockwise through East to South and West.
 
 .SH "DATA"
 A few galaxies, biased what PJT has worked on.
 .nf
 .ta +1i +1.5i +1.5i +0.7i +0.7i +1.0i +1.0i +1.0i
-galaxy	RA(J2000)	DEC(J2000)	VLSR	INC	PA_kin	PA_near	PA_bar
+galaxy	RA(J2000)	DEC(J2000)	VLSR	INC	PA_kin	dPA_near	dPA_bar
 -    -	rotation	center  	km/s	deg	deg	d-deg	d-deg
 	
 NGC253	00:47:33.134	-25:17:19.68	241	79.8	233	+90	+15:
@@ -31,13 +33,15 @@ NGC1097	2:44:11.1	-30:29:03.0	1280	46	134	+90	+10:
 NGC1365	3:31:42.0	-36:18:18	1625	46	222	+90	+30:
 NGC1530	4:23:26.1	+75:17:43.6	2450	55	199	+90	+80:
 NGC2347	109.016250	+64.710800	4387	50.2	189.1	+90	n/a
+NGC5728 14:42:23.9	-17:15:11.1	2801	60	33	+90 	~0:
 NGC6503	17:49:26.30	+70:08:40.7	25	75	-60	-90	-80:
 
 .nf
 Another way of saying is that if PA_near = +90, flow is clock wise, and -90 for
 counter clock wise.
 .PP
-Values with : at the end means an eye estimate.
+Values with : at the end means an eye estimate. Other values are from the literature.
+
 .SH "SEE ALSO"
 rotcur(1NEMO), rvstack(1NEMO)
 

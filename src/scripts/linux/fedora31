@@ -2,12 +2,14 @@
 #                 dnf list installed
 gfortran
 g++
-csh
+tcsh
 make
 libXext-devel
 
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
 # missing <rpc/rpc.h>            libtirpc-devel didn't work - now works (dec 2020)
+# didn't work in fedora34mknemo
+
 
 libtirpc-devel 
 
@@ -15,11 +17,21 @@ libtirpc-devel
 tcsh
 wget
 
+# if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
+hdf-devel
+
+hdf5-devel
+
+# /usr/lib64   and /usr/include/cfitsio
+cfitsio-devel
+
+# f
+netcdf-devel
+
+
+
 # if you use pgplot w/ xwindows  (Xext seems not needed, except configure wants it)
 # xorg-x11-proto-devel
 # libX11-devel
 libXext-devel
-# if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
-libhdf-devel
-# /usr/lib   and /usr/include/cfitsio
-cfitsio-devel
+

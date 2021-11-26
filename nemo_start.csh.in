@@ -1,6 +1,6 @@
 #! /bin/csh
 #
-#   nemo_start.csh:
+#   nemo_start.csh:   source this script to enable your NEMO environment
 #
 #   @WARNING@
 #

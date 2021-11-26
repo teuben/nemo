@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "2 March 2020"
+.TH TABHIST 1NEMO "14 November 2021"
 .SH NAME
 tabhist \- histogram plotter and gaussian fit for tabular data
 .SH SYNOPSIS
@@ -129,11 +129,20 @@ Default: f
 Delete points more than nsigma times the sigma from the mean. After each
 point sigma and mean are recomputed. [Default: none]
 .TP
+\fBqac=t|f\fI
+If selected, a QAC listing is selected. This gives the mean, rms, min and max.
+[Default: f]
+
+.TP
 \fBsort=\fP\fIsort_mode\fP
+Default:  qsort.   If flogger is enabled additional sorting modes are available:
+bubble, heap, insert, merge, quick, shell.
 .TP
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
 Default: none.
+.SH FLOGGER
+There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
 .SH BUGS
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
@@ -175,5 +184,6 @@ xx-mar-88	V1.0: created          	PJT
 16-jan-14	6.4: added mad= 	PJT
 8-jan-2020	7.0: added pyplot=	PJT
 2-mar-2020	7.1: added norm=	PJT
+14-nov-2021	7.4: added qac=		PJT
 .fi
 

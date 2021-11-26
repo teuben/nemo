@@ -32,7 +32,7 @@ string usage = "Add comments to a table, or comments certain lines";
 #define MAX_LINELEN  2048
 #endif
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     char   line[MAX_LINELEN], *cp;

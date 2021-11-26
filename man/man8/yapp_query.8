@@ -1,0 +1,29 @@
+.TH YAPP_QUERY 8NEMO "12 July 2020"
+.SH NAME
+yapp_query \- show which yapp device(s) are installed
+.SH SYNOPSIS
+.PP
+\fByapp_query \fIdev1 ...\fP 
+.SH DESCRIPTION
+\fByapp_query\fP attempts to show which possible devices
+are installed in NEMO, to make shell scripts more portable.
+For example for the pgplot device list
+.nf
+
+       yapp_query png ps
+       
+.fi
+would return the first device that is available. Here's an example of usage:
+
+.nf
+       dev=$(yapp_query png ps)
+       tabplot 1.tab yapp=fig1.$dev/$dev
+.fi
+would be a more portable way. This is a common situation, where on redhat based
+system the png driver is not installed, but on debian based it is (in 2021).
+.SH "UPDATE HISTORY"
+.nf
+.ta +1i +4i
+2021	Created		PJT
+.fi
+
