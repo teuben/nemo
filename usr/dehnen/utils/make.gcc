@@ -44,7 +44,7 @@ ostype:
 API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
 ifeq "$(API_GCC_7)" "1"
-    STDAPI=-std=c++03 
+    STDAPI=-std=c++17 
 else
     STDAPI=
 endif
@@ -89,7 +89,7 @@ WARNING		+= -Woverloaded-virtual
 OPTFLAGS	+= -Woverloaded-virtual
 
 ifdef CXX11
-CXXFLAGS	:= -std=c++11 $(OPTFLAGS)
+CXXFLAGS	:= -std=c++17 $(OPTFLAGS)
 else
 CXXFLAGS	:= $(STDAPI) $(OPTFLAGS)
 endif
