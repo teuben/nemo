@@ -9,6 +9,7 @@
  *      16-jan-13   V1.5    added MAD                                      pjt
  *      10-oct-20   V1.7    ansi                                           pjt
  *      16-nov-21   V1.8    added qac= and robust=                         pjt
+ *       1-dec-21   V1.9    with qac/robust keep the min/max from all data PJT
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
  */
@@ -37,7 +38,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=1.8\n	 16-nov-2021 PJT",
+    "VERSION=1.9\n	 1-dec-2021 PJT",
     NULL
 };
 
@@ -177,7 +178,8 @@ void stat_data(void)
 	  robust_range(&m[j], rrange);
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
-		 rrange[0], rrange[1], 0.0, sratio_moment(&m[j]), n_robust_moment(&m[j]));
+		 min_moment(&m[j]), max_moment(&m[j]),		 
+		 0.0, sratio_moment(&m[j]), n_robust_moment(&m[j]));
 	} else
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_moment(&m[j]), sigma_moment(&m[j]),
