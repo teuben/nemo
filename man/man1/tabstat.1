@@ -1,49 +1,68 @@
 .TH TABSTAT 1NEMO "6 June 2001"
-.SH NAME
+
+.SH "NAME"
 tabstat \- table column statistics
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
+
 \fBtabstat\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabstat\fP performs table statistics, much like tabhist without
 graphical output but with multiple columns. It also contains
 an iterative worst outlier removal.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 Input file name (table)
 [No default]
-.TP 20
+.TP
 \fBxcol=\fP
 x coordinate column(s) [1]    
-.TP 20
+.TP
 \fBiter=\fP
 # iterations removing worst outlier [0]  
-.TP 20
+.TP
 \fBnsigma=\fP
 sigma-clipping: multiple sigma above which to remove outliers. See also
 \fBiter=\fB. If 0 is specified, no sigma-clipping applied.  [0]
-.TP 20
+.TP
 \fBverbose=\fP
 Verbose output of all iterations? [t]  
-.TP 20
+.TP
 \fBwidth=\fP
 Width of columns to print []  
-.TP 20
+.TP
 \fBmedian=\fP
 Compute median too? (can be time consuming) [t]
-.TP 20
+.TP
 \fBmethod=\fP
 Method to remove outliers (0=fast 1=slow) [0] 
-.TP 20
+.TP
 \fBnmax=\fP
 maximum number of data to be read if data file is a pipe [10000]
-.SH SEE ALSO
+.TP
+\fBbad=\fP
+If given, this bad value is ignored from the statistics
+.TP
+\fBrobust=t|f\fP
+Perform robust stats by removing outliers. Only used if qac=t set.
+[f]
+.TP
+\fBqac=t|f\fP
+Output information in "QAC" format: mean, rms, min and max.   If
+robust=t is choosen, the min/max will still be the one of the
+original distribution.
+
+.SH "SEE ALSO"
 tabhist(1NEMO)
 .PP
 http://vostat.org
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 A table of the numbers 1 through 100, their squares and square roots
 is fed into tabstat and compute statistics for each column:
 .nf
@@ -57,13 +76,17 @@ skew:           0  0.633312 -0.538185
 kurt:    -1.20024 -0.863731 -0.669795
 median:      50.5    2550.5   7.10625
 .fi
-.SH BUGS
+
+.SH "BUGS"
 Non-existent columns are not handled gracefully
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 24-Jan-00	doc written	PJT
 6-jun-01	V1.1  sigma -> nsigma	PJT
+1-dec-2021	V1.9 added qac/bad/robust	PJT
 .fi
