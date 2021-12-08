@@ -49,7 +49,7 @@ string defv[] = {
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
-    "VERSION=3.8a\n 14-nov-2021 PJT",
+    "VERSION=3.9\n  8-dec-2021 PJT",
     NULL,
 };
 
@@ -87,7 +87,7 @@ void nemo_main(void)
     real dmin, dmax;
     real sum, sov, q1, q2, q3, tm;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount;
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
@@ -155,6 +155,7 @@ void nemo_main(void)
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
     Qtorben = getbparam("torben");
+    Qmmcount = getbparam("mmcount");    
     if (Qtorben) Qmedian = TRUE;
     if (Qmedian || Qrobust || Qtorben) {
       ndat = nx*ny*nz;
@@ -230,10 +231,16 @@ void nemo_main(void)
 	  kurt = kurtosis_moment(&m);
 
 	if (Qac) {
-	  real flux = 0.0;
-	  printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
-		 getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
-		 flux, sratio_moment(&m));
+	  if (Qrobust) {
+	    compute_robust_moment(&m);
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+		   getparam("in"), mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m));
+	  } else
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+		   getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m));	    
+
 	  return;
 	}
 	
