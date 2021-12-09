@@ -91,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3e\n  24-jun-2021 PJT",
+        "VERSION=6.3f\n  9-dec-2021 PJT",
         NULL,
 };
 
@@ -452,6 +452,9 @@ void write_fits(string name,imageptr iptr)
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
         fitwrhda(fitsfile,"CTYPE2",ref_ctype[1]);
         if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
+        fitwrhda(fitsfile,"CUNIT1",ref_cunit[0]);
+        fitwrhda(fitsfile,"CUNIT2",ref_cunit[1]);
+        if (ndim>2) fitwrhda(fitsfile,"CUNIT3",ref_cunit[2]);
       } else {
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
@@ -611,7 +614,7 @@ void set_refmap(string name)
 
   fitrdhda(fitsfile,"CUNIT1",ref_cunit[0],"");
   fitrdhda(fitsfile,"CUNIT2",ref_cunit[1],"");
-  fitrdhda(fitsfile,"CUNUT3",ref_cunit[2],"");
+  fitrdhda(fitsfile,"CUNIT3",ref_cunit[2],"");
 
   fitrdhdi(fitsfile,"WCSAXES",&wcsaxes, -1);
   if (wcsaxes != -1) warning("WCSAXES = %d\n",wcsaxes);
