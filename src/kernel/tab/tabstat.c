@@ -38,7 +38,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=1.9\n	 1-dec-2021 PJT",
+    "VERSION=1.9a\n	 8-dec-2021 PJT",
     NULL
 };
 
@@ -179,12 +179,12 @@ void stat_data(void)
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
 		 min_moment(&m[j]), max_moment(&m[j]),		 
-		 0.0, sratio_moment(&m[j]), n_robust_moment(&m[j]));
+		 sum_moment(&m[j]), sratio_moment(&m[j]), n_robust_moment(&m[j]));
 	} else
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_moment(&m[j]), sigma_moment(&m[j]),
 		 min_moment(&m[j]), max_moment(&m[j]),
-		 0.0, sratio_moment(&m[j]),n_moment(&m[j]));
+		 sum_moment(&m[j]), sratio_moment(&m[j]),n_moment(&m[j]));
       }
       return;
     }
