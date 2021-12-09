@@ -105,11 +105,12 @@ string defv[] = {
     "sort=qsort\n                 Sort mode {qsort, bubble, heap, insert, merge, quick, shell}",
 #endif
     "dual=f\n                     Dual pass for large numbers",
+    "bad=\n                       If given, skip this value as a badvalue",
     "qac=f\n                      QAC mode listing mean,rms,min,max",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.4\n		  14-nov-2021 PJT",
+    "VERSION=7.5\n		  16-nov-2021 PJT",
     NULL
 };
 
@@ -161,6 +162,8 @@ local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
 local bool   Qmad;                      /* MAD ? */
 local bool   Qac;                       /* QAC output mode for stats */
+local bool   Qbad;
+local real   badval;
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
@@ -266,6 +269,8 @@ local void setparams()
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
     Qac = getbparam("qac");
+    Qbad = hasvalue("bad");
+    if (Qbad) badval = getrparam("bad");
 
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
