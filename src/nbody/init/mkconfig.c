@@ -16,6 +16,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <mdarray.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -45,7 +46,13 @@ local double total_mass;
 local double radius;	                /* must be double !! */
 
 extern double xrandom(double, double);
-
+extern void  zerocms(double *, int, double *, int, int);
+void makeshell(void);
+void makeball(void);
+void makecusp(void);
+void makeline(void);
+void makering(void);
+void writesnap(void);
 
 
 void nemo_main()
@@ -77,7 +84,7 @@ void nemo_main()
     writesnap();
 }
 
-makeshell()
+void makeshell()
 {
     int i;
 
@@ -88,7 +95,7 @@ makeshell()
     }
 }
 
-makeball()
+void makeball()
 {
     int i;
 
@@ -99,7 +106,7 @@ makeball()
     }
 }
 
-makecusp()
+void makecusp()
 {
     int i;
 
@@ -110,7 +117,7 @@ makecusp()
     }
 }
 
-makeline()
+void makeline()
 {
     int i;
 
@@ -122,7 +129,7 @@ makeline()
     }
 }
 
-makering()
+void makering()
 {
     int i;
     real theta;
@@ -137,7 +144,7 @@ makering()
     }
 }
 
-writesnap()
+void writesnap()
 {
     stream outstr;
     string headline = getparam("headline");
