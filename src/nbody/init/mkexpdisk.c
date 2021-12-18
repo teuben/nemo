@@ -66,7 +66,7 @@ local void writesnap(string name, string headline);
 
 extern double bessi0(double), bessk0(double), bessi1(double), bessk1(double);
 
-nemo_main()
+void nemo_main()
 {
     int seed;
 
