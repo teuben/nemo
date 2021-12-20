@@ -2,6 +2,8 @@ NEMO is a toolbox for stellar dynamics, particle simulations, stellar orbits,
 image processing and tabular data manipulation. Documentation is maintained
 in the github pages, https://teuben.github.io/nemo
 
+## History
+
 This is the 4th major release of NEMO,  and although data are compatible
 with earlier releases, old source code may need to be tweaked a
 bit to compile and link in the newer releases. Some compatibility with ZENO
@@ -22,6 +24,8 @@ Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 	 STARLAB:   ascl:1010.076
 	 ACS:       https://artcompsci.org
 	 AMUSE:     ascl:1107.007
+	 
+## Optional Packages
 
 Packages we optionally use (sometimes also installed in $NEMO/opt via its code in $NEMO/local):
 
@@ -44,6 +48,8 @@ compiler, (t)csh, and git.  For graphics it's probably
 useful to have pgplot, but the default ps driver works
 fine just to get started quickly.
 
+
+## Installation
 
 There are different ways to install NEMO.  Although there are
 some install scripts with many options, and there is the README.install file
@@ -76,6 +82,8 @@ To rebuild NEMO to ensure you have all updates:
 	     cd $NEMO
 		 git pull
 		 make rebuild
+		 
+## Examples		 
 
 Once NEMO has been installed, here are some examples of scripts and
 figures: https://teuben.github.io/nemo/examples/ or look at an example
@@ -83,4 +91,12 @@ ipython notebook
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
+Of if you want to quickly see something to work, here are a few commands to
+make a Plummer sphere of just 10 particles, print the positions, plot
+the positions and view the contents of its binary file:
+
+        mkplummer p10.dat 10
+		snapprint p10.dat
+		snapplot p10.dat
+		tsf p10.dat
 
