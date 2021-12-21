@@ -69,6 +69,9 @@ end
 #   - linear decrease (inverse of previous)
 #   - constant
 
+# See also  https://arxiv.org/abs/2109.10437 (ALMA Imaging of a Galactic Molecular Outflow in NGC4945)
+# Bolatto et al. 2021
+
 
 rm -f $out.*
 
