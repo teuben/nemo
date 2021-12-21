@@ -8,21 +8,21 @@ Here is a simple table that side-by-side compares different
 common shells.
 .SH SHELL
 .nf
-sh                          csh                         perl
+bash                        csh                         perl
 -------------------------   -------------------------   -------------------------
 
 a="Hi world"                set a="Hi world"            $a="Hi World";
 echo $a                     echo $a                     print a,"\n";
 .PP
 if [ $a = "yes" ];then      if ($a == "yes") then       if ( a eq "yes" ) {
-else if [ ... ]; then       else if ( ... ) then        } elsif {  # notice spelling
+elif [ ... ]; then          else if ( ... ) then        } elsif {  # notice spelling
 else                        else                        } else {
 fi                          endif                       }
 .PP
 read a                      set a=$<                    chomp ( $a = <> );
 .PP
-while                       while ($n > 0)              while ( $a > 0 ) {
-end?                        end                         }
+while [ ]; do               while ($n > 0)              while ( $a > 0 ) {
+done                        end                         }
 .PP
                                                         for ( $n = 99; $n > 0; $n-- ) { 
                                                         }
