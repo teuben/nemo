@@ -47,29 +47,38 @@ If 0 is given, the time of the day will be used (see
 \fIxrandom(3NEMO)\fP for other special seed values)
 to initialize the random number generator. [Default: \fB0\fP].
 .TP
-\fBmaxlines=\fP
-In case a NEMO/unix pipe is used, the maximum number of lines will need to be specified. [10000]
-.TP
 \fBnewline=t|f\fP
 Should a newline be used between output values. [f]
 .TP
+\fBmaxline=\fP\fImax\fP
+In case a NEMO/unix pipe is used, the maximum number of lines will need to be specified. [10000]
+.TP
 \fBp#=\fP\fIword,row,col,...\fP
 Parameter directive in the indexed keyword notation (e.g. p0=, p1=, p2=), see \fIgetparam(3NEMO)\fP.
-\fIword\fP is the string to search on (with some limited grep syntax), but can be blank.
-\fIrow\fP is the row occurance looking for. 1 would be the first, 2 the 2nd, -1 the last, -2 the one but last etc.
-\fIcol\fP is the "column" to look for, 1 would be the first word, -1 the last etc. Multiple \fIcol\fP are allowed,
-but is discouraged.
+\fIword\fP is the string to search on (with some limited grep syntax), but can be blank if all lines need to apply.
+\fIrow\fP is an integer, and is the row-th occurance from the \fIword\fP match. 1 would be the first, 2 the 2nd, -1 the last, -2 the one but last etc.
+0 is not an allowed row number.
+\fIcol\fP is an integer, and designates the "column" to look for in the current row (line), 1 would be the first word, -1 the last etc.
+Multiple \fIcol\fP will be allowed in a future version, but currently not available. Current version does not support negative numbers. 0 is now an
+allowed col number.
+
 
 .SH "EXAMPLES"
-Here is
+Here is an example of extracting three values and converting them to two output values:
 .nf
-       txtpar in=example.txt expr="log(abs(%1)),log(abs(%2/%1))" format=%.3f \\
+
+       txtpar in=example.txt expr="log(abs(%1)),log(abs(%3/%2))" format=%.3f \\
               p1=^Worst,1,9  p2=^QAC,1,3 par3=^QAC,1,4
 	
+       cat example.txt
+       \fIWorst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.00146761 at T = 1.28125
+       QAC_STATS: - 0.039966 0.0274195 0.00185505 0.135854  0.799319 1  20
+       \fP
+
 .fi
-This would output two values.
+
 .PP
-If both original values as well as new computed \fBexpr=\fP are desired in the output (this is the default
+If both original values as well as new computed \fBexpr=\fP are desired in the output (the default
 behavior in \fItabmath(1NEMO)\fP), an extra pipe using
 \fItabmath(1NEMO)\fP) is needed. Here is an example to add the first column in the first two lines of a table
 in both forms, with and without the original values
