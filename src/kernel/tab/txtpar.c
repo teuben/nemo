@@ -22,10 +22,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "expr=\n            formula for parameters after extraction",
     "format=%g\n        format for new output values",
     "seed=0\n           Initial random number",
-    "maxlines=10000\n   Max number of lines in case a pipe was used",
+    "maxline=10000\n    Max number of lines in case a pipe was used",
     "newline=f\n        add newline between output parameters",
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.1\n      27-dec-2021 PJT",
+    "VERSION=0.2\n      27-dec-2021 PJT",
     NULL
 };
 
@@ -56,7 +56,7 @@ bool   Qnewline;                        /* boolean if newline is needed */
 bool   Qexpr;
 
 string *lines;
-int    nlines, maxlines;
+int    nlines, maxline;
 
 string word[MAXPAR];
 int    row[MAXPAR];
@@ -75,6 +75,7 @@ extern void dofie(real *, int *, real *, real *);
 extern void dmpfie(void);
 extern int savefie(int);
 extern int loadfie(int);
+extern int nemo_file_lines(string, int);
 
 
 void nemo_main(void)
@@ -97,8 +98,9 @@ local void setparams(void)
 
     input  = getparam("in");
     instr = stropen(input,"r");
-    maxlines = getiparam("maxlines");
-    lines = (string *) allocate(maxlines * sizeof(string));
+    maxline = nemo_file_lines(input, getiparam("maxline"));
+    dprintf(1,"Allocated %d lines for file\n",maxline);
+    lines = (string *) allocate(maxline * sizeof(string));
 
     Qexpr = hasvalue("expr");
     newcol = getparam("expr");
@@ -155,8 +157,12 @@ local void convert(stream instr)
     char   *cp, *seps=", \t";       /* column separators  */
     real   errval=0.0;
 
-    nlines=0;               /* count lines read so far */
 
+    /*
+     *   read input lines
+     */
+
+    nlines=0;                              /* counter for lines read */
     for(;;) {                              /* loop over all lines in file(s) */
       if (get_line(instr, line) < 0)           
 	break; 					      /* EOF */
@@ -165,9 +171,16 @@ local void convert(stream instr)
       tab2space(line);	          /* work around a Gipsy (?) problem */
       lines[nlines] = strdup(line);
       nlines++;
+      if (nlines == maxline) {
+	warning("maxline=%d exhausted", maxline);
+	break;
+      }
     }
     dprintf(0,"Read %d lines\n",nlines);
 
+    /*
+     *   extract parameters
+     */
 
     nval = 0;   // this will fill the dval[]
     dprintf(0,"Parsing %d parameters p#=\n", maxpar);
@@ -177,70 +190,55 @@ local void convert(stream instr)
       // no backwards counting rows yet, this is version 0.1
       dprintf(0,"p%d row=%d col=%d\n", i, row[i], col[i]);
       cp = lines[row[i]-1];
+      dprintf(0,"LINE: %s\n", cp);
       // cach the outv, this is still version 0.1
       outv = burststring(cp, seps);
       sval[nval] = outv[col[i]-1];
       nval++;
     }
-
-
     if (nval == 0) warning("no output??? should never happen");
 
-    if (Qexpr) {
-      error("expr not implemented yet");
-    } else {
+
+    /*
+     *  if no expressions give, output parameters "as is" from their textual input
+     */
+
+    if (!Qexpr) {
       // simple output of input parameters
       for (i=0; i<nval; i++) {
 	if (i>0 && Qnewline) printf("\n");
 	printf("%s ", sval[i]);
       }
-      printf("\n");      
+      printf("\n");
+      return;
     }
 
-
-    // code below is from tabmath, of which we'll still need some 
-
-
-    if (nlines < 0) {
-        if (nfies>0 || *selfie) {              	/* if a new column requested */
-            nval = nemoinpr(line,dval,MAXCOL);         /* split into numbers */
-	    if (nval < 0) error("bad parsing in %s",line);
-	    /* this could contain some NULL's, so how do we measure this ??? */
-            dprintf (3,"nval=%d \n",nval);
-            if (nval>MAXCOL)
-                error ("Too many numbers: %s",line);
-            for(i=0; i<nfies; i++) {
-                if (Qfie) loadfie(i+1);
-                dofie(dval,&one,&dval[nval+i],&errval);
-                dprintf(3," dofie(%d) -> %g\n",i+1,dval[nval+i]); //BUG
-                strcat(line," ");
-                sprintf(newdat,fmt,dval[nval+i]);
-                dprintf (2,"newdat=%s\n",newdat);
-                strcat(line,newdat);
-            }
-        }
-	if (*selfie) {                             /* check if row selected */
-            if (Qfie) loadfie(nfies+1);
-            dofie(dval,&one,&retval,&errval);
-            //if (retval == 0.0) continue;            
-            /* ?? but what about this stride business ?? */
-	}
-        if (ndelc==0) {                      /* nothing to skip while output */
-            strcat (line,"\n");     
-            puts (line);
-        } else {		           /* something to skip while output */
-            outv = burststring(line,seps);
-            i=0;
-            while (outv[i]) {
-                if (keepc[i+1] && (ndelc>0 || i>=nval)) {
-		  puts(outv[i]);
-		  puts(" ");
-                }
-                i++;
-            }
-            puts("\n");
-        }
+    /*
+     *   convert strings to float values
+     */
+    
+    for (i=0; i<nval; i++) {
+      dval[i] = atof(sval[i]);
     }
+
+    /*
+     *   apply math and output the new expressions
+     */
+
+    line[0] = '\0';
+    for(i=0; i<nfies; i++) {
+      if (Qfie) loadfie(i+1);
+      dofie(dval,&one,&dval[nval+i],&errval);
+      dprintf(3," dofie(%d) -> %g  %g\n",i+1,dval[nval+i], errval); //BUG
+      strcat(line," ");
+      printf(fmt,dval[nval+i]);
+      printf(" ");
+      if (Qnewline)
+	printf("\n");
+    }
+    if (!Qnewline)
+      printf("\n");
+    
 }
 
 /* burstfie(): to be placed with burststring() later on...
