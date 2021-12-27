@@ -22,10 +22,10 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "expr=\n            formula for parameters after extraction",
     "format=%g\n        format for new output values",
     "seed=0\n           Initial random number",
-    "maxline=10000\n    Max number of lines in case a pipe was used",
     "newline=f\n        add newline between output parameters",
+    "maxline=10000\n    Max number of lines in case a pipe was used",
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.2\n      27-dec-2021 PJT",
+    "VERSION=0.3\n      27-dec-2021 PJT",
     NULL
 };
 
@@ -41,9 +41,8 @@ stream instr;			        /* file streams */
 string fmt;                             /* format of new column */
 
 #define MAXCOL          256             /* MAXIMUM number of columns */
+#define MAXROW          256
 #define MLINELEN       8196		/* linelength of catenated */
-#define MNEWDAT          80		/* space needed for one number */
-
 #define MAXPAR          100
 
 bool   keepc[MAXCOL+1];                 /* columns to keep (t/f) */
@@ -94,7 +93,9 @@ local void setparams(void)
     string delcol;                          /* which columns not to write */
     int    delc[MAXCOL];                    /* columns to skip for output */
     int    wrc[3];                          /* hold "word","row","col" - temp */
-    int i, nwrc;
+    int i, nwrc, ispar, nsp;
+    string *sp;
+    char   *cp;
 
     input  = getparam("in");
     instr = stropen(input,"r");
@@ -109,17 +110,32 @@ local void setparams(void)
     // check all indexed parameters
     maxpar = indexparam("p",-1);
     if (maxpar < 0) error("No parameter directives (p0=, p1, ...) given");
-    int ispar;
     for (i=0; i<maxpar; i++) {
       ispar = indexparam("p",i);
       if (ispar) {
 	dprintf(0,"%d : %s\n", i, getparam_idx("p",i));
-	// just by line, to get us going
-	word[i] = "";
-	nwrc = nemoinpi(getparam_idx("p",i), wrc, 3);
-	if (nwrc < 0) error("parsing p%d=%s", i, getparam_idx("p",i));
-	row[i] = wrc[1];
-	col[i] = wrc[2];
+	cp = getparam_idx("p",i);
+	if (*cp == ',') {
+	  sp = burststring(cp+1, ",");
+	  nsp = xstrlen(sp, sizeof(string)) - 1;
+	  if (nsp < 2 ) error("Need row,col");
+	  word[i] = strdup("");
+	  row[i] = atoi(sp[0]);
+	  col[i] = atoi(sp[1]);
+	} else {
+	  sp = burststring(cp, ",");	  
+	  nsp = xstrlen(sp, sizeof(string)) - 1;
+	  if (nsp == 2) {    // this could be a bad idea if we allow multiple col's
+	    word[i] = strdup("");
+	    row[i] = atoi(sp[0]);
+	    col[i] = atoi(sp[1]);
+	  } else if (nsp == 3) {
+	    word[i] = strdup(sp[0]);
+	    row[i] = atoi(sp[1]);
+	    col[i] = atoi(sp[2]);
+	  } else
+	      error("Need word,row,col");
+	}
       } else {
 	if (i==0) warning("p0 is missing");
 	word[i] = NULL;
@@ -138,9 +154,7 @@ local void setparams(void)
     Qfie = nfies > 1;
 
     init_xrandom(getparam("seed"));
-
     Qnewline = getbparam("newline");
-
 }
 
 
@@ -151,8 +165,8 @@ local void convert(stream instr)
     real   dval[MAXCOL];            /* number of items (values on line) */
     string sval[MAXCOL];            // 
     real   retval;
-    char   newdat[MNEWDAT];         /* to store new column in ascii */
-    int    nval, i, one=1;
+    int    nval, i, j, one=1;
+    int    match[MAXROW], nmatch, rownr;
     string *outv;                   /* pointer to vector of strings to write */
     char   *cp, *seps=", \t";       /* column separators  */
     real   errval=0.0;
@@ -182,14 +196,41 @@ local void convert(stream instr)
      *   extract parameters
      */
 
-    nval = 0;   // this will fill the dval[]
+    nval = 0;       // this will fill the dval[]
     dprintf(0,"Parsing %d parameters p#=\n", maxpar);
     for (i=0; i<maxpar; i++) {
-      if (word[i] == NULL) continue;
-      // no word selection yet, this is version 0.1
-      // no backwards counting rows yet, this is version 0.1
-      dprintf(0,"p%d row=%d col=%d\n", i, row[i], col[i]);
-      cp = lines[row[i]-1];
+      if (strlen(word[i]) > 0) {
+	dprintf(0,"Searching word=%s\n",word[i]);
+	nmatch = 0;
+	for (j=0; j<nlines; j++) {
+	  if (strstr(lines[j],word[i])) {
+	    dprintf(0,"Match in %d: %s\n",j,lines[j]);
+	    match[nmatch++] = j;
+	  }
+	}
+	if (nmatch == 0) continue;
+      } else
+	nmatch = 0;
+      dprintf(0,"nmatch: %d\n",nmatch);
+      if (nmatch == 0) {
+	if (row[i] > 0)
+	  rownr = row[i]-1;
+	else if (row[i] < 0) 
+	  rownr = nlines+row[i];
+	else
+	  error("Illegal row=0 reference - 1");	  
+      } else {
+	if (row[i] > 0)
+	  rownr = match[row[i]-1];
+	else if (row[i] < 0)
+	  rownr = match[nmatch+row[i]];
+	else
+	  error("Illegal row=0 reference - 2");
+      }
+      
+
+      dprintf(0,"p%d row=%d col=%d\n", i, rownr, col[i]);
+      cp = lines[rownr];
       dprintf(0,"LINE: %s\n", cp);
       // cach the outv, this is still version 0.1
       outv = burststring(cp, seps);
