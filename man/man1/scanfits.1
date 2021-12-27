@@ -196,8 +196,10 @@ If a keyword \fBDATExxxx\fP is present, and it matches the pattern
 "dd/mm/yy", it will be transformed to "yyyy-mm-dd", which makes the
 file Y2K compliant.  FYI: the unix \fIdate(1)\fP
 command produces Y2K compliant
-with \fBdate +%Y-%m-%dT%H:%M:%S.%N\fP, where the subsecond \fB.%N\fP portion is optional.
-The old style is done with  \fBdate +%d/%m/%y\fB,  which does not sort lexically.
+with \fBdate -u +%Y-%m-%dT%H:%M:%S.%N\fP, where the subsecond \fB.%N\fP portion is optional.
+The old style is done with  \fBdate +%d/%m/%y\fB,  which does not sort lexically, and
+no timezone has been applied. The TIME-OBS keyword has also been used before Y2K
+to record the observation.
 .TP
  \fBUNY2K\fP
 If a keyword \fBDATExxxx\fP is present, and it matches the pattern
@@ -268,4 +270,5 @@ Peter Teuben
 13-jan-93    	V1.7 insert= now implemented Arie!	PJT
 2-dec-98	V1.8 fix=PROMOTE for lgm's nicmos 	PJT
 15-oct-99	V1.8b fix=UNY2K (and Y2K)for Staguhn's GILDAS  	pjt
+23-dec-21	fixed -u flag for date	PJT
 .fi
