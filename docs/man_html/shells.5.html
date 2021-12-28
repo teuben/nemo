@@ -18,21 +18,21 @@ them causes the personal memory to leak.  Here is a simple table that side-by-si
 compares different common shells. 
 <h2><a name='sect2' href='#toc2'>Shell</a></h2>
 <br>
-<pre>sh                          csh                         perl
+<pre>bash                        csh                         perl
 -------------------------   -------------------------   -------------------------
 a="Hi world"                set a="Hi world"            $a="Hi World";
 echo $a                     echo $a                     print a,"0;
 if [ $a = "yes" ];then      if ($a == "yes") then       if ( a eq "yes"
 ) {
-else if [ ... ]; then       else if ( ... ) then        } elsif {  # notice spelling
+elif [ ... ]; then          else if ( ... ) then        } elsif {  # notice spelling
 else                        else                        } else {
 fi                          endif                       }
 
 read a                      set a=$&lt;                    chomp ( $a = &lt;&gt; );
 
-while                       while ($n &gt; 0)              while ( $a &gt; 0 )
+while [ ]; do               while ($n &gt; 0)              while ( $a &gt; 0 )
 {
-end?                        end                         }
+done                        end                         }
 
                                                         for ( $n = 99;
 $n &gt; 0; $n-- ) { 

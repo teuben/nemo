@@ -22,24 +22,27 @@ to <i>O</i>(<i>N</i>log<i>N</i>). <i>hackcode1_qp</i> is similar, but includes q
 to body-cell interactions (L. Hernquist, <i>App. J. Suppl.</i>, <b>64<i>, 715,  1987). <p>
 Particles
 with zero mass will not be included in building the  tree structure, and
-hence in effect produce a restricted N-body code. 
-<h2><a name='sect3' href='#toc3'></i></b>Parameters</a></h2>
-The following
-parameters are recognized; they may be given in any order. 
+hence in effect produce a restricted N-body code. <p>
+A special program, <a href='snapdiagplot.1.html'><i>snapdiagplot(1NEMO)</i></i></b></a>
+
+can be used to monitor conservation of energy and momentum. 
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+The
+following parameters are recognized; they may be given in any order. 
 <dl>
 
-<dt><b>in=</b><i>in-file</i> </dt>
-<dd>If
-given, initial conditions will be read from <i>in-file</i> in snapshot format. At
-most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
+<dt><b>in=</b><i>in-file</i>
+</dt>
+<dd>If given, initial conditions will be read from <i>in-file</i> in snapshot format.
+At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
 
 <dt><b>out=</b><i>out-file</i> </dt>
-<dd>If given,
-results are written to <i>out-file</i> in snapshot format. </dd>
-
-<dt><b>restart=</b><i>state-file</i> </dt>
 <dd>If
-given, the system state will be read from <i>state-file</i>. New values are accepted
+given, results are written to <i>out-file</i> in snapshot format. </dd>
+
+<dt><b>restart=</b><i>state-file</i>
+</dt>
+<dd>If given, the system state will be read from <i>state-file</i>. New values are accepted
 for the following parameters: <b>out</b>, <b>save</b>, <b>eps</b>, <b>tol</b>, <b>options</b>, <b>fcells</b>, <b>tstop</b>,
 <b>freqout</b>, <b>minor_freqout</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b>
 may be specified. </dd>
@@ -120,6 +123,7 @@ out=- needs to be part of a pipe.
 ,
 <a href='directcode.1.html'>directcode(1NEMO)</a>
 , <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
+, <a href='snapdiagplot.1.html'>snapdiagplot(1NEMO)</a>
  <br>
 <pre>https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
 Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
