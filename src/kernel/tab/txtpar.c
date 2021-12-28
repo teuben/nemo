@@ -25,7 +25,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "newline=f\n        add newline between output parameters",
     "maxline=10000\n    Max number of lines in case a pipe was used",
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.3\n      27-dec-2021 PJT",
+    "VERSION=0.4\n      27-dec-2021 PJT",
     NULL
 };
 
@@ -113,7 +113,7 @@ local void setparams(void)
     for (i=0; i<maxpar; i++) {
       ispar = indexparam("p",i);
       if (ispar) {
-	dprintf(0,"%d : %s\n", i, getparam_idx("p",i));
+	dprintf(2,"%d : %s\n", i, getparam_idx("p",i));
 	cp = getparam_idx("p",i);
 	if (*cp == ',') {
 	  sp = burststring(cp+1, ",");
@@ -190,50 +190,56 @@ local void convert(stream instr)
 	break;
       }
     }
-    dprintf(0,"Read %d lines\n",nlines);
+    dprintf(1,"Read %d lines\n",nlines);
 
     /*
      *   extract parameters
      */
 
     nval = 0;       // this will fill the dval[]
-    dprintf(0,"Parsing %d parameters p#=\n", maxpar);
-    for (i=0; i<maxpar; i++) {
-      if (strlen(word[i]) > 0) {
-	dprintf(0,"Searching word=%s\n",word[i]);
+    dprintf(1,"Parsing %d parameters p#=\n", maxpar);
+    for (i=0; i<maxpar; i++) {                          // loop all parameters
+      if (strlen(word[i]) > 0) {                        // check if a word match was needed
+	dprintf(1,"Searching word=%s\n",word[i]);
 	nmatch = 0;
 	for (j=0; j<nlines; j++) {
 	  // @todo  allow ^word 
 	  if (strstr(lines[j],word[i])) {
-	    dprintf(0,"Match in %d: %s\n",j,lines[j]);
+	    dprintf(1,"Match in %d: %s\n",j,lines[j]);
 	    match[nmatch++] = j;
 	  }
 	}
-	if (nmatch == 0) continue;
+	if (nmatch == 0) {
+	  error("No match found for \"%s\"", word[i]);
+	  continue;
+	}
       } else
 	nmatch = 0;
-      dprintf(0,"nmatch: %d\n",nmatch);
-      if (nmatch == 0) {
+      dprintf(1,"nmatch: %d\n",nmatch);
+      
+      if (nmatch == 0) {                        // can use absolute row number
 	if (row[i] > 0)
 	  rownr = row[i]-1;
 	else if (row[i] < 0) 
 	  rownr = nlines+row[i];
 	else
-	  error("Illegal row=0 reference - 1");	  
-      } else {
-	if (row[i] > 0)
+	  error("Illegal row=0 reference - 1");
+	if (rownr < 0 || rownr >= nlines)
+	  error("bad rownumber %d for p%d", row[i],i);
+      } else {                                  // look in matched values
+	if (row[i] > 0) {
+	  if (row[i] > nmatch) error("Not enough matches for %s,%d",word[i],row[i]);
 	  rownr = match[row[i]-1];
-	else if (row[i] < 0)
+	} else if (row[i] < 0) {
+	  if (nmatch+row[i] < 0) error("Not enough matches for %s,%d",word[i],row[i]);	  
 	  rownr = match[nmatch+row[i]];
-	else
+	} else
 	  error("Illegal row=0 reference - 2");
       }
       
-
-      dprintf(0,"p%d row=%d col=%d\n", i, rownr, col[i]);
+      dprintf(1,"par p%d row=%d col=%d\n", i, rownr, col[i]);
       cp = lines[rownr];
-      dprintf(0,"LINE: %s\n", cp);
-      // cach the outv, this is still version 0.1
+      dprintf(1,"LINE: %s\n", cp);
       outv = burststring(cp, seps);
       sval[nval] = outv[col[i]-1];
       nval++;
