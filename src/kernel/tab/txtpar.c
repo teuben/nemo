@@ -203,6 +203,7 @@ local void convert(stream instr)
 	dprintf(0,"Searching word=%s\n",word[i]);
 	nmatch = 0;
 	for (j=0; j<nlines; j++) {
+	  // @todo  allow ^word 
 	  if (strstr(lines[j],word[i])) {
 	    dprintf(0,"Match in %d: %s\n",j,lines[j]);
 	    match[nmatch++] = j;
