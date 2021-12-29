@@ -24,10 +24,11 @@ orbit - binary format for stellar orbits
 binary structured fileformat as described in <a href='filestruct.3.html'><i>filestruct(3NEMO)</i></a>
 . It is accompanied
 by a package of functions that make the calculation, display and analysis
-of simple stellar orbits a simpler task. 
+of 2- and 3D stellar orbits a simpler task. 
 <h2><a name='sect3' href='#toc3'>Format</a></h2>
 <br>
-<pre>typedef struct {
+<pre>#define ORBIT_PHI
+typedef struct {
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;int   ndim;
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;int   coordsys;
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;real  mass;
@@ -38,6 +39,10 @@ of simple stellar orbits a simpler task.
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;int   nsteps;
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;real  *time;
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;real  *phase;
+#ifdef ORBIT_PHI
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;realptr _phi;
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;realptr _acc;
+#endif  
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;a_potential pot;
 } orbit, *orbitptr;
 </pre><p>
@@ -69,6 +74,10 @@ General access macro&rsquo;s are available by including <b>orbit.h</b>. <br>
 #define Uorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)))
 #define Vorb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+1))
 #define Worb(optr,i)    (*(PhasePath(optr)+Ndim(optr)*2*(i)+Ndim(optr)+2))
+#define Porb(optr,i)    (*(PhiPath(optr)+(i)))
+#define AXorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)))
+#define AYorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+1))
+#define AZorb(optr,i)   (*(AccPath(optr)+Ndim(optr)*(i)+2))
 #define PotName(optr)   (Potential(optr).name)
 #define PotPars(optr)   (Potential(optr).pars)
 #define PotFile(optr)   (Potential(optr).file)
@@ -94,6 +103,7 @@ Peter Teuben
 6-dec-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.x: added maxsteps for re-allocation<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 1-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.3: added iom_error<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 24-jul-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0: added key<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+6-oct-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.1: split Pos/Vel; support for PHI/ACC<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

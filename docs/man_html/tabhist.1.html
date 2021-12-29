@@ -142,9 +142,16 @@ f </dd>
 <dd>Delete points more than nsigma times the sigma from the mean.
 After each point sigma and mean are recomputed. [Default: none] </dd>
 
-<dt><b>sort=</b><i>sort_mode</i>
-</dt>
-<dd></dd>
+<dt><b>qac=t|f<i> </i></b></dt>
+<dd>If
+selected, a QAC listing is selected. This gives the mean, rms, min and max.
+[Default: f] 
+<p> </dd>
+
+<dt><b>sort=</b><i>sort_mode</i> </dt>
+<dd>Default:  qsort.   If flogger is enabled additional
+sorting modes are available: bubble, heap, insert, merge, quick, shell.
+</dd>
 
 <dt><b>pyplot=</b> </dt>
 <dd>If given, it will be the filename where a template python script
@@ -152,32 +159,35 @@ that can serve as starting point for more elaborate plotting. Default: none.
 </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-Points that fall exactly on the boundary of a bin, are added to the
-right side. Another way of saying is that a cell includes the left side,
-but is open ended on the right side, i.e. [---). Note this behavior is exactly
-opposite that of SM&rsquo;s behavior, which was used to compare results. 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Flogger</a></h2>
+There is a compile option to make <b>tabhist_flogger</b> which enables
+more sorting modes. 
+<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
+Points that fall exactly on the boundary of a bin,
+are added to the right side. Another way of saying is that a cell includes
+the left side, but is open ended on the right side, i.e. [---). Note this behavior
+is exactly opposite that of SM&rsquo;s behavior, which was used to compare results.
+
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
-,
-<a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabstat.1.html'>tabstat(1NEMO)</a>
 , <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
- <p>
+
+<p>
 <a href='http://vostat.org'>http://vostat.org</a>
  <p>
 <a href='http://www.star.bris.ac.uk/~mbt/stilts/'>http://www.star.bris.ac.uk/~mbt/stilts/</a>
-
-<p>
-http://arxiv.org/ps/0807.4820 (<i>choosing the binning for a histogram</i>) 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter
-Teuben 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+ <p>
+http://arxiv.org/ps/0807.4820
+(<i>choosing the binning for a histogram</i>) 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
+Peter Teuben 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>~/src/kernel/tab<tt> </tt>&nbsp;<tt> </tt>&nbsp;sources
 </pre>
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>xx-mar-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-Apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: higher order moments, Y scale  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -197,6 +207,7 @@ Teuben
 16-jan-14<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.4: added mad= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-jan-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.0: added pyplot=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-mar-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.1: added norm=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-nov-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.4: added qac=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 
@@ -207,11 +218,12 @@ Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Bugs</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Flogger</a></li>
+<li><a name='toc5' href='#sect5'>Bugs</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

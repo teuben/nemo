@@ -197,9 +197,11 @@ that does not have an &rsquo;=&rsquo; in column 9 are not affected. <br>
 <dd>If a keyword <b>DATExxxx</b> is present, and it matches the pattern "dd/mm/yy",
 it will be transformed to "yyyy-mm-dd", which makes the file Y2K compliant.
  FYI: the unix <a href='date.1.html'><i>date(1)</i></a>
- command produces Y2K compliant with <b>date +%Y-%m-%dT%H:%M:%S.%N</b>,
+ command produces Y2K compliant with <b>date -u +%Y-%m-%dT%H:%M:%S.%N</b>,
 where the subsecond <b>.%N</b> portion is optional. The old style is done with 
-<b>date +%d/%m/%y<b>,  which does not sort lexically. <br>
+<b>date +%d/%m/%y<b>,  which does not sort lexically, and no timezone has been
+applied. The TIME-OBS keyword has also been used before Y2K to record the
+observation. <br>
 </dd>
 
 <dt> <b>UNY2K</b></b></b> </dt>
@@ -276,6 +278,7 @@ Peter Teuben
 13-jan-93    <tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 insert= now implemented Arie!<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-dec-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.8 fix=PROMOTE for lgm&rsquo;s nicmos <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-oct-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.8b fix=UNY2K (and Y2K)for Staguhn&rsquo;s GILDAS  <tt> </tt>&nbsp;<tt> </tt>&nbsp;pjt
+23-dec-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed -u flag for date<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -15,6 +15,7 @@ tabmath - general table manipulator
 <p>
 <b>tabmath in=</b>table-file <b>out=</b>table-file
  [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tabmath</i> has a few simple functions to modify
 a file in tabular format, similar to a spreadsheet calculator. It can handle
@@ -40,9 +41,10 @@ can be used. It uses the same <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 column expressions. It must evaluate to exactly 0 in order for a row not
 to be written. For example "<i>selfie=iflt(%1,3,1,0)</i>" would only output rows
 in which the first column is less than 3. <p>
-Tablefiles are simple ascii files
+Table files are simple ascii files
 in a columnar format. Lines which start with a # symbol are interpreted
 as comment lines and are skipped. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are
 recognized in any order if the keyword is also given: 
@@ -138,6 +140,7 @@ awk(1) can be used as follows:
 between values $a and $b: <br>
 <pre>   tabmath file - selfie="ifgt(%4,$a,iflt(%4,$b,1,0),0)"
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Common Expressions</a></h2>
 Although <a href='fie.3.html'>fie(3NEMO)</a>
  expressions  are quite rich, some
@@ -151,6 +154,7 @@ or false (R2): <br>
 (P1&gt;V1 &amp;&amp; P2&gt;V2) ? R1 : R2<tt> </tt>&nbsp;<tt> </tt>&nbsp;ifgt(%1,V1,ifgt(%2,V2,R1,R2),R2)
 (V1&lt;P1&lt;V2) ? R1 : R2        <tt> </tt>&nbsp;<tt> </tt>&nbsp;ifgt(%1,V1,iflt(%1,V2,R1,R2),R2)
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='colrm.1.html'>colrm(1)</a>
 , <a href='expand.1.html'>expand(1)</a>
@@ -161,6 +165,7 @@ or false (R2): <br>
 ,
 <a href='tabtranspose.1.html'>tabtranspose(1NEMO)</a>
 , <a href='tabplot.1.html'>tabplot(1NEMO)</a>
+, <a href='txtpar.1.html'>txtpar(1NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
  <p>
 jdb (http://www.isi.edu/~johnh/SOFTWARE/JDB/):
@@ -172,18 +177,20 @@ msort - <a href='http://billposer.org/Software/msort.html'>http://billposer.org/
 starbas - <a href='http://cfa-www.harvard.edu/~john/starbase/starbase.html'>http://cfa-www.harvard.edu/~john/starbase/starbase.html</a>
  -
 an ASCII relational database for UNIX. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Bugs</a></h2>
-Parsing of
-<b>newcol</b> expression is done by <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
-, and  is space sensitive. Parsing
-allows more than one value, e.g. "1 _+ 1" is interpreted as two values, instead
-of the number 2. "1+1" would be interpreted as 2. Hence multiple columns
-(with probably the wrong value) would be created in the first example. <p>
-If
-comments are passed on, processing multiple input files which do not have
-matching comment lines will cause the output to have odd lines. <p>
+Parsing
+of <b>newcol</b> expression is done by <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+, and  is space sensitive.
+Parsing allows more than one value, e.g. "1 _+ 1" is interpreted as two values,
+instead of the number 2. "1+1" would be interpreted as 2. Hence multiple
+columns (with probably the wrong value) would be created in the first example.
+<p>
+If comments are passed on, processing multiple input files which do not
+have matching comment lines will cause the output to have odd lines. <p>
 Complex
 expressions where one component fails, fails the whole expression.  An example
 is adding two gaussians with different widths. The one with the narrow gaussian
