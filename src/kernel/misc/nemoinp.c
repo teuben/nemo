@@ -243,6 +243,9 @@ int nemoinpf(
  *    @todo   H:M:S is normal,
  *        NED  example 00h07m15.84s, +27d42m29.1s
  *        CASA example 12:22:55.212, +15.49.15.500    (who came up with THAT?)
+ *        ???          10,20,30.456                 (miriad might have an input example)
+ *
+ *    sep options:      ':'  ','   '.'  'hms'   'dms'
  */
 
 double atox(string nptr)
