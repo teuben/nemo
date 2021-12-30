@@ -1,18 +1,21 @@
-.TH ERROR 3NEMO "8 December 2001"
+.TH ERROR 3NEMO "25 October 2021"
 .SH NAME
 error, fatal, warning, recover, stop \- handle errors and warnings and system exit
 .SH SYNOPSIS
 .nf
 \fB#include <stdinc.h>\fP
 .PP
-\fBvoid error(string format, ... )\fP
-\fBvoid fatal(string format, ... )\fP
-\fBvoid warning(string format, arg ... )\fP
-\fBvoid recover(proc cleanup)\fP
-\fBvoid stop(int lev)\fP
+\fBvoid nemo_error(string format, ... )\fP
+\fBvoid nemo_fatal(string format, ... )\fP
+\fBvoid nemo_warning(string format, arg ... )\fP
+\fBvoid nemo_recover(proc cleanup)\fP
+\fBvoid nemo_stop(int lev)\fP
 \fBvoid set_exit_level(int lev)\fP
 .fi
 .SH DESCRIPTION
+NOTE: for compatibility \fIerror()\fP (and friends) is still maintained via a macro in <stdinc.h>, but	\" l
+to avoid collisions with the GNU C library, our \fIerror()\fP was renamed to \fInemo_error()\fP (and friends).
+.PP
 \fIerror\fP prints out an error 
 string to \fIstderr\fP and calls \fIstop\fP, which normally
 exit's the program (see also \fIexit(3)\fP). A program
@@ -61,4 +64,5 @@ xx-xxx-86	Created in the dark ages	Josh
 29-oct-90	abort for large enough debug_level	Peter
 5-mar-94	documented stop                     	peter
 8-dec-01	added errno reporting, updated man page  	peter
+25-oct-2021	error -> nemo_error() for GNU C library linkking	PJT
 .fi
