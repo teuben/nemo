@@ -10,8 +10,8 @@ HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bi
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-nemoinp, natof, natoi - decode and parse string into reals, integers,
-logicals 
+nemoinp, natof, natoi, atox - decode and parse string into reals, integers,
+logicals, sexagesimal 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>int nemoinpd (expr,doutv,nout)
@@ -28,6 +28,7 @@ int nemorinpl (string var, long   *xvar,  int n, long   defvar, bool repeated)
 int nemorinpb (string var, int    *xvar,  int n, bool   defvar, bool repeated)
 double natof(expr)
 int  natoi(expr)
+double atox(expr)
 char *expr;
 double doutv[];
 float  foutv[];
@@ -58,6 +59,10 @@ and <a href='atoi.3.html'><i>atoi(3)</i></a>
 any error checking (most importantly if the string contains non-number parts,
 except for the string "NaN" or "nan" in <i>natof()</i> where it will return the
 appropriate IEEE <b>nan</b> value). <p>
+<b>atox</b> provides the Babylonian sexagesimal (D:M:S)
+conversion to D+M/60+S/3600 conversion, but without any error checking.
+The user is still responsible for units, e.g. it does not know how to distinguish
+between H:M:S and D:M:S. <p>
 An expression can have basic mathematical functions,
 such as addition, most transcendental functions and  even some mathematical
 and physical constants. See also <a href='herinp.3.html'><i>herinp(3NEMO)</i></a>
@@ -184,6 +189,7 @@ xx-feb-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;nemoinp made archaic - must now call ne
 4-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.9 added nemoinpx()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-jan-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;recognize nan&rsquo;s in natof<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 jan-2005<tt> </tt>&nbsp;<tt> </tt>&nbsp;added nemorinpX<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+dec-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added atox, fix sign bug<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

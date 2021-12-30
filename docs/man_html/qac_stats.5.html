@@ -16,7 +16,8 @@ qac_stats - provide statistics that can be used as regression
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 The
 <b>QAC_STATS</b> is a series of numbers associated with a file <br>
-<pre>      QAC_STATS: ngc0001.ccd -4.29944e-05 0.0126181 -0.0720263 0.0892035  0 -0.00437804
+<pre>      QAC_STATS: ngc0001.ccd -4.29944e-05 0.0126181 -0.0720263 0.0892035  75.9081
+-0.00437804
 </pre>that represent the mean, rms, min and max of a set of numbers. Optionally
 there are 2 or more numbers present: the flux and the signal ratio <i>sratio=(psum+nsum)/(psum-nsum)</i>,
 where the sums are over the positive and negative values. For sratio=0 (or
@@ -32,7 +33,8 @@ happens near sratio=0 and one will need more sophisticated signal detection
 schemes. 
 <h2><a name='sect2' href='#toc2'>Examples</a></h2>
 For a FITS file: <br>
-<pre>   fitsccd ngc0001.fits - | ccdstat - qac=t
+<pre>   fitsccd NGC0001.fits - | ccdstat - qac=t bad=0
+   
 </pre>
 <p> 
 <h2><a name='sect3' href='#toc3'>See Also</a></h2>
