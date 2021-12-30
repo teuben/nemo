@@ -1,21 +1,24 @@
-.TH TABDMS 1NEMO "17 July 2020"
-.SH NAME
-tabdms \- Convert to HMS/DMS tables
-.SH SYNOPSIS
+.TH TABDMS 1NEMO "30 December 2021"
+
+.SH "NAME"
+tabdms \- Convert from/to sexagesimal HMS/DMS tables
+
+.SH "SYNOPSIS"
 \fBtabdms\fP [parameter=value]
-.SH DESCRIPTION
-\fBtabdms\fP replaces selected column(s) from a table to their
-HMS/DMS format. 
+
+.SH "DESCRIPTION"
+\fBtabdms\fP replaces selected column(s) from a table to or from their sexagesimal HMS/DMS equivalent.
 .PP
-Currently the format is fixed.
+Currently the output HMS/DMS format is fixed to \fB%06.3f\fP
 .PP
-There is little controversie about DMS, these are numbers between -180 or 180, or 0 to 360. In fact, the
-program does not care about the absolute value, any number will do.
+HMS is normally on a 0..24 h system, but conversion is done to/from a 0..360 system (as in fits headers). If this not
+required, pick the DMS version instead.
 .PP
-HMS is more complicated, since the 24h system is used as well as the 360deg. 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+The .DMS and .HMS formation option referred to is where the digits before are copied "as is". They could represent
+days in a DDD:HH:MM:SS.S type notation.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input file name, an ascii table. No Default.
@@ -26,62 +29,112 @@ output file name, an ascii table. No Default.
 \fBtodms=\fP
 list of columns (1..) to convert to dms. 
 Negative columns should be used if the format is to be interpreted
-as ".DMS" instead of the default "D.MS". 
-The D ins DMS is normally assumed to be modulo 360.
+as fractional ".DMS" instead of the default "D:M:S". 
+The D in DMS is normally assumed to be modulo 360.
 Default: none.
 .TP 
 \fBtohms=\fP
 list of columns (1..) to convert to hms.
 Negative columns should be used if the format is to be interpreted
-as ".HMS" instead of the default "H.MS".
-The H ins HMS is normally assumed to be modulo 24.
+as fractional ".HMS" instead of the default "H:M:S".
+The H in HMS is normally assumed to be modulo 24.
 Default: none.
 .TP 
-\fBfromhms=\fP
-A list of columns (1..) to convert from hms to degrees (or seconds)
+\fBfromdms=\fP
+A list of columns (1..) to convert from dms to degrees
 [none]
 .TP
 \fBfromhms=\fP
-A list of columns (1..) to convert from dms to seconds (or seconds)
+A list of columns (1..) to convert from hms to degrees, which includes a factor of 15.
 [none]
 .TP 
 \fBseparator=\fP
-separator between output D-M-S.S 
+separator between output D M and S.S. 
 [Default: \fB:\fP]
 .TP
 \fBformat=\fP
-Format statement for columns converted by fromhms= and fromdms=
+Output format statement used for columns converted by fromhms= and fromdms=
 [Default: \fB%g\fP]
 .TP 
 \fBscale=\fP
-Scaling factor applied to degrees. If you want seconds, use 3600 here. For radians,
-use \fBpi/180\fP.
+Scaling factor applied to degrees when converted by fromhms= and fromdms=.
+If you want seconds, use 3600 here. For radians,
+use \fBpi/180\fP. Careful in using this, each of \fBfromdms=\fP and \fBfromhms=\fP columns will get
+this factor applies.
+-\fInot implemented yet\fP-
 [Default: \fB1\fP]
-.SH EXAMPLES
+.TP
+\fBcenter=\fP
+If given, the angular X,Y differences of two selected colums with this acenter is computed.
+If sexadecimal notation is used, it is assumed to be an RA,DEC, else the center is assumed
+to be in degrees.
+-\fInot implemented yet\fP-
+
+
+.SH "EXAMPLES"
 The following example prints out the 4 possible ways to convert the
 number "12.51" to DMS or HMS:
 .nf
-% echo 11.51 11.51 11.51 11.51 11.51 | tabdms - - todms=1,-2 tohms=3,-4
-11:30:36.000 11:183:35:60.000 11:30:36.000 11:12:14:24.000 11.51 
+
+% echo 90.25 90.25 90.25 90.25 90.25 | tabdms - - todms=1,-2 tohms=3,-4
+90:15:00.000 90:90:00:00.000 06:00:60.000 90:06:00:00.000 90.25 
+
 .fi
-Column 1 in .DMS, 2 as D.MS, 3 as .HMS, 4 as H.MS and 5 is the
+Column 1 in D.MS, 2 as .DMS, 3 as H.MS, 4 as .HMS and 5 is the
 original column copied.
 .nf
+
 echo 12:00:00 12:00:00 | tabdms - - fromhms=1 fromdms=2
-12 180
+180 12
 .fi
-.SH LIMITATIONS
+
+.SH "CAVEATS"
+There are still a number of input format errors not caught, plus due to rounding one may
+see
+.nf
+   echo  90.1 | tabdms - -  todms=1
+   90:05:60.000 
+.fi
+.PP
+The sexagesimal notation has many forms. 
+Apart from the H:M:S we don't support others yet.
+Here are some examples :
+.nf
+
+FITS DATE_OBS   2021-12-29T15:51:19.004800615       \fIdate -u +%Y-%m-%dT%H:%M:%S.%N\fP
+NED             00h07m15.84s, +27d42m29.1s       
+CASA            12:22:55.212, +15.49.15.500
+
+SIMBAD gives the following guidelines to allowed coordinate input:
+
+ 20 54 05.689 +37 01 17.38
+ 10:12:45.3-45:17:50
+ 15h17m-11d10m
+ 15h17+89d15
+ 275d11m15.6954s+17d59m59.876s
+ 12.34567h-17.87654d
+ 350.123456d-17.33333d <=> 350.123456 -17.33333
+
+.fi
+
+.SH "LIMITATIONS"
 The code is compiled with a maximum number of columns, MAXCOL, typically 256.
-.SH SEE ALSO
-tabmath(1NEMO), nemoinp(1NEMO), nemoinpx(3NEMO)
-.SH FILES
+.PP
+
+.SH "SEE ALSO"
+tabmath(1NEMO), nemoinp(1NEMO), nemoinpx(3NEMO), atox(3NEMO)
+
+.SH "FILES"
 src/kernel/tab/tabdms.c      source code
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 24-Jan-00	V0.4 doc written	PJT
 25-sep-13	V0.8 added fromdms=	PJT
 17-jul-20	clarifications	PJT
+30-dec-21	V0.9 use new atox() and fix numerous conversion errors	PJT
 .fi
