@@ -1,4 +1,4 @@
-.TH HACKCODE1 1NEMO "27 July 2011"
+.TH HACKCODE1 1NEMO "26 December 2021"
 .SH NAME
 hackcode1, hackcode1_qp \- hierarchical N-body code
 .SH SYNOPSIS
@@ -14,6 +14,9 @@ body-cell interactions (L. Hernquist, \fIApp. J. Suppl.\fP, \fB64\fI, 715,
 .PP
 Particles with zero mass will not be included in building the 
 tree structure, and hence in effect produce a restricted N-body code.
+.PP
+A special program, \fIsnapdiagplot(1NEMO)\fP can be used to monitor
+conservation of energy and momentum.
 .SH PARAMETERS
 The following parameters are recognized; they may be given in any order.
 .TP 24
@@ -104,7 +107,7 @@ Default is standard output (\fB-\fP). Can also use \fBlog=.\fP to make it disapp
 in case your out=- needs to be part of a pipe.
 
 .SH SEE ALSO
-treecode(1NEMO), newton0(1NEMO), directcode(1NEMO), gyrfalcON(1NEMO)
+treecode(1NEMO), newton0(1NEMO), directcode(1NEMO), gyrfalcON(1NEMO), snapdiagplot(1NEMO)
 .nf
 https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
 Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
