@@ -32,7 +32,8 @@ but always continues the program.
 .PP
 Each of these functions converts, formats,  and  prints  its
 \fBargs\fP under control of the \fBformat\fP, as described in
-\fIprintf(3)\fP.
+\fIprintf(3)\fP. To encourage one line error/warning/... messages, no
+newline character is needed in the format string.
 .PP
 When \fBdebug_level\fP is larger than 5 (see \fIgetparam(3NEMO)\fP)
 \fIabort(3)\fP is called, instead of \fIexit(3)\fP. This should create
