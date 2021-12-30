@@ -72,6 +72,23 @@ to be in degrees.
 
 
 .SH "EXAMPLES"
+To convert a D.MS to D:M:S
+.nf
+
+   echo 12.34 | tabdms - - todms=1
+   12:20:24.000
+      
+.fi
+and to convert a D:M:S string to D.MS:
+.nf
+
+    echo 12:34:56.789 | tabdms - - fromdms=1 format=%.10f
+    12.5824413889
+    
+.fi
+
+
+.PP
 The following example prints out the 4 possible ways to convert the
 number "12.51" to DMS or HMS:
 .nf
