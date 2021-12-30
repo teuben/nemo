@@ -1,6 +1,6 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter tabtrend gauss1d gauss2d meanmed tabstat
+      tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms
 
 NEED = $(BIN) nemoinp
 
@@ -12,13 +12,24 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f tab.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
+	@rm -f txt.in tab.in tab2.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
 
 all:	tab.in $(BIN) fitmyline
 
 tab.in:
 	@echo Creating $@
 	$(EXEC) nemoinp 1:100 > tab.in
+
+tab2.in:
+	@echo Creating $@
+	$(EXEC) nemoinp 90.25::5 newline=f > tab2.in
+
+txt.in:
+	@echo "#   testing txtpar"   > txt.in
+	@echo "a  1 2 3"   >> txt.in
+	@echo "a  4 5 6"   >> txt.in
+	@echo "b  7 8 9"   >> txt.in
+	@echo "c  101 102 103"  >> txt.in
 
 tabmath: tab.in
 	@echo Running $@
@@ -40,6 +51,18 @@ tabstat:
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - nmax=-$(NMAX); nemo.coverage tabstat.c
 	
+
+txtpar:  txt.in
+	 @echo Running $*
+	 $(EXEC) txtpar txt.in p0=1,2; nemo.coverage txtpar.c
+	 $(EXEC) txtpar txt.in p0=a,2,2 p1=b,1,3 expr=%1,%2,%1+%2; nemo.coverage txtpar.c
+
+tabdms: tab2.in
+	@echo 6 | tabdms - - tohms=1
+	@echo 6 | tabdms - - todms=1
+	@echo 06:00:00 | tabdms - - fromhms=1
+	@echo 06:00:00 | tabdms - - fromdms=1
+	tabdms tab2.in - todms=1,-2 tohms=3,-4; nemo.coverage tabdms.c
 
 
 meanmed:

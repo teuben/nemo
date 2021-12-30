@@ -1,6 +1,6 @@
 .TH NEMOINP 3NEMO "28 January 2004"
 .SH NAME
-nemoinp, natof, natoi \- decode and parse string into reals, integers, logicals
+nemoinp, natof, natoi, atox \- decode and parse string into reals, integers, logicals, sexagesimal
 .SH SYNOPSIS
 .nf
 \fBint nemoinpd (expr,doutv,nout)
@@ -19,6 +19,8 @@ int nemorinpb (string var, int    *xvar,  int n, bool   defvar, bool repeated)
 
 double natof(expr)
 int  natoi(expr)
+
+double atox(expr)
 
 char *expr;
 double doutv[];
@@ -53,6 +55,11 @@ are provided as natof() and natoi(), but they do not provide any
 error checking (most importantly if the string contains non-number
 parts, except for the string "NaN" or "nan" in \fInatof()\fP where
 it will return the appropriate IEEE \fBnan\fP value).
+.PP
+\fBatox\fP provides the Babylonian sexagesimal (D:M:S) conversion
+to D+M/60+S/3600 conversion, but without any error checking. The user
+is still responsible for units, e.g. it does not know how to
+distinguish between H:M:S and D:M:S.
 .PP
 An expression can have basic mathematical functions, such as addition,
 most transcendental functions and  even some mathematical and physical
@@ -184,4 +191,5 @@ xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 4-mar-03	1.9 added nemoinpx()	PJT
 28-jan-04	recognize nan's in natof	PJT
 jan-2005	added nemorinpX	PJT
+dec-2021	added atox, fix sign bug	PJT
 .fi

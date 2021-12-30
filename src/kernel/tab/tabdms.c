@@ -8,9 +8,10 @@
  *       8-dec-01   0.6 std MAX_ macros
  *      10-jan-03     a SGN -> SIGN
  *      31-jan-04   0.7 added fromhms=
+ *      30-dec-21   0.9 use the new atox(), major fixes
  *
   
-  TODO:  shuld use strptime() for parsing 
+  TODO:  should use strptime() for parsing 
 
    %a, %A     Sun/Mon/...  or Sunday/...
    %b, %B     Jan/...	      January/...
@@ -26,27 +27,34 @@
    %T         time (hh:mm:ss)
    %y         last two digits of year (00..99)
    %Y         year (1970..)
+
+
+   TODO:  allow a special mode with a center, and all coordinates are then relative to
+          the center value. Of course output can be in degrees, minutes are arcsec
  */
 
 #include <stdinc.h>
+#include <extstring.h>
 #include <getparam.h>
+#include <table.h>
 #include <ctype.h>
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
-    "in=???\n           input file name(s)",
+    "in=???\n           input file name",
     "out=???\n          output file name",
     "todms=\n           list of columns (1..) to convert to dms (0=none)",
     "tohms=\n           list of columns (1..) to convert to hms (0=none)",
-    "fromhms=\n         list of columns (1..) to convert from hms (0=none)",
     "fromdms=\n         list of columns (1..) to convert from dms (0=none)",
-    "separator=:\n      separator between output D-M-S.S",
+    "fromhms=\n         list of columns (1..) to convert from hms (0=none)",
+    "separator=:\n      separator between output D M and S.S",
     "format=%g\n        output format",
-    "scale=1\n          scale applied to degrees in the fromhms=/fromdms=",
-    "VERSION=0.8\n      25-sep-2013 PJT",
+    "scale=1\n          scale applied to degrees in the fromhms=/fromdms= and center=",
+    "center=\n          If coordinates are to reference to a center",
+    "VERSION=0.9\n      30-dec-2021 PJT",
     NULL
 };
 
-string usage = "Convert to HMS/DMS tables";
+string usage = "Convert to HMS/DMS";
 
 string cvsid="$Id$";
 
@@ -56,6 +64,8 @@ stream instr, outstr;			/* file streams */
 string sep;                             /* separator */
 string fmt;                             /* output format */
 real   scale;                           /* output scale factor */
+bool Qcenter;
+real x_cen, y_cen;
 
 #ifndef MAX_COL
 #define MAX_COL 256
@@ -65,14 +75,17 @@ real   scale;                           /* output scale factor */
 #define MAX_LINELEN  2048
 #endif
 
-bool   keepc[MAX_COL+1];                 /* columns to keep (t/f) in old fmt */
-int    colmode[MAX_COL+1];		 /* 0, +/-24, +/- 360 */
+int    colmode[MAX_COL+1];		 /* 0, +/-24, +/- 360 for conversion to HMS/DMS  */
 int    fromhms[MAX_COL+1];               /* convert HMS to decimal (seconds)? */
 int    fromdms[MAX_COL+1];               /* convert DMS to decimal (seconds)? */
 
-extern string *burststring(string, string);
 
-nemo_main()
+// local
+void setparams();
+void convert(stream instr, stream outstr);
+void center(string cen);
+  
+void nemo_main()
 {
     setparams();
 
@@ -82,15 +95,15 @@ nemo_main()
     convert(instr,outstr);
 }
 
-setparams()
+void setparams()
 {
     int    col[MAX_COL];                    /* columns to skip for output */
     int    ncol, i, j;
 
     for (i=0; i<MAX_COL; i++) {
-        colmode[i+1] = 0;
-	fromhms[i+1] = 0;
-	fromdms[i+1] = 0;
+        colmode[i+1] = 0;         // will be 0, 24 or 360
+	fromhms[i+1] = 0;         // columns start at 1
+	fromdms[i+1] = 0;         // 0 means not used here
     }
 
     if (hasvalue("todms")) {
@@ -133,88 +146,100 @@ setparams()
 	    fromdms[j] = 1;
         }
     }
-    sep = getparam("separator");
+    // @todo   H:M:S is normal,
+    //     NED  example 00h07m15.84s, +27d42m29.1s
+    //     CASA example 12:22:55.212, +15.49.15.500    (who came up with THAT?)
+
+    sep = getparam("separator");   
     fmt = getparam("format");
     scale = getrparam("scale");
+
+    Qcenter = hasvalue("center");
+}
+
+void center(string scen)
+{
+  int ncen;
+  double xycen[2];
+
+  ncen = nemoinpx(scen, xycen, 2);
+  if (ncen != 2) error("Error parsing %s", scen);
+  x_cen = xycen[0];
+  y_cen = xycen[1];
+  dprintf(0,"center:  %g %g\n", x_cen, y_cen);
 }
 
 
 
-convert(stream instr, stream outstr)
+void convert(stream instr, stream outstr)
 {
-    char   line[MAX_LINELEN];          /* input linelength */
-    double dval;        
-    int    nval, i, nlines, sign, decimalval,nhms,ndms;
-    string *outv, *hms, *dms;       /* pointer to vector of strings to write */
-    string seps=", \t";             /* column separators  */
-    real   dd, mm, ss;
-        
-    nlines=0;               /* count lines read so far */
-    for(;;) {                       /* loop over all lines in file(s) */
+  char   line[MAX_LINELEN];          /* input linelength */
+  double dval;        
+  int    nval, i, nlines, sign, decimalval,nhms,ndms;
+  string *outv, *hms, *dms;       /* pointer to vector of strings to write */
+  string seps=", \t";             /* column separators  */
+  real   dd, mm, ss;
+  
+  nlines=0;               /* count lines read so far */
+  for(;;) {                       /* loop over all lines in file(s) */
 
-        if (get_line(instr, line) < 0)
-            return 0;
-        dprintf(3,"LINE: (%s)\n",line);
-	if(line[0] == '#') continue;		/* don't use comment lines */
-        nlines++;
+    if (get_line(instr, line) < 0)
+      return;
+    dprintf(3,"LINE: (%s)\n",line);
+    if(line[0] == '#') continue;		/* don't use comment lines */
+    nlines++;
 
-
-        outv = burststring(line,seps);
-        i=0;
-        while (outv[i]) {
-            if (colmode[i+1] == 0) {        /* no special mode: just copy */
-	      if (fromhms[i+1]) {
-		hms = burststring(outv[i],sep);
-		nhms = xstrlen(hms,sizeof(string))-1;
-		dval = atof(hms[0])*3600;
-		if (nhms > 1) dval += atof(hms[1])*60;
-		if (nhms > 2) dval += atof(hms[2]);
-		if (nhms > 3) error("HMS string %s too many %s",outv[i],sep);
-                fprintf(outstr,fmt,dval/3600.0);
-                fputs(" ",outstr);
-		freestrings(hms);
-	      } else if (fromdms[i+1]) {
-		dms = burststring(outv[i],sep);
-		ndms = xstrlen(dms,sizeof(string))-1;
-		dval = atof(dms[0])*3600;
-		if (ndms > 1) dval += atof(dms[1])*60;
-		if (ndms > 2) dval += atof(dms[2]);
-		if (ndms > 3) error("DMS string %s too many %s",outv[i],sep);
-                fprintf(outstr,fmt,dval*15/3600.0);
-                fputs(" ",outstr);
-		freestrings(dms);
-	      } else {
-                fputs(outv[i],outstr);
-                fputs(" ",outstr);
-	      }
-            } else {
-                if (nemoinpd(outv[i],&dval,1)<0) 
-                    error("syntax error decoding %s",outv[i]);
-		if (colmode[i+1] < 0) {     
-                    sign = SGN(dval);
-		    dval = ABS(dval);       /* do we allow < 0 ??? */
-                    decimalval = (int)floor(dval);
-                    fprintf(outstr,"%d",decimalval*sign);
-                    fprintf(outstr,"%s",sep);
-                    dval -= decimalval;
-                    dval *= ABS(colmode[i+1]);
-		}
-                sign = SGN(dval);
-                dval = ABS(dval);
-                dd = floor(dval);
-                dval = (dval-dd)*60.0;
-                mm = floor(dval);
-                ss = (dval-mm)*60.0;
-                fprintf(outstr,"%02d",(int)dd*sign);
-                fprintf(outstr,"%s",sep);
-                fprintf(outstr,"%02d",(int)mm);
-                fprintf(outstr,"%s",sep);
-                fprintf(outstr,"%06.3f ",ss);
-
-            }
-            i++;
-        }
-        fputs("\n",outstr);
-	freestrings(outv);
-    } /* for(;;) */
+    outv = burststring(line,seps);
+    i=0; // column counter, internally 0-based, but 1-based where user interface was involved
+    while (outv[i]) {
+      if (colmode[i+1] == 0) {          // convert from sexagesimal, or pass through (fromhms/fromdms)
+	if (fromhms[i+1]) {
+	  dval = atox(outv[i]) * 15;
+	  fprintf(outstr,fmt,dval);
+	  fputs(" ",outstr);
+	} else if (fromdms[i+1]) {
+	  dval = atox(outv[i]);
+	  fprintf(outstr,fmt,dval);
+	  fputs(" ",outstr);
+	} else {                        // pass through
+	  fputs(outv[i],outstr);
+	  fputs(" ",outstr);
+	}
+      } else {                          // todms/tohms:   convert degree to sexagesimal
+	if (nemoinpd(outv[i],&dval,1)<0) 
+	  error("syntax error decoding %s",outv[i]);
+	if (colmode[i+1] < 0) {
+	  dprintf(1,"colmode %d: %d\n",i,colmode[i+1]);	     
+	  sign = SGN(dval);
+	  dval = ABS(dval);       /* do we allow < 0 ??? */
+	  decimalval = (int)floor(dval);
+	  fprintf(outstr,"%d",decimalval*sign);
+	  fprintf(outstr,"%s",sep);
+	  dval -= decimalval;
+	  dval *= ABS(colmode[i+1]);
+	}
+	if (colmode[i+1] == 24)
+	  scale = 15;
+	else
+	  scale = 1;
+	sign = SGN(dval);
+	dval = ABS(dval/scale);
+	dd = floor(dval);
+	dval = (dval-dd)*60.0;
+	mm = floor(dval);
+	ss = (dval-mm)*60.0;
+	fprintf(outstr,"%02d",(int)dd*sign);
+	fprintf(outstr,"%s",sep);
+	fprintf(outstr,"%02d",(int)mm);
+	fprintf(outstr,"%s",sep);
+	fprintf(outstr,"%06.3f ",ss);
+	// @todo     if the final string is 60.000 it should become 0.000
+	//           and mm and dd might need to be incremented
+	
+      }
+      i++;
+    } // while
+    fputs("\n",outstr);
+    freestrings(outv);
+  } /* for(;;) */
 }
