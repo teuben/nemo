@@ -9,6 +9,7 @@
  *      10-jan-03     a SGN -> SIGN
  *      31-jan-04   0.7 added fromhms=
  *      30-dec-21   0.9 use the new atox(), major fixes
+ *      31-dec-21   1.0 implemented center=
  *
   
   TODO:  should use strptime() for parsing 
@@ -50,7 +51,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        output format",
     "scale=1\n          scale applied to degrees in the fromhms=/fromdms= and center=",
     "center=\n          If coordinates are to reference to a center",
-    "VERSION=0.9\n      30-dec-2021 PJT",
+    "VERSION=1.0\n      31-dec-2021 PJT",
     NULL
 };
 
@@ -65,7 +66,7 @@ string sep;                             /* separator */
 string fmt;                             /* output format */
 real   scale;                           /* output scale factor */
 bool Qcenter;
-real x_cen, y_cen;
+real x_cen, y_cen, x_fac, cosdec;       /* center parameters */
 
 #ifndef MAX_COL
 #define MAX_COL 256
@@ -78,11 +79,13 @@ real x_cen, y_cen;
 int    colmode[MAX_COL+1];		 /* 0, +/-24, +/- 360 for conversion to HMS/DMS  */
 int    fromhms[MAX_COL+1];               /* convert HMS to decimal (seconds)? */
 int    fromdms[MAX_COL+1];               /* convert DMS to decimal (seconds)? */
+int    ncol_xy, col_x, col_y;
 
 
 // local
 void setparams();
 void convert(stream instr, stream outstr);
+void diff(stream instr, stream outstr);
 void center(string cen);
   
 void nemo_main()
@@ -92,13 +95,20 @@ void nemo_main()
     instr = stropen(getparam("in"),"r");
     outstr = stropen (getparam("out"),"w");
 
-    convert(instr,outstr);
+    if (Qcenter)
+      diff(instr,outstr);
+    else
+      convert(instr,outstr);
 }
 
 void setparams()
 {
     int    col[MAX_COL];                    /* columns to skip for output */
     int    ncol, i, j;
+
+    Qcenter = hasvalue("center");
+    ncol_xy = 0;
+    x_fac = 1.0;
 
     for (i=0; i<MAX_COL; i++) {
         colmode[i+1] = 0;         // will be 0, 24 or 360
@@ -134,6 +144,12 @@ void setparams()
             if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
             if (colmode[j] || fromhms[j]) error("Column %d already specified",j);
 	    fromhms[j] = 1;
+	    if (Qcenter) {
+	      if (ncol > 1) error("Cannot deal with more than one HMS column");
+	      col_x = j;
+	      ncol_xy++;
+	      x_fac = 15.0;
+	    }
         }
     }
     if (hasvalue("fromdms")) {
@@ -144,8 +160,22 @@ void setparams()
             if (j>MAX_COL) error("Column %d too large, MAX_COL=%d",j,MAX_COL);
             if (colmode[j] || fromdms[j]) error("Column %d already specified",j);
 	    fromdms[j] = 1;
+	    if (Qcenter) {
+	      if (ncol_xy == 2 && ncol > 1) error("Cannot deal with multiple DMS columns");
+	      if (ncol_xy == 0)
+		col_x = j;
+	      else
+		col_y = j;
+	      ncol_xy++;
+	    }
         }
     }
+
+    if (Qcenter) center(getparam("center"));
+
+    if (Qcenter && ncol_xy != 2) error("No fromhms= and fromdms= column selected");
+    dprintf(1,"center cols: %d %d\n",col_x, col_y);
+    
     // @todo   H:M:S is normal,
     //     NED  example 00h07m15.84s, +27d42m29.1s
     //     CASA example 12:22:55.212, +15.49.15.500    (who came up with THAT?)
@@ -154,7 +184,6 @@ void setparams()
     fmt = getparam("format");
     scale = getrparam("scale");
 
-    Qcenter = hasvalue("center");
 }
 
 void center(string scen)
@@ -164,9 +193,36 @@ void center(string scen)
 
   ncen = nemoinpx(scen, xycen, 2);
   if (ncen != 2) error("Error parsing %s", scen);
-  x_cen = xycen[0];
+  x_cen = xycen[0] * x_fac;
   y_cen = xycen[1];
-  dprintf(0,"center:  %g %g\n", x_cen, y_cen);
+  cosdec = cos(y_cen * PI/180.0);
+  dprintf(1,"center:  %g %g\n", x_cen, y_cen);
+}
+
+void diff(stream instr, stream outstr)
+{
+  char   line[MAX_LINELEN];          /* input linelength */
+  double xval, yval;
+  int    nval, i, nlines;
+  string *outv;                   /* pointer to vector of strings to write */
+  string seps=", \t";             /* column separators  */
+
+  
+  nlines=0;               /* count lines read so far */
+  for(;;) {                       /* loop over all lines in file(s) */
+    if (get_line(instr, line) < 0)
+      return;
+    dprintf(3,"LINE: (%s)\n",line);
+    if(line[0] == '#') continue;		/* don't use comment lines */
+    nlines++;
+
+    outv = burststring(line,seps);
+    xval = atox(outv[col_x-1]) * x_fac;
+    yval = atox(outv[col_y-1]);
+    printf("%s %s   %g %g\n",
+	   outv[col_x-1], outv[col_y-1],
+	   (xval-x_cen)*cosdec*scale, (yval-y_cen)*scale);
+  } /* for(;;) */
 }
 
 
@@ -207,7 +263,7 @@ void convert(stream instr, stream outstr)
 	}
       } else {                          // todms/tohms:   convert degree to sexagesimal
 	if (nemoinpd(outv[i],&dval,1)<0) 
-	  error("syntax error decoding %s",outv[i]);
+ 	  error("syntax error decoding %s",outv[i]);
 	if (colmode[i+1] < 0) {
 	  dprintf(1,"colmode %d: %d\n",i,colmode[i+1]);	     
 	  sign = SGN(dval);
