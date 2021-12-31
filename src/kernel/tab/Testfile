@@ -12,7 +12,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f txt.in tab.in tab2.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
+	@rm -f txt.in tab.in tab2.in dms.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
 
 all:	tab.in $(BIN) fitmyline
 
@@ -30,6 +30,14 @@ txt.in:
 	@echo "a  4 5 6"   >> txt.in
 	@echo "b  7 8 9"   >> txt.in
 	@echo "c  101 102 103"  >> txt.in
+
+dms.in:
+	@echo "#   testing txtpar"   > dms.in
+	@echo "1   12:00:20   60:00:00" >> dms.in
+	@echo "2   12:00:20   60:00:10" >> dms.in
+	@echo "3   11:59:40   60:00:00" >> dms.in
+	@echo "4   11:59:40   60:00:10" >> dms.in
+
 
 tabmath: tab.in
 	@echo Running $@
@@ -57,13 +65,14 @@ txtpar:  txt.in
 	 $(EXEC) txtpar txt.in p0=1,2; nemo.coverage txtpar.c
 	 $(EXEC) txtpar txt.in p0=a,2,2 p1=b,1,3 expr=%1,%2,%1+%2; nemo.coverage txtpar.c
 
-tabdms: tab2.in
+tabdms: tab2.in dms.in
 	@echo 6 | tabdms - - tohms=1
 	@echo 6 | tabdms - - todms=1
 	@echo 06:00:00 | tabdms - - fromhms=1
 	@echo 06:00:00 | tabdms - - fromdms=1
 	tabdms tab2.in - todms=1,-2 tohms=3,-4; nemo.coverage tabdms.c
-
+	tabdms dms.in - fromhms=2 fromdms=3 center=12:00:00,60:00:00 scale=3600
+	tabdms dms.in - fromdms=2,3 center=12:00:00,60:00:00 scale=3600	
 
 meanmed:
 	@echo Running $*
