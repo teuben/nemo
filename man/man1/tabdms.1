@@ -1,4 +1,4 @@
-.TH TABDMS 1NEMO "30 December 2021"
+.TH TABDMS 1NEMO "31 December 2021"
 
 .SH "NAME"
 tabdms \- Convert from/to sexagesimal HMS/DMS tables
@@ -41,11 +41,11 @@ The H in HMS is normally assumed to be modulo 24.
 Default: none.
 .TP 
 \fBfromdms=\fP
-A list of columns (1..) to convert from dms to degrees
+A list of columns (1..) to convert from dms to degrees. If \fBcenter=\fP is given a HMS/DMS or DMS/DMS needs to be picked.
 [none]
 .TP
 \fBfromhms=\fP
-A list of columns (1..) to convert from hms to degrees, which includes a factor of 15.
+A list of columns (1..) to convert from hms to degrees, which includes a factor of 15. 
 [none]
 .TP 
 \fBseparator=\fP
@@ -60,15 +60,14 @@ Output format statement used for columns converted by fromhms= and fromdms=
 Scaling factor applied to degrees when converted by fromhms= and fromdms=.
 If you want seconds, use 3600 here. For radians,
 use \fBpi/180\fP. Careful in using this, each of \fBfromdms=\fP and \fBfromhms=\fP columns will get
-this factor applies.
--\fInot implemented yet\fP-
-[Default: \fB1\fP]
+this factor applies. If \fBcenter=\fP is given, this is the scale factor applied,e.g. use 3600
+if arcsec are required.
+[Default: \fB1\fP]  
 .TP
 \fBcenter=\fP
 If given, the angular X,Y differences of two selected colums with this acenter is computed.
 If sexadecimal notation is used, it is assumed to be an RA,DEC, else the center is assumed
 to be in degrees.
--\fInot implemented yet\fP-
 
 
 .SH "EXAMPLES"
