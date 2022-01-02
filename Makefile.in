@@ -552,7 +552,11 @@ dehnen:
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
 	@echo Starting at `date` on `uname -a` > install.log
-	-(cd src;$(MAKE) -i -j clean install) >> install.log 2>&1 
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")  >> install.log 2>&1 
+	-(cd src;$(MAKE) -i -j clean install) >> install.log 2>&1
+
+maine:
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")
 
 slib:
 	(cd $(NEMOLIB); \
