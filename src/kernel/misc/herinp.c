@@ -57,6 +57,7 @@
  *              10-nov-03: allow and handle "null" more gracefully         pjt
  *              24-jan-04: STACKMAX check
  *              26-jul-2016:    double precision log(min/max) = 308        pjt
+ *               2-jan-2021:    squash some gcc warnings                   pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -1370,20 +1371,25 @@ static void dcd_evaluate(int q)
                 arg2 = dcd_pop(); arg1 = dcd_pop();
                 dcd_push(dcd_pwr(arg1,arg2)); break;
          case ldc: {
-            if (o != 0) c++; if (list) {
+            if (o != 0) c++;
+	    if (list) {
                dcd_push(lstfiecode[c++].c);
             } else {
                dcd_push(fiecode[c++].c);
             }
-            o = 0; break;
+            o = 0;
+	    break;
          }
          case lst: {
-            if (o != 0) c++; o = 0; if (list) {
+	    if (o != 0) c++; 
+	    o = 0;
+	    if (list) {
                dcd_push(lstfiecode[q+c].c);
             } else {
                dcd_push(fiecode[q+c].c);
             }
-            c = c + listlen[0]; break;
+            c = c + listlen[0];
+	    break;
          }
          default:  switch(opc-fie) {
 /* sin   */ case  0: dcd_push(dcd_sin(arg[0])); break;
