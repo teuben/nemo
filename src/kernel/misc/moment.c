@@ -262,7 +262,9 @@ void compute_robust_moment(Moment *m)
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+  dprintf(1,"compute_robust_moment: %d %g %g %g\n", n, m1, m2, m3);
 
+  // speed up computation if recalled without changing data
   last_min_robust_moment    = min_moment(&tmp);
   last_max_robust_moment    = max_moment(&tmp);
   last_mean_robust_moment   = mean_moment(&tmp);
@@ -271,7 +273,7 @@ void compute_robust_moment(Moment *m)
   last_n_robust_moment      = n_moment(&tmp);
   last_robust_range[0]      = dlo;
   last_robust_range[1]      = dhi;
-  free_moment(&tmp); 
+  free_moment(&tmp);
 }
 
 int n_robust_moment(Moment *m)

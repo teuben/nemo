@@ -177,7 +177,8 @@ int plstop()
     if (lpr) { 
       sprintf(cmd,"lpr %s; rm -f %s",yappfile, yappfile);
       dprintf(0,"%s\n",cmd);
-      system(cmd);
+      int retval = system(cmd);
+      if (retval) warning(cmd);
     } 
     return 0;
 }

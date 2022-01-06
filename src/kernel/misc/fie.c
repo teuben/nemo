@@ -40,6 +40,7 @@
  *             27-nov-01 fixed cosd(), it was sind()	  pjt
  *              4-dec-02 use MAXLINE for linelength       pjt
  *             13-nov-03 make it understand NULL          pjt
+ *              2-jan-21 squash some gcc warnings         pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -632,23 +633,27 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  	   else fie_push(asin(arg[0]));    
 			  	   break;
 			  case  2: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(sinh(arg[0])); break;
+			  	   else fie_push(sinh(arg[0]));
+			           break;
 			  case  3: fie_push(cos(arg[0])); break;
 			  case  4: if (fabs(arg[0]) > 1) opc = err;
 			  	   else fie_push(acos(arg[0]));
 			  	   break;
 			  case  5: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(cosh(arg[0])); break;
+			  	   else fie_push(cosh(arg[0]));
+			           break;
 			  case  6: fie_push(tan(arg[0])); break;
 			  case  7: fie_push(atan(arg[0])); break;
 			  case  8: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(tanh(arg[0])); break;
+			  	   else fie_push(tanh(arg[0]));
+			           break;
 			  case  9: fie_push(atan2(arg[0],arg[1])); break;
 			  case 10: fie_push(fie_rad(arg[0])); break;
 			  case 11: fie_push(fie_deg(arg[0])); break;
 			  case 12: fie_push(fie_pi()); break;
 			  case 13: if (fabs(arg[0]) > 70) opc =err;
-			  	   else fie_push(exp(arg[0])); break;
+			  	   else fie_push(exp(arg[0]));
+			           break;
 			  case 14: if (arg[0] > 0) fie_push(log(arg[0]));
 			  	   else opc = err;
 			  	   break;
@@ -671,24 +676,31 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 27: fie_push( 5.66961e-8 ); break;
 			  case 28: fie_push(fie_max(arg[0],arg[1])); break;
 			  case 29: fie_push(fie_min(arg[0],arg[1])); break;
-			  case 30: if (arg[1] == 0.0) opc = err; else
-			           fie_push(fie_mod(arg[0],arg[1])); break;
+			  case 30: if (arg[1] == 0.0) opc = err;
+				   else fie_push(fie_mod(arg[0],arg[1]));
+			           break;
 			  case 31: fie_push(fie_int(arg[0])); break;
 			  case 32: fie_push(fie_int(arg[0]+0.5)); break;
 			  case 33: fie_push(fie_sign(arg[0])); break;
 			  case 34: fie_push(undef); break;
 			  case 35: if (arg[0] > arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 36: if (arg[0] < arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 37: if (arg[0] >= arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 38: if (arg[0] <= arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 39: if (arg[0] == arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 40: if (arg[0] != arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			           else fie_push(arg[3]);
+			           break;
 			  case 41: fie_push(fie_ranu(arg[0],arg[1])); break;
 			  case 42: fie_push(fie_rang(arg[0],arg[1])); break;
 			  case 43: if (arg[0] < 0) opc = err;

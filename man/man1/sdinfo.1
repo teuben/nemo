@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "29 January 2019"
+.TH SDINFO 1NEMO "27 September 2021"
 .SH NAME
 sdinfo \- sdfits (BINTABLE) info and benchmark
 .SH SYNOPSIS
@@ -66,10 +66,11 @@ AGBT15B_287_39.raw.vegas.B.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 
 .fi
-Here is a benchmark of the ngc5291 example:
+Here is a benchmark of the GBT ngc5291 example:
 .nf
     time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
     ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### nemo Debug Info: DATA keyword TDIM7 = (32768,1,1,1)
     ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col = 7
     ### nemo Debug Info: DATA6 3.71521 0.0366262 3.30351     1.42437
     ### nemo Debug Info: CPU_USAGE sdinfo : 3.09    3.04 0.04  0.00 0.00  1803498650
@@ -89,12 +90,15 @@ scanfits(1NEMO), fitshead(1NEMO)
 https://fits.gsfc.nasa.gov/registry/sdfits.html
 .SH FILES
 src/image/fits
+.PP
+http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits
 .SH AUTHOR
 Peter Teuben
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 23-Nov-2019	V0.1 Created	PJT
-14-dec-2019	V0.4 dimension analysis w/ n5291	PJT
+14-dec-2019	V0.4 dimension analysis w/ ngc5291	PJT
 18-dec-2019	V0.7 Handle CIMAFITS and MATRIX extensions	PJT
+27-sep-2021	V0.9 Improved column reading, display TDIM	PJTq
 .fi

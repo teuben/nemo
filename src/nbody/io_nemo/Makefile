@@ -204,7 +204,7 @@ ${IONO}/io_nemo_test_double.o: ${IONT}/io_nemo_test.c
 
 
 ${IONO}/stress_io_nemo.o: ${IONT}/stress_io_nemo.cc
-	$(CXX) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo.cc       \
+	$(CXX) $(CXXFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo.cc       \
 			       -o ${IONO}/stress_io_nemo.o
 
 ${IONB}/stress_io_nemo : ${IONO}/stress_io_nemo.o $(LIB_IO_NEMO)
@@ -212,7 +212,7 @@ ${IONB}/stress_io_nemo : ${IONO}/stress_io_nemo.o $(LIB_IO_NEMO)
 	                          $(LIB_IO_NEMO) -L$(NEMOLIB) -lnemo -lm
 
 ${IONO}/stress_io_nemo_f.o: ${IONT}/stress_io_nemo_f.cc
-	$(CXX) $(CFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo_f.cc       \
+	$(CXX) $(CXXFLAGS) $(OPT) $(INC) -DSINGLEPREC -c ${IONT}/stress_io_nemo_f.cc       \
 			       -o ${IONO}/stress_io_nemo_f.o
 
 ${IONB}/stress_io_nemo_f : ${IONO}/stress_io_nemo_f.o $(LIB_IO_NEMO)

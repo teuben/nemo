@@ -91,10 +91,11 @@ plcommand *pl_fread(string file)
 void pl_readlines(void)
 {
   plcommand p;
-  char line[MAX_LINELEN], *cmd;
+  char line[MAX_LINELEN];
 
   p.next = NULL;
-#if HAVE_LIBREADLINE 
+#if HAVE_LIBREADLINE
+  char *cmd;
   warning("** Experimental readline based READLINE layout **");
   while(1) {
     cmd = readline("LAYOUT>");

@@ -31,7 +31,7 @@ const char * defv[] = {
   "in=???\n             GADGET input                                 ",
   "select=disk\n        info requested                               ",
   "verb=f\n             verbose info                                 ",
-  "VERSION=1.01\n       compiled on <"__DATE__"> JCL                ",
+  "VERSION=1.02\n       compiled on <" __DATE__ "> JCL               ",
   NULL
 };
 const char * usage="Display Gadget2 file information";

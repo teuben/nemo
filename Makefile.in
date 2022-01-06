@@ -1,4 +1,4 @@
-VERSION = NEMO V4.2 2-sep-2021 PJT
+VERSION = NEMO V4.2 6-jan-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -104,10 +104,10 @@ install:
 	@echo "There is no install because NEMO is build in place. The usual procedure is"
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
-	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
+	@echo "      make build1            -- 1: postconfig  (build would do all build1..3)"
 	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
-	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced)"
+	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced only)"
 	@echo "      make check             -- the testsuite"
 	@echo "      make bench5            -- the NEMOBENCH5 benchmark"
 	@echo "      source nemo_start.sh   -- after this NEMO can be used in the shell"
@@ -456,7 +456,7 @@ build2:
 
 build3:
 	(source nemo_start.sh ; $(MAKE) -j bins)
-	@echo 'Continue with "make build4"'
+	@echo 'Continue with "make build4 for advanced runs"'
 
 #       Advanced build examples that require opt=1 during the build.
 #       normally not needed
@@ -559,7 +559,12 @@ dehnen:
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	-(cd src;$(MAKE) -i -j clean install) > install.log 2>&1 
+	@echo Starting at `date` on `uname -a` > install.log
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")  >> install.log 2>&1 
+	-(cd src;$(MAKE) -i -j clean install) >> install.log 2>&1
+
+maine:
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")
 
 slib:
 	(cd $(NEMOLIB); \
@@ -589,7 +594,7 @@ testsuite:
 	@echo 'src/scripts/testsuite -b'
 
 check: 
-	(source nemo_start.sh; src/scripts/testsuite)
+	(source nemo_start.sh; src/scripts/testsuite | tee -a install.log )
 	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
 benchtest:
@@ -620,7 +625,7 @@ bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
 
 bench5:
-	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5)
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
 
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
