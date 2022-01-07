@@ -18,13 +18,16 @@ string defv[] = {
   "inc=???\n      Inclination of galaxy",
   "phi=\n         Angle between bar and disk in sky plane ",
   "theta=\n       Angle between bar and disk in galaxy plane",
-  "a=\n           Bar length (only used for stick formulae)",
+  "a=\n           Bar semi-axis (?) length (only used for stick formulae)",
   "dba=0.0\n      Error term in b/a, if determined",
   "dphi=0.0\n     Error term in phi, if determined",
   "da=0.0\n       Error term in a, if determined (only for stick formulae)",
   "nsim=0\n       Number of monte carlo to perform to compute an error term",
   "seed=0\n       Seed for random number generator",
-  "VERSION=0.4a\n 13-oct-2021 PJT",
+  "tab=\n         Table with disk and bar X,Y positions for plotting",
+  "r=1\n          Radius of disk to plot",
+  "pa=0\n         Position angle of disk",
+  "VERSION=0.5\n  20-oct-2021 PJT",
   NULL,
 };
 
@@ -73,6 +76,7 @@ void nemo_main()
   bool Qtheta = hasvalue("theta");
   bool Qphi = hasvalue("phi");
   bool Qstick = hasvalue("a");
+  bool Qtab = hasvalue("tab");
   // bool Qerrba;
   int nsim = getiparam("nsim");
   int seed = init_xrandom(getparam("seed"));
@@ -88,6 +92,24 @@ void nemo_main()
 
   nba = nemoinpd(getparam("ba"),ba,MAXP);
   ninc = nemoinpd(getparam("inc"),inc,MAXP);
+
+  if (Qtab) {
+    double d_r     =  getdparam("r");
+    double d_inc   =  getdparam("inc");
+    double d_pa    =  getdparam("pa");
+    double b_ba    =  getdparam("ba");
+    double b_a     =  getdparam("a");
+    double b_theta =  getdparam("theta");
+    nang = 361;
+    for (i=0; i<nang; i++) {
+      // make bar as circle
+      // rotate around acos(ba) around Y, only keep X,Y
+      // rotate ellipse by theta around Z
+      // make circle
+      // rotate both around INC around Y, only keep X,Y
+      // rotate PA around Z
+    }
+  }
 
   if (Qstick) {
     /* 

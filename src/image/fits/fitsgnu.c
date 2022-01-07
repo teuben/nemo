@@ -3,7 +3,7 @@
  *
  *      25-oct-2021    Demo created after the ADASS gnuastro tutorial & chat with Mohammad
  *
- *   @todo    doesn't handle errors like wrong HDU elegantly, it coredumps
+ *   @todo    doesn't handle errors like wrong HDU elegantly, it coredumps (side effect linking w/ gnuastro?)
  *
  */
 
