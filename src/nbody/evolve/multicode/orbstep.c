@@ -23,7 +23,7 @@ local real abak3[MCOR];
 
 local int nstep;	/* integration step counter */
 
-initstep(btab, nb, tptr, force)
+void initstep(btab, nb, tptr, force)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* initial time */
@@ -38,7 +38,7 @@ force_proc force;	/* acceleration calculation */
  * ORBSTEP: integrate the orbit of a set of bodies.
  */
 
-orbstep(btab, nb, tptr, force, dt, mode)
+void orbstep(btab, nb, tptr, force, dt, mode)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -60,7 +60,7 @@ int mode;		/* select integration algorithm */
     nstep++;					/* count another time-step  */
 }
 
-rkstep(btab, nb, tptr, force, dt, atmp1)
+void rkstep(btab, nb, tptr, force, dt, atmp1)
 Body *btab;		/* array of bodies */
 int nb;			/* number of bodies */
 real *tptr;		/* current time */
@@ -117,7 +117,7 @@ real atmp1[];		/* scratch accelerations */
     *tptr += dt;
 }
 
-pcstep(
+void pcstep(
        Body *btab,		/* array of bodies */
        int nb,			/* number of bodies */
        real *tptr,		/* current time */
@@ -160,7 +160,7 @@ pcstep(
 }
 
 
-moveaccel(Body *btab, int nb)
+void moveaccel(Body *btab, int nb)
 {
     Body *p;
     int i, k;

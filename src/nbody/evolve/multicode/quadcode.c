@@ -4,9 +4,10 @@
  *	 3-mar-89  V1.2  JEB	Some last version
  *	12-nov-91  V1.3  PJT  Nemo V2.
  *      20-may-94  V1.3a pjt  usage
+ *       6-jan-22  V1.4  pjt  linux now also requiring link protection
  */
 
-
+#define global                                  /* don't default to extern  */
 #include "quaddefs.h"
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS		    */
@@ -23,7 +24,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS		    */
     "minor_freqout=32.0\n	minor data-output frequency",
     "options=\n			misc options",
     "headline=\n		random mumble for humans",
-    "VERSION=1.3b\n	        15-aug-06 PJT",
+    "VERSION=1.4\n	        6-jan-2022 PJT",
     NULL,
 };
 
@@ -33,7 +34,9 @@ string cvsid="$Id$";
 
 local void force(Body *, int , real);
 
+void setparams();
 
+  
 void nemo_main(void)
 {
     setparams();
@@ -48,7 +51,7 @@ void nemo_main(void)
     stopoutput();
 }
 
-setparams()
+void setparams()
 {
     infile = getparam("in");
     outfile = getparam("out");

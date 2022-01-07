@@ -4,8 +4,10 @@
  *	 4-mar-89  V1.0 JEB	Some original version
  *	12-nov-91  V1.1 PJT	New NEMO V2.
  *       6-may-92  V1.1a PJT    usage, hasvalue, extra warning if no output
+ *       6-jan-22  V1.4  pjt  linux now also requiring link protection
  */
 
+#define global                                  /* don't default to extern  */
 #include "quaddefs.h"
 
 #include <filestruct.h>
@@ -18,13 +20,15 @@ string defv[] = {
     "quad=???\n			input file with field tables",
     "in=???\n			input file with N-body snapshot",
     "out=\n			output file with forces and potentials",
-    "VERSION=1.1\n		12-nov-91 PJT",
+    "VERSION=1.4\n		12-nov-91 PJT",
     NULL,
 };
 
 string usage="quadrupole-order force calculation from tabulated field.";
 
-nemo_main()
+local void get_quadfield(stream quadstr, real *eps1, real *eps2);
+
+void nemo_main()
 {
     stream instr, quadstr, outstr;
     Body *btab = NULL, *bp;
@@ -40,7 +44,7 @@ nemo_main()
     get_history(instr);
     get_quadfield(quadstr, &eps_r, &eps_t);
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
-    if (bits & PhaseSpaceBit == 0)
+    if ((bits & PhaseSpaceBit) == 0)
 	error("not enuf info: bits = %o", bits);
     for (bp = btab; bp < btab+nbody; bp++) {
 	CLRV(Acc(bp));
@@ -55,9 +59,7 @@ nemo_main()
     }
 }
 
-get_quadfield(quadstr, eps1, eps2)
-stream quadstr;
-real *eps1, *eps2;
+void get_quadfield(stream quadstr, real *eps1, real *eps2)
 {
     get_set(quadstr, "QuadField");
     get_data(quadstr, "nqtab", IntType, &qfld.nqtab, 0);
