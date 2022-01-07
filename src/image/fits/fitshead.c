@@ -23,7 +23,7 @@ string defv[] = {	/* Standard NEMO keyword+help */
     "blocking=1\n          Blocking factor (blocking/2880)",
     "out=\n                Convert input text to output fits header",
     "counter=f\n           Add line counter to output?",
-    "VERSION=1.3b\n        6-oct-2011 PJT",
+    "VERSION=1.3c\n        6-jan-2021 PJT",
     NULL,
 };
 
@@ -32,6 +32,9 @@ string usage = "display, or convert to, a fits header";
 string cvsid="$Id$";
 
 extern string *burststring(string, string);
+
+void read_fits_header(void);
+void convert_to_header(void);
 
 void nemo_main()
 {
