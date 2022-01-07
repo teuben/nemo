@@ -101,3 +101,6 @@ git intro, including pull request from a branch
   Some GUI tips:
     https://www.sitepoint.com/quick-tip-sync-your-fork-with-the-original-without-the-cli/
 
+  An Discussion about git flow, and why it is bad:
+    https://nvie.com/posts/a-successful-git-branching-model/
+    https://about.gitlab.com/blog/2020/03/05/what-is-gitlab-flow/
