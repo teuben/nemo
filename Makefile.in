@@ -1,10 +1,11 @@
-VERSION = NEMO V4.2 6-jan-2022 PJT
+VERSION = NEMO V4.3 6-jan-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
 ################################################################################
 
 SHELL = /bin/bash
+JOBS = 
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
 .PHONY:  INSTALL install scripts docs
@@ -455,7 +456,7 @@ build2:
 	@echo 'Continue with "make build3"'
 
 build3:
-	(source nemo_start.sh ; $(MAKE) -j bins)
+	(source nemo_start.sh ; $(MAKE) -j $(JOBS) bins)
 	@echo 'Continue with "make build4 for advanced runs"'
 
 #       Advanced build examples that require opt=1 during the build.
@@ -561,7 +562,7 @@ corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
 	@echo Starting at `date` on `uname -a` > install.log
 	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")  >> install.log 2>&1 
-	-(cd src;$(MAKE) -i -j clean install) >> install.log 2>&1
+	-(cd src;$(MAKE) -i -j $(JOBS) clean install) >> install.log 2>&1
 
 maine:
 	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")
@@ -573,8 +574,8 @@ slib:
 
 bins:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log	
-	cd src;$(MAKE) -i -j bins >> ../install.log 2>&1 
-	cd usr;$(MAKE) -i -j bins >> ../install.log 2>&1 
+	cd src;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
+	cd usr;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
 	@echo Done at `date`
 
 missingbins:
