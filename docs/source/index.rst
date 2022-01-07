@@ -10,10 +10,9 @@ Welcome to NEMO's documentation!
    \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
 
 
-.. todo::  This draft is a work in progress, and started on April 27. It is an updated version of the old (latex)
-   NEMO Users and Programmers Guide. We hope to have this converted sometime in this Summer (2021)
-   when version 4.3 is blessed. Not all sections from the old manual were taken, but we also
-   added some new sections.
+.. todo::  This draft is a work in progress, Most of the old
+   *NEMO Users and Programmers Guide* has been converted here, although not all sections
+   have been included here. 
 	   
    Other online entry points for NEMO are:
    `github pages <https://teuben.github.io/nemo/>`_ and
