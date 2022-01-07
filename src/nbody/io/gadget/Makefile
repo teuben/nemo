@@ -51,7 +51,7 @@ nemo_bin: install
 
 
 clean:
-	@/bin/rm $(IO) $(COMP) $(USER) $(FBIN)/g2info $(FOBJ)/g2info.o  $(FOBJ)/gadget2nemo.o  $(FBIN)/nemo2gadget  $(FBIN)/gadget2nemo >& /dev/null
+	@/bin/rm -f $(IO) $(COMP) $(USER) $(FBIN)/g2info $(FOBJ)/g2info.o  $(FOBJ)/gadget2nemo.o  $(FBIN)/nemo2gadget  $(FBIN)/gadget2nemo >& /dev/null
 #--
 # LIBs
 #
