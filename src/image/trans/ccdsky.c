@@ -32,7 +32,7 @@ string defv[] = {
   "scale=1\n        Scale image values",
   "H=71,0.27,0.73\n Hubble Constant, in case [d] is 'z', with optional WM and WV",
   "nsteps=1000\n    Integrations steps in the cosmo code (accuracy)",
-  "VERSION=3.0b\n   9-apr-2021 PJT",
+  "VERSION=3.0c\n   6-jan-2022 PJT",
   NULL,
 };
 
@@ -317,8 +317,8 @@ void CC(real z, int n, int verbose)
 {
   int i;
   real WR, WK, Tyr, DTT, DTT_Gyr, age, age_Gyr, zage, zage_Gyr,
-    DCMR, DCMR_Mpc, DCMR_Gyr, DA, DA_Gyr, kpc_DA, DL, DL_Mpc, DL_Gyr,
-    V_Gpc, a, az, h, adot, ratio, x, y, DCMT, VCM, pi, c;
+    DCMR, DCMR_Mpc, DCMR_Gyr, DA, DA_Gyr, kpc_DA, DL0, DL_Mpc, DL_Gyr,
+    V_Gpc, a, az, h, adot, ratio, x, y, DCMT, VCM, c;
   
   
   /* H0, WM, WV have been set in setCC() */
@@ -342,9 +342,9 @@ void CC(real z, int n, int verbose)
   DA_Mpc = 0.0;
   DA_Gyr = 0.0;
   kpc_DA = 0.0;
-  DL = 0.0;         // luminosity distance
+  DL0 = 0.0;         // luminosity distance
   DL_Mpc = 0.0;
-  DL_Gyr = 0.0;     // DL in units of billions of light years
+  DL_Gyr = 0.0;     // DL0 in units of billions of light years
   V_Gpc = 0.0;
   a = 1.0;          // 1/(1+z), the scale factor of the Universe
   az = 0.5;         //  1/(1+z(object))
@@ -401,9 +401,9 @@ void CC(real z, int n, int verbose)
   DA_Mpc = (c/H0)*DA;
   kpc_DA = DA_Mpc/206.264806;
   DA_Gyr = (Tyr/H0)*DA;
-  DL = DA/(az*az);
-  DL_Mpc = (c/H0)*DL;
-  DL_Gyr = (Tyr/H0)*DL;
+  DL0 = DA/(az*az);
+  DL_Mpc = (c/H0)*DL0;
+  DL_Gyr = (Tyr/H0)*DL0;
 
   /* comoving volume computation */
 
