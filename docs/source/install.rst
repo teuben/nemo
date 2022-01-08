@@ -54,11 +54,13 @@ Rebuilding
 
 If you have an existing installation, but many things have change, this is probably the preferred method:
 
+.. code-block:: bash
+   
    cd $NEMO
    git pull
    make rebuild
 
-as it will preserve the possibly peculiar options for configure that you passed the first time it was installed.
+this will also preserve the possibly peculiar options for configure that you passed the first time it was installed.
 
 Advanced Installation
 ---------------------
@@ -83,7 +85,8 @@ of for *cmake* based packages
 
       -DCMAKE_INSTALL_PREFIX=$NEMO/opt
 
-as NEMO generally adds the $NEMO/opt tree search for include and library files.
+as NEMO generally adds the $NEMO/opt tree search for include and library files, as
+well as adding its binaries to the search path.
 
 For some packages this has been automated using the ``mknemo`` command, described in
 the next section.
@@ -91,8 +94,9 @@ the next section.
 mknemo
 ------
 
-Although the ``mknemo`` script was intended to quickly compile a NEMO program, without the
-need to know where the source code lives. It is also used to aid the installation
+Although the ``mknemo`` script was intended to quickly compile a NEMO program
+(from any directory), and without the need to know where the source code lives.
+It is now also used to aid the installation
 of a number of supported libraries that
 can be used by NEMO. They are compiled within ``$NEMO/local``, and will be installed
 in ``$NEMO/opt``, as described
