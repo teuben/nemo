@@ -24,7 +24,7 @@ static double x1[3] = {  0.0, 0.0, 0.0 };
 static double m2 = 0.1;                         /* particle 2 */
 static double x2[3] = {  1.0, 0.0, 0.0 };
 
-static double eps = 0;                          /* classic softening */
+static double eps = 0, eps2;                         /* classic softening */
 
 /*------------------------------------------------------------------------------
  * INIPOTENTIAL: initializes the potential.
@@ -41,12 +41,14 @@ void inipotential (int  *npar, double *par, char *name)
     if (*npar>2) x2[0] = par[2];
     if (*npar>3) eps   = par[3];
 
-    if (omega < 0) {   // special case
-      omega = 1/sqrt(x2[0])/x2[0];
+    if (omega < 0) {   // special case in the matching rotating frame of reference
+      omega = 1/sqrt(x2[0])/x2[0]/sqrt(1+m2);
+      x1[0] = -x2[0] * m2/m1;
     }
+    eps2 = eps*eps;
 
     dprintf (1,"INI_POTENTIAL Two Fixed Point problem name=%s\n",name);
-    dprintf (1," omega=%g   eps=%\n", omega,eps);
+    dprintf (1," omega=%g   eps=%g\n", omega,eps);
     dprintf (1," 1: m=%g  pos=%g %g %g\n",m1,x1[0],x1[1],x1[2]);
     dprintf (1," 2: m=%g  pos=%g %g %g\n",m2,x2[0],x2[1],x2[2]);
 }
@@ -64,8 +66,8 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
 	double dr1, dr2;
 	
 	*pot = 0.0;
-	dr1 = sqr(pos[0]-x1[0]) + sqr(pos[1]-x1[1]) + sqr(pos[2]-x1[2]);
-	dr2 = sqr(pos[0]-x2[0]) + sqr(pos[1]-x2[1]) + sqr(pos[2]-x2[2]);
+	dr1 = sqr(pos[0]-x1[0]) + sqr(pos[1]-x1[1]) + sqr(pos[2]-x1[2]) + eps2;
+	dr2 = sqr(pos[0]-x2[0]) + sqr(pos[1]-x2[1]) + sqr(pos[2]-x2[2]) + eps2;
 	*pot -= m1/sqrt(dr1);
 	*pot -= m2/sqrt(dr2);
 	acc[0] = -m1*(pos[0]-x1[0])/dr1/sqrt(dr1)
