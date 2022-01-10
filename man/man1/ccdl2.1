@@ -1,0 +1,65 @@
+.TH CCDL2 1NEMO "9 January 2022"
+
+.SH "NAME"
+ccdl2 \- find the Lagrangian points in a 2D potential
+
+.SH "SYNOPSIS"
+\fBccdl2\fP [parameter=value]
+
+.SH "DESCRIPTION"
+
+For a 2D potential (or any image) on a grid, this program will
+list the local minima, maxima and saddle points. In rotating potentials
+these are the L1, L2, L3, L4 and L5 lagrangian points.
+.PP
+For a barred galaxy (see e.g. Sellwood & Wilkinson, 1993) L3 (center),
+L4 and L5 (along minor axis) are stable,
+whereas L1,L2 (along major axis) are unstable.
+.PP
+For a two-body system L4,L5 are stable (as long as the mass ratio > 24), and L1,L2,L3
+are all unstable!
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input image file [???]    
+
+.SH "EXAMPLES"
+Here is
+
+.nf
+
+    % potccd 2body_0.2 twobody -1,0.2,1,0.05 x=-2:2:0.01 y=-2:2:0.01
+    % ccdl2 2body_0.2
+    ### Warning [ccdl2]: Draft program
+    ### nemo Debug Info: Dx,Dy= 0.01 0.01
+    ###:  IX  IY   X     Y    Potential
+    L00: 240 112   0.4  -0.88  -1.59263  -8.81068e-05 -6.93231e-06 -1.30513e-05 -0.000190239
+    L00: 241 113   0.41 -0.87  -1.59264  -9.34876e-05 -4.41026e-06 -0.000122204 -7.94657e-05
+    L01:  85 200  -1.15  0     -1.80542  -0.00013568  -0.000199706  9.07661e-06  9.07661e-06
+    L11: 180 200  -0.2   0    -20.1865    0.38894      0.38771      0.388342     0.388342
+    L01: 257 200   0.57  0     -1.92043  -5.15358e-05 -0.000964568  0.000182036  0.000182036
+    L11: 300 200   1     0     -5.33261   0.0744966    0.0806428    0.0776562    0.0776562
+    L01: 343 200   1.43  0     -2.09766  -0.000249726 -0.000379773  8.47461e-05  8.47461e-05
+    L00: 241 287   0.41  0.87  -1.59264  -9.34876e-05 -4.41026e-06 -7.94657e-05 -0.000122204
+    L00: 240 288   0.4   0.88  -1.59263  -8.81068e-05 -6.93231e-06 -0.000190239 -1.30513e-05
+
+.fi
+
+Where L00 is a local maximum, L11 a local minimum, and L01/L10 are saddle points.
+
+.SH "SEE ALSO"
+potccd(1NEMO), potlist(1NEMO), potential(5NEMO), image(5NEMO)
+
+.SH "FILES"
+NEMO/src/image/misc
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+9-jan-22	V0.1 drafted	PJT
+.fi

@@ -18,7 +18,7 @@
 
 string defv[] = {
   "in=???\n       Input image file",
-  "VERSION=0.1\n  9-jan-2022 PJT",
+  "VERSION=0.2\n  9-jan-2022 PJT",
   NULL,
 };
 
@@ -44,6 +44,7 @@ void nemo_main()
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
   if (nz > 1) error("Cannot handle cubes");
   dprintf(0,"Dx,Dy= %g %g\n", Dx(iptr), Dy(iptr));
+  printf("###: ix  iy     x   y   Potential\n");
 
   for (j=1; j<ny-1; j++) {
     y = Ymin(iptr) + (j-Yref(iptr)) * Dy(iptr);
