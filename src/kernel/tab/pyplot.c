@@ -1,5 +1,5 @@
 /*
- *  rudimentary support to write a template script
+ *  rudimentary support to write a template python script
  *  for tabplot and tabhist
  *
  *  Typical usage:
