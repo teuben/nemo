@@ -2,22 +2,36 @@
 #
 # minimum packages needed:     gsl, wcslib   (ubuntu:  libgsl-dev  wcslib-dev)
 # optional:
+#
+# note:   the git compile may not work yet (i didn't for me)
 
-# version is hidden in the filename
+# version is hidden in the filename, if not git
 version=0.16
 wget=wgetc
 check=0
+url=https://git.savannah.gnu.org/git/gnuastro.git
 
 for arg in $*; do
   export $arg
 done
 
-cd $NEMO/local
-$wget  http://ftp.gnu.org/gnu/gnuastro/gnuastro-latest.tar.gz
 
-tar zxf gnuastro-latest.tar.gz
-version=$(ls -d gnuastro-* | grep -v latest | sed s/gnuastro-//)
+cd $NEMO/local
+if [ $version = "git" ]; then
+    if [ ! -d gnuastro-git ]; then
+        git clone $url gnuastro-git
+	(cd gnuastro-git; ./bootstrap)
+    else
+	(cd gnuastro-git; git pull)
+    fi
+else
+    $wget  http://ftp.gnu.org/gnu/gnuastro/gnuastro-latest.tar.gz
+    tar zxf gnuastro-latest.tar.gz
+    version=$(ls -d gnuastro-* | grep -v latest | grep -v git | sed s/gnuastro-//)
+fi
+   
 echo VERSION=$version
+
 cd gnuastro-$version
 ./configure --prefix=$NEMO/opt
 make -j
