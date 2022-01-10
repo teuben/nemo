@@ -32,7 +32,7 @@ void nemo_main()
 {
   stream   instr;
   imageptr iptr=NULL;
-  int      i,j,k,nx, ny, nz;
+  int      i,j,nx,ny,nz;
   int      sx1,sx2,sy1,sy2;
   real     x,y;
 
