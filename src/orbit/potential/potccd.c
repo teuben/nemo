@@ -34,7 +34,7 @@ string defv[] = {
     "omega=\n       Use this instead of any returned pattern speed",
     "ndim=3\n       Poisson map using 2D or 3D derivatives",
     "nder=1\n       1: use force der   2: use twice potential der for density",
-    "VERSION=2.2\n  19-mar-2021 PJT",
+    "VERSION=2.2a\n 9-jan-2022 PJT",
     NULL,
 };
 
@@ -49,13 +49,10 @@ local potproc_double mypot;    /* pointer to potential calculator function */
 
 void nemo_main(void)
 {
-    int    i, nx,ny,nz, ix,iy,iz, stepx, stepy, stepz, nsteps;
-    double pos[3],acc[3],pot,pot0,den,dr,da[3],time;
+    int    nx,ny,nz, ix,iy,iz;
+    double pos[3],acc[3],pot,den,dr,time;
     double xarr[MAXPT],yarr[MAXPT],zarr[MAXPT];
-    double ax,ay,az,epot;
-    double fourpi = FOUR_PI;
-    double omega, dmin, dmax;
-    char *fmt, s[20], pfmt[256];
+    double omega, dmin=0, dmax=0;
     string mode = getparam("mode");
     int idim, ndim, maxdim = 3, first=1, idx = 0;
     int axis = 0; // new WCS system
@@ -70,16 +67,12 @@ void nemo_main(void)
     dprintf(0,"Creating image %d * %d * %d\n",nx,ny,nz);
     if (nx > 1 || ny > 1 || nz > 1) {  /* check if > 1 */
         if (nx > 1) {
-           nsteps = nx;
            if (ny>1 && ny!=nx) error("ny <> nx\n");
            if (nz>1 && nz!=nx) error("nz <> nx\n");
         } else if (ny > 1) {
-           nsteps = ny;
            if (nz>1 && nz!=ny) error("nz <> ny\n");
-        } else
-           nsteps = nz;
-    } else                                 /* only one position */
-        nsteps = 1;
+        } 
+    } 
     if (nx < 0 || ny < 0 || nz < 0)
         error("problem with your grid, check your x=,y=,z=");
     ndim = getiparam("ndim");
