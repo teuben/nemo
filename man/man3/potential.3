@@ -1,7 +1,9 @@
 .TH POTENTIAL 3NEMO "13 September 2001"
-.SH NAME
+
+.SH "NAME"
 get_potential \- obtain potential descriptor and pattern speed
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 .ta +3i
 .B #include <stdinc.h>
@@ -15,8 +17,10 @@ get_potential \- obtain potential descriptor and pattern speed
 .PP
 .B proc get_inipotential ()
 .B real get_pattern()
+.B void set_pattern(real omega)
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIpotential(3NEMO)\fP provides a uniform interface to handle
 the input of the \fIpotential(5NEMO)\fP 'datafile' format. 
 It returns a pointer to the function wich computes potentials,
@@ -50,10 +54,14 @@ Potentials which compute the pattern speed from another parameter
 in the first array element of \fIini_potential\fP. This routine
 is heavily used by routines which need the pattern speed.
 .PP
+\fIset_pattern\fP would also set the pattern speed, but the method
+in the previous paragraph is preferred, and known to work.
+.PP
 \fIget_inipotential\fP returns a pointer to the function which
 initializes the potential. In this way one could re-initialize
-and re-use the potential. 
-.SH EXAMPLE
+and re-use the potential.
+
+.SH "EXAMPLE"
 .nf
 .B potproc mypot, get_potential();
 .B double pot,time;
@@ -66,27 +74,32 @@ and re-use the potential.
 .fi
 .SH "SEE ALSO"
 potlist(1NEMO),potential(5NEMO),loadobj(3NEMO),acceleration(3NEMO)
-.SH BUGS
+
+.SH "BUGS"
 Uses a dynamic object loader. See loadobj(3NEMO) for
 implementations, but see below for a standalone loader.
 .PP
 Fortran C interface only works on certain implementation where
 a fortran 
 character string gets its length passed by value as the last argument.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The non-loadobj version of the potential loader is called 
 \fIpotential0.c\fP and it can compile programs as follows:
 .nf
     make orbint L="$NEMOLIB/potential0.o -lnemo $NEMOOBJ/potential/plummer.o"
 .fi
 and make sure \fIpotential0.o\fP is loaded before the nemo library.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/orbit/potential  	potential.c potential0.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -98,4 +111,5 @@ Peter Teuben
 10-mar-93	-- also added potential0.c when loadobj doesn't work	PJT
 11-oct-93	V5.0: added get_pattern   	PJT
 13-sep-01	V5.4: added _float/_double versions w/ prototyping	PJT
+10-jan-22	V5.5: added set_pattern() - though not really needed	PJT
 .fi
