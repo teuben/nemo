@@ -1,6 +1,7 @@
 /*  2-body potential
  *
  *	 9-jan-2022 Peter Teuben - after a gradmap talk by Geme
+ *      10-jan-2022 set pattern speed if set < 0
  *
  */
 
@@ -10,7 +11,10 @@
  *
  *
  * This is the well known 2-body potential in the rotating frame
- * of reference.
+ * of reference. The mass of the particle at x<0 is kept at 1.0
+ * The mass of the second particle (m) is at x=r and both can
+ * be freely choosen.  If the pattern speed it set < 0, it will be
+ * computed.
  */
  
 #include <stdinc.h>
@@ -44,13 +48,15 @@ void inipotential (int  *npar, double *par, char *name)
     if (omega < 0) {   // special case in the matching rotating frame of reference
       omega = 1/sqrt(x2[0])/x2[0]/(1+m2);
       x1[0] = -x2[0] * m2/m1;
+      dprintf(0,"potpars=%g,%g,%g,%g\n",omega,m2,x2[0],eps);
+      par[0] = omega;         // set_pattern(omega);
     }
     eps2 = eps*eps;
 
-    dprintf (1,"INI_POTENTIAL Two Body problem name=%s\n",name);
-    dprintf (1," omega=%g   eps=%g\n", omega,eps);
-    dprintf (1," 1: m=%g  pos=%g %g %g\n",m1,x1[0],x1[1],x1[2]);
-    dprintf (1," 2: m=%g  pos=%g %g %g\n",m2,x2[0],x2[1],x2[2]);
+    dprintf(1,"INI_POTENTIAL Two Body problem name=%s\n",name);
+    dprintf(1," omega=%g   eps=%g\n", omega,eps);
+    dprintf(1," 1: m=%g  pos=%g %g %g\n",m1,x1[0],x1[1],x1[2]);
+    dprintf(1," 2: m=%g  pos=%g %g %g\n",m2,x2[0],x2[1],x2[2]);
 }
     
 /*------------------------------------------------------------------------------
@@ -63,8 +69,8 @@ void inipotential (int  *npar, double *par, char *name)
  */
 void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
 {
-  double dr1, dr2;
-	
+    double dr1, dr2;
+  
     *pot = 0.0;
     dr1 = sqr(pos[0]-x1[0]) + sqr(pos[1]-x1[1]) + sqr(pos[2]-x1[2]) + eps2;
     dr2 = sqr(pos[0]-x2[0]) + sqr(pos[1]-x2[1]) + sqr(pos[2]-x2[2]) + eps2;
