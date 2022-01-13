@@ -1,0 +1,7 @@
+                                         bash    csh    python
+0   simplest, basically bad form          x       x
+1   manual
+2   argparse                                               x
+3   docopt                                                 x
+4   getopt
+5   clic                                                   x
