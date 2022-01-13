@@ -49,7 +49,8 @@ string defv[] = {
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
-    "VERSION=3.9\n  8-dec-2021 PJT",
+    "label=\n       QAC label",
+    "VERSION=3.10\n 11-jan-2022 PJT",
     NULL,
 };
 
@@ -92,6 +93,7 @@ void nemo_main(void)
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
     bool Qac = getbparam("qac");
+    string qac_label;
     real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
@@ -101,6 +103,7 @@ void nemo_main(void)
     int maxmom = getiparam("maxmom");
     int maxpos[2];
     char slabel[32];
+
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -145,6 +148,11 @@ void nemo_main(void)
       Qw = TRUE;
     } else
       Qw = FALSE;
+
+    if (hasvalue("label"))
+      qac_label = getparam("label");
+    else
+      qac_label = getparam("in");
 
     Qmin = hasvalue("min");
     if (Qmin) xmin = getdparam("min");
@@ -234,11 +242,11 @@ void nemo_main(void)
 	  if (Qrobust) {
 	    compute_robust_moment(&m);
 	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
-		   getparam("in"), mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
+		   qac_label, mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
 		   sum_moment(&m), sratio_moment(&m));
 	  } else
 	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
-		   getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
+		   qac_label, mean, sigma, min_moment(&m), max_moment(&m),
 		   sum_moment(&m), sratio_moment(&m));	    
 
 	  return;
