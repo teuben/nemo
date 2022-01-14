@@ -1,7 +1,14 @@
-                                         bash    csh    python
-0   simplest, basically bad form          x       x
+
+Here we gather some simple examples of parsing a command line user interface.
+We have choosen the variables 'aaa' and 'bbb' in their long form. Where the CLI
+supports this, short options 'a' and 'b' are implemented, though NEMO's
+getparam() does not support this.
+
+
+ex                                bash     csh   python
+0   simplest, but bad form          x       x
 1   manual
-2   argparse                                               x
-3   docopt                                                 x
+2   argparse                                        x
+3   docopt                                          x
 4   getopt
-5   clic                                                   x
+5   clic                                            x
