@@ -9,9 +9,9 @@ set dir = $NEMO/usr/dice
 set url = https://bitbucket.org/vperret/dice
 
 if (! -e $dir) then
-  mkdir -p $dir
-  cd $dir
+  cd $dir:h
   git clone $url
+  cd $dir:t
 else
   cd $dir
   git pull
