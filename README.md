@@ -51,10 +51,9 @@ fine just to get started quickly.
 
 ## Installation
 
-There are different ways to install NEMO.  Although there are
-some install scripts with many options, and there is the README.install file
-for background information. Here is the basic method
-for most Linux distros (assuming you have the preconditions):
+There are a few different ways to install NEMO, here is a basic
+example that works most of the time on most Linux distros (assuming
+you have the preconditions):
 
          git clone https://github.com/teuben/nemo
          cd nemo
@@ -62,8 +61,8 @@ for most Linux distros (assuming you have the preconditions):
          make build check bench5
          source nemo_start.sh
 
-If you plan to modify code and submit pull request, the github CLI is recommended
-instead of cloning the upstream (see also [CONTRIBUTING.md](CONTRIBUTING.md)
+If you plan to modify code and submit pull request, the github CLI is recommended,
+though you can of course also clone the upstream (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
 
@@ -79,24 +78,25 @@ work (there are other ways to install tools on a mac, but don't get me started):
 
 To rebuild NEMO to ensure you have all updates:
 
-	     cd $NEMO
-		 git pull
-		 make rebuild
+         cd $NEMO
+         git pull
+         make rebuild
 		 
 ## Examples		 
 
-Once NEMO has been installed, here are some examples of scripts and
-figures: https://teuben.github.io/nemo/examples/ or look at an example
-ipython notebook
+Of if you want to quickly see something to work, here are a few commands to
+make a classic 1911 Plummer sphere of just 10 particles, print the positions, plot
+the positions and view the contents of its binary file:
+
+         mkplummer p10.dat 10
+         snapprint p10.dat
+         snapplot p10.dat
+         tsf p10.dat
+
+There are more examples of scripts and figures in
+https://teuben.github.io/nemo/examples/ 
+and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
-Of if you want to quickly see something to work, here are a few commands to
-make a Plummer sphere of just 10 particles, print the positions, plot
-the positions and view the contents of its binary file:
-
-        mkplummer p10.dat 10
-		snapprint p10.dat
-		snapplot p10.dat
-		tsf p10.dat
 
