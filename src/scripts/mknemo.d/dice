@@ -19,8 +19,9 @@ endif
 
 mkdir -p build
 cd build
-#cmake -DCMAKE_INSTALL_PREFIX:PATH=$NEMO/opt ..
-#cmake -DCMAKE_INSTALL_PREFIX=$NEMO ..
+
+# -DCMAKE_INSTALL_PREFIX=$NEMO/opt
+# -DCMAKE_C_COMPILER=gcc-9
 cmake -DENABLE_THREADS=ON -DCMAKE_INSTALL_PREFIX=$NEMO/opt ..
 make
 make install
