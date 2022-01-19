@@ -1,7 +1,7 @@
 DIR = src/nbody/trans
 BIN = snapcenter snaprotate snaprect snapinert snapsplit snapcopy snapadd \
       snapdens snapshift snapstack snapmass
-NEED = $(BIN) mkplummer snapprint
+NEED = $(BIN) mkplummer snapprint snapgrid mkdisk ccdplot
 
 help:
 	@echo $(DIR)
@@ -11,7 +11,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f snap.in
+	@rm -f snap.in m33.ccd m51.ccd
 
 NBODY = 10
 
@@ -33,6 +33,10 @@ snapcenter: snap.in
 snaprotate: snap.in
 	@echo Running snaprotate
 	$(EXEC) snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
+	$(EXEC) mkdisk - 10000 mass=1 seed=123 sign=1   | snaprotate - - -22,170 yz | snapgrid - m51.ccd moment=-1
+	$(EXEC) mkdisk - 10000 mass=1 seed=123 sign=-1  | snaprotate - - 30,200  yz | snapgrid - m33.ccd moment=-1
+	$(EXEC) ccdprint m51.ccd x=25 y=25
+	$(EXEC) ccdprint m33.ccd x=25 y=25
 
 snaprect: snap.in
 	@echo Running snaprect
