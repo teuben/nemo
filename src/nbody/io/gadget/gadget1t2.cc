@@ -77,6 +77,9 @@ int main(int argc, char * argv[]) {
 	initparam(const_cast<char**>(argv),const_cast<char**>(defv));
 	InFile  = getparam((char *) "in");
 	OutFile = getparam((char *) "out");
+
+	if (sizeof(int) != 4) warning("sizeof(int) = %d", sizeof(int));
+	if (sizeof(long) != 8) warning("sizeof(long) = %d", sizeof(long));
 	
 	
    	fp=fopen(InFile.c_str(),"r");
