@@ -5,10 +5,10 @@ supports this, short options 'a' and 'b' are implemented, though NEMO's
 getparam() does not support this.
 
 
-ex                                bash     csh   python
+#                                bash     csh  python
 0   simplest, but bad form          x       x
-1   manual
+1   manual                                         
 2   argparse                                        x
 3   docopt                                          x
-4   getopt
+4   getopts                         ?       ?
 5   clic                                            x
