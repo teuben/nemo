@@ -22,19 +22,23 @@
 
 struct io_header_1
 {
-    int      npart[6];
-    double   mass[6];
-    double   time;
-    double   redshift;
-    int      flag_sfr;
-    int      flag_feedback;
-    int      npartTotal[6];
-    int      flag_cooling;
-    int      num_files;
-    double   BoxSize;
-    double   Omega0;
-    double   OmegaLambda;
-    double   HubbleParam;
+  int      npart[6];          // The number of particles of each type in the present file.
+#if 0
+  long     nall[6];           // uint64 - Total number of particles of each type in the simulation
+#endif  
+  double   mass[6];           // The mass of each particle type. If set to 0 for a type which is present,
+                              // individual particle masses are stored for this type.
+  double   time;              // Time of output, or expansion factor for cosmological simulations.
+  double   redshift;          // z=1/a-1 (only set for cosmological integrations)
+  int      flag_sfr;
+  int      flag_feedback;
+  int      npartTotal[6];
+  int      flag_cooling;
+  int      num_files;
+  double   BoxSize;           // Gives the box size if periodic boundary conditions are used.
+  double   Omega0;
+  double   OmegaLambda;
+  double   HubbleParam;
 
 #if 0
   /* newer versions may have this - need to recount the filler space now */
@@ -62,7 +66,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "omega0=0.3\n               ** Omega0",
     "lambda0=0.7\n              ** OmegaLambda0",
     "h=0.75\n                   ** HubbleParam",
-    "VERSION=1.1a\n		23-jun-2011 PJT",
+    "VERSION=1.1b\n		19-jan-2022 PJT",
     NULL,
 };
 
@@ -157,6 +161,9 @@ void write_gadget(stream outstr,real time,Body *bodies,int nhalo,int ndisk,
   int i,k,blklen,np,ntotwithmass;
   float xyz[3];
   int ibuf;
+
+  if (sizeof(header) != 256)
+    warning("sizeof(io_header_1)=%d - it should be 256, check compile options",sizeof(header));
 
   /* check if all the masses for a given particle type are the same,
      in which case we should use the mass field in the header rather
