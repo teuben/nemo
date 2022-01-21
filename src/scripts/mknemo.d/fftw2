@@ -32,4 +32,4 @@ if [ $mpi == 1 ]; then
 fi
 
 
-echo Installed version=$version
+echo fftw2 $version `date` >> $NEMO/opt/mknemo.log
