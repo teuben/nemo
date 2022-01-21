@@ -1,13 +1,17 @@
 #! /bin/csh -f
 #
-#  this script will find Testfile's and create a testsuite from it
-#  Note that it will run in a directory $NEMO/tmp/test$$
+#  this script will find Benchfile's and create a benchsuite from it
+#  Note that it will run in a directory $NEMO/tmp/bench$$
 #
 #   22-jul-21   Cloned off testsuite                Vanday Bundu
+#   20-jan-22   test -> bench; add debug mode?      PJT
+#
 # BUG:  -b  does not remove executable, so you never know if new binary did
 #		not compile
 
-set benchdir=$NEMO/tmp/test$$
+set version="20-jan-2022"
+
+set benchdir=$NEMO/tmp/bench$$
 set log=benchsuite.log
 alias test 'make -f Testfile'
 
@@ -24,6 +28,8 @@ set local=0
 set options=()
 set exec=()
 set usr=1
+set debug=0
+
 foreach arg ($*)
     switch ($arg)
     case -b:
@@ -67,6 +73,9 @@ foreach arg ($*)
     case -u:  
               set usr=0
               breaksw
+    case -d:
+              set debug=1
+	      breaksw
     case -h:  
               goto help
               breaksw
@@ -91,14 +100,13 @@ pushd $benchdir >& /dev/null
 set tdir=src
 if ($usr) set tdir=src,usr
 
-# onintr cleanup
+onintr cleanup
 
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
-echo "BENCHSUITE started `date`"                                        > $log
+echo "BENCHSUITE started `date`"                                       > $log
+echo "BENCHSUITE version $version"                                    >> $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
-
-#   using $NEMO instead of $NEMO/src really makes it run slow on solaris
 
 foreach benchfile (`find $NEMO/{$tdir} -name Benchfile -print | sort`)
     if ($norun) then
@@ -145,36 +153,26 @@ end
 
 echo "BENCHSUITE   ended `date`"                                       >> $log
 
-# cleanup:
+cleanup:
 
-#    popd >& /dev/null
+     popd >& /dev/null
 
-#    if ($show || $query) then
-#        set clean=1
-#    else
-#        grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
+     if ($show || $query) then
+         set clean=1
+     else
+#       grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
 #	if (! -z $testdir/not-found.log) then
 #	    echo FAIL : The following programs were not found:
 #	    cat $testdir/not-found.log
 #	endif
         echo Results in $benchdir/$log
-#	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
-#	if (-z $testdir/bsf-fail.log) then
-#	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
-#	else
-#	    echo BSF regression results that failed:
-#	    cat $testdir/bsf-fail.log
-#	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
-#	endif
-#	echo If you have any unsolved problems, this file should be saved.
-#        head -1 $testdir/$log
-#        tail -1 $testdir/$log
+	cp $benchdir/$log $NEMO/$log
 	
-#    endif
+    endif
 
-#    if ($cleanup || $clean) then
-#        rm -rf $testdir
-#    endif
+    if ($cleanup || $clean) then
+        rm -rf $testdir
+    endif
 
 
     exit 0
