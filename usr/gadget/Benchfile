@@ -1,0 +1,34 @@
+# -*- makefile -*-
+
+
+DIR  = usr/gadget
+BENCH = galaxy_bench
+NEED  = Gadget.galaxy
+TIME = /usr/bin/time
+NP = 1
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+
+all:	bench
+
+clean:
+	@echo Cleaning in $(DIR)
+	@echo nothing to clean yet
+
+bench:
+	@if [ -e $(NEMO)/$(DIR)/Gadget ]; then \
+	   (mkdir -p galaxy;\
+	    mkdir -p ICs;\
+	    pedit $(NEMO)/$(DIR)/Gadget/Gadget2/parameterfiles/galaxy.param TimeMax=0.1 TimeBetSnapshot=0.1 > galaxy.param ;\
+	    cp $(NEMO)/$(DIR)/Gadget/ICs/galaxy_littleendian.dat ICs;\
+	    nemobench mpirun -np $(NP) Gadget2.galaxy galaxy.param ;\
+	    date >> galaxy/data.log;\
+	   ); \
+	else \
+	   echo Skipping gadget2; \
+	fi
+
