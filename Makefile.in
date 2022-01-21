@@ -1,4 +1,4 @@
-VERSION = NEMO V4.3 7-jan-2022 PJT
+VERSION = NEMO V4.3 21-jan-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -150,19 +150,16 @@ dirs:
 	@echo By `whoami` on `hostname`
 	-@for i in $(CHECKDIR1) $(ASCIIDIRS); do \
 	(if [ ! -d $(NEMO)/$$i ]; then \
-	    echo DIR $(NEMO)/$$i created; \
 	    mkdir $(NEMO)/$$i; \
 	    chmod a+w $(NEMO)/$$i; \
 	fi); done
 	-@for i in $(CHECKDIR2); do \
 	(if [ ! -d $$i ]; then \
-	    echo DIR $$i created; \
 	    mkdir $$i; \
 	    chmod a+w $$i; \
 	fi); done
 	-@for i in $(CHECKFIL2); do \
 	(if [ ! -f $$i ]; then \
-	    echo FILE $$i created; \
 	    touch $$i; \
 	    chmod a+w $$i; \
 	fi); done
@@ -217,8 +214,7 @@ dirs:
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
 	    ls -l $(NEMOLIB)/maxsizes.h;\
 	fi
-	@echo "OK, all main directories and files should be there now"
-	@echo Done at `date`
+	@echo Done with dirs at `date`
 
 docs:
 	(cd docs/source; make html)
