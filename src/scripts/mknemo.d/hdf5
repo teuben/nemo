@@ -9,8 +9,9 @@
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
+
 version=1.10.7      # 11-sep-2020
-mversion=1.10
+version=1.13.0      # 01-dec-2021
 url=https://github.com/HDFGroup/hdf5
 
 wget=wgetc
@@ -18,7 +19,9 @@ wget=wgetc
 for arg in $*; do
   export $arg
 done
-    
+
+mversion=$(echo $version | awk -F. '{printf("%s.%s",$1,$2)}')
+
 cd $NEMO/local
 $wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$mversion/hdf5-$version/src/hdf5-$version.tar.gz    
 
