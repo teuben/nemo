@@ -43,3 +43,4 @@ done
 
 
 
+echo gadget2 $version `date` >> $NEMO/opt/mknemo.log
