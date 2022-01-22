@@ -4,3 +4,13 @@ md5sum				  sum		file		type
 d9336f6d25cebbd7e54a811b0b886198  37953		hack128.sun4	binary
 21b88287e2cdfb3a1a82e8e029aa504e  43322		plum10		binary
 2b412b2b0d795ee953f79978ba667669  61488		plum10.205	ascii
+
+# Some example datasets from https://yt-project.org/data/
+# these are large
+
+
+RAMSES   DICEGalaxyDisk_nonCosmological    https://yt-project.org/data/DICEGalaxyDisk_nonCosmological.tar.gz
+tipsy    TipsyGalaxy                       https://yt-project.org/data/TipsyGalaxy.tar.gz
+gadget   GadgetDiskGalaxy                  https://yt-project.org/data/GadgetDiskGalaxy.tar.gz
+ENZO     IsolatedGalaxy                    https://yt-project.org/data/IsolatedGalaxy.tar.gz
+
