@@ -1139,6 +1139,7 @@ C=======================================================================
  10     CONTINUE
  
  20     CONTINUE
+        REWIND(ulog)
 
         mtot=0.0
         xcm=0.0
@@ -1477,6 +1478,7 @@ C=======================================================================
  10     CONTINUE
  
  20     CONTINUE
+        REWIND(ulog)
 
         WRITE(ulog,30) cputime1-cputime0
  30     FORMAT(//,15x,' Total cpu time used (secs) =',1pe15.7)
