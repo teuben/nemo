@@ -24,6 +24,7 @@ string defv[] = {
   "bad=0\n        Bad value to ignore",
   "wcs=t\n        Use WCS to sample",
   "fwhm=\n        FWHM of the convolution filter in each dimension",
+  "flux=\n        Conserve flux (1) or not (0) in each dimension",
   "VERSION=0.3a\n 23-may-2021 PJT",
   NULL,
 };
@@ -94,7 +95,8 @@ void nemo_main ()
         instr   = stropen(fnames[l],"r");    /* open file */
         iptr[l] = NULL;        /* make sure to init it right */
         read_image (instr, &iptr[l]);
-        dprintf (2,"Image %d read in, minmax %g %g\n",l,MapMin(iptr[l]),MapMax(iptr[l]));
+	dprintf(0,"Image %d: pixel size %g %g   minmax %g %g\n",
+		l, Dx(iptr[l]),Dy(iptr[l]),MapMin(iptr[l]),MapMax(iptr[l]));
         strclose(instr);        /* close input file */
     }
     do_combine();
@@ -133,13 +135,13 @@ local void do_combine()
     //  x = (ix - xref) * dx + xmin
     // ix = (x-xmin) / dx    + xref
     if (Qwcs)
-      dprintf(0,"Images stacked in the WCS of the first image");
+      dprintf(0,"Images stacked in the WCS of the first image\n");
     else
-      dprintf(0,"Images stacked in image index");
+      dprintf(0,"Images stacked in image index\n");
     
-    create_cube(&wptr, nx, ny, nx);
+    create_cube(&wptr, nx, ny, nx);   // weight cube
         
-    for (l=1; l<nimage; l++) {
+    for (l=1; l<nimage; l++) {        // The fir
       dprintf(0,"Adding image %d\n",l);
       for (iz=0; iz<Nz(iptr[l]); iz++) {
 	if (Qwcs) {
