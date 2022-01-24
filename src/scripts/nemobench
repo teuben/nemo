@@ -22,6 +22,8 @@ if ! command -v $1 >/dev/null 2>&1; then
 fi    
 echo NEMOBENCH: $* >> $log
 /usr/bin/time $* >> $log 2>&1
+#echo CHRT
+#sudo chrt -f 99 /usr/bin/time $* >> $log 2>&1
 echo -n "NEMOBENCH: $1 "
 tail -2 $log |grep elapsed
 
