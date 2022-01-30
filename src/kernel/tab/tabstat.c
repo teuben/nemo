@@ -38,7 +38,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=1.9a\n	 8-dec-2021 PJT",
+    "VERSION=1.9b\n	 30-jan-2022 PJT",
     NULL
 };
 
@@ -216,7 +216,7 @@ void stat_data(void)
     
             printf("sum:    ");
             for (j=0; j<nxcol; j++) {
-	        sprintf(fmt," %g",sum_moment(&m[j]) * mean_moment(&m[j]));
+  	        sprintf(fmt," %g",sum_moment(&m[j]));
                 out(fmt);
             }   
             printf("\n");
