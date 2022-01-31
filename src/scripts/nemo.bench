@@ -20,6 +20,7 @@
    help=help=cm
    ften=1
      f5=1
+     np=1
 
 for arg in $*; do\
    export $arg
@@ -56,6 +57,28 @@ if [ $mode == 2 ]; then
 fi
 
 if [ $mode == 5 ]; then
+    if [ $np -gt 1 ]; then
+	# special mode to use GNU parallel with $np jobs
+	# 1: ~670   2:  1336/668    4: 1875/468   8 1730/216  16:  1490/93   32:  1413/44
+	rm -f job_${np}	
+	for j in $(seq $np); do
+	    rm -f job.$j
+	    echo "$NEMO/src/scripts/nemo.bench mode=5 clean=$clean > job.$j" >> job_${np}
+	done
+	echo Running in `pwd`
+	/usr/bin/time parallel -j $np < job_${np}
+	grep score: job.* | tabstat - 3
+	# clean_tmp
+	if [ $clean == 1 ]; then
+	    echo "Cleaning $tmp (use clean=0 to prevent this)"
+	    cd ..
+	    rm -rf $tmp
+	else
+	    echo results in $tmp
+	fi
+	
+	exit 0
+    fi
     echo 'Equal 5sec CPU time per code, no output files to check'
     echo 'Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode treecode1'
     t1=4.28*$f5
