@@ -15,6 +15,7 @@
 #include <assert.h>
 #include <getparam.h>
 #include <vectmath.h>
+#include <history.h>
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
 
@@ -24,7 +25,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS                 */
     "options=mass,phase\n         information to output {mass,phase,phi}",
     "iformat=  %d\n		  output format for integers",
     "rformat= %21.13E\n		  output format for floating-point",
-    "VERSION=2.3c\n               22-feb-94 PJT",
+    "VERSION=2.3d\n               2-feb-2022 PJT",
     NULL,
 };
 
