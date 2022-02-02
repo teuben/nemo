@@ -176,7 +176,7 @@ void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nma
 	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, int mode);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
-void rotcurpars();
+void rotcurparse();
 
 
 typedef real (*my_proc1)(real *, real *, int);
