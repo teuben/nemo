@@ -38,6 +38,7 @@
 #include <extstring.h>
 #include <loadobj.h>
 #include <rotcurshape.h>
+#include <table.h>
 
 /*     Set this appropriately if you want to use NumRec's mrqmin() based engine */
 /*     right now it appears as if the NR routine does not work as well          */
