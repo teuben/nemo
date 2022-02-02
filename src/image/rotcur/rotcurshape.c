@@ -95,7 +95,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4d\n  28-may-2020 PJT",
+    "VERSION=1.4e\n  2-feb-2022 PJT",
     NULL,
 };
 
@@ -176,6 +176,7 @@ void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nma
 	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, int mode);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
+void rotcurpars();
 
 
 typedef real (*my_proc1)(real *, real *, int);
@@ -317,7 +318,7 @@ void nemo_main()
            mask,ifit,elp,lunpri,cor,npt,factor);
 }
 
-rotcurparse()
+void rotcurparse()
 {
   string *sp, fname, path;
   char keyname[30];
@@ -515,8 +516,8 @@ stream  lunpri;       /* LUN for print output */
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
     bool Qdens;
-    real *coldat[3];
-    int colnr[3];
+    real *coldat[4];
+    int colnr[4];
 
     dprintf(0,"%s: NEMO VERSION %s\n", 
                         getparam("argv0"), getparam("VERSION"));
