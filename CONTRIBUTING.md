@@ -15,7 +15,7 @@ if you just want to compile and run, but not ideal if you make modifications and
 want to share them back to the *upstream* via a *pull request* (PR). You
 can however "repair" your local repo, discussed below, and still submit a PR.
 
-2. You (forked)[https://guides.github.com/activities/forking/] NEMO
+2. You [forked](https://guides.github.com/activities/forking/) NEMO
 from the *upstream*, and cloned it locally from the repo in your own
 github account. This is the ideal method, but you will still need to
 set the *upstream* manually if you used github.com. See also the
