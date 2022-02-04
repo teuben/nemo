@@ -29,6 +29,7 @@
  * 18-aug-00    also allow binary files..., with padding and optional swap
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
+ *  4-feb-22    make binary the default
  */
  
 #include <stdinc.h>
@@ -48,10 +49,11 @@ string defv[] = {
     "in=???\n                   Input (tipsy) ascii file",
     "out=???\n                  Output snapshot file",
     "options=gas,dark,star\n    Output which particles?",
-    "mode=ascii\n		Input mode (ascii, binary)",
+    "mode=binary\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
-    "VERSION=2.1b\n             4-feb-2018 pjt",
+    "boom=f\n                   BOOM mode with add-acc ?",
+    "VERSION=3.0\n              4-feb-2022 pjt",
     NULL,
 };
 
@@ -74,8 +76,12 @@ void nemo_main()
     struct dark_particle *dp, *lastdp ;
     struct star_particle *sp, *lastsp, *last_old_sp ;
 
+#ifdef BOOM
+    warning("BOOM support enabled");
+#endif    
+
     /* NEMO */
-    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap;
+    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap, Qboom;
     string options, mode;
     int i, j, n, nbody, bits, offset;
     real tsnap;
@@ -94,6 +100,7 @@ void nemo_main()
     mode = getparam("mode");
     Qascii   = scanopt(mode,"ascii");
     Qbinary  = scanopt(mode,"binary");
+    Qboom = getbparam("boom");
 
     Qswap = getbparam("swap");
     

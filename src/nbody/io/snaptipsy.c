@@ -29,7 +29,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "times=all\n		Times to select snapshot",
     "mode=dark\n                Output mode (dark|gas|star)",
     "swap=f\n                   Swap bytes on output?",
-    "VERSION=1.3a\n		16-jun-2011",
+    "VERSION=1.3b\n		4-feb-2022",
     NULL,
 };
 
@@ -54,6 +54,10 @@ void nemo_main()
     int i, ndim, nbody, bits, ParticlesBit, omode;
     struct dump header;
     struct dark_particle *dark;
+
+#ifdef BOOM
+    warning("BOOM support enabled");
+#endif    
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit);
@@ -87,7 +91,7 @@ void nemo_main()
 	header.nbodies = nbody;
 	header.nsph = header.nstar = header.ndark = 0;
 #ifdef TIPSY_NEEDPAD
-	header.junk = 1;		/* padding byte */
+	header.version = 1;		/* padding byte */
 #endif
 	switch (omode) {
 	    case MODE_DARK: 	header.ndark = nbody;  break;

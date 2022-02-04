@@ -7,10 +7,12 @@
  *      28-aug-01       no NEEDPAD but warn if sizeof() not 32.....????
  *      16-jun-11       trying the new Balin padding scheme         PJT
  *                      but enabling TIPSY_NEEDPAD again
+ *       4-feb-22       allow the BOOM extension to store acc's     PJT
  */
 
 #define MAXDIM 3
-#define TIPSY_NEEDPAD   
+#define TIPSY_NEEDPAD
+//#define BOOM
 #define forever for(;;)
 
 typedef float Real;
@@ -32,6 +34,11 @@ struct dark_particle {
     Real mass;
     Real pos[MAXDIM];
     Real vel[MAXDIM];
+#ifdef BOOM
+    Real acc[MAXDIM];
+    Real pot;
+#endif  
+    Real metals ;
     Real eps;
     Real phi ;
 } ;
@@ -42,6 +49,10 @@ struct star_particle {
     Real mass;
     Real pos[MAXDIM];
     Real vel[MAXDIM];
+#ifdef BOOM
+    Real acc[MAXDIM];
+    Real pot;
+#endif  
     Real metals ;
     Real tform ;
     Real eps;
@@ -58,7 +69,7 @@ struct dump {
     int ndark ;
     int nstar ;
 #ifdef TIPSY_NEEDPAD
-    int junk ;			/* padding byte  !!! ??? !!! */
+    int version ;			// padding byte  !!! ??? !!!   also seen used for version in dumpV2
 #endif
 #if 0
         /* Jeremy Balin addition */
