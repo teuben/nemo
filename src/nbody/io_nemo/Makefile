@@ -21,7 +21,8 @@ LIBNEMO = -lnemo
 FC     = gfortran
 
 ifeq ($(FC),gfortran)
-FFLAGS = -O -fno-second-underscore
+# can also try to add:   -std=legacy 
+FFLAGS = -O -fno-second-underscore -fallow-argument-mismatch
 DFC    = GFORT
 else
 FFLAGS = -O -fno-second-underscore -Wno-globals
