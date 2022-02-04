@@ -76,6 +76,32 @@ NEMOBENCH5 score: 469.85
 .fi
 where on this particular CPU there is a diversity of speeds. Some CPU show even more diversity.
 
+.PP
+Here is an example how to use nemobench5 is parallel mode on a 32 core Xeon, where a single NEMOBENCH5 has a score of 630.
+Since all codes are single core, gnu parallel is used to run them in parallel, which should scale linearly as long as memory
+is not exhausted (this particular CPU has 512GB memory):
+
+.nf
+
+for j in 2 4 8 12 16 24 32 48 64 128; do
+    $NEMO/src/scripts/nemo.bench mode=5 np=$j | txtpar - p0=npt,1,2 p1=sum,1,2 p2=mean,1,2
+done
+
+  2  1256  628
+  4  2512  628
+  8  5020  628
+ 12  7512  626
+ 16 10047  628
+ 24 15024  626
+ 32 20025  626
+ 48 20589  429
+ 64 21517  336
+128 20792  162
+
+(numbers were rounded to improve readability)
+.fi
+
+
 .SH "BENCH"
 Here are the results of the "make bench" benchmark. The time is the user CPU time. If two values
 are listed after the machine name, these are the GeekBench5 values.
@@ -251,6 +277,7 @@ so it should be highly parallizable:
 .fi
 
 which follows Amdahl's law close to 100%!
+
 
 .SH "CONSIDERATIONS"
 Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
