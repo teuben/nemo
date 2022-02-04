@@ -25,7 +25,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "newline=f\n        add newline between output parameters",
     "maxline=10000\n    Max number of lines in case a pipe was used",
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.4\n      27-dec-2021 PJT",
+    "VERSION=0.5\n      2-feb-2022 PJT",
     NULL
 };
 
@@ -254,10 +254,11 @@ local void convert(stream instr)
     if (!Qexpr) {
       // simple output of input parameters
       for (i=0; i<nval; i++) {
-	if (i>0 && Qnewline) printf("\n");
-	printf("%s ", sval[i]);
+	if (i>0 && !Qnewline) printf(" ");
+	printf("%s", sval[i]);
+	if (Qnewline) printf("\n");
       }
-      printf("\n");
+      if (!Qnewline) printf("\n");
       return;
     }
 
