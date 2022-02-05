@@ -91,7 +91,7 @@ void nemo_main()
 	header.nbodies = nbody;
 	header.nsph = header.nstar = header.ndark = 0;
 #ifdef TIPSY_NEEDPAD
-	header.version = 1;		/* padding byte */
+	header.version = 2;		/* padding byte */
 #endif
 	switch (omode) {
 	    case MODE_DARK: 	header.ndark = nbody;  break;
