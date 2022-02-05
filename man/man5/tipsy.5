@@ -1,15 +1,21 @@
 .TH TIPSY 5NEMO "23 December 1994" 
-.SH NAME
+
+.SH "NAME"
 tipsy \- formats used in TIPSY package
-.SH DESCRIPTION
-The \fBTIPSY ARRAY\fP format is an ascii format where the first
+
+.SH "DESCRIPTION"
+The \fBTIPSY ARRAY\fP format was originally an ascii format where the first
 line contains the number of elements of a 1 dimensional array,
 followed by all elements.
 .PP
 The \fBTIPSY VECTOR\fP format is an ascii format where the first
 line contains the number of elements of the 3 dimensional vector,
 followed by all elements, one vector at a time (but split of 3 lines).
-.SH EXAMPLE
+.PP
+The \fBTIPSY binary\fP format is the more common format. Its binary header (28 or 32 bytes,
+perhaps padded to 32) contains
+
+.SH "EXAMPLE"
 Here is a TIPSY VECTOR format of the origin, unit X, Y and Z vectors
 on a 3-dimensional cube.
 .PP
@@ -25,19 +31,53 @@ on a 3-dimensional cube.
 0.0
 1.0
 .fi
-.SH CAVEATS
-Only works in 3-dimensional space
+
+.SH "BINARY"
+
+The header is 28 bytes in Tipsy's original \fBcode/defs.h\fP, however, many authors are padding this
+with a integer version, making it 32 bytes. This also limits the number of particles, see CAVEAT below.
+
+.nf
+
+struct header {
+    double time ;
+    int nbodies ;     // total number of bodies
+    int ndim ;        // always 3
+    int nsph ;        // number of gas particles
+    int ndark ;       // number of dark/halo particles
+    int nstar ;       // number of star particles
+    int version ;     // a new 32-byte padding field not used by all tipsy I/O projects
+} ;
+
+.fi
+
+.SH "CAVEATS"
+Only works in 3-dimensional space, and only 3 flavors of particles (gas, dark, star) are supported. For comparison,
+the \fIgadget(5NEMO)\fP format (version 1/2/3) supports 6 flavors of particles, though the last one is never
+used (but never say never).
+.PP
+Since the 32 byte header contains a few 4-byte integers, this limits the total number of
+particles to ~2 billion, unless the parser is recoded to use \fBunsigned int\fP, in which
+case ~4 billion can be used.
+
 .SH "SEE ALSO"
 tipsy(1), snapshot(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben 
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
-tipsy.h  	definition of the TIPSY binary format
+nemo/src/nbody/io/tipsydefs.h  	definition of the TIPSY binary format 
+bonsai/runtime/include/tipsydefs.h	Bonsai's view (with some fields changed type) [no version]
+tipsy/code/defs.h	Original definition [no version]
+uns_projects/lib/utils/tipsydefs.std.h	 [no version]
 .fi
+Note that Bonsai has hyjacked the Phi field for dark and stars for an integer ID.
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i
 23-dec-94	man written 	PJT
+5-feb-2022	document some historic confusion	PJT
 .fi
