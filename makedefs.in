@@ -139,6 +139,7 @@ XLIBS  = @XLIBS@
 #PEFFLAG = -Werror-implicit-function-declaration -Wimplicit-int -Wimplicit-function-declaration
 #PEDFLAG = --warn-no-implicit-function-declaration
 #PEDFLAG = -Wimplicit-int -Wimplicit-function-declaration
+#PEDFLAG = -Wno-error      # if you want the compiler to shut up and just take a chance in life
 PFLAGS = @PFLAGS@ -Wimplicit-function-declaration
 COPT = @CFLAGS@ 
 FOPT = @FFLAGS@
