@@ -16,7 +16,8 @@ OBJFILES = snapserial.o
 SRCDIR = $(NEMO)/src/nbody/io
 SUBDIRS= gadget
 BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
-	   rvsnap snaprv snaptipsy tipsysnap \
+	   rvsnap snaprv \
+	   snaptipsy tipsysnap snaptipsy_acc tipsysnap_acc \
 	   gadgetsnap snapgadget binsnap
 
 TESTFILES = testss testio
@@ -111,11 +112,13 @@ xvpsnap: xvpsnap.c
 snap3dv: snap3dv.c
 	$(CC) $(CFLAGS) -o snap3dv snap3dv.c  $(NEMO_LIBS)
 
-snaptipsy: snaptipsy.c
+snaptipsy snaptipsy_add: snaptipsy.c
 	$(CC) $(CFLAGS) -o snaptipsy snaptipsy.c  $(NEMO_LIBS)
+	$(CC) $(CFLAGS) -DHAVE_BOOM -o snaptipsy_acc snaptipsy.c  $(NEMO_LIBS)
 
-tipsysnap: tipsysnap.c
+tipsysnap tipsysnap_acc: tipsysnap.c
 	$(CC) $(CFLAGS) -o tipsysnap tipsysnap.c  $(NEMO_LIBS)
+	$(CC) $(CFLAGS) -DHAVE_BOOM -o tipsysnap_acc tipsysnap.c  $(NEMO_LIBS)
 
 # This needs:  (cd $NEMO/usr/eagle; make install)
 # @todo  this needs to be done  via configure
