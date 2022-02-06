@@ -13,6 +13,7 @@
  *      25-jul-2013     V3.0 allow multiple orbits output;
  *      11-nov-2015     V3.1 now the efficient way
  *      19-dec-2019     V3.2 deal with ACC/PHI
+ *       6-feb-2022     V3.3 initialize I1, properly implement ibody=-1
  */
 
 #include <stdinc.h>
@@ -29,7 +30,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=0\n			which particles to take (-1=all, 0=first)",
   "nsteps=10000\n		max orbit length allocated",
-  "VERSION=3.2\n		19-dec-2019 PJT",
+  "VERSION=3.3\n		6-feb-2022 PJT",
   NULL,
 };
 
@@ -70,16 +71,22 @@ void nemo_main()
   instr  = stropen(iname,"r");		/* read from snapshot */
   outstr = stropen(oname,"w");		/* write to orbit */
 
-  optr=(orbitptr *) allocate(norb*sizeof(orbitptr));
-  for (i=0; i<norb; i++) {
-    optr[i] = NULL;
-    allocate_orbit (&optr[i],NDIM,nsteps);
-  }
-  
-      
   i = 0;				/* counter of timesteps */
-  while (read_snap()) {		         /* read until exausted */
+  while (read_snap()) {		        /* read until exausted */
       if (i==0) {			/* first time around */
+	if (isel[0] < 0) {              /* special case selecting all */
+	  dprintf(0,"Selecting all %d bodies for conversion to an orbit\n", nobj);
+	  norb = nobj;
+	  for (j=0; j<norb; j++)
+	    isel[j] = j;
+	}
+	
+	optr=(orbitptr *) allocate(norb*sizeof(orbitptr));
+	for (j=0; j<norb; j++) {
+	  optr[j] = NULL;
+	  allocate_orbit (&optr[j],NDIM,nsteps);
+	}
+  
 	for (j=0; j<norb; j++) {
 	  ibody = isel[j];
 	  if (ibody>=nobj)
@@ -95,7 +102,7 @@ void nemo_main()
       }
       for (j=0; j<norb; j++) {
 	ibody = isel[j];
-	Key(optr[0])    = key[ibody];
+	Key(optr[j])    = key[ibody];
 	Torb(optr[j],i) = tsnap;
 	Xorb(optr[j],i) = phase[ibody][0][0];	
 	Yorb(optr[j],i) = phase[ibody][0][1];	
@@ -108,6 +115,8 @@ void nemo_main()
 	AXorb(optr[j],i) = acc[ibody][0];
 	AYorb(optr[j],i) = acc[ibody][1];
 	AZorb(optr[j],i) = acc[ibody][2];
+	if (i==0) 
+	  I1(optr[j]) = phi[ibody] + 0.5*(sqr(phase[ibody][1][0]) + sqr(phase[ibody][1][1]) + sqr(phase[ibody][1][2]));
 #endif
       }
       i++;
@@ -117,6 +126,7 @@ void nemo_main()
   put_history(outstr);
   for (j=0; j<norb; j++)
     write_orbit(outstr,optr[j]);		/* write orbit to file */
+  dprintf(0,"Found %d snapshots\n",i);
 
   
   strclose(outstr);			/* close files */
