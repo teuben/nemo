@@ -50,6 +50,19 @@ If the tipsy file has extra accellerations and potentials stored,
 the version should be 6.
 Default: f
 
+.SH "EXAMPLES"
+In case multiple flavors of particles are read, they are deposited
+in different SnapShot's in the file. \fIsnapmerge(1NEMO)\fP needs to
+be used to make one snapshot. For example the standard
+\fBrun99.bin\fP from the tipsy source code distrution has all 3 flavors:
+.nf
+
+   tipsysnap run99.bin -  |  snapmerge - run99.snap
+   ### nemo Debug Info: time=14.9708 N=8579 (1049,1021,6509) for gas,dark,star    version=0
+   ### nemo Debug Info: header = 32  gas = 48   dark = 36  star = 44 bytes
+
+.fi
+
 .SH "DATA FORMAT"
 See also \fItipsy(5NEMO)\fP on some basic concepts of tipsy data. The
 ascii format of a TIPSY "\fIgds\fP" (gas-dark-star) snapshot is essentially
