@@ -86,7 +86,7 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
   
   t = Torb(o,Nsteps(o)-1);
   e = I1(o);
-  dprintf(0,"E=%g\n",e);
+  dprintf(1,"E=%g\n",e);
   for (i=0; i<Nsteps(o); i++) {
     accum_moment(&xm,Xorb(o,i),1.0);
     accum_moment(&ym,Yorb(o,i),1.0);
@@ -108,6 +108,7 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
     accum_moment(&em,etot,1.0);
   }
   if (first) {
+    dprintf(0,"# Orbit with %d checkpoints\n", Nsteps(o));
     if (Qell)
       dprintf(0,"# T\tE\tr2_min\tr2_max\tv2_min\tv2_max\tr2_mean\tr2_sigma\tv2_mean\tv2_sigma\tLmin/Lmax\n");
     else
@@ -126,14 +127,14 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
       accum_moment(&r2m,r2,1.0);
       accum_moment(&v2m,v2,1.0);
     }
-    printf("%g %g  %g %g %g %g  %g %g %g %g  %g\n",
-	   t,e,
+    printf("%d %g %g  %g %g %g %g  %g %g %g %g  %g\n",
+	   Key(o), t,e,
 	   min_moment(&r2m), max_moment(&r2m), min_moment(&v2m), max_moment(&v2m), 
 	   mean_moment(&r2m), sigma_moment(&r2m), mean_moment(&v2m), sigma_moment(&v2m),
 	   ymax*umax/(xmax*vmax));
   } else {
-    printf("%g %g %g %g %g %g %g %g %g %g\n",
-	   t,e,
+    printf("%d %g %g %g %g %g %g %g %g %g %g\n",
+	   Key(o), t,e,
 	   max_moment(&xm), max_moment(&ym),
 	   max_moment(&um), max_moment(&vm),
 	   mean_moment(&jm), sigma_moment(&jm),
