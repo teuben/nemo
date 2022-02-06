@@ -68,16 +68,18 @@ Peter Teuben
 
 .SH "FILES"
 .nf
-.ta +2.5i
+.ta +4.5i
 nemo/src/nbody/io/tipsydefs.h  	definition of the TIPSY binary format 
 bonsai/runtime/include/tipsydefs.h	Bonsai's view (with some fields changed type) [no version]
 tipsy/code/defs.h	Original definition [no version]
-uns_projects/lib/utils/tipsydefs.std.h	 [no version]
+uns_projects/lib/utils/tipsydefs.std.h	[no version]
+
 .fi
-Note that Bonsai has hyjacked the Phi field for dark and stars for an integer ID.
+Note that Bonsai has hyjacked the Phi field for dark and stars for an integer ID.  With the -DWITH_BOOM
+you can currently carry a new acc/epot in version 6 of the tipsy files
 .SH "UPDATE HISTORY"
 .nf
-.ta +2.0i +2.0i
-23-dec-94	man written 	PJT
+.ta +1.5i +4.5i
+23-dec-1994	man written	PJT
 5-feb-2022	document some historic confusion	PJT
 .fi
