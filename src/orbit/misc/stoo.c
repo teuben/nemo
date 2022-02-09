@@ -14,12 +14,20 @@
  *      11-nov-2015     V3.1 now the efficient way
  *      19-dec-2019     V3.2 deal with ACC/PHI
  *       6-feb-2022     V3.3 initialize I1, properly implement ibody=-1
+ *       8-feb-2022     V3.4 stopped massive memory leak, add scan_snap() for files
+ *                           use mdarray for dynamic snapshot
+ *
+ *
+ *  @todo    force nsteps > 0 if input is a pipe
+ *           deal with PhaseSpace as well as split Pos/Vel
+ *           deal with no Potential/Accelleration
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <mdarray.h>
 
 #include <snapshot/snapshot.h>
 #include <potential.h>
@@ -28,9 +36,9 @@
 string defv[] = {
   "in=???\n			snapshot input file name",
   "out=???\n			orbit output file name",
-  "ibody=0\n			which particles to take (-1=all, 0=first)",
-  "nsteps=10000\n		max orbit length allocated",
-  "VERSION=3.3\n		6-feb-2022 PJT",
+  "ibody=-1\n			which particles to take (-1=all, 0=first)",
+  "nsteps=0\n	                max orbit length allocated in case of pipe",
+  "VERSION=3.4\n		8-feb-2022 PJT",
   NULL,
 };
 
@@ -43,35 +51,67 @@ string headline;
 
  	/* global snapshot stuff */
 
-#define MOBJ 	1000000
 int    nobj;                    /* number of bodies per snapshot */
 int    norb;                    /* number of orbits to extract */
+int    maxobj = 0;
 real   tsnap;			/* time of snapshot */
-real   mass[MOBJ];
-real   phase[MOBJ][2][NDIM];
-real   phi[MOBJ];
-real   acc[MOBJ][NDIM];
-int    key[MOBJ];
-int    isel[MOBJ];              /* select for output orbit? */
+
+//#define USE_MDARRAY           /* seems not to work yet */
+
+#if defined(USE_MDARRAY)
+  int MOBJ = 0;
+  real *mass;
+  real ***phase;
+  real *phi;
+  real **acc;
+  int  *key;
+  int  *isel;
+#else
+  #define MOBJ 	1000000
+  real   mass[MOBJ];
+  real   phase[MOBJ][2][NDIM];
+  real   phi[MOBJ];
+  real   acc[MOBJ][NDIM];
+  int    key[MOBJ];
+  int    isel[MOBJ];              /* select for output orbit? */
+#endif
+
+
 bool   Qtime, Qmass, Qkey;
 	/* global orbit stuff */
 
 int    ibody, nsteps;		/* allocation */
 orbitptr *optr;			/* pointer to orbit pointers */
 
-void setparams();
 int read_snap();
+int scan_snap();
+void alloc_snap(int);
 
 void nemo_main()
 {
   int i,j;
-    
-  setparams();
+
+  iname = getparam("in");
+  oname = getparam("out");
+  nsteps = getiparam("nsteps");
     
   instr  = stropen(iname,"r");		/* read from snapshot */
   outstr = stropen(oname,"w");		/* write to orbit */
 
-  i = 0;				/* counter of timesteps */
+  if (nsteps == 0)  {
+    nsteps = scan_snap();
+    dprintf(0,"Found %d snapshots with maxobj=%d\n",nsteps,maxobj);
+    alloc_snap(maxobj);
+
+    norb = nemoinpi(getparam("ibody"),isel,MOBJ);
+    if (norb < 0) error("%d: ibody=%s bad",norb,getparam("ibody"));
+    if (norb == 0) warning("no orbits will be output");
+    rewind(instr);    
+  } else {
+    dprintf(0,"Setting orbits for %d snapshots\n",nsteps);
+  }
+
+  i = 0;				/* counter of snapshots/timesteps */
   while (read_snap()) {		        /* read until exausted */
       if (i==0) {			/* first time around */
 	if (isel[0] < 0) {              /* special case selecting all */
@@ -123,27 +163,69 @@ void nemo_main()
       for (j=0; j<norb; j++)
 	Nsteps(optr[j]) = i;			/* record actual number */      
   }
+  strclose(instr);
+  dprintf(0,"Writing orbits\n");
+  
   put_history(outstr);
-  for (j=0; j<norb; j++)
+  for (j=0; j<norb; j++) {
+    if (j%(norb/50)==0) dprintf(0,".");
     write_orbit(outstr,optr[j]);		/* write orbit to file */
-  dprintf(0,"Found %d snapshots\n",i);
-
+    free_orbit(optr[j]);
+  }
+  free(optr);
+  dprintf(0,"\nFound %d snapshots\n",i);
   
   strclose(outstr);			/* close files */
-  strclose(instr);
 }
 
-void setparams()
-{
-  iname = getparam("in");
-  oname = getparam("out");
-  nsteps = getiparam("nsteps");
-  norb = nemoinpi(getparam("ibody"),isel,MOBJ);
-  if (norb < 0) error("ibody=%s bad",getparam("ibody"));
-  if (norb == 0) warning("no orbits will be output");
-  
-}
 
+
+void alloc_snap(int nbody)
+{
+#if defined(USE_MDARRAY)
+  dprintf(1,"alloc_snap(%d)\n",nbody);
+  mass = (real *) allocate_mdarray1(nbody);
+  phase = (real ***) allocate_mdarray3(nbody,2,NDIM);
+  phi =  (real *) allocate_mdarray1(nbody);
+  acc = (real **) allocate_mdarray2(nbody,NDIM);
+  key =  (int *) allocate(nbody * sizeof(int));
+  isel = (int *) allocate(nbody * sizeof(int));
+  MOBJ = nbody;
+#else
+  warning("alloc_snap: already allocated statically");
+#endif  
+}
+  
+
+/*
+ * SCAN_SNAP:   scan to find how many snapshots there are;
+ */
+
+int scan_snap()
+{
+  int nsnap=0, nobj;
+
+  dprintf(0,"Scanning snapshot\n");
+  maxobj = 0;
+  
+  for(;;) {
+    get_history(instr);
+    if (!get_tag_ok(instr,SnapShotTag))
+      return nsnap;
+
+     get_set(instr,SnapShotTag);
+     get_set(instr, ParametersTag);
+     get_data(instr, NobjTag, IntType, &nobj, 0);
+     if (maxobj == 0) 
+       maxobj = nobj;
+     if (maxobj != nobj)
+       error("Cannot process snapshots with unequal number of bodies: %d != %d", nobj,maxobj);
+     get_tes(instr, ParametersTag);
+     get_tes(instr,SnapShotTag);
+     nsnap++;
+  }
+}
+
 /*
  * READ_SNAP: read next snapshot from input stream
  */
@@ -152,11 +234,14 @@ int read_snap()
 {				
   int i, cs;
   static bool first = TRUE;
+  static int no_mass = 0;
     
   for(;;) {  /* loop until one snapshot found */
     get_history(instr);
 
     if (!get_tag_ok(instr,SnapShotTag)) {      /* we DO need a SnapShot */
+        if (no_mass)
+	    warning("There were %d snapshots with no masses. Total mass=1 was set" , no_mass);
 	return 0;
     }
         
@@ -169,7 +254,7 @@ int read_snap()
 	} 
 	dprintf(1,"."); fflush(stderr);
 	if (nobj>MOBJ)
-	  error ("read_snap: not enough declared space to get data");
+	  error ("read_snap: not enough memory; only space for %d bodies",MOBJ);
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
 		get_data(instr,TimeTag,RealType,&tsnap,0);
 	else
@@ -189,8 +274,9 @@ int read_snap()
            get_data(instr, MassTag, RealType, mass, nobj, 0);
            Qmass=TRUE;
          }
-         else if (!Qmass) {	   
-              dprintf (0,"Warning: no masses present: ASSUME 1/%d\n",nobj);
+         else if (!Qmass) {
+     	      no_mass++;
+              dprintf (1,"Warning: no masses present: ASSUME 1/%d\n",nobj);
               for (i=0; i<nobj; i++)
                  mass[i] = 1.0/(double)nobj;
          }
