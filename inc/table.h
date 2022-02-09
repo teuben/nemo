@@ -60,7 +60,7 @@ typedef struct {
 // int linelen = 0;
 // char *line = NULL;
 // 
-// tab_getline(&line,&linelen);   // initialize
+// tab_setline(&line,&linelen,MAX_LINELEN);   // initialize
 // 
 // tab_open(instr, &table, mode);
 // while (tab_line(table, &line, &linelen)) {    // getline
