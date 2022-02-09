@@ -112,7 +112,7 @@ xvpsnap: xvpsnap.c
 snap3dv: snap3dv.c
 	$(CC) $(CFLAGS) -o snap3dv snap3dv.c  $(NEMO_LIBS)
 
-snaptipsy snaptipsy_add: snaptipsy.c
+snaptipsy snaptipsy_acc: snaptipsy.c
 	$(CC) $(CFLAGS) -o snaptipsy snaptipsy.c  $(NEMO_LIBS)
 	$(CC) $(CFLAGS) -DHAVE_BOOM -o snaptipsy_acc snaptipsy.c  $(NEMO_LIBS)
 
