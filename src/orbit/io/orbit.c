@@ -24,6 +24,7 @@
  *  12-nov-2015 V5.0  some support for split Pos/Vel            pjt
  *  10-dec-2019 V5.1  optional support for PHI/ACC              pjt
  *   5-oct-2021 V5.2  fix for 3D orbits and printing PHI/ACC    pjt
+ *   8-feb-2022       free the extra PHI/ACC                    pjt
  *------------------------------------------------------------------------------
  */
 
@@ -166,6 +167,11 @@ void free_orbit(orbitptr optr)
     free( (char *) TimePath(optr) );
     free( (char *) PhasePath(optr) );
     free( (char *) IOM(optr) );
+    free( (char *) IOMERR(optr) );
+#ifdef ORBIT_PHI
+    free( (char *) PhiPath(optr) );
+    free( (char *) AccPath(optr) );
+#endif    
     free( (char *) optr );
 }
 
