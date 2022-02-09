@@ -1,18 +1,18 @@
 .TH STOO 1NEMO "8 February 2012" 
 
 .SH "NAME"
-stoo \- convert snapshot to orbit: choose one or more particles
+stoo \- convert snapshot to orbit
 
 .SH "SYNOPSIS"
 .PP
 \fBstoo in=\fPsnapshot \fBout=\fPorbit [parameter=value]
 
 .SH "DESCRIPTION"
-\fBstoo\fP selects one or more bodies from a snapshot file,
-and converts it to orbit format, for further processing. Orbits are
+\fBstoo\fP selects one or more bodies from a snapshot file
+and converts it to orbit format. Orbits are
 stored sequentially, the Key field in the snapshot is used to
 identify the particle making this orbit. If no Key field is present,
-the first snapshot has key 0.
+the first body has key 0.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -43,11 +43,12 @@ to scan the input snapshot. However, if the input is from a pipe,
 .SH "EXAMPLES"
 Here is an example of producing a large snapshot, in single precision, with
 \fIgyrfalcon(1NEMO)\fP. Since currently \fIstoo(1NEMO)\fP cannot read such
-single precision Positon/Velocity, they need to be converted via
+single precision Positon/Velocity yet, they need to be converted via
 \fIsnapcopy(1NEMO)\fP. Some timings are given.  The input snapshot is 430MB,
 the output snapshot and orbit file are 860MB.
 .nf
 
+   mkplummer p10k 10000
    gyrfalcON p10k p10k.out tstop=100 step=0.1 kmax=8 eps=0.1 give=mxvap > p10k.log
 
    /usr/bin/time snapcopy p10k.out tmp.out
