@@ -18,12 +18,11 @@
  *                           use mdarray for dynamic snapshot
  *
  *
- *  @todo    force nsteps > 0 if input is a pipe
- *           deal with PhaseSpace as well as split Pos/Vel
- *           deal with no Potential/Accelleration
+ *  @todo    deal with no Potential/Accelleration
  */
 
 #include <stdinc.h>
+#include <unistd.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
@@ -38,7 +37,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=-1\n			which particles to take (-1=all, 0=first)",
   "nsteps=0\n	                max orbit length allocated in case of pipe",
-  "VERSION=3.4\n		8-feb-2022 PJT",
+  "VERSION=3.4a\n		8-feb-2022 PJT",
   NULL,
 };
 
@@ -56,7 +55,7 @@ int    norb;                    /* number of orbits to extract */
 int    maxobj = 0;
 real   tsnap;			/* time of snapshot */
 
-//#define USE_MDARRAY           /* seems not to work yet */
+#define USE_MDARRAY           /* seems not to work yet */
 
 #if defined(USE_MDARRAY)
   int MOBJ = 0;
@@ -86,6 +85,13 @@ orbitptr *optr;			/* pointer to orbit pointers */
 int read_snap();
 int scan_snap();
 void alloc_snap(int);
+
+bool ispipe(stream instr)
+{
+  off_t try = lseek(fileno(instr), 0, SEEK_CUR);
+  if (try < 0) return TRUE;
+  return FALSE;
+}
 
 void nemo_main()
 {
@@ -93,12 +99,14 @@ void nemo_main()
 
   iname = getparam("in");
   oname = getparam("out");
-  nsteps = getiparam("nsteps");
-    
   instr  = stropen(iname,"r");		/* read from snapshot */
   outstr = stropen(oname,"w");		/* write to orbit */
+  nsteps = getiparam("nsteps");
 
   if (nsteps == 0)  {
+    if (ispipe(instr))
+      error("Need to set nsteps= for pipe files");
+
     nsteps = scan_snap();
     dprintf(0,"Found %d snapshots with maxobj=%d\n",nsteps,maxobj);
     alloc_snap(maxobj);
@@ -271,7 +279,7 @@ int read_snap()
       get_set(instr, ParticlesTag);
          get_data(instr, CoordSystemTag, IntType, &cs, 0);
          if (get_tag_ok(instr,MassTag)) {
-           get_data(instr, MassTag, RealType, mass, nobj, 0);
+           get_data_coerced(instr, MassTag, RealType, mass, nobj, 0);
            Qmass=TRUE;
          }
          else if (!Qmass) {
@@ -280,8 +288,12 @@ int read_snap()
               for (i=0; i<nobj; i++)
                  mass[i] = 1.0/(double)nobj;
          }
-         
-         get_data(instr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
+         if (get_tag_ok(instr,PhaseSpaceTag))
+	   get_data(instr, PhaseSpaceTag, RealType, &phase[0][0][0], nobj, 2, NDIM, 0);
+	 else {
+	   get_data_coerced(instr, PosTag, RealType, &phase[0][0][0], nobj, NDIM, 0);
+	   get_data_coerced(instr, VelTag, RealType, &phase[0][1][0], nobj, NDIM, 0);
+	 }
 	 /* need additional Qkey here ? */
 	 if (get_tag_ok(instr,KeyTag))
 	   get_data(instr, KeyTag, IntType, key, nobj, 0);
@@ -290,8 +302,8 @@ int read_snap()
 	   for (i=0; i<nobj; i++) key[i] = i;
 	 }
 #ifdef ORBIT_PHI
-	 get_data(instr,PotentialTag,RealType,phi,nobj,0);
-	 get_data(instr,AccTag,RealType,acc,nobj,NDIM,0);
+	 get_data_coerced(instr,PotentialTag,RealType,phi,nobj,0);
+	 get_data_coerced(instr,AccTag,RealType,&acc[0][0],nobj,NDIM,0);
 #endif	 
       get_tes(instr,ParticlesTag);
     get_tes(instr,SnapShotTag);
