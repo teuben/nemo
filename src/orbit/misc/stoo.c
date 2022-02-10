@@ -17,7 +17,6 @@
  *       8-feb-2022     V3.4 stopped massive memory leak, add scan_snap() for files
  *                           use mdarray for dynamic snapshot
  *
- *
  *  @todo    deal with no Potential/Accelleration
  */
 
@@ -37,7 +36,7 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=-1\n			which particles to take (-1=all, 0=first)",
   "nsteps=0\n	                max orbit length allocated in case of pipe",
-  "VERSION=3.4a\n		8-feb-2022 PJT",
+  "VERSION=3.4b\n		9-feb-2022 PJT",
   NULL,
 };
 
@@ -48,14 +47,12 @@ string iname, oname;		/* file names */
 stream instr,outstr;		/* file pointers */
 string headline;
 
- 	/* global snapshot stuff */
-
 int    nobj;                    /* number of bodies per snapshot */
-int    norb;                    /* number of orbits to extract */
-int    maxobj = 0;
+int    norb;                    /* number of bodies to extract for orbits */
+int    nsteps;                  /* number of snapshots to use for each orbit */
 real   tsnap;			/* time of snapshot */
 
-#define USE_MDARRAY           /* seems not to work yet */
+#define USE_MDARRAY
 
 #if defined(USE_MDARRAY)
   int MOBJ = 0;
@@ -77,9 +74,8 @@ real   tsnap;			/* time of snapshot */
 
 
 bool   Qtime, Qmass, Qkey;
-	/* global orbit stuff */
 
-int    ibody, nsteps;		/* allocation */
+int    ibody;	
 orbitptr *optr;			/* pointer to orbit pointers */
 
 int read_snap();
@@ -108,22 +104,22 @@ void nemo_main()
       error("Need to set nsteps= for pipe files");
 
     nsteps = scan_snap();
-    dprintf(0,"Found %d snapshots with maxobj=%d\n",nsteps,maxobj);
-    alloc_snap(maxobj);
-
-    norb = nemoinpi(getparam("ibody"),isel,MOBJ);
-    if (norb < 0) error("%d: ibody=%s bad",norb,getparam("ibody"));
-    if (norb == 0) warning("no orbits will be output");
-    rewind(instr);    
+    dprintf(0,"Found %d snapshots with nobj=%d\n",nsteps,nobj);
+    alloc_snap(nobj);
+    rewind(instr);
   } else {
     dprintf(0,"Setting orbits for %d snapshots\n",nsteps);
   }
 
   i = 0;				/* counter of snapshots/timesteps */
-  while (read_snap()) {		        /* read until exausted */
+  while (read_snap()) {
       if (i==0) {			/* first time around */
+	norb = nemoinpi(getparam("ibody"),isel,MOBJ);
+	if (norb < 0)  error("%d: ibody=%s bad",norb,getparam("ibody"));
+	if (norb == 0) error("no orbits will be output");
+	
 	if (isel[0] < 0) {              /* special case selecting all */
-	  dprintf(0,"Selecting all %d bodies for conversion to an orbit\n", nobj);
+	  dprintf(1,"Selecting all %d bodies for conversion to an orbit\n", nobj);
 	  norb = nobj;
 	  for (j=0; j<norb; j++)
 	    isel[j] = j;
@@ -133,20 +129,18 @@ void nemo_main()
 	for (j=0; j<norb; j++) {
 	  optr[j] = NULL;
 	  allocate_orbit (&optr[j],NDIM,nsteps);
-	}
-  
-	for (j=0; j<norb; j++) {
+	  
 	  ibody = isel[j];
-	  if (ibody>=nobj)
-	    error("request to output ibody=%d, however nobj=%d",ibody,nobj);
+	  if (ibody < 0 || ibody>=nobj)
+	    error("illegal ibody=%d,  nobj=%d",ibody,nobj);
 	  Masso(optr[j]) = mass[ibody];
 	  I1(optr[j]) = I2(optr[j]) = I3(optr[j]) = 0.0;
 	}
-      } else {
-	if (i>=nsteps) {
-	  warning("too many timesteps requested, stopped at %d",i);
-	  break;
-	  }
+	dprintf(0,"Selecting %d bodies for orbits, %d..%d\n",norb,isel[0],isel[norb-1]);
+  
+      } else if (i>=nsteps) {
+	warning("too many timesteps requested, stopped at %d",i);
+	break;
       }
       for (j=0; j<norb; j++) {
 	ibody = isel[j];
@@ -172,18 +166,22 @@ void nemo_main()
 	Nsteps(optr[j]) = i;			/* record actual number */      
   }
   strclose(instr);
-  dprintf(0,"Writing orbits\n");
-  
-  put_history(outstr);
-  for (j=0; j<norb; j++) {
-    if (j%(norb/50)==0) dprintf(0,".");
-    write_orbit(outstr,optr[j]);		/* write orbit to file */
-    free_orbit(optr[j]);
+  dprintf(0,"Writing %d orbits\n",norb);
+
+  if (norb > 0) {
+    put_history(outstr);
+    for (j=0; j<norb; j++) {
+      if (norb>50 && j%(norb/50)==0) dprintf(0,".");
+      //if (norb>50 && j%(norb/50)==0) progress(0.0,".");      
+      write_orbit(outstr,optr[j]);		/* write orbit to file */
+      free_orbit(optr[j]);
+    }
+    free(optr);
   }
-  free(optr);
-  dprintf(0,"\nFound %d snapshots\n",i);
+  dprintf(0,"\n");
+  dprintf(0,"Found %d snapshots\n",i);
   
-  strclose(outstr);			/* close files */
+  strclose(outstr);		        	/* close files */
 }
 
 
@@ -207,15 +205,15 @@ void alloc_snap(int nbody)
 
 /*
  * SCAN_SNAP:   scan to find how many snapshots there are;
+ *              also ensuring they are all the same size
  */
 
 int scan_snap()
 {
-  int nsnap=0, nobj;
+  int nsnap = 0;
+  int maxobj = 0;
 
   dprintf(0,"Scanning snapshot\n");
-  maxobj = 0;
-  
   for(;;) {
     get_history(instr);
     if (!get_tag_ok(instr,SnapShotTag))
@@ -229,6 +227,10 @@ int scan_snap()
      if (maxobj != nobj)
        error("Cannot process snapshots with unequal number of bodies: %d != %d", nobj,maxobj);
      get_tes(instr, ParametersTag);
+     if (!get_tag_ok(instr,ParticlesTag)) {
+       get_tes(instr,SnapShotTag);
+       continue;
+     }
      get_tes(instr,SnapShotTag);
      nsnap++;
   }
@@ -236,6 +238,7 @@ int scan_snap()
 
 /*
  * READ_SNAP: read next snapshot from input stream
+ *
  */
 
 int read_snap()
@@ -261,6 +264,10 @@ int read_snap()
 	  first = FALSE;
 	} 
 	dprintf(1,"."); fflush(stderr);
+	if (MOBJ == 0) {
+	  alloc_snap(nobj);
+	  // this will set MOBJ if allowed
+	}
 	if (nobj>MOBJ)
 	  error ("read_snap: not enough memory; only space for %d bodies",MOBJ);
 	if ((Qtime=get_tag_ok(instr,TimeTag)))
@@ -270,7 +277,7 @@ int read_snap()
       get_tes(instr,ParametersTag);
       
       if (!get_tag_ok(instr, ParticlesTag)) {		/* do it again, we need ParticlesTag */
-						/*   normally happens because of DiagnosticsTag */
+	                                                /*   normally happens because of DiagnosticsTag */
 	 get_tes(instr,SnapShotTag);			/* close this SnapShotTag */
 	 continue;					/* and loop again to read next one */
       }
