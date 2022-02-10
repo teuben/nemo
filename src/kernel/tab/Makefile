@@ -16,7 +16,7 @@ LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o) 
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab meanmed \
 	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend \
 	   tabstat tabdms txtpar
-TESTFILES= getaline
+TESTFILES= getaline tabletest
 
 help:
 	@echo NEMO/src/kernel/tab
@@ -150,3 +150,6 @@ getaline:	getaline.c
 	$(CC) -DTESTBED $(CFLAGS) -o getaline getaline.c \
 		$(NEMO_LIBS) $(EL) -lm
 
+tabletest:	table.c
+	$(CC) -DTESTBED $(CFLAGS) -o tabletest table.c \
+		$(NEMO_LIBS) $(EL) -lm
