@@ -1,6 +1,8 @@
 /*
  *  various support for table I/O
  *
+ *  feb-2022     Table I/O - V2.0
+ *
  *  Additional support is given via burststring.c and extstring.c
  *
  */
@@ -18,7 +20,7 @@ int get_itable(stream , int , int *, int **, int);
 int get_ftable(stream , int , int *, string *, real **, int);
 
 /* table.c */
-int get_line(stream, string);		/* should be deprecated */
+int get_line(stream, string);		/* should be deprecated in V2 -> getline() */
 void parse(int, string, double *, int);
 void strinsert(string, string, int);
 int iscomment(string);

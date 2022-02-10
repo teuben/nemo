@@ -23,6 +23,7 @@
 #define MAX_LINELEN  16384
 #endif
 
+
 /*
  * insert a string 'b' into 'a' replacing the first 'n' positions into 'a'
  *      (see als hsh.h in ..../hermes/lib  --  PJT)
@@ -53,6 +54,14 @@ void strinsert(char *a, char *b, int n)
 int get_line(stream instr, char *line)
 {
 	int  c, i=0;
+#if 1	
+	static int _first = TRUE;
+
+	if (_first) {
+	  warning("old get_line() is still used - it is being deprecated");
+	  _first = FALSE;
+	}
+#endif
 	
 	for(;;) {
 		c=getc(instr);
