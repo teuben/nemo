@@ -35,7 +35,7 @@ string defv[] = {
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
     "ibody=-1\n         One body to select (not implemented yet)",
-    "VERSION=1.3\n      27-dec-2019 PJT",
+    "VERSION=1.3a\n     10-feb-2022 PJT",
     NULL,
 };
 
@@ -53,9 +53,12 @@ void nemo_main(void)
     string times, precision, keep;
     Body   *btab = NULL, *bpi, *bpo;
     int    i, nbody, nout, nreject, bitsi, bitso, vis, visnow, vismax;
+    int    isnap = 0;
     bool   Qall;
     int    ibody = getiparam("ibody");
     iproc_body sfunc;
+
+    if (ibody >=0) warning("ibody not implemented yet");
 
     times = getparam("times");
     sfunc = btitrans(getparam("select"));
@@ -145,5 +148,7 @@ void nemo_main(void)
 				tsnap,nout);
         } else
            dprintf(0,"No particles to copy at tsnap=%f\n",tsnap);
+	isnap++;
+	progress(1.0,"Processed snapshot %d", isnap);
     }
 }
