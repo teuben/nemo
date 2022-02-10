@@ -14,6 +14,7 @@
  
 #include <stdinc.h>
 #include <ctype.h>
+#include <table.h>
 
 #if !defined(HUGE)
 #define HUGE 1e20
@@ -152,3 +153,62 @@ bool **Qsel;
 
 #endif
 
+
+
+
+#ifdef TESTBED
+
+#include <getparam.h>
+
+string defv[] = {
+    "file=???\n           Input or Output file",
+    "mode=r\n             Read (r) or Write (w)",
+    "VERSION=2.0\n        10-feb-2022 PJT",
+    NULL,
+};
+
+string usage = "testing tables";
+
+
+void nemo_main()
+{
+    tableptr tp1, tp2;
+    stream instr, outstr;
+#if 1
+    size_t linelen = 0;                  // getline() is allowed to start from 0
+    char *line = NULL;
+#else
+    size_t linelen = MAX_LINELEN;        // does we need to worry about the extra newline
+    char *line = allocate(linelen);      // allocate formally has the wrong argument type
+    //char *line = malloc(linelen);
+#endif
+
+    if (strcmp(getparam("mode"),"w") == 0) {
+      dprintf(0,"write mode\n");
+      
+      outstr = stropen(getparam("file"),"w");
+
+#if 0
+      // special test to get an embedded 0
+      char *buffer = "A\n\0\nHello\n";
+      fwrite(buffer,10,1,outstr);
+#endif
+      
+      strclose(outstr);
+      
+    } else {
+      dprintf(0,"read mode\n");
+      
+      instr = stropen(getparam("file"),"r");
+      dprintf(0,"linelen=%ld\n", linelen);
+      
+      while (getline(&line, &linelen, instr) >= 0)
+	printf("line[%ld] = %s\n", linelen, line);
+      
+      free(line);
+    }
+
+}
+
+
+#endif
