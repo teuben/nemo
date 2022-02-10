@@ -9,6 +9,9 @@
 
 #ifndef _h_table
 #define _h_table
+
+//  code can use #if defined(TABLE2) to test out new features.
+#define TABLE2
  
 /* getaline.c */
 char *getaline(stream);
@@ -57,7 +60,7 @@ typedef struct {
 //
 //
 // stream instr = stropen(getparam("in"),"r");
-// Table *table = NULL;
+// table *table = NULL;
 // int mode = 0;
 // int linelen = 0;
 // char *line = NULL;
