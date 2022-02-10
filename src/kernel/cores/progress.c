@@ -27,13 +27,13 @@ int progress(double dtime, string fmt, ...)
       else
 	bypass = 1;
       cpu0 = cputime()*60.0;
-      dprintf(0,"Progress bar initialized; dtime=%g cpu0=%g; bypass=%d\n",dtime,cpu0,bypass);
+      dprintf(1,"Progress bar initialized; dtime=%g cpu0=%g; bypass=%d\n",dtime,cpu0,bypass);
     } 
     if (bypass) return 0;
 
     if (dtime > 0) {
       cpu1 = cputime()*60.0;
-      dprintf(1,"check: %g %g\n",cpu0,cpu1);
+      dprintf(2,"check: %g %g\n",cpu0,cpu1);
       if (cpu1-cpu0 < dtime) return 0;
       cpu0 = cpu1;
     }
