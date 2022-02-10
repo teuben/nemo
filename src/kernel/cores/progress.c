@@ -64,7 +64,7 @@ string defv[]={
   "m=1\n          report every m",
   "sleep=0\n	  delay?",
   "cpu=0\n        cpu delay?",
-  "compute=1\n    compute something",
+  "compute=1\n    compute something quadratic in this",
   "int=f\n        check int value",
   "VERSION=1.2\n  10-feb-2022 PJT",
   NULL,
@@ -80,9 +80,11 @@ void do_compute(int n)
   a = 2.0;
   b = 3.0;
   c = 0.0;
-  for (i=0; i<n; i++)
-  for (j=0; j<n; j++)
-    c += sqrt(a)*sqrt(a) + sqrt(b)*sqrt(b);
+  for (i=0; i<n; i++) {
+    for (j=0; j<n; j++)
+      c += sqrt(a)*sqrt(a) + sqrt(b)*sqrt(b);
+    progress(1.0,"computing %d",i);
+  }
   dprintf(2,"c=%g\n",c);
 }
 
