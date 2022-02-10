@@ -22,12 +22,12 @@ int progress(double dtime, string fmt, ...)
     double cpu1;
 
     if (bypass < 0) {                /* initialize a few things */
-      dprintf(0,"Progress bar initialized; dtime=%g cpu0=%g\n",dtime,cpu0);
       if (isatty(fileno(stderr)))
 	bypass = 0;
       else
 	bypass = 1;
       cpu0 = cputime()*60.0;
+      dprintf(0,"Progress bar initialized; dtime=%g cpu0=%g; bypass=%d\n",dtime,cpu0,bypass);
     } 
     if (bypass) return 0;
 
@@ -57,6 +57,8 @@ int progress(double dtime, string fmt, ...)
 
 #ifdef TESTBED
 
+#include <getparam.h>
+
 string defv[]={
   "n=10\n         number of loops",
   "m=1\n          report every m",
@@ -84,7 +86,7 @@ void do_compute(int n)
   dprintf(2,"c=%g\n",c);
 }
 
-nemo_main()
+void nemo_main()
 {
   int k, n0, n = getiparam("n");
   int m = getiparam("m");
