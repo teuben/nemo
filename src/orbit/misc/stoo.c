@@ -139,7 +139,7 @@ void nemo_main()
 	dprintf(0,"Selecting %d bodies for orbits, %d..%d\n",norb,isel[0],isel[norb-1]);
   
       } else if (i>=nsteps) {
-	warning("too many timesteps requested, stopped at %d",i);
+	warning("more snapshots found, stopped at %d",i);
 	break;
       }
       for (j=0; j<norb; j++) {
@@ -163,7 +163,8 @@ void nemo_main()
       }
       i++;
       for (j=0; j<norb; j++)
-	Nsteps(optr[j]) = i;			/* record actual number */      
+	Nsteps(optr[j]) = i;			/* record actual number */
+      progress(1.0,"processed snapshot %d/%d", i,nsteps);      
   }
   strclose(instr);
   dprintf(0,"Writing %d orbits\n",norb);
@@ -171,15 +172,13 @@ void nemo_main()
   if (norb > 0) {
     put_history(outstr);
     for (j=0; j<norb; j++) {
-      if (norb>50 && j%(norb/50)==0) dprintf(0,".");
-      //if (norb>50 && j%(norb/50)==0) progress(0.0,".");      
+      progress(1.0,"writing orbit %d", j);
       write_orbit(outstr,optr[j]);		/* write orbit to file */
       free_orbit(optr[j]);
     }
     free(optr);
   }
-  dprintf(0,"\n");
-  dprintf(0,"Found %d snapshots\n",i);
+  dprintf(0,"Processed %d snapshots\n",i);
   
   strclose(outstr);		        	/* close files */
 }
