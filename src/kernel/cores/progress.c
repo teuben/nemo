@@ -66,7 +66,7 @@ string defv[]={
   "cpu=0\n        cpu delay?",
   "compute=1\n    compute something",
   "int=f\n        check int value",
-  "VERSION=1.1\n  1-nov-04 PJT",
+  "VERSION=1.2\n  10-feb-2022 PJT",
   NULL,
 };
 
