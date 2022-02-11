@@ -53,6 +53,10 @@ typedef struct {
   string *lines;    // pointer to 'nr' lines (depending on mode)
 } table, *tableptr;
 
+void    table_open(stream instr, tableptr *tptr, int mode);
+void    table_close(tableptr tptr);
+ssize_t table_line(tableptr tptr, char **line, size_t *linelen);
+
 #endif
 
 // Here's a top level example snippet of code how we could read a table

@@ -153,6 +153,37 @@ bool **Qsel;
 
 #endif
 
+void table_open(stream instr, tableptr *tptr, int mode)
+{
+  if (*tptr == NULL)
+    *tptr = (tableptr) allocate(sizeof(table));
+
+  (*tptr)->str   = instr;
+  (*tptr)->mode  = mode;
+  (*tptr)->lines = NULL;
+
+
+  // in full buffering mode, the whole file is read into memory
+  // using the *tptr->lines (or linked list?)
+}
+
+void table_close(tableptr tptr)
+{
+  
+}
+
+ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
+{
+  // in simple (streaming) mode, just get the next line
+  if (tptr->mode == 0)
+    return getline(line, linelen, tptr->str);
+
+
+  
+  error("Unsupported table mode=%d", tptr->mode);
+  return -1;
+}
+
 
 
 
@@ -172,7 +203,7 @@ string usage = "testing tables";
 
 void nemo_main()
 {
-    tableptr tp1, tp2;
+    tableptr tp1;
     stream instr, outstr;
 #if 1
     size_t linelen = 0;                  // getline() is allowed to start from 0
@@ -201,9 +232,19 @@ void nemo_main()
       
       instr = stropen(getparam("file"),"r");
       dprintf(0,"linelen=%ld\n", linelen);
-      
+#if 0
+      // original C
       while (getline(&line, &linelen, instr) >= 0)
 	printf("line[%ld] = %s\n", linelen, line);
+#else
+      // new style table2 
+      tp1 = NULL;
+      table_open(instr, &tp1, 0);
+      while (table_line(tp1, &line, &linelen) >= 0)
+	printf("line[%ld] = %s\n", linelen, line);
+      table_close(tp1);
+      
+#endif
       
       free(line);
     }
