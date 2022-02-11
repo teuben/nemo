@@ -153,18 +153,19 @@ bool **Qsel;
 
 #endif
 
-void table_open(stream instr, tableptr *tptr, int mode)
+table *table_open(stream instr, int mode)
 {
-  if (*tptr == NULL)
-    *tptr = (tableptr) allocate(sizeof(table));
+  tableptr tptr = (tableptr) allocate(sizeof(table));
 
-  (*tptr)->str   = instr;
-  (*tptr)->mode  = mode;
-  (*tptr)->lines = NULL;
+  tptr->str   = instr;
+  tptr->mode  = mode;
+  tptr->lines = NULL;
 
 
   // in full buffering mode, the whole file is read into memory
   // using the *tptr->lines (or linked list?)
+
+  return tptr;
 }
 
 void table_close(tableptr tptr)
@@ -176,8 +177,8 @@ ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
 {
   // in simple (streaming) mode, just get the next line
   if (tptr->mode == 0)
+    // return getdelim(line, linelen, ' ', tptr->str);
     return getline(line, linelen, tptr->str);
-
 
   
   error("Unsupported table mode=%d", tptr->mode);
@@ -238,12 +239,10 @@ void nemo_main()
 	printf("line[%ld] = %s\n", linelen, line);
 #else
       // new style table2 
-      tp1 = NULL;
-      table_open(instr, &tp1, 0);
+      tp1 = table_open(instr, 0);
       while (table_line(tp1, &line, &linelen) >= 0)
 	printf("line[%ld] = %s\n", linelen, line);
       table_close(tp1);
-      
 #endif
       
       free(line);

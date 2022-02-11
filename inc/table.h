@@ -53,28 +53,12 @@ typedef struct {
   string *lines;    // pointer to 'nr' lines (depending on mode)
 } table, *tableptr;
 
-void    table_open(stream instr, tableptr *tptr, int mode);
+//  this API is not final yet
+table  *table_open(stream instr, int mode);
 void    table_close(tableptr tptr);
 ssize_t table_line(tableptr tptr, char **line, size_t *linelen);
 
 #endif
 
-// Here's a top level example snippet of code how we could read a table
-// See tabbench1.c and tabbench2.c for examples with old and new code
-//
-//
-// stream instr = stropen(getparam("in"),"r");
-// table *table = NULL;
-// int mode = 0;
-// int linelen = 0;
-// char *line = NULL;
-// 
-// tab_setline(&line,&linelen,MAX_LINELEN);   // initialize
-// 
-// tab_open(instr, &table, mode);
-// while (tab_line(table, &line, &linelen)) {    // getline
-//    printf("%s\n",line);
-// }
-// tab_close(table);
-// strclose(instr);
+
 
