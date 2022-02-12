@@ -1,0 +1,25 @@
+#! /usr/bin/bash
+#
+
+if [ "$#" == "0" ]; then
+    echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    exit 0
+fi
+
+out=$1
+if [ -e "$out" ]; then
+    echo "Cannot overwrite $out"
+    exit 1
+fi
+
+shift
+
+for f in $*; do
+    # tipsysnap_acc $f - | csf - - item=SnapShot >> tmp.snap
+    if [ "$out" == "-" ]; then
+	tipsysnap_acc $f -
+    else
+	tipsysnap_acc $f -  >> $out
+    fi
+done
+
