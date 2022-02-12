@@ -1,6 +1,11 @@
 #! /usr/bin/bash
 #
 
+#    bonsai's v2
+t2s=tipsysnap
+#    bonsai's v6 dialect
+t2s=tipsysnap_acc
+
 if [ "$#" == "0" ]; then
     echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
     exit 0
@@ -17,9 +22,9 @@ shift
 for f in $*; do
     # tipsysnap_acc $f - | csf - - item=SnapShot >> tmp.snap
     if [ "$out" == "-" ]; then
-	tipsysnap_acc $f -
+	$t2s $f -	
     else
-	tipsysnap_acc $f -  >> $out
+	$t2s $f -  >> $out
     fi
 done
 
