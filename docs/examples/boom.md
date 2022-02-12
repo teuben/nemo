@@ -31,7 +31,7 @@ and an example:
         stoo  p100.snap  p100.orb
         orboom p100.snap p100.boom
 	  
-	    snappat ??
+        snappat ??
 
 2. bonsai produces tipsy files, one file per snapshot
 
@@ -49,23 +49,58 @@ but the I/O routines store the snapshot like a "A"-"P"
 
 ### nbody
 
-     mkplummer p3 1000
-     gyrfalcON p3 p3.out eps=0.1 kmax=4 step=0.0625 tstop=125 give=mxvap > p3.log
-     4.30user 0.09system 0:04.41elapsed 99%CPU
+Make a 1000 body Plummer sphere, and integrate for 2000 steps, saving each step
+
+     mkplummer p3 1000 seed=123
+     gyrfalcON p3 p3a.out eps=0.1 kmax=4 step=0.0625 tstop=125 give=mxvap > p3a.log
+     
+
+### Comparing simulations
+
+One can also run a second simulation, e.g. with finer steps, or better force accuracy
+
+     gyrfalcON p3 p3b.out eps=0.1 kmax=5 step=0.0625 tstop=125 give=mxvap > p3b.log
+
+and compare the orbits visually, side by side in two panels:
+
+     snapcopy p3a.out - i=10 | snapmerge - - | snapplot3 - yapp=1/xs
+     snapcopy p3b.out - i=10 | snapmerge - - | snapplot3 - yapp=2/xs
+
+![alt text](boom1.png "Comparing two orbits")
+
+or another way to compare a selected observable and look at the whole ensemble of particles. Here the
+three quarticles in "x" are plotted as function of time:
+
+     snapcmp p3a.out p3b.out | tabplot - 1 3,4,5
+
+Energy conservation can be viewed as follows:
+
+     tabplot p3a.log 1 2
+     tabstat p3a.log  2 qac=t
+
+and energy conservation for a specific particle:
+
+     snapplot p3a.out xvar=t yvar=etot visib=i==10
 
 ### convert to orbits
+
+A snapshot can be "transposed" into a series of orbits, one for each particle. We have two formats for
+this:
 
      stoo p3.out p3.orb
      orboom p3.out p3.boom odm=f
 
-### plot-1
+Plotting an orbit
 
      csf p3.boom - Orbit 11 | orbplot -
+     csf p3.orb  - Orbit 11 | orbplot -
+     snapcopy p3.out - i=10 | snapmerge - - | snapplot -
 
-### plot-2
+Plotting an orbit density map (ODM) :
 
-     snapcopy p3.out - select=i==10 | snapmerge - - | snapplot -
-     snapcopy p3.out - select=i==10 | snapmerge - - | snapplot3 -
-     snapcopy p3.out - select=i==10 | snapmerge - - | snapgrid - - | ccdplot -
+     snapcopy p3.out - i=10 | snapmerge - - | snapgrid - - | ccdplot -
 
-x
+or if you just prefer a binary map with 0 and non-zero:
+
+     snapcopy p3.out - i=10 | snapmerge - - | snapgrid - - mean=t | ccdplot -
+
