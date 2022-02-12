@@ -1,9 +1,12 @@
-.TH ORBOOM 1NEMO "2 January 2020"
-.SH NAME
+.TH ORBOOM 1NEMO "11 February 2022"
+
+.SH "NAME"
 orboom \- Transform an orbit and ODM into 'BOOM' HDF [still testing]
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBorboom\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 This program is under development for the BOOM project. It will take
 some combination input of a simulation (series of snapshots),
 orbit(s) and ODM's  [all to be determined] and turn them into a BOOM hdf
@@ -11,7 +14,8 @@ for further analysis outside of NEMO.
 .PP
 For the ODM (Orbit Density Map) some gridding parameters are needed
 to represent a simple cube, so we only need number of pixels and box size.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -55,7 +59,8 @@ Output ODM?
 \fBhdf=t|f\fP
 Output file format in HDF ?  If not, NEMO format will be used.
 Currently only NEMO format is supported. [f]
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The current version just writes NEMO Orbit/Image file.  To extract
 a certain orbit or image, here is an example
 .nf
@@ -74,20 +79,21 @@ Of course there two other ways to select that same orbit (11th one in this examp
 from a simulation, but both methods need a patch for more efficiency:
 .nf
 
-   stoo p100.out - ibody=10 | tsf -     [this one is currently broken]
-   snapcopy p100.out - select=i==10 ibody=10 | snapmerge - - | snapplot -    [ibody not working yet]
+   stoo p100.out - ibody=10 | tsf -   
+   snapcopy p100.out - select=i==10 ibody=10 | snapmerge - - | snapplot -   
    
 .fi
 The latter one is useful to view a 3D orbit with
 \fIsnapplot3(1NEMO)\fP or \fIglnemo2(1NEMO)\fP
-.SH SEE ALSO
-boom(5NEMO), h5dump(1), orbint(1NEMO), orbsos(1NEMO), snapgrid(1NEMO)
+.SH "SEE ALSO"
+boom(5NEMO), h5dump(1), orbint(1NEMO), stoo(1NEMO), orbsos(1NEMO), snapgrid(1NEMO)
+
 .fi
-.SH FILES
+.SH "FILES"
 .nf
 src/orbit/misc - source code
 .fi
-.SH COMPILATION
+.SH "COMPILATION"
 Although \fBorboom\fP compiles via the Makefile (and mknemo), this is the first program in NEMO that
 combines all three major objects: SnapShot, Orbit and Image, as well as links with
 a 3rd party library (hdf5). Linking with hdf5 may require
@@ -103,7 +109,8 @@ you with this:
    rpm -ql hdf5-devel         (redhat/centos)
 
 .fi
-.SH MEMORY USAGE
+
+.SH "MEMORY USAGE"
 \fBorboom\fP is an example of a program that does a transpose of a matrix, which in some
 parts of the parameter space can cause issues. Essentially it does
 .nf
@@ -118,9 +125,11 @@ with of order
 which at 8 bytes per real means about 8GB.
 We have a benchmark to time just this operation, for which the example command will be
 written down here at some point.   There is also the I/O component.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 26-dec-2019	V0.2 Created	PJT
