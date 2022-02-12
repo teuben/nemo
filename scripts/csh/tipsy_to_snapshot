@@ -8,6 +8,7 @@ t2s=tipsysnap_acc
 
 if [ "$#" == "0" ]; then
     echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    echo "This version uses $t2s"
     exit 0
 fi
 
