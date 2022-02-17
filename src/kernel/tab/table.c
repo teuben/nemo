@@ -14,6 +14,7 @@
  
 #include <stdinc.h>
 #include <ctype.h>
+#include <table.h>
 
 #if !defined(HUGE)
 #define HUGE 1e20
@@ -22,6 +23,7 @@
 #ifndef MAX_LINELEN
 #define MAX_LINELEN  16384
 #endif
+
 
 /*
  * insert a string 'b' into 'a' replacing the first 'n' positions into 'a'
@@ -53,6 +55,14 @@ void strinsert(char *a, char *b, int n)
 int get_line(stream instr, char *line)
 {
 	int  c, i=0;
+#if 1	
+	static int _first = TRUE;
+
+	if (_first) {
+	  warning("old get_line() is still used - it is being deprecated");
+	  _first = FALSE;
+	}
+#endif
 	
 	for(;;) {
 		c=getc(instr);
@@ -143,3 +153,102 @@ bool **Qsel;
 
 #endif
 
+table *table_open(stream instr, int mode)
+{
+  tableptr tptr = (tableptr) allocate(sizeof(table));
+
+  tptr->str   = instr;
+  tptr->mode  = mode;
+  tptr->lines = NULL;
+
+
+  // in full buffering mode, the whole file is read into memory
+  // using the *tptr->lines (or linked list?)
+
+  return tptr;
+}
+
+void table_close(tableptr tptr)
+{
+  
+}
+
+ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
+{
+  // in simple (streaming) mode, just get the next line
+  if (tptr->mode == 0)
+    // return getdelim(line, linelen, ' ', tptr->str);
+    return getline(line, linelen, tptr->str);
+
+  
+  error("Unsupported table mode=%d", tptr->mode);
+  return -1;
+}
+
+
+
+
+#ifdef TESTBED
+
+#include <getparam.h>
+
+string defv[] = {
+    "file=???\n           Input or Output file",
+    "mode=r\n             Read (r) or Write (w)",
+    "VERSION=2.0\n        10-feb-2022 PJT",
+    NULL,
+};
+
+string usage = "testing tables";
+
+
+void nemo_main()
+{
+    tableptr tp1;
+    stream instr, outstr;
+#if 1
+    size_t linelen = 0;                  // getline() is allowed to start from 0
+    char *line = NULL;
+#else
+    size_t linelen = MAX_LINELEN;        // does we need to worry about the extra newline
+    char *line = allocate(linelen);      // allocate formally has the wrong argument type
+    //char *line = malloc(linelen);
+#endif
+
+    if (strcmp(getparam("mode"),"w") == 0) {
+      dprintf(0,"write mode\n");
+      
+      outstr = stropen(getparam("file"),"w");
+
+#if 0
+      // special test to get an embedded 0
+      char *buffer = "A\n\0\nHello\n";
+      fwrite(buffer,10,1,outstr);
+#endif
+      
+      strclose(outstr);
+      
+    } else {
+      dprintf(0,"read mode\n");
+      
+      instr = stropen(getparam("file"),"r");
+      dprintf(0,"linelen=%ld\n", linelen);
+#if 0
+      // original C
+      while (getline(&line, &linelen, instr) >= 0)
+	printf("line[%ld] = %s\n", linelen, line);
+#else
+      // new style table2 
+      tp1 = table_open(instr, 0);
+      while (table_line(tp1, &line, &linelen) >= 0)
+	printf("line[%ld] = %s\n", linelen, line);
+      table_close(tp1);
+#endif
+      
+      free(line);
+    }
+
+}
+
+
+#endif
