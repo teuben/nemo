@@ -4,15 +4,7 @@
  *  feb-2022     Table I/O - V2.0
  *
  *  Additional support is given via burststring.c and extstring.c
- *
- */
-
-#ifndef _h_table
-#define _h_table
-
-//  code can use #if defined(TABLE2) to test out new features.
-#define TABLE2
- 
+ *  Deprecation messages added to old routine
 /* getaline.c */
 char *getaline(stream);
 char *getsline(stream, string *);
