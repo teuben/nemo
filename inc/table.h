@@ -5,6 +5,14 @@
  *
  *  Additional support is given via burststring.c and extstring.c
  *  Deprecation messages added to old routine
+ */
+
+#ifndef _h_table
+#define _h_table
+
+//  code can use #if defined(TABLE2) to test out new features.
+#define TABLE2
+
 /* getaline.c */
 char *getaline(stream);
 char *getsline(stream, string *);
