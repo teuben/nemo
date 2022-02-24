@@ -130,6 +130,44 @@ back in the upstream, it is really not needed anymore:
 
 Which even allows you to re-use that branch name.
 
+## Common work in a branch
+
+Lets say there is a new development idea, lets call it "table2", and others will
+share the development in this "table2" branch, but until the development is done, this is not
+merged to the master yet. 
+
+1. NEMO (*upstream*) itself will start making this new development branch:
+
+      git checkout -b table2
+      ...
+	  git push
+	  
+2. others will do then branch off this new branch (user *astroumd* is used as example here):
+
+	  gh repo fork https://github.com/teuben/nemo
+      cd nemo
+      git checkout table2
+      git checkout -b myTable3
+      ...
+	  git push
+	  
+3. NEMO will merge from *astroumd* :
+
+	  git checkout -b astroumd-myTable3 table2
+	  git pull https://github.com/astroumd/nemo.git myTable3
+	  
+4. these changes can now be tested, and then properly merged and committed
+
+      git checkout table2
+      git merge --no-ff astroumd-myTable3
+      git push 
+	  
+5. after this, all collaborators will need to merge these back:
+
+	  git checkout myTable3
+	  git fetch upstream
+	  git merge upstream/table2
+
 ## Memorable git options
 
 1.  Show all files modified in a branch AAA 
