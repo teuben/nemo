@@ -1,45 +1,49 @@
-.TH TABLE 3NEMO "9 August 2020"
+.TH TABLE 3NEMO "3 March 2022"
 .SH NAME
 table_open, table_md2, table_close - new table manipulation routines (\fIdrafted\fP)
 .PP
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator routines
 .SH SYNOPSIS
+Under development.   The API with a - in front have not been implemented.
 .nf
+
 .B #include <table.h>
 .B #include <mdarray.h>
 .PP
-.B table *table_open(string fname, int rowbufsize, ? int maxrow);
-.B mdarray2 table_md2(table *t);
-.B void table_read(table *t);
-.B string *table_comments(table *t);
+.B table *table_open(string fname, int mode, ? int rowbufsize, ? int maxrow);
+.B - mdarray2 table_md2(table *t);
+.B - void table_read(table *t);
+.B - string *table_comments(table *t);
 .B void table_reset(table *t);
 .B void table_close(table *t);
 .PP
 .B int table_nrows(table *t);
 .B int table_ncols(table *t);
-.B void table_set_valid_rows(int nrows, int *rows)
-.B void table_set_valid_cols(int ncols, int *cols)
+.B - void table_set_valid_rows(int nrows, int *rows)
+.B - void table_set_valid_cols(int ncols, int *cols)
 .PP
-.B int table_next_row(table *t)   
-.B int table_next_rows(table *t)  
-.B int table_next_rowi(table *t)
-.B int table_next_rowr(table *t)
+.B - int table_next_row(table *t)   
+.B - int table_next_rows(table *t)  
+.B - int table_next_rowi(table *t)
+.B - int table_next_rowr(table *t)
 .B string table_line(table *t)
+.B ssize_t table_line1(table *t) 
+.B ssize_t table_line0(table *t, char **line, size_t *linelen);
 .PP
-.B string table_cols(table *t, int col)
-.B int  table_coli(table *t, int col)
-.B real table_colr(table *t, int col)
+.B - string table_cols(table *t, int col)
+.B - int  table_coli(table *t, int col)
+.B - real table_colr(table *t, int col)
 .PP
-.B string *table_colsp(table *t, int col) 
-.B int *table_colip(table *t, int col)
-.B real *table_colrp(table *t, int col)
+.B - string *table_colsp(table *t, int col) 
+.B - int *table_colip(table *t, int col)
+.B - real *table_colrp(table *t, int col)
 .PP
-.B string table_row(table *t, int row)
-.B string *table_rowsp(table *t, int row)
-.B int *table_rowip(table *t, int row)
-.B real *table_rowrp(table *t, int row)
+.B - string table_row(table *t, int row)
+.B - string *table_rowsp(table *t, int row)
+.B - int *table_rowip(table *t, int row)
+.B - real *table_rowrp(table *t, int row)
 .PP
-.B void table_set_ncols(int ncols) 
+.B - void table_set_ncols(int ncols) 
 .PP
 .I Old:
 .PP
@@ -64,11 +68,11 @@ Space Separated Values (SSV), Comma Separated Values (CSV) or Tab Separated Valu
 .B table_open
 opens a file for reading. The returned \fItable *\fP pointer is used in all subsequent table_ routines.
 The
-.B rowbufsize
+.B rowbufsize?
 controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
 means the whole table will be read in memory, a value of \fB1\fP will read the table line
 by line.  Values larger than 1 are planned, but not yet supported.
-.B maxrow
+.B maxrow?
 used to be in the old system a lot, but we can probably live without it. It normally is only
 needed when the input file is a pipe and the whole file needs to be read, which is now supported.
 .B table_md2
