@@ -33,30 +33,40 @@ int iscomment(string);
 //  struct.
 
 typedef struct {
+  
   string *name;    // name of the column
   string *unit;    // units 
-  int type;        // type (integer, real)
+  int type;        // type (integer, real, string)
 
 } column, *columnptr;
    
 typedef struct {
-  int  mode;        // I/O mode  (streaming, all-in-memory, ...)
-  int  type;        // type of table (SSV, TSV, CSV, ....)
-  int    nr;        // number of rows
-  int    nc;        // number of columns
+  
+  int  mode;        // I/O mode  (0=streaming, 1=all-in-memory, ...)
+  int  type;        // type of table (SSV, TSV, CSV, ECSV, ipac, ....)
+  size_t  nr;       // number of rows
+  size_t  nc;       // number of columns
 
   columnptr *cols;  // optional column designators
 
   string name;      // filename, if used
   stream str;       // stream, if used
 
-  string *lines;    // pointer to 'nr' lines (depending on mode)
+  string *lines;    // pointer to 'nr' lines (depends on mode)
+
+  size_t linelen;   // see Posix getline(3)
+  char  *line;      // see Posix getline(3)
+  
 } table, *tableptr;
 
-//  this API is not final yet
+//  this API is not final yet; see also table.3 for a proposed API
 table  *table_open(stream instr, int mode);
 void    table_close(tableptr tptr);
-ssize_t table_line(tableptr tptr, char **line, size_t *linelen);
+string  table_line0(tableptr tptr);
+ssize_t table_line1(tableptr tptr, char **line, size_t *linelen);
+size_t  table_nrows(tableptr tprt);
+size_t  table_ncols(tableptr tprt);
+string  table_row(tableptr tptr, int row);
 
 #endif
 

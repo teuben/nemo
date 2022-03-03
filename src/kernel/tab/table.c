@@ -160,20 +160,56 @@ table *table_open(stream instr, int mode)
   tptr->str   = instr;
   tptr->mode  = mode;
   tptr->lines = NULL;
+  tptr->nr    = 0;
+  tptr->nc    = 0;
 
+#if 0  
+  tptr->linelen = 0;
+  tptr->line    = NULL;
+#else
+  tptr->linelen = 20;
+  tptr->line    = malloc(tptr->linelen);
+#endif
+  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
   // in full buffering mode, the whole file is read into memory
-  // using the *tptr->lines (or linked list?)
+  // using the *tptr->lines (linked list?)
+
+  if (mode == 1) {
+    //
+    warning("new mode=1");
+    // we could cheat for now and find the number of lines 
+    // allocate tptr->lines and stuff them there
+    // for flexibility this should become a linked list
+  }
 
   return tptr;
 }
 
-void table_close(tableptr tptr)
+size_t table_nrows(tableptr tptr)
 {
-  
+  return tptr->nr;
 }
 
-ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
+
+size_t table_ncols(tableptr tptr)
+{
+  return tptr->nc;
+}
+
+
+void table_reset(tableptr tptr)
+{
+  // reset the table 
+}
+
+
+void table_close(tableptr tptr)
+{
+  // free that memory
+}
+
+ssize_t table_line1(tableptr tptr, char **line, size_t *linelen)
 {
   // in simple (streaming) mode, just get the next line
   if (tptr->mode == 0)
@@ -185,6 +221,20 @@ ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
   return -1;
 }
 
+string table_line0(tableptr tptr)
+{
+  // in simple (streaming) mode, just get the next line
+  if (tptr->mode == 0) {
+    // return getdelim(line, linelen, ' ', tptr->str);
+    ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
+    if (ret >= 0)
+      return tptr->line;
+    return NULL;
+  }
+
+  error("Unsupported table mode=%d", tptr->mode);
+  return NULL;
+}
 
 
 
@@ -195,7 +245,7 @@ ssize_t table_line(tableptr tptr, char **line, size_t *linelen)
 string defv[] = {
     "file=???\n           Input or Output file",
     "mode=r\n             Read (r) or Write (w)",
-    "VERSION=2.0\n        10-feb-2022 PJT",
+    "VERSION=2.0\n        3-mar-2022 PJT",
     NULL,
 };
 
@@ -234,20 +284,55 @@ void nemo_main()
       instr = stropen(getparam("file"),"r");
       dprintf(0,"linelen=%ld\n", linelen);
 #if 0
+      
       // original C
       while (getline(&line, &linelen, instr) >= 0)
 	printf("line[%ld] = %s\n", linelen, line);
+
+      
 #else
       // new style table2 
       tp1 = table_open(instr, 0);
-      while (table_line(tp1, &line, &linelen) >= 0)
-	printf("line[%ld] = %s\n", linelen, line);
+
+#if 0
+      // using your own allocation
+      while (table_line1(tp1, &line, &linelen) >= 0)
+	printf("line[%ld] = %s", linelen, line);
+#else
+      // depending on table internals
+      string s;
+      while ( (s=table_line0(tp1)) )
+	printf("line[%ld] = %s", tp1->linelen, s);
+#endif
+      
       table_close(tp1);
+
+      
 #endif
       
       free(line);
     }
 
+}
+
+
+#endif
+
+
+#if 0
+//    meta code
+
+void testmode1()
+{
+  tableptr tp1 = table_open(instr, 1);     // read the whole file in memory
+  int nrows = table_nrows(tp2);
+  string s;
+  for (i=0; i<nrows; i++) {
+    s = table_row(tp1, i);
+    printf("%d: %s", i, s);
+  }
+  
+  
 }
 
 
