@@ -24,6 +24,12 @@
 #define MAX_LINELEN  16384
 #endif
 
+bool ispipe(stream instr)
+{
+  off_t try = lseek(fileno(instr), 0, SEEK_CUR);
+  if (try < 0) return TRUE;
+  return FALSE;
+}
 
 /*
  * insert a string 'b' into 'a' replacing the first 'n' positions into 'a'
@@ -186,6 +192,74 @@ table *table_open(stream instr, int mode)
   return tptr;
 }
 
+// non-seekable file mode=1
+table *table_open0(stream instr, int mode)
+{
+  tableptr tptr = (tableptr) allocate(sizeof(table));
+
+  tptr->str   = instr;
+  tptr->mode  = mode;
+  tptr->lines = NULL;
+  tptr->nr    = 0;
+  tptr->nc    = 0;
+
+#if 0  
+  tptr->linelen = 0;
+  tptr->line    = NULL;
+#else
+  tptr->linelen = 20;
+  tptr->line    = malloc(tptr->linelen);
+#endif
+  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
+
+  // in full buffering mode, the whole file is read into memory
+  // using the *tptr->lines (linked list?)
+
+  if (mode == 1) {
+    //
+    warning("new mode=1");
+    // we could cheat for now and find the number of lines 
+    // allocate tptr->lines and stuff them there
+    // for flexibility this should become a linked list
+  }
+
+  return tptr;
+}
+
+// seekable file mode=1
+table *table_open1(stream instr, int mode)
+{
+  tableptr tptr = (tableptr) allocate(sizeof(table));
+
+  tptr->str   = instr;
+  tptr->mode  = mode;
+  tptr->lines = NULL;
+  tptr->nr    = 0;
+  tptr->nc    = 0;
+
+#if 0  
+  tptr->linelen = 0;
+  tptr->line    = NULL;
+#else
+  tptr->linelen = 20;
+  tptr->line    = malloc(tptr->linelen);
+#endif
+  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
+
+  // in full buffering mode, the whole file is read into memory
+  // using the *tptr->lines (linked list?)
+
+  if (mode == 1) {
+    //
+    warning("new mode=1");
+    // we could cheat for now and find the number of lines 
+    // allocate tptr->lines and stuff them there
+    // for flexibility this should become a linked list
+  }
+
+  return tptr;
+}
+
 size_t table_nrows(tableptr tptr)
 {
   return tptr->nr;
@@ -236,7 +310,10 @@ string table_line0(tableptr tptr)
   return NULL;
 }
 
-
+string table_row(tableptr tptr, int row)
+{
+  return tptr->lines[row];
+}
 
 #ifdef TESTBED
 
@@ -250,7 +327,6 @@ string defv[] = {
 };
 
 string usage = "testing tables";
-
 
 void nemo_main()
 {
@@ -300,9 +376,8 @@ void nemo_main()
 	printf("line[%ld] = %s", linelen, line);
 #else
       // depending on table internals
-      string s;
-      while ( (s=table_line0(tp1)) )
-	printf("line[%ld] = %s", tp1->linelen, s);
+      while ( table_line0(tp1) )
+	printf("line[%ld] = %s", tp1->linelen, tp1->line);
 #endif
       
       table_close(tp1);

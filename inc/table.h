@@ -52,7 +52,7 @@ typedef struct {
   string name;      // filename, if used
   stream str;       // stream, if used
 
-  string *lines;    // pointer to 'nr' lines (depends on mode)
+  string *lines;    // pointer to 'nr' lines (depends on mode)   lines[0], lines[1], ....
 
   size_t linelen;   // see Posix getline(3)
   char  *line;      // see Posix getline(3)
@@ -61,6 +61,8 @@ typedef struct {
 
 //  this API is not final yet; see also table.3 for a proposed API
 table  *table_open(stream instr, int mode);
+table  *table_open0(stream instr, int mode);
+table  *table_open1(stream instr, int mode);
 void    table_close(tableptr tptr);
 string  table_line0(tableptr tptr);
 ssize_t table_line1(tableptr tptr, char **line, size_t *linelen);
