@@ -30,6 +30,8 @@ else
     done
 fi
 
+
+
 rm -f $run.*
 mkplummer $run.in $nbody scale=-1 seed=$seed
 
@@ -61,7 +63,7 @@ fi
 snapmask $run.hc1 - $nbody-1  | snapprint - x,y,z > $run.tab1
 orblist $run.orb | awk '{print $3,$4,$5}' > $run.tab2
 snapprint $run.out x,y,z > $run.tab3
-seed=$(tsf run1.in | head -1 | txtpar - %1 p0=1,6 format=%.0f)
+seed=$(tsf $run.in | head -1 | txtpar - %1 p0=1,6 format=%.0f)
 
 echo '# pars'         > $run.rc
 echo "run=\"$run\""  >> $run.rc
@@ -73,6 +75,9 @@ echo "seed=$seed"    >> $run.rc
 echo "box=$box"      >> $run.rc
 echo "fig=\"$fig\""  >> $run.rc
 
+echo "CMD: run=$run nbody=$nbody freq=$freq tstop=$tstop eps=$eps seed=$seed box=$box plot=$plot fig=$fig"
+
 if [ $plot = 2 ]; then
     $NEMO/scripts/csh/plummer_orbits.py $run.rc
 fi
+

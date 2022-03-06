@@ -28,7 +28,7 @@ for arg in sys.argv[2:]:
     exec(arg)
 
 plname = "%s_%d_%g_%d.%s" % (run, nbody, eps, seed, fig)
-print('PLOT:',plname)
+print('xdg-open ',plname)
 
 o = [0,0,0]
 
