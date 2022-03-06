@@ -9,10 +9,10 @@ The goal is to analyze a set of orbits. There are several ways how they can be m
    2. Initial Conditions from a distribution function that represents the potential
    
 2. In a static N-body potential. This would be useful to check the accuracy of an orbit
-   compared to the analytical one
+   compared to the analytical one from the previous item.
    
 3. In a dynamical N-body simulation
-   1. stable model (e.g. plummer)
+   1. stable model (e.g. plummer) - again can be compared to 1. and 2.
    2. adiabatic changing model (e.g. larger softening)
    3. violent model (e.g. collapse simulation)
 
@@ -80,7 +80,7 @@ Energy conservation can be viewed as follows:
 
 and energy conservation for a specific particle:
 
-     snapplot p3a.out xvar=t yvar=etot visib=i==10
+     snapplot p3a.out xvar=t yvar=etot visib=i==10 xrange=0:160 yrange=-2:0 trak=t
 
 ### convert to orbits
 
@@ -104,3 +104,5 @@ or if you just prefer a binary map with 0 and non-zero:
 
      snapcopy p3.out - i=10 | snapmerge - - | snapgrid - - mean=t | ccdplot -
 
+in this example the values in the map are either 0, or 1/1000, since we used 1000 equal mass particles. Use
+ccdmath to multiply this map by 1000 if you really need a 0 and 1 map.
