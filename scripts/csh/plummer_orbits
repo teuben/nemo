@@ -1,21 +1,25 @@
 #! /usr/bin/env bash
 #
-#    view the "same" orbit in Plummer potential three different ways:
-#    1. in a live nbody simulation
-#    2. in a frozen nbody potential
-#    3. in an analytical Plummer potential
+#  view the "same" orbit in Plummer potential in three different ways:
+#    1. in an analytical Plummer potential (tab2 - top graph)
+#    2. in a frozen nbody potential (tab3 - middle graph)
+#    3. in a live nbody simulation (tab1 - bottom graph)
 #
-#    We only pick 1 particle, the last one, of the Plummmer realization
+#  We only pick 1 particle, the last one, from the Plummmer realization,
+#  to be compared
+#
+#    5-mar-2022  Created - Peter Teuben
+#
 
-run=run1
+run=p3o     # basename:  plummer 3 orbits
 nbody=400
 freq=50
 tstop=50
 eps=0.1
-hack1=1
 seed=0
-plot=1
 box=2
+plot=2      # 0, 1 (/xs) or 2 (matplotlib)
+fig=x       # x, pdf or png in matplotlib
 
 if [ -e "$1" ]; then
     echo Special recovery $1
@@ -29,13 +33,16 @@ fi
 rm -f $run.*
 mkplummer $run.in $nbody scale=-1 seed=$seed
 
-if [ $hack1 = 1 ]; then
-    hackcode1 $run.in $run.hc1                 freqout=$freq freq=$freq tstop=$tstop eps=$eps options=mass,phase,acc,phi > $run.log1
+hackcode1 $run.in $run.hc1                 freqout=$freq freq=$freq tstop=$tstop eps=$eps options=mass,phase,acc,phi > $run.log1
+if [ $plot = 1 ]; then    
     snapmask $run.hc1 - $nbody-1  | snapplot - trak=t yapp=1/xs
-fi	     
+fi
+
 hackcode3 $run.in $run.out nrigid=$nbody-1 freqout=$freq freq=$freq tstop=$tstop eps=$eps options=mass,phase,acc,phi potname=zero > $run.log3
-snapplot $run.out trak=t yapp=3/xs
-#snapplot3 $run.out trak=t
+if [ $plot = 1 ]; then
+    snapplot $run.out trak=t yapp=3/xs
+    #snapplot3 $run.out trak=t
+fi
 snapprint $run.out etot | tabstat - qac=t
 snapmask $run.in - $nbody-1 | snapprint - > $run.phase
 x=$(txtpar $run.phase p0=1,1)
@@ -46,21 +53,26 @@ v=$(txtpar $run.phase p0=1,5)
 w=$(txtpar $run.phase p0=1,6)
 mkorbit $run.iorb $x $y $z $u $v $w potname=plummer
 orbint $run.iorb $run.orb nsteps=$tstop*$freq dt=1/$freq mode=leapfrog
-orbplot $run.orb yapp=2/xs
-cat $run.phase
-tsf $run.in | head -2
+if [ $plot = 1 ]; then
+    orbplot $run.orb yapp=2/xs
+fi
+# cat $run.phase
+# tsf $run.in | head -2
 snapmask $run.hc1 - $nbody-1  | snapprint - x,y,z > $run.tab1
 orblist $run.orb | awk '{print $3,$4,$5}' > $run.tab2
 snapprint $run.out x,y,z > $run.tab3
 seed=$(tsf run1.in | head -1 | txtpar - %1 p0=1,6 format=%.0f)
 
 echo '# pars'         > $run.rc
+echo "run=\"$run\""  >> $run.rc
 echo "nbody=$nbody"  >> $run.rc
 echo "freq=$freq"    >> $run.rc
 echo "tstop=$tstop"  >> $run.rc
 echo "eps=$eps"      >> $run.rc
-echo "hack1=$hack1"  >> $run.rc
 echo "seed=$seed"    >> $run.rc
 echo "box=$box"      >> $run.rc
+echo "fig=\"$fig\""  >> $run.rc
 
-$NEMO/scripts/csh/plummer_orbits.py $run
+if [ $plot = 2 ]; then
+    $NEMO/scripts/csh/plummer_orbits.py $run.rc
+fi
