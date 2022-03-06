@@ -7,6 +7,7 @@
 #
 #  You will need to "mknemo gsl fftw2 hdf5" and make sure mpicc exists
 #  (e.g. via LAM/LAM-MPI)
+#  Ubuntu:  openmpi-bin openmpi-common libopenmpi-dev
 #
 #  This script supersedes the old src/scripts/gadget.install
 #

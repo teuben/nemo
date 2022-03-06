@@ -8,10 +8,27 @@ tldr \- (proposed) snippets for tldr in a man page
 In 2021 we have started to use the \fBTLDR\fP section in a man
 page, that can be used by the \fBtldr\fP program.
 .PP
+"TLDR", or "TL;DR", stands for "Too Long; Didn't Read".
+
+.PP
 CAVEAT: Only the \fItsf(1NEMO)\fP program has been tried out.
+
+.SH "CLIENTS"
+There are a number of clients available, but to make use of a
+personal repository like \fPman(1)\fP can do using the
+\fBMANPATH\fP environment variable is not much implemented?
+.PP
+tldr in python
+.PP
+tldr++ written in go: https://github.com/isacikgoz/tldr/releases/download/v0.5.0/tldr_0.5.0_linux_amd64.tar.gz
 
 .SH "SEE ALSO"
 tsf(1NEMO), ads(5NEMO)
+
+.SH "FILES"
+
+The tldr++ clients keeps its database in ~/.local/share/tldr/pages, so NEMO could add them to the pages/common,or
+if configurable, pages/nemo
 
 .SH "AUTHOR"
 Peter Teuben

@@ -1,16 +1,11 @@
 #! /bin/bash 
 #
 #
-#  For gadget, see       http://www.mpa-garching.mpg.de/gadget/
-#  For NEMO suport, see  http://www.astro.umd.edu/nemo/
-#                        notably gadgetsnap and snapgadget
+#  For old gadget, see   http://www.mpa-garching.mpg.de/gadget/
 #
 #  You will need to "mknemo gsl fftw2 hdf5" and make sure mpicc exists
 #  (e.g. via LAM/LAM-MPI)
 #
-#  This script supersedes the old src/scripts/gadget.install
-#
-#  $Id$
 
 version=git
 url=http://gitlab.mpcdf.mpg.de/vrs/gadget4

@@ -18,11 +18,11 @@ The goal is to analyze a set of orbits. There are several ways how they can be m
 
 ## Notes 
 
-Using the Particle-Attribute-Time (P-A-T) notation
+Using the Particle-Attribute-Time (P-A-T) notation and in row-major (C/python) notation
 
-1. nemo snapshot:    [T][A][P]
-2. tipsy, Body       [T][P][A]
-3. orbits:           [P][A][T]
+1. nemo snapshot:   data[nT][nA][nP]
+2. tipsy, Body      data[nT][nP][nA]
+3. orbits:          data[nP][nA][nT]
 
 and an example:
 
