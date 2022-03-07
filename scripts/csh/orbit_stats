@@ -38,21 +38,17 @@ else
     exit 0
 fi
 
-nstep=$(nemoinp $nbody/20)
-nlast=$(nemoinp $nbody-1)
-for i in $(seq 0 $nstep $nlast); do
-    #snapcopy $run.out - | snapmask - - $i| snapprint - t,etot | tabstat - 2 qac=t >> $run.stats
-    snapcopy $run.out - | snapmask - - $i| snapprint - t,etot > $run.$i.etot
-    tabstat $run.$i.etot 2 qac=t >> $run.stats
-done	    
+stoo $run.out $run.orb stats=t > $run.stats
 
+#    de0:   global energy conservation in 
 if [ $mode = 1 ]; then
     de0=$(tabstat $run.etot 2 qac=t | txtpar - -%2/%1 p0=1,3 p1=1,4)    
 else
     de0=$(txtpar $run.etot p0=Worst,1,9)
 fi
 
-de1=$(awk '{print -$4/$3}' $run.stats | tabstat - qac=t | txtpar - p0=1,3 p1=1,4)
+#     de0:   mean and sigma of 
+de1=$(awk '{print -$2/$1}' $run.stats | tabstat - qac=t | txtpar - p0=1,3 p1=1,4)
 
 echo $nbody $mode $kmax $eps $de0 $de1
 
