@@ -13,6 +13,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <snapshot/snapshot.h>
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
@@ -34,6 +35,9 @@ int  *keytot=NULL, *key;
 bool Qmass;
 real tsnap;
 
+void readdata(void);
+void writedata(void);
+
 
 void nemo_main() 
 {
@@ -44,7 +48,7 @@ void nemo_main()
     writedata();
 }
 
-readdata()
+void readdata()
 {
     int i, offset=0, n=0;
 
@@ -109,7 +113,7 @@ readdata()
 }
 
 
-writedata()
+void writedata()
 {
     permanent int cscode = CSCode(Cartesian, NDIM, 2);
 
