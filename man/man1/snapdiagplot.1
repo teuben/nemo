@@ -1,14 +1,20 @@
-.TH SNAPDIAGPLOT 1NEMO "17 June 1992"
-.SH NAME
+.TH SNAPDIAGPLOT 1NEMO "7 March 2022"
+
+.SH "NAME"
 snapdiagplot \- plot diagnostics of an N-body run
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapdiagplot in=\fPsnap_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapdiagplot\fP plots the diagnostics of an N-body run. As input it
 needs a \fIsnapshot\fP(5NEMO) file.  The diagnostics currently
 displayed, as functions of time, are the total binding energy and the
 center of mass offset.
-.SH PARAMETERS
+.PP
+Several codes in NEMO write the output format this program expects.
+
+.SH "PARAMETERS"
 The following parameters are recognized.
 .TP 24
 \fBin=\fP\fIsnap_file\fP
@@ -28,9 +34,16 @@ Default: \fB0.05\fP.
 .TP
 \fBformal=\fP\fIformal_flag\fP
 If set, generate publication-style plot.  Default: \fBfalse\fP.
-.SH SEE ALSO
-snapplot(1NEMO), snapshot(5NEMO).
-.SH DATA FORMAT
+.TP
+\fBtab=\fP\fItable_name\fP
+If a \fItable_name\fP is given, time and total energy are written
+to this table, and no plot is produced.  Default: no filename
+given, plot is made.
+
+.SH "SEE ALSO"
+hackcode1(1NEMO), quadcode(1NEMO), snapplot(1NEMO), snapshot(5NEMO).
+
+.SH "DATA FORMAT"
 \fIsnapdiagplot\fP expects a \fBDiagnostics\fP set inside a \fPSnapShot\fP.
 Here is an example of the current contents. Note not all elements are
 currently being used.
@@ -49,12 +62,15 @@ currently being used.
     double cputime 0.000833333
   tes
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 dark-ages	0.0 Created	JEB
 2-jun-88	1.0 Man Created...   	JEB
 17-jun-92	1.2 fixed times=; added energy conservation message	PJT
+7-mar-22	1.5 add tab=	PJT
 .fi
