@@ -26,6 +26,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <mdarray.h>
+#include <moment.h>
 
 #include <snapshot/snapshot.h>
 #include <potential.h>
@@ -36,12 +37,12 @@ string defv[] = {
   "out=???\n			orbit output file name",
   "ibody=-1\n			which particles to take (-1=all, 0=first)",
   "nsteps=0\n	                max orbit length allocated in case of pipe",
-  "VERSION=3.4b\n		9-feb-2022 PJT",
+  "stats=f\n                    report stats on conserving quantities",
+  "VERSION=3.5\n		6-mar-2022 PJT",
   NULL,
 };
 
 string usage="convert a snapshot file to an orbit";
-string cvsid="$Id$";
 
 string iname, oname;		/* file names */
 stream instr,outstr;		/* file pointers */
@@ -73,7 +74,7 @@ real   tsnap;			/* time of snapshot */
 #endif
 
 
-bool   Qtime, Qmass, Qkey;
+bool   Qtime, Qmass, Qkey, Qstats;
 
 int    ibody;	
 orbitptr *optr;			/* pointer to orbit pointers */
@@ -81,6 +82,8 @@ orbitptr *optr;			/* pointer to orbit pointers */
 int read_snap();
 int scan_snap();
 void alloc_snap(int);
+
+local void orb_stats(orbitptr op);
 
 bool ispipe(stream instr)
 {
@@ -98,6 +101,7 @@ void nemo_main()
   instr  = stropen(iname,"r");		/* read from snapshot */
   outstr = stropen(oname,"w");		/* write to orbit */
   nsteps = getiparam("nsteps");
+  Qstats = getbparam("stats");
 
   if (nsteps == 0)  {
     if (ispipe(instr))
@@ -159,6 +163,8 @@ void nemo_main()
 	AZorb(optr[j],i) = acc[ibody][2];
 	if (i==0) 
 	  I1(optr[j]) = phi[ibody] + 0.5*(sqr(phase[ibody][1][0]) + sqr(phase[ibody][1][1]) + sqr(phase[ibody][1][2]));
+	if (Qstats)
+	  Porb(optr[j],i) = phi[ibody] + 0.5*(sqr(phase[ibody][1][0]) + sqr(phase[ibody][1][1]) + sqr(phase[ibody][1][2]));
 #endif
       }
       i++;
@@ -174,6 +180,7 @@ void nemo_main()
     for (j=0; j<norb; j++) {
       progress(1.0,"writing orbit %d", j);
       write_orbit(outstr,optr[j]);		/* write orbit to file */
+      if (Qstats) orb_stats(optr[j]);
       free_orbit(optr[j]);
     }
     free(optr);
@@ -318,3 +325,13 @@ int read_snap()
   }
 }
 
+local void orb_stats(orbitptr optr)
+{
+  Moment m;
+  int i;
+
+  ini_moment(&m, 2, 0);
+  for (i=0; i<Nsteps(optr); i++)
+    accum_moment(&m, Porb(optr,i),1.0);
+  printf("%g %g %g %g\n", mean_moment(&m), sigma_moment(&m), min_moment(&m), max_moment(&m));
+}
