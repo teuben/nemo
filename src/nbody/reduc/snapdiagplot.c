@@ -25,7 +25,8 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "exactpot=false\n		if true, compute O(N^2) PE",
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
-    "VERSION=1.4e\n		29-jul-09 PJT",
+    "tab=\n                     If given, tabulate Time,Etot",
+    "VERSION=1.5\n		7-mar-2022 PJT",
     NULL,
 };
 
@@ -76,7 +77,7 @@ real ttrans(real), drtrans(real), Etrans(real), dEtrans(real);
 #define NXTICK  5			/* ### changed from 7  24/9/87 */
 #define NYTICK  3
 
-nemo_main()
+void nemo_main()
 {
     stream instr;
 
@@ -163,7 +164,7 @@ readinput(stream instr)
 	get_tes(instr, SnapShotTag);
 	ndiagfr++;
     }
-    printf("%d diagnostic frames read\n", ndiagfr);
+    dprintf(0,"%d diagnostic frames read\n", ndiagfr);
 }
 
 
@@ -173,6 +174,15 @@ diagplot()
     int i, j;
     char msg[128];
 
+
+    if (hasvalue("tab")) {
+      stream tstr = stropen(getparam("tab"),"w");
+      for (i=0; i<ndiagfr; i++)
+	fprintf(tstr,"%g %.10g\n", Time[i],KEnergy[i] + PEnergy[i]);
+      strclose(tstr);
+      return;
+    }
+    
     setlimits();
     if (! formal) {
 	plinit("", 0.0, 20.0, 0.0, 20.0);

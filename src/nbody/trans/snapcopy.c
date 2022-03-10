@@ -34,8 +34,8 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "ibody=-1\n         One body to select (overrides select=)",
-    "VERSION=1.4\n      11-feb-2022 PJT",
+    "i=-1\n             Select one body to select (overrides select=)",
+    "VERSION=2.0\n      12-feb-2022 PJT",
     NULL,
 };
 
@@ -55,7 +55,7 @@ void nemo_main(void)
     int    i, nbody, nout, nreject, bitsi, bitso, vis, visnow, vismax;
     int    isnap = 0;
     bool   Qall;
-    int    ibody = getiparam("ibody");
+    int    ibody = getiparam("i");
     iproc_body sfunc;
 
     if (ibody >=0) warning("ibody not implemented yet");
