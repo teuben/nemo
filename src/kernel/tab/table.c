@@ -227,7 +227,7 @@ table *table_open0(stream instr, int mode)
 }
 
 // seekable file mode=1
-table *table_open1(stream instr, int mode)
+table *table_open1(stream instr, int mode, int nlines)
 {
   tableptr tptr = (tableptr) allocate(sizeof(table));
 
@@ -246,16 +246,12 @@ table *table_open1(stream instr, int mode)
 #endif
   dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
-  // in full buffering mode, the whole file is read into memory
-  // using the *tptr->lines (linked list?)
 
-  if (mode == 1) {
-    //
-    warning("new mode=1");
-    // we could cheat for now and find the number of lines 
-    // allocate tptr->lines and stuff them there
-    // for flexibility this should become a linked list
-  }
+  warning("table_open1: mode=%d nlines=%d",mode,nlines);
+  tptr->nr = nlines;
+  tptr->lines = (string *) allocate(nlines*sizeof(string));
+  for (int i=0; i<nlines; i++)
+    tptr->lines[i] = strdup(table_line0(tptr));
 
   return tptr;
 }
@@ -322,7 +318,8 @@ string table_row(tableptr tptr, int row)
 string defv[] = {
     "file=???\n           Input or Output file",
     "mode=r\n             Read (r) or Write (w)",
-    "VERSION=2.0\n        3-mar-2022 PJT",
+    "test=0\n             testmode",
+    "VERSION=2.0\n        10-mar-2022 PJT",
     NULL,
 };
 
@@ -330,6 +327,7 @@ string usage = "testing tables";
 
 void nemo_main()
 {
+    int testmode = getiparam("test");
     tableptr tp1;
     stream instr, outstr;
 #if 1
@@ -340,6 +338,11 @@ void nemo_main()
     char *line = allocate(linelen);      // allocate formally has the wrong argument type
     //char *line = malloc(linelen);
 #endif
+
+    if (testmode == 1) {
+      testmode1();
+      return;
+    }
 
     if (strcmp(getparam("mode"),"w") == 0) {
       dprintf(0,"write mode\n");
@@ -394,21 +397,19 @@ void nemo_main()
 #endif
 
 
-#if 0
-//    meta code
-
 void testmode1()
 {
-  tableptr tp1 = table_open(instr, 1);     // read the whole file in memory
-  int nrows = table_nrows(tp2);
-  string s;
-  for (i=0; i<nrows; i++) {
-    s = table_row(tp1, i);
-    printf("%d: %s", i, s);
-  }
-  
-  
+  string input = getparam("file");
+  int nlines = nemo_file_lines(input,0);
+  stream instr = stropen(input,"r");
+  tableptr tp1 = table_open1(instr, 0, nlines);     // read the whole file in memory
+  tableptr tp1 = table_open0(instr, 0, 0);     // read the whole file in memory
+
+  dprintf(0,"nlines: %d\n",tp1->nr);
+
+  printf("first line: %s",table_row(tp1,0));
+  printf("last  line: %s",table_row(tp1,tp1->nr - 1));
+	 
 }
 
 
-#endif
