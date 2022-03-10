@@ -34,6 +34,9 @@ if [ $mode = 1 ]; then
 elif [ $mode = 2 ]; then
     hackcode1 $run.in $run.out eps=$eps freq="2**$kmax" freqout=1/$step tstop=$tstop options=mass,phi,acc > $run.log
     snapdiagplot $run.out yapp=/null > $run.etot
+elif [ $mode = 3 ]; then
+    quadcode $run.in $run.out eps=$eps freq="2**$kmax" freqout=1/$step tstop=$tstop options=mass,phi,acc > $run.log
+    snapdiagplot $run.out yapp=/null > $run.etot
 else
     exit 0
 fi
