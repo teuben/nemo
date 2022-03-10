@@ -59,7 +59,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.7e\n  8-dec-2021 PJT",
+  "VERSION=2.8\n  10-mar-2022 PJT",
   NULL,
 };
 
@@ -211,6 +211,8 @@ void nemo_main()
       
       scale = Dx(iptr);
       offset = Xmin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Xref(iptr)*Dx(iptr);
       if (Qint) ifactor *= ABS(Dx(iptr));
       for (k=0; k<nz; k++)
         for (j=0; j<ny; j++) {
@@ -269,6 +271,8 @@ void nemo_main()
       
       scale = Dy(iptr);
       offset = Ymin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Yref(iptr)*Dy(iptr);
       if (Qint) ifactor *= ABS(Dy(iptr));
       for (k=0; k<nz; k++)
         for (i=0; i<nx; i++) {
@@ -327,6 +331,8 @@ void nemo_main()
       
         scale = Dz(iptr);
 	offset = Zmin(iptr);
+	if (Axis(iptr)==1)
+	  offset -= Zref(iptr)*Dz(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
       	  for(i=0; i<nx; i++) {                         /* loop over all X and Y positions */
