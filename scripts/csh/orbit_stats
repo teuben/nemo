@@ -3,6 +3,11 @@
 #  integrate orbits using different methods, and provide
 #  some orbit statistics on conserving energy
 #
+#  Typical run & analysis:
+#
+#       for i in $(seq 100); do orbit_stats  eps=0.1 nbody=1000 kmax=7 mode=1 run=run1 seed=-2 >> stat1a.log; done
+#       tabhist stat1a.log 5 0 400 scale=1e6
+#
  
 #set -x
 export DEBUG=-1
