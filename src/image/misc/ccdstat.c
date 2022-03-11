@@ -50,13 +50,11 @@ string defv[] = {
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
     "label=\n       QAC label",
-    "VERSION=3.10\n 11-jan-2022 PJT",
+    "VERSION=3.10a\n 11-mar-2022 PJT",
     NULL,
 };
 
 string usage="basic statistics of an image, optional chi2 calculation";
-
-string cvsid="$Id$";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
@@ -64,8 +62,6 @@ stream  tabstr = NULL;                  /* output table? */
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
 imageptr wptr=NULL;                     /* optional weight map */
-
-
 
 int    nx,ny,nz,nsize;			/* actual size of map */
 double xmin,ymin,zmin,dx,dy,dz;
@@ -206,6 +202,7 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
+	    if (isnan(x)) continue;
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -322,6 +319,7 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);
+	    if (isnan(x)) continue;
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
             if (Qbad && x==bad) continue;
