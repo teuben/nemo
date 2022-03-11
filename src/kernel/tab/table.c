@@ -403,7 +403,6 @@ void testmode1()
   int nlines = nemo_file_lines(input,0);
   stream instr = stropen(input,"r");
   tableptr tp1 = table_open1(instr, 0, nlines);     // read the whole file in memory
-  tableptr tp1 = table_open0(instr, 0, 0);     // read the whole file in memory
 
   dprintf(0,"nlines: %d\n",tp1->nr);
 
