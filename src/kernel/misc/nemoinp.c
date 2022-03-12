@@ -428,19 +428,18 @@ string defv[] = {
     "separ=\n		Separator between numbers on output",
     "format=%g\n	Format used to print numbers",
     "newline=t\n	Use newline between numbers?",
-    "nmax=32768\n	Size of output buffer",
+    "nmax=100000\n	Size of output buffer",
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.10d\n	24-jan-2021 PJT",
+    "VERSION=1.11\n	11-mar-2022 PJT",
     NULL,
 };
 
 
 string usage = "expression parser and evaluator; also does lists";
 
-string cvsid="$Id$";
 
 void nemo_main(void)
 {
@@ -500,8 +499,8 @@ void nemo_main(void)
     	/* this somewhat unusual exit is because aliens often use this program */
 	/* what really should have been done is make "expression=???" default */
         dprintf(0,"Usage: %s <expression>\n",getargv0());
-        dprintf(0,"\n<expr> can be of form:  start[:end][:incr][,start::repeat]...\n");
-        dprintf(0,"Also try keyword 'help= or help=h'\n");
+        dprintf(0,"<expr> can be of form:  start[:end][:incr][,start::repeat]...\n");
+	dprintf(0,"NEMO=%s\n",getenv("NEMO"));
         stop(0);
     }
     nx = getiparam("nmax");
