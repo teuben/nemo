@@ -46,7 +46,7 @@ string defv[] = {
     "dual=f\n             Dual pass for large number",
     "blankval=\n          if used, use this as blankval",
     "scale=1\n            Scale factor for data",
-    "VERSION=1.1\n	  25-feb-2013 PJT",
+    "VERSION=1.1a\n	  11-mar-2022 PJT",
     NULL
 };
 
@@ -217,6 +217,7 @@ local void read_data()
 
   Nunder = Nover = Nblank = 0;
   for (i=0, k=0; i<ndata; i++) {
+    if (isnan(data[i])) continue;
     if (Qblank && data[i]==blankval) { Nblank++; continue;}
     data[i] -= dual_mean;
     if (Qmin && data[i] < xrange[0]) { Nunder++; continue;}
