@@ -68,7 +68,8 @@ string defv[] = {
     "format=%g\n        Output format for fitted values and their errors",
     "bootstrap=0\n      Bootstrapping to estimate errors",
     "seed=0\n           Random seed initializer",
-    "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)"
+    "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
+    "nbench=1\n         bench",
     "VERSION=4.1a\n     7-jul-2019 PJT",
     NULL
 };
@@ -135,6 +136,7 @@ string format;
 bool Qtab;                  /* do table output ? */
 
 int  nboot;
+int  nbench;
 
 typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
@@ -460,6 +462,7 @@ nemo_main()
     } else if (scanopt(fit_object,"poly2")) {
     	do_poly2();
     } else if (scanopt(fit_object,"gauss1d")) {
+      for (int i=0; i<nbench; i++)
     	do_gauss1d();
     } else if (scanopt(fit_object,"gauss2d")) {
     	do_gauss2d();
@@ -557,6 +560,7 @@ setparams()
     }
     format = getparam("format");
     nboot = getiparam("bootstrap");
+    nbench = getiparam("nbench");
     init_xrandom(getparam("seed"));
 }
 
