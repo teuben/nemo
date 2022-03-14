@@ -1,0 +1,63 @@
+.TH CCDFLIPD 1NEMO "14 March 2022"
+
+.SH "NAME"
+ccdflipd \- patch up neighbors that are +/- of each other within a delta
+
+.SH "SYNOPSIS"
+\fBccdflipd\fP [parameter=value]
+
+.SH "DESCRIPTION"
+This peculiar program patches an image where neighbors that sum to something close
+to 0 (see \fBdelta=\fP below) become proper positive neighors. It will iterate over
+the image until no more patches are needed.
+.PP
+In the current version each pixel looks at all 8 neighors and will flip the sign
+of those neighbors if within range. In a future version a minimum number of those
+8 neighbors might be required to avoid too flips.
+
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image file [???]    
+.TP 
+\fBout=\fP
+Output image file [???]    
+.TP 
+\fBdelta=\fP
+Allowed delta between sum of two neighboring pixels
+[20]     
+.TP 
+\fBiter=\fP
+Number of iterations [50]
+
+.SH "EXAMPLES"
+The origin of this peculiar program is a double peak fit (see \fIccdmom(1NEMO)\fP) to
+a cube, where the two peaks are not always in the same order.   A difference map between
+peak1 and peak2 will then have alternating signs, and this program nicely patches this up
+.nf
+
+    ccdmom cube1 peak1 mom=31 peak=1
+    ccdmom cube1 peak2 mom=31 peak=1
+    ccdmath peak1,peak2 peak12  %1-%2
+    ccdflipd peak12 peak12a iter=20 delta=30
+
+.fi
+
+
+.SH "SEE ALSO"
+ccdmath(1NEMO), image(5NEMO)
+
+.SH "FILES"
+src/image/trans/ccdflipd.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+14-Mar-22	V0.1 Created		PJT
+.fi
