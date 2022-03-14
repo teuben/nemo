@@ -9,7 +9,8 @@ ccdflipd \- patch up neighbors that are +/- of each other within a delta
 .SH "DESCRIPTION"
 This peculiar program patches an image where neighbors that sum to something close
 to 0 (see \fBdelta=\fP below) become proper positive neighors. It will iterate over
-the image until no more patches are needed.
+the image until no more patches are needed or until the requested number of
+iterations (\fBiter=\fP) is exhausted.
 .PP
 In the current version each pixel looks at all 8 neighors and will flip the sign
 of those neighbors if within range. In a future version a minimum number of those
