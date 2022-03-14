@@ -16,9 +16,9 @@
 string defv[] = {
 	"in=???\n       Input image file",
 	"out=???\n      Output image file",
-	"delta=20\n     Allowed delta",
-	"iter=1\n       Number of iterations",
-	"VERSION=0.1\n  12-mar-2022 PJT",
+	"delta=20\n     Allowed delta between neighoring pixels",
+	"iter=50\n      Number of iterations",
+	"VERSION=0.2\n  12-mar-2022 PJT",
 	NULL,
 };
 
