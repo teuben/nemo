@@ -12,10 +12,10 @@ to 0 (see \fBdelta=\fP below) become proper positive neighors. It will iterate o
 the image until no more patches are needed or until the requested number of
 iterations (\fBiter=\fP) is exhausted.
 .PP
-In the current version each pixel looks at all 8 neighors and will flip the sign
-of those neighbors if within range. In a future version a minimum number of those
-8 neighbors might be required to avoid too flips.
-
+In default mode each pixel looks at all 8 neighors and will flip the sign
+of those neighbors if within range. By increasing \fBm=\fP you can require
+a larger number of neighbors needed to flip them, favoring more interconnected
+regions.
 
 .SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
@@ -33,6 +33,12 @@ Allowed delta between sum of two neighboring pixels
 .TP 
 \fBiter=\fP
 Number of iterations [50]
+.TP
+\fBm=\fP
+Minimum number of neighbors needed to path the pixel. The default of 1
+is rather aggressive, but yields reasonable results, but increasing this
+can make the flipping more conservative.
+Default: 1
 
 .SH "EXAMPLES"
 The origin of this peculiar program is a double peak fit (see \fIccdmom(1NEMO)\fP) to
@@ -41,7 +47,7 @@ peak1 and peak2 will then have alternating signs, and this program nicely patche
 .nf
 
     ccdmom cube1 peak1 mom=31 peak=1
-    ccdmom cube1 peak2 mom=31 peak=1
+    ccdmom cube1 peak2 mom=31 peak=2
     ccdmath peak1,peak2 peak12  %1-%2
     ccdflipd peak12 peak12a iter=20 delta=30
 
