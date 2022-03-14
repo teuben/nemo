@@ -126,32 +126,51 @@ Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))).
 5: 0.01116455,0.04166667,0.08333333,0.125,0.15550212,0.16666667,0.15550212,0.125,0.08333333,0.04166667,0.01116455
 </pre>which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp. 
 <p> 
-<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
-Smoothing
-a map which has already been smoothed will result in an incorrect header
-- this would be a simple sum of squares, if the beams are aligned with the
-axis. 
+<h2><a name='sect7' href='#toc7'>Noise Reduction</a></h2>
+For
+a given smoothing, a map with random gaussian noise will have a smaller
+noise for given smoothing. Most maps in astronomy will not have uncorrelated
+noise. Here&rsquo;s a (bash) script and results to sample that behavior. We fix
+the noise at 1, and for given smoothing (in terms of pixels FWHM) the noise
+will be lower: <br>
+<pre>export DEBUG=-1
+slist=$(nemoinp 0.01,0.25:5:0.25)
+for s in $slist; do
+     echo -n "$s "
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | grep
+^Mean | awk &rsquo;{print $6}&rsquo;
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | txtpar
+- p0=Mean,1,6
+done
+</pre>
 <p> 
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+Smoothing a map which has already been smoothed will result in an
+incorrect header - this would be a simple sum of squares, if the beams are
+aligned with the axis. 
+<p> 
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
 , <a href='ccdfill.1.html'>ccdfill(1NEMO)</a>
 , <a href='ccddiffract.1.html'>ccddiffract(1NEMO)</a>
-, <a href='snapccd.1.html'>snapccd(1NEMO)</a>
 ,
-<a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
+<a href='snapccd.1.html'>snapccd(1NEMO)</a>
+, <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
 , <a href='snapgrid.1.html'>snapgrid(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  
 <p> 
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
-Peter Teuben 
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
+Peter
+
+<p>Teuben 
 <p> 
-<h2><a name='sect10' href='#toc10'>Files</a></h2>
+<h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>src/image/trans     <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdsmooth.c
 </pre>
 <p> 
-<h2><a name='sect11' href='#toc11'>History</a></h2>
+<h2><a name='sect12' href='#toc12'>History</a></h2>
 <br>
 <pre>29-jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created as module from CCD program<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-Jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: improved &rsquo;struct&rsquo; filestructure      <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -173,11 +192,12 @@ Peter Teuben
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Timing</a></li>
 <li><a name='toc6' href='#sect6'>Hanning</a></li>
-<li><a name='toc7' href='#sect7'>Bugs</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Files</a></li>
-<li><a name='toc11' href='#sect11'>History</a></li>
+<li><a name='toc7' href='#sect7'>Noise Reduction</a></li>
+<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc9' href='#sect9'>See Also</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Files</a></li>
+<li><a name='toc12' href='#sect12'>History</a></li>
 </ul>
 </body>
 </html>

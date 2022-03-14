@@ -22,26 +22,26 @@ bsf - benchmark stats on all floating point values in a (binary) structured
 <b>bsf</b> computes some numbers
 for all the floating point values in a structured file, which can then
 be used against previously obtained number in an effort to assert proper
-regression. Both the <i>testsuite</i> and <i>benchmark</i> scripts uses it. <p>
-The output
-will be: <i>mean, rms, min, max</i> and <i>number of points</i>. <p>
-This program can be used
-by users who want to provide some regression in their NEMO scripts. See
-some EXAMPLES below. 
+regression. Both the <i>testsuite</i> and <i>benchmark</i> scripts use it. <p>
+The output will
+be: <i>mean, rms, min, max</i> and <i>number of points</i>. <p>
+This program can be used by
+users who want to provide some regression in their NEMO scripts. See some
+EXAMPLES below. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized
-in order; they may be given in any order if the keyword is also given. Use
---help to confirm this man page is up to date.  
+ The following parameters are recognized in order;
+they may be given in any order if the keyword is also given. Use --help to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>file</i> </dt>
-<dd>input file name. No
-default. </dd>
+<dd>input file name. No default.
+</dd>
 
 <dt><b>test=</b><i>test-string</i> </dt>
-<dd>If given, this is the resulting string that should
-have been obtained. Default: none </dd>
+<dd>If given, this is the resulting string that should have
+been obtained. Default: none </dd>
 
 <dt><b>fmt=</b><i>C-fmt</i> </dt>
 <dd>C-Format string for the 4 floating

@@ -49,40 +49,46 @@ format.  [Default: none.] </dd>
 <dt><b>select=<i>select-string</i></b> </dt>
 <dd>expression which evaluates to an integer,
 only particles with non-zero expression will be copied to the output file.
-The ranking of the particles is copied to the <b>Key<i> array in the snapshot
-if not all particles were selected. The default is all particles will  be
-copied. [default: <b>1</b></i></b>]. </dd>
+The ranking of the particles is copied to the <b>Key</b> array in the snapshot
+if not all particles were selected. Selecting one body is cumbersome, e.g.
+<b>select=i==9</b> to select the 10th body, so a <b>ibody=9</b> a shortcut is provided
+for these case (see below). 
+<p> The default is all particles will be copied.
+[default: <b>1</b>]. </dd>
 
 <dt><b>times=<i>time-ranges</i></b> </dt>
-<dd>Only snapshots with time values within
-<i>times-ranges</i>, which is of the form <b>ts[:te],...</b>, will be copied. [default: <b>all</b>].
-</dd>
+<dd>Only snapshots with time values within <i>times-ranges</i>,
+which is of the form <b>ts[:te],...</b>, will be copied. [default: <b>all</b>]. </dd>
 
-<dt><b>precision=<b>double|single</b></b> </dt>
-<dd>Precision of variables to be stored. The default
-for snapshots is <b>double</b> (double precision), but many snapshot programs
-now recognize data in single precision format. [default: <b>double</b>]. <i> *** This
-option is not implemented yet ***</i> </dd>
+<dt><b>precision=<b>double|single</b></b>
+</dt>
+<dd>Precision of variables to be stored. The default for snapshots is <b>double</b>
+(double precision), but many snapshot programs now recognize data in single
+precision format. [default: <b>double</b>]. <i> *** This option is not implemented
+yet ***</i> </dd>
 
 <dt><b>keep=<i>items-list</i></b> </dt>
-<dd>List of items to keep
-in the snapshot. The list may contain any of <b>time,mass,phase,phi,acc,aux</b>
-and <b>key</b>. </dd>
+<dd>List of items to keep in the snapshot. The list may
+contain any of <b>time,mass,phase,phi,acc,aux</b> and <b>key</b>. </dd>
 
-<dt><b>ibody=</b> </dt>
-<dd>One body to select (not implemented yet) 
+<dt><b>i=</b> </dt>
+<dd>One body to select.
+If -1 is given, the <b>select=</b> takes preference. If a nunber 0 or larger is
+selected, this body is selected. Only one body can be selected.   [-1] 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>See
+Also</a></h2>
 <a href='snapsort.1.html'>snapsort(1NEMO)</a>
-,
-<a href='snapmask.1.html'>snapmask(1NEMO)</a>
+, <a href='snapmask.1.html'>snapmask(1NEMO)</a>
 , <a href='snapplotedit.5.html'>snapplotedit(5NEMO)</a>
  
 <p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter Teuben 
+Peter
+
+<p>Teuben 
 <p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
@@ -93,6 +99,7 @@ Peter Teuben
 <br>
 <pre>12-apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: document created          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-sep-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: debugged and exported to NEMO<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+12-feb-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4: implemented ibody=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> 
 <p> <p>

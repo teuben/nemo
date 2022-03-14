@@ -29,7 +29,13 @@ Although <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
  can do some of this processing too, <a href='txtpar.1.html'><i>txtpar(1NEMO)</i></a>
 &rsquo;s
 strength is processing multiple lines in a reduction style, instead of
-filtering. <p>
+filtering. It often simplifies the esoteric syntax used in the grep/awk/sed
+pipes, but is much more limited. <p>
+<br>
+<pre>     grep RA rsr.33551.driver.sum.txt  | head -1 | awk &rsquo;{print $4}&rsquo;
+vs.
+     txtpar rsr.33551.driver.sum.txt p0=RA,1,4
+</pre><p>
 Normally one parameter is extracted per <b>p#=</b> directive, in a <i>word,row,col</i>
 fashion. Future option will allow multiple <i>col&rsquo;s</i> , but this is not implemented
 yet. <p>
@@ -130,23 +136,29 @@ This program is not intended for streaming very large files, as
 the file is read into memory for processing and each parameter could potentially
 cause a search through the file. 
 <p> 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect6' href='#toc6'>Todo</a></h2>
+On the wishlist are relative row/col
+w.r.t. the matched word using an explicit + or - in front of the row or col:
+<br>
+<pre>     p0=word,+row,col
+     p0=word,row,-col
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='grep.1.html'>grep(1)</a>
 , <a href='awk.1.html'>awk(1)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
-,
-<a href='tablines.1.html'>tablines(1NEMO)</a>
+, <a href='tablines.1.html'>tablines(1NEMO)</a>
 , <a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
-, <a href='table.5.html'>table(5NEMO)</a>
+,
+<a href='table.5.html'>table(5NEMO)</a>
 , <a href='run.1.html'>run(1NEMO)</a>
  
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter
-
-<p>Teuben 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>27-dec-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 simple draft written - implemented simple version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -160,9 +172,10 @@ Peter
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Todo</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

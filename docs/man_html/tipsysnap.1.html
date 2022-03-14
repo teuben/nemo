@@ -9,16 +9,20 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tipsysnap - convert tipsy file to snapshot 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tipsysnap</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tipsysnap</b> converts a <i>tipsy</i> ascii or binary formatted data file,
 consisting of gas, dark and star- particles to <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. Simple
 selections by particle kind can be made. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
 are recognized in any order if the keyword is also given: 
@@ -29,37 +33,86 @@ are recognized in any order if the keyword is also given:
 file. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output snapshot file. No default. </dd>
+<dd>Output snapshot file. If not supplied, only header
+information is displayed. </dd>
 
 <dt><b>options=</b> </dt>
-<dd>Output which
-particles?. Valid options are <b>gas</b>, <b>dark</b> and <b>star</b>. Default: <b>gas,dark,star</b>
-(all). </dd>
+<dd>Output which particles?. Valid options
+are <b>gas</b>, <b>dark</b> and <b>star</b>. Default: <b>gas,dark,star</b> (all). </dd>
 
 <dt><b>modes=ascii|binary</b> </dt>
-<dd>Read ascii or binary TIPSY file format. Default:
-ascii </dd>
+<dd>Read
+ascii or binary TIPSY file format. Default: binary </dd>
 
 <dt><b>swap=t|f</b> </dt>
-<dd>Swap bytes. This is needed if you want to be able to read
-standard (XDR, big endian) or native binary files. Default: false. </dd>
+<dd>Swap bytes. This
+is needed if you want to be able to read standard (XDR, big endian) or
+native binary files. Default: false. </dd>
 
-<dt><b>offset=0</b>
-</dt>
-<dd>Number of bytes to offset the data portion from the header. Normally this
-would be 0, but the header strcture (tipsydefs.h) containing one double
-and 5 integers, some architectures may read this as 32 bytes, whereas it
-was meant to be 28 bytes. By using offset=-4 in this case, data with 28 byte
-headers can still be read. Equally so, the opposite can also happen, in
-which case offset=4 is needed. Default: 0 </dd>
+<dt><b>offset=0</b> </dt>
+<dd>Number of bytes to offset the
+data portion from the header. Normally this would be 0, but the header structure
+(tipsydefs.h) containing one double and 5 integers, some architectures may
+read this as 32 bytes, whereas it was meant to be 28 bytes. By using offset=-4
+in this case, data with 28 byte headers can still be read. Equally so, the
+opposite can also happen, in which case offset=4 is needed. Some version
+of the format use the last 4 bytes as a version ID, an integer that can
+be 1 or 2. See <a href='tipsy.5.html'><i>tipsy(5NEMO)</i></a>
+. Default: 0 </dd>
+
+<dt><b>boom=t|f</b> </dt>
+<dd>If the tipsy file has extra
+accellerations and potentials stored, the version should be 6. Default:
+
+<p>f 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Data Format</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+In case multiple flavors of particles are read, they are deposited
+in different SnapShot&rsquo;s in the file. <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
+ needs to be used to
+make one snapshot. For example the standard <b>run99.bin</b> from the tipsy source
+code distrution has all 3 flavors: <br>
+<pre>   tipsysnap run99.bin -  |  snapmerge - run99.snap
+   ### nemo Debug Info: time=14.9708 N=8579 (1049,1021,6509) for gas,dark,star
+   version=0
+   ### nemo Debug Info: header = 32  gas = 48   dark = 36  star = 44 bytes
+</pre>
+<p> Some codes (e.g. Bonsai) write a different tipsy file for each dump time.
+this complicates the pipe approach of NEMO. Below is a script could process
+tipsy files into a NEMO snapshot, or into a pipe for further processing:
+<br>
+<pre>     ./tipsy_to_snap out.snap out_*.*
+or
+     ./tipsy_to_snap  -  out_*.* | tsf -
+#! /usr/bin/bash
+#
+if [ "$#" == "0" ]; then
+    echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    exit 0
+fi
+out=$1
+if [ -e "$out" ]; then
+    echo "Cannot overwrite $out"
+    exit 1
+fi
+shift
+for f in $*; do
+    # tipsysnap_acc $f - | csf - - item=SnapShot &gt;&gt; tmp.snap
+    if [ "$out" == "-" ]; then
+        tipsysnap_acc $f -
+    else
+        tipsysnap_acc $f -  &gt;&gt; $out
+    fi
+done
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Data Format</a></h2>
 See also <a href='tipsy.5.html'><i>tipsy(5NEMO)</i></a>
-
-on some basic concepts of tipsy data. The ascii format of a TIPSY "<i>gds</i>"
-(gas-dark-star) snapshot is essentially a single long column of data with
-the following items <br>
+ on some basic concepts of tipsy data.
+The ascii format of a TIPSY "<i>gds</i>" (gas-dark-star) snapshot is essentially
+a single long column of data with the following items <br>
 <pre>ntot ngas nstar      [noting that ndark=ntot-ngas-nstar]
 ndim                 [usually 3, i&rsquo;ve not see ndim=2 data]
 time                 [a floating point number]
@@ -73,22 +126,28 @@ VZ(g),VZ(d),VZ(s)
 EPS(d), EPS(s)
 ...
 </pre>
-<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 In <b>mode=binary</b> the gas, dark and star particles are output in separate
 snapshots. 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='snaptipsy.1.html'>snaptipsy(1NEMO)</a>
 , <a href='stoa_tip.1ZENO.html'>stoa_tip(1ZENO)</a>
 , <a href='tipsy.5.html'>tipsy(5NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter
-Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+
+<p>Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>02-Sep-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-aug-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 add mode= to allow binary files, added swap= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-28-aug-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 process binary data, added offset= (replaces shortlives fix32=t|f)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+28-aug-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 process binary data, added offset= (replaces shortlived fix32=t|f)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+4-feb-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 add boom= and make mode=binary the default <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -98,11 +157,12 @@ Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Data Format</a></li>
-<li><a name='toc5' href='#sect5'>Bugs</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Data Format</a></li>
+<li><a name='toc6' href='#sect6'>Bugs</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

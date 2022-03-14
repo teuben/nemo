@@ -9,12 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mknemo - attempt to find NEMO (and related) programs and install them
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>mknemo <i>program(s)</i></b>  
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mknemo</i> attempts to find the source
 code of the program(s) specified on the command line, and tries to compile
@@ -41,7 +44,8 @@ Initially mknemo was nothing more than a convenience
 tool to build (new) binaries from your working directory, without having
 to remember where the source code lived... but since it has also acquired
 being a semi-package manager, it should be mentioned there are many other
-options to solve this problem.  
+options to solve this problem. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Options</a></h2>
 <br>
 <pre>  -c CODE   search for CODE.c to set the directory for target(s)
@@ -59,6 +63,7 @@ options to solve this problem.
   -v        more verbose, it will report version and cvsid of program (deprecated)
   -D        show special projects from the mknemo.d directory
 </pre>
+<p> 
 <h2><a name='sect4' href='#toc4'>Makedefs</a></h2>
 All compile flags and libraries that are used should have been
 configured in the $NEMOLIB/makedefs file. Here are some critical programs
@@ -78,6 +83,7 @@ yapp<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;tabh
 </pre>If any of these fail for obvious reasons, you can try and fix them by rerunning
 configure and comparing $NEMOLIB/makedefs with $NEMO/makedefs, or simply
 editing $NEMOLIB/makedefs directly. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 Here are some examples of the
 non-default control files in $NEMO/src/scripts/mknemo.d: <br>
@@ -89,14 +95,24 @@ galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.
 cfitsio<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;CFITSIO library
 </pre>For a 3rd party library system type library, such as cfitsio, the sources
 will be under $NEMO/local, and being built with --prefix=$NEMO/opt. 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+The
+mknemo <i>attempts</i> to (re)install a program or package for NEMO, but there
+is no guarentee this works. For programs it typically depends on a matching
+sourcecode (e.g. name.c) and a proper Makefile in the directory where this
+code lives, or in more complicated cases, a matching script name in $NEMO/src/scripts/mknemo.d
+
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='bake.8.html'>bake(8NEMO)</a>
-,
-<a href='mkbin.8.html'>mkbin(8NEMO)</a>
+, <a href='mkbin.8.html'>mkbin(8NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>$NEMO/src/scripts/mknemo.d<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory with non-default control files for mknemo
 $NEMO/src/scripts/template<tt> </tt>&nbsp;<tt> </tt>&nbsp;NEMO program template generator
@@ -111,7 +127,8 @@ $NEMO/local/&lt;package&gt;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> 
 $NEMO/opt/{bin,include,lib}<tt> </tt>&nbsp;<tt> </tt>&nbsp;--prefix location of &lt;package&gt; binaries and headers
 for public use
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>21-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: doc created       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added lockfile     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -134,10 +151,11 @@ jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -L options, switch -L and -l meani
 <li><a name='toc3' href='#sect3'>Options</a></li>
 <li><a name='toc4' href='#sect4'>Makedefs</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

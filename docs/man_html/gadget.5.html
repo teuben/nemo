@@ -9,24 +9,36 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 gadget - binary format for N-body snapshot files 
+<p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
-<i>gadget</i> is
-the format used by Springel&rsquo;s <a href='gadget.1.html'><i>gadget(1NEMO)</i></a>
+<i>gadget</i>
+is the format used by Springel&rsquo;s <a href='gadget.1.html'><i>gadget(1NEMO)</i></a>
  code, and several other packages
 and code know how to read and write such files. These are either <i>gadget
 binary</i> files (a 256 byte header, followed by a number of families of particles
 (stars, halo, gas, etc.). <p>
-There is also a HDF implementation <p>
+There is also an HDF implementation <p>
 Some description
 in <a href='gadgetsnap.1.html'><i>gadgetsnap(1NEMO)</i></a>
-. 
-<h2><a name='sect2' href='#toc2'>Examples</a></h2>
-Since gadget binary files have the structure
-of a Fortran unformatted file, the <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
- program can display the
-top level structure, e.g. the following two commands are identical <br>
+. <p>
+The <b>gadget2</b> format is an extension of the <b>gadget1</b>
+format, with extra headers for each block. The <b>gadget3</b> format is ....  probably
+
+<p>something we can&rsquo;t handle yet 
+<p> 
+<h2><a name='sect2' href='#toc2'>Gadget-1</a></h2>
+
+<p> 
+<p> 
+<h2><a name='sect3' href='#toc3'>Examples</a></h2>
+Since gadget binary files
+have the structure of a Fortran unformatted file, the <a href='unfio.1.html'><i>unfio(1NEMO)</i></a>
+ program
+can display the top level structure, e.g. the following two commands are
+identical <br>
 <pre>unfio ICs/galaxy_bigeendian.dat swap=t
 unfio ICs/galaxy_littleendian.dat
   ### nemo Debug Info: 1   256
@@ -52,7 +64,8 @@ snapcmp gal1r gal2r
   # obs=r
   0   2.57303e-07 3.97679e-06 6.6571e-06 1.38556e-05 4.10978e-05  9.74949e-06 7.71154e-06
 </pre>
-<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+<p> 
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='gadget.1.html'>gadget(1NEMO)</a>
 , <a href='gadgetsnap.1.html'>gadgetsnap(1NEMO)</a>
 , <a href='gadget2pcs.1.html'>gadget2pcs(1NEMO)</a>
@@ -60,10 +73,15 @@ snapcmp gal1r gal2r
 ,
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='unfio.1.html'>unfio(1NEMO)</a>
- 
-<h2><a name='sect4' href='#toc4'>Author</a></h2>
+ <p>
+<a href='https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md'>https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md</a>
+
+
+<p> 
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>22-feb-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;placeholder written <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -73,10 +91,11 @@ Peter Teuben
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Examples</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Author</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc2' href='#sect2'>Gadget-1</a></li>
+<li><a name='toc3' href='#sect3'>Examples</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc6' href='#sect6'>Update History</a></li>
 </ul>
 </body>
 </html>
