@@ -1,9 +1,9 @@
 /*
  * NII-a, Ha, NII-b triplet fitting 3 (constrained) gaussians
  *
- * 6549.86    NII-a
- * 6564.614   Halpha
- * 6585.27    NII-b
+ * 6549.86    NII-a   -673.8 km/s
+ * 6564.614   Halpha     0.0 
+ * 6585.27    NII-b   +943.3 
  *
  * WARNING: some hcn notation from the clone left over.....
  *
@@ -29,9 +29,9 @@
 
 /*  delta wings in AA */
 
-#define F11 +14.754
-#define F21  0.0000
-#define F01 -20.656
+#define F11 -14.754
+#define F21   0.000
+#define F01  20.656
 
 // ??
 #define A11 1
