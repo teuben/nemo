@@ -55,12 +55,28 @@ be created. Another way to create a smooth velocity field is using
 The resulting output residual map then contains -1 times the desired
 velocity field.
 .PP
-nemoinp 0:100:1 > map1.radt
-tabmath map1.radt - "%1/sqrt(40+%1*%1)" all > map1.velt
-ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60 size=256
+.nf
+  nemoinp 0:100:1 > map1.radt
+  tabmath map1.radt - "%1/sqrt(40+%1*%1)" all > map1.velt
+  ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60 size=256
+.fi
+.PP
+Here is an example of creating a (0/1) mask cube based on where you expect emission
+from a rotating disk given the geometry
+.nf
+
+ccdvel out=$tmp.d radii=0,$r0,$r1 vrot=1,1,1      inc=$inc pa=$pa size=$nx cell=$cell amp=t
+ccdvel out=$tmp.v radii=0,$r0,$r1 vrot=0,$v1,$v1  inc=$inc pa=$pa size=$nx cell=$cell amp=f vsys=$vsys
+ccdvel out=$tmp.s radii=0,$r0,$r1 vrot=100,100,50 inc=$inc pa=$pa size=$nx cell=$cell amp=t
+velcube - $tmp.v $tmp.d zrange=${vsys}-5*${nz}:${vsys}+5*${nz} nz=$nz sigdefault=$sig |\\
+  ccdmath - -  'ifgt(%1,0,1,0)' |\\
+  ccdfits - $mask refmap=$refmap refaxis=1,2,3 crpix=$nx/2,$nx/2,$nz/2 cdelt=-$cell/3600,$cell/3600,$chan 
+
+.fi
+where a $refmap was used to inherit the WCS from.
 
 .SH "SEE ALSO"
-ccdvel(1NEMO) , rotcurshape(1NEMO)
+ccdvel(1NEMO) , ccdmath(1NEMO) , rotcurshape(1NEMO)
 
 .SH "FILES"
 src/image/rotcur/velcube.c

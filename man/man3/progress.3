@@ -1,18 +1,23 @@
 .TH PROGRESS 3NEMO "1 November 2004"
-.SH NAME
+
+.SH "NAME"
 progress \- write progress strings
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 \fB#include <stdinc.h>\fP
 .PP
 \fBint progress(double dcpusec, string format, ... )\fP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIprogress\fP optionally prints out a user-controlled formatted
 string to \fIstderr\fP, automatically terminated with the
 carriage-return (\\r) symbol, so it overwrites the previous
 string. The return value if set to 1 if progress should be reported.
 If the \fIformat\fP string is set to 0, no output is done.
+.PP
+If \fIstderr\fP has been redirected to a file, no progress is reported.
 .PP
 It is the users control to
 make sure the string length does not descrease, since
@@ -52,16 +57,19 @@ You can also use \fIprogress\fP to take your own actions:
 
     do {
         if (progress(10.0,0)) 
-	  dprintf(1,"Working on line %3d\r",n);
+	  dprintf(1,"Working on line %3d\\r",n);
 	n = do_something();
     } while (n>0);
 
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 dprintf(3NEMO), warning(3NEMO), 
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 30-jun-04	created 	PJT

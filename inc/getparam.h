@@ -38,12 +38,14 @@ extern int     getiparam (string);
 extern long    getlparam (string);
 extern bool    getbparam (string);
 extern double  getdparam (string);
-
+  
 extern string  getparam_idx  (string, int);
 extern int     getiparam_idx (string, int);
 extern long    getlparam_idx (string, int);
 extern bool    getbparam_idx (string, int);
 extern double  getdparam_idx (string, int);
+
+extern double atox(string);
 
 extern int nemoinpi (string, int *, int);
 extern int nemoinpd (string, double *, int);

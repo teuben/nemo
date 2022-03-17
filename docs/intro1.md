@@ -2,7 +2,8 @@
 
 NEMO is a collection of (Unix) programs. Each program is specialized
 to do certain things, and you then orchestrate a simulation by scripting a
-series of these programs.
+series of these programs. Programs can also pipe information between them,
+instead of using files.
 
 ## Installing NEMO
 
@@ -11,15 +12,16 @@ the csh shell:
 
        source /astromake/opt/nemo/git/nemo_start.csh
 
-An example to install it in a bash shell on MacOSX with pgplot
-installed via Homebrew:
+An example to install it in a bash shell with pgplot
+installed 
 
-       curl -O https://teuben.github.io/nemo/install_nemo
-       chmod +x install_nemo
-       ./install_nemo brew=1
-       source nemo/nemo_start.sh
+       git clone https://github.com/teuben/nemo
+       cd nemo
+       ./configure --with-yapp=pgplot
+       make build
+       source nemo_start.sh
 
-The last **source** command can then be added to your **.cshrc** (csh shell) or
+The last **source** command can then be added to your 
 **.bashrc** (linux bash) or **.bash_profile** (mac bash)
 
 ## Some properties of NEMO
@@ -54,7 +56,7 @@ A few other NEMO things useful to know
 ## Example 1: The Gentle Collapse of a Plummer (1911) Sphere
 
 
-Initialize: 1024 stars in a plummer sphere
+Initialize: 1024 stars in a plummer sphere, but slightly cooled down:
 
        mkplummer p1k 1024
        snapscale p1k p1ks vscale="1/sqrt(2)"
@@ -139,9 +141,10 @@ Enter tkrun in NEMO.
 
    * Uses hierarchy of "Makefile" for installation
    * Uses hierarchy of "Testfile" to do regression/baseline tests
+   * Uses hierarchy of "Benchfile" to benchmark expensive programs
    * Has $NEMO/src (supported) and $NEMO/usr (unsupported)
    * Uses 'mknemo' to recompile a program
-   * Can use $NEMO/opt to override bad system libraries
+   * Can use $NEMO/opt to override mis-behaving system libraries
 
 ## Useful software that is NEMO friendly
 
@@ -156,4 +159,5 @@ Enter tkrun in NEMO.
    * ZENO
    * yt
    * AMUSE
+   * python modules: gala, galpy, agama, pynbody, astromartini, unsio
    

@@ -1,5 +1,5 @@
 /*
- *  rudimentary support to write a template script
+ *  rudimentary support to write a template python script
  *  for tabplot and tabhist
  *
  *  Typical usage:
@@ -42,6 +42,7 @@ void pyplot_plot(stream str, string tabname, int *xcol, int *ycol, int *dycol, r
   fprintf(str,"#plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n");
   fprintf(str,"plt.figure()\n"); 
   fprintf(str,"plt.plot(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
+  fprintf(str,"#plt.step(data1[%d],data1[%d],label=tab1,where='mid')\n",xcol[0]-1,ycol[0]-1);
   fprintf(str,"plt.scatter(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
   fprintf(str,"#plt.errorbar(data1[%d],data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1,dycol[0]-1);  
   fprintf(str,"plt.xlabel('X')\n");

@@ -1,22 +1,26 @@
-.TH STOO 1NEMO "11 November 2015" 
-.SH NAME
-stoo \- convert snapshot to orbit: choose one or more particles
-.SH SYNOPSIS
+.TH STOO 1NEMO "8 February 2012" 
+
+.SH "NAME"
+stoo \- convert snapshot to orbit
+
+.SH "SYNOPSIS"
 .PP
 \fBstoo in=\fPsnapshot \fBout=\fPorbit [parameter=value]
-.SH DESCRIPTION
-\fBstoo\fP selects one or more bodies from a snapshot file,
-and converts it to orbit format, for further processing. Orbits are
+
+.SH "DESCRIPTION"
+\fBstoo\fP selects one or more bodies from a snapshot file
+and converts it to orbit format. Orbits are
 stored sequentially, the Key field in the snapshot is used to
-identify the orbit. If no Key field is present, the first snapshot
-has key 0.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+identify the particle making this orbit. If no Key field is present,
+the first body has key 0.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
-input file, in \fIsnapshot(5NEMO)\fP format. Cannot be a pipe if
-multiple stars selected. [no default]
+input file, in \fIsnapshot(5NEMO)\fP format. If in a pipe, the
+number of snapshots to be converted to orbits needs to be
+given via \fBnsteps=\fP, see below. [no default]
 .TP
 \fBout=\fIout-file\fP
 output file, will be in \fIorbit(5NEMO)\fP format [no default]
@@ -25,22 +29,57 @@ output file, will be in \fIorbit(5NEMO)\fP format [no default]
 ranking \fInumber\fP of the star in the snapshot file,
 normally the Key field.  Multiple stars can be selected here,
 e.g. 0:1000:10 in the usual \fInemoinp(3NEMO)\fP notation.
-However, all orbits need to be allocated in memory.
-[default: \fB0\fP].
+However, all orbits need to be allocated in memory. Use a negative
+number to process all bodies.
+[default: \fB-1\fP].
 .TP
 \fBnsteps=\fInumber\fP
-\fInumber\fP of timesteps to be allocated. Dont concern yourself
-with this one, just for future.
-[default: \fB1\fP].
+\fInumber\fP of timesteps to be allocated. Use 0 to allow the program
+to scan the input snapshot. However, if the input is from a pipe,
+\fBnsteps\fP needs to be given the (maximum) number of steps allowed.
+
+[default: \fB0\fP].
+
+.SH "EXAMPLES"
+Here is an example of producing a large snapshot, in single precision, with
+\fIgyrfalcon(1NEMO)\fP. Since currently \fIstoo(1NEMO)\fP cannot read such
+single precision Positon/Velocity yet, they need to be converted via
+\fIsnapcopy(1NEMO)\fP. Some timings are given.  The input snapshot is 430MB,
+the output snapshot and orbit file are 860MB.
+.nf
+
+   mkplummer p10k 10000
+   gyrfalcON p10k p10k.out tstop=100 step=0.1 kmax=8 eps=0.1 give=mxvap > p10k.log
+
+   /usr/bin/time snapcopy p10k.out tmp.out
+   2.52user 0.48system 0:03.02elapsed 99%CPU
+
+
+   /usr/bin/time stoo tmp.out tmp.orb -1
+   1.60user 1.04system 0:02.65elapsed 99%CPU
+
+   /usr/bin/time orbstat tmp.orb > tmp.orb.log
+   0.49user 0.23system 0:00.73elapsed 99%CPU
+
+.fi
+
+Data-wide this "Particle-Attribute-Time" dataset  is 10000 x 11 x 1000 in this case,
+but at various stages dimensions are shuffled around rather haphazardly, and
+does not scale well for large numbers of particles and/or times.
+
+
 .SH "SEE ALSO"
 snapshot(5NEMO), orbit(5NEMO), orblist(1NEMO), otos(1NEMO), orboom(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/orbit/misc   	stoo.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -49,4 +88,5 @@ Peter Teuben
 23-jun-91	V2.4 fixed bugs, upgraded doc for NEMO2 	PJT
 24-jul-2013	V3.0 added support for multiple orbits and use Key	PJT
 11-nov-2015	V3.1 efficient version without rewinding file	PJT
+6-feb-2022	V3.3 process all particles by default, init I1	PJT
 .fi

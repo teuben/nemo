@@ -23,17 +23,24 @@ void parse(int, string, double *, int);
 void strinsert(string, string, int);
 int iscomment(string);
 
+//  For a new table system we need a table struct, and each table
+//  will have some columns, with properties that we hide in another
+//  struct.
 
-/* table, *tableptr:
-   a structure containing a string table - new 2020 style
+typedef struct {
+  string *name;    // name of the column
+  string *unit;    // units 
+  int type;        // type (integer, real)
 
-*/
+} column, *columnptr;
    
 typedef struct {
   int  mode;        // I/O mode  (streaming, all-in-memory, ...)
   int  type;        // type of table (SSV, TSV, CSV, ....)
   int    nr;        // number of rows
   int    nc;        // number of columns
+
+  columnptr *cols;  // optional column designators
 
   string name;      // filename, if used
   stream str;       // stream, if used
@@ -42,3 +49,23 @@ typedef struct {
 } table, *tableptr;
 
 #endif
+
+// Here's a top level example snippet of code how we could read a table
+// See tabbench1.c and tabbench2.c for examples with old and new code
+//
+//
+// stream instr = stropen(getparam("in"),"r");
+// Table *table = NULL;
+// int mode = 0;
+// int linelen = 0;
+// char *line = NULL;
+// 
+// tab_setline(&line,&linelen,MAX_LINELEN);   // initialize
+// 
+// tab_open(instr, &table, mode);
+// while (tab_line(table, &line, &linelen)) {    // getline
+//    printf("%s\n",line);
+// }
+// tab_close(table);
+// strclose(instr);
+

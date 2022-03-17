@@ -9,12 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabplot - general table plotter 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>tabplot in=</b>infile [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tabplot</i> plots datapoints from an ascii table, optionally connects
 the datapoints by lines, plots different styles for the points and (if
@@ -32,41 +35,43 @@ more complicated plots, full plotting packages should be used (Mongo, SM,
 WIP, gnuplot, Grace, matplotlib etc.), though  moderately sophisticated
 plots can also be made using <b>layout=</b>. The <b>readline=</b> is available to give
 some degree of interactive usage. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>infile</i></b> </dt>
-<dd>input file,
-in (ASCII) tabular format [no default]. </dd>
+<dd>input
+file, in (ASCII) tabular format [no default]. </dd>
 
 <dt><b>xcol=<i>x-column</i></b> </dt>
-<dd>column(s) from which
-the X values are taken. Multiple columns can be taken, but if so, the number
-of Y columns must be the same for pairwise plotting. [default <b>1</b>]. </dd>
+<dd>column(s) from
+which the X values are taken. Multiple columns can be taken, but if so,
+the number of Y columns must be the same for pairwise plotting. [default
+<b>1</b>]. </dd>
 
-<dt><b>ycol=<i>y-column</i></b>
-</dt>
-<dd>column from which the Y values are taken. Multiple columns can be given.
-The number of X columns can either be 1 or must be equal to the number
-of Y columns. [default <b>2</b>]. </dd>
+<dt><b>ycol=<i>y-column</i></b> </dt>
+<dd>column from which the Y values are taken. Multiple columns
+can be given. The number of X columns can either be 1 or must be equal to
+the number of Y columns. [default <b>2</b>]. </dd>
 
 <dt><b>xmin=<i>x_min</i></b> </dt>
-<dd>Minimum value along X-axis to include
-[default: minimum of datapoints]. </dd>
+<dd>Minimum value along X-axis
+to include [default: minimum of datapoints]. </dd>
 
 <dt><b>xmax=<i>x_max</i></b> </dt>
-<dd>Maximum value along X-axis to
-include [default: maximum of datapoints]. </dd>
+<dd>Maximum value along
+X-axis to include [default: maximum of datapoints]. </dd>
 
 <dt><b>ymin=<i>y_min</i></b> </dt>
-<dd>Minimum value along
-y-axis to include [default: minimum of datapoints]. </dd>
+<dd>Minimum value
+along y-axis to include [default: minimum of datapoints]. </dd>
 
 <dt><b>ymax=<i>y_max</i></b> </dt>
-<dd>Maximum value
-along y-axis to include [default: maximum of datapoints]. </dd>
+<dd>Maximum
+value along y-axis to include [default: maximum of datapoints]. </dd>
 
 <dt><b>xbin=<i>boundaries</i></b>
 </dt>
@@ -184,35 +189,42 @@ only implemented for PGPLOT). Cursor keys are in the usual definition: A=left
 mouse will mark, D=middle mouse has no function, X=right mouse will exit.
  Default: not used. </dd>
 
+<dt><b>backtrack=t|f</b> </dt>
+<dd>Allow lines to backtrack? [Default: t]
+</dd>
+
 <dt><b>layout=</b> </dt>
-<dd>Optional Layout file that contains draw commands.
-Default: none. </dd>
+<dd>Optional Layout file that contains draw commands. Default: none.
+</dd>
 
 <dt><b>first=t|f</b> </dt>
-<dd>Should the layout file be called first or last ?
-  [<b>f</b>] </dd>
+<dd>Should the layout file be called first or last ?   [<b>f</b>] </dd>
 
-<dt><b>readline=t|f</b> </dt>
-<dd>After all batch plotting is done, should an interactive
-layout annotator (see also <a href='layout.5.html'><i>layout(5NEMO)</i></a>
+<dt><b>readline=t|f</b>
+</dt>
+<dd>After all batch plotting is done, should an interactive layout annotator
+(see also <a href='layout.5.html'><i>layout(5NEMO)</i></a>
 ) be called. [<b>f</b>] </dd>
 
 <dt><b>pyplot=</b> </dt>
-<dd>If given,
-it will be the filename where a template python script that can serve as
-starting point for more elaborate plotting. Default: none. </dd>
+<dd>If given, it will be the
+filename where a template python script that can serve as starting point
+for more elaborate plotting. Default: none. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='tabhist.1.html'>tabhist(1NEMO)</a>
-,
-<a href='snapplot.1.html'>snapplot(1NEMO)</a>
- 
+, <a href='snapplot.1.html'>snapplot(1NEMO)</a>
+
+
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 tab= doesn&rsquo;t work properly with multiple columns 
+<p> 
 <h2><a name='sect6' href='#toc6'>Examples</a></h2>
-Here
-is an example working with layout files.  <br>
+Here is an
+example working with layout files.  <br>
 <pre>  % nemoinp 1:20 | tabmath - -  &rsquo;ranu(0,1),ranu(0,1)&rsquo; all &gt; ran.tab
   % tabmath ran.tab - &rsquo;2+%1*16,2+%2*16,0.2&rsquo; all | awk &rsquo;{print "circle",$0}&rsquo; &gt; ran.layout
   % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
@@ -233,8 +245,8 @@ table has 2 columns: <br>
 
 See Alsotablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO) http://vostat.org
 
-http://www.star.bris.ac.uk/~mbt/stilts/ 
-AuthorPeter Teuben Files
+http://www.star.bris.ac.uk/~mbt/stilts/  
+AuthorPeter Teuben  Files
 ~/src/kernel/tab<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabplot.c
 </pre>
 <h2><a name='sect10' href='#toc10'>Update History</a></h2>

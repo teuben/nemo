@@ -1,0 +1,28 @@
+
+Here we gather some simple examples of parsing a command line user interface.
+We have choosen the variables 'aaa' and 'bbb' in their long form. Where the CLI
+supports this, short options 'a' and 'b' are implemented, though NEMO's
+getparam() does not support this.
+
+
+#                                bash     csh  python      C
+0   simplest, but bad form          x       x
+1   manual                                         
+2   argparse                                        x
+3   docopt                                          x
+4   getopt                          ?       ?
+5   getopts
+6   clic                                            x
+7   optparse
+
+
+
+0 -
+1 -
+2 https://docs.python.org/3/library/argparse.html
+3 http://docopt.org/
+4 https://docs.python.org/3/library/getopt.html
+4 https://linux.die.net/man/3/getopt
+5 https://www.mkssoftware.com/docs/man1/getopts.1.asp
+6 https://click.palletsprojects.com/en/8.0.x/
+7 https://docs.python.org/3/library/optparse.html

@@ -1,10 +1,13 @@
 .TH TABHIST 1NEMO "26 April 2020"
-.SH NAME
+
+.SH "NAME"
 tabplot \- general table plotter
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBtabplot in=\fPinfile [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItabplot\fP plots datapoints from an ascii table, optionally
 connects the datapoints by lines, plots different styles for the
 points and (if available) uses different colors.
@@ -22,9 +25,9 @@ For more complicated plots, full plotting packages should be used
 moderately sophisticated
 plots can also be made using \fBlayout=\fP. The \fBreadline=\fP is
 available to give some degree of interactive usage.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIinfile\fP
 input file, in (ASCII) tabular format [no default].
@@ -155,6 +158,9 @@ PGPLOT). Cursor keys are in the usual definition: A=left mouse will mark,
 D=middle mouse has no function, X=right mouse will exit. 
 Default: not used.
 .TP
+\fBbacktrack=t|f\fP
+Allow lines to backtrack? [Default: t]
+.TP
 \fBlayout=\fP
 Optional Layout file that contains draw commands. Default: none.
 .TP
@@ -170,11 +176,14 @@ After all batch plotting is done, should an interactive layout annotator
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
 Default: none.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tabhist(1NEMO), snapplot(1NEMO)
-.SH BUGS
+
+.SH "BUGS"
 tab= doesn't work properly with multiple columns
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here is an example working with layout files. 
 .nf
 
@@ -207,9 +216,11 @@ tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO)
 http://vostat.org
 .PP
 http://www.star.bris.ac.uk/~mbt/stilts/
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/kernel/tab	tabplot.c

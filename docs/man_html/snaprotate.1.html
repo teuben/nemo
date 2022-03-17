@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snaprotate - rotate N-body snapshot file about principle axes. 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snaprotate
 in=</b>snap-file <b>out=</b>snap-file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snaprotate</i> rotates
 the positions and velocities of an N-body snapshot file. A maximum of 3 rotations
@@ -31,6 +34,7 @@ keyword, where all points are rotated around this vector. <p>
 Although by default
 all vectors are rotated by the same matrix, the keyword <b>select=</b> can be
 used to select any set of Position, Velocity or Acceleration. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
 following parameters are recognized; they may be given in any order. 
@@ -77,13 +81,29 @@ options such as tscale, invert </dd>
 <dt><b>select=</b><i>vec1,vec2,...</i> </dt>
 <dd>Vector variables in a
 snapshot that should be rotated. Valid options are: <b>pos</b>, <b>vel</b>,  and <b>acc</b>. Exact
-match required for now. [Default:  <b>pos,vel,acc</b>] </dd>
+match required for now. [Default:  <b>pos,vel,acc</b>] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Suppose you have
-a barred galaxy model, <i>bar.dat</i>,  with the galactic plane at z=0 and the
-bar along the y axis (<i>"position angle=0"</i>),  and want to project this (such
+
+<p> For &rsquo;normal&rsquo; unbarred
+spiral galaxies the following example shows how to project them into their
+normaly sky view, taking the sense of rotation into account: <br>
+<pre>   set pa=170             # M51, use pa=200 for M33
+   set inc=22             # M51, use inc=30 for M33
+   set sign=1             # M51, use sign=-1 for M33
+   set sinc=&lsquo;nemoinp "iflt($sign,0,$inc,-$inc)"&lsquo;
+   mkdisk - 1000 sign=$sign |\
+      snaprotate - - theta=$sinc,$pa order=yz |\
+      snapgrid - velfie.ccd mom=-1
+   nds9 velfie.ccd        # view the velocity field using &rsquo;ds9&rsquo;.fi
+</pre>With sign=1 it will create a counter clockwise rotating disk and project
+it using <b>-$inc,$pa</b>, For a clock-wise rotating disk  <b>$inc,$pa</b>,  hence the
+somewhat awkward looking expressing to compute <b>sinc</b>. <p>
+Suppose you have a
+barred galaxy model, <i>bar.dat</i>,  with the galactic plane at z=0 and the bar
+along the y axis (<i>"position angle=0"</i>),  and want to project this (such
 that z=0 will be the sky plane, and the positive z-axis pointed towards
 the observer) with given final  position angle ($pa), inclination ($inc)
 and angle from line of nodes to bar ($phi) the following rotations will
@@ -94,34 +114,23 @@ do the job: <br>
     snaprotate bar.dat n7476.dat "atand(tand($phi)/cosd($inc)),$inc,$pa"
 zyz
     snapplot n7476 psize="z&gt;0?0.03:0.0"
+    
 </pre>where <b>psize</b> was choosen such that &lsquo;&lsquo;near&rsquo;&rsquo; (z&gt;0)  particles were plotted a bit
 bigger to accentuate the near side of the model. Flipping the sign if $inc
-will flip the near and far side. <p>
-For &rsquo;normal&rsquo; spiral galaxies the following
-example shows how to project them into their normaly sky view, taking the
-sense of rotation into account: <br>
-<pre>   set pa=170             # M51, use pa=-160 for M33
-   set inc=22             # M51, use inc=30 for M33
-   set sign=-1            # M51, use sign=1 for M33
-   set sinc=&lsquo;nemoinp "iflt($sign,0,$inc,-$inc)"&lsquo;
-   mkdisk - 1000 sign=$sign |\
-      snaprotate - - theta=$sinc,$pa order=yz |\
-      snapgrid - velfie.ccd mom=-1
-   nds9 velfie.ccd        # view the velocity field using &rsquo;ds9&rsquo;
-</pre>With sign=-1 it will create a counter-clockwise rotating disk and project
-it using <b>$inc,$pa</b>, For a clock-wise rotating disk the math is nearly the
-same, except the sign for the inclination needs to be flipped,  or <b>-$inc,$pa</b>,
- hence the somewhat awkward looking expressing to compute <b>sinc</b>. 
+will flip the near and far side. 
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapshift.1.html'>snapshift(1NEMO)</a>
+, <a href='snapscale.1.html'>snapscale(1NEMO)</a>
 ,
-<a href='snapscale.1.html'>snapscale(1NEMO)</a>
-, <a href='snapspin.1.html'>snapspin(1NEMO)</a>
+<a href='snapspin.1.html'>snapspin(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Joshua E. Barnes,
-Peter Teuben 
+Joshua E. Barnes, Peter Teuben 
+<p>
+
 <h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>xx-jan-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 original                   <tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
@@ -134,6 +143,7 @@ Peter Teuben
 21-nov-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.0 added tscale= keyword<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-nov-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.1a added select=, also implemented select=acc<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-sep-08<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.0 added spinvector=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-jan-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;fix sense of rotation example<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

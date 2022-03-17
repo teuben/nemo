@@ -1,9 +1,12 @@
-.TH CCD2VEL 1NEMO "28 April 2017"
-.SH NAME
+.TH CCD2VEL 1NEMO "11 March 2022"
+
+.SH "NAME"
 ccd2vel \- convert map of wave/freq/velocities to doppler velocities
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccd2vel\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccd2vel\fP converts a map to a doppler velocity map. The input map
 units can be in wavelength (\fBrestwave=\fP is needed), frequency (\fBrestfreq=\fP is needed)
 or one of three doppler velocity frames of reference (radio, optical, relativistic).
@@ -12,9 +15,9 @@ The output map will be in one of those three doppler velocity frames of referenc
 .PP
 This program ignores references to being in a Barycenric, Heliocentric or LSR frame. See comments below in the
 CASA and MIRIAD sections.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Optional input image file. No default.
@@ -41,7 +44,12 @@ Clipping of output (none, or two values needed). Default: no clipping.
 .TP
 \fBunits=km/s\fP
 Desired output units (km/s, m/s) [km/s]
-.SH EXAMPLES
+.TP
+\fBunits=\fP
+If given, and no in/out is given, the three velocity conventions (radio, relativistic, optical)
+are given in km/s. Default: not used.
+
+.SH "EXAMPLES"
 Here is how one converts a fits cube with an optical wavelengths 3rd axis
 to a relatistic velocity field:
 .nf
@@ -51,7 +59,15 @@ and here an optical velocity field into a relativistic
 .nf
    NGC2347.VoptFromHa.fits - | ccd2vel - NGC2347.VrelFromHa.ccd opt rel
 .fi
-.SH CASA
+and the different doppler conversion velocities for z=1:
+.nf
+    ccd2vel z=1
+    vrad=149896
+    vrel=179875
+    vopt=299792
+.fi
+
+.SH "CASA"
 From the \fBtclean\fP documentation on the \fBveltype\fP keyword:
 
 Velocity type (radio, z, ratio, beta, gamma, optical)
@@ -77,7 +93,8 @@ The different types (with F = f/f0, the frequency ratio), are:
                       (although the calculation will proceed) if given as a velocity.
 
 .fi
-.SH MIRIAD
+
+.SH "MIRIAD"
 From the \fBVELSW\fP documentation:
 
 VELSW is a Miriad task used to change the type of a spectral axis.
@@ -144,12 +161,17 @@ The default for both the spectral type and the Doppler frame is
 to leave them as is, performing only required translations.
 
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
+
 ccdsky(1NEMO), ccdmath(1NEMO), fitsccd(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 27-Apr-17	V0.3 Created	PJT
+11-mar-11	V0.6 added doppler conversions for given z=	PJT
 .fi

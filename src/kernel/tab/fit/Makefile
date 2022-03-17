@@ -25,7 +25,7 @@ MAN5FILES =
 INCFILES = 
 
 FIT_CC  = \
-	gauss2.c  gauss3_hcn.c	gauss7_n2h+.c  gaussn.c  myline.c  taugauss.c rotcurm.c 
+	gauss2.c  gauss3_hcn.c	gauss3_ha.c gauss7_n2h+.c  gaussn.c  myline.c  taugauss.c rotcurm.c 
 
 FIT_CXX = \
 

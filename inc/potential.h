@@ -37,6 +37,7 @@ potproc_float  get_potential_float  (const string, const string, const string);
 potproc_double get_potential_double (const string, const string, const string);
 proc           get_inipotential     (void);
 real           get_pattern          (void);
+void           set_pattern          (real);
 
 #if defined(__cplusplus)
 }

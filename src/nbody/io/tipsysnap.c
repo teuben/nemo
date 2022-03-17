@@ -29,33 +29,36 @@
  * 18-aug-00    also allow binary files..., with padding and optional swap
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
+ *  4-feb-22    make binary the default
  */
  
 #include <stdinc.h>
 #include <getparam.h>
 #include <math.h>
 #include <stdlib.h>
-#include <vectmath.h>		/* otherwise NDIM undefined */
+#include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
-#include "tipsydefs.h"              /* header is in here */
+
+#include "tipsydefs.h"
 
 string defv[] = {
     "in=???\n                   Input (tipsy) ascii file",
-    "out=???\n                  Output snapshot file",
+    "out=\n                     Output snapshot file",
     "options=gas,dark,star\n    Output which particles?",
-    "mode=ascii\n		Input mode (ascii, binary)",
+    "mode=binary\n		Input mode (ascii, binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
-    "VERSION=2.1b\n             4-feb-2018 pjt",
+    "boom=f\n                   BOOM mode with add-acc ?",
+    "VERSION=3.1\n              5-feb-2022 pjt",
     NULL,
 };
 
-string usage="convert tipsy ascii/binary file to snapshot";
+string usage="convert tipsy file to NEMO snapshot";
 
 void nemo_main()
 {
@@ -66,16 +69,23 @@ void nemo_main()
     int nstar ;
     int last_nstar ;
     int count ;
+    int version ;
     float dummy ;
     float *tform  = NULL;
     float *tf ;
     float last_tform ;
-    struct  gas_particle *gp, *lastgp;
-    struct dark_particle *dp, *lastdp ;
-    struct star_particle *sp, *lastsp, *last_old_sp ;
+    struct  gas_particle   *gp,  *lastgp;
+    struct dark_particle   *dp,  *lastdp;
+    struct star_particle   *sp,  *lastsp,  *last_old_sp;
+    struct dark_particleV6 *dp6, *lastdp6;
+    struct star_particleV6 *sp6, *lastsp6, *last_old_sp6;
+
+#ifdef HAVE_BOOM
+    warning("BOOM support enabled");
+#endif    
 
     /* NEMO */
-    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap;
+    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap, Qboom, Qout;
     string options, mode;
     int i, j, n, nbody, bits, offset;
     real tsnap;
@@ -83,8 +93,11 @@ void nemo_main()
     stream instr, outstr;
     
     instr = stropen(getparam("in"),"r");
-    outstr = stropen(getparam("out"),"w");
-    put_history(outstr);
+    Qout = hasvalue("out");
+    if (Qout) {
+      outstr = stropen(getparam("out"),"w");
+      put_history(outstr);
+    }
     
     options = getparam("options");
     Qgas  = scanopt(options,"gas");
@@ -94,6 +107,7 @@ void nemo_main()
     mode = getparam("mode");
     Qascii   = scanopt(mode,"ascii");
     Qbinary  = scanopt(mode,"binary");
+    Qboom = getbparam("boom");
 
     Qswap = getbparam("swap");
     
@@ -308,9 +322,11 @@ void nemo_main()
 	ndim=header.ndim;
 
 	nbodies=header.nbodies;
-	ngas=header.nsph;
+	ngas  = header.nsph;
 	nstar = header.nstar ;
-	ndark = header.ndark = nbodies - nstar - ngas ;
+	ndark = header.ndark;
+	if (ndark != nbodies - nstar - ngas)
+	  warning("ndark=%d   not equal to nbodies - nstar - ngas = %d", ndark,  nbodies - nstar - ngas);
 
         switch(header.ndim) {
             case 3:
@@ -320,10 +336,19 @@ void nemo_main()
                     error("strange header.ndim=%d, need swap?",header.ndim);
                     break;
         }
+#ifdef TIPSY_NEEDPAD
+	version = header.version;
+#else
+	version = 0;
+#endif
 
-        dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star\n",
+        dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star    version=%d\n",
                 header.time, header.nbodies,
-                header.nsph, header.ndark, header.nstar);
+                header.nsph, header.ndark, header.nstar, version);
+	dprintf(0,"header = %d  gas = %d   dark = %d  star = %d bytes\n", sizeof(header),
+		sizeof(struct gas_particle), sizeof(struct dark_particle), sizeof(struct star_particle));
+
+	if (!Qout) return;
 
 	if (offset) {
 	  n = fseek(instr, offset, SEEK_CUR);
@@ -372,9 +397,17 @@ void nemo_main()
 		  Pos(bp)[j] = dp[i].pos[j];
 		  Vel(bp)[j] = dp[i].vel[j];
 	        }
+#ifdef HAVE_BOOM
+		Phi(bp) = dp[i].pot;
+	        for (j=0; j<ndim; j++)
+		  Acc(bp)[j] = dp[i].acc[j];
+#endif		
 	        bp++;
 	      }
 	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+#ifdef HAVE_BOOM
+	      bits = (bits  | PotentialBit | AccelerationBit);
+#endif	      
 	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	    }
         }
@@ -396,9 +429,17 @@ void nemo_main()
 		  Pos(bp)[j] = sp[i].pos[j];
 		  Vel(bp)[j] = sp[i].vel[j];
 	        }
+#ifdef HAVE_BOOM
+		Phi(bp) = sp[i].pot;
+	        for (j=0; j<ndim; j++)
+		  Acc(bp)[j] = sp[i].acc[j];
+#endif		
 	        bp++;
 	      }
-	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+	      bits = (TimeBit | MassBit | PhaseSpaceBit);
+#ifdef HAVE_BOOM
+	      bits = (bits  | PotentialBit | AccelerationBit);
+#endif	      
 	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 
 	    }

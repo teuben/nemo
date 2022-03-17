@@ -150,25 +150,19 @@ OMP_NUM_THREADS
 <p> slurm is a popular package you will find on large computer clusters.
 
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='nemo.1.html'>nemo(1NEMO)</a>
-, <a href='bench.5.html'>bench(5NEMO)</a>
-, <a href='tee.1.html'>tee(1)</a>
-, <a href='pee.1.html'>pee(1)</a>
-, <a href='netcat.1.html'>netcat(1)</a>
-, <a href='zrun.1.html'>zrun(1)</a>
-,
-<a href='parallel.1.html'>parallel(1)</a>
-, <a href='sponge.1.html'>sponge(1)</a>
-, <a href='vipe.1.html'>vipe(1)</a>
- 
-<p> 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben. 
-<p> 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
-<br>
-<pre>18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
+<h2><a name='sect5' href='#toc5'>Tables</a></h2>
+
+<p> Tables (<a href='table.5.html'><i>table(5NEMO)</i></a>
+) come in many forms. Here are some TLDR type
+reminder on manipulating and displaying tables <br>
+<pre>  # align a table for viewing
+  csvlook data.csv
+  column -s, -t data.csv
+  python -c "import sys,prettytable; print(prettytable.from_csv(sys.stdin))"
+&lt; data.csv
+See Alsonemo(1NEMO), bench(5NEMO), table(5NEMO), tee(1), pee(1), netcat(1),
+zrun(1), parallel(1), sponge(1), vipe(1)  AuthorPeter Teuben.  Update History
+18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 5-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabccd added         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;ds added          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed some typos<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -184,9 +178,10 @@ may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;OpenMP<tt> </tt>&nbsp;<tt> </tt>&nbsp;<t
 <li><a name='toc2' href='#sect2'>PIPES and SHARED MEMORY</a></li>
 <li><a name='toc3' href='#sect3'>PARALLEL and OpenMP</a></li>
 <li><a name='toc4' href='#sect4'>Slurm</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Tables</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

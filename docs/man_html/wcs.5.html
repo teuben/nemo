@@ -9,13 +9,17 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 wcs - World Coordinate Systems 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>wcs</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>wcs</b>
 is the World Coordinate System. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Polarization</a></h2>
 Polarization is an exceptional
 case, since it&rsquo;s enumerated (XX, YY, LL, etc.), but the community has assigned
@@ -34,7 +38,45 @@ This is the AIPS/FITS convention. <br>
 -7<tt> </tt>&nbsp;<tt> </tt>&nbsp;XY
 -8<tt> </tt>&nbsp;<tt> </tt>&nbsp;YX
 </pre>
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<p> 
+<h2><a name='sect4' href='#toc4'>Coordinates</a></h2>
+Some common coordinate systems: <br>
+<pre>   RA--    Equatorial
+   DEC-
+   GLON    Galactic
+   GLAT
+   ELON    Ecliptic
+   ELAT
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Projection</a></h2>
+Some common projections: <br>
+<pre>   -SIN
+   -TAN
+   -ARC
+   -NCP
+   -GLS (or -FLS)
+   -MER
+   -AIT
+</pre>
+<p> 
+<p> 
+<h2><a name='sect6' href='#toc6'>Velocity Convenctions</a></h2>
+
+<p> Radio vs. Optical. Linear vs. Non-linear.  See also
+<a href='ccd2vel.1.html'><i>ccd2vel(1NEMO)</i></a>
+ <br>
+<pre>  FREQ
+  WAVE
+  VRAD (radio)
+  VOPT (optical)
+  VELO (relativistic)
+  FELO [VOPT-F2W)
+  -HEL
+  -LSR
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='wcs.1.html'>wcs(1NEMO)</a>
 , <a href='worldpos.3.html'>worldpos(3NEMO)</a>
 , <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
@@ -44,9 +86,11 @@ This is the AIPS/FITS convention. <br>
  <a href='xy2sky.1WCSTOOLS.html'>xy2sky(1WCSTOOLS)</a>
 , <a href='sky2xy.1WCSTOOLS.html'>sky2xy(1WCSTOOLS)</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>15-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;written<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -58,9 +102,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Polarization</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Coordinates</a></li>
+<li><a name='toc5' href='#sect5'>Projection</a></li>
+<li><a name='toc6' href='#sect6'>Velocity Convenctions</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

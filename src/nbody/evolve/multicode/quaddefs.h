@@ -8,37 +8,44 @@
 #include <snapshot/body.h>
 
 #include "quadfield.h"
+/*
+ * GLOBAL: pseudo-keyword for storage class.
+ */
+ 
+#if !defined(global)
+#  define global extern
+#endif
 
 typedef void (*force_proc)(Body *, int , real);
 
-string infile;			/* input file with initial conds            */
-string outfile;			/* output file for simulation results       */
-string quadfile;		/* output file for field tables             */
-string savefile;		/* output file for system state             */
+global string infile;			/* input file with initial conds            */
+global string outfile;			/* output file for simulation results       */
+global string quadfile;		/* output file for field tables             */
+global string savefile;		/* output file for system state             */
 
-real freq;			/* fundamental integration frequency        */
+global real freq;			/* fundamental integration frequency        */
 
-int mode;			/* integrator: RK, PC or PC1                */
+global int mode;			/* integrator: RK, PC or PC1                */
 
-real eps1, eps2;		/* radial, tangential softening             */
+global real eps1, eps2;		/* radial, tangential softening             */
 
-real freqout, minor_freqout;	/* major, minor output frequencies          */
+global real freqout, minor_freqout;	/* major, minor output frequencies          */
 
-real tstop;			/* time to stop integration                 */
+global real tstop;			/* time to stop integration                 */
 
-string options;			/* misc. options                            */
+global string options;			/* misc. options                            */
 
-string headline;		/* identification message                   */
+global string headline;		/* identification message                   */
 
-real tnow;			/* time state is defined                    */
+global real tnow;			/* time state is defined                    */
 
-real tout, minor_tout;		/* time of next major, minor output         */
+global real tout, minor_tout;		/* time of next major, minor output         */
 
-quadfield qfld;			/* tables of field moments                  */
+global quadfield qfld;			/* tables of field moments                  */
 
-int nbody;			/* number of bodies simulated               */
+global int nbody;			/* number of bodies simulated               */
 
-Body *bodytab;			/* array representing state                 */
+global Body *bodytab;			/* array representing state                 */
 
 #if !defined(MBODY)
 #  define MBODY 100000		/* max number of bodies, for orbstep        */
@@ -53,12 +60,14 @@ extern int savestate(string file);
 extern int restorestate(string file);
 
 /* orbstep.c */
-extern int initstep(body *btab, int nb, real *tptr, force_proc force);
-extern int orbstep(body *btab, int nb, real *tptr, force_proc force, real dt, int mode);
-extern int rkstep(body *btab, int nb, real *tptr, force_proc force, real dt, real atmp1[]);
-extern int pcstep(body *btab, int nb, real *tptr, force_proc force, real dt);
-extern int moveaccel(body *btab, int nb);
+extern void initstep(body *btab, int nb, real *tptr, force_proc force);
+extern void orbstep(body *btab, int nb, real *tptr, force_proc force, real dt, int mode);
+extern void rkstep(body *btab, int nb, real *tptr, force_proc force, real dt, real atmp1[]);
+extern void pcstep(body *btab, int nb, real *tptr, force_proc force, real dt);
+extern void moveaccel(body *btab, int nb);
 
 /* quadforce.c */
 extern int quadforce(body *btab, int nb, real eps1, real eps2);
 
+/* quadinter.c */
+extern int quadinter(Body *btab, int nb, real eps1, real eps2);

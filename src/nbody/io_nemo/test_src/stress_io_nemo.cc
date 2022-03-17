@@ -289,9 +289,9 @@ template <class T> bool StressIO_Nemo<T>::write()
 //------------------------------------------------------------------------------
 // NEMO parameters
 ::string defv[] = {  // use `::'string because of 'using namespace std'
-  "in=???\n             txt input file          ",
+  "in=???\n                 txt input file          ",
   "precision=double\n       double (default) | float",
-  "VERSION=1.0\n       compiled on <"__DATE__"> JCL  ",
+  "VERSION=1.0a\n           compiled on <" __DATE__ "> JCL  ",
   NULL
 };
 ::string usage="stress test on io_nemo function";

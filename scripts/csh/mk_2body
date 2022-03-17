@@ -1,0 +1,32 @@
+#! /bin/csh -f
+#
+#     Set up a 2 body system in inertial space
+#
+# example use:
+#     mk_2body outname m r
+# where the 2nd body with mass M=1, and at -R, will be derived.
+#
+# 
+
+if ($#argv == 0) then
+  exit 0
+endif
+
+
+set name=$1
+set m=$2
+set r=$3
+
+
+set M=1
+set R=`nemoinp "$m*$r"`
+set v=`nemoinp "1/(1+$m)/sqrt($r)"`
+set V=`nemoinp "$m*$v"`
+
+
+set l1="2  0.0"
+set l2="$m  $r 0 0  0  $v 0"
+set l3="$M -$R 0 0  0 -$V 0"
+
+printf "%s\n%s\n%s\n" "$l1"  "$l2" "$l3"  | tabtos - $name nbody,time m,pos,vel nbody=2
+

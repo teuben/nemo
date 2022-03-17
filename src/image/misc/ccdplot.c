@@ -60,7 +60,7 @@ string defv[] = {
 	"ylab=\n	(override) Label along Y-axis",
 	"xscale=1\n     Scale all X values by this",
 	"yscale=1\n     Scale all Y values by this",
-	"VERSION=3.1\n	23-aug-2018 PJT",
+	"VERSION=3.2\n	10-jan-2022 PJT",
 	NULL,
 };
 
@@ -130,6 +130,11 @@ void nemo_main()
     if (nz > 1) error("Cannot handle 3D images [%d,%d,%d]",nx,ny,nz);
     xmin=Xmin(iptr);
     ymin=Ymin(iptr);
+    if (Axis(iptr) == 1) {
+      xmin -= Xref(iptr)*Dx(iptr)*xscale;
+      ymin -= Yref(iptr)*Dy(iptr)*yscale;
+      dprintf(0,"axis=1:   new xmin,ymin=%g %g\n", xmin,ymin);
+    }
     dx=Dx(iptr) * xscale;
     dy=Dy(iptr) * yscale;
     xsize = nx * dx;
@@ -261,7 +266,7 @@ void plot_map ()
 
 	/* set scales and labels along axes */
     if (xplot[0]==UNDEF || xplot[1]==UNDEF) {
-    	xplot[0] = Xmin(iptr) - 0.5*Dx(iptr);
+        xplot[0] = Xmin(iptr) - 0.5*Dx(iptr);     // @todo axis=1
     	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr);
     	xplot[0] *= xscale;
     	xplot[1] *= xscale;
@@ -274,7 +279,7 @@ void plot_map ()
         strcpy (xlabel,"");
 
     if (yplot[0]==UNDEF || yplot[1]==UNDEF) {
-    	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr);
+    	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr);     // @todo axis=1
     	yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr);
     	yplot[0] *= yscale;
     	yplot[1] *= yscale;

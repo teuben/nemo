@@ -1,10 +1,13 @@
 .TH MKNEMO 8NEMO "12 July 2020"
-.SH NAME
+
+.SH "NAME"
 mknemo \- attempt to find NEMO (and related) programs and install them
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBmknemo \fIprogram(s)\fP 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImknemo\fP attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them.
 If successfull, the binary will be placed in \fB$NEMOBIN\fP.
@@ -31,6 +34,12 @@ Finally, if still no source code is found,
 a directory with the name \fIprogram\fP is searched for, 
 and a local Makefile is then used to install the \fIprogram\fP.
 \fBhackcode1\fP is an example of this type of program.
+.PP
+Initially mknemo was nothing more than a convenience tool to build (new) binaries
+from your working directory, without having to remember where the source code
+lived... but since it has also acquired being a semi-package manager, it should
+be mentioned there are many other options to solve this problem.
+
 .SH "OPTIONS"
 .nf
   -c CODE   search for CODE.c to set the directory for target(s)
@@ -48,7 +57,8 @@ and a local Makefile is then used to install the \fIprogram\fP.
   -v        more verbose, it will report version and cvsid of program (deprecated)
   -D        show special projects from the mknemo.d directory
 .fi
-.SH MAKEDEFS
+
+.SH "MAKEDEFS"
 All compile flags and libraries that are used should have been configured in the $NEMOLIB/makedefs file.
 Here are some critical programs that you could use to test if that specific library was properly referenced
 in makedefs:
@@ -69,7 +79,8 @@ yapp	        	tabhist
 If any of these fail for obvious reasons,
 you can try and fix them by rerunning configure and comparing
 $NEMOLIB/makedefs with $NEMO/makedefs, or simply editing $NEMOLIB/makedefs directly.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 .nf 
 .ta +2i
@@ -82,11 +93,19 @@ cfitsio		CFITSIO library
 .fi
 For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and being
 built with --prefix=$NEMO/opt.
+
+.SH "CAVEATS"
+The mknemo \fIattempts\fP to (re)install a program or package for NEMO, but there is no guarentee this works.
+For programs it typically depends on a matching sourcecode (e.g. name.c) and a proper Makefile in the directory
+where this code lives, or in more complicated cases, a matching script name in $NEMO/src/scripts/mknemo.d
+
 .SH "SEE ALSO"
 bake(8NEMO), mkbin(8NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 $NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
@@ -102,6 +121,7 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 $NEMO/local/<package>		source of a <package>
 $NEMO/opt/{bin,include,lib}	--prefix location of <package> binaries and headers for public use
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i

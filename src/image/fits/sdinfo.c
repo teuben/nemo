@@ -32,7 +32,8 @@ string defv[] = {
     "row=\n              Show spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
     "bench=1\n           How many times to run benchmark",
-    "VERSION=0.9\n       28-sep-2021 PJT",
+    "VERSION=0.9a\n      6-jan-2022 PJT",
+    "VERSION=0.9\n       27-sep-2021 PJT",
     NULL,
 };
 
@@ -128,7 +129,7 @@ void minmaxi(int n, int *data, int *data_min, int *data_max)
 }
 
 
-// 
+//
 
 double *get_column_dbl(fitsfile *fptr, char *colname, int nrows, int ncols, char **colnames)
 {
@@ -289,6 +290,7 @@ void nemo_main(void)
       printf("FDNUM: %d %d\n", fd_min, fd_max);
       printf("IFNUM: %d %d\n", if_min, if_max);
       printf("PLNUM: %d %d\n", pl_min, pl_max);
+
       if (int_data) {
 	minmaxi(nrows, int_data, &int_min, &int_max);
 	printf("INT:   %d %d\n", int_min, int_max);	
@@ -317,8 +319,7 @@ void nemo_main(void)
       for (i=0; i<nrows; i++)
 	printf("SIGCAL %d '%s' '%s'\n", i, sig_data[i], cal_data[i]);
 
-
-
+      // printf("INT: @ 0x%d\n", int_data);
       
       if (hasvalue("nchan")) {
 	nchan = getiparam("nchan");

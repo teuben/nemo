@@ -49,13 +49,12 @@ string defv[] = {
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
-    "VERSION=3.8a\n 14-nov-2021 PJT",
+    "label=\n       QAC label",
+    "VERSION=3.10a\n 11-mar-2022 PJT",
     NULL,
 };
 
 string usage="basic statistics of an image, optional chi2 calculation";
-
-string cvsid="$Id$";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
@@ -63,8 +62,6 @@ stream  tabstr = NULL;                  /* output table? */
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
 imageptr wptr=NULL;                     /* optional weight map */
-
-
 
 int    nx,ny,nz,nsize;			/* actual size of map */
 double xmin,ymin,zmin,dx,dy,dz;
@@ -87,11 +84,12 @@ void nemo_main(void)
     real dmin, dmax;
     real sum, sov, q1, q2, q3, tm;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount;
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
     bool Qac = getbparam("qac");
+    string qac_label;
     real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
@@ -101,6 +99,7 @@ void nemo_main(void)
     int maxmom = getiparam("maxmom");
     int maxpos[2];
     char slabel[32];
+
 
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
@@ -146,6 +145,11 @@ void nemo_main(void)
     } else
       Qw = FALSE;
 
+    if (hasvalue("label"))
+      qac_label = getparam("label");
+    else
+      qac_label = getparam("in");
+
     Qmin = hasvalue("min");
     if (Qmin) xmin = getdparam("min");
     Qmax = hasvalue("max");
@@ -155,6 +159,7 @@ void nemo_main(void)
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
     Qtorben = getbparam("torben");
+    Qmmcount = getbparam("mmcount");    
     if (Qtorben) Qmedian = TRUE;
     if (Qmedian || Qrobust || Qtorben) {
       ndat = nx*ny*nz;
@@ -197,6 +202,7 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
+	    if (isnan(x)) continue;
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -230,10 +236,16 @@ void nemo_main(void)
 	  kurt = kurtosis_moment(&m);
 
 	if (Qac) {
-	  real flux = 0.0;
-	  printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
-		 getparam("in"), mean, sigma, min_moment(&m), max_moment(&m),
-		 flux, sratio_moment(&m));
+	  if (Qrobust) {
+	    compute_robust_moment(&m);
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+		   qac_label, mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m));
+	  } else
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+		   qac_label, mean, sigma, min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m));	    
+
 	  return;
 	}
 	
@@ -307,6 +319,7 @@ void nemo_main(void)
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);
+	    if (isnan(x)) continue;
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
             if (Qbad && x==bad) continue;

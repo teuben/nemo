@@ -64,7 +64,7 @@ local int nemoinprt(char *line, real *par, int npar)
   //     *  0  *  0
   char *token = strtok(line," ,");
   int ntok = 0;
-  lls *currq, *prev = NULL;
+  lls *curr, *prev = NULL;
   static real *value;   //   value[0] , value[1], .... value[ntok-1]
   static int nvalue = 0;
 

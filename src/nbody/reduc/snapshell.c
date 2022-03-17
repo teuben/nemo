@@ -16,6 +16,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <moment.h>
+#include <extstring.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -37,7 +38,7 @@ string defv[] = {
     "cumulative=f\n              Use mvar= as cumulative in radii=",
     "first=t\n                   Process only first snapshot?",
     "rstat=f\n                   Add stats in 'r' also ?",
-    "VERSION=2.1\n		 14-nov-05 PJT",
+    "VERSION=2.1a\n		 2-may-2021 PJT",
     NULL,
 };
 
@@ -93,8 +94,10 @@ local int n_sel, *n_mask;
 
 local void print_stat(Moment *m, bool Qhead, string name);
 local void printvec(string name, vector vec);
+local void reshape(int dir);
+local void shells();
 
-nemo_main()
+void nemo_main()
 {
     stream instr;
     int i, bits, ndim;
@@ -156,7 +159,7 @@ vector w_jvec;			/* specific angular momentum		    */
 matrix w_qpole;			/* weighted quadrupole moment		    */
 matrix w_keten;			/* weighted kinetic energy tensor	    */
 
-reshape(int dir)
+void reshape(int dir)
 {
     int i;
     Body *b;
@@ -183,7 +186,7 @@ reshape(int dir)
 }
 
 
-shells()
+void shells()
 {
   int i, j, irad, nviol;
   Body *b;

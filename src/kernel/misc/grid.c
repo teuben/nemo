@@ -6,6 +6,7 @@
  *     20-jun-01    gcc3
  *     15-mar-05    proper real_proc for c++
  *     29-jun-2020  MAXN cleanup in TESTBED
+ *      2-jan-2021  squash gcc warnings
  *
  */
 
@@ -102,7 +103,7 @@ int index_grid(
 		      }
 		      imin = 0;
 		      imax = g->n;
-		      error("grid_array not implemented yet");
+		      error("grid_array not implemented yet %d %d",imin,imax);
 		      break;
     default:
                       error("illegal grid mode %d",g->mode);

@@ -21,10 +21,30 @@ contains a timestamp of that creation.
 <hr>
 -->
 
-<A NAME=4_2_2>
-<H2> 4.2.2:  in github</H2>
+<H2> 4.3.1:  in github</H2>
 <UL>
+  <LI> (Feb 10, 2022) branch <B>table2</B> created to finish the table V2 implementation.
+  <LI> (Feb 2022) Various tools for the (snapshot/orbit) BOOM project upgraded:
+    snaptipsy, tipsysnap, snapcopy, stoo, orboom, orbstat.  Started an example in
+    <A HREF=https://github.com/teuben/nemo/blob/master/docs/examples/boom.md>boom.md</A>
+
+  <LI> (Jan 20, 2022) Get some working exaples with gadget files and clarify current state of their versions. The man page
+    <A HREF=man_html/gadget.5.html>gadget</A> will be updated for this.
+  <LI> (Jan 8, 2022) Fixed WCS in
+    <A HREF=man_html/potccd.1.html>potccd</A>, added new program
+    <A HREF=man_html/ccdl2.1.html>ccdl2</A> to find Lagrange points in a 2D grid potential.
+</UL>
+  
+<A NAME=4_3_0>
+<H2> 4.3.0:  7-jan-2022 </H2>
+<UL>
+  <LI> (Jan 6, 2022)  Merged the nearly complete M1 branch to master; some merging with other old code for new release
+  <LI> (Dec 30, 2021) New parameter grabbing program (shortcut for grep/awk...)
+    <A HREF=man_html/txtpar.1.html>txtpar</A> and big update/bugfix for
+    <A HREF=man_html/tabdms.1.html>tabdms</A> 
   <LI> The default anaconda3 install is now 2021.05
+  <LI> (Oct, 2023)  <A HREF=https://www.gnu.org/software/gnuastro/>gnuastro</A>
+       is now installable via mknemo (courtesy ADASS meeting) - trying out a demo program <B>fitsgnu</B>
   <LI> (July 12-15 2021) This week is the AMUSE workshop. So a few NEMO-ish highlights:
     <UL>
       <LI> <A HREF=https://github.com/GalacticDynamics-Oxford/pyfalcon>Python interface for the fast-multipole gravity solver falcON </A>
@@ -65,7 +85,7 @@ contains a timestamp of that creation.
 <LI> (7-apr-2021) Apple's long SIP arm reared it's ugly head again, a side effect of the MAC fix caused
     falcon's bodyfun to fail on linux. should be fixed now.
   <LI> Benchfile introduced, with a function similar to the Testfile, all parallel to the Makefile
-  <LI> The "make bench3" command will now run 5 nbody codes, each tuned to take 5sec cpu on an i5-1135G7
+  <LI> The "make bench5" command will now run 5 nbody codes, each tuned to take 5sec cpu on an i5-1135G7
    <pre>
      $ /usr/bin/time src/scripts/nemo.bench mode=3
      NEMOBENCH: (2021-03-21) bench3566979 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 bsf=0 tmp=bench3566979

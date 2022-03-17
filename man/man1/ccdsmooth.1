@@ -115,6 +115,23 @@ Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))).
 .fi
 which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp.
 
+.SH "NOISE REDUCTION"
+For a given smoothing, a map with random gaussian noise will have a smaller noise for given smoothing. Most
+maps in astronomy will not have uncorrelated noise. Here's a (bash) script and results to sample that behavior.
+We fix the noise at 1, and for given smoothing (in terms of pixels FWHM) the noise will be lower:
+.nf
+
+export DEBUG=-1
+slist=$(nemoinp 0.01,0.25:5:0.25)
+
+for s in $slist; do
+     echo -n "$s "
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | grep ^Mean | awk '{print $6}'
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | txtpar - p0=Mean,1,6
+done
+
+.fi
+
 .SH "BUGS"
 Smoothing a map which has already been smoothed will result in an incorrect
 header - this would be a simple sum of squares, if the beams are aligned with the axis.

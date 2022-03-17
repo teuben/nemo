@@ -1,9 +1,12 @@
 .TH GALAXY1 1NEMO "6 February 2018"
-.SH NAME
+
+.SH "NAME"
 galaxy \-  3D FFT N-body code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBgalaxy\fP 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIgalaxy\fP 
 is a direct descendant of the code first used by James & Sellwood (1978, MNRAS
 v182, p331) with only minor refinements since.  The Poisson solver was
@@ -58,11 +61,42 @@ the particles are saved by a call to UNLOAD.
 .SH 
 The new 2014 public release of \fBgalaxy\fP contains an updated code, including
 versions of SCF (see \fIscfm(1NEMO)\fP) and BHTREE (see \fBhackcode1(1NEMO)\fP).
-.SH FILES
+
+.SH "GALAXY15"
+The new release of GALAXY15 contains a fairly large number of executables that do not
+confirm to the NEMO user interface. See the manual.pdf for more details, but in summary
+they are:
+.nf
+analys
+cold
+compress
+corrplt
+dfiter
+dflook
+dmp2pcs
+estfreq
+gadget2pcs
+galaxy
+genplt
+isotropy
+merge
+mkpcs
+modefit
+pcs2dmp
+plotpft
+ptest
+smooth
+tipsy2pcs
+weed
+.fi
+
+
+.SH "FILES"
 .nf
 .ta +2i
 $NEMO/src/nbody/evolve/sellwood  	source code tree (w/ res2snap & snap2ini)
 $NEMO/usr/sellwood/GALAXY15	source code tree for GALAXY15
+$NEMO/usr/sellwood//manual.pdf	The Manual
 .fi
 The main files associated with the run are (notice the basename 'galaxy' is fixed by the code):
 .nf
@@ -97,7 +131,8 @@ is:
 The \fIgalaxy.fin\fP can also be used for a restart. Note that the timestep
 is one more then the last requested time, to prevent that the 
 \fIgalaxy.res\fP file will contain a datadump on the restart timestep twice.
-.SH COMPILATION
+
+.SH "COMPILATION"
 Note that the maximum grid size and maximum amount of particles are hardcoded
 during compilation. See comments in \fBrjinclude.h\fP how to change the
 maximum grid size and the parameter \fBmbod\fP in
@@ -106,7 +141,8 @@ maximum grid size and the parameter \fBmbod\fP in
 The new release V15 does not depend on commercial (e.g. NAG) software, and
 can be compiled using open source tools and libraries. PGPLOT must be
 installed independantly.
-.SH RES2SNAP
+
+.SH "RES2SNAP"
 The following shell script, given as an example, will convert a particular
 snapshot from a binary "galaxy.res" file into a NEMO \fIsnapshot(5NEMO)\fP
 format.
@@ -128,7 +164,8 @@ set nbody=`unfio $file "$n*2-1" int   | awk '{if (NR==2) print $1}'`
 unfio $file "$n*2" float maxbuf=100000 |\\
    tabtos - ${file:r}.$n.snap "" pos,vel,phi options=wrap times=$tsnap nbody=$nbody
 .fi
-.SH BENCHMARKS
+
+.SH "BENCHMARKS"
 1000 particles on a 32**3 cube integrating for 20 steps took 4.77\" on
 a sparc Ultra-2. (1997?)
 .PP
@@ -136,7 +173,7 @@ a sparc Ultra-2. (1997?)
 13 speedup from the 2004 results. However, compiling with flang (FFLAGS=-O3), 200 steps took
 0.22\", a remarkable speedup of 16 over gfortran.
 
-.SH SEE ALSO
+.SH "SEE ALSO"
 rungalaxy(1NEMO), unfio(1NEMO), snapshot(5NEMO)
 .PP
 .nf
@@ -146,11 +183,13 @@ Sellwood (1997, in "Computational Astrophysics" ed Clarke & West, ASP Conf serie
 http://www.physics.rutgers.edu/galaxy   (full 2014 version; V1.5 and later)
 .fi
 
-.SH ADS
+.SH "ADS"
 @ads 2014arXiv1406.6606S
-.SH AUTHOR
+
+.SH "AUTHOR"
 Jerry Sellwood
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 9-jun-97	V1.0  Sellwood public release/adopted for NEMO  	JS/PJT

@@ -9,17 +9,21 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapmradii - print lagrangian mass radii in a snapshot 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>snapscale
+<b>snapmradii
 in=</b><i>in_file</i> [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snapmradii</i> prints a table of the
-fractional lagrangian mass-radii of a snapshot. The snapshot will be sorted
-internally by increasing radius (which can be changed by using <b>sort=</b>),
+<i>snapmradii</i> prints a table of
+the fractional lagrangian mass-radii of a snapshot. The snapshot will be
+sorted internally by increasing radius (which can be changed by using <b>sort=</b>),
 there is no need to use <a href='snapsort.1.html'><i>snapsort(1NEMO)</i></a>
  preceding this call. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
 following parameters are recognized: 
@@ -46,39 +50,54 @@ is one snapshot per output row, with  time, and the mass fractions [Default:
 </dt>
 <dd>Sorting variable used to sort the particles. Any <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
  expression
-can be used. Default: <b>r</b>. Default </dd>
+can be used. Default: <b>r</b>. Default 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-The following example shows the evolution
-of 10% lagrangian mass radius and outputs the result in a graph <br>
-<pre>    snapmradii snap.dat 0.05 |\
-            tabplot - xlab=time ylab="10% Mass radius"
+The following example shows the
+evolution of 10%-90% lagrangian mass radii and outputs the result in a graph
+and a pretty printed table <br>
+<pre>  hackcode1 out=snap.dat tstop=10 freqout=5
+  snapmradii snap.dat | tabplot - line=1,1
+  snapmradii snap.dat | column -t
+  0        0.441198  0.571462  0.677862  0.765226  0.822322  0.858481  0.889645
+ 0.918198  0.960976
+  0.21875  0.396341  0.570931  0.652903  0.745234  0.791166  0.844938  0.893917
+ 0.958933  1.00103
+  0.40625  0.399102  0.479913  0.628671  0.707029  0.785033  0.829081  0.907681
+ 0.986865  1.06195
 </pre><p>
 The following example shows the cumulative mass distribution function for
 the third snapshot in a large simulation, and plots it: <br>
 <pre>    snaptrim snap.dat - times=#3 | snapmradii - 0.01:0.99:01 |\
             tabplot - xlab="Mass fraction" ylab=Radius
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 Doesn&rsquo;t handle snapshots with zero mass very well. <p>
-Doesn&rsquo;t deal with snapshots
-where there is no stars in one of the fraction bins requested. Since linear
-interpolation is used, some crazy larger radius is reported. 
+Doesn&rsquo;t deal with
+snapshots where there is no stars in one of the fraction bins requested.
+Since linear interpolation is used, some crazy larger radius is reported.
+
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
-,
-<a href='snapstat.1.html'>snapstat(1NEMO)</a>
+, <a href='snapstat.1.html'>snapstat(1NEMO)</a>
 , <a href='snapprint.1.html'>snapprint(1NEMO)</a>
- <p>
+, <a href='column.1.html'>column(1)</a>
+
+<p>
 W.L.Sweatman - (1993) MNRAS 261, 497. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter
-Teuben 
+Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>~/src/nbody/reduc   <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapmradii.c 
 </pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>12-May-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

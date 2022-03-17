@@ -24,7 +24,7 @@ string defv[] = {
         "out=???\n              Output filename (a fits file)",
         "options=mass,phase\n   Options for output",
         "comment=\n             Additional comments for FITS file",
-        "VERSION=1.0a\n         9-aug-04 PJT",            
+        "VERSION=1.1\n          6-jan-2022 PJT",            
         NULL,
 };
 
@@ -42,6 +42,7 @@ static char *comments[] = {NULL, NULL};        /* place to save ONE comment */
 
 #define MAXNEEDS 10
 static int needs[MAXNEEDS];     /* 0=mass, 1=pos, 2=vel 3=phi, 4=acc */
+
 
 int need_pars(string options)
 {
@@ -158,5 +159,19 @@ void w_data(stream ostr,struct fits_header *fh,int nbody,Body *btab)
     while (i-- > 0)
        fts_wdata(fh,ostr,1,&null);
     
+}
+
+
+
+void nemo_main(void)
+{
+    instr = stropen (getparam ("in"), "r");     /* open snapshot */
+    get_history(instr);
+    get_snap(instr,&btab,&nbody,&tnow,&bits);
+    strclose(instr);
+
+    outstr = stropen(getparam("out"), "w");
+    w_header(outstr,&fh,nbody,getparam("options"),getparam("comment"));
+    w_data(outstr,&fh,nbody,btab);
 }
 

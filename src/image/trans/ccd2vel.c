@@ -24,13 +24,13 @@ string defv[] = {
   "restfreq=\n      Input rest frequency, in the units of the map, only if needed",
   "clip=\n          Clipping of output (none, or two values needed)",
   "units=km/s\n     Desired output units (km/s, m/s)",
-  "VERSION=0.5\n    21-jun-2017 PJT",
+  "z=\n             Show conversions if no files used",
+  "VERSION=0.6\n    11-mar-2022 PJT",
   NULL,
 };
 
 string usage = "convert map of wave/freq to doppler velocities";
 
-string cvsid = "$Id$";
 
 static real c = c_MKS / 1000.0;    /* use km/s for now */
 
@@ -101,6 +101,25 @@ real wav2opt(real w,real w0)
 real frq2rad(real f,real f0)
 {
   return c * (1.0 - f/f0);
+}
+
+
+// optical to z
+real opt2z(real vopt)
+{
+  return vopt/c;
+}
+
+// z to optical
+real z2opt(real z)
+{ 
+  return c*z;
+}
+
+// z to radio
+real z2rad(real z)
+{
+  return opt2rad(z2opt(z));
 }
 
 
@@ -219,5 +238,15 @@ void nemo_main()
       dprintf(0,"MinMax: %g %g\n",vmin,vmax);
       outstr = stropen(getparam("out"), "w");
       write_image(outstr, iptr);
+    } else if (hasvalue("z")) {
+      real z = getrparam("z");
+      real vopt = z2opt(z);
+      real vrad = z2rad(z);
+      printf("z=%g\n",z);
+      printf("vrad=%g\n",vrad);
+      printf("vrel=%g\n",opt2rel(vopt));
+      printf("vopt=%g\n",vopt);
     }
+
+    
 }

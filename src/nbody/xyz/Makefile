@@ -30,7 +30,7 @@ INCFILES =
 SRCFILES = 
 OBJFILES=  
 LOBJFILES= 
-BINFILES = snapxyz xyzview
+BINFILES = snapxyz 
 TESTFILES= 
 
 help:

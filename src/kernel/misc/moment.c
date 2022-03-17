@@ -262,7 +262,9 @@ void compute_robust_moment(Moment *m)
     if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
     accum_moment(&tmp,m->dat[i],1.0);
   }
+  dprintf(1,"compute_robust_moment: %d %g %g %g\n", n, m1, m2, m3);
 
+  // speed up computation if recalled without changing data
   last_min_robust_moment    = min_moment(&tmp);
   last_max_robust_moment    = max_moment(&tmp);
   last_mean_robust_moment   = mean_moment(&tmp);
@@ -271,8 +273,54 @@ void compute_robust_moment(Moment *m)
   last_n_robust_moment      = n_moment(&tmp);
   last_robust_range[0]      = dlo;
   last_robust_range[1]      = dhi;
+  free_moment(&tmp);
+}
+
+// signal = np.median(flux)
+// noise  = 0.6052697 * np.median(np.abs(2.0 * flux[2:n-2] - flux[0:n-4] - flux[4:n]))
+// return signal / noise
+#if 0
+void compute_der_snr(Moment *m)
+{
+  int i,n;
+  real m1,m2,m3,iqr,dlo,dhi;
+  Moment tmp;
+  real fac = 0.6052697;
+  real ne = 2;
+  real *qdat;
+  
+  if (m->ndat==0)
+    error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
+  
+  n = MIN(m->n, m->ndat);
+  m2 = median(n,m->dat);
+
+  qdat = (real *) allocate((n-ne) * sizeof(real));
+  for (i=ne; i<n-ne; i++) {
+    qdat[i] = 2*m->dat[i] - m->dat[i-ne] - m->dat[i+ne];
+  }
+
+  
+  m1 = median_q1(n,m->dat);
+  m3 = median_q3(n,m->dat);
+  iqr = m3-m1;
+  dlo = m1 - frob*iqr;   /* perhaps better if this 1.5 factor */
+  dhi = m3 + frob*iqr;   /* should depend on the # datapoints */
+  ini_moment(&tmp,2,n);
+  for (i=0; i<n; i++) {
+    if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
+    accum_moment(&tmp,m->dat[i],1.0);
+  }
+  last_mean_robust_moment   = mean_moment(&tmp);
+  last_sigma_robust_moment  = sigma_moment(&tmp);
+  last_median_robust_moment = median_moment(&tmp);
+  last_n_robust_moment      = n_moment(&tmp);
+  last_robust_range[0]      = dlo;
+  last_robust_range[1]      = dhi;
   free_moment(&tmp); 
 }
+
+#endif
 
 int n_robust_moment(Moment *m)
 {

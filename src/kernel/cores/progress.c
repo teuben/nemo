@@ -22,18 +22,18 @@ int progress(double dtime, string fmt, ...)
     double cpu1;
 
     if (bypass < 0) {                /* initialize a few things */
-      dprintf(0,"Progress bar initialized; dtime=%g cpu0=%g\n",dtime,cpu0);
       if (isatty(fileno(stderr)))
 	bypass = 0;
       else
 	bypass = 1;
       cpu0 = cputime()*60.0;
+      dprintf(1,"Progress bar initialized; dtime=%g cpu0=%g; bypass=%d\n",dtime,cpu0,bypass);
     } 
     if (bypass) return 0;
 
     if (dtime > 0) {
       cpu1 = cputime()*60.0;
-      dprintf(1,"check: %g %g\n",cpu0,cpu1);
+      dprintf(2,"check: %g %g\n",cpu0,cpu1);
       if (cpu1-cpu0 < dtime) return 0;
       cpu0 = cpu1;
     }
@@ -57,14 +57,16 @@ int progress(double dtime, string fmt, ...)
 
 #ifdef TESTBED
 
+#include <getparam.h>
+
 string defv[]={
   "n=10\n         number of loops",
   "m=1\n          report every m",
   "sleep=0\n	  delay?",
   "cpu=0\n        cpu delay?",
-  "compute=1\n    compute something",
+  "compute=1\n    compute something quadratic in this",
   "int=f\n        check int value",
-  "VERSION=1.1\n  1-nov-04 PJT",
+  "VERSION=1.2\n  10-feb-2022 PJT",
   NULL,
 };
 
@@ -78,13 +80,15 @@ void do_compute(int n)
   a = 2.0;
   b = 3.0;
   c = 0.0;
-  for (i=0; i<n; i++)
-  for (j=0; j<n; j++)
-    c += sqrt(a)*sqrt(a) + sqrt(b)*sqrt(b);
+  for (i=0; i<n; i++) {
+    for (j=0; j<n; j++)
+      c += sqrt(a)*sqrt(a) + sqrt(b)*sqrt(b);
+    progress(1.0,"computing %d",i);
+  }
   dprintf(2,"c=%g\n",c);
 }
 
-nemo_main()
+void nemo_main()
 {
   int k, n0, n = getiparam("n");
   int m = getiparam("m");

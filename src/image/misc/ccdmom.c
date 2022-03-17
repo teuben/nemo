@@ -59,7 +59,7 @@ string defv[] = {
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif  
-  "VERSION=2.7d\n  5-jan-2021 PJT",
+  "VERSION=2.8\n  10-mar-2022 PJT",
   NULL,
 };
 
@@ -70,7 +70,7 @@ local real peak_spectrum(int n, real *spec, int p);
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero);
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
-local void  peak_assign(int n, real *data, int *mask);
+local void peak_assign(int n, real *data, int *mask);
 local bool out_of_range(real *clip, real x);
 local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
@@ -159,6 +159,8 @@ void nemo_main()
       return;
     }
 
+    if (mom==-3) Qkeep=TRUE;
+
     if (Qkeep) {
         dprintf(0,"Keeping %d*%d*%d cube\n",nx1,ny1,nz1);
         if (axis==1) {
@@ -206,8 +208,11 @@ void nemo_main()
 
     ifactor = 1.0;
     if (axis==1) {
+      
       scale = Dx(iptr);
       offset = Xmin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Xref(iptr)*Dx(iptr);
       if (Qint) ifactor *= ABS(Dx(iptr));
       for (k=0; k<nz; k++)
         for (j=0; j<ny; j++) {
@@ -262,9 +267,12 @@ void nemo_main()
 
 	if (Qoper) image_oper(iptr,oper,iptr1);
 
-    } else if (axis==2) {                      
+    } else if (axis==2) {
+      
       scale = Dy(iptr);
       offset = Ymin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Yref(iptr)*Dy(iptr);
       if (Qint) ifactor *= ABS(Dy(iptr));
       for (k=0; k<nz; k++)
         for (i=0; i<nx; i++) {
@@ -320,8 +328,11 @@ void nemo_main()
 	if (Qoper) image_oper(iptr,oper,iptr1);
 
     } else if (axis==3) {                       /* this one is well tested and has more options */
+      
         scale = Dz(iptr);
 	offset = Zmin(iptr);
+	if (Axis(iptr)==1)
+	  offset -= Zref(iptr)*Dz(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
       	  for(i=0; i<nx; i++) {                         /* loop over all X and Y positions */
@@ -350,6 +361,7 @@ void nemo_main()
 		    CubeValue(iptr1,i,j,k) = spec[k]-spec[k-1];
 		}
     	    } /* for(k) */
+	    
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {

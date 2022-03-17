@@ -15,9 +15,13 @@
  *  Note: astronomical images often have Dx<0 (Right Ascension increases
  *        to the left)....
  * 
- *  @todo:  potential is just given from the nearest(?) pixel, no interpolation done yet
+ *  @todo  potential is just given from the nearest(?) pixel, no interpolation done yet
  *
- *  @todo:  fix for WCS with axis=1
+ *  @todo  fix for WCS with axis=1
+ *
+ *  @todo  allow to store a quadrant or octant if there is symmetry
+ *
+ *  @todo  implement a 3D version
  *
  */
 
@@ -57,7 +61,7 @@ local double   iscale = 1.0;
 local stream   potstr = NULL;
 local imageptr iptr = NULL;
 local double   idx, idy, xmin, ymin, xmax, ymax;
-local bool     Qcen,Qdel;
+local bool     Qcen, Qdel,Qsym;
 local int      nx, ny;
 local double   xcen=0.0;       /* central pixel; where (0,0) is the lower left pixel */
 local double   ycen=0.0;
@@ -123,6 +127,9 @@ void inipotential (int *npar, double par[], char *name)
       xmin = -xcen*dx;
       ymin = -ycen*dy;
     }
+
+    Qsym = FALSE;
+    // @todo figure out if a quadrant is used from both edges to be 0
 
     if (idx != idy) {
         if (idx == -idy && xmin == -ymin) {     /* try and patch it */

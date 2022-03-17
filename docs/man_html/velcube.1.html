@@ -73,20 +73,37 @@ field is using  <a href='rotcurshape.1.html'><i>rotcurshape(1NEMO)</i></a>
  using a 0 input map and fixing all fittable
 parameters. The resulting output residual map then contains -1 times the
 desired velocity field. <p>
-nemoinp 0:100:1 &gt; map1.radt tabmath map1.radt - "%1/sqrt(40+%1*%1)"
-all &gt; map1.velt ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60
+<br>
+<pre>  nemoinp 0:100:1 &gt; map1.radt
+  tabmath map1.radt - "%1/sqrt(40+%1*%1)" all &gt; map1.velt
+  ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60 size=256
+</pre><p>
+Here is an example of creating a (0/1) mask cube based on where you expect
+emission from a rotating disk given the geometry <br>
+<pre>ccdvel out=$tmp.d radii=0,$r0,$r1 vrot=1,1,1      inc=$inc pa=$pa size=$nx
+cell=$cell amp=t
+ccdvel out=$tmp.v radii=0,$r0,$r1 vrot=0,$v1,$v1  inc=$inc pa=$pa size=$nx
+cell=$cell amp=f vsys=$vsys
+ccdvel out=$tmp.s radii=0,$r0,$r1 vrot=100,100,50 inc=$inc pa=$pa size=$nx
+cell=$cell amp=t
+velcube - $tmp.v $tmp.d zrange=${vsys}-5*${nz}:${vsys}+5*${nz} nz=$nz sigdefault=$sig
+|\
+  ccdmath - -  &rsquo;ifgt(%1,0,1,0)&rsquo; |\
+  ccdfits - $mask refmap=$refmap refaxis=1,2,3 crpix=$nx/2,$nx/2,$nz/2 cdelt=-$cell/3600,$cell/3600,$chan
 
-<p>size=256 
+</pre>where a $refmap was used to inherit the WCS from. 
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdvel.1.html'>ccdvel(1NEMO)</a>
+
+, <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
  , <a href='rotcurshape.1.html'>rotcurshape(1NEMO)</a>
  
 <p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/image/rotcur/velcube.c
+src/image/rotcur/velcube.c 
+<p>
 
-<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <p> 

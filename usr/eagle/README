@@ -8,6 +8,8 @@ make install
 
 this will create $NEMOLIB/libread_eagle.so and $NEMOINC/read_eagle.h
 An example in $NEMO/src/nbody/io will compile eaglesnap.c
+    mknemo eaglesnap
+this will need HDF5 properly enabled in the $NEMOLIB/makedefs file
 
 
 Also useful, if you want to do a lot more in python

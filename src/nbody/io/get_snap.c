@@ -9,6 +9,7 @@
  *	 2-may-92  fixed allocate() declaration PJT
  *	22-feb-94 ansi headers (w/ allocate)    pjt
  *	 7-nov-00 printf -> warning
+ *      14-feb-2017   added get_nbody()
  */
 
 /*
@@ -437,3 +438,31 @@ string times;
 
 #endif
 
+
+/*
+ * GET_SNAP_NBODY: get the number of bodies in a snapshot
+ */
+
+#ifndef get_snap_nbody
+
+#define get_snap_nbody  _get_snap_nbody
+
+local int
+_get_snap_nbody(instr)
+stream instr;
+{
+  Body *btab = NULL;
+  int nbody = 0;
+  real tsnap;
+  real bits;
+  
+  get_history(instr);
+  if (!get_tag_ok(instr, SnapShotTag))
+    return -1;
+  get_snap(instr, &btab, &nbody, &tsnap, &bits);
+  dprintf(0,"get_nbody: %d %f %d\n",nbody,tsnap,bits);
+  free(btab);
+  return nbody;
+}
+
+#endif

@@ -43,12 +43,13 @@
  *       8-apr-11      e : fixed dycol reference bug
  *      22-aug-2018 V3.1 : print commented line if bin= causes an empty bin
  *       8-jan-2020 V4.0 : template python option
+ *      12-jan-2021 V4.1 : added backtrack=
  */
 
 /* TODO:
  *     - automatic scaling with dxcol and/or dycol 
  *     - also allow nxcol>1 and nycol=1 ??
- *     - allow a step=-1,0,1 like matplotlib's step function with pre,mid,post
+ *     - allow a step=-1,0,1 like matplotlib's step function with pre,mid,post options
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -104,11 +105,12 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "tab=f\n             Table output also if binning is used?",
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
+    "backtrack=t\n       Allow backtrack in line= option",
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.0b\n	 23-jan-2021 PJT",
+    "VERSION=4.1\n	 12-jan-2022 PJT",
     NULL
 };
 
@@ -162,12 +164,14 @@ local real xscale, yscale;
 local plcommand *layout;
 local bool layout_first;
 local bool Qreadlines;
+local bool Qbacktrack;
 
 void setparams(void);
 void read_data(void);
 void plot_data(void);
 void rebin_data(int n, real *x, real *y, int nbin, real *xbin, int np, real *xp, real *yp, real *xps, real *yps);
-void plot_points(int np, real xp[], real yp[], real dx[], real dy[], real xps[], real yps[], real pstyle, real psize, int lwidth, int lstyle, int color, int errorbars);
+void plot_points(int np, real xp[], real yp[], real dx[], real dy[], real xps[], real yps[], real pstyle,
+		 real psize, int lwidth, int lstyle, int color, int errorbars);
 void parse_pairsi(string key, int *pairs, int nycol);
 void parse_pairsr(string key, real *pairs, int nycol);
 double my_sqrt(double x);
@@ -333,6 +337,7 @@ void setparams(void)
     } 
     Qtab = getbparam("tab");
     Qmedian = getbparam("median");
+    Qbacktrack = getbparam("backtrack");
     xlab=getparam("xlab");
     ylab=getparam("ylab");
     headline = getparam("headline");
@@ -741,9 +746,13 @@ void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, rea
             i++;                             /* skip first undefined */
 	if (lstyle > 0) {       /* connect the dots */
             plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to point */
-            while (++i < np)
-                if (xp[i] != NaN)
+            while (++i < np) {
+	      if (xp[i] != NaN) {
+		if (Qbacktrack || (xtrans(xp[i]) > xtrans(xp[i-1])))
                     plline (xtrans(xp[i]), ytrans(yp[i]));  /* draw line */
+	      }
+	      plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to point */	    
+	    }
 
         } else {                /* histogram approach */
             plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to 1st point */

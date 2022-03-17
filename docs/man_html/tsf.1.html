@@ -97,7 +97,8 @@ of <i>MaxSetLen</i> as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> an
 . 
 <p> 
 <h2><a name='sect6' href='#toc6'>Examples</a></h2>
-An example of converting all double precision numbers
+
+<p> An example of converting all double precision numbers
 to single precision in a NEMO file: <br>
 <pre>    % tsf in=double.dat out=float.dat convert=d2f
 </pre>And here is an N-body snapshot of a Plummer sphere with 10 particles: <br>
@@ -123,23 +124,31 @@ tes
 </pre>
 <p> 
 <h2><a name='sect7' href='#toc7'>Tldr</a></h2>
-- Show contents of a binary structured file in brief format 
-<p> tsf {{file}}
 
-<p> - Show contents of a binary structured file, showing all lines, and in
+<p> list brief contents of a binary structured file 
+<p> % tsf {{path/to/file}}
 
-<p>full precision 
-<p> tsf {{file}} True allline=t 
+<p> list more 
+<p> % tsf {{path/to/file}} 
+<p> - Show contents of a binary structured
+
+<p>file in brief format 
+<p> tsf {{file}} 
+<p> - Show contents of a binary structured
+file, showing all lines, and in full precision 
+<p> tsf {{file}} True allline=t
+
+<p> 
 <p> 
 <h2><a name='sect8' href='#toc8'>Bugs</a></h2>
-The algorithm for implementing
-<b>maxline</b> is crude. <p>
-If <b>indent=</b> and <b>margin=</b> are choosen too large, resp. too
-small, they can bump into each other and cause illegable output, which
-cannot be read by <i>rsf</i> either. 
+The algorithm for implementing <b>maxline</b> is crude. <p>
+If <b>indent=</b> and <b>margin=</b>
+are choosen too large, resp. too small, they can bump into each other and
+cause illegable output, which cannot be read by <i>rsf</i> either. 
 <p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
-Joshua E. Barnes. 
+Joshua
+E. Barnes. 
 <p> 
 <h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>

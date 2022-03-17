@@ -1,10 +1,11 @@
-VERSION = NEMO V4.2 2-sep-2021 PJT
+VERSION = NEMO V4.3 4-feb-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
 ################################################################################
 
 SHELL = /bin/bash
+JOBS = 
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
 .PHONY:  INSTALL install scripts docs
@@ -104,10 +105,10 @@ install:
 	@echo "There is no install because NEMO is build in place. The usual procedure is"
 	@echo ""
 	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
-	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
+	@echo "      make build1            -- 1: postconfig  (build would do all build1..3)"
 	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
-	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced)"
+	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced only)"
 	@echo "      make check             -- the testsuite"
 	@echo "      make bench5            -- the NEMOBENCH5 benchmark"
 	@echo "      source nemo_start.sh   -- after this NEMO can be used in the shell"
@@ -149,19 +150,16 @@ dirs:
 	@echo By `whoami` on `hostname`
 	-@for i in $(CHECKDIR1) $(ASCIIDIRS); do \
 	(if [ ! -d $(NEMO)/$$i ]; then \
-	    echo DIR $(NEMO)/$$i created; \
 	    mkdir $(NEMO)/$$i; \
 	    chmod a+w $(NEMO)/$$i; \
 	fi); done
 	-@for i in $(CHECKDIR2); do \
 	(if [ ! -d $$i ]; then \
-	    echo DIR $$i created; \
 	    mkdir $$i; \
 	    chmod a+w $$i; \
 	fi); done
 	-@for i in $(CHECKFIL2); do \
 	(if [ ! -f $$i ]; then \
-	    echo FILE $$i created; \
 	    touch $$i; \
 	    chmod a+w $$i; \
 	fi); done
@@ -216,8 +214,7 @@ dirs:
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
 	    ls -l $(NEMOLIB)/maxsizes.h;\
 	fi
-	@echo "OK, all main directories and files should be there now"
-	@echo Done at `date`
+	@echo Done with dirs at `date`
 
 docs:
 	(cd docs/source; make html)
@@ -455,8 +452,8 @@ build2:
 	@echo 'Continue with "make build3"'
 
 build3:
-	(source nemo_start.sh ; $(MAKE) -j bins)
-	@echo 'Continue with "make build4"'
+	(source nemo_start.sh ; $(MAKE) -j $(JOBS) bins)
+	@echo 'Continue with "make build4 for advanced runs"'
 
 #       Advanced build examples that require opt=1 during the build.
 #       normally not needed
@@ -559,7 +556,12 @@ dehnen:
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	-(cd src;$(MAKE) -i -j clean install) > install.log 2>&1 
+	@echo Starting at `date` on `uname -a` > install.log
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")  >> install.log 2>&1 
+	-(cd src;$(MAKE) -i -j $(JOBS) clean install) >> install.log 2>&1
+
+maine:
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")
 
 slib:
 	(cd $(NEMOLIB); \
@@ -568,8 +570,8 @@ slib:
 
 bins:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log	
-	cd src;$(MAKE) -i -j bins >> ../install.log 2>&1 
-	cd usr;$(MAKE) -i -j bins >> ../install.log 2>&1 
+	cd src;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
+	cd usr;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
 	@echo Done at `date`
 
 missingbins:
@@ -589,8 +591,7 @@ testsuite:
 	@echo 'src/scripts/testsuite -b'
 
 check: 
-	(source nemo_start.sh; src/scripts/testsuite)
-	@echo 'Continue with "make checklog" (if you see any FAILS)'
+	(source nemo_start.sh; src/scripts/testsuite | tee -a install.log )
 
 benchtest:
 	(source nemo_start.sh; src/scripts/benchsuite)
@@ -620,7 +621,7 @@ bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
 
 bench5:
-	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5)
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
 
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH

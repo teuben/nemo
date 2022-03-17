@@ -49,22 +49,23 @@
 
 void mapsys(char *func)
 {
-    int i, n;
-
-    n = strlen(func);
 
 #if defined(bsd)
-    for (i=n+1; i>0; i--)
+    int n = strlen(func);
+    for (int i=n+1; i>0; i--)
         func[i] = func[i-1];        /* shift right, also the '\0' */
     func[0] = '_';                  /* and prepend the underscore */
     n++;
 #endif
 
 #if defined(unicos)
-    for (i=0; i<n; i++)		    /* all caps, no underscores */
+    int n = strlen(func);
+    for (int i=0; i<n; i++)		    /* all caps, no underscores */
         if (islower(func[i]))
             func[i] = toupper(func[i]);
 #endif
+
+    dprintf(5,"mapsys: %s\n", func);
 }
 
 #ifdef TESTBED
