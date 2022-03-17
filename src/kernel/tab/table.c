@@ -423,7 +423,6 @@ void nemo_main()
 }
 
 
-#endif
 
 
 void testmode1()
@@ -452,3 +451,6 @@ void testmode2()
   // printf("last  line: %s",table_row(tp1,tp1->nr - 1));
 	 
 }
+
+
+#endif
