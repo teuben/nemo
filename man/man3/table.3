@@ -1,27 +1,38 @@
 .TH TABLE 3NEMO "17 March 2022"
 
 .SH "NAME"
-table_open, table_md2, table_close - new table manipulation routines (\fIdrafted\fP)
+table_open, table_md2, table_close - new table manipulation routines
 .PP
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator routines
 
 .SH "SYNOPSIS"
-table V2 is under development.   The API with a - in front have not been implemented.
+table V2 is under final development.   The API with a - in front have not been implemented. Names of
+functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
+development \fBtable.h\fP has the final word.
 .nf
 
 .B #include <table.h>
 .B #include <mdarray.h>
 .B #include <extstring.h>
 .PP
-.B table *table_open(string fname, int mode, ? int rowbufsize, ? int maxrow);
+.B table  *table_open(stream instr, int mode=0, int nlines=0;
+.B table  *table_open0(stream instr, int mode);
+.B table  *table_open1(stream instr, int mode, int nlines);
+.B void    table_close(tableptr tptr);
+.B size_t  table_nrows(tableptr tprt);
+.B size_t  table_ncols(tableptr tprt);
+.B string  table_row(tableptr tptr, int row);
+.PP
+.B string table_line(table *t)
+.B string table_line1(table *t) 
+.B ssize_t table_line0(table *t, char **line, size_t *linelen);
+.PP
 .B - mdarray2 table_md2(table *t);
 .B - void table_read(table *t);
 .B - string *table_comments(table *t);
 .B void table_reset(table *t);
 .B void table_close(table *t);
 .PP
-.B int table_nrows(table *t);
-.B int table_ncols(table *t);
 .B - void table_set_valid_rows(int nrows, int *rows)
 .B - void table_set_valid_cols(int ncols, int *cols)
 .PP
@@ -29,9 +40,6 @@ table V2 is under development.   The API with a - in front have not been impleme
 .B - int table_next_rows(table *t)  
 .B - int table_next_rowi(table *t)
 .B - int table_next_rowr(table *t)
-.B string table_line(table *t)
-.B string table_line1(table *t) 
-.B ssize_t table_line0(table *t, char **line, size_t *linelen);
 .PP
 .B - string table_cols(table *t, int col)
 .B - int  table_coli(table *t, int col)
@@ -121,7 +129,7 @@ For arrays that are processed in streaming mode (e.g. \fIfilename="-"\fP) this w
 .PP
 Once a table has been fully read into memory,
 .B table_nrows
-returns the number of rows, and 
+returns the number of rows (assuming non-streaming), and 
 .B table_ncols
 the number of columns. By using
 .B table_set_valid_rows
@@ -244,22 +252,23 @@ adding 1 to each element:
     mdarray2 d2 = table_md2(t);
     table_close(t);
     
-    for (int i=0; i<nrows; i++)
+    for (int i=0; i<nrows; i++) 
     for (int j=0; j<ncols; j++)
-        d2[i][j] += 1.0;
-	
+        d2[i][j] += 1.0;          // d2[row][col]
+
 .fi
 and here is an example of reading the table line by line, without any parsing,
-but removing comment lines
+but removing comment lines. This can be done in line by line streaming mode,
+not allocating space for the whole table:
 
 .nf
     table *t = table_open(filename, 1, 0);
     int nrows = 0;
-    while ( (n=table_next_row(t)) >= 0) {
-	if (n > 0) {
-	    nrows++	
-	    printf("%s\\n", table_line(t));
-	}
+    string s;
+    while ( (s=table(line(t)) ) {
+	if (iscomment(s)) continue;
+        nrows++	
+        printf("%s\\n", s);           q// fputs() might be faster
     }
     table_close(t);
     dprintf(0,"Read %d lines\\n",nrows);
