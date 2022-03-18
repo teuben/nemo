@@ -124,7 +124,7 @@ void nemo_main(void)
     printf("%s file_lines() = %d\nwc: ",
         fname, nemo_file_lines(fname,deflen));
     sprintf(cmd,"wc %s",fname);
-    system(cmd);
-        
+    if (system(cmd))
+      warning("system");
 }
 #endif
