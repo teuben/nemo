@@ -1,13 +1,17 @@
 .TH SNAPPAT 1NEMO "8 August 2009"
-.SH NAME
+
+.SH "NAME"
 snappat \- convert snapshot to a regular Particle-Attribute-Time image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnappat\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Convert a snapshot to a Particle-Attribute-Time (PAT) datacube. Use
 \fIccdfits(1NEMO)\fP to convert to a \fIfits(5NEMO)\fP file for usage
 in other programs.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -25,15 +29,29 @@ Times to select snapshot [all]
 .TP
 \fBntime=\fP
 if used, pre-allocate this number of snapshots []
-.SH CAVEATS
+
+.SH "CAVEATS"
 It is useful to know the number of snapshots ahead of time, using the \fBntime=\fP
 keyword. If the number of snapshots was larger, the last few planes in the cube
 are garbage, if fewers, snapshots are written in sets of that size.
-.SH SEE ALSO
+
+.SH "EXAMPLE"
+
+
+.nf
+
+    hackcode1 out=p.out options=mass,phase,phi,acc
+    snappat p.out p.im ntime=9
+
+.fi
+
+.SH "SEE ALSO"
 snapidl(1NEMO), ccdfits(1NEMO), fits(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 8-Aug-09	V0.1 Created	PJT
