@@ -1,5 +1,6 @@
 /*
  * NII-a, Ha, NII-b triplet fitting 3 (constrained) gaussians
+ * WARNING:  untested code
  *
  * 6549.86    NII-a   -673.8 km/s
  * 6564.614   Halpha     0.0 
@@ -64,7 +65,7 @@ void ini_gauss3_ha(int n, real *x, real *y, real *p, int np)
 
 
 /* parameters: a simple NII-Halpha-NII triplet, only continuum, middle amp, middle vel
- *             and dispersion given
+ *             and dispersion given (4 parameters per component)
  *
  */
 real func_gauss3_ha(real *x, real *p, int np)

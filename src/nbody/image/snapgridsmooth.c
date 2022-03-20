@@ -4,8 +4,6 @@
  *
  *	 1-nov-06  V0.1 -- derived from snapgrid	PJT/Ed Shaya/Alan Peel
  *       6-nov-06  V0.3 -- add normalizat and fixes for that         PJT
- *
- *
  * 
  *  TODO:    stack= and multiple evar= have not been tested
  */
@@ -40,13 +38,12 @@ string defv[] = {
   "stack=f\n			  Stack all selected snapshots?",
   "periodic=f\n                   Periodic boundary conditions for smoothing?",
   "normalize=t\n                  Normalize smoothing to conserve mass (evar)",
-  "VERSION=0.4\n		  16-nov-06 PJT",
+  "VERSION=0.5\n		  19-mar-2022 PJT",
   NULL,
 };
 
 string usage="grid a snapshot into a 3D image-cube with adaptive smoothing";
 
-string cvsid="$Id$";
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
@@ -216,9 +213,19 @@ allocate_image()
     create_cube (&iptr,nx,ny,nz);
     if (iptr==NULL) error("No memory to allocate first image");
 
+#if 0
     Xmin(iptr) = xrange[0] + 0.5*xrange[2];
     Ymin(iptr) = yrange[0] + 0.5*yrange[2];
     Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+#else
+    Axis(iptr) = 1;
+    Xmin(iptr) = 0.0;
+    Ymin(iptr) = 0.0;
+    Zmin(iptr) = 0.0;
+    Xref(iptr) = -xrange[0]/xrange[2]-0.5;
+    Yref(iptr) = -yrange[0]/yrange[2]-0.5;
+    Zref(iptr) = -zrange[0]/zrange[2]-0.5;
+#endif
     
     Dx(iptr) = xrange[2];
     Dy(iptr) = yrange[2];

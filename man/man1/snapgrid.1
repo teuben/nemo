@@ -152,7 +152,7 @@ and also cannot handle stacked snapshots yet **
 [default: \fBf\fP].
 .TP
 \fBproj=\fP
-If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
+If a valid projection type (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)
 but see also \fIwcs(1NEMO)\fP, the input coordinates are interpreted
 in angular degrees, and griddes with the appropriate sky projection.
 Default: no sky projection.
@@ -249,7 +249,8 @@ to obtain turbo speeds. Use non-negative \fBmoment\fPs to avoid
 having to allocate one or two extra images in addition to the
 snapshot and the image. 
 .PP
-Sky projections do not guarantee flux conservation. 
+Sky projections do not guarantee flux conservation.
+
 .SH "SEE ALSO"
 snapgridsmooth(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), uns_2dplot(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
@@ -275,6 +276,7 @@ Peter Teuben
 .ta +2.5i
 src/nbody/image  	snapgrid.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -291,4 +293,6 @@ src/nbody/image  	snapgrid.c
 2-mar-11	V5.3: moment -3,-4 implemented	PJT
 18-may-12	V5.4: added smoothing in VZ (szvar)
 14-feb-13	V6.0: units changed on a cube (now xyz-density instead of xy-surface brightness)	PJT
+19-mar-22	V6.1: axis=1 now written, fix cdelt1 for radecvel=t	PJT
+
 .fi 
