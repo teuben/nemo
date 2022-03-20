@@ -32,6 +32,7 @@
  *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
  *  13-feb-13   V8.1 added region and sub_image()                        PJT
  *  22-may-21   V8.2 deal with Object
+ *  19-mar-22   V8.3 deprecate Axis=0 images                              
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -77,7 +78,7 @@ local int idef = 1;
 
 
 /* 
- * set_iarray:  intelligent array usage:
+ * set_iarray:  intelligent array usage: (see also Karma)
  *              if USE_IARRAY the index arrays that make
  *                     data[x[ix] + y[iy] + z[iz]]
  *              work are defined.
@@ -111,7 +112,7 @@ static void set_iarray(imageptr iptr)
 
 
 /*
- *  MINMX_IMAGE: set and Min/Max of an image/cube
+ *  MINMAX_IMAGE: set the Min/Max of an image/cube
  *
  */
 
@@ -122,7 +123,8 @@ int minmax_image (imageptr iptr)
   real dmax = dmin;
   
   int i, n = Nx(iptr)*Nx(iptr)*Nz(iptr);
-  
+
+  // @todo deal with isnan()
   for (i=1; i<n; i++) {
     if (data[i] < dmin) dmin = data[i];
     if (data[i] > dmax) dmax = data[i];    
@@ -136,13 +138,15 @@ int minmax_image (imageptr iptr)
 
   
 /*
- *  WRITE_IMAGE: writes out a matrix, including header, in binary format
+ *  WRITE_IMAGE: writes out an imagae, including header
  *
  */
 
 
 int write_image (stream outstr, imageptr iptr)
 {
+
+  if (Axis(iptr) == 0) warning("Writing deprecated axis=0 image");
   put_history(outstr);
   put_set (outstr,ImageTag);
     put_set (outstr,ParametersTag);
@@ -193,7 +197,7 @@ int write_image (stream outstr, imageptr iptr)
  	
 
 /*
- * READ_IMAGE: read a matrix from a stream
+ * READ_IMAGE: read an image from a stream
  *	      returns 0 on error
  *	              1 if read seems OK
  *	To improve:	One cannot use a external buffer for iptr, iptr
