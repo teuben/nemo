@@ -357,7 +357,6 @@ int create_image (imageptr *iptr, int nx, int ny)
     dprintf (DLEV,"create_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny);
     Frame(*iptr) = (real *) allocate(nxy*sizeof(real));	
     dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
-    Axis(*iptr) = 0;            /* old style axis with no reference pixel */
     Nx(*iptr) = nx;             /* old style ONE map, no cube */
     Ny(*iptr) = ny;
     Nz(*iptr) = 1;
@@ -383,7 +382,7 @@ int create_image (imageptr *iptr, int nx, int ny)
     Object(*iptr) = NULL;
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
-    Axis(*iptr) = 0;
+    Axis(*iptr) = 1;
     Mask(*iptr) = NULL;
     set_iarray((*iptr));
 
@@ -543,7 +542,7 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
     Object(*iptr) = NULL;
     Time(*iptr)  = 0.0;
     Storage(*iptr) = matdef[idef];
-    Axis(*iptr) = 0;
+    Axis(*iptr) = 1;
     Mask(*iptr) = NULL;
     set_iarray(*iptr);
     
