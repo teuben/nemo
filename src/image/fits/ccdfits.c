@@ -81,7 +81,7 @@ string defv[] = {
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
+	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN,CAR)",
 	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
 	"vsys=0\n        VSYS correction in km/s",
 	"freq=f\n        Output axis in FREQ or VEL",
@@ -91,7 +91,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.3f\n  9-dec-2021 PJT",
+        "VERSION=6.4\n   19-mar-2022 PJT",
         NULL,
 };
 
@@ -254,10 +254,13 @@ static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
 static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
 static string radevrs[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
 static string radevrt[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
+static string radevrc[4]= { "RA---CAR", "DEC--CAR", "VRAD",     "STOKES"};
 static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"}; // careful
 static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"}; // careful
+static string radevec[4]= { "RA---CAR", "DEC--CAR", "VELO-LSR", "STOKES"}; // careful
 static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
+static string radefrc[4]= { "RA---CAR", "DEC--CAR", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
 
 void write_fits(string name,imageptr iptr)
@@ -393,13 +396,19 @@ void write_fits(string name,imageptr iptr)
     } else {
       if (Qrefmap || Qcdelt) {
 	dprintf(1,"Using ref_cdelt\n");
-	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
+	if (Qradecvel && ref_cdelt[0]*scale[0] > 0)
+	  fitwrhdr(fitsfile,"CDELT1",-ref_cdelt[0]*scale[0]);
+	else
+	  fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       } else {
-	fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);    
-	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
+	if (Qradecvel && dx[p[0]] > 0) 
+	  fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);
+	else
+	  fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);
+	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);
 	if (ndim>2) {
 	  if (Qfreq)
 	    fitwrhdr(fitsfile,"CDELT3",-dx[p[2]]);
@@ -421,6 +430,11 @@ void write_fits(string name,imageptr iptr)
 	ctype2_name = radevrt[p[1]];
 	ctype3_name = Qfreq ? radefrt[p[2]] : radevrt[p[2]];	
 	ctype4_name = radevrt[p[3]];
+      } else if (streq(proj,"CAR")) {
+	ctype1_name = radevrc[p[0]];
+	ctype2_name = radevrc[p[1]];
+	ctype3_name = Qfreq ? radefrc[p[2]] : radevrc[p[2]];	
+	ctype4_name = radevrc[p[3]];
       } else
 	error("Illegal projection scheme %s",proj);
 
