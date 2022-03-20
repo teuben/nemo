@@ -53,6 +53,14 @@ static real av3 = A11;
 
 
 static int debug_first = 1;
+
+void ini_gauss3_ha(int n, real *x, real *y, real *p, int np)
+{
+  //   find two or three peaks to get roughly where the lines are
+  //   find the extend of where the baseline is, and get the background
+  //   this will estimate the amplitudes
+  //   fix the sigma ?
+}
 
 
 /* parameters: a simple NII-Halpha-NII triplet, only continuum, middle amp, middle vel
