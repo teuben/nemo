@@ -73,7 +73,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3\n      12-mar-2022 PJT",
+    "VERSION=4.3a\n     14-mar-2022 PJT",
     NULL
 };
 
@@ -775,19 +775,21 @@ void load_function(string fname,string method)
   if (path == NULL) error("Cannot open %s",fname);
 
   if (method) {
+    dprintf(0,"method %s\n",method);
     sprintf(func_name,"func_%s",method);
     sprintf(derv_name,"derv_%s",method);
   } else {
+    dprintf(0,"default loadobj\n");
     sprintf(func_name,"func_loadobj");
     sprintf(derv_name,"derv_loadobj");
   }
-  dprintf(0,"load_function: %s with %s\n",path,func_name);
+  dprintf(0,"load_function: %s with %s [%s]\n",path,func_name,method);
   loadobj(path);
   
   fitfunc = (my_proc1) findfn(func_name);
   fitderv = (my_proc2) findfn(derv_name);
-  if (fitfunc==NULL) error("Could not find func_loadobj in %s",fname);
-  if (fitderv==NULL) error("Could not find derv_loadobj in %s",fname);
+  if (fitfunc==NULL) error("Could not find %s in %s",func_name,fname);
+  if (fitderv==NULL) error("Could not find %s in %s",derv_name,fname);
 }
 
 void do_function(string method)
@@ -1926,21 +1928,3 @@ void do_psf()
       fprintf(outstr,"%g %g %g %g\n",x[i],y[i],d[i],y[i]-d[i]);  
   printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
 }
-
-#if 0
-
-bench:     20 points gauss w/ noise
-nemoinp 1:20 | tabmath - - 'exp(-(%1-10)**2/2/2/2) + rang(0,0.05)' > tab12
-/usr/bin/time tabnllsqfit tab12  fit=gauss1d par=0,1,10,2 bench=100000 > /dev/null
-nemoinp 1:20 | tabmath - - 'exp(-(%1-5)**2/2/2/2) + 2*exp(-(%1-12)**2/2/2/2) + rang(0,0.05)' > tab11
-/usr/bin/time tabnllsqfit tab11  load=fit/gauss2.so fit=gauss2 par=0,1,5,2,2,12,2 free=1,1,1,1,1,1,1 bench=100000 > /dev/null
-
-------
-gauss1d      100000 in 3.5"  ->  35 us   (curve_fits is ~10 ms)
-gauss2       100000 in 7.4"  ->  74 us
-peak           ~1e7 in 1.8"  ->   0.2 us
-
-  tables  1d - 
-  images  3rd dim in XY
-
-#endif
