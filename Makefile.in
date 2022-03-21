@@ -1,4 +1,4 @@
-VERSION = NEMO V4.3 4-feb-2022 PJT
+VERSION = NEMO V4.3 21-mar-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -596,10 +596,6 @@ check:
 benchtest:
 	(source nemo_start.sh; src/scripts/benchsuite)
 	@echo 'Testing Benchsuite: Success!'
-
-# show the latest testsuite build log
-checklog:
-	cat `ls -tr tmp/test*/testsuite.log | tail -1`
 
 # check help/man consistency after a build
 checkpars:
