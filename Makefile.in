@@ -597,6 +597,9 @@ benchtest:
 	(source nemo_start.sh; src/scripts/benchsuite)
 	@echo 'Testing Benchsuite: Success!'
 
+checklog:
+	cat testsuite.log
+
 # check help/man consistency after a build
 checkpars:
 	src/scripts/checkpars.py -v > checkpars.log
