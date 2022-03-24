@@ -150,19 +150,17 @@ merged to the master yet.
       git checkout -b myTable3
       ...
 	  git push
-	  
-3. NEMO will merge from *astroumd* :
 
-	  git checkout -b astroumd-myTable3 table2
-	  git pull https://github.com/astroumd/nemo.git myTable3
-	  
-4. these changes can now be tested, and then properly merged and committed
+3. create an alias site "astroumd" and merge from their myTable3 branch
 
       git checkout table2
-      git merge --no-ff astroumd-myTable3
-      git push 
-	  
-5. after this, all collaborators will need to merge these back:
+      git remote add    astroumd  https://github.com/astroumd/nemo
+      git pull astroumd
+      git merge [--no-ff] astroumd/myTable3
+	  .... (resolve conflicts)
+	  git push
+
+4. after this, all collaborators will need to merge these back:
 
 	  git checkout myTable3
 	  git fetch upstream
