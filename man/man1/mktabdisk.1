@@ -1,9 +1,12 @@
 .TH MKTABDISK 1NEMO "27 May 2020"
-.SH NAME
+
+.SH "NAME"
 mktabdisk \- create a test disk with density, circular velocity and dispersion given by a table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmktabdisk\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmktabdisk\fP creates an idealized test disk with a given tabular form of density,
 circular velocity and velocity dispersion as function of radius.
 It can also optionally compute the asymmetric drift correction.
@@ -22,9 +25,9 @@ isotropicity):
 .fi
 Normally only the \fIadc_V^2\fP term increases the rotation curve, the other two act like an outward bound force, and
 subtract from the rotation curve to give the observed streaming velocity.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input table (radius,density,velocity,dispersion). No default.
@@ -68,7 +71,8 @@ Remember this is a toy model. The default is 3D isotropic, but use
 .TP
 \fBheadline=\fP\fImessage\fP
 Text headline for output file [default: not used].
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here is an example of producing the ADC table of an exponential disk with an isothermal halo rotation curve
 and constant velocity dispersion at 10% of the peak velocity:
 .nf
@@ -93,15 +97,20 @@ or a colorful plot with various velocity components plotted, and where the V/sig
      tabplot tab2.adc 1 3,4,5,6,7,8 0 16 -0.5 1.1 line=1,1,1,1,1,2 color=3,4,2,3,4,3 ycoord=0 xcoord=1
 
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 The current version distributes particles regularly by radius, but randomnly in angle.
-.SH SEE ALSO
-mkdisk(1NEMO), snapshot(5NEMO)
-.SH FILES
+
+.SH "SEE ALSO"
+mkdisk(1NEMO), snapshot(5NEMO), galmod(1GIPSY)
+
+.SH "FILES"
 $NEMO/src/nbody/init/mktabdisk.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 16-may-2020	V0.1 drafted	PJT
