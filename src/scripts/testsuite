@@ -113,8 +113,6 @@ echo "TESTSUITE started `date`"                                        > $log
 echo "TESTSUITE version $version"                                     >> $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
-#   using $NEMO instead of $NEMO/src really makes it run slow on solaris
-
 foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($norun) then
         echo $testfile
