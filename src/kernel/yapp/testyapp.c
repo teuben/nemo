@@ -25,9 +25,9 @@ string defv[] = {
     NULL,
 };
 
-nemo_main()
+void nemo_main()
 {
-    int i, j, ip, np, nc;
+    int i, j, ip, np;
     string name, dumpfile, headline;
     char label[80];
 
@@ -56,7 +56,7 @@ nemo_main()
 #ifdef COLOR
     if (hasvalue("lut")) pllut(getparam("lut"),TRUE);	/* load compressed LUT */
     plltype(10, 0);
-    nc = plncolors();
+    int nc = plncolors();
     printf("Found %d colors\n",nc);
     for (i = 1; i < nc; i++) {
 	plcolor(i);
