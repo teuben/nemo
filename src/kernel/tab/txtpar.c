@@ -25,11 +25,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "newline=f\n        add newline between output parameters",
     "maxline=10000\n    Max number of lines in case a pipe was used",
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.5\n      2-feb-2022 PJT",
+    "VERSION=0.5a\n     24-mar-2022 PJT",
     NULL
 };
 
-string usage = "Extract numeric parameters from a text file";
+string usage = "Extract numeric parameters from a text file, with optional math";
 
 
 
@@ -281,7 +281,7 @@ local void convert(stream instr)
       dprintf(3," dofie(%d) -> %g  %g\n",i+1,dval[nval+i], errval); //BUG
       strcat(line," ");
       printf(fmt,dval[nval+i]);
-      printf(" ");
+      if (nfies>1) printf(" ");
       if (Qnewline)
 	printf("\n");
     }
