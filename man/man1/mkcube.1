@@ -1,51 +1,97 @@
-.TH MKCUBE 1NEMO "26 August 1993"
-.SH NAME
-mkcube \- create a uniform cube of equal massive stars
-.SH SYNOPSIS
+.TH MKCUBE 1NEMO "25 March 2022"
+
+.SH "NAME"
+mkcube \- create a uniform cube of equal massive stars (\fIthe borg\fP)
+
+.SH "SYNOPSIS"
 \fBmkcube\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkcube\fP generates a random realization of a cube. Coordinates
 in X, Y and Z are uniformly randomly distributed on a cube with
 given size. Velocities by default are zero, but can be drawn from
 an isotropic distribution with choosen dispersion.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+As with most NEMO programs, the center of mass is (roughly, see \fBzerocm=\fP)
+at the origin, thus coordinates run from
+-\fBsize\fP/2 to +\fBsize\fP/2.
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 Output file name, in \fIsnapshot(5NEMO)\fP format. 
 No default.
-.TP 20
+.TP
 \fBnbody=\fP
 Number of particles. [Default: \fB256\fP].
-.TP 20
+.TP
 \fBsize=\fP
 Size of cube. 
 [Default: \fB1\fP].
-.TP 20
+.TP
 \fBsigma=\fP
 Isotropic velocity dispersion.
 [Default: \fB0.0\fP].
-.TP 20
+.TP
 \fBseed=\fP
 Random number seed     
 [Default: \fB0\fP].
-.TP 20
+.TP
 \fBzerocm=t|f\fP
 Center c.o.m. ? 
 [Default: \fBt\fP].
-.TP 20
+.TP
 \fBheadline=\fP
 Text headline for output    
 Default: none.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 mkgrid(1NEMO), mkplummer(1NEMO), snapshot(5NEMO)
 .PP
 http://arxiv.org/abs/1206.3857  (The gravitational field of a cube, Chappel et al.)
-.SH AUTHOR
+
+.SH "BENCHMARK"
+The following benchmark creates a large nbody cube, is gridded in an image cube and
+converted to a fits file (the fits file is normally half the size of the ccd file,
+since the latter uses double precision):
+
+.nf
+    nbody=10000000
+    nx=128
+    mkcube cube1 $nbody 4.0
+    snapgrid cube1 cube1.ccd nx=$nx ny=$nx nz=$nx zvar=z zrange=-2:2
+    ccdfits cube1.ccd cube1.fits
+.fi
+
+and with the following timings (\fBu\fPser and \fBs\fPystem times reported)
+on a 512GB machine:
+.nf
+
+nbody  nx   size  size       mkcube         snapgrid            ccdfits
+1e7   128   547MB   16    0.59u   0.55s    1.15u   0.48s
+1e7   256          131                     1.74u   0.54s
+1e7   512         1048                     2.31u   1.15s       4.03u  0.81s
+
+1e8   128   5.4G          6.55u   7.31s   11.62u   5.89s
+      256                                 15.46u   6.17s
+      512                                 21.51u   6.75s
+     1024                                 41.23u  16.45s
+     2048                                 65.91u  63.51s
+
+1e9   128   54G          69.05u  81.46s    73.83u  53.74s
+      256                                 79.05u  42.24s
+      512                                 81.07u  39.53s
+     1024          8GB                   103.28u  43.67s         74.26u 5.21s
+     2048         64GB                   145.19u  85.29s          -failed-
+
+.fi
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 26-Aug-93	V1.0 Created	PJT
+25-mar-2022	added benchmark	PJT
 .fi
