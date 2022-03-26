@@ -1,14 +1,20 @@
-.TH TABPEAK 1NEMO "30 May 2013"
-.SH NAME
+.TH TABPEAK 1NEMO "25 March 2022"
+.SH "NAME"
 tabpeak \- find peaks or valleys in a table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabpeak\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Find local maxima (and/or minima) and fit a local paraboloid, return the location and
-value of the peak, or valley. See also \fItablsqfit(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+value of the peak, or valley. See also \fItablsqfit(1NEMO)\fP and \fIccdmom(1NEMO)\fP.
+.PP
+The default is to search for local 3 point extrema. Using \fBedge=\fP one can force it
+away from the edge, and using \fBpmin=\fP one can increase the minimum number of points
+that need to be in the extreme
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file name [???]    
@@ -20,28 +26,44 @@ X-Column [1]
 Y-column [2]      
 .TP
 \fBclip=\fP
-Only consider points above this [0] 
+Only consider points above this [0]
 .TP
- \fBvalley=t|f\fP
+\fBpmin=\fP
+[EXPERIMENTAL]
+Require the peak to contain at least \fBpmin\fP points. By default, only 3 are required, in which
+case a polynomial is fit (though this is an exact fit).  By setting this higher, more points are
+required to be part of a peak which is then required to be monotonously decreasing.
+\fBedge=\fP
+Number of points near the edge to skip for a peak finder.   For the simplest 3-point peak
+finder this should be at least 1.
+[1]
+.TP
+\fBvalley=t|f\fP
 Also fit valleys, in which case the signal has to be below -clip. [Default: f]
 .TP
- \fBmean=t|f\fP
+\fBmean=t|f\fP
 .TP
 \fBnmax=\fP
 max size if a pipe [100000]  
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 .nf
 % nemoinp 1:3 | tabmath - - '-(2.2-%1)**2+10' | tabpeak -
 2.200000 10.000000
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tablsqfit(1NEMO)
-.SH FILES
-.SH AUTHOR
+.SH "FILES"
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 28-May-2013	V0.1 Created	PJT
 30-may-2013	V0.2 added valley=	PJT
+23-mar-2022	V0.4 added pmin=	PJT
+25-mar-2022	V0.5 added edge=	PJT
 .fi
