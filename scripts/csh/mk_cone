@@ -6,24 +6,32 @@
 # the disk= blends in a true disk so you can see both the outflow cones and the disk
 # Make sure "ds9" has been launched before this script is run, as many frames are sent to ds9
 # is the 'ds9' is selected in mode=. Alternatively, pick mode=plot
+# When in ds9 mode, the PV slices need to be set once: first can remains at 123, then 132, and 231
 #
-# Some History:
-#     nov-2018      written at ESO
+# History:
+#     nov-2018      written at ESO - Peter Teuben
 #     jul-2020      expanded with a disk and indep. geometry for Alberto to play with
 #     jun-2021      fix missing sign=; add noise
+#     mar-2022      add jdz= and debug=
 
 #   rmin:    the cone starts at rmin in the Z=0 plane
 #   vscale   setting this > 0 will give the outflow some rotation as well
 #   outflow  outflow
 #   flow
-#   view     0 = optically thin   1=only see front   (-1 only see back)
-#   incd     inc of disk
+#   cone     half opening angle
 #   inc      inc of cone w.r.t. disk (disk is always along X axis)
 #   pa       pa of cone w.r.t. disk
+#   view     0 = optically thin   1=only see front   (-1 only see back)
+#   jzd      angular momentum of disk (1=counter clock wise)
+#   incd     inc of disk
 #   mirror   1=have both sides
 #   fill     t=cone is filled  f=cone is hollow
-#   svar     smoothing
-#   mass     this is the mass ratio of the disk to a half cone   (@todo  allow 0..1 )
+#   disk     this is the mass ratio of the disk to a half cone   (@todo  allow 0..1 )
+#   svar     smoothing size (sigma, not FWHM)
+#   noise
+#   out
+#   mode     ds9 and/or (pdf) plot
+#   debug    -1 makes it quiet, 0 starts adding NEMO noise
 
 set nbody   = 10000     #> SCALE nbody=10000  1000:1000000:1000
 set rmin    = 0.3       #> SCALE rmin=0.3     0:1:0.1
@@ -35,6 +43,7 @@ set cone    = 30        #> SCALE cone=30      0:90:1
 set inc     = 0         #> SCALE inc=0        0:90:1
 set pa      = 0         #> SCALE pa=0         0:360:1
 set view    = 0         #> RADIO view=0       -1,0,1
+set jzd     = 1         #> RADIO jzd=1        -1,1
 set incd    = 80        #> SCALE incd=80      0:90:1
 set mirror  = 1         #> RADIO mirror=1     0,1
 set fill    = f         #> RADIO fill=f       t,f
@@ -43,6 +52,7 @@ set svar    = 0.01      #> SCALE svar=0.01    0:1:0.01
 set noise   = 0.0       #> SCALE noise=0.0    0:1:0.001
 set out     = cone1     #> ENTRY out=cone1
 set mode    = ds9       #> CHECK mode=ds9     ds9,plot
+set debug   = -1        #> SCALE debug=-1     -1:9
 
 #  parameters not in the GUI
 set rmaxd = 2
@@ -77,6 +87,7 @@ rm -f $out.*
 
 set do_ds9=`echo $mode | grep -c ds9`
 set do_plt=`echo $mode | grep -c plot`
+setenv DEBUG $debug
 
 # special case:
 if ($disk == "inf") then
@@ -85,7 +96,7 @@ if ($disk == "inf") then
 endif  
 
 # the disk rotates counterclock wise, kinematic major axis -X, and the near side is along the +Y axis.
-mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=$rmaxd >& /dev/null
+mkdisk $out.0 $nbody mass=$disk potname=log potpars="0,0.5*$rc,$rc" rmax=$rmaxd sign=$jzd >& /dev/null
 
 if ($flow == flat) then
     echo 0 $outflow   > $out.flow
@@ -103,7 +114,7 @@ endif
 
 if ($mirror == 0) then
   # only one cone
-  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" sign=$jzd |\
     snapscale - - vscale=$vscale |\
     snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
@@ -114,13 +125,13 @@ if ($mirror == 0) then
     snaprotate - - $incd x > $out.snap
 else if ($mirror == 1) then
   # one cone on each side
-  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" sign=$jzd |\
     snapscale - - vscale=$vscale |\
     snapspin - - rotcur=$out.flow outflow=t sign=-1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
     snapshift - - 0,0,-$rmin |\
     snaprotate - $out.1 $inc,$pa xz    
-  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" |\
+  mkdisk - $nbody mass=1 rmin=$rmin rmax=$rmax potname=log potpars="0,0.5*$rc,$rc" sign=$jzd |\
     snapscale - - vscale=$vscale |\
     snapspin - - rotcur=$out.flow outflow=t sign=1 |\
     snapfold - - theta=90-$cone fill=$fill view=$view |\
