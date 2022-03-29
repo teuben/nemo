@@ -1,9 +1,8 @@
-(the name of this directory "csh" is a misnomer, they are examples in
-a variety of shells by now)
+The name of this directory "csh" is a misnomer, they are examples in
+a variety of shells by now: csh, (ba)sh and python
 
-
-Various examples of NEMO scripts. There are some very old scripts
-from the 20th century which no doubt would need some work.
+See also the templates directory for simple examples of scripts with
+a variety of CLI/GUI
 
 
 exp1.sh      various spherical models, show mass radii plots for optional cooling
