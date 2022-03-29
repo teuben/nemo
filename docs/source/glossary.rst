@@ -7,7 +7,7 @@ Glossary
 
 
   accelleration
-      Dataformat used in the :term:`falcon`
+      Dataformat used in the :term:`falcon` package
 
   bodytrans
       Dataformat that is used to
@@ -21,7 +21,8 @@ Glossary
 
   ECSV
       (Enhanced Character Separated Values) a popular
-      self-describing ASCII table format popularized by astropy
+      self-describing ASCII table format popularized by astropy.
+      https://docs.astropy.org/en/stable/io/ascii/ecsv.html
 
   falcon
       A subpackage in NEMO that hosts the gyrfalcON code.
