@@ -9,11 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mktabdisk - create a test disk with density, circular velocity and dispersion
-given by a table 
+mktabdisk - create a test disk with density, circular velocity and
+
+<p>dispersion given by a table 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mktabdisk</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>mktabdisk</b>
 creates an idealized test disk with a given tabular form of density, circular
@@ -32,43 +36,45 @@ of isotropicity): <br>
 </pre>Normally only the <i>adc_V^2</i> term increases the rotation curve, the other two
 act like an outward bound force, and subtract from the rotation curve to
 give the observed streaming velocity. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input table
-(radius,density,velocity,dispersion). No default. </dd>
+<dd>Input
+table (radius,density,velocity,dispersion). No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file name in
-standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<dd>Output file
+name in standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. </dd>
 
 <dt><b>nbody=</b> </dt>
-<dd>Number of disk particles [2048]
-   </dd>
+<dd>Number of disk particles
+[2048]    </dd>
 
 <dt><b>rmin=</b> </dt>
 <dd>Inner disk radius [min radius from table] </dd>
 
 <dt><b>rmax=</b> </dt>
-<dd>Outer cutoff radius
-[max radius from table] </dd>
+<dd>Outer cutoff
+radius [max radius from table] </dd>
 
 <dt><b>mass=</b> </dt>
-<dd>Rescale total mass to this?. By default not
-scaled, if a positive value given, this will be the total mass [1.0] </dd>
+<dd>Rescale total mass to this?. By default
+not scaled, if a positive value given, this will be the total mass [1.0]
+</dd>
 
-<dt><b>seed=</b>
-</dt>
+<dt><b>seed=</b> </dt>
 <dd>Usual random number seed, see also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
  [0]    </dd>
 
 <dt><b>sign=</b> </dt>
-<dd>Sign of
-Z-angular momentum vector of disk. +1 means counter clock wise. [1] </dd>
+<dd>Sign
+of Z-angular momentum vector of disk. +1 means counter clock wise. [1] </dd>
 
 <dt><b>adc=t|f</b>
 </dt>
@@ -90,13 +96,14 @@ space coordinates  [1]. </dd>
 
 <dt><b>headline=</b><i>message</i> </dt>
 <dd>Text headline for output file [default:
-not used]. </dd>
+not used]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example of producing the ADC table of an exponential
-disk with an isothermal halo rotation curve and constant velocity dispersion
-at 10% of the peak velocity: <br>
+Here is an example of producing the ADC table of an
+exponential disk with an isothermal halo rotation curve and constant velocity
+dispersion at 10% of the peak velocity: <br>
 <pre>     nemoinp 0:5:0.2 | tabmath - - &rsquo;exp(-%1),%1/sqrt(1+%1**2),0.1&rsquo; &gt; tab1
      mktabdisk tab1 . adc=true
      # R  D          V         S    adc_D      adc_V     adc_S  Vobs
@@ -115,18 +122,24 @@ the V/sigma &lt; 1 in the nuclear region <br>
      tabplot tab2.adc 1 3,4,5,6,7,8 0 16 -0.5 1.1 line=1,1,1,1,1,2 color=3,4,2,3,4,3
 ycoord=0 xcoord=1
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-The current version distributes particles regularly by radius, but
-randomnly in angle. 
+The current version distributes particles regularly by radius,
+but randomnly in angle. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
- 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
-$NEMO/src/nbody/init/mktabdisk.c
+, <a href='galmod.1GIPSY.html'>galmod(1GIPSY)</a>
 
+
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+$NEMO/src/nbody/init/mktabdisk.c 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>16-may-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 drafted<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
