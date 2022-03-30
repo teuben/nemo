@@ -1,4 +1,4 @@
-.TH SNAPROTATE 1NEMO "25 March 2022"
+.TH SNAPROTATE 1NEMO "30 March 2022"
 
 .SH "NAME"
 snaprotate \- rotate N-body snapshot file about principle axes.
@@ -92,10 +92,13 @@ rotation into account:
    nds9 velfie.ccd        # view the velocity field using 'ds9'.fi
 
 .fi
-With sign=1 it will create a counter clockwise rotating disk
-and project it using \fB-$inc,$pa\fP, For a clock-wise rotating disk 
+With sign=1 it will create a counter clockwise (CCW) rotating disk
+and project it using \fB-$inc,$pa\fP, For a clock-wise (CW) rotating disk 
 \fB$inc,$pa\fP, 
-hence the somewhat awkward looking expressing to compute \fBsinc\fP.
+hence the somewhat awkward looking expressing to compute \fBsinc\fP.   An
+alternative desription could be to allow the inclination to be negative
+as well (which observers do not do), where inc<0 means CCW, and inc>0 means CW
+rotation.
 .PP
 Suppose you have a barred galaxy model, \fIbar.dat\fP, 
 with the galactic plane at z=0
