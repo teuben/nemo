@@ -41,6 +41,7 @@ Welcome to NEMO's documentation!
    progr
    potname
    coordsys
+   python
    .. dirs
    .. gls
    trouble
