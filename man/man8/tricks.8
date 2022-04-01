@@ -89,6 +89,8 @@ Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
 .nf
         mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
 .fi
+The (bash) array ${PIPESTATUS[@]} contains the status ($?) for each program in
+a unix pipe. In this example it should return "0 0 0".
 
 .SH "PARALLEL and OpenMP"
 Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
