@@ -21,12 +21,12 @@ string defv[] = {
   "mode=0\n            0, 1, 2, 3",
   "size=2\n            Box will be from -size : size",
   "npix=32\n           Number of pixels along (cube) box axes",
-  "times=all\n         Which times to use from the snapshot [not yet implemented]",
+  "times=all\n         Select times to use from the snapshot [only all is implemented]",
   "nsteps=10000\n      Max timesteps to allocate",
   "ibody=-1\n          If >= 0, only select this body for the orbit (0=first)",
   "odm=t\n             Produce an ODM",
   "hdf=f\n             Outut format - Not implemented yet",
-  "VERSION=0.7\n       2-jan-2020 PJT",
+  "VERSION=0.7a\n      11-feb-2022 PJT",
   NULL,
 };
 
@@ -65,14 +65,14 @@ void nemo_main()
   if (mode==0) {
     scandata(fin,fout,Qhdf);
   } else if (mode==1)
-    crtdat(fin);
+    crtdat(fout);
   else if (mode==2)
-    rdwt(fin);
+    rdwt(fout);
   else if (mode==3)
-    crtatt(fin);
+    crtatt(fout);
 }
 
-// @todo    scan once and then determine MAXSNAP as variable
+// @todo    scan once and then determine MAXSNAP as variable - see stoo
 #define MAXSNAP 10000
 
 #ifndef TIMEFUZZ
@@ -91,6 +91,7 @@ void scandata(string fin, string fout, bool Qhdf)
   int nbody0 = 0, nbody, bits;
   real sum;
   int i, j, nsnap = 0;
+  char object[16];      // stores the integer key of th particle
 
   if (Qhdf) warning("HDF output not avaiable yet. Deal with NEMO for now");
 
@@ -147,6 +148,7 @@ void scandata(string fin, string fout, bool Qhdf)
     dprintf(0,"Only processing body %d\n",ibody);
   
   for (i=0; i<nbody0; i++) {    // loop over all bodies
+    sprintf(object,"%d", i);
 
     if (ibody >= 0 && ibody != i) continue;
     
@@ -193,6 +195,7 @@ void scandata(string fin, string fout, bool Qhdf)
 	  }
       MapMin(iptr) = dmin;
       MapMax(iptr) = dmax;
+      Object(iptr) = object;
       if (dmax == 0.0)
 	warning("MapMax 0 for body %d\n",i);
     }
