@@ -32,13 +32,23 @@
 
 
 in=disk1   #>  IFILE   in=disk1
-inc=70     #>  SCALE   inc=70       0:90:1
-contour=2  #>  SCALE   contour=2    0.01:20:0.01
-size=0.5   #>  SCALE   size=0.5      0.1:10:0.1
+inc=70     #>  SCALE   inc=70        0:90:1
+mag=2      #>  SCALE   mag=2         0:10:0.05
+size=1     #>  SCALE   size=1        0.05:10:0.05
 n=128      #>  SCALE   n=128         64:1024:64
 sp=2       #>  SCALE   sp=2          0.5:5:0.5
-debug=-1   #>  SCALE   debug=-1      -1:9:1
+debug=-1   #>  SCALE   debug=-2      -2:9:1
+yapp=/xs   #>  ENTRY   yapp=/xs      
 q0=0       #>  ENTRY   q0=0
+
+#> HELP in       input snapshot
+#> HELP inc      inclination
+#> HELP contour  contour
+#> HELP size     -size:size
+#> HELP n        pixels
+#> HELP sp       smoothing in pixels
+#> HELP debug    NEMO's $DEBUG
+#> HELP q0       optional
 
 
 for arg in $*; do
@@ -46,18 +56,24 @@ for arg in $*; do
 done
 
 export DEBUG=$debug
+export YAPP=$yapp
 
 s=$(nemoinp 2*$sp*$size/$n)
+cnt=$(nemoinp "10**(-$mag/2.5)")
     
 
 snaprotate $in - $inc x |\
     snapgrid - - xrange=-$size:$size yrange=-$size:$size nx=$n ny=$n |\
     ccdsmooth - - $s |\
-    ccdplot - $contour gray=t tab=- headline=$in |\
+    ccdplot -  $cnt gray=t power=0.4 tab=- headline=$in relative=t |\
     tablsqfit - fit=ellipse > tmp.fit
-
-cat tmp.fit
+if [ $debug -ge -1 ]; then
+    echo "mag: $mag $cnt"
+    echo "status rot/grid/smooth/plot/fit: ${PIPESTATUS[@]}"
+    cat tmp.fit
+fi
 echo -n "$in $inc $q0 $contour "
 txtpar tmp.fit p0=eccentr,1,5 \
        expr="%1,acos(%1)*180/pi,acos(sqrt((%1**2-$q0**2)/(1-$q0**2)))*180/pi,sqrt((%1**2-cosd($inc)**2)/(1-cosd($inc)**2))" 
 
+# why should the vertical stellar distribution be isothermal, when dark matter is in play as well

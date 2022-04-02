@@ -6,7 +6,7 @@ getparam() does not support this.
 
 
 #                                bash     csh  python      C
-0   simplest, but bad form          x       x
+0   simple key=val                  x       x       x
 1   manual                                         
 2   argparse                                        x
 3   docopt                                          x
@@ -27,4 +27,24 @@ getparam() does not support this.
 6 https://click.palletsprojects.com/en/8.0.x/
 7 https://docs.python.org/3/library/optparse.html
 8 https://typer.tiangolo.com/
+
+
+
+csh:
+     set key = val
+     foreach arg ($*)
+       set $arg
+     end
+
+bash:
+     key=val
+     for arg $*; do
+       export $arg
+     done
+
+python:
+     import sys
+     key=val
+     for in sys.arg[1:]:
+        exec(arg)
 
