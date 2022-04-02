@@ -14,7 +14,7 @@ getparam() does not support this.
 5   getopts
 6   clic                                            x
 7   optparse
-
+8   typer
 
 
 0 -
@@ -26,3 +26,5 @@ getparam() does not support this.
 5 https://www.mkssoftware.com/docs/man1/getopts.1.asp
 6 https://click.palletsprojects.com/en/8.0.x/
 7 https://docs.python.org/3/library/optparse.html
+8 https://typer.tiangolo.com/
+
