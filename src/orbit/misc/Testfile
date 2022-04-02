@@ -26,6 +26,10 @@ orb2.in:
 	$(EXEC) mkorbit orb2.in x=1 vy=1 potname=plummer potpars=$(OMEGA)
 	@bsf orb2.in "0.151513 0.4863 -0.707107 1 18"
 
+orb3.in:
+	$(EXEC) mkorbit orb3.in x=1 vy=1 vz=0.5 potname=plummer potpars=$(OMEGA)
+	@bsf orb3.in "0.186235 0.486386 -0.707107 1 18"
+
 otos:
 	@echo Running $@
 	$(EXEC) otos orb1.in snap1.in
@@ -61,6 +65,10 @@ orbint2: orb2.in
 	@bsf orb2b.out '4.33963 16.9909 -8.84718 100 110018'
 	@bsf orb2c.out '4.29883 17.0019 -8.86182 100 110018'
 	@bsf orb2d.out '4.29881 17.0019 -8.8621 100 110018'
+
+orbint3: orb3.in
+	@echo Running $@
+	$(EXEC) orbint orb3.in orb3a.out nsteps=10000 dt=0.01 ndiag=1000 mode=euler   
 
 
 orbintv:
