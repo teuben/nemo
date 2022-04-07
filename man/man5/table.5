@@ -1,4 +1,4 @@
-.TH TABLE 5NEMO "6 August 2020"
+.TH TABLE 5NEMO "17 March 2022"
 
 .SH "NAME"
 table \- (ASCII) table format
@@ -6,11 +6,11 @@ table \- (ASCII) table format
 .SH "DESCRIPTION"
 A \fBtable\fP file is a simple ASCII text file, 
 structured in rows and columns, with one row per line. 
-Columns can be separated by spaces or tabs (though many
-dialects of this definition exist).
+Columns can be separated by spaces, commas, vertical bars, or tabs
+(though many dialects of this definition exist).
 The number of columns per row does not have to be the same,
 as long as the columns accessed are in the specified range
-(although some programs, e.g. \fItablint(1NEMO)\fP may
+(although some programs, e.g. \fItablint(1NEMO)\fP, may
 put restrictions on this).
 .PP
 Comments can be entered by using the octothorpe ('\fB#\fP') symbol 
@@ -18,8 +18,7 @@ on the first character on a line (though again, many
 dialects exist, most notably the exclamation, semi-colon and 
 backslash (IPAC tables) symbols are in practice.
 Empty lines will generally be skipped too, and as said,
-some programs 
-even skip lines starting with the ! or ; symbol. See also
+some programs even skip lines starting with the ! or ; symbol. See also
 \fItabcomment(1NEMO)\fP for some other filtering techniques.
 
 .PP
@@ -32,7 +31,7 @@ even skip lines starting with the ! or ; symbol. See also
 .fi
 
 .SH "EXAMPLE"
-The following listing is an example of a simple table:
+Here is an example of a table:
 .nf
 
     # This is the first line of the table
@@ -47,16 +46,21 @@ Here is an example how to make a table from scratch. It contains
 one column, with even numbers 2 through 10, done with
 \fInemoinp(1NEMO)\fP and \fIseq(1)\fP
 .nf
+
     nemoinp 2:10:2 newline=t > even1.tab
     seq 2 2 10 > even2.tab
+
 .fi
+and for performance testing the \fItabgen(1NEMO)\fP program can be used
+to create random large tables.
 
 .SH "OTHER TABLE FORMATS"
-Another popular table format is that of ESO/Midas, where all columns
-are separated by TABs. The unix program \fIpaste(1)\fP will generally
-put a TAB between the columns.
+ESO/Midas, where all columns
+are separated by TABs. The unix program \fIpaste(1)\fP will by default
+put a TAB between the columns (files).
 .PP
 FITS uses the 'TABLE' (ascii tables) and BINTABLE (binary tables) format.
+See \fIfits(5NEMO)\fP.
 .PP
 IPAC-table format: (often using the extension \fB.tbl\fP)
 .nf
@@ -144,6 +148,7 @@ XSV:  https://github.com/BurntSushi/xsv
 
 .SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
