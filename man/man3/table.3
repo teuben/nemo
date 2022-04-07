@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "17 March 2022"
+.TH TABLE 3NEMO "7 April 2022"
 
 .SH "NAME"
 table_open, table_md2, table_close - new table manipulation routines
@@ -9,6 +9,7 @@ get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator r
 table V2 is under final development.   The API with a - in front have not been implemented. Names of
 functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
 development \fBtable.h\fP has the final word.
+
 .nf
 .B #include <table.h>
 .B #include <mdarray.h>
@@ -53,9 +54,11 @@ development \fBtable.h\fP has the final word.
 .B - int *table_rowip(table *t, int row)
 .B - real *table_rowrp(table *t, int row)
 .PP
-.B - void table_set_ncols(int ncols) 
+.B - void table_set_ncols(int ncols)
 .PP
-.I Old:
+.B - table *table_cat(int ntable, table *tptr, int mode)
+.PP
+.I Old: (deprecated or emulated)
 .PP
 .B int get_atable(strean instr,int ncol,int *colnr,real *coldat,int ndat)
 .PP
@@ -91,7 +94,7 @@ row fashion.
 
 .PP
 An exception could be made where the table can be read in blocks of say 100
-lines or so. This makes it possible to work
+lines or so. 
 
      
 
@@ -180,9 +183,16 @@ where the row number is ignored if the table is parsed row by row.
 Possible future routines are
 .B table_set_ncols
 to cover the case where a row can span multiple lines. By default each line is a row in the table.
+.PP
+Given a number of tables, the
+.B table_cat
+function will catenate them. mode=0 will catenate them \fIvertically\fP, i.e. append the rows, keeping the
+same number of columns, whereas mode=1 will catenate them \fIhorizontally\fP, keeping the number of
+rows, but increasing the number of columns.   It is currently considered an error if the tables are
+not conformant in size.
 
 .PP
-The original \fIlegacy table routines\fP remain available:
+The original \fIlegacy table routines\fP remain available, though they should implement the new API.
 .PP
 Both \fIget_atable\fP
 and \fIget_ftable\fP parse an ascii table, pointed by the \fIinstr\fP stream,
@@ -310,6 +320,7 @@ mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(5NEMO), table(5NEMO)
 .nf
 https://github.com/BurntSushi/xsv
 https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
+https://www.gnu.org/software/gnuastro/manual/html_node/Tables.html
 .fi
 
 .SH "FILES"
