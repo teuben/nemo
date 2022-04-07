@@ -10,12 +10,11 @@ table V2 is under final development.   The API with a - in front have not been i
 functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
 development \fBtable.h\fP has the final word.
 .nf
-
 .B #include <table.h>
 .B #include <mdarray.h>
 .B #include <extstring.h>
 .PP
-.B table  *table_open(stream instr, int mode=0, int nlines=0;
+.B table  *table_open(stream instr, int mode);
 .B table  *table_open0(stream instr, int mode);
 .B table  *table_open1(stream instr, int mode, int nlines);
 .B void    table_close(tableptr tptr);
@@ -23,9 +22,9 @@ development \fBtable.h\fP has the final word.
 .B size_t  table_ncols(tableptr tprt);
 .B string  table_row(tableptr tptr, int row);
 .PP
-.B string table_line(table *t)
-.B string table_line1(table *t) 
-.B ssize_t table_line0(table *t, char **line, size_t *linelen);
+
+.B string table_line0(table *t) 
+.B ssize_t table_line1(table *t, char **line, size_t *linelen);
 .PP
 .B - mdarray2 table_md2(table *t);
 .B - void table_read(table *t);
@@ -73,11 +72,10 @@ development \fBtable.h\fP has the final word.
 
 .SH "USING TABLES"
 
-Tables can be arbitrarely large, but like NEMO structures files,
+Tables can be arbitrarely large, but like top level of NEMO structured files,
 do need to fit in memory. There can be some exceptions to this,
 and certain applications will stream data that do not fit in
 memory.
-
 
 .PP
 The particular table dialect should be detected automatically in
@@ -98,7 +96,7 @@ lines or so. This makes it possible to work
      
 
 .SH "DESCRIPTION"
-A new \fItable\fP interface was introduced in Summer 2020 to create a more uniform and scaleable
+This new \fItable\fP interface was introduced in Summer 2020 to create a more uniform and scaleable
 table ASCII system. This will have no limit on number of columns, line length or number or rows,
 perhaps at a slight cost of performance. It should also detect automatically if they have
 Space Separated Values (SSV), Comma Separated Values (CSV) or Tab Separated Values (TSV).
@@ -307,7 +305,7 @@ Low-level catastrophies (eg, bad filenames, parsing errors, wrong delimiters)
 generate messages via \fIerror(3NEMO)\fP.
 
 .SH "SEE ALSO"
-mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(3NEMO), table(5NEMO)
+mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(5NEMO), table(5NEMO)
 .PP
 .nf
 https://github.com/BurntSushi/xsv
@@ -317,7 +315,7 @@ https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
 .SH "FILES"
 .nf
 .ta +2.0i
-src/kernel/tab  	table.c gettab.c
+src/kernel/tab  	table.c 
 .fi
 
 .SH "AUTHOR"
