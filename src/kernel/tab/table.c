@@ -197,6 +197,10 @@ struct LineNode {
   struct LineNode* next;
 };
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> upstream/table2
 // non-seekable file mode=1
 table *table_open0(stream instr, int mode)
 {
@@ -217,9 +221,12 @@ table *table_open0(stream instr, int mode)
 #endif
   dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
+<<<<<<< HEAD
   // in full buffering mode, the whole file is read into memory
   // using the *tptr->lines (linked list?)
 
+=======
+>>>>>>> upstream/table2
 
   // we could cheat for now and find the number of lines 
   // allocate tptr->lines and stuff them there
@@ -302,6 +309,10 @@ void table_close(tableptr tptr)
   // free that memory
 }
 
+<<<<<<< HEAD
+=======
+// deprecate
+>>>>>>> upstream/table2
 ssize_t table_line1(tableptr tptr, char **line, size_t *linelen)
 {
   // in simple (streaming) mode, just get the next line
@@ -364,10 +375,18 @@ void nemo_main()
     //char *line = malloc(linelen);
 #endif
 
+<<<<<<< HEAD
     // if (testmode == 1) {
     //   testmode1();
     //   return;
     // }
+=======
+    if (testmode == 1) {
+      testmode1();
+      return;
+    }
+
+>>>>>>> upstream/table2
     if (testmode == 2) {
       testmode2();
       return;
@@ -423,7 +442,10 @@ void nemo_main()
 }
 
 
+<<<<<<< HEAD
 #endif
+=======
+>>>>>>> upstream/table2
 
 
 void testmode1()
@@ -432,7 +454,10 @@ void testmode1()
   int nlines = nemo_file_lines(input,0);
   stream instr = stropen(input,"r");
   tableptr tp1 = table_open1(instr, 0, nlines);     // read the whole file in memory
+<<<<<<< HEAD
   //tableptr tp1 = table_open0(instr, 0, 0);     // read the whole file in memory
+=======
+>>>>>>> upstream/table2
 
   dprintf(0,"nlines: %d\n",tp1->nr);
 
@@ -445,8 +470,12 @@ void testmode2()
 {
   string input = getparam("file");
   stream instr = stropen(input,"r");
+<<<<<<< HEAD
   tableptr tp1 = table_open0(instr, 0);     // read the whole file in memory
   //tableptr tp1 = table_open0(instr, 0, 0);     // read the whole file in memory
+=======
+  tableptr tp1 = table_open0(instr, 0);     // read the whole file in memory - linked list
+>>>>>>> upstream/table2
 
   dprintf(0,"nlines: %d\n",tp1->nr);
 
@@ -454,3 +483,9 @@ void testmode2()
   // printf("last  line: %s",table_row(tp1,tp1->nr - 1));
 	 
 }
+<<<<<<< HEAD
+=======
+
+
+#endif
+>>>>>>> upstream/table2

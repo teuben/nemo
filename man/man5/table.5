@@ -1,7 +1,9 @@
 .TH TABLE 5NEMO "6 August 2020"
-.SH NAME
+
+.SH "NAME"
 table \- (ASCII) table format
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 A \fBtable\fP file is a simple ASCII text file, 
 structured in rows and columns, with one row per line. 
 Columns can be separated by spaces or tabs (though many
@@ -19,24 +21,37 @@ Empty lines will generally be skipped too, and as said,
 some programs 
 even skip lines starting with the ! or ; symbol. See also
 \fItabcomment(1NEMO)\fP for some other filtering techniques.
-.SH EXAMPLE
+
+.PP
+
+.nf
+  HEADER
+  D11 D12 D13 ....
+  D21 D22 ...
+  ...
+.fi
+
+.SH "EXAMPLE"
 The following listing is an example of a simple table:
 .nf
 
     # This is the first line of the table
-    # I    N     Q
+    # I    N     Q      # names of columns (for a human)
     1.0   2.0   4.0
     # 2.0 3.0   5.0     bad data, commented out.
-    3.0   5.1   6.32
+    3.0   5.1   6.32    # comment belonging to a line
     # End of table
     
 .fi
 Here is an example how to make a table from scratch. It contains 
-one column, with numbers 1 through 100:
+one column, with even numbers 2 through 10, done with
+\fInemoinp(1NEMO)\fP and \fIseq(1)\fP
 .nf
-    nemoinp 1:100 newline=t > 100.tab
+    nemoinp 2:10:2 newline=t > even1.tab
+    seq 2 2 10 > even2.tab
 .fi
-.SH OTHER TABLE FORMATS
+
+.SH "OTHER TABLE FORMATS"
 Another popular table format is that of ESO/Midas, where all columns
 are separated by TABs. The unix program \fIpaste(1)\fP will generally
 put a TAB between the columns.
@@ -122,6 +137,11 @@ nemoinp(1NEMO), tabcomment(1NEMO), table(3NEMO), awk(1), paste(1), ffe(1), colum
 FFE: (flat file extractor): http://ff-extractor.sourceforge.net/
 .PP
 ECSV: https://github.com/astropy/astropy-APEs/blob/master/APE6.rst
+.PP
+GNU astronomy:  https://www.gnu.org/savannah-checkouts/gnu/gnuastro/manual/html_node/Gnuastro-text-table-format.html
+.PP
+XSV:  https://github.com/BurntSushi/xsv
+
 .SH "AUTHOR"
 Peter Teuben
 .SH "UPDATE HISTORY"
@@ -129,4 +149,5 @@ Peter Teuben
 .ta +1.0i +4.0i
 1-feb-93	document created  	PJT
 25-oct-03	some more docs on other table formats	PJT
+17-mar-2022	changes for table-V2	PJT
 .fi

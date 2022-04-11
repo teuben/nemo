@@ -65,24 +65,18 @@ local int nemoinprt(char *line, real *par, int npar)
   char *token = strtok(line," ,");
   int ntok = 0;
   lls *curr, *prev = NULL;
-  static real *value;   //   value[0] , value[1], .... value[ntok-1]
+  static char *value;   //   value[0] , value[1], .... value[ntok-1]
   static int nvalue = 0;
 
-
   /*      tokenize and build linked list */
-
-  //first.val = atof(token);
-  //first.next = NULL;
-
   while (token != NULL) {
     if (ntok == npar) {
-      error("too many");
+      error("Error: Number of tokens exceed number of parameters");
       return ntok;
     }
-    //par[ntok++] = atof(token);
-    //token = strtok(NULL," ,");
+
     curr = (lls *) allocate(sizeof(lls));
-    curr->val = atof(token);
+    curr->val = token;
     sum += curr->val;
     curr->next = NULL;
 
@@ -92,7 +86,6 @@ local int nemoinprt(char *line, real *par, int npar)
 
     token = strtok(NULL, " ,");
   }
-
 
   /* walk through the list of ntok elements , allocate *value
      and place the token pointers here
@@ -105,9 +98,6 @@ local int nemoinprt(char *line, real *par, int npar)
     value = (real *) reallocate (value, ntok * sizeof(real));
   }
       
-
-
-
   /* if ntok <= npar; fill those elements of the par[] */
   /* put warning if not , and only fill first npar */
   

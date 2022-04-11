@@ -1,45 +1,60 @@
-.TH TABLE 3NEMO "9 August 2020"
-.SH NAME
-table_open, table_md2, table_close - new table manipulation routines (\fIdrafted\fP)
+.TH TABLE 3NEMO "17 March 2022"
+
+.SH "NAME"
+table_open, table_md2, table_close - new table manipulation routines
 .PP
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator routines
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
+table V2 is under final development.   The API with a - in front have not been implemented. Names of
+functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
+development \fBtable.h\fP has the final word.
 .nf
+
 .B #include <table.h>
 .B #include <mdarray.h>
+.B #include <extstring.h>
 .PP
-.B table *table_open(string fname, int rowbufsize, ? int maxrow);
-.B mdarray2 table_md2(table *t);
-.B void table_read(table *t);
-.B string *table_comments(table *t);
+.B table  *table_open(stream instr, int mode=0, int nlines=0;
+.B table  *table_open0(stream instr, int mode);
+.B table  *table_open1(stream instr, int mode, int nlines);
+.B void    table_close(tableptr tptr);
+.B size_t  table_nrows(tableptr tprt);
+.B size_t  table_ncols(tableptr tprt);
+.B string  table_row(tableptr tptr, int row);
+.PP
+.B string table_line(table *t)
+.B string table_line1(table *t) 
+.B ssize_t table_line0(table *t, char **line, size_t *linelen);
+.PP
+.B - mdarray2 table_md2(table *t);
+.B - void table_read(table *t);
+.B - string *table_comments(table *t);
 .B void table_reset(table *t);
 .B void table_close(table *t);
 .PP
-.B int table_nrows(table *t);
-.B int table_ncols(table *t);
-.B void table_set_valid_rows(int nrows, int *rows)
-.B void table_set_valid_cols(int ncols, int *cols)
+.B - void table_set_valid_rows(int nrows, int *rows)
+.B - void table_set_valid_cols(int ncols, int *cols)
 .PP
-.B int table_next_row(table *t)   
-.B int table_next_rows(table *t)  
-.B int table_next_rowi(table *t)
-.B int table_next_rowr(table *t)
-.B string table_line(table *t)
+.B - int table_next_row(table *t)   
+.B - int table_next_rows(table *t)  
+.B - int table_next_rowi(table *t)
+.B - int table_next_rowr(table *t)
 .PP
-.B string table_cols(table *t, int col)
-.B int  table_coli(table *t, int col)
-.B real table_colr(table *t, int col)
+.B - string table_cols(table *t, int col)
+.B - int  table_coli(table *t, int col)
+.B - real table_colr(table *t, int col)
 .PP
-.B string *table_colsp(table *t, int col) 
-.B int *table_colip(table *t, int col)
-.B real *table_colrp(table *t, int col)
+.B - string *table_colsp(table *t, int col) 
+.B - int *table_colip(table *t, int col)
+.B - real *table_colrp(table *t, int col)
 .PP
-.B string table_row(table *t, int row)
-.B string *table_rowsp(table *t, int row)
-.B int *table_rowip(table *t, int row)
-.B real *table_rowrp(table *t, int row)
+.B - string table_row(table *t, int row)
+.B - string *table_rowsp(table *t, int row)
+.B - int *table_rowip(table *t, int row)
+.B - real *table_rowrp(table *t, int row)
 .PP
-.B void table_set_ncols(int ncols) 
+.B - void table_set_ncols(int ncols) 
 .PP
 .I Old:
 .PP
@@ -55,7 +70,34 @@ get_atable, get_ftable, get_line, parse, strinsert \- legacy table manipulator r
 .PP
 .B int iscomment(char *line)
 .fi
-.SH DESCRIPTION
+
+.SH "USING TABLES"
+
+Tables can be arbitrarely large, but like NEMO structures files,
+do need to fit in memory. There can be some exceptions to this,
+and certain applications will stream data that do not fit in
+memory.
+
+
+.PP
+The particular table dialect should be detected automatically in
+files, and number of columns and rows can be arbitrarely high.  tabgen
+has methods to make really big tables in both "column" and "row" space
+for testing purposes.
+
+.PP
+When a table comes from a pipe, obviously it cannot seek, however
+using the new table I/O the full table is read into memory, initially
+using a linked list, and can then be addressed line by line in random
+row fashion.
+
+.PP
+An exception could be made where the table can be read in blocks of say 100
+lines or so. This makes it possible to work
+
+     
+
+.SH "DESCRIPTION"
 A new \fItable\fP interface was introduced in Summer 2020 to create a more uniform and scaleable
 table ASCII system. This will have no limit on number of columns, line length or number or rows,
 perhaps at a slight cost of performance. It should also detect automatically if they have
@@ -64,11 +106,11 @@ Space Separated Values (SSV), Comma Separated Values (CSV) or Tab Separated Valu
 .B table_open
 opens a file for reading. The returned \fItable *\fP pointer is used in all subsequent table_ routines.
 The
-.B rowbufsize
+.B rowbufsize?
 controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
 means the whole table will be read in memory, a value of \fB1\fP will read the table line
 by line.  Values larger than 1 are planned, but not yet supported.
-.B maxrow
+.B maxrow?
 used to be in the old system a lot, but we can probably live without it. It normally is only
 needed when the input file is a pipe and the whole file needs to be read, which is now supported.
 .B table_md2
@@ -87,7 +129,7 @@ For arrays that are processed in streaming mode (e.g. \fIfilename="-"\fP) this w
 .PP
 Once a table has been fully read into memory,
 .B table_nrows
-returns the number of rows, and 
+returns the number of rows (assuming non-streaming), and 
 .B table_ncols
 the number of columns. By using
 .B table_set_valid_rows
@@ -196,7 +238,8 @@ characters of \fIa\fP.
 .PP
 \fIiscomment\fP returns 1 if the line appears to be a comment
 (starts with ';', '#', '!' or a blank/newline)
-.SH EXAMPLES - DRAFTED
+
+.SH "EXAMPLES"
 Some examples drafted, based on the new API presented.
 .PP
 An example reading in a full table into a two dimensional mdarray2, and
@@ -209,22 +252,23 @@ adding 1 to each element:
     mdarray2 d2 = table_md2(t);
     table_close(t);
     
-    for (int i=0; i<nrows; i++)
+    for (int i=0; i<nrows; i++) 
     for (int j=0; j<ncols; j++)
-        d2[i][j] += 1.0;
-	
+        d2[i][j] += 1.0;          // d2[row][col]
+
 .fi
 and here is an example of reading the table line by line, without any parsing,
-but removing comment lines
+but removing comment lines. This can be done in line by line streaming mode,
+not allocating space for the whole table:
 
 .nf
     table *t = table_open(filename, 1, 0);
     int nrows = 0;
-    while ( (n=table_next_row(t)) >= 0) {
-	if (n > 0) {
-	    nrows++	
-	    printf("%s\\n", table_line(t));
-	}
+    string s;
+    while ( (s=table(line(t)) ) {
+	if (iscomment(s)) continue;
+        nrows++	
+        printf("%s\\n", s);           q// fputs() might be faster
     }
     table_close(t);
     dprintf(0,"Read %d lines\\n",nrows);
@@ -248,7 +292,7 @@ and dealing (and preserving) comments while reading in the whole table:
 
 .fi
 
-.SH XSV
+.SH "XSV"
 .nf
 cat AAPL.csv | xsv table | head -2
 cat AAPL.csv | xsv slice -i 1 | xsv table
@@ -258,24 +302,28 @@ cat AAPL.csv | xsv count
 
 .fi
 
-.SH DIAGNOSTICS
+.SH "DIAGNOSTICS"
 Low-level catastrophies (eg, bad filenames, parsing errors, wrong delimiters)
 generate messages via \fIerror(3NEMO)\fP.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(3NEMO), table(5NEMO)
 .PP
 .nf
 https://github.com/BurntSushi/xsv
 https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
 .fi
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.0i
 src/kernel/tab  	table.c gettab.c
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +3i
 xx-sep-88	V1.0 written	PJT
@@ -283,4 +331,5 @@ xx-sep-88	V1.0 written	PJT
 1-sep-95	added iscomment()	PJT
 12-jul-03	fixed reading large table buffereing	PJT
 aug-2020	designing new table system	Sathvik/PJT
+mar-2022	finalizing implementation of table2	PJT/xxx/yyy
 .fi
