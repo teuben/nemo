@@ -68,7 +68,7 @@ local int nemoinprt(char *line, real *par, int npar)
   static char *value;   //   value[0] , value[1], .... value[ntok-1]
   static int nvalue = 0;
 
-  /*      tokenize and build linked list */
+  /* tokenize and build linked list */
   while (token != NULL) {
     if (ntok == npar) {
       error("Error: Number of tokens exceed number of parameters");
