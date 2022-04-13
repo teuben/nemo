@@ -14,8 +14,8 @@
 #define TABLE2
 
 /* getaline.c */
-char *getaline(stream);
-char *getsline(stream, string *);
+char *getaline(stream);              // deprecated - table_line0() does this
+char *getsline(stream, string *);    // deprecated - was never used, getline() does this
 
 /* gettab.c */
 int get_atable(stream , int , int *, real **, int);
