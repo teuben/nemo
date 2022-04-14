@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "9 April 2022"
+.TH TABLE 3NEMO "10 April 2022"
 
 .SH "NAME"
 table_open, table_md2, table_close - table manipulation routines
@@ -6,7 +6,7 @@ table_open, table_md2, table_close - table manipulation routines
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table routines
 
 .SH "SYNOPSIS"
-table V2 is under final development.   The API with a - in front have not been implemented. Names of
+\fINOTE:\fP table V2 is under final development.   The API with a - in front have not been implemented. Names of
 functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
 development \fBtable.h\fP has the final word.
 
@@ -106,6 +106,8 @@ them all.   A line starting with
 .B !
 .B ;
 .B /
+.B \e
+.B |
 .B C
 
 .fi
@@ -369,7 +371,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +3i
+.ta +1.5i +5.5i
 xx-sep-88	V1.0 written	PJT
 6-aug-92	documented get_Xtable functions  	PJT
 1-sep-95	added iscomment()	PJT
@@ -377,3 +379,10 @@ xx-sep-88	V1.0 written	PJT
 aug-2020	designing new table system	Sathvik/PJT
 mar-2022	finalizing implementation of table2	PJT/xxx/yyy
 .fi
+
+
+.ig
+-------   here's the progress list of programs that have been converted
+tabcomment
+
+..
