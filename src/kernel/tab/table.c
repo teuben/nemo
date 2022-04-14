@@ -1,5 +1,14 @@
-/* some utility routines for table manipulations */
-/*
+/* some utility routines for table manipulations
+ *
+ * New table V2 I/O routines:
+ *
+ *    table_open
+ *    table_line
+ *    table_close
+ *
+ *
+ * ==== some deprecatale functions ====
+ *
  * get_line (instr, line)		get a line from a stream and return len
  *					(dangerous: max line len unpecified)
  *
@@ -213,10 +222,10 @@ table *table_open0(stream instr, int mode)
   tptr->line    = NULL;
   dprintf(0,"table_open0 - got %d chars allocated at the start\n", tptr->linelen);
 
-  if (mode == 0) {
-    dprintf(0,"linked list reading\n");
+  if (mode == 0) {   //
+    dprintf(1,"linked list reading of table\n");
 
-    // use a linked list
+    // use a linked list 
     struct LineNode* first = (struct LineNode*) allocate(sizeof(struct LineNode));
     struct LineNode* curr = first;
 
@@ -230,24 +239,29 @@ table *table_open0(stream instr, int mode)
       if (line == NULL)
 	break;
       
-      // line = strdup(line);
       nLines++;
       curr->val = strdup(line);
       curr->next = (struct LineNode*) allocate(sizeof(struct LineNode));
       curr = curr->next;
       curr->next = NULL;
     }
+    // allocate the array of nLines strings, point each line there
     tptr->nr = nLines;
+    tptr->lines = (string *) allocate(nLines*sizeof(string));
+    curr = first;
+    for (int i=0; i<nLines; i++) {
+      tptr->lines[i] = curr->val;
+      curr = curr->next;
+    }
+    // @todo free up space of the linked list itself
   }
-
-  // allocate the array of nLines strings
-
+  
   // done!
   dprintf(0,"Read %d lines so far\n",tptr->nr);
   return tptr;
 }
 
-// seekable file mode=1
+// seekable file mode=1 where you know number of lines
 table *table_open1(stream instr, int mode, int nlines)
 {
   tableptr tptr = (tableptr) allocate(sizeof(table));
@@ -261,6 +275,9 @@ table *table_open1(stream instr, int mode, int nlines)
   tptr->linelen = 0;
   tptr->line    = NULL;
   dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
+
+  if (mode == 1)
+    return tptr;
 
   // @todo what if nlines was not enough.
   warning("table_open1: mode=%d nlines=%d",mode,nlines);
@@ -297,7 +314,16 @@ void table_close(tableptr tptr)
   tptr->linelen = 0;
 }
 
-// deprecate
+string table_line0(tableptr tptr)
+{
+  ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
+  if (ret >= 0)
+    return tptr->line;
+  // end of file
+  return NULL;
+}
+
+// deprecate?
 ssize_t table_line1(tableptr tptr, char **line, size_t *linelen)
 {
   // in simple (streaming) mode, just get the next line
@@ -309,14 +335,6 @@ ssize_t table_line1(tableptr tptr, char **line, size_t *linelen)
   return -1;
 }
 
-string table_line0(tableptr tptr)
-{
-  ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
-  if (ret >= 0)
-    return tptr->line;
-  // end of file
-  return NULL;
-}
 
 string table_row(tableptr tptr, int row)
 {
@@ -339,6 +357,8 @@ string usage = "testing tables";
 
 void testmode1();
 void testmode2();
+void testmode3();
+void testmode4();
 
 void nemo_main()
 {
@@ -346,15 +366,10 @@ void nemo_main()
     tableptr tp1;
     stream instr, outstr;
 
-    if (testmode == 1) {
-      testmode1();
-      return;
-    }
-
-    if (testmode == 2) {
-      testmode2();
-      return;
-    }
+    if (testmode == 1) return testmode1();
+    if (testmode == 2) return testmode2();
+    if (testmode == 3) return testmode3();
+    if (testmode == 4) return testmode4();
 
     if (strcmp(getparam("mode"),"w") == 0) {
       dprintf(0,"write mode\n");
@@ -401,11 +416,34 @@ void testmode1()
   stream instr = stropen(input,"r");
   if (ispipe(instr))
     error("This mode is not supported with a pipe");
+  rewind(instr);
     
-  tableptr tp1 = table_open1(instr, 1, nlines);     // read the whole file in memory
+  tableptr tp1 = table_open1(instr, 0, nlines);     // read the whole file in memory
   dprintf(0,"found nlines: %d\n",tp1->nr);
   printf("last  line: %s",table_row(tp1,tp1->nr - 1));
   printf("first line: %s",table_row(tp1,0));
+}
+
+// streaming
+void testmode3()
+{
+  string input = getparam("file");
+  string s;
+  int nlines = nemo_file_lines(input,0);            // this will not work on pipes
+  dprintf(0,"nemo_file_lines: %d\n",nlines);
+  stream instr = stropen(input,"r");
+  if (ispipe(instr))
+    error("This mode is not supported with a pipe");
+  rewind(instr);
+    
+  tableptr tp1 = table_open1(instr, 1, nlines);     // read the whole file in memory
+  int nl=0;
+  while ((s=table_line0(tp1)))
+    nl++;
+    
+  dprintf(0,"found nlines: %d\n",nl);
+  // note cannot use table_row() since lines have not been saved
+
 }
 
 // linked list read, supports pipes
@@ -418,9 +456,26 @@ void testmode2()
   dprintf(0,"nlines: %d\n",tp1->nr);
 
   // assuming the linked list has been converted....
-  //  printf("first line: %s",table_row(tp1,0));
-  // printf("last  line: %s",table_row(tp1,tp1->nr - 1));
+  printf("first line: %s",table_row(tp1,0));
+  printf("last  line: %s",table_row(tp1,tp1->nr - 1));
 	 
+}
+
+// linked list, streaming one line, and not keeping a buffer
+void testmode4()
+{
+  string input = getparam("file");
+  string s;
+  stream instr = stropen(input,"r");
+    
+  tableptr tp1 = table_open0(instr, 1);
+  int nl=0;
+  while ((s=table_line0(tp1)))
+    nl++;
+    
+  dprintf(0,"found nlines: %d\n",nl);
+  // note cannot use table_row() since lines have not been saved
+  dprintf(0,"has buffered nlines: %d\n",tp1->nr);
 }
 
 
