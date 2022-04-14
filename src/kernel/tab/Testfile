@@ -1,3 +1,5 @@
+#  -*- makefile -*-
+
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
       tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms
@@ -12,7 +14,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f txt.in tab.in tab2.in dms.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
+	@rm -f txt.in tab.in tab2.in dms.in tab.out gauss1d.tab gauss2d.tab fit/myline.so tab123
 
 all:	tab.in $(BIN) fitmyline
 
@@ -58,7 +60,6 @@ tabstat:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - nmax=-$(NMAX); nemo.coverage tabstat.c
-	
 
 txtpar:  txt.in
 	 @echo Running $*
@@ -136,3 +137,20 @@ gauss2d:
 	tablsqfit   gauss2d.tab 1,2 3 fit=gauss2d
 	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=0,1,1,1,1
 	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=1,1,1,1,1
+
+# new table2
+tab123:
+	tabgen tab123
+
+table2:	tab123
+	./tabletest tab123 test=0
+	./tabletest tab123 test=1
+	./tabletest tab123 test=2
+	./tabletest tab123 test=3
+	./tabletest tab123 test=4
+	cat tab123  | ./tabletest - test=0
+	-cat tab123 | ./tabletest - test=1
+	cat tab123  | ./tabletest - test=2
+	-cat tab123  | ./tabletest - test=3
+	cat tab123  | ./tabletest - test=4
+
