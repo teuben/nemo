@@ -7,7 +7,7 @@
 #
 # https://unix.stackexchange.com/questions/34516/can-i-create-a-man-page-for-a-script
 #
-set version="1.4  22-may-2021 PJT"
+set version="1.5  11-apr-2022 PJT"
 
 if ($#argv == 0) then
   echo "Usage: $0 [-section] name"
@@ -75,6 +75,6 @@ echo "mkman"
 echo
 echo '.SH "UPDATE HISTORY"'
 echo ".nf"
-echo ".ta +1.0i +4.0i"
-echo "$ddmmyy	V0.0 Created by mkman	NEMO/$USER"
+echo ".ta +1.5i +5.5i"
+echo "dd-mmm-yyyy	Created ...	XYZ"
 echo ".fi"
