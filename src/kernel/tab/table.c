@@ -314,6 +314,66 @@ void table_close(tableptr tptr)
   tptr->linelen = 0;
 }
 
+table *table_cat(table* t1, table* t2, int mode){
+  tableptr tptr = (tableptr) allocate(sizeof(table));
+  
+  tptr->lines = NULL;
+  tptr->nr = 0;
+  tptr->nc = 0;
+
+  #if 0
+    tptr->linelen = 0;
+    tptr->line = NULL;
+
+  #else
+    tptr->linelen = 20;
+    tptr->line = malloc(tptr->linelen);
+  #endif 
+  dprintf(0,"table_cat - got %d chars allocated at the start\n", tptr->linelen);
+
+  //concatenation(above and below)
+  if(mode == 0) {
+    //updating # of rows in the new table
+    int totalLines = t1->nr + t2->nr;
+    tptr->nr = totalLines;
+
+    //updating # of columns to be the larger of the original two tables
+    if(t1->nc > t2->nc){
+      tptr->nc = t1->nc;
+    } else {
+      tptr->nc = t2->nc;
+    }
+
+    tptr->lines = (string*) allocate((tptr->nr) * sizeof(string));
+    for(int i = 0; i < t1->nr; i++){
+      tptr->lines[i] = strdup(table_line0(t1));
+    }
+    for(int i = 0; i < t2->nr; i++){
+      tptr->lines[i + t1->nr] = strdup(table_line0(t2));
+    }
+
+
+  } else { //paste mode
+    //assume number of rows are the same
+    tptr->nr = t1->nr;
+    //How do I update #of column in this case
+    tptr->nc = t1->nc + t2->nc;
+    tptr->lines = (string*) allocate((tptr->nr) * sizeof(string));
+
+    //special symbol(IFS)
+
+    for(int i = 0; i < t1->nr; i++){
+      //@TODO: add a white space before paste(default: white space)
+      tptr->lines[i] = strcat(strdup(table_line0(t1)), strdup(table_line0(t2)));
+    }
+
+  }
+
+  return tptr;
+} 
+
+
+
 string table_line0(tableptr tptr)
 {
   ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
