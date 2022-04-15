@@ -140,21 +140,26 @@ merged to the master yet.
 
       git checkout -b table2
       ...
-	  git push
+	  git push --set-upstream origin table2
 	  
 2. others will do then branch off this new branch (user *astroumd* is used as example here):
 
-	  gh repo fork https://github.com/teuben/nemo
-      cd nemo
-      git checkout table2
+	  gh repo fork https://github.com/teuben/nemo nemo_table2
+      cd nemo_table2
+      git remote add upstream  https://github.com/teuben/nemo
+      git fetch upstream
       git checkout -b myTable3
+	  git merge upstream/table2
       ...
-	  git push
+	  git push --set-upstream origin myTable3
+	  
+   on github.com/astroumd/nemo you can then do a pull request from astroumd::myTable3 to teuben:table2. An 
+   alternative (next item) is that the upstream person would pull in myTable3 and tests locally
 
-3. create an alias site "astroumd" and merge from their myTable3 branch
+3. NEMO, optionally, creates an alias site "astroumd" and merge from their myTable3 branch to check out the code
 
       git checkout table2
-      git remote add    astroumd  https://github.com/astroumd/nemo
+      git remote add  astroumd  https://github.com/astroumd/nemo
       git pull astroumd
       git merge [--no-ff] astroumd/myTable3
 	  .... (resolve conflicts)
