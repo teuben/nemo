@@ -1,6 +1,6 @@
 /* some utility routines for table manipulations
  *
- * New table V2 I/O routines:
+ * New table V2 I/O routines: - test -
  *
  *    table_open
  *    table_line
