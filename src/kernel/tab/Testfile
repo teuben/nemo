@@ -154,3 +154,5 @@ table2:	tab123
 	-cat tab123  | ./tabletest - test=3
 	cat tab123  | ./tabletest - test=4
 
+
+# testing
