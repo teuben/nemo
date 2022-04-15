@@ -1,62 +1,60 @@
 /*
  * MEANMED: NEMO version of a CARMA program with the same intent:
  *
- *      12-dec-2007   PJT    quick hack for running local 'quality'
+ *      12-dec-2007   PJT    1.0 quick hack for running local 'quality'
+ *       4-mar-2022   PJT    1.1 converted to table V2 (initial steps) + cleanup
  *
  */
 
 #include <stdinc.h>	
 #include <getparam.h>
 #include <moment.h>
-
+#include <table.h>
 
 
 string defv[] = {              
     "infile=???\n        Input file name (table)",
     "maxpnt=10000\n      Max number of points that can be read",
     "carma=t\n           Special CARMA output",
-    "VERSION=1.0\n	 12-dec-2007 PJT",
+    "VERSION=1.1\n	 4-mar-2022 PJT",
     NULL
 };
 
 string usage = "simple stats of all the numbers in a file";
 
 
-local stream instr;
-
-
-#ifndef MAX_LINELEN
-#define MAX_LINELEN  2048
-#endif
-
 #ifndef MAXCOL
 #define MAXCOL     1024
 #endif
 
-local char  line[MAX_LINELEN];
-local real  data[MAXCOL];
-local Moment m;
-
-
 
 void nemo_main()
 {
-  int i,n;
-  int maxpnt = getiparam("maxpnt");
   bool Qcarma = getbparam("carma");
+  int maxpnt = getiparam("maxpnt");
+  real  data[MAXCOL];
+  stream instr;
+  tableptr tp;
+  Moment m;
+  string s;
+  int i,k=0,n, mode = 0;
 
-  instr = stropen (getparam("infile"),"r");
+  instr = stropen(getparam("infile"),"r");
+  tp = table_open(instr, mode);
+
   ini_moment(&m,2,maxpnt);
 
-  for(;;) {
-    if (fgets(line,MAX_LINELEN,instr) == NULL) 
+  while(1) {
+    if (!(s=table_line0(tp)))        // @todo   table_line0 
       break;
-    if (line[0] == '#') continue;
-    n = strlen(line);
-    if (line[n-1]=='\n') line[n-1]='\0';
-    n = nemoinpr(line,data,MAXCOL);
+    if (s[0] == '#') continue;
+    n = strlen(s);
+    if (s[n-1]=='\n') s[n-1]='\0';
+    n = nemoinpr(s,data,MAXCOL);
     for (i=0; i<n; i++) {
       if (Qcarma && data[i]<=0.0) continue;
+      k++;
+      if (k==maxpnt) error("too many points, increase maxpnt=%d",maxpnt);
       accum_moment(&m,data[i],1.0);
     }
   }
