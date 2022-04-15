@@ -314,6 +314,8 @@ void table_close(tableptr tptr)
   tptr->linelen = 0;
 }
 
+
+//This is a simple change for testing purposes
 table *table_cat(table* t1, table* t2, int mode){
   tableptr tptr = (tableptr) allocate(sizeof(table));
   
