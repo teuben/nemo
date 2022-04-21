@@ -1,4 +1,4 @@
-/* some utility routines for table manipulations
+/* some utility routines for table manipulations.
  *
  * New table V2 I/O routines: - test2 -
  *
