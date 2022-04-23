@@ -100,6 +100,7 @@ tabnllsqfit:
 tabdate:
 	@echo Running $*
 	@echo 1000000000 | $(EXEC) tabdate - - %s %c
+	@echo 'Sat Sep  8 21:46:40 2001'
 
 tabfilter:
 	@echo Running $*
