@@ -61,12 +61,11 @@ typedef struct {
 
 //  this API is not final yet; see also table.3 for a proposed API
 table  *table_open(stream instr, int mode);
-table  *table_open0(stream instr, int mode);
 table  *table_open1(stream instr, int mode, int nlines);
 table  *table_cat(table *tp1, table *tp2, int mode);
 void    table_close(tableptr tptr);
-string  table_line0(tableptr tptr);
-ssize_t table_line1(tableptr tptr, char **line, size_t *linelen);
+string  table_line(tableptr tptr);
+ssize_t table_line1(tableptr tptr, char **line, size_t *linelen, int newline);
 size_t  table_nrows(tableptr tprt);
 size_t  table_ncols(tableptr tprt);
 string  table_row(tableptr tptr, int row);

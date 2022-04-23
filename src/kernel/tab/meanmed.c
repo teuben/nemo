@@ -45,7 +45,7 @@ void nemo_main()
   ini_moment(&m,2,maxpnt);
 
   while(1) {
-    if (!(s=table_line0(tp)))        // @todo   table_line0 
+    if (!(s=table_line(tp)))
       break;
     if (s[0] == '#') continue;
     n = strlen(s);

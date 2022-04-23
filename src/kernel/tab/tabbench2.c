@@ -68,7 +68,6 @@ local int nemoinprt(char *line, real *par, int npar)
   static real *value;   //   value[0] , value[1], .... value[ntok-1]
   static int nvalue = 0;
 
-
   /*      tokenize and build linked list */
 
   //first.val = atof(token);
@@ -167,6 +166,7 @@ void nemo_main(void)
 	  sum += retval;
 	  if (Qout) fprintf(ostr,"%s %g\n",line,retval);
 	}
+	dprintf(0,"last npar=%d\n",npar);	
     } else if (mode == 3) {
         dprintf(0,"nemoinp + fie(sqrt())\n");                  
         while (getline(&line, &linelen, istr) != -1) {	        
@@ -176,6 +176,7 @@ void nemo_main(void)
 	  sum += retval;
 	  if (Qout) fprintf(ostr,"%s %g\n",line,retval);	  
 	}
+	dprintf(0,"last npar=%d\n",npar);
     }
 
     strclose(istr);

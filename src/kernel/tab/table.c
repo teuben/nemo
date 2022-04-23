@@ -1,13 +1,14 @@
-/* some utility routines for table manipulations
+/* some utility routines for table manipulations.
  *
- * New table V2 I/O routines: - test -
+ * New table V2 I/O routines: - test2 -
  *
  *    table_open
  *    table_line
+ *    table_line1
  *    table_close
  *
  *
- * ==== some deprecatale functions ====
+ * ==== some deprecatable functions ====
  *
  * get_line (instr, line)		get a line from a stream and return len
  *					(dangerous: max line len unpecified)
@@ -24,6 +25,8 @@
 #include <stdinc.h>
 #include <ctype.h>
 #include <table.h>
+#include <extstring.h>
+#include <mdarray.h>
 
 #if !defined(HUGE)
 #define HUGE 1e20
@@ -168,7 +171,7 @@ bool **Qsel;
 
 #endif
 
-table *table_open(stream instr, int mode)
+table *table_open_old(stream instr, int mode)
 {
   tableptr tptr = (tableptr) allocate(sizeof(table));
 
@@ -178,14 +181,10 @@ table *table_open(stream instr, int mode)
   tptr->nr    = 0;
   tptr->nc    = 0;
 
-#if 0  
-  tptr->linelen = 0;
-  tptr->line    = NULL;
-#else
-  tptr->linelen = 20;
+  tptr->linelen = 128;
   tptr->line    = malloc(tptr->linelen);
-#endif
-  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
+
+  dprintf(1,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
   // in full buffering mode, the whole file is read into memory
   // using the *tptr->lines (linked list?)
@@ -208,10 +207,10 @@ struct LineNode {
 
 
 // non-seekable file, line by line, mode=1   or linked list all line mode=0
-table *table_open0(stream instr, int mode)
+table *table_open(stream instr, int mode)
 {
   tableptr tptr = (tableptr) allocate(sizeof(table));
-  dprintf(0,"table_open0: mode=%d\n",mode);
+  dprintf(0,"table_open: mode=%d\n",mode);
 
   tptr->str     = instr;
   tptr->mode    = mode;
@@ -220,7 +219,7 @@ table *table_open0(stream instr, int mode)
   tptr->nc      = 0;
   tptr->linelen = 0;
   tptr->line    = NULL;
-  dprintf(0,"table_open0 - got %d chars allocated at the start\n", tptr->linelen);
+  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
   if (mode == 0) {   //
     dprintf(1,"linked list reading of table\n");
@@ -233,8 +232,8 @@ table *table_open0(stream instr, int mode)
     string line;
 
     while (1) {
-      line = table_line0(tptr);
-      dprintf(1,"line: %s",line);
+      line = table_line(tptr);
+      dprintf(1,"line: %s\n",line);
 
       if (line == NULL)
 	break;
@@ -284,7 +283,7 @@ table *table_open1(stream instr, int mode, int nlines)
   tptr->nr = nlines;
   tptr->lines = (string *) allocate(nlines*sizeof(string));
   for (int i=0; i<nlines; i++)
-    tptr->lines[i] = strdup(table_line0(tptr));
+    tptr->lines[i] = strdup(table_line(tptr));
 
   return tptr;
 }
@@ -314,22 +313,86 @@ void table_close(tableptr tptr)
   tptr->linelen = 0;
 }
 
-string table_line0(tableptr tptr)
+string table_line(tableptr tptr)
 {
   ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
-  if (ret >= 0)
+  if (ret >= 0) {
+    if (tptr->line[ret-1] == '\n')
+      tptr->line[ret-1] = '\0';
     return tptr->line;
+  }
   // end of file
   return NULL;
 }
 
-// deprecate?
-ssize_t table_line1(tableptr tptr, char **line, size_t *linelen)
+table *table_cat(table* t1, table* t2, int mode){
+  tableptr tptr = (tableptr) allocate(sizeof(table));
+  
+  tptr->lines = NULL;
+  tptr->nr = 0;
+  tptr->nc = 0;
+
+#if 0
+    tptr->linelen = 0;
+    tptr->line = NULL;
+#else
+    tptr->linelen = 20;
+    tptr->line = malloc(tptr->linelen);
+#endif 
+  dprintf(0,"table_cat - got %d chars allocated at the start\n", tptr->linelen);
+
+  //concatenation(above and below)
+  if(mode == 0) {
+    //updating # of rows in the new table
+    int totalLines = t1->nr + t2->nr;
+    tptr->nr = totalLines;
+
+    //updating # of columns to be the larger of the original two tables
+    if(t1->nc > t2->nc){
+      tptr->nc = t1->nc;
+    } else {
+      tptr->nc = t2->nc;
+    }
+
+    tptr->lines = (string*) allocate((tptr->nr) * sizeof(string));
+    for(int i = 0; i < t1->nr; i++){
+      tptr->lines[i] = strdup(table_line(t1));
+    }
+    for(int i = 0; i < t2->nr; i++){
+      tptr->lines[i + t1->nr] = strdup(table_line(t2));
+    }
+
+
+  } else { //paste mode
+    //assume number of rows are the same
+    tptr->nr = t1->nr;
+    //How do I update #of column in this case
+    tptr->nc = t1->nc + t2->nc;
+    tptr->lines = (string*) allocate((tptr->nr) * sizeof(string));
+
+    for(int i = 0; i < t1->nr; i++){
+      //@TODO: add white spaces between two lines
+      tptr->lines[i] = strcat(strdup(table_line(t1)), strdup(table_line(t2)));
+    }
+
+  }
+
+  return tptr;
+} 
+
+
+ssize_t table_line1(tableptr tptr, char **line, size_t *linelen, int newline)
 {
   // in simple (streaming) mode, just get the next line
-  if (tptr->mode == 1)
-    // return getdelim(line, linelen, ' ', tptr->str);
-    return getline(line, linelen, tptr->str);
+  if (tptr->mode == 1) {
+    ssize_t len1 = getline(line, linelen, tptr->str);
+    if (newline) return len1;
+    if (*line[len1-1] == '\n') {
+      line[len1-1] = '\0';
+      len1--;
+      return len1;
+    }
+  }
 
   error("line1: Unsupported table mode=%d", tptr->mode);
   return -1;
@@ -341,14 +404,109 @@ string table_row(tableptr tptr, int row)
   return tptr->lines[row];
 }
 
+// linked list placeholder
+typedef struct lls {
+  char *val;
+  struct lls *next;
+} lls;
+
+// return list of zero terminated (extstring) pointers to the words in a row
+string *table_rowsp(table *t, int row)
+{
+  char *line = strdup(t->lines[row]);
+  int ntok = 0;
+  char *token = strtok(line," ,");
+  lls *first = (lls *) allocate(sizeof(lls));
+  lls *curr = first;
+  string *sp;
+  int i;
+
+  // find tokens
+  while (token != NULL) {
+    dprintf(2,"token: %d  %s\n",ntok, token);
+    curr->val = token;
+    curr->next = (lls *) allocate(sizeof(lls));
+    curr = curr->next;
+    curr->next = NULL;
+
+    ++ntok;
+    token = strtok(NULL, " ,");
+  }
+
+  // allocate the array to hold the tokens
+  sp = (string *) allocate((ntok+1) * sizeof(string));
+  curr = first;
+  for (i=0; i<ntok; i++) {
+    sp[i] = curr->val;
+    curr = curr->next;
+  }
+  sp[ntok] = NULL;
+
+  // consistency check on # columns
+  if (t->nc == 0) {
+    dprintf(0,"table_rowsp[%d]: setting ncols=%d\n",row,ntok);
+    t->nc = ntok;
+  } else if (ntok != t->nc)
+    error("column number changed:  %d -> %d\n",t->nc, ntok);
+  
+  // free memory of linked list
+  curr = first;
+  while (curr->next) {
+    dprintf(2,"free up LLS with %s\n",curr->val);
+    first = curr->next;
+    free(curr);
+    curr = first;
+  }
+  // list of strings
+  return sp;
+}
+
+
+mdarray2 table_md2(table *t)
+{
+  int nr = t->nr;
+  int nc = t->nc;
+  if (nc == 0) {   // no data read yet...
+    string *sp = table_rowsp(t,0);
+    dprintf(0,"processed first line to get nc -> %d\n",t->nc);
+    nc = t->nc;
+  }
+  dprintf(1,"table_md2: %d x %d table\n",nr,nc);
+  mdarray2 a = allocate_mdarray2(nr,nc);    // a[nr][nc]
+  int i,j;
+
+  dprintf(1,"table_md2 first\n");
+  for (i=0; i<nr; i++) {
+    string s = table_row(t,i);
+    dprintf(1,"%d: %s\n",i,s);
+    string *sp = table_rowsp(t,i);
+    for (j=0; j<nc; j++) {
+      a[i][j] = atof(sp[j]);
+    }
+  }
+
+#if 1
+  for (int j=0; j<nr; j++) {
+    dprintf(1,"%d",j);      
+    for (int i=0; i<nc; i++)
+      dprintf(1," %g",a[j][i]);
+    dprintf(1,"\n");
+  }
+#endif  
+  return a;
+}
+
+
+
 #ifdef TESTBED
 
 #include <getparam.h>
 
 string defv[] = {
     "file=???\n           Input or Output file",
-    "mode=r\n             Read (r) or Write (w)",
+    "write=f\n            Write mode? or else Write (w)",
     "test=0\n             testmode",
+    "mode=0\n             buffering mode for table_open",
     "VERSION=2.0\n        10-apr-2022 PJT",
     NULL,
 };
@@ -359,10 +517,12 @@ void testmode1();
 void testmode2();
 void testmode3();
 void testmode4();
+void testmode5();
 
 void nemo_main()
 {
     int testmode = getiparam("test");
+    int mode = getiparam("mode");
     tableptr tp1;
     stream instr, outstr;
 
@@ -370,22 +530,19 @@ void nemo_main()
     if (testmode == 2) return testmode2();
     if (testmode == 3) return testmode3();
     if (testmode == 4) return testmode4();
+    if (testmode == 5) return testmode5();
 
-    if (strcmp(getparam("mode"),"w") == 0) {
+    warning("Falling through testmodes");
+
+    if (getbparam("write")) {
       dprintf(0,"write mode\n");
       outstr = stropen(getparam("file"),"w");
-#if 0
-      // special test to get an embedded 0
-      char *buffer = "A\n\0\nHello\n";
-      fwrite(buffer,10,1,outstr);
-#endif
       strclose(outstr);
       return;
     } 
 
 
     dprintf(0,"read mode\n");
-      
     instr = stropen(getparam("file"),"r");
 #if 0
     // original C
@@ -397,9 +554,9 @@ void nemo_main()
 #else
     // new style table2 
     char *cp;
-    tp1 = table_open(instr, 0);
-    while ( (cp=table_line0(tp1)) )
-      printf("line = %s", cp);
+    tp1 = table_open(instr, mode);
+    while ( (cp=table_line(tp1)) )
+      printf("line = %s\n", cp);
     table_close(tp1);
 #endif
 
@@ -420,8 +577,8 @@ void testmode1()
     
   tableptr tp1 = table_open1(instr, 0, nlines);     // read the whole file in memory
   dprintf(0,"found nlines: %d\n",tp1->nr);
-  printf("last  line: %s",table_row(tp1,tp1->nr - 1));
-  printf("first line: %s",table_row(tp1,0));
+  printf("last  line: %s\n",table_row(tp1,tp1->nr - 1));
+  printf("first line: %s\n",table_row(tp1,0));
 }
 
 // streaming
@@ -438,7 +595,7 @@ void testmode3()
     
   tableptr tp1 = table_open1(instr, 1, nlines);     // read the whole file in memory
   int nl=0;
-  while ((s=table_line0(tp1)))
+  while ((s=table_line(tp1)))
     nl++;
     
   dprintf(0,"found nlines: %d\n",nl);
@@ -451,13 +608,13 @@ void testmode2()
 {
   string input = getparam("file");
   stream instr = stropen(input,"r");
-  tableptr tp1 = table_open0(instr, 0);     // read the whole file in memory - linked list
+  tableptr tp1 = table_open(instr, 0);     // read the whole file in memory - linked list
 
   dprintf(0,"nlines: %d\n",tp1->nr);
 
   // assuming the linked list has been converted....
-  printf("first line: %s",table_row(tp1,0));
-  printf("last  line: %s",table_row(tp1,tp1->nr - 1));
+  printf("first line: %s\n",table_row(tp1,0));
+  printf("last  line: %s\n",table_row(tp1,tp1->nr - 1));
 	 
 }
 
@@ -468,9 +625,9 @@ void testmode4()
   string s;
   stream instr = stropen(input,"r");
     
-  tableptr tp1 = table_open0(instr, 1);
+  tableptr tp1 = table_open(instr, 1);
   int nl=0;
-  while ((s=table_line0(tp1)))
+  while ((s=table_line(tp1)))
     nl++;
     
   dprintf(0,"found nlines: %d\n",nl);
@@ -478,5 +635,44 @@ void testmode4()
   dprintf(0,"has buffered nlines: %d\n",tp1->nr);
 }
 
+void testmode5()
+{
+  string input = getparam("file");
+  stream instr = stropen(input,"r");
+  tableptr tp1 = table_open(instr, 0);
+  
+#if 1
+  int nl = table_nrows(tp1);
+  int nc = table_ncols(tp1);
+  dprintf(0,"testmode5: table %d x %d\n",nl,nc);
+
+  for (int j=0; j<nl; j++) {
+    string *sp = table_rowsp(tp1,j);
+    int nsp = xstrlen(sp, sizeof(string))-1;
+    if (nc == 0)
+      nc = nsp;
+    else if (nsp != nc)
+      warning("Number of columns changed in row %d.... %d -> %d",j+1,nc,nsp);
+    dprintf(1,"%d",j);
+    for (int i=0; i<nsp; i++)
+      dprintf(1," %s",sp[i]);
+    dprintf(1,"\n");
+    // free this memory is painful, so table should keep it.....
+    char *cp = sp[0];
+    free(cp);
+  }
+#endif
+  
+  mdarray2 a = table_md2(tp1);
+  
+  dprintf(0,"after table_md2: table %d x %d\n",tp1->nr,tp1->nc);  
+  for (int j=0; j<tp1->nr; j++) {
+    dprintf(0,"%d",j);      
+    for (int i=0; i<tp1->nc; i++)
+      dprintf(0," %g",a[j][i]);
+    dprintf(0,"\n");
+  }
+    
+}
 
 #endif
