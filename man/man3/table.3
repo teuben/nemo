@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "10 April 2022"
+.TH TABLE 3NEMO "22 April 2022"
 
 .SH "NAME"
 table_open, table_md2, table_close - table manipulation routines
@@ -16,7 +16,6 @@ development \fBtable.h\fP has the final word.
 .B #include <extstring.h>
 .PP
 .B table  *table_open(stream instr, int mode);
-.B table  *table_open0(stream instr, int mode);
 .B table  *table_open1(stream instr, int mode, int nlines);
 .B void    table_close(tableptr tptr);
 .B size_t  table_nrows(tableptr tprt);
@@ -24,10 +23,10 @@ development \fBtable.h\fP has the final word.
 .B string  table_row(tableptr tptr, int row);
 .PP
 
-.B string table_line0(table *t) 
-.B ssize_t table_line1(table *t, char **line, size_t *linelen);
+.B string table_line(table *t);
+.B ssize_t table_line1(table *t, char **line, size_t *linelen, int newline);
 .PP
-.B - mdarray2 table_md2(table *t);
+.B mdarray2 table_md2(table *t);
 .B - void table_read(table *t);
 .B - string *table_comments(table *t);
 .B void table_reset(table *t);
@@ -49,8 +48,8 @@ development \fBtable.h\fP has the final word.
 .B - int *table_colip(table *t, int col)
 .B - real *table_colrp(table *t, int col)
 .PP
-.B - string table_row(table *t, int row)
-.B - string *table_rowsp(table *t, int row)
+.B string table_row(table *t, int row)
+.B string *table_rowsp(table *t, int row)
 .B - int *table_rowip(table *t, int row)
 .B - real *table_rowrp(table *t, int row)
 .PP
@@ -134,15 +133,24 @@ The
 controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
 means the whole table will be read in memory, a value of \fB1\fP will read the table line
 by line, controlled by the user (see \fBtable_line\fP below).
-Values larger than 1 are planned, but not yet supported.
+Values larger than 1 are planned to hold small buffers of rows.
 .PP
-.B nlines?
-used to be in the old system a lot, but we can probably live without it. It normally is only
+.B table_open1
+is kept for compatibility with older softwhere where the maximum number of lines
+.B nlines
+is given. 
+It normally is only
 needed when the input file is a pipe and the whole file needs to be read, which is now supported.
 .PP
-.B table_line0
+.B table_line
 will read the next line from the table stream.  If the file had been opened in \fBmode=0\fP all
-lines have been read,  and \fBtable_line0\fP would return NULL.
+lines have been read,  and \fBtable_line\fP would return NULL. Note that the returned string
+is 0-terminated, not newline terminated as \fIgetline(3)\fP would do.
+
+.B table_line1
+will read the next line from the table stream using \fIgetline(3)\fP, but depending on the setting of
+\fInewline\fP, the string can still contain a newline character. To best mimic the behavior
+of \fIgetline(3)\fP, \fInewline=1\fP needs to be set.
 
 .PP
 .B table_md2
@@ -302,7 +310,7 @@ but removing comment lines. This can be done in line by line streaming mode,
 not allocating space for the whole table, for which \fBmode=1\fP is needed:
 .nf
 
-    table *t = table_open0(filename, 1);
+    table *t = table_open(filename, 1);
     int nrows = 0;
     string s;
     
@@ -377,7 +385,7 @@ xx-sep-88	V1.0 written	PJT
 1-sep-95	added iscomment()	PJT
 12-jul-03	fixed reading large table buffereing	PJT
 aug-2020	designing new table system	Sathvik/PJT
-mar-2022	finalizing implementation of table2	PJT/xxx/yyy
+22-apr-2022	finalizing implementation of table2	PJT/xxx/yyy
 .fi
 
 
