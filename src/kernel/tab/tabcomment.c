@@ -30,7 +30,7 @@ string defv[] = {
 	"delete=f\n		  Delete the comment lines?",
 	"raw=f\n                  Show only the raw comments?",
 	"comment=#\n              The comment character!",
-	"VERSION=2.1\n		  10-apr-2022 PJT",
+	"VERSION=2.1\n		  22-apr-2022 PJT",
 	NULL,
 };
 
@@ -48,7 +48,7 @@ void nemo_main()
 
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
-    tptr = table_open0(instr,1);
+    tptr = table_open(instr,1);
     
     Qalpha = getbparam("alpha");
     Qblank = getbparam("blank");
@@ -61,7 +61,7 @@ void nemo_main()
       warning("new raw mode");
     }
     dprintf(0,"start ncols=%d nrows=%d\n",table_ncols(tptr),table_nrows(tptr));
-    while ( (cp=table_line0(tptr)) ) {
+    while ( (cp=table_line(tptr)) ) {
         nlines++;
 
         while (isspace(*cp))            /* skip whitespace */
