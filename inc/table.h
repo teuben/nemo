@@ -7,6 +7,8 @@
  *  Deprecation messages added to old routine
  */
 
+#include <mdarray.h>
+
 #ifndef _h_table
 #define _h_table
 
@@ -69,6 +71,13 @@ ssize_t table_line1(tableptr tptr, char **line, size_t *linelen, int newline);
 size_t  table_nrows(tableptr tprt);
 size_t  table_ncols(tableptr tprt);
 string  table_row(tableptr tptr, int row);
+string *table_rowsp(tableptr tptr, int row);
+mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols);  // a[row][col]
+mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows);  // a[col][row]
+
+
+
+
 
 #endif
 
