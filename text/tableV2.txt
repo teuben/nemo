@@ -1,0 +1,34 @@
+Notes on the table V2 design
+----------------------------
+
+The API is defined in table.3
+    man 3 table
+and some comments on interfaces with other ascii table systems in table.5
+    man 5 table
+
+As usual, implemention in
+   $NEMO/inc/table.h
+   $NEMO/src/kernel/tab/table.c
+
+Some initial testing was done in
+   $NEMO/src/kernel/tab/tabbench1.c
+   $NEMO/src/kernel/tab/tabbench2.c
+
+
+The following programs were converted, and some comments on their conversion:
+-----------------------------------------------------------------------------
+
+    meanmed        super easy, since it was line by line processing.
+    tabcomment     simple, since it's processing line by line; no maxpnt= or so
+    tabstat    	   was using get_atable, not table_md2cr() - more complex manual labor
+
+
+
+Testing methods:
+----------------
+
+    make tabletest
+    ./tabletest ....
+    
+    mknemo tabbench2
+    tabbench2 ...
