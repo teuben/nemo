@@ -67,9 +67,15 @@ local void do_work(void)
 local void do_output(void)
 {
   int i, j, max_spaces = 0, count_spaces;
-  int max_space[nrow];   // @todo   is this dynamic now allowed???  stacks are limited
+#if 0
+  int max_space[nrow];   // @todo  stacks are limited (wow, this is allowed now)
+  int freemp=0;
   // this segfaults:   tabgen - 10000000 2  | tabtranspose - .
-
+  // stack 8MB according to ulimit -a
+#else
+  int freemp=1;  
+  int *max_space = (int *) allocate(nrow*sizeof(int));
+#endif
   
   if (alignment) {
     dprintf(1, "The alignment parameter is true\n"); 
@@ -100,6 +106,7 @@ local void do_output(void)
     }
     fprintf(outstr,"\n");
   }
+  if (freemp) free(max_space);
 }
 
 
