@@ -135,8 +135,8 @@ void parse(int linenr, char *line, double *dat, int ndat)
 
 /*
  * iscomment: is a line a comment or blank line ?
- *		comment lines must start with '#', ';' or '!'
- *		or a NULL or newline '\n'
+ *		comment lines must start with '#' ';' '!' '/'
+ *		or a NULL or newline '\n' (blank line)
  */
 
 int iscomment(char *line)
@@ -233,7 +233,7 @@ table *table_open(stream instr, int mode)
 
     while (1) {
       line = table_line(tptr);
-      dprintf(1,"line: %s\n",line);
+      //dprintf(1,"line: %s\n",line);
 
       if (line == NULL)
 	break;
@@ -296,6 +296,17 @@ size_t table_nrows(tableptr tptr)
 
 size_t table_ncols(tableptr tptr)
 {
+  // if tptr->nr > 0 and nc==0, force to read a line in mode=0 and set nc
+  if (tptr->nr > 0 && tptr->nc == 0) {
+    if (tptr->mode == 0) {
+      string *sp = table_rowsp(tptr,0);
+      dprintf(0,"table_ncols: processed first line to get nc -> %d\n",tptr->nc);
+      tptr->nc = xstrlen(sp,sizeof(string)) - 1;
+      // free
+    } else {
+      warning("mode=1 ... does not have ncols yet");
+    }
+  }
   return tptr->nc;
 }
 
@@ -461,16 +472,15 @@ string *table_rowsp(table *t, int row)
   return sp;
 }
 
-
-mdarray2 table_md2(table *t)
+//
+// nrow=0 and/or ncol=0 are allowed. It simply means all rows/cols are
+// used in order
+// Returns data[row][col]
+//
+mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols)
 {
-  int nr = t->nr;
-  int nc = t->nc;
-  if (nc == 0) {   // no data read yet...
-    string *sp = table_rowsp(t,0);
-    dprintf(0,"processed first line to get nc -> %d\n",t->nc);
-    nc = t->nc;
-  }
+  int nr = table_nrows(t);
+  int nc = table_ncols(t);
   dprintf(1,"table_md2: %d x %d table\n",nr,nc);
   mdarray2 a = allocate_mdarray2(nr,nc);    // a[nr][nc]
   int i,j;
@@ -485,17 +495,36 @@ mdarray2 table_md2(table *t)
     }
   }
 
-#if 1
-  for (int j=0; j<nr; j++) {
-    dprintf(1,"%d",j);      
-    for (int i=0; i<nc; i++)
-      dprintf(1," %g",a[j][i]);
-    dprintf(1,"\n");
-  }
-#endif  
   return a;
 }
 
+// return a data[col][row] based table
+// this is the more practical
+mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows)
+{
+  int nr = table_nrows(t);
+  int nc = table_ncols(t);
+  dprintf(1,"table_md2: %d x %d table\n",nr,nc);
+  dprintf(1,"table_md2: ncol=%d nrow=%d\n",ncol,nrow);
+  if (ncol>0) nc=ncol;
+  if (nrow>0) nr=nrow;   // not supported yet  
+  mdarray2 a = allocate_mdarray2(nc,nr);                  // a[nc][nr]
+  int i,j,jidx;
+
+
+  dprintf(1,"table_md2cr first\n");
+  for (i=0; i<nr; i++) {
+    string s = table_row(t,i);
+    dprintf(1,"%d: %s\n",i,s);
+    string *sp = table_rowsp(t,i);
+    for (j=0; j<nc; j++) {
+      jidx = (ncol == 0 ?  j  :  cols[j]-1);
+      a[j][i] = atof(sp[jidx]);
+    }
+  }
+
+  return a;
+}
 
 
 #ifdef TESTBED
@@ -552,12 +581,15 @@ void nemo_main()
       printf("line[%ld] = %s\n", linelen, line);
     free(line);
 #else
-    // new style table2 
+    // new style table2 : mode picks the reading by line, or using the
+    //                    slightly slower linked-list reader
     char *cp;
+    int nl = 0;
     tp1 = table_open(instr, mode);
     while ( (cp=table_line(tp1)) )
-      printf("line = %s\n", cp);
+      nl++;
     table_close(tp1);
+    dprintf(0,"Read %d extra\n",nl);
 #endif
 
 }

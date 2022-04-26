@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "22 April 2022"
+.TH TABLE 3NEMO "25 April 2022"
 
 .SH "NAME"
 table_open, table_md2, table_close - table manipulation routines
@@ -26,8 +26,8 @@ development \fBtable.h\fP has the final word.
 .B string table_line(table *t);
 .B ssize_t table_line1(table *t, char **line, size_t *linelen, int newline);
 .PP
-.B mdarray2 table_md2(table *t);
-.B - void table_read(table *t);
+.B mdarray2 table_md2rc(table *t);
+.B mdarray2 table_md2cr(table *t);
 .B - string *table_comments(table *t);
 .B void table_reset(table *t);
 .B void table_close(table *t);
@@ -132,7 +132,8 @@ The
 .B mode
 controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
 means the whole table will be read in memory, a value of \fB1\fP will read the table line
-by line, controlled by the user (see \fBtable_line\fP below).
+by line, controlled by the user (see \fBtable_line\fP below). Performance will be better
+if tables are read line by line (mode=1).
 Values larger than 1 are planned to hold small buffers of rows.
 .PP
 .B table_open1
@@ -153,11 +154,11 @@ will read the next line from the table stream using \fIgetline(3)\fP, but depend
 of \fIgetline(3)\fP, \fInewline=1\fP needs to be set.
 
 .PP
-.B table_md2
-is a shortcut to convert an ascii table immediately into a two dimensional \fImdarray(3NEMO)\fP.
+.B table_md2cr, table_md2rc
+are shortcut functions to convert an ascii table immediately into a two dimensional \fImdarray(3NEMO)\fP
+data, for the [col][row] or [row][col] notation resp.
 With
-.B table_read
-the whole table is read into memory (not implemented, use the table_line routines).
+.PP
 Any comment lines at the start of the file will saved in a special
 \fIcomment\fP set of lines, which can be extracted with
 .B table_comments.
@@ -294,15 +295,15 @@ An example reading in a full table into a two dimensional mdarray2, and
 adding 1 to each element:
 .nf
 
-    table *t = table_open(filename, 0, 0);
-    ncols = table_ncols(t);
-    nrows = table_nrows(t);
+    table *t = table_open(filename, 0);
     mdarray2 d2 = table_md2(t);
     table_close(t);
+    ncols = table_ncols(t);
+    nrows = table_nrows(t);
     
     for (int i=0; i<nrows; i++) 
-    for (int j=0; j<ncols; j++)
-        d2[i][j] += 1.0;          // d2[row][col]
+      for (int j=0; j<ncols; j++)
+        d2[i][j] += 1.0;             // d2[row][col]
 
 .fi
 and here is an example of reading the table line by line, without any parsing,
@@ -346,6 +347,7 @@ and dealing (and preserving) comments while reading in the whole table:
 .fi
 
 .SH "XSV"
+An interesting package to deal with tables is the XSV program
 .nf
 cat AAPL.csv | xsv table | head -2
 cat AAPL.csv | xsv slice -i 1 | xsv table
@@ -363,9 +365,12 @@ generate messages via \fIerror(3NEMO)\fP.
 mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(5NEMO), table(5NEMO)
 .PP
 .nf
+
 https://github.com/BurntSushi/xsv
 https://heasarc.gsfc.nasa.gov/docs/software/fitsio/c/c_user/cfitsio.html
 https://www.gnu.org/software/gnuastro/manual/html_node/Tables.html
+XSV:  https://github.com/BurntSushi/xsv
+
 .fi
 
 .SH "FILES"
@@ -392,5 +397,6 @@ aug-2020	designing new table system	Sathvik/PJT
 .ig
 -------   here's the progress list of programs that have been converted
 tabcomment
+tabstat       complicated conversion to use table_md2cr()
 
 ..
