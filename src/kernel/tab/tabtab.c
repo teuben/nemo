@@ -9,8 +9,8 @@
 string defv[] = {
   "in=\n            Input tables",
   "out=\n           Output table",
-  "mode=paste\n     Cat (by row) or Paste (by column)",
-  "VERSION=0.1\n    26-apr-2022 PJT",
+  "mode=paste\n     cat (by row) or paste (by column)",
+  "VERSION=0.2\n    26-apr-2022 PJT",
   NULL,
 };
 
@@ -19,7 +19,6 @@ string usage="concatenate or paste conformant tables";
 
 void nemo_main()
 {
-  string out = getparam("out");
   string mode = getparam("mode");
 
   string *infiles = burststring(getparam("in")," ,");
@@ -47,9 +46,30 @@ void nemo_main()
   } else
     error("unknown mode %s",mode);
 
+#if 1
+  // if the table has no header, we can now do it manually use the space separator
+  // but this case can be done with the unix "cat" and "paste" commands as well
+  stream o = stropen(getparam("out"),"w");
+  
+  if (*mode == 'c') {
+    for (int i=0; i<nfiles; i++)
+      for (int j=0; j<table_nrows(t[i]); j++)
+	fprintf(o,"%s\n",table_row(t[i],j));
+  } else if (*mode == 'p') {
+    for (int j=0; j<table_nrows(t[0]); j++) {
+      fprintf(o,"%s ",table_row(t[0],j));      
+      for (int i=1; i<nfiles; i++)
+	fprintf(o,"%s",table_row(t[i],j));
+      fprintf(o,"\n");
+    }
+  }
+  
+  strclose(o);
+#endif
+
   // table_cat
 
-
+  
   // output
   
 }
