@@ -1,0 +1,49 @@
+.TH TABTAB 1NEMO "26 April 2022"
+
+.SH "NAME"
+tabtab \- 
+
+.SH "SYNOPSIS"
+\fBtabtab\fP [parameter=value]
+
+.SH "DESCRIPTION"
+concatenate or paste conformant tables.
+.PP
+In \fBpaste\fP mode the number of rows need to be the same.  In \fBconcat\fP mode
+the number of columns need to be same.   Although these mimic
+the standard \fIpaste(1)\fP and \fIcat(1)\fP programs, the tables need to be
+conformant, though the input tables can have their own header/comment files.
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input files. At least 2 need to be given.
+.TP
+\fBout=\fP
+Output file, must not exist yet.
+.TP
+\fBmode=p|c\fP
+Paste or Concat mode. [p].
+
+.SH "EXAMPLES"
+
+.nf
+% tabtab tab1,tab2  tab2
+.fi
+
+.SH "SEE ALSO"
+tablines(1NEMO)
+
+.SH "FILES"
+src/kernel/tab/tabtab.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+26-apr-2022	Created		PJT
+.fi
