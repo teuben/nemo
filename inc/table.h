@@ -46,6 +46,7 @@ typedef struct {
   
   int  mode;        // I/O mode  (0=streaming, 1=all-in-memory, ...)
   int  type;        // type of table (SSV, TSV, CSV, ECSV, ipac, ....)
+  size_t  nh;       // number of header/comment rows
   size_t  nr;       // number of rows
   size_t  nc;       // number of columns
 
@@ -54,6 +55,7 @@ typedef struct {
   string name;      // filename, if used
   stream str;       // stream, if used
 
+  string *comments; // pointer to 'nh' (header/comment) lines
   string *lines;    // pointer to 'nr' lines (depends on mode)   lines[0], lines[1], ....
 
   size_t linelen;   // see Posix getline(3)
