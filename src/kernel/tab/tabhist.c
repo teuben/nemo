@@ -51,6 +51,7 @@
  *       2-mar-2020 7.1   add norm= for cumulative, fix bin bug PJT
  *      10-oct-2020 7.2   using median()                        PJT
  *      11-feb-2021 7.3   added diff mean & disp                PJT
+ *      29-apr-2022 8.0   converted to use table V2             PJT
  *                
  * 
  * TODO:
@@ -83,7 +84,9 @@ string defv[] = {
     "xmax=\n			  Set maximum, if no autoscale needed",
     "bins=16\n			  Number of bins (or optionally edges of bins)",
     "maxcount=0\n		  Maximum along count-axis",
+#if 0    
     "nmax=0\n 		          maximum number of data to be read if pipe",
+#endif    
     "ylog=f\n			  log scaling in Y?",
     "xlab=$in[$xcol]\n	          Optional Label along X",
     "ylab=N\n			  Optional Label along Y",
@@ -110,7 +113,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.5\n		  16-nov-2021 PJT",
+    "VERSION=8.0\n		  29-apr-2022 PJT",
     NULL
 };
 
@@ -136,6 +139,7 @@ string cvsid = "$Id$";
 
 local string input;			/* filename */
 local stream instr, outstr;		/* input file , optional output file */
+local table *tptr;                      /* table */
 
 local int ncol;                         /* number of columns used */
 local int col[MAXCOL];			/* histogram column number(s) */
@@ -186,11 +190,7 @@ local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
 
 extern real median_torben(int n, real *x, real xmin, real xmax);
-
-extern int  nemo_file_lines(string fname, int nmax);
-
 extern void minmax(int n, real *x, real *xmin, real *xmax);
-
 extern real smedian(int,real*);
 extern real smedian_q1(int,real*);
 extern real smedian_q3(int,real*);
@@ -220,7 +220,7 @@ local void setparams()
 {
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
-    if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    if (ncol < 0) error("parsing error col=%s",getparam("xcol"));
     if (hasvalue("out")) outstr=stropen(getparam("out"),"w");
     else outstr = NULL;
 
@@ -272,9 +272,6 @@ local void setparams()
     Qbad = hasvalue("bad");
     if (Qbad) badval = getrparam("bad");
 
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    if (nmax<1) error("Problem reading from %s",input);
-
     nxcoord = nemoinpr(getparam("xcoord"),xcoord,MAXCOORD);
 
     nsigma = getdparam("nsigma");
@@ -289,24 +286,19 @@ local void setparams()
       xlab = xlab2;
     }
     instr = stropen (input,"r");
+    tptr = table_open(instr,0);
 }
 
 
 
 local void read_data()
 {
-    real *coldat[MAXCOL];
     int   i,j,k;
-    mdarray2 md2 = allocate_mdarray2(ncol,nmax);
-
+    mdarray2 md2 = table_md2cr(tptr, ncol, col, 0,0);
     dprintf(0,"Reading %d column(s)\n",ncol);
-    for (i=0; i<ncol; i++)
-      coldat[i] = md2[i];
-    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
-    if (npt == -nmax) {
-    	warning("Could only read %d data, use nmax=",nmax);
-    	npt = nmax;
-    }
+    
+    nmax = npt = table_nrows(tptr);
+
     if (scale != 1.0) {
       warning("Scale factor=%g\n",scale);
       for (i=0, k=0; i<ncol; i++)
