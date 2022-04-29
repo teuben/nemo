@@ -15,7 +15,7 @@ OBJFILES=  table.o gettab.o tabselect.o funtab.o getaline.o pyplot.o
 LOBJFILES= $L(table.o) $L(gettab.o) $L(tabselect.o) $L(funtab.o) $L(getaline.o) $L(pyplot.o)
 BINFILES = tabhist tablst tabplot tablsqfit tabmath gettab funtab meanmed \
 	   tabcomment tabspline tab2xml tabnllsqfit tabdate tabfilter tabtrend \
-	   tabstat tabdms txtpar tabcols
+	   tabstat tabdms txtpar tabcols tabgen
 TESTFILES= getaline tabletest
 
 help:
