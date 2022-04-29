@@ -8,16 +8,14 @@ string defv[] = {
     "out=???\n     Output table",
     "nr=10\n       Number of rows",
     "nc=5\n        Number of columns",
-    "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear)",
+    "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear, 5=linear)",
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
-    "VERSION=0.4\n 25-jul-2020 PJT",
+    "VERSION=0.5\n 25-apr-2022 PJT",
     NULL,
 };
 
 string usage="Create a table with (random) numbers";
-
-string cvsid="$Id:$";
 
 typedef real (*my_real_proc)(real,real);
 
