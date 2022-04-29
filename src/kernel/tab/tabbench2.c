@@ -128,12 +128,11 @@ void nemo_main(void)
     string iname = getparam("in");
     real par[MAXPAR], retval, errval;
     int mode = getiparam("mode");
-    size_t linelen = MAX_LINELEN;
-    //char line[MAX_LINELEN];
+    size_t linelen = 128;
     char *line = malloc((linelen) * sizeof(char));        
 
     npar = inifie("sqrt(%1*%1+%2*%2+%3*%3)");
-    dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
+    // dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
 
     istr = stropen(getparam("in"),"r");
     if (Qout) ostr = stropen(getparam("out"),"w");
@@ -146,7 +145,6 @@ void nemo_main(void)
 	dprintf(0,"Just reading\n");
       else
 	dprintf(0,"Just reading and writing\n");
-      //while (fgets(line,MAX_LINELEN,istr) != NULL)
       while (getline(&line, &linelen, istr) != -1) {
 	nlines++;
 	if (Qout && mode == 0) fputs(line,ostr);
@@ -156,6 +154,7 @@ void nemo_main(void)
         while (getline(&line, &linelen, istr) != -1) {
 	  nlines++;
 	  npar = my_nemoinpr(line,par,MAXPAR);
+	  dprintf(1,"%d: %d npar=%d\n",nlines,linelen,npar);
 	}
     } else if (mode == 2) {
         dprintf(0,"nemoinp + sqrt()\n");            
