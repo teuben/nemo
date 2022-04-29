@@ -17,7 +17,6 @@ string defv[] = {
 
 string usage="Create a table with (random) numbers";
 
-string cvsid="$Id:$";
 
 typedef real (*my_real_proc)(real,real);
 
