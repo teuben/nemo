@@ -109,10 +109,9 @@ extern int loadfie(int);
 void nemo_main(void)
 {
     setparams();
-    for (int i=0; i<ninput; i++)
+    for (int i=0; i<ninput; i++)  // open files in line-by-line access
       tptr[i] = table_open(stropen(inputs[i],"r"), 1);
     outstr = stropen (output,"w");
-
     convert(ninput,tptr,outstr);
 }
 
@@ -186,17 +185,14 @@ local void convert(int ninput, tableptr *tptr, stream outstr)
       fprintf(outstr,"#");
       for (i=0; i<nval; i++)
 	fprintf(outstr," %s",colname[i]);
-
       fprintf(outstr,"\n");
     }
         
-    nlines=0;               /* count lines read so far */
-
+    nlines=0;                       /* count lines read so far */
     for(;;) {                              /* loop over all lines in file(s) */
 
         for(i=0; i<ninput; i++) {    /* loop over files, append all lines into one */
  	    cp = table_line(tptr[i]);
-	    //printf("LINE[%d,%d]: %s\n",i,nlines,cp);
 	    if (cp==NULL) return;
 	    // figure out a dynamic way to do this, not depending on MLINELEN
 	    if (i==0) strcpy(line,cp);

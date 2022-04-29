@@ -8,10 +8,10 @@ string defv[] = {
     "out=???\n     Output table",
     "nr=10\n       Number of rows",
     "nc=5\n        Number of columns",
-    "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear)",
+    "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear, 5=linear)",
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
-    "VERSION=0.4\n 25-jul-2020 PJT",
+    "VERSION=0.6\n 29-apr-2022 PJT",
     NULL,
 };
 
@@ -41,12 +41,10 @@ void nemo_main()
   int mode = getiparam("mode");
   int amode = ABS(mode);
   int seed = init_xrandom(getparam("seed"));
-  char fmt[64];
+  string fmt = getparam("fmt");
   my_real_proc my_random = NULL;
 
   dprintf(1,"seed=%d\n",seed);
-
-  sprintf(fmt,"%s ",getparam("fmt"));
 
   if (amode == 1) {
     dprintf(1,"Uniform values between 0 and 1\n");
@@ -73,8 +71,10 @@ void nemo_main()
   } else
     // output to file as well
     for (i=0; i<nr; i++) {
-      for (j=0; j<nc; j++)
+      for (j=0; j<nc; j++) {
+	if (j>0) fprintf(ostr, " ");
 	fprintf(ostr,fmt, my_random(0.0, 1.0));
+      }
       fprintf(ostr,"\n");
     }
 }

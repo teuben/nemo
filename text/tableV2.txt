@@ -51,7 +51,7 @@ The following programs were converted, and some comments on their conversion:
     tabstat        get_atable -> table_md2cr
     tabint         get_atable -> table_md2cr; kept #ifdef
     tabtranspose   no more burststring()
-
+    tabcols        reads line by line
 
 The most common pattern get_atable()   ->   table_md2cr()
 
@@ -79,7 +79,7 @@ tabbench2.c
 tabblend.c       no V2 needed
 tabclip.c
 tabcmp.c
-tabcols.c
+
 tabcomment.c
 tabdate.c
 tabdist.c
@@ -103,7 +103,7 @@ tabplot.c
 tabpoly.c
 tabpolygon.c
 tabpp.c
-tabs.c
+tabs.c             --  this should be part of auto-conversion?
 tabselect.c
 tabseries.c
 tabslide.c
