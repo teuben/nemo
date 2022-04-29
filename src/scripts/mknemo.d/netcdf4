@@ -48,3 +48,4 @@ make -j
 make install
 
 echo netcdf $version  `date` >> $NEMO/opt/mknemo.log
+echo Example: mknemo lmtinfo
