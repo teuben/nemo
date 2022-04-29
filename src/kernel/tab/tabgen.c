@@ -17,6 +17,7 @@ string defv[] = {
 
 string usage="Create a table with (random) numbers";
 
+
 typedef real (*my_real_proc)(real,real);
 
 local real constant(real c1, real c2)
