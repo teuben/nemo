@@ -171,46 +171,17 @@ bool **Qsel;
 
 #endif
 
-table *table_open_old(stream instr, int mode)
-{
-  tableptr tptr = (tableptr) allocate(sizeof(table));
 
-  tptr->str   = instr;
-  tptr->mode  = mode;
-  tptr->lines = NULL;
-  tptr->nr    = 0;
-  tptr->nc    = 0;
-
-  tptr->linelen = 128;
-  tptr->line    = malloc(tptr->linelen);
-
-  dprintf(1,"table_open - got %d chars allocated at the start\n", tptr->linelen);
-
-  // in full buffering mode, the whole file is read into memory
-  // using the *tptr->lines (linked list?)
-
-  if (mode == 1) {
-    //
-    warning("new mode=1");
-    // we could cheat for now and find the number of lines 
-    // allocate tptr->lines and stuff them there
-    // for flexibility this should become a linked list
-  }
-
-  return tptr;
-}
-
-struct LineNode {
-  char *val; // strdup
+struct LineNode {        // simple linked list while reading lines
+  char *val;
   struct LineNode* next;
 };
 
 
-// non-seekable file, line by line, mode=1   or linked list all line mode=0
 table *table_open(stream instr, int mode)
 {
   tableptr tptr = (tableptr) allocate(sizeof(table));
-  dprintf(0,"table_open: mode=%d\n",mode);
+  dprintf(1,"table_open: mode=%d\n",mode);
 
   tptr->str     = instr;
   tptr->mode    = mode;
@@ -219,12 +190,12 @@ table *table_open(stream instr, int mode)
   tptr->nc      = 0;
   tptr->linelen = 0;
   tptr->line    = NULL;
-  dprintf(0,"table_open - got %d chars allocated at the start\n", tptr->linelen);
+  dprintf(1,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
-  if (mode == 0) {   //
+  if (mode == 0) {   //  read table in memory, also separate header (comments) from body of table
     dprintf(1,"linked list reading of table\n");
 
-    // use a linked list 
+    // use a linked list to read all lines
     struct LineNode* first = (struct LineNode*) allocate(sizeof(struct LineNode));
     struct LineNode* curr = first;
 
@@ -233,11 +204,8 @@ table *table_open(stream instr, int mode)
 
     while (1) {
       line = table_line(tptr);
-      //dprintf(1,"line: %s\n",line);
-
       if (line == NULL)
 	break;
-      
       nLines++;
       curr->val = strdup(line);
       curr->next = (struct LineNode*) allocate(sizeof(struct LineNode));
@@ -256,7 +224,8 @@ table *table_open(stream instr, int mode)
   }
   
   // done!
-  dprintf(0,"Read %d lines so far\n",tptr->nr);
+
+  dprintf(1,"Read %d lines so far\n",tptr->nr);
   return tptr;
 }
 
@@ -300,7 +269,7 @@ size_t table_ncols(tableptr tptr)
   if (tptr->nr > 0 && tptr->nc == 0) {
     if (tptr->mode == 0) {
       string *sp = table_rowsp(tptr,0);
-      dprintf(0,"table_ncols: processed first line to get nc -> %d\n",tptr->nc);
+      dprintf(1,"table_ncols: processed first line to get nc -> %d\n",tptr->nc);
       tptr->nc = xstrlen(sp,sizeof(string)) - 1;
       // free
     } else {
@@ -313,7 +282,7 @@ size_t table_ncols(tableptr tptr)
 
 void table_reset(tableptr tptr)
 {
-  // reset the table 
+  // reset the table   --    TBD
 }
 
 
@@ -322,6 +291,7 @@ void table_close(tableptr tptr)
   // free that memory
   free(tptr->line);
   tptr->linelen = 0;
+  // @todo - free more
 }
 
 string table_line(tableptr tptr)
@@ -336,7 +306,8 @@ string table_line(tableptr tptr)
   return NULL;
 }
 
-table *table_cat(table* t1, table* t2, int mode){
+table *table_cat(table* t1, table* t2, int mode)
+{
   tableptr tptr = (tableptr) allocate(sizeof(table));
   
   tptr->lines = NULL;
@@ -372,7 +343,6 @@ table *table_cat(table* t1, table* t2, int mode){
     for(int i = 0; i < t2->nr; i++){
       tptr->lines[i + t1->nr] = strdup(table_line(t2));
     }
-
 
   } else { //paste mode
     //assume number of rows are the same
@@ -455,7 +425,7 @@ string *table_rowsp(table *t, int row)
 
   // consistency check on # columns
   if (t->nc == 0) {
-    dprintf(0,"table_rowsp[%d]: setting ncols=%d\n",row,ntok);
+    dprintf(1,"table_rowsp[%d]: setting ncols=%d\n",row,ntok);
     t->nc = ntok;
   } else if (ntok != t->nc)
     error("column number changed:  %d -> %d\n",t->nc, ntok);
@@ -472,6 +442,11 @@ string *table_rowsp(table *t, int row)
   return sp;
 }
 
+/*
+ *    a_i_j   row-major if a11 and a12 follow in memory    C,python:    data[0][0], data[0][1], ...
+ *            col-major if a11 and a21 follow in memory    Fortran:     data(1,1), data(2,1)
+ */
+
 //
 // nrow=0 and/or ncol=0 are allowed. It simply means all rows/cols are
 // used in order
@@ -481,7 +456,8 @@ mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols)
 {
   int nr = table_nrows(t);
   int nc = table_ncols(t);
-  dprintf(1,"table_md2: %d x %d table\n",nr,nc);
+  dprintf(1,"table_md2: table %d x %d \n",nr,nc);
+  dprintf(1,"table_md2: data2 ncol=%d nrow=%d\n",ncol,nrow);
   mdarray2 a = allocate_mdarray2(nr,nc);    // a[nr][nc]
   int i,j;
 
@@ -504,8 +480,8 @@ mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows)
 {
   int nr = table_nrows(t);
   int nc = table_ncols(t);
-  dprintf(1,"table_md2: %d x %d table\n",nr,nc);
-  dprintf(1,"table_md2: ncol=%d nrow=%d\n",ncol,nrow);
+  dprintf(1,"table_md2: table %d x %d \n",nr,nc);
+  dprintf(1,"table_md2: data2 ncol=%d nrow=%d\n",ncol,nrow);
   if (ncol>0) nc=ncol;
   if (nrow>0) nr=nrow;   // not supported yet  
   mdarray2 a = allocate_mdarray2(nc,nr);                  // a[nc][nr]
@@ -536,7 +512,7 @@ string defv[] = {
     "write=f\n            Write mode? or else Write (w)",
     "test=0\n             testmode",
     "mode=0\n             buffering mode for table_open",
-    "VERSION=2.0\n        10-apr-2022 PJT",
+    "VERSION=2.0\n        29-apr-2022 PJT",
     NULL,
 };
 
@@ -589,7 +565,7 @@ void nemo_main()
     while ( (cp=table_line(tp1)) )
       nl++;
     table_close(tp1);
-    dprintf(0,"Read %d extra\n",nl);
+    dprintf(0,"Read %d extra in mode %s\n",nl,mode);
 #endif
 
 }
@@ -695,15 +671,26 @@ void testmode5()
   }
 #endif
   
-  mdarray2 a = table_md2(tp1);
+  mdarray2 a = table_md2rc(tp1,0,0,0,0);    //   a[row][col]
   
-  dprintf(0,"after table_md2: table %d x %d\n",tp1->nr,tp1->nc);  
+  dprintf(0,"after table_md2rc: table %d x %d\n",tp1->nr,tp1->nc);  
   for (int j=0; j<tp1->nr; j++) {
     dprintf(0,"%d",j);      
     for (int i=0; i<tp1->nc; i++)
       dprintf(0," %g",a[j][i]);
     dprintf(0,"\n");
   }
+
+  mdarray2 b = table_md2cr(tp1,0,0,0,0);    //   a[col][row]
+  
+  dprintf(0,"after table_md2cr: table %d x %d\n",tp1->nr,tp1->nc);  
+  for (int j=0; j<tp1->nr; j++) {
+    dprintf(0,"%d",j);      
+    for (int i=0; i<tp1->nc; i++)
+      dprintf(0," %g",b[i][j]);
+    dprintf(0,"\n");
+  }
+  
     
 }
 
