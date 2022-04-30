@@ -23,9 +23,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        format for new output values",
     "seed=0\n           Initial random number",
     "newline=f\n        add newline between output parameters",
+#if 0    
     "maxline=10000\n    Max number of lines in case a pipe was used",
+#endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.5\n      2-feb-2022 PJT",
+    "VERSION=0.6\n      29-apr-2022 PJT",
     NULL
 };
 
@@ -37,6 +39,7 @@ string usage = "Extract numeric parameters from a text file";
 
 string input;			        /* file names */
 stream instr;			        /* file streams */
+table *tptr;                            /* table */
 
 string fmt;                             /* format of new column */
 
@@ -54,7 +57,7 @@ bool   Qfie;				/* boolean if multiple fie's loaded */
 bool   Qnewline;                        /* boolean if newline is needed */
 bool   Qexpr;
 
-string *lines;
+//string *lines;
 int    nlines, maxline;
 
 string word[MAXPAR];
@@ -74,17 +77,12 @@ extern void dofie(real *, int *, real *, real *);
 extern void dmpfie(void);
 extern int savefie(int);
 extern int loadfie(int);
-extern int nemo_file_lines(string, int);
 
 
 void nemo_main(void)
 {
-    int i;
-
     setparams();
-
-    convert (instr);
-
+    convert(instr);
 }
 
 local void setparams(void)
@@ -99,9 +97,8 @@ local void setparams(void)
 
     input  = getparam("in");
     instr = stropen(input,"r");
-    maxline = nemo_file_lines(input, getiparam("maxline"));
-    dprintf(1,"Allocated %d lines for file\n",maxline);
-    lines = (string *) allocate(maxline * sizeof(string));
+    tptr = table_open(instr,0);
+    maxline = table_nrows(tptr);
 
     Qexpr = hasvalue("expr");
     newcol = getparam("expr");
@@ -161,7 +158,7 @@ local void setparams(void)
 
 local void convert(stream instr)
 {
-    char   line[MLINELEN];          /* input linelength */
+  char   line[MLINELEN];
     real   dval[MAXCOL];            /* number of items (values on line) */
     string sval[MAXCOL];            // 
     real   retval;
@@ -176,21 +173,8 @@ local void convert(stream instr)
      *   read input lines
      */
 
-    nlines=0;                              /* counter for lines read */
-    for(;;) {                              /* loop over all lines in file(s) */
-      if (get_line(instr, line) < 0)           
-	break; 					      /* EOF */
-      dprintf(3,"LINE: (%s)\n",line);
-
-      tab2space(line);	          /* work around a Gipsy (?) problem */
-      lines[nlines] = strdup(line);
-      nlines++;
-      if (nlines == maxline) {
-	warning("maxline=%d exhausted", maxline);
-	break;
-      }
-    }
-    dprintf(1,"Read %d lines\n",nlines);
+    nlines = table_nrows(tptr);
+    // lines = tptr->lines;
 
     /*
      *   extract parameters
@@ -204,8 +188,8 @@ local void convert(stream instr)
 	nmatch = 0;
 	for (j=0; j<nlines; j++) {
 	  // @todo  allow ^word 
-	  if (strstr(lines[j],word[i])) {
-	    dprintf(1,"Match in %d: %s\n",j,lines[j]);
+	  if (strstr(table_row(tptr,j),word[i])) {
+	    dprintf(1,"Match in %d: %s\n",j,table_row(tptr,j));
 	    match[nmatch++] = j;
 	  }
 	}
@@ -238,7 +222,7 @@ local void convert(stream instr)
       }
       
       dprintf(1,"par p%d row=%d col=%d\n", i, rownr, col[i]);
-      cp = lines[rownr];
+      cp = table_row(tptr,rownr);
       dprintf(1,"LINE: %s\n", cp);
       outv = burststring(cp, seps);
       sval[nval] = outv[col[i]-1];
