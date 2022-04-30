@@ -132,7 +132,7 @@ string cvsid = "$Id$";
 #endif
 
 #ifndef MAXCOL
-#define MAXCOL 256
+#define MAXCOL 1000
 #endif
 
 #define MAXCOORD 16
@@ -305,7 +305,17 @@ local void read_data()
 	for (j=0; j<npt; j++)
 	  md2[i][j] *= scale;
     }
+#define XHACK    
+    // @todo  XHACK: saves 1/2 memory
+    // in theory one could hack this section by having x point
+    // to md2[0][0], traverse the array in the correct order
+    // and not free_mdarray2()
+#ifdef XHACK
+    x = &md2[0][0];
+#else      
     x = (real *) allocate(npt*ncol*sizeof(real));
+#endif    
+    
     if (Qdual) {
       warning("dual=t is a new test option");
       /* pass over the data, finding the mean */
@@ -329,13 +339,14 @@ local void read_data()
     }
     npt = k;
     dprintf(0,"Under/Over flow: %d %d\n",Nunder,Nover);
-
+#ifndef XHACK    
+    // @todo if shared with *x, delay this free
     free_mdarray2(md2,ncol,nmax);
+#endif
 
     minmax(npt, x, &xmin, &xmax);
     if (!Qmin) xrange[0] = xmin;
     if (!Qmax) xrange[1] = xmax;
-
 
     /*  allocate index arrray , and compute sorted index for median */
     if (Qmedian) 
