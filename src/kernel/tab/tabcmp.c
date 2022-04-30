@@ -13,14 +13,18 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <table.h>
+#include <mdarray.h>
 
 string defv[] = {
     "in1=???\n		First dataset",
     "in2=???\n		Second dataset",
     "col1=1\n           Column from 1st dataset",
     "col2=1\n           Column from 2nd dataset",
+#if 0    
     "nmax=10000\n       Max lines in data, if pipe",
-    "VERSION=0.4\n	23-nov-02 PJT",
+#endif    
+    "VERSION=0.5\n	30-apr-2022 PJT",
     NULL,
 };
 
@@ -28,74 +32,63 @@ string usage="KS2, Student T and F test for mean and variance comparisons";
 
 /* local NR routines ; now properly 0 based */
 
-void ftest(real data1[], int  n1, real data2[], int  n2,
-	real *f, real *prob);
-void tptest(real data1[], real data2[], int  n, real *t,
-	real *prob);
-void ttest(real data1[], int  n1, real data2[], int  n2,
-	real *t, real *prob);
-void tutest(real data1[], int  n1, real data2[], int  n2,
-	real *t, real *prob);
+void ftest(real data1[], int  n1, real data2[], int  n2, real *f, real *prob);
+void tptest(real data1[], real data2[],         int  n,  real *t, real *prob);
+void ttest(real data1[], int  n1, real data2[], int  n2, real *t, real *prob);
+void tutest(real data1[], int  n1, real data2[], int n2, real *t, real *prob);
 void avevar(real data[], int  n, real *ave, real *var);
 
 /* NEMO's NR routines in src/kernel/numrec */
 
 extern real betai(real a, real b, real x);
-
 extern void kstwo(real *data1, int n1, real *data2, int n2, real *d, real *p);
 
-nemo_main()
+void nemo_main()
 {
-    int i, npt, npt1, npt2, nmax = getiparam("nmax");
+    int i, npt1, npt2;
+    string input1 = getparam("in1");
+    string input2 = getparam("in2");
     int col1 = getiparam("col1");
     int col2 = getiparam("col2");
-    real *coldat1[2], *coldat2[2];
     int colnr1[2], colnr2[2];
     real *x1 = NULL, *x2 = NULL;
     real t, f, tu, tp, tprob, fprob, tuprob, tpprob, ks2, ks2prob;
-    string input1 = getparam("in1");
-    string input2 = getparam("in2");
     stream instr1, instr2;
-
+    table *tptr1, *tptr2;
 
     instr1 = stropen(input1,"r");
     if (!streq(input1,input2)) {
         dprintf(0,"Two different files\n");
         instr2 = stropen(input2,"r");
+	tptr1 = table_open(instr1,0);
+	tptr2 = table_open(instr2,0);
     } else {
         dprintf(0,"One file, different columns\n");
+	tptr1 = table_open(instr1,0);
         instr2 = NULL;
     }
+    mdarray2 d1, d2;
 
-    npt1 = nemo_file_lines(input1,nmax);
-    if (instr2)
-      npt2 = nemo_file_lines(input2,nmax);
-    else
-      npt2 = npt1;
-    x1 = (real *) allocate(npt1 * sizeof(real));
-    x2 = (real *) allocate(npt2 * sizeof(real));
-
-
-    coldat1[0] = x1;    colnr1[0] = col1;
+    npt1 = table_nrows(tptr1);
     if (instr2) {
-        coldat2[0] = x2;    colnr2[0] = col2;
-        npt1 = get_atable(instr1,1,colnr1,coldat1,npt1);
-        npt2 = get_atable(instr2,1,colnr2,coldat2,npt2);
+      npt2 = table_nrows(tptr2);
+      colnr1[0] = col1;      
+      colnr2[0] = col2;
+      d1 = table_md2cr(tptr1, 1, colnr1, 0, 0);
+      d2 = table_md2cr(tptr2, 1, colnr2, 0, 0);
+      x1 = &d1[0][0];
+      x2 = &d2[0][0];
     } else {
-        coldat1[1] = x2;    colnr1[1] = col2;
-        npt1 = get_atable(instr1,2,colnr1,coldat1,npt1);
-        npt2 = npt1;
+      npt2 = npt1;
+      colnr1[0] = col1;
+      colnr1[1] = col2;
+      d1 = table_md2cr(tptr1, 2, colnr1, 0, 0);
+      x1 = &d1[0][0];
+      x2 = &d1[1][0];
     }
-    
     dprintf(0,"Npt1=%d Npt2=%d\n",npt1,npt2);
-    if (npt1 < 0) {
-      warning("Could not read all data from %s",input1);
-      npt1 = -npt1;
-    }
-    if (npt2 < 0) {
-      warning("Could not read all data from %s",input2);
-      npt2 = -npt2;
-    }
+    for (i=0; i < MIN(npt1,npt2); i++)
+      dprintf(1,"%g %g\n",x1[i],x2[i]);
 
     strclose(instr1);
     if (instr2)
