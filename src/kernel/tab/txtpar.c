@@ -3,7 +3,7 @@
  *
  *     27-dec-2021    drafted
  *
- *
+ *  @todo   bring back comments
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -27,7 +27,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "maxline=10000\n    Max number of lines in case a pipe was used",
 #endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.6\n      29-apr-2022 PJT",
+    "VERSION=0.7\n      30-apr-2022 PJT",
     NULL
 };
 
@@ -57,8 +57,7 @@ bool   Qfie;				/* boolean if multiple fie's loaded */
 bool   Qnewline;                        /* boolean if newline is needed */
 bool   Qexpr;
 
-//string *lines;
-int    nlines, maxline;
+int    nlines;
 
 string word[MAXPAR];
 int    row[MAXPAR];
@@ -69,7 +68,6 @@ int    maxpar;
 local void setparams(void);
 local void convert(stream);
 local string *burstfie(string);
-local void tab2space(char *);
 
 extern  string *burststring(string, string);
 extern  int inifie(string);
@@ -97,8 +95,7 @@ local void setparams(void)
 
     input  = getparam("in");
     instr = stropen(input,"r");
-    tptr = table_open(instr,0);
-    maxline = table_nrows(tptr);
+    tptr = table_open(instr,-1);            /* open & read table, treating comments like data */
 
     Qexpr = hasvalue("expr");
     newcol = getparam("expr");
@@ -158,23 +155,20 @@ local void setparams(void)
 
 local void convert(stream instr)
 {
-  char   line[MLINELEN];
+    char   line[MLINELEN];
     real   dval[MAXCOL];            /* number of items (values on line) */
     string sval[MAXCOL];            // 
-    real   retval;
     int    nval, i, j, one=1;
     int    match[MAXROW], nmatch, rownr;
     string *outv;                   /* pointer to vector of strings to write */
     char   *cp, *seps=", \t";       /* column separators  */
     real   errval=0.0;
 
-
     /*
      *   read input lines
      */
 
     nlines = table_nrows(tptr);
-    // lines = tptr->lines;
 
     /*
      *   extract parameters
@@ -250,9 +244,8 @@ local void convert(stream instr)
      *   convert strings to float values
      */
     
-    for (i=0; i<nval; i++) {
+    for (i=0; i<nval; i++)
       dval[i] = atof(sval[i]);
-    }
 
     /*
      *   apply math and output the new expressions
@@ -312,17 +305,3 @@ local string *burstfie(string lst)
     return ((string *) copxstr(wrdbuf, sizeof(string)));	/*PPAP*/
 }
 
-/*
- * small helper function, replaces tabs by spaces before processing.
- * this prevents me from diving into gipsy parsing routines and fix
- * the problem there 
- * PJT - June 1998.
- */
-
-local void tab2space(char *cp)
-{
-    while (*cp) {
-        if (*cp == '\t') *cp = ' ';
-        cp++;
-    }
-}
