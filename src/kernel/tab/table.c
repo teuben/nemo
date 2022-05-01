@@ -192,7 +192,9 @@ table *table_open(stream instr, int mode)
   tptr->line    = NULL;
   dprintf(1,"table_open - got %d chars allocated at the start\n", tptr->linelen);
 
-  if (mode == 0) {   //  read table in memory, also separate header (comments) from body of table
+  if (mode <= 0) {   //  read table in memory, also separate header (comments) from body of table
+    // note:    mode<0 treats all lines the same
+    //          mode=0 should split comments out @todo
     dprintf(1,"linked list reading of table\n");
 
     // use a linked list to read all lines
