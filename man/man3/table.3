@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "25 April 2022"
+.TH TABLE 3NEMO "1 May 2022"
 
 .SH "NAME"
 table_open, table_md2, table_close - table manipulation routines
@@ -132,9 +132,12 @@ The
 .B mode
 controls how many lines from the table are allowed in internal buffers. A value of \fB0\fP
 means the whole table will be read in memory, a value of \fB1\fP will read the table line
-by line, controlled by the user (see \fBtable_line\fP below). Performance will be better
-if tables are read line by line (mode=1).
-Values larger than 1 are planned to hold small buffers of rows.
+by line, controlled by the user (see \fBtable_line\fP below). Performance will be better (?)
+if tables are read line by line (mode=1), or at least not occupy memory for the whole table.
+Values larger than 1 are planned to hold small buffers of rows. Normally a table will
+be split in a \fI"header"\fP (comment lines) and \fI"data"\fP (rows of data), but
+with special \fImode=-1\fP all lines are treated equal and can be obtained via
+\fBtable_row()\fP.
 .PP
 .B table_open1
 is kept for compatibility with older softwhere where the maximum number of lines
