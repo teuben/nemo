@@ -36,13 +36,12 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.5\n  1-may-2022 PJT",
+  "average=t\n    Average (t) or Sum (f)",
+  "VERSION=2.6\n  1-may-2022 PJT",
   NULL,
 };
 
 string usage = "sub/average of an image, with reorder option";
-
-string cvsid="$Id$";
 
 
 
@@ -74,7 +73,7 @@ void nemo_main(void)
     real    sum, tmp, zzz;
     real    *row;
     bool    Qreorder = FALSE;
-    bool    Qdummy, Qsample, Qmoving;
+    bool    Qdummy, Qsample, Qmoving, Qaver;
     string  reorder;
 
     instr = stropen(getparam("in"), "r");
@@ -83,6 +82,7 @@ void nemo_main(void)
     nzaver=getiparam("nzaver");
     Qdummy = getbparam("dummy");
     Qmoving = getbparam("moving");
+    Qaver = getbparam("average");
 
     nx1 = nemoinpi(getparam("x"),ix,MAXDIM);
     ny1 = nemoinpi(getparam("y"),iy,MAXDIM);
@@ -169,7 +169,8 @@ void nemo_main(void)
       write_image(outstr, iptr);
     } else if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
         if (Qmoving) error("moving=t not implemented in this mode");
-        dprintf(0,"Averaging map %d * %d * %d pixels; mapsize %d * %d * %d\n",
+        dprintf(0,"%s map %d * %d * %d pixels; mapsize %d * %d * %d\n",
+		   Qaver ? "Averaging" : "Summing",
                    nxaver,nyaver,nzaver,nx,ny,nz);
         nx1 = nx/nxaver;  if (nx % nxaver) warning("X binning not even");
         ny1 = ny/nyaver;  if (ny % nyaver) warning("Y binning not even");
@@ -182,7 +183,8 @@ void nemo_main(void)
 	      i = i1*nxaver;
 	      sum = 0.0;
 	      LOOP(k0,nzaver) LOOP(j0,nyaver) LOOP(i0,nxaver) sum += CV(iptr, i+i0, j+j0, k+k0);
-	      sum /= (real) (nxaver*nyaver*nzaver);
+	      if (Qaver)
+		sum /= (real) (nxaver*nyaver*nzaver);
 	      LOOP(k0,nzaver) LOOP(j0,nyaver) LOOP(i0,nxaver) CV(iptr, i+i0, j+j0, k+k0) = sum;
             }
 	  }
@@ -234,16 +236,22 @@ void nemo_main(void)
 	    CV(iptr1,i,j,k) = CV(iptr,ix[i],iy[j],iz[k]);
       // adjust the WCS, assuming sampling was uniform
       if (Nx(iptr) > 1) {
-	Xref(iptr1) = (Xref(iptr)-ix[0])/(ix[1]-ix[0]);
-	Dx(iptr1)   = (ix[1]-ix[0]) * Dx(iptr);
+	real width_step = ix[1]-ix[0];
+	Xref(iptr1) = (Xref(iptr)-ix[0])/width_step;
+	Dx(iptr1)   = Dx(iptr) * width_step;
+	Xref(iptr1) = Xref(iptr1) - 0.5*(width_step - 1.0)/width_step;
       }
       if (Ny(iptr) > 1) {
-	Yref(iptr1) = (Yref(iptr)-iy[0])/(iy[1]-iy[0]);      
-	Dy(iptr1)   = (iy[1]-iy[0]) * Dy(iptr);
+	real width_step = iy[1]-iy[0];
+	Yref(iptr1) = (Yref(iptr)-iy[0])/width_step;
+	Dy(iptr1)   = Dy(iptr) * width_step;
+	Yref(iptr1) = Yref(iptr1) - 0.5*(width_step - 1.0)/width_step;	
       }
       if (Nz(iptr) > 1) {
-	Zref(iptr1) = (Zref(iptr)-iz[0])/(iz[1]-iz[0]);            
-	Dz(iptr1)   = (iz[1]-iz[0]) * Dz(iptr);
+	real width_step = iz[1]-iz[0];
+	Zref(iptr1) = (Zref(iptr)-iz[0])/width_step;
+	Dz(iptr1)   = Dz(iptr) * width_step;
+	Zref(iptr1) = Zref(iptr1) - 0.5*(width_step - 1.0)/width_step;	
       }
       dprintf(0,"WCS Corner: %g %g %g\n",Xmin(iptr1),Ymin(iptr1),Zmin(iptr1));
 
