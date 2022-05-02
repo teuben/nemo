@@ -1,6 +1,6 @@
 #! /bin/bash
 
-# version is hidden in the filename
+# version is now hidden in the filename with "latest"
 version=3.47
 wget=wgetc
 
@@ -22,3 +22,4 @@ make install
 echo Installed version=$version
 
 echo cfitsio $version `date` >> $NEMO/opt/mknemo.log
+echo Example: mknemo sdinfo

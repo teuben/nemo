@@ -8,7 +8,9 @@
 #     jan-2021  ubuntu
 #
 #  ubuntu:   sudo apt install flex bison libjpeg-dev
-#
+#            U22 complains  --enable-hdf4-xdr is not supported for 64 bit mode.
+#  ubuntu:   hdf4-tools libhdf4-dev and edit the makedefs with /usr/include/hdf
+
 #  On a mac you may see build failures due to a missing libjpeg
 #  hdf4 needs jpeg and z (-ldf -ljpeg -lz)
 #
@@ -29,7 +31,7 @@ $wget https://support.hdfgroup.org/ftp/HDF/releases/HDF$version/src/hdf-$version
 tar zxf hdf-$version.tar.gz
 cd hdf-$version
 
-./configure --prefix=$NEMO/opt
+./configure --disable-hdf4-xdr  --prefix=$NEMO/opt
 make -j
 make install 
 
