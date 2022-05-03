@@ -1,9 +1,12 @@
 .TH CCDSUB 1NEMO "24 December 2020"
-.SH NAME
+
+.SH "NAME"
 ccdsub \- sub/average of an image, and optionally reorder axes.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdsub\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdsub\fP takes a subimage from an image, as described by a new
 set of coordinates in X, Y and/or Z (since the expression of the
 selected axes is arbitrary, the resulting coordinate system may
@@ -16,7 +19,8 @@ get rid of them, or use the \fBdummy=\fP keyword below.
 If no parameters are given, other than in= and out=, the image
 is copied straight through, which is still a great way to
 test your I/O subsystem, assuming your image fits in memory.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -65,20 +69,25 @@ To reverse only the X and Y axis, \fBreorder=yxz\fP is needed.
 \fBmoving=t|f\fP
 Moving average in n{x,y,z}aver= ? [f]
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 To reorder a cube from xyz to zxy and back to xyz, the 2nd step
 will have a perhaps non-intuitive axis reordering, since it refers
 to the new "zxy" order:
 .nf
+
     ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
+    
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +4.0i
 1993     	code written     	PJT
 22-Feb-97	man page written	PJT
 12-aug-02	more doc	PJT
