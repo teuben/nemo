@@ -40,7 +40,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=2.0\n	 23-apr-2022 PJT",
+    "VERSION=2.0a\n	 2-may-2022 PJT",
     NULL
 };
 
@@ -161,10 +161,6 @@ void stat_data(void)
     if (Qmad || Qac || Qrobust) ndat = npt;
 
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
-        // @todo   for QAC don't need extra space
-      if (Qac)
-        ini_moment(&m[j],2,0);
-      else
         ini_moment(&m[j],4,ndat);
         for (i=0; i<npt; i++) {                          /* loop over rows */
 	  if (Qbad && x[j][i]==badval) continue;
