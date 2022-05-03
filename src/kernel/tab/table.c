@@ -208,6 +208,10 @@ table *table_open(stream instr, int mode)
       line = table_line(tptr);
       if (line == NULL)
 	break;
+      if (iscomment(line)) {
+	// for now, skip them
+	continue;
+      }
       nLines++;
       curr->val = strdup(line);
       curr->next = (struct LineNode*) allocate(sizeof(struct LineNode));
