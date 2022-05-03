@@ -34,13 +34,15 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "mad=f\n             Compute MAD ?",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
+#if 0    
     "nmax=100000\n       maximum number of data to be read if pipe",
+#endif
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=2.0a\n	 2-may-2022 PJT",
+    "VERSION=2.1\n	 2-may-2022 PJT",
     NULL
 };
 
@@ -95,7 +97,6 @@ void nemo_main(void)
 
 void setparams(void)
 {
-    int  j;
     int nrows, ncols;
    
     input = getparam("in");             /* input table file */
@@ -151,8 +152,7 @@ void read_data(void)
 void stat_data(void)
 {
     int i, j, ndat, imax, kmin, kmax;
-    real median, mean, sigma, d, dmax, fac;
-    real rmean, rsigma, rrange[2];
+    real median, mean, sigma, d, dmax, rrange[2];
     char fmt[20];
     
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
@@ -175,8 +175,6 @@ void stat_data(void)
       for (j=0; j<nxcol; j++) {
 	if (Qrobust) {
 	  compute_robust_moment(&m[j]);
-	  rmean  = mean_robust_moment(&m[j]);
-	  rsigma = sigma_robust_moment(&m[j]);
 	  robust_range(&m[j], rrange);
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
