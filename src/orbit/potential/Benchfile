@@ -11,6 +11,9 @@ FTEN      = 1
 POTNAME   = gauss
 POTPARS   = 0,1,1,1,0.25
 DR        = 0.05
+R0        = -5:5:$(DR)*2
+R1        = -5:5:$(DR)
+R2        = -5:5:$(DR)/2
 
 help:
 	@echo $(DIR)
@@ -25,27 +28,22 @@ all:    $(BENCHDATA) $(BENCH)
 
 bench1.ccd:
 	@rm -rf bench1.ccd
-	@potccd bench1.ccd plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2 >> $(LOG) 2>&1
-
-
-
-
+	potccd bench1.ccd plummer x=$(R2 y=$(R2 z=$(R2) >> $(LOG) 2>&1
 
 bench0:
-	nemobench potccd . plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2
+	nemobench potccd . plummer x=$(R2) y=$(R2) z=$(R2)
 
 bench0d:
-	nemobench potccd . plummer x=-5:5:$(DR)/2 y=-5:5:$(DR)/2 z=-5:5:$(DR)/2 mode=den dr=0.001 nder=2
+	nemobench potccd . plummer x=$(R2) y=$(R2) z=$(R2) mode=den dr=0.001 nder=2
 
 bench1:
-	nemobench potccd . gauss 0,1,1 1 x=-5:5:$(DR) y=-5:5:$(DR) z=-5:5:$(DR)
+	nemobench potccd . gauss 0,1,1 1 x=$(R1) y=$(R1) z=$(R1)
 
 bench2:
-	nemobench potccd . gauss 0,1,1,1,0.5 x=-5:5:$(DR) y=-5:5:$(DR) z=-5:5:$(DR)
+	nemobench potccd . gauss 0,1,1,1,0.5 x=$(R1) y=$(R1) z=$(R1)
 
-bench3:
+bench3: bench1.ccd
 	nemobench ccdpot bench1.ccd .
-
 
 R10=9.45
 bench10:
