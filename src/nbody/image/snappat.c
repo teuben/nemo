@@ -18,12 +18,13 @@
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "in=???\n			Input file (snapshot)",
-    "out=???\n                  Output file (image)",
-    "options=x,y,z,vx,vy,vz\n	Things to output",
+    "out=\n                     Output file (image)",
+    "options=x,y,z,vx,vy,vz\n	Data to output",
     "times=all\n		Times to select snapshot",
     "ntime=\n                   if used, pre-allocate this number of snapshots",
     "first=f\n                  only write first cube?",
-    "VERSION=0.2\n		9-aug-09 PJT",
+    "format=binary\n            output format options (binary | fits | hdf )",
+    "VERSION=0.4\n		14-feb-2022 PJT",
     NULL,
 };
 
@@ -34,6 +35,7 @@ string cvsid="$Id$";
 #define MAXOPT    64
 
 
+extern string *burststring(string, string);
 
 void fixheader(imageptr iptr, string options, real t0, real dt);
 
@@ -45,16 +47,32 @@ void nemo_main()
     Body *btab = NULL, *bp, *bq;
     int i, j, k, n, nbody, bits, nopt, ParticlesBit, ntime;
     char fmt[20],*pfmt;
-    string *burststring(), *opt;
+    string *opt;
     rproc btrtrans(), fopt[MAXOPT];
     imageptr iptr = NULL; 
     bool Qfirst = getbparam("first");
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
             AuxBit | KeyBit | DensBit | EpsBit);
-    instr = stropen(getparam("in"), "r");	
-    outstr = stropen(getparam("out"), "w");
+    instr = stropen(getparam("in"), "r");
 
+    if (hasvalue("out"))
+      outstr = stropen(getparam("out"), "w");
+    else {
+        for(;;) {                /* repeating until first or all times are read */
+	   get_history(instr);
+	   if (!get_tag_ok(instr, SnapShotTag))
+	       break;                                  /* done with work */
+	   get_snap(instr, &btab, &nbody, &tsnap, &bits);
+	   if (!streq(times,"all") && !within(tsnap,times,0.0001))
+	     continue;                   /* skip work on this snapshot */
+	   if ( (bits & ParticlesBit) == 0)
+	     continue;                   /* skip work, only diagnostics here */
+	   dprintf(1,"Time=%g\n",tsnap);
+	}
+	return;
+    }
+    
     opt = burststring(getparam("options"),", ");
     nopt = 0;					/* count options */
     while (opt[nopt]) {				/* scan through options */
