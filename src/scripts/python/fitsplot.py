@@ -25,6 +25,9 @@ else:
 f.show_grayscale()
 f.show_colorscale(cmap='gist_heat')
 f.add_colorbar()
+# Cannot show beam when WCS is not celestial
+# perhaps doesn't like VRAD, but our fits files are not good enough
+# for 2D maps, ccdfits ndim=2 will help
 
 try:
     f.add_beam()
