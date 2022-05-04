@@ -3,7 +3,7 @@
 #include <string.h>
 #include <unistd.h>
 
-#define VERSION "TkRun $Id$"
+#define VERSION "TkRun NEMO"
 
 				/* tcl/tk startup code */
 char *preamble=\

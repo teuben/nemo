@@ -12,6 +12,7 @@
 
 version=1.10.7      # 11-sep-2020
 version=1.13.0      # 01-dec-2021
+version=1.13.1      # 02-mar-2022
 url=https://github.com/HDFGroup/hdf5
 
 wget=wgetc
@@ -33,3 +34,4 @@ make -j
 make install 
 
 echo hdf5 $version `date` >> $NEMO/opt/mknemo.log
+echo Example to test linking:  mknemo 

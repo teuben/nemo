@@ -1,4 +1,4 @@
-.TH CCDPLOT 1NEMO "16 March 2005"
+.TH CCDPLOT 1NEMO "1 April 2022"
 .SH NAME
 ccdplot \- display program for 2D image maps (contour and/or gray-scale)
 .SH SYNOPSIS
@@ -86,6 +86,9 @@ Scale all X values by this
 .TP
 \fByscale=\fP
 Scale all Y values by this
+.TP
+\fBrelative=f|t\fP
+Use contour levels a fraction of the peak in the image [f]
 
 .SH "EXAMPLES"
 .nf
@@ -129,4 +132,5 @@ Peter Teuben
 29-mar-97	fixed outdated doc	PJT
 20-feb-02	2.8: added ltype; also documented new parameters	PJT
 16-mar-05	3.0: added timestep label + multiple timestep plot	PJT
+1-apr-22	3.3: added relative=	PJT
 .fi

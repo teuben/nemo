@@ -127,7 +127,7 @@ int minmax_image (imageptr iptr)
   // @todo deal with isnan()
   for (i=1; i<n; i++) {
     if (data[i] < dmin) dmin = data[i];
-    if (data[i] > dmax) dmax = data[i];    
+    else if (data[i] > dmax) dmax = data[i];    
   }
   dprintf(0,"MinMax: %g %g\n",dmin,dmax);
 

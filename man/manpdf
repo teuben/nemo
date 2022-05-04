@@ -19,5 +19,6 @@
 foreach file ($*)
   if (-e $file) then
     groff -man -Tpdf $file > $file.pdf
+    echo xdg-open $file.pdf
   endif
 end

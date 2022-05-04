@@ -3,6 +3,8 @@
 #      Neeleman et al. (2020)     https://www.nature.com/articles/s41586-020-2276-y
 #      ccdsky d=4.2603,z   H=70,0.3,0.7         ->  6.767  kpc/arcsec
 #      The units in the model are KPC, but in the FITS export, we set 1 kpc = 1 arcmin,
+#
+# mknemo 
 
 version="29-may-2020 PJT"
 
@@ -16,7 +18,7 @@ version="29-may-2020 PJT"
 
 #               Parameters  (default are the ones from Neeleman's paper)
 model=10
-   rd=1.4       # kpc (i think 1.75 fits better if you compare figure 6)
+   rd=1.4       # kpc (i think 1.75 fits better if you compare their figure 6)
    rv=0.12      # kpc
    v0=272       # km/s
   sig=80        # km/s
