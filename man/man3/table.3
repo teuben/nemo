@@ -1,7 +1,7 @@
 .TH TABLE 3NEMO "1 May 2022"
 
 .SH "NAME"
-table_open, table_md2, table_close - table manipulation routines
+table_open, table_row, table_md2, table_close - table manipulation routines
 .PP
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table routines
 
@@ -55,7 +55,7 @@ development \fBtable.h\fP has the final word.
 .PP
 .B - void table_set_ncols(int ncols)
 .PP
-.B - table *table_cat(int ntable, table *tptr, int mode)
+.B table *table_cat(int ntable, table *tptr, int mode)
 .PP
 .I Old: (deprecated or emulated)
 .PP
@@ -232,11 +232,13 @@ Given a number of tables, the
 .B table_cat
 function will catenate them. mode=0 will catenate them \fIvertically\fP, i.e. append the rows, keeping the
 same number of columns, whereas mode=1 will catenate them \fIhorizontally\fP, keeping the number of
-rows, but increasing the number of columns.   It is currently considered an error if the tables are
+rows, but increasing the number of columns. These are similar to the unix programs
+\fIcat(1)\fP and \fIpaste(1)\fP resp. It is currently considered an error if the tables are
 not conformant in size.
 
 .PP
-The original \fIlegacy table routines\fP remain available, though they should implement the new API.
+The original \fIlegacy table routines\fP remain available, though they should implement the new API,
+as it better deals with tables of unknown size in a pipe.
 .PP
 Both \fIget_atable\fP
 and \fIget_ftable\fP parse an ascii table, pointed by the \fIinstr\fP stream,
@@ -299,7 +301,7 @@ adding 1 to each element:
 .nf
 
     table *t = table_open(filename, 0);
-    mdarray2 d2 = table_md2(t);
+    mdarray2 d2 = table_md2rc(t,0,0,0,0);
     table_close(t);
     ncols = table_ncols(t);
     nrows = table_nrows(t);
@@ -321,7 +323,7 @@ not allocating space for the whole table, for which \fBmode=1\fP is needed:
     while ( (s=table_line(t)) ) {
 	if (iscomment(s)) continue;
         nrows++	
-        printf("%s\\n", s);           // fputs() might be faster
+        printf("%s\\n", s);  
     }
     
     table_close(t);
