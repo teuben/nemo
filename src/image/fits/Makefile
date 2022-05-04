@@ -132,6 +132,7 @@ ccd_cfitsio.o:		ccd_cfitsio.c
 fitsio_nemo.o:	fitsio.c fitsio_nemo.c
 
 # demo version of linking NEMO and gnuastro (@todo needs to go to configure/makedefs)
+# for now you will need "mknemo gnuastro" for an internal build
 GNUASTRO_INC =
 GNUASTRO_LIB = -lgnuastro
 fitsgnu: fitsgnu.c 
