@@ -10,6 +10,8 @@ version=0.16
 wget=wgetc
 check=0
 url=https://git.savannah.gnu.org/git/gnuastro.git
+#  ???  https://github.com/sachinkumarsingh092/gnuastro
+
 
 for arg in $*; do
   export $arg
