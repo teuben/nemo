@@ -254,6 +254,7 @@ table *table_open1(stream instr, int mode, int nlines)
     return tptr;
 
   // @todo what if nlines was not enough.
+  // @todo skip comments here too?
   warning("table_open1: mode=%d nlines=%d",mode,nlines);
   tptr->nr = nlines;
   tptr->lines = (string *) allocate(nlines*sizeof(string));
