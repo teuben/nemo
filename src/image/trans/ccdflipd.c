@@ -17,8 +17,9 @@ string defv[] = {
 	"in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"delta=20\n     Allowed delta between neighoring pixels",
+	"m=1\n          Minimum number of neighbors needed to flip",
 	"iter=50\n      Number of iterations",
-	"VERSION=0.2\n  12-mar-2022 PJT",
+	"VERSION=0.3\n  14-mar-2022 PJT",
 	NULL,
 };
 
@@ -30,13 +31,14 @@ string usage = "patch up neighbors that are +/- of each other within a delta";
 void nemo_main(void)
 {
   stream   instr, outstr;
-  int      n=1, nx, ny, nz;        /* size of scratch map */
-  int      nflip;
+  int      nx, ny, nz;  
+  int      nflip, mflip;
   int      i,j,k, di, dj;
   imageptr iptr=NULL;
   int      iter, niter = getiparam("iter");
   real     delta = getrparam("delta");
   real     m1, m2, dmin, dmax;
+  int      n=1, m = getiparam("m");
   
   instr = stropen(getparam("in"), "r");
   read_image( instr, &iptr);
@@ -46,7 +48,7 @@ void nemo_main(void)
   dmin = MapMax(iptr);
   dmax = MapMin(iptr);
   dprintf(0,"Old data min/max: %g %g\n",dmax,dmin);
-  if (nz>1) warning("Patching each plane independantly");
+  if (nz>1) warning("Patching first plane only");
 
   
   outstr = stropen(getparam("out"), "w");
@@ -62,22 +64,50 @@ void nemo_main(void)
 
 	  // @todo  first grab how many are changed in the neighbor list
 	  //        require a minimum number 
-	  
-	  for (dj=-n; dj<=n; dj++) {               // look at all neighbors
-	    if (j+dj<0 || j+dj>=ny) continue;
-	    for (di=-n; di<=n; di++) {
-	      if (i+di<0 || i+di>=nx) continue;
-	      m2 = MapValue(iptr,i+di,j+dj);
-	      if (ABS(m1+m2)  < delta) {
-		MapValue(iptr,i+di,j+dj) = -m2;    // m1 was well above 0 
-		nflip++;
-		m2 = -m2;
-		dmin = MIN(dmin,m2);
-		dmax = MAX(dmax,m2);
-	      }
-	    } // di
-	  } // dj
-	  
+	  if (m==1) {
+	    for (dj=-n; dj<=n; dj++) {               // look at all neighbors
+	      if (j+dj<0 || j+dj>=ny) continue;
+	      for (di=-n; di<=n; di++) {
+		if (i+di<0 || i+di>=nx) continue;
+		m2 = MapValue(iptr,i+di,j+dj);
+		if (ABS(m1+m2)  < delta) {
+		  MapValue(iptr,i+di,j+dj) = -m2;    // m1 was well above 0 
+		  nflip++;
+		  m2 = -m2;
+		  dmin = MIN(dmin,m2);
+		  dmax = MAX(dmax,m2);
+		}
+	      } // di
+	    } // dj
+	  } else {
+	    mflip=0;
+	    for (dj=-n; dj<=n; dj++) {               // look at all neighbors
+	      if (j+dj<0 || j+dj>=ny) continue;
+	      for (di=-n; di<=n; di++) {
+		if (i+di<0 || i+di>=nx) continue;
+		m2 = MapValue(iptr,i+di,j+dj);
+		if (ABS(m1+m2)  < delta)
+		  mflip++;
+	      } // di
+	    } // dj
+	    if (mflip >= m) {
+	      for (dj=-n; dj<=n; dj++) {               // look at all neighbors
+		if (j+dj<0 || j+dj>=ny) continue;
+		for (di=-n; di<=n; di++) {
+		  if (i+di<0 || i+di>=nx) continue;
+		  m2 = MapValue(iptr,i+di,j+dj);
+		  if (ABS(m1+m2)  < delta) {
+		    MapValue(iptr,i+di,j+dj) = -m2;    // m1 was well above 0 
+		    nflip++;
+		    m2 = -m2;
+		    dmin = MIN(dmin,m2);
+		    dmax = MAX(dmax,m2);
+		  }
+		} // di
+	      } // dj
+	    }
+	      
+	  }
 	}
       } // i
     } // j

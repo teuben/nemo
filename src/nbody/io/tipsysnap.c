@@ -29,7 +29,9 @@
  * 18-aug-00    also allow binary files..., with padding and optional swap
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
- *  4-feb-22    make binary the default
+ *  4-feb-22    3.1 make binary the default
+ *
+ * @todo    allow in= to have multiple files
  */
  
 #include <stdinc.h>

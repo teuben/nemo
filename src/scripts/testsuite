@@ -19,7 +19,7 @@
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did not compile
 
-set version="6-jan-2022"
+set version="21-mar-2022"
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
@@ -113,8 +113,6 @@ echo "TESTSUITE started `date`"                                        > $log
 echo "TESTSUITE version $version"                                     >> $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
 
-#   using $NEMO instead of $NEMO/src really makes it run slow on solaris
-
 foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($norun) then
         echo $testfile
@@ -172,7 +170,7 @@ cleanup:
 	    cat $testdir/not-found.log
 	endif
         echo "Results in $testdir/$log"
-	echo "A local copy in $NEMO/$log is kept as well."
+	echo "A copy in $NEMO/$log is kept as well as the latest."
 	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
 	if (-z $testdir/bsf-fail.log) then
 	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
@@ -181,7 +179,6 @@ cleanup:
 	    cat $testdir/bsf-fail.log
 	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
 	endif
-	echo If you have any unsolved problems, this file should be saved.
         head -1 $testdir/$log
         tail -1 $testdir/$log
 

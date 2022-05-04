@@ -1,4 +1,4 @@
-.TH TIPSYSNAP 1NEMO "5 February 2022"
+.TH TIPSYSNAP 1NEMO "11 February 2022"
 
 .SH "NAME"
 tipsysnap \- convert tipsy file to snapshot
@@ -60,6 +60,45 @@ be used to make one snapshot. For example the standard
    tipsysnap run99.bin -  |  snapmerge - run99.snap
    ### nemo Debug Info: time=14.9708 N=8579 (1049,1021,6509) for gas,dark,star    version=0
    ### nemo Debug Info: header = 32  gas = 48   dark = 36  star = 44 bytes
+
+.fi
+
+Some codes (e.g. Bonsai) write a different tipsy file for each dump time. this complicates
+the pipe approach of NEMO. Below is a script could process tipsy files into a NEMO snapshot,
+or into a pipe for further processing:
+.nf
+
+     ./tipsy_to_snap out.snap out_*.*
+or
+     ./tipsy_to_snap  -  out_*.* | tsf -
+
+
+
+
+#! /usr/bin/bash
+#
+
+if [ "$#" == "0" ]; then
+    echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    exit 0
+fi
+
+out=$1
+if [ -e "$out" ]; then
+    echo "Cannot overwrite $out"
+    exit 1
+fi
+
+shift
+
+for f in $*; do
+    # tipsysnap_acc $f - | csf - - item=SnapShot >> tmp.snap
+    if [ "$out" == "-" ]; then
+        tipsysnap_acc $f -
+    else
+        tipsysnap_acc $f -  >> $out
+    fi
+done
 
 .fi
 

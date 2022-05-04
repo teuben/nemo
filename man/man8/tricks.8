@@ -1,4 +1,4 @@
-.TH TRICKS 8NEMO "6 March 1989"
+.TH TRICKS 8NEMO "3 March 2022"
 
 .SH "NAME"
 tricks \- some Unix tricks when using NEMO
@@ -89,6 +89,8 @@ Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
 .nf
         mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
 .fi
+The (bash) array ${PIPESTATUS[@]} contains the status ($?) for each program in
+a unix pipe. In this example it should return "0 0 0".
 
 .SH "PARALLEL and OpenMP"
 Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
@@ -128,8 +130,18 @@ should be aware of the user interface implications of controlling how many cores
 
 slurm is a popular package you will find on large computer clusters.
 
+.SH "TABLES"
+
+Tables (\fItable(5NEMO)\fP) come in many forms. Here are some TLDR type reminder on manipulating and displaying tables
+.nf
+  # align a table for viewing
+  csvlook data.csv
+  column -s, -t data.csv
+  python -c "import sys,prettytable; print(prettytable.from_csv(sys.stdin))" < data.csv
+
+
 .SH "SEE ALSO"
-nemo(1NEMO), bench(5NEMO), tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)
+nemo(1NEMO), bench(5NEMO), table(5NEMO), tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)
 
 .SH "AUTHOR"
 Peter Teuben.

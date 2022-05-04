@@ -1,0 +1,77 @@
+.TH CCDCROSS 1NEMO "11 April 2022"
+
+.SH "NAME"
+ccdcross \- cross correlate images with a reference image
+
+.SH "SYNOPSIS"
+\fBccdcross\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBccdcross\fP finds the optimal offset one (or more) images and a reference image based on the
+cross-correlation between two images.  By selecting a specific \fBcenter=\fP and
+half \fBbox=\fP size, one can focus on a specific area, assuming the offset is less than
+the box-size.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP\fIref,im1,...\fP
+Input image files, first image is the reference image. At least two images need
+to be given. No default.
+.TP
+\fBout=\fP\fIim\fP
+Output cross image. No default.
+.TP
+\fBcenter=\fP\fIx0,y0\fP
+X-Y Reference center (0-based pixels) []  
+.TP
+\fBbox=\fP\fIb2\fP
+Half size of correlation box. The output image is forced to have an odd pixel size, 2*box+1.
+By default half the mapsize is used.
+.TP
+\fBclip=\fP\fIc\fP
+Only use values above this clip level. By default values are not clipped.
+.TP
+\fBbad=\fP\fIb\fP
+bad value to ignore. By default there is no bad value recognized.
+
+.SH "CAVEAT"
+Only 2D images are handled.
+.PP
+The WCS is ignored, 0-pixel based coordinates are reported.
+.PP
+Images should ideally be the same size, but nothing will stop the program from
+running off without that. The user is then responsible for computing the true offsets
+as all bets are off.
+
+.SH "EXAMPLES"
+
+Here two gaussian shaped sources with noise are created with a small 1 pixel offset from
+each other.
+
+.nf
+
+    ccdgen "" - gauss 1,2 size=128,128 center=64,64  | ccdgen - g64 noise spar=0,0.05 
+    ccdgen "" - gauss 1,2 size=128,128 center=65,65  | ccdgen - g65 noise spar=0,0.05
+    ccdcross g64,g65 shift.ccd box=16
+    ...
+    ### nemo Debug Info: max cross 12.2081 @ 17 17
+    ### nemo Debug Info: X,Y mean: -0.00853349 -0.00708124
+    ### nemo Debug Info: Shift: 0.991467 0.992919
+
+.fi
+
+.SH "SEE ALSO"
+ccdmath(1NEMO), image(5NEMO)
+
+.SH "FILES"
+src/image/mics	ccdcross.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+11-Apr-2022	V0.1 Created	PJT
+.fi

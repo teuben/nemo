@@ -2,7 +2,8 @@
  *  wcsio:  Convert a classic FITS wcs into image(5NEMO) notation, and vice versa
  *
  *    FITS: x = (i-crpix)*cdelt + crval        lower/left is 1 (i=1...naxis)
- *    NEMO: x = i*Dx + Xmin                    lower/left is 0 (i=0...naxis-1)
+ *    NEMO: x = i*Dx + Xmin                    lower/left is 0 (i=0...naxis-1)         axis=0
+ *    NEMO: x = (i-Xref)*Dx + Xmin             Xref is where Xmin is (i=0...naxis-1)   axis=1
  *
  *  History:
  *    6-jan-2005    pulled out of ccdmath/ccdgen and stuck in library

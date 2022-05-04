@@ -76,14 +76,13 @@ string defv[] = {		/* keywords/default values/help */
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
-	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=6.0a\n			  27-jul-2019 PJT",
+	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)",
+	"VERSION=6.1\n			  19-mar-2022 PJT",
 	NULL,
 };
 
 string usage="grid a snapshot into a 2/3D image-cube";
 
-string cvsid="$Id$";
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
@@ -404,9 +403,20 @@ allocate_image()
       Namez(iptr) = zlab;
       
     } else {
+#if 0      
       Xmin(iptr) = xrange[0] + 0.5*xrange[2];
       Ymin(iptr) = yrange[0] + 0.5*yrange[2];
       Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+      Axis(iptr) = 0;
+#else
+      Xmin(iptr) = 0.0;
+      Ymin(iptr) = 0.0;
+      Zmin(iptr) = 0.0;
+      Xref(iptr) = -xrange[0]/xrange[2] - 0.5;
+      Yref(iptr) = -yrange[0]/yrange[2] - 0.5;
+      Zref(iptr) = -zrange[0]/zrange[2] - 0.5;
+      Axis(iptr) = 1;
+#endif
       
       Dx(iptr) = xrange[2];
       Dy(iptr) = yrange[2];

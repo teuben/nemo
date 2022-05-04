@@ -9,7 +9,9 @@ install:
 	@echo As well as:   mknemo fftw2 gsl hdf5
 	@echo After this
 	@echo "             mknemo gadget2"
-	@echo should work. 
+	@echo should work.
+
+# 1624.17user 6.50system 6:51.03elapsed 396%CPU
 
 # benchmarks 
 galaxy:

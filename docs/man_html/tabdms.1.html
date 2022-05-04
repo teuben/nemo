@@ -56,39 +56,41 @@ of the default "H:M:S". The H in HMS is normally assumed to be modulo 24.
 Default: none. </dd>
 
 <dt><b>fromdms=</b> </dt>
-<dd>A list of columns (1..) to convert from dms to degrees
-[none] </dd>
+<dd>A list of columns (1..) to convert from dms to degrees.
+If <b>center=</b> is given a HMS/DMS or DMS/DMS needs to be picked. [none] </dd>
 
-<dt><b>fromhms=</b> </dt>
-<dd>A list of columns (1..) to convert from hms to degrees, which
-includes a factor of 15. [none] </dd>
+<dt><b>fromhms=</b>
+</dt>
+<dd>A list of columns (1..) to convert from hms to degrees, which includes a
+factor of 15.  [none] </dd>
 
 <dt><b>separator=</b> </dt>
-<dd>separator between output D M
-and S.S.  [Default: <b>:</b>] </dd>
+<dd>separator between output D M and S.S.  [Default:
+<b>:</b>] </dd>
 
 <dt><b>format=</b> </dt>
-<dd>Output format statement used for columns converted
-by fromhms= and fromdms= [Default: <b>%g</b>] </dd>
+<dd>Output format statement used for columns converted by fromhms=
+and fromdms= [Default: <b>%g</b>] </dd>
 
 <dt><b>scale=</b> </dt>
-<dd>Scaling factor applied to
-degrees when converted by fromhms= and fromdms=. If you want seconds, use
-3600 here. For radians, use <b>pi/180</b>. Careful in using this, each of <b>fromdms=</b>
-and <b>fromhms=</b> columns will get this factor applies. -<i>not implemented yet</i>- [Default:
-<b>1</b>] </dd>
+<dd>Scaling factor applied to degrees when
+converted by fromhms= and fromdms=. If you want seconds, use 3600 here. For
+radians, use <b>pi/180</b>. Careful in using this, each of <b>fromdms=</b> and <b>fromhms=</b>
+columns will get this factor applies. If <b>center=</b> is given, this is the scale
+factor applied,e.g. use 3600 if arcsec are required. [Default: <b>1</b>]   </dd>
 
-<dt><b>center=</b> </dt>
-<dd>If given, the angular X,Y differences of two selected colums
-with this acenter is computed. If sexadecimal notation is used, it is assumed
-to be an RA,DEC, else the center is assumed to be in degrees. -<i>not implemented
-yet</i>- 
+<dt><b>center=</b>
+</dt>
+<dd>If given, the angular X,Y differences of two selected colums with this
+acenter is computed. If sexadecimal notation is used, it is assumed to be
+an RA,DEC, else the center is assumed to be in degrees. 
 <p> 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To convert a D.MS to D:M:S <br>
+To convert
+a D.MS to D:M:S <br>
 <pre>   echo 12.34 | tabdms - - todms=1
    12:20:24.000
       

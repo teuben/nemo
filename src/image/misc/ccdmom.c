@@ -58,8 +58,9 @@ string defv[] = {
   "pos=\n         Given this (i,j) [0 based] location, debug output spectral information",
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
-#endif  
-  "VERSION=2.8\n  10-mar-2022 PJT",
+#endif
+  "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
+  "VERSION=3.0\n  17-apr-2022 PJT",
   NULL,
 };
 
@@ -81,9 +82,11 @@ void nemo_main()
     stream  instr, outstr;
     string  oper;
     int     i,j,k,nx, ny, nz, nx1, ny1, nz1;
+    int     i1,j1,k1;
     int     pos[2];
     int     ii, axis, mom;
     int     nclip, apeak, apeak1, cnt;
+    int     narange=0, *arange;
     imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
     real    *spec, ifactor, cv, clip[2], m_min, m_max;
@@ -97,6 +100,7 @@ void nemo_main()
     bool    Qabs  = getbparam("abs");
     bool    Qzero = getbparam("zero");
     bool    Qcontsub = getbparam("contsub");
+    bool    Qrange = hasvalue("arange");
 
     if (Qoper) {
       Qkeep = TRUE;
@@ -132,9 +136,21 @@ void nemo_main()
     ny1 = ny = Ny(iptr);
     nz1 = nz = Nz(iptr);
 
+    if (axis==1) narange = nx;
+    if (axis==2) narange = ny;
+    if (axis==3) narange = nz;
+    if (narange == 0) error("illegal axis=%d", axis);
+    arange = (int *) allocate(sizeof(int) * narange);
+    if (Qrange) {
+      narange = nemoinpi(getparam("arange"), arange, narange);
+      if (narange < 0) error("Error %d parsing arange=%s", narange,getparam("arange"));
+    } else
+      for (i=0; i<narange; i++) arange[i] = i;
+
     if (mom==-4) {   /* clumping hack : only works for axis=3 */
       if (axis==3) {
-	for (k=0; k<nz; k++) {
+	for (k1=0; k1<narange; k1++) {
+	  k = arange[k1];
 	  tmp0 = tmp1 = tmp2 = 0.0;
 	  for (j=0; j<ny; j++) {
             for (i=0; i<nx; i++) {	
@@ -219,7 +235,8 @@ void nemo_main()
 	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,0,j,k);
-            for (i=0; i<nx; i++) {
+            for (i1=0; i1<narange; i1++) {
+	        i = arange[i1];
 	        spec[i] = CubeValue(iptr,i,j,k);
  	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
@@ -279,7 +296,8 @@ void nemo_main()
             tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,0,k);
-            for (j=0; j<ny; j++) {
+            for (j1=0; j1<narange; j1++) {
+	        j = arange[j1];
 	        spec[j] = CubeValue(iptr,i,j,k); 
  	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
@@ -338,7 +356,8 @@ void nemo_main()
       	  for(i=0; i<nx; i++) {                         /* loop over all X and Y positions */
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
-    	    for(k=0; k<nz; k++) {
+    	    for(k1=0; k1<narange; k1++) {
+   	        k = arange[k1];
 	        spec[k] = CubeValue(iptr,i,j,k);
  	        if (Qclip && out_of_range(clip,spec[k])) continue;
 		if (cnt==0) {
@@ -360,7 +379,7 @@ void nemo_main()
 		  else
 		    CubeValue(iptr1,i,j,k) = spec[k]-spec[k-1];
 		}
-    	    } /* for(k) */
+    	    } /* for(k/k1) */
 	    
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;

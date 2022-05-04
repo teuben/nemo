@@ -1,12 +1,15 @@
 .TH SNAPSPLIT 1NEMO "2 June 2004"
-.SH NAME
+
+.SH "NAME"
 snapsplit \- split a snapshot into pieces
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapsplit\fP \fbin= out=\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapsplit\fP is modeled after the unix program split(1), and splits
 a snapshot up into pieces of equal length, except perhaps for the last
-one which may be ''incomplete''. It's purpose is solely to be able
+one which may be ''partial''. It's purpose is solely to be able
 to process snapshots which are too big to fit into memory.
 You can either specify the size of the new snapshot, or the number
 of pieces you want to have a snapshot split into.
@@ -18,9 +21,11 @@ all particles in memory at the same time.
 If you want to create
 split a snapshot by time, use \fIsnaptrim(1NEMO)\fP; it can
 also create multiple output files.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+The reverse of snapsplit is \fIsnapmerge(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input snapshot      
@@ -44,7 +49,7 @@ No default.
 Times to select. 
 default: \fIall\fP.
 
-.SH EXAMPLE
+.SH "EXAMPLE"
 The following example splits a 1000 body snapshot in pieces of 250 bodies, and views
 the 2nd piece:
 .nf
@@ -52,16 +57,19 @@ the 2nd piece:
   % snapsplit p1000 p1000.split nbody=250
   % snapplot p1000.split times=#2
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 snapmerge(1NEMO)
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
 ~src/nbody/trans	snapsplit.c
 .fi
-.SH AUTHOR
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 27-Jan-94	V1.0 Created	PJT

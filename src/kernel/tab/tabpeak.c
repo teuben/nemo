@@ -4,6 +4,7 @@
  *   28-may-2013   0.1 Created quick & dirty for ASTUTE               PJT
  *   30-may-2013   0.2 Also search for valleys
  *    1-jun-2013   0.3 Allow intensity weighted mean
+ *   23-mar-2022   0.4 3pt vs. 5 pt
  *
  *                        
  * 
@@ -18,6 +19,8 @@
 #include <yapp.h>
 #include <axis.h>
 #include <mdarray.h>
+#include <lsq.h>
+#include <table.h>
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
@@ -26,16 +29,17 @@ string defv[] = {
     "xcol=1\n			  X-Column",
     "ycol=2\n                     Y-column",
     "clip=0\n                     Only consider points above this",
+    "pmin=3\n                     Min of points part of the peak [3=exact fit]",
+    "edge=1\n                     Edge to ignore (1 or higher)",
     "valley=f\n                   Also find the valleys?",
     "mean=f\n                     Intensity weighted mean",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.2\n		  30-may-2013 PJT",
+    "VERSION=0.5\n		  25-mar-2012 PJT",
     NULL
 };
 
 string usage = "peaks in a table";
 
-string cvsid = "$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -57,26 +61,31 @@ local int col[2], ncol;
 real *xcol, *ycol, *coldat[2];
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
+local int    pmin;
+local int    edge;
 real clip;
 bool  Qvalley, Qmean;
 
 local void setparams(void);
 local void read_data(void); 
 local void peak_data(void);
+local void peak_fit(void);
 local void mean_data(void);
 
 
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main()
 {
     setparams();			/* read the parameters */
     read_data();
     if (Qmean)
       mean_data();
-    else
+    else if (pmin == 3)
       peak_data();
+    else
+      peak_fit();
 }
 
 local void setparams()
@@ -85,6 +94,10 @@ local void setparams()
     col[0] = getiparam("xcol");
     col[1] = getiparam("ycol");
     clip = getrparam("clip");
+    pmin = getiparam("pmin");
+    if (pmin < 3) error("pmin=%d too small, 3 or higher",pmin);
+    edge = getiparam("edge");
+    if (edge < 1) error("edge=%d too small, 1 or higher",edge);
     Qvalley = getbparam("valley");
     Qmean = getbparam("mean");
     if (Qmean && Qvalley) warning("Valley fitting not supported in mean mode");
@@ -123,7 +136,7 @@ local void peak_data(void)
 
   /* loop over all interior points and find peaks or valleys, fit local polynomial */
 
-  for (i=1; i<npt-1; i++) {
+  for (i=edge; i<npt-edge; i++) {
     if (            (ycol[i]> clip && ycol[i]>ycol[i-1] && ycol[i]>ycol[i+1]) ||
          (Qvalley && ycol[i]<-clip && ycol[i]<ycol[i-1] && ycol[i]<ycol[i+1]) ) {
       lsq_zero(3,mat,vec);
@@ -138,6 +151,60 @@ local void peak_data(void)
       dprintf(1,"Poly2 fit near i=%d (%g,%g)   %g %g %g\n",i+1,xcol[i],ycol[i],sol[0],sol[1],sol[2]);
       printf("%f %f \n",xcol[i] - sol[1]/(2*sol[2]),
 	     sol[0]-sol[1]*sol[1]/(4*sol[2]));
+    } 
+  }
+}
+
+local void peak_fit(void)
+{
+  int i,j,p;
+  real mat[9], vec[3], sol[3], a[4];
+  int pedge = (pmin-1)/2;
+
+  dprintf(0,"pedge=%d\n",pedge);
+
+  /* loop over all interior points and find peaks or valleys, fit local polynomial */
+
+  for (i=pedge; i<npt-pedge; i++) {
+    if (            (ycol[i]> clip && ycol[i]>ycol[i-1] && ycol[i]>ycol[i+1]) ||
+         (Qvalley && ycol[i]<-clip && ycol[i]<ycol[i-1] && ycol[i]<ycol[i+1]) ) {
+
+      lsq_zero(3,mat,vec);
+      for (j=i-1; j<=i+1; j++) {
+	a[0] = 1.0;
+	a[1] = (xcol[j]-xcol[i]);
+	a[2] = (xcol[j]-xcol[i]) * a[1];
+	a[3] = ycol[j];
+	lsq_accum(3,mat,vec,a,1.0);
+      }
+      
+      // found a peak, or valley, now ensure we get at least pmin points,
+      // constantly requiring to go downhill/uphill
+      p = 3;
+      if (ycol[i-2] < ycol[i-1]) {
+	j = i-2;
+	a[0] = 1.0;
+	a[1] = (xcol[j]-xcol[i]);
+	a[2] = (xcol[j]-xcol[i]) * a[1];
+	a[3] = ycol[j];
+	lsq_accum(3,mat,vec,a,1.0);	
+	p++;
+      }
+      if (ycol[i+2] < ycol[i+1]) {
+	j = i+2;
+	a[0] = 1.0;
+	a[1] = (xcol[j]-xcol[i]);
+	a[2] = (xcol[j]-xcol[i]) * a[1];
+	a[3] = ycol[j];
+	lsq_accum(3,mat,vec,a,1.0);	
+	p++;
+      }
+      if (p < pmin) continue;
+      
+      lsq_solve(3,mat,vec,sol);
+      dprintf(1,"Poly2 fit near i=%d (%g,%g)   %g %g %g\n",i+1,xcol[i],ycol[i],sol[0],sol[1],sol[2]);
+      printf("%f %f %d\n",xcol[i] - sol[1]/(2*sol[2]),
+	     sol[0]-sol[1]*sol[1]/(4*sol[2]),p);
     } 
   }
 }

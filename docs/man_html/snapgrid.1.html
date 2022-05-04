@@ -180,7 +180,7 @@ stacked snapshots yet ** [default: <b>f</b>]. </dd>
 
 <dt><b>proj=</b> </dt>
 <dd>If a valid projection type
-(SIN, TAN, ARC, NCP, GLS, MER, AIT) but see also <a href='wcs.1.html'><i>wcs(1NEMO)</i></a>
+(SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT) but see also <a href='wcs.1.html'><i>wcs(1NEMO)</i></a>
 , the input
 coordinates are interpreted in angular degrees, and griddes with the appropriate
 sky projection. Default: no sky projection. </dd>
@@ -265,7 +265,8 @@ may run into memory problems since both the snapshot and the image(s) must
 fit into memory to obtain turbo speeds. Use non-negative <b>moment</b>s to avoid
 having to allocate one or two extra images in addition to the snapshot
 and the image.  <p>
-Sky projections do not guarantee flux conservation.  
+Sky projections do not guarantee flux conservation. 
+<p> 
 <h2><a name='sect8' href='#toc8'>See
 Also</a></h2>
 <a href='snapgridsmooth.1.html'>snapgridsmooth(1NEMO)</a>
@@ -310,6 +311,7 @@ Peter Teuben
 <br>
 <pre>src/nbody/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapgrid.c
 </pre>
+<p> 
 <h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>19-jan-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -326,6 +328,7 @@ Peter Teuben
 18-may-12<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.4: added smoothing in VZ (szvar)
 14-feb-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.0: units changed on a cube (now xyz-density instead of xy-surface
 brightness)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-mar-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.1: axis=1 now written, fix cdelt1 for radecvel=t<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

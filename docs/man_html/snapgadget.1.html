@@ -8,41 +8,48 @@
 <body bgcolor='white'>
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
-<b>snapgadget</b> [parameter=value] 
+
 <p> 
-<h2><a name='sect0' href='#toc0'>Description</a></h2>
-<b>snapgadget</b> converts  data from
-standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format into <a href='gadget.l.html'><i>gadget(lNEMO)</i></a>
+<h2><a name='sect0' href='#toc0'>Name</a></h2>
+snapgadget - convert snapshot to GADGET format 
+<p> 
+<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
+<b>snapgadget</b>
+[parameter=value] 
+<p> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+<b>snapgadget</b> converts  data from standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+
+format into <a href='gadget.l.html'><i>gadget(lNEMO)</i></a>
 .  <p>
 Although <a href='gadget.l.html'><i>gadget(lNEMO)</i></a>
-
-has several flavors of particles (halo, disk, bulge, stars, gas), this
-version can only handle a limited set due to current limitations in the
-way snapshot&rsquo;s are handled. <p>
-Some programs (e.g. AHF) that need proper cosmological
-information in a gadget header, will need these explicitly passed via a
-set of parameters (see below). 
+ has several flavors of
+particles (halo, disk, bulge, stars, gas), this version can only handle
+a limited set due to current limitations in the way snapshot&rsquo;s are handled.
+<p>
+Some programs (e.g. AHF) that need proper cosmological information in a gadget
+header, will need these explicitly passed via a set of parameters (see
+below). 
 <p> 
-<h2><a name='sect1' href='#toc1'>Parameters</a></h2>
- The following parameters are
-recognized in order; they may be given in any order if the keyword is also
-given. Use --help to confirm this man page is up to date.  
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use --help to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file (snapshot
-format). No default. </dd>
+<dd>Input file (snapshot format). No default.
+</dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file (gadget format).  Each  snapshot is
-placed in its own file, and "%t" is replaced with the time of the snapshot
-(useful for times=all). No default. </dd>
+<dd>Output file (gadget format).  Each  snapshot is placed in its own file,
+and "%t" is replaced with the time of the snapshot (useful for times=all).
+No default. </dd>
 
 <dt><b>N=</b><i>Nhalo,Ndisk,Nbulge,Nstars</i> </dt>
-<dd>Nhalo,Ndisk,Nbulge,Nstars
-needs to be specified for the sub-components as GADGET wants them. Note the
- current version does not handle gas particles. No default. </dd>
+<dd>Nhalo,Ndisk,Nbulge,Nstars needs
+to be specified for the sub-components as GADGET wants them. Note the  current
+version does not handle gas particles. No default. </dd>
 
 <dt><b>M=</b><i>Mhalo,Mdisk,Mbulge,Mstars</i>
 </dt>
@@ -73,48 +80,56 @@ redshift [0] </dd>
 <dd>OmegaLambda0 [0.7]      </dd>
 
 <dt><b>h=</b> </dt>
-<dd>HubbleParam [0.75]      </dd>
+<dd>HubbleParam [0.75]      
+<p> </dd>
 </dl>
 
-<h2><a name='sect2' href='#toc2'>Caveat</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
 There is an option
 to run gadget in double precision mode, their output files  may not be
-compatible with this version of the program. 
-<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+compatible with this version of the program. <p>
+Such "unformatted binary" files
+are limited to 4GB per block. 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='gadgetsnap.1.html'>gadgetsnap(1NEMO)</a>
+, <a href='nemo2gadget.1.html'>nemo2gadget(1NEMO)</a>
 ,
-<a href='nemo2gadget.1.html'>nemo2gadget(1NEMO)</a>
-, <a href='gadget2nemo.1.html'>gadget2nemo(1NEMO)</a>
+<a href='gadget2nemo.1.html'>gadget2nemo(1NEMO)</a>
 , <a href='uns2uns.1.html'>uns2uns(1NEMO)</a>
+, <a href='g2info.1.html'>g2info(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-,
-<a href='gadget.5.html'>gadget(5NEMO)</a>
- <p>
+, <a href='gadget.5.html'>gadget(5NEMO)</a>
+
+<p>
 <a href='http://www.mpa-garching.mpg.de/gadget/'>http://www.mpa-garching.mpg.de/gadget/</a>
- 
-<h2><a name='sect4' href='#toc4'>Files</a></h2>
+ <p>
+<a href='https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md'>https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md</a>
 
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Jeremy Bailin
 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Jeremy Bailin 
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>8-sep-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;J.Bailin
 8-sep-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 minor mods on order of arguments, fix missing %t case<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-jun-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 add some reasonable cosmo defaults, in case they&rsquo;re needed<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-22-jun-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 add M=
+22-jun-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 add M=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-jan-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated man page format; added links<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
-<li><a name='toc0' href='#sect0'>Description</a></li>
-<li><a name='toc1' href='#sect1'>Parameters</a></li>
-<li><a name='toc2' href='#sect2'>Caveat</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Files</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc0' href='#sect0'>Name</a></li>
+<li><a name='toc1' href='#sect1'>Synopsis</a></li>
+<li><a name='toc2' href='#sect2'>Description</a></li>
+<li><a name='toc3' href='#sect3'>Parameters</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>
