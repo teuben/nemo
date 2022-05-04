@@ -392,7 +392,7 @@ void nemo_main()
 		  } else {
 		      newvalue = 0.0;
 		  }
-		} else {
+		} else { // npeak > 0
 		  (void) peak_find(nz, spec, smask, 0);                  /* initialize smask */
 		  apeak1 = peak_find(nz, spec, smask, 1);                /* first peak again */
 		  if (apeak1 > 0) {
