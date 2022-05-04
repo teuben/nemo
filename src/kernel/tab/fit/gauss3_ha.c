@@ -2,9 +2,17 @@
  * NII-a, Ha, NII-b triplet fitting 3 (constrained) gaussians
  * WARNING:  untested code
  *
- * 6549.86    NII-a   -673.8 km/s
- * 6564.614   Halpha     0.0 
- * 6585.27    NII-b   +943.3 
+ * 6549.86    NII-a   -673.8 km/s   14.754
+ * 6564.614   Halpha     0.0         0.0
+ * 6585.27    NII-b   +943.3        20.656
+ *
+ *          air     vacuum
+ * [N II]  6548.05  6549.86
+ * H-alpha 6562.801 6564.614
+ * [N II]  6583.45  6585.27
+ * [S II]  6716.44  6718.29
+ * [S II]  6730.82  6732.68
+ *
  *
  * WARNING: some hcn notation from the clone left over.....
  *
