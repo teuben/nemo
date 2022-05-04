@@ -177,7 +177,8 @@ int get_idx(string var)
     else if (streq(var,"vz"))
         return 5;
     else
-        error("this version does not support var=%s",var);
+        return -1;
+        // error("this version does not support var=%s",var);
     return 0;
 }
 
@@ -197,23 +198,29 @@ void compfuncs()
 
 void plot_path(orbitptr o, real tstart, real tend, int n)
 {
-	int i, plotfirst = 1;
-	real x,y;
+  int i, plotfirst = 1;
+  real x,y;
 
-	for (i=0; i<(Nsteps(o)-n); i += n) {
-	    if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
-		x = xtrans(Posorb(o,i,xvar_idx));
-		y = ytrans(Posorb(o,i,yvar_idx));
-		if (plotfirst) {
-		    plpoint (x,y);			/* mark first point */
-	 	    plotfirst = 0;
-		}
-		plmove (x,y);
-		x = xtrans(Posorb(o,i+n,xvar_idx));
-		y = ytrans(Posorb(o,i+n,yvar_idx));
-		plline (x,y);
-	     }
-	}
+  for (i=0; i<(Nsteps(o)-n); i += n) {
+    if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
+      if (xvar_idx < 0)
+	x = Torb(optr,i);
+      else
+	x = xtrans(Posorb(o,i,xvar_idx));
+      y = ytrans(Posorb(o,i,yvar_idx));
+      if (plotfirst) {
+	plpoint (x,y);			/* mark first point */
+	plotfirst = 0;
+      }
+      plmove (x,y);
+      if (xvar_idx < 0)
+	x = Torb(optr,i+n);
+      else
+	x = xtrans(Posorb(o,i+n,xvar_idx));
+      y = ytrans(Posorb(o,i+n,yvar_idx));
+      plline (x,y);
+    }
+  }
 }
 
 #if 0
