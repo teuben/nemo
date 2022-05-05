@@ -1,4 +1,4 @@
-.TH TABLE 3NEMO "1 May 2022"
+.TH TABLE 3NEMO "5 May 2022"
 
 .SH "NAME"
 table_open, table_row, table_md2, table_close - table manipulation routines
@@ -6,10 +6,7 @@ table_open, table_row, table_md2, table_close - table manipulation routines
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table routines
 
 .SH "SYNOPSIS"
-\fINOTE:\fP table V2 is under final development.   The API with a - in front have not been implemented. Names of
-functions with 0, 1 or 2 at the end are varients that should (will) be unified. During this
-development \fBtable.h\fP has the final word.
-
+Note the API below has not been implemented for names with a preceding dash!
 .nf
 .B #include <table.h>
 .B #include <mdarray.h>
@@ -57,13 +54,13 @@ development \fBtable.h\fP has the final word.
 .PP
 .B table *table_cat(int ntable, table *tptr, int mode)
 .PP
-.I Old: (deprecated or emulated)
+.I Legacy: (might be deprecated in future)
 .PP
 .B int get_atable(strean instr,int ncol,int *colnr,real *coldat,int ndat)
 .PP
-.B int get_ftable(stream instr,int ncol,int *colpos,string *colfmt,real *coldat,int ndat) // check
+.B int get_ftable(stream instr,int ncol,int *colpos,string *colfmt,real *coldat,int ndat) 
 .PP
-.B int get_line (string instr, char *line)
+.B int get_line (string instr, char *line) // deprecated now
 .PP
 .B int parse(int linenr, char *line, double *dat, int ndat)
 .PP

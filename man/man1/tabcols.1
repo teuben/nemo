@@ -10,7 +10,7 @@ This way a newline on input can be converted into a space on
 output and therefore creating a file with one long column from
 a table with mulitple columns.
 .PP
-To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+To select specific lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword
 is also given:
@@ -44,7 +44,7 @@ re-arranges all the numbers in a table in one long column
     tabcols in.tab all n > out.tab
 .fi
 .SH SEE ALSO
-tablines(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
+tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
 .SH FILES
 src/kernel/tab/tabcols.c   source code
 .SH AUTHOR
