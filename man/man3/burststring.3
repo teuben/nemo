@@ -1,7 +1,8 @@
 .TH BURSTSTRING 3NEMO "26 December 1994"
-.SH NAME
+.SH "NAME"
 burststring \- separate a string into tokens, and free them
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 .B #include <stdinc.h>
 .PP
@@ -13,7 +14,8 @@ burststring \- separate a string into tokens, and free them
 .B void freestrings(strptr)
 .B string *strptr;
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIburststring()\fP breaks a string \fPstr\fP of words separated by characters
 in \fPsep\fP into individual strings, and returns them as an extended string
 (ie, a NULL-terminated sequence of string pointers; see \fIextstring\fP).
@@ -30,11 +32,35 @@ elements. Useful for editing.
 .PP
 \fIfreestrings\fP can be used to free all memory associated with an
 array of strings, as e.g. allocated by \fIburststring\fP.
-.SH SEE ALSO
-extstring(3NEMO)
-.SH AUTHOR
+
+.SH "EXAMPLES"
+
+.nf
+    string *sp = burststring("a b c"," ");
+    int nsp = xstrlen(sp,sizeof(string))-1;
+    for (int i=0; i<nsp; i++)
+        printf("sp[%d] = %s\\n",i,sp[i]);
+    freestrings(sp);
+.fi
+
+Note that unlike \fIstrtok(3)\fP, \fBburststring\fP does not modify the input string
+
+
+.SH "CAVEATS"
+The maximum number of words and characters per word is hardcoded
+as MWRD=2048 and MSTR=256.  An alternative would be to recode this using
+\fIstrtok(3)\fP. Some examples of these are in
+\fItable(3NEMO)\fP.
+
+
+
+.SH "SEE ALSO"
+extstring(3NEMO), strtok(3)
+
+.SH "AUTHOR"
 Joshua Barnes, Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 2-dec-86	Dark ages version	JEB

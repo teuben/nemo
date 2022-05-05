@@ -1,0 +1,119 @@
+Notes on the table V2 design
+============================
+
+Development:  summer 2020, and spring 2022 - see the table2 branch
+
+API:
+----
+
+The API is defined in table.3
+    man 3 table
+and some comments on interfaces with other ascii table systems in table.5
+    man 5 table
+
+As usual, implemention in
+   $NEMO/inc/table.h
+   $NEMO/src/kernel/tab/table.c
+
+The legacy interface get_atable() is the one most likely to remain implemented,
+since it's used in so many codes. It requires the user to know the number of lines
+in the file though, which is what we wanted to move away from...
+(there's a script $NEMO/src/scripts/wsl that can quickly find those)
+
+TODO
+----
+- recognize comments, and place them in their table structure
+- free memory that was allocated (use valgrind)
+
+
+Testing methods:
+----------------
+
+Some initial testing was done in
+   $NEMO/src/kernel/tab/tabbench1.c
+   $NEMO/src/kernel/tab/tabbench2.c
+but in the usual NEMO sense, table.c has a TESTBED to make tabletest:
+
+    make tabletest
+    ./tabletest ....
+    
+    mknemo tabbench2
+    tabbench2 ...
+
+The following programs were converted, and some comments on their conversion:
+-----------------------------------------------------------------------------
+
+    meanmed        super easy, since it was line by line processing.
+    tabcomment     simple, since it's processing line by line; no maxpnt= or so
+    tabstat    	   was using get_atable, not table_md2cr() - more complex manual labor
+    funtab         get_atable -> table_md2cr; kept #ifdef
+    tabmath        manual
+    tabint         get_atable -> table_md2cr; kept #ifdef
+    tabtranspose   no more burststring()
+    tabcols        reads line by line
+    tabcmp         get_atable -> table_md2cr
+    tabcomment     reads line by line
+    tabplot        get_atable -> table_md2cr
+    txtpar         read whole table (needs to deal with comments still)
+    tabgen         no real changes needed, just cleaned up
+    tabhist        get_atable -> table_md2cr
+    
+    
+The most common pattern get_atable()   ->   table_md2cr()
+
+    # select the columns you want, but you get all rows (up to nmax)
+    # in columns pointed to by coldat[icol]
+    nrows = get_atable(instr,ncols,colnr,coldat,nmax);
+
+    # select the columns and rows you want, though generally nrows=0, meaning get all
+    d2 = table_md2cr(tptr,ncols,colnr,nrows, rownr)
+    coldat[icol] = &d1[icol][0]     // d1[icol] is dangerous
+
+
+to work out
+-----------
+ahf2grp.c
+chem.c
+
+getaline.c      deprecated
+gettab.c        getX_table: useful, difficult to replace quickly
+
+tab2xml.c        no V2 needed
+tabbench1.c
+tabbench2.c
+
+tabblend.c       no V2 needed
+tabclip.c
+
+
+tabdate.c
+tabdist.c
+tabdms.c
+tabextinct.c
+tabfft.c
+tabfilter.c
+
+tablines.c          needs work
+tablint.c
+tablovas.c
+tablsqfit.c
+tablst.c
+
+tabnllsqfit.c
+tabpeak.c
+tabpoly.c
+tabpolygon.c
+tabpp.c
+tabs.c             --  this should be part of auto-conversion?
+tabselect.c
+tabseries.c
+tabslide.c
+tabsmooth.c
+tabspline.c
+
+tabtrend.c
+tabunwrap.c
+tabview.c
+tabzoom.c
+
+ustat.c

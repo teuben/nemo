@@ -2,6 +2,9 @@
  * FunctionTable:
  */
 
+
+#include <table.h>
+
 /* lookup modes */
 
 #define FUNTAB_LINEAR  0x01
@@ -10,6 +13,7 @@
 
 typedef struct FunctionTable {
     string name;        /* ID or filename */
+    tableptr t;         /* table v2 pointer (non-zero if used) */ 
     int mode;           /* lookup mode (one of the above FUNTAB_xxx */
     int n;              /* Number of points in table */
     real *x;		/* pointer to array of X values */

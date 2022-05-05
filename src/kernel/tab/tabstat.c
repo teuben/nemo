@@ -10,6 +10,7 @@
  *      10-oct-20   V1.7    ansi                                           pjt
  *      16-nov-21   V1.8    added qac= and robust=                         pjt
  *       1-dec-21   V1.9    with qac/robust keep the min/max from all data PJT
+ *      23-apr-22   V2.0    new table V2 interface                         PJT
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
  */
@@ -18,6 +19,7 @@
 #include <getparam.h>
 #include <moment.h>
 #include <table.h>
+#include <mdarray.h>
 
 #define MAXCOL  256
 #define MAXCOORD 16
@@ -32,13 +34,15 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "median=t\n          Compute median too? (can be time consuming)",
     "mad=f\n             Compute MAD ?",
     "method=0\n          Method to remove outliers (0=fast 1=slow)",
+#if 0    
     "nmax=100000\n       maximum number of data to be read if pipe",
+#endif
     "xmin=\n             Set minimum ",
     "xmax=\n             Set maximum ",
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=1.9b\n	 30-jan-2022 PJT",
+    "VERSION=2.1\n	 2-may-2022 PJT",
     NULL
 };
 
@@ -47,13 +51,15 @@ string usage = "table column statistics";
 
 local string input;				/* filename */
 local stream instr;				/* input file */
+local table  *tptr;
 
 local int xcol[MAXCOL], nxcol; 		        /* column numbers */
 
-local real  *x[MAXCOL]; 			/* data from file */
+local mdarray2  x;                              /*  x[col][row] */
+
 local Moment m[MAXCOL];
 local int    imaxdev[MAXCOL];
-local int    npt;		              /* actual number of data points */
+local int    npt;		                /* actual number of data points */
 local int   *ix;
 
 local bool   Qmedian;
@@ -63,7 +69,7 @@ local bool   Qac;
 local bool   Qrobust;
 local bool   Qbad;
 local real   badval;
-local int    nmax;				/* lines to allocate */
+local int    nmax;			 	 /* lines to allocate */
 local int    width;
 local char   outfmt[20];
 local int    iter;
@@ -85,24 +91,32 @@ void out(string fmt);
 void nemo_main(void)
 {
     setparams();
-
-    instr = stropen (input,"r");
     read_data();
     stat_data();
 }
 
 void setparams(void)
 {
-    int  j;
+    int nrows, ncols;
    
     input = getparam("in");             /* input table file */
-    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
-    if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
+    instr = stropen (input,"r");
+    tptr  = table_open(instr, 0);
 
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    dprintf(1,"Allocated %d lines for table\n",nmax);
-    for (j=0; j<nxcol; j++)
-        x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* data */
+    nrows = table_nrows(tptr);
+    ncols = table_ncols(tptr);
+    dprintf(0,"Table: %d x %d\n", nrows, ncols);
+    
+    
+    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
+    if (nxcol == 0) {
+      warning("selecting all columns");
+      //nxcol = ncols;
+      //if (ncols > MAXCOL) error("No room to select all (%d) columns; MAXCOL=%d", ncols,MAXCOL);
+    } else if (nxcol < 1) {
+      error("Error parsing xcol=%s   MAXCOL=%d",getparam("xcol"),MAXCOL);
+    }
+    nmax = nrows;
 
     Qverbose = getbparam("verbose");
     Qmedian = getbparam("median");
@@ -128,30 +142,17 @@ void setparams(void)
 
 void read_data(void)
 {
-    real *coldat[1+MAXCOL];
-    int i, j, colnr[1+MAXCOL];
-		
-    dprintf (2,"Reading datafile, xcol=%d...\n",xcol[0]);
-    for (j=0; j<nxcol; j++) {
-        colnr[j] = xcol[j];
-        coldat[j] = x[j];
-    }
-    npt = get_atable(instr,nxcol,colnr,coldat,nmax);    /* get data */
-    if (npt < 0) {
-    	npt = -npt;
-    	warning("Could only read %d data",npt);
-    }
-    if (iter > npt) 
-        error("Cannot iterate more than there is data (%d > %d)",iter,npt);
-
+    // x[col][row] will be the data
+    x = table_md2cr(tptr, nxcol, xcol, 0, 0);
+    npt = tptr->nr;
+    if (nxcol == 0) nxcol = tptr->nc;
 }
 
 
 void stat_data(void)
 {
     int i, j, ndat, imax, kmin, kmax;
-    real median, mean, sigma, d, dmax, fac;
-    real rmean, rsigma, rrange[2];
+    real median, mean, sigma, d, dmax, rrange[2];
     char fmt[20];
     
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
@@ -161,7 +162,7 @@ void stat_data(void)
 
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
         ini_moment(&m[j],4,ndat);
-        for (i=0; i<npt; i++) {
+        for (i=0; i<npt; i++) {                          /* loop over rows */
 	  if (Qbad && x[j][i]==badval) continue;
 	  if (Qmin && x[j][i]<xmin) continue;
 	  if (Qmax && x[j][i]>xmax) continue;
@@ -169,12 +170,11 @@ void stat_data(void)
         }
     }
 
-    if (Qac) {
+    // simpler one line output
+    if (Qac) {   
       for (j=0; j<nxcol; j++) {
 	if (Qrobust) {
 	  compute_robust_moment(&m[j]);
-	  rmean  = mean_robust_moment(&m[j]);
-	  rsigma = sigma_robust_moment(&m[j]);
 	  robust_range(&m[j], rrange);
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
