@@ -1,13 +1,16 @@
 .TH TAB2XML 1NEMO "13 February 2004"
-.SH NAME
+
+.SH "NAME"
 tabcols \- Select columns, and output a VOTable (xml) file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fPtab2xml\fP [parameter=value] ...
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtab2xml\fP selects columns from a file, and outputs
 the columns in VOTable format.
 .PP
-To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+To select lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -34,7 +37,8 @@ default column names, then one selecting columns and giving them proper names
     tab2xml a.tab a1.xml
     tab2xml a.tab a2.xml col=4,8:10 colnames=z,ax,ay,az
 .fi
-.SH LIMITATION
+
+.SH "LIMITATION"
 Currently can only do a subset of the \fIVOTable(5NEMO)\fP version 1.0 standard,
 as shown below:
 .nf
@@ -61,13 +65,17 @@ as shown below:
 </RESOURCE>
 </VOTABLE>
 .fi
-.SH SEE ALSO
-tabcols(1NEMO), tabmath(1NEMO), awk(1), VOTable(5NEMO)
-.SH FILES
+
+.SH "SEE ALSO"
+tabcols(1NEMO), tabrows(1NEMO), tabmath(1NEMO), awk(1), VOTable(5NEMO)
+
+.SH "FILES"
 src/kernel/tab/tab2xml.c   source code
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 13-feb-04	V1.0 Created 	PJT

@@ -1,10 +1,10 @@
-.TH TABLINES 1NEMO "9 March 1999"
+.TH TABROWS 1NEMO "5 May 2022"
 .SH NAME
-tablines \- select lines from a file
+tabrows \- select rows/lines from a file
 .SH SYNOPSIS
-\fBtablines\fP [parameter=value]
+\fBtabrows\fP [parameter=value]
 .SH DESCRIPTION
-\fBtablines\fP selective copies lines from an input (ASCII) table.
+\fBtabrows\fP selective copies lines from an input (ASCII) table.
 Selection is done by line numbers, 1 being the first line. Syntax
 follows the \fInemofie(1NEMO)\fP rules.
 .SH PARAMETERS
@@ -31,7 +31,7 @@ To find the square root of any number \fIn\fP between 1 and 100:
 .nf
     nemoinp 1:100:1 > t1
     tabmath t1 t2 'sqrt(%1)' all
-    tablines t2 - select=\fIn\fP
+    tabrows t2 - select=\fIn\fP
 .fi
 .SH SEE ALSO
 awk(1), tabmath(1NEMO)
