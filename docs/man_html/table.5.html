@@ -9,46 +9,64 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 table - (ASCII) table format 
+<p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 A <b>table</b> file is a simple ASCII
 text file,  structured in rows and columns, with one row per line.  Columns
-can be separated by spaces or tabs (though many dialects of this definition
-exist). The number of columns per row does not have to be the same, as long
-as the columns accessed are in the specified range (although some programs,
-e.g. <a href='tablint.1.html'><i>tablint(1NEMO)</i></a>
- may put restrictions on this). <p>
-Comments can be entered
-by using the octothorpe (&rsquo;<b>#</b>&rsquo;) symbol  on the first character on a line (though
-again, many dialects exist, most notably the exclamation, semi-colon and
- backslash (IPAC tables) symbols are in practice. Empty lines will generally
-be skipped too, and as said, some programs  even skip lines starting with
-the ! or ; symbol. See also <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
- for some other filtering techniques.
+can be separated by spaces, commas, vertical bars, or tabs (though many
+dialects of this definition exist). The number of columns per row does not
+have to be the same, as long as the columns accessed are in the specified
+range (although some programs, e.g. <a href='tablint.1.html'><i>tablint(1NEMO)</i></a>
+, may put restrictions
+on this). <p>
+Comments can be entered by using the octothorpe (&rsquo;<b>#</b>&rsquo;) symbol  on
+the first character on a line (though again, many dialects exist, most
+notably the exclamation, semi-colon and  backslash (IPAC tables) symbols
+are in practice. Empty lines will generally be skipped too, and as said,
+some programs even skip lines starting with the ! or ; symbol. See also
+<a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
+ for some other filtering techniques. 
+<p> <p>
 
+<p> <br>
+<pre>  HEADER
+  D11 D12 D13 ....
+  D21 D22 ...
+  ...
+</pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Example</a></h2>
-The following listing is an example of a simple table: <br>
+Here is an example of a table: <br>
 <pre>    # This is the first line of the table
-    # I    N     Q
+    # I    N     Q      # names of columns (for a human)
     1.0   2.0   4.0
     # 2.0 3.0   5.0     bad data, commented out.
-    3.0   5.1   6.32
+    3.0   5.1   6.32    # comment belonging to a line
     # End of table
     
 </pre>Here is an example how to make a table from scratch. It contains  one column,
-with numbers 1 through 100: <br>
-<pre>    nemoinp 1:100 newline=t &gt; 100.tab
-</pre>
+with even numbers 2 through 10, done with <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
+ and <a href='seq.1.html'><i>seq(1)</i></a>
+ <br>
+<pre>    nemoinp 2:10:2 newline=t &gt; even1.tab
+    seq 2 2 10 &gt; even2.tab
+</pre>and for performance testing the <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+ program can be used to create
+random large tables. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Other Table Formats</a></h2>
-Another popular table format is that of ESO/Midas, where
-all columns are separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
- will generally
-put a TAB between the columns. <p>
-FITS uses the &rsquo;TABLE&rsquo; (ascii tables) and BINTABLE
-(binary tables) format. <p>
-IPAC-table format: (often using the extension <b>.tbl</b>)
-<br>
+ESO/Midas, where all columns are
+separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
+ will by default put a TAB between
+the columns (files). <p>
+FITS uses the &rsquo;TABLE&rsquo; (ascii tables) and BINTABLE (binary
+tables) format. See <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+. <p>
+IPAC-table format: (often using the extension
+<b>.tbl</b>) <br>
 <pre>\HISTORY some history on the data processing
 \HISTORY infile=data3.fits
 \char Comment This table contains parameters for calibrating science data.
@@ -129,6 +147,11 @@ ECSV: <a href='https://github.com/astropy/astropy-APEs/blob/master/APE6.rst'>htt
  <p>
 cvskit:
 <a href='https://csvkit.readthedocs.io/en/latest/'>https://csvkit.readthedocs.io/en/latest/</a>
+ <p>
+GNU astronomy:  <a href='https://www.gnu.org/savannah-checkouts/gnu/gnuastro/manual/html_node/Gnuastro-text-table-format.html'>https://www.gnu.org/savannah-checkouts/gnu/gnuastro/manual/html_node/Gnuastro-text-table-format.html</a>
+
+<p>
+XSV:  <a href='https://github.com/BurntSushi/xsv'>https://github.com/BurntSushi/xsv</a>
  
 <p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
@@ -138,6 +161,7 @@ Peter Teuben
 <br>
 <pre>1-feb-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;document created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-oct-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;some more docs on other table formats<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-mar-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;changes for table-V2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
