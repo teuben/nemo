@@ -18,11 +18,8 @@ get_atable, get_ftable, get_line, parse, strinsert - legacy table
 <p>routines 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<i>NOTE:</i> table V2 is under final development.   The API with
-a - in front have not been implemented. Names of functions with 0, 1 or 2
-at the end are varients that should (will) be unified. During this development
-<b>table.h</b> has the final word. 
-<p> <br>
+Note the API below has not been implemented for names
+with a preceding dash! <br>
 <pre>#include &lt;table.h&gt;#include &lt;mdarray.h&gt;#include &lt;extstring.h&gt;table  *table_open(stream
 instr, int mode);table  *table_open1(stream instr, int mode, int nlines);void
    table_close(tableptr tptr);size_t  table_nrows(tableptr tprt);size_t
@@ -48,43 +45,43 @@ string table_row(table
 - void table_set_ncols(int
 ncols)
 table *table_cat(int ntable, table *tptr, int mode)
-Old: (deprecated
-or emulated)
-int get_atable(strean instr,int ncol,int *colnr,real *coldat,int
-ndat)
-int get_ftable(stream instr,int ncol,int *colpos,string *colfmt,real
-*coldat,int ndat) // check
+Legacy: (might
+be deprecated in future)
+int get_atable(strean instr,int ncol,int *colnr,real
+*coldat,int ndat)
+int get_ftable(stream instr,int ncol,int *colpos,string
+*colfmt,real *coldat,int ndat) 
 int get_line (string instr, char *line)
-int parse(int
-linenr, char *line, double *dat, int ndat)
-int strinsert(char *a, char *b,
-int n)
+// deprecated now
+int parse(int linenr, char *line, double *dat, int ndat)
+int
+strinsert(char *a, char *b, int n)
 int iscomment(char *line)</pre>
 <p> 
 <h2><a name='sect2' href='#toc2'>Using Tables</a></h2>
 
-<p> Tables can be arbitrarely
-large, but like top level of NEMO structured files, do need to fit in memory.
-There can be some exceptions to this, and certain applications will stream
-data that do not fit in memory. 
+<p>
+Tables can be arbitrarely large, but like top level of NEMO structured
+files, do need to fit in memory. There can be some exceptions to this, and
+certain applications will stream data that do not fit in memory. 
 <p> <p>
-The particular table dialect should be
-detected automatically in files, and number of columns and rows can be
-arbitrarely high. <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
- has methods to make really large tables
-in both "column" and "row" space for testing purposes. 
+The particular
+table dialect should be detected automatically in files, and number of
+columns and rows can be arbitrarely high. <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+ has methods to make
+really large tables in both "column" and "row" space for testing purposes.
+
 <p> <p>
-When a table comes
-from a pipe, obviously it cannot seek, however using the new table I/O
-the full table is read into memory, initially using a linked list, and
-can then be addressed line by line in random row fashion. 
+When a table comes from a pipe, obviously it cannot seek, however using
+the new table I/O the full table is read into memory, initially using a
+linked list, and can then be addressed line by line in random row fashion.
+
 <p> <p>
-An exception
-could be made where the table can be read in blocks of say 100 lines or
-so? 
+An exception could be made where the table can be read in blocks of say
+100 lines or so? 
 <p> <p>
-Comment lines: there are too many conventions for this, but we need
-to cover them all.   A line starting with <br>
+Comment lines: there are too many conventions for this,
+but we need to cover them all.   A line starting with <br>
 <pre>#!;/\|C</pre>have all been used for comments.  In addition comments have been used
 at the end of a line, e.g. <br>
 <pre>1 2 3   # this is a comment</pre>but see <a href='table.5.html'><i>table(5NEMO)</i></a>

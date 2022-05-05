@@ -9,15 +9,18 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabcols - Select columns, and output a VOTable (xml) file 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 tab2xml
 [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tab2xml</b> selects columns from a file, and
 outputs the columns in VOTable format. <p>
-To select lines, use <a href='tablines.1.html'><i>tablines(1NEMO)</i></a>
+To select lines, use <a href='tabrows.1.html'><i>tabrows(1NEMO)</i></a>
 
 or <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 . 
@@ -54,6 +57,7 @@ column names, then one selecting columns and giving them proper names <br>
 <pre>    tab2xml a.tab a1.xml
     tab2xml a.tab a2.xml col=4,8:10 colnames=z,ax,ay,az
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Limitation</a></h2>
 Currently can only do a subset of the <a href='VOTable.5.html'><i>VOTable(5NEMO)</i></a>
  version
@@ -80,18 +84,24 @@ Currently can only do a subset of the <a href='VOTable.5.html'><i>VOTable(5NEMO)
 &lt;/RESOURCE&gt;
 &lt;/VOTABLE&gt;
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabcols.1.html'>tabcols(1NEMO)</a>
+, <a href='tabrows.1.html'>tabrows(1NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='awk.1.html'>awk(1)</a>
 , <a href='VOTable.5.html'>VOTable(5NEMO)</a>
- 
+
+
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/kernel/tab/tab2xml.c
-  source code 
+src/kernel/tab/tab2xml.c   source code 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update
+History</a></h2>
 <br>
 <pre>13-feb-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
