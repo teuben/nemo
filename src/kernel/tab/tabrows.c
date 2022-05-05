@@ -1,10 +1,11 @@
 /*
- * 	Select lines from a file
+ *     TABROWS:	Select rows (lines) from a file - formerly called TABLINES
  *
  *      9-mar-99    V1.0    Created
  *     10-mar-99    V1.0a   code cleanup, no pipe check if no selection
  *     14-oct-99    V1.1    added comment= keyword
  *     10-mar-2022  V1.2    use new table interface
+ *      5-may-2022  V2.0    new name (tablines -> tabrows)
  *
  */
 
@@ -18,11 +19,11 @@ string defv[] = {
         "select=all\n           lines to select",
 	"comment=t\n		count comment lines too?",
         "nmax=10000\n           Default max allocation for lines to be picked",
-	"VERSION=1.2\n		10-mar-2022 PJT",
+	"VERSION=2.0\n		5-may-2022 PJT",
 	NULL,
 };
 
-string usage="Select lines from a file";
+string usage="Select rows/lines from a file";
 
 void nemo_main()
 {
