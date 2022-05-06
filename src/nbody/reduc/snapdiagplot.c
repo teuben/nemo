@@ -13,6 +13,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 #include <vectmath.h>
 #include <snapshot/snapshot.h>
 #include <yapp.h>
@@ -26,7 +27,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
     "tab=\n                     If given, tabulate Time,Etot",
-    "VERSION=1.5\n		7-mar-2022 PJT",
+    "VERSION=1.5a\n		6-may-2022 PJT",
     NULL,
 };
 
@@ -73,6 +74,16 @@ local real Erange[2]  = { -1.00, 1.00 };
 
 real ttrans(real), drtrans(real), Etrans(real), dEtrans(real);
 
+void setparams(void);
+real poten(real phsp[][2][NDIM], real mass[], int nobj);
+void readinput(stream instr);
+void diagplot(void);
+void setlimits(void);
+real ttrans(real t);
+real drtrans(real dr);
+real dvtrans(real dv);
+real dEtrans(real dE);
+real Etrans(real E);
 
 #define NXTICK  5			/* ### changed from 7  24/9/87 */
 #define NYTICK  3
@@ -88,7 +99,7 @@ void nemo_main()
     diagplot();
 }
 
-setparams()
+void setparams()
 {
     input = getparam("in");
     times = getparam("times");
@@ -98,10 +109,8 @@ setparams()
 }
 
 
-real poten(phsp, mass, nobj)
-real phsp[][2][NDIM];
-real mass[];
-int nobj;
+// phsp, mass, nobj
+real poten(real phsp[][2][NDIM], real mass[], int nobj)
 {
     int i, j;
     real epssq, petot, *posi, pei, dpos[NDIM], dpossq;
@@ -118,10 +127,10 @@ int nobj;
 	}
 	petot += mass[i] * pei;
     }
-    return (petot);
+    return petot;
 }
 
-readinput(stream instr)
+void readinput(stream instr)
 {
     int nobj;
     real etot[3], cmphase[2][3];
@@ -168,7 +177,7 @@ readinput(stream instr)
 }
 
 
-diagplot()
+void diagplot()
 {
     real Etot, deltaE;
     int i, j;
@@ -230,7 +239,7 @@ diagplot()
     plstop();
 }
 
-setlimits()
+void setlimits()
 {
     real Etot, deltaE, WorstTime, WorstDeltaE=0.0;
     int i;
@@ -269,25 +278,25 @@ setlimits()
 
 real ttrans(real t)
 {
-    return (2.0 + 16.0 * (t - trange[0]) / (trange[1] - trange[0]));
+    return 2.0 + 16.0 * (t - trange[0]) / (trange[1] - trange[0]);
 }
 
 real drtrans(real dr)
 {
-    return (10.0 + 8.0 * (dr - drrange[0]) / (drrange[1] - drrange[0]));
+    return 10.0 + 8.0 * (dr - drrange[0]) / (drrange[1] - drrange[0]);
 }
 
 real dvtrans(real dv)
 {
-    return (10.0 + 8.0 * (dv - dvrange[0]) / (dvrange[1] - dvrange[0]));
+    return 10.0 + 8.0 * (dv - dvrange[0]) / (dvrange[1] - dvrange[0]);
 }
 
 real dEtrans(real dE)
 {
-    return (2.0 + 8.0 * (dE - dErange[0]) / (dErange[1] - dErange[0]));
+    return 2.0 + 8.0 * (dE - dErange[0]) / (dErange[1] - dErange[0]);
 }
 
 real Etrans(real E)
 {
-    return (2.0 + 8.0 * (E - Erange[0]) / (Erange[1] - Erange[0]));
+    return 2.0 + 8.0 * (E - Erange[0]) / (Erange[1] - Erange[0]);
 }
