@@ -140,17 +140,24 @@ the Z direction, hence X and Y. At some future time it may also support
 spectra along Y or X, but most advanced features are only implemented along
 axis=3. Default: none 
 <p> </dd>
+
+<dt><b>arange</b><i>[k0,k1,k2,....]</i> </dt>
+<dd>Pixels along the <b>axis</b> to include
+in the moment. By default the whole axis is used, but with this keyword
+select pixels can be selected, for example <b>arange=0:20,40:60</b>. Default: all
+pixels. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-In this example we examine a cube with independent
-values drawn from a gaussian distribution with mean 0 and dispersion 1.
-  The dispersion of the values along the 3rd axis are compared with the
-dispersion in the differentials (mom=-3). For a normal distribution the latter
-should be <a href='sqrt.2.html'>sqrt(2)</a>
- higher than the intrinsic dispersion. Comparing the two,
-maps in this case, could say something about correllations along the 3rd
-axis (see also examples in <a href='tabtrend.1.html'><i>tabtrend(1NEMO)</i></a>
+In this example we examine a cube with independent values
+drawn from a gaussian distribution with mean 0 and dispersion 1.   The dispersion
+of the values along the 3rd axis are compared with the dispersion in the
+differentials (mom=-3). For a normal distribution the latter should be <a href='sqrt.2.html'>sqrt(2)</a>
+
+higher than the intrinsic dispersion. Comparing the two, maps in this case,
+could say something about correllations along the 3rd axis (see also examples
+in <a href='tabtrend.1.html'><i>tabtrend(1NEMO)</i></a>
 ) 
 <p> <br>
 <pre>      1% ccdgen "" cube1 noise spar=0,1 size=100,100,1000 seed=123
@@ -166,7 +173,20 @@ axis (see also examples in <a href='tabtrend.1.html'><i>tabtrend(1NEMO)</i></a>
       QAC_STATS: - 0.611611 0.0191999 0.541171 0.685092  6116.11 1
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>Python</a></h2>
+For those more familiar with python, here are some cross-walks, where
+<b>I</b> denotes the <i>numpy</i> cube, and <b>V</b> a one-dimensional WCS value along the the
+picked axis. the axis= keyword in the numpy functions to pick another but
+our default of axis=3. <br>
+<pre>       mom=0<tt> </tt>&nbsp;<tt> </tt>&nbsp;m0=I.sum(axis=2)
+       ?<tt> </tt>&nbsp;<tt> </tt>&nbsp;I.mean(axis=2)
+       mom=-1<tt> </tt>&nbsp;<tt> </tt>&nbsp;m1=I.mean(axis=2)
+       mom=-2<tt> </tt>&nbsp;<tt> </tt>&nbsp;m2=I.std(axis=2)
+       mom=1    v=(V*I).sum(axis=2)/I.sum(axis=2)
+       mom=2    s=
+</pre>
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='pvtrace.1.html'>pvtrace(1NEMO)</a>
 , <a href='ccdmoms.1.html'>ccdmoms(1NEMO)</a>
 , <a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
@@ -181,19 +201,19 @@ axis (see also examples in <a href='tabtrend.1.html'><i>tabtrend(1NEMO)</i></a>
 
 
 <p> 
-<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
 Cannot compute straight moments, e.g. the 2nd moment along an axis,
 such as e.g. <i>snapgrid</i> can do. This  program only computes user friendly numbers
 (sum, mean, dispersion) and gives special meaning to negative values of
 mom= and axis=. 
 <p> 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 src/image/misc/ccdmom.c 
 <p> 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect9' href='#toc9'>Update
+<h2><a name='sect10' href='#toc10'>Update
 History</a></h2>
 <br>
 <pre>09-jun-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -210,6 +230,7 @@ History</a></h2>
 10-may-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4 force q&amp;d cont subtraction on mom=30,31,....<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-jun-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.5 add pos= option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-jun-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.6 add abs= option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V.30 add arange=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -220,11 +241,12 @@ History</a></h2>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Caveats</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Python</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Caveats</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>
