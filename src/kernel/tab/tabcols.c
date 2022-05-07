@@ -48,9 +48,6 @@ extern  string *burststring(string, string);
 void nemo_main()
 {
     setparams();
-    instr  = stropen(input,"r");
-    tptr   = table_open(instr,1);
-    outstr = stropen (output,"w");
     convert (instr,outstr);
 }
 
@@ -62,6 +59,13 @@ local void setparams(void)
 
     input = getparam("in");
     output = getparam("out");
+
+    instr  = stropen(input,"r");
+    tptr   = table_open(instr,1);
+    outstr = stropen (output,"w");
+
+    // dprintf(1,"table: %d x %d\n", table_nrows(tptr), table_ncols(tptr));
+    
 
     select = getparam("select");
     if (select==NULL || *select=='\0' || streq(select,"all")) {
