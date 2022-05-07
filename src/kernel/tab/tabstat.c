@@ -42,7 +42,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
-    "VERSION=2.1\n	 2-may-2022 PJT",
+    "label=\n            QAC label",
+    "VERSION=2.2\n	 6-may-2022 PJT",
     NULL
 };
 
@@ -77,6 +78,7 @@ local real   fsigma;
 local int    method;
 local bool   Qmin, Qmax;
 local real   xmin, xmax;
+local string qac_label;
 
 extern void sortptr (real *x ,int *idx, int n);
 
@@ -106,8 +108,7 @@ void setparams(void)
     nrows = table_nrows(tptr);
     ncols = table_ncols(tptr);
     dprintf(0,"Table: %d x %d\n", nrows, ncols);
-    
-    
+
     nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
     if (nxcol == 0) {
       warning("selecting all columns");
@@ -138,6 +139,10 @@ void setparams(void)
     fsigma = getrparam("nsigma");
     iter = getiparam("iter");
     method = getiparam("method");
+    if (hasvalue("label"))
+      qac_label = getparam("label");
+    else
+      qac_label = getparam("in");
 }
 
 void read_data(void)
@@ -177,12 +182,12 @@ void stat_data(void)
 	  compute_robust_moment(&m[j]);
 	  robust_range(&m[j], rrange);
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
-		 input, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
+		 qac_label, mean_robust_moment(&m[j]), sigma_robust_moment(&m[j]),
 		 min_moment(&m[j]), max_moment(&m[j]),		 
 		 sum_moment(&m[j]), sratio_moment(&m[j]), n_robust_moment(&m[j]));
 	} else
 	  printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
-		 input, mean_moment(&m[j]), sigma_moment(&m[j]),
+		 qac_label, mean_moment(&m[j]), sigma_moment(&m[j]),
 		 min_moment(&m[j]), max_moment(&m[j]),
 		 sum_moment(&m[j]), sratio_moment(&m[j]),n_moment(&m[j]));
       }
