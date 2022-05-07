@@ -6,7 +6,8 @@ table_open, table_row, table_md2, table_close - table manipulation routines
 get_atable, get_ftable, get_line, parse, strinsert \- legacy table routines
 
 .SH "SYNOPSIS"
-Note the API below has not been implemented for names with a preceding dash!
+Note the API below has not been implemented for functions with a preceding dash!
+
 .nf
 .B #include <table.h>
 .B #include <mdarray.h>
@@ -308,7 +309,7 @@ adding 1 to each element:
         d2[i][j] += 1.0;             // d2[row][col]
 
 .fi
-and here is an example of reading the table line by line, without any parsing,
+Here is an example of reading the table line by line, without any parsing,
 but removing comment lines. This can be done in line by line streaming mode,
 not allocating space for the whole table, for which \fBmode=1\fP is needed:
 .nf
@@ -327,14 +328,14 @@ not allocating space for the whole table, for which \fBmode=1\fP is needed:
     dprintf(0,"Read %d lines\\n",nrows);
     
 .fi
-and dealing (and preserving) comments while reading in the whole table:
+Dealing (and preserving) comments while reading in the whole table:
 .nf
 
     table *t = table_open1(filename, 0, 0);
     int nrows = table_nrows(t);
     int ncols = table_ncols(t);  // this triggers a column counter
     
-    string *sp = table_comments(t);
+    string *sp = table_comments(t);   // not implemented yet
     while (*sp)
       printf("%s\n",*sp++);
 
@@ -350,12 +351,12 @@ and dealing (and preserving) comments while reading in the whole table:
 
 .SH "XSV"
 An interesting package to deal with tables is the XSV program
+
 .nf
 cat AAPL.csv | xsv table | head -2
 cat AAPL.csv | xsv slice -i 1 | xsv table
 cat AAPL.csv | xsv slice -i 1 | xsv flatten
 cat AAPL.csv | xsv count
-
 
 .fi
 
@@ -390,15 +391,7 @@ Peter Teuben
 xx-sep-88	V1.0 written	PJT
 6-aug-92	documented get_Xtable functions  	PJT
 1-sep-95	added iscomment()	PJT
-12-jul-03	fixed reading large table buffereing	PJT
+12-jul-03	fixed reading large table bufferrng	PJT
 aug-2020	designing new table system	Sathvik/PJT
-22-apr-2022	finalizing implementation of table2	PJT/xxx/yyy
+5-may-2022	finalizing implementation of table2	PJT/Parker/Yuzhu
 .fi
-
-
-.ig
--------   here's the progress list of programs that have been converted
-tabcomment
-tabstat       complicated conversion to use table_md2cr()
-
-..

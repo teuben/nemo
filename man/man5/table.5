@@ -1,4 +1,4 @@
-.TH TABLE 5NEMO "17 March 2022"
+.TH TABLE 5NEMO "5 May 2022"
 
 .SH "NAME"
 table \- (ASCII) table format
@@ -7,11 +7,11 @@ table \- (ASCII) table format
 A \fBtable\fP file is a simple ASCII text file, 
 structured in rows and columns, with one row per line. 
 Columns can be separated by spaces, commas, vertical bars, or tabs
-(though many dialects of this definition exist).
+(though many dialects of this definition exist which we will try and support).
 The number of columns per row does not have to be the same,
-as long as the columns accessed are in the specified range
-(although some programs, e.g. \fItablint(1NEMO)\fP, may
-put restrictions on this).
+as long as the columns accessed are in the specified range.
+Some programs, e.g. \fItablint(1NEMO)\fP, may
+put restrictions on this though.
 .PP
 Comments can be entered by using the octothorpe ('\fB#\fP') symbol 
 on the first character on a line (though again, many
