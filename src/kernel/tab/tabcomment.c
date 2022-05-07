@@ -20,7 +20,7 @@
 
 string defv[] = {
 	"in=???\n		  input ascii table",
-	"out=-n                   output ascii table",
+	"out=-\n                  output ascii table",
 #if 0
 	"lines=\n		  Lines to comment (1..Nlines)",
 #endif
@@ -30,7 +30,7 @@ string defv[] = {
 	"delete=f\n		  Delete the comment lines?",
 	"raw=f\n                  Show only the raw comments?",
 	"comment=#\n              The comment character!",
-	"VERSION=2.1\n		  22-apr-2022 PJT",
+	"VERSION=2.1a\n		  7-may-2022 PJT",
 	NULL,
 };
 
@@ -68,26 +68,26 @@ void nemo_main()
             cp++;
 
         if (*cp == '\0' && Qblank) {        /* if blank, comment */
-            if (Qkeep) fprintf(outstr,"%c %s",*comment,cp);
-	    if (Qraw)  fprintf(outstr,"%s",cp);
+            if (Qkeep) fprintf(outstr,"%c %s\n",*comment,cp);
+	    if (Qraw)  fprintf(outstr,"%s\n",cp);
             continue;
         }
 
         if (isalpha(*cp) && Qalpha) {        /* if alpha, comment */
-            if (Qkeep) fprintf(outstr,"%c %s",*comment,cp);
-	    if (Qraw)  fprintf(outstr,"%s",cp);
+            if (Qkeep) fprintf(outstr,"%c %s\n",*comment,cp);
+	    if (Qraw)  fprintf(outstr,"%s\n",cp);
             continue;
         }
 
         if (ispunct(*cp) && Qpunct) {        /* if punct, comment */
-            if (Qkeep) fprintf(outstr,"%c %s",*comment,cp);
-	    if (Qraw)  fprintf(outstr,"%s",cp);
+            if (Qkeep) fprintf(outstr,"%c %s\n",*comment,cp);
+	    if (Qraw)  fprintf(outstr,"%s\n",cp);
             continue;
         }
 
         nreal++;
 	if (!Qraw)
-	  fprintf(outstr,"%s",cp);          /* else, regular output */
+	  fprintf(outstr,"%s\n",cp);          /* else, regular output */
     }
     dprintf(1,"%s: commented %d/%d lines\n",getparam("in"),nlines-nreal,nlines);
     table_close(tptr);
