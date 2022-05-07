@@ -15,10 +15,10 @@
 
 string defv[] = {
 	"in=???\n		input file",
-        "out=???\n              output file",
-        "select=all\n           lines to select",
+        "select=all\n           rows/lines to select",
 	"comment=t\n		count comment lines too?",
         "nmax=10000\n           Default max allocation for lines to be picked",
+        "out=-\n                output file",
 	"VERSION=2.0\n		5-may-2022 PJT",
 	NULL,
 };
@@ -39,6 +39,7 @@ void nemo_main()
     string iname = getparam("in");
 
     if (Qsel) {
+        // @todo   relic from old table interface, this needs a more dynamic interface
         nmax = nemo_file_lines(iname,getiparam("nmax"));
 	dprintf(0,"nmax=%d\n",nmax);
         if (nmax<0) error("Error opening %s",iname);
