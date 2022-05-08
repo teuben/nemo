@@ -60,7 +60,7 @@ void nemo_main()
       Qkeep=FALSE;
       warning("new raw mode");
     }
-    dprintf(0,"start ncols=%d nrows=%d\n",table_ncols(tptr),table_nrows(tptr));
+    dprintf(1,"start ncols=%d nrows=%d\n",table_ncols(tptr),table_nrows(tptr));
     while ( (cp=table_line(tptr)) ) {
         nlines++;
 
