@@ -16,7 +16,7 @@ string defv[] = {
     "infile=???\n        Input file name (table)",
     "maxpnt=10000\n      Max number of points that can be read",
     "carma=t\n           Special CARMA output",
-    "VERSION=1.1\n	 4-mar-2022 PJT",
+    "VERSION=1.1a\n	 7-may-2022 PJT",
     NULL
 };
 
@@ -37,7 +37,7 @@ void nemo_main()
   tableptr tp;
   Moment m;
   string s;
-  int i,k=0,n, mode = 0;
+  int i,k=0,n, mode = 1;
 
   instr = stropen(getparam("infile"),"r");
   tp = table_open(instr, mode);
