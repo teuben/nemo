@@ -51,16 +51,16 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        output format",
     "scale=1\n          scale applied to degrees in the fromhms=/fromdms= and center=",
     "center=\n          If coordinates are to reference to a center",
-    "VERSION=1.0\n      31-dec-2021 PJT",
+    "VERSION=1.1\n      7-may-2022 PJT",
     NULL
 };
 
 string usage = "Convert to HMS/DMS";
 
-string cvsid="$Id$";
 
 
 stream instr, outstr;			/* file streams */
+table *tptr;                            /* table */
 
 string sep;                             /* separator */
 string fmt;                             /* output format */
@@ -201,17 +201,19 @@ void center(string scen)
 
 void diff(stream instr, stream outstr)
 {
-  char   line[MAX_LINELEN];          /* input linelength */
+  //char   line[MAX_LINELEN];          /* input linelength */
+  char *line;
   double xval, yval;
   int    nval, i, nlines;
   string *outv;                   /* pointer to vector of strings to write */
-  string seps=", \t";             /* column separators  */
+  string seps=", \t";       /* column separators  */
 
+  tptr = table_open(instr, 1);
   
   nlines=0;               /* count lines read so far */
   for(;;) {                       /* loop over all lines in file(s) */
-    if (get_line(instr, line) < 0)
-      return;
+    line = table_line(tptr);
+    if (line == NULL) return;
     dprintf(3,"LINE: (%s)\n",line);
     if(line[0] == '#') continue;		/* don't use comment lines */
     nlines++;
@@ -229,18 +231,20 @@ void diff(stream instr, stream outstr)
 
 void convert(stream instr, stream outstr)
 {
-  char   line[MAX_LINELEN];          /* input linelength */
+  //char   line[MAX_LINELEN];          /* input linelength */
+  char *line;
   double dval;        
   int    nval, i, nlines, sign, decimalval,nhms,ndms;
   string *outv, *hms, *dms;       /* pointer to vector of strings to write */
   string seps=", \t";             /* column separators  */
   real   dd, mm, ss;
+
+  tptr = table_open(instr, 1);
   
   nlines=0;               /* count lines read so far */
   for(;;) {                       /* loop over all lines in file(s) */
-
-    if (get_line(instr, line) < 0)
-      return;
+    line = table_line(tptr);
+    if (line==NULL) return;
     dprintf(3,"LINE: (%s)\n",line);
     if(line[0] == '#') continue;		/* don't use comment lines */
     nlines++;
