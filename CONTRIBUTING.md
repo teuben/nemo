@@ -244,3 +244,4 @@ Some references on git workflows:
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 * http://physics.mnstate.edu/craig/git-novice-pyastro/
 * https://www.sitepoint.com/quick-tip-sync-your-fork-with
+* https://how-to.dev/how-git-stores-data
