@@ -18,14 +18,24 @@ it's mostly noise, whereas for sratio=1 (or near 1) it's mostly signal.
 .PP
 It is used by a number of programs in NEMO, e.g. \fItabstat(1NEMO)\fP and \fIccdstat(1NEMO)\fP
 where the keyword \fBqac=t\fP needs to be used to active this style of output.
-.PP
+
+.SH "CAVEATS"
 Of course all of the interesting science happens near sratio=0 and one will need more sophisticated
-signal detection schemes.
+signal detection schemes, but the sratio is useful for regression.
+
 .SH "EXAMPLES"
-For a FITS file:
+For three maps with dispersion 1 and mean at 0, 1 and 2 we find:
 .nf
-   fitsccd NGC0001.fits - | ccdstat - qac=t bad=0
-   
+
+    ccdgen out=- object=noise spar=0,1 size=100,100 seed=123 | ccdstat - qac=t
+    QAC_STATS: - 0.00841719 1.00315 -3.8169 3.9858  84.1719 0.0105624
+    
+    ccdgen out=- object=noise spar=1,1 size=100,100 seed=123 | ccdstat - qac=t
+    QAC_STATS: - 1.00842 1.00315 -2.8169 4.9858  10084.2 0.858938
+    
+    ccdgen out=- object=noise spar=2,1 size=100,100 seed=123 | ccdstat - qac=t
+    QAC_STATS: - 2.00842 1.00315 -1.8169 5.9858  20084.2 0.991482
+
 .fi
 
 .SH "SEE ALSO"
