@@ -1,4 +1,4 @@
-
+ 
 Here we gather some simple examples of parsing a command line user interface.
 We have choosen the variables 'aaa' and 'bbb' in their long form. Where the CLI
 supports this, short options 'a' and 'b' are implemented, though NEMO's

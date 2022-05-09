@@ -31,25 +31,23 @@ string defv[] = {
   "out=???\n       Output file",
   "object=flat\n   Object type (test,flat,exp,gauss,bar,spiral,....)",
   "spar=\n         Parameters for this object",
-  "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "size=10,10,1\n  2- or 3D dimensions of map/cube (only if no input file given)",
   "cell=1\n        Cellsize",
   "pa=0\n          Position Angle of disk in which object lives",
   "inc=0\n         Inclination Angle of disk in which object lives",
   "totflux=f\n     Interpret peak values (spar[0]) as total flux instead",
   "factor=1\n      Factor to multiple input image by before adding object",
+  "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "crpix=\n        Override/Set crpix (1,1,1) // ignored ** mapcenter if left blank **",
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=1.1a\n  22-may-2021 PJT",
+  "VERSION=1.2\n   8-may-2022 PJT",
   NULL,
 };
 
 string usage = "image creation/modification with objects";
-
-string cvsid = "$Id$";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -105,7 +103,7 @@ void nemo_main(void)
   string  object;
   string  headline;
   int seed = init_xrandom(getparam("seed"));
-  int ndim;
+  int ndim = 0;
 
   object = getparam("object");
   npar = nemoinpr(getparam("spar"),spar,MAXPAR);

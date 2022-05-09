@@ -16,8 +16,12 @@ try:
 except:
     Qfit = False
 
-Qdebug = False    
-Qplot = True
+Qdebug = False
+#  -1:  no plot
+#   0:  interactive only
+#   1:  interactive + plotfile
+#   2:  plotfile only
+Nplot = -1
 
 table = sys.argv[1]
 xcol = 0
@@ -44,10 +48,13 @@ else:
 print('P:',p)
 
 
-if Qplot:
+if Nplot >= 0:
     import matplotlib.pyplot as plt
     xp = np.linspace(x.min(), x.max(), 2*len(x))
     z = np.poly1d(p)
+    
     plt.figure()
     plt.plot(x,y,'.',xp,z(xp),'-')
+    # interactive or batch
+    plt.savefig('tabfit.png')
     plt.show()

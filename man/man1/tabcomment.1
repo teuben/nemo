@@ -1,9 +1,12 @@
-.TH TABCOMMENT 1NEMO "18 October 2004"
-.SH NAME
-tabcomment \- Add comments to a table, or comment certain lines
-.SH SYNOPSIS
+.TH TABCOMMENT 1NEMO "10 April 2022"
+
+.SH "NAME"
+tabcomment \- Add comments to a table, or comment certain lines, or show just comments
+
+.SH "SYNOPSIS"
 \fBtabcomment\fP \fBin=\fP \fBout=\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItabcomment\fP comments selected lines of a text file.
 .PP
 A comment line is a line that starts with a \fB#\fP symbol, and is
@@ -16,45 +19,65 @@ in particular the functions
 from \fIctype(3)\fP are used to detect this, always
 skipping initial whitespace of course)
 Individual control over each of these types can be given, see below.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+Other common comment characters are:   ;  !  C  /, but they are all caught
+with these defaults.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input ascii table. No Default.
 .TP 20
 \fBout=\fP
-output ascii table. No Default.
+output ascii table. No Default. Use "out=-" if \fIstdout\fP is preferred.
 .TP 20
 \fBalpha=t|f\fP
-Comment lines that start with alpha? [Default: \fBt\fP].
+Comment lines that start with alpha? See \fIisalpha(3)\fP [Default: \fBt\fP].
 .TP 20
 \fBblank=t|f\fP
 Comment blank lines (lines that only contain
-blanks, see \fIisspace\fP) [Default: \fBt\fP].
+blanks, see \fIisspace(3)\fP) [Default: \fBt\fP].
 .TP
 \fBpunct=t|f\fP
 Comment lines that start with a punctuation character
-(neither control nor alphanumeric, see also \fIispunct\fP).
+(neither control nor alphanumeric, see also \fIispunct(3)\fP).
 [Default: \fBt\fP].
 .TP
 \fBdelete=t|f\fP
 Delete comment lines from output? [Default: \fBf\fP].
+.TP
+\fBraw=t|f\fP
+In raw mode only the comments are shown. [Default: \fBf\fP].
 .TP
 \fBcomment=\fP
 The actual comment character to be used at the beginning of the line.
 Although it is not adviced to use anything but the '#' symbol, the
 '!' and ';' characters have also been popular as a choice for
 comment characters. Default: \fB#\fP.
-.SH EXAMPLES
 
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+.SH "EXAMPLES"
+Historically this program was written because some programs could not deal with
+comments in tables, thus we often wind up with constructs such as
 .nf
-.ta +1.0i +4.0i
-01-aug-92	V1.0 Created	PJT
-14-sep-92	V1.1 added delete=; also updated man	PJT
-20-may-93	updated man	PJT
-18-oct-04	V2.0 allow change of comment character	PJT
+
+      program1 | tabcomment - delete=t | program2
+.fi
+but especially if the tail end of the pipe has to filter down to numbers, the
+\fItxtpar(1NEMO)\fP can be useful.
+
+.SH "SEE ALSO"
+tr(1), grep(1), isalpha(3), txtpar(1NEMO), table(5NEMO), ascii(7)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+01-aug-1992	V1.0 Created	PJT
+14-sep-1992	V1.1 added delete=; also updated man	PJT
+20-may-1993	updated man	PJT
+18-oct-2004	V2.0 allow change of comment character	PJT
+10-apr-2022	V2.1 new table I/O, add raw=, default out=-	PJT
 .fi

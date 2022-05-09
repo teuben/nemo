@@ -3,7 +3,7 @@
  *
  *     27-dec-2021    drafted
  *
- *
+ *  @todo   bring back comments
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -23,9 +23,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "format=%g\n        format for new output values",
     "seed=0\n           Initial random number",
     "newline=f\n        add newline between output parameters",
+#if 0    
     "maxline=10000\n    Max number of lines in case a pipe was used",
+#endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.5a\n     24-mar-2022 PJT",
+    "VERSION=0.7a\n     5-may-2022 PJT",
     NULL
 };
 
@@ -37,6 +39,7 @@ string usage = "Extract numeric parameters from a text file, with optional math"
 
 string input;			        /* file names */
 stream instr;			        /* file streams */
+table *tptr;                            /* table */
 
 string fmt;                             /* format of new column */
 
@@ -54,8 +57,7 @@ bool   Qfie;				/* boolean if multiple fie's loaded */
 bool   Qnewline;                        /* boolean if newline is needed */
 bool   Qexpr;
 
-string *lines;
-int    nlines, maxline;
+int    nlines;
 
 string word[MAXPAR];
 int    row[MAXPAR];
@@ -66,7 +68,6 @@ int    maxpar;
 local void setparams(void);
 local void convert(stream);
 local string *burstfie(string);
-local void tab2space(char *);
 
 extern  string *burststring(string, string);
 extern  int inifie(string);
@@ -74,17 +75,12 @@ extern void dofie(real *, int *, real *, real *);
 extern void dmpfie(void);
 extern int savefie(int);
 extern int loadfie(int);
-extern int nemo_file_lines(string, int);
 
 
 void nemo_main(void)
 {
-    int i;
-
     setparams();
-
-    convert (instr);
-
+    convert(instr);
 }
 
 local void setparams(void)
@@ -99,9 +95,7 @@ local void setparams(void)
 
     input  = getparam("in");
     instr = stropen(input,"r");
-    maxline = nemo_file_lines(input, getiparam("maxline"));
-    dprintf(1,"Allocated %d lines for file\n",maxline);
-    lines = (string *) allocate(maxline * sizeof(string));
+    tptr = table_open(instr,-1);            /* open & read table, treating comments like data */
 
     Qexpr = hasvalue("expr");
     newcol = getparam("expr");
@@ -161,36 +155,20 @@ local void setparams(void)
 
 local void convert(stream instr)
 {
-    char   line[MLINELEN];          /* input linelength */
+    char   line[MLINELEN];
     real   dval[MAXCOL];            /* number of items (values on line) */
     string sval[MAXCOL];            // 
-    real   retval;
     int    nval, i, j, one=1;
     int    match[MAXROW], nmatch, rownr;
     string *outv;                   /* pointer to vector of strings to write */
     char   *cp, *seps=", \t";       /* column separators  */
     real   errval=0.0;
 
-
     /*
      *   read input lines
      */
 
-    nlines=0;                              /* counter for lines read */
-    for(;;) {                              /* loop over all lines in file(s) */
-      if (get_line(instr, line) < 0)           
-	break; 					      /* EOF */
-      dprintf(3,"LINE: (%s)\n",line);
-
-      tab2space(line);	          /* work around a Gipsy (?) problem */
-      lines[nlines] = strdup(line);
-      nlines++;
-      if (nlines == maxline) {
-	warning("maxline=%d exhausted", maxline);
-	break;
-      }
-    }
-    dprintf(1,"Read %d lines\n",nlines);
+    nlines = table_nrows(tptr);
 
     /*
      *   extract parameters
@@ -204,8 +182,8 @@ local void convert(stream instr)
 	nmatch = 0;
 	for (j=0; j<nlines; j++) {
 	  // @todo  allow ^word 
-	  if (strstr(lines[j],word[i])) {
-	    dprintf(1,"Match in %d: %s\n",j,lines[j]);
+	  if (strstr(table_row(tptr,j),word[i])) {
+	    dprintf(1,"Match in %d: %s\n",j,table_row(tptr,j));
 	    match[nmatch++] = j;
 	  }
 	}
@@ -238,7 +216,7 @@ local void convert(stream instr)
       }
       
       dprintf(1,"par p%d row=%d col=%d\n", i, rownr, col[i]);
-      cp = lines[rownr];
+      cp = table_row(tptr,rownr);
       dprintf(1,"LINE: %s\n", cp);
       outv = burststring(cp, seps);
       sval[nval] = outv[col[i]-1];
@@ -266,9 +244,8 @@ local void convert(stream instr)
      *   convert strings to float values
      */
     
-    for (i=0; i<nval; i++) {
+    for (i=0; i<nval; i++)
       dval[i] = atof(sval[i]);
-    }
 
     /*
      *   apply math and output the new expressions
@@ -328,17 +305,3 @@ local string *burstfie(string lst)
     return ((string *) copxstr(wrdbuf, sizeof(string)));	/*PPAP*/
 }
 
-/*
- * small helper function, replaces tabs by spaces before processing.
- * this prevents me from diving into gipsy parsing routines and fix
- * the problem there 
- * PJT - June 1998.
- */
-
-local void tab2space(char *cp)
-{
-    while (*cp) {
-        if (*cp == '\t') *cp = ' ';
-        cp++;
-    }
-}

@@ -21,6 +21,7 @@
  *      16-mar-05  V3.0 loop over all images if more found      PJT
  *                     a   added blankval to the new pl_matrix routine    PJT
  *      23-aug-18  V3.1  xscale,yscale,xlab,ylab                          PJT
+ *       1-apr-22  V3.3  add fraction of peak contour
  *	
  */
 
@@ -60,7 +61,8 @@ string defv[] = {
 	"ylab=\n	(override) Label along Y-axis",
 	"xscale=1\n     Scale all X values by this",
 	"yscale=1\n     Scale all Y values by this",
-	"VERSION=3.2\n	10-jan-2022 PJT",
+	"abs=t\n        Absolute WCS coordinates? (vs. relative)",
+	"VERSION=3.2c\n	4-may-2022 PJT",
 	NULL,
 };
 
@@ -90,7 +92,8 @@ real xscale, yscale;
 
 #define MCNTVAL	100			/* maximum contour levels */
 string cntstr;				/* string of contour levels */
-real cntval[MCNTVAL];			/* contour levels */
+real cntvali[MCNTVAL];			/* contour levels - as input*/ 
+real cntval[MCNTVAL];                   /* contour levels - used (abs/rel) */
 int ncntval;				/* actual number of contours */
 
 real xplot[2],   yplot[2];		/* ranges in plot variables */
@@ -102,6 +105,7 @@ string headline;			/* extra label */
 char   format4[100];
 int    cmode;
 int    lwidth=0, ltype=0;
+bool   Qabs;
 
 local real xtrans(real), ytrans(real);
 void lineto(real, real, real, real);
@@ -113,7 +117,7 @@ void setrange(real *rval, string exp);
 void setparams(void);
 void plot_map(void);
 void lineto(real x1, real y1, real x2, real y2);
-
+void fix_wcs(imageptr iptr, bool Qabs);
 
 void nemo_main()
 {
@@ -123,6 +127,7 @@ void nemo_main()
   instr = stropen (infile, "r");
   plinit ("***", 0.0, 20.0, 0.0, 20.0);       /* init yapp */
   while (read_image(instr,&iptr)) {   /* loop while more images found */
+    fix_wcs(iptr,Qabs);
     dprintf(1,"Time= %g MinMax= %g %g\n",Time(iptr),MapMin(iptr),MapMax(iptr));
     nx=Nx(iptr);			
     ny=Ny(iptr);
@@ -168,7 +173,6 @@ void setrange(real *rval, string rexp)
 void setparams()
 {
 	string  tmpstr;
-	int	tmpint, i;
 
 	infile = getparam ("in");
 
@@ -177,7 +181,7 @@ void setparams()
 /*	    ncntval = 0;	     this will cause a grayscale plot */
 	    gray=TRUE;
 	} else {
-	    ncntval = nemoinpr(getparam("contour"),cntval,MCNTVAL);
+	    ncntval = nemoinpr(getparam("contour"),cntvali,MCNTVAL);
 	    tmpstr = getparam("gray");
 	    if (*tmpstr==0)
 	    	gray=FALSE;
@@ -228,15 +232,26 @@ void setparams()
 	yscale = getrparam("yscale");
 	if (hasvalue("xlab")) xlab = getparam("xlab");
 	if (hasvalue("ylab")) ylab = getparam("ylab");
-            
+	Qabs = getbparam("abs");
+}
+
+void fix_wcs(imageptr iptr, bool Qabs)
+{
+  if (Qabs) return;
+  // make relative coords with (0,0) at the center
+  // also assume (but should check ctype) an astronomical WCS
+  real xmin = Xmin(iptr);
+  real ymin = Ymin(iptr);
+
+  Xmin(iptr) = Ymin(iptr) = 0.0;
+  
 }
 
 void plot_map ()
 {
-    real m_range, brightness, dcm;
+    real m_range, dcm;
     real m_min, m_max;
-    int    i, ix, iy;
-    int    cnt;		/* counter of pixels */
+    int  i;
 
     nsize = Nx(iptr);           /* old method forced square .. */			
     cell = Dx(iptr) * xscale;   /* and forced so for gray scale due to LW mem-problems */
@@ -256,18 +271,19 @@ void plot_map ()
 	if (gray) warning("%g; Plot-range was zero, mmax increased by 1",mmin);
     }
         
-    dprintf (1,"User reset Min and max are: %f %f\n",mmin,mmax);
+    dprintf(1,"User reset Min and max are: %f %f\n",mmin,mmax);
+    dprintf(0,"Image minmax: %g %g\n",mmin,mmax);
 
     
     sprintf (plabel,"File: %s",infile);			/* filename */
-    sprintf (clabel,"Contours: %s",cntstr);             /* contour levels */
+    sprintf (clabel,"Contours: %s [%s]",cntstr, Qabs ? "abs" : "rel");    /* contour levels */
     sprintf (glabel,"Gray MinMax: %g %g",mmin,mmax);    /* grey scale minmax */
     sprintf (tlabel,"Time: %g",Time(iptr));             /* time of orig snapshot */
 
 	/* set scales and labels along axes */
     if (xplot[0]==UNDEF || xplot[1]==UNDEF) {
-        xplot[0] = Xmin(iptr) - 0.5*Dx(iptr);     // @todo axis=1
-    	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr);
+        xplot[0] = Xmin(iptr) - 0.5*Dx(iptr) - Xref(iptr)*Dx(iptr);         // @todo axis=1
+    	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr) - Xref(iptr)*Dx(iptr);
     	xplot[0] *= xscale;
     	xplot[1] *= xscale;
     }
@@ -279,8 +295,8 @@ void plot_map ()
         strcpy (xlabel,"");
 
     if (yplot[0]==UNDEF || yplot[1]==UNDEF) {
-    	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr);     // @todo axis=1
-    	yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr);
+    	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr)- Yref(iptr)*Dy(iptr);     // @todo axis=1
+    	yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr) - Yref(iptr)*Dy(iptr);
     	yplot[0] *= yscale;
     	yplot[1] *= yscale;
 	
@@ -301,19 +317,25 @@ void plot_map ()
        pl_matrix (Frame(iptr), nx, ny, 
 		  xtrans(Xmin(iptr)), ytrans(Ymin(iptr)), dcm , mmin, mmax, power, blankval);
            /*  color_bar (100.0,500.0,32);  */
-     } 
+    }
+
+    if (Qabs)
+      for (i=0; i<ncntval; i++)  cntval[i] = cntvali[i];
+    else
+      for (i=0; i<ncntval; i++)  cntval[i] = cntvali[i] * mmax;
+      
      		/* OLD ROUTINE, has to call relocate/frame ---> plcontour */
-     plltype(lwidth,ltype);
-     if (cmode==0) 
+    plltype(lwidth,ltype);
+    if (cmode==0) 
         contour (Frame(iptr),nx,ny,cntval,ncntval,          /*  @todo  scaling not correct, see xplot/yplot[] */
-		Xmin(iptr), 
-		Ymin(iptr), 
-		Xmin(iptr)+(Nx(iptr)-1)*Dx(iptr)*xscale,
-		Ymin(iptr)+(Ny(iptr)-1)*Dy(iptr)*yscale, lineto);
+		 Xmin(iptr) - Xref(iptr)*Dx(iptr)*xscale,
+		 Ymin(iptr) - Yref(iptr)*Dy(iptr)*yscale,
+		 Xmin(iptr)+(Nx(iptr)-Xref(iptr)-1)*Dx(iptr)*xscale,
+		 Ymin(iptr)+(Ny(iptr)-Yref(iptr)-1)*Dy(iptr)*yscale, lineto);
     
-     else if (cmode==1)
+    else if (cmode==1)
          pl_contour (Frame(iptr),nx,ny,ncntval,cntval);
-     plltype(1,1);
+    plltype(1,1);
 
 	/* draw axes and their labels */
     xaxis ( 2.0, 2.0, 16.0, xplot, -7, xtrans,  xlabel);

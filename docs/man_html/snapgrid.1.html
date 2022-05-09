@@ -9,12 +9,16 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapgrid - grid a snapshot into a 2D or 3D image (cube), with optional
-moments 
+
+<p>moments 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>snapgrid in=</b>snapshot <b>out=</b>image [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapgrid</i>
 grids three arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
@@ -47,39 +51,41 @@ For a related program
 that creates images (and can create movies as well), see <a href='uns_2dplot.1.html'><i>uns_2dplot(1NEMO)</i></a>
 .
 <p>
-As of V6.0 the units in 3D cubes will be particle density. This ensures that
-programs such as <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
+As of V6.0 the units in 3D cubes will be particle density, not their sum.
+This ensures that programs such as <a href='ccdmom.1.html'><i>ccdmom(1NEMO)</i></a>
  and <a href='ccdstat.1.html'><i>ccdstat(1NEMO)</i></a>
- give the proper answer
-in their summed emission. <p>
-In the <b>yt</b> package such images are called <i>phase
-plot</i>, where a 2D grid  in field1 (<b>xvar=</b>) and field2 (<b>yvar=</b>) is computed,
-with  some statistic (<b>mom=</b>) on field3 (<b>evar=</b>). 
+ give
+the proper answer in their summed emission. <p>
+In the <b>yt</b> package such images
+are called <i>phase plot</i>, where a 2D grid  in <i>field1</i> (<b>xvar=</b>) and <i>field2</i> (<b>yvar=</b>)
+is computed, with  some statistic (<b>mom=</b>) on <i>field3</i> (<b>evar=</b>). 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized: 
+The
+following parameters are recognized: 
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format.
-Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.
- [no default]. </dd>
+
+format. Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b>
+below.  [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
 <dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
- format [no
-default]. </dd>
+ format
+[no default]. </dd>
 
 <dt><b>times=</b><i>t1:t2,t3,..</i> </dt>
-<dd>Selection of the times of snapshots to be selected
-for gridding. For <b>stack=t</b> all snapshots will be co-added into one image,
-however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can request multiple
-output images. [Default: <b>all</b>]. </dd>
+<dd>Selection of the times of snapshots to be
+selected for gridding. For <b>stack=t</b> all snapshots will be co-added into one
+image, however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can request
+multiple output images. [Default: <b>all</b>]. </dd>
 
 <dt><b>xrange=<i>xb:xe</i></b> </dt>
-<dd>Range in <b>xvar</b> to bin, the coordinates
-are allowed to decrease as well as increase.  [default: <b>-2:2</b>].<br>
+<dd>Range in <b>xvar</b> to bin,
+the coordinates are allowed to decrease as well as increase.  [default:
+<b>-2:2</b>].<br>
  </dd>
 
 <dt><b>yrange=<i>xb:xe</i></b> </dt>
@@ -183,17 +189,26 @@ stacked snapshots yet ** [default: <b>f</b>]. </dd>
 (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT) but see also <a href='wcs.1.html'><i>wcs(1NEMO)</i></a>
 , the input
 coordinates are interpreted in angular degrees, and griddes with the appropriate
-sky projection. Default: no sky projection. </dd>
+sky projection. Default: no sky projection. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example
-makes three moment images from an N-body snapshot, then smooths and combines
-them into an &rsquo;intensity&rsquo; (<b>int</b>), &rsquo;mean velocity&rsquo; (<b>vel</b>) and &rsquo;velocity dispersion&rsquo;
-(<b>sig</b>) map using a CCD math operator. <p>
-Note that the moment maps must be smoothed
-<i>before</i> they can be combined to the proper velocity and dispersion maps.
-<br>
+<h2><a name='sect4' href='#toc4'>Sky Projection</a></h2>
+By default <b>snapgrid</b>
+will provide a sky-view where the (-x,y) axes are (RA,DEC), and the observer
+is along the z-axis at +infinity. <p>
+An alternative view could be to assign
+(RA,DEC) to be the (y,x), i.e. a 90-degree rotated system. This has the benefit
+that the astronomical position angle is now <i>atan2(y,x)</i>.   In the conventional
+system, this would be <i>atan2(-x,y)</i> 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+The following example makes three
+moment images from an N-body snapshot, then smooths and combines them into
+an &rsquo;intensity&rsquo; (<b>int</b>), &rsquo;mean velocity&rsquo; (<b>vel</b>) and &rsquo;velocity dispersion&rsquo; (<b>sig</b>) map
+using a CCD math operator. <p>
+Note that the moment maps must be smoothed <i>before</i>
+they can be combined to the proper velocity and dispersion maps. <br>
 <pre>   % snapgrid in=nbody.dat out=map0 moment=0
    % snapgrid in=nbody.dat out=map1 moment=1
    % snapgrid in=nbody.dat out=map2 moment=2
@@ -234,14 +249,16 @@ to divide them to get the desired result: <br>
     ccdmath in=map1,map2 out=map3 fie="ifeq(%2,0,0,%1/%2)"
 </pre>with an additional safeguard to set cells to 0 if no emission with found
 in them. 
-<h2><a name='sect5' href='#toc5'>Kinemetry</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Kinemetry</a></h2>
 Krajnovic et al. (2006) popularized kinemetry, a description
 of line of sight velocities in terms of the first four moments (v, sigma,
 h3 and h4). The following example shows how to create these maps with <b>snapgrid</b>:
 <br>
 <pre>  % snapgrid ...
 </pre>
-<h2><a name='sect6' href='#toc6'>Units</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Units</a></h2>
 Units are maintained in the same way as in snapshots, they don&rsquo;t have
 a specific name, but carry their normal meaning &rsquo;length&rsquo;, &rsquo;velocity&rsquo; and &rsquo;mass&rsquo;.
 Since <i>snapgrid</i> calculates (surface/space) densities, its units are formally
@@ -259,33 +276,36 @@ can also be used, after a snapshot has been gridded into a map/cube, <a href='cc
 can optionally be used to rescale a cube in astronomical units (degrees
 and m/s) such  that exported FITS files can be compared directly with model
 generated FITS files. 
-<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
-Combinations of large snapshots and large images
-may run into memory problems since both the snapshot and the image(s) must
-fit into memory to obtain turbo speeds. Use non-negative <b>moment</b>s to avoid
-having to allocate one or two extra images in addition to the snapshot
-and the image.  <p>
-Sky projections do not guarantee flux conservation. 
 <p> 
-<h2><a name='sect8' href='#toc8'>See
-Also</a></h2>
+<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+The usual NEMO problem: everything needs to fit
+in memory, thus large snapshots and images can be hazardous to your computers
+health. Use non-negative <b>moment</b>s to avoid having to allocate one or two extra
+images in addition to the snapshot and the image.  It might also help to
+split the snapshot in pieces and have a multi-snapshot dataset (see <a href='snapsplit.1.html'><i>snapsplit(1NEMO)</i></a>
+),
+though this could still result into a catch-22 situation. <p>
+Sky projections
+do not guarantee flux conservation. 
+<p> 
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='snapgridsmooth.1.html'>snapgridsmooth(1NEMO)</a>
 , <a href='snapmap.1.html'>snapmap(1NEMO)</a>
-, <a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
+,
+<a href='snaprotate.1.html'>snaprotate(1NEMO)</a>
 , <a href='snapslit.1.html'>snapslit(1NEMO)</a>
-,
-<a href='snapifu.1.html'>snapifu(1NEMO)</a>
+, <a href='snapifu.1.html'>snapifu(1NEMO)</a>
 , <a href='snapsmooth.1.html'>snapsmooth(1NEMO)</a>
-, <a href='uns_2dplot.1.html'>uns_2dplot(1NEMO)</a>
-, <a href='snapaxsym.1.html'>snapaxsym(1NEMO)</a>
 ,
-<a href='wcs.1.html'>wcs(1NEMO)</a>
+<a href='uns_2dplot.1.html'>uns_2dplot(1NEMO)</a>
+, <a href='snapaxsym.1.html'>snapaxsym(1NEMO)</a>
+, <a href='wcs.1.html'>wcs(1NEMO)</a>
 , <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='snapccd.1.html'>snapccd(1NEMO)</a>
-, <a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
-, <a href='ccdstack.1.html'>ccdstack(1NEMO)</a>
 ,
-<a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+<a href='ccdintpol.1.html'>ccdintpol(1NEMO)</a>
+, <a href='ccdstack.1.html'>ccdstack(1NEMO)</a>
+, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
 ,  <p>
 <a href='http://www.iinet.com.au/~watson/nngridr.html'>http://www.iinet.com.au/~watson/nngridr.html</a>
@@ -304,15 +324,19 @@ FluxCompensator<tt> </tt>&nbsp;<tt> </tt>&nbsp; <a href='https://github.com/koep
  <p>
 cygrid:  <a href='http://ascl.net/cygrid'>http://ascl.net/cygrid</a>
 
-  (1606.003) 
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
+  (1606.003) <p>
+yt project:  <a href='https://yt-project.org'>https://yt-project.org</a>
+ 
+<p> 
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect10' href='#toc10'>Files</a></h2>
+<p> 
+<h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>src/nbody/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapgrid.c
 </pre>
 <p> 
-<h2><a name='sect11' href='#toc11'>Update History</a></h2>
+<h2><a name='sect12' href='#toc12'>Update History</a></h2>
 <br>
 <pre>19-jan-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added emisitivity evar<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -338,14 +362,15 @@ brightness)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Kinemetry</a></li>
-<li><a name='toc6' href='#sect6'>Units</a></li>
-<li><a name='toc7' href='#sect7'>Bugs</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Files</a></li>
-<li><a name='toc11' href='#sect11'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Sky Projection</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Kinemetry</a></li>
+<li><a name='toc7' href='#sect7'>Units</a></li>
+<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc9' href='#sect9'>See Also</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Files</a></li>
+<li><a name='toc12' href='#sect12'>Update History</a></li>
 </ul>
 </body>
 </html>

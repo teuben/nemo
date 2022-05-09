@@ -68,7 +68,6 @@ local int nemoinprt(char *line, real *par, int npar)
   static real *value;   //   value[0] , value[1], .... value[ntok-1]
   static int nvalue = 0;
 
-
   /*      tokenize and build linked list */
 
   //first.val = atof(token);
@@ -129,12 +128,11 @@ void nemo_main(void)
     string iname = getparam("in");
     real par[MAXPAR], retval, errval;
     int mode = getiparam("mode");
-    size_t linelen = MAX_LINELEN;
-    //char line[MAX_LINELEN];
+    size_t linelen = 128;
     char *line = malloc((linelen) * sizeof(char));        
 
     npar = inifie("sqrt(%1*%1+%2*%2+%3*%3)");
-    dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
+    // dprintf(0,"MAX_LINELEN=%d\n",MAX_LINELEN);
 
     istr = stropen(getparam("in"),"r");
     if (Qout) ostr = stropen(getparam("out"),"w");
@@ -147,7 +145,6 @@ void nemo_main(void)
 	dprintf(0,"Just reading\n");
       else
 	dprintf(0,"Just reading and writing\n");
-      //while (fgets(line,MAX_LINELEN,istr) != NULL)
       while (getline(&line, &linelen, istr) != -1) {
 	nlines++;
 	if (Qout && mode == 0) fputs(line,ostr);
@@ -157,6 +154,7 @@ void nemo_main(void)
         while (getline(&line, &linelen, istr) != -1) {
 	  nlines++;
 	  npar = my_nemoinpr(line,par,MAXPAR);
+	  dprintf(1,"%d: %d npar=%d\n",nlines,linelen,npar);
 	}
     } else if (mode == 2) {
         dprintf(0,"nemoinp + sqrt()\n");            
@@ -167,6 +165,7 @@ void nemo_main(void)
 	  sum += retval;
 	  if (Qout) fprintf(ostr,"%s %g\n",line,retval);
 	}
+	dprintf(0,"last npar=%d\n",npar);	
     } else if (mode == 3) {
         dprintf(0,"nemoinp + fie(sqrt())\n");                  
         while (getline(&line, &linelen, istr) != -1) {	        
@@ -176,6 +175,7 @@ void nemo_main(void)
 	  sum += retval;
 	  if (Qout) fprintf(ostr,"%s %g\n",line,retval);	  
 	}
+	dprintf(0,"last npar=%d\n",npar);
     }
 
     strclose(istr);

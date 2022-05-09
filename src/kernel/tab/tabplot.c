@@ -1,5 +1,5 @@
 /*
- * TABPLOT: a simple general table plotter
+ * TABPLOT: a (formarly simple) general table plotter
  *	    for ascii data in tabular format which has now grown quite complex
  *
  *	25-nov-88  V1.0 :  created by P.J.Teuben
@@ -44,6 +44,7 @@
  *      22-aug-2018 V3.1 : print commented line if bin= causes an empty bin
  *       8-jan-2020 V4.0 : template python option
  *      12-jan-2021 V4.1 : added backtrack=
+ *      20-apr-2022 V5.0 : converted to table V2
  */
 
 /* TODO:
@@ -60,6 +61,7 @@
 #include <axis.h>
 #include <layout.h>
 #include <table.h>
+#include <mdarray.h>
 #include <pyplot.h>
 #include <moment.h>
                     /* undefined values trick !!!  MACHINE DEP  !!! */
@@ -70,6 +72,7 @@
 #endif
 
 #define MAXCOL  256
+#define MAXBIN  256
 #define MAXCOORD 16
 
 /**************** COMMAND LINE PARAMETERS **********************/
@@ -99,7 +102,9 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "yscale=1\n          Scale all Y values by this",
     "dxcol=\n            Columns representing error bars in X ",
     "dycol=\n            Columns representing error bars in Y ",
+#if 0    
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
+#endif    
     "median=f\n          Use median in computing binning averages?",
     "headline=\n	 headline in graph on top right",
     "tab=f\n             Table output also if binning is used?",
@@ -110,19 +115,19 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.1\n	 12-jan-2022 PJT",
+    "VERSION=5.0\n	 29-apr-2022 PJT",
     NULL
 };
 
 string usage = "general table plotter";
-
-string cvsid="$Id$";
 
 
 /**************** GLOBAL VARIABLES ************************/
 
 local string input;				/* filename */
 local stream instr;				/* input file */
+local table *tptr;                              /* table */
+local mdarray2 d2;                              /* data[col][row] */
 
 local int xcol[MAXCOL], ycol[MAXCOL], nxcol, nycol;	/* column numbers */
 local int dxcol[MAXCOL],dycol[MAXCOL],ndxcol,ndycol;	/* column numbers */
@@ -196,7 +201,6 @@ void nemo_main(void)
     }
       
 
-    instr = stropen (input,"r");
     read_data();
     plot_data();
 }
@@ -207,6 +211,9 @@ void setparams(void)
     int  i, j;
    
     input = getparam("in");             /* input table file */
+    instr = stropen (input,"r");
+    tptr = table_open(instr,0);
+    
     nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
     nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
@@ -216,38 +223,19 @@ void setparams(void)
     npcol = MAX(nxcol,nycol);
     ndxcol = nemoinpi(getparam("dxcol"),dxcol,MAXCOL);
     ndycol = nemoinpi(getparam("dycol"),dycol,MAXCOL);
-    // TODO: some ndxycol/ndycol checks
+    // @todo - ndxycol/ndycol checks
     
-
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    dprintf(1,"Allocated %d lines for table\n",nmax);
-    for (j=0; j<nxcol; j++)
-        x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* X data */
-    for (j=0; j<nycol; j++)
-        y[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* Y data */
-    if (ndxcol)
-      for (j=0; j<ndxcol; j++)
-        dx[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DX data */
-    else
-      for (j=0; j<ndxcol; j++)
-        dx[j] = 0;
-    if (ndycol)
-      for (j=0; j<ndycol; j++)
-        dy[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DY data */
-    else
-      for (j=0; j<ndycol; j++)
-        dy[j] = 0;
-
+    nmax = table_nrows(tptr);
 
     Qsigx = Qsigy = FALSE;
     if (hasvalue("xbin")) {
       if (nxcol > 1) error("Cannot bin in X, more than 1 column is used");
       smin = getparam("xbin");            /* binning of data */
       Qsigx = Qsigy = TRUE;           /* binning of data */
-      xbin = (real *) allocate(nmax*sizeof(real));
-      nbin = nemoinpr(smin,xbin,nmax);   /* get binning boundaries */
+      xbin = (real *) allocate(MAXBIN*sizeof(real));
+      nbin = nemoinpr(smin,xbin,MAXBIN);   /* get binning boundaries */
       if (nbin==1) {              /*  fixed amount of datapoints to bin */
-	(void) nemoinpi(smin,&nbin,1);
+	nbin = getiparam("xbin");
 	dprintf(0,"Binning with fixed number (%d) of points\n",nbin);
 	np = nmax / nbin + 1;
 	nbin = -nbin;       /* make it <0 to trigger rebin_data */
@@ -257,6 +245,7 @@ void setparams(void)
 	  warning("plotting one averaged datapoint");
       } else
 	error("Error %d in parsing xbin=%s",nbin,smin);
+      dprintf(0,"np=%d\n",np);
 
       xp =  (real *) allocate(np*sizeof(real));    /* X data */
       yp =  (real *) allocate(np*sizeof(real));    /* Y data */
@@ -362,33 +351,29 @@ void read_data(void)
     int i, j, k, colnr[1+MAXCOL];
 		
     dprintf (2,"Reading datafile, xcol,ycol=%d..,%d,...\n",xcol[0],ycol[0]);
-    for (j=0, k=0; j<nxcol; j++, k++) {
-        colnr[k]  = xcol[j];
-        coldat[k] = x[j];
-    }
-    for (j=0; j<ndxcol; j++, k++) {
-        colnr[k]  = dxcol[j];
-        coldat[k] = dx[j];
-    }
-    for (j=0; j<nycol; j++, k++) {
-        colnr[k]  = ycol[j];
-        coldat[k] = y[j];
-    }
-    for (j=0; j<ndycol; j++, k++) {
-        colnr[k]  = dycol[j];
-        coldat[k] = dy[j];
-    }
     
+    for (j=0, k=0; j<nxcol; j++, k++)
+        colnr[k]  = xcol[j];
+    for (j=0; j<ndxcol; j++, k++)
+        colnr[k]  = dxcol[j];
+    for (j=0; j<nycol; j++, k++) 
+        colnr[k]  = ycol[j];
+    for (j=0; j<ndycol; j++, k++) 
+        colnr[k]  = dycol[j];
+    int ncol = nxcol + nycol + ndxcol + ndycol;
+    d2 = table_md2cr(tptr, ncol,colnr,0,0);
 
-    /* could also find out if any columns duplicated, and
-       replace them with pointers */
+    for (j=0, k=0; j<nxcol; j++, k++)
+        x[j] = &d2[k][0];
+    for (j=0; j<nycol; j++, k++)
+        y[j] = &d2[k][0];
+    for (j=0; j<ndxcol; j++, k++)
+        dx[j] = &d2[k][0];
+    for (j=0; j<ndycol; j++, k++)
+        dy[j] = &d2[k][0];
 
-    npt = get_atable(instr,nxcol+nycol+ndxcol+ndycol,colnr,coldat,nmax);    /* get data */
-    dprintf(1,"get_atable: %d\n",npt);
-    if (npt < 0) {
-    	npt = -npt;
-    	warning("Could only read first set of %d data",npt);
-    }
+    npt = table_nrows(tptr);
+
     if (xscale != 1.0) {
       for (j=0; j<nxcol; j++)
 	for (i=0; i<npt; i++)

@@ -10,7 +10,8 @@
  * 1.5  added a more proper WCS when simple subsetting is done     PJT
  * 2.0  rearranged a lot, removed useless options, enabled others  PJT
  * 2.1  added moving=t averaging for nxaver only (for now)         PJT
- * 2.2  fixed WCS on output 
+ * 2.2  fixed WCS on output
+ * 2.5  fix WCS for Qsample'd maps
 
     TODO:  wcs is wrong on output
  */
@@ -35,13 +36,12 @@ string defv[] = {
   "dummy=t\n      Retain dummy axis?",
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
-  "VERSION=2.4\n  24-dec-2020 PJT",
+  "average=t\n    Average (t) or Sum (f)",
+  "VERSION=2.6\n  1-may-2022 PJT",
   NULL,
 };
 
 string usage = "sub/average of an image, with reorder option";
-
-string cvsid="$Id$";
 
 
 
@@ -73,7 +73,7 @@ void nemo_main(void)
     real    sum, tmp, zzz;
     real    *row;
     bool    Qreorder = FALSE;
-    bool    Qdummy, Qsample, Qmoving;
+    bool    Qdummy, Qsample, Qmoving, Qaver;
     string  reorder;
 
     instr = stropen(getparam("in"), "r");
@@ -82,6 +82,7 @@ void nemo_main(void)
     nzaver=getiparam("nzaver");
     Qdummy = getbparam("dummy");
     Qmoving = getbparam("moving");
+    Qaver = getbparam("average");
 
     nx1 = nemoinpi(getparam("x"),ix,MAXDIM);
     ny1 = nemoinpi(getparam("y"),iy,MAXDIM);
@@ -168,7 +169,8 @@ void nemo_main(void)
       write_image(outstr, iptr);
     } else if (nxaver>1 || nyaver>1 || nzaver>1) {  /*  averaging, but retaining size */
         if (Qmoving) error("moving=t not implemented in this mode");
-        dprintf(0,"Averaging map %d * %d * %d pixels; mapsize %d * %d * %d\n",
+        dprintf(0,"%s map %d * %d * %d pixels; mapsize %d * %d * %d\n",
+		   Qaver ? "Averaging" : "Summing",
                    nxaver,nyaver,nzaver,nx,ny,nz);
         nx1 = nx/nxaver;  if (nx % nxaver) warning("X binning not even");
         ny1 = ny/nyaver;  if (ny % nyaver) warning("Y binning not even");
@@ -181,7 +183,8 @@ void nemo_main(void)
 	      i = i1*nxaver;
 	      sum = 0.0;
 	      LOOP(k0,nzaver) LOOP(j0,nyaver) LOOP(i0,nxaver) sum += CV(iptr, i+i0, j+j0, k+k0);
-	      sum /= (real) (nxaver*nyaver*nzaver);
+	      if (Qaver)
+		sum /= (real) (nxaver*nyaver*nzaver);
 	      LOOP(k0,nzaver) LOOP(j0,nyaver) LOOP(i0,nxaver) CV(iptr, i+i0, j+j0, k+k0) = sum;
             }
 	  }
@@ -226,23 +229,34 @@ void nemo_main(void)
       write_image(outstr, iptr1);
     } else if (Qsample) {            	/* straight sub-sampling */
       create_cube(&iptr1,nx1,ny1,nz1);
+      ax_copy(iptr,iptr1);
       LOOP(k,nz1)
 	LOOP(j,ny1)
 	  LOOP(i,nx1)
 	    CV(iptr1,i,j,k) = CV(iptr,ix[i],iy[j],iz[k]);
-      warning("Attempting to fix the WCS");
-
-      Xmin(iptr1) = Xmin(iptr) + ix[0]*Dx(iptr);
-      Dx(iptr1)   = (ix[1]-ix[0]) * Dx(iptr);
-
-      Ymin(iptr1) = Ymin(iptr) + iy[0]*Dy(iptr);
-      Dy(iptr1)   = (iy[1]-iy[0]) * Dy(iptr);
-
-      Zmin(iptr1) = Zmin(iptr) + iz[0]*Dz(iptr);
-      Dz(iptr1)   = (iz[1]-iz[0]) * Dz(iptr);
+      // adjust the WCS, assuming sampling was uniform
+      if (Nx(iptr) > 1) {
+	real width_step = ix[1]-ix[0];
+	Xref(iptr1) = (Xref(iptr)-ix[0])/width_step;
+	Dx(iptr1)   = Dx(iptr) * width_step;
+	Xref(iptr1) = Xref(iptr1) - 0.5*(width_step - 1.0)/width_step;
+      }
+      if (Ny(iptr) > 1) {
+	real width_step = iy[1]-iy[0];
+	Yref(iptr1) = (Yref(iptr)-iy[0])/width_step;
+	Dy(iptr1)   = Dy(iptr) * width_step;
+	Yref(iptr1) = Yref(iptr1) - 0.5*(width_step - 1.0)/width_step;	
+      }
+      if (Nz(iptr) > 1) {
+	real width_step = iz[1]-iz[0];
+	Zref(iptr1) = (Zref(iptr)-iz[0])/width_step;
+	Dz(iptr1)   = Dz(iptr) * width_step;
+	Zref(iptr1) = Zref(iptr1) - 0.5*(width_step - 1.0)/width_step;	
+      }
       dprintf(0,"WCS Corner: %g %g %g\n",Xmin(iptr1),Ymin(iptr1),Zmin(iptr1));
 
       if (!Qdummy) ax_shift(iptr1);
+      minmax_image(iptr1);
       write_image(outstr, iptr1);
     } else {                            /* nothing really done, still a great benchmark */
       warning("No x=,y=,z= selection applied");
@@ -250,6 +264,16 @@ void nemo_main(void)
       write_image(outstr, iptr);
     }
 }
+
+/* from miriad::imbin WCS correction:
+ *  crpixo(i) = 1 + (crpixi(i)-blc(i))/bin(1,i)
+ *  cdelto(i) = bin(1,i) * cdelti(i)
+ *  crpixo(i) = crpixo(i) - 0.5*(bin(2,i)-1)/bin(2,i)
+ *
+ *  where bin(1) = step  and bin(2) = width
+ *
+ */
+
 
 /*
  * either initialize idx array, if not done, or normalize to 0..n-1
@@ -290,6 +314,7 @@ void ax_copy(imageptr i0, imageptr i1)
   if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
   if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
   if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
+  Axis(i1) = Axis(i0);
 }
 
 /* ax_shift:  

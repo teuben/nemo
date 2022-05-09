@@ -159,9 +159,11 @@ def region_cgdisp(data,ds9,scale=0.0083333):
 if __name__ == "__main__":
     name = sys.argv[1]
     rmax = float(sys.argv[2])
+    p = float(sys.argv[3])
+    print("file: %s   rmax: %g   pixel: %g" % (name,rmax,p))
     data = rotcurtab(name)
     plot1(data,name,efactor=3.0,rmax=rmax)
     n = len(data)
     print("Found %d rings" % n)
     m = 1
-    region_ds9(data[0:n:m],'ds9.reg')
+    region_ds9(data[0:n:m],'ds9.reg',scale=p/3600)

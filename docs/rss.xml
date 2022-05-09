@@ -15,6 +15,28 @@
 
 <item>
 <title>
+nemo_4_4_0
+</title>
+<description>
+ (8-may-2022)
+NEMO V4.4 was released this weekend. Many fixes and
+additions, also ensured a mac with the M1 installs. Most
+significant is the new table V2 I/O interface, which
+makes it possible to have ascii tables of arbitrary
+size (columns and/or rows).   Not all programs have
+been converted, those with the <b>nmax=</b> keyword
+are suspect.
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_4_0
+</link>
+</item>
+
+
+
+<item>
+<title>
 nemo_4_2_1
 </title>
 <description>

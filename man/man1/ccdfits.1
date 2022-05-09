@@ -82,7 +82,7 @@ instead of the one defined in the reference map or defined
 by the input. By default not used.
 .TP
 \fBradecvel=t|f\fP
-If no reference map used, this can be used to enforce a more reasonable
+If no reference map used, this keyword can be used to enforce a more reasonable
 axis descriptor (RA/DEC/VEL) for astronomical data packages which 
 cannot handle theory data too well (e.g. miriad, karma etc.). We also
 add CUNITn and BUNIT (albeit in JY/PIXEL). See also \fIccdsky(1NEMO)\fP
@@ -112,6 +112,16 @@ with multiple Image's. [Default: 1]
 \fBfitshead=\fP
 If used, the header of this fitsfile will be used instead of the
 one from the converted input image. Default; not used.
+
+.SH "RESTFREQ"
+Common popular rest frequencies in astronomy are:
+.nf
+       1.420405751786  GHz      HI
+     115.271204        GHz      CO(1-0)
+     230.538           GHz      CO(2-1)
+    1900.5369          GHz      [CII] 2P3/2-2P1/2
+     656.4614          nm       H-alpha
+.fi
 
 .SH "EXAMPLES"
 To convert an image to unsigned 16 bit integers use the following math:

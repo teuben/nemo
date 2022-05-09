@@ -3,7 +3,8 @@
  *
  *	 6-may-95   V1.0 created 	Peter Teuben
  *      29-dec-01   V1.0a   also compute MapMin/Max
- *      27-feb-2021 V1.2    zslabs= andzscale implemented
+ *      27-feb-2021 V1.2    zslabs= and zscale implemented
+ *       1-may-2022 V1.3    fix WCS for sampling
  */
 
 
@@ -21,24 +22,18 @@ string defv[] = {	/* keywords + help string for user interface */
     "zslabs=\n      Zmin,Zmax pairs in WCS to select",
     "zscale=1\n     Scaling applied to zslabs",
     "select=t\n     Select the planes for output (t) or de-select those (f)",
-    "VERSION=1.2a\n 27-feb-2021 PJT",
+    "VERSION=1.3\n  1-may-2022 PJT",
     NULL,
 };
 
 string usage="takes slices from a cube";
 
-#ifndef MAXPLANE
-#define MAXPLANE 2048
-#endif
 
 #define X_SLICE 0
 #define Y_SLICE 1
 #define Z_SLICE 2
 
-static int need_init_minmax = 1;
-static real new_min, new_max;
-
-void new_minmax(real ival);
+void ax_copy(imageptr i0, imageptr i1);
 void slice(imageptr i, imageptr o, int mode, int *planes);
 int  get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real amin, real da, real ascale);
 
@@ -80,6 +75,7 @@ void nemo_main(void)
 	maxplane = nz;	
     } else 
         error("Illegal slice axis %s, must be x,y,z",zvar);
+    warning("slice mode %d", mode);
 
     planes = (int *)  allocate(maxplane * sizeof(int));
     slabs  = (real *) allocate(maxplane * sizeof(real));
@@ -90,6 +86,8 @@ void nemo_main(void)
         nz = nemoinpi(getparam("zrange"),planes,maxplane);
         if (nz<1) 
             error("Bad syntax %d for zrange=%s",nz,getparam("zrange"));
+	if (nz>1 && ABS(planes[1]-planes[0]) > 1)
+	  warning("Stepping assumed to be regular as %d for WCS correction", planes[1]-planes[0]);
     } else if (hasvalue("zslabs")) {
         nz = nemoinpr(getparam("zslabs"),slabs,maxplane);
         if (nz<1) 
@@ -107,6 +105,7 @@ void nemo_main(void)
             planes[i] = i+1;
     }
     create_cube(&optr,nx,ny,nz);
+    ax_copy(iptr,optr);
     slice(iptr,optr,mode,planes);
 
     outstr = stropen(getparam("out"),"w");
@@ -114,26 +113,25 @@ void nemo_main(void)
     strclose(outstr);
 }
 
-void new_minmax(real ival) 
-{
-  if (need_init_minmax) {
-    need_init_minmax = 0;
-    new_min = new_max = ival;
-    return;
-  } else {
-    new_min = MIN(new_min, ival);
-    new_max = MAX(new_max, ival);
-  }
-}
+
+/* from miriad::imbin WCS correction:
+ *  crpixo(i) = 1 + (crpixi(i)-blc(i))/bin(1,i)
+ *  cdelto(i) = bin(1,i) * cdelti(i)
+ *  crpixo(i) = crpixo(i) - 0.5*(bin(2,i)-1)/bin(2,i)
+ *
+ *  where bin(1) = step  and bin(2) = width
+ *
+ */
+
 
 void slice(imageptr i, imageptr o, int mode, int *planes)
 {
     int x, y, z, iz;
     real ival;
 
-    warning("Code not converted to fix reference pixel value");
 
     if (mode==X_SLICE) {
+        warning("Code for X not converted to fix reference pixel value");
         for(iz=0; iz<Nz(o); iz++) {
             z = planes[iz]-1;
             if (z<0 || z>Nx(i)) 
@@ -142,19 +140,19 @@ void slice(imageptr i, imageptr o, int mode, int *planes)
 	      for (x=0; x<Nx(o); x++) {
 		ival = CubeValue(i,z,x,y);
                 CubeValue(o,x,y,iz) = ival;
-		new_minmax(ival);
 	      }
         }
         Namex(o) = Namey(i);
         Namey(o) = Namez(i);
         Namez(o) = Namex(i);
-        Xmin(o) = Ymin(i);
+        Xmin(o) = Ymin(i);  // fix
         Ymin(o) = Zmin(i);
         Zmin(o) = Xmin(i);
-        Dx(o) = Dy(i);
+        Dx(o) = Dy(i);      // fix
         Dy(o) = Dz(i);
         Dz(o) = Dx(i);
     } else if (mode==Y_SLICE) {
+        warning("Code for Y not converted to fix reference pixel value");      
         for(iz=0; iz<Nz(o); iz++) {
             z = planes[iz]-1;
             if (z<0 || z>Ny(i)) 
@@ -163,7 +161,6 @@ void slice(imageptr i, imageptr o, int mode, int *planes)
 	      for (x=0; x<Nx(o); x++) {
 		ival = CubeValue(i,x,z,y);
                 CubeValue(o,x,y,iz) = ival;
-		new_minmax(ival);
 	      }
         }
         Namex(o) = Namex(i);
@@ -181,26 +178,17 @@ void slice(imageptr i, imageptr o, int mode, int *planes)
             if (z<0 || z>Nz(i)) 
                 error("%d: illegal plane in z, max is %d",z,Nz(i));
             for (y=0; y<Ny(o); y++)
-	      for (x=0; x<Nx(o); x++) {
-		ival = CubeValue(i,x,y,z);
-                CubeValue(o,x,y,iz) = ival;
-		new_minmax(ival);
-	      }
+	      for (x=0; x<Nx(o); x++)
+                CubeValue(o,x,y,iz) = CubeValue(i,x,y,z);
         }
-        Namex(o) = Namex(i);
-        Namey(o) = Namey(i);
-        Namez(o) = Namez(i);
-        Xmin(o) = Xmin(i);
-        Ymin(o) = Ymin(i);
-        Zmin(o) = Zmin(i);
-        Dx(o) = Dx(i);
-        Dy(o) = Dy(i);
-        Dz(o) = Dz(i);
+	real width_step = planes[1]-planes[0];
+	dprintf(0,"Z_SLICE: %d %g\n",planes[0],width_step);
+	Zref(o) = (Zref(i)-planes[0])/width_step;
+	Dz(o) = Dz(i) * width_step;
+	Zref(o) = Zref(o) - 0.5*(width_step - 1.0)/width_step;
     }
-    MapMin(o) = new_min;
-    MapMax(o) = new_max;
+    minmax_image(o);
 }
-
 
 /*
  *  convert slabs to 1..N based index array
@@ -242,3 +230,22 @@ int get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real ami
   return nz;
 }
   
+void ax_copy(imageptr i0, imageptr i1)
+{
+  Dx(i1) = Dx(i0);
+  Dy(i1) = Dy(i0);
+  Dz(i1) = Dz(i0);
+  Xmin(i1) = Xmin(i0);
+  Ymin(i1) = Ymin(i0);
+  Zmin(i1) = Zmin(i0);
+  Xref(i1) = Xref(i0);
+  Yref(i1) = Yref(i0);
+  Zref(i1) = Zref(i0);
+  Beamx(i1) = Beamx(i0);
+  Beamy(i1) = Beamy(i0);
+  Beamz(i1) = Beamz(i0);
+  if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
+  if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
+  if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
+  Axis(i1) = Axis(i0);
+}

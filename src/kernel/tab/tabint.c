@@ -3,6 +3,7 @@
  *
  *      13-may-05    Q&D first version, cloned off tabfilter
  *      26-may-05    allow step<0 for logsteps (xmin must be > 0)
+ *      25-apr-22    convert to use the new table V2
  */
 
 #include <stdinc.h> 
@@ -10,6 +11,7 @@
 #include <spline.h>
 #include <extstring.h>
 #include <table.h>
+#include <mdarray.h>
 
 string defv[] = {
   "in=???\n         Input table file",
@@ -17,14 +19,13 @@ string defv[] = {
   "ycol=2\n         Column with Y coordinate of function",
   "step=\n          Integration step if resampling used (<0 for logarithmic steps)",
   "normalize=f\n    Normalize integral",
-  "VERSION=0.3\n    26-may-05 PJT",
+  "VERSION=0.4\n    25-apr-2022 PJT",
   NULL,
 
 };
 
 string usage="integrate a sorted table";
 
-string cvsid="$Id$";
 
 
 extern int minmax(int, real *, real *, real *);
@@ -33,21 +34,36 @@ extern int minmax(int, real *, real *, real *);
 void nemo_main()
 {
   int colnr[2], i, n, nmax, nsteps;
-  real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax, zmin, zmax;
-  real x, y, z, s, xold, yold, zold, dx, dz, sum, sum0, *sdat;
-  stream instr;
+  real *xdat, *ydat, xmin, xmax, ymin, ymax, zmin, zmax;
+  real x, y, z, s, xold, yold, dx, dz, sum, sum0, *sdat;
   string spectrum = getparam("in");
   bool Qnorm = getbparam("normalize");
 
+  
   /* read the data */
+
+#if 1
+  // #ifdef TABLE2
+  tableptr t = table_open(stropen(spectrum,"r"),0);
+  n = nmax = table_nrows(t);
+  int ncols = table_ncols(t);
+  dprintf(1,"%s has %d x %d table\n", spectrum, n, ncols);
+  colnr[0] = getiparam("xcol");
+  colnr[1] = getiparam("ycol");
+  mdarray2 d = table_md2cr(t,2,colnr,0,0);
+  xdat = &d[0][0];
+  ydat = &d[1][0];
+#else
+  real *coldat[2];
   nmax = nemo_file_lines(spectrum,MAXLINES);
   xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
   ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
   colnr[0] = getiparam("xcol");
   colnr[1] = getiparam("ycol");
-  instr = stropen(spectrum,"r");
+  stream instr = stropen(spectrum,"r");
   n = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
+#endif
   
   /* figure out some min/max */
   minmax(n,xdat,&xmin,&xmax);

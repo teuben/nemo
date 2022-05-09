@@ -37,6 +37,15 @@ char *getaline(stream f)
 				     this too small, else there is too much
 				     time wasted trying to reclaim a couple
 				     of bytes.  */
+#if 1
+	static int _first = TRUE;
+
+	if (_first) {
+	  warning("old getaline() is still used - it is being deprecated");
+	  _first = FALSE;
+	}
+#endif	
+	
 
 	len = 0;
 	size = thres;
@@ -102,6 +111,8 @@ char *getsline(stream f, string *s)
 
 #ifdef TESTBED
 
+#include <getparam.h>
+
 string defv[] = {
     "in=???\n       input file",
     "VERSION=1\n    pjt",
@@ -110,7 +121,7 @@ string defv[] = {
 
 string usage="test getaline";
 
-nemo_main()
+void nemo_main()
 {
     char *cp;
     stream f = stropen(getparam("in"),"r");

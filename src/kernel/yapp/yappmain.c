@@ -14,7 +14,8 @@
 string defv[] = {
   "name=***\n     Override for yapp= system keyword (*** = default)",
   "layout=\n      Optional layout file",
-  "VERSION=0.1\n  6-dec-2011 PJT",
+  "pgplot=\n      Query PGPLOT devices",
+  "VERSION=0.2\n  14-jul-2021 PJT",
   NULL,
 };
 
@@ -25,6 +26,10 @@ void nemo_main()
     int i, j, ip, np, nc;
     string name, dumpfile, headline;
     char label[80];
+
+    if (hasvalue("pgplot")) {
+      
+    }
 
     name = getparam("name");
     if (hasvalue("layout"))

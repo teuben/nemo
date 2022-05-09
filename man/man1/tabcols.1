@@ -1,19 +1,22 @@
 .TH TABCOLS 1NEMO "26 January 2000"
-.SH NAME
+
+.SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fPtabcols\fP [parameter=value] ...
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabcols\fP selects columns from a file, and can also re-arrange the
 output column order. New column separators can be used on output.
 This way a newline on input can be converted into a space on 
 output and therefore creating a file with one long column from
 a table with mulitple columns.
 .PP
-To select lines, use \fItablines(1NEMO)\fP or \fItabmath(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+To select specific lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input file name(s). No default.
@@ -33,7 +36,12 @@ and '\fB:\fP'.
 .TP
 \fBout=-\fP
 output file name. By default standard output it used.
-.SH EXAMPLE
+
+.SH "CAVEATS"
+Although this program uses the new table interface, there are
+still some internal variables that limits the column count.
+
+.SH "EXAMPLE"
 Here is an example of how to reverse the columns from a table with 4 columns:
 .nf
     tabcols in.tab 4:1:-1 > out.tab
@@ -43,15 +51,20 @@ re-arranges all the numbers in a table in one long column
 .nf
     tabcols in.tab all n > out.tab
 .fi
-.SH SEE ALSO
-tablines(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
-.SH FILES
+
+.SH "SEE ALSO"
+tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
+
+.SH "FILES"
 src/kernel/tab/tabcols.c   source code
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.0i
 26-Jan-00	V1.0 Created 	PJT
 9-apr-09	V2.0 out=- now default and last argument	PJT
+5-may-2022	V2.1 converted to table V2 interface	PJT
 .fi

@@ -8,6 +8,9 @@
  * BURSTSTRING: break a string of the form "word1, word2, ..." into
  * seperate strings "word1", "word2", ... and return them in an
  * extended-string (ie, NULL-terminated sequence of pointers).
+ * This space is allocated, and needs to be freed using freestrings()
+ *
+ * @todo replace with strtok?
  */
 
 #include <stdinc.h>
@@ -173,26 +176,27 @@ string defv[] = {
     NULL,
 };
 
-nemo_main()
+void nemo_main()
 {
-    string lst, sep, *wrds;
+    string lst, sep, *wrds, *w;
 
     lst = getparam("lst");
     sep = getparam("sep");
     printf("lst=%s\n",lst);
     printf("sep=%s\n",sep);
+    if (strlen(lst)==0) return;
 
     wrds = burststring(lst, sep);
     printf("(%d items): ",xstrlen(wrds,sizeof(string))-1);
-    while (*wrds != NULL)
-	printf("\"%s\"  ", *wrds++);
+    for (w=wrds; *w != NULL; w++)
+	printf("\"%s\"  ", *w);
     printf("\n");
     freestrings(wrds);
 
     wrds = burst0string(lst, sep);
     printf("(%d items): ",xstrlen(wrds,sizeof(string))-1);
-    while (*wrds != NULL)
-	printf("\"%s\"  ", *wrds++);
+    for (w=wrds; *w != NULL; w++)
+	printf("\"%s\"  ", *w);
     printf("\n");
     freestrings(wrds);
     

@@ -4,7 +4,7 @@ User Interface (*)
 ==================
 
 .. note::
-   The command line user interface is a series of *keyword=value* pairs, where
+   The NEMO command line user interface is a series of *keyword=value* pairs, where
    we differentiate between  :term:`program keyword` and :term:`system keyword`.
    The ``--help`` or ``help=`` options will describe the keywords.
 
@@ -389,12 +389,12 @@ caveat, here are various help options:
 - Unix manual pages
     for programs, functions, and file
     formats, all in good old UNIX tradition. All these
-    files live in ``$NEMO/man`` and below.
+    files live in ``$NEMO/man`` and below. 
     Several interfaces to the manual pages
     are now available:
 
     * man
-        good old UNIX ``man``  (this relies on 
+        the good old UNIX ``man`` command (this relies on 
         **$MANPATH** environment variable)
         The ``manpdf`` script
 	can print out the manual pages in a pretty decent form.
@@ -415,7 +415,13 @@ caveat, here are various help options:
     * html
         The html formatted manual pages. Has some limited form of hypertext,
         but contains the links to general UNIX manual
-        pages, if properly addressed.  Try the `github link <https://teuben.github.io/nemo/man_html/index.html>`_ or `local pages <../../../man_html/index.html>`_ 
+        pages, if properly addressed.  Try the `github link <https://teuben.github.io/nemo/man_html/index.html>`_ or `local pages <../../../man_html/index.html>`_
+
+    Since manual pages are kept separate from the source code, it is easy to diverge
+    from the "by definition" more up to date inline help. A script ``checkpar.py`` can
+    be used to flag where they differ. As of this writing, about 25% of the programs
+    diverge.
+      
 
 - The old manual, the *The NEMO User and Programmers Guide*,
     contains information on a wide level, aimed at beginners

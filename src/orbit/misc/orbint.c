@@ -87,6 +87,7 @@ bool   Qstop = FALSE;                   /* global flag to stop intgr. */
 bool   Qvar;
 
 
+int osfac[2] = {1, -1};   /* coriolis factor */
 
 extern int match(string, string, int *);
 
@@ -191,7 +192,7 @@ void prepare()
 /* Standard Euler integration */
 void integrate_euler1()
 {
-    int i, ndim, kdiag, ksave, isave;
+  int i, ndim, kdiag, ksave, isave, ip;
     double time,epot,e_last;
     double pos[3],vel[3],acc[3], xvel;
 
@@ -227,17 +228,29 @@ void integrate_euler1()
 	if (i>=nsteps) break;           /* see if need to quit looping */
 
 	time   += dt;                     /* advance particle */
+#if 1
         acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
         acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
-	
 
 	pos[0] += dt*vel[0];
 	pos[1] += dt*vel[1];
 	pos[2] += dt*vel[2];
-
 	vel[0] += dt*acc[0];
 	vel[1] += dt*acc[1];
 	vel[2] += dt*acc[2];
+	
+#else
+
+	//#pragma omp for
+	for (ip=0; ip<2; ip++)
+	  acc[ip] += omega2*pos[ip] + osfac[ip]*tomega*vel[1-ip]; 
+	//#pragma omp for
+	for (ip=0; ip<3; ip++)
+	  pos[ip] += dt*vel[ip];
+	//#pragma omp for
+	for (ip=0; ip<3; ip++)
+	  vel[ip] += dt*acc[ip];
+#endif	
 	i++;
 
 	if (++ksave == nsave) {		/* see if need to store particle */

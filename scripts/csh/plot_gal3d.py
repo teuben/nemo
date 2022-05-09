@@ -1,6 +1,6 @@
 #! /usr/bin/env python
 #
-#  Plot the data created with mk_con3
+#  Plot the data created with mk_cone
 #
 #
 
