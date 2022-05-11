@@ -50,7 +50,7 @@ string defv[] = {
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
     "label=\n       QAC label",
-    "VERSION=3.10a\n 11-mar-2022 PJT",
+    "VERSION=3.11\n 6-may-2022 PJT",
     NULL,
 };
 
@@ -238,13 +238,13 @@ void nemo_main(void)
 	if (Qac) {
 	  if (Qrobust) {
 	    compute_robust_moment(&m);
-	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		   qac_label, mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
-		   sum_moment(&m), sratio_moment(&m));
+		   sum_moment(&m), sratio_moment(&m), n_robust_moment(&m));
 	  } else
-	    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+	    printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 		   qac_label, mean, sigma, min_moment(&m), max_moment(&m),
-		   sum_moment(&m), sratio_moment(&m));	    
+		   sum_moment(&m), sratio_moment(&m) ,n_moment(&m));
 
 	  return;
 	}

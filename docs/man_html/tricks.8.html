@@ -109,14 +109,16 @@ a file <p>
 <a href='pv.1.html'><i>pv(1)</i></a>
  monitors the progress of data through a pipe, e.g. <br>
 <pre>        mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
-</pre>
+</pre>The (bash) array ${PIPESTATUS[@]} contains the status ($?) for each program
+in a unix pipe. In this example it should return "0 0 0". 
 <p> 
 <h2><a name='sect3' href='#toc3'>PARALLEL and OpenMP</a></h2>
-Most programs in NEMO are still single-core, but many
-current machines have a number of cores. If a program only uses a fraction
-of the memory on the machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
- program can be used to
-spread the load, e.g. <br>
+Most
+programs in NEMO are still single-core, but many current machines have a
+number of cores. If a program only uses a fraction of the memory on the
+machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ program can be used to spread the load, e.g.
+<br>
 <pre>       echo mkplummer . 10000 &gt; run.txt
        echo mkplummer . 10000 &gt;&gt; run.txt
        parallel --jobs 2 &lt; run.txt

@@ -9,12 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabtranspose - transpose a table 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabtranspose<b> [parameter=value]
 
-<h2><a name='sect2' href='#toc2'></b></b>Description</a></h2>
+<p></b></b> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabtranspose</b> transposes a table. Columns become the rows, rows
 become the columns. Comment lines are skipped. <p>
 Lines can be arbitrarly long.
@@ -30,35 +33,34 @@ keyword is also given:
 
 <dt><b>out=</b> </dt>
 <dd>output file
-name. No default.     </dd>
+name. No default. </dd>
 
-<dt><b>nmax=</b> </dt>
-<dd>max space (needed if data in pipe) [10000] 
+<dt><b>align=t|f</b> </dt>
+<dd>Align the column on output 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Using
-<b>tabtranspose</b> twice will result in the same file: <br>
-<pre>  tabgen tab00 10 10
+Using <b>tabtranspose</b>
+twice will result in the same file: <br>
+<pre>  tabgen tab00 10 20
   tabtranspose tab00 - | tabtranspose - tab00n
   diff tab00 tab00n
 </pre>
-<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
-Since <a href='burststring.3.html'><i>burststring(3NEMO)</i></a>
- is used, the number of columns is limited
-to 2048 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
  
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update
-History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>5-Oct-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 24-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added align=<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sathvik
+26-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new table V2, removed nmax=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -69,10 +71,9 @@ History</a></h2>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Bugs</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

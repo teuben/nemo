@@ -9,13 +9,16 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 nemoinp - parse a user supplied number string 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>nemoinp [parameter=value]
 ... 
-<h2><a name='sect2' href='#toc2'></b>Description</a></h2>
+<p></b> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>nemoinp</i> parses an expression supplied by the user, using the
 rules as given by <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 . The output format can be defined too,
@@ -26,6 +29,7 @@ set an array in a shell variable or to initialize tables, e.g. <b>set x=(&lsquo;
 different from the matlab convention, where this would be written 1:2:10
 instead, see also <a href='seq.1.html'><i>seq(1)</i></a>
 , where the syntax is <b>seq 1 2 10</b>. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
 following parameters are recognized in any order if the keyword is also
@@ -75,26 +79,36 @@ can return the wrong number.  </dd>
 <dd>Force parsing the (optionally comma
 separated) string(s) as D:M:S.S, converting  them to fractional degrees.
 For H:M:S parsing the user is responsible for the extra factor of 15. Default:
-<b>f</b>. </dd>
+<b>f</b>. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+The number of elements in an array is limited, currently hardcoded
+to 32678 in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+. If possible, use <a href='seq.1.html'><i>seq(1)</i></a>
+. 
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='seq.1.html'>seq(1)</a>
 , <a href='tabgen.1.html'>tabgen(1NEMO)</a>
-, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
+,
+<a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
 , <a href='getrange.3.html'>getrange(3NEMO)</a>
-,
-<a href='functions.5.html'>functions(5NEMO)</a>
+, <a href='functions.5.html'>functions(5NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
 <br>
 <pre>   nemoinp 4.2+3.1           simple math
    nemoinp &rsquo;sqrt(2)&rsquo;         math functions
    nemoinp pi+3              some support for funny numbers
    nemoinp 2:20:4            from 2 to 20 in steps of 4 (NEMO command)
    seq 2 4 20                from 2 to 20 in steps of 4 (UNIX command)
-   set n=20                  a C-shell variable
+   set n=20                  a (t)C-shell variable
+   n=20<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;     a bash/zsh variable
    nemoinp 2:${n}:4          as before, now using a shell variable
    nemoinp 2::4              repeat the value 4 times
    nemoinp &rsquo;iflt(1,2,3,4)&rsquo;   print 3, not 4, because 1 is less than 1
@@ -103,9 +117,11 @@ For H:M:S parsing the user is responsible for the extra factor of 15. Default:
    nemoinp c,G,h,p,m         a few good constants
    nemoinp &rsquo;p*pi/(3600*180)&rsquo; 1 AU in km
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>18-apr-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-jun-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0a small changed - doc updated<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -124,10 +140,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

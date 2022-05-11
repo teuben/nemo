@@ -1,0 +1,59 @@
+.TH TABROWS 1NEMO "5 May 2022"
+.SH NAME
+tabrows \- select rows/lines from a file
+.SH SYNOPSIS
+\fBtabrows\fP [parameter=value]
+.SH DESCRIPTION
+\fBtabrows\fP selective copies lines from an input (ASCII) table.
+Selection is done by line numbers, 1 being the first line. Syntax
+follows the \fInemofie(1NEMO)\fP rules.
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+input file. No default.
+.TP
+\fBselect=\fP
+rows/lines to select. Any \fInemoinp(3NEMO)\fP expression can be used.
+First column is 1.
+[all]
+.TP
+\fBcomment=t|f\fP
+Count comment lines too? See also \fItabcomment(1NEMO)\fP to filter comments.
+Default: t
+.TP
+\fBnmax=\fP
+Default max allocation of the linecount in a table from
+a pipe  [10000].
+.TP
+\fBout=\fP
+output file. Default is standard output.
+
+.SH "CAVEATS"
+Although this program uses the new table interface, the \fBnmax=\fP parameter
+is still used and thus limits the row count.
+
+.SH "EXAMPLES"
+To find the square root of any number \fIn\fP between 1 and 100:
+.nf
+    nemoinp 1:100:1 > t1
+    tabmath t1 t2 'sqrt(%1)' all
+    tabrows t2 - select=\fIn\fP
+.fi
+.SH "SEE ALSO"
+tabcols(1NEMO), awk(1), tabmath(1NEMO), tabcomment(1NEMO), table(5NEMO)
+
+.SH "FILES"
+src/kernel/tab
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +6.0i
+9-Mar-99	V0.9 Created 	PJT
+5-may-2022	V2.0 converted to table V2 interface, renamed from tablines	PJT
+.fi

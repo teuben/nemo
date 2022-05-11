@@ -144,8 +144,8 @@ merged to the master yet.
 	  
 2. others will do then branch off this new branch (user *astroumd* is used as example here):
 
-	  gh repo fork https://github.com/teuben/nemo nemo_table2
-      cd nemo_table2
+	  gh repo fork https://github.com/teuben/nemo nemo
+      cd nemo
       git remote add upstream  https://github.com/teuben/nemo
       git fetch upstream
       git checkout -b myTable3
@@ -186,6 +186,10 @@ merged to the master yet.
    you know the file that belonged to it), then
 
      git diff-tree --no-commit-id --name-only -r SHA
+	 
+4. Difference between two SHA's
+
+     git diff <commit-id> <commit-id> 
 
 # Tests
 
@@ -240,3 +244,4 @@ Some references on git workflows:
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
 * http://physics.mnstate.edu/craig/git-novice-pyastro/
 * https://www.sitepoint.com/quick-tip-sync-your-fork-with
+* https://how-to.dev/how-git-stores-data

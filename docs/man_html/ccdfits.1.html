@@ -107,43 +107,53 @@ of the one defined in the reference map or defined by the input. By default
 not used. </dd>
 
 <dt><b>radecvel=t|f</b> </dt>
-<dd>If no reference map used, this can be used to enforce
-a more reasonable axis descriptor (RA/DEC/VEL) for astronomical data packages
-which  cannot handle theory data too well (e.g. miriad, karma etc.). We also
-add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
- for a
-smart scaling placing the object at a computed distance. [Default: <b>f</b>]. </dd>
+<dd>If no reference map used, this keyword can be used
+to enforce a more reasonable axis descriptor (RA/DEC/VEL) for astronomical
+data packages which  cannot handle theory data too well (e.g. miriad, karma
+etc.). We also add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
 
-<dt><b>dummy=t|f</b>
-</dt>
-<dd>Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are written
-last. Default: t </dd>
+for a smart scaling placing the object at a computed distance. [Default:
+<b>f</b>]. </dd>
+
+<dt><b>dummy=t|f</b> </dt>
+<dd>Write dummy (NAXISn=1) axes too?  If not, axes with length
+1 are written last. Default: t </dd>
 
 <dt><b>nfill=0</b> </dt>
-<dd>Number of dummy comment lines to add to a fits
-header to test I/O routines. Default: 0 </dd>
+<dd>Number of dummy comment lines to
+add to a fits header to test I/O routines. Default: 0 </dd>
 
 <dt><b>ndim=</b> </dt>
-<dd>This is a hack. If used, this
-will be the value of NAXIS written to the FITS file. Only useful of <b>dummy=f</b>
-and your FITS reader still cannot handle  dummy trailing axes. For <b>ndim=4</b>
-the axis will be labeled as <i>STOKES</i>, which is useful for packages such as
-CASA. Default: not used. </dd>
+<dd>This is a hack.
+If used, this will be the value of NAXIS written to the FITS file. Only
+useful of <b>dummy=f</b> and your FITS reader still cannot handle  dummy trailing
+axes. For <b>ndim=4</b> the axis will be labeled as <i>STOKES</i>, which is useful for
+packages such as CASA. Default: not used. </dd>
 
 <dt><b>select=1</b> </dt>
-<dd>Select this image (1 being the first) to
-grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
+<dd>Select this image (1 being
+the first) to grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
 
-<dt><b>fitshead=</b> </dt>
-<dd>If used, the
-header of this fitsfile will be used instead of the one from the converted
-input image. Default; not used. 
+<dt><b>fitshead=</b>
+</dt>
+<dd>If used, the header of this fitsfile will be used instead of the one from
+the converted input image. Default; not used. 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To convert an image to unsigned
-16 bit integers use the following math: <br>
+<h2><a name='sect4' href='#toc4'>Restfreq</a></h2>
+Common popular rest
+frequencies in astronomy are: <br>
+<pre>       1.420405751786  GHz      HI
+     115.271204        GHz      CO(1-0)
+     230.538           GHz      CO(2-1)
+    1900.5369          GHz      [CII] 2P3/2-2P1/2
+     656.4614          nm       H-alpha
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+To convert an image to unsigned 16 bit integers use the following
+math: <br>
 <pre>        a = "(a &lt; 0 ? a+65536 : a)" 
 </pre>or using <i>ccdmath</i>: <br>
 <pre>        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
@@ -157,7 +167,7 @@ is never needed. You can see <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits ... refmap=cube.fitshdr ...
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Fits Tapes</a></h2>
+<h2><a name='sect6' href='#toc6'>Fits Tapes</a></h2>
 For historic amusement, but completely irrelevant for the 21st
 Century: <p>
 In the old days (somewhere before the 90s) there were actually
@@ -202,7 +212,7 @@ the following command procedure on VMS (Bob Hanisch, ST ScI): <br>
  $!
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='ccdfitsio.1.html'>ccdfitsio(1NEMO)</a>
 , <a href='scanfits.1.html'>scanfits(1NEMO)</a>
@@ -215,17 +225,17 @@ the following command procedure on VMS (Bob Hanisch, ST ScI): <br>
 , <a href='dd.1.html'>dd(1)</a>
  
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter
 
 <p>Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>~/src/pjt/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits.c ccdfits.1
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>29-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created, calling WERONG fortran subroutines<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: new filestruct, renamed wfits to ccdfits   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -249,12 +259,13 @@ apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 refer
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Fits Tapes</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Restfreq</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Fits Tapes</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

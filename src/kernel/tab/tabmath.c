@@ -33,7 +33,7 @@
  *      13-nov-03  V3.3  handle null's (now that herinp sort of knows what to do?)  [unfinished]
  *      31-dec-03  V3.4  added colname=
  *       1-jan-04     a  changed interface to get_line
- *
+ *      25-apr-22  V4.0  conversion to table V2 I/O
  *
  */
 
@@ -60,7 +60,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "colname=\n         (unchecked) commented column names to add into output",
     "comments=f\n       Pass through comments?",
     "refie=f\n          Re-FIE each output column (not used)",
-    "VERSION=3.5b\n     19-nov-2020 PJT",
+    "VERSION=4.0\n      25-apr-2022 PJT",
     NULL
 };
 
@@ -71,7 +71,8 @@ string usage = "General table manipulator";
 /**************** GLOBAL VARIABLES *******************************/
 
 string *inputs, output;			/* file names */
-stream *instr, outstr;			/* file streams */
+stream outstr;	 		        /* output file streams */
+tableptr *tptr;
 int   ninput;				/* number of input files */
 
 string fmt;                             /* format of new column */
@@ -92,7 +93,7 @@ string *colname=NULL;                   /* names of columns */
 bool   Qcomment;
 
 local void setparams(void);
-local void convert(int, stream *, stream);
+local void convert(int, tableptr *, stream);
 local string *burstfie(string);
 local void tab2space(char *);
 
@@ -107,16 +108,11 @@ extern int loadfie(int);
 
 void nemo_main(void)
 {
-    int i;
-
     setparams();
-
-    for (i=0; i<ninput; i++)
-        instr[i] = stropen(inputs[i],"r");
+    for (int i=0; i<ninput; i++)  // open files in line-by-line access
+      tptr[i] = table_open(stropen(inputs[i],"r"), 1);
     outstr = stropen (output,"w");
-
-    convert (ninput,instr,outstr);
-
+    convert(ninput,tptr,outstr);
 }
 
 local void setparams(void)
@@ -128,12 +124,10 @@ local void setparams(void)
 
     inputs = burststring(getparam("in"),", \t");
     ninput = xstrlen(inputs,sizeof(string)) - 1;
-    instr = (stream *) allocate(ninput*sizeof(stream));
+    tptr = (tableptr *) allocate(ninput*sizeof(tableptr));
 
     output = getparam("out");
-
     newcol = getparam("newcol");
-
     delcol = getparam("delcol");
     for (i=0; i<MAXCOL; i++)
         keepc[i]=TRUE;
@@ -175,7 +169,7 @@ local void setparams(void)
 
 
 
-local void convert(int ninput, stream *instr, stream outstr)
+local void convert(int ninput, tableptr *tptr, stream outstr)
 {
     char   line[MLINELEN];          /* input linelength */
     real   dval[MAXCOL];            /* number of items (values on line) */
@@ -191,29 +185,29 @@ local void convert(int ninput, stream *instr, stream outstr)
       fprintf(outstr,"#");
       for (i=0; i<nval; i++)
 	fprintf(outstr," %s",colname[i]);
-
       fprintf(outstr,"\n");
     }
         
-    nlines=0;               /* count lines read so far */
-
+    nlines=0;                       /* count lines read so far */
     for(;;) {                              /* loop over all lines in file(s) */
 
-        for(i=0, cp=line; i<ninput; i++) { /* append all lines into one line */
-            if (get_line(instr[i], cp) < 0)           
-                return; 					      /* EOF */
+        for(i=0; i<ninput; i++) {    /* loop over files, append all lines into one */
+ 	    cp = table_line(tptr[i]);
+	    if (cp==NULL) return;
+	    // figure out a dynamic way to do this, not depending on MLINELEN
+	    if (i==0) strcpy(line,cp);
+	    else {
+	      strcat(line," ");
+	      strcat(line,cp);
+	    }
             if(iscomment(cp)) {
 	      if (Qcomment)
 		fprintf(outstr,"%s",cp);
 	      else
 		continue;	               	  /* don't use comment lines */
 	    }
-            if(i<ninput-1) {                         /* if not the last one: */
-                cp += strlen(cp);		       /* append a blank for */
-                *cp++ = ' ';	      		               /* catenation */
-            }
         }
-        dprintf(3,"LINE: (%s)\n",line);
+        dprintf(3,"LINE[%d]: (%s)\n",nlines,line);
         if (iscomment(line)) {
 	  if (Qcomment)
 	    fprintf(outstr,"%s\n",line);

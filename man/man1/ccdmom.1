@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "1 May 2021"
+.TH CCDMOM 1NEMO "17 April 2022"
 .SH "NAME"
 ccdmom \- moment or accumulate along an axis of an image
 
@@ -125,6 +125,12 @@ is printed to stdout. Currently only implemented along the Z direction, hence X 
 some future time it may also support spectra along Y or X, but most advanced features are only
 implemented along axis=3. Default: none
 
+.TP
+\fBarange\fP\fI[k0,k1,k2,....]\fP
+Pixels along the \fBaxis\fP to include in the moment. By default the whole axis is used, but
+with this keyword select pixels can be selected, for example \fBarange=0:20,40:60\fP.
+Default: all pixels.
+
 .SH "EXAMPLES"
 In this example we examine a cube with independent values drawn from a gaussian
 distribution with mean 0 and dispersion 1.   The dispersion of the values along the 3rd axis are compared with the
@@ -147,6 +153,20 @@ along the 3rd axis (see also examples in \fItabtrend(1NEMO)\fP)
       % ccdsmooth cube1 - dir=z | ccdmom - - mom=-2 | ccdstat - qac=t
       QAC_STATS: - 0.611611 0.0191999 0.541171 0.685092  6116.11 1
 
+.fi
+
+.SH "PYTHON"
+For those more familiar with python, here are some cross-walks, where \fBI\fP denotes the \fInumpy\fP cube,
+and \fBV\fP a one-dimensional WCS value along the the picked axis.
+the axis= keyword in the numpy functions to pick another but our default of axis=3.
+.nf
+.ta +2i
+       mom=0	m0=I.sum(axis=2)
+       ?	I.mean(axis=2)
+       mom=-1	m1=I.mean(axis=2)
+       mom=-2	m2=I.std(axis=2)
+       mom=1    v=(V*I).sum(axis=2)/I.sum(axis=2)
+       mom=2    s=
 .fi
 
 .SH "SEE ALSO"
@@ -181,4 +201,5 @@ Peter Teuben
 10-may-2017	V2.4 force q&d cont subtraction on mom=30,31,....	PJT
 15-jun-2017	V2.5 add pos= option	PJT
 21-jun-2017	V2.6 add abs= option	PJT
+17-apr-2022	V.30 add arange=	PJT
 .fi

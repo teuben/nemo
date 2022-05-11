@@ -1,5 +1,5 @@
 Python
-======
+------
 
 Python support in NEMO itself is still rudimentary, but there are good
 import and export routines to other formats, through which other toolkits

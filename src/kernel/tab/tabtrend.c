@@ -28,7 +28,9 @@
 string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
+#if 0    
     "nmax=100000\n                max size if a pipe",
+#endif
     "cumul=f\n                    cumulative instead?",
     "orig=f\n                     show original column as well?",
     "first=f\n                    add first row?",
@@ -54,13 +56,13 @@ string cvsid = "$Id$";
 
 local string input;			/* filename */
 local stream instr;			/* input file */
+local table *tptr;                      /* table */
 
 local int ncol;                         /* number of columns used */
-local int col[MAXCOL];			/* histogram column number(s) */
+local int col[MAXCOL];			/* column number(s) */
 
-real *coldat[MAXCOL];
-local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
+local mdarray2 coldat;                  /* the table data */
 
 local bool   Qcumul;
 local bool   Qorig;
@@ -92,10 +94,8 @@ local void setparams()
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error col=%s",getparam("col"));
     
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    if (nmax<1) error("Problem reading from %s",input);
-
     instr = stropen (input,"r");
+    tptr = table_open(instr,0);
 
     Qcumul = getbparam("cumul");
     Qorig = getbparam("orig");
@@ -106,16 +106,9 @@ local void setparams()
 
 local void read_data()
 {
-    int   i,j,k;
-    
-    dprintf(0,"Reading %d column(s)\n",ncol);
-    for (i=0; i<ncol; i++)
-      coldat[i] = (real *) allocate(sizeof(real)*nmax);
-    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
-    if (npt == -nmax) {
-    	warning("Could only read %d data",nmax);
-    	npt = nmax;
-    }
+    coldat = table_md2cr(tptr, ncol, col, 0, 0);
+    dprintf(1,"Reading %d column(s)\n",ncol);
+    npt = table_nrows(tptr);
 }
 
 

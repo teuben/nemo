@@ -3,65 +3,70 @@
 
 <html>
 <head>
-<title>TABLINES(1NEMO) manual page</title>
+<title>TABTAB(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tablines - select lines from a file 
+tabtab -  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tablines</b> [parameter=value]
-
+<b>tabtab</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>tablines</b> selective copies lines from an input (ASCII) table.
-Selection is done by line numbers, 1 being the first line. Syntax follows
-the <a href='nemofie.1.html'><i>nemofie(1NEMO)</i></a>
- rules. 
+concatenate
+or paste conformant tables. <p>
+In <b>paste</b> mode the number of rows need to be
+the same.  In <b>concat</b> mode the number of columns need to be same.   Although
+these mimic the standard <a href='paste.1.html'><i>paste(1)</i></a>
+ and <a href='cat.1.html'><i>cat(1)</i></a>
+ programs, the tables need
+to be conformant, though the input tables can have their own header/comment
+files. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following parameters are recognized in any order if
+the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input file. No default. </dd>
+<dd>Input files. At least 2 need to be given.
+</dd>
 
-<dt><b>out=</b>
-</dt>
-<dd>output fil. No default. </dd>
+<dt><b>out=</b> </dt>
+<dd>Output file, must not exist yet. </dd>
 
-<dt><b>select=</b> </dt>
-<dd>lines to select     [all] </dd>
-
-<dt><b>comment=t|f</b> </dt>
-<dd>Count
-comment lines too? [t] </dd>
-
-<dt><b>nmax=</b> </dt>
-<dd>Default max allocation of the linecount in
-a table from a pipe  [10000]. </dd>
+<dt><b>mode=p|c</b> </dt>
+<dd>Paste or Concat mode. [p]. 
+<p>
+</dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To find the square root of any number
-<i>n</i> between 1 and 100: <br>
-<pre>    nemoinp 1:100:1 &gt; t1
-    tabmath t1 t2 &rsquo;sqrt(%1)&rsquo; all
-    tablines t2 - select=n
+
+<p> <br>
+<pre>% tabtab tab1,tab2  tab2
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='awk.1.html'>awk(1)</a>
-, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
+<a href='tabcols.1.html'>tabcols(1NEMO)</a>
+, <a href='tabrows.1.html'>tabrows(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
  
+<p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/kernel/tab 
+src/kernel/tab/tabtab.c
+
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update
-History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
-<pre>9-Mar-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>26-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

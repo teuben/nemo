@@ -3,6 +3,9 @@
 #   align columns in a file.   doesn't work well if number of columns
 #   not the same through out the file
 #
+#   The unix command  "column -t" does something similar
+#
+#   @todo    align on the dot
 
 import os, sys
 

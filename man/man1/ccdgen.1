@@ -15,6 +15,8 @@ An added feature is that the objects can be added as if they are
 in a "galactic" disk with given inclination and position angle. The
 default is a "face-on" view (\fBinc=0\fP). 
 No corrections for brightness due to inclination are made however.
+.PP
+3D images are supported if \fBsize=\fP contains a 3rd non-1 value.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -42,10 +44,6 @@ For certain objects, the multiple objects can be given, and the sequence
 of parameters can be repeated. Currently \fBobject=blobs\fP has this
 option for 3D cubes.
 .TP
-\fBcenter=\fP
-Center of object (in 0-based pixel coordinates). The lower left corner
-is counted as (0,0) here. Default: mapcenter.
-.TP
 \fBsize=\fP
 Mapsize. It is allowed to have a different size in X and Y.
 .TP
@@ -72,6 +70,10 @@ The factor by which an image is multiplied before the object is added.
 Warning: if the amplitude (usually the first of the spar= numbers) is 0,
 this will not apply, and the output would equal the input.
 Default: 1
+.TP
+\fBcenter=\fP
+Center of object (in 0-based pixel coordinates). The lower left corner
+is counted as (0,0) here. Default: mapcenter.
 .TP
 \fBcrpix=\fP
 Override/Set crpix (1,1,1) 
@@ -214,10 +216,11 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 4-Jan-05	V0.1 Created	PJT
 6-jan-05	V0.7 added (many features and) factor=	PJT
 8-jan-05	V0.8 add #arms parameter to spiral	PJT
 31-jan-12	V0.9 added object=test	PJT
 12-mar-2020	V1.0 added object=blobs		PJT
+8-may-2022	V1.2 moved center= down the arg list 	PJT
 .fi

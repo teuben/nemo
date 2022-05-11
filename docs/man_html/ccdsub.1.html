@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdsub - sub/average of an image, and optionally reorder axes. 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdsub</b>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdsub</b> takes a subimage from an image, as
 described by a new set of coordinates in X, Y and/or Z (since the expression
@@ -26,6 +29,7 @@ use the <b>dummy=</b> keyword below. <p>
 If no parameters are given, other than in=
 and out=, the image is copied straight through, which is still a great
 way to test your I/O subsystem, assuming your image fits in memory. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The
 following parameters are recognized in any order if the keyword is also
@@ -88,15 +92,19 @@ To reorder a cube
 from xyz to zxy and back to xyz, the 2nd step will have a perhaps non-intuitive
 axis reordering, since it refers to the new "zxy" order: <br>
 <pre>    ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
+    
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdslice.1.html'>ccdslice(1NEMO)</a>
 , <a href='ccdmom.1.html'>ccdmom(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben
 
+<p> 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>1993     <tt> </tt>&nbsp;<tt> </tt>&nbsp;code written     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

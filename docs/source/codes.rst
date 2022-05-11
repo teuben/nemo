@@ -18,6 +18,8 @@ that have a tighter connection to NEMO:
    
 .. include:: zeno.rst
 
+.. include:: yt.rst
+
 
 
 List of Related Codes
@@ -368,6 +370,8 @@ and
 https://ascl.net/code/search/nbody.
 The last time this list was cross-checked was ... 16-jul-2021.
 
+
+.. include:: python.rst
 
 Categories
 ----------
