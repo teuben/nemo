@@ -1,0 +1,41 @@
+.TH TABCSV 1NEMO "11 May 2022"
+
+.SH "NAME"
+tabcsv \- convert table to CSV
+
+.SH "SYNOPSIS"
+\fBtabcsv\fP [parameter=value]
+
+.SH "DESCRIPTION"
+No description available. This manual page was created by mkman
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input table. No default.
+.TP
+\fBmode=\fP
+separator mode (also: LF, HT,) [csv]  
+.TP
+\fBaddrow=\fP
+add a row counter? [f]   
+.TP
+\fBout=\fP
+Output table filename. Default is stdout.
+
+
+.SH "SEE ALSO"
+table(5NEMO)
+
+.SH "FILES"
+src/kernel/tab/tabcsv.c - source
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+8-may-2022	Created 	PJT
+.fi
