@@ -2,7 +2,7 @@
 
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms
+      tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms tabcsv
 
 NEED = $(BIN) nemoinp
 
@@ -142,6 +142,10 @@ gauss2d:
 # new table2
 tab123:
 	tabgen tab123
+
+tabcsv: tab123
+	tabcsv tab123
+
 
 table2:	tab123
 	./tabletest tab123 test=0
