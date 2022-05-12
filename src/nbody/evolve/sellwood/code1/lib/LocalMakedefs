@@ -1,6 +1,6 @@
 #
-# disable optimization for this code, it will hang on linux
+# disable optimization for this code, it will hang on linux (well, at some version)
 #
 
 
-FFLAGS = -g
+FFLAGS = -g -std=legacy
