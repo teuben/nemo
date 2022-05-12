@@ -25,7 +25,7 @@ m4_include([m4/acx_plplot.m4])
 m4_include([m4/acx_cfitsio.m4])
 m4_include([m4/ax_lib_netcdf4.m4])
 m4_include([m4/ax_lib_hdf5.m4])
-dnl m4_include([m4/gsl.m4])
+m4_include([m4/gsl.m4])
 dnl ax_lib_readline.m4
 dnl ax_mpi.m4
 dnl ax_pkg_swig.m4
@@ -878,9 +878,12 @@ dnl##	this doesn't seem to work, since gsl linkeage also need libcblas etc...
 dnl AC_CHECK_LIB(gsl,gsl_version)
 dnl##   hmm, but this does not seem to work either....
 dnl AC_CHECK_LIB(gsl, main)
-AC_SEARCH_LIBS(sin, m)
-AC_SEARCH_LIBS(cblas_daxpy, gslcblas)
-AC_SEARCH_LIBS(gsl_version, gsl)
+dnl AC_SEARCH_LIBS(sin, m)
+dnl AC_SEARCH_LIBS(cblas_daxpy, gslcblas)
+dnl AC_SEARCH_LIBS(gsl_version, gsl)
+AC_CHECK_LIB([m],[cos])
+AC_CHECK_LIB([gslcblas],[cblas_dgemm])
+AC_CHECK_LIB([gsl],[gsl_blas_dgemm])
 
 dnl AC_CHECK_LIB(c, strsignal)
 

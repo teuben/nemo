@@ -3568,6 +3568,36 @@ printf %s "checking NEMO config... " >&6; }
 
 
 
+# Configure path for the GNU Scientific Library
+# Christopher R. Gabriel <cgabriel@linux.it>, April 2000
+
+
+
+
+# This is what autoupdate's m4 run will expand.  It fires the warning
+# (with _au_warn_XXX), outputs it into the updated configure.ac (with
+# m4_warn), and then outputs the replacement expansion.  We need extra
+# quotation around the m4_warn and dnl so they will be written
+# unexpanded into the updated configure.ac.
+
+
+# This is an auxiliary macro that is also run when
+# autoupdate runs m4.  It simply calls m4_warning, but
+# we need a wrapper so that each warning is emitted only
+# once.  We break the quoting in m4_warning's argument in
+# order to expand this macro's arguments, not AU_DEFUN's.
+
+
+# Finally, this is the expansion that is picked up by
+# autoconf, causing NAME to expand to NEW-CODE, plus
+# (if SILENT is not "silent") a m4_warning telling the
+# maintainer to run autoupdate.  We don't issue MESSAGE
+# from autoconf, because that's instructions for what
+# to do *after* running autoupdate.
+
+
+
+
 ac_config_headers="$ac_config_headers config.h:config.h.in"
 
 
@@ -11487,180 +11517,132 @@ fi
 
 
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing sin" >&5
-printf %s "checking for library containing sin... " >&6; }
-if test ${ac_cv_search_sin+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for cos in -lm" >&5
+printf %s "checking for cos in -lm... " >&6; }
+if test ${ac_cv_lib_m_cos+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_func_search_save_LIBS=$LIBS
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lm  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char sin ();
+char cos ();
 int
 main (void)
 {
-return sin ();
+return cos ();
   ;
   return 0;
 }
 _ACEOF
-for ac_lib in '' m
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
+if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_search_sin=$ac_res
+  ac_cv_lib_m_cos=yes
+else $as_nop
+  ac_cv_lib_m_cos=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_sin+y}
-then :
-  break
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-done
-if test ${ac_cv_search_sin+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_m_cos" >&5
+printf "%s\n" "$ac_cv_lib_m_cos" >&6; }
+if test "x$ac_cv_lib_m_cos" = xyes
 then :
+  printf "%s\n" "#define HAVE_LIBM 1" >>confdefs.h
 
-else $as_nop
-  ac_cv_search_sin=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_sin" >&5
-printf "%s\n" "$ac_cv_search_sin" >&6; }
-ac_res=$ac_cv_search_sin
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  LIBS="-lm $LIBS"
 
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing cblas_daxpy" >&5
-printf %s "checking for library containing cblas_daxpy... " >&6; }
-if test ${ac_cv_search_cblas_daxpy+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for cblas_dgemm in -lgslcblas" >&5
+printf %s "checking for cblas_dgemm in -lgslcblas... " >&6; }
+if test ${ac_cv_lib_gslcblas_cblas_dgemm+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_func_search_save_LIBS=$LIBS
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgslcblas  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char cblas_daxpy ();
+char cblas_dgemm ();
 int
 main (void)
 {
-return cblas_daxpy ();
+return cblas_dgemm ();
   ;
   return 0;
 }
 _ACEOF
-for ac_lib in '' gslcblas
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
+if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_search_cblas_daxpy=$ac_res
+  ac_cv_lib_gslcblas_cblas_dgemm=yes
+else $as_nop
+  ac_cv_lib_gslcblas_cblas_dgemm=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_cblas_daxpy+y}
-then :
-  break
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-done
-if test ${ac_cv_search_cblas_daxpy+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gslcblas_cblas_dgemm" >&5
+printf "%s\n" "$ac_cv_lib_gslcblas_cblas_dgemm" >&6; }
+if test "x$ac_cv_lib_gslcblas_cblas_dgemm" = xyes
 then :
+  printf "%s\n" "#define HAVE_LIBGSLCBLAS 1" >>confdefs.h
 
-else $as_nop
-  ac_cv_search_cblas_daxpy=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_cblas_daxpy" >&5
-printf "%s\n" "$ac_cv_search_cblas_daxpy" >&6; }
-ac_res=$ac_cv_search_cblas_daxpy
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  LIBS="-lgslcblas $LIBS"
 
 fi
 
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for library containing gsl_version" >&5
-printf %s "checking for library containing gsl_version... " >&6; }
-if test ${ac_cv_search_gsl_version+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for gsl_blas_dgemm in -lgsl" >&5
+printf %s "checking for gsl_blas_dgemm in -lgsl... " >&6; }
+if test ${ac_cv_lib_gsl_gsl_blas_dgemm+y}
 then :
   printf %s "(cached) " >&6
 else $as_nop
-  ac_func_search_save_LIBS=$LIBS
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lgsl  $LIBS"
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
 /* Override any GCC internal prototype to avoid an error.
    Use char because int might match the return type of a GCC
    builtin and then its argument prototype would still apply.  */
-char gsl_version ();
+char gsl_blas_dgemm ();
 int
 main (void)
 {
-return gsl_version ();
+return gsl_blas_dgemm ();
   ;
   return 0;
 }
 _ACEOF
-for ac_lib in '' gsl
-do
-  if test -z "$ac_lib"; then
-    ac_res="none required"
-  else
-    ac_res=-l$ac_lib
-    LIBS="-l$ac_lib  $ac_func_search_save_LIBS"
-  fi
-  if ac_fn_c_try_link "$LINENO"
+if ac_fn_c_try_link "$LINENO"
 then :
-  ac_cv_search_gsl_version=$ac_res
+  ac_cv_lib_gsl_gsl_blas_dgemm=yes
+else $as_nop
+  ac_cv_lib_gsl_gsl_blas_dgemm=no
 fi
 rm -f core conftest.err conftest.$ac_objext conftest.beam \
-    conftest$ac_exeext
-  if test ${ac_cv_search_gsl_version+y}
-then :
-  break
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
 fi
-done
-if test ${ac_cv_search_gsl_version+y}
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_gsl_gsl_blas_dgemm" >&5
+printf "%s\n" "$ac_cv_lib_gsl_gsl_blas_dgemm" >&6; }
+if test "x$ac_cv_lib_gsl_gsl_blas_dgemm" = xyes
 then :
+  printf "%s\n" "#define HAVE_LIBGSL 1" >>confdefs.h
 
-else $as_nop
-  ac_cv_search_gsl_version=no
-fi
-rm conftest.$ac_ext
-LIBS=$ac_func_search_save_LIBS
-fi
-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_search_gsl_version" >&5
-printf "%s\n" "$ac_cv_search_gsl_version" >&6; }
-ac_res=$ac_cv_search_gsl_version
-if test "$ac_res" != no
-then :
-  test "$ac_res" = "none required" || LIBS="$ac_res $LIBS"
+  LIBS="-lgsl $LIBS"
 
 fi
 
