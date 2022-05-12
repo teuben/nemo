@@ -177,7 +177,7 @@ if test "$ok" = "yes"; then
   flags="-march=native"
   CFLAGS="$CFLAGS $flags"
   CXXFLAGS="$CXXFLAGS $flags"
-  FFLAGS="$CFLAGS $flags"
+  FFLAGS="$FFLAGS $flags"
   falcon_NO_NATIVE=0
 else
   falcon_NO_NATIVE=1
@@ -251,6 +251,9 @@ AC_ARG_WITH(openmp,
 AC_ARG_WITH(std,
 		  [  --with-std              use this -std=], with_std=$withval, with_std=c99)
 
+AC_ARG_WITH(stdfc,
+		  [  --with-stdfc            use this -stdfc=], with_stdfc=$withval, with_stdfc=legacy)
+
 if test $with_std != "default"; then
   STDFLAG="-D_GNU_SOURCE -std=$with_std"
 else
@@ -258,10 +261,12 @@ else
 fi
 AC_SUBST(STDFLAG)
 
+FFLAGS="$FFLAGS -std=$with_stdfc"
+
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
   CXXFLAGS="$CXXFLAGS -fopenmp"
-  FFLAGS="$CFLAGS -fopenmp"
+  FFLAGS="$FFLAGS -fopenmp"
   falcon_OPENMP="OPENMP"
 else
   falcon_OPENMP="noOPENMP"
