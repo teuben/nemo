@@ -660,8 +660,6 @@ TCL_LIBS
 TCL_CFLAGS
 MIRIAD_LIB
 MIRIAD_INC
-CFITSIO_LIB
-CFITSIO_INC
 HDF_LIB
 HDF_INC
 DSO_LINK
@@ -678,11 +676,36 @@ F77_CMAIN_FFLAGS
 FC
 FLIBS
 ac_ct_F77
-FFLAGS
 F77
 GLLIBS
+CFITSIO_LIB
+CFITSIO_INC
+CFITSIO_ERROR
+CFITSIO_LIBS
+HDF5_TYPE
+HDF5_FLIBS
+HDF5_FFLAGS
+HDF5_FC
 HDF5_LIBS
+HDF5_LDFLAGS
+HDF5_CPPFLAGS
 HDF5_CFLAGS
+HDF5_CC
+HDF5_VERSION
+H5FC
+H5CC
+NETCDF_LIB
+NETCDF_INC
+NETCDF4_FLIBS
+NETCDF4_FFLAGS
+NETCDF4_FC
+NETCDF4_LIBS
+NETCDF4_LDFLAGS
+NETCDF4_CFLAGS
+NETCDF4_CC
+NETCDF4_VERSION
+NC_CONFIG
+SED
 XINCS
 XLIBS
 X_EXTRA_LIBS
@@ -732,6 +755,7 @@ build_cpu
 build
 NEMOVER
 WARNING
+FFLAGS
 NEMO_FFLAGS
 NEMO_CFLAGS
 NEMO_LIBS
@@ -802,14 +826,17 @@ with_openmp
 with_std
 with_stdfc
 with_x
+with_netcdf4
+with_hdf5
+with_cfitsio
+with_cfitsio_libdir
+with_cfitsio_incdir
 enable_png
 with_pgplot_prefix
 enable_plplot
 with_plplot_libdir
 with_plplot_incdir
 with_hdf_prefix
-enable_cfitsio
-with_cfitsio_prefix
 with_miriad_prefix
 enable_flogger
 enable_tcl
@@ -1478,7 +1505,6 @@ Optional Features:
   --disable-falcon        disable falcON
   --enable-png            force the use of PNG for pgplot
   --enable-plplot         Activate PLPlot library (default = yes)
-  --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
   --enable-flogger        use Flogger
   --enable-tcl            use TCL
   --enable-readline       use READLINE
@@ -1497,6 +1523,15 @@ Optional Packages:
   --with-std              use this -std=
   --with-stdfc            use this -stdfc=
   --with-x                use the X Window System
+  --with-netcdf4=yes/no/PATH
+                          base directory of NetCDF4 installation
+  --with-hdf5=yes/no/PATH location of h5cc or h5pcc for HDF5 configuration
+Link with the CFITSIO library
+  --with-cfitsio-libdir=<CFITSIO library path>
+                          Provide an alternative path to the CFITSIO library
+  --with-cfitsio-incdir=<CFITSIO include dir>
+                          Provide an alternative path to the CFITSIO include
+                          directory
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-plplot-libdir=<PLPlot library path>
                           Provide an alternative path to the PLPlot library
@@ -1504,8 +1539,6 @@ Optional Packages:
                           Provide an alternative path to the PLPlot include
                           directory
   --with-hdf-prefix=PFX     Prefix where HDF4 was installed
-  --with-cfitsio-prefix=PFX
-                          CFITSIO installation prefix (default: $cfdefault)
   --with-miriad-prefix=PFX    Root directory where MIRIAD was installed
   --with-tar=TARDIR       cache directory for tar files for opt install
   --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, ..)
@@ -3344,6 +3377,197 @@ printf %s "checking NEMO config... " >&6; }
 
 
 
+
+# ===========================================================================
+#      https://www.gnu.org/software/autoconf-archive/ax_lib_netcdf4.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_LIB_NETCDF4([serial/parallel])
+#
+# DESCRIPTION
+#
+#   This macro provides tests of the availability of the NetCDF v4 library.
+#
+#   The optional macro argument should be either 'serial' or 'parallel'. The
+#   macro will call nc-config to check the output of the '--has-pnetcdf'
+#   option and error out if the requested parallel isn't supported.
+#
+#   If the optional argument is omitted, no check is made to see if NetCDF
+#   has parallel support.
+#
+#   The macro adds a --with-netcdf4 option accepting one of three values:
+#
+#     no   - do not check for the NetCDF4 library.
+#     yes  - do check for NetCDF4 library in standard locations.
+#     path - installation prefix for NetCDF version 4.
+#
+#   If NetCDF4 is successfully found, this macro calls
+#
+#     AC_SUBST(NETCDF4_VERSION)
+#     AC_SUBST(NETCDF4_CC)
+#     AC_SUBST(NETCDF4_CFLAGS)
+#     AC_SUBST(NETCDF4_CPPFLAGS)
+#     AC_SUBST(NETCDF4_LDFLAGS)
+#     AC_SUBST(NETCDF4_LIBS)
+#     AC_SUBST(NETCDF4_FC)
+#     AC_SUBST(NETCDF4_FFLAGS)
+#     AC_SUBST(NETCDF4_FLIBS)
+#     AC_DEFINE(HAVE_NETCDF4)
+#
+#   It also sets
+#
+#     with_netcdf4="yes"
+#     with_netcdf4_fortran="yes"    (if NetCDF has Fortran support)
+#     with_netcdf4_parallel="yes"   (if NetCDF has MPI support)
+#
+#   If NetCDF4 is disabled or not found, this macros sets
+#
+#     with_netcdf4="no"
+#     with_netcdf4_fortran="no"
+#
+#   Note it does not set with_netcdf4_parallel in this case.
+#
+#   Your configuration script can test $with_netcdf4 to take any further
+#   actions. NETCDF4_{C,CPP,LD}FLAGS may be used when building with C or
+#   C++. NETCDF4_F{FLAGS,LIBS} and NETCDF4_LDFLAGS should be used when
+#   building Fortran applications.
+#
+#   To use the macro, one would code one of the following in "configure.ac"
+#   before AC_OUTPUT:
+#
+#     1) dnl Check for NetCDF4 support
+#        AX_LIB_NETCDF4()
+#
+#     2) dnl Check for serial NetCDF4 support
+#        AX_LIB_NETCDF4([serial])
+#
+#     3) dnl Check for parallel NetCDF4 support
+#        AX_LIB_NETCDF4([parallel])
+#
+#   One could test $with_netcdf4 for the outcome or display it as follows
+#
+#     echo "NetCDF v4 support:  $with_netcdf4"
+#
+#   One could also for example, override the default CC in "configure.ac" to
+#   enforce compilation with the compiler that NetCDF v4 was built with:
+#
+#     AX_LIB_NETCDF4([parallel])
+#     if test "$with_netcdf4" = "yes"; then
+#             CC="$NETCDF4_CC"
+#     else
+#             AC_MSG_ERROR([Unable to find NetCDF4, we need parallel NetCDF4.])
+#     fi
+#
+# LICENSE
+#
+#   Copyright (c) 2016 Timothy Brown <tbrown@freeshell.org>
+#
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 2
+
+
+
+# ===========================================================================
+#       https://www.gnu.org/software/autoconf-archive/ax_lib_hdf5.html
+# ===========================================================================
+#
+# SYNOPSIS
+#
+#   AX_LIB_HDF5([serial/parallel])
+#
+# DESCRIPTION
+#
+#   This macro provides tests of the availability of HDF5 library.
+#
+#   The optional macro argument should be either 'serial' or 'parallel'. The
+#   former only looks for serial HDF5 installations via h5cc. The latter
+#   only looks for parallel HDF5 installations via h5pcc. If the optional
+#   argument is omitted, serial installations will be preferred over
+#   parallel ones.
+#
+#   The macro adds a --with-hdf5 option accepting one of three values:
+#
+#     no   - do not check for the HDF5 library.
+#     yes  - do check for HDF5 library in standard locations.
+#     path - complete path to the HDF5 helper script h5cc or h5pcc.
+#
+#   If HDF5 is successfully found, this macro calls
+#
+#     AC_SUBST(HDF5_VERSION)
+#     AC_SUBST(HDF5_CC)
+#     AC_SUBST(HDF5_CFLAGS)
+#     AC_SUBST(HDF5_CPPFLAGS)
+#     AC_SUBST(HDF5_LDFLAGS)
+#     AC_SUBST(HDF5_LIBS)
+#     AC_SUBST(HDF5_FC)
+#     AC_SUBST(HDF5_FFLAGS)
+#     AC_SUBST(HDF5_FLIBS)
+#     AC_SUBST(HDF5_TYPE)
+#     AC_DEFINE(HAVE_HDF5)
+#
+#   and sets with_hdf5="yes".  Additionally, the macro sets
+#   with_hdf5_fortran="yes" if a matching Fortran wrapper script is found.
+#   Note that Autoconf's Fortran support is not used to perform this check.
+#   H5CC and H5FC will contain the appropriate serial or parallel HDF5
+#   wrapper script locations.
+#
+#   If HDF5 is disabled or not found, this macros sets with_hdf5="no" and
+#   with_hdf5_fortran="no".
+#
+#   Your configuration script can test $with_hdf to take any further
+#   actions. HDF5_{C,CPP,LD}FLAGS may be used when building with C or C++.
+#   HDF5_F{FLAGS,LIBS} should be used when building Fortran applications.
+#
+#   To use the macro, one would code one of the following in "configure.ac"
+#   before AC_OUTPUT:
+#
+#     1) dnl Check for HDF5 support
+#        AX_LIB_HDF5()
+#
+#     2) dnl Check for serial HDF5 support
+#        AX_LIB_HDF5([serial])
+#
+#     3) dnl Check for parallel HDF5 support
+#        AX_LIB_HDF5([parallel])
+#
+#   One could test $with_hdf5 for the outcome or display it as follows
+#
+#     echo "HDF5 support:  $with_hdf5"
+#
+#   You could also for example, override the default CC in "configure.ac" to
+#   enforce compilation with the compiler that HDF5 uses:
+#
+#     AX_LIB_HDF5([parallel])
+#     if test "$with_hdf5" = "yes"; then
+#             CC="$HDF5_CC"
+#     else
+#             AC_MSG_ERROR([Unable to find HDF5, we need parallel HDF5.])
+#     fi
+#
+#   The HDF5_TYPE environment variable returns "parallel" or "serial",
+#   depending on which type of library is found.
+#
+# LICENSE
+#
+#   Copyright (c) 2009 Timothy Brown <tbrown@freeshell.org>
+#   Copyright (c) 2010 Rhys Ulerich <rhys.ulerich@gmail.com>
+#
+#   Copying and distribution of this file, with or without modification, are
+#   permitted in any medium without royalty provided the copyright notice
+#   and this notice are preserved. This file is offered as-is, without any
+#   warranty.
+
+#serial 20
+
+
+
+
 ac_config_headers="$ac_config_headers config.h:config.h.in"
 
 
@@ -3354,6 +3578,8 @@ NEMOHOST="`./config.guess`"
 NEMO_LIBS=""
 NEMO_CFLAGS=""
 NEMO_FFLAGS=""
+
+
 
 
 
@@ -6775,7 +7001,7 @@ else
 fi
 
 
-FFLAGS="$FFLAGS -std=$with_stdfc"
+# FFLAGS="$FFLAGS -std=$with_stdfc"
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
@@ -7652,6 +7878,1084 @@ else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
 
+
+
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for a sed that does not truncate output" >&5
+printf %s "checking for a sed that does not truncate output... " >&6; }
+if test ${ac_cv_path_SED+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+            ac_script=s/aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb/
+     for ac_i in 1 2 3 4 5 6 7; do
+       ac_script="$ac_script$as_nl$ac_script"
+     done
+     echo "$ac_script" 2>/dev/null | sed 99q >conftest.sed
+     { ac_script=; unset ac_script;}
+     if test -z "$SED"; then
+  ac_path_SED_found=false
+  # Loop through the user's path and test for each of PROGNAME-LIST
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_prog in sed gsed
+   do
+    for ac_exec_ext in '' $ac_executable_extensions; do
+      ac_path_SED="$as_dir$ac_prog$ac_exec_ext"
+      as_fn_executable_p "$ac_path_SED" || continue
+# Check for GNU ac_path_SED and select it if it is found.
+  # Check for GNU $ac_path_SED
+case `"$ac_path_SED" --version 2>&1` in
+*GNU*)
+  ac_cv_path_SED="$ac_path_SED" ac_path_SED_found=:;;
+*)
+  ac_count=0
+  printf %s 0123456789 >"conftest.in"
+  while :
+  do
+    cat "conftest.in" "conftest.in" >"conftest.tmp"
+    mv "conftest.tmp" "conftest.in"
+    cp "conftest.in" "conftest.nl"
+    printf "%s\n" '' >> "conftest.nl"
+    "$ac_path_SED" -f conftest.sed < "conftest.nl" >"conftest.out" 2>/dev/null || break
+    diff "conftest.out" "conftest.nl" >/dev/null 2>&1 || break
+    as_fn_arith $ac_count + 1 && ac_count=$as_val
+    if test $ac_count -gt ${ac_path_SED_max-0}; then
+      # Best one so far, save it but keep looking for a better one
+      ac_cv_path_SED="$ac_path_SED"
+      ac_path_SED_max=$ac_count
+    fi
+    # 10*(2^10) chars as input seems more than enough
+    test $ac_count -gt 10 && break
+  done
+  rm -f conftest.in conftest.tmp conftest.nl conftest.out;;
+esac
+
+      $ac_path_SED_found && break 3
+    done
+  done
+  done
+IFS=$as_save_IFS
+  if test -z "$ac_cv_path_SED"; then
+    as_fn_error $? "no acceptable sed could be found in \$PATH" "$LINENO" 5
+  fi
+else
+  ac_cv_path_SED=$SED
+fi
+
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_path_SED" >&5
+printf "%s\n" "$ac_cv_path_SED" >&6; }
+ SED="$ac_cv_path_SED"
+  rm -f conftest.sed
+
+
+
+
+
+
+
+if   test "" = ""        ; then
+    netcdf4_requested_mode="serial"
+elif test "" = "serial"  ; then
+    netcdf4_requested_mode="serial"
+elif test "" = "parallel"; then
+    netcdf4_requested_mode="parallel"
+else
+    as_fn_error $? "
+Unrecognized value for AX_LIB_NETCDF4 within configure.ac.
+If supplied, argument 1 must be either 'serial' or 'parallel'.
+" "$LINENO" 5
+fi
+
+
+# Check whether --with-netcdf4 was given.
+if test ${with_netcdf4+y}
+then :
+  withval=$with_netcdf4; if test "$withval" = "no"; then
+     with_netcdf4="no"
+   elif test "$withval" = "yes"; then
+     with_netcdf4="yes"
+   else
+     with_netcdf4="yes"
+     NETCDF4_PREFIX="${withval}"
+     NC_CONFIG="${withval}/bin/nc-config"
+   fi
+else $as_nop
+  with_netcdf4="yes"
+
+fi
+
+
+NETCDF4_CC=""
+NETCDF4_VERSION=""
+NETCDF4_CFLAGS=""
+NETCDF4_CPPFLAGS=""
+NETCDF4_LDFLAGS=""
+NETCDF4_LIBS=""
+NETCDF4_FC=""
+NETCDF4_FFLAGS=""
+NETCDF4_FLIBS=""
+
+if test "$with_netcdf4" = "yes"; then
+    if test -z "$NC_CONFIG"; then
+                for ac_prog in nc-config
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_NC_CONFIG+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $NC_CONFIG in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_NC_CONFIG="$NC_CONFIG" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_NC_CONFIG="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+NC_CONFIG=$ac_cv_path_NC_CONFIG
+if test -n "$NC_CONFIG"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $NC_CONFIG" >&5
+printf "%s\n" "$NC_CONFIG" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  test -n "$NC_CONFIG" && break
+done
+
+        NETCDF4_PREFIX=$($as_dirname -- $($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') ||
+$as_expr X$($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X$($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') : 'X\(//\)[^/]' \| \
+	 X$($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') : 'X\(//\)$' \| \
+	 X$($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X$($as_dirname -- "$NC_CONFIG" ||
+$as_expr X"$NC_CONFIG" : 'X\(.*[^/]\)//*[^/][^/]*/*$' \| \
+	 X"$NC_CONFIG" : 'X\(//\)[^/]' \| \
+	 X"$NC_CONFIG" : 'X\(//\)$' \| \
+	 X"$NC_CONFIG" : 'X\(/\)' \| . 2>/dev/null ||
+printf "%s\n" X"$NC_CONFIG" |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q') |
+    sed '/^X\(.*[^/]\)\/\/*[^/][^/]*\/*$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)[^/].*/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\/\)$/{
+	    s//\1/
+	    q
+	  }
+	  /^X\(\/\).*/{
+	    s//\1/
+	    q
+	  }
+	  s/.*/./; q')
+    else
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Using provided NetCDF4 prefix" >&5
+printf %s "checking Using provided NetCDF4 prefix... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $NC_CONFIG" >&5
+printf "%s\n" "$NC_CONFIG" >&6; }
+    fi
+
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for NetCDF4 libraries" >&5
+printf %s "checking for NetCDF4 libraries... " >&6; }
+
+    if test ! -f "$NC_CONFIG" || test ! -x "$NC_CONFIG"; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:
+
+Unable to locate NetCDF4 compilation helper script 'nc-config'.
+Please specify --with-netcdf4=<LOCATION> as the full path prefix
+where NetCDF4 has been installed.
+NetCDF4 support is being disabled (equivalent to --with-netcdf4=no).
+" >&5
+printf "%s\n" "$as_me: WARNING:
+
+Unable to locate NetCDF4 compilation helper script 'nc-config'.
+Please specify --with-netcdf4=<LOCATION> as the full path prefix
+where NetCDF4 has been installed.
+NetCDF4 support is being disabled (equivalent to --with-netcdf4=no).
+" >&2;}
+        with_netcdf4="no"
+        with_netcdf4_fortran="no"
+    else
+                NETCDF4_CC=$(eval $NC_CONFIG --cc | $AWK '{print $1}')
+        if test "$NETCDF4_CC" = "ccache"; then
+            NETCDF4_CC=$(eval $NC_CONFIG --cc | $AWK '{print $2}')
+        fi
+
+                NETCDF4_VERSION=$(eval $NC_CONFIG --version | $AWK '{print $2}')
+
+                NETCDF4_CFLAGS=$(eval $NC_CONFIG --cflags)
+
+                NETCDF4_tmp_clibs=$(eval $NC_CONFIG --libs)
+
+                for arg in $NETCDF4_tmp_clibs ; do
+          case "$arg" in
+            -L*) echo $NETCDF4_LDFLAGS | $GREP -e "$arg" 2>&1 >/dev/null \
+                   || NETCDF4_LDFLAGS="$arg $NETCDF4_LDFLAGS"
+              ;;
+            -l*) echo $NETCDF4_LIBS | $GREP -e "$arg" 2>&1 >/dev/null \
+                   || NETCDF4_LIBS="$arg $NETCDF4_LIBS"
+              ;;
+          esac
+        done
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes (version $NETCDF4_VERSION)" >&5
+printf "%s\n" "yes (version $NETCDF4_VERSION)" >&6; }
+
+                if test "$netcdf4_requested_mode" = "parallel" ; then
+            with_netcdf4_parallel=$(eval $NC_CONFIG --has-pnetcdf)
+            if test "$with_netcdf4_parallel" = "no" ; then
+                as_fn_error $? "
+parallel NetCDF4 is not supported (while it was requested)
+" "$LINENO" 5
+            fi
+        fi
+
+                ax_lib_netcdf4_save_CC=$CC
+        ax_lib_netcdf4_save_CPPFLAGS=$CPPFLAGS
+        ax_lib_netcdf4_save_LIBS=$LIBS
+        ax_lib_netcdf4_save_LDFLAGS=$LDFLAGS
+        CC=$NETCDF4_CC
+        CFLAGS=$NETCDF4_CFLAGS
+        LIBS=$NETCDF4_LIBS
+        LDFLAGS=$NETCDF4_LDFLAGS
+        ac_fn_c_check_header_compile "$LINENO" "netcdf.h" "ac_cv_header_netcdf_h" "$ac_includes_default"
+if test "x$ac_cv_header_netcdf_h" = xyes
+then :
+  ac_cv_netcdf4_h=yes
+else $as_nop
+  ac_cv_netcdf4_h=no
+fi
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for nc_create in -lnetcdf" >&5
+printf %s "checking for nc_create in -lnetcdf... " >&6; }
+if test ${ac_cv_lib_netcdf_nc_create+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lnetcdf  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char nc_create ();
+int
+main (void)
+{
+return nc_create ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_netcdf_nc_create=yes
+else $as_nop
+  ac_cv_lib_netcdf_nc_create=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_netcdf_nc_create" >&5
+printf "%s\n" "$ac_cv_lib_netcdf_nc_create" >&6; }
+if test "x$ac_cv_lib_netcdf_nc_create" = xyes
+then :
+  ac_cv_libnetcdf4=yes
+else $as_nop
+  ac_cv_libnetcdf4=no
+fi
+
+        if test "$ac_cv_netcdf4_h" = "no" && \
+           test "$ac_cv_libnetcdf4" = "no" ; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to compile NetCDF4 test program" >&5
+printf "%s\n" "$as_me: WARNING: Unable to compile NetCDF4 test program" >&2;}
+        fi
+
+        CC=$ax_lib_netcdf4_save_CC
+        CFLAGS=$ax_lib_netcdf4_save_CFLAGS
+        LIBS=$ax_lib_netcdf4_save_LIBS
+        LDFLAGS=$ax_lib_hdf5_save_LDFLAGS
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for matching NetCDF4 Fortran libraries" >&5
+printf %s "checking for matching NetCDF4 Fortran libraries... " >&6; }
+        NF_CONFIG="${NETCDF4_PREFIX}/bin/nf-config"
+        if test ! -f "$NF_CONFIG" || test ! -x "$NF_CONFIG"; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+            with_netcdf4_fortran="no"
+        else
+            NETCDF_FVERSION=$(eval $NF_CONFIG --version | $AWK '{print $2}')
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes (version $NETCDF_FVERSION)" >&5
+printf "%s\n" "yes (version $NETCDF_FVERSION)" >&6; }
+            NETCDF4_FC=$(eval $NF_CONFIG --fc | $AWK '{print $1}')
+            if test "$NETCDF4_FC" = "ccache"; then
+                NETCDF4_FC=$(eval $NF_CONFIG --fc | $AWK '{print $2}')
+            fi
+                        NETCDF4_FFLAGS=$(eval $NC_CONFIG --fflags)
+
+                        NETCDF4_tmp_flibs=$(eval $NC_CONFIG --flibs)
+
+                        for arg in $NETCDF4_tmp_flibs ; do
+              case "$arg" in
+                -L*) echo $NETCDF4_LDFLAGS | $GREP -e "$arg" 2>&1 >/dev/null \
+                       || NETCDF4_LDFLAGS="$arg $NETCDF4_LDFLAGS"
+                  ;;
+                -l*) echo $NETCDF4_FLIBS | $GREP -e "$arg" 2>&1 >/dev/null \
+                       || NETCDF4_FLIBS="$arg $NETCDF4_FLIBS"
+                  ;;
+               esac
+            done
+            with_netcdf4_fortran="yes"
+        fi
+
+
+
+
+
+
+
+
+
+
+printf "%s\n" "#define HAVE_NETCDF4 1" >>confdefs.h
+
+    fi
+fi
+
+echo "netCDF4 support:  $with_netcdf4"
+if test "$with_netcdf4" = "yes"; then
+  NETCDF_INC=$NETCDF4_CFLAGS
+  NETCDF_LIB=$NETCDF4_LIBS
+
+
+fi
+
+
+
+
+
+
+
+
+if   test "" = ""        ; then
+    : # Recognized value
+elif test "" = "serial"  ; then
+    : # Recognized value
+elif test "" = "parallel"; then
+    : # Recognized value
+else
+    as_fn_error $? "
+Unrecognized value for AX_LIB_HDF5 within configure.ac.
+If supplied, argument 1 must be either 'serial' or 'parallel'.
+" "$LINENO" 5
+fi
+
+
+# Check whether --with-hdf5 was given.
+if test ${with_hdf5+y}
+then :
+  withval=$with_hdf5; if test "$withval" = "no"; then
+     with_hdf5="no"
+   elif test "$withval" = "yes"; then
+     with_hdf5="yes"
+   else
+     with_hdf5="yes"
+     H5CC="$withval"
+   fi
+else $as_nop
+  with_hdf5="yes"
+
+fi
+
+
+HDF5_CC=""
+HDF5_VERSION=""
+HDF5_CFLAGS=""
+HDF5_CPPFLAGS=""
+HDF5_LDFLAGS=""
+HDF5_LIBS=""
+HDF5_FC=""
+HDF5_FFLAGS=""
+HDF5_FLIBS=""
+HDF5_TYPE=""
+
+if test "$with_hdf5" = "yes"; then
+    if test -z "$H5CC"; then
+                for ac_prog in h5cc h5pcc
+do
+  # Extract the first word of "$ac_prog", so it can be a program name with args.
+set dummy $ac_prog; ac_word=$2
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for $ac_word" >&5
+printf %s "checking for $ac_word... " >&6; }
+if test ${ac_cv_path_H5CC+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  case $H5CC in
+  [\\/]* | ?:[\\/]*)
+  ac_cv_path_H5CC="$H5CC" # Let the user override the test with a path.
+  ;;
+  *)
+  as_save_IFS=$IFS; IFS=$PATH_SEPARATOR
+for as_dir in $PATH
+do
+  IFS=$as_save_IFS
+  case $as_dir in #(((
+    '') as_dir=./ ;;
+    */) ;;
+    *) as_dir=$as_dir/ ;;
+  esac
+    for ac_exec_ext in '' $ac_executable_extensions; do
+  if as_fn_executable_p "$as_dir$ac_word$ac_exec_ext"; then
+    ac_cv_path_H5CC="$as_dir$ac_word$ac_exec_ext"
+    printf "%s\n" "$as_me:${as_lineno-$LINENO}: found $as_dir$ac_word$ac_exec_ext" >&5
+    break 2
+  fi
+done
+  done
+IFS=$as_save_IFS
+
+  ;;
+esac
+fi
+H5CC=$ac_cv_path_H5CC
+if test -n "$H5CC"; then
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $H5CC" >&5
+printf "%s\n" "$H5CC" >&6; }
+else
+  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+fi
+
+
+  test -n "$H5CC" && break
+done
+
+    else
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking Using provided HDF5 C wrapper" >&5
+printf %s "checking Using provided HDF5 C wrapper... " >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $H5CC" >&5
+printf "%s\n" "$H5CC" >&6; }
+    fi
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for HDF5 type" >&5
+printf %s "checking for HDF5 type... " >&6; }
+    case $H5CC in #(
+  *h5pcc) :
+    HDF5_TYPE=parallel ;; #(
+  *h5cc) :
+    HDF5_TYPE=serial ;; #(
+  *) :
+    HDF5_TYPE=neither ;;
+esac
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $HDF5_TYPE" >&5
+printf "%s\n" "$HDF5_TYPE" >&6; }
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for HDF5 libraries" >&5
+printf %s "checking for HDF5 libraries... " >&6; }
+    if test ! -f "$H5CC" || test ! -x "$H5CC"; then
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:
+Unable to locate HDF5 compilation helper scripts 'h5cc' or 'h5pcc'.
+Please specify --with-hdf5=<LOCATION> as the full path to h5cc or h5pcc.
+HDF5 support is being disabled (equivalent to --with-hdf5=no).
+" >&5
+printf "%s\n" "$as_me: WARNING:
+Unable to locate HDF5 compilation helper scripts 'h5cc' or 'h5pcc'.
+Please specify --with-hdf5=<LOCATION> as the full path to h5cc or h5pcc.
+HDF5 support is being disabled (equivalent to --with-hdf5=no).
+" >&2;}
+        with_hdf5="no"
+        with_hdf5_fortran="no"
+    else
+                HDF5_SHOW=$(eval $H5CC -show)
+
+                HDF5_CC=$(eval $H5CC -show | head -n 1 | $AWK '{print $1}')
+        if test "$HDF5_CC" = "ccache"; then
+            HDF5_CC=$(eval $H5CC -show | head -n 1 | $AWK '{print $2}')
+        fi
+
+
+                HDF5_VERSION=$(eval $H5CC -showconfig | $GREP 'HDF5 Version:' \
+            | $AWK '{print $3}')
+
+                                                                                HDF5_tmp_flags=$(eval $H5CC -showconfig \
+            | $GREP 'FLAGS\|Extra libraries:' \
+            | $AWK -F: '{printf("%s "), $2}' )
+
+                HDF5_tmp_inst=$(eval $H5CC -showconfig \
+            | $GREP 'Installation point:' \
+            | $AWK '{print $NF}' )
+
+                HDF5_CPPFLAGS="-I${HDF5_tmp_inst}/include"
+
+                for arg in $HDF5_SHOW $HDF5_tmp_flags ; do
+          case "$arg" in
+            -I*) echo $HDF5_CPPFLAGS | $GREP -e "$arg" 2>&1 >/dev/null \
+                  || HDF5_CPPFLAGS="$HDF5_CPPFLAGS $arg"
+              ;;
+            -L*) echo $HDF5_LDFLAGS | $GREP -e "$arg" 2>&1 >/dev/null \
+                  || HDF5_LDFLAGS="$HDF5_LDFLAGS $arg"
+              ;;
+            -l*) echo $HDF5_LIBS | $GREP -e "$arg" 2>&1 >/dev/null \
+                  || HDF5_LIBS="$HDF5_LIBS $arg"
+              ;;
+          esac
+        done
+
+        HDF5_LIBS="-lhdf5 $HDF5_LIBS"
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yes (version $HDF5_VERSION)" >&5
+printf "%s\n" "yes (version $HDF5_VERSION)" >&6; }
+
+                ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+        ax_lib_hdf5_save_CC=$CC
+        ax_lib_hdf5_save_CPPFLAGS=$CPPFLAGS
+        ax_lib_hdf5_save_LIBS=$LIBS
+        ax_lib_hdf5_save_LDFLAGS=$LDFLAGS
+        CC=$HDF5_CC
+        CPPFLAGS=$HDF5_CPPFLAGS
+        LIBS=$HDF5_LIBS
+        LDFLAGS=$HDF5_LDFLAGS
+        ac_fn_c_check_header_compile "$LINENO" "hdf5.h" "ac_cv_header_hdf5_h" "$ac_includes_default"
+if test "x$ac_cv_header_hdf5_h" = xyes
+then :
+  ac_cv_hadf5_h=yes
+else $as_nop
+  ac_cv_hadf5_h=no
+fi
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for H5Fcreate in -lhdf5" >&5
+printf %s "checking for H5Fcreate in -lhdf5... " >&6; }
+if test ${ac_cv_lib_hdf5_H5Fcreate+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhdf5  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char H5Fcreate ();
+int
+main (void)
+{
+return H5Fcreate ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_hdf5_H5Fcreate=yes
+else $as_nop
+  ac_cv_lib_hdf5_H5Fcreate=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdf5_H5Fcreate" >&5
+printf "%s\n" "$ac_cv_lib_hdf5_H5Fcreate" >&6; }
+if test "x$ac_cv_lib_hdf5_H5Fcreate" = xyes
+then :
+  ac_cv_libhdf5=yes
+else $as_nop
+  ac_cv_libhdf5=no
+fi
+
+        if test "$ac_cv_hadf5_h" = "no" && test "$ac_cv_libhdf5" = "no" ; then
+          { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: Unable to compile HDF5 test program" >&5
+printf "%s\n" "$as_me: WARNING: Unable to compile HDF5 test program" >&2;}
+        fi
+                { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for main in -lhdf5_hl" >&5
+printf %s "checking for main in -lhdf5_hl... " >&6; }
+if test ${ac_cv_lib_hdf5_hl_main+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lhdf5_hl  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+
+int
+main (void)
+{
+return main ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_hdf5_hl_main=yes
+else $as_nop
+  ac_cv_lib_hdf5_hl_main=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_hdf5_hl_main" >&5
+printf "%s\n" "$ac_cv_lib_hdf5_hl_main" >&6; }
+if test "x$ac_cv_lib_hdf5_hl_main" = xyes
+then :
+  HDF5_LIBS="-lhdf5_hl $HDF5_LIBS"
+fi
+ac_cv_lib_hdf5_hl=ac_cv_lib_hdf5_hl_main
+
+
+        CC=$ax_lib_hdf5_save_CC
+        CPPFLAGS=$ax_lib_hdf5_save_CPPFLAGS
+        LIBS=$ax_lib_hdf5_save_LIBS
+        LDFLAGS=$ax_lib_hdf5_save_LDFLAGS
+        ac_ext=c
+ac_cpp='$CPP $CPPFLAGS'
+ac_compile='$CC -c $CFLAGS $CPPFLAGS conftest.$ac_ext >&5'
+ac_link='$CC -o conftest$ac_exeext $CFLAGS $CPPFLAGS $LDFLAGS conftest.$ac_ext $LIBS >&5'
+ac_compiler_gnu=$ac_cv_c_compiler_gnu
+
+
+        { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for matching HDF5 Fortran wrapper" >&5
+printf %s "checking for matching HDF5 Fortran wrapper... " >&6; }
+                H5FC=$(eval echo -n $H5CC | $SED -n 's/cc$/fc/p')
+        if test -x "$H5FC"; then
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $H5FC" >&5
+printf "%s\n" "$H5FC" >&6; }
+            with_hdf5_fortran="yes"
+
+
+                        for arg in `$H5FC -show`
+            do
+              case "$arg" in #(
+                -I*) echo $HDF5_FFLAGS | $GREP -e "$arg" >/dev/null \
+                      || HDF5_FFLAGS="$HDF5_FFLAGS $arg"
+                  ;;#(
+                -L*) echo $HDF5_FFLAGS | $GREP -e "$arg" >/dev/null \
+                      || HDF5_FFLAGS="$HDF5_FFLAGS $arg"
+                                                               echo $HDF5_FFLAGS | $GREP -e "-I${arg#-L}" >/dev/null \
+                      || HDF5_FFLAGS="$HDF5_FFLAGS -I${arg#-L}"
+                  ;;
+              esac
+            done
+
+                        for arg in $HDF5_LIBS
+            do
+              case "$arg" in #(
+                -lhdf5_hl) HDF5_FLIBS="$HDF5_FLIBS -lhdf5hl_fortran $arg"
+                  ;; #(
+                -lhdf5)    HDF5_FLIBS="$HDF5_FLIBS -lhdf5_fortran $arg"
+                  ;; #(
+                *) HDF5_FLIBS="$HDF5_FLIBS $arg"
+                  ;;
+              esac
+            done
+        else
+            { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
+printf "%s\n" "no" >&6; }
+            with_hdf5_fortran="no"
+        fi
+
+
+
+
+
+
+
+
+
+
+
+
+printf "%s\n" "#define HAVE_HDF5 1" >>confdefs.h
+
+    fi
+fi
+
+echo "HDF5 support:  $with_hdf5"
+if test "$with_hdf5" = "yes"; then
+   HDF5_INC=$HDF5_CFLAGS
+   HDF5_LIB=$HDF5_LIBS
+
+
+fi
+
+# Provide special options for CFITSIO
+
+# Check whether --with-cfitsio was given.
+if test ${with_cfitsio+y}
+then :
+  withval=$with_cfitsio;
+fi
+
+
+# Check whether --with-cfitsio-libdir was given.
+if test ${with_cfitsio_libdir+y}
+then :
+  withval=$with_cfitsio_libdir;
+fi
+
+
+# Check whether --with-cfitsio-incdir was given.
+if test ${with_cfitsio_incdir+y}
+then :
+  withval=$with_cfitsio_incdir;
+fi
+
+
+if test "$with_cfitsio" != "no"; then
+
+
+
+
+acx_cfitsio_ok=no
+if test x$with_cfitsio_incdir = x; then
+  ac_fn_c_check_header_compile "$LINENO" "fitsio.h" "ac_cv_header_fitsio_h" "$ac_includes_default"
+if test "x$ac_cv_header_fitsio_h" = xyes
+then :
+  acx_cfitsio_ok=yes
+fi
+
+  if test x$acx_cfitsio_ok = xyes; then
+
+printf "%s\n" "#define CFITSIO_H \"fitsio.h\"" >>confdefs.h
+
+  else
+    ac_fn_c_check_header_compile "$LINENO" "cfitsio/fitsio.h" "ac_cv_header_cfitsio_fitsio_h" "$ac_includes_default"
+if test "x$ac_cv_header_cfitsio_fitsio_h" = xyes
+then :
+  acx_cfitsio_ok=yes
+fi
+
+    if test x$acx_cfitsio_ok = xyes; then
+
+printf "%s\n" "#define CFITSIO_H \"cfitsio/fitsio.h\"" >>confdefs.h
+
+    else
+      CFITSIO_ERROR="CFITSIO include files not found at default location!"
+    fi
+  fi
+else
+  as_ac_Header=`printf "%s\n" "ac_cv_header_$with_cfitsio_incdir/fitsio.h" | $as_tr_sh`
+ac_fn_c_check_header_compile "$LINENO" "$with_cfitsio_incdir/fitsio.h" "$as_ac_Header" "$ac_includes_default"
+if eval test \"x\$"$as_ac_Header"\" = x"yes"
+then :
+  acx_cfitsio_ok=yes
+fi
+
+  if test x$acx_cfitsio_ok = xyes; then
+
+printf "%s\n" "#define CFITSIO_H \"$with_cfitsio_incdir/fitsio.h\"" >>confdefs.h
+
+  else
+    CFITSIO_ERROR="CFITSIO include files not found in $with_cfitsio_incdir!"
+  fi
+fi
+
+
+CFITSIO_LIBS=""
+OLIBS="$LIBS"
+LIBS=""
+
+if test x$acx_cfitsio_ok = xyes; then
+  if test x$with_cfitsio_libdir = x; then
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ffopen in -lcfitsio" >&5
+printf %s "checking for ffopen in -lcfitsio... " >&6; }
+if test ${ac_cv_lib_cfitsio_ffopen+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcfitsio  $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char ffopen ();
+int
+main (void)
+{
+return ffopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_cfitsio_ffopen=yes
+else $as_nop
+  ac_cv_lib_cfitsio_ffopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cfitsio_ffopen" >&5
+printf "%s\n" "$ac_cv_lib_cfitsio_ffopen" >&6; }
+if test "x$ac_cv_lib_cfitsio_ffopen" = xyes
+then :
+  acx_cfitsio_ok=yes
+else $as_nop
+  acx_cfitsio_ok=no
+fi
+
+    if test x$acx_cfitsio_ok = xyes; then
+
+printf "%s\n" "#define HAVE_CFITSIO 1" >>confdefs.h
+
+      CFITSIO_LIBS="-lcfitsio"
+    else
+      CFITSIO_ERROR="CFITSIO library files not found at usual locations!"
+    fi
+  else
+    { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking for ffopen in -lcfitsio" >&5
+printf %s "checking for ffopen in -lcfitsio... " >&6; }
+if test ${ac_cv_lib_cfitsio_ffopen+y}
+then :
+  printf %s "(cached) " >&6
+else $as_nop
+  ac_check_lib_save_LIBS=$LIBS
+LIBS="-lcfitsio -L$with_cfitsio_libdir $LIBS"
+cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+/* Override any GCC internal prototype to avoid an error.
+   Use char because int might match the return type of a GCC
+   builtin and then its argument prototype would still apply.  */
+char ffopen ();
+int
+main (void)
+{
+return ffopen ();
+  ;
+  return 0;
+}
+_ACEOF
+if ac_fn_c_try_link "$LINENO"
+then :
+  ac_cv_lib_cfitsio_ffopen=yes
+else $as_nop
+  ac_cv_lib_cfitsio_ffopen=no
+fi
+rm -f core conftest.err conftest.$ac_objext conftest.beam \
+    conftest$ac_exeext conftest.$ac_ext
+LIBS=$ac_check_lib_save_LIBS
+fi
+{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $ac_cv_lib_cfitsio_ffopen" >&5
+printf "%s\n" "$ac_cv_lib_cfitsio_ffopen" >&6; }
+if test "x$ac_cv_lib_cfitsio_ffopen" = xyes
+then :
+  acx_cfitsio_ok=yes
+else $as_nop
+  acx_cfitsio_ok=no
+fi
+
+    if test x$acx_cfitsio_ok = xyes; then
+
+printf "%s\n" "#define HAVE_CFITSIO 1" >>confdefs.h
+
+        CFITSIO_LIBS="-L$with_cfitsio_libdir -lcfitsio"
+    else
+      CFITSIO_ERROR="CFITSIO library files not found in $with_cfitsio_libdir!"
+    fi
+  fi
+fi
+
+LIBS="$OLIBS"
+if test x$acx_cfitsio_ok = xyes; then
+
+  LIBS="$CFITSIO_LIBS $LIBS"
+        if test "$CFITSIO_WARN" != ""; then
+          { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: $CFITSIO_WARN" >&5
+printf "%s\n" "$as_me: WARNING: $CFITSIO_WARN" >&2;}
+        fi
+else
+
+  as_fn_error $? "$CFITSIO_ERROR Exiting." "$LINENO" 5
+fi
+
+
+  CFITSIO_INC="$CFITSIO_CFLAGS"
+  CFITSIO_LIB="$CFITSIO_LIBS"
+fi
 
 
 
@@ -9543,87 +10847,6 @@ fi
 
 
 
-CFITSIO_INC=""
-CFITSIO_LIB=""
-
-# Check whether --enable-cfitsio was given.
-if test ${enable_cfitsio+y}
-then :
-  enableval=$enable_cfitsio; ok=$enableval
-else $as_nop
-  ok=no
-fi
-
-
-if test "$ok" = "yes"; then
-
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking whether we have CFITSIO" >&5
-printf %s "checking whether we have CFITSIO... " >&6; }
-
-  cfdefault=/usr
-
-
-# Check whether --with-cfitsio-prefix was given.
-if test ${with_cfitsio_prefix+y}
-then :
-  withval=$with_cfitsio_prefix; cfitsio_config_prefix="$withval"
-else $as_nop
-  cfitsio_config_prefix="use_default"
-fi
-
-
-  if test "$cfitsio_config_prefix" = "use_default"; then
-    if test -n "$CFITSIO"; then
-      cfitsio_config_prefix="$CFITSIO"
-    else
-      cfitsio_config_prefix="$cfdefault"
-    fi
-  fi
-
-  if test x$cfitsio_config_prefix != x; then
-    cdir="$cfitsio_config_prefix"
-    for dir in $cdir/include $cdir/cfitsio $cdir/include/cfitsio $cdir
-      do
-        if test -f ${dir}/fitsio.h ; then
-          CFITSIO_INC="-I${dir}"
-          incdir="$dir"
-	  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $incdir (valid)" >&5
-printf "%s\n" "$incdir (valid)" >&6; }
-          break;
-        fi
-      done
-
-    if test -n "$CFITSIO_INC"; then
-      for dir in $cdir/lib $cdir $cdir/lib/$host_cpu-$host_os
-        do
-	  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $dir" >&5
-printf "%s\n" "$dir" >&6; }
-          if test -f ${dir}/libcfitsio.a ; then
-            CFITSIO_LIB="${dir}/libcfitsio.a"
-            break;
-          fi
-        done
-    fi
-
-    if test -z "$CFITSIO_LIB"; then
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: $cdir (invalid)" >&5
-printf "%s\n" "$cdir (invalid)" >&6; }
-      if test -z "$CFITSIO_INC"; then who="header"; else who="library"; fi
-      as_fn_error $? "CFITSIO ${who} not found, please specify valid --with-cfitsio-prefix=DIR" "$LINENO" 5
-    else
-      { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: ${cdir}" >&5
-printf "%s\n" "${cdir}" >&6; }
-      printf "%s\n" "#define HAVE_LIBCFITSIO 1" >>confdefs.h
-
-      rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
-    fi
-  fi
-else
-  CFITSIOINC=""
-  CFITSIOLIB=""
-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING: CFITSIO disabled" >&5
-printf "%s\n" "$as_me: WARNING: CFITSIO disabled" >&2;}
-fi
 
 
 

@@ -22,6 +22,9 @@ dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
 m4_include([m4/ax_f77_func_mangle.m4])
 m4_include([m4/acx_plplot.m4])
+m4_include([m4/acx_cfitsio.m4])
+m4_include([m4/ax_lib_netcdf4.m4])
+m4_include([m4/ax_lib_hdf5.m4])
 dnl m4_include([m4/gsl.m4])
 dnl ax_lib_readline.m4
 dnl ax_mpi.m4
@@ -51,6 +54,8 @@ AC_SUBST(NEMOHOST)
 AC_SUBST(NEMO_LIBS)
 AC_SUBST(NEMO_CFLAGS)
 AC_SUBST(NEMO_FFLAGS)
+
+AC_SUBST(FFLAGS)
 
 dnl -- 			warning stuff
 AC_SUBST(WARNING)
@@ -261,7 +266,7 @@ else
 fi
 AC_SUBST(STDFLAG)
 
-FFLAGS="$FFLAGS -std=$with_stdfc"
+# FFLAGS="$FFLAGS -std=$with_stdfc"
 
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
@@ -288,6 +293,48 @@ fi
 AC_SUBST(XLIBS)
 AC_SUBST(XINCS)
 
+dnl --
+AX_LIB_NETCDF4
+echo "netCDF4 support:  $with_netcdf4"
+if test "$with_netcdf4" = "yes"; then
+  NETCDF_INC=$NETCDF4_CFLAGS
+  NETCDF_LIB=$NETCDF4_LIBS
+  AC_SUBST(NETCDF_INC)
+  AC_SUBST(NETCDF_LIB)
+fi
+
+
+AX_LIB_HDF5
+echo "HDF5 support:  $with_hdf5"
+if test "$with_hdf5" = "yes"; then
+   HDF5_INC=$HDF5_CFLAGS
+   HDF5_LIB=$HDF5_LIBS
+   AC_SUBST(HDF5_CFLAGS)
+   AC_SUBST(HDF5_LIBS)
+fi
+
+# Provide special options for CFITSIO
+AC_ARG_WITH(cfitsio,
+        [Link with the CFITSIO library])
+AC_ARG_WITH(cfitsio-libdir,
+        [AS_HELP_STRING([--with-cfitsio-libdir=<CFITSIO library path>],
+        [Provide an alternative path to the CFITSIO library])])
+AC_ARG_WITH(cfitsio-incdir,
+        [AS_HELP_STRING([--with-cfitsio-incdir=<CFITSIO include dir>],
+        [Provide an alternative path to the CFITSIO include directory])])
+
+if test "$with_cfitsio" != "no"; then
+  ACX_CFITSIO($with_cfitsio_libdir, $with_cfitsio_incdir,
+        [LIBS="$CFITSIO_LIBS $LIBS"]
+        if test "$CFITSIO_WARN" != ""; then
+          AC_MSG_WARN([$CFITSIO_WARN])
+        fi,
+        AC_MSG_ERROR([$CFITSIO_ERROR Exiting.]))
+  CFITSIO_INC="$CFITSIO_CFLAGS"
+  CFITSIO_LIB="$CFITSIO_LIBS"
+fi
+AC_SUBST(CFITSIO_INC)
+AC_SUBST(CFITSIO_LIB)
 
 dnl CFITSIO_INC=""
 dnl CFITSIO_LIB=""
@@ -684,68 +731,6 @@ dnl   This section also allows --with-cfitsio-prefix to point to the
 dnl   source code tree, since that is where the *.a and *.h files live
 
 
-dnl PJT
-CFITSIO_INC=""
-CFITSIO_LIB=""
-
-AC_ARG_ENABLE(cfitsio, [  --enable-cfitsio        use CFITSIO, instead of local fits I/O routines], ok=$enableval, ok=no)
-
-if test "$ok" = "yes"; then
-
-  AC_MSG_CHECKING(whether we have CFITSIO)
-
-  cfdefault=/usr
- 
-  AC_ARG_WITH(cfitsio-prefix, AC_HELP_STRING([--with-cfitsio-prefix=PFX],
-        [CFITSIO installation prefix (default: $cfdefault)]),
-        cfitsio_config_prefix="$withval", cfitsio_config_prefix="use_default")
- 
-  if test "$cfitsio_config_prefix" = "use_default"; then
-    if test -n "$CFITSIO"; then
-      cfitsio_config_prefix="$CFITSIO"
-    else
-      cfitsio_config_prefix="$cfdefault"
-    fi
-  fi
-                                                                                
-  if test x$cfitsio_config_prefix != x; then
-    cdir="$cfitsio_config_prefix"
-    for dir in $cdir/include $cdir/cfitsio $cdir/include/cfitsio $cdir
-      do
-        if test -f ${dir}/fitsio.h ; then
-          CFITSIO_INC="-I${dir}"
-          incdir="$dir"
-	  AC_MSG_RESULT($incdir (valid))	  
-          break;
-        fi
-      done
-                                                                                
-    if test -n "$CFITSIO_INC"; then
-      for dir in $cdir/lib $cdir $cdir/lib/$host_cpu-$host_os
-        do
-	  AC_MSG_RESULT($dir)
-          if test -f ${dir}/libcfitsio.a ; then
-            CFITSIO_LIB="${dir}/libcfitsio.a"
-            break;
-          fi
-        done
-    fi
-                                                                                
-    if test -z "$CFITSIO_LIB"; then
-      AC_MSG_RESULT($cdir (invalid))
-      if test -z "$CFITSIO_INC"; then who="header"; else who="library"; fi
-      AC_MSG_ERROR([CFITSIO ${who} not found, please specify valid --with-cfitsio-prefix=DIR])
-    else
-      AC_MSG_RESULT(${cdir})
-      AC_DEFINE(HAVE_LIBCFITSIO)
-      rm -f src/include/cfitsio ; ln -s $incdir src/include/cfitsio
-    fi
-  fi
-else
-  CFITSIOINC=""
-  CFITSIOLIB=""
-  AC_MSG_WARN([CFITSIO disabled])
-fi
 
 AC_SUBST(CFITSIO_INC)
 AC_SUBST(CFITSIO_LIB)
