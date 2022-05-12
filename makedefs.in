@@ -65,10 +65,10 @@ MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
 #  GSL library:   -lgsl -lgslcblas -lm
+GSL_INC = `pkg-config --cflags gsl`
+GSL_LIB = `pkg-config --libs gsl`
 #GSL_INC = @GSL_CFLAGS@
 #GSL_LIB = @GSL_LIBS@
-GSL_INC = 
-GSL_LIB =
 
 #	PLPLOT: -lplplot
 #PLPLOT_INC = -I/usr/include/plplot
