@@ -19,7 +19,12 @@ import sys
 import time
 import argparse
 import numpy as np
-from astroquery.gaia import Gaia
+try:
+    from astroquery.gaia import Gaia
+except:
+    print("astroquery is not installed in your python. we cannot proceed")
+    print("e.g.:     pip3 install astroquery")
+    sys.exit(0)
 try:
     import unsio.output as uns_out 
     import unsiotools.simulations.cfalcon as falcon
