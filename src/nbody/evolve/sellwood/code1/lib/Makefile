@@ -31,6 +31,7 @@ LIB = ../galaxy.a
 
 help:
 	@echo No help
+	@echo FFLAGS=$(FFLAGS)
 
 clean:
 	rm -f core *.o *.a 
