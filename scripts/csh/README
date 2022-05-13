@@ -2,12 +2,16 @@ The name of this directory "csh" is a misnomer, they are examples in
 a variety of shells by now: csh, (ba)sh and python
 
 See also the templates directory for simple examples of scripts with
-a variety of CLI/GUI
+a variety of CLI/GUI interfaces to choose from.
+
+Lastly, be careful using the older scripts, they have not been
+re-vetted.
 
 
 exp1.sh      various spherical models, show mass radii plots for optional cooling
 mk_cone      rotating disk with conical outflow - 3D viewing; uses "tkrun"
-mkplummer.sh example of using getopt in a bash script
+mkplummer.sh example of using getopt in a bash script (horrible really)
 mktt72.sh    Toomre & Toomre 1972 setup
+mkmh97.sh    Makino & Hut 1997 setup (and then some)
 do_neeleman  rotation curves of very beamsmeared galaxies
 
