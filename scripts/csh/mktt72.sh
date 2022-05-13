@@ -1,6 +1,6 @@
-#!/bin/bash
+\#!/bin/bash
 #
-#    Example of setting up a Toomtre & Toomre type interaction, and some
+#    Example of setting up a Toomre & Toomre type interaction, and some
 #    further analysis
 #
 #    Many todo's:
