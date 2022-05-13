@@ -1525,7 +1525,7 @@ Optional Packages:
   --with-x                use the X Window System
   --with-netcdf4=yes/no/PATH
                           base directory of NetCDF4 installation
-  --with-hdf5=yes/no/PATH location of h5cc or h5pcc for HDF5 configuration
+  --with-hdf5=yes/no/PATH location of h5cc for serial HDF5 configuration
 Link with the CFITSIO library
   --with-cfitsio-libdir=<CFITSIO library path>
                           Provide an alternative path to the CFITSIO library
@@ -8434,12 +8434,11 @@ fi
 
 
 
-
-if   test "" = ""        ; then
+if   test "serial" = ""        ; then
     : # Recognized value
-elif test "" = "serial"  ; then
+elif test "serial" = "serial"  ; then
     : # Recognized value
-elif test "" = "parallel"; then
+elif test "serial" = "parallel"; then
     : # Recognized value
 else
     as_fn_error $? "
@@ -8479,7 +8478,7 @@ HDF5_TYPE=""
 
 if test "$with_hdf5" = "yes"; then
     if test -z "$H5CC"; then
-                for ac_prog in h5cc h5pcc
+                for ac_prog in h5cc
 do
   # Extract the first word of "$ac_prog", so it can be a program name with args.
 set dummy $ac_prog; ac_word=$2
@@ -8553,13 +8552,13 @@ printf %s "checking for HDF5 libraries... " >&6; }
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: no" >&5
 printf "%s\n" "no" >&6; }
         { printf "%s\n" "$as_me:${as_lineno-$LINENO}: WARNING:
-Unable to locate HDF5 compilation helper scripts 'h5cc' or 'h5pcc'.
-Please specify --with-hdf5=<LOCATION> as the full path to h5cc or h5pcc.
+Unable to locate serial HDF5 compilation helper script 'h5cc'.
+Please specify --with-hdf5=<LOCATION> as the full path to h5cc.
 HDF5 support is being disabled (equivalent to --with-hdf5=no).
 " >&5
 printf "%s\n" "$as_me: WARNING:
-Unable to locate HDF5 compilation helper scripts 'h5cc' or 'h5pcc'.
-Please specify --with-hdf5=<LOCATION> as the full path to h5cc or h5pcc.
+Unable to locate serial HDF5 compilation helper script 'h5cc'.
+Please specify --with-hdf5=<LOCATION> as the full path to h5cc.
 HDF5 support is being disabled (equivalent to --with-hdf5=no).
 " >&2;}
         with_hdf5="no"
@@ -8786,7 +8785,6 @@ if test "$with_hdf5" = "yes"; then
 
 fi
 
-# Provide special options for CFITSIO
 
 # Check whether --with-cfitsio was given.
 if test ${with_cfitsio+y}
@@ -8986,16 +8984,6 @@ fi
   CFITSIO_INC="$CFITSIO_CFLAGS"
   CFITSIO_LIB="$CFITSIO_LIBS"
 fi
-
-
-
-
-
-
-
-
-
-
 
 
 

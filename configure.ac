@@ -17,8 +17,6 @@ AC_MSG_CHECKING([NEMO config])
 AC_CONFIG_MACRO_DIR([m4])
 dnl AC_CONFIG_MACRO_DIRS - for future autoconf 2.70 ?
 m4_include([m4/csh.m4])
-dnl m4_include([m4/hdf5.m4])
-dnl m4_include([m4/ax_lib_hdf5.m4])
 m4_include([m4/ax_f77_cmain_fflags.m4])
 m4_include([m4/ax_f77_func_mangle.m4])
 m4_include([m4/acx_plplot.m4])
@@ -293,7 +291,7 @@ fi
 AC_SUBST(XLIBS)
 AC_SUBST(XINCS)
 
-dnl --
+dnl -- netCDF4
 AX_LIB_NETCDF4
 echo "netCDF4 support:  $with_netcdf4"
 if test "$with_netcdf4" = "yes"; then
@@ -303,8 +301,8 @@ if test "$with_netcdf4" = "yes"; then
   AC_SUBST(NETCDF_LIB)
 fi
 
-
-AX_LIB_HDF5
+dnl -- HDF5
+AX_LIB_HDF5([serial])
 echo "HDF5 support:  $with_hdf5"
 if test "$with_hdf5" = "yes"; then
    HDF5_INC=$HDF5_CFLAGS
@@ -313,7 +311,7 @@ if test "$with_hdf5" = "yes"; then
    AC_SUBST(HDF5_LIBS)
 fi
 
-# Provide special options for CFITSIO
+dnl -- CFITSIO
 AC_ARG_WITH(cfitsio,
         [Link with the CFITSIO library])
 AC_ARG_WITH(cfitsio-libdir,
@@ -335,45 +333,6 @@ if test "$with_cfitsio" != "no"; then
 fi
 AC_SUBST(CFITSIO_INC)
 AC_SUBST(CFITSIO_LIB)
-
-dnl CFITSIO_INC=""
-dnl CFITSIO_LIB=""
-dnl AC_CHECK_HEADERS([fitsio.h])
-dnl AC_CHECK_HEADERS([/opt/include/fitsio.h],[CFITSIO_INC=-I/opt/include])
-dnl AC_CHECK_HEADERS([/local/include/fitsio.h],[CFITSIO_INC=-I/local/include])
-dnl AC_CHECK_LIB(cfitsio,ffopen,[CFITSIO_LIB="-lcfitsio"])
-dnl AC_SUBST(CFITSIO_INC)
-dnl AC_SUBST(CFITSIO_LIB)
-
-dnl HDF5 is sometimes in a weird place, e.g. /usr/lib/x86_64-linux-gnu/hdf5/serial   /usr/include/hdf5/serial
-dnl AX_LIB_HDF5()
-
-dnl AX_LIB_HDF5([serial])
-
-dnl
-dnl
-dnl PKG_CHECK_MODULES(HDF5, [hdf5-serial],
-dnl			[AC_MSG_NOTICE([pkg-config hdf5-serial])],
-dnl			[AC_MSG_ERROR([hdf5-serial not found])]
-dnl			)			       
-dnl
-
-dnl PKG_CHECK_MODULES([HDF5], [hdf5-serial],[have_hdf5="yes"],[have_hdf5="no"])
-dnl AC_SUBST([have_hdf5])
-
-dnl 
-dnl PKG_CHECK_MODULES(HDF5, [hdf5-serial],
-dnl 			[AC_MSG_NOTICE([pkg-config hdf5-serial])],
-dnl 			[PKG_CHECK_MODULES(HDF5, [hdf5],
-dnl 						 [AC_MSG_NOTICE([pkg-config hdf5-serial])],
-dnl 						 [HDF5_CFLAGS=""
-dnl 						  HDF5_LIB="-lhdf5"
-dnl 						  AC_MSG_NOTICE([falling back to -lhdf5])
-dnl 						  ]
-
-
-AC_SUBST([HDF5_CFLAGS])
-AC_SUBST([HDF5_LIBS])
 
 
 dnl ---------------------------------------------------------------------
