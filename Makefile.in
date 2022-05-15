@@ -1,4 +1,4 @@
-VERSION = NEMO V4.3 21-mar-2022 PJT
+VERSION = NEMO V4.4 13-may-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -21,8 +21,7 @@ JOBS =
 CHECKDIR1 = data inc news tmp csh \
             man man/man1 man/man3 man/man5 man/man8 man/manl \
             demo etc adm bin lib obj \
-	    local \
-            adm/import adm/export adm/install adm/submit adm/purge
+	    local adm/install
 
 _ASCIIDIRS_  = text bugs man/doc  $(SRC) $(USR)       # check if ASCIIDIRS can go
 
@@ -593,10 +592,6 @@ testsuite:
 check: 
 	(source nemo_start.sh; src/scripts/testsuite | tee -a install.log )
 
-benchtest:
-	(source nemo_start.sh; src/scripts/benchsuite)
-	@echo 'Testing Benchsuite: Success!'
-
 checklog:
 	cat testsuite.log
 
@@ -609,6 +604,10 @@ checkpars:
 TIME = /usr/bin/time
 
 bench:   benchtest
+
+benchtest:
+	(source nemo_start.sh; src/scripts/benchsuite)
+	@echo 'Testing Benchsuite: Success!'
 
 bench0:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)
