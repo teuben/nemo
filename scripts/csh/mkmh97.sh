@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 #    Example of setting up a Makino & Hut 1997 simulation
-#    See also: https://arxiv.org/pdf/2205.04623.pdf
+#    See also: https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
 #
 #    @todo
 #    - allow circular orbit
