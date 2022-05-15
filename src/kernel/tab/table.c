@@ -463,12 +463,11 @@ mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols)
 {
   int nr = table_nrows(t);
   int nc = table_ncols(t);
-  dprintf(1,"table_md2: table %d x %d \n",nr,nc);
-  dprintf(1,"table_md2: data2 ncol=%d nrow=%d\n",ncol,nrow);
+  dprintf(1,"table_md2rc: table %d x %d \n",nr,nc);
+  dprintf(1,"table_md2rc: data2 ncol=%d nrow=%d\n",ncol,nrow);
   mdarray2 a = allocate_mdarray2(nr,nc);    // a[nr][nc]
   int i,j;
 
-  dprintf(1,"table_md2 first\n");
   for (i=0; i<nr; i++) {
     string s = table_row(t,i);
     dprintf(1,"%d: %s\n",i,s);
@@ -483,26 +482,28 @@ mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols)
 
 // return a data[col][row] based table
 // this is the more practical
+// note column 0 has a special meaning, it's the row number
 mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows)
 {
   int nr = table_nrows(t);
   int nc = table_ncols(t);
-  dprintf(1,"table_md2: table %d x %d \n",nr,nc);
-  dprintf(1,"table_md2: data2 ncol=%d nrow=%d\n",ncol,nrow);
+  dprintf(1,"table_md2cr: table %d x %d \n",nr,nc);
+  dprintf(1,"table_md2cr: data2 ncol=%d nrow=%d\n",ncol,nrow);
   if (ncol>0) nc=ncol;
   if (nrow>0) nr=nrow;   // not supported yet  
   mdarray2 a = allocate_mdarray2(nc,nr);                  // a[nc][nr]
   int i,j,jidx;
 
-
-  dprintf(1,"table_md2cr first\n");
   for (i=0; i<nr; i++) {
     string s = table_row(t,i);
     dprintf(1,"%d: %s\n",i,s);
     string *sp = table_rowsp(t,i);
     for (j=0; j<nc; j++) {
       jidx = (ncol == 0 ?  j  :  cols[j]-1);
-      a[j][i] = atof(sp[jidx]);
+      if (jidx < 0)
+	a[j][i] = i;
+      else
+	a[j][i] = atof(sp[jidx]);
     }
   }
 
