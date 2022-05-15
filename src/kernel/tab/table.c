@@ -501,7 +501,7 @@ mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows)
     for (j=0; j<nc; j++) {
       jidx = (ncol == 0 ?  j  :  cols[j]-1);
       if (jidx < 0)
-	a[j][i] = i;
+	a[j][i] = i+1;
       else
 	a[j][i] = atof(sp[jidx]);
     }
