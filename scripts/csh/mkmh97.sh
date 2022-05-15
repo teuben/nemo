@@ -1,14 +1,14 @@
 #!/bin/bash
 #
-#    Example of setting up a Makino & Hut 1997 interation
-#    See https://arxiv.org/pdf/2205.04623.pdf
+#    Example of setting up a Makino & Hut 1997 simulation
+#    See also: https://arxiv.org/pdf/2205.04623.pdf
 #
-#    Many todo's:
+#    @todo
 #    - allow circular orbit
 #    - recode such that v0 is speed at infinity
 #
-# version: 12-may-2022
-#          15-may-2022   added option to make circular orbit
+# version: 12-may-2022   initial version with just (near) head-on collision
+#          15-may-2022   added option to make (near) circular orbit
 
 set -x
 
@@ -38,7 +38,7 @@ if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
     snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
 else
     # (near) circular orbit
-    snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0  zerocm=t    
+    snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t    
 fi
 
 # integrate
