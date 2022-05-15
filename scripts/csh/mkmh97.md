@@ -60,11 +60,11 @@ Plot some of the evolution:
 ## Circular orbits?
 
 For **v0<0** we can set up the two sytems in a circular orbit by launching from
-(r0,0,0) and (0,v0,0), i.e. in clock wise motion. You will need to figure out the
-right v0 for a circular orbit. E.g.
+(r0,0,0) and (0,v0,0), i.e. in clock wise motion. For an exact circular orbit,
+the following example should work
 
-      ./mkmh97.sh v0=-1 r0=1 nbody=1
-      snapplot run0.4 trak=t
+      ./mkmh97.sh v0=-1 r0=2 nbody=1 eps=0
+      snapplot run0.4 visib=i==0 trak=t 
 
 ## TODO
 
