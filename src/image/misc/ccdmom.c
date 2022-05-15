@@ -60,12 +60,11 @@ string defv[] = {
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif
   "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
-  "VERSION=3.0\n  17-apr-2022 PJT",
+  "VERSION=3.1\n  14-mayr-2022 PJT",
   NULL,
 };
 
 string usage = "moment along an axis of an image";
-string cvsid="$Id$";
 
 local real peak_spectrum(int n, real *spec, int p);
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero);
@@ -267,7 +266,7 @@ void nemo_main()
 	    }
 	    for (i=0; i<nx1; i++)
 	      CubeValue(iptr1,i,j,k) = newvalue;
-        }
+        } // j
 
         /* TODO: fix up Qkeep headers */
 
@@ -328,7 +327,7 @@ void nemo_main()
 	    }
             for (j=0; j<ny1; j++)
                 CubeValue(iptr1,i,j,k) = newvalue;
-        }
+        } // i
 
         /* TODO: */
 
@@ -371,14 +370,14 @@ void nemo_main()
 		tmp00 += sqr(spec[k]);
 		if (spec[k] > peakvalue) {
 		  apeak = k;
-		  peakvalue = spec[k];
+		  peakvalue = spec[k];     // mom=8
 		}
 		if (mom==-3) {
 		  if (k==0)
 		    CubeValue(iptr1,i,j,k) = 0;
 		  else
 		    CubeValue(iptr1,i,j,k) = spec[k]-spec[k-1];
-		}
+		} 
     	    } /* for(k/k1) */
 	    
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
@@ -398,6 +397,8 @@ void nemo_main()
 		  newvalue = 0.0;
 		else
 		  newvalue = scale*sqrt(newvalue);
+	      } else if (mom==8) {
+		newvalue = peakvalue;
 	      } else if (mom==3 || mom/10==3) {  /* mom=3, 30,31,32,33,34 */
 		if (npeak == 0) {
 		  if (mom==3) {

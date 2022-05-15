@@ -65,7 +65,7 @@ in a shell session:
 
 .. code-block::
 
-   source /opt/nemo/nemo_starts.sh
+   source /opt/nemo/nemo_start.sh
 
    mkplummer p100 100
    snapplot p100 xvar=x yvar=vx
