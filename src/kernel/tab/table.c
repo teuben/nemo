@@ -485,14 +485,22 @@ mdarray2 table_md2rc(table *t, int nrow, int *rows, int ncol, int *cols)
 // note column 0 has a special meaning, it's the row number
 mdarray2 table_md2cr(table *t, int ncol, int *cols, int nrow, int *rows)
 {
+  int i,j,jidx;
   int nr = table_nrows(t);
   int nc = table_ncols(t);
   dprintf(1,"table_md2cr: table %d x %d \n",nr,nc);
   dprintf(1,"table_md2cr: data2 ncol=%d nrow=%d\n",ncol,nrow);
+  if (ncol > 0) {
+    for (j=0; j<ncol; j++) {
+      jidx = cols[j];
+      if (jidx < 0)  error("illegal column reference %d < 0", jidx);
+      if (jidx > nc) error("illegal column reference %d > %d", jidx,nc);
+    }
+  }
+  
   if (ncol>0) nc=ncol;
   if (nrow>0) nr=nrow;   // not supported yet  
   mdarray2 a = allocate_mdarray2(nc,nr);                  // a[nc][nr]
-  int i,j,jidx;
 
   for (i=0; i<nr; i++) {
     string s = table_row(t,i);
