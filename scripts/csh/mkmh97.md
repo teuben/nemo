@@ -11,8 +11,8 @@ the exception there is no syntax or validity of the keyword checking!
 
 As in NEMO, units are virial units.
 
-1. **run**:  an identifying name used in all the derived filenames, e.g. run1, which then
-creates files like run1.1 and run1.4.log etc.  Warning: if you specify an already
+1. **run**:  an identifying name used in all the derived filenames, e.g. run0, which then
+creates files like run0.1 and run0.4.log etc.  Warning: if you specify an already
 used simulation, that run is overwritten!
 
 2. **nbody**: number of bodies per plummer sphere. Notice that nbody=1 is also allowed,
@@ -37,25 +37,25 @@ with the right choices of **v0** and **r0** a circular orbit can also be achieve
 
 Plot some initial conditions:
 
-      snapplot run1.3 xrange=-16:16 yrange=-16:16
-      snapplot run1.3 xrange=-16:16 yrange=-2:2 yvar=vx
+      snapplot run0.3 xrange=-16:16 yrange=-16:16
+      snapplot run0.3 xrange=-16:16 yrange=-2:2 yvar=vx
 
 Plot some of the evolution:
 
       # plot energy vs. time - how well is energy conserved?
-      tabplot run1.4.log
+      tabplot run0.4.log
 
       # histogram of energy, easier to see fractional conservation
-      tabhist run1.4.log 2
+      tabhist run0.4.log 2
 
       # evolution in XY projection
-      snapplot run1.4 xrange=-4:4 yrange=-4:4
+      snapplot run0.4 xrange=-4:4 yrange=-4:4
 
       # the orbit of star #100
-      snapplot run1.4 xrange=-4:4 yrange=-4:4 trak=t visib==100
+      snapplot run0.4 xrange=-4:4 yrange=-4:4 trak=t visib==100
 
       # the evolution in Radius-Angular momentum space
-      snapplot run1.4.log xrange=0:4 yrange=-2:2 xvar=r xvar=jz
+      snapplot run0.4.log xrange=0:4 yrange=-2:2 xvar=r xvar=jz
       
 ## Circular orbits?
 
@@ -64,26 +64,30 @@ For **v0<0** we can set up the two sytems in a circular orbit by launching from
 the following example should work
 
       ./mkmh97.sh v0=-1 r0=2 nbody=1 eps=0
-      snapplot run0.4 visib=i==0 trak=t 
+      snapplot run0.4 trak=t 
+	  
+and you will see the two particles chase each other on the same circular orbit. Pick a 
+different v0 or r0 and this will not be true.
 
 ## TODO
 
-* define v0 as being from infinity? (cf. Makino & Hut paper)
+1. define v0 as being from infinity? (cf. Makino & Hut paper)
 
-* allow circular orbit using negative **v0**.   The initial offset **r0** is then used
+2. allow circular orbit using negative **v0**.   The initial offset **r0** is then used
 as the diameter of the circular orbit. This could be a fun way to study dynamical
 friction (cf. Bontekoe & v Albada, White, ...)
 
-* Exact Newtonian solutions vs. Order Of Magnitude Estimates (OOME)
+3. Exact Newtonian solutions vs. Order Of Magnitude Estimates (OOME)
 
-* various sanity tests
+4. various sanity tests
   e.g. energy conservation as function of integration step
 
-* for v0 at r0, what is vi (v_infty)
+5. for v0 at r0, what is vi (v_infty)
 
-* write down the eq. for a circular orbit: what is the relation ship between r0 and v0
+6. write down the eq. for a circular orbit: what is the relation ship between r0 and v0
 
-* find v0 for the circular orbit at r0=4
+7. find v0 for the circular orbit at r0=4
 
-* integrate plunging orbit for different values of softening.
-  make sure it's not an escaping orbit, i.e. E < 0
+8. integrate plunging orbit for different values of softening.
+   make sure it's not an escaping orbit, i.e. E < 0
+   Plot for example X vs. VX, or time (t)
