@@ -30,7 +30,7 @@ A more manual install, bypassing this script, can be:
    git clone https://github.com/teuben/nemo
    cd nemo
    ./configure --with-yapp=pgplot
-   make build check bench bench5 python
+   make build check bench5 python
    source nemo_start.sh
 
 
@@ -43,10 +43,10 @@ the ``--disable-shared`` flag needs to be added
    git clone https://github.com/teuben/nemo
    cd nemo
    ./configure --with-yapp=pgplot --disable-shared
-   make build check bench bench5
+   make build check bench5
    source nemo_start.sh
 
-Disabling SIP is not recommended.		
+Disabling SIP is not recommended, so we've been told.		
 
 
 Rebuilding
@@ -61,6 +61,7 @@ If you have an existing installation, but many things have change, this is proba
    make rebuild
 
 this will also preserve the possibly peculiar options for configure that you passed the first time it was installed.
+Or more importantly, if you had edited the $NEMOLIB/makedefs file.
 
 Advanced Installation
 ---------------------
@@ -118,10 +119,10 @@ python
 ------
 
 With so many useful python packages around, and so many different methods
-(anaconda, cond, venv etc.), we will not recommend a method, as this will
+(anaconda, conda, venv etc.), we will not recommend a method, as this will
 likely depend on your own situation. The installation examples below
 should give you enough information how to adapt it for your python
-installation.  It goes without saying (this is 2021) we only support
+installation.  It goes without saying (it 2021 here) we only support
 python3.
 
 However, if you install python from within NEMO, there will be a
