@@ -42,6 +42,7 @@ else
 fi
 
 # integrate
-gyrfalcON $run.3 $run.4 eps=$eps kmax=8 step=$step tstop=$tstop > $run.4.log
+#gyrfalcON $run.3 $run.4 eps=$eps kmax=8 step=$step tstop=$tstop > $run.4.log
+hackcode1 $run.3 $run.4 eps=$eps freq=128 freqout=1 tstop=$tstop > $run.4.log
 
 
