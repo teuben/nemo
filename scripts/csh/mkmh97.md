@@ -73,3 +73,17 @@ the following example should work
 * allow circular orbit using negative **v0**.   The initial offset **r0** is then used
 as the diameter of the circular orbit. This could be a fun way to study dynamical
 friction (cf. Bontekoe & v Albada, White, ...)
+
+* Exact Newtonian solutions vs. Order Of Magnitude Estimates (OOME)
+
+* various sanity tests
+  e.g. energy conservation as function of integration step
+
+* for v0 at r0, what is vi (v_infty)
+
+* write down the eq. for a circular orbit: what is the relation ship between r0 and v0
+
+* find v0 for the circular orbit at r0=4
+
+* integrate plunging orbit for different values of softening.
+  make sure it's not an escaping orbit, i.e. E < 0
