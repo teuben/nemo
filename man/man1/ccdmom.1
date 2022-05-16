@@ -1,4 +1,4 @@
-.TH CCDMOM 1NEMO "17 April 2022"
+.TH CCDMOM 1NEMO "14 May 2022"
 .SH "NAME"
 ccdmom \- moment or accumulate along an axis of an image
 
@@ -45,6 +45,7 @@ referring to the selected axis as "\fIvelocity\fP" we have the following moments
 1	mean velocity
 2	sigma, the velocity dispersion (FWHM = 2.355 * sigma)
 3	velocity of peak fit (around the max and the two points on either side)
+8	peak value along axis
 -1	average intensity along the axis
 -2	dispersion around the mean intensity along the axis
 -3	differentials along an axis (forces keep=true)
@@ -161,12 +162,13 @@ and \fBV\fP a one-dimensional WCS value along the the picked axis.
 the axis= keyword in the numpy functions to pick another but our default of axis=3.
 .nf
 .ta +2i
-       mom=0	m0=I.sum(axis=2)
+       mom=0	m0 = I.sum(axis=2)
        ?	I.mean(axis=2)
-       mom=-1	m1=I.mean(axis=2)
-       mom=-2	m2=I.std(axis=2)
-       mom=1    v=(V*I).sum(axis=2)/I.sum(axis=2)
+       mom=-1	m1 = I.mean(axis=2)
+       mom=-2	m2 = I.std(axis=2)
+       mom=1    v = (V*I).sum(axis=2)/I.sum(axis=2)
        mom=2    s=
+       mom=8    peak = I.max(axis=2)
 .fi
 
 .SH "SEE ALSO"
@@ -201,5 +203,6 @@ Peter Teuben
 10-may-2017	V2.4 force q&d cont subtraction on mom=30,31,....	PJT
 15-jun-2017	V2.5 add pos= option	PJT
 21-jun-2017	V2.6 add abs= option	PJT
-17-apr-2022	V.30 add arange=	PJT
+17-apr-2022	V3.0 add arange=	PJT
+14-may-2022	V3.1 add mom=8 option	PJT
 .fi
