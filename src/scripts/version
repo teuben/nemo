@@ -63,7 +63,8 @@ echo "/* do not edit - created by the src/scripts/version script */"  >! $h
 echo "#if defined(GETPARAM_VERSION_ID)"                  >>! $h
 echo -n 'static char *version_h = '                      >>! $h
 echo -n '"'"git_$git"                                    >>! $h
-echo '";'                                                >>! $h 
+echo -n '";'                                             >>! $h
+echo " // git rev-list --count HEAD"                     >>! $h
 echo "#endif"                                            >>! $h 
 echo '#define NEMO_VERSION "'$version'"'                 >>! $h
 
