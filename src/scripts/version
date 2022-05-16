@@ -16,7 +16,8 @@ if (! -e $v) then
 endif
 
 
-echo  "GIT `git rev-list --count HEAD`"
+echo  "GIT Counter  `git rev-list --count HEAD`"
+echo  "GIT Revision `git rev-parse master`"
 
 set version=`cat $v`
 set patch=$version:e
