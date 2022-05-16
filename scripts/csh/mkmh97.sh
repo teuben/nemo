@@ -21,6 +21,8 @@ v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius (not used for v
 r0=10.0         # initial offset position for v0 > 0
 eps=0.05        # softening
+kmax=8          # integration timestep is 1/2**kmax
+hack=1          # hackcode? else use the faster gyrfalcON code
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
@@ -41,8 +43,11 @@ else
     snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t    
 fi
 
-# integrate
-#gyrfalcON $run.3 $run.4 eps=$eps kmax=8 step=$step tstop=$tstop > $run.4.log
-hackcode1 $run.3 $run.4 eps=$eps freq=128 freqout=1 tstop=$tstop > $run.4.log
+# integrate (hackcode1 is slower for large Nbody systems)
+if [ $hack = 1 ]; then
+    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step tstop=$tstop > $run.4.log
+else
+    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop > $run.4.log
+fi
 
 
