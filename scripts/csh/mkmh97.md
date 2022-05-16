@@ -43,10 +43,10 @@ Plot some initial conditions:
 Plot some of the evolution:
 
       # plot energy vs. time - how well is energy conserved?
-      tabplot run0.4.log
+      tabplot run0.4.etot
 
       # histogram of energy, easier to see fractional conservation
-      tabhist run0.4.log 2
+      tabhist run0.4.etot 2
 
       # evolution in XY projection
       snapplot run0.4 xrange=-4:4 yrange=-4:4
