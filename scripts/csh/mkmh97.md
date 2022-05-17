@@ -32,6 +32,11 @@ with the right choices of **v0** and **r0** a circular orbit can also be achieve
 
 8. **eps**: gravitational softening. There are some codes in NEMO that allow negative softening,
    in which case a Post-Newtonian (PN) approximation is used. This is outside the realm of this study. [0.05]
+   
+9. **kmax**: parameter to control the timestep = 1/2**kmax [8]
+
+10. **hack**: If hackcode1 (the original 1986 Barnes & Hut treecode) has to be used. It's a bit slower than
+   the default gyrfalcON, but on some machines the latter does not compile. [1]
 
 ## Plotting Examples
 
