@@ -11,34 +11,37 @@ the exception there is no syntax or validity of the keyword checking!
 
 As in NEMO, units are virial units.
 
-1. **run**:  an identifying name used in all the derived filenames, e.g. run0, which then
+1. **run=**:  an identifying name used in all the derived filenames, e.g. run0, which then
 creates files like run0.1 and run0.4.log etc.  Warning: if you specify an already
 used simulation, that run is overwritten!
 
-2. **nbody**: number of bodies per plummer sphere. Notice that nbody=1 is also allowed,
+2. **nbody=**: number of bodies per plummer sphere. Notice that nbody=1 is also allowed,
 allowing you to check on Kepler orbits. [1000]
 
-3. **tstop**: stopping time. Should be several times r0/v0   [50]
+3. **tstop=**: stopping time. Should be several times r0/v0   [50]
 
-4. **step**: step time when snapshots are stored. 1 is probably ok, for movies you probably need 0.1 [1.0]
+4. **step=**: step time when snapshots are stored. 1 is probably ok, for movies you probably need 0.1 [1.0]
 
-5. **v0**: initial impact speed between the two spheres.
+5. **v0=**: initial impact speed between the two spheres.
 Use positive values for a (near) collision. Negative values are reserved for a (near) circular orbit, although
 with the right choices of **v0** and **r0** a circular orbit can also be achieved.  [1.0]
 
-6. **rp**: initial impact parameter. 0 means a head-on collision [0]
+6. **rp=**: initial impact parameter. 0 means a head-on collision [0]
 
-7. **r0**: initial impact distance between the two spheres [10]
+7. **r0=**: initial impact distance between the two spheres [10]
 
-8. **eps**: gravitational softening. There are some codes in NEMO that allow negative softening,
+8. **eps=**: gravitational softening. There are some codes in NEMO that allow negative softening,
    in which case a Post-Newtonian (PN) approximation is used. This is outside the realm of this study. [0.05]
    
-9. **kmax**: parameter to control the timestep = 1/2**kmax [8]
+9. **kmax=**: parameter to control the timestep = 1/(2^kmax) [8]
 
-10. **hack**: If hackcode1 (the original 1986 Barnes & Hut treecode) has to be used. It's a bit slower than
-   the default gyrfalcON, but on some machines the latter does not compile. [1]
+10. **hack=**: Set to 1 if hackcode1 (the original 1986 Barnes & Hut treecode) has to be used. It's a bit slower than
+   the default gyrfalcON, but on some machines the latter may not compile. [1]
 
 ## Plotting Examples
+
+In the examples below the name *run0" is used, since that's the default for **run=**, however, if you want to 
+preserve the data, be sure to use your run name!
 
 Plot some initial conditions:
 
@@ -54,13 +57,19 @@ Plot some of the evolution:
       tabhist run0.4.etot 2
 
       # evolution in XY projection
-      snapplot run0.4 xrange=-4:4 yrange=-4:4
-
-      # the orbit of star #100
-      snapplot run0.4 xrange=-4:4 yrange=-4:4 trak=t visib==100
+      snapplot run0.4 xrange=-16:16 yrange=-16:16
+	  
+	  # evolution but coloring each galaxy different
+      snapplot run0.4 xrange=-16:16 yrange=-16:16 color='i<1000?0.1:0.2'
+	  
+      # the orbit of star #100 (try a few stars, some are bound, some escape)
+      snapplot run0.4 xrange=-4:4 yrange=-4:4 trak=t visib=i==100
+	  
+	  # the evolution in X-VX space (rather interesting)
+      snapplot run0.4 xrange=-16:16 yrange=-2:2 xvar=x yvar=vx
 
       # the evolution in Radius-Angular momentum space
-      snapplot run0.4.log xrange=0:4 yrange=-2:2 xvar=r xvar=jz
+      snapplot run0.4 xrange=0:16 yrange=-8:8 xvar=r yvar=jz
       
 ## Circular orbits?
 
