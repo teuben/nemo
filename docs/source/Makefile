@@ -26,3 +26,4 @@ pjt: lastmod html
 
 lastmod:
 	echo "Last modified `date`" > $(SOURCEDIR)/lastmod.rst
+#	echo "`git rev-list --count HEAD` and Revision `git rev-parse master`" >>  $(SOURCEDIR)/lastmod.rst
