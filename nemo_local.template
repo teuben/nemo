@@ -6,3 +6,6 @@
 #
 #  xps13: otherwise -march=native causes compiler to fail since tiger lake is not known
 NO_ARCH_NATIVE=1
+
+# fortune   $NEMO/data/fortunes/
+# echo "git counter: `git rev-list --count HEAD`"

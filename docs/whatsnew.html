@@ -24,6 +24,11 @@ contains a timestamp of that creation.
 <A NAME=4_4_0>
 <H2> 4.4.0:  in github</H2>
 <UL>
+  <LI> (May 15, 2022) table I/O: column 0 was not understood, added column range check
+  <LI> (May 12, 2022) default gfortran compilation now add -std=legacy, since the
+    compiler is now using a picky 2018 standard
+  <LI> (May 10, 2022) gaia_snapshot.py - downloads a gaia based snapshot, optionally with
+       a density estimator, great for viewing in glnemo2 - PJT + JCL
   <LI> (May 8, 2022) the new table interface has been merged into the master branch.
     The <A HREF=man_html/table.3.html>table(3NEMO)</A> manual page has implemented
     most of the important parts of the planned API. This should make it easier to

@@ -5,13 +5,22 @@
 #
 #  Should work with python-unsiotools, or if not available, uns_tools
 #
+#  Example of converting this to 10x10x10 pc voxels with # stars as the "intensity"
+#  
+#       snapgrid gaia.snap - xrange=-100:100 yrange=-100:100 zrange=-100:100 nx=20 ny=20 nz=20 evar=1 zvar=z |\
+#       ccdmath - gaia.ccd %1*1000
+#  
+#
 #  @todo   use velocities as well
+#          use magnitudes to convert to brightness as proxy for mass
 #
 #  GAIA archive (for manual downloads)      https://gea.esac.esa.int/archive/
 #  astroquery (for programmatic downloads)  https://astroquery.readthedocs.io/en/latest/gaia/gaia.html
 #
 #  7-may-2022 - created on a rainy cold windy Greenman Festival in Greenbelt while playing Mahjong - PJT
 #  10-may-2022 - merged in JCL's unsio method - if it fails, the old method will be attempted
+#  14-may-2022 - select by error in parallax (didn't seem to make a difference)
+#
 #
 
 import os
@@ -19,7 +28,12 @@ import sys
 import time
 import argparse
 import numpy as np
-from astroquery.gaia import Gaia
+try:
+    from astroquery.gaia import Gaia
+except:
+    print("astroquery is not installed in your python. we cannot proceed")
+    print("e.g.:     pip3 install astroquery")
+    sys.exit(0)
 try:
     import unsio.output as uns_out 
     import unsiotools.simulations.cfalcon as falcon
@@ -77,14 +91,14 @@ def process(args):
     tic=time.perf_counter()
     
     if dump:
-        job = Gaia.launch_job_async("SELECT l,b,parallax "
+        job = Gaia.launch_job_async("SELECT l,b,parallax,parallax_error "
                                     "FROM %s "
                                     "WHERE parallax >= %g" % (db,pmax),
                                     dump_to_file=True, output_format="ecsv")
         f1 = job.outputFile
         print(f"Dumpfile {f1}", file=sys.stderr)
     else:
-        job = Gaia.launch_job_async("SELECT l,b,parallax "
+        job = Gaia.launch_job_async("SELECT l,b,parallax,parallax_error "
                                     "FROM %s "
                                     "WHERE parallax >= %g" % (db,pmax))
         f1 = None
@@ -114,6 +128,9 @@ def process(args):
             os.system(cmd)
             print("Written",f2)
         else:
+            p = r['parallax']
+            pe = r['parallax_error']
+            mask = ( pe < p )
             l = r['l']
             b = r['b']
             d = 1000.0/r['parallax']
@@ -134,9 +151,15 @@ def process(args):
             print("Written",f2)
     else:
         using = "UNSIO"
-        l = r['l']
-        b = r['b']
-        d = 1000.0/r['parallax']
+        p = r['parallax']
+        pe = r['parallax_error']
+        mask = ( pe < p )
+        print("P error: mean/std/min/max=",pe.mean(),pe.std(),pe.min(),pe.max())
+        #
+        l = r['l'][mask]
+        b = r['b'][mask]
+        d = 1000.0/r['parallax'][mask]
+        print('Mask Found ', len(d))
         rpd = np.pi/180.0
         x = d * np.cos(l*rpd) * np.cos(b*rpd)
         y = d * np.sin(l*rpd) * np.cos(b*rpd)

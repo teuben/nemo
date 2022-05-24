@@ -260,7 +260,7 @@ has been included in NEMO
 would run the ``tsf`` command, but redirecting the
 *stderr* standard error output to a file ``stderr.out``. There are
 ways in the C-shell to do the same thing, but they are
-clumsy and hard to remember. In the bourne/bash
+clumsy and hard to remember. In the bash
 shell this is accomplished much easier:
 
 .. code-block::
@@ -276,16 +276,10 @@ at the profile:
 
     8% snapprint r001.dat r | tabhist - 
 
+In older versions of NEMO the number of lines that tabhist could
+read from a pipe, but as of NEMO version 4.4 tables can be
+arbitrarely large in size.
 
-If the snapshot contains more than 10,000 points, ``tabhist`` cannot
-read the remainer of the file, since the default maximum number
-of libes for reading from pipes
-is set by a keyword ``nmax=10000``. To properly read all lines, you
-have to know (or estimate) the number of lines. In 
-the other case where the input is a regular file, table programs
-are always able to find the correct amount to allocate for their
-internal buffers by scanning over the file once. For very large tables
-this does introduce a little extra overhead.
 
 Dynamically Loadable Functions
 ------------------------------

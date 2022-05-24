@@ -915,6 +915,24 @@ appropriate NEMO permissions}
 
     % mknemo snapprint
 
+Template
+~~~~~~~~
+
+If you need to write a new program in NEMO, you can always clone an existing
+program and modify it, if it fits the workflow.   Another approach is to
+use the ``template`` script that does all the initial tedious work of
+writing your *nemo_main*.  It also can write the initial manual page. Here
+is an example:
+
+.. code-block::
+
+    % $NEMO/src/scripts/template foobar a=1 b=2.3 n=10 m=10
+    % mknemo foobar
+    % $NEMO/src/scripts/mkman foobar > $NEMO/man/man1/foobar.1
+
+After some editing, compiling, testing those two files are ready for inclusion
+in the package via a git commit!
+
 Manual pages
 ~~~~~~~~~~~~
 
