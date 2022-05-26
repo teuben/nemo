@@ -8,6 +8,7 @@
 # may  6  2021: -h flag added
 # may  29 2021: -f flag added
 # july 22 2021: -u flag added
+# may  26 2022: run from anywhere support
 
 import re, os, subprocess, getopt, sys
 
@@ -199,7 +200,7 @@ def readFlags():
         print('failed to read flag')
 
 def help():
-    print('checkpars V1.3')
+    print('checkpars V1.4')
     print('-v           prints help and man keywords for mismatched files')
     print('-f <file>    allows you to specify tasklist to scan')
     print('-h           prints help page')
@@ -207,6 +208,10 @@ def help():
 
 def main():
     readFlags()
+
+    # Find nemo directory
+    while os.getcwd()[-4:] != 'nemo':
+        os.chdir('../')
 
     if HELP: # Prints help and exits
         help()
