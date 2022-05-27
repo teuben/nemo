@@ -10,7 +10,7 @@
 string defv[] = {
     "in=???\n            Input netCDF4 file",
     "mode=1\n            1=ifproc  2=roach   3=SpecFile",
-    "VERSION=0.2\n       10-may-2022 PJT",
+    "VERSION=0.2a\n      27-may-2022 PJT",
     NULL,
 };
 
@@ -26,6 +26,8 @@ void nemo_main(void)
 {
   string infile;
   int mode, ncid, retval;
+
+  warning("Experimental program to interrogate LMT netcdf files");
 
   infile = getparam("in");
   mode = getiparam("mode");
