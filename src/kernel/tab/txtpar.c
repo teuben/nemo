@@ -27,7 +27,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "maxline=10000\n    Max number of lines in case a pipe was used",
 #endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.7a\n     5-may-2022 PJT",
+    "VERSION=0.7b\n     18-may-2022 PJT",
     NULL
 };
 
@@ -188,7 +188,7 @@ local void convert(stream instr)
 	  }
 	}
 	if (nmatch == 0) {
-	  error("No match found for \"%s\"", word[i]);
+	  error("No match found for \"%s\" in %s", word[i],input);
 	  continue;
 	}
       } else
@@ -203,16 +203,16 @@ local void convert(stream instr)
 	else
 	  error("Illegal row=0 reference - 1");
 	if (rownr < 0 || rownr >= nlines)
-	  error("bad rownumber %d for p%d", row[i],i);
+	  error("bad rownumber %d for p%d in %s", row[i],i,input);
       } else {                                  // look in matched values
 	if (row[i] > 0) {
-	  if (row[i] > nmatch) error("Not enough matches for %s,%d",word[i],row[i]);
+	  if (row[i] > nmatch) error("Not enough matches for %s,%d in %s",word[i],row[i],input);
 	  rownr = match[row[i]-1];
 	} else if (row[i] < 0) {
-	  if (nmatch+row[i] < 0) error("Not enough matches for %s,%d",word[i],row[i]);	  
+	  if (nmatch+row[i] < 0) error("Not enough matches for %s,%d in %s",word[i],row[i],input);	  
 	  rownr = match[nmatch+row[i]];
 	} else
-	  error("Illegal row=0 reference - 2");
+	  error("Illegal row=0 reference - 2 in %s",input);
       }
       
       dprintf(1,"par p%d row=%d col=%d\n", i, rownr, col[i]);
