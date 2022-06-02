@@ -124,6 +124,7 @@ document. For now, use the github.com web interface
 You can even delete a branch, once it has been accepted as a pull request and merged
 back in the upstream, it is really not needed anymore:
 
+      git checkout b1
       git checkout master
       git branch -D b1
       git push origin --delete b1

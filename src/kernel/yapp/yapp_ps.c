@@ -21,9 +21,10 @@
  *                              20 jun 01  debug level now 1
  *         3.3  PJT             15-jun-2018 prototypes
  *                              22-dec-2020 back to a pragmatic 20cm scale, make Helvetica default font
+ *         3.4  PJT              1-jun-2022 allow  file.ps/ps  to bypass lazy pgplot users
  */
 
-#define VERSIONID "Version 3.3a 22-dec-2020 PJT"
+#define VERSIONID "Version 3.4 1-jun-2022 PJT"
 
 #include <stdinc.h>
 //#include <yapp.h>
@@ -100,9 +101,15 @@ extern string date_id(void);                    /* date id */
 int plinit(string opt, real x0, real x1, real y0, real y1)
 {
     real dx, dy;
+    char *cp = strstr(yapp_string, "/ps");
+
+    if (*cp) {
+      warning("Chopping off /ps from %s", yapp_string);
+      *cp = 0;
+    } 
 
     if (yappstat != INACTIVE)
-	error("plinit: called twice\n");
+        error("plinit: called twice");
     if (yapp_string != 0 && *yapp_string != 0)
         yappfile = yapp_string;
     if (streq(yappfile,"lpr")) {
