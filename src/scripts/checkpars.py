@@ -8,7 +8,7 @@
 # may  6  2021: -h flag added
 # may  29 2021: -f flag added
 # july 22 2021: -u flag added
-# may  26 2022: run from anywhere support
+# june 1  2022: run from anywhere support
 
 import re, os, subprocess, getopt, sys
 
@@ -209,9 +209,7 @@ def help():
 def main():
     readFlags()
 
-    # Find nemo directory
-    while os.getcwd()[-4:] != 'nemo':
-        os.chdir('../')
+    os.chdir(os.environ['OLDPWD'])
 
     if HELP: # Prints help and exits
         help()
