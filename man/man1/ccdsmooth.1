@@ -1,4 +1,4 @@
-.TH CCDSMOOTH 1NEMO "10 May 2010"
+.TH CCDSMOOTH 1NEMO "31 May 2022"
 .SH NAME
 ccdsmooth \- smoothing of an image map (2D or 3D)
 .SH SYNOPSIS
@@ -33,6 +33,9 @@ the pre-existing beam.
 If this parameter is used, the parameter \fBsmooth\fP is
 ignored [default: not used].
 .TP
+\fBmoffat=\fIvalue\fP
+If given, this will be the FWHM of the Moffat smoothing function.
+.TP
 \fBdir=x|y|z\fP
 Direction of smoothing. This gives the flexibility of smoothing in
 x, y and/or z separately. Note that when smoothing in more than one
@@ -47,6 +50,9 @@ Example is e.g. the Hanning smoothing: "0.25,0.5,0.25".
 [default: \fB0.25,0.5,0.25\fP]. This parameter is only used if
 \fBgauss\fP parameter is not used.
 .TP
+\fBwiener=\fIvalue\fP
+If used, this will be the (square) size of the Wiener filter.
+.TP
 \fBnsmooth=\fIvalue\fP
 Number of times the above smoothing kernel is applied over the data.
 [default: \fB1\fP].
@@ -55,9 +61,15 @@ Number of times the above smoothing kernel is applied over the data.
 Input pixel value which to skip in smoothing.
 [Default: not used]
 .TP
+\fBbeta=\fImoffat_beta\fP
+If used, this is the \fIbeta\fP parameter for the MOffat smoothing function. [Default: 4.765]
+.TP
 \fBcut=\fIcutoff_value\fP
 Value at which to cutoff the gaussian beam. 
 [Default: \fB0.01\fP]
+.TP
+\fBmode=\fIedge_mode\fP
+Special edge smoothing mode (testing). [0]
 
 .SH "EXAMPLES"
 Here is an example to compute the noise of an image with unity noise that has been smoothed
@@ -151,7 +163,7 @@ src/image/trans     	ccdsmooth.c
 
 .SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 29-jun-87	V1.0: Created as module from CCD program	PJT
 30-Jun-87	V1.1: improved 'struct' filestructure      	PJT
  9-jul-87	V1.2: keyword 'dir' and keyword order changed	PJT
@@ -160,4 +172,5 @@ src/image/trans     	ccdsmooth.c
 11-sep-91	some additional comments                	PJT
 12-mar-98	V3.1: added cut=, fixed fwhm=0.0         	PJT
 23-jun-21	add EXAMPLE with smoothing noise		PJT
+31-may-22	documented missing parameters		PJT
 .fi
