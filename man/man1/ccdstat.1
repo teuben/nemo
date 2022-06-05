@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "4 December 2020"
+.TH CCDSTAT 1NEMO "31 May 2022"
 
 .SH "NAME"
 ccdstat \- statistics (1st through 4th moment) and chi2
@@ -106,6 +106,10 @@ on screen.
 \fBqac=t|f\fP
 If selected, a QAC listing is selected. This gives the mean, rms, min and max.
 [Default: f]
+.TP
+\fBlabel=\fP
+Descriptive label for QAC output. Normally the filename is used, but for awkward long
+or short (a pipe) filenames this can be useful. Default: \fIin_file\fP
 
 .SH "EXAMPLE"
 .nf
