@@ -23,6 +23,12 @@ for arg in $*; do
     fi
 done
 
+# Not found anything in pgplot, trying our simple yapp_ps driver
+yapp - $tmp.yapp yapp=$tmp.ps > $tmp.log 2>&1
+if [ -e $tmp.ps ]; then
+    echo "ps"
+fi
+
 # cleanup
 rm $tmp.*
 exit 1
