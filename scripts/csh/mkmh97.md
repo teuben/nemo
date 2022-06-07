@@ -119,3 +119,6 @@ friction (cf. Bontekoe & v Albada, White, ...)
 8. integrate plunging orbit for different values of softening.
    make sure it's not an escaping orbit, i.e. E < 0
    Plot for example X vs. VX, or time (t)
+
+9. Estimate how many particles we need to see shells, and how many to trace the full
+   dynamic range of the galaxy as for example can be seen in the CenA image.
