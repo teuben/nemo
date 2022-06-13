@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7g 22-may-2021 PJT"
+#define GETPARAM_VERSION_ID  "3.7h 9-may-2022 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -212,6 +212,7 @@
 #include <getparam.h>
 #include <extstring.h>
 #include <filefn.h>
+#include <stdlib.h>
 #include <strlib.h>
 #include <history.h>
 
@@ -1061,7 +1062,9 @@ local void printhelp(string help)
 	printf("  c       >> show cpu usage at the end of the run\n");
 	printf("  m       >> show memory usage at the end of the run\n");
 	printf("  M       >> man page (same as -man and --man)\n");
-	printf("  I       >> cvs id\n");
+	printf("  I       >> GIT version\n");
+	printf("  N       >> NEMO version\n");
+	printf("  V       >> getparam version\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
@@ -1100,7 +1103,14 @@ local void printhelp(string help)
         /*NOTREACHED*/
     }
     if (strchr(help,'I')) {
-      printf("%s\n",cvsid);
+	printf("GIT version = %s\n", version_h);
+	printf("Current HEAD: ");
+	fflush(stdout);
+        local_exit( system("cd $NEMO; git rev-list --count HEAD") );
+        /*NOTREACHED*/
+    }
+    if (strchr(help,'N')) {
+        printf("NEMO VERSION = %s\n",NEMO_VERSION);	
         local_exit(0);
         /*NOTREACHED*/
     }
@@ -1114,7 +1124,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucmM")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucmMINV")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);

@@ -453,6 +453,7 @@ build2:
 build3:
 	(source nemo_start.sh ; $(MAKE) -j $(JOBS) bins)
 	@echo 'Continue with "make build4 for advanced runs"'
+	@echo ' and/or "make check bench5" for a final check'
 
 #       Advanced build examples that require opt=1 during the build.
 #       normally not needed

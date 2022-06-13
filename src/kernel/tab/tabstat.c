@@ -107,7 +107,7 @@ void setparams(void)
 
     nrows = table_nrows(tptr);
     ncols = table_ncols(tptr);
-    dprintf(0,"Table: %d x %d\n", nrows, ncols);
+    dprintf(1,"Table: %d x %d\n", nrows, ncols);
 
     nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
     if (nxcol == 0) {
