@@ -41,14 +41,14 @@ with the right choices of **v0** and **r0** a circular orbit can also be achieve
 ## Plotting Examples
 
 In the examples below the name *run0" is used, since that's the default for **run=**, however, if you want to 
-preserve the data, be sure to use your run name!
+preserve the data, be sure to use another run name!
 
-Plot some initial conditions:
+1. Plot some initial conditions. Here is an X-Y plot, and an X-VX plot:
 
       snapplot run0.3 xrange=-16:16 yrange=-16:16
       snapplot run0.3 xrange=-16:16 yrange=-2:2 yvar=vx
 
-Plot some of the evolution:
+2. Plot some of the evolution:
 
       # plot energy vs. time - how well is energy conserved?
       tabplot run0.4.etot
@@ -56,7 +56,7 @@ Plot some of the evolution:
       # histogram of energy, easier to see fractional conservation
       tabhist run0.4.etot 2
 
-      # evolution in XY projection
+      # evolution in X-Y projection
       snapplot run0.4 xrange=-16:16 yrange=-16:16
 	  
 	  # evolution but coloring each galaxy different
@@ -70,7 +70,21 @@ Plot some of the evolution:
 
       # the evolution in Radius-Angular momentum space
       snapplot run0.4 xrange=0:16 yrange=-8:8 xvar=r yvar=jz
-      
+	  
+3. Make a CCD frame so we can compare them to telescope images
+
+      # a CCD frame of the final snapshot, and convert to a FITS file, to 
+	  # to view it in ds9
+	  snapgrid run0.4 run0.4.ccd xrange=-16:16 yrange=-16:16 times=50
+      ccdfits run0.4.ccd run0.4.fits ndim=2 radecvel=t
+	  ds9 run0.4.fits
+	  
+The quality of the image in [ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9/download)
+will depend strongly on the number of particles
+in the galaxy. The default image only has 64 x 64 pixels, and with only
+2000 particles in this default simulation there will be lots of pixels
+with 0 stars.
+
 ## Circular orbits?
 
 For **v0<0** we can set up the two sytems in a circular orbit by launching from
@@ -105,3 +119,6 @@ friction (cf. Bontekoe & v Albada, White, ...)
 8. integrate plunging orbit for different values of softening.
    make sure it's not an escaping orbit, i.e. E < 0
    Plot for example X vs. VX, or time (t)
+
+9. Estimate how many particles we need to see shells, and how many to trace the full
+   dynamic range of the galaxy as for example can be seen in the CenA image.

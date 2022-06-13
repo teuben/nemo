@@ -1,9 +1,12 @@
-.TH TABTREND 1NEMO "26 May 2020"
-.SH NAME
+.TH TABTREND 1NEMO "31 May 2022"
+
+.SH "NAME"
 tabtrend \- difference rows from previous rows
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabtrend\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabtrend\fP takes a single column from an ASCII table, and differences subsequent
 values, creating a new column that is thus one row shorter.
 .PP
@@ -11,18 +14,14 @@ Note that for a gaussian signal,
 differencing subsequent elements will create a distribution
 with a noise sqrt(2) larger than the input signal.
 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file name. No default.
 .TP
 \fBxcol=\fP
 Column(s) to use [1]
-.TP
-\fBnmax=\fP
-max size if a pipe [100000]  
 .TP
 \fBcumul=t|f\fP
 Cumulative, instead of differences.  Default: false
@@ -33,7 +32,7 @@ Also show the original column (if selected it will be shown \fIafter\fP the tren
 \fBfirst=t|f\fP
 Add the first row?  [Default: f]
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 Create 10000 numbers gaussian distributed with dispersion 1, observe the following:
 .nf
 set n = 10000
@@ -56,15 +55,19 @@ This also means if you don't know if a signal had been applied a Hanning smoothi
 before and after a difference operator. If that ratio is sqrt(2), it means it was not, it was a pure
 un-correllated gaussian. However, if the ratio is sqrt(2/3) = 0.816, it was a Hanning smoothed signal
 to begin with.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +1.0i +4i
+.ta +1.5i +5.5i
 26-Nov-2012	finally documented	PJT
 13-oct-2014	better examples		PJT
 15-jun-2016	added cumul=		PJT
 26-may-2020	added orig=		PJT
+1-may-2022	remove nmax= for table V2	PJT
 .fi
