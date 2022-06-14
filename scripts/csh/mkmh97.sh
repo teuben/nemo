@@ -49,7 +49,7 @@ if [ $hack = 1 ]; then
     snapdiagplot $run.4 tab=$run.4.etot
 else
     gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop > $run.4.log
-    tabcols run0.4.log 1,2 > $run.4.etot
+    tabcols $run.4.log 1,2 > $run.4.etot
 fi
 
 
