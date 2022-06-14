@@ -1,9 +1,12 @@
-.TH SNAPSCALE 1NEMO "19 October 1999"
-.SH NAME
+.TH SNAPSCALE 1NEMO "13 June 2022"
+
+.SH "NAME"
 snapscale \- re-scale an N-body system
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapscale in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapscale\fP copies an N-body system from \fBin\fP to \fBout\fP,
 multiplying various components of the snapshot by their respective
 scale factors. All scalings are done independantly, the scalefactors
@@ -17,8 +20,9 @@ the program figure out how to rescale all available items in the snapshot
 if e.g. only masses are scaled, and virial units are to be effective, the
 radii and/or velocities will also be appropriately scaled.
 These features are implemented in \fIsnapvirial\fP.
-.SH PARAMETERS
-The following parameters are recognized:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fIin_file\fP
 input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
@@ -62,27 +66,41 @@ be an integer. Default: \fB1\fP.
 Only snapshots with time values within \fItimes-ranges\fP, which is
 of the form \fBts[:te],...\fP, will be 
 copied. [default: \fBall\fP].
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 For a given axisymmetric disk with all particles on circular orbits
 squashing the orbits a bit would give a reasonable approximation for
 elliptical orbits, say by 10%:
 .nf
-    set e=1.1
+
+    e=1.1
     snapscale in=mod.axi out=mod.ell "rscale=sqrt($e),1/sqrt($e),1" \\
         "vscale=$e,1/$e,1"
 .fi
+
+Scaling an already virialized Plummer sphere (see \fImkplummer(1NEMO)\fP), and the
+Faber-Jackson relation, here is one way to scale such models with a massfraction \fBa\fP:
+.nf
+
+    a=0.1
+    snapscale plum1.dat plum2.dat mscale="$a" rscale="$a**0.5" vscale="$a**0.25"
+.fi
+
 .SH "SEE ALSO"
-snapvirial(1NEMO), snapshift(1NEMO), snapshot(5NEMO)
-.SH AUTHOR
+mkplummer(1NEMO), snapvirial(1NEMO), snapshift(1NEMO), snapshot(5NEMO)
+
+.SH "AUTHOR"
 Joshua E. Barnes, Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/pjt/nbody   	snapscale.c snapscale.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.0i
  7-May-87	V1.0: created          	PJT
 16-Nov-87	V1.1: mass added	PJT
 9-Mar-88	V1.2: data history added, proper debug output	PJT
@@ -91,6 +109,7 @@ Joshua E. Barnes, Peter Teuben
 24-aug-88	V2.1: added pscale keyword	PJT
 15-aug-89	V2.4: added pscale,ascale,xscale,kscale  	PJT
 19-oct-99	doc improved	PJT
+13-jun-22	add example	PJT
 .fi
 
 
