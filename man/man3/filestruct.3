@@ -1,7 +1,9 @@
 .TH FILESTRUCT 3NEMO "7 April 2012"
-.SH NAME
+
+.SH "NAME"
 filestruct \- primitives for structured binary file I/O
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 \fB#include <stdinc.h>\fP
 \fB#include <filestruct.h>\fP
@@ -41,7 +43,8 @@ filestruct \- primitives for structured binary file I/O
 \fBstring msg;\fP
 \fBint offset, length\fP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 These routines provide a simple yet reasonably general mechanism for
 the structured input and output of binary data.  A structured binary
 file may be viewed as a sequence of tagged data items
@@ -170,7 +173,8 @@ called \fIget_data_blocked\fP, where the I/O must occur sequentially.
 dimension array (allocated and zero terminated!), 
 and data-length in bytes for the whole item.
 These routines should be rarely needed by programmers though.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following code fragment reads and later writes some data to
 structured binary files.
 .nf
@@ -236,7 +240,8 @@ how to handle structures:
 \ \ \ \ \ \ \0\0\0\0\0\0\0\fB64, sizeof(struct foo), 0);\fP
 \ \ \ \ 
 .fi
-.SH DIAGNOSTICS
+
+.SH "DIAGNOSTICS"
 Exceptional conditions (eg, unexpected EOF), invalid arguments (eg,
 types out of range) and low-level catastrophies (eg, running out of
 memory) generate messages via \fIerror\fP(3), which will, in general,
@@ -244,22 +249,29 @@ return the program to the operating system.
 This error-checking is
 implemented with the goal of freeing applications programmers from
 the responsibility of checking for I/O errors other than end-of-file.
-.SH NOTES
+
+.SH "NOTES"
 The library will delay reading large data-items in memory and only
 store a pointer to their location until it is really needed via
 one of the get_data() routines.
-.SH CAVEATS
+
+.SH "CAVEATS"
 Whenever pipes are used, all data is read into memory, as opposed to
 being deferred for input.
 This may lead to large memory consuption. 
 .PP
 random access can currently only take place in one item
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes, Lyman P. Hurd, Peter Teuben
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 filestruct(5NEMO), \fINEMO Users/Programmers Guide\fP
-.P
+.PP
 http://www.openexr.com/about.html#features  (half precision floating point)
+.PP
+https://github.com/syrte/snapio - python implementation of snap I/O
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i
