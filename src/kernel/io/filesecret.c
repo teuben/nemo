@@ -8,6 +8,9 @@
  *           multiple same-named items within a set, whereas NEMO
  *           cannot (yet)
  *
+ *  A python implementation was written by  Zhaozhou Li (lizz.astro@gmail.com)
+ *  See https://github.com/syrte/snapio
+ *
  *  Input is done through:      Output through:
  *      fread()                     fwrite()
  *      getxstr() -> getc()         putxstr() ->  putc()    (see extstring.c)
