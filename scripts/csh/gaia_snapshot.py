@@ -20,6 +20,7 @@
 #  7-may-2022 - created on a rainy cold windy Greenman Festival in Greenbelt while playing Mahjong - PJT
 #  10-may-2022 - merged in JCL's unsio method - if it fails, the old method will be attempted
 #  14-may-2022 - select by error in parallax (didn't seem to make a difference)
+#  13-jun-2022 - make DR3 the default
 #
 #
 
@@ -46,7 +47,7 @@ except:
 
 
 # defaults
-def_db    = "gaiaedr3.gaia_source"    #   others:  "gaiadr2.gaia_source"
+def_db    = "gaiadr3.gaia_source"    #   others:  "gaiadr2.gaia_source" "gaiaedr3.gaia_source"
 def_pmax  = 25
 def_dump  = False
 def_dens  = False
@@ -186,7 +187,7 @@ def commandLine():
 
     parser.add_argument('filename',    help="output snapshot name",    default=None)
     parser.add_argument('--pmax',      help="pmax value",              default=def_pmax,type=float)
-    parser.add_argument('--db',        help="Gaia DB",                 default="gaiaedr3.gaia_source")
+    parser.add_argument('--db',        help="Gaia DB",                 default=def_db)
     parser.add_argument('--dump',      help='force ECSV dump',         dest="dump",  action="store_true" , default=def_dump)
     parser.add_argument('--density',   help='compute local density',   dest="dens",  action="store_true",  default=def_dens)
     parser.add_argument('--nemo',      help='force NEMO tools [slow]', dest="nemo",  action="store_true",  default=def_nemo)    
