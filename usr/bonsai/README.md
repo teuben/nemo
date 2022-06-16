@@ -33,3 +33,8 @@ bonsai2 took 22sec for 10k, and a 100k simulation took 33sec!
 Examples taken from a 2022 desktop: Xeon(R) CPU E5-2687W 0 @ 3.10GHz;  Nvidia RTX 3070 w/ 8GB memory
 
 
+Bonsai - sciserver
+------------------
+
+This version stores potentials and accelerations as well, and a modified tipsysnap_acc is needed
+for conversion back to NEMO snapshot format.
