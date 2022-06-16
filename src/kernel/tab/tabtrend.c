@@ -36,7 +36,7 @@ string defv[] = {
     "delta=1\n                    How far away the neighbor",
     "orig=f\n                     show original column as well?",
     "first=f\n                    add first row?",
-    "VERSION=0.4\n		  17-mar-2021 PJT",
+    "VERSION=0.5\n		  16-jun-2022 PJT",
     NULL
 };
 
