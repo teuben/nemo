@@ -56,7 +56,7 @@ string defv[] = {
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
     "boom=f\n                   BOOM mode with add-acc ?",
-    "VERSION=3.1\n              5-feb-2022 pjt",
+    "VERSION=3.2\n              16-jun-2022 pjt",
     NULL,
 };
 
@@ -343,7 +343,7 @@ void nemo_main()
 #else
 	version = 0;
 #endif
-
+        tsnap = header.time;
         dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star    version=%d\n",
                 header.time, header.nbodies,
                 header.nsph, header.ndark, header.nstar, version);

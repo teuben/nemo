@@ -1,7 +1,9 @@
 .TH FITS 5NEMO "29 September 2001"
-.SH NAME
+
+.SH "NAME"
 fits \- standard astronomical data interchange format 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIFITS\fP (Flexible Image/Information Transport System)
 is \fBTHE\fP standard format for the interchange
 of astronomical images and other digital arrays (ascii and binary 
@@ -34,7 +36,8 @@ NEMO has two library routines available to process \fIfits\fP
 files: \fIfits(3NEMO)\fP and \fIfitsio(3NEMO)\fP, the latter
 more specialized to read and write images and derived (and compatible
 with) from the MIRIAD fitsio interface.
-.SH KEYWORDS
+
+.SH "KEYWORDS"
 The following header keywords describe the most important
 facts about the data (or at least enables a reader to skip data)
 .nf
@@ -67,7 +70,8 @@ can always be computed from the following formula:
 where \fIm\fP is the value of NAXIS. This size must of course be rounded
 up to the nearest multiple of 2880 bytes. After this, either there is no
 more information on the medium, or another HDU can be read.
-.SH TIME
+
+.SH "TIME"
 The old DATE-OBS format (with the Y2K problem) was yy-dd-mm, and some
 files might have a corresponding TIME-OBS keyword, hh:mm:ss. The new
 format follows the ISO format, obtained with the unix date command
@@ -77,7 +81,8 @@ as follows:
     2020-12-18T13:15:49.648961250
 .fi
 and this should be the new format (with as many sub-second digits as are needed).
-.SH COORDINATE SYSTEMS
+
+.SH "COORDINATE SYSTEMS"
 World Coordinate Systems are described in detail in
 draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled
 \fIRepresentations of Celestial Coordinates in FITS\fP.
@@ -122,9 +127,14 @@ CSC  0  Cobe Quadrilateralized Spherical Cube
 QSC  0  Quadrilateralized Spherical Cube     
 TSC  0  Tangential Spherical Cube
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
 fitsio(3NEMO), fits(3NEMO), image(5NEMO)
+.nf
+https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html  - 
+.fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
