@@ -4,13 +4,24 @@
 #    See also: https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
 #
 #    @todo
-#    - allow circular orbit
 #    - recode such that v0 is speed at infinity
+#
+# bench:
+#          ./mkmh97a.sh code=0 run=run100 nbody=10000 tstop=20 seed=123 
+#          ./mkmh97a.sh code=1 run=run101 nbody=10000 tstop=20 seed=123
+#                     i7-1185G7  Xeon E5-2687W      i9-12900K
+#          code=0     5:12 min       10:48            3:31
+#          code=1     2:10 min        3:20            1:25
+#          code=2     ----            0:16            ----
+
 #
 # version: 12-may-2022   initial version with just (near) head-on collision
 #          15-may-2022   added option to make (near) circular orbit
+#          15-jun-2022   added m= mass ratio parameter, changed hack= -> code= and implemented bonsai
+#          17-jun-2022   added seed= and defined a benchmark
 
 set -x
+set -e
 
 #            parameters for the script that can be overriden via the commandline
 run=run0        # basename of the files belonging to this simulation
@@ -22,7 +33,10 @@ rp=0.0          # impact offset radius (not used for v
 r0=10.0         # initial offset position for v0 > 0
 eps=0.05        # softening
 kmax=8          # integration timestep is 1/2**kmax
-hack=1          # hackcode? else use the faster gyrfalcON code
+code=0          # 0=hackcode1 2=gyrfalcON  3=bonsai2
+m=1             # mass of second galaxy (mass of first will be 1)
+seed=0          # random seed
+
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
@@ -33,8 +47,8 @@ done
 rm -f $run.*
 
 # make two random plummer spheres in virial units and stack them
-mkplummer $run.1 $nbody
-mkplummer $run.2 $nbody
+mkplummer $run.1 $nbody seed=$seed
+mkplummer -      $nbody seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
 if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
     # (near) head-on collision
     snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
@@ -44,12 +58,30 @@ else
 fi
 
 # integrate (hackcode1 is slower for large Nbody systems)
-if [ $hack = 1 ]; then
+#           
+if [ $code = 0 ]; then
     hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop > $run.4.log
     snapdiagplot $run.4 tab=$run.4.etot
-else
+elif [ $code = 1 ]; then
     gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop > $run.4.log
     tabcols $run.4.log 1,2 > $run.4.etot
+elif [ $code = 2 ]; then
+    # See $NEMO/usr/bonsai
+    snaptipsy  $run.3 $run.3t
+    bonsai2 -i $run.3t --snapname $run. --logfile $run.gpu --dev 0 --snapiter $step -T $tstop -t $(nemoinp 1/2**$kmax)  1>$run.4.log 2>$run.4.err
+    grep Etot= run0.4.log  |tabcols - 4,6 > $run.4.etot
+    set +x
+    for f in $run._*; do
+	echo Processing $f
+	(tipsysnap $f - | csf - - item=SnapShot 1>>$run.4 ) 2>>$run.4.t2s
+    done
+    echo Wrote final combined snapshot in $run.4
+else
+    set +x
+    echo Unknown code=$code, valid are:
+    echo 1 = hackcode1
+    echo 2 = gyrfalcON
+    echo 3 = bonsai2
 fi
 
 
