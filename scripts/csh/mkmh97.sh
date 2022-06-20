@@ -9,6 +9,7 @@
 #
 # version: 12-may-2022   initial version with just (near) head-on collision
 #          15-may-2022   added option to make (near) circular orbit
+#          20-jun-2022   add potentials & acc
 
 set -x
 
@@ -45,10 +46,10 @@ fi
 
 # integrate (hackcode1 is slower for large Nbody systems)
 if [ $hack = 1 ]; then
-    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop > $run.4.log
+    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log
     snapdiagplot $run.4 tab=$run.4.etot
 else
-    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop > $run.4.log
+    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap > $run.4.log
     tabcols $run.4.log 1,2 > $run.4.etot
 fi
 
