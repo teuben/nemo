@@ -7,8 +7,8 @@
 #    - recode such that v0 is speed at infinity
 #
 # bench:
-#          ./mkmh97a.sh code=0 run=run100 nbody=10000 tstop=20 seed=123 
-#          ./mkmh97a.sh code=1 run=run101 nbody=10000 tstop=20 seed=123
+#          ./mkmh97.sh code=0 run=run100 nbody=10000 tstop=20 seed=123 
+#          ./mkmh97.sh code=1 run=run101 nbody=10000 tstop=20 seed=123
 #                     i7-1185G7  Xeon E5-2687W      i9-12900K
 #          code=0     5:12 min       10:48            3:31
 #          code=1     2:10 min        3:20            1:25
@@ -19,6 +19,7 @@
 #          15-may-2022   added option to make (near) circular orbit
 #          15-jun-2022   added m= mass ratio parameter, changed hack= -> code= and implemented bonsai
 #          17-jun-2022   added seed= and defined a benchmark
+#          20-jun-2022   add potentials & acc
 
 set -x
 set -e
@@ -60,10 +61,10 @@ fi
 # integrate (hackcode1 is slower for large Nbody systems)
 #           
 if [ $code = 0 ]; then
-    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop > $run.4.log
+    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
     snapdiagplot $run.4 tab=$run.4.etot
 elif [ $code = 1 ]; then
-    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop > $run.4.log
+    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap > $run.4.log
     tabcols $run.4.log 1,2 > $run.4.etot
 elif [ $code = 2 ]; then
     # See $NEMO/usr/bonsai
