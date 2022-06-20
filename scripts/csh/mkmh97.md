@@ -97,6 +97,11 @@ the following example should work
 and you will see the two particles chase each other on the same circular orbit. Pick a 
 different v0 or r0 and this will not be true.
 
+
+      ./mkmh97.sh run=run1 eps=0.05 nbody=1000
+	  
+
+
 ## TODO
 
 1. define v0 as being from infinity? (cf. Makino & Hut paper)
@@ -122,3 +127,7 @@ friction (cf. Bontekoe & v Albada, White, ...)
 
 9. Estimate how many particles we need to see shells, and how many to trace the full
    dynamic range of the galaxy as for example can be seen in the CenA image.
+
+10. modify the script such that the 2nd galaxy has a mass ratio mratio=0.1 for example.
+    You can use snapvirial and/or snapscale for this.
+
