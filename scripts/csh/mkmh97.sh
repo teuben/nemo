@@ -95,6 +95,7 @@ fi
 
 # some analysis
 bsigma=0.0001
+tplot=0,5,10,15,20,25,30,40,50
 
 tabplot $run.4.etot   yapp=etot.plot.png/png
 tabhist $run.4.etot 2 yapp=etot.hist.png/png > etot.hist.log 2>&1
@@ -102,3 +103,5 @@ snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.
 snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.png/png
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=init.ccd.png/png
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=final.ccd.png/png
+
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tplot nxy=3,3 yapp=run4.plot.png/png
