@@ -104,4 +104,5 @@ snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=init.ccd.png/png
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=final.ccd.png/png
 
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tplot nxy=3,3 yapp=run4.plot.png/png
+snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution.plot.png/png
+snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
