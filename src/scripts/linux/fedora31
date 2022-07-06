@@ -8,8 +8,8 @@ libXext-devel
 
 # the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
 # missing <rpc/rpc.h>            libtirpc-devel didn't work - now works (dec 2020)
-# didn't work in fedora34mknemo
-
+# didn't work in fedora34
+# -I/usr/include/tirpc   ?   -> netconfig.h is missing
 
 libtirpc-devel 
 
@@ -34,4 +34,11 @@ netcdf-devel
 # xorg-x11-proto-devel
 # libX11-devel
 libXext-devel
+
+
+# pgplot pgplot-devel
+# pgsbox in wcslib
+
+flex
+m4
 
