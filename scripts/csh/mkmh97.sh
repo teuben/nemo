@@ -48,12 +48,16 @@ for arg in $*; do
   export $arg
 done
 
+version=7-jul-2022
+
 #             delete the old run, work within the run directory
 if [ -d $run ]; then
     rm -fr $run
 fi
 mkdir $run
 cd $run
+echo "# version=$version" > mkmk97.rc
+echo "$*"                >> mkmk97.rc
 
 # make two random plummer spheres in virial units and stack them
 # optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
