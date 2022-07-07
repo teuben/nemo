@@ -78,6 +78,7 @@ fi
 # integrator:  0:  hackcode1 is O(NlogN) code
 #              1:  gyrfalcON is O(N)
 #              2:  bonsai2 is O(N) but scales faster for "small" N
+echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
 if [ $code = 0 ]; then
     hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
     snapdiagplot $run.4 tab=$run.4.etot
