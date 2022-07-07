@@ -4,6 +4,11 @@
 # optional:
 #
 # note:   the git compile may not work yet (i didn't for me)
+#
+
+# example of alpha/beta-testing:
+#       https://alpha.gnu.org/gnu/gnuastro/gnuastro-0.17.81-1a40.tar.lz
+#       tar --lzip -xf gnuastro-0.17.81-1a40.tar.lz 
 
 # version is hidden in the filename, if not git
 version=0.16

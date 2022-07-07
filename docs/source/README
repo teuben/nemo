@@ -27,3 +27,9 @@ to test pdf:
 to test man:
    make man
    man -l _build/man/nemo.1
+
+Errors:
+
+1. ModuleNotFoundError: No module named 'sphinx_rtd_theme'
+
+   
