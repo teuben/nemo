@@ -1,0 +1,51 @@
+#            sudo dnf instal $*
+#                 dnf list installed
+gfortran
+g++
+tcsh
+make
+libXext-devel
+
+# the .so file was missing, it needed a symlink to the .so.5 file in order for linking to work
+# missing <rpc/rpc.h>            libtirpc-devel didn't work - now works (dec 2020)
+# works again in fedora36, 
+# 
+libtirpc-devel 
+
+
+
+# if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
+hdf-devel
+
+hdf5-devel
+
+# /usr/lib64   and /usr/include/cfitsio
+cfitsio-devel
+
+# f
+netcdf-devel
+
+# compiling uemacs
+ncurses-devel
+
+
+# if you use pgplot w/ xwindows  (Xext seems not needed, except configure wants it)
+# xorg-x11-proto-devel
+# libX11-devel
+libXext-devel
+
+# http://download1.rpmfusion.org/nonfree/fedora/
+#  rpm -Uvh <this file>
+# after this pgplot can be installed
+pgplot
+
+# still needed to:  -- this is weird --
+# cd /usr/lib64
+# sudo ln -s libpgplot5.so.5 libpgplot5.so
+# sudo ln -s libcpgplot5.so.5 libcpgplot5.so
+our Makefile should not be depending on libpthread.so directly, but pass -pthread to gcc and let it determine what to link.
+
+Everything is folded into glibc:
+https://lists.gnu.org/archive/html/info-gnu/2021-08/msg00001.html 3
+1
+ls /usr/lib64/libpthread.

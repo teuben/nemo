@@ -1,9 +1,12 @@
 .TH MKHERNQUIST 1NEMO "27 March 2003"
-.SH NAME
+
+.SH "NAME"
 mkhernquist \- create a two-component, isotropic, spherical galaxy+halo Hernquist model
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkhernquist\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkhernquist\fP
 generates a two-component, isotropic, spherical galaxy/halo model using a
 superposition of two Hernquist models.  The galaxy is assumed to be a
@@ -12,16 +15,20 @@ free parameters specified on the command line.  The distribution
 function is calculated on the fly using Eddington's formula and then
 sampled to generate a N-body realization of a galaxy.  The galaxy and
 halo particles are dumped in succession -- first half are galaxy
-particles.  
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+particles.
+.PP
+If a single component model is needed, use \fBm=a=1\fP (which is the default).
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
-Output file name. No default.
+Output \fIsnapshot(5NEMO)\fP file name. No default.
 .TP
 \fBnbody=\fP
-Total number of particles for both components. No default.
+Total number of particles. This needs to be an even number,
+as an equal number of particles is used for each component.
+No default.
 .TP
 \fBm=\fP
 Mass of Halo (where the galaxy has mass=1) [1]   
@@ -40,16 +47,19 @@ Centrate snapshot (t/f)? [t]
 .TP
 \fBheadline=\fP
 Optional verbiage []     
-.SH CAVEATS
+
+.SH "CAVEATS"
 Due to the relatively large number of particles at large radii,
 setting zerocm=t will cause the center to be significantly 
 shifted from the origin.
-.SH SEE ALSO
-mkplummer(1NEMO)
-.SH FILES
-.SH AUTHOR
+
+.SH "SEE ALSO"
+mkplummer(1NEMO), mkommod(1NEMO)
+
+.SH "AUTHOR"
 Peter Teuben, John Dubinski (original version)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 27-Mar-03	V1.1 man pages finally created  	PJT
