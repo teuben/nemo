@@ -327,6 +327,7 @@ void nemo_main()
 	ngas  = header.nsph;
 	nstar = header.nstar ;
 	ndark = header.ndark;
+	//  for the ASCII format ndark was not stored, here it is, but it better be consistent
 	if (ndark != nbodies - nstar - ngas)
 	  warning("ndark=%d   not equal to nbodies - nstar - ngas = %d", ndark,  nbodies - nstar - ngas);
 
