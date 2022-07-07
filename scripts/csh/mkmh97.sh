@@ -21,6 +21,7 @@
 #          17-jun-2022   added seed= and defined a benchmark
 #          20-jun-2022   add potentials & acc
 #          27-jun-2022   $run is now a directory
+#           7-jul-2022   $em=1 as option to have equal mass particles
 
 set -x
 set -e
@@ -40,6 +41,7 @@ m=1             # mass of second galaxy (mass of first will be 1)
 seed=0          # random seed
 box=16          # box size for plotting and CCD frames
 npixel=256      # number of pixels in CCD frame
+em=0            # equal mass particles?
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
@@ -54,8 +56,13 @@ mkdir $run
 cd $run
 
 # make two random plummer spheres in virial units and stack them
-mkplummer $run.1 $nbody seed=$seed
-mkplummer -      $nbody seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+# optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
+mkplummer $run.1 $nbody      seed=$seed
+if [ $em = 0 ]; then
+    mkplummer -      $nbody      seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+else
+    mkplummer -      "$nbody*$m" seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+fi
 if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
     # (near) head-on collision
     snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
