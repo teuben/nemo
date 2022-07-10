@@ -30,6 +30,7 @@
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
  *  4-feb-22    3.1 make binary the default
+ * 16-jun-22    fixed time of snapshot for binary tipsy
  *
  * @todo    allow in= to have multiple files
  */
@@ -38,7 +39,7 @@
 #include <getparam.h>
 #include <math.h>
 #include <stdlib.h>
-#include <vectmath.h>
+
 #include <filestruct.h>
 #include <history.h>
 
