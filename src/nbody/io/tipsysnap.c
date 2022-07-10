@@ -38,6 +38,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <math.h>
+#include <vectmath.h>
 #include <stdlib.h>
 
 #include <filestruct.h>
@@ -57,7 +58,7 @@ string defv[] = {
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
     "boom=f\n                   BOOM mode with add-acc ?",
-    "VERSION=3.2\n              16-jun-2022 pjt",
+    "VERSION=3.2a\n             10-jul-2022 pjt",
     NULL,
 };
 
