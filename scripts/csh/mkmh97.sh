@@ -20,12 +20,14 @@
 #          15-jun-2022   added m= mass ratio parameter, changed hack= -> code= and implemented bonsai
 #          17-jun-2022   added seed= and defined a benchmark
 #          20-jun-2022   add potentials & acc
+#          27-jun-2022   $run is now a directory
+#           7-jul-2022   $em=1 as option to have equal mass particles
 
 set -x
 set -e
 
 #            parameters for the script that can be overriden via the commandline
-run=run0        # basename of the files belonging to this simulation
+run=run0        # directory and basename of the files belonging to this simulation
 nbody=1000      # number of bodies in one model
 tstop=50        # stop time of the integration
 step=1          # step when to dump snapshots
@@ -37,19 +39,34 @@ kmax=8          # integration timestep is 1/2**kmax
 code=0          # 0=hackcode1 2=gyrfalcON  3=bonsai2
 m=1             # mass of second galaxy (mass of first will be 1)
 seed=0          # random seed
-
+box=16          # box size for plotting and CCD frames
+npixel=256      # number of pixels in CCD frame
+em=0            # equal mass particles?
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
   export $arg
 done
 
-#             delete the old run
-rm -f $run.*
+version=7-jul-2022
+
+#             delete the old run, work within the run directory
+if [ -d $run ]; then
+    rm -fr $run
+fi
+mkdir $run
+cd $run
+echo "# version=$version" > mkmk97.rc
+echo "$*"                >> mkmk97.rc
 
 # make two random plummer spheres in virial units and stack them
-mkplummer $run.1 $nbody seed=$seed
-mkplummer -      $nbody seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+# optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
+mkplummer $run.1 $nbody      seed=$seed
+if [ $em = 0 ]; then
+    mkplummer -      $nbody      seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+else
+    mkplummer -      "$nbody*$m" seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+fi
 if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
     # (near) head-on collision
     snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
@@ -58,8 +75,10 @@ else
     snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t    
 fi
 
-# integrate (hackcode1 is slower for large Nbody systems)
-#           
+# integrator:  0:  hackcode1 is O(NlogN) code
+#              1:  gyrfalcON is O(N)
+#              2:  bonsai2 is O(N) but scales faster for "small" N
+echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
 if [ $code = 0 ]; then
     hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
     snapdiagplot $run.4 tab=$run.4.etot
@@ -86,3 +105,16 @@ else
 fi
 
 
+# some analysis
+bsigma=0.0001
+tplot=0,5,10,15,20,25,30,40,50
+
+tabplot $run.4.etot   yapp=etot.plot.png/png
+tabhist $run.4.etot 2 yapp=etot.hist.png/png > etot.hist.log 2>&1
+snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.png/png
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.png/png
+snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=init.ccd.png/png
+snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel | ccdmath - - "log(1+%1/$bsigma)" | ccdplot - yapp=final.ccd.png/png
+
+snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution.plot.png/png
+snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
