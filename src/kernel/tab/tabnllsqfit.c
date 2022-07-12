@@ -73,13 +73,12 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3a\n     14-mar-2022 PJT",
+    "VERSION=4.3b\n     11-jul-2022 PJT",
     NULL
 };
 
 string usage="a non-linear least square fitting program for tabular data";
 
-string cvsid="$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -667,10 +666,10 @@ int inrange(a_range *r, real rval)
   int i,  nr = r->nr;
   if (nr==0) return 1;
   for (i=0; i<nr; i++) {
-    dprintf(1,"%g <? %g <? %g\n",r->rmin[i],rval,r->rmax[i]);
+    dprintf(2,"%g <? %g <? %g\n",r->rmin[i],rval,r->rmax[i]);
     if (r->rmin[i] <= rval && rval <= r->rmax[i]) return 1;
   }
-  dprintf(1,"%g not in range\n",rval);
+  dprintf(2,"%g not in range\n",rval);
   return 0;
 }
 
@@ -1260,7 +1259,7 @@ void do_gauss1d()
     dmax = 0.5*(y[0]+y[npt-1]) - par[1];
     dmin = ABS(dmin);
     dmax = ABS(dmax);
-    printf("par01,dmin/max = %g %g %g %g\n",par[0],par[1],dmin,dmax);
+    printf("par0/1,dmin/max,sum = %g %g %g %g %g\n",par[0],par[1],dmin,dmax,sum);    
     if (dmax > dmin) {                    /* positive peak */
       par[1] -= par[0];
       par[2] = xmax;
@@ -1271,8 +1270,12 @@ void do_gauss1d()
       par[1] = dmax;
       par[2] = xmin;
     }
+    // correct for baseline offset (0th order)
+    sum -= 0.5*(y[npt-1]+y[0])*(x[npt-1]-x[0]);
+    printf("par0/1,dmin/max,sum = %g %g %g %g %g\n",par[0],par[1],dmin,dmax,sum);
 
     par[3] = sum / (par[1]*sqrt(TWO_PI)); /* sigma */
+    par[3] = ABS(par[3]);
     printf("par=%g,%g,%g,%g\n",par[0],par[1],par[2],par[3]);
   }
   
