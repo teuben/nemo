@@ -1,4 +1,4 @@
-.TH CCDSUB 1NEMO "24 December 2020"
+.TH CCDSUB 1NEMO "1 May 2022"
 
 .SH "NAME"
 ccdsub \- sub/average of an image, and optionally reorder axes.
@@ -21,8 +21,7 @@ is copied straight through, which is still a great way to
 test your I/O subsystem, assuming your image fits in memory.
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input image file     
@@ -68,6 +67,9 @@ To reverse only the X and Y axis, \fBreorder=yxz\fP is needed.
 .TP
 \fBmoving=t|f\fP
 Moving average in n{x,y,z}aver= ? [f]
+.TP
+\fBaverage=t|f\fP
+Average (t) or Sum (f)? 
 
 .SH "EXAMPLES"
 To reorder a cube from xyz to zxy and back to xyz, the 2nd step
@@ -95,4 +97,5 @@ Peter Teuben
 9-apr-09	V1.6 replace skip= with dummy=, fix bug nzaver=  	PJT
 18-jun-09	V2.0a fixed bug when Z size if different from XY	PJT
 24-dec-2020	V2.4  add centerbox=	PJT
+1-may-2022	V2.6 added average=	PJT
 .fi

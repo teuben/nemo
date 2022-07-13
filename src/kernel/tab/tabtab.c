@@ -10,7 +10,8 @@ string defv[] = {
   "in=\n            Input tables",
   "out=\n           Output table",
   "mode=paste\n     cat (by row) or paste (by column)",
-  "VERSION=0.2\n    26-apr-2022 PJT",
+  "space=t\n        extra separator?",
+  "VERSION=0.3\n    2-jun-2022 PJT",
   NULL,
 };
 
@@ -20,6 +21,13 @@ string usage="concatenate or paste conformant tables";
 void nemo_main()
 {
   string mode = getparam("mode");
+  bool Qspace = getbparam("space");
+  char sep[8];
+  if (Qspace)
+    sprintf(sep," ");
+  else
+    sep[0] = '\0';
+  warning("SEP:'%s'", sep);
 
   string *infiles = burststring(getparam("in")," ,");
   int nfiles = xstrlen(infiles,sizeof(string))-1;
@@ -34,7 +42,7 @@ void nemo_main()
     t[i] = table_open(stropen(infiles[i],"r"), 0);
 
   //  make sure tables are conformant, depending on mode
-  
+   
   if (*mode == 'c') {          // cat, they all need the same #cols
     for (int i=1; i<nfiles; i++)
       if (table_ncols(t[i]) != table_ncols(t[0]))
@@ -59,7 +67,7 @@ void nemo_main()
     for (int j=0; j<table_nrows(t[0]); j++) {
       fprintf(o,"%s ",table_row(t[0],j));      
       for (int i=1; i<nfiles; i++)
-	fprintf(o,"%s",table_row(t[i],j));
+	fprintf(o,"%s%s",table_row(t[i],j),sep);
       fprintf(o,"\n");
     }
   }

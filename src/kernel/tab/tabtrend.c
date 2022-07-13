@@ -5,6 +5,7 @@
  *   15-jun-2016 cumul= option
  *   23-may-2020 orig=T/F option
  *   17-mar-2021 add first= option
+ *    6-jun-2022 allow delta > 1
  *                        
  * 
  * TODO:
@@ -32,15 +33,15 @@ string defv[] = {
     "nmax=100000\n                max size if a pipe",
 #endif
     "cumul=f\n                    cumulative instead?",
+    "delta=1\n                    How far away the neighbor",
     "orig=f\n                     show original column as well?",
     "first=f\n                    add first row?",
-    "VERSION=0.4\n		  17-mar-2021 PJT",
+    "VERSION=0.5\n		  16-jun-2022 PJT",
     NULL
 };
 
 string usage = "difference rows from previous rows, or cumulate them";
 
-string cvsid = "$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -60,6 +61,7 @@ local table *tptr;                      /* table */
 
 local int ncol;                         /* number of columns used */
 local int col[MAXCOL];			/* column number(s) */
+local int delta;                        /* neighbor distance */
 
 local int    npt;			/* actual number of points */
 local mdarray2 coldat;                  /* the table data */
@@ -93,6 +95,7 @@ local void setparams()
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    delta = getiparam("delta");
     
     instr = stropen (input,"r");
     tptr = table_open(instr,0);
@@ -126,12 +129,12 @@ local void trend_data(void)
     }
   }
 
-  for (i=1; i<npt; i++) {
+  for (i=delta; i<npt; i++) {
     for (j=0; j<ncol;  j++) {
       if (Qorig)
-	printf("%g %g ",coldat[j][i]-coldat[j][i-1],coldat[j][i-1]);
+	printf("%g %g ",coldat[j][i]-coldat[j][i-delta],coldat[j][i-delta]);
       else
-	printf("%g ",coldat[j][i]-coldat[j][i-1]);
+	printf("%g ",coldat[j][i]-coldat[j][i-delta]);
       printf("\n");
     }
   }

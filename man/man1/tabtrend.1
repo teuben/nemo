@@ -1,4 +1,4 @@
-.TH TABTREND 1NEMO "31 May 2022"
+.TH TABTREND 1NEMO "6 June 2022"
 
 .SH "NAME"
 tabtrend \- difference rows from previous rows
@@ -13,6 +13,10 @@ values, creating a new column that is thus one row shorter.
 Note that for a gaussian signal, 
 differencing subsequent elements will create a distribution
 with a noise sqrt(2) larger than the input signal.
+.PP
+The parameter \fBdelta=\fP is the distance in rows to compute the trend, which
+enables one to compute the phase structure function of the signal
+(see EXAMPLES below).
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -25,6 +29,9 @@ Column(s) to use [1]
 .TP
 \fBcumul=t|f\fP
 Cumulative, instead of differences.  Default: false
+.TP
+\fBdelta=N\fP
+How far should the neighbor in the trend analysis be? [1]
 .TP
 \fBorig=t|f\fP
 Also show the original column (if selected it will be shown \fIafter\fP the trend column  [f]
@@ -55,6 +62,19 @@ This also means if you don't know if a signal had been applied a Hanning smoothi
 before and after a difference operator. If that ratio is sqrt(2), it means it was not, it was a pure
 un-correllated gaussian. However, if the ratio is sqrt(2/3) = 0.816, it was a Hanning smoothed signal
 to begin with.
+.PP
+By using different values of the \fBdelta=\fP parameter, one can study the correlation length of
+the noise, .e.g to look at correlations on a scale of up to 64:
+.nf
+
+    rm -f rms.tab
+    seq 10000 | tabmath - - 'rang(0,1),%2+10*sind(%1*2)' > tab1
+    for i in $(seq 64); do
+       rms=(tabtrend tab1 delta=$i |tabstat - qac=t | txtpar - p0=QAC,1,4)
+       echo $i $rms >> rms.tab
+    done
+    tabplot rms.tab
+.fi
 
 .SH "SEE ALSO"
 tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
@@ -70,4 +90,5 @@ Peter Teuben
 15-jun-2016	added cumul=		PJT
 26-may-2020	added orig=		PJT
 1-may-2022	remove nmax= for table V2	PJT
+6-jun-2022	add delta=	PJT
 .fi

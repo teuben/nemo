@@ -1,4 +1,4 @@
-.TH SNAPPAT 1NEMO "8 August 2009"
+.TH SNAPPAT 1NEMO "20 June 2022"
 
 .SH "NAME"
 snappat \- convert snapshot to a regular Particle-Attribute-Time image
@@ -29,11 +29,17 @@ Times to select snapshot [all]
 .TP
 \fBntime=\fP
 if used, pre-allocate this number of snapshots []
+.TP
+\fBfirst=t|f\fP
+Only write first cube?
+.TP
+\fBformat=binary|fits|hdf\fP
+Output format option. By default binary
 
 .SH "CAVEATS"
 It is useful to know the number of snapshots ahead of time, using the \fBntime=\fP
 keyword. If the number of snapshots was larger, the last few planes in the cube
-are garbage, if fewers, snapshots are written in sets of that size.
+are garbage, if fewer, snapshots are written in sets of that size.
 
 .SH "EXAMPLE"
 
@@ -53,6 +59,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.0i
 8-Aug-09	V0.1 Created	PJT
+20-jun-2022	V0.4 various BOOM related improvements	PJT
 .fi

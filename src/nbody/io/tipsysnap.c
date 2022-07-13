@@ -30,6 +30,7 @@
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
  *  4-feb-22    3.1 make binary the default
+ * 16-jun-22    fixed time of snapshot for binary tipsy
  *
  * @todo    allow in= to have multiple files
  */
@@ -37,8 +38,9 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <math.h>
-#include <stdlib.h>
 #include <vectmath.h>
+#include <stdlib.h>
+
 #include <filestruct.h>
 #include <history.h>
 
@@ -56,7 +58,7 @@ string defv[] = {
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
     "boom=f\n                   BOOM mode with add-acc ?",
-    "VERSION=3.1\n              5-feb-2022 pjt",
+    "VERSION=3.2a\n             10-jul-2022 pjt",
     NULL,
 };
 
@@ -327,6 +329,7 @@ void nemo_main()
 	ngas  = header.nsph;
 	nstar = header.nstar ;
 	ndark = header.ndark;
+	//  for the ASCII format ndark was not stored, here it is, but it better be consistent
 	if (ndark != nbodies - nstar - ngas)
 	  warning("ndark=%d   not equal to nbodies - nstar - ngas = %d", ndark,  nbodies - nstar - ngas);
 
@@ -343,7 +346,7 @@ void nemo_main()
 #else
 	version = 0;
 #endif
-
+        tsnap = header.time;
         dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star    version=%d\n",
                 header.time, header.nbodies,
                 header.nsph, header.ndark, header.nstar, version);

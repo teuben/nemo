@@ -14,4 +14,5 @@ mkplummer.sh example of using getopt in a bash script (horrible really)
 mktt72.sh    Toomre & Toomre 1972 setup
 mkmh97.sh    Makino & Hut 1997 setup (and then some)
 do_neeleman  rotation curves of very beamsmeared galaxies
+pop.csh      Plummer of Plummers 
 
