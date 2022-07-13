@@ -62,7 +62,7 @@ string defv[] = {
 	"xscale=1\n     Scale all X values by this",
 	"yscale=1\n     Scale all Y values by this",
 	"abs=t\n        Absolute WCS coordinates? (vs. relative)",
-	"VERSION=3.2c\n	4-may-2022 PJT",
+	"VERSION=3.2d\n	12-jul-2022 PJT",
 	NULL,
 };
 
@@ -280,10 +280,11 @@ void plot_map ()
     sprintf (glabel,"Gray MinMax: %g %g",mmin,mmax);    /* grey scale minmax */
     sprintf (tlabel,"Time: %g",Time(iptr));             /* time of orig snapshot */
 
+
 	/* set scales and labels along axes */
     if (xplot[0]==UNDEF || xplot[1]==UNDEF) {
-        xplot[0] = Xmin(iptr) - 0.5*Dx(iptr) - Xref(iptr)*Dx(iptr);         // @todo axis=1
-    	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr) - Xref(iptr)*Dx(iptr);
+	xplot[0] = Xmin(iptr) - (Xref(iptr)+0.5)*Dx(iptr);
+	xplot[1] = xplot[0] + Nx(iptr)*Dx(iptr);
     	xplot[0] *= xscale;
     	xplot[1] *= xscale;
     }
@@ -295,8 +296,8 @@ void plot_map ()
         strcpy (xlabel,"");
 
     if (yplot[0]==UNDEF || yplot[1]==UNDEF) {
-    	yplot[0] = Ymin(iptr) - 0.5*Dy(iptr)- Yref(iptr)*Dy(iptr);     // @todo axis=1
-    	yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr) - Yref(iptr)*Dy(iptr);
+        yplot[0] = Ymin(iptr) - (Yref(iptr)+0.5)*Dy(iptr);
+        yplot[1] = yplot[0] + Ny(iptr)*Dy(iptr);
     	yplot[0] *= yscale;
     	yplot[1] *= yscale;
 	
