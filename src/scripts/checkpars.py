@@ -209,7 +209,8 @@ def help():
 def main():
     readFlags()
 
-    os.chdir(os.environ['OLDPWD'])
+    # Change working directory
+    os.chdir(os.environ['NEMO'])
 
     if HELP: # Prints help and exits
         help()
