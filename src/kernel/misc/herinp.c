@@ -122,6 +122,7 @@ static double dcd_pwr(double arg1, double arg2);
 static double dcd_sin(double arg1);
 static double dcd_asin(double arg1);
 static double dcd_sinh(double arg1);
+static double dcd_asinh(double arg1);
 static double dcd_cos(double arg1);
 static double dcd_acos(double arg1);
 static double dcd_cosh(double arg1);
@@ -211,7 +212,7 @@ static char *functs[] = {
    "MOD"   , "INT"   , "NINT"  , "SIGN"  , "BLANK" , "IFGT"  ,
    "IFLT"  , "IFGE"  , "IFLE"  , "IFEQ"  , "IFNE"  , "RANU"  ,
    "RANG"  , "RANP"  , "SIND"  , "ASIND" , "COSD"  , "ACOSD" ,
-   "TAND"  , "ATAND" , "ATAND2", "NULL"
+   "TAND"  , "ATAND" , "ATAND2", "ASINH" , "NULL"
 };
 
 static int nargs[]    = {
@@ -223,7 +224,7 @@ static int nargs[]    = {
    2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
    4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
    2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
-   1   ,    1   ,    2   ,    0
+   1   ,    1   ,    2   ,    1   ,    0
 };
 
 static char *bools[] = {
@@ -943,6 +944,17 @@ static double dcd_sinh(double arg1)
    return(0.0);     /* make stringent compilers happy */
 }
 
+static double dcd_asinh(double arg1)
+{
+   if (arg1 == DCDBLANK) {
+      return(DCDBLANK);
+   } else {
+      return(asinh(arg1));
+   }
+   return(0.0);     /* make stringent compilers happy */
+}
+
+
 static double dcd_cos(double arg1)
 {
    if (arg1 == DCDBLANK) {
@@ -1443,7 +1455,8 @@ static void dcd_evaluate(int q)
 /* tand  */ case 48: dcd_push(tan(dcd_rad(arg[0]))); break;
 /* atand */ case 49: dcd_push(dcd_deg(dcd_atan(arg[0]))); break;
 /* atand2*/ case 50: dcd_push(dcd_deg(dcd_atan2(arg[0],arg[1]))); break;
-/* null  */ case 51: dcd_null(); break;
+/* asinh */ case 51: dcd_push(dcd_asinh(arg[0])); break;
+/* null  */ case 52: dcd_null(); break;   /* this has to be the last 'function' */
             default: opc = err; break;
          }; break;
       };
