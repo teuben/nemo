@@ -23,34 +23,36 @@
 #          27-jun-2022   $run is now a directory
 #           7-jul-2022   $em=1 as option to have equal mass particles
 #          11-jul-2022   able to rerun if the run directory exists
+#          18-jul-2022   add r-vr evolution plot; new defaults for some parameters
 
 set -x
 set -e
+_version=18-jul-2022
 
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
 nbody=1000      # number of bodies in one model
-em=0            # equal mass particles?
-step=1          # step when to dump snapshots
+m=1             # mass of second galaxy (mass of first will always be 1)
+em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
+step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius (not used for v
 r0=10.0         # initial offset position for v0 > 0
 eps=0.05        # softening
-kmax=8          # integration timestep is 1/2**kmax
-code=0          # 0=hackcode1 2=gyrfalcON  3=bonsai2
-m=1             # mass of second galaxy (mass of first will always be 1)
+kmax=6          # integration timestep is 1/2**kmax
+code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2
 seed=0          # random seed
 #             parameters for the analysis
-box=32          # box size for plotting and CCD frames
-npixel=256      # number of pixels in CCD frame
-tstop=50        # stop time of the integration (or analysis time)
+tstop=50        # stop time of the integration (or analysis time when doing a re-run)
+box=32          # spatial box size for plotting and CCD frames
+vbox=2          # velocity box size
+npixel=128      # number of pixels in xy CCD frame
+power=0.5       # gamma factor for CCD plots
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
   export $arg
 done
-
-version=12-jul-2022
 
 #             delete the old run, work within the run directory
 if [ -d $run ]; then
@@ -60,8 +62,8 @@ else
 fi
 mkdir -p $run
 cd $run
-echo "# version=$version" >> mkmk97.rc
-echo "$*"                 >> mkmk97.rc
+echo "# version=$_version" >> mkmk97.rc
+echo "$*"                  >> mkmk97.rc
 
 source  mkmk97.rc
 
@@ -125,18 +127,30 @@ tabplot $run.4.etot 1 2  yapp=etot.plot.png/png > /dev/null 2>&1
 tabhist $run.4.etot 2    yapp=etot.hist.png/png > etot.hist.log 2>&1
 snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.png/png
 snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.png/png
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=final1.plot.png/png
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=final2.plot.png/png
+    
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - yapp=init.ccd.png/png headline="Initial Conditions"
+    ccdplot - power=$power yapp=init.ccd.png/png headline="Initial Conditions"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - yapp=final.ccd.png/png headline="Conditions tstop=$tstop"
+    ccdplot - power=$power yapp=final.ccd.png/png headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
+    tee final1.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - yapp=final1.ccd.png/png headline="Galaxy-1 at tstop=$tstop"
+    ccdplot - power=$power yapp=final1.ccd.png/png headline="Galaxy-1 at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i>=$nbody?m:0" |\
+    tee final2.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - yapp=final2.ccd.png/png headline="Galaxy-2 at tstop=$tstop"
+    ccdplot - power=$power yapp=final2.ccd.png/png headline="Galaxy-2 at tstop=$tstop"
 
-snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution.plot.png/png
+#  convert the tee's ccd files to fits
+rm -f final1.fits final2.fits
+ccdfits final1.ccd final1.fits radecvel=t
+ccdfits final2.ccd final2.fits radecvel=t
+
+#  final plotting
+snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution-xy.plot.png/png
+snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.png/png
 snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
