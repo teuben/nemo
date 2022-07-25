@@ -90,7 +90,8 @@ pip install galpy
 #
 pip install agama
 
-
+# https://github.com/webbjj/clustertools
+pip install clustertools
 
 # https://github.com/pynbody/pynbody
 #
