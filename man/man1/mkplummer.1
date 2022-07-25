@@ -1,9 +1,12 @@
-.TH MKPLUMMER 1NEMO "15 September 2010"
-.SH NAME
+.TH MKPLUMMER 1NEMO "25 July 2022"
+
+.SH "NAME"
 mkplummer \- generates a snapshot according to a truncated Plummer model
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkplummer\fP [parameters=values...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImkplummer\fP constructs a Plummer model, with a spatial or mass
 cut-off, after which it performs a coordinate transformation to the
 center-of-mass coordinate system. The data are then written into a
@@ -65,7 +68,8 @@ Reset center of mass to zero? [default: \fBt\fP].
 .TP
 \fBscale=\fP\fIscale_factor\fP
 A scale factor or scale to virial units (M=G=-4E=1). Use -1 for
-virial units, and 1 to get a model in structural (natural) units.
+virial units (see also VIRIAL UNITS below),
+and 1 to get a model in structural (natural) units.
 Note: large scale factors means small systems with large velocity
 disperson.
 [Default: \fB-1\fP].
@@ -111,6 +115,15 @@ The processing mode, purely for debugging.
 2=data written, and extra analysis done.
 [Default: 1].
 
+.SH "VIRIAL UNITS"
+The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
+~ 0.589.  As an example this should plot the same "rotation" curve:
+.nf
+
+     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 yapp=1/xs
+     rotcurves plummer '0,1,3*pi/16' yapp=2/xs
+
+.fi
 
 .SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
