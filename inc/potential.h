@@ -17,8 +17,6 @@ typedef struct a_potential {
     struct a_potential *next;
 } a_potential;
 
-/* should we make args 1,2 and 5 const ?? */
-
 typedef void (*potproc_double)(const int *, const double *, double *, double *, const double *);
 typedef void (*potproc_float) (const int *, const float *,  float *,  float *,  const float *);
 #ifdef SINGLEPREC
