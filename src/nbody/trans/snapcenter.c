@@ -32,7 +32,7 @@ string defv[] = {
     "times=all\n    range of times to process ",
     "report=f\n	    report the c.o.m shift",
     "one=f\n        Only output COM as a snapshot?",
-    "VERSION=1.7\n  31-dec-02 PJT",
+    "VERSION=1.7a\n 25-jul-2022 PJT",
     NULL,
 };
 
@@ -47,7 +47,7 @@ void nemo_main()
     string times;
     rproc_body weight;
     Body *btab = NULL, *b;
-    int i, nbody, bits;
+    int i, nbody, nbody1, bits;
     real tsnap, mass;
     bool Qreport, Qone;
     vector c_pos, c_vel;
@@ -83,9 +83,10 @@ void nemo_main()
                 for (i = 0, b = btab; i < nbody; i++, b++) 
                     mass += Mass(b);
                 Mass(btab) = mass;
-                nbody = 1;
-            }
-	    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+                nbody1 = 1;
+		put_snap(outstr, &btab, &nbody1, &tsnap, &bits);		
+            } else
+	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	}
     } while (bits != 0);
     strclose(outstr);
