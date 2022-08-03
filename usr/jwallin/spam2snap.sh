@@ -1,7 +1,11 @@
 #! /usr/bin/env bash
 #
+#   converts a series of SPAM files
+#   (as listed in the files.txt file in the run directory)
+#   to a single NEMO snapshot.
 #
-
+#   note: Replaces  NaN with 0.0
+#    
 
 dir=$1
 out=spam.snap
@@ -20,8 +24,9 @@ echo Working with nbody=$nbody
 rm -f $out
 touch $out
 
-# convert to snapshot
-# note the 
+# convert to snapshot (the benchmark files had 3999 particles)
+# note in my 2022 version one particle was reported with NaN
+# so we replace it with 0.0
 
 while read next; do
     echo $next
