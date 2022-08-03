@@ -31,10 +31,12 @@ $(JAR):
 bench1: $(JAR)
 	(cd JSPAM/archive ; ./runone.sh `tail -1 data.txt`)
 	./spam2snap.sh JSPAM/archive/output/HST_NGC6786
+	@echo "Benchmark takes ~ 1.7 sec on a nemobench5=1000 CPU"
 
 bench2: $(JAR)
 	(cd JSPAM/archive ;./runall.sh)
 	@echo "Results in $(OUT)"
+	@echo "Benchmark takes ~ 76 sec on a nemobench5=1000 CPU"
 
 out:
 	ls $(OUT)
