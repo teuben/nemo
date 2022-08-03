@@ -28,9 +28,11 @@ touch $out
 # note in my 2022 version one particle was reported with NaN
 # so we replace it with 0.0
 
+t=0
 while read next; do
     echo $next
-    sed s/NaN/0.0/g $next | tabtos - - block1=pos,vel nbody=3999 debug=-1 >> $out 
+    sed s/NaN/0.0/g $next | tabtos - - block1=pos,vel nbody=3999 times=$t debug=-1 >> $out
+    t=$(nemoinp $t+1)
 done < files.txt
 
 echo Final output in $dir/$out
