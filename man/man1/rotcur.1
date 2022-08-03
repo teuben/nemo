@@ -1,9 +1,12 @@
-.TH ROTCUR 1NEMO "18 January 2021"
-.SH NAME
+.TH ROTCUR 1NEMO "26 July 2022"
+
+.SH "NAME"
 rotcur \- fit parameters to velocity field using tilted rings
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBrotcur in=\fPvelfie [parameters=values ...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIrotcur\fP derives the kinematical parameters from the observed
 velocity field by fitting a tilted-rings model to the velocity field.  It
 does a non-linear least-squares-fitting to the function:
@@ -78,7 +81,8 @@ therein.
 .PP
 See also \fIvelfit(1NEMO)\fP on the classic WWB73
 (Warner, Wright and Baldwin, 1973, MNRAS, 163,163) method.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized:
 .TP 25
 \fBin\fP=\fIimage_vel\fP
@@ -237,7 +241,8 @@ in column 3, and optional errors in the radial velocity in column 4
 .TP
 \fBwwb73=t|f\fP
 Use a simpler WWB73 (Warner, Wright, Baldwin 1973) linear method of fitting? [false]
-.SH AWK
+
+.SH "AWK"
 The standard output is normally not very useful; it displays, for each
 iteration, the run of parameters plus the number of points and mean
 error in the ring. The following \fIawk(1)\fP
@@ -263,7 +268,8 @@ BEGIN{count=0;line="";}
 END{printf("%s  %s\n",rad,line);}
 
 .fi
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 Here is an example of creating a synthetic velocity field with
 ccdvel, and analysing it with rotcur:
 .nf
@@ -290,7 +296,8 @@ ccdvel, and analysing it with rotcur:
 
 
 .fi
-.SH BUGS
+
+.SH "BUGS"
 Failures in \fInllsqfit\fP are not handled gracefully, and may
 \fIerror\fP out the program. Usage of the \fBerror=\fP system
 keyword can be used to bypass such bad rings, use with caution
@@ -319,7 +326,8 @@ image is assumed. See also the \fBreuse=\fP keyword.
 .PP
 For calculations of residuals in  overlapping rings (e.g. warps) only the last ring velocity
 will be used.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), rotcurshape(1NEMO), pvtrace(1NEMO), runvelfitss07(1NEMO), ccdmom(1NEMO), testbsc(1NEMO), 
 gal(AIPS), rocur(AIPS), velfitpatch(1NEMO), rotcur(5NEMO)
 .nf
@@ -332,11 +340,14 @@ BBAROLO: https://bbarolo.readthedocs.io/en/latest/
 GALPAK3D: http://galpak3d.univ-lyon1.fr/index.html
 GBKFIT: http://supercomputing.swin.edu.au/projects/gbkfit/
 TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
+PaFit:  (Krajnovic et al 2006) https://www-astro.physics.ox.ac.uk/~cappellari/software/#pafit
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 K. Begeman (original GIPSY Sheltran version, now also available in C),
 P. J. Teuben (NEMO C version)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 19/jul/83	original program                     	KGB
