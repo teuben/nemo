@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-#    Example of setting up a Makino & Hut 1997 simulation
+#    Example of setting up a Makino & Hut 1997 simulation, but with unequal masses
 #    See also: https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
 #
 #    @todo
@@ -13,6 +13,9 @@
 #          code=0     5:12 min       10:48            3:31
 #          code=1     2:10 min        3:20            1:25
 #          code=2     ----            0:16            ----
+#
+# Note G1 (the one with mass=1) starts at x>0 and launched with vx<0, moving to the left
+#      G2 (the one with mass=m) starts at x<0 and launched with vx>0, moving to the right
 
 #
 # version: 12-may-2022   initial version with just (near) head-on collision
@@ -24,10 +27,11 @@
 #           7-jul-2022   $em=1 as option to have equal mass particles
 #          11-jul-2022   able to rerun if the run directory exists
 #          18-jul-2022   add r-vr evolution plot; new defaults for some parameters
+#           8-aug-2022   store a table with time,x1,vx1,x2,vx2
 
 set -x
 set -e
-_version=18-jul-2022
+_version=8-aug-2022
 
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
@@ -48,6 +52,8 @@ box=32          # spatial box size for plotting and CCD frames
 vbox=2          # velocity box size
 npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
+bsigma=0.0001                      # asinh/log breakover point
+tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
@@ -115,13 +121,27 @@ if [ $restart = 1 ]; then
     fi
 else
     echo "============================================================================="
-    echo "Skipping integration because run=$run already existed"
+    echo "Skipping integration because run=$run already existed, or: rm -r $run"
+fi
+
+
+#  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
+
+if [ ! -e $run.xv.tab ]; then
+    snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
+    snapcenter $run.4 . "weight=i<10000?phi*phi*phi*phi:0" report=t > $run.4.g1.tab
+    snapcopy $run.4 - "select=i>=10000?1:0" | hackforce - - debug=-1 | snapcenter - . "phi*phi*phi*phi" report=t >$run.4.g2.tab
+    paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
+    
+    #  plot the path in Pos and Vel separately
+    tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=path-pos.png/png
+    tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=path-vel.png/png
+else
+    echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
 
 # now some analysis will follow
 
-bsigma=0.0001
-tplot=0,5,10,15,20,25,30,40,50
 
 tabplot $run.4.etot 1 2  yapp=etot.plot.png/png > /dev/null 2>&1
 tabhist $run.4.etot 2    yapp=etot.hist.png/png > etot.hist.log 2>&1
@@ -154,3 +174,4 @@ ccdfits final2.ccd final2.fits radecvel=t
 snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution-xy.plot.png/png
 snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.png/png
 snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
+
