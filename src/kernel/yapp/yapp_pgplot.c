@@ -268,7 +268,7 @@ int pljust(int jus)       /* -1, 0, 1 for left, mid, right just */
 {
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    fjust = (jus < -1 ? 0.0 : (jus > 1 ? 1.0 : 0.5));
+    fjust = (jus <= -1 ? 0.0 : (jus >= 1 ? 1.0 : 0.5));
     return fjust;
 }
 
