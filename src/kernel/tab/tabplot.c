@@ -115,7 +115,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=5.0\n	 29-apr-2022 PJT",
+    "VERSION=5.0a\n	 9-aug-2022 PJT",
     NULL
 };
 
@@ -540,10 +540,10 @@ void plot_data(void)
     xplot[1] = xmax;
     yplot[0] = ymin;        /* set scales for ytrans() */
     yplot[1] = ymax;
-    xaxis (xbox[0],ybox[0],xbox[2], xplot, -nxticks, xtrans, xlab);
-    xaxis (xbox[0],ybox[1],xbox[2], xplot, -nxticks, xtrans, NULL);
-    yaxis (xbox[0],ybox[0],ybox[2], yplot, -nyticks, ytrans, ylab);
-    yaxis (xbox[1],ybox[0],ybox[2], yplot, -nyticks, ytrans, NULL);
+    xaxis(xbox[0],ybox[0],xbox[2], xplot, -nxticks, xtrans, xlab);
+    xaxis(xbox[0],ybox[1],xbox[2], xplot, -nxticks, xtrans, NULL);
+    yaxis(xbox[0],ybox[0],ybox[2], yplot, -nyticks, ytrans, ylab);
+    yaxis(xbox[1],ybox[0],ybox[2], yplot, -nyticks, ytrans, NULL);
     for (i=0; i<nxcoord; i++) {
         plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
         plline(xtrans(xcoord[i]),ytrans(yplot[1]));
@@ -556,7 +556,7 @@ void plot_data(void)
     pljust(-1);     /* set to left just */
     pltext(input,xbox[0],ybox[1]+0.2,0.32,0.0);             /* filename */
     pljust(1);
-    pltext(headline,xbox[1],ybox[1]+0.2,0.24,0.0);         /* headline */
+    pltext(headline,xbox[1],ybox[1]+0.2,0.32,0.0);          /* headline */
     pljust(-1);     /* return to left just */
 
     for (k=0, i=0, j=0; k<npcol; k++) {
