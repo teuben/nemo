@@ -20,6 +20,7 @@
  *      28-jul-97           a check if first particle at 0,0,0  pjt
  *      20-jun-01           c gcc3 pr
  *      20-jun-02        V3.1 read PhaseSpace as well as Pos/Vel data
+ *       8-aug-22        V3.2 option sort=f  - PJT
  */
 
 #include <stdinc.h>
@@ -41,8 +42,9 @@ string defv[] = {
     "vmax=0.0\n			  def: automatic scaling ",
     "kmax=1\n			  number of nearest 'radial' neighbors",
     "tab=f\n			  need a table ? ",
+    "sort=t\n                     sort by radius (recommended, unless snapsort was done)",
     "headline=\n                  random verbiage for plot",
-    "VERSION=3.1a\n		  20-jun-02 PJT",
+    "VERSION=3.2\n		  8-aug-2022 PJT",
     NULL,
 };
 
@@ -73,6 +75,8 @@ local real vmax;                /* velocity */
 local int  k;
 
 local bool   Qtab;                    /* table output? */
+local bool   Qsort;                   /* ensure sort by radius ? */
+local bool   Qdens = FALSE;           /* do we need densities (N^2 algorithm) */
 local void   read_snap(string);
 
 local real xtrans(real), ytrans(real);
@@ -92,7 +96,8 @@ void nemo_main()
     setparams();
 
     read_snap(iname);
-    sort_rad();
+    if (Qsort)
+      sort_rad();
     if (!Qtab) {    
         plinit("***",0.0,20.0,0.0,20.0);
         if (strcmp(mode,"mass")==0)
@@ -126,6 +131,7 @@ local void setparams()
     vmax = getdparam("vmax");
     k = getiparam("kmax");
     Qtab = getbparam("tab");
+    Qsort = getbparam("sort");
 }
 
 local void read_snap(string name)		
@@ -202,6 +208,8 @@ local void sort_rad(void)
     int i,j,l,u;
     real dr, radmax, cum_mass, densmax, velmax, mtot;
     real drmin, sum, radius;
+
+    if (!Qdens) warning("skipping density computation");
         
     
     for (i=0, radmax=0.0; i<nobj; i++) {     /* build rad[] and find radmax */
@@ -244,9 +252,12 @@ local void sort_rad(void)
             l = MAX(i-k,0);
             u = MIN(i+k,nobj-1);
 
-            for (j=l, mtot=0.0; j<=u; j++) mtot += mass[irad[j]];
-            mtot -= 0.5 * (mass[irad[l]] + mass[irad[u]]);
-            dens[i] = mtot/FRTHRD_PI/(qbe(rad[irad[u]])-qbe(rad[irad[l]]));
+	    if (Qdens) {
+	      for (j=l, mtot=0.0; j<=u; j++) mtot += mass[irad[j]];
+	      mtot -= 0.5 * (mass[irad[l]] + mass[irad[u]]);
+	      dens[i] = mtot/FRTHRD_PI/(qbe(rad[irad[u]])-qbe(rad[irad[l]]));
+	    } else
+	      dens[i] = 0.0;
         } else
             dens[i] = 0;        /* don't know anything better yet */
 
@@ -256,11 +267,14 @@ local void sort_rad(void)
         if (Qtab && i<nobj-1) {
             sum = 0.0;              /* add up to surface density */
             radius = rad[irad[i]] + drmin;  /* softened sur.den. */
-            for (j=i+1; j<nobj; j++)    /* all stars on outside  */
+	    if (Qdens) {
+	      for (j=i+1; j<nobj; j++)    /* all stars on outside  */
                    sum += mass[irad[j]] / ( rad[irad[j]] * sqrt(
                       (rad[irad[j]]-radius)*(rad[irad[j]]+radius)));
-            sum /= TWO_PI;          /* correct dimension */
-            printf ("%g %g %g %g %g %g %g\n",
+	      sum /= TWO_PI;          /* correct dimension */
+	    } else
+	      sum = 1.0;
+            printf("%f %g %g %g %g %g %g\n",
                      rad[irad[i]],dens[i],vel[i],cum_mass,sum,
                      pow(rad[irad[i]],0.25),
                      -2.5*log10(sum));
