@@ -73,7 +73,6 @@ echo "$*"                  >> mkmk97.rc
 
 source  mkmk97.rc
 
-
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
     # optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
@@ -127,10 +126,10 @@ fi
 
 #  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
 
-if [ ! -e $run.xv.tab ]; then
+if [ ! -e $run.xv.tab-bad ]; then
     snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
-    snapcenter $run.4 . "weight=i<10000?phi*phi*phi*phi:0" report=t > $run.4.g1.tab
-    snapcopy $run.4 - "select=i>=10000?1:0" | hackforce - - debug=-1 | snapcenter - . "phi*phi*phi*phi" report=t >$run.4.g2.tab
+    snapcenter $run.4 . "weight=i<$nbody?phi*phi*phi*phi:0" report=t > $run.4.g1.tab
+    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "phi*phi*phi*phi" report=t >$run.4.g2.tab
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
     
     #  plot the path in Pos and Vel separately
@@ -175,3 +174,15 @@ snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tp
 snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.png/png
 snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
 
+#  final G2 snapshot for analysis:
+#  center G2 on G1, and plot and show the cumulative mass fraction as function of radius
+snaptrim $run.4 - times=$tstop | snapcopy - - "select=i>=$nbody" > final2.snap
+x1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,2)
+v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
+snapshift final2.snap - $x1,0,0 $v1,0,0 mode=sub > final2c.snap
+radprof final2c.snap tab=t > final2c.tab
+tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
+tabspline final2cm.tab    x=1:15:2
+m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
+tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.png/png
+echo "M16=$m16"
