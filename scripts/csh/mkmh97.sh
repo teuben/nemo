@@ -56,6 +56,7 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
+yapp=png                           # pick png, or ps, or whichever
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
@@ -140,8 +141,8 @@ if [ ! -e $run.xv.tab-bad ]; then
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
     
     #  plot the path in Pos and Vel separately
-    tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=path-pos.png/png
-    tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=path-vel.png/png
+    tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=path-pos.$yapp/$yapp
+    tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=path-vel.$yapp/$yapp
 else
     echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
@@ -149,27 +150,27 @@ fi
 # now some analysis will follow
 
 
-tabplot $run.4.etot 1 2  yapp=etot.plot.png/png > /dev/null 2>&1
-tabhist $run.4.etot 2    yapp=etot.hist.png/png > etot.hist.log 2>&1
-snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.png/png
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.png/png
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=final1.plot.png/png
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=final2.plot.png/png
+tabplot $run.4.etot 1 2  yapp=etot.plot.$yapp/$yapp > /dev/null 2>&1
+tabhist $run.4.etot 2    yapp=etot.hist.$yapp/$yapp > etot.hist.log 2>&1
+snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.$yapp/$yapp
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.$yapp/$yapp
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=final1.plot.$yapp/$yapp
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=final2.plot.$yapp/$yapp
     
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=init.ccd.png/png headline="Initial Conditions"
+    ccdplot - power=$power yapp=init.ccd.$yapp/$yapp headline="Initial Conditions"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final.ccd.png/png headline="Conditions at tstop=$tstop"
+    ccdplot - power=$power yapp=final.ccd.$yapp/$yapp headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
     tee final1.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final1.ccd.png/png headline="Galaxy-1 at tstop=$tstop"
+    ccdplot - power=$power yapp=final1.ccd.$yapp/$yapp headline="Galaxy-1 at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i>=$nbody?m:0" |\
     tee final2.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final2.ccd.png/png headline="Galaxy-2 at tstop=$tstop"
+    ccdplot - power=$power yapp=final2.ccd.$yapp/$yapp headline="Galaxy-2 at tstop=$tstop"
 
 #  convert the tee's ccd files to fits
 rm -f final1.fits final2.fits
@@ -177,9 +178,9 @@ ccdfits final1.ccd final1.fits radecvel=t
 ccdfits final2.ccd final2.fits radecvel=t
 
 #  final plotting
-snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution-xy.plot.png/png
-snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.png/png
-snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.png/png
+snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution-xy.plot.$yapp/$yapp
+snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.$yapp/$yapp
+snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.$yapp/$yapp
 
 #  final G2 snapshot for analysis:
 #  center G2 on G1, and plot and show the cumulative mass fraction as function of radius
@@ -191,6 +192,6 @@ radprof final2c.snap tab=t > final2c.tab
 tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
 tabspline final2cm.tab    x=1:15:2
 m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
-tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.png/png
+tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.$yapp/$yapp
 echo "m16=$m16" >> $_pars
 echo "m16=$m16"
