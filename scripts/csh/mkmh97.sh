@@ -28,10 +28,12 @@
 #          11-jul-2022   able to rerun if the run directory exists
 #          18-jul-2022   add r-vr evolution plot; new defaults for some parameters
 #           8-aug-2022   store a table with time,x1,vx1,x2,vx2
+#          11-aug-2022   using more generic nemopars.rc
 
 set -x
 set -e
-_version=8-aug-2022
+_version=11-aug-2022
+_pars=nemopars.rc
 
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
@@ -68,10 +70,15 @@ else
 fi
 mkdir -p $run
 cd $run
-echo "# version=$_version" >> mkmk97.rc
-echo "$*"                  >> mkmk97.rc
+# backwards compatible!
+if [ -e mkmh97.rc ]; then
+    mv  mkmh97.rc $_pars
+fi
+# keep track of history
+echo "# $0 version=$_version"  >> $_pars
+echo "$*"                      >> $_pars
 
-source  mkmk97.rc
+source  $_pars
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
@@ -185,4 +192,5 @@ tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
 tabspline final2cm.tab    x=1:15:2
 m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.png/png
-echo "M16=$m16"
+echo "m16=$m16" >> $_pars
+echo "m16=$m16"
