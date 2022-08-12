@@ -29,8 +29,9 @@
  *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
  *  24-jan-18   faster version of grandom() with better caching               PJT
  *              1e7 grandom:   V2.2 -> 1.40"    V2.3 -> 0.85
+ *  11-aug-22   implement special value -3 to use /dev/random on linux      PJT
  *
- *  See also: getrandom(2LINUX)
+ *  See also: getrandom(2) for seed=-3
  */
 
 #include <stdinc.h>
@@ -43,6 +44,10 @@
 #ifndef __MINGW32__
 #include <sys/times.h>
 #endif
+
+// apt-get install libc6-dev-amd64  
+// #include <sys/random.h>     // for getrandom(), only on linux
+
 
 extern string *burststring(string,string);
 
@@ -125,10 +130,11 @@ int init_xrandom(string init)
 
 int set_xrandom(int dum)
 {
-    int retval;
+    int retval = 0;
 #ifndef __MINGW32__
     struct tms buffer;
 #endif
+    
     if (dum <= 0) {
 	if (dum == -1)
 #ifndef __MINGW32__
@@ -136,9 +142,22 @@ int set_xrandom(int dum)
 #else
 	    ;
 #endif
-        else if (dum == -2)
+	else if (dum == -2)
             retval = idum = (int) getpid();         /* process id */
-        else            /* normally if dum==0 */
+        else if (dum == -3) {                       /* /dev/(u)random only on linux */
+#if 1
+	    stream fp = stropen("/dev/random","r");
+	    int nretval = fread(&retval, sizeof(int), 1, fp);
+	    if (nretval != 1) error("Bad read from /dev/random: %d", nretval);
+	    strclose(fp);
+	    dprintf(1,"xrandom(-3): /dev/random\n");
+#else
+	    int nretval = getrandom(&retval, sizeof(int), GRND_RANDOM);
+	    if (nretval != sizeof(int)) error("Bad getrandom: %d", nretval);
+	    dprintf(1,"xrandom(-3): getrandom\n");	    
+#endif
+	    idum = retval;
+        } else            /* normally if dum==0 */
 	    retval = idum = (int) time(0);          /* seconds since 1970 */
     } else
     	retval = idum = dum;	           /* use supplied seed in argument */
