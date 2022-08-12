@@ -16,14 +16,20 @@ If compiled with GSL, random number generator types
 can be selected, as well as many more distribution types.
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBseed=\fP
-Initial seed. Use 0 for the current time (seconds since 1970.00,
-see also \fItime(2)\fP)
+Initial seed. Values 0 and below are special:
+
+0 for the current time (seconds since 1970.00, see also \fItime(2)\fP)
+
 -1 for the number of centiseconds since boot (see \fItimes(2)\fP) 
-and 2 for the current pid (see \fIgetpid(2)\fP).  If GSL is implemented
+
+-2 for the current pid (see \fIgetpid(2)\fP).
+
+-3 wishful thinking the linux kernel will give an even more random seed
+
+If GSL is implemented
 the seed value can be optionally followed by the random number 
 generator type (default: mt19937). See \fIxrandom(3)\fP for more
 details.
@@ -165,7 +171,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 26-Nov-96	V1.0 turned TESTBED into a TOOLBOX program	PJT
 13-apr-97	example
 8-sep-01	V2.0 GSL optionally added	PJT
