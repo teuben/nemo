@@ -136,7 +136,9 @@ int set_xrandom(int dum)
 #endif
     
     if (dum <= 0) {
-	if (dum == -1)
+        if (dum == 0)
+	    retval = idum = (int) time(0);          /* seconds since 1970 */
+	else if (dum == -1)
 #ifndef __MINGW32__
             retval = idum = (int) times(&buffer);   /* clock cycles */
 #else
@@ -157,8 +159,8 @@ int set_xrandom(int dum)
 	    dprintf(1,"xrandom(-3): getrandom\n");	    
 #endif
 	    idum = retval;
-        } else            /* normally if dum==0 */
-	    retval = idum = (int) time(0);          /* seconds since 1970 */
+        } else
+   	    error("set_xrandom(%d) not supported", dum);
     } else
     	retval = idum = dum;	           /* use supplied seed in argument */
 
