@@ -1,16 +1,26 @@
-.TH SNAPCENTERP 1NEMO "1 April 2006"
-.SH NAME
-snapcenterp - find center of a snapshot with potential minimum search
-.SH SYNOPSIS
+.TH SNAPCENTERP 1NEMO "12 August 2022"
+
+.SH "NAME"
+snapcenterp - find position center of a snapshot from minimum in potential 
+
+.SH "SYNOPSIS"
 \fBsnapcenterp in=\fPsnap-file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapcenterp\fP finds the potential center of a snapshot using
-the iterative Cruz method. 
+the iterative Cruz et al. (2002) method. They identified
+three parameters, \fBfn\fP, \fBeps\fP and \fBeta\fP, discussed below.
+This algorithm is linear in \fINbody\fP and \fINiter\fP.
 .PP
-This program is in development, for example, no output file is written.
-See also \fIsnapcenter(1NEMO)\fP and \fIsnapshift(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+Unlike \fIsnapcenter(1NEMO)\fP, which centers all phase space coordinates,
+this program only centers the spatial coordinates, although the method
+could be generalized and center the velocities.
+.PP
+This program is still in development (see also CAVEATS below), not
+all keywords are fully implemented.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fP\fIsnap-file\fP
 Input data is read from \fIsnap-file\fP, which must be in snapshot format.
@@ -48,7 +58,7 @@ Softening length, in length units used in the snapshot. [0.025]
 \fBeta=\fP
 Convergence stop criterion. This number is the length of the difference 
 vector of two subsequent iterations of the potential center, and is thus
-in units of those of the snapshot. [0.001]
+in units of those of the snapshot and \fBeps\fP. [0.001]
 .TP
 \fBfn=\fP
 Fraction of particles to consider in the potential finding algorithm [0.5] 
@@ -58,14 +68,39 @@ Fraction of particles to consider in the potential finding algorithm [0.5]
 Maximum number of iterations to use. If the \fBeta\fP stop criterion
 did not converge, this criterion will stop the iterations. [10]
 
-.SH SEE ALSO
+.SH "CAVEAT"
+Mysteriously this does not seem to work yet. Viz.
+.nf
+
+mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - debug=1
+
+### nemo Debug Info: 1 0.212503 -0.023019 -0.111053 0.109614
+### nemo Debug Info: 2 0.229355 -0.025213 -0.162219 0.053914
+### nemo Debug Info: 3 0.221806 -0.025366 -0.175827 0.015562
+### nemo Debug Info: 4 0.215902 -0.017432 -0.178834 0.010336
+### nemo Debug Info: 5 0.206639 -0.000181 -0.180961 0.019696
+### nemo Debug Info: 6 0.193003 0.019449 -0.182329 0.023941
+### nemo Debug Info: 7 0.186807 0.025474 -0.182157 0.008644
+### nemo Debug Info: 8 0.186308 0.025859 -0.182110 0.000632
+
+.fi
+where the columns are iter#, pos and |r_{i+1} - r_{i}|
+
+.SH "SEE ALSO"
 snapshift(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
 .PP
 Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225
-.SH AUTHOR
+https://ui.adsabs.harvard.edu/abs/2002RMxAA..38..225C
+
+.SH "ADS"
+@ads  2002RMxAA..38..225C
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
-.ta +1i +4i
+
+.SH "UPDATE HISTORY"
+.ta +1.5i +5.5i
 .nf
 1-apr-06	0.1 Created in Rembrandt Hotel		PJT
+12-aug-2022	0.2 cleanup up	PJT
 .fi
