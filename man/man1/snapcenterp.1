@@ -25,10 +25,10 @@ all keywords are fully implemented.
 \fBin=\fP\fIsnap-file\fP
 Input data is read from \fIsnap-file\fP, which must be in snapshot format.
 No default.
-\fBtimes=\fP\fItime-range\fP
-Only data frames with time values within \fItime-range\fP, which
-is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
-[Default: \fBall\fP].
+.TP
+\fBout=\fP\fIsnap-file\fP
+Output data is written to \fIsnap-file\fP, which will be in snapshot format.
+No default.
 .TP
 \fBweight=\fP\fIexpression\fP
 The value of \fIexpression\fP is used to compute the centroid.
@@ -36,6 +36,11 @@ The value of \fIexpression\fP is used to compute the centroid.
 real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBm\fP, \fBt\fP, and the integer value \fBi\fP.
 [Default \fBm\fP].
+.TP
+\fBtimes=\fP\fItime-range\fP
+Only data frames with time values within \fItime-range\fP, which
+is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
+[Default: \fBall\fP].
 .TP
 \fBreport=t|f\fP
 Report the center of mass coordinates. These are 2*NDIM numbers,
@@ -46,11 +51,6 @@ If you want to use \fIsnapcenter\fP in a pipe, you need to reset
 will get merged, and become illegable for the next program in the
 pipe.
 [Default: \fBt\fP].
-.TP
-\fBone=t|f\fP
-Write output center of mass (COM) as a single body with total mass
-and COM coordinates as computed from \fBweight=\fP.**not active**
-[Default: \fBf\fP].
 .TP
 \fBeps=\fP
 Softening length, in length units used in the snapshot. [0.025]
@@ -72,7 +72,7 @@ did not converge, this criterion will stop the iterations. [10]
 Mysteriously this does not seem to work yet. Viz.
 .nf
 
-mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - debug=1
+mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - . debug=1
 
 ### nemo Debug Info: 1 0.212503 -0.023019 -0.111053 0.109614
 ### nemo Debug Info: 2 0.229355 -0.025213 -0.162219 0.053914
@@ -84,7 +84,9 @@ mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - debug=1
 ### nemo Debug Info: 8 0.186308 0.025859 -0.182110 0.000632
 
 .fi
-where the columns are iter#, pos and |r_{i+1} - r_{i}|
+where the columns are iter#, pos and |r_{i+1} - r_{i}|. But clearly it is not
+converging to 0.5, but oddly enough the larger the shift, the better the
+convergence.
 
 .SH "SEE ALSO"
 snapshift(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
