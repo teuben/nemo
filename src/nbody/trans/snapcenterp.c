@@ -1,8 +1,9 @@
 /*
  * SNAPCENTERP: find center of a snapshot with the Cruz et al. method
  *
- *       1-apr-06   0.1 no joke, hotel rembrandt amsterdam,      pjt
- *      12-aug-22   0.2 cleanup?
+ *       1-apr-06   0.1 no joke, hotel rembrandt amsterdam,       pjt
+ *      12-aug-22   0.2 cleanup, only report pos now (no vel)     pjt
+ *      13-aug-22   0.3 more cleanup, still no proper convergence PJT
  */
 
 #include <stdinc.h>
@@ -18,20 +19,20 @@
 #include <bodytransc.h>
 
 string defv[] = {	
-    "in=???\n       input file name ",
-    "weight=m\n	    factor used finding center",
+    "in=???\n       input file name",
+    "out=???\n      output file name",
+    "weight=m\n	    weight factor used finding center",
     "times=all\n    range of times to process",
     "report=f\n	    report the c.o.m shift",
-    "one=f\n        Only output COM as a snapshot?",
     "eps=0.025\n    Gravitational softening length",
     "eta=0.001\n    Convergence stop criterion",
     "fn=0.5\n       Fraction of particles to consider (not used yet)",
     "iter=20\n      Maximum number of iterations to use",
-    "VERSION=0.2\n  12-aug-2022 PJT",
+    "VERSION=0.3\n  13-aug-2022 PJT",
     NULL,
 };
 
-string usage="Center position of a snapshot based on iterative Cruz_2002 method";
+string usage="Center position of a snapshot based on iterative Cruz2002 method";
 
 
 void snapcenter(Body*, int, real, rproc_body, real, vector, vector, bool);
@@ -44,20 +45,21 @@ void nemo_main()
   Body *btab = NULL;
   int i, j, nbody=0, bits, iter;
   real tsnap, mass, eps, eta, dr;
-  bool Qreport, Qone;
+  bool Qreport;
   vector n_pos, n_vel, o_pos, o_vel;
   
   instr = stropen(getparam("in"), "r");
+  outstr = stropen(getparam("out"), "w");
   weight = btrtrans(getparam("weight"));
   eps = getrparam("eps");
   eta = getrparam("eta");
   iter = getiparam("iter");
   times = getparam("times");
   Qreport = getbparam("report");
-  Qone = getbparam("one");
   if (Qreport) dprintf(1,"pos vel of center(s) will be:\n");
   
   get_history(instr);
+  put_history(outstr);
   
   do {
     get_snap_by_t(instr, &btab, &nbody, &tsnap, &bits, times);
@@ -85,7 +87,8 @@ void nemo_main()
 	//for (j=0; j<NDIM; j++)  printf("%f ",n_vel[j]);
 	printf("\n");
       }
-      
+      // write output
+      // warning("development version; no output data written yet.");
     }
   } while (bits != 0);
 }
