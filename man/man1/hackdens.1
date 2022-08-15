@@ -110,10 +110,21 @@ centering, and compute the center in two ways:
    
 .fi
 Note that in this case the Plummer sphere should have the correct mathematical center, and not \fIcentered\fP.
-For a 100 body Plummer sphere, the center is off by about 0.100 in RMS, snapdens by
-about 0.061, and the hackforce based methods appear to be around 0.052 (3rd power) and 0.054 (4th power). It is
-perhaps somewhat surprising that the 4th power potential has a slightly larger dispersion. This is also true
-when looking at the dispersion in velocity.
+This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh, in which these different methods
+can also be applied to different models, as expanded in the following table.
+.nf
+
+    nbody=100 models:     Plummer   King1   King3   King5  DeVauc
+    -------------------------------------------------------------
+    snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299
+    snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*
+    snapcenter  on phi^3:   0.052*  0.032   0.030   0.026*  0.035
+    snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031
+    snapcenterp:            0.080
+
+.fi
+Although for a Plummer sphere one method is about twice as better than the worst method,
+this does not apply to other models, plus the phi^3 weighting is not always best.
 
 .SH "SEE ALSO"
 hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON)
