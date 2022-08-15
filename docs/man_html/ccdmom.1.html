@@ -58,6 +58,7 @@ following moments: <br>
 1<tt> </tt>&nbsp;<tt> </tt>&nbsp;mean velocity
 2<tt> </tt>&nbsp;<tt> </tt>&nbsp;sigma, the velocity dispersion (FWHM = 2.355 * sigma)
 3<tt> </tt>&nbsp;<tt> </tt>&nbsp;velocity of peak fit (around the max and the two points on either side)
+8<tt> </tt>&nbsp;<tt> </tt>&nbsp;peak value along axis
 -1<tt> </tt>&nbsp;<tt> </tt>&nbsp;average intensity along the axis
 -2<tt> </tt>&nbsp;<tt> </tt>&nbsp;dispersion around the mean intensity along the axis
 -3<tt> </tt>&nbsp;<tt> </tt>&nbsp;differentials along an axis (forces keep=true)
@@ -141,7 +142,7 @@ spectra along Y or X, but most advanced features are only implemented along
 axis=3. Default: none 
 <p> </dd>
 
-<dt><b>arange</b><i>[k0,k1,k2,....]</i> </dt>
+<dt><b>arange=</b><i>[k0,k1,k2,....]</i> </dt>
 <dd>Pixels along the <b>axis</b> to include
 in the moment. By default the whole axis is used, but with this keyword
 select pixels can be selected, for example <b>arange=0:20,40:60</b>. Default: all
@@ -178,12 +179,13 @@ For those more familiar with python, here are some cross-walks, where
 <b>I</b> denotes the <i>numpy</i> cube, and <b>V</b> a one-dimensional WCS value along the the
 picked axis. the axis= keyword in the numpy functions to pick another but
 our default of axis=3. <br>
-<pre>       mom=0<tt> </tt>&nbsp;<tt> </tt>&nbsp;m0=I.sum(axis=2)
+<pre>       mom=0<tt> </tt>&nbsp;<tt> </tt>&nbsp;m0 = I.sum(axis=2)
        ?<tt> </tt>&nbsp;<tt> </tt>&nbsp;I.mean(axis=2)
-       mom=-1<tt> </tt>&nbsp;<tt> </tt>&nbsp;m1=I.mean(axis=2)
-       mom=-2<tt> </tt>&nbsp;<tt> </tt>&nbsp;m2=I.std(axis=2)
-       mom=1    v=(V*I).sum(axis=2)/I.sum(axis=2)
+       mom=-1<tt> </tt>&nbsp;<tt> </tt>&nbsp;m1 = I.mean(axis=2)
+       mom=-2<tt> </tt>&nbsp;<tt> </tt>&nbsp;m2 = I.std(axis=2)
+       mom=1    v = (V*I).sum(axis=2)/I.sum(axis=2)
        mom=2    s=
+       mom=8    peak = I.max(axis=2)
 </pre>
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
@@ -230,7 +232,8 @@ History</a></h2>
 10-may-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4 force q&amp;d cont subtraction on mom=30,31,....<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-jun-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.5 add pos= option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-jun-2017<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.6 add abs= option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-17-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V.30 add arange=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 add arange=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1 add mom=8 option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

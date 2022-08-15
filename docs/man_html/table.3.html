@@ -18,8 +18,9 @@ get_atable, get_ftable, get_line, parse, strinsert - legacy table
 <p>routines 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-Note the API below has not been implemented for names
-with a preceding dash! <br>
+Note the API below has not been implemented for functions
+with a preceding dash! 
+<p> <br>
 <pre>#include &lt;table.h&gt;#include &lt;mdarray.h&gt;#include &lt;extstring.h&gt;table  *table_open(stream
 instr, int mode);table  *table_open1(stream instr, int mode, int nlines);void
    table_close(tableptr tptr);size_t  table_nrows(tableptr tprt);size_t
@@ -231,7 +232,7 @@ each element: <br>
     for (int i=0; i&lt;nrows; i++) 
       for (int j=0; j&lt;ncols; j++)
         d2[i][j] += 1.0;             // d2[row][col]
-</pre>and here is an example of reading the table line by line, without any parsing,
+</pre>Here is an example of reading the table line by line, without any parsing,
 but removing comment lines. This can be done in line by line streaming mode,
 not allocating space for the whole table, for which <b>mode=1</b> is needed: <br>
 <pre>    table *t = table_open(filename, 1);
@@ -247,13 +248,12 @@ not allocating space for the whole table, for which <b>mode=1</b> is needed: <br
     table_close(t);
     dprintf(0,"Read %d lines\n",nrows);
     
-</pre>and dealing (and preserving) comments while reading in the whole table:
-<br>
+</pre>Dealing (and preserving) comments while reading in the whole table: <br>
 <pre>    table *t = table_open1(filename, 0, 0);
     int nrows = table_nrows(t);
     int ncols = table_ncols(t);  // this triggers a column counter
     
-    string *sp = table_comments(t);
+    string *sp = table_comments(t);   // not implemented yet
     while (*sp)
       printf("%s0,*sp++);
     for (int j=0; j&lt;nrows; j++)
@@ -265,7 +265,8 @@ not allocating space for the whole table, for which <b>mode=1</b> is needed: <br
 </pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>Xsv</a></h2>
-An interesting package to deal with tables is the XSV program <br>
+An interesting package to deal with tables is the XSV program 
+<p> <br>
 <pre>cat AAPL.csv | xsv table | head -2
 cat AAPL.csv | xsv slice -i 1 | xsv table
 cat AAPL.csv | xsv slice -i 1 | xsv flatten
@@ -305,12 +306,10 @@ Peter Teuben
 <pre>xx-sep-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-aug-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented get_Xtable functions  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 1-sep-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;added iscomment()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-12-jul-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed reading large table buffereing<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+12-jul-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed reading large table bufferrng<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 aug-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;designing new table system<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sathvik/PJT
-22-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;finalizing implementation of table2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/xxx/yyy
-</pre>
-<p> 
-<p> <p>
+5-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;finalizing implementation of table2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/Parker/Yuzhu
+</pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
