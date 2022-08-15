@@ -1,10 +1,13 @@
-.TH RADPROF 1NEMO "27 May 2004"
-.SH NAME
+.TH RADPROF 1NEMO "9 August 2022"
+
+.SH "NAME"
 radprof \- tabulate or display radial profiles of an N-body snapshot
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBradprof in=\fPsnapshot [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIradprof\fP computes spherically averaged density
 (and some derived quantities) of 
 an N-body realization.  Although it can plot, it
@@ -38,9 +41,9 @@ The table will contain 7 columns:
 (1) radius, (2) density, (3) circular velocity (assuming centrifugal
 balance), (4) cumulative mass, (5) projected surface density, (6) radius
 to the power 0.25 and (7) -2.5*log(surface density). 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIsnapshot(5NEMO)\fP format [no default]
@@ -91,23 +94,28 @@ only the table is produced on standard output:
 .TP
 \fBheadline=\fP
 Optional text for plot header. [no header].
-.SH BUGS
+
+.SH "BUGS"
 .nf
 Tables (\fBtab=t\fP): the density is crummy.
 Plot: no logarithmic scaling can be done.
 .fi
+
 .SH "SEE ALSO"
 snapdens(1NEMO), hackdens(1NEMO), tabplot(1NEMO), snapshot(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~src/nbody/reduc	radprof.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +2.0i +2.0i
+.ta +1.5i +5.5i
 18-Mar-87	document created        	PJT
  8-Apr-87	V1.0 coding             	PJT
 21-Apr-87	V1.1 rotcur added       	PJT
@@ -116,4 +124,5 @@ Peter Teuben
 12-feb-92       V2.1a Nemo V2.x         	PJT
 25-jul-97	V3.0 added kmax= and changed density computation	PJT
 20-jun-02	V3.1 able to read PhaseSpace as well as Pos/Vel data	PJT
+8-aug-2022	V3.2 added sort=t and dens=t keyword	PJT
 .fi
