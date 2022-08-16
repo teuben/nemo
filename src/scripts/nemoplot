@@ -1,0 +1,43 @@
+#! /bin/bash
+#
+#      Find the #PLOT lines in a file
+
+if [ $# -lt 1 ]; then
+    echo "Usage: $0 TABLE [ARGS]"
+    echo "    plot=      Pick which plot# to run (0 means show all, 1 the first)   [1]"
+    echo "    tmp=       Name of bash script to run plots                          [tmp$$]"
+    echo "    clean=     1 means clean up bash script, 0 means keep it             [1]"
+    echo ""
+    echo "This script selects lines marked in the TABLE with '#PLOT' to be executed"
+    echo "Normally those are NEMO plotting commands, e.g. tabplot, tabhist"
+    exit 1
+fi
+
+file=$1
+if [ ! -e $file ]; then
+    echo "File $file does not exist"
+    exit 1
+fi
+shift
+
+plot=1
+tmp=tmp$$.sh
+clean=1
+
+#    Poor man's command line parser
+for arg in $*; do\
+  export $arg
+done
+
+grep ^'#PLOT' $file | sed s/#PLOT// |  awk '{if (NR=='$plot') print $0}'  > $tmp
+if [ $plot = 0 ]; then
+    grep ^'#PLOT' $file | sed s/#PLOT// 
+else
+    cat $tmp
+    bash $tmp
+fi
+if [ $clean == 1 ]; then
+    rm $tmp
+else
+    echo "$tmp not removed"
+fi
