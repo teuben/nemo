@@ -143,7 +143,8 @@ static char *functs[] = { "SIN"  , "ASIN" , "SINH" , "COS"  , "ACOS" , "COSH" ,
                    "K"    , "H"    , "P"    , "S"    , "MAX"  , "MIN"  ,
                    "MOD"  , "INT"  , "NINT" , "SIGN" , "UNDEF", "IFGT" ,
                    "IFLT" , "IFGE" , "IFLE" , "IFEQ" , "IFNE" , "RANU" ,
-		   "RANG" , "RANP" , "SIND" , "COSD" , "TAND" , "NULL"};
+		   "RANG" , "RANP" , "SIND" , "COSD" , "TAND" , "ASINH",
+		   "NULL"};
 
 static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       1   ,    1   ,    1   ,    2   ,    1   ,    1   ,
@@ -152,7 +153,8 @@ static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       0   ,    0   ,    0   ,    0   ,    2   ,    2   ,
                       2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
                       4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
-		      2   ,    1   ,    1   ,    1   ,    1   ,    0 };
+		      2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
+		      0 };
 
 
 /*  definitions/declarations for the scanner and parser  */
@@ -709,7 +711,10 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 44: fie_push(sin(PI*arg[0]/180.0)); break;
 			  case 45: fie_push(cos(PI*arg[0]/180.0)); break;
 			  case 46: fie_push(tan(PI*arg[0]/180.0)); break;
-		          case 47: fie_null(); break;
+			  case 47: fie_push(asinh(arg[0]));
+			           break;
+			    
+		          case 48: fie_null(); break;
 			  default: opc = err; break;
 			  }
 			  break;

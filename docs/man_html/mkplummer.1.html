@@ -9,15 +9,18 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkplummer - generates a snapshot according to a truncated Plummer model
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkplummer</b> [parameters=values...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>mkplummer</i> constructs a
-Plummer model, with a spatial or mass cut-off, after which it performs a
-coordinate transformation to the center-of-mass coordinate system. The data
+<i>mkplummer</i> constructs
+a Plummer model, with a spatial or mass cut-off, after which it performs
+a coordinate transformation to the center-of-mass coordinate system. The data
 are then written into a file <i>snap-file</i>, in a standard N-body snapshot format.
   The model is constructed in VIRIAL units (M=G=-4E=1, with E the total
 energy), and finite spatial extent which can be regulated by specifying
@@ -82,57 +85,64 @@ See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
 
 <dt><b>scale=</b><i>scale_factor</i>
 </dt>
-<dd>A scale factor or scale to virial units (M=G=-4E=1). Use -1 for virial units,
-and 1 to get a model in structural (natural) units. Note: large scale factors
-means small systems with large velocity disperson. [Default: <b>-1</b>]. </dd>
+<dd>A scale factor or scale to virial units (M=G=-4E=1). Use -1 for virial units
+(see also VIRIAL UNITS below), and 1 to get a model in structural (natural)
+units. Note: large scale factors means small systems with large velocity
+disperson. [Default: <b>-1</b>]. </dd>
 
-<dt><b>quiet=<i>level</i></b>
-</dt>
-<dd>Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet [default:
-<b>0</b>]. </dd>
+<dt><b>quiet=<i>level</i></b> </dt>
+<dd>Level of quit start. 0 is noisy, 1=somewhat
+quiet, 2=more quiet [default: <b>0</b>]. </dd>
 
 <dt><b>massname=<i>name</i></b> </dt>
-<dd>Identification of the mass spectrum. It is normally only
-a function of mass, so <b>n(m)</b> will suffice. If nothing specified, all stars
-will have the same mass (total mass M=1). [default: not used]. </dd>
+<dd>Identification of the mass
+spectrum. It is normally only a function of mass, so <b>n(m)</b> will suffice. If
+nothing specified, all stars will have the same mass (total mass M=1). [default:
+not used]. </dd>
 
-<dt><b>massexpr=<i>expr</i></b>
-</dt>
-<dd>Expression for the mass-spectrum. In addition to the mass <i>m</i> from the <b>massname</b>
-it may contain any variables contained in the  <b>masspars</b> to be specified
-next. [default: <b>pow(m,p)</b>]. </dd>
+<dt><b>massexpr=<i>expr</i></b> </dt>
+<dd>Expression for the mass-spectrum. In addition to
+the mass <i>m</i> from the <b>massname</b> it may contain any variables contained in
+the  <b>masspars</b> to be specified next. [default: <b>pow(m,p)</b>]. </dd>
 
 <dt><b>masspars=<i>pars</i></b> </dt>
-<dd>List of parameters and their values.
-They can be used by name in the <b>massexpr</b> specified before. [default: <b>p,0.0</b>].
-</dd>
+<dd>List
+of parameters and their values. They can be used by name in the <b>massexpr</b>
+specified before. [default: <b>p,0.0</b>]. </dd>
 
 <dt><b>massrange=<i>mlow,mhigh</i></b> </dt>
-<dd>Valid massrange. A lower and higher cutoff must be
-supplied. The massrange has arbitrary units, since all masses will be rescaled
-to set the total mass M=1. [default: <b>1,1</b>]. </dd>
+<dd>Valid massrange. A
+lower and higher cutoff must be supplied. The massrange has arbitrary units,
+since all masses will be rescaled to set the total mass M=1. [default: <b>1,1</b>].
+</dd>
 
 <dt><b>headline=</b><i>string</i> </dt>
-<dd>Optional headline,
-which is written as the first item in the snapshot file, the next item
-being the snapshot itself. [default: not used]. </dd>
+<dd>Optional headline, which is written as the first item in
+the snapshot file, the next item being the snapshot itself. [default: not
+used]. </dd>
 
 <dt><b>nmodel=</b><i>integer</i> </dt>
-<dd>Number of
-models to generate. Although mostly meant for benchmarks, generating more
-then 1 model can be useful to process very large snapshots (which won&rsquo;t
-fit in memory) in a serialized fashion. See also <i>snapsplit</i>.  Default: <b>1</b>. </dd>
+<dd>Number of models to generate. Although mostly meant
+for benchmarks, generating more then 1 model can be useful to process very
+large snapshots (which won&rsquo;t fit in memory) in a serialized fashion. See
+also <i>snapsplit</i>.  Default: <b>1</b>. </dd>
 
-<dt><b>mode=0|1|2</b>
-</dt>
-<dd>The processing mode, purely for debugging. 0=no data written. 1=data written,
-but no extra analysis. 2=data written, and extra analysis done. [Default:
-1]. 
-<p> 
+<dt><b>mode=0|1|2</b> </dt>
+<dd>The processing mode, purely for debugging.
+0=no data written. 1=data written, but no extra analysis. 2=data written,
+and extra analysis done. [Default: 1]. 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Bugs</a></h2>
+<h2><a name='sect4' href='#toc4'>Virial Units</a></h2>
+The scale length of a
+Plummer sphere in virial units is <b>3.pi/16</b> ~ 0.589.  As an example this should
+plot the same "rotation" curve: <br>
+<pre>     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 yapp=1/xs
+     rotcurves plummer &rsquo;0,1,3*pi/16&rsquo; yapp=2/xs
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 A non-delta function mass-spectrum will not create a properly virialized
 system yet. See <a href='snapvirial.1.html'><i>snapvirial(1NEMO)</i></a>
  <p>
@@ -141,14 +151,14 @@ ranges the spline interpolation, used in <a href='frandom.3.html'><i>frandom(3NE
 , can fail using
 a valid [0,1] range. 
 <p> 
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
 mkplummer can also be used to create a plummer
 sphere with a mass spectrum, e.g. a Salpeter mass spectrum with <br>
 <pre>  % mkplummer salpeter.dat 10000 massname=&rsquo;n(m)&rsquo; massexpr=&rsquo;pow(m,p)&rsquo; masspars=p,-2.35
 massrange=0.1,10
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Benchmarks</a></h2>
+<h2><a name='sect7' href='#toc7'>Benchmarks</a></h2>
 The default benchmark (see Benchfile) creates a 10,000,000 snapshot
 in double precision, with and without writing to a local file: <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;make -f Benchfile bench0 bench1
@@ -162,11 +172,11 @@ in double precision, with and without writing to a local file: <br>
 time needed to write 535MB (for 10M particles) 
 <p> 
 <p> 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 NEMO/src/nbody/init/mkplummer.c
 
 <p> 
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='snapvirial.1.html'>snapvirial(1NEMO)</a>
 , <a href='mkplummer.3.html'>mkplummer(3NEMO)</a>
 , <a href='snapmass.1.html'>snapmass(1NEMO)</a>
@@ -181,21 +191,25 @@ H.C.Plummer (1911), <i>MNRAS</i>,
 S.J. Aarseth, M. Henon and R.  Wielen (1974),  <i>Astron. and Astrophys.<b>
 37</b></i>, p. 183. <p>
 A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt, 2011,
-MNRAS, 417, 2300 (McLuster) 
+MNRAS, 417, 2300 (McLuster) <p>
+Arnold et al. (2022) - <a href='https://arxiv.org/abs/2207.10681'>https://arxiv.org/abs/2207.10681</a>
+
+-  <a href='https://github.com/r-j-arnold/gen_fractal_star_clusters'>https://github.com/r-j-arnold/gen_fractal_star_clusters</a>
+ 
 <p> 
-<h2><a name='sect9' href='#toc9'>Ads</a></h2>
+<h2><a name='sect10' href='#toc10'>Ads</a></h2>
 @ads <A HREF=https://ui.adsabs.harvard.edu/abs/1974A&amp;A....37..183A> 1974A&amp;A....37..183A </A>
+
 <p> 
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
-Piet Hut (Peter
-Teuben) 
+<h2><a name='sect11' href='#toc11'>Author</a></h2>
+Piet Hut (Peter Teuben) 
 <p> 
-<h2><a name='sect11' href='#toc11'>Files</a></h2>
+<h2><a name='sect12' href='#toc12'>Files</a></h2>
 <br>
 <pre>~/src/nbody/init<tt> </tt>&nbsp;<tt> </tt>&nbsp;mkplummer.c
 </pre>
 <p> 
-<h2><a name='sect12' href='#toc12'>Update History</a></h2>
+<h2><a name='sect13' href='#toc13'>Update History</a></h2>
 <br>
 <pre>23-Apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1.0: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
 10-Jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1.1: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET

@@ -1,4 +1,4 @@
-.TH SNAPMRADII 1NEMO "5 March 2022"
+.TH SNAPMRADII 1NEMO "25 July 2022"
 
 .SH "NAME"
 snapmradii \- print lagrangian mass radii in a snapshot
@@ -12,6 +12,9 @@ mass-radii of a snapshot. The snapshot will be sorted internally by
 increasing radius (which can be changed by using \fBsort=\fP),
 there is no need to use \fIsnapsort(1NEMO)\fP
 preceding this call.
+.PP
+See \fIradprof(1NEMO)\fP to get the cumulative mass radii for
+each particle.
 
 .SH "PARAMETERS"
 The following parameters are recognized:
@@ -69,7 +72,7 @@ fraction bins requested. Since linear interpolation is used, some crazy
 larger radius is reported.
 
 .SH "SEE ALSO"
-snapcenter(1NEMO), snapstat(1NEMO), snapprint(1NEMO), column(1)
+snapcenter(1NEMO), snapstat(1NEMO), snapprint(1NEMO), radprof(1NEMO), column(1)
 .PP
 W.L.Sweatman - (1993) MNRAS 261, 497.
 

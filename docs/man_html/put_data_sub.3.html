@@ -9,8 +9,10 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 filestruct - primitives for structured binary file I/O 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;
@@ -50,6 +52,7 @@ int dimN, ..., dim1;
 string msg;
 int offset, length
 </pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 These routines provide a simple yet reasonably general mechanism
 for the structured input and output of binary data.  A structured binary
@@ -168,6 +171,7 @@ called <i>get_data_blocked</i>, where the I/O must occur sequentially.
  <i>get_dims</i>,  and <i>get_dlen</i> return the type,  dimension array (allocated and
 zero terminated!),  and data-length in bytes for the whole item. These routines
 should be rarely needed by programmers though. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Examples</a></h2>
 The following code
 fragment reads and later writes some data to structured binary files. <br>
@@ -230,7 +234,8 @@ example shows how to handle structures: <br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;       64, sizeof(struct foo), 0);
 
 </pre>
-<h2><a name='sect4' href='#toc4'>&nbsp;&nbsp;&nbsp;&nbsp;Diagnostics</a></h2>
+<p>&nbsp;&nbsp;&nbsp;&nbsp; 
+<h2><a name='sect4' href='#toc4'>Diagnostics</a></h2>
 Exceptional conditions (eg, unexpected EOF), invalid arguments
 (eg, types out of range) and low-level catastrophies (eg, running out of
 memory) generate messages via <a href='error.3.html'><i>error</i>(3)</a>
@@ -238,25 +243,36 @@ memory) generate messages via <a href='error.3.html'><i>error</i>(3)</a>
 the program to the operating system. This error-checking is implemented with
 the goal of freeing applications programmers from the responsibility of
 checking for I/O errors other than end-of-file. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Notes</a></h2>
 The library will delay
 reading large data-items in memory and only store a pointer to their location
 until it is really needed via one of the get_data() routines. 
+<p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 Whenever
 pipes are used, all data is read into memory, as opposed to being deferred
 for input. This may lead to large memory consuption.  <p>
 random access can currently
-only take place in one item 
+
+<p>only take place in one item 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Joshua E. Barnes, Lyman P. Hurd, Peter
-Teuben 
+
+<p>Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='filestruct.5.html'>filestruct(5NEMO)</a>
 , <i>NEMO Users/Programmers Guide</i> <p>
 <a href='http://www.openexr.com/about.html#features'>http://www.openexr.com/about.html#features</a>
 
- (half precision floating point) 
+ (half precision floating point) <p>
+<a href='https://github.com/syrte/snapio'>https://github.com/syrte/snapio</a>
+ - python
+
+<p>implementation of snap I/O 
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>4-Apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;original implementation<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB

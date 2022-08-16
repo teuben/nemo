@@ -19,6 +19,7 @@ tabrows - select rows/lines from a file
 is done by line numbers, 1 being the first line. Syntax follows the <a href='nemofie.1.html'><i>nemofie(1NEMO)</i></a>
 
 rules. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in any order if
 the keyword is also given: 
@@ -27,41 +28,57 @@ the keyword is also given:
 <dt><b>in=</b> </dt>
 <dd>input file. No default. </dd>
 
-<dt><b>out=</b> </dt>
-<dd>output fil. No
-default. </dd>
-
 <dt><b>select=</b> </dt>
-<dd>lines to select     [all] </dd>
+<dd>rows/lines
+to select. Any <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+ expression can be used. First column is 1. [all]
+</dd>
 
 <dt><b>comment=t|f</b> </dt>
-<dd>Count comment lines
-too? [t] </dd>
+<dd>Count comment lines too? See also <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
+ to filter
+comments. Default: t </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>Default max allocation of the linecount in a table from
-a pipe  [10000]. </dd>
+<dd>Default max allocation of the linecount in a
+table from a pipe  [10000]. </dd>
+
+<dt><b>out=</b> </dt>
+<dd>output file. Default is standard output.
+
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To find the square root of any number <i>n</i> between
-1 and 100: <br>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+Although this program uses the new table interface, the <b>nmax=</b> parameter
+is still used and thus limits the row count. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+To find the square
+root of any number <i>n</i> between 1 and 100: <br>
 <pre>    nemoinp 1:100:1 &gt; t1
     tabmath t1 t2 &rsquo;sqrt(%1)&rsquo; all
     tabrows t2 - select=n
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='awk.1.html'>awk(1)</a>
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='tabcols.1.html'>tabcols(1NEMO)</a>
+, <a href='awk.1.html'>awk(1)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
- 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+, <a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
+
+
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/kernel/tab 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update
-History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>9-Mar-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+5-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 converted to table V2 interface, renamed from tablines<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -71,11 +88,12 @@ History</a></h2>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

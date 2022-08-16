@@ -9,8 +9,10 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 fits - standard astronomical data interchange format  
+<p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 <i>FITS</i>
 (Flexible Image/Information Transport System) is <b>THE</b> standard format for
@@ -39,6 +41,7 @@ has two library routines available to process <i>fits</i> files: <a href='fits.3
 <a href='fitsio.3.html'><i>fitsio(3NEMO)</i></a>
 , the latter more specialized to read and write images and
 derived (and compatible with) from the MIRIAD fitsio interface. 
+<p> 
 <h2><a name='sect2' href='#toc2'>Keywords</a></h2>
 The
 following header keywords describe the most important facts about the data
@@ -67,6 +70,7 @@ be computed from the following formula: <br>
 </pre>where <i>m</i> is the value of NAXIS. This size must of course be rounded up to
 the nearest multiple of 2880 bytes. After this, either there is no more
 information on the medium, or another HDU can be read. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Time</a></h2>
 The old DATE-OBS
 format (with the Y2K problem) was yy-dd-mm, and some files might have a corresponding
@@ -76,6 +80,7 @@ with the unix date command as follows: <br>
     2020-12-18T13:15:49.648961250
 </pre>and this should be the new format (with as many sub-second digits as are
 needed). 
+<p> 
 <h2><a name='sect4' href='#toc4'>Coordinate Systems</a></h2>
 World Coordinate Systems are described in detail
 in draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled <i>Representations
@@ -117,6 +122,7 @@ CSC  0  Cobe Quadrilateralized Spherical Cube
 QSC  0  Quadrilateralized Spherical Cube     
 TSC  0  Tangential Spherical Cube
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
 , <a href='fitsccd.1.html'>fitsccd(1NEMO)</a>
@@ -126,7 +132,10 @@ TSC  0  Tangential Spherical Cube
 <a href='fitsio.3.html'>fitsio(3NEMO)</a>
 , <a href='fits.3.html'>fits(3NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
- 
+ <br>
+<pre>https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html  - 
+</pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>30-may-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;written  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

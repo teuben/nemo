@@ -116,7 +116,7 @@ real get_pattern()
     return local_omega;
 }
 
-void set_pattern(double omega)
+void set_pattern(real omega)
 {
   error("set_pattern not properly implemented, see e.g. twobody.c");
   if (local_omega < 0.0) {

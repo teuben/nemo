@@ -22,24 +22,29 @@ checkpars - check consistency between keywords described in man page
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>checkpars</i>
 reports on a consistency check if the parameters listed in the man page
-of a program are in agreement with the ones reported via the <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
-.
-Not only should the same parameter names be documented, but also their
-order. Typically the verbose output would report the two lists, e.g. <br>
+of a program are in agreement with the ones reported via <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+,
+exposed to the user via the <b>help=h</b> command line option. Not only should
+the same parameter names be documented, but also their order. Typically
+the verbose output would report the two lists, e.g. <br>
 <pre>ccdmoms
 man: [&rsquo;in&rsquo;, &rsquo;out&rsquo;, &rsquo;mom&rsquo;, &rsquo;weights&rsquo;, &rsquo;axis&rsquo;, &rsquo;win&rsquo;, &rsquo;sigma&rsquo;]
 bin: [&rsquo;in&rsquo;, &rsquo;out&rsquo;, &rsquo;mom&rsquo;, &rsquo;weight&rsquo;, &rsquo;axis&rsquo;, &rsquo;win&rsquo;, &rsquo;sigma&rsquo;]
 </pre>
-<p> has an obvious typo. <p>
-By default a predefined <b>tasklist</b> is used, but this
-is not an exhaustive list. Using the <b>-f</b> flag another list could be passed
-(only the first word per line is the name of the program to be checked).
-
+<p> has an obvious typo in the man page for the <b>weight</b> keyword <p>
+By default
+a predefined <b>tasklist</b> is used, but this is not an exhaustive list. Using
+the <b>-f</b> flag another list could be passed (only the first word per line is
+the name of the program to be checked). <p>
+Each time when <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
+ is
+used, it puts updated information on the task in $NEMO/etc/tasklist 
 <p> 
 <p> 
 <h2><a name='sect3' href='#toc3'>Examples</a></h2>
 <br>
-<pre>    % make checkpars
+<pre>    % cd $NEMO
+    % make checkpars
     python checkpars.py -v &gt; checkpars.log
     Files read: 200
     Bad files found: 104
@@ -47,27 +52,27 @@ is not an exhaustive list. Using the <b>-f</b> flag another list could be passed
 </pre>
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='mknemo.8.html'>mknemo(8NEMO)</a>
- Checkpars currently can only be run from the $NEMO
-
-<p>directory 
+ 
 <p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Parker Tewell 
 <p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
-<pre>$NEMO/src/scripts/checkpars.py         <tt> </tt>&nbsp;<tt> </tt>&nbsp;script
-$NEMO/src/scripts/tasklist<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;default list of binaries to check
+<pre>$NEMO/src/scripts/checkpars.py<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;script
+$NEMO/src/scripts/tasklist      <tt> </tt>&nbsp;<tt> </tt>&nbsp;default list of binaries to check
+$NEMO/etc/tasklist<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;active list made via mknemo(1NEMO)
 </pre>
 <p> 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
-<pre>15-apr-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;first version<tt> </tt>&nbsp;<tt> </tt>&nbsp;    PPT
-30-apr-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -v flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;    PPT
-06-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -h flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;    PPT
-21-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;draft man created   PJT
-29-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -f flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;    PPT
-22-jul-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -u flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;    PPT
+<pre>15-apr-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;first version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
+30-apr-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -v flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
+06-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -h flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
+21-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;draft man created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+29-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -f flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
+22-jul-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -u flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
+01-jun-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;run from anywhere<tt> </tt>&nbsp;<tt> </tt>&nbsp;PPT
 </pre><p>
 
 <hr><p>

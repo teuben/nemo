@@ -1,4 +1,4 @@
-.TH MKOMMOD 1NEMO "5 July 1997"
+.TH MKOMMOD 1NEMO "14 August 2022"
 
 .SH "NAME"
 mkommod \- generate N-body system with anisotropic distribution function
@@ -10,13 +10,18 @@ mkommod \- generate N-body system with anisotropic distribution function
 \fImkommod\fP generates N-body realizations of a spherical system with
 a spheroidal anisotropic distribution function a la Osipkov-Merritt,
 using tables of radius, mass, potential, and distribution function.
+.PP
+We keep a number of example tables in $NEMODAT, see \fIdata(5NEMO)\fP for
+a full description.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 24
 \fBin=\fP\fIin_file\fP
 Read input tables in binary from \fIin_file\fP, which should contain
-an \fBOsipkovMerrittModel\fP data set.  Default: \fIrequired\fP.
+an \fBOsipkovMerrittModel\fP data set. 
+
+Default: \fIrequired\fP.
 .TP
 \fBout=\fP\fIout_file\fP
 Write snapshot(s) to \fIout_file\fP in \fIsnapshot\fP(5NEMO)
@@ -50,8 +55,12 @@ Message prepended to \fIout_file\fP.
 Small number that controls potential roundoff problems in f(E)
 [Default: \fB1.0e-10\fP].
 
+.SH "EXAMPLES"
+.nf
+mkommod in=$NEMODAT/k2isot.dat out=k1.snap nbody=1000
+.fi
 .SH "SEE ALSO"
-snapshot(5NEMO)
+mkplummer(1NEMO), snapshot(5NEMO)
 .PP
 .nf
 Binney & Tremaine (1987), pp.240
@@ -63,8 +72,8 @@ agama: https://github.com/GalacticDynamics-Oxford/Agama
 
 .SH "FILES"
 .nf
-\fB$NEMODAT/k?isot.dat\fP     isotropic King models
-\fB$NEMODAT/k?an??.dat\fP     anisotropic King models
+\fB$NEMODAT/k?isot.dat\fP     isotropic King models (1,3,5)
+\fB$NEMODAT/k?an??.dat\fP     anisotropic King models (1,3,5)
 \fB$NEMODAT/plum.dat\fP       isotropic Plummer model
 .fi
 

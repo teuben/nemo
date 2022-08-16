@@ -29,7 +29,8 @@ string defv[] = {
     "item=\n		Top level selection items [default: all]",
     "select=\n          Selection numbers (1...) [default: all]",
     "convert=\n		Conversion options {d2f,f2d,i2f,f2i,d2i,i2d,h2d,d2h}",
-    "VERSION=1.6\n	11-dec-09 PJT",
+    "headline=\n        Add additional headline",
+    "VERSION=1.7\n	13-aug-2022 PJT",
     NULL,
 };
 
@@ -79,6 +80,8 @@ void nemo_main(void)
         dprintf(1,"\n\n");
     }
     outstr = stropen(getparam("out"), "w");
+    if (hasvalue("headline"))
+      put_string(outstr, HeadlineTag, getparam("headline"));
     cntrd = 0;      /* keep track of items read */
     cntwr = 0;      /* and written */
     while ((tags = list_tags(instr)) != NULL) {

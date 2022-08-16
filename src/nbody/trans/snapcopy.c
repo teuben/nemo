@@ -35,13 +35,11 @@ string defv[] = {
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
     "i=-1\n             Select one body to select (overrides select=)",
-    "VERSION=2.0\n      12-feb-2022 PJT",
+    "VERSION=2.0a\n     8-aug-2022 PJT",
     NULL,
 };
 
 string usage="copy an N-body snapshot";
-
-string cvsid="$Id$";
 
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
@@ -57,8 +55,6 @@ void nemo_main(void)
     bool   Qall;
     int    ibody = getiparam("i");
     iproc_body sfunc;
-
-    if (ibody >=0) warning("ibody not implemented yet");
 
     times = getparam("times");
     sfunc = btitrans(getparam("select"));

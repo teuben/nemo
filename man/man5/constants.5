@@ -1,4 +1,5 @@
-.TH CONSTANTS 5NEMO "25 August 2020"
+.TH CONSTANTS 5NEMO "8 July 2022"
+
 .SH NAME
 constants \- list of useful constants
 
@@ -14,6 +15,7 @@ Only a few are available in programs that use \fInemoinp(1NEMO)\fP
 57.295780	Degrees per radian (180/pi)
 206264.81	Arcseconds per Radian (3600*180/pi)
 2.35482		STOF = 2*sqrt(2*ln(2)) - the FWHM/sigma of a gaussian 
+2.50663		sqrt(2*pi) - flux (gauss1d) = sqrt(2*pi)  * peak * sigma
 1.13309		BOF (beam oversampling factor) = 1.13309 * (FWHM/PIXEL)^2  = pi/(4*ln(2))
 1.4826		rms = 1.4826*MAD (Median Absolution Deviation)
 3.26163		pc/ly 
@@ -55,5 +57,3 @@ data     	NEMO standard repository area for data files.
 .ta +1.0i +4.0i
 21-aug-2020	created  	PJT
 .fi
-
-

@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapxyz - Convert snapshot to xyzc data 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snapxyz</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapxyz</i> converts snapshot data into Position-Color (<b>xyzc</b>) data,
 or optionally Position-Velocity-Color (<b>xyzuvwc</b>) data. In this format utilities
@@ -23,74 +26,89 @@ with velocity vectors. See <a href='xyzview.1.html'><i>xyzview(1NEMO)</i></a>
 The positions are computed  using
 a <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
  expression, and default to <b>x,y,z</b> for position, and 
-<b>vx,vy,vz</b>  for velocity. 
+<b>vx,vy,vz</b>  for velocity. <p>
+Arguably <a href='glnemo2.1.html'><i>glnemo2(1NEMO)</i></a>
+ is a better way to view
+3D snapshot data, though the expression transformation is not something
+we can easily do for snapshots. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file of <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
-
-data. No default. </dd>
+<dd>Input file of
+<a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ data. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file for xyzc/xyzuvwc data in <a href='xyz.3.html'><i>xyz(3NEMO)</i></a>
- format.
-No default. </dd>
+<dd>Output file for xyzc/xyzuvwc data
+in <a href='xyz.3.html'><i>xyz(3NEMO)</i></a>
+ format. No default. </dd>
 
 <dt><b>times=</b> </dt>
-<dd>Range of times to convert. [Default: <b>all</b>]. </dd>
+<dd>Range of times to convert. [Default:
+<b>all</b>]. </dd>
 
 <dt><b>xvar=</b> </dt>
-<dd>Expression
-for x-axis variable    [Default:  <b>x</b>]. </dd>
+<dd>Expression for x-axis variable    [Default:  <b>x</b>]. </dd>
 
 <dt><b>yvar=</b> </dt>
-<dd>Expression for y-axis variable
-   [Default:  <b>y</b>]. </dd>
+<dd>Expression
+for y-axis variable    [Default:  <b>y</b>]. </dd>
 
 <dt><b>zvar=</b> </dt>
-<dd>Expression for z-axis variable    [Default:  <b>z</b>]. </dd>
+<dd>Expression for z-axis variable
+   [Default:  <b>z</b>]. </dd>
 
-<dt><b>vxvar=</b>
-</dt>
-<dd>Expression for vx-axis variable (see also <b>vel=</b> below) [Default:  <b>vx</b>]. </dd>
+<dt><b>vxvar=</b> </dt>
+<dd>Expression for vx-axis variable (see also <b>vel=</b> below)
+[Default:  <b>vx</b>]. </dd>
 
-<dt><b>vyvar=</b>
-</dt>
-<dd>Expression for vy-axis variable  (see also <b>vel=</b> below) [Default:  <b>vy</b>]. </dd>
+<dt><b>vyvar=</b> </dt>
+<dd>Expression for vy-axis variable  (see also <b>vel=</b> below)
+[Default:  <b>vy</b>]. </dd>
 
-<dt><b>vzvar=</b>
-</dt>
-<dd>Expression for vz-axis variable  (see also <b>vel=</b> below) [Default:  <b>vz</b>]. </dd>
+<dt><b>vzvar=</b> </dt>
+<dd>Expression for vz-axis variable  (see also <b>vel=</b> below)
+[Default:  <b>vz</b>]. </dd>
 
-<dt><b>vel=t|f</b>
-</dt>
+<dt><b>vel=t|f</b> </dt>
 <dd>Should velocities be output also. Default: <b>t</b>. </dd>
 
-<dt><b>color=</b> </dt>
-<dd>Expression for point
-color. This must be an integer expression, 0 being the background color,
-1 and higher some other colors. [Default: <b>1</b>]. </dd>
+<dt><b>color=</b>
+</dt>
+<dd>Expression for point color. This must be an integer expression, 0 being
+the background color, 1 and higher some other colors. [Default: <b>1</b>]. </dd>
 
-<dt><b>visib=</b> </dt>
-<dd>Expression for point
-visibility. This must be an integer expression, where 0 means invisible,
-and anything else visible. [Default: <b>1</b>]. </dd>
+<dt><b>visib=</b>
+</dt>
+<dd>Expression for point visibility. This must be an integer expression, where
+0 means invisible, and anything else visible. [Default: <b>1</b>]. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Files</a></h2>
+scrpts/csh/gaia_snapshot.py
+- a now better way of viewing 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snap3dv.1.html'>snap3dv(1NEMO)</a>
+, <a href='glnemo2.1.html'>glnemo2(1NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Josh
 Barnes, Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>xx-xxx-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.x using bodymap(3ZENO)         <tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 20-Jan-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 using bodytrans(3NEMO) now  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-mar-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 formal export in NEMO; added vel=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+13-may-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented glnemo2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 
@@ -101,9 +119,10 @@ Barnes, Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Files</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

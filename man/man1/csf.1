@@ -1,9 +1,12 @@
-.TH CSF 1NEMO "12 December 2009"
-.SH NAME
+.TH CSF 1NEMO "13 August 2022"
+
+.SH "NAME"
 csf \- copy structured file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBcsf in=\fP\fIin-file\fP \fBout=\fP\fIout-file\fP
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIcsf\fP copies a NEMO structured file.  By using the \fBitem\fP and
 \fBselect\fP keyword items can be selected by name and/or number.  Note
 that items can currently only be selected from the top level, items
@@ -21,7 +24,8 @@ file can be obtained with the following Unix pipe:
 Although \fIstructured files\fP can always be read when they were created
 on a byte swapped machine, \fIcsf\fP can also be used to create a file
 in which the bytes are not swapped.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 .so man1/parameters
 .TP 24
 \fBin=\fP\fIin-file\fP
@@ -52,30 +56,39 @@ is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
 (half precision) ,
 \fBl\fP (long), \fBi\fP (int) or \fBs\fP (short). 
 [Default: -blank-].
+.TP
+\fBheadline=\fP
+If supplied, add this string of random verbiage to the data stream. [Default: none]
 
-.SH CAVEAT
+.SH "CAVEATS"
 Some of the conversions in \fBconvert=\fP
 are not supported or are in danger of loosing more than just precision.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 An image with too much data-history can be cut by only copying the \fIImage\fP
 items:
 .nf
    % csf in=map1.ccd out=map2.ccd select=Image
 .fi
-.SH BUGS
+
+.SH "BUGS"
 Items can only be selected (\fBselect=\fP) from the top level.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 cp(1), tsf(1NEMO), rsf(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben, Joshua E. Barnes
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +1.5i
 ~/src/kernel/io  	csf.c
 .fi
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 xx-xxx-87	V1.0: created	JEB
 9-dec-89	V1.1 added select keyword	PJT
 10-oct-90	V1.3 select= is now item=: select= used for counting	PJT
@@ -83,4 +96,5 @@ xx-xxx-87	V1.0: created	JEB
 13-feb-92	documentation added	PJT
 26-mar-95	V1.5 fixed selection bug and clarified doc	PJT
 12-dec-09	V1.6 added support for half precision (halfp) type	PJT
+13-aug-2022	V1.7 add headline=	PJT
 .fi

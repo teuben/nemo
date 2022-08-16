@@ -408,7 +408,7 @@ double natof(char *expr)
     return atof("nan");
 
   n = nemoinpd(expr,&x,1);
-  if (n!=1) warning("Parsing %s",expr);
+  if (n!=1) warning("natof parsing: %s",expr);
   return x;
 }
 
@@ -416,7 +416,7 @@ int natoi(char *expr)
 {
   int x, n;
   n = nemoinpi(expr,&x,1);
-  if (n!=1) warning("Parsing %s",expr);  
+  if (n!=1) warning("natof parsing: %s",expr);  
   return x;
 }
 

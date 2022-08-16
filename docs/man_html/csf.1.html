@@ -9,10 +9,13 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 csf - copy structured file 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>csf in=</b><i>in-file</i> <b>out=</b><i>out-file</i> 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>csf</i>
 copies a NEMO structured file.  By using the <b>item</b> and <b>select</b> keyword items
@@ -29,6 +32,7 @@ the following Unix pipe: <br>
 Although <i>structured files</i> can always be read when they were created on
 a byte swapped machine, <i>csf</i> can also be used to create a file in which
 the bytes are not swapped. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following parameters are recognized
 in order; they may be given in any order if the keyword is also given. Use
@@ -61,33 +65,43 @@ keyword) has been applied. If none are provided, all are copied. [default:
 <dd>List of conversions to make, separated by comma&rsquo;s
 or spaces. Each conversion is of the format <i>from</i>2<i>to</i>, where both the <i>from</i>
 and <i>to</i> part are any of: <b>d</b> (double), <b>f</b> (float), <b>h</b>  (half precision) , <b>l</b>
-(long), <b>i</b> (int) or <b>s</b> (short).  [Default: -blank-]. 
+(long), <b>i</b> (int) or <b>s</b> (short).  [Default: -blank-]. </dd>
+
+<dt><b>headline=</b> </dt>
+<dd>If supplied, add
+this string of random verbiage to the data stream. [Default: none] 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Caveat</a></h2>
-Some of the conversions
-in <b>convert=</b> are not supported or are in danger of loosing more than just
-precision. 
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+Some
+of the conversions in <b>convert=</b> are not supported or are in danger of loosing
+more than just precision. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An image with too much data-history can be cut by only
-copying the <i>Image</i> items: <br>
+An image with too much data-history can
+be cut by only copying the <i>Image</i> items: <br>
 <pre>   % csf in=map1.ccd out=map2.ccd select=Image
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 Items can only be selected (<b>select=</b>) from the top level. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='cp.1.html'>cp(1)</a>
 ,
 <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
  
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben, Joshua E. Barnes 
+<p> 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>~/src/kernel/io  <tt> </tt>&nbsp;<tt> </tt>&nbsp;csf.c
 </pre>
+<p> 
 <h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>xx-xxx-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
@@ -97,6 +111,7 @@ Peter Teuben, Joshua E. Barnes
 13-feb-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;documentation added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-mar-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 fixed selection bug and clarified doc<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-dec-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 added support for half precision (halfp) type<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+13-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 add headline=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -106,7 +121,7 @@ Peter Teuben, Joshua E. Barnes
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Caveat</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>Bugs</a></li>
 <li><a name='toc7' href='#sect7'>See Also</a></li>
