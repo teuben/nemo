@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 rotcur - fit parameters to velocity field using tilted rings 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>rotcur
 in=</b>velfie [parameters=values ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>rotcur</i> derives the kinematical
 parameters from the observed velocity field by fitting a tilted-rings model
@@ -59,6 +62,7 @@ See also <a href='velfit.1.html'><i>velfit(1NEMO)</i></a>
 
 on the classic WWB73 (Warner, Wright and Baldwin, 1973, MNRAS, 163,163)
 method. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized: 
 <dl>
@@ -220,7 +224,8 @@ velocities in column 3, and optional errors in the radial velocity in column
 
 <dt><b>wwb73=t|f</b> </dt>
 <dd>Use a simpler WWB73
-(Warner, Wright, Baldwin 1973) linear method of fitting? [false] </dd>
+(Warner, Wright, Baldwin 1973) linear method of fitting? [false] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>AWK</a></h2>
@@ -246,9 +251,10 @@ The following <a href='awk.1.html'><i>awk(1)</i></a>
 }
 END{printf("%s  %s0,rad,line);}
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
-Here is an example of creating a synthetic velocity field with ccdvel,
-and analysing it with rotcur: <br>
+Here is an example of creating a synthetic velocity field with
+ccdvel, and analysing it with rotcur: <br>
 <pre>    % set r=&lsquo;nemoinp 0:100:5&lsquo;
     % set v=&lsquo;nemoinp 0:100:5 | tabmath - - "100*%1/(20+%1)" all&lsquo;
     % ccdvel out=map1.vel rad="$r" vrot="$v" pa=30 inc=60
@@ -273,6 +279,7 @@ tab=map1.rotcur units=arcsec,1
  average x-position       :    63.50  (   0.000)  grids
  average y-position       :    63.50  (   0.001)  grids
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 Failures in <i>nllsqfit</i> are not handled gracefully, and may <i>error</i> out
 the program. Usage of the <b>error=</b> system keyword can be used to bypass such
@@ -291,6 +298,7 @@ an astronomical image is assumed. See also the <b>reuse=</b> keyword. <p>
 For calculations
 of residuals in  overlapping rings (e.g. warps) only the last ring velocity
 will be used. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdvel.1.html'>ccdvel(1NEMO)</a>
 , <a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
@@ -315,10 +323,13 @@ BBAROLO: https://bbarolo.readthedocs.io/en/latest/
 GALPAK3D: http://galpak3d.univ-lyon1.fr/index.html
 GBKFIT: http://supercomputing.swin.edu.au/projects/gbkfit/
 TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
+PaFit:  (Krajnovic et al 2006) https://www-astro.physics.ox.ac.uk/~cappellari/software/#pafit
 </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 K. Begeman (original GIPSY Sheltran version, now also available in
 C), P. J. Teuben (NEMO C version) 
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>19/jul/83<tt> </tt>&nbsp;<tt> </tt>&nbsp;original program                     <tt> </tt>&nbsp;<tt> </tt>&nbsp;KGB

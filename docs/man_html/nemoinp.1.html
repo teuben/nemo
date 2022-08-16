@@ -22,81 +22,85 @@ nemoinp - parse a user supplied number string
 <i>nemoinp</i> parses an expression supplied by the user, using the
 rules as given by <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 . The output format can be defined too,
-separators, newlines etc. can be choosen at will. <p>
-It may come in handy to
-set an array in a shell variable or to initialize tables, e.g. <b>set x=(&lsquo;nemoinp
-1:10:2&lsquo;)</b> will then result in <b>x</b> having <b>1 3 5 7 9</b>.   (this is unfortunately
-different from the matlab convention, where this would be written 1:2:10
-instead, see also <a href='seq.1.html'><i>seq(1)</i></a>
-, where the syntax is <b>seq 1 2 10</b>. 
+separators, newlines etc. can be choosen at will. See also the EXAMPLES below.
+<p>
+It may come in handy to set an array in a shell variable or to initialize
+tables, e.g. <b>nemoinp 1:10:2</b> will then result in <b>1 3 5 7 9</b>.  Although such
+implied loops are a common feature of scripting environments, there are
+subtle differences: <br>
+<pre>nemoinp<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;1:10:2
+matlab<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;1:2:10
+seq<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;1 2 10
+numpy.arange<tt> </tt>&nbsp;<tt> </tt>&nbsp;1,10,2<tt> </tt>&nbsp;<tt> </tt>&nbsp;last element (10) is never used
+</pre>
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters are recognized in any order if the
+keyword is also given: 
 <dl>
 
 <dt><b>expression=<i>expr-string</i></b> </dt>
-<dd>expression to be parsed [default: empty ].
-</dd>
+<dd>expression to be parsed [default:
+empty ]. </dd>
 
 <dt><b>separ=<i>string</i></b> </dt>
-<dd>The string which is appended to the format string described
-in previous keyword and is used to separate the numbers output. When no
-string is supplied, a blank is used. [default: empty]. </dd>
+<dd>The string which is appended to the format string
+described in previous keyword and is used to separate the numbers output.
+When no string is supplied, a blank is used. [default: empty]. </dd>
 
-<dt><b>format=<i>string</i></b> </dt>
-<dd>Valid
-C-format descriptor used in <a href='printf.3.html'><i>printf(3)</i></a>
- to output the numbers. When %d is used,
-integer math is forced. See also next keyword for output number separator.
-[default: <b>%g</b>]. </dd>
+<dt><b>format=<i>string</i></b>
+</dt>
+<dd>Valid C-format descriptor used in <a href='printf.3.html'><i>printf(3)</i></a>
+ to output the numbers. When %d
+is used, integer math is forced. See also next keyword for output number
+separator. [default: <b>%g</b>]. </dd>
 
 <dt><b>newline=t|f</b> </dt>
-<dd>Should a newline be added after each number parsed.
-This is often useful in cases <i>nemoinp</i> is used to generate the independant
-coordinate when tables have to be generated from scratch. [Default: <b>t</b>]. </dd>
+<dd>Should a newline be added after each
+number parsed. This is often useful in cases <i>nemoinp</i> is used to generate
+the independant coordinate when tables have to be generated from scratch.
+[Default: <b>t</b>]. </dd>
 
-<dt><b>nmax=<i>integer</i></b>
-</dt>
-<dd>Size of scratch array to be allocated dynamically for the parsed number
-[default: <b>32768</b>]. </dd>
+<dt><b>nmax=<i>integer</i></b> </dt>
+<dd>Size of scratch array to be allocated dynamically
+for the parsed number [default: <b>32768</b>]. </dd>
 
 <dt><b>tab=<i>table_file</i></b> </dt>
-<dd>Optional table output. Default: none </dd>
+<dd>Optional table output.
+Default: none </dd>
 
-<dt><b>seed=<i>initial_seed</i></b>
-</dt>
+<dt><b>seed=<i>initial_seed</i></b> </dt>
 <dd>Seed for <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
 . Default: 0 </dd>
 
-<dt><b>atof=</b> </dt>
-<dd>Merely provided to test what <i>natof</i>
-returns. Note that this function does not perform any error checking and
-can return the wrong number.  </dd>
+<dt><b>atof=</b>
+</dt>
+<dd>Merely provided to test what <i>natof</i> returns. Note that this function does
+not perform any error checking and can return the wrong number.  </dd>
 
-<dt><b>dms=t|f</b> </dt>
-<dd>Force parsing the (optionally comma
-separated) string(s) as D:M:S.S, converting  them to fractional degrees.
-For H:M:S parsing the user is responsible for the extra factor of 15. Default:
-<b>f</b>. 
+<dt><b>dms=t|f</b>
+</dt>
+<dd>Force parsing the (optionally comma separated) string(s) as D:M:S.S, converting
+ them to fractional degrees. For H:M:S parsing the user is responsible for
+the extra factor of 15. Default: <b>f</b>. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-The number of elements in an array is limited, currently hardcoded
-to 32678 in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
-. If possible, use <a href='seq.1.html'><i>seq(1)</i></a>
+The number of elements in an
+array is limited, currently hardcoded to 32678 in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+. If possible,
+use <a href='seq.1.html'><i>seq(1)</i></a>
 . 
 <p> 
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='seq.1.html'>seq(1)</a>
 , <a href='tabgen.1.html'>tabgen(1NEMO)</a>
-,
-<a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
-, <a href='getrange.3.html'>getrange(3NEMO)</a>
+,
+<a href='getrange.3.html'>getrange(3NEMO)</a>
 , <a href='functions.5.html'>functions(5NEMO)</a>
  
 <p> 
@@ -111,7 +115,7 @@ to 32678 in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
    n=20<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;     a bash/zsh variable
    nemoinp 2:${n}:4          as before, now using a shell variable
    nemoinp 2::4              repeat the value 4 times
-   nemoinp &rsquo;iflt(1,2,3,4)&rsquo;   print 3, not 4, because 1 is less than 1
+   nemoinp &rsquo;iflt(1,2,3,4)&rsquo;   print 3, not 4, because 1 is less than 2
    nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal
 30.5043
    nemoinp c,G,h,p,m         a few good constants

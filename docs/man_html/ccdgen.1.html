@@ -26,31 +26,33 @@ use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
 An added feature is that the objects can be
 added as if they are in a "galactic" disk with given inclination and position
 angle. The default is a "face-on" view (<b>inc=0</b>).  No corrections for brightness
-due to inclination are made however. 
+due to inclination are made however. <p>
+3D images are supported if <b>size=</b> contains
+a 3rd non-1 value. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters
-are recognized in order; they may be given in any order if the keyword
-is also given. Use --help to confirm this man page is up to date.  
+ The following parameters are recognized in
+order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input
-file (optional) to be added to the output file. Default: none, map is generated.
-</dd>
+<dd>Input file (optional)
+to be added to the output file. Default: none, map is generated. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file, in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
+<dd>Output
+file, in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. No default.      </dd>
 
-<dt><b>object=</b>
-</dt>
-<dd>Object type. Valid are flat, exp, gauss, bar, spiral, noise, test, blobs.
-See below for an explanation and their parameters. Default: flat </dd>
+<dt><b>object=</b> </dt>
+<dd>Object type.
+Valid are flat, exp, gauss, bar, spiral, noise, test, blobs. See below for
+an explanation and their parameters. Default: flat </dd>
 
 <dt><b>spar=</b> </dt>
-<dd>Parameters
-for this object. The first parameter is often the peak  value, and the second
+<dd>Parameters for
+this object. The first parameter is often the peak  value, and the second
 one a scale length. Some object have more complex geometries and require
 more parameters. The meaning of the peak value can be modified by setting
 <b>totflux=t</b> (see below). The defaults are defined per object, but are typically
@@ -59,61 +61,61 @@ For certain objects, the multiple objects can be given, and the sequence
 of parameters can be repeated. Currently <b>object=blobs</b> has this option for
 3D cubes. </dd>
 
+<dt><b>size=</b> </dt>
+<dd>Mapsize. It is allowed to have a different size in X and
+Y. </dd>
+
+<dt><b>cell=</b> </dt>
+<dd>Cellsize [1]      *not used yet* </dd>
+
+<dt><b>pa=</b> </dt>
+<dd>Position Angle of disk in
+which the object lives. Counted positive starting at North through East
+in the standard astronomical fashion. Default: 0 </dd>
+
+<dt><b>inc=</b> </dt>
+<dd>Inclination Angle
+of disk in which object lives. 0 is face on. Default: 0 </dd>
+
+<dt><b>totflux=t|f</b> </dt>
+<dd>If set
+to true, the amplitude (always the first parameter in <b>spar</b>) is interpreted
+as the total integrated intensity instead of the peak value of the object.
+Default: <b>f</b>. </dd>
+
+<dt><b>factor=</b> </dt>
+<dd>The factor by which an image is multiplied before the
+object is added. Warning: if the amplitude (usually the first of the spar=
+numbers) is 0, this will not apply, and the output would equal the input.
+Default: 1 </dd>
+
 <dt><b>center=</b> </dt>
 <dd>Center of object (in 0-based pixel coordinates). The lower
 left corner is counted as (0,0) here. Default: mapcenter. </dd>
 
-<dt><b>size=</b> </dt>
-<dd>Mapsize. It
-is allowed to have a different size in X and Y. </dd>
-
-<dt><b>cell=</b> </dt>
-<dd>Cellsize [1]     
-*not used yet* </dd>
-
-<dt><b>pa=</b> </dt>
-<dd>Position Angle of disk in which the object lives. Counted
-positive starting at North through East in the standard astronomical fashion.
-Default: 0 </dd>
-
-<dt><b>inc=</b> </dt>
-<dd>Inclination Angle of disk in which object lives. 0 is face
-on. Default: 0 </dd>
-
-<dt><b>totflux=t|f</b> </dt>
-<dd>If set to true, the amplitude (always the first
-parameter in <b>spar</b>) is interpreted as the total integrated intensity instead
-of the peak value of the object. Default: <b>f</b>. </dd>
-
-<dt><b>factor=</b> </dt>
-<dd>The factor by which
-an image is multiplied before the object is added. Warning: if the amplitude
-(usually the first of the spar= numbers) is 0, this will not apply, and
-the output would equal the input. Default: 1 </dd>
-
 <dt><b>crpix=</b> </dt>
-<dd>Override/Set crpix (1,1,1)
- </dd>
+<dd>Override/Set
+crpix (1,1,1)  </dd>
 
 <dt><b>crval=</b> </dt>
 <dd>Override/Set crval (0,0,0)  </dd>
 
 <dt><b>cdelt=</b> </dt>
-<dd>Override/Set cdelt (1,1,1) 
-</dd>
+<dd>Override/Set cdelt
+(1,1,1)  </dd>
 
 <dt><b>seed=</b> </dt>
 <dd>Random seed [0]     </dd>
 
 <dt><b>headline=</b> </dt>
-<dd>Random verbiage added to the image.
-Default: none 
+<dd>Random verbiage added to the
+image. Default: none 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Object</a></h2>
-The <b>object=</b> keyword allows for the following objects,
-and <b>spar=</b> for their parameters <br>
+The <b>object=</b> keyword allows for the following
+objects, and <b>spar=</b> for their parameters <br>
 <pre>OBJECT<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPAR
 flat<tt> </tt>&nbsp;<tt> </tt>&nbsp;A<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;A
 exp<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
@@ -237,6 +239,7 @@ Peter Teuben
 8-jan-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 add #arms parameter to spiral<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-jan-12<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 added object=test<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-mar-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 added object=blobs<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+8-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 moved center= down the arg list <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

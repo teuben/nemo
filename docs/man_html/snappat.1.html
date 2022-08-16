@@ -45,16 +45,24 @@ to output [x,y,z,vx,vy,vz]     </dd>
  </dd>
 
 <dt><b>ntime=</b> </dt>
-<dd>if used, pre-allocate this number of snapshots [] 
+<dd>if used, pre-allocate this number of snapshots [] </dd>
+
+<dt><b>first=t|f</b> </dt>
+<dd>Only
+write first cube? </dd>
+
+<dt><b>format=binary|fits|hdf</b> </dt>
+<dd>Output format option. By default
+
+<p>binary 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-It is
-useful to know the number of snapshots ahead of time, using the <b>ntime=</b>
-keyword. If the number of snapshots was larger, the last few planes in the
-cube are garbage, if fewers, snapshots are written in sets of that size.
-
+It is useful to know the number of snapshots ahead of time,
+using the <b>ntime=</b> keyword. If the number of snapshots was larger, the last
+few planes in the cube are garbage, if fewer, snapshots are written in
+sets of that size. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
 
@@ -77,6 +85,7 @@ Peter Teuben
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>8-Aug-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-jun-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 various BOOM related improvements<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabcols - Select columns, and optionally rearrange, from a table 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 tabcols
 [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabcols</b> selects columns from a file, and
 can also re-arrange the output column order. New column separators can be
@@ -24,54 +27,67 @@ To select specific lines, use <a href='tabrows.1.html'><i>tabrows(1NEMO)</i></a>
  or <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 .
 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+ The following parameters are recognized in order; they may
+be given in any order if the keyword is also given. Use --help to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>input file name(s). No default. </dd>
 
-<dt><b>select=</b> </dt>
-<dd>list of columns
-to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
-  expression can be used. Columns can be repeated,
-and in any order. The output will be in exactly the same order as given
-with this keyword. First column is 1. [all]     </dd>
+<dt><b>select=</b>
+</dt>
+<dd>list of columns to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
+  expression can be used. Columns
+can be repeated, and in any order. The output will be in exactly the same
+order as given with this keyword. First column is 1. [all]     </dd>
 
 <dt><b>colsep=</b> </dt>
-<dd>Column separator.
-Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),  <b>r</b> (carriage return), as well
-as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default: <b>s</b>] </dd>
+<dd>Column
+separator. Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),  <b>r</b> (carriage return),
+as well as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default: <b>s</b>] </dd>
 
 <dt><b>out=-</b> </dt>
-<dd>output file name. By default
-standard output it used. </dd>
+<dd>output file name.
+By default standard output it used. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Example</a></h2>
-Here is an example of how to reverse the
-columns from a table with 4 columns: <br>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+Although this program uses the
+new table interface, there are still some internal variables that limits
+the column count. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Example</a></h2>
+Here is an example of how to reverse the columns
+from a table with 4 columns: <br>
 <pre>    tabcols in.tab 4:1:-1 &gt; out.tab
 </pre>and here is an example that re-arranges all the numbers in a table in one
 long column <br>
 <pre>    tabcols in.tab all n &gt; out.tab
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabrows.1.html'>tabrows(1NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabs.1.html'>tabs(1NEMO)</a>
 , <a href='awk.1.html'>awk(1)</a>
  
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/kernel/tab/tabcols.c
   source code 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>26-Jan-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-apr-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 out=- now default and last argument<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+5-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 converted to table V2 interface<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -81,11 +97,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Example</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Example</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

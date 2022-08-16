@@ -9,81 +9,101 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkommod - generate N-body system with anisotropic distribution function
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkommod in=</b>in_file <b>out=</b>out_file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkommod</i>
 generates N-body realizations of a spherical system with a spheroidal anisotropic
 distribution function a la Osipkov-Merritt, using tables of radius, mass,
-potential, and distribution function. 
+potential, and distribution function. <p>
+We keep a number of example tables
+in $NEMODAT, see <a href='data.5.html'><i>data(5NEMO)</i></a>
+ for a full description. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized. 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use --help to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b><i>in_file</i> </dt>
-<dd>Read input tables in binary from <i>in_file</i>, which
-should contain an <b>OsipkovMerrittModel</b> data set.  Default: <i>required</i>. </dd>
+<dd>Read input tables in binary from <i>in_file</i>, which should contain
+an <b>OsipkovMerrittModel</b> data set.  
+<p> Default: <i>required</i>. </dd>
 
-<dt><b>out=</b><i>out_file</i>
+<dt><b>out=</b><i>out_file</i> </dt>
+<dd>Write
+snapshot(s) to <i>out_file</i> in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
+ form.  Default: <i>required</i>. </dd>
+
+<dt><b>nbody=</b><i>num_bodies</i>
 </dt>
-<dd>Write snapshot(s) to <i>out_file</i> in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
- form.  Default: <i>required</i>.
-</dd>
+<dd>Number of particles to generate per model. Default: <b>512</b>. </dd>
 
-<dt><b>nbody=</b><i>num_bodies</i> </dt>
-<dd>Number of particles to generate per model. Default: <b>512</b>.
-</dd>
+<dt><b>seed=</b><i>random_seed</i>
+</dt>
+<dd>Seed used to initialize random number generator. Default: <b>123</b>. </dd>
 
-<dt><b>seed=</b><i>random_seed</i> </dt>
-<dd>Seed used to initialize random number generator. Default:
-<b>123</b>. </dd>
-
-<dt><b>ftrun=</b><i>mass_frac</i> </dt>
-<dd>To save time in the rejection phase, all particles
-generated will lie within the radius containing a fraction <i>mass_frac</i> of
-the total mass.  Since the d.f. is not truncated in energy, this amounts to
-a slight bias in the orbital phases of a few outlying particles. Default:
-<b>0.999</b>. </dd>
+<dt><b>ftrun=</b><i>mass_frac</i>
+</dt>
+<dd>To save time in the rejection phase, all particles generated will lie within
+the radius containing a fraction <i>mass_frac</i> of the total mass.  Since the
+d.f. is not truncated in energy, this amounts to a slight bias in the orbital
+phases of a few outlying particles. Default: <b>0.999</b>. </dd>
 
 <dt><b>zerocm=</b><i>zero_flag</i> </dt>
-<dd>If true, zero center of mass of generated model(s).
-Default: <b>true</b>. </dd>
+<dd>If true,
+zero center of mass of generated model(s). Default: <b>true</b>. </dd>
 
-<dt><b>nmodel=</b><i>num_models</i> </dt>
-<dd>Number of models to generate, written one
-after the other to <i>out_file</i>.  Default: <b>1</b>. </dd>
+<dt><b>nmodel=</b><i>num_models</i>
+</dt>
+<dd>Number of models to generate, written one after the other to <i>out_file</i>. 
+Default: <b>1</b>. </dd>
 
 <dt><b>headline=</b><i>message</i> </dt>
-<dd>Message prepended
-to <i>out_file</i>. </dd>
+<dd>Message prepended to <i>out_file</i>. </dd>
 
-<dt><b>epsilon=</b><i>epsilon</i> </dt>
-<dd>Small number that controls potential roundoff
-problems in f(E) [Default: <b>1.0e-10</b>]. </dd>
+<dt><b>epsilon=</b><i>epsilon</i>
+</dt>
+<dd>Small number that controls potential roundoff problems in f(E) [Default:
+<b>1.0e-10</b>]. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+<br>
+<pre>mkommod in=$NEMODAT/k2isot.dat out=k1.snap nbody=1000
+</pre>
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  <p>
 <br>
 <pre>Binney &amp; Tremaine (1987), pp.240
 Osipkov, L.P. 1979, Soviet Astron Lett, 5, 42.
 Merritt, D. 1985, AJ, 90, 1027.
 LIMEPY: https://github.com/mgieles/limepy
+agama: https://github.com/GalacticDynamics-Oxford/Agama
 </pre>
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
-<pre>$NEMODAT/k?isot.dat     isotropic King models
-$NEMODAT/k?an??.dat     anisotropic King models
+<pre>$NEMODAT/k?isot.dat     isotropic King models (1,3,5)
+$NEMODAT/k?an??.dat     anisotropic King models (1,3,5)
 $NEMODAT/plum.dat       isotropic Plummer model
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Joshua E. Barnes 
-<h2><a name='sect7' href='#toc7'>History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>22-may-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.x created/documented   <tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 5-jul-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 added epsilon, some code cleanup<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -96,10 +116,11 @@ Joshua E. Barnes
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>
