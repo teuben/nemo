@@ -99,4 +99,22 @@ and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
+## Citation
+
+Please use the following citation if you use NEMO in your work
+
+
+     @INPROCEEDINGS{1995ASPC...77..398T,
+            author = {{Teuben}, P.},
+             title = "{The Stellar Dynamics Toolbox NEMO}",
+         booktitle = {Astronomical Data Analysis Software and Systems IV},
+              year = 1995,
+            editor = {{Shaw}, R.~A. and {Payne}, H.~E. and {Hayes}, J.~J.~E.},
+            series = {Astronomical Society of the Pacific Conference Series},
+            volume = {77},
+             month = jan,
+             pages = {398},
+            adsurl = {https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T},
+           adsnote = {Provided by the SAO/NASA Astrophysics Data System}
+     }
 
