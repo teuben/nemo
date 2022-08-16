@@ -1,0 +1,56 @@
+.TH NEMOPLOT 8NEMO "16 August 2022"
+
+.SH "NAME"
+nemoplot \- plot a table with self-describing PLOT command(s)
+
+.SH "SYNOPSIS"
+.PP
+\fBnemoplot \fI table_file [key=val] ...\fP 
+
+.SH "DESCRIPTION"
+\fBnemoplot\fP will plot a data table using NEMO commands that
+are embedded as comments in the table.
+
+.SH "PARAMETERS"
+.TP 24
+\fItable_file\fP
+This needs to be the first argument, without a keyword, and must be
+an existing file (normally an acii table).   No default
+.TP
+\fBplot=\fP\fInumber\fP
+Pick which plot# to run (0 means show all, 1 the first)   [1]
+.TP
+\fBtmp=\fP\fIscript-file\fP
+Name of bash script to run plots, which will be created.
+[tmp$$]
+.TP
+\fBclean=0|1\fP
+means clean up bash script, 0 means keep it
+[1]
+
+.SH "CAVEATS"
+Any plot commands will likely refer to a filename, which must be in the current (or correct) directory.
+
+.SH "EXAMPLES"
+.nf
+	cd $NEMODAT/nemoplot
+	nemoplot shift2.tab plot=2
+.fi
+
+.SH "SEE ALSO"
+nemo(1NEMO), yapp(1NEMO), tabplot(1NEMO), tabhist(1NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
+.ta +3i
+$NEMO/src/scripts/nemoedit	bash script
+$NEMODAT/nemoplot	directory with example \fInemoplot\fP files
+.fi
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+16-aug-2022	Created		PJT
+.fi
