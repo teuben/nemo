@@ -68,8 +68,14 @@ Fraction of particles to consider in the potential finding algorithm [0.5]
 Maximum number of iterations to use. If the \fBeta\fP stop criterion
 did not converge, this criterion will stop the iterations. [10]
 .TP
-\fBpos=\fP\fIxc,yc,zc\fP
+\fBcenter=\fP\fIxc,yc,zc\fP
 An estimated center to speed up convergence. [0,0,0]
+.TP
+.TP
+\fBone=t|f\fP
+Write output center of mass (COM) as a single body with total mass
+and COM coordinates as computed from \fBweight=\fP.
+[Default: \fBf\fP].
 
 .SH "CAVEATS"
 Mysteriously this does not seem to work well for small Nbody, e.g.
