@@ -24,15 +24,16 @@ import tempfile
 
 if len(sys.argv) < 3:
     print("Usage: %s par1,par2,...   rc1 rc2 ..." % sys.argv[0])
-    print("  loops over all bash rc files that contain par1=val1 par2=val2...")
-    print("  and tabulates  par1 par2 ...")
+    print("  loops over all bash rc files that contain  par1=val1 par2=val2 ...")
+    print("  and tabulates   val1 val2 ...")
     print("  NEMO convention is that the rc files are called nemopars.rc")
     sys.exit(0)
 
-# grab the parameters to print (no error checking)
+# grab the parameters to print (no error checking on their names)
 pars = sys.argv[1].split(',')
 
-# make a temporary name for the bash script file
+# make a temporary name for the bash script file name
+# this will get automatically deleted when this script ends
 s = tempfile.NamedTemporaryFile()
 script = s.name
 # print('SCRIPT',script)
@@ -43,7 +44,14 @@ for p in pars:
 fp.write(cmd + '\n')
 fp.close()
 
-# loop over the rc files
+# print comment header for output
+cmd = '#'
+for p in pars:
+    cmd = cmd + ' %s' % p
+print(cmd)    
+
+# loop over the rc files and report values
+# if a variable is missing, that line contains fewer values, no error checking
 for rc in sys.argv[2:]:
     cmd = 'bash %s %s' % (script,rc)
     # print("CMD",cmd)
