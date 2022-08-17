@@ -1,0 +1,87 @@
+.TH NEMOPARS 8NEMO "17 August 2022"
+
+.SH "NAME"
+nemopars \- extract parameters from a bash-style rc file
+
+.SH "SYNOPSIS"
+.PP
+\fBnemopars \fI par1,par2,... rc1 rc2 ...\fP 
+
+.SH "DESCRIPTION"
+\fBnemopars\fP will extract the values of \fIpar=val\fP constructs
+in a  bash-style rc file. The convention is that in a run directory
+NEMO stores these in a \fBnemopars.rc\fP file. For example with the
+following rc file
+.nf
+
+# ./mkmh97.sh version=11-aug-2022
+run=run0 m=1 v0=1 seed=-3
+m16=0.815569
+
+.fi
+the command
+.nf
+
+   nemopars m,v0,m16 run0/nemopars.rc
+   
+.fi
+would result
+.nf
+
+   # m v0 m16
+   1 1 0.815569
+
+.fi
+
+When many simulations each in their own run directory, a command line
+.nf
+
+   nemopars m,v0,m15 run*/nemopars.rc
+   
+.fi
+would be a quick way to assemble a table summarizing these three parameters
+
+.SH "PARAMETERS"
+Except for the first parameter, subsquent parameters must be \fIkey=val\fP, and
+cannot be abbreviated.
+.TP 24
+\fItable_file\fP
+This needs to be the first parameter, without a keyword, and must be
+an existing file (normally an acii table).   No default
+.TP
+\fBplot=\fP\fInumber\fP
+Pick which plot# to run (0 means show all, 1 execute the first, etc.)   [1]
+.TP
+\fBtmp=\fP\fIscript-file\fP
+Name of bash script to run plots, which will be created. [tmp$$]
+.TP
+\fBclean=0|1\fP
+means clean up bash script, 0 means keep it [1]
+.TP
+\fByapp=\fP
+Override any potential \fIyapp(5NEMO)\fP setting from the one used in the script. Unlike in a normal
+NEMO command line parser, here we allow keywords to be given multiple times, the last one set will
+be the one used. [Default: not used]
+
+.SH "CAVEATS"
+This is a simple python script, the CLI does not adhere to the usual \fIgetparam(3NEMO)\fP conventions.
+There is also no error checking on the names of the parameters. A mis-spelled variable or missing parameter
+in the rc file simply results in fewer columns in the output file.
+
+.SH "SEE ALSO"
+nemo(1NEMO), awk(1)
+
+.SH "FILES"
+.nf
+.ta +3i
+$NEMO/src/scripts/nemopars	(python) script
+.fi
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-aug-2022	Created		PJT
+.fi
