@@ -1,16 +1,23 @@
-.TH SNAPMNMX 1NEMO "8 November 1993"
-.SH NAME
-snapmnmx \- show statistics of snapshot variables
-.SH SYNOPSIS
+.TH SNAPMNMX 1NEMO "17 August 2022"
+
+.SH "NAME"
+snapmnmx \- show statistics of snapshot variables, optionally output a single min or max particle
+
+.SH "SYNOPSIS"
 .PP
 \fBsnapmnmx in=\fPsnap_in  [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapmnmx\fP produces a table of a number of selected statistics
 of requested quantities of the bodies in a snapshot. It can also add
 the selected times to the table.
-.SH PARAMETERS
-The following parameters are recognized in any order if the 
-keyword is also given:
+.PP
+A special case where \fBout=\fP is given, and
+either just the \fBmin\fP or \fBmax\fP was selected
+of the variable will cause this particle to be output in a single particle snapshot.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 Input file, in \fIsnapshot(5NEMO)\fP format [no default].
@@ -42,21 +49,48 @@ Time values/intervals of which snapshots should be used.
 Format string (in the C language notation) of the output numbers.
 If no space is used in the format description, the program will
 add one for you. [default: \fB%g\fP (free format)].
-.SH SEE ALSO
+.TP
+\fBout=\fP
+If give, this will be the output file of the particle for which the min or max was selected.
+Only a single particle can be output here.
+
+.SH "EXAMPLES"
+.nf
+    # make a Plummer sphere with 100 particles and given seed
+    mkplummer p100 100 seed=123
+    
+    #  find the min x,y,z and max x,y,z; the bounding box of this model
+    snapmnmx p100
+    -4.67407 -3.82852 -2.03958 4.78748 2.74591 5.57043
+    
+    #  write the particle with min x to a file; it's the 10th particle
+    snapmnmx p100 x min out=p100.xmin
+    -4.67407 9
+
+    # show the x,y,z,vx,vy,vz for this particle with min x
+    snapprint p100.xmin
+    -4.67407 1.09453 0.180351 -0.125468 -0.137605 -0.16439
+.nf
+
+.SH "SEE ALSO"
 snapstat(1NEMO), snaprstat(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/nbody/reduc     snapmnmx.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 16-Apr-91	V1.0: created          	PJT
 13-may-91	V1.1: added time to mode, added more doc	PJT
 8-nov-93	V1.2: using moment.h	PJT
+17-aug-2022	V1.3: added out=	PJT
 .fi
 
 
