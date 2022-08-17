@@ -67,13 +67,15 @@ Fraction of particles to consider in the potential finding algorithm [0.5]
 \fBiter=\fP
 Maximum number of iterations to use. If the \fBeta\fP stop criterion
 did not converge, this criterion will stop the iterations. [10]
+.TP
+\fBpos=\fP\fIxc,yc,zc\fP
+An estimated center to speed up convergence. [0,0,0]
 
-.SH "CAVEAT"
-Mysteriously this does not seem to work yet. Viz.
+.SH "CAVEATS"
+Mysteriously this does not seem to work well for small Nbody, e.g.
 .nf
 
-mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - . debug=1
-
+mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - . debug=1 report=t
 ### nemo Debug Info: 1 0.212503 -0.023019 -0.111053 0.109614
 ### nemo Debug Info: 2 0.229355 -0.025213 -0.162219 0.053914
 ### nemo Debug Info: 3 0.221806 -0.025366 -0.175827 0.015562
@@ -82,11 +84,15 @@ mkplummer - 100 seed=123 | snapshift - - 0.5,0,0 | snapcenterp - . debug=1
 ### nemo Debug Info: 6 0.193003 0.019449 -0.182329 0.023941
 ### nemo Debug Info: 7 0.186807 0.025474 -0.182157 0.008644
 ### nemo Debug Info: 8 0.186308 0.025859 -0.182110 0.000632
+0.186308 0.025859 -0.182110
 
 .fi
 where the columns are iter#, pos and |r_{i+1} - r_{i}|. But clearly it is not
-converging to 0.5, but oddly enough the larger the shift, the better the
-convergence.
+converging to 0.5. The larger the shift, the better the
+convergence. Increasing \fBeps\fP does help, for example for
+eps=0.2 an ensemble of simulations with different seeds does return
+the proper value within the error. See also $NEMODAT/nemoplot/shift1.tab
+and shift2.tab
 
 .SH "SEE ALSO"
 snapshift(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
@@ -105,4 +111,5 @@ Peter Teuben
 .nf
 1-apr-06	0.1 Created in Rembrandt Hotel		PJT
 12-aug-2022	0.2 cleanup up	PJT
+16-aug-2022	0.4 add (nemoplot) example	PJT
 .fi
