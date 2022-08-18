@@ -9,19 +9,29 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-snapmnmx - show statistics of snapshot variables 
+snapmnmx - show statistics of snapshot variables, optionally output
+
+<p>a single min or max particle 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>snapmnmx in=</b>snap_in
- [parameter=value] 
+<b>snapmnmx in=</b>snap_in  [parameter=value]
+
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snapmnmx</i> produces a table of a number of
-selected statistics of requested quantities of the bodies in a snapshot.
-It can also add the selected times to the table. 
+<i>snapmnmx</i> produces a table of a number of selected statistics
+of requested quantities of the bodies in a snapshot. It can also add the
+selected times to the table. <p>
+A special case where <b>out=</b> is given, and either
+just the <b>min</b> or <b>max</b> was selected of the variable will cause this particle
+to be output in a single particle snapshot. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the  keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b>
@@ -55,23 +65,39 @@ should be used.  [default: <b>all</b>] </dd>
 C language notation) of the output numbers. If no space is used in the format
 description, the program will add one for you. [default: <b>%g</b> (free format)].
 </dd>
+
+<dt><b>out=</b> </dt>
+<dd>If give, this will be the output file of the particle for which the
+min or max was selected. Only a single particle can be output here. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapstat.1.html'>snapstat(1NEMO)</a>
-, <a href='snaprstat.1.html'>snaprstat(1NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
 <br>
-<pre>~/src/nbody/reduc     snapmnmx.c
+<pre>    # make a Plummer sphere with 100 particles and given seed
+    mkplummer p100 100 seed=123
+    
+    #  find the min x,y,z and max x,y,z; the bounding box of this model
+    snapmnmx p100
+    -4.67407 -3.82852 -2.03958 4.78748 2.74591 5.57043
+    
+    #  write the particle with min x to a file; it&rsquo;s the 10th particle
+    snapmnmx p100 x min out=p100.xmin
+    -4.67407 9
+    # show the x,y,z,vx,vy,vz for this particle with min x
+    snapprint p100.xmin
+    -4.67407 1.09453 0.180351 -0.125468 -0.137605 -0.16439
+
+See Alsosnapstat(1NEMO), snaprstat(1NEMO)  AuthorPeter Teuben  Files
+~/src/nbody/reduc     snapmnmx.c
 </pre>
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>16-Apr-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-may-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added time to mode, added more doc<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-nov-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2: using moment.h<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3: added out=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> 
 <p> <p>
@@ -83,10 +109,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>
