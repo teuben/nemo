@@ -29,12 +29,15 @@
 #          18-jul-2022   add r-vr evolution plot; new defaults for some parameters
 #           8-aug-2022   store a table with time,x1,vx1,x2,vx2
 #          11-aug-2022   using more generic nemopars.rc
+#          20-aug-2022   add --help option in a neat self-documenting way
 
 set -x
 set -e
-_version=11-aug-2022
+_version=20-aug-2022
 _pars=nemopars.rc
 
+#            text between #--HELP and #--HELP is displayed when --help is used
+#--HELP
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
 nbody=1000      # number of bodies in one model
@@ -44,10 +47,10 @@ step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius (not used for v
 r0=10.0         # initial offset position for v0 > 0
-eps=0.05        # softening
+eps=0.05        # gravitational softening
 kmax=6          # integration timestep is 1/2**kmax
-code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2
-seed=0          # random seed
+code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
+seed=0          # random seed (use seed=123 for the benchmark)
 #             parameters for the analysis
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
@@ -56,12 +59,21 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
-yapp=png                           # pick png, or ps, or whichever
+yapp=png                           # pick png, or ps (for yapp_pgplot) - @todo needs a better method
+#--HELP
+
+if [ "$1" == "--help" ];then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
 
 #             simple keyword=value command line parser for bash
 for arg in $*; do
   export $arg
 done
+
+#  @todo  if an explicit  (not advertised) restart was requested
 
 #             delete the old run, work within the run directory
 if [ -d $run ]; then
@@ -136,8 +148,8 @@ fi
 
 if [ ! -e $run.xv.tab-bad ]; then
     snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
-    snapcenter $run.4 . "weight=i<$nbody?phi*phi*phi*phi:0" report=t > $run.4.g1.tab
-    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "phi*phi*phi*phi" report=t >$run.4.g2.tab
+    snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t > $run.4.g1.tab
+    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >$run.4.g2.tab
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
     
     #  plot the path in Pos and Vel separately
@@ -195,3 +207,12 @@ m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.$yapp/$yapp
 echo "m16=$m16" >> $_pars
 echo "m16=$m16"
+
+#--HELP
+
+#    BENCHMARK:
+#    rm -rf run0
+#    run=run0 seed=123      should give:    m16=0.821802 for phi*phi*phi*phi
+#    run=run0 seed=123      should give:    m16=0.861046 for -phi*phi*phi  (now the default)
+
+#--HELP
