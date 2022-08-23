@@ -1,10 +1,14 @@
-.TH TABGEN 1NEMO "25 July 2020"
-.SH NAME
-tabgen \- Create an ASCII table with (random) values
-.SH SYNOPSIS
+.TH TABGEN 1NEMO "22 August 2022"
+
+.SH "NAME"
+tabgen \- Create an arbitrarely large ASCII table with (random) values
+
+.SH "SYNOPSIS"
 \fBtabgen\fP [parameter=value]
-.SH DESCRIPTION
-Create a table with (random) numbers. Either uniformly ditributed numbers between 0 and 1,
+
+.SH "DESCRIPTION"
+Create a table with (random) numbers.
+Either uniformly ditributed numbers between 0 and 1,
 from a gaussian (normal) distribution with mean 0 and sigma 1, 
 a constant value, or a linearly increasing value (0, 1, 2, ...). See \fBmode=\fP below.
 .PP
@@ -14,10 +18,14 @@ can be managed with the \fBnmax=\fP keyword, but columns is hidden deeper and no
 user control.
 .PP
 Using \fBmode < 0\fP
-numbers are generated but not output, in effect allowing a benchmark. 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+numbers are generated but not output, in effect allowing a benchmark.
+.PP
+ This program has no real use other than benchmarking and testing the limits
+of other program being fed very large tables. See EXAMPLES below
+for a counter example.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 Output ascii table [???]     
@@ -38,7 +46,8 @@ Random seed [123]
 .TP
 \fBfmt=\fP
 The \fIprintf(3)\fP style format specifier. [%g]
-.SH PERFORMANCE
+
+.SH "PERFORMANCE"
 On a typical 2020 machine it takes 0.23 seconds to create and output 1M random numbers,
 however most of the time is the output function. Using mode < 0 you can test the speed
 of just producing random numbers. About 95% of the time is spent in \fIprintf(3)\fP,
@@ -67,14 +76,32 @@ ot the standard unix tool \fIseq(1)\fP:
     
 .fi
 which is most likely the more complex operations of a floating point \fIfprintf(3)\fP.
-.SH SEE ALSO
-seq(1), tabmath(1NEMO), xrandom(1NEMO), xrandom(3NEMO), printf(3)
-.SH AUTHOR
+.PP
+The \fInemoinp(1NEMO)\fP program can also generate a simple table, but
+the maximum number of elements in an implied list is limited (100,000 currently).
+This is where \fBtabgen\fP might be useful:
+.nf
+
+     nemoinp 1:200000 > tab1
+     ### Fatal error [nemoinp]: Too many items in list, use a bigger nmax=100000
+     
+     tabgen - 200000 1 mode=4 > tab1
+     wc -l tab1
+     200000 tab1
+
+.fi
+
+.SH "SEE ALSO"
+seq(1), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 12-Jul-2020	V0.1 Created	PJT
 14-jul-2020	V0.3 mode= implemented	PJT
 25-jul-2020	V0.4 changed meaning of mode=	PJT
+29-apr-2022	V0.6 cleanup and tableV2 things 	PJT
 .fi
