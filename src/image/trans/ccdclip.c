@@ -18,16 +18,12 @@ string defv[] = {
 	"out=???\n      Output file",
 	"min=\n         Minimum value below which replace w/ clipvalue",
 	"max=\n         Maximum value below which replace w/ clipvalue",
-	"VERSION=1.0\n  22-mar-99 PJT",
+	"VERSION=1.1\n  24-aug-2022 PJT",
 	NULL,
 };
 
 string usage = "clip an image";
 
-#define X 0
-#define Y 1
-#define Z 2
-#define XY 3
 
 
 void nemo_main()
@@ -63,10 +59,12 @@ void nemo_main()
             if (Qmin && tmp < newmin) {
                 CubeValue(iptr,ix,iy,iz) = newmin;
                 countmin++;
+		dprintf(1,"min %d  %d %d %d  %g\n", countmin,ix,iy,iz,tmp);
             }
             if (Qmax && tmp > newmax) {
                 CubeValue(iptr,ix,iy,iz) = newmax;
                 countmax++;
+		dprintf(1,"max %d  %d %d %d  %g\n", countmax,ix,iy,iz,tmp);		
             }
         }
       }
