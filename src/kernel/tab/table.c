@@ -403,7 +403,7 @@ string *table_rowsp(table *t, int row)
 {
   char *line = strdup(t->lines[row]);
   int ntok = 0;
-  char *token = strtok(line," ,");
+  char *token = strtok(line," ,\t");
   lls *first = (lls *) allocate(sizeof(lls));
   lls *curr = first;
   string *sp;
@@ -418,7 +418,7 @@ string *table_rowsp(table *t, int row)
     curr->next = NULL;
 
     ++ntok;
-    token = strtok(NULL, " ,");
+    token = strtok(NULL, " ,\t");
   }
 
   // allocate the array to hold the tokens
