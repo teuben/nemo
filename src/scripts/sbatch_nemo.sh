@@ -1,41 +1,45 @@
 #! /bin/bash
 #
-#  NEMO's simple frontend for sbatch 
+#--HELP
+#  NEMO's simple frontend for sbatch
 #
-#  SLURM cheat list 
-#     sinfo
-#     sbatch run_12345.sh               (this example)
-#     squeue -u $USER                  (also shows your JOBID's)
-#     scancel JOBID
-#     srun -n 1 -c 4 --mem=16G -p toltec-cpu --x11 --pty bash
-#
-
 # Usage
 #     sbatch_nemo.sh -x scriptfile [args]
-#     sbatch_nemo.sh cmdline.txt
+#     sbatch_nemo.sh -r runfile.txt
+#
+# SLURM cheat list 
+#     sinfo
+#     sbatch run_12345.sh              (repeat a run)
+#     squeue -u $USER                  (also shows your JOBID's)
+#     scancel JOBID
+#
+#--HELP
 
-#                                --help
-if [ "$1" == "--help" ];then
-    echo Usage:...
+
+if [ $# -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
     exit 0
 fi
 
-#                                -l cmds.txt
-if [ "$1" == "-l" ];then
+#                                -l runfile.txt
+if [ "$1" == "-r" ]; then
     shift
     # catch the single argument batch call first
     if [ -e "$1" ]; then
 	echo Processing lines from $1 line by line
 	while IFS= read -r line; do
             echo "LINE: $line"
-            sbatch_nemo.sh $line
+            sbatch_nemo.sh -x $line
 	done < $1
 	exit 1
     fi
-
     exit 0
 fi
 
+if [ "$1" == "-x" ]; then
+    shift
+fi
 
 
 
@@ -70,10 +74,13 @@ if [ "$(which sbatch)" != "/usr/bin/sbatch" ]; then
     #exit 0
 fi
 
+if [ "$SBATCH_TEMPLATE" != "" ]; then
+    source $SBATCH_TEMPLATE
+fi
 
 cat <<EOF > $run
 #! /bin/bash
-#
+#   Probably should not edit this file, it has been created by $0
 #   $0 version=$version
 #
 #SBATCH -o slurm-%j-%x.out
