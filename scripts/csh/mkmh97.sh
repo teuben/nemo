@@ -59,7 +59,8 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
-yapp=png                           # pick png, or ps (for yapp_pgplot) - @todo needs a better method
+yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
+#
 #--HELP
 
 if [ "$1" == "--help" ];then
