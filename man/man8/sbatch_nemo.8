@@ -1,0 +1,62 @@
+.TH SBATCH_NEMO 8NEMO "28 August 2022"
+
+.SH "NAME"
+sbatch_nemo.sh \- helper script to issue sbatch commands in SLURM
+
+.SH "SYNOPSIS"
+.PP
+\fBsbatch_nemo.sh \fP options
+
+.SH "DESCRIPTION"
+\fBsbatch_nemo.sh\fP is useful for certain sbatch operations on HPC systems, if you
+have an existing scripts 
+\fIrunfile\fP, that a simple ascii file where each line has to run through sbatch
+
+.SH "OPTIONS"
+.TP 24
+\fB-r \fP\fIrun_file\fP
+If a text file exists with simple one liner shell commands, the -r flag can be used
+.TP
+\fB-x \fP\fIscript_file [args]\fP
+If a script has multi-line commands, plus knows how to pars command line arguments, the
+\fB-x\fP is appropriate.
+
+.SH "SBATCH DIRECTIVES"
+Each HPC system will have its own specific set of \fIsbatch\fP directives.
+
+.nf
+
+#SBATCH -J $runid
+#SBATCH -o slurm-%j-%x.out
+#SBATCH -t 04:00
+#SBATCH --nodes=1
+#SBATCH --ntasks=1
+#SBATCH --cpus-per-task=1
+#SBATCH --mem=16G
+#SBATCH --partition toltec-cpu
+#SBATCH --parsable
+
+.fi
+
+.SH "EXAMPLES"
+For a given \fIrunfile\fP that contains many one-line commands, the following examples
+are all equivalent, but expects the user to know if/when they can be used
+.nf
+
+     bash runfile                       # serial, on any unix
+     sbatch_nemo.sh runfile             # sbatch (slurm) on HPC
+     parallel -j 4 < runfile            # gnu parallel on multi-core systems
+     
+.nf
+
+.SH "SEE ALSO"
+slurm(1), parallel(1), tricks(8NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+26-aug-2022	Created		PJT
+.fi
