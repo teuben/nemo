@@ -1,13 +1,16 @@
 .TH IMAGE 5NEMO "27 January 2021"
-.SH NAME
+
+.SH "NAME"
 image \- binary format for 2D and 3D image/cube "ccd" files
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 \fB#include <stdinc.h>\fP
 \fB#include <filestruct.h>\fP
 \fB#include <image.h>\fP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIimage\fP implement a rectangular 
 2-dimensional matrix or 3-dimensional cube in a 
 \fIfilestruct(5NEMO)\fP datafile. 
@@ -37,7 +40,11 @@ a compile switch or #define in the image.h module, which must be
 included in every program using images. The default compilation is
 using the FORDEF, i.e. x coordinate running fastest in memory
 (compatibility with existing contour and FITS routines).
-.SH FORMAT
+.PP
+There is some experimental code in image.c to compile with -DUSE_IARRAY
+(Iliffe vectors).
+
+.SH "FORMAT"
 .nf
 typedef struct {
     real   *frame;	 /* pointer to datablock */
@@ -70,7 +77,8 @@ typedef struct {
     string storage;		/* pointer to storage fashion string */
 } image, *imageptr;
 .fi
-.SH ACCESS-MACROS
+
+.SH "ACCESS-MACROS"
 Accessing the individual structure components can be done through some
 pre-define macros (in \fBimage.h\fP):
 .nf
@@ -111,7 +119,8 @@ pre-define macros (in \fBimage.h\fP):
 #define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
 #endif 
 .fi
-.SH ARRAY NOTATION
+
+.SH "ARRAY NOTATION"
 The \fIMapValue\fP and \fICubeValue\fP macros are sometimes cumbersome
 typography, and using two image library routines, 
 \fBmap2_image\fP and \fBmap3_image\fP these can be converted to
@@ -138,8 +147,9 @@ In ForDef mode:
     % tsf cube0
     double MapValues[4][3][2] 0.00000 1.00000 2.00000 3.00000 10.0000 11.0000 ... 123.000
 .fi
-.SH LIMITATIONS
-The current default images (axis=0) have their original at the
+
+.SH "LIMITATIONS"
+The current default images (axis=0) have their origin at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no
 freedom in the location of the reference pixel, it's (0,0).
 For axis=1 (most programs now support it, notably
@@ -147,18 +157,27 @@ For axis=1 (most programs now support it, notably
 will go away, but only simple cartesian coordinate systems are
 supported. There is no astronomical WCS support, other than
 labeling it. Perhaps this will be for a future axis=2.
+
 .SH "FUTURE EXPANSIONS"
 Code could be modified to use dynamem(3NEMO). Allows more flexable
 use by addressing image[i][j] instead of slower (?) macros MapValue(iptr,i,j)
+
 .SH "SEE ALSO"
 snapshot(5NEMO), image(3NEMO), tsf(1NEMO), mdarray(3NEMO)
-.SH AUTHOR
+.nf
+https://en.wikipedia.org/wiki/Row-_and_column-major_order
+https://en.wikipedia.org/wiki/Iliffe_vector
+.fi
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/pjt/image   	image.c image.h image.3 image.5
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i
