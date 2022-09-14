@@ -61,7 +61,7 @@ USR =
 #
 ASCIIFILES = COPYING MANIFEST NEMORC PORTING README VERSION \
 	     src/Makefile \
-	     configure configure.in \
+	     configure configure.ac \
 	     Makefile.in makedefs.in config.h.in \
 	     nemo_start.csh.in nemo_start.sh.in \
              install-sh config.sub config.guess \

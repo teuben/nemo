@@ -30,10 +30,11 @@
 #           8-aug-2022   store a table with time,x1,vx1,x2,vx2
 #          11-aug-2022   using more generic nemopars.rc
 #          20-aug-2022   add --help option in a neat self-documenting way
+#          13-sep-2022   set m16=0 when no stars of G2 near G1
 
 set -x
 set -e
-_version=20-aug-2022
+_version=13-sep-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -214,8 +215,15 @@ v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
 snapshift final2.snap - $x1,0,0 $v1,0,0 mode=sub > final2c.snap
 radprof final2c.snap tab=t > final2c.tab
 tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
-tabspline final2cm.tab    x=1:15:2
-m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
+# If the first radius (star) is not within 16, there's no G2 stars near G1
+r0=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
+if [ $r0 = 1 ]; then
+    set +e
+    tabspline final2cm.tab    x=1:15:2
+    m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
+else
+    m16=0
+fi
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=$(yapp massg2g1)
 echo "m16=$m16" >> $_pars
 echo "m16=$m16"
