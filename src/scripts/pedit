@@ -2,6 +2,8 @@
 #
 #   parameter editor for "keyword    value"
 #                     or "keyword=value"
+#                     or "keyword = value"
+#                     or "value = keyword = comment"
 #   parameter files
 #
 #   Usage:   pedit pfile [options] a=1 f="'a.fits'"
@@ -18,22 +20,26 @@
 #           implement an option (-g ?) to match on something, then replace the
 #              first value. Example taken from Tracy, where he had files like
 #              "1.234  =  RC  = some text about this"
+#           flag cmdline parameters that were not used
 
-version = "17-feb-2021"
+version = "16-sep-2022"
 
 import sys
 
 if len(sys.argv) < 2:
     print("Usage: %s parfile [options] a=1 f=\"'a.fits'\" [> parfile.new]" % sys.argv[0])
     print("Version: %s" % version)
-    print("Options:    -e     use bash style key=val");
-    print("            -o     overwrite input parfile");
+    print("Options:    -e     use bash style key=val")
+    print("            -o     overwrite input parfile")
+    print("            -r     use value = keyword  parfile")
     sys.exit(1)
 
 
 filename = sys.argv[1]
-eqmode   = False
-owmode   = False
+eqmode   = False        # -e mode
+owmode   = False        # -o mode
+vkmode   = False        # -r mode
+ckmode   = True         # hardcoded
 
 kv = {}
 
@@ -43,6 +49,9 @@ for keyval in sys.argv[2:]:
         continue
     if keyval=='-o':
         owmode = True
+        continue
+    if keyval=='-r':
+        vkmode = True
         continue
     
     ieq = keyval.find('=')
@@ -62,12 +71,22 @@ if owmode:
 for line in lines:
     line = line.strip()
     w = line.split()
-    if len(w) > 1:
+    nw = len(w)
+    comment = ""
+    if nw > 1:
+        if vkmode:
+            (w[0],w[2]) = (w[2],w[0])
         if w[0] in kv:
             if eqmode:
-                oline = "%s = %s" % (w[0],kv[w[0]])
+                if vkmode:
+                    comment = ' '.join(w[3:])   # hockunk3d needs the comment
+                    oline = "%s = %s %s" % (kv[w[0]],w[0],comment)
+                else:
+                    oline = "%s = %s %s" % (w[0],kv[w[0]],comment)
             else:
-                oline = "%s   %s" % (w[0],kv[w[0]])
+                oline = "%s   %s %s" % (w[0],kv[w[0]],comment)
+            if ckmode:
+                kv.pop(w[0])
         else:
             oline = line
     else:
@@ -76,6 +95,8 @@ for line in lines:
             if len(w)==2:
                 if w[0] in kv:
                     oline = "%s=%s" % (w[0],kv[w[0]])
+                    if ckmode:
+                        kv.pop(w[0])
                 else:
                     oline = line
             else:
@@ -86,7 +107,12 @@ for line in lines:
         fp.write("%s\n" % oline)
     else:
         print(oline)
-        
 
 if owmode:
     fp.close()
+
+if len(kv) > 0:
+    print("# Warning: unused parameters:", kv)
+        
+
+    
