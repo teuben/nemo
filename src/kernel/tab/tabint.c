@@ -19,7 +19,8 @@ string defv[] = {
   "ycol=2\n         Column with Y coordinate of function",
   "step=\n          Integration step if resampling used (<0 for logarithmic steps)",
   "normalize=f\n    Normalize integral",
-  "VERSION=0.4\n    25-apr-2022 PJT",
+  "cumulative=f\n   Show accumulation of integral",
+  "VERSION=0.5\n    20-sep-2022 PJT",
   NULL,
 
 };
@@ -38,6 +39,7 @@ void nemo_main()
   real x, y, z, s, xold, yold, dx, dz, sum, sum0, *sdat;
   string spectrum = getparam("in");
   bool Qnorm = getbparam("normalize");
+  bool Qcum = getbparam("cumulative");
 
   
   /* read the data */
@@ -119,12 +121,13 @@ void nemo_main()
     for (i=1; i<n; i++) {
       sum += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
       sum0 += (xdat[i]-xdat[i-1]);
+      if (Qcum) printf("%g %g %g\n",xdat[i],sum,sum/sum0);
     }
   }
   dprintf(1,"xmin=%g xmax=%g dx=%g sum=%g sum0=%g nsteps=%d\n",
 	  xmin,xmax,dx,sum,sum0,nsteps);
   if (Qnorm)
     sum /= sum0;
-  printf("%g\n",sum);
+  printf("%s%g\n",  Qcum ? "# " : "",  sum);
 }
 
