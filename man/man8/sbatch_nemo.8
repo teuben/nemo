@@ -1,56 +1,55 @@
-.TH SBATCH_NEMO 8NEMO "28 August 2022"
+.TH SBATCH_NEMO 8NEMO "21 September 2022"
 
 .SH "NAME"
-sbatch_nemo.sh \- helper script to issue sbatch commands in SLURM
+sbatch_nemo.sh \- simple sbatch frontend for NEMO scripts
 
 .SH "SYNOPSIS"
 .PP
-\fBsbatch_nemo.sh \fP options
+.nf
+\fBsbatch_nemo.sh -r runfile\fI args ...\fP
+\fBsbatch_nemo.sh -x scriptfile\fI args ...\fP 
+.fi
 
 .SH "DESCRIPTION"
-\fBsbatch_nemo.sh\fP is useful for certain sbatch operations on HPC systems, if you
-have an existing scripts 
-\fIrunfile\fP, that a simple ascii file where each line has to run through sbatch
-
-.SH "OPTIONS"
-.TP 24
-\fB-r \fP\fIrun_file\fP
-If a text file exists with simple one liner shell commands, the -r flag can be used
-.TP
-\fB-x \fP\fIscript_file [args]\fP
-If a script has multi-line commands, plus knows how to pars command line arguments, the
-\fB-x\fP is appropriate.
-
-.SH "SBATCH DIRECTIVES"
-Each HPC system will have its own specific set of \fIsbatch\fP directives.
-
+\fBsbatch_nemo.sh\fP is a simple frontend that can make it easier to
+submit an existing script, or series of commands from a run-file,
+to a SLURM based system using \fIsbatch(1)\fP.
+.PP
+Some flexibility is allowed by using a local \fBsbatch_nemo.rc\fP parameter file
+in which the following parameters can be modified (the defaults are listed here):
 .nf
 
-#SBATCH -J $runid
-#SBATCH -o slurm-%j-%x.out
-#SBATCH -t 04:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=16G
-#SBATCH --partition toltec-cpu
-#SBATCH --parsable
+#                                        probably don't change this
+runid=$$
+#                                        prefix to run
+prefix="/usr/bin/time xvfb-run -a"
+#                                        sbatch run file
+run=run_$runid.sh
+#                                        max sbatch time 
+tmax=04:00:00
+#                                        max memory used
+mem=16G
 
 .fi
 
+.SH "CAVEAT"
+The current version only allows for single core codes.
+
 .SH "EXAMPLES"
-For a given \fIrunfile\fP that contains many one-line commands, the following examples
-are all equivalent, but expects the user to know if/when they can be used
+
+Here is a single explicit NEMO command
 .nf
 
-     bash runfile                       # serial, on any unix
-     sbatch_nemo.sh runfile             # sbatch (slurm) on HPC
-     parallel -j 4 < runfile            # gnu parallel on multi-core systems
-     
-.nf
+  % sbatch_nemo.sh -x $NEMO/scripts/csh/mkmh97.sh run=run_bench yapp=ps
+  run_472742.sh      - use scancel JOBID to kill this one, JOBID is:
+  Submitted batch job 40887
+
+.fi
+This will have created a file \fBrun_472742.sh\fP that was submitted with \fIsbatch(1)\fP, and
+a logfile \fBslurm-40887-run_472742.sh.out\fP
 
 .SH "SEE ALSO"
-slurm(1), parallel(1), tricks(8NEMO)
+sbatch(1), slurm(1)
 
 .SH "AUTHOR"
 Peter Teuben
@@ -58,5 +57,5 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.5i +5.5i
-26-aug-2022	Created		PJT
+21-sep-2022	man written		PJT
 .fi
