@@ -1,18 +1,22 @@
 #! /bin/bash
 #
 #--HELP
-#  NEMO's simple frontend for sbatch
+#  NEMO's simple frontend for sbatch. Only tested on zaratan.umd.edu
 #
 # Usage
 #     sbatch_nemo.sh -x scriptfile [args]
-#     sbatch_nemo.sh -r runfile.txt
+#     sbatch_nemo.sh -r runfile.txt [args]
+#
+# If a file s
 #
 # SLURM cheat list 
 #     sinfo
 #     sbatch run_12345.sh              (repeat a run)
 #     squeue -u $USER                  (also shows your JOBID's)
 #     scancel JOBID
+#     sbalance
 #
+version=21-sep-2022
 #--HELP
 
 
@@ -52,26 +56,25 @@ done
 
 #
 runid=$$
-
-#                                        version
-version="14-may-2022"
-
 #                                        prefix to run
 prefix="/usr/bin/time xvfb-run -a"
-
 #                                        sbatch run file
 run=run_$runid.sh
-
 #                                        max sbatch time 
 tmax=04:00:00
-
+#                                        max memory used
+mem=16G
 
 
 if [ "$(which sbatch)" != "/usr/bin/sbatch" ]; then
     echo "$0 version=$version"    
     echo "run=$run"
     echo "ERROR:  No sbatch system here on $(hostname)"
-    #exit 0
+    exit 0
+fi
+
+if [ -e sbatch_nemo.rc ]; then
+    source sbatch_nemo.rc
 fi
 
 if [ "$SBATCH_TEMPLATE" != "" ]; then
@@ -88,7 +91,7 @@ cat <<EOF > $run
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
 #SBATCH --cpus-per-task=1
-#SBATCH --mem=16G
+#SBATCH --mem=$mem
 
 $prefix $*
 
