@@ -1,0 +1,17 @@
+
+set -e
+n=100
+
+if [ ! -e p10 ]; then
+   mkplummer p10 10
+fi	     
+
+for i in $(seq $n); do
+   echo iteration compile $i
+   #make clean install > /dev/null 2>&1
+   (cd $NEMO; make build2a build3) > /dev/null 2>&1
+   echo iteration run $i
+   hackcode1 p10 . fcells=4 tstop=0  debug=2
+done
+
+echo Seems ok after n=$i
