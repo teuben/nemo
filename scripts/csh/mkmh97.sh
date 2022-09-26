@@ -34,7 +34,7 @@
 
 set -x
 set -e
-_version=13-sep-2022
+_version=26-sep-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -185,7 +185,7 @@ snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbod
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp init.ccd) headline="Initial Conditions"
-snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel |\
+snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar=m |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final.ccd) headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
