@@ -3,13 +3,16 @@
 #   compute m16 and add it to the "xv" table
 
 # define the run
-run=run701
+run=run0
 
 # take all times that were in the run
 times=$(tabcols $run/$run.xv.tab 1)
-# or cheat for debugging
-#times="20 60 80 100"
-#times="20 60"
+
+#             simple keyword=value command line parser for bash
+for arg in $*; do
+  export $arg
+done
+
 
 new=$run/m16.tab
 rm -f $new
