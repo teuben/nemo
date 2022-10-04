@@ -34,7 +34,7 @@
 
 set -x
 set -e
-_version=26-sep-2022
+_version=28-sep-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -159,7 +159,7 @@ fi
 
 #  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
 
-if [ ! -e $run.xv.tab-bad ]; then
+if [ ! -e $run.xv.tab ]; then
     snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
     snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t > $run.4.g1.tab
     snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >$run.4.g2.tab
