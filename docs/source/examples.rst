@@ -343,6 +343,12 @@ a new name.
    * - yait
      - real
      - Aitoff projection y [-1,1] T.B.A.
+   * - ra
+     - real
+     - Right Ascension, converted from radians to degrees (-x)
+   * - dec
+     - real
+     - Declination, converted from radians to degrees (y)
 
 As usual an example:
 
