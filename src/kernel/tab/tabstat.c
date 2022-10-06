@@ -21,8 +21,8 @@
 #include <table.h>
 #include <mdarray.h>
 
-#define MAXCOL  256
-#define MAXCOORD 16
+#define MAXCOL  10000
+#define MAXCOORD   16
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n            Input file name (table)",
@@ -43,7 +43,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "robust=f\n          robust stats?",
     "qac=f\n             QAC mode listing mean,rms,min,max",
     "label=\n            QAC label",
-    "VERSION=2.2\n	 6-may-2022 PJT",
+    "VERSION=2.2a\n	 5-oct-2022 PJT",
     NULL
 };
 
