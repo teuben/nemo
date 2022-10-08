@@ -11,7 +11,8 @@ string defv[] = {
     "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear, 5=linear)",
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
-    "VERSION=0.6\n 29-apr-2022 PJT",
+    "sep=space\n   column separator (s=space t=tab c=comma v=vertical bar)",
+    "VERSION=0.7\n 5-oct-2022 PJT",
     NULL,
 };
 
@@ -43,6 +44,15 @@ void nemo_main()
   int seed = init_xrandom(getparam("seed"));
   string fmt = getparam("fmt");
   my_real_proc my_random = NULL;
+  string seps = getparam("sep");
+  char sep[8];
+
+  if (seps[0] == 'c') strcpy(sep,",");
+  else if (seps[0] == 's') strcpy(sep," ");
+  else if (seps[0] == 't') strcpy(sep,"\t");
+  else if (seps[0] == 'v') strcpy(sep,"|");
+  else strcpy(sep,seps);
+  
 
   dprintf(1,"seed=%d\n",seed);
 
@@ -72,7 +82,7 @@ void nemo_main()
     // output to file as well
     for (i=0; i<nr; i++) {
       for (j=0; j<nc; j++) {
-	if (j>0) fprintf(ostr, " ");
+	if (j>0) fprintf(ostr, "%s", sep);
 	fprintf(ostr,fmt, my_random(0.0, 1.0));
       }
       fprintf(ostr,"\n");

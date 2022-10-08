@@ -34,7 +34,7 @@
 
 set -x
 set -e
-_version=13-sep-2022
+_version=28-sep-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -159,7 +159,7 @@ fi
 
 #  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
 
-if [ ! -e $run.xv.tab-bad ]; then
+if [ ! -e $run.xv.tab ]; then
     snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
     snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t > $run.4.g1.tab
     snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >$run.4.g2.tab
@@ -185,7 +185,7 @@ snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbod
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp init.ccd) headline="Initial Conditions"
-snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel |\
+snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar=m |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final.ccd) headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
