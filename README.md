@@ -48,6 +48,9 @@ compiler, (t)csh, and git.  For graphics it's probably
 useful to have pgplot, but the default ps driver works
 fine just to get started quickly.
 
+The files in $NEMO/src/scripts/linux describe the actual package
+names for different linux distros that should lead to success.
+
 
 ## Installation
 
