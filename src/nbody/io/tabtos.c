@@ -38,12 +38,15 @@
  *      29-jul-05   V1.4    added auto-incrementing time option (Amsterdam, cafe amaricain) pjt
  *      14-nov-06   V1.5    add first # comments to the NEMO output history.
  *      18-Jan-12   V1.5a   add 'dens' array                           jcl
+ *       3-aug-22   V2.0    adapted for new table I/O system           pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
+#include <extstring.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -69,13 +72,11 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=1.5c\n 16-nov-2017 PJT",
+    "VERSION=2.0a\n 9-oct-2022 PJT",
     NULL,
 };
 
 string usage = "convert ASCII tabular information to snapshot format";
-
-string cvsid = "$Id$";
 
 
 #define MAXLINE  1024
@@ -232,7 +233,7 @@ void check_options(void)
 local bool get_header(void)
 {
     int i, ndim=0;
-    double dval, *dvals;
+    double dval=0, *dvals;
     char line[MAXLINE];
 
     if (feof(instr)) return FALSE;
