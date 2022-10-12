@@ -34,7 +34,7 @@
 
 set -x
 set -e
-_version=28-sep-2022
+_version=11-oct-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -71,8 +71,8 @@ if [ "$1" == "--help" ];then
 fi
 
 #             simple keyword=value command line parser for bash
-for arg in $*; do
-  export $arg
+for arg in "$@"; do
+  export "$arg"
 done
 
 # portable yapp
@@ -186,6 +186,7 @@ snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp init.ccd) headline="Initial Conditions"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar=m |\
+    tee final.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final.ccd) headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
@@ -197,8 +198,9 @@ snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final2.ccd) headline="Galaxy-2 at tstop=$tstop"
 
-#  convert the tee's ccd files to fits
-rm -f final1.fits final2.fits
+#  convert the tee'd ccd files to fits
+rm -f final.fits final1.fits final2.fits
+ccdfits final.ccd  final.fits  radecvel=t
 ccdfits final1.ccd final1.fits radecvel=t
 ccdfits final2.ccd final2.fits radecvel=t
 
