@@ -24,7 +24,7 @@ zeno_pjt:
 
 #  install
 install:
-	(cd zeno; source zeno_start.sh ; make -f Zeno install_all)
+	(source zeno_start.sh ; cd zeno; make -f Zeno install_all)
 
 #  optional install of gsl in $NEMO/opt
 gsl:
