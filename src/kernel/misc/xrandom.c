@@ -253,6 +253,10 @@ double grandom(double mean, double sdev)
 
 }
 
+double erandom(double a)
+{
+  return -a*log( xrandom(0.0,1.0) );
+}
 
 
 
@@ -269,6 +273,7 @@ string defv[] = {
     "n=0\n          Number of random numbers to draw",
     "m=1\n          Number of times to repeat experiment (enforces tab=f)",
     "gauss=f\n      gaussian or uniform noise?",
+    "exp=f\n        exponential instead?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
     "offset=0.0\n   Offset of distribution from 0",
@@ -277,7 +282,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.3\n  24-jan-2018 PJT",
+    "VERSION=2.4\n  22-aug-2022 PJT",
     NULL,
 };
 
@@ -305,6 +310,7 @@ void nemo_main()
   double p[MAXPARS];
   unsigned int up[MAXPARS];
   bool   Qgauss = getbparam("gauss");
+  bool   Qexp = getbparam("exp");
   bool   Qreport = getbparam("report");
   bool   Qtab = getbparam("tab");
   bool   Qbench;
@@ -339,7 +345,13 @@ void nemo_main()
   
   for (k=0; k<m; k++) {
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
-    if (Qgauss) {
+    if (Qexp) {
+      for (j=0; j<n;j++) {
+	for (i=0, s=1.0, y = erandom(1.0); i<5; i++, s *= y)
+	  sum[i] += s;
+	if (Qtab) printf("%g\n",y);
+      }
+    } else if (Qgauss) {
       for (j=0; j<n;j++) {
 	for (i=0, s=1.0, y = grandom(offset,1.0); i<5; i++, s *= y)
 	  sum[i] += s;

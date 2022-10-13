@@ -4,6 +4,7 @@
  *       1-apr-06   0.1 no joke, hotel rembrandt amsterdam,       pjt
  *      12-aug-22   0.2 cleanup, only report pos now (no vel)     pjt
  *      13-aug-22   0.3 more cleanup, still no proper convergence PJT
+ *      14-aug-22   0.4 add pos=                                  pjt
  */
 
 #include <stdinc.h>
@@ -26,9 +27,11 @@ string defv[] = {
     "report=f\n	    report the c.o.m shift",
     "eps=0.025\n    Gravitational softening length",
     "eta=0.001\n    Convergence stop criterion",
-    "fn=0.5\n       Fraction of particles to consider (not used yet)",
+    "fn=0.5\n       Fraction of particles to consider [not implemented]",
     "iter=20\n      Maximum number of iterations to use",
-    "VERSION=0.3\n  13-aug-2022 PJT",
+    "center=0,0,0\n Initial estimate for the center",
+    "one=f\n        Only output COM as a snapshot? [not implemented]",
+    "VERSION=0.4\n  16-aug-2022 PJT",
     NULL,
 };
 
@@ -43,10 +46,11 @@ void nemo_main()
   string times;
   rproc_body weight;
   Body *btab = NULL;
-  int i, j, nbody=0, bits, iter;
-  real tsnap, mass, eps, eta, dr;
-  bool Qreport;
+  int i, j, np=0, nbody=0, bits, iter;
+  real tsnap, eps, eta, dr;
+  bool Qreport, Qone;
   vector n_pos, n_vel, o_pos, o_vel;
+  real pos[NDIM];
   
   instr = stropen(getparam("in"), "r");
   outstr = stropen(getparam("out"), "w");
@@ -55,8 +59,17 @@ void nemo_main()
   eta = getrparam("eta");
   iter = getiparam("iter");
   times = getparam("times");
+  Qone = getbparam("one");
+  if (Qone) dprintf(1,"Output single particle COM snapshot"); 
   Qreport = getbparam("report");
   if (Qreport) dprintf(1,"pos vel of center(s) will be:\n");
+  if (hasvalue("center")) {
+    np = nemoinpr(getparam("center"),pos,NDIM);
+    if (np != NDIM) error("center=%s needs %d values, got %d", getparam("center"), NDIM, np);
+    dprintf(1,"Using center=%g,%g,%g\n", pos[0],pos[1],pos[2]);
+  } else
+    np = 0;
+
   
   get_history(instr);
   put_history(outstr);
@@ -66,6 +79,8 @@ void nemo_main()
     if (bits & PhaseSpaceBit) {
       CLRV(n_pos);
       CLRV(n_vel);
+      if (np > 0)
+	SETV(n_pos, pos);
       for (i=0;i<iter;i++) {
 	snapcenter(btab, nbody, tsnap, weight, eps, n_pos, n_vel, Qreport);
 	if (i>0) {
@@ -105,7 +120,7 @@ void snapcenter(
 {
     int i;
     Body *b;
-    real s, w_i, w_sum,eps2 = eps*eps;
+    real s, w_i, w_sum, eps2 = eps*eps;
     vector tmpv, w_pos, w_vel;
 
     w_sum = 0.0;
@@ -115,17 +130,17 @@ void snapcenter(
 	SUBV(tmpv,o_pos,Pos(b));
 	DOTVP(s,tmpv,tmpv);
 	s += eps2;
-	s = s * sqrt(s);  // @todo   could use another power?
+	s = s * sqrt(s);    // @todo   could use another power?
 
-	w_i = (weight)(b, tsnap, i);
+	w_i = (weight)(b, tsnap, i);    // should be mass
 	if (w_i < 0.0) warning("weight[%d] = %g < 0\n", i, w_i);
 	w_i /= s;
 
 	w_sum += w_i;
 	MULVS(tmpv, Pos(b), w_i);
-	ADDV(w_pos, w_pos, tmpv);
-	MULVS(tmpv, Vel(b), w_i);
-	ADDV(w_vel, w_vel, tmpv);
+	SADDV(w_pos, tmpv);
+	MULVS(tmpv, Vel(b), w_i);  // has no meaning
+	SADDV(w_vel, tmpv);
     }
     if (w_sum == 0.0) error("total weight is zero");
     SDIVVS(w_pos, w_sum);

@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 13-may-2022 PJT
+VERSION = NEMO V4.4 24-aug-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -46,7 +46,7 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 MAKEDIRS = @MAKEDIRS@
 MAKELIBS = @MAKELIBS@
 NEMOTARS = @NEMOTARS@
-#MKNEMOS  = hdf4 hdf5 cfitsio fftw wcslib gsl
+#MKNEMOS  = hdf4 hdf5 cfitsio fftw wcslib gsl - things that can be made via mknemo
 MKNEMOS  = 
 
 ################################################################################
@@ -61,7 +61,7 @@ USR =
 #
 ASCIIFILES = COPYING MANIFEST NEMORC PORTING README VERSION \
 	     src/Makefile \
-	     configure configure.in \
+	     configure configure.ac \
 	     Makefile.in makedefs.in config.h.in \
 	     nemo_start.csh.in nemo_start.sh.in \
              install-sh config.sub config.guess \
@@ -447,7 +447,7 @@ build1:
 	@echo 'Continue with "make build2 (or build2a build2b)"'
 
 build2:
-	(source nemo_start.sh ; $(MAKE) libs)
+	(source nemo_start.sh ; $(MAKE) scripts libs)
 	@echo 'Continue with "make build3"'
 
 build3:
@@ -544,7 +544,7 @@ cleansrc:
 libs:	$(MAKELIBS)
 	@echo Done at `date`
 
-build2a:  corelibs
+build2a:  scripts corelibs
 	@echo Done at `date` - continue with build2b or build3
 
 build2b:  dehnen

@@ -1,0 +1,61 @@
+.TH CCDCLIP 1NEMO "24 August 2022"
+
+.SH "NAME"
+ccdpixelclip \- patch an image above or below a clip level with valid neighbor averages
+
+.SH "SYNOPSIS"
+\fBccdpixelclip\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBccdpixelclip\fP 
+replaces pixels with any 
+component below a specified clip threshold with the mean of its over-threshold 
+nearest neighbors. This can be used to replace JWST blown-out 
+star cores in monochromatic telescope images where the pipeline had
+set them to 0.
+.PP
+The blown-out core is replaced with pixel values just outside the 
+blown-out region. This can be done early in the linear (pre-stretched) 
+state.  It restores dynamic range to that of the camera and recovers 
+the blown-out star cores.
+.PP
+By setting \fBjwst=f\fP the logic can be reversed. Any levels larger than
+\fIclip\fP are then replaced by average neighbor values lower than this
+\fIclip\fP level.
+ 
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input image file. No default.
+.TP 20
+\fBout=\fP
+Output image file. No default.
+.TP
+\fBclip=\fP
+clip threshold below which data are patched [0]
+.TP
+\fBsize=\fP
+size around clip pixel to average around (-size..+size) [1]
+.TP
+\fBmatchclip=t|f\fP
+Also fix data where it matches the clip. [t]
+.TP
+\fBjwst=t|f\fP
+Reverse the logic? Currently hardcoded for the JWST logic. [t]
+
+.SH "CAVEATS"
+Results can depends on the (hardcoded) scan-direction of the image.
+
+
+.SH "SEE ALSO"
+ccdclip(1NEMO), ccdmnmx(1NEMO), ccdmath(1NEMO), image(5NEMO)
+
+.SH "AUTHOR"
+Gerrit Barrere, Joseph DePasquale (PixelClip.js), Peter Teuben (NEMO version)
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+24-aug-2022	V0.2 drafted	PJT
+.fi

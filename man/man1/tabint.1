@@ -1,18 +1,21 @@
 .TH TABINT 1NEMO "25 April 2022"
-.SH NAME
+
+.SH "NAME"
 tabint \- integrate a sorted table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabint\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabint\fP integrates a function Y=F(X) that is defined by a set of (X,Y) points
 obtained via an ASCII table.
 The function can either be resampled using a spline interpolation,
 or directly summed.
 .PP
 See also \fItabhist(1NEMO)\fP with \fBcumul=t\fP for a visual display.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input table file. No default.
@@ -29,23 +32,34 @@ Integration step if resampling used. By default the datapoints themselves
 are used, but by setting an integration \fBstep\fP here, the function
 is resampled using a spline and numerically integrated that way.
 .TP
-\fBnormalize=\fP
+\fBnormalize=t|f\fP
 Normalize integral. If set, the integral is normalized by the integration
 interval. Default: f
-.SH EXAMPLES
+.TP
+\fBcumulative=t|f\fP
+If set, it will show the invidual cumulative integrations instead. Only implemented
+for native steps.
+Default: f
+
+.SH "EXAMPLES"
 .nf
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint -
  0.335
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint - step=0.01
  0.33335
-.SH SEE ALSO
+ 
+.SH "SEE ALSO"
 tabfilter(1NEMO), tabmath(1NEMO), table(5NEMO)
-.SH FILES
+
+.SH "FILES"
 src/kernel/tab
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 13-May-05	V0.1 Created	PJT
+10-sep-2022	V0.5 added cumulative=	PJT
 .fi

@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "13 July 2022"
+.TH XRANDOM 1NEMO "22 August 2022"
 
 .SH "NAME"
 xrandom \- Return seed for random numbers and optionally random numbers
@@ -46,6 +46,11 @@ and the statistics of the mean's from each \fBn\fP sample is shown.
 .TP
 \fBgauss=\fP
 Return gaussian numbers instead of uniform?
+[Default: f]
+.TP
+.TP
+\fBexp=\fP
+Return exponential random numbers instead. Setting this will override the \fBgauss=\fP parameter.
 [Default: f]
 .TP
 \fBreport=\fP
@@ -106,6 +111,7 @@ Skewness and kurtosis: -0.0528344 1.19066
 Median               : 0.000425562
 
 .fi
+
 .SH "GSL"
 If the GNU Scientific Library (GSL) has been enabled during installation, the
 \fBgsl=\fP and \fBpars\fP keyword will appear in the keyword list of xrandom.
@@ -176,4 +182,5 @@ Peter Teuben
 13-apr-97	example
 8-sep-01	V2.0 GSL optionally added	PJT
 9-oct-2012	V2.2 added m=	PJT
+21-aug-2022	V2.4 added exp=	PJT
 .fi

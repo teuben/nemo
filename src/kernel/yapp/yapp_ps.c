@@ -24,7 +24,7 @@
  *         3.4  PJT              1-jun-2022 allow  file.ps/ps  to bypass lazy pgplot users
  */
 
-#define VERSIONID "Version 3.4 1-jun-2022 PJT"
+#define VERSIONID "Version 3.4a 26-aug-2022 PJT"
 
 #include <stdinc.h>
 //#include <yapp.h>
@@ -103,7 +103,7 @@ int plinit(string opt, real x0, real x1, real y0, real y1)
     real dx, dy;
     char *cp = strstr(yapp_string, "/ps");
 
-    if (*cp) {
+    if (cp) {
       warning("Chopping off /ps from %s", yapp_string);
       *cp = 0;
     } 

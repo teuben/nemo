@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "12 August 2022"
+.TH HACKDENS 1NEMO "21 August 2022"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -118,13 +118,22 @@ can also be applied to different models, as expanded in the following table.
     -------------------------------------------------------------
     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299
     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*
-    snapcenter  on phi^3:   0.052*  0.032   0.030   0.026*  0.035
+    snapcenter  on phi:     0.053
+    snapcenter  on phi^2:   0.050*
+    snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035
     snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031
     snapcenterp:            0.080
+    snapmnmx on min phi:    0.122
+    snapmnmx on m 50% phi:  0.058
+    snapmnmx on m 33% phi:  0.063                           0.053
+    snapmnmx on m 25% phi:  0.067
+    rockstart on m:         0.082:
+
+A (*) denotes the best method for that model.
 
 .fi
-Although for a Plummer sphere one method is about twice as better than the worst method,
-this does not apply to other models, plus the phi^3 weighting is not always best.
+Although for a Plummer sphere the best method is more than twice as good than the worst method,
+this does not apply to other models.
 
 .SH "SEE ALSO"
 hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON)

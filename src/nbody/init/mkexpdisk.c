@@ -17,6 +17,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -40,13 +41,11 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "tab=f\n		  table output also? ",
     "zerocm=t\n           center the snapshot?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.3\n	  16-apr-09 PJT",
+    "VERSION=1.3a\n	  9-oct-2022 PJT",
     NULL,
 };
 
 string usage="set up a (bare) exponential disk";
-
-string cvsid="$Id$";
 
 local real alpha, rcut, mdisk, Qtoomre, gammas, z0;
 

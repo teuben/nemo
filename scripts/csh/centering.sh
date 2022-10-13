@@ -12,6 +12,7 @@ nbody=100
 seed=-3
 n=10
 shift=0
+nfrac=3
 model=0     # 0=plummer    via mkommod:  1,3,5 king   -1 plummer -2 devauc
 
 for _a in $*; do
@@ -40,8 +41,19 @@ for i in $(seq $n); do
    c1=$(snapcenter p.dat . report=t)
    c2=$(hackdens p.dat - | snapcenter  - . weight=dens report=t)
    c3=$(hackforce p.dat - fcells=3 | snapcenter - . weight="-phi*phi*phi" report=t)
-   c4=$(hackforce p.dat - fcells=3 | snapcenter - . weight="phi*phi*phi*phi" report=t)
-   #  snapcenterp
+   #c4=$(hackforce p.dat - fcells=3 | snapcenter - . weight="phi*phi*phi*phi" report=t)
+   #c5=$(hackforce p.dat - fcells=3 | snapmnmx - phi min out=- | snapprint -)
+   c6=$(hackforce p.dat - fcells=3 | snapsort - - phi | snapcopy - - "i<$nbody/$nfrac" | snapcenter - . report=t)
+   #c7=$(hackforce p.dat - fcells=3 | snapsort - - phi | snapcopy - - "i<$nbody/$nfrac" | snapcenter - . weight="-phi*phi*phi" report=t)
+   #c8=$(hackforce p.dat - fcells=3 | snapcenter - . weight="phi*phi" report=t)
+   #c9=$(hackforce p.dat - fcells=3 | snapcenter - . weight="-phi" report=t)   
+   echo $c1 $c2 $c3 $c6
    
-   echo $c1 $c2 $c3 $c4
+   #  snapcenterp
+
+   #  c5: center based on the particle with the deepest potential; use snapmnmx | snapprint
+   #  c6: center based on some fraction of particles sorted by potential; use snapsort | snapcopy i < nbody/k or so
+   #  c7: center based on some fraction of particles sorted by potential and weighted by phi*3
+   
+   #echo $c1 $c2 $c3 $c4
 done

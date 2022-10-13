@@ -29,12 +29,16 @@
 #          18-jul-2022   add r-vr evolution plot; new defaults for some parameters
 #           8-aug-2022   store a table with time,x1,vx1,x2,vx2
 #          11-aug-2022   using more generic nemopars.rc
+#          20-aug-2022   add --help option in a neat self-documenting way
+#          13-sep-2022   set m16=0 when no stars of G2 near G1
 
 set -x
 set -e
-_version=11-aug-2022
+_version=11-oct-2022
 _pars=nemopars.rc
 
+#            text between #--HELP and #--HELP is displayed when --help is used
+#--HELP
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
 nbody=1000      # number of bodies in one model
@@ -44,10 +48,10 @@ step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius (not used for v
 r0=10.0         # initial offset position for v0 > 0
-eps=0.05        # softening
+eps=0.05        # gravitational softening
 kmax=6          # integration timestep is 1/2**kmax
-code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2
-seed=0          # random seed
+code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
+seed=0          # random seed (use seed=123 for the benchmark)
 #             parameters for the analysis
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
@@ -56,12 +60,33 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
-yapp=png                           # pick png, or ps, or whichever
+yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
+#
+#--HELP
+
+if [ "$1" == "--help" ];then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
 
 #             simple keyword=value command line parser for bash
-for arg in $*; do
-  export $arg
+for arg in "$@"; do
+  export "$arg"
 done
+
+# portable yapp
+yapp() {
+    if test $yapp = "xs"; then
+        echo $1/$yapp
+    elif test $yapp = "_ps"; then
+        echo $1.ps
+    else
+        echo $1.$yapp/$yapp
+    fi
+}
+
+#  @todo  if an explicit  (not advertised) restart was requested
 
 #             delete the old run, work within the run directory
 if [ -d $run ]; then
@@ -134,15 +159,15 @@ fi
 
 #  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
 
-if [ ! -e $run.xv.tab-bad ]; then
+if [ ! -e $run.xv.tab ]; then
     snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
-    snapcenter $run.4 . "weight=i<$nbody?phi*phi*phi*phi:0" report=t > $run.4.g1.tab
-    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "phi*phi*phi*phi" report=t >$run.4.g2.tab
+    snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t > $run.4.g1.tab
+    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >$run.4.g2.tab
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
     
     #  plot the path in Pos and Vel separately
-    tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=path-pos.$yapp/$yapp
-    tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=path-vel.$yapp/$yapp
+    tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-pos)
+    tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-vel)
 else
     echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
@@ -150,37 +175,39 @@ fi
 # now some analysis will follow
 
 
-tabplot $run.4.etot 1 2  yapp=etot.plot.$yapp/$yapp > /dev/null 2>&1
-tabhist $run.4.etot 2    yapp=etot.hist.$yapp/$yapp > etot.hist.log 2>&1
-snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=init.plot.$yapp/$yapp
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=final.plot.$yapp/$yapp
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=final1.plot.$yapp/$yapp
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=final2.plot.$yapp/$yapp
+tabplot $run.4.etot 1 2  yapp=$(yapp etot.plot) > /dev/null 2>&1
+tabhist $run.4.etot 2    yapp=$(yapp etot.hist) > etot.hist.log 2>&1
+snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=$(yapp init.plot)
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=$(yapp final.plot)
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=$(yapp final1.plot)
+snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=$(yapp final2.plot)
     
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=init.ccd.$yapp/$yapp headline="Initial Conditions"
-snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel |\
+    ccdplot - power=$power yapp=$(yapp init.ccd) headline="Initial Conditions"
+snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar=m |\
+    tee final.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final.ccd.$yapp/$yapp headline="Conditions at tstop=$tstop"
+    ccdplot - power=$power yapp=$(yapp final.ccd) headline="Conditions at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i<$nbody?m:0" |\
     tee final1.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final1.ccd.$yapp/$yapp headline="Galaxy-1 at tstop=$tstop"
+    ccdplot - power=$power yapp=$(yapp final1.ccd) headline="Galaxy-1 at tstop=$tstop"
 snapgrid $run.4 - xrange=-$box:$box yrange=-$box:$box times=$tstop nx=$npixel ny=$npixel evar="i>=$nbody?m:0" |\
     tee final2.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
-    ccdplot - power=$power yapp=final2.ccd.$yapp/$yapp headline="Galaxy-2 at tstop=$tstop"
+    ccdplot - power=$power yapp=$(yapp final2.ccd) headline="Galaxy-2 at tstop=$tstop"
 
-#  convert the tee's ccd files to fits
-rm -f final1.fits final2.fits
+#  convert the tee'd ccd files to fits
+rm -f final.fits final1.fits final2.fits
+ccdfits final.ccd  final.fits  radecvel=t
 ccdfits final1.ccd final1.fits radecvel=t
 ccdfits final2.ccd final2.fits radecvel=t
 
 #  final plotting
-snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=evolution-xy.plot.$yapp/$yapp
-snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=evolution-vr.plot.$yapp/$yapp
-snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=final.3d.plot.$yapp/$yapp
+snapplot  $run.4 xrange=-$box:$box yrange=-$box:$box                   times=$tplot nxy=3,3 yapp=$(yapp evolution-xy.plot)
+snapplot  $run.4 xrange=0:$box yrange=-$vbox:$vbox xvar=r yvar=vr      times=$tplot nxy=3,3 yapp=$(yapp evolution-vr.plot)
+snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$tstop         yapp=$(yapp final.3d.plot)
 
 #  final G2 snapshot for analysis:
 #  center G2 on G1, and plot and show the cumulative mass fraction as function of radius
@@ -190,8 +217,24 @@ v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
 snapshift final2.snap - $x1,0,0 $v1,0,0 mode=sub > final2c.snap
 radprof final2c.snap tab=t > final2c.tab
 tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
-tabspline final2cm.tab    x=1:15:2
-m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
-tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=massg2g1.$yapp/$yapp
+# If the first radius (star) is not within 16, there's no G2 stars near G1
+r0=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
+if [ $r0 = 1 ]; then
+    set +e
+    tabspline final2cm.tab    x=1:15:2
+    m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
+else
+    m16=0
+fi
+tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=$(yapp massg2g1)
 echo "m16=$m16" >> $_pars
 echo "m16=$m16"
+
+#--HELP
+
+#    BENCHMARK:
+#    rm -rf run0
+#    run=run0 seed=123      should give:    m16=0.821802 for phi*phi*phi*phi
+#    run=run0 seed=123      should give:    m16=0.861046 for -phi*phi*phi  (now the default)
+
+#--HELP
