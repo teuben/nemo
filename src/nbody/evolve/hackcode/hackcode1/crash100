@@ -4,6 +4,7 @@
 #  * intel bugs out, AMD seems ok
 #  * just -g compilation triggers bug faster
 #  * extra filler in node(ptr) didn't solve it
+#  ? zeno's treecode has similar header, will it crash too?
 
 set -e
 n=100
@@ -29,7 +30,8 @@ for i in $(seq $n); do
     #make clean install > /dev/null 2>&1
     #
     echo iteration run $i
-    hackcode1 p10 . fcells=4 tstop=0  debug=3
+    #hackcode1 p10 . fcells=4 tstop=0  debug=3
+    hackcode1 tstop=0 debug=3
 done
 
 echo Seems ok after n=$i
