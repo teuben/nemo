@@ -7,7 +7,15 @@
 #  ? zeno's treecode has similar header, will it crash too?
 
 set -e
-n=100
+#set -x
+
+iter=-1
+niter=100
+
+# trap -l
+trap \
+ "{ echo last iter=$iter ; tail -1 iter.log; exit 255; }" \
+ SIGBUS SIGINT SIGTERM ERR EXIT
 
 if [ ! -e p10 ]; then
    mkplummer p10 10
@@ -17,8 +25,10 @@ fi
 make clean install
 echo "###  Test compile ok"
 
-for i in $(seq $n); do
-    echo iteration compile $i
+rm -f iter.log
+
+for iter in $(seq $niter); do
+    echo iteration compile $iter
     # just compile the code locally doesn't seem to trigger the bug,
     # the whole (?) library needs a rebuild
     # 1. => no bug
@@ -29,9 +39,10 @@ for i in $(seq $n); do
     #(cd $NEMO; make build2a) > /dev/null 2>&1
     #make clean install > /dev/null 2>&1
     #
-    echo iteration run $i
+    echo iteration run $iter
+    echo iteration run $iter >> iter.log    
     #hackcode1 p10 . fcells=4 tstop=0  debug=3
-    hackcode1 tstop=0 debug=3
+    hackcode1 nbody=10 fcells=4 tstop=0 debug=3
 done
 
-echo Seems ok after n=$i
+echo Seems ok after iter=$iter
