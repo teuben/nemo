@@ -4,7 +4,7 @@ latest releases.  ZENO is also maintained in github now, and this is
 the preferred way to install it within NEMO. See the Makefile for a
 few targets to help you with the install.
 
-If this all works, and you have the preconditions (gsl, mpicc) you
+If this all works, and you have the preconditions (gsl, mpicc, gl) you
 should be able to do:
 
        	  make zeno
@@ -18,12 +18,15 @@ download my zeno_pjt fork, just in case.
 
 For Ubuntu this is what I needed:
 
-    sudo apt install libgsl-dev openmpi-bin freeglut3-dev
+    sudo apt install libgsl-dev openmpi-bin freeglut3-dev libopenmpi-dev
 
 
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
 and may not be doing exactly the same thing. mkorbit is the major one that
-I know about.
+I know about. Note there is no mkplummer for ZENO.
 
- - Peter Teuben,    dec 2019
+Removing the symlink $NEMO/usr/zeno/zeno will disable the ZENO environment
+on your next NEMO load.
+
+ - Peter Teuben,    oct 2022
