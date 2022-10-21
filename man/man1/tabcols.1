@@ -14,6 +14,9 @@ output and therefore creating a file with one long column from
 a table with mulitple columns.
 .PP
 To select specific lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+.PP
+To align a table by column, use the \fIcolumn(1)\fP program with the \fB-t\fP
+option.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -53,7 +56,7 @@ re-arranges all the numbers in a table in one long column
 .fi
 
 .SH "SEE ALSO"
-tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
+tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1), column(1)
 
 .SH "FILES"
 src/kernel/tab/tabcols.c   source code
