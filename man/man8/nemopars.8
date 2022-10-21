@@ -42,28 +42,6 @@ When many simulations each in their own run directory, a command line
 would be a quick way to assemble a table summarizing these three parameters
 
 .SH "PARAMETERS"
-Except for the first parameter, subsquent parameters must be \fIkey=val\fP, and
-cannot be abbreviated.
-.TP 24
-\fItable_file\fP
-This needs to be the first parameter, without a keyword, and must be
-an existing file (normally an acii table).   No default
-.TP
-\fBplot=\fP\fInumber\fP
-Pick which plot# to run (0 means show all, 1 execute the first, etc.)   [1]
-.TP
-\fBtmp=\fP\fIscript-file\fP
-Name of bash script to run plots, which will be created. [tmp$$]
-.TP
-\fBclean=0|1\fP
-means clean up bash script, 0 means keep it [1]
-.TP
-\fByapp=\fP
-Override any potential \fIyapp(5NEMO)\fP setting from the one used in the script. Unlike in a normal
-NEMO command line parser, here we allow keywords to be given multiple times, the last one set will
-be the one used. [Default: not used]
-
-.SH "CAVEATS"
 This is a simple python script, the CLI does not adhere to the usual \fIgetparam(3NEMO)\fP conventions.
 There is also no error checking on the names of the parameters. A mis-spelled variable or missing parameter
 in the rc file simply results in fewer columns in the output file.
