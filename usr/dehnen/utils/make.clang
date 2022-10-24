@@ -22,15 +22,15 @@ OSTYPE := $(shell uname)
 ostype:
 	@echo "OSTYPE = " $(OSTYPE)
 # set following variable to 1 if gcc > 700
-API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
+#API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
 STDAPI=-std=c++03
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member
+WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 else
-WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member
+WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel

@@ -26,6 +26,7 @@
 #define POT_DEF
 #include <cmath>
 #include <iostream>
+#include <stdinc.h>
 #include <defacc.h> // $NEMOINC/defacc.h
 //=============================================================================#
 // define C++ implementation of potential                                      |
