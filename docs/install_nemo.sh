@@ -24,37 +24,27 @@
 #   opt=0 python=1                           6'15"
 #   opt=1 python=1                          14'00" 
 
-echo "install_nemo.sh:  Version 1.5 -- 9-sep-2021"
+echo "install_nemo.sh:  Version 1.6 -- 25-oct-2022"
 
-opt=0
-nemo=nemo
-branch=master
-python=0
-url=https://github.com/teuben/nemo
-mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4
-falcon=1
-yapp=auto
-check=1
-bench=0
-bench5=1
+#--HELP
+ opt=0                                                # install optional mknemo's
+ nemo=nemo                                            # root directory where NEMO will be installed
+ branch=master                                        # branch used
+ python=0                                             # install anaconda3 python?
+ url=https://github.com/teuben/nemo                   # git repo adres
+ mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4    # optional packages (needs opt=1)
+ falcon=1                                             # install falcON tools?
+ yapp=auto                                            # yapp driver   (auto, ps, pgplot, pglocal, plplot)
+ check=1                                              # "make check" at the end?
+ bench=0                                              # "make bench" at the end?
+ bench5=1                                             # "make bench5" at the end?
+#--HELP
 
-help() {
-    echo This is a simple install script for NEMO
-    echo Optional parameters are key=val, defaults are:
-    echo
-    echo opt=$opt
-    echo nemo=$nemo
-    echo branch=$branch
-    echo python=$python
-    echo url=$url
-    echo mknemos=$mknemos
-    echo falcon=$falcon
-    echo yapp=$yapp
-    echo check=$check
-    echo bench=$bench
-    echo bench5=$bench5
-}
-
+if [ "$1" == "--help" ] || [ "$1" == "-h" ];then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
 
 # indirect git clone via nemo.git for faster testing
 # bootstrap with:    git clone https://github.com/teuben/nemo nemo.git
@@ -67,12 +57,9 @@ else
   echo "      git clone $url nemo.git"
 fi  
 
-for arg in $*; do\
-  if test $arg == --help || test $arg == -h; then
-    help
-    exit 0
-  fi
-  export $arg
+#             simple keyword=value command line parser for bash
+for arg in "$@"; do
+  export "$arg"
 done
 
 echo "Using: "
@@ -131,6 +118,10 @@ fi
 
 if [ $yapp = "auto" ]; then
     with_yapp=""
+elif [ $yapp = "pglocal" ]; then    
+    source nemo_start.sh
+    with_yapp="--with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB"
+    src/scripts/pgplot.install png=1
 else
     with_yapp="--with-yapp=$yapp"
 fi
