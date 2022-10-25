@@ -148,7 +148,11 @@ cd $dir
 if (-d pgplot) then
   echo Assuming your $dir/pgplot is current
 else
-  git clone $git
+  if (! -e pgplot) then
+      git clone $git
+  else
+      (cd pgplot; git pull)
+  endif
   if (0) then
     if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
     if (! -e $file) then
