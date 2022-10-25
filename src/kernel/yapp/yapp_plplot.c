@@ -62,6 +62,9 @@ extern void c_plwidth(int);
 extern void c_plcol0(int);
 extern void c_plcol1(pl_real);
 extern void c_plsori(int);
+extern void c_plsfam(int, int, int);
+extern void c_plvasp(pl_real);
+extern void c_plsvpa(pl_real, pl_real, pl_real, pl_real);
 
 extern void c_plgver(char *);
 extern void c_plgpage(int *,int *,int *,int *,int *,int *);
