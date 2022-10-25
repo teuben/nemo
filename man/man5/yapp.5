@@ -1,7 +1,9 @@
 .TH YAPP 5NEMO "24 December 2019"
-.SH NAME
+
+.SH "NAME"
 yapp \- Yet Another Plotting Package
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fByapp\fP is NEMO's application programming interface \fIdefinition\fP
 for a graphics device.
 .PP
@@ -30,7 +32,8 @@ various devices. As we do not advertise interactive programs
 very much, the keyword 'yapp=' or an environment variable
 \fBYAPP\fP will be used to select a device and it's possible
 options.
-.SH AVAILABLE YAPP VERSIONS
+
+.SH "AVAILABLE YAPP VERSIONS"
 .TP 24
 \fByapp\fP
 wrapper, which attempts (with or without some help) to include the
@@ -148,31 +151,36 @@ any old pgplot xwin_server has been killed:
     xkill pgxwin_server
     xrdb -merge ~/.Xdefaults
 .fi
-.SH PLPLOT
+
+.SH "PLPLOT"
 Like PGPLOT, PLPLOT can also pick different graphics output devices, specified via the usual yapp= system
 keyword, followed by a filename for the non-interactive devices.
 Here are a few, though specifying yapp=help should give the list of currently compiled
 devices.  For a full list see e.g.
 http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html
 .nf
-.ta +1i
-png,FILE.png	PNG
-pdfcairo,FILE.pdf	PDF (cairo)
-pdf,FILE.pdf	PDF (Haru)
-svg,FILE.svg	SVG
+.ta +2.5i
+png,FILE_%n.png		PNG
+pdfcairo,FILE_%n.pdf	PDF (cairo)
+pdf,FILE_%n.pdf		PDF (Haru)
+svg,FILE_%n.svg		SVG
 xwin
 tk
 .fi
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 NEMO/src/kernel/yapp	various yapp_* implementations
 .fi
-.SH AUTHOR
-Joshua E. Barnes, Peter Teuben
-.SH SEE ALSO
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "SEE ALSO"
 catps(1NEMO), catpgps(1NEMO), yapp(3NEMO)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 16-aug-88	document written - some are premature!	PJT
