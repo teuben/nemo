@@ -10,9 +10,11 @@ done
 cd $NEMO/local
 $NEMO/src/scripts/pgplot.install png=1
 
-echo Installed version=$version
+echo "Installed version=$version in $NEMOLIB"
 
 echo pgplot $version `date` >> $NEMO/opt/mknemo.log
 echo "You may need to rerun configure:"
 with_yapp="--with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB"
-echo "./configure $with_yapp"
+echo "  ./configure $with_yapp"
+echo "  source nemo_start.sh"
+echo "  make build"
