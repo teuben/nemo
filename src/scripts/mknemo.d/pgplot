@@ -1,0 +1,18 @@
+#! /bin/bash
+
+#    this is a last resort way to install PGPLOT from source
+version=5.2.2-git
+
+for arg in $*; do
+  export $arg
+done
+
+cd $NEMO/local
+$NEMO/src/scripts/pgplot.install png=1
+
+echo Installed version=$version
+
+echo pgplot $version `date` >> $NEMO/opt/mknemo.log
+echo "You may need to rerun configure:"
+with_yapp="--with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB"
+echo "./configure $with_yapp"
