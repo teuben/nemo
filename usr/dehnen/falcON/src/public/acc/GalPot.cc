@@ -54,6 +54,7 @@
 #include <iostream>
 #include <fstream>
 #define POT_DEF
+#include <stdinc.h>
 #include <defacc.h>
 ////////////////////////////////////////////////////////////////////////////////
 using namespace std;

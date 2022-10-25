@@ -87,7 +87,7 @@ To rebuild NEMO to ensure you have all updates:
 		 
 ## Examples		 
 
-Of if you want to quickly see something to work, here are a few commands to
+If you want to quickly see something work, here are the commands to
 make a classic 1911 Plummer sphere of just 10 particles, print the positions, plot
 the positions and view the contents of its binary file:
 
@@ -95,6 +95,15 @@ the positions and view the contents of its binary file:
          snapprint p10.dat
          snapplot p10.dat
          tsf p10.dat
+
+and here is an example of creating the 4 major data objects on the fly in NEMO
+(table, snapshot, image, orbit), showing off the command line interface and
+use of unix pipes with a dash denoting the piped file:
+
+         tabgen -  | tabplot -
+  	 mkplummer - 100 | snapplot - 
+	 ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
+	 mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
 
 There are more examples of scripts and figures in
 https://teuben.github.io/nemo/examples/ 

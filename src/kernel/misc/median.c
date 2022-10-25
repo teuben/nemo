@@ -7,6 +7,7 @@
  *	20-jun-01	gcc3
  *       6-aug-2012     added median_torben
  *      15-jun-2013     added median_torben_info
+ *      20-oct-2022     warning for small N Q1,Q3
  */
 
 #include <stdinc.h>
@@ -19,7 +20,7 @@ static int *ix=NULL;
 static int last_n = 0;
 static real *last_x = NULL;
 
-extern     void sortptr(real *x, int *ix, int n);
+extern void sortptr(real *x, int *ix, int n);
 
 // sorted array versions 
 
@@ -41,8 +42,10 @@ real smedian_q1(int n, real *x)
     n1=(n+1)/4;
     return x[n1];
   } else {
-    error("smedian_q1: too few points");
-    return INT_MIN;
+    warning("smedian_q1: too few points");
+    n1=(n+1)/4;
+    return x[n1];
+    //return INT_MIN;
   }
     
 
@@ -55,8 +58,11 @@ real smedian_q3(int n, real *x)
     n3=((n+1)*3)/4;
     return x[n3];
   } else {
-    error("smedian_q1: too few points");
-    return INT_MIN;
+    warning("smedian_q3: too few points");
+    n3=((n+1)*3)/4;
+    if (n3>=n) n3=n-1;
+    return x[n3];
+    //return INT_MIN;
   }
 }
 
@@ -107,6 +113,7 @@ real pmedian_q1(int n, real *x)
   }
 
 }
+
 real pmedian_q3(int n, real *x)
 {
   int n3;

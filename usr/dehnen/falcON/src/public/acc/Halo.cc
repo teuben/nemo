@@ -21,6 +21,7 @@
 //                                                                             |
 //-----------------------------------------------------------------------------+
 #define POT_DEF
+#include <stdinc.h>
 #include <defacc.h>
 #include <ctime>
 #include "public/lib/halo.cc"

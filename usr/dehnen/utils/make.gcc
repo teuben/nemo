@@ -51,9 +51,9 @@ endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow -Wno-c++11-compat-deprecated-writable-strings -Wno-redeclared-class-member
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow -Wno-c++11-compat-deprecated-writable-strings -Wno-redeclared-class-member
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
