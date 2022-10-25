@@ -34,6 +34,7 @@
 #include <acc/timer.h>
 #define __NO_AUX_DEFACC
 #include <defacc.h> // $NEMOINC/defacc.h
+#include <stdinc.h>
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   using namespace WDutils;

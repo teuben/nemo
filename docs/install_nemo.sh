@@ -131,6 +131,10 @@ fi
 
 if [ $yapp = "auto" ]; then
     with_yapp=""
+elif [ $yapp = "pglocal" ]; then    
+    source nemo_start.sh
+    with_yapp="--with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB"
+    src/scripts/pgplot.install png=1
 else
     with_yapp="--with-yapp=$yapp"
 fi
