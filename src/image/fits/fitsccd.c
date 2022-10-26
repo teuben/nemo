@@ -69,13 +69,11 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.3b\n	12-nov-2021 PJT",
+    "VERSION=5.3c\n	19-oct-2022 PJT",
     NULL,
 };
 
 string usage = "convert (near)fits files into ccd images";
-
-string cvsid="$Id$";
 
 #define MAXPLANES 2048
 
@@ -88,7 +86,7 @@ int is_feq(int *a, int *b);
 void nemo_main()
 {
     stream outstr;
-    FITS *fitsfile;
+    FITS *fitsfile = NULL;
     int ndim=3, naxis[3], nx, ny, nz, i, j, k, npl, p, planes[MAXPLANES];
     int nbox, box[4], i0, j0;
     int nbval=0;
@@ -278,10 +276,10 @@ FITS *rawopen(string name, string status, int naxis, int *nsize)
 
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
 {
-    int ndim, n;
+    int n;
     double tmpr[3];
     
-    ndim = (Nz(iptr) > 1) ? 3 : 2;
+    //ndim = (Nz(iptr) > 1) ? 3 : 2;
 
     n = nemoinpd(getparam("cdelt"),tmpr,3);
     if (n == 0) {

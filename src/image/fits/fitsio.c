@@ -59,6 +59,7 @@
 /*    11-dec-06 store cvsID in output                                   */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
+/*  - deal with pipes                                                   */
 /************************************************************************/
 
 #include <stdinc.h>
@@ -125,6 +126,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 
   Inputs:
     name        A string giving the name of the file to be opened.
+                @todo allow pipe
     status      Either "old" or "new".
     naxis       The number of dimensions of the image. When opening
                 an "old" file, fitopen makes sure that the number of
@@ -840,6 +842,7 @@ local int fitsrch(FITS *f,string keyword,char *card)
   This searches for a FITS keyword in a file.
   Returns cardnumber index (1 based) :
   -1 if not found, and 1 or higher if found
+  @todo    allow using input pipe
 ----------------------------------------------------------------------*/
 {
   int length,ncard;
