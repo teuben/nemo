@@ -91,16 +91,17 @@ typedef fitsfile FITS;
 #else
 
 typedef struct { 
-    int ncards;		/* is now 1-based !!! */
-    int naxis;
-    int axes[MAXNAX];
-    size_t offset;		/* will/can change during I/O */
-    size_t skip;		/* fixed */
-    int type;
-    int bytepix;
-    int status;		/* STATUS  _OLD, _NEW, _NEW_WRITE   */
+    int ncards;	   	   /* is now 1-based !!! */
+    int naxis;             /* number of dimensions;   <= MAXNAX */
+    int axes[MAXNAX];      /* length per dimension */
+    size_t offset;	   /* will/can change during I/O */
+    size_t skip;	   /* fixed */
+    int type;              /* our data type */
+    int bytepix;           /* 1,2,4,8 */
+    int status;		   /* STATUS  _OLD, _NEW, _NEW_WRITE   */
+    int ispipe;            /* is the stream a pipe ? */
     stream fd;
-    FLOAT bscale,bzero; 
+    FLOAT bscale, bzero;   /* scaling factors for BITPIX > 0 maps */
 } FITS;
 
 #endif
