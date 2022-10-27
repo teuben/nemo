@@ -6,3 +6,5 @@ https://docs.brew.sh/Homebrew-on-Linux
 
 We keep a list of the "formula" that should be installed for NEMO,
 although there are probably a few more than needed
+
+Version 3 of homebrew does not support pgplot, because of the obscure caltech license
