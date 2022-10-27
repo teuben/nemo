@@ -115,7 +115,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=5.0a\n	 9-aug-2022 PJT",
+    "VERSION=5.0b\n	 26-oct-2022 PJT",
     NULL
 };
 
@@ -158,7 +158,7 @@ local real xplot[2],yplot[2];		        /* borders of plot */
 local int    yapp_line[2*MAXCOL];            /* thickness and pattern of line */
 local int    yapp_color[MAXCOL];	      /* color per column */
 local real yapp_point[2*MAXCOL];             /* what sort of point to plot */
-local string errorbars;                       /* x or y or both (xy) */
+//local string errorbars;                       /* x or y or both (xy) */
 local real xcoord[MAXCOORD], ycoord[MAXCOORD];/* coordinate lines */
 local int nxcoord, nycoord;
 local int nxticks, nyticks;                   /*& number of tickmarks */
@@ -207,8 +207,8 @@ void nemo_main(void)
 
 void setparams(void)
 {
-    char *smin,*smax;
-    int  i, j;
+    char *smin;
+    int  i;
    
     input = getparam("in");             /* input table file */
     instr = stropen (input,"r");
@@ -347,7 +347,6 @@ void setparams(void)
 
 void read_data(void)
 {
-    real *coldat[1+MAXCOL];
     int i, j, k, colnr[1+MAXCOL];
 		
     dprintf (2,"Reading datafile, xcol,ycol=%d..,%d,...\n",xcol[0],ycol[0]);
@@ -424,7 +423,7 @@ void plot_data(void)
     real xcur, ycur, edge;
     char c;
     stream cstr;
-    bool first, Qin;
+    bool first;
 
     if (npt<1) {
         warning("Nothing to plot, npt=%d",npt);
@@ -856,7 +855,6 @@ void parse_pairsi(string key, int *pairs, int nycol)
 void parse_pairsr(string key, real *pairs, int nycol)
 {
     int n, i;
-    real r1, r2;
 
     n = nemoinpr(getparam(key),pairs,2*nycol);
     if (n>=0 && n<2) error("%s= needs at least 2 values",key);
