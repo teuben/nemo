@@ -11157,6 +11157,9 @@ $as_echo "$as_me: WARNING: using" >&2;}
 	  fi
 	  YAPP_DEF="/xs"
           ;;
+	giza)
+	  YAPP_DEF="/xw"
+	  YAPP_LIBS="-lgiza"
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $YAPP_NAME" >&5
 $as_echo "$YAPP_NAME" >&6; }
