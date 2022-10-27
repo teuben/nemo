@@ -127,7 +127,7 @@ void setticks(real tiks[], int *ntik, string tikstr);
 #  define FRAMEDELAY 1
 #endif
 
-nemo_main()
+void nemo_main()
 {
     permanent bool first=TRUE;
     int frameno;
