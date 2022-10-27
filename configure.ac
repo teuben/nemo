@@ -979,6 +979,9 @@ case $yapp_name in
 	  fi
 	  YAPP_DEF="/xs"
           ;;
+	giza)
+	  YAPP_DEF="/xw"
+	  YAPP_LIBS="-lgiza"
 esac
 AC_MSG_RESULT($YAPP_NAME)
 
