@@ -14,7 +14,7 @@ string defv[] = {
   "name=***\n     Override for yapp= system keyword (*** = default)",
   "layout=\n      Optional layout file",
   "pgplot=\n      Query PGPLOT devices",
-  "VERSION=0.3\n  25-oct-2022 PJT",
+  "VERSION=0.3a\n 27-oct-2022 PJT",
   NULL,
 };
 
@@ -22,9 +22,7 @@ local plcommand *layout;
 
 void nemo_main()
 {
-    int i, j, ip, np, nc;
-    string name, dumpfile, headline;
-    char label[80];
+    string name;
 
     if (hasvalue("pgplot")) {
       warning("pgplot= not implemented yet");
