@@ -2,6 +2,10 @@
 # command line parameter parsing tools
 #       28-oct-2022   finally a good commandline parser
 #
+#
+# things to think about:
+#   - more pythonic ?     p.get("a")   vs.     p["a"]
+#                         p.has("a")   vs.     "a" in p
 
 import os
 import sys
@@ -13,7 +17,7 @@ class Param(object):
     - only program keywords, though -h and --help give reminders
 
     """
-    def __init__(self, keyval, usage, debug=False):
+    def __init__(self, keyval, usage, debug=0):
         self.keyval = keyval
         self.k   = []
         self.key = {}
@@ -24,7 +28,7 @@ class Param(object):
             self.k.append(kv[0])
             self.key[kv[0]] = kv[1]
             self.help[kv[0]] = w[1].lstrip()
-        if debug: print(self.key)
+        if debug>0: print(self.key)
         self.name = sys.argv[0]
         self.usage = usage
         equals = False
@@ -36,10 +40,14 @@ class Param(object):
                 sys.exit(0)
             if a=='--help':
                 for i in range(len(self.k)):
-                    print("%-10s  %s  (%s)" % (self.k[i], self.key[self.k[i]], self.help[self.k[i]]))
-                sys.exit(0)                
+                    print("%-10s: %s [%s]" % (self.k[i], self.help[self.k[i]], self.key[self.k[i]]))
+                print(self.usage)
+                sys.exit(0)
+            if a=='--version':
+                print("%s  %s  %s"  % (self.name, self.key["VERSION"], self.help["VERSION"]))
+                sys.exit(0)            
             na = na + 1
-            if debug: print("processing ",a)
+            if debug>0: print("processing ",a)
             if a.find('=') < 0:
                 if na > len(self.k):
                     print("too many args")                
@@ -56,6 +64,18 @@ class Param(object):
             
     def get(self, keyword):
         return self.key[keyword]
+
+    def has(self, keyword):
+        if len(self.key[keyword]) > 0:
+            return True
+        return False
+
+    def listf(self, keyword):
+        return [float(x) for x in self.get(keyword).split(',')]
+
+    def listi(self, keyword):
+        return [int(x) for x in self.get(keyword).split(',')]
+
 
 
 if __name__ == "__main__":
