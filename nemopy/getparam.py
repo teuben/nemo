@@ -71,12 +71,20 @@ class Param(object):
             return True
         return False
 
-    def listf(self, keyword):
-        return [float(x) for x in self.get(keyword).split(',')]
+    def list(self, keyword, sep=','):
+        if self.has(keyword):
+            return [x for x in self.get(keyword).split(sep)]
+        return []
 
-    def listi(self, keyword):
-        return [int(x) for x in self.get(keyword).split(',')]
+    def listf(self, keyword, sep=','):
+        if self.has(keyword):
+            return [float(x) for x in self.get(keyword).split(sep)]
+        return []        
 
+    def listi(self, keyword, sep=','):
+        if self.has(keyword):        
+            return [int(x) for x in self.get(keyword).split(sep)]
+        return []        
 
 
 if __name__ == "__main__":
@@ -86,7 +94,9 @@ if __name__ == "__main__":
         "c=3\n       help for c",
     ]
 
-    p = Param(keyval)
+    p = Param(keyval, "a test")
     print('a:',p.get("a"))
     print('b:',p.get("b"))
     print('c:',p.get("c"))
+    print('a_list:',p.list("a"))
+    print('a_listi:',p.listi("a"))    
