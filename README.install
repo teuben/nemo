@@ -1,17 +1,18 @@
 Executive Summary
 =================
 
-Installation of the core version of NEMO is as follows:
+Installation of the core version of NEMO is roughly follows (your yapp selection may vary):
 
       git clone https://github.com/teuben/nemo
       cd nemo
       ./configure --with-yapp=pgplot
-      make build 
+      make build check
       source nemo_start.sh
 
 many more details can be found below. The biggest caveat on this scheme is the use of the pgplot
 driver for the yapp plotting interface. By default it would install a safe but fairly useless
-postscript-only driver.
+postscript-only driver. The pgplot driver is probably the most functional, but We also have (fairly)
+functional plplot and giza drivers. 
 
 The configure line can be complex, for example for a Mac it could be:
 
@@ -35,17 +36,18 @@ C++ and Fortran highly recommended.  You will also need the usual build tools
 C		essential
 C++		highly recommended
 Fortran    	highly recommended
-csh		essential (some scripts are still in csh)
+tcsh		essential (some scripts are still in csh)
 make 		essential
 cmake		highly recommended
-pgplot    	recommended for yapp_pgplot
+pgplot    	recommended for yapp_pgplot (we also have a "mknemo pgplot" builtin option)
 cfitsio		recommended for some tools
 hdf4     	recommended for some tools
 hdf5		recommended for some tools
 netcdf          recommended for some tools
-python3		recommended (a builtin anaconda is one option)
+python3		recommended (a builtin anaconda3 is one option)
 boost           recommended (for uns_projects)
-swig
+swig            recommended (for unsio)
+x11, cairo      needed depending on the selected yapp graphics driver
 
 Depending on your packaging tools (apt, yum, dnf, brew, port, ....) these are hidden under
 various package names
@@ -57,6 +59,10 @@ dpkg -l
 rpm -ql pgplot
 rpm -qf /usr/lib64/libpgplot.so.5.2.2
 rpm -qa
+
+or your system manager has hidden them in a module
+
+module avail
 
 See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/brew (for Mac too)
 
