@@ -15,6 +15,7 @@ class Param(object):
     Simple NEMO style parameter parsing,
     - still limited error checking
     - only program keywords, though -h and --help give reminders
+    - --usage now can print a mini TLDR
 
     """
     def __init__(self, keyval, usage, debug=0):
