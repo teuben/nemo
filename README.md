@@ -84,6 +84,15 @@ To rebuild NEMO to ensure you have all updates:
          cd $NEMO
          git pull
          make rebuild
+
+### python
+
+There is now a small python component to NEMO, in the **nemopy** module.
+
+         cd $NEMO
+         pip install -e .
+
+but this will depend on the details of how your python environment exists (virtual, conda etc.)
 		 
 ## Examples		 
 
