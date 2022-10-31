@@ -42,58 +42,27 @@ m16=0.815569
 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-Except for the first parameter, subsquent parameters must be
-<i>key=val</i>, and cannot be abbreviated. 
-<dl>
-
-<dt><i>table_file</i> </dt>
-<dd>This needs to be the first
-parameter, without a keyword, and must be an existing file (normally an
-acii table).   No default </dd>
-
-<dt><b>plot=</b><i>number</i> </dt>
-<dd>Pick which plot# to run (0 means show
-all, 1 execute the first, etc.)   [1] </dd>
-
-<dt><b>tmp=</b><i>script-file</i> </dt>
-<dd>Name of bash script
-to run plots, which will be created. [tmp$$] </dd>
-
-<dt><b>clean=0|1</b> </dt>
-<dd>means clean up bash
-script, 0 means keep it [1] </dd>
-
-<dt><b>yapp=</b> </dt>
-<dd>Override any potential <a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
- setting
-from the one used in the script. Unlike in a normal NEMO command line parser,
-here we allow keywords to be given multiple times, the last one set will
-be the one used. [Default: not used] 
-<p> </dd>
-</dl>
-
-<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-This is a simple python script,
-the CLI does not adhere to the usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- conventions. There
-is also no error checking on the names of the parameters. A mis-spelled variable
-or missing parameter in the rc file simply results in fewer columns in
-the output file. 
+This is a simple python script, the CLI does not adhere to the
+usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+ conventions. There is also no error checking on the
+names of the parameters. A mis-spelled variable or missing parameter in the
+rc file simply results in fewer columns in the output file. 
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
-, <a href='awk.1.html'>awk(1)</a>
+,
+<a href='awk.1.html'>awk(1)</a>
  
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect5' href='#toc5'>Files</a></h2>
 <br>
 <pre>$NEMO/src/scripts/nemopars<tt> </tt>&nbsp;<tt> </tt>&nbsp;(python) script
 </pre>
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>17-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -105,11 +74,10 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Caveats</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Files</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

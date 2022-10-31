@@ -130,42 +130,50 @@ as expanded in the following table. <br>
     -------------------------------------------------------------
     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299
     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*
-    snapcenter  on phi^3:   0.052*  0.032   0.030   0.026*  0.035
+    snapcenter  on phi:     0.053
+    snapcenter  on phi^2:   0.050*
+    snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035
     snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031
     snapcenterp:            0.080
-</pre>Although for a Plummer sphere one method is about twice as better than
-the worst method, this does not apply to other models, plus the phi^3 weighting
-is not always best. 
+    snapmnmx on min phi:    0.122
+    snapmnmx on m 50% phi:  0.058
+    snapmnmx on m 33% phi:  0.063                           0.053
+    snapmnmx on m 25% phi:  0.067
+    rockstart on m:         0.082:
+A (*) denotes the best method for that model.
+</pre>Although for a Plummer sphere the best method is more than twice as good
+than the worst method, this does not apply to other models. 
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='hackforce.1.html'>hackforce(1NEMO)</a>
-, <a href='snapdens.1.html'>snapdens(1NEMO)</a>
-, <a href='snapcenterp.1.html'>snapcenterp(1NEMO)</a>
 ,
-<a href='density.1falcON.html'>density(1falcON)</a>
+<a href='snapdens.1.html'>snapdens(1NEMO)</a>
+, <a href='snapcenterp.1.html'>snapcenterp(1NEMO)</a>
+, <a href='density.1falcON.html'>density(1falcON)</a>
  <p>
 <a href='https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/'>https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/</a>
- - Casertano
-&amp; Hut (1985) 
+
+- Casertano &amp; Hut (1985) 
 <p> 
 <h2><a name='sect7' href='#toc7'>Ads</a></h2>
 @ads <A HREF=https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C> 1985ApJ...298...80C </A>
 <p> 
 <h2><a name='sect8' href='#toc8'>Bugs</a></h2>
-The local density is calculated
-using (neib-1)th neighbor. Calculation can become very slow if the input
-snapshot is not well-formed. There should exist an option that forces the
-density will be written in the "Aux" slot of the snapshot file. Current
-version does not use standard <i>get_snap/put_snap</i> macros. KEY and AUX will
-be lost from the output snapshot.  
+The local density is
+calculated using (neib-1)th neighbor. Calculation can become very slow if
+the input snapshot is not well-formed. There should exist an option that
+forces the density will be written in the "Aux" slot of the snapshot file.
+Current version does not use standard <i>get_snap/put_snap</i> macros. KEY and
+AUX will be lost from the output snapshot.  
 <p> 
 <h2><a name='sect9' href='#toc9'>Timing</a></h2>
-N=4096, merger remnant <p>
-Presorted
-snapshot: 5 minutes on Sun-3/60, particles are presorted by the distance
-from the center of mass of the system. <p>
-Random snapshot: 60 minutes Sun-3/60
+N=4096, merger remnant
+<p>
+Presorted snapshot: 5 minutes on Sun-3/60, particles are presorted by the
+distance from the center of mass of the system. <p>
+Random snapshot: 60 minutes
 
+<p>Sun-3/60 
 <p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
 Jun Makino 
