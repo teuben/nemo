@@ -2,36 +2,27 @@
  * YAPP: Yet Another Plotting Package.
  *
  *      15-jun-2018:    cloned off yapp_pgplot                PJT
+ *      26-oct-2022:    pure giza now, finally                PJT
  *
- *  Linking will need:    -lgiza -lpgplot
+ *  Linking will need:    -lgiza 
  */
 
 #include <stdinc.h>
 #include <yapp.h>
+#include <giza.h>
 
 extern string yapp_string;	/* a kludge, see: getparam.c */
 extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
 
-/* make COLOR and PG6 (short names only) now the defaults */
-
-#define PG6
-#include "fpgplot.h"
-
-#define COLOR
-
 local real   dxymax;    /* size of user window */
 local int    iterm;     /* terminal number */
 
-#ifdef COLOR
 #define MAXCOLOR 256
 local int ncolors=0;
 local float red[MAXCOLOR];		/* RGB color tables		    */
 local float blue[MAXCOLOR];
 local float green[MAXCOLOR];
 local void cms_rgbsetup();
-#else
-#define MAXCOLOR 0
-#endif
 
 /*
  * PLINIT: initalize the plotting package.
@@ -39,9 +30,11 @@ local void cms_rgbsetup();
 
 int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
-    float width, height, x1,x2,y1,y2, zero, one;
+    double width, height, x1,x2,y1,y2, zero, one;
     int   dummy, nx, ny, ask, units;
-    
+
+    warning("testing YAPP_GIZA");
+
     iterm = 1;
     if (yapp_string == NULL || *yapp_string == 0) {
 	if (pltdev == NULL || *pltdev == 0)
@@ -50,53 +43,34 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 	    yapp_string = pltdev;
     }
 
-    nx = ny = 1;        /* only one window on the page */
-    if (iterm) {
-      iterm = pgbegin_(&dummy,yapp_string, &nx, &ny, strlen(yapp_string))==1;
-    } else {
-      iterm = pgbegin_(&dummy,"?", &nx, &ny, 1)==1;
-    }
-    if (iterm==0) return 0;
-#if 1
-    ask = 0;        /* 'ask' should really be a fortran LOGICAL ! */
-    pgask_(&ask);   /* here we want ask=FALSE */
-#endif
+    //  define a 20x20 cm grid
+    int gid = giza_open_device_size (yapp_string, "?", 200.0, 200.0, GIZA_UNITS_MM);
 
-    units = 2;
-    pgqvsz_(&units, &x1, &x2, &y1, &y2);
-    dprintf(1,"PGQVSZ: X= %g - %g Y= %g - %g\n",x1,x2,y1,y2);
-    if (x2 < x1 || y2 < y1) {
-      warning("yapp_pgplot: (plinit) weird screen layout, or your X server things the DPI is wrong");
-      warning("              check w/ xdpyinfo if your dpi is ok, else use startx -- -dpi 140 or so");
-    }
-    zero = 0.0;  one = 1.0;    /* zero is good for "max size of device" */
-    pgsvp_(&zero,&one,&zero,&one);
-#if 0
+    int interactive = giza_device_has_cursor();
 
-	/* it's better to use the PGPLOT_PS_ * environment variables */
-    /* zero = 7.874;	       /* 20.0 cm is good for most YAPP devices */
-    /* zero = 9.874; */
-#endif    
-    pgpaper_( &zero, &one);    /* set size and make it come out square  */
+    // normally 0..20 and 0..20
+    giza_set_window_equal_scale(xmin, xmax, ymin, ymax);     
+    giza_set_character_height(0.75);
+    // use the whole sheet
+    giza_set_viewport(0.0, 1.0, 0.0, 1.0);
 
-    x1=xmin;  x2=xmax;
-    y1=ymin;  y2=ymax;
-    pgwindow_(&x1,&x2,&y1,&y2);         /* set the viewport */
+    // dummy frame setting
+    giza_print_id();
+    //giza_label("Xlabel", "Ylabel", "PlotTitle");
 
-    if (ymax - ymin < xmax - xmin) {		/* not used for now */
-        dxymax = xmax - xmin;
-        width = 1.0;
-        height = (ymax - ymin) / dxymax;
-    } else {
-        dxymax = ymax - ymin;
-        width = (xmax - xmin) / dxymax;
-        height = 1.0;
-    }
-#if defined(COLOR)
+
+    char font[128];
+    giza_get_font(font, 128);
+    dprintf(0,"font: %s\n", font);
+    strcpy(font,"Sans Serif");
+    strcpy(font,"Arial");
+    giza_set_font(font);
+    giza_set_fill(2);   // 1=solid 2=hollow 3=hatch 4=crosshatch
+   
     cms_rgbsetup();
     plcolor(1);     /* set initial color to the forground color */
-#endif
-return 0;
+    
+    return 0;
 }
 
 /*
@@ -129,15 +103,12 @@ int plltype(int lwid, int lpat)
     int lw, ls;
 
     if (iterm==0) return 0;       /* no graphics output requested */
-
-    if (lwid > 0) {
-        lw = lwid;
-	pgslw_(&lw);			/* set line width */
-    }
-    if (lpat > 0) {
-        ls = lpat;
-	pgsls_(&ls);			/* set line style */
-    }
+    dprintf(1,"ltype: %d %d\n", lwid,lpat);
+    if (lwid > 0)
+      giza_set_line_width(1.0*lwid);      
+    if (lpat > 0)
+      giza_set_line_style(1.0*lpat);
+      
     return 0;
 }
 
@@ -147,36 +118,28 @@ int plltype(int lwid, int lpat)
 
 int plline(real x, real y)
 {
-    float xp,yp;
-
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    xp=x; yp=y;         /* RECALC !! */
-    pgdraw_(&xp,&yp);
+    dprintf(1,"line: %g %g\n", x, y);
+    giza_draw(x, y);
     return 0;
 }
 
 int plmove(real x, real y)
 {
-   float xp,yp;
-
    if (iterm==0) return 0;       /* no graphics output requested */
 
-   xp=x; yp=y;          /* RECALC !! */
-   pgmove_(&xp,&yp);
-    return 0;
+   dprintf(1,"move: %g %g\n", x, y);   
+   giza_move(x,y);
+   return 0;
 }
 
 int plpoint(real x, real y)
 {
-    int n=0,istyle=0;           /* just a dot */
-    int ipoint=-1, npoint=1;
-    float xp,yp;
-    
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    xp=x; yp=y;         /* RECALC !! */
-    pgpoint_(&npoint, &xp, &yp, &ipoint);       /* draw 1 dot */
+    dprintf(1,"point: %g %g\n", x, y);    
+    giza_single_point(x, y, 1);
     return 0;
 }
 
@@ -186,17 +149,23 @@ int plpoint(real x, real y)
 
 int plcircle(real x, real y, real r)
 {
+    if (iterm==0) return 0;       /* no graphics output requested */
+
+#if 1
+    dprintf(1,"circle: %g %g %g\n", x,y,r);
+    giza_circle(x,y,r);
+#else
     int npnts, i;
     real theta;
 
-    if (iterm==0) return 0;       /* no graphics output requested */
-
+    // this also seems broken in giza, but should work
     npnts = MAX(2400 * r / dxymax, 6.0);
     plmove(x + r, y);
     for (i = 1; i <= npnts; i++) {
         theta = TWO_PI * ((real) i) / ((real) npnts);
         plline(x + r * cos(theta), y + r * sin(theta));
     }
+#endif
     return 0;
 }
 
@@ -261,20 +230,11 @@ int pljust(int jus)       /* -1, 0, 1 for left, mid, right just */
 
 int pltext(string msg, real x, real y, real hgt, real ang)
 {
-    real c, s;
-    float dx, dy, xp, yp, ap;
-    float newsize, sl, sh;
-    int   n;
-
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    xp=x; yp=y; ap=ang;         /* copy into local variables */
-
-    newsize = 2 * hgt;          /* pgplot scaling factor */        
-    pgsch_(&newsize);           /* set height of char */
-
-    n = strlen(msg);
-    pgptext_(&xp, &yp, &ap, &fjust, msg, n);        /* plot it */
+    real just = (fjust+1)/2;  //  -1 .. 1  =>  0 .. 1
+    dprintf(1,"text: %g %g %g %g %s\n", x,y,ang,just,msg);
+    giza_ptext(x, y, ang, just, msg);
     return 0;
 }
 
@@ -286,7 +246,7 @@ int plflush()
 { 
     if (iterm==0) return 0;
 
-    pgupdt_();
+    giza_flush_device();
     return 0;
 }
 
@@ -298,7 +258,7 @@ int plframe()
 {
     if (iterm==0) return 0;       /* no graphics output requested */
 
-    pgpage_();
+    giza_change_page();
     return 0;
 }
 
@@ -310,15 +270,9 @@ int plframe()
 
 int plstop()
 {
-    int nvec, bell=0x07;
-
     if (iterm==0) return 0;       /* no graphics output requested */
 
-
-    if (debug_level > 0)
-        pgiden_();    
-
-    pgend_();
+    giza_close_device();
     return 0;
 }
 
@@ -331,7 +285,14 @@ int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
     real dval,dfac;
     
     if (iterm==0) return 0;       /* no graphics output requested */
+    dprintf(0,"matrix: %d %d (gray not working)\n", nx,ny);
 
+    // double affine[6] = {0, 0, 1, 0, 0, 1};
+    // double affine[6] = {1, 0, 0, 1, 0, 0};
+    double affine[4] = {1, 0, 0, 1};
+    giza_render_gray(nx, ny, frame, 0, nx-1, 0, ny-1, fmin, fmax, 0, affine);
+     
+#if 0
     dprintf(1,"PL_MATRIX development version for YAPP_PGPLOT\n");
     if (findex < 0.0) {
         dprintf(0,"Swapping min and max to : %g %g\n",fmax,fmin);
@@ -376,8 +337,9 @@ int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin,
             *dp++ = pow(dval,findex);
 	    }
         }
-    pggray_(data,&nx,&ny,&ix0,&ix1,&iy0,&iy1,&gray1,&gray0,tr);
+    //pggray_(data,&nx,&ny,&ix0,&ix1,&iy0,&iy1,&gray1,&gray0,tr);
     free(data);
+#endif    
     return 0;
 }
 
@@ -408,7 +370,7 @@ int pl_contour(real *frame,int nx,int ny, int nc, real *c)
     cnt = (float *) allocate(sizeof(float)*nc);
     for(ix=0; ix<nc; ix++)
         cnt[ix] = c[ix];
-    pgcont_(data,&nx,&ny,&ix0,&ix1,&iy0,&iy1,cnt,&nc,tr);
+    //pgcont_(data,&nx,&ny,&ix0,&ix1,&iy0,&iy1,cnt,&nc,tr);
     free(data);
     free(cnt);
     return 0;
@@ -417,15 +379,8 @@ int pl_contour(real *frame,int nx,int ny, int nc, real *c)
 
 int pl_screendump(string fname)
 {
-  printf("pl_screendump(%s): Not implemented for yapp_pgplot\n",fname);
+  printf("pl_screendump(%s): Not implemented for yapp_giza\n",fname);
   return 0;
-}
-
-void local bell()
-{
-    int ring=7;
-    putchar(ring);
-    putchar('\n');		/* send a line feed to flush the buffer */
 }
 
 int pl_getpoly(float *x, float *y, int n)
@@ -434,14 +389,12 @@ int pl_getpoly(float *x, float *y, int n)
     float xold,yold, xnew,ynew;
     char ch[10];
 
-    bell();
-
     printf("Define a polygon:\n");
     printf("   LEFT   = define first/next vertex of polygon\n");
     printf("   MIDDLE = delete previous vertex point from polygon\n");
     printf("	    (this option cannot remove already plotted vertex lines\n");
     printf("   RIGHT  = close polygon\n");
-
+#if 0
     nn = 0;                           /* count points in polygon */
     for(;;) {
         k = pgcurse_(&xnew, &ynew, ch, 1);
@@ -486,6 +439,9 @@ int pl_getpoly(float *x, float *y, int n)
         pgdraw_(&x[0],&y[0]);       /* close polygon */
     }
     return nn<3 ? 0 : nn;
+#else
+    return 0;
+#endif
 }
 
 int pl_cursor(real *x, real *y, char *c)
@@ -493,7 +449,7 @@ int pl_cursor(real *x, real *y, char *c)
     char inf[8], ans[8];
     int len, inf_len, ans_len;
     permanent float xsave, ysave;
-                
+#if 0                
     strcpy(inf,"CURSOR");
     inf_len = strlen(inf);
     ans_len = 1;
@@ -502,12 +458,12 @@ int pl_cursor(real *x, real *y, char *c)
     pgcurs_(&xsave, &ysave, c, 1);
     *x = xsave;
     *y = ysave;
+#endif    
     return 1;
 }
 
 
-/*  The rest of this file is for optional color support */
-#if defined(COLOR)
+
 /*
  * CMS_RGBSETUP: default color table initialization.
  */
@@ -517,8 +473,8 @@ int pl_cursor(real *x, real *y, char *c)
 #define GREEN		2
 #define BLUE		3
 #define CYAN 		4	/* (Green + Blue) */	
-#define MAGENTA 	5	/* (Red + Blue) */	
-#define YELLOW		6	/*   (Red + Green) */	
+#define MAGENTA 	5	/* (Red + Blue)   */	
+#define YELLOW		6	/* (Red + Green)  */	
 #define ORANGE		7
 #define GREEN_YELLOW	8
 #define GREEN_CYAN	9
@@ -531,6 +487,7 @@ int pl_cursor(real *x, real *y, char *c)
 
 local void cms_rgbsetup()
 {
+  dprintf(1,"cms_rgbsetup\n");
   ncolors = WHITE+1;
   /* default PGPLOT  colors: although, defined here, plpalette is not called */
   red[BLACK]=0.00;         green[BLACK]=0.00;          blue[BLACK]=0.00;
@@ -549,6 +506,7 @@ local void cms_rgbsetup()
   red[DARK_GRAY] =0.33;    green[DARK_GRAY]=0.33;      blue[DARK_GRAY]=0.33;
   red[LIGHT_GRAY]=0.66;    green[LIGHT_GRAY]=0.66;     blue[LIGHT_GRAY]=0.66;
   red[WHITE]=1.00;         green[WHITE]=1.00;          blue[WHITE]=1.00;
+  // WHITE is the last color
 }
 
 /*
@@ -563,7 +521,9 @@ void plcolor(int color)
 	color = 0;
     else if (color > ncolors - 1)
         color = 1;
-    pgsci_(&color);
+    //pgsci_(&color);
+    dprintf(1,"color: %d/%d\n",color,ncolors);
+    giza_set_colour_index(color);
 }
 
 /*
@@ -582,7 +542,7 @@ int plncolors()
 void plpalette(real *r, real *g, real *b, int nc)
 {
     int i;
-
+#if 0
     if (nc > MAXCOLOR)
 	error("plpalette: cannot define more than %d colors", MAXCOLOR);
     ncolors = nc;
@@ -597,6 +557,7 @@ void plpalette(real *r, real *g, real *b, int nc)
     plcolor(1);			/* reset default color to foreground */
     dprintf(0,"Setting default color to: %g %g %g\n",
             red[1], green[1], blue[1]);
+#endif    
 }
 
 /*
@@ -640,4 +601,3 @@ void pllut(string fname, bool compress)
     plpalette(red, green, blue, ncolors);
 }
 
-#endif

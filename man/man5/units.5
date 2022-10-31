@@ -1,7 +1,9 @@
 .TH UNITS 5NEMO "11 July 2006"
-.SH NAME
+
+.SH "NAME"
 units \- various units used in simulations
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Most NEMO programs use the "virial" (sometimes also called
 "N-Body") units as described by
 Heggie & Mathieu (1986). We also list a few other common
@@ -14,7 +16,8 @@ it saves a precious floating point operation!  However, for sake
 of completeness, here are a few common values of G in some other 'common'
 unit systems, recalling that G*m/(r*v*v) is dimensionless:
 .nf
-.ta +0.7i +0.7i +1i +1i +1i +0.5i +1i
+.ta +0.7i +0.7i +0.7i +0.9i +0.9i +0.7i +0.7i
+
   mass	length	velocity	G       	1/G     	time	"system"
 
      g	cm    	cm/s    	6.6732e-8  	1.49853e+07  	s   	(cgs)
@@ -23,12 +26,13 @@ unit systems, recalling that G*m/(r*v*v) is dimensionless:
      M	pc   	km/s    	.           	2.32385e2     	1e6.yr	(starcluster)
      M	kpc   	km/s    	.          	2.32385e5     	1e9.yr	.
 1e10.M	10.kpc	100.km/s	.             	2.32385       	1e8.yr	(galaxy)
-1e10 M	1.kpc	1.km/s		43007.1		.		1e9.yr	[gadget] 
+1e10.M	1.kpc	1.km/s	43007.1		.	1e9.yr	[gadget] 
 ~2e4.M	kpc   	~990.km/s	1          	1             	1e6.yr	(galaxy)
 1e11.M	10.kpc	~97.8.km/s	4.497       	0.22237       	1e8.yr	(galaxy)
 
 .fi
-.SH UNITS
+
+.SH "UNITS"
 For the purpose of comparison of results obtained by different authors,
 it is very convenient if they share a common system of units. The following
 system of units seems to find quite wide (if not universal) favor. The units
@@ -37,23 +41,35 @@ are such that:
             G = 1
             M = 1
             E = -1/4
+	    
 where G is the gravitational constant, M the total initial mass, and E the
 initial energy. The corresponding units of mass, length and time are then
+
             U_m = M
             U_l = - G M^2 / (4E)
             U_t = G M^2.5 / (-4E)^1.5
 (cf. Henon, 1972).
 
 .fi
-The choice for E looks odd, but corresponds to a virial radius R (harmonic
+The choice for E may look odd, but corresponds to a virial radius R (harmonic
 mean particles separation) equal to unity for a system in virial equilibrium.
-In N-body work a somewhat different, actually N-dependant, system is often
-used (cf. Aarseth 1972), but leads to a crossing time scale proportional
+In N-body work a somewhat different, actually N-dependant, system is sometimes
+still used (cf. Aarseth 1972), but leads to a crossing time scale proportional
 to N^(-1/2). This system is also unsuitable for galaxy simulations, where 
 neither the number of stars nor the number of particles in the simulation
 is relevant to the imortant dynamical timescales. There are of course
 stellar dynamical calculations for which the above described units are
 unsuitable, e.g. unbound systems or cosmological simulations.
+
+.SH "EXAMPLES"
+Given a Plummer sphere in virial units
+.nf
+     mkplummer p100 100 seed=123
+.fi
+we can scale this to .... using
+.nf
+     snapscale p100 p100.gal
+.fi
 .SH "SEE ALSO"
 units(1NEMO), nemoinp(1NEMO)
 .nf
@@ -67,10 +83,13 @@ NPL's United of Measurement webpage: http://www.npl.co.uk/npl/reference/
 AstroTables: http://nedwww.ipac.caltech.edu/level5/tabular_info.html
 .PP
 https://en.wikipedia.org/wiki/N-body_units
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 7-may-96	Created  	PJT
+18-aug-2022	Format/Updates	PJT
 .fi

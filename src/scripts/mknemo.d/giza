@@ -1,6 +1,6 @@
 #! /bin/bash
 #
-#  ubuntu package:   libcairo2-dev
+#  ubuntu packages:   libcairo2-dev  libx11-dev
 #
 #  old one:  wget http://cairographics.org/releases/cairo-1.8.10.tar.gz
 
