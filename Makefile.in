@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 24-aug-2022 PJT
+VERSION = NEMO V4.4 30-oct-2022 PJT
 ################################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -479,6 +479,9 @@ testpython:
 anaconda3:
 	(source nemo_start.sh ; src/scripts/install_anaconda3)
 	(source nemo_start.sh ; pip3 freeze > pip_freeze.log)
+
+nemopy:
+	pip install -e .
 
 
 

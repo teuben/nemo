@@ -112,6 +112,7 @@ if test $python = 1; then
     make build1
     NEMO=`pwd` make python
     source python_start.sh
+    make nemopy
 else
     echo No python install
 fi
