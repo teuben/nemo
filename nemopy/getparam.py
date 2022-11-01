@@ -1,6 +1,6 @@
 #
 # command line parameter parsing tools
-#       28-oct-2022   finally a good commandline parser
+#       28-oct-2022   finally a NEMOish commandline parser
 #
 #
 # things to think about:
@@ -62,6 +62,9 @@ class Param(object):
                 equals = True
                 kv = a.split('=')
                 self.key[kv[0]] = kv[1]
+                if not kv[0] in self.k:
+                    print("bad keyword ",kv[0])
+                    sys.exit(0)
             
     def get(self, keyword):
         return self.key[keyword]
