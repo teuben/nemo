@@ -6,11 +6,11 @@
 #  tabgen tab5 100000 1000
 #  /usr/bin/time tabstat tab5 1:1000 median=f
 #  /usr/bin/time ./tabstat.py tab5
-#
-#     size             C     py
+#                      I/O+cpu    just I/O
+#     size             C     py    C   py
 #  100000 x  100      1.0   4.5
 #   10000 x 1000      1.0   3.3
-#  100000 x 1000     10.6  41.3
+#  100000 x 1000     10.6  41.3   4.9  27.5
 
 import sys
 import numpy as np
@@ -21,6 +21,8 @@ tab = sys.argv[1]
 
 data = np.loadtxt(tab).T
 (nc,nr) = data.shape
+
+# sys.exit(1)
 
 for i in range(nc):
     print(i,data[i].min(), data[i].max(), data[i].sum(),
