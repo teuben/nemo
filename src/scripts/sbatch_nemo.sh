@@ -7,7 +7,9 @@
 #     sbatch_nemo.sh -x scriptfile [args]
 #     sbatch_nemo.sh -r runfile.txt [args]
 #
-# If a file s
+# If a file sbatch_nemo.rc is present in the current directory,
+# it will be sourced to override any parameters used here.
+# A file $SBATCH_TEMPLATE is also allowed after this.
 #
 # SLURM cheat list 
 #     sinfo
@@ -20,6 +22,7 @@ version=21-sep-2022
 #--HELP
 
 
+# give help
 if [ $# -eq 0 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
     awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
@@ -54,7 +57,7 @@ for arg in $*; do
     fi
 done
 
-#
+#                                        probably don't change this
 runid=$$
 #                                        prefix to run
 prefix="/usr/bin/time xvfb-run -a"
