@@ -4,7 +4,13 @@
  *      15-jun-2018:    cloned off yapp_pgplot                PJT
  *      26-oct-2022:    pure giza now, finally                PJT
  *
- *  Linking will need:    -lgiza 
+ *  Linking will need:    -lgiza
+ *  See also "mknemo giza" for a self-built version of giza
+ *
+ *  @todo    placement of numbers at axis tickmarks seems a bit off
+ *           pl_matrix doesn't work
+ *           pl_contour doesn't work (but contour does, so ccdplot is ok)
+ *           builtin circle doesn't work, but giza_circle is ok
  */
 
 #include <stdinc.h>
