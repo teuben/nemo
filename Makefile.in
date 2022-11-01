@@ -90,7 +90,7 @@ NEMO_RC_SH  = $(NEMO)/nemo_local.sh
 
 #  Master site (Maryland) specific, and probably not used anywhere else
 FTPDIR = /n/ftp/pub/nemo/
-SFTPDIR = chara.astro.umd.edu:$(FTPDIR)
+SFTPDIR = ssh.astro.umd.edu:$(FTPDIR)
 WWWDIR = $(NEMO)/local/www
 ################################################################################
 # INSTALL:
@@ -337,6 +337,7 @@ dist:
 	@if [ ! -d $(DIST_DIR) ]; \
 	then \
 	  echo 'TODO for a new DIST: -------------------------------------'; \
+	  echo 'git pull' ;\
 	  echo Date: `date`; \
 	  echo 'Change this date in:  www/nemo/lastftp {FIX THIS}'; \
 	  echo 'Change: docs/whatsnew.html'; \
