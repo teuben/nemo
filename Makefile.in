@@ -342,6 +342,8 @@ dist:
 	  echo 'Change this date in:  www/nemo/lastftp {FIX THIS}'; \
 	  echo 'Change: docs/whatsnew.html'; \
 	  echo 'Change: docs/index.html'; \
+	  echo 'Change: CITATION.cff'; \
+	  echo 'Change: codemeta.json'; \
 	  echo 'And run the following commands: '; \
 	  echo 'make targit'; \
 	  echo 'scp $(DIST_DIR).tar.gz $(SFTPDIR)'; \
