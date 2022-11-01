@@ -18,6 +18,9 @@
  *      9-sep-01    gsl/xrandom
  *     27-mar-03    fixed double/float usage or qromb (it never worked before)
  *
+ * MH97: For Hernquist models, we adopted a kind of 'quiet start' in which particle i is initially placed
+ *       in an arbitrary position on a sphere with a radius corresponding to the Lagrangian mass (i [ 0.5)/N.
+ *       The velocity of each particle was then chosen randomly from the velocity distribution function at that radius.
  */
 
 #include <stdinc.h>
@@ -39,7 +42,7 @@ string  defv[] = {
     "addphi=f\n               Add potentials to snapshot",
     "zerocm=t\n               Centrate snapshot (t/f)?",
     "headline=\n              Optional verbiage",
-    "VERSION=1.1\n            27-mar-03 PJT",
+    "VERSION=1.1a\n           6-jul-2022 PJT",
     NULL,
 };
 
@@ -72,17 +75,18 @@ extern int set_xrandom(int);
 
 void nemo_main()
 {
-	int i, seed, bits;
+	int i, bits;
 	real mg, mh, tsnap;
-	double vx, vy, vz;
+	double vx=0, vy=0, vz=0;
 	double fmax, f0, f1, v2, vmax, vmax2;
         bool Qcenter = getbparam("zerocm");
         bool Qphi = getbparam("addphi");
         stream outstr = stropen(getparam("out"),"w");
+        int seed = init_xrandom(getparam("seed"));	
 
         mu = getdparam("m");
         a = getdparam("a");
-        seed = init_xrandom(getparam("seed"));
+
         nobj = getiparam("nbody");
 	if (nobj%2) 
 	    warning("Total number of particles reset to %d\n",2*((nobj+1)/2));
@@ -90,6 +94,7 @@ void nemo_main()
         if (hasvalue("headline"))
             set_headline(getparam("headline"));
         put_history(outstr);
+	dprintf(1,"seed: %d\n", seed);
 
 	b = a - 1;
 
@@ -291,12 +296,11 @@ double radpsi(double p)
 double radmass(double m)
 {
 	double eps;
-	double rguess, r0, r1;
+	double r0, r1;
 	double dr;
 	double c0, c1, c02, c12; 
 
 	eps = 1.0e-6; dr = 1;
-	rguess = 0;
 	r0 = 0.001;
 	while( dr > eps ) {
 		c0 = 1 + r0; c1 = a + r0;
