@@ -29,7 +29,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2022-01-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2022-09-14) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -106,7 +106,7 @@ if [ $mode == 5 ]; then
     score=$(nemoinp 5000/$cpu_mean)
     ntest=$(cat cpu_usage.log | wc -l)
     echo "NEMOBENCH5 score:   $score" 
-    echo "$score $ntest       $(date)" >> $NEMO/nemobench5.log
+    echo "$score $ntest   $(hostname)    $(date)" >> $NEMO/nemobench5.log
 
     if [ $clean == 1 ]; then
 	echo "Cleaning $tmp (use clean=0 to prevent this)"
