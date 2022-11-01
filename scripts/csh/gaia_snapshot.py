@@ -31,6 +31,7 @@ import argparse
 import numpy as np
 try:
     from astroquery.gaia import Gaia
+    Gaia.login()
 except:
     print("astroquery is not installed in your python. we cannot proceed")
     print("e.g.:     pip3 install astroquery")
