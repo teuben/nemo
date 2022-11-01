@@ -9,7 +9,7 @@ authors:
   given-names: Peter
 title: "NEMO: A Stellar Dynamics Toolbox"
 version: 4.4.0
-date-released: 1-nov-2022
+date-released: 2022-11-01
 identifiers:
  - type: "ascl-id"
    value: "1010.051"
