@@ -1,12 +1,15 @@
-cff-version: 1.1.0
+cff-version: 1.2.0
 message: "Please cite the following works when using this software: https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T"
 authors:
 - family-names: Barnes
   given-names: Joshua
+  orcid: https://orcid.org/0000-0002-3371-1082
 - family-names: Hut
   given-names: Piet
+  orcid:  https://orcid.org/0000-0001-7565-5843
 - family-names: Teuben
   given-names: Peter
+  orcid: https://orcid.org/0000-0003-1774-3436
 title: "NEMO: A Stellar Dynamics Toolbox"
 version: 4.4.0
 date-released: 2022-11-01
