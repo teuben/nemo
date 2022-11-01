@@ -9,14 +9,17 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 image - binary format for 2D and 3D image/cube "ccd" files 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;
 #include &lt;filestruct.h&gt;
 #include &lt;image.h&gt;
 </pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>image</i> implement a rectangular  2-dimensional matrix or 3-dimensional
 cube in a  <a href='filestruct.5.html'><i>filestruct(5NEMO)</i></a>
@@ -40,7 +43,11 @@ The data is stored on disk in Fortran (column-major) or C (row-major) fashion,
 as in <i>Data(row,column,plane)</i> depending on a compile switch or #define in
 the image.h module, which must be included in every program using images.
 The default compilation is using the FORDEF, i.e. x coordinate running fastest
-in memory (compatibility with existing contour and FITS routines). 
+in memory (compatibility with existing contour and FITS routines). <p>
+There
+is some experimental code in image.c to compile with -DUSE_IARRAY (Iliffe
+vectors). 
+<p> 
 <h2><a name='sect3' href='#toc3'>Format</a></h2>
 <br>
 <pre>typedef struct {
@@ -75,9 +82,10 @@ in memory (compatibility with existing contour and FITS routines).
     string storage;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to storage fashion string */
 } image, *imageptr;
 </pre>
+<p> 
 <h2><a name='sect4' href='#toc4'>Access-macros</a></h2>
-Accessing the individual structure components can be done through
-some pre-define macros (in <b>image.h</b>): <br>
+Accessing the individual structure components can be done
+through some pre-define macros (in <b>image.h</b>): <br>
 <pre>#define Frame(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;frame)
 #define Nx(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;nx)
 #define Ny(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;ny)
@@ -114,6 +122,7 @@ some pre-define macros (in <b>image.h</b>): <br>
 #define CubeValue(iptr,ix,iy,iz)<tt> </tt>&nbsp;<tt> </tt>&nbsp;(*( (iptr)-&gt;frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
 #endif 
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Array Notation</a></h2>
 The <i>MapValue</i> and <i>CubeValue</i> macros are sometimes cumbersome
 typography, and using two image library routines,  <b>map2_image</b> and <b>map3_image</b>
@@ -136,8 +145,9 @@ In CDef mode: <br>
     double MapValues[4][3][2] 0.00000 1.00000 2.00000 3.00000 10.0000 11.0000
 ... 123.000
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Limitations</a></h2>
-The current default images (axis=0) have their original at the
+The current default images (axis=0) have their origin at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no freedom in
 the location of the reference pixel, it&rsquo;s (0,0). For axis=1 (most programs
 now support it, notably <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
@@ -146,24 +156,32 @@ now support it, notably <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
 will go away, but only simple cartesian coordinate systems are supported.
 There is no astronomical WCS support, other than labeling it. Perhaps this
 will be for a future axis=2. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Future Expansions</a></h2>
 Code could be modified to
 use <a href='dynamem.3.html'>dynamem(3NEMO)</a>
 . Allows more flexable use by addressing image[i][j] instead
 of slower (?) macros MapValue(iptr,i,j) 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='image.3.html'>image(3NEMO)</a>
 ,
 <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='mdarray.3.html'>mdarray(3NEMO)</a>
- 
+ <br>
+<pre>https://en.wikipedia.org/wiki/Row-_and_column-major_order
+https://en.wikipedia.org/wiki/Iliffe_vector
+</pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>~/src/pjt/image   <tt> </tt>&nbsp;<tt> </tt>&nbsp;image.c image.h image.3 image.5
 </pre>
+<p> 
 <h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>29-Jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Original created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

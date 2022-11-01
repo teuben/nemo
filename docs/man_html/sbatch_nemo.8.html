@@ -11,62 +11,66 @@ HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bi
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-sbatch_nemo.sh - helper script to issue sbatch commands in SLURM 
+sbatch_nemo.sh - simple sbatch frontend for NEMO scripts 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>sbatch_nemo.sh
-</b> options 
-<p> 
-<h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>sbatch_nemo.sh</b> is useful for certain sbatch operations
-on HPC systems, if you have an existing scripts  <i>runfile</i>, that a simple
-
-<p>ascii file where each line has to run through sbatch 
-<p> 
-<h2><a name='sect3' href='#toc3'>Options</a></h2>
-
-<dl>
-
-<dt><b>-r </b><i>run_file</i>
-</dt>
-<dd>If a text file exists with simple one liner shell commands, the -r flag
-can be used </dd>
-
-<dt><b>-x </b><i>script_file [args]</i> </dt>
-<dd>If a script has multi-line commands, plus
-knows how to pars command line arguments, the <b>-x</b> is appropriate. 
-<p> </dd>
-</dl>
-
-<h2><a name='sect4' href='#toc4'>Sbatch
-Directives</a></h2>
-Each HPC system will have its own specific set of <i>sbatch</i> directives.
-
-<p> <br>
-<pre>#SBATCH -J $runid
-#SBATCH -o slurm-%j-%x.out
-#SBATCH -t 04:00
-#SBATCH --nodes=1
-#SBATCH --ntasks=1
-#SBATCH --cpus-per-task=1
-#SBATCH --mem=16G
-#SBATCH --partition toltec-cpu
-#SBATCH --parsable
+<br>
+<pre>sbatch_nemo.sh -r runfile args ...
+sbatch_nemo.sh -x scriptfile args ... 
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
-For a given <i>runfile</i> that contains many one-line commands, the following
-examples are all equivalent, but expects the user to know if/when they
-can be used <br>
-<pre>     bash runfile                       # serial, on any unix
-     sbatch_nemo.sh runfile             # sbatch (slurm) on HPC
-     parallel -j 4 &lt; runfile            # gnu parallel on multi-core systems
-     
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+<b>sbatch_nemo.sh</b> is a simple frontend that can make it easier
+to submit an existing script, or series of commands from a run-file, to
+a SLURM based system using <a href='sbatch.1.html'><i>sbatch(1)</i></a>
+. <p>
+Some flexibility is allowed by using
+a local <b>sbatch_nemo.rc</b> parameter file in which the following parameters
+can be modified (the defaults are listed here): <br>
+<pre>#                                        probably don&rsquo;t change this
+runid=$$
+#                                        prefix to run
+prefix="/usr/bin/time xvfb-run -a"
+#                                        sbatch run file
+run=run_$runid.sh
+#                                        max sbatch time 
+tmax=04:00:00
+#                                        max memory used
+mem=16G
+</pre>
+<p> 
+<h2><a name='sect3' href='#toc3'>Caveat</a></h2>
+The current version only allows for single core codes. 
+<p> 
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
 
-See Alsoslurm(1), parallel(1), tricks(8NEMO)  AuthorPeter Teuben  Update
-History
-26-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<p>
+Here is a single explicit NEMO command <br>
+<pre>  % sbatch_nemo.sh -x $NEMO/scripts/csh/mkmh97.sh run=run_bench yapp=ps
+  run_472742.sh      - use scancel JOBID to kill this one, JOBID is:
+  Submitted batch job 40887
+</pre>This will have created a file <b>run_472742.sh</b> that was submitted with <a href='sbatch.1.html'><i>sbatch(1)</i></a>
+,
+and a logfile <b>slurm-40887-run_472742.sh.out</b> <p>
+This benchmark took: <br>
+<pre>   zaratan<tt> </tt>&nbsp;<tt> </tt>&nbsp;9.50user 0.22system 0:13.38elapsed 72%CPU   (on scratch) [AMD EPYC
+7763]
+   t480<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;13.07user 0.19system 0:13.17elapsed 100%CPU [i7-8550U]
+   dl5420<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.54user 0.09system 0:07.64elapsed 99%CPU [i7-1185G7]
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<a href='sbatch.1.html'>sbatch(1)</a>
+, <a href='slurm.1.html'>slurm(1)</a>
+ 
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<br>
+<pre>21-sep-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;man written<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -75,12 +79,11 @@ History
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Options</a></li>
-<li><a name='toc4' href='#sect4'>Sbatch Directives</a></li>
-<li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Caveat</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>
