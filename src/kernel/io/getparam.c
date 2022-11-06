@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7h 9-may-2022 PJT"
+#define GETPARAM_VERSION_ID  "3.7i 5-nov-2022 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -284,7 +284,7 @@ inline omp_int_t omp_get_max_threads() { return 1;}
 # define MAXBUF 1024
 #endif
 
-#define MAXKEYLEN 16
+#define MAXKEYLEN 64
 
 
 /* keyword is a helper struct containing a keyword. From this the code will
@@ -2303,7 +2303,7 @@ local int set_indexed(string name, int *idx)
 
   dprintf(1,"set_indexed(%s)\n",name);
   *idx = -1;
-  strcpy(key,name);                 /* local copy of the keyword to mess with */
+  strncpy(key,name,MAXKEYLEN);          /* local copy of the keyword to mess with */
   cp = &key[strlen(key)-1];
   if (!isdigit(*cp)) return 0;      /* definitely not indexed */
   while (isdigit(*cp))              /* work backwords through all digits */
