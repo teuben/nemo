@@ -12,14 +12,37 @@
   https://teuben.github.io/nemo/rss.xml
 </link>
 
-
 <item>
 <title>
 nemo_4_4_0
 </title>
 <description>
+ (1-nov-2022)
+ NEMO V4.4.0 was released this weekend at ADASS, where
+ "A Retrospective view of NEMO" was presented.   Nothing
+ really major, the table routines got (and need) more
+ shakedown. There is now a simple nemopy.getparam module
+ for python. pgplot has competation from giza. New scripts
+ nemoplot and nemopars were introduced, helping self-plotting
+ tables and parsing parameters.
+
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_4_0
+</link>
+</item>
+
+
+
+
+<item>
+<title>
+nemo_4_3_1
+</title>
+<description>
  (8-may-2022)
-NEMO V4.4 was released this weekend. Many fixes and
+NEMO V4.3.1 was released this weekend. Many fixes and
 additions, also ensured a mac with the M1 installs. Most
 significant is the new table V2 I/O interface, which
 makes it possible to have ascii tables of arbitrary
@@ -29,7 +52,7 @@ are suspect.
 
 </description>
 <link>
-https://teuben.github.io/nemo/whatsnew.html#4_4_0
+https://teuben.github.io/nemo/whatsnew.html#4_3_1
 </link>
 </item>
 
