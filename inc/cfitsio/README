@@ -1,0 +1,12 @@
+These files were copied from the cfitsio distribution and are only needed for some hacking.
+
+There is a possibility that there is a version skew, as reported when programs use different header files.
+In NEMO we use
+
+#include <cfitsio/fitsio.h>
+  vs.
+#include <fitsio.h>
+
+for normal usage.
+
+After a "mknemo cfitsio" however, they will exist in $NEMO/opt/include
