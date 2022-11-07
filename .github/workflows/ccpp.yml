@@ -7,7 +7,7 @@ jobs:
 
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     # runs-on: ubuntu-latestq
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     
     steps:
     - uses: actions/checkout@v1
