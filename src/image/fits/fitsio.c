@@ -150,9 +150,9 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 
   if (first_message) {
 #ifdef WORDS_BIGENDIAN
-    dprintf(1,"fitopen: Big-endian machine; no need to swap bytes\n");
+    dprintf(1,"fitopen [MIRIAD]: Big-endian machine; no need to swap bytes\n");
 #else
-    dprintf(1,"fitopen: Little-endian machine; swapping bytes for FITSIO\n");
+    dprintf(1,"fitopen [MIRIAD]: Little-endian machine; swapping bytes for FITSIO\n");
 #endif
     first_message = 0;
   }
