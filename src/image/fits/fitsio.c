@@ -506,14 +506,14 @@ void fitwrite(FITS *file, int j, FLOAT *data)
 void fitsetpl(FITS *file, int n, int *nsize)
 /*
   This sets the plane to be accessed in a FITS file which has more than
-  two dimensions.
+  two dimensions (ndim=3,4,...)
 
   Input:
     file        The pointer returned by fitopen.
-    n           This gives the size of the nsize array.
+    n           This gives the size of the nsize array (usually ndim-2)
     nsize       This gives the indices of the higher dimensions of the
                 FITS image. They are zero-relative. nsize[0] gives the
-                index along the 3rd dimension, nsize[1] is the indice along
+                index along the 3rd dimension, nsize[1] is the indix along
                 the 4th dimension, etc.
 ----------------------------------------------------------------------*/
 {
@@ -542,6 +542,7 @@ void fitsetpl(FITS *file, int n, int *nsize)
   	warning("fitsetpl: f->skip is 0, should be multiple of 2880");
   if (offset < 0)
 	error("fitsetpl: bad offset=%ld (%d,...)\n",offset,nsize[0]);
+  dprintf(1,"fitsetpl(%d)  nsize[%d]=%d",n,i,nsize[i]);
   dprintf(4,"fitsetpl: offset=%ld (%d,...)\n",offset,nsize[0]);
 }
 /**********************************************************************/
