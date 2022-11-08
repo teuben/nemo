@@ -51,6 +51,11 @@ fi
 export VDEVICE=X11
 
 if [ 1 ]; then
+  if [ -z "$PKG_CONFIG_PATH" ]; then
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig
+  else
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig:$PKG_CONFIG_PATH
+  fi
   if [ -z "$LD_LIBRARY_PATH" ]; then
     export LD_LIBRARY_PATH=$NEMOLIB:$NEMO/opt/lib
   else
