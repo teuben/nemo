@@ -57,6 +57,7 @@
 /*    14-nov-02 add dummy DATASUM and CHECKSUM                          */
 /*     8-nov-05 also recognize XTENSION = 'IMAGE'                       */
 /*    11-dec-06 store cvsID in output                                   */
+/*     7-nov-22 CFITSIO version in fitsio_nemo.c is now the default     */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /*  - deal with pipes                                                   */
@@ -113,7 +114,6 @@ local int w_bitpix = -32;               /* see: fit_setbitpix()    */
 local FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
 local FLOAT w_bzero = 0.0;              /* see: fit_setscale()     */
 local int blocksize= 2880;	        /* See: fit_setblocksize() */
-local int first_message = 1;		/* See: fitopen */
 
 local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
 local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
@@ -147,7 +147,8 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
   FITS *f;
   int n,t,i,size,bitpix;
   char keyword[9],line[81];
-
+  static int first_message = 1;
+  
   if (first_message) {
 #ifdef WORDS_BIGENDIAN
     dprintf(1,"fitopen [MIRIAD]: Big-endian machine; no need to swap bytes\n");
