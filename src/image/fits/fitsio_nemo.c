@@ -2,18 +2,18 @@
    Wrapper routines for the public routines in the NEMO fitsio.c file,
    which call the CFITSIO library.
    This code also includes the old MIRIAD-style code if CFITSIO is not
-   available
+   made available  (configure --enable-cfitsio)
 
    16-dec-2001     Original version sketched                 Bill Pence
    18-dec-2001     finalized with the new fitsio_nemo.h      Peter Teuben
    19-dec-2001     shift over comment/history cards          PJT
+    7-nov-2022     default is now the CFITSIO interface, if enabled   PJT  (NEMO V4.4.1)
 */
 
 #include <nemo.h>
 #include "fitsio_nemo.h" 
 
-/*#ifndef HAVE_LIBCFITSIO*/
-#if 1
+#ifndef HAVE_LIBCFITSIO
 #include "fitsio.c"       /* old self-coded MIRIAD-style interface */
 #else
 
@@ -21,10 +21,9 @@
  * so as of 14-dec-2006 this version has been hardcoded out
  */
 
-static int w_bitpix = -32;               /* see: fit_setbitpix()    */
-static FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
-static FLOAT w_bzero = 0.0;              /* see: fit_setscale()     */
-static char *cvs_id="$Id$ fitsio_nemo.c";
+static int w_bitpix   = -32;               /* see: fit_setbitpix()    */
+static FLOAT w_bscale = 1.0;               /* see: fit_setscale()     */
+static FLOAT w_bzero  = 0.0;               /* see: fit_setscale()     */
 
 /**********************************************************************/
 FITS *fitopen (char *name, char *status, int naxis, int *nsize)
@@ -53,8 +52,12 @@ FITS *fitopen (char *name, char *status, int naxis, int *nsize)
     FITS *fptr;
     int tstatus = 0, ndims, hdutype, ii;
     long naxes[MAXNAX];
-    
-    nemo_dprintf(1,"[fitopen: using CFITSIO wrapper routine]\n");
+    static int first_message = 1;
+
+    if (first_message) {
+      nemo_dprintf(1,"fitopen [CFITSIO]\n");
+      first_message = 0;
+    }
 
     if (!strncmp(status, "old", 3) || *status == 'r') { 
          /* open existing image */
