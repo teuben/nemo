@@ -13,7 +13,8 @@
 #include <nemo.h>
 #include "fitsio_nemo.h" 
 
-#ifndef HAVE_LIBCFITSIO
+//#ifndef HAVE_LIBCFITSIO
+#if 1
 #include "fitsio.c"       /* old self-coded MIRIAD-style interface */
 #else
 
@@ -55,8 +56,8 @@ FITS *fitopen (char *name, char *status, int naxis, int *nsize)
     static int first_message = 1;
 
     if (first_message) {
-      nemo_dprintf(1,"fitopen [CFITSIO]\n");
-      first_message = 0;
+        nemo_dprintf(1,"fitopen [CFITSIO]\n");
+        first_message = 0;
     }
 
     if (!strncmp(status, "old", 3) || *status == 'r') { 
@@ -86,7 +87,7 @@ FITS *fitopen (char *name, char *status, int naxis, int *nsize)
         /* create new FITS image file */
         fptr = 0;
         if (fits_create_file(&fptr, name, &tstatus) )
-            return(0);
+            return 0;
 
         for (ii = 0; ii < naxis; ii++) 
             naxes[ii] = nsize[ii];   /* copy from int to long array */
@@ -96,10 +97,10 @@ FITS *fitopen (char *name, char *status, int naxis, int *nsize)
 
     if (tstatus)  {
         fits_close_file(fptr, &tstatus);
-        return 0;      /* error occured */
+        return 0;        /* error occured */
     }
     else
-         return(fptr);    /* OK */
+        return fptr;    /* OK */
 }
 
 /**********************************************************************/
@@ -146,8 +147,7 @@ void fitread(FITS *file, int j, FLOAT *data)
     fpixel[0] = 1;
     fpixel[1] = j+1;
 
-    fits_read_pix(file, TFLOAT, fpixel, nelements, NULL, data, 
-                   NULL, &status);
+    fits_read_pix(file, TFLOAT, fpixel, nelements, NULL, data, NULL, &status);
     return;
 }
 /**********************************************************************/
