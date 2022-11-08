@@ -20,6 +20,8 @@
 #define _fitsio_nemo_h
 
 /*  NOTE:   this also assumed cfitsio was installed in its own directory/namespace ... */
+/*          there is a backup in $NEMO/inc/cfitsio but 'mknemo cfitsio' also installs  */
+/*          it in $NEMO/opt/include/cfitsio                                            */
 #ifdef HAVE_LIBCFITSIO
 #include <cfitsio/fitsio.h>
 #endif
