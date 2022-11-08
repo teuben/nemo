@@ -2,5 +2,9 @@
 #
 import os, sys
 
-import pynbody
+try:
+    import pynbody
+except:
+    print("Failed loading pynbody")
+    sys.exit(1)
 

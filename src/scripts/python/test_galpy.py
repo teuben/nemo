@@ -2,5 +2,8 @@
 #
 import os, sys
 
-import galpy
-
+try:
+    import galpy
+except:
+    print("Failed loading galpy")
+    sys.exit(1)

@@ -2,5 +2,9 @@
 #
 import os, sys
 
-import yt
+try:
+    import yt
+except:
+    print("Failed loading yt")
+    sys.exit(1)
 
