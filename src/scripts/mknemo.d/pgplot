@@ -1,6 +1,8 @@
 #! /bin/bash
-
+#
 #    this is a last resort way to install PGPLOT from source
+#    See also the yapp=pglocal option in $NEMO/doc/install_nemo.sh
+#
 version=5.2.2-git
 
 for arg in $*; do
