@@ -173,7 +173,10 @@ acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_sph) $(acc_walter) $(acc_pjm)
 ifdef DPROPER
 man		:
 else
-man		:
+man	        :
+			@echo "no man page sync to NEMO, assuming NEMO has the latest"
+			@echo "use 'make man_orig' to force, but check git logs"
+man_orig		:
 			- cp -p man/man1/*.? $(NEMO)/man/man1
 			- cp -p man/man3/*.? $(NEMO)/man/man3
 			- cp -p man/man5/*.? $(NEMO)/man/man5

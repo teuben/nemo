@@ -460,8 +460,10 @@ build3:
 
 #       Advanced build examples that require opt=1 during the build.
 #       normally not needed
-BINS4 = tsf tabhist tsd orboom sdinfo lmtinfo
+BINS4   = tsf tabhist tsd orboom sdinfo lmtinfo
+BINS4H  = nemo yapp hdf4 hdf5 cfitsio netcdf
 build4:
+	@echo "This will test linked with: $(BINS4H)"
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 

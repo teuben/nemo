@@ -37,6 +37,7 @@ ccdplot: ccd.in
 ccdstat: ccd.in
 	@echo Running $@
 	$(EXEC) ccdstat ccd.in ; nemo.coverage ccdstat.c
+	$(EXEC) ccdstat ccd.in qac=t ; nemo.coverage ccdstat.c	
 
 ccdsub: ccd.in
 	@echo Running $@

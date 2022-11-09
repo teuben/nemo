@@ -2,7 +2,12 @@
 #
 import os, sys
 
-from nemopy import getparam
+try:
+    from nemopy import getparam
+except:
+    print("Failed loading nemopy")
+    sys.exit(1)
+    
 
 keydef = [
     "a=1\n         the a parameter",

@@ -103,6 +103,11 @@ setenv VDEVICE X11
 #  Change 0 -> 1 if you need this
 
 if (1) then
+  if ($?PKG_CONFIG_PATH) then
+    setenv PKG_CONFIG_PATH ${NEMO}/opt/lib/pkgconfig:${PKG_CONFIG_PATH}
+  else
+    setenv PKG_CONFIG_PATH ${NEMO}/opt/lib/pkgconfig
+  endif
 
   if ($?LD_LIBRARY_PATH) then
     setenv LD_LIBRARY_PATH ${NEMOLIB}:${NEMO}/opt/lib:${LD_LIBRARY_PATH}
