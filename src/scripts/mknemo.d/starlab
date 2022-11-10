@@ -1,0 +1,41 @@
+#! /bin/bash
+#
+#  Install starlab within NEMO
+#
+#  10-nov-2022  drafted
+#
+
+# if ($?NEMO == 0) set NEMO=`pwd`
+
+version=n/a
+wget=wgetc
+git=1
+branch=main
+url=https://github.com/
+url=https://github.com/teuben/Starlab
+
+for arg in $*; do
+  export $arg
+done
+
+    
+cd $NEMO/local
+
+
+if [ $git == 1 ]; then
+    git clone $url starlab
+    version=git
+else
+    echo there is no versioned starlab
+    exit 0
+fi    
+
+cd Starlab
+
+autoreconf -i -f
+./configure --prefix=$NEMO/opt
+make -i
+make install 
+
+echo starlab $version  `date` >> $NEMO/opt/mknemo.log
+
