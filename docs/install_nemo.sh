@@ -28,7 +28,7 @@ echo "install_nemo.sh:  Version 1.6 -- 25-oct-2022"
 
 #--HELP
  opt=0                                                # install optional mknemo's
- nemo=nemo                                            # root directory where NEMO will be installed
+ nemo=nemo                                            # root directory where NEMO will be installed (. = here)
  branch=master                                        # branch used
  python=0                                             # install anaconda3 python?
  url=https://github.com/teuben/nemo                   # git repo adres
@@ -76,19 +76,26 @@ echo "  bench=$bench"
 echo "  bench5=$bench5"
 echo ""
 
-# safety
-if [ -d $nemo ]; then
-    echo Sleep 5 seconds before removing nemo=$nemo ....
-    sleep 5
+if [ "$nemo" == "." ]; then
+    # use local directory, but one has to be in the NEMO root directory
+    if [ ! -e nemo_start.sh.in ]; then
+	echo No nemo_start.sh.in here
+	exit 0
+    fi
+    nemo=$(pwd)
 else
-    echo Installing NEMO in a new directory $nemo
-fi    
-
-date0=$(date)
-
-rm -rf $nemo
-git clone $url $nemo
-cd $nemo
+    # safety
+    if [ -d $nemo ]; then
+	echo Sleep 5 seconds before removing nemo=$nemo ....
+	sleep 5
+    else
+	echo Installing NEMO in a new directory $nemo
+    fi    
+    date0=$(date)
+    rm -rf $nemo
+    git clone $url $nemo
+    cd $nemo
+fi
 git checkout $branch
 ./configure 
 
