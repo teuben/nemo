@@ -6,6 +6,7 @@
 #
 #  24-nov-2020  drafted
 #  29-apr-2022  modified URL since 2021-08-18 for 4.8.1
+#   9-nov-2022  opt=1 is needed when HDF5 was locally built
 #
 
 # if ($?NEMO == 0) set NEMO=`pwd`
@@ -13,6 +14,7 @@
 version=4.8.1
 wget=wgetc
 git=0
+opt=1
 url=https://downloads.unidata.ucar.edu/netcdf-c/
 
 for arg in $*; do
@@ -38,10 +40,14 @@ if [[ $version == git ]]; then
     exit 0
 fi
 
-#   compile without HDF5 (not recommended)
-./configure --prefix=$NEMO/opt --disable-netcdf-4
-#   or with HDF5
-# ./configure --prefix=$NEMO/opt 
+
+if [ $opt == 1 ]; then
+    #   with HDF5
+    CPPFLAGS="-I$NEMO/opt/include"  LDFLAGS="-L$NEMO/opt/lib" ./configure --prefix=$NEMO/opt
+else
+    #   compile without HDF5 (not recommended)
+    ./configure --prefix=$NEMO/opt --disable-hdf5
+fi
 
 make clean
 make -j

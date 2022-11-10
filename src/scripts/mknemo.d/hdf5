@@ -11,8 +11,9 @@
 
 
 version=1.10.7      # 11-sep-2020
+version=1.12.1      # 06-jul-2021 <toltec default>
 version=1.13.0      # 01-dec-2021
-version=1.13.1      # 02-mar-2022
+version=1.13.3
 url=https://github.com/HDFGroup/hdf5
 
 wget=wgetc
@@ -29,7 +30,7 @@ $wget https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-$mversion/hdf5-$versio
 tar zxf hdf5-$version.tar.gz
 cd hdf5-$version
 
-./configure --prefix=$NEMO/opt
+./configure --prefix=$NEMO/opt --enable-build-mode=production
 make -j
 make install 
 
