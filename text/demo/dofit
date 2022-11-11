@@ -1,0 +1,29 @@
+#! /bin/csh -f
+#
+#
+#nemoinp 1:100 | tabmath - - "%1+rang(0,10),ranu(1,2)" | tablsqfit - 1 2 3
+#
+#>  OFILE   out=
+#>  SCALE   n=100		    3:1000:1
+#>  SCALE   sigma=10		    0:1000:0.1
+#>  SCALE   weight=2                1:100:0.1
+#>  SCALE   seed=0                  0:10000:1
+#>  RADIO   yerror=y		    y,n
+#
+# Here is an example of automatically setting default:
+awk '{if ($1=="#>") print "set",$3}' $0 > $0.keys; source $0.keys
+foreach a ($*)
+  set $a
+end
+
+if (X$out == X) set out=tmp.$$
+
+nemoinp 1:$n | tabmath - $out "%1+rang(0,$sigma),ranu(1,$weight)"  seed=$seed
+tabplot $out >& /dev/null
+if ($yerror == y) then
+  tablsqfit $out 1 2 3
+else
+  tablsqfit $out 1 2
+endif
+
+if (-e tmp.$$) rm -f tmp.$$

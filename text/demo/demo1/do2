@@ -1,0 +1,47 @@
+#! /bin/csh -f
+#
+#  for a selected run and time ranges, study the rotation of the 'bar'
+#  It returns a small ascii table with times, Phi-X, Phi-Y and the
+#  Moments of Inertia along X, Y and Z of the rectified object
+#
+
+#                      defaults for script
+set run=run1
+set times=5:10:0.5
+set hackdens=0
+
+#                      command line parser
+foreach a ($*)
+  set $a
+end
+
+if ($hackdens) then
+  set weight=("phi*phi")
+else
+  set weight=("-phi*phi*phi")
+endif
+
+#                      loop over all times requested
+foreach t (`nemoinp $times`)
+ rm -f $run.snaptmp
+ if ($hackdens) then
+    snaptrim $run.02 - times=$t debug=-1 |\
+        hackdens - $run.snaptmp write_at_phi=t
+    snaprect $run.snaptmp . weight="$weight" > $run.tmp
+ else
+    snaptrim $run.02 $run.snaptmp times=$t debug=-1 
+    snaprect $run.snaptmp . weight="$weight" > $run.tmp
+ endif
+ set ex=(`grep e_x $run.tmp | awk -F: '{print $2}'`) 
+ set ey=(`grep e_y $run.tmp | awk -F: '{print $2}'`) 
+ if ($#ex != 6) continue
+
+ snapinert $run.snaptmp - weight="$weight" tab=t > $run.tmp
+ set si=(`cat $run.tmp`)
+
+ echo $t $ex[6] $ey[6] $si[11] $si[12] $si[13]
+end
+
+#                      clean up the mess
+rm -f $run.tmp $run.snaptmp
+

@@ -1,0 +1,232 @@
+#! /bin/csh -f
+#
+#  Demo1 : create an exponential disk, embed it in some halo and integrate 
+#          then extract a given time, freeze potential, and check orbits
+#          also project and make velocity field, and determine rotation curve
+#          and compare model with model-model
+#
+#  jun-2001    Original version (before gyrfalcON was called YANC)
+#  jan-2014    Fixed for changed options over the past 12+ years...
+
+#  parameters to be changed by the user
+set run=run1               # identification, and basename for all files
+set nbody=1000             # number of bodies
+set Qtoomre=1.2            # 'Q' for the disk 
+set potname=plummer        ## not used yet (for external halo)
+set potpars=0,0            ## not used yet
+set xymovie=0              # show a movie?
+set orbit=                 # orbit to be selected in xymovie
+set pa=30                  # PA of disk on sky (E through N)
+set inc=60                 # INC of disk
+set phi=30                 # angle of bar with major axis of galaxy (on sky)
+set beam=0.1               # FWHM of beam
+set range=2                # gridding from -range:range
+set nsize=64               # number of pixels in gridding (px=py=2*range/nx)
+set radii=5:120:5          # set some rings for rotcur
+set yanc=0                 # use YANC or NEMO's default integrator (hackcode1)
+
+set goto=start
+
+#  some other parameters, probably not useful for the user at an initial stage
+set freq=32                # integration frequency (i.e. 1/timestep)
+set hmin=6                 # integration step for YANC
+set freqout=2              # output frequency (i.e. 1/dumptimes)
+set tstop=10               # total integration time
+set tview=10               # viewing time for velocity field analysis
+set eps=0.05               # softening length
+set kernel=20              # softening kernel (only used in YANC)
+set tol=0.7                # opening angle for treecode
+set tstart=0               # starting time for analysis of pattern speed
+set seed=123               # random seed for sprinkling particles
+set rcut=2                 # cutoff radius of exponential disk
+set hackdens=1             # override potentials with hackdens based densities
+
+#  parse the command line arguments (they will then override the above defaults)
+
+foreach a ($*)
+  set $a
+end
+
+
+#  derive some parameters that appear common or logically belong together
+
+set pot_pars=(potname=$potname potpars=$potpars)
+set tree_pars=(eps=$eps tol=$tol)
+set grid_pars=(xrange=-${range}:${range} yrange=-${range}:${range} nx=$nsize ny=$nsize)
+set cell=`nemoinp "2*$range/$nsize*60"`
+set step=`nemoinp 1/$freqout`
+
+#  keep a log, incase we call this routine multiple times
+echo `date` :: $* >> $run.history
+
+goto $goto
+
+# ================================================================================ START
+start:
+
+rm -f $run.* >& /dev/null
+
+
+echo Creating exponential disk with $nbody particles
+mkexpdisk out=$run.01 nbody=$nbody Qtoomre=$Qtoomre seed=$seed rcut=$rcut tab=t > $run.tab
+echo "Integrating to time=$tstop ..."
+if ($yanc) then
+  echo "Using YANC with $tree_pars kernel=$kernel hmin=$hmin"
+  set y=$run.01y
+  echo "## Created for YANC by NEMO demo1 script"  > $y
+  echo "#  theta $tol"    >> $y
+  echo "#  eps $eps"      >> $y
+  echo "#  time 0.0"      >> $y
+  echo "#  kernel $kernel">> $y
+  echo "#  hmin $hmin"    >> $y
+  echo "#  Nref 8"        >> $y
+  echo "#  N  $nbody"     >> $y
+  echo "#  give_pot 1"    >> $y
+  echo "#  give_rho 1"    >> $y
+  echo "#  data_format 0" >> $y
+  echo "#  start_data"    >> $y
+  snapprint $run.01 m,x,y,z,vx,vy,vz >> $y
+  echo YANC $y $y.out $tstop $step 0
+  time YANC $y $y.out $tstop $step 0 > $run.2.log
+  set t=0.0
+  tabcomment $y - delete=t |\
+	tabtos - - block1=mass,x,y,z,vx,vy,vz nbody=$nbody times=$t > $run.02
+  rm -f $y
+  foreach file ($y.out.*)
+    tabcomment $file - delete=t |\
+	tabtos - - block1=mass,x,y,z,vx,vy,vz,phi,aux nbody=$nbody times=$t |\
+	csf - - item=SnapShot >> $run.02
+    rm -f $file
+    set t=`nemoinp $t+$step`
+  end
+else
+  echo "Using hackcode1 with $tree_pars"
+  time hackcode1 in=$run.01 out=$run.02 \
+    options=mass,phi,acc \
+    $tree_pars \
+    freq=$freq freqout=$freqout tstop=$tstop > $run.2.log
+endif
+
+#  
+# =========================================================================== MOVIE
+#
+movie:
+
+if ($xymovie) then
+  (snapxyz $run.02 - | xyzview - orbit=$orbit maxpoint="2*$nbody") &
+endif
+
+#  
+# =========================================================================== TRIM
+#
+trim:
+rm -f $run.1? $run.1?? >& /dev/null
+echo "Trimming and centering at given time $tview"
+
+#snaptrim $run.2 $run.3 times=$tview
+snaptrim $run.02 -  times=$tview |\
+   snapcenter - $run.12 weight="-phi*phi*phi" 
+echo :::SNAPRECT
+snaprect $run.12 $run.13 weight="-phi*phi*phi"
+echo :::SNAPINERT
+snapinert $run.12 - weight="-phi*phi*phi"
+snapinert $run.12 - weight="-phi*phi*phi" tab=t
+echo :::SNAPKINEM
+snapkinem $run.12
+
+echo "Could study pattern speed by running do2"
+echo "Followed by align.awk and tablsqfit"
+
+snapgrid $run.13 $run.14 $grid_pars
+ccdprint $run.14 x= y= newline=t label=x,y | tabcomment - - delete=t > $run.15
+tabtos $run.15 $run.16 block1=x,y
+snapmass $run.16 $run.17 mass=1
+
+echo "Compute potentials on a regular grid"
+
+hackforce $run.13 $run.19 $run.17 $tree_pars fcells=2
+snapgrid $run.19 $run.110 $grid_pars evar=phi mean=t
+ccdflip $run.110 - x | ccdflip - $run.111 y
+ccdmath $run.110,$run.111 $run.112 "(%1+%2)/2"
+ccdmath $run.110,$run.111 $run.113 "(%1-%2)/(%1+%2)"
+
+echo "Study sample orbits by running 'do1'"
+#  ./do1 [run=run1] [iorbit=0] [range=2] [omega=0]
+
+#  
+# =========================================================================== ROTCUR
+#
+rotcur:
+
+echo "Creating a velocity field"
+rm -f $run.2? $run.2??  $run.rotcur >& /dev/null
+snaprotate $run.13 $run.20 "atand(tand($phi)/cosd($inc)),$inc,$pa" zyz
+snapgrid $run.20 $run.21 $grid_pars moment=0
+snapgrid $run.20 $run.22 $grid_pars moment=1
+snapgrid $run.20 $run.23 $grid_pars moment=2
+ccdsmooth $run.21 $run.21s $beam 
+ccdsmooth $run.22 $run.22s $beam 
+ccdsmooth $run.23 $run.23s $beam 
+ccdmath $run.21s,$run.22s,$run.23s $run.20d %1
+ccdmath $run.21s,$run.22s,$run.23s $run.20v "%2/%1*100"
+ccdmath $run.21s,$run.22s,$run.23s $run.20s "100*sqrt(%3/%1-%2*%2/(%1*%1))"
+
+rotcur  $run.20v units=arcmin \
+    tab=$run.rotcur \
+    radii=$radii pa=$pa inc=$inc vrot=100 fixed=vsys,pa,inc,xpos,ypos > $run.rotcur.log
+tabcomment $run.rotcur - > $run.rotcur1
+
+tabcomment $run.rotcur - | tabmath - - %1,%4,%5 all > $run.rottab
+
+
+
+# care about units ...  we're doing arcmin vs. arcsec here
+echo Creating model from rotcur, with cell=$cell
+ccdvel $run.24 rotcurfit=run1.rotcur1 size=$nsize cell=$cell
+echo And subtracting it, look at $run.24d for the difference map
+ccdmath $run.20v,$run.24 $run.24d fie="ifeq(%1,0.0,0.0,ifeq(%2,0.0,0.0,%1-%2))"
+
+#  
+# =========================================================================== OMEGA
+#
+omega:
+echo Determining the pattern speed over times ${tstart}:${tstop}:$step 
+## get the pattern speed from an analysis of the direction of the moment of inertia tensor
+./do2 run=$run times=${tstart}:${tstop}:$step hackdens=$hackdens > $run.ome
+exit 1
+#   DEMO PLOT omega.gif/ps
+align.awk $run.ome | tabplot - 1 2,3 2 10 -1080 360 line=1,1 color=2,3 point=2,0.1 \
+    xlab=Time ylab=Phi headline="$*"  yapp=1/xs
+foreach o (1 2 3 4) 
+  rm -f $run.ome_$o
+  align.awk $run.ome | tablsqfit - 1 2 fit=poly order=$o out=$run.ome_$o tab=t 
+end
+paste $run.ome_1 $run.ome_2 $run.ome_3 $run.ome_4 |\
+  tabmath - - %1,%3-%2,%6-%5,%9-%8,%12-%11 all > $run.ome_0
+tabplot run2.ome_0 1 2,3,4,5 0 10 -40 40 line=1,1 color=2,3,4,5 point=2,0.1 ycoord=0 yapp=2/xs
+
+
+
+exit 0
+
+######  demo commands for plots: #######################################################
+#
+# DEMO PLOT evolution.gif/ps
+# overview of evolution
+snapplot run1.02 nxy=5,5 nxticks=3 nyticks=3 yapp=/vps
+
+# get angle and shape for a set of times
+./do2 times=0:10:0.5 > run1.ome
+tabmath run1.ome - %1,%4,%5,%6,%5/%4,%6/%4 all |\
+   tabplot - 1 5,6 0 10 0 1 line=1,1 color=2,3 point=2,0.2 yapp=/vps
+
+# DEMO PLOT: shape.gif/ps
+align.awk run1.ome |\
+   tabplot - 1 2,3 0 10 line=1,1 color=2,3 point=2,0.2 yapp=/vps
+align.awk run1.ome | tablsqfit - 1 2
+align.awk run1.ome | tablsqfit - 1 3
+#      get 'a =', and multiply by pi/180 to get the pattern speed omega 
+
+##  orbit analysis via 'do1' - which is tkrun enabled...
+
+tkrun do1
