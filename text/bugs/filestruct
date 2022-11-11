@@ -1,2 +1,3 @@
 How to recognize a proper filestruct(5)file - no secret first byte
 perhaps use tsf when OK???
+10-nov-92   filesecret.c    pretty bad conversion error f2d & d2f
