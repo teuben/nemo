@@ -15,7 +15,8 @@ getparam() does not support this.
 6   clic                                            x
 7   optparse
 8   typer
-
+9
+10  getparam                        -        -      x      x
 
 0 -
 1 -
@@ -27,7 +28,8 @@ getparam() does not support this.
 6 https://click.palletsprojects.com/en/8.0.x/
 7 https://docs.python.org/3/library/optparse.html
 8 https://typer.tiangolo.com/
-
+9 https://www.gnu.org/software/gengetopt/gengetopt.html
+10 NEMO
 
 
 csh:
@@ -38,8 +40,8 @@ csh:
 
 bash:
      key=val
-     for arg $*; do
-       export $arg
+     for arg "$@"; do
+       export "$arg"
      done
 
 python:
