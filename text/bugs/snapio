@@ -1,0 +1,13 @@
+Many programs assume that in a multiple snapshot file, the
+size of the non-first snapshots is the same, or less, than
+the first one.
+Especially when using programs like 'editplot', this is
+not guaranteed anymore. 
+
+many programs need proper implementation of
+	get_history(instr);	
+before filestruct input, and
+	put_history(instr);
+before output.
+
+

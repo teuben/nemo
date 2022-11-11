@@ -1,0 +1,252 @@
+		NEMO upgrade June 1988: results
+
+Before discouraging you let me list the things we did accomplish:
+  - most programs have been updated for new filestruct (check intro(1NEMO))
+  - most programs now have more consistent names
+  - we have set up a hopefully working efficient way to communicate
+	between NEMO sites, using nemo's 'news' command and
+	the regular unix 'mail' We have a user 'nemo' to whom
+	bugreports and small source updates for other sites should
+	be sent. It sort of needs a NEMO (mail) manager to
+	dequeue the spool every now-and-then. I guess every site needs
+	one.
+  - a perhaps still vague description how Makefiles should look like
+	should appear in more formal way soon (Peter and Josh will
+	look into this; there is a pre-version of this in the
+	NEMO manual)
+  - created two major nemo.tex files with lot's of information
+	(One we already referred to as the NEMO manual, the other
+	one is Twurl's prose)
+  - created a new yapp_mongo.c
+
+
+
+A few minor things need to be looked into:
+  - a few programs don't have version numbers, see intro(1NEM0)
+  - some man pages miss a few 'sections'
+	(mostly 'AUTHOR', proper date header/foother, 'UPDATE HISTORY')
+  - graphics: we have no general and efficient way to install yapp
+	devices on non-SUN's. The installer has to know what he's	
+	doing - I proposed a (set of) environment variables, much like
+	we use NEMOPATH, to be used in the Makefiles.
+	Most makefiles have 'hardcore' programmed in which yapp to
+	link with.
+  - new getparam.c and history, which now lives in libT.a, must be ported
+	to libJ.a (Josh needs to look further down in this file
+	for more details how to get it)
+	<======= There is a SUN system difference at UIUC and IAS 
+	<======= The current version does not handle interactive help mode
+  - hackforce in library callable format, or at least something like
+	I did to make it in potential(5NEMO). Peter has a hack,
+	in his orbit subdir hack. 
+
+		===============================================
+	Some more specific issues:
+
+- data history:
+	If you want to use data-history (see NEMO manual),
+	you have to link with libT.a before libJ.a. This
+	will use my version of getparam. Josh should copy
+	this stuff over to his clib.
+
+	files are in $NEMOPATH/src/pjt/clib:
+		getparam.c history.c getparam.3 history.3
+
+	I have initparam() understand a HISTORY environment
+	variable, when set to 0 it will not do any data-history.
+	This is unfortunately necessary, since some programs have
+	not added the get_hist() and put_hist() before the major
+	filestruct-I/O is done.
+		!!!! Please change this !!!!
+	At the moment data history is completely useless.
+	===>
+	One is forced to have an
+		setenv HISTORY 0
+	in the .cshrc file!
+
+	Note to Josh: As a hack, one can use csf(1NEMO) to strip
+		the history, sort of opposite function
+		of hisf(1NEMO). csf is not exported to NEMO it seems.
+
+
+-general filestruct/snapshot question:
+	In using the snapshot macros, one uses the 'body' structure
+	normally, the definition of which might be the small barebody,
+	(barebody.h) or the somewhat bigger vanilla one (body.h)
+	For programs which use simple array operations, and need
+	the 
+		...
+	there is a lot of gather/scatter on the input and output
+	operations because one is 'forced' to use the macros.
+	Also, if you really need the arrays, it is much better
+	to do all the work yourself. An example of this I needed
+	to do in 'snappeak' and 'stat'. See code. snappeak is
+	probably the most clear case.
+
+
+potential(5):
+	The use of hackforce has not been merged with the IAS
+	version. I have a private copy in /disk6/pjt/teuben/orbit/hack,
+	it is really a shame we didn't do this one. Some day when
+	Josh decides  to modify hack-force, this will keep the
+	old version. I find a lacking feature that use programs
+	cannot call a hackforce, one is always forces to use
+	hackforce(1), and then use the hackforce'd forces. An example
+	is in unbind(1). Here it is fine with me, but what about
+	orbit calculations. I had a lot of fun with my hack and
+	usage of potential(5).
+
+
+Personal notes:
+
+to Josh:
+   getparam.3;history.3:
+	I guess see above; you need the 4 files and a small
+	mod  ot your makefile
+	
+   snapscale.1:
+	I'm exporting snapscale(1NEMO) now.
+
+
+   filestruct.3:
+	When get_data() gets an address 0 to get things into,
+	it refuses to do so, but doesn't warn the user for
+	a possible future mishap. This seems indeed a good
+	defense, but I guess the user needs to be told about
+	this. Possibly same with put_data().
+
+   hackforce.1:
+	Could we please have the default option in the 'options' keyword
+	to be "out_mass,out_phase" instead of "out_phase", since a
+	snapshot with potentials and forces in general also
+	needs masses (e.g. unbind, stat, I agree, they happen
+	to be mine)
+	Is there a reason why hackforce does not copy the time
+	from input to output file?
+	
+   snapplot.1:
+	A small mod is necessary to be able to display movies in position-
+	space, i.e. the keyword 'frame=' should be able to have a
+	full filename. If one tells frame to make 'frame=frame.10'
+	it should create the frame file 'frame.10'. However when using
+	'frame=frame' (the default to make a time-series movie) snapplot
+	will start at frame.0, i.e. create frame.0, frame.1 etc.
+	See my local hack of snapplot.c
+	NOTE: movie can only display frame.0, frame.1, ... etc.
+
+
+    mkommod.1:
+        I'm almost done with Stefano's fortran program, we can then
+        straight compute the tables, and put them into mkommod.
+        I'll send an update a.s.a.p. - but probably not before I
+        leave for Groningen. (back on July 7).
+
+
+
+To Piet:
+    newton0.1:
+	did you check if the filestructure is now compatible with
+	snapdiagplot(1NEMO), i.e. you had earlier
+
+	set Snapshot
+	   ...
+	   set Diagnostics
+	   tes
+	tes
+	set Diagnostics
+        tes
+	set Diagnostics
+	tes
+	set Snapshot
+	   ...
+	   set Diagnostics
+	   tes
+	tes
+	..
+	..
+
+
+	and diagplot does (at least did) not like the a pure Diagnostics,
+	always wants a Diagnostics inside a Snapshot.
+	Check with Josh otherwise.
+	The above example should be:
+
+	set Snapshot
+	   ...
+	   set Diagnostics
+	   tes
+	tes
+	set Snapshot
+	   set Diagnostics
+	   tes
+	set Snapshot
+	   set Diagnostics
+	   tes
+	tes
+	set Snapshot
+	   ...	
+	   set Diagnostics
+	   tes
+	tes
+	..
+	..
+
+
+to PSWisnovski:
+	- vsmooth complained about missing funcion 'putstr', probably just needs
+	an update for new filestruct(). Some people complained it wasn't
+	working anymore.
+	Peter will look into this when back in Illinois.
+
+
+#---------- here are .o files remaining in NEMO/src/... after nemo_install !!!
+#	there shouldn't be any!! Please modify you private makefiles 
+
+4	./josh/clib/filestruct_old/old_filestruct.o
+7	./josh/clib/filestruct_old/old_filestr.o
+4	./josh/clib/filestruct_old/rsf_parse.o
+3	./josh/clib/filestruct_old/rsf_read.o
+7	./josh/clib/filestruct_new/rsf.o
+14	./josh/clib/filestruct_new/filesecret.o
+6	./josh/clib/filestruct_new/tsf.o
+14	./josh/clib/filesecret.o
+4	./josh/clib/getparam.o
+1	./josh/clib/error.o
+1	./josh/clib/xrand.o
+1	./josh/clib/xrandom.o
+3	./josh/clib/spline.o
+2	./josh/clib/extstring.o
+4	./josh/clib/axis.o
+1	./josh/clib/within.o
+1	./josh/clib/cputime.o
+1	./josh/clib/newextn.o
+1	./josh/clib/burststring.o
+1	./josh/clib/strlib.o
+1	./josh/clib/vectmath_d.o
+1	./josh/clib/vectmath_f.o
+3	./josh/clib/filefn.o
+5	./josh/clib/loadobj.o
+2	./josh/clib/stropen.o
+1	./josh/clib/scanopt.o
+3	./josh/clib/besselfunc.o
+1	./josh/clib/log2.o
+6	./josh/hackcode/source1/code.o
+15	./josh/hackcode/source1/code_io.o
+4	./josh/hackcode/source1/load.o
+3	./josh/hackcode/source1/grav.o
+1	./josh/hackcode/source1/util.o
+5	./josh/hackcode/source1/load_qp.o
+3	./josh/hackcode/source1/grav_qp.o
+1	./josh/nbody/pickpnt.o
+1	./josh/nbody/zerocms.o
+1	./josh/nbody/units.o
+3	./josh/multicode/quadcode.o
+4	./josh/multicode/orbstep.o
+7	./josh/multicode/quadforce.o
+17	./josh/multicode/code_io.o
+7	./pjt/orbit/orbit.o
+5	./pjt/orbit/potential.o
+3	./pjt/orbit/plummer.o
+3	./pjt/orbit/harmonic.o
+5	./pswisnov/vsmooth/kninc.o
+3	./pswisnov/vsmooth/nnio.o

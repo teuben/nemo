@@ -1,0 +1,94 @@
+
+
+* active issues are now moved to https://github.com/teuben/nemo/issues
+* Some TODO's also here:   https://github.com/teuben/nemo/projects/1
+
+
+* this is the TODO list for the 4.2 release
+
+- default configure gives yapp.ps, but should check if pgplot is natively there
+- is rman partially broken on U18?
+       PolyglotMan v3.2 of $Date: 2003/07/26 19:00:48 $
+- is there rman -> rst ?
+- more solid examples of openmp
+
+
+
+
+
+
+
+
+* Below here old stuff - some are still relevant
+
+
+- gcc3:  when using c++ NEMO's "string" will now collide with the 
+         default C++ type 'string'....
+
+	 -DSINGLEPREC does not work for a number of programs due to
+	bad prototyping of the "proc" functions. This will be fixed,
+	and is also needed in preparation for NEMO V5 when a C++ compiler
+	will be the default compiler. 
+
+- large objects (> 2GB or > 4GB), specifically snapshots, can be limited
+  in size of they use private calls to allocate() without making sure the
+  argument has been casted to (size_t)
+
+- filestruct:
+  The following snippet of code stores only  "1" for the value of pi,
+  3 times. ZENO actually does it correct.
+    put_set(ostr,"par");
+    pi = 1;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    pi = 2;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    pi = 3;
+    put_data(ostr, "pi", DoubleType, &pi, 0);
+    put_tes(ostr,"par");
+  ZENO also reads correctly, and if no more 'same name' items are present,
+  it will repeat the last one read. But the ZENO reader will serially
+  read (and remember?)
+
+- filestruct history: long character strings are broken in silly places,
+	and don't port very well between tsf/rsf
+
+- comment from Walter:
+
+  > I tried to make my own potential very much in the same way in which
+  > plummer.c works, except that I added a routine "potential()", beside
+  > "potential_double()" and "potential_float()", but identical to
+  > "potential_double()". It appears that adding "potential()" creates a
+  > segmentation fault (on returning from "potential_float()"). I don't know
+  > why, do you?
+
+
+- mktemp() should be converted mkstemp() in stropen.c (recent gcc compilers
+  will complain about it, but it will work)
+  Problem: can't get a fileno from a FILE * (the other way around
+  is ok, use fileno()) so we're stuck....
+
+
+- -DSINGLEPREC:  scfm does not work
+ 		 athan92 shows some significant force differences
+		 testsuite nbody/init and nbody/evolve/flowcode have problems
+
+? kawai/nbody does not seem to work, neither in IONEMO mode, nor default I/O mode
+  (at least on linux)
+
+- fie:  ifgt(%1,0,log(%1),-10) doesn't work,e.g. seems to work in nemoinp
+  but not via ccdmath/tabmath, e.g.
+   echo -10 | tabmath - - 'ifgt(%1,0,log(%1),%1)'
+
+- x86_64:  our configure doesn't always seem to recognize /usr/X11R6/lib64 should be used
+  instead of /usr/X11R6/lib ....
+  Examples: gaia fails, diary ok:
+
+- cfitsio: currently broken, seems to write huge files in e.g. ccdfits
+
+- magalie: hangs on gcc 4.1.0 ?? but this is the same gcc 4.1.0 in which
+	falcON mis-behaves, while on the laptop it's both ok.
+	
+- pgplot (or yapp_pgplot): if the sccreen aspect ratio is not the
+  classic 4:3, the plot is not square
+
+

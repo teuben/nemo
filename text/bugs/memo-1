@@ -1,0 +1,63 @@
+						24-aug-88
+
+It has become progressively convenient to be able to treat an N-body
+experiment, i.e. the dataset, as one entity to many programs (e.g.
+snapplot, snapshift etc). In other words, view the data as a
+7 dimensional data-set, instead of a series of 6 dimensional data-sets.
+Of course this generalization can be continued, as we include our
+own favourite model parameter(s) into yet another dimension. Available
+diskspace will eventually set a practical limit to N (7?).
+
+The extension from a 6 to a 7 dimensional dataset is similar to the
+situation in radio astronomy 15 years ago, when multifrequency
+(interferometric) observations suddenly became feasable, and astronomers
+were suddenly confronted with a series of 2 dimensional maps. A package
+like AIPS has yet to solve this problem elegantly: handling data cubes
+in AIPS is a real problem, not only for the programmer!
+
+There are a number of programs which CAN handle multi-snapshot
+datafiles. I encountered the following problems, which all have kludged
+solutions, but we should be aware of them, and be consistent in their
+usage.
+
+First there is the problem of masses (or to generalize: any item which
+is not present in all snapshots, and may be assumed to be the same
+in following ones). If not present in all snapshots, certain programs
+will  bomb when they need masses. Often one has to kludge and use
+keyword such as "options=out_mass" in such cases (e.g. hackcode1 uses
+this keyword, and for any serious anaylsis it is almost always needed
+to include the masses in every snapshot).
+
+Secondly, there should be a uniform way (keyword) to extract a certain
+snapshot from a database. Currently the times= keyword is used for
+this, and has a fairly uniform  interface to the database using the
+within() function. It should also be able to understand a snapshot by
+its position in the file. E.g.
+
+	times=#1,#3,#10:#20:#2
+
+Thirdly, there is the unequal sized snapshot. Most programs are not
+guarded against the obvious catastrphy which will follow.
+I modified <snapshot/get_snap.c> in a trivial way, but it needs
+
+	#define REALLOC
+
+before you use
+
+	#include <snapshot/get_snap.c> 
+
+in the source code to activate the reallocation of memory for larger
+snapshots. Of course we should make this the default, but I'll let
+Josh handle this.
+
+These were just a few inconveniences I found while shakingn down NEMO. 
+The filestructure, as is, is not easily modified, and works comfortably
+in most cases (really?), the implementation of a more general N-dimensional
+filestructure (YAFS) does not make sense right now. However, I do want
+to mention that the Groningen GIPSY package, after struggling for over
+10 year with a (still superior to AIPS filestructure) set-subset data
+structure for multi frequency data cubes, made a rather courageous step
+last year and modified the filestructre to a general N-dimensional
+one. It is now trivial to take ANY substructure (cube, slice, line ...)
+from  the 'lattice'.
+

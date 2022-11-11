@@ -1,0 +1,25 @@
+From josh@bohemia Wed Nov 16 21:27:51 1988
+To: josh@bohemia, piet@kirin, pjt@grolsch.ias.edu
+Subject: Re:  history.c
+
+Peter,
+	thinking back to the code for snapscale you showed me today,
+I can see why you might get funny results if you call put_history()
+every time you write a snapshot.  Now I can, as you ask, fix the
+put_history() routine to clear the count of history strings after
+each use, but what are we to do about programs which write more
+than one output file?  If you call put_history() to write history
+data to one output file, then there will be no history data left
+for the other output file.  Do you see the problem?  My solution
+was to assume that the history mechanism would collect all the
+history data, and never forget what it collected, just as a good
+historian should.  As you noticed, this makes for a lot of history
+data.  But, if you only call put_history() one and only one time,
+just after opening a binary output file, you will get all history
+data read up to that time, and if put_history() does not reset the
+counter, a subsequent call to put_history() for another output file
+will insure that that output file, too, has a correct history pre-
+pended.  I think that the put_history() mechanism I've implemented,
+and described here, is the correct algorithm.
+						Josh
+

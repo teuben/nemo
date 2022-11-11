@@ -1,0 +1,290 @@
+
+            A FEW ITEMS RELATED TO THE FUTURE OF NEMO
+
+                                            Peter Teuben, November 1988
+
+
+(1) New programs or modifications to other-than-pjt programs/routines
+    to be imported/merged from the Illinois version of NEMO
+    (man pages may also have been modified, they are not listed here,
+     check the $NEMOPATH/man directory)
+    The illinois version now lives as
+            NEMOPATH = /disk6/pjt/illinois/nemo/nemo
+    Now the list:
+
+    $NEMO/inc/snapshot/put_snap.c   allow to output 'key' and 'aux'
+    
+    $NEMO/inc/snapshot/get_snap.c   allow snapshots with different sizes
+                                    to be read on reentries
+                                            #define REALLOC 
+                                    is needed before #include <>  code.
+
+        
+    josh/nbody/snapplot	edit mode using #if defined(EDIT) compiles
+				into 'editplot'
+
+    josh/       atos        added option 'acc' for output
+
+    pjt/nbody/anisot	Plummer models are calculated correctly
+				King, Jaffe, DeVauc and general table files 
+				are also accepted
+
+
+    pjt/nbody/snapdens	 Estimates density and phase space density on the bases
+			 of a nearest neighbour technique and local gaussian
+			 velocity dispersion.
+
+
+    piet/clib/snipshot.c added dprintf(1, code to output c.o.m. shifts)
+			 Piet should add a zerocm=f/t to his mkplummer
+			 program
+
+    piet/clib/mkplummer.c routine mkplummer() has an extra parameter
+			  'zerocm' to allow yes/no C.O.M. shift, as
+			  e.g. in mkommod. The TOOL program mkplummer
+			  now has extra keyword 'zerocm=t'
+			
+    josh/nbody/snapcenter.c  added code to print out shift, and also
+			     calculate second moments.
+
+    nemo/yapp/yapp_xxx:	See GRAPHICS comments later one
+	 or
+    pjt/clib/yapp/          (probably in pjt's private clib area)
+
+    snapplotplot            new clone of snapplot, needs yapp_suntools.c,
+				PJT will port it from his nbody
+
+    snapscale               PJT and JOISH have both a version
+
+    snaprotate              PJT worked on improved proper Euler angle 
+                            definition; see his nbody dir.
+	
+
+
+(2) GRAPHICS
+
+ (a)There is no standard (i.e. portable accross various UNIX machines) way
+    to include a different graphics library (for that matter almost any
+    non-NEMO library if you whish). It doesn't really help to rename
+    your favorite yapp_xxx.c to yapp.c and start the installation, 
+    because most yapp's need something else than '-lsuntoools' as their
+    extra-to-be-linked-libraries. I would suggest to have an environment
+    variable for this (I think this was proposed before a while back,
+    but we never got our act together on this), so e.g.
+        YAPPLINK_1 or YAPPLINK_PS or whatever.
+    These variables are normally set in $NEMOPATH/CSHRC, the one that
+    every NEMO user should 'source' in it's .cshrc file.
+    
+ (b)On BSD UNIX systems (but also on Cray-2's UNICOS and various other
+    new UNIX flavours) a client-server model can be used for graphics
+    libraries. This means that the program itself gets linked with a
+    little routine which sets up a link with a server somewhere on the
+    network. This is just another yapp version, to be called yapp_client.c,
+    and old yapp_xxx.c modules need a -DSERVER interface to make them
+    understand the client-server world. This also keeps the programs
+    which use graphics very small (no suntools etc. overhead). The only thing
+    a user has to make sure to do it create the server on his host;
+    this is normally done by putting it in the background:
+        sun> yapp_suntools &
+    or
+        sun> yapp_mongo &
+    
+    When working on the supercomputer, you would then use e.g. snapshot as:
+        cray> snapplot r321.dat yapp=server_guinness
+    or use the YAPP environment variable:
+        cray> setenv YAPP server_guinness
+    for all subsequent yapp-graphics programs
+        
+    I have experience building such client-server implementations, and
+    plan to do this also for NEMO's yapp in the near future.
+
+
+(3) Fortran interfaces:
+    To ease porting certain peoples fortran code (e.g. Tjeerd van Albada's
+    code) a few fortran interface routines need to be designed, also in
+    more cases this will prove to be important in case people are going
+    to interface old existing code to NEMO.
+
+    Just a very simple example to give to flavor:
+
+    fio (rwflag, nbody, btab, mass, pos, vel)
+    int rwflag, nbody;
+    Body *btab;
+    float *mass, *pos, *vel;
+    {
+        Body *bi;
+        int  i;
+
+        for (i=0, bi=btab; i<nbody; i++, bi++) {
+            (rwflag
+                ? *mass = Mass(bi)
+                : Mass(bi) = *mass );       /* copy masses */
+            (rwflag
+                ? SETV(pos,Pos(bi))
+                : SETV(Pos(bi),pos) );      /* .. positions */
+            (rwflag
+                ? SETV(vel,Vel(bi))
+                : SETV(Vel(bi),vel) );      /* .. and velocities */
+            mass++;
+            pos += NDIM;
+            vel += NDIM;
+        }
+        
+            
+
+A main NEMO program would then look something like:
+
+        ...
+        GetSnap (...,btab,...&nbody..);             /* read NEMO snapshot */
+
+        pos = (float *) malloc(nbody*NDIM*sizeof(float)); /* allocate fortran */
+        vel = (float *) malloc(nbody*NDIM*sizeof(float)); /*    arrays */
+
+        fio (WRITE_FLAG,nbody,btab,mass,pos,vel);   /* into fortran arrays */
+        fwork_ (&nbody, mass, pos, vel, &result);   /* fortran routine */
+        fio (READ_FLAG,nbody,btab,mass,pos,vel);    /* back into btab */
+        
+        PutSnap (....,btab,...&nbody..);            /* write NEMO snapshot */
+
+
+The fortran subroutine FWORK would look something like this:
+
+    SUBROUTINE FWORK (N, XMASS, POS, VEL, RESULT)
+    INTEGER N
+    REAL XMASS(N), POS(3*N), VEL(3*N), RESULT(1)
+    ...
+    RETURN
+    END
+   
+
+(4)  User interface
+
+We all know and love the <getparam.h> user interface, and there have 
+been a few additions
+
+To aid beginning users a primitive help facility was build in, set 
+by the hidden keyword (only known to initparam()) 'help='
+(just like 'yapp' and 'debug' are also hidden system keywords.
+These keywords can also be given a value through an environment
+variable (see nemo(1NEMO)).
+
+The help level 1 (help=1) prompts the user for values, if the
+command line aleady contains a value, it can be defaulted, or
+line be edited. Currently all keywords are prompted for in
+initparam(), i.e. no real interaction between user and program
+is possible: this can be improved by having the actual work done
+in the getparam() type call. This also means that a more interactive
+input can be used, e.g. a program which accepts a keyword, on which
+it depends whichg other keywords are asked. During execution
+of the program the user will never be asked keywords which
+do not matter to him/her.
+
+This mechanism needs a new kind of setparam() call, in which 
+the programmer has the option to 'clear' the contents of a
+keywords (e.g. in a loop, asking if it wants to continue
+another loop).
+
+    For the programmer of getparam.c: this means that a more
+    static structure with contents of keywords must be build,
+    with the current version the above described mechanism is
+    not very memory-safe. (cf. the usage of static temporary
+    storage of the keyword name in extrname()).
+
+
+A help level 2 could also be easily implemented, which allows the user
+to enter a '?', in which case a short explanation follows. This can
+be implemented in initparam() by allowing the famous defv[] string
+to have a help-tail after (e.g.) a newline character:
+
+    char *defv[] = {
+        "in=???\n input file (snapshot format)",
+        "out=\n output file (snapshot format) optional",
+        "center=0,0,0\n center of snapshot",
+        NULL };
+
+This sort of mechanism is compatible with the old structure we use.
+
+NEMOINP(3NEMO) is a general expression parser, and could be
+used automatically with GETPARAM(3NEMO). One could then always
+enter expressions such as
+    "3*pi/4*g*$mass/$radius**3"
+assuming there were shell variable 'mass' and 'radius' in this
+case.
+The expression parser also has a simple decision branching
+mechanism:
+    iflt(x,0.0,-1*x,x)
+
+I currently use getparam (instead of getdparam) and then call
+nemoinp to do the parsing, this is always safe and more portable
+of course, but for a user it is veryu confusing that certain
+programs accept input which can contain expressions, but others
+that cannot...
+
+
+(5) Dynamic loading of object modules (loadobj.c)
+
+A very powerful, but difficult to port, feature of nemo is
+the ability to 'compile on the fly', which is one of the reasons why
+snapplot is such a powerful (if not the most) tool in NEMO. I have
+been successfull in building a version of 'loadobj' for a Gould (not
+running COFF), but that's about it. 
+Another difficulty with loadobj.c is that it is not really intended for 
+public domain usage. (We would have the same difficulties if we included
+Numerical Recipies and Mongo with our distribution tape).
+
+
+A possible alternative is a real-time parser/interpreter, which will
+slow down essential parts of tools, but is portable.
+
+Example:
+
+    double getdbodyval(), x_value;
+    string xvar;
+    Body    *bp;
+
+    x_value = getdbodyval(xvar, bp);
+
+It uses the expression parser-tool of nemoinp(3NEMO); not a well
+advertised or used feature (it is slow if you want to do it
+one million times), but it works.
+
+
+(6)	Some improvements to be made & other defence programming styles
+
+1. Should we have a general <nemo.h> include file, which contains
+   a number of machine dependant / implementation dependant #define's
+   and such. 
+    E.g.:  
+    1. user interface allows data history in datafiles  (normally in getparam.c)
+    2. user interface allows multiple HELP levels       (normally in getparam.c)
+    3. user interface allows remote host execution      (normally in getparam.c)
+    4. a verbose DEBUG version of NEMO  (normally in certain modules)
+
+2. Since we started using the inclusion of source code in programs,
+   instead of linking them thorugh a library, there is the increasing
+   chance of redefining things. As is also practice in official UNIX
+   include files, every include file should have a mechanism to prevent
+   reentry:
+
+    #if defined(NEMO_STDINC_H)
+    #define NEMO_STDINC_H
+    ...
+    ... <the old stdinc.h code>
+    ...
+    #endif
+
+
+--
+
+It is still difficult to have snadwiched snapshots with and without 
+diagnostics, many utilities bomb on this.
+	-> Use snaptrim
+
+(7)	Wishlist type of things
+
+hackforce (josh)
+   Can the options keywords in hackforce contain 'mass,phase' instead of
+   'out_mass,out_phase" (it's so much typing, besides, all programs with
+   similar keywords use the short name version). Note that the default
+   is only out_phase, i.e. no masses!
+

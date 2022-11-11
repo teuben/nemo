@@ -1,0 +1,3 @@
+When 'cat'ting more files the resulting file cannot be diagplot'ted
+if a headline is present at intermediate steps.
+In fact many programs will abort gracefully because of this bug.
