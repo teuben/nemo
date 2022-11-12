@@ -32,8 +32,6 @@
 #          20-aug-2022   add --help option in a neat self-documenting way
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
 
-set -x
-set -e
 _version=11-oct-2022
 _pars=nemopars.rc
 
@@ -55,12 +53,14 @@ seed=0          # random seed (use seed=123 for the benchmark)
 #             parameters for the analysis
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
+r16=16          # radius within which to measure G2 on top of G1
 vbox=2          # velocity box size
 npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
 yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
+debug=1                            # 1=
 #
 #--HELP
 
@@ -85,6 +85,13 @@ yapp() {
         echo $1.$yapp/$yapp
     fi
 }
+
+if [ $debug == 1 ]; then
+    set -x
+    set -e
+    set -u
+fi
+    
 
 #  @todo  if an explicit  (not advertised) restart was requested
 
@@ -222,7 +229,7 @@ r0=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
 if [ $r0 = 1 ]; then
     set +e
     tabspline final2cm.tab    x=1:15:2
-    m16=$(tabspline final2cm.tab    x=16 | txtpar - p0=1,2)
+    m16=$(tabspline final2cm.tab    x=$r16 | txtpar - p0=1,2)
 else
     m16=0
 fi
