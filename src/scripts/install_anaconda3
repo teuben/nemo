@@ -13,20 +13,30 @@
 #
 #  but this has not been experimented with.
 #
+#  Another option is installing several versions in astromake, e.g.
+#
+#     ./install_anaconda3 opt=0 dir=$ASTROMAKE/opt/python/383 version=2020.07
+#
+#
 #  May-2020        os=Linux/MacOSX
+#  Nov-2022        version= now a variable, add requirements.txt
 
-set url   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.11-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2021.05-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2021.11-%s-x86_64.sh
+set url     = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+set url     = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
+set url     = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
 
-set dir   = `pwd`/anaconda3
-set opt   = 1
-set wget  = wgetc
-set os    = `uname -s`
+set url     = https://repo.anaconda.com/archive/Anaconda3-%s-%s-x86_64.sh
+set version = 2020.07   # 3.8.3
+set version = 2020.11   # 3.8.5
+set version = 2021.04   # 3.8.8
+set version = 2021.11   # 3.9.8  but sphinx not working
+set version = 2022.05   # 3.9.12 sphinx
+set version = 2022.10   # 3.9.13 sphinx
+
+set dir     = `pwd`/anaconda3
+set opt     = 1
+set wget    = wgetc
+set os      = `uname -s`
 
 set amuse = 0
 
@@ -37,16 +47,26 @@ end
 
 if ($os == Darwin) set os = MacOSX
 
-set mc3 = `printf $url $os`
+set mc3 = `printf $url $version $os`
 set msh = $mc3:t
 
 $wget $mc3
+
+if ( ! -e $msh ) then
+  echo "File $msh not found. Wrong version=$version ?"
+  exit 0
+endif
+
 bash $msh -b -p $dir
 
 setenv PATH "$dir/bin:$PATH"
 
 conda update -y conda
 pip install --upgrade pip
+
+if ( -e requirements.txt) then
+   pip3 install -r requirements.txt
+endif
 
 # write the source-able shell startup files
 
