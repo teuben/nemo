@@ -1,20 +1,13 @@
 #! /bin/bash
 #
-#  new V4.1+ install
-#
-#  the old (csh) script "nemo_install" is still available to guide you
-#  for some problems but this is the recommended more cleaner
-#  installation procedure.
+#--HELP
+#  Install script for NEMO V4.1+ install
 #
 #  You can also use this script to shortcut network installs by cloning
 #  off a local nemo.git tree and use caching of optional tar files.
 #
 #  The script has a number of key=val optional keywords. Their defaults
-#  are listed below in the code.
-#
-#  opt=1          uses MKNEMOS=hdf4 hdf5 cfitsio fftw wcslib gsl
-#  python=1       uses an anaconda3 install within $NEMO
-#  ...
+#  are listed below
 #
 #  In full version (opt=1 python=1) this script takes about 14 mins
 #  A simple version without falcON and any checks and benchmarks takes about 2 mins
@@ -22,12 +15,12 @@
 #   opt=0 python=0 falcon=0 mknemos=cfitsio  2'13"
 #   opt=0 python=0                           5'30"
 #   opt=0 python=1                           6'15"
-#   opt=1 python=1                          14'00" 
+#   opt=1 python=1                          14'00"
+#
 
-echo "install_nemo.sh:  Version 1.6 -- 25-oct-2022"
+echo "install_nemo.sh:  Version 1.7 -- 12-nov-2022"
 
-#--HELP
- opt=0                                                # install optional mknemo's
+ opt=0                                                # install some optional mknemo= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
  branch=master                                        # branch used
  python=0                                             # install anaconda3 python?
