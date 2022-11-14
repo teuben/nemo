@@ -31,26 +31,27 @@
 #          11-aug-2022   using more generic nemopars.rc
 #          20-aug-2022   add --help option in a neat self-documenting way
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
+#          11-nov-2022   align integration parameters w/ MH97
 
-_version=11-oct-2022
+_version=11-nov-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
-nbody=1000      # number of bodies in one model
+nbody=4096      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
-rp=0.0          # impact offset radius (not used for v
-r0=10.0         # initial offset position for v0 > 0
-eps=0.05        # gravitational softening
-kmax=6          # integration timestep is 1/2**kmax
+rp=0.0          # impact offset radius
+r0=16.0         # initial offset position for v0 > 0   [note v0 > 2/sqrt(r0)]
+eps=0.03125     # gravitational softening
+kmax=7          # integration timestep is 1/2**kmax
 code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
 seed=0          # random seed (use seed=123 for the benchmark)
-#             parameters for the analysis
+#             parameters for the analysis (which can be re-run)
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
 r16=16          # radius within which to measure G2 on top of G1
@@ -60,7 +61,7 @@ power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
 yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
-debug=1                            # 1=
+debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
