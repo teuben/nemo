@@ -13,22 +13,31 @@
 #
 #  but this has not been experimented with.
 #
+#  Another option is installing several versions in astromake, e.g.
+#
+#     ./install_anaconda3 opt=0 dir=$ASTROMAKE/opt/python/383 version=2020.07
+#
+#
 #  May-2020        os=Linux/MacOSX
+#  Nov-2022        version= now a variable, add requirements.txt, use pip3
 
-set url   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.07-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2020.11-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2021.05-%s-x86_64.sh
-set url   = https://repo.anaconda.com/archive/Anaconda3-2021.11-%s-x86_64.sh
+set url     = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
+set url     = https://repo.anaconda.com/archive/Anaconda3-2020.07-MacOSX-x86_64.sh
+set url     = https://repo.anaconda.com/archive/Anaconda3-2020.07-Linux-x86_64.sh
 
-set dir   = `pwd`/anaconda3
-set opt   = 1
-set wget  = wgetc
-set os    = `uname -s`
+set url     = https://repo.anaconda.com/archive/Anaconda3-%s-%s-x86_64.sh
+set version = 2020.07   # 3.8.3
+set version = 2020.11   # 3.8.5
+set version = 2021.04   # 3.8.8
+set version = 2021.11   # 3.9.8  but sphinx not working
+set version = 2022.05   # 3.9.12 sphinx
+set version = 2022.10   # 3.9.13 sphinx
 
-set amuse = 0
+set dir     = `pwd`/anaconda3
+set opt     = 1
+set amuse   = 0
+set wget    = wgetc
+set os      = `uname -s`
 
 # you better know what you are doing here
 foreach arg ($*)
@@ -37,16 +46,26 @@ end
 
 if ($os == Darwin) set os = MacOSX
 
-set mc3 = `printf $url $os`
+set mc3 = `printf $url $version $os`
 set msh = $mc3:t
 
 $wget $mc3
+
+if ( ! -e $msh ) then
+  echo "File $msh not found. Wrong version=$version ?"
+  exit 0
+endif
+
 bash $msh -b -p $dir
 
 setenv PATH "$dir/bin:$PATH"
-
+exit 0
 conda update -y conda
-pip install --upgrade pip
+pip3 install --upgrade pip
+
+if ( -e requirements.txt) then
+   pip3 install -r requirements.txt
+endif
 
 # write the source-able shell startup files
 
@@ -62,16 +81,16 @@ if ($opt == 0) exit 0
 # http://projets.lam.fr/projects/unsio/
 # install a default via pip
 # pip install unsio uns_projects
-pip install python-unsio python-unsiotools
+pip3 install python-unsio python-unsiotools
 
 # but then install the developers version if these directories exist
 if ($?NEMO) then
   foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
     if (-d $dir) then
-      echo Installing with pip install $dir
-      (cd $dir ; pip install -e .)
+      echo Installing with pip3 install $dir
+      (cd $dir ; pip3 install -e .)
     else
-      echo Skipping pip install -e $dir
+      echo Skipping pip3 install -e $dir
     endif
   end
 else
@@ -80,47 +99,47 @@ endif
 
 # https://github.com/adrn/gala
 # conda install gala --channel conda-forge
-pip install gala
+pip3 install gala
 
 # https://github.com/jobovy/galpy
 #
-pip install galpy
+pip3 install galpy
 
 # https://github.com/GalacticDynamics-Oxford/Agama
 #
-pip install agama
+pip3 install agama
 
 # https://github.com/webbjj/clustertools
-pip install clustertools
+pip3 install clustertools
 
 # https://github.com/pynbody/pynbody
 #
-pip install pynbody
+pip3 install pynbody
 
 # https://github.com/kyleaoman/martini
 #
-pip install astromartini
+pip3 install astromartini
 
 # https://github.com/yt-project/yt
 #
-pip install yt
+pip3 install yt
 
 # http://galpak3d.univ-lyon1.fr/
 # optional: PyFFTW,  MPDAF, EMCEE , PyMultinest
-pip install galpak
+pip3 install galpak
 
 # https://amusecode.github.io/getting-started
 #
-pip install amuse-framework
+pip3 install amuse-framework
 # and a few simple starter packages
-pip install amuse-galactics amuse-gadget2 amuse-bhtree
+pip3 install amuse-galactics amuse-gadget2 amuse-bhtree
 
 # Installing AMUSE takes a LONG LONG time, so by default this is not installed at first
 # It also needs a lot more packages (see below)
 #   pip install numpy nose docutils mpi4py h5py
 #   pip install scipy astropy jupyter pandas seaborn
 if ($amuse) then
-  pip install amuse
+  pip3 install amuse
 endif  
 
 
