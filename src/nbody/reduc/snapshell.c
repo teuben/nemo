@@ -7,8 +7,9 @@
  *     19-nov-02     V1.2   process all snapshots in input if requested        PJT
  *     14-nov-05     V2.0   changed svar= to rvar=, no more sort=              PJT
  *                   V2.1   added mvar= cumulative=                            PJT
+ *     14-nov-2022   V3.0   add cone= angle=                                   PJT
  *
- * TODO: use constant number (or mass?) fraction shells as option
+ * @todo   use constant number (or mass?) fraction shells as option
  */
 
 #include <stdinc.h>
@@ -32,19 +33,19 @@ string defv[] = {
     "mvar=m\n                    Mass variable if cumulative= is selected",
     "weight=1\n			 weighting for particles",
     "axes=1,1,1\n                X,Y,Z axes for spatial spheroidal normalization",
+    "cone=0,0,1\n                Axis of the cone around which particles will be selected",
+    "angle=-1\n                  Opening angle of the cone to select particles from (-1 means all)",
     "stats=mean,disp,npt\n       Statistics to print (mean,disp,skew,kurt,min,max,median,npt)",
     "format=%g\n                 Format used for output columns",
     "normalized=f\n              Use normalized rvar/mvar radii?",
     "cumulative=f\n              Use mvar= as cumulative in radii=",
     "first=t\n                   Process only first snapshot?",
     "rstat=f\n                   Add stats in 'r' also ?",
-    "VERSION=2.1a\n		 2-may-2021 PJT",
+    "VERSION=3.0\n		 14-nov-2022 PJT",
     NULL,
 };
 
 string usage="compute statistics of bodyvariables in a set of shells";
-
-string cvsid="$Id$";
 
 extern int match(string, string, int *);
 extern string *burststring(string,string);
@@ -67,6 +68,9 @@ local rproc rvar;
 local rproc mvar;
 
 local vector axes;                    /* normalization radii for shells           */
+local vector cone;                    /* viewing cone */
+local real angle, cosang;             /* opening angle of viewing cone (-1 is all) */
+local bool Qcone;                     /* trigger cone search ? */
 local bool Qaxes;
 local bool Qnorm;                     /* rvar in normalized space ? */
 local bool Qrstat;
@@ -123,6 +127,17 @@ void nemo_main()
 	if (axes[i] != axes[0]) Qaxes = FALSE;
     } else
       Qaxes = FALSE;
+    ndim = nemoinpd(getparam("cone"),cone,3);
+    if (ndim != NDIM) error("Not enough values for cone=");
+    angle = getrparam("angle");
+    Qcone = (angle > 0.0 && angle < 360.0);
+    cosang = cos(angle*PI/180.0);
+    if (Qcone) {
+      SDIVVS(cone, absv(cone));   /* make sure cone has length 1 */
+      warning("Using cone opening angle %g around %g %g %g", angle, cone[0], cone[1], cone[2]);
+      if (!streq(getparam("rvar"),"r"))
+	warning("With rvar=%s and cone angle viewing is ill adviced", getparam("rvar"));
+    }
     sel_options = burststring(getparam("stats"),",");
     n_sel = xstrlen(sel_options,sizeof(string))-1;
     if (n_sel <= 0) error("bad stats=%g",getparam("stats"));
@@ -190,8 +205,7 @@ void shells()
 {
   int i, j, irad, nviol;
   Body *b;
-  real rad, r, rmin, rmax, wt, unew, uold;
-  vector tmpv, pos_b, vel_b;
+  real rad, r, rmin, rmax, wt, uold;
   Moment mq, mr, ms;
   bool Qhead = TRUE;
   real *cmass, sum, totmas;
@@ -237,7 +251,7 @@ void shells()
   dprintf(0,"Shell range %g .. %g\n",radii[0],radii[nrad-1]);
 
   /*
-   * notice the quircky double i,j loops, looping over the particles
+   * notice the quirky double i,j loops, looping over the particles
    * the j-loop is needed to detect particles before radii[0]
    * this way is probably faster than trying to index into the
    * radii[] array, but requires the particles to be sorted.
@@ -253,6 +267,10 @@ void shells()
     if (Qcumul) {
       for (j=0; i<nbody; b++, i++, j++) {
 	rad = absv(Pos(b));
+	if (Qcone) {
+	  real dvp = dotvp(cone,Pos(b))/rad;    // cone vector has length=1
+	  if (dvp < cosang) continue;
+	}
 	r = (rvar)(b,tsnap,i);
 	if (cmass[i] >= radii[irad] && cmass[i] < radii[irad+1]) {
 	  accum_moment(&mr, rad, 1.0);
@@ -268,6 +286,10 @@ void shells()
     } else if (Qnorm) {                      /* select if rvar normalized */
       for (j=0; i<nbody; b++, i++, j++) {
 	rad = absv(Pos(b));
+	if (Qcone) {
+	  real dvp = dotvp(cone,Pos(b))/rad;    // cone vector has length=1
+	  if (dvp < cosang) continue;
+	}
 	r = (rvar)(b,tsnap,i);
 	if (i>0 && r < uold) nviol++;
 	uold = r;
@@ -287,6 +309,10 @@ void shells()
     } else {                                /* select if rvar space */
       for (j=0; i<nbody; b++, i++, j++) {
 	rad = absv(Pos(b));
+	if (Qcone) {
+	  real dvp = dotvp(cone,Pos(b))/rad;    // cone vector has length=1
+	  if (dvp < cosang) continue;
+	}
 	r = (rvar)(b,tsnap,i);
 	if (i>0 && r < uold) nviol++;
 	uold = r;
