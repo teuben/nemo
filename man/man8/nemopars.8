@@ -1,4 +1,4 @@
-.TH NEMOPARS 8NEMO "17 August 2022"
+.TH NEMOPARS 8NEMO "16 November 2022"
 
 .SH "NAME"
 nemopars \- extract parameters from a bash-style rc file
@@ -43,8 +43,8 @@ would be a quick way to assemble a table summarizing these three parameters
 
 .SH "PARAMETERS"
 This is a simple python script, the CLI does not adhere to the usual \fIgetparam(3NEMO)\fP conventions.
-There is also no error checking on the names of the parameters. A mis-spelled variable or missing parameter
-in the rc file simply results in fewer columns in the output file.
+.PP
+When a parameter is missing (or mis-spelled) from the rc file, the value "nan" is printed instead.
 
 .SH "SEE ALSO"
 nemo(1NEMO), awk(1)
@@ -62,4 +62,5 @@ Peter Teuben
 .nf
 .ta +1.5i +5.5i
 17-aug-2022	Created		PJT
+16-nov-2022	Print "nan" when parameter missing	PJT
 .fi
