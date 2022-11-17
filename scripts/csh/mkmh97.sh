@@ -4,7 +4,8 @@
 #    See also: https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
 #
 #    @todo
-#    - recode such that v0 is speed at infinity
+#    - recode such that v0 is speed at infinity:
+#      v0=$(nemoinp "sqrt($v**2+2*(1+$m)/$r0)")
 #
 # bench:
 #          ./mkmh97.sh code=0 run=run100 nbody=10000 tstop=20 seed=123 
@@ -33,14 +34,14 @@
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
 #          11-nov-2022   align integration parameters w/ MH97
 
-_version=11-nov-2022
+_version=17-nov-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
 #            parameters for the integration
 run=run0        # directory and basename of the files belonging to this simulation
-nbody=4096      # number of bodies in one model
+nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
 step=1          # step in time when to dump snapshots
@@ -244,5 +245,14 @@ echo "m16=$m16"
 #    rm -rf run0
 #    run=run0 seed=123      should give:    m16=0.821802 for phi*phi*phi*phi
 #    run=run0 seed=123      should give:    m16=0.861046 for -phi*phi*phi  (now the default)
+
+
+#    NemoPlots with relevant scales for this script
+
+# 1. plummer scaling to retain virial equilibrium
+#PLOT nemoinp 0:1:0.01 | tabmath - - 'sqrt(%1),sqrt(%2)' | tabplot -  1 2,3 0 1 0 1 yapp=30/xs line=1,1 color=2,3 nxticks=9 nyticks=9 xlab=m ylab="Scale Factor" headline="Scale factor for position (R) and velocity (G)"
+
+# 2. v0 vs. v (at infinity)
+#PLOT nemoinp 0:1.6:0.01 | tabmath - - "0.01,0.1,1,sqrt(%1**2+2*(1+%2)/16),sqrt(%1**2+2*(1+%3)/16),sqrt(%1**2+2*(1+%4)/16)"|tabplot - 1 5,6,7,1 0 1.6 0 1.6 color=2,3,4,1 line=1,1 xlab=V ylab=V0 headline="V0 for m=0.01(r), 0.1(g) and 1.0(b)"
 
 #--HELP
