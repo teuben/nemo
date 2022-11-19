@@ -14,10 +14,8 @@ In this script we extend this with a few options:
 
 3. pick a different N-body integrator (**code=**)
 
-We have not (yet) implemented:
-
-1. different models, though for shell galaxies it will be useful to replace
-   the Plummer with a colder stellar system
+4. different models, though for shell galaxies it will be useful to replace
+   the Plummer with a colder stellar system [not yet implemented]
 
 Some initial analysis is performed as well, see also **mh16.sh** for an example
 
@@ -27,27 +25,20 @@ All input parameters are of the form *keyword=value*, like most NEMO programs, w
 the exception there is no syntax or validity of the keyword checking!  Use **--help**
 as the first keyword to get up to date information on the keywords and their defaults.
 
-1. r0=0.77*2*10=15.4 so we should take the easy 16
-
-2. dt=1/128, which is really kmax=7, we took 6.
-
-3. eps=1/32, we took 0.05 though, should be 0.03125
-
-4. nbody=4096. We took 1,000 as default
-
 As in NEMO, units are virial units.
 
-1. **run=**:  run directory name, plus the name used in all the derived filenames, e.g. run0, which then
-   creates files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
+1. **run=**:  run directory name, also the name used in all the derived filenames. For example with
+   run=run0, you would see files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
    used simulation, the integration step is skipped, but the analysis is done with
-   whatever analysis parameters are given again.
+   whatever analysis parameters are given again. [run0]
 
 2. **nbody=**: number of bodies per plummer sphere. Notice that nbody=1 is also allowed,
-   allowing you to check on Kepler orbits. [1000]
+   allowing you to check on Kepler orbits. [2048]
 
-3. **m=**: mass of the 2nd galaxy where the first galaxy has fixed mass=1
+3. **m=**: mass of the 2nd galaxy where the first galaxy has fixed mass=1   [1]
 
-4. **em=**: use equal mass particles? By default, each system has same number of particles, even if their massed are different.
+4. **em=**: use equal mass particles? By default, each system has same number
+   of particles, even if their massed are different. [0]
 
 4. **step=**: step time when full snapshots are stored. 1 is probably ok,
    for movies you probably need 0.1.   For very large values of nbody a larger value for the step
@@ -60,14 +51,14 @@ As in NEMO, units are virial units.
    [1.0]
 
 6. **rp=**: initial impact parameter. 0 means a head-on collision. Note MH97 use
-   two conventions. [0]
+   two conventions. Pericenter distance and impact parameter. [0]
 
-7. **r0=**: initial impact distance between the two spheres [10]
+7. **r0=**: initial impact distance between the two spheres [16]
 
 8. **eps=**: gravitational softening. There are some codes in NEMO
    that allow negative softening, in which case a Post-Newtonian (PN)
    approximation is used. This is outside the realm of this
-   study. [0.0325]
+   study. [1/32 = 0.03125]
    
 9. **kmax=**: parameter to control the timestep = 1/(2^kmax) [7]
 
@@ -81,10 +72,11 @@ As in NEMO, units are virial units.
 
 12. **seed=**: the usual NEMO seed value. 0=current time in seconds since 1970,
    -1=number of centiseconds since boot, -2=PID, -3=linux kernel entropy based.
-   The command **date +%Y%m%d%H%M%S" gives a perhaps more memorable seed.
+   The command **date +%Y%m%d%H%M%S** gives a perhaps more memorable seed.
    [0]
 
-5. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
+
+13. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
    [50]
 
 13. **box=**: spatial plotting box size
@@ -124,12 +116,13 @@ the value of **tstop**, which can be any of the dumptimes that the simulation wa
 run with.
 
 The default run=run0 with m=1  nbody=2048 tstop=50 will take about 30 seconds to run,
-with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds.
+with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds
+(2020 style i7-1185G7).
 
 ## Plotting Examples
 
-In the examples below the name *run0" is used, since that's the default for **run=**, however, if you want to 
-preserve the data, be sure to use another run name!
+In the examples below the name **run0** is used, since that's the default for **run=**, however, if you want to 
+preserve the data, be sure to use another run name! These are run inside of the run directory.
 
 1. Plot some initial conditions. Here is an X-Y plot, and an X-VX plot:
 
@@ -148,7 +141,7 @@ preserve the data, be sure to use another run name!
         snapplot run0.4 xrange=-16:16 yrange=-16:16
 	  
         # evolution but coloring each galaxy different
-        snapplot run0.4 xrange=-16:16 yrange=-16:16 color='i<1000?0.1:0.2'
+        snapplot run0.4 xrange=-16:16 yrange=-16:16 color='i<2048?0.1:0.2'
 	  
         # the orbit of star #100 (try a few stars, some are bound, some escape)
         snapplot run0.4 xrange=-4:4 yrange=-4:4 trak=t visib=i==100
@@ -169,8 +162,8 @@ preserve the data, be sure to use another run name!
 	  
 The quality of the image in [ds9](https://sites.google.com/cfa.harvard.edu/saoimageds9/download)
 will depend strongly on the number of particles
-in the galaxy. The default image only has 64 x 64 pixels, and with only
-2000 particles in this default simulation there will be lots of pixels
+in the galaxy. The default image only has 128 x 128 pixels, and with only
+4096 particles in this default simulation there will be lots of pixels
 with 0 stars.
 
 ## Circular orbits?
@@ -179,8 +172,9 @@ For **v0<0** we can set up the two sytems in a circular orbit by launching from
 (r0,0,0) and (0,v0,0), i.e. in clock wise motion. For an exact circular orbit,
 the following example should work
 
-      ./mkmh97.sh v0=-1 r0=2 nbody=1 eps=0
-      snapplot run0.4 trak=t 
+      rm -rf run0
+      ./mkmh97.sh run=run0 v0=-1 r0=2 nbody=1 eps=0
+      snapplot run0/run0.4 trak=t 
 	  
 and you will see the two particles chase each other on the same circular orbit. Pick a 
 different v0 or r0 and this will not be true.
@@ -189,7 +183,7 @@ different v0 or r0 and this will not be true.
 	  
 Compare to Bontekoe & v Albada work?
 
-## TODO
+## EXERCISES
 
 1. define v0 as being from infinity? (cf. Makino & Hut paper)
    Noting that for position values of v0 the value of r0 will determine
@@ -199,12 +193,12 @@ Compare to Bontekoe & v Albada work?
    as the diameter of the circular orbit. This could be a fun way to study dynamical
    friction (cf. Bontekoe & v Albada 1987MNRAS.224..349B   White, ...)
 
-3. Exact Newtonian solutions vs. Order Of Magnitude Estimates (OOME)
+3. Exact Newtonian solutions vs. Order Of Magnitude Estimates
 
 4. various sanity tests
    e.g. energy conservation as function of integration step
 
-5. for v0 at r0, what is the asumptitic value 'v' at infinity?
+5. for v0 at r0, what is the asymptotic value 'v' at infinity?
 
 6. write down the eq. for a circular orbit: what is the relation ship between r0 and v0
 
