@@ -2,31 +2,30 @@
 
 Based on the paper by Makino & Hut (1997) -
 https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract - this
-example lets two Plummer (1911) interact with either
+script lets two Plummer (1911) interact with either
 other. In the original Makino & Hut paper the masses were equal, but
 the model, relative velocity and impact parameter were all varied.
 
 In this script we extend this with a few options:
 
-1. a (near) collision or a (near) circular orbit. (sign of **v0=**)
+1. a (near) collision or a (near) circular orbit. (controlled by the sign of **v0=**)
 
 2. unequal masses, where the first galaxy is fixed at mass=1 (**m=**)
 
 3. pick a different N-body integrator (**code=**)
 
-We have not implemented:
+We have not (yet) implemented:
 
-1. different models
+1. different models, though for shell galaxies it will be useful to replace
+   the Plummer with a colder stellar system
 
-Some initial analysis is performed as well.
+Some initial analysis is performed as well, see also **mh16.sh** for an example
 
 ## Input parameters
 
 All input parameters are of the form *keyword=value*, like most NEMO programs, with
 the exception there is no syntax or validity of the keyword checking!  Use **--help**
 as the first keyword to get up to date information on the keywords and their defaults.
-
-TODO:    the MH97 paper discusses good defaults for some parameters:
 
 1. r0=0.77*2*10=15.4 so we should take the easy 16
 
@@ -39,37 +38,38 @@ TODO:    the MH97 paper discusses good defaults for some parameters:
 As in NEMO, units are virial units.
 
 1. **run=**:  run directory name, plus the name used in all the derived filenames, e.g. run0, which then
-creates files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
-used simulation, the integration step is skipped, but the analysis is done with
-whatever analysis parameters are given again.
+   creates files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
+   used simulation, the integration step is skipped, but the analysis is done with
+   whatever analysis parameters are given again.
 
 2. **nbody=**: number of bodies per plummer sphere. Notice that nbody=1 is also allowed,
-allowing you to check on Kepler orbits. [1000]
+   allowing you to check on Kepler orbits. [1000]
 
-3. **m=**
+3. **m=**: mass of the 2nd galaxy where the first galaxy has fixed mass=1
 
-4. **em=**: use equal mass particles? By default, each ysstem has same number of particles, even if their massed are different.
+4. **em=**: use equal mass particles? By default, each system has same number of particles, even if their massed are different.
 
-4. **step=**: step time when snapshots are stored. 1 is probably ok,
-for movies you probably need 0.1.   For very large values of nbody a larger value for the step
-is probably adviced, unless you have a lot of disk space. [1.0]
+4. **step=**: step time when full snapshots are stored. 1 is probably ok,
+   for movies you probably need 0.1.   For very large values of nbody a larger value for the step
+   is probably adviced, unless you have a lot of disk space. Perhaps step=5.  [1.0]
 
-5. **v0=**: initial impact speed between the two spheres.  Use
-positive values for a (near) collision. Negative values are reserved
-for a (near) circular orbit, although with the right choices of **v0**
-and **r0** a circular orbit can also be achieved.
-[1.0]
+5. **v0=**: initial impact speed between the two galaxies.  Use
+   positive values for a (near) collision. Negative values are reserved
+   for a (near) circular orbit, although with the right choices of **v0**
+   and **r0** a circular orbit can also be achieved.
+   [1.0]
 
-6. **rp=**: initial impact parameter. 0 means a head-on collision [0]
+6. **rp=**: initial impact parameter. 0 means a head-on collision. Note MH97 use
+   two conventions. [0]
 
 7. **r0=**: initial impact distance between the two spheres [10]
 
 8. **eps=**: gravitational softening. There are some codes in NEMO
    that allow negative softening, in which case a Post-Newtonian (PN)
    approximation is used. This is outside the realm of this
-   study. [0.05]
+   study. [0.0325]
    
-9. **kmax=**: parameter to control the timestep = 1/(2^kmax) [6]
+9. **kmax=**: parameter to control the timestep = 1/(2^kmax) [7]
 
 10. **code=**: Set to 0 if **hackcode1** (the original 1986 Barnes &
    Hut treecode) has to be used. It's a bit slower than the default
@@ -77,29 +77,54 @@ and **r0** a circular orbit can also be achieved.
    compile. code=2 is reserved for GPU enabled machines where **bonsai2**
    has been compiled. This code is likely to be the fastests as long as it fits
    in the GPU memory.
+   [1]
 
-12. **seed=**
+12. **seed=**: the usual NEMO seed value. 0=current time in seconds since 1970,
+   -1=number of centiseconds since boot, -2=PID, -3=linux kernel entropy based.
+   The command **date +%Y%m%d%H%M%S" gives a perhaps more memorable seed.
+   [0]
 
+5. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
+   [50]
 
-5. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0   [50]
+13. **box=**: spatial plotting box size
+   [32]
 
+14. **r16=**: radius where m16 is measured.
+   [16]
 
-13. **box=**
+15. **vbox=**: velocity plotting size
+   [2]
 
-14. **r16=**
+16. **npixel=**:  number of pixels in the CCD frames
+   [128]
 
-15. **vbox=**
+17. **power=**:  gamma factor for CCD plots
+   [0.5]
 
-16. **npixel=**
+18. **bsigma=**: asinh/log breakover point
+   [0.0001]
 
-17. **power=**
-
-18. **bsigma=**
-
-19. **tplot=**
+19. **tplot=**: times to plot in the 3x3 evolution plot.
+   [0,5,10,15,20,25,30,40,50]
 
 20. **yapp=**:   pick png, or vps (for yapp_pgplot) _ps for native ps
 
+21. **debug=**:  not the usual NEMO debug=, but special for this script.
+    0=nothing   1=set -x -e -u in bash
+    [1]
+
+## Running
+
+The first time when you run the script and the **run** directory does not exist yet,
+initial conditions are generated and the simulation is run to **tstop**.
+
+Subsequent runs with this **run** directory will re-analyse the simulation at
+the value of **tstop**, which can be any of the dumptimes that the simulation was
+run with.
+
+The default run=run0 with m=1  nbody=2048 tstop=50 will take about 30 seconds to run,
+with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds.
 
 ## Plotting Examples
 
@@ -160,10 +185,8 @@ the following example should work
 and you will see the two particles chase each other on the same circular orbit. Pick a 
 different v0 or r0 and this will not be true.
 
-
       ./mkmh97.sh run=run1 eps=0.05 nbody=1000
 	  
-
 Compare to Bontekoe & v Albada work?
 
 ## TODO
@@ -172,15 +195,14 @@ Compare to Bontekoe & v Albada work?
    Noting that for position values of v0 the value of r0 will determine
    a minimum value.
 
-
 2. allow circular orbit using negative **v0**.   The initial offset **r0** is then used
-as the diameter of the circular orbit. This could be a fun way to study dynamical
-friction (cf. Bontekoe & v Albada 1987MNRAS.224..349B   White, ...)
+   as the diameter of the circular orbit. This could be a fun way to study dynamical
+   friction (cf. Bontekoe & v Albada 1987MNRAS.224..349B   White, ...)
 
 3. Exact Newtonian solutions vs. Order Of Magnitude Estimates (OOME)
 
 4. various sanity tests
-  e.g. energy conservation as function of integration step
+   e.g. energy conservation as function of integration step
 
 5. for v0 at r0, what is the asumptitic value 'v' at infinity?
 
@@ -230,7 +252,6 @@ and perhaps a better way
      radprof snap3 mode=mass tab=t > tab1
      tabplot tab1 1 4 0 16 0 0.008
 
-
 ## CCD images
 
 A few words on CCD images created with **snapgrid**:
@@ -274,7 +295,6 @@ although now one should call this a *Truncated Plummer Sphere*:
 
      ./mkmh97.sh run=run53 tstop=50 nbody=1000000 m=0.04 step=5 r0=5 v0=0
 
-
 ## Using images to measure mass using ds9 regions
 
 A snapshot that was converted to an image using **snapgrid** stores it's data in mass per square pixel. If the image
@@ -283,7 +303,6 @@ of interest (*Edit -> Region*) after which (*Region -> Get Information -> Analys
 of the values in that region.   For a given pixel size **p** in arcsec (which ds9 reports) the total mass in the region is then
 ** sum * (p/3600)^2**
 
-
 ## orbits vs. orbits
 
       mkorbit p2.orb -10 0 0 0 0 0 potname=plummer potpars=0,1,3*pi/16
@@ -291,13 +310,11 @@ of the values in that region.   For a given pixel size **p** in arcsec (which ds
       orblist p2a.orb  | tabplot - 2 3
       orblist p2a.orb  | tabplot - 2 3 0 600 -12 12
 
-
       ./mkmh97.sh run=run202 tstop=500 nbody=10000 m=0.04
       ./mkmh97.sh run=run203 tstop=500 nbody=10000 m=0.04  v0=0
       snapcenter run203.4 run204.4c "weight=i>=10000?-phi*phi*phi:0" one=t
       snapprint run204.4c t,x | tabplot - 1 2 0 500  line=1,1
       snapprint run204.4c t,x > run204.tab
-
 
       ./mkmh97.sh run=run205 tstop=500 nbody=100000 m=0.04  v0=0.5
       28823.446 arcsec
@@ -305,7 +322,6 @@ of the values in that region.   For a given pixel size **p** in arcsec (which ds
       g2a = 4.603125e-05    = 0.07365
       0.00045568125	      = 0.7290    center (original G2)
       g2b = 0.0001215125    = 0.19442
-
 
       14402.926 ar
                 fraction
