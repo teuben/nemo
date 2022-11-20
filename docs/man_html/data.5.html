@@ -47,26 +47,49 @@ plum.dat<tt> </tt>&nbsp;<tt> </tt>&nbsp;Osipkov-Merritt DF: plummer (isotropic)
 devauc.dat<tt> </tt>&nbsp;<tt> </tt>&nbsp;Osipkov-Merritt DF: De Vaulouleurs (isotropic)
 expmodel.inp<tt> </tt>&nbsp;<tt> </tt>&nbsp;Example table for mkexphot
 nbabel<tt> </tt>&nbsp;<tt> </tt>&nbsp;(some) input files from the nbabel.org project
-starlab/cube10.dyn<tt> </tt>&nbsp;<tt> </tt>&nbsp;example starlab data (dyn): [mkcube -n 10 -s 123]
+starlab/cube10.dyn<tt> </tt>&nbsp;<tt> </tt>&nbsp;example starlab data (dyn): [makecube -n 10 -s 123]
 archive     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Archive of interesting N-body simulations
         <tt> </tt>&nbsp;<tt> </tt>&nbsp;        (usually a symbolic link to a large local disk)
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;
-See Alsosnapshot(5NEMO), image(5NEMO), tsf(1NEMO), rotcur(5NEMO) A comparison
-of eleven numerical integrations of the same gravitational 25 body problem,
-Myron. Lecar, Bull.Astr. 3, 91. 1968 (in: Colloque sur le problem gravitationnel
-des N corps). 
-http://orca.ucsc.edu/~rmont/index.html for the Figure-8 orbit
+ExamplesThe starlab dyn format can be converted to a table using the dumbp(1STARLAB)
+program, viz. 
+     dumbp &lt; $NEMO/data/starlab/cube10.dyn  &gt; cube10.col
+     tabcomment cube10.col delete=t |&gt; cube10.col
+        tabtos -  cube10.dat block1=skip,mass,pos,vel times=0
+</pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<br>
+ 
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='rotcur.5.html'>rotcur(5NEMO)</a>
+, <a href='dumbp.1STARLAB.html'>dumbp(1STARLAB)</a>
 
-http://arxiv.org/abs/1303.0181 - Three Classes of Newtonian Three-Body Planar
-Periodic Orbits, Suvakov &amp; Dmitrasinovic (2013) 
-https://yt-project.org/data/
-- sample datasets for testing 
-https://nbabel.org  - orbit integrator problem
-in many languages  
-AuthorPeter Teuben  Files
-~/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for data files.
+<p>
+<i>A comparison of eleven numerical integrations of the same gravitational
+25 body problem</i>, Myron. Lecar, Bull.Astr. 3, 91. 1968 (in: Colloque sur le
+problem gravitationnel des N corps). <p>
+<a href='http://orca.ucsc.edu/~rmont/index.html'>http://orca.ucsc.edu/~rmont/index.html</a>
+
+for the Figure-8 orbit <p>
+<a href='http://arxiv.org/abs/1303.0181'>http://arxiv.org/abs/1303.0181</a>
+ - <i>Three Classes of Newtonian
+Three-Body Planar Periodic Orbits</i>, Suvakov &amp; Dmitrasinovic (2013) <p>
+<a href='https://yt-project.org/data/'>https://yt-project.org/data/</a>
+
+- sample datasets for testing <p>
+<a href='https://nbabel.org'>https://nbabel.org</a>
+  - orbit integrator problem
+
+<p>in many languages 
+<p> 
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<br>
+<pre>~/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for data files.
 </pre>
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>24-jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-jul-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;IAU25 added  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -86,10 +109,11 @@ AuthorPeter Teuben  Files
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Description</a></li>
 <li><a name='toc2' href='#sect2'>Data</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Author</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Examples</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>
