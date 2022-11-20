@@ -17,6 +17,7 @@
 #
 #    11-aug-2022    toy version in bash - PJT
 #    17-aug-2022    more generic python version - PJT
+#    16-nov-2022    print "nan" when keyword/value is missing
 
 
 import sys, os
@@ -27,6 +28,7 @@ if len(sys.argv) < 3:
     print("  loops over all bash rc files that contain  par1=val1 par2=val2 ...")
     print("  and tabulates   val1 val2 ...")
     print("  NEMO convention is that the rc files are called nemopars.rc")
+    print("  parameters that do not exist, get the value 'nan'")
     sys.exit(0)
 
 # grab the parameters to print (no error checking on their names)
@@ -38,10 +40,14 @@ s = tempfile.NamedTemporaryFile()
 script = s.name
 # print('SCRIPT',script)
 fp = open(script,'w')
-cmd = 'source $1; echo'
+fp.write('source $1\n')
 for p in pars:
-    cmd = cmd + ' $%s' % p
-fp.write(cmd + '\n')
+    fp.write('if [ ! -z "$%s" ]; then\n' % p)
+    fp.write('  echo -n "$%s "\n' % p)
+    fp.write('else\n')
+    fp.write('  echo -n "nan "\n')
+    fp.write('fi\n')
+fp.write('echo ""\n')
 fp.close()
 
 # print comment header for output
