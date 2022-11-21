@@ -7,7 +7,8 @@ Glossary
 
 
   accelleration
-      Dataformat used in the :term:`falcon` package
+      Dataformat used in the :term:`falcon` package. Related to the
+      :term:`potential` in NEMO
 
   bodytrans
       Dataformat that is used to
@@ -77,7 +78,7 @@ Glossary
   potential
       Dataformat in NEMO used to represent a
       potential; most programs in NEMO which handle potentials start
-      or end with *pot*. Related are the :term:`accelleration`
+      or end with *pot*. Related to the :term:`accelleration`
 
   program keyword
       Keywords that are defined by the
@@ -88,7 +89,7 @@ Glossary
       A small user interface that pops up when a
       program is interrupted. Type ``quit`` to exit it, or ``?``
       for help. This feature of the user interface may not be
-      installed in your version.
+      installed in your version. 
 
   set
       Compound hierarchical data-structure of a
