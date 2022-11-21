@@ -15,7 +15,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select",
     "colsep=SP\n        Column separator (SP,TAB,NL)",    
     "out=-\n            output file name",
-    "VERSION=2.1\n      28-apr-2022 PJT",
+    "VERSION=2.1a\n     20-nov-2022 PJT",
     NULL
 };
 
@@ -70,13 +70,12 @@ local void setparams(void)
     select = getparam("select");
     if (select==NULL || *select=='\0' || streq(select,"all")) {
         Qall = TRUE;
-        for (i=0; i<=MAX_COL; i++) keep[i] = i;
+        for (i=0; i<MAX_COL; i++) keep[i] = i+1;
     } else {
         Qall = FALSE;
         nkeep = nemoinpi(select,keep,MAX_COL);
         if (nkeep<=0 || nkeep>MAX_COL)
-            error("Too many columns given (%d) to keep (MAX_COL %d)",
-      			nkeep,MAX_COL);
+            error("Too many columns given (%d) to keep (MAX_COL %d)",nkeep,MAX_COL);
         for (i=0; i<nkeep; i++){
             if (keep[i]<0) error("Negative column number %d",keep[i]);
             maxcol = MAX(maxcol,keep[i]);
