@@ -1,9 +1,20 @@
 Python
 ------
 
-Python support in NEMO itself is still rudimentary, but there are good
-import and export routines to other formats, through which other toolkits
-can provide interesting ways to analyze NEMO data. We list a few
+Python support in NEMO itself is still rudimentary, though the common
+
+.. code-block::
+
+     cd $NEMO
+     pip3 install -e .
+
+will add the ``nemopy`` module to your python environment. Currently only
+a simple getparam interface is available.
+
+
+There are good import and export routines to other N-body formats, through
+which other toolkits can provide interesting ways to analyze NEMO
+data. We list a few
 
 * yt toolkit: https://yt-project.org/
 
