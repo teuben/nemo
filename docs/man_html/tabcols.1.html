@@ -45,27 +45,28 @@ this man page is up to date.
 <dd>list of columns to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
   expression can be used. Columns
 can be repeated, and in any order. The output will be in exactly the same
-order as given with this keyword. First column is 1. [all]     </dd>
+order as given with this keyword. First column is 1. Column 0 can also be
+added to the output, which is the row number (first row is 1). [all]   
+ </dd>
 
 <dt><b>colsep=</b> </dt>
-<dd>Column
-separator. Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),  <b>r</b> (carriage return),
-as well as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default: <b>s</b>] </dd>
+<dd>Column separator. Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),
+ <b>r</b> (carriage return), as well as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default:
+<b>s</b>] </dd>
 
 <dt><b>out=-</b> </dt>
-<dd>output file name.
-By default standard output it used. 
+<dd>output file name. By default standard output it used. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Although this program uses the
-new table interface, there are still some internal variables that limits
-the column count. 
+Although
+this program uses the new table interface, there are still some internal
+variables that limits the column count. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
-Here is an example of how to reverse the columns
-from a table with 4 columns: <br>
+Here is an example of how
+to reverse the columns from a table with 4 columns: <br>
 <pre>    tabcols in.tab 4:1:-1 &gt; out.tab
 </pre>and here is an example that re-arranges all the numbers in a table in one
 long column <br>

@@ -52,22 +52,22 @@ archive     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Archive of interesting N-body simula
         <tt> </tt>&nbsp;<tt> </tt>&nbsp;        (usually a symbolic link to a large local disk)
 ExamplesThe starlab dyn format can be converted to a table using the dumbp(1STARLAB)
 program, viz. 
-     dumbp &lt; $NEMO/data/starlab/cube10.dyn  &gt; cube10.col
-     tabcomment cube10.col delete=t |&gt; cube10.col
-        tabtos -  cube10.dat block1=skip,mass,pos,vel times=0
-</pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<br>
- 
+     dumbp &lt; $NEMO/data/starlab/cube10.dyn | tabcols - &gt; cube10.col
+     tabtos cube10.col cube10.dat block1=mass,pos,vel times=0
+</pre>Note this method does not convert the time, and cannot convert a series
+of snapshots from a simulation. 
+<p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
-, <a href='tsf.1.html'>tsf(1NEMO)</a>
+,
+<a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='rotcur.5.html'>rotcur(5NEMO)</a>
 , <a href='dumbp.1STARLAB.html'>dumbp(1STARLAB)</a>
-
-<p>
-<i>A comparison of eleven numerical integrations of the same gravitational
-25 body problem</i>, Myron. Lecar, Bull.Astr. 3, 91. 1968 (in: Colloque sur le
-problem gravitationnel des N corps). <p>
+ <p>
+<i>A comparison of eleven numerical
+integrations of the same gravitational 25 body problem</i>, Myron. Lecar, Bull.Astr.
+3, 91. 1968 (in: Colloque sur le problem gravitationnel des N corps). <p>
 <a href='http://orca.ucsc.edu/~rmont/index.html'>http://orca.ucsc.edu/~rmont/index.html</a>
 
 for the Figure-8 orbit <p>
