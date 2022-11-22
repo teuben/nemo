@@ -1,0 +1,5 @@
+Some legacy codes from Joachim Stadel - via N-BodyShop https://github.com/N-BodyShop
+
+direct -  A "fast" O(N^2) gravity code
+smooth - A Smoothing Program for N-body Simulations 
+
