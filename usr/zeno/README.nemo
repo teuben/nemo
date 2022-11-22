@@ -1,6 +1,10 @@
 
 See http://www.ifa.hawaii.edu/~barnes/software.html for info on the
-latest releases.  ZENO is also maintained in github now, and this is
+latest releases.  In 2022 their website went legacy, so try
+https://legacy.ifa.hawaii.edu/faculty/barnes/software.html now.
+
+
+ZENO is also maintained in github now, and this is
 the preferred way to install it within NEMO. See the Makefile for a
 few targets to help you with the install.
 

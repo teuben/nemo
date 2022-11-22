@@ -7,7 +7,8 @@ Glossary
 
 
   accelleration
-      Dataformat used in the :term:`falcon` package
+      Dataformat used in the :term:`falcon` package. Related to the
+      :term:`potential` in NEMO
 
   bodytrans
       Dataformat that is used to
@@ -28,8 +29,8 @@ Glossary
       A subpackage in NEMO that hosts the gyrfalcON code.
   
   fie
-      Most expressions that you give to program
-      keywords are
+      Most expressions that you give to
+      :term:`program keyword`s are
       parsed by *nemofie* and eventually ``fie``. (Nomenclature
       borrowed from :term:`GIPSY`)
 
@@ -77,18 +78,18 @@ Glossary
   potential
       Dataformat in NEMO used to represent a
       potential; most programs in NEMO which handle potentials start
-      or end with *pot*. Related are the :term:`accelleration`
+      or end with *pot*. Related to the :term:`accelleration`
 
   program keyword
       Keywords that are defined by the
       program only. They can be seen by using the **help=** keyword
-      (in itself being a system keyword).
+      (in itself being a :term:`system keyword`).
 
   review
       A small user interface that pops up when a
       program is interrupted. Type ``quit`` to exit it, or ``?``
       for help. This feature of the user interface may not be
-      installed in your version.
+      installed in your version. 
 
   set
       Compound hierarchical data-structure of a
@@ -114,7 +115,7 @@ Glossary
       Global keyword that every NEMO
       program knows about, and are not listed in the (program)
       keywords that can be seen by issuing e.g. **help=** (in itself
-      being a system keyword). This concept originated in GIPSY
+      being a system keyword). This concept originated in :term:`GIPSY`
 
   table
       A table consists of rows and columns of values, numbers or text.

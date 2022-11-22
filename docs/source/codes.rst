@@ -18,6 +18,8 @@ that have a tighter connection to NEMO:
    
 .. include:: zeno.rst
 
+.. include:: starlab.rst   
+
 .. include:: yt.rst
 
 

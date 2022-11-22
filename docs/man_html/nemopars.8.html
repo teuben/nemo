@@ -44,9 +44,9 @@ m16=0.815569
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 This is a simple python script, the CLI does not adhere to the
 usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- conventions. There is also no error checking on the
-names of the parameters. A mis-spelled variable or missing parameter in the
-rc file simply results in fewer columns in the output file. 
+ conventions. <p>
+When a parameter is missing (or mis-spelled)
+from the rc file, the value "nan" is printed instead. 
 <p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
@@ -65,6 +65,7 @@ Peter Teuben
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>17-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+16-nov-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Print "nan" when parameter missing<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

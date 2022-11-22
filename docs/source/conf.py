@@ -19,7 +19,7 @@
 import sphinx_rtd_theme
 
 project = 'NEMO'
-copyright = '2021, teuben'
+copyright = '2022, teuben'
 author = 'teuben'
 
 # The full version, including alpha/beta/rc tags

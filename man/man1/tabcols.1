@@ -1,4 +1,4 @@
-.TH TABCOLS 1NEMO "26 January 2000"
+.TH TABCOLS 1NEMO "20 November 2022"
 
 .SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
@@ -27,7 +27,8 @@ input file name(s). No default.
 \fBselect=\fP
 list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
 Columns can be repeated, and in any order. The output will be in exactly
-the same order as given with this keyword. First column is 1.
+the same order as given with this keyword. First column is 1. Column 0 can also
+be added to the output, which is the row number (first row is 1).
 [all]    
 .TP
 \fBcolsep=\fP
