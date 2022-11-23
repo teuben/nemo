@@ -15,15 +15,13 @@ For the benefit of NEMO users, STARLAB can usually be installed as follows:
 Examples
 ~~~~~~~~
 
-These examples taken from http://www.sns.ias.edu/~starlab/examples/
+These examples were taken from http://www.sns.ias.edu/~starlab/examples/,
+but an up-to-date list may be found in the file EXAMPLES in the Starlab
+distribution. If installed within NEMO, this should be in
+$NEMO/local/starlab/EXAMPLES.
 
-Note: Most tools are just simple interfaces onto the corresponding
-library functions, so the tasks listed below could all also be carried
-out by compiled programs rather than by pipes. However, the use of
-pipes is in many ways clearer and much more flexible.
 
-An up-to-date list may be found in the file EXAMPLES in the Starlab
-distribution. For details on a specific tool, type
+For details on a specific tool, type
 
 .. code-block::
 
