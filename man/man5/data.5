@@ -45,7 +45,8 @@ archive     	Archive of interesting N-body simulations
 
 .SH "EXAMPLES"
 The starlab \fIdyn\fP format can be converted to a table using
-the \fIdumbp(1STARLAB)\fP program, viz.
+the \fIdumbp(1STARLAB)\fP program, after which it can be
+converted to a snapshot, viz.
 .nf
      dumbp < $NEMO/data/starlab/cube10.dyn | tabcols - > cube10.col
      tabtos cube10.col cube10.dat block1=mass,pos,vel times=0
