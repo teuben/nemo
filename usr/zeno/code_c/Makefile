@@ -13,6 +13,11 @@
 # all available systems seem to have single-precision square root.
 CFLAGS = -DDOUBLEPREC -O
 
+all:   code
+
+clean:
+	rm -f *.o code
+
 # Build a treecode.
 
 code: code.o io.o load.o grav.o util.o getparam.o
@@ -38,3 +43,4 @@ util.o: util.c stdinc.h
 
 getparam.o: getparam.c stdinc.h
 	$(CC) $(CFLAGS) -c getparam.c
+
