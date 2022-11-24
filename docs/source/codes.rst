@@ -228,7 +228,12 @@ List of Related Codes
   nbody6xx
       Alias for nbody6++
       Also usable via :term:`NEMO`  
-      | http://ascl.net/1502.010 	
+      | http://ascl.net/1502.010
+
+  N-BodyShop
+      Simulation codes of astrophysical phenomenon with particle methods.
+      (tipsy, changa, gasoline)
+      | https://github.com/N-BodyShop
       
   nemesis
       Another code to document.

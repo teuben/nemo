@@ -37,3 +37,13 @@ identikit2:
 	wget http://www.ifa.hawaii.edu/faculty/barnes/research/identikit/identikit2.tar
 	mkdir identikit2
 	(cd identikit2; tar xf ../identikit2.tar)
+
+
+code1:
+	(cd code_c; make clean all)
+
+bench.ascii:
+	mkplummer - 128 | stoa - - > bench.ascii
+
+bench1: bench.ascii
+	code_c/code < bench.in > bench.log   2 > bench.err

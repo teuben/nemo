@@ -4,6 +4,8 @@ latest releases.  In 2022 their website went legacy, so try
 https://legacy.ifa.hawaii.edu/faculty/barnes/software.html now.
 
 
+# ZENO
+
 ZENO is also maintained in github now, and this is
 the preferred way to install it within NEMO. See the Makefile for a
 few targets to help you with the install.
@@ -33,4 +35,10 @@ I know about. Note there is no mkplummer for ZENO.
 Removing the symlink $NEMO/usr/zeno/zeno will disable the ZENO environment
 on your next NEMO load.
 
- - Peter Teuben,    oct 2022
+# code_c
+
+For historic reasons, this is the original Barnes and Hut treecode, written
+in C, preserved by Joshua Barnes. This is their 4th release. NEMO's "hackcode1"
+should come close to this version.
+
+ - Peter Teuben,    nov 2022
