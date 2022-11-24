@@ -7,16 +7,23 @@ ccdellint \- integrate in elliptical rings
 \fBccdellint\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBccdellint\fP integrates a Position-Position-Velocity (PPV) cube in elliptical rings,
-reducing it to a Radius-Velocity (RV) image.
+\fBccdellint\fP integrates a Position-Position-Velocity (PPV) cube in elliptical annuli
+in the first two dimensions, reducing it to a Radius-Velocity (RV) image.
 .PP
-This program also handles 2D images, in which case the output is
-a 1D image, or table (which makes more sense). The table lists
-ring number, number of pixels in ring, ring radius, ring brightness, cumulative ring brightness.
+This program also handles 2D images, in which case the output is a table, consisting
+of 6 columns:
+.nf
+   rad = outer radius of the annulus;
+   npix = number of pixels in the annulus;
+   int = average in the annulus; (no support for median yet)
+   rms = rms in the annulus;
+   sum = sum in the annulus;
+   cumsum = cumulative sum for all annuli so far. 
+.fi
+This is the same order and meaning as the corresponding \fIellint(1MIRIAD)\fP program.
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input data cube. No default.   
@@ -43,10 +50,10 @@ Value of the blank pixel to be ignored
 Normalize values to number of pixels in ring [t]
 .TP
 \fBout=\fP
-RV image, more useful for 3D cubes.
+RV image, useful for 3D cubes.
 .TP
 \fBtab=\fP
-Optional output table, more useful for 2D images.
+Output table, useful for 2D images.
 
 .SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
