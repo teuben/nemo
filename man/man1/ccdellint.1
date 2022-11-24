@@ -1,15 +1,20 @@
-.TH CCDELLINT 1NEMO "1 December 2020"
-.SH NAME
+.TH CCDELLINT 1NEMO "23 November 2022"
+
+.SH "NAME"
 ccdellint \- integrate in elliptical rings
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdellint\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdellint\fP integrates a Position-Position-Velocity (PPV) cube in elliptical rings,
 reducing it to a Radius-Velocity (RV) image.
 .PP
-This program should also be able to handle 2D images, in which case the output is
-a 1D image, or table. Not tested yet.
-.SH PARAMETERS
+This program also handles 2D images, in which case the output is
+a 1D image, or table (which makes more sense). The table lists
+ring number, number of pixels in ring, ring radius, ring brightness, cumulative ring brightness.
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -20,40 +25,55 @@ input data cube. No default.
 radii of the ring boundaries (Nring+1) [] 
 .TP
 \fBpa=\fP
-position angle of disk [0]   
+position angle of disk, astronomical convention. [0]   
 .TP
 \fBinc=\fP
 inclination angle of disk [45]   
 .TP
-\fBvsys=\fP
-systemic velocity [0]     
-.TP
 \fBcenter=\fP
 rotation center (mapcenter if left blank, 0,0=lower left)
+.TP
+\fBvsys=\fP
+systemic velocity. Only needed for cube. [0]     
 .TP
 \fBblank=\fP
 Value of the blank pixel to be ignored
 .TP
 \fBnorm=\fP
-Normalize RV image to number of pixels in
+Normalize values to number of pixels in ring [t]
 .TP
 \fBout=\fP
-RV image []     
+RV image, more useful for 3D cubes.
 .TP
 \fBtab=\fP
-Optional output table []
-.SH CAVEATS
+Optional output table, more useful for 2D images.
+
+.SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
-.SH EXAMPLES
-soon
-.SH SEE ALSO
+
+.SH "EXAMPLES"
+Example of generating a gaussian profile from a 2D gauss image
+.nf
+  % ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 out=. tab=-
+  0 60 2.5 0.997956 0.997956
+  1 164 7.5 0.99048 1.98844
+  ...
+  18 752 92.5 0.354992 13.4326
+  19 464 97.5 0.300485 13.7331
+.fi
+
+.SH "SEE ALSO"
 ccdzshift(1NEMO), ellipse(1NEMO), image(5NEMO)
-.SH FILES
+
+.SH "FILES"
 NEMO/src/image/misc/ccdellint.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 30-nov-2020	V0.1 drafted	PJT
+23-nov-2022	V0.3 confirmed 2D images, added table output	PJT
 .fi

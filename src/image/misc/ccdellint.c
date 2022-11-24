@@ -15,20 +15,18 @@ string defv[] = {
   "radii=\n       radii of the ring boundaries (Nring+1)",
   "pa=0\n         position angle of disk",
   "inc=45\n       inclination angle of disk",
-  "vsys=0\n       systemic velocity",
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
+  "vsys=0\n       systemic velocity (if PPV)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
   "norm=t\n       Normalize RV image to number of pixels in ring",
   "out=\n         RV image",
   "tab=\n         Optional output table",
-  "VERSION=0.2\n  1-dec-2020 PJT",
+  "VERSION=0.3\n  23-nov-2022 PJT",
   NULL,
 };
 
 
 string usage="integrate map/cube in elliptical rings";
-
-string cvsid="$Id$";
 
 
 #ifndef MAXRING
@@ -79,7 +77,7 @@ void nemo_main(void)
 {
   stream denstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, x, y, xt, yt, r, den;
-  real vr, wt, dx, dy, xmin, ymin, rmin, rmax, ave, tmp, rms;
+  real vr, wt, dx, dy, xmin, ymin, rmin, rmax, ave, tmp, rms, sum;
   real sincosi, cos2i, tga, dmin, dmax, dval, dr, area, fsum1, fsum2;
   int i, j, k, nx, ny, nz, ir, nring, nundf, nout, nang, nsum;
   bool Qnorm = getbparam("norm");
@@ -203,9 +201,18 @@ void nemo_main(void)
   /* report on the rings */
 
   if (Qtab) {
-    dprintf(0,"tab= not implemented yet");
+    if (nz > 1) error("Cannot print table for 3D cube ellint");
+    sum = 0.0;
+    for (i=0; i<nring; i++) {
+      r =  0.5*(rad[i]+rad[i+1]);
+      if (Qnorm)
+	sum += 2 * PI * r * MapValue(outptr,i,0);
+      else
+	sum += MapValue(outptr,i,0);
+      printf("%d %d %g %g %g\n", i, pixe[i], r, MapValue(outptr,i,0), sum);
+    }
   }
-  dprintf(0,"Nundf=%d/%d Nout=%d Nang=%d (sum=%d)\n",
+  dprintf(0,"Nundef=%d/%d Nout=%d Nang=%d (sum=%d)\n",
 	  nundf,nx*ny,nout,nang,nout+nundf+nang);
   dprintf(0,"Rmin/max = %g %g\n",rmin,rmax);
 
