@@ -2,7 +2,8 @@
  * CCDELLINT:   integrate properties in elliptical rings
  *              cloned off VELMAP
  *      
- *    30-nov-2020   0.1    New task, cloned off velmap     PJT
+ *    30-nov-2020   0.1    New task, cloned off velmap, for PPV -> RV     PJT
+ *    23-nov-2022   0.4    Mods for 2D maps                               PJT
  *
  *
  */
@@ -21,7 +22,9 @@ string defv[] = {
   "norm=t\n       Normalize RV image to number of pixels in ring",
   "out=\n         RV image",
   "tab=\n         Optional output table",
-  "VERSION=0.3\n  23-nov-2022 PJT",
+  "rscale=1\n     Scale applied ot radii",
+  "iscale=1\n     Scale applied to intensities",
+  "VERSION=0.4\n  23-nov-2022 PJT",
   NULL,
 };
 
@@ -34,7 +37,7 @@ string usage="integrate map/cube in elliptical rings";
 #endif
 
 bool Qtab = FALSE;
-imageptr denptr = NULL, velptr = NULL, outptr = NULL;
+imageptr velptr = NULL, outptr = NULL;
 
 real rad[MAXRING];
 int nrad;
@@ -75,12 +78,14 @@ int ring_index(int n, real *r, real rad)
 
 void nemo_main(void)
 {
-  stream denstr, velstr, outstr, tabstr;
-  real center[2], cospa, sinpa, cosi, sini, x, y, xt, yt, r, den;
-  real vr, wt, dx, dy, xmin, ymin, rmin, rmax, ave, tmp, rms, sum;
-  real sincosi, cos2i, tga, dmin, dmax, dval, dr, area, fsum1, fsum2;
-  int i, j, k, nx, ny, nz, ir, nring, nundf, nout, nang, nsum;
+  stream velstr, outstr, tabstr;
+  real center[2], cospa, sinpa, cosi, sini, x, y, xt, yt, r;
+  real dx, dy, xmin, ymin, rmin, rmax, sum;
+  real sincosi, cos2i, dmin, dmax, dval, dr, nppb;
+  int i, j, k, nx, ny, nz, ir, nring, nundf, nout, nang;
   bool Qnorm = getbparam("norm");
+  real iscale = getrparam("iscale");
+  real rscale = getrparam("rscale");
 
   velstr = stropen(getparam("in"),"r");
   
@@ -91,10 +96,18 @@ void nemo_main(void)
   dprintf(0,"Image %d x %d x %d pixels = %g x %g x %g size\n",
 	  nx,ny,nz, nx*Dx(velptr), ny*Dy(velptr), nz*Dz(velptr));
 
+  // Number of points per pixel = pi/(4*ln(2)) * (beam/pixel)^2
+  nppb = 1.13309 * Beamx(velptr) * Beamy(velptr) / (Dx(velptr)*Dy(velptr));
+  nppb = ABS(nppb);
+  if (nppb==0) nppb=1;
+  dprintf(0,"nppb = %g\n",nppb);
+
 
   if (hasvalue("tab")) {
     Qtab = TRUE;
     tabstr = stropen(getparam("tab"),"w");
+    fprintf(tabstr,"#  nppb=%g rscale=%g iscale=%g\n",nppb,rscale,iscale);
+    fprintf(tabstr,"# r npix int rms sum sumcum\n");
   } 
 
   nrad = nemoinpd(getparam("radii"),rad,MAXRING);
@@ -104,7 +117,7 @@ void nemo_main(void)
   create_image(&outptr, nring, nz);
   Xref(outptr) = 0.0;
   Xmin(outptr) = rad[0];
-  Dx(outptr)   = rad[1] - rad[0];
+  Dx(outptr)   = dr = rad[1] - rad[0];
   Yref(outptr) = Zref(velptr);
   Ymin(outptr) = Zmin(velptr);
   Dy(outptr)   = Dz(velptr);
@@ -193,7 +206,6 @@ void nemo_main(void)
 	  MapValue(outptr,i,k) = MapValue(outptr,i,k) / pixe[i];
 	  //printf("%d %d  %g\n",i,k,MapValue(outptr,i,k));
 	}
-  
 
   /* output R-V image */
   write_image(outstr, outptr);
@@ -204,17 +216,27 @@ void nemo_main(void)
     if (nz > 1) error("Cannot print table for 3D cube ellint");
     sum = 0.0;
     for (i=0; i<nring; i++) {
-      r =  0.5*(rad[i]+rad[i+1]);
-      if (Qnorm)
-	sum += 2 * PI * r * MapValue(outptr,i,0);
-      else
-	sum += MapValue(outptr,i,0);
-      printf("%d %d %g %g %g\n", i, pixe[i], r, MapValue(outptr,i,0), sum);
+      r =  rad[i+1];
+      sum += MapValue(outptr,i,0);
+      fprintf(tabstr,"%g %d %g 0.0 %g %g\n",
+	      r, pixe[i], iscale*MapValue(outptr,i,0), iscale*pixe[i]*MapValue(outptr,i,0),iscale*sum);
     }
+    strclose(tabstr);
   }
-  dprintf(0,"Nundef=%d/%d Nout=%d Nang=%d (sum=%d)\n",
+  dprintf(0,"Nundf=%d/%d Nout=%d Nang=%d (sum=%d)\n",
 	  nundf,nx*ny,nout,nang,nout+nundf+nang);
   dprintf(0,"Rmin/max = %g %g\n",rmin,rmax);
 
 }
 
+/*
+c       The output consists of 6 columns. They are the
+c
+c       outer radius (arcsec for RA, DEC images) of the annulus;
+c       number of pixels in the annulus;
+c       the average (median) in the annulus;
+c       the rms of the annulus;
+c       the sum in the annulus normalized by the volume of the primary beam
+c          (if there is one);
+c       the cumulative sum for all annuli so far.
+*/
