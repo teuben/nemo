@@ -1,7 +1,7 @@
-.TH CCDELLINT 1NEMO "24 November 2022"
+.TH CCDELLINT 1NEMO "25 November 2022"
 
 .SH "NAME"
-ccdellint \- integrate in elliptical rings
+ccdellint \- integrate map or cube in elliptical rings
 
 .SH "SYNOPSIS"
 \fBccdellint\fP [parameter=value]
@@ -13,14 +13,16 @@ in the first two dimensions, reducing it to a Radius-Velocity (RV) image.
 This program also handles 2D images, in which case the output is a table, consisting
 of 6 columns:
 .nf
+
    rad = outer radius of the annulus;
    npix = number of pixels in the annulus;
    int = average in the annulus; (no support for median yet)
    rms = rms in the annulus;
    sum = sum in the annulus;
-   cumsum = cumulative sum for all annuli so far. 
+   cumsum = cumulative sum for all annuli so far.
+   
 .fi
-This is the same order and meaning as table from \fIellint(1MIRIAD)\fP.
+This is the same order and meaning as the table from \fIellint(1MIRIAD)\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -62,7 +64,7 @@ this is usually 3600.  [1]
 .TP
 \fBiscale=\fP
 Convenience factor by which intensities are multiplied for display in the table. For FITS images
-this is usually 1.133*(beam/pixel)**2.  [1]
+this is usually 1 / (1.133*(beam/pixel)**2).  [1]
 
 .SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
@@ -71,12 +73,12 @@ As with most of these codes, the center of pixel determines to which ring the pi
 Example of generating a gaussian profile from a 2D gauss image
 .nf
 
-% ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 out=. tab=-
-  0 60 2.5 0.997956 0.997956
-  1 164 7.5 0.99048 1.98844
+% ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 tab=-
+  5 60 0.997956 0.00130234 59.8774 59.8774
+  10 164 0.99048 0.00395266 162.439 222.316
   ...
-  18 752 92.5 0.354992 13.4326
-  19 464 97.5 0.300485 13.7331
+  95 752 0.354992 0.0438741 266.954 9807.25
+  100 464 0.300485 0.0282898 139.425 9946.68
 
 .fi
 .PP
@@ -94,21 +96,13 @@ and iscale=2.5/6 for viewing in Jy.km/s:
   250 241 -0.0573514 0 -13.8217 3044.04
   
 .fi
-where the total flux out to 250 arcsec is 3044 Jy.km/s
+
 .PP
 Some examples of PPV->RV
 .nf
   % fitsccd ngc6503.cube.fits - |\\
-      ccdellint - 0:1000/3600:10/3600 pa=-60 inc=40 center=163,122 out=junk1.ccd norm=f
+      ccdellint - 0:1000/3600:10/3600 pa=-60 inc=40 center=163,122 out=ngc6503.rv.ccd norm=f
 
-  % fitsccd  M100_97520_99703.fits |\\
-      ccdellint - 0:240/3600:10/3600 pa=150 inc=40 center=45,45 out=junk1.ccd norm=f
-
-  % fitsccd  M100_combine_CO_cube.image.fits - |\\
-      ccdellint - 0:200/3600:1/3600 pa=150 inc=40 center=400,411 out=junk2.ccd norm=f
-
-  % fitsccd  M100_Feather_CO.image.fits - |\\
-      ccdellint - 0:200/3600:1/3600 pa=150 inc=40 center=180,263 out=junk3.ccd norm=f
 .fi
 .SH "SEE ALSO"
 ccdzshift(1NEMO), ellipse(1NEMO), image(5NEMO)
