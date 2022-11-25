@@ -19,7 +19,7 @@ string defv[] = {
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "vsys=0\n       systemic velocity (if PPV)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
-  "norm=t\n       Normalize RV image to number of pixels in ring",
+  "norm=f\n       Normalize RV image to number of pixels in ring",
   "out=\n         RV image",
   "tab=\n         Optional output table",
   "rscale=1\n     Scale applied ot radii",
@@ -37,6 +37,7 @@ string usage="integrate map/cube in elliptical rings";
 #endif
 
 bool Qtab = FALSE;
+bool Qout = FALSE;
 imageptr velptr = NULL, outptr = NULL;
 
 real rad[MAXRING];
@@ -108,7 +109,16 @@ void nemo_main(void)
     tabstr = stropen(getparam("tab"),"w");
     fprintf(tabstr,"#  nppb=%g rscale=%g iscale=%g\n",nppb,rscale,iscale);
     fprintf(tabstr,"# r npix int rms sum sumcum\n");
-  } 
+    dprintf(0,"#  nppb=%g rscale=%g iscale=%g\n",nppb,rscale,iscale);    
+  }
+
+  if (hasvalue("out")) {
+    Qout = TRUE;
+    outstr = stropen(getparam("out"), "w");
+  }
+
+  if (!Qtab && !Qout)
+    warning("No output (out= or tab=) selected");
 
   nrad = nemoinpd(getparam("radii"),rad,MAXRING);
   if (nrad < 2) error("got no rings (%d), use radii=",nrad);
@@ -128,12 +138,11 @@ void nemo_main(void)
     Namex(outptr)= strdup("R");
     Namey(outptr)= strdup("Z");
   }
-    
-  outstr = stropen(getparam("out"), "w");
+
     
   if (hasvalue("center")) {
     if (nemoinpd(getparam("center"),center,2) != 2)
-      error("not enuf values for center=, need 2");
+      error("not enuf values for center=%s, need 2",getparam("center"));
     xpos = center[0];
     ypos = center[1];
   } else {
@@ -199,27 +208,40 @@ void nemo_main(void)
     } /* i */
   } /* j */
 
-  if (Qnorm)
+  if (Qnorm) {
     for (i=0; i<nring; i++)
       if (pixe[i] > 0)
 	for (k=0; k<nz; k++) {
 	  MapValue(outptr,i,k) = MapValue(outptr,i,k) / pixe[i];
 	  //printf("%d %d  %g\n",i,k,MapValue(outptr,i,k));
 	}
+  } 
 
   /* output R-V image */
-  write_image(outstr, outptr);
+  if (Qout)
+    !write_image(outstr, outptr);
 
   /* report on the rings */
 
   if (Qtab) {
+    if (Qnorm)      // un-normalize back if it has been
+      for (i=0; i<nring; i++)
+	if (pixe[i] > 0)
+	  MapValue(outptr,i,0) = MapValue(outptr,i,0) * pixe[i];
+
     if (nz > 1) error("Cannot print table for 3D cube ellint");
     sum = 0.0;
     for (i=0; i<nring; i++) {
       r =  rad[i+1];
       sum += MapValue(outptr,i,0);
-      fprintf(tabstr,"%g %d %g 0.0 %g %g\n",
-	      r, pixe[i], iscale*MapValue(outptr,i,0), iscale*pixe[i]*MapValue(outptr,i,0),iscale*sum);
+      // r npix int rms sum sumcum
+      fprintf(tabstr,"%g %d %g %g %g %g\n",
+	rscale*r,
+	pixe[i],
+	iscale*MapValue(outptr,i,0)/pixe[i],
+	0.0, // @todo rms
+	iscale*MapValue(outptr,i,0),
+	iscale*sum);
     }
     strclose(tabstr);
   }
@@ -229,14 +251,3 @@ void nemo_main(void)
 
 }
 
-/*
-c       The output consists of 6 columns. They are the
-c
-c       outer radius (arcsec for RA, DEC images) of the annulus;
-c       number of pixels in the annulus;
-c       the average (median) in the annulus;
-c       the rms of the annulus;
-c       the sum in the annulus normalized by the volume of the primary beam
-c          (if there is one);
-c       the cumulative sum for all annuli so far.
-*/

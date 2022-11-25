@@ -1,4 +1,4 @@
-.TH CCDELLINT 1NEMO "23 November 2022"
+.TH CCDELLINT 1NEMO "24 November 2022"
 
 .SH "NAME"
 ccdellint \- integrate in elliptical rings
@@ -20,7 +20,7 @@ of 6 columns:
    sum = sum in the annulus;
    cumsum = cumulative sum for all annuli so far. 
 .fi
-This is the same order and meaning as the corresponding \fIellint(1MIRIAD)\fP program.
+This is the same order and meaning as table from \fIellint(1MIRIAD)\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -44,16 +44,25 @@ rotation center (mapcenter if left blank, 0,0=lower left)
 systemic velocity. Only needed for cube. [0]     
 .TP
 \fBblank=\fP
-Value of the blank pixel to be ignored
+Value of the blank pixel to be ignored [0.0]
 .TP
 \fBnorm=\fP
-Normalize values to number of pixels in ring [t]
+Normalize values to number of pixels in ring. This only has an effect on the image
+written, not on the table, which uses both.  [t]
 .TP
 \fBout=\fP
-RV image, useful for 3D cubes.
+RV image, useful for 3D cubes. If not given, no image will be written. Default: not used
 .TP
 \fBtab=\fP
-Output table, useful for 2D images.
+Output table, useful for 2D images. If not give, no table will be written. Default: not used
+.TP
+\fBrscale=\fP
+Convenience factor by which radii are multiplied for display in the table. For FITS images
+this is usually 3600.  [1]
+.TP
+\fBiscale=\fP
+Convenience factor by which intensities are multiplied for display in the table. For FITS images
+this is usually 1.133*(beam/pixel)**2.  [1]
 
 .SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
@@ -61,14 +70,46 @@ As with most of these codes, the center of pixel determines to which ring the pi
 .SH "EXAMPLES"
 Example of generating a gaussian profile from a 2D gauss image
 .nf
-  % ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 out=. tab=-
+
+% ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 out=. tab=-
   0 60 2.5 0.997956 0.997956
   1 164 7.5 0.99048 1.98844
   ...
   18 752 92.5 0.354992 13.4326
   19 464 97.5 0.300485 13.7331
-.fi
 
+.fi
+.PP
+For a map in K.km/s that needs to be converted to Jy.km/s, with Jy/K=2.5 and a beam of 12.65 arcsec and
+5.5 pixels there are 6 points per beam, therefore the rscale=3600 is needed to view the table in arcsec,
+and iscale=2.5/6 for viewing in Jy.km/s:
+.nf
+
+  % fitsccd M100_97520_99703.mom0.fits  - |\\
+       ccdellint - 0:250/3600:10/3600 pa=150 inc=40 center=45,45 rscale=3600 iscale=1.41/0.65/6.00 tab=-
+  10 7 16.3524 0 114.467 114.467
+  20 24 11.824 0 283.776 398.243
+  ..
+  240 290 0.0505762 0 14.6671 3057.86
+  250 241 -0.0573514 0 -13.8217 3044.04
+  
+.fi
+where the total flux out to 250 arcsec is 3044 Jy.km/s
+.PP
+Some examples of PPV->RV
+.nf
+  % fitsccd ngc6503.cube.fits - |\\
+      ccdellint - 0:1000/3600:10/3600 pa=-60 inc=40 center=163,122 out=junk1.ccd norm=f
+
+  % fitsccd  M100_97520_99703.fits |\\
+      ccdellint - 0:240/3600:10/3600 pa=150 inc=40 center=45,45 out=junk1.ccd norm=f
+
+  % fitsccd  M100_combine_CO_cube.image.fits - |\\
+      ccdellint - 0:200/3600:1/3600 pa=150 inc=40 center=400,411 out=junk2.ccd norm=f
+
+  % fitsccd  M100_Feather_CO.image.fits - |\\
+      ccdellint - 0:200/3600:1/3600 pa=150 inc=40 center=180,263 out=junk3.ccd norm=f
+.fi
 .SH "SEE ALSO"
 ccdzshift(1NEMO), ellipse(1NEMO), image(5NEMO)
 
