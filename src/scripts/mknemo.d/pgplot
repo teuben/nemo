@@ -5,6 +5,7 @@
 #
 #    Note that if the GIF driver is selected, for gcc >= 10.x the
 #    gfortran compiler needs an extra  -fallow-argument-mismatch  flag.
+#    issue #110
 #
 version=5.2.2-git
 
