@@ -10,6 +10,7 @@
 
 #include <nemo.h>
 #include <image.h>
+#include <moment.h>
 
 string defv[] = {
   "in=???\n       input velocity field",
@@ -24,13 +25,12 @@ string defv[] = {
   "tab=\n         Optional output table",
   "rscale=1\n     Scale applied ot radii",
   "iscale=1\n     Scale applied to intensities",
-  "VERSION=0.4\n  23-nov-2022 PJT",
+  "VERSION=0.5\n  25-nov-2022 PJT",
   NULL,
 };
 
 
 string usage="integrate map/cube in elliptical rings";
-
 
 #ifndef MAXRING
 #define MAXRING    2048
@@ -44,8 +44,6 @@ real rad[MAXRING];
 int nrad;
 
 int  pixe[MAXRING];
-real vsum[MAXRING], vsqu[MAXRING], wsum[MAXRING];
-real vrot[MAXRING];
 
 real pa, inc, vsys, xpos, ypos;
 real undf;
@@ -87,6 +85,7 @@ void nemo_main(void)
   bool Qnorm = getbparam("norm");
   real iscale = getrparam("iscale");
   real rscale = getrparam("rscale");
+  Moment *mp;
 
   velstr = stropen(getparam("in"),"r");
   
@@ -123,6 +122,10 @@ void nemo_main(void)
   nrad = nemoinpd(getparam("radii"),rad,MAXRING);
   if (nrad < 2) error("got no rings (%d), use radii=",nrad);
   nring = nrad-1;
+
+  mp = (Moment *) allocate(nring * sizeof(Moment));
+  for (i=0; i<nring; i++)
+    ini_moment(&mp[i], 2, 0);
 
   create_image(&outptr, nring, nz);
   Xref(outptr) = 0.0;
@@ -204,6 +207,9 @@ void nemo_main(void)
 	dval = CubeValue(velptr,i,j,k);
 	MapValue(outptr,ir,k) = MapValue(outptr,ir,k) + dval;
 	pixe[ir]++;
+	if (nz==1) {    // for 2D maps keep track of RMS
+	  accum_moment(&mp[ir], dval, 1.0);
+	}
       } /* k */
     } /* i */
   } /* j */
@@ -236,12 +242,12 @@ void nemo_main(void)
       sum += MapValue(outptr,i,0);
       // r npix int rms sum sumcum
       fprintf(tabstr,"%g %d %g %g %g %g\n",
-	rscale*r,
-	pixe[i],
-	iscale*MapValue(outptr,i,0)/pixe[i],
-	0.0, // @todo rms
-	iscale*MapValue(outptr,i,0),
-	iscale*sum);
+	      rscale*r,
+	      n_moment(&mp[i]),
+	      iscale*mean_moment(&mp[i]),
+	      iscale*sigma_moment(&mp[i]),
+	      iscale*sum_moment(&mp[i]),
+	      iscale*sum);
     }
     strclose(tabstr);
   }
