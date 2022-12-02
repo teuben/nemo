@@ -16,7 +16,7 @@
 #   tabmath sratio.tab - 1/%2 | tabnllsqfit - 1 3
 #   -> a= 0.926675 0.697506    intercept
 #      b= 0.786314 0.0112413   slope
-#   ->  sratio_rms ~ 1.26/N
+#   ->  sratio_rms ~ 1.27/N
 #
 #PLOT tabplot sratio.tab 1 2   0 100 0 0.16  point=2,0.05 line=1,1 nxticks=9 xlab=Nbeams ylab=sratio_rms headline=RMS=1
 
