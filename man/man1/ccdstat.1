@@ -1,4 +1,4 @@
-.TH CCDSTAT 1NEMO "31 May 2022"
+.TH CCDSTAT 1NEMO "1 December 2022"
 
 .SH "NAME"
 ccdstat \- statistics (1st through 4th moment) and chi2
@@ -68,6 +68,9 @@ Use the \fItorben\fP method to compute the median. [Default: f]
 \fBrobust=t|f\fP
 Conmpute robust mean, median and dispersion. [Default: f]
 .TP
+\fBsratio=t|f\fP
+Conmpute signed flux ratio (FP-FN)/(FP+FN).. [Default: f]
+.TP
 \fBmmcount=t|f\fP
 Count occurances of min and max
 .TP
@@ -104,7 +107,8 @@ If a table output filename is given, data values are written here. otherwise
 on screen.
 .TP
 \fBqac=t|f\fP
-If selected, a QAC listing is selected. This gives the mean, rms, min and max.
+If selected, a QAC listing is selected. This gives the mean, rms, min, max, etc.
+See \fIqac_stats(5NEMO)\fP for more info.
 [Default: f]
 .TP
 \fBlabel=\fP
@@ -142,7 +146,7 @@ df= 98
 .fi
 
 .SH "SEE ALSO"
-snapccd(1NEMO), image(5NEMO)
+snapccd(1NEMO), image(5NEMO), qac_stats(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
@@ -155,7 +159,7 @@ src/image/misc	ccdstat.c
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
  4-Oct-88	V1.0: Created		PJT
 9-may-03	V1.3: added bad=	PJT
 5-jun-03	V1.4: added win=	PJT
@@ -164,4 +168,5 @@ src/image/misc	ccdstat.c
 15-oct-11	V1.10: added maxmom= and bench options	PJT
 14-feb-13	V2.0:  ignore=t to properly handle units	PJT
 4-dec-2020	V3.8: added qac=	PJT
+1-dec-2022	V3.12: added sratio=	PJT
 .fi

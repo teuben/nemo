@@ -21,8 +21,9 @@
  *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
  *    11-oct-2020   3.7 optimized memory usage, speed up median computation
  *     4-dec-2020   3.8 qac mode
+ *     1-dec-2022   3.12 qac mode when planes >= 0
  */
-
+ 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
@@ -40,6 +41,7 @@ string defv[] = {
     "median=f\n     Optional display of the median value",
     "torben=f\n     Use torben method for median instead",
     "robust=f\n     Compute robust median",
+    "sratio=f\n     Optional display of the signed fluxes (FP-FN)/(FP+FN) ratio",
     "mmcount=f\n    Count occurances of min and max",
     "maxpos=f\n     Add location of where the max occured",
     "half=f\n       Only use half (negative) values and symmetrize them",
@@ -50,7 +52,7 @@ string defv[] = {
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
     "label=\n       QAC label",
-    "VERSION=3.11\n 6-may-2022 PJT",
+    "VERSION=3.12\n 1-dec-2022 PJT",
     NULL,
 };
 
@@ -84,7 +86,7 @@ void nemo_main(void)
     real dmin, dmax;
     real sum, sov, q1, q2, q3, tm;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount;
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount, Qsratio;
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
@@ -156,6 +158,7 @@ void nemo_main(void)
     if (Qmax) xmax = getdparam("max");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
+    Qsratio = getbparam("sratio");
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
     Qtorben = getbparam("torben");
@@ -304,7 +307,8 @@ void nemo_main(void)
 
       /* tabular output, one line per (selected) plane */
 
-      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov ");
+      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov");
+      if (Qsratio) printf(" sratio");
       if (Qmedian) printf(" med1 med2");
       if (Qrobust) printf(" rN rmean rsigma rmed]");
       if (Qmaxpos) printf(" maxposx maxposy");
@@ -352,6 +356,9 @@ void nemo_main(void)
 	printf("%d %f  %f %f %d  %f %f %f %f  %f %f",
 	       k+1, z, min_moment(&m), max_moment(&m), n_moment(&m),
 	       mean,sigma,skew,kurt,sum,sum*sov);
+	if (Qsratio) {
+	  printf ("   %f",sratio_moment(&m));
+	}
 	if (Qmedian) {
 	  printf ("   %f",get_median(ngood,data));
 	  if (ndat>0) printf (" %f",median_moment(&m));

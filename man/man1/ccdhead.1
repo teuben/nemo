@@ -1,4 +1,4 @@
-.TH CCDHEAD 1NEMO "22 May 2021"
+.TH CCDHEAD 1NEMO "24 November 2022"
 
 .SH "NAME"
 ccdhead \- print out image header
@@ -15,12 +15,16 @@ is also given:
 .TP 20
 \fBin=\fP
 Input image filename [???]    
+\fBscale=\fP
+Factor by which pixel and beam size are multiplied for easier viewing. [1]
 
 .SH "EXAMPLES"
 Sample output
 .nf
 Size:      97 108 1
 Cell:      0.8774 20 1
+Beam:      1 1 1 
+
 AXIS=1:
 LL-Corner: 0.4387 -1070 0
 TR-Corner: 84.6691 1070 0
@@ -33,7 +37,7 @@ Note that the LL and RR corner are the centers of the pixel, whereas X-Y-Z range
 pixel edge. They should differ by cell/2 size.
 
 .SH "SEE ALSO"
-tsf(1NEMO)
+tsf(1NEMO), fitshead(1NEMO)
 
 .SH "FILES"
 src/image/io
@@ -43,6 +47,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 22-May-21	V1.4 man page finally written	PJT
+24-nov-22	V1.5 add scale=	PJT
 .fi

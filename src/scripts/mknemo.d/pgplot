@@ -3,6 +3,10 @@
 #    this is a last resort way to install PGPLOT from source
 #    See also the yapp=pglocal option in $NEMO/doc/install_nemo.sh
 #
+#    Note that if the GIF driver is selected, for gcc >= 10.x the
+#    gfortran compiler needs an extra  -fallow-argument-mismatch  flag.
+#    issue #110
+#
 version=5.2.2-git
 
 for arg in $*; do
@@ -10,7 +14,7 @@ for arg in $*; do
 done
 
 cd $NEMO/local
-$NEMO/src/scripts/pgplot.install png=1
+$NEMO/src/scripts/pgplot.install png=1 $*
 
 echo "Installed version=$version in $NEMOLIB"
 
