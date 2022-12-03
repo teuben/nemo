@@ -41,4 +41,8 @@ For historic reasons, this is the original Barnes and Hut treecode, written
 in C, preserved by Joshua Barnes. This is their 4th release. NEMO's "hackcode1"
 should come close to this version.
 
+## Description of test procedures and related files:
+
+wget --no-check-certificate  https://legacy.ifa.hawaii.edu/faculty/barnes/treecode_old/testdata.txt
+
  - Peter Teuben,    nov 2022
