@@ -77,6 +77,10 @@ if [ "$nemo" == "." ]; then
     fi
     nemo=$(pwd)
 else
+    if [ -e nemo_start.sh.in ]; then
+	echo "Warning: you seem to want to make a new nemo inside an old nemo...."
+	sleep 5
+    fi
     # safety
     if [ -d $nemo ]; then
 	echo Sleep 5 seconds before removing nemo=$nemo ....
