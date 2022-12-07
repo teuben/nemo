@@ -4,6 +4,7 @@
  *      
  *    30-nov-2020   0.1    New task, cloned off velmap, for PPV -> RV     PJT
  *    23-nov-2022   0.4    Mods for 2D maps                               PJT
+ *     6-dec-2022   0.6    Option for more square shapes                  PJT
  *
  *
  */
@@ -16,7 +17,7 @@ string defv[] = {
   "in=???\n       input velocity field",
   "radii=\n       radii of the ring boundaries (Nring+1)",
   "pa=0\n         position angle of disk",
-  "inc=45\n       inclination angle of disk",
+  "inc=0\n        inclination angle of disk",
   "center=\n      rotation center (mapcenter if left blank, 0,0=lower left)",
   "vsys=0\n       systemic velocity (if PPV)",
   "blank=0.0\n    Value of the blank pixel to be ignored",
@@ -25,12 +26,15 @@ string defv[] = {
   "tab=\n         Optional output table",
   "rscale=1\n     Scale applied ot radii",
   "iscale=1\n     Scale applied to intensities",
-  "VERSION=0.5\n  25-nov-2022 PJT",
+  "metric=2\n     radius metric : 2 = circle (2) or boxy (>>2) or pointy (<<1)",
+  "VERSION=0.6\n  6-dec-2022 PJT",
   NULL,
 };
 
 
-string usage="integrate map/cube in elliptical rings";
+string usage="integrate map/cube in elliptical (like) rings";
+
+//#define JUNK
 
 #ifndef MAXRING
 #define MAXRING    2048
@@ -70,14 +74,25 @@ int ring_index(int n, real *r, real rad)
   if (rad < r[0]) return -1;
   if (rad > r[n-1]) return -2;
   for (i=0;i<n;i++)
-    if (rad >= r[i] && rad < r[i+1]) return i;
+    if (rad >= r[i] && rad <= r[i+1]) return i;
   error("ring_index: should never gotten here %g in [%g : %g]",	rad,r[0],r[n-1]);
   return -1;
 }
 
+inline real radius_metric(real x,real y,real m)
+{
+  if (m==2)
+    return sqrt(x*x+y*y);
+  if (x<0) x=-x;
+  if (y<0) y=-y;
+  if (m==1)
+    return x+y;
+  return pow(pow(x,m)+pow(y,m), 1.0/m);
+}
+
 void nemo_main(void)
 {
-  stream velstr, outstr, tabstr;
+  stream velstr, outstr=NULL, tabstr=NULL;
   real center[2], cospa, sinpa, cosi, sini, x, y, xt, yt, r;
   real dx, dy, xmin, ymin, rmin, rmax, sum;
   real sincosi, cos2i, dmin, dmax, dval, dr, nppb;
@@ -85,6 +100,7 @@ void nemo_main(void)
   bool Qnorm = getbparam("norm");
   real iscale = getrparam("iscale");
   real rscale = getrparam("rscale");
+  real metric = getrparam("metric");
   Moment *mp;
 
   velstr = stropen(getparam("in"),"r");
@@ -189,7 +205,7 @@ void nemo_main(void)
       yt = x*sinpa + y*cospa;      /* major axis now along Y  */
       xt = x*cospa - y*sinpa;      /* minor axis along X      */
       xt /= cosi;                  /* deproject to the circle */
-      r  = sqrt(xt*xt+yt*yt);      /* radius in the disk      */
+      r = radius_metric(xt,yt,metric);
       rmin = MIN(r,rmin);
       rmax = MAX(r,rmax);
       ir = ring_index(nrad,rad,r);
@@ -210,6 +226,9 @@ void nemo_main(void)
 	if (nz==1) {    // for 2D maps keep track of RMS
 	  accum_moment(&mp[ir], dval, 1.0);
 	}
+#ifdef JUNK
+	CubeValue(velptr,i,j,k) = 0.0;
+#endif	
       } /* k */
     } /* i */
   } /* j */
@@ -225,7 +244,17 @@ void nemo_main(void)
 
   /* output R-V image */
   if (Qout)
-    !write_image(outstr, outptr);
+    write_image(outstr, outptr);
+  else {
+#ifdef JUNK    
+    warning("debug output");
+    outstr = stropen("junk.ccd","w");
+    write_image(outstr,velptr);
+    strclose(outstr);
+#else
+    warning("no binary out=");
+#endif    
+  }
 
   /* report on the rings */
 
