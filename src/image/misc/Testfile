@@ -1,5 +1,5 @@
 DIR = src/image/misc
-BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack
+BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint
 NEED = $(BIN)  ccdmath ccdgen
 
 help:
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in ccdmom.in gauss1 gauss2 gauss12 gauss21
+	@rm -f ccd.in ccdmom.in ccdmom2.in gauss1 gauss2 gauss12 gauss21
 
 #	power of function and contour levels to plot with
 P = 1.1
@@ -28,7 +28,6 @@ ccdmom.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
 	@bsf ccdmom.in	'1.65217 2.37026 0 7 23'
-
 
 ccdplot: ccd.in
 	@echo Running $@
@@ -53,6 +52,14 @@ ccdmom: ccdmom.in
 	$(EXEC) ccdmom ccdmom.in - 2 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 	$(EXEC) ccdmom ccdmom.in - 3 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 
+N2 = 100
+ccdmom2.in:
+	@echo Creating $@
+	$(EXEC) ccdgen out=ccdmom2.in object=gauss spar=1,25 size=128,128
+
+ccdellint: ccdmom2.in
+	@echo Running $@
+	$(EXEC) ccdellint ccdmom2.in 0:50:10 tab=- ; nemo.coverage ccdellint.c
 
 gauss1:
 	@echo Creating $@
