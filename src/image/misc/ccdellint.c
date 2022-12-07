@@ -247,7 +247,7 @@ void nemo_main(void)
     write_image(outstr, outptr);
   else {
 #ifdef JUNK    
-    warning("debug output");
+    warning("debug output to junk.ccd");
     outstr = stropen("junk.ccd","w");
     write_image(outstr,velptr);
     strclose(outstr);
