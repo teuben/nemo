@@ -1,7 +1,7 @@
-.TH CCDELLINT 1NEMO "25 November 2022"
+.TH CCDELLINT 1NEMO "6 December 2022"
 
 .SH "NAME"
-ccdellint \- integrate map or cube in elliptical rings
+ccdellint \- integrate map or cube in elliptical (like) rings
 
 .SH "SYNOPSIS"
 \fBccdellint\fP [parameter=value]
@@ -25,6 +25,9 @@ of 6 columns:
 This is the same order and meaning as the table from \fIellint(1MIRIAD)\fP.
 .PP
 The particle based program \fIsnapshell(1NEMO)\fP does something similar in 3D.
+.PP
+The metric of how the radius is computed can be changed using the \fBmetric=\fP keyword.
+For metric=2 these would be called true rings, for metric=1 a square.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -39,7 +42,7 @@ radii of the ring boundaries (Nring+1) []
 position angle of disk, astronomical convention. [0]   
 .TP
 \fBinc=\fP
-inclination angle of disk [45]   
+inclination angle of disk [0]   
 .TP
 \fBcenter=\fP
 rotation center (mapcenter if left blank, 0,0=lower left)
@@ -67,20 +70,28 @@ this is usually 3600.  [1]
 \fBiscale=\fP
 Convenience factor by which intensities are multiplied for display in the table. For FITS images
 this is usually 1 / (1.133*(beam/pixel)**2).  [1]
+.TP
+\fBmetric=N\fP 
+The power of the metric to compute radius. N=2 is the traditional cartesian [2]
 
 .SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
+.PP
+A value of \fBmetric=1\fP can be interesting, though the position angle may need to be adjusted, as the
+box is mis-aligned by 45 degrees from the major axis.
+For large values of \fBmetric\fP the box is aligned along the major axis.
+
 
 .SH "EXAMPLES"
 Example of generating a gaussian profile from a 2D gauss image
 .nf
 
-% ccdgen out=- object=gauss spar=1,50 size=128,128 | ccdellint - 0:100:5 tab=-
-  5 60 0.997956 0.00130234 59.8774 59.8774
-  10 164 0.99048 0.00395266 162.439 222.316
+% ccdgen out=- object=gauss spar=1,50 size=256,256 | ccdellint - 0:100:5 tab=-
+  5 80 0.997464 0.00145455 79.7971 79.7971
+  10 236 0.987487 0.00426892 233.047 312.844
   ...
-  95 752 0.354992 0.0438741 266.954 9807.25
-  100 464 0.300485 0.0282898 139.425 9946.68
+  95 2924 0.180558 0.0096899 527.951 13127.6
+  100 3056 0.149281 0.00837475 456.204 13583.8
 
 .fi
 .PP
@@ -117,7 +128,8 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 30-nov-2020	V0.1 drafted	PJT
 23-nov-2022	V0.3 confirmed 2D images, added table output	PJT
+6-dec-2022	V0.6 use metric= to allow other radius methods	PJT
 .fi
