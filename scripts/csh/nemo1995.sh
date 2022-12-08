@@ -1,6 +1,7 @@
 #! /bin/bash
 #
-#   Snippet of code as was presented in Teuben(1995) - 1995ASPC...77..398T
+#   Snippet of code as was presented in 1995ASPC...77..398T
+#   "The Stellar Dynamics Toolbox NEMO" , Teuben (1995)
 
 #   Still runs, though it had a bug (the times=80 keyword should not have been used)
 #   Even the URL from that 1995 paper   http://astro.umd.edu/nemo   still works.
