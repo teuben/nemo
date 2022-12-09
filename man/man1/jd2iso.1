@@ -12,6 +12,12 @@ Written in a rush, this converts Julian Days to Civil Time, using
 cannot go before 1970.0
 .TP
 Some future version will make it real ISO and do the time zones correct.
+.nf
+
+   # ISO format display the current time:
+   date -u +%Y-%m-%dT%H:%M:%S.%N
+   2022-12-09T00:05:28.406997840
+.fi
 .TP
 For reference, MJD2000 = 51544.0, JD2000 = 2451544.5.
 
