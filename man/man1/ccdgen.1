@@ -1,4 +1,4 @@
-.TH CCDGEN 1NEMO "8 May 2022"
+.TH CCDGEN 1NEMO "8 December 2022"
 
 .SH "NAME"
 ccdgen \- create or add objects to an image
@@ -21,10 +21,6 @@ No corrections for brightness due to inclination are made however.
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
-\fBin=\fP
-Input file (optional) to be added to the output file. Default: none,
-map is generated.
-.TP
 \fBout=\fP
 Output file, in standard \fIimage(5NEMO)\fP format. No default.     
 .TP
@@ -89,6 +85,10 @@ Random seed [0]
 .TP
 \fBheadline=\fP
 Random verbiage added to the image. Default: none
+.TP
+\fBin=\fP
+Input file (optional) to be added to the output file. Default: none,
+map is generated.
 
 .SH "OBJECT"
 The \fBobject=\fP keyword allows for the following objects, and \fBspar=\fP for their parameters
@@ -156,16 +156,16 @@ Here's how to make a simple barred galaxy by adding an exponential disk and
 a (smaller) exponential bar:
 .nf
 
-ccdgen out=- object=exp spar=1,40 pa=60 inc=45 size=256 |\\
- ccdgen - bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
+ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256 |\\
+ ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
 
 .fi
 or if you want them to be a bit more astronomical, you'll need to make the units
 come out in degrees for the conversion to FITS, viz.:
 .nf
 
-ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600 |\\
- ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\\
+ccdgen - object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600 |\\
+ ccdgen - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 in=- |\\
  ccdfits - bar.fits radecvel=t
 
 .fi
@@ -175,8 +175,8 @@ and the option to fill your cube with some random blobs and noise is a bit more 
 nemoinp 1:100 |\\
   tabmath - - 'ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)' all > b100.tab
 
-ccdgen "" - blobs @b100.tab size=128,128,128 |\\
-  ccdgen - - noise 0,0.02 |\\
+ccdgen - blobs @b100.tab size=128,128,128 |\\
+  ccdgen - noise 0,0.02 in=- |\\
   ccdsmooth - - 5   |\\
   ccdsky - -  |\\
   ccdfits - junk2.fits radecvel=t ndim=4
@@ -191,7 +191,7 @@ In \fIbash\fP notation:
   nx=$(grep NAXIS1 tmp.fitshead|awk '{print $3}')
   ny=$(grep NAXIS2 tmp.fitshead|awk '{print $3}')
   nz=$(grep NAXIS3 tmp.fitshead|awk '{print $3}')
-  ccdgen in= out=- object=noise spar=0,1 size=$nx,$ny,$nz |\\
+  ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\\
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
 .fi
@@ -223,4 +223,5 @@ Peter Teuben
 31-jan-12	V0.9 added object=test	PJT
 12-mar-2020	V1.0 added object=blobs		PJT
 8-may-2022	V1.2 moved center= down the arg list 	PJT
+8-dec-2022	V2.0 moved in= down the arg list	PJT
 .fi
