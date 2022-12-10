@@ -32,4 +32,4 @@ cp tipsy $NEMO/opt/bin
 
 echo Installed version=$version
 
-echo tipsyo $version `date` >> $NEMO/opt/mknemo.log
+echo tipsy $version `date` >> $NEMO/opt/mknemo.log
