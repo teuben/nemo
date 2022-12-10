@@ -51,39 +51,40 @@ is up to date.
 
 <dt><b>radii=</b> </dt>
 <dd>radii of the ring
-boundaries (Nring+1) []  </dd>
+boundaries (Nring+1). See <b>metrix=</b> below for different ways to change the
+metric of computing a radius. No default. </dd>
 
 <dt><b>pa=</b> </dt>
-<dd>position angle of disk, astronomical convention.
-[0]    </dd>
+<dd>position angle of disk, astronomical
+convention. [0]    </dd>
 
 <dt><b>inc=</b> </dt>
 <dd>inclination angle of disk [0]    </dd>
 
 <dt><b>center=</b> </dt>
-<dd>rotation center (mapcenter
-if left blank, 0,0=lower left) </dd>
+<dd>rotation
+center (mapcenter if left blank, 0,0=lower left) </dd>
 
 <dt><b>vsys=</b> </dt>
-<dd>systemic velocity. Only needed for
-cube. [0]      </dd>
+<dd>systemic velocity.
+Only needed for cube. [0]      </dd>
 
 <dt><b>blank=</b> </dt>
-<dd>Value of the blank pixel to be ignored [0.0] </dd>
+<dd>Value of the blank pixel to be ignored
+[0.0] </dd>
 
-<dt><b>norm=</b>
+<dt><b>norm=</b> </dt>
+<dd>Normalize values to number of pixels in ring. This only has an
+effect on the image written, not on the table, which uses both.  [t] </dd>
+
+<dt><b>out=</b>
 </dt>
-<dd>Normalize values to number of pixels in ring. This only has an effect on
-the image written, not on the table, which uses both.  [t] </dd>
-
-<dt><b>out=</b> </dt>
-<dd>RV image,
-useful for 3D cubes. If not given, no image will be written. Default: not
-used </dd>
+<dd>RV image, useful for 3D cubes. If not given, no image will be written. Default:
+not used </dd>
 
 <dt><b>tab=</b> </dt>
-<dd>Output table, useful for 2D images. If not give, no table will
-be written. Default: not used </dd>
+<dd>Output table, useful for 2D images. If not give, no table
+will be written. Default: not used </dd>
 
 <dt><b>rscale=</b> </dt>
 <dd>Convenience factor by which radii
@@ -96,23 +97,23 @@ for display in the table. For FITS images this is usually 1 / (1.133*(beam/pixel
  [1] </dd>
 
 <dt><b>metric=N</b>  </dt>
-<dd>The power of the metric to compute radius. N=2 is the traditional
-cartesian [2] 
+<dd>The exponent of the r^N = x^N + y^N metric to compute a radius.
+N=2 is the traditional cartesian [2] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-As with most of these codes, the center of pixel
-determines to which ring the pixel belongs in it total. <p>
-A value of <b>metric=1</b>
-can be interesting, though the position angle may need to be adjusted,
-as the box is mis-aligned by 45 degrees from the major axis. For large values
-of <b>metric</b> the box is aligned along the major axis. 
+As with most of these codes,
+the center of pixel determines to which ring the pixel belongs in it total.
+<p>
+A value of <b>metric=1</b> can be interesting, though the position angle may need
+to be adjusted, as the box is mis-aligned by 45 degrees from the major axis.
+For large values of <b>metric</b> the box is aligned along the major axis. 
 <p> 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-Example of
-generating a gaussian profile from a 2D gauss image <br>
+Example
+of generating a gaussian profile from a 2D gauss image <br>
 <pre>% ccdgen out=- object=gauss spar=1,50 size=256,256 | ccdellint - 0:100:5 tab=-
   5 80 0.997464 0.00145455 79.7971 79.7971
   10 236 0.987487 0.00426892 233.047 312.844
