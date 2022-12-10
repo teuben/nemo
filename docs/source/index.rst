@@ -17,7 +17,8 @@ Welcome to NEMO's documentation!
    Other online entry points for NEMO are:
    `github pages <https://teuben.github.io/nemo/>`_ and
    `github code <https://github.com/teuben/nemo>`_ .  We also keep an index to
-   `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_.
+   `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_ and of course a
+   `what's new <https://teuben.github.io/nemo/whatsnew.html>`_ .
 
    Although this manual should be on
    https://astronemo.readthedocs.io
