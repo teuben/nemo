@@ -110,9 +110,9 @@ and here is an example of creating the 4 major data objects on the fly in NEMO
 use of unix pipes with a dash denoting the piped file:
 
          tabgen -  | tabplot -
-  	 mkplummer - 100 | snapplot - 
-	 ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
-	 mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
+         mkplummer - 100 | snapplot - 
+         ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
+         mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
 
 There are more examples of scripts and figures in
 https://teuben.github.io/nemo/examples/ 
@@ -139,3 +139,5 @@ Please use the following citation if you use NEMO in your work
            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
      }
 
+
+![A Real Bar](docs/figures/realbar1.png)
