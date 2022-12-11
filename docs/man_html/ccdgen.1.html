@@ -36,27 +36,22 @@ order; they may be given in any order if the keyword is also given. Use
 --help to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in=</b> </dt>
-<dd>Input file (optional)
-to be added to the output file. Default: none, map is generated. </dd>
-
 <dt><b>out=</b> </dt>
-<dd>Output
-file, in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
+<dd>Output file, in standard
+<a href='image.5.html'><i>image(5NEMO)</i></a>
  format. No default.      </dd>
 
 <dt><b>object=</b> </dt>
-<dd>Object type.
-Valid are flat, exp, gauss, bar, spiral, noise, test, blobs. See below for
-an explanation and their parameters. Default: flat </dd>
+<dd>Object type. Valid are flat,
+exp, gauss, bar, spiral, noise, test, blobs. See below for an explanation
+and their parameters. Default: flat </dd>
 
 <dt><b>spar=</b> </dt>
-<dd>Parameters for
-this object. The first parameter is often the peak  value, and the second
-one a scale length. Some object have more complex geometries and require
-more parameters. The meaning of the peak value can be modified by setting
-<b>totflux=t</b> (see below). The defaults are defined per object, but are typically
-1,1... <br>
+<dd>Parameters for this object. The
+first parameter is often the peak  value, and the second one a scale length.
+Some object have more complex geometries and require more parameters. The
+meaning of the peak value can be modified by setting <b>totflux=t</b> (see below).
+The defaults are defined per object, but are typically 1,1... <br>
 For certain objects, the multiple objects can be given, and the sequence
 of parameters can be repeated. Currently <b>object=blobs</b> has this option for
 3D cubes. </dd>
@@ -109,13 +104,17 @@ crpix (1,1,1)  </dd>
 
 <dt><b>headline=</b> </dt>
 <dd>Random verbiage added to the
-image. Default: none 
+image. Default: none </dd>
+
+<dt><b>in=</b> </dt>
+<dd>Input file (optional) to be added to the output
+file. Default: none, map is generated. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Object</a></h2>
-The <b>object=</b> keyword allows for the following
-objects, and <b>spar=</b> for their parameters <br>
+The <b>object=</b> keyword allows
+for the following objects, and <b>spar=</b> for their parameters <br>
 <pre>OBJECT<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPAR
 flat<tt> </tt>&nbsp;<tt> </tt>&nbsp;A<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;A
 exp<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
@@ -178,21 +177,21 @@ p=2.0001, the negative arm becomes 0.
 Here&rsquo;s how to make a simple
 barred galaxy by adding an exponential disk and a (smaller) exponential
 bar: <br>
-<pre>ccdgen out=- object=exp spar=1,40 pa=60 inc=45 size=256 |\
- ccdgen - bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
+<pre>ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256 |\
+ ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
 </pre>or if you want them to be a bit more astronomical, you&rsquo;ll need to make the
 units come out in degrees for the conversion to FITS, viz.: <br>
-<pre>ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600
+<pre>ccdgen - object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600
 |\
- ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\
+ ccdgen - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 in=- |\
  ccdfits - bar.fits radecvel=t
 </pre>and the option to fill your cube with some random blobs and noise is a
 bit more involved: <br>
 <pre>nemoinp 1:100 |\
   tabmath - - &rsquo;ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)&rsquo;
 all &gt; b100.tab
-ccdgen "" - blobs @b100.tab size=128,128,128 |\
-  ccdgen - - noise 0,0.02 |\
+ccdgen - blobs @b100.tab size=128,128,128 |\
+  ccdgen - noise 0,0.02 in=- |\
   ccdsmooth - - 5   |\
   ccdsky - -  |\
   ccdfits - junk2.fits radecvel=t ndim=4
@@ -204,7 +203,7 @@ by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a
   nx=$(grep NAXIS1 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
   ny=$(grep NAXIS2 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
   nz=$(grep NAXIS3 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
-  ccdgen in= out=- object=noise spar=0,1 size=$nx,$ny,$nz |\
+  ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
 </pre>
@@ -240,6 +239,7 @@ Peter Teuben
 31-jan-12<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 added object=test<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-mar-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 added object=blobs<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 moved center= down the arg list <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+8-dec-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 moved in= down the arg list<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
