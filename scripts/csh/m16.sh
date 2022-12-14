@@ -6,7 +6,7 @@
 #   Timing:   Handling 200 time frames of nbody=10000  took about 9 mins.
 #                      100 time frames of nbody=100000 took about 7 mins.
 
-_version=10-oct-2022
+_version=5-dec-2022
 
 # define the run (required)
 run=run0
@@ -43,6 +43,8 @@ fi
 
 new=$run/$run.xvm.tab
 rm -f $new
+
+echo "# t x1 v1 x2 v2 m16" > $new
 
 for t in $(echo $times | sed 's/,/ /g'); do
     echo $t

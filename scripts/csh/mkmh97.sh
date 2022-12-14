@@ -33,6 +33,7 @@
 #          20-aug-2022   add --help option in a neat self-documenting way
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
 #          11-nov-2022   align integration parameters w/ MH97
+#           5-dec-2022   label the table columns where needed
 #          13-dec-2022   try to unbind G2 in it's own C.O.M.
 
 _version=13-dec-2022
@@ -146,13 +147,20 @@ if [ $restart = 1 ]; then
     elif [ $code = 2 ]; then
 	# See $NEMO/usr/bonsai
 	snaptipsy  $run.3 $run.3t
+	ulimit -s unlimited
 	bonsai2 -i $run.3t --snapname $run. --logfile $run.gpu --dev 0 --snapiter $step -T $tstop -t $(nemoinp 1/2**$kmax)  1>$run.4.log 2>$run.4.err
-	grep Etot= run0.4.log  |tabcols - 4,6 > $run.4.etot
+	grep Etot= $run.4.log  |tabcols - 4,6 > $run.4.etot
+	# since bonsai writes a new snapshot (in tipsy format) for each time, need to convert them
+	# to single NEMO snapshot for the same analysis as the other codes.
 	set +x
 	for f in $run._*; do
 	    echo Processing $f
 	    (tipsysnap $f - | csf - - item=SnapShot 1>>$run.4 ) 2>>$run.4.t2s
 	done
+	rm -f $run._*
+	if [ $debug == 1 ]; then
+	    set -x
+	fi	    
 	echo Wrote final combined snapshot in $run.4
     else
 	set +x
@@ -170,10 +178,25 @@ fi
 #  compute the path of G1 and G2.   G2 needs a special treatment if mass G2 << G1
 
 if [ ! -e $run.xv.tab ]; then
-    snapcopy $run.4 - i=0 | snapprint - t                           > $run.4.t.tab
-    snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t > $run.4.g1.tab
-    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >$run.4.g2.tab
-    paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' > $run.xv.tab
+    #
+    echo "# t"                              >$run.4.t.tab
+    snapcopy $run.4 - i=0 | snapprint - t  >>$run.4.t.tab
+
+    #
+    echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                  >$run.4.g1.tab
+    if [ $code == 2 ]; then
+	snapcopy $run.4 - "select=i<$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >>$run.4.g1.tab
+    else
+	snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t                                             >>$run.4.g1.tab
+    fi
+    
+    #
+    echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                 >$run.4.g2.tab    
+    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
+    #
+    echo "# t x1 v1 x2 v2"                                                           >$run.xv.tab
+    paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' >>$run.xv.tab
+
     
     #  plot the path in Pos and Vel separately
     tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-pos)
@@ -226,7 +249,8 @@ x1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,2)
 v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
 snapshift final2.snap - $x1,0,0 $v1,0,0 mode=sub > final2c.snap
 radprof final2c.snap tab=t > final2c.tab
-tabmath final2c.tab - %1,%4/$m all format=%f > final2cm.tab
+echo '# radius mass'                           >final2cm.tab
+tabmath final2c.tab - %1,%4/$m all format=%f  >>final2cm.tab
 # If the first radius (star) is not within 16, there's no G2 stars near G1
 r0=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
 if [ $r0 = 1 ]; then
