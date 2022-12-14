@@ -34,7 +34,7 @@
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
 #          11-nov-2022   align integration parameters w/ MH97
 #           5-dec-2022   label the table columns where needed
-#          13-dec-2022   try to unbind G2 in it's own C.O.M.
+#          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
 
 _script=mkmh97
 _version=14-dec-2022
@@ -293,10 +293,12 @@ tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" > $ru
 tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
 
 echo "Final binding energy behavior:"
-tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot
+etot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,3)
+echo "etot=$etot" >> $_pars
+
 
 echo "m16=$m16"
-
+echo "etot=$etot"
 
 #--HELP
 
