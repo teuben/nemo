@@ -33,8 +33,9 @@
 #          20-aug-2022   add --help option in a neat self-documenting way
 #          13-sep-2022   set m16=0 when no stars of G2 near G1
 #          11-nov-2022   align integration parameters w/ MH97
+#          13-dec-2022   try to unbind G2 in it's own C.O.M.
 
-_version=17-nov-2022
+_version=13-dec-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
@@ -238,6 +239,19 @@ fi
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=$(yapp massg2g1)
 echo "m16=$m16" >> $_pars
 echo "m16=$m16"
+
+
+# center on G2, unbind stars
+x2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,4)
+v2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,5)
+snapshift final2.snap - $x2,0,0 $v2,0,0 mode=sub |\
+   hackforce - - |\
+   unbind - - > final2u.snap
+snapplot final2u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final2u.plot)
+snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixel evar=m |\
+    tee final2u.ccd |\
+    ccdmath - - "log(1+%1/$bsigma)" |\
+    ccdplot - power=$power yapp=$(yapp final2u.ccd) headline="Galaxy-2 bound at tstop=$tstop"
 
 #--HELP
 
