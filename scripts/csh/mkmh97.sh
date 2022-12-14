@@ -36,13 +36,14 @@
 #           5-dec-2022   label the table columns where needed
 #          13-dec-2022   try to unbind G2 in it's own C.O.M.
 
-_version=13-dec-2022
+_script=mkmh97
+_version=14-dec-2022
 _pars=nemopars.rc
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
 #            parameters for the integration
-run=run0        # directory and basename of the files belonging to this simulation
+run=run0        # directory and basename of the files belonging to this simulation  [ empty means self] @todo
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
@@ -68,7 +69,7 @@ debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
-if [ "$1" == "--help" ];then
+if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
     awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
     exit 0
@@ -105,16 +106,25 @@ if [ -d $run ]; then
 else
     restart=1
 fi
-mkdir -p $run
-cd $run
+if [ $run != . ]; then
+    mkdir -p $run
+    cd $run
+else
+    if [ ! -e $_pars ]; then
+	echo "No $_pars in $(pwd)"
+	exit 0
+    fi
+    
+fi
 # backwards compatible!
 if [ -e mkmh97.rc ]; then
+    echo "Fixing old mkmh97.rc to $_pars"
     mv  mkmh97.rc $_pars
 fi
-# keep track of history
+# keep track of history  @todo need to bootstrap current $run
+[[ -e $_pars ]] && source $_pars
 echo "# $0 version=$_version"  >> $_pars
-echo "$*"                      >> $_pars
-
+echo "$*" run=$run             >> $_pars
 source  $_pars
 
 if [ $restart = 1 ]; then
@@ -262,7 +272,6 @@ else
 fi
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=$(yapp massg2g1)
 echo "m16=$m16" >> $_pars
-echo "m16=$m16"
 
 
 # center on G2, unbind stars
@@ -270,12 +279,24 @@ x2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,4)
 v2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,5)
 snapshift final2.snap - $x2,0,0 $v2,0,0 mode=sub |\
    hackforce - - |\
-   unbind - - > final2u.snap
+   unbind    - - > final2u.snap
+m2=$(snapmstat final2u.snap | txtpar - p0=TotMas,1,8) 
 snapplot final2u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final2u.plot)
 snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixel evar=m |\
     tee final2u.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final2u.ccd) headline="Galaxy-2 bound at tstop=$tstop"
+
+
+# binding energy argument, plot total binding energy as function of time
+tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" > $run.xve.tab
+tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
+
+echo "Final binding energy behavior:"
+tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot
+
+echo "m16=$m16"
+
 
 #--HELP
 
@@ -290,7 +311,7 @@ snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixe
 # 1. plummer scaling to retain virial equilibrium
 #PLOT nemoinp 0:1:0.01 | tabmath - - 'sqrt(%1),sqrt(%2)' | tabplot -  1 2,3 0 1 0 1 yapp=30/xs line=1,1 color=2,3 nxticks=9 nyticks=9 xlab=m ylab="Scale Factor" headline="Scale factor for position (R) and velocity (G)"
 
-# 2. v0 vs. v (at infinity)
+# 2. v0 vs. v (at infinity) for r0=16
 #PLOT nemoinp 0:1.6:0.01 | tabmath - - "0.01,0.1,1,sqrt(%1**2+2*(1+%2)/16),sqrt(%1**2+2*(1+%3)/16),sqrt(%1**2+2*(1+%4)/16)"|tabplot - 1 5,6,7,1 0 1.6 0 1.6 color=2,3,4,1 line=1,1 xlab=V ylab=V0 headline="V0 for m=0.01(r), 0.1(g) and 1.0(b)"
 
 #--HELP
