@@ -193,7 +193,8 @@ Compare to Bontekoe & v Albada work?
    as the diameter of the circular orbit. This could be a fun way to study dynamical
    friction (cf. Bontekoe & v Albada 1987MNRAS.224..349B   White, ...)
 
-3. Exact Newtonian solutions vs. Order Of Magnitude Estimates
+3. Exact Newtonian solutions vs. Order Of Magnitude Estimates.   Can you use this
+   script to get an idea of the accuracy of the forces of tree vs. exact newton?
 
 4. various sanity tests
    e.g. energy conservation as function of integration step
@@ -211,10 +212,7 @@ Compare to Bontekoe & v Albada work?
 9. Estimate how many particles we need to see shells, and how many to trace the full
    dynamic range of the galaxy as for example can be seen in the CenA image.
 
-10. modify the script such that the 2nd galaxy has a mass ratio mratio=0.1 for example.
-    You can use snapvirial and/or snapscale for this.
-
-11. Run the script with two systems with initial conditions r0=0 and v0=0. What does this do? Hint: you
+10. Run the script with two systems with initial conditions r0=0 and v0=0. What does this do? Hint: you
     may need a special seed= to avoid an interesting numerical problem (some codes will even crash)
 
 ## Example analysis
