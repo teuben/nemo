@@ -22,6 +22,7 @@ string defv[] = {
 
 string usage="print out image header";
 
+/*  convenience function to print out the true extent of an axis */
 void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
   *xmin = xm - (xr+0.5)*dx;
   *xmax = xm + (n-0.5-xr)*dx;
