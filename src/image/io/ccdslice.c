@@ -22,7 +22,7 @@ string defv[] = {	/* keywords + help string for user interface */
     "zslabs=\n      Zmin,Zmax pairs in WCS to select",
     "zscale=1\n     Scaling applied to zslabs",
     "select=t\n     Select the planes for output (t) or de-select those (f)",
-    "VERSION=1.3\n  1-may-2022 PJT",
+    "VERSION=1.3a\n 18-dec-2022 PJT",
     NULL,
 };
 
@@ -251,4 +251,5 @@ void ax_copy(imageptr i0, imageptr i1)
   Unit(i1) = Unit(i0);
   Object(i1) = Object(i0);
   Telescope(i1) = Telescope(i0);
+  Restfreq(i1) = Restfreq(i0);
 }
