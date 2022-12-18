@@ -64,11 +64,12 @@
 #include <image.h>
 #include <history.h>
 #include <fitsio_nemo.h>
+#include <mks.h>
 
 string defv[] = {
         "in=???\n        Input image filename",
         "out=???\n       Output fits filename",
-	"bitpix=-32\n	 FITS bitpix value {16,32,-32}",
+	"bitpix=-32\n	 FITS bitpix value {16,32,-32,-64}",
         "scale=1,1,1\n   Extra scalefactor for cdelt&crval",
         "iscale=1,0\n    Scale and Offset Intensity conversion factor",
         "object=\n       Object name",
@@ -91,22 +92,22 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.4\n   19-mar-2022 PJT",
+        "VERSION=6.4b\n  17-dec-2022 PJT",
         NULL,
 };
 
 string usage = "convert image to a fits file";
-
-string cvsid = "$Id$";
 
 stream  instr, outstr;                         /* file streams */
 
 imageptr iptr=NULL;                     /* image, allocated dynamically */
 int  isel = 0;
 
-double scale[4];        /* scale conversion for FITS (CDELT) */
-double iscale[2];	/* intensity rescale */
+double scale[4];         /* scale conversion for FITS (CDELT) */
+double iscale[2];	 /* intensity rescale */
 string object;           /* name of object in FITS header */
+string telescope;        /* name of telescope in FITS header */
+string bunit;            /* name of intensity unit in FITS header */
 string comment;          /* extra comments */
 string headline;         /* optional NEMO headline, added as COMMENT */
 string proj;             /* projection type for WCS */
@@ -279,7 +280,7 @@ void write_fits(string name,imageptr iptr)
     get_nanf(&fnan);    
 
     if (Qfreq)
-      vsys = -restfreq * vsys / 300000.0;        // convert km/s to Hz
+      vsys = -restfreq * vsys / (c_MKS/1000.0);        // convert km/s to Hz
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
     nx[0] = Nx(iptr);
@@ -309,6 +310,8 @@ void write_fits(string name,imageptr iptr)
     bpa  = 0.0;        /* only spherical beams for now */
     if (strlen(object) == 0)
       object = Object(iptr);
+    telescope = Telescope(iptr);
+    bunit = Unit(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */
@@ -443,10 +446,13 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",ctype1_name);
       fitwrhda(fitsfile,"CTYPE2",ctype2_name);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
-      fitwrhdr(fitsfile,"RESTFRQ",restfreq);  
+      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);
+      // @todo  currently HI would be written as 1.420405760     E+09
+      //                     where it is         1.4204057517861 E+09
+      // (float/double issue) - this is about 2 m/s in doppler space
 
       if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
-      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
 
       fitwrhda(fitsfile,"CUNIT1","deg");
       fitwrhda(fitsfile,"CUNIT2","deg");
@@ -519,6 +525,10 @@ void write_fits(string name,imageptr iptr)
     
     if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
+    if (telescope)
+      fitwrhda(fitsfile,"TELESCOP",telescope);
+    if (bunit)
+      fitwrhda(fitsfile,"BUNIT",bunit);
 
     if (comment)                                       /* COMMENT */
         stuffit(fitsfile,"COMMENT",comment);

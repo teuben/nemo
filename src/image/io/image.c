@@ -32,7 +32,8 @@
  *  19-oct-11   V8.0 implementing USE_IARRAY methods                     PJT
  *  13-feb-13   V8.1 added region and sub_image()                        PJT
  *  22-may-21   V8.2 deal with Object
- *  19-mar-22   V8.3 deprecate Axis=0 images                              
+ *  19-mar-22   V8.3 deprecate Axis=0 images
+ *  17-dec-22        deal with Telescope/Object/Unit 
  *			
  *
  *  Note: bug in TESTBED section; new items (Unit) not filled in
@@ -178,6 +179,8 @@ int write_image (stream outstr, imageptr iptr)
          put_string (outstr,UnitTag,Unit(iptr));
       if (Object(iptr))
    	 put_string(outstr,ObjectTag,Object(iptr));
+      if (Telescope(iptr))
+   	 put_string(outstr,TelescopeTag,Telescope(iptr));
       put_data (outstr,TimeTag,  RealType, &(Time(iptr)), 0);
       put_string(outstr,StorageTag,matdef[idef]);
       put_data (outstr,AxisTag,  IntType, &(Axis(iptr)), 0);
@@ -283,7 +286,11 @@ int read_image (stream instr, imageptr *iptr)
   	        Object(*iptr) = get_string(instr,ObjectTag);
             else
                 Object(*iptr) = NULL;
-            if (get_tag_ok(instr,TimeTag))             /* time  */
+            if (get_tag_ok(instr,TelescopeTag))          /* telescope  */
+  	        Telescope(*iptr) = get_string(instr,TelescopeTag);
+            else
+                Telescope(*iptr) = NULL;
+            if (get_tag_ok(instr,TimeTag))              /* time  */
    	    	get_data_coerced (instr,TimeTag, RealType, &(Time(*iptr)), 0);
    	    else
    	    	Time(*iptr) = 0.0;
@@ -441,6 +448,7 @@ int copy_image (imageptr iptr, imageptr *optr)
   Namez(*optr) = mystrcpy(Namez(iptr));
   Unit(*optr)  = mystrcpy(Unit(iptr));
   Object(*optr) = mystrcpy(Object(iptr));
+  Telescope(*optr) =  mystrcpy(Telescope(iptr));
   Xref(*optr) = Xref(iptr);
   Yref(*optr) = Yref(iptr);
   Zref(*optr) = Zref(iptr);

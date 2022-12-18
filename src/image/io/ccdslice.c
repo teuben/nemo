@@ -248,4 +248,7 @@ void ax_copy(imageptr i0, imageptr i1)
   if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
   if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
   Axis(i1) = Axis(i0);
+  Unit(i1) = Unit(i0);
+  Object(i1) = Object(i0);
+  Telescope(i1) = Telescope(i0);
 }
