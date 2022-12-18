@@ -22,6 +22,8 @@
  *	feb 1994 - ansi					pjt
  *	apr 1995 - no more ARGS, fix up prototypes
  *    6-jan-1998 - fixed up TESTBED bit more            pjt
+ *
+ * @todo    fix for checking Telescope/Restfreq (dec 2022)
  */
 
 #include <stdinc.h>
