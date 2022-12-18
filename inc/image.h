@@ -110,6 +110,9 @@ typedef struct {        // image
     string namex;       /* name of axes (could be a NULL) */
     string namey;
     string namez;
+    string unitx;       /* unit of the axis (FITS: CUNITx) */
+    string unity;   
+    string unitz;   
     string unit;        /* FITS 'BUNIT'   units (could be a NULL) */
     string object;      /* object name */
     string telescope;   // FITS 'TELESCOP'
@@ -178,6 +181,9 @@ typedef struct {        // region
 #define Namex(iptr)     ((iptr)->namex)
 #define Namey(iptr)     ((iptr)->namey)
 #define Namez(iptr)     ((iptr)->namez)
+#define Unitx(iptr)     ((iptr)->unitx)
+#define Unity(iptr)     ((iptr)->unity)
+#define Unitz(iptr)     ((iptr)->unitz)
 #define Unit(iptr)      ((iptr)->unit)
 #define Object(iptr)    ((iptr)->object)
 #define Telescope(iptr) ((iptr)->telescope)
@@ -260,6 +266,9 @@ typedef struct {        // region
 #define     NamexTag		"Namex"
 #define     NameyTag		"Namey"
 #define     NamezTag		"Namez"
+#define     UnitxTag		"Unitx"
+#define     UnityTag		"Unity"
+#define     UnitzTag		"Unitz"
 #define     UnitTag             "Unit"
 #define     ObjectTag           "Object"
 #define     TelescopeTag        "Telescope"

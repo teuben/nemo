@@ -69,7 +69,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.4\n	17-dec-2022 PJT",
+    "VERSION=5.4a\n	18-dec-2022 PJT",
     NULL,
 };
 
@@ -368,6 +368,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     }
 
     if (axistype==0) {
+      warning("axistype 0 is deprecated");
       Axis(iptr) = 0;
       if (crpix1 != 1.0)
         Xmin(iptr) -= (crpix1-1.0)*Dx(iptr);
@@ -405,15 +406,28 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
       fitrdhdr(fitsfile,"RESTFRQ",&tmpr,0.0); 
       Restfreq(iptr) = tmpr;
     }
-
     
-
     if (nz>1) {
-           fitrdhda(fitsfile,"CTYPE3",tmpc,"");
-	   Namez(iptr) = scopy(tmpc);
+      fitrdhda(fitsfile,"CTYPE3",tmpc,"");
+      Namez(iptr) = scopy(tmpc);
     }
 
-
+    if (fitexhd(fitsfile,"CUNIT1")) {
+      fitrdhda(fitsfile,"CUNIT1",tmpc,"");
+      dprintf(0,"CUNIT1 %s\n",tmpc);
+      Unitx(iptr) = scopy(tmpc);
+    }
+    if (fitexhd(fitsfile,"CUNIT2")) {
+      fitrdhda(fitsfile,"CUNIT2",tmpc,"");
+      dprintf(0,"CUNIT2 %s\n",tmpc);
+      Unity(iptr) = scopy(tmpc);
+    }
+    if (fitexhd(fitsfile,"CUNIT3")) {
+      fitrdhda(fitsfile,"CUNIT3",tmpc,"");
+      dprintf(0,"CUNIT3 %s\n",tmpc);
+      Unitz(iptr) = scopy(tmpc);
+    }
+      
     fitrdhdr(fitsfile,"DATAMIN",&tmpr,0.0); 
     MapMin(iptr) = *data_min = tmpr;
     dprintf(1,"DATAMIN: %g %g\n",*data_min,MapMin(iptr));

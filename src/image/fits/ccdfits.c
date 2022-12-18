@@ -93,7 +93,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.5\n  17-dec-2022 PJT",
+        "VERSION=6.5a\n  18-dec-2022 PJT",
         NULL,
 };
 
@@ -128,7 +128,8 @@ int   nref = 0, nfill = 0;
 FLOAT ref_crval[4] = {0,0,0,1},
       ref_crpix[4] = {1,1,1,1},
       ref_cdelt[4] = {1,1,1,1};
-char  ref_ctype[4][80], ref_cunit[4][80];
+char  ref_ctype[4][80],
+      ref_cunit[4][80];
 FLOAT restfreq = 1420405751.786;  /* HI line default line for radecvel=t */
 real  vsys = 0.0;
 real  equinox = 2000.0;
@@ -265,6 +266,7 @@ static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string radefrc[4]= { "RA---CAR", "DEC--CAR", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
+static string uvw[4]    = { "",         "",         "",         ""};
 
 void write_fits(string name, imageptr iptr)
 {
@@ -274,7 +276,7 @@ void write_fits(string name, imageptr iptr)
     FITS *fitsfile;
     char *cp, origin[80];
     char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
-    string *hitem, axname[4];
+    string *hitem, axname[4], axunit[4];
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
@@ -309,6 +311,9 @@ void write_fits(string name, imageptr iptr)
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
     axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
+    axunit[0] = (Unitx(iptr) ? Unitx(iptr) : uvw[0]);
+    axunit[1] = (Unity(iptr) ? Unity(iptr) : uvw[1]);
+    axunit[2] = (Unitz(iptr) ? Unitz(iptr) : uvw[2]);
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
     bmaj = Beamx(iptr);
@@ -486,7 +491,12 @@ void write_fits(string name, imageptr iptr)
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
-	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);	
+	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);
+	if (          strlen(axunit[p[0]])>0) fitwrhda(fitsfile,"CUNIT1",axunit[p[0]]);
+       	if (          strlen(axunit[p[1]])>0) fitwrhda(fitsfile,"CUNIT2",axunit[p[1]]);
+	if (ndim>2 && strlen(axunit[p[2]])>0) fitwrhda(fitsfile,"CUNIT3",axunit[p[2]]);
+	if (ndim>3 && strlen(axunit[p[3]])>0) fitwrhda(fitsfile,"CUNIT4",axunit[p[3]]);
+	
       }
       fitwrhdr(fitsfile,"RESTFRQ",restfreq);      
     }

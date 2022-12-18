@@ -169,18 +169,15 @@ int write_image (stream outstr, imageptr iptr)
       put_data (outstr,BeamxTag, RealType, &(Beamx(iptr)), 0);
       put_data (outstr,BeamyTag, RealType, &(Beamy(iptr)), 0);
       put_data (outstr,BeamzTag, RealType, &(Beamz(iptr)), 0);
-      if (Namex(iptr))
-         put_string (outstr,NamexTag,Namex(iptr));
-      if (Namey(iptr))
-         put_string (outstr,NameyTag,Namey(iptr));
-      if (Namez(iptr))
-         put_string (outstr,NamezTag,Namez(iptr));
-      if (Unit(iptr))
-         put_string (outstr,UnitTag,Unit(iptr));
-      if (Object(iptr))
-   	 put_string(outstr,ObjectTag,Object(iptr));
-      if (Telescope(iptr))
-   	 put_string(outstr,TelescopeTag,Telescope(iptr));
+      if (Namex(iptr))     put_string (outstr,NamexTag,Namex(iptr));
+      if (Namey(iptr))     put_string (outstr,NameyTag,Namey(iptr));
+      if (Namez(iptr))     put_string (outstr,NamezTag,Namez(iptr));
+      if (Unitx(iptr))     put_string (outstr,UnitxTag,Unitx(iptr));      
+      if (Unity(iptr))     put_string (outstr,UnityTag,Unity(iptr));      
+      if (Unitz(iptr))     put_string (outstr,UnitzTag,Unitz(iptr));      
+      if (Unit(iptr))      put_string (outstr,UnitTag,Unit(iptr));
+      if (Object(iptr))    put_string(outstr,ObjectTag,Object(iptr));
+      if (Telescope(iptr)) put_string(outstr,TelescopeTag,Telescope(iptr));
       put_data(outstr,RestfreqTag, RealType, &(Restfreq(iptr)), 0);
       put_data(outstr,TimeTag,  RealType, &(Time(iptr)), 0);
       put_string(outstr,StorageTag,matdef[idef]);
@@ -279,6 +276,18 @@ int read_image (stream instr, imageptr *iptr)
                 Namez(*iptr) = get_string(instr,NamezTag);
             else
                 Namez(*iptr) = NULL;
+            if (get_tag_ok(instr,UnitxTag))             /* X-axis unit */
+                Unitx(*iptr) = get_string(instr,UnitxTag);
+            else
+                Unitx(*iptr) = NULL;
+            if (get_tag_ok(instr,UnityTag))             /* Y-axis unit */
+                Unity(*iptr) = get_string(instr,UnityTag);
+            else
+                Unity(*iptr) = NULL;
+            if (get_tag_ok(instr,UnitzTag))             /* Z-axis unit */
+                Unitz(*iptr) = get_string(instr,UnitzTag);
+            else
+                Unitz(*iptr) = NULL;
             if (get_tag_ok(instr,UnitTag))             /* units  */
                 Unit(*iptr) = get_string(instr,UnitTag);
             else
