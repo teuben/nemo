@@ -69,7 +69,7 @@ string defv[] = {
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.3c\n	19-oct-2022 PJT",
+    "VERSION=5.4\n	17-dec-2022 PJT",
     NULL,
 };
 
@@ -320,7 +320,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     int nz, tmpi, i, j;
     real crpix1, crpix2, crpix3;
     FLOAT tmpr, cd[3][3];
-    char cdname[10], ctype[32];
+    char cdname[10], tmpc[32];
 
     nz = Nz(iptr);
 
@@ -383,21 +383,34 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     } else
       error("Illegal axistype=%d",axistype);
 
-    fitrdhda(fitsfile,"CTYPE1",ctype,"");
-    Namex(iptr) = scopy(ctype);
+    fitrdhda(fitsfile,"BUNIT",tmpc,"");
+    Unit(iptr) = scopy(tmpc);    
 
-    fitrdhda(fitsfile,"CTYPE2",ctype,"");
-    Namey(iptr) = scopy(ctype);
+    fitrdhda(fitsfile,"CTYPE1",tmpc,"");
+    Namex(iptr) = scopy(tmpc);
+
+    fitrdhda(fitsfile,"CTYPE2",tmpc,"");
+    Namey(iptr) = scopy(tmpc);
 
     if (fitexhd(fitsfile,"OBJECT")) {
-      fitrdhda(fitsfile,"OBJECT",ctype,"");
-      Object(iptr) = scopy(ctype);
+      fitrdhda(fitsfile,"OBJECT",tmpc,"");
+      Object(iptr) = scopy(tmpc);
     }
+    if (fitexhd(fitsfile,"TELESCOP")) {
+      fitrdhda(fitsfile,"TELESCOP",tmpc,"");
+      Telescope(iptr) = scopy(tmpc);
+    }
+
+    if (fitexhd(fitsfile,"RESTFRQ")) {
+      fitrdhdr(fitsfile,"RESTFRQ",&tmpr,0.0); 
+      Restfreq(iptr) = tmpr;
+    }
+
     
 
     if (nz>1) {
-           fitrdhda(fitsfile,"CTYPE3",ctype,"");
-	   Namez(iptr) = scopy(ctype);
+           fitrdhda(fitsfile,"CTYPE3",tmpc,"");
+	   Namez(iptr) = scopy(tmpc);
     }
 
 

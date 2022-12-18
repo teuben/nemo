@@ -28,13 +28,15 @@
  *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
  *  22-may-21         added Object
+ *  13-dec-22         added various frequently used FITS header items for fitsccd-ccdfits conversions
  */
 #ifndef _h_image
 #define _h_image
 
 #include <matdef.h>
 
-typedef struct {
+
+typedef struct {            // image_axis
     int    nr;
     string name;
     string unit;
@@ -52,7 +54,7 @@ typedef struct {
     real *val;              /* array of length 'nr' for coordinates */
 } image_axis, *image_axisptr;
 
-typedef struct {
+typedef struct {        // image_mask
     bool    *frame;	/* pointer to a contiguous block of data */
     bool   **matrix;    /* 2D special case: pointers to pointers */
     bool  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
@@ -63,7 +65,7 @@ typedef struct {
 } image_mask, *image_maskptr;
 
 
-typedef struct {
+typedef struct {        // image
     real    *frame;     /* pointer to a contiguous block of data */
     real   **matrix;    /* 2D special case: pointers to pointers */
     real  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
@@ -87,6 +89,8 @@ typedef struct {
     real  xref;         /* fake corner (normally 0,0,0 in lower left) */
     real  yref;         /* for new style axis */
     real  zref;
+    real  restfreq;     // FITS 'RESTFRQ'
+    real  vlsr;         // FITS
 #if 0
     image_axis  ax;     /* new optional axis descriptors */
     image_axis  ay;
@@ -106,14 +110,21 @@ typedef struct {
     string namex;       /* name of axes (could be a NULL) */
     string namey;
     string namez;
-    string unit;        /* units (could be a NULL) */
+    string unit;        /* FITS 'BUNIT'   units (could be a NULL) */
     string object;      /* object name */
+    string telescope;   // FITS 'TELESCOP'
+    string instrument;  // FITS 'INSTRUME'
+    string observer;    // FITS
+    real   equinox;     // FITS
+    string radecsys;    // FITS (FK5)
+    string specsys;     // FITS (LSRK)
+    string timesys;     // FITS (UTC)
     real   time;	/* time tag */
     string storage;	/* array stored in Fortran or C definition */
     image_mask *mask;   /* optional image mask */
 } image, *imageptr;
 
-typedef struct {
+typedef struct {        // new_image
     
     void    *frame;  	/* pointer to a contiguous block of data */
     void   **matrix;    /* 2D special case: pointers to pointers */
@@ -134,7 +145,7 @@ typedef struct {
 } new_image, *new_imageptr;
 
 
-typedef struct {
+typedef struct {        // region
   int mode;             /* default mode is rectangular region blc-trc */
   int blc[3];           /* bottom lower (boundingbox) corner  in ix,iy,iz */
   int trc[3];           /* top right (boundingbox) corner in ix,iy,iz */
@@ -169,6 +180,8 @@ typedef struct {
 #define Namez(iptr)     ((iptr)->namez)
 #define Unit(iptr)      ((iptr)->unit)
 #define Object(iptr)    ((iptr)->object)
+#define Telescope(iptr) ((iptr)->telescope)
+#define Restfreq(iptr)  ((iptr)->restfreq)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
@@ -249,6 +262,8 @@ typedef struct {
 #define     NamezTag		"Namez"
 #define     UnitTag             "Unit"
 #define     ObjectTag           "Object"
+#define     TelescopeTag        "Telescope"
+#define     RestfreqTag         "Restfreq"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
 #define     AxisTag             "Axis"
