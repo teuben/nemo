@@ -15,13 +15,11 @@
 
 string defv[] = {
   "in=???\n       Input image filename",
-  "VERSION=1.4\n  21-may-2021 PJT",
+  "VERSION=1.5\n  18-nov-2022 PJT",
   NULL,
 };
 
 string usage="print out image header";
-
-string cvsid="$Id$";
 
 void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
   *xmin = xm - (xr+0.5)*dx;
@@ -49,6 +47,7 @@ void nemo_main()
     printf("Size:      %d %d %d\n", Nx(iptr), Ny(iptr), Nz(iptr));
     printf("Cell:      %g %g %g\n", Dx(iptr), Dy(iptr), Dz(iptr));
     if (Axis(iptr) == 0) {
+      warning("Axis type 0 deprecated");
       printf("AXIS=0:\n");
       printf("LL-Corner: %g %g %g\n", Xmin(iptr), Ymin(iptr), Zmin(iptr));
       printf("TR-Corner: %g %g %g\n",
@@ -77,6 +76,7 @@ void nemo_main()
     printf("MinMax:    %g %g\n", MapMin(iptr), MapMax(iptr));
     if (Unit(iptr))    printf("Unit:      %s\n", Unit(iptr));
     if (Object(iptr))  printf("Object:    %s\n", Object(iptr));
+    printf("Restfreq:  %f\n", Restfreq(iptr));
 
 }
 
