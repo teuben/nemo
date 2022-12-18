@@ -59,25 +59,34 @@ or the ones to ignore for output (f) - Not Implemented yet.
 Here is a cube, in which only the 2nd plane (z=1) is selected, the output
 'cube' is hence two-dimensional
 .nf
+
     ccdslice cube.in cube.out z 2
+
 .fi
 here is a cube which is re-oriented in YZX:
 .nf
+
     ccdslice cube.in cube.out x
+
 .fi
 and here a somewhat cumbersome three-step process to select a 
 subset of the X axis, but leaving the cube intact:
 .nf
+
     ccdslice cube.in - x 2:10:2 | ccdslice - - x | ccdslice - cube.out x
+
 .fi
 and the same for selecting a subset of the Y axis, now in two steps:
 .fi
+
     ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y
+
 .fi
 Here an example to select some ranges in Z, where the input FITS file is in m/s,
 but the selection is done in km/s. After this a noise map is computed for the selected
 planes:
 .nf
+
     fitsccd cube.fits - | ccdslice - - zslabs=100,200,500,600 zscale=1000 | ccdmom - cube.mom2 mom=-2
 .fi
 
