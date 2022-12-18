@@ -181,7 +181,8 @@ int write_image (stream outstr, imageptr iptr)
    	 put_string(outstr,ObjectTag,Object(iptr));
       if (Telescope(iptr))
    	 put_string(outstr,TelescopeTag,Telescope(iptr));
-      put_data (outstr,TimeTag,  RealType, &(Time(iptr)), 0);
+      put_data(outstr,RestfreqTag, RealType, &(Restfreq(iptr)), 0);
+      put_data(outstr,TimeTag,  RealType, &(Time(iptr)), 0);
       put_string(outstr,StorageTag,matdef[idef]);
       put_data (outstr,AxisTag,  IntType, &(Axis(iptr)), 0);
     put_tes (outstr, ParametersTag);
@@ -290,6 +291,10 @@ int read_image (stream instr, imageptr *iptr)
   	        Telescope(*iptr) = get_string(instr,TelescopeTag);
             else
                 Telescope(*iptr) = NULL;
+            if (get_tag_ok(instr,RestfreqTag))           /* restfreq  */
+   	    	get_data_coerced (instr,RestfreqTag, RealType, &(Restfreq(*iptr)), 0);
+   	    else
+   	    	Restfreq(*iptr) = 0.0;
             if (get_tag_ok(instr,TimeTag))              /* time  */
    	    	get_data_coerced (instr,TimeTag, RealType, &(Time(*iptr)), 0);
    	    else
@@ -449,6 +454,7 @@ int copy_image (imageptr iptr, imageptr *optr)
   Unit(*optr)  = mystrcpy(Unit(iptr));
   Object(*optr) = mystrcpy(Object(iptr));
   Telescope(*optr) =  mystrcpy(Telescope(iptr));
+  Restfreq(*optr) = Restfreq(iptr);
   Xref(*optr) = Xref(iptr);
   Yref(*optr) = Yref(iptr);
   Zref(*optr) = Zref(iptr);

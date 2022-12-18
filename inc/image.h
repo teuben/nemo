@@ -181,6 +181,7 @@ typedef struct {        // region
 #define Unit(iptr)      ((iptr)->unit)
 #define Object(iptr)    ((iptr)->object)
 #define Telescope(iptr) ((iptr)->telescope)
+#define Restfreq(iptr)  ((iptr)->restfreq)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
@@ -262,6 +263,7 @@ typedef struct {        // region
 #define     UnitTag             "Unit"
 #define     ObjectTag           "Object"
 #define     TelescopeTag        "Telescope"
+#define     RestfreqTag         "Restfreq"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
 #define     AxisTag             "Axis"

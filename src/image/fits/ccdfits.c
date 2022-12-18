@@ -83,7 +83,8 @@ string defv[] = {
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN,CAR)",
-	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	//	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	"restfreq=\n     RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */	
 	"vsys=0\n        VSYS correction in km/s",
 	"freq=f\n        Output axis in FREQ or VEL",
 	"dummy=t\n       Write dummy axes also ?",
@@ -92,7 +93,7 @@ string defv[] = {
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.4b\n  17-dec-2022 PJT",
+        "VERSION=6.5\n  17-dec-2022 PJT",
         NULL,
 };
 
@@ -128,8 +129,8 @@ FLOAT ref_crval[4] = {0,0,0,1},
       ref_crpix[4] = {1,1,1,1},
       ref_cdelt[4] = {1,1,1,1};
 char  ref_ctype[4][80], ref_cunit[4][80];
-FLOAT restfreq;
-real  vsys;
+FLOAT restfreq = 1420405751.786;  /* HI line default line for radecvel=t */
+real  vsys = 0.0;
 real  equinox = 2000.0;
 
 void setparams(void);
@@ -208,7 +209,8 @@ void setparams(void)
     error("parsing error scale=%s - must be 2 numbers",getparam("scale"));
   object = getparam("object");
   comment = getparam("comment");
-  restfreq = getrparam("restfreq");
+  if (hasvalue("restfreq"))
+    restfreq = getrparam("restfreq");
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qfreq     = getbparam("freq");
@@ -264,7 +266,7 @@ static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string radefrc[4]= { "RA---CAR", "DEC--CAR", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
 
-void write_fits(string name,imageptr iptr)
+void write_fits(string name, imageptr iptr)
 {
     FLOAT tmpr,xmin[4],xref[4],dx[4],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FLOAT bmaj,bmin,bpa;
@@ -277,7 +279,11 @@ void write_fits(string name,imageptr iptr)
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
 
-    get_nanf(&fnan);    
+    get_nanf(&fnan);
+
+    if (Restfreq(iptr) != 0.0)
+	restfreq = Restfreq(iptr);
+    dprintf(0,"Using restfreq=%g Hz\n",restfreq);
 
     if (Qfreq)
       vsys = -restfreq * vsys / (c_MKS/1000.0);        // convert km/s to Hz
@@ -460,6 +466,7 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
 	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or km/s */
+      
       //fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
@@ -481,6 +488,7 @@ void write_fits(string name,imageptr iptr)
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
 	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);	
       }
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);      
     }
 
     fitwrhdr(fitsfile,"BMAJ",bmaj*scale[0]);

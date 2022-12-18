@@ -400,6 +400,12 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
       fitrdhda(fitsfile,"TELESCOP",tmpc,"");
       Telescope(iptr) = scopy(tmpc);
     }
+
+    if (fitexhd(fitsfile,"RESTFRQ")) {
+      fitrdhdr(fitsfile,"RESTFRQ",&tmpr,0.0); 
+      Restfreq(iptr) = tmpr;
+    }
+
     
 
     if (nz>1) {
