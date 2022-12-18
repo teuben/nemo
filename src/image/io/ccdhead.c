@@ -15,13 +15,13 @@
 
 string defv[] = {
   "in=???\n       Input image filename",
-  "VERSION=1.4\n  21-may-2021 PJT",
+  "scale=1\n      scale for cdelt, beam (3600 for fits images)",
+  "VERSION=1.5\n  24-nov-2022 PJT",
   NULL,
 };
 
 string usage="print out image header";
 
-string cvsid="$Id$";
 
 void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
   *xmin = xm - (xr+0.5)*dx;
@@ -36,6 +36,7 @@ void nemo_main()
     int i, j, i0, j0, nfiles;
     int nx, ny, nx1, ny1, ix, iy, n;
     real xmin,xmax,ymin,ymax,zmin,zmax;
+    real s = getrparam("scale");
 
     filename = getparam("in");
     instr = stropen(filename,"r");
@@ -46,8 +47,9 @@ void nemo_main()
     aminmax(Ymin(iptr),Yref(iptr),Dy(iptr),Ny(iptr),  &ymin, &ymax);
     aminmax(Zmin(iptr),Zref(iptr),Dz(iptr),Nz(iptr),  &zmin, &zmax);
 
-    printf("Size:      %d %d %d\n", Nx(iptr), Ny(iptr), Nz(iptr));
-    printf("Cell:      %g %g %g\n", Dx(iptr), Dy(iptr), Dz(iptr));
+    printf("Size:      %d %d %d\n", Nx(iptr),      Ny(iptr),      Nz(iptr));
+    printf("Cell:      %g %g %g\n", s*Dx(iptr),    s*Dy(iptr),    s*Dz(iptr));
+    printf("Beam:      %g %g %g\n", s*Beamx(iptr), s*Beamy(iptr), s*Beamz(iptr));
     if (Axis(iptr) == 0) {
       printf("AXIS=0:\n");
       printf("LL-Corner: %g %g %g\n", Xmin(iptr), Ymin(iptr), Zmin(iptr));
@@ -77,7 +79,6 @@ void nemo_main()
     printf("MinMax:    %g %g\n", MapMin(iptr), MapMax(iptr));
     if (Unit(iptr))    printf("Unit:      %s\n", Unit(iptr));
     if (Object(iptr))  printf("Object:    %s\n", Object(iptr));
-
 }
 
 
