@@ -60,7 +60,7 @@ string defv[] = {
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif
   "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
-  "VERSION=3.1\n  14-mayr-2022 PJT",
+  "VERSION=3.2\n  19-dec-2022 PJT",
   NULL,
 };
 
@@ -86,7 +86,7 @@ void nemo_main()
     int     ii, axis, mom;
     int     nclip, apeak, apeak1, cnt;
     int     narange=0, *arange;
-    imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
+    imageptr iptr=NULL, iptr1=NULL;         /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
     real    *spec, ifactor, cv, clip[2], m_min, m_max;
     int     *smask;
@@ -216,7 +216,7 @@ void nemo_main()
 
     if (axis > 0) {
       create_cube(&iptr1,nx1,ny1,nz1);
-      create_cube(&iptr2,nx1,ny1,nz1);
+      copy_image_header(iptr, iptr1);
     } else {
       copy_image(iptr,&iptr1);
     }
