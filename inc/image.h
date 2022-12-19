@@ -36,32 +36,32 @@
 #include <matdef.h>
 
 
-typedef struct {            // image_axis
-    int    nr;
-    string name;
-    string unit;
+typedef struct {          // image_axis
+  int    nr;              // FITS 'naxisN' - length of axis
+  string name;            // FITS 'ctype'
+  string unit;            // FITS 'cunit'
 
-    int  beamtype;
-    real beamsize;
+  int  beamtype;
+  real beamsize;
 
-    int   type;		    /* axis type: 0 not defined, 1 linear, 2 array */
+  int   type;		  /* axis type: 0 not defined, 1 linear, 2 array */
     
-    real  rmin;             /* 'crval' at 0 ; linear axis */
-    real  dr;               /* 'cdelt' */
-    real  refpix;           /* normally 0, but like 'crpix' in FITS */
-    real  refval;           /* normally rmin, but like 'crval' in FITS */
+  real  rmin;             /* 'crval' at 0 ; linear axis */
+  real  dr;               /* 'cdelt' */
+  real  refpix;           /* normally 0, but like 'crpix' in FITS */
+  real  refval;           /* normally rmin, but like 'crval' in FITS */
 
-    real *val;              /* array of length 'nr' for coordinates */
+  real *val;              /* array of length 'nr' for coordinates if non-linear */
 } image_axis, *image_axisptr;
 
 typedef struct {        // image_mask
-    bool    *frame;	/* pointer to a contiguous block of data */
-    bool   **matrix;    /* 2D special case: pointers to pointers */
-    bool  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
-    // @todo: needs USE_IARRAY
-    int   nx;		/* dimensions in X, Y and Z */
-    int   ny;
-    int   nz;
+  bool    *frame;	/* pointer to a contiguous block of data */
+  bool   **matrix;      /* 2D special case: pointers to pointers */
+  bool  ***cube;        /* 3D special case: ptr to ptr to ptr's  */
+  // @todo: needs USE_IARRAY
+  int   nx;		/* dimensions in X, Y and Z */
+  int   ny;
+  int   nz;
 } image_mask, *image_maskptr;
 
 
@@ -76,6 +76,7 @@ typedef struct {        // image
 #endif
 
     int   axis;         /* new style axis (image_axis x,y,z) ??  */
+                        // FITS can also use WCSAXES=3
 
     int   nx;		/* dimensions in X, Y and Z */
     int   ny;
@@ -86,27 +87,29 @@ typedef struct {        // image
     real  dx;           /* grid spacing (same for all pixels) */
     real  dy;
     real  dz;
+                        /* the 'ref' coordinates only used for axis>0 */
     real  xref;         /* fake corner (normally 0,0,0 in lower left) */
     real  yref;         /* for new style axis */
     real  zref;
+  
     real  restfreq;     // FITS 'RESTFRQ'
     real  vlsr;         // FITS
-#if 0
-    image_axis  ax;     /* new optional axis descriptors */
+
+    image_axis  ax;     /* new axis descriptors -- not used yet */
     image_axis  ay;
     image_axis  az;
-#endif
+
     char proj[16];      /* standard FITS WCS projection types */
 
 #if 0
     matrix cd;          /* WCS: note, this can only handle NDIM by NDIM */
 #endif
-    real  map_min;	/* data min and max in data */
-    real  map_max;
-    int   beamtype;	/* beams - not very well used yet */
-    real  beamx;        /* smoothing beams */
-    real  beamy;
-    real  beamz;
+    real   map_min;	/* data min and max in data */
+    real   map_max;
+    int    beamtype;	/* beams - not very well used yet */
+    real   beamx;       /* smoothing beams */
+    real   beamy;
+    real   beamz;
     string namex;       /* name of axes (could be a NULL) */
     string namey;
     string namez;
@@ -119,16 +122,17 @@ typedef struct {        // image
     string instrument;  // FITS 'INSTRUME'
     string observer;    // FITS
     real   equinox;     // FITS
-    string radecsys;    // FITS (FK5)
-    string specsys;     // FITS (LSRK)
-    string timesys;     // FITS (UTC)
+    string radecsys;    // FITS (e.g. FK5)
+    string specsys;     // FITS (e.g. LSRK)
+    string timesys;     // FITS (e.g. UTC)
+    string ssysobs;     // GBT uses 'TOPOCENT'
     real   time;	/* time tag */
     string storage;	/* array stored in Fortran or C definition */
+  
     image_mask *mask;   /* optional image mask */
 } image, *imageptr;
 
 typedef struct {        // new_image
-    
     void    *frame;  	/* pointer to a contiguous block of data */
     void   **matrix;    /* 2D special case: pointers to pointers */
     void  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
@@ -153,6 +157,9 @@ typedef struct {        // region
   int blc[3];           /* bottom lower (boundingbox) corner  in ix,iy,iz */
   int trc[3];           /* top right (boundingbox) corner in ix,iy,iz */
 } region,  *regionptr;
+
+// future?
+// #define Nx_new(iptr)    ((iptr)->ax.nr)
 
 
 #define Frame(iptr)	((iptr)->frame)
