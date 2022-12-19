@@ -321,3 +321,18 @@ of the values in that region.   For a given pixel size **p** in arcsec (which ds
       0.00050480001  0.201
       0.001759025    0.704
       0.0025	
+
+## Versions
+
+In an earlier version (Sep-2022 and before) we didn't use the MH defaults yet. The following snippet
+of code produces the same results with the two versions of the script
+
+     mkmh97_old.sh run=run0 seed=123 m=0.02 v0=0.6
+     mkmh97_new.sh run=run1 seed=123 m=0.02 v0=0.6 r0=10 kmax=6 eps=0.05 nbody=1000
+
+where the new defaults are now r0=16, kmax=7, eps=0.03125 nbody=2048.
+
+For this seed the relevant output parameters are:
+
+     m16==0.17137
+     etot=0.000908545
