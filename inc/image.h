@@ -287,17 +287,18 @@ typedef struct {        // region
 #define     MapTag		"Map"
 #define     MapValuesTag	"MapValues"
 
-int minmax_image ( imageptr );
-int write_image  ( stream, imageptr );
-int read_image   ( stream, imageptr * );
-int free_image   ( imageptr );
-int create_image ( imageptr *, int, int );
-int create_image_mask ( imageptr, image_maskptr *);
-int create_cube  ( imageptr *, int, int, int );
-int copy_image   ( imageptr, imageptr *);
+int minmax_image      (imageptr);
+int write_image       (stream, imageptr);
+int read_image        (stream, imageptr *);
+int free_image        (imageptr);
+int create_image      (imageptr *, int, int);
+int create_image_mask (imageptr, image_maskptr *);
+int create_cube       (imageptr *, int, int, int);
+int copy_image        (imageptr, imageptr *);
+int copy_image_header (imageptr, imageptr);
 
-real  **map2_image( imageptr );
-real ***map3_image( imageptr );
+real  **map2_image(imageptr);
+real ***map3_image(imageptr);
 
 /* worldpos.c */
 int worldpos(double xpix, double ypix, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpos, double *ypos);

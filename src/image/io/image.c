@@ -108,6 +108,8 @@ static void set_iarray(imageptr iptr)
     for (i=0; i<nz; i++) IDz(iptr)[i] = nx*ny*i;
   } else // ILLEGAL
     error("set_iarray: idef=%d\n",idef);
+#else
+    warning("set_iarray: idef=%d not implemented\n",idef);  
 #endif
 }
 
@@ -451,25 +453,46 @@ int copy_image (imageptr iptr, imageptr *optr)
   Nx(*optr) = nx;
   Ny(*optr) = ny;
   Nz(*optr) = nz;
-  Xmin(*optr) = Xmin(iptr);
-  Ymin(*optr) = Ymin(iptr);
-  Zmin(*optr) = Zmin(iptr);
   Dx(*optr) = Dx(iptr);
   Dy(*optr) = Dy(iptr);
   Dz(*optr) = Dz(iptr);
+  Xmin(*optr) = Xmin(iptr);
+  Ymin(*optr) = Ymin(iptr);
+  Zmin(*optr) = Zmin(iptr);
+  Xref(*optr) = Xref(iptr);
+  Yref(*optr) = Yref(iptr);
+  Zref(*optr) = Zref(iptr);
   Namex(*optr) = mystrcpy(Namex(iptr));
   Namey(*optr) = mystrcpy(Namey(iptr));
   Namez(*optr) = mystrcpy(Namez(iptr));
+  Unitx(*optr) = mystrcpy(Unitx(iptr));
+  Unity(*optr) = mystrcpy(Unity(iptr));
+  Unitz(*optr) = mystrcpy(Unitz(iptr));  
+#if 1
+  copy_image_header(iptr, *optr);
+#else
   Unit(*optr)  = mystrcpy(Unit(iptr));
   Object(*optr) = mystrcpy(Object(iptr));
   Telescope(*optr) =  mystrcpy(Telescope(iptr));
   Restfreq(*optr) = Restfreq(iptr);
-  Xref(*optr) = Xref(iptr);
-  Yref(*optr) = Yref(iptr);
-  Zref(*optr) = Zref(iptr);
   Storage(*optr) = matdef[idef];
   Axis(*optr) = Axis(iptr);
+#endif  
   set_iarray(*optr);
+  
+  return 1;		/* succes return code  */
+}
+
+int copy_image_header (imageptr iptr, imageptr optr)
+{
+  Unit(optr)  = mystrcpy(Unit(iptr));
+  Object(optr) = mystrcpy(Object(iptr));
+  Telescope(optr) =  mystrcpy(Telescope(iptr));
+  Restfreq(optr) = Restfreq(iptr);
+  Storage(optr) = matdef[idef];
+  Axis(optr) = Axis(iptr);
+  // vlsr
+  // instrument
   
   return 1;		/* succes return code  */
 }
