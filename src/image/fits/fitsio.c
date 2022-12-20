@@ -206,9 +206,12 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     fitwra(f,"COMMENT",cfits1);
     fitwra(f,"COMMENT",cfits2);
     fitwra(f,"COMMENT",cfits3);
+#if 0
+    /* who is even using this anymore ? */
     fitwrhda(f,"DATASUM", "0000000000000000");
     fitwrhda(f,"CHECKSUM","0000000000000000");
-
+#endif
+    
 /* Handle an old file. */
 
   } else if(streq(status,"old") || streq(status,"r")) {
