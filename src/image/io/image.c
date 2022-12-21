@@ -132,7 +132,7 @@ int minmax_image (imageptr iptr)
     if (data[i] < dmin) dmin = data[i];
     else if (data[i] > dmax) dmax = data[i];    
   }
-  dprintf(0,"MinMax: %g %g\n",dmin,dmax);
+  dprintf(1,"MinMax: %g %g\n",dmin,dmax);
 
   MapMin(iptr) = dmin;
   MapMax(iptr) = dmax;
@@ -672,7 +672,7 @@ char *mystrcpy(char *a)
 
 string defv[] = {
   "mode=w\n      	Read (r) or Write (w)",
-  "VERSION=8.0\n	19-oct-11 pjt",
+  "VERSION=8.0\n	20-dec-2022 pjt",
   NULL
 };
 
@@ -686,10 +686,11 @@ nemo_main()
     image f1;
     imageptr fp1, fp2;	/* or image *fp1 */
     stream instr,outstr;
+    string mode = getparam("mode");
 
-    if (strcmp(getparam("mode"),"w")==0) {		/* write test */
-	printf ("WRITING test (mode=w) foo.dat\n");
-	outstr = stropen ("foo.dat","w");
+    if (mode[0] == 'w') {		/* write test */
+        printf ("WRITING test (mode=%s) foo.dat\n",mode);
+	outstr = stropen ("foo.dat",mode);
 
 	f1.frame = &frame[0][0];  /* compiler complained when = frame used ???? */
 				  /* would be same as fp2->frame = ... */
@@ -715,6 +716,8 @@ nemo_main()
     }
 }
 
+//    @todo    should create_image or so, and only set data here
+
 void ini_matrix(imageptr *iptr, int nx, int ny)
 {
   int ix,iy;
@@ -739,17 +742,27 @@ void ini_matrix(imageptr *iptr, int nx, int ny)
   Dx(*iptr) = 0.1;
   Dy(*iptr) = 0.1;
   Dz(*iptr) = 0.1;
+  Xref(*iptr) = 0.0;
+  Yref(*iptr) = 0.0;
+  Zref(*iptr) = 0.0;
   Namex(*iptr) = NULL;        /* no axis names */
   Namey(*iptr) = NULL;
   Namez(*iptr) = NULL;
+  Unitx(*iptr) = NULL;        /* no axis units */
+  Unity(*iptr) = NULL;
+  Unitz(*iptr) = NULL;
   Unit(*iptr)  = NULL;        /* no units */
   Object(*iptr) = NULL;
   Mask(*iptr)  = NULL;
-
+  Restfreq(*iptr) = 0.0;
+  Axis(*iptr) = 1;
+  
   set_iarray(*iptr);
   for (ix=0; ix<nx; ix++)
     for (iy=0; iy<ny; iy++)
       MapValue(*iptr,ix,iy)  = (ix*ny+iy)*0.1;
+
+  minmax_image(*iptr);
 }
 #endif
 
