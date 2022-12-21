@@ -285,7 +285,7 @@ void write_fits(string name, imageptr iptr)
 
     if (Restfreq(iptr) != 0.0)
 	restfreq = Restfreq(iptr);
-    dprintf(0,"Using restfreq=%g Hz\n",restfreq);
+    dprintf(1,"Using restfreq=%f Hz\n",restfreq);
 
     if (Qfreq)
       vsys = -restfreq * vsys / (c_MKS/1000.0);        // convert km/s to Hz
