@@ -94,6 +94,7 @@ typedef struct {        // image
   
     real  restfreq;     // FITS 'RESTFRQ'
     real  vlsr;         // FITS
+                        // FITS 'VELREF' e.g. 257   / 1 LSR, 2 HEL, 3 OBS, +256 Radio
 
     image_axis  ax;     /* new axis descriptors -- not used yet */
     image_axis  ay;
@@ -117,11 +118,12 @@ typedef struct {        // image
     string unity;   
     string unitz;   
     string unit;        /* FITS 'BUNIT'   units (could be a NULL) */
+                        /* FITS 'BTYPE' (e.g. 'Intensity') not used yet */
     string object;      /* object name */
     string telescope;   // FITS 'TELESCOP'
     string instrument;  // FITS 'INSTRUME'
     string observer;    // FITS
-    real   equinox;     // FITS
+    real   equinox;     // FITS, e.g. 2000.0
     string radecsys;    // FITS (e.g. FK5)
     string specsys;     // FITS (e.g. LSRK)
     string timesys;     // FITS (e.g. UTC)
