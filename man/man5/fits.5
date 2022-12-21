@@ -135,14 +135,41 @@ TSC  0  Tangential Spherical Cube
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
 fitsio(3NEMO), fits(3NEMO), image(5NEMO)
 .nf
+https://fits.gsfc.nasa.gov/fits_documentation.html - fits
+https://ui.adsabs.harvard.edu/abs/2001A%2526A...376..359H - FITS standard 1.0
 
-https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1061G - celestial coordinates
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1061G - world coordinates
+
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1077G - celestial coordinates
 
 https://ui.adsabs.harvard.edu/abs/2006A%26A...446..747G - spectral coordinates
 
 https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
 
 .fi
+
+.SH "EXAMPLES"
+Sometimes converting a fits file back to itself using a particular package can "fix" problems. Here are some examples
+for some arbitrary FITS file:
+.nf
+
+    f=L1157-B1_84475
+    
+    # NEMO:
+    fitsccd $f.fits - | ccdfits - $f.nemo.fits
+
+    # CASA:
+    casa -c 'importfits("'"$f"'.fits","junk.im",overwrite=True); exportfits("junk.im","'$f'.casa.fits",overwrite=True)'
+
+    # or less hassle with shell quoting , in casa python
+    f = 'L1157-B1_84475'
+    importfits(f+".fits","junk.im",overwrite=True);
+    exportfits("junk.im",f+".casa.fits",overwrite=True)
+
+    # MIRIAD:
+    fits in=$f.fits out=junk.im op=xyin
+    fits in=junk.im out=$f.miriad.fits op=xyout
+	
 
 .SH "UPDATE HISTORY"
 .nf
