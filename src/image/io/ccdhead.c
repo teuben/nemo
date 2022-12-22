@@ -16,7 +16,7 @@
 string defv[] = {
   "in=???\n       Input image filename",
   "scale=1\n      scale for cdelt, beam (3600 for fits images)",
-  "VERSION=1.5\n  18-dec-2022 PJT",
+  "VERSION=1.6\n  21-dec-2022 PJT",
   NULL,
 };
 
@@ -81,6 +81,7 @@ void nemo_main()
     if (Unit(iptr))    printf("Unit:      %s\n", Unit(iptr));
     if (Object(iptr))  printf("Object:    %s\n", Object(iptr));
     printf("Restfreq:  %f\n", Restfreq(iptr));
+    printf("VLSR:      %f\n", Vlsr(iptr));
 }
 
 

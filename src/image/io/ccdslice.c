@@ -75,7 +75,7 @@ void nemo_main(void)
 	maxplane = nz;	
     } else 
         error("Illegal slice axis %s, must be x,y,z",zvar);
-    warning("slice mode %d", mode);
+    dprintf(1,"slice mode %d", mode);
 
     planes = (int *)  allocate(maxplane * sizeof(int));
     slabs  = (real *) allocate(maxplane * sizeof(real));
@@ -247,5 +247,5 @@ void ax_copy(imageptr i0, imageptr i1)
   if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
   if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
   if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
-  copy_image_header(i0,i1);
+  copy_header(i0,i1);
 }

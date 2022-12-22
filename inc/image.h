@@ -35,7 +35,6 @@
 
 #include <matdef.h>
 
-
 typedef struct {          // image_axis
   int    nr;              // FITS 'naxisN' - length of axis
   string name;            // FITS 'ctype'
@@ -81,9 +80,11 @@ typedef struct {        // image
     int   nx;		/* dimensions in X, Y and Z */
     int   ny;
     int   nz;
+  
     real  xmin;         /* coordinates of first pixel (0,0,0)    */
     real  ymin;	        /*   --- which is at center of a cell/voxel --- !!  */
     real  zmin;
+  
     real  dx;           /* grid spacing (same for all pixels) */
     real  dy;
     real  dz;
@@ -101,6 +102,7 @@ typedef struct {        // image
     image_axis  az;
 
     char proj[16];      /* standard FITS WCS projection types */
+    real rotang;        /* FITS: CROTA  - not used here yet */
 
 #if 0
     matrix cd;          /* WCS: note, this can only handle NDIM by NDIM */
@@ -197,6 +199,7 @@ typedef struct {        // region
 #define Object(iptr)    ((iptr)->object)
 #define Telescope(iptr) ((iptr)->telescope)
 #define Restfreq(iptr)  ((iptr)->restfreq)
+#define Vlsr(iptr)      ((iptr)->vlsr)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
@@ -257,12 +260,12 @@ typedef struct {        // region
 #define     NxTag		"Nx"
 #define     NyTag		"Ny"
 #define     NzTag		"Nz"
-#define	    XminTag		"Xmin"
-#define	    YminTag		"Ymin"
-#define	    ZminTag		"Zmin"
 #define     DxTag		"Dx"
 #define	    DyTag		"Dy"
 #define	    DzTag		"Dz"
+#define	    XminTag		"Xmin"
+#define	    YminTag		"Ymin"
+#define	    ZminTag		"Zmin"
 #define	    XrefTag		"Xrefpix"
 #define	    YrefTag		"Yrefpix"
 #define	    ZrefTag		"Zrefpix"
@@ -282,6 +285,7 @@ typedef struct {        // region
 #define     ObjectTag           "Object"
 #define     TelescopeTag        "Telescope"
 #define     RestfreqTag         "Restfreq"
+#define     VlsrTag             "VLSR"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
 #define     AxisTag             "Axis"
@@ -289,15 +293,16 @@ typedef struct {        // region
 #define     MapTag		"Map"
 #define     MapValuesTag	"MapValues"
 
-int minmax_image      (imageptr);
-int write_image       (stream, imageptr);
-int read_image        (stream, imageptr *);
-int free_image        (imageptr);
-int create_image      (imageptr *, int, int);
-int create_image_mask (imageptr, image_maskptr *);
-int create_cube       (imageptr *, int, int, int);
-int copy_image        (imageptr, imageptr *);
-int copy_image_header (imageptr, imageptr);
+int minmax_image       (imageptr);
+int write_image        (stream, imageptr);
+int read_image         (stream, imageptr *);
+int free_image         (imageptr);
+int create_image       (imageptr *, int, int);
+int create_image_mask  (imageptr, image_maskptr *);
+int create_cube        (imageptr *, int, int, int);
+int create_header      (imageptr);
+int copy_image         (imageptr, imageptr *);
+int copy_header        (imageptr, imageptr, int);
 
 real  **map2_image(imageptr);
 real ***map3_image(imageptr);
