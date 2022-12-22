@@ -60,7 +60,7 @@ string defv[] = {
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif
   "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
-  "VERSION=3.2\n  19-dec-2022 PJT",
+  "VERSION=3.3\n  21-dec-2022 PJT",
   NULL,
 };
 
@@ -216,7 +216,7 @@ void nemo_main()
 
     if (axis > 0) {
       create_cube(&iptr1,nx1,ny1,nz1);
-      copy_image_header(iptr, iptr1);
+      copy_header(iptr, iptr1, 1);
     } else {
       copy_image(iptr,&iptr1);
     }
