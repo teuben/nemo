@@ -1,12 +1,12 @@
-TESTSUITE started Sun May  8 12:50:58 AM EDT 2022
+TESTSUITE started Wed Dec 21 10:14:31 PM EST 2022
 TESTSUITE version 21-mar-2022
-NEMO version 4.4.0 DL5420 (x86_64-unknown-linux-gnu)
+NEMO version 4.4.1 xps13 (x86_64-unknown-linux-gnu)
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/fits
 Creating ccd.in
 ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-BSF: OK     41.644 31.2134 0 93 115 ccd.in
+BSF: OK     40.9321 31.4127 0 93 117 ccd.in
 Running ccdfits
 ccdfits ccd.in fits.in; nemo.coverage ccdfits.c
 Running fitsccd
@@ -22,7 +22,7 @@ Skewness and kurtosis  : -0.820134 3.622802
 Sum and Sum*Dx*Dy*     : -0.000027 -0.000027
 Points per beam (map)  : 1
 0/100 out-of-range points discarded
-BSF: OK     41.6353 31.2251 -1 93 115 ccd.out
+BSF: OK     1.21403e+07 1.30754e+08 -1 1.42041e+09 117 ccd.out
 Running scanfits
 scanfits fits.in	; nemo.coverage scanfits.c
 __________________________________________________________
@@ -34,7 +34,7 @@ NAXIS  = 3
  1:	10	X       	1	0	1
  2:	10	Y       	1	0	1
  3:	1	Z       	1	0	1
-headersize = 3200 bytes = 2 2880-records
+headersize = 3120 bytes = 2 2880-records
 datasize = 400 bytes = 1 2880-records
 __________________________________________________________
 ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 |  ccdfits - map001.fits ; nemo.coverage ccdfits.c
@@ -45,15 +45,12 @@ fitsglue map%03d.fits cube.fits inlist=1:3 ; nemo.coverage fitsglue.c
 ### nemo Debug Info: Blanked out a total of 2 cards
 Output NAXIS3 = 3
 fitshead map001.fits | grep DATA; nemo.coverage fitshead.c
-DATASUM = '0000000000000000'
 DATAMIN =     -2.586638927E+00 /
 DATAMAX =      2.619837284E+00 /
 fitshead map002.fits | grep DATA
-DATASUM = '0000000000000000'
 DATAMIN =     -2.655572653E+00 /
 DATAMAX =      2.179121494E+00 /
 fitshead map003.fits | grep DATA
-DATASUM = '0000000000000000'
 DATAMIN =     -2.652021646E+00 /
 DATAMAX =      2.824515581E+00 /
 fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
@@ -70,8 +67,6 @@ NAXIS3  =                    1 /
 COMMENT  FITS (Flexible Image Transport System) format is defined in 'Astronomy
 COMMENT  and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
 COMMENT  nemo::fitsio.c $Id$
-DATASUM = '0000000000000000'
-CHECKSUM= '0000000000000000'
 CRPIX1  =      1.000000000E+00 /
 CRPIX2  =      1.000000000E+00 /
 CRPIX3  =      1.000000000E+00 /
@@ -84,21 +79,22 @@ CDELT3  =      1.000000000E+00 /
 CTYPE1  = 'X       '           /
 CTYPE2  = 'Y       '           /
 CTYPE3  = 'Z       '           /
+RESTFRQ =      1.420405760E+09 /
 BMAJ    =      0.000000000E+00 /
 BMIN    =      0.000000000E+00 /
 BPA     =      0.000000000E+00 /
 DATAMIN =     -2.652021646E+00 /
 DATAMAX =      2.824515581E+00 /
-ORIGIN  = 'NEMO ccdfits 6.4'
+ORIGIN  = 'NEMO ccdfits 6.5a'
 SPECSYS = 'LSRK    '           /
 RADECSYS= 'FK5     '           /
 EQUINOX =      2.000000000E+03 /
 AUTHOR  = 'teuben  '           /
 OBSERVER= 'teuben  '           /
-DATE-OBS= '2022-05-08T00:50:58'
+DATE-OBS= '2022-12-21T22:14:31'
 COMMENT
 HISTORY  NEMO: History in reversed order
-HISTORY  ccdfits - map003.fits VERSION=6.4
+HISTORY  ccdfits - map003.fits VERSION=6.5a
 HISTORY  ccdmath  - rang(0,1) size=10,10,1 seed=3 VERSION=3.3
 END
 tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
@@ -106,15 +102,15 @@ tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
 ### Warning [tabfits]: old get_line() is still used - it is being deprecated
 ### nemo Debug Info: Read 0 header lines
 ### nemo Debug Info: MinMax in map: 1 - 100
-fitshead tab.fits | grep DATA
-DATASUM = '0000000000000000'
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+fitshead tab.fits | grep bibcode
+COMMENT  and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/io
 Creating ccd.in
 ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-BSF: OK     41.644 31.2134 0 93 115 ccd.in
+BSF: OK     40.9321 31.4127 0 93 117 ccd.in
 Running ccddump
 ccddump ccd.in . ; nemo.coverage ccddump.c
 ### nemo Debug Info: linear scaling
@@ -138,8 +134,7 @@ ccdgen out=ccd3.in object=noise spar=0,1  size=10,10,100 seed=123
 ### nemo Debug Info: Generating a map from scratch
 ### nemo Debug Info: noise: center pixel: 4.5 4.5
 ### nemo Debug Info: noise:0 1
-### nemo Debug Info: MinMax: -3.8169 3.9858
-BSF: OK     0.00961965 1.00606 -3.8169 4.5 10015 ccd3.in
+BSF: OK     0.00961773 1.00596 -3.8169 4.5 10017 ccd3.in
 ccdspec ccd3.in | tail -3
 98 -0.0392291
 99 -0.296735
@@ -147,6 +142,7 @@ ccdspec ccd3.in | tail -3
 ccdhead ccd.in
 Size:      10 10 1
 Cell:      1 1 1
+Beam:      0 0 0
 AXIS=1:
 LL-Corner: 0 0 0
 TR-Corner: 9 9 0
@@ -154,13 +150,15 @@ X-range:   -0.5 9.5
 Y-range:   -0.5 9.5
 Z-range:   -0.5 0.5
 MinMax:    0 93
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+Restfreq:  0.000000
+VLSR:      0.000000
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/misc
 Creating ccd.in
 ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**1.1+(abs(%y-31.5))**1.1)" size=64,64,1
-BSF: OK     1.70886 0.707985 0 10.3526 4111 ccd.in
+BSF: OK     1.70803 0.708814 0 10.3526 4113 ccd.in
 Running ccdplot
 ccdplot ccd.in 0.01,0.1,1:9,9.9,9.99  yapp=/xs ; nemo.coverage ccdplot.c
 ### nemo Debug Info: axis=1:   new xmin,ymin=0 0
@@ -174,9 +172,11 @@ Skewness and kurtosis  : 4.406508 34.555856
 Sum and Sum*Dx*Dy*     : 7010.703997 7010.703997
 Points per beam (map)  : 1
 0/4096 out-of-range points discarded
+ccdstat ccd.in qac=t ; nemo.coverage ccdstat.c	
+QAC_STATS: ccd.in 1.7116 0.690818 1.06026 10.3526  7010.7 1  4096
 Creating ccdmom.in
 ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=2,2,2
-BSF: OK     1.65217 2.37026 0 7 23 ccdmom.in
+BSF: OK     1.52 2.31724 0 7 25 ccdmom.in
 Running ccdmom
 ccdmom ccdmom.in - 1 |  ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 Number of points       : 4
@@ -206,7 +206,6 @@ Running ccdsub
 ccdsub ccd.in - 10:20 10:20 |   ccdstat - ; nemo.coverage ccdsub.c ccdstat.c
 ### Warning [ccdsub]: Sampling will be done
 ### nemo Debug Info: WCS Corner: 0 0 0
-### nemo Debug Info: MinMax: 1.27581 1.76272
 Number of points       : 121
 Min and Max            : 1.275806 1.762725
 Mean and dispersion    : 1.474749 0.106430
@@ -230,14 +229,12 @@ ccdgen out=gauss1 object=gauss spar=1,10 size=20,20
 ### nemo Debug Info: Generating a map from scratch
 ### nemo Debug Info: gauss: center pixel: 9.5 9.5
 ### nemo Debug Info: gauss: 1 10
-### nemo Debug Info: MinMax: 0.405555 0.997503
 Creating gauss2
 ccdgen out=gauss2 object=gauss spar=1,20 size=10,10
 ### nemo Debug Info: gauss: disk with pa=0 inc=0
 ### nemo Debug Info: Generating a map from scratch
 ### nemo Debug Info: gauss: center pixel: 4.5 4.5
 ### nemo Debug Info: gauss: 1 20
-### nemo Debug Info: MinMax: 0.950635 0.999375
 Running ccdstack
 ccdstack gauss1,gauss2 - |  ccdstat -
 ### nemo Debug Info: Using 2 images
@@ -271,9 +268,32 @@ Skewness and kurtosis  : -0.306637 -0.658466
 Sum and Sum*Dx*Dy*     : 95.084319 95.084319
 Points per beam (map)  : 1
 0/100 out-of-range points discarded
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+Creating ccdmom2.in
+ccdgen out=ccdmom2.in object=gauss spar=1,25 size=128,128
+### nemo Debug Info: gauss: disk with pa=0 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: gauss: center pixel: 63.5 63.5
+### nemo Debug Info: gauss: 1 25
+Running ccdellint
+ccdellint ccdmom2.in 0:50:10 tab=- ; nemo.coverage ccdellint.c
+### nemo Debug Info: Image 128 x 128 x 1 pixels = 128 x 128 x 1 size
+### nemo Debug Info: nppb = 1
+### nemo Debug Info: #  nppb=1 rscale=1 iscale=1
+### nemo Debug Info: Map 128 x 128 pixels, size 128 x 128
+### nemo Debug Info: Pixel size: 1 x 1
+### Warning [ccdellint]: no binary out=
+#  nppb=1 rscale=1 iscale=1
+# r npix int rms sum sumcum
+10 316 0.960839 0.0222903 303.625 303.625
+20 948 0.819764 0.057072 777.137 1080.76
+30 1564 0.597863 0.068607 935.058 2015.82
+40 2196 0.372785 0.0599843 818.636 2834.46
+50 2836 0.198133 0.0411041 561.905 3396.36
+### nemo Debug Info: Nundf=0/16384 Nout=8524 Nang=0 (sum=8524)
+### nemo Debug Info: Rmin/max = 0.707107 89.8026
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/rotcur
 Creating map1.den
 ccdvel map1.den radii=@map1.r vrot=@map1.d pa=30 inc=60 amp=t; nemo.coverage ccdvel.c
@@ -437,13 +457,13 @@ velfit in=map1.vel radii=0:100:5 pa=30 inc=60 out=map2.vel
 ### nemo Debug Info: Nundf=3600/16384 Nout=0 Nang=0 (sum=3600)
 ### nemo Debug Info: Rmin/max = 0.774907 99.9645
 ### nemo Debug Info: Data min/max = 0 84.9286
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/trans
 Creating ccd.in
 ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
-BSF: OK     14.3933 15.6202 0 42 40 ccd.in
+BSF: OK     13.7079 15.5488 0 42 42 ccd.in
 Running ccdmath
 ccdmath ccd.in - %1 |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
   2.000  12.000  22.000  32.000  42.000 
@@ -473,7 +493,6 @@ ccdgen out=- object=exp pa=30 |  ccdprint - x= y= format=%7.3f ; nemo.coverage c
 ### nemo Debug Info: Generating a map from scratch
 ### nemo Debug Info: exp: center pixel: 4.5 4.5
 ### nemo Debug Info: exp: 1 1
-### nemo Debug Info: MinMax: 0.00172253 0.493069
   0.002   0.003   0.006   0.009   0.011   0.011   0.009   0.006   0.003   0.002 
   0.003   0.007   0.014   0.022   0.029   0.029   0.022   0.014   0.007   0.003 
   0.006   0.014   0.029   0.054   0.078   0.078   0.054   0.029   0.014   0.006 
@@ -494,7 +513,7 @@ ccdsharp ccd.in - |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
   0.000   0.000   0.000   0.000   0.000 
 Creating ccd3.in
 ccdmath out=ccd3.in "fie=10*%x+sqrt(%y)+%z*%z"  size=5,5,5 ; nemo.coverage ccdmath.c
-BSF: OK     24.7475 16.8428 0 58 140 ccd3.in
+BSF: OK     24.399 16.9762 0 58 142 ccd3.in
 Running ccdsharp3
 ccdsharp3 ccd3.in -|  ccdprint - x= y= z= format=%7.3f ; nemo.coverage ccdsmooth.c
 ### nemo Debug Info: Image sharpening method #1
@@ -534,9 +553,9 @@ vscale=1000
 iscale=1
 Mass(HI) = 2.3595e-07  
 Mass(H2) = 1.05e-08  (alpha=4.3; includes 1.36 He contribution)
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/image/wcs
 Running wcs
 wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pix=10,10
@@ -545,14 +564,14 @@ wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pix=10,10
 wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pos=10,10
 -72 -72 
 -72 -72 should be on the line before
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/kernel/fortran
 make[1]: Nothing to be done for 'all'.
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/kernel/io
 Creating rsf.in
 Running rsf
@@ -588,9 +607,9 @@ bsf rsf.out  test="5.55552 4.32102 1.2345 9.87654 2"; nemo.coverage bsf.c
 BSF: OK     5.55552 4.32102 1.2345 9.87654 2 rsf.out
 Running hisf
 hisf csf.out				; nemo.coverage history.c
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/kernel/misc
 Running xrandom
 uniform seed=5 n=5
@@ -617,18 +636,24 @@ Skewness and kurtosis: -0.517217 -1.260559
 nemoinp 1:10:2 newline=f	 ; nemo.coverage nemoinp.c
 1 3 5 7 9
 
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/kernel/tab
 Creating tab.in
 nemoinp 1:100 > tab.in
 Running tabmath
 tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
 Running tabplot
-tabmath tab.in - 'sqrt(%1)' |  tabplot - ; nemo.coverage tabplot.c
+tabmath tab.in - 'sqrt(%1)' |  tabplot - 1 2 ; nemo.coverage tabplot.c
 ### nemo Debug Info: read 100 points
 ### nemo Debug Info: min and max value in xcolumns 1: [1.000000 : 100.000000]
+### nemo Debug Info: min and max value in ycolumns 2: [1.000000 : 10.000000]
+### nemo Debug Info: X:min and max value reset to : [-3.950000 : 104.950000]
+### nemo Debug Info: Y:min and max value reset to : [0.550000 : 10.450000]
+tabmath tab.in - 'sqrt(%1)' |  tabplot - 0 2 ; nemo.coverage tabplot.c
+### nemo Debug Info: read 100 points
+### nemo Debug Info: min and max value in xcolumns 0: [1.000000 : 100.000000]
 ### nemo Debug Info: min and max value in ycolumns 2: [1.000000 : 10.000000]
 ### nemo Debug Info: X:min and max value reset to : [-3.950000 : 104.950000]
 ### nemo Debug Info: Y:min and max value reset to : [0.550000 : 10.450000]
@@ -770,7 +795,6 @@ nemoinp 1:1000 |  tabmath - - 'rang(0,1)' all seed=123 |  meanmed - ; nemo.cover
   550   0.294479   0.836967   0.627633   0.00052585   3.34828 
 Running
 nemoinp 1:1000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabstat - ; nemo.coverage tabstat.c
-### nemo Debug Info: Table: 1000 x 1
 npt:     1000
 min:     -2.73132
 max:     3.34828
@@ -783,7 +807,6 @@ min/sig: -2.83018
 max/sig: 3.21925
 median:  0.111046
 nemoinp 1:100000 nmax=100000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabstat - ; nemo.coverage tabstat.c
-### nemo Debug Info: Table: 100000 x 1
 npt:     100000
 min:     -4.4138
 max:     4.41422
@@ -813,11 +836,41 @@ tabdms dms.in - fromhms=2 fromdms=3 center=12:00:00,60:00:00 scale=3600
 12:00:20 60:00:10   150 10
 11:59:40 60:00:00   -150 0
 11:59:40 60:00:10   -150 10
-tabdms dms.in - fromdms=2,3 center=12:00:00,60:00:00 scale=3600	
+tabdms dms.in - fromdms=2,3 center=12:00:00,60:00:00 scale=3600
 12:00:20 60:00:00   10 0
 12:00:20 60:00:10   10 10
 11:59:40 60:00:00   -10 0
 11:59:40 60:00:10   -10 10
+tabgen tab123
+tabcsv tab123
+0.552584,0.126911,0.520753,0.0930232,0.563683
+0.258931,0.0369577,0.965763,0.634585,0.981766
+0.334841,0.988963,0.802354,0.0781159,0.670491
+0.0813695,0.406962,0.410499,0.0580781,0.00621213
+0.76675,0.916136,0.933575,0.232357,0.13957
+0.0119871,0.0043076,0.246779,0.298222,0.976148
+0.124062,0.495466,0.66104,0.395841,0.444194
+0.37393,0.561871,0.447876,0.253845,0.25011
+0.0599213,0.868871,0.141264,0.703102,0.940953
+0.552831,0.0700808,0.974204,0.164322,0.75846
+tabrows txt.in 2,3; nemo.coverage tabrows.c
+### nemo Debug Info: nmax=10000
+a  1 2 3
+a  4 5 6
+tabrows csv.in 2,3
+### nemo Debug Info: nmax=10000
+a, 1, 2, 3
+a, 4, 5, 6
+tabcols txt.in 2,3; nemo.coverage tabcols.c
+1 2
+4 5
+7 8
+101 102
+tabcols csv.in 2,3
+1 2
+4 5
+7 8
+101 102
 tabnllsqfit tab.out
 nrt=0
 Fitting a+bx:  
@@ -838,9 +891,9 @@ p1= 0.079116 0.00155773
 rms= 0.445137
 rms2/chi2= 19.8147
 rms/chi = 1
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/cores
 Running bodytrans
 bodytrans x; nemo.coverage bodytrans.c
@@ -863,9 +916,9 @@ mkplummer - 128 seed=128 |\
 ### nemo Debug Info: Total mass: 118.859
 ### nemo Debug Info: Rescaling total mass to 1
 BSF: OK     0.00111483 0.691696 -6.34556 6.87197 897 -
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/aarseth/nbody0
 Creating nbody0.in
 mkplummer nbody0.in 10 seed=123
@@ -967,9 +1020,9 @@ set SnapShot
       0.00000 1.02687 -0.182481 0.00000 -0.324941 -0.452423 0.00000 
   tes
 tes
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/aarseth/tools
 Running runbody1 testrun for NBODY1
 ### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
@@ -989,7 +1042,7 @@ Running runbody1 testrun for NBODY1
 #  runbody1 - run2 10 kz=1,2,1,2,0,0,0,0,0,1,1 > run2.log
 ### nemo Debug Info: get_nbody: 10 0.000000 7
 ### nemo Debug Info: Grabbing nbody=10
-### nemo Debug Info: stou4 /home/teuben/NEMO/nemo/tmp/test90527/run2.p nbody=10
+### nemo Debug Info: stou4 /home/teuben/NEMO/nemo/tmp/test1424487/run2.p nbody=10
 ### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
 ### nemo Debug Info: Saving model 1 (nbody=10 time=0)
 ### nemo Debug Info: Saving model 2 (nbody=10 time=1.30619)
@@ -1084,9 +1137,9 @@ snapcmp run4b/out.snap  run4c/out.snap
 10   0.00212655 0.277043 0.546946 0.986654 25.46  1.84095 4.89701
 BSF: OK     -39.3365 1445.22 -53238.1 12.727 1356 run4b/out.snap
 BSF: OK     -39.4595 1450.66 -53438.8 14.2075 1356 run4c/out.snap
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/dehnen
 Running gyrfalcON
 mkplum p1024.in 1024 seed=1024
@@ -1094,36 +1147,36 @@ gyrfalcON in=p1024.in out=p1024.out kmax=6 eps=0.05 tstop=2 > p1024.log
 # ----------------------------------------------------------------------------------------------------------------------
 # "gyrfalcON in=p1024.in out=p1024.out kmax=6 eps=0.05 tstop=2"
 #
-# run at  Sun May  8 00:50:59 2022
+# run at  Wed Dec 21 22:14:32 2022
 #     by  "teuben"
-#     on  "DL5420"
-#     pid  91161
+#     on  "xps13"
+#     pid  1425150
 #
 #      time       E=T+V        T         V_in       W        -2T/W    |L|   |v_cm| l2R  D  tree  grav  step  accumulated
 # ----------------------------------------------------------------------------------------------------------------------
  0.000000     -0.1539854968 0.1485343 -0.3025198 -0.3020617 0.9835 0.02787 0.01667   6 11  0.00  0.00  0.00   0:00:00.00
  0.0156250000 -0.1539898994 0.1484817 -0.3024716 -0.3020513 0.9832 0.02787 0.01667   6 11  0.00  0.00  0.00   0:00:00.00
 ...
- 1.9843750000 -0.1540080607 0.1497851 -0.3037932 -0.3035646 0.9868 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.18
- 2.0000000000 -0.1540100387 0.1498393 -0.3038493 -0.3035896 0.9871 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.18
+ 1.9843750000 -0.1540080607 0.1497851 -0.3037932 -0.3035646 0.9868 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.16
+ 2.0000000000 -0.1540100387 0.1498393 -0.3038493 -0.3035896 0.9871 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.16
 snapscale p1024.in p1024.in2 mscale=0.5
 gyrfalcON in=p1024.in2 out=p1024.out2 kmax=6 eps=0.05 tstop=2 \
 	accname=Plummer accpars=0,0.5,1 > p1024.log2
 # ---------------------------------------------------------------------------------------------------------------------------------------
 # "gyrfalcON in=p1024.in2 out=p1024.out2 kmax=6 eps=0.05 tstop=2 accname=Plummer accpars=0,0.5,1"
 #
-# run at  Sun May  8 00:50:59 2022
+# run at  Wed Dec 21 22:14:32 2022
 #     by  "teuben"
-#     on  "DL5420"
-#     pid  91167
+#     on  "xps13"
+#     pid  1425156
 #
 #      time       E=T+V        T         V_in       V_ex       W        -2T/W    |L|   |v_cm| l2R  D  tree  grav  pext  step  accumulated
 # ---------------------------------------------------------------------------------------------------------------------------------------
  0.000000     -0.1507441419 0.0742672 -0.0756300 -0.1493813 -0.1480623 1.0032 0.01394 0.01667   6 11  0.00  0.00  0.00  0.00   0:00:00.00
  0.0156250000 -0.1507452397 0.0742426 -0.0756177 -0.1493702 -0.1480766 1.0028 0.01394 0.01668   6 11  0.00  0.00  0.00  0.00   0:00:00.00
 ...
- 1.9843750000 -0.1507520575 0.0734572 -0.0752389 -0.1489704 -0.1480077 0.9926 0.01394 0.01427   6 11  0.00  0.00  0.00  0.00   0:00:00.19
- 2.0000000000 -0.1507535811 0.0734607 -0.0752429 -0.1489714 -0.1480196 0.9926 0.01394 0.01421   6 10  0.00  0.00  0.00  0.00   0:00:00.19
+ 1.9843750000 -0.1507520575 0.0734572 -0.0752389 -0.1489704 -0.1480077 0.9926 0.01394 0.01427   6 11  0.00  0.00  0.00  0.00   0:00:00.16
+ 2.0000000000 -0.1507535811 0.0734607 -0.0752429 -0.1489714 -0.1480196 0.9926 0.01394 0.01421   6 10  0.00  0.00  0.00  0.00   0:00:00.16
 snapmradii p1024.out  log=t > p1024.tab
 snapmradii p1024.out2 log=t > p1024.tab2
 To view lagrangian radii, redo test with larger TSTOP=2 and plot:
@@ -1148,7 +1201,7 @@ mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60
 ### nemo Debug Info: findfn: looking up iniacceleration
 # falcON  Debug Info [inc/public/halo.h:445]:   ModifiedDoublePowerLawHalo: rh0=3.978874
 # falcON  Debug Info [src/public/lib/halo.cc:434]:   HaloPotential: minimum & maximum tabulated radii = 0.000390625, 102.4
-# falcON  Debug Info [src/public/acc/Halo.cc:87]: external potential "Halo" recognizes 8 parameters:
+# falcON  Debug Info [src/public/acc/Halo.cc:88]: external potential "Halo" recognizes 8 parameters:
    omega   pattern speed (ignored)   [0]
    r_s     scale radius              [1]
    m_t     total mass                [1]
@@ -1175,7 +1228,7 @@ mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60
    Moore:     gi=3/2, go=3, eta=3/2
    DM:        gi=7/9, go=31/9, eta=4/9
  and differing values are ignored.
-# falcON  Debug Info [src/public/acc/Halo.cc:117]: external potential "Halo" initialized with:
+# falcON  Debug Info [src/public/acc/Halo.cc:118]: external potential "Halo" initialized with:
    r_s = 0.2
    m_t = 0.2
    g_i = 1
@@ -1191,7 +1244,7 @@ mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60
 ### nemo Debug Info: hasvalue: checking indexing on max_r
 # falcON  Debug Info [src/public/lib/halo.cc:434]:   HaloPotential: minimum & maximum tabulated radii = 1.14441e-05, 6144
 # falcON  Warning [src/public/lib/halo.cc:512]: HaloModel: PJT patched at 1386/1746
-# falcON  Debug Info [src/public/lib/body.cc:755]:   bodies::bodies(): constructing bodies @0x7ffd1f5f7b90: n=0,0,1000, bits=mxve
+# falcON  Debug Info [src/public/lib/body.cc:755]:   bodies::bodies(): constructing bodies @0x7ffc50ed4070: n=0,0,1000, bits=mxve
 ### nemo Debug Info: hasvalue: checking indexing on eps
 # falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 m
 # falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 x
@@ -1206,9 +1259,9 @@ mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60
 ### nemo Debug Info: NEMOKEYS: using ./nemokeys.dat
 ### nemo Debug Info: finiparam: now freeup some final memory
 s2s p1024.in p1024.out3 filter='i<#0' params=512
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/directcode
 Running directcode
 directcode out=bench.dat > bench.log; nemo.coverage code.c
@@ -1236,22 +1289,22 @@ Direct code: test data
 
 	particle data written
 BSF: OK     0.00207274 0.391917 -1.22155 2 10469 bench.dat
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/flowcode
 Copying vrtm51.c locally
 cp /home/teuben/NEMO/nemo/src/nbody/evolve/flowcode/vrtm51.c .
 make -f /home/teuben/NEMO/nemo/lib/Makefile.lib vrtm51.so
-make[2]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
-gcc -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE  -fpic -rdynamic  -Dlinux -DSYSV  -I/home/teuben/NEMO/nemo/inc -I/home/teuben/NEMO/nemo/lib -I/home/teuben/NEMO/nemo/opt/include    -Wall -Wimplicit-function-declaration  -D_GNU_SOURCE -std=c99  -c vrtm51.c
+make[2]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
+gcc -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE  -fpic -rdynamic  -Dlinux -DSYSV  -I/home/teuben/NEMO/nemo/inc -I/home/teuben/NEMO/nemo/lib -I/home/teuben/NEMO/nemo/opt/include -I/usr/include/hdf   -Wall -Wimplicit-function-declaration  -D_GNU_SOURCE -std=c99  -c vrtm51.c
 vrtm51.c: In function ‘potential’:
 vrtm51.c:194:15: warning: unused variable ‘rad0’ [-Wunused-variable]
   194 |     real rad, rad0, rad1, phi, phase;
       |               ^~~~
 ldso vrtm51
 CXX=g++
-make[2]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[2]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
 mkflowdisk bench.in 100 \
   seed=123 \
@@ -1289,9 +1342,9 @@ flowcode in=bench.in out=bench.dat \
 
 	particle data written
 BSF: OK     -0.0200055 0.681308 -1.95706 1.98711 4321 bench.dat
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/hackcode/hackcode1
 Running hackcode1
 hackcode1 out=bench.dat > bench.log; nemo.coverage hackcode1.c
@@ -1319,9 +1372,9 @@ Hack code: test data
 
 	particle data written
 BSF: OK     0.00196205 0.391904 -1.22753 2 10469 bench.dat
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/hackcode/treecode1
 Running treecode1
 treecode1 out=bench.dat nbody=128 > bench.log; nemo.coverage treecode.c
@@ -1348,15 +1401,15 @@ Hierarchical N-body code (theta scan)
        2.000 0.23655 0.23686 0.47341 0.50032 0.00057 0.07147   0.000
 
 	data output to file bench.dat at time 2.000000
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/scfm
 Creating scfm.in
 mkplummer scfm.in 10 seed=123
 Running runscfm
 runscfm scfm.in scfm.run > scfm.log
-### nemo Debug Info: snapprint /home/teuben/NEMO/nemo/tmp/test90527/scfm.in m,x,y,z,vx,vy,vz header=t > SCFBI
+### nemo Debug Info: snapprint /home/teuben/NEMO/nemo/tmp/test1424487/scfm.in m,x,y,z,vx,vy,vz header=t > SCFBI
 ### nemo Debug Info: m x y z vx vy vz 
 ### nemo Debug Info: get_header(nskip=0)
 ### nemo Debug Info: [reading 10 bodies at time 0.000000]
@@ -1365,7 +1418,7 @@ runscfm scfm.in scfm.run > scfm.log
 ### nemo Debug Info: get_header(nskip=0)
 tsf scfm.run/scfm.dat
 char History[59] "tabtos - scfm.dat nbody,time mass,pos,vel,phi VERSION
-  =1.5c"
+  =2.0a"
 set SnapShot
   set Parameters
     int Nobj 10 
@@ -1385,7 +1438,7 @@ set SnapShot
   tes
 tes
 char History[59] "tabtos - scfm.dat nbody,time mass,pos,vel,phi VERSION
-  =1.5c"
+  =2.0a"
 set SnapShot
   set Parameters
     int Nobj 10 
@@ -1405,11 +1458,10 @@ set SnapShot
   tes
 tes
 BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 scfm.in
-BSF: FAIL   -0.218618 1.19229 -5.85487 5.21154 162 scfm.run/scfm.dat
-BSF: EXPECT -0.132291 0.95194 -4.6523 4.80925 81 scfm.run/scfm.dat
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+BSF: OK     -0.218618 1.19229 -5.85487 5.21154 162 scfm.run/scfm.dat
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/evolve/sellwood/tools
 mkplummer run1.in 100 seed=100
 rungalaxy in=run1.in outdir=run1
@@ -1509,28 +1561,27 @@ set SnapShot
   tes
 tes
 BSF: OK     -0.105414 0.49662 -1.71432 1.40336 2103 run1/galaxy.snap
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/image
 Creating snap.in
 mkplummer snap.in 10 seed=123
 BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 snap.in
 Running snapccd
-snapccd snap.in - | bsf - test='0.0713999 1.38289 0 31.5 4111' ; nemo.coverage snapccd.c
-BSF: OK     0.0713999 1.38289 0 31.5 4111 -
+snapccd snap.in - | bsf - test='0.0713652 1.38255 0 31.5 4113' ; nemo.coverage snapccd.c
+BSF: OK     0.0713652 1.38255 0 31.5 4113 -
 Running snapgrid
-snapgrid snap.in - | bsf - test='4.865e+16 3.11891e+18 -1.96875 2e+20 4111' ; nemo.coverage snapgrid.c
-BSF: FAIL   4.865e+16 3.11891e+18 0 2e+20 4111 -
-BSF: EXPECT 4.865e+16 3.11891e+18 -1.96875 2e+20 4111 -
+snapgrid snap.in - | bsf - test='4.86263e+16 3.11816e+18 0 2e+20 4113' ; nemo.coverage snapgrid.c
+BSF: OK     4.86263e+16 3.11816e+18 0 2e+20 4113 -
 Running snapslit
 snapslit snap.in  width=1 length=4 zvar=vy ; nemo.coverage snapsplit.c
 ### nemo Debug Info: Convolving with 3-length beam: 0.250000 0.500000 0.250000 
 ### nemo Debug Info: mmax=0.750000 vmin=-0.463708 vmax=0.649302 smax=0.051491  reset to:
 ### nemo Debug Info: mmax=0.750000 vmin=-0.463708 vmax=0.649302 smax=0.051491           
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/init
 Creating snapenter.in
 snapenter < snapenter.in verbose=f headline="test suite"  ; nemo.coverage snapenter.c
@@ -1589,7 +1640,7 @@ BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 mkplummer.out
 Running mkexpdisk
 mkexpdisk mkexpdisk.out 10 seed=123 ; nemo.coverage mkexpdisk.c
 tsf mkexpdisk.out
-char History[48] "mkexpdisk mkexpdisk.out 10 seed=123 VERSION=1.3"
+char History[49] "mkexpdisk mkexpdisk.out 10 seed=123 VERSION=1.3a"
 set SnapShot
   set Parameters
     int Nobj 10 
@@ -1716,9 +1767,9 @@ set SnapShot
   tes
 tes
 BSF: OK     0.757501 82.4069 -284.984 218.881 71 mktabdisk.out
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/io_nemo
 rm -rf io_nemo_run_test
 (cd /home/teuben/NEMO/nemo/src/nbody/io_nemo ; make test  ; script/test_io_nemo.csh RT=io_nemo_run_test)
@@ -1749,17 +1800,17 @@ Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
 
 *** Running [compile/bin/nemo_fortran_d_n3] with [compile/bin/snapmask_d] ***
 Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/io/starlab
 make[1]: Nothing to be done for 'all'.
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/io
 Running stoa
-mkplummer - 10 | stoa - stoa.out ; nemo.coverage stoa.a
+mkplummer - 10 seed=123 | stoa - stoa.out ; nemo.coverage stoa.a
 ### nemo Debug Info: [stoa: writing 10 bodies at time 0.000000]
 Running atos
 atos stoa.out atos.out ; nemo.coverage atos.c
@@ -1769,7 +1820,7 @@ stoa atos.out stoa.cmp ; nemo.coverage stoa.c
 Running diff stoa.out stoa.cmp
 diff stoa.out stoa.cmp
 Running tabtos
-mkplummer - 10 |  snapprint - m,x,y,z,vx,vy,vz > tabtos.in
+mkplummer - 10 seed=123  |  snapprint - m,x,y,z,vx,vy,vz > tabtos.in
 ### nemo Debug Info: m x y z vx vy vz 
 tabtos tabtos.in tabtos.out "" mass,pos,vel times=0  ; nemo.coverage tabtos.c
 ### nemo Debug Info: get_header(nskip=0)
@@ -1779,7 +1830,7 @@ snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
 ### nemo Debug Info: m x y z vx vy vz 
 Running diff tabtos.in tabtos.cmp
 diff tabtos.in tabtos.cmp
-mkplummer mp.out 10
+mkplummer mp.out 10 seed=123 
 Running snaptipsy:
 snaptipsy mp.out st.out mode=dark ; nemo.coverage snaptipsy.c
 Running tipsysnap
@@ -1792,7 +1843,7 @@ Running snapcmp
 snapcmp ts.out mp.out
 # time  Min  Qlow Median Qhigh  Max   Mean Sigma
 # obs=r
-0   7.11435e-09 2.14448e-08 2.97466e-08 3.10182e-08 2.20991e-07  4.66902e-08 5.93586e-08
+0   5.79208e-09 7.26423e-09 9.93596e-09 2.20485e-08 1.59336e-07  3.22352e-08 4.49276e-08
 Running snapgadget
 snapgadget mp.out sg.out N=10,0,0,0; nemo.coverage snapgadget.c
 Running gadgetsnap
@@ -1812,9 +1863,9 @@ BoxSize: 128
 Omega0: 0.3
 OmegaLambda: 0.7
 HubbleParam: 0.75
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/reduc
 Creating snap.in
 mkplummer snap.in 10 seed=123
@@ -1844,10 +1895,11 @@ snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
 ### nemo Debug Info: Y:min and max value reset to : [-0.088542 : 3.838869]
 Running radprof
 radprof snap.in tab=t > /dev/null ; nemo.coverage radprof.c
+### Warning [radprof]: skipping density computation
 Checking d2f for snapfour
 mkplummer - 100 seed=123 |  csf - - convert=d2f |  snapfour - radii=0:2
-### nemo Debug Info: ### nemo Debug Info: On top-level: 3 items  read, 3 items written
-<R> N A0 A1 A2 A3 A4 B1 B2 B3 B4 
+### nemo Debug Info: On top-level: 3 items  read, 3 items written
+### nemo Debug Info: <R> N A0 A1 A2 A3 A4 B1 B2 B3 B4 
 0.5 76 0.02257 0.0430464 0.106832 0.0378323 -0.0870279 0.0106452 -0.151254 -0.00847635 -0.176513
 1.5 16 -0.233933 -0.402085 -0.176371 0.291476 0.547148 -0.873766 -0.724156 0.123881 0.27142
 Checking f2d for snapfour
@@ -1925,9 +1977,9 @@ snapprint snap.in y+z | head -1
 snapprint snap.in x-y | head -1
 ### nemo Debug Info: x-y 
 -0.387799 
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/trans
 Creating snap.in
 mkplummer snap.in 10 seed=123
@@ -2086,9 +2138,9 @@ set SnapShot
       . . .
   tes
 tes
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/nbody/xyz
 Creating snap.in
 mkplummer snap.in 10 seed=123
@@ -2116,9 +2168,9 @@ set PointData
 tes
 ### nemo Debug Info: [snapxyz: npoint = 10  time = 0.00]
 BSF: OK     1.04652e-17 0.966872 -4.6523 4.80925 61 snapxyz
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/orbit/misc
 Running mkorbit
 mkorbit orb1.in x=1 vy=1 potname=plummer
@@ -2413,9 +2465,9 @@ snapprint snap4.out
 0.893952 0.772575 0 -0.249326 0.903155 0 
 0.86785 0.86183 0 -0.272379 0.881783 0 
 0.839546 0.948903 0 -0.29336 0.859548 0 
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 Cleaning src/orbit/potential
 Running potlist
 potlist harmonic  x=1 dr=0.001 ; nemo.coverage potlist.c
@@ -2544,10 +2596,10 @@ potrot pfenniger84 r=1:10
 8 -0.0133471 0.326767
 9 -0.0110215 0.31495
 10 -0.00924088 0.303988
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 ==========================================================
-make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test90527'
+make[1]: Entering directory '/home/teuben/NEMO/nemo/tmp/test1424487'
 rm -rf run000  run001 run002
 tests are disabled
-make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test90527'
-TESTSUITE   ended Sun May  8 12:51:03 AM EDT 2022
+make[1]: Leaving directory '/home/teuben/NEMO/nemo/tmp/test1424487'
+TESTSUITE   ended Wed Dec 21 10:14:36 PM EST 2022
