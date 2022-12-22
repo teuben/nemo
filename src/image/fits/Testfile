@@ -77,4 +77,4 @@ tab.in:
 
 tabfits:	tab.in
 	$(EXEC) tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
-	$(EXEC) fitshead tab.fits | grep DATA
+	$(EXEC) fitshead tab.fits | grep bibcode
