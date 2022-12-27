@@ -1,4 +1,4 @@
-/* 
+/*
  * CCDMOM: take a moment along an axis in an image/cube
  *
  *	quick and dirty:  8-jun-95		pjt
@@ -60,7 +60,7 @@ string defv[] = {
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
 #endif
   "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
-  "VERSION=3.3\n  21-dec-2022 PJT",
+  "VERSION=3.3a\n 27-dec-2022 PJT",
   NULL,
 };
 
@@ -229,7 +229,7 @@ void nemo_main()
       if (Axis(iptr)==1)
 	offset -= Xref(iptr)*Dx(iptr);
       if (Qint) ifactor *= ABS(Dx(iptr));
-      for (k=0; k<nz; k++)
+      for (k=0; k<nz; k++) {
         for (j=0; j<ny; j++) {
 	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
@@ -267,21 +267,21 @@ void nemo_main()
 	    for (i=0; i<nx1; i++)
 	      CubeValue(iptr1,i,j,k) = newvalue;
         } // j
+      } // k
+      /* TODO: fix up Qkeep headers */
 
-        /* TODO: fix up Qkeep headers */
-
-        Xmin(iptr1) = Xmin(iptr) + 0.5*(nx-1)*Dx(iptr);
-        Ymin(iptr1) = Ymin(iptr);
-        Zmin(iptr1) = Zmin(iptr);
-        Dx(iptr1) = nx * Dx(iptr);
-        Dy(iptr1) = Dy(iptr);
-        Dz(iptr1) = Dz(iptr);
+      Xmin(iptr1) = Xmin(iptr) + 0.5*(nx-1)*Dx(iptr);
+      Ymin(iptr1) = Ymin(iptr);
+      Zmin(iptr1) = Zmin(iptr);
+      Dx(iptr1) = nx * Dx(iptr);
+      Dy(iptr1) = Dy(iptr);
+      Dz(iptr1) = Dz(iptr);
         
-        Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
-        Namey(iptr1) = Namey(iptr);
-        Namez(iptr1) = Namez(iptr);
-
-	if (Qoper) image_oper(iptr,oper,iptr1);
+      Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
+      Namey(iptr1) = Namey(iptr);
+      Namez(iptr1) = Namez(iptr);
+      
+      if (Qoper) image_oper(iptr,oper,iptr1);
 
     } else if (axis==2) {
       
@@ -290,7 +290,7 @@ void nemo_main()
       if (Axis(iptr)==1)
 	offset -= Yref(iptr)*Dy(iptr);
       if (Qint) ifactor *= ABS(Dy(iptr));
-      for (k=0; k<nz; k++)
+      for (k=0; k<nz; k++) {
         for (i=0; i<nx; i++) {
             tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
@@ -328,21 +328,22 @@ void nemo_main()
             for (j=0; j<ny1; j++)
                 CubeValue(iptr1,i,j,k) = newvalue;
         } // i
+      } // k
 
-        /* TODO: */
+      /* TODO: */
 
-        Xmin(iptr1) = Xmin(iptr);
-        Ymin(iptr1) = Ymin(iptr) + 0.5*(ny-1)*Dy(iptr);
-        Zmin(iptr1) = Zmin(iptr);
-        Dx(iptr1) = Dx(iptr);
-        Dy(iptr1) = ny * Dy(iptr);
-        Dz(iptr1) = Dz(iptr);
-        
-        Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
-        Namey(iptr1) = Namey(iptr);
-        Namez(iptr1) = Namez(iptr);
-
-	if (Qoper) image_oper(iptr,oper,iptr1);
+      Xmin(iptr1) = Xmin(iptr);
+      Ymin(iptr1) = Ymin(iptr) + 0.5*(ny-1)*Dy(iptr);
+      Zmin(iptr1) = Zmin(iptr);
+      Dx(iptr1) = Dx(iptr);
+      Dy(iptr1) = ny * Dy(iptr);
+      Dz(iptr1) = Dz(iptr);
+      
+      Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
+      Namey(iptr1) = Namey(iptr);
+      Namez(iptr1) = Namez(iptr);
+      
+      if (Qoper) image_oper(iptr,oper,iptr1);
 
     } else if (axis==3) {                       /* this one is well tested and has more options */
       
@@ -514,7 +515,9 @@ void nemo_main()
 	  }
     } else
         error("Cannot do axis %d",axis);
-
+#if 0
+    minmax_image(iptr1);
+#else
     m_min = HUGE;
     m_max = -HUGE;
     for (k=0; k<Nz(iptr1); k++)
@@ -523,10 +526,10 @@ void nemo_main()
       cv = CubeValue(iptr1,i,j,k);
       m_max = MAX(m_max, cv);
       m_min = MIN(m_min, cv);
-
     }
     MapMin(iptr1) = m_min;
     MapMax(iptr1) = m_max;
+#endif    
     write_image(outstr, iptr1);
 }
 
@@ -651,7 +654,7 @@ local real peak_axis(imageptr iptr, int i, int j, int k, int axis)
 local int peak_find(int n, real *data, int *mask, int npeak)
 {
   int i, ipeak=0, apeak=-1;
-  real peakvalue, oldvalue;
+  real peakvalue=0, oldvalue=0;  // fool compiler
 
   dprintf(1,"peak_find %d\n",n);
   if (npeak==0) {               /* initialize by resetting the mask */
@@ -692,6 +695,7 @@ local int peak_find(int n, real *data, int *mask, int npeak)
     if (apeak==(n-1)) {         /* ...or last point, since they have no neighbors */
       mask[apeak]= 0;
       apeak = -1;
+      // compiler: peakvalue may be used uninitialized
       for (i=n-2; oldvalue=peakvalue, mask[i]==0 && i>0; i--) {  /* walk down, and mask out */
 	if (data[i] > oldvalue) break;                        /* until data increase again */
 	oldvalue = data[i];
