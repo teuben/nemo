@@ -39,6 +39,7 @@
  *      14-nov-06   V1.5    add first # comments to the NEMO output history.
  *      18-Jan-12   V1.5a   add 'dens' array                           jcl
  *       3-aug-22   V2.0    adapted for new table I/O system           pjt
+ *      29-dec-22   V2.1    read DOS or MAC files as well              pjt
  */
 
 #include <stdinc.h>
@@ -72,7 +73,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=2.0a\n 9-oct-2022 PJT",
+    "VERSION=2.1\n 29-dec-2022 PJT",
     NULL,
 };
 
@@ -121,6 +122,7 @@ local int get_double(int, double *);
 local int get_nbody(void);
 local void do_scan(stream);     
 local void tab2space(string);
+local void sanitize(string);
 
 void nemo_main(void)
 {
@@ -174,6 +176,7 @@ void nemo_main(void)
         }
 	if (auto_time)
 	  tsnap += 1.0;
+
         dprintf(0, "[reading %d bodies at time %f]\n", nbody, tsnap);
         if (btab==NULL) {
             btab = (Body *) allocate(nbody*sizeof(Body));
@@ -246,6 +249,7 @@ local bool get_header(void)
             if (i==0) return FALSE;
             error("in_header(%d): unexpected EOF at line %d",i+1,linecnt);
         }
+	sanitize(line);
     }
 
     dvals = (double *) allocate(nheader * sizeof(double));
@@ -355,6 +359,7 @@ local bool get_block(int id,string options)
 
 	  do {
             if (fgets(line, MAXLINE, instr) == NULL) {
+	      dprintf(1,"LINE: %s\n", line);
 	      if (j==0 && nvals==0) {
 		warning("Block %d: line %d nvals=0",id,linecnt);
 		return FALSE;
@@ -365,6 +370,7 @@ local bool get_block(int id,string options)
 	      warning("Resetting nbody=%d",nbody);
 	      return TRUE;
             } else {
+	      sanitize(line);
 	      if (Qcom && line[0]=='#') {
 		dprintf(1,"COMMENT1: %s",line);
 		if (Qhis) {
@@ -375,7 +381,7 @@ local bool get_block(int id,string options)
 	      } else
 		break;
 	    }
-	  } while(line[0]=='#' || line[0]=='\n');    /* read until EOF or non-comment lines */
+	  } while(line[0]=='#' || line[0]==';' || line[0]=='\n');    /* read until EOF or non-comment lines */
 
 	  linecnt++;
 	  if (line[strlen(line)-1] == '\n') line[strlen(line)-1] = 0;
@@ -513,7 +519,7 @@ local int get_nbody(void)
 {
     if (hasvalue("header"))
         error("Need value for nbody=, or specify it in header=");
-    nbody = nemo_file_lines(getparam("in"),0);
+    nbody = nemo_file_lines(getparam("in"),0) - nskip;
     if (nbody <= 0) 
         error("Cannot determine nbody, try nbody= or header=");
     if (nblocks == 0) 
@@ -573,3 +579,13 @@ local void tab2space(char *cp)
     }
 }
 
+local void sanitize(char *line)
+{
+  int ret = strlen(line);
+  if (line[ret-1] == '\r')                            /*   mac -> unix */
+    line[ret-1] = '\n';    
+  if (line[ret-2] == '\r' && line[ret-1] == '\n') {   /*   dos -> unix */
+    line[ret-2] = '\n';
+    line[ret-1] = 0;
+  }
+}
