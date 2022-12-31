@@ -26,11 +26,11 @@ string defv[] = {
 #endif
 	"alpha=t\n		  Comment lines that start with alpha?",
 	"blank=t\n		  Comment blank lines?",
-	"punct=t\n		  Comment lines seem punctiation?",
+	"punct=t\n		  Comment lines seem punctuation?",
 	"delete=f\n		  Delete the comment lines?",
 	"raw=f\n                  Show only the raw comments?",
-	"comment=#\n              The comment character!",
-	"VERSION=2.1a\n		  7-may-2022 PJT",
+	"comment=#\n              The output comment character!",
+	"VERSION=2.2\n		  20-nov-2022 PJT",
 	NULL,
 };
 
