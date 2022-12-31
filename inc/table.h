@@ -29,6 +29,7 @@ int get_line(stream, string);		/* should be deprecated in V2 -> getline() */
 void parse(int, string, double *, int);
 void strinsert(string, string, int);
 int iscomment(string);
+void sanitize(string);
 
 //  For a new table system we need a table struct, and each table
 //  will have some columns, with properties that we hide in another
