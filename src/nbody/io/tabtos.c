@@ -40,7 +40,7 @@
  *      18-Jan-12   V1.5a   add 'dens' array                           jcl
  *       3-aug-22   V2.0    adapted for new table I/O system           pjt
  *      29-dec-22   V2.1    read DOS or MAC files as well              pjt
- *                          allow ; as comments
+ *                          allow ; as comments? [not working]
  */
 
 #include <stdinc.h>
@@ -49,6 +49,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <extstring.h>
+#include <table.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -74,7 +75,7 @@ string defv[] = {
     "options=\n    Other processing options (scan|comment|wrap|spill|time)",
     "nskip=0\n     Number of lines skipped before each (header+block1+...)",
     "headline=\n   Random mumblage for humans",
-    "VERSION=2.1a\n 30-dec-2022 PJT",
+    "VERSION=2.1b\n 31-dec-2022 PJT",
     NULL,
 };
 
@@ -123,7 +124,6 @@ local int get_double(int, double *);
 local int get_nbody(void);
 local void do_scan(stream);     
 local void tab2space(string);
-local void sanitize(string);
 
 void nemo_main(void)
 {
@@ -281,6 +281,7 @@ local bool get_header(void)
 
     if (ndim>0 && ndim != NDIM)
 	error("got ndim = %d, not %d", ndim, NDIM);
+    dprintf(1,"last dval read: %g\n",dval);  // appease the compiler
     return TRUE;
 }
 
@@ -411,7 +412,8 @@ local bool get_block(int id,string options)
         } else if (nvals < need) {
 	  dprintf(0," bad line:%s\n",line);
 	  do {
-	    fgets(line, MAXLINE, instr);
+	    if (fgets(line, MAXLINE, instr) == NULL)
+	      warning("zero line?");
 	    if (Qcom && (line[0]=='#' || line[0]==';')) {
 	      dprintf(0,"COMMENT2: %s",line);
 	      if (Qhis) {
@@ -419,7 +421,7 @@ local bool get_block(int id,string options)
 		shist[nhist++] = strdup(line);
 	      }
 	    }
-	      } while (line[0]=='#' || line[0]==';');
+	  } while (line[0]=='#' || line[0]==';');
 	      
 	  dprintf(0,"next line:%s\n",line);
             error("Bad line %d (%d) Not enough values (need %d for %s) - try wrap",
@@ -581,13 +583,3 @@ local void tab2space(char *cp)
     }
 }
 
-local void sanitize(char *line)
-{
-  int ret = strlen(line);
-  if (line[ret-1] == '\r')                            /*   mac -> unix */
-    line[ret-1] = '\n';    
-  if (line[ret-2] == '\r' && line[ret-1] == '\n') {   /*   dos -> unix */
-    line[ret-2] = '\n';
-    line[ret-1] = 0;
-  }
-}
