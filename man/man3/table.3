@@ -55,7 +55,7 @@ Note the API below has not been implemented for functions with a preceding dash!
 .PP
 .B table *table_cat(int ntable, table *tptr, int mode)
 .PP
-.I Legacy: (might be deprecated in future)
+.I Legacy: (some of these might be deprecated in future)
 .PP
 .B int get_atable(strean instr,int ncol,int *colnr,real *coldat,int ndat)
 .PP
@@ -68,6 +68,8 @@ Note the API below has not been implemented for functions with a preceding dash!
 .B int strinsert(char *a, char *b, int n)
 .PP
 .B int iscomment(char *line)
+.PP
+.B void sanitize(char *line)
 .fi
 
 .SH "USING TABLES"
@@ -290,6 +292,9 @@ characters of \fIa\fP.
 .PP
 \fIiscomment\fP returns 1 if the line appears to be a comment
 (starts with ';', '#', '!' or a blank/newline)
+.PP
+\fIsanitize\fP converts any possible line originating from a DOS (CR/LF) or
+MAC (CR) or unix (LF) and 0-terminate it.
 
 .SH "EXAMPLES"
 Some examples drafted, based on the new API presented.
@@ -370,7 +375,7 @@ Low-level catastrophies (eg, bad filenames, parsing errors, wrong delimiters)
 generate messages via \fIerror(3NEMO)\fP.
 
 .SH "SEE ALSO"
-mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(5NEMO), table(5NEMO)
+mdarray(3NEMO), nemoinp(3NEMO), burststring(3NEMO), fits(5NEMO), table(5NEMO), ascii(7)
 .PP
 .nf
 
@@ -399,4 +404,5 @@ xx-sep-88	V1.0 written	PJT
 12-jul-03	fixed reading large table bufferrng	PJT
 aug-2020	designing new table system	Sathvik/PJT
 5-may-2022	finalizing implementation of table2	PJT/Parker/Yuzhu
+31-dec-2022	add sanitize() to 0-terminate any style text	PJT
 .fi
