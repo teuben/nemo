@@ -301,12 +301,26 @@ void table_close(tableptr tptr)
   // @todo - free more
 }
 
+/*
+ *   table_line returns a NULL terminated line
+ *   should be able to read unix (\n)   dos (\r\n) or mac (\r) files
+ */
 string table_line(tableptr tptr)
 {
   ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
   if (ret >= 0) {
-    if (tptr->line[ret-1] == '\n')
+    if (tptr->line[ret-1] == '\r') {
       tptr->line[ret-1] = '\0';
+      ret--;
+    }
+    if (tptr->line[ret-1] == '\n') {
+      tptr->line[ret-1] = '\0';
+      ret--;
+    }
+    if (tptr->line[ret-1] == '\r') {
+      tptr->line[ret-1] = '\0';
+      ret--;
+    }
     return tptr->line;
   }
   // end of file
