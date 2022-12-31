@@ -153,6 +153,32 @@ int iscomment(char *line)
     return 1;
 }
 
+/*
+ * sanitize: convert to unix style 0 terminated lines
+ *           if the line ending was DOS or MAC or UNIX
+ *   MAC:   \r     (CR)
+ *   UNIX:  \n     (LF)
+ *   DOS:   \r\n   (CR-LF)
+ */
+
+void sanitize(char *line)
+{
+  int ret = strlen(line);
+  //dprintf(1,"sanitize-1[%d]: '%s'\n", ret, line);
+  if (line[ret-1] == '\r') {    //MAC
+    line[ret-1] = '\0';
+    ret--;
+  }
+  if (line[ret-1] == '\n') {    //UNIX
+    line[ret-1] = '\0';
+    ret--;
+  }
+  if (line[ret-1] == '\r') {    //DOS
+    line[ret-1] = '\0';
+    ret--;
+  }
+  //dprintf(1,"sanitize-2[%d]: '%s'\n", ret, line);
+}
 
 /*
  * parse_select, with dynamic reallocation
@@ -309,18 +335,7 @@ string table_line(tableptr tptr)
 {
   ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
   if (ret >= 0) {
-    if (tptr->line[ret-1] == '\r') {
-      tptr->line[ret-1] = '\0';
-      ret--;
-    }
-    if (tptr->line[ret-1] == '\n') {
-      tptr->line[ret-1] = '\0';
-      ret--;
-    }
-    if (tptr->line[ret-1] == '\r') {
-      tptr->line[ret-1] = '\0';
-      ret--;
-    }
+    if (ret > 0) sanitize(tptr->line);
     return tptr->line;
   }
   // end of file
