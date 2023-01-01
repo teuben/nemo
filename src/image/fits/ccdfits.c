@@ -90,10 +90,11 @@ string defv[] = {
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
+	"bunit=\n        Override the bunit",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.5a\n  18-dec-2022 PJT",
+        "VERSION=6.6\n   31-dec-2022 PJT",
         NULL,
 };
 
@@ -322,7 +323,10 @@ void write_fits(string name, imageptr iptr)
     if (strlen(object) == 0)
       object = Object(iptr);
     telescope = Telescope(iptr);
-    bunit = Unit(iptr);
+    if (hasvalue("bunit"))
+      bunit = getparam("bunit");
+    else
+      bunit = Unit(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */
