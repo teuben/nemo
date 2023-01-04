@@ -121,8 +121,10 @@ local void convert(stream instr, stream outstr)
 
         outv = burststring(line,seps);
         noutv = xstrlen(outv,sizeof(string)) - 1;
-        if (noutv < maxcol)
-            error("Too few columns in input file (%d < %d)",noutv,maxcol);
+        if (noutv < maxcol) {
+	  warning("skipping line %d; Too few columns in input file (%d < %d)",nlines,noutv,maxcol);
+	  continue;
+	}
         if (Qall) nkeep = noutv;
                         
         for (i=0; i<nkeep; i++) {
