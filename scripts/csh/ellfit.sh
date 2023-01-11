@@ -29,6 +29,8 @@
 #   INC_Q0 predicted INC based on Hubble's correction with Q0
 #   Q1     predicted Q0 based on INC_Q0 = INC
 # -----------------------------------------------------------------
+#
+# Need: snaprotate snapgrid ccdsmooth ccdplot tablsqfit txtpar
 
 
 in=disk1   #>  IFILE   in=disk1
@@ -60,12 +62,18 @@ export YAPP=$yapp
 
 s=$(nemoinp 2*$sp*$size/$n)
 cnt=$(nemoinp "10**(-$mag/2.5)")
+
+if [ ! -e $in ]; then
+    echo File $in does not exist. Example of making one:
+    echo mkexpdisk disk1 100000 z0=0.1
+    exit 0
+fi
     
 
 snaprotate $in - $inc x |\
     snapgrid - - xrange=-$size:$size yrange=-$size:$size nx=$n ny=$n |\
     ccdsmooth - - $s |\
-    ccdplot -  $cnt gray=t power=0.4 tab=- headline=$in relative=t |\
+    ccdplot -  $cnt gray=t power=0.4 tab=- headline=$in abs=f |\
     tablsqfit - fit=ellipse > tmp.fit
 if [ $debug -ge -1 ]; then
     echo "mag: $mag $cnt"
