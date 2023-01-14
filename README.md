@@ -27,7 +27,7 @@ Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 	 
 ## Optional Packages
 
-Packages we optionally use (sometimes also installed in $NEMO/opt via its code in $NEMO/local):
+Packages we optionally use (sometimes also installed in $NEMO/opt with source code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
@@ -43,8 +43,8 @@ Packages we optionally use (sometimes also installed in $NEMO/opt via its code i
 	 uns_project
 	 wcstools
 
-Tools you will need to have pre-installed: A C/C++/Fortran
-compiler, (t)csh, and git.  For graphics it's probably
+Tools you will need to have pre-installed: the C/C++/Fortran
+compilers, (t)csh, and git.  For graphics it's probably
 useful to have pgplot, but the default ps driver works
 fine just to get started quickly.
 
@@ -64,14 +64,14 @@ you have the preconditions):
          make build check bench5
          source nemo_start.sh
 
-If you plan to modify code and submit pull request, the github CLI is recommended,
-though you can of course also clone the upstream (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
+If you plan to modify code and submit pull request, the github CLI is now recommended,
+though you can of course also clone the upstream manually (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
 
 On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
 awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
-work (there are other ways to install tools on a mac, but don't get me started):
+work (there may be other ways to install tools on a mac, but don't get me started):
 
          git clone https://github.com/teuben/nemo
          cd nemo
@@ -79,7 +79,7 @@ work (there are other ways to install tools on a mac, but don't get me started):
          make build check bench5
          source nemo_start.sh
 
-To rebuild NEMO to ensure you have all updates:
+After installaton, rebuilding NEMO to ensure you have all updates can be done as follows:
 
          cd $NEMO
          git pull
@@ -92,7 +92,8 @@ There is now a small python component to NEMO, in the **nemopy** module.
          cd $NEMO
          pip install -e .
 
-but this will depend on the details of how your python environment exists (virtual, conda etc.)
+but this will depend on the details of how your python environment exists (virtual, conda etc.).
+We leave this to the user.
 		 
 ## Examples		 
 
@@ -119,6 +120,14 @@ https://teuben.github.io/nemo/examples/
 and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
+
+## Documentation and Help
+
+There are several additional entry points if you are starting out with NEMO:
+
+* github pages: https://teuben.github.io/nemo
+* software carpentry: https://teuben.github.io/nemo-lesson 
+* contributing to NEMO: CONTRIBUTING.md
 
 ## Citation
 
