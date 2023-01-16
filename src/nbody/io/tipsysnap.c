@@ -31,6 +31,7 @@
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
  *  4-feb-22    3.1 make binary the default
  * 16-jun-22    fixed time of snapshot for binary tipsy
+ * 16-jan-23    3.3  fix swap for particle data (why was this never done before)
  *
  * @todo    allow in= to have multiple files
  */
@@ -58,7 +59,7 @@ string defv[] = {
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
     "boom=f\n                   BOOM mode with add-acc ?",
-    "VERSION=3.2a\n             10-jul-2022 pjt",
+    "VERSION=3.3\n              16-jan-2023 PJT",
     NULL,
 };
 
@@ -365,6 +366,9 @@ void nemo_main()
             n = fread((char *)gp, sizeof(*gp), header.nsph, instr);
             if (n <= 0) error("Problem reading gas data");            
 	    dprintf(1,"Found %d gas particles\n",n);
+	    if (Qswap)
+	      bswap((void *)gp, sizeof(Real), sizeof(*gp)*n/sizeof(Real));
+	    
 
 	    if (Qgas) {
 	      nbody = ngas;
@@ -390,6 +394,8 @@ void nemo_main()
             n = fread((char *)dp, sizeof(*dp), header.ndark, instr);
             if (n <= 0) error("Problem reading dark data");            
 	    dprintf(1,"Found %d dark matter particles\n",n);
+	    if (Qswap)
+	      bswap((void *)dp, sizeof(Real), sizeof(*dp)*n/sizeof(Real));
 
 	    if (Qdark) {
 	      nbody = ndark;
@@ -422,6 +428,8 @@ void nemo_main()
             n = fread((char *)sp, sizeof(*sp), header.nstar, instr);
             if (n <= 0) error("Problem reading star data");            
 	    dprintf(1,"Found %d star particles\n",n);
+	    if (Qswap)
+	      bswap((void *)sp, sizeof(Real), sizeof(*sp)*n/sizeof(Real));
 
 	    if (Qstar) {
 	      nbody = nstar;
