@@ -5,7 +5,7 @@
  *   30-may-2013   0.2 Also search for valleys
  *    1-jun-2013   0.3 Allow intensity weighted mean
  *   23-mar-2022   0.4 3pt vs. 5 pt
- *   22-jan-2023   0.6 added npeak= following ccdmom - PJT
+ *   22-jan-2023   0.8 added npeak= following ccdmom, adding epeak= - PJT
  *
  *                        
  * 
@@ -35,8 +35,9 @@ string defv[] = {
     "valley=f\n                   Also find the valleys?",
     "mean=f\n                     Intensity weighted mean",
     "npeak=0\n                    extract the Nth peak (N>0)",
+    "epeak=1\n                    expand around the peak by this factor",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.6\n		  22-jan-2023 PJT",
+    "VERSION=0.7\n		  23-jan-2023 PJT",
     NULL
 };
 
@@ -67,6 +68,7 @@ local int    npt;			/* actual number of points */
 local int    pmin;
 local int    edge;
 local int    npeak;
+local real   epeak;
 real clip;
 bool  Qvalley, Qmean;
 
@@ -75,7 +77,7 @@ local void read_data(void);
 local void peak_data(void);
 local void peak_fit(void);
 local void mean_data(void);
-//local void extract_peak(void);
+local void extract_peak(void);
 local int  peak_find(int n, real *data, int *mask, int npeak);
 
 
@@ -83,24 +85,11 @@ local int  peak_find(int n, real *data, int *mask, int npeak);
 
 void nemo_main()
 {
-    int ipeak;
-  
     setparams();			/* read the parameters */
     read_data();
     
     if (npeak > 0) {
-      // initialize mask
-      (void) peak_find(npt, ycol, smask, 0);
-      for (int n=1; n<=npeak; n++)
-	ipeak = peak_find(npt, ycol, smask, n);
-      if (ipeak >= 0)
-	dprintf(0,"peak %d found near %g\n", npeak,xcol[ipeak]);
-      else
-	error("ipeak %d?", ipeak);
-      for (int i; i<npt; i++) {
-	if (smask[i]==npeak)
-	  printf("%g %g %d\n",xcol[i],ycol[i],smask[i],i);
-      }
+      extract_peak();
     } else if (Qmean)
       mean_data();
     else if (pmin == 3)
@@ -123,6 +112,7 @@ local void setparams()
     Qmean = getbparam("mean");
     if (Qmean && Qvalley) warning("Valley fitting not supported in mean mode");
     npeak = getiparam("npeak");
+    epeak = getrparam("epeak");
     
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
@@ -134,8 +124,6 @@ local void setparams()
 
 local void read_data()
 {
-    int   i,j,k;
-    
     ncol = 2;
     dprintf(0,"Reading %d column(s)\n",ncol);
     xcol = (real *) allocate(sizeof(real)*nmax);
@@ -287,6 +275,43 @@ local void mean_data(void)
 }
 
 
+void extract_peak()
+{
+    int ipeak, i0, i1, i2, i3;
+    
+    (void) peak_find(npt, ycol, smask, 0);          // initialize mask
+    for (int n=1; n<=npeak; n++)                    // loop each peak and tag them in the mask
+      ipeak = peak_find(npt, ycol, smask, n);
+    if (ipeak >= 0)                                 // there better be an N-th peak
+      dprintf(0,"peak %d found near %d/%d -> %g\n", npeak,ipeak,npt,xcol[ipeak]);
+    else
+      error("ipeak %d?", ipeak);
+    // print out the extracted section of the spectrum
+    i0 = i1 = -1;
+    for (int i=0; i<npt; i++) {
+      if (smask[i]==npeak) {
+	if (epeak == 1.0) printf("%g %g %d %d\n",xcol[i],ycol[i],smask[i],i);
+	else dprintf(1,"%g %g %d %d\n",xcol[i],ycol[i],smask[i],i);
+	dprintf(1,"PJT-1 %d/%d %d %d\n",i,npt,i0,i1);
+	if (i0<0) i0=i;  // remember first one
+	i1=i;            // and remember last one
+	dprintf(1,"PJT-2 %d/%d %d %d\n",i,npt,i0,i1);	
+      }
+    }
+    dprintf(0,"PJT: %d %d\n",i0,i1);
+    // if and expanded spectrum was called for, computed that new range to extract
+    if (epeak != 1.0) {
+      i2 = (int)((i0+i1)/2.0);           // half point (or use ipeak ?)
+      i3 = (int) (0.5*epeak*(i1-i0));    // expanded half width
+      i0 = i2 - i3;
+      i1 = i2 + i3;
+      if (i0<0) i0=0;                    // ensure it doesnt step outside the array
+      if (i1>=npt) i1=npt;
+      dprintf(0,"PJT: %d %d %d %d\n",i0,i1,i2,i3);
+      for (int i=i0; i<=i1; i++)
+	printf("%g %g %d %d\n",xcol[i],ycol[i],smask[i],i);	  
+    }
+}
 
 /* 
  * this routine can be called multiple times
