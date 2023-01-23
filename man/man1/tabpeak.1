@@ -1,4 +1,4 @@
-.TH TABPEAK 1NEMO "25 March 2022"
+.TH TABPEAK 1NEMO "23 January 2023"
 .SH "NAME"
 tabpeak \- find peaks or valleys in a table
 
@@ -42,6 +42,15 @@ finder this should be at least 1.
 Also fit valleys, in which case the signal has to be below -clip. [Default: f]
 .TP
 \fBmean=t|f\fP
+Use intensity weighted mean ?  [Default: f]
+.TP
+\fBnpeak=\fP
+extract the Nth peak (N>0). If npeak=0, no extraction done. Other keywords will be ignored
+if a peak is ectracted for further analysis.  [Default: 0]
+.TP
+\fBepeak=\fP
+expand around the N-th peak extracted by npeak>0 by this factor. By default the segment around
+a peak is defined until the first point away from the peak will increase again. [Default: 1]
 .TP
 \fBnmax=\fP
 max size if a pipe [100000]  
@@ -51,7 +60,14 @@ max size if a pipe [100000]
 % nemoinp 1:3 | tabmath - - '-(2.2-%1)**2+10' | tabpeak -
 2.200000 10.000000
 .fi
+Here is a pipeline extracting the first peak, fitting a gaussian to it, and plotting the data and residuals
+(in the PGPLOT driver the data will be in red, the residuals in green, and the fit in blue):
+.nf
 
+   tabpeak spec.tab | tabnllsqfit - fit=gauss1d out=- | tee fit.log | tabcomment - | tabplot - 1 2,3,4 color=2,3,4 line=1,1
+   cat fit.log
+   
+.fi
 .SH "SEE ALSO"
 tablsqfit(1NEMO)
 .SH "FILES"
@@ -66,4 +82,5 @@ Peter Teuben
 30-may-2013	V0.2 added valley=	PJT
 23-mar-2022	V0.4 added pmin=	PJT
 25-mar-2022	V0.5 added edge=	PJT
+23-jan-2023	V0.7 added npeak, epeak=	PJT
 .fi
