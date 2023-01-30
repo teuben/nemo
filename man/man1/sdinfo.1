@@ -1,9 +1,12 @@
 .TH SDINFO 1NEMO "27 September 2021"
-.SH NAME
+
+.SH "NAME"
 sdinfo \- sdfits (BINTABLE) info and benchmark
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsdinfo\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsdinfo\fP list some tabular properties of an SDFITS (and some dialects) file, and has 
 options to benchmark some basic operations.
 .PP
@@ -12,9 +15,9 @@ single dish spectra and all associated variables. This program was only
 written to provide size info and can run a few basic benchmarks. A few known dialects
 to this are known:  "CIMAFITS" (Arecibo) and "MATRIX" (30m/CLASS), the latter designates
 the spectrum via a "SPECTRUM" column name, instead of the more common "DATA" column name.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input SDFITS fits file. Multiple files can be given as well, as a space or comma separated this.
@@ -52,7 +55,8 @@ columns: channel number (0 being the first) and the spectrum value, native units
 \fBbench=\fP
 How many times the procedure should be processed. This will only re-execute the procedure,
 not the alloc/free that are needed for this. Using 0 will bypass the procedure. Default: 1
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following example takes all fits files matching a particular pattern and summarize their contents.
 .nf
     ls *.?.fits > dirin.lis
@@ -84,21 +88,24 @@ Here is a way to plot a spectrum:
 .nf
     sdinfo ngc5291.fits t row=11 | tabplot - 
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 scanfits(1NEMO), fitshead(1NEMO)
 .PP
 https://fits.gsfc.nasa.gov/registry/sdfits.html
-.SH FILES
+
+.SH "FILES"
 src/image/fits
 .PP
 http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 23-Nov-2019	V0.1 Created	PJT
 14-dec-2019	V0.4 dimension analysis w/ ngc5291	PJT
 18-dec-2019	V0.7 Handle CIMAFITS and MATRIX extensions	PJT
-27-sep-2021	V0.9 Improved column reading, display TDIM	PJTq
+27-sep-2021	V0.9 Improved column reading, display TDIM	PJT
 .fi
