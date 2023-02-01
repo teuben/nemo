@@ -19,7 +19,7 @@
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did not compile
 
-set version="21-mar-2022"
+set version="1-feb-2023"
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
@@ -179,6 +179,7 @@ cleanup:
 	    cat $testdir/bsf-fail.log
 	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
 	endif
+	echo "There are `ls bin|wc -l` binaries in NEMO"
         head -1 $testdir/$log
         tail -1 $testdir/$log
 
