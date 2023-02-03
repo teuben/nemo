@@ -4,7 +4,6 @@
 #
 # history: 30-jan-2023   recoded old snippets of code (following mkmh97.sh) in bash
 
-
 _version=3-feb-2023
 
 #--HELP
@@ -34,18 +33,17 @@ if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
     exit 0
 fi
-
 #  simple keyword=value command line parser for bash
 for arg in "$@"; do
     eval "$arg"
 done
-
+#   add various helpful things for bash
 if [ $debug == 1 ]; then
     set -x
     set -e
     set -u
 fi
-
+#   make sure the directory does not exist yet
 if [ -d $run ]; then
     echo Run directory run=$run already exists, cannot overwrite
     exit 0
