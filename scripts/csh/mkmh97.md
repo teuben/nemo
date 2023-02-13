@@ -21,11 +21,11 @@ Some initial analysis is performed as well, see also **mh16.sh** for an example
 
 ## Input parameters
 
-All input parameters are of the form *keyword=value*, like most NEMO programs, with
+All input parameters are of the form *keyword=value*, like most NEMO programs. But with
 the exception there is no syntax or validity of the keyword checking!  Use **--help**
 as the first keyword to get up to date information on the keywords and their defaults.
 
-As in NEMO, units are virial units.
+As in NEMO, units are virial (N-body) units.
 
 1. **run=**:  run directory name, also the name used in all the derived filenames. For example with
    run=run0, you would see files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
@@ -75,6 +75,11 @@ As in NEMO, units are virial units.
    The command **date +%Y%m%d%H%M%S** gives a perhaps more memorable seed.
    [0]
 
+13. **trim=**: set to 1 if you want to trim the simulation from all but the final
+    (tstop) snapshot. [0]
+
+Parameters for (re)analysis:
+
 
 13. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
    [50]
@@ -111,13 +116,65 @@ As in NEMO, units are virial units.
 The first time when you run the script and the **run** directory does not exist yet,
 initial conditions are generated and the simulation is run to **tstop**.
 
-Subsequent runs with this **run** directory will re-analyse the simulation at
+Subsequent runs with an existing  **run** directory will re-analyse the simulation at
 the value of **tstop**, which can be any of the dumptimes that the simulation was
-run with.
+run with, so it does not need to be the initial **tstop** to which the simulation
+was run.
 
 The default run=run0 with m=1  nbody=2048 tstop=50 will take about 30 seconds to run,
 with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds
 (2020 style i7-1185G7).
+
+## Files
+
+The following files should be present, the example is for run=run0:
+
+     etot.hist.log           Logfile
+     etot.hist.png           Histogram of total energy values
+     etot.plot.png           Time evolution of total energy
+     evolution-vr.plot.png   Time evolution of r-vr
+     evolution-xy.plot.png   Time evolution of x-y
+     final.3d.plot.png       UnFolded x-y-z view of the final ($tstop) 
+     final.ccd               Final CCD of the whole system
+     final.ccd.png
+     final.fits
+     final.plot.png
+     final1.ccd              Final CCD of just Galaxy-1 (plus fits and point plot)
+     final1.ccd.png
+     final1.fits
+     final1.plot.png
+     final2.ccd              Final CCD of just Galaxy-2 (plus fits and point plot)
+     final2.ccd.png
+     final2.fits
+     final2.plot.png
+     final2.snap
+     final2c.snap            Final snapshot of Galaxy-2 in its own center of mass frame
+     final2c.tab             Radial profile (from radprof) ***
+     final2cm.tab            Table of cumulative mass vs. radius
+     final2u.ccd             Final bound particles of Galaxy-2
+     final2u.snap
+     init.ccd.png            Initial conditions
+     init.plot.png
+     massg2g1.png            Cumulative mass of G2 around the center of G1
+     nemopars.rc             Simulation parameters
+     path-energy.png         Path of the binding energy
+     path-pos.png            Path of the two galaxies in X;  1 in red, 2 in green
+     path-vel.png            Path of the two galaxies in VX; 1 in red, 2 in green
+     run0.1                  Galaxy-1, the one with mass=1 - snapshot
+     run0.2                  Galaxy-2, the one with mass=$m - shapshot
+     run0.3                  The initial conditions - snapshot 
+     run0.4                  Simulation, as time intervals of $step - snapshot
+     run0.4.etot             Table of time and total energy
+     run0.4.g1.tab           Table of pos and vel of Galaxy-1           
+     run0.4.g2.tab           Table of pos and vel of Galaxy-2
+     run0.4.log              Logfile of the simulation
+     run0.4.t.tab            Table of times
+     run0.xv.tab             Table of time,x1,vx1,x2,vx2
+     run0.xve.tab            Table of time,x1,vx1,x2,vx2,kin1,kin2,pot,epot
+     run0.xvm.tab            Table of time,x1,vx1,x2,vx2,m16    (only if m16.sh was run)
+
+
+
 
 ## Plotting Examples
 
