@@ -35,10 +35,12 @@
 #          11-nov-2022   align integration parameters w/ MH97
 #           5-dec-2022   label the table columns where needed
 #          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
+#          13-feb-2023   add trim option, using nemo_functions.sh now, add $_date
 
 _script=mkmh97
-_version=14-dec-2022
+_version=20-feb-2023
 _pars=nemopars.rc
+_date=$(date +%Y-%m-%dT%H:%M:%S)
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
@@ -55,6 +57,7 @@ eps=0.03125     # gravitational softening
 kmax=7          # integration timestep is 1/2**kmax
 code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
 seed=0          # random seed (use seed=123 for the benchmark)
+trim=0          # trim the data after analysis so only the last snapshot is kept
 #             parameters for the analysis (which can be re-run)
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
@@ -64,6 +67,7 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
+hackforce=hackforce_qp             # which hackforce to use in the force re-calculation
 yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
 debug=1                            # 1=set -x,-e,-u   0=nothing
 #
@@ -79,6 +83,7 @@ fi
 for arg in "$@"; do
   export "$arg"
 done
+
 
 # portable yapp
 yapp() {
@@ -118,14 +123,20 @@ else
 fi
 # backwards compatible!
 if [ -e mkmh97.rc ]; then
-    echo "Fixing old mkmh97.rc to $_pars"
-    mv  mkmh97.rc $_pars
+    echo This script is not compatible with this run
+    exit 0
 fi
 # keep track of history  @todo need to bootstrap current $run
 [[ -e $_pars ]] && source $_pars
+if [ ! -e $_pars ]; then
+    source nemo_functions.sh
+    show_vars run nbody m em step v0 rp r0 eps kmax code seed trim tstop box r16 vbox npixel power bsigma tplot yapp >> $_pars
+fi
 echo "# $0 version=$_version"  >> $_pars
+echo "# date=$_date"           >> $_pars
 echo "$*" run=$run             >> $_pars
 source  $_pars
+
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
@@ -195,14 +206,14 @@ if [ ! -e $run.xv.tab ]; then
     #
     echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                  >$run.4.g1.tab
     if [ $code == 2 ]; then
-	snapcopy $run.4 - "select=i<$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >>$run.4.g1.tab
+	snapcopy $run.4 - "select=i<$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >>$run.4.g1.tab
     else
 	snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t                                             >>$run.4.g1.tab
     fi
     
     #
     echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                 >$run.4.g2.tab    
-    snapcopy $run.4 - "select=i>=$nbody?1:0" | hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
+    snapcopy $run.4 - "select=i>=$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
     #
     echo "# t x1 v1 x2 v2"                                                           >$run.xv.tab
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' >>$run.xv.tab
@@ -218,8 +229,11 @@ fi
 # now some analysis will follow
 
 
-tabplot $run.4.etot 1 2  yapp=$(yapp etot.plot) > /dev/null 2>&1
-tabhist $run.4.etot 2    yapp=$(yapp etot.hist) > etot.hist.log 2>&1
+#  mean and sigma of trended energy
+estats=$(tabtrend $run.4.etot 2 | tabstat - qac=t  | txtpar -  p0=QAC,1,3 p1=QAC,1,4)
+
+tabplot $run.4.etot 1 2  headline="mean/sigma $estats" yapp=$(yapp etot.plot) > /dev/null 2>&1
+tabhist $run.4.etot 2                                  yapp=$(yapp etot.hist) > etot.hist.log 2>&1
 snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=$(yapp init.plot)
 snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=$(yapp final.plot)
 snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=$(yapp final1.plot)
@@ -278,7 +292,7 @@ echo "m16=$m16" >> $_pars
 x2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,4)
 v2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,5)
 snapshift final2.snap - $x2,0,0 $v2,0,0 mode=sub |\
-   hackforce - - |\
+   $hackforce - - |\
    unbind    - - > final2u.snap
 m2=$(snapmstat final2u.snap | txtpar - p0=TotMas,1,8) 
 snapplot final2u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final2u.plot)
@@ -286,10 +300,18 @@ snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixe
     tee final2u.ccd |\
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final2u.ccd) headline="Galaxy-2 bound at tstop=$tstop"
+echo m2=$m2 >> $_pars
 
+# compare m16 and m2 as function of time
+if [ -e $run.xvm.tab ]; then
+    sed s/nan/000/ $run.xvm.tab |\
+	tabmath - - %1,%6*$m,%7 all |\
+	tabplot - 1 2,3 line=1,1 color=2,3 ycoord=0,$m yapp=$(yapp path-g2)
+fi
 
 # binding energy argument, plot total binding energy as function of time
-tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" > $run.xve.tab
+echo "# time x1 v1 x2 v2 kin1 kin2 pot12 etot"                              > $run.xve.tab
+tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" >> $run.xve.tab
 tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
 
 echo "Final binding energy behavior:"
@@ -299,6 +321,12 @@ echo "etot=$etot" >> $_pars
 
 echo "m16=$m16"
 echo "etot=$etot"
+
+if [ $trim == 1 ]; then
+    mv $run.4 $run.40
+    snaptrim $run.40 $run.4 times=$tstop
+    rm $run.40
+fi
 
 #--HELP
 
