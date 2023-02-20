@@ -158,6 +158,7 @@ The following files should be present, the example is for run=run0:
      massg2g1.png            Cumulative mass of G2 around the center of G1
      nemopars.rc             Simulation parameters
      path-energy.png         Path of the binding energy
+     path-g2.png             Path of mass of G2 in several ways
      path-pos.png            Path of the two galaxies in X;  1 in red, 2 in green
      path-vel.png            Path of the two galaxies in VX; 1 in red, 2 in green
      run0.1                  Galaxy-1, the one with mass=1 - snapshot
@@ -170,10 +171,8 @@ The following files should be present, the example is for run=run0:
      run0.4.log              Logfile of the simulation
      run0.4.t.tab            Table of times
      run0.xv.tab             Table of time,x1,vx1,x2,vx2
-     run0.xve.tab            Table of time,x1,vx1,x2,vx2,kin1,kin2,pot,epot
-     run0.xvm.tab            Table of time,x1,vx1,x2,vx2,m16    (only if m16.sh was run)
-
-
+     run0.xve.tab            Table of time,x1,vx1,x2,vx2,kin1,kin2,pot,etot
+     run0.xvm.tab            Table of time,x1,vx1,x2,vx2,m16,m2    (only after m16.sh was run)
 
 
 ## Plotting Examples
