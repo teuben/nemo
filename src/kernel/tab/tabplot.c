@@ -115,7 +115,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=5.0b\n	 26-oct-2022 PJT",
+    "VERSION=5.0c\n	 22-feb-2023 PJT",
     NULL
 };
 
@@ -353,10 +353,10 @@ void read_data(void)
     
     for (j=0, k=0; j<nxcol; j++, k++)
         colnr[k]  = xcol[j];
-    for (j=0; j<ndxcol; j++, k++)
-        colnr[k]  = dxcol[j];
     for (j=0; j<nycol; j++, k++) 
         colnr[k]  = ycol[j];
+    for (j=0; j<ndxcol; j++, k++)
+        colnr[k]  = dxcol[j];
     for (j=0; j<ndycol; j++, k++) 
         colnr[k]  = dycol[j];
     int ncol = nxcol + nycol + ndxcol + ndycol;
@@ -777,6 +777,7 @@ void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, rea
         for (i=0; i<np; i++) {
             p1 = xp[i] - dx[i];
             p2 = xp[i] + dx[i];
+	    dprintf(0,"PJT-x %g %g %g\n",xp[i],yp[i],dx[i]);
             plmove (xtrans(p1), ytrans(yp[i]));
             plline (xtrans(p2), ytrans(yp[i]));
         }
@@ -786,6 +787,7 @@ void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, rea
         for (i=0; i<np; i++) {
             p1 = yp[i] - dy[i];
             p2 = yp[i] + dy[i];
+	    dprintf(0,"PJT-y %g %g %g\n",xp[i],yp[i],dy[i]);	    
             plmove (xtrans(xp[i]), ytrans(p1));
             plline (xtrans(xp[i]), ytrans(p2));
         }
