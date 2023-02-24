@@ -44,7 +44,7 @@ fi
 new=$run/$run.xvm.tab
 rm -f $new
 
-echo "# t x1 v1 x2 v2 m16" > $new
+echo "# t x1 v1 x2 v2 m16 m2" > $new
 
 for t in $(echo $times | sed 's/,/ /g'); do
     echo $t
@@ -53,8 +53,12 @@ for t in $(echo $times | sed 's/,/ /g'); do
     if [ -z "$m16" ]; then
 	m16=0
     fi
+    m2=$(nemopars m2 $run/nemopars.rc | grep -v ^#)
+    if [ -z "$m2" ]; then
+	m2=0
+    fi
     xv=$(grep  ^"$t " $run/$run.xv.tab)
-    echo $xv $m16 >> $new
+    echo $xv $m16 $m2 >> $new
 done
 
 
