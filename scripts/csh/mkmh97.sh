@@ -36,9 +36,10 @@
 #           5-dec-2022   label the table columns where needed
 #          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
 #          13-feb-2023   add trim option, using nemo_functions.sh now, add $_date
+#          25-feb-2023   add detot
 
 _script=mkmh97
-_version=20-feb-2023
+_version=25-feb-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -212,11 +213,11 @@ if [ ! -e $run.xv.tab ]; then
     fi
     
     #
-    echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                 >$run.4.g2.tab    
+    echo "# x2 y2 z2 vx2 vy2 vz2"                                                                                 >$run.4.g2.tab    
     snapcopy $run.4 - "select=i>=$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
     #
-    echo "# t x1 v1 x2 v2"                                                           >$run.xv.tab
-    paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | awk '{print $1,$2,$5,$8,$11}' >>$run.xv.tab
+    echo "# t x1 v1 x2 v2"                                                                        >$run.xv.tab
+    paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | grep -v ^# | awk '{print $1,$2,$5,$8,$11}' >>$run.xv.tab
 
     
     #  plot the path in Pos and Vel separately
@@ -316,11 +317,13 @@ tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time yl
 
 echo "Final binding energy behavior:"
 etot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,3)
-echo "etot=$etot" >> $_pars
+detot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,4)
+echo "etot=$etot"   >> $_pars
+echo "detot=$detot" >> $_pars
 
 
 echo "m16=$m16"
-echo "etot=$etot"
+echo "etot=$etot +\- $detot"
 
 if [ $trim == 1 ]; then
     mv $run.4 $run.40
