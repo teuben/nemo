@@ -174,6 +174,17 @@ The following files should be present, the example is for run=run0:
      run0.xve.tab            Table of time,x1,vx1,x2,vx2,kin1,kin2,pot,etot
      run0.xvm.tab            Table of time,x1,vx1,x2,vx2,m16,m2    (only after m16.sh was run)
 
+## Parameters
+
+In addition to the input parameter, the following parameters are computed by the script
+
+1. **m2=**:  absolute mass of stars around G2 bound to G1. 
+
+2. **m16=**: relative mass of stars of G2 around the center of G1, within a radius of **r16**.
+
+2. **etot**:  orbital energy of bound particles of the last 10 snapshot
+
+3. **detot**:  variation of **etot**
 
 ## Plotting Examples
 
