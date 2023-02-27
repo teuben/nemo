@@ -338,12 +338,14 @@ v20=$(nemoinp "$v0/(1+$m)")
 
 echo "0 $x10 $v10 $x20 $v20" | tabmath - - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8"       > $run.xve0.tab
 tail -1 $run.xv.tab  | tabmath - - "0.5*${m1}*%3**2,0.5*${m2}*%5**2,-${m1}*${m2}/abs(%2-%4),%6+%7+%8" > $run.xve2.tab
+etot2=$(tabcols $run.xve2.tab 9)
 
 echo "Final binding energy behavior:"
 etot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,3)
 detot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,4)
 echo "etot=$etot"   >> $_pars
 echo "detot=$detot" >> $_pars
+echo "etot2=$etot2" >> $_pars
 
 
 echo "m16=$m16"
