@@ -37,9 +37,10 @@
 #          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
 #          13-feb-2023   add trim option, using nemo_functions.sh now, add $_date
 #          25-feb-2023   add detot
+#          27-feb-2023   compute m1, and add xve2.tab and xve0.tab
 
 _script=mkmh97
-_version=25-feb-2023
+_version=27-feb-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -277,8 +278,8 @@ radprof final2c.snap tab=t > final2c.tab
 echo '# radius mass'                           >final2cm.tab
 tabmath final2c.tab - %1,%4/$m all format=%f  >>final2cm.tab
 # If the first radius (star) is not within 16, there's no G2 stars near G1
-r0=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
-if [ $r0 = 1 ]; then
+r1=$(txtpar final2cm.tab 'iflt(%1,16,1,0)' p0=1,1)
+if [ $r1 = 1 ]; then
     set +e
     tabspline final2cm.tab    x=1:15:2
     m16=$(tabspline final2cm.tab    x=$r16 | txtpar - p0=1,2)
@@ -288,6 +289,20 @@ fi
 tabplot final2cm.tab  1 2 0 16 xlab=Radius ylab=Mass  headline="x1=$x1 v1=$v1 m16=$m16"  yapp=$(yapp massg2g1)
 echo "m16=$m16" >> $_pars
 
+# center on G1, unbind stars
+snaptrim $run.4 - times=$tstop | snapcopy - - "select=i<$nbody" > final1.snap
+x1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,2)
+v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
+snapshift final1.snap - $x1,0,0 $v1,0,0 mode=sub |\
+   $hackforce - - |\
+   unbind    - - > final1u.snap
+m1=$(snapmstat final1u.snap | txtpar - p0=TotMas,1,8) 
+snapplot final1u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final1u.plot)
+snapgrid final1u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixel evar=m |\
+    tee final1u.ccd |\
+    ccdmath - - "log(1+%1/$bsigma)" |\
+    ccdplot - power=$power yapp=$(yapp final1u.ccd) headline="Galaxy-1 bound at tstop=$tstop"
+echo m1=$m1 >> $_pars
 
 # center on G2, unbind stars
 x2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,4)
@@ -314,6 +329,15 @@ fi
 echo "# time x1 v1 x2 v2 kin1 kin2 pot12 etot"                              > $run.xve.tab
 tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" >> $run.xve.tab
 tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
+
+# alternative orbital energy
+x10=$(nemoinp "$r0*$m/(1+$m)")
+v10=$(nemoinp "-$v0*$m/(1+$m)")
+x20=$(nemoinp "-$r0/(1+$m)")
+v20=$(nemoinp "$v0/(1+$m)")
+
+echo "0 $x10 $v10 $x20 $v20" | tabmath - - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8"       > $run.xve0.tab
+tail -1 $run.xv.tab  | tabmath - - "0.5*${m1}*%3**2,0.5*${m2}*%5**2,-${m1}*${m2}/abs(%2-%4),%6+%7+%8" > $run.xve2.tab
 
 echo "Final binding energy behavior:"
 etot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,1,3)
