@@ -37,7 +37,7 @@
 #          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
 #          13-feb-2023   add trim option, using nemo_functions.sh now, add $_date
 #          25-feb-2023   add detot
-#          27-feb-2023   compute m1, and add xve2.tab and xve0.tab
+#          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and 
 
 _script=mkmh97
 _version=27-feb-2023
