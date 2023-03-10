@@ -40,7 +40,7 @@
 #          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and 
 
 _script=mkmh97
-_version=27-feb-2023
+_version=10-mar-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -139,6 +139,8 @@ echo "# date=$_date"           >> $_pars
 echo "$*" run=$run             >> $_pars
 source  $_pars
 
+# derived parameters
+r=-$box:$box
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
@@ -236,10 +238,10 @@ estats=$(tabtrend $run.4.etot 2 | tabstat - qac=t  | txtpar -  p0=QAC,1,3 p1=QAC
 
 tabplot $run.4.etot 1 2  headline="mean/sigma $estats" yapp=$(yapp etot.plot) > /dev/null 2>&1
 tabhist $run.4.etot 2                                  yapp=$(yapp etot.hist) > etot.hist.log 2>&1
-snapplot $run.3 xrange=-$box:$box yrange=-$box:$box              yapp=$(yapp init.plot)
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop yapp=$(yapp final.plot)
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i<$nbody"  yapp=$(yapp final1.plot)
-snapplot $run.4 xrange=-$box:$box yrange=-$box:$box times=$tstop visib="i>=$nbody" yapp=$(yapp final2.plot)
+snapplot $run.3 xrange=$r yrange=$r                                yapp=$(yapp init.plot)
+snapplot $run.4 xrange=$r yrange=$r times=$tstop                   yapp=$(yapp final.plot)
+snapplot $run.4 xrange=$r yrange=$r times=$tstop visib="i<$nbody"  yapp=$(yapp final1.plot)
+snapplot $run.4 xrange=$r yrange=$r times=$tstop visib="i>=$nbody" yapp=$(yapp final2.plot)
     
 snapgrid $run.3 - xrange=-$box:$box yrange=-$box:$box              nx=$npixel ny=$npixel |\
     ccdmath - - "log(1+%1/$bsigma)" |\
@@ -294,8 +296,8 @@ snaptrim $run.4 - times=$tstop | snapcopy - - "select=i<$nbody" > final1.snap
 x1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,2)
 v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
 snapshift final1.snap - $x1,0,0 $v1,0,0 mode=sub |\
-   $hackforce - - |\
-   unbind    - - > final1u.snap
+   $hackforce - - > final1c.snap
+unbind final1c.snap - > final1u.snap
 m1=$(snapmstat final1u.snap | txtpar - p0=TotMas,1,8) 
 snapplot final1u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final1u.plot)
 snapgrid final1u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixel evar=m |\
@@ -303,13 +305,21 @@ snapgrid final1u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixe
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final1u.ccd) headline="Galaxy-1 bound at tstop=$tstop"
 echo m1=$m1 >> $_pars
+# binding plots
+snapplot  final1c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r                                       yapp=$(yapp final1c.plot)
+snapplot3 final1c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r zrange=$r                             yapp=$(yapp final1c.3d.plot)
+snapplot  final1c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=r yvar=vr xrange=0:$box yrange=-$vbox:$vbox nxy=3,3  yapp=$(yapp final1c.evolution-binding-vr.plot)
+snapplot  final1c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=x  yvar=y xrange=$r yrange=$r nxy=3,3                yapp=$(yapp final1c.evolution-binding-xy.plot)
+
+
 
 # center on G2, unbind stars
 x2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,4)
 v2=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,5)
+echo "PJT: $x2 $v2"
 snapshift final2.snap - $x2,0,0 $v2,0,0 mode=sub |\
-   $hackforce - - |\
-   unbind    - - > final2u.snap
+    $hackforce - - > final2c.snap
+unbind final2c.snap - > final2u.snap
 m2=$(snapmstat final2u.snap | txtpar - p0=TotMas,1,8) 
 snapplot final2u.snap xrange=-$box:$box yrange=-$box:$box yapp=$(yapp final2u.plot)
 snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixel evar=m |\
@@ -317,6 +327,12 @@ snapgrid final2u.snap - xrange=-$box:$box yrange=-$box:$box nx=$npixel ny=$npixe
     ccdmath - - "log(1+%1/$bsigma)" |\
     ccdplot - power=$power yapp=$(yapp final2u.ccd) headline="Galaxy-2 bound at tstop=$tstop"
 echo m2=$m2 >> $_pars
+# binding plots
+snapplot  final2c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r                                       yapp=$(yapp final2c.plot)
+snapplot3 final2c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r zrange=$r                             yapp=$(yapp final2c.3d.plot)
+snapplot  final2c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=r yvar=vr xrange=0:$box yrange=-$vbox:$vbox nxy=3,3  yapp=$(yapp final2c.evolution-binding-vr.plot)
+snapplot  final2c.snap color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=x  yvar=y xrange=$r yrange=$r nxy=3,3                yapp=$(yapp final2c.evolution-binding-xy.plot)
+
 
 # compare m16 and m2 as function of time
 if [ -e $run.xvm.tab ]; then
@@ -329,6 +345,17 @@ fi
 echo "# time x1 v1 x2 v2 kin1 kin2 pot12 etot"                              > $run.xve.tab
 tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" >> $run.xve.tab
 tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
+
+
+
+#plot by binding energy
+r=-$box:$box
+snapplot $run.4 color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r times=$tstop yapp=$(yapp final-binding.plot)
+snapplot3 $run.4 color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xrange=$r yrange=$r zrange=$r times=$tstop yapp=$(yapp final-binding.3d.plot)
+snapplot $run.4 color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=r yvar=vr xrange=0:$box yrange=-$vbox:$vbox nxy=3,3 times=$tplot yapp=$(yapp evolution-binding-vr.plot)
+snapplot $run.4 color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=x  yvar=y xrange=$r yrange=$r nxy=3,3 times=$tplot yapp=$(yapp evolution-binding-xy.plot)
+
+
 
 # alternative orbital energy
 x10=$(nemoinp "$r0*$m/(1+$m)")
