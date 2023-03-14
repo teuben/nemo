@@ -6,6 +6,9 @@
 #include <vectmath.h>
 #include <assert.h>
 
+//typedef short atype;   // this could be problematic if word alignment is important
+typedef long atype;
+
 /*
  * GLOBAL: pseudo-keyword for storage class.
  */
@@ -41,7 +44,7 @@
  */
 
 typedef struct {
-    short type;                 /* code for node type */
+    atype type;                 /* code for node type */
     real mass;                  /* total mass of node */
     vector pos;			/* position of node */
 } node, *nodeptr;
@@ -57,7 +60,7 @@ typedef struct {
 #define BODY 01                 /* type code for bodies */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */
     real mass;                  /* mass of body */
     vector pos;                 /* position of body */
     vector vel;                 /* velocity of body */
@@ -75,7 +78,7 @@ typedef struct {
  */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */  
     real mass;
     vector phase[2];            /* position, velocity of body */
     vector acc;
@@ -93,7 +96,7 @@ typedef struct {
 #define NSUB (1 << NDIM)        /* subcells per cell */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */    
     real mass;                  /* total mass of cell */
     vector pos;                 /* cm. position of cell */
 #ifdef QUADPOLE
