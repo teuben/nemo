@@ -23,6 +23,9 @@ if ( ! -d ${RT} ) then
     mkdir -p ${RT}
 endif
 
+# rm every file in case of crash
+rm -f ${RT}/plum*
+
 # Set io_nemo test programs path
 set IONB=compile/bin
 

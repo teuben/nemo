@@ -121,7 +121,7 @@ sub buildModel {
   for (my $n=0; $n < $nmodel; $n++) {
     my $name="$sim[$n][0]";
     printf STDERR "$sim[$n][0]   $sim[$n][1]   $sim[$n][2]\n";
-    #`/bin/rm -f $name 2> /dev/null`;
+    `/bin/rm -f $name 2> /dev/null`;
     if ( ! -f $name) {
       printf STDERR "Building model [$name], please wait ...\n";
       `(mkplummer - ${sim[$n][1]}       |\
