@@ -1,10 +1,17 @@
 #! /bin/bash
 #
-#  this bug has got to be the mother of all bugs... (sep 2022)
+#  this bug has got to be the mother of all bugs... (sep 2022/mar 2023)
 #  * intel bugs out, AMD seems ok
 #  * just -g compilation triggers bug faster
-#  * extra filler in node(ptr) didn't solve it
-#  ? zeno's treecode has similar header, will it crash too?
+#  * extra filler in node(ptr) didn't solve it, neither the typedef of type to be a long
+#  * hackcode1_qp usually works when hackcode1 does not, but crash100 on the _qp will also bug out
+#  * 'configure --enable-float' caused a segfault, not a bus error
+#  * zeno's treecode has similar header, but does not crash!
+#
+#    Ubuntu16-32bit would not work in virtualbox
+#    Ubuntu16 has gcc 5.4.0 - and has the bug
+#    Ubuntu14 has gcc 4.8.4 - and has the bug
+
 
 set -e
 #set -x
@@ -32,7 +39,7 @@ for iter in $(seq $niter); do
     # just compile the code locally doesn't seem to trigger the bug,
     # the whole (?) library needs a rebuild
     # 1. => no bug
-    #make clean install > /dev/null 2>&1
+    # make clean install > /dev/null 2>&1
     # 2. => bug is triggered
     (cd $NEMO; make build2a build3) > /dev/null 2>&1
     # 3. => no bug
@@ -43,6 +50,7 @@ for iter in $(seq $niter); do
     echo iteration run $iter >> iter.log    
     #hackcode1 p10 . fcells=4 tstop=0  debug=3
     hackcode1 nbody=10 fcells=4 tstop=0 debug=3
+    #hackcode1_qp  nbody=10 fcells=4 tstop=0 debug=3
 done
 
 echo Seems ok after iter=$iter
