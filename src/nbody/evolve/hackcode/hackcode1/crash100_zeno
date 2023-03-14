@@ -1,0 +1,50 @@
+#! /bin/bash
+#
+#  this bug has got to be the mother of all bugs... (sep 2022)
+#  * intel bugs out, AMD seems ok
+#  * just -g compilation triggers bug faster
+#  * extra filler in node(ptr) didn't solve it
+#  ? zeno's treecode has similar header, will it crash too?
+
+set -e
+
+iter=-1
+niter=100
+
+# trap -l
+trap \
+ "{ echo last iter=$iter ; tail -1 iter.log; exit 255; }" \
+ SIGBUS SIGINT SIGTERM ERR EXIT
+
+if [ ! -e p10 ]; then
+   mkplummer p10 10
+fi
+
+# initially:
+if [ ! -e $NEMO/usr/zeno/zeno ]; then
+    cd $NEMO/usr/zeno
+    make zeno pjt
+    source zeno_start.sh
+    make install
+else
+    cd $NEMO/usr/zeno
+    source zeno_start.sh
+fi
+    
+
+
+
+
+cd $NEMO/usr/zeno
+rm -f iter.log
+touch iter.log
+
+for iter in $(seq $niter); do
+    echo iteration compile $iter
+    make install > install.log 2>&1
+    echo iteration run $iter
+    echo iteration run $iter >> iter.log    
+    treecode nbody=128 tstop=0
+done
+
+echo Seems ok after iter=$iter
