@@ -20,13 +20,13 @@
 #include <extstring.h>
 #include <moment.h>
 #include <mdarray.h>
+#include <lsq.h>
 
 #include <fitsio.h>  
 #include <longnam.h>
 
 string defv[] = {
     "in=???\n            Input SDFITS  fits file(s)",
-    "stats=f\n           Doing simple stats",
     "mom=-1\n            Adding stats to this highest moment",
     "cols=\n             Column names to track - or names of the dimensions if given",
     "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4]",
@@ -38,11 +38,17 @@ string defv[] = {
     "blfit=-1\n          Do a baseline fit of this order (-1 skips)",
     "bench=1\n           How many times to run benchmark",
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
-    "VERSION=0.9d\n      15-mar-2023 PJT",
+    "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
+    "VERSION=0.9e\n      15-mar-2023 PJT",
     NULL,
 };
 
 string usage = "sdfits info and bench reduction procedure";
+
+typedef struct {
+  int nchan;
+  float *data;
+} Spectrum1D, *Spectrum1Dptr;
 
 
 real dcmeantsys(int ndata, real *calon, real *caloff, real tcal)
@@ -119,10 +125,48 @@ void average2(int ndata, real *data1, real *data2, real *ave)
  *   perform a baseline subtraction
  */
 
-void baseline(int ndata, real *x, real *y, int npoly, real *coeffs, real *errors)
+
+void baseline(int npt, real *x, real *y, int npoly, real *coeffs, real *errors)
 {
-  for (int n=0; n<npoly; n++)
-    coeffs[n] = errors[n] = 0.0;
+  int i,j;
+  real sum;
+  static real *mat = NULL;
+  static real *vec = NULL;
+  static real *sol = NULL;
+  static real *a   = NULL;
+  static real *x0  = NULL;
+  static int  n0 = 0;
+  if (mat == NULL) {
+    mat = (real *) allocate(sizeof(real) * (npoly+1)*(npoly+1));
+    vec = (real *) allocate(sizeof(real) * (npoly+1));
+    sol = (real *) allocate(sizeof(real) * (npoly+1));
+    a   = (real *) allocate(sizeof(real) * (npoly+2));
+    n0  = npt;
+    x0  = (real *) allocate(sizeof(real) * n0);
+    for (i=0; i<n0; i++) x0[i] = i;
+  }
+  if (n0 > npt) error("First npt=%d, a new npt=%d too large", n0, npt);
+  if (x == NULL)   x = x0;
+  
+  lsq_zero(npoly+1, mat, vec);
+  for (i=0; i<npt; i++) {
+    a[0] = 1.0;
+    for (j=0; j<npoly; j++)
+	a[j+1] = a[j] * x[i];
+    a[npoly+1] = y[i];
+    lsq_accum(npoly+1,mat,vec,a,1.0);
+  }
+  //if (npoly==0) printf("TEST = %g %g\n",mat[0], vec[0]);
+  lsq_solve(npoly+1,mat,vec,sol);
+  //for (j=0; j<=npoly; j++) printf("%g ",sol[j]);
+  //printf("\n");
+
+  for(i=0; i<npt; i++) {
+    sum=sol[npoly];
+    for (j=npoly-1; j>=0; j--)
+      sum = (x[i] * sum + sol[j]);
+    y[i] = y[i] - sum;
+  }
 }
 
 /* find a string in an array of strings; return -1 if not found */
@@ -225,6 +269,7 @@ void nemo_main(void)
     bool Qraw = getbparam("raw");
     int mom = getiparam("mom");
     int mode = getiparam("mode");
+    int datadim = getiparam("datadim");
     string *colcheck = burststring(getparam("cols"),", ");
     int ncolcheck = xstrlen(colcheck, sizeof(string))-1;
     int anynul = 0;
@@ -250,6 +295,8 @@ void nemo_main(void)
     } else 
       nsize = ndims = 0;
 
+    dprintf(0,"%s mode\n", datadim==1 ? "ONEDIM" : "TWODIM");
+    
     for (j=0; j<nfiles; j++) {
       dprintf(1,"MODE=0\n");      
       fname = fnames[j];
@@ -387,37 +434,39 @@ void nemo_main(void)
 
 	/*
 	 *    Now get at the big DATA[] - this is where virtually memory gets filled
-	 *    at about 100M/sec in double mode = 12.5e6 chan/sec
+	 *    at the data I/O rate
 	 */
+
+	float *data1 = NULL;     // data1[nrows*nchan]
+	mdarray2 data2 = NULL;   // data2[nrows][nchan]
 	
-#define ONEDIM
-#ifdef ONEDIM
-	// just one long 1dim array
-	dprintf(0,"ONEDIM: get Waterfall\n");
-	float *data1 = (float *) allocate(nchan*nrows*sizeof(float));
-	float nulval = 0.0;
-	fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
-	if (nrows > 1)
-	  dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
-	else
-	  dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
-	if (blfit >= 0) warning("ONEDIM mode cannot subtract baselines");
-#else
-	// 2dim array, suitable for waterfall plot
-	dprintf(0,"TWODIM: get Waterfall\n");
-	mdarray2 data2 = allocate_mdarray2(nrows,nchan);
-	double nulval = 0.0;
-	fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
-	if (nrows > 1)
-	  dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
-	else
-	  dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);
-	if (blfit >= 0) {
-	  warning("blfit=%d not yet implemented", blfit);
-	  for (ii=0; ii<nrows; ii++)
-	    baseline(nchan, NULL, data2[ii], blfit, coeffs, errors);
+	if (datadim==1) {
+	  // just one long 1dim array. Force single precision
+	  dprintf(0,"ONEDIM DATA1: make Waterfall\n");
+	  data1 = (float *) allocate(nchan*nrows*sizeof(float));
+	  float nulval = 0.0;
+	  fits_read_col(fptr, TFLOAT, data_col, 1, 1, nchan*nrows, &nulval, data1, &anynul, &status);
+	  if (nrows > 1)
+	    dprintf(0,"DATA1 %g %g %g\n",data1[0],data1[1],data1[nchan]);
+	  else
+	    dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
+	  if (blfit >= 0) warning("ONEDIM mode cannot subtract baselines");  // also due to float/real
+	} else {
+	  // 2dim array, suitable for waterfall plot. Note this could be double precision in NEMO
+	  dprintf(0,"TWODIM DATA2: make Waterfall\n");
+	  data2 = allocate_mdarray2(nrows,nchan);
+	  double nulval = 0.0;
+	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nrows, &nulval, &data2[0][0], &anynul, &status);
+	  if (nrows > 1)
+	    dprintf(0,"DATA2 %g %g %g\n",data2[0][0], data2[0][1], data2[1][0]);
+	  else
+	    dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);
+	  if (blfit >= 0) {
+	    dprintf(0,"BASELINE %d\n",blfit);
+	    for (ii=0; ii<nrows; ii++)
+	      baseline(nchan, NULL, data2[ii], blfit, coeffs, errors);
+	  }
 	}
-#endif
 
 	if (mode >= 0 && mode < 5) continue;
 	dprintf(1,"MODE=5\n");
@@ -430,26 +479,26 @@ void nemo_main(void)
 	  Moment m;
 
 	  ini_moment(&m,mom,0);
-#ifdef ONEDIM
-	  for (i=0; i<nmax; i++) {                  // empty loop: 1.1"
-	    if (mom==0)
-	      sum += data1[i];                          // 1.6"
-	    else
-	      accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
-	  }//for(i)
-#else
-	  for (ii=0; ii<nrows; ii++)                 // empty loop: 1.1"
-	    for (jj=0; jj<nchan; jj++)
+	  if (datadim==1) {
+	    for (i=0; i<nmax; i++) {                  // empty loop: 1.1"
 	      if (mom==0)
-		sum += data2[ii][jj];                         // 3.1"
+		sum += data1[i];                          // 1.6"
 	      else
-		accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
-	  if (row >= 0) {
-	    warning("spectrum row");
-	    for (jj=0; jj<nchan; jj++)
-	      printf("%d %g\n",jj,data2[row][jj]);
-	  }
-#endif
+		accum_moment(&m, data1[i], 1.0);         // 7.9" (6.6 if mom=1)
+	    }//for(i)
+	  } else {
+	    for (ii=0; ii<nrows; ii++)                 // empty loop: 1.1"
+	      for (jj=0; jj<nchan; jj++)
+		if (mom==0)
+		  sum += data2[ii][jj];                         // 3.1"
+		else
+		  accum_moment(&m, data2[ii][jj], 1.0);       // 8.8" (7.3 if mom=1)
+	    if (row >= 0) {
+	      warning("spectrum row");
+	      for (jj=0; jj<nchan; jj++)
+		printf("%d %g\n",jj,data2[row][jj]);
+	    }
+	  } 
 	  dprintf(0,"mean: %g\n", sum / nmax);
 	  if (mom > 2)
 	    printf("MOM %d TBD\n",mom);
