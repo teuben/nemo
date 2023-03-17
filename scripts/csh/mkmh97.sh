@@ -40,7 +40,7 @@
 #          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and 
 
 _script=mkmh97
-_version=10-mar-2023
+_version=17-mar-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -60,6 +60,7 @@ kmax=7          # integration timestep is 1/2**kmax
 code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
 seed=0          # random seed (use seed=123 for the benchmark)
 trim=0          # trim the data after analysis so only the last snapshot is kept
+save=1          # save the "final" plots in a subdirectory "movies" labeled with tstop
 #             parameters for the analysis (which can be re-run)
 tstop=50        # stop time of the integration (or analysis time when doing a re-run)
 box=32          # spatial box size for plotting and CCD frames
@@ -377,6 +378,16 @@ echo "etot2=$etot2" >> $_pars
 
 echo "m16=$m16"
 echo "etot=$etot +\- $detot"
+
+if [ $save == 1 ]; then
+    label=$(printf %04.0f $(nemoinp 10*$tstop))
+    echo "$run/movies label: $label"
+    mkdir -p movies
+    for p in final*png; do
+	n=$(echo $p | sed s/.png/_${label}.png/)
+	cp $p movies/$n
+    done
+fi
 
 if [ $trim == 1 ]; then
     mv $run.4 $run.40
