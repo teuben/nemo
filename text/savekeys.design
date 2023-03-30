@@ -97,7 +97,9 @@ database, e.g.
    export NEMOVAR=/dev/shm/nemovar.$USER
 
 if the user prefers to maintain variables accross (shell) sessions. The default
-is a filename controlled with the PPID.
+is a filename controlled with the PPID, which in bash should be something like
+
+   export NEMOVAR=/dev/shm/nemovar_$$.$USER
 
 Writing should be done with an exclusive lock. Reading can be done at will.
 
