@@ -7,7 +7,12 @@ tabhead \- Generate an ascii table header
 \fBtabhead\fP [parameter=value]
 
 .SH "DESCRIPTION"
-No description available. This manual page was created by mkman
+Some programs that manipulate tables, especially those outside of NEMO,
+benefit from having a descriptive header.  The \fItable(5NEMO)\fP describes
+a number of them.
+
+\fBtabhead\fP will generate headers, depending on the mode (see \fBmode=\fP below),
+automagically.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -28,11 +33,19 @@ Extra separator between column names.
 Number of columns in case cols= not given
 
 .SH "EXAMPLES"
+To give a simple alpabetically ordered column names to a table with 10 columns:
+.nf
+
+   % tabhead ncols=10 mode=2 > ex1.tab
+   % tabgen - nr=100 nc=10  >> ex1.tab
+
+.fi
 
 .SH "SEE ALSO"
 tabgen(1NEMO), table(5NEMO)
 
 .SH "FILES"
+src/kernel/tab
 
 .SH "AUTHOR"
 Peter Teuben
