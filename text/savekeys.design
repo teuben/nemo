@@ -14,15 +14,20 @@ So in NEMO, which uses the shell, there is no such easy construct.
 Imagine NEMO to have a pool of variables, controlled by $NEMOVAR
 (e.g. ~/.nemovar)
 
+A reminder of some of the more advanced features of the command line interface:
 
-An example of internal parameters re-use within a program:
-(there often is not a good reason for this)
+1) An example of internal parameters re-use within a program:
 
    snapgrid in=snap.dat out=ccd.dat nx=200 ny=\$nx
    or 
    snapgrid in=snap.dat out=ccd.dat nx=200 ny='$nx'
 
-An example of keyword macro files:
+there often is not a good reason for this, as this can also be done with
+
+   np=200
+   snapgrid in=snap.dat out=ccd.dat nx=$np ny=$np
+
+2) An example of (multiline) macro files:
 
    nemoinp 1:10:2 > c.lis
    ccdplot in=ccd.dat contour=@c.lis
@@ -30,8 +35,9 @@ An example of keyword macro files:
 
 
 
-New safekeys:   (nemovar is the new name)
+New savekeys:   (nemovar is the new name)
 
+The idea is to mirror input and output parameters.
 
 Each program, like the string defv[] array, will need to define an array
 of keywords that can be exported. Sort of as follows:
@@ -59,10 +65,47 @@ It also turns out I once did write a prototype for this
 	void kprintf(string key, const string fmt, ...)
 but this was designed to store keywords in ascii format, which we are
 now arguing we should do in binary using NEMO's filestruct(3NEMO)
-format. Also , the name is in use in the kernel and may cause confusion.
+format. Also , the function name is in use in the kernel and may cause confusion.
+
+Where the data is written is another matter.  In it's simplest form this could
+be a file named via the PPID. The file can be local or sit in /dev/shm (where this
+is depends on the OS, ubuntu uses /dev/shm, but redhat uses /tmp, and probably
+macos as well)
+
+
+Example use:
+       # make an image of a gauss and plot it
+       ccdgen "" ccd1 gauss 100,100 500
+       ccdplot ccd1
+       
+       # get stats from an image
+       ccdstat ccd1 outkeys=mean,rms
+       
+       # define a few contours
+       c1=$(nemovar mean)-$(nemovar rms)
+       c2=$(nemovar mean)
+       c3=$(nemovar mean)+$(nemovar rms)
+       
+       #
+       ccdplot ccd1 $c1,$c2,$c3
+
+
+The nemovar program normally has only a comma separated list of variables
+to query. But it should also be able to help setting a fixed value for the
+database, e.g.
+
+   export NEMOVAR=/dev/shm/nemovar.$USER
+
+if the user prefers to maintain variables accross (shell) sessions. The default
+is a filename controlled with the PPID.
+
+Writing should be done with an exclusive lock. Reading can be done at will.
+
+
 
 ---------------------------------------------------------------------------
 http://www.ex-parrot.com/~chris/xdata/
+http://www.ex-parrot.com/~chris/software.html
 
 xdata is a set of shell-level utilities, and a perl module, which
 implement an interface to arbitrary key-value pairs which is accessible
@@ -76,6 +119,14 @@ you to propagate information among hosts in a transparent fashion
 you want to create a uniform environment on numerous machines.
 
 
+obvious question:   this was from 2001, now we are python centric, is
+there a way to use this from python.
+Currently implemented using GDBM (the GNU database management library)
+
+sudo apt install libgdbm-dev
+
 
 ---
+
+
 could memcached be used ?
