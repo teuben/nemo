@@ -2,7 +2,7 @@
  * DEFS: include file for hack programs.
  *
  * 29-mar-2023  swapped the order of subp[] and quad in cell struct to fix the hackcode1 bus error bug
- *                  as well as updating the data structure diagram
+ *              as well as updating the data structure diagram - Makefile also needs a fix [github issue 98]
  * 
  */
 
@@ -10,8 +10,10 @@
 #include <vectmath.h>
 #include <assert.h>
 
-//typedef short atype;   // this could be problematic if word alignment is important
-typedef long atype;
+//    pick one if you care about word alignment 
+typedef short atype;     // original one as it was developed
+//typedef int atype;
+//typedef long atype;
 
 /*
  * GLOBAL: pseudo-keyword for storage class.
