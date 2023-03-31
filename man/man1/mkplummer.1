@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "25 July 2022"
+.TH MKPLUMMER 1NEMO "31 March 2023"
 
 .SH "NAME"
 mkplummer \- generates a snapshot according to a truncated Plummer model
@@ -120,8 +120,8 @@ The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
 ~ 0.589.  As an example this should plot the same "rotation" curve:
 .nf
 
-     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 yapp=1/xs
-     rotcurves plummer '0,1,3*pi/16' yapp=2/xs
+     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
+     rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
 
 .fi
 
