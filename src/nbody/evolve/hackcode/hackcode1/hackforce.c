@@ -45,7 +45,7 @@ string defv[] = {
     "rmin=\n              Lower left corner of initial box [default is -rsize/2 (centered)",
     "options=mass,phase\n Output options: phase and/or mass",
     "fcells=0.75\n        Cell/body allocation ratio",
-    "VERSION=1.6a\n       28-mar-05 PJT",
+    "VERSION=1.6b\n       1-apr-2023 PJT",
     NULL,
 };
 
