@@ -154,10 +154,10 @@ There is no direct way to plot a particular column from a table while selecting 
 \fItabmath(1NEMO)\fP program would need to be used in pipe to select, as given in the following example:
 .nf
 
-    % tabgen - 1000 2 | tabmath - - selfie='iflt(%1,0.5,1,0)' | tabhist - 2
+    % tabgen - 1000 2 | tabmath - - selfie='range(%1,0.0,0.5)' | tabhist - 2
     
 .fi
-where columns 2 is only plotted wher column 1 is below a value of 0.5
+where column 2 is only used where column 1 is between 0 and 0.5.
 
 .SH "FLOGGER"
 There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
