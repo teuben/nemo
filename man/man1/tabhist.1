@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "15 June 2022"
+.TH TABHIST 1NEMO "3 April 2023"
 
 .SH "NAME"
 tabhist \- histogram plotter and gaussian fit for tabular data
@@ -140,7 +140,6 @@ point sigma and mean are recomputed. [Default: none]
 \fBqac=t|f\fI
 If selected, a QAC listing is selected. This gives the mean, rms, min and max.
 [Default: f]
-
 .TP
 \fBsort=\fP\fIsort_mode\fP
 Default:  qsort.   If flogger is enabled additional sorting modes are available:
@@ -149,9 +148,21 @@ bubble, heap, insert, merge, quick, shell.
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
 Default: none.
-.SH FLOGGER
+
+.SH "EXAMPLES"
+There is no direct way to plot a particular column from a table while selecting from another column. The
+\fItabmath(1NEMO)\fP program would need to be used in pipe to select, as given in the following example:
+.nf
+
+    % tabgen - 1000 2 | tabmath - - selfie='iflt(%1,0.5,1,0)' | tabhist - 2
+    
+.fi
+where columns 2 is only plotted wher column 1 is below a value of 0.5
+
+.SH "FLOGGER"
 There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
-.SH BUGS
+
+.SH "BUGS"
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is
