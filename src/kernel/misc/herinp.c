@@ -58,6 +58,7 @@
  *              24-jan-04: STACKMAX check
  *              26-jul-2016:    double precision log(min/max) = 308        pjt
  *               2-jan-2021:    squash some gcc warnings                   pjt
+ *               3-apr-2023:    add the range() function                   pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -157,6 +158,7 @@ static double dcd_ran(void);
 static double dcd_ranu(double arg1, double arg2);
 static double dcd_rang(double arg1, double arg2);
 static double dcd_ranp(double arg1);
+static double dcd_range(double arg1, double arg2, double arg3);
 static void   dcd_null(void);
 static void   dcd_evaluate(int q);
 
@@ -197,7 +199,7 @@ static int lstopcodeptr;
 
 /*  functions we know  */
 
-#define maxfuncts  52
+#define maxfuncts  53
 #define maxfunlen  10
 #define maxarg      4
 #define maxbools    8
@@ -212,7 +214,7 @@ static char *functs[] = {
    "MOD"   , "INT"   , "NINT"  , "SIGN"  , "BLANK" , "IFGT"  ,
    "IFLT"  , "IFGE"  , "IFLE"  , "IFEQ"  , "IFNE"  , "RANU"  ,
    "RANG"  , "RANP"  , "SIND"  , "ASIND" , "COSD"  , "ACOSD" ,
-   "TAND"  , "ATAND" , "ATAND2", "ASINH" , "NULL"
+   "TAND"  , "ATAND" , "ATAND2", "ASINH" , "RANGE" , "NULL"
 };
 
 static int nargs[]    = {
@@ -224,7 +226,7 @@ static int nargs[]    = {
    2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
    4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
    2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
-   1   ,    1   ,    2   ,    1   ,    0
+   1   ,    1   ,    2   ,    1   ,    3   ,    0
 };
 
 static char *bools[] = {
@@ -1343,6 +1345,19 @@ static double dcd_ranp(double arg1)
      return(val);
    }
 }
+
+static double dcd_range(double arg1, double arg2, double arg3)
+{
+  dprintf(0,"DCD_RANGE\n");
+   if (arg1 == DCDBLANK) {
+      return DCDBLANK;
+   } else if (arg2 <= arg1 && arg1 <= arg3) {
+      return 1.0;
+   } else {
+      return 0.0;
+   }
+}
+
 static void dcd_null(void)
 {
   have_null = 1;
@@ -1456,7 +1471,8 @@ static void dcd_evaluate(int q)
 /* atand */ case 49: dcd_push(dcd_deg(dcd_atan(arg[0]))); break;
 /* atand2*/ case 50: dcd_push(dcd_deg(dcd_atan2(arg[0],arg[1]))); break;
 /* asinh */ case 51: dcd_push(dcd_asinh(arg[0])); break;
-/* null  */ case 52: dcd_null(); break;   /* this has to be the last 'function' */
+/* range */ case 52: dcd_push(dcd_range(arg[0],arg[1],arg[2])); break;
+/* null  */ case 53: dcd_null(); break;   /* this has to be the last 'function' */
             default: opc = err; break;
          }; break;
       };
@@ -1490,6 +1506,8 @@ void herinp(
     int    *ierd)
 {
    int    i;
+
+   dprintf(0,"HERINP: %s\n",expr);
    
    cptr = expr;
    mpos = *nchr;
