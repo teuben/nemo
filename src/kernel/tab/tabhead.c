@@ -1,5 +1,5 @@
 /*
- *  TEMPLATE: created by NEMO 
+ *  tabhead:    create a header for a table based on columns descriptions
  */
 
 #include <nemo.h>
@@ -7,11 +7,11 @@
 
 string defv[] = {
   "cols=\n        Column names",
-  "mode=1\n       Mode:  0=cols names   1=col1,col2,...  1=A,B....AA,....",
+  "mode=1\n       Mode:  0=cols names   1=col1,col2,...  2=A,B....AA,....",
   "prefix=#\n     Prefix before column names",
   "separ= \n      Separator between column names",
   "ncols=0\n      Number of columns in case cols= not given",
-  "VERSION=0.1\n  30-Mar-2023 PJT",
+  "VERSION=0.2\n  3-apr-2023 PJT",
   NULL,
 };
 
@@ -39,7 +39,7 @@ void nemo_main()
     }
     printf("\n");
     free(colnames);
-  } else if (mode == 1) {    //   topcat mode (prefix="")
+  } else if (mode == 1) {    //   topcat mode (needs prefix="")
     printf("%s", prefix);
     for (i=0; i<ncols; i++) {
       if (i>0) printf("%s ",separ);
@@ -49,6 +49,7 @@ void nemo_main()
   } else if (mode == 2) {
     if (ncols > 702)  // 26*27
       error("spreadheet alphabet mode cannot support more than 702 columns");
+    printf("%s", prefix);    
     for (i=0; i<ncols; i++) {
       if (i>0) printf("%s ",separ);
       j = i%26;
