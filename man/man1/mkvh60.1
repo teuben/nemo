@@ -1,9 +1,12 @@
 .TH MKVH60 1NEMO "19 April 2021"
-.SH NAME
+
+.SH "NAME"
 mkvh60 \- create a uniform sphere of equal mass stars using von Hoerner's 1960 recipe
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkvh60\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Sebastian von Hoerner (1960ZA.....50..184V) describes - in beautiful German -
 four steps how his equal mass virialized homogenous
 sphere was constructed. It also uses a random number generator he himself designed. Here's my interpretation
@@ -30,7 +33,8 @@ discussed the case nbody=25!
 The seed is special in von Hoerner. It is a random number between 0.57 and 0.91, and uses is own 1957 method,
 implemented in \fIran_svh57(3NEMO)\fP. By default this code will use NEMO's default random numbers,
 set by \fBseed=\fP, however if \fBseed57\fP is given, his code is used. See also \fIxrandom(1NEMO)\fP.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -51,7 +55,8 @@ Center c.o.m. ? [t]
 .TP
 \fBheadline=\fP
 Text headline for output. By default not used.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here is a default n=16 sphere, first using the NEMO random number generator, and then the von Hoerner ran57 method:
 
 .nf
@@ -67,7 +72,7 @@ Here is a default n=16 sphere, first using the NEMO random number generator, and
 
 .fi
 
-.SH SEED57
+.SH "SEED57"
 The \fBseed57=\fP keyword is the seed for the revived ran_svh57() \fIZufallzahl\fP random number generator.
 My interpretation of eq.(44) in 1960ZA.....50..184V is : (code in python)
 
@@ -84,7 +89,7 @@ My interpretation of eq.(44) in 1960ZA.....50..184V is : (code in python)
     x = xnew
 .fi    
 
-.SH SEE ALSO
+.SH "SEE ALSO"
 mkhomsph(1NEMO), firstn(1NEMO), snapshot(1NEMO)
 .PP
 .nf
@@ -92,12 +97,15 @@ Z.f.Astrophys. 50, 184, 1960  (1960ZA.....50..184V)
 2001ASPC..228...11V  \fIHow it all started\fP
 Siemens 2002 computer: https://dl.acm.org/doi/10.1145/1458043.1458076
 .fi
-.SH FILES
+
+.SH "FILES"
 src/nbody/init
-.SH AUTHOR
+
+.SH "AUTHOR"
 Sebastian von Hoerner (1960), Peter Teuben (NEMO re-implementation)
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 19-Apr-2021	V0.1 Created	PJT
 .fi
