@@ -1507,8 +1507,6 @@ void herinp(
 {
    int    i;
 
-   dprintf(0,"HERINP: %s\n",expr);
-   
    cptr = expr;
    mpos = *nchr;
    dptr = outv;
