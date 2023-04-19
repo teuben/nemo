@@ -1,4 +1,4 @@
-.TH CSF 1NEMO "13 August 2022"
+.TH CSF 1NEMO "19 April 2023"
 
 .SH "NAME"
 csf \- copy structured file
@@ -18,12 +18,17 @@ no data conversion is applied.
 An overview of the top level items that are present in a structured
 file can be obtained with the following Unix pipe:
 .nf
+q
     % \fBtsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk '{print $2}'
 .fi
 .PP
 Although \fIstructured files\fP can always be read when they were created
 on a byte swapped machine, \fIcsf\fP can also be used to create a file
 in which the bytes are not swapped.
+.PP
+As a convenience option, the keyword \fBblocksize=\fP can be used to forced
+a fixed blocksize to copy a file "as is", but it will bypass the structured
+file I/O so should be functionally the same as a unix \fIcp(1)\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -56,6 +61,10 @@ is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
 (half precision) ,
 \fBl\fP (long), \fBi\fP (int) or \fBs\fP (short). 
 [Default: -blank-].
+.TP
+\fBblocksize=\fP
+If selected, this is the blocksize, in bytes, by which a file gets copied
+bypassing NEMO's structured file I/O. A value of 512 is ok. Default: 0 (not used)
 .TP
 \fBheadline=\fP
 If supplied, add this string of random verbiage to the data stream. [Default: none]
@@ -97,4 +106,5 @@ xx-xxx-87	V1.0: created	JEB
 26-mar-95	V1.5 fixed selection bug and clarified doc	PJT
 12-dec-09	V1.6 added support for half precision (halfp) type	PJT
 13-aug-2022	V1.7 add headline=	PJT
+19-apr-2023	V1.8 add blocksize=	PJT
 .fi
