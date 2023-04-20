@@ -1,10 +1,10 @@
 
 
-FDPS -    framework for Developing Particle Simulator
+# FDPS -    framework for Developing Particle Simulator
 
 See also https://github.com/FDPS/FDPS/
 
-# command line flags for nbody.out:
+## command line flags for nbody.out:
 
      o: dir name of output (default: ./result)
      t: theta (default: 0.5)
@@ -18,7 +18,7 @@ See also https://github.com/FDPS/FDPS/
      h: help
 
 
-# bench:  nbody.out -N 8192 -n 256
+## bench:  nbody.out -N 8192 -n 256
 
 test1:  58.12user 0.07system 0:58.24elapsed  99%CPU 
 test2: 157.69user 0.33system 0:20.64elapsed 765%CPU 
@@ -28,7 +28,7 @@ test5:  dnc
 
 (dnc = did not compile)
 
-# comparing bench w/ gyrfalcON ?
+## comparing bench w/ gyrfalcON ?
 
 How does gyrfalcON compare to nbody.out
 
@@ -36,13 +36,13 @@ How does gyrfalcON compare to nbody.out
     gyrfalcON p8k p8k.out tstop=10 step=1 theta=0.5 kmax=7 eps=0.05
     19.67user 0.00system 0:19.69elapsed 99%CPU 
 
-# input files for nbody.out ?
+## input files for nbody.out ?
 
 Alas, there is no input option for nbody.out (hence the name?), neither is there an
 option for softening, but once there is, here's an example how to create that
 format with NEMO
 
-n=1000
-t=0.0
-nemoinp $t,$n > data.in
-mkplummer - $n | snapprint - i,m,x,y,z,vx,vy,vz >> data.in
+     n=1000
+     t=0.0
+     nemoinp $t,$n > data.in
+     mkplummer - $n | snapprint - i,m,x,y,z,vx,vy,vz >> data.in
