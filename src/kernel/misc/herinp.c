@@ -1348,7 +1348,6 @@ static double dcd_ranp(double arg1)
 
 static double dcd_range(double arg1, double arg2, double arg3)
 {
-  dprintf(0,"DCD_RANGE\n");
    if (arg1 == DCDBLANK) {
       return DCDBLANK;
    } else if (arg2 <= arg1 && arg1 <= arg3) {
