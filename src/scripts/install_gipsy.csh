@@ -7,6 +7,8 @@
 #
 #  After installation, you have about 234MB under the GIPSY root directory
 #  This script should take about 3 minutes to install on a typical 2020 laptop
+#
+#  2022:   ? gfortran -fallow-argument-mismatch
 
 if ($?NEMO) then
     mkdir -p $NEMO/opt/gipsy
@@ -20,7 +22,7 @@ echo See also:  https://www.astro.rug.nl/~gipsy/installation/installation64.html
 echo Sleeping for 5 seconds, then proceeding in `pwd`
 sleep 5
 
-# Step 0: Download the source
+# Step 0: Download the source (also a bad idea to not put a gipsy top level name?)
 url=ftp://ftp.astro.rug.nl/gipsy/gipsy64/src/gipsy64python3_src.tar.gz
 setenv gip_root `\pwd`
 curl $url | tar zxf -
@@ -30,13 +32,15 @@ curl $url | tar zxf -
 cd $gip_root/sys 
 ./mkclient.csh  71
 mv clients.new $gip_root/loc/clients
+#   what's the bash equivalent?
 source cshrc.csh
 
 # Installation step 2: Compiler setup
 cd $gip_loc
 cp $gip_sys/setup.mgr setup 
 cd $gip_sys
- ./install.csh
+#    this fails, gfortran needs the flag to allow old-style argument violations -fallow-argument-mismatch
+./install.csh
 
 # Installation step 3: Building the sources
 cd $gip_sys

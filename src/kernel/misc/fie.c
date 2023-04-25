@@ -720,7 +720,6 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 48: if (arg[1] <= arg[0] &&                    // RANGE
 				       arg[0] <= arg[2])  fie_push(1.0);
 				   else fie_push(0.0);
-			    dprintf(0,"FIE\n");
     			           break;
 		          case 49: fie_null(); break;                         // NULL , by defintion the final
 			  default: opc = err; break;
