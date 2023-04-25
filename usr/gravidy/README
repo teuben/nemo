@@ -17,5 +17,12 @@ Example install from scratch: (version is 1.70.1 here, may be newer)
    ./bootstrap.sh --prefix=$NEMO/opt
    time ./b2
 
+It seems (2023) that bintray is gone.  Here's another URL:
+
+   vu=1_81_0
+   vd=`echo $vu | sed s/_/./g`   
+   wget https://boostorg.jfrog.io/artifactory/main/release/$vd/source/boost_${vu}.tar.gz
+
+
 The last command will compile and install in $NEMO/opt/, and can take a while
-(~15 mins)
+(~5-15 mins)
