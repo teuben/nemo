@@ -1,16 +1,21 @@
 include $(NEMOLIB)/makedefs
 
+URL1 =  http://github.com/cmaureir/gravidy.git
+URL2 =  http://github.com/chongchonghe/gravidy.git
+
 help:
 	@echo "install:         install NEMOBIN/gravidy"
 	@echo "gravidy:         grab the code"
 	@echo "ubuntu:          install BOOST (ubuntu)"
 	@echo "gravidy-view:    install the 3D viewer"
+	@echo "URL1:   $(URL1)"
+	@echo "URL2:   $(URL2)"
 
 gravidy:
-	git clone http://github.com/cmaureir/gravidy.git
+	git clone $(URL1)
 
 clean:
-	rm -rf gravidy
+	(cd gravidy/src/; make distclean)
 
 install: gravidy
 	(cd gravidy/src ; make clean pn $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)
