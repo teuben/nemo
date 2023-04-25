@@ -9,6 +9,7 @@ help:
 	@echo "gravidy:         grab the code"
 	@echo "ubuntu:          install BOOST (ubuntu)"
 	@echo "gravidy-view:    install the 3D viewer"
+	@echo "cmp34:           compare run3 (gravidy) with run4 (rungravidy)"
 	@echo "URL1:   $(URL1)"
 	@echo "URL2:   $(URL2)"
 	@echo "URL3:   $(URL3)"
@@ -18,6 +19,9 @@ gravidy:
 
 clean:
 	(cd gravidy/src/; make distclean)
+
+cleanall:
+	rm -rf p128 run3 run4 run5
 
 install: gravidy
 	(cd gravidy/src ; make clean pn $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)
@@ -57,5 +61,12 @@ run3:   p128
 run4:	p128
 	rungravidy p128 run4 eta=0.01 deltat=0.1 tcrit=10.0 eps=0.05
 
+run5:	p128
+	mkdir run5
+	hackcode1 p128 run5/OUT3.snap tstop=10 eps=0.05 freqout=10 freq=100
+
 cmp34:  run3 run4
 	snapcmp run3/OUT3.snap run4/OUT3.snap
+
+cmp45:  run4 run5
+	snapcmp run4/OUT3.snap run5/OUT3.snap
