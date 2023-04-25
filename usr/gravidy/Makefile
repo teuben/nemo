@@ -2,6 +2,7 @@ include $(NEMOLIB)/makedefs
 
 URL1 =  http://github.com/cmaureir/gravidy.git
 URL2 =  http://github.com/chongchonghe/gravidy.git
+URL3 =  http://github.com/teuben/gravidy.git
 
 help:
 	@echo "install:         install NEMOBIN/gravidy"
@@ -10,6 +11,7 @@ help:
 	@echo "gravidy-view:    install the 3D viewer"
 	@echo "URL1:   $(URL1)"
 	@echo "URL2:   $(URL2)"
+	@echo "URL3:   $(URL3)"
 
 gravidy:
 	git clone $(URL1)
