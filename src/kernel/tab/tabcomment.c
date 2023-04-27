@@ -6,6 +6,7 @@
  *     18-jun-98  V1.1b   increased debug output level by 1 	PJT
  *      8-dec-01      c   MAX_LINELEN
  *      9-apr-22  V2.1 using new tablev2, no more MAX_LINELEN
+ *     27-apr-23  V2.3 don't use +/- as punctuation
  *
  *  Modes:
  *      - show table and commented comments (default)
@@ -30,12 +31,16 @@ string defv[] = {
 	"delete=f\n		  Delete the comment lines?",
 	"raw=f\n                  Show only the raw comments?",
 	"comment=#\n              The output comment character!",
-	"VERSION=2.2\n		  20-nov-2022 PJT",
+	"VERSION=2.3\n		  27-apr-2023 PJT",
 	NULL,
 };
 
 string usage = "Add comments to a table, or comments certain lines, or show just comments";
 
+int my_ispunct(int c) {
+  if (c=='+' || c=='-')  return 0;
+  return ispunct(c);
+}
 
 void nemo_main()
 {
@@ -79,7 +84,7 @@ void nemo_main()
             continue;
         }
 
-        if (ispunct(*cp) && Qpunct) {        /* if punct, comment */
+        if (my_ispunct(*cp) && Qpunct) {        /* if punct, comment */
             if (Qkeep) fprintf(outstr,"%c %s\n",*comment,cp);
 	    if (Qraw)  fprintf(outstr,"%s\n",cp);
             continue;
