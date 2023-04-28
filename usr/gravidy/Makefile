@@ -17,9 +17,9 @@ url:
 	@echo "URL3:   $(URL3)"
 	@echo "URL4:   $(URL4)"
 
-## gravidy:      get the github repo from URL1
+## gravidy:      get the github repo from URL2 for now where we do 2023 development
 gravidy:
-	git clone $(URL1)
+	git clone $(URL2)
 
 ## clean:        distclean the gravidy source tree
 clean:
