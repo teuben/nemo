@@ -1,4 +1,4 @@
-.TH GRAVIDY1 1NEMO "12 February 2019"
+.TH GRAVIDY1 1NEMO "25 April 2023"
 
 .SH "NAME"
 gravidy - direct summation hermite N-body integrator with variable block timesteps
@@ -25,10 +25,15 @@ Example from NEMO/usr/gravidy. See README file for dependencies such as the BOOS
 
    cd $NEMO/usr/gravidy
    make install
-   mknemo rungravidy
+   mknemo -a rungravidy
+   make cmp34
    
 .fi
 this will install the vanilla "cpu" version.   The "gpu" and "mpi" version will need more guidance.
+.PP
+The "cmp34" target will compare the results of a direct run of gravidy with the same one of rungravidy. There
+should be no differences.
+.PP
 
 .SH "AUTHOR"
 Cristian Maureira-Fredes, and Pao Amaro-Seoane
