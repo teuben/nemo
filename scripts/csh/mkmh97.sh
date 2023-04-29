@@ -3,10 +3,6 @@
 #    Example of setting up a Makino & Hut 1997 simulation, but with unequal masses
 #    See also: https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract
 #
-#    @todo
-#    - recode such that v0 is speed at infinity:
-#      v0=$(nemoinp "sqrt($v**2+2*(1+$m)/$r0)")
-#
 # bench:
 #          ./mkmh97.sh code=0 run=run100 nbody=10000 tstop=20 seed=123 
 #          ./mkmh97.sh code=1 run=run101 nbody=10000 tstop=20 seed=123
@@ -17,6 +13,7 @@
 #
 # Note G1 (the one with mass=1) starts at x>0 and launched with vx<0, moving to the left
 #      G2 (the one with mass=m) starts at x<0 and launched with vx>0, moving to the right
+# For fixed=1 G1 will be fixed at (0,0), where G2 is launched at x<0 
 
 #
 # version: 12-may-2022   initial version with just (near) head-on collision
@@ -39,9 +36,10 @@
 #          25-feb-2023   add detot
 #          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and
 #          29-mar-2023   add option to use a fixed potential for galaxy1
+#          29-apr-2023   fix orbital energies for fixed=1, also save etot0,v
 
 _script=mkmh97
-_version=7-apr-2023
+_version=29-apr-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -77,6 +75,8 @@ yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for 
 debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
+
+save_vars="run nbody m em fixed step v0 rp r0 eps kmax code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
@@ -135,7 +135,7 @@ fi
 [[ -e $_pars ]] && source $_pars
 if [ ! -e $_pars ]; then
     source nemo_functions.sh
-    show_vars run nbody m em step v0 rp r0 eps kmax code seed trim tstop box r16 vbox npixel power bsigma tplot yapp >> $_pars
+    show_vars $save_vars >> $_pars
 fi
 echo "# $0 version=$_version"  >> $_pars
 echo "# date=$_date"           >> $_pars
@@ -233,11 +233,11 @@ if [ ! -e $run.xv.tab ]; then
     snapcopy $run.4 - i=0 | snapprint - t  >>$run.4.t.tab
 
     #
-    echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                  >$run.4.g1.tab
+    echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                   >$run.4.g1.tab
     if [ $code == 2 ]; then
 	snapcopy $run.4 - "select=i<$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >>$run.4.g1.tab
     else
-	snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t                                             >>$run.4.g1.tab
+	snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t                                              >>$run.4.g1.tab
     fi
     
     #
@@ -259,8 +259,6 @@ if [ ! -e $run.xv.tab ]; then
 else
     echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
-
-# now some analysis will follow
 
 
 #  mean and sigma of trended energy
@@ -377,7 +375,11 @@ fi
 
 # binding energy argument, plot total binding energy as function of time
 echo "# time x1 v1 x2 v2 kin1 kin2 pot12 etot"                              > $run.xve.tab
-tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" >> $run.xve.tab
+if [ $fixed = 0 ]; then
+    tabmath $run.xv.tab - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8" >> $run.xve.tab
+else
+    tabmath $run.xv.tab - "0,0.5*${m}*%5**2,-${m}/abs(%2),%6+%7+%8" >> $run.xve.tab    
+fi
 tabplot $run.xve.tab 1 9 line=1,1 ycoord=0 yapp=$(yapp path-energy) xlab=Time ylab=Energy
 
 
@@ -391,14 +393,19 @@ snapplot $run.4 color='phi+0.5*(vx*vx+vy*vy+vz*vz) > 0 ? 0.1 : 0.2' xvar=x  yvar
 
 
 
-# alternative orbital energy
+# alternative orbital energy based on time=0
 x10=$(nemoinp "$r0*$m/(1+$m)")
 v10=$(nemoinp "-$v0*$m/(1+$m)")
 x20=$(nemoinp "-$r0/(1+$m)")
 v20=$(nemoinp "$v0/(1+$m)")
-
 echo "0 $x10 $v10 $x20 $v20" | tabmath - - "0.5*%3**2,0.5*${m}*%5**2,-${m}/abs(%2-%4),%6+%7+%8"       > $run.xve0.tab
-tail -1 $run.xv.tab  | tabmath - - "0.5*${m1}*%3**2,0.5*${m2}*%5**2,-${m1}*${m2}/abs(%2-%4),%6+%7+%8" > $run.xve2.tab
+etot0=$(tabcols $run.xve0.tab 9)
+
+if [ $fixed = 0 ]; then
+    tail -1 $run.xv.tab  | tabmath - - "0.5*${m1}*%3**2,0.5*${m2}*%5**2,-${m1}*${m2}/abs(%2-%4),%6+%7+%8" > $run.xve2.tab
+else
+    tail -1 $run.xv.tab  | tabmath - - "0,0.5*${m1}*%5**2,-${m1}/abs(%2),%6+%7+%8" > $run.xve2.tab    
+fi
 etot2=$(tabcols $run.xve2.tab 9)
 
 echo "Final binding energy behavior:"
@@ -407,10 +414,16 @@ detot=$(tail -10 $run.xve.tab | tabstat - 9 qac=t label=Etot | txtpar -  p0=QAC,
 echo "etot=$etot"   >> $_pars
 echo "detot=$detot" >> $_pars
 echo "etot2=$etot2" >> $_pars
+echo "etot0=$etot0" >> $_pars
 
 
 echo "m16=$m16"
 echo "etot=$etot +\- $detot"
+
+#   compute the v from infinity, give it a negative sign if "imaginary"
+v2=$(nemoinp "$v0**2-2*(1+$m)/$r0")
+v=$(nemoinp "sqrt(abs($v2))*sign($v2))")
+echo "v=$v" >> $_pars
 
 if [ $save == 1 ]; then
     label=$(printf %04.0f $(nemoinp 10*$tstop))
