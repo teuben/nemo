@@ -40,6 +40,8 @@ As in NEMO, units are virial (N-body) units.
 4. **em=**: use equal mass particles? By default, each system has same number
    of particles, even if their massed are different. [0]
 
+4. **fixed=**: if set to 1, use a fixed potential for galaxy-1.  [0]
+
 4. **step=**: step time when full snapshots are stored. 1 is probably ok,
    for movies you probably need 0.1.   For very large values of nbody a larger value for the step
    is probably adviced, unless you have a lot of disk space. Perhaps step=5.  [1.0]
