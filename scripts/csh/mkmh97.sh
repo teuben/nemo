@@ -37,10 +37,11 @@
 #          14-dec-2022   try to unbind G2 in it's own C.O.M., store etot
 #          13-feb-2023   add trim option, using nemo_functions.sh now, add $_date
 #          25-feb-2023   add detot
-#          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and 
+#          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and
+#          29-mar-2023   add option to use a fixed potential for galaxy1
 
 _script=mkmh97
-_version=17-mar-2023
+_version=7-apr-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -51,6 +52,7 @@ run=run0        # directory and basename of the files belonging to this simulati
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
+fixed=0         # fixed potential for galaxy-1 ?
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius
@@ -70,7 +72,7 @@ npixel=128      # number of pixels in xy CCD frame
 power=0.5       # gamma factor for CCD plots
 bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
-hackforce=hackforce_qp             # which hackforce to use in the force re-calculation
+hackforce=hackforce                # which hackforce to use in the force re-calculation
 yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
 debug=1                            # 1=set -x,-e,-u   0=nothing
 #
@@ -140,8 +142,9 @@ echo "# date=$_date"           >> $_pars
 echo "$*" run=$run             >> $_pars
 source  $_pars
 
-# derived parameters
+# derived/fixed parameters
 r=-$box:$box
+plummer_pars="0,1,3*pi/16"
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
@@ -154,46 +157,67 @@ if [ $restart = 1 ]; then
     fi
     if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
 	# (near) head-on collision
-	snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
+	if [ $fixed = 0 ]; then
+	    snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
+	else
+	    # 1 system only
+	    snapshift $run.2 $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    # 2 systems, but mass of G1 is 0
+	    # snapscale $run.1 - mscale=0  | snapstack - $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
+	fi
     else
 	# (near) circular orbit
-	snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t    
+	snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t
     fi
 
     # integrator:  0:  hackcode1 is O(NlogN) code
     #              1:  gyrfalcON is O(N)
     #              2:  bonsai2 is O(N) but scales faster for "small" N
     echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
-    if [ $code = 0 ]; then
-	hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
-	snapdiagplot $run.4 tab=$run.4.etot
-    elif [ $code = 1 ]; then
-	gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap > $run.4.log
-	tabcols $run.4.log 1,2 > $run.4.etot
-    elif [ $code = 2 ]; then
-	# See $NEMO/usr/bonsai
-	snaptipsy  $run.3 $run.3t
-	ulimit -s unlimited
-	bonsai2 -i $run.3t --snapname $run. --logfile $run.gpu --dev 0 --snapiter $step -T $tstop -t $(nemoinp 1/2**$kmax)  1>$run.4.log 2>$run.4.err
-	grep Etot= $run.4.log  |tabcols - 4,6 > $run.4.etot
-	# since bonsai writes a new snapshot (in tipsy format) for each time, need to convert them
-	# to single NEMO snapshot for the same analysis as the other codes.
-	set +x
-	for f in $run._*; do
-	    echo Processing $f
-	    (tipsysnap $f - | csf - - item=SnapShot 1>>$run.4 ) 2>>$run.4.t2s
-	done
-	rm -f $run._*
-	if [ $debug == 1 ]; then
-	    set -x
-	fi	    
-	echo Wrote final combined snapshot in $run.4
+    if [ $fixed = 1 ]; then
+	echo Fixed potential now, only code=0 is supported
+	if [ $code = 0 ]; then
+	    hackcode3 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc \
+		      potname=plummer potpars=$plummer_pars   > $run.4.log
+	    snapdiagplot $run.4 tab=$run.4.etot
+	elif [ $code = 1 ]; then
+	    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap \
+		      accname=plummer accpars=$plummer_pars    > $run.4.log
+	    tabcols $run.4.log 1,2 > $run.4.etot
+	fi
+	# exit 0
     else
-	set +x
-	echo Unknown code=$code, valid are:
-	echo 1 = hackcode1
-	echo 2 = gyrfalcON
-	echo 3 = bonsai2
+	if [ $code = 0 ]; then
+	    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
+	    snapdiagplot $run.4 tab=$run.4.etot
+	elif [ $code = 1 ]; then
+	    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap > $run.4.log
+	    tabcols $run.4.log 1,2 > $run.4.etot
+	elif [ $code = 2 ]; then
+	    # See $NEMO/usr/bonsai
+	    snaptipsy  $run.3 $run.3t
+	    ulimit -s unlimited
+	    bonsai2 -i $run.3t --snapname $run. --logfile $run.gpu --dev 0 --snapiter $step -T $tstop -t $(nemoinp 1/2**$kmax)  1>$run.4.log 2>$run.4.err
+	    grep Etot= $run.4.log  |tabcols - 4,6 > $run.4.etot
+	    # since bonsai writes a new snapshot (in tipsy format) for each time, need to convert them
+	    # to single NEMO snapshot for the same analysis as the other codes.
+	    set +x
+	    for f in $run._*; do
+		echo Processing $f
+		(tipsysnap $f - | csf - - item=SnapShot 1>>$run.4 ) 2>>$run.4.t2s
+	    done
+	    rm -f $run._*
+	    if [ $debug == 1 ]; then
+		set -x
+	    fi	    
+	    echo Wrote final combined snapshot in $run.4
+	else
+	    set +x
+	    echo Unknown code=$code, valid are:
+	    echo 1 = hackcode1
+	    echo 2 = gyrfalcON
+	    echo 3 = bonsai2
+	fi
     fi
 else
     echo "============================================================================="
@@ -217,8 +241,13 @@ if [ ! -e $run.xv.tab ]; then
     fi
     
     #
-    echo "# x2 y2 z2 vx2 vy2 vz2"                                                                                 >$run.4.g2.tab    
-    snapcopy $run.4 - "select=i>=$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
+    if [ $fixed = 0 ]; then
+	echo "# x2 y2 z2 vx2 vy2 vz2"                                                                                  >$run.4.g2.tab    
+	snapcopy $run.4 - "select=i>=$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t   >>$run.4.g2.tab
+    else
+	# fake it
+	cp $run.4.g1.tab $run.4.g2.tab
+    fi
     #
     echo "# t x1 v1 x2 v2"                                                                        >$run.xv.tab
     paste  $run.4.t.tab $run.4.g1.tab $run.4.g2.tab | grep -v ^# | awk '{print $1,$2,$5,$8,$11}' >>$run.xv.tab
@@ -273,7 +302,11 @@ snapplot3 $run.4 xrange=-$box:$box yrange=-$box:$box zrange=-$box:$box times=$ts
 
 #  final G2 snapshot for analysis:
 #  center G2 on G1, and plot and show the cumulative mass fraction as function of radius
-snaptrim $run.4 - times=$tstop | snapcopy - - "select=i>=$nbody" > final2.snap
+if [ $fixed == 0 ]; then
+    snaptrim $run.4 - times=$tstop | snapcopy - - "select=i>=$nbody" > final2.snap
+else
+    snaptrim $run.4 - times=$tstop                                   > final2.snap
+fi
 x1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,2)
 v1=$(grep -w ^$tstop $run.xv.tab | txtpar - p0=1,3)
 snapshift final2.snap - $x1,0,0 $v1,0,0 mode=sub > final2c.snap

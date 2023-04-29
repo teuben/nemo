@@ -14,7 +14,8 @@
  *	26-mar-95   V1.5  fixed counting bug in select= and item=, 1 is now
  *			  the first item in all item= selected (as meant)
  *			a fixed NULL vs. 0 warning
- *      11-dec-09   V1.6  experimenting with half precision
+ *      11-dec-09   V1.6  experimenting with half precision 
+ *      19-apr-23   V1.8  allow raw "cp" style copy using blocksize=
  */
 
 #include <stdinc.h>
@@ -29,8 +30,9 @@ string defv[] = {
     "item=\n		Top level selection items [default: all]",
     "select=\n          Selection numbers (1...) [default: all]",
     "convert=\n		Conversion options {d2f,f2d,i2f,f2i,d2i,i2d,h2d,d2h}",
+    "blocksize=0\n      If selected, use raw I/O with this blocksize, bypassing structured I/O",
     "headline=\n        Add additional headline",
-    "VERSION=1.7\n	13-aug-2022 PJT",
+    "VERSION=1.8\n	19-apr-2023 PJT",
     NULL,
 };
 
@@ -42,13 +44,29 @@ extern string *burststring(string, string);
 
 local bool check(string *, string);
 
+
 void nemo_main(void)
 {
     stream instr, outstr, nullstr;
     string item, *items;
     string *tags, *sels, *cvt;
     int    i, nsel, select[MAXSEL], cntrd, cntwr;
-    bool all;
+    int blocksize = getiparam("blocksize");
+    bool all = TRUE;
+
+    if (blocksize > 0) {
+      dprintf(1,"raw I/O using blocksize=%d\n",blocksize);
+      char *data = allocate(blocksize);
+      size_t ndata, nsum = 0;
+      instr = stropen(getparam("in"), "r");
+      outstr = stropen(getparam("out"), "w");
+      while ((ndata=fread(data, 1, blocksize, instr))) {
+	nsum += ndata;
+	fwrite(data, 1, ndata, outstr);
+      }
+      dprintf(1,"Wrote %ld\n",nsum);
+      return;
+    }
 
     instr = stropen(getparam("in"), "r");
     nullstr = stropen("/dev/null","w+");        /* kludge: force write */

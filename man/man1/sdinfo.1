@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "27 September 2021"
+.TH SDINFO 1NEMO "15 March 2023"
 
 .SH "NAME"
 sdinfo \- sdfits (BINTABLE) info and benchmark
@@ -10,11 +10,12 @@ sdinfo \- sdfits (BINTABLE) info and benchmark
 \fBsdinfo\fP list some tabular properties of an SDFITS (and some dialects) file, and has 
 options to benchmark some basic operations.
 .PP
-SDFITS files have a BINTABLE extension named "SINGLE DISH", and is used to store
-single dish spectra and all associated variables. This program was only
+SDFITS files have a BINTABLE extension named "SINGLE DISH", and are used to store
+single dish spectra and all associated variables. This program was 
 written to provide size info and can run a few basic benchmarks. A few known dialects
 to this are known:  "CIMAFITS" (Arecibo) and "MATRIX" (30m/CLASS), the latter designates
-the spectrum via a "SPECTRUM" column name, instead of the more common "DATA" column name.
+the spectrum via a "SPECTRUM" column name, instead of the more common "DATA" column name
+in classic "SDFITS".
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -23,13 +24,12 @@ the spectrum via a "SPECTRUM" column name, instead of the more common "DATA" col
 Input SDFITS fits file. Multiple files can be given as well, as a space or comma separated this.
 No default.
 .TP
-\fBstats=t|f\fP
-If true, some basic statistics will be computed. You also need this option
-if a row (see row= below) is output.
-.TP
 \fBmom=\fP\fI
-Maximum moment some statistics will be computed. mom=0 will just sum, and be much faster than
-general moment computation. [2].
+If set to a non-negative value, this is the max. moment of the stats being computed. 
+mom=0 is a special case, and will just sum, and be much faster than
+general moment computation.
+You also need this option if a row (see row= below) is output.
+[-1].
 .TP
 \fBcols=\fP
 Column names to track. Currently it just gives the column number and format used.  Default: not used.
@@ -52,9 +52,35 @@ be useful to set this here. This number is related to NAXIS1 in the BINTABLE.
 If used, this row (0 being the first) will be output as an ascii spectrum. This spectrum has two
 columns: channel number (0 being the first) and the spectrum value, native units.
 .TP
+\fBraw=\fP
+Do only raw I/O?   If selected, no SDFITS processing
+is done, the file is just read in blocks of 2880 bytes. [f]
+.TP
+\fBhdu=\fP
+Which HDU to process. Normally hdu=2 should contain the BINTABLE, but it's possible
+there are more. [2]
+.TP
+\fBblfit=\fP
+Another benchmark option:  setting the blfit (baseline fit order) to a non-negative
+number, a baseline of that order will be fitted to each spectrum. [-1]
+.TP
 \fBbench=\fP
 How many times the procedure should be processed. This will only re-execute the procedure,
 not the alloc/free that are needed for this. Using 0 will bypass the procedure. Default: 1
+.TP
+\fBmode=\fP
+Another benchmark option: setting this to a non-negative value will restrict how far the
+SDFITS is processed.
+.TP
+\fBdatadim=1|2\fP
+Another benchmark option: allowing all data to appear in one long one dimensional
+DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array.
+[1]
+
+.SH "CAVEATS"
+By default NEMO compiles in double precision. The DATA1[nrows*nchan] "ONEDIM" mode will this occupy half the
+memory of a DATA2[nrows][nchan] array. NEMO will need to be compiled in single mode to have them use the same
+memory.
 
 .SH "EXAMPLES"
 The following example takes all fits files matching a particular pattern and summarize their contents.
@@ -74,6 +100,7 @@ Here is a benchmark of the GBT ngc5291 example:
 .nf
     time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
     ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### nemo Debug Info: tcal: 24   cal: 46 sig: 45 fdnum: 0 ifnum: 0 plnum: 0
     ### nemo Debug Info: DATA keyword TDIM7 = (32768,1,1,1)
     ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col = 7
     ### nemo Debug Info: DATA6 3.71521 0.0366262 3.30351     1.42437
@@ -84,9 +111,9 @@ Here is a benchmark of the GBT ngc5291 example:
 
 .fi
 
-Here is a way to plot a spectrum:
+Here is a way to plot a spectrum, with the X-axis being the channel number
 .nf
-    sdinfo ngc5291.fits t row=11 | tabplot - 
+    sdinfo ngc5291.fits t row=11 | tabcomment - | tabplot -
 .fi
 
 .SH "SEE ALSO"
@@ -108,4 +135,5 @@ Peter Teuben
 14-dec-2019	V0.4 dimension analysis w/ ngc5291	PJT
 18-dec-2019	V0.7 Handle CIMAFITS and MATRIX extensions	PJT
 27-sep-2021	V0.9 Improved column reading, display TDIM	PJT
+15-mar-2023	V1.0 Finalized more benchmarks		PJT
 .fi
