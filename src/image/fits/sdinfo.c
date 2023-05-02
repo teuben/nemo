@@ -1,11 +1,12 @@
 /*
  * sample program to use cfitsio on SDFITS files
- * benchmark some low level math
+ * also serves as benchmark and does some low level math
  *
  * 23-nov-2019   PJT       written
  * 11-dec-2019   PJT       mdarray reduction example
  * 29-feb-2020   PJT       verbose, raw I/O
  * 28-sep-2021   PJT       better cfitsio usage, report more SDFITS properties
+ *    apr-2023   PJT       some mods for the DYSH work
  *
  * Benchmark 6 N2347 files:  2.4"  (this is with mom=0 stats)
  * dims=5 for NGC5291:       31-35ms (depending in 1 or 3 levels)
@@ -26,24 +27,25 @@
 #include <longnam.h>
 
 string defv[] = {
-    "in=???\n            Input SDFITS  fits file(s)",
+    "in=???\n            Input SDFITS fits file(s)",
     "mom=-1\n            Adding stats to this highest moment",
     "cols=\n             Column names to track - or names of the dimensions if given",
     "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4]",
     "proc=\n             Reduction procedure (PS,FS,NOD,TP)",
+    "nrows=\n            Override the nrows derived from the data",
     "nchan=\n            Override the nchan derived from the data",
     "row=-1\n            Show ascii spectrum for this row (0=first)",
     "raw=f\n             Do only raw I/O ?",
-    "hdu=2\n             Which HDU (BINTABLE SINGLE DISH) to process",
+    "hdu=2\n             Which HDU (BINTABLE SINGLE DISH) to process (1=first)",
     "blfit=-1\n          Do a baseline fit of this order (-1 skips)",
     "bench=1\n           How many times to run benchmark",
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
     "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
-    "VERSION=0.9e\n      15-mar-2023 PJT",
+    "VERSION=0.9g\n      19-apr-2023 PJT",
     NULL,
 };
 
-string usage = "sdfits info and bench reduction procedure";
+string usage = "sdfits info and bench reduction procedures";
 
 typedef struct {
   int nchan;
@@ -136,6 +138,10 @@ void baseline(int npt, real *x, real *y, int npoly, real *coeffs, real *errors)
   static real *a   = NULL;
   static real *x0  = NULL;
   static int  n0 = 0;
+
+  if (n0 == 0) {
+    dprintf(0,"baseline fit:  npt=%d\n", npt);
+  }
   if (mat == NULL) {
     mat = (real *) allocate(sizeof(real) * (npoly+1)*(npoly+1));
     vec = (real *) allocate(sizeof(real) * (npoly+1));
@@ -261,6 +267,7 @@ void nemo_main(void)
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
     int status, fmode, ii, jj, i, j, k, data_col;
     long int nrows;
+    long int nrows0;
     int ncols, nchan, nfiles, found, row, nhdus;
     string fname = getparam("in"), *fnames;
     string *colnames;
@@ -298,8 +305,26 @@ void nemo_main(void)
     dprintf(0,"%s mode\n", datadim==1 ? "ONEDIM" : "TWODIM");
     
     for (j=0; j<nfiles; j++) {
-      dprintf(1,"MODE=0\n");      
       fname = fnames[j];
+
+      if (Qraw) {
+	stream fp;
+	char fitsline[IOBUFLEN];    // IOBUFLEN = 2880 from fitsio.h
+	int ndat, n=0;
+	
+	fp = stropen(fname,"r");
+	while(1) {
+	  ndat = fread(fitsline, IOBUFLEN, 1, fp);
+	  if (ndat != 1)
+	    break;
+	  n++;
+	}
+	strclose(fp);
+	dprintf(0,"RAW I/O: read %d  %d FITS records = %g GB\n",n, IOBUFLEN, (n/1024.0/1024.0/1024.0)*IOBUFLEN);
+	continue;
+      }
+
+      dprintf(1,"MODE=0\n");      
       status = 0;         /* initialize status before calling fitsio routines */
       fmode = READONLY;   /* from fitsio.h */
       fits_open_table(&fptr, fname, fmode, &status);
@@ -635,23 +660,6 @@ void nemo_main(void)
       fits_close_file(fptr, &status);            /* close the file */
       fits_report_error(stderr, status);     /* print out any error messages */
 
-      if (Qraw) {
-	stream fp;
-	char fitsline[IOBUFLEN];    // IOBUFLEN = 2880 from fitsio.h
-	int ndat, n=0;
-	
-	fp = stropen(fname,"r");
-	while(1) {
-	  ndat = fread(fitsline, IOBUFLEN, sizeof(char), fp);
-	  if (ndat != 1)
-	    break;
-	  n++;
-	}
-	strclose(fp);
-	dprintf(0,"RAW I/O: read %d  %d FITS records = %g GB\n",n, IOBUFLEN, (n/1024.0/1024.0/1024.0)*IOBUFLEN);
-
-	
-      }
 	  
     } //for(j) loop over files
 }
