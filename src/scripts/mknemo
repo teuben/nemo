@@ -203,6 +203,8 @@ if ($u) then
 endif
 
 if ($R) then
+  echo Rebuilding in 2...
+  sleep 2
   cd $NEMO
   make rebuild
   rm -f $lockfile >& /dev/null 
