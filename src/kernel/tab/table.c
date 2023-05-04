@@ -459,12 +459,15 @@ string *table_rowsp(table *t, int row)
   }
   sp[ntok] = NULL;
 
-  // consistency check on # columns
+  // consistency check on # columns; allow extra columns
   if (t->nc == 0) {
     dprintf(1,"table_rowsp[%d]: setting ncols=%d\n",row,ntok);
     t->nc = ntok;
-  } else if (ntok != t->nc)
-    error("column number changed:  %d -> %d\n",t->nc, ntok);
+  } else if (ntok < t->nc) {
+    error("too few columns:  %d -> %d\n",t->nc, ntok);    
+  } else if (ntok > t->nc) {
+    warning("ignoring extra column(s):  %d -> %d\n",t->nc, ntok);
+  }
   
   // free memory of linked list
   curr = first;
