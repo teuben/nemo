@@ -1,8 +1,8 @@
 #    Interactions between two Plummer Spheres
 
 Based on the paper by Makino & Hut (1997) -
-https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract - this
-script lets two Plummer (1911) interact with either
+https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract - the
+**mkmh97.sh** script lets two Plummer (1911) interact with either
 other. In the original Makino & Hut paper the masses were equal, but
 the model, relative velocity and impact parameter were all varied.
 
@@ -17,7 +17,11 @@ In this script we extend this with a few options:
 4. different models, though for shell galaxies it will be useful to replace
    the Plummer with a colder stellar system [not yet implemented]
 
+5. allow the first galaxy (with mass=1) to be a fixed analytical potential. This will result
+   in some other limitations to the analysis.
+
 Some initial analysis is performed as well, see also **mh16.sh** for an example
+for further time-dependant analysis.
 
 ## Input parameters
 
@@ -180,14 +184,48 @@ The following files should be present, the example is for run=run0:
 
 In addition to the input parameter, the following parameters are computed by the script
 
+1. **m1=**:  absolute mass of stars around G1 bound to G1. 
+
 1. **m2=**:  absolute mass of stars around G2 bound to G1. 
 
 2. **m16=**: relative mass of stars of G2 around the center of G1, within a radius of **r16**.
 
-2. **etot**:  orbital energy of bound particles of the last 10 snapshot
+2. **etot=**:  orbital energy of bound particles of the last 10 snapshot
 
-3. **detot**:  variation of **etot**
+3. **detot=**:  variation of **etot**
 
+2. **etot2=**:  orbital energy of bound particles corrected for mass-loss
+
+2. **etot0=**:  orbital energy at time=0
+
+4. **v=**:      correct input velocity (from v0), as computed from two systems at infinity
+
+All parameters are stored in the **nemopars.rc** file, which can be queried with
+the **nemopars** program.
+
+## Pipeline Examples
+
+Here is an example of running 16 instances of the same input parameters (m,v,n) but
+with differently seeded models:
+
+     m=0.05
+     v=0.80
+     n=8000
+     r=$(nemoinp 1:16 format=%02d)
+     for rr in $r; do
+        mkmh97.sh run=run_${m}_${v}_${n}_${rr} m=$m v0=$v nbody=$n tstop=100 step=1 seed=-2
+     done
+
+after which querying all nemopars.rc files will result in a table, which could be plotted or further analyzed:
+
+     nemopars m,v0,etot,detot,etot2 run_${m}_${v}_${n}_*/nemopars.rc
+     # m v0 etot detot etot2
+     0.05 0.80 0.00371626 9.70455e-05 0.00261469 
+     0.05 0.80 0.00361105 0.000106836 0.0026038 
+     0.05 0.80 0.00261421 0.000115724 0.00178161 
+     0.05 0.80 0.00273166 7.53117e-05 0.00183988
+     ...
+  
 ## Plotting Examples
 
 In the examples below the name **run0** is used, since that's the default for **run=**, however, if you want to 
