@@ -43,7 +43,15 @@ string usage="stack two N-body systems on top of each other";
 
 extern string *burststring(string,string);
 
-nemo_main()
+void readdata(void);
+void snapstack(void);
+void setvect(vector vec, string str);
+void writedata(void);
+void freedata(void);
+void snapcenter(void);
+
+
+void nemo_main()
 {
     readdata();
     snapstack();
@@ -56,7 +64,7 @@ local int bits,  bits1,  bits2, shift;
 local Body *btab, *btab1, *btab2;
 local real tsnap, tsnap1, tsnap2;
 
-readdata()
+void readdata()
 {
     stream instr1, instr2;
 
@@ -74,7 +82,7 @@ readdata()
     dprintf(1,"tsnap1 = %g    tsnap2 = %g\n", tsnap1, tsnap2);
 }
 
-snapstack()
+void snapstack()
 {
     vector deltar, deltav;
     Body *bp;
@@ -109,7 +117,7 @@ snapstack()
     else warning("zerocm=false is now the default!!");
 }
 
-setvect(vector vec, string str)
+void setvect(vector vec, string str)
 {
     string *vcp;
     int i;
@@ -119,7 +127,7 @@ setvect(vector vec, string str)
 	vec[i] = (*vcp != NULL ? atof(*vcp++) : 0.0);
 }
 
-writedata()
+void writedata()
 {
     stream outstr;
 
@@ -130,13 +138,13 @@ writedata()
     put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 }
 
-freedata()
+void freedata()
 {
   free(btab1);
   free(btab2);
 }
 
-snapcenter() 
+void snapcenter() 
 {
     real w_i, w_sum;
     vector tmpv, w_pos, w_vel;
