@@ -23,6 +23,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 #include <snapshot/snapshot.h>
 
 string defv[] = {
@@ -37,7 +38,7 @@ string defv[] = {
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.2\n                13-jun-07 PJT/WD",
+    "VERSION=2.2a\n               8-may-2023 PJT/WD",
     NULL,
 };
 
@@ -53,7 +54,7 @@ string usage="cut a snapshot file down to size";
 */
 extern bool beyond(real, string, real);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr = NULL;
     mstr *mp;
