@@ -9,6 +9,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <loadobj.h>
@@ -48,7 +49,7 @@ string defv[] = {
     "color_table=\n		  specify new color table to use",
 #endif
     "frame=\n			  base filename for rasterfiles(5)",
-    "VERSION=1.1\n		  9-oct-03 PJT",
+    "VERSION=1.1a\n		  9-may-2023 PJT",
     NULL,
 };
 
@@ -87,14 +88,24 @@ local real *phaseptr = NULL;
 local real *phiptr = NULL;
 local real *auxptr = NULL;
 
-real xtrans(real),  ytrans(real);
-void arrow(real, real, real, real);
+void setparams(void);
+void setrange(real *rval, string exp);
+void compfuncs(void);
+bool scansnap(void);
+void plotbox(void);
+void setticks(real *tiks, int *ntik, string tikstr);
+void plotsnap(void);
+real xtrans(real x);
+real ytrans(real y);
+void arrow(real xcm, real ycm, real vx, real vy);
+void scrdump(int frameno);
+
 
 #ifndef FRAMEDELAY
 #  define FRAMEDELAY 1
 #endif
 
-nemo_main()
+void nemo_main()
 {
     permanent bool first=TRUE;
     int frameno;
@@ -156,7 +167,7 @@ nemo_main()
     plstop();
 }
 
-setparams()
+void setparams()
 {
     string tail();
 
@@ -204,9 +215,7 @@ setparams()
         frame = NULL;
 }
 
-setrange(rval, rexp)
-real rval[];
-string rexp;
+void setrange(real *rval, string rexp)
 {
     char *cptr;
 
@@ -224,7 +233,7 @@ string rexp;
 extern btrproc btrtrans(string);
 extern btiproc btitrans(string);
 
-compfuncs()
+void compfuncs()
 {
 
     xfunc = btrtrans(xvar);
@@ -244,7 +253,7 @@ compfuncs()
 
 #define MAXCOL  256
 
-setcolors()
+void setcolors()
 {
     stream cstr;
     int ncolors;
@@ -356,7 +365,7 @@ bool scansnap()
     return (TRUE);
 }
 
-plotbox()
+void plotbox()
 {
     char msg[128];
     int nticks;
@@ -411,10 +420,7 @@ plotbox()
     }
 }
 
-setticks(tiks, ntik, tikstr)
-real tiks[];
-int *ntik;
-string tikstr;
+void setticks(real *tiks, int *ntik, string tikstr)
 {
 #if 0
     /* this section has memory leak; allocate, but never free's */
@@ -430,7 +436,7 @@ string tikstr;
 #endif
 }
 
-plotsnap()
+void plotsnap()
 {
     real t, *mp, *psp, *pp, *ap;
     int vismax, visnow, i, vis, icol;
@@ -509,7 +515,7 @@ plotsnap()
 
 #define L0   0.05
 
-plottrack()
+void plottrack()
 {
     int i;
     real x, y, dx, dy;
@@ -582,8 +588,7 @@ void arrow(real xcm, real ycm, real vx, real vy)
 }
 
 
-scrdump(frameno)
-int frameno;
+void scrdump(int frameno)
 {
     char s[64];
 
