@@ -8,6 +8,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <filefn.h>
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -58,13 +59,11 @@ string defv[] = {
     "color_table=\n		  specify new color table to use",
     "crange=0:1\n                 range in colors to map",
 #endif
-    "VERSION=0.2\n		  2-nov-05 PJT",
+    "VERSION=0.2a\n		  9-may-2023 PJT",
     NULL,
 };
 
 string usage = "plot particle positions in a 3-panel XY,ZY,XZ from a snapshot file";
-
-string cvsid="$Id$";
 
 
 
@@ -112,13 +111,20 @@ local real *auxptr = NULL;
 
 real xtrans1(real), ytrans1(real), xtrans2(real), ytrans2(real), xtrans3(real), ytrans3(real);
 
-local bool scansnap(void);
+void setparams(void);
+void setrange(real *rval, string exp);
+void compfuncs(void);
+void setcolors(void);
+bool scansnap(void);
+void plotbox(void);
+void setticks(real *tiks, int *ntik, string tikstr);
+void plotsnap(void);
 
 #ifndef FRAMEDELAY
 #  define FRAMEDELAY 1
 #endif
 
-nemo_main()
+void nemo_main()
 {
     permanent bool first=TRUE;
 
@@ -146,7 +152,7 @@ nemo_main()
     plstop();
 }
 
-setparams()
+void setparams()
 {
     trakflag = FALSE;
     input = getparam("in");
@@ -210,7 +216,7 @@ setparams()
 #endif
 }
 
-setrange(real *rval, string rexp)
+void setrange(real *rval, string rexp)
 {
     char *cptr, *tmpstr;
     double dpar;
@@ -240,7 +246,7 @@ setrange(real *rval, string rexp)
 extern btrproc btrtrans(string);	/* in reality: rproc */
 extern btiproc btitrans(string);	/* in reality: iproc */
 
-compfuncs()
+void compfuncs()
 {
     xfunc = btrtrans(xvar);
     yfunc = btrtrans(yvar);
@@ -257,7 +263,7 @@ compfuncs()
 
 #define MAXCOL  256
 
-setcolors()
+void setcolors()
 {
     stream cstr;
     int ncolors;
@@ -377,7 +383,7 @@ bool scansnap(void)
     return TRUE;
 }
 
-plotbox()
+void plotbox()
 {
     char msg[128];
 
@@ -423,13 +429,13 @@ plotbox()
     }
 }
 
-setticks(real *tiks, int *ntik, string tikstr)
+void setticks(real *tiks, int *ntik, string tikstr)
 {
     *ntik = nemoinpr(tikstr, tiks, MAXTICKS);
     if (*ntik < 0) error("(5d) Parsing %s",*ntik, tikstr);
 }
 
-plotsnap()
+void plotsnap()
 {
     real t, *mp, *psp, *pp, *ap, *acp;
     int vismax, visnow, i, vis, icol;
