@@ -22,7 +22,7 @@ string defv[] = {	/* keywords + help string for user interface */
     "zslabs=\n      Zmin,Zmax pairs in WCS to select",
     "zscale=1\n     Scaling applied to zslabs",
     "select=t\n     Select the planes for output (t) or de-select those (f)",
-    "VERSION=1.3a\n 18-dec-2022 PJT",
+    "VERSION=1.3b\n 11-may-2023 PJT",
     NULL,
 };
 
@@ -247,5 +247,5 @@ void ax_copy(imageptr i0, imageptr i1)
   if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
   if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
   if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
-  copy_header(i0,i1);
+  copy_header(i0,i1,0);
 }
