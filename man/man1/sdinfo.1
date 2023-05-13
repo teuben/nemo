@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "15 March 2023"
+.TH SDINFO 1NEMO "13 May 2023"
 
 .SH "NAME"
 sdinfo \- sdfits (BINTABLE) info and benchmark
@@ -21,7 +21,7 @@ in classic "SDFITS".
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input SDFITS fits file. Multiple files can be given as well, as a space or comma separated this.
+Input SDFITS fits file(s). Multiple files can be given as well, as a space or comma separated list.
 No default.
 .TP
 \fBmom=\fP\fI
@@ -54,7 +54,9 @@ columns: channel number (0 being the first) and the spectrum value, native units
 .TP
 \fBraw=\fP
 Do only raw I/O?   If selected, no SDFITS processing
-is done, the file is just read in blocks of 2880 bytes. [f]
+is done, the file is just read in blocks of 2880 bytes.
+See also \fIcsf(1NEMO)\fP with \fBblocksize=\fP.
+[f]
 .TP
 \fBhdu=\fP
 Which HDU to process. Normally hdu=2 should contain the BINTABLE, but it's possible
@@ -113,11 +115,11 @@ Here is a benchmark of the GBT ngc5291 example:
 
 Here is a way to plot a spectrum, with the X-axis being the channel number
 .nf
-    sdinfo ngc5291.fits t row=11 | tabcomment - | tabplot -
+    sdinfo ngc5291.fits 0 row=11 | tabcomment - | tabplot -
 .fi
 
 .SH "SEE ALSO"
-scanfits(1NEMO), fitshead(1NEMO)
+scanfits(1NEMO), fitshead(1NEMO), csf(1NEMO), fits(5NEMO)
 .PP
 https://fits.gsfc.nasa.gov/registry/sdfits.html
 
@@ -128,6 +130,7 @@ http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits
 
 .SH "AUTHOR"
 Peter Teuben
+
 .SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
