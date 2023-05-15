@@ -26,7 +26,7 @@
  *      10-oct-13  4.0  method=
  *      26-may-16  4.1  the fit=grow recoded
  *       1-mar-22  4.2  also report the model (data-diff)
- *
+ *      15-may-23  4.3x report npt= ; add error analysis to select poly's
  *  line       a+bx
  *  plane      p0+p1*x1+p2*x2+p3*x3+.....     up to 'order'   (a 2D plane in 3D has order=2)
  *  poly       p0+p1*x+p2*x^2+p3*x^3+.....    up to 'order'   (paraboloid has order=2)
@@ -73,7 +73,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3b\n     11-jul-2022 PJT",
+    "VERSION=4.3c\n     15-may-2023 PJT",
     NULL
 };
 
@@ -177,6 +177,7 @@ void do_gauss2d(void);
 void do_exp(void);
 void do_grow(void);
 void do_poly(void);
+void do_poly_error(int, real*, real*);
 void do_poly2(void);
 void do_arm(void);
 void do_loren(void);
@@ -1133,6 +1134,7 @@ void do_line()
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g %g\n",x[i],y[i],d[i],y[i]-d[i]);  
   printf("rms/chi = %g\n",data_rms(npt,d,dy,2));
+  printf("npt= %d\n",npt);
   free(d);
 }
 
@@ -1195,8 +1197,9 @@ void do_plane()
     break;
 #endif
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);
-
+  
   if (outstr)
     for (i=0; i<npt; i++)
       /* bad : x1 and x2 not initialized */
@@ -1300,6 +1303,7 @@ void do_gauss1d()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
@@ -1398,6 +1402,7 @@ void do_dgauss1d()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
@@ -1456,6 +1461,7 @@ void do_gauss2d()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
@@ -1511,6 +1517,7 @@ void do_exp()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
@@ -1566,6 +1573,7 @@ void do_grow()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   //bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
@@ -1620,7 +1628,9 @@ void do_poly()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
+  do_poly_error(lpar, fpar,epar);
 
   if (outstr)
     for (i=0; i<npt; i++)
@@ -1677,6 +1687,7 @@ void do_poly2()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
@@ -1747,6 +1758,7 @@ void do_arm()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
 
@@ -1795,6 +1807,7 @@ void do_loren()
     if (npt1 == npt) break;
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
   if (outstr)
@@ -1863,6 +1876,7 @@ void do_arm3()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,1,x,y,dy,d, lpar,fpar,epar,mpar);
 
 
@@ -1924,10 +1938,49 @@ void do_psf()
     if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
     npt = npt1;
   }
+  printf("npt= %d\n",npt);
   bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);    
 
   if (outstr)
     for (i=0; i<npt; i++)
       fprintf(outstr,"%g %g %g %g\n",x[i],y[i],d[i],y[i]-d[i]);  
   printf("rms/chi = %g\n",data_rms(npt,d,dy,4));
+}
+
+
+
+/*
+ * do_poly_error
+ */
+
+void do_poly_error(int lpar, real *fpar, real *epar)
+{
+  if (lpar==1) {         // constant; nothing extra to report
+    return;
+  } else if (lpar==2) {  // straight line fit; really repeating from do_line()
+    real x0 = -fpar[0]/fpar[1];
+    real dx0 = sqrt(sqr(epar[0]/fpar[0])+sqr(epar[1]/fpar[1]))*x0;
+    printf("x0= %g %g\n",x0,dx0);
+    printf("y0= %g %g\n",fpar[0],epar[0]);
+  } else if (lpar==3) {  // paraboloid, only do error analysis if there are two roots
+    real s = sqr(fpar[1]) - 4*fpar[0]*fpar[2];
+    if (s < 0) {
+      warning("no roots");
+      return;
+    }
+    warning("Following values not certified yet");
+    s = sqrt(s);
+    real xm = -fpar[1]/(2*fpar[2]);  // location of min or max of paraboloid
+    real xd = s/(2*fpar[2]);         // delta to the zero points
+    real dxm =  0.5*sqrt(sqr(epar[1]/fpar[1])+sqr(epar[2]/fpar[2]))*ABS(xm);
+    real dp0 = epar[0]/s;
+    real dp1 = epar[1]*(fpar[1]/s - 1)/(2*fpar[2]);
+    real dp2 = epar[2]*((s-fpar[1]) + 2*fpar[0]*fpar[1]/s)/(2*sqr(fpar[2]));
+    real dx0 = sqrt(sqr(dp0)+sqr(dp1)+sqr(dp2));
+    printf("xm= %g %g\n",xm,dxm);
+    printf("x0a= %g %g\n",xm - xd, dx0);
+    printf("x0b= %g %g\n",xm + xd, dx0);
+    printf("dp[0,1,2] components: %g %g %g\n",dp0,dp1,dp2);
+  } else
+    dprintf(0,"do_poly_error: %d no error analysis\n",lpar);
 }
