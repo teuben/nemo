@@ -1,4 +1,4 @@
-.TH MKHERNQUIST 1NEMO "27 March 2003"
+.TH MKHERNQUIST 1NEMO "15 May 2023"
 
 .SH "NAME"
 mkhernquist \- create a two-component, isotropic, spherical galaxy+halo Hernquist model
@@ -40,13 +40,14 @@ Scale length of Halo (where the galaxy has radius=1) [1]
 Standard seed [0]     
 .TP
 \fBaddphi=\fP
-Add potentials to snapshot [f]   
+Add potentials to snapshot. Warning: in the current version
+potentials are positive. [f]   
 .TP
 \fBzerocm=\fP
-Centrate snapshot (t/f)? [t]    
+Centrate snapshot (t/f)? See CAVEATS below. [t]    
 .TP
 \fBheadline=\fP
-Optional verbiage []     
+Optional verbiage []
 
 .SH "CAVEATS"
 Due to the relatively large number of particles at large radii,
@@ -61,6 +62,7 @@ Peter Teuben, John Dubinski (original version)
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 27-Mar-03	V1.1 man pages finally created  	PJT
+15-may-2015	clarified docs	PJT
 .fi
