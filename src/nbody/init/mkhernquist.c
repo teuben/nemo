@@ -17,6 +17,7 @@
  *                   - float->real (including the NR stuff; no query/ran1)
  *      9-sep-01    gsl/xrandom
  *     27-mar-03    fixed double/float usage or qromb (it never worked before)
+ *     15-may-23    potentials negative now, added mfrac= and rfrac=
  *
  * MH97: For Hernquist models, we adopted a kind of 'quiet start' in which particle i is initially placed
  *       in an arbitrary position on a sphere with a radius corresponding to the Lagrangian mass (i [ 0.5)/N.
@@ -33,6 +34,9 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
+#include <nr.h>   // float qromb(float (*func)(float), float a, float b);
+
+
 string  defv[] = {     
     "out=???\n                Output file name",
     "nbody=???\n              Total number of particles for both components",
@@ -40,9 +44,11 @@ string  defv[] = {
     "a=1\n                    Scale length of Halo (Galaxy=1)",
     "seed=0\n                 Standard seed",
     "addphi=f\n               Add potentials to snapshot",
+    "mfrac=1.0\n              Mass fraction out to which Hernquist model is sampled",
+    "rfrac=\n                 If used, radius out to which Hernquist model is sampled",
     "zerocm=t\n               Centrate snapshot (t/f)?",
     "headline=\n              Optional verbiage",
-    "VERSION=1.1a\n           6-jul-2022 PJT",
+    "VERSION=1.2\n            16-may-2023 PJT",
     NULL,
 };
 
@@ -50,27 +56,22 @@ string usage="two-component, isotropic, spherical galaxy+halo Hernquist model";
 
 #define CONST (1.0/sqrt(32.)/(M_PI*M_PI*M_PI))
 
-int galaxy;
-int nobj;
-int *indx;
-Body *bp, *btab;
+local int galaxy;
+local int nobj;
+local Body *bp, *btab;
+local double a, b, mu, E; 
 
-int n; 
-double dE;
-double a, b, mu, E; 
+//local int n; 
+//local double dE;
+//local int *indx;
+
 
 /* local functions */
 
 double rad(double eta), f(double E2), drho2_d(double u), pot(double r),
        radpsi(double p), radmass(double m), rho1(double r), rho2(double r);
-void   cofm(void);
+void   cofm(bool Q);
 float  drho2(float u);
-
-extern float qromb(float (*func)(float), float a, float b);
-
-extern double xrandom(double,double);
-extern int set_xrandom(int);
-
 
 
 void nemo_main()
@@ -82,7 +83,14 @@ void nemo_main()
         bool Qcenter = getbparam("zerocm");
         bool Qphi = getbparam("addphi");
         stream outstr = stropen(getparam("out"),"w");
-        int seed = init_xrandom(getparam("seed"));	
+        int seed = init_xrandom(getparam("seed"));
+	double mfrac;
+	if (hasvalue("rfrac")) {
+	  double rfrac = getdparam("rfrac");
+	  mfrac= sqr(rfrac)/sqr(1+rfrac);
+	  dprintf(1,"rfrac=%g -> mfrac=%g\n",rfrac,mfrac);
+	} else
+	  mfrac = getdparam("mfrac");	  
 
         mu = getdparam("m");
         a = getdparam("a");
@@ -99,21 +107,23 @@ void nemo_main()
 	b = a - 1;
 
 	btab = (Body *) allocate(2*nobj*sizeof(Body));
+	double rmax = 0.0;
 
 	for(i=0, bp=btab; i<2*nobj; i++, bp++) {
 		double eta, radius, cth, sth, phi;
 		double psi0;
 
-		eta = (double) xrandom(0.0,1.0);
+		eta = xrandom(0.0,mfrac);
 		radius = rad(eta);
 		if( i >= nobj ) {
-			if( mu == 0.0 ) break;
-			radius *= a;
+		  if( mu == 0.0 ) break;
+		  radius *= a;
 		}
+		if (radius > rmax) rmax = radius;
 		if( i<nobj ) {
-			galaxy = 1;
+		  galaxy = 1;
 		} else {
-			galaxy = 0;
+		  galaxy = 0;
 		}
 
 		phi = xrandom(0.0,2*M_PI);
@@ -124,7 +134,7 @@ void nemo_main()
 		Pos(bp)[2] = (real) (radius*cth);
 
 		psi0 = -pot(radius);
-                if (Qphi) Phi(bp) = psi0;
+                if (Qphi) Phi(bp) = -psi0;
 		vmax2 = 2.0*psi0;
 		vmax = sqrt(vmax2);
 		fmax = f(psi0);
@@ -156,9 +166,8 @@ void nemo_main()
             else
                 Mass(bp) = mh;
 	}
-
-	if (Qcenter)
-	    cofm();
+	dprintf(1,"Maximum radius: %g\n",rmax);
+	cofm(Qcenter);
 
         bits = MassBit | PhaseSpaceBit;
         if (Qphi)  bits |= PotentialBit;
@@ -167,15 +176,17 @@ void nemo_main()
         put_snap(outstr, &btab, &nobj, &tsnap, &bits);
         strclose(outstr);
 }
-		
+
+// radius belonging to a mass fraction
 double rad(double eta)
 {
 	double sqeta;
 	sqeta = sqrt(eta);
-	return(sqeta/(1-sqeta));
+	return sqeta/(1-sqeta);
 }
 
-void cofm()
+// re-center of mass the snapshot 
+void cofm(bool Qcenter)
 {
 	int i;
 	real xcm, ycm, zcm;
@@ -200,22 +211,23 @@ void cofm()
 	vxcm /= mtot;
 	vycm /= mtot;
 	vzcm /= mtot;
-	dprintf(1,"Centering snapshot (%g,%g,%g) (%g,%g,%g)\n",
+	dprintf(1,"Center of snapshot snapshot (%g,%g,%g) (%g,%g,%g)\n",
 		xcm,ycm,zcm,vxcm,vycm,vzcm);
 
-
-	for(i=0, bp=btab; i<2*nobj; i++, bp++) {
+	if (Qcenter)  {
+	  dprintf(1,"Centering snapshot\n");
+	  for(i=0, bp=btab; i<2*nobj; i++, bp++) {
 		Pos(bp)[0] -= xcm;
 		Pos(bp)[1] -= ycm;
 		Pos(bp)[2] -= zcm;
 		Vel(bp)[0] -= vxcm;
 		Vel(bp)[1] -= vycm;
 		Vel(bp)[2] -= vzcm;
+	  }
 	}
 }
 
-/* Distribution function of the 2-component Hernquist model */
-
+// Distribution function of the 2-component Hernquist model
 double f(double E2)
 {
 	double ans;
