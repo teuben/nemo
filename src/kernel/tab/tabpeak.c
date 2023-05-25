@@ -5,8 +5,8 @@
  *   30-may-2013   0.2 Also search for valleys
  *    1-jun-2013   0.3 Allow intensity weighted mean
  *   23-mar-2022   0.4 3pt vs. 5 pt
- *   22-jan-2023   0.8 added npeak= following ccdmom, adding epeak= - PJT
- *
+ *   22-jan-2023   0.7 added npeak= following ccdmom, adding epeak= - PJT
+ *   25-may-2023   0.8 added delta= 
  *                        
  * 
  */
@@ -30,6 +30,7 @@ string defv[] = {
     "xcol=1\n			  X-Column",
     "ycol=2\n                     Y-column",
     "clip=0\n                     Only consider points above this",
+    "delta=0\n                    If given, consider points above this delta",
     "pmin=3\n                     Min of points part of the peak [3=exact fit]",
     "edge=1\n                     Edge to ignore (1 or higher)",
     "valley=f\n                   Also find the valleys?",
@@ -37,11 +38,11 @@ string defv[] = {
     "npeak=0\n                    extract the Nth peak (N>0)",
     "epeak=1\n                    expand around the peak by this factor",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.7\n		  23-jan-2023 PJT",
+    "VERSION=0.8\n		  25-may-2023 PJT",
     NULL
 };
 
-string usage = "peaks in a table";
+string usage = "find or extract peaks from a table";
 
 
 /**************** SOME GLOBAL VARIABLES ************************/
@@ -61,7 +62,7 @@ local stream instr;			/* input file */
 
 local int col[2], ncol;
 
-real *xcol, *ycol, *coldat[2];
+real *xcol, *ycol, *dcol, *coldat[2];
 int *smask;
 local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
@@ -70,6 +71,7 @@ local int    edge;
 local int    npeak;
 local real   epeak;
 real clip;
+real delta;
 bool  Qvalley, Qmean;
 
 local void setparams(void);
@@ -78,6 +80,7 @@ local void peak_data(void);
 local void peak_fit(void);
 local void mean_data(void);
 local void extract_peak(void);
+local void singles(void);
 local int  peak_find(int n, real *data, int *mask, int npeak);
 
 
@@ -87,10 +90,12 @@ void nemo_main()
 {
     setparams();			/* read the parameters */
     read_data();
-    
-    if (npeak > 0) {
+
+    if (delta > 0)
+      singles();
+    else if (npeak > 0)
       extract_peak();
-    } else if (Qmean)
+    else if (Qmean)
       mean_data();
     else if (pmin == 3)
       peak_data();
@@ -104,15 +109,17 @@ local void setparams()
     col[0] = getiparam("xcol");
     col[1] = getiparam("ycol");
     clip = getrparam("clip");
+    delta = getrparam("delta");
     pmin = getiparam("pmin");
-    if (pmin < 3) error("pmin=%d too small, 3 or higher",pmin);
+    if (pmin < 3) error("pmin=%d too small, needs to be 3 or higher",pmin);
     edge = getiparam("edge");
-    if (edge < 1) error("edge=%d too small, 1 or higher",edge);
+    if (edge < 1) error("edge=%d too small, needs to be 1 or higher",edge);
     Qvalley = getbparam("valley");
     Qmean = getbparam("mean");
     if (Qmean && Qvalley) warning("Valley fitting not supported in mean mode");
     npeak = getiparam("npeak");
     epeak = getrparam("epeak");
+    if (epeak < 1) warning("epeak=%g < 1 is unusual. Proceedings at your own risk now",epeak);
     
     nmax = nemo_file_lines(input,getiparam("nmax"));
     if (nmax<1) error("Problem reading from %s",input);
@@ -137,9 +144,32 @@ local void read_data()
     	npt = nmax;
     }
     smask = (int *) allocate(npt * sizeof(int));
+    dcol = (real *) allocate(npt * sizeof(real));
 }
 
 
+local void singles(void)
+{
+  int i,j,n;
+
+  if (edge < 1) error("cannot run singles with edge=%d", edge);
+
+  dcol[0] = 0.0;
+  for (i=1; i<npt; i++) dcol[i] = ABS(ycol[i] - ycol[i-1]);
+
+  printf("#  X       Y       Ypeak    Delta    Delta\n");
+
+  n=0;
+  for (i=edge; i<npt-edge; i++) {
+    if (dcol[i] > delta && dcol[i+1] > delta) {
+      printf("%f %f  %f %f %f\n",xcol[i], ycol[i],
+	     ycol[i] - 0.5*(ycol[i-1]+ycol[i+1]),dcol[i],dcol[i+1]);
+      n++;
+    } 
+  }
+  dprintf(1,"Found %d singles\n",n);
+}
+
 local void peak_data(void)
 {
   int i,j;
@@ -313,11 +343,14 @@ void extract_peak()
     }
 }
 
+// @todo  peak_find is shared with ccdmom.c - should go into a library
 /* 
  * this routine can be called multiple times
  * each time it will find a peak, and then walk down the peak
  * mask[] contains 0 if not part of a peak, 1 for the first peak
  * 2 for the 2nd etc.
+ *
+ * It is assumed the ordinate is ordered.
  *
  * During the first call, the mask[] array is set to all 0's.
  * i.e. unassigned to a peak, you will need npeak=0
