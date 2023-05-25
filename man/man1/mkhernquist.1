@@ -1,4 +1,4 @@
-.TH MKHERNQUIST 1NEMO "15 May 2023"
+.TH MKHERNQUIST 1NEMO "17 May 2023"
 
 .SH "NAME"
 mkhernquist \- create a two-component, isotropic, spherical galaxy+halo Hernquist model
@@ -49,6 +49,10 @@ Add (as negative) potentials to snapshot.  [f]
 Mass fraction used of Hernquist distribution. 
 A value of 1.0 will result in particles at large radii. See CAVEATS below.
 [1.0]
+.TP
+\fBrfrac=\fP
+Radius where to cut the mass model, which will override the \fBmfrac\fP
+value.  Default: not used.
 .TP
 \fBzerocm=\fP
 Centrate snapshot (t/f)? See CAVEATS below. [t]    
