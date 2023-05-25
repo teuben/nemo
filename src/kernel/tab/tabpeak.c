@@ -158,6 +158,7 @@ local void singles(void)
   for (i=1; i<npt; i++) dcol[i] = ABS(ycol[i] - ycol[i-1]);
 
   printf("#  X       Y       Ypeak    Delta    Delta\n");
+  printf("#  delta=%g\n", delta);
 
   n=0;
   for (i=edge; i<npt-edge; i++) {
