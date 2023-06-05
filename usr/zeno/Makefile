@@ -25,6 +25,15 @@ zeno_pjt:
 #  install
 install:
 	(source zeno_start.sh ; cd zeno; make -f Zeno install_all)
+	@echo 'Consider "make zbin" to isolate namesake ZENO bins from NEMO bins:'
+	@echo ZBIN=$(ZBIN)
+
+#  move ZENO bin's to bin/zeno if their name clashes with NEMO
+ZBIN = tsf csf rsf \
+	snapkey snaprect snaprotate snapsort snapsplit snapstack snapstat
+zbin:
+	mkdir -p zeno/bin/zeno
+	(cd zeno/bin; mv $(ZBIN) zeno)
 
 #  optional install of gsl in $NEMO/opt
 gsl:
