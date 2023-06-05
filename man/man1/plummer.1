@@ -1,4 +1,4 @@
-.TH PLUMMER 1NEMO "4 June 2023"
+.TH PLUMMER 1NEMO "5 June 2023"
 
 .SH "NAME"
 plummer \- tabulate Osipkov-Merritt generalization of Plummer model
@@ -25,6 +25,10 @@ anisotropic.  If negative, an isotropic model is tabulated.  Default:
 \fBmcutoff=\fP\fIfrac_mass_cutoff\fP
 The output tables extend to the radius corresponding to this fraction
 of the total mass.  Default: \fB0.999999\fP.
+.TP
+\fBntab=\fP
+Number of table entries. A compiled maximum (MXTB=10000) is the maximum allowed
+value. Default: \fB512\fP
 
 .SH "EXAMPLE"
 
@@ -45,11 +49,8 @@ of integration time on a 2020 style CPU. Adjust appropriately:
 
 .fi
 
-.SH "CAVEATS"
-The number of radial entries is fixed at 512
-
 .SH "SEE ALSO"
-mkommod(1NEMO)
+mkommod(1NEMO), mkplummer(1NEMO)
 
 .SH "AUTHOR"
 Joshua E. Barnes
@@ -58,5 +59,5 @@ Joshua E. Barnes
 .ta +1.5i +5.5i
 .nf
 2-jun-1988	original	JEB
-4-jun-2023	add example	PJT
+5-jun-2023	add example	PJT
 .fi
