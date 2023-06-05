@@ -39,14 +39,19 @@ zbin:
 gsl:
 	mknemo gsl
 
+# IFA has changed their access
+WFLAGS = --no-check-certificate
+URL1 = http://legacy.ifa.hawaii.edu/faculty/barnes/
 
 idkit:  identikit2
 
 identikit2:
-	wget http://www.ifa.hawaii.edu/faculty/barnes/research/identikit/identikit2.tar
+	wget $(WFLAGS) $(URL1)/research/identikit/identikit2.tar
 	mkdir identikit2
 	(cd identikit2; tar xf ../identikit2.tar)
 
+testdata.txt:
+	wget $(WFLAGS) $(URL1)/treecode_old/testdata.txt
 
 code1:
 	(cd code_c; make clean all)
