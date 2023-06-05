@@ -1,0 +1,45 @@
+.TH TABOMMOD 1NEMO "5 Jun 2023"
+
+.SH "NAME"
+tabommod \- tabulate an Osipkov-Merritt model
+
+.SH "SYNOPSIS"
+\fBtabommod\fP [parameter=value]
+
+.SH "DESCRIPTION"
+Tabulate the radius, mass, potential and distribution function of
+a binary Osipkov-Merritt model file.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+input OM model. No default.
+
+.SH "EXAMPLES"
+
+.nf
+  %tabommod /home/teuben/NEMO/nemo/data/k1isot.dat | head
+  
+  # Radius Mass Potential DistFunc
+  0 0 -2.13846 0.308038
+  0.0532665 0.00225881 -2.11708 0.303906
+  0.0756551 0.00636147 -2.09569 0.299206
+  0.0930611 0.0116363 -2.07431 0.294226
+
+.fi
+
+.SH "SEE ALSO"
+mkommod(1NEMO), plummer(1NEMO)
+
+.SH "FILES"
+$NEMODAT/k1isot.dat  - example OM file
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+5-jun-2023	Created		PJT
+.fi
