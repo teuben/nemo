@@ -1,12 +1,16 @@
-.TH PLUMMER 1NEMO "2 June 1988"
-.SH NAME
+.TH PLUMMER 1NEMO "4 June 2023"
+
+.SH "NAME"
 plummer \- tabulate Osipkov-Merritt generalization of Plummer model
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBplummer out=\fPout_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIplummer\fP tabulates an Osipkov-Merritt-Plummer model.  The output
 file, written in binary format, may be used with \fImkommod\fP(1NEMO).
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized.
 .TP 24
 \fBout=\fP\fIout_file\fP
@@ -21,7 +25,38 @@ anisotropic.  If negative, an isotropic model is tabulated.  Default:
 \fBmcutoff=\fP\fIfrac_mass_cutoff\fP
 The output tables extend to the radius corresponding to this fraction
 of the total mass.  Default: \fB0.999999\fP.
+
+.SH "EXAMPLE"
+
+Here is an example of a rather large 100,000 Plummer sphere. This will take about 30 minutes
+of integration time on a 2020 style CPU. Adjust appropriately:
+.nf
+
+# generate OM model table and snapshot
+    plummer out=plummer.tab anisorad=1
+    mkommod plummer.tab plummer.snap nbody=100000
+
+# integrate this plummer model (needs about 500 MB disk space)
+    gyrfalcON plummer.snap plummer.out eps=0.025 tstop=100 step=0.5 kmax=7
+
+# plot lagrangian radii to confirm the model is in equilibrium
+    snapmradii plummer.out 0.01,0.1:0.9:0.1,0.99 log=t |\\
+         tabplot  - 1 2:12 line=1,1 xlab=Radius ylab="log(MassFraction)"
+
+.fi
+
+.SH "CAVEATS"
+The number of radial entries is fixed at 512
+
 .SH "SEE ALSO"
 mkommod(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes
+
+.SH "HISTORY"
+.ta +1.5i +5.5i
+.nf
+2-jun-1988	original	JEB
+4-jun-2023	add example	PJT
+.fi
