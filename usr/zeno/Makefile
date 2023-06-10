@@ -1,5 +1,8 @@
+# 
+URL0 = http://legacy.ifa.hawaii.edu/faculty/barnes/
+URL1 = https://github.com/joshuabarnes/zeno/
+URL2 = https://github.com/teuben/zeno
 
-#
 
 zeno:  zeno_jeb zeno_pjt
 	@echo 'You will need to create a symlink zeno -> zeno_XYZ'
@@ -15,11 +18,11 @@ pjt:
 
 #  original one
 zeno_jeb:
-	git clone https://github.com/joshuabarnes/zeno/ zeno_jeb
+	git clone $(URL1) zeno_jeb
 
 #  my current repo has a branch for linux
 zeno_pjt:
-	git clone https://github.com/teuben/zeno zeno_pjt
+	git clone $(URL2) zeno_pjt
 	(cd zeno_pjt; git co teuben1)
 
 #  install
@@ -41,17 +44,17 @@ gsl:
 
 # IFA has changed their access
 WFLAGS = --no-check-certificate
-URL1 = http://legacy.ifa.hawaii.edu/faculty/barnes/
+
 
 idkit:  identikit2
 
 identikit2:
-	wget $(WFLAGS) $(URL1)/research/identikit/identikit2.tar
+	wget $(WFLAGS) $(URL0)/research/identikit/identikit2.tar
 	mkdir identikit2
 	(cd identikit2; tar xf ../identikit2.tar)
 
 testdata.txt:
-	wget $(WFLAGS) $(URL1)/treecode_old/testdata.txt
+	wget $(WFLAGS) $(URL0)/treecode_old/testdata.txt
 
 code1:
 	(cd code_c; make clean all)
