@@ -73,7 +73,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3c\n     15-may-2023 PJT",
+    "VERSION=4.3d\n     15-may-2023 PJT",
     NULL
 };
 
@@ -2056,12 +2056,13 @@ void do_poly_error(int lpar, real *fpar, real *epar)
     s = sqrt(s);
     real xm = -fpar[1]/(2*fpar[2]);  // location of min or max of paraboloid
     real xd = s/(2*fpar[2]);         // delta to the zero points
-    real dxm =  0.5*sqrt(sqr(epar[1]/fpar[1])+sqr(epar[2]/fpar[2]))*ABS(xm);
+    real dxm =  sqrt(sqr(epar[1]/fpar[1])+sqr(epar[2]/fpar[2]))*ABS(xm);
     real dp0 = epar[0]/s;
     real dp1 = epar[1]*(fpar[1]/s - 1)/(2*fpar[2]);
     real dp2 = epar[2]*((s-fpar[1]) + 2*fpar[0]*fpar[1]/s)/(2*sqr(fpar[2]));
     real dx0 = sqrt(sqr(dp0)+sqr(dp1)+sqr(dp2));
     printf("xm= %g %g\n",xm,dxm);
+    printf("xd= %g\n", xd);
     printf("x0a= %g %g\n",xm - xd, dx0);
     printf("x0b= %g %g\n",xm + xd, dx0);
     printf("dp[0,1,2] components: %g %g %g\n",dp0,dp1,dp2);
