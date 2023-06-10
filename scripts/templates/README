@@ -17,6 +17,7 @@ getparam() does not support this.
 8   typer
 9
 10  getparam                        -        -      x      x
+11  docopt                          -        -      x      -
 
 0 -
 1 -
@@ -30,6 +31,7 @@ getparam() does not support this.
 8 https://typer.tiangolo.com/
 9 https://www.gnu.org/software/gengetopt/gengetopt.html
 10 NEMO
+11 http://docopt.org/
 
 
 csh:
