@@ -73,7 +73,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3d\n     15-may-2023 PJT",
+    "VERSION=4.3e\n     10-jun-2023 PJT",
     NULL
 };
 
