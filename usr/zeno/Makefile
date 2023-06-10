@@ -25,19 +25,33 @@ zeno_pjt:
 #  install
 install:
 	(source zeno_start.sh ; cd zeno; make -f Zeno install_all)
+	@echo 'Consider "make zbin" to isolate namesake ZENO bins from NEMO bins:'
+	@echo ZBIN=$(ZBIN)
+
+#  move ZENO bin's to bin/zeno if their name clashes with NEMO
+ZBIN = tsf csf rsf \
+	snapkey snaprect snaprotate snapsort snapsplit snapstack snapstat
+zbin:
+	mkdir -p zeno/bin/zeno
+	(cd zeno/bin; mv $(ZBIN) zeno)
 
 #  optional install of gsl in $NEMO/opt
 gsl:
 	mknemo gsl
 
+# IFA has changed their access
+WFLAGS = --no-check-certificate
+URL1 = http://legacy.ifa.hawaii.edu/faculty/barnes/
 
 idkit:  identikit2
 
 identikit2:
-	wget http://www.ifa.hawaii.edu/faculty/barnes/research/identikit/identikit2.tar
+	wget $(WFLAGS) $(URL1)/research/identikit/identikit2.tar
 	mkdir identikit2
 	(cd identikit2; tar xf ../identikit2.tar)
 
+testdata.txt:
+	wget $(WFLAGS) $(URL1)/treecode_old/testdata.txt
 
 code1:
 	(cd code_c; make clean all)

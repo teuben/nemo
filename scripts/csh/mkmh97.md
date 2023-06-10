@@ -1,10 +1,10 @@
 #    Interactions between two Plummer Spheres
 
-Based on the paper by Makino & Hut (1997) -
+Loosely based on the paper by Makino & Hut (1997) -
 https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M/abstract - the
 **mkmh97.sh** script lets two Plummer (1911) interact with either
 other. In the original Makino & Hut paper the masses were equal, but
-the model, relative velocity and impact parameter were all varied.
+the model, relative velocity and impact parameter were all parameters.
 
 In this script we extend this with a few options:
 
@@ -17,19 +17,20 @@ In this script we extend this with a few options:
 4. different models, though for shell galaxies it will be useful to replace
    the Plummer with a colder stellar system [not yet implemented]
 
-5. allow the first galaxy (with mass=1) to be a fixed analytical potential. This will result
-   in some other limitations to the analysis.
+5. allow the first galaxy (with mass=1) to be a fixed analytical potential. This will
+   however result in some other limitations to the analysis. (**fixed=**)
 
-Some initial analysis is performed as well, see also **mh16.sh** for an example
+Some additional analysis is performed as well, see also **mh16.sh** for an example
 for further time-dependant analysis.
 
 ## Input parameters
 
-All input parameters are of the form *keyword=value*, like most NEMO programs. But with
-the exception there is no syntax or validity of the keyword checking!  Use **--help**
+All input parameters are of the form *keyword=value*, like most NEMO programs, but with
+the exception there is no check on syntax or validity of the keyword!  Use **--help**
+or **-h**
 as the first keyword to get up to date information on the keywords and their defaults.
 
-As in NEMO, units are virial (N-body) units.
+As in many NEMO programs, units are virial (N-body) units.
 
 1. **run=**:  run directory name, also the name used in all the derived filenames. For example with
    run=run0, you would see files like run0/run0.1 and run0/run0.4.log etc.  Warning: if you specify an already
@@ -84,8 +85,7 @@ As in NEMO, units are virial (N-body) units.
 13. **trim=**: set to 1 if you want to trim the simulation from all but the final
     (tstop) snapshot. [0]
 
-Parameters for (re)analysis:
-
+Parameters for (re)analysis (this happens if the **run=** already exists):
 
 13. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
    [50]
@@ -123,13 +123,13 @@ The first time when you run the script and the **run** directory does not exist 
 initial conditions are generated and the simulation is run to **tstop**.
 
 Subsequent runs with an existing  **run** directory will re-analyse the simulation at
-the value of **tstop**, which can be any of the dumptimes that the simulation was
-run with, so it does not need to be the initial **tstop** to which the simulation
+the value of **tstop**, which can be any of the dump-times that the simulation was
+run with, so it does not need to be the initial **tstop** with which the simulation
 was run.
 
 The default run=run0 with m=1  nbody=2048 tstop=50 will take about 30 seconds to run,
 with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds
-(2020 style i7-1185G7).
+(on a 2020 style i7-1185G7, or where NEMOBENCH5 measured around 1000).
 
 ## Files
 
@@ -182,7 +182,8 @@ The following files should be present, the example is for run=run0:
 
 ## Parameters
 
-In addition to the input parameter, the following parameters are computed by the script
+In addition to the input parameter, the following parameters are computed by the script,
+and placed in the "rc" file:
 
 1. **m1=**:  absolute mass of stars around G1 bound to G1. 
 
@@ -196,7 +197,7 @@ In addition to the input parameter, the following parameters are computed by the
 
 2. **etot2=**:  orbital energy of bound particles corrected for mass-loss
 
-2. **etot0=**:  orbital energy at time=0
+2. **etot0=**:  orbital energy at time=0 (ideal)
 
 4. **v=**:      correct input velocity (from v0), as computed from two systems at infinity
 
@@ -218,7 +219,7 @@ with differently seeded models:
 
 after which querying all nemopars.rc files will result in a table, which could be plotted or further analyzed:
 
-     nemopars m,v0,etot,detot,etot2 run_${m}_${v}_${n}_*/nemopars.rc
+     nemopars m,v0,etot,detot,etot2 run_*_*_*_*/nemopars.rc
      # m v0 etot detot etot2
      0.05 0.80 0.00371626 9.70455e-05 0.00261469 
      0.05 0.80 0.00361105 0.000106836 0.0026038 
@@ -271,7 +272,8 @@ The quality of the image in [ds9](https://sites.google.com/cfa.harvard.edu/saoim
 will depend strongly on the number of particles
 in the galaxy. The default image only has 128 x 128 pixels, and with only
 4096 particles in this default simulation there will be lots of pixels
-with 0 stars.
+with 0 stars. One can use **ccdfill** to patch this up a bit, perhaps in combination
+with **ccdsmooth**.
 
 ## Circular orbits?
 
@@ -288,7 +290,7 @@ different v0 or r0 and this will not be true.
 
       ./mkmh97.sh run=run1 eps=0.05 nbody=1000
 	  
-Compare to Bontekoe & v Albada work?
+Compare to Bontekoe & v Albada (1987MNRAS.224..349B) work.
 
 ## EXERCISES
 
@@ -328,8 +330,8 @@ Compare to Bontekoe & v Albada work?
 
 Here are two commands comparing the analysis of two runs with different masses for the particles.
 
-      ./mkmh97.sh run=run100 tstop=50 em=0 m=0.1 code=1 kmax=6 nbody=100000
-      ./mkmh97.sh run=run101 tstop=50 em=1 m=0.1 code=1 kmax=6 nbody=100000
+     ./mkmh97.sh run=run100 tstop=50 em=0 m=0.1 code=1 kmax=6 nbody=100000
+     ./mkmh97.sh run=run101 tstop=50 em=1 m=0.1 code=1 kmax=6 nbody=100000
 
 and plotting
 
@@ -341,7 +343,7 @@ a rough view shows that selecting x<0 might discimincate:
      snapcopy run100/run100.4 - times=50 select='i>100000 && x<0' | tsf -
      snapcopy run101/run101.4 - times=50 select='i>100000 && x<0' | tsf -
 
-This gives  5578 vs.  587   or about 5.6 vs. 5.9% of particles of S1 are lost to S1.
+This gives  5578 vs.  587   or about 5.6 vs. 5.9% of particles of G1 are lost to G1.
 
 and perhaps a better way
 
@@ -441,5 +443,5 @@ where the new defaults are now r0=16, kmax=7, eps=0.03125 nbody=2048.
 
 For this seed the relevant output parameters are:
 
-     m16==0.17137
+     m16=0.17137
      etot=0.000908545

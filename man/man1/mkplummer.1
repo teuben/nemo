@@ -137,8 +137,27 @@ using a valid [0,1] range.
 mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
 a Salpeter mass spectrum with
 .nf
-  % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+
+% mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+
 .fi
+Another method to create a Plummer sphere is by using the Osipkov-Merritt tables in NEMO, e.g.
+.nf
+
+  % plummer plum.dat ntab=1024
+  % mkommod plum.dat plum.snap nbody=10000
+
+.fi
+or the new General Spherical Profile in ZENO:
+.nf
+
+  % plumgsp plum.gsp
+  % gsprealize plum.gsp plum.snap zerocm=true
+  % snapcopy plum.snap plum2.snap
+
+.fi
+with a note that ZENO files may need an extra \fIsnapcopy(1NENO)\fP to be compatible with NEMO
+\fIsnapshot(5NEMO)\fP files.
 
 .SH "BENCHMARKS"
 The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double precision,
@@ -162,7 +181,7 @@ the time needed to write 535MB (for 10M particles)
 NEMO/src/nbody/init/mkplummer.c
 
 .SH "SEE ALSO"
-snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
+mkpolytrope(1NEMO), snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP
@@ -188,7 +207,7 @@ Piet Hut (Peter Teuben)
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.5i +5.5i
 23-Apr-87	Version 1.0: created         	PIET
 10-Jun-88	Version 1.1: created         	PIET
 xx-xxx-88	V1.2: zerocm keyword added	PJT
@@ -200,3 +219,5 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
 2-dec-2017	documented mcluster	PJT
 29-mar-2021	benchmark	PJT
+5-jun-2023	
+.fi

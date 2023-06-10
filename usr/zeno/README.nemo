@@ -24,16 +24,26 @@ download my zeno_pjt fork, just in case.
 
 For Ubuntu this is what I needed:
 
-    sudo apt install libgsl-dev openmpi-bin freeglut3-dev libopenmpi-dev
-
-
+     sudo apt install libgsl-dev openmpi-bin freeglut3-dev libopenmpi-dev
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
 and may not be doing exactly the same thing. mkorbit is the major one that
-I know about. Note there is no mkplummer for ZENO.
+I know about. Note there is no mkplummer for ZENO, this is solved via the GSP
+functions, viz.
+
+     plumgsp - | gsprealize - plummer.snap
 
 Removing the symlink $NEMO/usr/zeno/zeno will disable the ZENO environment
 on your next NEMO load.
+
+An alternative is to issue the command
+
+     make zbin
+
+which moves all likewise commands to bin/zeno.   If you thus want to use ZENO's
+version of "tsf" use the command
+
+     $ZENOPATH/bin/zeno/tsf
 
 # code_c
 
