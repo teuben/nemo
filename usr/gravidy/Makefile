@@ -69,15 +69,17 @@ install_mpi: gravidy
 
 NBODY = 128
 
-## p128:          benchmark plummer sphere osf 128 particles for regression
+## p128:          benchmark plummer sphere of 128 particles for regression
 p128:
 	mkplummer p128 $(NBODY) seed=128
+
+EXE = gravidy
 
 ## run3:          gravidy run
 run3:   p128
 	mkdir run3
 	snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f > run3/in
-	gravidy --input run3/in --output run3/run3 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
+	$(EXE) --input run3/in --output run3/run3 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
 	cat run3/run3.out.snapshot_0* | sed 's/# Time://' |\
                 tabtos - - time skip,m,pos,vel nbody=128 |\
                 csf - run3/OUT3.snap SnapShot
