@@ -26,3 +26,5 @@ It seems (2023) that bintray is gone.  Here's another URL:
 
 The last command will compile and install in $NEMO/opt/, and can take a while
 (~5-15 mins)
+
+Example input files in:  https://gitlab.com/cmaureir/gravidy-input
