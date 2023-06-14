@@ -7,7 +7,7 @@ URL4 =  https://gitlab.com/cmaureir/gravidy-view
 URL5 =  http://gitlab.com/cmaureir/gravidy-input.git
 
 .PHONY : help
-## help:         This Help
+## help:          This Help
 help : Makefile
 	@sed -n 's/^##//p' $<
 
@@ -39,29 +39,32 @@ clean:
 cleanall:
 	rm -rf p128 run3 run4 run5
 
-## install:       install the gravidy-cpu into $NEMOBIN
-install: gravidy
-	(cd gravidy/src ; make clean pn $(NEMO_BFLAGS); cp gravidy-cpu $(NEMOBIN)/gravidy)
-
-
-## ubuntu:        example ubuntu-style install target to get boost
+## ubuntu:        example ubuntu-style install target to get boost and openmpi
 ubuntu:
-	sudo apt install libboost-all-dev
+	sudo apt install libboost-all-dev openmpi-bin
+
+## install:       install the gravidy-cpu into $NEMOBIN
+install: install_cpu
+
+install_cpu: gravidy
+	(cd gravidy/src ;\
+	make clean cpu CXX=$(CXX); \
+	cp gravidy-cpu $(NEMOBIN)/gravidy; cp gravidy-cpu $(NEMOBIN))
 
 
 NEMO_BFLAGS = "BOOSTFLAGS =-I$(NEMO)/opt/boost_1_69_0 -L$(NEMO)/opt/boost_1_69_0/stage/lib -lboost_program_options"
 NEMO_NVCC   = /test/usr/local/cuda/bin/nvcc
-## install_gpu:   example gravidy-gpu
+## install_gpu:   example gravidy-gpu (uses NEMO_BFLAGS and NEMO_NVCC)
 install_gpu: gravidy
 	(cd gravidy/src ; \
 	make clean gpu NVCC=$(NEMO_NVCC) BOOSTFLAGS = "$(NEMO_BFLAGS)"; \
-	cp gravidy-cpu $(NEMOBIN)/gravidy)	
+	cp gravidy-cpu $(NEMOBIN)/gravidy; cp gravidy-cpu $(NEMOBIN))
 
 ## install_mpi:   example gravidy-mpi
 install_mpi: gravidy
 	(cd gravidy/src ; \
-	make clean mpi CXX=mpic++ ; \
-	cp gravidy-mpi $(NEMOBIN)/gravidy)	
+	make clean mpi CXX=$(CXX) ; \
+	cp gravidy-mpi $(NEMOBIN)/gravidy; cp gravidy-mpi $(NEMOBIN))
 
 
 

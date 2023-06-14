@@ -28,3 +28,21 @@ The last command will compile and install in $NEMO/opt/, and can take a while
 (~5-15 mins)
 
 Example input files in:  https://gitlab.com/cmaureir/gravidy-input
+
+
+Example install (assuming Ubuntu and openmpi-bin was installed):
+
+	 make clean install_cpu
+	 make clean install_mpi CXX=mpic++.openmpi
+
+Example running CPU and MPI modes:
+
+	 rm -rf run3
+	 make run3 EXE=gravidy-cpu
+	 ->    BSF: OK     0.00679654 0.736003 -8.00616 10 91494 run3/OUT3.snap
+	 
+	 rm -rf run3
+	 make run3 EXE=gravidy-mpi
+	 ->    BSF: OK     0.00679654 0.736003 -8.00616 10 91494 run3/OUT3.snap	 
+
+
