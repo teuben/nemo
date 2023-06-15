@@ -1,6 +1,7 @@
 #
 
 CC = gcc
+MPICC = mpicc
 
 TIME = /usr/bin/time
 
@@ -34,7 +35,7 @@ bench2: heated_plate_openmp
 # https://people.sc.fsu.edu/~jburkardt/c_src/poisson_mpi/poisson_mpi.c
 
 poisson_mpi:
-	mpicc poisson_mpi.c -o poisson_mpi -lm
+	$(MPICC) poisson_mpi.c -o poisson_mpi -lm
 
 bench3:
 	$(TIME) mpirun -np 4 ./poisson_mpi 512
@@ -46,7 +47,7 @@ bench4:
 # scaling from https://stackoverflow.com/questions/19780554/what-limits-scaling-in-this-simple-openmp-program
 
 scaling: scaling.c
-	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling
+	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling -lm
 
 ONT=1 2 4 8
 bench5: scaling
