@@ -43,9 +43,12 @@ cleanall:
 ubuntu:
 	sudo apt install libboost-all-dev openmpi-bin
 
-## install:       install the gravidy-cpu into $NEMOBIN
-install: install_cpu
 
+## install:       install rungravidy and the default gravidy-cpu
+install: install_cpu
+	mknemo rungravidy
+
+## install_cpu:   example gravidy-cpu (uses CXX=)
 install_cpu: gravidy
 	(cd gravidy/src ;\
 	make clean cpu CXX=$(CXX); \
@@ -104,3 +107,6 @@ cmp34:  run3 run4
 ## cmp45:         compare run4 and run5
 cmp45:  run4 run5
 	snapcmp run4/OUT3.snap run5/OUT3.snap
+
+example1:
+	$(EXE) -i gravidy/input/04-nbody-p1024_m1.in -p -t 1 
