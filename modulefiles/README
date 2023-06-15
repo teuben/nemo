@@ -1,0 +1,15 @@
+Depending on your module implemention
+you may need to add a nemo symlink in /usr/share/modules/modulefiles to
+your $NEMO/modulefiles/nemo or a subdirectory nemo with named files to
+your different nemo's, e.g.
+
+     cd /usr/share/modules/modulefiles
+
+     ln -s ~/NEMO/nemo/modulefiles/nemo    nemo
+
+     mkdir nemo
+     ln -s ~/NEMO/nemo/modulefiles/nemo    nemo/git
+     ln -s ~/NEMO/nemo/modulefiles/nemo    nemo/git
+
+
+See also ubuntu's environment-modules package, or install from ...
