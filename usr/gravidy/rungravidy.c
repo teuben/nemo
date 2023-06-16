@@ -27,13 +27,13 @@
 // see also https://gravidy.xyz/include/use.html#command-line-options
 
 string defv[] = {
-    "in=???\n         Input file (optional - see nbody= )   (-i --input) ",
-    "outdir=???\n     Output run directory (required) (-o --output)",
+    "in=???\n         Input file, required   (-i --input) ",
+    "outdir=???\n     Output run directory, required (-o --output)",
 
-    "eta=0.02\n       Time-step parameter for irregular force polynomial (-e --eta)",
-    "deltat=0.25\n    Output time interval in units of the crossing time) (-z --interval)",
-    "tcrit=2.0\n      Termination time in units of the crossing time (-t --time)",
-    "eps=0.05\n       Potential softening parameter (-s --softening)",
+    "eta=0.01\n       Time-step parameter for irregular force polynomial (-e --eta)",
+    "deltat=0.125\n   Output time interval in units of the crossing time) (-z --interval)",
+    "tcrit=1\n        Termination time in units of the crossing time (-t --time)",
+    "eps=0.0001\n     Gravitational softening parameter (-s --softening)",
 
     "lagrange=t\n     Print information of the Lagrange Radii in every integration time (-l --lagrange)",
     "all=f\n          Print all the information of N-particles in every integration time (-a --all)",
@@ -42,7 +42,7 @@ string defv[] = {
     "dryrun=f\n       Dryrun?",
     "exe=gravidy\n    Name of the executable",
 
-    "VERSION=0.3\n    14-jun-2023 PJT",
+    "VERSION=0.4\n    16-jun-2023 PJT",
     NULL,
 };
 
