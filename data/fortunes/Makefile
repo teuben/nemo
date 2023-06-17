@@ -1,6 +1,8 @@
+#   Maintain NEMO's fortunes database
 
-#   Maintain the fortunes database
-
+#
+#  Ubuntu:    sudo apt install fortune-mod
+#
 FORTUNES = /usr/share/games/fortunes
 
 nemo.dat:    nemo
