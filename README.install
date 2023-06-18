@@ -320,6 +320,14 @@ d) If you are on a system where you need to install NEMO and other packages,
 	configure --enable-gsl
 	configure --disable-gsl		(the default)
 
+Peer Installations
+==================
+
+Here is a list of peer (astronomy) packages install instructions that could
+well be useful in case of issues with the instructions listed above:
+
+* cloudy:  https://gitlab.nublado.org/cloudy/cloudy/-/wikis/CompilingCloudyNext
+
 
 
 Some old notes
