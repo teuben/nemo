@@ -53,7 +53,7 @@ string defv[] = {
     "qac=f\n        QAC mode listing mean,rms,min,max",
     "fmt=%g\n       QAC format of floating point values",
     "label=\n       QAC label",
-    "VERSION=3.13\n 31-jan-2023 PJT",
+    "VERSION=3.13a\n 19-jun-2023 PJT",
     NULL,
 };
 
@@ -242,7 +242,7 @@ void nemo_main(void)
 	  kurt = kurtosis_moment(&m);
 
 	if (Qac) {
-	  sprintf(qac_format,"QAC_STATS: %%s %s %s %s %s %s  %s %s  %%d\n",
+	  sprintf(qac_format,"QAC_STATS: %%s %s %s %s %s %s  %s  %%d\n",
 		  qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt);
 	  if (Qrobust) {
 	    compute_robust_moment(&m);
