@@ -55,7 +55,7 @@ string defv[] = {
     "in=???\n                   Input (tipsy) ascii file",
     "out=\n                     Output snapshot file",
     "options=gas,dark,star\n    Output which particles?",
-    "mode=binary\n		Input mode (ascii, binary)",
+    "mode=binary\n		Input mode (ascii | binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
     "boom=f\n                   BOOM mode with add-acc ?",
@@ -143,21 +143,21 @@ void nemo_main()
         if (nbody==0) error("Nothing to output");
 
 	if(gas_particles != NULL) free(gas_particles);
-	if(ngas != 0)
+	if(ngas > 0)
 	  gas_particles = (struct gas_particle *) 
 	            allocate(ngas*sizeof(*gas_particles));
 	else
 	  gas_particles = NULL;
 	  
 	if(dark_particles != NULL) free(dark_particles);
-	if(ndark != 0)
+	if(ndark > 0)
 	  dark_particles = (struct dark_particle *) 
 	            allocate(ndark*sizeof(*dark_particles));
 	else
 	  dark_particles = NULL;
 	  
 	if(star_particles != NULL) free(star_particles);
-	if(nstar != 0) {
+	if(nstar > 0) {
 	    star_particles = (struct star_particle *)
 	        allocate(nstar*sizeof(*star_particles));
 	    if(tform == NULL)
@@ -302,8 +302,7 @@ void nemo_main()
     
         bits = (TimeBit | MassBit | PhaseSpaceBit);	    
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
-    }
-
+      } // Qascii
 
     if (Qbinary) for(;;) {
         n = fread((char *)&header,sizeof(header),1,instr) ;
@@ -322,6 +321,9 @@ void nemo_main()
             bswap((void *)&header.nsph,    sizeof(int),    1);
             bswap((void *)&header.ndark,   sizeof(int),    1);
             bswap((void *)&header.nstar,   sizeof(int),    1);
+#ifdef TIPSY_NEEDPAD
+            bswap((void *)&header.version, sizeof(int),    1);	    
+#endif
         }
 
 	ndim=header.ndim;
@@ -357,12 +359,12 @@ void nemo_main()
 	if (!Qout) return;
 
 	if (offset) {
+	  warning("Trying offsetting data by %d bytes....: %d",n);
 	  n = fseek(instr, offset, SEEK_CUR);
-	  warning("Stupid TIPSY, offsetting data by %d bytes....: %d",n);
 	}
 
         if (header.nsph > 0) {
-            gp = allocate(header.nsph*sizeof(*gp));
+            gp = (struct gas_particle *) allocate(header.nsph*sizeof(*gp));
             n = fread((char *)gp, sizeof(*gp), header.nsph, instr);
             if (n <= 0) error("Problem reading gas data");            
 	    dprintf(1,"Found %d gas particles\n",n);
@@ -390,7 +392,7 @@ void nemo_main()
         }
 
         if (header.ndark > 0) {
-            dp = allocate(header.ndark*sizeof(*dp));
+            dp = (struct dark_particle *) allocate(header.ndark*sizeof(*dp));
             n = fread((char *)dp, sizeof(*dp), header.ndark, instr);
             if (n <= 0) error("Problem reading dark data");            
 	    dprintf(1,"Found %d dark matter particles\n",n);
@@ -424,7 +426,7 @@ void nemo_main()
         }
 
         if (header.nstar > 0) {
-            sp = allocate(header.nstar*sizeof(*sp));
+            sp = (struct star_particle *) allocate(header.nstar*sizeof(*sp));
             n = fread((char *)sp, sizeof(*sp), header.nstar, instr);
             if (n <= 0) error("Problem reading star data");            
 	    dprintf(1,"Found %d star particles\n",n);
@@ -457,7 +459,7 @@ void nemo_main()
 
 	    }
         }
-    }
+      } // Qbinary
 
     if(tform) free(tform);
     strclose(instr);

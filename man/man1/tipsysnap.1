@@ -43,6 +43,7 @@ in this case, data with 28 byte headers can still be read. Equally
 so, the opposite can also happen, in which case offset=4 is needed.
 Some version of the format use the last 4 bytes as a version ID, an
 integer that can be 1 or 2. See \fItipsy(5NEMO)\fP.
+The \fBhexdump -C\fP program may help identify problems.
 Default: 0
 .TP
 \fBboom=t|f\fP
@@ -123,10 +124,12 @@ EPS(d), EPS(s)
 
 .SH "BUGS"
 In \fBmode=binary\fP the gas, dark and star particles are output
-in separate snapshots.
+in separate snapshots. Use \fIcsf(1NEMO)\fP and/or \fIsnapmerge(1NEMO)\fP
+if some or all need to be a a single snapshot. Some properties may be lost
+in the merging though.
 
 .SH "SEE ALSO"
-snaptipsy(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
+snaptipsy(1NEMO), snapmerge(1NEMO), csf(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

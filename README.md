@@ -125,6 +125,7 @@ for something completely different.
 
 There are several additional entry points if you are starting out with NEMO:
 
+* readthedocs: https://astronemo.readthedocs.io/en/latest/
 * github pages: https://teuben.github.io/nemo
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * contributing to NEMO: CONTRIBUTING.md

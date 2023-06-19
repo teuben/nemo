@@ -25,11 +25,11 @@ Differences
   them in 
   **$AMUSE/src/amuse/community** and
   **$NEMO/usr**
-  resp.
+  resp., though the latter has some supporting script in **$NEMO/src/scripts/mknemo.d**
 
 - **Units**:
   NEMO uses dimensionless values, and units are implied. 
-  Most programs actually use virial units where G=1, but there are a few programs
+  Most programs actually use virial units (a.k.a N-body units, or Henon units) where G=1, but there are a few programs
   (e.g. galaxy, nbodyX) that use other units. The
   `units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_
   tries to help you converting.

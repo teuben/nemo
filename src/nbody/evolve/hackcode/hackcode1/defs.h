@@ -1,10 +1,19 @@
 /*
  * DEFS: include file for hack programs.
+ *
+ * 29-mar-2023  swapped the order of subp[] and quad in cell struct to fix the hackcode1 bus error bug
+ *              as well as updating the data structure diagram - Makefile also needs a fix [github issue 98]
+ * 
  */
 
 #include <stdinc.h>
 #include <vectmath.h>
 #include <assert.h>
+
+//    pick one if you care about word alignment 
+typedef short atype;     // original one as it was developed
+//typedef int atype;
+//typedef long atype;
 
 /*
  * GLOBAL: pseudo-keyword for storage class.
@@ -18,22 +27,25 @@
 /*
  * BODY and CELL data structures are used to represent the tree:
  *
+ * 
+ * 
+ * 
  *         +-----------------------------------------------+
- * root--> | CELL: mass, pos, quad, /, o, /, /, /, /, o, / |
- *         +---------------------------|--------------|----+
- *                                     |              |
- *    +--------------------------------+              |
- *    |                                               |
- *    |    +--------------------------------+         |
- *    +--> | BODY: mass, pos, vel, acc, phi |         |
- *         +--------------------------------+         |
- *                                                    |
- *    +-----------------------------------------------+
+ * root--> | CELL: mass, pos, /, o, /, /, /, /, o, /, quad |
+ *         +---------------------|--------------|----------+
+ *                               |              |
+ *    +--------------------------+              |
+ *    |                                         |
+ *    |    +--------------------------------+   |
+ *    +--> | BODY: mass, pos, vel, acc, phi |   |
+ *         +--------------------------------+   |
+ *                                              |
+ *    +-----------------------------------------+
  *    |
  *    |    +-----------------------------------------------+
- *    +--> | CELL: mass, pos, quad, o, /, /, o, /, /, o, / |
- *         +------------------------|--------|--------|----+
- *                                 etc      etc      etc
+ *    +--> | CELL: mass, pos, o, /, /, o, /, /, o, /, quad |
+ *         +------------------|--------|--------|----------+
+ *                           etc      etc      etc
  */
 
 /*
@@ -41,7 +53,7 @@
  */
 
 typedef struct {
-    short type;                 /* code for node type */
+    atype type;                 /* code for node type */
     real mass;                  /* total mass of node */
     vector pos;			/* position of node */
 } node, *nodeptr;
@@ -57,7 +69,7 @@ typedef struct {
 #define BODY 01                 /* type code for bodies */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */
     real mass;                  /* mass of body */
     vector pos;                 /* position of body */
     vector vel;                 /* velocity of body */
@@ -75,7 +87,7 @@ typedef struct {
  */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */  
     real mass;
     vector phase[2];            /* position, velocity of body */
     vector acc;
@@ -93,13 +105,13 @@ typedef struct {
 #define NSUB (1 << NDIM)        /* subcells per cell */
 
 typedef struct {
-    short type;
+    atype type;                 /* code for node type */    
     real mass;                  /* total mass of cell */
     vector pos;                 /* cm. position of cell */
+    nodeptr subp[NSUB];         /* descendents of cell */
 #ifdef QUADPOLE
     matrix quad;		/* quad. moment of cell */
 #endif
-    nodeptr subp[NSUB];         /* descendents of cell */
 } cell, *cellptr;
 
 #ifdef QUADPOLE

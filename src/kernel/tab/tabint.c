@@ -4,6 +4,7 @@
  *      13-may-05    Q&D first version, cloned off tabfilter
  *      26-may-05    allow step<0 for logsteps (xmin must be > 0)
  *      25-apr-22    convert to use the new table V2
+ *      22-feb-23    add xmin,xmax,scale keywords
  */
 
 #include <stdinc.h> 
@@ -17,16 +18,18 @@ string defv[] = {
   "in=???\n         Input table file",
   "xcol=1\n         Column with X coordinate (must be sorted in that column)",
   "ycol=2\n         Column with Y coordinate of function",
+  "xmin=\n          value if data below xmin to be discarded",
+  "xmax=\n          value if data above xmax to be discarded",
   "step=\n          Integration step if resampling used (<0 for logarithmic steps)",
   "normalize=f\n    Normalize integral",
   "cumulative=f\n   Show accumulation of integral",
-  "VERSION=0.5\n    20-sep-2022 PJT",
+  "scale=1\n        Scale factor to apply to integral",
+  "VERSION=0.6\n    22-feb-2023 PJT",
   NULL,
 
 };
 
 string usage="integrate a sorted table";
-
 
 
 extern int minmax(int, real *, real *, real *);
@@ -40,7 +43,9 @@ void nemo_main()
   string spectrum = getparam("in");
   bool Qnorm = getbparam("normalize");
   bool Qcum = getbparam("cumulative");
-
+  bool Qmin = hasvalue("xmin");
+  bool Qmax = hasvalue("xmax");
+  real yscale = getrparam("scale");
   
   /* read the data */
 
@@ -72,6 +77,22 @@ void nemo_main()
   minmax(n,ydat,&ymin,&ymax);
   dprintf(1,"X range: %g : %g\n",xmin,xmax);
   dprintf(1,"Y range: %g : %g\n",ymin,ymax);
+  if (Qmin || Qmax) {
+    if (Qmin) xmin = getrparam("xmin");
+    if (Qmax) xmax = getrparam("xmax");
+    dprintf(1,"X range: %g : %g   (reset)\n",xmin,xmax) ;
+    int imin = n;
+    int imax = 0;
+    for (i=0; i<n; i++) {
+      if (Qmin && xdat[i] < xmin) imin = i;
+      if (Qmax && xdat[i] < xmax) imax = i;
+    }
+    dprintf(1,"New range %d - %d   %g - %g\n", imin, imax, xdat[imin], xdat[imax]);
+    /* new data */
+    n = imax - imin + 1;
+    xdat = &xdat[imin];
+    ydat = &ydat[imin];
+  }
 
   sum = sum0 = 0.0;
   nsteps = 0;
@@ -128,6 +149,6 @@ void nemo_main()
 	  xmin,xmax,dx,sum,sum0,nsteps);
   if (Qnorm)
     sum /= sum0;
-  printf("%s%g\n",  Qcum ? "# " : "",  sum);
+  printf("%s%g\n",  Qcum ? "# " : "",  sum * yscale);
 }
 

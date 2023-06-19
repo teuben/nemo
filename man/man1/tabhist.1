@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "15 June 2022"
+.TH TABHIST 1NEMO "5 May 2023"
 
 .SH "NAME"
 tabhist \- histogram plotter and gaussian fit for tabular data
@@ -25,7 +25,7 @@ tendency, the weighted average of Median and two quartiles:  (Q1 + 2*Q2 + Q3) / 
 .PP
 If multiple columns are used, they are appended to each other and
 treated like a single long column.
-If you need simple statistics for multiple columns, use \fBtabstat\fP 
+If you need simple statistics for multiple columns, see \fItabstat(1NEMO)\fP 
 instead. 
 .PP
 Using the \fBnsigma\fP keyword, outliers can be removed
@@ -140,7 +140,6 @@ point sigma and mean are recomputed. [Default: none]
 \fBqac=t|f\fI
 If selected, a QAC listing is selected. This gives the mean, rms, min and max.
 [Default: f]
-
 .TP
 \fBsort=\fP\fIsort_mode\fP
 Default:  qsort.   If flogger is enabled additional sorting modes are available:
@@ -149,16 +148,28 @@ bubble, heap, insert, merge, quick, shell.
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
 Default: none.
-.SH FLOGGER
+
+.SH "EXAMPLES"
+There is no direct way to plot a particular column from a table while selecting from another column. The
+\fItabmath(1NEMO)\fP program would need to be used in pipe to select, as given in the following example:
+.nf
+
+    % tabgen - 1000 2 | tabmath - - selfie='range(%1,0.0,0.5)' | tabhist - 2
+    
+.fi
+where column 2 is only used where column 1 is between 0 and 0.5.
+
+.SH "FLOGGER"
 There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
-.SH BUGS
+
+.SH "BUGS"
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is
 exactly opposite that of SM's behavior, which was used to compare results.
 
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO), tabtrend(1NEMO), tabint(1NEMO)
+tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO), tabtrend(1NEMO), tabint(1NEMO), tabgen(1NEMO)
 .PP
 http://vostat.org
 .PP
@@ -177,7 +188,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +6.5i
 xx-mar-88	V1.0: created          	PJT
 15-Apr-88	V1.1: higher order moments, Y scale  	PJT
 1-jun-88	V2.0: new name, code same	PJT

@@ -15,6 +15,9 @@ your (bash) shell, using a configurable helper script:
 .. code-block:: bash
 
    wget https://teuben.github.io/nemo/install_nemo.sh
+or		
+   curl -LO https://teuben.github.io/nemo/install_nemo.sh
+
    bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1 python=1
    source  $HOME/opt/nemo/nemo_start.sh
 

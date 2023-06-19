@@ -113,7 +113,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=8.0a\n		  30-apr-2022 PJT",
+    "VERSION=8.0b\n		  19-feb-2023 PJT",
     NULL
 };
 
@@ -175,6 +175,7 @@ local real   scale;                     /* scale factor */
 local real   bins[MAXHIST+1];           /* edges of histogram bins */
 
 local string headline;			/* text string above plot */
+local char   headlines[128];            /* statistics headline  */
 local string xlab, ylab, xlab2;		/* text string along axes */
 local bool   ylog;			/* count axis in logarithmic scale? */
 local real   xplot[2],yplot[2];		/* borders of plot */
@@ -648,7 +649,12 @@ local void histogram(void)
   pljust(-1);     /* set to left just */
   pltext(input,2.0,18.2,0.32,0.0);             /* filename */
   pljust(1);
-  pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+  if (strlen(headline) > 0)
+    pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+  else {
+    sprintf(headlines,"mean: %g sigma: %g", mean, sigma);
+    pltext(headlines,18.0,18.2,0.24,0.0);         /* headline */
+  }
   pljust(-1);     /* return to left just */
 
   if (Qbin) {

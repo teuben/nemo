@@ -1,0 +1,12 @@
+# example of a yapp layout(5NEMO) file
+# usage:    yapp layout=$NEMODAT/yapp.layout
+move 10 10
+line 10 15
+color 2
+cross 5 5 1
+color 3
+circle 15 15 1
+color 4
+box  5 15 1
+point 15 5
+text "Yapp Yapp" 10 10 0.5 30

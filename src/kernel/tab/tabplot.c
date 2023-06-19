@@ -115,7 +115,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=5.0b\n	 26-oct-2022 PJT",
+    "VERSION=5.0c\n	 22-feb-2023 PJT",
     NULL
 };
 
@@ -353,10 +353,10 @@ void read_data(void)
     
     for (j=0, k=0; j<nxcol; j++, k++)
         colnr[k]  = xcol[j];
-    for (j=0; j<ndxcol; j++, k++)
-        colnr[k]  = dxcol[j];
     for (j=0; j<nycol; j++, k++) 
         colnr[k]  = ycol[j];
+    for (j=0; j<ndxcol; j++, k++)
+        colnr[k]  = dxcol[j];
     for (j=0; j<ndycol; j++, k++) 
         colnr[k]  = dycol[j];
     int ncol = nxcol + nycol + ndxcol + ndycol;

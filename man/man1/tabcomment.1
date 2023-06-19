@@ -1,4 +1,4 @@
-.TH TABCOMMENT 1NEMO "10 April 2022"
+.TH TABCOMMENT 1NEMO "25 April 2023"
 
 .SH "NAME"
 tabcomment \- Add comments to a table, or comment certain lines, or show just comments
@@ -40,7 +40,7 @@ Comment blank lines (lines that only contain
 blanks, see \fIisspace(3)\fP) [Default: \fBt\fP].
 .TP
 \fBpunct=t|f\fP
-Comment lines that start with a punctuation character
+Comment lines that start with a punctuation character, except the + or -.
 (neither control nor alphanumeric, see also \fIispunct(3)\fP).
 [Default: \fBt\fP].
 .TP
@@ -80,4 +80,5 @@ Peter Teuben
 20-may-1993	updated man	PJT
 18-oct-2004	V2.0 allow change of comment character	PJT
 10-apr-2022	V2.1 new table I/O, add raw=, default out=-	PJT
+27-apr-2023	V2.3 don't view + and - as punctuation		PJT
 .fi

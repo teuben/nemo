@@ -6,12 +6,16 @@
 #   Timing:   Handling 200 time frames of nbody=10000  took about 9 mins.
 #                      100 time frames of nbody=100000 took about 7 mins.
 
+_version=5-dec-2022
+
 # define the run (required)
 run=run0
 
 # times?   by default all times from the simulation are used, via run.xv.tab
 #          otherwise manually use a comma separated list here
 unset times
+
+r16=8
 
 #--HELP
 
@@ -22,8 +26,8 @@ if [ -z $1 ] || [ "$1" == "--help" ] || [ "$1" == "-h" ];then
 fi
 
 # simple keyword=value command line parser for bash
-for arg in $*; do
-  export $arg
+for arg in "$@"; do
+  export "$arg"
 done
 
 # make sure directory exist
@@ -40,15 +44,21 @@ fi
 new=$run/$run.xvm.tab
 rm -f $new
 
+echo "# t x1 v1 x2 v2 m16 m2" > $new
+
 for t in $(echo $times | sed 's/,/ /g'); do
     echo $t
-    ./mkmh97.sh run=$run tstop=$t  > /dev/null 2>&1
+    ./mkmh97.sh run=$run tstop=$t r16=$r16 > /dev/null 2>&1
     m16=$(nemopars m16 $run/nemopars.rc | grep -v ^#)
     if [ -z "$m16" ]; then
 	m16=0
     fi
+    m2=$(nemopars m2 $run/nemopars.rc | grep -v ^#)
+    if [ -z "$m2" ]; then
+	m2=0
+    fi
     xv=$(grep  ^"$t " $run/$run.xv.tab)
-    echo $xv $m16 >> $new
+    echo $xv $m16 $m2 >> $new
 done
 
 

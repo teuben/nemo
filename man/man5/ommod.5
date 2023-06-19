@@ -1,10 +1,13 @@
 .TH OMMOD 5NEMO "27 June 1997" 
-.SH NAME
+
+.SH "NAME"
 ommod \- binary table format for Osipkov-Merritt models
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIommod\fP is a binary table format that is currently only
 understood by \fImkommod(1NEMO)\fP. 
-.SH FORMAT
+
+.SH "FORMAT"
 With the command
 .nf
     tsf $NEMODAT/k1isot.dat
@@ -55,15 +58,20 @@ Optional additions some programs write:
   double Energy -32.0519 
 
 .fi
-.SH FILES
+
+.SH "FILES"
 $NEMODAT/k*iso*dat
+
 .SH "SEE ALSO"
-mkommod(1NEMO), king(1NEMO), plummer(1NEMO)
-.SH AUTHOR
+mkommod(1NEMO), king(1NEMO), plummer(1NEMO), gsp(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +2.0i +2.0i
+.ta +1.5i +5.5i
 27-jun-97	man written 	PJT
 25-jul-97	documented some optional additions	PJT
+10-jun-2023	add gsp reference	PJT
 .fi

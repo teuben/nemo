@@ -15,6 +15,12 @@ Since NEMO ascii tables (see \fItable(5NEMO)\fP) can contain
 #-style comments, we allow (NEMO) commands to be embedded with
 a special '#PLOT' line, making such tables somewhat \fIself-plotting\fP.
 .PP
+Although \fBnemoplot\fP is a great
+way to self-plot a table, NEMO's plotting routines are arguably
+not publication quality, and a followup python/matplotlib script
+may be needed.
+
+.PP
 The \fIxmgrace(1)\fP program has a similar approach, combining data and
 the commands to produce the plot all in a single file, referred
 to as a Grace Project File (*.agr).

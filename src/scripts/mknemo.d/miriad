@@ -1,0 +1,22 @@
+#! /bin/bash
+#
+#   mknemo build helper for miriad
+#
+#
+
+
+cd $NEMO/local
+
+if [ ! -d miriad ]; then
+    git clone https://github.com/astroumd/miriad
+    cd miriad
+else
+    cd miriad
+    git pull
+fi
+version=$(cat VERSION)
+docs/install_miriad.sh miriad=.
+
+echo Installed version=$version
+
+echo miriad '"'$version'"' `date` >> $NEMO/opt/mknemo.log

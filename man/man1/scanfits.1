@@ -1,4 +1,4 @@
-.TH SCANFITS 1NEMO "15 October 1999"
+.TH SCANFITS 1NEMO "28 April 2023"
 
 .SH "NAME"
 scanfits \- scan a fits file, optionally extract and convert.
@@ -238,7 +238,8 @@ know the processing order:
         insert new header items before the END card (\fBinsert=\fP)
         fix header items (in order of individual \fBfix=\fP components)
 .fi
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 To extract the header in a pleasing manner, such that \fImore(1)\fP
 can be used, one can use:
 .nf
@@ -249,11 +250,13 @@ or
 where the latter example does not contain trailing blanks anymore.
 
 .SH "SEE ALSO"
-ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO)
+ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO), astfits(1)
 .PP
 .nf
 https://heasarc.gsfc.nasa.gov/fitsio/
 https://fits.gsfc.nasa.gov/fits_verify.html
+https://www.gnu.org/software/gnuastro/manual/html_node/Keyword-manipulation.html
+
 .fi
 
 .SH "AUTHOR"

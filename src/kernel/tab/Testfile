@@ -3,7 +3,7 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
       tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms tabcsv \
-      tabrows tabcols 
+      tabrows tabcols tabint
 
 NEED = $(BIN) nemoinp
 
@@ -50,6 +50,8 @@ dms.in:
 	@echo "4   11:59:40   60:00:10" >> dms.in
 
 
+tab.out: tabmath
+
 tabmath: tab.in
 	@echo Running $@
 	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
@@ -70,6 +72,12 @@ tabstat:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
+
+tabint: tab.out
+	@echo Running $*
+	$(EXEC) tabint tab.out ; nemo.coverage tabstat.c
+	$(EXEC) tabint tab.out xmin=10 xmax=20 ; nemo.coverage tabstat.c
+	@echo Results should be 665.963 and 37.2084
 
 txtpar:  txt.in
 	 @echo Running $*

@@ -1,4 +1,4 @@
-.TH TABINT 1NEMO "25 April 2022"
+.TH TABINT 1NEMO "22 February 2023"
 
 .SH "NAME"
 tabint \- integrate a sorted table
@@ -13,6 +13,9 @@ The function can either be resampled using a spline interpolation,
 or directly summed.
 .PP
 See also \fItabhist(1NEMO)\fP with \fBcumul=t\fP for a visual display.
+.PP
+An optional scale factor can be applied, which folds in any X or Y scaling that might
+want to be applied.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -25,7 +28,13 @@ Column with X coordinate. The X coordinates must be sorted
 in increasing X. Default: 1
 .TP
 \fBycol=\fP
-Column with Y coordinate of function [Default: 2] 
+Column with Y coordinate of function [Default: 2]
+.TP
+\fBxmin=\fP
+value if data below xmin to be discarded. By default it uses the first datapoint.
+.TP
+\fBxmax=\fP
+value if data above xmax to be discarded. By default it uses the last datapoint.
 .TP
 \fBstep=\fP
 Integration step if resampling used. By default the datapoints themselves
@@ -40,6 +49,9 @@ interval. Default: f
 If set, it will show the invidual cumulative integrations instead. Only implemented
 for native steps.
 Default: f
+.TP
+\fBscale=\fP
+scale factor to apply to the integral. [Default: 1]
 
 .SH "EXAMPLES"
 .nf
@@ -47,7 +59,19 @@ Default: f
  0.335
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint - step=0.01
  0.33335
- 
+
+.fi
+Here is an example to compute the line integral of a spectrum where the frequency axis is in GHz,
+and intensity in Kelvin. We want to get an answer in K.km/s instead. We also know the line is
+around 110.5 GHz:
+.nf
+
+ % tabint rsr.33551.driver.sum.txt xmin=110.5-2*0.15 xmax=110.5+2*0.15  scale=c/110.5/1000
+ 8.05
+
+.fi
+recalling that \fBc\fP is in m/s and the requested line integral was requested in km/s.
+
 .SH "SEE ALSO"
 tabfilter(1NEMO), tabmath(1NEMO), table(5NEMO)
 
@@ -62,4 +86,5 @@ Peter Teuben
 .ta +1.5i +5.5i
 13-May-05	V0.1 Created	PJT
 10-sep-2022	V0.5 added cumulative=	PJT
+22-feb-2022	V0.6 added xmin=, xmax=, scale=	PJT
 .fi

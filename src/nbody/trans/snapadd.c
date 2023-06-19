@@ -24,6 +24,8 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
+#include <extstring.h>
 #include <snapshot/snapshot.h>
 
 string defv[] = {		/* DEFAULT INPUT PARAMETERS */
@@ -33,7 +35,7 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "options=\n         Forced output of: {acc, phi}",
     "sync=f\n           Force time sync, based on first file in list",
     "headline=\n	random verbiage",
-    "VERSION=2.5c\n	11-apr-2019 PJT",
+    "VERSION=2.5d\n	8-may-2023 PJT",
     NULL,
 };
 
@@ -58,6 +60,11 @@ int nsnap;
 extern string *burststring(string,string);
 extern bool scanopt(string,string);
 extern string  strname(stream);
+extern void  zerocms(double *, int, double *, int, int);
+
+void setparams();
+void snapstack();
+void writedata();
 
 
 void nemo_main() 
@@ -71,7 +78,7 @@ void nemo_main()
     }
 }
 
-setparams()
+void setparams()
 {
     string *pp, options;
     int i, offset;
@@ -201,7 +208,7 @@ int readdata()
 }
 
 
-snapstack()
+void snapstack()
 {
     int i, nzero;
 
@@ -217,7 +224,7 @@ snapstack()
     }
 }
 
-writedata()
+void writedata()
 {
     static int cscode = CSCode(Cartesian, NDIM, 2);
 

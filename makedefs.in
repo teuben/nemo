@@ -48,11 +48,11 @@ HDF5_LIB = @HDF5_LIB@
 #PNG_LIB = `pkg-config --libs libpng`
 PNG_LIB = @PNG_LIB@
 
-#  CFITSIO library: -lcfitsio
-CFITSIO_INC = `pkg-config --cflags cfitsio`
-CFITSIO_LIB = `pkg-config --libs cfitsio`
-#CFITSIO_INC = @CFITSIO_INC@
-#CFITSIO_LIB = @CFITSIO_LIB@
+#  CFITSIO library: -lcfitsio -lcurl -lz -lbz2
+#CFITSIO_INC = `pkg-config --cflags cfitsio`
+#CFITSIO_LIB = `pkg-config --libs cfitsio`
+CFITSIO_INC = @CFITSIO_INC@
+CFITSIO_LIB = @CFITSIO_LIB@
 
 #  NETCDF4 library: -lnetcdf
 #NETCDF_INC = `pkg-config --cflags netcdf`
