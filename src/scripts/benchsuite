@@ -9,7 +9,7 @@
 # BUG:  -b  does not remove executable, so you never know if new binary did
 #		not compile
 
-set version="20-jan-2022"
+set version="22-dec-2022"
 
 set benchdir=$NEMO/tmp/bench$$
 set log=benchsuite.log
@@ -102,6 +102,15 @@ if ($usr) set tdir=src,usr
 
 onintr cleanup
 
+# define red, green and neutral colors
+set red  = '\033[0;31m'
+set grn  = '\033[0;32m'
+set neu  = '\033[0m'
+set ok   = "${red}OKOK${neu}"
+set fail = "${grn}FAIL${neu}"
+set ok   = "OK  "
+set fail = "FAIL"
+
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
 echo "BENCHSUITE started `date`"                                       > $log
@@ -142,10 +151,10 @@ foreach benchfile (`find $NEMO/{$tdir} -name Benchfile -print | sort`)
     if ($local) pushd $benchfile:h >& /dev/null
     make -f $benchfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-	echo -n BENCHSUITE: "FAIL" $benchfile:h
+	echo -n "BENCHSUITE: $fail $benchfile:h"
 	echo ""
     else
-	echo -n BENCHSUITE: "OK  " $benchfile:h
+	echo -n "BENCHSUITE: $ok $benchfile:h"
 	echo ""
     endif
     if ($local) popd >& /dev/null
@@ -179,6 +188,7 @@ cleanup:
 
 help:
     echo "Usage: $0 [options] [KEYWORD=value ...]"
+    echo "Version: $version"
     echo ""
     echo "This program excerizes NEMO by running a number of core programs"
     echo "from a diverse set of packages (kernel,nbody,orbit,image)"
