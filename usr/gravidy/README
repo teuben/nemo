@@ -60,3 +60,12 @@ gravidy -i gravidy/input/04-nbody-p1024_m1.in -p -t 1
 00     0.750           3725         180446   -2.5687759832e-01   1.394194e-08   1.835861e-08    7.067978e+01       2.889
 00     0.875           4354         212425   -2.5687773276e-01   5.233652e-07   5.417238e-07    8.363315e+01       2.531
 00     1.000           5160         244165   -2.5687767307e-01   2.323583e-07   3.093654e-07    9.905656e+01       2.467
+
+
+OMP_NUM_THREADS=1 /usr/bin/time gravidy-cpu -i gravidy-input/04-nbody-p1024_m1.in -p -t 1
+
+1   6.19user 0.06system 0:06.26elapsed 99%CPU
+2   6.97user 0.10system 0:03.54elapsed 199%CPU
+4   8.31user 0.12system 0:02.12elapsed 396%CPU
+6  12.36user 0.19system 0:02.15elapsed 582%CPU
+8  17.18user 0.22system 0:02.43elapsed 715%CPU 
