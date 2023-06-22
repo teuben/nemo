@@ -92,7 +92,8 @@ Here is an example integrating gravidy with NEMO files
   cat p128.out.snapshot_0* | sed 's/# Time://' | tabtos - - time skip,m,pos,vel nbody=128 | csf - p128.out SnapShot
   
 .fi
-although note that the last snapshot (time=10.0) is replicated. The \fBrungravidy\fP frontend would simplify this to
+although note that the last snapshot (time=10.0 in this case) might be replicated in versions of gravidy before June 2023.
+The \fBrungravidy\fP frontend would simplify this to
 .nf
 
   mkplummer p128 128
@@ -101,7 +102,7 @@ although note that the last snapshot (time=10.0) is replicated. The \fBrungravid
   snapplot p128.d/OUT3.snap
   
 .fi
-with the caveat that \fBrungravidy\fP enforces the use of a run directory.
+with the caveat that \fBrungravidy\fP enforces the use of a run directory. 
 
 .SH "INSTALL"
 Example from NEMO/usr/gravidy. See README file for dependencies such as the BOOST library
@@ -133,7 +134,8 @@ rungravidy.c - example NEMO frontend
 .SH "SEE ALSO"
 nbody1(1NEMO), snapshot(5NEMO)
 .PP
-Maureira-Fredes, C and Amaro-Seoane, P. "GraviDy, a GPU modular, parallel direct-summation N-body integrator: Dynamics with softening", MNRAS, vol. 473, pp. 3113-3127, Jan . 2018.  https://ui.adsabs.harvard.edu/abs/2018MNRAS.473.3113M
+Maureira-Fredes, C and Amaro-Seoane, P. "GraviDy, a GPU modular, parallel direct-summation N-body integrator: Dynamics with softening",
+MNRAS, vol. 473, pp. 3113-3127, Jan . 2018.  https://ui.adsabs.harvard.edu/abs/2018MNRAS.473.3113M
 .PP
 http://github.com/cmaureir/gravidy.git
 
@@ -143,4 +145,5 @@ http://github.com/cmaureir/gravidy.git
 12-feb-2017	example added	PJT
 6-apr-2023	add install note	PJT
 16-jun-2023	(rungravidy v0.4 now using gravidy default parameters	PJT
+21-jun-2023	fixed gravidy last duplicated snapshot	PJT
 .fi

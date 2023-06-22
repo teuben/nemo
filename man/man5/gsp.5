@@ -82,16 +82,16 @@ gspdistfu	calculate distribution function of GSP [raniso=-1]
 gspeval		evaluate GSP at particle positions
 gspgravity	calculate gravitational potential of GSP
 gsplist		list properties of GSP as a function of radius.
-gspsmooth	smooth mass distribution of GSPq
-gspsmoothfit	Fit smoothed gsp to gravitational field
-gsptrun		truncate mass distribution of general spherical profile [trun=16]
+gspsmooth	smooth mass distribution of GSP [eps=0.025 kappa=1.5]
+gspsmoothfit	** Fit smoothed gsp to gravitational field 
+gsptrun		truncate mass distribution of general spherical profile [rtrun=16]
 gspveldisp	calculate radial velocity dispersion for GSP [beta=1]
 
 NBODY   	USE
 -----   	---
-gspdisk		set up an exponential (gas) disk
-gspmodel	make N-body model of GSP [beta_a=0]
-gsprealize	make N-body realization of GSP with isotropic [raniso=-1
+gspdisk		set up an exponential (gas) disk [mdisk=0.1875 alpha=12 rcut=1 zdisk=1 mu=2]
+gspmodel	** make N-body model of GSP [beta_a=0]
+gsprealize	make N-body realization of GSP with isotropic [raniso=-1]o 
 		or Osipkov-Merritt distribution function
 gspsphere	make SPH realization of GSP [gamma=5/3]
 gsptestdisk	set up a test-particle disk embedded in a gsp spheroid.
@@ -101,7 +101,7 @@ gsptestdisk	set up a test-particle disk embedded in a gsp spheroid.
 Some programs have an extra \fBgrav=\fP in addition to the input GSP model. What is that for again?
 
 .SH "SEE ALSO"
-mkommod(1NEMO), king(1NEMO), plummer(1NEMO), zeno(1NEMO)
+mkommod(1NEMO), king(1NEMO), plummer(1NEMO), zeno(1NEMO), zeno(1NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

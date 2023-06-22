@@ -36,12 +36,15 @@ are some links at the bottom of this document.
 ## gh:   github CLI
 
 You can safely skip this section if you prefer to work via github.com, though the **gh** command
-described here is by far the fastest and easiest way to work with the github ecosystem.
+described here is by far the fastest and easiest way to work with the github ecosystem. You just
+have to intall yet another tool for this.
 
-A relatively new addition to github is called "github CLI", which is implemented via the command
-**gh** through which many github.com actions can now be run as terminal commands.
-Besides [installing](https://cli.github.com/manual/installation)
-it once, you also need to authenticate once via your github account:
+If you can use conda, installation can be done as follows:
+
+      conda install gh --channel conda-forge  
+
+but see also [manual installing instructions](https://cli.github.com/manual/installation),
+after this you need to authenticate once via your github account:
 
       gh auth login
 
@@ -52,22 +55,25 @@ in just one step:
 
 If all is well, the following commands should show the correct *origin* and *upstream*:
 
-      git config --local remote.upstream.url
-          >>> git@github.com:teuben/nemo.git
-      git config --local remote.origin.url
-          >>> git@github.com:YOURNAME/nemo.git
+      git remote -v
 
-None of these should be blank though!
+      origin git@github.com:YOURNAME/nemo.git
+      upstream git@github.com:teuben/nemo.git
+
+for both the (fetch) and (push). None of these should be blank! You are now ready for working
+in your own branches and issue a pull request (PR). 
 
 ## 2. Cloning your personal fork
 
-If you have cloned your own fork
+This section can be skipped if you use the **gh repo fork** method described before this.
+
+If you have cloned your own fork on github.com, you should now clone it
 
       git clone https://github.com/YOURNAME/nemo
 
 you only need to set the upstream:
 
-      git remote add    upstream https://github.com/teuben/nemo
+      git remote add upstream https://github.com/teuben/nemo
 
 and you are ready for creating a PR (from a branch of course).
 
@@ -93,7 +99,8 @@ Again, the **gh** command now gives a single line shortcut to all this:
 You should regularly make sure your local master branch
 is in sync with the upstream master branch. This allows you
 to work in local branches, and be up to date by branching off the
-tip of this upstream master branch. Here's a recipe for that:
+tip of this upstream master branch. Here's a recipe for that
+in your local clone:
 
       git checkout master
       git fetch upstream
@@ -104,32 +111,31 @@ tip of this upstream master branch. Here's a recipe for that:
 ## Working in a branch
 
 Assuming your own master is in sync with the upstream master,
-here is a typical example, using a branchname **b1**
+here is a typical example to work in a branch, using a branchname **b1**
 
       git branch b1
       git checkout b1
       
-          ## edit/add your files; test them; commit them, e.g.
-	  git commit -m "my comment"  existing_file
-	  git add new_file
-	  git commit -m "my command"  new_file
+      ## edit/add your files; test them; commit them, e.g.
+      git commit -m "my comment"  existing_file
+      git add new_file
+      git commit -m "my command"  new_file
           
       git push -u origin b1
 
-Now you can issue a pull request on this branch **b1**.  There is a way to do this
-via the **gh pr** command sequence. More about that in a future revision of this
-document. For now, use the github.com web interface
- 
+Now you can issue a pull request on this branch **b1**.
 
-You can even delete a branch, once it has been accepted as a pull request and merged
-back in the upstream, it is really not needed anymore:
+If you have become a fan on the **gh pr** method, here's the recipe for this:
 
-      git checkout b1
-      git checkout master
-      git branch -D b1
-      git push origin --delete b1
+      git checkout -b b1
+        <<edit, test, commit>>
+      gh pr create 
 
-Which even allows you to re-use that branch name.
+once the branch has been merged, you don't need it locally anymore, so delete it
+
+      git branch -d b1
+      git push original --delete b1
+
 
 ## Common work in a branch
 
@@ -141,18 +147,18 @@ merged to the master yet.
 
       git checkout -b table2
       ...
-	  git push --set-upstream origin table2
+      git push --set-upstream origin table2
 	  
 2. others will do then branch off this new branch (user *astroumd* is used as example here):
 
-	  gh repo fork https://github.com/teuben/nemo nemo
+      gh repo fork https://github.com/teuben/nemo nemo
       cd nemo
       git remote add upstream  https://github.com/teuben/nemo
       git fetch upstream
       git checkout -b myTable3
-	  git merge upstream/table2
+      git merge upstream/table2
       ...
-	  git push --set-upstream origin myTable3
+      git push --set-upstream origin myTable3
 	  
    on github.com/astroumd/nemo you can then do a pull request from astroumd::myTable3 to teuben:table2. An 
    alternative (next item) is that the upstream person would pull in myTable3 and tests locally
@@ -163,14 +169,14 @@ merged to the master yet.
       git remote add  astroumd  https://github.com/astroumd/nemo
       git pull astroumd
       git merge [--no-ff] astroumd/myTable3
-	  .... (resolve conflicts)
-	  git push
+      .... (resolve conflicts)
+      git push
 
 4. after this, all collaborators will need to merge these back:
 
-	  git checkout myTable3
-	  git fetch upstream
-	  git merge upstream/table2
+      git checkout myTable3
+      git fetch upstream
+      git merge upstream/table2
 
 ## Memorable git options
 
@@ -186,30 +192,61 @@ merged to the master yet.
 3. To see which files belonged in a commit, find the sha (e.g. via "git log" or "git log file" if 
    you know the file that belonged to it), then
 
-     git diff-tree --no-commit-id --name-only -r SHA
+      git diff-tree --no-commit-id --name-only -r SHA
 	 
 4. Difference between two SHA's
 
-     git diff <commit-id> <commit-id> 
+      git diff <commit-id> <commit-id>
+
+## PR with github CLI
+
+Recapping working with "github CLI" (gh)
+
+Step 1 from the submitter of the PR:
+
+      gh repo fork https://github.com/teuben/nemo
+      cd nemo
+      git checkout -b teuben1
+      $EDITOR index.md
+      gh pr create 
+
+Once the branch has been merged by the upstream, there is no need to keep it.
+It can be removed as follows:
+
+      git branch -d teuben1
+      git push original --delete teuben1
+
+Step 2 by the receiver of the PR:
+
+
+
+	
 
 # Tests
 
 From the top level directory in NEMO there are a few basics regression tests and benchmarks:
 
       make check
+      make bench5
       make bench
-      make bench3
 
-The **check** target depends on the many **Testfile** files sprinkled throughout NEMO.  Although
-you can now find a few **Benchfile** files as well, they have not been put under a top level
-target, so the current bench is hardcoded via a script **src/scripts/nemo.bench**. A future
-revision of this document may go in a little more details.
+The **check** target depends on the many **Testfile** files sprinkled throughout NEMO.
+
+The **bench5** target currently runs 6 NEMO programs all designed to run 5 seconds on
+some particular processor that your NEMO compilation can now be compared to. The default
+*speed* for that processor is defined to be 1000, anything larger is a faster processor.
+Currently in 2023 we're approaching a single core score of 2000!
+
+
+The **bench** target is still under development, and has a more
+diverse set of programs, all controlled by sprinkled **Benchfile**
+files. See the script **src/scripts/nemo.bench**.
 
 # Debugging
 
-Most applications are built using *make* variables defined in the $NEMOLIB/makedefs file.
+Most applications are built using *make* variables defined in the **$NEMOLIB/makedefs** file.
 Although not recommended, 
-some hacking is allowed by directly editing this file, with the caveat you are then
+hacking is always possible by directly editing this file, with the caveat you are then
 bypassing the **configure** step of the install, which also does modify some other files.
 Notably the **falcON** package has some extra dependancies that start with configure.
 

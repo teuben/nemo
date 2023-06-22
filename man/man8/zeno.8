@@ -29,13 +29,17 @@ ending in snap, but this seemed too wordy; the ending snap is
 omitted.) Finally, a handfull of programs which operate on any
 structured file of data have three-letter names ending with the
 initials \fBsf\fP.
+.PP
+In this listing below, the NEMO functionally
+equivalent program(s) are listed when available.
+Programs listed with *** do not yet compile within NEMO.
 .SH
 .nf
 .ta +0.5i +2i 
 .B N-Body Simulation
-  	treecode	  	Hierarchical N-body code
-  	treecode_x	  	Hierarchical N-body code (+ ext grav)
-  	treepeek	  	Peek at contents of state file
+  	treecode	  	Hierarchical N-body code (NEMO: hackcode1, gyrfalcON)
+  	treecode_x	  	Hierarchical N-body code (+ ext grav) (NEMO: hackcode3)
+  	treepeek	  	*** Peek at contents of state file
 
 .B SPH Simulation
   	sphcode_e	  	SPH/N-body simulation code.
@@ -52,13 +56,13 @@ initials \fBsf\fP.
   	sphcode_uir	  	SPH/N-body simulation code.
 
 .B Snapshot Construction
-  	kepsnap	  	Compute initial data for 2-body orbit
-  	makesnap	  	Make a configuration of bodies
-  	plumsnap	  	Construct Plummer model
-  	polysnap	  	Construct generalized polytrope
+  	kepsnap 	  	Compute initial data for 2-body orbit
+  	makesnap	  	*** Make a configuration of bodies
+  	plumsnap	  	Construct Plummer model (NEMO: mkplummer)
+  	polysnap	  	Construct generalized polytrope (NEMO: mkpolytrope)
   	snaptestdisk	  	Make test disk in spherical system
-  	snapcons	  	Construct compound N-body system
-  	snapstack	  	Stack two N-body systems
+  	snapcons	  	Construct compound N-body system (NEMO: mktestdisk)
+  	snapstack	  	Stack two N-body systems (NEMO: snapstack)
 
 .B General Spherical Profile Generation
   	expdgsp	  	Generate "spherical" exp. disk
@@ -79,7 +83,7 @@ initials \fBsf\fP.
   	gsptrun	  	Truncate mass distribution of GSP
 
 .B General Spherical Profile Realization
-  	gspdisk	  	Make exponential disk in a gsp model
+  	gspdisk 	  	Make exponential disk in a gsp model
   	gspmodel	  	Make N-body model of GSP
   	gsprealize	  	Construct N-body realization of GSP.
   	gspsphere	  	Make SPH gas sphere from GSP
@@ -92,10 +96,10 @@ initials \fBsf\fP.
   	buildmap	  	Invoke buildmap routine
 
 .B Snapshot Transformation
-  	snapavg	  	Calculate averages over time
-  	snapcenter	  	Center snapshot on weighted bodies
+  	snapavg 	  	Calculate averages over time
+  	snapcenter	  	Center snapshot on weighted bodies (NEMO: snapcenter)
   	snapcollect	  	Collect info from several frames
-  	snapforce	  	Compute forces by direct-sum
+  	snapforce	  	Compute forces by direct-sum (NEMO: hackforce)
   	snapobject	  	Identify objects using percolation
   	snaprect	  	Diagonalize weight tensor
   	snaprotate	  	Rotate N-body configuration
@@ -107,31 +111,34 @@ initials \fBsf\fP.
   	snapturn	  	Produce stream of rotated snapshots
 
 .B Snapshot Analysis
-  	snapcm	  	Calculate center-of-mass coords
+  	snapcm  	  	Calculate center-of-mass coords (NEMO: snapcenter)
   	snaphist	  	Make histogram of particle data
   	snapshape	  	Estimate ellipticity & r.m.s. radius
   	snapstat	  	Analyze statistics of SnapShot data.
   	snaprholist	  	List spherical density profile
 
 .B Snapshot Output
-  	snapascii	  	Convert binary N-body file to ascii
-  	snaplist	  	List contents of snapshot file
-  	snaptipsy	  	Convert binary N-body file to tipsy
+  	snapascii	  	Convert binary N-body file to ascii (NEMO: stoa)
+  	snaplist	  	List contents of snapshot file (NEMO: snapprint)
+  	snaptipsy	  	Convert binary N-body file to tipsy (NEMO: snaptipsy)
 
 .B Snapshot Visuialization
-  	snapppm	  	Render snapshot as ppm images
+  	snapppm	  	Render snapshot as ppm images (NEMO: snapgrid | ccdppm)
   	snapsmooth	  	Smooth N-body/SPH values onto grid
-  	snapview	  	Interactively view SnapShot data.
+  	snapview	  	Interactively view SnapShot data. [NEMO: glnemo2]
   	viewfile	  	Construct view file
 
 .B Structured File Utilities
-  	csf	  	Copy a structured binary file.
+  	csf	  	Copy a structured binary file. (NEMO: csf)
   	dsf	  	Dress binary data as structured file.
   	gsf	  	Grab structured binary files.
-  	rsf	  	Read ascii form of structured file.
+  	rsf	  	Read ascii form of structured file. (NEMO: rsf)
   	ssf	  	Strip a structured binary file.
-  	tsf	  	Type out a structured binary file.
+  	tsf	  	Type out a structured binary file. (NEMO: tsf)
 .fi
+
+.SH "SEE ALSO"
+zeno(1NEMO), gsp(5NEMO)
 
 .SH "HISTORY"
 .nf
