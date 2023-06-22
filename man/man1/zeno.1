@@ -7,7 +7,7 @@
 .SH "DESCRIPTION"
 \fBZENO\fP is Josh Barnes' version of NEMO. The code is 
 derived from NEMO, with a common ancestor around 1988.
-The binary datafiles, via \fIflestruct(3NEMO)\fP
+The binary datafiles, via \fIfilestruct(3NEMO)\fP
 are largely compatible.
 .PP
 When installed, ZENO adds well over 100 executables via $ZENOPATH/bin,
@@ -36,15 +36,15 @@ older direct reading of snapshots will not be able to process these snapshots wi
 filter.
 
 .SH "DIFFERENCES WITH NEMO"
-As highlighted in the example, a ZENO snapshot uses \fINBody\fP instead of NEMO's \fINobj\fP, but
-as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted.
-.PP
-NEMO's \fIpotential(5NEMO)\fP are similar to ZENO's \fIgspmodels\fP, where the latter also allows for adding
-potentials (much harder in NEMO).  falcON has similar tools to add potentials.
+A ZENO snapshot uses \fINBody\fP instead of NEMO's \fINobj\fP, but
+as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted. NEMO uses
+PhaseSpace whereas ZENO uses separate Position and Velocity.
 .PP
 NEMO has no real support for SPH (though some tags in snapshot's are supported)
 .PP
 ZENO has no plotting such as NEMO's yapp
+.PP
+NEMO's command line userface is a bit more richer
 
 .SH "FILES"
 .nf
