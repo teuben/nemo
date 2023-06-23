@@ -31,4 +31,6 @@ bench:	bench10
 bench10: p1k
 	rm -rf p1k.d
 	nemobench rungravidy p1k p1k.d eta=0.01 eps=0.05 tcrit=20 deltat=1
+	@head -1 p1k.d/p1k.d.out.log
+	@tail -1 p1k.d/p1k.d.out.log
 
