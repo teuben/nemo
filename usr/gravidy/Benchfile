@@ -1,0 +1,34 @@
+# -*- makefile -*-
+
+DIR       = usr/gravidy
+BENCH     = bench10
+BENCHDATA = p1k
+LOG       = /tmp/nemobench.log
+BIN       = mkplummer rungravidy
+NEED      = $(BIN)
+TIME      = /usr/bin/time
+FTEN      = 1
+NBODY     = 1024
+
+
+help:
+	@echo $(DIR)
+	@echo NBODY=$(NBODY)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+p1k:
+	mkplummer p1k $(NBODY) 
+
+bench:	bench10
+
+bench10: p1k
+	rm -rf p1k.d
+	nemobench rungravidy p1k p1k.d eta=0.01 eps=0.05 tcrit=20 deltat=1
+
