@@ -37,9 +37,10 @@
 #          27-feb-2023   compute m1, etot2, plus add xve2.tab and xve0.tab, and
 #          29-mar-2023   add option to use a fixed potential for galaxy1
 #          29-apr-2023   fix orbital energies for fixed=1, also save etot0,v
+#          22-jun-2023   added code=3 for princeton hackathon comparisons
 
 _script=mkmh97
-_version=29-apr-2023
+_version=22-jun-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -57,7 +58,8 @@ rp=0.0          # impact offset radius
 r0=16.0         # initial offset position for v0 > 0   [note v0 > 2/sqrt(r0)]
 eps=0.03125     # gravitational softening
 kmax=7          # integration timestep is 1/2**kmax
-code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)
+eta=0.01        # alternative to timestep (only used by gravidy)
+code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)  3=rungravidy
 seed=0          # random seed (use seed=123 for the benchmark)
 trim=0          # trim the data after analysis so only the last snapshot is kept
 save=1          # save the "final" plots in a subdirectory "movies" labeled with tstop
@@ -76,7 +78,7 @@ debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
-save_vars="run nbody m em fixed step v0 rp r0 eps kmax code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
+save_vars="run nbody m em fixed step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
@@ -173,6 +175,7 @@ if [ $restart = 1 ]; then
     # integrator:  0:  hackcode1 is O(NlogN) code
     #              1:  gyrfalcON is O(N)
     #              2:  bonsai2 is O(N) but scales faster for "small" N
+    #              3:  rungravidy
     echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
     if [ $fixed = 1 ]; then
 	echo Fixed potential now, only code=0 is supported
@@ -211,17 +214,28 @@ if [ $restart = 1 ]; then
 		set -x
 	    fi	    
 	    echo Wrote final combined snapshot in $run.4
+	elif [ $code = 3 ]; then
+	    /usr/bin/time rungravidy $run.3 $run.4.d tcrit=$tstop deltat=$step eps=$eps eta=$eta > $run.4.log
+	    ln -s $run.4.d/OUT3.snap $run.4
+	    tabcols $run.4.d/$run.4.d.out.log 2,5 > $run.4.etot
 	else
 	    set +x
 	    echo Unknown code=$code, valid are:
-	    echo 1 = hackcode1
-	    echo 2 = gyrfalcON
-	    echo 3 = bonsai2
+	    echo 0 = hackcode1
+	    echo 1 = gyrfalcON
+	    echo 2 = bonsai2
+	    echo 3 = rungravidy
 	fi
     fi
 else
     echo "============================================================================="
     echo "Skipping integration because run=$run already existed, or: rm -r $run"
+fi
+
+#  special case for tstop=0:   just make initial conditins
+
+if [ $tstop = 0 ]; then
+    exit
 fi
 
 
