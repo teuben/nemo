@@ -42,7 +42,7 @@ string defv[] = {
     "dryrun=f\n       Dryrun?",
     "exe=gravidy\n    Name of the executable",
 
-    "VERSION=0.4\n    16-jun-2023 PJT",
+    "VERSION=0.5\n    22-jun-2023 PJT",
     NULL,
 };
 
@@ -75,13 +75,15 @@ void nemo_main(void)
 
     if (!Qdry)
       run_mkdir(rundir);
+    else
+      printf("mkdir %s\n",rundir);
 
     stream instr = stropen(infile,"r");
     nbody = get_snap_nbody(instr);
     strclose(instr);
     dprintf(0,"Grabbing nbody=%d\n",nbody);
     
-    sprintf(runcmd,"snapprint %s i,m,x,y,z,vx,vy,vz format=%%.15f > %s/%s", infile,rundir,tabfile);
+    sprintf(runcmd,"snapprint %s i,m,x,y,z,vx,vy,vz format=%%.15g > %s/%s", infile,rundir,tabfile);
     if (Qdry)
       printf("%s\n",runcmd);
     else {
@@ -106,18 +108,24 @@ void nemo_main(void)
     if (Qdry)
       printf("%s\n",runcmd);
     else {
-      dprintf(0,"%s\n",runcmd);      
-      run_sh(runcmd);
+      dprintf(0,"%s\n",runcmd);
+      if (tcrit <= 0.0)
+	warning("Not running gravidy for tcrit=0");
+      else {
+	run_sh(runcmd);
+
+	sprintf(runcmd,"cat %s.out.snapshot_* | sed 's/# Time://' | tabtos - - time skip,m,pos,vel nbody=%d | csf - OUT3.snap SnapShot",
+		rundir, nbody);
+	
+	if (Qdry)
+	  printf("%s\n",runcmd);
+	else {
+	  dprintf(0,"%s\n",runcmd);      
+	  run_sh(runcmd);
+	}
+      }
     }
 
-    sprintf(runcmd,"cat %s.out.snapshot_* | sed 's/# Time://' | tabtos - - time skip,m,pos,vel nbody=%d | csf - OUT3.snap SnapShot",
-	    rundir, nbody);
-    
-    if (Qdry)
-      printf("%s\n",runcmd);
-    else {
-      dprintf(0,"%s\n",runcmd);      
-      run_sh(runcmd);
-    }
+    dprintf(0,"Results in %s\n", rundir);
 
 }
