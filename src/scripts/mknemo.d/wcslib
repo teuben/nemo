@@ -1,8 +1,9 @@
 #! /bin/bash
 #
+#  example: http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib-8.1.tar.bz2
 
-#   version is sadly hidden in the filename
-version=7.4
+#   version is sadly (?) hidden in the filename
+version=8.1
 wget=wgetc
 
 for arg in $*; do
