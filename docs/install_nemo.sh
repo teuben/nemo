@@ -18,7 +18,7 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.7 -- 12-nov-2022"
+echo "install_nemo.sh:  Version 1.8 -- 7-jul-2023"
 
  opt=0                                                # install some optional mknemo= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
@@ -115,7 +115,7 @@ fi
 if test $python = 1; then
     make build1
     NEMO=`pwd` make python
-    source python_start.sh
+    source anaconda3/python_start.sh
     make nemopy
 else
     echo No python install
