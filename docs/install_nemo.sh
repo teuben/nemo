@@ -18,15 +18,16 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.8 -- 7-jul-2023"
+echo "install_nemo.sh:  Version 1.8 -- 8-jul-2023"
 
- opt=0                                                # install some optional mknemo= packages
+ opt=0                                                # install some optional mknemos= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
  branch=master                                        # branch used
- python=0                                             # install anaconda3 python?
+ python=0                                             # 1=install anaconda3 python? 2=post-install pip
  url=https://github.com/teuben/nemo                   # git repo adres
- mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4    # optional packages (needs opt=1)
+ mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4    # optional packages via source (needs opt=1)
  falcon=1                                             # install falcON tools?
+ amuse=0                                              # install amuse via python? (needs python=2)
  yapp=auto                                            # yapp driver   (auto, ps, pgplot, pglocal, plplot)
  check=1                                              # "make check" at the end?
  bench=0                                              # "make bench" at the end?
@@ -112,11 +113,14 @@ if test $falcon = 0; then
 fi
 
 
-if test $python = 1; then
+if [ $python -gt 0 ]; then
     make build1
     NEMO=`pwd` make python
     source anaconda3/python_start.sh
     make nemopy
+    if [ $python  -gt 1 ]; then
+	src/scripts/install_python_modules amuse=$amuse
+    fi
 else
     echo No python install
 fi
@@ -175,6 +179,7 @@ echo "Ended:   $date1"
 
 echo All done.
 echo ""
-echo "(ba)sh users:  source $nemo/nemo_start.sh  to activate NEMO in your shell"
-echo "(t)csh users:  source $nemo/nemo_start.csh to activate NEMO in your shell"
+fnemo=$(readline -f $nemo)
+echo "(ba)sh users:  source $fnemo/nemo_start.sh  to activate NEMO in your shell"
+echo "(t)csh users:  source $fnemo/nemo_start.csh to activate NEMO in your shell"
 
