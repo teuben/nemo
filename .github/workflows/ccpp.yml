@@ -11,7 +11,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-      - name: apt install
+    - name: apt install
       # run:  sudo apt install csh gfortran pgplot5 libhdf4-dev libhdf5-dev libcfitsio-dev libnetcdf-dev -y
       # run:  sudo apt install csh gfortran pgplot5
       run:  sudo apt install csh
@@ -35,3 +35,11 @@ jobs:
     - name: make bench5
       run: make bench5
     
+    runs-on: macos-11
+
+    steps:
+    - uses: actions/checkout@v1
+    - name: Configure
+      run: ./configure --without-csh
+    - name: Build1
+      run: make build1
