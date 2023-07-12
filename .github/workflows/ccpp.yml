@@ -42,6 +42,6 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: configure
-      run: ./configure --without-csh
+      run: ./configure --without-csh --disable-fortran
     - name: build1
       run: make build1 
