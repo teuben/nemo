@@ -1,5 +1,7 @@
-#            sudo dnf instal $*
+#            sudo dnf install $*
 #                 dnf list installed
+#    pkg=$(grep -v ^# fedora38)
+#    sudo dnf install $pkg
 gcc
 gcc-gfortran
 gcc-g++
@@ -40,14 +42,11 @@ libXext-devel
 #  rpm -Uvh <this file>
 # after this pgplot can be installed
 pgplot
+pgplot-devel
 
-# still needed to:  -- this is weird --
-# cd /usr/lib64
-# sudo ln -s libpgplot5.so.5 libpgplot5.so
-# sudo ln -s libcpgplot5.so.5 libcpgplot5.so
-our Makefile should not be depending on libpthread.so directly, but pass -pthread to gcc and let it determine what to link.
+# our Makefile should not be depending on libpthread.so directly, but pass -pthread to gcc and let it determine what to link.
 
-Everything is folded into glibc:
-https://lists.gnu.org/archive/html/info-gnu/2021-08/msg00001.html 3
-1
-ls /usr/lib64/libpthread.
+# Everything is folded into glibc:
+# https://lists.gnu.org/archive/html/info-gnu/2021-08/msg00001.html 3
+# 1
+# ls /usr/lib64/libpthread.
