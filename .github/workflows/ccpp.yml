@@ -18,7 +18,7 @@ jobs:
       run:  autoconf
     - name: configure
       # run: ./configure --with-yapp=pgplot --enable-debug
-      run: ./configure 
+      run: ./configure --without-csh
     - name: build1
       run: make build1 
     - name: build2
