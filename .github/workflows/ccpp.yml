@@ -11,7 +11,7 @@ jobs:
     
     steps:
     - uses: actions/checkout@v1
-    - name: apt install
+      # - name: apt install
       # run:  sudo apt install csh gfortran pgplot5 libhdf4-dev libhdf5-dev libcfitsio-dev libnetcdf-dev -y
       # run:  sudo apt install csh gfortran pgplot5 
     - name: autoconf
