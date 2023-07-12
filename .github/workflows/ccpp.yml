@@ -7,7 +7,7 @@ jobs:
 
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     # runs-on: ubuntu-latestq
-    runs-on: ubuntu-22.04
+    runs-on: ubuntu-22.04 macos-11
     
     steps:
     - uses: actions/checkout@v1
@@ -35,11 +35,3 @@ jobs:
     - name: make bench5
       run: make bench5
     
-    runs-on: macos-11
-
-    steps:
-    - uses: actions/checkout@v1
-    - name: Configure
-      run: ./configure --without-csh
-    - name: Build1
-      run: make build1
