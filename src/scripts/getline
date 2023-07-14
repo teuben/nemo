@@ -40,7 +40,7 @@ def strip_comments(line, comment='#'):
 if __name__ == "__main__":
     n = len(sys.argv)
     if n==1:
-        print("Usage: %s [-c] [-s] file [nnn]")
+        print("Usage: %s [-c] [-s] file [nnn]" % sys.argv[0])
         print("Displays line 'nnn' from a file, or report number of lines in a file")
         print("Options:")
         print("  -c     remove anything after comment (#) character")
