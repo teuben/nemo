@@ -184,6 +184,9 @@ int main(int argc, char **argv)
     fclose(sp);
 
 
+    // tooltip kind of help    
+    fprintf(tp,"pack [label .l1 -textvariable status -bg yellow -font {Arial 12}]\n");
+    
     fprintf(tp,"set keyList {");
     for (i=0; i<nw; i++) {
         if (widgets[i].list)
@@ -341,6 +344,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(tp,"bind %s <1> \"my_help 0 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <2> \"my_help 1 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <3> \"set %s \\\"\\\"; focus %s\"\n",tkey,tvar,tval);
+		// new
+                fprintf(tp,"bind %s <Enter> {set status \" some help 1 for %s \"}\n",tkey,tkey);
+                fprintf(tp,"bind %s <Leave> {set status \"\"}\n",tkey);		
 
                 fprintf(tp,"pack append %s %s %s %s %s\n",
                         t,tkey,  "{left frame center filly}",
@@ -393,6 +399,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(tp,"bind %s <1> \"my_help 0 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <2> \"my_help 1 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <3> \"set %s \\\"\\\"; focus %s\"\n",tkey,tvar,tval);
+		// new
+                fprintf(tp,"bind %s <Enter> {set status \" some help 2 for %s \"}\n",tkey,tkey);
+                fprintf(tp,"bind %s <Leave> {set status \"\"}\n",tkey);		
 
                 fprintf(tp,"pack append %s %s %s %s %s\n",
                         t,tkey,  "{left frame center filly}",
@@ -467,6 +476,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(tp,"bind %s <1> \"my_help 0 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <2> \"my_help 1 $%s\"\n",tkey,tvar);
                 fprintf(tp,"bind %s <3> \"set %s %s; focus %s\"\n",tkey,tvar,ip[0],tval);
+		// new
+                fprintf(tp,"bind %s <Enter> {set status \" some help 3 for %s \"}\n",tkey,tkey);
+                fprintf(tp,"bind %s <Leave> {set status \"\"}\n",tkey);		
 
                 fprintf(tp,"pack append %s %s %s %s %s\n",
                         t,tkey,  "{left frame center filly}",
@@ -524,6 +536,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 fprintf(tp,"bind %s <2> \"my_help 1 $%s\"\n",tkey,tvar);
 		fprintf(tp,"# is bug in next line fixed now?\n");
                 fprintf(tp,"bind %s <3> \"set %s \\\"%s\\\"\"\n",tkey,tvar,ip[0]);
+		// new
+                fprintf(tp,"bind %s <Enter> {set status \" some help 4 for %s \"}\n",tkey,tkey);
+                fprintf(tp,"bind %s <Leave> {set status \"\"}\n",tkey);		
 
                 fprintf(tp,"pack append %s %s %s %s %s\n",
                         t,tkey,  "{left frame center filly}",
@@ -622,6 +637,9 @@ int parse(FILE *fp, FILE *tp, FILE *sp, int maxw, Widget *w)
                 for (i=0; ip[i] != 0; i++)
                     fprintf(tp,"set %s_%s 0;",tvar,ip[i]);
                 fprintf(tp,"new_%s\"\n",tvar);
+		// new
+                fprintf(tp,"bind %s <Enter> {set status \" some help 5 for %s \"}\n",tkey,tkey);
+                fprintf(tp,"bind %s <Leave> {set status \"\"}\n",tkey);		
 
                 fprintf(tp,"pack append %s %s %s %s %s\n",
                         t,tkey,  "{left frame center filly}",
@@ -755,6 +773,7 @@ void example(void)
 void usage(void)
 {
   fprintf(stderr,"Usage: tkrun [-options] script\n");
+  fprintf(stderr,"Version: 14-jul-2023\n");
   fprintf(stderr,"  Extracts simple widgets from \"script\", writes a tcl/tk script\n");
   fprintf(stderr,"  and runs this script to execute \"script\"\n");
   fprintf(stderr,"Command line flags:\n");
