@@ -10,7 +10,7 @@
 #  are listed below
 #
 #  In full version (opt=1 python=1) this script takes about 14 mins
-#  A simple version without falcON and any checks and benchmarks takes about 2 mins
+#  A simple version without falcON and any checks and benchmarks takes about 1-2 mins
 #   opt=0 python=0 falcon=0                  1'50"
 #   opt=0 python=0 falcon=0 mknemos=cfitsio  2'13"
 #   opt=0 python=0                           5'30"
@@ -177,9 +177,9 @@ date1=$(date)
 echo "Started: $date0"
 echo "Ended:   $date1"
 
-echo All done.
+echo All done installing $nemo
 echo ""
-fnemo=$(readline -f $nemo)
+fnemo=$(pwd)
 echo "(ba)sh users:  source $fnemo/nemo_start.sh  to activate NEMO in your shell"
 echo "(t)csh users:  source $fnemo/nemo_start.csh to activate NEMO in your shell"
 
