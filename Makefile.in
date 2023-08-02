@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 18-jul-2023 PJT
+VERSION = NEMO V4.4 2-aug-2023 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -631,7 +631,7 @@ checkpars:
 
 TIME = /usr/bin/time
 
-## bench:     basic benchmark test
+## bench:     basic benchmark test based off all Benchfile's
 bench:   benchtest
 
 benchtest:
@@ -654,13 +654,24 @@ bench5:
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
 
-## bench11:    special gyrfalcON bench with 1e6 particles
+## bench11:   special gyrfalcON bench with 1e6 particles
 bench11:
 	mkplummer - 1000000 seed=123 | gyrfalcON - . eps=0.05 kmax=7 tstop=0.125
 	@echo " 0.1250000000 -0.2499838110 0.2497201 -0.4997039 -0.4980992 1.0027 0.00018 1.0e-09   5 14  0.11  1.05  1.18   0:00:20.38 [bench11]"
 
+## bench11a:  like bench11 but run forever
 bench11a:
 	mkplummer - 1000000 seed=123 | gyrfalcON - . eps=0.05 kmax=7
+
+## bench12:   special hackcode1 bench with 1e6 particles
+bench12:
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=0.125 freq=128 | grep 0.125
+	@echo " 0.1250000000 -0.2499838110 0.2497201 -0.4997039 -0.4980992 1.0027 0.00018 1.0e-09   5 14  0.11  1.05  1.18   0:00:20.38 [bench11]"
+
+## bench12a:  like bench12 but run forever
+bench12a:
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128 
+	@echo " 0.1250000000 -0.2499838110 0.2497201 -0.4997039 -0.4980992 1.0027 0.00018 1.0e-09   5 14  0.11  1.05  1.18   0:00:20.38 [bench11]"
 
 
 #

@@ -10,7 +10,7 @@
 string defv[] = {
     "in=???\n            Input netCDF4 file",
     "mode=1\n            1=ifproc  2=roach   3=SpecFile",
-    "VERSION=0.2a\n      27-may-2022 PJT",
+    "VERSION=0.3\n       28-jul-2023 PJT",
     NULL,
 };
 
@@ -22,15 +22,29 @@ string usage = "netCDF4 info and bench reduction procedures";
 #define ERR(e) {printf("Error: %s\n", nc_strerror(e)); exit(ERRCODE);}
 
 
+#include <sys/types.h>
+#include <sys/stat.h>
+
+local int checkexists(string name)
+{
+    permanent struct stat statbuf;
+
+    return ((stat(name, &statbuf) == 0) ? 1 : 0);
+}
+
+
 void nemo_main(void)
 {
   string infile;
   int mode, ncid, retval;
 
-  warning("Experimental program to interrogate LMT netcdf files");
+  warning("Experimental NEMO program to interrogate LMT netcdf files");
 
   infile = getparam("in");
   mode = getiparam("mode");
+
+  if (!checkexists(infile))
+    error("%s does not exist",infile);
 
   if ((retval = nc_open(infile, NC_NOWRITE, &ncid)))
     ERR(retval);
