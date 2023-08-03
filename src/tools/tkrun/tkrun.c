@@ -739,6 +739,7 @@ void example(void)
     printf("#>  IFILE   in=\n");
     printf("#>  OFILE   out=\n");
     printf("#>  IDIR    indir=\n");
+    printf("#>  ODIR    outdir=\n");
     printf("#>  ENTRY   eps=0.01\n");
     printf("#>  RADIO   mode=gauss              gauss,newton,leibniz\n");
     printf("#>  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis\n");
@@ -755,10 +756,13 @@ void example(void)
     printf("echo in      =$in\n");
     printf("echo indir   =$indir\n");
     printf("echo out     =$out\n");
+    printf("echo outdir  =$outdir\n");
     printf("echo eps     =$eps\n");
     printf("echo mode    =$mode\n");
     printf("echo options =$options\n");
     printf("echo n       =$n\n");
+    printf("#\n");
+    printf("#  NOTE the ODIR directive has not been implemented yet\n");
 
 #if 0
     printf("# Here is an example of automatically setting default:\n");
@@ -773,7 +777,7 @@ void example(void)
 void usage(void)
 {
   fprintf(stderr,"Usage: tkrun [-options] script\n");
-  fprintf(stderr,"Version: 14-jul-2023\n");
+  fprintf(stderr,"Version: 3-aug-2023\n");
   fprintf(stderr,"  Extracts simple widgets from \"script\", writes a tcl/tk script\n");
   fprintf(stderr,"  and runs this script to execute \"script\"\n");
   fprintf(stderr,"Command line flags:\n");
