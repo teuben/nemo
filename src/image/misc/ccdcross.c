@@ -21,7 +21,7 @@ string defv[] = {
   "box=\n         Half size of correlation box",
   "clip=\n        Only use values above this clip level",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.1\n  11-apr-2022 PJT",
+  "VERSION=0.1a\n 11-apr-2022 PJT",
   NULL,
 };
 
@@ -166,10 +166,11 @@ local void do_cross(int l0, int l)
 	}
     real sumx=0, sumy=0, sumxx=0, sumxy=0, sumyy=0;
     int dx, dy;
+    int n=3;
     sum = 0;
-    for (dy=-3; dy<=3; dy++) {        // 
+    for (dy=-n; dy<=n; dy++) {        // 
       iy = iy0+dy;
-      for (dx=-3; dx<=3; dx++) {
+      for (dx=-n; dx<=n; dx++) {
 	ix = ix0+dx;
 	sum   = sum   + CubeValue(optr,ix,iy,0);
 	sumx  = sumx  + CubeValue(optr,ix,iy,0) * dx;
@@ -180,8 +181,11 @@ local void do_cross(int l0, int l)
       }
     }
     dprintf(0,"X,Y mean: %g %g\n", sumx/sum, sumy/sum);
-    dprintf(0,"Center at: %g %g\n",
-	    ix0-box+sumx/sum, iy0-box+sumy/sum);
+    real xcen = ix0-box+sumx/sum;
+    real ycen = iy0-box+sumy/sum;
+    dprintf(0,"Center at: %g %g\n",xcen,ycen);
+    printf("%g %g\n",xcen,ycen);
+	   
     
     if (badvalues)
     	warning("There were %d bad operations in dofie",badvalues);
