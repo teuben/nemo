@@ -12,6 +12,9 @@ os=$(uname -s)
 gitbv() {
     _branch=$(cd $1;git branch --show-current)
     _counter=$(cd $1;git rev-list --count HEAD)
+    _lastdate=$(cd $1;git log -1 --format="%at" | xargs -I{} date -d @{} +%Y/%m/%d_%H:%M:%S)
+    _branch="$(printf %-10s $_branch)"
+    _counter="$(printf %-10s $_counter)"
 }    
 
 if [ -z $NEMO ]; then
@@ -20,7 +23,8 @@ if [ -z $NEMO ]; then
 else
     _version=$(cat $NEMO/VERSION)
     gitbv $NEMO
-    echo "NEMO:       $NEMO  - Version:$_version"
+    echo "NEMO:        $NEMO  - Version:$_version"
+    echo "git:         Branch:$_branch Counter:$_counter Date: $_lastdate"
 fi
 
 echo "python:      $(which python)  - $(python --version)"
@@ -31,6 +35,7 @@ elif [ $os == Darwin ]; then
 else
     echo "OS_release:  $os (unknown)"
 fi
+gitbv $NEMO
 
 # this is a relatively new git option, disable until we all have it
 # (cd $LMTOY; make branch)
@@ -50,5 +55,5 @@ if [ "$1" == dev ]; then
     echo "tsf:              "  $(tsf help=V)
     echo "tabplot:          "  $(tabplot help=V)
     echo "fitsccd:          "  $(fitsccd help=V)
-    echo "----------------------------------------------------------"
+    echo "----------------------------------------------------------"    
 fi
