@@ -1,4 +1,4 @@
-#! /bin/bin/env bash
+#! /usr/bin/env bash
 #
 # install anaconda3, plus a sourceable python_start script
 #
