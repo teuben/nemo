@@ -3,16 +3,24 @@
 #  graphical aid, using zenity, to configure and build NEMO
 #
 
+
+if ! [ -x "$(command -v zenity)" ]; then
+  echo 'Error: zenity is not installed.' >&2
+  exit 1
+fi
+
+
+
 options=$(zenity --list --checklist \
        --title="Choose the configure and build options for NEMO" \
        --separator=, \
        --column="Option"  --column "what"  --column="Description" \
-       FALSE   enable-debug  "Debugging enables" \
+       FALSE   enable-debug      "Debugging enables" \
        FALSE   disable-fortran   "Disable footran" \
        FALSE   with-csh          "no csh" \
-       FALSE   disable-shared   " on a mac?" \
-       FALSE   enable-clang     "clang compiler instead of gcc" \
-       FALSE   enable-single    "single precision" \
+       FALSE   disable-shared    " on a mac?" \
+       FALSE   enable-clang      "clang compiler instead of gcc" \
+       FALSE   enable-single     "single precision" \
        TRUE    build1    "do this" \
        TRUE    build2    "do this" \
        TRUE    build3    "do this" \
