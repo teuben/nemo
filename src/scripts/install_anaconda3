@@ -1,11 +1,11 @@
-#! /bin/env bash
+#! /usr/bin/env bash
 #
 # install anaconda3, plus a sourceable python_start script
 #
 
 #--HELP
 # default parameters
-    url=https://repo.anaconda.com/archive/Anaconda3-%s-%s-x86_64.sh
+    url=https://repo.anaconda.com/archive/Anaconda3-%s-%s-%s.sh
                    # anaconda3 versions available:
 version=2020.07    # 3.8.3
 version=2020.11    # 3.8.5
@@ -18,7 +18,12 @@ version=2023.03-1  # 3.10.9
 
    dir=$(pwd)/anaconda3       # where anaconda will be located
   wget=wgetc                  # use wgetc is you have my cashing version
-    os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
+  os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
+ cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
+
+# At the conclusion of the install, sourceable python_start.[c]sh scripts
+# are placed in the root directory (dir=) of anaconda3
+    
 #--HELP
 
 # some help?    
@@ -38,7 +43,7 @@ if [ "$os" = "Darwin" ]; then
     os=MacOSX
 fi
 
-mc3=$(printf $url $version $os)
+mc3=$(printf $url $version $os $cpu)
 $wget $mc3
 
 msh=$(basename $mc3)
