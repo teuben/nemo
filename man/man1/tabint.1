@@ -1,4 +1,4 @@
-.TH TABINT 1NEMO "31 July 2023"
+.TH TABINT 1NEMO "6 August 2023"
 
 .SH "NAME"
 tabint \- integrate a sorted table, optionally higher order moments
@@ -27,8 +27,8 @@ are then ignored.
 Input table file. No default.
 .TP
 \fBxcol=\fP
-Column with X coordinate. The X coordinates must be sorted
-in increasing X. Default: 1
+Column with X coordinate. If the X coordinates are not increasing, the
+array will be reversed. Default: 1
 .TP
 \fBycol=\fP
 Column with Y coordinate of function [Default: 2]
