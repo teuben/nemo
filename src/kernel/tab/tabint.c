@@ -26,7 +26,7 @@ string defv[] = {
   "cumulative=f\n   Show accumulation of integral",
   "scale=1\n        Scale factor to apply to integral",
   "mom=0\n          0=flux 1=weighted mean 2=dispersion",
-  "VERSION=0.8\n    6-aug-2023 PJT",
+  "VERSION=0.8a\n   7-aug-2023 PJT",
   NULL,
 
 };
@@ -81,6 +81,12 @@ void nemo_main()
     reverse(n, xdat);
     reverse(n, ydat);
   }
+  /* check if array is now properly sorted */
+  int nbad = 0;
+  for (i=1; i<n; i++)
+    if (xdat[i] < xdat[i-1]) nbad++;
+  if (nbad > 0) warning("There were %d/%d points not sorted properly",nbad, n);
+			       
   
   /* figure out some min/max */
   minmax(n,xdat,&xmin,&xmax);
