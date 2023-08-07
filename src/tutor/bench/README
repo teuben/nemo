@@ -1,1 +1,14 @@
 See also the 'mp' directory parallel to this about benchmarking multi-processing (OpenMP, MPI, OpenMPI)
+
+https://en.wikipedia.org/wiki/FLOPS
+
+flops:
+k2:	  4.7 GHz -> 14000  2.98 Gflops/Ghz
+k2:       2.5         6300  2.52
+x1        4.2         9700  2.31
+          2.1         1900  0.90
+dl:       4.8        12000  2.50
+i5-1240P  4.4?       13000  2.95
+i5-12450H
+t480      4.0         8000  2.00
+i9-12900K 4.2        15500  3.69
