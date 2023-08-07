@@ -1,4 +1,4 @@
-.TH CCDCROSS 1NEMO "11 April 2022"
+.TH CCDCROSS 1NEMO "3 August 2023"
 
 .SH "NAME"
 ccdcross \- cross correlate images with a reference image
@@ -23,11 +23,14 @@ to be given. No default.
 Output cross image. No default.
 .TP
 \fBcenter=\fP\fIx0,y0\fP
-X-Y Reference center (0-based pixels) []  
+X-Y Reference center around which a box (see \fBbox=\fP below) is taken.
+The are 0-based integer pixels. By default the center of the image
+is used.  Default: center of first input image.
 .TP
 \fBbox=\fP\fIb2\fP
 Half size of correlation box. The output image is forced to have an odd pixel size, 2*box+1.
-By default half the mapsize is used.
+The shift between the images should not exceed \fBbox\fP.
+By default half the mapsize is used. 
 .TP
 \fBclip=\fP\fIc\fP
 Only use values above this clip level. By default values are not clipped.
@@ -38,7 +41,7 @@ bad value to ignore. By default there is no bad value recognized.
 .SH "CAVEAT"
 Only 2D images are handled.
 .PP
-The WCS is ignored, 0-pixel based coordinates are reported.
+The WCS is ignored, 0-based pixel coordinates are reported.
 .PP
 Images should ideally be the same size, but nothing will stop the program from
 running off without that. The user is then responsible for computing the true offsets
@@ -51,8 +54,8 @@ each other.
 
 .nf
 
-    ccdgen "" - gauss 1,2 size=128,128 center=64,64  | ccdgen - g64 noise spar=0,0.05 
-    ccdgen "" - gauss 1,2 size=128,128 center=65,65  | ccdgen - g65 noise spar=0,0.05
+    ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05  in=-
+    ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05  in=-
     ccdcross g64,g65 shift.ccd box=16
     ...
     ### nemo Debug Info: max cross 12.2081 @ 17 17
@@ -74,4 +77,5 @@ Peter Teuben
 .nf
 .ta +1.5i +5.5i
 11-Apr-2022	V0.1 Created	PJT
+3-aug-2023	V0.2 fix absolute coordinate	PJT
 .fi
