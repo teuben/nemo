@@ -150,7 +150,6 @@ void nemo_main()
   } else {  /* use the datapoints itself */
     dx = xdat[1]-xdat[0];
     if (mom == 0) {
-      dprintf(0,"Simple mom0, dx=%g\n",dx);
       for (i=1; i<n; i++) {
 	sum  += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
 	sum0 += (xdat[i]-xdat[i-1]);
