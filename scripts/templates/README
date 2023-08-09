@@ -48,6 +48,12 @@ bash:
        export "$arg"
      done
 
+   or:
+
+     for arg in "$@"; do
+       export "$arg"
+     done
+
 python:
      import sys
      key=val

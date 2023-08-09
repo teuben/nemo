@@ -26,7 +26,7 @@ string defv[] = {
   "cumulative=f\n   Show accumulation of integral",
   "scale=1\n        Scale factor to apply to integral",
   "mom=0\n          0=flux 1=weighted mean 2=dispersion",
-  "VERSION=0.7\n    31-jul-2023 PJT",
+  "VERSION=0.8a\n   7-aug-2023 PJT",
   NULL,
 
 };
@@ -35,6 +35,7 @@ string usage="integrate a sorted table";
 
 
 extern int minmax(int, real *, real *, real *);
+local void reverse(int n, real *x);
 
 
 void nemo_main()
@@ -74,6 +75,18 @@ void nemo_main()
   n = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
 #endif
+
+  /* reverse arrays if not sorted properly */
+  if (xdat[0] > xdat[1]) {
+    reverse(n, xdat);
+    reverse(n, ydat);
+  }
+  /* check if array is now properly sorted */
+  int nbad = 0;
+  for (i=1; i<n; i++)
+    if (xdat[i] < xdat[i-1]) nbad++;
+  if (nbad > 0) warning("There were %d/%d points not sorted properly",nbad, n);
+			       
   
   /* figure out some min/max */
   minmax(n,xdat,&xmin,&xmax);
@@ -144,7 +157,7 @@ void nemo_main()
     dx = xdat[1]-xdat[0];
     if (mom == 0) {
       for (i=1; i<n; i++) {
-	sum += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
+	sum  += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
 	sum0 += (xdat[i]-xdat[i-1]);
 	if (Qcum) printf("%g %g %g\n",xdat[i],sum,sum/sum0);
       }
@@ -175,3 +188,14 @@ void nemo_main()
   printf("%s%g\n",  Qcum ? "# " : "",  sum * yscale);
 }
 
+
+local void reverse(int n, real *x)
+{
+  int i;
+  real t;
+  for(i = 0; i<n/2; i++) {
+    t = x[i];
+    x[i] = x[n-i-1];
+    x[n-i-1] = t;
+  }
+}
