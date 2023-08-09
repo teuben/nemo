@@ -647,6 +647,11 @@ bench1:
 bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
 
+## bench4:    4 times the flops benchmarks
+bench4:
+	(source nemo_start.sh; cd src/tutor/bench; make flops; ./flops 4)
+
+
 ## bench5:    special nemobench5
 bench5:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
@@ -670,7 +675,7 @@ bench12:
 
 ## bench12a:  like bench12 but run forever
 bench12a:
-	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128 
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128
 
 
 #
