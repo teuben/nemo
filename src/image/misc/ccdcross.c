@@ -1,8 +1,9 @@
 /* 
- * CCDSTACK: corr-correlate images, first one in the reference image
+ * CCDSTACK: cross-correlate images, first one in the reference image
  *
  *   11-apr-2022:    derived from ccdstack
  *
+ * @todo   gaussian fit to peak in corr image?
  */
 
 
@@ -16,16 +17,17 @@
 
 string defv[] = {
   "in=???\n       Input image files, first image sets the WCS",
-  "out=???\n      Output cross image",
+  "out=???\n      Output cross correlated image",
   "center=\n      X-Y Reference center (0-based pixels)",
   "box=\n         Half size of correlation box",
+  "n=3\n          Half size of box inside correlation box to find center",
   "clip=\n        Only use values above this clip level",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.1a\n 11-apr-2022 PJT",
+  "VERSION=0.2\n  4-aug-2023 PJT",
   NULL,
 };
 
-string usage = "cross correlate images";
+string usage = "cross correlate images to find the offset";
 
 
 #ifndef HUGE
@@ -45,23 +47,23 @@ bool     Qclip;
 real     clip;
 
 
-local void do_cross(int l0, int l);
+local void do_cross(int l0, int l, int n);
 
 extern int minmax_image (imageptr iptr);
 
-void nemo_main ()
+void nemo_main()
 {
     string *fnames;
     stream  instr;                      /* input files */
     stream  outstr;                     /* output file */
     int     nx, ny, nc;
-    int     ll;
+    int     ll, n;
     
     badval = getrparam("bad");
     Qclip = hasvalue("clip");
     if (Qclip) clip = getrparam("clip");
-
-    
+    n = getiparam("n");
+ 
     fnames = burststring(getparam("in"), ", ");  /* input file names */
     nimage = xstrlen(fnames, sizeof(string)) - 1;
     if (nimage > MAXIMAGE) error("Too many images %d > %d", nimage, MAXIMAGE);
@@ -80,6 +82,7 @@ void nemo_main ()
     } else {
       center[0] = Nx(iptr[0])/2;
       center[1] = Ny(iptr[0])/2;
+      dprintf(0,"center=%d,%d\n",center[0],center[1]);
     }
 
     if (hasvalue("box"))
@@ -101,7 +104,7 @@ void nemo_main ()
 	dprintf(0,"Image %d: pixel size %g %g   minmax %g %g\n",
 		ll, Dx(iptr[ll]),Dy(iptr[ll]),MapMin(iptr[ll]),MapMax(iptr[ll]));
         strclose(instr);        /* close input file */
-	do_cross(0,ll);
+	do_cross(0,ll,n);
     }
 
     write_image(outstr,optr); 
@@ -114,7 +117,7 @@ void nemo_main ()
  *  combine input maps into an output map  --
  *
  */
-local void do_cross(int l0, int l)
+local void do_cross(int l0, int l, int n)
 {
     real   sum;
     int    i, j, ix, iy, nx, ny;
@@ -150,13 +153,13 @@ local void do_cross(int l0, int l)
 	    sum += CubeValue(iptr[l0],ix1,iy1,0) * CubeValue(iptr[l],ix2,iy2,0);
 	  }
 	}
-	CubeValue(optr,i+box, j+box, 0) = sum;
+	CubeValue(optr,i+box,j+box,0) = sum;
       }
     }
 
     int ix0=0, iy0=0;
     minmax_image(optr);
-    dprintf(0,"New min and max in map are: %f %f\n",MapMin(optr) ,MapMax(optr) );
+    dprintf(0,"New min and max in correlation image are: %f %f\n",MapMin(optr) ,MapMax(optr) );
     for (iy=0; iy<Ny(optr); iy++)
       for (ix=0; ix<Nx(optr); ix++)
 	if (CubeValue(optr,ix,iy,0) == MapMax(optr)) {
@@ -164,13 +167,13 @@ local void do_cross(int l0, int l)
 	  iy0 = iy;
 	  dprintf(0,"Max cross %g @ %d %d\n",MapMax(optr),ix,iy);
 	}
+    
     real sumx=0, sumy=0, sumxx=0, sumxy=0, sumyy=0;
     int dx, dy;
-    int n=3;
     sum = 0;
-    for (dy=-n; dy<=n; dy++) {        // 
-      iy = iy0+dy;
-      for (dx=-n; dx<=n; dx++) {
+    for (dy=-n; dy<=n; dy++) {        // look around (ix0,iy0) by just a few pixels 
+      iy = iy0+dy;  
+      for (dx=-n; dx<=n; dx++) {      // to find the 
 	ix = ix0+dx;
 	sum   = sum   + CubeValue(optr,ix,iy,0);
 	sumx  = sumx  + CubeValue(optr,ix,iy,0) * dx;
@@ -180,16 +183,18 @@ local void do_cross(int l0, int l)
 	sumyy = sumyy + CubeValue(optr,ix,iy,0) * dy*dy;
       }
     }
-    dprintf(0,"X,Y mean: %g %g\n", sumx/sum, sumy/sum);
-    real xcen = ix0-box+sumx/sum;
-    real ycen = iy0-box+sumy/sum;
+    sumx /= sum;   sumy /= sum;
+    sumxx = sqrt(sumxx/sum - sumx*sumx);
+    sumyy = sqrt(sumyy/sum - sumy*sumy);    
+    dprintf(0,"X,Y mean: %g %g\n", sumx,  sumy);
+    dprintf(0,"X,Y sig:  %g %g\n", sumxx, sumyy);    
+    real xcen = ix0-box+sumx;
+    real ycen = iy0-box+sumy;
     dprintf(0,"Center at: %g %g\n",xcen,ycen);
-    printf("%g %g\n",xcen,ycen);
-	   
+    printf("%g %g  %g %g  %d %d\n",xcen,ycen,sumx,sumy, ix0,iy0);	   
     
     if (badvalues)
     	warning("There were %d bad operations in dofie",badvalues);
-    
 }
 
 
