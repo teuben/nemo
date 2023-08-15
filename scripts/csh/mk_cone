@@ -82,6 +82,7 @@ end
 # See also  https://arxiv.org/abs/2109.10437 (ALMA Imaging of a Galactic Molecular Outflow in NGC4945)
 # Bolatto et al. 2021
 # See https://arxiv.org/abs/2307.01854
+# See also Westmoquette et al. (2011) - MNRAS 414, 3719
 
 
 rm -f $out.*
