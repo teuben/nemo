@@ -12,14 +12,13 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
-#include <moment.h>
 
 string defv[] = {
         "in=???\n       Input image cube",
 	"out=???\n      Output image cube",
         "factor=2\n     Integer factor by which Z axis  is stretched",
 	"axis=z\n       Axis to be stretched (z,y,z)",
-	"VERSION=0.1\n  17-aug-2023 PJT",
+	"VERSION=0.2\n  18-aug-2023 PJT",
 	NULL,
 };
 
@@ -60,16 +59,15 @@ void nemo_main()
 
     outstr = stropen(getparam("out"), "w");
     create_cube(&optr,nx2,ny2,nz2);
-    Dx(optr) = axis==1 ? Dx(iptr)/factor : Dx(iptr);
-    Dy(optr) = axis==2 ? Dy(iptr)/factor : Dy(iptr);
-    Dz(optr) = axis==3 ? Dz(iptr)/factor : Dz(iptr);
-    Xmin(optr) = Xmin(iptr);
-    Ymin(optr) = Ymin(iptr);
-    Zmin(optr) = Zmin(iptr);
-    Xref(optr) = Xref(iptr);
-    Yref(optr) = Yref(iptr);
-    Zref(optr) = Zref(iptr);
-    Axis(optr) = Axis(iptr);
+    copy_header(iptr,optr,1);
+    /* fix cell size */
+    if(axis==1) Dx(optr) /= factor;
+    if(axis==2) Dy(optr) /= factor;
+    if(axis==3) Dz(optr) /= factor;
+    /* fix reference pixel, recalling integer pixel reference is in center of pixel */
+    if(axis==3) Xref(optr) = (Xref(iptr)+0.5)*factor - 0.5;
+    if(axis==3) Yref(optr) = (Yref(iptr)+0.5)*factor - 0.5;
+    if(axis==3) Zref(optr) = (Zref(iptr)+0.5)*factor - 0.5;
 
     if (axis==3) {
       for (j=0; j<ny; j++) {
