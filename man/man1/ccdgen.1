@@ -1,4 +1,4 @@
-.TH CCDGEN 1NEMO "8 December 2022"
+.TH CCDGEN 1NEMO "17 August 2023"
 
 .SH "NAME"
 ccdgen \- create or add objects to an image
@@ -194,6 +194,10 @@ In \fIbash\fP notation:
   ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\\
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
+.fi
+A test cube234.fits with value x + 10y + 100z can be made as follows:
+.nf
+  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
 .fi
 
 .SH "CAVEATS"
