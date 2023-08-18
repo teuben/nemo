@@ -22,7 +22,14 @@ string defv[] = {
 
 string usage="print out image header";
 
-/*  convenience function to print out the true extent of an axis */
+/*  convenience function to print out the true extent of an axis 
+  xm = xmin  - like FITS crval
+  xr = xref  - like FITS crpix, but 0 based, not 1
+  dx = dx    - like FITS cdelt
+  n  = n     - like FITS naxis
+  
+*/
+
 void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
   *xmin = xm - (xr+0.5)*dx;
   *xmax = xm + (n-0.5-xr)*dx;
