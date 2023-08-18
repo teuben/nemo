@@ -1,0 +1,51 @@
+.TH CCDSTRETCH 1NEMO "17 August 2023"
+
+.SH "NAME"
+ccdstretch \- stretching an image cube along an axis
+
+.SH "SYNOPSIS"
+\fBccdstretch\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBccdstretch\fP stretches  a selected axis from a cube
+by replacating the pixel values. This of course causes
+a step function along the stretch axis, but a subsequent
+\fIccdsmooth(1NEMO)\fP 
+
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input image cube. No default.
+.TP
+\fBout=\fP
+Output image cube. No default.
+.TP
+\fBfactor=\fP
+Integer factor by which the selected axis is stretched
+[Default: 2]
+.TP
+\fBaxis=x|y|z\fP.
+Select the axis to be stretched. Currently only z is implemented.
+Default: z
+
+.SH "EXAMPLES"
+.nf
+  fitsccd cube.fits - | ccdstretch - - 4 | ccdsmooth - -  nsmooth=2 dir=z | ccdfits -
+.fi
+
+.SH "SEE ALSO"
+ccdsmooth(1NEMO), ccdsub(1NEMO), ccdslice(1NEMO), image(5NEMO)
+
+.SH "FILES"
+src/image/trans/ccdstretch.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-aug-2023	Created		PJT
+.fi
