@@ -1,17 +1,16 @@
-.TH CCDSTRETCH 1NEMO "17 August 2023"
+.TH CCDSTRETCH 1NEMO "18 August 2023"
 
 .SH "NAME"
-ccdstretch \- stretching an image cube along an axis
+ccdstretch \- stretching an image cube along a given axis
 
 .SH "SYNOPSIS"
 \fBccdstretch\fP [parameter=value]
 
 .SH "DESCRIPTION"
 \fBccdstretch\fP stretches  a selected axis from a cube
-by replacating the pixel values. This of course causes
-a step function along the stretch axis, but a subsequent
-\fIccdsmooth(1NEMO)\fP 
-
+by duplicating its pixel values \fBfactor\fP times. This of course causes
+a step function along the stretched axis, but a subsequent
+\fIccdsmooth(1NEMO)\fP can fix this. See EXAMPLES below.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -26,15 +25,32 @@ Output image cube. No default.
 Integer factor by which the selected axis is stretched
 [Default: 2]
 .TP
-\fBaxis=x|y|z\fP.
-Select the axis to be stretched. Currently only z is implemented.
+\fBaxis=x|y|z\fP
+Select the axis to be stretched. Valid are:  x,X,1 for the first axis,
+y,Y,2 for the second and z,Z,3 for the third axis of the cube.
 Default: z
 
 .SH "EXAMPLES"
+An example of stretching an axis 4 times, and adding some smoothing to make it look less edgy:
 .nf
-  fitsccd cube.fits - | ccdstretch - - 4 | ccdsmooth - -  nsmooth=2 dir=z | ccdfits -
-.fi
 
+  fitsccd cube.fits - | ccdstretch - - 4 z | ccdsmooth - -  nsmooth=2 dir=z | ccdfits - cube4.fits
+  
+.fi
+Depending how much you stretch, the smoothing function and/or number of times to smooth
+may need to be changed. In this example the axis is stretched 4 times, and two hanning smoothings
+are then applied.
+.PP
+If multiple axese need to be stretched, the program currently needs to be run multiple time,
+for example in a Unix pipe, as only one axis at the time can be stretched. Here is an example
+of stretching a 2 x 2 x 2 cube into a 4 x 4 x 4 cube:
+.nf
+
+   ccdgen cube0 noise 0,1 2,2,2
+   ccdstretch cube0 - 2 x | ccdstretch - - 2 y | ccdstretch - - 2 z | ccdprint - x= y= z= label=z pixel=t
+  
+   
+.fi
 .SH "SEE ALSO"
 ccdsmooth(1NEMO), ccdsub(1NEMO), ccdslice(1NEMO), image(5NEMO)
 
@@ -47,5 +63,6 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.5i +5.5i
-17-aug-2023	Created		PJT
+17-aug-2023	V0.1 for Stuart Vogel's rosetta stone cube	PJT
+	paws-pdbi+30m-12co10-1as-cube.fits
 .fi
