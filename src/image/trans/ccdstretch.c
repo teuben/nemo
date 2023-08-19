@@ -66,8 +66,9 @@ void nemo_main()
       ny2 = axis==2 ? ny*factor : ny;
       nz2 = axis==3 ? nz*factor : nz;
     }
-    dprintf(0,"Input: %d x %d x %d   Output: %d x %d x %d \n",
-	    nx,ny,nz, nx2,ny2,nz2);
+    dprintf(0,"Input: %d x %d x %d   Output: %d x %d x %d   %s %s %s\n",
+	    nx,ny,nz, nx2,ny2,nz2,
+	    saxis, Qbin ? "compress" : "stretch ",  Qbin ?  (Qaver ? "aver" : "sum") : "");
 
     outstr = stropen(getparam("out"), "w");
     create_cube(&optr,nx2,ny2,nz2);
