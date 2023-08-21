@@ -1,4 +1,4 @@
-.TH CCDSUB 1NEMO "1 May 2022"
+.TH CCDSUB 1NEMO "19 August 2023"
 
 .SH "NAME"
 ccdsub \- sub/average of an image, and optionally reorder axes.
@@ -19,6 +19,8 @@ get rid of them, or use the \fBdummy=\fP keyword below.
 If no parameters are given, other than in= and out=, the image
 is copied straight through, which is still a great way to
 test your I/O subsystem, assuming your image fits in memory.
+.PP
+Use \fIccdstretch(1NEMO)\fP with \fBcompress=t\fP if true binning has to be used.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -82,7 +84,7 @@ to the new "zxy" order:
 .fi
 
 .SH "SEE ALSO"
-ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
+ccdslice(1NEMO), ccdstretch(1NEMO), ccdmom(1NEMO), image(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
