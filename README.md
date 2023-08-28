@@ -44,9 +44,10 @@ Packages we optionally use (sometimes also installed in $NEMO/opt with source co
 	 wcstools
 
 Tools you will need to have pre-installed: the C/C++/Fortran
-compilers, (t)csh, and git.  For graphics it's probably
-useful to have pgplot, but the default ps driver works
-fine just to get started quickly.
+compilers, (t)csh, and git.  For graphics it's probably useful to have
+pgplot, but the default ps driver works fine just to get started.
+We are looking for more portable full graphics, as an alternative
+to pgplot.
 
 The files in $NEMO/src/scripts/linux describe the actual package
 names for different linux distros that should lead to success.
@@ -64,22 +65,22 @@ you have the preconditions):
          make build check bench5
          source nemo_start.sh
 
-If you plan to modify code and submit pull request, the github CLI is now recommended,
+If you plan to modify code and submit pull requests, the github CLI is recommended,
 though you can of course also clone the upstream manually (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
 
-On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
-awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
+On the most recent apple controlled hardware, with SIP enabled, you might be in for a rude
+awakening. I use brew on a mac, and assuming you have gcc-10 (and related) and pgplot installed, this should
 work (there may be other ways to install tools on a mac, but don't get me started):
 
          git clone https://github.com/teuben/nemo
          cd nemo
-         CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
+         CC=gcc-10 CXX=g++-10 FC=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
          make build check bench5
          source nemo_start.sh
 
-After installaton, rebuilding NEMO to ensure you have all updates can be done as follows:
+After installation, rebuilding NEMO to ensure you have all updates can be done as follows:
 
          cd $NEMO
          git pull
@@ -108,7 +109,7 @@ the positions and view the contents of its binary file:
 
 and here is an example of creating the 4 major data objects on the fly in NEMO
 (table, snapshot, image, orbit), showing off the command line interface and
-use of unix pipes with a dash denoting the piped file:
+use of Unix pipes, with a dash denoting the piped file:
 
          tabgen -  | tabplot -
          mkplummer - 100 | snapplot - 
@@ -128,7 +129,7 @@ There are several additional entry points if you are starting out with NEMO:
 * readthedocs: https://astronemo.readthedocs.io/en/latest/
 * github pages: https://teuben.github.io/nemo
 * software carpentry: https://teuben.github.io/nemo-lesson 
-* contributing to NEMO: CONTRIBUTING.md
+* contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
 
 ## Citation
 
