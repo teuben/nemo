@@ -3,6 +3,8 @@
  *
  *       17-aug-2023     V0.1 written for Stuart's rosetta cube
  *       19-aug-2023     V0.5 added compress= and average=
+ *
+ *   @todo some crop=t/f factor if the channels are not a multiple of factor (default will crop them)
  */
 
 
