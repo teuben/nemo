@@ -15,7 +15,7 @@ string defv[] = {
      NULL,
 };
 
-string usage="NEMO version of the OpenMP scaling program";
+string usage="NEMO version of the well scaled OpenMP scaling program";
 		 
 
 void nemo_main(void)
@@ -49,7 +49,7 @@ void nemo_main(void)
     }
     t0 = 60*cputime2(0);
     t1 = 60*cputime2(2);
-    dprintf(0,"cputime: %g %g %g sec\n",t0, t1, t1-t2);
+    dprintf(0,"cputime: %d %g %g %g sec\n", niter+1, t0, t1, t1-t2);
     t2 = t1;
   }
   
