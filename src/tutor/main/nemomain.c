@@ -21,7 +21,10 @@
 string defv[] = {                               /* keywords definitions */
     "nmax=10\n          Number of iterations",
     "format=%20.10f\n	Format to print result",
-    "VERSION=1.2\n      12-feb-95 PJT",
+    "a=1\n              the a number",
+    "b=2\n              the b number",
+    "c=3\n              the c number",        
+    "VERSION=1.3\n      30-aug-2023 PJT",
     NULL,
 };
 
@@ -29,7 +32,7 @@ string usage = "Example C program with nemo_main convention";	/* Usage */
 
 void nemo_main(void)                            /* NEMO's program main entry */
 {
-    real a;         /* becomes 'float' or 'double' depending on compile flag */
+    real a,b,c;         /* becomes 'float' or 'double' depending on compile flag */
     int   i, nmax;
     char fmt[64];
 
@@ -44,4 +47,9 @@ void nemo_main(void)                            /* NEMO's program main entry */
 
     sprintf(fmt,"The sum is %s\n",getparam("format")); /* set format string */
     printf(fmt,a);                                         /* output */
+
+    a = getrparam("a");
+    b = getrparam("b");
+    c = getrparam("c");
+    printf("a=%g b=%g c=%g\n",a,b,c);
 }
