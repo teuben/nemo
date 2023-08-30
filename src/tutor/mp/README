@@ -17,3 +17,7 @@ OMP_NUM_THREADS=4 sections iter=10000
 
 No openmp:
 25.02user 0.00system 0:25.02elapsed 99%CPU (0avgtext+0avgdata 17824maxresident)k
+
+cool pages:
+
+https://zingale.github.io/phy504/openmp-relax.html
