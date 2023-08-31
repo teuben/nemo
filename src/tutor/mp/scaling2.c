@@ -11,11 +11,11 @@ string defv[] = {
     "umax=10000\n         sqrt of Ending",   
     "umax2=0\n            Non-parallel loop",
     "iter=1\n             How many times to iterate and report timing",
-    "VERSION=1.2\n        29-aug-2022 PJT",
+    "VERSION=1.3\n        31-aug-2022 PJT",
      NULL,
 };
 
-string usage="NEMO version of the OpenMP scaling program";
+string usage="NEMO version of the well scaled OpenMP scaling program";
 		 
 
 void nemo_main(void)
@@ -33,7 +33,6 @@ void nemo_main(void)
   dprintf(0,"omp_get_num_procs() -> %d\n",np_openmp);
   dprintf(0,"scaling2: umin=%ld umax=%ld\n",umin,umax);
   
-
   while (niter--) {
     double sum=0.0;
 #pragma omp parallel for reduction(+:sum)
@@ -49,7 +48,7 @@ void nemo_main(void)
     }
     t0 = 60*cputime2(0);
     t1 = 60*cputime2(2);
-    dprintf(0,"cputime: %d %g %g %g sec\n",iter, t0, t1, t1-t2);
+    dprintf(0,"cputime: %d %g %g %g sec\n", niter+1, t0, t1, t1-t2);
     t2 = t1;
   }
   
