@@ -69,3 +69,10 @@ bench7: python_openmp.py
 	@echo OMP_NUM_THREADS ONT=$(ONT)
 	-@for i in $(ONT); do\
 	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ipython python_openmp.py); done
+
+bench8: scaling2
+	@echo OMP_NUM_THREADS ONT=$(ONT)
+	-@for i in $(ONT); do\
+	   (echo $$i;$(TIME) scaling2 umax=20000 np=$$i iter=20*$$i debug=-1); done
+
+
