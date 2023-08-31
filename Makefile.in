@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 2-aug-2023 PJT
+VERSION = NEMO V4.4 31-aug-2023 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -655,6 +655,10 @@ bench4:
 ## bench5:    special nemobench5
 bench5:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
+
+## bench8:    OpenMP test
+bench8:
+	(source nemo_start.sh; cd src/tutor/mp; make scaling2 bench8)
 
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
