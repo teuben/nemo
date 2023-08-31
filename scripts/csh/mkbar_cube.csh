@@ -39,6 +39,9 @@ if ($#argv == 0) then
   exit 0
 endif
 
+
+#--HELP
+
 # 			Required Keywords
 unset in
 unset out
@@ -71,6 +74,14 @@ set vsys=0
 #
 set par=""
 set inden=""
+#--HELP
+
+if ( "$1" == "--help" || "$1" == "-h" ) then
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+endif
+
+
 #			Parse commandline to (re)set keywords
 foreach a ($*)
   set $a
