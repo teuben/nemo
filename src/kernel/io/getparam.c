@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7i 5-nov-2022 PJT"
+#define GETPARAM_VERSION_ID  "3.7j 1-sep-2023 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -2980,7 +2980,7 @@ local void set_np(string arg)
       warning("Problem setting %s",np_env);
     } else {
       np_openmp = atoi(arg);
-      dprintf(0,"%s\n",np_env);
+      dprintf(1,"%s\n",np_env);
 #if _OPENMP      
       /* on linux the putenv (or even setenv) don't seem to work */
       /* forcing me to use omp_set_num_threads()                 */
