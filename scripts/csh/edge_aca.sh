@@ -5,33 +5,37 @@
 #
 #
 _script=edge_aca.sh
-_version=6-sep-2023
+_version=8-sep-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
 #--HELP
 #
-#  edge_aca.sh   simulate an EDGE ACA cube at CO(2-1)
+#  edge_aca.sh   simulate an EDGE ACA cube at 230.538 GHz CO(2-1)
 #
-run=model1             # identification, and basename for all files     
+run=model1             # identification, and basename for all files       #> ENTRY    
 nbody=1000000          # number of bodies per model                       #> RADIO 1000,10000,100000,1000000
 r0=10                  # turnover radius (arcsec)                         #> SCALE 1:100:1
 v0=200                 # peak velocity (km/s)                             #> SCALE 50:400:10
-re=20                  # exponential scalelength of disk                  #> SCALE 1:100:1
-rmax=60                # edge of disk                                     
+r1=0.1                 # central unresolved bulge, bar or black hole
+v1=300                 # representative rotation speed at r1
+re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
+rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 
 pa=90                  # PA of receding side disk (E through N)           #> SCALE 0:360:1               
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 
 beam=5                 # FWHM of spatial smoothing beam (arcsec)          #> SCALE 1:20:1
-vbeam=5                # FWHM of spectral smoothing beam                  #> SCALE 1:40:2
-range=80               # gridding from -range:range                       
-vrange=320             # velocity gridding -vrange:vrange
+vbeam=5                # FWHM of spectral smoothing beam   (arcsec)       #> SCALE 1:40:2
+range=80               # gridding from -range:range  (arcsec)                       
+vrange=320             # velocity gridding -vrange:vrange (km/s)
 nsize=160              # number of spatial pixels (px=py=2*range/nx)
-nvel=120               # number of spectral pixels 
+nvel=120               # number of spectral pixels
+
+z0=0                   # scaleheight [buggy]                              #> SCALE 0:10:0.5
 
 seed=0                 # random seed
-frac=0                 # fraction random motion                           #> SCALE 0:1:0.01
+sigma=0                # random motion in plane  (km/s)                   #> SCALE 0:20:0.1
 
 noise=0.1              # add optional noise to cube                       #> ENTRY
 clip=0.1               # clipping level for cube                          #> ENTRY
@@ -67,17 +71,28 @@ echo `date` :: $* >> $run.history
 
 rm -f $run.* >& /dev/null
 
-echo "Creating homogeneous disk with $nbody particles times"
 
-
-mkdisk out=- nbody=$nbody seed=$seed \
-       potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$frac rmax=$rmax debug=1 |\
+if [ $v1 = 0 ]; then
+  echo "Creating homogeneous disk with $nbody particles times"
+  mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
+       potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
     snapmass - - "mass=exp(-r/$re)" |\
     snapscale - - mscale=$nbody |\
     snaprotate - $run.20 "$inc,$pa" yz
+else
+  m1=`nemoinp "$r1*($v1/0.62)**2"`
+  echo "Creating homogeneous disk with $nbody particles times and a nuclear component m1=$m1"
+  rotcurves  name1=rotcur0 pars1=0,$v0,$r0  name2=plummer pars2=0,$m1,$r1 tab=t radii=0:${rmax}:0.01 |\
+      tabmath - - %1,1,%2,$sigma all > $run.tab
+  tabplot $run.tab 1 3 yapp=1/xs
 
+  mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
+    snapmass - - "mass=exp(-r/$re)" |\
+    snapscale - - mscale=$nbody |\
+    snaprotate - $run.20 "$inc,$pa" yz
+fi
 
-echo "Creating a velocity field - method 1"
+echo "Creating velocity moments"
 snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
 snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
 snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
@@ -87,7 +102,7 @@ ccdsmooth $run.23 $run.23c $beam
 ccdmath $run.21c,$run.22c,$run.23c $run.20d %1
 ccdmath $run.21c,$run.22c,$run.23c $run.20v "%2/%1"
 ccdmath $run.21c,$run.22c,$run.23c $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
-#  cutoff
+#  clipping
 ccdmath $run.20d,$run.21 $run.21d "ifgt(%2,0,%1,0)"
 ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
 ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
@@ -147,7 +162,7 @@ if [ $show = 1 ]; then
     xpaset -p ds9 frame frameno 4
     nds9 $run.fits
 
-    tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr"
+    tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 
 
