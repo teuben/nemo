@@ -113,8 +113,9 @@ mkplummer - 1 | snapgrid - $run.p1 $grid_pars
 ccdsmooth $run.p1 $run.beam $beam dir=xy
 
 echo "Creating a velocity field - method 2"
-snapgrid $run.20 $run.30 $grid_pars \
-    zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m
+snapgrid $run.20 - $grid_pars \
+	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m |\
+    ccdflip - $run.30 z wcs=t
 ccdstat $run.30
 if [ $vbeam = 0 ]; then
   ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
@@ -126,7 +127,7 @@ ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
 ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
 ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
 
-# see if we need WCS from a reference map
+# see if we need WCS from a reference map and if we need the flip the cube
 
 if [ -e $refmap ]; then
     ra=$(fitshead $refmap | grep CRVAL1 | awk '{print $3}')
