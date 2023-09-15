@@ -5,7 +5,7 @@
 #
 #
 _script=edge_aca.sh
-_version=8-sep-2023
+_version=14-sep-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -18,7 +18,7 @@ nbody=1000000          # number of bodies per model                       #> RAD
 r0=10                  # turnover radius (arcsec)                         #> SCALE 1:100:1
 v0=200                 # peak velocity (km/s)                             #> SCALE 50:400:10
 r1=0.1                 # central unresolved bulge, bar or black hole
-v1=300                 # representative rotation speed at r1
+v1=0                   # representative rotation speed at r1
 re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
 rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 
@@ -129,17 +129,26 @@ ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
 # see if we need WCS from a reference map
 
 if [ -e $refmap ]; then
-    ra=$(fitshead $refmap | grep CRVAL1 | awk '{print $3}')
-   dec=$(fitshead $refmap | grep CRVAL2 | awk '{print $3}')
-  vref=$(fitshead $refmap | grep CRVAL3 | awk '{print $3}')
+    #  RA and DEC we take the value at the reference pixel
+    #  VLSR we take the value at the center of the band
+     ra=$(fitshead $refmap | grep CRVAL1 | awk '{print $3}')
+    dec=$(fitshead $refmap | grep CRVAL2 | awk '{print $3}')
+   vref=$(fitshead $refmap | grep CRVAL3 | awk '{print $3}')
+ cdelt3=$(fitshead $refmap | grep CDELT3 | awk '{print $3}')
+   vpix=$(fitshead $refmap | grep CRPIX3 | awk '{print $3}')
+   npix=$(fitshead $refmap | grep NAXIS3 | awk '{print $3}')
   echo "REFMAP: $ra $dec $vref"
   # @todo figure out of m/s,km/s or freq
   vscale=1000
-  vlsr=$(nemoinp $vref/$vscale)
-  crval=$ra,$dec,$vlsr 
+  vlsr=$(nemoinp "($vref+($npix+1)*$cdelt3/2)/$vscale")
+  echo VLSR=$vlsr
+  crval=$ra,$dec,$vlsr
+  cdelt3=$(nemoinp "ifgt($cdelt3,0,1,-1)")
+  cdelt3=1
 else
   vlsr=0    
   crval=180,0,0
+  cdelt3=1
 fi
      
 # single dish profile
@@ -150,7 +159,7 @@ ccdmom $run.32 - axis=1 mom=0 |\
 
 # export for barolo or so, in decent units (could also use ccdsky)
 # this way the input spatial scale is in arcsec and km/s
-ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
+ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,$cdelt3 crval=$crval restfreq=$restfreq
 
 if [ $show = 1 ]; then
     xpaset -p ds9 frame frameno 1
