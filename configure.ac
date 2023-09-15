@@ -876,7 +876,7 @@ AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
 
 AC_SEARCH_LIBS([dlopen], [dl dld], [], [
-  AC_MSG_ERROR([unable to find the dlopen() function])
+  AC_MSG_WARN([unable to find the dlopen() function])
 ])
 
 

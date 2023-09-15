@@ -1,4 +1,4 @@
-.TH FITSCCD 1NEMO "19 February 2015"
+.TH FITSCCD 1NEMO "6 September 2023"
 
 .SH "NAME"
 fitsccd \- read a (fits) image file from disk
@@ -121,6 +121,12 @@ Use relative coordinates instead of absolute coordinates?
 \fBaxistype=0|1\fP
 Old style (0) or new style with crpix-type header information (1) passed
 through. Default: 0
+.TP
+\fBaltr=t|f\fP
+If set, it will attempt to convert the 3rd axis from FREQ to VRAD (in km/s).
+The current implementation is very simple and also depends on the ALTRPIX
+being the same as CDELT3.
+Default:  f
 
 .SH "FOREIGN FORMATS"
 An \fIAIPS\fP dataset...
@@ -198,7 +204,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 7-mar-90	V1.0 Written	PJT
 1-oct-90	V3.0 New fitsio routines from Sault	PJT
 11-oct-90	V3.1 Added 'raw' mode  	PJT
@@ -206,6 +212,7 @@ Peter Teuben
 18-may-99	V3.6 added support to read CD_i_j based files	PJT
 21-mar-00	V3.6a fixed offset bug for raw cubes	PJT
 7-nov-00	V3.7 added relcoords=	PJT
-23-nov-04	V4.9 added axistype=  for new image format PJT
+23-nov-04	V4.9 added axistype=  for new image format	PJT
 19-feb-2015	V5.1 added box= to select a subregion in XY	PJT
+6-sep-2023	V5.5 implemented a simple altr=t wcs converson	PJT
 .fi
