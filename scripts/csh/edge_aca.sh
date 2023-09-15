@@ -5,7 +5,7 @@
 #
 #
 _script=edge_aca.sh
-_version=14-sep-2023
+_version=15-sep-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -112,21 +112,6 @@ echo "Creating the beam"
 mkplummer - 1 | snapgrid - $run.p1 $grid_pars
 ccdsmooth $run.p1 $run.beam $beam dir=xy
 
-echo "Creating a velocity field - method 2"
-snapgrid $run.20 - $grid_pars \
-	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m |\
-    ccdflip - $run.30 z wcs=t
-ccdstat $run.30
-if [ $vbeam = 0 ]; then
-  ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
-else
-  ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam dir=z
-fi
-ccdsmooth $run.31 $run.32 $beam dir=xy
-ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
-ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
-ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
-
 # see if we need WCS from a reference map and if we need the flip the cube
 
 if [ -e $refmap ]; then
@@ -144,14 +129,33 @@ if [ -e $refmap ]; then
   vlsr=$(nemoinp "($vref+($npix+1)*$cdelt3/2)/$vscale")
   echo VLSR=$vlsr
   crval=$ra,$dec,$vlsr
-  cdelt3=$(nemoinp "ifgt($cdelt3,0,1,-1)")
-  cdelt3=1
+  flip=$(nemoinp "ifgt($cdelt3,0,1,-1)")
+  if [ $flip -lt 0 ]; then
+      flip=z
+  else
+      flip=none
+  fi
 else
   vlsr=0    
   crval=180,0,0
-  cdelt3=1
+  flip=none
 fi
-     
+
+echo "Creating a velocity field - method 2"
+snapgrid $run.20 - $grid_pars \
+	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m |\
+    ccdflip - $run.30 flip=$flip wcs=t
+ccdstat $run.30
+if [ $vbeam = 0 ]; then
+  ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
+else
+  ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam dir=z
+fi
+ccdsmooth $run.31 $run.32 $beam dir=xy
+ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
+ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
+ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
+
 # single dish profile
 ccdmom $run.32 - axis=1 mom=0 |\
     ccdmom - - axis=2 mom=0 |\
@@ -160,7 +164,7 @@ ccdmom $run.32 - axis=1 mom=0 |\
 
 # export for barolo or so, in decent units (could also use ccdsky)
 # this way the input spatial scale is in arcsec and km/s
-ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,$cdelt3 crval=$crval restfreq=$restfreq
+ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
 
 if [ $show = 1 ]; then
     xpaset -p ds9 frame frameno 1
