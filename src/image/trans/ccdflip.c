@@ -7,29 +7,31 @@
  *      22-feb-97   allow flipping x and y if the image is square,
  *		    also fixed an initialization problem!
  *      17-jun-2019 allow flipping in z
+ *      15-sep-2023 optionally fix WCS also instead of flipping data only
  *                      
  */
 
 
-#include <stdinc.h>		/* also gets <stdio.h>	*/
+#include <stdinc.h>
 #include <getparam.h>
-#include <vectmath.h>		/* otherwise NDIM undefined */
+#include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
 
 string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output file",
-	"flip=x\n       Flip in x,y  or allow xy for square images",
-	"VERSION=1.3a\n  27-jan-2021 PJT",
+	"flip=x\n       Flip in x,y,z  or allow xy for square images",
+	"wcs=t\n        Also fix WCS?",
+	"VERSION=2.0\n  15-sep-2023 PJT",
 	NULL,
 };
 
 string usage = "flip an image along certain axes";
 
-#define X 0
-#define Y 1
-#define Z 2
+#define X 1
+#define Y 2
+#define Z 4
 #define XY 3
 
 #define SWAPR(a,b)	          \
@@ -53,6 +55,7 @@ void nemo_main()
     imageptr iptr=NULL;        /* pointer to image */
     real    tmp, zzz;
     string  flipmode;
+    bool    Qwcs = getbparam("wcs");
 
     flipmode = getparam("flip");
     if (streq(flipmode,"x"))
@@ -64,13 +67,13 @@ void nemo_main()
     else if (streq(flipmode,"z"))
         flip = Z;      
     else
-        error("Illegal flip axis");
+        warning("No flipping done");
 
     instr = stropen(getparam("in"), "r");
     outstr = stropen(getparam("out"), "w");
 
     read_image( instr, &iptr);
-    if (Axis(iptr) > 0)
+    if (Axis(iptr) > 0 && !Qwcs)
       warning("WCS is not changed, only values flipped");
 
     nx = Nx(iptr);	
@@ -78,7 +81,7 @@ void nemo_main()
     nz = Nz(iptr);
 
     if(flip==X) {
-
+      // @todo do for all Z
       for (iy=0; iy<ny; iy++) {		    /* flip in x */
         for (ix=0; ix<nx/2; ix++) {
             tmp = MapValue(iptr,ix,iy);
@@ -88,7 +91,13 @@ void nemo_main()
             MapValue(iptr,nx-ix-1,iy) = tmp;
         }
       }
+      if (Qwcs) {
+	dprintf(0,"Fixing WCS in X\n");
+	Dx(iptr) = -Dx(iptr);
+	Xref(iptr) = Nx(iptr)-1 - Xref(iptr);
+      }
     } else if (flip==Y) {
+      // @todo do for all Z      
       for (iy=0; iy<ny; iy++) {		    /* flip in y */
         for (ix=0; ix<nx/2; ix++) {
             tmp = MapValue(iptr,iy,ix);
@@ -98,7 +107,14 @@ void nemo_main()
             MapValue(iptr,iy,nx-ix-1) = tmp;
         }
       }
+      if (Qwcs) {
+	dprintf(0,"Fixing WCS in Y\n");
+	Dy(iptr) = -Dy(iptr);
+	Yref(iptr) = Ny(iptr)-1 - Yref(iptr);
+      }
     } else if (flip==XY) {
+      if (nx != ny) error("Cannot flip non-square images yet in XY");
+      // @todo do for all Z      
       for (iy=0; iy<ny; iy++) {		    /* swap the x and y axes */
         for (ix=iy+1; ix<nx; ix++) {
             tmp = MapValue(iptr,ix,iy);
@@ -121,6 +137,11 @@ void nemo_main()
             CubeValue(iptr,ix,iy,nz-iz-1) = tmp;
 	  }
         }
+      }
+      if (Qwcs) {
+	dprintf(0,"Fixing WCS in Z\n");
+	Dz(iptr) = -Dz(iptr);
+	Zref(iptr) = Nz(iptr)-1 - Zref(iptr);
       }
     }
     write_image(outstr, iptr);
