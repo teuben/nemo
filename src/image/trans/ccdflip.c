@@ -23,16 +23,17 @@ string defv[] = {
 	"out=???\n      Output file",
 	"flip=x\n       Flip in x,y,z  or allow xy for square images",
 	"wcs=t\n        Also fix WCS?",
-	"VERSION=2.0\n  15-sep-2023 PJT",
+	"VERSION=2.0a\n 17-sep-2023 PJT",
 	NULL,
 };
 
 string usage = "flip an image along certain axes";
 
-#define X 1
-#define Y 2
-#define Z 4
-#define XY 3
+#define FLIP_0  0
+#define FLIP_X  1
+#define FLIP_Y  2
+#define FLIP_Z  4
+#define FLIP_XY 3
 
 #define SWAPR(a,b)	          \
 {                                 \
@@ -51,7 +52,7 @@ void nemo_main()
 {
     stream  instr, outstr;
     int     nx, ny, nz;        /* size of scratch map */
-    int     ix, iy, iz, flip;
+    int     ix, iy, iz, flip = FLIP_0;
     imageptr iptr=NULL;        /* pointer to image */
     real    tmp, zzz;
     string  flipmode;
@@ -59,13 +60,13 @@ void nemo_main()
 
     flipmode = getparam("flip");
     if (streq(flipmode,"x"))
-        flip = X;
+        flip = FLIP_X;
     else if (streq(flipmode,"y"))
-        flip = Y;
+        flip = FLIP_Y;
     else if (streq(flipmode,"xy"))
-        flip = XY;
+        flip = FLIP_XY;
     else if (streq(flipmode,"z"))
-        flip = Z;      
+        flip = FLIP_Z;      
     else
         warning("No flipping done");
 
@@ -80,7 +81,7 @@ void nemo_main()
     ny = Ny(iptr);
     nz = Nz(iptr);
 
-    if(flip==X) {
+    if(flip==FLIP_X) {
       // @todo do for all Z
       for (iy=0; iy<ny; iy++) {		    /* flip in x */
         for (ix=0; ix<nx/2; ix++) {
@@ -96,7 +97,7 @@ void nemo_main()
 	Dx(iptr) = -Dx(iptr);
 	Xref(iptr) = Nx(iptr)-1 - Xref(iptr);
       }
-    } else if (flip==Y) {
+    } else if (flip==FLIP_Y) {
       // @todo do for all Z      
       for (iy=0; iy<ny; iy++) {		    /* flip in y */
         for (ix=0; ix<nx/2; ix++) {
@@ -112,7 +113,7 @@ void nemo_main()
 	Dy(iptr) = -Dy(iptr);
 	Yref(iptr) = Ny(iptr)-1 - Yref(iptr);
       }
-    } else if (flip==XY) {
+    } else if (flip==FLIP_XY) {
       if (nx != ny) error("Cannot flip non-square images yet in XY");
       // @todo do for all Z      
       for (iy=0; iy<ny; iy++) {		    /* swap the x and y axes */
@@ -126,7 +127,7 @@ void nemo_main()
       SWAPR(Xmin(iptr),  Ymin(iptr));
       SWAPR(Dx(iptr),    Dy(iptr));
       SWAPS(Namex(iptr), Namey(iptr));
-    } else if (flip==Z) {
+    } else if (flip==FLIP_Z) {
       for (ix=0; ix<nx; ix++) {
 	for (iy=0; iy<ny; iy++) {	
 	  for (iz=0; iz<nz/2; iz++) {	    /* flip in z */
