@@ -10,6 +10,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -23,7 +24,8 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.0b\n 9-sep-01 PJT",
+    "bench=0\n      Add a number of benchmarks",
+    "VERSION=1.1\n  2-oct-2022 PJT",
     NULL,
 };
 
@@ -32,13 +34,18 @@ string usage = "create a uniform cube of equal massive stars";
 local real rmin, rmax;
 local real sigma;
 local bool zerocm;
+local int bench;
 
 local Body *btab;
 local int nbody;
 
 extern double xrandom(double,double), grandom(double,double);
 
-
+void writegalaxy(string name, string headline);
+void mkcube(void);
+void do_bench(void);
+void centersnap(Body *btab, int nb);
+  
 void nemo_main()
 {
     int seed;
@@ -48,8 +55,12 @@ void nemo_main()
     nbody = getiparam("nbody");
     sigma = getdparam("sigma");
     seed = init_xrandom(getparam("seed"));
+    dprintf(1,"seed=%d\n",seed);
+    bench = getiparam("bench");
     zerocm = getbparam("zerocm");
+    
     mkcube();
+    if (bench) do_bench();
     writegalaxy(getparam("out"), getparam("headline"));
     free(btab);
 }
@@ -58,9 +69,7 @@ void nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(name, headline)
-string name;
-string headline;
+void writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -78,11 +87,11 @@ string headline;
  * MKCUBE: homogeneous cube
  */
 
-mkcube()
+void mkcube(void)
 {
     Body *bp;
-    real rmin3, rmax3, r_i, theta_i, phi_i, mass_i;
-    int i, ndim=NDIM;
+    real mass_i;
+    int i;
 
     btab = (Body *) allocate(nbody * sizeof(Body));
     mass_i = 1.0/nbody;
@@ -98,10 +107,30 @@ mkcube()
     if (zerocm)
         centersnap(btab,nbody);
 }
+
+void do_bench(void)
+{
+    Body *bp;
+    int i,j;
+    dprintf(0,"bench=%d\n",bench);
+
+    for (j=0; j<bench; j++) {
+# pragma omp for
+      for (i=0; i < nbody; i++) {      
+	//for (bp=btab; bp < tbab + nbody; bp++) {
+	bp = btab+i;
+	Mass(bp) *= 2.0;
+	Phase(bp)[0][0] *= 2.0;
+	Phase(bp)[0][1] *= 2.0;
+	Phase(bp)[0][2] *= 2.0;
+	Phase(bp)[1][0] *= 2.0;
+	Phase(bp)[1][1] *= 2.0;
+	Phase(bp)[1][2] *= 2.0;
+      }
+    }
+}
 
-centersnap(btab, nb)
-Body *btab;
-int nb;
+void centersnap(Body *btab, int nb)
 {
     real mtot;
     vector cmphase[2], tmp;
