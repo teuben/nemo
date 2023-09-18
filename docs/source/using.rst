@@ -8,7 +8,6 @@ Using NEMO
    for using NEMO.
 
 In order to use NEMO, you will need to modify your
-==================================================
 shell environment, for example in the ``bash`` shell
 this could be
 

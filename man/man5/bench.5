@@ -1,4 +1,4 @@
-.TH BENCH 5NEMO "11 July 2022"
+.TH BENCH 5NEMO "31 August 2023"
 
 .SH "NAME"
 bench \- various NEMO benchmarks
@@ -41,13 +41,17 @@ be adjusted if more codes are used.
 
 i9-13900K	-	2133
 i9-12900K	-	n/a ~2000
-M2	-	n/a 1919, 1899
+M2	~1450?	n/a 1919, 1899
 i9-12900H	-	n/a 1851
 M1-Max	-	n/a 1785
 i7-12800H	-	n/a 1654
 i9-11980HK	-	n/a 1616
 i9-12900K	1330	jansky gcc 11.2.0
+i7-1260P	1261	k2
+i5-1240P	1155	chromebook
 M1 (Macbook Air)	1269	n/a 1750 / 7xxxx
+i7-1260P	1250	k2 - but only on full power
+i5-1240P	1155	chromebook (frameworks)
 i7-11800H		n/a	1474
 i7-1185G7	1060	Dell Latitude 5420
 i5-1135G7	1000	XPS13 1460 /
@@ -154,6 +158,33 @@ orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000\fP
 In addition each data file that is produced is checksummed and compared
 to a baseline version using \fIbsf(1NEMO)\fP if the argument
 \fBbsf=1\fP is added.
+
+.SH "BENCH8"
+The \fBbench8\fP measures how well your CPU performs simple OpenMP algorithm
+as more cores are employed. This can be an effective way to determine how
+well your CPU adjusts under increased power demands, for example laptops with
+thermal protection will scale down their cpu frequency as more cores are
+employed.
+
+.nf
+   scaling2 umax=20000 np=1 iter=20
+   scaling2 umax=20000 np=2 iter=40
+   scaling2 umax=20000 np=4 iter=80
+.fi
+
+Look at the elapsed time to follow how well a particular CPU performs at increased load:
+
+.nf
+.ta +3.0i +0.75i +0.75i +0.75i +0.75i
+CPU     	1	2	4	8	16
+
+i7-1260P (pow)	7.0	7.1	8.5	18.7	24.6
+i7-1260P (bat)	10.2	13.0	17.6	40.4	59.9
+jansky   	6.4	6.5	6.5	6.7	17.4
+lma     	12.2	12.3	12.2	12.3	12.4
+M2      	6.9	7.2	7.6	9.4	19.3
+.fi
+
 
 
 .SH "BENCH10"
@@ -319,4 +350,5 @@ Benchfile	A Makefile that can orchestrate series of benchmarks
 6-jan-2018	updated for V4, more balanced benchmarks 	PJT
 27-dec-2019	nemo.bench; updated with potcode and orbint	PJT
 26-jul-2020	added timings / added geekbench5 	PJT
+31-aug-2023	added bench8	PJT
 .fi

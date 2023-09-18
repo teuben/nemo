@@ -1,9 +1,12 @@
-.TH TKRUN 1 "24 December 2009"
-.SH NAME
+.TH TKRUN 1 "14 July 2023"
+
+.SH "NAME"
 tkrun \- automatic GUI builder and frontend to run shell scripts or programs
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtkrun\fP [-option value...] \fIscript\fP
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItkrun\fP presents an interactive graphical user interface to
 a shell \fIscript\fP or program that conforms to a ``key=val'' interface.
 It does this by extracting
@@ -11,7 +14,8 @@ named keywords from the shell script and building a
 Tcl/Tk run script that provideds the interface to running the
 script itself (or any program for that matter, see the \fB-r\fP option
 below).
-.SH OPTIONS
+
+.SH "OPTIONS"
 The following options parameters are recognized (the ones with a * still
 have to be implemented):
 .TP 15
@@ -88,10 +92,12 @@ The additional Tcl/Tk options (on a \fB#<\fP line immediately following the
 .PP
 The code is horribly non-defensive, and does not handle syntax errors on the
 \fB#>\fP tag lines very well.
-.SH TODO
+
+.SH "TODO"
 Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
-out sections of the script.
-.SH SEE ALSO
+out sections of the script. There is a tooltip available, but not implemented
+
+.SH "SEE ALSO"
 wish(1), zenity(1)
 .PP
 .nf
@@ -100,7 +106,8 @@ http://sunscript.sun.com/	Home Page of Tcl/Tk (now gone)
 http://www.neosoft.com/		Archive of Tcl/Tk tools 
 http://tcl.sourceforge.net/	Current home page and source code repo
 .fi
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 .nf
     % \fBtkrun design\fP
 .fi
@@ -150,20 +157,24 @@ again:
   shift argv
   goto again
 .fi
-.SH AUTHOR
-Peter Teuben (teuben@astro.umd.edu) Astronomy Department,University of Maryland,College Park,MD,USA)
-.SH FILES
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
 .nf
 .ta +2.0i
 ~/.tkrunrc	(optional) global configuration file
 $run.key	keyword file in which key=val pairs are maintained
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.5i +5.5i
 18-aug-97	V0.1 released for ADASS97 paper (tcl/tk 7.6/4.2) 	PJT
 30-jan-98	V0.2 added -e, and some minor features	PJT
 22-apr-04	V1.2 added option to share the set and #> comment on one line	PJT
 12-jun-08	V1.4 updated doc and minor code cleanup	PJT
 24-dec-09	V1.7 implemented the load/save of key=val files    	PJT
+14-jul-2023	rudimentary tooltip
 .fi

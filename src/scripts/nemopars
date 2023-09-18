@@ -17,20 +17,48 @@
 #
 #    11-aug-2022    toy version in bash - PJT
 #    17-aug-2022    more generic python version - PJT
+#    16-nov-2022    print "nan" when keyword/value is missing
+#    22-nov-2022    flush the header before the columns
+#    19-feb-2023    allow default nemopars.rc
+#     3-mar-2023    add -v option
 
+_version = "3-mar-2023"
 
 import sys, os
 import tempfile
 
-if len(sys.argv) < 3:
+def help():    
+    print("Version: [-n] %s" % _version)
     print("Usage: %s par1,par2,...   rc1 rc2 ..." % sys.argv[0])
     print("  loops over all bash rc files that contain  par1=val1 par2=val2 ...")
     print("  and tabulates   val1 val2 ...")
     print("  NEMO convention is that the rc files are called nemopars.rc")
+    print("  but any filename will do.")
+    print("  Note parameters that do not exist, get the value 'nan'")
+    print("  -v      print a commented header with the column names")
     sys.exit(0)
 
+if len(sys.argv) < 2:
+    help()
+
+argv = sys.argv[1:]
+if argv[0] == '-v':
+    Qhead = True
+    argv = argv[1:]
+else:
+    Qhead = False
+    
+    
 # grab the parameters to print (no error checking on their names)
-pars = sys.argv[1].split(',')
+pars = argv[0].split(',')
+
+# print comment header for output
+if Qhead:
+    cmd = '#'
+    for p in pars:
+        cmd = cmd + ' %s' % p
+        print(cmd)    
+    sys.stdout.flush()
 
 # make a temporary name for the bash script file name
 # this will get automatically deleted when this script ends
@@ -38,21 +66,28 @@ s = tempfile.NamedTemporaryFile()
 script = s.name
 # print('SCRIPT',script)
 fp = open(script,'w')
-cmd = 'source $1; echo'
+fp.write('source $1\n')
 for p in pars:
-    cmd = cmd + ' $%s' % p
-fp.write(cmd + '\n')
+    fp.write('if [ ! -z "$%s" ]; then\n' % p)
+    fp.write('  echo -n "$%s "\n' % p)
+    fp.write('else\n')
+    fp.write('  echo -n "nan "\n')
+    fp.write('fi\n')
+fp.write('echo ""\n')
 fp.close()
 
-# print comment header for output
-cmd = '#'
-for p in pars:
-    cmd = cmd + ' %s' % p
-print(cmd)    
 
-# loop over the rc files and report values
-# if a variable is missing, that line contains fewer values, no error checking
-for rc in sys.argv[2:]:
-    cmd = 'bash %s %s' % (script,rc)
+if len(argv) == 1:
+    if not os.path.exists('nemopars.rc'):
+        print("# No default nemopars.rc file found")
+        sys.exit(1)
+    cmd = 'bash %s nemopars.rc' % (script)
     # print("CMD",cmd)
     os.system(cmd)
+else:
+    # loop over the rc files and report values
+    # if a variable is missing, that line contains fewer values, no error checking
+    for rc in argv[1:]:
+        cmd = 'bash %s %s' % (script,rc)
+        # print("CMD",cmd)
+        os.system(cmd)

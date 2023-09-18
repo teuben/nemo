@@ -36,7 +36,7 @@
             "id": "PLACEHOLDER: Add DOI (https://doi.org/xxxxxx) here"
         }
     ],
-    "version": "4.3",
+    "version": "4.4.0",
     "license": "PLACEHOLDER: Add license (ideally as a URL to the SPDX page - e.g. https://spdx.org/licenses/MIT.html) here"
     "tasklist": [
         { "name" : "snapplot",  "description" : "plot particle positions from a snapshot file" },

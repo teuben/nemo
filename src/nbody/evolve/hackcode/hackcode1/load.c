@@ -15,6 +15,7 @@
 
 local cellptr ctab = NULL;	/* cells are allocated from here */
 local int ncell, maxcell;	/* count cells in use, max available */
+local int first = 1;            /* first time a debug output is added */
 
 /* local forward declarations: */
 static void expandbox(bodyptr p);
@@ -33,6 +34,17 @@ void maketree(
   int nbody)			/* number of bodies in above array */
 {
     register bodyptr p;
+
+    if (first) {
+      node x1;
+      body x2;
+      phasebody x3;
+      cell x4;
+      dprintf(1,"node: %d\n", sizeof(x1));
+      dprintf(1,"body: %d\n", sizeof(x2));
+      dprintf(1,"cell: %d\n", sizeof(x4));
+      first = 0;
+    }
 
     if (ctab == NULL) {				/* first time through?      */
 	maxcell = fcells * nbody;		/*   typ. need: 0.5 nbody   */
@@ -97,7 +109,7 @@ local void loadtree(bodyptr p)			/* body to load into tree */
     qptr = &troot;				/* start with tree root     */
     while (*qptr != NULL) {			/* loop descending tree     */
         if(debug_level)
-          dprintf(1,"loadtree: descending tree  l = %o\n", l);
+          dprintf(1,"loadtree: descending tree  l = 0x%x\n", l);
 	assert(l != 0);				/*   dont run out of bits   */
 	if (Type(*qptr) == BODY) {		/*   reached a "leaf"?      */
 	    if(debug_level)
@@ -111,7 +123,7 @@ local void loadtree(bodyptr p)			/* body to load into tree */
 	l = l >> 1;				/*   and test next bit      */
     }
     if(debug_level)
-      dprintf(1,"loadtree: installing body  l = %o\n", l);
+      dprintf(1,"loadtree: installing body  l = 0x%x\n", l);
     *qptr = (nodeptr) p;			/* found place, store p     */
 }
 
@@ -228,7 +240,7 @@ local cellptr makecell(void)
     c = ctab + ncell;
     ncell++;
     if(debug_level)
-      dprintf(1,"cell %d allocated at address 0%o\n", ncell, (int) c);
+      dprintf(1,"cell %d allocated at address 0x%x\n", ncell, (int) c);
     Type(c) = CELL;
     for (i = 0; i < NSUB; i++)
 	Subp(c)[i] = NULL;

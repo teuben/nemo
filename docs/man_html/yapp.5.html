@@ -9,8 +9,10 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 yapp - Yet Another Plotting Package 
+<p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 <b>yapp</b> is NEMO&rsquo;s application
 programming interface <i>definition</i> for a graphics device. <p>
@@ -35,6 +37,7 @@ Some yapp implementations allow you to select from various devices.
 As we do not advertise interactive programs very much, the keyword &rsquo;yapp=&rsquo;
 or an environment variable <b>YAPP</b> will be used to select a device and it&rsquo;s
 possible options. 
+<p> 
 <h2><a name='sect2' href='#toc2'>Available Yapp Versions</a></h2>
 
 <dl>
@@ -159,6 +162,7 @@ been killed: <br>
 <pre>    xkill pgxwin_server
     xrdb -merge ~/.Xdefaults
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Plplot</a></h2>
 Like PGPLOT, PLPLOT can also pick different graphics output devices,
 specified via the usual yapp= system keyword, followed by a filename for
@@ -167,25 +171,29 @@ should give the list of currently compiled devices.  For a full list see
 e.g. <a href='http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html'>http://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/devices.html</a>
 
 <br>
-<pre>png,FILE.png<tt> </tt>&nbsp;<tt> </tt>&nbsp;PNG
-pdfcairo,FILE.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (cairo)
-pdf,FILE.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (Haru)
-svg,FILE.svg<tt> </tt>&nbsp;<tt> </tt>&nbsp;SVG
+<pre>png,FILE_%n.png<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PNG
+pdfcairo,FILE_%n.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (cairo)
+pdf,FILE_%n.pdf<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PDF (Haru)
+svg,FILE_%n.svg<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SVG
 xwin
 tk
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>NEMO/src/kernel/yapp<tt> </tt>&nbsp;<tt> </tt>&nbsp;various yapp_* implementations
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Joshua E. Barnes, Peter Teuben 
+Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='catps.1.html'>catps(1NEMO)</a>
 , <a href='catpgps.1.html'>catpgps(1NEMO)</a>
-,
-<a href='yapp.3.html'>yapp(3NEMO)</a>
- 
+, <a href='yapp.3.html'>yapp(3NEMO)</a>
+
+
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>16-aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;document written - some are premature!<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

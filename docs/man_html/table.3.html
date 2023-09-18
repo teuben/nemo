@@ -273,17 +273,23 @@ cat AAPL.csv | xsv slice -i 1 | xsv flatten
 cat AAPL.csv | xsv count
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Diagnostics</a></h2>
-Low-level catastrophies (eg, bad filenames, parsing errors,
-wrong delimiters) generate messages via <a href='error.3.html'><i>error(3NEMO)</i></a>
+<h2><a name='sect6' href='#toc6'>Performance</a></h2>
+Anecdotally comparing the table I/O routines with python can
+be found in $NEMO/scripts/csh/tabstat.py, which seems to indicate the C
+code is about 4 times faster than numpy. 
+<p> 
+<h2><a name='sect7' href='#toc7'>Diagnostics</a></h2>
+Low-level catastrophies
+(eg, bad filenames, parsing errors, wrong delimiters) generate messages
+via <a href='error.3.html'><i>error(3NEMO)</i></a>
 . 
 <p> 
-<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='mdarray.3.html'>mdarray(3NEMO)</a>
-,
-<a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
+, <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
 , <a href='burststring.3.html'>burststring(3NEMO)</a>
-, <a href='fits.5.html'>fits(5NEMO)</a>
+,
+<a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
  <p>
 <br>
@@ -293,15 +299,15 @@ https://www.gnu.org/software/gnuastro/manual/html_node/Tables.html
 XSV:  https://github.com/BurntSushi/xsv
 </pre>
 <p> 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>src/kernel/tab  <tt> </tt>&nbsp;<tt> </tt>&nbsp;table.c 
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect10' href='#toc10'>Update History</a></h2>
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>xx-sep-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-aug-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented get_Xtable functions  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -320,11 +326,12 @@ aug-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;designing new table system<tt> </tt>&nbs
 <li><a name='toc3' href='#sect3'>Description</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Xsv</a></li>
-<li><a name='toc6' href='#sect6'>Diagnostics</a></li>
-<li><a name='toc7' href='#sect7'>See Also</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Performance</a></li>
+<li><a name='toc7' href='#sect7'>Diagnostics</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Update History</a></li>
 </ul>
 </body>
 </html>

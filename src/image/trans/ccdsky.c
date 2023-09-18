@@ -9,6 +9,7 @@
  *      29-jan-2013     allow distance to be in cosmological 'z'
  *      16-mar-2013     3.0 added Wright's CosmoCalculator math, verbose
  *                      (cosmocalc in ASCL?)
+ *      18-nov-2022     add Jy/K factor
  *
  */
 
@@ -29,16 +30,17 @@ string defv[] = {
   "r=1,AU\n         Length scale of object, optional unit [AU]",
   "v=1,km/s\n       Velocity scale of object, optional unit [km/s]",
   "sdv=1\n          Integrated Flux (must be in Jy.km/s)",
+  "freq=115\n       Observing frequency in GHz",
+  "beam=12.65\n     Beam size in arcsec [not used]",
+  "dish=50\n        Dish size in meter",
   "scale=1\n        Scale image values",
   "H=71,0.27,0.73\n Hubble Constant, in case [d] is 'z', with optional WM and WV",
   "nsteps=1000\n    Integrations steps in the cosmo code (accuracy)",
-  "VERSION=3.0c\n   6-jan-2022 PJT",
+  "VERSION=3.1\n    22-nov-2022 PJT",
   NULL,
 };
 
 string usage = "lazy sky scaling (cosmology) calculator";
-
-string cvsid = "$Id$";
 
 
 #define CVI(x,y,z)  CubeValue(iptr,x,y,z)
@@ -247,6 +249,19 @@ void nemo_main(void)
     printf("Mass(HI) = %g  \n",mass);
     mass = CO_factor * sqr( d * sdv_scale ) * sdv;
     printf("Mass(H2) = %g  (alpha=4.3; includes 1.36 He contribution)\n",mass);
+
+    /* jy/k calculations */
+    /* See also: https://science.nrao.edu/facilities/vla/proposing/TBconv */
+    real freq = getdparam("freq");
+    //real beam = getdparam("beam");
+    real dish = getdparam("dish");
+    real alpha = 1.15;  /* beam = alpha*lambda/D factor */    //  sqrt(3514/3127) = 1.06
+    real beam = alpha * 299792.458 * 1e3 / (freq*1e9 * dish) * 206264.81;
+    real jyperk  = sqr(freq*beam)/1.222e6;        // NRAO
+    real jyper2  = alpha*alpha*3127/(dish*dish);  // mine (a^2*3127/D^2)
+    real jyper3  = 8*1380/3.141592/(dish*dish);   // Schloerb using k.T = S.A/2 where A=pi.D^2/4   (3514/D^2)
+    printf("Freq %g Dish %g Beam %g alpha %g Jy/K %g %g %g\n",freq,dish,beam,alpha,jyperk,jyper2,jyper3);
+      
 
     if (hasvalue("in") && hasvalue("out")) {      /* patch image if needed */
       instr = stropen(getparam("in"), "r");

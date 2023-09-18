@@ -1,4 +1,4 @@
-.TH TXTPAR 1NEMO "27 December 2021"
+.TH TXTPAR 1NEMO "3 February 2023"
 
 .SH "NAME"
 txtpar \- extract parameters from a text file, with optional math
@@ -10,7 +10,7 @@ txtpar \- extract parameters from a text file, with optional math
 .SH "DESCRIPTION"
 \fBtxtpar\fP combines some of the often used combinations of
 standard Unix text filtering programs like
-\fIgrep(1)\fP and \fIawk(1)\fP, 
+\fIgrep(1)\fP, \fIawk(1)\fP, and \fIsed(1)\fP, and 
 with \fInemoinp(3NEMO)\fP style math into one "simple" NEMO program. Although
 \fItabmath(1NEMO)\fP can do some of this processing too, \fItxtpar(1NEMO)\fP's strength is
 processing multiple lines in a reduction style, instead of filtering. It often simplifies
@@ -31,6 +31,8 @@ Comment lines in the input file are considered part of the text, they are not st
 Optionally additional math is allowed on the extracted parameters using \fInemoinp(1NEMO)\fP style expressions. In
 this case, the parameters themselves are not output, but only the ones computed via \fBexpr=\fP. See EXAMPLES below
 if you need both.
+.PP
+To extract values from a \fIkey=val\fP style parameter file, use \fInemopars(8NEMO)\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -109,7 +111,7 @@ of the row or col:
 .fi     
 
 .SH "SEE ALSO"
-grep(1), awk(1), tabmath(1NEMO), tabrows(1NEMO), tabcomment(1NEMO), table(5NEMO), run(1NEMO)
+grep(1), awk(1), nemopars(8NEMO), tabmath(1NEMO), tabrows(1NEMO), tabcomment(1NEMO), table(5NEMO), run(1NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

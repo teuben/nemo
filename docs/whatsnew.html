@@ -21,9 +21,51 @@ contains a timestamp of that creation.
 <hr>
 -->
 
-<A NAME=4_4_0>
-<H2> 4.4.0:  in github</H2>
+<A NAME=4_4_1>
+
+<H2> 4.4.2:  in github</H2>
+  <UL>
+  <LI> (Jul 7, 2023) python install now places the python_start.[c]sh scripts inside the anaconda3 directory
+  </UL>
+  
+<H2> 4.4.1:  6-jul-2023 </H2>
 <UL>
+  <LI> (Jun 15, 2023) Experimental support for modulefiles, e.g. "module load nemo/git".   tcl is back!
+  <LI> (Mar 29, 2023) A very ancient bug in the compilation of hackcode1 was fixed. Although the error can be
+    fixed by swapping around a data item in a C structure, the basic error was a sloppy Makefile! Look for
+    issue 98 in github.
+  <LI> (Jan 3, 2023) an
+    <A HREF=https://teuben.github.io/nemo-lesson>experimental Software Carpentry style NEMO introduction</A>
+  <LI> (Dec 29, 2022) an odd problem with parsing DOS or MAC text files should be resolved now in the
+    patches table I/O system, as well as text files with a non-closing final line.
+  <LI> (Dec 18, 2022) fitsccd/ccdfits conversion now maintains header MUCH better (CUNIT, TELESCOP, RESTFRQ)
+  <LI> (Dec 10, 2022) revived partiview install via mknemo. Confirmed
+    <A HREF=man_html/snapspecks.1.html>snapspecks(1NEMO)</A> still works.
+  <LI> (Dec 5, 2022)  <A HREF=man_html/ccdellint.1.html>ccdellint(1NEMO)</A> 
+    can now integrate in ellipses with a different from the default metric=2
+  <LI> (Nov 29, 2022) python-unsio and python-unsiotools have recently been updated.
+  <LI>  ccdellint can now properly handle 2D maps, and almost related,
+    snapshell can integrate in arcs instead of full shells.
+  <LI> (Nov 20, 2022)  We now have quetta, ronna, ronto and quecto prefixes!
+  <LI> (Nov 10, 2022)  starlab is back in NEMO! The command "mknemo starlab" will build it, the
+    181 binaries will be in $NEMO/opt/bin.
+  <LI> (Nov 9, 2022) better mknemo build of netcdf4 where it needs to depend on hdf5
+</UL>
+
+<A NAME=4_4_0>
+<H2> 4.4.0:  1-nov-2022   (a.k.a. the ADASS release)</H2>
+<UL>
+  <LI> (Nov 1, 2022) wrapping up a release since NEMO poster was presented at ADASS2022
+  <LI> (Oct 28, 2022) nemopy is now a python module, so far only getparam is implemented, weakly but functional . Installation
+        with the usual "pip install -e ."
+  <LI> (Oct 27, 2022) rudimentary support for giza as an alternative to pgplot.  "mknemo giza" is also able to build
+    the latest giza, and --with-yapp=giza will be needed in configure.
+  <LI> (Oct 25, 2022) revived internal pgplot build in install_nemo.sh as yapp=pglocal, ("mknemo pgplot" will also work)
+    plus some improved yapp_plplot filenaming
+  <LI> (Oct 24, 2022) improved falcon tools build on mac
+  <LI> (Sep 16, 2022) the pedit
+    <A HREF=man_html/pedit.8.html>pedit(8NEMO)</A> script now handles parameter files
+    that are structures as "value = keyword = comment"
   <LI> (Aug 17, 2022) new scripts:   
     <A HREF=man_html/nemoplot.8.html>nemoplot(8NEMO)</A> to auto-plot ascii tables, and
     <A HREF=man_html/nemopars.8.html>nemopars(8NEMO)</A> to extract parameters from bash-style
@@ -1459,6 +1501,10 @@ most of NEMO is now running. This includes a smooth running
 <B> NOTE: </B> the export tar files have not been updated yet, as much
 more proper testing is needed.
 
+<H2>1986 </H2>
+
+NEMO conceived as a toolbox wrapped around the Barnes and Hut treecode (called
+hackcode1 in NEMO). 
 
 <P>
 Back to: <A HREF=nemo.html> NEMO Home page </A>, the

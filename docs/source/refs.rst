@@ -42,8 +42,8 @@ Binney, J. and Tremaine, S.
 (Princeton U. Press; Princeton; 2008) [BT2]
 
 *Astrophysical Recipes - The art of AMUSE* -
-Simon Portegies Zwart and Steve McMillan
-IOP Publishing, Bristol, UK, 2018
+Simon Portegies Zwart, Steve McMillan,  Inty Pelupessi, Steven Rieder
+AAS - IOP Publishing, Bristol, UK, 2018, 2022.
 
 Code Comparison Papers
 ----------------------

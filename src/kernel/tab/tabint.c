@@ -4,6 +4,8 @@
  *      13-may-05    Q&D first version, cloned off tabfilter
  *      26-may-05    allow step<0 for logsteps (xmin must be > 0)
  *      25-apr-22    convert to use the new table V2
+ *      22-feb-23    add xmin,xmax,scale keywords
+ *      31-jul-23    add mom=
  */
 
 #include <stdinc.h> 
@@ -17,10 +19,14 @@ string defv[] = {
   "in=???\n         Input table file",
   "xcol=1\n         Column with X coordinate (must be sorted in that column)",
   "ycol=2\n         Column with Y coordinate of function",
+  "xmin=\n          value if data below xmin to be discarded",
+  "xmax=\n          value if data above xmax to be discarded",
   "step=\n          Integration step if resampling used (<0 for logarithmic steps)",
   "normalize=f\n    Normalize integral",
   "cumulative=f\n   Show accumulation of integral",
-  "VERSION=0.5\n    20-sep-2022 PJT",
+  "scale=1\n        Scale factor to apply to integral",
+  "mom=0\n          0=flux 1=weighted mean 2=dispersion",
+  "VERSION=0.8a\n   7-aug-2023 PJT",
   NULL,
 
 };
@@ -28,8 +34,8 @@ string defv[] = {
 string usage="integrate a sorted table";
 
 
-
 extern int minmax(int, real *, real *, real *);
+local void reverse(int n, real *x);
 
 
 void nemo_main()
@@ -40,7 +46,10 @@ void nemo_main()
   string spectrum = getparam("in");
   bool Qnorm = getbparam("normalize");
   bool Qcum = getbparam("cumulative");
-
+  bool Qmin = hasvalue("xmin");
+  bool Qmax = hasvalue("xmax");
+  real yscale = getrparam("scale");
+  int mom = getiparam("mom");
   
   /* read the data */
 
@@ -66,12 +75,40 @@ void nemo_main()
   n = get_atable(instr,2,colnr,coldat,nmax);
   strclose(instr);
 #endif
+
+  /* reverse arrays if not sorted properly */
+  if (xdat[0] > xdat[1]) {
+    reverse(n, xdat);
+    reverse(n, ydat);
+  }
+  /* check if array is now properly sorted */
+  int nbad = 0;
+  for (i=1; i<n; i++)
+    if (xdat[i] < xdat[i-1]) nbad++;
+  if (nbad > 0) warning("There were %d/%d points not sorted properly",nbad, n);
+			       
   
   /* figure out some min/max */
   minmax(n,xdat,&xmin,&xmax);
   minmax(n,ydat,&ymin,&ymax);
   dprintf(1,"X range: %g : %g\n",xmin,xmax);
   dprintf(1,"Y range: %g : %g\n",ymin,ymax);
+  if (Qmin || Qmax) {
+    if (Qmin) xmin = getrparam("xmin");
+    if (Qmax) xmax = getrparam("xmax");
+    dprintf(1,"X range: %g : %g   (reset)\n",xmin,xmax) ;
+    int imin = n;
+    int imax = 0;
+    for (i=0; i<n; i++) {
+      if (Qmin && xdat[i] < xmin) imin = i;
+      if (Qmax && xdat[i] < xmax) imax = i;
+    }
+    dprintf(1,"New range %d - %d   %g - %g\n", imin, imax, xdat[imin], xdat[imax]);
+    /* new data */
+    n = imax - imin + 1;
+    xdat = &xdat[imin];
+    ydat = &ydat[imin];
+  }
 
   sum = sum0 = 0.0;
   nsteps = 0;
@@ -117,17 +154,48 @@ void nemo_main()
     } else
       error("Cannot handle log steps with dx=%g xmin=%g xmax=%g",dx,xmin,xmax);
   } else {  /* use the datapoints itself */
-    dx = 0.0;
-    for (i=1; i<n; i++) {
-      sum += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
-      sum0 += (xdat[i]-xdat[i-1]);
-      if (Qcum) printf("%g %g %g\n",xdat[i],sum,sum/sum0);
+    dx = xdat[1]-xdat[0];
+    if (mom == 0) {
+      for (i=1; i<n; i++) {
+	sum  += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
+	sum0 += (xdat[i]-xdat[i-1]);
+	if (Qcum) printf("%g %g %g\n",xdat[i],sum,sum/sum0);
+      }
+    } else {
+      double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, retval=0.0;
+      
+      for (i=0; i<n; i++) {
+	sum0 +=  ydat[i];
+	sum1 +=  ydat[i]*xdat[i];
+	sum2 +=  ydat[i]*xdat[i]*xdat[i];
+      }
+      sum1 /= sum0;
+      sum2 /= sum0;
+      dprintf(1,"sum1/sum0=%g\n", sum1);
+      dprintf(1,"sum2/sum0=%g\n", sum2);
+      sum2 = sqrt(sum2 - sum1*sum1);
+      dprintf(1,"dispersion=%g\n", sum2);
+      if (mom==1) retval=sum1;
+      if (mom==2) retval=sum2;
+      printf("%g\n",retval);
+      return;
     }
   }
   dprintf(1,"xmin=%g xmax=%g dx=%g sum=%g sum0=%g nsteps=%d\n",
 	  xmin,xmax,dx,sum,sum0,nsteps);
   if (Qnorm)
     sum /= sum0;
-  printf("%s%g\n",  Qcum ? "# " : "",  sum);
+  printf("%s%g\n",  Qcum ? "# " : "",  sum * yscale);
 }
 
+
+local void reverse(int n, real *x)
+{
+  int i;
+  real t;
+  for(i = 0; i<n/2; i++) {
+    t = x[i];
+    x[i] = x[n-i-1];
+    x[n-i-1] = t;
+  }
+}

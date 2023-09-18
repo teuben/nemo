@@ -103,6 +103,11 @@ setenv VDEVICE X11
 #  Change 0 -> 1 if you need this
 
 if (1) then
+  if ($?PKG_CONFIG_PATH) then
+    setenv PKG_CONFIG_PATH ${NEMO}/opt/lib/pkgconfig:${PKG_CONFIG_PATH}
+  else
+    setenv PKG_CONFIG_PATH ${NEMO}/opt/lib/pkgconfig
+  endif
 
   if ($?LD_LIBRARY_PATH) then
     setenv LD_LIBRARY_PATH ${NEMOLIB}:${NEMO}/opt/lib:${LD_LIBRARY_PATH}
@@ -142,7 +147,9 @@ if (-e $NEMO/usr/zeno/ZENORC)  source $NEMO/usr/zeno/ZENORC
 if (-e $NEMO/nemo_local.csh)   source $NEMO/nemo_local.csh
 if (-e $HOME/.nemo_local.csh)  source $HOME/.nemo_local.csh
 
-if (-e $NEMO/python_start.csh) source $NEMO/python_start.csh
+# optional python (anaconda3 should win)
+if (-e $NEMO/python_start.csh)           source $NEMO/python_start.csh
+if (-e $NEMO/anaconda3/python_start.csh) source $NEMO/anaconda3/python_start.csh
 
 
 set path = ( $NEMOBIN $NEMO/opt/bin $path )

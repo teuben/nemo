@@ -25,6 +25,7 @@
 #include <cmath>             // for std::sqrt()
 #include <public/default.h>  // $FALCON/inc/public/default.h
 #define POT_DEF
+#include <stdinc.h>
 #include <defacc.h>          // $NEMOINC/defacc.h
 //
 namespace {

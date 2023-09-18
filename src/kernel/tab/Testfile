@@ -3,7 +3,7 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
       tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms tabcsv \
-      tabrows tabcols 
+      tabrows tabcols tabint tabpeak
 
 NEED = $(BIN) nemoinp
 
@@ -50,6 +50,8 @@ dms.in:
 	@echo "4   11:59:40   60:00:10" >> dms.in
 
 
+tab.out: tabmath
+
 tabmath: tab.in
 	@echo Running $@
 	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
@@ -70,6 +72,13 @@ tabstat:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
+
+tabint: tab.out
+	@echo Running $*
+	$(EXEC) tabint tab.out ; nemo.coverage tabstat.c
+	$(EXEC) tabint tab.out xmin=10 xmax=20 ; nemo.coverage tabstat.c
+	@echo Results should be 665.963 and 37.2084
+
 
 txtpar:  txt.in
 	 @echo Running $*
@@ -142,12 +151,21 @@ fitmyline:
 SIZE=4
 NOISE=0.01
 
-gauss1d:
+gauss1d.tab:
 	@echo "Running $* with gauss1d(B=2 A=3 x0=1 b=1)"
 	nemoinp 0:$(SIZE) | tabmath - - '0+3*exp(-((%1-1)**2)/2)+rang(0,$(NOISE))' seed=123 > gauss1d.tab
+
+
+gauss1d: gauss1d.tab
 	tablsqfit   gauss1d.tab fit=gauss1d
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
+
+tabpeak: gauss1d.tab
+	@echo Running $*
+	$(EXEC) tabpeak gauss1d.tab ; nemo.coverage tabint.c
+	@echo "0.998270 3.009534 should be the result"
+
 
 gauss2d:
 	@echo "Running $* with gauss2d(B=0 A=3 x0=1 y0=1 b=1)"

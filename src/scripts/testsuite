@@ -19,7 +19,7 @@
 #
 # BUG:  -b  does not remove executable, so you never know if new binary did not compile
 
-set version="21-mar-2022"
+set version="19-jun-2023"
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
@@ -107,6 +107,18 @@ if ($usr) set tdir=src,usr
 
 onintr cleanup
 
+# define red, green and neutral colors
+set red  = '\033[0;31m'
+set grn  = '\033[0;32m'
+set neu  = '\033[0m'
+set red  = '\e[1;31m'
+set grn  = '\e[1;32m'
+set neu  = '\e[0m'
+set ok   = "${red}OKOK${neu}"
+set fail = "${grn}FAIL${neu}"
+set ok   = "OK  "
+set fail = "FAIL"
+
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
 echo "TESTSUITE started `date`"                                        > $log
@@ -146,10 +158,10 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($local) pushd $testfile:h >& /dev/null
     make -f $testfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-	echo -n TESTSUITE: "FAIL" $testfile:h
+	echo -n "TESTSUITE: $fail $testfile:h"
 	echo ""
     else
-	echo -n TESTSUITE: "OK  " $testfile:h
+	echo -n "TESTSUITE: $ok $testfile:h"
 	echo ""
     endif
     if ($local) popd >& /dev/null
@@ -179,6 +191,7 @@ cleanup:
 	    cat $testdir/bsf-fail.log
 	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
 	endif
+	echo "There are `ls bin|wc -l` binaries in NEMO"
         head -1 $testdir/$log
         tail -1 $testdir/$log
 

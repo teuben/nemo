@@ -1,28 +1,61 @@
-.TH PEDIT 8NEMO "17 February 2021"
-.SH NAME	
+.TH PEDIT 8NEMO "16 August 2022"
+
+.SH "NAME"
 pedit \- parameter editing on a file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBpedit \fI parfile [options] key=val ...\fP 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIpedit\fP helps you create a new parameter file based on
 a template by replacing the values of selected parameters.
 The result is shown on \fIstdout\fP.
+.PP
+The sad state is that for parameter file conventions there are
+many options, many of which this program hasn't implemented.
+.PP
 .SH FLAGS
 .TP 10
 -e
 This will assume the lines are bash style key=val (no spaces allowed)
 .TP
 -o
-This will overwrite
-.SH EXAMPLES
+This will overwrite, and not use stdout
+.TP
+-r
+This reverse format allows editing
+.nf
+      value = keyword = COMMENTS
+.fi
+style parameter files. The lone example I know that uses this format is \fIhochunk3D\fP.
+
+.SH "EXAMPLES"
 .nf
    % pedit $NEMODAT/Bbarolo/model0_3dfit.par FITSFILE=out.fits OUTFOLDER=out.3dfit INC=40 > qout.3dfit.par
 
    % pedit lmtoy_79448.rc -e -o slice=[-100,100]
    Overwriting lmtoy_79448.rc
 
+   % pedit mctherm.par -r -e NP=40000 NPMIN=10000 > run_bench/mctherm.par
+
 .fi
+
+.PP
+Here is a very peculiar example from the hochunk3D program, which uses
+a "value = keyword = comment" format, plus once defined, never overwritten
+style. COmments not allowed (yet)
+
+.nf
+
+  ' =================== Parameter file ==================='
+  '**** Preliminaries ****'
+  40000000 = NP = Number of photons from central star
+  '../parfiles' = PARDIR = directory containing atmosphere, dust, and filter files
+  
+.fi
+
+
 .SH "SEE ALSO"
 nemo(1NEMO)
 
@@ -30,8 +63,10 @@ nemo(1NEMO)
 Peter Teuben
 
 .SH "FILES"
+.ni
 $NEMO/src/scripts/pedit         	python script
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1i +1i

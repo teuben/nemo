@@ -21,8 +21,9 @@
  *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
  *    11-oct-2020   3.7 optimized memory usage, speed up median computation
  *     4-dec-2020   3.8 qac mode
+ *     1-dec-2022   3.12 qac mode when planes >= 0
  */
-
+ 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
@@ -40,6 +41,7 @@ string defv[] = {
     "median=f\n     Optional display of the median value",
     "torben=f\n     Use torben method for median instead",
     "robust=f\n     Compute robust median",
+    "sratio=f\n     Optional display of the signed fluxes (FP-FN)/(FP+FN) ratio",
     "mmcount=f\n    Count occurances of min and max",
     "maxpos=f\n     Add location of where the max occured",
     "half=f\n       Only use half (negative) values and symmetrize them",
@@ -49,8 +51,9 @@ string defv[] = {
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
     "qac=f\n        QAC mode listing mean,rms,min,max",
+    "fmt=%g\n       QAC format of floating point values",
     "label=\n       QAC label",
-    "VERSION=3.11\n 6-may-2022 PJT",
+    "VERSION=3.13a\n 19-jun-2023 PJT",
     NULL,
 };
 
@@ -84,12 +87,13 @@ void nemo_main(void)
     real dmin, dmax;
     real sum, sov, q1, q2, q3, tm;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount;
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount, Qsratio;
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
     bool Qac = getbparam("qac");
-    string qac_label;
+    string qac_label, qac_fmt;
+    char qac_format[128];
     real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
@@ -149,6 +153,7 @@ void nemo_main(void)
       qac_label = getparam("label");
     else
       qac_label = getparam("in");
+    qac_fmt = getparam("fmt");
 
     Qmin = hasvalue("min");
     if (Qmin) xmin = getdparam("min");
@@ -156,6 +161,7 @@ void nemo_main(void)
     if (Qmax) xmax = getdparam("max");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
+    Qsratio = getbparam("sratio");
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
     Qtorben = getbparam("torben");
@@ -236,13 +242,15 @@ void nemo_main(void)
 	  kurt = kurtosis_moment(&m);
 
 	if (Qac) {
+	  sprintf(qac_format,"QAC_STATS: %%s %s %s %s %s %s  %s  %%d\n",
+		  qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt);
 	  if (Qrobust) {
 	    compute_robust_moment(&m);
-	    printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
+	    printf(qac_format,
 		   qac_label, mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
 		   sum_moment(&m), sratio_moment(&m), n_robust_moment(&m));
 	  } else
-	    printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
+	    printf(qac_format,		   
 		   qac_label, mean, sigma, min_moment(&m), max_moment(&m),
 		   sum_moment(&m), sratio_moment(&m) ,n_moment(&m));
 
@@ -304,7 +312,8 @@ void nemo_main(void)
 
       /* tabular output, one line per (selected) plane */
 
-      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov ");
+      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov");
+      if (Qsratio) printf(" sratio");
       if (Qmedian) printf(" med1 med2");
       if (Qrobust) printf(" rN rmean rsigma rmed]");
       if (Qmaxpos) printf(" maxposx maxposy");
@@ -352,6 +361,9 @@ void nemo_main(void)
 	printf("%d %f  %f %f %d  %f %f %f %f  %f %f",
 	       k+1, z, min_moment(&m), max_moment(&m), n_moment(&m),
 	       mean,sigma,skew,kurt,sum,sum*sov);
+	if (Qsratio) {
+	  printf ("   %f",sratio_moment(&m));
+	}
 	if (Qmedian) {
 	  printf ("   %f",get_median(ngood,data));
 	  if (ndat>0) printf (" %f",median_moment(&m));

@@ -1,33 +1,149 @@
-.TH GRAVIDY1 1NEMO "12 February 2019"
-.SH NAME
-gravidy - direct summation hermite N-body integrator with variable block timesteps
-.SH SYNOPSIS
+.TH GRAVIDY1 1NEMO "16 June 2023"
+
+.SH "NAME"
+gravidy, rungravidy \- direct summation CPU/MPI/GPU hermite N-body integrator with variable block timesteps
+
+.SH "SYNOPSIS"
 \fBgravidy -i input_file ...\fP
-.SH DESCRIPTION
-\fIgravidy\fP is not installed by default in NEMO. See FILES below.
-.SH EXAMPLE
+.PP
+\fBrungravidy in= outdir= ...\fP
+
+.SH "DESCRIPTION"
+\fIGraviDy\fP is a direct-summation N-body integrator based on the Hermite scheme. It can be compiled in a CPU (including openMP),
+an MPI, and a GPU (using CUDA) version. Depending on your needs, a single core version using GNU parallel can be a faster
+way to get survey results.
+.PP
+\fIgravidy\fP is not installed by default in NEMO. See INSTALL below. The \fBrungravidy\fP NEMO frontend is
+available for those who want to work with NEMO's \fIsnapshot(5NEMO)\fP files.
+
+.SH "PARAMETERS"
+The following NEMO parameters are recognized for \fBrungravidy\fP, where the correspoding short and long flag for \fBgravidy\fP is
+mentioned as well:
+.TP 20
+\fBin=\fP
+Input file, required (-i --input) [???]
+.TP
+\fBoutdir=\fP
+Output run directory, required (-o --output) [???] 
+.TP
+\fBeta=\fP
+Time-step parameter for irregular force polynomial (-e --eta) [0.01]
+.TP
+\fBdeltat=\fP
+Output time interval in units of the crossing (-z --interval)  [0.125]
+.TP
+\fBtcrit=\fP
+Termination time in units of the crossing time (-t --time) [1]
+.TP
+\fBeps=\fP
+Gravitational softening parameter (-s --softening) [0.0001]  
+.TP
+\fBlagrange=\fP
+Print information of the Lagrange Radii in every integration time (-l --lagrange) [t]
+.TP
+\fBall=\fP
+Print all the information of N-particles in every integration time (-a --all) [f]
+.TP
+\fBgpu=\fP
+GPUs to use, by default is the maximum available devices (use even numbers) (-g --gpu) [0]
+.TP
+\fBdryrun=\fP
+If set, would only display the shell commands  [f]      
+.TP 
+\fBexe=\fP
+Name of the executable [gravidy]
+.PP
+Note the current version of \fBrungravidy\fP does not support the \fB-p\fP (screen output)
+and \fB-r\fP (resume an old run) options.
+
+.nf
+
+GraviDy:
+  -h [ --help ]         Display this message
+
+Required options:
+  -i [ --input ] <filename>       Input data filename
+  -t [ --time ] <value> (=1)      Integration time (In N-body units)
+  -r [ --resume ] <filename>.info Resume a simulation with an .info file
+
+Elective options:
+  -o [ --output ] <filename>      Output data filename
+  -s [ --softening ] <value>      Softening parameter (default 1e-4)
+  -e [ --eta ] <value>            ETA of time-step calculation (default 0.01)
+  -p [ --screen ]                 Print summary in the screen instead of a file
+  -z [ --interval ] <value>       Output time interval (default 0.125)
+
+Extra options:
+  -l [ --lagrange ]               Print information of the Lagrange Radii in every
+                                  integration time
+  -a [ --all ]                    Print all the information of N-particles in every
+                                  integration time
+  -g [ --gpu ] <value> (=0)       GPUs to use, by default is the maximum available
+                                  devices (use even numbers)
+.fi
+
+.SH "EXAMPLE"
 Here is an example integrating gravidy with NEMO files
 .nf
+
   mkplummer p128 128
   snapprint p128 i,m,x,y,z,vx,vy,vz format=%.15f > p128.tab
   gravidy --input p128.tab --output p128 --interval 0.1 --time 10 --eta 0.01 --softening 0.05
   cat p128.out.snapshot_0* | sed 's/# Time://' | tabtos - - time skip,m,pos,vel nbody=128 | csf - p128.out SnapShot
+  
 .fi
-although note that the last snapshot (time=10.0) is replicated.
-.SH AUTHOR
-Cristian Maureira-Fredes, and Pao Amaro-Seoane
-.SH FILES
-NEMO/usr/gravidy
-.SH SEE ALSO
-nbody1(1NEMO)
+although note that the last snapshot (time=10.0 in this case) might be replicated in versions of gravidy before June 2023.
+The \fBrungravidy\fP frontend would simplify this to
+.nf
+
+  mkplummer p128 128
+  mkdir p128.d
+  rungravidy p128 p128.d deltat=0.1 tcrit=10 eta=0.01 eps=0.05
+  snapplot p128.d/OUT3.snap
+  
+.fi
+with the caveat that \fBrungravidy\fP enforces the use of a run directory. 
+
+.SH "INSTALL"
+Example from NEMO/usr/gravidy. See README file for dependencies such as the BOOST library
+.nf
+
+   cd $NEMO/usr/gravidy
+   make clean install
+   make cmp34
+   
+.fi
+this will install the vanilla "cpu" version.   The "gpu" and "mpi" version will need more guidance.
 .PP
-https://arxiv.org/abs/1702.00440
+The "cmp34" target will compare the results of a direct run of gravidy with the same one of rungravidy. There
+should be no differences.
 .PP
-Maureira-Fredes, C and Amaro-Seoane, P. "GraviDy, a GPU modular, parallel direct-summation N-body integrator: Dynamics with softening", MNRAS, vol. 473, pp. 3113-3127, Jan . 2018.
+
+.SH "AUTHOR"
+Cristian Maureira-Fredes, and Pao Amaro-Seoane (gravidy), Peter Teuben (rungravidy)
+
+.SH "FILES"
+.nf
+NEMO/usr/gravidy - root directory
+rungravidy.c - example NEMO frontend
+.fi
+
+.SH "ADS"
+@ads 2018MNRAS.473.3113M
+
+.SH "SEE ALSO"
+nbody1(1NEMO), snapshot(5NEMO)
+.PP
+Maureira-Fredes, C and Amaro-Seoane, P. "GraviDy, a GPU modular, parallel direct-summation N-body integrator: Dynamics with softening",
+MNRAS, vol. 473, pp. 3113-3127, Jan . 2018.  https://ui.adsabs.harvard.edu/abs/2018MNRAS.473.3113M
 .PP
 http://github.com/cmaureir/gravidy.git
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 12-feb-2017	example added	PJT
+6-apr-2023	add install note	PJT
+16-jun-2023	(rungravidy v0.4 now using gravidy default parameters	PJT
+21-jun-2023	fixed gravidy last duplicated snapshot	PJT
 .fi

@@ -1,7 +1,9 @@
-.TH IMAGE 3NEMO "8 May 2004"
-.SH NAME
-image, read_image, write_image, create_image, create_cube, copy_image, free_image - high level image i/o
-.SH SYNOPSIS
+.TH IMAGE 3NEMO "20 December 2022"
+
+.SH "NAME"
+image, read_image, write_image, create_image, create_cube, copy_image, copy_image_header, free_image - high level image i/o
+
+.SH "SYNOPSIS"
 .nf
 .B #include <stdinc.h>
 .B #include <image.h>
@@ -22,14 +24,19 @@ image, read_image, write_image, create_image, create_cube, copy_image, free_imag
 .B imageptr iptr;
 .B imageptr *optr;
 .PP
+.B int copy_image_header (iptr, optr)
+.B imageptr iptr;
+.B imageptr optr;
+.PP
 .B int create_cube (iptr, nx, ny, nz)
 .B imageptr *iptr;
 .B int nx,ny,nz;
 .PP
 .B int free_image (iptr)
 .B imageptr iptr;
-.SH DESCRIPTION
-These routines provide a high-level interface to a CCD-like image  structure.
+
+.SH "DESCRIPTION"
+These routines provide a simple high-level interface to a CCD-like image structure (2/3 D)
 \fIread_image()\fP reads in a full image (which may be a cube), pointed
 to by the pointer \fBiptr\fP from a file pointed to by the stream
 \fBinstr\fP.
@@ -45,16 +52,21 @@ and sets most image header (except the size) variables to zero.
 \fIcreate_cube()\fP is the extension of \fIcreate_image()\fP for 3D images.
 \fIcopy_image\fP copies an image, but not the image elements.  All header
 elements are copied.
-.SH AUTHOR
+\fIcopy_image_header\fP copies an image header, and leaves the data untouched.
+
+.SH "AUTHOR"
 Peter Teuben
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 image(5NEMO), fits(5NEMO)
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +1.5i
 ~/src/pjt/image         image.c image.h image.3 image.5
 .fi
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 xx-jul-87       original version        PJT

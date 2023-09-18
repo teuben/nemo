@@ -8,6 +8,7 @@
  *      5-aug-11        V0.9: object = test
  *     15-oct-2014      V0.10:  object=noise now can do 3D
  *     12-mar-2020      V1.0    object=blobs in 3D
+ *        dec-2022      V2.0:  moved in= down the argument list
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
@@ -27,7 +28,6 @@
 #include <image.h>
 
 string defv[] = {
-  "in=\n           Input file (optional) to be added to the new file",
   "out=???\n       Output file",
   "object=flat\n   Object type (test,flat,exp,gauss,bar,spiral,....)",
   "spar=\n         Parameters for this object",
@@ -43,7 +43,8 @@ string defv[] = {
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=1.2\n   8-may-2022 PJT",
+  "in=\n           Input file (optional) to be added to the new file",
+  "VERSION=2.0\n   8-dec-2022 PJT",
   NULL,
 };
 
@@ -76,6 +77,13 @@ real surface=1.0;
 
 local void do_create(int nx, int ny, int nz);
 
+local string objects[] = {
+  "flat", "exp", "gauss", "bar", "ferrers",
+  "spiral", "noise", "jet", "j1x", "isothermal",
+  "comet", "shell", "point", "test", "blobs",
+  NULL,
+};
+  
 local void object_test(int npars, real *pars);
 local void object_flat(int npars, real *pars);
 local void object_exp(int npars, real *pars);
@@ -128,6 +136,9 @@ void nemo_main(void)
   nwcs = nemorinpd(getparam("crval"),crval,MAXNAX,0.0,FALSE);
   nwcs = nemorinpd(getparam("cdelt"),cdelt,MAXNAX,1.0,FALSE);
   nwcs = nemorinpd(getparam("crpix"),crpix,MAXNAX,1.0,FALSE);
+
+  outstr = stropen (getparam("out"),"w");  /* open output file first ... */
+  
   if (hasvalue("in")) {
     instr = stropen(getparam("in"),"r");    /* open file */
     read_image (instr, &iptr);
@@ -169,6 +180,7 @@ void nemo_main(void)
 #endif
   }
 
+
   if (!Object(iptr))
     Object(iptr) = scopy(object);
   
@@ -183,6 +195,8 @@ void nemo_main(void)
   dprintf(0,"%s: center pixel: %g %g\n",object,center[0],center[1]);
   surface = Dx(iptr)*Dy(iptr);
   surface = ABS(surface);
+
+
 
   if (streq(object,"flat"))
     object_flat(npar,spar);
@@ -215,11 +229,10 @@ void nemo_main(void)
   else if (streq(object,"blobs"))
     object_blobs(ndim,npar,spar);
   else
-    error("Unknown object %g",object);
+    error("Unknown object %s",object);
 
   minmax_image(iptr);
   
-  outstr = stropen (getparam("out"),"w");  /* open output file first ... */
   if (hasvalue("headline"))
     set_headline(getparam("headline"));
   write_image (outstr,iptr);         /* write image to file */

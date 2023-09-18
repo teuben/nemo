@@ -1,4 +1,4 @@
-.TH TIPSYSNAP 1NEMO "11 February 2022"
+.TH TIPSYSNAP 1NEMO "16 January 2023"
 
 .SH "NAME"
 tipsysnap \- convert tipsy file to snapshot
@@ -43,6 +43,7 @@ in this case, data with 28 byte headers can still be read. Equally
 so, the opposite can also happen, in which case offset=4 is needed.
 Some version of the format use the last 4 bytes as a version ID, an
 integer that can be 1 or 2. See \fItipsy(5NEMO)\fP.
+The \fBhexdump -C\fP program may help identify problems.
 Default: 0
 .TP
 \fBboom=t|f\fP
@@ -123,19 +124,22 @@ EPS(d), EPS(s)
 
 .SH "BUGS"
 In \fBmode=binary\fP the gas, dark and star particles are output
-in separate snapshots.
+in separate snapshots. Use \fIcsf(1NEMO)\fP and/or \fIsnapmerge(1NEMO)\fP
+if some or all need to be a a single snapshot. Some properties may be lost
+in the merging though.
 
 .SH "SEE ALSO"
-snaptipsy(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
+snaptipsy(1NEMO), snapmerge(1NEMO), csf(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 02-Sep-94	V1.0 Created 	PJT
 19-aug-00	V2.0 add mode= to allow binary files, added swap= 	PJT
 28-aug-01	V2.1 process binary data, added offset= (replaces shortlived fix32=t|f)	PJT
-4-feb-22	V3.0 add boom= and make mode=binary the default 	PJT
+4-feb-2022	V3.0 add boom= and make mode=binary the default 	PJT
+16-jan-2023	V3.3 fix swap= for particle data	PJT
 .fi

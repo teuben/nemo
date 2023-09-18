@@ -64,11 +64,12 @@
 #include <image.h>
 #include <history.h>
 #include <fitsio_nemo.h>
+#include <mks.h>
 
 string defv[] = {
         "in=???\n        Input image filename",
         "out=???\n       Output fits filename",
-	"bitpix=-32\n	 FITS bitpix value {16,32,-32}",
+	"bitpix=-32\n	 FITS bitpix value {16,32,-32,-64}",
         "scale=1,1,1\n   Extra scalefactor for cdelt&crval",
         "iscale=1,0\n    Scale and Offset Intensity conversion factor",
         "object=\n       Object name",
@@ -82,31 +83,33 @@ string defv[] = {
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
 	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN,CAR)",
-	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	//	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	"restfreq=\n     RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */	
 	"vsys=0\n        VSYS correction in km/s",
 	"freq=f\n        Output axis in FREQ or VEL",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
+	"bunit=\n        Override the bunit",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
 	"fitshead=\n     If used, the header of this file is used instead",
-        "VERSION=6.4\n   19-mar-2022 PJT",
+        "VERSION=6.6\n   31-dec-2022 PJT",
         NULL,
 };
 
 string usage = "convert image to a fits file";
-
-string cvsid = "$Id$";
 
 stream  instr, outstr;                         /* file streams */
 
 imageptr iptr=NULL;                     /* image, allocated dynamically */
 int  isel = 0;
 
-double scale[4];        /* scale conversion for FITS (CDELT) */
-double iscale[2];	/* intensity rescale */
+double scale[4];         /* scale conversion for FITS (CDELT) */
+double iscale[2];	 /* intensity rescale */
 string object;           /* name of object in FITS header */
+string telescope;        /* name of telescope in FITS header */
+string bunit;            /* name of intensity unit in FITS header */
 string comment;          /* extra comments */
 string headline;         /* optional NEMO headline, added as COMMENT */
 string proj;             /* projection type for WCS */
@@ -126,9 +129,10 @@ int   nref = 0, nfill = 0;
 FLOAT ref_crval[4] = {0,0,0,1},
       ref_crpix[4] = {1,1,1,1},
       ref_cdelt[4] = {1,1,1,1};
-char  ref_ctype[4][80], ref_cunit[4][80];
-FLOAT restfreq;
-real  vsys;
+char  ref_ctype[4][80],
+      ref_cunit[4][80];
+FLOAT restfreq = 1420405751.786;  /* HI line default line for radecvel=t */
+real  vsys = 0.0;
 real  equinox = 2000.0;
 
 void setparams(void);
@@ -207,7 +211,8 @@ void setparams(void)
     error("parsing error scale=%s - must be 2 numbers",getparam("scale"));
   object = getparam("object");
   comment = getparam("comment");
-  restfreq = getrparam("restfreq");
+  if (hasvalue("restfreq"))
+    restfreq = getrparam("restfreq");
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qfreq     = getbparam("freq");
@@ -262,8 +267,9 @@ static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
 static string radefrc[4]= { "RA---CAR", "DEC--CAR", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
+static string uvw[4]    = { "",         "",         "",         ""};
 
-void write_fits(string name,imageptr iptr)
+void write_fits(string name, imageptr iptr)
 {
     FLOAT tmpr,xmin[4],xref[4],dx[4],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FLOAT bmaj,bmin,bpa;
@@ -271,15 +277,19 @@ void write_fits(string name,imageptr iptr)
     FITS *fitsfile;
     char *cp, origin[80];
     char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
-    string *hitem, axname[4];
+    string *hitem, axname[4], axunit[4];
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
 
-    get_nanf(&fnan);    
+    get_nanf(&fnan);
+
+    if (Restfreq(iptr) != 0.0)
+	restfreq = Restfreq(iptr);
+    dprintf(1,"Using restfreq=%f Hz\n",restfreq);
 
     if (Qfreq)
-      vsys = -restfreq * vsys / 300000.0;        // convert km/s to Hz
+      vsys = -restfreq * vsys / (c_MKS/1000.0);        // convert km/s to Hz
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
     nx[0] = Nx(iptr);
@@ -302,6 +312,9 @@ void write_fits(string name,imageptr iptr)
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
     axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
+    axunit[0] = (Unitx(iptr) ? Unitx(iptr) : uvw[0]);
+    axunit[1] = (Unity(iptr) ? Unity(iptr) : uvw[1]);
+    axunit[2] = (Unitz(iptr) ? Unitz(iptr) : uvw[2]);
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
     bmaj = Beamx(iptr);
@@ -309,6 +322,11 @@ void write_fits(string name,imageptr iptr)
     bpa  = 0.0;        /* only spherical beams for now */
     if (strlen(object) == 0)
       object = Object(iptr);
+    telescope = Telescope(iptr);
+    if (hasvalue("bunit"))
+      bunit = getparam("bunit");
+    else
+      bunit = Unit(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */
@@ -443,10 +461,13 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",ctype1_name);
       fitwrhda(fitsfile,"CTYPE2",ctype2_name);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
-      fitwrhdr(fitsfile,"RESTFRQ",restfreq);  
+      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);
+      // @todo  currently HI would be written as 1.420405760     E+09
+      //                     where it is         1.4204057517861 E+09
+      // (float/double issue) - this is about 2 m/s in doppler space
 
       if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
-      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
 
       fitwrhda(fitsfile,"CUNIT1","deg");
       fitwrhda(fitsfile,"CUNIT2","deg");
@@ -454,6 +475,7 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
 	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or km/s */
+      
       //fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
@@ -473,8 +495,14 @@ void write_fits(string name,imageptr iptr)
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
-	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);	
+	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);
+	if (          strlen(axunit[p[0]])>0) fitwrhda(fitsfile,"CUNIT1",axunit[p[0]]);
+       	if (          strlen(axunit[p[1]])>0) fitwrhda(fitsfile,"CUNIT2",axunit[p[1]]);
+	if (ndim>2 && strlen(axunit[p[2]])>0) fitwrhda(fitsfile,"CUNIT3",axunit[p[2]]);
+	if (ndim>3 && strlen(axunit[p[3]])>0) fitwrhda(fitsfile,"CUNIT4",axunit[p[3]]);
+	
       }
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);      
     }
 
     fitwrhdr(fitsfile,"BMAJ",bmaj*scale[0]);
@@ -519,6 +547,10 @@ void write_fits(string name,imageptr iptr)
     
     if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
+    if (telescope)
+      fitwrhda(fitsfile,"TELESCOP",telescope);
+    if (bunit)
+      fitwrhda(fitsfile,"BUNIT",bunit);
 
     if (comment)                                       /* COMMENT */
         stuffit(fitsfile,"COMMENT",comment);

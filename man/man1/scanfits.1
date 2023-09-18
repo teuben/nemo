@@ -1,10 +1,13 @@
-.TH SCANFITS 1NEMO "15 October 1999"
-.SH NAME
+.TH SCANFITS 1NEMO "28 April 2023"
+
+.SH "NAME"
 scanfits \- scan a fits file, optionally extract and convert.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBscanfits in=\fPfits_file  [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIscanfits\fP reads a FITS file. It scans the header for
 various FITS (mis)interpretations, and reports on bad behaviour.
 Some of it can be fixed, in which case the header and/or data
@@ -21,7 +24,8 @@ similar programs. See also notes in \fIccdfits(1NEMO)\fP how
 to process fits files from tape.
 .PP
 This program was written while the author was on the first FITS panel.
-The cfitsio suite is now also providing a FITS checker
+The \fIcfitsio\fP package is now also providing a FITS checker
+called \fIfitsverify\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -234,7 +238,8 @@ know the processing order:
         insert new header items before the END card (\fBinsert=\fP)
         fix header items (in order of individual \fBfix=\fP components)
 .fi
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 To extract the header in a pleasing manner, such that \fImore(1)\fP
 can be used, one can use:
 .nf
@@ -243,23 +248,28 @@ or
     % fitshead junk.fits  > junk.header
 .fi
 where the latter example does not contain trailing blanks anymore.
+
 .SH "SEE ALSO"
-ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO)
+ccdfits(1NEMO), dd(1), fits(5NEMO), fitshead(1NEMO), astfits(1)
 .PP
 .nf
 https://heasarc.gsfc.nasa.gov/fitsio/
 https://fits.gsfc.nasa.gov/fits_verify.html
+https://www.gnu.org/software/gnuastro/manual/html_node/Keyword-manipulation.html
+
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/image/fits         scanfits.c
 .fi
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 27-mar-90	V1.0 Written                     	PJT
 17-jul-90	V1.1 added fix=, blank=            	PJT
  7-mar-91	V1.3 added split=,keep=, and TUSCON 	PJT

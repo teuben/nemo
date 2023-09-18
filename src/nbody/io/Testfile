@@ -14,12 +14,13 @@ clean:
 		tabtos.in tabtos.out tabtos.cmp
 
 NBODY = 10
+SEED = 123
 
 all:	$(BIN)
 
 stoa:
 	@echo Running stoa
-	$(EXEC) mkplummer - $(NBODY) | stoa - stoa.out ; nemo.coverage stoa.a
+	$(EXEC) mkplummer - $(NBODY) seed=$(SEED) | stoa - stoa.out ; nemo.coverage stoa.a
 
 atos:
 	@echo Running atos
@@ -31,7 +32,7 @@ atos:
 T = dark
 
 mp.out:
-	$(EXEC) mkplummer mp.out $(NBODY)
+	$(EXEC) mkplummer mp.out $(NBODY) seed=$(SEED) 
 
 snaptipsy: mp.out
 	@echo Running snaptipsy:
@@ -55,7 +56,7 @@ gadgetsnap:
 
 tabtos:
 	@echo Running tabtos
-	$(EXEC) mkplummer - $(NBODY) | $(EXEC) snapprint - m,x,y,z,vx,vy,vz > tabtos.in
+	$(EXEC) mkplummer - $(NBODY) seed=$(SEED)  | $(EXEC) snapprint - m,x,y,z,vx,vy,vz > tabtos.in
 	$(EXEC) tabtos tabtos.in tabtos.out "" mass,pos,vel times=0  ; nemo.coverage tabtos.c
 	$(EXEC) snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
 	@echo Running diff tabtos.in tabtos.cmp

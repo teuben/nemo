@@ -108,6 +108,14 @@ be replaced with a dash to designate a unix pipe, e.g.
 .nf
 
      mkplummer - 10 | snapprint -
+     
+.fi
+this would be identical to the two liner
+.nf
+
+     mkplummer out=p10.snap nbody=10
+     snapprint in=p10.snap
+     
 .fi
 .PP
 NEMO programs all work by using a series of \fIkeyword=value\fP pairs
@@ -269,16 +277,17 @@ Workshop on N-body simulations:  http://paginapessoal.utfpr.edu.br/rubensmachado
 .SH "BUGS"
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these
-changes if they should. Keeping good cross references in the manual
+changeqs if they should. Keeping good cross references in the manual
 pages might help. However, the \fBhelp=\fP description should always
-be up to date, since it is derived from the code itself. And there
+be up to date, since it is derived from the code itself. See also
+\fIcheckpars(8NEMO)\fP. And there
 is always https://github.com/teuben/nemo/issues
 
 .SH "HISTORY"
-.ta +1i +4i
+.ta +1i +5.5i
 .nf
-1986		V1 Initial Development	Barnes/Hut/Teuben
-1994		V2 UMD release	Teuben
-2001		V3 UMD release using CVS	Teuben
-2017		V4 UMD release using git	Teuben
+1986	V1 Initial Development	Barnes/Hut/Teuben
+1994	V2 UMD release	Teuben
+2001	V3 UMD release using CVS	Teuben
+2017	V4 UMD release using git	Teuben
 .fi

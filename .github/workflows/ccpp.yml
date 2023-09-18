@@ -7,17 +7,19 @@ jobs:
 
     # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
     # runs-on: ubuntu-latestq
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04 
     
     steps:
     - uses: actions/checkout@v1
     - name: apt install
       # run:  sudo apt install csh gfortran pgplot5 libhdf4-dev libhdf5-dev libcfitsio-dev libnetcdf-dev -y
-      run:  sudo apt install csh gfortran pgplot5 
+      # run:  sudo apt install csh gfortran pgplot5
+      run:  sudo apt install csh
     - name: autoconf
       run:  autoconf
     - name: configure
-      run: ./configure --with-yapp=pgplot --enable-debug
+      # run: ./configure --with-yapp=pgplot --enable-debug
+      run: ./configure --without-csh
     - name: build1
       run: make build1 
     - name: build2
@@ -33,3 +35,23 @@ jobs:
     - name: make bench5
       run: make bench5
     
+  build2:
+
+    runs-on: macos-12
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Configure
+      run: ./configure --without-csh --disable-fortran
+    - name: Build1
+      run: make build1 
+    - name: Build2
+      run: make build2
+    - name: Build3
+      run: make build3
+    - name: make check
+      run: make check checklog
+    - name: make bench
+      run: make bench
+    - name: make bench5
+      run: make bench5

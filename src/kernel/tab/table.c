@@ -153,6 +153,32 @@ int iscomment(char *line)
     return 1;
 }
 
+/*
+ * sanitize: convert to unix style 0 terminated lines
+ *           if the line ending was DOS or MAC or UNIX
+ *   MAC:   \r     (CR)
+ *   UNIX:  \n     (LF)
+ *   DOS:   \r\n   (CR-LF)
+ */
+
+void sanitize(char *line)
+{
+  int ret = strlen(line);
+  //dprintf(1,"sanitize-1[%d]: '%s'\n", ret, line);
+  if (line[ret-1] == '\r') {    //MAC
+    line[ret-1] = '\0';
+    ret--;
+  }
+  if (line[ret-1] == '\n') {    //UNIX
+    line[ret-1] = '\0';
+    ret--;
+  }
+  if (line[ret-1] == '\r') {    //DOS
+    line[ret-1] = '\0';
+    ret--;
+  }
+  //dprintf(1,"sanitize-2[%d]: '%s'\n", ret, line);
+}
 
 /*
  * parse_select, with dynamic reallocation
@@ -301,12 +327,15 @@ void table_close(tableptr tptr)
   // @todo - free more
 }
 
+/*
+ *   table_line returns a NULL terminated line
+ *   should be able to read unix (\n)   dos (\r\n) or mac (\r) files
+ */
 string table_line(tableptr tptr)
 {
   ssize_t ret = getline(&(tptr->line), &(tptr->linelen), tptr->str);
   if (ret >= 0) {
-    if (tptr->line[ret-1] == '\n')
-      tptr->line[ret-1] = '\0';
+    if (ret > 0) sanitize(tptr->line);
     return tptr->line;
   }
   // end of file
@@ -430,12 +459,15 @@ string *table_rowsp(table *t, int row)
   }
   sp[ntok] = NULL;
 
-  // consistency check on # columns
+  // consistency check on # columns; allow extra columns
   if (t->nc == 0) {
     dprintf(1,"table_rowsp[%d]: setting ncols=%d\n",row,ntok);
     t->nc = ntok;
-  } else if (ntok != t->nc)
-    error("column number changed:  %d -> %d\n",t->nc, ntok);
+  } else if (ntok < t->nc) {
+    error("too few columns:  %d -> %d\n",t->nc, ntok);    
+  } else if (ntok > t->nc) {
+    warning("ignoring extra column(s):  %d -> %d\n",t->nc, ntok);
+  }
   
   // free memory of linked list
   curr = first;

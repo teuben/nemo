@@ -19,12 +19,12 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
-	@bsf ccd.in '41.644 31.2134 0 93 115'
+	@bsf ccd.in '40.9321 31.4127 0 93 117'
 
 ccd3.in:
 	@echo Creating $@
 	$(EXEC) ccdgen out=ccd3.in object=noise spar=0,1  size=10,10,100 seed=123
-	@bsf ccd3.in '0.00961965 1.00606 -3.8169 4.5 10015'
+	@bsf ccd3.in '0.00961773 1.00596 -3.8169 4.5 10017'
 
 ccdprint: ccd.in
 	@echo Running $@

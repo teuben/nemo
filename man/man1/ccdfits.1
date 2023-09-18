@@ -1,4 +1,4 @@
-.TH CCDFITS 1NEMO "22 May 2021"
+.TH CCDFITS 1NEMO "31 December 2022"
 
 .SH "NAME"
 ccdfits \- convert an image to a fits file 
@@ -104,6 +104,10 @@ useful of \fBdummy=f\fP and your FITS reader still cannot handle
 dummy trailing axes. For \fBndim=4\fP the axis will be labeled
 as \fISTOKES\fP, which is useful for packages such as CASA.
 Default: not used.
+.TP
+\fBbunit=\fP
+If supplied, this will override the BUNIT in the fits header. Common values are
+JY/BEAM (if a beam is present), JY/PIXEL, or K.
 .TP
 \fBselect=1\fP
 Select this image (1 being the first) to grab in an file
@@ -224,4 +228,5 @@ apr-01		V3.0 reference map/pixel to inherit a WCS from  	PJT
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true	PJT
 27-dec-2020	V6.3 added fitshead=	PJT
 22-may-2021	V6.3d:  object inherited from Image	PJT
+31-dec-2022	V6.6: add bunit=	PJT
 .fi

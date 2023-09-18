@@ -58,7 +58,7 @@ mainc2:	mainc2.c
 	$(CC) $(CFLAGS) -I$(NEMOINC) -I$(NEMOLIB) -o mainc2 mainc2.c $(NEMOLIB)/libnemo.a -lm
 
 nemomain: nemomain.c
-	$(CC) $(CFLAGS) -o nemomain nemomain.c $(NEMOLIB)/libnemo.a -lm
+	$(CC) $(CFLAGS) -I$(NEMOINC) -I$(NEMOLIB) -o nemomain nemomain.c $(NEMOLIB)/libnemo.a -lm
 
 
 

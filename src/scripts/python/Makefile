@@ -3,7 +3,8 @@
 include $(NEMOLIB)/makedefs
 
 
-TESTS = test_unsio.py test_gala.py test_galpy.py test_pynbody.py test_yt.py test_amuse.py
+TESTS = test_unsio.py test_gala.py test_galpy.py test_pynbody.py \
+	test_yt.py test_amuse.py test_nemopy.py
 
 
 help:

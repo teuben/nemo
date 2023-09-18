@@ -1,4 +1,4 @@
-.TH TABPEAK 1NEMO "25 March 2022"
+.TH TABPEAK 1NEMO "25 March 2023"
 .SH "NAME"
 tabpeak \- find peaks or valleys in a table
 
@@ -28,6 +28,10 @@ Y-column [2]
 \fBclip=\fP
 Only consider points above this [0]
 .TP
+\fBdelta=\fP
+If a positive value is used, single peaks larger than this value on either side of this
+peak are reported. [0]
+.TP
 \fBpmin=\fP
 [EXPERIMENTAL]
 Require the peak to contain at least \fBpmin\fP points. By default, only 3 are required, in which
@@ -42,28 +46,68 @@ finder this should be at least 1.
 Also fit valleys, in which case the signal has to be below -clip. [Default: f]
 .TP
 \fBmean=t|f\fP
+Use intensity weighted mean ?  [Default: f]
+.TP
+\fBnpeak=\fP
+extract the Nth peak (N>0). If npeak=0, no extraction done. Other keywords will be ignored
+if a peak is ectracted for further analysis.  [Default: 0]
+.TP
+\fBepeak=\fP
+expand around the N-th peak extracted by npeak>0 by this factor. By default the segment around
+a peak is defined until the first point away from the peak will increase again. [Default: 1]
 .TP
 \fBnmax=\fP
 max size if a pipe [100000]  
 
 .SH "EXAMPLES"
+The peak in a simple paraboloid:
 .nf
-% nemoinp 1:3 | tabmath - - '-(2.2-%1)**2+10' | tabpeak -
-2.200000 10.000000
+
+  $ nemoinp 1:3 | tabmath - - '-(2.2-%1)**2+10' | tabpeak -
+  2.200000 10.000000
+  
+.fi
+Here is a pipeline extracting the first peak, fitting a gaussian to it, and plotting the data and residuals
+(in the PGPLOT driver the data will be in red, the residuals in green, and the fit in blue):
+.nf
+
+  $ tabpeak spec.tab | tabnllsqfit - fit=gauss1d out=- | tee fit.log | tabcomment - | tabplot - 1 2,3,4 color=2,3,4 line=1,1
+  $ cat fit.log
+   
+.fi
+.PP
+Finding single peaks by setting an appropriate delta (related to a robust dispersion of
+the differences of the data):
+
+.nf
+  $ tabtrend L1157-B1_109989__1.bstats.tab  2 | tabhist - robust=t
+  ...
+  Robust Mean Disp     : 1.52724e-05 0.00640417
+  
+  $ tabpeak L1157-B1_109989__1.bstats.tab  delta=0.05
+  #  X       Y       Ypeak    Delta    Delta
+  166.000000 1.591776  0.083979 0.087718 0.080239
+  286.000000 26.544859  25.062155 25.063228 25.061082
+  452.000000 1.838022  0.324911 0.324182 0.325639
+  ...
+  3524.000000 1.520718  0.229133 0.229248 0.229019
+  3810.000000 0.427400  -0.871551 0.870384 0.872717
+
 .fi
 
 .SH "SEE ALSO"
-tablsqfit(1NEMO)
-.SH "FILES"
+tablsqfit(1NEMO), tabnllsqfit(1NEMO), tabtrend(1NEMO), tabhist(1NEMO), tabplot(1NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 28-May-2013	V0.1 Created	PJT
 30-may-2013	V0.2 added valley=	PJT
 23-mar-2022	V0.4 added pmin=	PJT
 25-mar-2022	V0.5 added edge=	PJT
+23-jan-2023	V0.7 added npeak, epeak=	PJT
+25-may-2023	0.8 added delta=	PJT
 .fi

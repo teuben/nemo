@@ -51,6 +51,11 @@ fi
 export VDEVICE=X11
 
 if [ 1 ]; then
+  if [ -z "$PKG_CONFIG_PATH" ]; then
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig
+  else
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig:$PKG_CONFIG_PATH
+  fi
   if [ -z "$LD_LIBRARY_PATH" ]; then
     export LD_LIBRARY_PATH=$NEMOLIB:$NEMO/opt/lib
   else
@@ -83,8 +88,10 @@ test -f $NEMO/usr/zeno/ZENORC   &&     echo "No ZENO support for bash yet"
 test -f $NEMO/nemo_local.sh     &&     source $NEMO/nemo_local.sh
 test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 
-# optional python
-test -f $NEMO/python_start.sh   &&     source $NEMO/python_start.sh
+# optional python (anaconda3 should win)
+test -f $NEMO/python_start.sh             &&     source $NEMO/python_start.sh
+test -f $NEMO/anaconda3/python_start.sh   &&     source $NEMO/anaconda3/python_start.sh
+
 
 # optional dot check?
 export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH

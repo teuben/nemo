@@ -1,52 +1,68 @@
-.TH ZENO 1NEMO "30 December 2019"
-.SH SYNOPSIS
-\fBprogram [key1=]val1 [key2=]val2 .\!.\!.
-.SH DESCRIPTION
+.TH ZENO 1NEMO "10 June 2023"
+
+.SH "SYNOPSIS"
+.B program [key1=]val1 [key2=]val2 .\!.\!.
+.br
+.B program --help.
+.SH "DESCRIPTION"
 \fBZENO\fP is Josh Barnes' version of NEMO. The code is 
 derived from NEMO, with a common ancestor around 1988.
-The binary datafiles, via \fIflestruct(3NEMO)\fP
+The binary datafiles, via \fIfilestruct(3NEMO)\fP
 are largely compatible.
 .PP
-When installed, ZENO adds about 130 executables via $ZENOPATH/bin.
-Within NEMO, a user would source the $NEMO/usr/zeno/zeno_start.sh script.
+When installed, ZENO adds well over 100 executables via $ZENOPATH/bin,
+but some have the same name as NEMO's counterpart. See EXAMPLES below how
+to add ZENO to your NEMO environment. See \fIzeno(8NEMO)\fP for a list of
+all programs
+
+.SH "EXAMPLES"
+From within NEMO the following command should load ZENO:
+.nf
+
+   source $NEMO/usr/zeno/zeno_start.sh
+
+.fi
+but note this may shield likewise named executables of NEMO.
 .PP
-.SH EXAMPLES
 A \fIsnapshot(5NEMO)\fP created with ZENO has Position and Velocity, as well
 as using NBody instead of Nobj.
 It can be converted to NEMO's PhaseSpace with e.g. \fIsnapcopy(1NEMO)\fP, and then
 processed like NEMO snapshots. E.g.:
 .nf
-    % plumsnap p16k
-    % snapcopy p16k - | snapplot -
+    % plumsnap - | snapcopy -  - | snapplot -
 .fi
 The magic of this ZENO detection is in get_snap.c, and programs (such as snapplot) that use
 older direct reading of snapshots will not be able to process these snapshots with such a
 filter.
 
 .SH "DIFFERENCES WITH NEMO"
-As highlighted in the example, a ZENO snapshot uses \fINBody\fP instead of NEMO's \fINobj\fP, but
-as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted.
-.PP
-NEMO's \fIpotential(5NEMO)\fP are similar to ZENO's \fIgspmodels\fP, where the latter also allows for adding
-potentials (much harder in NEMO).  falcON has similar tools to add potentials.
+A ZENO snapshot uses \fINBody\fP instead of NEMO's \fINobj\fP, but
+as get as snapshot I/O is done via the \fIget_snap\fP macros, they  will be converted. NEMO uses
+PhaseSpace whereas ZENO uses separate Position and Velocity.
 .PP
 NEMO has no real support for SPH (though some tags in snapshot's are supported)
 .PP
 ZENO has no plotting such as NEMO's yapp
+.PP
+NEMO's command line userface is a bit more richer
 
 .SH "FILES"
 .nf
 .ta +3i
 $NEMO/usr/zeno			directory, with instructions how to install
+$NEMO/usr/zeno/zeno		symlink to the actual location of ZENO
 $NEMO/usr/zeno/zeno_start.sh	startup script
 .fi
 
 .SH "SEE ALSO"
-nemo(1NEMO)
-.SH AUTHOR
+nemo(1NEMO), zeno(8NEMO)
+
+.SH "AUTHOR"
 Josh Barnes
-.SH FURTHER INFORMATION
+
+.SH "FURTHER INFORMATION"
 .nf
-http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+http://legacy.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+https://www2.ifa.hawaii.edu/faculty/barnes/zeno/Programs.html
 https://github.com/joshuabarnes/zeno/
 .fi

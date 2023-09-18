@@ -59,7 +59,7 @@ give special meaning to the parenthesis, which are shell **meta**
 characters.
 
 The second galaxy is made in a similar way, with
-a different seed:
+a different seed (the default seed=0 takes the time of the day):
 
 .. code-block::
 
@@ -101,7 +101,7 @@ Integration using hackcode1
 
 We then run the collision for 20 time units, with the standard
 N-body integrator based on the Barnes  "hierarchical tree" 
-algorith:
+algorithm:
 
 .. code-block::
 
@@ -343,6 +343,12 @@ a new name.
    * - yait
      - real
      - Aitoff projection y [-1,1] T.B.A.
+   * - ra
+     - real
+     - Right Ascension, converted from radians to degrees (-x)
+   * - dec
+     - real
+     - Declination, converted from radians to degrees (y)
 
 As usual an example:
 

@@ -1,9 +1,12 @@
-.TH CCDSLICE 1NEMO "27 February 2021"
-.SH NAME
+.TH CCDSLICE 1NEMO "11 May 2023"
+
+.SH "NAME"
 ccdslice \- takes slices and/or re-orient an image cube
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdslice\fP [parameter=value] ...
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdslice\fP takes slices from an image cube, along any (orthogonal)
 axis and can thereby also reorder the axes, or remove a redundant axis.
 .PP
@@ -16,10 +19,11 @@ see also \fIccdsub(1NEMO)\fP for a better alternative.
 when writing out a \fIfits(5NEMO)\fP file.
 .PP
 Using the \fBzslabs=\fP keyword one or more sections based on the WCS
-along that axis can be selected.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+along that axis can be selected, but for a regular selection
+(e.g. 30:50:2) it will do the right thing.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input filename, in \fIimage(5NEMO)\fP format.
@@ -50,44 +54,59 @@ Scaling applied to \fBzslabs\fP to match the WCS in the header. Default: 1
 \fBselect=t|f\fP
 A boolean to signify of the selected planes are selected for output (t)
 or the ones to ignore for output (f) - Not Implemented yet.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here is a cube, in which only the 2nd plane (z=1) is selected, the output
 'cube' is hence two-dimensional
 .nf
+
     ccdslice cube.in cube.out z 2
+
 .fi
 here is a cube which is re-oriented in YZX:
 .nf
+
     ccdslice cube.in cube.out x
+
 .fi
 and here a somewhat cumbersome three-step process to select a 
 subset of the X axis, but leaving the cube intact:
 .nf
+
     ccdslice cube.in - x 2:10:2 | ccdslice - - x | ccdslice - cube.out x
+
 .fi
 and the same for selecting a subset of the Y axis, now in two steps:
 .fi
+
     ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y
+
 .fi
 Here an example to select some ranges in Z, where the input FITS file is in m/s,
 but the selection is done in km/s. After this a noise map is computed for the selected
 planes:
 .nf
+
     fitsccd cube.fits - | ccdslice - - zslabs=100,200,500,600 zscale=1000 | ccdmom - cube.mom2 mom=-2
 .fi
-.SH BUGS/CAVEATS
+
+.SH "CAVEATS"
 This code depends on the fact that the data is 3-dimensional, i.e. an
 image cube. This is a limitation of the \fIimage(5NEMO)\fP format.
 .PP
 The coordinate system description of the new \fIzvar\fP axis can easily 
 be corrupted by choosing an irregular layout with \fBxrange=\fP.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdsub(1NEMO), ccdfits(1NEMO),  image(5NEMO), fits(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
-6-May-95	V1.0 Created    PJT
+.ta +1.5i +5.5i
+6-May-95	V1.0 Created		PJT
 27-feb-2021	V1.2  add zslabs= and zscale=	PJT
+11-may-2023	V1.3  better WCS handling	PJT
 .fi

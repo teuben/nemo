@@ -1,4 +1,4 @@
-.TH DATA 5NEMO "18 April 2021"
+.TH DATA 5NEMO "19 July 2023"
 
 .SH "NAME"
 data \- list of various data files in $NEMODAT
@@ -38,20 +38,31 @@ plum.dat	Osipkov-Merritt DF: plummer (isotropic)
 devauc.dat	Osipkov-Merritt DF: De Vaulouleurs (isotropic)
 expmodel.inp	Example table for \fImkexphot\fP
 nbabel	(some) input files from the nbabel.org project
-starlab/cube10.dyn	example starlab data (dyn): [mkcube -n 10 -s 123]
+starlab/cube10.dyn	example starlab data (dyn): [makecube -n 10 -s 123]
 
 archive     	Archive of interesting N-body simulations
         	        (usually a symbolic link to a large local disk)
-			
+
+.SH "EXAMPLES"
+The starlab \fIdyn\fP format can be converted to a table using
+the \fIdumbp(1STARLAB)\fP program, after which it can be
+converted to a snapshot, viz.
+.nf
+     dumbp < $NEMO/data/starlab/cube10.dyn | tabcols - > cube10.col
+     tabtos cube10.col cube10.dat block1=mass,pos,vel times=0
+.fi
+Note this method does not convert the time, and cannot convert a series of snapshots
+from a simulation.
+
 .SH "SEE ALSO"
-snapshot(5NEMO), image(5NEMO), tsf(1NEMO), rotcur(5NEMO)
+snapshot(5NEMO), image(5NEMO), tsf(1NEMO), rotcur(5NEMO), dumbp(1STARLAB)
 .PP
 \fIA comparison of eleven numerical integrations of the same gravitational 25 body
 problem\fP,
 Myron. Lecar, Bull.Astr. 3, 91. 1968 (in: Colloque sur le problem gravitationnel des N
 corps).
 .PP
-http://orca.ucsc.edu/~rmont/index.html for the Figure-8 orbit
+http://orca.ucsc.edu/~rmont/index.html for the Figure-8 orbit - https://arxiv.org/pdf/math/0011268.pdf
 .PP
 http://arxiv.org/abs/1303.0181 - \fIThree Classes of Newtonian Three-Body Planar Periodic Orbits\fP, Suvakov & Dmitrasinovic (2013)
 .PP

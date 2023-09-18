@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 units - units conversion utility 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopis</a></h2>
 <b>units from=</b><i>from</i> <b>to=</b><i>to</i>  [parameter=value
 ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 The units program converts quantities expression in various
 scales to  their equivalents in other scales.  The units program can only
@@ -116,6 +119,8 @@ same was as standard units, but with  a trailing dash at the end of the
 prefix name.   <p>
 <br>
 <pre>prefix<tt> </tt>&nbsp;<tt> </tt>&nbsp;abbrev.<tt> </tt>&nbsp;<tt> </tt>&nbsp;factor
+quetta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Q-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e30
+ronna-<tt> </tt>&nbsp;<tt> </tt>&nbsp;R-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e27
 yotta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Y-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e24
 zetta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Z-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e21
 exa-<tt> </tt>&nbsp;<tt> </tt>&nbsp;E-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e18
@@ -137,6 +142,8 @@ femto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;f-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-15
 atto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;a-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-18
 zopto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;z-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-21
 yocto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;y-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-24
+ronto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;r-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-27
+quecto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;q-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-30
 </pre>
 <h2><a name='sect5' href='#toc5'>G</a></h2>
 The gravitational constant is often set to unity in N-body codes. However,
@@ -184,6 +191,7 @@ division of symbols.  This distinction should not be necessary. <p>
 The program
 contains various arbitrary limits on the length of the units converted
 and on the length of the data file. 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='expr.1.html'>expr(1)</a>
 , <a href='units.5.html'>units(5NEMO)</a>
@@ -200,8 +208,11 @@ FRINK: <a href='http://futureboy.homeip.net/frinkdocs/'>http://futureboy.homeip.
 units calculator: <a href='http://www.astro.wisc.edu/~dolan/constants/calc.html'>http://www.astro.wisc.edu/~dolan/constants/calc.html</a>
 
 <p>
-Granot, <i>Scaling relations between numerical simulations and physical systems
-they representP,  <a href='http://arxiv.org/pdf/1111.6865v1'>http://arxiv.org/pdf/1111.6865v1</a>
+astropy units:  <a href='https://docs.astropy.org/en/stable/units/index.html'>https://docs.astropy.org/en/stable/units/index.html</a>
+ <p>
+Granot,
+<i>Scaling relations between numerical simulations and physical systems they
+representP,  <a href='http://arxiv.org/pdf/1111.6865v1'>http://arxiv.org/pdf/1111.6865v1</a>
  <p>
 <a href='https://en.wikipedia.org/wiki/N-body_units'>https://en.wikipedia.org/wiki/N-body_units</a>
 
@@ -222,6 +233,7 @@ Mariano (adrian@u.washington.edu or mariano@geom.umn.edu)
 <pre>14-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;AM
 21-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 Conversion to nemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-aug-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 cleanup, reset defaults, switch key order<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-nov-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2 added r/q/R/Q as per new NIST decree<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

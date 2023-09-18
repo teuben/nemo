@@ -1,60 +1,44 @@
 #! /bin/bash
 #
-#  new V4.1+ install
-#
-#  the old (csh) script "nemo_install" is still available to guide you
-#  for some problems but this is the recommended more cleaner
-#  installation procedure.
+#--HELP
+#  Install script for NEMO V4.1+ install
 #
 #  You can also use this script to shortcut network installs by cloning
 #  off a local nemo.git tree and use caching of optional tar files.
 #
 #  The script has a number of key=val optional keywords. Their defaults
-#  are listed below in the code.
-#
-#  opt=1          uses MKNEMOS=hdf4 hdf5 cfitsio fftw wcslib gsl
-#  python=1       uses an anaconda3 install within $NEMO
-#  ...
+#  are listed below
 #
 #  In full version (opt=1 python=1) this script takes about 14 mins
-#  A simple version without falcON and any checks and benchmarks takes about 2 mins
+#  A simple version without falcON and any checks and benchmarks takes about 1-2 mins
 #   opt=0 python=0 falcon=0                  1'50"
 #   opt=0 python=0 falcon=0 mknemos=cfitsio  2'13"
 #   opt=0 python=0                           5'30"
 #   opt=0 python=1                           6'15"
-#   opt=1 python=1                          14'00" 
+#   opt=1 python=1                          14'00"
+#
 
-echo "install_nemo.sh:  Version 1.5 -- 9-sep-2021"
+echo "install_nemo.sh:  Version 1.8 -- 8-jul-2023"
 
-opt=0
-nemo=nemo
-branch=master
-python=0
-url=https://github.com/teuben/nemo
-mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4
-falcon=1
-yapp=auto
-check=1
-bench=0
-bench5=1
+ opt=0                                                # install some optional mknemos= packages
+ nemo=nemo                                            # root directory where NEMO will be installed (. = here)
+ branch=master                                        # branch used
+ python=0                                             # 1=install anaconda3 python? 2=post-install pip
+ url=https://github.com/teuben/nemo                   # git repo adres
+ mknemos=hdf4,hdf5,cfitsio,fftw,wcslib,gsl,netcdf4    # optional packages via source (needs opt=1)
+ falcon=1                                             # install falcON tools?
+ amuse=0                                              # install amuse via python? (needs python=2)
+ yapp=auto                                            # yapp driver   (auto, ps, pgplot, pglocal, plplot)
+ check=1                                              # "make check" at the end?
+ bench=0                                              # "make bench" at the end?
+ bench5=1                                             # "make bench5" at the end?
+#--HELP
 
-help() {
-    echo This is a simple install script for NEMO
-    echo Optional parameters are key=val, defaults are:
-    echo
-    echo opt=$opt
-    echo nemo=$nemo
-    echo branch=$branch
-    echo python=$python
-    echo url=$url
-    echo mknemos=$mknemos
-    echo falcon=$falcon
-    echo yapp=$yapp
-    echo check=$check
-    echo bench=$bench
-    echo bench5=$bench5
-}
-
+if [ "$1" == "--help" ] || [ "$1" == "-h" ];then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
 
 # indirect git clone via nemo.git for faster testing
 # bootstrap with:    git clone https://github.com/teuben/nemo nemo.git
@@ -67,12 +51,9 @@ else
   echo "      git clone $url nemo.git"
 fi  
 
-for arg in $*; do\
-  if test $arg == --help || test $arg == -h; then
-    help
-    exit 0
-  fi
-  export $arg
+#             simple keyword=value command line parser for bash
+for arg in "$@"; do
+  export "$arg"
 done
 
 echo "Using: "
@@ -89,19 +70,30 @@ echo "  bench=$bench"
 echo "  bench5=$bench5"
 echo ""
 
-# safety
-if [ -d $nemo ]; then
-    echo Sleep 5 seconds before removing nemo=$nemo ....
-    sleep 5
+if [ "$nemo" == "." ]; then
+    # use local directory, but one has to be in the NEMO root directory
+    if [ ! -e nemo_start.sh.in ]; then
+	echo No nemo_start.sh.in here
+	exit 0
+    fi
+    nemo=$(pwd)
 else
-    echo Installing NEMO in a new directory $nemo
-fi    
-
-date0=$(date)
-
-rm -rf $nemo
-git clone $url $nemo
-cd $nemo
+    if [ -e nemo_start.sh.in ]; then
+	echo "Warning: you seem to want to make a new nemo inside an old nemo...."
+	sleep 5
+    fi
+    # safety
+    if [ -d $nemo ]; then
+	echo Sleep 5 seconds before removing nemo=$nemo ....
+	sleep 5
+    else
+	echo Installing NEMO in a new directory $nemo
+    fi    
+    date0=$(date)
+    rm -rf $nemo
+    git clone $url $nemo
+    cd $nemo
+fi
 git checkout $branch
 ./configure 
 
@@ -121,16 +113,24 @@ if test $falcon = 0; then
 fi
 
 
-if test $python = 1; then
+if [ $python -gt 0 ]; then
     make build1
     NEMO=`pwd` make python
-    source python_start.sh
+    source anaconda3/python_start.sh
+    make nemopy
+    if [ $python  -gt 1 ]; then
+	src/scripts/install_python_modules amuse=$amuse
+    fi
 else
     echo No python install
 fi
 
 if [ $yapp = "auto" ]; then
     with_yapp=""
+elif [ $yapp = "pglocal" ]; then    
+    source nemo_start.sh
+    with_yapp="--with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB"
+    src/scripts/pgplot.install png=1
 else
     with_yapp="--with-yapp=$yapp"
 fi
@@ -177,8 +177,9 @@ date1=$(date)
 echo "Started: $date0"
 echo "Ended:   $date1"
 
-echo All done.
+echo All done installing $nemo
 echo ""
-echo "(ba)sh users:  source $nemo/nemo_start.sh  to activate NEMO in your shell"
-echo "(t)csh users:  source $nemo/nemo_start.csh to activate NEMO in your shell"
+fnemo=$(pwd)
+echo "(ba)sh users:  source $fnemo/nemo_start.sh  to activate NEMO in your shell"
+echo "(t)csh users:  source $fnemo/nemo_start.csh to activate NEMO in your shell"
 

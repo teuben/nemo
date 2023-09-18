@@ -22,7 +22,7 @@ string defv[] = {	/* keywords + help string for user interface */
     "zslabs=\n      Zmin,Zmax pairs in WCS to select",
     "zscale=1\n     Scaling applied to zslabs",
     "select=t\n     Select the planes for output (t) or de-select those (f)",
-    "VERSION=1.3\n  1-may-2022 PJT",
+    "VERSION=1.3c\n 11-may-2023 PJT",
     NULL,
 };
 
@@ -33,7 +33,6 @@ string usage="takes slices from a cube";
 #define Y_SLICE 1
 #define Z_SLICE 2
 
-void ax_copy(imageptr i0, imageptr i1);
 void slice(imageptr i, imageptr o, int mode, int *planes);
 int  get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real amin, real da, real ascale);
 
@@ -41,10 +40,10 @@ void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
-    int *planes, mode, i;
+    int *planes, mode=-1, i;
     real *slabs, zscale;
     string zvar;
-    int nx, ny, nz, maxplane;
+    int nx=0, ny=0, nz=0, maxplane=0;
     bool Qsel = getbparam("select");
 
     instr = stropen (getparam("in"),"r");
@@ -75,7 +74,7 @@ void nemo_main(void)
 	maxplane = nz;	
     } else 
         error("Illegal slice axis %s, must be x,y,z",zvar);
-    warning("slice mode %d", mode);
+    dprintf(1,"slice mode %d", mode);
 
     planes = (int *)  allocate(maxplane * sizeof(int));
     slabs  = (real *) allocate(maxplane * sizeof(real));
@@ -105,7 +104,7 @@ void nemo_main(void)
             planes[i] = i+1;
     }
     create_cube(&optr,nx,ny,nz);
-    ax_copy(iptr,optr);
+    copy_header(iptr,optr,1);
     slice(iptr,optr,mode,planes);
 
     outstr = stropen(getparam("out"),"w");
@@ -230,22 +229,3 @@ int get_planes(int nslabs, real *slabs, int *planes, int na, real aref, real ami
   return nz;
 }
   
-void ax_copy(imageptr i0, imageptr i1)
-{
-  Dx(i1) = Dx(i0);
-  Dy(i1) = Dy(i0);
-  Dz(i1) = Dz(i0);
-  Xmin(i1) = Xmin(i0);
-  Ymin(i1) = Ymin(i0);
-  Zmin(i1) = Zmin(i0);
-  Xref(i1) = Xref(i0);
-  Yref(i1) = Yref(i0);
-  Zref(i1) = Zref(i0);
-  Beamx(i1) = Beamx(i0);
-  Beamy(i1) = Beamy(i0);
-  Beamz(i1) = Beamz(i0);
-  if (Namex(i0))  Namex(i1) = strdup(Namex(i0));
-  if (Namey(i0))  Namey(i1) = strdup(Namey(i0));
-  if (Namez(i0))  Namez(i1) = strdup(Namez(i0));
-  Axis(i1) = Axis(i0);
-}

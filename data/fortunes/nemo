@@ -7,6 +7,11 @@ can be
 If you want to find out the order of the keywords, use the "help=" option
 or the multi-line "help=h"
 %
+Each NEMO program should have a Unix style manual page, but the --man command line argument
+will also call this man page
+        man mkplummer
+	mkplummer --man
+%
 A unix pipe becomes a '-' in NEMO:
 
 	mkplummer - 10 | tsf -
@@ -54,7 +59,8 @@ $NEMO/src/scripts/mknemo.d. E.g.
 	mknemo gyrfalcON
 
 The -u flag will update ("git pull") your NEMO before the program is
-recompiled.  See -h for other options.
+recompiled. The -a flag will also search in $NEMO/usr.
+See -h for other options.
 	
 %
 The yapp= system keyword selects for programs that need a graphics output

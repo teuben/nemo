@@ -47,7 +47,7 @@ void inputdata(string file)
     						/* invoke generic input     */
     strclose(instr);				/* close input stream       */
     if ((bits & MassBit) == 0 || (bits & PhaseSpaceBit) == 0)
-	error("inputdata: essential data missing\tbits = %o\n", bits);
+	error("inputdata: essential data missing\tbits = 0x%x\n", bits);
     if ((bits & TimeBit) == 0 || scanopt(options, "reset_time"))
 						/* time missing or reset?   */
 	tnow = 0.0;				/*   then supply default    */

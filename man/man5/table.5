@@ -1,4 +1,4 @@
-.TH TABLE 5NEMO "5 May 2022"
+.TH TABLE 5NEMO "30 March 2023"
 
 .SH "NAME"
 table \- (ASCII) table format
@@ -24,21 +24,23 @@ some programs even skip lines starting with the ! or ; symbol. See also
 NEMO tables can also contain commands that plot certainly variations of the table
 using the '#PLOT' directives and the \fInemoplot(8NEMO)\fP command. 
 
-.PP
-
 .nf
+
   HEADER
   D11 D12 D13 ....
   D21 D22 ...
   ...
+
 .fi
+Where \fBDIJ\fP refers to the I-th row and J-th column.  The HEADER can be in
+a number of formats (optional #, verbatim column names, with or without comma's etc.)
 
 .SH "EXAMPLE"
 Here is an example of a table:
 .nf
 
     # This is the first line of the table
-    # I    N     Q      # names of columns (for a human)
+    # I    N     Q      # names of columns (some programs also understand this)
     1.0   2.0   4.0
     # 2.0 3.0   5.0     bad data, commented out.
     3.0   5.1   6.32    # comment belonging to a line
@@ -52,9 +54,10 @@ one column, with even numbers 2 through 10, done with
 
     nemoinp 2:10:2 newline=t > even1.tab
     seq 2 2 10 > even2.tab
+    tabgen -  10 3 > random.tab
 
 .fi
-and for performance testing the \fItabgen(1NEMO)\fP program can be used
+where for performance testing the \fItabgen(1NEMO)\fP program can be used
 to create random large tables.
 
 .SH "OTHER TABLE FORMATS"
@@ -62,7 +65,7 @@ ESO/Midas, where all columns
 are separated by TABs. The unix program \fIpaste(1)\fP will by default
 put a TAB between the columns (files).
 .PP
-FITS uses the 'TABLE' (ascii tables) and BINTABLE (binary tables) format.
+FITS uses the 'TABLE' (ascii tables) and 'BINTABLE' (binary tables) format.
 See \fIfits(5NEMO)\fP.
 .PP
 IPAC-table format: (often using the extension \fB.tbl\fP)
@@ -124,7 +127,7 @@ RA	Dec
 .PP
 The ECVS (Enhanced Character Separated Values) is extension to the generic ascii table
 format, except it has a commented YAML header encoding the units, and one extra
-\fIannoying\fP row with column names:
+\fIannoying\fP (YMMV) row with column names:
 .nf
 
 # %ECSV 0.9
@@ -156,7 +159,7 @@ Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 1-feb-93	document created  	PJT
 25-oct-03	some more docs on other table formats	PJT
 17-mar-2022	changes for table-V2	PJT

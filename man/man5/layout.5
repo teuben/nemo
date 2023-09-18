@@ -6,7 +6,13 @@ A \fBlayout\fP file is a simple ASCII text file, with
 commands to execute basic \fIyapp(3NEMO)\fP routines. See
 \fIlayout(3NEMO)\fP for routines how to interpret and execute
 these files.
-.SH COMMANDS
+.PP
+They can be useful for a more rich annotation of standard
+plots made with programs such as \fIsnapplot(1NEMO)\fP
+and \fItabplot(1NEMO)\fP, normally via their \fBlayout=\fP keyword.
+
+
+.SH "COMMANDS"
 .TP 30
 \fBinit\fP \fIdevice xmin xmax ymin ymax\fP
 Name of graphics device and optional parameters, if any choice 
@@ -65,21 +71,45 @@ counterclockwise from the positive X-axis.
 .TP
 \fB#\fP
 A comment.
-.SH BUGS
+
+.SH "EXAMPLE"
+Here is an example (see also $NEMODAT/yapp.layout) layout file:
+.nf
+
+move 10 10
+line 10 15
+color 2
+cross 5 5 1
+color 3
+circle 15 15 1
+color 4
+box  5 15 1
+point 15 5
+text "Yapp Yapp" 10 10 0.5 30
+
+.fi
+
+.SH "BUGS"
 There are some more commands, but see \fIyapp(3NEMO)\fP.
-.SH FILES
+
+.SH "FILES"
 src/kernel/misc/layout.c	source code
+dat/yapp.layout                 example
+
 .SH "SEE ALSO"
 layout(3NEMO), yapp(3NEMO), mgl(5), mglview(1)
 .PP
 MathGL - http://mathgl.sourceforge.net/
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 21-oct-92	document created  	PJT
 2009		add link to MGL		PJT
 aug-2022	fixed MGL link	PJT
+feb-2023	add example yapp.layout	PJT
 
 .fi

@@ -37,7 +37,7 @@ string defv[] = {
   "reorder=\n     New coordinate ordering",
   "moving=f\n     Moving average in n{x,y,z}aver= ?",
   "average=t\n    Average (t) or Sum (f)",
-  "VERSION=2.6\n  1-may-2022 PJT",
+  "VERSION=2.6\n  9-oct-2022 PJT",
   NULL,
 };
 
@@ -174,7 +174,7 @@ void nemo_main(void)
                    nxaver,nyaver,nzaver,nx,ny,nz);
         nx1 = nx/nxaver;  if (nx % nxaver) warning("X binning not even");
         ny1 = ny/nyaver;  if (ny % nyaver) warning("Y binning not even");
-        nz1 = nz/nzaver;  if (nz % nzaver) warning("X binning not even");
+        nz1 = nz/nzaver;  if (nz % nzaver) warning("Z binning not even");
 	LOOP(k1,nz1) {
 	  k = k1*nzaver;
 	  LOOP(j1,ny1) {

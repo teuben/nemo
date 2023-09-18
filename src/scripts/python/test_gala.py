@@ -2,5 +2,9 @@
 #
 import os, sys
 
-import gala
+try:
+    import gala
+except:
+    print("Failed loading gala")
+    sys.exit(0)
 

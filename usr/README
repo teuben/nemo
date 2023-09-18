@@ -5,14 +5,18 @@ The $NEMO/src tree is more controlled in how routines and programs get compiled.
 Portability within the $NEMO/usr tree is not as well maintained as in the $NEMO/src
 tree.
 
+Some of the code here is also used by mknemo, see e.g.
+   grep NEMO/usr $NEMO/src/scripts/mknemo.d
+
 aarseth/firstn/		von Hoerner's N-body code (1960), arguably the first N-body code
 aarseth/hermit/		a Hermite integrator
 
 dehnen/falcON/		Dehnen's improved treecode
-       yanc/		older version
+       yanc/		older version [deprecated]
 
 heggie/                 Heggie & Hut (2003) codes
 
 manybody/		placeholder for the manybody packages (sans NEMO)
 
 vogl/			a simple old-style GL library that works on non-accellerated X displays
+

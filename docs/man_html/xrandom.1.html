@@ -65,20 +65,24 @@ is shown. [Default: 1]. </dd>
 <dd>Return gaussian numbers instead of uniform?
 [Default: f] </dd>
 
+<dt><b>exp=</b> </dt>
+<dd>Return exponential random numbers instead. Setting this
+will override the <b>gauss=</b> parameter. [Default: f] </dd>
+
 <dt><b>report=</b> </dt>
-<dd>Report mean/dispersion/skewness/kurtosis?  [Default:
-f] </dd>
+<dd>Report mean/dispersion/skewness/kurtosis?
+ [Default: f] </dd>
 
 <dt><b>tab=t|f</b> </dt>
 <dd>Tabulate all random numbers [t] </dd>
 
 <dt><b>offset=</b> </dt>
-<dd>Offset of distribution
-from 0. Default: 0.0 </dd>
+<dd>Offset of
+distribution from 0. Default: 0.0 </dd>
 
 <dt><b>gsl=</b> </dt>
-<dd>Name of the random number distribution requested.
-They follow the name convention of the same-name functions <i>gsl_random_xxx</i>
+<dd>Name of the random number distribution
+requested. They follow the name convention of the same-name functions <i>gsl_random_xxx</i>
 in the <a href='gsl.3.html'><i>gsl(3)</i></a>
  library. Only available if compiled with GSL. No default. </dd>
 
@@ -121,6 +125,7 @@ Mean and dispersion  : 0.0120416 0.102367
 Skewness and kurtosis: -0.0528344 1.19066
 Median               : 0.000425562
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Gsl</a></h2>
 If the GNU Scientific Library (GSL) has been enabled during installation,
 the <b>gsl=</b> and <b>pars</b> keyword will appear in the keyword list of xrandom. The
@@ -185,6 +190,7 @@ Peter Teuben
 13-apr-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;example
 8-sep-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 GSL optionally added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-oct-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2 added m=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+21-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4 added exp=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

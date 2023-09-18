@@ -21,7 +21,7 @@ help:
 
 # PJT keeps a private version because he doesn't trust the cloud (and has been proven right in July 2021)
 pjt: lastmod html
-	rsync -av _build/html  chara:public_html/nemo/readthedocs
+	rsync -av _build/html  ssh.astro.umd.edu:public_html/nemo/readthedocs
 	@echo https://www.astro.umd.edu/~teuben/nemo/readthedocs/html
 
 lastmod:

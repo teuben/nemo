@@ -14,12 +14,16 @@
  *     11-oct-07  compile option to use the double instead of float
  *   24-dec-2019  Trying PLplot-5.15.0 (june 2019) - fixed plwid -> plwidth
  *      mar-2022  Trying few more things, still not for our prime-time
+ *      
  *
  *  ToDo: colors
  *        fix the --without-double requirement
  *        fix aspect ratio problems
- *        presistent plots on the screen
+ *        persistent plots on the screen (wxwidgets seems to do this)
+ *        ps driver doesn't cover page
+ *        pdf has very small default font - pdfqt arguably too big, but better
  *        tk driver has symbol size scaling error
+ *        colors don't match pgplot yet
  *
  *  Ubuntu packages: libplplot-dev plplot-driver-xwin plplot-tcl-dev
  */
@@ -62,6 +66,9 @@ extern void c_plwidth(int);
 extern void c_plcol0(int);
 extern void c_plcol1(pl_real);
 extern void c_plsori(int);
+extern void c_plsfam(int, int, int);
+extern void c_plvasp(pl_real);
+extern void c_plsvpa(pl_real, pl_real, pl_real, pl_real);
 
 extern void c_plgver(char *);
 extern void c_plgpage(int *,int *,int *,int *,int *,int *);
@@ -115,7 +122,10 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     } else
         warning("No device name specified - plplot running interactive");
 
-    c_plsfam(1,0,0); /* this will make file.ext.N */
+    // if %n in the name, use a family, else assume the name is "as is"
+    if (strstr(pltdev,"%n"))
+      c_plsfam(1,0,0);        // example could be test_%n.ps
+
     c_plsori(0);     /* 0=landscape 1=portrait (2/3 upside) */
     
     c_plinit();

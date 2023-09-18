@@ -18,6 +18,8 @@ that have a tighter connection to NEMO:
    
 .. include:: zeno.rst
 
+.. include:: starlab.rst   
+
 .. include:: yt.rst
 
 
@@ -130,6 +132,10 @@ List of Related Codes
       Interactive Visualization 3D Program
       | http://ascl.net/1110.008
 
+  gnuastro
+      GNU Astronomy Utilities
+      | https://www.gnu.org/software/gnuastro/
+
   GraviDy
       Gravitational Dynamics. Also usable via :term:`NEMO` with the **rungravidy** interface.
       | http://ascl.net/1902.004 	
@@ -204,6 +210,10 @@ List of Related Codes
       *A software package for orbital dynamics*. In :term:`AMUSE`.
       | http://ascl.net/1209.010
 
+  montage
+      An Astronomical Image Mosaicking Toolkit.
+      | https://github.com/Caltech-IPAC/Montage
+
   MYRIAD
       N-body code for simulations of star clusters
       | https://ascl.net/1203.009
@@ -226,7 +236,12 @@ List of Related Codes
   nbody6xx
       Alias for nbody6++
       Also usable via :term:`NEMO`  
-      | http://ascl.net/1502.010 	
+      | http://ascl.net/1502.010
+
+  N-BodyShop
+      Simulation codes of astrophysical phenomenon with particle methods.
+      (tipsy, changa, gasoline)
+      | https://github.com/N-BodyShop
       
   nemesis
       Another code to document.

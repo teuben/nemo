@@ -57,8 +57,10 @@
 /*    14-nov-02 add dummy DATASUM and CHECKSUM                          */
 /*     8-nov-05 also recognize XTENSION = 'IMAGE'                       */
 /*    11-dec-06 store cvsID in output                                   */
+/*     7-nov-22 CFITSIO version in fitsio_nemo.c is now the default     */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
+/*  - deal with pipes                                                   */
 /************************************************************************/
 
 #include <stdinc.h>
@@ -112,7 +114,6 @@ local int w_bitpix = -32;               /* see: fit_setbitpix()    */
 local FLOAT w_bscale = 1.0;             /* see: fit_setscale()     */
 local FLOAT w_bzero = 0.0;              /* see: fit_setscale()     */
 local int blocksize= 2880;	        /* See: fit_setblocksize() */
-local int first_message = 1;		/* See: fitopen */
 
 local string cfits1="FITS (Flexible Image Transport System) format is defined in 'Astronomy";
 local string cfits2="and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H";
@@ -125,6 +126,7 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
 
   Inputs:
     name        A string giving the name of the file to be opened.
+                @todo allow pipe
     status      Either "old" or "new".
     naxis       The number of dimensions of the image. When opening
                 an "old" file, fitopen makes sure that the number of
@@ -145,12 +147,13 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
   FITS *f;
   int n,t,i,size,bitpix;
   char keyword[9],line[81];
-
+  static int first_message = 1;
+  
   if (first_message) {
 #ifdef WORDS_BIGENDIAN
-    dprintf(1,"fitopen: Big-endian machine; no need to swap bytes\n");
+    dprintf(1,"fitopen [MIRIAD]: Big-endian machine; no need to swap bytes\n");
 #else
-    dprintf(1,"fitopen: Little-endian machine; swapping bytes for FITSIO\n");
+    dprintf(1,"fitopen [MIRIAD]: Little-endian machine; swapping bytes for FITSIO\n");
 #endif
     first_message = 0;
   }
@@ -203,9 +206,12 @@ FITS *fitopen(string name,string status,int naxis,int *nsize)
     fitwra(f,"COMMENT",cfits1);
     fitwra(f,"COMMENT",cfits2);
     fitwra(f,"COMMENT",cfits3);
+#if 0
+    /* who is even using this anymore ? */
     fitwrhda(f,"DATASUM", "0000000000000000");
     fitwrhda(f,"CHECKSUM","0000000000000000");
-
+#endif
+    
 /* Handle an old file. */
 
   } else if(streq(status,"old") || streq(status,"r")) {
@@ -503,14 +509,14 @@ void fitwrite(FITS *file, int j, FLOAT *data)
 void fitsetpl(FITS *file, int n, int *nsize)
 /*
   This sets the plane to be accessed in a FITS file which has more than
-  two dimensions.
+  two dimensions (ndim=3,4,...)
 
   Input:
     file        The pointer returned by fitopen.
-    n           This gives the size of the nsize array.
+    n           This gives the size of the nsize array (usually ndim-2)
     nsize       This gives the indices of the higher dimensions of the
                 FITS image. They are zero-relative. nsize[0] gives the
-                index along the 3rd dimension, nsize[1] is the indice along
+                index along the 3rd dimension, nsize[1] is the indix along
                 the 4th dimension, etc.
 ----------------------------------------------------------------------*/
 {
@@ -539,6 +545,7 @@ void fitsetpl(FITS *file, int n, int *nsize)
   	warning("fitsetpl: f->skip is 0, should be multiple of 2880");
   if (offset < 0)
 	error("fitsetpl: bad offset=%ld (%d,...)\n",offset,nsize[0]);
+  dprintf(1,"fitsetpl(%d)  nsize[%d]=%d",n,i,nsize[i]);
   dprintf(4,"fitsetpl: offset=%ld (%d,...)\n",offset,nsize[0]);
 }
 /**********************************************************************/
@@ -840,6 +847,7 @@ local int fitsrch(FITS *f,string keyword,char *card)
   This searches for a FITS keyword in a file.
   Returns cardnumber index (1 based) :
   -1 if not found, and 1 or higher if found
+  @todo    allow using input pipe
 ----------------------------------------------------------------------*/
 {
   int length,ncard;

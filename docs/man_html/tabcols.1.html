@@ -26,6 +26,9 @@ with mulitple columns. <p>
 To select specific lines, use <a href='tabrows.1.html'><i>tabrows(1NEMO)</i></a>
  or <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
 .
+<p>
+To align a table by column, use the <a href='column.1.html'><i>column(1)</i></a>
+ program with the <b>-t</b> option.
 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -42,27 +45,28 @@ this man page is up to date.
 <dd>list of columns to select. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
   expression can be used. Columns
 can be repeated, and in any order. The output will be in exactly the same
-order as given with this keyword. First column is 1. [all]     </dd>
+order as given with this keyword. First column is 1. Column 0 can also be
+added to the output, which is the row number (first row is 1). [all]   
+ </dd>
 
 <dt><b>colsep=</b> </dt>
-<dd>Column
-separator. Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),  <b>r</b> (carriage return),
-as well as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default: <b>s</b>] </dd>
+<dd>Column separator. Valid are: <b>s</b> (space), <b>n</b> (newline),  <b>t</b> (tab),
+ <b>r</b> (carriage return), as well as the literal symbols &rsquo;<b>,</b>&rsquo;  and &rsquo;<b>:</b>&rsquo;. [Default:
+<b>s</b>] </dd>
 
 <dt><b>out=-</b> </dt>
-<dd>output file name.
-By default standard output it used. 
+<dd>output file name. By default standard output it used. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Although this program uses the
-new table interface, there are still some internal variables that limits
-the column count. 
+Although
+this program uses the new table interface, there are still some internal
+variables that limits the column count. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
-Here is an example of how to reverse the columns
-from a table with 4 columns: <br>
+Here is an example of how
+to reverse the columns from a table with 4 columns: <br>
 <pre>    tabcols in.tab 4:1:-1 &gt; out.tab
 </pre>and here is an example that re-arranges all the numbers in a table in one
 long column <br>
@@ -74,16 +78,18 @@ long column <br>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabs.1.html'>tabs(1NEMO)</a>
 , <a href='awk.1.html'>awk(1)</a>
- 
+, <a href='column.1.html'>column(1)</a>
+
+
 <p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/kernel/tab/tabcols.c
-  source code 
+src/kernel/tab/tabcols.c   source code 
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update
+History</a></h2>
 <br>
 <pre>26-Jan-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 9-apr-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 out=- now default and last argument<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

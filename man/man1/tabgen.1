@@ -1,4 +1,4 @@
-.TH TABGEN 1NEMO "22 August 2022"
+.TH TABGEN 1NEMO "5 October 2022"
 
 .SH "NAME"
 tabgen \- Create an arbitrarely large ASCII table with (random) values
@@ -46,6 +46,11 @@ Random seed [123]
 .TP
 \fBfmt=\fP
 The \fIprintf(3)\fP style format specifier. [%g]
+.TP
+\fBsep=c|s|v|t\fP
+Separator between columns. c=comma  s=space  v=vertical bar  t=tab.
+If none of these are given, the string is taken literal
+[Default: space]
 
 .SH "PERFORMANCE"
 On a typical 2020 machine it takes 0.23 seconds to create and output 1M random numbers,
@@ -92,16 +97,17 @@ This is where \fBtabgen\fP might be useful:
 .fi
 
 .SH "SEE ALSO"
-seq(1), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
+seq(1), tabhead(1NEMO), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
 
 .SH "AUTHOR"
 Peter Teuben
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 12-Jul-2020	V0.1 Created	PJT
 14-jul-2020	V0.3 mode= implemented	PJT
 25-jul-2020	V0.4 changed meaning of mode=	PJT
 29-apr-2022	V0.6 cleanup and tableV2 things 	PJT
+5-oct-2022	V0.7 added sep=	PJT
 .fi

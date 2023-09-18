@@ -1,4 +1,4 @@
-.TH TABCOLS 1NEMO "26 January 2000"
+.TH TABCOLS 1NEMO "20 November 2022"
 
 .SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
@@ -14,6 +14,9 @@ output and therefore creating a file with one long column from
 a table with mulitple columns.
 .PP
 To select specific lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+.PP
+To align a table by column, use the \fIcolumn(1)\fP program with the \fB-t\fP
+option.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -24,7 +27,8 @@ input file name(s). No default.
 \fBselect=\fP
 list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
 Columns can be repeated, and in any order. The output will be in exactly
-the same order as given with this keyword. First column is 1.
+the same order as given with this keyword. First column is 1. Column 0 can also
+be added to the output, which is the row number (first row is 1).
 [all]    
 .TP
 \fBcolsep=\fP
@@ -53,7 +57,7 @@ re-arranges all the numbers in a table in one long column
 .fi
 
 .SH "SEE ALSO"
-tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1)
+tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), awk(1), column(1)
 
 .SH "FILES"
 src/kernel/tab/tabcols.c   source code

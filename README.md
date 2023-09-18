@@ -27,7 +27,7 @@ Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 	 
 ## Optional Packages
 
-Packages we optionally use (sometimes also installed in $NEMO/opt via its code in $NEMO/local):
+Packages we optionally use (sometimes also installed in $NEMO/opt with source code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
@@ -43,10 +43,14 @@ Packages we optionally use (sometimes also installed in $NEMO/opt via its code i
 	 uns_project
 	 wcstools
 
-Tools you will need to have pre-installed: A C/C++/Fortran
-compiler, (t)csh, and git.  For graphics it's probably
-useful to have pgplot, but the default ps driver works
-fine just to get started quickly.
+Tools you will need to have pre-installed: the C/C++/Fortran
+compilers, (t)csh, and git.  For graphics it's probably useful to have
+pgplot, but the default ps driver works fine just to get started.
+We are looking for more portable full graphics, as an alternative
+to pgplot.
+
+The files in $NEMO/src/scripts/linux describe the actual package
+names for different linux distros that should lead to success.
 
 
 ## Installation
@@ -61,30 +65,40 @@ you have the preconditions):
          make build check bench5
          source nemo_start.sh
 
-If you plan to modify code and submit pull request, the github CLI is recommended,
-though you can of course also clone the upstream (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
+If you plan to modify code and submit pull requests, the github CLI is recommended,
+though you can of course also clone the upstream manually (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
 
-On the most recent apple controlled hardware, with SIP enabled, you're in for a rude
-awakening. I use brew, and assuming you have gcc-10 (and related) and pgplot installed, this should
-work (there are other ways to install tools on a mac, but don't get me started):
+On the most recent apple controlled hardware, with SIP enabled, you might be in for a rude
+awakening. I use brew on a mac, and assuming you have gcc-10 (and related) and pgplot installed, this should
+work (there may be other ways to install tools on a mac, but don't get me started):
 
          git clone https://github.com/teuben/nemo
          cd nemo
-         CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
+         CC=gcc-10 CXX=g++-10 FC=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
          make build check bench5
          source nemo_start.sh
 
-To rebuild NEMO to ensure you have all updates:
+After installation, rebuilding NEMO to ensure you have all updates can be done as follows:
 
          cd $NEMO
          git pull
          make rebuild
+
+### python
+
+There is now a small python component to NEMO, in the **nemopy** module.
+
+         cd $NEMO
+         pip install -e .
+
+but this will depend on the details of how your python environment exists (virtual, conda etc.).
+We leave this to the user.
 		 
 ## Examples		 
 
-Of if you want to quickly see something to work, here are a few commands to
+If you want to quickly see something work, here are the commands to
 make a classic 1911 Plummer sphere of just 10 particles, print the positions, plot
 the positions and view the contents of its binary file:
 
@@ -93,11 +107,29 @@ the positions and view the contents of its binary file:
          snapplot p10.dat
          tsf p10.dat
 
+and here is an example of creating the 4 major data objects on the fly in NEMO
+(table, snapshot, image, orbit), showing off the command line interface and
+use of Unix pipes, with a dash denoting the piped file:
+
+         tabgen -  | tabplot -
+         mkplummer - 100 | snapplot - 
+         ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
+         mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
+
 There are more examples of scripts and figures in
 https://teuben.github.io/nemo/examples/ 
 and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
+
+## Documentation and Help
+
+There are several additional entry points if you are starting out with NEMO:
+
+* readthedocs: https://astronemo.readthedocs.io/en/latest/
+* github pages: https://teuben.github.io/nemo
+* software carpentry: https://teuben.github.io/nemo-lesson 
+* contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
 
 ## Citation
 
@@ -118,3 +150,5 @@ Please use the following citation if you use NEMO in your work
            adsnote = {Provided by the SAO/NASA Astrophysics Data System}
      }
 
+
+![A Real Bar](docs/figures/realbar1.png)

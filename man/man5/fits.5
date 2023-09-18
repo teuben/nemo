@@ -42,6 +42,7 @@ The following header keywords describe the most important
 facts about the data (or at least enables a reader to skip data)
 .nf
 .ta +1i
+
 SIMPLE	T (standard FITS file)
 BITPIX	Number of bits per datum [choice of 8, 16, 32, -32, -64, (64 experimental)
 	(-32,-64 IEEE floating point, 8 unsigned, 16,32 twos-complement ints)
@@ -50,10 +51,11 @@ NAXISn	size of a particular axis (n=1 through NAXIS) in cube
 PCOUNT	number of extra parameters associated with cube [0 if not present]
 GCOUNT	number of repetitions of the cube+parameter [1 if not present]
 .PP
-CRVALn	value of the coordinate at the reference pixel
 CRPIXn	the reference pixel (often in range 1..NAXISn)
-CDELTn	increment per pixel
-CTYPEn	coordinate type (an ascii string)
+CRVALn	value of the coordinate at the reference pixel
+CDELTn	increment per pixel (can be negative)
+CTYPEn	coordinate type (an ascii string), often in two part, e.g. "RA---SIN" or "VELO-LSR"
+CUNITn	units of coordinate type 
 DATE-OBS	Observing date: new Y2K format "yyyy-mm-ddThh:mm:ss"
 TIME-OBS	Observing time, "hh:mm:ss", deprecated after new Y2K
 .PP
@@ -61,6 +63,7 @@ HISTORY  	history records (no '=' needed)
 COMMENT  	comment cards (no '=' needed)
 .PP
 END  	last keyword in header
+
 .fi
 For SIMPLE=T fits file the size of the data section (in bytes) 
 can always be computed from the following formula:
@@ -132,12 +135,45 @@ TSC  0  Tangential Spherical Cube
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
 fitsio(3NEMO), fits(3NEMO), image(5NEMO)
 .nf
-https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html  - 
+https://fits.gsfc.nasa.gov/fits_documentation.html - fits
+https://ui.adsabs.harvard.edu/abs/2001A%2526A...376..359H - FITS standard 1.0
+
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1061G - world coordinates
+
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1077G - celestial coordinates
+
+https://ui.adsabs.harvard.edu/abs/2006A%26A...446..747G - spectral coordinates
+
+https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+
 .fi
+
+.SH "EXAMPLES"
+Sometimes converting a fits file back to itself using a particular package can "fix" problems. Here are some examples
+for some arbitrary FITS file:
+.nf
+
+    f=L1157-B1_84475
+    
+    # NEMO:
+    fitsccd $f.fits - | ccdfits - $f.nemo.fits
+
+    # CASA:
+    casa -c 'importfits("'"$f"'.fits","junk.im",overwrite=True); exportfits("junk.im","'$f'.casa.fits",overwrite=True)'
+
+    # or less hassle with shell quoting , in casa python
+    f = 'L1157-B1_84475'
+    importfits(f+".fits","junk.im",overwrite=True);
+    exportfits("junk.im",f+".casa.fits",overwrite=True)
+
+    # MIRIAD:
+    fits in=$f.fits out=junk.im op=xyin
+    fits in=junk.im out=$f.miriad.fits op=xyout
+	
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 30-may-88	written  	PJT
 20-mar-90	Nemo's FITS I/O library is being tested  	PJT
 3-jul-94	doc updated with PCOUNT/GCOUNT	PJT

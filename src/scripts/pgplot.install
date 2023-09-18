@@ -28,6 +28,7 @@
 # 16-aug-09     added support for Cygwin (JM)
 # 19-may-10     gfortran default, and option to use gif because of old gfortran41/40
 # 21-feb-19     add brew option for darwin
+# 25-oct-22     make github default version
 
 # Other places to get pgplot from
 # cvs -d :pserver:anonymous@cvs.starlink.ac.uk:/cvs co thirdparty/caltech/pgplot
@@ -40,6 +41,8 @@
 # wich has two versions:
 #    - this script
 #    - the autoconf'd configure script
+# git:   https://github.com/astroumd/pgplot
+
 
 
 # Example standalone WIP install outside of MIRIAD or NEMO
@@ -62,6 +65,7 @@
 #			 	.. command line keywords that can be modifid ..
 set version=522
 set ftp=ftp.astro.caltech.edu
+set git=https://github.com/astroumd/pgplot
 if ($?NEMO) then
   set dir=$NEMO/local
 endif
@@ -78,7 +82,7 @@ endif
 set debug=0
 set png=0
 set int8=0
-set gif=1
+set gif=0
 
 #  dir:  where the source code will be extracted
 #  lib:  where the library (PGPLOT_DIR) will be placed
@@ -144,16 +148,23 @@ cd $dir
 if (-d pgplot) then
   echo Assuming your $dir/pgplot is current
 else
-  if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
-  if (! -e $file) then
-    echo No file $file, you need to pick it up, e.g.
-    echo ncftp ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
-    echo Or use the improved MIRIAD cvs version 
-    exit 1
+  if (! -e pgplot) then
+      git clone $git
   else
-    echo Found $file
+      (cd pgplot; git pull)
   endif
-  gunzip -dc $file | tar xf -
+  if (0) then
+    if ($?file == 0) set file=$dir/pgplot${version}.tar.gz
+    if (! -e $file) then
+	echo No file $file, you need to pick it up, e.g.
+	echo ncftp ftp://ftp.astro.caltech.edu/pub/pgplot/pgplot${version}.tar.gz
+	echo Or use the improved MIRIAD cvs version 
+	exit 1
+    else
+	echo Found $file
+    endif
+    gunzip -dc $file | tar xf -
+  endif
 endif
 
 cd pgplot

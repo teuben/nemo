@@ -1,9 +1,12 @@
-.TH CCDSKY 1NEMO "26 January 2021"
-.SH NAME
+.TH CCDSKY 1NEMO "31 December 2022"
+
+.SH "NAME"
 ccdsky \- lazy (cosmology) sky scaling calculator
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdsky\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdsky\fP is a lazy sky scaling calculator. It will give you the scaling parameters
 for a FITS file (which uses degrees for angles, and m/s for velocities), to make
 your typical observer or astronomical software package happy and print out values 
@@ -50,6 +53,16 @@ the one that FITS uses, m/s.
 Total flux, in Jy.km/s, of the source. Based on the distance, it will
 the compute the HI and H2 (given some reasonable X factor) masses, in
 units of solar masses. Default: 1
+.TP
+\fBfreq=\fP
+Observing frequency in GHz [115]
+.TP
+\fBbeam=\fP
+Beam size in arcsec [not used] [12.65]
+.TP
+\fBdish=\fP
+Dish size in meter. For given dish size and frequency, the beam and conversions
+from K to Jy/beam is given. [50]
 .TP
 \fBscale=#\fP
 Scale the intensity values in the data itself. Default: 1.
@@ -170,12 +183,14 @@ Universe at desired redshift z
  - Critical density at z (g/cm^3):                        9.177897e-29
 
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 Although the conversion from an observed HI flux to mass is not
 too controversial (sans optical depth effects), the conversion 
 from CO to a mass is still under debate. We use the X value
 2e20 cm-2/K km/s.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdgen(1NEMO), ccdmath(1NEMO), ccd2vel(1NEMO), ccdfits(1NEMO), snapscale(1NEMO), image(5NEMO)
 .PP
 http://arxiv.org/abs/astro-ph/0609593  \fIA Cosmology Calculator for the Web\fP (E.Wright)
@@ -185,16 +200,20 @@ http://www.astro.ucla.edu/~wright/CosmoCalc.html \fI The CosmoCalc website\fP
 https://ui.adsabs.harvard.edu/abs/2013ARA%26A..51..207B/abstract
 .PP
 https://ascl.net/gnuastro
-.SH FILES
+
+.SH "FILES"
 NEMO/src/image/trans	ccdsky.c - source code
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +0.5i +3.0i
+.ta +1.5i +5.5i
 17-Aug-2012	V1.0 Created		PJT
 23-aug-2012	V1.1 added sdv=		PJT
 28-aug-2012	V1.2 implemented scale=	PJT
 28-feb-2013	V2.2 more verbose, added H=	PJT
 16-mar-2013	V3.0 added Wright's cosmology calculator	PJT
+21-dec-2022	V3.1 add some Jy/K support		PJT
 .fi

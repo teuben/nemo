@@ -19,13 +19,11 @@ string defv[] = {
   "y=\n              Pixel in Y to print",
   "z=\n              Pixel range in Z select (2 values, or none for all pixels)",
   "scale=1,1\n       Scaling factors for the two columns",
-  "VERSION=0.5\n     12-feb-2021 PJT",
+  "VERSION=0.6\n     21-dec-2022 PJT",
   NULL,
 };
 
 string usage = "print spectrum at a grid point of a cube";
-
-string cvsid="$Id$";
 
 
 void nemo_main(void)
@@ -74,7 +72,13 @@ void nemo_main(void)
     }
     if (zr[0] < 0)    zr[0] = 0;
     if (zr[1] > nz-1) zr[1] = nz-1;
+
+    /* simple header */
+    printf("# ccdspec %s  %d/%d %d/%d\n", getparam("in"), ix, nx, iy, ny);
+    printf("# restfreq %f\n",Restfreq(iptr));
+    printf("# %s %s\n", Namez(iptr), Unit(iptr));
     
+    /* write spectrum */
     for (iz=zr[0], f1=0; iz<=zr[1]; iz++) {
         z = (Zmin(iptr) + (iz-Zref(iptr)) * Dz(iptr)) * sf[0];
 	f = CubeValue(iptr,ix,iy,iz) * sf[1];

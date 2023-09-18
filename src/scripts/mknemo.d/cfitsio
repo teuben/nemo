@@ -1,7 +1,7 @@
 #! /bin/bash
 
 # version is now hidden in the filename with "latest"
-version=3.47
+version=4.2.0
 wget=wgetc
 
 for arg in $*; do
@@ -14,7 +14,9 @@ $wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
 tar zxf cfitsio_latest.tar.gz
 version=$(echo cfitsio-*.* | sed s/cfitsio-//)
 cd cfitsio-$version
-./configure --prefix=$NEMO/opt
+./configure --prefix=$NEMO/opt --includedir=$NEMO/opt/include/cfitsio
+
+make clean
 make -j
 make install
 
@@ -22,4 +24,4 @@ make install
 echo Installed version=$version
 
 echo cfitsio $version `date` >> $NEMO/opt/mknemo.log
-echo Example: mknemo sdinfo
+echo Example to test from build4: mknemo sdinfo

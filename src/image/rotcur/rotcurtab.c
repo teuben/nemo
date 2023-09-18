@@ -29,13 +29,12 @@ string defv[] = {
     "rotcur4=\n      Rotation curve <NAME>, and parameters",
     "rotcur5=\n      Rotation curve <NAME>, and parameters",
     "load=\n         dynamically loadobject file with rotcur_<NAME>",
-    "VERSION=1.1\n   30-jan-08 PJT",
+    "VERSION=1.1a\n  9-may-2023 PJT",
     NULL,
 };
 
 string usage="prints a table of a rotation curve";
 
-string cvsid="$Id$";
 
 
 
@@ -56,6 +55,7 @@ real rad[MAXRAD];
 extern string *burststring(string,string);
 extern void freestrings(string *);
 
+void rotcurparse();
 
 real rotcur(real r);
 
@@ -63,7 +63,7 @@ real rotcur(real r);
 
 
 /******************************************************************************/
-nemo_main()
+void nemo_main()
 {
     int  mask[PARAMS];   /* mask to define the free(1) or fixed(0) parameters */
     int  nring;  /* number of rings defined by users */
@@ -85,7 +85,7 @@ nemo_main()
       printf("%g  %g\n",rad[i],rotcur(rad[i]));
 }
 
-rotcurparse()
+void rotcurparse()
 {
   string *sp, fname, path;
   char keyname[30];

@@ -27,6 +27,7 @@
 #include <bodytransc.h>
 
 #include <nrutil.h>
+#include <nr.h>
 
 string defv[] = {	
     "in=???\n			  Input snapshot file name",
@@ -35,7 +36,7 @@ string defv[] = {
     "weight=m\n		          factor to use in computing center/inertia  ",
     "per_weight=t\n		  flag to give inertia per weight basis  ",
     "tab=f\n			  flag to produce one-line output",
-    "VERSION=2.1\n		  31-dec-02 PJT",
+    "VERSION=2.1a\n		  9-may-2023 PJT",
     NULL,
 };
 
@@ -45,8 +46,12 @@ string usage="get inertia tensor & its eigenvectors, eigenvalues";
 
 void snapinert(Body *, int, real, rproc_body, float i[3][3]);
 
+// nr.h
+//jacobi(convi, 3, eigens, eigenvs, &nrot);
+//eigsrt(eigens, eigenvs, 3);
 
-nemo_main()
+
+void nemo_main()
 {
     stream instr, outstr;
     string times;

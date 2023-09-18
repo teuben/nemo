@@ -20,6 +20,7 @@ pgplot5
 wcslib-dev 
 libhdf4-dev libhdf5-dev hdf5-tools 
 libgsl-dev
+# libeigen3-dev    # agama needs it
 libfftw3-dev
 libcfitsio-dev
 libplplot-dev
@@ -30,6 +31,7 @@ flex bison libjpeg-dev
 autoconf
 # man html making
 rman
+swig
 
 # fom the amuse build system
 build-essential gfortran python-dev

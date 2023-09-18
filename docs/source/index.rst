@@ -10,14 +10,15 @@ Welcome to NEMO's documentation!
    \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
 
 
-.. todo::  This draft is a work in progress, Most of the old
-   *NEMO Users and Programmers Guide* has been converted here, although not all sections
-   have been included yet.
+.. todo::  This draft is the result of converting the old latex manual,
+   *NEMO Users and Programmers Guide*, although not all sections
+   have been included yet, and some sections have not been fully converted.
 	   
    Other online entry points for NEMO are:
    `github pages <https://teuben.github.io/nemo/>`_ and
    `github code <https://github.com/teuben/nemo>`_ .  We also keep an index to
-   `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_.
+   `(unix) man pages for all programs <https://teuben.github.io/nemo/man_html/index1.html>`_ and of course a
+   `what's new <https://teuben.github.io/nemo/whatsnew.html>`_ .
 
    Although this manual should be on
    https://astronemo.readthedocs.io

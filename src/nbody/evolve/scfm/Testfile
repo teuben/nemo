@@ -13,16 +13,17 @@ clean:
 	@rm -fr core scfm.in scfm.log  scfm.run
 
 NBODY = 10
+SEED = 123
 
 all: runscfm
 
 scfm.in:
 	@echo Creating scfm.in
-	$(EXEC) mkplummer scfm.in $(NBODY) seed=123
+	$(EXEC) mkplummer scfm.in $(NBODY) seed=$(SEED)
 
 runscfm:	scfm.in
 	@echo Running $@
 	$(EXEC) runscfm scfm.in scfm.run > scfm.log
 	$(EXEC) tsf scfm.run/scfm.dat
 	@bsf scfm.in '0.0140845 0.896875 -4.6523 4.80925 71'
-	@bsf scfm.run/scfm.dat '-0.132291 0.95194 -4.6523 4.80925 81'
+	@bsf scfm.run/scfm.dat '-0.218618 1.19229 -5.85487 5.21154 162'
