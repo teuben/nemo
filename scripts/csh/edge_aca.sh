@@ -43,6 +43,10 @@ clip=0.1               # clipping level for cube                          #> ENT
 refmap=0               # reference map for WCS and masking                #> IFILE 0
 
 show=1                 # display some results (ds9, plots)                #> RADIO 0,1
+
+# Example for NGC0001:   inc=34 pa=110  z=0.01511 (4530 km/s)
+#                 NED:   inc=39 pa=110  z=0.01518  VHEL=4550  VLSR=4554  VCMB=4212 (62 Mpc)
+ 
 #--HELP
 
 
