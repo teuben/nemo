@@ -15,6 +15,7 @@
  *      12-mar-98  V3.1  handle gauss=0 and added cut= keyword          PJT
  *	20-apr-01      a bigger default size for MSIZE			pjt
  *      30-jun-2016 V3.4 option to use a moffat smoothing
+ *      19-sep-2023 V4.0 option to use a 2D beam map                    pjt
  *
  *	"Smoothing is art, not science"
  *				- Numerical Recipies, p495
@@ -45,8 +46,9 @@ string defv[] = {
 	"bad=\n			Optional ignoring this bad value",
 	"beta=4.765\n           beta parameter for the moffat function",
 	"cut=0.01\n             Cutoff value for gaussian, if used",
+	"beam=\n                Optional 2D beam map",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=3.4b\n         12-feb-2021 PJT",
+	"VERSION=4.0\n          19-sep-2023 PJT",
 	NULL,
 };
 
@@ -56,19 +58,23 @@ string usage = "smooth image cube in XYZ";
 # define HUGE 1.0e20
 #endif
 
-string	infile, outfile;			/* file names */
-stream  instr, outstr;				/* file streams */
+string	infile, bfile, outfile;			/* file names */
+stream  instr, bstr, outstr;			/* file streams */
 
 #define MSIZE  100000   	      /* maximum # pixels along selected dimension */
 #define MSMOOTH 101 		    /* maximum full beam-size (has to be odd) */
 	              /* because of symmetry, you could try and be smart here */
 
 imageptr iptr=NULL;			/* will be allocated dynamically */
+imageptr optr=NULL;			/* will be allocated dynamically */
 int    nx,ny,nz,nsize;			/* actual size of map */
 real   xmin,ymin,zmin,dx,dy,dz;
 real   size;				/* size of frame (square) */
 real   cell;				/* cell or pixel size (square) */
 int    nxw=0, nyw=0, nzw=0;             /* wiener filter size */
+
+imageptr bptr=NULL;			/* will be allocated dynamically */
+int    nxb,nyb; 			/* actual size of beam map */
 
 real   c[MSIZE];                        /* temporary buffer for convolution */
 
@@ -86,7 +92,7 @@ int    mode;                            /* special edge smoothing modes */
 bool   Qbad;                            /* ignore smoothing for */
 real   bad;                             /* this value */
 
-void setparams(), smooth_it(), wiener();
+void setparams(), smooth_bm(), smooth_it(), wiener();
 int convolve_cube (), convolve_x(), convolve_y(), convolve_z();
 
 void make_gauss_beam(char *sdir);
@@ -99,7 +105,7 @@ void nemo_main(void)
 
     instr = stropen(infile, "r");
     read_image(instr,&iptr);
-				/* set some global paramters */
+
     nx = Nx(iptr);	
     ny = Ny(iptr);
     nz = Nz(iptr);
@@ -110,22 +116,34 @@ void nemo_main(void)
     dy = Dy(iptr);
     dz = Dz(iptr);
 
-    if(hasvalue("gauss"))
+    outstr = stropen(outfile,"w");    
+
+    if (hasvalue("beam")) {
+      bstr = stropen(bfile, "r");
+      read_image(bstr, &bptr);
+      nxb = Nx(bptr);
+      nyb = Ny(bptr);
+      dprintf(0,"Beam %d x %d\n", nxb,nyb);
+      copy_image(iptr,&optr);
+      smooth_bm();
+      write_image(outstr,optr);      
+    } else {
+      if(hasvalue("gauss"))
         make_gauss_beam(getparam("dir"));
-    else if (hasvalue("moffat")) {  
+      else if (hasvalue("moffat")) {  
 	moffat_fwhm = getrparam("moffat");
         moffat_beta = getrparam("beta");
 	moffat_alpha = moffat_fwhm / (2*sqrt(pow(2.0,1.0/moffat_beta)-1));
 	dprintf(0,"Moffat: alpha=%g beta=%g\n",moffat_alpha, moffat_beta);
 	make_moffat_beam(getparam("dir"));
+      }
+      if (hasvalue("wiener"))
+	wiener();
+      else
+	smooth_it();
+      write_image(outstr,iptr);
     }
-
-    outstr = stropen(outfile,"w");
-    if (hasvalue("wiener"))
-      wiener();
-    else
-      smooth_it();
-    write_image(outstr,iptr);
+      
 
     strclose(instr);
     strclose(outstr);
@@ -136,6 +154,7 @@ void setparams()
     int     nw,nws[3];
     infile = getparam ("in");
     outfile = getparam ("out");
+    bfile = getparam("beam");
 
     if(hasvalue("gauss")) {         /* gaussian beam */
         if(nemoinpr(getparam("gauss"),&gauss_fwhm,1) != 1)
@@ -156,6 +175,79 @@ void setparams()
     }
 }
 
+void smooth_bm()
+{
+    real m_min, m_max, brightness, total;
+    real sum, sum_beam;
+    int    i, ix, iy, iz, kounter, idir;
+    int  ix0, iy0, ixb, iyb;
+    char   *cp;
+
+    m_min = HUGE;
+    m_max = -HUGE;
+    total = 0.0;
+
+    sum_beam = 0;
+    for (iyb=0; iyb<nyb; iyb++) {
+      for (ixb=0; ixb<nxb; ixb++) {
+	sum_beam += MapValue(bptr,ixb,iyb);
+      }
+    }
+    dprintf(1,"Beam volume: %g\n", sum_beam);
+
+    for (iz=0; iz<Nz(iptr); iz++) {
+      for (iy=0; iy<Ny(iptr); iy++)  {
+	for (ix=0; ix<Nx(iptr); ix++)  {
+	  sum = 0.0;
+	  for (iyb=-nyb/2; iyb<=nyb/2; iyb++) {
+	    if (iy+iyb <   0) continue;	    
+	    if (iy+iyb >= ny) continue;
+	    for (ixb=-nxb/2; ixb<=nxb/2; ixb++) {
+	      if (ix+ixb <   0) continue;	      	      
+	      if (ix+ixb >= nx) continue;	      
+	      sum += CubeValue(iptr,ix+ixb,iy+iyb,iz) * MapValue(bptr,ixb+nxb/2,iyb+nyb/2);
+	    }
+	  } 
+	  CubeValue(optr,ix,iy,iz) = sum/sum_beam;
+	} // ix
+      } // iy
+    } // iz
+
+    // convolve_cube (Frame(iptr),nx,ny,nz,smooth,lsmooth,idir);
+
+    m_max = -HUGE;                      /* determine new min/max */
+    m_min =  HUGE;
+    for (ix=0; ix<Nx(iptr); ix++)   	
+    for (iy=0; iy<Ny(iptr); iy++)
+    for (iz=0; iz<Nz(iptr); iz++) {
+          brightness = CubeValue(iptr,ix,iy,iz);
+	  total += brightness;
+          m_max = MAX(m_max, brightness);
+          m_min = MIN(m_min, brightness);
+    }
+    MapMin(iptr) = m_min; 		/* update map headers */
+    MapMax(iptr) = m_max;
+    if (hasvalue("gauss")) {
+    	BeamType(iptr)=GAUSS;
+	if (strchr(getparam("dir"),'x'))
+    	   Beamx(iptr)=gauss_fwhm;
+ 	if (strchr(getparam("dir"),'y'))
+    	   Beamy(iptr)=gauss_fwhm;
+	if (strchr(getparam("dir"),'z'))
+    	   Beamz(iptr)=gauss_fwhm;
+     } else {
+    	BeamType(iptr)=ANYBEAM;
+	/*  factor (3+nsmooth)/2   is very roughly ok for nsmooth=1,2,3,4 */
+	Beamx(iptr) = (1.5+0.5*nsmooth) * ABS(Dx(iptr));
+	Beamy(iptr) = (1.5+0.5*nsmooth) * ABS(Dy(iptr));
+	Beamz(iptr) = (1.5+0.5*nsmooth) * ABS(Dz(iptr));
+     }
+    	
+    dprintf (1,"New min and max in map are: %f %f\n",m_min,m_max);
+    dprintf (1,"New total brightness/mass is %f\n",total*Dx(iptr)*Dy(iptr));
+}
+
+
 void smooth_it()
 {
     real m_min, m_max, brightness, total;
