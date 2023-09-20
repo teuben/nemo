@@ -48,7 +48,7 @@ string defv[] = {
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"beam=\n                Optional 2D beam map",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=4.0\n          19-sep-2023 PJT",
+	"VERSION=4.0a\n         20-sep-2023 PJT",
 	NULL,
 };
 
@@ -124,6 +124,8 @@ void nemo_main(void)
       nxb = Nx(bptr);
       nyb = Ny(bptr);
       dprintf(0,"Beam %d x %d\n", nxb,nyb);
+      if (nxb != nyb) warning("your beam is not square");
+      if (nxb % 2 == 0) warning("your beam does not have an odd number of pixels");
       copy_image(iptr,&optr);
       smooth_bm();
       write_image(outstr,optr);      
