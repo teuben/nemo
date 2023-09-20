@@ -56,6 +56,7 @@ show=1                 # display some results (ds9, plots)                #> RAD
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
     awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    echo "# Script version: $_script $_version"
     exit 0
 fi
 
