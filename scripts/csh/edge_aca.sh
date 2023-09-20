@@ -5,7 +5,7 @@
 #
 #
 _script=edge_aca.sh
-_version=15-sep-2023
+_version=18-sep-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -25,7 +25,9 @@ rmax=60                # edge of disk  (arcsec)                           #> SCA
 pa=90                  # PA of receding side disk (E through N)           #> SCALE 0:360:1               
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 
-beam=5                 # FWHM of spatial smoothing beam (arcsec)          #> SCALE 1:20:1
+bmaj=8                 # major axis of spatial smoothing beam (arcsec)    #> SCALE 1:20:0.1
+bmin=5                 # minor axis of spatial smoothing beam (arcsec)    #> SCALE 1:20:0.1
+bpa=30                 # PA of the smoothing beam                         #> SCALE -90:90:1
 vbeam=5                # FWHM of spectral smoothing beam   (arcsec)       #> SCALE 1:40:2
 range=80               # gridding from -range:range  (arcsec)                       
 vrange=320             # velocity gridding -vrange:vrange (km/s)
@@ -41,6 +43,7 @@ noise=0.1              # add optional noise to cube                       #> ENT
 clip=0.1               # clipping level for cube                          #> ENTRY
 
 refmap=0               # reference map for WCS and masking                #> IFILE 0
+vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
 
 show=1                 # display some results (ds9, plots)                #> RADIO 0,1
 
@@ -49,10 +52,11 @@ show=1                 # display some results (ds9, plots)                #> RAD
  
 #--HELP
 
-
+#  basic help if --help or -h is given
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
     awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    echo "# Script version: $_script $_version"
     exit 0
 fi
 
@@ -96,13 +100,28 @@ else
     snaprotate - $run.20 "$inc,$pa" yz
 fi
 
+echo "Creating the beam $run.beam"
+nppb=$(nemoinp "$bmaj/(2*$range/$nsize)")
+size=$(nemoinp "4*$nppb+1")
+echo "Pixels per beam, size: $nppb  $size"
+ccdgen $run.beam gauss spar=1,$bmaj/2.35482 inc=$(nemoinp "acosd($bmin/$bmaj)") pa="-1*$bpa" size=$size,$size
+
+
 echo "Creating velocity moments"
 snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
 snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
 snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
-ccdsmooth $run.21 $run.21c $beam
-ccdsmooth $run.22 $run.22c $beam
-ccdsmooth $run.23 $run.23c $beam
+if [ $bmaj = $bmin ]; then
+    echo "SMOOTHING: circular beam $bmaj"
+    ccdsmooth $run.21 $run.21c $bmaj
+    ccdsmooth $run.22 $run.22c $bmaj
+    ccdsmooth $run.23 $run.23c $bmaj
+else
+    echo "SMOOTHING: $bmaj $bmin @ $bpa  via $run.beam"
+    ccdsmooth $run.21 $run.21c beam=$run.beam
+    ccdsmooth $run.22 $run.22c beam=$run.beam
+    ccdsmooth $run.23 $run.23c beam=$run.beam
+fi
 ccdmath $run.21c,$run.22c,$run.23c $run.20d %1
 ccdmath $run.21c,$run.22c,$run.23c $run.20v "%2/%1"
 ccdmath $run.21c,$run.22c,$run.23c $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
@@ -112,9 +131,6 @@ ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
 ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
 
 
-echo "Creating the beam"
-mkplummer - 1 | snapgrid - $run.p1 $grid_pars
-ccdsmooth $run.p1 $run.beam $beam dir=xy
 
 # see if we need WCS from a reference map and if we need the flip the cube
 
@@ -130,7 +146,9 @@ if [ -e $refmap ]; then
   echo "REFMAP: $ra $dec $vref"
   # @todo figure out of m/s,km/s or freq
   vscale=1000
-  vlsr=$(nemoinp "($vref+($npix+1)*$cdelt3/2)/$vscale")
+  if [ $vlsr = 0 ]; then
+      vlsr=$(nemoinp "($vref+($npix+1)*$cdelt3/2)/$vscale")
+  fi
   echo VLSR=$vlsr
   crval=$ra,$dec,$vlsr
   flip=$(nemoinp "ifgt($cdelt3,0,1,-1)")
@@ -140,8 +158,7 @@ if [ -e $refmap ]; then
       flip=none
   fi
 else
-  vlsr=0    
-  crval=180,0,0
+  crval=180,0,$vlsr
   flip=none
 fi
 
@@ -155,9 +172,15 @@ if [ $vbeam = 0 ]; then
 else
   ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam dir=z
 fi
-ccdsmooth $run.31 $run.32 $beam dir=xy
+if [ $bmaj = $bmin ]; then
+    echo "SMOOTHING: circular beam $bmaj"
+    ccdsmooth $run.31 $run.32 $bmaj dir=xy    
+else
+    echo "SMOOTHING: $bmaj $bmin @ $bpa  via $run.beam"
+    ccdsmooth $run.31 $run.32  beam=$run.beam
+fi
 ccdmom $run.32 $run.33d axis=3 mom=0 clip=$clip
-ccdmom $run.32 $run.33v axis=3 mom=1 clip=$clip rngmsk=true
+ccdmom $run.32 -        axis=3 mom=1 clip=$clip rngmsk=true | ccdmath - $run.33v %1+$vlsr
 ccdmom $run.32 $run.33s axis=3 mom=2 clip=$clip
 
 # single dish profile
@@ -166,7 +189,7 @@ ccdmom $run.32 - axis=1 mom=0 |\
     ccdprint - x= y= z= label=z newline=t |\
     tabcomment - - punct=f delete=t > $run.spec
 
-# export for barolo or so, in decent units (could also use ccdsky)
+# export for other programs, in decent units
 # this way the input spatial scale is in arcsec and km/s
 ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
 
@@ -178,6 +201,8 @@ if [ $show = 1 ]; then
     xpaset -p ds9 frame frameno 3
     nds9 $run.33s
     xpaset -p ds9 frame frameno 4
+    nds9 $run.beam
+    xpaset -p ds9 frame frameno 5    
     nds9 $run.fits
 
     tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs

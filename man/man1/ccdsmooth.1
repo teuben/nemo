@@ -1,7 +1,9 @@
-.TH CCDSMOOTH 1NEMO "31 May 2022"
-.SH NAME
+.TH CCDSMOOTH 1NEMO "20 September 2022"
+
+.SH "NAME"
 ccdsmooth \- smoothing of an image map (2D or 3D)
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBccdsmooth in=\fPimage \fBout=\fPimage [parameter=value]
 
@@ -67,6 +69,12 @@ If used, this is the \fIbeta\fP parameter for the MOffat smoothing function. [De
 \fBcut=\fIcutoff_value\fP
 Value at which to cutoff the gaussian beam. 
 [Default: \fB0.01\fP]
+.TP
+\fBbeam=\fP
+Optional 2D spatial beam. This should be a map with odd number of pixels,
+where the central pixel value is 1. Normalization by the beam volume
+is done automatically, such that smoothing conserves flux.
+
 .TP
 \fBmode=\fIedge_mode\fP
 Special edge smoothing mode (testing). [0]
@@ -173,4 +181,5 @@ src/image/trans     	ccdsmooth.c
 12-mar-98	V3.1: added cut=, fixed fwhm=0.0         	PJT
 23-jun-21	add EXAMPLE with smoothing noise		PJT
 31-may-22	documented missing parameters		PJT
+20-sep-23	V4.0 add beam=	PJT
 .fi
