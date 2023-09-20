@@ -5,7 +5,7 @@
 #
 #
 _script=edge_aca.sh
-_version=18-sep-2023
+_version=20-sep-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -87,12 +87,13 @@ if [ $v1 = 0 ]; then
     snapmass - - "mass=exp(-r/$re)" |\
     snapscale - - mscale=$nbody |\
     snaprotate - $run.20 "$inc,$pa" yz
+  rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 |\
+      tabmath - - %1,1,%2,$sigma all > $run.tab
 else
   m1=`nemoinp "$r1*($v1/0.62)**2"`
   echo "Creating homogeneous disk with $nbody particles times and a nuclear component m1=$m1"
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  name2=plummer pars2=0,$m1,$r1 tab=t radii=0:${rmax}:0.01 |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
-  tabplot $run.tab 1 3 yapp=1/xs
 
   mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
     snapmass - - "mass=exp(-r/$re)" |\
@@ -205,6 +206,7 @@ if [ $show = 1 ]; then
     xpaset -p ds9 frame frameno 5    
     nds9 $run.fits
 
+    tabplot $run.tab 1 3 yapp=1/xs
     tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 
