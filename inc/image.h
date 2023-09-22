@@ -29,6 +29,7 @@
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
  *  22-may-21         added Object
  *  13-dec-22         added various frequently used FITS header items for fitsccd-ccdfits conversions
+ *  14-sep-22         Also allow more common names in FITS (CDELTi,CRVALi,CRPIXi)
  */
 #ifndef _h_image
 #define _h_image
@@ -81,17 +82,17 @@ typedef struct {        // image
     int   ny;
     int   nz;
   
-    real  xmin;         /* coordinates of first pixel (0,0,0)    */
+    real  xmin;         /* coordinates at xref etc. */
     real  ymin;	        /*   --- which is at center of a cell/voxel --- !!  */
-    real  zmin;
+    real  zmin;         /* this is close to the CRVAL keyword */ 
   
     real  dx;           /* grid spacing (same for all pixels) */
     real  dy;
     real  dz;
                         /* the 'ref' coordinates only used for axis>0 */
-    real  xref;         /* fake corner (normally 0,0,0 in lower left) */
+    real  xref;         /* fake corner (used to hardcode 0,0,0 in lower left) */
     real  yref;         /* for new style axis */
-    real  zref;
+    real  zref;         /* this is close to the CRPIX keyword */
   
     real  restfreq;     // FITS 'RESTFRQ'
     real  vlsr;         // FITS
@@ -177,12 +178,21 @@ typedef struct {        // region
 #define Xmin(iptr) 	((iptr)->xmin)
 #define Ymin(iptr) 	((iptr)->ymin)
 #define Zmin(iptr) 	((iptr)->zmin)
+#define CRVAL1(iptr) 	((iptr)->xmin)
+#define CRVAL2(iptr) 	((iptr)->ymin)
+#define CRVAL3(iptr) 	((iptr)->zmin)
 #define Dx(iptr)	((iptr)->dx)
 #define Dy(iptr)	((iptr)->dy)
 #define Dz(iptr)	((iptr)->dz)
+#define CDELT1(iptr) 	((iptr)->dx)
+#define CDELT2(iptr) 	((iptr)->dy)
+#define CDELT3(iptr) 	((iptr)->dz)
 #define Xref(iptr)      ((iptr)->xref)
 #define Yref(iptr)      ((iptr)->yref)
 #define Zref(iptr)      ((iptr)->zref)
+#define CRPIX1(iptr) 	((iptr)->xref)
+#define CRPIX2(iptr) 	((iptr)->yref)
+#define CRPIX3(iptr) 	((iptr)->zref)
 #define MapMin(iptr)	((iptr)->map_min)
 #define MapMax(iptr)	((iptr)->map_max)
 #define BeamType(iptr)	((iptr)->beamtype)
