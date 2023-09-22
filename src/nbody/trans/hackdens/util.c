@@ -10,11 +10,12 @@
  * PICKVEC: generate random coordinates within a unit sphere.
  */
 
-pickvec(x, cf)
-vector x;                               /* coord vector to generate */
-bool cf;                                /* pick from 1/r^2 profile */
+void pickvec(vector x, bool cf)
+//vector x;                               /* coord vector to generate */
+//bool cf;                                /* pick from 1/r^2 profile */
 {
-    double xrandom(), xd[NDIM];
+  // double xrandom(), xd[NDIM];
+    double xd[NDIM];
 
     dprintf(1,"pickvec: cf = %d\t", cf);
     if (cf)					/* cent. concentrated?      */
