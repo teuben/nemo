@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "21 August 2022"
+.TH HACKDENS 1NEMO "21 September 2023"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -66,11 +66,23 @@ Ratio of cells to bodies, used  when
 allocating cells [defaults:0.9].
 .TP
 \fBnudge\fP=\fIsize\fP
-
+nudge overlapping particles with this positional dispersion [0]
 .TP
-\fBverbose\fP=\fIt|f\fP
+\fBverbose=t|f\fP
 Logical if print out the number of particles processed during the
 calculation [defaults:f].
+.TP
+\fBdensity=t|f\fP
+write density, or alternatively distance to Kth particle.
+Default: t
+.TP
+\fBndim=2|3\fP
+3D or 2D computation [Default: 3]
+.TP
+\fBdirect=t|f\fP
+slower N-squared direct density computation.  Default: f
+
+
 
 .SH "NOTES"
 Since the search radius is adaptively changed during the calculation,
@@ -171,5 +183,6 @@ Jun Makino
 18-jul-92	printf -> dprintf to make it pipable	Peter
 24-may-02	fixed running out of bits for large-N systems	PJT
 11-aug-2022	added example hackforce vs. hackdens	PJT
+21-sep-2023	added direct=	PJT
 .fi
 
