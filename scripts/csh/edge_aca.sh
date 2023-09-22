@@ -103,7 +103,7 @@ fi
 
 echo "Creating the beam $run.beam"
 nppb=$(nemoinp "$bmaj/(2*$range/$nsize)")
-size=$(nemoinp "4*$nppb+1")
+size=$(nemoinp "4*int($nppb)+1")
 echo "Pixels per beam, size: $nppb  $size"
 ccdgen $run.beam gauss spar=1,$bmaj/2.35482 inc=$(nemoinp "acosd($bmin/$bmaj)") pa="-1*$bpa" size=$size,$size
 
