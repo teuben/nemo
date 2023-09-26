@@ -15,21 +15,18 @@ local cellptr ctab = NULL;	/* cells are allocated from here */
 local int ncell, maxcell;	/* count cells in use, max available */
 
 
-static expandbox(bodyptr p);
-static loadtree(bodyptr p, bodyptr btab, double nudge);
+static void expandbox(bodyptr p);
+static void loadtree(bodyptr p, bodyptr btab, double nudge);
 static bool intcoord(int_hack xp[3], vector rp);
 static int_hack subindex(int_hack x[3], int_hack l);
-static hackcofm(register nodeptr q);
+static void hackcofm(register nodeptr q);
 static cellptr makecell(void);
-
-extern double xrandom(double,double);
-
 
 /*
  * MAKETREE: initialize tree structure for hack force calculation.
  */
 
-maketree(
+void maketree(
 	 bodyptr btab,			/* array of bodies to build into tree */
 	 int nbody,			/* number of bodies in above array */
 	 double nudge)
@@ -54,7 +51,7 @@ maketree(
  * EXPANDBOX: enlarge cubical "box", salvaging existing tree structure.
  */
 
-local expandbox(
+local void expandbox(
 		bodyptr p)                      /* body to be loaded */
 {
     bool intcoord();
@@ -87,7 +84,7 @@ local expandbox(
  * LOADTREE: descend tree and insert a particle.
  */
 
-local loadtree(
+local void loadtree(
 	       bodyptr p,			/* body to load into tree */
 	       bodyptr btab,	                /* pointer to base array  */
 	       double nudge)
@@ -103,7 +100,7 @@ local loadtree(
     qptr = &troot;				/* start with tree root     */
     while (*qptr != NULL) {			/* loop descending tree     */
         dprintf(1,"loadtree: descending tree  l = %o\n", l);
-	/* assert(l != 0);			/*   dont run out of bits   */
+	/* assert(l != 0); */			/*   dont run out of bits   */
 	if(l==0) {
 	  int offset = p-btab;
 	  warning("loadtree: ran out of bits for particle %d",offset+1);
@@ -178,7 +175,7 @@ local int_hack subindex(
  * HACKCOFM: descend tree finding center-of-mass coordinates.
  */
 
-local hackcofm(
+local void hackcofm(
 	       register nodeptr q)             /* pointer into body-tree */
 {
     register int i;
@@ -240,5 +237,5 @@ local cellptr makecell()
     Type(c) = CELL;
     for (i = 0; i < NSUB; i++)
 	Subp(c)[i] = NULL;
-    return (c);
+    return c;
 }

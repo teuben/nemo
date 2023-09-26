@@ -1,6 +1,8 @@
 .TH SNAPCCD 1NEMO "30 January 1989"
+
 .SH NAME
 snapccd \- top view integrated velocity moment ccd-like image
+
 .SH SYNOPSIS
 .PP
 \fBsnapccd in=\fPsnapshot \fBout=\fPimage [parameter=value]
@@ -28,6 +30,7 @@ is located at infinity at the positive Z-axis: a positive z velocity
 .PP
 \fIsnaprotate(1NEMO)\fP has to be used first to do any other than a top-view,
 probably the more general version \fIsnapgrid(1NEMO)\fP should be used.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -90,6 +93,7 @@ can be combined to the proper velocity and dispersion maps.
    % \fBrm map11 map22\fP
 \fP
 .fi
+
 .SH UNITS
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
@@ -103,17 +107,24 @@ convolving velocity beam. For a rectangular beam (\fBvrange=vmin:vmax\fP)
 the data should formally be divided by \fB(vmax-vmin)\fP, for a 
 gaussian beam (\fBvrange=vmean,vsig\fP) by \fBvsig*sqrt(2*pi)\fP.
 Also remember that a gaussian beam has \fBFWHM = 2.355*sigma\fP.
+
 .SH FUTURE
 \fIsnapccd(1NEMO)\fP's function is rather similar to that of
 \fIsnapplot(1NEMO)\fP,
 except of plotting the position of the stars, its bins the data.
 It would be a nice idea to combine both programs.
+
+.SH "CAVEATS"
+If smoothing is followed after gridding, the resulting beam is actually
+slightly larger than the smoothing beam.
+
 .SH BUGS
 Large snapshots (of order 4k or more) will have problems when also
 large images (512 square) or so are used. Need larger memory machine.
 .PP
 The program gracefully allows the user to use nonzero \fBmoment\fP
 and a non-infinite \fBvrange\fP. No warnings here.
+
 .SH "SEE ALSO"
 snapgrid(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 

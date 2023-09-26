@@ -1,7 +1,7 @@
-.TH SNAPSHELL 1NEMO "15 November 2022"
+.TH SNAPSHELL 1NEMO "25 September 2023"
 
 .SH "NAME"
-snapshell \- compute statistics of bodyvariables in a set of radial shells
+snapshell \- compute statistics of bodyvariables in a set of "radial" shells
 
 .SH "SYNOPSIS"
 \fBsnapshell in=\fPsnap_file [parameter=value] .\|.\|.
@@ -9,11 +9,12 @@ snapshell \- compute statistics of bodyvariables in a set of radial shells
 .SH "DESCRIPTION"
 \fIsnapshell\fP computes selected diagnostics and their statistics 
 from an N-body snapshot in a set of shells in an arbitrary body
-variable (default \fBrvar=r\fP).
+variable (default \fBrvar=r\fP being the radius).
 The snapshot must have been
 properly centered and oriented using 
 other tools (e.g. \fIsnapcenter(1NEMO)\fP and/or
-\fIsnaprect(1NEMO)\fP). 
+\fIsnaprect(1NEMO)\fP), as well have been sorted in 
+\fBrvar\fP. See \fIsnapsort(1NEMO)\fP how to sort a snapshot.
 .PP
 Normally the shell radii are explicitly set (optionally normalized)
 in \fBrvar\fP space, by setting \fBcumulative=t\fP the
@@ -141,6 +142,7 @@ values in svar space):
 .nf
     % \fBsnapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 rvar=phi cumul=t\fP
 .fi
+
 
 .SH "CAVEATS"
 Although \fBrvar=\fP can be choosen arbitrarely, with a cone selection (i.e. \fBangle>0\fP)

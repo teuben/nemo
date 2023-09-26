@@ -14,6 +14,9 @@ local void walksub(real, nodeptr, vector, real, real *, int *);
 local bool subdivp(real, vector, real);
 local real distcount(real *, int, int);
 
+void hackcount(bodyptr p, real dis, real *ra, int *total);
+void hackwalk(real dis, real *ra, int *total);
+
 real directden(p, nb, dis, ra, base, nbody)
     bodyptr p;
     int nb;
@@ -22,7 +25,7 @@ real directden(p, nb, dis, ra, base, nbody)
     bodyptr base;
     int nbody;
 {
-    int total, i;
+    int i;
     bodyptr q;
     real rn, nbr, den;
     vector disp;
@@ -93,14 +96,11 @@ real hackden(p, nb, dis, newdis, ra)
     return den;
 }
 
-local real distcount(ra ,total, nb)
-    real *ra;
-    int total;
-    int nb;
+local real distcount(real *ra , int total, int nb)
 {
     register int i,j;
     register real tmp;
-    int jmin;
+    int jmin=-1;
 #ifdef DEBUG
     dprintf(0,"distcount: distances--");
     for(i=0; i<total; i++)dprintf(0," %f", ra[i]);
@@ -131,11 +131,7 @@ local real distcount(ra ,total, nb)
 local bodyptr pskip;			/* body to skip in force evaluation */
 local vector pos0;			/* point to evaluate field at */
 
-hackcount(p, dis, ra, total)
-bodyptr p;
-real dis;
-real *ra;
-int * total;
+void hackcount(bodyptr p, real dis, real *ra, int *total)
 {
     pskip = p;					/* exclude p from f.c.      */
     SETV(pos0, Pos(p));				/* set field point          */
@@ -147,10 +143,7 @@ int * total;
  */
 
 
-hackwalk(dis, ra, total)
-real dis;
-real *ra;
-int * total;
+void hackwalk(real dis, real *ra, int *total)
 {
     vector croot;
     int i;

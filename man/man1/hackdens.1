@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "21 August 2022"
+.TH HACKDENS 1NEMO "25 September 2023"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -66,11 +66,23 @@ Ratio of cells to bodies, used  when
 allocating cells [defaults:0.9].
 .TP
 \fBnudge\fP=\fIsize\fP
-
+nudge overlapping particles with this positional dispersion [0]
 .TP
-\fBverbose\fP=\fIt|f\fP
+\fBverbose=t|f\fP
 Logical if print out the number of particles processed during the
 calculation [defaults:f].
+.TP
+\fBdensity=t|f\fP
+write density, or alternatively distance to Kth particle.
+Default: t
+.TP
+\fBndim=2|3\fP
+3D or 2D computation [Default: 3]
+.TP
+\fBdirect=t|f\fP
+slower N-squared direct density computation.  Default: f
+
+
 
 .SH "NOTES"
 Since the search radius is adaptively changed during the calculation,
@@ -135,6 +147,23 @@ A (*) denotes the best method for that model.
 Although for a Plummer sphere the best method is more than twice as good than the worst method,
 this does not apply to other models.
 
+.SH "BUGS"
+The local density is calculated using (neib-1)th neighbor.
+Calculation can become very slow if the input snapshot is not
+well-formed. There should exist an option that forces the density will be
+written in the "Aux" slot of the snapshot file. Current version does
+not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
+the output snapshot.
+.PP
+The density in \fIsnapdens(1NEMO)\fP and \fIdensity(1falcON)\fP
+are in the correct units, but
+in  \fIhackdens(1NEMO)\fP seem to be off by \fBnbody\fP for equal mass
+particles. For example, a Plummer sphere in virial (nbody) units should have
+a central density
+.nf
+    (32/(3.pi^2))^2 ~ 1.168
+.fi
+
 .SH "SEE ALSO"
 hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON)
 .PP
@@ -143,13 +172,6 @@ https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/ - Casertano & Hut (1985)
 .SH "ADS"
 @ads 1985ApJ...298...80C
 
-.SH "BUGS"
-The local density is calculated using (neib-1)th neighbor.
-Calculation can become very slow if the input snapshot is not
-well-formed. There should exist an option that forces the density will be
-written in the "Aux" slot of the snapshot file. Current version does
-not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
-the output snapshot. 
 
 .SH "TIMING"
 N=4096, merger remnant
@@ -171,5 +193,6 @@ Jun Makino
 18-jul-92	printf -> dprintf to make it pipable	Peter
 24-may-02	fixed running out of bits for large-N systems	PJT
 11-aug-2022	added example hackforce vs. hackdens	PJT
+21-sep-2023	added direct=	PJT
 .fi
 
