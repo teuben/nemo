@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "31 March 2023"
+.TH MKPLUMMER 1NEMO "25 September 2023"
 
 .SH "NAME"
 mkplummer \- generates a snapshot according to a truncated Plummer model
@@ -125,6 +125,26 @@ The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
 
 .fi
 
+.SH "QUIET START"
+For small N-body systems it can easily happen that small random fluctuations
+cause a unacceptabel large deviation from an ideal Plummer sphere. One way to
+achieve more "quiet" initial conditions is by positioning the particles more uniformely in
+their 1/N mass shells, instead of uniformely filling the space between 0 and 1. This is
+the \fBquiet=1\fP setting.   An even more quiet start can be achieved
+by placing the particles on exactly the radius compatible with its mass fraction, this is
+the \fBquiet=2\fP setting.
+.PP
+In this example you can clearly see the difference between the radii selected:
+.nf
+
+  mkplummer - 10 quiet=0 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+  mkplummer - 10 quiet=1 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+  mkplummer - 10 quiet=2 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+
+.fi
+Important to note that with \fBzerocm=f\fP the center of mass will drift, while the "mathematical center"
+was placed at the origin. This will counter the quietness, if you will.
+
 .SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
@@ -156,7 +176,7 @@ or the new General Spherical Profile in ZENO:
   % snapcopy plum.snap plum2.snap
 
 .fi
-with a note that ZENO files may need an extra \fIsnapcopy(1NENO)\fP to be compatible with NEMO
+with a note that ZENO files may need an extra \fIsnapcopy(1NEMO)\fP to be compatible with NEMO
 \fIsnapshot(5NEMO)\fP files.
 
 .SH "BENCHMARKS"
@@ -205,7 +225,7 @@ Piet Hut (Peter Teuben)
 ~/src/nbody/init	mkplummer.c
 .fi
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
 23-Apr-87	Version 1.0: created         	PIET
@@ -219,5 +239,5 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
 2-dec-2017	documented mcluster	PJT
 29-mar-2021	benchmark	PJT
-5-jun-2023	
+25-sep-2023	describe quiet starts	PJT
 .fi
