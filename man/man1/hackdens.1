@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "21 September 2023"
+.TH HACKDENS 1NEMO "25 September 2023"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -147,6 +147,23 @@ A (*) denotes the best method for that model.
 Although for a Plummer sphere the best method is more than twice as good than the worst method,
 this does not apply to other models.
 
+.SH "BUGS"
+The local density is calculated using (neib-1)th neighbor.
+Calculation can become very slow if the input snapshot is not
+well-formed. There should exist an option that forces the density will be
+written in the "Aux" slot of the snapshot file. Current version does
+not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
+the output snapshot.
+.PP
+The density in \fIsnapdens(1NEMO)\fP and \fIdensity(1falcON)\fP
+are in the correct units, but
+in  \fIhackdens(1NEMO)\fP seem to be off by \fBnbody\fP for equal mass
+particles. For example, a Plummer sphere in virial (nbody) units should have
+a central density
+.nf
+    (32/(3.pi^2))^2 ~ 1.168
+.fi
+
 .SH "SEE ALSO"
 hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON)
 .PP
@@ -155,13 +172,6 @@ https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/ - Casertano & Hut (1985)
 .SH "ADS"
 @ads 1985ApJ...298...80C
 
-.SH "BUGS"
-The local density is calculated using (neib-1)th neighbor.
-Calculation can become very slow if the input snapshot is not
-well-formed. There should exist an option that forces the density will be
-written in the "Aux" slot of the snapshot file. Current version does
-not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
-the output snapshot. 
 
 .SH "TIMING"
 N=4096, merger remnant
