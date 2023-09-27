@@ -29,7 +29,8 @@
  *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
  *  24-jan-18   faster version of grandom() with better caching               PJT
  *              1e7 grandom:   V2.2 -> 1.40"    V2.3 -> 0.85
- *  11-aug-22   implement special value -3 to use /dev/random on linux      PJT
+ *  11-aug-22   implement special value -3 to use /dev/random on linux        PJT
+ *  27-sep-23   less verbose by default                                       PJT
  *
  *  See also: getrandom(2) for seed=-3
  */
@@ -282,7 +283,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.4\n  22-aug-2022 PJT",
+    "VERSION=2.5\n  23-sep-2023 PJT",
     NULL,
 };
 
@@ -341,7 +342,7 @@ void nemo_main()
     ini_moment(&mom,0,0);
   }
 
-  printf("Seed used = %d\n",seed);
+  printf("%d\n",seed);
   
   for (k=0; k<m; k++) {
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
