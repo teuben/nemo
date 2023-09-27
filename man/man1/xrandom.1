@@ -116,8 +116,11 @@ xrandom can also be use to estimate the wall clock time of a complex pipe. Here
 is an example:
 .nf
   t0=$(xrandom -1);mkplummer - 1000000 | snapsort - - r | hackdens - .; t1=$(xrandom -1); nemoinp "($t1-$t0)/100"
-  18.91
+  6.09
 .fi
+where 6.09 was measured on the fastest  machine I had available at the time of this writing
+(Jansky, with nemobench5 ~ 1350). Turns out for this example most of the time is spent in \fPhackdens(1NEMO)\fP,
+about 90%.
 
 .SH "GSL"
 If the GNU Scientific Library (GSL) has been enabled during installation, the
