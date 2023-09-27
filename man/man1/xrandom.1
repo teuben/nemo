@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "22 August 2022"
+.TH XRANDOM 1NEMO "27 September 2023"
 
 .SH "NAME"
 xrandom \- Return seed for random numbers and optionally random numbers
@@ -111,6 +111,13 @@ Skewness and kurtosis: -0.0528344 1.19066
 Median               : 0.000425562
 
 .fi
+.PP
+xrandom can also be use to estimate the wall clock time of a complex pipe. Here
+is an example:
+.nf
+  t0=$(xrandom -1);mkplummer - 1000000 | snapsort - - r | hackdens - .; t1=$(xrandom -1); nemoinp "($t1-$t0)/100"
+  18.91
+.fi
 
 .SH "GSL"
 If the GNU Scientific Library (GSL) has been enabled during installation, the
@@ -183,4 +190,5 @@ Peter Teuben
 8-sep-01	V2.0 GSL optionally added	PJT
 9-oct-2012	V2.2 added m=	PJT
 21-aug-2022	V2.4 added exp=	PJT
+27-sep-2023	V2.5 less verbose and wall clock timing example added	PJT
 .fi
