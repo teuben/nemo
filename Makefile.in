@@ -682,6 +682,10 @@ bench12a:
 	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128
 
 
+## bench13:    sorting a plummer sphere
+bench13:
+	@t0=`xrandom -1`;mkplummer - 1000000 seed=123 | snapsort - - r | hackdens - . debug=-1; t1=`xrandom -1`; nemoinp "($$t1-$$t0)/100"
+
 #
 TEST=""
 reinstall:
