@@ -1,11 +1,18 @@
-.TH TABSMOOTH 1NEMO "20 December 2010"
-.SH NAME
-tabsmooth \- (hanning) smooth columns of a table
-.SH SYNOPSIS
+.TH TABSMOOTH 1NEMO "28 September 2023"
+
+.SH "NAME"
+tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
+
+.SH "SYNOPSIS"
 \fBtabsmooth\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Quick and dirty program to Hanning (1/4,1/2,1/4) smooth a table.
-.SH PARAMETERS
+.PP
+Equally quick and dirty is the filter= option, to try some
+Savitzky-Golay filters.
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -15,19 +22,40 @@ Input file name [???]
 \fBxcol=\fP
 Column(s) to use. Although multiple columns can be used, only those 
 columns are output to stdout.  [1]
-.TP 
-\fBnmax=\fP
-max size if a pipe [100000]  
+.TP
+\fBfilter=\fP
+Filter option. The way the options are set will likely change, this
+is work in progress.
+.nf
+   -1 passthrough
+   0  hanning (1,2,1)
+   1  SK 5pt smooth
+   2  SK 1st derivative
+   3  SK 2nd derivative
+   4  SK 7pt smooth
+.fi
+Default: 0
 .TP 
 \fBsmooth=\fP
-Smoothing array. By default, single Hanning smooth (0.25,0.5,0.25).
-.SH SEE ALSO
+Manually set the smoothing array. By default, the filter= is used to set the smoothing
+array.  Be sure to enter an odd number
+of array elements, for example a Hanning would be
+smooth=0.25,0.5,0.25.
+Default: not provided.
+.TP 
+\fBnmax=\fP
+max size if a pipe [100000]  - to be deprecated for new table system
+
+.SH "SEE ALSO"
 tabmath(1NEMO), tabtrend(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 20-Dec-2010	V0.1 Created	PJT
 13-oct-2014	documented smooth=
+28-sep-2023	V0.5 added filter=	PJT
 .fi

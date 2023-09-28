@@ -4,8 +4,8 @@
  *   24-oct-07   Created quick & dirty               PJT
  *          12   keyword error
  *      may-13   smooth= added
- *                        
- * 
+ *   28-sep-23   filter= added
+ *
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -23,17 +23,16 @@
 string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
+    "filter=0\n                   Select one of the test filters (0,1,2,...)",
+    "smooth=\n                    Optional expliciti smoothing array",
     "nmax=100000\n                max size if a pipe",
-    "smooth=0.25,0.5,0.25\n       Smoothing array",
-    "VERSION=0.4\n		  2-may-2013 PJT",
+    "VERSION=0.5\n		  28-sep-2023 PJT",
     NULL
 };
 
 string usage = "(hanning) smooth columns of a table";
 
-string cvsid = "$Id$";
-
-/**************** SOME GLOBAL VARIABLES ************************/
+/**************** GLOBAL VARIABLES *****************************/
 
 #ifndef MAXHIST
 #define MAXHIST	1024
@@ -44,7 +43,7 @@ string cvsid = "$Id$";
 #endif
 
 #define MAXCOORD 16
-#define MAXSM    128
+#define MAXSM    9
 
 local string input;			/* filename */
 local stream instr;			/* input file */
@@ -60,8 +59,28 @@ local int  nsm;
 local real sm[MAXSM];                   /* smoothing array */
 
 
+/* Savitzky-Golay tables for fixed stepsize */
+
+typedef struct cst {
+  int n;              // number of points in the filter (needs to be odd)
+  real norm;          // normalization for coeff
+  real coeff[MAXSM];  // coefficients
+} cst, *cstptr;
+  
+
+cst cst0 =   {3,  4, {1, 2, 1}};              // Hanning
+cst csts[] = {
+  {3,  4, {1, 2, 1}},              // Hanning
+  {5, 35, {-3, 12, 17, 12, -3}},   // SK4 - smooth
+  {5, 12, { 1, -8,  0,  8, -1}},   // SK4 - 1st der
+  {5,  7, { 2, -1, -2, -1,  2}},   // SK4 - 2nd der
+  {7, 21, {-2,  3,  6,  7,  6,  3, -2}},   
+  NULL,
+};
+
 local void setparams(void);
-local void read_data(void); 
+local void read_data(void);
+local void build_filter(int);
 local void smooth_data(void);
 local void smooth_data_old(void);
 
@@ -69,9 +88,9 @@ local void smooth_data_old(void);
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main()
 {
-    setparams();			/* read the parameters */
+    setparams();
     read_data();
     smooth_data();
 }
@@ -80,6 +99,7 @@ local void setparams()
 {
     real sum;
     int i;
+    int filter = getiparam("filter");
 
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
@@ -92,9 +112,14 @@ local void setparams()
 
     nsm = nemoinpr(getparam("smooth"),sm,MAXSM);
     if (nsm < 0) error("smooth=%s parsing error",getparam("smooth"));
-    if (nsm % 2 != 1) error("smooth=%s needs an odd number of values",getparam("smooth"));
+    if (nsm == 0) 
+      build_filter(filter);
+    else
+      if (nsm % 2 != 1) error("smooth=%s needs an odd number of values",getparam("smooth"));
+
     for (i=0, sum=0.0; i<nsm; i++) sum += sm[i];
     dprintf(0,"Smooth sum= %g\n",sum);
+
 }
 
 
@@ -111,6 +136,21 @@ local void read_data()
     	warning("Could only read %d data",nmax);
     	npt = nmax;
     }
+}
+
+local void build_filter(int filter)
+{
+  int i;
+  if (filter < 0) {
+    warning("passthrough");
+    nsm = 1;
+    sm[0] = 1;
+    return;
+  }
+  cst *c = &csts[filter];
+  nsm = c->n;
+  for (i=0; i<nsm; i++)
+    sm[i] = c->coeff[i]/c->norm;
 }
 
 
