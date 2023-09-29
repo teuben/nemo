@@ -4,7 +4,8 @@
  *   24-oct-07   Created quick & dirty               PJT
  *          12   keyword error
  *      may-13   smooth= added
- *   28-sep-23   filter= added
+ *   28-sep-23   0.5 filter= added
+ *   29-sep-23   0.6 converted to table V2 format
  *
  */
 
@@ -16,23 +17,24 @@
 #include <moment.h>
 #include <yapp.h>
 #include <axis.h>
+#include <table.h>
 #include <mdarray.h>
 
 /**************** COMMAND LINE PARAMETERS **********************/
 
 string defv[] = {
     "in=???\n                     Input file name",
-    "xcol=1\n			  Column(s) to use",
-    "filter=0\n                   Select one of the test filters (0,1,2,...)",
-    "smooth=\n                    Optional expliciti smoothing array",
-    "nmax=100000\n                max size if a pipe",
-    "VERSION=0.5\n		  28-sep-2023 PJT",
+    "xcol=1\n			  Column(s) to use (1=first)",
+    "filter=0\n                   Select one of the test filters (-1,0,1,2,...)",
+    "smooth=\n                    Optional explicit smoothing array",
+    "VERSION=0.6\n		  29-sep-2023 PJT",
     NULL
 };
 
-string usage = "(hanning) smooth columns of a table";
+string usage = "smooth columns of a table (Hanning, Savitzky-Golay)";
 
-/**************** GLOBAL VARIABLES *****************************/
+
+/**************** LOCAL VARIABLES *****************************/
 
 #ifndef MAXHIST
 #define MAXHIST	1024
@@ -42,21 +44,19 @@ string usage = "(hanning) smooth columns of a table";
 #define MAXCOL 256
 #endif
 
-#define MAXCOORD 16
 #define MAXSM    9
 
 local string input;			/* filename */
 local stream instr;			/* input file */
+local table *tptr;                      /* table pointer */
 
-local int ncol;                         /* number of columns used */
-local int col[MAXCOL];			/* histogram column number(s) */
-
-real *coldat[MAXCOL];
-local int    nmax;			/* lines to use at all */
-local int    npt;			/* actual number of points */
-
-local int  nsm;
+local int xcol[MAXCOL];			/* histogram column number(s) */
+local int nxcol;                        /* actual number of columns used */
+local mdarray2  x;                      /* x[col][row] */
+local int    npt;			/* actual number of points (rows) in table */
+ 
 local real sm[MAXSM];                   /* smoothing array */
+local int  nsm;                         /* actual length of smoothing array */
 
 
 /* Savitzky-Golay tables for fixed stepsize */
@@ -68,21 +68,21 @@ typedef struct cst {
 } cst, *cstptr;
   
 
-cst cst0 =   {3,  4, {1, 2, 1}};              // Hanning
-cst csts[] = {
-  {3,  4, {1, 2, 1}},              // Hanning
-  {5, 35, {-3, 12, 17, 12, -3}},   // SK4 - smooth
-  {5, 12, { 1, -8,  0,  8, -1}},   // SK4 - 1st der
-  {5,  7, { 2, -1, -2, -1,  2}},   // SK4 - 2nd der
-  {7, 21, {-2,  3,  6,  7,  6,  3, -2}},   
-  NULL,
+local cst csts[] = {
+  {3,  4, { 1,  2,  1}},                  // 0:  Hanning (3pt)
+  {5, 35, {-3, 12, 17, 12, -3}},          // 1:  SK2 - smooth (5pt)
+  {5, 12, { 1, -8,  0,  8, -1}},          // 2:  SK2 - 1st der
+  {5,  7, { 2, -1, -2, -1,  2}},          // 3:  SK2 - 2nd der
+  {7,231, { 5,-30, 75,131, 75,-30, 5}},   // 4:  SK4 - smooth (7pt)
+  {7,252, {22,-67,-58,  0, 58, 67,-22}},  // 5:  SK4
 };
+
+/* forward references */
 
 local void setparams(void);
 local void read_data(void);
 local void build_filter(int);
 local void smooth_data(void);
-local void smooth_data_old(void);
 
 
 
@@ -100,16 +100,18 @@ local void setparams()
     real sum;
     int i;
     int filter = getiparam("filter");
-
+    int nrows, ncols;
+ 
     input = getparam("in");
-    ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
-    if (ncol < 0) error("parsing error xcol=%s",getparam("xcol"));
+    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
+    if (nxcol < 0) error("parsing error xcol=%s",getparam("xcol"));
     
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    if (nmax<1) error("Problem reading from %s",input);
-
     instr = stropen (input,"r");
-
+    tptr  = table_open(instr, 0);
+    nrows = table_nrows(tptr);
+    ncols = table_ncols(tptr);
+    dprintf(1,"Table: %d x %d\n", nrows, ncols);
+ 
     nsm = nemoinpr(getparam("smooth"),sm,MAXSM);
     if (nsm < 0) error("smooth=%s parsing error",getparam("smooth"));
     if (nsm == 0) 
@@ -118,24 +120,16 @@ local void setparams()
       if (nsm % 2 != 1) error("smooth=%s needs an odd number of values",getparam("smooth"));
 
     for (i=0, sum=0.0; i<nsm; i++) sum += sm[i];
-    dprintf(0,"Smooth sum= %g\n",sum);
-
+    dprintf(1,"Smooth sum= %g\n",sum);
 }
 
 
 
 local void read_data()
 {
-    int   i,j,k;
-    
-    dprintf(0,"Reading %d column(s)\n",ncol);
-    for (i=0; i<ncol; i++)
-      coldat[i] = (real *) allocate(sizeof(real)*nmax);
-    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
-    if (npt == -nmax) {
-    	warning("Could only read %d data",nmax);
-    	npt = nmax;
-    }
+  x = table_md2cr(tptr, nxcol, xcol, 0, 0);
+  npt = tptr->nr;
+  if (nxcol == 0) nxcol = tptr->nc;  
 }
 
 local void build_filter(int filter)
@@ -147,6 +141,9 @@ local void build_filter(int filter)
     sm[0] = 1;
     return;
   }
+  int maxfilter = sizeof(csts)/sizeof(cst);
+  if (filter >= maxfilter) error("Only %d filters available",maxfilter);
+  
   cst *c = &csts[filter];
   nsm = c->n;
   for (i=0; i<nsm; i++)
@@ -154,23 +151,6 @@ local void build_filter(int filter)
 }
 
 
-local void smooth_data_old(void)
-{
-  int i,j;
-
-  for (j=0; j<ncol;  j++)
-    printf("%g ",0.667*coldat[j][1] + 0.333*coldat[j][0]);
-  printf("\n");
-
-  for (i=1; i<npt-1; i++) {
-    for (j=0; j<ncol;  j++)
-      printf("%g ",0.25*coldat[j][i-1] + 0.5*coldat[j][i] + 0.25*coldat[j][i+1]);
-    printf("\n");
-  }
-  for (j=0; j<ncol;  j++)
-    printf("%g ",0.667*coldat[j][npt-2] + 0.333*coldat[j][npt-1]);
-  printf("\n");
-}
 
 local void smooth_data(void)
 {
@@ -179,12 +159,12 @@ local void smooth_data(void)
   int nsmh = (nsm-1)/2;  /* nsm better be odd */
 
   for (i=0; i<npt; i++) {
-    for (j=0; j<ncol;  j++) {
+    for (j=0; j<nxcol;  j++) {
       sum[j] = 0.0;
       for (k=-nsmh; k<=nsmh; k++) {
 	ipk = i+k;
 	if (ipk<0 || ipk>=npt) continue;
-	sum[j] += coldat[j][ipk] * sm[k+nsmh];
+	sum[j] += x[j][ipk] * sm[k+nsmh];
       }
       printf("%g ",sum[j]);
     }
