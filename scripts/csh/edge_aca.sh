@@ -5,7 +5,7 @@
 #
 #
 _script=edge_aca.sh
-_version=20-sep-2023
+_version=4-oct-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -45,7 +45,8 @@ clip=0.1               # clipping level for cube                          #> ENT
 refmap=0               # reference map for WCS and masking                #> IFILE 0
 vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
 
-show=1                 # display some results (ds9, plots)                #> RADIO 0,1
+plot=rotcur,profile                   # show which plots can be made      #> CHECK rotcur,profile
+ds9=mom0,mom1,mom2,beam,model,refmap  # show in ds9                       #> CHECK mom0,mom1,mom2,beam,model,refmap
 
 # Example for NGC0001:   inc=34 pa=110  z=0.01511 (4530 km/s)
 #                 NED:   inc=39 pa=110  z=0.01518  VHEL=4550  VLSR=4554  VCMB=4212 (62 Mpc)
@@ -72,13 +73,17 @@ cell=`nemoinp "2*$range/$nsize*60"`
 cen=`nemoinp $nsize/2-0.5`
 restfreq=230.53800     # CO(2-1) in GHz
 
-#  keep a log, incase we call this routine multiple times
-echo `date` :: $* >> $run.history
 
 # ================================================================================ START
 
+#  Announce:
+echo "$0 version $_version"
+
+#  Clear old model
 rm -f $run.* >& /dev/null
 
+#  keep a log
+echo "`date` :: $*" > $run.history
 
 if [ $v1 = 0 ]; then
   echo "Creating homogeneous disk with $nbody particles times"
@@ -87,7 +92,7 @@ if [ $v1 = 0 ]; then
     snapmass - - "mass=exp(-r/$re)" |\
     snapscale - - mscale=$nbody |\
     snaprotate - $run.20 "$inc,$pa" yz
-  rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 |\
+  rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 else
   m1=`nemoinp "$r1*($v1/0.62)**2"`
@@ -194,19 +199,55 @@ ccdmom $run.32 - axis=1 mom=0 |\
 # this way the input spatial scale is in arcsec and km/s
 ccdfits $run.32 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
 
-if [ $show = 1 ]; then
-    xpaset -p ds9 frame frameno 1
-    nds9 $run.33d
-    xpaset -p ds9 frame frameno 2
-    nds9 $run.33v
-    xpaset -p ds9 frame frameno 3
-    nds9 $run.33s
-    xpaset -p ds9 frame frameno 4
-    nds9 $run.beam
-    xpaset -p ds9 frame frameno 5    
-    nds9 $run.fits
 
+frameno=0
+echo "DS9: $ds9"
+if [[ "$ds9" == *"mom0"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno mom0"
+    xpaset -p ds9 frame frameno $frameno
+    nds9 $run.33d
+fi
+if [[ "$ds9" == *"mom1"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno mom1"    
+    xpaset -p ds9 frame frameno $frameno
+    nds9 $run.33v
+fi
+if [[ "$ds9" == *"mom2"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno mom2"    
+    xpaset -p ds9 frame frameno $frameno
+    nds9 $run.33s
+fi
+if [[ "$ds9" == *"beam"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno beam"    
+    xpaset -p ds9 frame frameno $frameno
+    nds9 $run.beam
+fi
+if [[ "$ds9" == *"model"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno model"    
+    xpaset -p ds9 frame frameno $frameno
+    nds9 $run.fits
+fi
+if [[ "$ds9" == *"refmap"* ]]; then
+    ((frameno+=1))
+    echo "frame $frameno refmap"
+    if [ -e $refmap ]; then
+	xpaset -p ds9 frame frameno $frameno
+	nds9 $refmap
+    else
+	echo "Warning: $refmap does not exist"
+    fi
+fi
+
+echo "PLOT: $plot"
+if [[ "$plot" == *"rotcur"* ]]; then
     tabplot $run.tab 1 3 yapp=1/xs
+fi
+if [[ "$plot" == *"profile"* ]]; then    
     tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 
