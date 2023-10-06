@@ -8,6 +8,8 @@ URL5 =  http://gitlab.com/cmaureir/gravidy-input.git
 
 URL  = $(URL3)
 
+TIME = /usr/bin/time
+
 .PHONY : help
 ## help:          This Help
 help : Makefile
@@ -111,6 +113,17 @@ cmp34:  run3 run4
 cmp45:  run4 run5
 	snapcmp run4/OUT3.snap run5/OUT3.snap
 
-## example1:      
+## example1:      quick example from the manual
 example1: gravidy-input
-	$(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 1 
+	$(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 1 
+
+## bench1:        single core performance
+bench1: gravidy-input
+	OMP_NUM_THREADS=1 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+
+## bench2:        multi core performance
+bench2: gravidy-input
+	OMP_NUM_THREADS=1 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=2 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=4 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=8 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
