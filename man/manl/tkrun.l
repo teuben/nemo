@@ -98,7 +98,7 @@ Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
 out sections of the script. There is a tooltip available, but not implemented
 
 .SH "SEE ALSO"
-wish(1), zenity(1)
+wish(1), zenity(1), qtrun(1NEMO)
 .PP
 .nf
 .ta +2i
