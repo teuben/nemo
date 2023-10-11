@@ -12,9 +12,10 @@
  *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
  *     28-jul-06  V2.2c  default for tag is now Density
  *                V2.2d  clarify D vs. P, working with std snapshot, not archaic
- *     21-dep-23  V2.3   add direct=
+ *     21-dep-23  V2.3   add a slow direct= for benchmark/comparison
+ *     11-OCT-23  v3.0   add norm=1 and made it the default
  *
- * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
+ * @todo -  this program seems to assume m_i = 1, so for unequal masses wrong (see norm=)
  */
 
 #define global
@@ -40,7 +41,8 @@ string defv[] = {
     "density=t\n                  write density, or distance to Kth particle",
     "ndim=3\n                     3D or 2D computation",
     "direct=f\n                   slower direct density computation",
-    "VERSION=2.3\n		  21-sep-2023 PJT",
+    "norm=1\n                     normalization mode (0=nothing   1=1/N)",
+    "VERSION=3.0\n		  11-oct-2023 PJT",
     NULL,
 };
 
@@ -74,6 +76,7 @@ bodyptr testdata;		/* array of test points */
 int ntest;			/* number of test points */
 
 bool Qdirect;
+bool norm;
 
 void inputdata()
 {
@@ -88,6 +91,7 @@ void inputdata()
     strclose(instr);
     testdata = massdata;
     ntest = nmass;
+    norm = getiparam("norm");
 }
 
 real tsnap;
@@ -214,6 +218,11 @@ void dencalc()
 	if(verbose && ibody%100==0)dprintf(0," %d rn=%f\n", ibody,rneib);
     }
     cpufcal = cputime() - cpubase;
+    if (norm==1) {
+      dprintf(1,"Renormalizing %d densities\n",ntest);
+      for (pp=dendata; pp < dendata+ntest; pp++)
+	*pp /= ntest;
+    }
 }
 
 stream outstr;
