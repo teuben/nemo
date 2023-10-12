@@ -113,7 +113,7 @@ since the \fIhelp\fP portion of the GUI specification in V2 has not been
 implemented here.
 
 .SH "SEE ALSO"
-wish(1), zenity(1)
+wish(1), zenity(1), qtrun(1NEMO)
 .PP
 .nf
 .ta +2i
