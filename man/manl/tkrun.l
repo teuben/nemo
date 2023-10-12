@@ -1,4 +1,4 @@
-.TH TKRUN 1 "14 July 2023"
+.TH TKRUN 1 "28 August 2023"
 
 .SH "NAME"
 tkrun \- automatic GUI builder and frontend to run shell scripts or programs
@@ -63,6 +63,8 @@ The following tags are recongized GUI builders, using
     #> CHECK    \fIkey=val\fP     \fIopt1,opt2,opt3,...\fP
     #> IFILE    \fIkey=val\fP     
     #> OFILE    \fIkey=val\fP
+    #> IDIR     \fIkey=val\fP     
+    #> ODIR     \fIkey=val\fP
     #<      \fI-tkopt1 tkval1 -tkopt2 -tkval2 ... \fP
     #
     #> HELP  \fIkey\fP    One-line helpers for this particular keyword
@@ -75,11 +77,22 @@ The following tags are recongized GUI builders, using
 It is also possible to put these lines on the same line as the shell variable
 in e.g. c-shell scripts, e.g.:
 .nf
+
     set a=1    #> SCALE  a=1     0:10:0.1
+
 .fi
 but this is a new feature and will possibly be modified to not have to specify
 the variable setting "a=1"  twice.
-.SH CAVEATS
+.PP
+In the upcoming \fBtkrun\fP V2 version of this format is expected to allow
+help, as well as normalize the keyword specification as follows:
+.nf
+
+    set a=1   # some help on this keyword        #> SCALE  0:10:0.1
+
+.fi
+
+.SH "CAVEATS"
 Resetting (right click on the keyword) a checkbutton doesn't work properly.
 .PP
 checkbuttons and radiobuttons do not layout their buttons efficiently, and
@@ -96,6 +109,8 @@ The code is horribly non-defensive, and does not handle syntax errors on the
 .SH "TODO"
 Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
 out sections of the script. There is a tooltip available, but not implemented
+since the \fIhelp\fP portion of the GUI specification in V2 has not been
+implemented here.
 
 .SH "SEE ALSO"
 wish(1), zenity(1)
@@ -134,7 +149,6 @@ distribution:
 #>  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis
 #>  SCALE   n=3.141592              0:10:0.01
 #<          -digits 2
-#<  
 #		parse named arguments
 foreach a ($*)
    set $a
@@ -158,14 +172,39 @@ again:
   goto again
 .fi
 
+
+.SH "TKRUN V2"
+In version 2 of this format we have implemented this via a new python based qt (and pySimpleGui) driver.
+Here the format can be run via bash, csh and python in the
+.nf
+
+    key=val  # help    #> GUI
+
+.fi
+specification, but the client software (bash/csh/python/....) is responsible to properly parse the \fIkey=val\fP
+command line arguments.  Here are the proposed GUI tags with generic key=val/help sections
+
+.nf
+
+   in=foo        # input file      #> IFILE
+   out=bar       # output file     #> OFILE
+   text=hello    # some text       #> ENTRY
+   mode=gauss    # the mode        #> RADIO gauss,newton,leibniz
+   stats=mean    # what to show    #> CHECK sum,mean,sigma,skewness,kurtosis
+   n=3.141592    # the n value     #> SCALE 0:10:0.01
+   k=3.141592    # k, use n        #> LINK  n
+
+.fi
+
 .SH "AUTHOR"
 Peter Teuben
 
 .SH "FILES"
 .nf
-.ta +2.0i
+.ta +2.5i
 ~/.tkrunrc	(optional) global configuration file
 $run.key	keyword file in which key=val pairs are maintained
+$NEMO/scripts/templates 	example templates of key=val parsing
 .fi
 
 .SH "UPDATE HISTORY"
@@ -176,5 +215,6 @@ $run.key	keyword file in which key=val pairs are maintained
 22-apr-04	V1.2 added option to share the set and #> comment on one line	PJT
 12-jun-08	V1.4 updated doc and minor code cleanup	PJT
 24-dec-09	V1.7 implemented the load/save of key=val files    	PJT
-14-jul-2023	rudimentary tooltip
+14-jul-2023	rudimentary tooltips
+3-aug-2023	proposing the new V2 GUI format    	PJT
 .fi
