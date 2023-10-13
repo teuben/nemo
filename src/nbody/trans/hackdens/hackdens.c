@@ -112,11 +112,10 @@ stream instr;					/* stream to read from */
 
     get_set(instr, SnapShotTag);
     get_set(instr, ParametersTag);
-    if (get_tag_ok(instr, TimeTag)) {
+    if (get_tag_ok(instr, TimeTag))
 	get_data_coerced(instr, TimeTag, RealType, &tsnap, 0);
-    }else{
+    else
 	tsnap=0.0;
-    }
     get_data(instr, NobjTag, IntType, &nobj, 0);
     if (nobj < 1)
 	error("readsnapshot: %s = %d  is absurd\n", NobjTag, nobj);
@@ -135,19 +134,19 @@ stream instr;					/* stream to read from */
     get_tes(instr, SnapShotTag);
     *btab_ptr = bp = (bodyptr) malloc(nobj * sizeof(body));
     if (bp == NULL)
-	error("readsnapshot: not enuf memory for bodies\n");
+	error("readsnapshot: not enuf memory for bodies");
     totalmass = 0.0;
     for (i = 0; i < nobj; i++) {
 	Type(bp) = BODY;
 	Mass(bp) = *mp++;
+	totalmass += Mass(bp);
 	SETV(Pos(bp), pp);
 	pp += NDIM;
 	SETV(Vel(bp), pp);
 	pp += NDIM;
 	bp++;
-	totalmass += Mass(bp);
     }
-    dprintf(0,"Total mass = %g\n", totalmass);
+    dprintf(1,"Total mass = %g, nbody=%d\n", totalmass,nobj);
     free(mbuf);
     free(pbuf);
     *nobj_ptr = nobj;
@@ -224,9 +223,9 @@ void dencalc()
     }
     cpufcal = cputime() - cpubase;
     if (norm==1) {
-      dprintf(1,"Renormalizing %d densities\n",ntest);
       real factor = 1.0/ntest;
       if (Qdensity) factor *= totalmass;
+      dprintf(0,"Renormalizing %d densities by %g\n",ntest,factor);
       for (pp=dendata; pp < dendata+ntest; pp++) 
 	*pp *= factor;
     }
