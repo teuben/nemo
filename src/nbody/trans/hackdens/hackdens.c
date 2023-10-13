@@ -12,9 +12,11 @@
  *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
  *     28-jul-06  V2.2c  default for tag is now Density
  *                V2.2d  clarify D vs. P, working with std snapshot, not archaic
- *     21-dep-23  V2.3   add direct=
+ *     21-sep-23  V2.3   add direct=
+ *     12-oct-23  V2.4   scale by mass
  *
- * TODO:  this program seems to assume m_i = 1, so for unequal masses wrong
+ * NOTE:   for snapshots with unequal masses this program doesn't work
+ *
  */
 
 #define global
@@ -27,7 +29,7 @@
 
 string defv[] = {	
     "in=???\n			  input snapshot",
-    "out=\n			  output file with f.c. results ",
+    "out=\n			  optional output file with density results ",
     "neib=6\n			  number of neighbours to define local density ",
     "rneib=0.1\n		  initial guess for neighbour sphere radius ",
     "write_at_phi=f\n		  flag to write density with Potential instead of Density tag",
@@ -40,7 +42,7 @@ string defv[] = {
     "density=t\n                  write density, or distance to Kth particle",
     "ndim=3\n                     3D or 2D computation",
     "direct=f\n                   slower direct density computation",
-    "VERSION=2.3\n		  21-sep-2023 PJT",
+    "VERSION=2.4\n		  12-oct-2023 PJT",
     NULL,
 };
 
@@ -69,6 +71,7 @@ void nemo_main()
 
 bodyptr massdata;		/* array of mass points */
 int nmass;			/* number of mass points */
+real totalmass;
 
 bodyptr testdata;		/* array of test points */
 int ntest;			/* number of test points */
@@ -129,6 +132,7 @@ stream instr;					/* stream to read from */
     *btab_ptr = bp = (bodyptr) malloc(nobj * sizeof(body));
     if (bp == NULL)
 	error("readsnapshot: not enuf memory for bodies\n");
+    totalmass = 0.0;
     for (i = 0; i < nobj; i++) {
 	Type(bp) = BODY;
 	Mass(bp) = *mp++;
@@ -137,7 +141,9 @@ stream instr;					/* stream to read from */
 	SETV(Vel(bp), pp);
 	pp += NDIM;
 	bp++;
+	totalmass += Mass(bp);
     }
+    dprintf(0,"Total mass = %g\n", totalmass);
     free(mbuf);
     free(pbuf);
     *nobj_ptr = nobj;
@@ -192,9 +198,8 @@ void dencalc()
     fcells = getdparam("fcells");
     dendata = pp = (real *) malloc(ntest * sizeof(real));
     work = (real *) malloc(ntest * sizeof(real));
-    if (pp == NULL||work==NULL){
+    if (pp == NULL || work==NULL)
 	error("forcecalc: not enuf memory for results");
-    }
     cpubase = cputime();
     maketree(massdata, nmass,nudge);
     cputree = cputime() - cpubase;
@@ -208,6 +213,8 @@ void dencalc()
 	  *pp = directden(bp, neibnum, rneib, work, testdata, ntest);
 	else
 	  *pp = hackden(bp, neibnum, rneib, &newrneib, work);
+	if (Qdensity)
+	  *pp += totalmass;   /* only correct for equal mass systems */
 	rneib=0.95*rneib+0.05*newrneib;
 	pp++;
 	ibody++;
@@ -242,7 +249,7 @@ void writesnapshot()
     mbuf = mp = (real *) malloc(ntest * sizeof(real));
     pspbuf = pspp = (real *) malloc(ntest * 2 * NDIM * sizeof(real));
     if (mbuf == NULL || pspbuf == NULL)
-	error("writesnapshot: not enuf memory for buffers\n");
+	error("writesnapshot: not enuf memory for particle buffers");
     for (bp = testdata; bp < testdata+ntest; bp++) {
 	*mp++ = Mass(bp);
 	SETV(pspp, Pos(bp));
