@@ -12,8 +12,9 @@
  *     25-apr-06  V2.2b  use global to isolate extern's (for Mac linking)
  *     28-jul-06  V2.2c  default for tag is now Density
  *                V2.2d  clarify D vs. P, working with std snapshot, not archaic
- *     21-sep-23  V2.3   add direct=
+ *     21-dep-23  V2.3   add a slow direct= for benchmark/comparison
  *     12-oct-23  V2.4   scale by mass
+ *     11-OCT-23  v3.0   add norm=1 and made it the default
  *
  * NOTE:   for snapshots with unequal masses this program doesn't work
  *
@@ -42,7 +43,8 @@ string defv[] = {
     "density=t\n                  write density, or distance to Kth particle",
     "ndim=3\n                     3D or 2D computation",
     "direct=f\n                   slower direct density computation",
-    "VERSION=2.4\n		  12-oct-2023 PJT",
+    "norm=1\n                     normalization mode (0=nothing   1=1/N)",
+    "VERSION=3.0\n		  12-oct-2023 PJT",
     NULL,
 };
 
@@ -77,6 +79,7 @@ bodyptr testdata;		/* array of test points */
 int ntest;			/* number of test points */
 
 bool Qdirect;
+bool norm;
 
 void inputdata()
 {
@@ -91,6 +94,7 @@ void inputdata()
     strclose(instr);
     testdata = massdata;
     ntest = nmass;
+    norm = getiparam("norm");
 }
 
 real tsnap;
@@ -213,14 +217,19 @@ void dencalc()
 	  *pp = directden(bp, neibnum, rneib, work, testdata, ntest);
 	else
 	  *pp = hackden(bp, neibnum, rneib, &newrneib, work);
-	if (Qdensity)
-	  *pp += totalmass;   /* only correct for equal mass systems */
 	rneib=0.95*rneib+0.05*newrneib;
 	pp++;
 	ibody++;
 	if(verbose && ibody%100==0)dprintf(0," %d rn=%f\n", ibody,rneib);
     }
     cpufcal = cputime() - cpubase;
+    if (norm==1) {
+      dprintf(1,"Renormalizing %d densities\n",ntest);
+      real factor = 1.0/ntest;
+      if (Qdensity) factor *= totalmass;
+      for (pp=dendata; pp < dendata+ntest; pp++) 
+	*pp *= factor;
+    }
 }
 
 stream outstr;

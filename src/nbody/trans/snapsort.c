@@ -26,22 +26,21 @@
 string defv[] = {	
     "in=???\n		Input file name (snapshot)",
     "out=???\n		Output file name (snapshot)",
-    "rank=etot\n	Value used in ranking particles",
+    "rank=r\n	        Value used in ranking particles",
     "times=all\n        Range of times to process ",
     "sort=qsort\n       Sort mode {qsort;...}",
-    "VERSION=1.5c\n     19-jun-09 PJT ",
+    "VERSION=1.6\n      11-oct-2023 PJT ",
     NULL,
 };
 
 string usage="sort particles according to a user-specified ranking";
 
-string cvsid="$Id$";
 
 /* #define FLOGGER 1       /* merge in the cute flogger test routines */
 
 void snapsort(Body *, int , real , bool, bool, rproc_body, iproc);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     string times;

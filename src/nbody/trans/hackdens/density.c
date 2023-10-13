@@ -10,13 +10,14 @@
 
 #include "defs.h"
 
-local void walksub(real, nodeptr, vector, real, real *, int *);
-local bool subdivp(real, vector, real);
-local real distcount(real *, int, int);
-
+local void walksub(real dis, nodeptr p, vector cpos, real d, real *ra, int *total);
+  local bool subdivp(real dis, vector cpos, real d);
+local real distcount(real *ra , int total, int nb);
+  
 void hackcount(bodyptr p, real dis, real *ra, int *total);
 void hackwalk(real dis, real *ra, int *total);
 
+  
 real directden(p, nb, dis, ra, base, nbody)
     bodyptr p;
     int nb;
@@ -39,7 +40,7 @@ real directden(p, nb, dis, ra, base, nbody)
 #ifdef DEBUG
     dprintf(0,"Directden= %f\n", den);
 #endif
-    return (den);
+    return den;
 }
 
 real hackden(p, nb, dis, newdis, ra)
@@ -96,7 +97,7 @@ real hackden(p, nb, dis, newdis, ra)
     return den;
 }
 
-local real distcount(real *ra , int total, int nb)
+local real distcount(real *ra, int total, int nb)
 {
     register int i,j;
     register real tmp;
@@ -156,14 +157,14 @@ void hackwalk(real dis, real *ra, int *total)
  * WALKSUB: recursive routine to do hackwalk operation.
  */
 
-local void walksub(dis, p, cpos, d, ra, total)
-real dis;			        /* critical displacement */
-register nodeptr p;                     /* pointer into body-tree */
-vector cpos;			        /* geometoric center of the node */
-real d;                                 /* size of box  */
-real * ra;			/* array to store distances to */
-				/* particles within sphere */
-int *total;			/* number of particles in the sphere */
+local void walksub(real dis, nodeptr p, vector cpos, real d, real *ra, int *total)
+//  dis		        critical displacement
+//  p                   pointer into body-tree
+//  cpos		geometoric center of the node
+//  d                   size of box
+//  ra			array to store distances to
+//			particles within sphere
+//  total               number of particles in the sphere
 {
     register nodeptr *pp;
     register int i,j;
@@ -202,10 +203,10 @@ int *total;			/* number of particles in the sphere */
  * true if need to subdivide
  */
 
-local bool subdivp(dis, cpos, d)
-real dis;			        /* critical separation  */
-vector cpos;			        /* geometrical center of the node */
-real d;                                 /* size of cell squared */
+local bool subdivp(real dis, vector cpos, real d)
+// dis		critical separation
+// cpos		geometrical center of the node
+// d            size of cell squared
 {
     int i;
     vector dr;
