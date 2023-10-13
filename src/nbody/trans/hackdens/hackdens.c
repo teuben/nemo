@@ -13,9 +13,11 @@
  *     28-jul-06  V2.2c  default for tag is now Density
  *                V2.2d  clarify D vs. P, working with std snapshot, not archaic
  *     21-dep-23  V2.3   add a slow direct= for benchmark/comparison
+ *     12-oct-23  V2.4   scale by mass
  *     11-OCT-23  v3.0   add norm=1 and made it the default
  *
- * @todo -  this program seems to assume m_i = 1, so for unequal masses wrong (see norm=)
+ * NOTE:   for snapshots with unequal masses this program doesn't work
+ *
  */
 
 #define global
@@ -28,7 +30,7 @@
 
 string defv[] = {	
     "in=???\n			  input snapshot",
-    "out=\n			  output file with f.c. results ",
+    "out=\n			  optional output file with density results ",
     "neib=6\n			  number of neighbours to define local density ",
     "rneib=0.1\n		  initial guess for neighbour sphere radius ",
     "write_at_phi=f\n		  flag to write density with Potential instead of Density tag",
@@ -42,7 +44,7 @@ string defv[] = {
     "ndim=3\n                     3D or 2D computation",
     "direct=f\n                   slower direct density computation",
     "norm=1\n                     normalization mode (0=nothing   1=1/N)",
-    "VERSION=3.0\n		  11-oct-2023 PJT",
+    "VERSION=3.0\n		  12-oct-2023 PJT",
     NULL,
 };
 
@@ -71,6 +73,7 @@ void nemo_main()
 
 bodyptr massdata;		/* array of mass points */
 int nmass;			/* number of mass points */
+real totalmass;
 
 bodyptr testdata;		/* array of test points */
 int ntest;			/* number of test points */
@@ -109,11 +112,10 @@ stream instr;					/* stream to read from */
 
     get_set(instr, SnapShotTag);
     get_set(instr, ParametersTag);
-    if (get_tag_ok(instr, TimeTag)) {
+    if (get_tag_ok(instr, TimeTag))
 	get_data_coerced(instr, TimeTag, RealType, &tsnap, 0);
-    }else{
+    else
 	tsnap=0.0;
-    }
     get_data(instr, NobjTag, IntType, &nobj, 0);
     if (nobj < 1)
 	error("readsnapshot: %s = %d  is absurd\n", NobjTag, nobj);
@@ -132,16 +134,19 @@ stream instr;					/* stream to read from */
     get_tes(instr, SnapShotTag);
     *btab_ptr = bp = (bodyptr) malloc(nobj * sizeof(body));
     if (bp == NULL)
-	error("readsnapshot: not enuf memory for bodies\n");
+	error("readsnapshot: not enuf memory for bodies");
+    totalmass = 0.0;
     for (i = 0; i < nobj; i++) {
 	Type(bp) = BODY;
 	Mass(bp) = *mp++;
+	totalmass += Mass(bp);
 	SETV(Pos(bp), pp);
 	pp += NDIM;
 	SETV(Vel(bp), pp);
 	pp += NDIM;
 	bp++;
     }
+    dprintf(1,"Total mass = %g, nbody=%d\n", totalmass,nobj);
     free(mbuf);
     free(pbuf);
     *nobj_ptr = nobj;
@@ -196,9 +201,8 @@ void dencalc()
     fcells = getdparam("fcells");
     dendata = pp = (real *) malloc(ntest * sizeof(real));
     work = (real *) malloc(ntest * sizeof(real));
-    if (pp == NULL||work==NULL){
+    if (pp == NULL || work==NULL)
 	error("forcecalc: not enuf memory for results");
-    }
     cpubase = cputime();
     maketree(massdata, nmass,nudge);
     cputree = cputime() - cpubase;
@@ -219,9 +223,11 @@ void dencalc()
     }
     cpufcal = cputime() - cpubase;
     if (norm==1) {
-      dprintf(1,"Renormalizing %d densities\n",ntest);
-      for (pp=dendata; pp < dendata+ntest; pp++)
-	*pp /= ntest;
+      real factor = 1.0/ntest;
+      if (Qdensity) factor *= totalmass;
+      dprintf(0,"Renormalizing %d densities by %g\n",ntest,factor);
+      for (pp=dendata; pp < dendata+ntest; pp++) 
+	*pp *= factor;
     }
 }
 
@@ -251,7 +257,7 @@ void writesnapshot()
     mbuf = mp = (real *) malloc(ntest * sizeof(real));
     pspbuf = pspp = (real *) malloc(ntest * 2 * NDIM * sizeof(real));
     if (mbuf == NULL || pspbuf == NULL)
-	error("writesnapshot: not enuf memory for buffers\n");
+	error("writesnapshot: not enuf memory for particle buffers");
     for (bp = testdata; bp < testdata+ntest; bp++) {
 	*mp++ = Mass(bp);
 	SETV(pspp, Pos(bp));
