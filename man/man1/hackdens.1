@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "25 September 2023"
+.TH HACKDENS 1NEMO "11 October 2023"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -81,7 +81,12 @@ Default: t
 .TP
 \fBdirect=t|f\fP
 slower N-squared direct density computation.  Default: f
-
+.TP
+\fBnorm=0|1\fP
+Mode of normalization. Earlier (2.x and before) versions would scale equal mass
+systems by nbody, the current default is norm=1 which normalizes by nbody, so
+densities from the slower \fPsnapdens(1NEMO)\fP agree with \fBhackdens\fP.
+Default: 1
 
 
 .SH "NOTES"
@@ -107,7 +112,7 @@ in the order of the distance from the C.M., and calculate local density.
 .nf
 
    snapcenter nbody.dat nbody.centered
-   snapsort nbody.centered nbody.sorted rank="x*x+y*y+z*z"
+   snapsort nbody.centered nbody.sorted 
    hackdens nbody.sorted nbody.density
 
 .fi
@@ -146,6 +151,30 @@ A (*) denotes the best method for that model.
 .fi
 Although for a Plummer sphere the best method is more than twice as good than the worst method,
 this does not apply to other models.
+.PP
+\fIdensity(1falcON)\fP is considerable faster, about twice with their K=32 default. 
+.nf
+
+mkplummer - 100000 |\
+ snapscale - - mscale=10 |\
+ snapsort - - |\
+ density - - give=mxvr |\
+ snapshell - '10**[-4:4:0.1]' dens  |\
+ tabmath - - 'log(%1),log(%4)' all |\
+ tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
+
+vs.
+
+mkplummer - 100000 |\
+ snapscale - - mscale=10 |\
+ snapsort - - |\
+ hackdens - - |\
+ snapshell - '10**[-4:4:0.1]' dens  |\
+ tabmath - - 'log(%1),log(%4)' all |\
+ tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
+
+
+.fi
 
 .SH "BUGS"
 The local density is calculated using (neib-1)th neighbor.
@@ -165,7 +194,7 @@ a central density
 .fi
 
 .SH "SEE ALSO"
-hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON)
+hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON), snapshell(1NEMO)
 .PP
 https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/ - Casertano & Hut (1985)
 
@@ -194,5 +223,5 @@ Jun Makino
 24-may-02	fixed running out of bits for large-N systems	PJT
 11-aug-2022	added example hackforce vs. hackdens	PJT
 21-sep-2023	added direct=	PJT
+11-oct-2023	V3.0 added norm=1 as a new default	PJT
 .fi
-
