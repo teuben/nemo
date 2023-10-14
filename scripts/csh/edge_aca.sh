@@ -45,7 +45,7 @@ clip=0.1               # clipping level for cube                          #> ENT
 refmap=0               # reference map for WCS and masking                #> IFILE 0
 vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
 
-plot=rotcur,profile                   # show which plots can be made      #> CHECK rotcur,profile
+plot=rotcur,profile                   # show which plots can be made      #> CHECK rotcur,profile,mom0
 ds9=mom0,mom1,mom2,beam,model,refmap  # show in ds9                       #> CHECK mom0,mom1,mom2,beam,model,refmap
 
 # Example for NGC0001:   inc=34 pa=110  z=0.01511 (4530 km/s)
@@ -249,6 +249,9 @@ if [[ "$plot" == *"rotcur"* ]]; then
 fi
 if [[ "$plot" == *"profile"* ]]; then    
     tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
+fi
+if [[ "$plot" == *"mom0"* ]]; then    
+    ccdplot $run.33d yapp=3/xs
 fi
 
 
