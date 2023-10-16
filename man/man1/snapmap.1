@@ -1,10 +1,13 @@
 .TH SNAPMAP 1NEMO "6 May 2011"
-.SH NAME
-snapmap \- map a snapshot into a 2D image
-.SH SYNOPSIS
+
+.SH "NAME"
+snapmap \- map (kriging) a snapshot into a 2D image
+
+.SH "SYNOPSIS"
 .PP
 \fBsnapmap in=\fPsnapshot \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapmap\fP "grids" two arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, and \fBy\fP) of a snapshot into a 2D map, using
 another \fIbodytrans(3NEMO)\fP expression (default: \fBm\fP) as the map
@@ -12,7 +15,8 @@ value. The result is an
 \fIimage(5NEMO)\fP, with optional astronomical projection for direct
 comparision with true astronomical images. There are a number of ways
 implemented to "grid" the particles: mean value, with or without gaussian
-or cone weighting, and forms of linear interpolation.
+or cone weighting, and forms of linear interpolation. These functions are
+also known as "kriging".
 .PP 
 Use \fIsnapgrid(1NEMO)\fP instead to grid datacubes (e.g. X-Y-Z), or
 if you need various styles of
@@ -21,8 +25,9 @@ to obtain well interpolated maps from \fIirregularly sampled\fP data where the
 input mapping \fII(x,y)\fP is still a smooth function, although good results
 can also be ontained by averaging the values (the default mode) or
 using a smoothing length \fIsvar=\fB.
-.SH PARAMETERS
-The following parameters are recognized:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, must be in \fIsnapshot(5NEMO)\fP format. Multiple snapshots can
@@ -106,13 +111,12 @@ is larger than \fBemax\fP, to prevent roundoff error and/or contributions
 from too far away. This equals \fBsqrt(2*emax)\fP times the sigma
 listed in \fBsvar=\fP. 
 [Default: \fB10\fP]
-.SH BUGS
-Combinations of large snapshots and large images may run into memory
-problems since both the snapshot and the image(s) must fit into memory.
-.PP
+
+.SH "BUGS"
 Sky projections do not guarantee flux conservation, interpolation is done
 in linear space.
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 This program was written to create maps with more accurate interpolated
 velocity fields from models. However, in the default mode it used
 the same \fImean\fP pixel value as \fIsnapgrid(1NEMO)\fP:
@@ -135,14 +139,18 @@ separate images. If you want them in a single image cube, use
 .fi
 .SH "SEE ALSO"
 snapgrid(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdmerge(1NEMO), ccdsky(1NEMO), image(5NEMO)
-.SH AUTHOR
+.PP
+kriging programs such as \fIlmtgridder\fP and \fIgbtgridder\fP take single dish pointings and create a map from them.
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/nbody/image  	snapmap.c
 .fi
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 20-jun-09	V1.0: created	PJT

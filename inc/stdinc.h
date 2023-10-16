@@ -45,6 +45,9 @@
  * 16-sep-08    removes nemo_exit (better use stdlib's atexit)      WD
  * 18-sep-08    replaced sqr, qbe, dex inline in mathfns.h          WD
  * 11-dec-09    tinkering with halfp                                PJT
+ *    jul-20    add cputime2()                                      PJT
+ *    oct-21    deal with error() in the GNU C library              PJT
+ *              programs linking with e.g. gnuastro will otherwise barf
  */
 
 #ifndef _stdinc_h      /* protect against re-entry */
@@ -80,7 +83,10 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <errno.h>
+#include <limits.h>  
+
 #ifdef HAVE_MALLOC_H
 #include <malloc.h>
 #endif
@@ -99,6 +105,7 @@ ERROR!  Sorry, NEMO now requires an ANSI C compiler
 
 #if STDC_HEADERS
 #include <string.h>
+#include <strings.h>
 #else
 # ifndef HAVE_STRCHR
 #   define strchr  index
@@ -304,6 +311,7 @@ typedef real (*float_proc)(float);
 #define   FORTRD     1.33333333333333333333
 #define   ONESVN     0.14285714285714285714
 #define   ONESIX     0.16666666666666666667
+#define   LN10       2.30258509299404568402 
 
 /*
  * angular conversion factors (multiplicative)
@@ -451,6 +459,14 @@ void set_mpi_rank(int rank);
 /* C99 stdargs example of macro usage:   #define HELLO(a,...)  error(a,__VA_ARGS__)   */
 /* GNU stdargs (deprecated now)          #define HELLO(a,args...)  error(a,##args)    */
 
+/*  GNU C library has error.h with error(int,int,string,...) */
+#define error   nemo_error
+#define fatal   nemo_fatal  
+#define warning nemo_warning
+#define recover nemo_recover
+#define stop    nemo_stop  
+
+
 /* prints error message (printf-style) to stderr and exits (via nemo_exit) */
 void error(string, ...);
 /* void errorn(string, ...);   not implemented, commented out WD 10-09-2008 */
@@ -509,7 +525,7 @@ dprintf_pter get_dprintf(const_string, int);
 #endif
 
 /* eprintf is ZENO's "warning" */
-#define eprintf warning
+#define eprintf nemo_warning
 
 /* core/allocate.c */
 
@@ -528,7 +544,7 @@ dprintf_pter get_dprintf(const_string, int);
          reallocate() MUST #include this file.
 
    NOTE  With C++ this will not work, as the C++ std header file <new>
-         has a member function allocate() (so that our macror definition
+         has a member function allocate() (so that our macro definition
 	 causes a compilation error). Therefore, under C++, we simply
 	 define allocate and reallocate as inline functions, which however
 	 never report source file and line number.
@@ -556,7 +572,7 @@ dprintf_pter get_dprintf(const_string, int);
 /* END of changes WD 12th June 2008 */
 
 /* this is to shut up e.g. gcc when allocate(n*sizeof(T)) is used */
-#define  sizeof  (size_t)sizeof
+// #define  sizeof  (size_t)sizeof
 
 /* core/common.c */
 void set_common(int id, int byte_size);
@@ -569,6 +585,7 @@ extern bool scanopt(string, string);
 
 /* core/cputime.c */
 extern double cputime(void);
+extern double cputime2(int mode);
 
 /* core/burststring.c */
 string *burststring(string lst, string sep);
@@ -576,6 +593,12 @@ string *burst0string(string lst, string sep);
 string *burst2string(string lst, string sep);
 void freestrings(string *strptr);
 int splitstring(int maxout, string out[], string lst, string sep);
+
+/* core/file_size.c */
+int nemo_file_size(char *name);
+int nemo_file_time(char *name);
+int nemo_file_lines(char *name, int deflen);
+ 
 
 
 /*
@@ -618,11 +641,6 @@ extern bool within(double val, string range, double fuzz);
 }
 #endif
 
-/* for tables: (ought to go into maxsizes.h) */
-
-#ifndef MAXLINES
-#define MAXLINES 10000
-#endif
 
 /* for solaris compiler SC4.2, doesn't appear to know HUGE .... */
 /* should fit double and single precision floating point        */

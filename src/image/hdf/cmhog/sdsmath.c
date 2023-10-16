@@ -15,15 +15,15 @@
 #include <history.h>
 #include <image.h>
 
-#ifdef INC_HDF
+//#ifdef INC_HDF
 #include <hdf.h> 	/* some conflicts with nemo include files */
-#endif
+//#endif
 
 string defv[] = {
     "in=???\n			Input cmhog file (HDF SD)",
     "out=???\n                  Output cmhog file (HDF SD)",
     "ome1=\n                    Some kind of ......",
-    "VERSION=1.0\n		7-apr-98 PJT",
+    "VERSION=1.0a\n		26-jan-2021 PJT",
     NULL,
 };
 
@@ -37,7 +37,7 @@ local char label[256], unit[256], fmt[256], coordsys[256];
 
 extern string *burststring(string, string);
 
-void nemo_main()
+void nemo_main(void)
 {
     float **image, **coord, *buffer, *rads, *phis, rad, phi, phi_orig, 
          dmin, dmax, phi1, phi2, rad1, rad2;

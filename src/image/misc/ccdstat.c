@@ -19,8 +19,11 @@
  *      25-aug-14   3.5 added maxpos=, fixed duplicate header, so format='ascii.commented_header'
  *                      works in astropy
  *    26-dec-2019   3.6 (not finished yet) enable some openmp sections of code
+ *    11-oct-2020   3.7 optimized memory usage, speed up median computation
+ *     4-dec-2020   3.8 qac mode
+ *     1-dec-2022   3.12 qac mode when planes >= 0
  */
-
+ 
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
@@ -38,6 +41,7 @@ string defv[] = {
     "median=f\n     Optional display of the median value",
     "torben=f\n     Use torben method for median instead",
     "robust=f\n     Compute robust median",
+    "sratio=f\n     Optional display of the signed fluxes (FP-FN)/(FP+FN) ratio",
     "mmcount=f\n    Count occurances of min and max",
     "maxpos=f\n     Add location of where the max occured",
     "half=f\n       Only use half (negative) values and symmetrize them",
@@ -46,13 +50,14 @@ string defv[] = {
     "sort=qsort\n   Sorting routine (not activated yet)",
     "planes=-1\n    -1: whole cube in one      0=all planes   start:end:step = selected planes",
     "tab=\n         If given, print out data values",
-    "VERSION=3.5b\n 26-dec-2019 PJT",
+    "qac=f\n        QAC mode listing mean,rms,min,max",
+    "fmt=%g\n       QAC format of floating point values",
+    "label=\n       QAC label",
+    "VERSION=3.13a\n 19-jun-2023 PJT",
     NULL,
 };
 
 string usage="basic statistics of an image, optional chi2 calculation";
-
-string cvsid="$Id$";
 
 string	infile;	        		/* file names */
 stream  instr;				/* file streams */
@@ -61,33 +66,35 @@ stream  tabstr = NULL;                  /* output table? */
 imageptr iptr=NULL;			/* will be allocated dynamically */
 imageptr wptr=NULL;                     /* optional weight map */
 
-
-
 int    nx,ny,nz,nsize;			/* actual size of map */
 double xmin,ymin,zmin,dx,dy,dz;
 double size;				/* size of frame (square) */
 double cell;				/* cell or pixel size (square) */
 int *planes = NULL;                     /* selected planes , if used */
 
-real get_median(int n, real *x);
+real get_median(int n, real *x);        /* uses an in place sort */
 
-extern real median(int,real*);
-extern real median_q1(int,real*);
-extern real median_q3(int,real*);
-
+/* median.c */
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+extern real median_torben(int n, real *x, real xmin, real xmax);
 
-nemo_main()
+void nemo_main(void)
 {
     int  i, j, k, ki;
     real x, y, z, xmin, xmax, mean, sigma, skew, kurt,  bad, w, *data;
     real dmin, dmax;
-    real sum, sov, q1, q2, q3;
+    real sum, sov, q1, q2, q3, tm;
     Moment m;
-    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount = getbparam("mmcount");
+    bool Qmin, Qmax, Qbad, Qw, Qmedian, Qrobust, Qtorben, Qmmcount, Qsratio;
     bool Qx, Qy, Qz, Qone, Qall, Qign = getbparam("ignore");
     bool Qhalf = getbparam("half");
     bool Qmaxpos = getbparam("maxpos");
-    real nu, nppb = getdparam("nppb");
+    bool Qac = getbparam("qac");
+    string qac_label, qac_fmt;
+    char qac_format[128];
+    real nu, nppb0, nppb = getdparam("nppb");
     int npar = getiparam("npar");
     int ngood;
     int ndat = 0;
@@ -97,12 +104,21 @@ nemo_main()
     int maxpos[2];
     char slabel[32];
 
+
     instr = stropen (getparam("in"), "r");
     read_image (instr,&iptr);
     strclose(instr);
     nx = Nx(iptr);	
     ny = Ny(iptr);
     nz = Nz(iptr);
+    if (Beamx(iptr)>0 && Beamy(iptr)>0) {
+      // 1.13309 = pi/(4*ln(2))
+      nppb0 = 1.13309 * Beamx(iptr) * Beamy(iptr) / (Dx(iptr)*Dy(iptr));
+      nppb0 = ABS(nppb0);
+      dprintf(1,"nppb = %g\n",nppb0);
+    } else
+      nppb0 = 1.0;
+    
     dprintf(1,"# data order debug:  %f %f\n",Frame(iptr)[0], Frame(iptr)[1]);
     if (hasvalue("tab")) tabstr = stropen(getparam("tab"),"w");
 
@@ -133,15 +149,23 @@ nemo_main()
     } else
       Qw = FALSE;
 
+    if (hasvalue("label"))
+      qac_label = getparam("label");
+    else
+      qac_label = getparam("in");
+    qac_fmt = getparam("fmt");
+
     Qmin = hasvalue("min");
     if (Qmin) xmin = getdparam("min");
     Qmax = hasvalue("max");
     if (Qmax) xmax = getdparam("max");
     Qbad = hasvalue("bad");
     if (Qbad) bad = getdparam("bad");
+    Qsratio = getbparam("sratio");
     Qmedian = getbparam("median");
     Qrobust = getbparam("robust");
     Qtorben = getbparam("torben");
+    Qmmcount = getbparam("mmcount");    
     if (Qtorben) Qmedian = TRUE;
     if (Qmedian || Qrobust || Qtorben) {
       ndat = nx*ny*nz;
@@ -183,7 +207,8 @@ nemo_main()
       for (k=0; k<nz; k++) {
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
-            x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,k]
+            x =  CubeValue(iptr,i,j,k);    // iptr->cube[k,j,i]
+	    if (isnan(x)) continue;
 	    if (Qhalf && x>=0.0) continue;
             if (Qmin  && x<xmin) continue;
             if (Qmax  && x>xmax) continue;
@@ -215,32 +240,52 @@ nemo_main()
 	  skew = skewness_moment(&m);
 	if (maxmom > 3)
 	  kurt = kurtosis_moment(&m);
+
+	if (Qac) {
+	  sprintf(qac_format,"QAC_STATS: %%s %s %s %s %s %s  %s  %%d\n",
+		  qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt, qac_fmt);
+	  if (Qrobust) {
+	    compute_robust_moment(&m);
+	    printf(qac_format,
+		   qac_label, mean_robust_moment(&m), sigma_robust_moment(&m), min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m), n_robust_moment(&m));
+	  } else
+	    printf(qac_format,		   
+		   qac_label, mean, sigma, min_moment(&m), max_moment(&m),
+		   sum_moment(&m), sratio_moment(&m) ,n_moment(&m));
+
+	  return;
+	}
 	
 	printf ("Number of points       : %d\n",n_moment(&m));
 	printf ("Min and Max            : %f %f\n",min_moment(&m), max_moment(&m));
 	printf ("Mean and dispersion    : %f %f\n",mean,sigma);
 	printf ("Skewness and kurtosis  : %f %f\n",skew,kurt);
 	printf ("Sum and Sum%s  : %f %f\n",slabel,sum,sum*sov);   /* align trick */
+	printf ("Points per beam (map)  : %g\n",nppb0);
 	if (Qmedian) {
 	  if (Qtorben) {
-	    printf ("Median Torben         : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
+	    printf ("Median Torben          : %f (%d)\n",median_torben(ngood,data,min_moment(&m),max_moment(&m)),ngood);
 	  } else {
-	    printf ("Median                : %f\n",get_median(ngood,data));
-	    q2 = median(ngood,data);
-	    q1 = median_q1(ngood,data);
-	    q3 = median_q3(ngood,data);
-	    printf ("Q1,Q2,Q3              : %f %f %f\n",q1,q2,q3);
+	    printf ("Median                 : %f\n",get_median(ngood,data));  // in-place sort
+	    q2 = smedian(ngood,data);                                         // slow if not in-place sorted before
+	    q1 = smedian_q1(ngood,data);
+	    q3 = smedian_q3(ngood,data);
+	    tm = (q1 + 2*q2 + q3 ) / 4.0;
+	    printf ("Q1,Q2,Q3               : %f %f %f\n",q1,q2,q3);
+	    printf ("TriMean                : %f\n",tm);
 	  }
-#if 1
-	  if (ndat>0)
-	    printf ("MedianL               : %f\n",median_moment(&m));
+#if 0
+	  if (ndat>0)  // very slow
+	    printf ("MedianL                : %f\n",median_moment(&m));       // slow
 #endif
 	}
 	if (Qrobust) {
 	  compute_robust_moment(&m);
-	  printf ("Mean Robust           : %f\n",mean_robust_moment(&m));
-	  printf ("Sigma Robust          : %f\n",sigma_robust_moment(&m));
-	  printf ("Median Robust         : %f\n",median_robust_moment(&m));
+	  printf ("N Robust               : %d\n",n_robust_moment(&m));
+	  printf ("Mean Robust            : %f\n",mean_robust_moment(&m));
+	  printf ("Sigma Robust           : %f\n",sigma_robust_moment(&m));
+	  printf ("Median Robust          : %f\n",median_robust_moment(&m));
 	}
 
 	if (Qmmcount) {
@@ -261,11 +306,14 @@ nemo_main()
 	printf ("%d/%d out-of-range points discarded\n",nsize-n_moment(&m), nsize);
       }
 
+      free_moment(&m);
+
     } else {             /* treat each plane seperately */
 
       /* tabular output, one line per (selected) plane */
 
-      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov ");
+      printf("# iz z min  max  N  mean sigma skew kurt sum sumsov");
+      if (Qsratio) printf(" sratio");
       if (Qmedian) printf(" med1 med2");
       if (Qrobust) printf(" rN rmean rsigma rmed]");
       if (Qmaxpos) printf(" maxposx maxposy");
@@ -280,6 +328,7 @@ nemo_main()
 	for (j=0; j<ny; j++) {
 	  for (i=0; i<nx; i++) {
             x =  CubeValue(iptr,i,j,k);
+	    if (isnan(x)) continue;
             if (Qmin && x<xmin) continue;
             if (Qmax && x>xmax) continue;
             if (Qbad && x==bad) continue;
@@ -312,6 +361,9 @@ nemo_main()
 	printf("%d %f  %f %f %d  %f %f %f %f  %f %f",
 	       k+1, z, min_moment(&m), max_moment(&m), n_moment(&m),
 	       mean,sigma,skew,kurt,sum,sum*sov);
+	if (Qsratio) {
+	  printf ("   %f",sratio_moment(&m));
+	}
 	if (Qmedian) {
 	  printf ("   %f",get_median(ngood,data));
 	  if (ndat>0) printf (" %f",median_moment(&m));
@@ -342,17 +394,20 @@ nemo_main()
 #endif
 	printf("\n");
       } /* ki */
+      free_moment(&m);
     }
 }
 
 
-/* 
+/*   @todo:   this could be placed in median.c?
  *   local version of a median. The one in moment.c and median.c are sorting
  *   pointers , this one sorts the data 
  */
 
-int compar_real(real *a, real *b)
+int compar_real(const void *va, const void *vb)
 {
+  real *a = (real *) va;
+  real *b = (real *) vb;
   return *a < *b ? -1 : *a > *b ? 1 : 0;
 }
 

@@ -1,0 +1,4 @@
+Here we keep a few libraries, which could also have been updated upstream.
+
+cmpfit       MPFIT: A MINPACK-1 Least Squares Fitting Library in C
+flogger      the Sort Flogger

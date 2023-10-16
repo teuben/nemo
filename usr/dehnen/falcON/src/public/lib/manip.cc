@@ -384,7 +384,7 @@ falcON::Manipulator::Manipulator(const char*mannames,
   for(int i=0; i!=N; ++i) {
     try {
       single_manipulator(MANIP[i], _name[i], _pars[i], _file[i], manpaths);
-    } catch (falcON::exception E) {
+    } catch (falcON::exception& E) {
       CLEANUP;
       falcON_RETHROW(E);
     }

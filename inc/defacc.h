@@ -378,7 +378,7 @@ namespace {
       if(pars && npar>0) {
 	try {
 	  Pars = new double[npar];
-	} catch(std::bad_alloc E) {
+	} catch(std::bad_alloc& E) {
 	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
 	}
 	for(int n=0; n!=npar; ++n) Pars[n] = pars[n];
@@ -390,7 +390,7 @@ namespace {
 	size_t n = strlen(file)+1;
 	try {
 	  File = new char[n];
-	} catch(std::bad_alloc E) {
+	} catch(std::bad_alloc& E) {
 	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
 	}
 	strncpy(File,file,n);
@@ -675,7 +675,7 @@ void iniacceleration(const double*pars,					\
   }									\
   try {									\
     MyAcc[AccN] = new MyAccInstall(pars,npar,file,need_m,need_v);	\
-  } catch(std::bad_alloc E) {						\
+  } catch(std::bad_alloc& E) {						\
     ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
   *accel = Accs[AccN++];						\
@@ -714,7 +714,7 @@ void inipotential(const int   *npar,					\
   }									\
   try {									\
     MyPot = new MyPotInstall(pars,*npar,file,0,0);			\
-  } catch(std::bad_alloc E) {						\
+  } catch(std::bad_alloc& E) {						\
     ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
 }									\

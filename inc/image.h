@@ -27,42 +27,45 @@
  *  19-oct-11    V8.0 optional intelligent array from Karma, see USE_IARRAY
  *                    i->frame[i->x[ix] + i->y[iy]+ i->z[iz]]
  *                    which seems 15% slower..... (ccdstat EVLA benchmark)
+ *  22-may-21         added Object
+ *  13-dec-22         added various frequently used FITS header items for fitsccd-ccdfits conversions
+ *  14-sep-22         Also allow more common names in FITS (CDELTi,CRVALi,CRPIXi)
  */
 #ifndef _h_image
 #define _h_image
 
 #include <matdef.h>
 
-typedef struct {
-    int    nr;
-    string name;
-    string unit;
+typedef struct {          // image_axis
+  int    nr;              // FITS 'naxisN' - length of axis
+  string name;            // FITS 'ctype'
+  string unit;            // FITS 'cunit'
 
-    int  beamtype;
-    real beamsize;
+  int  beamtype;
+  real beamsize;
 
-    int   type;		    /* axis type: 0 not defined, 1 linear, 2 array */
+  int   type;		  /* axis type: 0 not defined, 1 linear, 2 array */
     
-    real  rmin;             /* 'crval' at 0 ; linear axis */
-    real  dr;               /* 'cdelt' */
-    real  refpix;           /* normally 0, but like 'crpix' in FITS */
-    real  refval;           /* normally rmin, but like 'crval' in FITS */
+  real  rmin;             /* 'crval' at 0 ; linear axis */
+  real  dr;               /* 'cdelt' */
+  real  refpix;           /* normally 0, but like 'crpix' in FITS */
+  real  refval;           /* normally rmin, but like 'crval' in FITS */
 
-    real *val;              /* array of length 'nr' for coordinates */
+  real *val;              /* array of length 'nr' for coordinates if non-linear */
 } image_axis, *image_axisptr;
 
-typedef struct {
-    bool    *frame;	/* pointer to a contiguous block of data */
-    bool   **matrix;    /* 2D special case: pointers to pointers */
-    bool  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
-    // @todo: needs USE_IARRAY
-    int   nx;		/* dimensions in X, Y and Z */
-    int   ny;
-    int   nz;
+typedef struct {        // image_mask
+  bool    *frame;	/* pointer to a contiguous block of data */
+  bool   **matrix;      /* 2D special case: pointers to pointers */
+  bool  ***cube;        /* 3D special case: ptr to ptr to ptr's  */
+  // @todo: needs USE_IARRAY
+  int   nx;		/* dimensions in X, Y and Z */
+  int   ny;
+  int   nz;
 } image_mask, *image_maskptr;
 
 
-typedef struct {
+typedef struct {        // image
     real    *frame;     /* pointer to a contiguous block of data */
     real   **matrix;    /* 2D special case: pointers to pointers */
     real  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
@@ -73,46 +76,68 @@ typedef struct {
 #endif
 
     int   axis;         /* new style axis (image_axis x,y,z) ??  */
+                        // FITS can also use WCSAXES=3
 
     int   nx;		/* dimensions in X, Y and Z */
     int   ny;
     int   nz;
-    real  xmin;         /* coordinates of first pixel (0,0,0)    */
+  
+    real  xmin;         /* coordinates at xref etc. */
     real  ymin;	        /*   --- which is at center of a cell/voxel --- !!  */
-    real  zmin;
+    real  zmin;         /* this is close to the CRVAL keyword */ 
+  
     real  dx;           /* grid spacing (same for all pixels) */
     real  dy;
     real  dz;
-    real  xref;         /* fake corner (normally 0,0,0 in lower left) */
+                        /* the 'ref' coordinates only used for axis>0 */
+    real  xref;         /* fake corner (used to hardcode 0,0,0 in lower left) */
     real  yref;         /* for new style axis */
-    real  zref;
-#if 0
-    image_axis  ax;     /* new optional axis descriptors */
+    real  zref;         /* this is close to the CRPIX keyword */
+  
+    real  restfreq;     // FITS 'RESTFRQ'
+    real  vlsr;         // FITS
+                        // FITS 'VELREF' e.g. 257   / 1 LSR, 2 HEL, 3 OBS, +256 Radio
+
+    image_axis  ax;     /* new axis descriptors -- not used yet */
     image_axis  ay;
     image_axis  az;
-#endif
+
     char proj[16];      /* standard FITS WCS projection types */
+    real rotang;        /* FITS: CROTA  - not used here yet */
 
 #if 0
     matrix cd;          /* WCS: note, this can only handle NDIM by NDIM */
 #endif
-    real  map_min;	/* data min and max in data */
-    real  map_max;
-    int   beamtype;	/* beams - not very well used yet */
-    real  beamx;        /* smoothing beams */
-    real  beamy;
-    real  beamz;
+    real   map_min;	/* data min and max in data */
+    real   map_max;
+    int    beamtype;	/* beams - not very well used yet */
+    real   beamx;       /* smoothing beams */
+    real   beamy;
+    real   beamz;
     string namex;       /* name of axes (could be a NULL) */
     string namey;
     string namez;
-    string unit;        /* units (could be a NULL) */
+    string unitx;       /* unit of the axis (FITS: CUNITx) */
+    string unity;   
+    string unitz;   
+    string unit;        /* FITS 'BUNIT'   units (could be a NULL) */
+                        /* FITS 'BTYPE' (e.g. 'Intensity') not used yet */
+    string object;      /* object name */
+    string telescope;   // FITS 'TELESCOP'
+    string instrument;  // FITS 'INSTRUME'
+    string observer;    // FITS
+    real   equinox;     // FITS, e.g. 2000.0
+    string radecsys;    // FITS (e.g. FK5)
+    string specsys;     // FITS (e.g. LSRK)
+    string timesys;     // FITS (e.g. UTC)
+    string ssysobs;     // GBT uses 'TOPOCENT'
     real   time;	/* time tag */
     string storage;	/* array stored in Fortran or C definition */
+  
     image_mask *mask;   /* optional image mask */
 } image, *imageptr;
 
-typedef struct {
-    
+typedef struct {        // new_image
     void    *frame;  	/* pointer to a contiguous block of data */
     void   **matrix;    /* 2D special case: pointers to pointers */
     void  ***cube;      /* 3D special case: ptr to ptr to ptr's  */
@@ -132,11 +157,14 @@ typedef struct {
 } new_image, *new_imageptr;
 
 
-typedef struct {
+typedef struct {        // region
   int mode;             /* default mode is rectangular region blc-trc */
   int blc[3];           /* bottom lower (boundingbox) corner  in ix,iy,iz */
   int trc[3];           /* top right (boundingbox) corner in ix,iy,iz */
 } region,  *regionptr;
+
+// future?
+// #define Nx_new(iptr)    ((iptr)->ax.nr)
 
 
 #define Frame(iptr)	((iptr)->frame)
@@ -150,12 +178,21 @@ typedef struct {
 #define Xmin(iptr) 	((iptr)->xmin)
 #define Ymin(iptr) 	((iptr)->ymin)
 #define Zmin(iptr) 	((iptr)->zmin)
+#define CRVAL1(iptr) 	((iptr)->xmin)
+#define CRVAL2(iptr) 	((iptr)->ymin)
+#define CRVAL3(iptr) 	((iptr)->zmin)
 #define Dx(iptr)	((iptr)->dx)
 #define Dy(iptr)	((iptr)->dy)
 #define Dz(iptr)	((iptr)->dz)
+#define CDELT1(iptr) 	((iptr)->dx)
+#define CDELT2(iptr) 	((iptr)->dy)
+#define CDELT3(iptr) 	((iptr)->dz)
 #define Xref(iptr)      ((iptr)->xref)
 #define Yref(iptr)      ((iptr)->yref)
 #define Zref(iptr)      ((iptr)->zref)
+#define CRPIX1(iptr) 	((iptr)->xref)
+#define CRPIX2(iptr) 	((iptr)->yref)
+#define CRPIX3(iptr) 	((iptr)->zref)
 #define MapMin(iptr)	((iptr)->map_min)
 #define MapMax(iptr)	((iptr)->map_max)
 #define BeamType(iptr)	((iptr)->beamtype)
@@ -165,7 +202,14 @@ typedef struct {
 #define Namex(iptr)     ((iptr)->namex)
 #define Namey(iptr)     ((iptr)->namey)
 #define Namez(iptr)     ((iptr)->namez)
+#define Unitx(iptr)     ((iptr)->unitx)
+#define Unity(iptr)     ((iptr)->unity)
+#define Unitz(iptr)     ((iptr)->unitz)
 #define Unit(iptr)      ((iptr)->unit)
+#define Object(iptr)    ((iptr)->object)
+#define Telescope(iptr) ((iptr)->telescope)
+#define Restfreq(iptr)  ((iptr)->restfreq)
+#define Vlsr(iptr)      ((iptr)->vlsr)
 #define Time(iptr)	((iptr)->time)
 #define Storage(iptr)   ((iptr)->storage)
 #define Mask(iptr)      ((iptr)->mask)
@@ -226,12 +270,12 @@ typedef struct {
 #define     NxTag		"Nx"
 #define     NyTag		"Ny"
 #define     NzTag		"Nz"
-#define	    XminTag		"Xmin"
-#define	    YminTag		"Ymin"
-#define	    ZminTag		"Zmin"
 #define     DxTag		"Dx"
 #define	    DyTag		"Dy"
 #define	    DzTag		"Dz"
+#define	    XminTag		"Xmin"
+#define	    YminTag		"Ymin"
+#define	    ZminTag		"Zmin"
 #define	    XrefTag		"Xrefpix"
 #define	    YrefTag		"Yrefpix"
 #define	    ZrefTag		"Zrefpix"
@@ -244,7 +288,14 @@ typedef struct {
 #define     NamexTag		"Namex"
 #define     NameyTag		"Namey"
 #define     NamezTag		"Namez"
+#define     UnitxTag		"Unitx"
+#define     UnityTag		"Unity"
+#define     UnitzTag		"Unitz"
 #define     UnitTag             "Unit"
+#define     ObjectTag           "Object"
+#define     TelescopeTag        "Telescope"
+#define     RestfreqTag         "Restfreq"
+#define     VlsrTag             "VLSR"
 #define	    TimeTag		"Time"		/* note: from snapshot.h  */
 #define     StorageTag	        "Storage"
 #define     AxisTag             "Axis"
@@ -252,15 +303,19 @@ typedef struct {
 #define     MapTag		"Map"
 #define     MapValuesTag	"MapValues"
 
-int write_image  ( stream, imageptr );
-int read_image   ( stream, imageptr * );
-int free_image   ( imageptr );
-int create_image ( imageptr *, int, int );
-int create_cube  ( imageptr *, int, int, int );
-int copy_image   ( imageptr, imageptr *);
+int minmax_image       (imageptr);
+int write_image        (stream, imageptr);
+int read_image         (stream, imageptr *);
+int free_image         (imageptr);
+int create_image       (imageptr *, int, int);
+int create_image_mask  (imageptr, image_maskptr *);
+int create_cube        (imageptr *, int, int, int);
+int create_header      (imageptr);
+int copy_image         (imageptr, imageptr *);
+int copy_header        (imageptr, imageptr, int);
 
-real  **map2_image( imageptr );
-real ***map3_image( imageptr );
+real  **map2_image(imageptr);
+real ***map3_image(imageptr);
 
 /* worldpos.c */
 int worldpos(double xpix, double ypix, double xref, double yref, double xrefpix, double yrefpix, double xinc, double yinc, double rot, char *type, double *xpos, double *ypos);
@@ -270,5 +325,9 @@ int xypix(double xpos, double ypos, double xref, double yref, double xrefpix, do
 void wcs_f2i(int ndim, double *crpix, double *crval, double *cdelt,            image *iptr);
 void wcs_i2f(image *iptr, 	     int ndim, double *crpix, double *crval, double *cdelt);
 
+
+/* get_nan.c */
+void get_nanf(float *x);
+void get_nand(double *x);
 
 #endif

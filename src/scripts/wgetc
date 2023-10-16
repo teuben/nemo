@@ -11,8 +11,14 @@
 #
 #    Note wget preserves the timestamp of the remote file
 #         curl does not.
+#
+#    Author:  Peter Teuben
+#    History: 17-mar-2020  written in our corona virus quarantined period
+#
+#    wgetc('https://casaguides.nrao.edu/images/3/3f/M51ha.fits.txt',' M51ha.fits')
 
-echo "wgetc - version 1.0  17-mar-2020"
+
+version="wgetc - version 1.2  20-mar-2020"
 
 wget=""
 for w in /usr/local/bin/wget /opt/local/bin/wget /usr/bin/wget; do
@@ -29,15 +35,26 @@ if [ ! -d $cdir ]; then
     echo Creating $cdir
     mkdir $cdir
     echo Created by $0 > $cdir/README
+    echo $version     >> $cdir/README
+    touch $cdir/HISTORY
 fi
 
-
+n=0
 for url in $*; do
-    file=$(basename $url)    
+    n=1
+    file=$(basename $url)
+    echo Trying $file
     if [ -e $file ]; then
 	echo $file already exists, skipping
 	continue
     fi
+
+    if [ -e $cdir/$file ]; then
+	echo Creating symlink to $cdir/$file
+	ln -s $cdir/$file
+	continue
+    fi
+    
     if [ ! -e $cdir/$file ]; then
 	if [ ! -z $wget ]; then
 	    echo $wget $url -O $cdir/$file	    
@@ -46,7 +63,11 @@ for url in $*; do
 	    echo curl $url -o $cdir/$file	    
 	    curl $url -o $cdir/$file
 	fi
-	echo $url >> $cdir/HISTORY
+	if [ -s $cdir/$file ]; then
+	    echo $url >> $cdir/HISTORY
+	else
+	    rm -f $cdir/$file
+	fi
     fi
     if [ -e $cdir/$file ]; then
 	echo Creating symlink to $cdir/$file
@@ -54,3 +75,9 @@ for url in $*; do
 	continue
     fi
 done
+
+if [ $n = 0 ]; then
+    echo $version
+    echo The following URLs are in your cache $cdir
+    cat $cdir/HISTORY
+fi

@@ -1,0 +1,43 @@
+.TH uns_tonemo 1NEMO "March 17, 2020"
+.SH NAME
+uns_tonemo \- convert UNS N-body snapshots to NEMO snapshot
+.SH SYNOPSIS
+\fBuns_tonemo in=\fPin_file \fBout=\fPout_file [parameter=value] .\|.\|.
+.SH DESCRIPTION
+\fIuns_tonemo\fP reads a compatible UNS snapshot and save it in
+NEMO format
+.SH PARAMETERS
+The following parameters are recognized.
+.TP 24
+\fBin=\fP\fIuns input file snapshot\fP
+give as input a compatible UNS file snapshot (Nemo, Gadget, Ramses...)
+Default: \fIrequired\fP.
+.TP
+\fBout=\fP\fIout_file\fP
+Output file name. You can give a filename or "-" (to pipe with
+another NEMO program). Default: \fIrequired\fP.
+.TP
+\fBtimes=\fP\fItime-range\fP
+Select time [all]
+.TP
+\fBfirst=\fP\fIboolean\fP
+if true, add a trailing number to the first output file [f]
+.TP
+\fBoffset=\fP\fItime offset\fP
+ +/- time offset between two consecutives snapshots [0.01]
+.TP
+\fBverbose=\fP\fIflag\fP
+If true, give some verbose output [t].
+.TP
+.SH SEE ALSO
+uns2uns(1NEMO), uns_projects(1NEMO), snapshot(5NEMO)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
+.SH AUTHOR
+Jean-Charles LAMBERT
+.SH HISTORY
+.nf
+.ta +1i +4i
+17-Mar-20	V2.0 manual created	JCL
+.fi
+

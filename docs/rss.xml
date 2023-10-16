@@ -12,7 +12,73 @@
   https://teuben.github.io/nemo/rss.xml
 </link>
 
+<item>
+<title>
+nemo_4_4_0
+</title>
+<description>
+ (1-nov-2022)
+ NEMO V4.4.0 was released this weekend at ADASS, where
+ "A Retrospective view of NEMO" was presented.   Nothing
+ really major, the table routines got (and need) more
+ shakedown. There is now a simple nemopy.getparam module
+ for python. pgplot has competation from giza. New scripts
+ nemoplot and nemopars were introduced, helping self-plotting
+ tables and parsing parameters.
 
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_4_0
+</link>
+</item>
+
+
+
+
+<item>
+<title>
+nemo_4_3_1
+</title>
+<description>
+ (8-may-2022)
+NEMO V4.3.1 was released this weekend. Many fixes and
+additions, also ensured a mac with the M1 installs. Most
+significant is the new table V2 I/O interface, which
+makes it possible to have ascii tables of arbitrary
+size (columns and/or rows).   Not all programs have
+been converted, those with the <b>nmax=</b> keyword
+are suspect.
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_3_1
+</link>
+</item>
+
+
+
+<item>
+<title>
+nemo_4_2_1
+</title>
+<description>
+ (6-feb-2021)
+NEMO V4.2, the Corona version, was released last week. Many many fixes and
+ additions, also revived the mac again, as the most recent versions
+ use SIP (System Integrity Protection), for which shared libraries had
+ to be disabled. The clang based Xcode compiler now fails on falcON,
+ so you will need to use the gnu compiler via brew (or port), e.g.
+ <pre>
+   CC=gcc-10 CXX=g++-10 ./configure ...
+   make build check bench
+ </pre>
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_2_1
+</link>
+</item>
 
 <item>
 <title>

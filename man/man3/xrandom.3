@@ -63,6 +63,18 @@ for inversion will be initialized every time a new function is given.
 If two series of random numbers
 are needed, each with their own probability function, it is hence 
 not such a good idea to do it within the same \fIfor-\fPloop!
+
+.SH SEED
+
+We have special negative values:
+
+.nf
+     0   unix number of seconds since 1970
+     -1  PID
+     -2  number of centiseconds since boot
+     -3  Ouput of unix "date +%Y%m%d%H%M%S" in case you need a more memorable seed
+.fi
+
 .SH TESTBED
 With the testbed program (\fBmake xrandomtest CFLAGS=\fP)
 the following first four random numbers have been extracted:

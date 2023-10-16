@@ -30,6 +30,7 @@
 #include <acceleration.h>
 #include <acc/timer.h>
 #define  __NO_AUX_DEFACC
+#include <stdinc.h>
 #include <defacc.h>      // $NMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {

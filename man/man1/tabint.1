@@ -1,49 +1,98 @@
-.TH TABINT 1NEMO "13 May 2005"
-.SH NAME
-tabint \- integrate a sorted table
-.SH SYNOPSIS
+.TH TABINT 1NEMO "6 August 2023"
+
+.SH "NAME"
+tabint \- integrate a sorted table, optionally higher order moments
+
+.SH "SYNOPSIS"
 \fBtabint\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabint\fP integrates a function Y=F(X) that is defined by a set of (X,Y) points
 obtained via an ASCII table.
 The function can either be resampled using a spline interpolation,
 or directly summed.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+See also \fItabhist(1NEMO)\fP with \fBcumul=t\fP for a visual display.
+.PP
+An optional scale factor can be applied, which folds in any X or Y scaling that might
+want to be applied.
+.PP
+Optionally the 1st or 2nd moment can be computed, though the step=, normalize= and cumulative=
+are then ignored.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input table file. No default.
 .TP
 \fBxcol=\fP
-Column with X coordinate. The X coordinates must be sorted
-in increasing X. Default: 1
+Column with X coordinate. If the X coordinates are not increasing, the
+array will be reversed. Default: 1
 .TP
 \fBycol=\fP
-Column with Y coordinate of function [Default: 2] 
+Column with Y coordinate of function [Default: 2]
+.TP
+\fBxmin=\fP
+value if data below xmin to be discarded. By default it uses the first datapoint.
+.TP
+\fBxmax=\fP
+value if data above xmax to be discarded. By default it uses the last datapoint.
 .TP
 \fBstep=\fP
 Integration step if resampling used. By default the datapoints themselves
 are used, but by setting an integration \fBstep\fP here, the function
 is resampled using a spline and numerically integrated that way.
 .TP
-\fBnormalize=\fP
+\fBnormalize=t|f\fP
 Normalize integral. If set, the integral is normalized by the integration
 interval. Default: f
-.SH EXAMPLES
+.TP
+\fBcumulative=t|f\fP
+If set, it will show the invidual cumulative integrations instead. Only implemented
+for native steps.
+Default: f
+.TP
+\fBscale=\fP
+scale factor to apply to the integral. [Default: 1]
+.TP
+\fBmom=0|1|2\fP
+The moment along the profile. mom=0 is the flux, mom=1 the first moment along the X axis,
+and mom=2 the dispersion.   [Default: 0]
+
+.SH "EXAMPLES"
 .nf
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint -
  0.335
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint - step=0.01
  0.33335
-.SH SEE ALSO
-tabfilter(1NEMO), tabmath(1NEMO), table(5NEMO)
-.SH FILES
-src/kernel/tab
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+
+.fi
+Here is an example to compute the line integral of a spectrum where the frequency axis is in GHz,
+and intensity in Kelvin. We want to get an answer in K.km/s instead. We also know the line is
+around 110.5 GHz:
 .nf
-.ta +1.0i +4.0i
+
+ % tabint rsr.33551.driver.sum.txt xmin=110.5-2*0.15 xmax=110.5+2*0.15  scale=c/110.5/1000
+ 8.05
+
+.fi
+recalling that \fBc\fP is in m/s and the requested line integral was requested in km/s.
+
+.SH "SEE ALSO"
+tabfilter(1NEMO), tabmath(1NEMO), tabnllsqfit(1NEMO)¸ tabpeak(1NEMO), table(5NEMO)
+
+.SH "FILES"
+src/kernel/tab
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
 13-May-05	V0.1 Created	PJT
+10-sep-2022	V0.5 added cumulative=	PJT
+22-feb-2022	V0.6 added xmin=, xmax=, scale=	PJT
+31-jul-2023	V0.7 poor man's implementation of mom=	PJT
 .fi

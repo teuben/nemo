@@ -1,3 +1,31 @@
+Executive Summary
+=================
+
+Installation of the core version of NEMO is roughly follows (your yapp selection may vary):
+
+      git clone https://github.com/teuben/nemo
+      cd nemo
+      ./configure --with-yapp=pgplot
+      make build check
+      source nemo_start.sh
+
+many more details can be found below. The biggest caveat on this scheme is the use of the pgplot
+driver for the yapp plotting interface. By default it would install a safe but fairly useless
+postscript-only driver. The pgplot driver is probably the most functional, but We also have (fairly)
+functional plplot and giza drivers. 
+
+The configure line can be complex, for example for a Mac it could be:
+
+      CC=gcc-10 CXX=g++-10 F77=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
+
+A simple test to create and plot a 1911 Plummer sphere is the following:
+
+      mkplummer p10.dat 10
+      snapprint p10.dat
+      snapplot p10.dat
+      tsf p10.dat
+
+
 Preconditions for Installation
 ==============================
 
@@ -8,18 +36,20 @@ C++ and Fortran highly recommended.  You will also need the usual build tools
 C		essential
 C++		highly recommended
 Fortran    	highly recommended
-csh		essential (some scripts are still in csh)
+tcsh		essential (some scripts are still in csh)
 make 		essential
 cmake		highly recommended
-pgplot    	recommended for yapp_pgplot
+pgplot    	recommended for yapp_pgplot (we also have a "mknemo pgplot" builtin option)
 cfitsio		recommended for some tools
 hdf4     	recommended for some tools
 hdf5		recommended for some tools
-python3		recommended
-swig
+netcdf          recommended for some tools
+python3		recommended (a builtin anaconda3 is one option)
 boost           recommended (for uns_projects)
+swig            recommended (for unsio)
+x11, cairo      needed depending on the selected yapp graphics driver
 
-Depending on your packaging tools (apt, yum, brew, port, ....) these are hidden under
+Depending on your packaging tools (apt, yum, dnf, brew, port, ....) these are hidden under
 various package names
 
 dpkg -L pgplot5
@@ -30,6 +60,11 @@ rpm -ql pgplot
 rpm -qf /usr/lib64/libpgplot.so.5.2.2
 rpm -qa
 
+or your system manager has hidden them in a module
+
+module avail
+
+See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/brew (for Mac too)
 
 
 -gfortran
@@ -88,7 +123,7 @@ the basic scheme is more one of (except commands are different and
 detailed below!!!):
 
 	configure   
-	make build1 build2 build3 build4
+	make build
 	source nemo_start.sh
 
 It may be handy to pre-install a few libraries and packages on your
@@ -107,6 +142,13 @@ or
       -DCMAKE_INSTALL_PREFIX=$NEMO/opt ..
       make
       make install
+
+We generally now support this via the mknemo script, e.g.
+
+      mknemo cfitsio
+
+would compile cfitsio under $NEMO/opt, which all Makefiles when building
+NEMO programs use to compile and link.
 
 Preconditions for INSTALLATION
 ==============================
@@ -277,6 +319,14 @@ d) If you are on a system where you need to install NEMO and other packages,
 	configure --with-gsl-prefix=$NEMO/opt
 	configure --enable-gsl
 	configure --disable-gsl		(the default)
+
+Peer Installations
+==================
+
+Here is a list of peer (astronomy) packages install instructions that could
+well be useful in case of issues with the instructions listed above:
+
+* cloudy:  https://gitlab.nublado.org/cloudy/cloudy/-/wikis/CompilingCloudyNext
 
 
 

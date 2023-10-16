@@ -1,7 +1,8 @@
-.TH HISPECTRUM 1NEMO "6 March 1996"
-.SH NAME
+.TH HISPECTRUM 1NEMO "24 July 2023"
+
+.SH "NAME"
 hispectrum \- HI spectrum extraction and gridder
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 \fBhispectrum\fP [parameter=value]
 .SH DESCRIPTION
 \fIhispectrum\fP can perform any of the following functions:
@@ -220,13 +221,18 @@ $HI_DIR/        	directory, or colon separated searchpath, where the ascii (raw)
 $NEMO/usr/bima/hi  	source code
 hiXXXXXX           	scratch file (see mktemp) with scans for the cube gridding
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 hi(5NEMO), fitsio(3NEMO), tabplot(3NEMO), himap(1NEMO), fitstohi(1NEMO)
-.SH AUTHOR
+.PP
+https://www.astro.uni-bonn.de/hisurvey/euhou/LABprofile/index.php
+
+.SH "AUTHOR"
 Peter Teuben, William T. Reach (decode.f)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 29-Jun-92	V0.0 Created: simple spectrum extraction	PJT
 1-jul-92	V0.1 cube gridder - using nearest cells 	PJT
 6-jul-92	V0.2 added HI_DIR, deleted nx=, ny=       	PJT
@@ -236,4 +242,5 @@ Peter Teuben, William T. Reach (decode.f)
 6-apr-94	V0.7 sigma=0 now default; delete scratchfile	PJT
 29-sep-95	V0.8 added npolar/spolar projection options 	PJT
 x-mar-96	V0.9 added cosb averagin, gridding options	PJT
+24-jul-2023	added URL to web simulator	PJT
 .fi

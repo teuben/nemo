@@ -14,14 +14,14 @@ local stream yappstr = NULL;
 local string yapp_dev;
 local int ncolors = 16;      /* kind of faking pgplot */
 
-plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
+int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
     yappstr = stropen(yapp_string,"w");
     fprintf(yappstr,"plinit %5.2f %5.2f %5.2f %5.2f %s\n",
             xmin,xmax,ymin,ymax,yapp_string);
 }
 
-plswap() 
+int plswap() 
 {
     fprintf(yappstr,"plswap\n");
 }
@@ -36,62 +36,62 @@ real plyscale(real x, real y)
     fprintf(yappstr,"plyscale %5.2f %5.2f\n",x,y);
 }
 
-plltype(int lwid, int lpat)
+int plltype(int lwid, int lpat)
 {
     fprintf(yappstr,"plltype %d %d\n",lwid,lpat);
 }
 
-plline(real x, real y)
+int plline(real x, real y)
 {
     fprintf(yappstr,"plline %5.2f %5.2f\n",x,y);
 }
 
-plmove(real x, real y)
+int plmove(real x, real y)
 {
     fprintf(yappstr,"pldraw %5.2f %5.2f\n",x,y);
 }
 
-plpoint(real x, real y)
+int plpoint(real x, real y)
 {
     fprintf(yappstr,"plpoint %5.2f %5.2f\n",x,y);
 }
 
-plcircle(real x, real y, real r)
+int plcircle(real x, real y, real r)
 {
     fprintf(yappstr,"plcircle %5.2f %5.2f %5.2f\n",x,y,r);    
 }
 
-plcross(real x, real y, real s)
+int plcross(real x, real y, real s)
 {
     fprintf(yappstr,"plcross %5.2f %5.2f %5.2f\n",x,y,s);
 }
 
-plbox(real x, real y, real s)
+int plbox(real x, real y, real s)
 {
     fprintf(yappstr,"plbox %5.2f %5.2f %5.2f\n",x,y,s);
 }
 
-pljust(int jus)
+int pljust(int jus)
 {
     fprintf(yappstr,"pljust %d\n",jus);
 }
 
-pltext(string msg, real x, real y, real hgt, real ang)
+int pltext(string msg, real x, real y, real hgt, real ang)
 {
     fprintf(yappstr,"pltext %5.2f %5.2f %5.2f %5.2f %s\n",x,y,hgt,ang,msg);
 }
 
-plflush() 
+int plflush() 
 {
     fprintf(yappstr,"plflush\n");
 }
 
-plframe()
+int plframe()
 {
     fprintf(yappstr,"plframe\n");
 }
 
-plstop()
+int plstop()
 {
     fprintf(yappstr,"plstop\n");
     strclose(yappstr);
@@ -115,24 +115,24 @@ void plpalette(real *r, real *g, real *b, int n)
 }
 
 
-pl_matrix(real *frame,int nx,int ny,real xmin,real ymin, real cell,
+int pl_matrix(real *frame,int nx,int ny,real xmin,real ymin, real cell,
 	  real fmin,real fmax,real findex, real blankval)
 {
     fprintf(yappstr,"pl_matrix\n");
 }
 
-pl_screendump(string fname)
+int pl_screendump(string fname)
 {
     fprintf(yappstr,"pl_screendump\n");
 }
 
-pl_getpoly(float *x, float *y, int n)
+int pl_getpoly(float *x, float *y, int n)
 {
     fprintf(yappstr,"pl_getpoly\n");
     return 0;
 }
 
-pl_interp(string cmd)
+int pl_interp(string cmd)
 {
     fprintf(yappstr,"pl_interp\n");
 }

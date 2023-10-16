@@ -17,5 +17,55 @@ Example install from scratch: (version is 1.70.1 here, may be newer)
    ./bootstrap.sh --prefix=$NEMO/opt
    time ./b2
 
+It seems (2023) that bintray is gone.  Here's another URL:
+
+   vu=1_81_0
+   vd=`echo $vu | sed s/_/./g`   
+   wget https://boostorg.jfrog.io/artifactory/main/release/$vd/source/boost_${vu}.tar.gz
+
+
 The last command will compile and install in $NEMO/opt/, and can take a while
-(~15 mins)
+(~5-15 mins)
+
+Example input files in:  https://gitlab.com/cmaureir/gravidy-input
+
+
+Example install (assuming Ubuntu and openmpi-bin was installed):
+
+	 make clean install_cpu
+	 make clean install_mpi CXX=mpic++.openmpi
+
+Example running CPU and MPI modes:
+
+	 rm -rf run3
+	 make run3 EXE=gravidy-cpu
+	 ->    BSF: OK     0.00679654 0.736003 -8.00616 10 91494 run3/OUT3.snap
+	 
+	 rm -rf run3
+	 make run3 EXE=gravidy-mpi
+	 ->    BSF: OK     0.00679654 0.736003 -8.00616 10 91494 run3/OUT3.snap	 
+
+
+Example from paper:
+
+gravidy -i gravidy/input/04-nbody-p1024_m1.in -p -t 1
+...
+#    IteTime           Iter         Nsteps              Energy           RelE           CumE     ElapsedTime      GFLOPS
+00     0.000              0              0   -2.5687759360e-01   0.000000e+00   0.000000e+00    1.055280e-01       0.000
+00     0.125            698          30093   -2.5687765551e-01   2.410004e-07   2.410004e-07    1.370501e+01      12.687
+00     0.250           1262          61319   -2.5687762708e-01   1.106466e-07   1.303538e-07    2.320249e+01       4.398
+00     0.375           1897          91571   -2.5687761632e-01   4.192094e-08   8.843281e-08    3.605409e+01       4.866
+00     0.500           2530         121963   -2.5687759445e-01   8.512492e-08   3.307882e-09    4.795939e+01       3.703
+00     0.625           3132         150924   -2.5687760190e-01   2.899267e-08   3.230055e-08    5.925118e+01       3.233
+00     0.750           3725         180446   -2.5687759832e-01   1.394194e-08   1.835861e-08    7.067978e+01       2.889
+00     0.875           4354         212425   -2.5687773276e-01   5.233652e-07   5.417238e-07    8.363315e+01       2.531
+00     1.000           5160         244165   -2.5687767307e-01   2.323583e-07   3.093654e-07    9.905656e+01       2.467
+
+
+OMP_NUM_THREADS=1 /usr/bin/time gravidy-cpu -i gravidy-input/04-nbody-p1024_m1.in -p -t 1
+
+1   6.19user 0.06system 0:06.26elapsed 99%CPU
+2   6.97user 0.10system 0:03.54elapsed 199%CPU
+4   8.31user 0.12system 0:02.12elapsed 396%CPU
+6  12.36user 0.19system 0:02.15elapsed 582%CPU
+8  17.18user 0.22system 0:02.43elapsed 715%CPU 

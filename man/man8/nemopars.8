@@ -1,0 +1,67 @@
+.TH NEMOPARS 8NEMO "16 November 2022"
+
+.SH "NAME"
+nemopars \- extract parameters from a bash-style rc file
+
+.SH "SYNOPSIS"
+.PP
+\fBnemopars \fI par1,par2,... rc1 rc2 ...\fP 
+
+.SH "DESCRIPTION"
+\fBnemopars\fP will extract the values of \fIpar=val\fP constructs
+in a  bash-style rc file (it will also support python assignments).
+The convention is that in a run directory
+NEMO stores these in a \fBnemopars.rc\fP file. For example with the
+following rc file
+.nf
+
+# ./mkmh97.sh version=11-aug-2022
+run=run0 m=1 v0=1 seed=-3
+m16=0.815569
+
+.fi
+the command
+.nf
+
+   nemopars m,v0,m16 run0/nemopars.rc
+   
+.fi
+would result
+.nf
+
+   # m v0 m16
+   1 1 0.815569
+
+.fi
+
+When many simulations each in their own run directory, a command line
+.nf
+
+   nemopars m,v0,m15 run*/nemopars.rc
+   
+.fi
+would be a quick way to assemble a table summarizing these three parameters
+
+.SH "PARAMETERS"
+This is a simple python script, the CLI does not adhere to the usual \fIgetparam(3NEMO)\fP conventions.
+.PP
+When a parameter is missing (or mis-spelled) from the rc file, the value "nan" is printed instead.
+
+.SH "SEE ALSO"
+nemo(1NEMO), awk(1)
+
+.SH "FILES"
+.nf
+.ta +3i
+$NEMO/src/scripts/nemopars	(python) script
+.fi
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-aug-2022	Created		PJT
+16-nov-2022	Print "nan" when parameter missing	PJT
+.fi

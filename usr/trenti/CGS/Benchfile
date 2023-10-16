@@ -1,0 +1,36 @@
+# -*- makefile -*-
+
+DIR       = usr/trenti/CGS
+BENCH     = bench10
+BENCHDATA = p10k
+LOG       = /tmp/nemobench.log
+BIN       = mkplummer runCGS
+NEED      = $(BIN)
+TIME      = /usr/bin/time
+FTEN      = 1
+NBODY     = 10000
+
+
+help:
+	@echo $(DIR)
+	@echo NBODY=10000
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+p10k:
+	mkplummer - $(NBODY) | snapscale - p10k vscale='sqrt(4.4971)'
+
+bench:	bench10
+
+bench10:
+	rm -rf p10k runCGS_p10k
+	mkplummer - $(NBODY) | snapscale - p10k vscale='sqrt(4.4971)'
+	nemobench runCGS runCGS_p10k in=p10k nemo=f maxstep=999999 tstop="6.12*$(FTEN)"
+	# snapmass run_p10k/snap.out - 1/10000.0 | snapmradii - 
+

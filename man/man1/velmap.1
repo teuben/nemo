@@ -13,9 +13,9 @@ rings, defined by their radii, a center, position angle and inclination,
 various computations can be done and tabulated. 
 .PP
 An output map can be generated with amusing quantities. 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input velocity field, in \fIimage(5NEMO)\fP format. 
@@ -30,12 +30,12 @@ position angle of disk, in degrees. [0]
 \fBinc=\fP
 inclination angle of disk, in degrees [45]   
 .TP
+\fBvsys=\fP
+systemic velocity [0]     
+.TP
 \fBcenter=\fP
 rotation center. Default is the mapcenter ((Nx-1)/2,Ny-1)/2)
 where 0,0=center of lower left pixel.
-.TP
-\fBvsys=\fP
-systemic velocity [0]     
 .TP
 \fBden=\fP
 input density image, only needed if surface brightness (d) given in 
@@ -64,7 +64,8 @@ Optional output file.  See \fBmode=\fP which quantity. Default: none
 Optional output table file. This will contain the 
 radius, rotation speed, dispersion in the ring and some
 other values.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 rotcur(1NEMO), velfit(1NEMO), runvelfitss07(1NEMO), rotcurshape(1NEMO)
 .SH FILES
 src/image/rotcur : velmap.c

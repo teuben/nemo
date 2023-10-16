@@ -1,0 +1,34 @@
+C	
+C	Test program for NEMO's footran interface
+C		25-jun-91  1.0
+C		24-may-92  1.1
+C		21-jul-93  1.2 for manual src file
+C	Note the special comments C: C+ C- for 'ftoc'
+C:  	Test program for NEMO's footran interface
+C+
+C   in=???\n		Required (dummy) filename
+C   n=1000\n            Test integer value
+C   pi=3.1415\n         Test real value
+C   e=2.3\n             Another test value
+C   text=hello world\n  Test string
+C   VERSION=1.1\n       24-may-92 PJT
+C-
+C
+      SUBROUTINE nemomain         ! note the name !
+C
+C#include "getparam.inc"          ! if cpp is used to get at $NEMOINC
+      INCLUDE 'getparam.inc'      ! use defs from $NEMOINC
+
+      INTEGER n
+      DOUBLE PRECISION pi,e
+      CHARACTER text*40, file*80
+
+      file = getparam('in')       ! get the CL parameters
+      n = getiparam('n')
+      pi = getdparam('pi')
+      e = getdparam('e')
+      text = getparam('text')
+
+      WRITE (*,*) 'n=',n,' pi=',pi,' e=',e,' text='//text
+
+      END

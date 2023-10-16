@@ -1,31 +1,38 @@
-.TH TABHIST 1NEMO "2 March 2020"
-.SH NAME
+.TH TABHIST 1NEMO "5 May 2023"
+
+.SH "NAME"
 tabhist \- histogram plotter and gaussian fit for tabular data
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBtabhist in=\fPinfile [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItabhist\fP plots a histogram and computes the first 
 4 moments of points obtained from an (set of) column(s) from an ascii 
 \fItable(5NEMO)\fP.
 It calculates the mean, dispersion,
 skewness and kurtosis. It then plots the data in the form of a histogram,
 optionally with a 'best' gaussian fit and residuals. It can also plot
-a cumulative histogram of the data (see also tabtrend(1NEMO))
+a cumulative histogram of the data (see also \fItabtrend(1NEMO)\fP and
+\fItabint(1NEMO)\fP).
 .PP
-The median is also optionally computed, for which an 
-alternate sorting routine can be selected (if available). 
+The Median is also optionally computed, for which an 
+alternate sorting routine can be selected (if available).
+.TP
+The TriMean is reported, which is a robust statistic for the central
+tendency, the weighted average of Median and two quartiles:  (Q1 + 2*Q2 + Q3) / 4.
 .PP
 If multiple columns are used, they are appended to each other and
 treated like a single long column.
-If you need simple statistics for multiple columns, use \fBtabstat\fP 
+If you need simple statistics for multiple columns, see \fItabstat(1NEMO)\fP 
 instead. 
 .PP
 Using the \fBnsigma\fP keyword, outliers can be removed
 and statistics re-computed.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIinfile\fP
 input file, in tabular format [no default].
@@ -110,6 +117,7 @@ Compute median too? This can be timeconsuming for large numbers of points.
 Fast median calculator in case N is large. No sort will be used, but
 instead an iterative O(N) method will be used.
 [Default: \fBf\fP].
+.TP
 \fBrobust=t|f\fP
 Use a robust estimator to remove outliers before taking statistics again.
 [Default: \fBf\fP].
@@ -129,30 +137,58 @@ Default: f
 Delete points more than nsigma times the sigma from the mean. After each
 point sigma and mean are recomputed. [Default: none]
 .TP
+\fBqac=t|f\fI
+If selected, a QAC listing is selected. This gives the mean, rms, min and max.
+[Default: f]
+.TP
 \fBsort=\fP\fIsort_mode\fP
-.SH BUGS
+Default:  qsort.   If flogger is enabled additional sorting modes are available:
+bubble, heap, insert, merge, quick, shell.
+.TP
+\fBpyplot=\fP
+If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
+Default: none.
+
+.SH "EXAMPLES"
+There is no direct way to plot a particular column from a table while selecting from another column. The
+\fItabmath(1NEMO)\fP program would need to be used in pipe to select, as given in the following example:
+.nf
+
+    % tabgen - 1000 2 | tabmath - - selfie='range(%1,0.0,0.5)' | tabhist - 2
+    
+.fi
+where column 2 is only used where column 1 is between 0 and 0.5.
+
+.SH "FLOGGER"
+There is a compile option to make \fBtabhist_flogger\fP which enables more sorting modes.
+
+.SH "BUGS"
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is
 exactly opposite that of SM's behavior, which was used to compare results.
+
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO), tabtrend(1NEMO)
+tablsqfit(1NEMO), tabmath(1NEMO), tabstat(1NEMO), tabtrend(1NEMO), tabint(1NEMO), tabgen(1NEMO)
 .PP
 http://vostat.org
 .PP
 http://www.star.bris.ac.uk/~mbt/stilts/
 .PP
 http://arxiv.org/ps/0807.4820 (\fIchoosing the binning for a histogram\fP)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/kernel/tab	sources
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +6.5i
 xx-mar-88	V1.0: created          	PJT
 15-Apr-88	V1.1: higher order moments, Y scale  	PJT
 1-jun-88	V2.0: new name, code same	PJT
@@ -169,6 +205,8 @@ xx-mar-88	V1.0: created          	PJT
 1-jun-10	6.0: bins= now allowed to have manual edges	PJT
 22-aug-12	6.2: added torben= option for fast large-N median	PJT
 16-jan-14	6.4: added mad= 	PJT
+8-jan-2020	7.0: added pyplot=	PJT
 2-mar-2020	7.1: added norm=	PJT
+14-nov-2021	7.4: added qac=		PJT
 .fi
 

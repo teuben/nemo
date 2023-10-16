@@ -1,7 +1,9 @@
 .TH MDARRAY 3NEMO "19 February 2006"
-.SH NAME
-mdarray - simple multi-dimensional (C style) array allocators with sequential memory 
-.SH SYNOPSIS
+
+.SH "NAME"
+mdarray - hierarchical multi-dimensional (C style row-major) array allocators with sequential memory 
+
+.SH "SYNOPSIS"
 .nf
 .B
 #include <mdarray.h>
@@ -13,6 +15,7 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 .B typedef mdarray2 *mdarray3;   /* tensor */
 .B typedef mdarray3 *mdarray4;   /* hyper tensor */
 .B ...
+.B typedef mdarray7 *mdarray8;   /* see MDMAXDIM */
 .PP
 .B mdarray1 allocate_mdarray1(n1)
 .B mdarray2 allocate_mdarray2(n2,n1)
@@ -25,18 +28,22 @@ mdarray - simple multi-dimensional (C style) array allocators with sequential me
 .B void free_mdarray4(mdarray4 x, int n4, int n3, int n2, int n1);
 .B ...
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImdarray\fP offers a uniform way to allocate and free multi-dimensional
-(real) C-style arrays. Up to MDMAXDIM (defined via the header file) 
-dimensions are available. Actually data memory is guarenteed to be
-sequentually in memory, as they are with static multidimensional arrays.
+(real) C-style arrays, i.e. row-major. Up to MDMAXDIM (defined via the header file) 
+dimensions are available. Actual data memory is guarenteed to be
+sequentually in memory, as they are with static multidimensional arrays. This
+makes it easy to overlay them with traditional languages such a Fortran (with the
+caution of row-major and column-major differences).
 .PP
 Arrays are stored in row major order, if rows vary most rapidly in memory. 
 For example in
 .nf
    double matrix a[20][10];
 .fi
-the right-most index (10) varies most rapidly in memory, exactly like static C arrays.
+the right-most index (10) varies most rapidly in memory, exactly like static C arrays,
+but opposite those of fortran. The matching fortran array would be A(10,20) in this case.
 .PP
 Example of use: ( b = A.x)
 .nf
@@ -63,7 +70,8 @@ the address of the first element will normally be sufficient, e.g.
       mdarray2 data2 = allocate_mdarray2(nrows,ncols);
       fits_read_col(fptr, TDOUBLE, data_col, 1, 1, ncols, &nulval, &data2[0][0], &anynul, &status);      
 .fi
-.SH TIMING
+
+.SH "TIMING"
 The TESTBED function (\fBmdarraytest\fP) exercizes a simple initialization of 
 all array elements, and
 summing them up. This also clearly shows how reversing the order of array access 
@@ -86,7 +94,8 @@ affects the CPU speed , viz. timings on a P4/1600 laptop:
     30.530u 0.040s 0:31.85 95.9%    0+0k 0+0io 135pf+0w
 .fi
 On grus (P3/930) 5.0 vs. 19.9 sec.  On chand (P4/2500)  1.1 vs. 12.3 sec CPU. 
-.SH CAVEAT
+
+.SH "CAVEATS"
 Although both static and dynamic multi-dimensional arrays 
 .nf
     real     s3[4][5][6];
@@ -106,7 +115,8 @@ For example, for a double precision \fIa[n3][n2]n1]\fP mdarray3, instead of usin
 .PP
 To quote the FFTW manual: \fPusing it will cause FFTW to die a painful death\fP
 (referring to such dynamic arrays)
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 .nf
 vectmath(3NEMO), mdbench(1NEMO)
 nrutil.c (Numerical Recipes) for an alternative approach
@@ -115,14 +125,17 @@ http://www.fredosaurus.com/notes-cpp/arrayptr/23two-dim-array-memory-layout.html
 http://www.fftw.org/
 http://c-faq.com/aryptr/
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/kernel/misc	mdarray.c
 .fi
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 5-may-03	Created   	PJT

@@ -40,6 +40,8 @@
  *             27-nov-01 fixed cosd(), it was sind()	  pjt
  *              4-dec-02 use MAXLINE for linelength       pjt
  *             13-nov-03 make it understand NULL          pjt
+ *              2-jan-21 squash some gcc warnings         pjt
+ *              3-apr-23 add the range function           pjt
  *
  */
 #include <stdinc.h>   /* stdinc is NEMO's stdio =- uses real{float/double} */
@@ -135,23 +137,29 @@ static void fie_genconst(double cst)
 #define maxfunlen 10
 #define maxarg    4
 
-static char *functs[] = { "SIN"  , "ASIN" , "SINH" , "COS"  , "ACOS" , "COSH" ,
+static char *functs[] = {
+                   "SIN"  , "ASIN" , "SINH" , "COS"  , "ACOS" , "COSH" ,
                    "TAN"  , "ATAN" , "TANH" , "ATAN2", "RAD"  , "DEG"  ,
                    "PI"   , "EXP"  , "LN"   , "LOG"  , "SQRT" , "ABS"  ,
                    "SINC" , "C"    , "G"    , "M"    , "ERF"  , "ERFC" ,
                    "K"    , "H"    , "P"    , "S"    , "MAX"  , "MIN"  ,
                    "MOD"  , "INT"  , "NINT" , "SIGN" , "UNDEF", "IFGT" ,
                    "IFLT" , "IFGE" , "IFLE" , "IFEQ" , "IFNE" , "RANU" ,
-		   "RANG" , "RANP" , "SIND" , "COSD" , "TAND" , "NULL"};
+		   "RANG" , "RANP" , "SIND" , "COSD" , "TAND" , "ASINH",
+		   "RANGE",
+		   "NULL"};
 
-static int nargs[] = {    1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
+static int nargs[] = {
+                      1   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       1   ,    1   ,    1   ,    2   ,    1   ,    1   ,
                       0   ,    1   ,    1   ,    1   ,    1   ,    1   ,
                       1   ,    0   ,    0   ,    0   ,    1   ,    1   ,
                       0   ,    0   ,    0   ,    0   ,    2   ,    2   ,
                       2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
                       4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
-		      2   ,    1   ,    1   ,    1   ,    1   ,    0 };
+		      2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
+		      3   ,
+		      0 };
 
 
 /*  definitions/declarations for the scanner and parser  */
@@ -632,23 +640,27 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  	   else fie_push(asin(arg[0]));    
 			  	   break;
 			  case  2: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(sinh(arg[0])); break;
+			  	   else fie_push(sinh(arg[0]));
+			           break;
 			  case  3: fie_push(cos(arg[0])); break;
 			  case  4: if (fabs(arg[0]) > 1) opc = err;
 			  	   else fie_push(acos(arg[0]));
 			  	   break;
 			  case  5: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(cosh(arg[0])); break;
+			  	   else fie_push(cosh(arg[0]));
+			           break;
 			  case  6: fie_push(tan(arg[0])); break;
 			  case  7: fie_push(atan(arg[0])); break;
 			  case  8: if (fabs(arg[0]) > 70) opc = err;
-			  	   else fie_push(tanh(arg[0])); break;
+			  	   else fie_push(tanh(arg[0]));
+			           break;
 			  case  9: fie_push(atan2(arg[0],arg[1])); break;
 			  case 10: fie_push(fie_rad(arg[0])); break;
 			  case 11: fie_push(fie_deg(arg[0])); break;
 			  case 12: fie_push(fie_pi()); break;
 			  case 13: if (fabs(arg[0]) > 70) opc =err;
-			  	   else fie_push(exp(arg[0])); break;
+			  	   else fie_push(exp(arg[0]));
+			           break;
 			  case 14: if (arg[0] > 0) fie_push(log(arg[0]));
 			  	   else opc = err;
 			  	   break;
@@ -671,33 +683,45 @@ void dofie(real *data, int *nop, real *results, real *errorval)
 			  case 27: fie_push( 5.66961e-8 ); break;
 			  case 28: fie_push(fie_max(arg[0],arg[1])); break;
 			  case 29: fie_push(fie_min(arg[0],arg[1])); break;
-			  case 30: if (arg[1] == 0.0) opc = err; else
-			           fie_push(fie_mod(arg[0],arg[1])); break;
+			  case 30: if (arg[1] == 0.0) opc = err;
+				   else fie_push(fie_mod(arg[0],arg[1]));
+			           break;
 			  case 31: fie_push(fie_int(arg[0])); break;
 			  case 32: fie_push(fie_int(arg[0]+0.5)); break;
 			  case 33: fie_push(fie_sign(arg[0])); break;
-			  case 34: fie_push(undef); break;
-			  case 35: if (arg[0] > arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
-			  case 36: if (arg[0] < arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
-			  case 37: if (arg[0] >= arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
-			  case 38: if (arg[0] <= arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
-			  case 39: if (arg[0] == arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
-			  case 40: if (arg[0] != arg[1]) fie_push(arg[2]);
-			           else fie_push(arg[3]); break;
+			  case 34: fie_push(undef); break;                    // UNDEF
+			  case 35: if (arg[0] > arg[1]) fie_push(arg[2]);     // IFGT
+			           else fie_push(arg[3]);
+			           break;
+			  case 36: if (arg[0] < arg[1]) fie_push(arg[2]);     // IFLT
+			           else fie_push(arg[3]);
+			           break;
+			  case 37: if (arg[0] >= arg[1]) fie_push(arg[2]);    // IFGE
+			           else fie_push(arg[3]);
+			           break;
+			  case 38: if (arg[0] <= arg[1]) fie_push(arg[2]);    // IFLE
+			           else fie_push(arg[3]);
+			           break;
+			  case 39: if (arg[0] == arg[1]) fie_push(arg[2]);    // IFEQ
+			           else fie_push(arg[3]);
+			           break;
+			  case 40: if (arg[0] != arg[1]) fie_push(arg[2]);    // IFNE
+			           else fie_push(arg[3]);
+			           break;
 			  case 41: fie_push(fie_ranu(arg[0],arg[1])); break;
 			  case 42: fie_push(fie_rang(arg[0],arg[1])); break;
 			  case 43: if (arg[0] < 0) opc = err;
-			  	   else fie_push(fie_ranp(arg[0])); 
+			  	   else fie_push(fie_ranp(arg[0]));
 			  	   break;
 			  case 44: fie_push(sin(PI*arg[0]/180.0)); break;
 			  case 45: fie_push(cos(PI*arg[0]/180.0)); break;
 			  case 46: fie_push(tan(PI*arg[0]/180.0)); break;
-		          case 47: fie_null(); break;
+			  case 47: fie_push(asinh(arg[0]));        break;
+			  case 48: if (arg[1] <= arg[0] &&                    // RANGE
+				       arg[0] <= arg[2])  fie_push(1.0);
+				   else fie_push(0.0);
+    			           break;
+		          case 49: fie_null(); break;                         // NULL , by defintion the final
 			  default: opc = err; break;
 			  }
 			  break;

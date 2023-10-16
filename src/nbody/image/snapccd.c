@@ -1,11 +1,11 @@
 /* 
  *  SNAPCCD:  program makes a CCD frame from a snapshot
+ *            see also SNAPGRID for a better alternative
  *
  *	16-Jun-87  V1.0 adapted from slit : 1D version   PJT
  *	17-Jun-87       dynamic allocation of 'frame'	 PJT
  *	25-jun-87  V2.0 write out image for further processsing   PJT
  *	30-jun-87  V2.1 new filestructure for image(5) PJT
- *			oeps, bugje
  *	 6-jul-87  V2.3 roundoff controlled through floor()	PJT
  *	 8-jul-87  V2.4 correct implementation of cellposition   PJT
  *	20-aug-87  V3.0 better memory management in reading Nbody PJT
@@ -26,6 +26,7 @@
 #include <filestruct.h>
 #include <snapshot/snapshot.h>
 #include <image.h>
+#include <history.h>
 
 string defv[] = {
 	"in=???\n			input filename (a snapshot)",
@@ -35,14 +36,12 @@ string defv[] = {
 	"cell=0.0625\n			cellsize : 64 pixels if size=4",
 	"vrange=-infinity:infinity\n	range in velocity space",
 	"moment=0\n			velocity moment to weigh with",
-	"VERSION=4.6b\n			6-jun-08 PJT",
+	"VERSION=4.7\n			27-jan-2021 PJT",
 	NULL,
 };
 
 string usage = "simple conversion of snapshot to image";
 
-#define HPI  1.5702
-#define RPD (3.1415/360.0)
 #define EPS  0.00001
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -63,6 +62,7 @@ local int    nx,ny,nsize;		/* map-size */
 local real origin[2];			/* of map in sky coordinates */
 local real size;			/* size of frame (square) */
 local real cell;			/* cell or pixel size (square) */
+local real xmin, ymin;                  /* lower left of grid */
 
 local int    moment;	                /* moment to take in velocity */
 local real vmin,vmax;			/* range in velocity space */
@@ -70,34 +70,18 @@ local real vmean, vsig;		        /* beam in velocity space */
 local bool   vbeam;
 
 local char *axname[] = {               /* axnames */
-        "x", "y", "z", "vel-x", "vel-y", "vel-z"
+        "x", "y", "z", "vx", "vy", "vz"
     }; 
 
-
-nemo_main ()
-{
-	setparams();                    /* stuff command line [pars] */
 
-	instr = stropen (infile, "r");
-	outstr = stropen (outfile,"w");
-
-	read_snap();			/* read N-body data */
-	allocate_image();		/* make space for image */
-	bin_data();			/* do the heavy work */
-	write_image (outstr,iptr);	/* write the image */
-
-	strclose(instr);
-	strclose(outstr);
-}
-
-setparams()
+void setparams()
 {
 	string  tmpstr;
 	int	tmpint;
 	char    *cp;
 
 	if (NDIM!=3)
-		error ("This program requires 3D-data, 2D could work\n");
+		error("This program requires 3D-data, 2D could work");
 
 	infile =  getparam ("in");
 	outfile = getparam("out");
@@ -142,7 +126,7 @@ setparams()
         }
 }
 
-read_snap()
+int read_snap()
 {				
     int    i;
     real   imass;    
@@ -179,33 +163,44 @@ read_snap()
          get_data(instr, PhaseSpaceTag, RealType, phase, nobj, 2, NDIM, 0);
       get_tes(instr, ParticlesTag);
     get_tes(instr,SnapShotTag);
-    return(1);      /* make GCC happy */
+    return 1; 
 }
 
-allocate_image()
+void allocate_image()
 {
-/*	iptr = (imageptr ) malloc(sizeof(image));   OLD STYLE */
-        create_image (&iptr,nsize,nsize);       /* force square image */
-	if (iptr==NULL) {
-		dprintf (0,"Not enough memory for image\n");
-		stop(0);
-	}
-	Nx(iptr) = Ny(iptr) = nsize;			/* image will be square */
-	Xmin(iptr) = origin[0] - 0.5*size + 0.5*cell;   /* note definition of */
-	Ymin(iptr) = origin[1] - 0.5*size + 0.5*cell;   /* cell position here */
-	Dx(iptr) = Dy(iptr) = cell;
-        Dz(iptr) = 0.0;
-	Frame(iptr) = (real *) malloc(Nx(iptr)*Ny(iptr)*sizeof(real));
-	if (Frame(iptr)==NULL) {
-		dprintf (0,"Not enough memory to allocate %d*%d frame array\n",Nx(iptr),Ny(iptr));
-		stop(1);
-	}
-        Namex(iptr) = axname[0];        /* may change */
-        Namey(iptr) = axname[1];
-        Namez(iptr) = axname[5];
+    create_image (&iptr,nsize,nsize);       /* force square image */
+    if (iptr==NULL) {
+      dprintf (0,"Not enough memory for image\n");
+      stop(0);
+    }
+    Nx(iptr) = Ny(iptr) = nsize;			/* image will be square */
+    xmin = origin[0] - 0.5*size + 0.5*cell;   /* note definition of */
+    ymin = origin[1] - 0.5*size + 0.5*cell;   /* cell position here */    
+#if 0
+    // old axis=0 mode
+    Xmin(iptr) = xmin;
+    Ymin(iptr) = ymin;
+#else
+    // new axis=1 mode
+    Xmin(iptr) = origin[0];
+    Ymin(iptr) = origin[1];
+    Xref(iptr) = (nsize-1)/2.0;
+    Yref(iptr) = (nsize-1)/2.0;
+    Axis(iptr) = 1;
+#endif
+    Dx(iptr) = Dy(iptr) = cell;
+    Dz(iptr) = 0.0;
+    Frame(iptr) = (real *) malloc(Nx(iptr)*Ny(iptr)*sizeof(real));
+    if (Frame(iptr)==NULL) {
+      dprintf (0,"Not enough memory to allocate %d*%d frame array\n",Nx(iptr),Ny(iptr));
+      stop(1);
+    }
+    Namex(iptr) = axname[0];        /* may change */
+    Namey(iptr) = axname[1];
+    Namez(iptr) = axname[5];
 }
 
-bin_data()
+void bin_data()
 {
     real xsky, ysky, vrad;
     real m_min, m_max, brightness, inv_surden, total;
@@ -229,8 +224,8 @@ bin_data()
         ysky = *pptr++;			/* y */
         pptr += NDIM;
         vrad = -(*pptr++);		/* v_z */
-	ix = floor((xsky-Xmin(iptr))/cell+0.5+EPS);	/* integer coords in CCD */
-	iy = floor((ysky-Ymin(iptr))/cell+0.5+EPS);
+	ix = floor((xsky-xmin)/cell+0.5+EPS);	/* integer coords in CCD */
+	iy = floor((ysky-ymin)/cell+0.5+EPS);
 	if (ix<0 || iy<0 || ix>=nx || iy>=ny) {
 	    noutside++;			/* not in CCD frame */
 	    continue;
@@ -280,4 +275,18 @@ bin_data()
 
 }
 
+void nemo_main ()
+{
+	setparams();                    /* stuff command line [pars] */
 
+	instr = stropen (infile, "r");
+	outstr = stropen (outfile,"w");
+
+	read_snap();			/* read N-body data */
+	allocate_image();		/* make space for image */
+	bin_data();			/* do the heavy work */
+	write_image (outstr,iptr);	/* write the image */
+
+	strclose(instr);
+	strclose(outstr);
+}

@@ -43,7 +43,7 @@ const char * defv[] = {
   "comp=mxv\n           component requested to be saved             \n"
   "                   m->mass, x->positions, v->velocities          ",
   "verb=f\n             verbose mode                                  ",
-  "VERSION=3.2\n         compiled on <"__DATE__"> JCL                 ",
+  "VERSION=3.2a\n       compiled on <" __DATE__ "> JCL                 ",
   NULL
 };
 const char * usage="Convert GADGET (1 or 2 little/big endian) snapshot to NEMO snapshot";

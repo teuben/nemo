@@ -1,13 +1,17 @@
-.TH TIPSYSNAP 1NEMO "28 august 2001"
-.SH NAME
+.TH TIPSYSNAP 1NEMO "16 January 2023"
+
+.SH "NAME"
 tipsysnap \- convert tipsy file to snapshot
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtipsysnap\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtipsysnap\fP converts a \fItipsy\fP ascii or binary formatted data file,
 consisting of gas, dark and star- particles to \fIsnapshot(5NEMO)\fP
 format. Simple selections by particle kind can be made.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -15,7 +19,7 @@ is also given:
 Input TIPSY file. No default.
 .TP
 \fBout=\fP
-Output snapshot file. No default.
+Output snapshot file. If not supplied, only header information is displayed.
 .TP
 \fBoptions=\fP
 Output which particles?. Valid options are
@@ -23,7 +27,7 @@ Output which particles?. Valid options are
 \fBgas,dark,star\fP (all).
 .TP
 \fBmodes=ascii|binary\fP
-Read ascii or binary TIPSY file format. Default: ascii
+Read ascii or binary TIPSY file format. Default: binary
 .TP
 \fBswap=t|f\fP
 Swap bytes. This is needed if you want to be able to read
@@ -32,13 +36,74 @@ Default: false.
 .TP
 \fBoffset=0\fP
 Number of bytes to offset the data portion from the header. Normally
-this would be 0, but the header strcture (tipsydefs.h) containing
+this would be 0, but the header structure (tipsydefs.h) containing
 one double and 5 integers, some architectures may read this as
 32 bytes, whereas it was meant to be 28 bytes. By using offset=-4
 in this case, data with 28 byte headers can still be read. Equally
 so, the opposite can also happen, in which case offset=4 is needed.
+Some version of the format use the last 4 bytes as a version ID, an
+integer that can be 1 or 2. See \fItipsy(5NEMO)\fP.
+The \fBhexdump -C\fP program may help identify problems.
 Default: 0
-.SH DATA FORMAT
+.TP
+\fBboom=t|f\fP
+If the tipsy file has extra accellerations and potentials stored,
+the version should be 6.
+Default: f
+
+.SH "EXAMPLES"
+In case multiple flavors of particles are read, they are deposited
+in different SnapShot's in the file. \fIsnapmerge(1NEMO)\fP needs to
+be used to make one snapshot. For example the standard
+\fBrun99.bin\fP from the tipsy source code distrution has all 3 flavors:
+.nf
+
+   tipsysnap run99.bin -  |  snapmerge - run99.snap
+   ### nemo Debug Info: time=14.9708 N=8579 (1049,1021,6509) for gas,dark,star    version=0
+   ### nemo Debug Info: header = 32  gas = 48   dark = 36  star = 44 bytes
+
+.fi
+
+Some codes (e.g. Bonsai) write a different tipsy file for each dump time. this complicates
+the pipe approach of NEMO. Below is a script could process tipsy files into a NEMO snapshot,
+or into a pipe for further processing:
+.nf
+
+     ./tipsy_to_snap out.snap out_*.*
+or
+     ./tipsy_to_snap  -  out_*.* | tsf -
+
+
+
+
+#! /usr/bin/bash
+#
+
+if [ "$#" == "0" ]; then
+    echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    exit 0
+fi
+
+out=$1
+if [ -e "$out" ]; then
+    echo "Cannot overwrite $out"
+    exit 1
+fi
+
+shift
+
+for f in $*; do
+    # tipsysnap_acc $f - | csf - - item=SnapShot >> tmp.snap
+    if [ "$out" == "-" ]; then
+        tipsysnap_acc $f -
+    else
+        tipsysnap_acc $f -  >> $out
+    fi
+done
+
+.fi
+
+.SH "DATA FORMAT"
 See also \fItipsy(5NEMO)\fP on some basic concepts of tipsy data. The
 ascii format of a TIPSY "\fIgds\fP" (gas-dark-star) snapshot is essentially
 a single long column of data with the following items
@@ -56,17 +121,25 @@ VZ(g),VZ(d),VZ(s)
 EPS(d), EPS(s)
 \.\.\.
 .fi
-.SH BUGS
+
+.SH "BUGS"
 In \fBmode=binary\fP the gas, dark and star particles are output
-in separate snapshots.
-.SH SEE ALSO
-snaptipsy(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
-.SH AUTHOR
+in separate snapshots. Use \fIcsf(1NEMO)\fP and/or \fIsnapmerge(1NEMO)\fP
+if some or all need to be a a single snapshot. Some properties may be lost
+in the merging though.
+
+.SH "SEE ALSO"
+snaptipsy(1NEMO), snapmerge(1NEMO), csf(1NEMO), stoa_tip(1ZENO), tipsy(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 02-Sep-94	V1.0 Created 	PJT
 19-aug-00	V2.0 add mode= to allow binary files, added swap= 	PJT
-28-aug-01	V2.1 process binary data, added offset= (replaces shortlives fix32=t|f)	PJT
+28-aug-01	V2.1 process binary data, added offset= (replaces shortlived fix32=t|f)	PJT
+4-feb-2022	V3.0 add boom= and make mode=binary the default 	PJT
+16-jan-2023	V3.3 fix swap= for particle data	PJT
 .fi

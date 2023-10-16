@@ -1,9 +1,12 @@
-.TH CCDSUB 1NEMO "8 June 2013"
-.SH NAME
+.TH CCDSUB 1NEMO "19 August 2023"
+
+.SH "NAME"
 ccdsub \- sub/average of an image, and optionally reorder axes.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdsub\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdsub\fP takes a subimage from an image, as described by a new
 set of coordinates in X, Y and/or Z (since the expression of the
 selected axes is arbitrary, the resulting coordinate system may
@@ -16,9 +19,11 @@ get rid of them, or use the \fBdummy=\fP keyword below.
 If no parameters are given, other than in= and out=, the image
 is copied straight through, which is still a great way to
 test your I/O subsystem, assuming your image fits in memory.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+Use \fIccdstretch(1NEMO)\fP with \fBcompress=t\fP if true binning has to be used.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input image file     
@@ -28,7 +33,8 @@ Output image file
 .TP
 \fBx=\fP
 X coordinates to select. 
-Valid numbers are 1..nx. By default all will be selected.
+Valid numbers are 1..nx. By default all will be selected. See also
+\fBcenterbox\fP below.
 .TP
 \fBy=\fP
 Y coordinates to select.
@@ -45,7 +51,13 @@ Number X to aver (size remains same)
 Number Y to aver (size remains same) 
 .TP
 \fBnzaver=\fP
-Number Y to aver (size remains same) 
+Number Y to aver (size remains same)
+.TP
+\fBcenterbox=\fP
+Up to three values (between 0 and 1) to take that fraction of that axis for subsetting
+the cube. Using this option will override the corresponding x=, y= and/or z=. Any
+axis not specified will inherit the corresponding x=, y= or z=.
+Default: not used.
 .TP
 \fBdummy=t|f\fP
 Write out dummy axes as well? [true]
@@ -54,24 +66,38 @@ Write out dummy axes as well? [true]
 New order of axes after all previous actions have been taken.
 The default is no reordering, i.e. keep it in \fBxyz\fP order.
 To reverse only the X and Y axis, \fBreorder=yxz\fP is needed.
-.SH EXAMPLES
+.TP
+\fBmoving=t|f\fP
+Moving average in n{x,y,z}aver= ? [f]
+.TP
+\fBaverage=t|f\fP
+Average (t) or Sum (f)? 
+
+.SH "EXAMPLES"
 To reorder a cube from xyz to zxy and back to xyz, the 2nd step
 will have a perhaps non-intuitive axis reordering, since it refers
 to the new "zxy" order:
 .nf
+
     ccdsub cube0 - reorder=zxy | ccdsub - cube1 reorder=yzx
+    
 .fi
-.SH SEE ALSO
-ccdslice(1NEMO), ccdmom(1NEMO), image(5NEMO)
-.SH AUTHOR
+
+.SH "SEE ALSO"
+ccdslice(1NEMO), ccdstretch(1NEMO), ccdmom(1NEMO), image(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +4.0i
 1993     	code written     	PJT
 22-Feb-97	man page written	PJT
 12-aug-02	more doc	PJT
 17-jun-03	WCS for simple subsetting	PJT
 9-apr-09	V1.6 replace skip= with dummy=, fix bug nzaver=  	PJT
 18-jun-09	V2.0a fixed bug when Z size if different from XY	PJT
+24-dec-2020	V2.4  add centerbox=	PJT
+1-may-2022	V2.6 added average=	PJT
 .fi

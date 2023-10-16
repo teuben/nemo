@@ -1,6 +1,6 @@
-#! /bin/csh
+#! /bin/sh
 #
-#   nemo_start.sh:
+#   nemo_start.sh:   source this script to enable your NEMO environment
 #
 #   @WARNING@
 #
@@ -13,7 +13,7 @@
 #   BASH interactive shell uses ~/.bashrc     
 #        login shell       uses ~/.bash_login (or .bash_profile)
 #   Note Linux uses the interactive shell, Mac uses the login shell
-#   ZSH users should also be able to ued this file.
+#   ZSH users should also be able to use this file.
 #
 #                                       Things via configure
 export          NEMO=@NEMO@
@@ -40,7 +40,7 @@ export PGPLOT_DIR=@PGPLOT_DIR@
 
 
 if [ -z "$MANPATH" ]; then
-  export MANPATH=$NEMO/man
+  export MANPATH=$NEMO/man:$(manpath)
 else
   export MANPATH=$NEMO/man:$MANPATH
 fi
@@ -51,6 +51,11 @@ fi
 export VDEVICE=X11
 
 if [ 1 ]; then
+  if [ -z "$PKG_CONFIG_PATH" ]; then
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig
+  else
+    export PKG_CONFIG_PATH=$NEMO/opt/lib/pkgconfig:$PKG_CONFIG_PATH
+  fi
   if [ -z "$LD_LIBRARY_PATH" ]; then
     export LD_LIBRARY_PATH=$NEMOLIB:$NEMO/opt/lib
   else
@@ -83,8 +88,10 @@ test -f $NEMO/usr/zeno/ZENORC   &&     echo "No ZENO support for bash yet"
 test -f $NEMO/nemo_local.sh     &&     source $NEMO/nemo_local.sh
 test -f $HOME/.nemo_local.sh    &&     source $HOME/.nemo_local.sh
 
-# optional python
-test -f $NEMO/python_start.sh   &&     source $NEMO/python_start.sh
+# optional python (anaconda3 should win)
+test -f $NEMO/python_start.sh             &&     source $NEMO/python_start.sh
+test -f $NEMO/anaconda3/python_start.sh   &&     source $NEMO/anaconda3/python_start.sh
+
 
 # optional dot check?
 export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
@@ -92,3 +99,6 @@ export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 # falcON 
 export FALCON=$NEMO/usr/dehnen/falcON
 source $FALCON/falcON_start.sh
+
+# aliases
+alias ni=nemoinp

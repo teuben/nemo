@@ -41,7 +41,7 @@ string usage="rotation curve of an oblate spheroidal sersic bulge";
 string cvsid="$Id$";
  
 
-nemo_main()
+void nemo_main()
 {
   string exefile = getparam("exe");
   string rundir  = getparam("outdir");

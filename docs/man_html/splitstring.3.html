@@ -6,15 +6,18 @@
 <title>BURSTSTRING(3NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 burststring - separate a string into tokens, and free them 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;string *burststring(str, sep)string *burst2string(str,
 sep)string str;string sep;
 void freestrings(strptr)string *strptr;</pre>
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>burststring()</i>
 breaks a string str of words separated by characters in sep into individual
@@ -31,13 +34,40 @@ reconstruct the original input string by catenating all the array elements.
 Useful for editing. <p>
 <i>freestrings</i> can be used to free all memory associated
 with an array of strings, as e.g. allocated by <i>burststring</i>. 
-<h2><a name='sect3' href='#toc3'>See Also</a></h2>
+<p> 
+<h2><a name='sect3' href='#toc3'>Examples</a></h2>
+
+<p> <br>
+<pre>    string *sp = burststring("a b c"," ");
+    int nsp = xstrlen(sp,sizeof(string))-1;
+    for (int i=0; i&lt;nsp; i++)
+        printf("sp[%d] = %s\n",i,sp[i]);
+    freestrings(sp);
+</pre>
+<p> Note that unlike <a href='strtok.3.html'><i>strtok(3)</i></a>
+, <b>burststring</b> does not modify the input string
+
+<p> 
+<p> 
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+The maximum number of words and characters per word is hardcoded
+as MWRD=2048 and MSTR=256.  An alternative would be to recode this using
+<a href='strtok.3.html'><i>strtok(3)</i></a>
+. Some examples of these are in <a href='table.3.html'><i>table(3NEMO)</i></a>
+. 
+<p> 
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='extstring.3.html'>extstring(3NEMO)</a>
-
-
-<h2><a name='sect4' href='#toc4'>Author</a></h2>
+,
+<a href='strtok.3.html'>strtok(3)</a>
+ 
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Joshua Barnes, Peter Teuben 
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>2-dec-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dark ages version<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 16-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;Added freestrings<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -50,9 +80,11 @@ Joshua Barnes, Peter Teuben
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>See Also</a></li>
-<li><a name='toc4' href='#sect4'>Author</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Examples</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

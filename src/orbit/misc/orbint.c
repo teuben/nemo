@@ -35,6 +35,7 @@
  *                           after Tremaines nice lecture
  *      10-dec-2019     V4.2 Add optional Phi/Acc to output     PJT
  *                           but not implemented for all cases - also fixed pattern speed bug
+ *      21-mar-2021     V4.3 optional tstop which override nsteps  PJT
  *                           
  *
  */
@@ -57,7 +58,8 @@ string defv[] = {
     "mode=rk4\n           integration method (euler,leapfrog,rk2,rk4)",
     "eta=\n               if used, stop if abs(de/e) > eta",
     "variable=f\n         Use variable timesteps (needs eta=)",
-    "VERSION=4.2\n        10-dec-2019 PJT",
+    "tstop=\n             If given, this overrides nsteps=",
+    "VERSION=4.3\n        21-mar-2021 PJT",
     NULL,
 };
 
@@ -85,6 +87,7 @@ bool   Qstop = FALSE;                   /* global flag to stop intgr. */
 bool   Qvar;
 
 
+int osfac[2] = {1, -1};   /* coriolis factor */
 
 extern int match(string, string, int *);
 
@@ -160,11 +163,19 @@ void setparams()
     infile = getparam("in");
     outfile = getparam("out");
 
-    nsteps = getiparam("nsteps");
     dt = getdparam("dt");
+    if (hasvalue("tstop")) {
+      nsteps = (int) (getdparam("tstop")/dt);
+      nsave  = (int) (getdparam("nsave")/dt);
+      if (nsave < 1) nsave=1;
+      ndiag  = (int) (getdparam("ndiag")/dt);      
+      dprintf(0,"Using nsteps,nsave,ndiag=%d  %d %d\n",nsteps,nsave,ndiag);
+    } else {
+      nsteps = getiparam("nsteps");
+      nsave=getiparam("nsave");
+      ndiag=getiparam("ndiag");
+    }
     dt2 = 0.5*dt;
-    ndiag=getiparam("ndiag");
-    nsave=getiparam("nsave");
     Qvar = getbparam("variable");
     if (hasvalue("eta")) 
       eta = getdparam("eta");
@@ -181,7 +192,7 @@ void prepare()
 /* Standard Euler integration */
 void integrate_euler1()
 {
-    int i, ndim, kdiag, ksave, isave;
+  int i, ndim, kdiag, ksave, isave, ip;
     double time,epot,e_last;
     double pos[3],vel[3],acc[3], xvel;
 
@@ -217,17 +228,29 @@ void integrate_euler1()
 	if (i>=nsteps) break;           /* see if need to quit looping */
 
 	time   += dt;                     /* advance particle */
+#if 1
         acc[0] += omega2*pos[0] + tomega*vel[1];    /* rotating frame */
         acc[1] += omega2*pos[1] - tomega*vel[0];    /* corrections    */
-	
 
 	pos[0] += dt*vel[0];
 	pos[1] += dt*vel[1];
 	pos[2] += dt*vel[2];
-
 	vel[0] += dt*acc[0];
 	vel[1] += dt*acc[1];
 	vel[2] += dt*acc[2];
+	
+#else
+
+	//#pragma omp for
+	for (ip=0; ip<2; ip++)
+	  acc[ip] += omega2*pos[ip] + osfac[ip]*tomega*vel[1-ip]; 
+	//#pragma omp for
+	for (ip=0; ip<3; ip++)
+	  pos[ip] += dt*vel[ip];
+	//#pragma omp for
+	for (ip=0; ip<3; ip++)
+	  vel[ip] += dt*acc[ip];
+#endif	
 	i++;
 
 	if (++ksave == nsave) {		/* see if need to store particle */

@@ -6,14 +6,17 @@
 <title>EXAMPLE(8NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-example - example skeleton file for manual writers  
+example - example skeleton file for man page writers 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-This section
-should  contain a short synopis of the command including its options and
-arguments. In case of main <a href='programs.1.html'>programs (1)</a>
+This
+section should  contain a short synopis of the command including its options
+and arguments. In case of main <a href='programs.1.html'>programs (1)</a>
  one could say: <p>
 <b>snapadd in1=</b>snap1
 <b>in2=</b>snap2 <b>out=</b>snapo [<b>cut=</b>cutoff] <p>
@@ -22,50 +25,77 @@ In case of library <a href='routines.3.html'>routines (3)</a>
 probably look like: <p>
 <br>
 <pre>#include &lt;example.h&gt;
-void example(msg)char *msg;</pre>
+void example(const char *msg);</pre>
+<p></b> You can also put comments
+in a man page that won&rsquo;t show up.  
+<p> 
 <h2><a name='sect2' href='#toc2'>Side Effects</a></h2>
-This should list
-if there are any expected external variables or routines which will be
-moderated: <p>
+This should list if there
+are any expected external variables or routines which will be moderated:
+<p>
 <br>
 <pre>extern int nobj;extern int mass[MOBJ];extern int phase[MOBJ][6];</pre>
+<p> 
 <h2><a name='sect3' href='#toc3'>Author</a></h2>
-Peter
-Teuben, the guy who wrote it or deserved the credit or: 
-<h2><a name='sect4' href='#toc4'>Person Responsible</a></h2>
-John
-Doe, the guy who is now responsible of keeping this particluar piece of
-software up to date. 
+
+<p>
+Peter Teuben, the person(s) who wrote it or deserved the credit or: 
+<p> 
+<h2><a name='sect4' href='#toc4'>Person
+Responsible</a></h2>
+John Doe, the guy who is now responsible of keeping this particluar
+piece of software up to date. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Files</a></h2>
-This should contain a reference to files needed
-to be included at compilation or linked at linking time. Note that a &lt;TAB&gt;
-must be included for proper  allignment at 2.5 inches <br>
+This should contain a reference to files
+needed to be included at compilation or linked at linking time. Note that
+a &lt;TAB&gt; must be included for proper  allignment at 2.5 inches <br>
 <pre>/usr/lib/tmac/tmac.an   <tt> </tt>&nbsp;<tt> </tt>&nbsp;This file contains the MAN macros
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Description</a></h2>
-This is a simple skeleton file for authors of manual pages and
-shows e.g. the possibilities of text in <b>bold</b> as well as <i>Italics</i> typeface.
+This is a simple skeleton file for authors of manual pages
+and shows e.g. the possibilities of text in <b>bold</b> as well as <i>Italics</i> typeface.
 It is better studied by directly looking at the source file, than by viewing
 the roffed-output. This file contains about all the possible SECTIONS we
 are using, in practice you would use a subset of them, but never leave
 out the NAME section. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Parameters</a></h2>
-This list of options is usually added in
-case of a <a href='level.1.html'><i>level(1)</i></a>
- program 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in1=<i>snap1</i></b> </dt>
-<dd>Input data is read from <i>snap1</i>, which
-must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
+<dd>Input data is read
+from <i>snap1</i>, which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
  format. </dd>
 
 <dt><b>in2=<i>snap2</i></b> </dt>
-<dd>Input data is read from <i>snap2</i>,
-which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
+<dd>Input data is
+read from <i>snap2</i>, which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
  format. </dd>
-</dl>
 
+<dt><b>flag=t|f</b> </dt>
+<dd>a boolean
+flag </dd>
+
+<dt><b>range=</b><i>start:end</i> </dt>
+<dd>A min_max range. </dd>
+
+<dt><b>levels=</b><i>s1:e1:d1,s2:e2:d2,...</i> </dt>
+<dd>many levels
+
+<p>using nemoinp 
+<p> </dd>
+</dl>
+<p>
+On the design of keyword names and order: <b>in=</b> and <b>out=</b> should
+ideally appear first, with reasonable defaults for all other keywords for
+a standard run. Also note that the <b>key=</b> is in boldface. Anything after that
+is optional, can be literal (boldface) or implied (italics). 
+<p> 
 <h2><a name='sect8' href='#toc8'>List of Functions</a></h2>
 <p>
 <br>
@@ -73,23 +103,39 @@ which must be in <a href='SnapShot.5.html'><i>SnapShot(5)</i></a>
 
 example <tt> </tt>&nbsp;<tt> </tt>&nbsp;example.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;skeleton for manual page with simple columns
 </pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
-This secion gives a list if <i>other(0)</i> routines and manuals which
+This section gives a list if <i>other(0)</i> routines and manuals which
 are relevant to this command.  In case you want to know more than you possibly
 ever wanted to know about writing manuals, consult one of the following:
 <p>
 The <b>-man</b> Macro Package (upper case directives in this file) <p>
 Text processing
 with NROFF and TROFF (lower case directives in this file) 
-<h2><a name='sect10' href='#toc10'>Bugs</a></h2>
-After certain
-roff commands a space is forced into the output, e.g. the space in <b>in1=</b>snap1.
+<p> 
+<h2><a name='sect10' href='#toc10'>Examples</a></h2>
+Most
+programs probably deserve an example how it is used. 
+<p> 
+<h2><a name='sect11' href='#toc11'>Benchmarks</a></h2>
+For programs
+with interesting scaling properties, it&rsquo;s useful to provide a benchark. 
 <p>
-The MAN macro file needs special NEMO entry, to prevent the clumsy header
-&rsquo;Unknown section of the manual&rsquo;.(see FILES caption on this manual page) 
-<h2><a name='sect11' href='#toc11'>Update
-History</a></h2>
+
+<h2><a name='sect12' href='#toc12'>Caveats</a></h2>
+Some programs have known limitations, caveats. It would be good to
+warn the user of this. 
+<p> 
+<h2><a name='sect13' href='#toc13'>Bugs</a></h2>
+After certain roff commands a space is forced
+into the output, e.g. the space in <b>in1=</b>snap1. <p>
+The MAN macro file needs special
+NEMO entry, to prevent the clumsy header &rsquo;Unknown section of the manual&rsquo;.(see
+FILES caption on this manual page) 
+<p> 
+<h2><a name='sect14' href='#toc14'>Update History</a></h2>
 <br>
 <pre>16-Mar-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-Mar-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;PARAMETERS added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 01-Aug-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;John Doe takes over<tt> </tt>&nbsp;<tt> </tt>&nbsp;JXD
+24-may-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;added markups to emacs is more properly colorized<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

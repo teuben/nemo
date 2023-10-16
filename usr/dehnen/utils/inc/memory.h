@@ -108,7 +108,7 @@ namespace WDutils {
     bool failed=0;
     try {
       t = new T[num];
-    } catch(std::bad_alloc E) {
+    } catch(std::bad_alloc& E) {
       t = 0;
       failed = 1;
     }

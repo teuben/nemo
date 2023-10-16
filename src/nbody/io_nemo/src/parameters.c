@@ -86,7 +86,7 @@ char * get_field(char **p)
 { 
   char * chaine="", * x, * y;
 
-  int len,start,end,i;
+  int len,start,end=0,i;
 
   /* find out the next ',' from the current position */
   x = strchr(*p,',');

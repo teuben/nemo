@@ -73,6 +73,7 @@
 #include <stdinc.h>             /* NEMO's stdio.h */
 #include <ctype.h>              /* needs: isdigit() */
 #include <fits.h>
+#include <extstring.h>          /*suppresses error with xstrlen*/
 
 #if SIZEOF_LONG_LONG==8
 typedef long long int8;         /* e.g. i386; sparc <= sol7; ppc ? */
@@ -1133,7 +1134,7 @@ int fts_phead(fits_header *fh, string *print)
     printf("__________________________________________________________\n");
     printf("______________________ FITS HEADER _______________________\n");
     if (fh->xtension) {         /* primary header ? */
-      printf("Standard eXTENSION header: %s\n",fh->xtension);
+      printf("Standard eXTENSION header %d: %s\n",fh->hdu,fh->xtension);
     } else {
       printf("Primary header: ");
       switch(fh->simple) {
@@ -1254,9 +1255,12 @@ int fts_phead(fits_header *fh, string *print)
     }
     dsize = fts_dsize(fh);
     printf("headersize = %d bytes = %d %d-records\n",
-            fh->hlen, (fh->hlen - 1)/ftsblksiz_i + 1, ftsblksiz_i);
-    printf("datasize = %ld bytes = %ld %d-records\n",
+            (int) fh->hlen, ((int) fh->hlen - 1)/ftsblksiz_i + 1, ftsblksiz_i);
+    if (dsize > 0) 
+      printf("datasize = %ld bytes = %ld %d-records\n",
             dsize, (dsize-1)/ftsblksiz_i + 1, ftsblksiz_i);
+    else
+      printf("datasize = 0 bytes = 0 %d-records\n", ftsblksiz_i);
     printf("__________________________________________________________\n");
 
     return 1;
@@ -1268,7 +1272,7 @@ int fts_phead(fits_header *fh, string *print)
  *
  */
 
-int fts_read_img_coord(
+void fts_read_img_coord(
 		       fits_header *fh,            /* (i)  pointer to fits header structure */
 		       double *crval1, 
 		       double *crval2,
@@ -1291,7 +1295,7 @@ int fts_read_img_coord(
 }
 
 
-static nnl = 0;
+static int nnl = 0;
 static void printnl(int fnl, int reset) {
   if (fnl==0) return;
   if (reset) {
@@ -1909,7 +1913,7 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
         a2[0] = 0;                   /* zero out the a2 parameter */
         i = 8;                          /* count where we are; starts at i=0 */
         while (*buf == ' ') {           /* skip leading blanks again */
-            *buf++;  i++;
+            buf++;  i++;             
         }  
         for (cp=a3; i<FTSLINSIZ; i++)  /* and copy into a3 */
             *cp++ = *buf++;
@@ -1978,7 +1982,7 @@ local int parse_card (int icard, char *card, char *a1, char *a2, char *a3, char 
         }
     } /* end of parsing value */
     while (*buf == ' ')         /* skip blanks before the comment */
-        *buf++;
+        buf++;               
     if (*buf != '/') {            /* if it is not a comment designator, quit */
         if (buf-card != FTSLINSIZ)
             dprintf(2,"### No comment or ??? in card %d, pos=%d\n",

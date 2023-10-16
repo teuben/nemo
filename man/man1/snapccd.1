@@ -1,10 +1,13 @@
 .TH SNAPCCD 1NEMO "30 January 1989"
-.SH NAME
+
+.SH "NAME"
 snapccd \- top view integrated velocity moment ccd-like image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBsnapccd in=\fPsnapshot \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsnapccd\fP makes a ccd frame from an N-body snapshot, by
 binning the (projected) x-y coordinates of all stars on a regular 
 rectangular (square) grid and
@@ -28,9 +31,14 @@ is located at infinity at the positive Z-axis: a positive z velocity
 .PP
 \fIsnaprotate(1NEMO)\fP has to be used first to do any other than a top-view,
 probably the more general version \fIsnapgrid(1NEMO)\fP should be used.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+.PP
+A better alternative is \fIsnapgrid(1NEMO)\fP, and for
+more interpolation (as opposed to gridding) style is
+\fIsnapmap(1NEMO)\fP
+
+
+.SH "PARAMETERS"
+.so/man1 parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, must be in \fISnapShot(5NEMO)\fP format [no default].
@@ -69,7 +77,8 @@ Most commonly choosen are: \fB0\fP (total intensity), \fB1\fP
 (velocity weighted intensity) and \fB2\fP (velocity square weighted intensity),
 where 'intensity' should really be read as surface density per square unit length.
 [default: \fB0\fP].
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 The following example makes (three) CCD frames from an N-body snapshot,
 smoothes the three moment maps
 and combines them into an 'intensity' (\fBint\fP), 'mean velocity' (\fBvel\fP)
@@ -90,7 +99,8 @@ can be combined to the proper velocity and dispersion maps.
    % \fBrm map11 map22\fP
 \fP
 .fi
-.SH UNITS
+
+.SH "UNITS"
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
 and 'mass'. Since \fIsnapccd\fP calculates surface densities,
@@ -103,29 +113,37 @@ convolving velocity beam. For a rectangular beam (\fBvrange=vmin:vmax\fP)
 the data should formally be divided by \fB(vmax-vmin)\fP, for a 
 gaussian beam (\fBvrange=vmean,vsig\fP) by \fBvsig*sqrt(2*pi)\fP.
 Also remember that a gaussian beam has \fBFWHM = 2.355*sigma\fP.
-.SH FUTURE
+
+.SH "FUTURE"
 \fIsnapccd(1NEMO)\fP's function is rather similar to that of
 \fIsnapplot(1NEMO)\fP,
 except of plotting the position of the stars, its bins the data.
 It would be a nice idea to combine both programs.
-.SH BUGS
-Large snapshots (of order 4k or more) will have problems when also
-large images (512 square) or so are used. Need larger memory machine.
+
+.SH "CAVEATS"
+If smoothing is followed after gridding, the resulting beam is actually
+slightly larger than the smoothing beam.
+
+.SH "BUGS"
 .PP
 The program gracefully allows the user to use nonzero \fBmoment\fP
 and a non-infinite \fBvrange\fP. No warnings here.
+
 .SH "SEE ALSO"
 snapgrid(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapsmooth(1NEMO), snapaxsym(1NEMO), 
-tsf(1NEMO), ccdgrid(1NEMO), ccdsky(1NEMO)
-.SH AUTHOR
+tsf(1NEMO), ccdgrid(1NEMO), ccdsky(1NEMO), ccdstack(1NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
-src/pjt/image	snapccd.c, snapccd.1
+src/nbody/image	snapccd.c, snapccd.1
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 17-Jun-87	V1.0: Created	PJT

@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 DIR = src/image/fits
 BIN = ccdfits fitsccd scanfits fitsglue fitshead tabfits
 NEED = $(BIN) ccdmath ccdstat
@@ -24,7 +26,7 @@ ccd.in:
 	@echo Creating $@
 #	ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
 	$(EXEC) ccdmath out=ccd.in "fie=$(FIE)"  size=10,10,1
-	@bsf ccd.in '41.644 31.2134 0 93 115'
+	@bsf ccd.in '40.9321 31.4127 0 93 117'
 
 map001.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 | $(EXEC) ccdfits - map001.fits ; nemo.coverage ccdfits.c
@@ -34,7 +36,6 @@ map002.fits:
 
 map003.fits:
 	$(EXEC) ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 | $(EXEC) ccdfits - map003.fits; nemo.coverage ccdfits.c
-	
 
 bitpix64:
 	$(EXEC) ccdmath "" map004.ccd "%x+%y" size=10,10,1 
@@ -42,7 +43,6 @@ bitpix64:
 	$(EXEC) fitsccd map004.fits map004a.ccd; nemo.coverage fitsccd.c
 	$(EXEC) ccdmath map004a.ccd,map004.ccd - %1-%2 | ccdstat -
 	@bsf map004.ccd
-	
 
 ccdfits: ccd.in
 	@echo Running $@
@@ -53,7 +53,7 @@ fitsccd: ccdfits
 	$(EXEC) fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
 	@echo Testing ccd-fits-ccd with "FIE=$(FIE)"
 	$(EXEC) ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
-	@bsf ccd.out '41.6266 31.2366 -1 93 115'
+	@bsf ccd.out '1.21403e+07 1.30754e+08 -1 1.42041e+09 117'
 
 scanfits: ccdfits
 	@echo Running $@
@@ -67,7 +67,6 @@ fitsglue: map001.fits map002.fits map003.fits
 	$(EXEC) fitshead map002.fits | grep DATA
 	$(EXEC) fitshead map003.fits | grep DATA
 	$(EXEC) fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
-	
 
 fitshead: map003.fits
 	@echo Running $@
@@ -78,4 +77,4 @@ tab.in:
 
 tabfits:	tab.in
 	$(EXEC) tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
-	$(EXEC) fitshead tab.fits | grep DATA
+	$(EXEC) fitshead tab.fits | grep bibcode

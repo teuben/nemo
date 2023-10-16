@@ -1,0 +1,29 @@
+#! /bin/bash
+#
+#   typically called via a Benchfile as in:
+#          nemobench mkplummer . 10000
+#set -x
+
+
+if [ $# -eq 0 ]; then
+    echo Usage $0 cmd
+    exit 0
+fi
+
+log=/tmp/nemobench$$.log                 # per process
+log=/tmp/nemobench.log                   # global
+log=$XDG_RUNTIME_DIR/nemobench.log       # per session (does not work on a mac)
+log=$NEMO/tmp/nemobench.log              # per NEMO
+
+if ! command -v $1 >/dev/null 2>&1; then
+    echo -n "NEMOBENCH: FAIL"
+    echo ""
+    exit 1
+fi    
+echo NEMOBENCH: $* >> $log
+/usr/bin/time $* >> $log 2>&1
+#echo CHRT
+#sudo chrt -f 99 /usr/bin/time $* >> $log 2>&1
+echo -n "NEMOBENCH: $1 "
+tail -2 $log |grep elapsed
+

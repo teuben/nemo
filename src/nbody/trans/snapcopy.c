@@ -34,14 +34,12 @@ string defv[] = {
     "times=all\n        Times to select",
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
-    "ibody=-1\n         One body to select (not implemented yet)",
-    "VERSION=1.3\n      27-dec-2019 PJT",
+    "i=-1\n             Select one body to select (overrides select=)",
+    "VERSION=2.0a\n     8-aug-2022 PJT",
     NULL,
 };
 
 string usage="copy an N-body snapshot";
-
-string cvsid="$Id$";
 
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
@@ -53,8 +51,9 @@ void nemo_main(void)
     string times, precision, keep;
     Body   *btab = NULL, *bpi, *bpo;
     int    i, nbody, nout, nreject, bitsi, bitso, vis, visnow, vismax;
+    int    isnap = 0;
     bool   Qall;
-    int    ibody = getiparam("ibody");
+    int    ibody = getiparam("i");
     iproc_body sfunc;
 
     times = getparam("times");
@@ -111,16 +110,19 @@ void nemo_main(void)
         for (bpi = btab; bpi < btab+nbody; bpi++)
             Key(bpi) = 0;                    /* set to false */
         visnow = vismax = nreject = 0;
-        do {				/* loop through all particles */
-            visnow++;
+	if (ibody < 0) {   // use the select=
+	  do {				/* loop through all particles */
+	    visnow++;
             for (bpi = btab, i=0; i<nbody; bpi++,i++) {
-                vis = (*sfunc)(bpi, tsnap, i);
-		dprintf(2,"sfunc [%d] = %d\n",i,vis);
-                vismax = MAX(vismax,vis);
-                if (vis==visnow)
-                    Key(bpi) = 1;
+	      vis = (*sfunc)(bpi, tsnap, i);
+	      dprintf(2,"sfunc [%d] = %d\n",i,vis);
+	      vismax = MAX(vismax,vis);
+	      if (vis==visnow)
+		Key(bpi) = 1;
             }
-        } while (visnow < vismax);          /* do all layers */
+	  } while (visnow < vismax);          /* do all layers */
+	} else
+	  Key(btab+ibody) = 1;
         nreject = 0;
         for (bpi = btab, bpo = btab, i=0; i<nbody; bpi++,i++) {
             if (!Key(bpi)) { 
@@ -145,5 +147,7 @@ void nemo_main(void)
 				tsnap,nout);
         } else
            dprintf(0,"No particles to copy at tsnap=%f\n",tsnap);
+	isnap++;
+	progress(1.0,"Processed snapshot %d", isnap);
     }
 }

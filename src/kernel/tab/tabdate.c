@@ -4,6 +4,7 @@
  *      1-feb-05    0.1 Created
  *      9-may-05    0.2 added time0= (tcol= still defaulted to 'all')
  *      3-apr-09    0.3 initialize the 'struct tm' structures better, using dcol= now
+ *     15-apr-22    0.4 new tablev2
  *
  * TODO:   allow non-date columns to pass through
  */
@@ -12,26 +13,26 @@
 #include <getparam.h>
 #include <extstring.h>
 #include <ctype.h>
-/* #define _XOPEN_SOURCE /* glibc2 needs this */
+// #define _XOPEN_SOURCE /* glibc2 needs this */
 #include <time.h>
+#include <table.h>
 
 extern string *burststring(string, string);
 
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
     "out=???\n          output file name",
-    "format1=???\n      format to read with",
-    "format2=???\n      format to write with",
+    "format1=???\n      format to read with, e.g. %s",
+    "format2=???\n      format to write with, e.g. %c",
     "dcol=0\n           Column for date conversion (0=whole line)",
     "time0=\n           If given, reference input times w.r.t this time (format2=%s)",
     "scale=1\n          Scale factor output seconds are divided by when time0 used" 
-    "VERSION=0.3\n      4-apr-09 PJT",
+    "VERSION=0.4\n      14-apr-2022 PJT",
     NULL
 };
 
 string usage = "Convert a date/time column";
 
-string cvsid = "$Id$";
 
 
 
@@ -50,7 +51,11 @@ string time0 = 0;
 bool need_time0 = FALSE;
 bool use_scale = FALSE;
 
-nemo_main()
+local int convert(stream instr, stream outstr);
+
+
+
+void nemo_main()
 {
   format1 = getparam("format1");
   if (hasvalue("time0"))  {
@@ -71,15 +76,15 @@ nemo_main()
   convert(instr,outstr);
 }
 
-convert(stream instr, stream outstr)
+int convert(stream instr, stream outstr)
 {
   char   line[MAX_LINELEN];          /* input linelength */
   int  nlines, nwords, nskip;
-  long long nt0, nt;
+  long long nt0 = 0, nt;
   real dt;
+  string s, *bp;
   struct tm tm, tm0;
-  string *bp;
-
+  table *tp = table_open(instr, 1);
 
   if (time0) {
     tm0.tm_sec= tm0.tm_min = tm0.tm_hour = 0;
@@ -88,20 +93,20 @@ convert(stream instr, stream outstr)
     nt0 = atoll(line);
     dprintf(0,"Using time0=%lld sec since 1970.0 using %s on %s \n",
 	    nt0,format1,time0);
-  }
+  } 
 
   nlines=0;               /* count lines read so far */
   nskip=0;
   for(;;) {                       /* loop over all lines in file(s) */
-    if (get_line(instr, line) < 0)
-      return 0;
-    dprintf(3,"LINE: (%s)\n",line);
-    if(line[0] == '#') continue;		/* don't use comment lines */
+    s=table_line(tp);
+    if (s==NULL) return 0;
+    dprintf(3,"LINE: (%s)\n",s);
+    if(s[0] == '#') continue;		/* don't use comment lines */
     nlines++;
     tm.tm_sec= tm.tm_min = tm.tm_hour = 0;
 
     if (dcol>0) {
-      bp = burststring(line,", ");                /* split line in words */
+      bp = burststring(s,", ");                /* split line in words */
       nwords = xstrlen(bp,sizeof(string))-1;
       if (nwords<dcol) {
 	nskip++;
@@ -111,7 +116,7 @@ convert(stream instr, stream outstr)
       freestrings(bp);
     }
 
-    strptime(line,format1,&tm);
+    strptime(s,format1,&tm);
     if (need_time0) {
       dprintf(0,"First line: %s\n",line);
       strftime(line,MAX_LINELEN,"%s",&tm);

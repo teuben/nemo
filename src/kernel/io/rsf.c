@@ -28,8 +28,6 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
 
 string usage = "Read an ascii structured file into binary structured file";
 
-string cvsid="$Id$";
-
 /* local functions */
 
 bool parse_line (stream, string, string, int *, byte **);
@@ -359,11 +357,11 @@ void safe_read_char(stream fp, char *word)
 
 void safe_read_short(stream fp, short *word)
 {
-    int temp;
+    short temp;
 
     if (fscanf(fp, "%ho", &temp) == EOF)
 	error("read_short: EOF found");
-    *word = ((short) temp);
+    *word = temp;
 }
 
 void safe_read_int(stream fp, int *word)

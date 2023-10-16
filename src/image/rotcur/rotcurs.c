@@ -4,8 +4,9 @@
 
 
 
-/* a bunch of rotation curves and parameter derivatives */
+/* a bunch of rotation curves and parameter derivatives for rotcurshape */
 
+static int debug_rotcurs = 1;
 
 real rotcur_flat(real r, int n, real *p, real *d)
 {
@@ -83,7 +84,7 @@ real rotcur_core(real r, int np, real *p, real *d)
 
   d[0] = x / y;
   d[1] = -p[0]*d[0]/(p[1]*q);
-  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* CForm[D[(1+x^c)^(-1/c),c]]  */
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* in mathematica:    CForm[D[(1+x^c)^(-1/c),c]]  */
   d[2] *= p[0] * x;
   return p[0] * d[0];
 }
@@ -104,6 +105,39 @@ real rotcur_tanh(real r, int np, real *p, real *d)
   dvdx = sqr(sech(x));
 }
 #endif
+
+
+real rotcur_arctan(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real y =  2/PI*atan(x);
+
+  d[0] = y;
+  d[1] = p[0]/p[1] * 2/PI / (1+x*x);
+  return p[0] * y;
+  
+}
+
+/*
+ * https://astrohchung.com/project/mangarc/
+ *    v(r) = V_0 * (tanh(r/R1) + r/R2)
+ */
+
+
+
+real rotcur_chung(real r, int np, real *p, real *d)
+{
+  real x1 = r/p[1];
+  real x2 = r/p[2];
+  real y =  atan(x1) + x2;
+
+  d[0] = y;
+  d[1] = p[0]/p[1] / (1+x1*x1) + p[0]/p[2];
+  return p[0] * y;
+  
+}
+
+
 
 /*
  * softened iso-thermal sphere: (a.k.a. pseudo-isothermal)
@@ -231,6 +265,43 @@ real rotcur_power(real r, int np, real *p, real *d)
   return p[0] * d[0];
 }
 
+/* 
+ * simple shaped linear-flat rotation curve
+ * (power1 and power2 are m=1 and m=2 in this one)
+ *
+ *    v = p0 * x / (1+x**p2)**(1/p2)
+ */
+
+real rotcur_rotcurm(real r, int np, real *p, real *d)
+{
+  real x = r/p[1];
+  real m = p[2];
+  real a = pow(1+pow(x,m),1/m);
+  real v = x / pow(1+pow(x,m),1/m);
+  d[0] = v;
+  d[1] = p[0]*x*x*pow(x,m-1)*pow(a,-1-1/m)/(p[1]*p[1]*p[1]) -
+         p[0]*x/(p[1]*a);
+  d[2] = p[0]*r/pow(a,1/m) * (log(a)/(m*m) - pow(x,m)*log(x)/(m*a));
+  return p[0] * d[0];
+}
+
+real rotcur_core_mm(real r, int np, real *p, real *d) // via mathematica
+{
+  real x = r/p[1];
+  real c = p[2];
+  real q1 = pow(x,c);
+  real q = 1+q1;
+  real lnx = log(x);
+  real lnq = log(q);
+  real y = pow(q,1/c);
+
+  d[0] = x / y;
+  d[1] = -p[0]*d[0]/(p[1]*q);
+  d[2] = (-((q1*lnx)/(c*q)) + lnq/(c*c))/y;     /* CForm[D[(1+x^c)^(-1/c),c]]  */
+  d[2] *= p[0] * x;
+  return p[0] * d[0];
+}
+
 /*
  * some kind of toy disk for max disk degeneracy simulations
  *
@@ -242,4 +313,5 @@ real rotcur_disk1(real r, int np, real *p, real *d)
 #if 0
   error("disk1 not implemented yet");
 #endif
+  return 0;
 }

@@ -54,7 +54,8 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "formal=false\n			  if true, make publication plot",
     "headline=\n                          header",
 #endif
-    "VERSION=1.6a\n			  25-apr-2019 PJT",
+    "time0=t\n                            Also print time=0 ?",
+    "VERSION=1.7\n			  27-feb-2020 PJT",
     NULL,
 };
 
@@ -77,7 +78,7 @@ string headline;
 
 local real small_dt = 1.0e-14;
 
-local bool Qlog;
+local bool Qlog, Qtime0;
 
 
 
@@ -107,6 +108,7 @@ void nemo_main()
     diffpart = getbparam("diffpart");
     relative = getbparam("relative");
     Qlog = getbparam("log");
+    Qtime0 = getbparam("time0");
 #if HISTOGRAM || SCATTERPLOT
     headline = getparam("headline");
 #endif
@@ -135,6 +137,7 @@ void nemo_main()
 	if (dt > small_dt)
 	  warning("times = %f, %f are different (%g)", tsnap1, tsnap2, dt);
       }
+      if (!Qtime0 && time1==0 && time2==0) continue;
       if (bits1 != bits2)
 	warning("bits = 0x%x, 0x%x are different", bits1, bits2);
       result = snapcmp(btab1, btab2, nbody1, tsnap1);

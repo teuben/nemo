@@ -6,18 +6,23 @@
 <title>UNITS(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 units - units conversion utility 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopis</a></h2>
 <b>units from=</b><i>from</i> <b>to=</b><i>to</i>  [parameter=value
 ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 The units program converts quantities expression in various
 scales to  their equivalents in other scales.  The units program can only
 handle multiplicative (linear) scale changes.  This means it cannot convert
 Centigrade to Fahrenheit, for example. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters
 are recognized in any order if the keyword is also given: 
@@ -48,7 +53,9 @@ the <b>mul</b> is always shown first, irrespective of the order given. [Default:
 
 <dt><b>quiet=t|f</b> </dt>
 <dd>Be quiet in interactive mode? [Default: <b>t</b>]    <i>NOTE: interactive
-mode not implemented</i> </dd>
+
+<p>mode not implemented</i> 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
@@ -112,6 +119,8 @@ same was as standard units, but with  a trailing dash at the end of the
 prefix name.   <p>
 <br>
 <pre>prefix<tt> </tt>&nbsp;<tt> </tt>&nbsp;abbrev.<tt> </tt>&nbsp;<tt> </tt>&nbsp;factor
+quetta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Q-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e30
+ronna-<tt> </tt>&nbsp;<tt> </tt>&nbsp;R-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e27
 yotta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Y-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e24
 zetta-<tt> </tt>&nbsp;<tt> </tt>&nbsp;Z-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e21
 exa-<tt> </tt>&nbsp;<tt> </tt>&nbsp;E-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e18
@@ -133,6 +142,8 @@ femto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;f-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-15
 atto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;a-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-18
 zopto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;z-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-21
 yocto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;y-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-24
+ronto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;r-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-27
+quecto-<tt> </tt>&nbsp;<tt> </tt>&nbsp;q-<tt> </tt>&nbsp;<tt> </tt>&nbsp;1e-30
 </pre>
 <h2><a name='sect5' href='#toc5'>G</a></h2>
 The gravitational constant is often set to unity in N-body codes. However,
@@ -153,8 +164,10 @@ tides)
 ~2e4.M       kpc ~990.km/s    1            1               1e6.yr  (galaxy)
 1e11.M    10.kpc ~97.8.km/s   4.497        0.22237         1e8.yr  (galaxy)
 1e10.M     1.kpc     1.km/s   43007.1                              (GADGET)
+2.325e9 M  1.kpc   100.km/s   .            .               .       (galactICS?)
 </pre>
-<h2><a name='sect6' href='#toc6'>Memorizable Conversions</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>Memorable Conversions</a></h2>
 <br>
 <pre>1 pc<tt> </tt>&nbsp;<tt> </tt>&nbsp;3.086e18 cm
 1 AU<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.496e13 cm
@@ -163,51 +176,64 @@ tides)
 1 solarmass<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.988e33 g
 1 km/s      <tt> </tt>&nbsp;<tt> </tt>&nbsp;1.023 pc per million year
 1 arcsec/yr<tt> </tt>&nbsp;<tt> </tt>&nbsp;4.74 km/s at 1 pc
-1 arcsec        4.848 pc/Mpc_distance
-</pre>
+1 arcsec<tt> </tt>&nbsp;<tt> </tt>&nbsp;4.848 pc/Mpc_distance
+</pre>See also <a href='constants.5.html'><i>constants(5NEMO)</i></a>
+ for some other constants. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Bugs</a></h2>
 <p>
-The effect of including a &rsquo;/&rsquo; in a prefix is surprising. <p>
-Exponents entered
-by the user can be only one digit. <p>
-The user must use | to indicate division
-of numbers and / to indicate division of symbols.  This distinction should
-not be necessary. <p>
-The program contains various arbitrary limits on the length
-of the units converted and on the length of the data file. 
+The effect of including
+a &rsquo;/&rsquo; in a prefix is surprising. <p>
+Exponents entered by the user can be only
+one digit. <p>
+The user must use | to indicate division of numbers and / to indicate
+division of symbols.  This distinction should not be necessary. <p>
+The program
+contains various arbitrary limits on the length of the units converted
+and on the length of the data file. 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='expr.1.html'>expr(1)</a>
-,
-<a href='units.5.html'>units(5NEMO)</a>
+, <a href='units.5.html'>units(5NEMO)</a>
 , <a href='nemoinp.1.html'>nemoinp(1NEMO)</a>
- <p>
-NIST: <a href='http://physics.nist.gov/cuu/Constants/index.html'>http://physics.nist.gov/cuu/Constants/index.html</a>
-
- <p>
-NIST: <a href='http://physics.nist.gov/PhysRefData/contents.html'>http://physics.nist.gov/PhysRefData/contents.html</a>
- <p>
-FRINK: <a href='http://futureboy.homeip.net/frinkdocs/'>http://futureboy.homeip.net/frinkdocs/</a>
 
 <p>
+NIST: <a href='http://physics.nist.gov/cuu/Constants/index.html'>http://physics.nist.gov/cuu/Constants/index.html</a>
+  <p>
+NIST: <a href='http://physics.nist.gov/PhysRefData/contents.html'>http://physics.nist.gov/PhysRefData/contents.html</a>
+
+<p>
+FRINK: <a href='http://futureboy.homeip.net/frinkdocs/'>http://futureboy.homeip.net/frinkdocs/</a>
+ <p>
 units calculator: <a href='http://www.astro.wisc.edu/~dolan/constants/calc.html'>http://www.astro.wisc.edu/~dolan/constants/calc.html</a>
+
+<p>
+astropy units:  <a href='https://docs.astropy.org/en/stable/units/index.html'>https://docs.astropy.org/en/stable/units/index.html</a>
  <p>
 Granot,
 <i>Scaling relations between numerical simulations and physical systems they
 representP,  <a href='http://arxiv.org/pdf/1111.6865v1'>http://arxiv.org/pdf/1111.6865v1</a>
- 
-<h2><a name='sect9' href='#toc9'></i>Files</a></h2>
+ <p>
+<a href='https://en.wikipedia.org/wiki/N-body_units'>https://en.wikipedia.org/wiki/N-body_units</a>
+
+</i>
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>$NEMODAT/units.lib - the standard units library 
 /usr/lib/units     - original units library from units(1)
-</pre>
+</pre>Sadly, the modified units.c with the NEMO interface has been lost 
+<p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
-Adrian Mariano (adrian@u.washington.edu or mariano@geom.umn.edu) 
-<h2><a name='sect11' href='#toc11'>Update
-History</a></h2>
+Adrian
+Mariano (adrian@u.washington.edu or mariano@geom.umn.edu) 
+<p> 
+<h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>14-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Original version<tt> </tt>&nbsp;<tt> </tt>&nbsp;AM
 21-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 Conversion to nemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-aug-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 cleanup, reset defaults, switch key order<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-nov-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2 added r/q/R/Q as per new NIST decree<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -219,7 +245,7 @@ History</a></h2>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>G</a></li>
-<li><a name='toc6' href='#sect6'>Memorizable Conversions</a></li>
+<li><a name='toc6' href='#sect6'>Memorable Conversions</a></li>
 <li><a name='toc7' href='#sect7'>Bugs</a></li>
 <li><a name='toc8' href='#sect8'>See Also</a></li>
 <li><a name='toc9' href='#sect9'>Files</a></li>

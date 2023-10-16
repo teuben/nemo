@@ -1,0 +1,82 @@
+.TH CCDSTACK 1NEMO "23 May 2021"
+
+.SH "NAME"
+ccdstack \- stack images, with simple gridding option if WCS differs
+
+.SH "SYNOPSIS"
+\fBccdstack\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBccdstat\fP stacks images and takes their mean, allowing for the WCS to be different.
+The current re-sampling method is simple:  the first image inherits the WCS for the
+output stacked image, all other images compute in which pixel of the first image this
+pixel would contribute. No other gridding or convolution is done yet (but probably should).
+
+.SH "PARAMETERS"
+The following parameters are recognized in any order if the keyword
+is also given:
+.TP 20
+\fBin=\fP
+Input image files, first image sets the WCS.
+.TP
+\fBout=\fP
+Output image file. No default.
+.TP
+\fBweight=\fP
+Scalar weight per image [1 for all].
+.TP
+\fBsigma=\fP
+Are the weights still SIGMA (t), or straight
+.TP
+\fBbad=\fP
+Bad value to ignore [0]
+.TP
+\fBwcs=t|f\fP
+Use the WCS to re-sample for stacking with the WCS of the first image.
+If not set, images are stacked "as is". If WCS is set, you can thus
+stack images of unequal size. Pixels falling outside that of the first
+image are simply ignored.
+[Default: t]
+.TP
+\fBfwhm=\fP
+If given, these are the convolution FWHM kernels in each dimension of the
+input images. It only makes sense to use this is \fBwcs=t\fP is used.
+\fINot Implemented Yet\fP.
+.TP
+\fBflux=0|1\fP
+Conserve flux (1) or not (0) in each dimension. Not implemented yet.
+
+.SH "EXAMPLES"
+Since the first image determines the WCS of the output image, it can be
+also be used as a template by setting its image values to 0. 
+\fIccdgen(1NEMO)\fP can be used for this.
+.PP
+Here is a contrived example of mosaicing two fields in a Plummer sphere
+projection. It will generate a template with all 0 values (which don't
+contribute to the stack), and adding in the two fields:
+.nf
+    mkplummer p1 100000
+    snapgrid p1 ccd1 xrange=0:1 yrange=0:1    nx=16 ny=16
+    snapgrid p1 ccd2 xrange=-1:0 yrange=-1:0  nx=16 ny=16
+    ccdgen "" ccd3 spar=0 size=64,64 cdelt=4/64,4/64
+    ccdstack ccd3,ccd1,ccd2 ccd12
+    ccdstack ccd3,ccd2,ccd1 ccd21
+.fi
+
+
+
+.SH "SEE ALSO"
+ccdmoms(1NEMO), rvstack(1NEMO), ccdmath(1NEMO), ccdborder(1NEMO), ccdgen(1NEMO),
+image(5NEMO)
+
+.SH "FILES"
+src/image/misc
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+21-May-21	V0.1 Drafted	PJT
+.fi

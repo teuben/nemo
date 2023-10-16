@@ -1,14 +1,21 @@
-.TH MKPOLYTROPE 1NEMO "13 December 1994"
-.SH NAME
+.TH MKPOLYTROPE 1NEMO "6 June 2023"
+
+.SH "NAME"
 mkpolytrope \- make N-body model of generalized polytrope
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkpolytrope  out=\fPout_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImkpolytrope\fP generates an N-body realization of one of Henon's
 generalized polytropes.  At present, only the polytrope \fIn = 1,
 m = -1\fP is supported.
-.SH PARAMETERS
-The following parameters are recognized.
+.PP
+See also ZENO's \fIGeneral Spherical Profile\fP for another generalization
+to create models.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBout=\fIout_file\fI
 Write to \fIout_file\fP in \fIsnapshot\fP(5NEMO) format.
@@ -30,18 +37,25 @@ Seed for random number generator.  Default: \fB0\fP.
 .TP
 \fBheadline=\fP\fImessage\fP
 Message prepended to \fIout_file\fP.  Default: \fInone\fP.
-.SH SEE ALSO
-mkommod(1NEMO)
+
+.SH "SEE ALSO"
+mkommod(1NEMO), mkplummer(1NEMO)
 .PP
 "\fIStability of Collisionless Stellar Dynamics\fP", P.L.Palmer
 (Kluwer, Dordrecht, 1994) - Appendix A.
-.SH AUTHOR
+.PP
+BGH A14
+
+.SH "AUTHOR"
 Joshua E. Barnes
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 2-Jun-88	created?	Josh
 22-jan-89	V1.1 some more	Josh
 15-nov-90	V1.2 NEMO 2.x upgrades	PJT
 13-dec-94	V1.3 keyword nobj= renamed to nbody=	PJT
+19-feb-06	V1.4 mdarray	PJT
+6-jun-2023	cleaner compile	PJT
 .fi

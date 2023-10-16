@@ -1,0 +1,42 @@
+.TH SNAPRSTAT 1NEMO "2 July 2021"
+
+.SH "NAME"
+snaprstat \- snapshot statistics
+
+.SH "SYNOPSIS"
+\fBsnaprstat\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBsnaprstat\fP was a simpler version of \fIsnapstat(1NEMO)\fP, which is rather verbose,
+giving just some statistics of the phase space coordinates.
+There are are no control options (yet).
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input file name (snapshot) [???]
+
+.SH "EXAMPLES"
+Statistics of a 100 body Plummer sphere:
+
+.nf
+% mkplummer - 100 seed=123 | snaprstat -
+time: 0.000000
+pos:  -0.000000 +/- 0.994500  0.000000 +/- 0.768110  -0.000000 +/- 0.956304 
+vel:  -0.000000 +/- 0.416997  -0.000000 +/- 0.356604  -0.000000 +/- 0.389235 
+mnmx pos:  -4.674068 4.787482  -3.828522 2.745906  -2.039575 5.570426 
+mnmx vel:  -1.200676 0.838139  -0.808448 1.070254  -0.897802 0.885880 
+.fi
+
+.SH "SEE ALSO"
+snapstat(1NEMO), snapmnmx(1NEMO), snapshot(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+2-Jul-21	V0.1 finally documented	PJT
+.fi

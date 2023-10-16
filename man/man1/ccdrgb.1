@@ -1,9 +1,12 @@
-.TH CCDRGB 1NEMO "10 May 2010"
-.SH NAME
+.TH CCDRGB 1NEMO "18 July 2020"
+
+.SH "NAME"
 ccdrgb \- create composite RGB color images from multiple input images
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdrgb\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 No description available. This manual page was created by mkman
 .PP
 To convert an RGB into a greyscale image, there are some general
@@ -18,22 +21,23 @@ where gamma = 2.2 typically. This is the Y in XYZ color space. Followed by
 in LAB  color space, where L* 
 "... aspires to perceptual uniformity ... closely matches human perception of lightness."
 
-.SH PARAMETERS
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin1=\fP
-Input image(s) [???]     
-.TP 20
+Input \fIRed\fP image [???]     
+.TP
 \fBin2=\fP
-Input image(s) [???]     
-.TP 20
+Input \fIGreen\fP image [???]     
+.TP
 \fBin3=\fP
-Input image(s) []     
-.TP 20
+Input \fIBlue\fP image.  If none supplied, the middle channel
+is computing from the other two, using \fBc=\fP.
+.TP
 \fBout=\fP
 Output image file [???]    
-.TP 20
+.TP
 \fBc=\fP
 color composition index RGB=(A, B+c*A, B) if only 2 images
 are used. [0.5] 
@@ -46,12 +50,71 @@ Range in image 2.
 .TP
 \fBrange3=\fP
 Range in image 3.
-.SH EXAMPLES
-.SH SEE ALSO
-ccdmath(1NEMO)
-.SH AUTHOR
+.TP 20
+\fBbw=\fP
+If given, scale factors for BW image creation
+.TP 20
+\fBnbench=\fP
+Benching OpenMP [1]     
+
+
+.SH "EXAMPLES"
+The command line version of FITS liberator is easy to use in combination with NEMO tools.
+.nf
+
+#    mean       sigma    wav  mean/sigma    min max
+1  0.228899   0.050121   090   4.57   -3.453089 2194.037842
+2  0.273568   0.046089   150   5.94   -2.816395 1438.471313 
+3  0.220265   0.041095   200   5.36   -2.520102 1421.706177
+4  0.133996   0.037056   277   3.62   -0.118913 323.830872 
+5  0.143088   0.023680   356   6.04   -0.005641 283.265594
+6  0.378302   0.022430   444  16.87    0.000000 312.359680
+
+
+first of all, all maps need to be smoothed to the same beam,
+since they are  diffraction limited.
+After this they should be scaled to the same noise (sigma)
+
+asinh(x) = ln(x + sqrt(x*x+1))
+
+
+fitscli  -i map1.fits -o junk5.tiff -s asinh -k 10 -p 1000 -S 50
++--------------------------------------+-------------------------------+
+|  -b Black:       -0.635749           |  -w White:       5.396417     |
+|  -k Background:  10.000000           |  -p Peak:        1000.000000  |
+|  -e Exponent:    0.500000            |  -S Scaled Peak: 50.000000    |
++-----------------+-------------+---------------+-------------+------------+
+|  Statistics     |  Min        |  Max          |  Mean       |  StDev     |
++-----------------+-------------+---------------+-------------+------------+
+|  Input Image:   |  -3.453089  |  2194.037842  |  0.290447   |  2.277242  |
+|  Scaled Image:  |  -0.635749  |  5.396417     |  -0.472900  |  0.036261  |
++-----------------+-------------+---------------+-------------+------------+
+
+
+fitscli  -i map1.fits -o junk4.tiff -s asinh -k -10 -p 4000 -S 50
++--------------------------------------+-------------------------------+
+|  -b Black:       0.081542            |  -w White:       4.007001     |
+|  -k Background:  -10.000000          |  -p Peak:        4000.000000  |
+|  -e Exponent:    0.500000            |  -S Scaled Peak: 50.000000    |
++-----------------+-------------+---------------+------------+------------+
+|  Statistics     |  Min        |  Max          |  Mean      |  StDev     |
++-----------------+-------------+---------------+------------+------------+
+|  Input Image:   |  -3.453089  |  2194.037842  |  0.290447  |  2.277242  |
+|  Scaled Image:  |  0.081542   |  4.007001     |  0.127890  |  0.013286  |
++-----------------+-------------+---------------+------------+------------+
+
+.fi
+
+.SH "SEE ALSO"
+ccdmath(1NEMO), ccdppm(1NEMO), fitscli(1)
+.nf
+https://noirlab.edu/public/products/fitsliberator/
+.fi
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 8-jun-98	V0.0 ancient version	PJT

@@ -6,7 +6,8 @@
  * It uses the generic unix rand() routine, which is known
  * to be not so great. See xrandom() for a  slightly better one.
  *
- *     4-mar-94  ansi, added -DNEED_RAND section - added stdin.h
+ *     4-mar-94    ansi, added -DNEED_RAND section - added stdin.h
+ *    18-apr-2021  von Hoerner's 1957 pretty good algorithm
  */
 
 #include <stdinc.h>
@@ -19,6 +20,30 @@
 double xrand(double xl, double xh)
 {
     return xl + (xh - xl) * ((double) rand()) / RAND_MAX;
+}
+
+
+static double seed_svh = -1.0;
+
+/*
+ * ran_svh57:    returns a number between 0 and 1
+ */
+
+double ran_svh57(double seed)
+{
+  double x2, xnew;
+  if (seed_svh < 0) {
+    if (seed < 0.57 || seed > 0.91) error("SvH seed needs to be between 0.57 and 0.91");
+    dprintf(0,"SvH seed=%g\n",seed);
+    seed_svh = seed;
+  }
+  x2 = seed_svh*seed_svh;
+  if (x2 < 0.57)
+    seed_svh = x2 + 0.32;
+  else
+    seed_svh = x2;
+  xnew = (seed_svh*1000) - (int)(seed_svh*1000);
+  return xnew;
 }
 
 #if defined(NEED_RAND)

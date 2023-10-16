@@ -27,7 +27,7 @@ string defv[] = {
     "dup=t\n        duplicate or interpolate?",
     "wcs=t\n        Retain WCS borders?",
     "ndim=2\n       2D or 3D duplication",
-    "VERSION=2.0\n  20-jul-2012 PJT",
+    "VERSION=2.1a\n 27-jan-2021 PJT",
     NULL,
 };
 
@@ -35,7 +35,7 @@ string usage="duplicate a 2D image";
 
 void slice2(imageptr i, imageptr o,  int n, real factor, bool Qwcs);
 
-nemo_main()
+void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
@@ -56,6 +56,7 @@ nemo_main()
     instr = stropen (getparam("in"),"r");	/* get stream */
     read_image (instr,&iptr);               /* read image */
     strclose(instr);                        /* close image file */
+    if (Axis(iptr)) warning("axis=1 not supported");
 
     nx = n*Nx(iptr);
     ny = n*Ny(iptr);
@@ -102,10 +103,14 @@ void slice2(imageptr i, imageptr o, int n, real factor, bool Qwcs)
       Dx(o) = Dx(i)*fac;
       Dy(o) = Dy(i)*fac;
     }
+    Xref(o) = Xref(i);
+    Yref(o) = Yref(i);
+    Axis(o) = Axis(i);
     MapMin(o) = MapMin(i) * factor;
     MapMax(o) = MapMax(i) * factor;
 }
 
+// not used yet
 void slice3(imageptr i, imageptr o, int n, real factor)
 {
     int x, y, z, iz;
@@ -119,6 +124,9 @@ void slice3(imageptr i, imageptr o, int n, real factor)
     Ymin(o) = Ymin(i);
     Dx(o) = Dx(i)*fac;
     Dy(o) = Dy(i)*fac;
+    Xref(o) = Xref(i);
+    Yref(o) = Yref(i);
+    Axis(o) = Axis(i);
     MapMin(o) = MapMin(i) * factor;
     MapMax(o) = MapMax(i) * factor;
 }

@@ -22,3 +22,6 @@ Also check the following files used to aid installing falcON tools:
 	$NEMO/docs/install_nemo
 	
 
+4) An example of somebody who wrote his own potential, see the contribution by
+   Bekdaulet Shukirgaliyev in https://github.com/BS-astronomer/GasPotential.git
+   http://archiv.ub.uni-heidelberg.de/volltextserver/25699/1/Thesis_Shukirgaliyev.pdf

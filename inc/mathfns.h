@@ -10,6 +10,7 @@
 /* 18-Sep-08  WD made sqr,qbe,dex inline                                    */
 /* ??-???-??  WD adapted for MAC                                            */
 /* 24-Jan-12  WD commented decl of rexp2() which clashes with math.h        */
+/* 19-nov-20  PT c99 doesn't define M_LN10, so we stuff it in stdinc.h      */
 /****************************************************************************/
 
 #ifndef _mathfns_h
@@ -117,6 +118,10 @@ extern "C" {
 #define rcbrt    fcbrt
 #endif
 
+#ifndef M_LN10
+#define M_LN10   LN10
+#endif  
+
 inline static double sqr(double x) { return x*x; }
 inline static double qbe(double x) { return x*x*x; }
 /* inline static double dex(double x) { return pow(10.0,x); } */
@@ -146,6 +151,7 @@ int init_xrandom(string);
 int set_xrandom(int);
 double xrandom(double, double);
 double grandom(double, double);
+double erandom(double);
 double frandom(double, double, real_proc);
 
 #ifdef NEMO

@@ -6,6 +6,7 @@
 <title>HACKCODE1(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -21,68 +22,71 @@ to <i>O</i>(<i>N</i>log<i>N</i>). <i>hackcode1_qp</i> is similar, but includes q
 to body-cell interactions (L. Hernquist, <i>App. J. Suppl.</i>, <b>64<i>, 715,  1987). <p>
 Particles
 with zero mass will not be included in building the  tree structure, and
-hence in effect produce a restricted N-body code. 
-<h2><a name='sect3' href='#toc3'></i></b>Parameters</a></h2>
-The following
-parameters are recognized; they may be given in any order. 
+hence in effect produce a restricted N-body code. <p>
+A special program, <a href='snapdiagplot.1.html'><i>snapdiagplot(1NEMO)</i></i></b></a>
+
+can be used to monitor conservation of energy and momentum. 
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+The
+following parameters are recognized; they may be given in any order. 
 <dl>
 
-<dt><b>in</b>=<i>in-file</i> </dt>
-<dd>If
-given, initial conditions will be read from <i>in-file</i> in snapshot format. At
-most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
+<dt><b>in=</b><i>in-file</i>
+</dt>
+<dd>If given, initial conditions will be read from <i>in-file</i> in snapshot format.
+At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
 
-<dt><b>out</b>=<i>out-file</i> </dt>
-<dd>If given,
-results are written to <i>out-file</i> in snapshot format. </dd>
-
-<dt><b>restart</b>=<i>state-file</i> </dt>
+<dt><b>out=</b><i>out-file</i> </dt>
 <dd>If
-given, the system state will be read from <i>state-file</i>. New values are accepted
+given, results are written to <i>out-file</i> in snapshot format. </dd>
+
+<dt><b>restart=</b><i>state-file</i>
+</dt>
+<dd>If given, the system state will be read from <i>state-file</i>. New values are accepted
 for the following parameters: <b>out</b>, <b>save</b>, <b>eps</b>, <b>tol</b>, <b>options</b>, <b>fcells</b>, <b>tstop</b>,
 <b>freqout</b>, <b>minor_freqout</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b>
 may be specified. </dd>
 
-<dt><b>continue</b>=<i>state-file</i> </dt>
+<dt><b>continue=</b><i>state-file</i> </dt>
 <dd>If given, the system state will be
 read from <i>state-file</i>. New values are accepted for the following parameters:
 <b>out</b>, <b>save</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified.
 </dd>
 
-<dt><b>save</b>=<i>state-file</i> </dt>
+<dt><b>save=</b><i>state-file</i> </dt>
 <dd>If given, the system state will be saved in <i>state-file</i> after
 each timestep. </dd>
 
-<dt><b>nbody</b>=<i>nbody-value</i> </dt>
+<dt><b>nbody=</b><i>nbody-value</i> </dt>
 <dd>Number of bodies for test data, generated
 only if none of <b>in</b>, <b>restart</b>, or <b>continue</b> are specified. Default is <b>128</b>. </dd>
 
-<dt><b>seed</b>=<i>random-seed</i>
+<dt><b>seed=</b><i>random-seed</i>
 </dt>
 <dd>Random number seed used in generating initial conditions. Default is <b>123</b>.
 </dd>
 
-<dt><b>cencon</b>=<i>cencon-flag</i> </dt>
+<dt><b>cencon=</b><i>cencon-flag</i> </dt>
 <dd>If <b>true</b>, generate centrally concentrated test system.
 Default is <b>false</b>. </dd>
 
-<dt><b>freq</b>=<i>integ-freq</i> </dt>
+<dt><b>freq=</b><i>integ-freq</i> </dt>
 <dd>Inverse time-step, to be used with a leap-frog
 integrator. Default is <b>32.0</b> (32 steps per unit time). </dd>
 
-<dt><b>eps</b>=<i>soft-length</i> </dt>
+<dt><b>eps=</b><i>soft-length</i> </dt>
 <dd>Force
 softening parameter. Default is <b>0.05</b>. </dd>
 
-<dt><b>tol</b>=<i>theta-value</i> </dt>
+<dt><b>tol=</b><i>theta-value</i> </dt>
 <dd>Opening-angle tolerence
 parameter. Default is <b>1.0</b>. </dd>
 
-<dt><b>fcells</b>=<i>fcells-value</i> </dt>
+<dt><b>fcells=</b><i>fcells-value</i> </dt>
 <dd>Ratio of cells to bodies, used
 when allocating cells. Default is <b>0.75</b>. </dd>
 
-<dt><b>options</b>=<i>option-string</i> </dt>
+<dt><b>options=</b><i>option-string</i> </dt>
 <dd>Miscellaneous
 control options, specified as a comma-separated list of keywords. Currently
 recognized keywords are: <b>reset_time</b>: when reading initial data, set <i>tnow</i>
@@ -92,24 +96,25 @@ space coordinates are always output.  It also seems that the reset_time
 and new_tout options have not been implemented yet. Default: <b>mass,phase</b>.
 </dd>
 
-<dt><b>tstop</b>=<i>stop-time</i> </dt>
+<dt><b>tstop=</b><i>stop-time</i> </dt>
 <dd>Time to stop integration in N-body model units. Default is
 <b>2.0</b>. </dd>
 
-<dt><b>freqout</b>=<i>out-freq</i> </dt>
+<dt><b>freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of major N-body data outputs. Default is <b>4.0</b>
 (4 frames per unit time). </dd>
 
-<dt><b>minor_freqout</b>=<i>out-freq</i> </dt>
+<dt><b>minor_freqout=</b><i>out-freq</i> </dt>
 <dd>Frequency of minor diagnostic
 outputs. If this frequency is not a simple fraction of <b>freq</b> (see above),
 the program can waiste significant amounts of time. Default is <b>32.0</b> (32 diagnostic
 measurements per unit time). </dd>
 
-<dt><b>log</b>=<i>logfile</i> </dt>
+<dt><b>log=</b><i>logfile</i> </dt>
 <dd>Output filename for log.  Default
 is standard output (<b>-</b>). Can also use <b>log=.</b> to make it disappear in case your
-out=- needs to be part of a pipe. </dd>
+out=- needs to be part of a pipe. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
@@ -118,29 +123,35 @@ out=- needs to be part of a pipe. </dd>
 ,
 <a href='directcode.1.html'>directcode(1NEMO)</a>
 , <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
+, <a href='snapdiagplot.1.html'>snapdiagplot(1NEMO)</a>
  <br>
 <pre>https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
 Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
 </pre>
-<h2><a name='sect5' href='#toc5'>Bugs</a></h2>
-This code is the very original 1986 (NEMO) version of the Barnes &amp; Hut
- treecode and only kept in NEMO for that reason. It is not the most  efficient
-treecode (see e.g. <a href='treecode.1.html'><i>treecode(1NEMO)</i></a>
+<p> 
+<h2><a name='sect5' href='#toc5'>Ads</a></h2>
+@ads <A HREF=https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B> 1986Natur.324..446B </A>
+<p> 
+<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
+This code is the very original 1986 (NEMO)
+version of the Barnes &amp; Hut  treecode and only kept in NEMO for that reason.
+It is not the most  efficient treecode (see e.g. <a href='treecode.1.html'><i>treecode(1NEMO)</i></a>
  and <a href='gyrfalcON.1.html'><i>gyrfalcON(1NEMO)</i></a>
- for improved versions),
-and also suffers from the  Warren &amp; Salmon imploding galaxy bug. <p>
-When a <b>restart</b>
-is specified, values must be given for <b>ALL</b> legal parameters which do not
-take default values. <p>
-<i>continue=</i> does not seem to work. Use <i>restart=</i> 
-<h2><a name='sect6' href='#toc6'>Benchmark</a></h2>
-Running
-<b>hackcode1</b> with all default parameters will integrate a 128 body plummer
-sphere for 64 timesteps to time 2 with softening 0.05 and critical opening
-angle 1 and a seed of 123. Assuming the standard portable &rsquo;ran3&rsquo; from NumRec
-is being used in <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
-, we get the following  initial and final
-printout: <br>
+
+for improved versions), and also suffers from the  Warren &amp; Salmon imploding
+galaxy bug. <p>
+When a <b>restart</b> is specified, values must be given for <b>ALL</b> legal
+parameters which do not take default values. <p>
+<i>continue=</i> does not seem to
+work. Use <i>restart=</i> 
+<p> 
+<h2><a name='sect7' href='#toc7'>Benchmark</a></h2>
+Running <b>hackcode1</b> with all default parameters
+will integrate a 128 body plummer sphere for 64 timesteps to time 2 with
+softening 0.05 and critical opening angle 1 and a seed of 123. Assuming the
+standard portable &rsquo;ran3&rsquo; from NumRec is being used in <a href='xrandom.3.html'><i>xrandom(3NEMO)</i></a>
+, we
+get the following  initial and final printout: <br>
 <pre>  tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
  0.000   -0.2675   -0.5434      3864         9        20      0.00
           cm pos   -0.0000    0.0000    0.0000
@@ -150,17 +161,21 @@ printout: <br>
           cm pos    0.0002   -0.0018    0.0007
           cm vel    0.0003   -0.0019    0.0009
 </pre>
-<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Caveats</a></h2>
 Particles cannot occupy the same position, since building the treestructure
 is done in integerized coordinates. 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Joshua E. Barnes. 
-<h2><a name='sect9' href='#toc9'>Files</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>src/nbody/evolve/hackcode/hackcode1/<tt> </tt>&nbsp;<tt> </tt>&nbsp;original NEMOized 1986 code
 usr/josh/treecode<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated 1990s version
 </pre>
-<h2><a name='sect10' href='#toc10'>History</a></h2>
+<p> 
+<h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
 <pre>1-jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0  man written<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 11-jul-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2  using getparam()&rsquo;s debug keyword + doc impr. <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -179,12 +194,13 @@ usr/josh/treecode<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Bugs</a></li>
-<li><a name='toc6' href='#sect6'>Benchmark</a></li>
-<li><a name='toc7' href='#sect7'>Caveats</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Files</a></li>
-<li><a name='toc10' href='#sect10'>History</a></li>
+<li><a name='toc5' href='#sect5'>Ads</a></li>
+<li><a name='toc6' href='#sect6'>Bugs</a></li>
+<li><a name='toc7' href='#sect7'>Benchmark</a></li>
+<li><a name='toc8' href='#sect8'>Caveats</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Files</a></li>
+<li><a name='toc11' href='#sect11'>History</a></li>
 </ul>
 </body>
 </html>

@@ -1,7 +1,9 @@
-.TH TRICKS 8NEMO "6 March 1989"
-.SH NAME
-tricks \- some tricks (and bugs) when using NEMO
-.SH DESCRIPTION
+.TH TRICKS 8NEMO "3 August 2022"
+
+.SH "NAME"
+tricks \- some Unix tricks when using NEMO
+
+.SH "FILES: COMPRESSION AND SUCH"
 One can use \fIcat(1)\fP to catenate structured binary files, e.g.
 .nf
 	\fBcat r001a.dat >>r001.dat\fP
@@ -22,6 +24,8 @@ be processed by NEMO after
 .nf
 	\fBzcat r001.data.Z | atos - r001.dat\fP
 .fi
+See also the \fItcppipe(1NEMO)\fP program to read the data over
+a pipe from another machine.
 .PP
 Some N-body programs, which are capable of handling a series of snapshots,
 and selecting them using the \fBtimes=\fP keyword, are not able to
@@ -44,31 +48,106 @@ to write a \fIfits(5NEMO)\fP format file.
 Check also the tabccd shell script, if available, or perhaps someone
 wrote it in C already. It calls awk, atos and snapgrid.
 .PP
-The \fIds(1LOCAL)\fP program, written by Bill Sebok, is one of the external 
-programs
-which can be used to display images. \fIds\fP can understand a variety of
-image file formats, of which the \fIfits(5NEMO)\fP is best suited for our needs.
+The \fIds9(1)\fP program is one of the external programs
+which can be used to display images. \fIds9\fP can understand a
+variety of FITS compression standards.
 Transform your image to a fits file using \fIccdfits(1NEMO)\fP, and use 
-ds on that fits file. Although \fIds(1L)\fP 
-works on monochrome SUN workstations,
-it's best on a color monitor. The trick to remember is to use the \fB-yflip\fP
-switch, or click on the Y button, because  our fits interface has a problem
-obviously...
-.SH PIPES and SHARED MEMORY
+ds on that fits file.
+
+.SH "PIPES and SHARED MEMORY"
 NEMO encourages you to use pipes where serial operations make sense (see also \fItee(1)\fP).
-However on Linux, assuming you have enough memory, using /dev/shm will sacrifice your memory to store
-data temporarely and could speed up your I/O dominated workflow. Here is a simple example:
+However on Linux, assuming you have enough memory, using /dev/shm (or anything that uses
+\fItmpfs(1)\fP)   will sacrifice your memory to store
+data temporarely and could speed up your I/O dominated workflow. Here is an example:
 .nf
        mkdir /dev/shm/$USER
        cd /dev/shm/$USER
        mkspiral s000 1000000 nmodel=40
 .fi
 The example of \fImkspiral(1NEMO)\fP is taken from the NEMO \fIbench(5NEMO)\fP suite, but this example
-is actually not very I/O dominated.
-.SH SEE ALSO
-nemo(1NEMO), bench(5NEMO), tee(1)
-.SH AUTHOR
+is actually not very I/O dominated. The variable $XDG_RUNTIME_DIR can also be used, or $TMPDIR,
+depending on your system configuration. Another option is using the \fImktemp(1)\fP command,
+e.g. \fBmktemp tmp.XXXXXXXX\fB
+.PP
+Using \fItcppipe(1NEMO)\fP one can read data produced on other machines
+.PP
+\fIzrun(1)\fP can uncompress on the fly, by prepending it to the command
+.nf
+	zrun fitsccd ngc6503.fits.gz - | tsf -
+.fi
+.PP
+\fIpee(1)\fP is tee for pipes
+.PP
+\fIsponge(1)\fP soaks up standard input and writes to a file
+.PP
+\fIvipe(1)\fP edits a pipe using your editor,e.g.
+.nf
+	command1 | vipe | command2
+.fi
+.PP
+\fIpv(1)\fP monitors the progress of data through a pipe, e.g.
+.nf
+        mkplummer - 10000 nmodel=10 | pv | snapscale - . mscale=1
+.fi
+The (bash) array ${PIPESTATUS[@]} contains the status ($?) for each program in
+a unix pipe. In this example it should return "0 0 0".
+
+.SH "PARALLEL and OpenMP"
+Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
+uses a fraction of the memory on the machine, the GNU \fIparallel(1)\fP program can be used to spread the load,
+e.g.
+.nf
+       echo mkplummer . 10000 > run.txt
+       echo mkplummer . 10000 >> run.txt
+       parallel --jobs 2 < run.txt
+.fi
+which will run both jobs in parallel.
+.PP
+One can also use the \fB-j\fP flag of \fBmake\fP of running commands in parallel. Similar to the run.txt file
+created here, a well crafted Runfile can be created, and with
+.nf
+       make -f Runfile -j 2
+.fi
+should achieve the same result.
+
+.PP
+Although NEMO can be configured using \fB--with-openmp\fP to take advantage of multi-cores OpenMP
+computing, there are really no programs in NEMO taking advantage of this yet.
+However, programs using \fInemo_main()\fP
+should be aware of the user interface implications of controlling how many cores are used:
+.nf
+
+   0.  the number of cores as per omp_get_num_procs().  We actually take a short-cut and use
+       omp_get_max_threads() since it listens to OMP_NUM_THREADS (see next item)
+       [the user has no control over this]
+   1.  setting the environment variable OMP_NUM_THREADS to the (max) number of cores it will use
+   2.  using the \fBnp=\fP system keyword will override any possible setting of OMP_NUM_THREADS
+       in the step before.
+   
+.fi
+
+.SH "SLURM"
+
+slurm is a popular package you will find on large computer clusters. See also
+\fIsbatch_nemo.sh(8NEMO)\fP for a helper script in NEMO to use slurm.
+
+.SH "TABLES"
+
+Tables (\fItable(5NEMO)\fP) come in many forms. Here are some TLDR type reminder on manipulating and displaying tables
+.nf
+  # align a table for viewing
+  csvlook data.csv
+  column -s, -t data.csv
+  python -c "import sys,prettytable; print(prettytable.from_csv(sys.stdin))" < data.csv
+
+
+.SH "SEE ALSO"
+nemo(1NEMO), bench(5NEMO), table(5NEMO), tcppipe(1NEMO), sbatch_nemo(8NEMO),
+tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)
+
+.SH "AUTHOR"
 Peter Teuben.
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.5i
@@ -77,4 +156,5 @@ Peter Teuben.
 6-mar-89	ds added          	PJT
 9-oct-90	fixed some typos	PJT
 jan-2020	added pipe/shm		PJT
+may-2021	OpenMP			PJT
 .fi

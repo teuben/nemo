@@ -1,0 +1,22 @@
+#! /bin/bash
+#
+#  FITS liberator CLI
+#  See also:  https://noirlab.edu/public/products/fitsliberator/
+#
+#  on ubuntu:     sudo apt install libcfitsio-dev libtiff-dev libvips-dev
+#                            
+
+url=https://gitlab.com/noirlab/fits-liberator-cli
+
+
+cd $NEMO/local
+if [ ! -d fits-liberator-cli ]; then
+  git clone $url
+fi
+cd fits-liberator-cli
+git pull
+make
+mv fitscli $NEMOBIN
+
+echo "If this failed, did you install the tools, e.g. on ubuntu:"
+echo "sudo apt install libcfitsio-dev libtiff-dev libvips-dev"

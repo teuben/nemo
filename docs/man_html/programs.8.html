@@ -6,6 +6,7 @@
 <title>PROGRAMS(8NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -22,8 +23,13 @@ under this and sometimes more wildcard names (e.g. snapplot and  snapplot_ps)
 Program names ending in a  questionmark (<b>?</b>) are not available yet, but
 we&rsquo;re thinking of making them. Check the future-plan <a href='software.8.html'><i>software(8NEMO)</i></a>
  document
-to see if anyone is working on them yet. 
-<h2><a name='sect2' href='#toc2'>1. GENERAL INFORMATION (only doc/man)</a></h2>
+to see if anyone is working on them yet. <p>
+Programs we don&rsquo;t have are in <a href='other.8.html'><i>other(8NEMO)</i></a>
+
+... <p>
+This thematic style was inspired by GIPSY. 
+<h2><a name='sect2' href='#toc2'>1. GENERAL INFORMATION (only
+doc/man)</a></h2>
 <br>
 <pre>programs<tt> </tt>&nbsp;<tt> </tt>&nbsp;list of programs (this file)<tt> </tt>&nbsp;<tt> </tt>&nbsp;[8]
 intro    <tt> </tt>&nbsp;<tt> </tt>&nbsp;list of programs (alphabetical)<tt> </tt>&nbsp;<tt> </tt>&nbsp;
@@ -34,15 +40,14 @@ usage205<tt> </tt>&nbsp;<tt> </tt>&nbsp;a very short an simple instruction list 
 usageeta10<tt> </tt>&nbsp;<tt> </tt>&nbsp;some comments on ETA-10 usage [8]
 cookbook<tt> </tt>&nbsp;<tt> </tt>&nbsp;a quick list of what to do to run (e.g.) treecode on the 205 [8]
 tricks    <tt> </tt>&nbsp;<tt> </tt>&nbsp;useful tricks and bug detours [8]
-orbit   <tt> </tt>&nbsp;<tt> </tt>&nbsp;overview what orbit utilities are planned [0]
 </pre>
 <h2><a name='sect3' href='#toc3'>2. Utility</a></h2>
 <br>
 <pre>mknemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;compile NEMO progams, out of directory
-nemoshow    <tt> </tt>&nbsp;<tt> </tt>&nbsp;check environment, show NEMO system variables/keywords
+-nemoshow    <tt> </tt>&nbsp;<tt> </tt>&nbsp;check environment, show NEMO system variables/keywords
 nemoman<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;create a template man pages from a compiled program
 nemoinp  <tt> </tt>&nbsp;<tt> </tt>&nbsp;test parsing of numbers
-units        <tt> </tt>&nbsp;<tt> </tt>&nbsp;units conversion utility
+units        <tt> </tt>&nbsp;<tt> </tt>&nbsp;units conversion utility (unix)
 </pre>
 <h2><a name='sect4' href='#toc4'>3. Data Conversion</a></h2>
 <br>
@@ -74,6 +79,7 @@ wcs       <tt> </tt>&nbsp;<tt> </tt>&nbsp;(astronomical) world coordinate system
 <br>
 <pre>anisot    <tt> </tt>&nbsp;<tt> </tt>&nbsp;create distribution function table for anistropic spherical models
 mkommod   <tt> </tt>&nbsp;<tt> </tt>&nbsp;anisotropic velocity distribution (Merritt)
+mkplum<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;plummer model (falcON)
 mkplummer<tt> </tt>&nbsp;<tt> </tt>&nbsp;plummer model 
 mkdisk  <tt> </tt>&nbsp;<tt> </tt>&nbsp;uniform disk of test-particles in external potential
 mkspiral<tt> </tt>&nbsp;<tt> </tt>&nbsp;uniform disk of test-particles with logarithmic spiral
@@ -89,6 +95,7 @@ mkisosph<tt> </tt>&nbsp;<tt> </tt>&nbsp;isothermal sphere
 mkmestel<tt> </tt>&nbsp;<tt> </tt>&nbsp;Mestel disk
 mktestdisk<tt> </tt>&nbsp;<tt> </tt>&nbsp;toy program
 mkkd95<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;Kuijken-Dubinski-95 composite disk-bulge-halo model
+mkgalaxy<tt> </tt>&nbsp;<tt> </tt>&nbsp;McMillan/Dehnen composite galaxy models (falcON)
 magalie<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;Boily et al. composite disk-bulge-halo model
 </pre>
 <h2><a name='sect6' href='#toc6'>5. N-body Integrators</a></h2>
@@ -222,6 +229,7 @@ fitstab  <tt> </tt>&nbsp;<tt> </tt>&nbsp;convert fits table to ascii table
 snapfits<tt> </tt>&nbsp;<tt> </tt>&nbsp;convert a snapshot file to a fits file
 ccdfits     <tt> </tt>&nbsp;<tt> </tt>&nbsp;write a fits file to disk
 fitsccd  <tt> </tt>&nbsp;<tt> </tt>&nbsp;read a (fits) image file from disk
+sdinfo<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;info and benchmarking SDFITS files
 </pre>
 <h2><a name='sect15' href='#toc15'>15. MODEL FITTING and ANALYSIS</a></h2>
 <br>
@@ -248,7 +256,7 @@ tabpairs<tt> </tt>&nbsp;<tt> </tt>&nbsp;analyze interaction histories of stars i
 Peter Teuben 
 <h2><a name='sect19' href='#toc19'>See Also</a></h2>
 <br>
-<pre>index(1NEMO), software(8NEMO)
+<pre>index(1NEMO), other(8NEMO), software(8NEMO)
 The NEMO Users/Programmers Manual
 </pre>
 <h2><a name='sect20' href='#toc20'>Update History</a></h2>

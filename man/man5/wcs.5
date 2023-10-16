@@ -1,11 +1,15 @@
 .TH WCS 5NEMO "15 December 2019"
-.SH NAME
+
+.SH "NAME"
 wcs \- World Coordinate Systems
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBwcs\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBwcs\fP is the World Coordinate System.
-.SH POLARIZATION
+
+.SH "POLARIZATION"
 Polarization is an exceptional case, since it's enumerated (XX, YY, LL, etc.), but
 the community has assigned integer values such that a usual NAXIS,CRPIX,CRVAL,CDELT,CTYPE
 can be used. This is the AIPS/FITS convention.
@@ -24,12 +28,60 @@ can be used. This is the AIPS/FITS convention.
 -7	XY
 -8	YX
 .fi
-.SH SEE ALSO
+
+.SH "COORDINATES"
+Some common coordinate systems:
+.nf
+   RA--    Equatorial
+   DEC-
+   GLON    Galactic
+   GLAT
+   ELON    Ecliptic
+   ELAT
+
+.fi
+
+.SH "PROJECTION"
+Some common projections:
+.nf
+   -SIN
+   -TAN
+   -ARC
+   -NCP
+   -GLS (or -SFL)
+   -MER
+   -AIT
+
+
+.fi
+
+
+.SH "VELOCITY CONVENCTIONS"
+
+Radio vs. Optical. Linear vs. Non-linear.  See also \fIccd2vel(1NEMO)\fP
+.nf
+  FREQ
+  WAVE (vacuum)
+  AWAV (air)
+  VRAD (radio)
+  VOPT (optical)
+  VELO (relativistic)
+  FELO [VOPT-F2W)
+
+  -HEL
+  -LSR
+.fi
+
+.SH "SEE ALSO"
 wcs(1NEMO), worldpos(3NEMO), ccdsky(1NEMO), ccdfits(1NEMO), impos(1MIRIAD), 
 xy2sky(1WCSTOOLS), sky2xy(1WCSTOOLS)
-.SH AUTHOR
+.PP
+https://www.aanda.org/articles/aa/pdf/2006/05/aa3818-05.pdf - Representations of spectral coordinates in FITS 
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 15-dec-2019	written		PJT

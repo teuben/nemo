@@ -1,10 +1,16 @@
 
 See http://www.ifa.hawaii.edu/~barnes/software.html for info on the
-latest releases.  ZENO is also maintained in github now, and this is
+latest releases.  In 2022 their website went legacy, so try
+https://legacy.ifa.hawaii.edu/faculty/barnes/software.html now.
+
+
+# ZENO
+
+ZENO is also maintained in github now, and this is
 the preferred way to install it within NEMO. See the Makefile for a
 few targets to help you with the install.
 
-If this all works, and you have the preconditions (gsl, mpicc) you
+If this all works, and you have the preconditions (gsl, mpicc, gl) you
 should be able to do:
 
        	  make zeno
@@ -16,9 +22,37 @@ should be able to do:
 Consult the zeno/Instructions for troubleshooting.   It will also
 download my zeno_pjt fork, just in case.
 
+For Ubuntu this is what I needed:
+
+     sudo apt install libgsl-dev openmpi-bin freeglut3-dev libopenmpi-dev
 
 WARNING:   if you add ZENO to your NEMO environment, some commands duplicate
 and may not be doing exactly the same thing. mkorbit is the major one that
-I know about.
+I know about. Note there is no mkplummer for ZENO, this is solved via the GSP
+functions, viz.
 
- - Peter Teuben,    dec 2019
+     plumgsp - | gsprealize - plummer.snap
+
+Removing the symlink $NEMO/usr/zeno/zeno will disable the ZENO environment
+on your next NEMO load.
+
+An alternative is to issue the command
+
+     make zbin
+
+which moves all likewise commands to bin/zeno.   If you thus want to use ZENO's
+version of "tsf" use the command
+
+     $ZENOPATH/bin/zeno/tsf
+
+# code_c
+
+For historic reasons, this is the original Barnes and Hut treecode, written
+in C, preserved by Joshua Barnes. This is their 4th release. NEMO's "hackcode1"
+should come close to this version.
+
+## Description of test procedures and related files:
+
+wget --no-check-certificate  https://legacy.ifa.hawaii.edu/faculty/barnes/treecode_old/testdata.txt
+
+ - Peter Teuben,    nov 2022

@@ -6,14 +6,18 @@
 <title>FITSCCD(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 fitsccd - read a (fits) image file from disk 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>fitsccd in=</b>image
 <b>out=</b>fits [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>fitsccd</b> reads a (fits) image file
 from disk. The input is normally in  <a href='fits.5.html'><i>fits(5NEMO)</i></a>
@@ -27,6 +31,7 @@ will need the keywords <b>bitpix=</b>,<b>offset=</b> and <b>naxis=</b>. <p>
 See old notes in <a href='ccdfits.1.html'><i>ccdfits(1NEMO)</i></a>
 
 how to process fits files from tape instead disk. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following
 parameters are recognized in any order if the keyword is also given: 
@@ -107,29 +112,35 @@ from raw data to internal data. It is only used in <i>raw</i> mode. [Default: <b
 <dd>Offset constant from raw data to internal data. It is only used
 in <i>raw</i> mode. [Default: <b>0</b>]. </dd>
 
-<dt><b>blank=</b>blank_value </dt>
-<dd>If a magic value from the input
-dataset needs to be  replaced in the output image, give that value here.
-It is not yet possible to use the FITS <b>BLANK</b> keyword for this. [Default:
-not used]. </dd>
+<dt><b>zscale=</b> </dt>
+<dd>Scaling for the Z axis. [Default: 1] </dd>
+
+<dt><b>blank=</b>blank_value
+</dt>
+<dd>If a magic value from the input dataset needs to be  replaced in the output
+image, give that value here. It is not yet possible to use the FITS <b>BLANK</b>
+keyword for this. [Default: not used]. </dd>
 
 <dt><b>relcoords=f|t</b> </dt>
-<dd>Use relative coordinates instead of absolute coordinates?
- [false] </dd>
+<dd>Use relative coordinates
+instead of absolute coordinates?  [false] </dd>
 
 <dt><b>axistype=0|1</b> </dt>
-<dd>Old style (0) or new style with crpix-type header <a href='information.1.html'>information
-(1)</a>
- passed through. Default: 0 </dd>
+<dd>Old style (0) or
+new style with crpix-type header <a href='information.1.html'>information (1)</a>
+ passed through. Default:
+
+<p>0 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Foreign Formats</a></h2>
 An <i>AIPS</i> dataset... <p>
-An <i>IRAF</i> dataset...
-<p>
-A <i>GIPSY</i> dataset uses offset=0 and bitpix=-32. Dataset name  normally has
-extension ".IMAGE". Use the GIPSY  program <i>gds</i> or <i>header</i> to find out relevant
-header parameters. <br>
+An <i>IRAF</i> dataset... <p>
+A <i>GIPSY</i> dataset uses
+offset=0 and bitpix=-32. Dataset name  normally has extension ".IMAGE". Use
+the GIPSY  program <i>gds</i> or <i>header</i> to find out relevant header parameters.
+<br>
 <pre>    % fitsccd in=10.IMAGE out=10.ccd mode=raw offset=0 bitpix=-32 ...
 </pre><p>
 A <i>MIRIAD</i> dataset is converted using an offset of 4 bytes and bitpix of
@@ -141,6 +152,7 @@ A <i>ZODIAC</i> dataset uses offset=0 and bitpix=-32. Dataset names are preceded
 with an underscore. For a zodiac image with  <br>
 <pre>    % fitsccd in=_zim out=zim.ccd mode=raw offset=0 bitpix=-32 ...
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 The following example presents some parameters of each axis in
 the cube: (listed are naxis, crpix, crval, cdelt, xmin, xmax) <br>
@@ -161,14 +173,16 @@ CLASS/GILDAS<tt> </tt>&nbsp;<tt> </tt>&nbsp;vectorts cube.fits from cube.lmv
 CASA<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;exportfits("cube.im","cube.fits")
 GIPSY<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;wfits
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>Caveats</a></h2>
-There are FITS image files stored as extensions to a dummy HDU. In
-those cases <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
- must be used to extract the correct HDU and
-continue the data analysis, e.g. <br>
+There are FITS image files stored as extensions to a dummy HDU.
+In those cases <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
+ must be used to extract the correct HDU
+and continue the data analysis, e.g. <br>
 <pre>    % scanfits abc.fits abc1.fits hdu=2
     % ccdfits abc1.fits abc1.ccd
 </pre>Note that FITS files in NEMO do now allow the use of pipes. 
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
 ,
@@ -180,12 +194,15 @@ continue the data analysis, e.g. <br>
 ,
 <a href='dd.1.html'>dd(1)</a>
  
+<p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>~/src/image/fits  <tt> </tt>&nbsp;<tt> </tt>&nbsp;fitsccd.c fitsccd.1
 </pre>
+<p> 
 <h2><a name='sect11' href='#toc11'>Update History</a></h2>
 <br>
 <pre>7-mar-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

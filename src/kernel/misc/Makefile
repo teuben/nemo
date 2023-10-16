@@ -47,11 +47,11 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 	  $L(sort.o) $L(sortptr.o) $L(unwrap.o) \
 	  $L(mp_nllsqfit.o)
 
-BINFILES = nemoinp layout xrandom scanopt 
+BINFILES = nemoinp layout xrandom scanopt linreg
 
 TESTFILES = vecttest axistest splinetest withintest \
 	matchtest linreg momenttest gridtest unwraptest frandomtest \
-	mdarraytest timerstest
+	mdarraytest timerstest runtest
 
 #	update the library: direct comparison with modules inside L
 help:
@@ -209,6 +209,9 @@ timerstest: timers.c
 
 powtest: pow.c
 	$(CC) $(CFLAGS) -o powtest -DTESTBED pow.c $(NEMO_LIBS)
+
+runtest: run.c
+	$(CC) $(CFLAGS) -o runtest -DTESTBED run.c $(NEMO_LIBS)
 
 
 randomizertest: randomizer.c

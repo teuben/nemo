@@ -12,6 +12,7 @@ extern real rotcur_core1   (real r, int n, real *p, real *d);
 extern real rotcur_core2   (real r, int n, real *p, real *d);
 extern real rotcur_plummer (real r, int n, real *p, real *d);
 extern real rotcur_tanh    (real r, int n, real *p, real *d);
+extern real rotcur_arctan  (real r, int n, real *p, real *d);
 extern real rotcur_iso     (real r, int n, real *p, real *d);
 extern real rotcur_exp     (real r, int n, real *p, real *d);
 extern real rotcur_nfw     (real r, int n, real *p, real *d);

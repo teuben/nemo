@@ -10,10 +10,14 @@
 
 #include "defs.h"
 
-local void walksub(real, nodeptr, vector, real, real *, int *);
-local bool subdivp(real, vector, real);
-local real distcount(real *, int, int);
+local void walksub(real dis, nodeptr p, vector cpos, real d, real *ra, int *total);
+  local bool subdivp(real dis, vector cpos, real d);
+local real distcount(real *ra , int total, int nb);
+  
+void hackcount(bodyptr p, real dis, real *ra, int *total);
+void hackwalk(real dis, real *ra, int *total);
 
+  
 real directden(p, nb, dis, ra, base, nbody)
     bodyptr p;
     int nb;
@@ -22,7 +26,7 @@ real directden(p, nb, dis, ra, base, nbody)
     bodyptr base;
     int nbody;
 {
-    int total, i;
+    int i;
     bodyptr q;
     real rn, nbr, den;
     vector disp;
@@ -36,7 +40,7 @@ real directden(p, nb, dis, ra, base, nbody)
 #ifdef DEBUG
     dprintf(0,"Directden= %f\n", den);
 #endif
-    return (den);
+    return den;
 }
 
 real hackden(p, nb, dis, newdis, ra)
@@ -93,14 +97,11 @@ real hackden(p, nb, dis, newdis, ra)
     return den;
 }
 
-local real distcount(ra ,total, nb)
-    real *ra;
-    int total;
-    int nb;
+local real distcount(real *ra, int total, int nb)
 {
     register int i,j;
     register real tmp;
-    int jmin;
+    int jmin=-1;
 #ifdef DEBUG
     dprintf(0,"distcount: distances--");
     for(i=0; i<total; i++)dprintf(0," %f", ra[i]);
@@ -131,11 +132,7 @@ local real distcount(ra ,total, nb)
 local bodyptr pskip;			/* body to skip in force evaluation */
 local vector pos0;			/* point to evaluate field at */
 
-hackcount(p, dis, ra, total)
-bodyptr p;
-real dis;
-real *ra;
-int * total;
+void hackcount(bodyptr p, real dis, real *ra, int *total)
 {
     pskip = p;					/* exclude p from f.c.      */
     SETV(pos0, Pos(p));				/* set field point          */
@@ -147,10 +144,7 @@ int * total;
  */
 
 
-hackwalk(dis, ra, total)
-real dis;
-real *ra;
-int * total;
+void hackwalk(real dis, real *ra, int *total)
 {
     vector croot;
     int i;
@@ -163,14 +157,14 @@ int * total;
  * WALKSUB: recursive routine to do hackwalk operation.
  */
 
-local void walksub(dis, p, cpos, d, ra, total)
-real dis;			        /* critical displacement */
-register nodeptr p;                     /* pointer into body-tree */
-vector cpos;			        /* geometoric center of the node */
-real d;                                 /* size of box  */
-real * ra;			/* array to store distances to */
-				/* particles within sphere */
-int *total;			/* number of particles in the sphere */
+local void walksub(real dis, nodeptr p, vector cpos, real d, real *ra, int *total)
+//  dis		        critical displacement
+//  p                   pointer into body-tree
+//  cpos		geometoric center of the node
+//  d                   size of box
+//  ra			array to store distances to
+//			particles within sphere
+//  total               number of particles in the sphere
 {
     register nodeptr *pp;
     register int i,j;
@@ -209,10 +203,10 @@ int *total;			/* number of particles in the sphere */
  * true if need to subdivide
  */
 
-local bool subdivp(dis, cpos, d)
-real dis;			        /* critical separation  */
-vector cpos;			        /* geometrical center of the node */
-real d;                                 /* size of cell squared */
+local bool subdivp(real dis, vector cpos, real d)
+// dis		critical separation
+// cpos		geometrical center of the node
+// d            size of cell squared
 {
     int i;
     vector dr;

@@ -1,0 +1,113 @@
+.TH TABGEN 1NEMO "5 October 2022"
+
+.SH "NAME"
+tabgen \- Create an arbitrarely large ASCII table with (random) values
+
+.SH "SYNOPSIS"
+\fBtabgen\fP [parameter=value]
+
+.SH "DESCRIPTION"
+Create a table with (random) numbers.
+Either uniformly ditributed numbers between 0 and 1,
+from a gaussian (normal) distribution with mean 0 and sigma 1, 
+a constant value, or a linearly increasing value (0, 1, 2, ...). See \fBmode=\fP below.
+.PP
+The number or rows and columns can be arbitrarely large, but not all \fItable(5NEMO)\fP
+programs in NEMO will be able to deal with large columns or rows. Usually rows
+can be managed with the \fBnmax=\fP keyword, but columns is hidden deeper and not under
+user control.
+.PP
+Using \fBmode < 0\fP
+numbers are generated but not output, in effect allowing a benchmark.
+.PP
+ This program has no real use other than benchmarking and testing the limits
+of other program being fed very large tables. See EXAMPLES below
+for a counter example.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBout=\fP
+Output ascii table [???]     
+.TP
+\fBnr=\fP
+Number of rows [10]    
+.TP
+\fBnc=\fP
+Number of columns [5]    
+.TP
+\fBmode=\fP
+The distribution of numbers: 1=uniform   2=normal   3=constant  4=linear
+< 0 : no output, but the
+absolute value determines which distribution of numbers  [1]
+.TP 
+\fBseed=\fP
+Random seed [123]
+.TP
+\fBfmt=\fP
+The \fIprintf(3)\fP style format specifier. [%g]
+.TP
+\fBsep=c|s|v|t\fP
+Separator between columns. c=comma  s=space  v=vertical bar  t=tab.
+If none of these are given, the string is taken literal
+[Default: space]
+
+.SH "PERFORMANCE"
+On a typical 2020 machine it takes 0.23 seconds to create and output 1M random numbers,
+however most of the time is the output function. Using mode < 0 you can test the speed
+of just producing random numbers. About 95% of the time is spent in \fIprintf(3)\fP,
+as can be seen with this benchmark:
+.nf
+
+    /usr/bin/time tabgen . 10000 10000 -1
+    1.38user 0.29system 0:01.68elapsed 99%CPU
+    
+    /usr/bin/time tabgen . 10000 10000 1
+    28.60user 0.14system 0:28.77elapsed 99%CPU
+    
+.fi
+The raw production of random numbers is thus about 72 Mrups (same speed as numpy.random.normal),
+where the Linpack benchmark claims this machine runs at 50 GFlops.
+.PP
+Generating a sequence of numbers is relatively slow in tabgen. To generate 10M numbers is slow compared
+ot the standard unix tool \fIseq(1)\fP:
+.nf
+
+    /usr/bin/time tabgen - 10000000 1 4 fmt=%-10.f > tab2
+    9.89user 0.07system 0:09.97elapsed 99%CPU
+
+    /usr/bin/time seq 10000000 > tab2
+    0.19user 0.22system 0:00.42elapsed 98%CPU
+    
+.fi
+which is most likely the more complex operations of a floating point \fIfprintf(3)\fP.
+.PP
+The \fInemoinp(1NEMO)\fP program can also generate a simple table, but
+the maximum number of elements in an implied list is limited (100,000 currently).
+This is where \fBtabgen\fP might be useful:
+.nf
+
+     nemoinp 1:200000 > tab1
+     ### Fatal error [nemoinp]: Too many items in list, use a bigger nmax=100000
+     
+     tabgen - 200000 1 mode=4 > tab1
+     wc -l tab1
+     200000 tab1
+
+.fi
+
+.SH "SEE ALSO"
+seq(1), tabhead(1NEMO), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+12-Jul-2020	V0.1 Created	PJT
+14-jul-2020	V0.3 mode= implemented	PJT
+25-jul-2020	V0.4 changed meaning of mode=	PJT
+29-apr-2022	V0.6 cleanup and tableV2 things 	PJT
+5-oct-2022	V0.7 added sep=	PJT
+.fi

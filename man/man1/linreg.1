@@ -1,9 +1,12 @@
 .TH LINREG 1NEMO "23 May 1996"
-.SH NAME
+
+.SH "NAME"
 linreg \- six linear regressions
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBlinreg\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIlinreg\fP computes the slope (\fBa\fP) and intercept coefficients 
 (\fBb\fP) for
 for OLS(Y/X) (1), OLS(X/Y) (2), OLS bisector(3), orthogonal(4),
@@ -15,7 +18,8 @@ T. Isobe, E. D. Feigelson, M. G. Akritas and G. J. Babu,
 Ap.J. 364, 104. (1990)
 .PP
 mean OLS is 0.5*[OLS(X/Y) + OLS(Y/X)]
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -33,7 +37,8 @@ Output mode (0=all, 1..6=various methods
 .TP 20
 \fBmaxline=\fP
 Maximum size of columns    
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 linreg(3NEMO), fitexy(3NEMO), gaussfit(1NEMO), tablsqfit(1NEMO)
 .nf
 T. Isobe,  E. D. Feigelson, M. G. Akritas and G. J. Babu,  (1990)
@@ -49,10 +54,14 @@ Britt & Luecke 1973, Technometrics, vol. 15
 Jeffreys 1980, ApJ, 85, 177
 
 https://arxiv.org/abs/1704.05466
+
+hyperfit:   https://hyperfit.readthedocs.io/en/latest/
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 23-May-96	Created		PJT

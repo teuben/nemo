@@ -1,9 +1,12 @@
-.TH ROTCUR 1NEMO "2 June 2004"
-.SH NAME
+.TH ROTCUR 1NEMO "26 July 2022"
+
+.SH "NAME"
 rotcur \- fit parameters to velocity field using tilted rings
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBrotcur in=\fPvelfie [parameters=values ...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIrotcur\fP derives the kinematical parameters from the observed
 velocity field by fitting a tilted-rings model to the velocity field.  It
 does a non-linear least-squares-fitting to the function:
@@ -78,7 +81,8 @@ therein.
 .PP
 See also \fIvelfit(1NEMO)\fP on the classic WWB73
 (Warner, Wright and Baldwin, 1973, MNRAS, 163,163) method.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized:
 .TP 25
 \fBin\fP=\fIimage_vel\fP
@@ -154,7 +158,7 @@ and minor axis, position angle of the one sigma deviation ellipse.
 [Default: not used]
 .TP
 \fBbeam\fP=
-The beam size (FWHM) for beam correction. One or two numbers required.
+The beam size (FWHM, in arcsec) for beam correction. One or two numbers required.
 Currently these are only used to correct error bars for the number
 of independant points per beam. If not given, each point is assumed
 independant. [no correction].
@@ -168,6 +172,9 @@ Note that for
 bizarre reasons this keyword can be used to trigger reading
 a weight column in tabular input mode (\Bimagemode=\fP).
 [Default: required if a beam is supplied].
+.TP
+\fBwtmap\fP=\fIwt_image\fP
+If given, the weights (like 1/RMS^2) of the pixels.
 .TP
 \fBtab\fP=
 If specified, this output table is used in \fIappend\fP mode!
@@ -233,8 +240,9 @@ in column 3, and optional errors in the radial velocity in column 4
 [Default: t]
 .TP
 \fBwwb73=t|f\fP
-Use a simpler WWB73 linear method of fitting? [false]
-.SH AWK
+Use a simpler WWB73 (Warner, Wright, Baldwin 1973) linear method of fitting? [false]
+
+.SH "AWK"
 The standard output is normally not very useful; it displays, for each
 iteration, the run of parameters plus the number of points and mean
 error in the ring. The following \fIawk(1)\fP
@@ -260,7 +268,8 @@ BEGIN{count=0;line="";}
 END{printf("%s  %s\n",rad,line);}
 
 .fi
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 Here is an example of creating a synthetic velocity field with
 ccdvel, and analysing it with rotcur:
 .nf
@@ -287,7 +296,8 @@ ccdvel, and analysing it with rotcur:
 
 
 .fi
-.SH BUGS
+
+.SH "BUGS"
 Failures in \fInllsqfit\fP are not handled gracefully, and may
 \fIerror\fP out the program. Usage of the \fBerror=\fP system
 keyword can be used to bypass such bad rings, use with caution
@@ -296,32 +306,48 @@ though and study the output.
 Errorbars quoted in the table are only an estimate since the beam
 size is not known. Multiply these numbers by the square root
 of the number of pixels per beam to get a more realistic estimate.
-If the beamsize, \fBbeam=\fP, is given, the formulae of Sicking (1997) is used
-to correct the errors for:
+If the beamsize, \fBbeam=\fP, is given, the formulae of Sicking (1997) was
+previously used to correct the errors for:
 .nf
 
 	factor = sqrt(4.PI.B_x.B_y/(D_x.D_y))
 
 .fi
+but this is clearly too large, instead
+.nf
+
+	factor = sqrt(PI/(4ln2).B_x.B_y/(D_x.D_y))
+
+.fi
+is now used.
 .PP
 Sign of the pixelsize \fIDx,Dy\fP in the CCD header is ignored, and an astronomical
 image is assumed. See also the \fBreuse=\fP keyword.
 .PP
 For calculations of residuals in  overlapping rings (e.g. warps) only the last ring velocity
 will be used.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdvel(1NEMO), tabcomment(1NEMO), rotcurves(1NEMO), rotcurshape(1NEMO), pvtrace(1NEMO), runvelfitss07(1NEMO), ccdmom(1NEMO), testbsc(1NEMO), 
-gal(AIPS), rocur(AIPS), velfitpatch(1NEMO)
+gal(AIPS), rocur(AIPS), velfitpatch(1NEMO), rotcur(5NEMO)
 .nf
-TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
-pPXF: http://www-astro.physics.ox.ac.uk/~mxc/idl/#ppxf
 Begeman(1989):  1989A+A...223...47B
+Warner, Wright, Baldwin (1973): 1973MNRAS.163..163W
+pPXF: http://www-astro.physics.ox.ac.uk/~mxc/idl/#ppxf
+2DBAT:  https://github.com/seheonoh/2dbat
+Bbarolo: http://editeodoro.github.io/Bbarolo/
+BBAROLO: https://bbarolo.readthedocs.io/en/latest/
+GALPAK3D: http://galpak3d.univ-lyon1.fr/index.html
 GBKFIT: http://supercomputing.swin.edu.au/projects/gbkfit/
+TiRiFiC: http://www.astron.nl/~jozsa/tirific/index.html
+PaFit:  (Krajnovic et al 2006) https://www-astro.physics.ox.ac.uk/~cappellari/software/#pafit
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 K. Begeman (original GIPSY Sheltran version, now also available in C),
 P. J. Teuben (NEMO C version)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
 19/jul/83	original program                     	KGB
@@ -344,4 +370,6 @@ P. J. Teuben (NEMO C version)
 11-sep-02	V2.9: implemented map residual velocity field	PJT
 30-jan-03	V2.10: allow tables to use error in velocity	PJT
 2-jun-04	V2.12: finally implemented the reuse= option	PJT
+6-jun-20	V2.13: added wtmap=	PJT
+18-jan-21	V2.14: beam error factor back to standard, not Sicking	PJT
 .fi

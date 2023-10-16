@@ -1,3 +1,5 @@
+# -*- makefile -*-
+
 DIR = src/nbody/evolve/aarseth/tools
 BIN = nbody1 u3tos runbody4
 NEED = $(BIN) mkplummer snaptrim snapcmp runbody1 nbody1 stou4 u3tos
@@ -89,4 +91,5 @@ runbody4:
 	u3tos    in=run4c/OUT3 out=run4c/out.snap mode=4
 	snapcmp run4b/out.snap  run4c/out.snap
 	@bsf run4b/out.snap '-39.3365 1445.22 -53238.1 12.727 1356'
-	@bsf run4c/out.snap '-39.4594 1450.66 -53438.8 14.2074 1356'
+	@bsf run4c/out.snap '-39.4595 1450.66 -53438.8 14.2075 1356'
+

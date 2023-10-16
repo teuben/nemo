@@ -94,8 +94,17 @@ Compute median too? This can be timeconsuming for large numbers of points.
 [Default: \fBt\fP].
 .\" @todo   what about torben method?
 .TP
-\fBmedian=\fP
-If used, use this as blankval. Default: none.
+\fBnsigma=\fI
+Delete points more than nsigma times the sigma from the mean. Also known
+as sigma-clipping. After each
+point sigma and mean are recomputed. [Default: none]
+.\" @todo   iter= to do it a few times?   what about robust=
+.TP
+\fBxcoord=\fP
+Draw additional vertical coordinate lines along these X values. By default, not used.
+.TP
+\fBsort=\fP\fIsort_mode\fP
+Sort mode {qsort;...} [qsort]
 .TP
 \fBdual=t|f\fP
 Dual pass over the data, subtracting the mean. This can be important
@@ -104,14 +113,13 @@ Notice that in this mode the mean is subtracted but never added to
 the min/max/mean/median etc. 
 Default: f
 .TP
-\fBnsigma=\fI
-Delete points more than nsigma times the sigma from the mean. Also known
-as sigma-clipping. After each
-point sigma and mean are recomputed. [Default: none]
-.\" @todo   iter= to do it a few times?   what about robust=
+\fBblankval=\fP
+If used, use this as blankval. Default: none.
 .TP
-\fBsort=\fP\fIsort_mode\fP
-.SH BUGS
+\fBscale=\fP
+Scale factor for data [1]
+
+.SH "BUGS"
 Points that fall exactly on the boundary of a bin, are added to the
 right side. Another way of saying is that a cell includes the left side,
 but is open ended on the right side, i.e. [---). Note this behavior is

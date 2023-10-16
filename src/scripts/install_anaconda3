@@ -1,93 +1,73 @@
-#! /bin/csh -f
+#! /usr/bin/env bash
 #
-#  Install an anaconda3 (or miniconda3) python. A full install takes about 2 mins,
-#  assuming you have the .sh file
-#
-#  An alternative is to set up a special conda environment for NEMO, e.g.
-#
-#     conda create -n nemo1 python=x.x -y
-#     source activate nemo1
-#     conda install -n nemo1 [package]
-#     source deactivate
-#     conda remove -n nemo1 -all
-#
-#  but this has not been experimented with.
+# install anaconda3, plus a sourceable python_start script
 #
 
-set mc3   = https://repo.continuum.io/miniconda/Miniconda3-latest-Linux-x86_64.sh
-set mc3   = https://repo.anaconda.com/archive/Anaconda3-2020.02-MacOSX-x86_64.sh
-set mc3   = https://repo.anaconda.com/archive/Anaconda3-2020.02-Linux-x86_64.sh
+#--HELP
+# default parameters
+    url=https://repo.anaconda.com/archive/Anaconda3-%s-%s-%s.sh
+                   # anaconda3 versions available:
+version=2020.07    # 3.8.3
+version=2020.11    # 3.8.5
+version=2021.04    # 3.8.8
+version=2021.11    # 3.9.8  but sphinx not working?
+version=2022.05    # 3.9.12 sphinx
+version=2022.10    # 3.9.13 sphinx
+version=2023.03-0  # 3.10.9
+version=2023.03-1  # 3.10.9
+version=2023.07-2  # 3.11.4
 
-set msh   = $mc3:t
-set dir   = `pwd`/anaconda3
-set opt   = 1
-set wget  = wgetc
 
-# you better know what you are doing here
-foreach arg ($*)
-  set $arg
-end
+   dir=$(pwd)/anaconda3       # where anaconda will be located
+  wget=wgetc                  # use wgetc is you have my cashing version
+  os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
+ cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
 
-wgetc $mc3
+# At the conclusion of the install, sourceable python_start.[c]sh scripts
+# are placed in the root directory (dir=) of anaconda3
+    
+#--HELP
+
+# some help?    
+ if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
+   
+# override parameters
+for arg in "$@"; do
+  export "$arg"
+done
+
+
+if [ "$os" = "Darwin" ]; then
+    os=MacOSX
+fi
+
+mc3=$(printf $url $version $os $cpu)
+$wget $mc3
+
+msh=$(basename $mc3)
+
+
+if [ ! -e $msh ]; then
+    echo "File $msh not found. Wrong version=$version ?"
+    exit 0
+fi
+
+
 bash $msh -b -p $dir
 
-setenv PATH "$dir/bin:$PATH"
-
+export PATH="$dir/bin:$PATH"
 conda update -y conda
-pip install --upgrade pip
+pip3 install --upgrade pip
 
-# write the source-able shell startup files
+#    write sourceable shell startup recipes
+echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
+echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
 
-echo "set path = ($dir/bin "'$path); rehash'  >> python_start.csh
-echo "export PATH=${dir}/bin:"'$PATH'         >> python_start.sh
+pip freeze > $dir/freeze.log
+echo Created python_start files for $version in $dir
+python --version
 
-
-if ($opt == 0) exit 0
-
-
-
-# http://projets.lam.fr/projects/unsio/
-# install a default via pip
-pip install unsio uns_projects
-# but then install the developers version if these directories exist
-foreach dir ($NEMO/usr/jsl/unsio $NEMO/usr/jsl/uns_projects)
-  if (-d $dir) then
-    echo Installing with pip install $dir
-    (cd $dir ; pip install -e .)
-  else
-    echo Skipping pip install -e $dir
-  endif
-end
-
-# https://github.com/adrn/gala
-# conda install astro-gala --channel conda-forge
-pip install astro-gala
-
-# https://github.com/jobovy/galpy
-#
-pip install galpy
-
-# https://github.com/pynbody/pynbody
-#
-pip install pynbody
-
-# https://github.com/kyleaoman/martini
-pip install astromartini
-
-#
-pip install yt
-
-# https://amusecode.github.io/getting-started
-#   pip install numpy nose docutils mpi4py h5py
-#   pip install scipy astropy jupyter pandas seaborn
-pip install amuse-framework
-pip install amuse
-
-
-# ubuntu packages for amuse:
-#  build-essential gfortran python-dev \
-#  libopenmpi-dev openmpi-bin \
-#  libgsl-dev cmake libfftw3-3 libfftw3-dev \
-#  libgmp3-dev libmpfr6 libmpfr-dev \
-#  libhdf5-serial-dev hdf5-tools \
-#  git

@@ -146,7 +146,7 @@ namespace falcON { namespace compile_info {
   char __compiler[30]; const char*compiler() { return __compiler; }
   void init() {
     if(! __set ) {
-      SNprintf(__compiler,10,
+      SNprintf(__compiler,15,
 #if   defined (__INTEL_COMPILER)
 	       "icc-%d",__INTEL_COMPILER
 #elif defined (__GNUC__)
@@ -274,7 +274,7 @@ int main(int argc, const char**argv)               // global main
 
     try {                                          // TRY:                      
       falcON::main();                              //   call user program       
-    } catch(falcON::exception E) {                 // CATCH falcON errors       
+    } catch(falcON::exception& E) {                 // CATCH falcON errors       
       falcON_ErrorN(text(E));
     }
     falcON::finiparam();                           // finish NEMO               
@@ -298,7 +298,7 @@ int main(int argc, const char**argv)               // global main
     falcON::report::close_file();
 #endif
 
-  } catch(falcON::exception E) {                   // CATCH falcON errors       
+  } catch(falcON::exception& E) {                   // CATCH falcON errors       
     falcON_ErrorN(text(E));
   }
 

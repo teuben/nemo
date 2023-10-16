@@ -21,10 +21,242 @@ contains a timestamp of that creation.
 <hr>
 -->
 
+<A NAME=4_4_1>
+
+<H2> 4.4.2:  in github</H2>
+  <UL>
+  <LI> (Oct 11, 2023) add  qtrun as modern alternative to tkrun
+  <LI> (Jul 7, 2023) python install now places the python_start.[c]sh scripts inside the anaconda3 directory
+  </UL>
+  
+<H2> 4.4.1:  6-jul-2023 </H2>
+<UL>
+  <LI> (Jun 15, 2023) Experimental support for modulefiles, e.g. "module load nemo/git".   tcl is back!
+  <LI> (Mar 29, 2023) A very ancient bug in the compilation of hackcode1 was fixed. Although the error can be
+    fixed by swapping around a data item in a C structure, the basic error was a sloppy Makefile! Look for
+    issue 98 in github.
+  <LI> (Jan 3, 2023) an
+    <A HREF=https://teuben.github.io/nemo-lesson>experimental Software Carpentry style NEMO introduction</A>
+  <LI> (Dec 29, 2022) an odd problem with parsing DOS or MAC text files should be resolved now in the
+    patches table I/O system, as well as text files with a non-closing final line.
+  <LI> (Dec 18, 2022) fitsccd/ccdfits conversion now maintains header MUCH better (CUNIT, TELESCOP, RESTFRQ)
+  <LI> (Dec 10, 2022) revived partiview install via mknemo. Confirmed
+    <A HREF=man_html/snapspecks.1.html>snapspecks(1NEMO)</A> still works.
+  <LI> (Dec 5, 2022)  <A HREF=man_html/ccdellint.1.html>ccdellint(1NEMO)</A> 
+    can now integrate in ellipses with a different from the default metric=2
+  <LI> (Nov 29, 2022) python-unsio and python-unsiotools have recently been updated.
+  <LI>  ccdellint can now properly handle 2D maps, and almost related,
+    snapshell can integrate in arcs instead of full shells.
+  <LI> (Nov 20, 2022)  We now have quetta, ronna, ronto and quecto prefixes!
+  <LI> (Nov 10, 2022)  starlab is back in NEMO! The command "mknemo starlab" will build it, the
+    181 binaries will be in $NEMO/opt/bin.
+  <LI> (Nov 9, 2022) better mknemo build of netcdf4 where it needs to depend on hdf5
+</UL>
+
+<A NAME=4_4_0>
+<H2> 4.4.0:  1-nov-2022   (a.k.a. the ADASS release)</H2>
+<UL>
+  <LI> (Nov 1, 2022) wrapping up a release since NEMO poster was presented at ADASS2022
+  <LI> (Oct 28, 2022) nemopy is now a python module, so far only getparam is implemented, weakly but functional . Installation
+        with the usual "pip install -e ."
+  <LI> (Oct 27, 2022) rudimentary support for giza as an alternative to pgplot.  "mknemo giza" is also able to build
+    the latest giza, and --with-yapp=giza will be needed in configure.
+  <LI> (Oct 25, 2022) revived internal pgplot build in install_nemo.sh as yapp=pglocal, ("mknemo pgplot" will also work)
+    plus some improved yapp_plplot filenaming
+  <LI> (Oct 24, 2022) improved falcon tools build on mac
+  <LI> (Sep 16, 2022) the pedit
+    <A HREF=man_html/pedit.8.html>pedit(8NEMO)</A> script now handles parameter files
+    that are structures as "value = keyword = comment"
+  <LI> (Aug 17, 2022) new scripts:   
+    <A HREF=man_html/nemoplot.8.html>nemoplot(8NEMO)</A> to auto-plot ascii tables, and
+    <A HREF=man_html/nemopars.8.html>nemopars(8NEMO)</A> to extract parameters from bash-style
+    rc files.
+  <LI> (May 15, 2022) table I/O: column 0 was not understood, added column range check
+  <LI> (May 12, 2022) default gfortran compilation now add -std=legacy, since the
+    compiler is now using a picky 2018 standard
+  <LI> (May 10, 2022) gaia_snapshot.py - downloads a gaia based snapshot, optionally with
+       a density estimator, great for viewing in glnemo2 - PJT + JCL
+  <LI> (May 8, 2022) the new table interface has been merged into the master branch.
+    The <A HREF=man_html/table.3.html>table(3NEMO)</A> manual page has implemented
+    most of the important parts of the planned API. This should make it easier to
+    work with tables with an arbitrarely large number of columns and/or rows, as
+    long as they fit in memory.
+  <LI> <B>tablines</B> was renamed to <B>tabrows</B> to be consistent with row/col concept
+    in the new table interface.
+</UL>
+  
+<A NAME=4_3_1>
+<H2> 4.3.1:  5-may-2022 </H2>
+<UL>
+  <LI> (Mar 19, 2022) images should all use axis=1; image writing will warn if not
+  <LI> (Feb 10, 2022) branch <B>table2</B> created to finish the table V2 implementation.
+  <LI> (Feb 2022) Various tools for the (snapshot/orbit) BOOM project upgraded:
+    snaptipsy, tipsysnap, snapcopy, stoo, orboom, orbstat.  Started an example in
+    <A HREF=https://github.com/teuben/nemo/blob/master/docs/examples/boom.md>boom.md</A>
+
+  <LI> (Jan 20, 2022) Get some working exaples with gadget files and clarify current state of their versions. The man page
+    <A HREF=man_html/gadget.5.html>gadget</A> will be updated for this.
+  <LI> (Jan 8, 2022) Fixed WCS in
+    <A HREF=man_html/potccd.1.html>potccd</A>, added new program
+    <A HREF=man_html/ccdl2.1.html>ccdl2</A> to find Lagrange points in a 2D grid potential.
+</UL>
+  
+<A NAME=4_3_0>
+<H2> 4.3.0:  7-jan-2022 </H2>
+<UL>
+  <LI> (Jan 6, 2022)  Merged the nearly complete M1 branch to master; some merging with other old code for new release
+  <LI> (Dec 30, 2021) New parameter grabbing program (shortcut for grep/awk...)
+    <A HREF=man_html/txtpar.1.html>txtpar</A> and big update/bugfix for
+    <A HREF=man_html/tabdms.1.html>tabdms</A> 
+  <LI> The default anaconda3 install is now 2021.05
+  <LI> (Oct, 2023)  <A HREF=https://www.gnu.org/software/gnuastro/>gnuastro</A>
+       is now installable via mknemo (courtesy ADASS meeting) - trying out a demo program <B>fitsgnu</B>
+  <LI> (July 12-15 2021) This week is the AMUSE workshop. So a few NEMO-ish highlights:
+    <UL>
+      <LI> <A HREF=https://github.com/GalacticDynamics-Oxford/pyfalcon>Python interface for the fast-multipole gravity solver falcON </A>
+      <LI> <A HREF=https://clustertools.readthedocs.io/en/latest/initialize.html#load>ClusterTools</A> reads gyrfalcon (NEMO) data 
+    </UL>
+      
+  <LI> Images now read the Object name, coming from FITS, and pass it on. Like the proper
+    handling of the WCS axis=1 mode, not all programs have been converted.
+  <LI> (22-may-2021) New stacking style program:
+    <A HREF=man_html/ccdstack.1.html>ccdstack</A>     
+  <LI> (6-may-2021) New stacking style program:
+    <A HREF=man_html/rvstack.1.html>rvstack</A> 
+  <LI> (2-may-2021)  Result on an M1 compilation showed 4/6 codes with an impressive
+    <A HREF=man_html/bench.5.html>NEMOBENCH5 score</A> of
+    1310, but also showed the default compiler (hpc.sourceforge.net) was much more strict C99
+    and failed many programs. Work to do, and its taking place in the M1 git branch. The final score
+    when all 6 codes were working was 1269.
+  <LI> (29-apr-2021) One more code added to the 5sec bench, now called "make bench5" (from bench3) -
+    the NEMO5 score will be defined as 5000/average_runtime, such that a score of 1000 is the
+    first benchmark machine I used (i5-1135G7)
+  <LI> (27-apr-2021) We started to convert the old NEMO manual from latex to reStructuredText (RST)
+    so changes are immediately visible on <A HREF=https://astronemo.readthedocs.io/>ReadTheDocs</A>.
+  <LI> (20-apr-2021) Added new historic program
+    <A HREF=man_html/epic5.1.html>epic5</A> to compute Lindblad orbits in an oval potential.
+    The original idea is outlined in
+    <a href=https://ui.adsabs.harvard.edu/abs/1994ASPC...66...29L> 1994ASPC...66...29L</A>
+    and the final code presented in
+    <A HREF=https://ui.adsabs.harvard.edu/abs/2012MNRAS.421.1089P> 2012MNRAS.421.1089P </A>.
+
+  <LI> (19-apr-2021) Added new historic program
+    <A HREF=man_html/mkvh60.1.html>mkvh60</A> and added von Hoerner's 1957 (!) random number generator to create this style
+    of homogeneous spheres. See <A HREF=https://ui.adsabs.harvard.edu/abs/1960ZA.....50..184V>1960ZA.....50..184V</A>
+
+  <LI> (15-apr-2021) Trying out a new automated <A HREF=man_html/bibcode.html>bibcode</A> listing which summarized and links
+    all codes in NEMO that have refereed papers on <A HREF=https://ui.adsabs.harvard.edu/>ADS</A>
+    (as opposed to <A HREF=https://paperswithcode.com>Papers with Code</A>)
+
+<LI> (7-apr-2021) Apple's long SIP arm reared it's ugly head again, a side effect of the MAC fix caused
+    falcon's bodyfun to fail on linux. should be fixed now.
+  <LI> Benchfile introduced, with a function similar to the Testfile, all parallel to the Makefile
+  <LI> The "make bench5" command will now run 5 nbody codes, each tuned to take 5sec cpu on an i5-1135G7
+   <pre>
+     $ /usr/bin/time src/scripts/nemo.bench mode=3
+     NEMOBENCH: (2021-03-21) bench3566979 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 bsf=0 tmp=bench3566979
+     Linux XPS13 5.6.0-1048-oem #52-Ubuntu SMP Thu Feb 18 11:37:00 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+     Fri 09 Apr 2021 08:44:36 PM EDT
+     Equal CPU time per code, no output files to check
+     Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode
+     Tstop: 4.28 5.64 7.89 787400.0 6.66 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz]
+     .1.23.45.
+     CPU_USAGE  directcode  :  5.00  5.00  0.00  0.00  0.00  1840028621
+     CPU_USAGE  gyrfalcON   :  4.97  4.96  0.00  0.00  0.00  1840029122
+     CPU_USAGE  hackcode1   :  5.01  5.00  0.00  0.00  0.00  1840029619
+     CPU_USAGE  orbint      :  5.04  5.04  0.00  0.00  0.00  1840030121
+     CPU_USAGE  potcode     :  5.04  5.02  0.01  0.00  0.00  1840030625
+     Cleaning bench3566979 (use clean=0 to prevent this)
+     25.07user 0.02system 0:25.09elapsed 100%CPU (0avgtext+0avgdata 7084maxresident)k
+     72inputs+4040outputs (3major+6909minor)pagefaults 0swaps
+   </pre>
+   If you run this on older or newer machines, you will most likely see a divergence in speed ratios between the different programs.
+</UL>
+
+
+<A NAME=4_2_1>
+<H2> 4.2.1:  12-feb-2021</H2>
+<UL>
+  <LI> (12-feb-2021) wrapped up the MAC SIP issues (or so I thought)
+  <LI> (11-feb-2021) added new program 
+        <A HREF=man_html/ccdspec.1.html>ccdspec</A> 
+    with a simple correlation statistic to assess normalcy
+  <LI> (8-feb-2021) back to previous default: shared libs remains enabled by default, so on a mac you will need to use
+    --disable-shared now.
+  <LI> (6-feb-2021) major issue on recent Mac:  latest (clang 11.0.0)) Xcode does not compile gyrfalcON anymore,
+    but brew based gcc-10 (10.2.0) works. More importantly, the SIP implementation causes shared libraries to not work
+    in scripts, or any system that will then filter out $DYLD_LIBRARY_PATH.   Thus the default is now that
+    shared libraries will not be made. Use --enable-shared if you want it back (e.g. on linux). Note that the NEMO
+    library has not worked in shared library mode for a while.
+</UL>
 
 <A NAME=4_2_0>
-<H2> 4.2.0:  in progress (a.k.a. the Corona release) </H2>
+<H2> 4.2.0:  28-jan-2021 (a.k.a. the Corona release) </H2>
+
+Although there is still a raging virus, it's just time to wrap this up this release
+given the large number of updates.
 <UL>
+  <LI> (28-jan-2021) latest benchmark on the fastest laptop I have:
+    <pre>
+   $ /usr/bin/time src/scripts/nemo.bench 
+   NEMOBENCH: (2020-11-22) bench3555175 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 bsf=0 tmp=bench3555175
+   Linux XPS13 5.6.0-1042-oem #46-Ubuntu SMP Thu Jan 7 00:51:04 UTC 2021 x86_64 x86_64 x86_64 GNU/Linux
+   Wed 27 Jan 2021 10:47:32 PM EST
+   Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint
+   Skipping BSF testing. Use bsf=1 to enable this.
+   CPU_USAGE directcode : 2.35    2.35 0.00  0.00 0.00  1750203216
+   CPU_USAGE gyrfalcON :  1.75    1.75 0.00  0.00 0.00  1750203579
+   CPU_USAGE hackcode1 :  1.26    1.26 0.00  0.00 0.00  1750203452
+   CPU_USAGE mkorbit :    0.00    0.00 0.00  0.00 0.00  1750204776
+   CPU_USAGE mkplummer :  0.01    0.00 0.00  0.00 0.00  1750203578
+   CPU_USAGE mkspiral :   4.26    3.09 1.16  0.00 0.00  1750203905
+   CPU_USAGE orbint :     0.64    0.64 0.00  0.00 0.00  1750204777
+   CPU_USAGE potcode :    1.49    1.49 0.00  0.00 0.00  1750203755
+   Processor:  11th Gen Intel(R) Core(TM) i5-1135G7 @ 2.40GHz
+   Cleaning bench927512 (use clean=0 to prevent this)
+   15.08user 1.32system 0:16.40elapsed 100%CPU (0avgtext+0avgdata 174172maxresident)k
+
+</pre>
+
+  <LI> (jan-2021) CCD images should now all be using a reference pixel, where in the
+    old code (0,0,0) was hardcoded and Axis=0. Images should now have Axis=1, otherwise
+    code was not converted yet.
+  <LI> (jan-2021) new programs:  ccdmoms, ccdellint, lmtinfo, ccdzshift
+  <LI> Code made C99 clean, mostly.
+  <LI> (oct-2020) new programs:  tabgen, snapnear, bigread, snapipdist
+    new script;  mk_cone, mklut
+  <LI> (30-may-2020)  the command <B>mknemo barolo</B> attempts to install the
+    <A HREF=https://editeodoro.github.io/Bbarolo/>BBarolo</A> program for rotation curve analysis of 3D cubes.
+Another useful tool to automated parameter editing is
+<A HREF=man_html/pedit.8.html>pedit</A>. An example is in a new script
+<A HREF=https://github.com/teuben/nemo/blob/master/scripts/csh/do_neeleman>do_neeleman</A>
+
+<Li> (16-may-2020)  new program <A HREF=man_html/mktabdisk.1.html>mktabdisk</A> to make fake disks to
+  simulate observe PPV cubes
+
+  <LI> (11-may-2020) benchmark streamlined:
+<pre>    
+  $ /usr/bin/time src/scripts/nemo.bench
+  NEMOBENCH: (2020-05-05) bench129749 : nbody0=3072 nbody1=10240 nbody3=1000000 size=256 clean=1 tmp=bench129749
+  CPU_USAGE ccdpot :     11.94   11.93 0.00  0.00 0.00  1718371453
+  CPU_USAGE directcode :  4.02    4.01 0.00  0.00 0.00  1718369452
+  CPU_USAGE gyrfalcON :   2.49    2.48 0.00  0.00 0.00  1718370096
+  CPU_USAGE hackcode1 :   2.41    2.39 0.01  0.00 0.00  1718369854
+  CPU_USAGE mkorbit :     0.00    0.00 0.00  0.00 0.00  1718372647
+  CPU_USAGE mkplummer :   0.01    0.00 0.00  0.00 0.00  1718370095
+  CPU_USAGE mkspiral :    8.17    5.90 2.23  0.00 0.00  1718370635
+  CPU_USAGE orbint :      1.16    1.15 0.00  0.00 0.00  1718372647
+  CPU_USAGE potcode :     2.90    2.89 0.00  0.00 0.00  1718370345
+  Cleaning bench129749 (use clean=0 to prevent this)
+  30.83user 2.53system 0:33.39elapsed 99%CPU (0avgtext+0avgdata 174280maxresident)k
+  0inputs+4413976outputs (0major+509968minor)pagefaults 0swaps
+</pre>
+although this is on my T480 Lenovo laptop (i7-8550U CPU @ 1.80GHz) I have yet to see any desktop being
+to beat this.
+  <LI> (26-apr-2020) tabplot and tabhist have a new <b>pyplot=</b> keyword to write a template starting point for matplotlib plotting
+  <LI> (24-apr-2020) Experimental <A HREF=https://www.astro.umd.edu/~teuben/nemo/deb/>debian packages for NEMO</A>
+  <LI> (23-apr-2020) small fix for Ubuntu 20.04 LTS
+  <LI> (10-apr-2020) the <A HREF=faq.html>FAQ</A> has been revived.
   <LI> (21-mar-2020) RSS feed re-instated. Now using https://teuben.github.io/nemo/rss.xml
   <LI> (13-mar-2020) fixed the  <B>mknemo uns_projects</B> install, which now
     installs both
@@ -60,7 +292,10 @@ for orbits, is available as
 </UL>
   
 <A NAME=4_1_0>
-<H2> 4.1.0:  10 December 2019 (a.k.a. the IAS release) </H2>
+  <H2> 4.1.0:  10 December 2019 (a.k.a. the IAS release) </H2>
+
+  Inspired by a visit to the IAS, including a presentation, this was released before the drive back to DC.
+  
 <UL>
   <LI> Added the <A HREF=https://github.com/teuben/nemo/blob/master/src/orbit/potential/data/hh64.c>
     Henon Heiles 1964 potential</A>, another Princeton contribution to the field!
@@ -86,7 +321,10 @@ for orbits, is available as
 </UL>
 
 <A NAME=4_0_0>
-<H2> 4.0.0:  1 January 2018 (a.k.a. the ESO release) </H2>
+  <H2> 4.0.0:  1 January 2018 (a.k.a. the ESO release) </H2>
+
+  During my mini-sabattical at ESO found some time to switch from CVS to GIT.
+  
 <UL>
 <LI> conversion of our source code based in CVS to GIT. Source on
   <A HREF=https://github.com/teuben/nemo>  https://github.com/teuben/nemo</A>, docs now served via github pages on
@@ -1264,6 +1502,10 @@ most of NEMO is now running. This includes a smooth running
 <B> NOTE: </B> the export tar files have not been updated yet, as much
 more proper testing is needed.
 
+<H2>1986 </H2>
+
+NEMO conceived as a toolbox wrapped around the Barnes and Hut treecode (called
+hackcode1 in NEMO). 
 
 <P>
 Back to: <A HREF=nemo.html> NEMO Home page </A>, the

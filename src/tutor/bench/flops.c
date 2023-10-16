@@ -117,6 +117,7 @@
 /***********************/
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 			    /* 'Uncomment' the line below to run   */
 			    /* with 'register double' variables    */
@@ -170,7 +171,11 @@ double D3 = 0.1233153E-5;
 double E2 = 0.48E-3;
 double E3 = 0.411051E-6;
 
-void main()
+static int dtime_id = 0;
+
+int dtime(double *);
+
+int main(int argc, char *argv[])
 {
 
 #ifdef ROPT
@@ -179,11 +184,18 @@ void main()
    double s,u,v,w,x;
 #endif
 
+   int gloops = 1;
    long loops, NLimit;
    register long i, m, n;
+   
+   if (argc > 1)
+     gloops = atoi(argv[1]);
+   
+   while(gloops--) {
 
    printf("\n");
-   printf("   FLOPS C Program (Double Precision), V2.0 18 Dec 1992\n\n");
+   printf("   FLOPS C Program (Double Precision), V2.0 18 Dec 1992 [%d]\n\n",gloops);
+
 
 			/****************************/
    loops = 15625;        /* Initial number of loops. */
@@ -638,6 +650,8 @@ void main()
    printf("   MFLOPS(3)       = %10.4lf\n",T[32]);
    printf("   MFLOPS(4)       = %10.4lf\n\n",T[34]);
 
+   } /* while(gloops) */
+   printf("dtime_id=%d\n",dtime_id);
 }
 
 /*****************************************************/
@@ -677,10 +691,10 @@ void main()
 #include <ctype.h>
 #define HZ 50
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 1;
 
  struct tt {
 	long  days;
@@ -715,10 +729,10 @@ double p[];
 
 struct rusage rusage;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 2;
 
  q = p[2];
 
@@ -748,10 +762,11 @@ double p[];
 
 struct tms tms;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 3;
+ 
 
  q = p[2];
 
@@ -786,10 +801,10 @@ struct tbuffer_t
 
 struct tbuffer_t tms;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 4;
 
  q = p[2];
 
@@ -813,10 +828,10 @@ double p[];
 #define HZ 100
 struct time tnow;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 5;
 
  q = p[2];
 
@@ -841,10 +856,10 @@ double p[];
 #define HZ CLOCKS_PER_SEC
 clock_t tnow;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 6;
 
  q = p[2];
 
@@ -865,10 +880,10 @@ double p[];
 
 #define HZ 60
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 7;
 
  q = p[2];
 
@@ -886,10 +901,10 @@ double p[];
 #ifdef IPSC
 extern double dclock();
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
   double q;
+  dtime_id = 8;
 
   q = p[2];
 
@@ -908,10 +923,10 @@ double p[];
 
 fortran double second();
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q,v;
+ dtime_id = 9;
 
  q = p[2];
 
@@ -932,11 +947,11 @@ double p[];
 #ifdef CTimer
 #include <time.h>
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double    q;
  clock_t   clock(void);
+ dtime_id = 10;
 
  q = p[2];
 
@@ -956,10 +971,10 @@ double p[];
 
 struct timeval tnow;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 11;
 
  q = p[2];
 
@@ -980,10 +995,10 @@ double p[];
 #include <sys/timesu.h>
 struct tmsu rusage;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 12;
 
  q = p[2];
 
@@ -1025,9 +1040,10 @@ static void     Remove_timer( )
  mgrInited = FALSE;
 }
 
-int     dtime( p )
-double p[];
+int dtime( double p[])
 {
+  dtime_id = 13;
+
  if ( mgrInited ) {
     RMV_TIMER;
     mgrClock += (MAX_TIME + mgrTimer.tmCount)*1.0e-6;
@@ -1057,10 +1073,10 @@ double p[];
 #ifdef PARIX
 #include <sys/time.h>
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 14;
 
  q = p[2];
  p[2] = (double) (TimeNowHigh()) / (double) CLK_TCK_HIGH;
@@ -1086,10 +1102,10 @@ double p[];
 
 struct rusage rusage;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 15;
 
  q = p[2];
 
@@ -1110,10 +1126,10 @@ double p[];
 #ifdef WIN32
 #include <windows.h>
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 16;
 
  q = p[2];
 
@@ -1140,10 +1156,11 @@ double p[];
 
 struct tms tms;
 
-dtime(p)
-double p[];
+int dtime(double p[])
 {
  double q;
+ dtime_id = 17;
+ 
  times(&tms);
  q = p[2];
  p[2] = (double)tms.tms_utime / (double)CLK_TCK;

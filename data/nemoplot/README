@@ -1,0 +1,7 @@
+These are example tables that can be "auto-plotted" with the nemoplot command.
+
+The script should also document how the table was created.
+
+sratio.tab      - how does sratio (see ccdstat) depend on map size?
+shift1.tab      - centering n-body snapshots
+shift2.tab      - centering n-body snapshots

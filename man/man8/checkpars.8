@@ -1,0 +1,67 @@
+.TH CHECKPARS 8NEMO "21 May 2021"
+
+.SH "NAME"
+checkpars \- check consistency between keywords described in man page and executable
+
+.SH "SYNOPSIS"
+.PP
+\fBcheckpars.py \fI[-v] [-f tasklist] [-h] [-u]\fP
+
+.SH "DESCRIPTION"
+\fIcheckpars\fP reports on a consistency check if the parameters listed in the man page
+of a program are in agreement with the ones reported via \fIgetparam(3NEMO)\fP, exposed
+to the user via the \fBhelp=h\fP command line option. Not
+only should the same parameter names be documented, but also their order. Typically
+the verbose output would report the two lists, e.g.
+.nf
+
+ccdmoms
+man: ['in', 'out', 'mom', 'weights', 'axis', 'win', 'sigma']
+bin: ['in', 'out', 'mom', 'weight', 'axis', 'win', 'sigma']
+
+.fi
+
+has an obvious typo in the man page for the \fBweight\fP keyword
+.PP
+By default a predefined \fBtasklist\fP is used, but this is not an exhaustive list. Using the
+\fB-f\fP flag another list could be passed (only the first word per line is the name of the
+program to be checked).
+.PP
+Each time when \fImknemo(8NEMO)\fP is used, it puts updated information on the task in $NEMO/etc/tasklist
+
+
+.SH "EXAMPLES"
+.nf
+    % \fBcd $NEMO\fP
+    % \fBmake checkpars\fP
+    python checkpars.py -v > checkpars.log
+    Files read: 200
+    Bad files found: 104
+    % \fBmore checkpars.log\fP
+.fi
+.SH "SEE ALSO"
+mknemo(8NEMO)
+
+.SH "AUTHOR"
+Parker Tewell
+
+.SH "FILES"
+.ta +3.5i
+.nf
+$NEMO/src/scripts/checkpars.py		script
+$NEMO/src/scripts/tasklist      	default list of binaries to check
+$NEMO/etc/tasklist			active list made via \fImknemo(1NEMO)\fP
+.fi
+
+.SH "UPDATE HISTORY"
+.ta +1.5i +5.5i
+.nf
+15-apr-2021	first version	PPT
+30-apr-2021	added -v flag	PPT
+06-may-2021	added -h flag	PPT
+21-may-2021	draft man created	PJT
+29-may-2021	added -f flag	PPT
+22-jul-2021	added -u flag	PPT
+01-jun-2022	run from anywhere	PPT
+
+.fi

@@ -20,8 +20,9 @@ clean:
 
 install:
 
-bins:	tkrun
+bins:	tkrun qtrun.py
 	mv tkrun $(NEMOBIN)
+	cp qtrun.py $(NEMOBIN)/qtrun
 
 
 tkrun: tkrun.c

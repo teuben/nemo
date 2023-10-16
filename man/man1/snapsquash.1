@@ -1,12 +1,15 @@
 .TH SNAPSQUASH 1NEMO "28 July 2006"
-.SH NAME
+
+.SH "NAME"
 snapsquash \- squash a snapshot using Bosma's thesis recipe
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapsquash\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsnapsquash\fP squashes a snapshot according the the recipe given
 in Bosma's thesis.  It is a toy model meant to operate on thin 
-disks in the XY plane.
+disks in the XY plane. To quote from Bosma (1978):
 .PP
 As a crude attempt to describe the velocity field of a galaxy with an
 oval distortion we have made a simple kinematical model, based on a
@@ -23,7 +26,7 @@ of a point P on the circle transform to (x', y') with:
     x' = x*f       ;   y' = y/f
 .fi
 a is the semi-major axis of the ellipse, b is the semi-minor axis. The
-circular velocity vector at P is (u, v) = (- V sin(phi), Vc cos(phi)),
+circular velocity vector at P is (u, v) = (- Vc sin(phi), Vc cos(phi)),
 with phi = arctan y / x and Vc the amplitude of the circular velocity
 at radius r. We can eliminate phi and transform this vector also with
 equations (1). Then we give the resulting ovals a constant pattern
@@ -35,10 +38,8 @@ to compensate for this. We then have:
 where r^2 = x^2f^2 + y^2/f^2 and Vc is taken at r.
 
 
-
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file name, a snapshot. No default.
@@ -55,26 +56,57 @@ Pattern Speed [0.0].
 .TP
 \fBtimes=\fP
 Times to select snapshots from [all]  
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following example makes a velocity field of a squashed disk,
 and creates a velocity field to view:
 .nf
-    mkdisk disk1 10000 rmax=2 mass=1
+
+    mkdisk disk1 100000 rmax=2 mass=1
     snapsquash disk1 disk2 1.1 1
     snaprotate disk2 disk3 30,60 zx
     snapgrid disk3 ccd3 moment=-1
     ccdplot ccd3
+    
+.nf
+or if you like NEMO's pipe method, it can be done in one line:
+.nf
+
+    mkdisk - 100000 rmax=2 mass=1 |\\
+	snapsquash - - 1/1.1 1 |\\
+	snaprotate - - 30,60 zy |\\
+	snapgrid - bosma-vel.ccd moment=-1
+    ccdplot bosma-vel.ccd
+    nds9 bosma-vel.ccd
+
 .fi
 If you have ds9, the command \fInds9\fP will send this image into the ds9
 display server.
-.SH SEE ALSO
+
+This can be compared in the same projection with the f=1 case, or now leaving
+out the programs and options we don't need anymore:
+
+.nf
+
+    mkdisk - 100000 rmax=2 mass=1 |\\
+	snaprotate - - 60 y |\\
+	snapgrid - bosma0-vel.ccd moment=-1
+    ccdplot bosma0-vel.ccd
+    nds9 bosma0-vel.ccd
+.fi
+
+.SH "SEE ALSO"
 mkdisk(1NEMO), snapshot(5NEMO)
-.SH FILES
+
+.SH "FILES"
 NEMO/src/nbody/init	snapsquash.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 28-Jul-06	V1.0  Created	PJT/AB
+23-oct-2021	adjusted example	PJT
 .fi

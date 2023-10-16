@@ -1,0 +1,69 @@
+.TH CCDL2 1NEMO "9 January 2022"
+
+.SH "NAME"
+ccdl2 \- find the Lagrangian points in a 2D potential
+
+.SH "SYNOPSIS"
+\fBccdl2\fP [parameter=value]
+
+.SH "DESCRIPTION"
+
+For a 2D potential (or any image) on a grid, this program will
+list the local minima, maxima and saddle points. In rotating potentials
+these are the L1, L2, L3, L4 and L5 lagrangian points.
+.PP
+For a barred galaxy (see e.g. Sellwood & Wilkinson, 1993) L3 (center),
+L4 and L5 (along minor axis) are stable,
+whereas L1,L2 (along major axis) are unstable.
+.PP
+For a two-body system L4,L5 are stable (as long as the mass ratio > 24.96), and L1,L2,L3
+are all unstable!
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input image file [???]    
+
+.SH "EXAMPLES"
+Here is
+
+.nf
+
+    % potccd  2body_0.2 potname=twobody potpars=-1,0.2,1,0.05 x=-2:2:0.01 y=-2:2:0.01
+    % ccdl2   2body_0.2
+    ### Warning [ccdl2]: Draft program
+    ### nemo Debug Info: Dx,Dy= 0.01 0.01
+    ###: IX0 IY0   X     Y    Potential
+    L00: 240 112   0.4  -0.88  -1.59263 
+    L00: 241 113   0.41 -0.87  -1.59264 
+    L01:  85 200  -1.15  0     -1.80542 
+    L11: 180 200  -0.2   0    -20.1865  
+    L01: 257 200   0.57  0     -1.92043 
+    L11: 300 200   1     0     -5.33261 
+    L01: 343 200   1.43  0     -2.09766 
+    L00: 241 287   0.41  0.87  -1.59264 
+    L00: 240 288   0.4   0.88  -1.59263 
+
+    % ccdplot 2body_0.2 contour=-3.5,-2.09766,-1.92043,-1.80542,-1.7,-1.6
+
+.fi
+
+Where L00 is a local maximum, L11 a local minimum, and L01/L10 are saddle points. The contour plot
+can thus use the potential values of the critical saddle points L1, L2 and L3.
+
+.SH "SEE ALSO"
+potccd(1NEMO), potlist(1NEMO), potential(5NEMO), image(5NEMO)
+
+.SH "FILES"
+NEMO/src/image/misc
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.0i
+1980s   	CYBER version for my thesis	PJT
+9-jan-22	V0.1 drafted from scratch	PJT
+.fi

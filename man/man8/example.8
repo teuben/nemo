@@ -1,7 +1,9 @@
 .TH EXAMPLE 8NEMO "9 October 1990"  "Left?" "Middle" "Right?" 
-.SH NAME
-example \- example skeleton file for manual writers 
-.SH SYNOPSIS
+
+.SH "NAME"
+example \- example skeleton file for man page writers
+
+.SH "SYNOPSIS"
 This section should  contain a short synopis of the command including
 its options and arguments. In case of main programs (1) one could say:
 .PP
@@ -12,9 +14,12 @@ In case of library routines (3) it will probably look like:
 .nf
 .B #include <example.h>
 .PP
-.B void example(msg)
-.B char *msg;
+.B void example(const char *msg);
 .fi
+
+You can also put comments in a man page that won't show up.
+." Lines starting with a ." are a comment
+
 .SH "SIDE EFFECTS"
 This should list if there are any expected external variables or routines
 which will be moderated:
@@ -24,12 +29,16 @@ which will be moderated:
 .B extern int mass[MOBJ];
 .B extern int phase[MOBJ][6];
 .fi
-.SH AUTHOR
-Peter Teuben, the guy who wrote it or deserved the credit or:
-.SH PERSON RESPONSIBLE
+
+.SH "AUTHOR"
+
+Peter Teuben, the person(s) who wrote it or deserved the credit or:
+
+.SH "PERSON RESPONSIBLE"
 John Doe, the guy who is now responsible of keeping this particluar piece of
 software up to date.
-.SH FILES
+
+.SH "FILES"
 This should contain a reference to files needed to be included at compilation
 or linked at linking time. Note that a <TAB> must be included for proper 
 allignment at 2.5 inches
@@ -37,7 +46,8 @@ allignment at 2.5 inches
 .ta +3.0i
 /usr/lib/tmac/tmac.an   	This file contains the MAN macros
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 This is a simple skeleton file for authors of manual pages
 and shows e.g. the
 possibilities of text in \fBbold\fP as well as \fIItalics\fP typeface.
@@ -45,8 +55,9 @@ It is better studied by directly looking at the source file, than by viewing
 the roffed-output. This file contains about all the possible SECTIONS
 we are using, in practice you would use a subset of them, but never leave
 out the NAME section.
-.SH PARAMETERS
-This list of options is usually added in case of a \fIlevel(1)\fP program
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBin1=\fIsnap1\fP
 Input data is read from \fIsnap1\fP, which must be in \fISnapShot(5)\fP
@@ -55,6 +66,22 @@ format.
 \fBin2=\fIsnap2\fP
 Input data is read from \fIsnap2\fP, which must be in \fISnapShot(5)\fP
 format.
+.TP
+\fBflag=t|f\fP
+a boolean flag
+.TP
+\fBrange=\fP\fIstart:end\fP
+A min_max range.
+.TP
+\fBlevels=\fP\fIs1:e1:d1,s2:e2:d2,...\fP
+many levels using nemoinp
+
+.PP
+On the design of keyword names and order: \fBin=\fP and \fBout=\fP should ideally
+appear first, with reasonable defaults for all other keywords for a standard run.
+Also note that the \fBkey=\fP is in boldface. Anything after that is optional, can be literal
+(boldface) or implied (italics).
+
 .SH "LIST OF FUNCTIONS"
 .sp 10
 .nf
@@ -64,8 +91,9 @@ format.
 .sp 5p
 example 	example.0	skeleton for manual page with simple columns
 .fi
+
 .SH "SEE ALSO"
-This secion gives a list if \fIother(0)\fP routines and manuals
+This section gives a list if \fIother(0)\fP routines and manuals
 which are relevant to this command. 
 In case you want to know more than you possibly ever wanted
 to know about writing manuals, consult one of the following:
@@ -73,15 +101,29 @@ to know about writing manuals, consult one of the following:
 The \fB-man\fP Macro Package (upper case directives in this file)
 .PP 
 Text processing with NROFF and TROFF (lower case directives in this file)
-.SH BUGS
+
+.SH "EXAMPLES"
+Most programs probably deserve an example how it is used.
+
+.SH "BENCHMARKS"
+For programs with interesting scaling properties, it's useful to
+provide a benchark.
+
+.SH "CAVEATS"
+Some programs have known limitations, caveats. It would be good to warn the user
+of this.
+
+.SH "BUGS"
 After certain roff commands a space is forced into the output, e.g.
 the space in \fBin1=\fPsnap1.
 .PP
 The MAN macro file needs special NEMO entry, to prevent the clumsy
 header 'Unknown section of the manual'.(see FILES caption on this manual page)
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.0i +5.5i
 16-Mar-87	created         	PJT
 18-Mar-87	PARAMETERS added	PJT
 01-Aug-87	John Doe takes over	JXD
+24-may-21	added markups to emacs is more properly colorized	PJT

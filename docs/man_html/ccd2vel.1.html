@@ -6,13 +6,17 @@
 <title>CCD2VEL(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccd2vel - convert map of wave/freq/velocities to doppler velocities
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccd2vel</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccd2vel</b> converts a map to
 a doppler velocity map. The input map units can be in wavelength (<b>restwave=</b>
@@ -23,9 +27,11 @@ relativistic). Output units are normally km/s. <p>
 This program ignores references
 to being in a Barycenric, Heliocentric or LSR frame. See comments below
 in the CASA and MIRIAD sections. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given 
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use --help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
@@ -59,16 +65,28 @@ units of the map.   Only one of restwave of restfreq can be used. </dd>
 <dt><b>units=km/s</b> </dt>
 <dd>Desired output
 units (km/s, m/s) [km/s] </dd>
+
+<dt><b>units=</b> </dt>
+<dd>If given, and no in/out is given, the three
+velocity conventions (radio, relativistic, optical) are given in km/s. Default:
+not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is how one converts a fits cube with
-an optical wavelengths 3rd axis to a relatistic velocity field: <br>
+Here is how one converts a fits cube with an optical
+wavelengths 3rd axis to a relatistic velocity field: <br>
 <pre>   fitsccd Ha.cube.fits  - | ccdmom - - mom=3 | ccd2vel - Ha-3.vel opt rel 6562.80
 
 </pre>and here an optical velocity field into a relativistic <br>
 <pre>   NGC2347.VoptFromHa.fits - | ccd2vel - NGC2347.VrelFromHa.ccd opt rel
+</pre>and the different doppler conversion velocities for z=1: <br>
+<pre>    ccd2vel z=1
+    vrad=149896
+    vrel=179875
+    vopt=299792
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Casa</a></h2>
 From the <b>tclean</b> documentation on the <b>veltype</b> keyword: 
 <p> Velocity type
@@ -93,6 +111,7 @@ can be changed in the position tracking pull down.
                       (although the calculation will proceed) if given
 as a velocity.
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Miriad</a></h2>
 From the <b>VELSW</b> documentation: 
 <p> VELSW is a Miriad task used to change
@@ -146,17 +165,22 @@ to (min-match applies): <br>
 </pre>The default for both the spectral type and the Doppler frame is to leave
 them as is, performing only required translations. 
 <p> </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
-<a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+
+<p> <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 ,
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 , <a href='fitsccd.1.html'>fitsccd(1NEMO)</a>
  
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>27-Apr-17<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+11-mar-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 added doppler conversions for given z=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

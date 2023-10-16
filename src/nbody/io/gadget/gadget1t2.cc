@@ -12,6 +12,7 @@
 
         History: July 2009 - written for PiTP summerschool - Andrew David
                  Aug  2009 - added to NEMO, added getparam's  - Peter Teuben
+		 Jan  2022 - fix ?
 
 */
 
@@ -25,11 +26,11 @@ extern "C" {
 #include <nemo.h>                                     // NEMO basics
 }
 
-const char * defv[] = {
+const char *defv[] = {
   "in=???\n             GADGET 1 file",
   "out=???\n            GADGET 2 file",
-  "VERSION=1.0\n        compiled on <"__DATE__"> PJT",
-  0,
+  "VERSION=1.1\n        19-jan-2022 PJT",
+  NULL,
 };
 
 const char * usage="Convert GADGET 1 to 2 format";
@@ -41,13 +42,13 @@ const char * usage="Convert GADGET 1 to 2 format";
 #define PUT fwrite(&dummy, sizeof(dummy), 1, fout);
 
 struct io_header {
-  long    npart[6];
+  int     npart[6];   // was: long
   double  mass[6];
   double  time;
   double  redshift;
   int     flag_sfr;
   int     flag_feedback;
-  long    npartTotal[6];
+  int     npartTotal[6];   // was: long
   int     flag_cooling;
   int     num_files;
   double  BoxSize;
@@ -76,6 +77,9 @@ int main(int argc, char * argv[]) {
 	initparam(const_cast<char**>(argv),const_cast<char**>(defv));
 	InFile  = getparam((char *) "in");
 	OutFile = getparam((char *) "out");
+
+	if (sizeof(int) != 4) warning("sizeof(int) = %d", sizeof(int));
+	if (sizeof(long) != 8) warning("sizeof(long) = %d", sizeof(long));
 	
 	
    	fp=fopen(InFile.c_str(),"r");

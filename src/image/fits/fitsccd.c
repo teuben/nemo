@@ -6,7 +6,6 @@
  *		even if fits file; i.e. make their
  *		defaults blanks, and use hasvalue() to detect mode.
  *              fix header if box= or planes= is used
- *             
  *
  *        ==>>  fix the NaN problem
  *
@@ -65,20 +64,20 @@ string defv[] = {
     "crval=0,0,0\n      Coordinates of reference pixel in raw mode (0)",
     "bscale=1\n         Scale conversion factor in raw mode (1)",
     "bzero=0\n          Offset conversion factor in raw mode (0)",
+    "zscale=1\n         Scaling for Z axis",
     "blank=\n           Blank value re-substitution value?",
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
-    "axistype=0\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
-    "VERSION=5.1\n	18-feb-2015 PJT",
+    "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
+    "altr=f\n           Switch to ALTR wcs",
+    "VERSION=5.5\n	6-sep-2023 PJT",
     NULL,
 };
 
 string usage = "convert (near)fits files into ccd images";
 
-string cvsid="$Id$";
-
 #define MAXPLANES 2048
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int, FLOAT *, FLOAT *);
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, bool Qaltr, int axis, real zscale, FLOAT *, FLOAT *);
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel);
 FITS *rawopen(string name, string status, int naxis, int *nsize);
 void print_axis(int axis, int naxis, real crpix, real crval, real cdelt);
@@ -87,17 +86,18 @@ int is_feq(int *a, int *b);
 void nemo_main()
 {
     stream outstr;
-    FITS *fitsfile;
+    FITS *fitsfile = NULL;
     int ndim=3, naxis[3], nx, ny, nz, i, j, k, npl, p, planes[MAXPLANES];
     int nbox, box[4], i0, j0;
     int nbval=0;
     real bval_out, rmin, rmax, tmp, fbval;
+    real zscale = getrparam("zscale");
     FLOAT *buffer, *bp, bval_in;  /* fitsio- is in FLOAT !!! */
     FLOAT fdata_min, fdata_max, fnan;
     int mir_nan = -1;    /* MIRIAD's FITS NaN */
     imageptr iptr;
     string mode, blankval;
-    bool   Qblank, Qrel, Qout;
+    bool   Qblank, Qrel, Qout, Qaltr;
     int axistype = getiparam("axistype");
 
     Qout = hasvalue("out");
@@ -113,11 +113,12 @@ void nemo_main()
     else if (nbox != 4) 
       error("Need 4 integers box=xmin,ymin,xmax,ymax");
     if (nbox>0) warning("New feature box= not fully tested");  /* > 2GP files wrong? */
-    dprintf(0,"npl=%d nbox=%d\n",npl,nbox);
+    dprintf(1,"npl=%d nbox=%d\n",npl,nbox);
     mode = getparam("mode");
     blankval = getparam("blank");
     Qblank = (*blankval != 0);
     Qrel = getbparam("relcoords");
+    Qaltr = getbparam("altr");
     get_nanf(&fnan);
 #if 1
     memcpy(&fnan,&mir_nan,sizeof(int));    /* PORTABILITY ! */
@@ -149,7 +150,7 @@ void nemo_main()
     if (iptr==NULL) error("No memory to allocate image");
 
     if (streq(mode,"fits")) {
-      make_fitheader(fitsfile,iptr,Qrel,Qout,axistype, &fdata_min, &fdata_max);
+      make_fitheader(fitsfile,iptr,Qrel,Qout,Qaltr,axistype,zscale, &fdata_min, &fdata_max);
       dprintf(1,"Datamin/max read: %g - %g\n",fdata_min, fdata_max);
     } else if (streq(mode,"raw"))
       make_rawheader(fitsfile,iptr,Qrel);
@@ -276,10 +277,10 @@ FITS *rawopen(string name, string status, int naxis, int *nsize)
 
 void make_rawheader(FITS *fitsfile, imageptr iptr, bool Qrel)
 {
-    int ndim, n;
+    int n;
     double tmpr[3];
     
-    ndim = (Nz(iptr) > 1) ? 3 : 2;
+    //ndim = (Nz(iptr) > 1) ? 3 : 2;
 
     n = nemoinpd(getparam("cdelt"),tmpr,3);
     if (n == 0) {
@@ -314,26 +315,30 @@ void print_axis(int axis, int naxis, real crpix, real crval, real cdelt)
  */
 
 
-void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axistype,
+void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, bool Qaltr, int axistype, real zscale,
 		    FLOAT *data_min, FLOAT *data_max)
 {
     int nz, tmpi, i, j;
     real crpix1, crpix2, crpix3;
     FLOAT tmpr, cd[3][3];
-    char cdname[10], ctype[32];
+    char cdname[10], tmpc[32];
 
     nz = Nz(iptr);
+    if (Qaltr && zscale != 1) {
+      warning("Cannot use zscale=%g for altr=t, resetting to 1",zscale);
+      zscale = 1.0;
+    }
 
     fitrdhdr(fitsfile,"CRVAL1",&tmpr,0.0); Xmin(iptr) = tmpr;
     fitrdhdr(fitsfile,"CRVAL2",&tmpr,0.0); Ymin(iptr) = tmpr;
-    fitrdhdr(fitsfile,"CRVAL3",&tmpr,0.0); Zmin(iptr) = tmpr;
+    fitrdhdr(fitsfile,"CRVAL3",&tmpr,0.0); Zmin(iptr) = tmpr * zscale;
     if (Qrel) {
       Xmin(iptr) = Ymin(iptr) = Zmin(iptr) = 0.0;
     }
 
     fitrdhdr(fitsfile,"CDELT1",&tmpr,1.0); Dx(iptr)=tmpr;
     fitrdhdr(fitsfile,"CDELT2",&tmpr,1.0); Dy(iptr)=tmpr;
-    fitrdhdr(fitsfile,"CDELT3",&tmpr,1.0); Dz(iptr)=tmpr;
+    fitrdhdr(fitsfile,"CDELT3",&tmpr,1.0); Dz(iptr)=tmpr * zscale;
     for (i=1; i<=3; i++)
       for (j=1; j<=3; j++) {
 	sprintf(cdname,"CD%d_%d",i,j);
@@ -356,6 +361,15 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     } else
       crpix3 = 0.0;
 
+    if (fitexhd(fitsfile,"RESTFRQ")) {
+      fitrdhdr(fitsfile,"RESTFRQ",&tmpr,0.0); 
+      Restfreq(iptr) = tmpr;
+    }
+      
+    // no support for BPA yet
+    fitrdhdr(fitsfile,"BMAJ",&tmpr,1.0); Beamx(iptr) = tmpr;
+    fitrdhdr(fitsfile,"BMIN",&tmpr,1.0); Beamy(iptr) = tmpr;
+
     if (!Qout) {
       print_axis(1, Nx(iptr), crpix1, Xmin(iptr), Dx(iptr));
       print_axis(2, Ny(iptr), crpix2, Ymin(iptr), Dy(iptr));
@@ -364,6 +378,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     }
 
     if (axistype==0) {
+      warning("axistype 0 is deprecated");
       Axis(iptr) = 0;
       if (crpix1 != 1.0)
         Xmin(iptr) -= (crpix1-1.0)*Dx(iptr);
@@ -379,17 +394,85 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
     } else
       error("Illegal axistype=%d",axistype);
 
-    fitrdhda(fitsfile,"CTYPE1",ctype,"");
-    Namex(iptr) = scopy(ctype);
+    fitrdhda(fitsfile,"BUNIT",tmpc,"");
+    Unit(iptr) = scopy(tmpc);    
 
-    fitrdhda(fitsfile,"CTYPE2",ctype,"");
-    Namey(iptr) = scopy(ctype);
+    fitrdhda(fitsfile,"CTYPE1",tmpc,"");
+    Namex(iptr) = scopy(tmpc);
 
-    if (nz>1) {
-           fitrdhda(fitsfile,"CTYPE3",ctype,"");
-	   Namez(iptr) = scopy(ctype);
+    fitrdhda(fitsfile,"CTYPE2",tmpc,"");
+    Namey(iptr) = scopy(tmpc);
+
+    if (fitexhd(fitsfile,"OBJECT")) {
+      fitrdhda(fitsfile,"OBJECT",tmpc,"");
+      Object(iptr) = scopy(tmpc);
+    }
+    if (fitexhd(fitsfile,"TELESCOP")) {
+      fitrdhda(fitsfile,"TELESCOP",tmpc,"");
+      Telescope(iptr) = scopy(tmpc);
     }
 
+    if (nz>1) {
+      fitrdhda(fitsfile,"CTYPE3",tmpc,"");
+      Namez(iptr) = scopy(tmpc);
+    }
+
+    if (fitexhd(fitsfile,"CUNIT1")) {
+      fitrdhda(fitsfile,"CUNIT1",tmpc,"");
+      dprintf(0,"CUNIT1 %s\n",tmpc);
+      Unitx(iptr) = scopy(tmpc);
+    }
+    if (fitexhd(fitsfile,"CUNIT2")) {
+      fitrdhda(fitsfile,"CUNIT2",tmpc,"");
+      dprintf(0,"CUNIT2 %s\n",tmpc);
+      Unity(iptr) = scopy(tmpc);
+    }
+    if (fitexhd(fitsfile,"CUNIT3")) {
+      fitrdhda(fitsfile,"CUNIT3",tmpc,"");
+      dprintf(0,"CUNIT3 %s\n",tmpc);
+      Unitz(iptr) = scopy(tmpc);
+    }
+
+    //  attempt to make a new 3rd axis - usually FREQ -> VRAD
+    //  @todo this section may need work if altrpix != cdelt3
+    //        or if the regular axis is not FREQ
+    //        or if the SPECSYS != LSRK
+    //        or if VELREF != 257
+    if (nz > 1 && Qaltr) {
+      warning("Attempting to use the ALTR wcs - restfreq=%g",Restfreq(iptr));
+      if (axistype==0) error("canot handle axistype=0");
+      // SPECSYS = 'LSRK    '           /Spectral reference frame
+      // ALTRVAL =   6.518001385687E+05
+      // ALTRPIX =   5.161290322581E-01
+      // VELREF  =                  257 /1 LSR, 2 HEL, 3 OBS, +256 Radio
+      // COMMENT casacore non-standard usage: 4 LSD, 5 GEO, 6 SOU, 7 GAL
+      //
+      // CTYPE3  = 'FREQ    '
+      // CRVAL3  =   1.145404667970E+11
+      // CDELT3  =   3.784699995180E+06
+      // CRPIX3  =   5.161290322581E-01
+      // CUNIT3  = 'Hz      '
+      real altrval=0, altrpix=0;
+      if (fitexhd(fitsfile,"ALTRVAL")) {
+	fitrdhdr(fitsfile,"ALTRVAL",&tmpr,0.0); 
+	altrval = tmpr;
+      } else
+	error("ALTRVAL missing from fits header");
+      if (fitexhd(fitsfile,"ALTRPIX")) {
+	fitrdhdr(fitsfile,"ALTRPIX",&tmpr,0.0); 
+	altrpix = tmpr;
+      } else
+	error("ALTRPIX missing from fits header");
+      if (altrpix != crpix3) error("altrpix != crpix3: %g != %g", altrpix, crpix3);
+      real cdelt3 = -Dz(iptr)/Restfreq(iptr) * 299792.458;
+      altrval /= 1000.0;      // convert to km/s
+      dprintf(0,"altrval = %g km/s @ altrpix = %g and cdelt3 = %g km/s\n",altrval,altrpix,cdelt3);
+      //
+      Namez(iptr) = scopy("VRAD");
+      Unitz(iptr) = scopy("KM/S");
+      Dz(iptr) = cdelt3;
+      Zmin(iptr) = altrval;
+    }
 
     fitrdhdr(fitsfile,"DATAMIN",&tmpr,0.0); 
     MapMin(iptr) = *data_min = tmpr;
@@ -414,7 +497,7 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, int axi
  *  the _nan routines should supply this
  */
 
-is_feq(int *ia, int *ib)
+int is_feq(int *ia, int *ib)
 {
   int r;
 #if 0

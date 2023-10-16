@@ -6,65 +6,106 @@
 <title>MKCUBE(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mkcube - create a uniform cube of equal massive stars 
+mkcube - create a uniform cube of equal massive stars (<i>the borg</i>) 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkcube</b>
 <b>out=</b><i>snapshot</i> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>mkcube</b> generates a random realization
 of a cube. Coordinates in X, Y and Z are uniformly randomly distributed
 on a cube with given size. Velocities by default are zero, but can be drawn
-from an isotropic distribution with choosen dispersion. 
+from an isotropic distribution with choosen dispersion. <p>
+As with most NEMO
+programs, the center of mass is (roughly, see <b>zerocm=</b>) at the origin, thus
+coordinates run from -<b>size</b>/2 to +<b>size</b>/2. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use --help to confirm this man page is up to date.  
 <dl>
 
-<dt><b>out=</b>
-</dt>
-<dd>Output file name, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<dt><b>out=</b> </dt>
+<dd>Output
+file name, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format.  No default. </dd>
 
 <dt><b>nbody=</b> </dt>
-<dd>Number of
-particles. [Default: <b>256</b>]. </dd>
+<dd>Number of particles.
+[Default: <b>256</b>]. </dd>
 
 <dt><b>size=</b> </dt>
 <dd>Size of cube.  [Default: <b>1</b>]. </dd>
 
 <dt><b>sigma=</b> </dt>
-<dd>Isotropic
-velocity dispersion. [Default: <b>0.0</b>]. </dd>
+<dd>Isotropic velocity
+dispersion. [Default: <b>0.0</b>]. </dd>
 
 <dt><b>seed=</b> </dt>
-<dd>Random number seed      [Default:
-<b>0</b>]. </dd>
+<dd>Random number seed      [Default: <b>0</b>]. </dd>
 
-<dt><b>zerocm=t|f</b> </dt>
+<dt><b>zerocm=t|f</b>
+</dt>
 <dd>Center c.o.m. ?  [Default: <b>t</b>]. </dd>
 
 <dt><b>headline=</b> </dt>
-<dd>Text headline for output
-    Default: none. </dd>
+<dd>Text headline for output     Default:
+none. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='mkgrid.1.html'>mkgrid(1NEMO)</a>
 , <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-
-<p>
+ <p>
 <a href='http://arxiv.org/abs/1206.3857'>http://arxiv.org/abs/1206.3857</a>
-  (The gravitational field of a cube, Chappel
-et al.) 
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+
+ (The gravitational field of a cube, Chappel et al.) 
+<p> 
+<h2><a name='sect5' href='#toc5'>Benchmark</a></h2>
+The following
+benchmark creates a large nbody cube, is gridded in an image cube and converted
+to a fits file (the fits file is normally half the size of the ccd file,
+since the latter uses double precision): 
+<p> <br>
+<pre>    nbody=10000000
+    nx=128
+    mkcube cube1 $nbody 4.0
+    snapgrid cube1 cube1.ccd nx=$nx ny=$nx nz=$nx zvar=z zrange=-2:2
+    ccdfits cube1.ccd cube1.fits
+</pre>
+<p> and with the following timings (<b>u</b>ser and <b>s</b>ystem times reported) on a 512GB
+machine: <br>
+<pre>nbody  nx   size  size       mkcube         snapgrid            ccdfits
+1e7   128   547MB   16    0.59u   0.55s    1.15u   0.48s
+1e7   256          131                     1.74u   0.54s
+1e7   512         1048                     2.31u   1.15s       4.03u  0.81s
+1e8   128   5.4G          6.55u   7.31s   11.62u   5.89s
+      256                                 15.46u   6.17s
+      512                                 21.51u   6.75s
+     1024                                 41.23u  16.45s
+     2048                                 65.91u  63.51s
+1e9   128   54G          69.05u  81.46s    73.83u  53.74s
+      256                                 79.05u  42.24s
+      512                                 81.07u  39.53s
+     1024          8GB                   103.28u  43.67s         74.26u 5.21s
+     2048         64GB                   145.19u  85.29s          -failed-
+</pre>
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>26-Aug-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+25-mar-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;added benchmark<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -75,8 +116,9 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Benchmark</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

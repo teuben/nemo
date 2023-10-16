@@ -4,8 +4,10 @@
  *	 4-mar-89  V1.0  JEB	Some original version
  *	12-nov-91  V1.1  PJT	New NEMO V2.
  *	 6-may-92      a PJT	extra warning if no output selected
+ *       6-jan-22  V1.4  pjt  linux now also requiring link protection
  */
 
+#define global                                  /* don't default to extern  */
 #include "quaddefs.h"
 
 #include <filestruct.h>
@@ -20,7 +22,7 @@ string defv[] = {
     "quad=\n			output file with field tables",
     "eps_r=0.05\n		radial softening parameter",
     "eps_t=0.07\n		tangential softening parameter",
-    "VERSION=1.1a\n		6-may-92 PJT",
+    "VERSION=1.4\n		6-jan-2022 PJT",
     NULL,
 };
 

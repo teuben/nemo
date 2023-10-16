@@ -1,0 +1,22 @@
+# n=10
+# ccdgen "" - noise 0,1 size=$n,$n,1000 | ccdstat - sratio=t planes=0  | tabstat - 12 qac=t | tabcols - 4
+# n   sratio_rms
+10   0.126562
+15   0.082149
+20   0.061657
+30   0.039877
+40   0.0295725
+50   0.0243081
+60   0.0210903
+70   0.0177777
+80   0.0160403
+90   0.0140776
+100  0.0124154
+#
+#   tabmath sratio.tab - 1/%2 | tabnllsqfit - 1 3
+#   -> a= 0.926675 0.697506    intercept
+#      b= 0.786314 0.0112413   slope
+#   ->  sratio_rms ~ 1.27/N
+#
+#PLOT tabplot sratio.tab 1 2   0 100 0 0.16  point=2,0.05 line=1,1 nxticks=9 xlab=Nbeams ylab=sratio_rms headline=RMS=1
+

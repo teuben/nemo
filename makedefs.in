@@ -37,10 +37,10 @@ CXX = @CXX@
 HDF_INC = @HDF_INC@
 HDF_LIB = @HDF_LIB@
 
-#  HDF5 library
+#  HDF5 library:  -lhdf5
 # --with-hdf5-incdir=   --with-hdf5-libdir=
 #HDF5_INC = `pkg-config --cflags hdf5`
-#HHD5_LIB = `pkg-config --libs hdf5`
+#HDF5_LIB = `pkg-config --libs hdf5`
 HDF5_INC = @HDF5_INC@
 HDF5_LIB = @HDF5_LIB@
 
@@ -48,23 +48,29 @@ HDF5_LIB = @HDF5_LIB@
 #PNG_LIB = `pkg-config --libs libpng`
 PNG_LIB = @PNG_LIB@
 
-#  CFITSIO library
+#  CFITSIO library: -lcfitsio -lcurl -lz -lbz2
 #CFITSIO_INC = `pkg-config --cflags cfitsio`
 #CFITSIO_LIB = `pkg-config --libs cfitsio`
 CFITSIO_INC = @CFITSIO_INC@
 CFITSIO_LIB = @CFITSIO_LIB@
 
+#  NETCDF4 library: -lnetcdf
+#NETCDF_INC = `pkg-config --cflags netcdf`
+#NETCDF_LIB = `pkg-config --libs netcdf`
+NETCDF_INC = @NETCDF_INC@
+NETCDF_LIB = @NETCDF_LIB@
+
 #  MIRIAD library
 MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
-#	GSL
+#  GSL library:   -lgsl -lgslcblas -lm
 #GSL_INC = @GSL_CFLAGS@
 #GSL_LIB = @GSL_LIBS@
 GSL_INC = 
 GSL_LIB =
 
-#	PLPLOT
+#	PLPLOT: -lplplot
 #PLPLOT_INC = -I/usr/include/plplot
 #PLPLOT_LIB = -lplplot
 PLPLOT_INC = @PLPLOT_CFLAGS@
@@ -130,16 +136,21 @@ XLIBS  = @XLIBS@
 # (see GSL users guide - appendix A)
 # PEDFLAG="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align  -Wwrite-strings -Wnested-externs  -fshort-enums -fno-common -Dinline= -g -O4"
 #   optimization only
-
-OPT  = @CFLAGS@
+#PEFFLAG = -Werror-implicit-function-declaration -Wimplicit-int -Wimplicit-function-declaration
+#PEDFLAG = --warn-no-implicit-function-declaration
+#PEDFLAG = -Wimplicit-int -Wimplicit-function-declaration
+#PEDFLAG = -Wno-error      # if you want the compiler to shut up and just take a chance in life
+PFLAGS = @PFLAGS@ -Wimplicit-function-declaration
+COPT = @CFLAGS@ 
 FOPT = @FFLAGS@
 LOPT = @LDFLAGS@
 #   for shared libaries
 CCSHARED = @CCSHARED@
 #   everything 
-CFLAGS  = $(OPT) $(CCSHARED) $(NEMO_CFLAGS)
-FFLAGS  = $(OPT) $(CCSHARED) $(NEMO_FFLAGS)
-LDFLAGS = $(OPT)             $(NEMO_LDFLAGS)
+CFLAGS   = $(COPT) $(CCSHARED) $(NEMO_CFLAGS) $(PFLAGS)  @STDFLAG@
+CXXFLAGS = $(COPT) $(CCSHARED) $(NEMO_CFLAGS)
+FFLAGS   = $(FOPT) $(CCSHARED) $(NEMO_FFLAGS)
+LDFLAGS  = $(LOPT)             $(NEMO_LDFLAGS)
 CPPFLAGS = @CPPFLAGS@
 
 RANLIB = @RANLIB@
@@ -158,14 +169,14 @@ RANLIB = @RANLIB@
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 
 .cc.o:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -c $<
 
 .c.so:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
 
 .cc.so:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -c $<
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -c $<
 	ldso $*
 
 .f.so:
@@ -179,7 +190,7 @@ RANLIB = @RANLIB@
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 .cc:
-	$(CXX) $(CFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBSPP) $(LOCAL_LIB) $(FORLIBS) $(EL)
+	$(CXX) $(CXXFLAGS) $(LOCAL_INC) -o $* $*.c $(NEMO_LIBSPP) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 .o:
 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.o $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)

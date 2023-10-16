@@ -103,7 +103,7 @@ static real av6 = A22;
 static real av7 = A01;
 
 
-static debug_first = 1;
+static int debug_first = 1;
 
 
 /* parameters: fix all widths to be the same as well as DV's as well as all Amp's

@@ -30,9 +30,11 @@ LIBSUNTOOLS = -Bdynamic -lcore -lsunwindow -lpixrect
 LIBMONGO    = /usr/local/lib/libmongo.a $(LIBSUNVIEW) $(FORLIBS)
 #LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBSUNVIEW) -lX11 $(FORLIBS)
 # linux:
-LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBX) $(FORLIBS)
+#LIBPGPLOT   = $(NEMOLIB)/libpgplot.a $(LIBX) $(FORLIBS)
+LIBPGPLOT   = -lpgplot $(LIBX) $(FORLIBS)
 #LIBPLPLOT   = -lplplotftk -ltk -litcl -ltcl $(LIBX) -lieee -lm -lf2c
-LIBPLPLOT   = -lplplot -ltk -ltcl  $(LIBX)
+#LIBPLPLOT   = -lplplot -ltk -ltcl  $(LIBX)
+LIBPLPLOT   = -lplplot   $(LIBX)
 # -lieee -lm
 # LIBSM       = /saturn/teuben/sm/callable/dummy.o 
 #  this is an SM without sunview, only X11 (check your sm/src/options.h)

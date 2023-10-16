@@ -237,29 +237,73 @@ int nemoinpf(
 }
 #endif
 
+/*
+ *  convert Babylonian sexagesimal string
+ *  D:M:S -> D + M/60 + S/3600
+ *    @todo   H:M:S is normal,
+ *        NED  example 00h07m15.84s, +27d42m29.1s
+ *        CASA example 12:22:55.212, +15.49.15.500    (who came up with THAT?)
+ *        ???          10,20,30.456                 (miriad might have an input example)
+ *
+ *    sep options:      ':'  ','   '.'  'hms'   'dms'
+ */
+
+double atox(string nptr)
+{
+  int ncomp, sign;
+  string *comp;
+  double retval;
+  
+  comp = burststring(nptr,":");
+  ncomp = xstrlen(comp,sizeof(string))-1;
+  if (ncomp < 1)
+    return 0.0;
+  sign = (*comp[0]=='-') ?   -1  : +1;
+  retval = fabs(atof(comp[0]));
+  if (ncomp > 1) {
+    retval += atof(comp[1])/60.0;
+    if (ncomp > 2) {
+      retval += atof(comp[2])/3600.0;
+      if (ncomp > 3)
+	warning("String %s has too many : for atox(), ignoring remainder",nptr);
+    }
+  }
+  retval *= sign;
+  freestrings(comp);
+  return retval;
+}
 
 int nemoinpx(
 	     char *expr,
 	     double *a,
 	     int     na)
 {
-  int nret, ncomp;
+  int nret, ncomp, sign;
   string *vals, *comp;
 
   vals = burststring(expr,",");
   for (nret=0; vals[nret] != NULL; nret++) {
     if (nret>=na)
       return -23;
+#if 1
+    // this code is the error checking version of atox()
+    // @todo  check for non-digits
     comp = burststring(vals[nret],":");
     ncomp = xstrlen(comp,sizeof(string))-1;
     if (ncomp < 1 || ncomp > 3)
       return -13;
-    a[nret] = atof(comp[0]);
-    if (ncomp==1) continue;
-    a[nret] += atof(comp[1])/60.0;
-    if (ncomp==2) continue;
-    a[nret] += atof(comp[2])/3600.0;
+    sign = (*comp[0]=='-') ?   -1  : +1;
+    a[nret] = fabs(atof(comp[0]));
+    if (ncomp > 1) {
+      a[nret] += atof(comp[1])/60.0;
+      if (ncomp > 2)
+	a[nret] += atof(comp[2])/3600.0;
+    }
+    a[nret] *= sign;
     freestrings(comp);
+#else
+    a[nret] = atox(vals[nret]);
+#endif
   }
   freestrings(vals);
   return nret;
@@ -364,6 +408,7 @@ double natof(char *expr)
     return atof("nan");
 
   n = nemoinpd(expr,&x,1);
+  if (n!=1) warning("natof parsing: %s",expr);
   return x;
 }
 
@@ -371,6 +416,7 @@ int natoi(char *expr)
 {
   int x, n;
   n = nemoinpi(expr,&x,1);
+  if (n!=1) warning("natof parsing: %s",expr);  
   return x;
 }
 
@@ -382,19 +428,18 @@ string defv[] = {
     "separ=\n		Separator between numbers on output",
     "format=%g\n	Format used to print numbers",
     "newline=t\n	Use newline between numbers?",
-    "nmax=32768\n	Size of output buffer",
+    "nmax=100000\n	Size of output buffer",
     "tab=\n             Optional table output",
     "seed=0\n		Seed for xrandom",
     "atof=\n            test (n)atof single value expression",
     "dms=f\n            Use D:M:S.SS parsing instead of regular",
-    "VERSION=1.10c\n	23-feb-2019 PJT",
+    "VERSION=1.11\n	11-mar-2022 PJT",
     NULL,
 };
 
 
 string usage = "expression parser and evaluator; also does lists";
 
-string cvsid="$Id$";
 
 void nemo_main(void)
 {
@@ -454,8 +499,8 @@ void nemo_main(void)
     	/* this somewhat unusual exit is because aliens often use this program */
 	/* what really should have been done is make "expression=???" default */
         dprintf(0,"Usage: %s <expression>\n",getargv0());
-        dprintf(0,"\n<expr> can be of form:  start[:end][:incr][,start::repeat]...\n");
-        dprintf(0,"Also try keyword 'help= or help=h'\n");
+        dprintf(0,"<expr> can be of form:  start[:end][:incr][,start::repeat]...\n");
+	dprintf(0,"NEMO=%s\n",getenv("NEMO"));
         stop(0);
     }
     nx = getiparam("nmax");

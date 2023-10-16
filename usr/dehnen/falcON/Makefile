@@ -24,9 +24,12 @@ endif
 # this should be set by a configure file
 #
 
+ifeq ($(COMPILER),)
 COMPILER		:= gcc#		# GNU compiler g++
+endif
 #COMPILER		:= icc#		# intel compiler icpc
 #COMPILER		:= clang#	# llvm compiler clang++
+
 
 #
 # 3 activate options (some only apply to proprietary and private versions)
@@ -144,8 +147,14 @@ falcON_objs	=	$(public_objs) $(proper_objs) $(sph_objs)
 $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 			$(AR) $@ $?
 			$(RL) $@
+
+ifeq ($(NO_SHARED_LIBS),0)
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
 			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
+else
+$(LIB)lib$(LIBNAME).so:
+			@echo Skipping lib$(LIBNAME).so:
+endif
 
 library		: 	links $(LIBT) $(falcON) $(BFCT)
 
@@ -164,7 +173,10 @@ acc		:	$(ACCT) $(acc_pub) $(acc_pro) $(acc_sph) $(acc_walter) $(acc_pjm)
 ifdef DPROPER
 man		:
 else
-man		:
+man	        :
+			@echo "no man page sync to NEMO, assuming NEMO has the latest"
+			@echo "use 'make man_orig' to force, but check git logs"
+man_orig		:
 			- cp -p man/man1/*.? $(NEMO)/man/man1
 			- cp -p man/man3/*.? $(NEMO)/man/man3
 			- cp -p man/man5/*.? $(NEMO)/man/man5

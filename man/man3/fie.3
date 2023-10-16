@@ -1,7 +1,9 @@
-.TH FIE 3NEMO "19 June 1989"
-.SH NAME
+.TH FIE 3NEMO "3 April 2023"
+
+.SH "NAME"
 inifie, dofie, dmpfie \- expression parser
-.SH DESSCRIPTION
+
+.SH "DESSCRIPTION"
 \fIinifie\fP parses an input string which contains a mathematical
 formula, and \fIdofie\fP does the actual calculation. \fIdmpfie\fP
 is merely included as a debugging aid, it lists the operations which
@@ -13,7 +15,8 @@ have an appended _c, i.e. \fIinifie_c, dofie_c\fP and \fIdmpfie_c\fP.
 For ease of use NEMO has defined counterparts where input variables can
 be entered by value, return valued must be obtained by reference always.
 In this case the names become \fIinifien, dofien\fP and \fIdmpfien\fP.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBint inifie(code)\fP
 .nf
             parse code for DOFIE
@@ -102,6 +105,7 @@ In this case the names become \fIinifien, dofien\fP and \fIdmpfien\fP.
             ifge(x,y,a,b)  returns a if x greater or equal y, else b
             iflt(x,y,a,b)  returns a if x less y, else b
             ifle(x,y,a,b)  returns a if x less or equal y, else b
+            range(x,a,b)   returns 1 if x inbetween a and b, including a and b.
 	    sind(x), cosd(x), tand(x)		sine/cosine/tangent in degrees
 
 \fINotes\fP:      The calculations are all done in double precision (double), although the
@@ -110,7 +114,8 @@ In this case the names become \fIinifien, dofien\fP and \fIdmpfien\fP.
 \fIRemarks\fP:    If you cannot find your favorite constant or function in the list,
             please contact Kor Begeman. He might be persuaded to put it in.
 .fi
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 .nf
                   PROGRAM TEST
 C == warning; program not conform to fortran77 and f2c interface definition
@@ -169,18 +174,22 @@ VMS Notes:  If you want to use this routine in one of your programs,
              <programname>,lib:genlib/lib,sys$library:vaxcrtl/lib
 
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 herinp(3NEMO), nemoinp(3NEMO)
-.SH AUTHORS
+
+.SH "AUTHORS"
 R. Kiel (and K.G. Begeman, P.J. Teuben)
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
 $NEMO/src/pjt/clib	fie.c (fortran callable) nemofie.c (C-callable) fie_ftoc.c
 .fi
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5
 12-mar-87	document created                      	KGB
 25-mar-87	small change in document              	KGB
 28-may-87	RJK bug removed                      	KGB
@@ -188,4 +197,5 @@ $NEMO/src/pjt/clib	fie.c (fortran callable) nemofie.c (C-callable) fie_ftoc.c
 15-dec-88	Minor things for INTEGER*4 unix version  	PJT
 19-jun-89	Merged new GR version with NEMO again - routinenames appending _c	PJT
 26-aug-01	added cosd/sind/tand    	PJT
+3-apr-2023	added range()	PJT
 .fi

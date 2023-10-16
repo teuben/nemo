@@ -38,7 +38,7 @@ int xypix(double xpos, double ypos, double xref, double yref,
       double xrefpix, double yrefpix, double xinc, double yinc, double rot,
       char *type, double *xpix, double *ypix);
 
-main() 
+int main() 
 {
     double xpix, ypix;
     double xpos, ypos;

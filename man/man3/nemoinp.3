@@ -1,7 +1,9 @@
-.TH NEMOINP 3NEMO "28 January 2004"
-.SH NAME
-nemoinp, natof, natoi \- decode and parse string into reals, integers, logicals
-.SH SYNOPSIS
+.TH NEMOINP 3NEMO "3 April 2023"
+
+.SH "NAME"
+nemoinp, natof, natoi, atox \- decode and parse string into reals, integers, logicals, sexagesimal
+
+.SH "SYNOPSIS"
 .nf
 \fBint nemoinpd (expr,doutv,nout)
 int nemoinpf (expr,foutv,nout)
@@ -10,8 +12,17 @@ int nemoinpi (expr,ioutv,nout)
 int nemoinpl (expr,loutv,nout)
 int nemoinpb (expr,boutv,nout)
 int nemoinpx (expr,doutv,nout)
+
+int nemorinpi (string var, int    *xvar,  int n, int    defvar, bool repeated)
+int nemorinpd (string var, double *xvar,  int n, double defvar, bool repeated)
+int nemorinpf (string var, float  *xvar,  int n, float  defvar, bool repeated)
+int nemorinpl (string var, long   *xvar,  int n, long   defvar, bool repeated)
+int nemorinpb (string var, int    *xvar,  int n, bool   defvar, bool repeated)
+
 double natof(expr)
 int  natoi(expr)
+
+double atox(expr)
 
 char *expr;
 double doutv[];
@@ -22,7 +33,8 @@ long   loutv[];
 bool   boutv[];
 int    nout;\fP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fInemoinp*(3NEMO)\fP parses the input character string \fBXexpr\fP into 
 a list of basic C-data structure items, pointed to by \fBXoutv\fP.
 The input string must be comma, space or
@@ -47,6 +59,11 @@ error checking (most importantly if the string contains non-number
 parts, except for the string "NaN" or "nan" in \fInatof()\fP where
 it will return the appropriate IEEE \fBnan\fP value).
 .PP
+\fBatox\fP provides the Babylonian sexagesimal (D:M:S) conversion
+to D+M/60+S/3600 conversion, but without any error checking. The user
+is still responsible for units, e.g. it does not know how to
+distinguish between H:M:S and D:M:S.
+.PP
 An expression can have basic mathematical functions, such as addition,
 most transcendental functions and  even some mathematical and physical
 constants. See also \fIherinp(3NEMO)\fP.
@@ -55,7 +72,12 @@ The only exception to \fIherinp(3NEMO)\fP parsing is \fInemoinpx\fP,
 which parses a string in \fBd:m:s.s\fP format, returning the number(s)
 in fractional degrees. For h:m:s conversion, the user is responsible for
 the extra factor of 15 between d:m:s and h:m:s.
-.SH OPERATORS
+.PP
+The \fInemorinpX\fP routines were added to allow for filling exactly
+\fBn\fP values with \fBdefval\fP (repeated=FALSE) or with the last used
+value (repeated=TRUE)
+
+.SH "OPERATORS"
 The following operators are known:
 .nf
 .ta +1i
@@ -65,7 +87,8 @@ The following operators are known:
 /	division
 **	power
 .fi
-.SH CONSTANTS
+
+.SH "CONSTANTS"
 The following constants are implemented (in SI units, where applicable)
 .nf
 .ta +1i
@@ -81,7 +104,8 @@ undef	errorval
 
 Note: the Hubble constant is not included.
 .fi
-.SH FUNCTIONS
+
+.SH "FUNCTIONS"
 The following mathematical functions are implemented:
 .nf
 .ta +1i
@@ -120,8 +144,10 @@ ifgt(x,y,a,b)  	returns a if x greater y, else b
 ifge(x,y,a,b)  	returns a if x greater or equal y, else b
 iflt(x,y,a,b)  	returns a if x less y, else b
 ifle(x,y,a,b)  	returns a if x less or equal y, else b
+range(x,a,b)    return 1 if x inbetween (included border) and b, else 0
 .fi
-.SH ERROR RETURN CODE
+
+.SH "ERROR RETURN CODE"
 .nf
 .ta +1i
 0   	no error
@@ -140,15 +166,18 @@ ifle(x,y,a,b)  	returns a if x less or equal y, else b
 -23   	output buffer overflow
 -24   	floating overflow/underflow in conversion
 .fi
-.SH BUGS
+
+.SH "BUGS"
 The number e-floating number 0 (0.00000E+00) cannot be processed, nemoinp
 complains about floating underflow. Begeman is looking into this (dec 88)
-.SH LIMITATIONS
+
+.SH "LIMITATIONS"
 Each subexpression can contain at most 32767 items, e.g. "1::40000" will not
 parse but "1::20000,1::20000" will correctly parse to 40000 1's.
 .PP
 Loops, repeats and lists cannot be nested!!
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 .nf
 .ta
 .ta +1.5i +0.5i 
@@ -158,13 +187,15 @@ log(10):log(100):2/4  	yields       	1.0 1.5 2.0
 10**[0 1 2 3]         	yields       	1.0 10.0 100.0 1000.0
 
 .fi
-.SH SEE ALSO
+.SH "SEE ALSO"
 herinp(3NEMO), fie(3NEMO), nemofie(3NEMO), getrange(3NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4i
+.ta +1.5i +5.5i
 18-May-88	Implemented in NEMO by calling GIPSY's herinp	PJT
 xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 20-jun-89	doc updated	PJT
@@ -172,4 +203,7 @@ xx-feb-89	nemoinp made archaic - must now call nemoinpX	PJT
 31-may-01	added natof/natoi	PJT
 4-mar-03	1.9 added nemoinpx()	PJT
 28-jan-04	recognize nan's in natof	PJT
+jan-2005	added nemorinpX	PJT
+dec-2021	added atox, fix sign bug	PJT
+3-apr-2023	added range()	PJT
 .fi

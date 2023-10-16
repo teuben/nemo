@@ -1,0 +1,214 @@
+#! /bin/csh -f
+#
+#  this script will find Benchfile's and create a benchsuite from it
+#  Note that it will run in a directory $NEMO/tmp/bench$$
+#
+#   22-jul-21   Cloned off testsuite                Vanday Bundu
+#   20-jan-22   test -> bench; add debug mode?      PJT
+#
+# BUG:  -b  does not remove executable, so you never know if new binary did
+#		not compile
+
+set version="22-dec-2022"
+
+set benchdir=$NEMO/tmp/bench$$
+set log=benchsuite.log
+alias test 'make -f Testfile'
+
+set norun=0
+set cleanup=0
+set clean=0
+set show=0
+set install=0
+set force=0
+set query=0
+set done=0
+set bootstrap=0
+set local=0
+set options=()
+set exec=()
+set usr=1
+set debug=0
+
+foreach arg ($*)
+    switch ($arg)
+    case -b:
+              set bootstrap=1
+              breaksw
+    case -l:
+              set local=1
+              breaksw
+    case -n:  
+              if ($done) then
+                set options=($options $arg)                
+              else
+                set norun=1
+              endif
+              breaksw
+    case -r:  
+              set cleanup=1
+              breaksw
+    case -c:  
+              set clean=1
+              breaksw
+    case -v:
+    case -v0:
+	      set exec=(valgrind --tool=memcheck)
+	      breaksw
+    case -v1:
+	      set exec=(valgrind --tool=addcheck)
+	      breaksw
+    case -s:  
+              set show=1
+              breaksw
+    case -i:
+	      set install=1
+	      breaksw
+    case -f:
+	      set force=1
+	      breaksw
+    case -q:  
+              set query=1
+              breaksw
+    case -u:  
+              set usr=0
+              breaksw
+    case -d:
+              set debug=1
+	      breaksw
+    case -h:  
+              goto help
+              breaksw
+    case --:
+              set done=1
+              breaksw
+    default:
+              set options=($options $arg)
+              breaksw
+    endsw
+end
+
+if ($bootstrap) then
+  set blog=/tmp/benchsuite_b.log
+  echo Rebuilding benchsuite executables, hang on.....see $blog 
+  (cd $NEMO/src/scripts; ./need -m `./bench/8ju-suite -s`; mknemo -c history hisf; mknemo -n 1 rotcur; mknemo -n 1 hackforce) >& $blog
+endif
+
+mkdir $benchdir
+pushd $benchdir >& /dev/null
+
+set tdir=src
+if ($usr) set tdir=src,usr
+
+onintr cleanup
+
+# define red, green and neutral colors
+set red  = '\033[0;31m'
+set grn  = '\033[0;32m'
+set neu  = '\033[0m'
+set ok   = "${red}OKOK${neu}"
+set fail = "${grn}FAIL${neu}"
+set ok   = "OK  "
+set fail = "FAIL"
+
+#echo OPTIONS=$options
+#echo CNRS=$clean $norun $cleanup $show
+echo "BENCHSUITE started `date`"                                       > $log
+echo "BENCHSUITE version $version"                                    >> $log
+echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
+
+foreach benchfile (`find $NEMO/{$tdir} -name Benchfile -print | sort`)
+    if ($norun) then
+        echo $benchfile
+        continue
+	
+    endif
+    if ($clean) then
+        (cd $benchfile:h ; make -f Benchfile clean)
+        continue
+    endif
+    if ($show) then
+        (cd $benchfile:h ; make -f Benchfile need)
+        continue
+    endif
+    if ($query) then
+        foreach bin (`cd $benchfile:h ; make -f Benchfile need`)
+            if (! -e $NEMOBIN/$bin) then
+                echo $NEMOBIN/$bin does not exist
+                if ($install) then
+                    mknemo $bin
+                endif
+	    else
+		if ($force) then
+                    mknemo $bin
+		endif
+            endif
+        end
+        continue
+    endif
+#    echo -n TESTSUITE: $testfile:h
+    echo "==========================================================" >>  $log
+    if ($local) pushd $benchfile:h >& /dev/null
+    make -f $benchfile clean all  $options EXEC="$exec"                >>& $log
+    if ($status) then
+	echo -n "BENCHSUITE: $fail $benchfile:h"
+	echo ""
+    else
+	echo -n "BENCHSUITE: $ok $benchfile:h"
+	echo ""
+    endif
+    if ($local) popd >& /dev/null
+end
+
+echo "BENCHSUITE   ended `date`"                                       >> $log
+
+cleanup:
+
+     popd >& /dev/null
+
+     if ($show || $query) then
+         set clean=1
+     else
+#       grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
+#	if (! -z $testdir/not-found.log) then
+#	    echo FAIL : The following programs were not found:
+#	    cat $testdir/not-found.log
+#	endif
+        echo Results in $benchdir/$log
+	cp $benchdir/$log $NEMO/$log
+	
+    endif
+
+    if ($cleanup || $clean) then
+        rm -rf $testdir
+    endif
+
+
+    exit 0
+
+help:
+    echo "Usage: $0 [options] [KEYWORD=value ...]"
+    echo "Version: $version"
+    echo ""
+    echo "This program excerizes NEMO by running a number of core programs"
+    echo "from a diverse set of packages (kernel,nbody,orbit,image)"
+    echo ""
+    echo "Options:"
+    echo "    -b    bootstrap: force rebuilding binaries"
+    echo "    -l    run test in local (where Testfile is) directory"
+    echo "    -n    dry-run, only show which directories have Testfile's"
+    echo "    -r    cleanup working directory in '$NEMO/tmp' afterwards"
+    echo "    -c    clean the NEMO directory itself of Testfile in/out files"
+    echo "    -s    show all the binaries that are needed for each test"
+    echo "    -i    install the missing binaries that are needed for all tests"
+    echo "    -f    forced install of the binaries needed for all tests"
+    echo "    -b    bootstrap mode"
+    echo "    -q    show all binaries that have not been installed yet"
+    echo "    -v    run programs through valgrind --tool=memcheck"
+    echo "    -h    this help"
+    echo ""
+    echo "Useful keywords, and their defaults:"
+    echo "(see also Testfile.def)"
+    echo "    NBODY=10         should at least be 10; 10 makes it run fast"
+    echo 
+

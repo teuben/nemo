@@ -3,9 +3,9 @@
 include $(NEMOLIB)/makedefs
 
 
-SCRIPTS = mknemo mkpdoc manlaser nemoman ldso nemo.version \
+SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
-	wgetc
+	wgetc yapp_query nemoplot nemopars sbatch_nemo.sh nemo_functions.sh
 MAKES = Makefile.lib 
 
 help:
@@ -60,3 +60,9 @@ mycc:	mycc.c
 scripts: $(SCRIPTS)
 	cp $? $(NEMOBIN)
 	cp Makefile.lib $(NEMOLIB)/Makefile
+
+
+checkpars:
+	(cd ../../; src/scripts/checkpars.py -v)  > checkpars.log
+	@grep ^'Files read'         checkpars.log
+	@grep ^'Bad files found'    checkpars.log

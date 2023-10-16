@@ -1,17 +1,19 @@
 .TH VELCUBE 1NEMO "29 May 2004"
-.SH NAME
-velcube \- create a data cube from a velocity field 
-.SH SYNOPSIS
+
+.SH "NAME"
+velcube \- create a data cube from a velocity field
+
+.SH "SYNOPSIS"
 \fBvelcube\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBvelcube\fP creates a theoretical position-position-velocity
 data cube with signal derived from a velocity field (required)
 surface density and velocity dispersion map (both optional).
 .PP
 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 Output file name (a cube) in \fIimage(5NEMO)\fP format. 
@@ -44,21 +46,47 @@ Number of gridding pixels in Z [64]
 \fBsigdefault=\fP
 Default (constant)
 velocity dispersion in case no dispersion map is given. [0].
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 A model velocity field can be easily made with \fIccdvel(1NEM0)\fP, and 
 using the \fBamp=t\fP keyword density and dispersion (sigma) maps can also
 be created. Another way to create a smooth velocity field is using 
 \fIrotcurshape(1NEMO)\fP using a 0 input map and fixing all fittable parameters.
 The resulting output residual map then contains -1 times the desired
-velocity field. 
-.SH SEE ALSO
-ccdvel(1NEMO) , rotcurshape(1NEMO)
-.SH FILES
+velocity field.
+.PP
+.nf
+  nemoinp 0:100:1 > map1.radt
+  tabmath map1.radt - "%1/sqrt(40+%1*%1)" all > map1.velt
+  ccdvel out=map1.vel radii=@map1.radt vrot=@map1.velt pa=30 inc=60 size=256
+.fi
+.PP
+Here is an example of creating a (0/1) mask cube based on where you expect emission
+from a rotating disk given the geometry
+.nf
+
+ccdvel out=$tmp.d radii=0,$r0,$r1 vrot=1,1,1      inc=$inc pa=$pa size=$nx cell=$cell amp=t
+ccdvel out=$tmp.v radii=0,$r0,$r1 vrot=0,$v1,$v1  inc=$inc pa=$pa size=$nx cell=$cell amp=f vsys=$vsys
+ccdvel out=$tmp.s radii=0,$r0,$r1 vrot=100,100,50 inc=$inc pa=$pa size=$nx cell=$cell amp=t
+velcube - $tmp.v $tmp.d zrange=${vsys}-5*${nz}:${vsys}+5*${nz} nz=$nz sigdefault=$sig |\\
+  ccdmath - -  'ifgt(%1,0,1,0)' |\\
+  ccdfits - $mask refmap=$refmap refaxis=1,2,3 crpix=$nx/2,$nx/2,$nz/2 cdelt=-$cell/3600,$cell/3600,$chan 
+
+.fi
+where a $refmap was used to inherit the WCS from.
+
+.SH "SEE ALSO"
+ccdvel(1NEMO) , ccdmath(1NEMO) , rotcurshape(1NEMO)
+
+.SH "FILES"
 src/image/rotcur/velcube.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 29-May-04	V1.0 Created	PJT
+6-may-2021	Add full example	PJT
 .fi

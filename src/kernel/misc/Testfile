@@ -36,7 +36,28 @@ xrandom_bench:
 	@xrandom -1
 	@xrandom -1
 	@xrandom -1
-
+	@echo Different PID
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@xrandom -2
+	@echo Differant
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
+	@xrandom -3
 
 nemoinp:
 	@nemoinp 'sqrt(2)'

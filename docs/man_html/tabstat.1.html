@@ -6,17 +6,23 @@
 <title>TABSTAT(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabstat - table column statistics 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tabstat</b> [parameter=value]
 
+<p> <b>tabstat</b> [parameter=value]
+
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabstat</b> performs table statistics, much like tabhist without
 graphical output but with multiple columns. It also contains an iterative
 worst outlier removal. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized
 in any order if the keyword is also given: 
@@ -55,17 +61,34 @@ to print []   </dd>
 <dt><b>nmax=</b> </dt>
 <dd>maximum number of
 data to be read if data file is a pipe [10000] </dd>
+
+<dt><b>bad=</b> </dt>
+<dd>If given, this bad
+value is ignored from the statistics </dd>
+
+<dt><b>robust=t|f</b> </dt>
+<dd>Perform robust stats by
+removing outliers. Only used if qac=t set. [f] </dd>
+
+<dt><b>qac=t|f</b> </dt>
+<dd>Output information
+in "QAC" format: mean, rms, min and max.   If robust=t is choosen, the min/max
+will still be the one of the original distribution. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='tabhist.1.html'>tabhist(1NEMO)</a>
- <p>
-<a href='http://vostat.org'>http://vostat.org</a>
 
+<p>
 
+<p><a href='http://vostat.org'>http://vostat.org</a>
+ 
+<p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
-A table of the numbers 1 through 100, their squares and square roots
-is fed into tabstat and compute statistics for each column: <br>
+A table of the numbers 1 through 100, their squares
+and square roots is fed into tabstat and compute statistics for each column:
+<br>
 <pre>   % nemoinp 1:100 | tabmath - - &rsquo;%1*%1,sqrt(%1)&rsquo; | tabstat - 1,2,3 width=10
 npt:          100       100       100
 min:            1         1         1
@@ -76,15 +99,19 @@ skew:           0  0.633312 -0.538185
 kurt:    -1.20024 -0.863731 -0.669795
 median:      50.5    2550.5   7.10625
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 Non-existent columns are not handled gracefully 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update
-History</a></h2>
+Peter Teuben
+
+<p> 
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>24-Jan-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;doc written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-jun-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1  sigma -&gt; nsigma<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+1-dec-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.9 added qac/bad/robust<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -16,12 +16,15 @@ if (! -e $v) then
 endif
 
 
+echo  "GIT Counter  `git rev-list --count HEAD`"
+echo  "GIT Revision `git rev-parse master`"
+
 set version=`cat $v`
 set patch=$version:e
 set id=$version:r
 set minor=$id:e
 set major=$id:r
-
+set git=`git rev-list --count HEAD`
 
 if ($#argv == 0) then
   echo $version
@@ -58,9 +61,11 @@ echo $version                                             >! $v
 
 echo updating $h
 echo "/* do not edit - created by the src/scripts/version script */"  >! $h
-echo "#if defined(GETPARAM_VERSION_ID)"                   >>! $h
-echo -n 'static char *version_h = "$'                    >>! $h
-echo 'Id: $";'                                           >>! $h
+echo "#if defined(GETPARAM_VERSION_ID)"                  >>! $h
+echo -n 'static char *version_h = '                      >>! $h
+echo -n '"'"git_$git"                                    >>! $h
+echo -n '";'                                             >>! $h
+echo " // git rev-list --count HEAD"                     >>! $h
 echo "#endif"                                            >>! $h 
 echo '#define NEMO_VERSION "'$version'"'                 >>! $h
 

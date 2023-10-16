@@ -1,8 +1,9 @@
 #! /bin/bash
 #
+#  example: http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib-8.1.tar.bz2
 
-#   version is hidden in the filename
-version=7.1
+#   version is sadly (?) hidden in the filename
+version=8.1
 wget=wgetc
 
 for arg in $*; do
@@ -11,12 +12,14 @@ done
  
 cd $NEMO/local
 $wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
+version=$(tar jtf wcslib.tar.bz2 | head -1 | awk -F/ '{print $1}' | sed s/wcslib-//)
 
 tar jxf wcslib.tar.bz2
-#cd wcslib-*
 cd wcslib-$version
 ./configure --prefix=$NEMO/opt
 make -j
 make install
 
 echo Installed version=$version
+
+echo wcslib $version `date` >> $NEMO/opt/mknemo.log

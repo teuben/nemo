@@ -1,16 +1,20 @@
-.TH CCDMATH 1NEMO "23 August 2017" 
-.SH NAME
+.TH CCDMATH 1NEMO "17 August 2023"
+
+.SH "NAME"
 ccdmath \- map arithmetic using function expressions
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBccdmath in=\fP[image1[,image2,...]]  \fBout=\fPimage \fBfie=\fPexpression  
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdmath\fP combines maps through some simple operations to make a new map.
 It also handles a few arithmetic functions, such as sqrt, exp, log10. See
 \fIfie(3NEMO)\fP for a full definition of the available functions and
 operations. Input maps are referred to by \fB%n\fP, where \fBn\fP
 is the ordinal number of the input maps (1 being the first one), 
-in the function expression \fBfie\fP.
+in the function expression \fBfie\fP. For example %1+%2 would add the first
+two maps.
 .PP
 The program can also be used in creation mode: when no input files are
 given, parameters \fB%x\fP, \fB%y\fP and \fB%z\fP in \fBfie=\fP 
@@ -19,7 +23,8 @@ Y and Z pixel coordinates in the map to be created, (0,0,0)
 in pixel coordinates w.r.t. reference pixel.
 \fB%w\fP and \fB%r\fP can be used for 2D and 3D radius w.r.t. reference pixel, again
 in pixel coordinates.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -29,7 +34,9 @@ In case of multiple files, the list must be space or comma separated.
 If no files are given, the program is in creation mode.
 .TP
 \fBout=\fIout-file\fP
-output file, will be in \fIImage(5NEMO)\fP format [no default]
+output file, will be in \fIImage(5NEMO)\fP format. The image header (WCS etc.) will
+be inherited from the first map on the input list.
+[no default]
 .TP
 \fBfie=\fIexpression\fP
 Expression how to manipulate the input maps or
@@ -61,7 +68,13 @@ image, however, by using all 3 keywords
 seed for the random number generator (default: a value 0, which will
 be converted into a unique new value using UNIX's clock time, in
 seconds since once-upon-a-time-in-the-seventies).
-.SH EXAMPLE
+.TP
+\fBreplicate=t|f\fB
+Normally each input image needs to be of the same shape. Setting \fBreplicate=t\fP
+will allow the 3rd axis of a 2D map to be replicated in order for the \fBfie=\fP
+expression to be parsed. Default: false
+
+.SH "EXAMPLE"
 Create a 'difference' map from two input maps:
 .nf
    % \fBccdmath inmap1,inmap2 outmap "abs(%1-%2)"\fP
@@ -97,8 +110,14 @@ from the mean:
   set s = 0.19
   cddmath map0 map0s "sign(%1)*$s*log(1+abs(%1)/$s)"
 .fi
-.SH TIMING
+A test \fBcube234.fits\fP with value x + 10y + 100z can be made as follows:
+.nf
+  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
+.fi
+
+.SH "TIMING"
 Performance on Rigel (SUN 3/160, 16Mhz):
+
 .nf
 .ta +1i +2i +2i
 100 * 100	rang: 5.8"	+: 3.4"  	sqrt: 2.6"
@@ -106,18 +125,28 @@ Performance on Rigel (SUN 3/160, 16Mhz):
 300 * 300	rang: 51.8"	+: 31.3"	sqrt: 23.8"
 512 * 512	rang: 152.7"	+: 88.4"	sqrt: 64.2"
 .fi
+
+For some historic amusement, this
+512^2 \fIrang\fP benchmark measured in 1989  took 153s. On a 2021 laptop
+this same benchmark took 0.81/64". Scaling this it means 12,000 times
+faster, in 32 years of evolution of hardware. This was a 4.2GHz i5-1135G7.
+For \fIhackcode1(1NEMO)\fP this was a factor of 26,000, see \fIbench(5NEMO)\fP.
+
 .SH "SEE ALSO"
 fie(3NEMO), image(5NEMO), tsf(1NEMO), ccdgen(1NEMO), ccdsky(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/image/trans  	ccdmath.c ccdmath.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
  1-Jul-87	V1.0: Created	PJT
  6-jul-87	V1.1: order keywords changed for future enhancements	PJT
  1-jun-88	V2.0: new filestruct, although code is same         	PJT
@@ -126,5 +155,6 @@ src/image/trans  	ccdmath.c ccdmath.1
 1-mar-03	V3.0: set/change the WCS				PJT
 19-jun-03	V3.1: allow %w and %r, and use offset from crpix	PJT
 25-aug-04	V3.2: fixed error in setting crpix (off by 2!)		PJT
+25-dec-2020	V3.3: add replicate=	PJT
 .fi
 

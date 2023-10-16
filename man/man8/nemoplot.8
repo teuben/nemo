@@ -1,0 +1,90 @@
+.TH NEMOPLOT 8NEMO "16 August 2022"
+
+.SH "NAME"
+nemoplot \- plot a table with self-describing PLOT command(s)
+
+.SH "SYNOPSIS"
+.PP
+\fBnemoplot \fI table_file [key=val] ...\fP 
+
+.SH "DESCRIPTION"
+\fBnemoplot\fP will plot a data table using NEMO commands that
+are embedded as comments in the table.
+.PP
+Since NEMO ascii tables (see \fItable(5NEMO)\fP) can contain
+#-style comments, we allow (NEMO) commands to be embedded with
+a special '#PLOT' line, making such tables somewhat \fIself-plotting\fP.
+.PP
+Although \fBnemoplot\fP is a great
+way to self-plot a table, NEMO's plotting routines are arguably
+not publication quality, and a followup python/matplotlib script
+may be needed.
+
+.PP
+The \fIxmgrace(1)\fP program has a similar approach, combining data and
+the commands to produce the plot all in a single file, referred
+to as a Grace Project File (*.agr).
+
+.SH "PARAMETERS"
+Except for the first parameter, subsquent parameters must be \fIkey=val\fP, and
+cannot be abbreviated.
+.TP 24
+\fItable_file\fP
+This needs to be the first parameter, without a keyword, and must be
+an existing file (normally an acii table).   No default
+.TP
+\fBplot=\fP\fInumber\fP
+Pick which plot# to run (0 means show all, 1 execute the first, etc.)   [1]
+.TP
+\fBtmp=\fP\fIscript-file\fP
+Name of bash script to run plots, which will be created. [tmp$$]
+.TP
+\fBclean=0|1\fP
+means clean up bash script, 0 means keep it [1]
+.TP
+\fByapp=\fP
+Override any potential \fIyapp(5NEMO)\fP setting from the one used in the script. Unlike in a normal
+NEMO command line parser, here we allow keywords to be given multiple times, the last one set will
+be the one used. [Default: not used]
+
+.SH "CAVEATS"
+Any '#PLOT' commands will likely refer to a table filename, which must be in the current (or correct) directory.
+.PP
+This is a simple bash script, the CLI does not adhere to the usual \fIgetparam(3NEMO)\fP conventions.
+
+.SH "EXAMPLES"
+An example from the \fInemoplot\fP repository:
+.nf
+
+	cd $NEMODAT/nemoplot
+	nemoplot shift2.tab plot=2
+	
+.fi
+and here an example how to make such a table from scratch
+.nf
+
+	nemoinp 1:10 | tabmath - - 'sqrt(%1),%2+rang(0,0.1)' > tab1
+	echo "#PLOT tabplot tab1 1 2,3 line=1,1,0,0 color=2,3 point=0,0,2,0.1" >> tab1
+
+	nemoplot tab1
+
+.fi
+
+.SH "SEE ALSO"
+nemo(1NEMO), yapp(1NEMO), tabplot(1NEMO), tabhist(1NEMO), grace(1)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
+.nf
+.ta +3i
+$NEMO/src/scripts/nemoplot	(bash) script
+$NEMODAT/nemoplot/      	directory with example \fInemoplot\fP files
+.fi
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+16-aug-2022	Created		PJT
+.fi

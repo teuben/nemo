@@ -1,10 +1,13 @@
-.TH SNAPGRID 1NEMO "14 February 2013"
-.SH NAME
+.TH SNAPGRID 1NEMO "25 March 2022"
+
+.SH "NAME"
 snapgrid \- grid a snapshot into a 2D or 3D image (cube), with optional moments
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBsnapgrid in=\fPsnapshot \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapgrid\fP grids three arbitrary \fIbodytrans(3NEMO)\fP expressions 
 (default: \fBx\fP, \fBy\fP and \fB-vz\fP) of a snapshot into a 2D or 3D
 \fIimage(5NEMO)\fP dataset, with optional astronomical projection for direct
@@ -31,14 +34,15 @@ this histogramming approach, use \fIsnapmap(1NEMO)\fP.
 For a related program that creates images (and can create movies as well),
 see \fIuns_2dplot(1NEMO)\fP.
 .PP
-As of V6.0 the units in 3D cubes will be particle density. This ensures
+As of V6.0 the units in 3D cubes will be particle density, not their sum. This ensures
 that programs such as \fIccdmom(1NEMO)\fP and \fIccdstat(1NEMO)\fP give
 the proper answer in their summed emission.
 .PP
 In the \fByt\fP package such images are called \fIphase plot\fP, where a 2D grid 
-in field1 (\fBxvar=\fP) and field2 (\fByvar=\fP) is computed, with 
-some statistic (\fBmom=\fP) on field3 (\fBevar=\fP).
-.SH PARAMETERS
+in \fIfield1\fP (\fBxvar=\fP) and \fIfield2\fP (\fByvar=\fP) is computed, with 
+some statistic (\fBmom=\fP) on \fIfield3\fP (\fBevar=\fP).
+
+.SH "PARAMETERS"
 The following parameters are recognized:
 .TP 20
 \fBin=\fIin-file\fP
@@ -152,11 +156,20 @@ and also cannot handle stacked snapshots yet **
 [default: \fBf\fP].
 .TP
 \fBproj=\fP
-If a valid projection type (SIN, TAN, ARC, NCP, GLS, MER, AIT)
+If a valid projection type (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)
 but see also \fIwcs(1NEMO)\fP, the input coordinates are interpreted
 in angular degrees, and griddes with the appropriate sky projection.
 Default: no sky projection.
-.SH EXAMPLES
+
+.SH "SKY PROJECTION"
+By default \fBsnapgrid\fP will provide a sky-view where the (-x,y) axes are (RA,DEC),
+and the observer is along the z-axis at +infinity.
+.PP
+An alternative view could be to assign (RA,DEC) to be the (y,x), i.e. a 90-degree
+rotated system. This has the benefit that the astronomical position angle is
+now \fIatan2(y,x)\fP.   In the conventional system, this would be \fIatan2(-x,y)\fP
+
+.SH "EXAMPLES"
 The following example makes three moment images from an N-body snapshot,
 then smooths
 and combines them into an 'intensity' (\fBint\fP), 'mean velocity' (\fBvel\fP)
@@ -215,14 +228,16 @@ but the weighted average computes the two maps seperately and uses
 .fi
 with an additional safeguard to set cells to 0 if no emission with
 found in them.
-.SH KINEMETRY
+
+.SH "KINEMETRY"
 Krajnovic et al. (2006) popularized kinemetry, a description of line of sight
 velocities in terms of the first four moments (v, sigma, h3 and h4). The following
 example shows how to create these maps with \fBsnapgrid\fP:
 .nf
   % snapgrid ...
 .fi
-.SH UNITS
+
+.SH "UNITS"
 Units are maintained in the same way as in snapshots, they don't have
 a specific name, but carry their normal meaning 'length', 'velocity'
 and 'mass'. Since \fIsnapgrid\fP calculates (surface/space) densities,
@@ -242,18 +257,22 @@ been gridded into a map/cube, \fIccdsky(1NEMO)\fP can optionally be
 used to rescale a cube in astronomical units (degrees and m/s) such 
 that exported FITS files can be compared directly with model generated
 FITS files.
-.SH BUGS
-Combinations of large snapshots and large images may run into memory
-problems since both the snapshot and the image(s) must fit into memory
-to obtain turbo speeds. Use non-negative \fBmoment\fPs to avoid
+
+.SH "BUGS"
+The usual NEMO problem: everything needs to fit in memory, thus
+large snapshots and images can be hazardous to your computers health.
+Use non-negative \fBmoment\fPs to avoid
 having to allocate one or two extra images in addition to the
-snapshot and the image. 
+snapshot and the image.  It might also help to split the snapshot
+in pieces and have a multi-snapshot dataset (see \fIsnapsplit(1NEMO)\fP),
+though this could still result into a catch-22 situation.
 .PP
-Sky projections do not guarantee flux conservation. 
+Sky projections do not guarantee flux conservation.
+
 .SH "SEE ALSO"
 snapgridsmooth(1NEMO), snapmap(1NEMO),
 snaprotate(1NEMO), snapslit(1NEMO), snapifu(1NEMO), snapsmooth(1NEMO), uns_2dplot(1NEMO), snapaxsym(1NEMO), wcs(1NEMO),
-tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdsky(1NEMO), image(5NEMO), 
+tsf(1NEMO), snapccd(1NEMO), ccdintpol(1NEMO), ccdstack(1NEMO), ccdsky(1NEMO), image(5NEMO), 
 .PP
 http://www.iinet.com.au/~watson/nngridr.html
 .PP
@@ -268,13 +287,20 @@ KinMSpy  https://github.com/TimothyADavis/KinMSpy
 FluxCompensator	 https://github.com/koepferl/FluxCompensator
 .PP
 cygrid:  http://ascl.net/cygrid   (1606.003)
-.SH AUTHOR
+.PP
+yt project:  https://yt-project.org
+.PP
+SimSpin:   https://github.com/kateharborne/SimSpin
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/nbody/image  	snapgrid.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -291,4 +317,6 @@ src/nbody/image  	snapgrid.c
 2-mar-11	V5.3: moment -3,-4 implemented	PJT
 18-may-12	V5.4: added smoothing in VZ (szvar)
 14-feb-13	V6.0: units changed on a cube (now xyz-density instead of xy-surface brightness)	PJT
+19-mar-22	V6.1: axis=1 now written, fix cdelt1 for radecvel=t	PJT
+
 .fi 

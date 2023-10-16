@@ -1,3 +1,24 @@
 Heggie & Hut 
 The Gravitational Million-Body Problem (Cambridge, 2003)
 Appendix A (pp.306): A Simple N-Body Integrator
+
+https://ui.adsabs.harvard.edu/abs/2003gmbp.book.....H
+
+BIBCODE:  2003gmbp.book.....H
+
+Historic notes:
+  nbody.m      Original version, written by D. Heggie (help by Chris Eilbeck?)
+  nbody.c      Version provided by Simon Portegies Zwart
+  nbody_hh.c   SPZ's version, with a simple CLI, adopted by Peter Teuben
+
+
+Benchmark is 1024 particles , 10 dumps, tstop=1.0
+Compilation default is "gcc -g -O2"
+
+CPU          sec
+
+X5550       21.40
+E31280      16.51
+i7-3820     15.43
+i7-8550U     6.49
+i5-1135G7    3.94

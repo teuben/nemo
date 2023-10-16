@@ -19,7 +19,7 @@ string defv[] = {
 	"out=???\n      Output image file",
 	"nsigma=20\n	cutoff in terms of sigma",
 	"n=1\n          width of area around pixel to get sigma",
-	"VERSION=0.1a\n 2-feb-05 PJT",
+	"VERSION=0.2\n  26-jan-2021 PJT",
 	NULL,
 };
 
@@ -63,6 +63,10 @@ void nemo_main()
     Xmin(optr) = Xmin(iptr);
     Ymin(optr) = Ymin(iptr);
     Zmin(optr) = Zmin(iptr);
+    Xref(optr) = Xref(iptr);
+    Yref(optr) = Yref(iptr);
+    Zref(optr) = Zref(iptr);
+    Axis(optr) = Axis(iptr);
 
     count = 0;
     for (j=n; j<ny-n; j++) {

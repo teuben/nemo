@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7c 18-mar-2020 PJT"
+#define GETPARAM_VERSION_ID  "3.7j 1-sep-2023 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -212,6 +212,7 @@
 #include <getparam.h>
 #include <extstring.h>
 #include <filefn.h>
+#include <stdlib.h>
 #include <strlib.h>
 #include <history.h>
 
@@ -283,7 +284,7 @@ inline omp_int_t omp_get_max_threads() { return 1;}
 # define MAXBUF 1024
 #endif
 
-#define MAXKEYLEN 16
+#define MAXKEYLEN 64
 
 
 /* keyword is a helper struct containing a keyword. From this the code will
@@ -566,7 +567,7 @@ void initparam(string argv[], string defv[])
 	      free(keys[j].val);
 	      keys[j].val = scopy(parvalue(argv[i]));        /* get value */
 	      keys[j].count++;
-	    } else if (j=set_indexed(name,&idx)) {       /* enter indexed keywords */
+	    } else if ((j=set_indexed(name,&idx))) {       /* enter indexed keywords */
 	      // process this indexed keyword
 #if 1
 	      addindexed(j,argv[i],idx);
@@ -752,8 +753,13 @@ void initparam(string argv[], string defv[])
     // provide a trigger for OMP so our DL doesn't get upset about undefined GOMP symbols
 #pragma omp parallel
     {
-      if (omp_get_thread_num() == 0) 
-	if (omp_get_num_threads() > 1) dprintf(1,"Using OpenMP with %d threads\n", omp_get_num_threads());
+      if (omp_get_thread_num() == 0) {
+	int nt = omp_get_num_threads();
+	int mt = omp_get_max_threads();
+	dprintf(1,"NT=%d MT=%d\n",nt,mt);
+	if (mt > 1) dprintf(1,"Using OpenMP with %d threads\n", mt);
+	np_openmp = mt;
+      }
       
       omp_t1 = omp_get_wtime(); //start stop-watch
     }
@@ -771,7 +777,7 @@ void initparam(string argv[], string defv[])
 local void initparam_out()
 {
   int nout = -1;
-  if (outdefv && *outdefv)
+  if (*outdefv)                                   
      nout = xstrlen(outdefv, sizeof(string));     /* count # params + progname */  
   /*  
    * here comes 
@@ -1056,7 +1062,9 @@ local void printhelp(string help)
 	printf("  c       >> show cpu usage at the end of the run\n");
 	printf("  m       >> show memory usage at the end of the run\n");
 	printf("  M       >> man page (same as -man and --man)\n");
-	printf("  I       >> cvs id\n");
+	printf("  I       >> GIT version\n");
+	printf("  N       >> NEMO version\n");
+	printf("  V       >> getparam version\n");
         printf("  ?       >> this help (always quits)\n\n");
         printf("Numeric helplevels determine degree and type of assistence:\n");
         printf("They can be added to give combined functionality\n");
@@ -1066,6 +1074,7 @@ local void printhelp(string help)
 	printf("  8       reserved\n");
 	printf(" 16       reserved\n");
         printf(" VERSION_ID = %s\n",GETPARAM_VERSION_ID);
+	printf(" GIT version = %s\n", version_h);
         printf(" NEMO VERSION = %s\n",NEMO_VERSION);
         showconfig();
 	showsystem();
@@ -1094,7 +1103,14 @@ local void printhelp(string help)
         /*NOTREACHED*/
     }
     if (strchr(help,'I')) {
-      printf("%s\n",cvsid);
+	printf("GIT version = %s\n", version_h);
+	printf("Current HEAD: ");
+	fflush(stdout);
+        local_exit( system("cd $NEMO; git rev-list --count HEAD") );
+        /*NOTREACHED*/
+    }
+    if (strchr(help,'N')) {
+        printf("NEMO VERSION = %s\n",NEMO_VERSION);	
         local_exit(0);
         /*NOTREACHED*/
     }
@@ -1108,7 +1124,7 @@ local void printhelp(string help)
 
     numl = ((strchr(help,'n')) ? 1 : 0);    /* add newlines between key=val ? */
 
-    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucmM")==NULL) { /* arguments */
+    if (strchr(help,'a') || strpbrk(help,"oapdqntvkzucmMINV")==NULL) { /* arguments */
         printf("%s", progname);
         for (i=1; i<nkeys; i++) {
             newline(numl);
@@ -1338,6 +1354,8 @@ local void printusage(string *defv)
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,
 	    "Insufficient parameters, try 'help=', 'help=?' or 'help=h' or 'man %s',\n", progname);
+    fprintf(stderr,
+	    "Formatted man page might also be here: https://teuben.github.io/nemo/man_html/%s.1.html\n", progname);
 	    
     if(mpi_proc) fprintf(stderr,"@%d: ",mpi_rank);
     fprintf(stderr,"Usage: %s", progname);
@@ -1527,9 +1545,11 @@ bool updparam(string name)
  *  GETPARAMSTAT
  */
 
-int getparamstat(string name) {
+/*Function commented out to silence warning*/
+
+/*int getparamstat(string name) {
   error("getparamstat is a ZENO feature, not implemented in NEMO yet");
-}
+}*/
 
 
 
@@ -1731,7 +1751,7 @@ bool getbparam(string par)
     int  nret;
 
     val = getparam(par);                        /* obtain value of param */
-#if !defined(NEMOINP)
+#if 1
     if (*val=='.') val++;                       /* catch .TRUE. .FALSE. */
     if (strchr("1tTyYjJ", *val) != NULL)        /* is value true? */
         return TRUE;
@@ -1741,6 +1761,7 @@ bool getbparam(string par)
     error("getbparam: %s=%s not bool", par, val);
     return 0;   /*turboc*/
 #else
+    // does not make sense to parse this via NEMOINP
     nret = nemoinpb(val,&bpar,1);
     if (nret < 0)
         error("getbparam(%s=%s) parsing error %d, assumed %d (FALSE)",
@@ -1889,8 +1910,8 @@ local void setparam (string par, string val, string prompt)
 #if 0
         if (gets(line) == NULL) error("Null input");
 #else
-        // if (fgets(line,80,stdin) == NULL) error("Null input");
-	error("Can't do prompting anymore until fgets() is fixed");
+    if (fgets(line,80,stdin) == NULL) error("Null input");
+	//error("Can't do prompting anymore until fgets() is fixed");
 #endif
         val = line;
     }
@@ -2282,11 +2303,11 @@ local int set_indexed(string name, int *idx)
 
   dprintf(1,"set_indexed(%s)\n",name);
   *idx = -1;
-  strcpy(key,name);                 /* local copy of the keyword to mess with */
+  strncpy(key,name,MAXKEYLEN);          /* local copy of the keyword to mess with */
   cp = &key[strlen(key)-1];
   if (!isdigit(*cp)) return 0;      /* definitely not indexed */
   while (isdigit(*cp))              /* work backwords through all digits */
-    *cp--;
+    cp--;                        
   cp++;                           
   strcpy(keyidx,cp);
   *idx = atoi(keyidx);
@@ -2959,10 +2980,11 @@ local void set_np(string arg)
       warning("Problem setting %s",np_env);
     } else {
       np_openmp = atoi(arg);
-      dprintf(0,"%s\n",np_env);
-#if 0
+      dprintf(1,"%s\n",np_env);
+#if _OPENMP      
       /* on linux the putenv (or even setenv) don't seem to work */
       /* forcing me to use omp_set_num_threads()                 */
+      dprintf(1,"np_openmp: %d\n",np_openmp);
       omp_set_num_threads(np_openmp);
 #endif
     }

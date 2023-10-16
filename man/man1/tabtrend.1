@@ -1,18 +1,25 @@
-.TH TABTREND 1NEMO "15 June 2016"
-.SH NAME
+.TH TABTREND 1NEMO "12 December 2022"
+
+.SH "NAME"
 tabtrend \- difference rows from previous rows
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabtrend\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabtrend\fP takes a single column from an ASCII table, and differences subsequent
 values, creating a new column that is thus one row shorter.
 .PP
 Note that for a gaussian signal, 
 differencing subsequent elements will create a distribution
 with a noise sqrt(2) larger than the input signal.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+The parameter \fBdelta=\fP is the distance in rows to compute the trend, which
+enables one to compute the phase structure function of the signal
+(see EXAMPLES below).
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file name. No default.
@@ -23,22 +30,30 @@ Column(s) to use [1]
 \fBcumul=t|f\fP
 Cumulative, instead of differences.  Default: false
 .TP
-\fBnmax=\fP
-max size if a pipe [100000]  
-.SH EXAMPLES
-Create 10000 numbers gaussian distributed with dispersion 1, observe the following:
-.nf
-set n = 10000
+\fBdelta=N\fP
+How far should the neighbor in the trend analysis be? [1]
+.TP
+\fBorig=t|f\fP
+Also show the original column (if selected it will be shown \fIafter\fP the trend column  [f]
+.TP
+\fBfirst=t|f\fP
+Add the first row?  [Default: f]
 
-seq $n | tabmath - - 'rang(0,1)' all seed=-1 |                             tabhist - 1 -2 2 nmax=$n
+.SH "EXAMPLES"
+Create 10000 numbers gaussian distributed with dispersion 1, here are a few sequences showing
+a few operations that modify the observed dispersion:
+.nf
+n=10000
+
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 |                             tabhist - 
 # sigma=1
-seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - |               tabhist - 1 -2 2 nmax=$n
-# sigma=0.612 (sqrt(3/8))
-seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  |               tabhist - 1 -2 2 nmax=$n
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - |               tabhist -
+# sigma=0.612 (sqrt(3/8)?)
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  |               tabhist -
 # sigma=1.414 (sqrt(2))
-seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - | tabtrend -  | tabhist - 1 -2 2 nmax=$n
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabsmooth - | tabtrend -  | tabhist -
 # sigma=0.5
-seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  | tabsmooth - | tabhist - 1 -2 2 nmax=$n
+seq $n | tabmath - - 'rang(0,1)' all seed=-1 | tabtrend -  | tabsmooth - | tabhist -
 # sigma=0.5
 .fi
 Note that smoothing and trending are related, so their resulting dispersions in the last two 
@@ -48,14 +63,33 @@ This also means if you don't know if a signal had been applied a Hanning smoothi
 before and after a difference operator. If that ratio is sqrt(2), it means it was not, it was a pure
 un-correllated gaussian. However, if the ratio is sqrt(2/3) = 0.816, it was a Hanning smoothed signal
 to begin with.
-.SH SEE ALSO
-tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+.PP
+By using different values of the \fBdelta=\fP parameter, one can study the correlation length of
+the noise, .e.g to look at correlations on a scale of up to 64:
 .nf
-.ta +1.0i +4.0i
+
+    rm -f rms.tab
+    seq 10000 | tabmath - - 'rang(0,1),%2+10*sind(%1*2)' > tab1
+    for i in $(seq 64); do
+       rms=(tabtrend tab1 delta=$i |tabstat - qac=t | txtpar - p0=QAC,1,4)
+       echo $i $rms >> rms.tab
+    done
+    tabplot rms.tab
+.fi
+
+.SH "SEE ALSO"
+tabsmooth(1NEMO), tabmath(1NEMO), nemoinp(1NEMO), tabhist(1NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
 26-Nov-2012	finally documented	PJT
 13-oct-2014	better examples		PJT
 15-jun-2016	added cumul=		PJT
+26-may-2020	added orig=		PJT
+1-may-2022	remove nmax= for table V2	PJT
+6-jun-2022	add delta=	PJT
 .fi

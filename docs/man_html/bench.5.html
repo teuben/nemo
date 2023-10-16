@@ -6,94 +6,197 @@
 <title>BENCH(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-bench - NEMO benchmarks in NemoStones 
-<h2><a name='sect1' href='#toc1'>Description</a></h2>
-Nemo Benchmarks (a.k.a.
-NemoStones) <p>
-<b>bench1</b> tests the classic (1986) Barnes and Hut code in C, without
-quadrupole corrections, for 10240 particles and 64 timesteps. <b>bench2</b> tests
-a more modern Treecode, this one is the O(N) version from Dehnen (2002?).
-Again 64 timesteps. <b>bench0</b> has been added to compare a tree code with a
- direct N-body code, also 64 timesteps, but now for fewer particles to prevent
-the benchmark to dominate the whole series. <b>bench3</b> benchmarks the I/O and
-creation of a large (&gt;2GB) snapshot. <b>bench4</b> benchmarks an image operation.
-
-<h2><a name='sect2' href='#toc2'>Data</a></h2>
-Here are the commands to execute the benchmarks, now the default in
-"cd $NEMO;make bench" <br>
-<pre>bench0:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time directcode nbody=10240
-bench1:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time hackcode1 nbody=10240
-bench2:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05
-bench3:<tt> </tt>&nbsp;<tt> </tt>&nbsp;time mkspiral s000 1000000 nmodel=40
-bench4:<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdmath "" - &rsquo;ranu(0,1)&rsquo; size=128 | ccdpot - . help=c
-</pre><p>
-and the data : <p>
+bench - various NEMO benchmarks 
+<p> 
+<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
-<pre>bench0 (directcode)
-       I5/7200@2.5       47.7 
-       I7/3630QM@3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;174.2  (nemo2: 
-       I7/3770@3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;152.6
-       P4/3.0            342.7
-       G5/2.0            472.8
-       AMD-opt64/2.0     300.3
-       AMD-ath64/2.0     888.7
-       P4/2.8 w/cygwin   365.9
-       x86_64/3.0        516.4
-       x86_64/3.2        480.6
-       sparcv9+vis/0.36 3048.2
-bench1 (hackcode1)
-       I5/2.5            2.2
-       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;14.0  (nemo2: 1.2 - 3.6)  5.1
-       I7/3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; 4.4
-       P4/3.0           13.4
-       G5/2.0           13.1
-       AMD-opt64/2.0     9.36
-       AMD-ath64/2.0    17.45
-       P4/2.8 w/cygwin  15.1
-       x86_64/3.0       11.7
-       x86_64/3.2       10.7
-       sparcv9+vis/0.36 81.5
-bench2 (gyrfalcON)
-       I5/2.5            2.5
-       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; 8.1  (nemo2)  2.948 3.19 5.09
-       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;31.2  (?)
-       P4/3.0           10.8
-       G5/2.0           21.0
-       AMD-opt64/2.0     8.1
-       AMD-ath64/2.0     8.9
-       P4/2.8 w/cygwin  45.5
-       x86_64/3.2        8.6
-       sparcv9+vis/0.36 85.1  
-bench3 (mkspiral)
-       I5/2.5    5.4u   1.6s
-       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.657u 3.856s 0:28.04 98.0%  (nemo2)
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;        10.760u 0.832s 0:20.33 57.0%
-       I7/3.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.112u 1.520 0:09.37 98.5%
-       P4/3.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;22.890u  5.980s 1:45.63 27.3%
-       G5/2.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;28.400u 24.660s 1:05.41 81.1% 
-       AMD-opt64/2.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;18.540u 10.921s 0:56.93 51.7% 
-       AMD-ath64/2.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;29.311u 10.353s 0:59.88 66.2% (SATA)
-       P4/2.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;25.541u 8.081s 0:59.98 56.0% (S/ATA)
-       P4/2.8 w/cygwin<tt> </tt>&nbsp;<tt> </tt>&nbsp;276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
-       x86_64/3.0       21.651u 8.897s 0:48.05 63.5%    0+0k 0+0io 0pf+0w
-       x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
-       i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
-       i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
-bench4 (ccdpot)
-       I5/2.5   11.9
-       I7/3.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.657u 3.856s 0:28.04 98.0%  (nemo2)
+<pre>/usr/bin/time $NEMO/src/scripts/nemo.bench
+make -f Benchfile clean all
+nemobench COMMAND
 </pre>
-<h2><a name='sect3' href='#toc3'>Caveats</a></h2>
-Defining and running a benchmark can be very tricky stuff. It might
-be important to separate disk I/O from CPU usage.   The unix <a href='time.1.html'><i>time(1)</i></a>
-  command
-can be a help. The output from bash::time is a bit different form csh::time,
-and yet different from /usr/bin/time. Unless you find a special one, we
-prefer the csh::time, since the output clearly separates user, system and
-wall clock time, and also reports the I/O, viz. <br>
+<p> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+There are several methods to compare the performance of NEMO
+on different processors or environments: 
+<p> <blockquote>
+<dl>
+
+<dt>1.</dt>
+<dd>The command <b>make bench</b> from
+the $NEMO directory runs a standard benchmark of about a dozen  selected
+NEMO programs.  It should run in about 30 seconds on a ~2020 computer. A
+short table (see below in RESULTS) lists results from some recent computers.
+
+<p> </dd>
+
+<dt>2.</dt>
+<dd>Various <b>Benchfile</b> filles scattered through the $NEMO source tree contain
+benchmarks. There is no  wrapper like "make check" has for Testfile&rsquo;s 
+<p> </dd>
+
+<dt>3.</dt>
+<dd>Selected
+man pages have some examples. Over time these should be moved into the Benchfile
+in the source directory where this program is maintained. Some are mentioned
+below in this man page. 
+<p> </dd>
+</dl>
+</blockquote>
+
+<h2><a name='sect3' href='#toc3'>Nemobench5</a></h2>
+
+<p> The NEMOBENCH5 benchmark (cd $NEMO;make
+bench5) runs a number (currently 6) N-body codes all calibrated to take
+5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating is
+defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7
+has a score of 1000.  This definition can be adjusted to 10s runs when the
+time comes that processors run too fast, there is a parameter internal
+to the nemo.bench script, and could also be adjusted if more codes are used.
+<br>
+<pre>i9-13900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;2133
+i9-12900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a ~2000
+M2<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1919, 1899
+i9-12900H<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1851
+M1-Max<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1785
+i7-12800H<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1654
+i9-11980HK<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1616
+i9-12900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;1330<tt> </tt>&nbsp;<tt> </tt>&nbsp;jansky gcc 11.2.0
+M1 (Macbook Air)<tt> </tt>&nbsp;<tt> </tt>&nbsp;1269<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1750 / 7xxxx
+i7-11800H<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<tt> </tt>&nbsp;<tt> </tt>&nbsp;1474
+i7-1185G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;1060<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dell Latitude 5420
+i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;1000<tt> </tt>&nbsp;<tt> </tt>&nbsp;XPS13 1460 /
+AMD threadripper 3960x<tt> </tt>&nbsp;<tt> </tt>&nbsp;896<tt> </tt>&nbsp;<tt> </tt>&nbsp;AlexBox
+i5-10400H<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;700<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dell Precision 3351 (astroumd)
+AMD EPYC 7302 @ 3.0GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;630<tt> </tt>&nbsp;<tt> </tt>&nbsp;lma 1000/ 28000
+Intel Core i9-9900X<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;geminid 1214 / 9467
+Xeon Gold 5218 @ 2.30 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;761<tt> </tt>&nbsp;<tt> </tt>&nbsp;unity/node99 1100 / 8610
+i5-10210U CPU @ 1.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;732 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;terra 777 / 10213
+i7-8550U CPU @ 1.80 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;548 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T480 (1600) 696 / 1935
+Xeon E-2186G 3.80 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;- <tt> </tt>&nbsp;<tt> </tt>&nbsp;aurora 1313 / 6721
+i7-3820QM @ 2.70 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;498<tt> </tt>&nbsp;<tt> </tt>&nbsp;MacBookPro (Retina, Mid 2012)
+i7-3820 CPU @ 3.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;414 <tt> </tt>&nbsp;<tt> </tt>&nbsp;dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;384<tt> </tt>&nbsp;<tt> </tt>&nbsp;chara 828 / 3117
+i7-3630QM CPU @ 2.40 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;429<tt> </tt>&nbsp;<tt> </tt>&nbsp;T530 (1200) 762 / 3006 
+Xeon E5-2623 v4 @ 2.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;kraken 782 / 5800
+Xeon X5550  @ 2.67 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;256<tt> </tt>&nbsp;<tt> </tt>&nbsp;sdp 566 / 3938
+</pre>
+<p> A typical output of bench5 might look as follows: 
+<p> <br>
+<pre>CPU_USAGE  directcode  :  11.31  11.29  0.00  0.00  0.00  1787697842
+CPU_USAGE  gyrfalcON   :  9.09   9.08   0.00  0.00  0.00  1787698975
+CPU_USAGE  hackcode1   :  11.69  11.68  0.00  0.00  0.00  1787699885
+CPU_USAGE  orbint      :  9.81   9.80   0.00  0.00  0.00  1787701056
+CPU_USAGE  potcode     :  11.01  10.99  0.01  0.00  0.00  1787702038
+CPU_USAGE  treecode1   :  10.94  10.93  0.01  0.00  0.00  1787703140
+NEMOBENCH5 score: 469.85
+</pre>where on this particular CPU there is a diversity of speeds. Some CPU show
+even more diversity. 
+<p> <p>
+Here is an example how to use nemobench5 is parallel
+mode on a 32 core Xeon, where a single NEMOBENCH5 has a score of 630. Since
+all codes are single core, gnu parallel is used to run them in parallel,
+which should scale linearly as long as memory is not exhausted (this particular
+CPU has 512GB memory): 
+<p> <br>
+<pre>for j in 2 4 8 12 16 24 32 48 64 128; do
+    $NEMO/src/scripts/nemo.bench mode=5 np=$j | txtpar - p0=npt,1,2 p1=sum,1,2
+p2=mean,1,2
+done
+  2  1256  628
+  4  2512  628
+  8  5020  628
+ 12  7512  626
+ 16 10047  628
+ 24 15024  626
+ 32 20025  626
+ 48 20589  429
+ 64 21517  336
+128 20792  162
+(numbers were rounded to improve readability)
+</pre>
+<p> 
+<p> 
+<h2><a name='sect4' href='#toc4'>Bench</a></h2>
+Here are the results of the "make bench" benchmark. The time is the
+user CPU time. If two values are listed after the machine name, these are
+the GeekBench5 values. <br>
+<pre>Intel Core i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;15.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;XPS13 1460 /
+AMD EPYC 7302 @ 3.0GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;23.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;lma 1000/ 28000
+Intel Core i9-9900X<tt> </tt>&nbsp;<tt> </tt>&nbsp;25.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;geminid 1214 / 9467
+i5-10210U CPU @ 1.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;29.4 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;37.1<tt> </tt>&nbsp;<tt> </tt>&nbsp;terra 777 / 10213
+i7-8550U CPU @ 1.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;40.6 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T480 (1600) 696 / 1935
+Xeon E-2186G 3.80GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;52.6 <tt> </tt>&nbsp;<tt> </tt>&nbsp;aurora 1313 / 6721
+i7-3820 CPU @ 3.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;??/67.5 <tt> </tt>&nbsp;<tt> </tt>&nbsp;dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;??/70.3 <tt> </tt>&nbsp;<tt> </tt>&nbsp;chara 828 / 3117
+i7-3630QM CPU @ 2.40GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;76.2 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T530 (1200) 762 / 3006 
+Xeon(R) E5-2623 v4 @ 2.60GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;42.1/79.4 <tt> </tt>&nbsp;<tt> </tt>&nbsp;kraken 782 / 5800
+Xeon(R) X5550  @ 2.67GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;115.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;sdp 566 / 3938
+</pre>
+<p> Keep in mind for most of these a default compilation was used.  Some benchmarks
+are known to be able to improved by up to a factor of two with selected
+compiler and options changes. 
+<p> 
+<p> <p>
+The following tasks are run in the standard
+NEMO bench, for details see the src/scripts/nemo.bench  script. <br>
+<pre>directcode nbody=3072 out=d0 seed=123 
+hackcode1 nbody=10240  out=h0 seed=123 
+mkplummer p0 10240 seed=123 
+gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05
+potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer
+mkspiral s0 $nbody3 nmodel=40 seed=123 
+ccdmath "" c0 &rsquo;ranu(0,1)&rsquo; size=256 seed=123
+ccdpot c0 c1 
+mkorbit o0 x=1 e=1 lz=1 potname=log
+orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000
+</pre>In addition each data file that is produced is checksummed and compared
+to a baseline version using <a href='bsf.1.html'><i>bsf(1NEMO)</i></a>
+ if the argument <b>bsf=1</b> is added. 
+<p>
+
+<p> 
+<h2><a name='sect5' href='#toc5'>Bench10</a></h2>
+Not really implemented, but this will be benchmarks orchestrated
+via the <b>Benchfile</b>&rsquo;s found in the source tree. 
+<p> 
+<h2><a name='sect6' href='#toc6'>Oldest Bench</a></h2>
+At the inception
+of NEMO in 1986 there was no real benchmark, so for a while (as computers
+were relatively slow still) we used the default <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
+ setting,
+where 128 particles in virial equilibrium are integrated for 64 timesteps:
+<br>
+<pre>      /usr/bin/time hackcode1 tstop=2  &gt; /dev/null
+</pre>
+<p> <p>
+On a Sun 3/50 (our development machine) this took about 5 seconds per
+step. Now, nearly 35 years later, my laptop runs this about 50,000 times
+faster. Looking in more detail at the original NEMO manual: 
+<p> <br>
+<pre>                       cpu/steps
+sun 3/60:  20 MHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.28        
+i5-1135G7: 4200 MHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.0000875   
+</pre>Despite that the cpu was 210 times faster, the code ran 26,000 faster. A
+very impressive factor of 120 improvement in chip and possibly some compiler
+technology. The NEMO users guide has an appendix in which this benchmark
+is listed for a variety of computers since 1986. 
+<p> 
+<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
+Defining and running
+a benchmark can be very tricky stuff. It might be important to separate
+disk I/O from CPU usage.   The unix <a href='time.1.html'><i>time(1)</i></a>
+  command can be a help. The output
+from bash::time is a bit different form csh::time, and yet different from
+/usr/bin/time. Unless you find a special one, we prefer the csh::time, since
+the output clearly separates user, system and wall clock time, and also
+reports the I/O, viz. <br>
 <pre>   % time ls 
    0.012u 0.068s 0:00.77 9.0%<tt> </tt>&nbsp;<tt> </tt>&nbsp;0+0k 8376+0io 0pf+0w
    2.324u 1.080s 0:09.25 36.7%<tt> </tt>&nbsp;<tt> </tt>&nbsp;0+0k 1049384+2097160io 2pf+0w
@@ -114,58 +217,140 @@ off easily, by using <b>out=.</b>, viz. <br>
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the
  wall clock time is more likely to properly account for the I/O overhead
-time. 
-<h2><a name='sect4' href='#toc4'> Others</a></h2>
-A few other manual pages in NEMO also maintain their own list
-how its program compares under different compilers/options/cpu options:
-<br>
+time. <p>
+Rule of thumb: always run a benchmark a few times to see if a hot
+CPU slows down the benchmark. If I/O is cached. Other tasks are interfering.
+
+<p> 
+<h2><a name='sect8' href='#toc8'> "others"</a></h2>
+A few other man pages in NEMO also maintain their own list how
+its program compares under different compilers/options/cpu options: <br>
 <pre>CGS(1NEMO)
 scfm(1NEMO)
+</pre><p>
+Other industry benchmarks: <br>
+<pre>    Geekbench 5 (very wide variety of compute workloads - baseline is i3-8100)
+    Linpack   (focus on floating point operations - Gflops)
+    SPEC CPU 2017 ($$$) benchmark - 
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Tabbench</a></h2>
+The table I/O benchmark uses a 100M row dataset with 3 columns,
+representing X,Y,Z of which the radius R=sqrt(X^2+Y^2+Z^2) is computed. This
+table is about 2.7 GB in size. Of course reading the table is all dependent
+on the HDD/SDD, but in the case described here this was a fast SSD, and
+took 2 sec to read, or just over 1000 MB/sec. <br>
+<pre>    /usr/bin/time tabgen tab3 100000000 3
+    /usr/bin/time tabbench2 . mode=-1
+    
+
+this bench will need to be repeated for mode=0,1,2,3 to estimate the different
+components as they
+are added to the workflow. The tabgen(1NEMO) is dominated by
+drawing random numbers and writing them using printf(3) , which is slow.
+
+    80s   writing, using tabgen
+     2s   reading in tabbench2
+    22s   parsing in numbers  [np.loadtxt takes 748 sec!!!]
+     6s   using fie(3NEMO) to compute radii
+     1s   using np.sqrt(), and presumably C&rsquo;s sqrt() as well
+    
+</pre>
+<p> 
+<h2><a name='sect10' href='#toc10'>Parallel</a></h2>
+The GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ tool can be of great use if your tasks are
+pure single core and you have enough cores (most laptops have at least
+4 these days) and memory to fit your tasks.   As an example, here is something
+contrived using <a href='mkplummer.1.html'><i>mkplummer(1NEMO)</i></a>
+ that does not write to disk, so it should
+be highly parallizable: 
+<p> <br>
+<pre>    nbody=10000000
+    /usr/bin/time mkplummer . $nbody
+    2.80user 0.45system 0:03.26elapsed 99%CPU
+    
+    echo mkplummer . $nbody  &gt; run.txt
+    echo mkplummer . $nbody &gt;&gt; run.txt
+    /usr/bin/time parallel --jobs 1 &lt; run.txt
+    5.89user 0.83system 0:06.71elapsed 100%CPU
+    
+    /usr/bin/time parallel --jobs 2 &lt; run.txt
+    6.00user 0.79system 0:03.44elapsed 197%CPU
+</pre>
+<p> which follows Amdahl&rsquo;s law close to 100%! 
+<p> 
+<p> 
+<h2><a name='sect11' href='#toc11'>Considerations</a></h2>
+Most programs
+that need an output file, can use <b>out=-</b> to pass the data into a standard
+Unix pipe, or even <b>out=.</b> to use a sink.  
+<p> 
+<h2><a name='sect12' href='#toc12'>See Also</a></h2>
 <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
 , <a href='data.5.html'>data(5NEMO)</a>
+,
+<a href='tabgen.1.html'>tabgen(1NEMO)</a>
 , <a href='mkspiral.1.html'>mkspiral(1NEMO)</a>
 , <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
-,
-<a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
+, <a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
 , <a href='nbody1.1.html'>nbody1(1NEMO)</a>
-, <a href='scfm.1.html'>scfm(1NEMO)</a>
+,
+<a href='scfm.1.html'>scfm(1NEMO)</a>
 , <a href='CGS.1.html'>CGS(1NEMO)</a>
 , <a href='triple.1.html'>triple(1NEMO)</a>
-,
-<a href='accudate.l.html'>accudate(lNEMO)</a>
+, <a href='accudate.l.html'>accudate(lNEMO)</a>
+, <a href='bsf.1.html'>bsf(1NEMO)</a>
+, <a href='nemobench.8.html'>nemobench(8NEMO)</a>
+
+<p>
+
+<p><a href='https://browser.geekbench.com/processor-benchmarks'>https://browser.geekbench.com/processor-benchmarks</a>
  
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<p> 
+<h2><a name='sect13' href='#toc13'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<p> 
+<h2><a name='sect14' href='#toc14'>Files</a></h2>
 <br>
-<pre>~/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for data files.
+<pre>$NEMO/src/scripts/nemo.bench<tt> </tt>&nbsp;<tt> </tt>&nbsp;Script uses by make bench/bench5/bench10
+$NEMO/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for (small) data files.
+Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series of benchmarks
+/tmp/nemobench.log<tt> </tt>&nbsp;<tt> </tt>&nbsp;The nemobench keeps logfile
 </pre>
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect15' href='#toc15'>Update History</a></h2>
 <br>
 <pre>12-may-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-nov-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;finally added some data<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 17-feb-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;added bench0 comparison  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-mar-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;added some cygwin numbers, fixed input<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-6-may-11    added i7 and SHMEM/HDD comparison   PJT
+6-may-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;added i7 and SHMEM/HDD comparison<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-sep-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;added caveats<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-6-jan-2018<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated for V4, more balanced benchmarks<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-27-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;nemo.bench; updated with potcode and orbint; now 10 tasks<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+6-jan-2018<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated for V4, more balanced benchmarks <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;nemo.bench; updated with potcode and orbint<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+26-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added timings / added geekbench5 <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
 <ul>
 <li><a name='toc0' href='#sect0'>Name</a></li>
-<li><a name='toc1' href='#sect1'>Description</a></li>
-<li><a name='toc2' href='#sect2'>Data</a></li>
-<li><a name='toc3' href='#sect3'>Caveats</a></li>
-<li><a name='toc4' href='#sect4'> Others</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc1' href='#sect1'>Synopsis</a></li>
+<li><a name='toc2' href='#sect2'>Description</a></li>
+<li><a name='toc3' href='#sect3'>Nemobench5</a></li>
+<li><a name='toc4' href='#sect4'>Bench</a></li>
+<li><a name='toc5' href='#sect5'>Bench10</a></li>
+<li><a name='toc6' href='#sect6'>Oldest Bench</a></li>
+<li><a name='toc7' href='#sect7'>Caveats</a></li>
+<li><a name='toc8' href='#sect8'> "others"</a></li>
+<li><a name='toc9' href='#sect9'>Tabbench</a></li>
+<li><a name='toc10' href='#sect10'>Parallel</a></li>
+<li><a name='toc11' href='#sect11'>Considerations</a></li>
+<li><a name='toc12' href='#sect12'>See Also</a></li>
+<li><a name='toc13' href='#sect13'>Author</a></li>
+<li><a name='toc14' href='#sect14'>Files</a></li>
+<li><a name='toc15' href='#sect15'>Update History</a></li>
 </ul>
 </body>
 </html>

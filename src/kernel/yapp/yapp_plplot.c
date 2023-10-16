@@ -13,11 +13,19 @@
  *     25-oct-03  various fixed for the new CVS 5.x series of plplot
  *     11-oct-07  compile option to use the double instead of float
  *   24-dec-2019  Trying PLplot-5.15.0 (june 2019) - fixed plwid -> plwidth
+ *      mar-2022  Trying few more things, still not for our prime-time
+ *      
  *
  *  ToDo: colors
  *        fix the --without-double requirement
  *        fix aspect ratio problems
- *        presistent plots on the screen
+ *        persistent plots on the screen (wxwidgets seems to do this)
+ *        ps driver doesn't cover page
+ *        pdf has very small default font - pdfqt arguably too big, but better
+ *        tk driver has symbol size scaling error
+ *        colors don't match pgplot yet
+ *
+ *  Ubuntu packages: libplplot-dev plplot-driver-xwin plplot-tcl-dev
  */
 
  
@@ -31,7 +39,7 @@
  local char *pl_nemoreal = "nemo: pl_real = double";
 #else
  typedef float  pl_real;
-l ocal char *pl_nemoreal = "nemo: pl_real = float";
+ local char *pl_nemoreal = "nemo: pl_real = float";
 #endif
 
 /* we use the c_ versions since NEMO uses the same namespace ... */
@@ -58,6 +66,9 @@ extern void c_plwidth(int);
 extern void c_plcol0(int);
 extern void c_plcol1(pl_real);
 extern void c_plsori(int);
+extern void c_plsfam(int, int, int);
+extern void c_plvasp(pl_real);
+extern void c_plsvpa(pl_real, pl_real, pl_real, pl_real);
 
 extern void c_plgver(char *);
 extern void c_plgpage(int *,int *,int *,int *,int *,int *);
@@ -111,14 +122,23 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     } else
         warning("No device name specified - plplot running interactive");
 
-    c_plsori(0);     /* 0=landscape 1=portrait upside 3=portrait ?*/
+    // if %n in the name, use a family, else assume the name is "as is"
+    if (strstr(pltdev,"%n"))
+      c_plsfam(1,0,0);        // example could be test_%n.ps
+
+    c_plsori(0);     /* 0=landscape 1=portrait (2/3 upside) */
     
     c_plinit();
     c_pladv(0);
-    c_plvpor(0.0, 1.0, 0.0, 1.0);
+    //c_plvpor(0.0, 1.0, 0.0, 1.0);
+    c_plsvpa(0.0, 200.0, 0.0, 200.0);    // does not seem to make 200mm
+    c_plvasp(1.0);
     c_plwind((pl_real)xmin, (pl_real)xmax, (pl_real)ymin, (pl_real)ymax);
     c_plfontld(1);
-    c_plcol0(15);    /* white color will be the default */
+    c_plcol0(15);    /* white color will be the default , on black background */
+
+    // @todo plscol0(icol0, r,g,b);     set a series of indexed colors (cf. pgplot)
+
 
     c_plgver(ver);
     dprintf(1,"Plplot library version: %s\n", ver);
@@ -332,6 +352,7 @@ int pl_screendump(string fname)
   warning("pl_screendump(%s): Not implemented for yapp_plplot",fname);
 }
 
+//   deprecate ?
 local void bell(void)
 {
     int ring=7;
@@ -345,7 +366,7 @@ int pl_getpoly(float *x, float *y, int n)
     float xold,yold, xnew,ynew;
     char ch[10];
 
-    bell();
+    //    bell();
 
     printf("Define a polygon:\n");
     printf("   LEFT   = define first/next vertex of polygon\n");
@@ -414,9 +435,9 @@ int pl_getpoly(float *x, float *y, int n)
 #define RED		1
 #define GREEN		2
 #define BLUE		3
-#define CYAN 		4	/* (Green + Blue) */	
-#define MAGENTA 	5	/* (Red + Blue) */	
-#define YELLOW		6	/*   (Red + Green) */	
+#define CYAN 		4	/* (Green + Blue) 0,1,1 */	
+#define MAGENTA 	5	/* (Red + Blue)   1,0,1 */	
+#define YELLOW		6	/* (Red + Green)  1,1,0 */	
 #define ORANGE		7
 #define GREEN_YELLOW	8
 #define GREEN_CYAN	9

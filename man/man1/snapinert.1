@@ -34,7 +34,7 @@ form, eg, "1.0:1.5,2.5,3.0", will be
 translated.
 [default: all].
 .TP
-\fBweight\fP=\fIexpression\fP
+\fBweight=\fP\fIexpression\fP
 The value of \fIexpression\fP is  used  to
 compute the center of the coordinate and also the momentum of inertia.
 \fIexpression\fP is
@@ -43,14 +43,15 @@ over  the  real  values x, y, z, vx,
 vy, vz, phi, m, t, and  the  integer
 value i.  [default : 1]
 .TP
-\fBper_weight=\fIt|f\fP
+\fBper_weight=\fP\fIt|f\fP
 Logical if the result is  weight-normalized. [default: t].
 .TP
-\fBtab=\fIt|f\fP
+\fBtab=\fP\fIt|f\fP
 Usually \fBsnapinert\fP gives the result in a (barely) human-readable format.
 This option forces all values printed in one line, so that other programs
 such as MONGO, TABMATH(NEMO1) and AWK can easily access it.
 [default: f].
+
 .SH "SEE ALSO"
 snapkinem(1NEMO), snaprect(1NEMO), bodytrans(3NEMO)
 .SH BUGS

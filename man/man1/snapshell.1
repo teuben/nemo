@@ -1,16 +1,20 @@
-.TH SNAPSHELL 1NEMO "15 November 2005"
-.SH NAME
-snapshell \- compute statistics of bodyvariables in a set of radial shells
-.SH SYNOPSIS
+.TH SNAPSHELL 1NEMO "25 September 2023"
+
+.SH "NAME"
+snapshell \- compute statistics of bodyvariables in a set of "radial" shells
+
+.SH "SYNOPSIS"
 \fBsnapshell in=\fPsnap_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapshell\fP computes selected diagnostics and their statistics 
 from an N-body snapshot in a set of shells in an arbitrary body
-variable (default \fBrvar=r\fP).
+variable (default \fBrvar=r\fP being the radius).
 The snapshot must have been
 properly centered and oriented using 
 other tools (e.g. \fIsnapcenter(1NEMO)\fP and/or
-\fIsnaprect(1NEMO)\fP). 
+\fIsnaprect(1NEMO)\fP), as well have been sorted in 
+\fBrvar\fP. See \fIsnapsort(1NEMO)\fP how to sort a snapshot.
 .PP
 Normally the shell radii are explicitly set (optionally normalized)
 in \fBrvar\fP space, by setting \fBcumulative=t\fP the
@@ -23,8 +27,15 @@ The output will be an ascii table, in which for each variable it will
 print a
 selected set of statistics (e.g. mean, dispersion, min, max, skewness, kurtosis,
 number of particles). Shells with no particles are not output however.
-.SH PARAMETERS
-The following parameters are recognized.
+.PP
+Optionally a viewing  axis (as seen from the center) can be selected with
+an opening angle. In this case only the particles within this cone are
+counted. See \fBcone=\fP and \fBangle=\fP below.
+.PP
+The image (ccd) based program \fIccdellint(1NEMO)\fP does something similar in 2D.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fP\fIsnap_file\fP
 Input data is read from \fIsnap_file\fP, which must be in
@@ -59,9 +70,16 @@ need to be ellipsoidal in shape. For certain choices of \fBrvar\fP the
 use of this keyword has to be taken with care.
 [Default: 1,1,1]
 .TP
+\fBcone=\fP\fIx,y,z\fP
+Central axis of the cone around which particles will be selected [0,0,1].
+.TP
+\fBangle=\fP\fIalpha\fP
+Opening angle of the cone to select particles from (-1 means no cone used).
+[-1]
+.TP
 \fBstats=\fP\fIprint_stats\fP
 Statistics selected to print. Allowed values are
-\fBmean, dispersion, min, max, median, kurt, skew, npt\fP. 
+\fBmean, dispersion, min, max, median, kurt, skew, npt\fP, though minimum match applies.
 [Default: \fBmean,disp,n\fP].
 .TP
 \fBformat=\fIstring\fP
@@ -89,9 +107,7 @@ Should statistics on \fBr\fP also be added as a third set of columns. This can b
 if you selected a particular \fBrvar\fP and want to see over what radii they apply.
 [Default: \fBf\fP]
 
-.SH SEE ALSO
-snapkinem(1NEMO), snaprect(1NEMO), snapsort(1NEMO), snapshot(5NEMO)
-.SH EXAMPLES
+.SH "EXAMPLES"
 To get a mean rotation speed in the disk, and the velocity dispersion, for a set of
 rings:
 .nf
@@ -126,14 +142,25 @@ values in svar space):
 .nf
     % \fBsnapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 rvar=phi cumul=t\fP
 .fi
-.SH CAVEAT
+
+
+.SH "CAVEATS"
+Although \fBrvar=\fP can be choosen arbitrarely, with a cone selection (i.e. \fBangle>0\fP)
+any select  \fBrvar!=r\fP has probably no meaning.
+.PP
 Ellipsoidal shells may need reshape/sort/reshape?
-.SH AUTHOR
+
+.SH "SEE ALSO"
+snapkinem(1NEMO), snaprect(1NEMO), snapsort(1NEMO), radprof(1NEMO), ccdellint(1NEMO), snapshot(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
-13-nov-01	V1.0 created    PJT
+.ta +1.5i +5.5i
+13-nov-01	V1.0 created	PJT
 14-nov-05	V2.0 some re-write: svar= is now rvar= 	PJT
 15-nov-05	V2.1 added mvar= and cumulative=	PJT
+14-nov-22	V3.0 added cone= and angle=	PJT
 .fi

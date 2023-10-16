@@ -35,7 +35,8 @@ ComponentRange::ComponentRange(const ComponentRange&m)
 }
 // ============================================================================
 // Copy Constructor                                                            
-const ComponentRange::ComponentRange & ComponentRange::operator=(const ComponentRange & m)
+//const ComponentRange::ComponentRange & ComponentRange::operator=(const ComponentRange & m)
+const ComponentRange& ComponentRange::operator=(const ComponentRange & m)
 {
   n     = m.n;
   first = m.first;

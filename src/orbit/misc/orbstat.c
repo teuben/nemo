@@ -20,7 +20,8 @@ string defv[] = {
     "ellipse=f\n        Check on how well ellipsoidal",
     "relative=f\n       Energy check relative to recorded version",
     "tab=\n             Output table of quantities **not implemented**",
-    "VERSION=2.0\n  	27-apr-05 PJT",
+    "pot=t\n            Use potential stored with orbit?",
+    "VERSION=2.1\n  	6-feb-2022 PJT",
     NULL,
 };
 
@@ -32,10 +33,11 @@ string	infile;			/* file name */
 stream  instr;			/* file stream */
 
 orbitptr optr;
+bool Qpot;
 
 void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr);
 
-nemo_main ()
+void nemo_main ()
 {
     string mode;
     stream tabstr;
@@ -45,6 +47,7 @@ nemo_main ()
     instr = stropen (infile,"r");
     Qell = getbparam("ellipse");
     Qrel = getbparam("relative");
+    Qpot = getbparam("pot");
     if (hasvalue("tab"))
       tabstr = stropen(getparam("tab"),"w");
     else 
@@ -76,10 +79,14 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
   ini_moment(&r2m,2,0);
   ini_moment(&v2m,2,0);
   pot=get_potential(PotName(o), PotPars(o), PotFile(o));
+  if (pot == NULL && Qpot==TRUE) {
+    warning("No potential found, using internal values");
+    Qpot = FALSE;
+  }
   
   t = Torb(o,Nsteps(o)-1);
   e = I1(o);
-  dprintf(0,"E=%g\n",e);
+  dprintf(1,"E=%g\n",e);
   for (i=0; i<Nsteps(o); i++) {
     accum_moment(&xm,Xorb(o,i),1.0);
     accum_moment(&ym,Yorb(o,i),1.0);
@@ -92,12 +99,16 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
     pos[1] = Yorb(o,i);
     pos[2] = Zorb(o,i);
     time = Torb(o,i);
-    (*pot)(&ndim,pos,acc,&etot,&time);
+    if (Qpot)
+      (*pot)(&ndim,pos,acc,&etot,&time);
+    else
+      etot = Porb(o,i);
     etot += 0.5*(sqr(Uorb(o,i)) + sqr(Vorb(o,i)) + sqr(Worb(o,i)));
     if (Qrel) etot -= e;
     accum_moment(&em,etot,1.0);
   }
   if (first) {
+    dprintf(0,"# Orbit with %d checkpoints\n", Nsteps(o));
     if (Qell)
       dprintf(0,"# T\tE\tr2_min\tr2_max\tv2_min\tv2_max\tr2_mean\tr2_sigma\tv2_mean\tv2_sigma\tLmin/Lmax\n");
     else
@@ -116,14 +127,14 @@ void stat_orbit(orbitptr o, bool Qell, bool Qrel, stream tabstr)
       accum_moment(&r2m,r2,1.0);
       accum_moment(&v2m,v2,1.0);
     }
-    printf("%g %g  %g %g %g %g  %g %g %g %g  %g\n",
-	   t,e,
+    printf("%d %g %g  %g %g %g %g  %g %g %g %g  %g\n",
+	   Key(o), t,e,
 	   min_moment(&r2m), max_moment(&r2m), min_moment(&v2m), max_moment(&v2m), 
 	   mean_moment(&r2m), sigma_moment(&r2m), mean_moment(&v2m), sigma_moment(&v2m),
 	   ymax*umax/(xmax*vmax));
   } else {
-    printf("%g %g %g %g %g %g %g %g %g %g\n",
-	   t,e,
+    printf("%d %g %g %g %g %g %g %g %g %g %g\n",
+	   Key(o), t,e,
 	   max_moment(&xm), max_moment(&ym),
 	   max_moment(&um), max_moment(&vm),
 	   mean_moment(&jm), sigma_moment(&jm),

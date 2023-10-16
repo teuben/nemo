@@ -64,6 +64,8 @@ or
 
 #include <stdinc.h>  
 #include <getparam.h>
+#include <lsq.h>
+#include <table.h>
 
 
 /* pick (n)one TESTNR= numrec    TESTMP = mpfit */
@@ -153,44 +155,23 @@ bool Qtab;                  /* do table output ? */
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+
+void setrange(real *rval, string rexp)
 {
+    char *cptr;
 
-    setparams();
-    read_data();
-
-    if (scanopt(method,"line")) {
-        do_line();
-    } else if (scanopt(method,"slope")) {
-        do_slope();
-    } else if (scanopt(method,"ellipse")) {
-        do_ellipse();
-    } else if (scanopt(method,"imageshift")) {
-        do_imageshift();
-    } else if (scanopt(method,"plane")) {
-    	do_plane();
-    } else if (scanopt(method,"gauss1d")) {
-    	do_gauss1d();
-    } else if (scanopt(method,"gauss2d")) {
-    	do_gauss2d();
-    } else if (scanopt(method,"poly")) {
-    	do_poly();
-    } else if (scanopt(method,"area")) {
-        do_area();
-    } else if (scanopt(method,"peak")) {
-    	do_peak();
-    } else if (scanopt(method,"zero")) {
-    	do_zero();
-    } else if (scanopt(method,"fourier")) {
-    	do_fourier();
-    } else
-        error("fit=%s invalid; try [line,ellipse,imageshift,plane,gauss1d,gauss2d,poly,area,peak,zero,fourier]",
-	      getparam("fit"));
-
-    if (outstr) strclose(outstr);
+    cptr = strchr(rexp, ':');
+    if (cptr) {
+        rval[0] = natof(rexp);
+        rval[1] = natof(cptr+1);
+    } else {
+        rval[0] = 0.0;
+        rval[1] = natof(rexp);
+    	warning("Range taken from 0 - %g",rval[1]);
+    }
 }
 
-setparams()
+void setparams()
 {
     string inname = getparam("in");
     nmax = nemo_file_lines(inname,getiparam("nmax"));
@@ -233,23 +214,8 @@ setparams()
 
     mpfit_mode = getiparam("mpfit");
 }
-
-setrange(real *rval, string rexp)
-{
-    char *cptr;
-
-    cptr = strchr(rexp, ':');
-    if (cptr) {
-        rval[0] = natof(rexp);
-        rval[1] = natof(cptr+1);
-    } else {
-        rval[0] = 0.0;
-        rval[1] = natof(rexp);
-    	warning("Range taken from 0 - %g",rval[1]);
-    }
-}
 
-read_data()
+void read_data()
 {
     real *coldat[2*MAXCOL+1];
     int colnr[2*MAXCOL+1], ncols = 0, i, j;
@@ -306,7 +272,7 @@ read_data()
 }
 
 
-write_data(stream outstr)              /* only for straight line fit */
+void write_data(stream outstr)              /* only for straight line fit */
 {
 #if 0    
     int i;
@@ -362,7 +328,7 @@ int linfitex(int m, int n, double *p, double *dy, double **dvec, void *vars)
 }
 
 
-do_line()
+void do_line()
 {
     real *x, *y, *dx, *dy, *dz;
     int i,j, mwt;
@@ -546,7 +512,7 @@ real medfunc(real a, real *x, real *y, int n)
 }
 
 
-do_slope()
+void do_slope()
 {
     real *x, *y, *dx, *dy, *dz;
     int i,j, n, mwt;
@@ -605,7 +571,7 @@ do_slope()
 
 char name[10] = "ABCDE";
 
-do_ellipse()
+int do_ellipse()
 {
     real *xdat, *ydat;
     real mat[5*5], vec[5], sol[5], a[6], cnt, xmean, ymean, x, y;
@@ -861,14 +827,14 @@ do_ellipse()
     }
 }
 
-do_imageshift()
+void do_imageshift()
 {
     real *x, *y, *u, *v;
     /* this code was on 3b1 ... before CVS ... lost for now */
 }
 
 
-my_poly(bool Qpoly)
+void my_poly(bool Qpoly)
 { 
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
   int i, j;
@@ -910,7 +876,7 @@ my_poly(bool Qpoly)
  *      used:   n = dimensionality of space in which hyper plane is fit
  */
  
-do_plane()
+void do_plane()
 {
     my_poly(FALSE);
 }
@@ -920,7 +886,7 @@ do_plane()
  *      used:   n = order of polynomial
  */
  
-do_poly()
+void do_poly()
 {
     my_poly(TRUE);
 }
@@ -932,7 +898,7 @@ do_poly()
  *            
  */
 
-do_gauss1d()
+int do_gauss1d()
 {
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
   int i, j, gorder=2, neg=0;
@@ -988,7 +954,7 @@ do_gauss1d()
  *            
  */
 
-do_gauss2d()
+int do_gauss2d()
 {
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2], sum;
   int i, j, gorder=3, neg=0;
@@ -1045,7 +1011,7 @@ do_gauss2d()
 
 
 
-do_fourier()
+void do_fourier()
 {
   real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2];
   real sum, theta, amp, pha, sigma;
@@ -1102,7 +1068,7 @@ do_fourier()
  * to find an exact solution
  */
 
-do_peak()
+int do_peak()
 {
     real mat[(MAXCOL+1)*(MAXCOL+1)], vec[MAXCOL+1], sol[MAXCOL+1], a[MAXCOL+2];
     real *x, *y, ymax;
@@ -1151,7 +1117,7 @@ do_peak()
  * to find an exact solution
  */
 
-do_zero()
+void do_zero()
 {
     real *x, *y, zero;
     int i, j;
@@ -1178,7 +1144,7 @@ do_zero()
 
 
 
-do_area()
+void do_area()
 {
     real *x, *y, ymax, xmean, ymean;
     int i, j, k;
@@ -1208,7 +1174,7 @@ do_area()
 
 
     /* NumRec emulator - no chi^2 */
-myfit(real *x,real *y,int npt,real *dy,int mwt,
+void myfit(real *x,real *y,int npt,real *dy,int mwt,
       real *b, real *a,real *sigb,real *siga,real *chi2, real *q)
 {
   real mat[4], vec[2], sol[2], aa[3];
@@ -1313,5 +1279,42 @@ int ndata,mwt;
 
 
   stop(0);       
+}
+
+void nemo_main()
+{
+
+    setparams();
+    read_data();
+
+    if (scanopt(method,"line")) {
+        do_line();
+    } else if (scanopt(method,"slope")) {
+        do_slope();
+    } else if (scanopt(method,"ellipse")) {
+        do_ellipse();
+    } else if (scanopt(method,"imageshift")) {
+        do_imageshift();
+    } else if (scanopt(method,"plane")) {
+    	do_plane();
+    } else if (scanopt(method,"gauss1d")) {
+    	do_gauss1d();
+    } else if (scanopt(method,"gauss2d")) {
+    	do_gauss2d();
+    } else if (scanopt(method,"poly")) {
+    	do_poly();
+    } else if (scanopt(method,"area")) {
+        do_area();
+    } else if (scanopt(method,"peak")) {
+    	do_peak();
+    } else if (scanopt(method,"zero")) {
+    	do_zero();
+    } else if (scanopt(method,"fourier")) {
+    	do_fourier();
+    } else
+        error("fit=%s invalid; try [line,ellipse,imageshift,plane,gauss1d,gauss2d,poly,area,peak,zero,fourier]",
+	      getparam("fit"));
+
+    if (outstr) strclose(outstr);
 }
 

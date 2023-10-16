@@ -20,9 +20,11 @@
  *                                         allow yapp.ps to be overwritten; others not
  *                              20 jun 01  debug level now 1
  *         3.3  PJT             15-jun-2018 prototypes
+ *                              22-dec-2020 back to a pragmatic 20cm scale, make Helvetica default font
+ *         3.4  PJT              1-jun-2022 allow  file.ps/ps  to bypass lazy pgplot users
  */
 
-#define VERSIONID "Version 3.3 15-jun-2018 PJT"
+#define VERSIONID "Version 3.4a 26-aug-2022 PJT"
 
 #include <stdinc.h>
 //#include <yapp.h>
@@ -32,7 +34,7 @@ extern int debug_level;         /* see dprintf.c   from DEBUG env.var. */
 
 /* Scaling and layout parameters. */
 
-#define PTCM  (72.0 / 2.54)			/* points per cm */
+#define PTCM  (72.0 / 2.45872)			/* points per cm where 1inch=2.54cm*/
 
 #define XRANGE	(20.0 * PTCM)			/* width of user area */
 #define YRANGE  (25.0 * PTCM)			/* height of user area */
@@ -65,7 +67,7 @@ local real uxmin, uymin;			/* origin of user c.s. */
 #define DEFWIDTH  0.5				/* default line width */
 #define DEFLTYPE  1				/* default line type */
 #define DEFJUST  -1				/* default text just'n */
-#define YAPPFONT  "Times-Roman"			/* font used by pltext */
+#define YAPPFONT  "Helvetica"			/* font used by pltext */
 
 local real width;				/* line width in pts */
 local int ltype;				/* line type: solid, etc */
@@ -96,12 +98,18 @@ extern string date_id(void);                    /* date id */
  * PLINIT: initialize YAPP_PS.
  */
 
-plinit(string opt, real x0, real x1, real y0, real y1)
+int plinit(string opt, real x0, real x1, real y0, real y1)
 {
     real dx, dy;
+    char *cp = strstr(yapp_string, "/ps");
+
+    if (cp) {
+      warning("Chopping off /ps from %s", yapp_string);
+      *cp = 0;
+    } 
 
     if (yappstat != INACTIVE)
-	error("plinit: called twice\n");
+        error("plinit: called twice");
     if (yapp_string != 0 && *yapp_string != 0)
         yappfile = yapp_string;
     if (streq(yappfile,"lpr")) {
@@ -131,13 +139,14 @@ plinit(string opt, real x0, real x1, real y0, real y1)
     ltype = DEFLTYPE;
     just = DEFJUST;
     fntsz = 0.0;
+    return 0;
 }
 
 /*
  * PLFRAME: finish current page, make ready for next.
  */
 
-plframe()
+int plframe()
 {
     endpath();
     endpage();
@@ -145,15 +154,17 @@ plframe()
     ltype = DEFLTYPE;
     just = DEFJUST;
     fntsz = 0.0;
+    return 0;
 }
 
 /*
  * PLFLUSH: output pending graphics
  */
 
-plflush()
+int plflush()
 {
         /*      does nothing yet */
+        return 0;
 }  
 
 
@@ -162,7 +173,7 @@ plflush()
  * PLSTOP: finish up current page and quit.
  */
 
-plstop()
+int plstop()
 {
     char cmd[256];
 
@@ -173,8 +184,10 @@ plstop()
     if (lpr) { 
       sprintf(cmd,"lpr %s; rm -f %s",yappfile, yappfile);
       dprintf(0,"%s\n",cmd);
-      system(cmd);
+      int retval = system(cmd);
+      if (retval) warning(cmd);
     } 
+    return 0;
 }
 
 /*
@@ -191,7 +204,7 @@ local string dashtab[NPAT] = {
     "[3 3 6 3] 0",		/* short long */
 };
 
-plltype(int lwd, int ltp)
+int plltype(int lwd, int ltp)
 {
     real w;
 
@@ -208,13 +221,14 @@ plltype(int lwd, int ltp)
 	fprintf(psst, "%s setdash\n", dashtab[(ltp - 1) % NPAT]);
 	ltype = ltp;
     }
+    return 0;
 }
 
 /*
  * PLMOVE, PLLINE, PLPOINT: low-level graphics commands.
  */
 
-plmove(real x, real y)
+int plmove(real x, real y)
 {
     begpage();
     begpath();
@@ -224,9 +238,10 @@ plmove(real x, real y)
 	endpath();
 	plmove(x, y);
     }
+    return 0;
 }
 
-plline(real x, real y)
+int plline(real x, real y)
 {
     begpage();
     begpath();
@@ -236,13 +251,15 @@ plline(real x, real y)
 	endpath();
 	plmove(x, y);
     }
+    return 0;
 }
 
-plpoint(real x, real y)
+int plpoint(real x, real y)
 {
     begpage();
     endpath();
     fprintf(psst, "%.1f %.1f pt\n", xscale(x), yscale(y));
+    return 0;
 }
 
 /*
@@ -297,15 +314,16 @@ void plpalette(real *r, real *g, real *b, int nc)
  *  PLCIRCLE, PLCROSS, PLBOX: draw useful marking symbols.
  */
  
-plcircle(real x, real y, real r)
+int plcircle(real x, real y, real r)
 {
     begpage();
     endpath();
     fprintf(psst, "%1d %.1f %.1f %.1f circ\n",
 	    r > 0.0 ? 1 : 0, xscale(x), yscale(y), uscale * ABS(r));
+    return 0;
 }
 
-plcross(real x, real y, real s)
+int plcross(real x, real y, real s)
 {
     if (s > 0.0) {
 	plmove(x-s, y);
@@ -319,14 +337,16 @@ plcross(real x, real y, real s)
 	plmove(x-s, y+s);
 	plline(x+s, y-s);
     }
+    return 0;
 }
 
-plbox(real x, real y, real s)
+int plbox(real x, real y, real s)
 {
     begpage();
     endpath();
     fprintf(psst, "%.1f %d %.1f %.1f box\n",
 	    uscale * ABS(s), s > 0.0 ? 0 : 45, xscale(x), yscale(y));
+    return 0;
 }
 
 /*
@@ -336,7 +356,7 @@ plbox(real x, real y, real s)
 #define FUDGE1  1.50		/* fudge factor to make pltext() larger by */
 #define FUDGE2  0.50		/* fudge factor to offset text coords by */
 
-pltext(string msg, real x, real y, real hgt, real ang)
+int pltext(string msg, real x, real y, real hgt, real ang)
 {
     real fs, x1, y1;
 
@@ -361,22 +381,24 @@ pltext(string msg, real x, real y, real hgt, real ang)
 	fprintf(psst, "rsh\n");
 	break;
     }
+    return 0;
 }
 
 /*
  * PLJUST: specify justification parameter.
  */
 
-pljust(int j)
+int pljust(int j)
 {
     just = (j < -1 ? -1 : (j > 1 ? 1 : j));
+    return just;
 }
 
 /*
  * PLSWAP: does nothing.  
  */
 
-plswap() { }
+int plswap() { return 0;}
 
 /*
  * PLXSCALE, PLYSCALE: transform from usr to plotting coordinates.
@@ -397,7 +419,7 @@ real plyscale(real x, real y)
  * PL_MATRIX: paint a matrix (someday).
  */
 
-pl_matrix(
+int pl_matrix(
     real *frame,		/* image array, stored in 1-D */
     int nx, int ny,		/* size of image */
     real xmin, real ymin,	/* lower-left corner */
@@ -412,11 +434,13 @@ pl_matrix(
 	warning("pl_matrix: not yet implemented");
 	virgin = FALSE;
     }
+    return 0;
 }
 
-pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
+int pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
 {
     warning("pl_contour: not yet implemented for yapp_ps");
+    return 0;
 }
 
 int pl_cursor(float *x,float *y, char *c)      
@@ -425,9 +449,10 @@ int pl_cursor(float *x,float *y, char *c)
 }
 
 
-pl_screendump (string fname)
+int pl_screendump (string fname)
 {
     warning("yapp_ps_new: pl_screendump not implemented");
+    return 0;
 }
 /*
  * XSCALE, YSCALE: user to pt transformations.

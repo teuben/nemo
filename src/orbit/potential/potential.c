@@ -38,7 +38,7 @@
  *      20-may-04         c add sqr() for dummy linker
  *      14-jul-05         d made dummy functions global, for new (FC4) linker 
  *      18-sep-08         e make 'r' == SINGLEPREC? 'f' : 'd'              WD
- *       
+ *      10-jan-22     V5.5  implement a set_potential()                    PJT
  *------------------------------------------------------------------------------
  */
 
@@ -115,6 +115,16 @@ real get_pattern()
     if (first) error("get_pattern: get_potential not called yet");
     return local_omega;
 }
+
+void set_pattern(real omega)
+{
+  error("set_pattern not properly implemented, see e.g. twobody.c");
+  if (local_omega < 0.0) {
+    dprintf(0,"set_pattern:  %g  ->  %g\n", local_omega, omega);
+    local_omega = omega;
+  }
+}
+
 
 /*-----------------------------------------------------------------------------
  *  load_potential -- load the potential from an object file

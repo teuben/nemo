@@ -1,0 +1,35 @@
+#! /bin/bash
+#
+
+version=git
+url=https://github.com/N-BodyShop/tipsy
+
+
+for arg in $*; do
+  export $arg
+done
+
+
+cd $NEMO/local
+if [ $version = "git" ]; then
+    if [ ! -d git ]; then
+        git clone $url
+	cd tipsy
+    else
+	cd tipsy
+	git pull
+    fi
+fi
+   
+echo VERSION=$version
+
+cd code
+#   --prefix=$NEMO/opt   doesn't seem to work
+./configure 
+make 
+cp tipsy $NEMO/opt/bin
+
+
+echo Installed version=$version
+
+echo tipsy $version `date` >> $NEMO/opt/mknemo.log

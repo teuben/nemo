@@ -1,6 +1,12 @@
-.TH SNAPGADGET 1NEMO "23 June 2011"
+.TH SNAPGADGET 1NEMO "19 January 2022"
+
+.SH "NAME"
+snapgadget - convert snapshot to GADGET format
+
+.SH "SYNOPSIS"
 \fBsnapgadget\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsnapgadget\fP converts  data
 from standard \fIsnapshot(5NEMO)\fP format into
 \fIgadget(lNEMO)\fP. 
@@ -13,9 +19,9 @@ are handled.
 Some programs (e.g. AHF) that need proper cosmological information
 in a gadget header, will need these explicitly passed via
 a set of parameters (see below).
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file (snapshot format). No default.
@@ -45,32 +51,42 @@ Force swaping bytes for other-endian machines [f]
 \fBz=\fP
 Current Redshift [0]    
 .TP
+\fBz=\fP
+Current redshift [0]
+.TP
 \fBbox=\fP
 Box size (Mpc/h) [128]   
 .TP
 \fBomega0=\fP
-Omega_0 [1]     
+Omega_0 [0.3]     
 .TP
-\fBlambda=\fP
-OmegaLambda [1]     
+\fBlambda0=\fP
+OmegaLambda0 [0.7]     
 .TP
 \fBh=\fP
 HubbleParam [0.75]     
-.SH CAVEAT
+
+.SH "CAVEATS"
 There is an option to run gadget in double precision mode, their output files 
 may not be compatible with this version of the program.
-.SH SEE ALSO
-gadgetsnap(1NEMO), nemo2gadget(1NEMO), gadget2nemo(1NEMO), uns2uns(1NEMO), snapshot(5NEMO), gadget(5NEMO)
+.PP
+Such "unformatted binary" files are limited to 4GB per block.
+
+.SH "SEE ALSO"
+gadgetsnap(1NEMO), nemo2gadget(1NEMO), gadget2nemo(1NEMO), uns2uns(1NEMO), g2info(1NEMO), snapshot(5NEMO), gadget(5NEMO)
 .PP
 http://www.mpa-garching.mpg.de/gadget/
-.SH FILES
-.SH AUTHOR
+.PP
+https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md
+.SH "AUTHOR"
 Jeremy Bailin
+
 .SH UPDATE HISTORY
 .nf
 .ta +1.0i +4.0i
 8-sep-03	V0.1 Created	J.Bailin
 8-sep-03	V0.2 minor mods on order of arguments, fix missing %t case	PJT
 21-jun-11	V1.0 add some reasonable cosmo defaults, in case they're needed	PJT
-22-jun-11	V1.1 add M=
+22-jun-11	V1.1 add M=	PJT
+19-jan-22	updated man page format; added links	PJT
 .fi

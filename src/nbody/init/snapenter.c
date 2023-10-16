@@ -20,6 +20,7 @@
 #include <extstring.h>
 
 #include <filestruct.h>
+#include <history.h>
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
@@ -32,7 +33,7 @@ string  defv[] = {              /* DEFAULT INPUT PARAMETERS */
     "time=0.0\n     Time at which snapshot taken",
     "headline=\n    Verbiage for output",
     "verbose=t\n    Be verbose when input requested",
-    "VERSION=2.2c\n 8-sep-01 PJT",
+    "VERSION=2.2d\n 2-feb-2022 PJT",
     NULL,
 };
 

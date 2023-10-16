@@ -7,12 +7,14 @@
  *	22-feb-92	V1.1b   usage
  *       9-nov-93       V1.2    times=
  *       7-may-02       minor code cleanup
+ *       3-apr-2020     1.2d
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
@@ -20,7 +22,7 @@
 
 string defv[] = {
     "in=???\n              Input snapshot",
-    "radii=0:2:0.1\n       Set of radii denoting edges of cylinders",
+    "radii=0:2:0.1\n       Set of N+1 radii denoting edges of the N cylinders",
     "cos=0:4:1\n	   List of noj-zero cos(m.phi) terms",
     "sin=1:4:1\n	   List of non-zero sin(m.phi) terms",
     "xvar=x\n              X variable",
@@ -29,7 +31,7 @@ string defv[] = {
     "weight=1\n            Weight applied to observable",
     "amode=t\n             Display sin/cos amps or amp/phase if possible?",
     "times=all\n           Snapshots to select",
-    "VERSION=1.2c\n        25-nov-2019 PJT",
+    "VERSION=1.2d\n        3-apr-2020 PJT",
     NULL,
 };
 
@@ -40,7 +42,16 @@ string usage = "Fourier coefficients of an N-body distribution";
 #define MAXRAD 513
 #define MAXORDER 8
 
-nemo_main()
+int snap_four(body *btab, int nbody, real tsnap, rproc xproc, rproc yproc, rproc fproc, rproc wproc,
+	      int maxorder, bool Qcos[], bool Qsin[], real rad[], int nrad, int amode);
+int print_header(int maxorder, bool Qcos[], bool Qsin[], int amode);
+
+extern void lsq_zero(int n, real *mat, real *vec);
+extern void lsq_accum(int n, real *mat, real *vec, real *a, real w);
+extern void lsq_solve(int n, real *mat, real *vec, real *sol);
+extern void lsq_cfill(int n, real * mat, int c, real *vec);
+
+void nemo_main(void)
 {
     stream instr;
     string times, vstr;
@@ -99,8 +110,7 @@ nemo_main()
 }
 
 
-snap_four(btab,nbody,tsnap,xproc,yproc,fproc,wproc,
-          maxorder,Qcos,Qsin,rad,nrad,amode)
+int snap_four(btab,nbody,tsnap,xproc,yproc,fproc,wproc,maxorder,Qcos,Qsin,rad,nrad,amode)
 Body *btab;                 /* pointer to snspshot with nbody Bodie's */
 real rad[];                 /* radii for shells */
 real tsnap;                 /* time of snapshot */
@@ -159,8 +169,8 @@ bool amode;                 /* TRUE=amps only FALSE=amp+phase if all available *
                 a[k++] = sin(m*th);
             }
             a[k] = fproc(bp,tsnap,ip);
-            dprintf(1,"adding %d: r^2=%g th=%g, fvar=%g wt=%g\n",
-			      cnt,r2,th*180/PI,a[k],w);
+            dprintf(1,"adding %d %g %g %g %g\n",
+		    cnt,sqrt(r2),th*180/PI,a[k],w);
             if (k!=dim) error("snapfour: Counting error dim=%d k=%d",dim,k);
             lsq_accum(dim,mat,vec,a,w);  /* accumulate for LSQ normal matrix */
         } /* bp */
@@ -190,7 +200,7 @@ bool amode;                 /* TRUE=amps only FALSE=amp+phase if all available *
     return 0;
 }
 
-print_header(maxorder,Qcos,Qsin,amode)
+int print_header(maxorder,Qcos,Qsin,amode)
 int maxorder;
 bool Qcos[], Qsin[], amode;
 {
@@ -208,5 +218,6 @@ bool Qcos[], Qsin[], amode;
             if (Qsin[m]) dprintf(0,"C%d P%d ",m,m);
     }
     dprintf(0,"\n");
+    return 0;
 }
 

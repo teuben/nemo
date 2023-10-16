@@ -1,0 +1,113 @@
+.TH GSP 5NEMO "10 June 2023" 
+
+.SH "NAME"
+gsp \- binary table format for General Spherical Models
+
+.SH "DESCRIPTION"
+\fIgsp\fP is a binary table format popular in ZENO to help making spherical models.
+For a precursor to this format, see \fIommod(5NEMO)\fP
+.PP
+A typical procedure is to generate a model table
+and use programs such as \fIgsprealize(1ZENO)\fP to make an N-body realization of
+this model.
+
+.SH "EXAMPLES"
+1. Here is an example of the structure/contents of a GSP table:
+
+.nf
+
+
+$ plumgsp - | tsf -
+
+set GeneralSphericalProfile
+  int Npoint 02401
+  double Radius[1281] 0.000976562 0.000987197 0.000997946 0.00100881 
+    0.00101980 0.00103090 0.00104213 0.00105348 0.00106495 0.00107655 
+    0.00108827 0.00110012 0.00111210 0.00112421 0.00113645 0.00114883 
+    0.00116134 0.00117398 0.00118676 0.00119969 0.00121275 0.00122596 
+    . . .
+  double Density[1281] 0.238732 0.238732 0.238732 0.238732 0.238732 
+    0.238732 0.238732 0.238732 0.238732 0.238732 0.238732 0.238732 
+    0.238732 0.238732 0.238732 0.238732 0.238732 0.238732 0.238732 
+    0.238732 0.238732 0.238732 0.238731 0.238731 0.238731 0.238731 
+    . . .
+  double Mass[1281] 9.31321e-10 9.62078e-10 9.93850e-10 1.02667e-09 
+    1.06058e-09 1.09560e-09 1.13179e-09 1.16916e-09 1.20777e-09 
+    1.24766e-09 1.28886e-09 1.33143e-09 1.37540e-09 1.42082e-09 
+    1.46774e-09 1.51622e-09 1.56629e-09 1.61801e-09 1.67145e-09 
+    . . .
+  double Alpha 0.00000
+  double Beta -5.00000
+  double Mtot 1.00000
+tes
+
+.fi
+Here Alpha and Beta are the power law exponents of the density law at very small and very large radii resp.
+.PP
+2. The current N-body snapshot that ZENO computes are not 100% compatible with the ones' NEMO is expecting.
+Filtering it through \fIsnapcopy(1NEMO)\fP will make it work again:
+.nf
+
+    plumgsp -| gsprealize - - | snapcopy - plum.snap
+
+.fi
+
+.SH "ZENO"
+After loading ZENO, for example using
+.nf
+     source $NEMO/usr/zeno/zeno_start.sh 
+.fi
+the following GSP programs are available, organized thematically, with a small sample of default parameters:
+.nf
+.ta +1.5i
+CONSTRUCTION	MODEL
+------------	-----
+einastogsp	Einasto [n=5]
+expdgsp		Exponential Sphere [zdisk=0]
+gammagsp	Dehnen's gamma sphere [gamma=1]
+halogsp		NFW Sphere [a=1 b=4 taper=exp]
+isochronegsp	Isochrone Sphere 
+isothgsp	Isothermal Sphere [b=10]
+perftgsp	Perfect Sphere
+plumgsp		Plummer Sphere
+polygsp		Polytropic Sphere [index=1.5]
+snapgsp		Construc GSP table from N-body snapshot [alpha=0 beta=0]
+tablegspq	Contruct GSP table from a text profile table
+
+MANIPULATION	USE
+------------	---
+
+gspadd		add several density profiles
+gspdistfu	calculate distribution function of GSP [raniso=-1]
+gspeval		evaluate GSP at particle positions
+gspgravity	calculate gravitational potential of GSP
+gsplist		list properties of GSP as a function of radius.
+gspsmooth	smooth mass distribution of GSP [eps=0.025 kappa=1.5]
+gspsmoothfit	** Fit smoothed gsp to gravitational field 
+gsptrun		truncate mass distribution of general spherical profile [rtrun=16]
+gspveldisp	calculate radial velocity dispersion for GSP [beta=1]
+
+NBODY   	USE
+-----   	---
+gspdisk		set up an exponential (gas) disk [mdisk=0.1875 alpha=12 rcut=1 zdisk=1 mu=2]
+gspmodel	** make N-body model of GSP [beta_a=0]
+gsprealize	make N-body realization of GSP with isotropic [raniso=-1]o 
+		or Osipkov-Merritt distribution function
+gspsphere	make SPH realization of GSP [gamma=5/3]
+gsptestdisk	set up a test-particle disk embedded in a gsp spheroid.
+
+.fi
+
+Some programs have an extra \fBgrav=\fP in addition to the input GSP model. What is that for again?
+
+.SH "SEE ALSO"
+mkommod(1NEMO), king(1NEMO), plummer(1NEMO), zeno(1NEMO), zeno(1NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+10-jun-2023	man written	PJT
+.fi

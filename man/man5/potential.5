@@ -83,7 +83,7 @@ The following table lists the non-pattern speed parameters
 for a few example potentials
 found in \fB$NEMOOBJ/potential\fP. \fINote: the pattern
 speed is not listed here\fP
-.ta +1.5i +1.5i
+.ta +1.5i +2.5i
 .nf
 \fBharmonic\fP	wx,wy,wz	1,1,1
 \fBplummer\fP	m,a      	1,1
@@ -155,9 +155,11 @@ potentials to modify their code in something like the following:
 .SH "ENVIRONMENT"
 The environment variable \fBPOTPATH\fP can be used to search for potentials
 in other than the local directory.
-.SH OTHER
+
+.SH "OTHERS"
 See also the "pav" format used in the LP-VI code (Carpintero et al.  ascl1501.007)
-.SH "CAVEAT"
+
+.SH "CAVEATS"
 Since the old format did not use _float or _double, there will
 be some potentials with no _float support, since _double is the
 default if  not present in the symbol table. For C/C++ routines
@@ -166,6 +168,11 @@ a potential_double() and potential_float(), or rename
 potential() to potential_double() and include <potential_float.h>
 (available for NEMO 3.2.2 and above) to have _float call 
 _double (the penalty for this is about 4%).
+.PP
+Because these potentials are implemented as simple functions, there can only
+be one in use. Unlike the ones in falcON.
+
+
 .SH "SEE ALSO"
 get_potential(3NEMO), orbit(5NEMO), acceleration(5NEMO), manipulator(5NEMO), flowcode(1NEMO), mkflowdisk(1NEMO), vpotcode(1NEMO)
 .SH "AUTHOR"

@@ -108,16 +108,16 @@ fitsgids: fitsgids.c look_nemo.c
 		 $(NEMO_LIBS) -lgdi
 
 sdsfits: sdsfits.c 
-	$(CC) $(CFLAGS) -o sdsfits sdsfits.c $(HDF_LIB) $(NEMO_LIBS)  $(CFITSIO_LIB) $(EL)
+	$(CC) $(CFLAGS) $(CFITSIO_INC) -o sdsfits sdsfits.c $(HDF_LIB) $(NEMO_LIBS)  $(CFITSIO_LIB) $(EL)
 
 mkfits: mkfits.c 
-	$(CC) $(CFLAGS) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
+	$(CC) $(CFLAGS) $(CFITSIO_INC) -o mkfits mkfits.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
 sdinfo: sdinfo.c
-	$(CC) $(CFLAGS) -o sdinfo sdinfo.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
+	$(CC) $(CFLAGS) $(CFITSIO_INC) -o sdinfo sdinfo.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
 ccdfitsio: ccdfitsio.c 
-	$(CC) $(CFLAGS) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
+	$(CC) $(CFLAGS) $(CFITSIO_INC) -o ccdfitsio ccdfitsio.c $(NEMO_LIBS) $(CFITSIO_LIB) $(EL)
 
 
 fitstiff: fitstiff.c 
@@ -126,7 +126,16 @@ fitstiff: fitstiff.c
 
 
 ccd_cfitsio.o:		ccd_cfitsio.c
-	$(CC) $(OPT) $(CFITSIOINC) -c $*.c
+	$(CC) $(OPT) $(CFITSIO_INC) -c $*.c
 
 
 fitsio_nemo.o:	fitsio.c fitsio_nemo.c
+
+# demo version of linking NEMO and gnuastro (@todo needs to go to configure/makedefs)
+# for now you will need "mknemo gnuastro" for an internal build
+GNUASTRO_INC =
+GNUASTRO_LIB = -lgnuastro
+fitsgnu: fitsgnu.c 
+	$(CC) $(CFLAGS) $(GNUASTRO_INC) -o fitsgnu fitsgnu.c $(NEMO_LIBS) $(GNUASTRO_LIB) $(EL)
+
+

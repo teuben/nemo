@@ -1,9 +1,12 @@
 .TH MKH41 1NEMO "23 July 2009"
-.SH NAME
+
+.SH "NAME"
 mkh41 \- Create a Holmberg 1941 disk
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkh41\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkh41\fP creates a disk of particles similar to the one 
 used in Holmberg's 1941
 paper (1941ApJ....94..385H).
@@ -15,7 +18,8 @@ See the example below to assign more realistic velocities.
 .PP
 The disk quoted in the 1941 paper has a mass of 10^11 solar masses, and a diameter
 of 2300 pc.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -47,14 +51,16 @@ clockwise rotation.
 .TP
 \fBheadline=\fP
 verbiage for output []    
-.SH CAVEAT
+
+.SH "CAVEAT"
 It is hard to create the exact same initial conditions as in the
 H41 paper, as not enough details are provided.
 Also, Figure 4a/b seem to suggest that the inner 7 points are not even
 acted upon self consistently, but just following the path of the galaxy.
 .PP
 A set of French Curves is not used for this program.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Since this program does not properly compute rotational velocities, and
 because each ring is in a separate snapshot, it is somewhat cumbersome
 to create the actual initial conditions for a true Holmberg 1941 disk:
@@ -68,8 +74,8 @@ mkh41 -  |\
 
 
 .fi
-.SH SEE ALSO
-.nf
+
+.SH "SEE ALSO"
 mkconfig(1NEMO), mktt72(1NEMO), mkdisk(1NEMO), snapscale(1NEMO), snapstack(1NEMO)
 .PP
 Holmberg, E. (1941) - \fI On the clustering tendencies among the nebulae\fP. ApJ. 94, 385.
@@ -77,11 +83,17 @@ Holmberg, E. (1941) - \fI On the clustering tendencies among the nebulae\fP. ApJ
 Lindblad, P.O. (1960) - \fIThe development of spiral structure in a galaxy approached by numerical computations\fP
 http://adsabs.harvard.edu/abs/1960StoAn..21....4L
 .fi
-.SH AUTHOR
+John Dubinsky, and no doubt others, have re-implemented the 1941 experiment.
+.PP
+Hanno Rein's REBOUND example
+https://rebound.readthedocs.io/en/latest/ipython_examples/Holmberg
+
+.SH "AUTHOR"
 Peter Teuben, Alar Toomre
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 15-Jul-2009	V1.0 Created at PiTP (IAS @ Princeton)	PJT + AT
 22-jul-2009	V1.1 added sign=	PJT
 .fi

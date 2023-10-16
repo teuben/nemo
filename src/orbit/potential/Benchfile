@@ -1,0 +1,50 @@
+# -*- makefile -*-
+
+DIR       = src/orbit/potential
+BENCH     = bench0 bench0d bench1 bench2 bench3
+BENCHDATA = bench1.ccd
+LOG       = /tmp/nemobench.log
+BIN       = potccd
+NEED      = $(BIN) 
+FTEN      = 1
+
+POTNAME   = gauss
+POTPARS   = 0,1,1,1,0.25
+DR        = 0.05
+R0        = -5:5:$(DR)*2
+R1        = -5:5:$(DR)
+R2        = -5:5:$(DR)/2
+
+help:
+	@echo $(DIR)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+bench1.ccd:
+	@rm -rf bench1.ccd
+	potccd bench1.ccd plummer x=$(R2 y=$(R2 z=$(R2) >> $(LOG) 2>&1
+
+bench0:
+	nemobench potccd . plummer x=$(R2) y=$(R2) z=$(R2)
+
+bench0d:
+	nemobench potccd . plummer x=$(R2) y=$(R2) z=$(R2) mode=den dr=0.001 nder=2
+
+bench1:
+	nemobench potccd . gauss 0,1,1 1 x=$(R1) y=$(R1) z=$(R1)
+
+bench2:
+	nemobench potccd . gauss 0,1,1,1,0.5 x=$(R1) y=$(R1) z=$(R1)
+
+bench3: bench1.ccd
+	nemobench ccdpot bench1.ccd .
+
+R10=9.45
+bench10:
+	nemobench potccd . $(POTNAME) $(POTPARS) x=0:9.5:"$(DR)/$(FTEN)**(1/3)" y=0:9.5:"$(DR)/$(FTEN)**(1/3)" z=0:9.5:"$(DR)/$(FTEN)**(1/3)"

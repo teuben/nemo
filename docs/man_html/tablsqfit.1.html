@@ -6,6 +6,7 @@
 <title>TABLSQFIT(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -77,14 +78,14 @@ fit (<b>fit=poly</b>) or  dimension of the hyper-plane fit (<b>fit=plane</b>). 0
 fit a constant. 0 and 1 would have the same meaning in both the <b>plane</b> and
 <b>poly</b> cases [Default: <b>0</b>]. </dd>
 
-<dt>out=<i>filename</i> </dt>
+<dt><b>out=</b><i>filename</i> </dt>
 <dd>Optional output filename (only active
 under certain options) where the data and residuals are stored. Column 1,
 2 and 3 will contain the X, Y and residuals F(X)-Y respectively. A future
 release will also store the errors (if it was given, see  keyword <b>dycol</b>
 above) in the 4th column. [default: empty, no output file created]. </dd>
 
-<dt>nsigma=<i>sigma_factor</i>
+<dt><b>nsigma=<i>sigma_factor</i></b>
 </dt>
 <dd>A positive number will delete points more than <i>sigma_factor</i> from the fit,
 and fit again. [Default: <b>-1</b>]. </dd>
@@ -109,7 +110,8 @@ and Y used. See also <a href='linreg.1.html'><i>linreg(1NEMO)</i></a>
 
 <dt><b>tab=t|f</b> </dt>
 <dd>Output results in simple tabular
-format. Default: false. </dd>
+format. Default: false. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>

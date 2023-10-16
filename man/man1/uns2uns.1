@@ -1,6 +1,6 @@
-.TH uns2uns 1NEMO "July 05, 2011"
+.TH uns2uns 1NEMO "March 17, 2020"
 .SH NAME
-uns2uns a universal converting tool for UNS snapshots.
+uns2uns \- a universal converting tool for UNS snapshots.
 
 .SH SYNOPSIS
 \fBuns2uns in=\fPuns_input\fB out=\fPuns_output\fB
@@ -23,14 +23,14 @@ There are two kinds of nbody file structure:
 - \fBrange\fP file structure (\fIRFS\fP), like NEMO, where  data are identified
   by range of indexes (ex 0:999 for the disk and 1000:9999  for the halo).  
 .TP 0
-- \fBcomponent\fP file structure (\fICFS\fP), like GADGET, where data are identified by
+- \fBcomponent\fP file structure (\fICFS\fP), like GADGET or RAMSES where data are identified by
   component name (disk, gas, halo, stars, bulge, bndry).
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 12
 \fBin=\fP\fIuns input file\fP
-Currently, the following input files are supported: Nemo,Gadget 2 &
-1, list of files, sqlite3 uns data base
+Currently, the following input files are supported: Nemo, Gadget3,
+Gadget2, Gadget1, RAMSES, list of files, sqlite3 uns data base
 .TP
 \fBout=\fP\fIuns output file\fP
 Output data will be written to \fIout_file\fP in the format type
@@ -48,7 +48,7 @@ select=gas@0:1000+disk@300:400). For more details, see EXAMPLES below.
 .TP
 \fBtype=\fP\fIuns type format\fP
 we specify here the type of the output file.
-Currently, the following output files are supported: nemo, gadget2
+Currently, the following output files are supported: nemo, gadget2, gadget3
 .TP
 \fBbits=\fP\fIphysical quantities to saved\fP
 If this parameter is left blank, then all physical quantities will be
@@ -71,6 +71,9 @@ values:
   'T'  temperature
 
   ex: bits=xRH will save positions, densities and hsml
+  
+  (see also : 
+https://projets.lam.fr/projects/unsio/wiki/UnsioVariablesUtilisation#How-to-select-data-at-loading)
 
 .SH EXAMPLES
 In the following examples, we assume that \fIfileg2\fP is a GADGET2 file,
@@ -110,6 +113,8 @@ output files will have a trailing number.
 
 .SH SEE ALSO
 snapmask(1NEMO), snapcopy(1NEMO), snapshot(5NEMO), uns_info(1NEMO)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
 
 .SH AUTHOR
 Jean-Charles LAMBERT
@@ -117,5 +122,6 @@ Jean-Charles LAMBERT
 .nf
 .ta +1i +4i
 05-Jul-11	V1.0 created	JCL
+17-Mar-20	V2.0 bugs fixed	JCL
 .fi
 

@@ -47,7 +47,7 @@ string defv[] = {
     "zmbar=0.5\n      mean mass of system, in solar units",
 
     "kz=0 0 1 0 0 1 5 0 0 1  0 0 0 0 2 1 1 0 0 0  1 2 0 0 0 2 0 0 0 2  0 0 2 0 0 0 1 0 0 1  0 0 0 0 0 0 0 0 0 0\n",
-      "Non-zero options for alternative paths (see below)\n"
+      "     Non-zero options for alternative paths (see below)\n"
       "       1  COMMON save on unit 1 at end of run (=2: every 100*NMAX steps).\n"
       "       2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
       "       3  Basic data on unit 3 at output (freq. NFIX; >1: cluster + tail).\n"
@@ -150,7 +150,7 @@ string defv[] = {
     "nbody6=0\n       run mode : 1=nbody6  0=nbody6++",
     "exe=\n           Name of the executable (default see nbody6=)",
 
-    "VERSION=0.8b\n   13-may-2019 PJT",
+    "VERSION=0.8c\n   27-may-2021 PJT",
     NULL,
 };
 

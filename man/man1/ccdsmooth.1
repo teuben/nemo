@@ -1,20 +1,28 @@
-.TH CCDSMOOTH 1NEMO "10 May 2010"
-.SH NAME
+.TH CCDSMOOTH 1NEMO "20 September 2022"
+
+.SH "NAME"
 ccdsmooth \- smoothing of an image map (2D or 3D)
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBccdsmooth in=\fPimage \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
-\fIccdsmooth\fP will smooth an image cube through a simple direct convolution
+
+.SH "DESCRIPTION"
+\fIccdsmooth\fP will smooth an image (cube) through a simple direct convolution
 (no FFT). The smoothing beam must be circular/spherical, or smoothing
 must be done independantly per coordinate by calling \fIccdsmooth\fP
 multiple times using the \fBdir=\fP keyword (see below).
 .PP
+Spatial smoothing in X-Y can also be done by creating an image of a beam,
+which is then convolved with the input image. For example, non-circular
+beams with a non-zero positon angle (in FITS: \fBBPA\fP) will need to
+create a beam file using \fIccdgen(1NEMO)\fP.
+.PP
 For more artistic versions of a smoothing operation, such as added
 noise and diffraction spikes for bright stars, see \fIccddiffract(1NEMO)\fP.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIImage(5)\fP format [no default]
@@ -32,6 +40,9 @@ the pre-existing beam.
 If this parameter is used, the parameter \fBsmooth\fP is
 ignored [default: not used].
 .TP
+\fBmoffat=\fIvalue\fP
+If given, this will be the FWHM of the Moffat smoothing function.
+.TP
 \fBdir=x|y|z\fP
 Direction of smoothing. This gives the flexibility of smoothing in
 x, y and/or z separately. Note that when smoothing in more than one
@@ -46,6 +57,9 @@ Example is e.g. the Hanning smoothing: "0.25,0.5,0.25".
 [default: \fB0.25,0.5,0.25\fP]. This parameter is only used if
 \fBgauss\fP parameter is not used.
 .TP
+\fBwiener=\fIvalue\fP
+If used, this will be the (square) size of the Wiener filter.
+.TP
 \fBnsmooth=\fIvalue\fP
 Number of times the above smoothing kernel is applied over the data.
 [default: \fB1\fP].
@@ -54,19 +68,70 @@ Number of times the above smoothing kernel is applied over the data.
 Input pixel value which to skip in smoothing.
 [Default: not used]
 .TP
+\fBbeta=\fImoffat_beta\fP
+If used, this is the \fIbeta\fP parameter for the Moffat smoothing function. [Default: 4.765]
+.TP
 \fBcut=\fIcutoff_value\fP
 Value at which to cutoff the gaussian beam. 
 [Default: \fB0.01\fP]
-.SH "SEE ALSO"
-ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
-.SH TIMING
+.TP
+\fBbeam=\fP
+Optional 2D spatial beam, in \fIImage(5)\fP format.
+This should be a map with an odd number of pixels,
+ideally where the central pixel value is 1. Normalization by the beam volume
+is done automatically, such that smoothing conserves flux.  The WCS of the beam
+is ignored, it's the pixels that count.
+
+.TP
+\fBmode=\fIedge_mode\fP
+Special edge smoothing mode (testing). [0]
+
+.SH "EXAMPLES"
+Here is an example to compute the noise of an image with unity noise that has been smoothed
+with a beam/pixel (B/P) ratio of 2.0 :
+.nf
+
+  ccdgen "" -  noise 0,1 size=1000,1000 seed=123 | ccdsmooth - - 2.0 | ccdstat - | grep dispersion
+  Mean and dispersion    : -0.000116 0.334048
+
+.fi
+with the following table showing the resulting RMS for a few values of the B/P ratio
+.nf
+
+B/P     RMS
+---    -----
+0.0    1.000
+1.0    0.796
+2.0    0.334
+3.0    0.223
+4.0    0.168
+5.0    0.1367
+6.0    0.1160
+7.0    0.1012
+8.0    0.0917
+
+.fi
+caveat/TBD:   this does not follow the expected (?) 1/sqrt(1.1309)/(B/P)
+
+sigma_smooth = -0.133 + 1.52 / beam
+
+.PP
+Here is an example of creating a beam image, with 5 x 2.5 beam, and a position angle
+of 30 degrees, by creating a disk at pa=-30 and inclination
+the cos(bmin/bmaj):
+.nf
+    ccdgen beam1 gauss 1,5 size=33,33 pa=-30 inc="acosd(0.5)"
+.fi
+
+.SH "TIMING"
 .nf
 .ta +1.0i
 With 68881 on SUN 3/50 (~16Mhz) and 200*200 map - old program (pre-V2.1)
 Nbeam=17	54s
 Nbeam=33	98s
 Nbeam=47	140s
-.SH HANNING
+
+.SH "HANNING"
 The following are the weights needed in smooth= for subsequent hanning smoothings:
 .nf
 1: 0.25,0.5,0.25
@@ -84,19 +149,44 @@ Note this is not the official Hanning definition (0.5-0.5 cos(2.pi.N/(M-1))).
 5: 0.01116455,0.04166667,0.08333333,0.125,0.15550212,0.16666667,0.15550212,0.125,0.08333333,0.04166667,0.01116455
 .fi
 which reduce the RMS by 0.61, 0.49, 0.43, 0.38 and 0.34 resp.
-.SH BUGS
+
+.SH "NOISE REDUCTION"
+For a given smoothing, a map with random gaussian noise will have a smaller noise for given smoothing. Most
+maps in astronomy will not have uncorrelated noise. Here's a (bash) script and results to sample that behavior.
+We fix the noise at 1, and for given smoothing (in terms of pixels FWHM) the noise will be lower:
+.nf
+
+export DEBUG=-1
+slist=$(nemoinp 0.01,0.25:5:0.25)
+
+for s in $slist; do
+     echo -n "$s "
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | grep ^Mean | awk '{print $6}'
+     ccdgen "" - noise 0,1 size=256,256 | ccdsmooth - - $s | ccdstat - | txtpar - p0=Mean,1,6
+done
+
+.fi
+
+.SH "BUGS"
 Smoothing a map which has already been smoothed will result in an incorrect
 header - this would be a simple sum of squares, if the beams are aligned with the axis.
-.SH AUTHOR
+
+.SH "SEE ALSO"
+ccdgen(1NEMO),
+ccdfill(1NEMO), ccddiffract(1NEMO), snapccd(1NEMO), snapsmooth(1NEMO), snapgrid(1NEMO), image(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 src/image/trans     	ccdsmooth.c
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 29-jun-87	V1.0: Created as module from CCD program	PJT
 30-Jun-87	V1.1: improved 'struct' filestructure      	PJT
  9-jul-87	V1.2: keyword 'dir' and keyword order changed	PJT
@@ -104,4 +194,7 @@ src/image/trans     	ccdsmooth.c
  5-feb-89	V2.2: general 3D smoothing                	PJT
 11-sep-91	some additional comments                	PJT
 12-mar-98	V3.1: added cut=, fixed fwhm=0.0         	PJT
+23-jun-21	add EXAMPLE with smoothing noise		PJT
+31-may-22	documented missing parameters		PJT
+20-sep-23	V4.0 add beam=	PJT
 .fi

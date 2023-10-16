@@ -8,14 +8,21 @@
 
 <H1> What's Up in NEMO </H1>
 
-Ideas.....and things we're working on
+Ideas.....and things we're working on. The list below is really old, though some items have
+never gone away, so we're leaving them.
+<BR>
+We are now maintaining a more active
+list on <A HREF=https://github.com/teuben/nemo/projects>GitHub Projects</A>,
+and for other items see also the
+<A HREF=https://github.com/teuben/nemo/issues>Github Issues</A>.
+
 
 <HR>
 
 <H2> Currently working on </H2>
 <UL>
   <LI> python support
-  <LI> omp support (-fopenmp)
+  <LI> omp support (-fopenmp): --enable [but not much code uses it actively]
   <LI> switch the default matrix definition from C based to Fortran based, to better match
     FITS I/O. There is a branch MATDEF (from CVS times) where this is developed.
 <LI> moving from MAKE to CMAKE?   [jcl]  
@@ -31,22 +38,6 @@ Ideas.....and things we're working on
       use new typedef's for prototyped versions. Sometimes one can
       get by with only a helper typedef in the actual code where
       the (*proc)() is called. [see e.g. contour.c]
-  <LI> shared libraries. Works for linux, but formal installation
-	not supported yet. The current install works for mac as well.
-  <LI> A nearly completely rewritten command line user interface
-	<A HREF=man_html/getparam.3.html> getparam(3NEMO) </A>
-	Also fixed many small bugs. The main new features will be:
-        <UL>
-        <LI> new argv= system keyword. To allow hackers to bypass some
-            of the restrictions os a static program keyword list. One
-            obvious example is a resource list for X windows yapp
-            drivers (although yapp= should be used for this primarely)
-        <LI> keywords can be used in minimum matched mode, but a warning
-            will be given for each minimum match that gets expanded.
-        <LI> if keywords have not been used, and a debug level is given,
-            the user will be warned about this.
-        <LI> a tcl interface, although by default this is not compiled
-        </UL>
   </UL>
 <LI> Planned upgrades:
     <UL>
@@ -62,19 +53,16 @@ Ideas.....and things we're working on
     <LI> velfit support needs to include diskfit now
     </UL>
 <LI> supplying <B> all </B> manual pages for the kernel routines
-<LI> orbname, orbwood - orbit classification and spectral dynamics
+<LI> orbname, orbwood - orbit classification and spectral dynamics (code is actually lost)
 <LI> snapfit - best fit 6D snapshot to a 3D data cube
 <LI> yapp_x - generic X windows device  (Patrick Frisch' contribution)
-<LI> nbody0, nbody1, nbody2, nbody5 - interfaces
 <LI> snap interface (Luis Aguilar)
-<LI> tabview - dynamic table queries
 <LI> serial snapshot processing. This is primarely usefull for 'small'
     memory (slow?) machines where as snapshot is broken up in pieces
     (see e.g. <A HREF=man_html/snapsplit.3.html> snapsplit </A> or 
     <A HREF=man_html/mkspiral.1.html>mkspiral</A>) 
     and processed independantly. Useful
     for Monte-Carlo simulations.
-<LI> WWW [now via github pages in $NEMO/docs]
 </UL>
 
 <H2> Considering work on  </H2>
@@ -82,9 +70,6 @@ Ideas.....and things we're working on
 <LI> yapp_generic - binds multiple yapp's into one (cf. yapp_pgplot),
 	in particular for yapp_x and yapp_ps
 <LI> tk interface ala Khoros/Cantata and Mirtool [abandoned]
-<LI> using GNU make (gmake). This would (eventually) make it impossible
-	to install NEMO without gmake. It would become part of the
-	installation procedure. [note CMAKE query]
 <LI> better image data-structure, e.g. allowing dynamic typing, and 
 	better random access for big images/cubes.
 <LI> support for non-homogenous snapshots (e.g. SPH, Tipsy "3S")

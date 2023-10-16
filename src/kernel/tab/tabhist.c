@@ -49,6 +49,9 @@
  *      15-jan-14   6.4   add MAD option
  *       8-jan-2020 7.0   add pyplot= options                   PJT
  *       2-mar-2020 7.1   add norm= for cumulative, fix bin bug PJT
+ *      10-oct-2020 7.2   using median()                        PJT
+ *      11-feb-2021 7.3   added diff mean & disp                PJT
+ *      29-apr-2022 8.0   converted to use table V2             PJT
  *                
  * 
  * TODO:
@@ -81,7 +84,9 @@ string defv[] = {
     "xmax=\n			  Set maximum, if no autoscale needed",
     "bins=16\n			  Number of bins (or optionally edges of bins)",
     "maxcount=0\n		  Maximum along count-axis",
+#if 0    
     "nmax=0\n 		          maximum number of data to be read if pipe",
+#endif    
     "ylog=f\n			  log scaling in Y?",
     "xlab=$in[$xcol]\n	          Optional Label along X",
     "ylab=N\n			  Optional Label along Y",
@@ -97,12 +102,18 @@ string defv[] = {
     "mad=f\n                      Compute Mean Absoluted Deviation",
     "nsigma=-1\n                  delete points more than nsigma",
     "xcoord=\n		          Draw additional vertical coordinate lines along these X values",
+#ifndef FLOGGER
     "sort=qsort\n                 Sort mode {qsort;...}",
-    "dual=f\n                     Dual pass for large number",
+#else
+    "sort=qsort\n                 Sort mode {qsort, bubble, heap, insert, merge, quick, shell}",
+#endif
+    "dual=f\n                     Dual pass for large numbers",
+    "bad=\n                       If given, skip this value as a badvalue",
+    "qac=f\n                      QAC mode listing mean,rms,min,max",
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=7.1\n		  2-mar-2020 PJT",
+    "VERSION=8.0b\n		  19-feb-2023 PJT",
     NULL
 };
 
@@ -121,13 +132,14 @@ string cvsid = "$Id$";
 #endif
 
 #ifndef MAXCOL
-#define MAXCOL 256
+#define MAXCOL 1000
 #endif
 
 #define MAXCOORD 16
 
 local string input;			/* filename */
 local stream instr, outstr;		/* input file , optional output file */
+local table *tptr;                      /* table */
 
 local int ncol;                         /* number of columns used */
 local int col[MAXCOL];			/* histogram column number(s) */
@@ -153,6 +165,9 @@ local bool   Qrobust;                   /* compute robust median also ? */
 local bool   Qdual;                     /* dual pass ? */
 local bool   Qbin;                      /* manual bins ? */
 local bool   Qmad;                      /* MAD ? */
+local bool   Qac;                       /* QAC output mode for stats */
+local bool   Qbad;
+local real   badval;
 local int    maxcount;
 local int    Nunder, Nover;             /* number of data under or over min/max */
 local real   dual_mean;                 /* mean value, if dual pass used */
@@ -160,6 +175,7 @@ local real   scale;                     /* scale factor */
 local real   bins[MAXHIST+1];           /* edges of histogram bins */
 
 local string headline;			/* text string above plot */
+local char   headlines[128];            /* statistics headline  */
 local string xlab, ylab, xlab2;		/* text string along axes */
 local bool   ylog;			/* count axis in logarithmic scale? */
 local real   xplot[2],yplot[2];		/* borders of plot */
@@ -175,10 +191,11 @@ local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
 
 extern real median_torben(int n, real *x, real xmin, real xmax);
-
-extern int  nemo_file_lines(string fname, int nmax);
-
 extern void minmax(int n, real *x, real *xmin, real *xmax);
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+
 
 
 /****************************** START OF PROGRAM **********************/
@@ -204,7 +221,7 @@ local void setparams()
 {
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
-    if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    if (ncol < 0) error("parsing error col=%s",getparam("xcol"));
     if (hasvalue("out")) outstr=stropen(getparam("out"),"w");
     else outstr = NULL;
 
@@ -252,9 +269,9 @@ local void setparams()
     Qrobust = getbparam("robust");
     if (ylog && streq(ylab,"N")) ylab = scopy("log(N)");
     Qdual = getbparam("dual");
-
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    if (nmax<1) error("Problem reading from %s",input);
+    Qac = getbparam("qac");
+    Qbad = hasvalue("bad");
+    if (Qbad) badval = getrparam("bad");
 
     nxcoord = nemoinpr(getparam("xcoord"),xcoord,MAXCOORD);
 
@@ -270,31 +287,36 @@ local void setparams()
       xlab = xlab2;
     }
     instr = stropen (input,"r");
+    tptr = table_open(instr,0);
 }
 
 
 
 local void read_data()
 {
-    real *coldat[MAXCOL];
     int   i,j,k;
-    mdarray2 md2 = allocate_mdarray2(ncol,nmax);
-
+    mdarray2 md2 = table_md2cr(tptr, ncol, col, 0,0);
     dprintf(0,"Reading %d column(s)\n",ncol);
-    for (i=0; i<ncol; i++)
-      coldat[i] = md2[i];
-    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
-    if (npt == -nmax) {
-    	warning("Could only read %d data",nmax);
-    	npt = nmax;
-    }
+    
+    nmax = npt = table_nrows(tptr);
+
     if (scale != 1.0) {
       warning("Scale factor=%g\n",scale);
       for (i=0, k=0; i<ncol; i++)
 	for (j=0; j<npt; j++)
 	  md2[i][j] *= scale;
     }
+#define XHACK    
+    // @todo  XHACK: saves 1/2 memory
+    // in theory one could hack this section by having x point
+    // to md2[0][0], traverse the array in the correct order
+    // and not free_mdarray2()
+#ifdef XHACK
+    x = &md2[0][0];
+#else      
     x = (real *) allocate(npt*ncol*sizeof(real));
+#endif    
+    
     if (Qdual) {
       warning("dual=t is a new test option");
       /* pass over the data, finding the mean */
@@ -318,13 +340,14 @@ local void read_data()
     }
     npt = k;
     dprintf(0,"Under/Over flow: %d %d\n",Nunder,Nover);
-
+#ifndef XHACK    
+    // @todo if shared with *x, delay this free
     free_mdarray2(md2,ncol,nmax);
+#endif
 
     minmax(npt, x, &xmin, &xmax);
     if (!Qmin) xrange[0] = xmin;
     if (!Qmax) xrange[1] = xmax;
-
 
     /*  allocate index arrray , and compute sorted index for median */
     if (Qmedian) 
@@ -334,13 +357,14 @@ local void read_data()
 
 local void histogram(void)
 {
-  int i,j,k, l, kmin, kmax, lcount = 0;
+  int i,j,k, l, kmax, lcount = 0;
   real count[MAXHIST];
   int under, over;
   real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
-  real mean, sigma, mad, skew, kurt, h3, h4, lmin, lmax, median;
+  real mean, sigma, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, mad=0;
+  real meand, sigmad;
   real rmean, rsigma, rrange[2];
-  Moment m;
+  Moment m, md;
   
   dprintf (0,"read %d values\n",npt);
   dprintf (0,"min and max value in column(s)  %s: %g  %g\n",getparam("xcol"),xmin,xmax);
@@ -363,7 +387,8 @@ local void histogram(void)
     count[k] = 0;		/* init histogram */
   under = over = 0;
   
-  ini_moment(&m, 4, Qrobust||Qmad ? npt : 0);
+  ini_moment(&m,  4, Qrobust||Qmad ? npt : 0);
+  ini_moment(&md, 4, Qrobust||Qmad ? npt : 0);  
   for (i=0; i<npt; i++) {
     if (Qbin) {
       k=ring_index(nsteps,bins,x[i]);
@@ -381,18 +406,25 @@ local void histogram(void)
     count[k] = count[k] + 1;
     dprintf (4,"%d : %f %d\n",i,x[i],k);
     accum_moment(&m,x[i],1.0);
+    if (i>0) {
+      accum_moment(&md,x[i]-x[i-1],1.0);
+      //printf("%d %g %g\n",i,x[i],x[i]-x[i-1]);
+    }
+    
   }
   if (under > 0) error("bug: under = %d",under);
   if (over  > 0) error("bug: over = %d",over);
   under = Nunder;
   over  = Nover;
 
-  mean = mean_moment(&m);
-  sigma = sigma_moment(&m);
-  skew = skewness_moment(&m);
-  kurt = kurtosis_moment(&m);
-  h3 = h3_moment(&m);
-  h4 = h4_moment(&m);
+  mean   = mean_moment(&m);
+  sigma  = sigma_moment(&m);
+  meand  = mean_moment(&md);
+  sigmad = sigma_moment(&md);
+  skew   = skewness_moment(&m);
+  kurt   = kurtosis_moment(&m);
+  h3     = h3_moment(&m);
+  h4     = h4_moment(&m);
   if (Qmad) mad = mad_moment(&m);
 
   if (nsigma > 0) {    /* remove outliers iteratively, starting from the largest */
@@ -475,20 +507,25 @@ local void histogram(void)
     dprintf (0,"Mean and dispersion  : %g %g %g\n",mean,sigma,sigma/sqrt(npt-1.0));
   else
     dprintf (0,"Mean and dispersion  : %g %g 0.0\n",mean,sigma);
+  if (!Qmedian) {
+    real sratio = sigmad/sqrt(2)/sigma;
+    dprintf(0,"Diff mean and disp   : %g %g %g\n", meand, sigmad, sratio);
+  }
 
   if (Qmad)  dprintf (0,"MAD                  : %g\n",mad);
   dprintf (0,"Skewness and kurtosis: %g %g\n",skew,kurt);
   dprintf (0,"h3 and h4            : %g %g\n", h3, h4);
   if (Qmedian) {
-    
-    if (npt % 2) 
-      median = x[(npt-1)/2];
-    else
-      median = 0.5 * (x[npt/2] + x[npt/2-1]);
-    dprintf (0,"Median               : %g\n",median);
+    q2 = smedian(npt,x);
+    q1 = smedian_q1(npt,x);
+    q3 = smedian_q3(npt,x);
+    // tm = (q1 + 2*q2 + q3 ) / 4.0;
+    dprintf (0,"Median (Q2)          : %g\n",q2);
+    dprintf (0,"Q1,Q2,Q3             : %g %g %g\n",q1,q2,q3);    
+    dprintf (0,"TriMean              : %g\n",q2);
   } else if (Qtorben) {
-    median = median_torben(npt,x,xmin,xmax);
-    dprintf (0,"Median_torben        : %g\n",median);
+    q2 = median_torben(npt,x,xmin,xmax);
+    dprintf (0,"Median_torben        : %g\n",q2);
   }
   dprintf (0,"Sum                  : %g\n",show_moment(&m,1));
   if (Qrobust) {
@@ -505,6 +542,13 @@ local void histogram(void)
 	fprintf(outstr,"%g %d\n",x[i],i+1);
       }
     }
+  }
+  if (Qac) {
+    real flux = 0.0;
+    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+	   input, mean, sigma, min_moment(&m), max_moment(&m),
+	   flux, sratio_moment(&m));
+    
   }
   
   if (lcount > 0) {
@@ -591,7 +635,6 @@ local void histogram(void)
   }
   
 #ifdef YAPP
-  /*	PLOTTING */	
   plinit("***",0.0,20.0,0.0,20.0);
 
   xplot[0] = xmin;
@@ -606,7 +649,12 @@ local void histogram(void)
   pljust(-1);     /* set to left just */
   pltext(input,2.0,18.2,0.32,0.0);             /* filename */
   pljust(1);
-  pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+  if (strlen(headline) > 0)
+    pltext(headline,18.0,18.2,0.24,0.0);         /* headline */
+  else {
+    sprintf(headlines,"mean: %g sigma: %g", mean, sigma);
+    pltext(headlines,18.0,18.2,0.24,0.0);         /* headline */
+  }
   pljust(-1);     /* return to left just */
 
   if (Qbin) {
@@ -697,11 +745,10 @@ typedef struct sortmode {
  
 #define SortName(x)  x->name
 #define SortProc(x)  x->fie
- 
- 
+
 /* List of externally available sort routines */
  
-/* extern int qsort();         /* Standard Unix : stdlib.h */
+// extern int qsort();         /* Standard Unix : stdlib.h */
 /* or:  void qsort(void *base, size_t nmemb, size_t size,
  *                 int(*compar)(const void *, const void *));
  */
@@ -711,6 +758,7 @@ typedef struct sortmode {
 #endif
 
 local sortmode smode[] = {
+    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
 #ifdef FLOGGER
     "bubble",   bubble_sort,        /* cute flogger routines */
     "heap",     heap_sort,
@@ -719,7 +767,6 @@ local sortmode smode[] = {
     "quick",    quick_sort,
     "shell",    shell_sort,
 #endif
-    "qsort",    (iproc) qsort,      /* standard Unix qsort() */
     NULL, NULL,
 };
                                                                                 
@@ -753,6 +800,6 @@ local int ring_index(int n, real *r, real rad)
   } else {
     error("reverse indexing not yet implemented");
   }
-
+  return -1;  /* NEVER REACHED */
 }
 

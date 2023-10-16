@@ -1,47 +1,72 @@
-.TH TABLE 5NEMO "4 June 2003"
-.SH NAME
+.TH TABLE 5NEMO "30 March 2023"
+
+.SH "NAME"
 table \- (ASCII) table format
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 A \fBtable\fP file is a simple ASCII text file, 
 structured in rows and columns, with one row per line. 
-Columns can be separated by spaces or tabs (though many
-dialects of this definition exist).
+Columns can be separated by spaces, commas, vertical bars, or tabs
+(though many dialects of this definition exist which we will try and support).
 The number of columns per row does not have to be the same,
-as long as the columns accessed are in the specified range
-(although some programs, e.g. \fItablint(1NEMO)\fP may
-put restrictions on this).
+as long as the columns accessed are in the specified range.
+Some programs, e.g. \fItablint(1NEMO)\fP, may
+put restrictions on this though.
 .PP
 Comments can be entered by using the octothorpe ('\fB#\fP') symbol 
 on the first character on a line (though again, many
 dialects exist, most notably the exclamation, semi-colon and 
 backslash (IPAC tables) symbols are in practice.
 Empty lines will generally be skipped too, and as said,
-some programs 
-even skip lines starting with the ! or ; symbol. See also
+some programs even skip lines starting with the ! or ; symbol. See also
 \fItabcomment(1NEMO)\fP for some other filtering techniques.
-.SH EXAMPLE
-The following listing is an example of a simple table:
+.PP
+NEMO tables can also contain commands that plot certainly variations of the table
+using the '#PLOT' directives and the \fInemoplot(8NEMO)\fP command. 
+
+.nf
+
+  HEADER
+  D11 D12 D13 ....
+  D21 D22 ...
+  ...
+
+.fi
+Where \fBDIJ\fP refers to the I-th row and J-th column.  The HEADER can be in
+a number of formats (optional #, verbatim column names, with or without comma's etc.)
+
+.SH "EXAMPLE"
+Here is an example of a table:
 .nf
 
     # This is the first line of the table
-    # I    N     Q
+    # I    N     Q      # names of columns (some programs also understand this)
     1.0   2.0   4.0
     # 2.0 3.0   5.0     bad data, commented out.
-    3.0   5.1   6.32
+    3.0   5.1   6.32    # comment belonging to a line
     # End of table
     
 .fi
 Here is an example how to make a table from scratch. It contains 
-one column, with numbers 1 through 100:
+one column, with even numbers 2 through 10, done with
+\fInemoinp(1NEMO)\fP and \fIseq(1)\fP
 .nf
-    nemoinp 1:100 newline=t > 100.tab
+
+    nemoinp 2:10:2 newline=t > even1.tab
+    seq 2 2 10 > even2.tab
+    tabgen -  10 3 > random.tab
+
 .fi
-.SH OTHER TABLE FORMATS
-Another popular table format is that of ESO/Midas, where all columns
-are separated by TABs. The unix program \fIpaste(1)\fP will generally
-put a TAB between the columns.
+where for performance testing the \fItabgen(1NEMO)\fP program can be used
+to create random large tables.
+
+.SH "OTHER TABLE FORMATS"
+ESO/Midas, where all columns
+are separated by TABs. The unix program \fIpaste(1)\fP will by default
+put a TAB between the columns (files).
 .PP
-FITS uses the 'TABLE' (ascii tables) and BINTABLE (binary tables) format.
+FITS uses the 'TABLE' (ascii tables) and 'BINTABLE' (binary tables) format.
+See \fIfits(5NEMO)\fP.
 .PP
 IPAC-table format: (often using the extension \fB.tbl\fP)
 .nf
@@ -86,8 +111,9 @@ arcmin|----------|deg    |deg   |arcsrc|mag|mag|
 ]]></CSV></DATA>
 </TABLE>
 .fi
+
 .PP
-The starbase format (http://cfa-www.harvard.edu/~john/starbase/starbase.html)
+The starbase format (http://tdc-www.harvard.edu/software/catalogs/starbase/starbase.5.html)
 also uses a TAB to separate columns, and uses a simple header to
 name the columns, example:
 .nf
@@ -97,15 +123,44 @@ RA	Dec
 12:00	-30.0
 15	60:00:30.4
 .fi
-.SH "SEE ALSO"
-nemoinp(1NEMO), tabcomment(1NEMO), table(3NEMO), awk(1), paste(1), ffe(1)
+
+.PP
+The ECVS (Enhanced Character Separated Values) is extension to the generic ascii table
+format, except it has a commented YAML header encoding the units, and one extra
+\fIannoying\fP (YMMV) row with column names:
 .nf
-ffe (flat file extractor): http://ff-extractor.sourceforge.net/
-.SH AUTHOR
+
+# %ECSV 0.9
+# ---
+# datatype:
+# - {name: a, unit: m / s, datatype: int64, format: '%03d'}
+# - {name: b, unit: km, datatype: int64, description: This is column b}
+a b
+001 2
+004 3
+
+.fi
+
+.SH "SEE ALSO"
+nemoinp(1NEMO), tabcomment(1NEMO), table(3NEMO), awk(1), paste(1), ffe(1), column(1), nemoplot(8NEMO)
+.PP
+FFE: (flat file extractor): http://ff-extractor.sourceforge.net/
+.PP
+ECSV: https://github.com/astropy/astropy-APEs/blob/master/APE6.rst
+.PP
+cvskit: https://csvkit.readthedocs.io/en/latest/
+.PP
+GNU astronomy:  https://www.gnu.org/savannah-checkouts/gnu/gnuastro/manual/html_node/Gnuastro-text-table-format.html
+.PP
+XSV:  https://github.com/BurntSushi/xsv
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 1-feb-93	document created  	PJT
 25-oct-03	some more docs on other table formats	PJT
+17-mar-2022	changes for table-V2	PJT
 .fi

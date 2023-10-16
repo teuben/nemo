@@ -1,5 +1,5 @@
 /*
- * TABPLOT: a simple general table plotter
+ * TABPLOT: a (formarly simple) general table plotter
  *	    for ascii data in tabular format which has now grown quite complex
  *
  *	25-nov-88  V1.0 :  created by P.J.Teuben
@@ -43,11 +43,14 @@
  *       8-apr-11      e : fixed dycol reference bug
  *      22-aug-2018 V3.1 : print commented line if bin= causes an empty bin
  *       8-jan-2020 V4.0 : template python option
+ *      12-jan-2021 V4.1 : added backtrack=
+ *      20-apr-2022 V5.0 : converted to table V2
  */
 
 /* TODO:
  *     - automatic scaling with dxcol and/or dycol 
  *     - also allow nxcol>1 and nycol=1 ??
+ *     - allow a step=-1,0,1 like matplotlib's step function with pre,mid,post options
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -58,6 +61,7 @@
 #include <axis.h>
 #include <layout.h>
 #include <table.h>
+#include <mdarray.h>
 #include <pyplot.h>
 #include <moment.h>
                     /* undefined values trick !!!  MACHINE DEP  !!! */
@@ -68,6 +72,7 @@
 #endif
 
 #define MAXCOL  256
+#define MAXBIN  256
 #define MAXCOORD 16
 
 /**************** COMMAND LINE PARAMETERS **********************/
@@ -97,29 +102,32 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "yscale=1\n          Scale all Y values by this",
     "dxcol=\n            Columns representing error bars in X ",
     "dycol=\n            Columns representing error bars in Y ",
+#if 0    
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
+#endif    
     "median=f\n          Use median in computing binning averages?",
     "headline=\n	 headline in graph on top right",
     "tab=f\n             Table output also if binning is used?",
     "fullscale=f\n       Use full autoscale in one axis if other autoscaled?",
     "cursor=\n           Optional output file to retrieve cursor coordinates",
+    "backtrack=t\n       Allow backtrack in line= option",
     "layout=\n           Optional input layout file",
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=4.0\n	 8-jan-2020 PJT",
+    "VERSION=5.0c\n	 22-feb-2023 PJT",
     NULL
 };
 
 string usage = "general table plotter";
-
-string cvsid="$Id$";
 
 
 /**************** GLOBAL VARIABLES ************************/
 
 local string input;				/* filename */
 local stream instr;				/* input file */
+local table *tptr;                              /* table */
+local mdarray2 d2;                              /* data[col][row] */
 
 local int xcol[MAXCOL], ycol[MAXCOL], nxcol, nycol;	/* column numbers */
 local int dxcol[MAXCOL],dycol[MAXCOL],ndxcol,ndycol;	/* column numbers */
@@ -150,7 +158,7 @@ local real xplot[2],yplot[2];		        /* borders of plot */
 local int    yapp_line[2*MAXCOL];            /* thickness and pattern of line */
 local int    yapp_color[MAXCOL];	      /* color per column */
 local real yapp_point[2*MAXCOL];             /* what sort of point to plot */
-local string errorbars;                       /* x or y or both (xy) */
+//local string errorbars;                       /* x or y or both (xy) */
 local real xcoord[MAXCOORD], ycoord[MAXCOORD];/* coordinate lines */
 local int nxcoord, nycoord;
 local int nxticks, nyticks;                   /*& number of tickmarks */
@@ -161,10 +169,19 @@ local real xscale, yscale;
 local plcommand *layout;
 local bool layout_first;
 local bool Qreadlines;
+local bool Qbacktrack;
 
-void setparams(), plot_data();
+void setparams(void);
+void read_data(void);
+void plot_data(void);
+void rebin_data(int n, real *x, real *y, int nbin, real *xbin, int np, real *xp, real *yp, real *xps, real *yps);
+void plot_points(int np, real xp[], real yp[], real dx[], real dy[], real xps[], real yps[], real pstyle,
+		 real psize, int lwidth, int lstyle, int color, int errorbars);
+void parse_pairsi(string key, int *pairs, int nycol);
+void parse_pairsr(string key, real *pairs, int nycol);
+double my_sqrt(double x);
 
-extern real median(int, real *);
+extern real smedian(int, real *);
 extern int nemo_file_lines(string, int);
 
 local real  xtrans(real),  ytrans(real);    /* WC -> cmXY */
@@ -184,17 +201,19 @@ void nemo_main(void)
     }
       
 
-    instr = stropen (input,"r");
     read_data();
     plot_data();
 }
 
-void setparams()
+void setparams(void)
 {
-    char *smin,*smax;
-    int  i, j;
+    char *smin;
+    int  i;
    
     input = getparam("in");             /* input table file */
+    instr = stropen (input,"r");
+    tptr = table_open(instr,0);
+    
     nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
     nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
@@ -204,38 +223,19 @@ void setparams()
     npcol = MAX(nxcol,nycol);
     ndxcol = nemoinpi(getparam("dxcol"),dxcol,MAXCOL);
     ndycol = nemoinpi(getparam("dycol"),dycol,MAXCOL);
-    // TODO: some ndxycol/ndycol checks
+    // @todo - ndxycol/ndycol checks
     
-
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    dprintf(1,"Allocated %d lines for table\n",nmax);
-    for (j=0; j<nxcol; j++)
-        x[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* X data */
-    for (j=0; j<nycol; j++)
-        y[j] = (real *) allocate(sizeof(real) * (nmax+1));   /* Y data */
-    if (ndxcol)
-      for (j=0; j<ndxcol; j++)
-        dx[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DX data */
-    else
-      for (j=0; j<ndxcol; j++)
-        dx[j] = 0;
-    if (ndycol)
-      for (j=0; j<ndycol; j++)
-        dy[j] = (real *) allocate(sizeof(real) * (nmax+1));  /* DY data */
-    else
-      for (j=0; j<ndycol; j++)
-        dy[j] = 0;
-
+    nmax = table_nrows(tptr);
 
     Qsigx = Qsigy = FALSE;
     if (hasvalue("xbin")) {
       if (nxcol > 1) error("Cannot bin in X, more than 1 column is used");
       smin = getparam("xbin");            /* binning of data */
       Qsigx = Qsigy = TRUE;           /* binning of data */
-      xbin = (real *) allocate(nmax*sizeof(real));
-      nbin = nemoinpr(smin,xbin,nmax);   /* get binning boundaries */
+      xbin = (real *) allocate(MAXBIN*sizeof(real));
+      nbin = nemoinpr(smin,xbin,MAXBIN);   /* get binning boundaries */
       if (nbin==1) {              /*  fixed amount of datapoints to bin */
-	(void) nemoinpi(smin,&nbin,1);
+	nbin = getiparam("xbin");
 	dprintf(0,"Binning with fixed number (%d) of points\n",nbin);
 	np = nmax / nbin + 1;
 	nbin = -nbin;       /* make it <0 to trigger rebin_data */
@@ -245,6 +245,7 @@ void setparams()
 	  warning("plotting one averaged datapoint");
       } else
 	error("Error %d in parsing xbin=%s",nbin,smin);
+      dprintf(0,"np=%d\n",np);
 
       xp =  (real *) allocate(np*sizeof(real));    /* X data */
       yp =  (real *) allocate(np*sizeof(real));    /* Y data */
@@ -325,6 +326,7 @@ void setparams()
     } 
     Qtab = getbparam("tab");
     Qmedian = getbparam("median");
+    Qbacktrack = getbparam("backtrack");
     xlab=getparam("xlab");
     ylab=getparam("ylab");
     headline = getparam("headline");
@@ -343,39 +345,34 @@ void setparams()
 #define MVAL 		 64
 #define MLINELEN	512
 
-read_data()
+void read_data(void)
 {
-    real *coldat[1+MAXCOL];
     int i, j, k, colnr[1+MAXCOL];
 		
     dprintf (2,"Reading datafile, xcol,ycol=%d..,%d,...\n",xcol[0],ycol[0]);
-    for (j=0, k=0; j<nxcol; j++, k++) {
-        colnr[k]  = xcol[j];
-        coldat[k] = x[j];
-    }
-    for (j=0; j<ndxcol; j++, k++) {
-        colnr[k]  = dxcol[j];
-        coldat[k] = dx[j];
-    }
-    for (j=0; j<nycol; j++, k++) {
-        colnr[k]  = ycol[j];
-        coldat[k] = y[j];
-    }
-    for (j=0; j<ndycol; j++, k++) {
-        colnr[k]  = dycol[j];
-        coldat[k] = dy[j];
-    }
     
+    for (j=0, k=0; j<nxcol; j++, k++)
+        colnr[k]  = xcol[j];
+    for (j=0; j<nycol; j++, k++) 
+        colnr[k]  = ycol[j];
+    for (j=0; j<ndxcol; j++, k++)
+        colnr[k]  = dxcol[j];
+    for (j=0; j<ndycol; j++, k++) 
+        colnr[k]  = dycol[j];
+    int ncol = nxcol + nycol + ndxcol + ndycol;
+    d2 = table_md2cr(tptr, ncol,colnr,0,0);
 
-    /* could also find out if any columns duplicated, and
-       replace them with pointers */
+    for (j=0, k=0; j<nxcol; j++, k++)
+        x[j] = &d2[k][0];
+    for (j=0; j<nycol; j++, k++)
+        y[j] = &d2[k][0];
+    for (j=0; j<ndxcol; j++, k++)
+        dx[j] = &d2[k][0];
+    for (j=0; j<ndycol; j++, k++)
+        dy[j] = &d2[k][0];
 
-    npt = get_atable(instr,nxcol+nycol+ndxcol+ndycol,colnr,coldat,nmax);    /* get data */
-    dprintf(1,"get_atable: %d\n",npt);
-    if (npt < 0) {
-    	npt = -npt;
-    	warning("Could only read first set of %d data",npt);
-    }
+    npt = table_nrows(tptr);
+
     if (xscale != 1.0) {
       for (j=0; j<nxcol; j++)
 	for (i=0; i<npt; i++)
@@ -420,13 +417,13 @@ read_data()
 }
 
 
-void plot_data()
+void plot_data(void)
 {
     int    i, j, k;
     real xcur, ycur, edge;
     char c;
     stream cstr;
-    bool first, Qin;
+    bool first;
 
     if (npt<1) {
         warning("Nothing to plot, npt=%d",npt);
@@ -542,10 +539,10 @@ void plot_data()
     xplot[1] = xmax;
     yplot[0] = ymin;        /* set scales for ytrans() */
     yplot[1] = ymax;
-    xaxis (xbox[0],ybox[0],xbox[2], xplot, -nxticks, xtrans, xlab);
-    xaxis (xbox[0],ybox[1],xbox[2], xplot, -nxticks, xtrans, NULL);
-    yaxis (xbox[0],ybox[0],ybox[2], yplot, -nyticks, ytrans, ylab);
-    yaxis (xbox[1],ybox[0],ybox[2], yplot, -nyticks, ytrans, NULL);
+    xaxis(xbox[0],ybox[0],xbox[2], xplot, -nxticks, xtrans, xlab);
+    xaxis(xbox[0],ybox[1],xbox[2], xplot, -nxticks, xtrans, NULL);
+    yaxis(xbox[0],ybox[0],ybox[2], yplot, -nyticks, ytrans, ylab);
+    yaxis(xbox[1],ybox[0],ybox[2], yplot, -nyticks, ytrans, NULL);
     for (i=0; i<nxcoord; i++) {
         plmove(xtrans(xcoord[i]),ytrans(yplot[0]));
         plline(xtrans(xcoord[i]),ytrans(yplot[1]));
@@ -558,7 +555,7 @@ void plot_data()
     pljust(-1);     /* set to left just */
     pltext(input,xbox[0],ybox[1]+0.2,0.32,0.0);             /* filename */
     pljust(1);
-    pltext(headline,xbox[1],ybox[1]+0.2,0.24,0.0);         /* headline */
+    pltext(headline,xbox[1],ybox[1]+0.2,0.32,0.0);          /* headline */
     pljust(-1);     /* return to left just */
 
     for (k=0, i=0, j=0; k<npcol; k++) {
@@ -611,9 +608,7 @@ double my_sqrt(double x)
  *      It is assumed that the X-data are sorted
  */
  
-rebin_data (n,x,y, nbin,xbin, np, xp, yp,  xps, yps)
-int n, nbin, np;
-real *x, *y, *xbin, *xp, *yp, *xps, *yps;
+void rebin_data (int n, real *x, real *y, int nbin, real *xbin, int np, real *xp, real *yp,  real *xps, real *yps)
 {
     int    i, j, ip, iold=0, zbin=0;
     Moment mx, my;
@@ -652,22 +647,23 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
 	  yp[ip]  = mean_moment(&my);
 	  yps[ip] = sigma_moment(&my);
 	  if (Qmedian) {
-	    xp[ip] = median(i-iold, &x[iold]);
-	    yp[ip] = median(i-iold, &y[iold]);
+	    xp[ip] = smedian(i-iold, &x[iold]);
+	    yp[ip] = smedian(i-iold, &y[iold]);
 	  }
         } else
             zbin++;     /* count bins with no data */
-	if(Qtab)
+	if(Qtab) {
 	    if (n_moment(&mx))    /* print non-zero bins */
 	      printf("%g %g %g %g %d\n",xp[ip],yp[ip],xps[ip],yps[ip],i-iold);
             else
 	      printf("# 0\n");    /* comment line for empty bin */
+	}
         iold = i;
     } /* for(ip) */
     if(zbin)warning("There were %d bins with no data",zbin);
     if(i<n) warning("%d points right of last bin",i);
     if (nbin>0)
-        return 0;      /* done with variable bins */
+        return;      /* done with variable bins */
 
     nbin = -nbin;       /* make it positive for fixed binning */
     for (i=0, ip=0; i<n;ip++) {       /* loop over all points */
@@ -695,9 +691,8 @@ real *x, *y, *xbin, *xp, *yp, *xps, *yps;
  *      X,Y Points with value NaN are skipped, as well as their errorbars
  */
  
-plot_points (np, xp, yp, dx, dy, xps, yps, pstyle, psize, lwidth, lstyle, color, errorbars)
-int np, lwidth, lstyle, color, errorbars;
-real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
+void plot_points (int np, real *xp, real *yp, real *dx, real *dy, real *xps, real *yps,
+		  real pstyle, real psize, int lwidth, int lstyle, int color, int errorbars)
 {
     int i, ipstyle;
     real p1, p2;
@@ -735,9 +730,13 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
             i++;                             /* skip first undefined */
 	if (lstyle > 0) {       /* connect the dots */
             plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to point */
-            while (++i < np)
-                if (xp[i] != NaN)
+            while (++i < np) {
+	      if (xp[i] != NaN) {
+		if (Qbacktrack || (xtrans(xp[i]) > xtrans(xp[i-1])))
                     plline (xtrans(xp[i]), ytrans(yp[i]));  /* draw line */
+	      }
+	      plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to point */	    
+	    }
 
         } else {                /* histogram approach */
             plmove (xtrans(xp[i]), ytrans(yp[i]));      /* move to 1st point */
@@ -750,7 +749,7 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
         plltype(1,1);
     }
     
-    if (errorbars && 0x0001) {
+    if (errorbars & 0x0001) {
         dprintf(0,"Trying X binning errors\n");
         for (i=0; i<np; i++) {
             if (xps[i] == NaN || xp[i] == NaN)
@@ -761,7 +760,7 @@ real xp[], yp[], dx[], dy[], xps[], yps[], pstyle, psize;
             plline (xtrans(p2), ytrans(yp[i]));
         }
     }
-    if (errorbars && 0x0002) {
+    if (errorbars & 0x0002) {
         dprintf(0,"Trying Y binning errors\n");
         for (i=0; i<np; i++) {
             if (yps[i] == NaN || yp[i] == NaN)
@@ -842,10 +841,7 @@ local void setrange(real *rval, string rexp)
 
 
 
-parse_pairsi(key, pairs, nycol)
-string key;
-int *pairs;
-int nycol;
+void parse_pairsi(string key, int *pairs, int nycol)
 {
     int n, i;
 
@@ -856,13 +852,9 @@ int nycol;
 
 }
 
-parse_pairsr(key, pairs, nycol)
-string key;
-real *pairs;
-int nycol;
+void parse_pairsr(string key, real *pairs, int nycol)
 {
     int n, i;
-    real r1, r2;
 
     n = nemoinpr(getparam(key),pairs,2*nycol);
     if (n>=0 && n<2) error("%s= needs at least 2 values",key);

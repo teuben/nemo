@@ -44,7 +44,7 @@ string defv[] = {
     "vmax=0.0\n             max mean to plot",
     "smax=0.0\n             max dispersion to plot",
     "tab=f\n                Need a table? If yes, no plot",
-    "VERSION=2.0b\n         4-mar-97 PJT",
+    "VERSION=2.1\n          9-oct-2022 PJT",
     NULL,
 };
 
@@ -91,8 +91,17 @@ local real xtrans(real), ytransm(real), ytransv1(real), ytransv2(real);
 
 extern rproc btrtrans(string);
 
+void setparams(void);
+void read_snap(void);
+int  out_slit(void);
+real xtrans(real x);
+real ytransm(real y);
+real ytransv1(real y);
+real ytransv2(real y);
+int convolve(real *a, int na, real *b, int nb);
+
 
-nemo_main()
+void nemo_main()
 {
     setparams();
 
@@ -103,7 +112,7 @@ nemo_main()
     out_slit();        /* no plot when Qtab=t */
 }
 
-setparams()
+void setparams()
 {
     string  tmpstr;
     int tmpint, i;
@@ -167,7 +176,7 @@ setparams()
     Qtab = getbparam("tab");
 }
 
-read_snap()
+void read_snap()
 {                               
     int    bits;
 
@@ -178,7 +187,7 @@ read_snap()
 #define  SYMBOLSIZE  0.1		/* size of plotsymbol in 'cm' */
 
 
-out_slit()
+int out_slit()
 {
     real xsky, ysky, vrad, inv_surden, sigma, mass;
     real xslit, yslit, xplt, yplt, sinpa, cospa;
@@ -250,7 +259,7 @@ out_slit()
     } /* for(islit) */
  
     if (Qtab)
-        return(0);
+        return 0;
 
     plinit ("***", 0.0, 20.0, 0.0, 20.0);
 
@@ -331,31 +340,28 @@ out_slit()
     }
 
     plstop();
+    return 1;
 }
 
 /*********** SOME LOCAL UTILITIES , for plotting ***********/
 
-real xtrans(x)
-real x;
+real xtrans(real x)
 {
     return (2.0 + 16.0*(x-xplot[0])/(xplot[1]-xplot[0]) );
 }
 
 
-real ytransm(y)	/* upper panel: mass surface density */
-real y;
+real ytransm(real y)	/* upper panel: mass surface density */
 {
     return (12.0 + 5.0*(y-yplot[0])/(yplot[1]-yplot[0]) );
 }
 
-real ytransv1(y)	/* middle panel: velocity */
-real y;
+real ytransv1(real y)	/* middle panel: velocity */
 {
     return (7.0 + 5.0*(y-yplot[0])/(yplot[1]-yplot[0]) );
 }
 
-real ytransv2(y)	/* lower panel: velocity dispersion */
-real y;
+real ytransv2(real y)	/* lower panel: velocity dispersion */
 {
     return (2.0 + 5.0*(y-yplot[0])/(yplot[1]-yplot[0]) );
 }
@@ -365,16 +371,14 @@ real y;
 
 /* CONVOLVE: 1D, the naive approach */
 
-convolve (a, na, b, nb)
-real a[], b[];
-int    na,  nb;
+int convolve(real *a, int na, real *b, int nb)
 {
     real c[MSIZE];
     int    i, j, k;
 	
     if (na>MSIZE) {
 	warning("convolve: MSIZE=%d array too small for input %d\n",MSIZE,na);
-	return(0);
+	return 0;
     }
 	
     for (i=0; i<na; i++) {
@@ -392,5 +396,5 @@ int    na,  nb;
                     continue;
         }
 			
-    return(1);
+    return 1;
 }

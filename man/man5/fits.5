@@ -1,7 +1,9 @@
 .TH FITS 5NEMO "29 September 2001"
-.SH NAME
+
+.SH "NAME"
 fits \- standard astronomical data interchange format 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIFITS\fP (Flexible Image/Information Transport System)
 is \fBTHE\fP standard format for the interchange
 of astronomical images and other digital arrays (ascii and binary 
@@ -34,11 +36,13 @@ NEMO has two library routines available to process \fIfits\fP
 files: \fIfits(3NEMO)\fP and \fIfitsio(3NEMO)\fP, the latter
 more specialized to read and write images and derived (and compatible
 with) from the MIRIAD fitsio interface.
-.SH KEYWORDS
+
+.SH "KEYWORDS"
 The following header keywords describe the most important
 facts about the data (or at least enables a reader to skip data)
 .nf
 .ta +1i
+
 SIMPLE	T (standard FITS file)
 BITPIX	Number of bits per datum [choice of 8, 16, 32, -32, -64, (64 experimental)
 	(-32,-64 IEEE floating point, 8 unsigned, 16,32 twos-complement ints)
@@ -47,15 +51,19 @@ NAXISn	size of a particular axis (n=1 through NAXIS) in cube
 PCOUNT	number of extra parameters associated with cube [0 if not present]
 GCOUNT	number of repetitions of the cube+parameter [1 if not present]
 .PP
-CRVALn	value of the coordinate at the reference pixel
 CRPIXn	the reference pixel (often in range 1..NAXISn)
-CDELTn	increment per pixel
-CTYPEn	coordinate type (an ascii string)
+CRVALn	value of the coordinate at the reference pixel
+CDELTn	increment per pixel (can be negative)
+CTYPEn	coordinate type (an ascii string), often in two part, e.g. "RA---SIN" or "VELO-LSR"
+CUNITn	units of coordinate type 
+DATE-OBS	Observing date: new Y2K format "yyyy-mm-ddThh:mm:ss"
+TIME-OBS	Observing time, "hh:mm:ss", deprecated after new Y2K
 .PP
 HISTORY  	history records (no '=' needed)
 COMMENT  	comment cards (no '=' needed)
 .PP
 END  	last keyword in header
+
 .fi
 For SIMPLE=T fits file the size of the data section (in bytes) 
 can always be computed from the following formula:
@@ -65,7 +73,19 @@ can always be computed from the following formula:
 where \fIm\fP is the value of NAXIS. This size must of course be rounded
 up to the nearest multiple of 2880 bytes. After this, either there is no
 more information on the medium, or another HDU can be read.
-.SH COORDINATE SYSTEMS
+
+.SH "TIME"
+The old DATE-OBS format (with the Y2K problem) was yy-dd-mm, and some
+files might have a corresponding TIME-OBS keyword, hh:mm:ss. The new
+format follows the ISO format, obtained with the unix date command
+as follows:
+.nf
+    date +%Y-%m-%dT%H:%M:%S.%N
+    2020-12-18T13:15:49.648961250
+.fi
+and this should be the new format (with as many sub-second digits as are needed).
+
+.SH "COORDINATE SYSTEMS"
 World Coordinate Systems are described in detail in
 draft by E.W. Greisen and M. Calabretta (AIPS memo 99?) titled
 \fIRepresentations of Celestial Coordinates in FITS\fP.
@@ -84,7 +104,8 @@ Some common coordinate system projection types:
 ___ __  ___________________________________
 AZP 90  Zenithal perspective                
 TAN 90  Gnomic (AZP w/ mu = 0)             
-SIN 90  Orthographic (AZP w/ mu = infty)  
+SIN 90  Orthographic (AZP w/ mu = infty)
+NCP 90  North celestial pole (special case of SIN) 
 STG 90  Stereographic (AZP w/ mu = 1)      
 ARC 90  Zenithal equidistant                 
 ZPN 90  Zenithal polynomial                 
@@ -100,22 +121,62 @@ COE 90  Conical equal-area
 COO 90  Conical orthomorphic                
 BON 90  Bonne's equal area                  
 PCO  0  Polyconic                            
-GLS  0  Sinusoidal                           
+SFL  0  Sanson-Flamsteed
+GLS  0  GLobal Sinusoidal (Similar to SFL)                          
 PAR  0  Parabolic                            
-AIT  0  Hammer-Aitoff                        
+AIT  0  Hammer-Aitoff equal area all-sky                       
 MOL  0  Molweide                             
 CSC  0  Cobe Quadrilateralized Spherical Cube  
 QSC  0  Quadrilateralized Spherical Cube     
-TSC  0  Tangential Spherical Cube           
+TSC  0  Tangential Spherical Cube
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 ccdfits(1NEMO), fitsccd(1NEMO), fitssnap(1NEMO), fitstab(1NEMO),
 fitsio(3NEMO), fits(3NEMO), image(5NEMO)
+.nf
+https://fits.gsfc.nasa.gov/fits_documentation.html - fits
+https://ui.adsabs.harvard.edu/abs/2001A%2526A...376..359H - FITS standard 1.0
+
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1061G - world coordinates
+
+https://ui.adsabs.harvard.edu/abs/2002A%26A...395.1077G - celestial coordinates
+
+https://ui.adsabs.harvard.edu/abs/2006A%26A...446..747G - spectral coordinates
+
+https://www.gb.nrao.edu/~fghigo/gbtdoc/doppler.html
+
+.fi
+
+.SH "EXAMPLES"
+Sometimes converting a fits file back to itself using a particular package can "fix" problems. Here are some examples
+for some arbitrary FITS file:
+.nf
+
+    f=L1157-B1_84475
+    
+    # NEMO:
+    fitsccd $f.fits - | ccdfits - $f.nemo.fits
+
+    # CASA:
+    casa -c 'importfits("'"$f"'.fits","junk.im",overwrite=True); exportfits("junk.im","'$f'.casa.fits",overwrite=True)'
+
+    # or less hassle with shell quoting , in casa python
+    f = 'L1157-B1_84475'
+    importfits(f+".fits","junk.im",overwrite=True);
+    exportfits("junk.im",f+".casa.fits",overwrite=True)
+
+    # MIRIAD:
+    fits in=$f.fits out=junk.im op=xyin
+    fits in=junk.im out=$f.miriad.fits op=xyout
+	
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 30-may-88	written  	PJT
 20-mar-90	Nemo's FITS I/O library is being tested  	PJT
 3-jul-94	doc updated with PCOUNT/GCOUNT	PJT
 28-sep-01	experimental bitpix 64 added	PJT
+18-dec-20	y2k date-obs reminder	PJT
 .fi

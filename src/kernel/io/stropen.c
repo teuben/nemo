@@ -9,6 +9,7 @@
  *     stream to read/write file descriptor num.
  * (4) a mode "s" is a scratch-file - will be deleted when
  *     strclose() is called
+ * (5) names containing :// are assumed a URL
  *
  * fopen() itself officially recognizes the following modes:
  *         r, w, a, r+, w+, a+
@@ -52,8 +53,6 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-#include <limits.h>
-#define MAXPATHLEN      PATH_MAX
 
 #if 0
 extern int unlink (string);		/* POSIX ??? unistd.h */
@@ -84,7 +83,7 @@ typedef struct flist_element fentry;
 
 /* possible URL command getters are:  @todo should make this a 'set' function
  *     curl -s <URL>
- *     wget -q -O -  <URL>    
+ *     wget -q -O -  <URL>
  */
 
 #if 1

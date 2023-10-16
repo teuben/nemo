@@ -57,7 +57,7 @@ string usage = "frontend to run Sellwood's galaxy13 code";
 
 string cvsid="$Id$";
 
-int nemo_main()
+void nemo_main()
 {
     int i, n, nbody, bits, ndata, count, ngrid[3];
     real scale, dt, dtout, dtlog, tstop, tsnap, mass;

@@ -70,6 +70,9 @@
  *               4-oct-03   2.11 added option to use the WWB73 method     PJT
  *              25-may-04       a    fixed sqrt(N) problem in sigma estimate for nsigma    PJT
  *               2-jun-04   2.12 finally implemented the reuse= option     PJT
+ *               5-jun-20   2.13 add wtmap= keyword                        PJT
+ *              19-jan-21   2.14 revert back to old beam factor error calculation     PJT
+ *
  *
  ******************************************************************************
  *
@@ -100,6 +103,8 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <extstring.h>
+#include <table.h>
 #include <image.h>
 
 /*     Set this appropriate if you want to use NumRec's mrqmin() based engine */
@@ -134,6 +139,7 @@ string defv[] = {
     "ellips=\n       Parameters for which to plot error ellips",
     "beam=\n         Beam (arcsec) for beam correction [no correction]",
     "dens=\n         Image containing containing density map",
+    "wtmap=\n        Weight map (should be mom0*mom0/mom2)",
     "tab=\n          If specified, this output table is used in append mode",
     "resid=\n        Output of residuals in a complicated plot",
     "tol=0.001\n     Tolerance for convergence of nllsqfit",
@@ -147,7 +153,7 @@ string defv[] = {
     "nsigma=-1\n     Iterate once by rejecting points more than nsigma resid",
     "imagemode=t\n   Input image mode? (false means ascii table)",
     "wwb73=f\n       Use simpler WWB73 linear method of fitting",
-    "VERSION=2.12c\n 1-jul-2016 PJT",
+    "VERSION=2.14c\n 23-jan-2021 PJT",
     NULL,
 };
 
@@ -156,7 +162,7 @@ string usage="nonlinear fit of kinematical parameters to a velocity field";
 string cvsid="$Id$";
 
 
-imageptr denptr, velptr, resptr;    /* pointers to Images, if applicable */
+imageptr denptr, velptr, resptr, wtmapptr;    /* pointers to Images, if applicable */
 image_maskptr   maskptr;
 int   lmin, mmin, lmax, mmax;              /* boundaries of map */
 real  grid[2];    /* grid separations in x and y (arcsec.) */
@@ -192,12 +198,12 @@ void vcor_s1(real *c, real *p, real *vd, real *dn);
 
 
 
-int rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
+void rotinp(real *rad, real pan[], real inc[], real vro[], int *nring, int ring, real *vsys, 
 	   real *x0, real *y0, real *thf, int *wpow, int mask[], int *side, int cor[], 
 	   int *inh, int *fitmode, real *nsigma, stream lunpri);
 int rotfit(real ri, real ro, real p[], real e[], int mask[], int wpow, int side, real thf, 
 	   real elp4[], int cor[], int *npt, real *rms, int fitmode, real nsigma, bool useflag, stream lunres);
-int perform_out(int h, real p[6], int n, real q);
+void perform_out(int h, real p[6], int n, real q);
 void rotplt(real rad[], real vsy[], real evs[], real vro[], real evr[], real pan[], real epa[], 
 	   real inc[], real ein[], real xce[], real exc[], real yce[], real eyc[], 
 	   int mask[], int ifit, real elp[][4], stream lunpri, int cor[], real res[], int npt[], real factor);
@@ -205,7 +211,7 @@ void stat2(real a[], int n, real *mean, real *sig);
 void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nmax, real p[], 
 	   real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, bool useflag);
 real bmcorr(real xx[2], real p[], int l, int m);
-int perform_init(real *p, real *c);
+void perform_init(real *p, real *c);
 
 typedef real (*my_proc1)(real *, real *, int);
 typedef void (*my_proc2)(real *, real *, real *, int);
@@ -213,6 +219,7 @@ typedef void (*my_proc3)(real *, real *, real *, real *);
  
 extern int nllsqfit(real *xdat, int xdim, real *ydat, real *wdat, real *ddat, int ndat, real *fpar, real *epar, int *mpar, int npar, real tol, int its, real lab, my_proc1 f, my_proc2 df);
 
+extern int match(string, string, int *); // not used currently
 
 my_proc1 vobs;
 my_proc2 vobsd;
@@ -220,7 +227,7 @@ my_proc3 vcor;			/* pointers to the correct functions */
 
 
 /******************************************************************************/
-nemo_main()
+void nemo_main(void)
 {
     int  ier;            /* error return code */
     int  ifit=0;         /* counter for number of succesful fits */
@@ -273,7 +280,9 @@ nemo_main()
 
     old_factor = sqrt((beam[0]+grid[0])*(beam[1]+grid[1])/(grid[0]*grid[1]));
     if (beam[0] > 0 && beam[1] > 0)
-      factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+      // factor = sqrt(FOUR_PI*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */
+      factor = sqrt(1.13309*beam[0]*beam[1]/(grid[0]*grid[1]));  /* Sicking 1997 !!! */      
+      //  should this not be pi/(4ln2) = 1.13309 ???
     else
       factor = 1.0;
     dprintf(0,"Sicking (1997)'s error multiplication factor=%g  (old_factor=%g)\n",
@@ -351,7 +360,7 @@ nemo_main()
  *    LUNPRI   integer          LUN for print output
  */
 
-rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,inh,fitmode,nsigma,lunpri)
+void rotinp(rad,pan,inc,vro,nring,ring,vsys,x0,y0,thf,wpow,mask,side,cor,inh,fitmode,nsigma,lunpri)
 int  *wpow;           /* weighting function to be applied */
 int  ring, *nring;    /* max. number of rings and wanted number of rings */
 int  mask[];          /* mask to define free and fixed parameters */
@@ -369,9 +378,10 @@ stream  lunpri;       /* LUN for print output */
     string *inputs;
     int iret, i, j, n, nfixed, fixed, ninputs;
     real center[2], toarcsec, tokms;
-    stream velstr, denstr;
+    stream velstr, denstr, wtmapstr;
     string *burststring(), *fmode;
     bool Qdens, scanopt();
+    bool Qwtmap;
     real *coldat[4];
     int colnr[4];
 
@@ -387,7 +397,8 @@ stream  lunpri;       /* LUN for print output */
     if (lunpri) fprintf(lunpri," velocity field file : %s (%s)\n",input,
 			Qimage ? "image" : "ascii table");
 
-    velstr = stropen(input,"r");                /* open velocity field */   
+    velstr = stropen(input,"r");                /* open velocity field */
+    Qwtmap = hasvalue("wtmap");
     Qdens = hasvalue("dens");                /* check if density given */
     if (Qimage) {                          /* get data from an image */
       read_image(velstr,&velptr);                 /* get data */
@@ -490,6 +501,15 @@ stream  lunpri;       /* LUN for print output */
       grid[1]=dy=1.0;
       pamp=0.0;
     }
+    if (Qwtmap) {
+      input = getparam("wtmap");
+      if (lunpri) fprintf(lunpri," weight map file      : %s\n", input);
+      wtmapstr = stropen(input,"r");
+      read_image(wtmapstr,&wtmapptr);
+      strclose(wtmapstr);
+      warning("Using special weight map for weights now");      
+    } else
+      wtmapstr = NULL;
 
     n = nemoinpr(getparam("beam"),beam,2);   /* get size of beam from user */
     if (n==2 || n==1) {       /* OK, got a beam, now get density map ... */
@@ -501,7 +521,8 @@ stream  lunpri;       /* LUN for print output */
             denstr = stropen(input,"r");
     	    read_image(denstr,&denptr);
 	    strclose(denstr);
-	    warning("Using density map for weights now");
+	    if (!Qwtmap) 
+	      warning("Using density map for weights now");
          } else {
             warning("beam defined, but no real beam correction used");
             if (lunpri) fprintf(lunpri,"  beam: %g %g\n",beam[0],beam[1]);
@@ -986,7 +1007,7 @@ stream lunres;   /* file for residuals */
     return ier;
 } /* rotfit */
 
-perform_out(int h,real *p,int n,real q)
+void perform_out(int h,real *p,int n,real q)
 {
 /*  FORMAT(1H ,I4,4X,3(F7.2,2X),F5.2,2X,2(F7.2,2X),I5,2X,F8.3) eq.fortran */
     printf(" %4d    %7.2f  %7.2f  %7.2f  %5.2f  %7.2f  %7.2f  %5d  %8.3f\n",
@@ -1189,7 +1210,9 @@ bool  useflag;
 	      dprintf(5,"@ %d,%d : r=%g cost=%g xr=%g yr=%g\n",l,m,r,costh,xr,yr);
 	      if (r>ri && r<ro && costh>free) {     /* point inside ring ? */
 		dprintf(5," ** adding this point\n");
-		if (denptr) 
+		if (wtmapptr)
+		  wi = MapValue(wtmapptr,l,m);
+	        else if (denptr) 
 		  wi = MapValue(denptr,l,m);
 		else
 		  wi=1.0;                /* calculate weight of this point */
@@ -1524,7 +1547,7 @@ void vcor_s1(real *c,real *p,real *vd,real *dn)
 }
 
 
-perform_init(real *p,real *c)
+void perform_init(real *p,real *c)
 {
     vs=p[0];                 /* systemic velocity */
     vc=p[1];                 /* circular velocity */

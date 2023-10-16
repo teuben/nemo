@@ -57,6 +57,8 @@
  *              10-nov-03: allow and handle "null" more gracefully         pjt
  *              24-jan-04: STACKMAX check
  *              26-jul-2016:    double precision log(min/max) = 308        pjt
+ *               2-jan-2021:    squash some gcc warnings                   pjt
+ *               3-apr-2023:    add the range() function                   pjt
  */
 
 #define BIGLOOP /* comment this our if you want MAXSHORT as largest count */
@@ -121,6 +123,7 @@ static double dcd_pwr(double arg1, double arg2);
 static double dcd_sin(double arg1);
 static double dcd_asin(double arg1);
 static double dcd_sinh(double arg1);
+static double dcd_asinh(double arg1);
 static double dcd_cos(double arg1);
 static double dcd_acos(double arg1);
 static double dcd_cosh(double arg1);
@@ -155,6 +158,7 @@ static double dcd_ran(void);
 static double dcd_ranu(double arg1, double arg2);
 static double dcd_rang(double arg1, double arg2);
 static double dcd_ranp(double arg1);
+static double dcd_range(double arg1, double arg2, double arg3);
 static void   dcd_null(void);
 static void   dcd_evaluate(int q);
 
@@ -195,7 +199,7 @@ static int lstopcodeptr;
 
 /*  functions we know  */
 
-#define maxfuncts  52
+#define maxfuncts  53
 #define maxfunlen  10
 #define maxarg      4
 #define maxbools    8
@@ -210,7 +214,7 @@ static char *functs[] = {
    "MOD"   , "INT"   , "NINT"  , "SIGN"  , "BLANK" , "IFGT"  ,
    "IFLT"  , "IFGE"  , "IFLE"  , "IFEQ"  , "IFNE"  , "RANU"  ,
    "RANG"  , "RANP"  , "SIND"  , "ASIND" , "COSD"  , "ACOSD" ,
-   "TAND"  , "ATAND" , "ATAND2", "NULL"
+   "TAND"  , "ATAND" , "ATAND2", "ASINH" , "RANGE" , "NULL"
 };
 
 static int nargs[]    = {
@@ -222,7 +226,7 @@ static int nargs[]    = {
    2   ,    1   ,    1   ,    1   ,    0   ,    4   ,
    4   ,    4   ,    4   ,    4   ,    4   ,    2   ,
    2   ,    1   ,    1   ,    1   ,    1   ,    1   ,
-   1   ,    1   ,    2   ,    0
+   1   ,    1   ,    2   ,    1   ,    3   ,    0
 };
 
 static char *bools[] = {
@@ -285,8 +289,9 @@ static union {
 
 /* some systems have these already defined....but we need them here*/
 /* as long as these are not out of bounds with your local machine  */
+#ifndef MAXFLOAT
 #define MAXFLOAT        1.2e+37  /* cray */
-#define MINFLOAT        0.8e-37  /* cray */
+#endif
 #define MAXSHORT        32767.5  /* cray */
 #define MINSHORT       -32768.5
 #define MAXINT     2147483647.5  /* cray */
@@ -941,6 +946,17 @@ static double dcd_sinh(double arg1)
    return(0.0);     /* make stringent compilers happy */
 }
 
+static double dcd_asinh(double arg1)
+{
+   if (arg1 == DCDBLANK) {
+      return(DCDBLANK);
+   } else {
+      return(asinh(arg1));
+   }
+   return(0.0);     /* make stringent compilers happy */
+}
+
+
 static double dcd_cos(double arg1)
 {
    if (arg1 == DCDBLANK) {
@@ -1329,6 +1345,18 @@ static double dcd_ranp(double arg1)
      return(val);
    }
 }
+
+static double dcd_range(double arg1, double arg2, double arg3)
+{
+   if (arg1 == DCDBLANK) {
+      return DCDBLANK;
+   } else if (arg2 <= arg1 && arg1 <= arg3) {
+      return 1.0;
+   } else {
+      return 0.0;
+   }
+}
+
 static void dcd_null(void)
 {
   have_null = 1;
@@ -1369,20 +1397,25 @@ static void dcd_evaluate(int q)
                 arg2 = dcd_pop(); arg1 = dcd_pop();
                 dcd_push(dcd_pwr(arg1,arg2)); break;
          case ldc: {
-            if (o != 0) c++; if (list) {
+            if (o != 0) c++;
+	    if (list) {
                dcd_push(lstfiecode[c++].c);
             } else {
                dcd_push(fiecode[c++].c);
             }
-            o = 0; break;
+            o = 0;
+	    break;
          }
          case lst: {
-            if (o != 0) c++; o = 0; if (list) {
+	    if (o != 0) c++; 
+	    o = 0;
+	    if (list) {
                dcd_push(lstfiecode[q+c].c);
             } else {
                dcd_push(fiecode[q+c].c);
             }
-            c = c + listlen[0]; break;
+            c = c + listlen[0];
+	    break;
          }
          default:  switch(opc-fie) {
 /* sin   */ case  0: dcd_push(dcd_sin(arg[0])); break;
@@ -1436,7 +1469,9 @@ static void dcd_evaluate(int q)
 /* tand  */ case 48: dcd_push(tan(dcd_rad(arg[0]))); break;
 /* atand */ case 49: dcd_push(dcd_deg(dcd_atan(arg[0]))); break;
 /* atand2*/ case 50: dcd_push(dcd_deg(dcd_atan2(arg[0],arg[1]))); break;
-/* null  */ case 51: dcd_null(); break;
+/* asinh */ case 51: dcd_push(dcd_asinh(arg[0])); break;
+/* range */ case 52: dcd_push(dcd_range(arg[0],arg[1],arg[2])); break;
+/* null  */ case 53: dcd_null(); break;   /* this has to be the last 'function' */
             default: opc = err; break;
          }; break;
       };
@@ -1470,7 +1505,7 @@ void herinp(
     int    *ierd)
 {
    int    i;
-   
+
    cptr = expr;
    mpos = *nchr;
    dptr = outv;

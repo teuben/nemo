@@ -1,11 +1,19 @@
 #! /bin/bash
 #
-#  Install HDF5 within NEMO
+#  Install HDF4 within NEMO
 #
 #
 #  25-dec-2019  drafted
 #     mar-2020  wgetc
+#     jan-2021  ubuntu
 #
+#  ubuntu:   sudo apt install flex bison libjpeg-dev
+#            U22 complains  --enable-hdf4-xdr is not supported for 64 bit mode.
+#            this was resolved in 4.2.15 - then we need -std=legacy in gfortran 11.3
+#            Also Note:   /usr/include/rpc/rpc.h   ->   /usr/include/tirpc/rpc/rpc.h
+#
+#  ubuntu:   hdf4-tools libhdf4-dev and edit the makedefs with /usr/include/hdf
+
 #  On a mac you may see build failures due to a missing libjpeg
 #  hdf4 needs jpeg and z (-ldf -ljpeg -lz)
 #
@@ -13,7 +21,9 @@
 
 # if ($?NEMO == 0) set NEMO=`pwd`
 
-version=4.2.14
+version=4.2.14    # 2018-06-26
+version=4.2.15    # 2020-03-03
+
 wget=wgetc
 
 for arg in $*; do
@@ -25,8 +35,11 @@ $wget https://support.hdfgroup.org/ftp/HDF/releases/HDF$version/src/hdf-$version
 
 tar zxf hdf-$version.tar.gz
 cd hdf-$version
+make clean
 
-./configure --prefix=$NEMO/opt
+FFLAGS="-std=legacy"  ./configure --disable-hdf4-xdr  --prefix=$NEMO/opt
+#FFLAGS="-std=legacy" ./configure --enable-hdf4-xdr  --prefix=$NEMO/opt
 make -j
 make install 
 
+echo hdf4 $version `date` >> $NEMO/opt/mknemo.log

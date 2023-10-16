@@ -1,0 +1,7 @@
+Summary of the options for nemo
+--------------------------------
+   help      - this help (-h and --help also give this help)
+   pull      - update NEMO and all sub-git via "git pull"
+   dev       - extra environment setting for developers
+
+ 

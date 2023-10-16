@@ -1,20 +1,26 @@
 #! /bin/bash
 #
 #   A NEMO CPU benchmark - 
-#  	it will exersice a few typical NEMO codes and use an
+#  	it will exercise a few typical NEMO codes and use an
 #	average. The baseline was a pentium-600 where each integrator
 #	would take about 30 seconds, and before the 2GB size test.
+#   See also the man page bench.5
 #
     tmp=bench$$
  nbody0=3072
  nbody1=10240
  nbody2=10240
  nbody3=1000000
+ nmodel=40
+   mode=0
    size=256
   clean=1
     bsf=0
    time=/usr/bin/time
    help=help=cm
+   ften=1
+     f5=1
+     np=1
 
 for arg in $*; do\
    export $arg
@@ -23,11 +29,95 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2020-02-19) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size clean=$clean tmp=$tmp"
+echo "NEMOBENCH: (2022-09-14) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
 
+if [ $mode == 10 ]; then
+    for bf in $(find $NEMO/src -name Benchfile) $(find $NEMO/usr -name Benchfile); do
+	echo ===========================================================
+	echo Benchfile $bf
+	make  -f $bf bench10 FTEN=$ften
+    done
+    echo ===========================================================
+    exit 0
+fi
+
+if [ $mode == 2 ]; then
+    rm -f s0
+    echo Special series of mkspiral benchmarks
+    echo -n "# D 0 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123          ; rm s0
+    echo -n "# . 0 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 
+    echo -n "# . 1 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=1  
+    echo -n "# . 2 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=2  
+    echo -n "# . 3 "; $time mkspiral .  nbody=$nbody3 nmodel=$nmodel seed=123 test=3  
+    echo -n "# D 3 "; $time mkspiral s0 nbody=$nbody3 nmodel=$nmodel seed=123 test=3   ; rm s0
+    exit 0
+fi
+
+if [ $mode == 5 ]; then
+    if [ $np -gt 1 ]; then
+	# special mode to use GNU parallel with $np jobs
+	# 1: ~670   2:  1336/668    4: 1875/468   8 1730/216  16:  1490/93   32:  1413/44
+	rm -f job_${np}	
+	for j in $(seq $np); do
+	    rm -f job.$j
+	    echo "$NEMO/src/scripts/nemo.bench mode=5 clean=$clean > job.$j" >> job_${np}
+	done
+	echo Running in `pwd`
+	/usr/bin/time parallel -j $np < job_${np}
+	grep score: job.* | tabstat - 3
+	# clean_tmp
+	if [ $clean == 1 ]; then
+	    echo "Cleaning $tmp (use clean=0 to prevent this)"
+	    cd ..
+	    rm -rf $tmp
+	else
+	    echo results in $tmp
+	fi
+	
+	exit 0
+    fi
+    echo 'Equal 5sec CPU time per code, no output files to check'
+    echo 'Codes:  directcode [mkplummer] gyrfalcON hackcode1 [mkorbit] orbint potcode treecode1'
+    t1=4.28*$f5
+    t2=5.64*$f5
+    t3=7.89*$f5
+    t4=787400.0*$f5
+    t5=6.66*$f5
+    t6=3.00*$f5
+    echo "Tstop: $t1 $t2 $t3 $t4 $t5 $t6 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz]"
+    echo -n .;
+    echo -n 1;$time directcode nbody=$nbody0 out=. tstop=$t1 seed=123 $help                 > bench2.directcode.log  2>&1
+    echo -n .;$time mkplummer p0 $nbody2 seed=123 $help                                     > bench0.mkplummer.log   2>&1
+    echo -n 2;$time gyrfalcON p0 . kmax=6 tstop=$t2 eps=0.05 $help                          > bench2.gyrfalcon.log   2>&1
+    echo -n 3;$time hackcode1 nbody=$nbody1  out=. seed=123 tstop=$t3 $help                 > bench2.hackcode1.log   2>&1
+    echo -n .;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                               > bench0.mkorbit.log     2>&1
+    echo -n 4;$time orbint o0 . tstop=$t4 dt=0.01 nsave=\$tstop ndiag=\$tstop/100 $help     > bench2.orbint.log      2>&1
+    echo -n 5;$time potcode p0 . freqout=10 freq=1000 tstop=$t5 potname=plummer $help       > bench2.potcode.log     2>&1
+    echo -n 6;$time treecode1 nbody=$nbody1  out=. seed=123 tstop=$t6 $help                 > bench2.treecode1.log   2>&1
+    echo -n .; 
+    echo ""
+
+    cat bench2.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+    column -t cpu_usage.log
+    cpu_mean=$(awk '{print $4}' cpu_usage.log   | tabstat - | grep mean: | awk '{print $2}')
+    score=$(nemoinp 5000/$cpu_mean)
+    ntest=$(cat cpu_usage.log | wc -l)
+    echo "NEMOBENCH5 score:   $score" 
+    echo "$score $ntest   $(hostname)    $(date)" >> $NEMO/nemobench5.log
+
+    if [ $clean == 1 ]; then
+	echo "Cleaning $tmp (use clean=0 to prevent this)"
+	cd ..
+	rm -rf $tmp
+    else
+	echo 
+    fi
+
+    exit 0
+fi
 
 echo 'Times:  directcode hackcode1 mkplummer gyrfalcON potcode mkspiral ccdmath ccdpot mkorbit orbint'
 
@@ -37,7 +127,7 @@ echo -n h;$time hackcode1 nbody=$nbody1  out=h0 seed=123 $help                  
 echo -n m;$time mkplummer p0 $nbody2 seed=123 $help                                                 > bench.mkplummer.log   2>&1
 echo -n g;$time gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05 $help                                       > bench.gyrfalcon.log   2>&1
 echo -n p;$time potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer $help                    > bench.potcode.log     2>&1
-echo -n m;$time mkspiral s0 $nbody3 nmodel=40 seed=123 $help                                        > bench.mkspiral.log    2>&1
+echo -n m;$time mkspiral s0 $nbody3 nmodel=$nmodel seed=123 $help                                   > bench.mkspiral.log    2>&1
 echo -n c;$time ccdmath "" c0 'ranu(0,1)' size=$size seed=123 > bench.ccdpot.log 2>&1; echo -n c; $time ccdpot c0 c1 $help  >> bench.ccdpot.log      2>&1
 echo -n m;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                                           > bench.mkorbit.log     2>&1
 echo -n o;$time orbint o0 o1 nsteps=10000000 dt=0.001 nsave=\$nsteps/100 $help                      > bench.orbint.log      2>&1
@@ -57,7 +147,19 @@ else
     echo Skipping BSF testing.  Use bsf=1 to enable this.
 fi
     
-grep CPU_USAGE bench.*.log
+cat bench.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
+column -t  cpu_usage.log
+
+echo -n "Processor: "
+unames=$(uname -s)
+if [[ $unames == Linux ]]; then
+    lscpu | grep 'Model name:' | awk -F: '{print $2}'
+elif [[ $unames == Darwin ]]; then
+    sysctl -n machdep.cpu.brand_string
+else
+    echo Unknown CPU for $unames
+fi
+	   
 
 if [ $clean == 1 ]; then
    echo "Cleaning $tmp (use clean=0 to prevent this)"

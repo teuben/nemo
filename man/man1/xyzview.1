@@ -1,8 +1,11 @@
 .TH XYZVIEW 1NEMO "10 December 2003"
+
 .SH NAME
 xyzview \- Display 3-D point (velocity) and time data 
+
 .SH SYNOPSIS
 \fBxyzview\fP [parameter=value]
+
 .SH DESCRIPTION
 \fIxyzview\fP is an program with which 3-D
 point data can be interactively displayed. It was initially developed
@@ -12,35 +15,8 @@ alternative if you don't have an SGI workstation.
 .PP
 It can also create a set of shadow particles that represent the
 orbit of a selected star (see \fBorbit=\fP).
-.SH INTERACTIVE KEYS/MOUSE BUTTONS
-.TP 20
-ESC
-quit
-.TP
-SPACE
-advance to next frame
-.TP
-RETURN
-write \fBviewfile\fP with viewing parameters
-.TP
-LEFTMOUSE 
-Viewing angles (xrot,yrot) are controlled by 
-the X and Y cursor position. 
-In most VOGL library versions you will
-have to depress the '1' key to get the same effect as on the SGI.
-.TP
-MIDDLEMOUSE
-Viewing scene (z viewing distance and field of view) are controlled by the X
-and Y cursor position.
-In most VOGL library versions you will
-have to depress the '2' key to get the same effect as on the SGI.
-.TP
-RIGHTMOUSE
-Velocity vectors (vscale and vskip) are controlled by the X and Y cursor
-position. 
-In most VOGL library versions you will
-have to depress the '3' key to get the same effect as on the SGI.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -102,7 +78,37 @@ this option is used, all particles are loaded automatically.
 If set, snapshots from subsequent times will be automatically loaded. This 
 is equivalent to hitting the 'l' (load all frames) as soon as the first
 snapshot would have been loaded. Default: false.
-.SH COLORS
+
+.SH "INTERACTIVE KEYS/MOUSE BUTTONS"
+.TP 20
+ESC
+quit
+.TP
+SPACE
+advance to next frame
+.TP
+RETURN
+write \fBviewfile\fP with viewing parameters
+.TP
+LEFTMOUSE 
+Viewing angles (xrot,yrot) are controlled by 
+the X and Y cursor position. 
+In most VOGL library versions you will
+have to depress the '1' key to get the same effect as on the SGI.
+.TP
+MIDDLEMOUSE
+Viewing scene (z viewing distance and field of view) are controlled by the X
+and Y cursor position.
+In most VOGL library versions you will
+have to depress the '2' key to get the same effect as on the SGI.
+.TP
+RIGHTMOUSE
+Velocity vectors (vscale and vskip) are controlled by the X and Y cursor
+position. 
+In most VOGL library versions you will
+have to depress the '3' key to get the same effect as on the SGI.
+
+.SH "COLORS"
 The standard color indices on the SGI GL are:
 .nf
 BLACK           0   (background)

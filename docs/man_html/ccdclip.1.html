@@ -6,42 +6,58 @@
 <title>CCDCLIP(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdclip - clip an image 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdclip</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdclip</b>
-clips an image with a minimum and/or maximum value, as  supplied. 
+clips an image with a minimum and/or maximum value, as  supplied. Only values
+below the clip, and above the clip are reported is a min or max clip has
+been set. Values of the clip levels are not reported. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following
+parameters are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b> </dt>
-<dd>Input image file      </dd>
+<dt><b>in=</b>
+</dt>
+<dd>Input image file. No default. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file       </dd>
+<dd>Output image file. No default. </dd>
 
 <dt><b>min=</b> </dt>
-<dd>Minimum value
-below which replace w/ clipvalue. Default: not clipped </dd>
+<dd>Minimum
+value below which replace w/ clipvalue. Default: not clipped </dd>
 
 <dt><b>max=</b> </dt>
-<dd>Maximum value
-below which replace w/ clipvalue.  Default: not clipped </dd>
+<dd>Maximum
+value below which replace w/ clipvalue.  Default: not clipped 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Author</a></h2>
-Peter Teuben
-
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<a href='ccdmnmx.1.html'>ccdmnmx(1NEMO)</a>
+,
+<a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='image.5.html'>image(5NEMO)</a>
+ 
+<p> 
+<h2><a name='sect5' href='#toc5'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>22-Mar-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created in a boring minute  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added dprintf<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -51,8 +67,9 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Author</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc6' href='#sect6'>Update History</a></li>
 </ul>
 </body>
 </html>

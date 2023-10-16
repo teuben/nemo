@@ -45,21 +45,21 @@ string defv[] = {
 
 
     "kz=1,2,1,2,0,1,0,0,0,1,1,0,0,0,1\n  Non-zero options for alternative paths (see below)\n"
-      " 1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT.\n"
-      " 2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
-      " 3  Basic data written to unit 3 at output time (frequency NFIX).\n"
-      " 4  Initial conditions on unit 4 (=1: output; =2: input).\n"
-      " 5  Initial conditions (=0: uniform & isotropic; =1: Plummer).\n"
-      " 6  Output of significant binaries.\n"
-      " 7  Output of movie frames on unit 7.\n"
-      " 8  Generation of two subsystems (merger experiment).\n"
-      " 9  Individual bodies printed at output time (MIN(5**KZ9,N)).\n"
-      "10  No scaling of initial conditions.\n"
-      "11  Modification of ETA by tolerance QE.\n"
-      "12  Initial parameters for binary orbit.\n"
-      "13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE).\n"
-      "14  Adjustment of coordinates & velocities to c.m. condition.\n"
-      "15  Use code units for tcrit/deltat",
+      "   1  COMMON save on unit 1 if TCOMP > CPU or if TIME > TCRIT.\n"
+      "   2  COMMON save on unit 2 at output (=1); restart if DE/E > 5*QE (=2).\n"
+      "   3  Basic data written to unit 3 at output time (frequency NFIX).\n"
+      "   4  Initial conditions on unit 4 (=1: output; =2: input).\n"
+      "   5  Initial conditions (=0: uniform & isotropic; =1: Plummer).\n"
+      "   6  Output of significant binaries.\n"
+      "   7  Output of movie frames on unit 7.\n"
+      "   8  Generation of two subsystems (merger experiment).\n"
+      "   9  Individual bodies printed at output time (MIN(5**KZ9,N)).\n"
+      "  10  No scaling of initial conditions.\n"
+      "  11  Modification of ETA by tolerance QE.\n"
+      "  12  Initial parameters for binary orbit.\n"
+      "  13  Escaper removal (R > 2*RTIDE; RTIDE = 10*RSCALE).\n"
+      "  14  Adjustment of coordinates & velocities to c.m. condition.\n"
+      "  15  Use code units for tcrit/deltat",
     
     "alphas=2.3\n     Power-law index for initial mass function",
     "body1=5.0\n      Maximum particle mass before scaling",
@@ -80,7 +80,7 @@ string defv[] = {
     "KZ#=\n           [indexed] Override some kz= keywords",
     "exe=nbody1\n     Name of the executable",
     
-    "VERSION=2.2\n    6-mar-2019 PJT",
+    "VERSION=2.2a\n   27-may-2021 PJT",
     NULL,
 };
 

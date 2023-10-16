@@ -2,6 +2,12 @@
 #
 #
 
+set RT=/tmp/.io_nemo_run_test
+
+foreach arg ($*)
+   set $arg
+end
+
 # Check necessary nemo binaries
 foreach i ( hackforce snapmask snapprint mkplummer )
     set x=""`$NEMOSRC/scripts/need $i`
@@ -11,12 +17,13 @@ foreach i ( hackforce snapmask snapprint mkplummer )
 end
 rehash
 
-set RT=/tmp/.io_nemo_run_test
-
 # Create 'run_test' directory
 if ( ! -d ${RT} ) then
     mkdir -p ${RT}
 endif
+
+# rm every file in case of crash
+rm -f ${RT}/plum*
 
 # Set io_nemo test programs path
 set IONB=compile/bin

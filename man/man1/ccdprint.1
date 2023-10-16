@@ -1,4 +1,4 @@
-.TH CCDPRINT 1NEMO "8 November 2005"
+.TH CCDPRINT 1NEMO "26 January 2021"
 .SH NAME
 ccdprint \- print out map values
 .SH SYNOPSIS
@@ -89,6 +89,12 @@ image display (at least astronomically).
 \fBpixel=t|f\fP
 Print out X,Y,Z labels in physical or pixel coordinates. By default
 physical. [Default: \fBf\fP]
+.TP
+\fBpair=t|f\fP
+Should input (x,y,z) be paired up [f]
+.TP
+\fBseq=\fP
+Print a sequence using access shortcut [0]
 .SH "SEE ALSO"
 printf(3), image(5NEMO)
 .SH AUTHOR
@@ -106,4 +112,5 @@ Peter Teuben
 9-jul-93	V1.2: added label=	PJT
 28-jul-02	V1.3: documented offset=, added pixel=	PJT
 8-nov-05	V1.4: added yreverse= and better handling of blank lines	PJT
+26-jan-2021	V1.7: use reference pixel	PJT
 .fi

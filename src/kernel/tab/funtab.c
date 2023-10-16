@@ -27,20 +27,40 @@
 #include <strlib.h>
 #include <funtab.h>
 #include <spline.h>
+#include <table.h>
+#include <mdarray.h>
 
 extern int nemo_file_lines(string, int);
-extern int get_atable(stream, int, int*, real **, int);
 
 FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
 {
     FunctionTable *ftp;
     stream instr;
-    real *coldat[2];   /* 2, for X and Y columns */
     int n, colnr[2];
 
     ftp = (FunctionTable *) allocate(sizeof(FunctionTable));
     ftp->name = scopy(fname);
     ftp->mode  = mode;
+
+#if 1
+    // #ifdef TABLE2
+    instr = stropen(fname,"r");    
+    table *t = table_open(instr, 0);
+    n = table_nrows(t);
+    int nc = table_ncols(t);
+    dprintf(1,"ft_open: %s has %d x %d table\n", fname, n, nc);
+    colnr[0] = xcol;
+    colnr[1] = ycol;
+    mdarray2 d = table_md2cr(t, 2, colnr, 0, 0);
+
+    ftp->x = &d[0][0];
+    ftp->y = &d[1][0];
+    ftp->n = n;
+    ftp->t = t;
+    
+
+#else
+    real *coldat[2];   /* 2, for X and Y columns */
     
     n = nemo_file_lines(fname,MAXLINES);  /* initial guess for number of points */
     if (n < 1) {
@@ -56,6 +76,8 @@ FunctionTable *ft_open(string fname, int mode, int xcol, int ycol)
     instr = stropen(fname,"r");
     ftp->n = get_atable(instr, 2, colnr, coldat, n);
     strclose(instr);
+    ftp->t = NULL;
+#endif    
     
     if (ftp->n < 0) {
     	ftp->n = -ftp->n;
@@ -139,16 +161,18 @@ int ft_close(FunctionTable *ftp)
     
     if (ftp==NULL) {
         warning("ft_close: not initialized (ftp=NULL)");
-        return 0.0;
+        return 0;
     }
     errors = ftp->errors; 
     if (errors != 0)
-        warning("FunctionTable[%s]: %d errors during processing",
-                    ftp->name, ftp->errors);
-
-    if (ftp->x)     free(ftp->x);
-    if (ftp->y)     free(ftp->y);
-    if (ftp->coeff) free(ftp->coeff);
+        warning("FunctionTable[%s]: %d errors during processing", ftp->name, ftp->errors);
+    if (ftp->t == NULL) {
+      if (ftp->x)     free(ftp->x);
+      if (ftp->y)     free(ftp->y);
+      if (ftp->coeff) free(ftp->coeff);
+    } else {
+      table_close(ftp->t);
+    }
     free(ftp->name);
     free(ftp);
 
@@ -172,13 +196,13 @@ string defv[] = {
     "y=\n           Y values to lookup (X to return)",
     "format=%g\n    Output format",
     "mode=linear\n  Lookup mode (spline, linear, near)",
-    "VERSION=1.2\n  8-dec-01 PJT",
+    "VERSION=2.0\n  25-apr-2022 PJT",
     NULL,
 };
 
 string usage="Function Table lookup";
 
-nemo_main()
+void nemo_main()
 {
     FunctionTable *ftp;
     string fmt1, fmode = getparam("mode");

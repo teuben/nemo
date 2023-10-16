@@ -1,9 +1,12 @@
-.TH MKPLUMMER 1NEMO "15 September 2010"
-.SH NAME
+.TH MKPLUMMER 1NEMO "25 September 2023"
+
+.SH "NAME"
 mkplummer \- generates a snapshot according to a truncated Plummer model
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkplummer\fP [parameters=values...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImkplummer\fP constructs a Plummer model, with a spatial or mass
 cut-off, after which it performs a coordinate transformation to the
 center-of-mass coordinate system. The data are then written into a
@@ -17,8 +20,11 @@ isotropic, and is a polytrope of index n = 5.
 See also Aarseth et al. (1974) and Plummer (1911)
 .PP
 There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+.PP
+For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBout=\fP\fIsnapfile\fP
 Output data is written into \fIsnapfile\fP, in standard snapshot format.
@@ -51,7 +57,8 @@ so that the cumulative mass at \fIrfrac\fP is \fImfrac\fP).
 \fBseed=\fP\fIinteger\fP
 seed for the random number generator (default: a value 0, which will
 be converted into a unique new value using UNIX's clock time, in
-seconds since once-upon-a-time-in-the-seventies).
+seconds since once-upon-a-time-in-the-seventies). See also
+\fIxrandom(1NEMO)\fP.
 .TP
 \fBtime=\fP\fItime\fP
 Time at which the snapshot applies (default: \fItime\fP=0.0).
@@ -61,12 +68,13 @@ Reset center of mass to zero? [default: \fBt\fP].
 .TP
 \fBscale=\fP\fIscale_factor\fP
 A scale factor or scale to virial units (M=G=-4E=1). Use -1 for
-virial units, and 1 to get a model in structural (natural) units.
+virial units (see also VIRIAL UNITS below),
+and 1 to get a model in structural (natural) units.
 Note: large scale factors means small systems with large velocity
 disperson.
 [Default: \fB-1\fP].
 .TP
-\fBquit=\fIlevel\fP
+\fBquiet=\fIlevel\fP
 Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet
 [default: \fB0\fP].
 .TP
@@ -99,21 +107,101 @@ generating more then 1 model can be useful to process very large
 snapshots (which won't fit in memory) in a serialized fashion. See
 also \fIsnapsplit\fP. 
 Default: \fB1\fP.
-.SH BUGS
+.TP
+\fBmode=0|1|2\fP
+The processing mode, purely for debugging.
+0=no data written.
+1=data written, but no extra analysis.
+2=data written, and extra analysis done.
+[Default: 1].
+
+.SH "VIRIAL UNITS"
+The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
+~ 0.589.  As an example this should plot the same "rotation" curve:
+.nf
+
+     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
+     rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
+
+.fi
+
+.SH "QUIET START"
+For small N-body systems it can easily happen that small random fluctuations
+cause a unacceptabel large deviation from an ideal Plummer sphere. One way to
+achieve more "quiet" initial conditions is by positioning the particles more uniformely in
+their 1/N mass shells, instead of uniformely filling the space between 0 and 1. This is
+the \fBquiet=1\fP setting.   An even more quiet start can be achieved
+by placing the particles on exactly the radius compatible with its mass fraction, this is
+the \fBquiet=2\fP setting.
+.PP
+In this example you can clearly see the difference between the radii selected:
+.nf
+
+  mkplummer - 10 quiet=0 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+  mkplummer - 10 quiet=1 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+  mkplummer - 10 quiet=2 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+
+.fi
+Important to note that with \fBzerocm=f\fP the center of mass will drift, while the "mathematical center"
+was placed at the origin. This will counter the quietness, if you will.
+
+.SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
 .PP
 For very large (>1000) ratio in the mass ranges the spline
 interpolation, used in \fIfrandom(3NEMO)\fP, can fail
 using a valid [0,1] range.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
 a Salpeter mass spectrum with
 .nf
-  % mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+
+% mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+
 .fi
-.SH SEE ALSO
-snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO)
+Another method to create a Plummer sphere is by using the Osipkov-Merritt tables in NEMO, e.g.
+.nf
+
+  % plummer plum.dat ntab=1024
+  % mkommod plum.dat plum.snap nbody=10000
+
+.fi
+or the new General Spherical Profile in ZENO:
+.nf
+
+  % plumgsp plum.gsp
+  % gsprealize plum.gsp plum.snap zerocm=true
+  % snapcopy plum.snap plum2.snap
+
+.fi
+with a note that ZENO files may need an extra \fIsnapcopy(1NEMO)\fP to be compatible with NEMO
+\fIsnapshot(5NEMO)\fP files.
+
+.SH "BENCHMARKS"
+The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double precision,
+with and without writing to a local file:
+.nf
+	make -f Benchfile bench0 bench1
+   or
+	/usr/bin/time mkplummer . 10000000
+	/usr/bin/time mkplummer bench1.snap 10000000
+.fi
+with some sample CPU for bench0:
+.nf
+   xps13       3.1s  or 171 MB/s
+   t480        4.9s  or  72 MB/s
+.fi
+the time difference betweeen bench0 and bench1 can be interpreted as
+the time needed to write 535MB (for 10M particles)
+
+
+.SH "FILES"
+NEMO/src/nbody/init/mkplummer.c
+
+.SH "SEE ALSO"
+mkpolytrope(1NEMO), snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP
@@ -121,16 +209,25 @@ S.J. Aarseth, M. Henon and R.  Wielen (1974),
 \fIAstron. and Astrophys.\fB 37\fP, p. 183.
 .PP
 A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt, 2011, MNRAS, 417, 2300 (McLuster)
-.SH AUTHOR
+.PP
+Arnold et al. (2022) - https://arxiv.org/abs/2207.10681 - 
+https://github.com/r-j-arnold/gen_fractal_star_clusters
+
+.SH "ADS"
+@ads 1974A&A....37..183A
+
+.SH "AUTHOR"
 Piet Hut (Peter Teuben)
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/nbody/init	mkplummer.c
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.5i +5.5i
 23-Apr-87	Version 1.0: created         	PIET
 10-Jun-88	Version 1.1: created         	PIET
 xx-xxx-88	V1.2: zerocm keyword added	PJT
@@ -141,3 +238,6 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 11-apr-05	V2.8: added nmodel=	PJT
 15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
 2-dec-2017	documented mcluster	PJT
+29-mar-2021	benchmark	PJT
+25-sep-2023	describe quiet starts	PJT
+.fi

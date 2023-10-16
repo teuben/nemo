@@ -24,9 +24,9 @@ endif
 setenv PATH $FALCON"/bin:"$PATH
 rehash
 
-if ($?prompt) then
-  echo "falcON loaded from $FALCON"
-endif
+#if ($?prompt) then
+#  echo "falcON loaded from $FALCON"
+#endif
 
 # add FALCONLIB to LD_LIBRARY_PATH and DYLD_LIBRARY_PATH
 if ($?LD_LIBRARY_PATH) then

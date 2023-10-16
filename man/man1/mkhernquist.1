@@ -1,9 +1,12 @@
-.TH MKHERNQUIST 1NEMO "27 March 2003"
-.SH NAME
+.TH MKHERNQUIST 1NEMO "17 May 2023"
+
+.SH "NAME"
 mkhernquist \- create a two-component, isotropic, spherical galaxy+halo Hernquist model
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkhernquist\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkhernquist\fP
 generates a two-component, isotropic, spherical galaxy/halo model using a
 superposition of two Hernquist models.  The galaxy is assumed to be a
@@ -12,16 +15,23 @@ free parameters specified on the command line.  The distribution
 function is calculated on the fly using Eddington's formula and then
 sampled to generate a N-body realization of a galaxy.  The galaxy and
 halo particles are dumped in succession -- first half are galaxy
-particles.  
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+particles. 
+.PP
+If a single component model is needed, use \fBm=a=1\fP (which is the default).
+.PP
+Hernquist models are a special case of Dehnen models with \fBgamma=1\fP. See
+\fImkdehnen(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
-Output file name. No default.
+Output \fIsnapshot(5NEMO)\fP file name. No default.
 .TP
 \fBnbody=\fP
-Total number of particles for both components. No default.
+Total number of particles. This needs to be an even number,
+as an equal number of particles is used for each component.
+No default.
 .TP
 \fBm=\fP
 Mass of Halo (where the galaxy has mass=1) [1]   
@@ -33,24 +43,48 @@ Scale length of Halo (where the galaxy has radius=1) [1]
 Standard seed [0]     
 .TP
 \fBaddphi=\fP
-Add potentials to snapshot [f]   
+Add (as negative) potentials to snapshot.  [f]
+.TP
+\fBmfrac=\fP
+Mass fraction used of Hernquist distribution. 
+A value of 1.0 will result in particles at large radii. See CAVEATS below.
+[1.0]
+.TP
+\fBrfrac=\fP
+Radius where to cut the mass model, which will override the \fBmfrac\fP
+value.  Default: not used.
 .TP
 \fBzerocm=\fP
-Centrate snapshot (t/f)? [t]    
+Centrate snapshot (t/f)? See CAVEATS below. [t]    
 .TP
 \fBheadline=\fP
-Optional verbiage []     
-.SH CAVEATS
+Optional verbiage []
+
+.SH "UNITS"
+\fBmkhernquist\fP is one of the programs in NEMO that does not quite use virial units,
+though is in virial equilibrium.
+The total mass is 2 by default, if halo mass \fBm=1\fP is used.
+
+.SH "CAVEATS"
 Due to the relatively large number of particles at large radii,
 setting zerocm=t will cause the center to be significantly 
-shifted from the origin.
-.SH SEE ALSO
-mkplummer(1NEMO)
-.SH FILES
-.SH AUTHOR
+shifted from the origin. This will depend on the value for
+\fBnbody=\fP and \fBmfrac=\fP. Setting mfrac=0.95 will thus
+a more reasonably looking model, at the cost of a model that
+is not quite relaxed.
+
+.SH "SEE ALSO"
+mkplummer(1NEMO), mkommod(1NEMO), mkdehnen(1NEMO)
+
+.SH "ADS"
+@ads 1990ApJ...356..359H
+
+.SH "AUTHOR"
 Peter Teuben, John Dubinski (original version)
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 27-Mar-03	V1.1 man pages finally created  	PJT
+15-may-2015	V1.2 clarified docs, potential negative now	PJT
 .fi

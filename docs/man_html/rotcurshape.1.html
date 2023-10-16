@@ -6,6 +6,7 @@
 <title>ROTCURSHAPE(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -62,85 +63,85 @@ The following parameters are known (those with
 to be slashed or (re)implemented): 
 <dl>
 
-<dt><b>in</b>=<i>v_image|xyv_tab|rv_tab</i> </dt>
+<dt><b>in=</b><i>v_image|xyv_tab|rv_tab</i> </dt>
 <dd>Input velocity
 field map, normally in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. Input data can also be a table,
 see <b>imagemode=</b> and <b>rotcurmode=</b> below how to control the input table. No
 default. </dd>
 
-<dt><b>radii</b>=<i>r0,r1</i> </dt>
+<dt><b>radii=</b><i>r0,r1</i> </dt>
 <dd>Inner and outer radius of the disk to fit (in arcsec).
 For images, the <b>units=</b> keyword can be used to scale your physical units
 in the header to &lsquo;&lsquo;human readable&rsquo;&rsquo; units (arcsec). By default the whole disk
 will be used. </dd>
 
-<dt><b>pa</b>=<i>pa</i> </dt>
+<dt><b>pa=</b><i>pa</i> </dt>
 <dd>Kinematic position angle (in degrees) of the disk (i.e.
 receding side). Angles can be 0..360 or -180..180. </dd>
 
-<dt><b>inc</b>=<i>inc</i> </dt>
+<dt><b>inc=</b><i>inc</i> </dt>
 <dd>Inclination (degrees)
 of the disk. Angles can be 0..90. </dd>
 
-<dt><b>vsys</b>=<i>v0</i> </dt>
+<dt><b>vsys=</b><i>v0</i> </dt>
 <dd>Systemic velocity. </dd>
 
-<dt><b>center</b>=<i>x0,y0</i> </dt>
+<dt><b>center=</b><i>x0,y0</i> </dt>
 <dd>Rotation
 center (grid units w.r.t. lower left corner being 0,0 for NEMO maps). Two numbers
 are required. For tabular input the units must be the same as those used
 in the table. Default: center of map. </dd>
 
-<dt><b>frang</b>= </dt>
+<dt><b>frang=</b> </dt>
 <dd>free angle around minor axis
 (degrees), in the plane of the galaxy, from which data is excluded from
 the fit (thus the total cone size of ignored data around the minor axis
 is 2*<b>frang</b>) [Default: <b>0.0</b>]. </dd>
 
-<dt><b>side</b>= </dt>
+<dt><b>side=</b> </dt>
 <dd>Choose the side of the galaxy to fit the
 velocity field to. Valid options are <b>receding</b>, <b>approaching</b>  or <b>both</b> side(s).
 [Default: <b>both</b>]. </dd>
 
-<dt><b>weight</b>= </dt>
+<dt><b>weight=</b> </dt>
 <dd>Choice of geometric weighting function with which
 points are weighed into the least squares solution as a function of galactic
 angle away from the major axis. Valid options are: <b>uniform</b>, <b>cosine</b>, and
 <b>cos-squared</b>.  If a density is given (see <b>dens=</b>), the weight function is multiplied
 by this geometric weight factor. [Default: <b>uniform</b>]. </dd>
 
-<dt><b>fixed</b>= </dt>
+<dt><b>fixed=</b> </dt>
 <dd>List of disk
 geometry parameters to be kept fixed during the fit. Choose any of the following:
 <b>vsys,pa,inc,xpos,ypos</b>, although <b>all</b> can also be use to fix all geometric
 parameters. [Default: none, i.e. all parameters free] </dd>
 
-<dt>** <b>ellips</b>= </dt>
+<dt>** <b>ellips=</b> </dt>
 <dd>The names
 of two parameters for which to calculate an error ellips.  (see <b>fixed=</b>).
 For the two parameters it shows the major and minor axis, position angle
 of the one sigma deviation ellipse. [Default: not used] </dd>
 
-<dt>** <b>beam</b>= </dt>
+<dt>** <b>beam=</b> </dt>
 <dd>The beam
 size (FWHM) for beam correction. One or two numbers required. Currently these
 are only used to correct error bars for the number of independant points
 per beam. If not given, each point is assumed independant. [no correction].
 ** See CAVEATS below ** </dd>
 
-<dt><b>dens</b>=<i>image_den</i> </dt>
+<dt><b>dens=</b><i>image_den</i> </dt>
 <dd>Image containing the density. Currently
 only used as an additional weight factor. If a map of velocity dispersions
 would be available, a density map would need to be contstructed from its
 inverse square, i.e. dens=1/sigma^2. Default: not used. </dd>
 
-<dt><b>tab</b>= </dt>
+<dt><b>tab=</b> </dt>
 <dd>If specified, this
 output table is used in <i>append</i> mode! **deprecated** [Default: not used].
 </dd>
 
-<dt><b>resid</b>= </dt>
+<dt><b>resid=</b> </dt>
 <dd>Residuals (OBS-FIT) if specified. If the input file was a table (see
 also <b>imagemode=</b>), this will contain a listing of X,  Y, Velocity and Residual
 Velocities in the disk, else it will be an <a href='image.5.html'><i>image(5NEMO)</i></a>
@@ -156,18 +157,18 @@ the residuals [the default], or the fitted map. If the fit is selected,
 the mask values are ignored and the map is filled with the fitted values.
 [Default: <b>f</b>] </dd>
 
-<dt><b>tol</b>= </dt>
+<dt><b>tol=</b> </dt>
 <dd>Tolerance for convergence of <i>nllsqfit</i> [Default: <b>0.001</b>].
 </dd>
 
-<dt><b>lab</b>= </dt>
+<dt><b>lab=</b> </dt>
 <dd>Mixing parameter for <i>nllsqfit</i> [Default: <b>0.001</b>] </dd>
 
-<dt><b>itmax</b>= </dt>
+<dt><b>itmax=</b> </dt>
 <dd>Maximum number
 of allowed <i>nllsqfit</i> iterations [Default: <b>50</b>] </dd>
 
-<dt><b>units</b>= </dt>
+<dt><b>units=</b> </dt>
 <dd>Units of input axes
 for radius and velocity. Valid options are <b>deg, arcmin, arcsec, rad</b> for
 radius. A numeric value can also be given, in which case your image pixel
@@ -232,7 +233,8 @@ rotcur1 </dd>
 
 <dt><b>rotcur5=</b><i>name5...</i> </dt>
 <dd>see rotcur1.  The final composite rotation curve will
-be the sum (in quadrature) of up to these 5 components. </dd>
+be the sum (in quadrature) of up to these 5 components. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Rotcur Functions</a></h2>
@@ -273,6 +275,7 @@ plummer<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a    <tt> </tt>&nbsp;<tt> </tt>&nbsp;v
 core1<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a      <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*x/(1+x)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
 core2<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a    <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*x/(1+x^2)^(1/2)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
 core<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a,c  <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*x/(1+x^c)^(1/c)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
+arctan<tt> </tt>&nbsp;<tt> </tt>&nbsp;c0,a<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;v=2*v0/pi*arctan(x)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
 poly<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a,p2,.. <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*(x+p2*x^2+p3*x^3+.....pN*x^N) <tt> </tt>&nbsp;<tt> </tt>&nbsp;a needs to be fixed !
 iso<tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a    <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*sqrt(1-atan(x)/x)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;-
 exp <tt> </tt>&nbsp;<tt> </tt>&nbsp;v0,a    <tt> </tt>&nbsp;<tt> </tt>&nbsp;v=v0*(1-exp(-x))                 <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
@@ -372,6 +375,7 @@ if <b>beam=</b> is used, the map is also used to estimate beam smearing correcti
 , <a href='loadobj.3.html'>loadobj(3NEMO)</a>
 ,
 gal(AIPS), <a href='nllsqfit.3.html'>nllsqfit(3NEMO)</a>
+, <a href='rotcur.5.html'>rotcur(5NEMO)</a>
  <br>
 <pre>GBKFIT: http://supercomputing.swin.edu.au/projects/gbkfit/
 </pre>
@@ -387,6 +391,7 @@ Peter Teuben
 26-may-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.2e fixed sqrt(n) bug in sigma, improved nsigma&gt;0 iterations<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-jun-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.3: added fit= option to save a fitted map<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-jan-08<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.4: with new rotcurtab minor overhaul of code<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+28-may-20<tt> </tt>&nbsp;<tt> </tt>&nbsp;added arctan<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

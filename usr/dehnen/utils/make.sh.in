@@ -3,12 +3,24 @@
 #  make variables for the install of falcON
 #  this file is controlled by NEMO's configure since Version 4.2 (dec 2019)
 
-
 # if you want --enable-native it should say "NO_ARCH_NATIVE=0"
 NO_ARCH_NATIVE=@falcon_NO_NATIVE@
 
 # if you want --fopenmp it should say "OPENMP=1"
 @falcon_OPENMP@=1
 
+# do or don't do shared libs. by default no, because of SIP on mac
+NO_SHARED_LIBS=@NO_SHARED_LIBS@
+
 # if you get "undefined symbol: GOMP_parallel"
 # may need to add -lgomp as NEMO needed for the body/pot plugins 
+
+
+GCC = @CC@
+GPP = @CXX@
+
+# set these, though they often get refined again in the make.COMPILER files
+CC  = @CC@
+CXX = @CXX@
+FC  = @FC@
+

@@ -1,93 +1,223 @@
-.TH BENCH 5NEMO "27 December 2019"
-.SH NAME
-bench \- NEMO benchmarks in NemoStones
-.SH DESCRIPTION
-Nemo Benchmarks (a.k.a. NemoStones)
+.TH BENCH 5NEMO "31 August 2023"
+
+.SH "NAME"
+bench \- various NEMO benchmarks
+
+.SH "SYNOPSIS"
+.nf
+/usr/bin/time $NEMO/src/scripts/nemo.bench
+make -f Benchfile clean all
+nemobench COMMAND
+.fi
+
+.SH "DESCRIPTION"
+There are several methods to compare the performance of NEMO on different processors or environments:
+
+.RS 2
+.IP 1.
+The command \fBmake bench\fP from the $NEMO directory runs a standard benchmark of about a dozen 
+selected NEMO programs.  It should run in about 30 seconds on a ~2020 computer. A short
+table (see below in RESULTS) lists results from some recent computers.
+
+.IP 2.
+Various \fBBenchfile\fP filles scattered through the $NEMO source tree contain benchmarks. There is
+no  wrapper like "make check" has for Testfile's
+
+.IP 3.
+Selected man pages have some examples. Over time these should be moved into the Benchfile in
+the source directory where this program is maintained. Some are mentioned below in this man page.
+
+.SH "NEMOBENCH5"
+
+The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs a number (currently 6) N-body codes all calibrated to
+take 5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating
+is defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7 has
+a score of 1000.  This definition can be adjusted to 10s runs when the time comes that processors
+run too fast, there is a parameter internal to the nemo.bench script, and could also
+be adjusted if more codes are used.
+.nf
+
+.ta +3.5i +1i +1i
+
+i9-13900K	-	2133
+i9-12900K	-	n/a ~2000
+M2	~1450?	n/a 1919, 1899
+i9-12900H	-	n/a 1851
+M1-Max	-	n/a 1785
+i7-12800H	-	n/a 1654
+i9-11980HK	-	n/a 1616
+i9-12900K	1330	jansky gcc 11.2.0
+i7-1260P	1261	k2
+i5-1240P	1155	chromebook
+M1 (Macbook Air)	1269	n/a 1750 / 7xxxx
+i7-1260P	1250	k2 - but only on full power
+i5-1240P	1155	chromebook (frameworks)
+i7-11800H		n/a	1474
+i7-1185G7	1060	Dell Latitude 5420
+i5-1135G7	1000	XPS13 1460 /
+AMD threadripper 3960x	896	AlexBox
+i5-10400H		700	Dell Precision 3351 (astroumd)
+AMD EPYC 7302 @ 3.0GHz	630	lma 1000/ 28000
+Intel Core i9-9900X	-	geminid 1214 / 9467
+Xeon Gold 5218 @ 2.30 GHz	761	unity/node99 1100 / 8610
+i5-10210U CPU @ 1.60 GHz	732 	X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz	-	terra 777 / 10213
+i7-8550U CPU @ 1.80 GHz	548 	T480 (1600) 696 / 1935
+Xeon E-2186G 3.80 GHz	- 	aurora 1313 / 6721
+i7-3820QM @ 2.70 GHz	498	MacBookPro (Retina, Mid 2012)
+i7-3820 CPU @ 3.60 GHz	414 	dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50 GHz	384	chara 828 / 3117
+i7-3630QM CPU @ 2.40 GHz	429	T530 (1200) 762 / 3006 
+Xeon E5-2623 v4 @ 2.60 GHz	-	kraken 782 / 5800
+Xeon X5550  @ 2.67 GHz	256	sdp 566 / 3938
+.fi
+
+A typical output of bench5 might look as follows:
+
+.nf
+
+CPU_USAGE  directcode  :  11.31  11.29  0.00  0.00  0.00  1787697842
+CPU_USAGE  gyrfalcON   :  9.09   9.08   0.00  0.00  0.00  1787698975
+CPU_USAGE  hackcode1   :  11.69  11.68  0.00  0.00  0.00  1787699885
+CPU_USAGE  orbint      :  9.81   9.80   0.00  0.00  0.00  1787701056
+CPU_USAGE  potcode     :  11.01  10.99  0.01  0.00  0.00  1787702038
+CPU_USAGE  treecode1   :  10.94  10.93  0.01  0.00  0.00  1787703140
+NEMOBENCH5 score: 469.85
+
+.fi
+where on this particular CPU there is a diversity of speeds. Some CPU show even more diversity.
+
 .PP
-\fBbench1\fP tests the classic (1986) Barnes and Hut code in C, without
-quadrupole corrections, for 10240 particles and 64 timesteps.
-\fBbench2\fP tests a more modern Treecode, this one is the
-O(N) version from Dehnen (2002?). Again 64 timesteps.
-\fBbench0\fP has been added to compare a tree code with a 
-direct N-body code, also 64 timesteps, but now for fewer particles to prevent
-the benchmark to dominate the whole series.
-\fBbench3\fP benchmarks the I/O and creation of a large (>2GB) snapshot.
-\fBbench4\fP benchmarks an image operation.
-.SH DATA
-Here are the commands to execute the benchmarks, now the default in "cd $NEMO;make bench"
+Here is an example how to use nemobench5 is parallel mode on a 32 core Xeon, where a single NEMOBENCH5 has a score of 630.
+Since all codes are single core, gnu parallel is used to run them in parallel, which should scale linearly as long as memory
+is not exhausted (this particular CPU has 512GB memory):
+
+.nf
+
+for j in 2 4 8 12 16 24 32 48 64 128; do
+    $NEMO/src/scripts/nemo.bench mode=5 np=$j | txtpar - p0=npt,1,2 p1=sum,1,2 p2=mean,1,2
+done
+
+  2  1256  628
+  4  2512  628
+  8  5020  628
+ 12  7512  626
+ 16 10047  628
+ 24 15024  626
+ 32 20025  626
+ 48 20589  429
+ 64 21517  336
+128 20792  162
+
+(numbers were rounded to improve readability)
+.fi
+
+
+.SH "BENCH"
+Here are the results of the "make bench" benchmark. The time is the user CPU time. If two values
+are listed after the machine name, these are the GeekBench5 values.
+.nf
+.ta +3.5i +1.5i
+
+Intel Core i5-1135G7	15.4	XPS13 1460 /
+AMD EPYC 7302 @ 3.0GHz	23.9	lma 1000/ 28000
+Intel Core i9-9900X	25.8	geminid 1214 / 9467
+i5-10210U CPU @ 1.60GHz	29.4 	X1Y4  1029 / 3194
+Xeon(R) Silver 4114 @ 2.20GHz	37.1	terra 777 / 10213
+i7-8550U CPU @ 1.80GHz	40.6 	T480 (1600) 696 / 1935
+Xeon E-2186G 3.80GHz	52.6 	aurora 1313 / 6721
+i7-3820 CPU @ 3.60GHz	??/67.5 	dante 833 / 3693
+Xeon(R) CPU E3-1280 @ 3.50GHz	??/70.3 	chara 828 / 3117
+i7-3630QM CPU @ 2.40GHz	76.2 	T530 (1200) 762 / 3006 
+Xeon(R) E5-2623 v4 @ 2.60GHz	42.1/79.4 	kraken 782 / 5800
+Xeon(R) X5550  @ 2.67GHz	115.4	sdp 566 / 3938
+.fi
+
+Keep in mind for most of these a default compilation was used.  Some benchmarks are known
+to be able to improved by up to a factor of two with selected compiler and options changes.
+
+
+.PP
+The following tasks are run in the standard NEMO bench, for details see the
+src/scripts/nemo.bench  script.
+.nf
+
+
+\fIdirectcode nbody=3072 out=d0 seed=123 
+hackcode1 nbody=10240  out=h0 seed=123 
+mkplummer p0 10240 seed=123 
+gyrfalcON p0 p1 kmax=6 tstop=2 eps=0.05
+potcode p0 p2 freqout=10 freq=1000 tstop=2 potname=plummer
+mkspiral s0 $nbody3 nmodel=40 seed=123 
+ccdmath "" c0 'ranu(0,1)' size=256 seed=123
+ccdpot c0 c1 
+mkorbit o0 x=1 e=1 lz=1 potname=log
+orbint o0 o1 nsteps=10000000 dt=0.001 nsave=100000\fP
+
+.fi
+In addition each data file that is produced is checksummed and compared
+to a baseline version using \fIbsf(1NEMO)\fP if the argument
+\fBbsf=1\fP is added.
+
+.SH "BENCH8"
+The \fBbench8\fP measures how well your CPU performs simple OpenMP algorithm
+as more cores are employed. This can be an effective way to determine how
+well your CPU adjusts under increased power demands, for example laptops with
+thermal protection will scale down their cpu frequency as more cores are
+employed.
+
+.nf
+   scaling2 umax=20000 np=1 iter=20
+   scaling2 umax=20000 np=2 iter=40
+   scaling2 umax=20000 np=4 iter=80
+.fi
+
+Look at the elapsed time to follow how well a particular CPU performs at increased load:
+
+.nf
+.ta +3.0i +0.75i +0.75i +0.75i +0.75i
+CPU     	1	2	4	8	16
+
+i7-1260P (pow)	7.0	7.1	8.5	18.7	24.6
+i7-1260P (bat)	10.2	13.0	17.6	40.4	59.9
+jansky   	6.4	6.5	6.5	6.7	17.4
+lma     	12.2	12.3	12.2	12.3	12.4
+M2      	6.9	7.2	7.6	9.4	19.3
+.fi
+
+
+
+.SH "BENCH10"
+Not really implemented, but this will be benchmarks orchestrated via the \fBBenchfile\fP's
+found in the source tree.
+
+.SH "OLDEST BENCH"
+At the inception of NEMO in 1986 there was no real benchmark, so for a while (as computers
+were relatively slow still) we used the default \fIhackcode1(1NEMO)\fP setting, where 128 particles
+in virial equilibrium are integrated for 64 timesteps:
+.nf
+
+      /usr/bin/time hackcode1 tstop=2  > /dev/null
+.fi
+
+.PP
+On a Sun 3/50 (our development machine) this took about 5 seconds per step.
+Now, nearly 35 years later, my laptop runs this about 50,000 times faster.
+Looking in more detail at the original NEMO manual:
+
+.nf
 .ta +1i
-.nf
-\fBbench0\fP:	\fItime directcode nbody=10240\fP
-\fBbench1\fP:	\fItime hackcode1 nbody=10240\fP
-\fBbench2\fP:	\fItime mkplummer p1 10240; time gyrfalcON p1 . kmax=6 tstop=2 eps=0.05\fB
-\fBbench3\fP:	\fItime mkspiral s000 1000000 nmodel=40\fP
-\fBbench4\fP:	\fIccdmath "" - 'ranu(0,1)' size=128 | ccdpot - . help=c\fB
-.fi
-.PP
-and the data :
-.PP
-.nf
-.ta +3i
-bench0 (directcode)
-       I5/7200@2.5       47.7 
-       I7/3630QM@3.6	174.2  (nemo2: 
-       I7/3770@3.5	152.6
-       P4/3.0            342.7
-       G5/2.0            472.8
-       AMD-opt64/2.0     300.3
-       AMD-ath64/2.0     888.7
-       P4/2.8 w/cygwin   365.9
-       x86_64/3.0        516.4
-       x86_64/3.2        480.6
-       sparcv9+vis/0.36 3048.2
-
-bench1 (hackcode1)
-       I5/2.5            2.2
-       I7/3.6		14.0  (nemo2: 1.2 - 3.6)  5.1
-       I7/3.5		 4.4
-       P4/3.0           13.4
-       G5/2.0           13.1
-       AMD-opt64/2.0     9.36
-       AMD-ath64/2.0    17.45
-       P4/2.8 w/cygwin  15.1
-       x86_64/3.0       11.7
-       x86_64/3.2       10.7
-       sparcv9+vis/0.36 81.5
-
-bench2 (gyrfalcON)
-       I5/2.5            2.5
-       I7/3.6		 8.1  (nemo2)  2.948 3.19 5.09
-       I7/3.6		31.2  (?)
-       P4/3.0           10.8
-       G5/2.0           21.0
-       AMD-opt64/2.0     8.1
-       AMD-ath64/2.0     8.9
-       P4/2.8 w/cygwin  45.5
-       x86_64/3.2        8.6
-       sparcv9+vis/0.36 85.1  
-
-bench3 (mkspiral)
-       I5/2.5    5.4u   1.6s
-       I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
-	        10.760u 0.832s 0:20.33 57.0%
-       I7/3.5	7.112u 1.520 0:09.37 98.5%
-       P4/3.0	22.890u  5.980s 1:45.63 27.3%
-       G5/2.0	28.400u 24.660s 1:05.41 81.1% 
-       AMD-opt64/2.0	18.540u 10.921s 0:56.93 51.7% 
-       AMD-ath64/2.0	29.311u 10.353s 0:59.88 66.2% (SATA)
-       P4/2.8	25.541u 8.081s 0:59.98 56.0% (S/ATA)
-       P4/2.8 w/cygwin	276.56u 26.35s 6:34.75 76.7% (using mkplummer V2.8)
-       x86_64/3.0       21.651u 8.897s 0:48.05 63.5%    0+0k 0+0io 0pf+0w
-       x86_64/3.2       21.950u 9.997s 0:39.37 81.1%  (SATA)
-       i7/2.93          7.892u 3.170s 0:12.92 85.6% (HDD)
-       i7/2.93          7.662u 1.467s 0:09.13 99.8% (SHMEM)
-
-bench4 (ccdpot)
-       I5/2.5   11.9
-       I7/3.6	23.657u 3.856s 0:28.04 98.0%  (nemo2)
+                       cpu/steps
+sun 3/60:  20 MHz	2.28        
+i5-1135G7: 4200 MHz	0.0000875   
 
 .fi
-.SH CAVEATS
+Despite that the cpu was 210 times faster, the code ran 26,000 faster. A very impressive
+factor of 120 improvement in chip and possibly some compiler technology. The NEMO users
+guide has an appendix in which this benchmark is listed for a variety of computers
+since 1986.
+
+.SH "CAVEATS"
 Defining and running a benchmark can be very tricky stuff. It might be
 important to separate disk I/O from CPU usage.   The unix \fItime(1)\fP 
 command can be a help. The output from bash::time is a bit different
@@ -120,32 +250,105 @@ where the last two instances were just re-running the same command, but
 now clearly showing the effect of reading the file from memory instead
 of disk. By repeating this whole series a few times, an lower bound to the 
 wall clock time is more likely to properly account for the I/O overhead time.
-.SH  OTHERS
-A few other manual pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
+.PP
+Rule of thumb: always run a benchmark a few times to see if a hot CPU slows
+down the benchmark. If I/O is cached. Other tasks are interfering.
+
+.SH  "OTHERS"
+A few other man pages in NEMO also maintain their own list how its program compares under different compilers/options/cpu options:
 .nf
 .ta +1i
 \fICGS(1NEMO)\fP
 \fIscfm(1NEMO)\fP
 .fi
-.SH "SEE ALSO"
-gyrfalcON(1NEMO), data(5NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO),
-triple(1NEMO), accudate(lNEMO)
-.SH AUTHOR
-Peter Teuben
-.SH FILES
+.PP
+Other industry benchmarks:
 .nf
-.ta +2.5i
-~/data   	standard repository area for data files.
+    Geekbench 5 (very wide variety of compute workloads - baseline is i3-8100)
+    Linpack   (focus on floating point operations - Gflops)
+    SPEC CPU 2017 ($$$) benchmark - 
 .fi
+
+.SH "TABBENCH"
+The table I/O benchmark uses a 100M row dataset with 3 columns,
+representing X,Y,Z of which the radius R=sqrt(X^2+Y^2+Z^2) is computed. This table
+is about 2.7 GB in size.
+Of course reading the table is all dependent on the HDD/SDD, but in the case described here
+this was a fast SSD, and took 2 sec to read, or just over 1000 MB/sec.
+.nf
+
+    /usr/bin/time tabgen tab3 100000000 3
+    /usr/bin/time tabbench2 . mode=-1
+    
+.nf
+this bench will need to be repeated for mode=0,1,2,3 to estimate the different components as they
+are added to the workflow. The \fItabgen(1NEMO)\fP is dominated by
+drawing random numbers and writing them using \fIprintf(3)\fP , which is slow.
+
+.nf
+    80s   writing, using tabgen
+     2s   reading in tabbench2
+    22s   parsing in numbers  [np.loadtxt takes 748 sec!!!]
+     6s   using \fIfie(3NEMO)\fP to compute radii
+     1s   using np.sqrt(), and presumably C's sqrt() as well
+    
+.fi
+
+.SH "PARALLEL"
+The GNU \fIparallel(1)\fP
+tool can be of great use if your tasks are pure single core and you have enough cores (most laptops have at least 4 these days)
+and memory to fit your tasks.   As an example, here is something contrived using \fImkplummer(1NEMO)\fP that does not write to disk,
+so it should be highly parallizable:
+
+.nf
+    nbody=10000000
+    /usr/bin/time mkplummer . $nbody
+    \fB2.80user 0.45system 0:03.26elapsed 99%CPU\fP
+    
+    echo mkplummer . $nbody  > run.txt
+    echo mkplummer . $nbody >> run.txt
+    /usr/bin/time parallel --jobs 1 < run.txt
+    \fB5.89user 0.83system 0:06.71elapsed 100%CPU\fP
+    
+    /usr/bin/time parallel --jobs 2 < run.txt
+    \fB6.00user 0.79system 0:03.44elapsed 197%CPU\fP
+.fi
+
+which follows Amdahl's law close to 100%!
+
+
+.SH "CONSIDERATIONS"
+Most programs that need an output file, can use \fBout=-\fP to pass the data into a standard Unix pipe,
+or even \fBout=.\fP to use a sink. 
+
+.SH "SEE ALSO"
+gyrfalcON(1NEMO), data(5NEMO), tabgen(1NEMO), mkspiral(1NEMO), mkplummer(1NEMO), hackcode1(1NEMO), nbody1(1NEMO), scfm(1NEMO), CGS(1NEMO), triple(1NEMO), accudate(lNEMO), bsf(1NEMO), nemobench(8NEMO)
+.PP
+https://browser.geekbench.com/processor-benchmarks
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
+.nf
+.ta +3.5i
+$NEMO/src/scripts/nemo.bench	Script uses by make bench/bench5/bench10
+$NEMO/data   	standard repository area for (small) data files.
+Benchfile	A Makefile that can orchestrate series of benchmarks
+/tmp/nemobench.log	The \fBnemobench\fP keeps logfile
+.fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.2i +5.0i
 12-may-97	created  	PJT
 26-nov-03	finally added some data		PJT
 17-feb-04	added bench0 comparison  	PJT
 31-mar-05	added some cygwin numbers, fixed input	PJT
-6-may-11    added i7 and SHMEM/HDD comparison   PJT
+6-may-11	added i7 and SHMEM/HDD comparison	PJT
 27-sep-13	added caveats	PJT
-6-jan-2018	updated for V4, more balanced benchmarks	PJT
-27-dec-2019	nemo.bench; updated with potcode and orbint; now 10 tasks	PJT
+6-jan-2018	updated for V4, more balanced benchmarks 	PJT
+27-dec-2019	nemo.bench; updated with potcode and orbint	PJT
+26-jul-2020	added timings / added geekbench5 	PJT
+31-aug-2023	added bench8	PJT
 .fi

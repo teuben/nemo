@@ -1,16 +1,26 @@
 .TH GADGET 5NEMO "23 February 2020"
-.SH NAME
+
+.SH "NAME"
 gadget \- binary format for N-body snapshot files
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIgadget\fP is the format used by Springel's \fIgadget(1NEMO)\fP code,
 and several other packages and code know how to read and write such files.
 These are either \fIgadget binary\fP files (a 256 byte header, followed
 by a number of families of particles (stars, halo, gas, etc.).
 .PP
-There is also a HDF implementation
+There is also an HDF implementation
 .PP
 Some description in \fIgadgetsnap(1NEMO)\fP.
-.SH EXAMPLES
+.PP
+The \fBgadget2\fP format is an extension of
+the \fBgadget1\fP format, with extra headers for each block.
+The \fBgadget3\fP format is ....  probably something we can't handle yet
+
+.SH "GADGET-1"
+
+
+.SH "EXAMPLES"
 Since gadget binary files have the structure of a Fortran unformatted file, the \fIunfio(1NEMO)\fP program
 can display the top level structure, e.g. the following two commands are identical
 .nf
@@ -51,10 +61,15 @@ snapcmp gal1r gal2r
   0   2.57303e-07 3.97679e-06 6.6571e-06 1.38556e-05 4.10978e-05  9.74949e-06 7.71154e-06
 
 .fi
+
 .SH "SEE ALSO"
 gadget(1NEMO), gadgetsnap(1NEMO), gadget2pcs(1NEMO), gadget1t2(1NEMO), snapshot(5NEMO), unfio(1NEMO)
-.SH AUTHOR
+.PP
+https://gitlab.mpcdf.mpg.de/vrs/gadget4/-/blob/master/documentation/06_snapshotformat.md
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i

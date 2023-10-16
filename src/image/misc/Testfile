@@ -1,6 +1,6 @@
 DIR = src/image/misc
-BIN = ccdplot ccdstat ccdmom ccdsub ccdrow
-NEED = $(BIN)  ccdmath
+BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint
+NEED = $(BIN)  ccdmath ccdgen
 
 help:
 	@echo $(DIR)
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in ccdmom.in
+	@rm -f ccd.in ccdmom.in ccdmom2.in gauss1 gauss2 gauss12 gauss21
 
 #	power of function and contour levels to plot with
 P = 1.1
@@ -21,14 +21,13 @@ all:	$(BIN)
 ccd.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**$(P)+(abs(%y-31.5))**$(P))" size=64,64,1
-	@bsf ccd.in '1.70886 0.707985 0 10.3526 4111'
+	@bsf ccd.in '1.70803 0.708814 0 10.3526 4113'
 
 N = 2
 ccdmom.in:
 	@echo Creating $@
 	$(EXEC) ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=$(N),$(N),$(N)
-	@bsf ccdmom.in	'1.65217 2.37026 0 7 23'
-
+	@bsf ccdmom.in	'1.52 2.31724 0 7 25'
 
 ccdplot: ccd.in
 	@echo Running $@
@@ -37,6 +36,7 @@ ccdplot: ccd.in
 ccdstat: ccd.in
 	@echo Running $@
 	$(EXEC) ccdstat ccd.in ; nemo.coverage ccdstat.c
+	$(EXEC) ccdstat ccd.in qac=t ; nemo.coverage ccdstat.c	
 
 ccdsub: ccd.in
 	@echo Running $@
@@ -52,4 +52,33 @@ ccdmom: ccdmom.in
 	$(EXEC) ccdmom ccdmom.in - 2 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 	$(EXEC) ccdmom ccdmom.in - 3 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 
+N2 = 100
+ccdmom2.in:
+	@echo Creating $@
+	$(EXEC) ccdgen out=ccdmom2.in object=gauss spar=1,25 size=128,128
 
+ccdellint: ccdmom2.in
+	@echo Running $@
+	$(EXEC) ccdellint ccdmom2.in 0:50:10 tab=- ; nemo.coverage ccdellint.c
+
+gauss1:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss1 object=gauss spar=1,10 size=20,20
+
+gauss2:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss2 object=gauss spar=1,20 size=10,10
+	
+ccdstack: gauss1 gauss2
+	@echo Running $@
+	$(EXEC) ccdstack gauss1,gauss2 - | $(EXEC) ccdstat -
+	$(EXEC) ccdstack gauss2,gauss1 - | $(EXEC) ccdstat -
+
+ccdstacktest:
+	rm -f p1 ccd1 ccd2 ccd3 ccd12 ccd21
+	mkplummer p1 100000	
+	snapgrid p1 ccd1 xrange=0:1 yrange=0:1    nx=32 ny=32
+	snapgrid p1 ccd2 xrange=-1:0 yrange=-1:0  nx=32 ny=32
+	ccdgen "" ccd3 spar=0 size=64,64 cdelt=4/64,4/64
+	ccdstack ccd3,ccd1,ccd2 ccd12
+	ccdstack ccd3,ccd2,ccd1 ccd21

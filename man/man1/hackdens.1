@@ -1,9 +1,12 @@
-.TH HACKDENS 1NEMO "6 January 2009"
-.SH NAME
+.TH HACKDENS 1NEMO "12 October 2023"
+
+.SH "NAME"
 hackdens \- local density estimator using tree algorithm
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBhackdens in=\fPsnapshot \fBout=\fPimage [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIhackdens\fP calculates the local density in the configuration space
 using the hierarchical
 N-body algorithm (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
@@ -13,8 +16,9 @@ used.
 .PP
 The density can be writtin in the slot normally used for Potentials (the default),
 or if \fBwrite_at_phi=f\fP be written to a tag named \fIDensity\fP.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin\fP=\fIin-file\fP
 Input data will be read from \fIin-file\fP in
@@ -24,7 +28,8 @@ snapshot format.
 Output data are written to \fIout-file\fP in snapshot format.
 .TP
 \fBneib\fP=\fIvalue\fP
-Number of neighbors used to determine the local density
+Number of neighbors used to determine the local density. The default
+of 6 is the recommended value by Casertano & Hut (1985)
 [default: 6].
 
 .TP
@@ -61,12 +66,30 @@ Ratio of cells to bodies, used  when
 allocating cells [defaults:0.9].
 .TP
 \fBnudge\fP=\fIsize\fP
-
+nudge overlapping particles with this positional dispersion [0]
 .TP
-\fBverbose\fP=\fIt|f\fP
+\fBverbose=t|f\fP
 Logical if print out the number of particles processed during the
 calculation [defaults:f].
-.SH NOTES
+.TP
+\fBdensity=t|f\fP
+write density, or alternatively distance to Kth particle.
+Default: t
+.TP
+\fBndim=2|3\fP
+3D or 2D computation [Default: 3]
+.TP
+\fBdirect=t|f\fP
+slower N-squared direct density computation.  Default: f
+.TP
+\fBnorm=0|1\fP
+Mode of normalization. Earlier (2.x and before) versions would scale equal mass
+systems by nbody, the current default is norm=1 which normalizes by nbody, so
+densities from the slower \fPsnapdens(1NEMO)\fP agree with \fBhackdens\fP.
+Default: 1
+
+
+.SH "NOTES"
 Since the search radius is adaptively changed during the calculation,
 the local density of particles which are close in the position in the
 snapshot file should be similar.
@@ -82,41 +105,124 @@ In many cases the system is roughly spherically symmetric.
 That means the density has strong correlation with the distance from
 the center of the cluster. Then sorting particles by the distance from
 the center will improve the speed significantly.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 The following example takes an N-body snapshot, sort the particles
 in the order of the distance from the C.M., and calculate local density.
 .nf
-\fB
+
    snapcenter nbody.dat nbody.centered
-   snapsort nbody.centered nbody.sorted rank="x*x+y*y+z*z"
+   snapsort nbody.centered nbody.sorted 
    hackdens nbody.sorted nbody.density
-\fP
+
 .fi
-.SH SEE ALSO
-hackforce(1NEMO), snapdens(1NEMO), density(1falcON)
-.SH BUGS
+One can also weight the particles by its potential to some power. For this we create a Plummer sphere, without
+centering, and compute the center in two ways:
+.nf
+   mkplummer - 100 zerocm=f | snapsort - - rank=r > p.dat
+   snapcenter p.dat . report=t
+   hackdens p.dat - | snapcenter  - . weight=dens report=t
+   hackforce p.dat - | snapcenter - . weight="-phi*phi*phi" report=t
+   hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t
+   
+.fi
+Note that in this case the Plummer sphere should have the correct mathematical center, and not \fIcentered\fP.
+This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh, in which these different methods
+can also be applied to different models, as expanded in the following table.
+.nf
+
+    nbody=100 models:     Plummer   King1   King3   King5  DeVauc
+    -------------------------------------------------------------
+    snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299
+    snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*
+    snapcenter  on phi:     0.053
+    snapcenter  on phi^2:   0.050*
+    snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035
+    snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031
+    snapcenterp:            0.080
+    snapmnmx on min phi:    0.122
+    snapmnmx on m 50% phi:  0.058
+    snapmnmx on m 33% phi:  0.063                           0.053
+    snapmnmx on m 25% phi:  0.067
+    rockstart on m:         0.082:
+
+A (*) denotes the best method for that model.
+
+.fi
+Although for a Plummer sphere the best method is more than twice as good than the worst method,
+this does not apply to other models.
+.PP
+\fIdensity(1falcON)\fP is considerable faster, about twice with their K=32 default. 
+.nf
+
+mkplummer - 100000 |\
+ snapscale - - mscale=10 |\
+ snapsort - - |\
+ density - - give=mxvr |\
+ snapshell - '10**[-4:4:0.1]' dens  |\
+ tabmath - - 'log(%1),log(%4)' all |\
+ tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
+
+vs.
+
+mkplummer - 100000 |\
+ snapscale - - mscale=10 |\
+ snapsort - - |\
+ hackdens - - |\
+ snapshell - '10**[-4:4:0.1]' dens  |\
+ tabmath - - 'log(%1),log(%4)' all |\
+ tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
+
+
+.fi
+
+.SH "BUGS"
 The local density is calculated using (neib-1)th neighbor.
-Calculation can become very slow if the input snap shot is not
+Calculation can become very slow if the input snapshot is not
 well-formed. There should exist an option that forces the density will be
 written in the "Aux" slot of the snapshot file. Current version does
 not use standard \fIget_snap/put_snap\fP macros. KEY and AUX will be lost from
-the output snapshot. 
-.SH TIMING
+the output snapshot.
+.PP
+The density in \fIsnapdens(1NEMO)\fP and \fIdensity(1falcON)\fP
+are in the correct units, but
+in  \fIhackdens(1NEMO)\fP seem to be off by \fBnbody\fP for equal mass
+particles. For example, a Plummer sphere in virial (nbody) units should have
+a central density
+.nf
+    (32/(3.pi^2))^2 ~ 1.168
+.fi
+
+.SH "SEE ALSO"
+hackforce(1NEMO), snapdens(1NEMO), snapcenterp(1NEMO), density(1falcON), snapshell(1NEMO)
+.PP
+https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/ - Casertano & Hut (1985)
+
+.SH "ADS"
+@ads 1985ApJ...298...80C
+
+
+.SH "TIMING"
 N=4096, merger remnant
 .PP
 Presorted snapshot: 5 minutes on Sun-3/60, particles are presorted by the distance from
 the center of mass of the system.
 .PP
 Random snapshot: 60 minutes Sun-3/60
-.SH AUTHOR
+
+.SH "AUTHOR"
 Jun Makino
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 2-Dec-88  	V1.0:Created  	Jun
 6-jul-89	doc updated?	Jun
 23-oct-90	doc updated	Peter
 18-jul-92	printf -> dprintf to make it pipable	Peter
 24-may-02	fixed running out of bits for large-N systems	PJT
+11-aug-2022	added example hackforce vs. hackdens	PJT
+21-sep-2023	added direct=	PJT
+11-oct-2023	V3.0 added norm=1 as a new default	PJT
+12-oct-2023	V3.0 - proper mass scaling as well as nbody scaling	PJT
 .fi
-

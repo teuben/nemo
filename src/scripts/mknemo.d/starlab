@@ -1,0 +1,52 @@
+#! /bin/bash
+#
+#  Install starlab within NEMO
+#
+#  10-nov-2022  finally in NEMO !! - compilation is about 3 mins and creates 181 binaries
+#
+#  148.24user 17.43system 2:44.14elapsed 100%CPU 
+#  250.73user 25.46system 1:35.80elapsed 288%CPU
+#
+# if ($?NEMO == 0) set NEMO=`pwd`
+
+version=n/a
+wget=wgetc
+git=1
+branch=main
+branch=teuben1
+url=https://github.com/amusecode/starlab
+url=https://github.com/teuben/starlab
+
+for arg in $*; do
+  export $arg
+done
+
+    
+cd $NEMO/local
+
+
+if [ $git == 1 ]; then
+    if [ ! -e starlab ]; then
+	git clone $url 
+    fi
+    version=git
+else
+    echo there is no versioned starlab
+    exit 0
+fi    
+
+cd starlab
+git checkout $branch
+git pull
+
+autoreconf -i -f
+CXXFLAGS=-std=c++98 ./configure --prefix=$NEMO/opt  --enable-sdyn3 --enable-sdyn 
+make clean
+make -j
+make install 
+
+echo starlab $version  `date` >> $NEMO/opt/mknemo.log
+
+exit 0
+
+# 163 binaries in default, 173 with sdyn3, 181 with sdyn

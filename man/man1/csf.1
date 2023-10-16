@@ -1,9 +1,12 @@
-.TH CSF 1NEMO "12 December 2009"
-.SH NAME
+.TH CSF 1NEMO "19 April 2023"
+
+.SH "NAME"
 csf \- copy structured file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBcsf in=\fP\fIin-file\fP \fBout=\fP\fIout-file\fP
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIcsf\fP copies a NEMO structured file.  By using the \fBitem\fP and
 \fBselect\fP keyword items can be selected by name and/or number.  Note
 that items can currently only be selected from the top level, items
@@ -15,67 +18,86 @@ no data conversion is applied.
 An overview of the top level items that are present in a structured
 file can be obtained with the following Unix pipe:
 .nf
+q
     % \fBtsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk '{print $2}'
 .fi
 .PP
 Although \fIstructured files\fP can always be read when they were created
 on a byte swapped machine, \fIcsf\fP can also be used to create a file
 in which the bytes are not swapped.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order
-if the keyword is also given.
+.PP
+As a convenience option, the keyword \fBblocksize=\fP can be used to forced
+a fixed blocksize to copy a file "as is", but it will bypass the structured
+file I/O so should be functionally the same as a unix \fIcp(1)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
-\fBin\fP=\fIin-file\fP
+\fBin=\fP\fIin-file\fP
 Input file, must be in \fIfilestruct(5NEMO)\fP format
 [no default].
 .TP
-\fBout\fP=\fIout-file\fP
+\fBout=\fP\fIout-file\fP
 Output file, will be in \fIfilestruct(5NEMO)\fP format
 [no default].
 .TP
-\fBitem\fP=\fIitem-list\fP
+\fBitem=\fP\fIitem-list\fP
 List of top level items, separated by comma's or spaces, to be copied.
 If none are provided, all items are selected. Note that the 
 \fIitem-list\fP will be case sensitive.
 [default: -blank-].
 .TP
-\fBselect\fP=\fIselect-list\fP
+\fBselect=\fP\fIselect-list\fP
 List of numbers (1 being the first) that are select for 
 copying, after the above mentioned item-name selection
 (from the \fBitem=\fP keyword) has been applied.
 If none are provided, all are copied.
 [default: -blank-].
 .TP
-\fBconvert\fP=\fIconvert-list\fP
+\fBconvert=\fP\fIconvert-list\fP
 List of conversions to make, separated by comma's or spaces. Each conversion
 is of the format \fIfrom\fP2\fIto\fP, where both the \fIfrom\fP and
 \fIto\fP part are any of: \fBd\fP (double), \fBf\fP (float), \fBh\fP 
 (half precision) ,
 \fBl\fP (long), \fBi\fP (int) or \fBs\fP (short). 
 [Default: -blank-].
-.SH CAVEAT
+.TP
+\fBblocksize=\fP
+If selected, this is the blocksize, in bytes, by which a file gets copied
+bypassing NEMO's structured file I/O. A value of 512 is ok. Default: 0 (not used)
+.TP
+\fBheadline=\fP
+If supplied, add this string of random verbiage to the data stream. [Default: none]
+
+.SH "CAVEATS"
 Some of the conversions in \fBconvert=\fP
 are not supported or are in danger of loosing more than just precision.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 An image with too much data-history can be cut by only copying the \fIImage\fP
 items:
 .nf
    % csf in=map1.ccd out=map2.ccd select=Image
 .fi
-.SH BUGS
+
+.SH "BUGS"
 Items can only be selected (\fBselect=\fP) from the top level.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 cp(1), tsf(1NEMO), rsf(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben, Joshua E. Barnes
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +1.5i
 ~/src/kernel/io  	csf.c
 .fi
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 xx-xxx-87	V1.0: created	JEB
 9-dec-89	V1.1 added select keyword	PJT
 10-oct-90	V1.3 select= is now item=: select= used for counting	PJT
@@ -83,4 +105,6 @@ xx-xxx-87	V1.0: created	JEB
 13-feb-92	documentation added	PJT
 26-mar-95	V1.5 fixed selection bug and clarified doc	PJT
 12-dec-09	V1.6 added support for half precision (halfp) type	PJT
+13-aug-2022	V1.7 add headline=	PJT
+19-apr-2023	V1.8 add blocksize=	PJT
 .fi

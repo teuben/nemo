@@ -30,6 +30,7 @@ the residuals are still computed correctly.
 .PP
 This routine can also be used to plot the function, although only in 1D cases,
 see \fBx=\fP.
+
 .SH PARAMETERS
 The following parameters are recognized in any order if the keyword is also
 given:
@@ -77,7 +78,7 @@ number of dimension of the hyper-plane fit (\fBfit=plane\fP). 0 would fit
 a constant. 
 [Default: \fB0\fP].
 .TP
-\fPout=\fIfilename\fP
+\fBout=\fP\fIfilename\fP
 Optional output filename
 where the data and residuals are stored.
 The first few columns contain the X and Y columns, the last
@@ -85,7 +86,7 @@ column contains the residual Y-F(X). See an example below how to plot
 the data with a model fit overlayed.
 [default: no output file created].
 .TP
-\fPnsigma=\fIsigma_factor\fP
+\fBnsigma=\fIsigma_factor\fP
 A positive number will delete points more than \fIsigma_factor\fP from the fit,
 and fit again. Multiple values can be given here, in which case
 multiple iterations are done.
@@ -125,21 +126,21 @@ from a pipe. If not, the routine \fIfile_lines(3NEMO)\fP is used
 to allocate space for the table.
 [Default: \fB10000\fP].
 .TP
-\fBtol\fP=
+\fBtol=\fP
 Tolerance for convergence of \fInllsqfit\fP
 [Default: \fB0.0\fP].
 .TP
-\fBlab\fP=
+\fBlab=\fP
 Mixing parameter for \fInllsqfit\fP [Default: \fB0.0\fP for linear,
 \fB0.1\fP for non-linear fits].
 .TP
-\fBitmax\fP=
+\fBitmax=\fP
 Maximum number of allowed \fInllsqfit\fP iterations [Default: \fB50\fP]
 .TP
-\fBformat\fP=
+\fBformat=\fP
 Output format. Default %g
 .TP
-\fBbootstrap\fP=
+\fBbootstrap=\fP
 Number of bootstrap samples to take to estimate the error in the parameters.
 Output off all parameters and their errors are on one line containing
 the word bootstrap. Parameters and their errors are output in pairs.
@@ -153,6 +154,7 @@ details. Default: 0
 Fitting method. Gipsy uses their \fInllsqfit(3NEMO)\fP, NumRec uses their
 \fImrqfit\fP and MINPACK uses \fImpfit(3NEMO)\fP.  Only first character
 is used, case insensitive.  [Default: \fBg\fP]
+
 .SH FIT PARAMETERS
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf

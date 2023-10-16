@@ -18,7 +18,8 @@ rotation axis defined along the Z-axis.
 Integrations backwards in time can be achieved by setting dt<0, since no
 stop time is given, but the number of steps is used to terminate
 the integration.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -79,7 +80,11 @@ Use variable timesteps? If so, the error control parameter
 \fBeta=\fP needs to be specified. Also note that not all integration
 methods support variable timesteps.
 Default: \fBf\fP.
-.SH EXAMPLES
+.TP
+\fBtstop=\fP
+If given, this will override \fBnsteps=\fP. Default: not used.
+
+.SH "EXAMPLES"
 The following example launches a particle from the Y axis (at y=1)
 in the X direction (speed 0.4) in a plummer potential. Although
 the 6D initial conditions are fully specified, so a potential
@@ -112,10 +117,11 @@ Read orbit with 10001 phase-points
 .fi
 
 .SH "SEE ALSO"
-mkorbit(1NEMO), orblist(1NEMO), orbintv(1NEMO), potential(5NEMO), newton0(1NEMO)
+mkorbit(1NEMO), orblist(1NEMO), orbintv(1NEMO), epic5(1NEMO), potential(5NEMO), newton0(1NEMO)
 .nf
 GALA: Galactic astronomy and gravitational dynamics (ascl:1707.006) - https://github.com/adrn/gala
 .fi
+
 .SH TIMING
 .nf
 .ta +2.0i
@@ -127,13 +133,16 @@ potential=hackforce	10" (100 bodies, standard Plummer model)
 potential=hackforce	30" (500 bodies)
 potential=hackforce	50" (2000 bodies)
 potential=hackforce	80" (8000 bodies)
+
 .SH AUTHOR
 Peter Teuben
+
 .SH FILES
 .nf
 .ta +2.5i
 src/orbit/misc  	orbint.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i

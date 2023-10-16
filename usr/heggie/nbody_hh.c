@@ -12,7 +12,7 @@
  * Slight modifications for NEMO
  *    - added a Makefile for NEMO integration
  *
- *
+@ads 2003gmbp.book.....H
  */
 
 #include <stdio.h>
@@ -34,13 +34,21 @@
 typedef double real;
 static int i, j, k;
 
-int main(int argc, char **argv) {
-    real x[NMAX][NDIM], xdot[NMAX][NDIM], f[NMAX][NDIM],
-      /**/fdot[NMAX][NDIM];
+// @todo  should 1024 -> NMAX ?
+void initialise(int n, real x[1024][3], real xdot[1024][3], real f[1024][3], real fdot[1024][3], real step[1024], real tlast[1024], real m[]);
+void uniform(int n, real a, real x[1024][3]);
+int hermite(real x[1024][3], real xdot[1024][3], real f[1024][3], real fdot[1024][3], real step[], real tlast[], real m[], real *t, real tend, int n);
+void ffdot(real x[1024][3], real xdot[1024][3], real m[], int i, int n, real fi[], real fidot[]);
+void runtime_output(real x[1024][3], real t, long int n);
+void final_output(real t, long int cpu, long int nsteps, long int noutp);
+
+
+int main(int argc, char **argv) 
+{
+    real x[NMAX][NDIM], xdot[NMAX][NDIM], f[NMAX][NDIM],fdot[NMAX][NDIM];
     real step[NMAX], tlast[NMAX], m[NMAX], t, dt;
-    long int j, i, n, nsteps, noutp, cpu, timenow;
-    extern void initialise(), runtime_output(), final_output();
-/*     cpu = clock(); */
+    long int j, n, nsteps, noutp, cpu = 0;
+    // cpu = clock();
     time(&cpu);
     srand(cpu);
     if (argc != 4) {
@@ -55,8 +63,7 @@ int main(int argc, char **argv) {
     initialise(n, x, xdot, f, fdot, step, tlast, m);
     nsteps=0;
     loop(j, noutp) {
-      nsteps += hermite(x, xdot, f, fdot, step, tlast, m, &t, 
-			/**/t+dt, n);
+      nsteps += hermite(x, xdot, f, fdot, step, tlast, m, &t, t+dt, n);
       runtime_output(x,t,n);
     }
     final_output(t,cpu,nsteps,noutp);
@@ -64,11 +71,11 @@ int main(int argc, char **argv) {
 }
 
 void initialise(int n, real x[NMAX][NDIM], 
-	     /**/real xdot[NMAX][NDIM], real f[NMAX][NDIM], 
-	     /**/real fdot[NMAX][NDIM], real step[NMAX], 
-	     /**/real tlast[NMAX], real m[]) {
+		real xdot[NMAX][NDIM], real f[NMAX][NDIM], 
+		real fdot[NMAX][NDIM], real step[NMAX], 
+		real tlast[NMAX], real m[])
+{
       real fi[NDIM],fidot[NDIM], radius, fmod, fdotmod;
-      extern void uniform(), ffdot();
       radius = 6./5.;
       uniform(n,radius,x);
       radius = sqrt(5./6.);
@@ -94,7 +101,7 @@ void uniform(int n, real a, real x[NMAX][NDIM]) {
   real r, cos_theta, sin_theta, phi; 
   loop(i, n) {
     r = a*pow((real)rand()/((real)RAND_MAX+1), 1./3.); 
-/*     r = a*pow(drand48(), 1./3.); */
+    // r = a*pow(drand48(), 1./3.);
     cos_theta = 2.*rand()/((real)RAND_MAX+1)-1;
     sin_theta = sqrt(1-pow(cos_theta, 2));
     phi = 2*M_PI*rand()/((real)RAND_MAX+1);
@@ -107,15 +114,13 @@ void uniform(int n, real a, real x[NMAX][NDIM]) {
 
 
 int hermite(real x[NMAX][NDIM], real xdot[NMAX][NDIM], 
-	    /**/real f[NMAX][NDIM], real fdot[NMAX][NDIM], 
-	    /**/real step[], real tlast[], real m[], real *t, 
-	    /**/real tend, int n) 
+	    real f[NMAX][NDIM], real fdot[NMAX][NDIM], 
+	    real step[], real tlast[], real m[], real *t, 
+	    real tend, int n) 
 {
-  real xtemp[NMAX][NDIM], xdottemp[NMAX][NDIM], fi[NDIM], 
-    /**/fidot[NDIM];
+  real xtemp[NMAX][NDIM], xdottemp[NMAX][NDIM], fi[NDIM], fidot[NDIM];
   real a2[NDIM], a3[NDIM], modfi, modfidot, moda2, moda3;
   real tmin, dt, dts, dtc, dnmtr, temp; 
-  extern void ffdot();
   int imin, nsteps;
   assert(n<=NMAX);
   nsteps=0;
@@ -138,8 +143,7 @@ int hermite(real x[NMAX][NDIM], real xdot[NMAX][NDIM],
          loop(k, NDIM) {
             xtemp[j][k] = x[j][k] + xdot[j][k]*dt + f[j][k]*dts/2  
                         + fdot[j][k]*dtc/6;
-            xdottemp[j][k] = xdot[j][k] + f[j][k]*dt + 
-	      /**/fdot[j][k]*dts/2;
+            xdottemp[j][k] = xdot[j][k] + f[j][k]*dt + fdot[j][k]*dts/2;
 	 }
       }
       ffdot(xtemp,xdottemp,m,i,n,fi,fidot);
@@ -174,7 +178,8 @@ int hermite(real x[NMAX][NDIM], real xdot[NMAX][NDIM],
 }
 
 void ffdot(real x[NMAX][NDIM], real xdot[NMAX][NDIM], 
-	   /**/real m[], int i, int n, real fi[], real fidot[]) {
+	   real m[], int i, int n, real fi[], real fidot[])
+{
       real rij[NDIM], rijdot[NDIM], r2, r3, r5, rrdot;
       loop(k, NDIM) { fi[k] = fidot[k] = 0;}
       loop(j, n) {
@@ -191,28 +196,26 @@ void ffdot(real x[NMAX][NDIM], real xdot[NMAX][NDIM],
 	    assert(r3!=0&&r5!=0);
             loop(k, NDIM) {
                fi[k] = fi[k] - m[j]*rij[k]/r3;
-               fidot[k] = fidot[k] - m[j]*(rijdot[k]/r3 - 
-					   /**/3*rrdot*rij[k]/r5);
+               fidot[k] = fidot[k] - m[j]*(rijdot[k]/r3 - 3*rrdot*rij[k]/r5);
 	    }
 	}
       }
 }
 
 
-void runtime_output(real x[NMAX][NDIM], real t, 
-		    /**/long int n){
+void runtime_output(real x[NMAX][NDIM], real t, long int n)
+{
   real ss=0;
-  loop (i,n) ss += x[i][0]*x[i][0] + x[i][1]*x[i][1] + 
-    /**/x[i][2]*x[i][2];
+  loop (i,n) ss += x[i][0]*x[i][0] + x[i][1]*x[i][1] + x[i][2]*x[i][2];
   printf("%lf %lf\n",t,sqrt(ss)/n);
 }
 
-void final_output(real t, long int cpu, long int nsteps, 
-		  /**/long int noutp){
+void final_output(real t, long int cpu, long int nsteps, long int noutp)
+{
   long int timenow;
   time(&timenow);
       printf("\n#%lf, %ld, %ld\n", 
-/* 	     t, (clock()-cpu)/CLOCKS_PER_SEC, nsteps); */
+	     // t, (clock()-cpu)/CLOCKS_PER_SEC, nsteps);
 	     t, (timenow-cpu), nsteps);
 }  
 

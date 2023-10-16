@@ -1,30 +1,51 @@
-.TH TABTRANSPOSE 1NEMO "5 October 2002"
-.SH NAME
+.TH TABTRANSPOSE 1NEMO "26 April 2022"
+
+.SH "NAME"
 tabtranspose \- transpose a table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabtranspose\fB [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabtranspose\fP transposes a table. Columns become the rows, rows become the
 columns. Comment lines are skipped.
-.SH PARAMETERS
+.PP
+Lines can be arbitrarly long.
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
 input file name. No default.
-.TP 20
+.TP
 \fBout=\fP
 output file name. No default.
-.TP 20
-\fBnmax=\fP
-max space (needed if data in pipe) [10000]
-.SH EXAMPLES
-.SH SEE ALSO
-tabmath(1NEMO)
-.SH AUTHOR
+.TP
+\fBalign=t|f\fP
+Align the column on output
+
+.SH "EXAMPLES"
+Using \fBtabtranspose\fP twice will result in the same file:
+.nf
+
+  tabgen tab00 10 20
+  tabtranspose tab00 - | tabtranspose - tab00n
+  diff tab00 tab00n
+
+.fi
+Note the \fBcolumn -t\fP program can also align columns
+
+.SH "SEE ALSO"
+tabmath(1NEMO), table(5NEMO), column(1)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 5-Oct-02	V1.0 Created	PJT
+24-jul-2020	V1.1 added align=	Sathvik
+26-apr-2022	V2.0 new table V2, removed nmax=	PJT
 .fi

@@ -1,9 +1,11 @@
-.TH CCDMOM 1NEMO "3 April 2018"
-.SH NAME
+.TH CCDMOM 1NEMO "14 May 2022"
+.SH "NAME"
 ccdmom \- moment or accumulate along an axis of an image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdmom\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdmom\fP takes special moments (in position, or image intensity)
 along an axis of an image/cube. 
 It can optionally also accumulate along the selected axis.
@@ -16,7 +18,11 @@ To get the intensity weighted shape of an object using the moments
 of inertia, use \fIccdshape(1NEMO)\fP.
 .PP
 Continuum subtraction is needed for reliable moments where applicable.
-.SH PARAMETERS
+.PP
+If moments needs to be taken across many images, like cubes with axis=4,
+use \fIccdmoms(1NEMO)\fP.
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -27,7 +33,7 @@ Input image file. No default.
 Output image file. No default.
 .TP
 \fBaxis=\fP
-Axis to take moment along (1=x 2=y 3=z). Unless \fBkeep=\fP, this axis will
+Axis to take moment along (1=x 2=y 3=z). Unless \fBkeep=t\fP, this axis will
 be reduced. [Default: \fB3\fP]
 .TP
 \fBmom=\fP
@@ -39,9 +45,10 @@ referring to the selected axis as "\fIvelocity\fP" we have the following moments
 1	mean velocity
 2	sigma, the velocity dispersion (FWHM = 2.355 * sigma)
 3	velocity of peak fit (around the max and the two points on either side)
+8	peak value along axis
 -1	average intensity along the axis
 -2	dispersion around the mean intensity along the axis
--3	differentials along an axis
+-3	differentials along an axis (forces keep=true)
 -4	clumping factor (only axis=3 supported now)
 30	total emission in the Nth (peak=) peak
 31	mean velocity of the Nth peak
@@ -69,13 +76,6 @@ The \fBmom=\fP keyword is ignored, and the input and output datasets will
 now have the same shape and dimension. 
 [Default: \fBf\fP]
 .TP
-** \fBclip=\fP **
-Exclude pixels with values in the range -clip to clip. Default: 0
-.TP
-** \fBrngmsk=t|f\fP **
-Don't assign a 1st moment if the value results in a value outside the
-range of the axis. This can easily happen for noisy data. Default: false.
-.TP
 \fBoper=\fP
 If supplied, this is an extra operator supplied to the input file and output file,
 to create the final output file. This is to prevent having to type two commands
@@ -94,11 +94,12 @@ For \fBmom=3,30-34\fP where it finds the peak, this allows you to find the N-th
 peak instead of the first. This is achieved by visiting each peak, and assigning
 a peak membership downwards from the peak and then finding the next one.
 .TP
-\fBintegrate=t|f\fP
-When using mom=0 the signal is summed along an axis, you can either just sum
-the numbers (this used to be the old default), or integrate, ie. multiply
-the sum by the cell-size along that axis. This is now the default, to make
-it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
+\fBclip=\fP
+Exclude pixels with values in the range -clip to clip. Default: 0
+.TP
+\fBrngmsk=t|f\fP
+Don't assign a 1st moment if the value results in a value outside the
+range of the axis. This can easily happen for noisy data. Default: false.
 .TP
 \fBabs=t|f\fP
 Use absolute values of the intensities for weights to a moment analysis. This is
@@ -113,23 +114,79 @@ Mask out values below zero for mom=30,31,32 (**experimental**)
 Fake a continuum subtraction for mom=30,31,32  (**experimental**)
 [t]
 .TP
+\fBintegrate=t|f\fP
+When using mom=0 the signal is summed along an axis, you can either just sum
+the numbers (this used to be the old default), or integrate, ie. multiply
+the sum by the cell-size along that axis. This is now the default, to make
+it more consistent with the new units in \fIsnapgrid(1NEMO)\fP.
+.TP
 \fBpos=\fP\fI[ix0,iy0]\fP
 If used, this should contain two (zero-based) pixel coordinates, at which position a spectrum
 is printed to stdout. Currently only implemented along the Z direction, hence X and Y. At
 some future time it may also support spectra along Y or X, but most advanced features are only
 implemented along axis=3. Default: none
-.SH SEE ALSO
-pvtrace(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), mom2cube(1NEMO), image(5NEMO)
-.SH CAVEATS
+
+.TP
+\fBarange=\fP\fI[k0,k1,k2,....]\fP
+Pixels along the \fBaxis\fP to include in the moment. By default the whole axis is used, but
+with this keyword select pixels can be selected, for example \fBarange=0:20,40:60\fP.
+Default: all pixels.
+
+.SH "EXAMPLES"
+In this example we examine a cube with independent values drawn from a gaussian
+distribution with mean 0 and dispersion 1.   The dispersion of the values along the 3rd axis are compared with the
+dispersion in the differentials (mom=-3). For a normal distribution the latter should be sqrt(2) higher than the
+intrinsic dispersion. Comparing the two, maps in this case, could say something about correllations
+along the 3rd axis (see also examples in \fItabtrend(1NEMO)\fP)
+
+.nf
+      1% ccdgen "" cube1 noise spar=0,1 size=100,100,1000 seed=123
+
+      # intrinsic dispersion
+      2% ccdmom cube1 -  mom=-2 | ccdstat - qac=t
+      QAC_STATS: - 0.999886 0.0224798 0.922334 1.08579  9998.86 1
+
+      # dispersion of the adjacent differences
+      3% ccdmom cube1 - mom=-3 | ccdmom - - mom=-2 | ccdstat - qac=t
+      QAC_STATS: - 1.4138 0.0388857 1.28338 1.55915  14138 1
+      
+      # dispersion of a hanning smoothed cube
+      % ccdsmooth cube1 - dir=z | ccdmom - - mom=-2 | ccdstat - qac=t
+      QAC_STATS: - 0.611611 0.0191999 0.541171 0.685092  6116.11 1
+
+.fi
+
+.SH "PYTHON"
+For those more familiar with python, here are some cross-walks, where \fBI\fP denotes the \fInumpy\fP cube,
+and \fBV\fP a one-dimensional WCS value along the the picked axis.
+the axis= keyword in the numpy functions to pick another but our default of axis=3.
+.nf
+.ta +2i
+       mom=0	m0 = I.sum(axis=2)
+       ?	I.mean(axis=2)
+       mom=-1	m1 = I.mean(axis=2)
+       mom=-2	m2 = I.std(axis=2)
+       mom=1    v = (V*I).sum(axis=2)/I.sum(axis=2)
+       mom=2    s=
+       mom=8    peak = I.max(axis=2)
+.fi
+
+.SH "SEE ALSO"
+pvtrace(1NEMO), ccdmoms(1NEMO), ccdsub(1NEMO), ccdrt(1NEMO), ccdshape(1NEMO), snapgrid(1NEMO), mom2cube(1NEMO), tabtrend(1NEMO), image(5NEMO), qac(5NEMO)
+
+.SH "CAVEATS"
 Cannot compute straight moments, e.g. the 2nd moment along an axis, such
 as e.g. \fIsnapgrid\fP can do. This 
 program only computes user friendly numbers (sum, mean, dispersion)
 and gives special meaning to negative values of mom= and axis=.
-.SH FILES
+
+.SH "FILES"
 src/image/misc/ccdmom.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 09-jun-95	V0.1 Created	PJT
@@ -146,4 +203,6 @@ Peter Teuben
 10-may-2017	V2.4 force q&d cont subtraction on mom=30,31,....	PJT
 15-jun-2017	V2.5 add pos= option	PJT
 21-jun-2017	V2.6 add abs= option	PJT
+17-apr-2022	V3.0 add arange=	PJT
+14-may-2022	V3.1 add mom=8 option	PJT
 .fi

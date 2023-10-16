@@ -13,10 +13,13 @@
 #   24-dec-04   support to run with EXEC= for e.g. valgrind using -v
 #    6-aug-06   look for Testfile's in usr tree also (-u will disable)
 #   26-nov-19   add bsf tests if not OK
+#   21-nov-20   check if any executables did not compile
+#    4-jun-21   always keep a local testsuite.log
 #
 #
-# BUG:  -b  does not remove executable, so you never know if new binary did
-#		not compile
+# BUG:  -b  does not remove executable, so you never know if new binary did not compile
+
+set version="19-jun-2023"
 
 set testdir=$NEMO/tmp/test$$
 set log=testsuite.log
@@ -104,12 +107,23 @@ if ($usr) set tdir=src,usr
 
 onintr cleanup
 
+# define red, green and neutral colors
+set red  = '\033[0;31m'
+set grn  = '\033[0;32m'
+set neu  = '\033[0m'
+set red  = '\e[1;31m'
+set grn  = '\e[1;32m'
+set neu  = '\e[0m'
+set ok   = "${red}OKOK${neu}"
+set fail = "${grn}FAIL${neu}"
+set ok   = "OK  "
+set fail = "FAIL"
+
 #echo OPTIONS=$options
 #echo CNRS=$clean $norun $cleanup $show
 echo "TESTSUITE started `date`"                                        > $log
+echo "TESTSUITE version $version"                                     >> $log
 echo "NEMO version $NEMOVER `hostname` ($NEMOHOST)"                   >> $log
-
-#   using $NEMO instead of $NEMO/src really makes it run slow on solaris
 
 foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
     if ($norun) then
@@ -139,17 +153,20 @@ foreach testfile (`find $NEMO/{$tdir} -name Testfile -print | sort`)
         end
         continue
     endif
-    echo -n TESTSUITE: $testfile:h
+#    echo -n TESTSUITE: $testfile:h
     echo "==========================================================" >>  $log
     if ($local) pushd $testfile:h >& /dev/null
     make -f $testfile clean all  $options EXEC="$exec"                >>& $log
     if ($status) then
-        echo " Problems"
+	echo -n "TESTSUITE: $fail $testfile:h"
+	echo ""
     else
-        echo " OK"
+	echo -n "TESTSUITE: $ok $testfile:h"
+	echo ""
     endif
     if ($local) popd >& /dev/null
 end
+
 echo "TESTSUITE   ended `date`"                                       >> $log
 
 cleanup:
@@ -159,18 +176,26 @@ cleanup:
     if ($show || $query) then
         set clean=1
     else
-        echo Results in $testdir/$log
+        grep 'not found' $testdir/$log | sort | uniq > $testdir/not-found.log
+	if (! -z $testdir/not-found.log) then
+	    echo FAIL : The following programs were not found:
+	    cat $testdir/not-found.log
+	endif
+        echo "Results in $testdir/$log"
+	echo "A copy in $NEMO/$log is kept as well as the latest."
 	grep BSF $testdir/$log | grep -v OK > $testdir/bsf-fail.log
 	if (-z $testdir/bsf-fail.log) then
 	    echo BSF regressions that are OK: `grep BSF $testdir/testsuite.log | grep OK | wc -l`
 	else
 	    echo BSF regression results that failed:
 	    cat $testdir/bsf-fail.log
-	    echo BSF regressions that are not OK: `grep OK $testdir/bsf-fail.log | wc -l`
+	    echo BSF regressions that are not OK: `grep FAIL $testdir/bsf-fail.log | wc -l`
 	endif
-	echo If you have any unsolved problems, this file should be saved.
+	echo "There are `ls bin|wc -l` binaries in NEMO"
         head -1 $testdir/$log
         tail -1 $testdir/$log
+
+	cp $testdir/$log $NEMO/$log
 	
     endif
 

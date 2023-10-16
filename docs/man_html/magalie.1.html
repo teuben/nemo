@@ -3,9 +3,10 @@
 
 <html>
 <head>
-<title>MKKD95(1NEMO) manual page</title>
+<title>MAGALIE(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -123,30 +124,23 @@ ISO [LH] </dd>
 <dt><b>seed=</b> </dt>
 <dd>Random seed [0] </dd>
 
-<dt><b>cleanup=</b> </dt>
-<dd>cleanup run directory after use
-(not used yet) </dd>
-
-<dt><b>seed=</b> </dt>
-<dd>Random seed. [Default: 0] </dd>
-
 <dt><b>cleanup=t|f</b> </dt>
-<dd>Cleanup runtime
-working directory? [Default: t] </dd>
+<dd>Cleanup runtime working directory?
+[Default: t] </dd>
 
 <dt><b>header=|4|8</b> </dt>
-<dd>Size of the header uses in unformatted
-fortran data. This used to be 4, but modern compilers (e.g. gfortran) may
-very well use 8. By default it is not specified, and the value determined
-to be the correct one during install (UNFIO_HDR_SIZE) is used. This keyword
-can be used to force another value, for example if you have compiled magalie
-with another  than the default compiler. </dd>
+<dd>Size of the header uses in unformatted fortran data.
+This used to be 4, but modern compilers (e.g. gfortran) may very well use
+8. By default it is not specified, and the value determined to be the correct
+one during install (UNFIO_HDR_SIZE) is used. This keyword can be used to
+force another value, for example if you have compiled magalie with another
+ than the default compiler. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Inputfile</a></h2>
-<b>magalie</b> calls the actual
-<b>magalie.exe</b> by reading an input file of parameters. Here is an annotated
-example of such a file (the comments can be left in when read) <br>
+<b>magalie</b> calls the actual <b>magalie.exe</b>
+by reading an input file of parameters. Here is an annotated example of
+such a file (the comments can be left in when read) <br>
 <pre>543216789       ! Random generator seed (ran1)
 n               ! Output particles smooth length?
 20000           ! Number of disc particles (M_d=1)

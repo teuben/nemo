@@ -1,4 +1,4 @@
-/* 
+/*
  * CCDMOM: take a moment along an axis in an image/cube
  *
  *	quick and dirty:  8-jun-95		pjt
@@ -58,19 +58,19 @@ string defv[] = {
   "pos=\n         Given this (i,j) [0 based] location, debug output spectral information",
 #else  
   "pos=\n         ** keyword disabled via the #ifdef USE_POS **",
-#endif  
-  "VERSION=2.7c\n 30-jul-2019 PJT",
+#endif
+  "arange=\n      Enumerate the axis pixels to use in moment, e.g. 0:10,20:30",
+  "VERSION=3.3a\n 27-dec-2022 PJT",
   NULL,
 };
 
 string usage = "moment along an axis of an image";
-string cvsid="$Id$";
 
 local real peak_spectrum(int n, real *spec, int p);
 local real peak_mom(int n, real *spec, int *smask, int peak, int mom, bool Qcontsub, bool Qabs, bool Qzero);
 local real peak_axis(imageptr iptr, int i, int j, int k, int axis);
 local int  peak_find(int n, real *data, int *mask, int npeak);
-local int  peak_assign(int n, real *data, int *mask);
+local void peak_assign(int n, real *data, int *mask);
 local bool out_of_range(real *clip, real x);
 local void image_oper(imageptr ip1, string oper, imageptr ip2);
 
@@ -81,10 +81,12 @@ void nemo_main()
     stream  instr, outstr;
     string  oper;
     int     i,j,k,nx, ny, nz, nx1, ny1, nz1;
+    int     i1,j1,k1;
     int     pos[2];
     int     ii, axis, mom;
     int     nclip, apeak, apeak1, cnt;
-    imageptr iptr=NULL, iptr1=NULL, iptr2=NULL;      /* pointer to images */
+    int     narange=0, *arange;
+    imageptr iptr=NULL, iptr1=NULL;         /* pointer to images */
     real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
     real    *spec, ifactor, cv, clip[2], m_min, m_max;
     int     *smask;
@@ -97,6 +99,7 @@ void nemo_main()
     bool    Qabs  = getbparam("abs");
     bool    Qzero = getbparam("zero");
     bool    Qcontsub = getbparam("contsub");
+    bool    Qrange = hasvalue("arange");
 
     if (Qoper) {
       Qkeep = TRUE;
@@ -132,9 +135,21 @@ void nemo_main()
     ny1 = ny = Ny(iptr);
     nz1 = nz = Nz(iptr);
 
+    if (axis==1) narange = nx;
+    if (axis==2) narange = ny;
+    if (axis==3) narange = nz;
+    if (narange == 0) error("illegal axis=%d", axis);
+    arange = (int *) allocate(sizeof(int) * narange);
+    if (Qrange) {
+      narange = nemoinpi(getparam("arange"), arange, narange);
+      if (narange < 0) error("Error %d parsing arange=%s", narange,getparam("arange"));
+    } else
+      for (i=0; i<narange; i++) arange[i] = i;
+
     if (mom==-4) {   /* clumping hack : only works for axis=3 */
       if (axis==3) {
-	for (k=0; k<nz; k++) {
+	for (k1=0; k1<narange; k1++) {
+	  k = arange[k1];
 	  tmp0 = tmp1 = tmp2 = 0.0;
 	  for (j=0; j<ny; j++) {
             for (i=0; i<nx; i++) {	
@@ -158,6 +173,8 @@ void nemo_main()
       free_image(iptr);
       return;
     }
+
+    if (mom==-3) Qkeep=TRUE;
 
     if (Qkeep) {
         dprintf(0,"Keeping %d*%d*%d cube\n",nx1,ny1,nz1);
@@ -199,22 +216,26 @@ void nemo_main()
 
     if (axis > 0) {
       create_cube(&iptr1,nx1,ny1,nz1);
-      create_cube(&iptr2,nx1,ny1,nz1);
+      copy_header(iptr, iptr1, 1);
     } else {
       copy_image(iptr,&iptr1);
     }
 
     ifactor = 1.0;
     if (axis==1) {
+      
       scale = Dx(iptr);
       offset = Xmin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Xref(iptr)*Dx(iptr);
       if (Qint) ifactor *= ABS(Dx(iptr));
-      for (k=0; k<nz; k++)
+      for (k=0; k<nz; k++) {
         for (j=0; j<ny; j++) {
 	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,0,j,k);
-            for (i=0; i<nx; i++) {
+            for (i1=0; i1<narange; i1++) {
+	        i = arange[i1];
 	        spec[i] = CubeValue(iptr,i,j,k);
  	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
@@ -245,33 +266,37 @@ void nemo_main()
 	    }
 	    for (i=0; i<nx1; i++)
 	      CubeValue(iptr1,i,j,k) = newvalue;
-        }
+        } // j
+      } // k
+      /* TODO: fix up Qkeep headers */
 
-        /* TODO: fix up Qkeep headers */
-
-        Xmin(iptr1) = Xmin(iptr) + 0.5*(nx-1)*Dx(iptr);
-        Ymin(iptr1) = Ymin(iptr);
-        Zmin(iptr1) = Zmin(iptr);
-        Dx(iptr1) = nx * Dx(iptr);
-        Dy(iptr1) = Dy(iptr);
-        Dz(iptr1) = Dz(iptr);
+      Xmin(iptr1) = Xmin(iptr) + 0.5*(nx-1)*Dx(iptr);
+      Ymin(iptr1) = Ymin(iptr);
+      Zmin(iptr1) = Zmin(iptr);
+      Dx(iptr1) = nx * Dx(iptr);
+      Dy(iptr1) = Dy(iptr);
+      Dz(iptr1) = Dz(iptr);
         
-        Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
-        Namey(iptr1) = Namey(iptr);
-        Namez(iptr1) = Namez(iptr);
+      Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
+      Namey(iptr1) = Namey(iptr);
+      Namez(iptr1) = Namez(iptr);
+      
+      if (Qoper) image_oper(iptr,oper,iptr1);
 
-	if (Qoper) image_oper(iptr,oper,iptr1);
-
-    } else if (axis==2) {                      
+    } else if (axis==2) {
+      
       scale = Dy(iptr);
       offset = Ymin(iptr);
+      if (Axis(iptr)==1)
+	offset -= Yref(iptr)*Dy(iptr);
       if (Qint) ifactor *= ABS(Dy(iptr));
-      for (k=0; k<nz; k++)
+      for (k=0; k<nz; k++) {
         for (i=0; i<nx; i++) {
             tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
 	    peakvalue = CubeValue(iptr,i,0,k);
-            for (j=0; j<ny; j++) {
+            for (j1=0; j1<narange; j1++) {
+	        j = arange[j1];
 	        spec[j] = CubeValue(iptr,i,j,k); 
  	        if (Qclip && out_of_range(clip,CubeValue(iptr,i,j,k))) continue;
 		cnt++;
@@ -302,32 +327,37 @@ void nemo_main()
 	    }
             for (j=0; j<ny1; j++)
                 CubeValue(iptr1,i,j,k) = newvalue;
-        }
+        } // i
+      } // k
 
-        /* TODO: */
+      /* TODO: */
 
-        Xmin(iptr1) = Xmin(iptr);
-        Ymin(iptr1) = Ymin(iptr) + 0.5*(ny-1)*Dy(iptr);
-        Zmin(iptr1) = Zmin(iptr);
-        Dx(iptr1) = Dx(iptr);
-        Dy(iptr1) = ny * Dy(iptr);
-        Dz(iptr1) = Dz(iptr);
-        
-        Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
-        Namey(iptr1) = Namey(iptr);
-        Namez(iptr1) = Namez(iptr);
-
-	if (Qoper) image_oper(iptr,oper,iptr1);
+      Xmin(iptr1) = Xmin(iptr);
+      Ymin(iptr1) = Ymin(iptr) + 0.5*(ny-1)*Dy(iptr);
+      Zmin(iptr1) = Zmin(iptr);
+      Dx(iptr1) = Dx(iptr);
+      Dy(iptr1) = ny * Dy(iptr);
+      Dz(iptr1) = Dz(iptr);
+      
+      Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
+      Namey(iptr1) = Namey(iptr);
+      Namez(iptr1) = Namez(iptr);
+      
+      if (Qoper) image_oper(iptr,oper,iptr1);
 
     } else if (axis==3) {                       /* this one is well tested and has more options */
+      
         scale = Dz(iptr);
 	offset = Zmin(iptr);
+	if (Axis(iptr)==1)
+	  offset -= Zref(iptr)*Dz(iptr);
 	if (Qint) ifactor *= ABS(Dz(iptr));
     	for(j=0; j<ny; j++) {
       	  for(i=0; i<nx; i++) {                         /* loop over all X and Y positions */
     	    tmp0 = tmp00 = tmp1 = tmp2 = 0.0;
 	    cnt = 0;
-    	    for(k=0; k<nz; k++) {
+    	    for(k1=0; k1<narange; k1++) {
+   	        k = arange[k1];
 	        spec[k] = CubeValue(iptr,i,j,k);
  	        if (Qclip && out_of_range(clip,spec[k])) continue;
 		if (cnt==0) {
@@ -341,15 +371,16 @@ void nemo_main()
 		tmp00 += sqr(spec[k]);
 		if (spec[k] > peakvalue) {
 		  apeak = k;
-		  peakvalue = spec[k];
+		  peakvalue = spec[k];     // mom=8
 		}
 		if (mom==-3) {
 		  if (k==0)
 		    CubeValue(iptr1,i,j,k) = 0;
 		  else
 		    CubeValue(iptr1,i,j,k) = spec[k]-spec[k-1];
-		}
-    	    } /* for(k) */
+		} 
+    	    } /* for(k/k1) */
+	    
 	    if (cnt==0 || (tmp0==0.0 && tmp00==0.0)) {
 	      newvalue = 0.0;
 	    } else {
@@ -367,6 +398,8 @@ void nemo_main()
 		  newvalue = 0.0;
 		else
 		  newvalue = scale*sqrt(newvalue);
+	      } else if (mom==8) {
+		newvalue = peakvalue;
 	      } else if (mom==3 || mom/10==3) {  /* mom=3, 30,31,32,33,34 */
 		if (npeak == 0) {
 		  if (mom==3) {
@@ -380,7 +413,7 @@ void nemo_main()
 		  } else {
 		      newvalue = 0.0;
 		  }
-		} else {
+		} else { // npeak > 0
 		  (void) peak_find(nz, spec, smask, 0);                  /* initialize smask */
 		  apeak1 = peak_find(nz, spec, smask, 1);                /* first peak again */
 		  if (apeak1 > 0) {
@@ -439,6 +472,10 @@ void nemo_main()
         Dx(iptr1) = Dx(iptr);
         Dy(iptr1) = Dy(iptr);
         Dz(iptr1) = nz * Dz(iptr);
+	Xref(iptr1) = Xref(iptr);
+	Yref(iptr1) = Yref(iptr);
+	Zref(iptr1) = 0.0;
+	Axis(iptr1) = Axis(iptr);
         
         Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
         Namey(iptr1) = Namey(iptr);
@@ -478,7 +515,9 @@ void nemo_main()
 	  }
     } else
         error("Cannot do axis %d",axis);
-
+#if 0
+    minmax_image(iptr1);
+#else
     m_min = HUGE;
     m_max = -HUGE;
     for (k=0; k<Nz(iptr1); k++)
@@ -487,10 +526,10 @@ void nemo_main()
       cv = CubeValue(iptr1,i,j,k);
       m_max = MAX(m_max, cv);
       m_min = MIN(m_min, cv);
-
     }
     MapMin(iptr1) = m_min;
     MapMax(iptr1) = m_max;
+#endif    
     write_image(outstr, iptr1);
 }
 
@@ -615,7 +654,7 @@ local real peak_axis(imageptr iptr, int i, int j, int k, int axis)
 local int peak_find(int n, real *data, int *mask, int npeak)
 {
   int i, ipeak=0, apeak=-1;
-  real peakvalue, oldvalue;
+  real peakvalue=0, oldvalue=0;  // fool compiler
 
   dprintf(1,"peak_find %d\n",n);
   if (npeak==0) {               /* initialize by resetting the mask */
@@ -656,6 +695,7 @@ local int peak_find(int n, real *data, int *mask, int npeak)
     if (apeak==(n-1)) {         /* ...or last point, since they have no neighbors */
       mask[apeak]= 0;
       apeak = -1;
+      // compiler: peakvalue may be used uninitialized
       for (i=n-2; oldvalue=peakvalue, mask[i]==0 && i>0; i--) {  /* walk down, and mask out */
 	if (data[i] > oldvalue) break;                        /* until data increase again */
 	oldvalue = data[i];
@@ -689,7 +729,7 @@ static inline int outside(real x,int i0,int i1) {
   return 1;
 }
 
-local int peak_assign(int n, real *d, int *s)
+local void peak_assign(int n, real *d, int *s)
 {
   int i;
   real p;

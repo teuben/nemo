@@ -81,6 +81,11 @@ LIMITED_WARNINGS	:= -Wextra -Winit-self
 -include ../utils/make.gcc
 endif
 
+# clang compiler
+ifeq ($(COMPILER),clang)
+-include ../utils/make.clang
+endif
+
 # Portland group compiler
 ifeq ($(COMPILER),pgi)
 -include ../utils/make.pgi
@@ -101,6 +106,7 @@ ifeq ($(COMPILER),icc)
 -include ../utils/make.icc
 endif
 
+
 # final compiler and linker flags
 FILEIO		:= -D_FILE_OFFSET_BITS=64
 NBDYFLAGS	:= $(DSPH) $(DPRECISION) $(DNEMO) $(DSSE) $(DSOFT) $(DWALTER)
@@ -116,6 +122,12 @@ RL		:= ranlib
 
 IUTIL		:= -I$(IUTI)
 LUTIL		:= -L../utils/lib -lWDutils
+
+ifneq ($(wildcard /usr/include/tirpc/rpc/rpc.h),)
+IUTIL		+= -I/usr/include/tirpc
+LUTIL		+= -ltirpc
+endif
+
 
 # --------------
 # falcON library

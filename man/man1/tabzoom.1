@@ -1,9 +1,12 @@
 .TH TABZOOM 1NEMO "22 October 2003"
-.SH NAME
+
+.SH "NAME"
 tabzoom \- dynamic query table viewer with interactive zoom and action
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabzoom in=\fP\fItable_file\fP [\fIparameter=value\fP]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fItabzoom\fP is an interactive program that
 displays numeric data from an ASCII table in a 2D
 plot (see also \fItabplot(1NEMO)\fP and \fItabview(1NEMO)\fP),
@@ -47,9 +50,9 @@ are AND-ed.
 .PP
 \fINote:\fP in this prototype the words \fIslider\fP and \fIcolumn\fP
 can be used interchangebly.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man/parameters
 .TP 20
 \fBin=\fP\fIin_table\fP
 Input table filename. No default.
@@ -140,7 +143,8 @@ Go into cursor mode directly?
 .TP
 \fBheadline=\fItext\fP
 Random verbiage, will be plotted along right top of plot for id. [default: none].
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 tabzoom does everything tabview does, and more. The new interactive commands
 are 'c', 'z' and 'Z'. First create a simple table, and tabzoom it:
 .nf
@@ -155,7 +159,8 @@ to the selected point:
   #
   echo ECHO1 ::  $*
 .fi
-.SH INTERACTIVE SLIDER COMMANDS
+
+.SH "INTERACTIVE SLIDER COMMANDS"
 Although the final program will have (X-window) 
 graphic sliders, the prototype
 has a simple command line interface to select and manipulate sliders
@@ -208,13 +213,16 @@ can be done using the
         \fB|\fP
 .fi
 command itself, since it remembers the last used \fB|\fP\fIcmd\fP. 
-.SH SEE ALSO
-tabview(1NEMO), tabplot(1NEMO), fie(3NEMO), layout(3NEMO), xgobi(l)
-.SH AUTHOR
+
+.SH "SEE ALSO"
+tabview(1NEMO), tabplot(1NEMO), fie(3NEMO), layout(3NEMO), xgobi(l), ggobi(l)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.5i +5.5i
 1-jul-03	V1.0 cloned off tabview			PJT
 22-oct-03	V1.2 added xlab, ylab, headline		PJT
 .fi

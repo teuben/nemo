@@ -11,6 +11,8 @@
  *
  * For a realistic galaxy model, see e.g. http://arxiv.org/abs/1502.00627
  *
+ * For projection properties, see https://arxiv.org/abs/2308.09615
+ *
  *  March 90 Stefano Casertano, University of Pittsburgh
  * 10-Nov-90 inserted omega as first parameter for standard Nemo  PJT
  *  6-oct-91 fixed bug - and made code accept both XYZ and XZY versions (pjt)

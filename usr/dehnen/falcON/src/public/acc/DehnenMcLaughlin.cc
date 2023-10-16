@@ -26,6 +26,7 @@
 #undef POT_DEF
 #include <iostream>
 #include <utils/WDMath.h>
+#include <stdinc.h>
 #include <defacc.h> // $NEMOINC/defacc.h
 ////////////////////////////////////////////////////////////////////////////////
 namespace {

@@ -6,6 +6,7 @@
 <title>CCDMATH(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -76,11 +77,17 @@ image creation]. </dd>
 <dd>seed for the random number generator (default:
 a value 0, which will be converted into a unique new value using UNIX&rsquo;s
 clock time, in seconds since once-upon-a-time-in-the-seventies). </dd>
+
+<dt><b>replicate=t|f<b>
+</b></b></dt>
+<dd>Normally each input image needs to be of the same shape. Setting <b>replicate=t</b>
+will allow the 3rd axis of a 2D map to be replicated in order for the <b>fie=</b>
+expression to be parsed. Default: false </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-Create
-a &rsquo;difference&rsquo; map from two input maps: <br>
+Create a &rsquo;difference&rsquo; map from
+two input maps: <br>
 <pre>   % ccdmath inmap1,inmap2 outmap "abs(%1-%2)"
 </pre></b>create the maximum of two maps: <br>
 <pre>   % ccdmath inmap1,inmap2 outmap "ifgt(%1,%2,%1,%2)"
@@ -103,26 +110,38 @@ in signal/noise for large values from the mean: <br>
   cddmath map0 map0s "sign(%1)*$s*log(1+abs(%1)/$s)"
 </pre>
 <h2><a name='sect5' href='#toc5'>Timing</a></h2>
-Performance on Rigel (SUN 3/160, 16Mhz): <br>
+Performance on Rigel (SUN 3/160, 16Mhz): 
+<p> <br>
 <pre>100 * 100<tt> </tt>&nbsp;<tt> </tt>&nbsp;rang: 5.8"<tt> </tt>&nbsp;<tt> </tt>&nbsp;+: 3.4"  <tt> </tt>&nbsp;<tt> </tt>&nbsp;sqrt: 2.6"
 200 * 200<tt> </tt>&nbsp;<tt> </tt>&nbsp;rang: 23.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;+: 13.0"<tt> </tt>&nbsp;<tt> </tt>&nbsp;sqrt: 8.7"
 300 * 300<tt> </tt>&nbsp;<tt> </tt>&nbsp;rang: 51.8"<tt> </tt>&nbsp;<tt> </tt>&nbsp;+: 31.3"<tt> </tt>&nbsp;<tt> </tt>&nbsp;sqrt: 23.8"
 512 * 512<tt> </tt>&nbsp;<tt> </tt>&nbsp;rang: 152.7"<tt> </tt>&nbsp;<tt> </tt>&nbsp;+: 88.4"<tt> </tt>&nbsp;<tt> </tt>&nbsp;sqrt: 64.2"
 </pre>
+<p> For some historic amusement, this 512^2 <i>rang</i> benchmark measured in 1989
+ took 153s. On a 2021 laptop this same benchmark took 0.81/64". Scaling this
+it means 12,000 times faster, in 32 years of evolution of hardware. This
+was a 4.2GHz i5-1135G7. For <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
+ this was a factor of 26,000,
+see <a href='bench.5.html'><i>bench(5NEMO)</i></a>
+. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='fie.3.html'>fie(3NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
 , <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
-, <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
-
-
+,
+<a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
+ 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>src/image/trans  <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdmath.c ccdmath.1
 </pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre> 1-Jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -133,6 +152,7 @@ Peter Teuben
 1-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0: set/change the WCS<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-jun-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1: allow %w and %r, and use offset from crpix<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-aug-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.2: fixed error in setting crpix (off by 2!)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+25-dec-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.3: add replicate=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre>
 <p> <p>
 

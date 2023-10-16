@@ -1,6 +1,9 @@
+#  -*- makefile -*-
+
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
-      tabfilter tabtrend gauss1d gauss2d meanmed tabstat
+      tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms tabcsv \
+      tabrows tabcols tabint tabpeak
 
 NEED = $(BIN) nemoinp
 
@@ -12,7 +15,8 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f tab.in tab.out gauss1d.tab gauss2d.tab fit/myline.so
+	@rm -f txt.in csv.in tab.in tab2.in dms.in tab.out \
+	gauss1d.tab gauss2d.tab fit/myline.so tab123
 
 all:	tab.in $(BIN) fitmyline
 
@@ -20,27 +24,83 @@ tab.in:
 	@echo Creating $@
 	$(EXEC) nemoinp 1:100 > tab.in
 
+tab2.in:
+	@echo Creating $@
+	$(EXEC) nemoinp 90.25::5 newline=f > tab2.in
+
+txt.in:
+	@echo "#   testing txtpar"   > txt.in
+	@echo "a  1 2 3"   >> txt.in
+	@echo "a  4 5 6"   >> txt.in
+	@echo "b  7 8 9"   >> txt.in
+	@echo "c  101 102 103"  >> txt.in
+
+csv.in:
+	@echo "#   testing txtpar"   > csv.in
+	@echo "a, 1, 2, 3"   >> csv.in
+	@echo "a, 4, 5, 6"   >> csv.in
+	@echo "b, 7, 8, 9"   >> csv.in
+	@echo "c, 101, 102, 103"  >> csv.in
+
+dms.in:
+	@echo "#   testing txtpar"   > dms.in
+	@echo "1   12:00:20   60:00:00" >> dms.in
+	@echo "2   12:00:20   60:00:10" >> dms.in
+	@echo "3   11:59:40   60:00:00" >> dms.in
+	@echo "4   11:59:40   60:00:10" >> dms.in
+
+
+tab.out: tabmath
+
 tabmath: tab.in
 	@echo Running $@
 	$(EXEC) tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
 
 tabplot:
 	@echo Running $@
-	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - ; nemo.coverage tabplot.c
+	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - 1 2 ; nemo.coverage tabplot.c
+	$(EXEC) tabmath tab.in - 'sqrt(%1)' | $(EXEC) tabplot - 0 2 ; nemo.coverage tabplot.c
 
 NMAX = 100000
 
 tabhist:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
-	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - nmax=-$(NMAX); nemo.coverage tabhist.c
+	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabhist - ; nemo.coverage tabhist.c
 
 tabstat:
 	@echo Running $*
 	$(EXEC) nemoinp 1:1000 | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
-	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - nmax=-$(NMAX); nemo.coverage tabstat.c
-	
+	$(EXEC) nemoinp 1:$(NMAX) nmax=$(NMAX) | $(EXEC) tabmath - - 'rang(0,1)' all seed=123 | $(EXEC) tabstat - ; nemo.coverage tabstat.c
 
+tabint: tab.out
+	@echo Running $*
+	$(EXEC) tabint tab.out ; nemo.coverage tabstat.c
+	$(EXEC) tabint tab.out xmin=10 xmax=20 ; nemo.coverage tabstat.c
+	@echo Results should be 665.963 and 37.2084
+
+
+txtpar:  txt.in
+	 @echo Running $*
+	 $(EXEC) txtpar txt.in p0=1,2; nemo.coverage txtpar.c
+	 $(EXEC) txtpar txt.in p0=a,2,2 p1=b,1,3 expr=%1,%2,%1+%2; nemo.coverage txtpar.c
+
+tabdms: tab2.in dms.in
+	@echo 6 | tabdms - - tohms=1
+	@echo 6 | tabdms - - todms=1
+	@echo 06:00:00 | tabdms - - fromhms=1
+	@echo 06:00:00 | tabdms - - fromdms=1
+	tabdms tab2.in - todms=1,-2 tohms=3,-4; nemo.coverage tabdms.c
+	tabdms dms.in - fromhms=2 fromdms=3 center=12:00:00,60:00:00 scale=3600
+	tabdms dms.in - fromdms=2,3 center=12:00:00,60:00:00 scale=3600
+
+tabcols: txt.in csv.in
+	$(EXEC) tabcols txt.in 2,3; nemo.coverage tabcols.c
+	$(EXEC) tabcols csv.in 2,3
+
+tabrows: txt.in csv.in
+	$(EXEC) tabrows txt.in 2,3; nemo.coverage tabrows.c
+	$(EXEC) tabrows csv.in 2,3
 
 meanmed:
 	@echo Running $*
@@ -67,6 +127,7 @@ tabnllsqfit:
 tabdate:
 	@echo Running $*
 	@echo 1000000000 | $(EXEC) tabdate - - %s %c
+	@echo 'Sat Sep  8 21:46:40 2001'
 
 tabfilter:
 	@echo Running $*
@@ -90,12 +151,21 @@ fitmyline:
 SIZE=4
 NOISE=0.01
 
-gauss1d:
+gauss1d.tab:
 	@echo "Running $* with gauss1d(B=2 A=3 x0=1 b=1)"
 	nemoinp 0:$(SIZE) | tabmath - - '0+3*exp(-((%1-1)**2)/2)+rang(0,$(NOISE))' seed=123 > gauss1d.tab
+
+
+gauss1d: gauss1d.tab
 	tablsqfit   gauss1d.tab fit=gauss1d
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
 	tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
+
+tabpeak: gauss1d.tab
+	@echo Running $*
+	$(EXEC) tabpeak gauss1d.tab ; nemo.coverage tabint.c
+	@echo "0.998270 3.009534 should be the result"
+
 
 gauss2d:
 	@echo "Running $* with gauss2d(B=0 A=3 x0=1 y0=1 b=1)"
@@ -104,3 +174,26 @@ gauss2d:
 	tablsqfit   gauss2d.tab 1,2 3 fit=gauss2d
 	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=0,1,1,1,1
 	tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=1,1,1,1,1
+
+# new table2
+tab123:
+	tabgen tab123
+
+tabcsv: tab123
+	tabcsv tab123
+
+
+table2:	tab123
+	./tabletest tab123 test=0
+	./tabletest tab123 test=1
+	./tabletest tab123 test=2
+	./tabletest tab123 test=3
+	./tabletest tab123 test=4
+	cat tab123  | ./tabletest - test=0
+	-cat tab123 | ./tabletest - test=1
+	cat tab123  | ./tabletest - test=2
+	-cat tab123  | ./tabletest - test=3
+	cat tab123  | ./tabletest - test=4
+
+
+# testing

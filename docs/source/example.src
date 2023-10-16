@@ -1,0 +1,35 @@
+/*
+ * EXAMPLE: example template NEMO program
+ *
+ *  History:    30-aug-93   Created                     PJT
+ */
+
+#include <nemo.h>              /* stdinc.h + getparam.h */
+
+string defv[] = {                                       /* keywords */
+    "out=???\n          Output file (a snapshot)",
+    "nbody=256\n        Number of bodies",
+    "center=t\n         Re-center? (t|f)",
+    "mass=1.0\n         Mass of cluster",
+    "headline=\n        Optional headline for data",    
+    "VERSION=0.1\n      30-aug-93 PJT",
+    NULL,
+};
+
+string usage = "Example template";                  /* recommended usage */
+
+nemo_main ()                                      /* called NEMO's main() */
+{
+    stream outstr = stropen(getparam("out"),"w");
+    int nbody     = getiparam("nbody");
+    bool center   = getbparam("center");
+    real mass     = getdparam("mass");
+    string headline = NULL;
+
+    if (hasvalue("headline")) headline = getparam("headline");
+
+    if (nbody < 1) error("Bad number of bodies (%d)",nbody);
+    if (mass < 0)  error("Cannot have negative mass (%g)",mass);
+    
+    /* ... real code goes here ... */
+}

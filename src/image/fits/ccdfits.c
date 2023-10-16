@@ -43,7 +43,8 @@
  *       6-apr-17   5.9  allow refmap to update only certain WCS (1,2,3)     PJT
  *       8-apr-17   6.0  new approach inheriting a new WCS
  *      14-jun-19   6.0a correct VSYS when in freq=t mode, fix cdelt1 in one common case
- *      19-jun-10   6.1  Output now in km/s
+ *      19-jun-19   6.1  Output now in km/s
+ *      27-dec-20   6.3  fitshead= header template keyword 
  *
  *  TODO:
  *      reference mapping has not been well tested, especially for 2D
@@ -56,17 +57,19 @@
 
 
 #include <stdinc.h>
+#include <time.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
 #include <history.h>
 #include <fitsio_nemo.h>
+#include <mks.h>
 
 string defv[] = {
         "in=???\n        Input image filename",
         "out=???\n       Output fits filename",
-	"bitpix=-32\n	 FITS bitpix value {16,32,-32}",
+	"bitpix=-32\n	 FITS bitpix value {16,32,-32,-64}",
         "scale=1,1,1\n   Extra scalefactor for cdelt&crval",
         "iscale=1,0\n    Scale and Offset Intensity conversion factor",
         "object=\n       Object name",
@@ -79,31 +82,34 @@ string defv[] = {
 	"crval=\n        reference value, if different from default",
 	"cdelt=\n        pixel value increment, if different from default",
 	"radecvel=f\n    Enforce reasonable RA/DEC/VEL axis descriptor",
-	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN)",
-	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	"proj=SIN\n      Projection type if RA/DEC used (SIN,TAN,CAR)",
+	//	"restfreq=115271204000\n   RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */
+	"restfreq=\n     RESTFRQ (in Hz) if a doppler axis is used",  /* 1.420405751786 */	
 	"vsys=0\n        VSYS correction in km/s",
 	"freq=f\n        Output axis in FREQ or VEL",
 	"dummy=t\n       Write dummy axes also ?",
 	"nfill=0\n	 Add some dummy comment cards to test fitsio",
 	"ndim=\n         Testing if only that many dimensions need to be written",
+	"bunit=\n        Override the bunit",
 	"select=1\n      Which image (if more than 1 present, 1=first) to select",
 	"blank=\n        If set, use this is the BLANK value in FITS (usual NaN)",
-        "VERSION=6.2\n   1-aug-2019 PJT",
+	"fitshead=\n     If used, the header of this file is used instead",
+        "VERSION=6.6\n   31-dec-2022 PJT",
         NULL,
 };
 
 string usage = "convert image to a fits file";
-
-string cvsid = "$Id$";
 
 stream  instr, outstr;                         /* file streams */
 
 imageptr iptr=NULL;                     /* image, allocated dynamically */
 int  isel = 0;
 
-double scale[4];        /* scale conversion for FITS (CDELT) */
-double iscale[2];	/* intensity rescale */
+double scale[4];         /* scale conversion for FITS (CDELT) */
+double iscale[2];	 /* intensity rescale */
 string object;           /* name of object in FITS header */
+string telescope;        /* name of telescope in FITS header */
+string bunit;            /* name of intensity unit in FITS header */
 string comment;          /* extra comments */
 string headline;         /* optional NEMO headline, added as COMMENT */
 string proj;             /* projection type for WCS */
@@ -114,6 +120,7 @@ bool Qrefmap;
 bool Qcrval, Qcdelt, Qcrpix;
 bool Qdummy;             /* write dummy axes ? */
 bool Qblank;
+bool Qfitshead; 
 real blankval;
 int  nrefaxis, refaxis[4];
 bool Qrefaxis[4];
@@ -122,9 +129,11 @@ int   nref = 0, nfill = 0;
 FLOAT ref_crval[4] = {0,0,0,1},
       ref_crpix[4] = {1,1,1,1},
       ref_cdelt[4] = {1,1,1,1};
-char  ref_ctype[4][80], ref_cunit[4][80];
-FLOAT restfreq;
-real  vsys;
+char  ref_ctype[4][80],
+      ref_cunit[4][80];
+FLOAT restfreq = 1420405751.786;  /* HI line default line for radecvel=t */
+real  vsys = 0.0;
+real  equinox = 2000.0;
 
 void setparams(void);
 void write_fits(string,imageptr);
@@ -145,6 +154,34 @@ void nemo_main()
   strclose(instr);                           /* close image file */
   write_fits(getparam("out"),iptr);          /* write fits file */
   free_image(iptr);
+
+  // output file needs to get the header of fitshead=
+  // this is a big hack, with little error checking on size matching
+  // so the fits file could be illegal
+  if (Qfitshead) {
+    warning("Replacing header from %s",getparam("fitshead"));
+    
+    static char fnh[32], fnd[32], cmd[256];
+#if 0    
+    strcpy(fnh,"tmp.head");
+    strcpy(fnd,"tmp.data");
+#else
+    sprintf(fnh,"tmp_%d.head",getpid());
+    sprintf(fnd,"tmp_%d.data",getpid());
+#endif
+    sprintf(cmd,"scanfits in=%s out=%s select=header", getparam("fitshead"), fnh);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"scanfits in=%s out=%s select=data",   getparam("out"),       fnd);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"cat %s %s > %s", fnh, fnd, getparam("out"));
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+    sprintf(cmd,"rm %s %s", fnh, fnd);
+    dprintf(1,"%s\n",cmd);
+    if (system(cmd)) error("Could not cmd=%s",cmd);
+  }
 }
 
 void setparams(void)
@@ -174,12 +211,14 @@ void setparams(void)
     error("parsing error scale=%s - must be 2 numbers",getparam("scale"));
   object = getparam("object");
   comment = getparam("comment");
-  restfreq = getrparam("restfreq");
+  if (hasvalue("restfreq"))
+    restfreq = getrparam("restfreq");
   Qcdmatrix = getbparam("cdmatrix");
   Qradecvel = getbparam("radecvel");
   Qfreq     = getbparam("freq");
   Qblank    = hasvalue("blank");
   if (Qblank) blankval = getrparam("blank");
+  Qfitshead = hasvalue("fitshead");
 
   
   Qrefmap = hasvalue("refmap");
@@ -218,15 +257,19 @@ static string ctypes[4] = { "CTYPE1",   "CTYPE2",   "CTYPE3",   "CTYPE4"};
 static string cdelts[4] = { "CDELT1",   "CDELT2",   "CDELT3",   "CDELT4"};
 static string crvals[4] = { "CRVAL1",   "CRVAL2",   "CRVAL3",   "CRVAL4"};
 static string crpixs[4] = { "CRPIX1",   "CRPIX2",   "CRPIX3",   "CRPIX4"};
-static string radeves[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
-static string radevet[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
-//static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"};
-//static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"};
+static string radevrs[4]= { "RA---SIN", "DEC--SIN", "VRAD",     "STOKES"};
+static string radevrt[4]= { "RA---TAN", "DEC--TAN", "VRAD",     "STOKES"};
+static string radevrc[4]= { "RA---CAR", "DEC--CAR", "VRAD",     "STOKES"};
+static string radeves[4]= { "RA---SIN", "DEC--SIN", "VELO-LSR", "STOKES"}; // careful
+static string radevet[4]= { "RA---TAN", "DEC--TAN", "VELO-LSR", "STOKES"}; // careful
+static string radevec[4]= { "RA---CAR", "DEC--CAR", "VELO-LSR", "STOKES"}; // careful
 static string radefrs[4]= { "RA---SIN", "DEC--SIN", "FREQ    ", "STOKES"};
 static string radefrt[4]= { "RA---TAN", "DEC--TAN", "FREQ    ", "STOKES"};
+static string radefrc[4]= { "RA---CAR", "DEC--CAR", "FREQ    ", "STOKES"};
 static string xyz[4]    = { "X",        "Y",        "Z",        "S"};
+static string uvw[4]    = { "",         "",         "",         ""};
 
-void write_fits(string name,imageptr iptr)
+void write_fits(string name, imageptr iptr)
 {
     FLOAT tmpr,xmin[4],xref[4],dx[4],mapmin,mapmax;   /* fitsio FLOAT !!! */
     FLOAT bmaj,bmin,bpa;
@@ -234,15 +277,19 @@ void write_fits(string name,imageptr iptr)
     FITS *fitsfile;
     char *cp, origin[80];
     char *ctype1_name, *ctype2_name, *ctype3_name, *ctype4_name;
-    string *hitem, axname[4];
+    string *hitem, axname[4], axunit[4];
     float *buffer, *bp;
     int i, j, k, axistype, bitpix, keepaxis[4], nx[4], p[4], nx_out[4], ndim=3;
     double bscale, bzero;
 
-    get_nanf(&fnan);    
+    get_nanf(&fnan);
+
+    if (Restfreq(iptr) != 0.0)
+	restfreq = Restfreq(iptr);
+    dprintf(1,"Using restfreq=%f Hz\n",restfreq);
 
     if (Qfreq)
-      vsys = -restfreq * vsys / 300000.0;        // convert km/s to Hz
+      vsys = -restfreq * vsys / (c_MKS/1000.0);        // convert km/s to Hz
     
     if (hasvalue("ndim")) ndim = getiparam("ndim");
     nx[0] = Nx(iptr);
@@ -265,11 +312,21 @@ void write_fits(string name,imageptr iptr)
     axname[0] = (Namex(iptr) ? Namex(iptr) : xyz[0]);
     axname[1] = (Namey(iptr) ? Namey(iptr) : xyz[1]);
     axname[2] = (Namez(iptr) ? Namez(iptr) : xyz[2]);
+    axunit[0] = (Unitx(iptr) ? Unitx(iptr) : uvw[0]);
+    axunit[1] = (Unity(iptr) ? Unity(iptr) : uvw[1]);
+    axunit[2] = (Unitz(iptr) ? Unitz(iptr) : uvw[2]);
     mapmin = MapMin(iptr);
     mapmax = MapMax(iptr);
     bmaj = Beamx(iptr);
     bmin = Beamy(iptr);
     bpa  = 0.0;        /* only spherical beams for now */
+    if (strlen(object) == 0)
+      object = Object(iptr);
+    telescope = Telescope(iptr);
+    if (hasvalue("bunit"))
+      bunit = getparam("bunit");
+    else
+      bunit = Unit(iptr);
 
     if (Qdummy) 
       for (i=0; i<4; i++) p[i] = i;   /* set permute order */
@@ -357,13 +414,19 @@ void write_fits(string name,imageptr iptr)
     } else {
       if (Qrefmap || Qcdelt) {
 	dprintf(1,"Using ref_cdelt\n");
-	fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
+	if (Qradecvel && ref_cdelt[0]*scale[0] > 0)
+	  fitwrhdr(fitsfile,"CDELT1",-ref_cdelt[0]*scale[0]);
+	else
+	  fitwrhdr(fitsfile,"CDELT1",ref_cdelt[0]*scale[0]);
 	fitwrhdr(fitsfile,"CDELT2",ref_cdelt[1]*scale[1]);
 	if (ndim>2) fitwrhdr(fitsfile,"CDELT3",ref_cdelt[2]*scale[2]);
 	if (ndim>3) fitwrhdr(fitsfile,"CDELT4",1.0);
       } else {
-	fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);    
-	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);    
+	if (Qradecvel && dx[p[0]] > 0) 
+	  fitwrhdr(fitsfile,"CDELT1",-dx[p[0]]);
+	else
+	  fitwrhdr(fitsfile,"CDELT1",dx[p[0]]);
+	fitwrhdr(fitsfile,"CDELT2",dx[p[1]]);
 	if (ndim>2) {
 	  if (Qfreq)
 	    fitwrhdr(fitsfile,"CDELT3",-dx[p[2]]);
@@ -376,15 +439,20 @@ void write_fits(string name,imageptr iptr)
 
     if (Qradecvel) {
       if (streq(proj,"SIN")) {
-	ctype1_name = radeves[p[0]];
-	ctype2_name = radeves[p[1]];
-	ctype3_name = Qfreq ? radefrs[p[2]] : radeves[p[2]];
-	ctype4_name = radeves[p[3]];
+	ctype1_name = radevrs[p[0]];
+	ctype2_name = radevrs[p[1]];
+	ctype3_name = Qfreq ? radefrs[p[2]] : radevrs[p[2]];
+	ctype4_name = radevrs[p[3]];
       } else if (streq(proj,"TAN")) {
-	ctype1_name = radevet[p[0]];
-	ctype2_name = radevet[p[1]];
-	ctype3_name = Qfreq ? radefrt[p[2]] : radevet[p[2]];	
-	ctype4_name = radevet[p[3]];
+	ctype1_name = radevrt[p[0]];
+	ctype2_name = radevrt[p[1]];
+	ctype3_name = Qfreq ? radefrt[p[2]] : radevrt[p[2]];	
+	ctype4_name = radevrt[p[3]];
+      } else if (streq(proj,"CAR")) {
+	ctype1_name = radevrc[p[0]];
+	ctype2_name = radevrc[p[1]];
+	ctype3_name = Qfreq ? radefrc[p[2]] : radevrc[p[2]];	
+	ctype4_name = radevrc[p[3]];
       } else
 	error("Illegal projection scheme %s",proj);
 
@@ -393,35 +461,48 @@ void write_fits(string name,imageptr iptr)
       fitwrhda(fitsfile,"CTYPE1",ctype1_name);
       fitwrhda(fitsfile,"CTYPE2",ctype2_name);
       if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ctype3_name);
-      fitwrhdr(fitsfile,"RESTFRQ",restfreq);  
+      // fitwrhdr(fitsfile,"RESTFREQ",restfreq);
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);
+      // @todo  currently HI would be written as 1.420405760     E+09
+      //                     where it is         1.4204057517861 E+09
+      // (float/double issue) - this is about 2 m/s in doppler space
 
       if (ndim>3) fitwrhda(fitsfile,"CTYPE4",ctype4_name);
-      fitwrhdr(fitsfile,"RESTFREQ",restfreq);
-      //
+
       fitwrhda(fitsfile,"CUNIT1","deg");
       fitwrhda(fitsfile,"CUNIT2","deg");
       if (Qfreq)
 	fitwrhda(fitsfile,"CUNIT3","Hz");
       else
 	fitwrhda(fitsfile,"CUNIT3","km/s");            /* or km/s */
-      fitwrhda(fitsfile,"CUNIT4","");
+      
+      //fitwrhda(fitsfile,"CUNIT4","");
       if (bmaj > 0.0)
 	fitwrhda(fitsfile,"BUNIT","JY/BEAM");
       else
 	fitwrhda(fitsfile,"BUNIT","JY/PIXEL");        /* if we have no beam */
-      fitwrhda(fitsfile,"TELESCOP","NEMO");  
+      fitwrhda(fitsfile,"TELESCOP","NEMO");
       
     } else {
       if (Qrefmap) {
         fitwrhda(fitsfile,"CTYPE1",ref_ctype[0]);
         fitwrhda(fitsfile,"CTYPE2",ref_ctype[1]);
         if (ndim>2) fitwrhda(fitsfile,"CTYPE3",ref_ctype[2]);
+        fitwrhda(fitsfile,"CUNIT1",ref_cunit[0]);
+        fitwrhda(fitsfile,"CUNIT2",ref_cunit[1]);
+        if (ndim>2) fitwrhda(fitsfile,"CUNIT3",ref_cunit[2]);
       } else {
 	fitwrhda(fitsfile,"CTYPE1",axname[p[0]]);
 	fitwrhda(fitsfile,"CTYPE2",axname[p[1]]);
 	if (ndim>2) fitwrhda(fitsfile,"CTYPE3",axname[p[2]]);
-	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);	
+	if (ndim>3) fitwrhda(fitsfile,"CTYPE4",axname[p[3]]);
+	if (          strlen(axunit[p[0]])>0) fitwrhda(fitsfile,"CUNIT1",axunit[p[0]]);
+       	if (          strlen(axunit[p[1]])>0) fitwrhda(fitsfile,"CUNIT2",axunit[p[1]]);
+	if (ndim>2 && strlen(axunit[p[2]])>0) fitwrhda(fitsfile,"CUNIT3",axunit[p[2]]);
+	if (ndim>3 && strlen(axunit[p[3]])>0) fitwrhda(fitsfile,"CUNIT4",axunit[p[3]]);
+	
       }
+      fitwrhdr(fitsfile,"RESTFRQ",restfreq);      
     }
 
     fitwrhdr(fitsfile,"BMAJ",bmaj*scale[0]);
@@ -432,6 +513,11 @@ void write_fits(string name,imageptr iptr)
     fitwrhdr(fitsfile,"DATAMAX",mapmax);
     fitwrhda(fitsfile,"ORIGIN",origin);
     fitwrhda(fitsfile,"SPECSYS","LSRK");     /* spectral reference frame */
+    fitwrhda(fitsfile,"RADECSYS","FK5");     // ICRS or FK5
+    fitwrhdr(fitsfile,"EQUINOX", equinox);   //
+    // warning("Using FK5/2000");
+    // we don't need VELREF=257
+    
     
 
     cp = getenv("USER");                                /* AUTHOR */
@@ -442,11 +528,29 @@ void write_fits(string name,imageptr iptr)
         fitwrhda(fitsfile,"AUTHOR","NEMO");
         fitwrhda(fitsfile,"OBSERVER","NEMO");
     }
+
+    if (1) {                // DATE-OBS is "now"
+      char toutstr[200];
+      time_t t;
+      struct tm *tmp;
+      const char *fmt = "%Y-%m-%dT%H:%M:%S";
+
+      t = time(NULL);
+      tmp = localtime(&t);
+      if (tmp==NULL) error("localtime failed");
+      if (strftime(toutstr, sizeof(toutstr), fmt, tmp) == 0)
+	error("strftime returned 0");
     
-    // DATE-OBS= '2015-06-14T15:42:02.319999'
+      fitwrhda(fitsfile,"DATE-OBS",toutstr);
+    }
+    
     
     if (object)                                        /* OBJECT */
         fitwrhda(fitsfile,"OBJECT",object);
+    if (telescope)
+      fitwrhda(fitsfile,"TELESCOP",telescope);
+    if (bunit)
+      fitwrhda(fitsfile,"BUNIT",bunit);
 
     if (comment)                                       /* COMMENT */
         stuffit(fitsfile,"COMMENT",comment);
@@ -556,7 +660,7 @@ void set_refmap(string name)
 
   fitrdhda(fitsfile,"CUNIT1",ref_cunit[0],"");
   fitrdhda(fitsfile,"CUNIT2",ref_cunit[1],"");
-  fitrdhda(fitsfile,"CUNUT3",ref_cunit[2],"");
+  fitrdhda(fitsfile,"CUNIT3",ref_cunit[2],"");
 
   fitrdhdi(fitsfile,"WCSAXES",&wcsaxes, -1);
   if (wcsaxes != -1) warning("WCSAXES = %d\n",wcsaxes);

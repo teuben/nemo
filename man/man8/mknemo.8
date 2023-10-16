@@ -1,10 +1,13 @@
-.TH MKNEMO 8NEMO "22 December 2019"
-.SH NAME
+.TH MKNEMO 8NEMO "12 July 2020"
+
+.SH "NAME"
 mknemo \- attempt to find NEMO (and related) programs and install them
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBmknemo \fIprogram(s)\fP 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImknemo\fP attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them.
 If successfull, the binary will be placed in \fB$NEMOBIN\fP.
@@ -31,6 +34,12 @@ Finally, if still no source code is found,
 a directory with the name \fIprogram\fP is searched for, 
 and a local Makefile is then used to install the \fIprogram\fP.
 \fBhackcode1\fP is an example of this type of program.
+.PP
+Initially mknemo was nothing more than a convenience tool to build (new) binaries
+from your working directory, without having to remember where the source code
+lived... but since it has also acquired being a semi-package manager, it should
+be mentioned there are many other options to solve this problem.
+
 .SH "OPTIONS"
 .nf
   -c CODE   search for CODE.c to set the directory for target(s)
@@ -41,13 +50,15 @@ and a local Makefile is then used to install the \fIprogram\fP.
   -t        cleanup after having made the binaries
   -T        cleanup before making the binaries
   -u        update your NEMO git tree before (re)making
-  -l        recompile the library before (re)making 
+  -l        update the library before (re)making
+  -L        force recompile the library before (re)making
   -g        use gmake, instead of make
   -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
   -D        show special projects from the mknemo.d directory
 .fi
-.SH MAKEDEFS
+
+.SH "MAKEDEFS"
 All compile flags and libraries that are used should have been configured in the $NEMOLIB/makedefs file.
 Here are some critical programs that you could use to test if that specific library was properly referenced
 in makedefs:
@@ -68,7 +79,8 @@ yapp	        	tabhist
 If any of these fail for obvious reasons,
 you can try and fix them by rerunning configure and comparing
 $NEMOLIB/makedefs with $NEMO/makedefs, or simply editing $NEMOLIB/makedefs directly.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here are some examples of the non-default control files in $NEMO/src/scripts/mknemo.d:
 .nf 
 .ta +2i
@@ -76,13 +88,24 @@ firstn    	the very first (?) nbody code
 glnemo2   	glnemo graphics
 gyrfalcON   	falcON tools (gyrfalcON, mkplum, the acc's and manip's)
 rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\fP)
-galaxy15	Sellwood's GALAXY V15.x
+galaxy15	Sellwood's GALAXY V15.
+cfitsio		CFITSIO library
 .fi
+For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and being
+built with --prefix=$NEMO/opt.
+
+.SH "CAVEATS"
+The mknemo \fIattempts\fP to (re)install a program or package for NEMO, but there is no guarentee this works.
+For programs it typically depends on a matching sourcecode (e.g. name.c) and a proper Makefile in the directory
+where this code lives, or in more complicated cases, a matching script name in $NEMO/src/scripts/mknemo.d
+
 .SH "SEE ALSO"
 bake(8NEMO), mkbin(8NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 $NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
@@ -95,7 +118,10 @@ $NEMOLIB/yapp*.o	various device drivers
 $NEMO/src          	source tree searched for programs/directories
 $NEMO/adm/install/mknemo.log	logfile of all previous installs done
 $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
+$NEMO/local/<package>		source of a <package>
+$NEMO/opt/{bin,include,lib}	--prefix location of <package> binaries and headers for public use
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1i +4i
@@ -107,5 +133,6 @@ $NEMO/adm/install/mknemo.lock	lockfile, to prevent multiple usage
 11-jun-04	V2.4: added -a flag	PJT
 11-apr-2019	V4.0: git based
 dec-2019	document critical binaries	PJT
+jul-2020	added -L options, switch -L and -l meaning	PJT
 .fi
-
+

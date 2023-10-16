@@ -1,0 +1,42 @@
+#! /bin/bash 
+#
+#
+#  For old gadget, see   http://www.mpa-garching.mpg.de/gadget/
+#
+#  You will need to "mknemo gsl fftw2 hdf5" and make sure mpicc exists
+#  (e.g. via LAM/LAM-MPI)
+#
+
+version=git
+url=http://gitlab.mpcdf.mpg.de/vrs/gadget4
+
+
+for arg in $*; do
+  export $arg
+done
+
+cd $NEMO/usr/gadget
+
+if [ ! -e gadget4 ]; then
+    git clone $url
+    cd gadget4
+else
+    cd gadget4
+    git pull
+fi
+
+export SYSTYPE=comp.gcc
+
+
+# on astroumd:
+# module load mpi
+# make PYTHON=$(which python)  DIR=examples/G2-galaxy  HDF5_INCL="-I$NEMO/opt/include -I/usr/include/mpich-x86_64/"
+
+# on t480
+# make DIR=examples/G2-galaxy  HDF5_INCL="-I$NEMO/opt/include -I/usr/lib/x86_64-linux-gnu/openmpi/include/"
+
+
+
+# echo gadget4 $version `date` >> $NEMO/opt/mknemo.log
+
+echo Sorry, not finished implementing.

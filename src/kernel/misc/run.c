@@ -3,6 +3,7 @@
  *
  *      17-sep-2013     finally written
  *      26-dec-2017     add include's
+ *       2-jan-2021     squash some gcc warnings
  *
  */
 
@@ -51,16 +52,18 @@ int run_popen1(string exe, string file)
 {
   FILE *fp = popen(exe,"w");
   if (fp==NULL) return 1;
-  fprintf(fp,file);        /* has no args */
-  fclose(fp);
+  fprintf(fp,"%s",file);
+  pclose(fp);
   return 0;
 }
 
 #ifdef TESTBED
 
+/*  also an example of a NEMO main that didn't define a defv[] and usage */
 
-nemo_main()
+void nemo_main(void)
 {
-  warning("nothing here yet");
+  dprintf(0,"wc on hello:");
+  run_popen1("wc","hello");
 }
 #endif

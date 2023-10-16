@@ -110,7 +110,7 @@ AC_PROG_LN_S
 AC_PROG_MAKE_SET
 AC_PROG_RANLIB
 AC_PROG_CSH
-dnl next ones seems to force linking with FC, and we have F77 as well
+dnl next ones seems to force linking with FC, and we have F77 as well, for now, FC=F77
 dnl AC_PROG_FC
 dnl AC_FC_WRAPPERS
 
@@ -142,16 +142,35 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
-AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for pedantic gcc], ok=$enableval, ok=no)
+AC_ARG_ENABLE(shared, [  --disable-shared        disable shared libraries? (needed for falcON on MAC)], ok=$enableval, ok=yes)
 if test "$ok" = "yes"; then
-  flags="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
-  flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
-  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O4"
-  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wclobbered -Wuninitialized"
-  CFLAGS="$CFLAGS $flags"
-  CXXFLAGS="$CXXFLAGS $flags"
-  # FFLAGS="$CFLAGS $flags"
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
 fi
+AC_SUBST(NO_SHARED_LIBS)
+
+AC_ARG_ENABLE(clang, [  --enable-clang          use clang compiler], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang++"
+	#FC="flang"
+	#F77="flang"
+	FC="gfortran"
+	F77="gfortran"
+fi
+
+AC_ARG_ENABLE(pedantic, [  --enable-pedantic       compile for lots of pedantics], ok=$enableval, ok=no)
+if test "$ok" = "yes"; then
+  flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
+  flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
+  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
+  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
+  PFLAGS="-Wimplicit-int -Werror-implicit-function-declaration"
+else
+  PFLAGS="-Wall"
+fi
+AC_SUBST(PFLAGS)
 
 AC_ARG_ENABLE(native, [  --enable-native         optimize for native CPU], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
@@ -176,7 +195,7 @@ AC_ARG_ENABLE(float,  [  --enable-float          single-precision], ok=$enableva
 if test "$ok" = "yes"; then
 	prec_flag="-DSINGLEPREC"
 fi
-AC_ARG_ENABLE(double, [  --enable-double         double-precision], ok=$enableval, ok=no)
+AC_ARG_ENABLE(double, [  --enable-double         double-precision (default)], ok=$enableval, ok=no)
 if test "$ok" = "yes"; then
 	prec_flag="-DDOUBLEPREC"
 fi
@@ -208,7 +227,7 @@ fi
 
 
 AC_ARG_ENABLE(fortran,[  --disable-fortran       don't use any Fortran], enable_fortran=$enableval, enable_fortran=yes)
-AC_ARG_ENABLE(falcon, [  --disable-falcon        enable falcON],enable_falcon=$enableval, enable_falcon=yes)
+AC_ARG_ENABLE(falcon, [  --disable-falcon        disable falcON],enable_falcon=$enableval, enable_falcon=yes)
 if test "$enable_falcon" = "yes"; then
   MAKELIBS="corelibs dehnen"
 else
@@ -229,6 +248,16 @@ AC_ARG_WITH(opt,
 AC_ARG_WITH(openmp,
 		  [  --with-openmp           use OMP directives], with_openmp=$withval, with_openmp=no)
 
+AC_ARG_WITH(std,
+		  [  --with-std              use this -std=], with_std=$withval, with_std=c99)
+
+if test $with_std != "default"; then
+  STDFLAG="-D_GNU_SOURCE -std=$with_std"
+else
+  STDFLAG=""
+fi
+AC_SUBST(STDFLAG)
+
 if test $with_openmp = "yes"; then
   CFLAGS="$CFLAGS -fopenmp"
   CXXFLAGS="$CXXFLAGS -fopenmp"
@@ -240,12 +269,14 @@ fi
 AC_SUBST(falcon_OPENMP)
 
 dnl ---------------------------------------------------------------------
-dnl             Check for basic X windows stuff
+dnl             Check for basic X windows stuff : AC_PATH_XTRA -> X_CFLAGS and X_LIBS
 AC_PATH_X
 AC_PATH_XTRA
 XINCS="$X_CFLAGS"
 if test -d /usr/X11R6/lib64; then
   XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11R6/lib64 -lXext -lX11 $X_EXTRA_LIBS"
+elif test -d /usr/X11/lib; then
+  XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11/lib -lXext -lX11 $X_EXTRA_LIBS"
 else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
@@ -408,6 +439,9 @@ else
   AC_MSG_WARN([no FORTRAN compiler])
 fi
 
+FC=$F77
+AC_SUBST(FC)
+
 dnl Fortran/C linkeage : defines F77_CMAIN_FFLAGS
 dnl ACX_F77_CMAIN_FFLAGS([AC_MSG_WARN([pjt])],[AC_MSG_WARN([problems fortran-c interface])])
 AX_F77_CMAIN_FFLAGS([AC_MSG_WARN([f77 cmain ok])],[AC_MSG_WARN([problems fortran-c interface])])
@@ -484,7 +518,7 @@ if test -d "$PGPLOT_DIR"; then
     pgplot_dir="$PGPLOT_DIR"
     AC_MSG_RESULT([yes, found \$PGPLOT_DIR=$PGPLOT_DIR])
 else
-    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot 
+    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot  /usr/share/pgplot /usr/lib/pgplot5
     do
         if test -f $dir/grfont.dat; then
             pgplot_dir="$dir"
@@ -842,7 +876,7 @@ AC_CHECK_LIB(dl, dlopen)	# Dynamic linking for SunOS/Solaris and SYSV
 AC_CHECK_LIB(dld, shl_load)	# Dynamic linking for HP-UX
 
 AC_SEARCH_LIBS([dlopen], [dl dld], [], [
-  AC_MSG_ERROR([unable to find the dlopen() function])
+  AC_MSG_WARN([unable to find the dlopen() function])
 ])
 
 
@@ -920,6 +954,19 @@ case $yapp_name in
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
           ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    AC_MSG_WARN(C using dollar)
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    AC_MSG_WARN(C using, external to NEMO, classic)
+	  fi
+	  YAPP_DEF="/xs"
+          ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
 	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
@@ -933,6 +980,9 @@ case $yapp_name in
 	  fi
 	  YAPP_DEF="/xs"
           ;;
+	giza)
+	  YAPP_DEF="/xw"
+	  YAPP_LIBS="-lgiza"
 esac
 AC_MSG_RESULT($YAPP_NAME)
 

@@ -1,4 +1,4 @@
-.TH RUNBODY1 1NEMO "9 February 2019"
+.TH RUNBODY1 1NEMO "4 June 2021"
 .SH NAME
 runbody1, nbody1 \- (frontend to) Aarseth N-body code
 .SH SYNOPSIS
@@ -139,6 +139,13 @@ variables. Only new runs are currently supported.
 .TP
 \fBtcomp=\fP
 not supposed to be used, but counts max computing time alotted.
+.TP
+\fBKZ#=\fP
+Special indexed keyword to override \fBkz=\fP, for example KZ4=1.
+.TP
+\fBexe=\fP
+Name of the (fortran) executable to run. [Default: nbody1]
+
 .SH BUGS
 Scaling can cause output to become out of bounds.
 .PP
@@ -184,6 +191,12 @@ as the default will not suffice anymore.
 Note that requesting tcript=10 you will see the final snapshot written at time=28.2843
 because the crossing time is about 2.828 and tcrit is measured in terms of crossing times,
 as opposed to code times for the default run with kz(15)=1.
+.SH BENCHMARK
+The command
+.nf
+     make bench
+.fi
+will run a standard 1280 body plummer sphere benchark to T=10.
 .SH CAVEATS
 \fBnbody1\fP still uses the old-style individual time-steps with force polynomials, not the
 \fIimproved\fP hermite integrater that is embedded in later versions of the NBODYx series. However,

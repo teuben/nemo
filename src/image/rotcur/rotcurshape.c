@@ -26,6 +26,7 @@
  *              13-jan-05 :    b  rachel mode: inc=0 -> cosi=sini=1.0 to get circles    pjt
  *              26-may-05 :    d  fixed bad NFW bug (used v^2, not v)                   pjt
  *              30-jan-08   1.4   shapes in rotcurs.c in library now                    pjt
+ *              28-may-20   
  *
  *
  ******************************************************************************/
@@ -37,6 +38,7 @@
 #include <extstring.h>
 #include <loadobj.h>
 #include <rotcurshape.h>
+#include <table.h>
 
 /*     Set this appropriately if you want to use NumRec's mrqmin() based engine */
 /*     right now it appears as if the NR routine does not work as well          */
@@ -94,7 +96,7 @@ string defv[] = {
     "rotcur3=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur4=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
     "rotcur5=\n      Rotation curve <NAME>, parameters and set of free(1)/fixed(0) values",
-    "VERSION=1.4c\n  10-jul-2019 PJT",
+    "VERSION=1.4e\n  2-feb-2022 PJT",
     NULL,
 };
 
@@ -175,6 +177,7 @@ void getdat(real x[], real y[], real w[], int idx[], real res[], int *n, int nma
 	   real p[], real ri, real ro, real thf, int wpow, real *q, int side, bool *full, int nfr, int mode);
 real bmcorr(real xx[2], real p[], int l, int m);
 int perform_init(real *p, real *c);
+void rotcurparse();
 
 
 typedef real (*my_proc1)(real *, real *, int);
@@ -316,7 +319,7 @@ void nemo_main()
            mask,ifit,elp,lunpri,cor,npt,factor);
 }
 
-rotcurparse()
+void rotcurparse()
 {
   string *sp, fname, path;
   char keyname[30];
@@ -360,6 +363,14 @@ rotcurparse()
 	mmsk[nmod][0] = natoi(sp[3]);
 	mmsk[nmod][1] = natoi(sp[4]);
 	rcfn[nmod] = rotcur_plummer;
+      } else if (streq(sp[0],"arctan")) {
+	if (nsp != 4) error("arctan needs 2 parameters");
+	npar[nmod] = 2;
+	mpar[nmod][0] = natof(sp[1]);
+	mpar[nmod][1] = natof(sp[2]);
+	mmsk[nmod][0] = natoi(sp[3]);
+	mmsk[nmod][1] = natoi(sp[4]);
+	rcfn[nmod] = rotcur_arctan;
       } else if (streq(sp[0],"core1")) {
 	if (nsp != 4) error("core1 needs 2 parameters");
 	npar[nmod] = 2;
@@ -506,8 +517,8 @@ stream  lunpri;       /* LUN for print output */
     real center[2], toarcsec, tokms;
     stream velstr, denstr;
     bool Qdens;
-    real *coldat[3];
-    int colnr[3];
+    real *coldat[4];
+    int colnr[4];
 
     dprintf(0,"%s: NEMO VERSION %s\n", 
                         getparam("argv0"), getparam("VERSION"));
@@ -672,7 +683,7 @@ stream  lunpri;       /* LUN for print output */
     }
 
     *nring = nemoinpr(getparam("radii"),rad,ring+1);
-    if (*nring != 2) error("radii=: Need two radii for a disk");
+    if (*nring != 2) error("radii=rmin,rmax: Need two radii");
     *vsys = getdparam("vsys");
     n = nemoinpr(getparam("pa"),pan,ring);
     if (n<1) error("pa=: need at least one position angle (%d)",n);

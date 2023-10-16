@@ -23,13 +23,7 @@ static int    entry = 0;
 #define ECONS  1		/* flag energy conservation */
 #define USE_MAXGRID 1           /* fix max allowed grid */
 
-dissipate (btab, nb, ndim, dr, eta, grid)
-Body *btab;
-int   nb;
-int   ndim;
-real *dr;
-real  eta;
-real  grid;
+int dissipate (Body *btab, int   nb, int   ndim, real *dr, real  eta, real  grid)
 {
     real rmin[NDIM], rmax[NDIM], *pos;
     int  nbin[NDIM], ndis=0;

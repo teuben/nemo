@@ -3,17 +3,18 @@
 # sets library sub-directory and flags for gcc compiler
 # to be included by makefile 
 #
--include make.sh
+include ../utils/make.sh
 
 ifndef GCC
 GCC		:= gcc
 GPP		:= g++
 endif
 
+
 EXT             := .gcc
 CXX             := $(GPP)
 CC              := $(GCC)
-FC              := gfortran
+FC              := $(FC)
 
 PLATFORM 	:= $(shell uname -m)
 #
@@ -31,7 +32,7 @@ GCCVERSION += 00
 # Remove spaces from the version number
 GCCVERSION := $(subst $(space),$(empty),$(GCCVERSION))
 # Crop the version number to 3 decimals.
-GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-3)
+GCCVERSION := $(shell expr `echo $(GCCVERSION)` | cut -b1-4)
 #$(warning $(GCCVERSION))
 gccversion:
 	@echo "GCC version = " $(GCCVERSION)
@@ -50,9 +51,9 @@ endif
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation
+WARNING		:= -Wall $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow -Wno-c++11-compat-deprecated-writable-strings -Wno-redeclared-class-member
 else
-WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-cast-function-type -Wno-format-overflow -Wno-c++11-compat-deprecated-writable-strings -Wno-redeclared-class-member
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
@@ -60,14 +61,18 @@ WARNING		+= -Wold-style-cast
 endif
 endif
 #WARNING		+= -Wno-unknown-pragmas
+WARNING		:= -Wall -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
 #PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
 #endif
 # general optimisation and warning flags
-OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 \
-		--param inline-unit-growth=50 -ggdb3 $(WARNING) -O2 -fPIC \
+# OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 
+#OPTFLAGS	:= -mfpmath=sse 
+#OPTFLAGS	:= \
+		--param inline-unit-growth=50
+OPTFLAGS	:= -ggdb3 $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 ifeq ($(NO_ARCH_NATIVE),1)

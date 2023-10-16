@@ -1,4 +1,4 @@
-.TH UNS_2DPLOT 1NEMO "November 9, 2010"
+.TH UNS_2DPLOT 1NEMO "March 17, 2020"
 .SH NAME
 uns_2dplot \- create a 2D image of an UNS file
 .SH SYNOPSIS
@@ -12,19 +12,28 @@ that you  get, looks like the one you get with glnemo2(see man
 glnemo2) on gas particles.
 .PP
 The computation of all gaussian is multithreaded and the number of threads used can be
-selected from the command line. It requires BOOST thread api for compilation.
+selected from the command line.
 
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
 \fBin=\fP\fIuns input file\fP
-Currently, the following input files are supported: Nemo,Gadget 2 &
-1, list of files
+Currently, the following input files are supported: Nemo regular, Nemo
+piped, Gadget3, Gadget2, Gadget1, Ramses, list of files
 .TP
 \fBselect=\fP\fIselect-particles\fP
 Select particles. Sets of particles must be selected using the : range operator, separated by a comma. 
 E.g. select=0:9,10:19 would select two sets of 10 particles, or by component (gas,halo,stars,bulge,disk,bndry)
-[all] 
+[all]
+.TP
+\fBprop=\fP\fproperties to display (metal,age,temp,rho)\fP
+In case of structured snapshots like Gagdet or Ramses, you can select
+the properties you want to display (metal,age,temp,rho). By default it
+displays accumulated density of particles in the light of see.
+.TP
+\fBpsort=\fP\f sort properties\fP
+sort properties according to 0:none, 1:min, 2:max. The default is [0]
+no sorting. 
 .TP
 \fBdev=\fP\fIoutput-image-file\fP
 you specify here the output name of the image which will be automatically saved in GIF
@@ -59,6 +68,18 @@ select as true if you want to display particles in ZY plan. Default is
 .TP
 \fBcom=\fP\fIcenter-of-mass?\fP
 center according to center if mass. Default is [t].
+.TP
+\fBhsml=\fP\fIuse hydro smooth length\fP
+Use hydro smooth length if exists, default [f] false
+.TP
+\fBcb=\fP\fItoggle color map\fP
+default is false [f]
+.TP
+\fBcmap=\fP\fIselect color map\fP
+available color maps 0:rainbow, 1:heat, 2:gray, default is [0]
+.TP
+\fBitf=\fP\fIimage transfer function\fP
+image transer function 0:linear, 1:logarithmic, 2:square-root, default [1]
 .TP
 \fBsview=\fP\fIsingle-display-view?\fP
 if true, only one image will be created for all requested plan
@@ -95,12 +116,16 @@ display some verbose log [f]
 .TP
 .TP
 .SH SEE ALSO
-snapplot(1NEMO), snapgrid(1NEMO), snapshot(5NEMO), glnemo2(1NEMO)
+snapplot(1NEMO), snapgrid(1NEMO), snapshot(5NEMO), glnemo2(1NEMO),
+uns_projects(1NEMO)
+.TP
+https://projets.lam.fr/projects/unsio/wiki
 .SH AUTHOR
 Jean-Charles LAMBERT
 .SH HISTORY
 .nf
 .ta +1i +4i
 09-Nov-10	V1.0 public release	JCL
+17-Mar-20	V2.0 bugs fixes		JCL
 .fi
 

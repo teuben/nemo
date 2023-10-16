@@ -8,6 +8,7 @@
  *      5-aug-11        V0.9: object = test
  *     15-oct-2014      V0.10:  object=noise now can do 3D
  *     12-mar-2020      V1.0    object=blobs in 3D
+ *        dec-2022      V2.0:  moved in= down the argument list
  * TODO:
  *    - find out why the normalization was PI, and not TWO_PI, which worked before.
  *       (this happened when I changed from 1 to 1/3600 scaling factor in the examples)
@@ -27,29 +28,27 @@
 #include <image.h>
 
 string defv[] = {
-  "in=\n           Input file (optional) to be added to the new file",
   "out=???\n       Output file",
   "object=flat\n   Object type (test,flat,exp,gauss,bar,spiral,....)",
   "spar=\n         Parameters for this object",
-  "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "size=10,10,1\n  2- or 3D dimensions of map/cube (only if no input file given)",
   "cell=1\n        Cellsize",
   "pa=0\n          Position Angle of disk in which object lives",
   "inc=0\n         Inclination Angle of disk in which object lives",
   "totflux=f\n     Interpret peak values (spar[0]) as total flux instead",
   "factor=1\n      Factor to multiple input image by before adding object",
+  "center=\n       Center of object (defaults to map(reference)center) in pixels 0..size-1",
   "crpix=\n        Override/Set crpix (1,1,1) // ignored ** mapcenter if left blank **",
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
-  "VERSION=1.0\n   11-mar-2020 PJT",
+  "in=\n           Input file (optional) to be added to the new file",
+  "VERSION=2.0\n   8-dec-2022 PJT",
   NULL,
 };
 
 string usage = "image creation/modification with objects";
-
-string cvsid = "$Id$";
 
 #ifndef HUGE
 # define HUGE 1.0e20
@@ -68,7 +67,7 @@ int nwcs = 0;
 real spar[MAXPAR];
 int npar;
 
-real pa,inc,center[2];
+real pa,inc,center[3];
 real sinp, cosp, sini, cosi;
 
 bool Qtotflux;
@@ -78,6 +77,13 @@ real surface=1.0;
 
 local void do_create(int nx, int ny, int nz);
 
+local string objects[] = {
+  "flat", "exp", "gauss", "bar", "ferrers",
+  "spiral", "noise", "jet", "j1x", "isothermal",
+  "comet", "shell", "point", "test", "blobs",
+  NULL,
+};
+  
 local void object_test(int npars, real *pars);
 local void object_flat(int npars, real *pars);
 local void object_exp(int npars, real *pars);
@@ -94,10 +100,8 @@ local void object_shell(int npars, real *pars);
 local void object_point(int npars, real *pars);
 local void object_blobs(int ndim, int npars, real *pars);
 
-extern string *burststring(string,string);
-
 
-void nemo_main ()
+void nemo_main(void)
 {
   string  fnames;
   stream  instr;                      /* input file (optional) */
@@ -107,7 +111,7 @@ void nemo_main ()
   string  object;
   string  headline;
   int seed = init_xrandom(getparam("seed"));
-  int ndim;
+  int ndim = 0;
 
   object = getparam("object");
   npar = nemoinpr(getparam("spar"),spar,MAXPAR);
@@ -132,6 +136,9 @@ void nemo_main ()
   nwcs = nemorinpd(getparam("crval"),crval,MAXNAX,0.0,FALSE);
   nwcs = nemorinpd(getparam("cdelt"),cdelt,MAXNAX,1.0,FALSE);
   nwcs = nemorinpd(getparam("crpix"),crpix,MAXNAX,1.0,FALSE);
+
+  outstr = stropen (getparam("out"),"w");  /* open output file first ... */
+  
   if (hasvalue("in")) {
     instr = stropen(getparam("in"),"r");    /* open file */
     read_image (instr, &iptr);
@@ -171,15 +178,25 @@ void nemo_main ()
       crpix[2] = (nz-1)/2.0;
     }
 #endif
-
   }
+
+
+  if (!Object(iptr))
+    Object(iptr) = scopy(object);
+  
   if (ncen==0) {   /* fix center if it has not been set yet */
     center[0] = (Nx(iptr)-1)/2.0;     /* 0 based center= */
     center[1] = (Ny(iptr)-1)/2.0;
   }
+  Xref(iptr) = center[0];
+  Yref(iptr) = center[1];
+  Zref(iptr) = 0.0;
+  Axis(iptr) = 1;
   dprintf(0,"%s: center pixel: %g %g\n",object,center[0],center[1]);
   surface = Dx(iptr)*Dy(iptr);
   surface = ABS(surface);
+
+
 
   if (streq(object,"flat"))
     object_flat(npar,spar);
@@ -212,14 +229,16 @@ void nemo_main ()
   else if (streq(object,"blobs"))
     object_blobs(ndim,npar,spar);
   else
-    error("Unknown object %g",object);
+    error("Unknown object %s",object);
+
+  minmax_image(iptr);
   
-  outstr = stropen (getparam("out"),"w");  /* open output file first ... */
   if (hasvalue("headline"))
     set_headline(getparam("headline"));
   write_image (outstr,iptr);         /* write image to file */
   strclose(outstr);
 }
+
 
 /*
  *  create new map from scratch, using %x and %y as position parameters 

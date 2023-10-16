@@ -6,17 +6,21 @@
 <title>MKH41(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkh41 - Create a Holmberg 1941 disk 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkh41</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>mkh41</b> creates a disk of particles similar to the one  used in
-Holmberg&rsquo;s 1941 paper (1941ApJ....94..385H). Currently each ring is placed in a
-separate snapshot. Use <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
+<b>mkh41</b> creates a disk of particles similar to the one  used
+in Holmberg&rsquo;s 1941 paper (1941ApJ....94..385H). Currently each ring is placed in
+a separate snapshot. Use <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
  if they must be in a single snapshot.
 <p>
 The disk is rotating counter clock wise by default, but with totally fake
@@ -24,6 +28,7 @@ velocities.  See the example below to assign more realistic velocities. <p>
 The
 disk quoted in the 1941 paper has a mass of 10^11 solar masses, and a diameter
 of 2300 pc. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following parameters are recognized in any order
 if the keyword is also given: 
@@ -81,18 +86,26 @@ true Holmberg 1941 disk: <br>
   hackforce - - tol=0.001 fcells=2 |
   snapdisk - h41.in
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<br>
-<pre>mkconfig(1NEMO), mktt72(1NEMO), mkdisk(1NEMO), snapscale(1NEMO), snapstack(1NEMO)
-Holmberg, E. (1941) -  On the clustering tendencies among the nebulae. ApJ.
-94, 385.
+<a href='mkconfig.1.html'>mkconfig(1NEMO)</a>
+, <a href='mktt72.1.html'>mktt72(1NEMO)</a>
+, <a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
+, <a href='snapscale.1.html'>snapscale(1NEMO)</a>
+,
+<a href='snapstack.1.html'>snapstack(1NEMO)</a>
+ <p>
+Holmberg, E. (1941) - <i> On the clustering tendencies among
+the nebulae</i>. ApJ. 94, 385. <p>
+Lindblad, P.O. (1960) - <i>The development of spiral
+structure in a galaxy approached by numerical computations</i> <a href='http://adsabs.harvard.edu/abs/1960StoAn..21....4L'>http://adsabs.harvard.edu/abs/1960StoAn..21....4L</a>
 
-Lindblad, P.O. (1960) - The development of spiral structure in a galaxy approached
-by numerical computations
-http://adsabs.harvard.edu/abs/1960StoAn..21....4L
-</pre>
+</pre>John Dubinsky, and no doubt others, have re-implemented the 1941 experiment.
+
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben, Alar Toomre 
+<p> 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>15-Jul-2009<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created at PiTP (IAS @ Princeton)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT + AT

@@ -17,6 +17,9 @@
  *  15-jan-14   add MAD (mean absolute deviation)
  *  11-jun-14   MAD is really median absolute deviation?  MAD0 for now the old mean
  *              is that MARD (mean absolute relative difference)
+ *  12-jul-20   add min/max for robust
+ *  10-oct-20   median improvement via inline sort
+ *  14-nov-21   add sratio
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -32,9 +35,13 @@
 #define sum3 m->sum[3]
 #define sum4 m->sum[4]
 
-extern real median(int,real*);
-extern real median_q1(int,real*);
-extern real median_q3(int,real*);
+/* median.c */
+extern real smedian(int,real*);
+extern real smedian_q1(int,real*);
+extern real smedian_q3(int,real*);
+extern real pmedian(int,real*);
+extern real pmedian_q1(int,real*);
+extern real pmedian_q3(int,real*);
 
 void ini_moment(Moment *m, int mom, int ndat)
 {
@@ -54,7 +61,9 @@ void ini_moment(Moment *m, int mom, int ndat)
       m->idat = -1;
       m->dat = (real *) allocate(ndat*sizeof(real));
       m->wgt = (real *) allocate(ndat*sizeof(real));
-    } 
+    }
+
+    m->sumn = m->sump = 0.0;
 }
 
 void free_moment(Moment *m)
@@ -83,6 +92,8 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
+    if (x<0) m->sumn += x;
+    if (x>0) m->sump += x;
     if (m->ndat > 0) {                   /* if moving moments .... */
       if (m->idat < 0)                        /* first time around */
 	m->idat=0;  
@@ -105,6 +116,7 @@ void accum_moment(Moment *m, real x, real w)
 
       m->dat[m->idat] = x;
       m->wgt[m->idat] = w;
+
     }
 }
 
@@ -128,6 +140,8 @@ void decr_moment(Moment *m, real x, real w)
         m->sum[i] -= sum;
         sum *= x;
     }
+    if (x<0) m->sumn -= x;
+    if (x>0) m->sump -= x;
 }
 
 void reset_moment(Moment *m)
@@ -139,6 +153,7 @@ void reset_moment(Moment *m)
     if (m->mom < 0) return;
     for (i=0; i <= m->mom; i++)
         m->sum[i] = 0.0;
+    m->sumn = m->sump = 0;
 }
 
 real show_moment(Moment *m, int mom)
@@ -166,7 +181,12 @@ int n_moment(Moment *m)
 
 real sum_moment(Moment *m)
 {
-    return sum0;   /* BAD BOY: should this not be sum1 ?? */
+    return sum1;
+}
+
+real sratio_moment(Moment *m)
+{
+    return (m->sump + m->sumn)/(m->sump - m->sumn);
 }
 
 real mean_moment(Moment *m)
@@ -185,11 +205,33 @@ real mean_moment(Moment *m)
  * @todo these temp variables should be stored inside the Moment structure
  */
 
+static real  last_min_robust_moment    = -1;
+static real  last_max_robust_moment    = -1;
 static real  last_mean_robust_moment   = -1;
 static real  last_sigma_robust_moment  = -1;
 static real  last_median_robust_moment = -1;
 static int   last_n_robust_moment      = -1;
 static real  last_robust_range[2];
+
+
+local int compar_real(const void *va, const void *vb)
+{
+  real *a = (real *) va;
+  real *b = (real *) vb;
+  return *a < *b ? -1 : *a > *b ? 1 : 0;
+}
+
+local real get_median(int n, real *x)
+{
+  dprintf(1,"get_median: n=%d\n",n);
+
+  qsort(x,n,sizeof(real),compar_real);
+  if (n % 2)
+    return  x[(n-1)/2];
+  else
+    return 0.5 * (x[n/2] + x[n/2-1]);
+}
+
 
 
 void compute_robust_moment(Moment *m)
@@ -202,7 +244,63 @@ void compute_robust_moment(Moment *m)
   if (m->ndat==0)
     error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
   n = MIN(m->n, m->ndat);
+#if 0
+  m2 = pmedian(n,m->dat);
+  m1 = pmedian_q1(n,m->dat);
+  m3 = pmedian_q3(n,m->dat);
+#else
+  get_median(n,m->dat);    // sort, but this will destroy the weights array
+  m2 = smedian(n,m->dat);
+  m1 = smedian_q1(n,m->dat);
+  m3 = smedian_q3(n,m->dat);  
+#endif  
+  iqr = m3-m1;
+  dlo = m1 - frob*iqr;   /* perhaps better if this 1.5 factor */
+  dhi = m3 + frob*iqr;   /* should depend on the # datapoints */
+  ini_moment(&tmp,2,n);
+  for (i=0; i<n; i++) {
+    if (m->dat[i]<dlo || m->dat[i]>dhi) continue;
+    accum_moment(&tmp,m->dat[i],1.0);
+  }
+  dprintf(1,"compute_robust_moment: %d %g %g %g\n", n, m1, m2, m3);
+
+  // speed up computation if recalled without changing data
+  last_min_robust_moment    = min_moment(&tmp);
+  last_max_robust_moment    = max_moment(&tmp);
+  last_mean_robust_moment   = mean_moment(&tmp);
+  last_sigma_robust_moment  = sigma_moment(&tmp);
+  last_median_robust_moment = median_moment(&tmp);
+  last_n_robust_moment      = n_moment(&tmp);
+  last_robust_range[0]      = dlo;
+  last_robust_range[1]      = dhi;
+  free_moment(&tmp);
+}
+
+// signal = np.median(flux)
+// noise  = 0.6052697 * np.median(np.abs(2.0 * flux[2:n-2] - flux[0:n-4] - flux[4:n]))
+// return signal / noise
+#if 0
+void compute_der_snr(Moment *m)
+{
+  int i,n;
+  real m1,m2,m3,iqr,dlo,dhi;
+  Moment tmp;
+  real fac = 0.6052697;
+  real ne = 2;
+  real *qdat;
+  
+  if (m->ndat==0)
+    error("mean_robust_moment cannot be computed with ndat=%d",m->ndat);
+  
+  n = MIN(m->n, m->ndat);
   m2 = median(n,m->dat);
+
+  qdat = (real *) allocate((n-ne) * sizeof(real));
+  for (i=ne; i<n-ne; i++) {
+    qdat[i] = 2*m->dat[i] - m->dat[i-ne] - m->dat[i+ne];
+  }
+
+  
   m1 = median_q1(n,m->dat);
   m3 = median_q3(n,m->dat);
   iqr = m3-m1;
@@ -222,6 +320,8 @@ void compute_robust_moment(Moment *m)
   free_moment(&tmp); 
 }
 
+#endif
+
 int n_robust_moment(Moment *m)
 {
   return last_n_robust_moment;
@@ -230,6 +330,15 @@ int n_robust_moment(Moment *m)
 real mean_robust_moment(Moment *m)
 {
   return last_mean_robust_moment;
+}
+
+real min_robust_moment(Moment *m)
+{
+  return last_min_robust_moment;
+}
+real max_robust_moment(Moment *m)
+{
+  return last_max_robust_moment;
 }
 
 real median_robust_moment(Moment *m)
@@ -255,7 +364,7 @@ real median_moment(Moment *m)
     error("median_moment cannot be computed with ndat=%d",m->ndat);
   dprintf(1,"median_moment: n=%d ndat=%d\n",m->n, m->ndat);
   n = MIN(m->n, m->ndat);
-  return median(n,m->dat);
+  return smedian(n,m->dat);
 }
 
 
@@ -271,6 +380,8 @@ real sigma_moment(Moment *m)
     if (tmp <= 0.0) return 0.0;
     return sqrt(tmp);
 }
+
+// MARD = Mean Absolute Relative Difference
 
 real mard_moment(Moment *m)
 {

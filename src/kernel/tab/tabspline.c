@@ -10,6 +10,8 @@
  *  26-may-02    3.1   add derivatives (old TOOLBOX from spline.c) for non-GSL
  *  27-jul-02    3.2   implement nder= using spline.c if GSL not present    PJT
  *  28-aug-02    3.3   allow to use 'all' for  x= or y= ?
+ *   9-aug-22    3.4   disabled pipe reading until table v2 implemented 
+ *                     also: remove data when either X or Y values repeat   PJT
  *
  *   TODO:
  *      - spline vs. linear
@@ -19,6 +21,7 @@
 
 #include <stdinc.h> 
 #include <getparam.h>
+#include <table.h>
 
 #if HAVE_GSL
 #include <gsl/gsl_errno.h>
@@ -42,22 +45,21 @@ string defv[] = {
     "type=cspline\n Spline interpolation type (only for GSL)",
 #endif
     "nder=0\n       Number of derivates to show (0,1,2)",
-    "VERSION=3.3a\n 13-may-05 PJT",
+    "VERSION=3.4\n  9-aug-2022 PJT",
     NULL,
 
 };
 
 string usage="interpolation and first two derivatives of a function table";
 
-string cvsid="$Id$";
-
 #define MAXZERO     64
 #define MAXDATA  16384
 
-nemo_main()
+void nemo_main()
 {
     int colnr[2];
     real *coldat[2], *xdat, *ydat, xmin, xmax, ymin, ymax;
+    int *mdat;
     real fy[MAXZERO], fx[MAXZERO], xp[MAXDATA], yp[MAXDATA], x, y, xd, yd;
     stream instr;
     string fmt, stype;
@@ -65,6 +67,7 @@ nemo_main()
     int i, j, n, nx, ny, nmax, izero;
     int nzero = getiparam("n");
     int nder = getiparam("nder");
+    int ndup;
     bool Qx, Qy, Qxall, Qyall;
 #if HAVE_GSL
     gsl_interp_accel *acc = gsl_interp_accel_alloc();
@@ -76,16 +79,21 @@ nemo_main()
     if (nzero > MAXZERO)
         error("MAXZERO=%d: Too many zero's to search for",MAXZERO);
 
+#if 0
     nmax = nemo_file_lines(getparam("in"),MAXLINES);
+#else    
+    nmax = nemo_file_lines(getparam("in"),0);  // until we use table V2
+#endif    
     xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
     ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
+    mdat = (int *) allocate(nmax*sizeof(int));
     colnr[0] = getiparam("xcol");
     colnr[1] = getiparam("ycol");
     Qx = hasvalue("x");
     Qy = hasvalue("y");
     fmt = getparam("format");
     sprintf(fmt2,"%s %s",fmt,fmt);
-    sprintf(fmt1," %s",fmt,fmt);
+    sprintf(fmt1,"%s %s",fmt,fmt);
     dprintf(1,"Using format=\"%s\"\n",fmt2);
     Qxall = (Qx && streq("all",getparam("x")));
     Qyall = (Qy && streq("all",getparam("y")));
@@ -93,8 +101,10 @@ nemo_main()
     instr = stropen(getparam("in"),"r");
     n = get_atable(instr,2,colnr,coldat,nmax);
 
+    ndup = 0;
     for(i=0; i<n; i++) {
         dprintf(2,fmt,xdat[i],ydat[i]);
+	mdat[i] = 1;
         if (i==0) {
             xmin = xmax = xdat[0];
             ymin = ymax = ydat[0];
@@ -103,9 +113,33 @@ nemo_main()
             ymax = MAX(ymax,ydat[i]);
             xmin = MIN(xmin,xdat[i]);
             ymin = MIN(ymin,ydat[i]);
+	    if (xdat[i] == xdat[i-1]) {
+	      mdat[i] = 0;
+	      ndup++;
+	      dprintf(1,"X=%f at %d duplicated\n", xdat[i], i);
+	    }
+	    if (ydat[i] == ydat[i-1]) {
+	      mdat[i] = 0;
+	      ndup++;
+	      dprintf(1,"Y=%f at %d duplicated\n", ydat[i], i);
+	    }
         }
     }
     dprintf(1,"Xrange: %g : %g  Yrange: %g : %g\n",xmin,xmax,ymin,ymax);
+    if (ndup>0) {
+      warning("There were %d/%d X or Y duplications - removing from table (a hack)",ndup,n);
+      for(i=0, j=0; i<n; i++) {
+	if (mdat[i]) {
+	  if (j<i) {
+	    xdat[j] = xdat[i];
+	    ydat[j] = ydat[i];
+	  }
+	  j++;
+	}
+      }
+      n=j;
+      warning("New n=%d", n);
+    }
 
 #if HAVE_GSL
     stype = getparam("type");
@@ -185,7 +219,7 @@ nemo_main()
 #else
 
     if (Qx) {
-      dprintf(1,"Evaluating Y(x)\n");
+      dprintf(1,"Evaluating Y(x) using spline\n");
       if (Qxall ) {
 	nx = n;
 	for (i=0; i<nx; i++) xp[i] = xdat[i];
@@ -193,7 +227,7 @@ nemo_main()
 	nx = nemoinpr(getparam("x"),xp,MAXDATA);
 	if (nx<0) error("Parsing x=%s",getparam("x"));
       }
-      dprintf(1,"[Using spline.c]\n");
+      dprintf(1,"[Using spline.c] n=%d\n",n);
       sdat = (real *) allocate(sizeof(real)*n*3);
       spline(sdat,xdat,ydat,n);
       for (j=0; j<nx; j++) {

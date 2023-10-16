@@ -1,6 +1,7 @@
 DIR = src/nbody/evolve/hackcode/hackcode1
 BIN = hackcode1
-NEED = $(BIN) 
+NEED = $(BIN)
+TIME = /usr/bin/time
 
 help:
 	@echo $(DIR)
@@ -10,7 +11,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -fr core bench.dat bench.log
+	@rm -fr core bench.dat bench.log bench5.log
 
 NBODY = 10
 
@@ -26,3 +27,8 @@ hackcode1:
 	@bsf bench.dat '0.00196205 0.391904 -1.22753 2 10469'
 
 
+# this reproduces the bench5 case
+nbody1=10240
+t3=7.89*1
+bench5:
+	$(TIME) hackcode1 nbody=$(nbody1)  out=. seed=123 tstop=$(t3) > bench5.log

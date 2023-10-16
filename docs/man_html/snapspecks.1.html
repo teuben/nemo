@@ -6,41 +6,54 @@
 <title>SNAPSPECKS(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapspecks - tabulate a snapshot in specks format 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snapspecks</b>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>snapspecks</b> tabulate a snapshot in specks format,
-one of the formats that <i>partiview</i> understands. 
+<b>snapspecks</b> tabulate a snapshot in specks
+format, one of the formats that <i>partiview</i> understands. 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use --help to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file
-(snapshot) [???]     </dd>
+<dd>Input file (snapshot) [???]     </dd>
 
 <dt><b>options=</b> </dt>
-<dd>Output variables [x,y,z,m]      </dd>
+<dd>Output variables [x,y,z,m]
+     </dd>
 
 <dt><b>format=</b> </dt>
-<dd>Format
-for output [%g]     </dd>
+<dd>Format for output [%g]     </dd>
 
 <dt><b>times=</b> </dt>
-<dd>Times to select snapshot [all]    </dd>
+<dd>Times to select snapshot
+[all] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-<br>
-<pre>#! partiview
-filepath +:../hipcat
-read sample.dat
+
+<p> Creating a 10 particle Plummer sphere snapshot <br>
+<pre>    mkplummer - 100 | snapspecks -  &gt; plum100.speck
+    
+</pre>it can be viewed via the following partiview script (usually called a .cf
+file) <br>
+<pre>#! /usr/bin/env partiview
+#filepath +:../hipcat
+filepath +:.
+read plum100.speck
 eval labels off
 #eval cmap colorbv.cmap
 eval lum lum 0 1
@@ -49,16 +62,41 @@ texturevar 4
 eval psize 5000
 eval slum 5
 eval every 1
+</pre>and from the partiview install, this might work: <br>
+<pre>    cd $NEMO/local/partiview/data
+    ./hipbright
+or
+    partiview hipbright
+    
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect5' href='#toc5'>Install</a></h2>
+With some preconditions the command <br>
+<pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;mknemo partview
+</pre>
+<p>should provide a clean install and place the <b>partiview<b> command in $NEMOBIN
+</b></b>
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='glnemo2.1.html'>glnemo2(1NEMO)</a>
+ <br>
+<pre>https://www.amnh.org/research/hayden-planetarium/digital-universe/download
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<br>
+<pre>src/scripts/mknemo.d/partiview<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;install (example) script
+*.cf<tt> </tt>&nbsp;<tt> </tt>&nbsp;"control file", this should be argument to partiview
+*.speck<tt> </tt>&nbsp;<tt> </tt>&nbsp;partiview data file, usually referenced in the cf file
+</pre>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>21-May-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;page created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+10-dec-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;modernized for the new version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -69,10 +107,11 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Install</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

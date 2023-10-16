@@ -1,20 +1,33 @@
-.TH NEMOINP 1NEMO "14 November  2006"
-.SH NAME
+.TH NEMOINP 1NEMO "11 October 2023"
+
+.SH "NAME"
 nemoinp \- parse a user supplied number string
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBnemoinp [parameter=value] ...
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fInemoinp\fP parses an expression supplied by the user, using the
 rules as given by \fInemoinp(3NEMO)\fP. The output format can be
 defined too, separators, newlines etc. can be choosen at will.
+See also the EXAMPLES below.
 .PP
 It may come in handy to set an array in a shell variable or to
-initialize tables, e.g. \fBset x=(`nemoinp 1:10:2`)\fP will then
-result in \fBx\fP having \fB1 3 5 7 9\fP.   (this is unfortunately different
-from the matlab convention, where this would be written 1:2:10 instead,
-see also \fIseq(1)\fP, where the syntax is \fBseq 1 2 10\fP.
-.SH PARAMETERS
+initialize tables, e.g. \fBnemoinp 1:10:2\fP will then
+result in \fB1 3 5 7 9\fP.  Although such implied
+loops are a common feature of scripting environments, there
+are subtle differences:
+.nf
+
+.ta +2i +1i
+nemoinp		1:10:2
+matlab		1:2:10
+seq		1 2 10
+numpy.arange	1,10,2	last element (10) is never used
+.fi
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP 20
@@ -60,25 +73,36 @@ Force parsing the (optionally comma separated) string(s) as D:M:S.S, converting
 them to fractional degrees. For H:M:S parsing the user is
 responsible for the extra factor of 15.
 Default: \fBf\fP.
-.SH SEE ALSO
-seq(1), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), functions(5NEMO)
-.SH EXAMPLES
+
+.SH "CAVEATS"
+The number of elements in an array is limited, currently hardcoded to 32678 in
+\fInemoinp(3NEMO)\fP. If possible, use \fIseq(1)\fP.
+
+
+.SH "SEE ALSO"
+seq(1), tabgen(1NEMO), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), functions(5NEMO)
+
+.SH "EXAMPLES"
 .nf
    nemoinp 4.2+3.1           simple math
    nemoinp 'sqrt(2)'         math functions
    nemoinp pi+3              some support for funny numbers
    nemoinp 2:20:4            from 2 to 20 in steps of 4 (NEMO command)
    seq 2 4 20                from 2 to 20 in steps of 4 (UNIX command)
-   set n=20                  a C-shell variable
+   set n=20                  a (t)C-shell variable
+   n=20			     a bash/zsh variable
    nemoinp 2:${n}:4          as before, now using a shell variable
    nemoinp 2::4              repeat the value 4 times
-   nemoinp 'iflt(1,2,3,4)'   print 3, not 4, because 1 is less than 1
+   nemoinp '10**[0:3:1]'     log spaced values  1 10 100 1000
+   nemoinp 'iflt(1,2,3,4)'   print 3, not 4, because 1 is less than 2
    nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal 30.5043
    nemoinp c,G,h,p,m         a few good constants
    nemoinp 'p*pi/(3600*180)' 1 AU in km
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i

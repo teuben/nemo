@@ -1,8 +1,15 @@
 #! /usr/bin/env python
 #
-#   parameter editor for "keyword    value"  parameter files
+#   parameter editor for "keyword    value"
+#                     or "keyword=value"
+#                     or "keyword = value"
+#                     or "value = keyword = comment"
+#   parameter files
 #
-#   Usage:   pedit [options] pfile a=1 f="'a.fits'"
+#   Usage:   pedit pfile [options] a=1 f="'a.fits'"
+#
+#   Options:
+#            -e      bash style keyword=value
 #
 #
 #   @todo   error checking
@@ -10,38 +17,102 @@
 #             -g : grep like function
 #             -c : pick comment character?
 #             -m : mode (e.g. using '=' between key and val)
+#           implement an option (-g ?) to match on something, then replace the
+#              first value. Example taken from Tracy, where he had files like
+#              "1.234  =  RC  = some text about this"
+#           flag cmdline parameters that were not used
 
+version = "16-sep-2022"
 
 import sys
 
 if len(sys.argv) < 2:
-    print("Usage: %s [options] parfile a=1 f=\"'a.fits'\" > parfile.new" % sys.argv[0])
+    print("Usage: %s parfile [options] a=1 f=\"'a.fits'\" [> parfile.new]" % sys.argv[0])
+    print("Version: %s" % version)
+    print("Options:    -e     use bash style key=val")
+    print("            -o     overwrite input parfile")
+    print("            -r     use value = keyword  parfile")
     sys.exit(1)
 
 
 filename = sys.argv[1]
-eqmode   = False
+eqmode   = False        # -e mode
+owmode   = False        # -o mode
+vkmode   = False        # -r mode
+ckmode   = True         # hardcoded
 
 kv = {}
 
 for keyval in sys.argv[2:]:
+    if keyval=='-e':
+        eqmode = True
+        continue
+    if keyval=='-o':
+        owmode = True
+        continue
+    if keyval=='-r':
+        vkmode = True
+        continue
+    
     ieq = keyval.find('=')
     key = keyval[:ieq]
     val = keyval[ieq+1:]
     kv[key] = val
 
-lines = open(filename).readlines()
+fp = open(filename)
+lines = fp.readlines()
+fp.close()
+
+if owmode:
+    print("Overwriting %s" % filename)
+    fp = open(filename,"w")
+
 
 for line in lines:
+    line = line.strip()
     w = line.split()
-    if len(w) > 1:
+    nw = len(w)
+    comment = ""
+    if nw > 1:
+        if vkmode:
+            (w[0],w[2]) = (w[2],w[0])
         if w[0] in kv:
             if eqmode:
-                print("%s = %s" % (w[0],kv[w[0]]))
+                if vkmode:
+                    comment = ' '.join(w[3:])   # hockunk3d needs the comment
+                    oline = "%s = %s %s" % (kv[w[0]],w[0],comment)
+                else:
+                    oline = "%s = %s %s" % (w[0],kv[w[0]],comment)
             else:
-                print("%s   %s" % (w[0],kv[w[0]]))
+                oline = "%s   %s %s" % (w[0],kv[w[0]],comment)
+            if ckmode:
+                kv.pop(w[0])
         else:
-            print(line.strip())
+            oline = line
     else:
-        print(line.strip())        
+        if eqmode:
+            w=line.split('=')
+            if len(w)==2:
+                if w[0] in kv:
+                    oline = "%s=%s" % (w[0],kv[w[0]])
+                    if ckmode:
+                        kv.pop(w[0])
+                else:
+                    oline = line
+            else:
+                oline = line
+        else:
+            oline = line
+    if owmode:
+        fp.write("%s\n" % oline)
+    else:
+        print(oline)
+
+if owmode:
+    fp.close()
+
+if len(kv) > 0:
+    print("# Warning: unused parameters:", kv)
         
+
+    

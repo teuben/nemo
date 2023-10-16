@@ -41,7 +41,7 @@ string defv[] = {
   "mode=vtan\n    Output mode {vtan,vmod,vres,vtan/r,ome,vrad,dv/dr}",
   "out=\n         Optional output map of converted rotation speeds",
   "tab=\n         Optional output table of radii, velocities etc.",
-  "VERSION=1.5\n  11-aug-2014 PJT",
+  "VERSION=1.5a\n 26-jan-2021 PJT",
   NULL,
 };
 
@@ -106,7 +106,7 @@ int ring_index(int n, real *r, real rad)
 	rad,r[0],r[n-1]);
 }
 
-nemo_main()
+void nemo_main()
 {
   stream denstr, velstr, outstr, tabstr;
   real center[2], cospa, sinpa, cosi, sini, sint, cost, costmin, 

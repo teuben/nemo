@@ -648,6 +648,7 @@ PNG_LIB
 MACOS_LIBS
 CCSHARED
 F77_CMAIN_FFLAGS
+FC
 FLIBS
 ac_ct_F77
 FFLAGS
@@ -663,9 +664,12 @@ X_PRE_LIBS
 X_CFLAGS
 XMKMF
 falcon_OPENMP
+STDFLAG
 MAKEDIRS
 MAKELIBS
 falcon_NO_NATIVE
+PFLAGS
+NO_SHARED_LIBS
 MAKE
 RANLIB
 SET_MAKE
@@ -750,6 +754,8 @@ ac_user_opts='
 enable_option_checking
 with_csh
 enable_debug
+enable_shared
+enable_clang
 enable_pedantic
 enable_native
 enable_single
@@ -766,6 +772,7 @@ with_ccmalloc
 with_dso
 with_opt
 with_openmp
+with_std
 with_x
 enable_png
 with_pgplot_prefix
@@ -1431,16 +1438,18 @@ Optional Features:
   --disable-FEATURE       do not include FEATURE (same as --enable-FEATURE=no)
   --enable-FEATURE[=ARG]  include FEATURE [ARG=yes]
   --enable-debug          compile for debugging
-  --enable-pedantic       compile for pedantic gcc
+  --disable-shared        disable shared libraries? (needed for falcON on MAC)
+  --enable-clang          use clang compiler
+  --enable-pedantic       compile for lots of pedantics
   --enable-native         optimize for native CPU
   --enable-single         single-precision
   --enable-float          single-precision
-  --enable-double         double-precision
+  --enable-double         double-precision (default)
   --enable-mixed          mixed-precision
   --enable-gcov           gnu coverage tool
   --enable-lfs            large-file-size (files over 2GB)
   --disable-fortran       don't use any Fortran
-  --disable-falcon        enable falcON
+  --disable-falcon        disable falcON
   --enable-png            force the use of PNG for pgplot
   --enable-plplot         Activate PLPlot library (default = yes)
   --enable-cfitsio        use CFITSIO, instead of local fits I/O routines
@@ -1459,6 +1468,7 @@ Optional Packages:
   --with-dso              use DSO linking
   --with-opt              use opt for essentials
   --with-openmp           use OMP directives
+  --with-std              use this -std=
   --with-x                use the X Window System
   --with-pgplot-prefix=DIR   Directory where PGPLOT was installed, aka PGPLOT_DIR
   --with-plplot-libdir=<PLPlot library path>
@@ -5703,6 +5713,36 @@ if test "$ok" = "yes"; then
         # should we define DEBUG too?
 fi
 
+# Check whether --enable-shared was given.
+if test "${enable_shared+set}" = set; then :
+  enableval=$enable_shared; ok=$enableval
+else
+  ok=yes
+fi
+
+if test "$ok" = "yes"; then
+  NO_SHARED_LIBS=0
+else
+  NO_SHARED_LIBS=1
+fi
+
+
+# Check whether --enable-clang was given.
+if test "${enable_clang+set}" = set; then :
+  enableval=$enable_clang; ok=$enableval
+else
+  ok=no
+fi
+
+if test "$ok" = "yes"; then
+        CC="clang"
+        CXX="clang++"
+	#FC="flang"
+	#F77="flang"
+	FC="gfortran"
+	F77="gfortran"
+fi
+
 # Check whether --enable-pedantic was given.
 if test "${enable_pedantic+set}" = set; then :
   enableval=$enable_pedantic; ok=$enableval
@@ -5711,14 +5751,15 @@ else
 fi
 
 if test "$ok" = "yes"; then
-  flags="-ansi -pedantic -Werror -Wall -W -Wmissing-prototypes -Wstrict-prototypes"
-  flags="$flags -Wtraditional -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
-  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O4"
-  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wclobbered -Wuninitialized"
-  CFLAGS="$CFLAGS $flags"
-  CXXFLAGS="$CXXFLAGS $flags"
-  # FFLAGS="$CFLAGS $flags"
+  flags="-std=c99  -pedantic -Wall -Werror -W -Wmissing-prototypes"
+  flags="$flags -Wconversion -Wshadow -Wpointer-arith -Wcast-qual -Wcast-align"
+  flags="$flags -Wwrite-strings -Wnested-externs -fshort-enums -fno-common -Dinline= -g -O3"
+  flags="$flags -Wsign-compare  -Wtype-limits -Wignored-qualifiers -Wempty-body -Wuninitialized"
+  PFLAGS="-Wimplicit-int -Werror-implicit-function-declaration"
+else
+  PFLAGS="-Wall"
 fi
+
 
 # Check whether --enable-native was given.
 if test "${enable_native+set}" = set; then :
@@ -5889,6 +5930,22 @@ if test "${with_openmp+set}" = set; then :
   withval=$with_openmp; with_openmp=$withval
 else
   with_openmp=no
+fi
+
+
+
+# Check whether --with-std was given.
+if test "${with_std+set}" = set; then :
+  withval=$with_std; with_std=$withval
+else
+  with_std=c99
+fi
+
+
+if test $with_std != "default"; then
+  STDFLAG="-D_GNU_SOURCE -std=$with_std"
+else
+  STDFLAG=""
 fi
 
 
@@ -6588,6 +6645,8 @@ fi
 XINCS="$X_CFLAGS"
 if test -d /usr/X11R6/lib64; then
   XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11R6/lib64 -lXext -lX11 $X_EXTRA_LIBS"
+elif test -d /usr/X11/lib; then
+  XLIBS="$X_LIBS $X_PRE_LIBS -L/usr/X11/lib -lXext -lX11 $X_EXTRA_LIBS"
 else
   XLIBS="$X_LIBS $X_PRE_LIBS -lXext -lX11 $X_EXTRA_LIBS"
 fi
@@ -7869,6 +7928,9 @@ else
 $as_echo "$as_me: WARNING: no FORTRAN compiler" >&2;}
 fi
 
+FC=$F77
+
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for f77 flags to use C main function" >&5
 $as_echo_n "checking for f77 flags to use C main function... " >&6; }
 if ${ax_cv_f77_cmain_fflags+:} false; then :
@@ -8030,7 +8092,7 @@ if test -d "$PGPLOT_DIR"; then
     { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes, found \$PGPLOT_DIR=$PGPLOT_DIR" >&5
 $as_echo "yes, found \$PGPLOT_DIR=$PGPLOT_DIR" >&6; }
 else
-    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot
+    for dir in lib /usr/lib/pgplot /usr/local/lib/pgplot /usr/local/pgplot /opt/pgplot  /usr/share/pgplot /usr/lib/pgplot5
     do
         if test -f $dir/grfont.dat; then
             pgplot_dir="$dir"
@@ -11065,6 +11127,21 @@ case $yapp_name in
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
           ;;
+	cpgplot)
+	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
+	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
+	    PGPLOT_DIR='$NEMOLIB'
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using dollar" >&5
+$as_echo "$as_me: WARNING: C using dollar" >&2;}
+	    echo $PGPLOT_DIR
+	    echo $NEMOLIB
+	  else
+   	    YAPP_LIBS="-L$PGPLOT_DIR -lcpgplot -lpgplot $PNG_LIB $XLIBS $FLIBS"
+	    { $as_echo "$as_me:${as_lineno-$LINENO}: WARNING: C using" >&5
+$as_echo "$as_me: WARNING: C using" >&2;}
+	  fi
+	  YAPP_DEF="/xs"
+          ;;
 	pgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
 	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
@@ -11080,6 +11157,9 @@ $as_echo "$as_me: WARNING: using" >&2;}
 	  fi
 	  YAPP_DEF="/xs"
           ;;
+	giza)
+	  YAPP_DEF="/xw"
+	  YAPP_LIBS="-lgiza"
 esac
 { $as_echo "$as_me:${as_lineno-$LINENO}: result: $YAPP_NAME" >&5
 $as_echo "$YAPP_NAME" >&6; }

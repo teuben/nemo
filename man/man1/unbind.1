@@ -1,10 +1,13 @@
 .TH UNBIND 1NEMO "24 October 1988"
-.SH NAME
+
+.SH "NAME"
 unbind \- find unbound stars to a stellar system
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBunbind in=\fPsnapshot_in \fBout=\fPsnapshot_out [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBunbind\fP tries to find stars that are unbound to a stellar system.
 It simply calculates the binding energy (per unit mass) and flags
 the stars for which this is larger than a specified cutoff energy (\fBecutoff\fP)
@@ -15,9 +18,9 @@ The Key field (an integer) in the \fIsnapshot(5NEMO)\fP data is also copied
 accordingly; when it is not present it will be initialized to the order of
 particles present in the input file, \fB0\fP being the first one, and \fBnbody-1\fP
 the last one.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIsnapshot(5NEMO)\fP format. If potentials are not
@@ -52,15 +55,27 @@ stars should be written to file
 Logical determining if you want a map displayed by star number of the
 stars bound and unbound to the system. This is handy to compare
 maps of the same system under slightly different conditions.
+.TP
+\fBtimes=\fP
+Which times to process, by default all.
+
+.SH "CAVEATS"
+In a multi-time snapshot series when stars around unbound, some programs only allocate space for
+a snapshot in the beginning, thus if there are snapshots with more particles than in the first
+one, the program may crash.
+
 .SH "SEE ALSO"
 snapmask(1NEMO), skid(1TIPSY)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/pjt/nbody   	unbind.c unbind.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +2.0i +2.0i

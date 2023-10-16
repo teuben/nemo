@@ -23,11 +23,11 @@ string defv[] = {
   "bs=4\n         Block size per item",
   "mode=xy\n      Mode of copy",
   "offset=0\n     Offset (not used)",
-  "VERSION=0.2\n  11-nov-2015 PJT",
+  "VERSION=0.2a\n  26-jan-2021 PJT",
   NULL,
 };
 
-string usage="gather-scatter operations on large blocks of data";
+string usage="benchmark gather-scatter operations on large blocks of data";
 
 void gs_xy(stream instr, stream outstr,int offset,int bs, int nx,int ny);
 void gs_yx(stream instr, stream outstr,int offset,int bs, int nx,int ny);
@@ -41,7 +41,7 @@ void gs_yxz(stream instr, stream outstr,int offset,int bs, int nx,int ny,int nz)
 
 void Print2DArray(real *A, int nr, int nc);
 
-nemo_main()
+void nemo_main(void)
 {
   stream instr, outstr;
   int i, j, i0, j0;

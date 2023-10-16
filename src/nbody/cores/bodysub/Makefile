@@ -2,12 +2,13 @@
 include $(NEMOLIB)/makedefs
 
 SRC = bti_0.c bti_1.c bti_i.c bti_key.c btr_0.c btr_1.c btr_aux.c \
-       btr_ax.c btr_ay.c btr_az.c btr_i.c btr_key.c btr_m.c btr_phi.c \
+       btr_ax.c btr_ay.c btr_az.c btr_ar.c btr_i.c btr_key.c btr_m.c btr_phi.c \
        btr_r.c btr_r2.c btr_t.c btr_v.c btr_vr.c btr_vt.c btr_v2.c btr_vr2.c btr_vt2.c btr_vp.c btr_vx.c btr_vy.c btr_vz.c \
-       btr_x.c btr_y.c btr_z.c btr_etot.c btr_ekin.c btr_jtot.c \
+       btr_x.c btr_y.c btr_z.c btr_etot.c btr_ekin.c btr_jtot.c btr_jx.c btr_jy.c btr_jz.c \
        btr_dens.c btr_eps.c \
        btr_glon.c btr_glat.c btr_mul.c btr_mub.c \
-       btr_xsky.c btr_ysky.c
+       btr_xsky.c btr_ysky.c \
+       btr_ra.c btr_dec.c
 
 OBJ  = $(SRC:.c=.so)
 

@@ -88,7 +88,7 @@ namespace falcON { namespace Manipulate {
       DESC[0]=0;
       try {
 	BF = new BodyFilter(filter, params);
-      } catch (falcON::exception E) {
+      } catch (falcON::exception& E) {
 #ifdef WARNING_ON_ERROR
 	falcON::warning("Manipulator \"%s\": "
 			"could not generate a filter from expression \"%s\" "

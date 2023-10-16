@@ -1,9 +1,12 @@
-.TH XRANDOM 1NEMO "9 October 2012"
-.SH NAME
+.TH XRANDOM 1NEMO "27 September 2023"
+
+.SH "NAME"
 xrandom \- Return seed for random numbers and optionally random numbers
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBxrandom\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBxrandom\fP returns a seed that can be used to random number generators,
 and optionally random numbers drawn from a uniform or gaussian (normal)
 distribution. Uniform numbers are between 0 and 1, gaussian numbers 
@@ -11,18 +14,26 @@ have a mean of 0 and a dispersion of 1.
 .PP
 If compiled with GSL, random number generator types 
 can be selected, as well as many more distribution types.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBseed=\fP
-Initial seed. Use 0 for the current time (seconds since 1970.00,
-see also \fItime(2)\fP)
+Initial seed. Values 0 and below are special:
+
+0 for the current time (seconds since 1970.00, see also \fItime(2)\fP)
+
 -1 for the number of centiseconds since boot (see \fItimes(2)\fP) 
-and 2 for the current pid (see \fIgetpid(2)\fP).  If GSL is implemented
+
+-2 for the current pid (see \fIgetpid(2)\fP).
+
+-3 wishful thinking the linux kernel will give an even more random seed
+
+If GSL is implemented
 the seed value can be optionally followed by the random number 
 generator type (default: mt19937). See \fIxrandom(3)\fP for more
 details.
+.TP 
 \fBn=\fP
 Number of random numbers to draw 
 [Default: 0].
@@ -35,6 +46,11 @@ and the statistics of the mean's from each \fBn\fP sample is shown.
 .TP
 \fBgauss=\fP
 Return gaussian numbers instead of uniform?
+[Default: f]
+.TP
+.TP
+\fBexp=\fP
+Return exponential random numbers instead. Setting this will override the \fBgauss=\fP parameter.
 [Default: f]
 .TP
 \fBreport=\fP
@@ -50,12 +66,19 @@ Offset of distribution from 0. Default: 0.0
 \fBgsl=\fP
 Name of the random number distribution requested. They follow the name convention
 of the same-name functions \fIgsl_random_xxx\fP in the \fIgsl(3)\fP library.
+Only available if compiled with GSL.
 No default.
 .TP
 \fBpars=\fP
 Parameters belonging to the selected \fBgsl\fP name. They need to match
 exactly (0, 1, 2 or 3 currently). No default.
-.SH EXAMPLES
+.TP
+\fBseed57=\fP
+This quaint option will activate von Hoerner's 1957 algorithm of drawing random numbers.
+It needs a seed between 0.57 and 0.91. See also \fImkvh60(1NEMO)\fP.
+Default: not used.
+
+.SH "EXAMPLES"
 Here is an example script, \fBgrandom.csh\fP, 
 to test if the error in the mean scales
 as 1/sqrt(N):
@@ -88,7 +111,18 @@ Skewness and kurtosis: -0.0528344 1.19066
 Median               : 0.000425562
 
 .fi
-.SH GSL
+.PP
+xrandom can also be use to estimate the wall clock time of a complex pipe. Here
+is an example:
+.nf
+  t0=$(xrandom -1);mkplummer - 1000000 | snapsort - - r | hackdens - .; t1=$(xrandom -1); nemoinp "($t1-$t0)/100"
+  6.09
+.fi
+where 6.09 was measured on the fastest  machine I had available at the time of this writing
+(Jansky, with nemobench5 ~ 1350). Turns out for this example most of the time is spent in \fPhackdens(1NEMO)\fP,
+about 90%.
+
+.SH "GSL"
 If the GNU Scientific Library (GSL) has been enabled during installation, the
 \fBgsl=\fP and \fBpars\fP keyword will appear in the keyword list of xrandom.
 The following random number distribution names are implemented, 
@@ -132,13 +166,32 @@ geometric              p
 hypergeometric         n1 n2 nt
 logarithmic            sigma
 .fi
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "RANDOM"
+Random numbers can be seeded using the \fIseed=\fP keyword.
+There are also Unix ways to do this. Here are a few (using bash notation):
+
 .nf
-.ta +1.0i +4.0i
+
+echo $RANDOM
+echo $$
+shuf -i 1-100 -n 5
+awk -v n=5 -v seed="$RANDOM" 'BEGIN {srand(seed); for(i=0; i<n; ++i) printf("%.3f\\n",rand())}'
+tr -cd "[:digit:]" < /dev/urandom | head -c 6
+
+.fi
+Note that /dev/urandom is only available on Linux
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
 26-Nov-96	V1.0 turned TESTBED into a TOOLBOX program	PJT
 13-apr-97	example
 8-sep-01	V2.0 GSL optionally added	PJT
 9-oct-2012	V2.2 added m=	PJT
+21-aug-2022	V2.4 added exp=	PJT
+27-sep-2023	V2.5 less verbose and wall clock timing example added	PJT
 .fi

@@ -1,5 +1,8 @@
 /*
  * MKHOMSPH.C: set up a uniform sphere
+ *
+ *      See also: https://arxiv.org/abs/2106.15155
+ *                Multilayer spherical stellar cluster with uniform density
  *	
  *	original version: 20-mar-89	Peter Teuben
  *		apr-89

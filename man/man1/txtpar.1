@@ -1,0 +1,123 @@
+.TH TXTPAR 1NEMO "3 February 2023"
+
+.SH "NAME"
+txtpar \- extract parameters from a text file, with optional math
+
+.SH "SYNOPSIS"
+.PP
+\fBtxtpar in=\fPtext-file \fBp0=\fP \fBp1=\fP ...
+
+.SH "DESCRIPTION"
+\fBtxtpar\fP combines some of the often used combinations of
+standard Unix text filtering programs like
+\fIgrep(1)\fP, \fIawk(1)\fP, and \fIsed(1)\fP, and 
+with \fInemoinp(3NEMO)\fP style math into one "simple" NEMO program. Although
+\fItabmath(1NEMO)\fP can do some of this processing too, \fItxtpar(1NEMO)\fP's strength is
+processing multiple lines in a reduction style, instead of filtering. It often simplifies
+the esoteric syntax used in the grep/awk/sed pipes, but is much more limited.
+.PP
+.nf
+     grep RA rsr.33551.driver.sum.txt  | head -1 | awk '{print $4}'
+vs.
+     txtpar rsr.33551.driver.sum.txt p0=RA,1,4
+.fi
+.PP
+Normally one parameter is extracted per \fBp#=\fP directive, in a \fIword,row,col\fP fashion. Future option
+will allow multiple \fIcol's\fP , but this is not implemented yet.
+.PP
+Comment lines in the input file are considered part of the text, they are not stripped out. Use
+\fItabcomment(1NEMO)\fP first if you really need them removed.
+.PP
+Optionally additional math is allowed on the extracted parameters using \fInemoinp(1NEMO)\fP style expressions. In
+this case, the parameters themselves are not output, but only the ones computed via \fBexpr=\fP. See EXAMPLES below
+if you need both.
+.PP
+To extract values from a \fIkey=val\fP style parameter file, use \fInemopars(8NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fIin-file\fP
+input text file, containing marker words and numeric values to be parsed. 
+No default.
+.TP
+\fBexpr=\fP\fIexpr1,...\fP
+Optional expression(s), separated by commas, referencing the extracted parameters via the \fIfie(3NEMO)\fP parsing rules.
+By default no expression is needed and each parameter is output as they appeared in the text file, however when \fBexpr=\fP is used, only those
+newly computed values are output.  [Default: no expression given]
+.TP
+\fBformat=\fP\fIexpression\fP
+A (\fIprintf(3)\fP) format specification applied to the computed expressions
+with which the parameters are written to output [Default: \fB%g\fP].
+.TP
+\fBseed=\fP\fIseed\fP
+Integer initial seed in case random numbers have been used in the expression.
+If 0 is given, the time of the day will be used (see 
+\fIxrandom(3NEMO)\fP for other special seed values)
+to initialize the random number generator. [Default: \fB0\fP].
+.TP
+\fBnewline=t|f\fP
+Should a newline be used between output values. [Default: \fBf\fP]
+.TP
+\fBmaxline=\fP\fImax\fP
+In case a NEMO/unix pipe is used, the maximum number of lines will need to be specified. [Default: 10000]
+.TP
+\fBp#=\fP\fI[word,]row,col,...\fP
+Parameter selection directive in the indexed keyword notation (e.g. p0=, p1=, p2=), see \fIgetparam(3NEMO)\fP.
+\fIword\fP is the string to search on (with some limited grep syntax), but can be blank if all lines need to apply.
+\fIrow\fP is an integer, and is the row-th occurance from the \fIword\fP match. 1 would be the first, 2 the 2nd, -1 the last, -2 the one but last etc.
+0 is not an allowed row number.
+\fIcol\fP is an integer, and designates the "column" to look for in the current row (line), 1 would be the first word, -1 the last etc.
+Multiple \fIcol\fP will be allowed in a future version, but currently not available. 0 is not an allowed col number.
+
+At least one parameter needs to be given: \fBp0=\fP.
+
+.SH "EXAMPLES"
+Here is an example of extracting three values and converting them to two output values:
+.nf
+
+       txtpar in=example.txt expr="log(abs(%1)),log(abs(%3/%2))" format=%.3f \\
+              p1=Worst,1,9  p2=QAC,1,3 par3=QAC,1,4
+	
+       cat example.txt
+       \fIWorst fractional energy loss dE/E = (E_t-E_0)/E_0 = 0.00146761 at T = 1.28125
+       QAC_STATS: - 0.039966 0.0274195 0.00185505 0.135854  0.799319 1  20
+       \fP
+
+.fi
+
+.PP
+If both original values as well as newly computed \fBexpr=\fP are desired in the output (this is the default
+behavior in \fItabmath(1NEMO)\fP), an extra pipe using
+\fItabmath(1NEMO)\fP) is needed. Here is an example to add the first column in the first two lines of a table
+in both forms, with and without the original values
+.nf
+
+      txtpar example.txt p0=1,1 p1=2,1 | tabmath - - %1+%2 format=%.3f
+      txtpar example.txt %1+%2 %.3f p0=1,1 p1=2,1 
+
+.fi
+
+.SH "CAVEATS"
+This program is not intended for streaming very large files, as the file is read into memory for processing
+and each parameter could potentially cause a search through the file.
+
+.SH "TODO"
+On the wishlist are relative row/col w.r.t. the matched word using an explicit + or - in front
+of the row or col:
+.nf
+     p0=word,+row,col
+     p0=word,row,-col
+.fi     
+
+.SH "SEE ALSO"
+grep(1), awk(1), nemopars(8NEMO), tabmath(1NEMO), tabrows(1NEMO), tabcomment(1NEMO), table(5NEMO), run(1NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.0i +4.0i
+27-dec-2021	V0.1 simple draft written - implemented simple version	PJT
+.fi

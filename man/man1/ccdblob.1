@@ -4,7 +4,8 @@ ccdblob \- properties of a blob in an image
 .SH SYNOPSIS
 \fBccdblob\fP [parameter=value]
 .SH DESCRIPTION
-\fBccdblob\fP computes some properties of a blob ("star") in an image. With given rough pixel coordinates
+\fBccdblob\fP is a poor man's source extractor and 
+computes some properties of a blob ("star") in an image. With given rough pixel coordinates
 and a box size, it will determine the peak, shape and flux of the blob, assuming the background signal (box
 needs to be big enough for this) is well characterised by the median value. This current algorithm thus does not
 work in crowded fields.
@@ -18,10 +19,10 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input image file [???]    
+Input NEMO image file [???]    
 .TP
 \fBpos=\fP
-(x,y) position, or use max in map []
+(x,y) position, or use max in map. Integers, and are 1-based. []
 .TP
 \fBbox=\fP
 Box size to use around pos [32] 

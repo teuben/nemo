@@ -299,7 +299,10 @@ void write_namelist(char *name)
 void run_program(char *exe)
 {
 #if 1
-    system(exe);
+  if (system(exe)) {
+    fprintf(stderr,"Problem executing \"%s\"\n",exe);
+    exit(1);
+  }
 #else
     if (execlp(exe,NULL)) {
         fprintf(stderr,"Problem executing %s\n",exe);

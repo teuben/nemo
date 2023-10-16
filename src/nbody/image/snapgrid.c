@@ -43,6 +43,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <strlib.h>
+#include <extstring.h>
 
 #include <snapshot/body.h>      /* snapshot's */
 #include <snapshot/snapshot.h>
@@ -75,14 +76,13 @@ string defv[] = {		/* keywords/default values/help */
 	"mean=f\n			  mean (moment=0) or sum per cell",
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
-	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, MER, AIT)",
-	"VERSION=6.0a\n			  27-jul-2019 PJT",
+	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)",
+	"VERSION=6.1\n			  19-mar-2022 PJT",
 	NULL,
 };
 
 string usage="grid a snapshot into a 2/3D image-cube";
 
-string cvsid="$Id$";
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #define TIMEFUZZ  0.000001
@@ -146,45 +146,6 @@ local int ybox(real y);
 local int zbox(real z);
 local real odepth(real tau);
 local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
-
-
-void nemo_main (void)
-{
-    int i;
-    
-    setparams();                /* set from user interface */
-    compfuncs();                /* get expression functions */
-    allocate_image();		/* make space for image(s) */
-    if (Qstack) clear_image();	/* clear the images */
-    if (Qstack && Qdepth) 
-      error("stack=t and depth analysis cannot be used together, use snapmerge first");
-    while (read_snap())	{                   /* read next N-body snapshot */
-        for (i=0; i<nvar; i++) {
-            if (!Qstack) {
-            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
-		clear_image();
-	    }
-            bin_data(i);	            /* bin and accumulate */
-            if (!Qstack) {                  /* if multiple images: */
-	      if (Qdepth||Qint)
-		los_data();
-	      rescale_data(i);            /* rescale */
-	      write_image(outstr,iptr);   /* and write them out */
-	      if (i==0) reset_history();  /* clean history */
-            }
-        }
-        free_snap();
-    }
-    if (Qstack) {
-      if (Qdepth||Qint)
-	los_data();
-      rescale_data(0);                    /* and rescale before ... */
-      write_image (outstr,iptr);	    /* write the image */
-    }
-
-    strclose(instr);
-    strclose(outstr);
-}
 
 
 void wcs(real *x, real *y)
@@ -442,9 +403,20 @@ allocate_image()
       Namez(iptr) = zlab;
       
     } else {
+#if 0      
       Xmin(iptr) = xrange[0] + 0.5*xrange[2];
       Ymin(iptr) = yrange[0] + 0.5*yrange[2];
       Zmin(iptr) = zrange[0] + 0.5*zrange[2];
+      Axis(iptr) = 0;
+#else
+      Xmin(iptr) = 0.0;
+      Ymin(iptr) = 0.0;
+      Zmin(iptr) = 0.0;
+      Xref(iptr) = -xrange[0]/xrange[2] - 0.5;
+      Yref(iptr) = -yrange[0]/yrange[2] - 0.5;
+      Zref(iptr) = -zrange[0]/zrange[2] - 0.5;
+      Axis(iptr) = 1;
+#endif
       
       Dx(iptr) = xrange[2];
       Dy(iptr) = yrange[2];
@@ -992,10 +964,48 @@ setaxis (string rexp, real range[3], int n, int *edge, real *beam)
         range[1] = natof(cp);
     range[2] = (range[1]-range[0])/(real)n;       /* step */
     if (range[2] < 0)
-      warning("%s: This axis %d has negative step",rexp,n);
+      warning("%s: This axis n=%d has negative step %g, you must be an observer",rexp,n,range[2]);
     cp = strchr(cp,',');
     if (cp)
         *beam = natof(++cp);                  /* convolution beam */
     else
         *beam = -1.0;                        /* any number < 0 */
+}
+
+void nemo_main (void)
+{
+    int i;
+    
+    setparams();                /* set from user interface */
+    compfuncs();                /* get expression functions */
+    allocate_image();		/* make space for image(s) */
+    if (Qstack) clear_image();	/* clear the images */
+    if (Qstack && Qdepth) 
+      error("stack=t and depth analysis cannot be used together, use snapmerge first");
+    while (read_snap())	{                   /* read next N-body snapshot */
+        for (i=0; i<nvar; i++) {
+            if (!Qstack) {
+            	if (nvar>1) dprintf(0,"Gridding evar=%s\n",evar[i]);
+		clear_image();
+	    }
+            bin_data(i);	            /* bin and accumulate */
+            if (!Qstack) {                  /* if multiple images: */
+	      if (Qdepth||Qint)
+		los_data();
+	      rescale_data(i);            /* rescale */
+	      write_image(outstr,iptr);   /* and write them out */
+	      if (i==0) reset_history();  /* clean history */
+            }
+        }
+        free_snap();
+    }
+    if (Qstack) {
+      if (Qdepth||Qint)
+	los_data();
+      rescale_data(0);                    /* and rescale before ... */
+      write_image (outstr,iptr);	    /* write the image */
+    }
+
+    strclose(instr);
+    strclose(outstr);
 }

@@ -1,0 +1,16 @@
+Input files described in http://nbabel.org/input
+
+Can also make your own in NEMO, e.g. a 256 body Plummer sphere:
+
+   mkplummer - 256 | snapprint - -1,m,x,y,z,vx,vy,vz format=%.16f
+
+or even run a benchmark using a single pipe
+
+mkplummer - 256 seed=123 | snapprint - -1,m,x,y,z,vx,vy,vz format=%.16f | /usr/bin/time ./nbabel_c
+
+
+Odd things to fix upstream:
+ - C and CPP return a 1 , Makefile sees it as error
+ - input files have an extra blank line, the command
+        sed -i '$d' input16
+   will fix that

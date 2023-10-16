@@ -1,9 +1,12 @@
 .TH SNAPVIRIAL 1NEMO "18 July 2012"
-.SH NAME
+
+.SH "NAME"
 snapvirial \- scale snapshots while retaining or setting virial ratio
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapvirial in=\fIin_file\fP \fBout=\fIout_file\fP [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapvirial\fP copies an N-body system from \fBin\fP to \fBout\fP,
 scaling particle qantities such that the virial ratio is either
 retained or gets a specified value. For a more manual rescale use
@@ -14,8 +17,8 @@ information, but also potential, as to make the rescaling computation
 a linear operation. Depending on accuracy needed, a general algorithm as
 in \fIhackforce(1NEMO)\fP can be used to add potentials and forces 
 to a snapshot.
-.SH PARAMETERS
-The following parameters are recognized:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fIin_file\fP
 input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
@@ -42,9 +45,25 @@ copied. [default: \fBall\fP].
 Virial ratio (must be non-negative) to be obtained - rescaling is done
 such that a virial ratio of |2T/W| is obtained. If no value is given,
 the old virial ratio is retained [default: not used].
+
+.SH "EXAMPLES"
+
+Scaling an already virialized Plummer sphere (see \fImkplummer(1NEMO)\fP), and the
+Faber-Jackson relation, one can also use \fIsnapscale(1NEMO)\fP to scale such models,
+here with a massfraction \fBa\fP:
+.nf
+
+    a=0.1
+    mkplummer plum1.dat 10000
+    snapscale plum1.dat plum2.dat mscale="$a" rscale="$a**0.5" vscale="$a**0.25"
+.fi
+
+
+
 .SH "SEE ALSO"
 snapscale(1NEMO), hackforce(1NEMO), snapshot(5NEMO), units(5NEMO)
-.SH BUGS
+
+.SH "BUGS"
 It is considered an error when either the potential energy is
 positive or the kinetic energy is negative. This usually requires the
 snapshot to be in the center of mass frame. Use \fIsnapcenter(1NEMO)\fP
@@ -53,13 +72,15 @@ if need be.
 This program has no intelligence about the shape of the system, and hence
 does a simple rescaling of the required quantities. 
 It thus works quite well for spherical galaxies.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/nbody/trans   	snapvirial.c
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
@@ -69,6 +90,7 @@ Peter Teuben
 29-oct-90	V1.3: fixed decision bug	PJT
 11-nov-91	V1.3a: man page clarifications	PJT
 18-jul-2012	V2.0:  reporting mode when out= left blank	PJT
+13-jun-2022	add snapscale example using Faber-Jackson	PJT
 .fi
 
 

@@ -43,6 +43,11 @@ hierarchical form similar to the Unix directory structure, although
 there are additional constraints imposed by the essentially linear
 nature of the storage media.
 .PP
+In modern parlor, the format resembles XML but where the data are stores
+in binary form. Libraries such as \fInetcdf(3)\fP and HDF5 overlap in ideas
+in this NEMO library. When NEMO was developed, in 1986, these libraries were
+not available yet.
+.PP
 The external data format (visualized by an otherwise non-existing
 \fBstruct _disk_item\fP) is a tagged list of data \fIitem\fPs, 
 each containing

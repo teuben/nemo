@@ -1,0 +1,72 @@
+.TH JD2ISO 1NEMO "8 December 2022"
+
+.SH "NAME"
+jd2iso \- Convert (Modified) Julian Day to a (ISO) civil time
+
+.SH "SYNOPSIS"
+\fBjd2iso\fP [parameter=value]
+
+.SH "DESCRIPTION"
+Written in a rush, this converts Julian Days to Civil Time, using
+\fIctime(3)\fP. There are better ways to do it, since this routine
+cannot go before 1970.0
+.TP
+Some future version will make it real ISO and do the time zones correct.
+.nf
+
+   # ISO format display the current time:
+   date -u +%Y-%m-%dT%H:%M:%S.%N
+   2022-12-09T00:05:28.406997840
+.fi
+.TP
+For reference, MJD2000 = 51544.0, JD2000 = 2451544.5.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBjd=\fP
+If give, this is the input Julian Day to convert.
+.TP
+\fBmjd=\fP
+Modified Julian Day (MJD=JD-2400000.5).
+.TP
+\fBtjd=\fP
+Truncated Julian Day (TJD=JD-2440000.5).
+
+.SH "EXAMPLES"
+.nf
+jd2iso 2400000.5
+### Fatal error [jd2iso]: cannot parse negative seconds: -3506716800 ~ -111.091 years
+
+% jd2iso 2400000.5+50000
+Mon Oct  9 20:00:00 1995
+
+% jd2iso 2400000.5+60000 60000 20000
+Fri Feb 24 19:00:00 2023
+Fri Feb 24 19:00:00 2023
+Fri Feb 24 19:00:00 2023
+
+MIRIAD% julian
+JULIAN: (Version 15-oct-2013)
+22DEC08:19:07:53.0 is Julian Day  2459922.297141
+22DEC08:19:07:53.0 is Modified Julian Day   59921.797141
+
+.SH "CAVEATS"
+Leap seconds and timezones are not properly accounted for.
+
+.SH "SEE ALSO"
+xrandom(3NEMO), julian(1MIRIAD), ctime(3), time(2)
+.nf
+https://www.aavso.org/jd-calculator
+https://aa.usno.navy.mil/data/JulianDate
+.fi
+.SH "FILES"
+src/kernel/misc/jd2iso.c
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+8-dec-2022	Created		PJT
+.fi

@@ -4,6 +4,8 @@
  *
  *
  *  28-may-04   V1.0  first version (see also Miriad's velimage program)
+ *  30-nov-20   V1.1  fix header
+ *   6-may-21   V1.2  fix for axis=1 style input maps
  *
  *  TODO:
  *    - normalization of exp(-x^2/2) :
@@ -28,7 +30,7 @@ string defv[] = {
   "zrange=-2:2\n        Range in Z velocity",
   "nz=64\n              Number of pixels in Z",
   "sigdefault=0\n       Default velocity dispersion",
-  "VERSION=1.0\n        28-may-04 PJT",
+  "VERSION=1.2\n        6-may-2021 PJT",
   NULL,
 };
 
@@ -55,9 +57,11 @@ local real sigdef = 0.0;
 local void cube_create(stream);
 
 extern double grandom(double,double);
+void setparams(void);
+void setrange(real *rval, string rexp);
 
 
-nemo_main ()
+void nemo_main(void)
 {
     setparams();
     outstr = stropen(getparam("out"),"w");
@@ -65,7 +69,7 @@ nemo_main ()
     strclose(outstr);
 }
 
-setparams()
+void setparams(void)
 {
   stream instr;
   string intpol;
@@ -140,7 +144,7 @@ setparams()
   
 }
 
-setrange(real *rval, string rexp)
+void setrange(real *rval, string rexp)
 {
     char *cptr, *tmpstr;
     double dpar;
@@ -246,6 +250,13 @@ local void cube_create(stream outstr)
   Xmin(vptr) = Xmin(velptr);
   Ymin(vptr) = Ymin(velptr);
   Zmin(vptr) = zrange[0];
+  Xref(vptr) = Xref(velptr);
+  Yref(vptr) = Yref(velptr);
+  Zref(vptr) = 0.0;
+  Namex(vptr) = strdup("X");
+  Namey(vptr) = strdup("Y");
+  Namez(vptr) = strdup("Z");
+  Axis(vptr) = Axis(velptr);
   
   if (n>0) warning("%d/%d cells with no signal",n,nx*ny*nz);
   printf("Min and max in map: %g %g\n",m_min,m_max);

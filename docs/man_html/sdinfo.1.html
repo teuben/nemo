@@ -6,6 +6,7 @@
 <title>SDINFO(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -88,9 +89,10 @@ AGBT15B_287_35.raw.vegas.C.fits : Nrows: 2168   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.A.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.B.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
-</pre>Here is a benchmark of the ngc5291 example: <br>
+</pre>Here is a benchmark of the GBT ngc5291 example: <br>
 <pre>    time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
     ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### nemo Debug Info: DATA keyword TDIM7 = (32768,1,1,1)
     ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col
 = 7
     ### nemo Debug Info: DATA6 3.71521 0.0366262 3.30351     1.42437
@@ -110,14 +112,18 @@ AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 
 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/image/fits 
+src/image/fits <p>
+<a href='http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits'>http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits</a>
+
+
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>23-Nov-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-14-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 dimension analysis w/ n5291<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 dimension analysis w/ ngc5291<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 Handle CIMAFITS and MATRIX extensions<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-sep-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Improved column reading, display TDIM<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJTq
 </pre><p>
 
 <hr><p>

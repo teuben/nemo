@@ -1,0 +1,24 @@
+#! /bin/bash
+#
+#   mknemo build helper for funtools
+#
+#
+
+
+cd $NEMO/local
+
+if [ ! -d funtools ]; then
+  git clone https://github.com/ericmandel/funtools
+fi
+cd funtools
+git pull
+version=$(git log -1 --format=%cd)
+
+./mkconfigure
+./configure --prefix=$NEMO/opt
+make
+make install
+
+echo Installed version=$version
+
+echo funtools '"'$version'"' `date` >> $NEMO/opt/mknemo.log

@@ -6,6 +6,7 @@
 <title>SNAPPRINT(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -74,20 +75,20 @@ are output in the table, this format is also referred to as the <a href='ntmpv.5
 
 format. [Default: <b>f</b>] </dd>
 
-<dt>Should newlines be added between the header elements?
-</dt>
-<dd><b>newline=f|t</b> [Default: <b>f</b>] </dd>
+<dt><b>newline=f|t</b> </dt>
+<dd>Should newlines be added between the header
+elements? [Default: <b>f</b>] </dd>
 
 <dt><b>csv=f|t</b> </dt>
-<dd>Use CSV (comma separated values) output
-style. This means a comma, instead of a space, will be used to separate
-the values in the output stream. Default: false. </dd>
+<dd>Use CSV (comma separated values) output style.
+This means a comma, instead of a space, will be used to separate the values
+in the output stream. Default: false. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-Times=time-string does
-not work, returns btab=NULL, bits=1, i.e. something weird here. Code is identical
-to snapcenter, which uses same technique. <p>
+Times=time-string does not work,
+returns btab=NULL, bits=1, i.e. something weird here. Code is identical to
+snapcenter, which uses same technique. <p>
 The inversion function of snapprint,
 reading a snapshot from a simple table, could be done with <a href='tabtos.1.html'><i>tabtos(1NEMO)</i></a>
 .

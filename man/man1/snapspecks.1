@@ -1,31 +1,44 @@
-.TH SNAPSPECKS 1NEMO "21 May 2001"
-.SH NAME
+.TH SNAPSPECKS 1NEMO "10 December 2022"
+
+.SH "NAME"
 snapspecks \- tabulate a snapshot in specks format
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapspecks\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsnapspecks\fP tabulate a snapshot in specks format, one of the
 formats that \fIpartiview\fP understands.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file (snapshot) [???]    
-.TP 20
+.TP
 \fBoptions=\fP
 Output variables [x,y,z,m]     
-.TP 20
+.TP
 \fBformat=\fP
 Format for output [%g]    
-.TP 20
+.TP
 \fBtimes=\fP
-Times to select snapshot [all]   
-.SH EXAMPLES
+Times to select snapshot [all]
+
+.SH "EXAMPLES"
+
+Creating a 10 particle Plummer sphere snapshot
 .nf
-#! partiview
-filepath +:../hipcat
-read sample.dat
+
+    mkplummer - 100 | snapspecks -  > plum100.speck
+    
+.fi
+it can be viewed via the following partiview script (usually called a .cf file)
+.nf
+
+#! /usr/bin/env partiview
+#filepath +:../hipcat
+filepath +:.
+read plum100.speck
 eval labels off
 #eval cmap colorbv.cmap
 eval lum lum 0 1
@@ -34,13 +47,45 @@ texturevar 4
 eval psize 5000
 eval slum 5
 eval every 1
+
 .fi
-.SH SEE ALSO
-.SH FILES
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+and from the partiview install, this might work:
 .nf
-.ta +1.0i +4.0i
+
+    cd $NEMO/local/partiview/data
+    ./hipbright
+or
+    partiview hipbright
+    
+.fi
+
+.SH "INSTALL"
+With some preconditions the command
+.nf
+	mknemo partview
+.fi
+should provide a clean install and place the \fBpartiview\fB command in $NEMOBIN
+
+.SH "SEE ALSO"
+glnemo2(1NEMO)
+.nf
+https://www.amnh.org/research/hayden-planetarium/digital-universe/download
+.fi
+
+.SH "FILES"
+.nf
+.ta +2i
+src/scripts/mknemo.d/partiview		install (example) script
+*.cf	"control file", this should be argument to partiview
+*.speck	partiview data file, usually referenced in the cf file
+.fi
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
 21-May-01	page created	PJT
+10-dec-2022	modernized for the new version	PJT
 .fi

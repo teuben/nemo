@@ -43,9 +43,9 @@ endif
 setenv PATH $FALCON"/bin:"$PATH
 rehash
 
-if ($?prompt) then
-  echo "falcON loaded from $FALCON"
-endif
+#if ($?prompt) then
+#  echo "falcON loaded from $FALCON"
+#endif
 
 # set compiler
 if($?MODULE_VERSION) then

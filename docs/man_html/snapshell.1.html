@@ -6,13 +6,18 @@
 <title>SNAPSHELL(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-snapshell - compute statistics of bodyvariables in a set of radial shells
+snapshell - compute statistics of bodyvariables in a set of radial
 
+<p>shells 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snapshell in=</b>snap_file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapshell</i>
 computes selected diagnostics and their statistics  from an N-body snapshot
@@ -29,17 +34,26 @@ An arbitrary weighting may be specified for each particle. <p>
 The output
 will be an ascii table, in which for each variable it will print a selected
 set of statistics (e.g. mean, dispersion, min, max, skewness, kurtosis, number
-of particles). Shells with no particles are not output however. 
+of particles). Shells with no particles are not output however. <p>
+Optionally
+a viewing  axis (as seen from the center) can be selected with an opening
+angle. In this case only the particles within this cone are counted. See
+<b>cone=</b> and <b>angle=</b> below. <p>
+The image (ccd) based program <a href='ccdellint.1.html'><i>ccdellint(1NEMO)</i></a>
+ does
+something similar in 2D. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized. 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>snap_file</i> </dt>
-<dd>Input data is read from
-<i>snap_file</i>, which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
- format.  Note that only the
-first snapshot found in this file will be used. No default. </dd>
+<dd>Input data is
+read from <i>snap_file</i>, which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
+ format.  Note that
+only the first snapshot found in this file will be used. No default. </dd>
 
 <dt><b>radii=</b><i>r0,r1,r2,...</i>
 </dt>
@@ -73,50 +87,52 @@ if shells are given in configuration space (i.e. svar= is not used) and need
 to be ellipsoidal in shape. For certain choices of <b>rvar</b> the use of this
 keyword has to be taken with care. [Default: 1,1,1] </dd>
 
+<dt><b>cone=</b><i>x,y,z</i> </dt>
+<dd>Central axis
+of the cone around which particles will be selected [0,0,1]. </dd>
+
+<dt><b>angle=</b><i>alpha</i>
+</dt>
+<dd>Opening angle of the cone to select particles from (-1 means no cone used).
+[-1] </dd>
+
 <dt><b>stats=</b><i>print_stats</i> </dt>
-<dd>Statistics
-selected to print. Allowed values are <b>mean, dispersion, min, max, median,
-kurt, skew, npt</b>.  [Default: <b>mean,disp,n</b>]. </dd>
+<dd>Statistics selected to print. Allowed values are <b>mean,
+dispersion, min, max, median, kurt, skew, npt</b>, though minimum match applies.
+[Default: <b>mean,disp,n</b>]. </dd>
 
 <dt><b>format=<i>string</i></b> </dt>
-<dd>Valid C-format descriptor,
-as used in <a href='printf.3.html'><i>printf(3)</i></a>
+<dd>Valid C-format descriptor, as used
+in <a href='printf.3.html'><i>printf(3)</i></a>
 , for tabular output. [default: <b>%g</b>]. </dd>
 
 <dt><b>normalized=t|f</b> </dt>
-<dd>Should
-<b>svar=</b> (if used) be done in normalized (0..1) space, and therefore easily
-allow equal size bins, or in direct svar space (this requires knowledge
-of the range of the <b>svar</b> variable. [Default: <b>t</b>] </dd>
+<dd>Should <b>svar=</b>
+(if used) be done in normalized (0..1) space, and therefore easily allow
+equal size bins, or in direct svar space (this requires knowledge of the
+range of the <b>svar</b> variable. [Default: <b>t</b>] </dd>
 
 <dt><b>cumulative=t|f</b> </dt>
-<dd>Should the
-shells be defined in the cumulative (and optionally normalized) space of
-the <b>cmas</b> variable. This way the number of particles in each shell can be
-better/differently controlled from selecting them in <b>rvar</b> space. [Default:
-<b>f</b>] </dd>
+<dd>Should the shells
+be defined in the cumulative (and optionally normalized) space of the <b>cmas</b>
+variable. This way the number of particles in each shell can be better/differently
+controlled from selecting them in <b>rvar</b> space. [Default: <b>f</b>] </dd>
 
 <dt><b>first=t|f</b> </dt>
-<dd>Should only the first snapshot be processed? [Default: <b>f</b>] </dd>
+<dd>Should
+only the first snapshot be processed? [Default: <b>f</b>] </dd>
 
-<dt><b>rstats=t|f</b>
-</dt>
-<dd>Should statistics on <b>r</b> also be added as a third set of columns. This can
-be handy if you selected a particular <b>rvar</b> and want to see over what radii
-they apply. [Default: <b>f</b>] 
+<dt><b>rstats=t|f</b> </dt>
+<dd>Should statistics
+on <b>r</b> also be added as a third set of columns. This can be handy if you selected
+a particular <b>rvar</b> and want to see over what radii they apply. [Default:
+<b>f</b>] 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
-, <a href='snaprect.1.html'>snaprect(1NEMO)</a>
-, <a href='snapsort.1.html'>snapsort(1NEMO)</a>
-,
-<a href='snapshot.5.html'>snapshot(5NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
-To get a mean rotation speed in the disk, and the
-velocity dispersion, for a set of rings: <br>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+To get a mean rotation speed in the disk, and the velocity
+dispersion, for a set of rings: <br>
 <pre>    % mkdisk - rmax=10 | snapsort - - r | snapshell - 0.01:10:0.1 pvar=vt
     #[rvar] mea  dis  npt  #[pvar] mea  dis  npt
     0.221025 0 1           0.213258 0
@@ -146,16 +162,34 @@ norm=t
 the values in svar space): <br>
 <pre>    % snapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 rvar=phi cumul=t
 </pre>
-<h2><a name='sect6' href='#toc6'>Caveat</a></h2>
-Ellipsoidal shells may need reshape/sort/reshape? 
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+Although <b>rvar=</b> can be choosen arbitrarely, with a cone selection
+(i.e. <b>angle&gt;0</b>) any select  <b>rvar!=r</b> has probably no meaning. <p>
+Ellipsoidal shells
+may need reshape/sort/reshape? 
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
+, <a href='snaprect.1.html'>snaprect(1NEMO)</a>
+,
+<a href='snapsort.1.html'>snapsort(1NEMO)</a>
+, <a href='radprof.1.html'>radprof(1NEMO)</a>
+, <a href='ccdellint.1.html'>ccdellint(1NEMO)</a>
+, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+ 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben
+Peter
 
+<p>Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
-<pre>13-nov-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created    PJT
+<pre>13-nov-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-nov-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 some re-write: svar= is now rvar= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-nov-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 added mvar= and cumulative=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-nov-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added cone= and angle=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -165,9 +199,9 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>Caveat</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>History</a></li>
 </ul>

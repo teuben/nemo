@@ -6,6 +6,7 @@
 <title>ZENO(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Synopsis</a></h2>
@@ -31,6 +32,7 @@ e.g. <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
 </pre>The magic of this ZENO detection is in get_snap.c, and programs (such as
 snapplot) that use older direct reading of snapshots will not be able to
 process these snapshots with such a filter. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Differences with Nemo</a></h2>
 As highlighted
 in the example, a ZENO snapshot uses <i>NBody</i> instead of NEMO&rsquo;s <i>Nobj</i>, but as
@@ -38,16 +40,18 @@ get as snapshot I/O is done via the <i>get_snap</i> macros, they  will be conver
 <p>
 NEMO&rsquo;s <a href='potential.5.html'><i>potential(5NEMO)</i></a>
  are similar to ZENO&rsquo;s <i>gspmodels</i>, where the latter
-also allows for adding potentials (much harder in NEMO).  falcON has simular
+also allows for adding potentials (much harder in NEMO).  falcON has similar
 tools to add potentials. <p>
 NEMO has no real support for SPH (though some tags
 in snapshot&rsquo;s are supported) <p>
 ZENO has no plotting such as NEMO&rsquo;s yapp 
+<p> 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 <br>
 <pre>$NEMO/usr/zeno<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory, with instructions how to install
 $NEMO/usr/zeno/zeno_start.sh<tt> </tt>&nbsp;<tt> </tt>&nbsp;startup script
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
  

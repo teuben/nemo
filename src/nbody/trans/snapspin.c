@@ -15,13 +15,16 @@
  *	mar-94 ansi
  *      23-may-02       V2.0a  nemo_file_lines                  pjt
  *      23-nov-03           b  carry over Key and Aux if present pjt
+ *      23-jul-20       V2.1 fix prototypes                     pjt
  */
 
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 #include <spline.h>
+#include <table.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -36,7 +39,7 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=2.0c\n	3-may-2013 PJT",
+    "VERSION=2.1\n	23-jul-2020 PJT",
     NULL,
 };
 
@@ -49,7 +52,7 @@ string cvsid="$Id$";
 void get_rotcur(string);
 real rotcur(real);
 
-nemo_main()
+void nemo_main(void)
 {
     stream instr, outstr;
     real   tsnap, omega, omega2, sign, r;
@@ -139,7 +142,7 @@ void get_rotcur(string name)
     int  i,colnr[2], nmax;
     real *coldat[2];
 
-    nmax = nemo_file_lines(name);
+    nmax = nemo_file_lines(name,0);
     if (nmax<1) error("No data to read from %s",name);
     rad = (real *) allocate(nmax*sizeof(real));
     vel = (real *) allocate(nmax*sizeof(real));
@@ -154,7 +157,7 @@ void get_rotcur(string name)
     if (nrad > 2)
         spline(coef,rad,vel,nrad);
     else {
-        warning("Could only read %d lines from %s - lin intpol",nrad,name);
+      //warning("Could only read %d lines from %s - lin intpol",nrad,name);
         if (nrad<1) error("Not enuf lines (%d) for rotcur",nrad);
     }
     for(i=0; i<nrad; i++)

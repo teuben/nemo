@@ -19,7 +19,7 @@ string defv[] = {
   "gamma=1\n      Gamma factor",
   "color=R,G,B\n  Pick R, G or B",
   "clip=\n        If used, clip values between -clip,clip or clip1,clip2",
-  "VERSION=0.2\n  20-aug-2013 PJT",
+  "VERSION=0.3\n  26-jan-2021 PJT",
   NULL,
 };
 
@@ -92,10 +92,17 @@ void nemo_main()
 
     Xmin(iptr1) = Xmin(iptr);
     Ymin(iptr1) = Ymin(iptr);
-    Zmin(iptr1) = Zmin(iptr) + 0.5*(nz-1)*Dz(iptr);
+    Zmin(iptr1) = Zmin(iptr) + 0.5*(nz-1)*Dz(iptr);  // fix this if Zref(iptr) != 0
     Dx(iptr1) = Dx(iptr);
     Dy(iptr1) = Dy(iptr);
     Dz(iptr1) = nz * Dz(iptr);
+
+    Xref(iptr1) = Xref(iptr);
+    Yref(iptr1) = Yref(iptr);
+    Zref(iptr1) = 0.0;
+    Axis(iptr1) = Axis(iptr);
+    if (Axis(iptr) != 0 && Zref(iptr) != 0)
+      warning("Need to fix Zmin=%g since Zref=%g",Zmin(iptr1),Zref(iptr));
     
     Namex(iptr1) = Namex(iptr); /* care: we're passing a pointer */
     Namey(iptr1) = Namey(iptr);

@@ -19,7 +19,7 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"mode=laplace\n	Modes (laplace, lapabs, aregan, pregan, divergence, vorticity)",
-	"VERSION=0.3\n  17-apr-2017 PJT",
+	"VERSION=0.4\n  26-jan-2021 PJT",
 	NULL,
 };
 
@@ -81,6 +81,11 @@ void nemo_main()
     Xmin(optr) = Xmin(iptr1);
     Ymin(optr) = Ymin(iptr1);
     Zmin(optr) = Zmin(iptr1);
+    Xref(optr) = Xref(iptr1);
+    Yref(optr) = Yref(iptr1);
+    Zref(optr) = Zref(iptr1);
+    Axis(optr) = Axis(iptr1);
+
     /* should do the others too */
 
     if (mode & MODE_LAPLACE) {

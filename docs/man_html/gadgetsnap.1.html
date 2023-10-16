@@ -6,49 +6,62 @@
 <title>GADGETSNAP(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 gadgetsnap - convert gadget files to snapshot format 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>gadgetsnap</b>
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>gadgetsnap</b> converts  data from <a href='gadget.l.html'><i>gadget(lNEMO)</i></a>
 
 into standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. Currently limited to only output <i>mass,pos,vel</i>
-and all of the potentially 5 particles typed are stacked in the order of
-how GADGET has stored them. 
+and all of the potentially 5 particles types are stacked in the order of
+how GADGET has stored them. <p>
+An improved version under the name <a href='gadget2nemo.1.html'><i>gadget2nemo(1NEMO)</i></a>
+
+is now preferred over this version. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file (gadget format).
-No default, and currently only one file at the time can be processed. </dd>
+<dd>Input file
+(gadget format). No default, and currently only one file at the time can
+be processed. </dd>
 
-<dt><b>out=</b>
-</dt>
+<dt><b>out=</b> </dt>
 <dd>Output file (snapshot format). No default. </dd>
 
 <dt><b>swap=</b> </dt>
-<dd>Force swaping bytes for
-other-endian machines [f]  </dd>
+<dd>Force
+swaping bytes for other-endian machines [f] </dd>
 
-<dt><b>header=|4|8</b> </dt>
-<dd>Size of the header uses in unformatted
-fortran data. This used to be 4, but modern compilers (e.g. gfortran) may
-very well use 8. By default it is not specified, and the value determined
-to be the correct one during install (UNFIO_HDR_SIZE) is used. This keyword
-can thus be used to force another value. </dd>
+<dt><b>reorder=t|f</b> </dt>
+<dd>Call reorder? This
+brings particles back into the order of their ID&rsquo;s. [Default: f] </dd>
+
+<dt><b>header=|4|8</b>
+</dt>
+<dd>Size of the header uses in unformatted fortran data. This used to be 4,
+but modern compilers (e.g. gfortran) may very well use 8. By default it is
+not specified, and the value determined to be the correct one during install
+(UNFIO_HDR_SIZE) is used. This keyword can thus be used to force another
+value. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The following example converts
-a standard sample dataset <i>lcdm_gas.dat</i> from the directory <b>$GADGET_DIR/ICs</b>
-to a NEMO snapshot file, and piped into <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
+The following example converts a standard sample dataset
+<i>lcdm_gas.dat</i> from the directory <b>$GADGET_DIR/ICs</b> to a NEMO snapshot file,
+and piped into <a href='tsf.1.html'><i>tsf(1NEMO)</i></a>
  for a quick look: <br>
 <pre>% gadgetsnap lcdm_gas.dat - swap=t | tsf -
 reading &lsquo;lcdm_gas.dat.intel&rsquo; ...
@@ -152,10 +165,12 @@ BoxSize <p>
 Omega0 <p>
 OmegaLambda <p>
 HubbleParam 
+<p> 
 <h2><a name='sect6' href='#toc6'>Caveat</a></h2>
 There is an option to run
 gadget in double precision mode, their output files  may not be compatible
 with this version of the program. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='snapgadget.1.html'>snapgadget(1NEMO)</a>
 , <a href='gadget2nemo.1.html'>gadget2nemo(1NEMO)</a>
@@ -168,14 +183,15 @@ with this version of the program.
 <a href='http://www.mpa-garching.mpg.de/gadget/'>http://www.mpa-garching.mpg.de/gadget/</a>
 
 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
-
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect10' href='#toc10'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>02-Jun-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created for Gadget-1<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 various fixes for Gadget-2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+21-jan-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;upd docs, and recommend gadget2nemo now <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -189,9 +205,8 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>Header</a></li>
 <li><a name='toc6' href='#sect6'>Caveat</a></li>
 <li><a name='toc7' href='#sect7'>See Also</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

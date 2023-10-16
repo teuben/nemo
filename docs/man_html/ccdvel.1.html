@@ -6,6 +6,7 @@
 <title>CCDVEL(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -13,33 +14,34 @@ ccdvel - create a velocity field; grid or retrace
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdvel out=</b>velfie
 [parameters=values ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>ccdvel</i> creates a model velocity field for
-a disk with material in circular orbits. The user supplies the program with
-a table of a rotation curve (see also <a href='rotcurshape.3.html'><i>rotcurshape(3NEMO)</a>
- for another approach)
-with a set of radii and rotation velocities. The position angle and inclination
-of each &rsquo;ring&rsquo; can also be varied to simulate  geometrical warps. <p>
-Two gridding
-methods exist:  <p>
-<i>retracing:</i></i> the GIPSY  method retraces each pixel in the
-sky plane to its (smallest)  radius in the (warped) galactic disk: its
-ring parameters  (velocity, position angle, and inclination) are then (linearly)
-<i>interpolated</i> from the input arrays, and that point is appropriately projected
-into that pixel (<i> bug? it might still wind up in the next pixel</i>) <p>
-<i>gridding:</i>
-the NEMO method places particles in rings, as prescribed by the input values,
-and computes a properly intensity weighted (number of particles in this
-case) mean velocity per pixel. This may however results in a &rsquo;meaningless&rsquo;
-mean velocity in areas where rings are projected on top of each other. <i>Note:</i>
-This mode, originally the only one,  merely served as a shortcut between
- the various N-body creators, followed by subsequent gridding with  <i>snapgrid</i>.
-It may not work anymore, since it is not well  maintained. <p>
-The center coordinates
-and systemic velocity are currently fixed for all rings. <p>
-Using keywords
-<b>mexp=</b> and <b>phexp=</b> a circular orbit  can have its expansion velocity modulated:
-<br>
+<i>ccdvel</i> creates a model velocity field
+for a disk with material in circular orbits. The user supplies the program
+with a table of a rotation curve (see also <a href='rotcurshape.3.html'><i>rotcurshape(3NEMO)</i></a>
+ for another
+approach) with a set of radii and rotation velocities. The position angle
+and inclination of each &rsquo;ring&rsquo; can also be varied to simulate  geometrical
+warps. <p>
+Two gridding methods exist:  <p>
+<i>retracing:</i> the GIPSY  method retraces
+each pixel in the sky plane to its (smallest)  radius in the (warped) galactic
+disk: its ring parameters  (velocity, position angle, and inclination)
+are then (linearly) <i>interpolated</i> from the input arrays, and that point
+is appropriately projected into that pixel (<i> bug? it might still wind up
+in the next pixel</i>) <p>
+<i>gridding:</i> the NEMO method places particles in rings,
+as prescribed by the input values, and computes a properly intensity weighted
+(number of particles in this case) mean velocity per pixel. This may however
+results in a &rsquo;meaningless&rsquo; mean velocity in areas where rings are projected
+on top of each other. <i>Note:</i> This mode, originally the only one,  merely
+served as a shortcut between  the various N-body creators, followed by subsequent
+gridding with  <i>snapgrid</i>. It may not work anymore, since it is not well 
+maintained. <p>
+The center coordinates and systemic velocity are currently fixed
+for all rings. <p>
+Using keywords <b>mexp=</b> and <b>phexp=</b> a circular orbit  can have
+its expansion velocity modulated: <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;vexp*cos(mexp*(phi-phiexp))
 </pre>instead of a constant vexp (i.e. mexp=0), where phi is measured from the
 major axis in the plane of the disk (check!). This only works for the retracing
@@ -49,109 +51,112 @@ re-define this as <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;vrot+vexp*sin(mexp*(phi-phiexp))
 </pre>though this would suggest the local velocity ellipsoid to be isotropic
 (cf. Binney &amp; Tremaine ....) 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized:
-
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
-<dt><b>out</b>=<i>image_out</i> </dt>
-<dd>Output velocity field map, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
- format.
-No default. </dd>
+<dt><b>out=</b><i>image_out</i> </dt>
+<dd>Output velocity
+field map, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
+ format. No default. </dd>
 
-<dt><b>radii</b>=<i>r1,r2,...</i> </dt>
-<dd>Radii (arcsec). Note they must be sorted by increasing
-radius. The default is taken from the <i>rotcur_table</i> table below, or from
-this keyword. </dd>
+<dt><b>radii=</b><i>r1,r2,...</i> </dt>
+<dd>Radii
+(arcsec). Note they must be sorted by increasing radius. The default is taken
+from the <i>rotcur_table</i> table below, or from this keyword. </dd>
 
-<dt><b>vrot</b>=<i>v1,v2,...</i> </dt>
-<dd>Array of rotation velocities, one for each radius,
-If less than the number of radii is given, the trailing ones are filled
-with the last supplied value. The default values from the <i>rotcur_table</i> table
-below can be also  be overridden with this keyword. </dd>
+<dt><b>vrot=</b><i>v1,v2,...</i> </dt>
+<dd>Array
+of rotation velocities, one for each radius, If less than the number of
+radii is given, the trailing ones are filled with the last supplied value.
+The default values from the <i>rotcur_table</i> table below can be also  be overridden
+with this keyword. </dd>
 
-<dt><b>vexp</b>=<i>v1,v2,...</i> </dt>
-<dd>Array of
-expansion velocities, one for each radius. If less than the number of radii
-is given, the trailing ones are filled with the last supplied value. Default:
-0 </dd>
+<dt><b>vexp=</b><i>v1,v2,...</i> </dt>
+<dd>Array of expansion velocities, one for each
+radius. If less than the number of radii is given, the trailing ones are
+filled with the last supplied value. Default: 0 </dd>
 
-<dt><b>inc</b>=<i>i1,i2,...</i> </dt>
-<dd>Array of inclinations (degrees), one for each radius. The default
-values from the <i>rotcur_table</i> table below can be also  be overridden with
-this keyword. </dd>
+<dt><b>inc=</b><i>i1,i2,...</i> </dt>
+<dd>Array of inclinations
+(degrees), one for each radius. The default values from the <i>rotcur_table</i>
+table below can be also  be overridden with this keyword. </dd>
 
-<dt><b>pa</b>=<i>p1,p2,...</i> </dt>
-<dd>Array of  position angles (degrees), one for each
-radius. The default values from the <i>rotcur_table</i> table below can be also
- be overridden with this keyword. </dd>
-
-<dt><b>phrot</b>=<i>p1,p2,p3,...</i> </dt>
-<dd>Array of rotation phase
-angles (degrees), one for each radius. Don&rsquo;t use this right now. Default:
-0 </dd>
-
-<dt><b>phexp</b>=<i>p1,p2,p3,...</i> </dt>
-<dd>Array of expansion phase angles (degrees), one for each
-radius, for the modulation of the expansion velocities. </dd>
-
-<dt><b>mrot</b>=<i>m</i> </dt>
-<dd>Fourier mode
-for the rotation speed modulation. Currently not a good idea to use this,
-since we would modulate the whole rotation, not a tiny bit on top of rotation.
-Use mexp=,phexp=. Default: 0 </dd>
-
-<dt><b>mexp</b>=<i>m</i> </dt>
-<dd>Fourier mode for the expansion speed
-modulation.  Default: 0 </dd>
-
-<dt><b>size</b>=<i>nx,ny</i> </dt>
-<dd>Size of map, up to two numbers. If one
-number supplied, the map will be square.  Note that in NEMO (0-based) coordinates,
-the center of rotation will be at <i>((nx-1)/2,(ny-1)/2)</i>. [Default: <b>128</b>]. </dd>
-
-<dt><b>cell</b>=<i>dx,dy</i>
-</dt>
-<dd>Cell size, up to two numbers. If one number supplied, the cells will be
-square. [Default: <b>1</b>]. </dd>
-
-<dt><b>center</b>=<i>x0,y0</i> </dt>
-<dd>Rotation center (grids with lower left
-corner being 0,0).  Default: center of map if <i>rotcur_table</i> is not used,
-else the <i>center_ring</i> entry from the <i>rotcur_table</i>.  </dd>
-
-<dt><b>blc</b>=<i>xmin,ymin</i> </dt>
-<dd>Lower left
-corner of the grid. Default: 0,0. </dd>
-
-<dt><b>vsys</b>=<i>vsys</i> </dt>
-<dd>Systemic velocity.  Default: <b>0</b>
-if <i>rotcur_table</i> is not used, else the <i>center_ring</i> entry from the <i>rotcur_table</i>.
+<dt><b>pa=</b><i>p1,p2,...</i> </dt>
+<dd>Array
+of  position angles (degrees), one for each radius. The default values from
+the <i>rotcur_table</i> table below can be also  be overridden with this keyword.
 </dd>
 
-<dt><b>rotcurfit=</b><i>rotcur_table</i> </dt>
-<dd>All ring parameters can also be read from this table,
- that is normally output by <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
-&rsquo;s <b>tab=</b> keyword. That table needs
-to be commented with <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
+<dt><b>phrot=</b><i>p1,p2,p3,...</i> </dt>
+<dd>Array of rotation phase angles (degrees), one for each
+radius. Don&rsquo;t use this right now. Default: 0 </dd>
+
+<dt><b>phexp=</b><i>p1,p2,p3,...</i> </dt>
+<dd>Array of expansion
+phase angles (degrees), one for each radius, for the modulation of the
+expansion velocities. </dd>
+
+<dt><b>mrot=</b><i>m</i> </dt>
+<dd>Fourier mode for the rotation speed modulation.
+Currently not a good idea to use this, since we would modulate the whole
+rotation, not a tiny bit on top of rotation. Use mexp=,phexp=. Default: 0
+</dd>
+
+<dt><b>mexp=</b><i>m</i> </dt>
+<dd>Fourier mode for the expansion speed modulation.  Default: 0 </dd>
+
+<dt><b>size=</b><i>nx,ny</i>
+</dt>
+<dd>Size of map, up to two numbers. If one number supplied, the map will be
+square.  Note that in NEMO (0-based) coordinates, the center of rotation
+will be at <i>((nx-1)/2,(ny-1)/2)</i>. [Default: <b>128</b>]. </dd>
+
+<dt><b>cell=</b><i>dx,dy</i> </dt>
+<dd>Cell size, up to
+two numbers. If one number supplied, the cells will be square. [Default:
+<b>1</b>]. </dd>
+
+<dt><b>center=</b><i>x0,y0</i> </dt>
+<dd>Rotation center (grids with lower left corner being 0,0).
+ Default: center of map if <i>rotcur_table</i> is not used, else the <i>center_ring</i>
+entry from the <i>rotcur_table</i>.  </dd>
+
+<dt><b>blc=</b><i>xmin,ymin</i> </dt>
+<dd>Lower left corner of the grid.
+Default: 0,0. </dd>
+
+<dt><b>vsys=</b><i>vsys</i> </dt>
+<dd>Systemic velocity.  Default: <b>0</b> if <i>rotcur_table</i> is
+not used, else the <i>center_ring</i> entry from the <i>rotcur_table</i>. </dd>
+
+<dt><b>rotcurfit=</b><i>rotcur_table</i>
+</dt>
+<dd>All ring parameters can also be read from this table,  that is normally
+output by <a href='rotcur.1.html'><i>rotcur(1NEMO)</i></a>
+&rsquo;s <b>tab=</b> keyword. That table needs to be commented
+with <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
 . </dd>
 
 <dt><b>fixring=</b><i>center_ring</i> </dt>
-<dd>Ring number
-(1..Nring), from the <i>rotcur_table</i>, of which  the center (<b>vsys, center</b>) is
-used. If <b>0</b> is used, they must have been given by the appropriate keywords.
-If a large number is given, the last table entry is used.  </dd>
+<dd>Ring number (1..Nring), from the
+<i>rotcur_table</i>, of which  the center (<b>vsys, center</b>) is used. If <b>0</b> is used,
+they must have been given by the appropriate keywords. If a large number
+is given, the last table entry is used.  </dd>
 
-<dt><b>noise=</b><i>v_sigma</i>
-</dt>
-<dd>Dispersion of the gaussian noise added to the map. Default: 0 </dd>
+<dt><b>noise=</b><i>v_sigma</i> </dt>
+<dd>Dispersion of the
+gaussian noise added to the map. Default: 0 </dd>
 
 <dt><b>amp=</b><i>t|f</i> </dt>
-<dd>If
-set to true (or 1) it will create an amplitude (surface brightness) map,
-instead of a velocity field. In this case, the rotation speed is taken as
-the amplitude of the density map. See also <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
-. </dd>
+<dd>If set to true (or 1)
+it will create an amplitude (surface brightness) map, instead of a velocity
+field. In this case, the rotation speed is taken as the amplitude of the
+density map. See also <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
+.   Default: false </dd>
 
 <dt><b>seed=</b> </dt>
 <dd>Initial seed
@@ -172,7 +177,8 @@ the starting value of ring is used. Default: <b>linear</b>. </dd>
 
 <dt><b>headline=</b><i>comments</i> </dt>
 <dd>Random
-verbiage added to the output image [Default: none]. </dd>
+verbiage added to the output image [Default: none]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>

@@ -1,9 +1,12 @@
-.TH CCDGEN 1NEMO "12 March 2020"
-.SH NAME
+.TH CCDGEN 1NEMO "17 August 2023"
+
+.SH "NAME"
 ccdgen \- create or add objects to an image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdgen\fP \fBout=\fP\fIimage-file\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdgen\fP creates or modified (2D) images by 
 adding simple parameterized two-dimensional objects. For arbitrary
 expressions use \fIccdmath(1NEMO)\fP instead. 
@@ -12,14 +15,12 @@ An added feature is that the objects can be added as if they are
 in a "galactic" disk with given inclination and position angle. The
 default is a "face-on" view (\fBinc=0\fP). 
 No corrections for brightness due to inclination are made however.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+3D images are supported if \fBsize=\fP contains a 3rd non-1 value.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
-\fBin=\fP
-Input file (optional) to be added to the output file. Default: none,
-map is generated.
-.TP
 \fBout=\fP
 Output file, in standard \fIimage(5NEMO)\fP format. No default.     
 .TP
@@ -38,10 +39,6 @@ are typically 1,1...
 For certain objects, the multiple objects can be given, and the sequence
 of parameters can be repeated. Currently \fBobject=blobs\fP has this
 option for 3D cubes.
-.TP
-\fBcenter=\fP
-Center of object (in 0-based pixel coordinates). The lower left corner
-is counted as (0,0) here. Default: mapcenter.
 .TP
 \fBsize=\fP
 Mapsize. It is allowed to have a different size in X and Y.
@@ -70,6 +67,10 @@ Warning: if the amplitude (usually the first of the spar= numbers) is 0,
 this will not apply, and the output would equal the input.
 Default: 1
 .TP
+\fBcenter=\fP
+Center of object (in 0-based pixel coordinates). The lower left corner
+is counted as (0,0) here. Default: mapcenter.
+.TP
 \fBcrpix=\fP
 Override/Set crpix (1,1,1) 
 .TP
@@ -84,9 +85,16 @@ Random seed [0]
 .TP
 \fBheadline=\fP
 Random verbiage added to the image. Default: none
-.SH OBJECTS
+.TP
+\fBin=\fP
+Input file (optional) to be added to the output file. Default: none,
+map is generated.
+
+.SH "OBJECT"
+The \fBobject=\fP keyword allows for the following objects, and \fBspar=\fP for their parameters
 .nf
-.ta +1i +1.5i
+.ta +1i +2.5i
+OBJECT	-		SPAR
 flat	A		A
 exp	A.exp(-r/h)	A,h
 gauss	A.exp(-r^2/(2h^2))	A,h
@@ -143,21 +151,21 @@ even and gets higher. For odd values of p you will again have a positive and neg
 spiral, and as p gets larger, the arms get narrower.   By making sure \fBp\fP becomes
 non-integer, e.g. p=2.0001, the negative arm becomes 0.
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 Here's how to make a simple barred galaxy by adding an exponential disk and
 a (smaller) exponential bar:
 .nf
 
-ccdgen out=- object=exp spar=1,40 pa=60 inc=45 size=256 |\\
- ccdgen - bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
+ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256 |\\
+ ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
 
 .fi
 or if you want them to be a bit more astronomical, you'll need to make the units
 come out in degrees for the conversion to FITS, viz.:
 .nf
 
-ccdgen out=- object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600 |\\
- ccdgen - - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 |\\
+ccdgen - object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600 |\\
+ ccdgen - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 in=- |\\
  ccdfits - bar.fits radecvel=t
 
 .fi
@@ -167,25 +175,59 @@ and the option to fill your cube with some random blobs and noise is a bit more 
 nemoinp 1:100 |\\
   tabmath - - 'ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)' all > b100.tab
 
-ccdgen "" - blobs @b100.tab size=128,128,128 |\\
-  ccdgen - - noise 0,0.02 |\\
+ccdgen - blobs @b100.tab size=128,128,128 |\\
+  ccdgen - noise 0,0.02 in=- |\\
   ccdsmooth - - 5   |\\
   ccdsky - -  |\\
   ccdfits - junk2.fits radecvel=t ndim=4
 
 .fi
-.SH SEE ALSO
-ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
-.SH FILES
-src/image/trans
-.SH AUTHOR
-Peter Teuben
-.SH UPDATE HISTORY
+Here is an example of making a new data section (in this case just noise)
+by stealing the header from existing \fIfits(5NEMO)\fP file. 
+In \fIbash\fP notation:
 .nf
-.ta +1.0i +4.0i
+
+  fitshead NGC5194_91112.fits > tmp.fitshead
+  nx=$(grep NAXIS1 tmp.fitshead|awk '{print $3}')
+  ny=$(grep NAXIS2 tmp.fitshead|awk '{print $3}')
+  nz=$(grep NAXIS3 tmp.fitshead|awk '{print $3}')
+  ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\\
+     ccdfits - noise.fits fitshead=NGC5194_91112.fits
+  
+.fi
+A test cube234.fits with value x + 10y + 100z can be made as follows:
+.nf
+  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
+.fi
+
+.SH "CAVEATS"
+Seting the WCS is not working well. There is cell=, there is crpix,cdelt,crval
+
+
+.SH "SEE ALSO"
+ccdmath(1NEMO), snaprotate(1NEMO), image(5NEMO)
+
+.PP
+https://github.com/GalSim-developers/GalSim
+.PP
+imfit::makeimage
+.PP
+There are also good simulators in starlab  and amuse
+
+.SH "FILES"
+src/image/trans
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
 4-Jan-05	V0.1 Created	PJT
 6-jan-05	V0.7 added (many features and) factor=	PJT
 8-jan-05	V0.8 add #arms parameter to spiral	PJT
 31-jan-12	V0.9 added object=test	PJT
 12-mar-2020	V1.0 added object=blobs		PJT
+8-may-2022	V1.2 moved center= down the arg list 	PJT
+8-dec-2022	V2.0 moved in= down the arg list	PJT
 .fi

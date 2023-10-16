@@ -69,7 +69,7 @@ static real av2 = A21;
 static real av3 = A11;
 
 
-static debug_first = 1;
+static int debug_first = 1;
 
 
 /* parameters: a simple HCN triplet, only continuum, middle amp, middle vel

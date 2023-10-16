@@ -1,11 +1,14 @@
-VERSION = NEMO V4.2 13-mar-2020 PJT
-################################################################################
+VERSION = NEMO V4.4 31-aug-2023 PJT
+# ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
-################################################################################
+# ###############################################################################
+
+SHELL = /bin/bash
+JOBS = 
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
-.PHONY:  INSTALL install scripts
+.PHONY:  INSTALL install scripts docs
 
 
 # The following subdirectories (1&2) are needed for installation, although only
@@ -18,8 +21,7 @@ VERSION = NEMO V4.2 13-mar-2020 PJT
 CHECKDIR1 = data inc news tmp csh \
             man man/man1 man/man3 man/man5 man/man8 man/manl \
             demo etc adm bin lib obj \
-	    local \
-            adm/import adm/export adm/install adm/submit adm/purge
+	    local adm/install
 
 _ASCIIDIRS_  = text bugs man/doc  $(SRC) $(USR)       # check if ASCIIDIRS can go
 
@@ -34,7 +36,7 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 	    $(NEMO)/adm/install/mknemo.log \
 	    $(NEMOOBJ)/bodytrans/BTNAMES
 
-################################################################################
+# ###############################################################################
 #  Top level sub-directories in NEMO that contain Makefiles for NEMO install.
 #  Currently accepted are:
 #	src 		- standard export (NEMO expects install targets)
@@ -44,10 +46,10 @@ CHECKFIL2 = $(NEMO)/adm/Usage \
 MAKEDIRS = @MAKEDIRS@
 MAKELIBS = @MAKELIBS@
 NEMOTARS = @NEMOTARS@
-#MKNEMOS  = hdf4 hdf5 cfitsio fftw wcslib gsl
+#MKNEMOS  = hdf4 hdf5 cfitsio fftw wcslib gsl - things that can be made via mknemo
 MKNEMOS  = 
 
-################################################################################
+# ###############################################################################
 # The following files/directories will be saved to a tar file
 # and used in incremental export tar files (Nightly/export.csh)
 # SRC is to select subsections of the whole src tree
@@ -59,7 +61,7 @@ USR =
 #
 ASCIIFILES = COPYING MANIFEST NEMORC PORTING README VERSION \
 	     src/Makefile \
-	     configure configure.in \
+	     configure configure.ac \
 	     Makefile.in makedefs.in config.h.in \
 	     nemo_start.csh.in nemo_start.sh.in \
              install-sh config.sub config.guess \
@@ -88,36 +90,44 @@ NEMO_RC_SH  = $(NEMO)/nemo_local.sh
 
 #  Master site (Maryland) specific, and probably not used anywhere else
 FTPDIR = /n/ftp/pub/nemo/
-SFTPDIR = chara.astro.umd.edu:$(FTPDIR)
+SFTPDIR = ssh.astro.umd.edu:$(FTPDIR)
 WWWDIR = $(NEMO)/local/www
-################################################################################
+# ###############################################################################
 # INSTALL:
 #	----------Installation starts here------------
 # make sure you're in $(NEMO) from here
 
-SHELL = /bin/bash
-
 # this should remain the first target in this Makefile, so a default "make" invocation goes here
-help:   install lsb
+# help:   install lsb
 
+## install:   reminder on typical install steps
 install:
 	@echo "There is no install because NEMO is build in place. The usual procedure is"
 	@echo ""
-	@echo "      ./configure  ....      -- run configure, with lots of options; try --help"
-	@echo "      make build1            -- 1: postconfig  (build would do all build1..4)"
-	@echo "      make build2            -- 2: libs + falcon"
+	@echo "      ./configure  ....      -- run configure, with lots of options; try --help here"
+	@echo "      make build1            -- 1: postconfig  (build would do all build1..3)"
+	@echo "      make build2            -- 2: libs + falcon (build2a and build2b)"
 	@echo "      make build3            -- 3: bins"
-	@echo "      make build4            -- 4: mknemo build reconfirmation"
+	@echo "      make build4            -- 4: mknemo build reconfirmation (advanced only)"
 	@echo "      make check             -- the testsuite"
-	@echo "      make bench             -- the benchmark"
+	@echo "      make bench5            -- the NEMOBENCH5 benchmark"
+	@echo "      source nemo_start.sh   -- after this NEMO can be used in the shell"
+	@echo "                                similar ones' exist for csh and python"
 	@echo ""
-	@echo "After this, users will need to source the nemo_start.(c)sh file"
-	@echo "There is also some new python support via nemo_start.py"
+	@echo "Local site variations must go in nemo_local.(c)sh and ~/.nemo_local.(c)sh"
+	@echo ""
+	@echo "Type 'make help' to list all other targets"
+
+.PHONY : help
+## help:      This Help
+help : Makefile
+	@sed -n 's/^##//p' $<
+
 
 lsb:
 	@lsb_release -a
 
-
+## help2:     show important variables in make
 help2:
 	@echo ""
 	@echo " ### NEMO installation help menu ###"
@@ -134,31 +144,30 @@ help2:
 	@echo ""
 	@echo "Additional help targets: helpfind, helptar"
 
-# optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
+## mknemos:   optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
+	@echo MKNEMOS=$(MKNEMOS)
 	@for mkn in $(MKNEMOS); do \
-	mknemo $$mkn;\
+	echo mknemo $$mkn;\
+	mknemo $$mkn > install_mknemo_$$mkn.log 2>&1;\
 	done
 
-# make sure all directories and files are present before install can take place
+## dirs:      make sure all directories and files are present before install can take place
 dirs: 
 	@echo Checking directory structure on `date`
 	@echo By `whoami` on `hostname`
 	-@for i in $(CHECKDIR1) $(ASCIIDIRS); do \
 	(if [ ! -d $(NEMO)/$$i ]; then \
-	    echo DIR $(NEMO)/$$i created; \
 	    mkdir $(NEMO)/$$i; \
 	    chmod a+w $(NEMO)/$$i; \
 	fi); done
 	-@for i in $(CHECKDIR2); do \
 	(if [ ! -d $$i ]; then \
-	    echo DIR $$i created; \
 	    mkdir $$i; \
 	    chmod a+w $$i; \
 	fi); done
 	-@for i in $(CHECKFIL2); do \
 	(if [ ! -f $$i ]; then \
-	    echo FILE $$i created; \
 	    touch $$i; \
 	    chmod a+w $$i; \
 	fi); done
@@ -213,8 +222,12 @@ dirs:
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
 	    ls -l $(NEMOLIB)/maxsizes.h;\
 	fi
-	@echo "OK, all main directories and files should be there now"
-	@echo Done at `date`
+	@echo Done with dirs at `date`
+
+## docs:      built htmol docs
+docs:
+	(cd docs/source; make html)
+	@echo open docs/source/_build/html/index.html
 
 # @todo: deprecate?
 pjt:
@@ -231,7 +244,7 @@ pjt:
 	    ls -l $(NEMOLIB)/makedefs;\
 	fi
 
-
+## scripts:   install scripts
 scripts:
 	@echo Installing scripts on `date` 
 	@echo By `whoami` on `hostname`
@@ -261,7 +274,7 @@ nemo_src:
 
 
 #
-##############################################################################
+# #############################################################################
 # HTML stuff
 #
 
@@ -275,7 +288,7 @@ README.html: README.md
 	pandoc README.md -o README.html
 
 
-##############################################################################
+# #############################################################################
 # EXPORT
 
 helptar:
@@ -316,20 +329,32 @@ targit0:
 	git clone $(GIT2) nemo_git/local/pgplot
 	tar zcf nemo_git.tar.gz nemo_git
 
+upstream:
+	-git remote add upstream https://github.com/teuben/nemo
+	@echo Reminder, to sync with the upsteam:
+	@echo "  git checkout master"
+	@echo "  git fetch upstream"
+	@echo "  git merge upstream/master"
+	@echo "  git status"
+	@echo "Always make sure you work in a branch, to keep your local master same as upstream/master"
 
 # autoconf/GIT based export
 #
 
 DIST_DIR = nemo_$(NEMOVER)
 
+## dist:      reminder what to do for making a new distribution
 dist:
 	@if [ ! -d $(DIST_DIR) ]; \
 	then \
 	  echo 'TODO for a new DIST: -------------------------------------'; \
+	  echo 'git pull' ;\
 	  echo Date: `date`; \
 	  echo 'Change this date in:  www/nemo/lastftp {FIX THIS}'; \
 	  echo 'Change: docs/whatsnew.html'; \
 	  echo 'Change: docs/index.html'; \
+	  echo 'Change: CITATION.cff'; \
+	  echo 'Change: codemeta.json'; \
 	  echo 'And run the following commands: '; \
 	  echo 'make targit'; \
 	  echo 'scp $(DIST_DIR).tar.gz $(SFTPDIR)'; \
@@ -392,7 +417,7 @@ test2:
 	@echo "(`date`)" >> $(WWWDIR)/lastftp
 
 
-##############################################################################
+# #############################################################################
 #	Some helpful non-NEMO targets
 
 # deprecated: needs doc files
@@ -408,17 +433,19 @@ makeindex:
 	@echo "Installing makeindex utility for LaTeX manuals"	(cd $(NEMO)/src/tools/makeindex;\
 	 $(MAKE);mv indexsrc/index $(NEMOBIN)/makeindex;$(MAKE) clean)
 
-#	internal PGPLOT install (not recommended anymore)
+## pgplot:    internal PGPLOT install (not recommended anymore)
 pgplot:
 	src/scripts/pgplot.install png=$(PNG) gif=$(GIF)
 
-#       some of the essentials that can be installed in $NEMO/opt
+## cfitsio:   some of the essentials that can be installed in $NEMO/opt
 cfitsio:
 	(source nemo_start.sh ; src/scripts/mknemo.d/cfitsio)
 
+## hdf4:      install hdf4 via mknemo
 hdf4:
 	(source nemo_start.sh ; src/scripts/mknemo.d/hdf4)
 
+## hdf5:      install hdf5 via mknemo
 hdf5:
 	(source nemo_start.sh ; src/scripts/mknemo.d/hdf5)
 
@@ -428,26 +455,39 @@ vogl:
 	src/scripts/nemo.vogl
 
 
+## build:     perform the first 3 builds (build1, build2, build3)
+build:   build1 build2 build3
 
-build:   build1 build2 build3 build4
-
+## build1:    postconfig and mknemos
 build1:
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
-	@echo 'Continue with "make build2"'
+	@echo 'Continue with "make build2 (or build2a build2b)"'
 
+## build2:    scripts and library
 build2:
-	(source nemo_start.sh ; $(MAKE) libs)
+	(source nemo_start.sh ; $(MAKE) scripts libs)
 	@echo 'Continue with "make build3"'
 
+## build3:    binaries
 build3:
-	(source nemo_start.sh ; $(MAKE) bins)
-	@echo 'Continue with "make build4"'
+	(source nemo_start.sh ; $(MAKE) -j $(JOBS) bins)
+	@echo 'Continue with "make build4 for advanced runs"'
+	@echo ' and/or "make check bench5" for a final check'
 
-BINS4 = tsf tabhist tsd orboom sdinfo
+#       Advanced build examples that require opt=1 during the build.
+#       normally not needed
+BINS4   = tsf tabhist tsd orboom sdinfo lmtinfo
+BINS4H  = nemo yapp hdf4 hdf5 cfitsio netcdf
+## build4:    advanced binaries that need various 3rd party libraries (hdf4/5, cfitsio, netcdf)
 build4:
+	@echo "This will test linked with: $(BINS4H)"
 	(source nemo_start.sh ; mknemo  $(BINS4))
 	@echo 'Continue with "make check"'
 
+## rebuild:   configure again and re-build
+rebuild: config.status
+	./config.status
+	$(MAKE) build
 
 # the exact python method under development
 
@@ -456,8 +496,14 @@ python: anaconda3
 python_setup: nemo_start.py
 	python -c 'import sys; print(sys.path)'
 
+testpython:
+	(source nemo_start.sh; cd src/scripts/python; make tests)
+
 anaconda3:
-	src/scripts/install_anaconda3
+	(source nemo_start.sh ; src/scripts/install_anaconda3)
+
+nemopy:
+	pip install -e .
 
 
 
@@ -500,12 +546,13 @@ clean:
 	@echo '2) "make cleanall" would remove' 
 	@echo ""
 	@echo $(CLEAN)
+	@echo and clean the falcON related directories
 	@echo ""
 	@echo '3) "make cleansrc" would clean the src tree (of .o files and such)'
 	@echo ""
 	@echo '"make distclean" would remove NEMORC.local as well as'
 	@echo ""
-	@echo $(CHEDKDIR2)
+	@echo $(CHECKDIR2)
 
 distclean: config_clean cleansrc
 	@echo Cleaning as much as one can to simulate a distribution
@@ -513,6 +560,7 @@ distclean: config_clean cleansrc
 
 cleanall:
 	rm -rf $(CLEAN)
+	$(MAKE) -C $(NEMO)/usr/dehnen clean
 
 cleansrc:
 	(cd src; $(MAKE) clean)
@@ -521,13 +569,24 @@ cleansrc:
 libs:	$(MAKELIBS)
 	@echo Done at `date`
 
+build2a:  scripts corelibs
+	@echo Done at `date` - continue with build2b or build3
+
+build2b:  dehnen
+	@echo Done at `date` - continue with build3
+
 # gyrfalcON
 dehnen:
 	-(cd usr/dehnen; $(MAKE) -i clean all) >> install.log 2>&1 
 
 corelibs:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log
-	-(cd src;$(MAKE) -i clean install) > install.log 2>&1 
+	@echo Starting at `date` on `uname -a` > install.log
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")  >> install.log 2>&1 
+	-(cd src;$(MAKE) -i -j $(JOBS) clean install) >> install.log 2>&1
+
+maine:
+	-(cd src/tutor/main; rm -f maine.o; make -f $(NEMOLIB)/makedefs  maine.o CFLAGS="-v -c")
 
 slib:
 	(cd $(NEMOLIB); \
@@ -536,8 +595,8 @@ slib:
 
 bins:
 	@echo Starting at `date`, tail -f $(NEMO)/install.log	
-	cd src;$(MAKE) -i bins >> ../install.log 2>&1 
-	cd usr;$(MAKE) -i bins >> ../install.log 2>&1 
+	cd src;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
+	cd usr;$(MAKE) -i -j $(JOBS) bins >> ../install.log 2>&1 
 	@echo Done at `date`
 
 missingbins:
@@ -556,18 +615,76 @@ testsuite:
 	@echo ISSUE the following command:
 	@echo 'src/scripts/testsuite -b'
 
-check:
-	(source nemo_start.sh; src/scripts/testsuite)
-	@echo 'Continue with "make checklog" (if you see any FAILS)'
 
-# show the latest testsuite build log
+## check:     basic regression test
+check: 
+	(source nemo_start.sh; src/scripts/testsuite | tee -a install.log )
+
 checklog:
-	cat `ls -tr tmp/test*/testsuite.log | tail -1`
+	cat testsuite.log
+
+# check help/man consistency after a build
+checkpars:
+	src/scripts/checkpars.py -v > checkpars.log
+	@grep ^'Files read'           checkpars.log
+	@grep ^'Bad files found'      checkpars.log
 
 TIME = /usr/bin/time
 
-bench:
+## bench:     basic benchmark test based off all Benchfile's
+bench:   benchtest
+
+benchtest:
+	(source nemo_start.sh; src/scripts/benchsuite)
+	@echo 'Testing Benchsuite: Success!'
+
+bench0:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)
+
+bench1:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=1)
+
+bench2:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
+
+## bench4:    4 times the flops benchmarks
+bench4:
+	(source nemo_start.sh; cd src/tutor/bench; make flops; ./flops 4)
+
+
+## bench5:    special nemobench5
+bench5:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
+
+## bench8:    OpenMP test
+bench8:
+	(source nemo_start.sh; cd src/tutor/mp; make scaling2 bench8)
+
+bench10:
+	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
+
+## bench11:   special gyrfalcON bench with 1e6 particles
+bench11:
+	mkplummer - 1000000 seed=123 | gyrfalcON - . eps=0.05 kmax=7 tstop=0.125
+	@echo " 0.1250000000 -0.2499838110 0.2497201 -0.4997039 -0.4980992 1.0027 0.00018 1.0e-09   5 14  0.11  1.05  1.18   0:00:20.38 [bench11]"
+
+## bench11a:  like bench11 but run forever
+bench11a:
+	mkplummer - 1000000 seed=123 | gyrfalcON - . eps=0.05 kmax=7
+
+## bench12:   special hackcode1 bench with 1e6 particles
+bench12:
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=0.125 freq=128 | grep 0.125
+	@echo "       0.125   -0.2461   -0.5038  82877192        22       391      0.29 [bench12]"
+
+## bench12a:  like bench12 but run forever
+bench12a:
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128
+
+
+## bench13:    sorting a plummer sphere
+bench13:
+	@t0=`xrandom -1`;mkplummer - 1000000 seed=123 | snapsort - - r | hackdens - . debug=-1; t1=`xrandom -1`; nemoinp "($$t1-$$t0)/100"
 
 #
 TEST=""
@@ -579,3 +696,5 @@ sure:	libs bins
 
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
+
+## Alas, there are many more undocumented targets

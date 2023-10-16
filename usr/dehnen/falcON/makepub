@@ -179,7 +179,7 @@ ifdef NEMO
 $(LIB)manip.o:		$(manip_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
 $(LIB)bodyfunc.o:	$(bodyfunc_cc) $(LIBT) $(makefiles)
-			$(MAKE_OBJ) $(NBDYFLAGS) -DCOMPILER='"$(GPP)"'
+			$(MAKE_OBJ) $(NBDYFLAGS) -DCOMPILER='"$(CXX)"'
 endif
 $(LIB)neighbours.o:	$(neighbours_cc) $(LIBT) $(makefiles)
 			$(MAKE_OBJ) $(NBDYFLAGS)
@@ -324,6 +324,11 @@ $(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) $(NBDYFLAGS)
+$(ACC)GasPotential.so:		$(SACC)GasPotential.cc $(ACCT) $(defacc_h) $(makefiles)
+				$(MAKE_ACC)
+$(ACC)GPDehnen.so:		$(SACC)GPDehnen.cc $(ACCT) $(defacc_h) $(makefiles)
+				$(MAKE_ACC)
+
 
 acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Dehnen.so \
@@ -340,6 +345,10 @@ acc_pub		:=		$(ACC)Combined.so \
 				$(ACC)Shrink.so \
 				$(ACC)SoftKernel.so \
 				$(ACC)LogPot.so
+# see https://github.com/BS-astronomer/GasPotential.git
+#				$(ACC)GasPotential.so \
+#				$(ACC)GPDehnen.so
+
 endif
 
 # -----

@@ -4,6 +4,9 @@ DIR = src/nbody/io_nemo
 BIN = testc testf
 NEED = mkplummer snapmask hackforce
 
+# RT = /tmp/.io_nemo_run_test
+RT = io_nemo_run_test
+
 help:
 	@echo $(DIR)
 
@@ -12,14 +15,15 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
+	rm -rf $(RT)
 
 all:	$(BIN)
 
 testc:	
-	(cd $(NEMO)/$(DIR) ; make test  ; script/test_io_nemo.csh)
+	(cd $(NEMO)/$(DIR) ; make test  ; script/test_io_nemo.csh RT=$(RT))
 
 testf:
-	(cd $(NEMO)/$(DIR) ; make testf ; script/fortran_test_io_nemo.csh)
+	(cd $(NEMO)/$(DIR) ; make testf ; script/fortran_test_io_nemo.csh RT=$(RT))
 
 tests:
 	(cd $(NEMO)/$(DIR) ; make run_stress)

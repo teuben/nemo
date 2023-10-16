@@ -6,6 +6,7 @@
 <title>SNAPBINARY(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -44,13 +45,18 @@ but only stars greater than <b>i1=</b> are used. [1]      </dd>
 <dt><b>bound=t|f</b> </dt>
 <dd>If given, only
 bound stars are listed. [t] </dd>
+
+<dt><b>out=</b> </dt>
+<dd>Optional out with strongest bound pair
+sink&rsquo;d. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 In this given snapshot <a href='snapstat.1.html'><i>snapstat(1NEMO)</i></a>
-
-is used to report close pairs (but note it will only report pairs closer
-than the previous one): <br>
+ is used to report
+close pairs (but note it will only report pairs closer than the previous
+one): <br>
 <pre>% snapstat snap22 exact=t all=t debug=1
 ### nemo Debug Info: rmin=31.0396 for (0,1) mass (0.00131882,0.000923836)
 ### nemo Debug Info: rmin=8.34925 for (0,4) mass (0.00131882,0.000368837)

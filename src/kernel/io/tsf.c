@@ -56,8 +56,6 @@ string defv[] = {
 
 string usage="type contents of a (binary) structured file";
 
-string cvsid="$Id$";
-
 local stream instr;			/* input stream from struct. file   */
 local bool maxprec;			/* if true, use max precision forms */
 local bool allline;			/* if true, disable maxline limit   */
@@ -81,7 +79,7 @@ void   change_indent(int);
 #define BUFLEN   512
 
 
-void nemo_main()
+void nemo_main(void)
 {
     string *tags;
 
@@ -382,7 +380,7 @@ bool outstr(string str)
     return (allline || (curline < maxline));
 }
 
-void end_line()
+void end_line(void)
 {
     printf("\n");
     curcoll = curline = 0;

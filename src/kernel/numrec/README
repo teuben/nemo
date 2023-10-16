@@ -1,5 +1,8 @@
 Most of the code in here is (c) Copyrighted by Numerical Recipes Software.
 
+These routines were tested by us at IAS in 1986/87 as NR was converted from
+Fortran to C, provided by W. Press, by a machine translator.
+
 You cannot use these selected few outside of NEMO because of interface
 and code changes. Please be careful in using them; some routines have
 a slightly different parameter sequence or type than their

@@ -1,30 +1,43 @@
 .TH SNAPMERGE 1NEMO "23 July 1992"
-.SH NAME
+
+.SH "NAME"
 snapmerge \- merge N-body snapshots together
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapmerge\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapmerge\fP works much like \fIsnapadd\fP, except it merges
 all data (currently only masses and phasespace coordinates)
 from all times in one snapshot.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input file, must be  in snapshot format [no default].
-.TP 20
+.TP
 \fBout=\fP
 output file name, will be in snapshot format [no default].
-.SH BUGS
+.TP
+\fBnbody=\fP
+Size of one (or more) snapshot(s) [] 
+.TP
+\fBnsnap=\fP
+Number of pieces to cut a snapshot into
+
+.SH "BUGS"
 Since \fIget_snap(3NEMO)\fP needs nearly twice the amount of memory
 to hold a snapshot, \fIsnapmerge\fP tends to run out of memory
 quickly.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH SEE ALSO
-snapmerge_a(1NEMO)
-.SH UPDATE HISTORY
+
+.SH "SEE ALSO"
+snapmerge_a(1NEMO), snapadd(1NEMO), snapstack(1NEMO), snapshot(5NEMO)
+
+.SH "UPDATE HISTORY"
 .nf
 .ta +1.0i +4.0i
 28-Jun-92	V1.0 Created	PJT

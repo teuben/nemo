@@ -14,12 +14,13 @@
 #   nov-2010            report special things it can do
 #   mar-2019            git instead of cvs
 #   nov-2019            maintain tasklist descriptions
+#   jul-2020            -l to allow incremental library update, -L to force new lib
 #
 #
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 4.3 9-jan-2020"
+set version="MKNEMO Version 4.5 3-may-2023"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -66,9 +67,11 @@ set post_tidy=""
 set pre_tidy=""
 set u=0
 set l=0
+set L=0
 set a=0
 set v=0
 set go=0
+set R=0
 
 # process command line options
 loop:
@@ -97,6 +100,11 @@ loop:
   case -l:
     shift argv
     set l=1
+    set go=1
+    breaksw
+  case -L:
+    shift argv
+    set L=1
     set go=1
     breaksw
   case -g:
@@ -130,6 +138,11 @@ loop:
     shift argv
     breaksw
   case -r:
+    shift argv
+    breaksw
+  case -R:
+    set R=1
+    set go=1
     shift argv
     breaksw
   case -u:
@@ -189,9 +202,26 @@ if ($u) then
   endif
 endif
 
-if ($l) then
+if ($R) then
+  echo Rebuilding in 2...
+  sleep 2
+  cd $NEMO
+  make rebuild
+  rm -f $lockfile >& /dev/null 
+  exit 0
+endif
+
+# force compile all
+if ($L) then
+  set l=0
   (cd $NEMO; $make libs)
 endif
+
+# only compile what's been updated
+if ($l) then
+  (cd $NEMO/src; $make install)
+endif
+
 
 foreach f ($argv)
  if (X$f:e != X) then
@@ -318,7 +348,7 @@ end
 end:
   if ($newbins == 1) then
     echo ""; echo ""
-    echo "### Warning: Use rehash for access to the new programs"
+    echo "### Warning: might need rehash to access new programs"
   else
     echo "";
   endif
@@ -344,11 +374,13 @@ usage:
   echo "  -n N      selection of N-th element from unresolved list [1]"
   echo "  -s DIR    root directory to start search [$NEMO]"
   echo "  -r        remove lockfile before starting"
+  echo "  -R        rebuild NEMO (build/1/2/3 only)"
   echo "  -d        also make doc file (only for true NEMO programs)"
   echo "  -t        cleanup after having made the binaries"
   echo "  -T        cleanup before making the binaries"
   echo "  -u        run 'git pull' to NEMO before making"
-  echo "  -l        recompile the library by running 'make libs'"
+  echo "  -l        update the library by running 'make install' from src"
+  echo "  -L        recompile the library by running 'make libs' from $NEMO"
   echo "  -g        explicitly use gmake, instead of make"
   echo "  -a        use all directories, usr and src, to find code to update"
   echo "  -v        more verbose, it will report version and cvsid of program"

@@ -1,9 +1,12 @@
 .TH MCLUSTER 1NEMO "4 December 2017"
-.SH NAME
+
+.SH "NAME"
 mcluster, mcluster_sse \- make a star cluster
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 mcluster -[N|M|P|W|R|r|c|g|S|D|T|Q|C|A|O|G|o|f|a|m|B|b|p|s|t|e|Z|X|V|x|u|h|?]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIMcLuster\fP is a program that can be
 used to either set up initial conditions for N-body computations or,
 alternatively, to generate artificial star clusters for direct
@@ -21,7 +24,7 @@ which is also provided with the code. For technical details on how to
 generate initial conditions for star cluster in general we would like
 to refer to Kroupa (2008) and referenced literature therein.
 
-.SH PARAMETERS
+.SH "PARAMETERS"
 .TP 20
 -N <number>
 The number of stars may vary from 3 to ~10^6. Remember though 
@@ -68,7 +71,7 @@ fractal dimension; 3.0= no fractality
 tcrit in N-body units
 .TP       
 -Q <value>
-virial ratio                                     
+virial ratio (Q=0.5 is virial equilibrium)
 .TP       
 -C <0|1|3|5>
 code; 0= Nbody6, 1= Nbody4, 3= table of stars, 5= Nbody6++
@@ -180,7 +183,7 @@ and some example plotting of the results:
 .SH INSTALL
 Non-standard install via "mknemo mcluster"
 .SH SEE ALSO
-mkplummer(1NEMO)
+mkplummer(1NEMO), plumix(1
 .PP
 Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS, 417, 2300
 "Mass segregation and fractal substructure in young massive clusters: 
@@ -189,6 +192,8 @@ Kuepper A.H.W., Maschberger T., Kroupa P., Baumgardt H., 2011, MNRAS, 417, 2300
 Kroupa P., 2008, LNP, 760, 181
 .PP
 https://github.com/ahwkuepper/mcluster
+.PP
+http://www.ascl.net/Plumix    2008MNRAS.385.1673S
 .SH AUTHOR
 Andreas H.W. Kuepper
 .SH FILES

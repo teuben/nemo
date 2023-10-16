@@ -1,9 +1,12 @@
-.TH SNAPROTATE 1NEMO "22 September 2008"
-.SH NAME
+.TH SNAPROTATE 1NEMO "30 March 2022"
+
+.SH "NAME"
 snaprotate \- rotate N-body snapshot file about principle axes.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnaprotate in=\fPsnap-file \fBout=\fPsnap-file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnaprotate\fP rotates the positions and velocities of an
 N-body snapshot file. A maximum of 3 rotations around either the x, y or
 z axes can be applied in any order. An Eulerian rotation
@@ -12,10 +15,14 @@ for projections of barred and unbarred galaxies are given in the examples
 below.
 .PP
 The rotation is counter clock-wise (i.e., mathematically positive, unless 
-\fBinvert=f\fP is used) as seen from the right-handed \fIxyz\fP-axes;
-a \fBz\fP rotation will rotate the \fBx\fP axis towards the \fBy\fP axis;
-a \fBy\fP rotation will rotate the \fBz\fP axis towards the \fBx\fP axis;
-a \fBx\fP rotation will rotate the \fBy\fP axis towards the \fBz\fP axis.
+\fBinvert=f\fP is used) as seen from the right-handed \fIxyz\fP-axes:
+a \fBz\fP rotation will rotate the \fBx\fP axis towards the \fBy\fP axis,
+a \fBy\fP rotation will rotate the \fBz\fP axis towards the \fBx\fP axis, and
+an \fBx\fP rotation will rotate the \fBy\fP axis towards the \fBz\fP axis.
+.PP
+As an example, for a disk in the X-Y plane, a positive Y rotation causes
+the -X axis to move
+upwards, towards the observer, i.e. becoming the near side.
 .PP
 An alternate way to specify rotations is using the \fBspinvector=\fP keyword,
 where all points are rotated around this vector.
@@ -23,7 +30,8 @@ where all points are rotated around this vector.
 Although by default all vectors are rotated by the same matrix, the
 keyword \fBselect=\fP can be used to select any set of Position,
 Velocity or Acceleration.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized; they may be given in any order.
 .TP 24
 \fBin=\fP\fIsnap-file\fP
@@ -66,7 +74,32 @@ such as tscale, invert
 Vector variables in a snapshot that should be rotated. Valid options
 are: \fBpos\fP, \fBvel\fP,  and \fBacc\fP. Exact match required for now.
 [Default:  \fBpos,vel,acc\fP]
-.SH EXAMPLES
+
+.SH "EXAMPLES"
+
+For 'normal' unbarred spiral galaxies the following example shows how to
+project them into their normaly sky view, taking the sense of
+rotation into account:
+.nf
+
+   set pa=170             # M51, use pa=200 for M33
+   set inc=22             # M51, use inc=30 for M33
+   set sign=1             # M51, use sign=-1 for M33
+   set sinc=`nemoinp "-$sign*$inc"`
+   mkdisk - 1000 sign=$sign |\\
+      snaprotate - - theta=$sinc,$pa order=yz |\\
+      snapgrid - velfie.ccd mom=-1
+   nds9 velfie.ccd        # view the velocity field using 'ds9'.fi
+
+.fi
+With sign=1 it will create a counter clockwise (CCW) rotating disk
+and project it using \fB-$inc,$pa\fP, For a clock-wise (CW) rotating disk 
+\fB$inc,$pa\fP, 
+hence the somewhat awkward looking expressing to compute \fBsinc\fP.   An
+alternative desription could be to allow the inclination to be negative
+as well (which observers do not do), where inc<0 means CCW, and inc>0 means CW
+rotation.
+.PP
 Suppose you have a barred galaxy model, \fIbar.dat\fP, 
 with the galactic plane at z=0
 and the bar along the y axis (\fI"position angle=0"\fP), 
@@ -75,40 +108,42 @@ and the positive z-axis pointed towards the observer) with given final
 position angle ($pa), inclination ($inc) and angle from line of nodes
 to bar ($phi) the following rotations will do the job:
 .nf
+
     set pa=39
     set inc=-45
     set phi=-34
     snaprotate bar.dat n7476.dat "atand(tand($phi)/cosd($inc)),$inc,$pa" zyz
     snapplot n7476 psize="z>0?0.03:0.0"
+    
 .fi
 where \fBpsize\fP was choosen such that ``near'' (z>0) 
 particles were plotted a bit bigger to accentuate
 the near side of the model. Flipping the sign if $inc will flip the near
 and far side.
-.PP
-For 'normal' spiral galaxies the following example shows how to
-project them into their normaly sky view, taking the sense of
-rotation into account:
+
+.SH "GEOMETRY"
+
 .nf
-   set pa=170             # M51, use pa=-160 for M33
-   set inc=22             # M51, use inc=30 for M33
-   set sign=-1            # M51, use sign=1 for M33
-   set sinc=`nemoinp "iflt($sign,0,$inc,-$inc)"`
-   mkdisk - 1000 sign=$sign |\\
-      snaprotate - - theta=$sinc,$pa order=yz |\\
-      snapgrid - velfie.ccd mom=-1
-   nds9 velfie.ccd        # view the velocity field using 'ds9'
+.ta +1i +1i +1i +1i
+rotation	dPA_near	J_z	sign(J_z)	sinc
+
+CW	+90	away	< 0	inc
+CCW	-90	towards	> 0	-inc
 .fi
-With sign=-1 it will create a counter-clockwise rotating disk
-and project it using \fB$inc,$pa\fP, For a clock-wise rotating disk the math is nearly
-the same, except the sign for the inclination needs to be flipped, 
-or \fB-$inc,$pa\fP, 
-hence the somewhat awkward looking expressing to compute \fBsinc\fP.
-.SH SEE ALSO
+
+.SH "ROLL-PITCH-YAW"
+
+Another common way to describe motion (e.g. in an aircraft, robotics) is
+the Yaw-Pitch-Roll (RPY) convention.
+
+
+.SH "SEE ALSO"
 snapshift(1NEMO), snapscale(1NEMO), snapspin(1NEMO), snapshot(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes, Peter Teuben
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 xx-jan-88	V1.0 original                   	JEB
@@ -121,4 +156,5 @@ xx-jan-88	V1.0 original                   	JEB
 21-nov-98	V5.0 added tscale= keyword	PJT
 18-nov-05	V5.1a added select=, also implemented select=acc	PJT
 22-sep-08	V6.0 added spinvector=	PJT
+18-jan-22	fix sense of rotation example	PJT
 .fi

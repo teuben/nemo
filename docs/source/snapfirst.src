@@ -1,0 +1,35 @@
+#include <stdinc.h>         /* general I/O */
+#include <getparam.h>       /* for the user interface */
+#include <vectmath.h>       /* to define NDIM */
+#include <filestruct.h>
+
+#include <snapshot/snapshot.h>  /* Snapshot macros */
+#include <snapshot/body.h>          
+#include <snapshot/get_snap.c>  /*   and I/O routines */ 
+#include <snapshot/put_snap.c>
+
+string defv[] = {
+    "in=???\n       Input snapshot",
+    "out=???\n      Output snapshot",
+    "VERSION=0.0\n  21-jul-93 PJT",
+    NULL,
+};
+
+string usage="copy the first snapshot";
+
+nemo_main()
+{
+   Body *btab = NULL;   /* pointer to the whole snapshot */
+   int  nbody, bits;
+   real tsnap;
+   stream instr, outstr;
+
+   instr = stropen(getparam("in"),"r");    
+   outstr = stropen(getparam("out"),"w");
+   get_history(instr);
+   get_snap(instr, &btab, &nbody, &tsnap, &bits);
+   put_history(outstr);
+   put_snap(outstr,&btab, &nbody, &tsnap, &bits);
+   strclose(instr);
+   strclose(outstr);
+}

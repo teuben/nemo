@@ -29,8 +29,10 @@
  *   9-oct-12   test the miriad method of drawing a gaussian                  PJT
  *  24-jan-18   faster version of grandom() with better caching               PJT
  *              1e7 grandom:   V2.2 -> 1.40"    V2.3 -> 0.85
+ *  11-aug-22   implement special value -3 to use /dev/random on linux        PJT
+ *  27-sep-23   less verbose by default                                       PJT
  *
- *  See also: getrandom(2LINUX)
+ *  See also: getrandom(2) for seed=-3
  */
 
 #include <stdinc.h>
@@ -43,6 +45,10 @@
 #ifndef __MINGW32__
 #include <sys/times.h>
 #endif
+
+// apt-get install libc6-dev-amd64  
+// #include <sys/random.h>     // for getrandom(), only on linux
+
 
 extern string *burststring(string,string);
 
@@ -125,21 +131,37 @@ int init_xrandom(string init)
 
 int set_xrandom(int dum)
 {
-    int retval;
+    int retval = 0;
 #ifndef __MINGW32__
     struct tms buffer;
 #endif
+    
     if (dum <= 0) {
-	if (dum == -1)
+        if (dum == 0)
+	    retval = idum = (int) time(0);          /* seconds since 1970 */
+	else if (dum == -1)
 #ifndef __MINGW32__
             retval = idum = (int) times(&buffer);   /* clock cycles */
 #else
 	    ;
 #endif
-        else if (dum == -2)
+	else if (dum == -2)
             retval = idum = (int) getpid();         /* process id */
-        else            /* normally if dum==0 */
-	    retval = idum = (int) time(0);          /* seconds since 1970 */
+        else if (dum == -3) {                       /* /dev/(u)random only on linux */
+#if 1
+	    stream fp = stropen("/dev/random","r");
+	    int nretval = fread(&retval, sizeof(int), 1, fp);
+	    if (nretval != 1) error("Bad read from /dev/random: %d", nretval);
+	    strclose(fp);
+	    dprintf(1,"xrandom(-3): /dev/random\n");
+#else
+	    int nretval = getrandom(&retval, sizeof(int), GRND_RANDOM);
+	    if (nretval != sizeof(int)) error("Bad getrandom: %d", nretval);
+	    dprintf(1,"xrandom(-3): getrandom\n");	    
+#endif
+	    idum = retval;
+        } else
+   	    error("set_xrandom(%d) not supported", dum);
     } else
     	retval = idum = dum;	           /* use supplied seed in argument */
 
@@ -232,6 +254,10 @@ double grandom(double mean, double sdev)
 
 }
 
+double erandom(double a)
+{
+  return -a*log( xrandom(0.0,1.0) );
+}
 
 
 
@@ -248,14 +274,16 @@ string defv[] = {
     "n=0\n          Number of random numbers to draw",
     "m=1\n          Number of times to repeat experiment (enforces tab=f)",
     "gauss=f\n      gaussian or uniform noise?",
+    "exp=f\n        exponential instead?",
     "report=f\n     Report mean/dispersian/skewness/kurtosis?",
     "tab=t\n        Tabulate all random numbers?",
     "offset=0.0\n   Offset of distribution from 0",
+    "seed57=\n      If used, this is von Hoerners 1957 seed (0.57 .. 0.91)",
 #ifdef HAVE_GSL
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.3\n  24-jan-2018 PJT",
+    "VERSION=2.5\n  23-sep-2023 PJT",
     NULL,
 };
 
@@ -274,6 +302,7 @@ string defaults[] = {
 #define MAXPARS 5
 
 static bool check(string, string, string, int, int);
+extern double ran_svh57(double);
 
 void nemo_main()
 {
@@ -282,9 +311,11 @@ void nemo_main()
   double p[MAXPARS];
   unsigned int up[MAXPARS];
   bool   Qgauss = getbparam("gauss");
+  bool   Qexp = getbparam("exp");
   bool   Qreport = getbparam("report");
   bool   Qtab = getbparam("tab");
   bool   Qbench;
+  bool   Q57 = hasvalue("seed57");
   string *sp, ran_name;
   Moment mom;
   real   offset = getdparam("offset");
@@ -292,6 +323,15 @@ void nemo_main()
   
   n = getiparam("n");
   m = getiparam("m");
+
+  if (Q57) {
+    real seed57 = getrparam("seed57");
+    dprintf(0,"von Hoerner seed57=%g first ran=%.9f\n",seed57,ran_svh57(seed57));
+    for (i=0; i<n; i++)
+      printf("%.9f\n",ran_svh57(0.0));
+    return;
+  }
+  
   seed = init_xrandom(getparam("seed"));
   Qbench = (n==4 && seed==1);
   
@@ -302,11 +342,17 @@ void nemo_main()
     ini_moment(&mom,0,0);
   }
 
-  printf("Seed used = %d\n",seed);
+  printf("%d\n",seed);
   
   for (k=0; k<m; k++) {
     sum[0] = sum[1] = sum[2] = sum[3] = sum[4] = 0.0;
-    if (Qgauss) {
+    if (Qexp) {
+      for (j=0; j<n;j++) {
+	for (i=0, s=1.0, y = erandom(1.0); i<5; i++, s *= y)
+	  sum[i] += s;
+	if (Qtab) printf("%g\n",y);
+      }
+    } else if (Qgauss) {
       for (j=0; j<n;j++) {
 	for (i=0, s=1.0, y = grandom(offset,1.0); i<5; i++, s *= y)
 	  sum[i] += s;

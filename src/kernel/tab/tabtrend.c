@@ -3,6 +3,9 @@
  *          
  *   12-may-05   Created quick & dirty for CARMA               PJT
  *   15-jun-2016 cumul= option
+ *   23-may-2020 orig=T/F option
+ *   17-mar-2021 add first= option
+ *    6-jun-2022 allow delta > 1
  *                        
  * 
  * TODO:
@@ -17,6 +20,7 @@
 #include <getparam.h>
 #include <moment.h>
 #include <yapp.h>
+#include <table.h>
 #include <axis.h>
 #include <mdarray.h>
 
@@ -25,15 +29,19 @@
 string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use",
+#if 0    
     "nmax=100000\n                max size if a pipe",
+#endif
     "cumul=f\n                    cumulative instead?",
-    "VERSION=0.2\n		  15-jun-2016 PJT",
+    "delta=1\n                    How far away the neighbor",
+    "orig=f\n                     show original column as well?",
+    "first=f\n                    add first row?",
+    "VERSION=0.5\n		  16-jun-2022 PJT",
     NULL
 };
 
 string usage = "difference rows from previous rows, or cumulate them";
 
-string cvsid = "$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -49,15 +57,18 @@ string cvsid = "$Id$";
 
 local string input;			/* filename */
 local stream instr;			/* input file */
+local table *tptr;                      /* table */
 
 local int ncol;                         /* number of columns used */
-local int col[MAXCOL];			/* histogram column number(s) */
+local int col[MAXCOL];			/* column number(s) */
+local int delta;                        /* neighbor distance */
 
-real *coldat[MAXCOL];
-local int    nmax;			/* lines to use at all */
 local int    npt;			/* actual number of points */
+local mdarray2 coldat;                  /* the table data */
 
 local bool   Qcumul;
+local bool   Qorig;
+local bool   Qfirst;
 
 
 local void setparams(void);
@@ -69,7 +80,7 @@ local void cumul_data(void);
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
+void nemo_main(void)
 {
     setparams();			/* read the parameters */
     read_data();
@@ -84,29 +95,23 @@ local void setparams()
     input = getparam("in");
     ncol = nemoinpi(getparam("xcol"),col,MAXCOL);
     if (ncol < 0) error("parsing error col=%s",getparam("col"));
+    delta = getiparam("delta");
     
-    nmax = nemo_file_lines(input,getiparam("nmax"));
-    if (nmax<1) error("Problem reading from %s",input);
-
     instr = stropen (input,"r");
+    tptr = table_open(instr,0);
 
     Qcumul = getbparam("cumul");
+    Qorig = getbparam("orig");
+    Qfirst = getbparam("first");
 }
 
 
 
 local void read_data()
 {
-    int   i,j,k;
-    
-    dprintf(0,"Reading %d column(s)\n",ncol);
-    for (i=0; i<ncol; i++)
-      coldat[i] = (real *) allocate(sizeof(real)*nmax);
-    npt = get_atable(instr,ncol,col,coldat,nmax);        /* read it */
-    if (npt == -nmax) {
-    	warning("Could only read %d data",nmax);
-    	npt = nmax;
-    }
+    coldat = table_md2cr(tptr, ncol, col, 0, 0);
+    dprintf(1,"Reading %d column(s)\n",ncol);
+    npt = table_nrows(tptr);
 }
 
 
@@ -114,10 +119,24 @@ local void trend_data(void)
 {
   int i,j;
 
-  for (i=1; i<npt; i++) {
-    for (j=0; j<ncol;  j++)
-      printf("%g ",coldat[j][i]-coldat[j][i-1]);
-    printf("\n");
+  for (j=0; j<ncol;  j++) {  
+    if (Qfirst) {
+      if (Qorig)
+	printf("%g %g ",coldat[j][0],coldat[j][0]);
+      else
+	printf("%g ",coldat[j][0]);
+      printf("\n");       
+    }
+  }
+
+  for (i=delta; i<npt; i++) {
+    for (j=0; j<ncol;  j++) {
+      if (Qorig)
+	printf("%g %g ",coldat[j][i]-coldat[j][i-delta],coldat[j][i-delta]);
+      else
+	printf("%g ",coldat[j][i]-coldat[j][i-delta]);
+      printf("\n");
+    }
   }
 }
 

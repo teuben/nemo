@@ -1,0 +1,31 @@
+EPIC5 (written in Fortran, it uses PGPLOT routines)
+
+- this is the 2021 version, which is part of NEMO in
+  https://github.com/teuben/nemo   in usr/lindblad/epics5
+
+
+- To compile:
+     make epic5 install
+  and consult the Makefile if the variables are correct. Notably the LIBS=-lpgplot
+  could need to be different in your environment.
+
+
+- See the unix manual page ("man epic5" in NEMO) for some help
+  how to run.   
+
+  The example in the man page is interactive, but
+  can be reproduced too-quick-to-see using
+     epic5 < epic5.stdin
+
+
+EXAMPLE
+- INPUT file: epar
+- rotational curve: vrot
+- Perturbing potential (given its Fourier decomposition): perpot
+- Pattern speed (km/s/kpc): -18 
+- Damping coefficients at OILR and OLR (km/s/kpc): 7    7
+- Corotation softening (km/s/kpc):    5.00
+- Minimum radius (kpc): 0.01
+- radius step (kpc): 0.5
+- Maximum radius (kpc): 22.
+- Number of THETA values: 32

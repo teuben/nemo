@@ -38,7 +38,7 @@ Default: \fB0.0\fP.
 \fBtimes=\fP\fItime_range\fP
 Only frames within \fItime_range\fP will be analyzed.  Default: \fBall\fP.
 .TP
-\fBshell\fP=\fIr_min,r_max\fP
+\fBshell=\fP\fIr_min,r_max\fP
 Two \fIradii\fP are expected here. They define an ellipsoidal shell
 within which the (modified) inertia tensor is computed and iterated.
 Default: all particles.
@@ -62,6 +62,7 @@ is also applied. It only makes sense to use this option if
 If a filename is given, it is expected to be a snapshot. The first
 snapshot in this file is used to rectify all selected snapshots
 from the inputfile. Default: none.
+
 .SH BUGS
 During iterations, the printed output contains momentary eigenvectors
 and angles, not the cumulative ones.

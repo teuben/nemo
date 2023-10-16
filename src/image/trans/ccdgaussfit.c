@@ -11,6 +11,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <image.h>
+#include <lsq.h>
 
 string defv[] = {
   "in=???\n       Input image file",
@@ -20,7 +21,7 @@ string defv[] = {
   "r1=\n          Inner radius (in pixels) of gaussian",
   "r2=\n          Outer radius (in pixels) for background estimation",
   "n=2\n          Order of 2D polynomial for background fit",
-  "VERSION=0.1\n  1-aug-04 PJT",
+  "VERSION=0.2\n  26-jan-2021 PJT",
   NULL,
 };
 
@@ -36,7 +37,8 @@ string usage = "fit a gaussian to a point and remove it";
 #define CVO(x,y)    MapValue(optr,x,y)
 #endif
 
-void nemo_main()
+
+void nemo_main(void)
 {
   stream  instr, outstr;
   int     nx, ny, nz, mode, badval;

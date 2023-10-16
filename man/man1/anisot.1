@@ -1,9 +1,11 @@
-.TH ANISOT 1NEMO "9 September 1990"
+.TH ANISOT 1NEMO "2 April 2021"
 .SH NAME
 anisot \- tabulate models for spherical galaxies
+
 .SH SYNOPSIS
 \fBanisot \fBout=\fPout_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIanisot\fP generates tables from which other programs
 (e.g. \fBmkommod\fP) can generate N-body realizations of a spherical 
 system with a spheroidal anisotropic distribution function 
@@ -23,10 +25,11 @@ A Hernquist model \fIhas not been implemented yet\fP.
 .PP
 The method used is to compute, from given density as a function of radius,
 the density as a function of potential, after which Eddingtons inversion
-formula (an Abel integral equation, see also eq. (4-140a) in Binney & Tremaine, 1987)
+formula (an Abel integral equation, see also eq. (4-140a) in Binney & Tremaine, 1987,
+or 4-46a in BT2008)
 is used to compute the distribution function at the energies at which the radii
 were given. The density/energy  has been modified to incoorporate anisotropic models
-a la Osipkov-Merrit (for details see pp.239 in Binney & Tremaine, 1987).
+a la Osipkov-Merrit (for details see pp.239 in Binney & Tremaine, 1987, or pp.297 in BT2008)
 .SH PARAMETERS
 The following parameters are recognized.
 .TP 24
@@ -88,23 +91,35 @@ Column number in \fIin-file\fP where cumulative mass is stored.
 Currently not used, but future expansion allows usage of a \fBmasscol\fP 
 instead of a \fBdenscol\fP 
 [default: \fB0\fP].
+
+.SH "EXAMPLES"
+
+.nf
+anisot plum.dat rmax=10
+tablst plum.dat OsipkovMerrittModel Radius,Density,Mass,Potential,DistFunc
+mkommos plum.dat plum.snap 10000
+.fi
+
 .SH "SEE ALSO"
 mkommod(1NEMO), plummer(1NEMO), tablst(1NEMO)
-.SH FILES
-~pjt/nbody/anisot.c
-.SH BUGS
-King models currently don't work anymore ... (did they ever?). The 
-integration interface needs to be checked (PJT)
+
+.SH "FILES"
+$NEMO/usr/pjt/anisot.c
+
+.SH "BUGS"
+King models not verified in detail.
 .PP
 The absolute value of the distribution function \fIf\fP in 
-Plummer models is wrong.  I don't know 
-why this is yet. Doesn't matter for mkanmod though.
-.SH AUTHOR
-Peter Teuben
+Plummer models is wrong.  Doesn't matter for mkomod though.
+
+.SH "AUTHOR"
+Peter Teuben, Stefano Casertano
+
 .SH UPDATE
 .nf
 .ta +1i +4i
 4-jun-88	V1.0 created                 	PJT
 28-oct-88	V1.1 in= added + bug removed  	PJT
 9-sep-90	V1.2 got rid of fortranish stuff	PJT
+2-apr-21	V1.3c - resurrected and fixed up king model	PJT
 .fi

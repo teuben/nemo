@@ -29,33 +29,41 @@
  * 18-aug-00    also allow binary files..., with padding and optional swap
  *  1-apr-01    compiler warnings - pjt
  * 26-aug-01    fix problems with mass99 data that have nsph=ndark=0
+ *  4-feb-22    3.1 make binary the default
+ * 16-jun-22    fixed time of snapshot for binary tipsy
+ * 16-jan-23    3.3  fix swap for particle data (why was this never done before)
+ *
+ * @todo    allow in= to have multiple files
  */
  
 #include <stdinc.h>
 #include <getparam.h>
 #include <math.h>
+#include <vectmath.h>
 #include <stdlib.h>
-#include <vectmath.h>		/* otherwise NDIM undefined */
+
 #include <filestruct.h>
 #include <history.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
-#include "tipsydefs.h"              /* header is in here */
+
+#include "tipsydefs.h"
 
 string defv[] = {
     "in=???\n                   Input (tipsy) ascii file",
-    "out=???\n                  Output snapshot file",
+    "out=\n                     Output snapshot file",
     "options=gas,dark,star\n    Output which particles?",
-    "mode=ascii\n		Input mode (ascii, binary)",
+    "mode=binary\n		Input mode (ascii | binary)",
     "swap=f\n                   Swap bytes?",
     "offset=0\n                 Offset data from header?",
-    "VERSION=2.1b\n             4-feb-2018 pjt",
+    "boom=f\n                   BOOM mode with add-acc ?",
+    "VERSION=3.3\n              16-jan-2023 PJT",
     NULL,
 };
 
-string usage="convert tipsy ascii/binary file to snapshot";
+string usage="convert tipsy file to NEMO snapshot";
 
 void nemo_main()
 {
@@ -66,16 +74,23 @@ void nemo_main()
     int nstar ;
     int last_nstar ;
     int count ;
+    int version ;
     float dummy ;
     float *tform  = NULL;
     float *tf ;
     float last_tform ;
-    struct  gas_particle *gp, *lastgp;
-    struct dark_particle *dp, *lastdp ;
-    struct star_particle *sp, *lastsp, *last_old_sp ;
+    struct  gas_particle   *gp,  *lastgp;
+    struct dark_particle   *dp,  *lastdp;
+    struct star_particle   *sp,  *lastsp,  *last_old_sp;
+    struct dark_particleV6 *dp6, *lastdp6;
+    struct star_particleV6 *sp6, *lastsp6, *last_old_sp6;
+
+#ifdef HAVE_BOOM
+    warning("BOOM support enabled");
+#endif    
 
     /* NEMO */
-    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap;
+    bool Qgas, Qdark, Qstar, Qascii, Qbinary, Qswap, Qboom, Qout;
     string options, mode;
     int i, j, n, nbody, bits, offset;
     real tsnap;
@@ -83,8 +98,11 @@ void nemo_main()
     stream instr, outstr;
     
     instr = stropen(getparam("in"),"r");
-    outstr = stropen(getparam("out"),"w");
-    put_history(outstr);
+    Qout = hasvalue("out");
+    if (Qout) {
+      outstr = stropen(getparam("out"),"w");
+      put_history(outstr);
+    }
     
     options = getparam("options");
     Qgas  = scanopt(options,"gas");
@@ -94,6 +112,7 @@ void nemo_main()
     mode = getparam("mode");
     Qascii   = scanopt(mode,"ascii");
     Qbinary  = scanopt(mode,"binary");
+    Qboom = getbparam("boom");
 
     Qswap = getbparam("swap");
     
@@ -124,21 +143,21 @@ void nemo_main()
         if (nbody==0) error("Nothing to output");
 
 	if(gas_particles != NULL) free(gas_particles);
-	if(ngas != 0)
+	if(ngas > 0)
 	  gas_particles = (struct gas_particle *) 
 	            allocate(ngas*sizeof(*gas_particles));
 	else
 	  gas_particles = NULL;
 	  
 	if(dark_particles != NULL) free(dark_particles);
-	if(ndark != 0)
+	if(ndark > 0)
 	  dark_particles = (struct dark_particle *) 
 	            allocate(ndark*sizeof(*dark_particles));
 	else
 	  dark_particles = NULL;
 	  
 	if(star_particles != NULL) free(star_particles);
-	if(nstar != 0) {
+	if(nstar > 0) {
 	    star_particles = (struct star_particle *)
 	        allocate(nstar*sizeof(*star_particles));
 	    if(tform == NULL)
@@ -283,8 +302,7 @@ void nemo_main()
     
         bits = (TimeBit | MassBit | PhaseSpaceBit);	    
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
-    }
-
+      } // Qascii
 
     if (Qbinary) for(;;) {
         n = fread((char *)&header,sizeof(header),1,instr) ;
@@ -303,14 +321,20 @@ void nemo_main()
             bswap((void *)&header.nsph,    sizeof(int),    1);
             bswap((void *)&header.ndark,   sizeof(int),    1);
             bswap((void *)&header.nstar,   sizeof(int),    1);
+#ifdef TIPSY_NEEDPAD
+            bswap((void *)&header.version, sizeof(int),    1);	    
+#endif
         }
 
 	ndim=header.ndim;
 
 	nbodies=header.nbodies;
-	ngas=header.nsph;
+	ngas  = header.nsph;
 	nstar = header.nstar ;
-	ndark = header.ndark = nbodies - nstar - ngas ;
+	ndark = header.ndark;
+	//  for the ASCII format ndark was not stored, here it is, but it better be consistent
+	if (ndark != nbodies - nstar - ngas)
+	  warning("ndark=%d   not equal to nbodies - nstar - ngas = %d", ndark,  nbodies - nstar - ngas);
 
         switch(header.ndim) {
             case 3:
@@ -320,21 +344,33 @@ void nemo_main()
                     error("strange header.ndim=%d, need swap?",header.ndim);
                     break;
         }
-
-        dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star\n",
+#ifdef TIPSY_NEEDPAD
+	version = header.version;
+#else
+	version = 0;
+#endif
+        tsnap = header.time;
+        dprintf(0,"time=%g N=%d (%d,%d,%d) for gas,dark,star    version=%d\n",
                 header.time, header.nbodies,
-                header.nsph, header.ndark, header.nstar);
+                header.nsph, header.ndark, header.nstar, version);
+	dprintf(0,"header = %d  gas = %d   dark = %d  star = %d bytes\n", sizeof(header),
+		sizeof(struct gas_particle), sizeof(struct dark_particle), sizeof(struct star_particle));
+
+	if (!Qout) return;
 
 	if (offset) {
+	  warning("Trying offsetting data by %d bytes....: %d",n);
 	  n = fseek(instr, offset, SEEK_CUR);
-	  warning("Stupid TIPSY, offsetting data by %d bytes....: %d",n);
 	}
 
         if (header.nsph > 0) {
-            gp = allocate(header.nsph*sizeof(*gp));
+            gp = (struct gas_particle *) allocate(header.nsph*sizeof(*gp));
             n = fread((char *)gp, sizeof(*gp), header.nsph, instr);
             if (n <= 0) error("Problem reading gas data");            
 	    dprintf(1,"Found %d gas particles\n",n);
+	    if (Qswap)
+	      bswap((void *)gp, sizeof(Real), sizeof(*gp)*n/sizeof(Real));
+	    
 
 	    if (Qgas) {
 	      nbody = ngas;
@@ -356,10 +392,12 @@ void nemo_main()
         }
 
         if (header.ndark > 0) {
-            dp = allocate(header.ndark*sizeof(*dp));
+            dp = (struct dark_particle *) allocate(header.ndark*sizeof(*dp));
             n = fread((char *)dp, sizeof(*dp), header.ndark, instr);
             if (n <= 0) error("Problem reading dark data");            
 	    dprintf(1,"Found %d dark matter particles\n",n);
+	    if (Qswap)
+	      bswap((void *)dp, sizeof(Real), sizeof(*dp)*n/sizeof(Real));
 
 	    if (Qdark) {
 	      nbody = ndark;
@@ -372,18 +410,28 @@ void nemo_main()
 		  Pos(bp)[j] = dp[i].pos[j];
 		  Vel(bp)[j] = dp[i].vel[j];
 	        }
+#ifdef HAVE_BOOM
+		Phi(bp) = dp[i].pot;
+	        for (j=0; j<ndim; j++)
+		  Acc(bp)[j] = dp[i].acc[j];
+#endif		
 	        bp++;
 	      }
 	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+#ifdef HAVE_BOOM
+	      bits = (bits  | PotentialBit | AccelerationBit);
+#endif	      
 	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 	    }
         }
 
         if (header.nstar > 0) {
-            sp = allocate(header.nstar*sizeof(*sp));
+            sp = (struct star_particle *) allocate(header.nstar*sizeof(*sp));
             n = fread((char *)sp, sizeof(*sp), header.nstar, instr);
             if (n <= 0) error("Problem reading star data");            
 	    dprintf(1,"Found %d star particles\n",n);
+	    if (Qswap)
+	      bswap((void *)sp, sizeof(Real), sizeof(*sp)*n/sizeof(Real));
 
 	    if (Qstar) {
 	      nbody = nstar;
@@ -396,14 +444,22 @@ void nemo_main()
 		  Pos(bp)[j] = sp[i].pos[j];
 		  Vel(bp)[j] = sp[i].vel[j];
 	        }
+#ifdef HAVE_BOOM
+		Phi(bp) = sp[i].pot;
+	        for (j=0; j<ndim; j++)
+		  Acc(bp)[j] = sp[i].acc[j];
+#endif		
 	        bp++;
 	      }
-	      bits = (TimeBit | MassBit | PhaseSpaceBit);	    
+	      bits = (TimeBit | MassBit | PhaseSpaceBit);
+#ifdef HAVE_BOOM
+	      bits = (bits  | PotentialBit | AccelerationBit);
+#endif	      
 	      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
 
 	    }
         }
-    }
+      } // Qbinary
 
     if(tform) free(tform);
     strclose(instr);

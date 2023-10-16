@@ -46,7 +46,7 @@ string defv[] = {
     "dual=f\n             Dual pass for large number",
     "blankval=\n          if used, use this as blankval",
     "scale=1\n            Scale factor for data",
-    "VERSION=1.1\n	  25-feb-2013 PJT",
+    "VERSION=1.1a\n	  11-mar-2022 PJT",
     NULL
 };
 
@@ -106,15 +106,9 @@ local void  setparams(void), read_data(void), histogram(void);
 local iproc getsort(string name);
 local int   ring_index(int n, real *r, real rad);
 
-
-/****************************** START OF PROGRAM **********************/
+extern int minmax(int n, real *array, real *amin, real *amax);
 
-nemo_main()
-{
-    setparams();			/* read the parameters */
-    read_data();
-    histogram();
-}
+/****************************** START OF PROGRAM **********************/
 
 local int compar_real(real *a, real *b)
 {
@@ -223,6 +217,7 @@ local void read_data()
 
   Nunder = Nover = Nblank = 0;
   for (i=0, k=0; i<ndata; i++) {
+    if (isnan(data[i])) continue;
     if (Qblank && data[i]==blankval) { Nblank++; continue;}
     data[i] -= dual_mean;
     if (Qmin && data[i] < xrange[0]) { Nunder++; continue;}
@@ -574,7 +569,7 @@ typedef struct sortmode {
  
 /* List of externally available sort routines */
  
-/* extern int qsort();         /* Standard Unix : stdlib.h */
+/* extern int qsort();          Standard Unix : stdlib.h */
 /* or:  void qsort(void *base, size_t nmemb, size_t size,
  *                 int(*compar)(const void *, const void *));
  */
@@ -633,7 +628,14 @@ int ring_index(int n, real *r, real rad)
 	  rad,r[0],r[n-1]);
   } else {
     error("reverse indexing not yet implemented");
+    //Must return a value in this path.
   }
 
 }
 
+void nemo_main()
+{
+    setparams();			/* read the parameters */
+    read_data();
+    histogram();
+}

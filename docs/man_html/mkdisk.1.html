@@ -6,48 +6,57 @@
 <title>MKDISK(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkdisk - create a uniform-density test disk in an external potential
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkdisk out=</b>snapshot [parameters=values ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkdisk</i> sets
-up a uniform &lsquo;&lsquo;cold&rsquo;&rsquo; disk of test particles orbiting counter clockwise (but
-see <b>sign=</b> below)  in the gravitational potential of a user-supplied potential
-(in <a href='potential.5.html'><i>potential(5NEMO)</i></a>
- format). <p>
-An input (snapshot) dataset can be given,
-in which case the positions are  taken from this input file. 
+up a uniform &lsquo;&lsquo;cold&rsquo;&rsquo; disk of test particles with positive angular momentum,
+i.e. rotating counter clockwise (but see <b>sign=</b> below)  in the gravitational
+potential of a user-supplied potential in <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+ format. <p>
+Optionally
+an input snapshot can be given, in which case the positions are  taken
+from this input file. <p>
+See <a href='mktabdisk.1.html'><i>mktabdisk(1NEMO)</i></a>
+ for a test disk with more parameters:
+the density, velocity and dispersion are specified by a table as function
+of radius.  
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+The following parameters are recognized in any order
+if the keyword is also given: 
 <dl>
 
 <dt><b>out=<i>out_file</i></b> </dt>
-<dd>The data are written to this file in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
-
- format . Currently the potential and total energy are stored in the Potential
-and Aux slots of the snapshot. [no default]. </dd>
+<dd>The data are written to this
+file in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+  format . Currently the potential and total energy
+are stored in the Potential and Aux slots of the snapshot. [no default].
+</dd>
 
 <dt><b>nbody=<i>num_bodies</i></b> </dt>
-<dd>Number of bodies
-particles [default: <b>2048</b>] </dd>
+<dd>Number of bodies particles [default: <b>2048</b>] </dd>
 
-<dt><b>potname=<i>potential_name</i></b> </dt>
-<dd>name of the potential,
-see <b>$NEMOOBJ/potential</b> for the current object repository. The user can supply
-his own, see <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+<dt><b>potname=<i>potential_name</i></b>
+</dt>
+<dd>name of the potential, see <b>$NEMOOBJ/potential</b> for the current object repository.
+The user can supply his own, see <a href='potential.5.html'><i>potential(5NEMO)</i></a>
 . [no default]. </dd>
 
-<dt><b>potpars=<i>pot_pars</i></b> </dt>
-<dd>Paramaters
-to the user supplied potential. The number of parameters depends on the
-potential supplied, the first parameter is reserved for the pattern speed.
-[default: not supplied, parameters as defined by <a href='potential.5.html'>potential(5)</a>
+<dt><b>potpars=<i>pot_pars</i></b>
+</dt>
+<dd>Paramaters to the user supplied potential. The number of parameters depends
+on the potential supplied, the first parameter is reserved for the pattern
+speed. [default: not supplied, parameters as defined by <a href='potential.5.html'>potential(5)</a>
 ]. </dd>
 
 <dt><b>potfile=<i>pot_data</i></b>
@@ -129,19 +138,22 @@ Fractional loss in circular streaming as z increased. Use z0_v now. </dd>
 
 <dt><b>headline=<i>message</i></b>
 </dt>
-<dd>Text headline for output file [default: not used]. </dd>
+<dd>Text headline for output file [default: not used]. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='mktestdisk.1.html'>mktestdisk(1NEMO)</a>
 ,
-<a href='mktt72.1.html'>mktt72(1NEMO)</a>
+<a href='mktabdisk.1.html'>mktabdisk(1NEMO)</a>
+, <a href='mktt72.1.html'>mktt72(1NEMO)</a>
 , <a href='mkbaredisk.1.html'>mkbaredisk(1NEMO)</a>
 , <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
-, <a href='snapfold.1.html'>snapfold(1NEMO)</a>
+,
+<a href='snapfold.1.html'>snapfold(1NEMO)</a>
 , <a href='snapspin.1.html'>snapspin(1NEMO)</a>
-
-
+ 
+<p> 
 <h2><a name='sect5' href='#toc5'>Update History</a></h2>
 <br>
 <pre>xx-feb-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;coding, still debugging  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

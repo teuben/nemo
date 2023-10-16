@@ -1,10 +1,10 @@
 <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 3.2 Final//EN"> 
 <HTML>
-<HEAD>
-<TITLE> NEMO Stellar Dynamics Toolbox </TITLE>
-<META HTTP-EQUIV="Description" NAME="Description" CONTENT="NEMO is an open source software toolbox to perform a variety of stellar dynamics and related calculations">
-<META HTTP-EQUIV="Keywords"    NAME="Keywords"    CONTENT="nemo,software,sph,stellar dynamics,n-body,orbits,images,fits,table,pgplot,animation">
-</HEAD>
+  <HEAD>
+    <TITLE> NEMO Stellar Dynamics Toolbox </TITLE>
+    <META HTTP-EQUIV="Description" NAME="Description" CONTENT="NEMO is an open source software toolbox to perform a variety of stellar dynamics and related calculations">
+    <META HTTP-EQUIV="Keywords"    NAME="Keywords"    CONTENT="nemo,software,sph,stellar dynamics,n-body,orbits,images,fits,table,pgplot,animation">
+  </HEAD>
 
 <!-- only edit this file when named index.html -->
 
@@ -12,7 +12,7 @@
 <hr>
 <H1>
 <IMG ALIGN=bottom SRC=nemo.gif ALT="*NOT A LOGO*">
-NEMO -  A Stellar Dynamics Toolbox </H1>
+     NEMO -  A Stellar Dynamics Toolbox </H1>
 
 <hr>
 <IMG SRC=new.gif ALT="*">:
@@ -20,6 +20,9 @@ NEMO is now managed with git and hosted on
 <A HREF=https://github.com/teuben/nemo>github</A>, with a copy
 on <A HREF=https://archive.softwareheritage.org/browse/origin/https://github.com/teuben/nemo/directory/>
 Software Heritage</A> archive.
+<br>
+The manual is being converted for
+<A HREF=https://astronemo.readthedocs.io/en/latest/>readthedocs</A>.
 <br>
 For the regulars: keep reading the
 <B><A HREF="whatsnew.html"> What's New </A></B>, the
@@ -70,7 +73,7 @@ and <A HREF=http://adsabs.harvard.edu/abs/2010ascl.soft10051B>ADS/ascl</A>
 </UL>
 
 
-<!-- Search My Google Search Appliance -->
+<!-- Search My Google Search Appliance 
 <form method="get" action="http://www.searchum.umd.edu/search">
   <table>
    <tr>
@@ -85,6 +88,10 @@ and <A HREF=http://adsabs.harvard.edu/abs/2010ascl.soft10051B>ADS/ascl</A>
       </tr>
    </table>
 </form>
+
+-->
+
+
 <!-- Search My Google Search Appliance-->
 <HR>
 
@@ -98,28 +105,35 @@ all be in great shape, however, for all of them fine looking postscript
 files are available.
 
 <UL>
-<LI> The
+  <LI> The new
+    <A HREF=https://astronemo.readthedocs.io/>manual</A> on ReadTheDocs.
+This project started with NEMO V4.2.2 (april 2021), and is
+an updated version from the old and badly outdated latex manual (next item)
+<LI> The old
       <A HREF="manual/nemo.html"> Users and Programmers Guide </A> is
 	an extensive (150 pages) manual. It's four major parts give
 	a general introduction, a cookbook with many examples, a
 	programmers guide and an appendix with many reference sections.
     <br>
-    <B>NOTE:</B> This manual is currently being rewritten for
-	version 4.x. In the
-    mean time you can <A HREF=http://www.astro.umd.edu/nemo/nemo.pdf>
-    download </A> a snapshot of this new version.
+    <B>NOTE:</B> Here is an
+    <A HREF=http://www.astro.umd.edu/nemo/nemo.pdf> old pdf </A>
 
+<!--
 <LI> At the GH-2001 workshop we started a
 NEMO demo series, wrapped around
-<A HREF=demo1/start.html>A Gentle Introduction to NEMO</A>. 
+<A HREF=demo1/start.html>A Gentle Introduction to NEMO</A>.
+-->
 
 <LI> <IMG SRC=new.gif> <A HREF=examples/>Example scripts</A>
 to highlight certain procedures or packages in NEMO.
+
+<!--
 
 <LI> The <A HREF="survival/survival.html"> Survival Guide </A>
 	is intended for the casual usual, who is familiar with
 	operating packages within UNIX.
 	(<I> badly outdated </I>)
+  
 
 <LI> A <A HREF="summary/summary.html"> summary of features </A>.
 	(<I> badly outdated </I>)
@@ -128,7 +142,8 @@ to highlight certain procedures or packages in NEMO.
      	who want to see what you can do, and try out features.
 	(<I> under construction </I>)
 
-
+-->
+  
 <LI> 	<A HREF=man_html/index.html>NEMO manual pages</A>:
 	Good starting points are the manual pages
 	<A HREF="man_html/programs.8.html"> programs(8NEMO)</A>, which lists
@@ -230,13 +245,13 @@ has the following to offer:
 -->
 
 <OL>
- <LI> Here is the now recommended GIT based installation.
+ <LI> Here is the now recommended GIT based installation in a bash shell:
 
 <PRE>
-	 %1 wget https://teuben.github.io/nemo/install_nemo
-	 %2 chmod +x install_nemo
-	 %3 ./install_nemo nemo=$HOME/opt/nemo
-	 %4 source $HOME/opt/nemo/nemo_start.csh
+	 %1 wget https://teuben.github.io/nemo/install_nemo.sh
+	 %2 chmod +x install_nemo.sh
+	 %3 ./install_nemo,sh nemo=$HOME/opt/nemo
+	 %4 source $HOME/opt/nemo/nemo_start.sh
      
 </PRE>
 
@@ -245,29 +260,8 @@ if you don't have the wget program, get something
 similar that can download this script, e.g. curl, or just your favorite browser.
 You can of course pick the
 location of NEMO to be anywhere, but we picked $HOME/opt/nemo in this example.
-In the 4th step it also assumed you
-were using the C-shell. If you are a bash user, source the nemo_start.sh script
-instead!
 
 
- <LI> A tar file from our ftp server may also work. 
-   Here is an example using 
-<PRE>
-        %1 wget  ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz
-           or
-	%1 curl ftp://ftp.astro.umd.edu/pub/nemo/nemo_git.tar.gz | tar zxf -
-	
-	%2 tar zxf nemo_git.tar.gz 
-
-		# wget could need --active-ftp, since --passive-ftp is default
-		# curl has a similar option, --ftp-pasv
-
-        %3 cd nemo_git
-	%4 git pull                # optional if you don't need any updates
-	%5 docs/install_nemo nemo=. reuse=1
-</PRE>
-    and you should have a working NEMO with PGPLOT as the plotting
-    engine.
    <LI> There are a number of optional libraries you will need to install
      if you want to use every possible program or option in NEMO. If this is you
      first time using NEMO, we recommend you to skip this unless you need a specific
@@ -301,11 +295,6 @@ instead!
         don't support anymore. You will be on your own here.
         
    
-<LI>    Some old <A HREF=macosx.html>MacOSX related installation notes</A>,
-	although the regular installation method should work fine as long
-  as you have compilers and various external libraries (notably X11) installed.
-
-
  <LI> <A HREF=ftp://ftp.astro.umd.edu/pub/nemo/nbody0.tar.gz>
         Aarseth's nbody0</A>. Although the source code is 
 	taken directly from NEMO, the Makefile contains 
@@ -332,19 +321,7 @@ instead!
  <LI> <A HREF=optional.html> optional software</A> that can be installed
 	to enrich NEMO (this is where you find links to PGPLOT, HDF, CFITSIO etc.)
 
- <LI>  The <A HREF=http://www.randomfactory.com/>
-	Linux for Astronomy </A> CD-ROM contains a release of NEMO. Also
-  	check <A HREF=lfa.html>latest LFA comments</A>. 
 </OL>
-
-Difficulties during installation are most likely resolved by consulting
-the $NEMO/README.install file.
-<P>
-If you download NEMO, we ask that you register the software, you can also
-optionally be notified of new releases, but please:
-<A HREF=mailto:nemo@astro.umd.edu>Send us an email!</A>
-
-
 
 <H2><img src=red.ball.gif alt="*">
     <A NAME=others> Other Software </A></H2>
@@ -377,7 +354,8 @@ reasons.
 <LI> 
 <A HREF=http://www.ArtCompSci.org>The Art of Computational Science</A>,
 	A series of e-books on how to build a computational lab (Hut & Makino) -
-alos has lots of code and examples available.
+alos has lots of code and examples available.  See also
+<A HREF=https://github.com/artcompsci>Mark Ridler's github project</A>.
 
 <LI> 
 <A HREF="http://www-hpcc.astro.washington.edu/tools/tipsy/tipsy.html">  TIPSY </A>,
@@ -411,6 +389,9 @@ and radiative transfer can be easily coupled.
 <IMG SRC=new.gif>  <A HREF=http://www.initialconditions.org/>
 	initialconditions.org</A>, a blog on Astrophysical
 Initial conditions (for the N-body problem).
+
+<LI>  Interactive Gravitational Simulator (IGS) - a master's thesis project
+  by Mike Bantegui (Hofstra U, 2012)
 
 
 
@@ -570,6 +551,9 @@ contains the material for
 A collaborative experiment on star cluster evolution</A>
 
 <LI> <A HREF=http://sverre.com/>Sverre's new interactive movie website</A>
+
+<LI> <A HREF=http://courses.physics.ucsd.edu/2019/Winter/physics141/>
+  UCSD Computational Physics class </A> (Julius Kuti)
 
 
 <LI> <A HREF=http://www.astro.umd.edu/~dcr/>
@@ -955,7 +939,7 @@ University of Maryland</A> in
 This page was last modified on
 <!--#config timefmt="%d-%h-%Y" -->
 <!--#echo var="LAST_MODIFIED" -->
-by PJT. &#169; 2004...2019
+by PJT. &#169; 2004...2022
 
 </BODY>
 

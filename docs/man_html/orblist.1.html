@@ -6,6 +6,7 @@
 <title>ORBLIST(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -17,33 +18,43 @@ orblist - list an orbit
 <b>orblist</b>
 will list the time, the X, Y, Z positions and  VX, VY, VZ velocities of
 an orbit. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order
-if the keyword is also given: 
+ The following parameters are recognized in order;
+they may be given in any order if the keyword is also given. Use --help to
+confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, in <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
- format
-[no default] </dd>
+
+format [no default] </dd>
 
 <dt><b>n=<i>number</i></b> </dt>
-<dd>stride through the data. <b>n=2</b> would list only the even
-timesteps. [default: <b>1</b>]. </dd>
+<dd>stride through the data. <b>n=2</b> would list only
+the even timesteps. [default: <b>1</b>]. </dd>
+
+<dt><b>maxsteps=</b> </dt>
+<dd>Maximum number of steps allowed
+[10000] </dd>
 
 <dt><b>format=<i>format</i></b> </dt>
-<dd>format to be used for printing [default:
-<b>%f</b>]. </dd>
+<dd>format to be used for printing [default: <b>%f</b>]. </dd>
+
+<dt><b>mode=</b>
+</dt>
+<dd>Output:  o,t,p,v (not used) [t,p,v] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='potential.5.html'>potential(5NEMO)</a>
-, <a href='newton0.1.html'>newton0(1NEMO)</a>
+,
+<a href='newton0.1.html'>newton0(1NEMO)</a>
  
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter Teuben
-
+Peter Teuben 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>~src/pjt/orbit  <tt> </tt>&nbsp;<tt> </tt>&nbsp;orblist.1 orblist.c

@@ -6,6 +6,7 @@
 #include "dopri5.h"
 
 
+
 static long      nfcn, nstep, naccpt, nrejct;
 static double    hout, xold, xout;
 static unsigned  nrds, *indir;
@@ -161,7 +162,7 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
   double   facold, expo1, fac, facc1, facc2, fac11, posneg, xph;
   double   atoli, rtoli, hlamb, err, sk, hnew, yd0, ydiff, bspl;
   double   stnum, stden, sqr;
-  int      iasti, iord, irtrn, reject, last, nonsti;
+  int      iasti, iord, irtrn, reject, last, nonsti=0;
   unsigned i, j;
   double   c2, c3, c4, c5, e1, e3, e4, e5, e6, e7, d1, d3, d4, d5, d6, d7;
   double   a21, a31, a32, a41, a42, a43, a51, a52, a53, a54;
@@ -273,18 +274,16 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
     for (i = 0; i < n; i++)
       yy1[i] = y[i] + h * (a71*k1[i] + a73*k3[i] + a74*k4[i] + a75*k5[i] + a76*k6[i]);
     fcn (n, xph, yy1, k2);
-    if (iout == 2)
+    if (iout == 2) {
       if (nrds == n)
 	for (i = 0; i < n; i++)
-	{
 	  rcont5[i] = h * (d1*k1[i] + d3*k3[i] + d4*k4[i] + d5*k5[i] + d6*k6[i] + d7*k2[i]);
-	}
       else
-	for (j = 0; j < nrds; j++)
-	{
+	for (j = 0; j < nrds; j++) {
 	  i = icont[j];
 	  rcont5[j] = h * (d1*k1[i] + d3*k3[i] + d4*k4[i] + d5*k5[i] + d6*k6[i] + d7*k2[i]);
 	}
+    }
     for (i = 0; i < n; i++)
       k4[i] = h * (e1*k1[i] + e3*k3[i] + e4*k4[i] + e5*k5[i] + e6*k6[i] + e7*k2[i]);
     nfcn += 6;
@@ -340,7 +339,7 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 	{
 	  nonsti = 0;
 	  iasti++;
-	  if (iasti == 15)
+	  if (iasti == 15) {
 	    if (fileout)
 	      fprintf (fileout, "The problem seems to become stiff at x = %.16e\r\n", x);
 	    else
@@ -349,6 +348,7 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 	      hout = h;
 	      return -4;
 	    }
+	  }
 	}
 	else
 	{
@@ -358,10 +358,9 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 	}
       }
 
-      if (iout == 2)
+      if (iout == 2) {
 	if (nrds == n)
-	  for (i = 0; i < n; i++)
-	  {
+	  for (i = 0; i < n; i++) {
 	    yd0 = y[i];
 	    ydiff = yy1[i] - yd0;
 	    bspl = h * k1[i] - ydiff;
@@ -371,8 +370,7 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 	    rcont4[i] = -h * k2[i] + ydiff - bspl;
 	  }
 	else
-	  for (j = 0; j < nrds; j++)
-	  {
+	  for (j = 0; j < nrds; j++) {
 	    i = icont[j];
 	    yd0 = y[i];
 	    ydiff = yy1[i] - yd0;
@@ -382,7 +380,7 @@ static int dopcor (unsigned n, FcnEqDiff5 fcn, double x, double* y, double xend,
 	    rcont3[j] = bspl;
 	    rcont4[j] = -h * k2[i] + ydiff - bspl;
 	  }
-
+      }
       memcpy (k1, k2, n * sizeof(double)); 
       memcpy (y, yy1, n * sizeof(double));
       xold = x;
@@ -664,7 +662,7 @@ int dopri5
 /* dense output function */
 double contd5 (unsigned ii, double x)
 {
-  unsigned i, j;
+  unsigned i;
   double   theta, theta1;
 
   i = UINT_MAX;

@@ -6,14 +6,18 @@
 <title>CCDFITS(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
+HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdfits - convert an image to a fits file  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>ccdfits in=</b>image
 <b>out=</b>fits [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdfits</b> writes a fits file to disk.
 The input must be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
@@ -23,30 +27,40 @@ The input must be in  <a href='image.5.html'><i>image(5NEMO)</i></a>
 An experimental version of this program that
 uses the standard <a href='cfitsio.3.html'><i>cfitsio(3)</i></a>
  library is known as <a href='ccdfitsio.1.html'><i>ccdfitsio(1NEMO)</i></a>
-. 
+. <p>
+A peculiar
+option is the use of the <b>fitshead=</b> keyword. In this mode the header of the
+output fits file will be replaced with that of the filename in the  <b>fitshead=</b>
+keyword. This is dangerous, it is the responsility of the user to ensure
+the dimensions (NAXIS,1,2,3) and BITPIX of the two are the same, or else
+an illegal FITS file will be created. The program <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a>
+ is used
+behind the scenes to achieve this feat. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use --help to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in=<i>image-file</i></b> </dt>
+<dt><b>in=<i>image-file</i></b>
+</dt>
 <dd>input file, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format [no default]. </dd>
 
-<dt><b>out=<i>fits-file</i></b>
-</dt>
-<dd>output file, will be in <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+<dt><b>out=<i>fits-file</i></b> </dt>
+<dd>output file,
+will be in <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  format [no default]. </dd>
 
 <dt><b>bitpix=<i>number</i></b> </dt>
-<dd>Bitpix
-applied for scaling. Options are 16, 32 or -32.  [default: -32]. </dd>
+<dd>Bitpix applied
+for scaling. Options are 16, 32 or -32.  [default: -32]. </dd>
 
-<dt><b>scale=<i>number</i></b>
-</dt>
-<dd>Scaling factors for CDELT keyword. If the second or third number is omitted,
-it is repeated from the previous number. [default: <b>1,1,1</b>]. </dd>
+<dt><b>scale=<i>number</i></b> </dt>
+<dd>Scaling
+factors for CDELT keyword. If the second or third number is omitted, it
+is repeated from the previous number. [default: <b>1,1,1</b>]. </dd>
 
 <dt><b>iscale=<i>bscale,bzero</i></b>
 </dt>
@@ -54,75 +68,92 @@ it is repeated from the previous number. [default: <b>1,1,1</b>]. </dd>
 <b>1,0</b>]. </dd>
 
 <dt><b>object=<i>name</i></b> </dt>
-<dd>Name of your object/image [default: none]. </dd>
+<dd>Name of your object/image. By default, the Object name
+inherited from the original. [default: none]. </dd>
 
-<dt><b>comment=<i>comments</i></b>
-</dt>
-<dd>Comment using the COMMENT keyword. [default: none] </dd>
+<dt><b>comment=<i>comments</i></b> </dt>
+<dd>Comment using
+the COMMENT keyword. [default: none] </dd>
 
 <dt><b>cdmatrix=t|f</b> </dt>
-<dd>Use CD matrix
-instead of CDELT? [t/f]. Default: f. </dd>
+<dd>Use CD matrix instead of
+CDELT? [t/f]. Default: f. </dd>
 
 <dt><b>blocking=<i>factor</i></b> </dt>
-<dd>Blocking factor (multiplicity
-of blocksize in terms of 2880 bytes) used when writing the fits file. [default:
+<dd>Blocking factor (multiplicity of
+blocksize in terms of 2880 bytes) used when writing the fits file. [default:
 <b>1</b>]. </dd>
 
-<dt>refmap= </dt>
+<dt><b>refmap=</b> </dt>
 <dd>Reference map or cube (a fits file) from which the WCS is inherited.
  It has to match the output cube which is created. <i>Deprecated</i>. By default
 none is used.  </dd>
 
-<dt><i>crpix=</i> </dt>
+<dt><b>crpix=</b> </dt>
 <dd>Use these pixels (2 or 3 need to be given, depending
 if a map or cube is output) as reference pixel, instead of the one defined
 in the reference map. By default not used. </dd>
 
-<dt><i>crval=</i> </dt>
+<dt><b>crval=</b> </dt>
 <dd>Use these values (2 or
 3 need to be given, depending if a map or cube is output) as value at the
 reference pixel,  instead of the one defined in the reference map or defined
 by the input. By default not used. </dd>
 
-<dt><i>cdelt=</i> </dt>
+<dt><b>cdelt=</b> </dt>
 <dd>Use these values (2 or 3 need to
 be given, depending if a map or cube is output) as pixel increments, instead
 of the one defined in the reference map or defined by the input. By default
 not used. </dd>
 
-<dt><i>radecvel=t|f</i> </dt>
-<dd>If no reference map used, this can be used to enforce
-a more reasonable axis descriptor (RA/DEC/VEL) for astronomical data packages
-which  cannot handle theory data too well (e.g. miriad, karma etc.). We also
-add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
- for a
-smart scaling placing the object at a computed distance. [Default: <b>f</b>]. </dd>
+<dt><b>radecvel=t|f</b> </dt>
+<dd>If no reference map used, this keyword can be used
+to enforce a more reasonable axis descriptor (RA/DEC/VEL) for astronomical
+data packages which  cannot handle theory data too well (e.g. miriad, karma
+etc.). We also add CUNITn and BUNIT (albeit in JY/PIXEL). See also <a href='ccdsky.1.html'><i>ccdsky(1NEMO)</i></a>
 
-<dt><i>dummy=t|f</i>
+for a smart scaling placing the object at a computed distance. [Default:
+<b>f</b>]. </dd>
+
+<dt><b>dummy=t|f</b> </dt>
+<dd>Write dummy (NAXISn=1) axes too?  If not, axes with length
+1 are written last. Default: t </dd>
+
+<dt><b>nfill=0</b> </dt>
+<dd>Number of dummy comment lines to
+add to a fits header to test I/O routines. Default: 0 </dd>
+
+<dt><b>ndim=</b> </dt>
+<dd>This is a hack.
+If used, this will be the value of NAXIS written to the FITS file. Only
+useful of <b>dummy=f</b> and your FITS reader still cannot handle  dummy trailing
+axes. For <b>ndim=4</b> the axis will be labeled as <i>STOKES</i>, which is useful for
+packages such as CASA. Default: not used. </dd>
+
+<dt><b>select=1</b> </dt>
+<dd>Select this image (1 being
+the first) to grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
+
+<dt><b>fitshead=</b>
 </dt>
-<dd>Write dummy (NAXISn=1) axes too?  If not, axes with length 1 are written
-last. Default: t </dd>
-
-<dt><i>nfill=0</i> </dt>
-<dd>Number of dummy comment lines to add to a fits
-header to test I/O routines. Default: 0 </dd>
-
-<dt><i>ndim=</i> </dt>
-<dd>This is a hack. If used, this
-will be the value of NAXIS written to the FITS file. Only useful of <b>dummy=f</b>
-and your FITS reader still cannot handle  dummy trailing axes. For <b>ndim=4</b>
-the axis will be labeled as <i>STOKES</i>, which is useful for packages such as
-CASA. Default: not used. </dd>
-
-<dt><i>select=1</i> </dt>
-<dd>Select this image (1 being the first) to
-grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
+<dd>If used, the header of this fitsfile will be used instead of the one from
+the converted input image. Default; not used. 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To convert an
-image to unsigned 16 bit integers use the following math: <br>
+<h2><a name='sect4' href='#toc4'>Restfreq</a></h2>
+Common popular rest
+frequencies in astronomy are: <br>
+<pre>       1.420405751786  GHz      HI
+     115.271204        GHz      CO(1-0)
+     230.538           GHz      CO(2-1)
+    1900.5369          GHz      [CII] 2P3/2-2P1/2
+     656.4614          nm       H-alpha
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+To convert an image to unsigned 16 bit integers use the following
+math: <br>
 <pre>        a = "(a &lt; 0 ? a+65536 : a)" 
 </pre>or using <i>ccdmath</i>: <br>
 <pre>        ccdmath in=map1 out=map2 fie="iflt(%1,0,%1+65536,%1)"
@@ -135,13 +166,14 @@ is never needed. You can see <a href='scanfits.1.html'><i>scanfits(1NEMO)</i></a
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;scanfits in=cube.fits out=cube.fitshdr select=header
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits ... refmap=cube.fitshdr ...
 </pre>
-<h2><a name='sect5' href='#toc5'>Fits Tapes</a></h2>
-For historic amusement: <p>
-In the old days (somewhere before the
-90s) there were actually software systems that could only directly read
-FITS files from tape, not from disk. The disk-fits file must be written to
-tape in &rsquo;raw&rsquo; format with a block length of 2880 bytes, which can be done
-with <a href='dd.1.html'><i>dd(1)</i></a>
+<p> 
+<h2><a name='sect6' href='#toc6'>Fits Tapes</a></h2>
+For historic amusement, but completely irrelevant for the 21st
+Century: <p>
+In the old days (somewhere before the 90s) there were actually
+software systems that could only directly read FITS files from tape, not
+from disk. The disk-fits file must be written to tape in &rsquo;raw&rsquo; format with
+a block length of 2880 bytes, which can be done with <a href='dd.1.html'><i>dd(1)</i></a>
  : <p>
 <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;% dd if=fits.dat of=/dev/rmt0 obs=2880
@@ -179,24 +211,31 @@ the following command procedure on VMS (Bob Hanisch, ST ScI): <br>
  $ purge &rsquo;P1&rsquo;
  $!
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='ccdfitsio.1.html'>ccdfitsio(1NEMO)</a>
+, <a href='scanfits.1.html'>scanfits(1NEMO)</a>
 , <a href='snapccd.1.html'>snapccd(1NEMO)</a>
-, <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
 ,
-<a href='iofits.1.html'>iofits(1NEMO)</a>
+<a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
+, <a href='iofits.1.html'>iofits(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
 , <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='dd.1.html'>dd(1)</a>
  
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter
+
+<p>Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>~/src/pjt/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdfits.c ccdfits.1
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>29-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created, calling WERONG fortran subroutines<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-jun-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: new filestruct, renamed wfits to ccdfits   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -209,6 +248,8 @@ apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 refer
 4-jan-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.2 docomented the recent changes to crval/cdelt/crpix=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-jun-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.4 added select= to grab not the first image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-dec-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.3 added fitshead=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+22-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.3d:  object inherited from Image<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -218,12 +259,13 @@ apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 refer
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Fits Tapes</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Restfreq</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Fits Tapes</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

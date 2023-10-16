@@ -39,7 +39,7 @@ int near_edge(int, int, int, int, int, int, int, int);
 #define MAXP 100000
 #endif
 
-nemo_main()
+void nemo_main(void)
 {
     int     i, j, k, j1, l, ix,iy,iz,nx, ny, nz, nxpos, nypos, nzpos;
     real    xr[MAXP], yr[MAXP], zr[MAXP], offset, dx, dy, dz;
@@ -185,7 +185,7 @@ nemo_main()
     strclose(instr);
 }
 
-ini_array(
+int ini_array(
 	  string key,             /* keyword */
 	  real *dat,              /* array */
 	  int ndat,               /* length of array */

@@ -40,8 +40,8 @@ e 'string usage="TEMPLATE program usage -- fill in yourself";' >> $name
 e '' >> $name
 #    break the CVS ID string in two pieces to fool cvs 
 #    'string cvsid="$Id$";' >> $name
-e -n 'string cvsid="$Id' >> $name
-e    ':$";'              >> $name
+# e -n 'string cvsid="$Id' >> $name
+# e    ':$";'              >> $name
 e '' >> $name
 e 'void nemo_main()'		>> $name
 e '{'				>> $name

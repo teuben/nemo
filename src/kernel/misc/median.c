@@ -7,19 +7,70 @@
  *	20-jun-01	gcc3
  *       6-aug-2012     added median_torben
  *      15-jun-2013     added median_torben_info
+ *      20-oct-2022     warning for small N Q1,Q3
  */
 
 #include <stdinc.h>
+#include <limits.h>
 
-static int *ix=NULL;
+// variables needed for the pmedian* functions that used a pointer array
 static int nix=0;
+static int *ix=NULL;
 
 static int last_n = 0;
 static real *last_x = NULL;
 
-extern     void sortptr(real *x, int *ix, int n);
+extern void sortptr(real *x, int *ix, int n);
 
-real median(int n, real *x)
+// sorted array versions 
+
+real smedian(int n, real *x)
+{
+    if (n <= 0) error("median: n=%d",n);
+    if (x == 0) error("median: x=NULL");
+
+    if (n % 2)
+        return x[(n-1)/2];
+    else
+        return  0.5*(x[n/2] + x[n/2-1]);
+}
+
+real smedian_q1(int n, real *x)
+{
+  int n1;
+  if (n>4) {
+    n1=(n+1)/4;
+    return x[n1];
+  } else {
+    warning("smedian_q1: too few points");
+    n1=(n+1)/4;
+    return x[n1];
+    //return INT_MIN;
+  }
+    
+
+}
+
+real smedian_q3(int n, real *x)
+{
+  int n3;
+  if (n>4) {
+    n3=((n+1)*3)/4;
+    return x[n3];
+  } else {
+    warning("smedian_q3: too few points");
+    n3=((n+1)*3)/4;
+    if (n3>=n) n3=n-1;
+    return x[n3];
+    //return INT_MIN;
+  }
+}
+
+
+// pointer array versions
+
+
+real pmedian(int n, real *x)
 {
     if (n <= 0) error("median: n=%d",n);
     if (x == 0) error("median: x=NULL");
@@ -48,7 +99,7 @@ real median(int n, real *x)
    this code will thus not run in MP mode
 */
 
-real median_q1(int n, real *x)
+real pmedian_q1(int n, real *x)
 {
   int n1;
   if (last_n==0) error("No previous median()");
@@ -56,11 +107,14 @@ real median_q1(int n, real *x)
   if (n>4) {
     n1=(n+1)/4;
     return(x[ix[n1]]);
-  } else
+  } else {
     error("median_q1: too few points");
+    return INT_MIN;
+  }
 
 }
-real median_q3(int n, real *x)
+
+real pmedian_q3(int n, real *x)
 {
   int n3;
   if (last_n==0) error("No previous median()");
@@ -68,12 +122,15 @@ real median_q3(int n, real *x)
   if (n>4) {
     n3=((n+1)*3)/4;
     return(x[ix[n3]]);
-  } else
+  } else {
     error("median_q1: too few points");
+    return INT_MIN;
+  }
 
 }
 
 
+// future ?
  
 void init_median(int size)
 {
@@ -188,6 +245,6 @@ real median_wirth(int n, real  *x)
     return kth_smallest(n, x,   n/2);      /* odd, picks the middle */
   else
     return kth_smallest(n, x,   n/2 - 1);  /* even, a slight cheat */
-  /* never reached */
+  /* NEVER REACHED */
   return x[0];
 }
