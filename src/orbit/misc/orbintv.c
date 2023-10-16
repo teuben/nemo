@@ -5,6 +5,7 @@
  *      15-may-2011    Cloned off orbint               Peter Teuben
  *      11-jun-2016    fixed *** stack smashing detected ***
  *
+ * @todo   implement ORBIT_PHI
  */
 
 #include <stdinc.h>
@@ -239,6 +240,13 @@ void solout8(long nr, double xold, double x, double *y, unsigned n, int *irtrn)
     Torb(o_out,isave) = x;
     Xorb(o_out,isave) = y[0]; Yorb(o_out,isave) = y[1];  Zorb(o_out,isave) = y[2];
     Uorb(o_out,isave) = y[3]; Vorb(o_out,isave) = y[4];  Worb(o_out,isave) = y[5];
+#ifdef ORBIT_PHI
+    // steal y[6], 7,8,9, for phi/acc ?
+    // Porb(o_out,isave) =
+    // AXorb(o_out,isave) = 
+    // AYorb(o_out,isave) = 
+    // AZorb(o_out,isave) = 
+#endif      
     (void) print_diag(x, y);
   } else  {
     while (x >= xout) {
