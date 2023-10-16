@@ -43,7 +43,6 @@ set sys_lib = "-lgfortran -lpng16 -L/usr/X11R6/lib64 -L/usr/lib64 -lX11"
 echo "###     Working on SRC/progs"
 
 set ok=0
-
 foreach l (/usr/lib/libpgplot.a $NEMOLIB/libpgplot.a)
   if (-e $l) then
     echo Found PGPLOT in $l
