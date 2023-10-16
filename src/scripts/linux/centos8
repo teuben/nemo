@@ -25,6 +25,7 @@ hdf-devel
 # 2. rpm -Uvh rpmfusion-nonfree-release*rpm
 # 3. dnf install pgplot
 # Or google for "centos 8 pgplot" and download the RPM's
+# NOTE:   this pgplot does not have the PNG device driver.
 
 
 # Dec 2020:     how to upgrade to Centos 8 stream
