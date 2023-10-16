@@ -2,6 +2,7 @@
  * SNAPPLOT3.C: plot particle positions from a snapshot output file;
  *              in a 3 panel plot ("the Jerry Sellwood look")
  *      V0.1  2-nov-05  Created, cloned off snapplot
+ *      V0.3  16-dec-2019   trying a vx,vy look
  */
 
 #include <stdinc.h>
@@ -31,9 +32,17 @@ string defv[] = {
     "ylabel=\n			  y-axis label; defaults to yvar",
     "yrange=-2.0:2.0\n		  y-axis variable range",
 
-    "zvar=z\n			  y-axis plotting variable",
-    "zlabel=\n			  y-axis label; defaults to yvar",
-    "zrange=-2.0:2.0\n		  y-axis variable range",
+    "zvar=z\n			  z-axis plotting variable",
+    "zlabel=\n			  z-axis label; defaults to yvar",
+    "zrange=-2.0:2.0\n		  z-axis variable range",
+
+    "vxvar=z\n			  vx-axis plotting variable",
+    "vxlabel=\n			  vx-axis label; defaults to yvar",
+    "vxrange=-2.0:2.0\n		  vx-axis variable range",
+
+    "vyvar=z\n			  vy-axis plotting variable",
+    "vylabel=\n			  vy-axis label; defaults to yvar",
+    "vyrange=-2.0:2.0\n		  vy-axis variable range",
 
     "visib=1\n			  determine visibility of points",
     "psize=0\n			  point type and size",
@@ -48,17 +57,21 @@ string defv[] = {
     "nxticks=7\n		  number of ticks on x axis",
     "nyticks=7\n		  number of ticks on y axis",
     "nzticks=7\n		  number of ticks on y axis",
+    "nvxticks=7\n		  number of ticks on y axis",
+    "nvyticks=7\n		  number of ticks on y axis",
 
     "xticks=\n                    x-tickmark positions, if not default",
     "yticks=\n		          y-",
     "zticks=\n		          z-",
+    "vxticks=\n		          z-",
+    "vyticks=\n		          z-",
 
 #ifdef COLOR
     "color=0\n			  determine color of points",
     "color_table=\n		  specify new color table to use",
     "crange=0:1\n                 range in colors to map",
 #endif
-    "VERSION=0.2\n		  2-nov-05 PJT",
+    "VERSION=0.3\n		  16-dec-2019 PJT",
     NULL,
 };
 
@@ -74,9 +87,9 @@ string cvsid="$Id$";
 local bool trakflag;			/* if TRUE, plot trajectories */
 local string input, times;
 local stream instr;
-local string xvar, yvar, zvar;
-local btrproc xfunc, yfunc, zfunc;
-local string xlabel, ylabel, zlabel;
+local string xvar, yvar, zvar, vxvar, vyvar;
+local btrproc xfunc, yfunc, zfunc, vxfunc, vyfunc;
+local string xlabel, ylabel, zlabel, vxlabel, vylabel;
 local string visib, psize, color;
 local btiproc vfunc;
 local btrproc pfunc, cfunc;
@@ -84,9 +97,9 @@ local bool fillcircle;
 local bool formal;
 local bool nobox;
 local real xbox[3], ybox[3], zbox[3];
-local real xrange[3], yrange[3], zrange[3], crange[3];
-local int nxticks, nyticks, nzticks;
-local real xticks[MAXTICKS], yticks[MAXTICKS], zticks[MAXTICKS];
+local real xrange[3], yrange[3], zrange[3], crange[3], vxrange[3], vyrange[3];
+local int nxticks, nyticks, nzticks, nvxticks, nvyticks;
+local real xticks[MAXTICKS], yticks[MAXTICKS], zticks[MAXTICKS], vxticks[MAXTICKS], vyticks[MAXTICKS];
 
 /*
  * Data read from input file.
@@ -172,7 +185,21 @@ setparams()
     else
 	zlabel = zvar;
     setrange(zrange, getparam("zrange"));
- 
+
+    vxvar = getparam("vxvar");
+    if (hasvalue("vxlabel"))
+        vxlabel = getparam("vxlabel");
+    else
+	vxlabel = vxvar;
+    setrange(vxrange, getparam("vxrange"));
+
+    vyvar = getparam("vyvar");
+    if (hasvalue("vylabel"))
+        vylabel = getparam("vylabel");
+    else
+	vylabel = vyvar;
+    setrange(vyrange, getparam("vyrange"));
+    
     visib = getparam("visib");
     psize = getparam("psize");
     fillcircle = getbparam("fill_circle");
@@ -202,7 +229,24 @@ setparams()
       zticks[0] = zrange[0];
       zticks[1] = zrange[1];
       nzticks = - getiparam("nzticks");
+    }
+
+    if (hasvalue("vxticks"))
+      setticks(vxticks, &nvxticks, getparam("vxticks"));
+    else {
+      vxticks[0] = vxrange[0];
+      vxticks[1] = vxrange[1];
+      nvxticks = - getiparam("nvxticks");
     } 
+
+    if (hasvalue("vyticks"))
+      setticks(vyticks, &nvyticks, getparam("vyticks"));
+    else {
+      vyticks[0] = vyrange[0];
+      vyticks[1] = vyrange[1];
+      nvyticks = - getiparam("nvyticks");
+    } 
+    
     
 #ifdef COLOR
     color = getparam("color");
@@ -245,6 +289,8 @@ compfuncs()
     xfunc = btrtrans(xvar);
     yfunc = btrtrans(yvar);
     zfunc = btrtrans(zvar);
+    vxfunc = btrtrans(vxvar);    
+    vyfunc = btrtrans(vyvar);    
 
     vfunc = btitrans(visib);
     pfunc = btrtrans(psize);
@@ -433,7 +479,7 @@ plotsnap()
 {
     real t, *mp, *psp, *pp, *ap, *acp;
     int vismax, visnow, i, vis, icol;
-    real psz, col, x, y, z;
+    real psz, col, x, y, z, vx, vy;
     real x1,x2,x3,y1,y2,y3;
     bool v1,v2,v3;
     Body b;
@@ -469,15 +515,19 @@ plotsnap()
 	        x = (*xfunc)(&b, t, i);	        /*     evaluate x,y,z coords*/
 		y = (*yfunc)(&b, t, i);
 		z = (*zfunc)(&b, t, i);
+		vx= (*vxfunc)(&b, t, i);
+		vy= (*vyfunc)(&b, t, i);
 
 		x1 = xtrans1(x);
 		y1 = ytrans1(y);
 
-		x2 = xtrans2(z);
+		//x2 = xtrans2(z);
+		x2 = xtrans2(vy);
 		y2 = ytrans2(y);
 
 		x3 = xtrans3(x);
-		y3 = ytrans3(z);
+		//y3 = ytrans3(z);
+		y3 = ytrans3(vx);
 		
 		v1 = (xbox[0] < x1 && x1 < xbox[1] && ybox[0] < y1 && y1 < ybox[1]);
 		v2 = (zbox[0] < x2 && x2 < zbox[1] && ybox[0] < y2 && y2 < ybox[1]);
