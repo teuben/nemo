@@ -60,6 +60,7 @@
  *              10-nov-05       newline option in fts_pgroup,fts_ptable 
  *              11-dec-06       store cvsID in saved string
  *              10-aug-09       int -> size_t in a few more places for big files
+ *               4-dec-2019     trying to support RPFITS with 2560 blocksize (not working yet)
  *
  * Places where this package will call error(), and hence EXIT program:
  *  - invalid BITPIX
@@ -2894,23 +2895,33 @@ local int check_unit(char *key, char *val)
 
 int fts_setiblk(int n)
 {
-  if (n<=0) error("fts_setiblk: Illegal blocking factor %d\n",n);
-  ftsblksiz_i=n * FTSBLKSIZ;	/* new blocksize for input */
-  ftslpb_i=n * FTSLPB;		/* new lines per block for input */
-  dprintf(1,"Input Blocking factor %d set",n);
+  if (n<=0) {
+    warning("fts_setiblk: Illegal blocking factor %d, assuming -blocksize\n",n);
+    ftsblksiz_i = -n;
+    ftslpb_i    = -n / FTSLINSIZ;
+  } else {
+    ftsblksiz_i = n * FTSBLKSIZ;	/* new blocksize for input */
+    ftslpb_i    = n * FTSLPB;		/* new lines per block for input */
+    dprintf(1,"Input Blocking factor %d set",n);
+  }
   return n;
 }
 
 int fts_setoblk(int n)
 {
-  if (n<=0) error("fts_setoblk: Illegal blocking factor %d\n",n);
-  ftsblksiz_o=n * FTSBLKSIZ;	/* new blocksize for output */
-  ftslpb_o=n * FTSLPB;		/* new lines per block for output */
-  dprintf(1,"Output Blocking factor %d set",n);
-  if (ftsblksiz_i != ftsblksiz_o) 
-    warning("Cannot handle different values for blocksize i/o");
-  if (ftsblksiz_i > ftsblksiz_o) 
-    warning("but ok since blocksize(input) > blocksize(output)");
+  if (n<=0) {
+    warning("fts_setoblk: Illegal blocking factor %d, assuming -blocksize\n",n);
+    ftsblksiz_o = -n;
+    ftslpb_o    = -n / FTSLINSIZ;
+  } else {
+    ftsblksiz_o = n * FTSBLKSIZ;	/* new blocksize for output */
+    ftslpb_o    = n * FTSLPB;		/* new lines per block for output */
+    dprintf(1,"Output Blocking factor %d set",n);
+    if (ftsblksiz_i != ftsblksiz_o) 
+      warning("Cannot handle different values for blocksize i/o");
+    if (ftsblksiz_i > ftsblksiz_o) 
+      warning("but ok since blocksize(input) > blocksize(output)");
+  }
   return n;
 }
 
