@@ -37,10 +37,11 @@ set bins=(analys cold compress corrplt dfiter dflook dmp2pcs estfreq gadget2pcs 
        #  libpng-config --libs
        #  x86_64-pc-linux-gnu-pkg-config --libs x11
 echo "###     Working on SRC/progs"
-if (1) then
-  (cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
+if (-e /usr/lib/libpgplot.a) then
+   # sys_lib = -lgfortran -lpng12 -L/usr/X11R6/lib64 -L/usr/lib64 -lX11
+  (cd SRC/progs;  make pgplot_lib=/usr/lib/libpgplot.a sys_lib="-lgfortran -lX11 -lpng"; make clean)
 else
-  (cd SRC/progs;  make pgplot_lib=/usr/lib/libpgplot.a; make clean)
+  (cd SRC/progs;  make pgplot_lib=$NEMOLIB/libpgplot.a; make clean)
 endif
 
 # if you need mpi versions:
