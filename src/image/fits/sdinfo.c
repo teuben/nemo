@@ -41,7 +41,8 @@ string defv[] = {
     "bench=1\n           How many times to run benchmark",
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
     "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
-    "VERSION=0.9g\n      19-apr-2023 PJT",
+    "tab=\n              If given, produce tabular output (datadim=1 or 2 only)",
+    "VERSION=1.1\n       18-oct-2023 PJT",
     NULL,
 };
 
@@ -125,6 +126,8 @@ void average2(int ndata, real *data1, real *data2, real *ave)
 
 /*
  *   perform a baseline subtraction
+ *
+ *   @todo the X coordinate is not w.r.t. some center (or multiple centra for each order polynomial)
  */
 
 
@@ -267,8 +270,9 @@ void nemo_main(void)
     fitsfile *fptr;       /* pointer to the FITS file; defined in fitsio.h */
     int status, fmode, ii, jj, i, j, k, data_col;
     long int nrows;
-    long int nrows0;
-    int ncols, nchan, nfiles, found, row, nhdus;
+    // long int nrows0;
+    int ncols, nfiles, found, row, nhdus;
+    int nchan = -1;
     string fname = getparam("in"), *fnames;
     string *colnames;
     int nsize, ndims, dims[MDMAXDIM];
@@ -362,6 +366,8 @@ void nemo_main(void)
 	}
 	dprintf(1,"%3d:  %-16s %s\n",ii,colname,data_fmt);
       } //for(i)
+      if (data_col < 0) warning("No DATA column found");
+      if (nchan < 0) warning("DATA with no nchan???");      
       real np = nrows * nchan * 4 / 1e6;
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d  nP: %g Mp\n",fname,nrows,ncols,nchan,np);
       int col_tcal  = keyindex(ncols, colnames, "TCAL") + 1;
@@ -372,7 +378,6 @@ void nemo_main(void)
       int col_plnum = keyindex(ncols, colnames, "PLNUM") + 1;
       dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
 	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
-
 
       // get optional columns
       int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
@@ -412,6 +417,17 @@ void nemo_main(void)
       }
       printf("SIG:   %d  = %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
       printf("CAL:   %d  = %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+
+
+      // the 1st coordinate for SDFITS is important
+      int col_crval = keyindex(ncols, colnames, "CRVAL1") + 1;
+      int col_crpix = keyindex(ncols, colnames, "CRPIX1") + 1;
+      int col_cdelt = keyindex(ncols, colnames, "CDELT1") + 1;
+      dprintf(0,"wcs1: %d %d %d \n", col_crval, col_crpix, col_cdelt);
+
+      double *crval_data = get_column_dbl(fptr, "CRVAL1", nrows, ncols, colnames);
+      double *crpix_data = get_column_dbl(fptr, "CRPIX1", nrows, ncols, colnames);
+      double *cdelt_data = get_column_dbl(fptr, "CDELT1", nrows, ncols, colnames);
 
       if (mode >= 0 && mode < 2) continue;            
       dprintf(1,"MODE=2\n");
@@ -476,6 +492,16 @@ void nemo_main(void)
 	  else
 	    dprintf(0,"DATA1 %g %g ... %g (only 1 row)\n",data1[0],data1[1],data1[nchan-1]);
 	  if (blfit >= 0) warning("ONEDIM mode cannot subtract baselines");  // also due to float/real
+	  if (hasvalue("tab")) {
+	    double xval;
+	    stream tstr = stropen(getparam("tab"),"w");	    
+	    for(int i=0; i<nchan; i++) {
+	      xval = (i+1-crpix_data[0])*cdelt_data[0] + crval_data[0];
+	      xval /= 1e9;
+	      fprintf(tstr,"%g %g\n",xval,data1[i]);
+	    }
+	    strclose(tstr);	    
+	  }
 	} else {
 	  // 2dim array, suitable for waterfall plot. Note this could be double precision in NEMO
 	  dprintf(0,"TWODIM DATA2: make Waterfall\n");
@@ -490,6 +516,18 @@ void nemo_main(void)
 	    dprintf(0,"BASELINE %d\n",blfit);
 	    for (ii=0; ii<nrows; ii++)
 	      baseline(nchan, NULL, data2[ii], blfit, coeffs, errors);
+	  }
+	  if (hasvalue("tab")) {
+	    double xval;
+	    stream tstr = stropen(getparam("tab"),"w");
+	    for (j=0; j<nrows; j++) {
+	      for (i=0; i<nchan; i++) {
+		xval = (i+1-crpix_data[j])*cdelt_data[j] + crval_data[j];
+		xval /= 1e9;
+		fprintf(tstr,"%d %g %g\n", j+1, xval, data2[j][i]);
+	      }
+	    }
+	    strclose(tstr);
 	  }
 	}
 

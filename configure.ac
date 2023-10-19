@@ -927,6 +927,7 @@ AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod s
 AC_C_BIGENDIAN
 
 dnl -- tar file caching?
+dnl -- if you have my "wgetc" use:   --with-tar=$HOME/.wget-cache
 
 tar_default="../tar"
 AC_ARG_WITH(tar,

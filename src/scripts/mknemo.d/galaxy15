@@ -51,6 +51,7 @@ foreach l (/usr/lib/libpgplot.a $NEMOLIB/libpgplot.a)
     break
   endif
 end
+
 if ($ok == 0) then
   echo Warning; no libpgplot.a found
 endif

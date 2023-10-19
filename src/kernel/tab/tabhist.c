@@ -113,7 +113,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=8.0b\n		  19-feb-2023 PJT",
+    "VERSION=8.0c\n		  18-oct-2023 PJT",
     NULL
 };
 
@@ -545,9 +545,9 @@ local void histogram(void)
   }
   if (Qac) {
     real flux = 0.0;
-    printf("QAC_STATS: %s %g %g %g %g  %g %g\n",
+    printf("QAC_STATS: %s %g %g %g %g  %g %g  %d\n",
 	   input, mean, sigma, min_moment(&m), max_moment(&m),
-	   flux, sratio_moment(&m));
+	   flux, sratio_moment(&m),n_moment(&m));
     
   }
   

@@ -2,9 +2,13 @@ include $(NEMOLIB)/makedefs
 
 URL1 =  http://github.com/cmaureir/gravidy.git
 URL2 =  http://github.com/chongchonghe/gravidy.git
-URL3 =  http://github.com/teuben/gravidy.git
+URL3 =  -b teuben1 http://github.com/teuben/gravidy.git
 URL4 =  https://gitlab.com/cmaureir/gravidy-view
 URL5 =  http://gitlab.com/cmaureir/gravidy-input.git
+
+URL  = $(URL3)
+
+TIME = /usr/bin/time
 
 .PHONY : help
 ## help:          This Help
@@ -18,10 +22,11 @@ url:
 	@echo "URL3:   $(URL3)"
 	@echo "URL4:   $(URL4)"
 	@echo "URL5:   $(URL5)"
+	@echo "Be aware some may need a specific branch"
 
 ## gravidy:       get the github repo from URL2 for now where we do 2023 development
 gravidy:
-	git clone $(URL2)
+	git clone $(URL)
 
 ## gravidy-input: get sample input files
 gravidy-input:
@@ -91,11 +96,11 @@ run3:   p128
                 csf - run3/OUT3.snap SnapShot
 	bsf run3/OUT3.snap "0.00679654 0.736003 -8.00616 10 91494"
 
-## run3:          rungravidy run
+## run4:          rungravidy run
 run4:	p128
 	rungravidy p128 run4 eta=0.01 deltat=0.1 tcrit=10.0 eps=0.05
 
-## run3:          hackcode1 run
+## run5:          hackcode1 run
 run5:	p128
 	mkdir run5
 	hackcode1 p128 run5/OUT3.snap tstop=10 eps=0.05 freqout=10 freq=100
@@ -108,5 +113,17 @@ cmp34:  run3 run4
 cmp45:  run4 run5
 	snapcmp run4/OUT3.snap run5/OUT3.snap
 
-example1:
-	$(EXE) -i gravidy/input/04-nbody-p1024_m1.in -p -t 1 
+## example1:      quick example from the manual
+example1: gravidy-input
+	$(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 1 
+
+## bench1:        single core performance
+bench1: gravidy-input
+	OMP_NUM_THREADS=1 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+
+## bench2:        multi core performance
+bench2: gravidy-input
+	OMP_NUM_THREADS=1 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=2 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=4 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null
+	OMP_NUM_THREADS=8 $(TIME) $(EXE) -i gravidy-input/04-nbody-p1024_m1.in -p -t 10 > /dev/null

@@ -17,7 +17,6 @@
  *
  * todo:  read one more line, check if file is done!!
  *        if header contains NAXIS, NAXIS1,...., nx=,ny=,nz= is still needed
- *        handle COMMENT and HISTORY "keywords" like keys, not comments
  */
 
 #include <stdinc.h>

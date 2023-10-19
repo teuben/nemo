@@ -1,19 +1,25 @@
 .TH MKTT72 1NEMO "5 December 2002"
-.SH NAME
+
+.SH "NAME"
 mktt72 \- Create a Toomre & Toomre 1972 test disk
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmktt72\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmktt72\fP creates a test disk of particles similar to the one 
 used in Toomre & Toomre's 1972
 paper (1972ApJ...178..623T). Currently each ring is placed in a separate snapshot. Use
-\fIsnapmerge(1NEMO)\fP if they must be in a single snapshot.
+\fIsnapmerge(1NEMO)\fP if they must be in a single snapshot. See EXAMPLES below.
 .PP
 The disk is rotating counter clock wise. Use \fIsnapscale(1NEMO)\fP to flip
 the sign of velocities.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+Another historic program is the Holmberg 1941 light bulb experiment, see
+\fImkh41(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 output file name, each ring in a separate \fIsnapshot(5NEMO)\fP. Use
@@ -30,24 +36,29 @@ interesting effects when grow=t. [1:6:1]
 .TP
 \fBmass=\fP
 Mass of the central particle. This is used to compute the
-forces, and hence the 
+forces.
+Default: 1.0
 .TP
 \fBeps=\fP
 Standard softening length applied between central mass and
-test particles to compute the forces that set the particles
+test particles to compute the forces that set the particles.
+Default: 0.0
 .TP
 \fBcentral=t|f\fP
-Add the central mass point also, as first snapshot? Default: f
+Add the central mass point also, as first snapshot?
+Default: f
 .TP
 \fBgrow=t|f\fP
 Grow the number of particles per ring to keep the line density
-constant? Default: t
+constant?
+Default: t
 .TP
 \fBheadline=\fP
 verbiage for output []    
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Create a single snapshot with 10 rings and 16 in the first ring
-(and about 160 in the outer ring).
+(and scaled to about 160 in the outer ring).
 .nf
 
    % mktt72 - 16 0.1:1:0.1 | snapmerge - snap.out
@@ -62,19 +73,21 @@ A large value of  eps= is used to make sure the first few rings are not pure 1/r
   % snapxyz snap.out - | xyzview -
 
 .fi
-.SH CAVEAT
+.SH "CAVEATS"
 It is near impossible to create the exact same initial conditions (at T=-10) of the TT72 paper.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 mkconfig(1NEMO), mkh41(1NEMO), mkdisk(1NEMO), snapscale(1NEMO), snapstack(1NEMO)
 .PP
 2010ApJ...725..353D - D'Onghia et al. (2010) - \fIQuasi-resonant Theory of Tidal Interactions\fP
 
-.SH ADS
+.SH "ADS"
 @ads 1972ApJ...178..623T
 
-.SH AUTHOR
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 19-Nov-02	V0.1 Created	PJT

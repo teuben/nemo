@@ -1,0 +1,8 @@
+The qt5 updated version of tkrun is called qtrun, written in python.
+We copy this script as "qtrun" into $NEMOBIN during installation.
+
+The original source is on https://github.com/teuben/agui
+
+More info coming.
+
+-- Peter Teuben, October 2023
