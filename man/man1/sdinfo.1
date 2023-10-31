@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "13 May 2023"
+.TH SDINFO 1NEMO "18 October 2023"
 
 .SH "NAME"
 sdinfo \- sdfits (BINTABLE) info and benchmark
@@ -79,6 +79,15 @@ Another benchmark option: allowing all data to appear in one long one dimensiona
 DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array.
 [1]
 
+.TP
+\fBtab=\fP
+If given, this will be the (ascii) table to which either 1dim or 2dim data (see datadim=) is written.
+For 1dim the x,y values printed are assumed Hz converted to GHz and raw intensity. For 2dim the row,x,y are printed,
+where row=1 is the first row. Apologies to non-radio users.
+Default: none.
+
+
+
 .SH "CAVEATS"
 By default NEMO compiles in double precision. The DATA1[nrows*nchan] "ONEDIM" mode will this occupy half the
 memory of a DATA2[nrows][nchan] array. NEMO will need to be compiled in single mode to have them use the same
@@ -139,4 +148,5 @@ Peter Teuben
 18-dec-2019	V0.7 Handle CIMAFITS and MATRIX extensions	PJT
 27-sep-2021	V0.9 Improved column reading, display TDIM	PJT
 15-mar-2023	V1.0 Finalized more benchmarks		PJT
+18-oct-2023	V1.1 add tab=	PJT
 .fi

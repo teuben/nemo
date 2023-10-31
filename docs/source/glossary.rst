@@ -38,7 +38,7 @@ Glossary
       "Flexible Interchange Transport System", a
       standard dataformat used to interchange data between
       machines. Commonly used for images, but has since its inception
-      be modified to store tables as well.
+      be modified to store tables as well. See also :term:`SDFITS`
 
   FWHM
       (Full Width Half Max): the effective resolution of the
@@ -73,7 +73,8 @@ Glossary
       or end with *orb*.
 
   pixel
-      PIXEL/voxel: an area in 2D or 3D representing
+      PIXEL/voxel: an area in 2D or 3D representing selected
+      phase space coordinates.
 
   potential
       Dataformat in NEMO used to represent a
@@ -89,7 +90,11 @@ Glossary
       A small user interface that pops up when a
       program is interrupted. Type ``quit`` to exit it, or ``?``
       for help. This feature of the user interface may not be
-      installed in your version. 
+      installed in your version.
+
+  SDFITS
+      A FITS extension that allows efficient storage of single dish
+      spectra. See also :term:`FITS`
 
   set
       Compound hierarchical data-structure of a
@@ -120,7 +125,10 @@ Glossary
   table
       A table consists of rows and columns of values, numbers or text.
       Most commonly stored in ASCII. Less well defined, it is one of the
-      four data types in NEMO.
+      four data types commonly used in NEMO.
+
+  voxel
+      See pixel
 
   yapp
       "Yet Another Plotting Package", the library
