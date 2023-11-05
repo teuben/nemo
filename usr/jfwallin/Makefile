@@ -22,4 +22,4 @@ install: JSPAM
 
 run1:
 	jspam
-	(rm a.snap; tabtos a.101 a.snap block1=pos,vel)
+	(rm a.snap; tabtos a.101 a.snap block1=pos,vel; snapplot3 a.snap)
