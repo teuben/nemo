@@ -1,0 +1,59 @@
+.TH AGUI 5 "1 November 2023"
+
+.SH "NAME"
+AGUI \- tags, usually embedded as a comment in code, to drive a GUI
+
+.SH "DESCRIPTION"
+Defines GUI tags 
+.PP
+Since derived from an earlier version of \fItkrun(1l)\fP, sometimes
+also referred to a TKRUN V2 format.
+.PP
+The keyword specification is in three parts on a line:
+setting a default keyword value (this will be language specific),
+a commented help, and the special #> comment that specifies
+the GUI elements, e.g. for csh this would look as follows
+for a slider that is allowed to go from 0 to 10 in steps of 0.1, but
+with a default of 1.0
+.nf
+
+    set a=1   # some help on this keyword        #> SCALE  0:10:0.1
+
+.fi
+
+
+.SH "AGUI"
+In version 2 of the old tkrun format we have implemented this via a new python based qt (and pySimpleGui) driver.
+Here the format can be run via bash, csh and python in the
+.nf
+
+    key=val  # help    #> GUI
+
+.fi
+specification, but the client software (bash/csh/python/....) is responsible to properly parse the \fIkey=val\fP
+command line arguments.  Here are the proposed GUI tags with generic key=val/help/agui sections
+
+.nf
+
+   in=foo        # input file      #> IFILE
+   out=bar       # output file     #> OFILE
+   text=hello    # some text       #> ENTRY
+   mode=gauss    # the mode        #> RADIO gauss,newton,leibniz
+   stats=mean    # what to show    #> CHECK sum,mean,sigma,skewness,kurtosis
+   n=3.141592    # the n value     #> SCALE 0:10:0.01
+   k=3.141592    # k, use n        #> LINK  n
+
+.fi
+
+.SH "SEE ALSO"
+wish(1), zenity(1), qtrun(1NEMO)
+
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+1-nov-2023	V1.0 documented from qtrun and pythena	PJT
+.fi

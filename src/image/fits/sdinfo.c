@@ -6,7 +6,7 @@
  * 11-dec-2019   PJT       mdarray reduction example
  * 29-feb-2020   PJT       verbose, raw I/O
  * 28-sep-2021   PJT       better cfitsio usage, report more SDFITS properties
- *    apr-2023   PJT       some mods for the DYSH work
+ *    apr-2023   PJT       some mods/clarifications for the DYSH work
  *
  * Benchmark 6 N2347 files:  2.4"  (this is with mom=0 stats)
  * dims=5 for NGC5291:       31-35ms (depending in 1 or 3 levels)
@@ -456,6 +456,7 @@ void nemo_main(void)
       dprintf(1,"MODE=3\n");
 	
       if (Qraw) ndims = -1;
+      
       if (ndims == 0) {  
 
 	for (k=0; k<ncolcheck; ++k) {
@@ -513,7 +514,7 @@ void nemo_main(void)
 	  else
 	    dprintf(0,"DATA2 %g %g ... %g (only 1 row)\n",data2[0][0], data2[0][1], data2[0][nchan-1]);
 	  if (blfit >= 0) {
-	    dprintf(0,"BASELINE %d\n",blfit);
+	    dprintf(0,"BASELINE %d (full row)\n",blfit);
 	    for (ii=0; ii<nrows; ii++)
 	      baseline(nchan, NULL, data2[ii], blfit, coeffs, errors);
 	  }
@@ -533,7 +534,6 @@ void nemo_main(void)
 
 	if (mode >= 0 && mode < 5) continue;
 	dprintf(1,"MODE=5\n");
-	
 
 	if (mom >= 0) {
 	  dprintf(0,"Stats\n");
@@ -574,8 +574,6 @@ void nemo_main(void)
 		   mean_moment(&m), -1.0,
 		   min_moment(&m), max_moment(&m), n_moment(&m));
 	} // stats
-
-
 	
       } else if (ndims > 0) {     // special processing
 
@@ -696,8 +694,7 @@ void nemo_main(void)
       } // ndims > 0
 	  
       fits_close_file(fptr, &status);            /* close the file */
-      fits_report_error(stderr, status);     /* print out any error messages */
-
+      fits_report_error(stderr, status);         /* print out any error messages */
 	  
     } //for(j) loop over files
 }
