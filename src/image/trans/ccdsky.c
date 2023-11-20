@@ -9,7 +9,7 @@
  *      29-jan-2013     allow distance to be in cosmological 'z'
  *      16-mar-2013     3.0 added Wright's CosmoCalculator math, verbose
  *                      (cosmocalc in ASCL?)
- *      18-nov-2022     add Jy/K factor
+ *      18-nov-2022     add Jy/K factor in three different ways
  *
  */
 
@@ -36,7 +36,7 @@ string defv[] = {
   "scale=1\n        Scale image values",
   "H=71,0.27,0.73\n Hubble Constant, in case [d] is 'z', with optional WM and WV",
   "nsteps=1000\n    Integrations steps in the cosmo code (accuracy)",
-  "VERSION=3.1\n    22-nov-2022 PJT",
+  "VERSION=3.1a\n   22-nov-2022 PJT",
   NULL,
 };
 
@@ -325,7 +325,6 @@ void setCC(int nc, real *cpar)
     WM = cpar[1];
     WV = cpar[2];
   }
-
 }
 
 void CC(real z, int n, int verbose)
@@ -357,7 +356,7 @@ void CC(real z, int n, int verbose)
   DA_Mpc = 0.0;
   DA_Gyr = 0.0;
   kpc_DA = 0.0;
-  DL0 = 0.0;         // luminosity distance
+  DL0 = 0.0;        // luminosity distance
   DL_Mpc = 0.0;
   DL_Gyr = 0.0;     // DL0 in units of billions of light years
   V_Gpc = 0.0;
@@ -458,5 +457,4 @@ void CC(real z, int n, int verbose)
     printf("%1.2f " , (5*log10(DL_Mpc*1e6)-5));
     printf("\n");
   }
-
 }
