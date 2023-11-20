@@ -1,4 +1,4 @@
-.TH IMAGE 5NEMO "27 January 2021"
+.TH IMAGE 5NEMO "18 August 2023"
 
 .SH "NAME"
 image \- binary format for 2D and 3D image/cube "ccd" files
@@ -63,8 +63,8 @@ typedef struct {
     real   xref;         /* reference pixel in X (0 the first) */
     real   yref;         /* reference pixel in Y */
     real   zref;         /* reference pixel in Z */
-    real   map_min; 	/* minimum map value */
-    real   map_max;	/* maximum map value */
+    real   map_min;  	 /* minimum map value */
+    real   map_max;	 /* maximum map value */
     int    beamtype;		/* type of beam used for beam smoothing */
     real   beamx;		/* beamwidth along x (if used) */
     real   beamy;		/* beamwidth along y (if used) */
