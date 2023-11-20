@@ -102,6 +102,9 @@ is a filename controlled with the PPID, which in bash should be something like
    export NEMOVAR=/dev/shm/nemovar_$$.$USER
 
 Writing should be done with an exclusive lock. Reading can be done at will.
+This implies - for the simple file based version - that this system cannot
+be used for pipe, viz.
+
 
 
 
