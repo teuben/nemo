@@ -20,10 +20,17 @@ selected NEMO programs.  It should run in about 30 seconds on a ~2020 computer. 
 table (see below in RESULTS) lists results from some recent computers.
 
 .IP 2.
+The command \fBmake bench5\fP from the $NEMO directory runs a standard benchmark of (currently) 6
+nbody runs, all calibrated to take 5 seconds on a specific machine. the average of those will
+result in a rating (speed) of 1000. Most machines post ~2020 should get a \fInemobench5\fP (SEE BELOW)
+of over 1000.
+
+
+.IP 3.
 Various \fBBenchfile\fP filles scattered through the $NEMO source tree contain benchmarks. There is
 no  wrapper like "make check" has for Testfile's
 
-.IP 3.
+.IP 4.
 Selected man pages have some examples. Over time these should be moved into the Benchfile in
 the source directory where this program is maintained. Some are mentioned below in this man page.
 
