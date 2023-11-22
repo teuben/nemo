@@ -1,4 +1,4 @@
-.TH IMAGE 5NEMO "27 January 2021"
+.TH IMAGE 5NEMO "21 November 2023"
 
 .SH "NAME"
 image \- binary format for 2D and 3D image/cube "ccd" files
@@ -44,6 +44,20 @@ using the FORDEF, i.e. x coordinate running fastest in memory
 There is some experimental code in image.c to compile with -DUSE_IARRAY
 (Iliffe vectors).
 
+.SH "FITS"
+For no good reason NEMO grew names different from FITS, so here's the dictionary between them
+.nf
+     NAXISi     nx,ny,nz
+     CRVALi     xmin,ymin,zmin
+     CDELTi     dx,dy,dz
+     CRPIXi     xref,yref,xref
+     CTYPEi     namex,namey,namez
+     CUNITi     unitx,unity,unitz
+     BUNIT      unit
+     BMAJ       beamx
+     BMIN       beamy
+.fi
+
 .SH "FORMAT"
 .nf
 typedef struct {
@@ -51,28 +65,33 @@ typedef struct {
     real   **matrix;     /* 2D special case: pointers to pointers */
     real   ***cube;      /* 3D special case: ptr to ptr to ptr's  */
     int    axis;         /* axis type (0=old, no ref pixel; 1=with Xref */
-    int    nx;		 /* number of pixels along x-axis */
-    int    ny;		 /* number of pixels along y-axis */
-    int    nz;           /* number of pixels along z-axis */
-    real   xmin;	 /* x-value belonging to reference x-pixel */
-    real   ymin;	 /* y-value belonging to reference y-pixel */
-    real   zmin;	 /* z-value belonging to reference z-pixel */
-    real   dx;		 /* step in x-pixel */
-    real   dy;		 /* step in y_pixel */
-    real   dz;		 /* step in z_pixel */
-    real   xref;         /* reference pixel in X (0 the first) */
-    real   yref;         /* reference pixel in Y */
-    real   zref;         /* reference pixel in Z */
-    real   map_min; 	/* minimum map value */
-    real   map_max;	/* maximum map value */
+
+    int    nx;		 /* number of pixels along x-axis NAXIS1 */
+    int    ny;		 /* number of pixels along y-axis NAXIS2 */
+    int    nz;           /* number of pixels along z-axis NAXIS3 */
+    real   xmin;	 /* x-value belonging to reference x-pixel CRVAL1 */
+    real   ymin;	 /* y-value belonging to reference y-pixel CRVAL2 */
+    real   zmin;	 /* z-value belonging to reference z-pixel CRVAL3 */
+    real   dx;		 /* step in x-pixel CDELT1 */
+    real   dy;		 /* step in y_pixel CDELT2 */
+    real   dz;		 /* step in z_pixel CDELT3 */
+    real   xref;         /* reference pixel in X (0 the first) CRPIX1 */
+    real   yref;         /* reference pixel in Y CRPIX2 */
+    real   zref;         /* reference pixel in Z CRPIX3 */
+    real   map_min; 	 /* minimum map value */
+    real   map_max; 	 /* maximum map value */
+
     int    beamtype;		/* type of beam used for beam smoothing */
     real   beamx;		/* beamwidth along x (if used) */
     real   beamy;		/* beamwidth along y (if used) */
     real   beamz;		/* beamwidth along z (if used) */
-    string namex;		/* pointer to x-axis name string */
-    string namey;		/* pointer to y-axis name string */
-    string namez;		/* pointer to z-axis name string */
-    string unit;
+    string namex;		/* pointer to x-axis name string CTYPE1 */
+    string namey;		/* pointer to y-axis name string CTYPE2 */
+    string namez;		/* pointer to z-axis name string CTYPE3 */
+    string unitx;		/* pointer to x-axis unit string CUNIT1 */
+    string unity;		/* pointer to y-axis unit string CUNIT2 */
+    string unitz;		/* pointer to z-axis unit string CUNIT3 */
+    string unit;                /* BUNIT */
     real   time;
     string storage;		/* pointer to storage fashion string */
 } image, *imageptr;

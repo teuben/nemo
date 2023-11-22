@@ -1,4 +1,4 @@
-.TH GRAVIDY1 1NEMO "16 June 2023"
+.TH GRAVIDY1 1NEMO "6 October 2023"
 
 .SH "NAME"
 gravidy, rungravidy \- direct summation CPU/MPI/GPU hermite N-body integrator with variable block timesteps
@@ -13,7 +13,7 @@ gravidy, rungravidy \- direct summation CPU/MPI/GPU hermite N-body integrator wi
 an MPI, and a GPU (using CUDA) version. Depending on your needs, a single core version using GNU parallel can be a faster
 way to get survey results.
 .PP
-\fIgravidy\fP is not installed by default in NEMO. See INSTALL below. The \fBrungravidy\fP NEMO frontend is
+\fIgravidy\fP is not installed by default in NEMO. See INSTALL below. The \fIrungravidy\fP NEMO frontend is
 available for those who want to work with NEMO's \fIsnapshot(5NEMO)\fP files.
 
 .SH "PARAMETERS"
@@ -102,7 +102,23 @@ The \fBrungravidy\fP frontend would simplify this to
   snapplot p128.d/OUT3.snap
   
 .fi
-with the caveat that \fBrungravidy\fP enforces the use of a run directory. 
+with the caveat that \fBrungravidy\fP enforces the use of a run directory.
+
+.SH "BENCHMARK"
+The \fBbench1\fP runs a single core OpenMP, a Plummer  1024 body integration to T=10.
+\fBbench2\fP runs this same benchmark with 1,2,4 and 8 cores to check the OpenMP performance.
+Note no output files are produced.
+.nf
+   cd $NEMO/usr/gravidy
+   make bench1
+.fi
+and some example timings
+.nf
+.ta +1.5i +1.5i
+k2-bat	21.9	i7-1260P
+lma	35.0?
+jansky	12.0?	i9-12xxxK
+.fi
 
 .SH "INSTALL"
 Example from NEMO/usr/gravidy. See README file for dependencies such as the BOOST library
