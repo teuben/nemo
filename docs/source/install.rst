@@ -9,22 +9,32 @@ Installation
 Installation from github
 ------------------------
 
-Installation is normally done via github. Here is a simple example, just 3 lines in
+Installation is normally done by getting the source code via github.
+Here is an example, just 3 lines in
 your (bash) shell, using a configurable helper script:
 
 .. code-block:: bash
 
    wget https://teuben.github.io/nemo/install_nemo.sh
-or		
+		
+or
+
+.. code-block:: bash
+   
    curl -LO https://teuben.github.io/nemo/install_nemo.sh
 
+after which
+
+.. code-block:: bash
+   
    bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1 python=1
    source  $HOME/opt/nemo/nemo_start.sh
 
 where the arguments to the
 `install_nemo.sh <https://github.com/teuben/nemo/blob/master/docs/install_nemo.sh>`_
 script are optional, but a few are
-given to show some often use non-defaults. See that script for more details.
+given to show some often use non-defaults. See that script for more details,
+or use the `-h` flag
 
 A more manual install, bypassing this script, can be:
 
@@ -39,7 +49,7 @@ A more manual install, bypassing this script, can be:
 
 On a Mac with their new
 `SIP protection <https://macpaw.com/how-to/disable-enable-system-integrity-protection>`_,
-the ``--disable-shared`` flag needs to be added
+the ``--disable-shared`` flag may need to be added
 
 .. code-block:: bash
 
@@ -49,7 +59,8 @@ the ``--disable-shared`` flag needs to be added
    make build check bench5
    source nemo_start.sh
 
-Disabling SIP is not recommended, so we've been told.		
+Disabling SIP is not recommended, so we've been told.	On a Mac you will also need to have
+Xcode installed, and gfortran (e.g. via brew). We need a special section on this
 
 
 Rebuilding
@@ -64,7 +75,7 @@ If you have an existing installation, but many things have change, this is proba
    make rebuild
 
 this will also preserve the possibly peculiar options for configure that you passed the first time it was installed.
-Or more importantly, if you had edited the $NEMOLIB/makedefs file.
+Or more importantly, if you had edited the ``$NEMOLIB/makedefs`` file.
 
 Advanced Installation
 ---------------------
