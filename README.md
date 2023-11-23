@@ -122,6 +122,14 @@ and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
+
+```mermaid
+   graph LR;
+   A[mkorbit]-->B[orbint]
+   B-->C[orbplot]
+```
+
+
 ## Documentation and Help
 
 There are several additional entry points if you are starting out with NEMO:
