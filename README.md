@@ -128,8 +128,7 @@ for something completely different.
    A[mkorbit]-->B[orbint]
    B-->C[orbplot]
 
-   graph LR:
-   A[tabgen]-->B[tabplot]   
+   D[tabgen]-->E[tabplot]   
 ```
 
 
