@@ -116,20 +116,26 @@ use of Unix pipes, with a dash denoting the piped file:
          ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
          mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
 
+or graphically
+
+```mermaid
+   graph LR;
+   A[tabgen]-->B[tabplot]
+
+   C[mkplummer]-->D[snapplot]
+
+   E[ccdgen]-->F[ccdplot]
+   
+   G[mkorbit]-->H[orbint]
+   H-->I[orbplot]
+```
+
 There are more examples of scripts and figures in
 https://teuben.github.io/nemo/examples/ 
 and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
 
-
-```mermaid
-   graph LR;
-   A[mkorbit]-->B[orbint]
-   B-->C[orbplot]
-
-   D[tabgen]-->E[tabplot]   
-```
 
 
 ## Documentation and Help
