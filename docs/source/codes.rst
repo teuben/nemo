@@ -1,7 +1,7 @@
 .. _codes:
 
-Related Codes (*)
-=================
+Related Codes
+=============
 
 Here we summarize some codes used in stellar dynamics that are similar to NEMO.
 We only list codes that are (publically) available. SPH/hydro codes are currently

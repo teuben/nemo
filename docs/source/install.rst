@@ -23,11 +23,11 @@ or
    
    curl -LO https://teuben.github.io/nemo/install_nemo.sh
 
-after which
+after which installation can be done with something like
 
 .. code-block:: bash
    
-   bash install_nemo.sh  nemo=$HOME/opt/nemo yapp=pgplot bench5=1 python=1
+   bash install_nemo.sh nemo=$HOME/opt/nemo yapp=pgplot bench5=1 python=1
    source  $HOME/opt/nemo/nemo_start.sh
 
 where the arguments to the
@@ -47,9 +47,9 @@ A more manual install, bypassing this script, can be:
    source nemo_start.sh
 
 
-On a Mac with their new
+On a Mac with 
 `SIP protection <https://macpaw.com/how-to/disable-enable-system-integrity-protection>`_,
-the ``--disable-shared`` flag may need to be added
+enabled, the ``--disable-shared`` flag may need to be added.
 
 .. code-block:: bash
 
@@ -136,8 +136,7 @@ With so many useful python packages around, and so many different methods
 (anaconda, conda, venv etc.), we will not recommend a method, as this will
 likely depend on your own situation. The installation examples below
 should give you enough information how to adapt it for your python
-installation.  It goes without saying (it 2021 here) we only support
-python3.
+installation.  
 
 However, if you install python from within NEMO, there will be a
 ``$NEMO/anaconda3`` directory, that gets automatically activated once

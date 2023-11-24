@@ -1,7 +1,7 @@
 .. _iface:
 
-User Interface (*)
-==================
+User Interface
+==============
 
 .. note::
    The NEMO command line user interface is a series of *keyword=value* pairs, where
@@ -333,14 +333,17 @@ of investment the programmability of higher level scripts can give you
 a very powerful programming environment.
 
 
-tkrun
-~~~~~
+tkrun, qtrun
+~~~~~~~~~~~~
 
 The ``tkrun`` program can take directives strategically placed in the
 comment fields of a shell script, and provide a dynamical GUI frontend to
 the command line parameters. Since the GUI is built up automatically,
 the number of keyword should be limited to a dozen or so, as vertical
 space is limited in most desktop managers.
+
+The ``qtrun`` program is an updated version using python and the Qt library.
+
 
 Interrupt to the REVIEW section 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -615,7 +618,7 @@ yapp_pgplot
 ~~~~~~~~~~~
 
 The YAPP interface to the common PGPLOT library is the most used
-interface, and allow one to select from a variety of graphics output
+interface, and allows one to select from a variety of graphics output
 devices without having to recompile the program.
 
 A graphics device in PGPLOT

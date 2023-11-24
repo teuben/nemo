@@ -3,9 +3,9 @@
 References
 ==========
 
-Here are some references.
 We also keep a list of
-`codes with papers in NEMO <https://teuben.github.io/nemo/man_html/bibcode.html>`_.
+`codes with papers  <https://teuben.github.io/nemo/man_html/bibcode.html>`_
+in NEMO. These are maintained based on ``@ads`` tags in the manual pages.
 
 
 *A Hierarchical O(N log N) Force-Calculation* -

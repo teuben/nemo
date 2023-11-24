@@ -21,13 +21,11 @@ distribution. If installed within NEMO, this should be in
 $NEMO/local/starlab/EXAMPLES.
 
 
-For details on a specific tool, type
+For details on a specific program, type
 
 .. code-block::
 
-        tool-name --help
-
-   
+        program --help
 
 
 - Create a linked list of 100 equal-mass nodes of unit total mass
