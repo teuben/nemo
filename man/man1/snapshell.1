@@ -1,4 +1,4 @@
-.TH SNAPSHELL 1NEMO "25 September 2023"
+.TH SNAPSHELL 1NEMO "27 November 2023"
 
 .SH "NAME"
 snapshell \- compute statistics of bodyvariables in a set of "radial" shells
@@ -74,7 +74,7 @@ use of this keyword has to be taken with care.
 Central axis of the cone around which particles will be selected [0,0,1].
 .TP
 \fBangle=\fP\fIalpha\fP
-Opening angle of the cone to select particles from (-1 means no cone used).
+Opening angle of the cone to select particles from (-1 means no cone used, or angle > 360).
 [-1]
 .TP
 \fBstats=\fP\fIprint_stats\fP
@@ -162,5 +162,6 @@ Peter Teuben
 13-nov-01	V1.0 created	PJT
 14-nov-05	V2.0 some re-write: svar= is now rvar= 	PJT
 15-nov-05	V2.1 added mvar= and cumulative=	PJT
-14-nov-22	V3.0 added cone= and angle=	PJT
+14-nov-2023	V3.0 added cone= and angle=	PJT
+27-nov-2023	V3.1 fix angle to be full opening angle of the cone 	PJT
 .fi
