@@ -41,7 +41,7 @@ string defv[] = {
     "cumulative=f\n              Use mvar= as cumulative in radii=",
     "first=t\n                   Process only first snapshot?",
     "rstat=f\n                   Add stats in 'r' also ?",
-    "VERSION=3.0\n		 14-nov-2022 PJT",
+    "VERSION=3.1\n		 27-nov-2023 PJT",
     NULL,
 };
 
@@ -129,8 +129,8 @@ void nemo_main()
       Qaxes = FALSE;
     ndim = nemoinpd(getparam("cone"),cone,3);
     if (ndim != NDIM) error("Not enough values for cone=");
-    angle = getrparam("angle");
-    Qcone = (angle > 0.0 && angle < 360.0);
+    angle = 0.5 * getrparam("angle");
+    Qcone = (angle > 0.0 && angle < 180.0);
     cosang = cos(angle*PI/180.0);
     if (Qcone) {
       SDIVVS(cone, absv(cone));   /* make sure cone has length 1 */
@@ -346,7 +346,7 @@ void shells()
     if (irad >= nrad) break;
   } /* for (i=0, irad=0; ; i < nbody */
   if (nviol)
-    warning("There were %d/%d particles in the snapshot out of sort order",
+    warning("There were %d/%d particles in the snapshot out of sort order, use snapsort?",
 	    nviol,nbody);
   if (Qcumul) {
     free(cmass);
