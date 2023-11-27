@@ -1,7 +1,7 @@
 #! /usr/bin/env  bash
 #
 
-# usage:   progress table column max
+# usage:   progress_bar.sh progress table column-number max-value
 #
 #  progress=0     none
 #           1     zenity
