@@ -43,10 +43,11 @@ write permission in the ``$NEMO`` directory tree:
 
    mknemo -u tsf
    mknemo -h
-   man mknemo		
-
-and an updated version should now be available (check the value of the ``VERSION=``
-value in the output of ``--help``).
+   man mknemo
+   tsf --help
+		
+and an updated version should now be available. Check the value of the ``VERSION=``
+value in the output of ``--help`` of the recompiled program.
 
 Writing NEMO program programs is covered in :ref:`progr`, or see
 also :ref:`install`.

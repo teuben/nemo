@@ -163,14 +163,14 @@ As an example consider:
 .. code-block::
 
     12% snapplot in=r001.dat xvar=r yvar="x*vy-y*vx" xrange=0:10 yrange=-2:2 \
-                 "visib=-0.2<z&&z<0.2&&i%2==0"
+                 "visib=-0.2<z&z<0.2&i%2==0"
 
     
-plots the angular momentum of the particles along the z axis,
+plots the angular momentum of the particles along the :math:`z` axis,
 :math:`J_z = x.v_y - y.v_x` ,
 against their radius, :math:`r`, but only for the even numbered particles,
 (``i%2==0``) within
-a distance of ``0.2`` of the X-Y plane (:math:`-0.2<z && z<0.2`).
+a distance of ``0.2`` of the X-Y plane (:math:`-0.2<z \& z<0.2`).
 Again note that some of the expressions are within quotes, to prevent
 the shell of giving them a special meaning. 
 
@@ -180,8 +180,8 @@ dynamically loaded into the program for
 execution.
 The expressions must contain legal C expressions and depending
 on their nature must return a value in the context of the
-program. {\it E.g.} {\tt xvar} and {\tt yvar} must return a 
-real value, whereas {\tt visib} must return a boolean (false/true or
+program. {\it E.g.} ``xvar`` and ``yvar`` must return a 
+real value, whereas ``visib`` must return a boolean (false/true or
 0/non-0) value. This should be explained in the manual page of the
 corresponding programs.
 
@@ -189,14 +189,14 @@ In the context of snapshots, the expression can contain
 basic body variables which
 are understood to the *bodytrans(3NEMO)* routine.
 The real
-variables {\tt x, y, z, vx, vy, vz} are the cartesian phase-space
-coordinates, {\tt t} the time,
-{\tt m} the mass, {\tt phi} the potential,
-{\tt ax,ay,az} the cartesian acceleration and {\tt aux} 
+variables ``x, y, z, vx, vy, vz`` are the cartesian phase-space
+coordinates, ``t`` the time,
+``m`` the mass, ``phi`` the potential,
+``ax,ay,az`` the cartesian acceleration and ``aux``
 some auxiliary information.
 The integer variables are
-{\tt i}, the index of the particle in the snapshot (0 being the
-first one in the usual C tradition) and {\tt key}, another
+``i``, the index of the particle in the snapshot (0 being the
+first one in the usual C tradition) and ``key``, another
 spare slot.
 
 
@@ -210,7 +210,7 @@ body variables listed above can be used in an expression.
 When you need a complex expression that has be used over and
 over again, it is handy to be able to store these expression under
 an alias for later retrieval. 
-With the program {\tt bodytrans}
+With the program ``bodytrans``
 it is possible to save such compiled expressions object files under
 a new name. 
 
@@ -488,12 +488,6 @@ code snippet:
 
     A% mkplummer - 1000 | tcppipe
     B% tcppipe A | tsf -
-
-
-Images
-------
-
-.. todo:: examples/Images
 
 
 Tables

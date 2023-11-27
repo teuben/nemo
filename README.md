@@ -116,11 +116,33 @@ use of Unix pipes, with a dash denoting the piped file:
          ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
          mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
 
+or graphically
+
+```mermaid
+   graph LR;
+   A[tabgen]-->B[tabplot]
+
+   C[mkplummer]-->D[snapplot]
+
+   E[ccdgen]-->F[ccdplot]
+   
+   G[mkorbit]-->H[orbint]
+   H-->I[orbplot]
+```
+
 There are more examples of scripts and figures in
 https://teuben.github.io/nemo/examples/ 
 and an example ipython notebook is shown here
 https://github.com/teuben/nemo/blob/master/nemo_start_example.ipynb
 for something completely different.
+
+A reproducable example is given in this notebook. To run this from the command line
+and print the phase space coordinates of the first particle, use this:
+
+      mkplummer - 10 seed=123| snapprint -  | head -1
+      ### nemo Debug Info: x y z vx vy vz 
+      -0.609486 -0.221687 -0.450963 -0.0766784 -0.209397 0.396561 
+
 
 ## Documentation and Help
 
