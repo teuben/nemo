@@ -13,10 +13,16 @@ col=$3
 max=$4
 
 
-echo "progress.sh: $pro $tab $col $max"
-if [ $pro = 0 ]; then
+if [ $# -ne 4 ]; then
+    echo "$0: need 4 arguments, got $#:"
+    echo "pro:    progress mode (0=none, 1=zenity 2=qt5)"
+    echo "tab:    ascii table file"
+    echo "col:    column to use to measure progress"
+    echo "max:    max value in this column which is 100%"
     exit 0
 fi
+
+echo "$0: $pro $tab $col $max"
 
 #  some programs take some startup time to create the progress file
 for i in $(seq 5); do
