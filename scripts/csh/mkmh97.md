@@ -431,6 +431,15 @@ of the values in that region.   For a given pixel size **p** in arcsec (which ds
       0.001759025    0.704
       0.0025	
 
+## Theory
+
+Ignoring mass loss etc. the critical velocity as function of mass (0,1) of the
+intrudor should be:
+
+     nemoinp 0.01:1:0.01 | tabmath - - "sqrt((1+1/%1)*(1+%1**1.5)/2)" > criticalv.tab
+
+but this shows a very unexpected trend.
+
 ## Versions
 
 In an earlier version (Sep-2022 and before) we didn't use the MH defaults yet. The following snippet
@@ -445,3 +454,4 @@ For this seed the relevant output parameters are:
 
      m16=0.17137
      etot=0.000908545
+
