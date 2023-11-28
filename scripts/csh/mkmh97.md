@@ -127,7 +127,7 @@ the value of **tstop**, which can be any of the dump-times that the simulation w
 run with, so it does not need to be the initial **tstop** with which the simulation
 was run.
 
-The default run=run0 with m=1  nbody=2048 tstop=50 will take about 30 seconds to run,
+The default run=run0 (with m=1 nbody=2048 tstop=50) will take around 30 seconds to run,
 with the gyrfalcON code (code=1). With hackcode1 (code=0) it will be about 60 seconds
 (on a 2020 style i7-1185G7, or where NEMOBENCH5 measured around 1000).
 
@@ -429,7 +429,30 @@ of the values in that region.   For a given pixel size **p** in arcsec (which ds
       0.00021045     0.084
       0.00050480001  0.201
       0.001759025    0.704
-      0.0025	
+      0.0025
+
+## Deflection Angle
+
+Instead of using **rp=** one can also use the deflection angle to parametrize the interaction.
+For a pointmass approximation this is fine, but for softened models like a Plummer sphere
+this is two-valued as for small **rp** the deflection angle goes back to 0.
+Here's a simple way to measure the deflection angle, based on the fact that
+for unbound encounters the orbit becomes a straight line again, so we measure
+that angles as follows:
+
+     rm -rf run2001
+     ./mkmh97.sh run=run2001 v0=2 tstop=20 nbody=1000 step=0.5 rp=0.5 seed=123
+     tabplot run2001/run2001.4.g2.tab xcoord=0 ycoord=0
+     tail -10  run2001/run2001.4.g2.tab  | tabnllsqfit - | txtpar - 'deg(atan(%1)),deg(%2/(1+%1**2))' p0=b=,1,2 p1=b=,1,3
+     15.8207 0.113264
+     tail -10  run2001/run2001.4.g1.tab  | tabnllsqfit - | txtpar - 'deg(atan(%1)),deg(%2/(1+%1**2))' p0=b=,1,2 p1=b=,1,3     
+     15.6923 0.0946659
+
+which reports the deflection angle (and the error) in degrees, based on a linear fit of the last 10 points.   For 1000 bodies
+the density and center of mass will not coincide, so interactions do not really have the same **rp**.   Repeating this experiment
+100 times gave a mean and dispersion of 14.3 and 1.2 resp.
+
+
 
 ## Versions
 
@@ -445,3 +468,26 @@ For this seed the relevant output parameters are:
 
      m16=0.17137
      etot=0.000908545
+
+## Issues
+
+- mh97 claim the energy jumps during an interaction are neglection of tidal interaction terms....
+  but their code is an N^2 code on GRAPE-3A.
+  Checking with this script with gravidy (code=3) also showed the jumps,
+  More accurate forces will lower the energy jump, so it lowers when hackcode1_qp is used
+  (run100q), or when gyrfalcON is used (run101).
+  For gravidy the jump also appears, but depends on the softening. Run104  vs. run106 clearly shows this.
+  Example:
+  
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=0  kmax=6 step=0.05 run=run100
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=0q kmax=6 step=0.05 run=run100q  
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=1  kmax=6 step=0.05 run=run101 
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=3  kmax=6 step=0.05 run=run103
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=3  kmax=6 step=0.05 run=run104 eta=0.001
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=3  kmax=6 step=0.05 run=run105 eta=0.001 eps=0.01
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=3  kmax=6 step=0.05 run=run106 eps=0.01  
+
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=6 step=0.05 run=run107
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run108
+  ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run109 eps=0.01
+
