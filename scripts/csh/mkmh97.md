@@ -454,6 +454,15 @@ the density and center of mass will not coincide, so interactions do not really 
 
 
 
+## Theory
+
+Ignoring mass loss etc. the critical velocity as function of mass (0,1) of the
+intrudor should be:
+
+     nemoinp 0.01:1:0.01 | tabmath - - "sqrt((1+1/%1)*(1+%1**1.5)/2)" > criticalv.tab
+
+but this shows a very unexpected trend.
+
 ## Versions
 
 In an earlier version (Sep-2022 and before) we didn't use the MH defaults yet. The following snippet
