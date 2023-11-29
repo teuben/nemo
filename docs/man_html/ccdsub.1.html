@@ -28,7 +28,10 @@ Since cubes/images produced by this program may have dummy axes
 use the <b>dummy=</b> keyword below. <p>
 If no parameters are given, other than in=
 and out=, the image is copied straight through, which is still a great
-way to test your I/O subsystem, assuming your image fits in memory. 
+way to test your I/O subsystem, assuming your image fits in memory. <p>
+Use
+<a href='ccdstretch.1.html'><i>ccdstretch(1NEMO)</i></a>
+ with <b>compress=t</b> if true binning has to be used. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 
@@ -102,13 +105,14 @@ it refers to the new "zxy" order: <br>
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdslice.1.html'>ccdslice(1NEMO)</a>
+, <a href='ccdstretch.1.html'>ccdstretch(1NEMO)</a>
 , <a href='ccdmom.1.html'>ccdmom(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
- 
+
+
 <p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben
-
+Peter Teuben 
 <p> 
 <h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>

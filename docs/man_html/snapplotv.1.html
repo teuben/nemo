@@ -10,48 +10,51 @@ HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bi
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-snapplotv - display an N-body snapshot file as a vector field 
+snapplotv - display an N-body snapshot file as a vector field (quiver
+plot) 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>snapplot
-in=</b>snap-file [parameter=value] ... 
+<b>snapplot in=</b>snap-file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snapplotv</i> is derived from <a href='snapplot.1.html'><i>snapplot(1NEMO)</i></a>
-,
-i.e. plots a  standard N-body snapshot file on a selected graphics device,
-but in addition two <a href='bodytrans.1.html'><i>bodytrans(1NEMO)</i></a>
- variables are selected that respresent
-a vector field.  
+<i>snapplotv</i>
+is derived from <a href='snapplot.1.html'><i>snapplot(1NEMO)</i></a>
+, i.e. plots a  standard N-body snapshot file
+on a selected graphics device, but in addition two <a href='bodytrans.1.html'><i>bodytrans(1NEMO)</i></a>
+ variables
+are selected that respresent a vector field.  
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following additional parameters to <i>snapplot</i>
-have been defined: 
+The following additional
+parameters to <i>snapplot</i> have been defined: 
 <dl>
 
 <dt><b>vxvar=</b><i>vx-expression</i> </dt>
-<dd>The value of <i>vx-expression</i> is plotted
-determines the length of the vector along the X axis. <i>vx-expression</i> is a
-real-valued C language expression over the real values <b>x</b>, <b>y</b>, <b>z</b>, <b>vx</b>, <b>vy</b>,
-<b>vz</b>, <b>phi</b>, <b>t</b>, and the integer value <b>i</b>. The default is <b>vx</b>. </dd>
+<dd>The value
+of <i>vx-expression</i> is plotted determines the length of the vector along the
+X axis. <i>vx-expression</i> is a real-valued C language expression over the real
+values <b>x</b>, <b>y</b>, <b>z</b>, <b>vx</b>, <b>vy</b>, <b>vz</b>, <b>phi</b>, <b>t</b>, and the integer value <b>i</b>. The default
+is <b>vx</b>. </dd>
 
-<dt><b>vyvar=</b><i>y-expression</i>
-</dt>
+<dt><b>vyvar=</b><i>y-expression</i> </dt>
 <dd>See above. The default is <b>vy</b>. </dd>
 
 <dt><b>scale=</b><i>factor</i> </dt>
-<dd>The factor with which each vector
-is multiplied to make unit velocity come out as 1/20 (1cm for <i>yapp</i>) of
-the plot. [Default is <b>1</b>]. </dd>
+<dd>The factor
+with which each vector is multiplied to make unit velocity come out as
+1/20 (1cm for <i>yapp</i>) of the plot. [Default is <b>1</b>]. </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='snapplot.1.html'>snapplot(1NEMO)</a>
-, <a href='bodytrans.1.html'>bodytrans(1NEMO)</a>
+,
+<a href='bodytrans.1.html'>bodytrans(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-.
-
+. 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 There is no autoscaling. 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Peter Teuben 
+Peter
+Teuben 
 <h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>4-oct-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 cloned from snapplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

@@ -130,20 +130,25 @@ useful of <b>dummy=f</b> and your FITS reader still cannot handle  dummy trailin
 axes. For <b>ndim=4</b> the axis will be labeled as <i>STOKES</i>, which is useful for
 packages such as CASA. Default: not used. </dd>
 
-<dt><b>select=1</b> </dt>
-<dd>Select this image (1 being
-the first) to grab in an file with multiple Image&rsquo;s. [Default: 1] </dd>
+<dt><b>bunit=</b> </dt>
+<dd>If supplied, this will override
+the BUNIT in the fits header. Common values are JY/BEAM (if a beam is present),
+JY/PIXEL, or K. </dd>
 
-<dt><b>fitshead=</b>
-</dt>
-<dd>If used, the header of this fitsfile will be used instead of the one from
-the converted input image. Default; not used. 
+<dt><b>select=1</b> </dt>
+<dd>Select this image (1 being the first) to grab in
+an file with multiple Image&rsquo;s. [Default: 1] </dd>
+
+<dt><b>fitshead=</b> </dt>
+<dd>If used, the header
+of this fitsfile will be used instead of the one from the converted input
+image. Default; not used. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Restfreq</a></h2>
-Common popular rest
-frequencies in astronomy are: <br>
+Common popular rest frequencies in astronomy
+are: <br>
 <pre>       1.420405751786  GHz      HI
      115.271204        GHz      CO(1-0)
      230.538           GHz      CO(2-1)
@@ -250,6 +255,7 @@ apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 refer
 26-may-2016     V5.8 added CUNITn and BUNIT and better parameters for radecvel=true<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-dec-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.3 added fitshead=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-may-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.3d:  object inherited from Image<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+31-dec-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V6.6: add bunit=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

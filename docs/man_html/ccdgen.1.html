@@ -206,6 +206,8 @@ by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a
   ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\
      ccdfits - noise.fits fitshead=NGC5194_91112.fits
   
+</pre>A test cube234.fits with value x + 10y + 100z can be made as follows: <br>
+<pre>  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
 </pre>
 <p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
@@ -222,11 +224,12 @@ Seting the WCS is not working well. There is cell=, there is crpix,cdelt,crval
 <a href='https://github.com/GalSim-developers/GalSim'>https://github.com/GalSim-developers/GalSim</a>
 
 <p>
+imfit::makeimage <p>
 There are also good simulators in starlab  and amuse 
-<p> 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
-src/image/trans
+<p>
 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
+src/image/trans 
 <p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 

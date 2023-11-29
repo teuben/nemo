@@ -9,14 +9,17 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 pvtrace - PV diagram envelope tracing  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>pvtrace</b> in=image [parameter=value]
  
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>pvtrace</b> tries to recover the rotation curve from a single 
-position-velocity (PV) diagram, by tracing the outer edges of the signal
+<b>pvtrace</b> tries to recover the rotation curve from a single
+ position-velocity (PV) diagram, by tracing the outer edges of the signal
 that, after correction for a velocity dispersion factor, is the material
 with the maximum amount of tangential motion. This is particularly appropriate
 for high-inclination  galaxies, where significant amounts of gas is observed
@@ -47,81 +50,85 @@ WAMET = WArped Modified
 <p>Envelope-Tracing method 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input image file - must be an PV <a href='image.5.html'><i>image(5NEMO)</i></a>
-
-with position along the 1st axis, and velocity along the 2nd. Units are
-not important. Use <b>ccdsub reorder=xzy</b> for an X-Y-VZ cube to  be properly reordered.
-No default. </dd>
+<dd>Input image file - must
+be an PV <a href='image.5.html'><i>image(5NEMO)</i></a>
+ with position along the 1st axis, and velocity along
+the 2nd. Units are not important. Use <b>ccdsub reorder=xzy</b> for an X-Y-VZ cube
+to  be properly reordered. No default. </dd>
 
 <dt><b>eta=</b> </dt>
-<dd>[0..1] weight factor for I_max adding to I_lc. [Default: 0.2]
-</dd>
+<dd>[0..1] weight factor for I_max
+adding to I_lc. [Default: 0.2] </dd>
 
 <dt><b>ilc=</b> </dt>
-<dd>Lowest Contour value. Normally taken as something like 3 times the
-noise level.  [Default: 0] </dd>
+<dd>Lowest Contour value. Normally taken as
+something like 3 times the noise level.  [Default: 0] </dd>
 
 <dt><b>sign=-1|1</b> </dt>
-<dd>Designates rotation of the galaxy. This
-is only important for tracing the &rsquo;right&rsquo; part of the PV diagram. sign=1 is
-meant for PV diagrams where the approaching side is for positive positions.
-By using the "wrong" value of sign you can find out something about the
-radial extent of the tracer, as for large radii this would cause small
-values of dV/dR. For a known rotation curve using sign=1 one could determine
-the radial extent from sign=-1. [Default: 1] </dd>
+<dd>Designates
+rotation of the galaxy. This is only important for tracing the &rsquo;right&rsquo; part
+of the PV diagram. sign=1 is meant for PV diagrams where the approaching
+side is for positive positions. By using the "wrong" value of sign you can
+find out something about the radial extent of the tracer, as for large
+radii this would cause small values of dV/dR. For a known rotation curve
+using sign=1 one could determine the radial extent from sign=-1. [Default:
+1] </dd>
 
 <dt><b>sigma=</b> </dt>
-<dd>Velocity dispersion correction
-factor. This includes both the observational resolution as well as the velocity
-dispersion of the tracer component that is being observed. [Default: 0]
-</dd>
+<dd>Velocity dispersion correction factor. This includes both the
+observational resolution as well as the velocity dispersion of the tracer
+component that is being observed. [Default: 0] </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Clipping values to aid removing noisy values around 0.  If value(s)
-given, signal will be clipped as follows: if one value given, clipping
-occurs between -clip and clip. If two numbers given, clipping occurs between
-<a href='clip.1.html'>clip(1)</a>
+<dd>Clipping values to
+aid removing noisy values around 0.  If value(s) given, signal will be clipped
+as follows: if one value given, clipping occurs between -clip and clip. If
+two numbers given, clipping occurs between <a href='clip.1.html'>clip(1)</a>
  and <a href='clip.2.html'>clip(2)</a>
-. Default: None </dd>
+. Default:
+None </dd>
 
 <dt><b>vsys=</b> </dt>
-<dd>Systemic velocity of the galaxy.
-Since the velocity axis (assumed to be the 2nd or Y-axis), this number is
-simply subtraced from each velocity determination. [Default: 0] </dd>
+<dd>Systemic velocity of the galaxy. Since the velocity axis (assumed
+to be the 2nd or Y-axis), this number is simply subtraced from each velocity
+determination. [Default: 0] </dd>
 
 <dt><b>inc=</b> </dt>
-<dd>Inclination
-of the galaxy. Each rotation speed is corrected by sin(inc). [Default: 90]
-</dd>
+<dd>Inclination of the galaxy. Each rotation
+speed is corrected by sin(inc). [Default: 90] </dd>
 
 <dt><b>center=</b> </dt>
-<dd>Center of the galaxy along the Position axis.  [Default: 0] </dd>
+<dd>Center of the galaxy
+along the Position axis.  [Default: 0] </dd>
 
-<dt><b>rotcur=t|f</b>
-</dt>
-<dd>Should a folded rotation curve be tabulated? If so, negative positions
-will have both position and velocity with a positive sign, thus creating
-two rotation curves, receding and approaching, which can be plotted on
-top of each other and compared. [Default: false] </dd>
+<dt><b>rotcur=t|f</b> </dt>
+<dd>Should a folded rotation
+curve be tabulated? If so, negative positions will have both position and
+velocity with a positive sign, thus creating two rotation curves, receding
+and approaching, which can be plotted on top of each other and compared.
+[Default: false] </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output file in case
-input file was a cube and output is now a map, not a table. </dd>
+<dd>Output file in case input file was a cube and output
+is now a map, not a table. </dd>
 
 <dt><b>mode=</b> </dt>
-<dd>Which
-of the output modes (see OUTPUT below) will be used for the output map.
-[Default: 2] </dd>
+<dd>Which of the output modes (see OUTPUT below)
+will be used for the output map. [Default: 2] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Output</a></h2>
-Output of the program will be an ASCII table, with various
-derived velocities as function of position along the P axis in the PV-diagram.
-The following columns are returned (see also <b>mode=</b> above): <p>
+Output of the program
+will be an ASCII table, with various derived velocities as function of
+position along the P axis in the PV-diagram. The following columns are returned
+(see also <b>mode=</b> above): <p>
 <br>
 <pre>1<tt> </tt>&nbsp;<tt> </tt>&nbsp;position from the P-axis of the PV diagram
 2<tt> </tt>&nbsp;<tt> </tt>&nbsp;envelope tracing (corrected with vsys, sini, and sigma)
@@ -132,12 +139,14 @@ The following columns are returned (see also <b>mode=</b> above): <p>
 7<tt> </tt>&nbsp;<tt> </tt>&nbsp;half gaussian fit
 8<tt> </tt>&nbsp;<tt> </tt>&nbsp;half gaussian fit, with for MET correction
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
 Position axis must be carefully created such that the galaxy center
 is at P=0, whereas for velocity it can be corrected with VSYS=. This is
 easy for theoretical data, but cumbersome for real data. <p>
 The MET mode is
 still not very robust, clipping helps. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='rotcur.1.html'>rotcur(1NEMO)</a>
 , <a href='runvelfitss07.1.html'>runvelfitss07(1NEMO)</a>
@@ -154,14 +163,18 @@ Sofue et al 1997 PASJ 49, 17
 Sofue et al 523, 136 
 Sofue et al (1997AJ....114.2428S)
 Gentile et al. (2004MNRAS.351..903G) - MET/WAMET method
+Aso &amp; Sai - Spectral Line Analysis/Modeling (SLAM) - https://arxiv.org/abs/2311.07988
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>src/image/rotcur<tt> </tt>&nbsp;<tt> </tt>&nbsp;sources
 </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>5-May-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-may-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 clip=, interpolated to find trace  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -181,7 +194,7 @@ Peter Teuben
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

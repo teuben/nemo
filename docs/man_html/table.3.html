@@ -46,43 +46,45 @@ string table_row(table
 - void table_set_ncols(int
 ncols)
 table *table_cat(int ntable, table *tptr, int mode)
-Legacy: (might
-be deprecated in future)
-int get_atable(strean instr,int ncol,int *colnr,real
-*coldat,int ndat)
-int get_ftable(stream instr,int ncol,int *colpos,string
-*colfmt,real *coldat,int ndat) 
-int get_line (string instr, char *line)
-// deprecated now
-int parse(int linenr, char *line, double *dat, int ndat)
-int
-strinsert(char *a, char *b, int n)
-int iscomment(char *line)</pre>
+Legacy: (some
+of these might be deprecated in future)
+int get_atable(strean instr,int
+ncol,int *colnr,real *coldat,int ndat)
+int get_ftable(stream instr,int ncol,int
+*colpos,string *colfmt,real *coldat,int ndat) 
+int get_line (string instr,
+char *line) // deprecated now
+int parse(int linenr, char *line, double *dat,
+int ndat)
+int strinsert(char *a, char *b, int n)
+int iscomment(char *line)
+void
+sanitize(char *line)</pre>
 <p> 
 <h2><a name='sect2' href='#toc2'>Using Tables</a></h2>
 
-<p>
-Tables can be arbitrarely large, but like top level of NEMO structured
-files, do need to fit in memory. There can be some exceptions to this, and
-certain applications will stream data that do not fit in memory. 
+<p> Tables can be arbitrarely large, but
+like top level of NEMO structured files, do need to fit in memory. There
+can be some exceptions to this, and certain applications will stream data
+that do not fit in memory. 
 <p> <p>
-The particular
-table dialect should be detected automatically in files, and number of
-columns and rows can be arbitrarely high. <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
- has methods to make
-really large tables in both "column" and "row" space for testing purposes.
-
+The particular table dialect should be detected
+automatically in files, and number of columns and rows can be arbitrarely
+high. <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+ has methods to make really large tables in both "column"
+and "row" space for testing purposes. 
 <p> <p>
-When a table comes from a pipe, obviously it cannot seek, however using
-the new table I/O the full table is read into memory, initially using a
-linked list, and can then be addressed line by line in random row fashion.
-
+When a table comes from a pipe, obviously
+it cannot seek, however using the new table I/O the full table is read
+into memory, initially using a linked list, and can then be addressed line
+by line in random row fashion. 
 <p> <p>
-An exception could be made where the table can be read in blocks of say
-100 lines or so? 
+An exception could be made where the table
+can be read in blocks of say 100 lines or so? 
 <p> <p>
-Comment lines: there are too many conventions for this,
-but we need to cover them all.   A line starting with <br>
+Comment lines: there are
+too many conventions for this, but we need to cover them all.   A line starting
+with <br>
 <pre>#!;/\|C</pre>have all been used for comments.  In addition comments have been used
 at the end of a line, e.g. <br>
 <pre>1 2 3   # this is a comment</pre>but see <a href='table.5.html'><i>table(5NEMO)</i></a>
@@ -216,13 +218,15 @@ current line number, to be entered in the argument <i>linenr</i>. <p>
 the string <i>b</i> into <i>a</i>, replacing <i>n</i> characters of <i>a</i>. <p>
 <i>iscomment</i> returns 1 if
 the line appears to be a comment (starts with &rsquo;;&rsquo;, &rsquo;#&rsquo;, &rsquo;!&rsquo; or a blank/newline)
-
+<p>
+<i>sanitize</i> converts any possible line originating from a DOS (CR/LF) or MAC
+(CR) or unix (LF) and 0-terminate it. 
 <p> 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Some examples drafted, based on the new API presented. <p>
-An example
-reading in a full table into a two dimensional mdarray2, and adding 1 to
-each element: <br>
+Some examples drafted, based
+on the new API presented. <p>
+An example reading in a full table into a two
+dimensional mdarray2, and adding 1 to each element: <br>
 <pre>    table *t = table_open(filename, 0);
     mdarray2 d2 = table_md2rc(t,0,0,0,0);
     table_close(t);
@@ -291,6 +295,7 @@ via <a href='error.3.html'><i>error(3NEMO)</i></a>
 ,
 <a href='fits.5.html'>fits(5NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
+, <a href='ascii.7.html'>ascii(7)</a>
  <p>
 <br>
 <pre>https://github.com/BurntSushi/xsv
@@ -315,6 +320,7 @@ Peter Teuben
 12-jul-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed reading large table bufferrng<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 aug-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;designing new table system<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sathvik/PJT
 5-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;finalizing implementation of table2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT/Parker/Yuzhu
+31-dec-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;add sanitize() to 0-terminate any style text<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

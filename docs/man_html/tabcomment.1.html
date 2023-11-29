@@ -59,29 +59,29 @@ that only contain blanks, see <a href='isspace.3.html'><i>isspace(3)</i></a>
 
 <dt><b>punct=t|f</b> </dt>
 <dd>Comment
-lines that start with a punctuation character (neither control nor alphanumeric,
-see also <a href='ispunct.3.html'><i>ispunct(3)</i></a>
+lines that start with a punctuation character, except the + or -. (neither
+control nor alphanumeric, see also <a href='ispunct.3.html'><i>ispunct(3)</i></a>
 ). [Default: <b>t</b>]. </dd>
 
 <dt><b>delete=t|f</b> </dt>
-<dd>Delete comment lines from output?
-[Default: <b>f</b>]. </dd>
+<dd>Delete
+comment lines from output? [Default: <b>f</b>]. </dd>
 
 <dt><b>raw=t|f</b> </dt>
-<dd>In raw mode only the comments are shown. [Default: <b>f</b>].
-</dd>
+<dd>In raw mode only the comments
+are shown. [Default: <b>f</b>]. </dd>
 
 <dt><b>comment=</b> </dt>
-<dd>The actual comment character to be used at the beginning of the
-line. Although it is not adviced to use anything but the &rsquo;#&rsquo; symbol, the 
-comment characters. Default: <b>#</b>. 
+<dd>The actual comment character to be used
+at the beginning of the line. Although it is not adviced to use anything
+but the &rsquo;#&rsquo; symbol, the  comment characters. Default: <b>#</b>. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Historically this program was written
-because some programs could not deal with comments in tables, thus we often
-wind up with constructs such as <br>
+Historically
+this program was written because some programs could not deal with comments
+in tables, thus we often wind up with constructs such as <br>
 <pre>      program1 | tabcomment - delete=t | program2
 </pre>but especially if the tail end of the pipe has to filter down to numbers,
 the <a href='txtpar.1.html'><i>txtpar(1NEMO)</i></a>
@@ -107,6 +107,7 @@ Peter Teuben
 20-may-1993<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated man<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-oct-2004<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 allow change of comment character<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 10-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 new table I/O, add raw=, default out=-<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-apr-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.3 don&rsquo;t view + and - as punctuation<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

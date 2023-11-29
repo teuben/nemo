@@ -9,46 +9,98 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabsmooth - (hanning) smooth columns of a table 
+tabsmooth - smooth columns of a table (Hanning, Savitzky-Golay) 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>tabsmooth</b> [parameter=value]
-
+<b>tabsmooth</b>
+[parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Quick and dirty program to Hanning (1/4,1/2,1/4) smooth a table.
-
+Quick and dirty program to <i>smooth</i> the column(s)
+of a table without paying attention to the X coordinate (meaning: a constant
+step size is assumed). <p>
+The filter= option is used to select the filter,
+for example a Hanning and a Savitzky-Golay filter (and some derivates) can
+be selected.   A pass-through is also allowed. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if the keyword
-is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input file name [???]     </dd>
+<dd>Input file
+name [???]     </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>Column(s) to use. Although
-multiple columns can be used, only those  columns are output to stdout.
- [1] </dd>
+<dd>Column(s) to use. Although multiple columns can be
+used, only those  columns are output to stdout.  [1] </dd>
+
+<dt><b>filter=</b> </dt>
+<dd>Filter option.
+The way the options are set will likely change, this is work in progress.
+<br>
+<pre>   -1 passthrough, the column is not modified
+   0  hanning (1,2,1)/4
+   1  SK2 5pt smooth
+   2  SK2 1st derivative with h=1
+   3  SK2 2nd derivative with h=1
+   4  SK4 7pt smooth
+   5  SK4 1st derivative
+</pre>The smoothing versions are normalized to conserve "flux". Default: 0 </dd>
+
+<dt><b>smooth=</b>
+</dt>
+<dd>Manually set the smoothing array. By default, the filter= is used to set
+the smoothing array.  Be sure to enter an odd number of array elements,
+for example a normalized Hanning would be smooth=0.25,0.5,0.25. Default: not
+provided. </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>max size if a pipe [100000]   </dd>
+<dd>max size if a pipe [100000]  - to be deprecated for new table
 
-<dt><b>smooth=</b> </dt>
-<dd>Smoothing array. By default,
-single Hanning smooth (0.25,0.5,0.25). </dd>
+<p>system 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+Here we draw 100000 random values from a normal distribution
+(mean 0, dispersion 1) and smooth them with various filters: <br>
+<pre>tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
+1.0022
+tabgen - 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp
+0.6128
+tabgen - 100000 1 2 123| tabsmooth - 1  1 | tabstat - | grep disp
+0.6973
+tabgen - 100000 1 2 123| tabsmooth - 1  4 | tabstat - | grep disp
+0.7537
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+Near the edge the smoothing array is cut off, thus there is some
+loss of flux. Otherwise in general the smoothing filter is normalized and
+should conserve flux. 
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
-
-
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+, <a href='tabrows.1.html'>tabrows(1NEMO)</a>
+,
+<a href='tabcols.1.html'>tabcols(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
+ 
+<p> 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
-<pre>20-Dec-2010<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>20-dec-2010<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=
+28-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added filter=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+29-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 converted to table V2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -58,9 +110,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

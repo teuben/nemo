@@ -9,12 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdmath - map arithmetic using function expressions 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>ccdmath
 in=</b>[image1[,image2,...]]  <b>out=</b>image <b>fie=</b>expression   
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdmath</b> combines
 maps through some simple operations to make a new map. It also handles a
@@ -22,72 +25,75 @@ few arithmetic functions, such as sqrt, exp, log10. See <a href='fie.3.html'><i>
  for a
 full definition of the available functions and operations. Input maps are
 referred to by <b>%n</b>, where <b>n</b> is the ordinal number of the input maps (1 being
-the first one),  in the function expression <b>fie</b>. <p>
-The program can also be
-used in creation mode: when no input files are given, parameters <b>%x</b>, <b>%y</b>
-and <b>%z</b> in <b>fie=</b>  can be used to refer to the X,  Y and Z pixel coordinates
-in the map to be created, (0,0,0)  in pixel coordinates w.r.t. reference pixel.
-<b>%w</b> and <b>%r</b> can be used for 2D and 3D radius w.r.t. reference pixel, again in
-pixel coordinates. 
+the first one),  in the function expression <b>fie</b>. For example %1+%2 would
+add the first two maps. <p>
+The program can also be used in creation mode: when
+no input files are given, parameters <b>%x</b>, <b>%y</b> and <b>%z</b> in <b>fie=</b>  can be used
+to refer to the X,  Y and Z pixel coordinates in the map to be created,
+(0,0,0)  in pixel coordinates w.r.t. reference pixel. <b>%w</b> and <b>%r</b> can be used
+for 2D and 3D radius w.r.t. reference pixel, again in pixel coordinates. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=<i>in-file(s)</i></b> </dt>
-<dd>list of input file
-name(s), each in <a href='image.5.html'><i>image(5NEMO)</i></a>
- format. In case of multiple files, the list
-must be space or comma separated. If no files are given, the program is
-in creation mode. </dd>
+<dd>list of input file name(s), each in <a href='image.5.html'><i>image(5NEMO)</i></a>
+ format.
+In case of multiple files, the list must be space or comma separated. If
+no files are given, the program is in creation mode. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
-<dd>output file, will be in <a href='Image.5.html'><i>Image(5NEMO)</i></a>
- format
-[no default] </dd>
+<dd>output
+file, will be in <a href='Image.5.html'><i>Image(5NEMO)</i></a>
+ format. The image header (WCS etc.) will be
+inherited from the first map on the input list. [no default] </dd>
 
-<dt><b>fie=<i>expression</i></b> </dt>
-<dd>Expression how to manipulate the input maps
-or create output map. Input maps are referred to by <b>%n</b> or <b>$n</b>, in creation
-mode position is referred to by <b>%x</b> and <b>%y</b> [no default]. </dd>
+<dt><b>fie=<i>expression</i></b>
+</dt>
+<dd>Expression how to manipulate the input maps or create output map. Input
+maps are referred to by <b>%n</b> or <b>$n</b>, in creation mode position is referred
+to by <b>%x</b> and <b>%y</b> [no default]. </dd>
 
 <dt><b>size=<i>nx,ny,nz</i></b> </dt>
-<dd>Size
-of the output map in case program is in creation mode [default: 10,10,1].
-</dd>
+<dd>Size of the output map in case
+program is in creation mode [default: 10,10,1]. </dd>
 
 <dt><b>crpix=<i>r1,r2,r3</i></b> </dt>
-<dd>(New) values for the reference pixel. Note these are in FITS
-notation, i.e. (1,1,1) is the lower left of the first plane in a cube. Recall
-that (nx+1)/2 is the central pixel in coordinate X, not nx/2! By default
-the WCS is transferred from the first input image to the output image,
-however, by using all 3 keywords  <b>crpix=,crval=,cdelt=</b> the WCS of the output
-image can be overwritten. [Default: <b>1,1,1</b> for image creation]. </dd>
+<dd>(New) values
+for the reference pixel. Note these are in FITS notation, i.e. (1,1,1) is
+the lower left of the first plane in a cube. Recall that (nx+1)/2 is the
+central pixel in coordinate X, not nx/2! By default the WCS is transferred
+from the first input image to the output image, however, by using all 3
+keywords  <b>crpix=,crval=,cdelt=</b> the WCS of the output image can be overwritten.
+[Default: <b>1,1,1</b> for image creation]. </dd>
 
-<dt><b>crval=<i>r1,r2,r3</i></b>
-</dt>
-<dd>(New) values for the reference pixel. [Default: <b>0,0,0</b> for image creation].
-</dd>
+<dt><b>crval=<i>r1,r2,r3</i></b> </dt>
+<dd>(New) values for the
+reference pixel. [Default: <b>0,0,0</b> for image creation]. </dd>
 
 <dt><b>cdelt=<i>r1,r2,r3</i></b> </dt>
-<dd>(New) values for the pixel separation.  [Default: <i>1,1,1</i> for
-image creation]. </dd>
+<dd>(New)
+values for the pixel separation.  [Default: <i>1,1,1</i> for image creation]. </dd>
 
-<dt><b>seed=</b><i>integer</i> </dt>
-<dd>seed for the random number generator (default:
-a value 0, which will be converted into a unique new value using UNIX&rsquo;s
-clock time, in seconds since once-upon-a-time-in-the-seventies). </dd>
+<dt><b>seed=</b><i>integer</i>
+</dt>
+<dd>seed for the random number generator (default: a value 0, which will be
+converted into a unique new value using UNIX&rsquo;s clock time, in seconds since
+once-upon-a-time-in-the-seventies). </dd>
 
-<dt><b>replicate=t|f<b>
-</b></b></dt>
-<dd>Normally each input image needs to be of the same shape. Setting <b>replicate=t</b>
-will allow the 3rd axis of a 2D map to be replicated in order for the <b>fie=</b>
-expression to be parsed. Default: false </dd>
+<dt><b>replicate=t|f<b> </b></b></dt>
+<dd>Normally each input image needs
+to be of the same shape. Setting <b>replicate=t</b> will allow the 3rd axis of
+a 2D map to be replicated in order for the <b>fie=</b> expression to be parsed.
+Default: false 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-Create a &rsquo;difference&rsquo; map from
-two input maps: <br>
+Create a &rsquo;difference&rsquo; map from two input maps: <br>
 <pre>   % ccdmath inmap1,inmap2 outmap "abs(%1-%2)"
 </pre></b>create the maximum of two maps: <br>
 <pre>   % ccdmath inmap1,inmap2 outmap "ifgt(%1,%2,%1,%2)"
@@ -108,7 +114,10 @@ cdelt=$dx,$dy,$dz
 in signal/noise for large values from the mean: <br>
 <pre>  set s = 0.19
   cddmath map0 map0s "sign(%1)*$s*log(1+abs(%1)/$s)"
+</pre>A test <b>cube234.fits</b> with value x + 10y + 100z can be made as follows: <br>
+<pre>  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Timing</a></h2>
 Performance on Rigel (SUN 3/160, 16Mhz): 
 <p> <br>

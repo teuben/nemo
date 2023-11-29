@@ -27,15 +27,21 @@ items are copied, and no data conversion is applied.  <p>
 An overview of the
 top level items that are present in a structured file can be obtained with
 the following Unix pipe: <br>
-<pre>    % tsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk &rsquo;{print $2}&rsquo;
+<pre>q
+    % tsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk &rsquo;{print $2}&rsquo;
 </pre><p>
 Although <i>structured files</i> can always be read when they were created on
 a byte swapped machine, <i>csf</i> can also be used to create a file in which
-the bytes are not swapped. 
+the bytes are not swapped. <p>
+As a convenience option, the keyword <b>blocksize=</b>
+can be used to forced a fixed blocksize to copy a file "as is", but it
+will bypass the structured file I/O so should be functionally the same
+as a unix <a href='cp.1.html'><i>cp(1)</i></a>
+. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized
-in order; they may be given in any order if the keyword is also given. Use
+ The following parameters are recognized in
+order; they may be given in any order if the keyword is also given. Use
 --help to confirm this man page is up to date.  
 <dl>
 
@@ -67,20 +73,25 @@ or spaces. Each conversion is of the format <i>from</i>2<i>to</i>, where both th
 and <i>to</i> part are any of: <b>d</b> (double), <b>f</b> (float), <b>h</b>  (half precision) , <b>l</b>
 (long), <b>i</b> (int) or <b>s</b> (short).  [Default: -blank-]. </dd>
 
-<dt><b>headline=</b> </dt>
-<dd>If supplied, add
-this string of random verbiage to the data stream. [Default: none] 
+<dt><b>blocksize=</b> </dt>
+<dd>If selected,
+this is the blocksize, in bytes, by which a file gets copied bypassing
+NEMO&rsquo;s structured file I/O. A value of 512 is ok. Default: 0 (not used) </dd>
+
+<dt><b>headline=</b>
+</dt>
+<dd>If supplied, add this string of random verbiage to the data stream. [Default:
+none] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Some
-of the conversions in <b>convert=</b> are not supported or are in danger of loosing
-more than just precision. 
+Some of the conversions in <b>convert=</b> are not supported or
+are in danger of loosing more than just precision. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An image with too much data-history can
-be cut by only copying the <i>Image</i> items: <br>
+An image with
+too much data-history can be cut by only copying the <i>Image</i> items: <br>
 <pre>   % csf in=map1.ccd out=map2.ccd select=Image
 </pre>
 <p> 
@@ -112,6 +123,7 @@ Peter Teuben, Joshua E. Barnes
 26-mar-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 fixed selection bug and clarified doc<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-dec-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 added support for half precision (halfp) type<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 13-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 add headline=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-apr-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.8 add blocksize=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

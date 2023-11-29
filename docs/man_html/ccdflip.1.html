@@ -9,43 +9,66 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdflip - flip an image in X,Y,Z  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdflip</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdflip</b> flips the coordinates of one of the principle axes (X,
+<b>ccdflip</b> flips the data along one of the principal axes (X,
 Y or Z) of an image. Not all permutations were implemented, as this program
-was a quick hack. 
+was a quick hack. <p>
+By default it now also adjusts the WCS (which historically
+was never the case, only the data were flipped). To retain the old behavior,
+<b>wcs=f</b> needs to be used. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any
-order if the keyword is also given: 
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+--help to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input image file      </dd>
+<dd>Input image file. No default.
+</dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output
-file       </dd>
+<dd>Output image file. No default. </dd>
 
-<dt><b>flip=</b> </dt>
-<dd>Flip in x,y or z?   Use &rsquo;xy&rsquo; for flipping axes on square
-images. Default: x </dd>
+<dt><b>flip=x|y|z|xy</b> </dt>
+<dd>Flip in x,y or z?   Use &rsquo;xy&rsquo;
+for flipping axes on square images. If an unknown axis is given, no flipping
+is done, the data is passed unchanged. Default: x </dd>
+
+<dt><b>wcs=t|f</b> </dt>
+<dd>Should be WCS be
+adjusted as well? Default: f 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To rotate an image by 90 degrees (clockwise)
-use two flips: <br>
+<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
+, <a href='ccdreorder.1.html'>ccdreorder(1NEMO)</a>
+,
+<a href='image.5.html'>image(5NEMO)</a>
+ 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+To rotate an image by 90 degrees (clockwise) use
+two flips: <br>
 <pre>    ccdflip gal1.ccd - xy | - gal2.ccd y
 </pre>
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>22-Feb-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;man written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-jul-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;example added<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+15-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 added wcs=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -55,9 +78,10 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>See Also</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

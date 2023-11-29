@@ -9,57 +9,67 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Synopsis</a></h2>
-<b>program [key1=]val1 [key2=]val2 .!.!. 
-<h2><a name='sect1' href='#toc1'></b>Description</a></h2>
-<b>ZENO</b> is Josh Barnes&rsquo;
-version of NEMO. The code is  derived from NEMO, with a common ancestor
-around 1988. The binary datafiles, via <a href='flestruct.3.html'><i>flestruct(3NEMO)</i></a>
- are largely compatible.
-<p>
-When installed, ZENO adds about 130 executables via $ZENOPATH/bin. Within
-NEMO, a user would source the $NEMO/usr/zeno/zeno_start.sh script. <p>
-
+<b>program [key1=]val1 [key2=]val2 .!.!.</b> <br>
+<b>program --help.</b> 
+<h2><a name='sect1' href='#toc1'>Description</a></h2>
+<b>ZENO</b> is Josh Barnes&rsquo; version of NEMO. The code is
+ derived from NEMO, with a common ancestor around 1988. The binary datafiles,
+via <a href='filestruct.3.html'><i>filestruct(3NEMO)</i></a>
+ are largely compatible. <p>
+When installed, ZENO adds
+well over 100 executables via $ZENOPATH/bin, but some have the same name
+as NEMO&rsquo;s counterpart. See EXAMPLES below how to add ZENO to your NEMO environment.
+See <a href='zeno.8.html'><i>zeno(8NEMO)</i></a>
+ for a list of all programs 
+<p> 
 <h2><a name='sect2' href='#toc2'>Examples</a></h2>
-A
-<a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- created with ZENO has Position and Velocity, as well as
-using NBody instead of Nobj. It can be converted to NEMO&rsquo;s PhaseSpace with
-e.g. <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
-, and then processed like NEMO snapshots. E.g.: <br>
-<pre>    % plumsnap p16k
-    % snapcopy p16k - | snapplot -
+From within NEMO the
+following command should load ZENO: <br>
+<pre>   source $NEMO/usr/zeno/zeno_start.sh
+</pre>but note this may shield likewise named executables of NEMO. <p>
+A <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+
+created with ZENO has Position and Velocity, as well as using NBody instead
+of Nobj. It can be converted to NEMO&rsquo;s PhaseSpace with e.g. <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
+,
+and then processed like NEMO snapshots. E.g.: <br>
+<pre>    % plumsnap - | snapcopy -  - | snapplot -
 </pre>The magic of this ZENO detection is in get_snap.c, and programs (such as
 snapplot) that use older direct reading of snapshots will not be able to
 process these snapshots with such a filter. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Differences with Nemo</a></h2>
-As highlighted
-in the example, a ZENO snapshot uses <i>NBody</i> instead of NEMO&rsquo;s <i>Nobj</i>, but as
-get as snapshot I/O is done via the <i>get_snap</i> macros, they  will be converted.
-<p>
-NEMO&rsquo;s <a href='potential.5.html'><i>potential(5NEMO)</i></a>
- are similar to ZENO&rsquo;s <i>gspmodels</i>, where the latter
-also allows for adding potentials (much harder in NEMO).  falcON has similar
-tools to add potentials. <p>
-NEMO has no real support for SPH (though some tags
-in snapshot&rsquo;s are supported) <p>
-ZENO has no plotting such as NEMO&rsquo;s yapp 
+A ZENO
+snapshot uses <i>NBody</i> instead of NEMO&rsquo;s <i>Nobj</i>, but as get as snapshot I/O is
+done via the <i>get_snap</i> macros, they  will be converted. NEMO uses PhaseSpace
+whereas ZENO uses separate Position and Velocity. <p>
+NEMO has no real support
+for SPH (though some tags in snapshot&rsquo;s are supported) <p>
+ZENO has no plotting
+such as NEMO&rsquo;s yapp <p>
+NEMO&rsquo;s command line userface is a bit more richer 
 <p> 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 <br>
 <pre>$NEMO/usr/zeno<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory, with instructions how to install
+$NEMO/usr/zeno/zeno<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;symlink to the actual location of ZENO
 $NEMO/usr/zeno/zeno_start.sh<tt> </tt>&nbsp;<tt> </tt>&nbsp;startup script
 </pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
+, <a href='zeno.8.html'>zeno(8NEMO)</a>
  
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Josh Barnes 
+<p> 
 <h2><a name='sect7' href='#toc7'>Further Information</a></h2>
 <br>
-<pre>http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+<pre>http://legacy.ifa.hawaii.edu/faculty/barnes/zeno/index.html
+https://www2.ifa.hawaii.edu/faculty/barnes/zeno/Programs.html
 https://github.com/joshuabarnes/zeno/
 </pre><p>
 

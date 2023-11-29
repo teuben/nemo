@@ -9,76 +9,121 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 sdinfo - sdfits (BINTABLE) info and benchmark 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>sdinfo</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>sdinfo</b> list some tabular properties of an SDFITS (and some dialects)
-file, and has  options to benchmark some basic operations. <p>
-SDFITS files
-have a BINTABLE extension named "SINGLE DISH", and is used to store single
-dish spectra and all associated variables. This program was only written
+<b>sdinfo</b> list some tabular properties of an SDFITS (and some
+dialects) file, and has  options to benchmark some basic operations. <p>
+SDFITS
+files have a BINTABLE extension named "SINGLE DISH", and are used to store
+single dish spectra and all associated variables. This program was  written
 to provide size info and can run a few basic benchmarks. A few known dialects
 to this are known:  "CIMAFITS" (Arecibo) and "MATRIX" (30m/CLASS), the
 latter designates the spectrum via a "SPECTRUM" column name, instead of
-the more common "DATA" column name. 
+the more common "DATA" column name in classic "SDFITS". 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use --help to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input SDFITS
-fits file. Multiple files can be given as well, as a space or comma separated
-this. No default. </dd>
-
-<dt><b>stats=t|f</b> </dt>
-<dd>If true, some basic statistics will be computed.
-You also need this option if a row (see row= below) is output. </dd>
+<dd>Input SDFITS fits file(s). Multiple files can be given as
+well, as a space or comma separated list. No default. </dd>
 
 <dt><b>mom=</b><i> </i></dt>
-<dd>Maximum
-moment some statistics will be computed. mom=0 will just sum, and be much
-faster than general moment computation. [2]. </dd>
+<dd>If set to a non-negative
+value, this is the max. moment of the stats being computed.  mom=0 is a special
+case, and will just sum, and be much faster than general moment computation.
+You also need this option if a row (see row= below) is output. [-1]. </dd>
 
-<dt><b>cols=</b> </dt>
-<dd>Column names to track.
-Currently it just gives the column number and format used.  Default: not
-used. </dd>
+<dt><b>cols=</b>
+</dt>
+<dd>Column names to track. Currently it just gives the column number and format
+used.  Default: not used. </dd>
 
 <dt><b>dims=</b> </dt>
-<dd>A list of dimensions how the data-block should be processed. The
-procedure of processing is set by the <b>proc=</b> keyword.  For example dims=2,11,2,2,4.
-  The product of the dimensions should be NAXIS2 (or less than) from the
-BINTABLE. Default: not used. </dd>
+<dd>A list of dimensions how the data-block should
+be processed. The procedure of processing is set by the <b>proc=</b> keyword.  For
+example dims=2,11,2,2,4.   The product of the dimensions should be NAXIS2
+(or less than) from the BINTABLE. Default: not used. </dd>
 
 <dt><b>proc=</b> </dt>
-<dd>The procedure of processing can be set
-with this. Currently only one specific example (see EXAMPLES below) for
-ngc5291 is implemented. Options would be PS (Position Switching), FS (frequency
-switching), NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever.
-</dd>
+<dd>The procedure
+of processing can be set with this. Currently only one specific example
+(see EXAMPLES below) for ngc5291 is implemented. Options would be PS (Position
+Switching), FS (frequency switching), NOD (nodding), TP (total power). NOT
+IMPLEMENTED YET, if ever. </dd>
 
 <dt><b>nchan=</b> </dt>
-<dd>Override the number of channels found in the data. Some dataset will
-find nchan=0 and it will be useful to set this here. This number is related
-to NAXIS1 in the BINTABLE. </dd>
+<dd>Override the number of channels found in
+the data. Some dataset will find nchan=0 and it will be useful to set this
+here. This number is related to NAXIS1 in the BINTABLE. </dd>
 
 <dt><b>row=</b> </dt>
-<dd>If used, this row (0 being the first) will
-be output as an ascii spectrum. This spectrum has two columns: channel number
-(0 being the first) and the spectrum value, native units. </dd>
+<dd>If used, this
+row (0 being the first) will be output as an ascii spectrum. This spectrum
+has two columns: channel number (0 being the first) and the spectrum value,
+native units. </dd>
+
+<dt><b>raw=</b> </dt>
+<dd>Do only raw I/O?   If selected, no SDFITS processing
+is done, the file is just read in blocks of 2880 bytes. See also <a href='csf.1.html'><i>csf(1NEMO)</i></a>
+
+with <b>blocksize=</b>. [f] </dd>
+
+<dt><b>hdu=</b> </dt>
+<dd>Which HDU to process. Normally hdu=2 should contain
+the BINTABLE, but it&rsquo;s possible there are more. [2] </dd>
+
+<dt><b>blfit=</b> </dt>
+<dd>Another benchmark
+option:  setting the blfit (baseline fit order) to a non-negative number,
+a baseline of that order will be fitted to each spectrum. [-1] </dd>
 
 <dt><b>bench=</b> </dt>
-<dd>How many
-times the procedure should be processed. This will only re-execute the procedure,
-not the alloc/free that are needed for this. Using 0 will bypass the procedure.
-Default: 1 </dd>
+<dd>How
+many times the procedure should be processed. This will only re-execute the
+procedure, not the alloc/free that are needed for this. Using 0 will bypass
+the procedure. Default: 1 </dd>
+
+<dt><b>mode=</b> </dt>
+<dd>Another benchmark option: setting this to
+a non-negative value will restrict how far the SDFITS is processed. </dd>
+
+<dt><b>datadim=1|2</b>
+</dt>
+<dd>Another benchmark option: allowing all data to appear in one long one dimensional
+DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array. [1]
+
+<p> </dd>
+
+<dt><b>tab=</b> </dt>
+<dd>If given, this will be the (ascii) table to which either 1dim or
+2dim data (see datadim=) is written. For 1dim the x,y values printed are
+assumed Hz converted to GHz and raw intensity. For 2dim the row,x,y are
+printed, where row=1 is the first row. Apologies to non-radio users. Default:
+none. 
+<p> 
+<p> 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+By default NEMO compiles in double precision. The DATA1[nrows*nchan]
+"ONEDIM" mode will this occupy half the memory of a DATA2[nrows][nchan]
+array. NEMO will need to be compiled in single mode to have them use the
+same memory. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
 The following example takes all fits files matching
 a particular pattern and summarize their contents. <br>
 <pre>    ls *.?.fits &gt; dirin.lis
@@ -92,6 +137,8 @@ AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
 </pre>Here is a benchmark of the GBT ngc5291 example: <br>
 <pre>    time sdinfo ngc5291.fits dims=2,11,2,2,4 bench=100 help=c
     ### nemo Debug Info: ngc5291.fits : Nrows: 352   Ncols: 46  Nchan: 32768
+    ### nemo Debug Info: tcal: 24   cal: 46 sig: 45 fdnum: 0 ifnum: 0 plnum:
+0
     ### nemo Debug Info: DATA keyword TDIM7 = (32768,1,1,1)
     ### Warning [sdinfo]: PS Reduction procedure in 5 dimensions; data_col
 = 7
@@ -101,29 +148,38 @@ AGBT15B_287_39.raw.vegas.C.fits : Nrows: 3004   Ncols: 70  Nchan: 32768
     user    0m3.047s
     sys     0m0.048s
 </pre>
-<p> Here is a way to plot a spectrum: <br>
-<pre>    sdinfo ngc5291.fits t row=11 | tabplot - 
+<p> Here is a way to plot a spectrum, with the X-axis being the channel number
+<br>
+<pre>    sdinfo ngc5291.fits 0 row=11 | tabcomment - | tabplot -
 </pre>
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='scanfits.1.html'>scanfits(1NEMO)</a>
 , <a href='fitshead.1.html'>fitshead(1NEMO)</a>
+, <a href='csf.1.html'>csf(1NEMO)</a>
+, <a href='fits.5.html'>fits(5NEMO)</a>
  <p>
 <a href='https://fits.gsfc.nasa.gov/registry/sdfits.html'>https://fits.gsfc.nasa.gov/registry/sdfits.html</a>
 
 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/image/fits <p>
 <a href='http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits'>http://safe.nrao.edu/wiki/pub/GB/Data/GBTIDLExampleAndSampleData/ngc5291.fits</a>
 
 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>23-Nov-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 dimension analysis w/ ngc5291<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 18-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 Handle CIMAFITS and MATRIX extensions<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-27-sep-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Improved column reading, display TDIM<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJTq
+27-sep-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Improved column reading, display TDIM<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+15-mar-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Finalized more benchmarks<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-oct-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 add tab=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -133,11 +189,12 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

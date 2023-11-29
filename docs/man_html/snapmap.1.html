@@ -9,80 +9,86 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-snapmap - map a snapshot into a 2D image 
+snapmap - map (kriging) a snapshot into a 2D image 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>snapmap in=</b>snapshot
-<b>out=</b>image [parameter=value] 
+<b>snapmap
+in=</b>snapshot <b>out=</b>image [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>snapmap</i> "grids" two arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
-
-expressions  (default: <b>x</b>, and <b>y</b>) of a snapshot into a 2D map, using another
-<a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
- expression (default: <b>m</b>) as the map value. The result is
-an <a href='image.5.html'><i>image(5NEMO)</i></a>
-, with optional astronomical projection for direct comparision
-with true astronomical images. There are a number of ways implemented to
-"grid" the particles: mean value, with or without gaussian or cone weighting,
-and forms of linear interpolation. These functions are also known as "kriging".
-<p>
+<i>snapmap</i> "grids" two
+arbitrary <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
+ expressions  (default: <b>x</b>, and <b>y</b>) of a snapshot
+into a 2D map, using another <a href='bodytrans.3.html'><i>bodytrans(3NEMO)</i></a>
+ expression (default: <b>m</b>) as
+the map value. The result is an <a href='image.5.html'><i>image(5NEMO)</i></a>
+, with optional astronomical
+projection for direct comparision with true astronomical images. There are
+a number of ways implemented to "grid" the particles: mean value, with
+or without gaussian or cone weighting, and forms of linear interpolation.
+These functions are also known as "kriging". <p>
 Use <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
- instead to grid datacubes (e.g. X-Y-Z), or if you need
-various styles of line of sight integrations. <b>snapmap</b> is more appropriate
-to obtain well interpolated maps from <i>irregularly sampled</i> data where the
-input mapping <i>I(x,y)</i> is still a smooth function, although good results
-can also be ontained by averaging the values (the default mode) or using
-a smoothing length <i>svar=<b>. 
-<h2><a name='sect3' href='#toc3'></b></i>Parameters</a></h2>
-The following parameters are recognized:
+ instead
+to grid datacubes (e.g. X-Y-Z), or if you need various styles of line of sight
+integrations. <b>snapmap</b> is more appropriate to obtain well interpolated maps
+from <i>irregularly sampled</i> data where the input mapping <i>I(x,y)</i> is still a
+smooth function, although good results can also be ontained by averaging
+the values (the default mode) or using a smoothing length <i>svar=<b>. 
+<p></b></i> 
+<h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use --help to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format. Multiple snapshots
-can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.  [no default].
-</dd>
+ format.
+Multiple snapshots can be stacked uses the <b>times=</b> keyword: see <b>stack=</b> below.
+ [no default]. </dd>
 
 <dt><b>out=<i>out-file</i></b> </dt>
 <dd>output file, will be in <a href='image.5.html'><i>image(5NEMO)</i></a>
- format. Note that multiple
-<b>times</b> and/or multiple <b>evar</b>&rsquo;s will produce multiple images in this file. [no
-default]. </dd>
+ format. Note
+that multiple <b>times</b> and/or multiple <b>evar</b>&rsquo;s will produce multiple images
+in this file. [no default]. </dd>
 
 <dt><b>times=</b><i>t1:t2,t3,..</i> </dt>
-<dd>Selection of the times of snapshots to be selected
-for gridding. For <b>stack=t</b> all snapshots will be co-added into one image,
-however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can request multiple
-output images. [Default: <b>all</b>]. </dd>
+<dd>Selection of the times of snapshots
+to be selected for gridding. For <b>stack=t</b> all snapshots will be co-added into
+one image, however selecting <b>stack=f</b> or selecting multiple <b>evar</b>&rsquo;s one can
+request multiple output images. [Default: <b>all</b>]. </dd>
 
 <dt><b>xrange=<i>xb:xe</i></b> </dt>
-<dd>Range in <b>xvar</b> to bin. Note these
-are the outer edges, not their cell centers. [default: <b>-2:2</b>]. </dd>
+<dd>Range in <b>xvar</b>
+to bin. Note these are the outer edges, not their cell centers. [default:
+<b>-2:2</b>]. </dd>
 
-<dt><b>yrange=<i>xb:xe</i></b>
-</dt>
+<dt><b>yrange=<i>xb:xe</i></b> </dt>
 <dd>Range in <b>yvar</b> to bin [default: <b>-2:2</b>]. </dd>
 
-<dt><b>xvar=</b><i>x-expression</i> </dt>
-<dd>The value of <i>x-expression</i>
-is gridded along the X axis. [default: <b>x</b>]. </dd>
+<dt><b>xvar=</b><i>x-expression</i>
+</dt>
+<dd>The value of <i>x-expression</i> is gridded along the X axis. [default: <b>x</b>]. </dd>
 
-<dt><b>yvar=</b><i>y-expression</i> </dt>
-<dd>The value of
-<i>y-expression</i> is gridded along the Y axis. [default: <b>y</b>]. </dd>
+<dt><b>yvar=</b><i>y-expression</i>
+</dt>
+<dd>The value of <i>y-expression</i> is gridded along the Y axis. [default: <b>y</b>]. </dd>
 
-<dt><b>evar=<i>e1,e2,...</i></b> </dt>
-<dd>Variable(s)
-to denote the emissivity per particle.  Multiple expressions, separated
-by commas, can be given, each of them generating a separate image in  a
-single multi-image output file. [default: <b>m</b>]. </dd>
+<dt><b>evar=<i>e1,e2,...</i></b>
+</dt>
+<dd>Variable(s) to denote the emissivity per particle.  Multiple expressions,
+separated by commas, can be given, each of them generating a separate image
+in  a single multi-image output file. [default: <b>m</b>]. </dd>
 
 <dt><b>svar=<i>smoothing</i></b> </dt>
-<dd>Variable to denote
-gaussian weighting size in X and Y. Note this is the gaussian sigma, not
-the FWHM (FMHW = 2.355 * sigma). Only used if <b>mode=mean</b>.  </dd>
+<dd>Variable
+to denote gaussian weighting size in X and Y. Note this is the gaussian
+sigma, not the FWHM (FMHW = 2.355 * sigma). Only used if <b>mode=mean</b>.  </dd>
 
 <dt><b>sfunc=<i>smoothing-function</i></b>
 </dt>
@@ -127,19 +133,18 @@ griddes with the appropriate sky projection. Default: no sky projection.
 <dd>Normally gaussian smoothing gets cut off when the argument to the
 exponent is larger than <b>emax</b>, to prevent roundoff error and/or contributions
 from too far away. This equals <b>sqrt(2*emax)</b> times the sigma listed in <b>svar=</b>.
- [Default: <b>10</b>] </dd>
+ [Default: <b>10</b>] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Bugs</a></h2>
-Combinations of large snapshots and large images may
-run into memory problems since both the snapshot and the image(s) must
-fit into memory. <p>
-Sky projections do not guarantee flux conservation, interpolation
-is done in linear space. 
+Sky projections do not guarantee flux conservation,
+interpolation is done in linear space. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Example</a></h2>
-This program was written to create maps
-with more accurate interpolated velocity fields from models. However, in
-the default mode it used the same <i>mean</i> pixel value as <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
+This program was written
+to create maps with more accurate interpolated velocity fields from models.
+However, in the default mode it used the same <i>mean</i> pixel value as <a href='snapgrid.1.html'><i>snapgrid(1NEMO)</i></a>
 :
 <br>
 <pre>   snapmap  snap101 ccd101 evar=-vz
@@ -168,16 +173,18 @@ Here&rsquo;s a simple example using NEMO&rsquo;s pipes: <br>
 , <a href='ccdsky.1.html'>ccdsky(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  <p>
-kiging programs
-such as <i>lmtgridder</i> and <i>gbtgridder</i> take single dish pointings and create
-a map from them. 
+kriging
+programs such as <i>lmtgridder</i> and <i>gbtgridder</i> take single dish pointings and
+create a map from them. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>src/nbody/image  <tt> </tt>&nbsp;<tt> </tt>&nbsp;snapmap.c
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>20-jun-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-may-11<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3: implemented emax= and sfunc=cone<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -196,7 +203,7 @@ Peter Teuben
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

@@ -11,7 +11,7 @@ HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bi
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-snapshell - compute statistics of bodyvariables in a set of radial
+snapshell - compute statistics of bodyvariables in a set of "radial"
 
 <p>shells 
 <p> 
@@ -21,118 +21,120 @@ snapshell - compute statistics of bodyvariables in a set of radial
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapshell</i>
 computes selected diagnostics and their statistics  from an N-body snapshot
-in a set of shells in an arbitrary body variable (default <b>rvar=r</b>). The snapshot
-must have been properly centered and oriented using  other tools (e.g. <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
-
-and/or <a href='snaprect.1.html'><i>snaprect(1NEMO)</i></a>
-).  <p>
-Normally the shell radii are explicitly set (optionally
-normalized) in <b>rvar</b> space, by setting <b>cumulative=t</b> the <b>mvar=</b> variable is
-used to compute a cumulative mass in each shell, still sorted by <b>rvar</b> of
-course. <p>
-An arbitrary weighting may be specified for each particle. <p>
-The output
-will be an ascii table, in which for each variable it will print a selected
-set of statistics (e.g. mean, dispersion, min, max, skewness, kurtosis, number
-of particles). Shells with no particles are not output however. <p>
-Optionally
-a viewing  axis (as seen from the center) can be selected with an opening
-angle. In this case only the particles within this cone are counted. See
-<b>cone=</b> and <b>angle=</b> below. <p>
+in a set of shells in an arbitrary body variable (default <b>rvar=r</b> being
+the radius). The snapshot must have been properly centered and oriented
+using  other tools (e.g. <a href='snapcenter.1.html'><i>snapcenter(1NEMO)</i></a>
+ and/or <a href='snaprect.1.html'><i>snaprect(1NEMO)</i></a>
+), as well
+have been sorted in  <b>rvar</b>. See <a href='snapsort.1.html'><i>snapsort(1NEMO)</i></a>
+ how to sort a snapshot. <p>
+Normally
+the shell radii are explicitly set (optionally normalized) in <b>rvar</b> space,
+by setting <b>cumulative=t</b> the <b>mvar=</b> variable is used to compute a cumulative
+mass in each shell, still sorted by <b>rvar</b> of course. <p>
+An arbitrary weighting
+may be specified for each particle. <p>
+The output will be an ascii table, in
+which for each variable it will print a selected set of statistics (e.g.
+mean, dispersion, min, max, skewness, kurtosis, number of particles). Shells
+with no particles are not output however. <p>
+Optionally a viewing  axis (as
+seen from the center) can be selected with an opening angle. In this case
+only the particles within this cone are counted. See <b>cone=</b> and <b>angle=</b> below.
+<p>
 The image (ccd) based program <a href='ccdellint.1.html'><i>ccdellint(1NEMO)</i></a>
- does
-something similar in 2D. 
+ does something similar in
+2D. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized
-in order; they may be given in any order if the keyword is also given. Use
---help to confirm this man page is up to date.  
+ The following parameters are recognized in order; they may
+be given in any order if the keyword is also given. Use --help to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>snap_file</i> </dt>
-<dd>Input data is
-read from <i>snap_file</i>, which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
- format.  Note that
-only the first snapshot found in this file will be used. No default. </dd>
+<dd>Input data is read from <i>snap_file</i>,
+which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
+ format.  Note that only the first snapshot
+found in this file will be used. No default. </dd>
 
-<dt><b>radii=</b><i>r0,r1,r2,...</i>
+<dt><b>radii=</b><i>r0,r1,r2,...</i> </dt>
+<dd>A set of radii
+in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+ format, representing the edges of the shell. They are
+normalized if <b>normalized=t</b> is used, and their units are in <b>rvar</b> space,
+unless <b>cumulative=t</b> is used, when they are in <b>cvar</b> units. No default. </dd>
+
+<dt><b>pvar=</b><i>variable</i>
 </dt>
-<dd>A set of radii in <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
- format, representing the edges of the
-shell. They are normalized if <b>normalized=t</b> is used, and their units are
-in <b>rvar</b> space, unless <b>cumulative=t</b> is used, when they are in <b>cvar</b> units.
-No default. </dd>
-
-<dt><b>pvar=</b><i>variable</i> </dt>
 <dd>The <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
- variable selected for statistics.
- [Default: <b>vt</b>]. </dd>
+ variable selected for statistics.  [Default: <b>vt</b>]. </dd>
 
-<dt><b>rvar=</b><i>shell_variable</i> </dt>
+<dt><b>rvar=</b><i>shell_variable</i>
+</dt>
 <dd>Default: <b>r</b> </dd>
 
 <dt><b>mvar=</b><i>mass_variable</i> </dt>
-<dd>Default:
-m </dd>
+<dd>Default: m </dd>
 
 <dt><b>weight=</b><i>body_weight</i> </dt>
-<dd>Expression used to compute the weight of each body.
-See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
- for the form of <i>body_weight</i>. Default: <b>1.0</b>. </dd>
+<dd>Expression
+used to compute the weight of each body. See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
+ for the form
+of <i>body_weight</i>. Default: <b>1.0</b>. </dd>
 
-<dt><b>axes=</b><i>x,y,z</i>
-</dt>
-<dd>Normalization values in X,Y and Z to compute (re-shape) radii. Only used
-if shells are given in configuration space (i.e. svar= is not used) and need
-to be ellipsoidal in shape. For certain choices of <b>rvar</b> the use of this
-keyword has to be taken with care. [Default: 1,1,1] </dd>
+<dt><b>axes=</b><i>x,y,z</i> </dt>
+<dd>Normalization values in X,Y and Z
+to compute (re-shape) radii. Only used if shells are given in configuration
+space (i.e. svar= is not used) and need to be ellipsoidal in shape. For certain
+choices of <b>rvar</b> the use of this keyword has to be taken with care. [Default:
+1,1,1] </dd>
 
 <dt><b>cone=</b><i>x,y,z</i> </dt>
-<dd>Central axis
-of the cone around which particles will be selected [0,0,1]. </dd>
+<dd>Central axis of the cone around which particles will
+be selected [0,0,1]. </dd>
 
-<dt><b>angle=</b><i>alpha</i>
-</dt>
-<dd>Opening angle of the cone to select particles from (-1 means no cone used).
-[-1] </dd>
+<dt><b>angle=</b><i>alpha</i> </dt>
+<dd>Opening angle of the cone to select particles
+from (-1 means no cone used, or angle &gt; 360). [-1] </dd>
 
 <dt><b>stats=</b><i>print_stats</i> </dt>
-<dd>Statistics selected to print. Allowed values are <b>mean,
-dispersion, min, max, median, kurt, skew, npt</b>, though minimum match applies.
-[Default: <b>mean,disp,n</b>]. </dd>
+<dd>Statistics
+selected to print. Allowed values are <b>mean, dispersion, min, max, median,
+kurt, skew, npt</b>, though minimum match applies. [Default: <b>mean,disp,n</b>]. </dd>
 
-<dt><b>format=<i>string</i></b> </dt>
-<dd>Valid C-format descriptor, as used
-in <a href='printf.3.html'><i>printf(3)</i></a>
-, for tabular output. [default: <b>%g</b>]. </dd>
+<dt><b>format=<i>string</i></b>
+</dt>
+<dd>Valid C-format descriptor, as used in <a href='printf.3.html'><i>printf(3)</i></a>
+, for tabular output. [default:
+<b>%g</b>]. </dd>
 
 <dt><b>normalized=t|f</b> </dt>
-<dd>Should <b>svar=</b>
-(if used) be done in normalized (0..1) space, and therefore easily allow
-equal size bins, or in direct svar space (this requires knowledge of the
-range of the <b>svar</b> variable. [Default: <b>t</b>] </dd>
+<dd>Should <b>svar=</b> (if used) be done in normalized (0..1) space,
+and therefore easily allow equal size bins, or in direct svar space (this
+requires knowledge of the range of the <b>svar</b> variable. [Default: <b>t</b>] </dd>
 
-<dt><b>cumulative=t|f</b> </dt>
-<dd>Should the shells
-be defined in the cumulative (and optionally normalized) space of the <b>cmas</b>
-variable. This way the number of particles in each shell can be better/differently
-controlled from selecting them in <b>rvar</b> space. [Default: <b>f</b>] </dd>
+<dt><b>cumulative=t|f</b>
+</dt>
+<dd>Should the shells be defined in the cumulative (and optionally normalized)
+space of the <b>cmas</b> variable. This way the number of particles in each shell
+can be better/differently controlled from selecting them in <b>rvar</b> space.
+[Default: <b>f</b>] </dd>
 
 <dt><b>first=t|f</b> </dt>
-<dd>Should
-only the first snapshot be processed? [Default: <b>f</b>] </dd>
+<dd>Should only the first snapshot be processed? [Default:
+<b>f</b>] </dd>
 
 <dt><b>rstats=t|f</b> </dt>
-<dd>Should statistics
-on <b>r</b> also be added as a third set of columns. This can be handy if you selected
-a particular <b>rvar</b> and want to see over what radii they apply. [Default:
-<b>f</b>] 
+<dd>Should statistics on <b>r</b> also be added as a third set of columns.
+This can be handy if you selected a particular <b>rvar</b> and want to see over
+what radii they apply. [Default: <b>f</b>] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To get a mean rotation speed in the disk, and the velocity
-dispersion, for a set of rings: <br>
+To get a mean rotation speed
+in the disk, and the velocity dispersion, for a set of rings: <br>
 <pre>    % mkdisk - rmax=10 | snapsort - - r | snapshell - 0.01:10:0.1 pvar=vt
     #[rvar] mea  dis  npt  #[pvar] mea  dis  npt
     0.221025 0 1           0.213258 0
@@ -163,6 +165,7 @@ the values in svar space): <br>
 <pre>    % snapsort run01.dat - phi times=4.0 | snapshell - -400:-200:10 rvar=phi cumul=t
 </pre>
 <p> 
+<p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
 Although <b>rvar=</b> can be choosen arbitrarely, with a cone selection
 (i.e. <b>angle&gt;0</b>) any select  <b>rvar!=r</b> has probably no meaning. <p>
@@ -189,7 +192,8 @@ Peter
 <pre>13-nov-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-nov-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 some re-write: svar= is now rvar= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 15-nov-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 added mvar= and cumulative=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-14-nov-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added cone= and angle=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-nov-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added cone= and angle=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+27-nov-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1 fix angle to be full opening angle of the cone <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

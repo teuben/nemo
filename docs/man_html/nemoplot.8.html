@@ -26,53 +26,57 @@ tables (see <a href='table.5.html'><i>table(5NEMO)</i></a>
 ) can contain #-style comments, we allow (NEMO)
 commands to be embedded with a special &rsquo;#PLOT&rsquo; line, making such tables somewhat
 <i>self-plotting</i>. <p>
+Although <b>nemoplot</b> is a great way to self-plot a table, NEMO&rsquo;s
+plotting routines are arguably not publication quality, and a followup
+python/matplotlib script may be needed. 
+<p> <p>
 The <a href='xmgrace.1.html'><i>xmgrace(1)</i></a>
- program has a similar approach, combining data
-and the commands to produce the plot all in a single file, referred to
-as a Grace Project File (*.agr). 
+ program has a similar
+approach, combining data and the commands to produce the plot all in a
+single file, referred to as a Grace Project File (*.agr). 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-Except for the first parameter,
-subsquent parameters must be <i>key=val</i>, and cannot be abbreviated. 
+Except
+for the first parameter, subsquent parameters must be <i>key=val</i>, and cannot
+be abbreviated. 
 <dl>
 
-<dt><i>table_file</i>
-</dt>
-<dd>This needs to be the first parameter, without a keyword, and must be an
-existing file (normally an acii table).   No default </dd>
+<dt><i>table_file</i> </dt>
+<dd>This needs to be the first parameter, without
+a keyword, and must be an existing file (normally an acii table).   No default
+</dd>
 
 <dt><b>plot=</b><i>number</i> </dt>
-<dd>Pick which
-plot# to run (0 means show all, 1 execute the first, etc.)   [1] </dd>
+<dd>Pick which plot# to run (0 means show all, 1 execute the first,
+etc.)   [1] </dd>
 
-<dt><b>tmp=</b><i>script-file</i>
-</dt>
-<dd>Name of bash script to run plots, which will be created. [tmp$$] </dd>
+<dt><b>tmp=</b><i>script-file</i> </dt>
+<dd>Name of bash script to run plots, which will
+be created. [tmp$$] </dd>
 
-<dt><b>clean=0|1</b>
-</dt>
-<dd>means clean up bash script, 0 means keep it [1] </dd>
+<dt><b>clean=0|1</b> </dt>
+<dd>means clean up bash script, 0 means keep it
+[1] </dd>
 
 <dt><b>yapp=</b> </dt>
-<dd>Override any potential
-<a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
- setting from the one used in the script. Unlike in a normal
-NEMO command line parser, here we allow keywords to be given multiple times,
-the last one set will be the one used. [Default: not used] 
+<dd>Override any potential <a href='yapp.5.html'><i>yapp(5NEMO)</i></a>
+ setting from the one used
+in the script. Unlike in a normal NEMO command line parser, here we allow
+keywords to be given multiple times, the last one set will be the one used.
+[Default: not used] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Any &rsquo;#PLOT&rsquo;
-commands will likely refer to a table filename, which must be in the current
-(or correct) directory. <p>
-This is a simple bash script, the CLI does not adhere
-to the usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- conventions. 
+Any &rsquo;#PLOT&rsquo; commands will likely refer to a table
+filename, which must be in the current (or correct) directory. <p>
+This is a
+simple bash script, the CLI does not adhere to the usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+
+conventions. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An example from the <i>nemoplot</i>
-repository: <br>
+An example from the <i>nemoplot</i> repository: <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;cd $NEMODAT/nemoplot
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;nemoplot shift2.tab plot=2
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;
