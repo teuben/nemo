@@ -40,7 +40,7 @@
 #          22-jun-2023   added code=3 for princeton hackathon comparisons
 
 _script=mkmh97
-_version=28-nov-2023
+_version=29-nov-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)     # now
 
@@ -52,6 +52,8 @@ nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies, thus individual masses not equal)
 fixed=0         # fixed potential for G1 ?
+potname=plummer       # fixed potential name for G1
+potpars=0,1,3*pi/16   # fixed potential parameters for G1
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius
@@ -147,7 +149,6 @@ source  $_pars
 
 # derived/fixed parameters
 r=-$box:$box
-plummer_pars="0,1,3*pi/16"
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
@@ -176,7 +177,7 @@ if [ $restart = 1 ]; then
     # compute the orbit of a massless G2 in a fixed potential
     dt=0.01
     echo "Computing fixed-path orbit with dt=$dt"
-    mkorbit - -$r0 $rp 0 $v0 0 0 potname=plummer potpars="0,1,3*pi/16" |\
+    mkorbit - -$r0 $rp 0 $v0 0 0 potname=$potname potpars=$potpars |\
 	orbint - - dt=$dt nsteps=$tstop/$dt nsave=$step/$dt |\
 	orblist -  > fixed-path.tab 2>&1
     
@@ -190,11 +191,11 @@ if [ $restart = 1 ]; then
 	echo "Fixed potential case; only code=0,1 are supported"
 	if [ $code = 0 ]; then
 	    hackcode3 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc \
-		      potname=plummer potpars=$plummer_pars   > $run.4.log
+		      potname=$potname potpars=$potpars   > $run.4.log
 	    snapdiagplot $run.4 tab=$run.4.etot
 	elif [ $code = 1 ]; then
 	    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap \
-		      accname=plummer accpars=$plummer_pars    > $run.4.log
+		      accname=$potname accpars=$potpars    > $run.4.log
 	    tabcols $run.4.log 1,2 > $run.4.etot
 	fi
 	# exit 0
