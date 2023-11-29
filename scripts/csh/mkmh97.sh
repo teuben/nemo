@@ -40,9 +40,9 @@
 #          22-jun-2023   added code=3 for princeton hackathon comparisons
 
 _script=mkmh97
-_version=6-oct-2023
+_version=28-nov-2023
 _pars=nemopars.rc
-_date=$(date +%Y-%m-%dT%H:%M:%S)
+_date=$(date +%Y-%m-%dT%H:%M:%S)     # now
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
@@ -51,7 +51,7 @@ run=run0        # directory and basename of the files belonging to this simulati
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies, thus individual masses not equal)
-fixed=0         # fixed potential for galaxy-1 ?
+fixed=0         # fixed potential for G1 ?
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius
@@ -173,13 +173,21 @@ if [ $restart = 1 ]; then
 	snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t
     fi
 
+    # compute the orbit of a massless G2 in a fixed potential
+    dt=0.01
+    echo "Computing fixed-path orbit with dt=$dt"
+    mkorbit - -$r0 $rp 0 $v0 0 0 potname=plummer potpars="0,1,3*pi/16" |\
+	orbint - - dt=$dt nsteps=$tstop/$dt nsave=$step/$dt |\
+	orblist -  > fixed-path.tab 2>&1
+    
+
     # integrator:  0:  hackcode1 is O(NlogN) code 
     #              1:  gyrfalcON is O(N)
     #              2:  bonsai2 is O(N) but scales faster for "small" N
     #              3:  rungravidy O(N^2) code
     echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
     if [ $fixed = 1 ]; then
-	echo Fixed potential now, only code=0 is supported
+	echo "Fixed potential case; only code=0,1 are supported"
 	if [ $code = 0 ]; then
 	    hackcode3 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc \
 		      potname=plummer potpars=$plummer_pars   > $run.4.log
@@ -281,6 +289,13 @@ if [ ! -e $run.xv.tab ]; then
     #  plot the path in Pos and Vel separately
     tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-pos)
     tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-vel)
+
+    # compare to the fixed-path
+    tabcols $run.xv.tab 1,4,5    > fixed1.tab
+    tabcols fixed-path.tab 2,3,6 > fixed2.tab
+    paste fixed1.tab fixed2.tab | tabplot - 1 2,5 line=1,1 color=3,2 ycoord=0 yapp=$(yapp path-pos-fixed)
+    paste fixed1.tab fixed2.tab | tabplot - 1 3,6 line=1,1 color=3,2 ycoord=0 yapp=$(yapp path-vel-fixed)
+
 else
     echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
@@ -472,6 +487,8 @@ fi
 #    rm -rf run0
 #    run=run0 seed=123      should give:    m16=0.821802 for phi*phi*phi*phi
 #    run=run0 seed=123      should give:    m16=0.861046 for -phi*phi*phi  (now the default)
+#    nemopars m16 run0/nemopars.rc
+
 
 
 #    NemoPlots with relevant scales for this script
