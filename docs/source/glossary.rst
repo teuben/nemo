@@ -30,7 +30,7 @@ Glossary
   
   fie
       Most expressions that you give to
-      :term:`program keyword`s are
+      :term:`program keyword` s are
       parsed by *nemofie* and eventually ``fie``. (Nomenclature
       borrowed from :term:`GIPSY`)
 
@@ -47,7 +47,7 @@ Glossary
 
   GIPSY
       The Groningen Image Processing System. A number of concepts in NEMO, and
-      a few routines, have been taken liberally from GIPSY.
+      a few routines, have been taken liberally from :term:`GIPSY`.
   
 
   history
@@ -118,9 +118,10 @@ Glossary
 
   system keyword
       Global keyword that every NEMO
-      program knows about, and are not listed in the (program)
-      keywords that can be seen by issuing e.g. **help=** (in itself
-      being a system keyword). This concept originated in :term:`GIPSY`
+      program knows about, and are not listed in the :term:`program keyword` s
+      that can be seen by issuing e.g. **help=** (in itself
+      being a system keyword). This concept originated in :term:`GIPSY` where
+      hidden keywords are also used.
 
   table
       A table consists of rows and columns of values, numbers or text.
