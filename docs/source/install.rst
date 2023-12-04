@@ -183,3 +183,71 @@ as can be seen in the example below
 
 For a few packages, we have a few existing examples in the ``$NEMO/usr`` tree
 (e.g. amuse, martini, unsio and uns_projects)
+
+
+Package Managers
+----------------
+
+Most operating systems will have some package manager that controls how software
+is installed. There is also a list in ``$NEMO/src/scripts/linux`` and ``$NEMO/src/scripts/brew``,
+but here we list a few common ones:
+
+.. tab:: Ubuntu
+
+   The package manager is called ``apt``
+
+   .. code:: bash
+
+      sudo apt install ...
+
+      build-essential	     
+      gcc
+      g++
+      gfortran
+	     
+      pgplot5
+      rman
+      xorg-dev	    
+
+.. tab:: Fedora
+
+   The package manager is called ``dnf`` (formerly ``rpm``)
+
+   .. code:: bash
+
+      sudo dnf install ...
+	     
+      gcc
+      gcc-gfortran
+      gcc-g++
+      tcsh
+      make
+      libtirpc-devel
+
+      pgplot-devel
+      cfitsio-devel
+      netcdf-devel
+      hdf-devel
+      hdf5-devel
+
+
+.. tab:: RedHat
+
+   Not tested, probably same as Fedora
+
+   .. code:: bash
+
+      sudo dnf install ...
+
+.. tab:: Homebrew
+
+   The package manager is called ``brew``, but installation is done via https://brew.sh   
+
+   Normally installed in the users own space. Prepend with the usual "sudo" if need be. Can be used
+   on both Linux and Mac.  Recent versions have barred pgplot, because of licencing issues.
+
+   .. code:: bash
+
+      brew install ...
+
+
