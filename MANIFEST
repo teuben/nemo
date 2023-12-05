@@ -1,12 +1,11 @@
     File Name                       Description
 ---------------------------------------------------------------------------
   MANIFEST                   This file
-  Makefile                   Root makefile for NEMO (created by configure)
+  Makefile.in                Root makefile for NEMO
   README.md                  Quick info on NEMO and where to continue reading
-  INSTALL                    Pointer to other instructions
   README.install             Installation instructions
   VERSION                    major.minor.patch - see src/scripts/version
-  nemo_start.sh              Startup  for bourne shell
-  nemo_start.csh             Startup  for C shell
+  nemo_start.sh.in           Startup  for bourne shell
+  nemo_start.csh.in          Startup  for C shell
 
 
