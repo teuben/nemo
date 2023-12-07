@@ -20,7 +20,7 @@ version=2023.09-0  # 3.11.5
 
 
    dir=$(pwd)/anaconda3       # where anaconda will be located
-  wget=wgetc                  # use wgetc is you have my cashing version
+  wget=wgetc                  # use wgetc is you have my cashing version (wget=curl is also allowed, 
   os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
  cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
 
@@ -47,16 +47,18 @@ if [ "$os" = "Darwin" ]; then
 fi
 
 mc3=$(printf $url $version $os $cpu)
-$wget $mc3
-
 msh=$(basename $mc3)
 
+if [ $wget = "curl" ]; then
+    curl $mc3 -o $msh
+else
+    $wget $mc3 
+fi
 
 if [ ! -e $msh ]; then
     echo "File $msh not found. Wrong version=$version ?"
     exit 0
 fi
-
 
 bash $msh -b -p $dir
 

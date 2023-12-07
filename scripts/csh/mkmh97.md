@@ -47,6 +47,10 @@ As in many NEMO programs, units are virial (N-body) units.
 
 4. **fixed=**: if set to 1, use a fixed potential for galaxy-1.  [0]
 
+4. **potname=**: if **fixed=1**, this is the potname. [plummer]
+
+4. **potpars=**: if **fixed=1**, this is the potpars. [0,1,3*pi/16]
+
 4. **step=**: step time when full snapshots are stored. 1 is probably ok,
    for movies you probably need 0.1.   For very large values of nbody a larger value for the step
    is probably adviced, unless you have a lot of disk space. Perhaps step=5.  [1.0]
@@ -159,6 +163,9 @@ The following files should be present, the example is for run=run0:
      final2cm.tab            Table of cumulative mass vs. radius
      final2u.ccd             Final bound particles of Galaxy-2
      final2u.snap
+     fixed-path.tab          Integration of (single particle) radial orbit
+     fixed1.tab
+     fixed2.tab
      init.ccd.png            Initial conditions
      init.plot.png
      massg2g1.png            Cumulative mass of G2 around the center of G1
