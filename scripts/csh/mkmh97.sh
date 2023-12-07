@@ -41,7 +41,7 @@
 #           6-dec-2023   added zerocm=t|f and zm=0|1
 
 _script=mkmh97
-_version=6-dec-2023
+_version=7-dec-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)     # now
 
@@ -52,7 +52,7 @@ run=run0        # directory and basename of the files belonging to this simulati
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies, thus individual masses not equal)
-zm=0            # zero the masses of G2 (only if fixed=1)
+zm=0            # zero the masses of G2 (only if fixed=1) but add a pointmass of m=
 fixed=0         # fixed potential for G1 ?
 potname=plummer       # fixed potential name for G1
 potpars=0,1,3*pi/16   # fixed potential parameters for G1
@@ -84,7 +84,7 @@ debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
-save_vars="run nbody m em fixed step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
+save_vars="run nbody m em zm fixed potname potpars zerocm step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
