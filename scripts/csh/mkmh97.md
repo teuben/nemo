@@ -507,3 +507,22 @@ For this seed the relevant output parameters are:
   ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run108
   ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run109 eps=0.01
 
+
+## Operations
+
+The **save_vars** variable in the script lists the variables that are saved in the **nemopars.rc** file, so they original
+values as set on the command line (or the defaults in the script) can be used on subsequent runs.
+It is not uncommon to add new variables, which are then not in the nemopars.rc file. Instead the default value would be
+seen. This is a problem, and the only solution would be to add those variables manually to the nemopars.rc file, e.g.
+
+      echo zm=1 >> run0e/nemopars.rc
+
+We can currently run 4 types of interactions between G1 (always mass=1) and G2 (mass=m):
+
+1. TT72 style:
+
+2. MH97: fully self-consistent
+
+3. MH97 fixed=1 :   G1 is an analytical potential, but G2 is self-consistent, 
+
+4. MH97 fixed=1 mz=0 :   G1 is an analytical potential, G2 is a point mass with test particles
