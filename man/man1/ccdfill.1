@@ -1,7 +1,9 @@
 .TH CCDFILL 1NEMO "3 May 2017"
-.SH NAME
+
+.SH "NAME"
 ccdfill \- patch up the holes in an image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdfill\fP [parameter=value]
 
 .SH "DESCRIPTION"
@@ -73,11 +75,16 @@ will be bogus. It is better to set m=4 for those cases.
 Edge effects will occur for large values of iter, use with caution. Really 
 a better bi-linear interpolation is needed. See also 
 \fIccdintpol(1NEMO)\fP if your irregulaties are regular enough.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 image(3NEMO), ccdmath(1NEMO), ccdsmooth(1NEMO), ccdintpol(1NEMO)
-.SH AUTHOR
+.nf
+https://github.com/dokkum/maskfill
+.fi
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 10-Dec-93	V1.0 Created	PJT
