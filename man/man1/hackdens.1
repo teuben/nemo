@@ -31,7 +31,6 @@ Output data are written to \fIout-file\fP in snapshot format.
 Number of neighbors used to determine the local density. The default
 of 6 is the recommended value by Casertano & Hut (1985)
 [default: 6].
-
 .TP
 \fBrneib\fP=\fIvalue\fP
 Initial radius to search the neighbors. \fIHackdens\fP adaptively
@@ -109,27 +108,28 @@ the center will improve the speed significantly.
 .SH "EXAMPLES"
 The following example takes an N-body snapshot, sort the particles
 in the order of the distance from the C.M., and calculate local density.
-.nf
+.EX
 
    snapcenter nbody.dat nbody.centered
    snapsort nbody.centered nbody.sorted 
    hackdens nbody.sorted nbody.density
 
-.fi
+.EE
 One can also weight the particles by its potential to some power. For this we create a Plummer sphere, without
 centering, and compute the center in two ways:
-.nf
+.EX
+
    mkplummer - 100 zerocm=f | snapsort - - rank=r > p.dat
    snapcenter p.dat . report=t
    hackdens p.dat - | snapcenter  - . weight=dens report=t
    hackforce p.dat - | snapcenter - . weight="-phi*phi*phi" report=t
    hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t
    
-.fi
+.EE
 Note that in this case the Plummer sphere should have the correct mathematical center, and not \fIcentered\fP.
 This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh, in which these different methods
 can also be applied to different models, as expanded in the following table.
-.nf
+.EX
 
     nbody=100 models:     Plummer   King1   King3   King5  DeVauc
     -------------------------------------------------------------
@@ -148,33 +148,34 @@ can also be applied to different models, as expanded in the following table.
 
 A (*) denotes the best method for that model.
 
+.EE
+
 .fi
 Although for a Plummer sphere the best method is more than twice as good than the worst method,
 this does not apply to other models.
 .PP
 \fIdensity(1falcON)\fP is considerable faster, about twice with their K=32 default. 
-.nf
+.EX
 
-mkplummer - 100000 |\
- snapscale - - mscale=10 |\
- snapsort - - |\
- density - - give=mxvr |\
- snapshell - '10**[-4:4:0.1]' dens  |\
- tabmath - - 'log(%1),log(%4)' all |\
+mkplummer - 100000 |\\
+ snapscale - - mscale=10 |\\
+ snapsort - - |\\
+ density - - give=mxvr |\\
+ snapshell - '10**[-4:4:0.1]' dens  |\\
+ tabmath - - 'log(%1),log(%4)' all |\\
  tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
 
 vs.
 
-mkplummer - 100000 |\
- snapscale - - mscale=10 |\
- snapsort - - |\
- hackdens - - |\
- snapshell - '10**[-4:4:0.1]' dens  |\
- tabmath - - 'log(%1),log(%4)' all |\
+mkplummer - 100000 |\\
+ snapscale - - mscale=10 |\\
+ snapsort - - |\\
+ hackdens - - |\\
+ snapshell - '10**[-4:4:0.1]' dens  |\\
+ tabmath - - 'log(%1),log(%4)' all |\\
  tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
 
-
-.fi
+.EE
 
 .SH "BUGS"
 The local density is calculated using (neib-1)th neighbor.
@@ -215,14 +216,14 @@ Jun Makino
 
 .SH "HISTORY"
 .nf
-.ta +1.5i +5.5i
+.ta +1.5i +4.5i
 2-Dec-88  	V1.0:Created  	Jun
 6-jul-89	doc updated?	Jun
 23-oct-90	doc updated	Peter
 18-jul-92	printf -> dprintf to make it pipable	Peter
-24-may-02	fixed running out of bits for large-N systems	PJT
+24-may-02	fixed running out of bits for large-N 	PJT
 11-aug-2022	added example hackforce vs. hackdens	PJT
 21-sep-2023	added direct=	PJT
 11-oct-2023	V3.0 added norm=1 as a new default	PJT
-12-oct-2023	V3.0 - proper mass scaling as well as nbody scaling	PJT
+12-oct-2023	V3.0 proper mass/nbody scaling 	PJT
 .fi
