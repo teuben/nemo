@@ -29,29 +29,34 @@ There are a few programs with which images can be initialized:
       double Dx 1.00000
       double Dy 1.00000
       double Dz 1.00000
+      double Xrefpix 0.00000 
+      double Yrefpix 0.00000 
+      double Zrefpix 0.00000 
       double MapMin -4.00000
       double MapMax 0.00000
       int BeamType 0
       double Beamx 0.00000
       double Beamy 0.00000
       double Beamz 0.00000
+      double Restfreq 0.00000 
+      double VLSR 0.00000 
       double Time 0.00000
       char Storage[5] "CDef"
+      int Axis 1
     tes
     set Map
-      double MapValues[2][4] -4.00000 -3.00000 -2.00000 -1.00000
-        -3.00000 -2.00000 -1.00000 0.00000
+      double MapValues[2][4] 0.00000 1.00000 2.00000 3.00000 1.00000 
+         2.00000 3.00000 4.00000 
     tes
   tes
 
   % ccdprint ccd1 x= y= label=x,y
    Y\X 0 1
  
-  3  -1 0
-  2  -2 -1
-  1  -3 -2
-  0  -4 -3
-
+  3  3 4 
+  2  2 3 
+  1  1 2 
+  0  0 1 
 
 - **snapgrid** converts a snapshot to an image.
 

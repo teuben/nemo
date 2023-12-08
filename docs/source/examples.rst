@@ -40,7 +40,7 @@ on your CPU and test your patience and integrator.
 These models are produced in so-called RMS-units in which the
 gravitational constant :math:`G=1`, the total mass :math:`M=1`, and binding energy
 :math:`E=-1/2`.
-In case you would like virial units
+In case you would like virial units (also known as N-body units)
 (see also:
 Heggie & Mathieu, :math:`E=-1/4`,
 in: *The use of supercomputers in stellar
@@ -443,7 +443,7 @@ then passed on for a quick and dirty plot (shown below).
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-One of NEMOs weaknesses is also it's strong point: programs must
+One of NEMOs weaknesses is arguably also its strong point: programs must
 generally be able to fit all their data in (virtual) memory.
 Although programs usually free memory associated with data
 that is not needed anymore, there is a very clear maximum
@@ -451,7 +451,7 @@ to the number of particles it can handle in a snapshot. By
 default\footnote{one can recompile NEMO in single precision and define
 {\tt body.h} with less wastefull members}
 a particle takes up about 100 bytes, which limits the size of a 
-snapshots on workstations.
+snapshots.
 
 It may happen that your data was generated on a machine which had
 a lot more memory
