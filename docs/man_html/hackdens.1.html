@@ -32,7 +32,7 @@ tag named <i>Density</i>.
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following parameters are recognized in
 order; they may be given in any order if the keyword is also given. Use
---help to confirm this man page is up to date.  
+<b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in</b>=<i>in-file</i> </dt>
@@ -46,8 +46,7 @@ to <i>out-file</i> in snapshot format. </dd>
 <dt><b>neib</b>=<i>value</i> </dt>
 <dd>Number of neighbors used to determine
 the local density. The default of 6 is the recommended value by Casertano
-&amp; Hut (1985) [default: 6]. 
-<p> </dd>
+&amp; Hut (1985) [default: 6]. </dd>
 
 <dt><b>rneib</b>=<i>value</i> </dt>
 <dd>Initial radius to search the neighbors.
@@ -128,60 +127,65 @@ will improve the speed significantly.
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 The following example takes
 an N-body snapshot, sort the particles in the order of the distance from
-the C.M., and calculate local density. <br>
-<pre>   snapcenter nbody.dat nbody.centered
-   snapsort nbody.centered nbody.sorted 
-   hackdens nbody.sorted nbody.density
-</pre>One can also weight the particles by its potential to some power. For this
-we create a Plummer sphere, without centering, and compute the center in
-two ways: <br>
-<pre>   mkplummer - 100 zerocm=f | snapsort - - rank=r &gt; p.dat
-   snapcenter p.dat . report=t
-   hackdens p.dat - | snapcenter  - . weight=dens report=t
-   hackforce p.dat - | snapcenter - . weight="-phi*phi*phi" report=t
-   hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t
-   
-</pre>Note that in this case the Plummer sphere should have the correct mathematical
+the C.M., and calculate local density.  
+<p>    snapcenter nbody.dat nbody.centered<br>
+    snapsort nbody.centered nbody.sorted <br>
+    hackdens nbody.sorted nbody.density<br>
+ 
+<p>  One can also weight the particles by its potential to some power. For
+this we create a Plummer sphere, without centering, and compute the center
+in two ways:  
+<p>    mkplummer - 100 zerocm=f | snapsort - - rank=r &gt; p.dat<br>
+    snapcenter p.dat . report=t<br>
+    hackdens p.dat - | snapcenter  - . weight=dens report=t<br>
+    hackforce p.dat - | snapcenter - . weight="-phi*phi*phi" report=t<br>
+    hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t<br>
+    <br>
+  Note that in this case the Plummer sphere should have the correct mathematical
 center, and not <i>centered</i>. This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh,
 in which these different methods can also be applied to different models,
-as expanded in the following table. <br>
-<pre>    nbody=100 models:     Plummer   King1   King3   King5  DeVauc
-    -------------------------------------------------------------
-    snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299
-    snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*
-    snapcenter  on phi:     0.053
-    snapcenter  on phi^2:   0.050*
-    snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035
-    snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031
-    snapcenterp:            0.080
-    snapmnmx on min phi:    0.122
-    snapmnmx on m 50% phi:  0.058
-    snapmnmx on m 33% phi:  0.063                           0.053
-    snapmnmx on m 25% phi:  0.067
-    rockstart on m:         0.082:
-A (*) denotes the best method for that model.
-</pre>Although for a Plummer sphere the best method is more than twice as good
-than the worst method, this does not apply to other models. <p>
+as expanded in the following table.  
+<p>     nbody=100 models:     Plummer
+  King1   King3   King5  DeVauc<br>
+     -------------------------------------------------------------<br>
+     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299<br>
+     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*<br>
+     snapcenter  on phi:     0.053<br>
+     snapcenter  on phi^2:   0.050*<br>
+     snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035<br>
+     snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031<br>
+     snapcenterp:            0.080<br>
+     snapmnmx on min phi:    0.122<br>
+     snapmnmx on m 50% phi:  0.058<br>
+     snapmnmx on m 33% phi:  0.063                           0.053<br>
+     snapmnmx on m 25% phi:  0.067<br>
+     rockstart on m:         0.082:<br>
+ 
+<p> A (*) denotes the best method for that model. 
+<p>  
+<p> </pre>Although for a Plummer
+sphere the best method is more than twice as good than the worst method,
+this does not apply to other models. <p>
 <a href='density.1falcON.html'><i>density(1falcON)</i></a>
-
-is considerable faster, about twice with their K=32 default.  <br>
-<pre>mkplummer - 100000 |is considerable faster, about twice with their K=32 default.
-
- snapscale - - mscale=10 |about twice with their K=32 default. 
- snapsort - - |about twice with their K=32 default. 
- density - - give=mxvr |about twice with their K=32 default. 
- snapshell - &rsquo;10**[-4:4:0.1]&rsquo; dens  |about twice with their K=32 default. 
- tabmath - - &rsquo;log(%1),log(%4)&rsquo; all |
- tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
-vs.
-mkplummer - 100000 |line=1,1 point=2,0.1
- snapscale - - mscale=10 |
- snapsort - - |
- hackdens - - |
- snapshell - &rsquo;10**[-4:4:0.1]&rsquo; dens  |
- tabmath - - &rsquo;log(%1),log(%4)&rsquo; all |
- tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1
-</pre>
+ is considerable faster,
+about twice with their K=32 default.   
+<p> mkplummer - 100000 |\  snapscale - -
+mscale=10 |\<br>
+  snapsort - - |\<br>
+  density - - give=mxvr |\<br>
+  snapshell - &rsquo;10**[-4:4:0.1]&rsquo; dens  |\<br>
+  tabmath - - &rsquo;log(%1),log(%4)&rsquo; all |\<br>
+  tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1<br>
+ 
+<p> vs. 
+<p> mkplummer - 100000 |\  snapscale - - mscale=10 |\<br>
+  snapsort - - |\<br>
+  hackdens - - |\<br>
+  snapshell - &rsquo;10**[-4:4:0.1]&rsquo; dens  |\<br>
+  tabmath - - &rsquo;log(%1),log(%4)&rsquo; all |\<br>
+  tabplot - 1 2 -4 4 -14 2  line=1,1 point=2,0.1<br>
+ 
+<p>  
 <p> 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 The local density is calculated using (neib-1)th neighbor. Calculation
@@ -233,11 +237,11 @@ Jun Makino
 6-jul-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;doc updated?<tt> </tt>&nbsp;<tt> </tt>&nbsp;Jun
 23-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;doc updated<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
 18-jul-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf -&gt; dprintf to make it pipable<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
-24-may-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed running out of bits for large-N systems<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-may-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;fixed running out of bits for large-N <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;added example hackforce vs. hackdens<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;added direct=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-oct-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added norm=1 as a new default<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-12-oct-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 - proper mass scaling as well as nbody scaling<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+12-oct-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 proper mass/nbody scaling <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
