@@ -2,7 +2,7 @@ ZENO
 ----
 
 
-`ZENO <http://www.ifa.hawaii.edu/faculty/barnes/zeno/index.html>`_
+`ZENO <http://www2.ifa.hawaii.edu/faculty/barnes/zeno/index.html>`_
 is Josh Barnes' version of an earlier version of NEMO that he
 continues to develop.
 We also keep a
