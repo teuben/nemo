@@ -22,7 +22,7 @@ data. We list a few
 
 * clustep, galstep: https://github.com/elvismello   create initial conditions in gadget2 format. ($NEMO/usr/mello)
 
-* galanyl:  https://bitbucket.org/ngoldbaum/galaxy_analysis  pip install galanyl
+* galanyl:  https://hg.sr.ht/~ngoldbaum/galaxy_analysis  pip install galanyl
 
 * galpy:  https://github.com/jobovy/galpy
 
