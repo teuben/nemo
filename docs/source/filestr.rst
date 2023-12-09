@@ -358,3 +358,5 @@ Rotation Curves Fitting Functions, except they are peculiar to the
 result of a projected circular streaming model. The program
 *rotcurshape(1NEMO)* is the only program that uses these functions, the
 manual page has a lot more details.
+
+.. include:: fits.rst
