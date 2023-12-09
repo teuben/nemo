@@ -63,7 +63,7 @@ a few peculiar aspects.
 * Q: What are lessons learned to keep this code going?
 
 * Q: How many users are using it? There is probably a small core group, and there is good competition from python based
-  environments (yt, amuse, galpy, gala, pynbody). In philosphy. `AMUSE <https://amusecode.github.io/>`_ comes closest
+  environments (yt, amuse, galpy, gala, pynbody). In philosphy. `AMUSE <https://www.amusecode.org/>`_ comes closest
   to NEMO.
 
 * Q: How many citations are there?
