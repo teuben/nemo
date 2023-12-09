@@ -18,7 +18,7 @@ data. We list a few
 
 * yt toolkit: https://yt-project.org/
 
-* nobodykit: https://nbodykit.readthedocs.io/
+* nobodykit: https://nbodykit.readthedocs.io/en/latest
 
 * clustep, galstep: https://github.com/elvismello   create initial conditions in gadget2 format. ($NEMO/usr/mello)
 

@@ -31,7 +31,7 @@ a few peculiar aspects.
 * In terms of documentation there are the unix manual (``man``) pages, very hyperlinked,
   and the old *Users and Programmers Guide* (in latex).  The man pages are still used,
   but also made available via html (see https://teuben.github.io/nemo/man_html/index1.html),
-  and the newer sphinx based documentation shared on https://astronemo.readthedocs.io.
+  and the newer sphinx based documentation shared on https://astronemo.readthedocs.io/en/latest.
   There is also the experimental TLDR suport and the classic "motd" via the **fortune**
   program.
 
