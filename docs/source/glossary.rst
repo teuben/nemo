@@ -18,7 +18,8 @@ Glossary
   ccd
       Synonymous for image; most programs in NEMO which handle
       images start or end with ``ccd``, e.g.
-      ``ccdfits``, ``fitsccd``, ``ccdmath``.
+      ``ccdfits``, ``fitsccd``, ``ccdmath``. Most programs handle
+      1D, 2D and 3D "ccd" images.
 
   ECSV
       (Enhanced Character Separated Values) a popular
@@ -27,6 +28,7 @@ Glossary
 
   falcon
       A subpackage in NEMO that hosts the gyrfalcON code.
+      See ``$NEMO/usr/dehnen/falcON``.
   
   fie
       Most expressions that you give to
@@ -47,7 +49,8 @@ Glossary
 
   GIPSY
       The Groningen Image Processing System. A number of concepts in NEMO, and
-      a few routines, have been taken liberally from :term:`GIPSY`.
+      a few routines, have been taken liberally from :term:`GIPSY`. See also
+      https://www.astro.rug.nl/~gipsy/
   
 
   history
@@ -129,7 +132,7 @@ Glossary
       four data types commonly used in NEMO.
 
   voxel
-      See pixel
+      A three dimensional pixel. See also pixel
 
   yapp
       "Yet Another Plotting Package", the library
