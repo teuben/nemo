@@ -27,7 +27,8 @@ string defv[] = {
     "xcol=1\n			  Column(s) to use (1=first)",
     "filter=0\n                   Select one of the test filters (-1,0,1,2,...)",
     "smooth=\n                    Optional explicit smoothing array",
-    "VERSION=0.6\n		  29-sep-2023 PJT",
+    "tcol=\n                      Optional independant variable ('time')",
+    "VERSION=0.7\n		  29-nov-2023 PJT",
     NULL
 };
 
@@ -50,13 +51,14 @@ local string input;			/* filename */
 local stream instr;			/* input file */
 local table *tptr;                      /* table pointer */
 
-local int xcol[MAXCOL];			/* histogram column number(s) */
+local int xcol[MAXCOL+1];		/* column number(s) ; one extra is tcol= used */
 local int nxcol;                        /* actual number of columns used */
 local mdarray2  x;                      /* x[col][row] */
 local int    npt;			/* actual number of points (rows) in table */
  
 local real sm[MAXSM];                   /* smoothing array */
 local int  nsm;                         /* actual length of smoothing array */
+local bool Qt;                          /* is tcol= used ? */
 
 
 /* Savitzky-Golay tables for fixed stepsize */
@@ -103,9 +105,14 @@ local void setparams()
     int nrows, ncols;
  
     input = getparam("in");
-    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
+
+    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL+1);
     if (nxcol < 0) error("parsing error xcol=%s",getparam("xcol"));
     
+    Qt = hasvalue("tcol");
+    if (Qt)
+      xcol[nxcol] = getiparam("tcol");
+
     instr = stropen (input,"r");
     tptr  = table_open(instr, 0);
     nrows = table_nrows(tptr);
@@ -127,7 +134,10 @@ local void setparams()
 
 local void read_data()
 {
-  x = table_md2cr(tptr, nxcol, xcol, 0, 0);
+  if (Qt)
+    x = table_md2cr(tptr, nxcol+1, xcol, 0, 0);
+  else
+    x = table_md2cr(tptr, nxcol,   xcol, 0, 0);
   npt = tptr->nr;
   if (nxcol == 0) nxcol = tptr->nc;  
 }
@@ -159,6 +169,7 @@ local void smooth_data(void)
   int nsmh = (nsm-1)/2;  /* nsm better be odd */
 
   for (i=0; i<npt; i++) {
+    if (Qt) printf("%g ", x[nxcol][i]);
     for (j=0; j<nxcol;  j++) {
       sum[j] = 0.0;
       for (k=-nsmh; k<=nsmh; k++) {
