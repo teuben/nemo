@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7j 1-sep-2023 PJT"
+#define GETPARAM_VERSION_ID  "3.7k 10-dec-2023 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -877,7 +877,7 @@ local void report(char what)
   if (what == 'm') {
 #if defined(linux)
     /* http://www.gnu.org/software/libc/manual/html_node/Statistics-of-Malloc.html */
-    struct mallinfo mi = mallinfo();
+    struct mallinfo2 mi = mallinfo2();
     dprintf(0,"mallinfo: hblks(d):%d %d uord=%d ford=%d keepcost=%d arena=%d ord=%d\n",
 	    mi.hblks,mi.hblkhd,mi.uordblks,mi.fordblks,mi.keepcost,mi.arena,mi.ordblks);
 #else
