@@ -69,3 +69,10 @@ OMP_NUM_THREADS=1 /usr/bin/time gravidy-cpu -i gravidy-input/04-nbody-p1024_m1.i
 4   8.31user 0.12system 0:02.12elapsed 396%CPU
 6  12.36user 0.19system 0:02.15elapsed 582%CPU
 8  17.18user 0.22system 0:02.43elapsed 715%CPU 
+
+
+OMP_NUM_THREADS=1 /usr/bin/time gravidy-cpu -i gravidy-input/04-nbody-p1024_m1.in -p -t 10
+jansky:  12.5
+k2:      15.0
+dell:    20.1
+lma:     33.1
