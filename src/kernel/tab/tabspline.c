@@ -45,7 +45,7 @@ string defv[] = {
     "type=cspline\n Spline interpolation type (only for GSL)",
 #endif
     "nder=0\n       Number of derivates to show (0,1,2)",
-    "VERSION=3.4\n  9-aug-2022 PJT",
+    "VERSION=3.4a\n 10-dec-2023 PJT",
     NULL,
 
 };
@@ -92,8 +92,8 @@ void nemo_main()
     Qx = hasvalue("x");
     Qy = hasvalue("y");
     fmt = getparam("format");
-    sprintf(fmt2,"%s %s",fmt,fmt);
-    sprintf(fmt1,"%s %s",fmt,fmt);
+    sprintf(fmt2,"%s %s ",fmt,fmt);
+    sprintf(fmt1,"%s %s ",fmt,fmt);
     dprintf(1,"Using format=\"%s\"\n",fmt2);
     Qxall = (Qx && streq("all",getparam("x")));
     Qyall = (Qy && streq("all",getparam("y")));
