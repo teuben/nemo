@@ -38,9 +38,10 @@
 #          29-mar-2023   add option to use a fixed potential for galaxy1
 #          29-apr-2023   fix orbital energies for fixed=1, also save etot0,v
 #          22-jun-2023   added code=3 for princeton hackathon comparisons
+#           6-dec-2023   added zerocm=t|f and zm=0|1
 
 _script=mkmh97
-_version=29-nov-2023
+_version=7-dec-2023
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)     # now
 
@@ -51,9 +52,11 @@ run=run0        # directory and basename of the files belonging to this simulati
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
 em=0            # equal mass particles? (em=0 means nbody same for both galaxies, thus individual masses not equal)
+zm=0            # zero the masses of G2 (only if fixed=1) but add a pointmass of m=
 fixed=0         # fixed potential for G1 ?
 potname=plummer       # fixed potential name for G1
 potpars=0,1,3*pi/16   # fixed potential parameters for G1
+zerocm=t        # apply a zerocm to models (@todo needs more careful check where to use)
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius
@@ -81,7 +84,7 @@ debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
-save_vars="run nbody m em fixed step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
+save_vars="run nbody m em zm fixed potname potpars zerocm step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
@@ -153,25 +156,32 @@ r=-$box:$box
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
     # optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
-    mkplummer $run.1 $nbody      seed=$seed
+    mkplummer $run.1 $nbody      seed=$seed zerocm=$zerocm
     if [ $em = 0 ]; then
-	mkplummer -      $nbody      seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+	mkplummer -      $nbody      seed=$seed zerocm=$zerocm | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
     else
-	mkplummer -      "$nbody*$m" seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+	mkplummer -      "$nbody*$m" seed=$seed zerocm=$zerocm | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
     fi
     if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
 	# (near) head-on collision
 	if [ $fixed = 0 ]; then
-	    snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
+	    # @todo   zerocm?
+	    snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=$zerocm
 	else
-	    # 1 system only
-	    snapshift $run.2 $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    # 1 system only; special case when zm=1
+	    if [ $zm = 1 ]; then
+		snapscale $run.2 $run.2b mscale=0
+		mkplummer - 1 | snapscale - $run.2a $m
+		snapadd $run.2a,$run.2b - | snapshift - $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    else
+		snapshift $run.2 $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    fi
 	    # 2 systems, but mass of G1 is 0
 	    # snapscale $run.1 - mscale=0  | snapstack - $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
 	fi
     else
-	# (near) circular orbit
-	snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t
+	# (near) circular orbit - using rp non-circular (e.g. parabolic) can be done 
+	snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0  deltav=0,$v0,0   zerocm=$zerocm
     fi
 
     # compute the orbit of a massless G2 in a fixed potential

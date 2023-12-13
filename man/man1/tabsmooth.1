@@ -1,4 +1,4 @@
-.TH TABSMOOTH 1NEMO "28 September 2023"
+.TH TABSMOOTH 1NEMO "29 November 2023"
 
 .SH "NAME"
 tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
@@ -48,8 +48,9 @@ of array elements, for example a normalized Hanning would be
 smooth=0.25,0.5,0.25.
 Default: not provided.
 .TP 
-\fBnmax=\fP
-max size if a pipe [100000]  - to be deprecated for new table system
+\fBtcol=\fP
+Optional column designating the independant variable. Currently the actual value is ignored,
+but this column will be output before the smoothed column(s).  Default: not used.
 
 .SH "EXAMPLES"
 Here we draw 100000 random values from a normal distribution (mean 0, dispersion 1) and smooth them
@@ -84,4 +85,5 @@ Peter Teuben
 13-oct-2014	documented smooth=
 28-sep-2023	V0.5 added filter=	PJT
 29-sep-2023	V0.6 converted to table V2	PJT
+29-nov-2023	V0.7 added tcol=	PJT
 .fi

@@ -9,13 +9,16 @@ User Interface
    The ``--help`` or ``help=`` options will describe the keywords.
 
 A NEMO program is invoked just as any other application program under
-the operating system, entering its name from a Unix shell, for example:
+the operating system, entering its name from a Unix shell, for example, the program
+`mkplummer <https://teuben.github.io/nemo/man_html/mkplummer.1.html>`_
+can be executing by typing
+
 
 .. code-block::
 
     mkplummer
 
-We first explain the command line interface to NEMO programs.
+from your terminal shell. We first explain the command line interface to NEMO programs.
 Subsequently, followed by some of the more advanced concepts of this
 user interface. We also discuss the overall documentation system in
 NEMO, and how to get different types of help.
@@ -37,8 +40,9 @@ Every NEMO program accepts input through a list
 of  **program keywords**,   constructed as '*keyword=value*' 
 string pairs on the commandline. We shall go through
 a few examples and point out a few noteworthy 
-things as we go along. The first example runs an N-body simulation and writes
-the results in a file **r001.dat**:
+things as we go along. The first example runs an N-body simulation using the program
+`hackcode1 <https://teuben.github.io/nemo/man_html/hackcode1.1.html>`_
+and writes the results in a file **r001.dat**:
 
 .. code-block::
 
@@ -76,8 +80,8 @@ the results in a file **r001.dat**:
 
 will integrate an (automatically generated) stellar system with 128 particles
 for 64 time steps.
-If your CPU is to slow, abort the program with ``<control>-C`` and
-re-run it with fewer particles:
+If your CPU is to slow or too fast, abort the program with the usual ``<control>-C`` and
+re-run it with fewer or more particles:
 
 .. code-block::
 
@@ -98,10 +102,12 @@ The error shows that in general NEMO programs do not allow
 files to be overwritten, and hence the ``r001.dat`` file,
 which was already (partially) created in the previous run, must be
 deleted before **hackcode1** can be re-run with the same
-keywords. The datafile, **r001.dat**, is in a peculiar binary
+keywords. The datafile, **r001.dat**, is in a NEMO specific binary
 format, which we shall discuss in the next chapter.
 
-Now, plotting the first snapshot of the run, i.e. the initial conditions, can be done as follows:
+Now, plotting the first snapshot of the run, i.e. the initial conditions, can be done with the
+`snapplot <https://teuben.github.io/nemo/man_html/snapplot.1.html>`_
+program
 
 
 .. code-block::

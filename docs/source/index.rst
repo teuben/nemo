@@ -21,7 +21,7 @@ Welcome to NEMO's documentation!
    `what's new <https://teuben.github.io/nemo/whatsnew.html>`_ .
 
    Although this manual should be on
-   https://astronemo.readthedocs.io
+   https://astronemo.readthedocs.io/en/latest
    we also keep a local copy 
    `readthedocs on astroumd <https://www.astro.umd.edu/~teuben/nemo/readthedocs/html>`_.
 
@@ -42,6 +42,7 @@ Welcome to NEMO's documentation!
    progr
    potname
    coordsys
+   .. fits
    python
    .. dirs
    .. gls

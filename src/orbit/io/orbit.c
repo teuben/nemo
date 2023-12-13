@@ -25,6 +25,7 @@
  *  10-dec-2019 V5.1  optional support for PHI/ACC              pjt
  *   5-oct-2021 V5.2  fix for 3D orbits and printing PHI/ACC    pjt
  *   8-feb-2022       free the extra PHI/ACC                    pjt
+ *  10-dec-2023       report etot in list_orbit()               pjt
  *------------------------------------------------------------------------------
  */
 
@@ -255,9 +256,10 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
 {
     int i, kount;
     char fmt7[256];
-    char fmt11[256];
+    char fmt12[256];
+    real etot = 0.0;
 
-    sprintf(fmt11, "%%d %s %s %s %s %s %s %s  %s %s %s %s\n",f,f,f,f,f,f,f, f,f,f,f);
+    sprintf(fmt12, "%%d %s %s %s %s %s %s %s  %s %s %s %s %s\n",f,f,f,f,f,f,f, f,f,f,f,f);
     sprintf(fmt7  ,"%%d %s %s %s %s %s %s %s\n",             f,f,f,f,f,f,f);
         
     dprintf (0,"Total number of steps = %d\n",Nsteps(optr));
@@ -284,13 +286,17 @@ void list_orbit (orbitptr optr, double tstart, double tend, int n, string f)
     kount = 0;
     for (i=0; i<Nsteps(optr); i++) {
         if ((tstart<Torb(optr,i)) && (Torb(optr,i)<tend)) {
+#ifdef ORBIT_PHI	  
+            etot = 0.5*(sqr(Uorb(optr,i))+sqr(Vorb(optr,i))+sqr(Worb(optr,i))) + Porb(optr,i);
+#endif	  
             if (kount++ == 0)
 #ifdef ORBIT_PHI
-                printf (fmt11,
+                printf (fmt12,
 			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),
 			Uorb(optr,i),Vorb(optr,i),Worb(optr,i),
 			Porb(optr,i),
-			AXorb(optr,i),AYorb(optr,i),AZorb(optr,i));	      
+			AXorb(optr,i),AYorb(optr,i),AZorb(optr,i),
+			etot);
 #else	      
                 printf (fmt7,
 			i,Torb(optr,i),Xorb(optr,i),Yorb(optr,i),Zorb(optr,i),

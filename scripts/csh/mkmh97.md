@@ -47,6 +47,10 @@ As in many NEMO programs, units are virial (N-body) units.
 
 4. **fixed=**: if set to 1, use a fixed potential for galaxy-1.  [0]
 
+4. **potname=**: if **fixed=1**, this is the potname. [plummer]
+
+4. **potpars=**: if **fixed=1**, this is the potpars. [0,1,3*pi/16]
+
 4. **step=**: step time when full snapshots are stored. 1 is probably ok,
    for movies you probably need 0.1.   For very large values of nbody a larger value for the step
    is probably adviced, unless you have a lot of disk space. Perhaps step=5.  [1.0]
@@ -159,6 +163,9 @@ The following files should be present, the example is for run=run0:
      final2cm.tab            Table of cumulative mass vs. radius
      final2u.ccd             Final bound particles of Galaxy-2
      final2u.snap
+     fixed-path.tab          Integration of (single particle) radial orbit
+     fixed1.tab
+     fixed2.tab
      init.ccd.png            Initial conditions
      init.plot.png
      massg2g1.png            Cumulative mass of G2 around the center of G1
@@ -500,3 +507,22 @@ For this seed the relevant output parameters are:
   ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run108
   ./mkmh97.sh tstop=20 nbody=1000 seed=123 code=4  kmax=7 step=0.05 run=run109 eps=0.01
 
+
+## Operations
+
+The **save_vars** variable in the script lists the variables that are saved in the **nemopars.rc** file, so they original
+values as set on the command line (or the defaults in the script) can be used on subsequent runs.
+It is not uncommon to add new variables, which are then not in the nemopars.rc file. Instead the default value would be
+seen. This is a problem, and the only solution would be to add those variables manually to the nemopars.rc file, e.g.
+
+      echo zm=1 >> run0e/nemopars.rc
+
+We can currently run 4 types of interactions between G1 (always mass=1) and G2 (mass=m):
+
+1. TT72 style:
+
+2. MH97: fully self-consistent
+
+3. MH97 fixed=1 :   G1 is an analytical potential, but G2 is self-consistent, 
+
+4. MH97 fixed=1 mz=0 :   G1 is an analytical potential, G2 is a point mass with test particles

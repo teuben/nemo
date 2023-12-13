@@ -7,5 +7,3 @@
   VERSION                    major.minor.patch - see src/scripts/version
   nemo_start.sh.in           Startup  for bourne shell
   nemo_start.csh.in          Startup  for C shell
-
-
