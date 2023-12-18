@@ -23,7 +23,7 @@ string defv[] = {
   "eps=\n                Accuracy comparison (not implemented)",
   "label=\n              Override the in= filename in reporting",
   "ignore=cputime\n      Items to ignore in checksum",
-  "VERSION=1.1\n         05-jul-2021 VMB ",
+  "VERSION=1.1a\n        18-dec-2023 PJT",
   NULL,
 };
 
@@ -53,6 +53,7 @@ void nemo_main()
   char fmt4[32];
   char current[128];
 
+  dprintf(1,"ignoring %s\n",ignore);
   dprintf(2,"TSF: MaxSetLen = %d\n",MaxSetLen);
   ini_moment(&m,2,0);
   sprintf(fmt4,"%s %s %s %s %%d",fmt,fmt,fmt,fmt);
