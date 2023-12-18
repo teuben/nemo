@@ -15,7 +15,7 @@ SRCFILES=
 OBJFILES=
 LOBJFILES=
 BINFILES = snapcenter snapsort snapstack snaptrim snaprotate snapdens \
-	snapscale unbind snapmask snapadd snaprect \
+	snapcenterp snapscale unbind snapmask snapadd snaprect \
         snapsphere snapmass snapspin snaptrans snapvirial \
         snapcopy snapinert snapmerge snapshift snapsplit \
         snapmerge_a_sp snapmerge_a_dp
