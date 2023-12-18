@@ -14,7 +14,7 @@ SRCFILES = contour.c
 OBJFILES=  contour.o
 LOBJFILES= $L(contour.o)
 BINFILES = ccdgoat ccdplot ccdstat ccdsub ccdmom ccdhist ccdrow ccdstack ccdellint \
-           ccdcross ccdflatten ccdstretch
+           ccdcross
 # ccdplot_ps
 TESTFILES= 
 
