@@ -15,17 +15,6 @@ help:
 	@echo No more specific help here
 
 ####		install by NEMO (done by top level directly)
-#
-# CC is somewhat of an exception: it should be installed before
-# everything else by a seperate call from the top-level Makefile
-#
-#nemo_startup: cc make
-#	cp $? $(NEMOBIN)
-#
-####
-# mycc.c, which should be still in this directory, has become obsolete
-# when using the shell script, Ultrix does not support -L flag, causing
-# Makefiles to explicitely name the libraries.....
 
 nemo_lib:
 	cp Makefile.lib $(NEMOLIB)/Makefile
