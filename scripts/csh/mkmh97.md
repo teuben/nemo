@@ -45,11 +45,15 @@ As in many NEMO programs, units are virial (N-body) units.
 4. **em=**: use equal mass particles? By default, each system has same number
    of particles, even if their massed are different. [0]
 
+4. **zm=**: if set to 1, zero the masses of the companion and place a testparticle at it's origin [0]
+
 4. **fixed=**: if set to 1, use a fixed potential for galaxy-1.  [0]
 
 4. **potname=**: if **fixed=1**, this is the potname. [plummer]
 
 4. **potpars=**: if **fixed=1**, this is the potpars. [0,1,3*pi/16]
+
+4. **zerocm=**:  if set to true, apply center of mass to the input model *not implemented yet*
 
 4. **step=**: step time when full snapshots are stored. 1 is probably ok,
    for movies you probably need 0.1.   For very large values of nbody a larger value for the step
@@ -89,6 +93,9 @@ As in many NEMO programs, units are virial (N-body) units.
 13. **trim=**: set to 1 if you want to trim the simulation from all but the final
     (tstop) snapshot. [0]
 
+13. **save=**: save the "final" (tstop=) plots in a subdirrectory called "movies"
+    labeled with the tstop.   [1]
+
 Parameters for (re)analysis (this happens if the **run=** already exists):
 
 13. **tstop=**: stopping (or analysis on a re-run) time. Should be several times r0/v0
@@ -115,7 +122,11 @@ Parameters for (re)analysis (this happens if the **run=** already exists):
 19. **tplot=**: times to plot in the 3x3 evolution plot.
    [0,5,10,15,20,25,30,40,50]
 
+19. **hackforce=**: which version of hackforce to use when computing force re-calculations
+
 20. **yapp=**:   pick png, or vps (for yapp_pgplot) _ps for native ps
+
+20. **progress=**:  spawn a GUI progress bar for the n-body evolution [0]
 
 21. **debug=**:  not the usual NEMO debug=, but special for this script.
     0=nothing   1=set -x -e -u in bash
@@ -517,7 +528,7 @@ seen. This is a problem, and the only solution would be to add those variables m
 
       echo zm=1 >> run0e/nemopars.rc
 
-We can currently run 4 types of interactions between G1 (always mass=1) and G2 (mass=m):
+We can currently run 4 types of interactions between G1 (fixed mass=1) and G2 (mass=m):
 
 1. TT72 style:
 
@@ -525,4 +536,7 @@ We can currently run 4 types of interactions between G1 (always mass=1) and G2 (
 
 3. MH97 fixed=1 :   G1 is an analytical potential, but G2 is self-consistent, 
 
-4. MH97 fixed=1 mz=0 :   G1 is an analytical potential, G2 is a point mass with test particles
+4. HQ88 style: MH97 fixed=1 zm=0 :   G1 is an analytical potential, G2 is a point mass with test particles
+
+we cannot run the JSPAM style interactions, this requires knowning the orbit of two smooth potentials under
+their own gravity. Also JSPAM has an option to add tidal effect and 
