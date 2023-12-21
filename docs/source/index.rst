@@ -10,7 +10,7 @@ Welcome to NEMO's documentation!
    \ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsilon^2)^{3/2} } }
 
 
-.. todo::  This draft is the result of converting the old latex manual,
+.. todo::  This manual was converted from the old latex based 
    *NEMO Users and Programmers Guide*, although not all sections
    have been included yet, and some sections have not been fully converted.
 	   
