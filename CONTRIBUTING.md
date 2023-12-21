@@ -134,7 +134,7 @@ If you have become a fan on the **gh pr** method, here's the recipe for this:
 once the branch has been merged, you don't need it locally anymore, so delete it
 
       git branch -d b1
-      git push original --delete b1
+      git push origin --delete b1
 
 
 ## Common work in a branch
@@ -214,7 +214,7 @@ Once the branch has been merged by the upstream, there is no need to keep it.
 It can be removed as follows:
 
       git branch -d teuben1
-      git push original --delete teuben1
+      git push origin --delete teuben1
 
 Step 2 by the receiver of the PR:
 
