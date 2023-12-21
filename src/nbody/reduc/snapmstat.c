@@ -27,7 +27,8 @@ string defv[] = {
     "in=???\n       Input file name",
     "sort=f\n       Sort masses before processing?",    
     "species=100\n  Maximum number of species",
-    "VERSION=2.0\n  6-feb-2020 PJT",
+    "show=f\n       Show only the select= for glnemo2",
+    "VERSION=2.1\n  28-nov-2023 PJT",
     NULL,
 };
 
@@ -42,11 +43,11 @@ void nemo_main(void)
     stream instr;
     real   mold, tsnap, mtot, mcum;
     int    i, iold, icum, nbody, bits, nspecies, maxspecies, scount;
-    bool   Qsort;
+    bool   Qsort = getbparam("sort");
+    bool   Qshow = getbparam("show");
     Body *btab = NULL, *bp;
     int *nsp;
 
-    Qsort = getbparam("sort");
     maxspecies = getiparam("species");
     nsp = (int *) allocate(maxspecies * sizeof(int));
 
@@ -67,8 +68,8 @@ void nemo_main(void)
     scount = -1;
     for (i=0, bp = btab; bp < btab+nbody; i++, bp++) {
         if (Mass(bp) != mold) {
-           printf("%d %d:%d  = %d Mass= %g TotMas= %g CumMas= %g\n",
-                scount+1, iold, i-1, i-iold,mold, mtot, mcum);
+	  if (!Qshow) printf("%d %d:%d  = %d Mass= %g TotMas= %g CumMas= %g\n",
+			     scount+1, iold, i-1, i-iold,mold, mtot, mcum);
 	   nsp[scount+1] = i-iold;
            scount++;
 	   if (scount == maxspecies) error("Too many mass species, use sort=t ?");
@@ -81,15 +82,15 @@ void nemo_main(void)
             mcum += Mass(bp);
         }
     }
-    printf("%d %d:%d = %d Mass= %g TotMas= %g CumMas= %g\n",
-                scount+1, iold, i-1, i-iold, mold, mtot, mcum);
+    if (!Qshow) printf("%d %d:%d = %d Mass= %g TotMas= %g CumMas= %g\n",
+		       scount+1, iold, i-1, i-iold, mold, mtot, mcum);
     nsp[scount+1] = i-iold;
     scount++;
     if (scount == maxspecies) error("Too many mass species, use sort=t ?");
     scount++;
 
     if (!Qsort) {
-      printf("# Found %d species:\n",scount);
+      dprintf(1,"# Found %d species:\n",scount);
       printf("select=");
       
       iold = 0;

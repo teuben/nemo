@@ -32,7 +32,7 @@ string defv[] = {
     "convert=\n		Conversion options {d2f,f2d,i2f,f2i,d2i,i2d,h2d,d2h}",
     "blocksize=0\n      If selected, use raw I/O with this blocksize, bypassing structured I/O",
     "headline=\n        Add additional headline",
-    "VERSION=1.8\n	19-apr-2023 PJT",
+    "VERSION=1.8a\n	18-dec-2023 PJT",
     NULL,
 };
 
@@ -52,7 +52,7 @@ void nemo_main(void)
     string *tags, *sels, *cvt;
     int    i, nsel, select[MAXSEL], cntrd, cntwr;
     int blocksize = getiparam("blocksize");
-    bool all = TRUE;
+    //bool all = TRUE;
 
     if (blocksize > 0) {
       dprintf(1,"raw I/O using blocksize=%d\n",blocksize);
@@ -84,11 +84,11 @@ void nemo_main(void)
     cvt = burststring(getparam("convert"),", ");
 
     if (*item == 0) {
-        all = TRUE;
+        //all = TRUE;
 	items = (string *) allocate(sizeof(string));    /* PPAP */
 	items[0] = NULL;
     } else {
-        all = FALSE;
+        //all = FALSE;
         items = burststring(item,", ");
         if (items==NULL)
             error("error parsing item=%s\n",item);
