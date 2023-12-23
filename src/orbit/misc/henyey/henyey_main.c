@@ -18,7 +18,8 @@ string defv[] = {
 
 string usage="NEMO program with unknown intent";
 
-nemo_main()
+extern void nemomain_(void);
+void nemo_main()
 {
     nemomain_();
 }
