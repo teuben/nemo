@@ -1,9 +1,12 @@
-.TH TEST 1NEMO "19 April 1995"
-.SH NAME
+.TH TEST 1NEMO "23 December 2023"
+
+.SH "NAME"
 henyey \- search for periodic orbits in a potential (Henyey's method)
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBhenyey\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBhenyey\fP compute periodic orbits using the Henyey method
 of searching for periodic solutions of a system of 
 differential equations in an (optionally rotating) 2D potential.
@@ -12,9 +15,13 @@ The method has been used first by T.S. v. Albada &
 R.H. Sanders (1982) MNRAS, 201, 303. 
 For more details see also: Henyey (1964) ApJ 139, 309
 .PP
+The method originated from the same equations as looking for oscillations
+in Cepheid type stars. See e.g. van Albada and Baker (1971)
+.PP
 \fINote: this program is under construction, and should not be used without
-consultation with the author\fP
-.SH PARAMETERS
+consultation with the current author\fP
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -44,15 +51,19 @@ Number of orbits to compute
 .TP 20
 \fBstep=\fP
 Step to increase non-zero position   
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 perorb(1NEMO)
-.SH AUTHOR
-Peter Teuben, Tjeerd van Albada
-.SH UPDATE HISTORY
+
+.SH "AUTHOR"
+Tjeerd van Albada, Peter Teuben (NEMO adaptation)
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
-1980?      	original version        	TVA
+.ta +1.5i +5.5i
+28-may-1979	original version as SBORB	TVA
 1981?     	Cyber7600 version - sheltran	PJT
 xx-may-92	V0.0 ported to NEMO     	PJT
 xx-mar-03	V0.01 .. and still working ..	PJT
+23-dec-2023	V0.1 renumbered and some cleanup	PJT
 .fi
