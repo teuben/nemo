@@ -9,12 +9,15 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 perorb - find periodic orbits in symmetric potentials 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>perorb
 <b>out=</b></b>orbit [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>perorb</i> searches for periodic orbits
 in two ways: <p>
@@ -37,105 +40,108 @@ by various researchers,  and is described in its most original form in
  Henon (1965, Ann.Astr. 28, 499). See also El-Sabaa &amp; Sherief (1990) Ap&amp;SS 167,
 305 for some more recent work. <p>
 Alternatives approaches are the Particle
-Swarm Optimization (Skokos et al. 2005). There is also code by T.S.v Albada,
-but not yet released in NEMO. 
+Swarm Optimization (Skokos et al. 2005). There is also the <i>Henyey</i> based code,
+implemented by T.S.v Albada, see <a href='henyey.1.html'><i>henyey(1NEMO)</i></a>
+. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
-<dd>An optional input
-file in standard <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
- format. If given, the input conditions are
-taken from the first phase point in this orbit (using the keyword <b>last=</b>
- you can select the last orbit). Default: none. <b>out=<i>out-file</i></b> output file,
-into which the orbits are accumulated. The file is in standard <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
-
-format. If no filename is given, the iterative mode is followed. [Default:
-none]. </dd>
+<dd>An
+optional input file in standard <a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+ format. If given, the input
+conditions are taken from the first phase point in this orbit (using the
+keyword <b>last=</b>  you can select the last orbit). Default: none. <b>out=<i>out-file</i></b>
+output file, into which the orbits are accumulated. The file is in standard
+<a href='orbit.5.html'><i>orbit(5NEMO)</i></a>
+ format. If no filename is given, the iterative mode is followed.
+[Default: none]. </dd>
 
 <dt><b>freqout=<i>rate</i></b> </dt>
-<dd>Frequency for output of the timeslots for the periodic
-orbits.  <i>Only used in iterative mode.</i> [default: <b>1</b>]. </dd>
+<dd>Frequency for output of the timeslots for
+the periodic orbits.  <i>Only used in iterative mode.</i> [default: <b>1</b>]. </dd>
 
-<dt><b>maxsteps=<i>number</i></b> </dt>
-<dd>maximum
-number of reserved integration steps. [default: <b>5000</b>]. </dd>
+<dt><b>maxsteps=<i>number</i></b>
+</dt>
+<dd>maximum number of reserved integration steps. [default: <b>5000</b>]. </dd>
 
-<dt><b>dt=<i>time-step</i></b> </dt>
-<dd>time step
-(constant) to be taken [default: <b>0.05</b>]. </dd>
+<dt><b>dt=<i>time-step</i></b>
+</dt>
+<dd>time step (constant) to be taken [default: <b>0.05</b>]. </dd>
 
 <dt><b>phase=<i>trial-phase</i></b> </dt>
-<dd>Initial trial phase
-space coodinates for orbit. The full 6 phase-space coordinates can specified,
-although you can also specify the (x0,v0) for dirint=0 or (y0,u0) for dirint=1.
-If a 7th (or 3rd) number is given (optional),  this is taken as the trial
-energy for the first orbit. The trial launch velocity is then calculated
-from the available potential at the specified launch position. </dd>
+<dd>Initial
+trial phase space coodinates for orbit. The full 6 phase-space coordinates
+can specified, although you can also specify the (x0,v0) for dirint=0 or
+(y0,u0) for dirint=1. If a 7th (or 3rd) number is given (optional),  this
+is taken as the trial energy for the first orbit. The trial launch velocity
+is then calculated from the available potential at the specified launch
+position. </dd>
 
-<dt><b>step=<i>step,perturb</i></b>
+<dt><b>step=<i>step,perturb</i></b> </dt>
+<dd>Step in phase space to take to get next orbit
+(the step is taken in the direction given by the <b>dir</b> keyword. The second
+number is the perturbation in direction <b>dir</b> used to start the first iteration
+that should result in finding the periodic orbit. Default: 0.1,0.01 </dd>
+
+<dt><b>dir=x|y</b>
 </dt>
-<dd>Step in phase space to take to get next orbit (the step is taken in the
-direction given by the <b>dir</b> keyword. The second number is the perturbation
-in direction <b>dir</b> used to start the first iteration that should result in
-finding the periodic orbit. Default: 0.1,0.01 </dd>
-
-<dt><b>dir=x|y</b> </dt>
-<dd>Direction in which to
-step for next orbit. This also determines in which surface of section the
-searching for the periodic orbit is done. Only <b>x</b> and <b>y</b> are allowed for now,
-since only planar XY-orbits are handled properly. </dd>
+<dd>Direction in which to step for next orbit. This also determines in which
+surface of section the searching for the periodic orbit is done. Only <b>x</b>
+and <b>y</b> are allowed for now, since only planar XY-orbits are handled properly.
+</dd>
 
 <dt><b>norbit=<i>n</i></b> </dt>
-<dd>Number of orbits
-to investigate. [Default: 1] </dd>
+<dd>Number of orbits to investigate. [Default: 1] </dd>
 
 <dt><b>accuracy=<i>eps</i></b> </dt>
-<dd>A relative accuracy parameter
-to which the final surface of section coordinate is to be accurate.  <i>Only
-used in iterative mode.</i> [Default: 0.001]. </dd>
+<dd>A relative
+accuracy parameter to which the final surface of section coordinate is
+to be accurate.  <i>Only used in iterative mode.</i> [Default: 0.001]. </dd>
 
 <dt><b>maxiter=</b> </dt>
-<dd>Maximum iterations allowed
-to find a periodic orbit. Default: 50. </dd>
+<dd>Maximum
+iterations allowed to find a periodic orbit. Default: 50. </dd>
 
 <dt><b>ncross=<i>count</i></b> </dt>
-<dd>Number of crossings through
-surface of section used to plot/iterate. This count does include the  half-period
-crossings if the keyword <b>period=2</b> is choosen. If set larger than 1, interactive
-mode is used. [default: <b>1</b>] </dd>
+<dd>Number
+of crossings through surface of section used to plot/iterate. This count
+does include the  half-period crossings if the keyword <b>period=2</b> is choosen.
+If set larger than 1, interactive mode is used. [default: <b>1</b>] </dd>
 
 <dt><b>period=2|1</b> </dt>
-<dd>The number of surface of section coordinates
-to generate per period. Must be either 1 or 2. A value of 2 make search faster,
-but a bit more difficult for irregular orbits or near resonances. Also non-symmetric
-orbits cannot be found this way. [default: <b>2</b>]. </dd>
+<dd>The
+number of surface of section coordinates to generate per period. Must be
+either 1 or 2. A value of 2 make search faster, but a bit more difficult
+for irregular orbits or near resonances. Also non-symmetric orbits cannot
+be found this way. [default: <b>2</b>]. </dd>
 
 <dt><b>potname=<i>name</i></b> </dt>
-<dd>name of file
-of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
- descriptor  [default: <b>plummer</b>]. </dd>
+<dd>name of file of <a href='potential.5.html'><i>potential(5NEMO)</i></a>
+
+descriptor  [default: <b>plummer</b>]. </dd>
 
 <dt>potpars=<i>par-list</i> </dt>
-<dd>List
-of parameters to the potential descriptor. The first parameter must be the
-pattern speed in the x-y plane, although rotating frames of reference are
-not yet supported. The remaining parameters are used by the <i>_inipotential()</i>
-routine in the potential descriptor. [default: none - let them be defined
-by routine itself]. </dd>
+<dd>List of parameters to the
+potential descriptor. The first parameter must be the pattern speed in the
+x-y plane, although rotating frames of reference are not yet supported. The
+remaining parameters are used by the <i>_inipotential()</i> routine in the potential
+descriptor. [default: none - let them be defined by routine itself]. </dd>
 
-<dt><b>potfile=<i>name</i></b> </dt>
-<dd>name of an optional datafile to the potential
-descriptor. This might be an N-body snapshot or list of spline fit coefficients
-etc. [default: none]. </dd>
+<dt><b>potfile=<i>name</i></b>
+</dt>
+<dd>name of an optional datafile to the potential descriptor. This might be
+an N-body snapshot or list of spline fit coefficients etc. [default: none].
+</dd>
 
 <dt><b>tab=<i>table_file</i></b> </dt>
-<dd>If set to a filename, a table, which
-normally appears on <i>stdout</i> is now written to a file. It contains the two
-axes rotation curves, number of steps in the orbit, numer of iterations
-in surface of section, the full period and  the energy: <i>pos,vel,pos,vel,nsteps,niter,period,energy</i>.
+<dd>If set to a filename, a table, which normally appears on
+<i>stdout</i> is now written to a file. It contains the two axes rotation curves,
+number of steps in the orbit, numer of iterations in surface of section,
+the full period and  the energy: <i>pos,vel,pos,vel,nsteps,niter,period,energy</i>.
 [Default: none]. </dd>
 
 <dt><b>mode=<i>int_mode</i></b> </dt>
@@ -149,12 +155,14 @@ the first one, otherwise the last. Default: <b>f</b>. </dd>
 
 <dt><b>headline=</b> </dt>
 <dd>Random user verbiage
-added to the output file. Default:none </dd>
+added to the output file. Default:none 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
 The potential (potname= etc)
 needs to have a proper potential defined for this routine to work. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 By
 default, perorb will find a circular orbit in a plummer potential near
@@ -246,19 +254,27 @@ tries to reproduce the periodic orbit with that specified energy.
  <br>
 <pre>Particle Swarm Optimization (PSO): Skokos et al. - 2005MNRAS.359..251S
 </pre>
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Ads</a></h2>
+
+<p> @ads 1985MNRAS.212..257T 
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<p> 
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
-<pre>pjt/orbit<tt> </tt>&nbsp;<tt> </tt>&nbsp;original sources
+<pre>NEMO/orbit/misc<tt> </tt>&nbsp;<tt> </tt>&nbsp;original sources
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>1980s       <tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.x Teuben&rsquo;s thesis work (written in SHELTRAN)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-may-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created from old Cyber CDC-7600 program &rsquo;PERORB&rsquo;  PJT
-24-may-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 rotating XY-frames, fixed energy option  PJT
+24-may-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 rotating XY-frames, fixed energy option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-apr-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 various, rk4 is now default integrator<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-1-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;minor code cleanup, less lies in the man page, added etot_err<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+1-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;minor code cleanup, fixed man page, added etot_err<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-aug-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.6 added last= and fixed an allocation problem<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-oct-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 allow phase= with 2 or 3 values<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -273,9 +289,10 @@ Peter Teuben
 <li><a name='toc4' href='#sect4'>Caveats</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>Ads</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>
