@@ -7,7 +7,7 @@ henyey \- search for periodic orbits in a potential (Henyey's method)
 \fBhenyey\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBhenyey\fP compute periodic orbits using the Henyey method
+\fBhenyey\fP computes periodic orbits using the Henyey method
 of searching for periodic solutions of a system of 
 differential equations in an (optionally rotating) 2D potential.
 .PP
@@ -17,40 +17,41 @@ For more details see also: Henyey (1964) ApJ 139, 309
 .PP
 The method originated from the same equations as looking for oscillations
 in Cepheid type stars. See e.g. van Albada and Baker (1971)
-.PP
-\fINote: this program is under construction, and should not be used without
-consultation with the current author\fP
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/paramters
 .TP 20
 \fBx0=\fP
 Initial x coordinate     
-.TP 20
+.TP
 \fBy0=\fP
 Initial y coordinate     
-.TP 20
+.TP
 \fBu0=\fP
 Initial u velocity     
-.TP 20
+.TP
 \fBv0=\fP
 Initial v velocity     
-.TP 20
+.TP
 \fBper=\fP
 Period       
-.TP 20
+.TP
 \fBtype=\fP
 Type of orbit {1,2,3}    
-.TP 20
+.TP
 \fBome=\fP
 Pattern speed of potential    
-.TP 20
+.TP
 \fBnorbit=\fP
 Number of orbits to compute   
-.TP 20
+.TP
 \fBstep=\fP
-Step to increase non-zero position   
+Step to increase non-zero position
+
+.SH "CAVEATS"
+This program has not been tested well, or integrated in NEMO, as the main core
+was written in Fortran. No cross check with \fIperorb(1NEMO)\fP yet, and this
+needs to be done before this program should be used for science.
 
 .SH "SEE ALSO"
 perorb(1NEMO)
