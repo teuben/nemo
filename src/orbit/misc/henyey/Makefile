@@ -3,7 +3,7 @@ include $(NEMOLIB)/makedefs
 
 #  P is used by 'forcon', to convert code from REAL*4 <---> REAL*8
 #  P must be 4 or 8 when called (e.g. "make real P=8" makes a REAL*8 version)
-P=4
+P=8
 #  B is the bar number (B=2 would give bar2 to be added to henyey)
 B=6
 #  Compiler flags
@@ -18,8 +18,7 @@ help:
 	@echo "	  real P=$(P)"
 	@echo "   tar"
 
-SRCS = Makefile README henyey.f henyey.h maxorb.h model.h \
-	forcon
+SRCS = Makefile README henyey.f henyey.h maxorb.h model.h forcon
 
 BINS = henyey bar bar2 bar6 
 
@@ -75,8 +74,8 @@ tar:
 
 real:
 	@echo "Making a real*$(P) version of the code (P=$(P))"
-	forcon -$(P) henyey.f *.h
+	./forcon -$(P) henyey.f *.h
 	@echo "$(P)" > P
 
 bench:
-	./henyey 0.6 0 0 1 1.3
+	./henyey 0.6 0 0 1 1.3 1 0.0 0
