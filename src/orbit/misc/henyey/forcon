@@ -1,0 +1,42 @@
+#! /bin/csh -f
+#
+#
+set prog=$0
+set tmp=tmp$$
+
+if ($#argv == 0) goto usage
+
+switch ($argv[1])
+ case -4:
+	set out=4
+	breaksw
+ case -8:
+	set out=8
+	breaksw
+ default:
+	goto usage
+endsw
+shift argv
+
+foreach file ($*)
+  if ($out == 4) then
+    sed 's/REAL\*8/REAL\*4/gp' $file > $tmp
+  else
+    sed 's/REAL\*4/REAL\*8/gp' $file > $tmp
+  endif
+  if ($status) goto error
+  mv $tmp $file
+end
+exit 0
+
+usage:
+  echo "Usage: $prog {-4|-8} file(s)"
+  echo ""
+  echo "    Toggle fortran source code files between REAL*4 and REAL*8"
+  echo "    Note that REAL must be in upper case in the source code"
+  echo ""
+  exit 0
+
+error:
+  echo "Error converting file $file"
+  exit 1
