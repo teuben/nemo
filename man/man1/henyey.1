@@ -34,27 +34,27 @@ Initial launching u velocity [0]
 Initial launching v velocity  [1]
 .TP
 \fBper=\fP
-Period, corresponding to the type [3]
+Period, corresponding to the orbit \fBtype\fP [3]
 .TP
 \fBtype=\fP
-Type of orbit {1,2,3} referring to half, full or quarter orbit  [1]
+Type of orbit {1,2,3} referring to half, full or quarter orbit (in some TDB order)  [1]
 .TP
 \fBome=\fP
 Pattern speed of potential    [0]
 .TP
 \fBnorbit=\fP
-Number of orbits to compute   [1]
+Number of extra orbits to compute   [1]
 .TP
 \fBstep=\fP
-Step to increase non-zero position   [0.1]
+Step to increase the non-zero (x or y) position for extra orbits   [0.1]
 
 .SH "CAVEATS"
 This program has not been tested well, or integrated in NEMO, as the main core
 was written in Fortran. No cross check with \fIperorb(1NEMO)\fP yet, and this
 needs to be done before this program should be used for science.
 .PP
-Unlike other NEMO orbit related programs, the potential has been hard-coded, although
-the corresponding Makefile makes is relatively easy to plug in another potential.
+Unlike other NEMO orbit related programs, the potential has been hard-coded.
+The corresponding Makefile makes it relatively easy to plug in another potential.
 Parameters are passed through FORTRAN common blocks, but again, hard-coded and not
 available via the command line interface yet, with the exception of the pattern speed.
 
