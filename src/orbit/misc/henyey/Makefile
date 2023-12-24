@@ -26,7 +26,7 @@ BINS = henyey bar bar2 bar6
 SRCDIR = $(NEMO)/src/orbit/misc/henyey
 
 install:
-	@echo Not part of install yet
+	@echo "Not part of install yet"
 
 clean:
 	rm -f *.o *.a core $(BINS) fort.20 \
@@ -35,14 +35,13 @@ clean:
 bin:	$(BINS)
 
 src:	.src
-.src:	$(SRCS)q
+.src:	$(SRCS)
 	cp $? $(SRCDIR)
 	@touch .src
 
 henyey:	henyey.o bar$(B).o henyey_main.o
 	$(FC) $(FFLAGS) -o henyey henyey.o henyey_main.o bar$(B).o \
 	$(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
-#	  -L$(NEMOLIB) -lnemo
 
 henyey_main.o: 
 	$(CC) $(CFLAGS) -I$(NEMOINC) -I$(NEMOLIB) -c henyey_main.c
@@ -70,13 +69,15 @@ bar6:
 bar2:
 	$(CC) -DTESTBED $(CFLAGS) -o bar2 bar2.c -lm
 
-tar:
-	tar cvf henyey.tar $(SRCS)
-
 real:
 	@echo "Making a real*$(P) version of the code (P=$(P))"
 	./forcon -$(P) henyey.f *.h
 	@echo "$(P)" > P
 
+# no rotation
 bench:
 	./henyey 0.6 0 0 1 1.3 1 0.0 0
+
+# some rotation
+bench2:
+	./henyey 0.6 0 0 1 1.3 1 0.2 0
