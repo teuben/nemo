@@ -9,7 +9,7 @@ c   type=1\n                Type of orbit {1,2,3}
 c   ome=0.0\n               Pattern speed of potential
 c   norbit=1\n              Number of orbits to compute
 c   step=0.1\n              Step to increase non-zero position
-c   VERSION=1.0\n           18-sep-91 PJT
+c   VERSION=0.1\n           23-dec-2023 PJT
 c-      
 c-----------------------------------------------------------------------
 c  HENYEY: Compute periodic orbits using the Henyey method
@@ -71,7 +71,8 @@ c     18-sep-91   NEMO user interface - some workings unclear       PJT
 c     19-sep-91   fixed up a few more old style fortrans            PJT
 c     24-sep-91   toyed with the newly checkly C version of BARX    PJT
 c                 dump (I,t/T,X,Y) of orbits on LUN=20 - for mongo
-c
+c     23-dec-23   trying to cleanup                                 PJT
+c     
 c***********************************************************************
 c Delete comments 'cm' and fiddle with USERINP to make it standalone
 cm      PROGRAM main
@@ -335,7 +336,7 @@ c
       EXTERNAL vipda
 c      
 c                    The decomposition A=LU
-c===likely BUG: 4th argument of DECOM is wrong, must be a real 1D array
+c===likely BUG: 4th argument of DECOM is wrong, must be a real 1D array? - PJT
       CALL decom(a,nr,n,ipr,ipr,d1,vipda)     
 c      CALL decom(a,nr,n,work,ipr,d1,vipda)     
 c
