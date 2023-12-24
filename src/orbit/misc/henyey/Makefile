@@ -74,9 +74,13 @@ real:
 	./forcon -$(P) henyey.f *.h
 	@echo "$(P)" > P
 
-# no rotation
+# no rotation, launch from X axis
 bench:
 	./henyey 0.6 0 0 1 1.3 1 0.0 0
+
+# no rotation, launch from Y axis
+bench1:
+	./henyey 0 0.6 0.9 0 1.1 2 0.0 0
 
 # some rotation
 bench2:
