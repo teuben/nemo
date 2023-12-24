@@ -1,5 +1,6 @@
-include $(NEMOLIB)/makedefs
 #	Testing FORTRAN interface in HENYEY
+
+include $(NEMOLIB)/makedefs
 
 #  P is used by 'forcon', to convert code from REAL*4 <---> REAL*8
 #  P must be 4 or 8 when called (e.g. "make real P=8" makes a REAL*8 version)
