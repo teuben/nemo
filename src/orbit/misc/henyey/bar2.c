@@ -1,5 +1,10 @@
 /* BAR2: prolate ferrers k=0 (homegeneous) for HENYEY - derived from BAR6 */
-double sqrt(), sqr(), log();         /* externals used in here */
+extern double sqrt(double), log(double);         /* externals used in here */
+
+double sqr(double x)
+{ 
+  return x*x; 
+}
 
 double Grav_Const = 1.0;        /* this makes you have to enter GM instead */
 
@@ -118,10 +123,5 @@ char *av[];
 			x,y,pden,norden,norden/pden);
 }
 
-double sqr(x)
-double x;
-{ 
-  return (x*x); 
-}
 #endif
 

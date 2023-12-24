@@ -1,5 +1,11 @@
 /* BAR6: prolate ferrers k=2 for HENYEY */
-double sqrt(), sqr(), log();         /* externals used in here */
+extern double sqrt(double), log(double);         /* externals used in here */
+
+double sqr(double x)
+{ 
+  return x*x; 
+}
+
 
 #include "real.h"
 
@@ -145,9 +151,4 @@ char *av[];
 			x,y,pden,norden,norden/pden);
 }
 
-double sqr(x)
-real x;
-{ 
-  return (x*x); 
-}
 #endif
