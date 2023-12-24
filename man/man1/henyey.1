@@ -1,4 +1,4 @@
-.TH TEST 1NEMO "23 December 2023"
+.TH TEST 1NEMO "24 December 2023"
 
 .SH "NAME"
 henyey \- search for periodic orbits in a potential (Henyey's method)
@@ -13,7 +13,7 @@ differential equations in an (optionally rotating) 2D potential.
 .PP
 The method has been used first by T.S. v. Albada & 
 R.H. Sanders (1982) MNRAS, 201, 303. 
-For more details see also: Henyey (1964) ApJ 139, 309
+For more details see also: Henyey et al.(1964) ApJ 139, 309
 .PP
 The method originated from the same equations as looking for oscillations
 in Cepheid type stars. See e.g. van Albada and Baker (1971)
@@ -22,22 +22,22 @@ in Cepheid type stars. See e.g. van Albada and Baker (1971)
 .so man1/paramters
 .TP 20
 \fBx0=\fP
-Initial x coordinate [1]
+Initial launching x coordinate [1]
 .TP
 \fBy0=\fP
-Initial y coordinate [0] 
+Initial launching y coordinate [0] 
 .TP
 \fBu0=\fP
-Initial u velocity [0]
+Initial launching u velocity [0]
 .TP
 \fBv0=\fP
-Initial v velocity  [1]
+Initial launching v velocity  [1]
 .TP
 \fBper=\fP
-Period [3]
+Period, corresponding to the type [3]
 .TP
 \fBtype=\fP
-Type of orbit {1,2,3}      [1]
+Type of orbit {1,2,3} referring to half, full or quarter orbit  [1]
 .TP
 \fBome=\fP
 Pattern speed of potential    [0]
@@ -52,9 +52,23 @@ Step to increase non-zero position   [0.1]
 This program has not been tested well, or integrated in NEMO, as the main core
 was written in Fortran. No cross check with \fIperorb(1NEMO)\fP yet, and this
 needs to be done before this program should be used for science.
+.PP
+Unlike other NEMO orbit related programs, the potential has been hard-coded, although
+the corresponding Makefile makes is relatively easy to plug in another potential.
+Parameters are passed through FORTRAN common blocks, but again, hard-coded and not
+available via the command line interface yet, with the exception of the pattern speed.
 
 .SH "SEE ALSO"
 perorb(1NEMO)
+.nf
+
+1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
+1982MNRAS.201..303V -  Periodic orbits and gas flow in barred spirals 
+.fi
+
+.SH "ADS"
+
+@ads 1982MNRAS.201..303V
 
 .SH "AUTHOR"
 Tjeerd van Albada, Peter Teuben (NEMO adaptation)
