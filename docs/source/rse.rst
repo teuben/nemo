@@ -72,7 +72,7 @@ a few peculiar aspects.
 * Some innovative aspects of NEMO perhaps not seen widely used:
    * connect code with papers via an `ADS bibcode <https://ui.adsabs.harvard.edu/help/actions/bibcode>`_.
      See our `bibcode <https://teuben.github.io/nemo/man_html/bibcode.html>`_ table
-   * help= vs. man and **checkpars** 
+   * help= vs. --man vs. man and **checkpars** 
    * loadobj:   body, potential, ...
    * data are binary, but name and type tagged and hierarchical, a bit like binary XML if you like. The **tsf** program
      will show the contents of such files in a more human readable format

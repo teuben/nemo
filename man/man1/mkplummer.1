@@ -120,13 +120,14 @@ The processing mode, purely for debugging benchmarks.
 
 .SH "VIRIAL UNITS"
 The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
-~ 0.589.  As an example this should plot the same "rotation" curve:
-.nf
+~ 0.589.  As an example the following two commands
+should plot the same "rotation" curve:
+.EX
 
-     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
-     rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
+ mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
+ rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
 
-.fi
+.EE
 
 .SH "QUIET START"
 For small N-body systems it can easily happen that small random fluctuations
@@ -138,13 +139,13 @@ by placing the particles on exactly the radius compatible with its mass fraction
 achieved with the the \fBquiet=2\fP setting.
 .PP
 In this example you can clearly see the difference between the radii selected:
-.nf
+.EX
 
-  mkplummer - 10 quiet=0 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
-  mkplummer - 10 quiet=1 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
-  mkplummer - 10 quiet=2 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+ mkplummer - 10 quiet=0 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+ mkplummer - 10 quiet=1 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+ mkplummer - 10 quiet=2 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
 
-.fi
+.EE
 Important to note that with \fBzerocm=f\fP the center of mass will drift, while the "mathematical center"
 was placed at the origin. This will counter the quietness, if you will.
 
@@ -159,44 +160,50 @@ using a valid [0,1] range.
 .SH "EXAMPLES"
 mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
 a Salpeter mass spectrum with
-.nf
+.EX
 
-% mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+ mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 
-.fi
+.EE
 Another method to create a Plummer sphere is by using the Osipkov-Merritt tables in NEMO, e.g.
-.nf
+.EX
 
-  % plummer plum.dat ntab=1024
-  % mkommod plum.dat plum.snap nbody=10000
+ plummer plum.dat ntab=1024
+ mkommod plum.dat plum.snap nbody=10000
 
-.fi
-or the new General Spherical Profile in ZENO:
-.nf
+.EE
+or in ZENO the new General Spherical Profile:
+.EX
 
-  % plumgsp plum.gsp
-  % gsprealize plum.gsp plum.snap zerocm=true
-  % snapcopy plum.snap plum2.snap
+plumsnap plum1.snap
 
-.fi
+plumgsp plum.gsp
+gsprealize plum.gsp plum.snap zerocm=true
+snapcopy plum.snap plum2.snap
+
+.EE
 with a note that ZENO files may need an extra \fIsnapcopy(1NEMO)\fP to be compatible with NEMO
 \fIsnapshot(5NEMO)\fP files.
 
 .SH "BENCHMARKS"
 The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double precision,
 with and without writing to a local file:
-.nf
-        cd $NEMO/nemo/src/nbody/init/
-	make -f Benchfile bench0 bench1
-   or
-	/usr/bin/time mkplummer . 10000000
-	/usr/bin/time mkplummer bench1.snap 10000000
-.fi
+.EX
+
+cd $NEMO/nemo/src/nbody/init/
+make -f Benchfile bench0 bench1
+
+    or
+    
+/usr/bin/time mkplummer . 10000000
+/usr/bin/time mkplummer bench1.snap 10000000
+
+.EE
 with some sample CPU for bench0:
-.nf
+.EX
    xps13       3.1s  or 171 MB/s
    t480        4.9s  or  72 MB/s
-.fi
+.EE
 the time difference betweeen bench0 and bench1 can be interpreted as
 the time needed to write 535MB (for 10M particles)
 

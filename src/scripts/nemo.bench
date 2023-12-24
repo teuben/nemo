@@ -87,7 +87,7 @@ if [ $mode == 5 ]; then
     t4=787400.0*$f5
     t5=6.66*$f5
     t6=3.00*$f5
-    echo "Tstop: $t1 $t2 $t3 $t4 $t5 $t6 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz]"
+    echo "Tstop: $t1 $t2 $t3 $t4 $t5 $t6 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz using gcc-11]"
     echo -n .;
     echo -n 1;$time directcode nbody=$nbody0 out=. tstop=$t1 seed=123 $help                 > bench2.directcode.log  2>&1
     echo -n .;$time mkplummer p0 $nbody2 seed=123 $help                                     > bench0.mkplummer.log   2>&1

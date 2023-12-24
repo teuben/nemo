@@ -58,16 +58,17 @@ the smoothing array.  Be sure to enter an odd number of array elements,
 for example a normalized Hanning would be smooth=0.25,0.5,0.25. Default: not
 provided. </dd>
 
-<dt><b>nmax=</b> </dt>
-<dd>max size if a pipe [100000]  - to be deprecated for new table
-
-<p>system 
+<dt><b>tcol=</b> </dt>
+<dd>Optional column designating the independant variable. Currently
+the actual value is ignored, but this column will be output before the
+smoothed column(s).  Default: not used. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here we draw 100000 random values from a normal distribution
-(mean 0, dispersion 1) and smooth them with various filters: <br>
+Here we draw 100000 random
+values from a normal distribution (mean 0, dispersion 1) and smooth them
+with various filters: <br>
 <pre>tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
 1.0022
 tabgen - 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp
@@ -101,6 +102,7 @@ Peter Teuben
 13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=
 28-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added filter=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 converted to table V2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+29-nov-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added tcol=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
