@@ -63,10 +63,10 @@ bar.o:  bar.f
 	$(CC) $(CFLAGS) -c bar_main.c
 	$(FC) $(FFLAGS) -c bar.f
 
-bar6:
+bar6:   bar6.c
 	$(CC) -DTESTBED $(CFLAGS) -o bar6 bar6.c -lm
 
-bar2:
+bar2:   bar2.c
 	$(CC) -DTESTBED $(CFLAGS) -o bar2 bar2.c -lm
 
 real:
@@ -75,13 +75,18 @@ real:
 	@echo "$(P)" > P
 
 # no rotation, launch from X axis
-bench:
-	./henyey 0.6 0 0 1 1.3 1 0.0 0
+bench1:
+	./henyey 0.6 0 0 1.9 1.0 1 0.0 0
 
 # no rotation, launch from Y axis
-bench1:
-	./henyey 0 0.6 0.9 0 1.1 2 0.0 0
+bench2:
+	./henyey 0 0.6 1.1 0 1.1 2 0.0 0
 
 # some rotation
-bench2:
+bench3:
 	./henyey 0.6 0 0 1 1.3 1 0.2 0
+
+# as bench1, but using perorb
+bench4:
+	perorb phase=0.6,0,0,0,1.85,0 dir=x potname=bar83 potpars=0,1,1,0.2,1 debug=1
+
