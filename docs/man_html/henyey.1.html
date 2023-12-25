@@ -29,3 +29,109 @@ method originated from the same equations as looking for solutions of pulsation
 stars (RR Lyr, Cepheids). See e.g. van Albada and Baker (1971) 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
+<dl>
+
+<dt><b>x0=</b> </dt>
+<dd>Initial launching x coordinate [1] </dd>
+
+<dt><b>y0=</b> </dt>
+<dd>Initial launching
+y coordinate [0]  </dd>
+
+<dt><b>u0=</b> </dt>
+<dd>Initial launching u velocity [0] </dd>
+
+<dt><b>v0=</b> </dt>
+<dd>Initial launching
+v velocity  [1] </dd>
+
+<dt><b>per=</b> </dt>
+<dd>Period, corresponding to the orbit <b>type</b> [3] </dd>
+
+<dt><b>type=</b>
+</dt>
+<dd>Type of orbit {1,2,3} referring to half, full or quarter orbit (in some
+TDB order)  [1] </dd>
+
+<dt><b>ome=</b> </dt>
+<dd>Pattern speed of potential    [0] </dd>
+
+<dt><b>norbit=</b> </dt>
+<dd>Number of
+extra orbits to compute   [1] </dd>
+
+<dt><b>step=</b> </dt>
+<dd>Step to increase the non-zero (x or
+y) position for extra orbits   [0.1] 
+<p> </dd>
+</dl>
+
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+
+<p>  
+<p>   # henyey:<br>
+   ./henyey 0.6 0 0 1.9 1.0 1 0.0 0 &gt; bench1.log<br>
+   tabcomment bench1.log | tabplot - 3 4 -1 1 -1 1 line=1,1 yapp=1/xs<br>
+ 
+<p>   # perorb:<br>
+   perorb phase=0.6,0,0,0,1.89,0 dir=x potname=bar83 potpars=0,1,1,0.2,1 
+out=o2<br>
+   orbplot o2 xrange=-1:1 yrange=-1:1  yapp=2/xs<br>
+ 
+<p>  
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+For a bar-only model this code has been confirmed to produce
+the same orbits as <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
+. <p>
+Unlike other NEMO orbit related programs,
+the potential has been hard-coded. The corresponding Makefile makes it relatively
+easy to plug in another potential. Parameters are passed through FORTRAN
+common blocks, but again, hard-coded and not available via the command line
+interface yet, with the exception of the pattern speed. 
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='perorb.1.html'>perorb(1NEMO)</a>
+
+<br>
+<pre>1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
+1982MNRAS.201..303V -  Periodic orbits and gas flow in barred spirals 
+</pre>
+<p> 
+<h2><a name='sect7' href='#toc7'>Ads</a></h2>
+
+<p> @ads 1982MNRAS.201..303V 
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Tjeerd van Albada, Peter Teuben (NEMO
+adaptation) 
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
+<br>
+<pre>28-may-1979<tt> </tt>&nbsp;<tt> </tt>&nbsp;original version as SBORB<tt> </tt>&nbsp;<tt> </tt>&nbsp;TVA
+1981?     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Cyber7600 version - sheltran<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ported to NEMO     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-dec-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 renumbered, cleanup, confirm perorb<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+</pre><p>
+
+<hr><p>
+<a name='toc'><b>Table of Contents</b></a><p>
+<ul>
+<li><a name='toc0' href='#sect0'>Name</a></li>
+<li><a name='toc1' href='#sect1'>Synopsis</a></li>
+<li><a name='toc2' href='#sect2'>Description</a></li>
+<li><a name='toc3' href='#sect3'>Parameters</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Ads</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
+</ul>
+</body>
+</html>
