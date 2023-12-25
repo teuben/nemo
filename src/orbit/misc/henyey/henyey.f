@@ -92,12 +92,14 @@ c                   (Get stuff from the commandline via NEMO)
 c                   (some constants, kept in the /CONSTS/ common in model.h)
       pi=3.14159265358979
       gravc=0.4298
+      gravc=1
       ome2=ome*ome
 c                   (MASS, A, B are those of the bar)
       mass = 2.29
       mass=mass*1.33333333/2.0
       a=0.5
       b=0.01
+      
 c                   MDi mass of a disk, ADi length scale of a disk (i=1,2)
 c                   Note MDi is actually M*GRAVC
       md1=9.9
@@ -106,11 +108,13 @@ c                   Note MDi is actually M*GRAVC
       ad2=0.106
 c--BEGIN TEST - reset some variables for known analytical answers
       IF(.TRUE.) THEN
-         mass=1.0
-         md1=0.0
-         ad1=2.0
-         md2=0.0
-         ad2=1.0
+        mass = 1.0
+        a = 1.0
+        b = 0.2
+        md1=0.0
+        ad1=2.0
+        md2=0.0
+        ad2=1.0
       ENDIF
 c--END TEST
 c
