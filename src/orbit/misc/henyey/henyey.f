@@ -7,7 +7,7 @@ c   v0=1\n                  Initial v velocity
 c   per=3\n                 Period
 c   type=1\n                Type of orbit {1,2,3}
 c   ome=0.0\n               Pattern speed of potential
-c   norbit=1\n              Number of orbits to compute
+c   norbit=0\n              Number of extra orbits to compute
 c   step=0.1\n              Step to increase non-zero position
 c   VERSION=0.1\n           23-dec-2023 PJT
 c-      
@@ -69,9 +69,9 @@ c  History:
 c     17-sep-91   created - and sort of works         Peter Teuben (PJT)
 c     18-sep-91   NEMO user interface - some workings unclear       PJT
 c     19-sep-91   fixed up a few more old style fortrans            PJT
-c     24-sep-91   toyed with the newly checkly C version of BARX    PJT
+c     24-sep-91   toyed with the newly checked C version of BARX    PJT
 c                 dump (I,t/T,X,Y) of orbits on LUN=20 - for mongo
-c     23-dec-23   trying to cleanup                                 PJT
+c     23-dec-23   cleanup for a draft release                       PJT
 c     
 c***********************************************************************
 c Delete comments 'cm' and fiddle with USERINP to make it standalone
@@ -129,7 +129,7 @@ c
       out=.TRUE.            
       uit=.FALSE.
       CALL orbit(n1,out)
-c                           Find more orbits ...(these are for type 1)
+c                           Find more orbits 
       DO l=1,norbits
          IF(type.EQ.1) THEN
             x0=x0+step
@@ -336,7 +336,7 @@ c
       EXTERNAL vipda
 c      
 c                    The decomposition A=LU
-c===likely BUG: 4th argument of DECOM is wrong, must be a real 1D array? - PJT
+c===  likely BUG: 4th argument of DECOM is wrong, must be a real 1D array? - PJT
       CALL decom(a,nr,n,ipr,ipr,d1,vipda)     
 c      CALL decom(a,nr,n,work,ipr,d1,vipda)     
 c
