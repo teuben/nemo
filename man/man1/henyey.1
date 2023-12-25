@@ -9,20 +9,41 @@ henyey \- search for periodic orbits in a potential (Henyey's method)
 .SH "DESCRIPTION"
 \fBhenyey\fP computes periodic orbits using the Henyey method
 of searching for periodic solutions of a system of 
-differential equations in an (optionally rotating) 2D potential.
+differential equations in an (optionally rotating) 2D potential. It needs
+a potential with first and seconds derivatives.
 .PP
-The method has been used first by T.S. v. Albada & 
-R.H. Sanders (1982) MNRAS, 201, 303. 
-For more details see also: Henyey et al.(1964) ApJ 139, 309
+The method has been used first by
+T.S. v. Albada & R.H. Sanders (1982) MNRAS, 201, 303. 
+For more details see also: Henyey et al.(1964) ApJ 139, 309.
 .PP
 The method originated from the same equations as looking for oscillations
-in Cepheid type stars. See e.g. van Albada and Baker (1971)
+in Cepheid type stars. See e.g. van Albada and Baker (1971).
+.PP
+The operation of the program is as follows:  The first orbit is launched perpendicular from either the X or Y axis
+with a reasonable launching velocity. Depending on the orbit type, will be integrated for the 1/4, 1/2 or full period,
+with given non-zero launching coordinates.   Currently implemented are
+.EX
+
+  type=1    x0=   y0=0  u0=0  v0=     # 1/4 orbit launched from X axis
+  type=2    x0=0  y0=   u0=   v0=0    # 1/4 orbit launched from Y axis
+  type=2    x0=0  y0=   u0=   v0=0    # 1/2 orbit launched from Y axis
+  
+.EE
+Type 3 orbits are needed to handle the SPO and LPO orbits around the stable lagrangian points perpendicular to a
+rotating bar. Although type 3 orbits also handle the X1..X4 orbits, integrating for 2x or 4x the period only make
+the computing time longer and possibly at the cost of some instabilities in the algorithm.
+
+.PP
+A stability parameter of the orbit is also computed.  Periodic orbits in potentials with chaos generally makes their
+islands in the surface of section shrink, and correspondingly finding the orbits becomes more difficult (i.e. needs
+good initial conditions). The same holds for the method used in \fIperorb(1NEMO)\fP so you can't win.
+
 
 .SH "PARAMETERS"
 .so man1/paramters
 .TP 20
 \fBx0=\fP
-Initial launching x coordinate [1]
+Initial launching x coordinate  [1]
 .TP
 \fBy0=\fP
 Initial launching y coordinate [0] 
@@ -34,19 +55,22 @@ Initial launching u velocity [0]
 Initial launching v velocity  [1]
 .TP
 \fBper=\fP
-Period, corresponding to the orbit \fBtype\fP [3]
+Period, corresponding to the orbit \fBtype\fP. For a type=1 1/4 orbit the period given should
+be 1/4 of the full period.  [3]
+
 .TP
 \fBtype=\fP
-Type of orbit {1,2,3} referring to half, full or quarter orbit (in some TDB order)  [1]
+Type of orbit {1,2,3} [1]
 .TP
 \fBome=\fP
 Pattern speed of potential    [0]
 .TP
 \fBnorbit=\fP
-Number of extra orbits to compute   [1]
+Number of extra orbits to compute.   [0]
 .TP
 \fBstep=\fP
-Step to increase the non-zero (x or y) position for extra orbits   [0.1]
+Step to increase the non-zero (x or y) position for extra orbits. Each new orbits will inherit
+the initial conditions of the previous periodic orbit. [0.1]
 
 .SH "CAVEATS"
 This program has not been tested well, or integrated in NEMO, as the main core
@@ -57,7 +81,23 @@ Unlike other NEMO orbit related programs, the potential has been hard-coded.
 The corresponding Makefile makes it relatively easy to plug in another potential.
 Parameters are passed through FORTRAN common blocks, but again, hard-coded and not
 available via the command line interface yet, with the exception of the pattern speed.
+.PP
+The default parameters for the Makefile is a double precision (P=8) bar6 (B=6).
 
+.SH "EXAMPLES"
+
+Here's the benchmark orbit with 5 derived orbits plotted:
+
+.EX
+   ./henyey 0.6 0 0 1 1.3 1 0.0 5 0.2 | tabcomment - | tabplot - 3 4 point=2,0.1 line=1,1
+
+.EE
+
+.SH "FILES"
+.nf
+NEMO/src/orbit/misc/henyey	source code
+fort.20 - output of (I,t/T,X,Y) for more detailed plotting
+.fi
 .SH "SEE ALSO"
 perorb(1NEMO)
 .nf
