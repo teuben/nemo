@@ -9,7 +9,7 @@ c   type=1\n                Type of orbit {1,2,3}
 c   ome=0.0\n               Pattern speed of potential
 c   norbit=1\n              Number of orbits to compute
 c   step=0.1\n              Step to increase non-zero position
-c   VERSION=0.1\n           23-dec-2023 PJT
+c   VERSION=0.2\n           24-dec-2023 PJT
 c-      
 c-----------------------------------------------------------------------
 c  HENYEY: Compute periodic orbits using the Henyey method
