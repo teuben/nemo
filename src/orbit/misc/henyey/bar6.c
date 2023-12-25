@@ -9,23 +9,9 @@ double sqr(double x)
 
 #include "real.h"
 
-real Grav_Const = 1.0;        /* this makes you have to enter GM instead */
+static real Grav_Const = 1.0;        /* this makes you have to enter GM instead */
+static int  first = 1;
 
-int PotBit = (1<<0);
-int FxBit  = (1<<1);
-int FyBit  = (1<<2);
-int FzBit  = (1<<3);
-int FxxBit = (1<<4);
-int FyyBit = (1<<5);
-int FzzBit = (1<<6);
-int FxyBit = (1<<7);
-int FxzBit = (1<<8);
-int FyzBit = (1<<9);
-#if 0
-int F0Bit = PotBit;
-int F1Bit = (FxBit|FyBit|FzBit);
-int F2Bit = (FxxBit|FyyBit|FzzBit|FxyBit|FxzBit|FyzBit);
-#endif
 
 /*
  *    BAR6:    the k=2 Ferrers prolate bar
@@ -38,9 +24,8 @@ int F2Bit = (FxxBit|FyyBit|FzzBit|FxyBit|FxzBit|FyzBit);
  *                      ept   potential
  *              axx,ayy,azz   second derivatives of potential - for testing
  */
-bar6 (elipm,a,b,x,y,ept,ax,ay,axx,axy,ayy)
-real elipm,a,b,x,y;                          /* input */
-real *ax,*ay,*ept,*axx,*axy,*ayy;            /* output */
+void bar6 (real elipm, real a, real b, real x, real y,                      /* input */
+	   real *ept, real *ax, real *ay, real *axx, real *axy, real *ayy)  /* output */
 {
     real aa,bb,xx,yy,zz,rr,gi,side,em,ee,e,lne;
     real kappa,i,a1,a3,a11,a13,a33,a111,a113,a133,a333,aconst;
@@ -116,13 +101,19 @@ real *ax,*ay,*ept,*axx,*axy,*ayy;            /* output */
     *axx *= aconst;
     *axy *= aconst;
     *ayy *= aconst;
+
+    if (first) {
+      printf("# bar6: M,a,b=%g %g %g   aconst=%g\n", elipm, a, b, aconst);
+      first = 0;
+    }
+
+    
 }
 
 
 
-barx_ (gm,a,b,x,y,ept,ax,ay,axx,axy,ayy)  /* called by FORTRAN as: CALL BARX() */
-real *gm,*a,*b,*x,*y;                   /* input */
-real *ax,*ay,*ept,*axx,*axy,*ayy;       /* output */
+void barx_ (real *gm,real *a,real *b,real *x,real *y,
+	    real *ept,real *ax,real *ay,real *axx,real *axy,real *ayy)  /* called by FORTRAN as: CALL BARX() */
 {
   bar6(*gm,*a,*b,*x,*y,ept,ax,ay,axx,axy,ayy);	/* Call the C routine */
 }
@@ -147,8 +138,8 @@ char *av[];
   norden = (r<0 ? 0 : r*r);
   pden = (axx+ayy+azz);
     
-  printf("x=%f y=%f: den=%f norden=%f norden/pden=%f\n",
-			x,y,pden,norden,norden/pden);
+  printf("x=%f y=%f: pot=%f den=%f norden=%f norden/pden=%f\n",
+	 x,y,ept,pden,norden,norden/pden);
 }
 
 #endif

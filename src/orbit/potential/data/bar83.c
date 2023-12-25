@@ -26,10 +26,16 @@ static double omega = 0.0;		/* pattern speed */
 static double fm    = 1.334697416;	/* mass ratio bar/disk */
 static double fx    = 8.485281374;	/* length scale ratio bar/disk */
 static double ca    = 0.2;		/* bar axial ratio */
+static int    mode  = 7;                /* 1=bar  2=halo  4=disk */
+static int    first = 1;
 
 
 static double    M_core, M_h, M_b, M_c, A_b, B_b, A_c, A_h;  /* handy variables */
 static double    Grav_Const;
+
+#define B_MODE  0x01
+#define H_MODE  0x02
+#define D_MODE  0x04
 
 static void prol6 (double elipm,
 		   double a,double b,double c, 
@@ -40,14 +46,11 @@ static void prol6 (double elipm,
 
 void inipotential (int *npar, double *par, char *name)
 {
-    if (*npar>0)
-        omega = par[0];
-    if (*npar>1)
-        fm=par[1];
-    if (*npar>2)
-    	fx=par[2];
-    if (*npar>3)
-        ca=par[3];
+    if (*npar>0)  omega = par[0];
+    if (*npar>1)  fm = par[1];
+    if (*npar>2)  fx = par[2];
+    if (*npar>3)  ca = par[3];
+    if (*npar>4)  mode = (int) par[4];
 
     M_core = 4.6724720e10;		/* mass of 'core' (bar and bulge) */
     M_h = 4.93 * M_core;		/* mass of halo */
@@ -60,7 +63,7 @@ void inipotential (int *npar, double *par, char *name)
     Grav_Const = 1.0/232.59;    
     dprintf (1,"INI_POTENTIAL Bar83  name=%s\n",name);
     dprintf (1,"Parameters : \nPattern Speed = %f \n",omega);
-    dprintf (1,"fm=%f   fx=%f  ca=%f\n\n",fm,fx,ca);
+    dprintf (1,"fm=%f   fx=%f  ca=%f mode=%d\n\n",fm,fx,ca,mode);
 }
     
 void potential_double (int *ndim,double *pos,double *acc,double *pot,double *time)
@@ -68,34 +71,54 @@ void potential_double (int *ndim,double *pos,double *acc,double *pot,double *tim
 	double rr, r;
 	double q_h, q_c, pot_h, pot_c, acc_h, acc_c;
 
-	prol6 (M_b,A_b,B_b,B_b,pos[0],pos[1],pos[2],
+	*pot = acc[0] = acc[1] = acc[2] = 0.0;
+
+	if (mode == B_MODE) {
+	  if (first) warning("special bar only mode");
+	  prol6 (1.0,1.0,B_b/A_b,B_b/A_b,
+		 pos[0],pos[1],pos[2],
+		 &acc[0],&acc[1],&acc[2],pot);
+	  return;
+	}
+
+	if (mode & B_MODE) {
+	  prol6 (M_b,A_b,B_b,B_b,pos[0],pos[1],pos[2],
 					&acc[0],&acc[1],&acc[2],pot);
+	} 
 
 	rr = sqr(pos[0]) + sqr(pos[1]) + sqr(pos[2]);
         r = sqrt(rr);
 
-	q_h = rr + sqr(A_h);
-	pot_h = M_h/sqrt(q_h);
-	*pot -= pot_h;			/* add halo potential */
+	if (mode & H_MODE) {	        /* add halo potential */
+	  q_h = rr + sqr(A_h);
+	  pot_h = M_h/sqrt(q_h);
+	  *pot -= pot_h;		
+	}
 
-	q_c = rr + sqr(A_c);
-	pot_c = M_c/sqrt(q_c);
-	*pot -= pot_c;			/* add core potential */
+	if (mode & D_MODE) {		/* add core potential */
+	  q_c = rr + sqr(A_c);
+	  pot_c = M_c/sqrt(q_c);
+	  *pot -= pot_c;	
+	}
 
 	*pot *= Grav_Const;		/* rescale */
 
 	if (r==0.0)			/* no forces at r=0 */
 	  return;			
 
-	acc_h = pot_h/(q_h*r);
-	acc[0] -= acc_h * pos[0];
-	acc[1] -= acc_h * pos[1];
-	acc[2] -= acc_h * pos[2];
+	if (mode & H_MODE) {
+	  acc_h = pot_h/(q_h*r);
+	  acc[0] -= acc_h * pos[0];
+	  acc[1] -= acc_h * pos[1];
+	  acc[2] -= acc_h * pos[2];
+	}
 
-	acc_c = pot_c/(q_c*r);
-	acc[0] -= acc_c * pos[0];
-	acc[1] -= acc_c * pos[1];
-	acc[2] -= acc_c * pos[2];
+	if (mode & D_MODE) {	
+	  acc_c = pot_c/(q_c*r);
+	  acc[0] -= acc_c * pos[0];
+	  acc[1] -= acc_c * pos[1];
+	  acc[2] -= acc_c * pos[2];
+	}
 
 	acc[0] *= Grav_Const;			/* rescale */
 	acc[1] *= Grav_Const;
@@ -146,30 +169,19 @@ static void prol6 (double elipm,
     a1=2.0*(gi-a3);
     i=aa*a1+2.0*cc*a3;
     
-    a33=1;
-    a13=1;
-    a11=1;
-	a33 = gi*(4*ee/em-6+3*em*lne/e)/(8*aa*sqr(ee));
-	a13 = 2*(gi/cc-2*a33);
-	a11 = 2*(gi/aa-a13)/3;
+    a33 = gi*(4*ee/em-6+3*em*lne/e)/(8*aa*sqr(ee));
+    a13 = 2*(gi/cc-2*a33);
+    a11 = 2*(gi/aa-a13)/3;
     
-    a333=1;
-    a333=1;
-
-
-
-	a333 = gi*(30-20*ee/em+16*sqr(ee)/sqr(em)-15*em*lne/e) /
-		(48*ee*sqr(ee)*sqr(aa));
-	a133 = 2*(gi/sqr(cc)-3*a333);
-	a113 = 2*(gi/(aa*cc)-2*a133)/3;
-	a111 = 2*(gi/sqr(aa)-a113)*0.2;
+    a333 = gi*(30-20*ee/em+16*sqr(ee)/sqr(em)-15*em*lne/e) /
+           (48*ee*sqr(ee)*sqr(aa));
+    a133 = 2*(gi/sqr(cc)-3*a333);
+    a113 = 2*(gi/(aa*cc)-2*a133)/3;
+    a111 = 2*(gi/sqr(aa)-a113)*0.2;
     
     x6=a111*xx + 3*a113*(yy+zz);
     y6=3*a133*xx + a333*(yy+3*zz);
     z6=3*a133*xx + a333*(3*yy+zz);
-    
-
-
 
     x4=a11*xx+a13*(yy+zz);
     y4=a13*xx+a33*(yy+zz);
@@ -183,7 +195,6 @@ static void prol6 (double elipm,
     *ay = -6*y*a3+  12*y*y4 - 2*y*(2*yy*y6+6*a133*xx*zz)
 	 -2*y*(3*sqr(xx)*a113+sqr(yy)*a333+3*sqr(zz)*a333);
     
-
     *az = -6*z*a3 + 12*z*z4 - 2*z*(2*zz*z6+6*a133*xx*yy)
 	-2*z*(3*sqr(xx)*a113+3*sqr(yy)*a333+sqr(zz)*a333);
 
@@ -192,6 +203,11 @@ static void prol6 (double elipm,
     *ax *= aconst;
     *ay *= aconst;
     *az *= aconst;
+    if (first) {
+      dprintf(0,"prol6:  M,a,c=%g %g %g   aconst=%g\n",elipm,a,c,aconst);
+      first = 0;
+    }
+    
 }
 
 

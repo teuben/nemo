@@ -9,11 +9,14 @@
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 hackcode1, hackcode1_qp - hierarchical N-body code 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>hackcode1</b>
 [<i>parameter</i>=<i>value</i>] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>hackcode1</i> is an equal-timestep implementation
 of a hierarchical N-body code (J. Barnes and P. Hut, <i>Nature</i> <b>324</b>, 446). It uses
@@ -26,73 +29,75 @@ hence in effect produce a restricted N-body code. <p>
 A special program, <a href='snapdiagplot.1.html'><i>snapdiagplot(1NEMO)</i></i></b></a>
 
 can be used to monitor conservation of energy and momentum. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized; they may be given in any order. 
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
 <dl>
 
-<dt><b>in=</b><i>in-file</i>
-</dt>
-<dd>If given, initial conditions will be read from <i>in-file</i> in snapshot format.
-At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
+<dt><b>in=</b><i>in-file</i> </dt>
+<dd>If given, initial conditions will be read from
+<i>in-file</i> in snapshot format. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be
+specified. </dd>
 
 <dt><b>out=</b><i>out-file</i> </dt>
-<dd>If
-given, results are written to <i>out-file</i> in snapshot format. </dd>
+<dd>If given, results are written to <i>out-file</i> in snapshot
+format. </dd>
 
-<dt><b>restart=</b><i>state-file</i>
-</dt>
-<dd>If given, the system state will be read from <i>state-file</i>. New values are accepted
-for the following parameters: <b>out</b>, <b>save</b>, <b>eps</b>, <b>tol</b>, <b>options</b>, <b>fcells</b>, <b>tstop</b>,
-<b>freqout</b>, <b>minor_freqout</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b>
-may be specified. </dd>
+<dt><b>restart=</b><i>state-file</i> </dt>
+<dd>If given, the system state will be read from <i>state-file</i>.
+New values are accepted for the following parameters: <b>out</b>, <b>save</b>, <b>eps</b>, <b>tol</b>,
+<b>options</b>, <b>fcells</b>, <b>tstop</b>, <b>freqout</b>, <b>minor_freqout</b>, and <b>debug</b>. At most one of
+<b>in</b>, <b>restart</b>, or <b>continue</b> may be specified. </dd>
 
 <dt><b>continue=</b><i>state-file</i> </dt>
-<dd>If given, the system state will be
-read from <i>state-file</i>. New values are accepted for the following parameters:
-<b>out</b>, <b>save</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>, or <b>continue</b> may be specified.
-</dd>
+<dd>If given,
+the system state will be read from <i>state-file</i>. New values are accepted for
+the following parameters: <b>out</b>, <b>save</b>, and <b>debug</b>. At most one of <b>in</b>, <b>restart</b>,
+or <b>continue</b> may be specified. </dd>
 
 <dt><b>save=</b><i>state-file</i> </dt>
-<dd>If given, the system state will be saved in <i>state-file</i> after
-each timestep. </dd>
+<dd>If given, the system state
+will be saved in <i>state-file</i> after each timestep. </dd>
 
 <dt><b>nbody=</b><i>nbody-value</i> </dt>
-<dd>Number of bodies for test data, generated
-only if none of <b>in</b>, <b>restart</b>, or <b>continue</b> are specified. Default is <b>128</b>. </dd>
+<dd>Number
+of bodies for test data, generated only if none of <b>in</b>, <b>restart</b>, or <b>continue</b>
+are specified. Default is <b>128</b>. </dd>
 
-<dt><b>seed=</b><i>random-seed</i>
-</dt>
-<dd>Random number seed used in generating initial conditions. Default is <b>123</b>.
-</dd>
+<dt><b>seed=</b><i>random-seed</i> </dt>
+<dd>Random number seed used in
+generating initial conditions. Default is <b>123</b>. </dd>
 
 <dt><b>cencon=</b><i>cencon-flag</i> </dt>
-<dd>If <b>true</b>, generate centrally concentrated test system.
-Default is <b>false</b>. </dd>
+<dd>If <b>true</b>,
+generate centrally concentrated test system. Default is <b>false</b>. </dd>
 
-<dt><b>freq=</b><i>integ-freq</i> </dt>
-<dd>Inverse time-step, to be used with a leap-frog
-integrator. Default is <b>32.0</b> (32 steps per unit time). </dd>
+<dt><b>freq=</b><i>integ-freq</i>
+</dt>
+<dd>Inverse time-step, to be used with a leap-frog integrator. Default is <b>32.0</b>
+(32 steps per unit time). </dd>
 
 <dt><b>eps=</b><i>soft-length</i> </dt>
-<dd>Force
-softening parameter. Default is <b>0.05</b>. </dd>
+<dd>Force softening parameter. Default
+is <b>0.05</b>. </dd>
 
 <dt><b>tol=</b><i>theta-value</i> </dt>
-<dd>Opening-angle tolerence
-parameter. Default is <b>1.0</b>. </dd>
+<dd>Opening-angle tolerence parameter. Default is <b>1.0</b>. </dd>
 
-<dt><b>fcells=</b><i>fcells-value</i> </dt>
-<dd>Ratio of cells to bodies, used
-when allocating cells. Default is <b>0.75</b>. </dd>
+<dt><b>fcells=</b><i>fcells-value</i>
+</dt>
+<dd>Ratio of cells to bodies, used when allocating cells. Default is <b>0.75</b>. </dd>
 
-<dt><b>options=</b><i>option-string</i> </dt>
-<dd>Miscellaneous
-control options, specified as a comma-separated list of keywords. Currently
-recognized keywords are: <b>reset_time</b>: when reading initial data, set <i>tnow</i>
-to zero; <b>new_tout</b>: when restarting, set new output times; <b>mass</b>, <b>phi</b>, <b>acc</b>:
-output mass, potential, acceleration data with major data outputs. The phase
-space coordinates are always output.  It also seems that the reset_time
+<dt><b>options=</b><i>option-string</i>
+</dt>
+<dd>Miscellaneous control options, specified as a comma-separated list of keywords.
+Currently recognized keywords are: <b>reset_time</b>: when reading initial data,
+set <i>tnow</i> to zero; <b>new_tout</b>: when restarting, set new output times; <b>mass</b>,
+<b>phi</b>, <b>acc</b>: output mass, potential, acceleration data with major data outputs.
+The phase space coordinates are always output.  It also seems that the reset_time
 and new_tout options have not been implemented yet. Default: <b>mass,phase</b>.
 </dd>
 
@@ -125,7 +130,7 @@ out=- needs to be part of a pipe.
 , <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
 , <a href='snapdiagplot.1.html'>snapdiagplot(1NEMO)</a>
  <br>
-<pre>https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
+<pre>Barnes &amp; Hut paper: https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
 Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
 </pre>
 <p> 
@@ -164,7 +169,14 @@ get the following  initial and final printout: <br>
 <p> 
 <h2><a name='sect8' href='#toc8'>Caveats</a></h2>
 Particles cannot occupy the same position, since building the treestructure
-is done in integerized coordinates. 
+is done in integerized coordinates. <p>
+This code is part of NEMOBENCH5 (see
+<a href='bench.5.html'><i>bench(5NEMO)</i></a>
+) and sometimes after a recompilation <b>hackcode1</b> shows a severe
+underperformance. This is some kind of compilation bug, which can be resolved
+by recompiling and running the test again, e.g.  
+<p>       mknemo -t -T hackcode1<br>
+  
 <p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Joshua E. Barnes. 

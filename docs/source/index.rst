@@ -12,7 +12,7 @@ Welcome to NEMO's documentation!
 
 .. todo::  This manual was converted from the old latex based 
    *NEMO Users and Programmers Guide*, although not all sections
-   have been included yet, and some sections have not been fully converted.
+   have been included or fully converted yet.
 	   
    Other online entry points for NEMO are:
    `github pages <https://teuben.github.io/nemo/>`_ and

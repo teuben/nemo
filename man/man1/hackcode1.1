@@ -1,9 +1,12 @@
-.TH HACKCODE1 1NEMO "26 December 2021"
-.SH NAME
+.TH HACKCODE1 1NEMO "22 December 2023"
+
+.SH "NAME"
 hackcode1, hackcode1_qp \- hierarchical N-body code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBhackcode1\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIhackcode1\fP is an equal-timestep implementation of a hierarchical
 N-body code (J. Barnes and P. Hut, \fINature\fP \fB324\fP, 446).
 It uses an adaptave Eulerian tree to reduce the number of interactions
@@ -17,8 +20,9 @@ tree structure, and hence in effect produce a restricted N-body code.
 .PP
 A special program, \fIsnapdiagplot(1NEMO)\fP can be used to monitor
 conservation of energy and momentum.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fP\fIin-file\fP
 If given, initial conditions will be read from \fIin-file\fP in
@@ -106,17 +110,18 @@ Output filename for log.
 Default is standard output (\fB-\fP). Can also use \fBlog=.\fP to make it disappear
 in case your out=- needs to be part of a pipe.
 
-.SH SEE ALSO
+.SH "SEE ALSO"
 treecode(1NEMO), newton0(1NEMO), directcode(1NEMO), gyrfalcON(1NEMO), snapdiagplot(1NEMO)
 .nf
-https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
+
+Barnes & Hut paper: https://ui.adsabs.harvard.edu/abs/1986Natur.324..446B
 Appel, A. SIAM J. Sei. statist. Comput. 6, 85-103 (1985)  https://doi.org/10.1137/0906008
 .fi
 
-.SH ADS
+.SH "ADS"
 @ads 1986Natur.324..446B
 
-.SH BUGS
+.SH "BUGS"
 This code is the very original 1986 (NEMO) version of the Barnes & Hut 
 treecode and only kept in NEMO for that reason. It is not the most 
 efficient treecode (see e.g. \fItreecode(1NEMO)\fP and \fIgyrfalcON(1NEMO)\fP
@@ -128,7 +133,7 @@ legal parameters which do not take default values.
 .PP
 \fIcontinue=\fP does not seem to work. Use \fIrestart=\fP
 
-.SH BENCHMARK
+.SH "BENCHMARK"
 Running \fBhackcode1\fP with all default parameters will
 integrate a 128 body plummer sphere for 64 timesteps to time 2
 with softening 0.05 and critical opening angle 1 and a seed of
@@ -152,21 +157,30 @@ initial and final printout:
 
 .fi
 
-.SH CAVEATS
+.SH "CAVEATS"
 Particles cannot occupy the same position, since building the treestructure
 is done in integerized coordinates.
+.PP
+This code is part of NEMOBENCH5 (see \fIbench(5NEMO)\fP) and sometimes
+after a recompilation \fBhackcode1\fP shows a severe underperformance. This is
+some kind of compilation bug, which can be resolved by recompiling and running
+the test again, e.g.
+.EX
 
-.SH AUTHOR
+      mknemo -t -T hackcode1
+.EE
+
+.SH "AUTHOR"
 Joshua E. Barnes.
 
-.SH FILES
+.SH "FILES"
 .ta +1.5i
 .nf
 src/nbody/evolve/hackcode/hackcode1/	original NEMOized 1986 code
 usr/josh/treecode			updated 1990s version
 .fi
 
-.SH HISTORY
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 1-jul-87	V1.0  man written	JEB
