@@ -3,7 +3,7 @@
 
 <html>
 <head>
-<title>TEST(1NEMO) manual page</title>
+<title>HENYEY(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
 HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
@@ -21,52 +21,79 @@ henyey - search for periodic orbits in a potential (Henyey&rsquo;s method)
 <b>henyey</b> computes periodic
 orbits using the Henyey method of searching for periodic solutions of a
 system of  differential equations in an (optionally rotating) 2D potential.
+It needs a potential with first and seconds derivatives. <p>
+The method has
+been used first by T.S. v. Albada &amp; R.H. Sanders (1982) MNRAS, 201, 303.  For
+more details see also: Henyey et al.(1964) ApJ 139, 309. <p>
+The method originated
+from the same equations as looking for periodic solutions in what become
+pulsation stars (RR Lyr, Cepheids). See e.g. van Albada and Baker (1971) 
 <p>
-The method has been used first by T.S. v. Albada &amp;  R.H. Sanders (1982) MNRAS,
-201, 303.  For more details see also: Henyey et al.(1964) ApJ 139, 309 <p>
-The
-method originated from the same equations as looking for solutions of pulsation
-stars (RR Lyr, Cepheids). See e.g. van Albada and Baker (1971) 
+<p>
+The operation of the program is as follows:  The first orbit is launched
+perpendicular from either the X or Y axis with a reasonable launching velocity.
+Depending on the orbit type, will be integrated for the 1/4, 1/2 or full
+period, with given non-zero launching coordinates.   Currently implemented
+are  
+<p>   type=1    x0=   y0=0  u0=0  v0=     # 1/4 orbit launched from X
+axis<br>
+   type=2    x0=0  y0=   u0=   v0=0    # 1/4 orbit launched from Y axis<br>
+   type=2    x0=0  y0=   u0=   v0=0    # 1/2 orbit launched from Y axis<br>
+   <br>
+  Type 3 orbits are needed to handle the SPO and LPO orbits around the
+stable lagrangian points perpendicular to a rotating bar. Although type
+3 orbits also handle the X1..X4 orbits, integrating for 2x or 4x the period
+only make the computing time longer and possibly at the cost of some instabilities
+in the algorithm. 
+<p> <p>
+A stability parameter of the orbit is also computed. 
+Periodic orbits in potentials with chaos generally makes their islands
+in the surface of section shrink, and correspondingly finding the orbits
+becomes more difficult (i.e. needs good initial conditions). The same holds
+for the method used in <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
+ so you can&rsquo;t win. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
 
-The following parameters are recognized in order; they may be given in
-any order if the keyword is also given. Use <b>--help</b> to confirm this man page
-is up to date.  
 <dl>
 
 <dt><b>x0=</b> </dt>
-<dd>Initial launching x coordinate [1] </dd>
+<dd>Initial launching x coordinate  [1] </dd>
 
 <dt><b>y0=</b> </dt>
-<dd>Initial launching
-y coordinate [0]  </dd>
+<dd>Initial launching y coordinate
+[0]  </dd>
 
 <dt><b>u0=</b> </dt>
 <dd>Initial launching u velocity [0] </dd>
 
 <dt><b>v0=</b> </dt>
-<dd>Initial launching
-v velocity  [1] </dd>
+<dd>Initial launching v velocity
+ [1] </dd>
 
 <dt><b>per=</b> </dt>
-<dd>Period, corresponding to the orbit <b>type</b> [3] </dd>
+<dd>Period, corresponding to the orbit <b>type</b>. For a type=1 1/4 orbit
+the period given should be 1/4 of the full period.  [3] 
+<p> </dd>
 
-<dt><b>type=</b>
-</dt>
-<dd>Type of orbit {1,2,3} referring to half, full or quarter orbit (in some
-TDB order)  [1] </dd>
+<dt><b>type=</b> </dt>
+<dd>Type of orbit
+{1,2,3} [1] </dd>
 
 <dt><b>ome=</b> </dt>
 <dd>Pattern speed of potential    [0] </dd>
 
 <dt><b>norbit=</b> </dt>
-<dd>Number of
-extra orbits to compute   [1] </dd>
+<dd>Number of extra
+orbits to compute.   [0] </dd>
 
 <dt><b>step=</b> </dt>
-<dd>Step to increase the non-zero (x or
-y) position for extra orbits   [0.1] 
+<dd>Step to increase the non-zero (x or y) position
+for extra orbits. Each new orbits will inherit the initial conditions of
+the previous periodic orbit. [0.1] 
 <p> </dd>
 </dl>
 
@@ -92,25 +119,40 @@ Unlike other NEMO orbit related programs,
 the potential has been hard-coded. The corresponding Makefile makes it relatively
 easy to plug in another potential. Parameters are passed through FORTRAN
 common blocks, but again, hard-coded and not available via the command line
-interface yet, with the exception of the pattern speed. 
+interface yet, with the exception of the pattern speed. <p>
+The default parameters
+for the Makefile is a double precision (P=8) bar6 (B=6). 
 <p> 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='perorb.1.html'>perorb(1NEMO)</a>
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
 
+<p> Here&rsquo;s
+the benchmark orbit with 5 derived orbits plotted: 
+<p>     ./henyey 0.6 0 0
+1 1.3 1 0.0 5 0.2 | tabcomment - | tabplot - 3 4 point=2,0.1 line=1,1<br>
+ 
+<p>  
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
+<pre>NEMO/src/orbit/misc/henyey<tt> </tt>&nbsp;<tt> </tt>&nbsp;source code
+fort.20 - output of (I,t/T,X,Y) for more detailed plotting
+</pre>
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<a href='perorb.1.html'>perorb(1NEMO)</a>
+ <br>
 <pre>1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
 1982MNRAS.201..303V -  Periodic orbits and gas flow in barred spirals 
 </pre>
 <p> 
-<h2><a name='sect7' href='#toc7'>Ads</a></h2>
+<h2><a name='sect9' href='#toc9'>Ads</a></h2>
 
 <p> @ads 1982MNRAS.201..303V 
 <p> 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Tjeerd van Albada, Peter Teuben (NEMO
 adaptation) 
 <p> 
-<h2><a name='sect9' href='#toc9'>History</a></h2>
+<h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
 <pre>28-may-1979<tt> </tt>&nbsp;<tt> </tt>&nbsp;original version as SBORB<tt> </tt>&nbsp;<tt> </tt>&nbsp;TVA
 1981?     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Cyber7600 version - sheltran<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -128,10 +170,12 @@ xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Ads</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>History</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
+<li><a name='toc9' href='#sect9'>Ads</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>History</a></li>
 </ul>
 </body>
 </html>
