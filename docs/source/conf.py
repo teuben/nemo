@@ -19,11 +19,11 @@
 import sphinx_rtd_theme
 
 project = 'NEMO'
-copyright = '2023, teuben'
+copyright = '2024, teuben'
 author = 'teuben'
 
 # The full version, including alpha/beta/rc tags
-release = '4.3'
+release = '4.4'
 
 
 # -- General configuration ---------------------------------------------------
