@@ -113,7 +113,7 @@ List of Related Codes
       | http://ascl.net/1904.002
   
   galpy
-      Galactic dynamics package (python)
+      Galactic dynamics package (python) - also support NEMO's potential format
       | http://ascl.net/1411.008
   
   GalPot
