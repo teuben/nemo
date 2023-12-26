@@ -1,5 +1,8 @@
 /* BAR6: prolate ferrers k=2 for HENYEY */
-extern double sqrt(double), log(double);         /* externals used in here */
+#include <stdio.h>
+#include <math.h>
+
+// extern double sqrt(double), log(double);         /* externals used in here */
 
 double sqr(double x)
 { 
