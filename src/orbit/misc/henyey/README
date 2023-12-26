@@ -1,12 +1,16 @@
 TvA version - slightly abused with liberal Fortran
 This version under development by Peter Teuben what appears was Sept 1991
 
-Found old printout from Tjeerd labeled SBORB from May 28, 1979 
+Found old printout from Tjeerd labeled SBORB from May 28, 1979
+as well as written noted by myself and Tjeerd in my green bar orbits "ringband" book.
 
-Cleanup in 2023 from an old pre-CVS directory - for a benchmark bar only
+The 2023 cleanup and release was from an old pre-CVS directory, though
+the henyey code was never checked into CVS. For a benchmark bar only
 potential perorb and henyey appear to agree.
 
-Also henyey is an old fortran code, and has no output in orbit(5NEMO) format.
+Note henyey is an old fortran code, and has no output in orbit(5NEMO) format.
+
+Examples to show the codes agree:
 
 1. HENYEY
 
