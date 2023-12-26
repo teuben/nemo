@@ -2,6 +2,8 @@
 
 include $(NEMOLIB)/makedefs
 
+TIME = /usr/bin/time
+
 #  P is used by 'forcon', to convert code from REAL*4 <---> REAL*8
 #  P must be 4 or 8 when called (e.g. "make real P=8" makes a REAL*8 version)
 P=8
@@ -76,7 +78,12 @@ real:
 
 # no rotation, launch from X axis
 bench1:
-	./henyey 0.6 0 0 1.9 1.0 1 0.0 0
+	$(TIME) ./henyey 0.6 0 0 1.9 1.0 1 0.0 0
+
+bench1m:
+	$(TIME) ./henyey 0.6 0 0 1.9 1.0 1 0.0 1000 0.001 > tab1
+	grep ^'  1  0.00' tab1 > tab1x
+	grep ^'201  '     tab1 > tab1y
 
 # no rotation, launch from Y axis
 bench2:
@@ -89,4 +96,8 @@ bench3:
 # as bench1, but using perorb
 bench4:
 	perorb phase=0.6,0,0,0,1.85,0 dir=x potname=bar83 potpars=0,1,1,0.2,1 debug=1
+
+bench4m:
+	$(TIME) perorb phase=0.6,0,0,0,1.85,0 dir=x potname=bar83 potpars=0,1,1,0.2,1  step=0.001 norbit=1000 > tab4
+
 
