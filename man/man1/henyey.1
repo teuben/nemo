@@ -1,4 +1,4 @@
-.TH HENYEY 1NEMO "24 December 2023"
+.TH HENYEY 1NEMO "26 December 2023"
 
 .SH "NAME"
 henyey \- search for periodic orbits in a potential (Henyey's method)
@@ -74,17 +74,29 @@ the initial conditions of the previous periodic orbit. [0.1]
 
 .SH "EXAMPLES"
 
+Here is a benchmark orbit computed with three different methods:
 .EX
 
   # henyey:
   ./henyey 0.6 0 0 1.9 1.0 1 0.0 0 > bench1.log
   tabcomment bench1.log | tabplot - 3 4 -1 1 -1 1 line=1,1 yapp=1/xs
 
+    n   tau      x       y       u       v
+    1  0.00  0.6000  0.0000  0.0000  1.8900 
+  201  1.00  0.0000  0.5951 -1.1203 -0.0001
+
   # perorb:
-  perorb phase=0.6,0,0,0,1.89,0 dir=x potname=bar83 potpars=0,1,1,0.2,1  out=o2
+  perorb phase=0.6,0,0,0,1.9,0 dir=x potname=bar83 potpars=0,1,1,0.2,1  out=o2
+  # x0     v0       y1       u1     NPT NITER  PERIOD  ETOT     LZ_MEAN  ETOT_ERR
+  0.611285 1.866136 0.599541 -1.128240 146 3 2.882204 -0.860843 0.801766 0.0035907
   orbplot o2 xrange=-1:1 yrange=-1:1  yapp=2/xs
 
+  # orbint
+  mkorbit - 0.6 0 0 0 1.9 0 potname=bar83 potpars=0,1,1,0.2,1 | orbint - -  1000 0.01 | orbplot -
+
 .EE
+
+where the latter orbit with the \fIorbint(1NEMO)\fP integrator is only approximately periodic.
 
 .SH "CAVEATS"
 For a bar-only model this code has been confirmed to produce the same orbits
@@ -97,22 +109,13 @@ available via the command line interface yet, with the exception of the pattern 
 .PP
 The default parameters for the Makefile is a double precision (P=8) bar6 (B=6).
 
-.SH "EXAMPLES"
-
-Here's the benchmark orbit with 5 derived orbits plotted:
-
-.EX
-   ./henyey 0.6 0 0 1 1.3 1 0.0 5 0.2 | tabcomment - | tabplot - 3 4 point=2,0.1 line=1,1
-
-.EE
-
 .SH "FILES"
 .nf
 NEMO/src/orbit/misc/henyey	source code
 fort.20 - output of (I,t/T,X,Y) for more detailed plotting
 .fi
 .SH "SEE ALSO"
-perorb(1NEMO)
+perorb(1NEMO), mkorbit(1NEMO), orbint(1NEMO), orbplot(1NEMO)
 .nf
 
 1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
@@ -131,7 +134,7 @@ Tjeerd van Albada, Peter Teuben (NEMO adaptation)
 .ta +1.5i +5.5i
 28-may-1979	original version as SBORB	TVA
 1981?     	Cyber7600 version - sheltran	PJT
-xx-may-92	V0.0 ported to NEMO     	PJT
-xx-mar-03	V0.01 .. and still working ..	PJT
-24-dec-2023	V0.2 renumbered, cleanup, confirm perorb	PJT
+xx-may-92	V0.0 ported to work with NEMO     	PJT
+xx-mar-03	V0.01 .. working, but not in CVS yet ..	PJT
+24-dec-2023	V0.2 cleanup, added to git, confirm with perorb	PJT
 .fi
