@@ -99,17 +99,31 @@ the previous periodic orbit. [0.1]
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 
-<p>  
+<p> Here is a benchmark orbit computed
+with three different methods:  
 <p>   # henyey:<br>
    ./henyey 0.6 0 0 1.9 1.0 1 0.0 0 &gt; bench1.log<br>
    tabcomment bench1.log | tabplot - 3 4 -1 1 -1 1 line=1,1 yapp=1/xs<br>
  
+<p>     n   tau      x       y       u       v<br>
+     1  0.00  0.6000  0.0000  0.0000  1.8900 <br>
+   201  1.00  0.0000  0.5951 -1.1203 -0.0001<br>
+ 
 <p>   # perorb:<br>
-   perorb phase=0.6,0,0,0,1.89,0 dir=x potname=bar83 potpars=0,1,1,0.2,1 
-out=o2<br>
+   perorb phase=0.6,0,0,0,1.9,0 dir=x potname=bar83 potpars=0,1,1,0.2,1  out=o2<br>
+   # x0     v0       y1       u1     NPT NITER  PERIOD  ETOT     LZ_MEAN
+ ETOT_ERR<br>
+   0.611285 1.866136 0.599541 -1.128240 146 3 2.882204 -0.860843 0.801766 0.0035907<br>
    orbplot o2 xrange=-1:1 yrange=-1:1  yapp=2/xs<br>
  
+<p>   # orbint<br>
+   mkorbit - 0.6 0 0 0 1.9 0 potname=bar83 potpars=0,1,1,0.2,1 | orbint - -  1000
+0.01 | orbplot -<br>
+ 
 <p>  
+<p> where the latter orbit with the <a href='orbint.1.html'><i>orbint(1NEMO)</i></a>
+ integrator is only approximately
+periodic. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
 For a bar-only model this code has been confirmed to produce
@@ -123,42 +137,36 @@ interface yet, with the exception of the pattern speed. <p>
 The default parameters
 for the Makefile is a double precision (P=8) bar6 (B=6). 
 <p> 
-<h2><a name='sect6' href='#toc6'>Examples</a></h2>
-
-<p> Here&rsquo;s
-the benchmark orbit with 5 derived orbits plotted: 
-<p>     ./henyey 0.6 0 0
-1 1.3 1 0.0 5 0.2 | tabcomment - | tabplot - 3 4 point=2,0.1 line=1,1<br>
- 
-<p>  
-<p> 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>NEMO/src/orbit/misc/henyey<tt> </tt>&nbsp;<tt> </tt>&nbsp;source code
 fort.20 - output of (I,t/T,X,Y) for more detailed plotting
 </pre>
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='perorb.1.html'>perorb(1NEMO)</a>
+, <a href='mkorbit.1.html'>mkorbit(1NEMO)</a>
+, <a href='orbint.1.html'>orbint(1NEMO)</a>
+, <a href='orbplot.1.html'>orbplot(1NEMO)</a>
  <br>
 <pre>1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
 1982MNRAS.201..303V -  Periodic orbits and gas flow in barred spirals 
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Ads</a></h2>
+<h2><a name='sect8' href='#toc8'>Ads</a></h2>
 
 <p> @ads 1982MNRAS.201..303V 
 <p> 
-<h2><a name='sect10' href='#toc10'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Tjeerd van Albada, Peter Teuben (NEMO
 adaptation) 
 <p> 
-<h2><a name='sect11' href='#toc11'>History</a></h2>
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>28-may-1979<tt> </tt>&nbsp;<tt> </tt>&nbsp;original version as SBORB<tt> </tt>&nbsp;<tt> </tt>&nbsp;TVA
 1981?     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Cyber7600 version - sheltran<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-xx-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ported to NEMO     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-24-dec-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 renumbered, cleanup, confirm perorb<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ported to work with NEMO     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. working, but not in CVS yet ..<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-dec-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 cleanup, added to git, confirm with perorb<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -170,12 +178,11 @@ xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>Caveats</a></li>
-<li><a name='toc6' href='#sect6'>Examples</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Ads</a></li>
-<li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>History</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Ads</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>
