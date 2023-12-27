@@ -7,7 +7,7 @@
 
 /*CTEX
  *    {\bf potname=log
- *       potpars={\it $\Omega,M_c,r_c,q$}} 
+ *       potpars={\it $\Omega,M_c,r_c,q,r$}} 
  *
  * The Logarithmic Potential (BT, pp.45, eq. 2.54 and eq. 3.77) has
  * been often used in orbit calculations because of its flat rotation
@@ -19,6 +19,10 @@
  * $$
  *
  * with $ M_c \equiv {1\over 2} r_c v_0^2 $ defined as the ``core mass''.
+ *
+ * This implementation adds a $q<r$ flattening in the 3rd dimension, effectively
+ * turning a prolate into a trixial halo, as well as allowing for an oblate
+ * with $q=1$ and $r<1$.
  */
 
 #include <stdinc.h>
