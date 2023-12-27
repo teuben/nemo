@@ -8,12 +8,13 @@ Glossary
 
   accelleration
       Dataformat used in the :term:`falcon` package. Related to the
-      :term:`potential` in NEMO
+      :term:`potential` in NEMO, except one can use multiple
+      accelleration descriptors, normally separated by a semi-colon.
 
   bodytrans
-      Dataformat that is used to
+      Dataformat (normally a C function) that is used to
       perform arbitrary operations on expression
-      variables used in snapshot's. 
+      variables used in snapshot's. Example:   xvar=x
 
   ccd
       Synonymous for image; most programs in NEMO which handle
@@ -27,14 +28,15 @@ Glossary
       https://docs.astropy.org/en/stable/io/ascii/ecsv.html
 
   falcon
-      A subpackage in NEMO that hosts the gyrfalcON code.
+      A subpackage in NEMO that hosts the gyrfalcON code
+      and many related tools.
       See ``$NEMO/usr/dehnen/falcON``.
   
   fie
       Most expressions that you give to
       :term:`program keyword` s are
       parsed by *nemofie* and eventually ``fie``. (Nomenclature
-      borrowed from :term:`GIPSY`)
+      borrowed from :term:`GIPSY`).  Example:   a='sqrt(pi)*G'
 
   FITS
       "Flexible Interchange Transport System", a
@@ -45,7 +47,9 @@ Glossary
   FWHM
       (Full Width Half Max): the effective resolution of the
       beam if normally given in **FITS** keywords BMAJ,BMIN,BPA.  The
-      term **resolution** is used interchangeably.
+      term **resolution** is used interchangeably.  The FWHM of
+      a gaussian beam is 2.355 :math:`\sigma`.
+  
 
   GIPSY
       The Groningen Image Processing System. A number of concepts in NEMO, and
@@ -54,7 +58,7 @@ Glossary
   
 
   history
-      Each NEMO dataset normally contains a data
+      Each NEMO dataset normally contains a data processing
       history in the form of of history items at the beginnging of the
       dataset. They are normally kept
       track of by the data processing programs, and can be displayed
@@ -64,7 +68,7 @@ Glossary
       Dataformat in NEMO, used to represent 2- and
       3-D images/data cubes. See also :term:`ccd`.
 
-  miriad
+  MIRIAD
       Another astronomical data reduction package,
       from which we have borrowed some user interfaces
       which are plug-compatible with
@@ -73,7 +77,7 @@ Glossary
   orbit
       Dataformat in NEMO used to represent a
       stellar orbit; most programs in NEMO which handle orbits start
-      or end with *orb*.
+      or end with *orb*, for example ``orbint``, an orbit integrator.
 
   pixel
       PIXEL/voxel: an area in 2D or 3D representing selected
@@ -82,7 +86,8 @@ Glossary
   potential
       Dataformat in NEMO used to represent a
       potential; most programs in NEMO which handle potentials start
-      or end with *pot*. Related to the :term:`accelleration`
+      or end with *pot*, for example ``potlist``.
+      Related to the :term:`accelleration`
 
   program keyword
       Keywords that are defined by the
@@ -101,12 +106,13 @@ Glossary
 
   set
       Compound hierarchical data-structure of a
-      structured file. They are the equivalent of a C structure.
+      structured file. They are the equivalent of a C *struct*..
+      A *set* is alwayd closed with a *tes*.
 
   snapshot
       Dataformat used in NEMO to represent an
       N-body system. Many programs that handle {\it snapshot}'s in
-      NEMO start or end with *snap*.
+      NEMO start or end with *snap*, for example ``snapplot``.
 
   structured file
       The binary data NEMO writes is in a
@@ -129,15 +135,19 @@ Glossary
   table
       A table consists of rows and columns of values, numbers or text.
       Most commonly stored in ASCII. Less well defined, it is one of the
-      four data types commonly used in NEMO.
+      four data types commonly used in NEMO. Most programs that handle
+      tables start or end with *tab*, for example ``tabplot``.
+      
 
   voxel
-      A three dimensional pixel. See also pixel
+      A three dimensional pixel. See also pixel.
 
   yapp
       "Yet Another Plotting Package", the library
-      definition that is used by all programs that produce graphics
-      output. It is kept very simple. The **yapp=** system keyword
-      controls the graphics device definitions/capabilities.
+      definition API that is used by all programs that produce graphics
+      output. It is deliberately kept very simple to promote portability
+      to lower level graphics packages. The **yapp=** system keyword
+      controls the graphics device definitions/capabilities.  Examples
+      are the ``ps`` and ``pgplot`` implementations.
 
 
