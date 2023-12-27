@@ -2,9 +2,11 @@
 .!delim ##
 .!.EN
 .TH NEWTON0 1NEMO "20 February 2004"
-.SH NAME
+
+.SH "NAME"
 newton0, newton0tree, newton0reg \- nbody codes with equal time steps
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBnewton0\fP
 [\fBin=\fPinfile]
 [\fBlastout=\fPlastoutfile]
@@ -44,7 +46,7 @@ newton0, newton0tree, newton0reg \- nbody codes with equal time steps
 [...same as in newton0...]
 [\fBniter=\fPinteger]
 
-.SH DESCRIPTION
+.SH "DESCRIPTION"
 
 \fInewton0\fP is a simple type of gravitational many-body code: simple
 in the sense of giving all particles equal time steps at any given
@@ -80,8 +82,9 @@ integration, softening, timestep and diagnostics schemes.  When using
 of the unneeded embellishments, and to optimize the inner loops -- but
 remember: \fIpremature optimization is the root of all evil\fP (or at
 least of most).  
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBin=\fP\fIinfile\fP
 If \fIinfile\fP is specified, a nbody snapshot is read in from this file
@@ -316,16 +319,46 @@ with respect to pseudo-time, the end of an integration time step can
 only be predicted roughly with respect to real time; iterating with
 increasing smaller timestep helps to zoom in on the correct end-time;
 Default: \fBniter=\fR3).
-.SH SEE ALSO
+
+.SH "EXAMPLES"
+Here is an example of integrating a 10 body Plummer sphere, with
+and without regularization:
+.EX
+   $ mkplummer p10 10 seed=123
+   
+   $ newton0 p10 out=p10.out t_end=100 dt_major=0.1
+   t_now    T+U    T/U   (E-E0)/E0  dE/E0  nsteps  pair_min  cputime
+   0.000 -0.1670 -0.4984       -0       -0      0     0.35         0
+   0.100 -0.1670 -0.5041 -1.8e-10 -1.8e-10     10     0.33         0
+   ...
+   1.000 -0.1670 -0.5909    2e-10 -1.1e-09    100     0.23         0
+   10.000 15.3983-122.1181      -93  1.3e-10   1000   0.0059   0.00033
+   100.000 16.7514-716.4978   -1e+02        0  10000   0.0059    0.0035
+
+   $ newton0reg p10 out=p10reg.out t_end=100 dt_major=0.1
+   t_now    T+U    T/U   (E-E0)/E0  dE/E0  nsteps  pair_min  cputime
+   0.000 -0.1670 -0.4984       -0       -0      0     0.35         0
+   0.100 -0.1670 -0.5041 -5.3e-10 -5.3e-10     10     0.33         0
+   1.000 -0.1670 -0.5909 -1.9e-09 -1.9e-09    101     0.23    0.0005
+   10.000 -0.1668 -0.5254  -0.0011  0.00014    958   0.0031    0.0055
+   100.000 -0.0869 -0.7171    -0.48      0.3   9619   0.0027     0.056
+
+.EE
+Although energy conservation is not great at all in the regularized version,
+it behaves much better than the vanilla version of \fBnewton0\fP.
+
+.SH "SEE ALSO"
 mkplummer(1NEMO), nbody0(1NEMO)
 .PP
 STARLAB: http://www.sns.ias.edu/~starlab/
-.SH CAVEATS
+
+.SH "CAVEATS"
 \fBnewton0\fP has not been maintained for a long time, the code was 
 revived in 2001 as version 2.0, but for any serious research codes
 such as the \fBnbodyX\fP series written by S.Aarseth (see e.g.
-\fInbody0(1NEMO)\fP) or the \fIstarlab\fP package should be used.
-.SH BUGS
+\fInbody0(1NEMO)\fP) or the \fIstarlab\fP package should probably be used.
+
+.SH "BUGS"
 Running the code with a file named \fIsavefile\fP lying around tricks
 poor newton0 into assuming that it has just been restored to the land
 of the living and that it should resume the task of its previous
@@ -338,17 +371,21 @@ overwrite the contents of the old \fIoutfile\fP. One can then manually
 concatenate the new and old \fIoutfile\fP after completion of the run.
 .PP
 The \fINewton0 Primer\fP is lost...
-.SH AUTHOR
+
+.SH "AUTHOR"
 Piet Hut
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 NEMO/src/nbody/evolve/newton0	source code
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.5i +5.5i
 25-May-87	Version 1.0: created         	PIET
 5-feb-01	V2.0: converted for NEMO V3	PJT
 20-feb-04	2.0a: integrated in NEMO V3, fixed an I/O problem	PJT
+26-dec-2023	add EXAMPLE	PJT
 .nf
