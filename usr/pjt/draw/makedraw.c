@@ -39,6 +39,8 @@
 
 
 #include <nemo.h>
+#include <extstring.h>
+#include <ctype.h>
 #include "draw.h"
 
 string defv[] = {
@@ -74,7 +76,7 @@ void    setup_byes(int);
 
 static int **byes;       // will be created by setup_byes()
 
-nemo_main()
+void nemo_main()
 {
     int n, i, i0, idx, p = getiparam("p");
     int nid, mid, midx, matchid[256];
@@ -121,7 +123,7 @@ nemo_main()
 
     outstr = stropen(getparam("out"),"w");
     fprintf(outstr,"## p=%d\n",p);
-    fprintf(outstr,"# First round of %d at 0 with i0=0\n",n,i0);
+    fprintf(outstr,"# First round of %d at 0 with i0=0\n",n);
     for (i=0, slot=1; i<nteam; i++, slot++) {
         while (slot < team[i].slot) {
             fprintf(outstr,"# %d/%d BYE\n",slot ,n);
