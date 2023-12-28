@@ -6,7 +6,7 @@
 <title>TXTPAR(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -21,11 +21,12 @@ in=</b>text-file <b>p0=</b> <b>p1=</b> ...
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>txtpar</b> combines some of the often used
 combinations of standard Unix text filtering programs like <a href='grep.1.html'><i>grep(1)</i></a>
- and
-<a href='awk.1.html'><i>awk(1)</i></a>
-,  with <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
- style math into one "simple" NEMO program.
-Although <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
+, <a href='awk.1.html'><i>awk(1)</i></a>
+,
+and <a href='sed.1.html'><i>sed(1)</i></a>
+, and  with <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
+ style math into one "simple" NEMO
+program. Although <a href='tabmath.1.html'><i>tabmath(1NEMO)</i></a>
  can do some of this processing too, <a href='txtpar.1.html'><i>txtpar(1NEMO)</i></a>
 &rsquo;s
 strength is processing multiple lines in a reduction style, instead of
@@ -47,12 +48,15 @@ Optionally additional math is allowed on the extracted parameters
 using <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  style expressions. In this case, the parameters themselves
 are not output, but only the ones computed via <b>expr=</b>. See EXAMPLES below
-if you need both. 
+if you need both. <p>
+To extract values from a <i>key=val</i> style parameter file,
+use <a href='nemopars.8.html'><i>nemopars(8NEMO)</i></a>
+. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in
-order; they may be given in any order if the keyword is also given. Use
---help to confirm this man page is up to date.  
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+<b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
@@ -147,18 +151,20 @@ w.r.t. the matched word using an explicit + or - in front of the row or col:
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='grep.1.html'>grep(1)</a>
 , <a href='awk.1.html'>awk(1)</a>
+, <a href='nemopars.8.html'>nemopars(8NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabrows.1.html'>tabrows(1NEMO)</a>
-, <a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
 ,
-<a href='table.5.html'>table(5NEMO)</a>
+<a href='tabcomment.1.html'>tabcomment(1NEMO)</a>
+, <a href='table.5.html'>table(5NEMO)</a>
 , <a href='run.1.html'>run(1NEMO)</a>
  
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update
+History</a></h2>
 <br>
 <pre>27-dec-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 simple draft written - implemented simple version<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>

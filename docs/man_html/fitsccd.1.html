@@ -6,7 +6,7 @@
 <title>FITSCCD(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -129,18 +129,22 @@ instead of absolute coordinates?  [false] </dd>
 <dd>Old style (0) or
 new style with crpix-type header <a href='information.1.html'>information (1)</a>
  passed through. Default:
+0 </dd>
 
-<p>0 
+<dt><b>altr=t|f</b> </dt>
+<dd>If set, it will attempt to convert the 3rd axis from FREQ to
+VRAD (in km/s). The current implementation is very simple and also depends
+on the ALTRPIX being the same as CDELT3. Default:  f 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Foreign Formats</a></h2>
-An <i>AIPS</i> dataset... <p>
+An
+<i>AIPS</i> dataset... <p>
 An <i>IRAF</i> dataset... <p>
-A <i>GIPSY</i> dataset uses
-offset=0 and bitpix=-32. Dataset name  normally has extension ".IMAGE". Use
-the GIPSY  program <i>gds</i> or <i>header</i> to find out relevant header parameters.
-<br>
+A <i>GIPSY</i> dataset uses offset=0 and bitpix=-32.
+Dataset name  normally has extension ".IMAGE". Use the GIPSY  program <i>gds</i>
+or <i>header</i> to find out relevant header parameters. <br>
 <pre>    % fitsccd in=10.IMAGE out=10.ccd mode=raw offset=0 bitpix=-32 ...
 </pre><p>
 A <i>MIRIAD</i> dataset is converted using an offset of 4 bytes and bitpix of
@@ -212,8 +216,9 @@ Peter Teuben
 18-may-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.6 added support to read CD_i_j based files<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-mar-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.6a fixed offset bug for raw cubes<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 7-nov-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.7 added relcoords=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-23-nov-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.9 added axistype=  for new image format PJT
+23-nov-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.9 added axistype=  for new image format<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-feb-2015<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.1 added box= to select a subregion in XY<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+6-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.5 implemented a simple altr=t wcs converson<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

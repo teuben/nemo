@@ -207,7 +207,7 @@ namespace {
 	  // add both potential and acceleration
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	    if(flag==0 || flag[n] & 1) {
-	      register scalar P, A[NDIM];
+	      scalar P, A[NDIM];
 	      grav<scalar,NDIM>::get(pd,pf,pos+nn, P, A);
 	      pot[n] += P;
 	      v_add<NDIM>(acc+nn,A);
@@ -216,7 +216,7 @@ namespace {
 	  // add potential, assign acceleration
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	    if(flag==0 || flag[n] & 1) {
-	      register scalar P;
+	      scalar P;
 	      grav<scalar,NDIM>::get(pd,pf,pos+nn, P, acc+nn);
 	      pot[n] += P;
 	    }
@@ -226,7 +226,7 @@ namespace {
 	  // assign potential, add acceleration
 	  for(int n=0,nn=0; n!=nbod; ++n,nn+=NDIM)
 	    if(flag==0 || flag[n] & 1) {
-	      register scalar A[NDIM];
+	      scalar A[NDIM];
 	      grav<scalar,NDIM>::get(pd,pf,pos+nn, pot[n], A);
 	      v_add<NDIM>(acc+nn,A);
 	    }

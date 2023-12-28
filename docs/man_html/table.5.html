@@ -6,7 +6,7 @@
 <title>TABLE(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -38,13 +38,15 @@ the &rsquo;#PLOT&rsquo; directives and the <a href='nemoplot.8.html'><i>nemoplot
   D11 D12 D13 ....
   D21 D22 ...
   ...
-</pre>Where <b>DIJ</b> refers to the I-th row and J-th column. 
+</pre>Where <b>DIJ</b> refers to the I-th row and J-th column.  The HEADER can be in a
+number of formats (optional #, verbatim column names, with or without comma&rsquo;s
+etc.) 
 <p> 
 <h2><a name='sect2' href='#toc2'>Example</a></h2>
-Here is an example
-of a table: <br>
+Here is an example of a table: <br>
 <pre>    # This is the first line of the table
-    # I    N     Q      # names of columns (for a human)
+    # I    N     Q      # names of columns (some programs also understand
+this)
     1.0   2.0   4.0
     # 2.0 3.0   5.0     bad data, commented out.
     3.0   5.1   6.32    # comment belonging to a line
@@ -56,20 +58,21 @@ with even numbers 2 through 10, done with <a href='nemoinp.1.html'><i>nemoinp(1N
  <br>
 <pre>    nemoinp 2:10:2 newline=t &gt; even1.tab
     seq 2 2 10 &gt; even2.tab
-</pre>and for performance testing the <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
- program can be used to create
-random large tables. 
+    tabgen -  10 3 &gt; random.tab
+</pre>where for performance testing the <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+ program can be used to
+create random large tables. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Other Table Formats</a></h2>
-ESO/Midas, where all columns are
-separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
- will by default put a TAB between
-the columns (files). <p>
-FITS uses the &rsquo;TABLE&rsquo; (ascii tables) and BINTABLE (binary
-tables) format. See <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ESO/Midas, where all columns
+are separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
+ will by default put a TAB
+between the columns (files). <p>
+FITS uses the &rsquo;TABLE&rsquo; (ascii tables) and &rsquo;BINTABLE&rsquo;
+(binary tables) format. See <a href='fits.5.html'><i>fits(5NEMO)</i></a>
 . <p>
-IPAC-table format: (often using the extension
-<b>.tbl</b>) <br>
+IPAC-table format: (often using the
+extension <b>.tbl</b>) <br>
 <pre>\HISTORY some history on the data processing
 \HISTORY infile=data3.fits
 \char Comment This table contains parameters for calibrating science data.
@@ -122,7 +125,7 @@ columns, example: <br>
 <p> <p>
 The ECVS (Enhanced Character Separated Values) is extension to the generic
 ascii table format, except it has a commented YAML header encoding the
-units, and one extra <i>annoying</i> row with column names: <br>
+units, and one extra <i>annoying</i> (YMMV) row with column names: <br>
 <pre># %ECSV 0.9
 # ---
 # datatype:

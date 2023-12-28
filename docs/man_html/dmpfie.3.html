@@ -6,11 +6,13 @@
 <title>FIE(3NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 inifie, dofie, dmpfie - expression parser 
+<p> 
 <h2><a name='sect1' href='#toc1'>Desscription</a></h2>
 <i>inifie</i> parses
 an input string which contains a mathematical formula, and <i>dofie</i> does the
@@ -23,6 +25,7 @@ For ease of use NEMO has defined counterparts where
 input variables can be entered by value, return valued must be obtained
 by reference always. In this case the names become <i>inifien, dofien</i> and <i>dmpfien</i>.
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Synopsis</a></h2>
 <b>int inifie(code)</b> <br>
 <pre>            parse code for DOFIE
@@ -109,6 +112,8 @@ y
             ifge(x,y,a,b)  returns a if x greater or equal y, else b
             iflt(x,y,a,b)  returns a if x less y, else b
             ifle(x,y,a,b)  returns a if x less or equal y, else b
+            range(x,a,b)   returns 1 if x inbetween a and b, including
+a and b.
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;    sind(x), cosd(x), tand(x)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;sine/cosine/tangent in degrees
 Notes:      The calculations are all done in double precision (double),
 although the
@@ -118,7 +123,8 @@ list,
             please contact Kor Begeman. He might be persuaded to put it
 in.
 </pre>
-<h2><a name='sect3' href='#toc3'>Example</a></h2>
+<p> 
+<h2><a name='sect3' href='#toc3'>Examples</a></h2>
 <br>
 <pre>                  PROGRAM TEST
 C == warning; program not conform to fortran77 and f2c interface definition
@@ -172,18 +178,22 @@ VMS Notes:  If you want to use this routine in one of your programs,
             file &lt;programname&gt;.COM, which should contain:
              &lt;programname&gt;,lib:genlib/lib,sys$library:vaxcrtl/lib
 </pre>
+<p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
 <a href='herinp.3.html'>herinp(3NEMO)</a>
 , <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
  
+<p> 
 <h2><a name='sect5' href='#toc5'>Authors</a></h2>
-R. Kiel (and K.G. Begeman, P.J.
-Teuben) 
+R. Kiel (and K.G. Begeman,
+P.J. Teuben) 
+<p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>$NEMO/src/pjt/clib<tt> </tt>&nbsp;<tt> </tt>&nbsp;fie.c (fortran callable) nemofie.c (C-callable) fie_ftoc.c
 </pre>
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>12-mar-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;document created                      <tt> </tt>&nbsp;<tt> </tt>&nbsp;KGB
 25-mar-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;small change in document              <tt> </tt>&nbsp;<tt> </tt>&nbsp;KGB
@@ -192,6 +202,7 @@ Teuben)
 15-dec-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Minor things for INTEGER*4 unix version  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-jun-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;Merged new GR version with NEMO again - routinenames appending _c<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-aug-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;added cosd/sind/tand    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+3-apr-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;added range()<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre> <p>
 
 <hr><p>
@@ -200,11 +211,11 @@ Teuben)
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Desscription</a></li>
 <li><a name='toc2' href='#sect2'>Synopsis</a></li>
-<li><a name='toc3' href='#sect3'>Example</a></li>
+<li><a name='toc3' href='#sect3'>Examples</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Authors</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

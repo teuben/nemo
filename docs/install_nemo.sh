@@ -18,7 +18,7 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.8 -- 8-jul-2023"
+echo "install_nemo.sh:  Version 1.8 -- 6-oct-2023"
 
  opt=0                                                # install some optional mknemos= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
@@ -32,6 +32,7 @@ echo "install_nemo.sh:  Version 1.8 -- 8-jul-2023"
  check=1                                              # "make check" at the end?
  bench=0                                              # "make bench" at the end?
  bench5=1                                             # "make bench5" at the end?
+ v=""                                                 # append version (e.g. "-12" or "12" to gcc/clang)
 #--HELP
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ];then
@@ -68,6 +69,7 @@ echo "  yapp=$yapp"
 echo "  check=$check"
 echo "  bench=$bench"
 echo "  bench5=$bench5"
+echo "  v=$v"
 echo ""
 
 if [ "$nemo" == "." ]; then
@@ -138,7 +140,7 @@ fi
 
 # pick a configure
 
-./configure $opt $with_yapp
+CC=gcc$v CXX=g++$v FC=gfortran$v ./configure $opt $with_yapp
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
 #./configure $opt --enable-debug --with-yapp=pgplot

@@ -38,28 +38,33 @@
 #          29-mar-2023   add option to use a fixed potential for galaxy1
 #          29-apr-2023   fix orbital energies for fixed=1, also save etot0,v
 #          22-jun-2023   added code=3 for princeton hackathon comparisons
+#           6-dec-2023   added zerocm=t|f and zm=0|1
 
 _script=mkmh97
-_version=22-jun-2023
+_version=7-dec-2023
 _pars=nemopars.rc
-_date=$(date +%Y-%m-%dT%H:%M:%S)
+_date=$(date +%Y-%m-%dT%H:%M:%S)     # now
 
 #            text between #--HELP and #--HELP is displayed when --help is used
 #--HELP
-#            parameters for the integration
+#            parameters for the integration   [defaults are following Makino & Hut 1997]
 run=run0        # directory and basename of the files belonging to this simulation  [ empty means self] @todo
 nbody=2048      # number of bodies in one model
 m=1             # mass of second galaxy (mass of first will always be 1)
-em=0            # equal mass particles? (em=0 means nbody same for both galaxies)
-fixed=0         # fixed potential for galaxy-1 ?
+em=0            # equal mass particles? (em=0 means nbody same for both galaxies, thus individual masses not equal)
+zm=0            # zero the masses of G2 (only if fixed=1) but add a pointmass of m=
+fixed=0         # fixed potential for G1 ?
+potname=plummer       # fixed potential name for G1
+potpars=0,1,3*pi/16   # fixed potential parameters for G1
+zerocm=t        # apply a zerocm to models (@todo needs more careful check where to use)
 step=1          # step in time when to dump snapshots
 v0=1.0          # initial impact/circular speed
 rp=0.0          # impact offset radius
 r0=16.0         # initial offset position for v0 > 0   [note v0 > 2/sqrt(r0)]
 eps=0.03125     # gravitational softening
 kmax=7          # integration timestep is 1/2**kmax
-eta=0.01        # alternative to timestep (only used by gravidy)
-code=1          # 0=hackcode1 1=gyrfalcON  2=bonsai2 (GPU)  3=rungravidy
+eta=0.01        # extra timestep accuracy (only used by gravidy)
+code=1          # 0=hackcode1  0q=hackcode1_qp  1=gyrfalcON   2=bonsai2 (GPU)  3=rungravidy  4=directcodeb
 seed=0          # random seed (use seed=123 for the benchmark)
 trim=0          # trim the data after analysis so only the last snapshot is kept
 save=1          # save the "final" plots in a subdirectory "movies" labeled with tstop
@@ -74,11 +79,12 @@ bsigma=0.0001                      # asinh/log breakover point
 tplot=0,5,10,15,20,25,30,40,50     # times to plot in evolution
 hackforce=hackforce                # which hackforce to use in the force re-calculation
 yapp=png                           # pick png, or vps (for yapp_pgplot) _ps for native ps
+progress=0                         # spawn a progress bar for the nbody run
 debug=1                            # 1=set -x,-e,-u   0=nothing
 #
 #--HELP
 
-save_vars="run nbody m em fixed step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
+save_vars="run nbody m em zm fixed potname potpars zerocm step v0 rp r0 eps kmax eta code seed trim tstop box r16 vbox npixel power bsigma tplot yapp"
 
 if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
     set +x
@@ -146,46 +152,60 @@ source  $_pars
 
 # derived/fixed parameters
 r=-$box:$box
-plummer_pars="0,1,3*pi/16"
 
 if [ $restart = 1 ]; then
     # make two random plummer spheres in virial units and stack them
     # optionally: use fewer particles in the impactor so all particles have the same mass (em=1)
-    mkplummer $run.1 $nbody      seed=$seed
+    mkplummer $run.1 $nbody      seed=$seed zerocm=$zerocm
     if [ $em = 0 ]; then
-	mkplummer -      $nbody      seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+	mkplummer -      $nbody      seed=$seed zerocm=$zerocm | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
     else
-	mkplummer -      "$nbody*$m" seed=$seed | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
+	mkplummer -      "$nbody*$m" seed=$seed zerocm=$zerocm | snapscale - $run.2 mscale="$m" rscale="$m**0.5" vscale="$m**0.25"
     fi
     if [ $(nemoinp "ifgt($v0,0,1,0)") = 1 ]; then
 	# (near) head-on collision
 	if [ $fixed = 0 ]; then
-	    snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
+	    # @todo   zerocm?
+	    snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=$zerocm
 	else
-	    # 1 system only
-	    snapshift $run.2 $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    # 1 system only; special case when zm=1
+	    if [ $zm = 1 ]; then
+		snapscale $run.2 $run.2b mscale=0
+		mkplummer - 1 | snapscale - $run.2a $m
+		snapadd $run.2a,$run.2b - | snapshift - $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    else
+		snapshift $run.2 $run.3 rshift=-$r0,$rp,0 vshift=$v0,0,0
+	    fi
 	    # 2 systems, but mass of G1 is 0
 	    # snapscale $run.1 - mscale=0  | snapstack - $run.2 $run.3 deltar=$r0,$rp,0 deltav=-$v0,0,0  zerocm=t
 	fi
     else
-	# (near) circular orbit
-	snapstack $run.1 $run.2 $run.3 deltar=$r0,0,0   deltav=0,$v0,0   zerocm=t
+	# (near) circular orbit - using rp non-circular (e.g. parabolic) can be done 
+	snapstack $run.1 $run.2 $run.3 deltar=$r0,$rp,0  deltav=0,$v0,0   zerocm=$zerocm
     fi
 
-    # integrator:  0:  hackcode1 is O(NlogN) code
+    # compute the orbit of a massless G2 in a fixed potential
+    dt=0.01
+    echo "Computing fixed-path orbit with dt=$dt"
+    mkorbit - -$r0 $rp 0 $v0 0 0 potname=$potname potpars=$potpars |\
+	orbint - - dt=$dt nsteps=$tstop/$dt nsave=$step/$dt |\
+	orblist -  > fixed-path.tab 2>&1
+    
+
+    # integrator:  0:  hackcode1 is O(NlogN) code 
     #              1:  gyrfalcON is O(N)
     #              2:  bonsai2 is O(N) but scales faster for "small" N
-    #              3:  rungravidy
+    #              3:  rungravidy O(N^2) code
     echo "Use:   tail -f $run/$run.4.log     to monitor progress of the integrator"
     if [ $fixed = 1 ]; then
-	echo Fixed potential now, only code=0 is supported
+	echo "Fixed potential case; only code=0,1 are supported"
 	if [ $code = 0 ]; then
 	    hackcode3 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc \
-		      potname=plummer potpars=$plummer_pars   > $run.4.log
+		      potname=$potname potpars=$potpars   > $run.4.log
 	    snapdiagplot $run.4 tab=$run.4.etot
 	elif [ $code = 1 ]; then
 	    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap \
-		      accname=plummer accpars=$plummer_pars    > $run.4.log
+		      accname=$potname accpars=$potpars    > $run.4.log
 	    tabcols $run.4.log 1,2 > $run.4.etot
 	fi
 	# exit 0
@@ -193,7 +213,11 @@ if [ $restart = 1 ]; then
 	if [ $code = 0 ]; then
 	    hackcode1 $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
 	    snapdiagplot $run.4 tab=$run.4.etot
+	elif [ $code = 0q ]; then
+	    hackcode1_qp $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step fcells=2 tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
+	    snapdiagplot $run.4 tab=$run.4.etot
 	elif [ $code = 1 ]; then
+	    progress_bar.sh $progress $run.4.log 1 $tstop &
 	    gyrfalcON $run.3 $run.4 eps=$eps kmax=$kmax step=$step tstop=$tstop give=mxvap > $run.4.log
 	    tabcols $run.4.log 1,2 > $run.4.etot
 	elif [ $code = 2 ]; then
@@ -215,16 +239,22 @@ if [ $restart = 1 ]; then
 	    fi	    
 	    echo Wrote final combined snapshot in $run.4
 	elif [ $code = 3 ]; then
+	    progress_bar.sh $progress $run.4.d/$run.4.d.out.log 2 $tstop &	    
 	    /usr/bin/time rungravidy $run.3 $run.4.d tcrit=$tstop deltat=$step eps=$eps eta=$eta > $run.4.log
 	    ln -s $run.4.d/OUT3.snap $run.4
 	    tabcols $run.4.d/$run.4.d.out.log 2,5 > $run.4.etot
+	    # @todo ### Fatal error [snapcenter]: total weight is zero
+	elif [ $code = 4 ]; then
+	    directcode $run.3 $run.4 eps=$eps freq=2**$kmax freqout=1/$step tstop=$tstop options=mass,phase,phi,acc > $run.4.log    
+	    snapdiagplot $run.4 tab=$run.4.etot
 	else
 	    set +x
-	    echo Unknown code=$code, valid are:
-	    echo 0 = hackcode1
-	    echo 1 = gyrfalcON
-	    echo 2 = bonsai2
-	    echo 3 = rungravidy
+	    echo "Unknown code=$code, valid are:"
+	    echo "0 = hackcode1"
+	    echo "1 = gyrfalcON"
+	    echo "2 = bonsai2"
+	    echo "3 = rungravidy"
+	    echo "4 = directcode"
 	fi
     fi
 else
@@ -248,7 +278,7 @@ if [ ! -e $run.xv.tab ]; then
 
     #
     echo "# x1 y1 z1 vx1 vy1 vz1"                                                                                   >$run.4.g1.tab
-    if [ $code == 2 ]; then
+    if [ $code == 2 ] || [ $code == 3 ]; then
 	snapcopy $run.4 - "select=i<$nbody?1:0" | $hackforce - - debug=-1 | snapcenter - . "-phi*phi*phi" report=t >>$run.4.g1.tab
     else
 	snapcenter $run.4 . "weight=i<$nbody?-phi*phi*phi:0" report=t                                              >>$run.4.g1.tab
@@ -270,6 +300,13 @@ if [ ! -e $run.xv.tab ]; then
     #  plot the path in Pos and Vel separately
     tabplot $run.xv.tab 1 2,4 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-pos)
     tabplot $run.xv.tab 1 3,5 line=1,1 color=2,3 ycoord=0 yapp=$(yapp path-vel)
+
+    # compare to the fixed-path
+    tabcols $run.xv.tab 1,4,5    > fixed1.tab
+    tabcols fixed-path.tab 2,3,6 > fixed2.tab
+    paste fixed1.tab fixed2.tab | tabplot - 1 2,5 line=1,1 color=3,2 ycoord=0 yapp=$(yapp path-pos-fixed)
+    paste fixed1.tab fixed2.tab | tabplot - 1 3,6 line=1,1 color=3,2 ycoord=0 yapp=$(yapp path-vel-fixed)
+
 else
     echo "Skipping path computation since it's already done, or: rm $run/$run.xv.tab"
 fi
@@ -461,6 +498,8 @@ fi
 #    rm -rf run0
 #    run=run0 seed=123      should give:    m16=0.821802 for phi*phi*phi*phi
 #    run=run0 seed=123      should give:    m16=0.861046 for -phi*phi*phi  (now the default)
+#    nemopars m16 run0/nemopars.rc
+
 
 
 #    NemoPlots with relevant scales for this script

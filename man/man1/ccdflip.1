@@ -1,35 +1,53 @@
-.TH CCDFLIP 1NEMO "15 July 2019"
-.SH NAME
+.TH CCDFLIP 1NEMO "15 September 2023"
+
+.SH "NAME"
 ccdflip \- flip an image in X,Y,Z 
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdflip\fP [parameter=value]
-.SH DESCRIPTION
-\fBccdflip\fP flips the coordinates of one of the principle axes
+
+.SH "DESCRIPTION"
+\fBccdflip\fP flips the data along one of the principal axes
 (X, Y or Z) of an image. Not all permutations were implemented,
 as this program was a quick hack.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+By default it now also adjusts the WCS (which historically was never the case,
+only the data were flipped). To retain the old behavior, \fBwcs=f\fP needs to be used.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
-Input image file     
+Input image file. No default.
 .TP
 \fBout=\fP
-Output file      
+Output image file. No default.
 .TP
-\fBflip=\fP
+\fBflip=x|y|z|xy\fP
 Flip in x,y or z?   Use 'xy' for flipping axes on square images.
+If an unknown axis is given, no flipping is done, the data is
+passed unchanged.
 Default: x
-.SH EXAMPLES
+.TP
+\fBwcs=t|f\fP
+Should be WCS be adjusted as well?
+Default: f
+
+.SH "SEE ALSO"
+ccdsub(1NEMO), ccdreorder(1NEMO), image(5NEMO)
+
+.SH "EXAMPLES"
 To rotate an image by 90 degrees (clockwise) use two flips:
 .nf
     ccdflip gal1.ccd - xy | - gal2.ccd y
 .fi
-.SH AUTHOR
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 22-Feb-97	man written	PJT
 15-jul-2019	example added	PJT
+15-sep-2023	V2.0 added wcs=	PJT
 .fi

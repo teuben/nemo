@@ -6,7 +6,7 @@
 <title>QAC_STATS(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -22,7 +22,7 @@ The
 there are 2 or more numbers present: the <i>flux</i> and the signal ratio  <i>sratio=(psum+nsum)/(psum-nsum)</i>,
 where the sums are over the positive and negative values, and <i>npts</i>. For
 sratio=0 (or near 0) there is no signal, it&rsquo;s mostly noise, whereas for
-sratio=1 (or near 1) it&rsquo;s mostly signal. <p>
+sratio=1 (or near 1) it&rsquo;s all/mostly signal. <p>
 It is used by a number of programs
 in NEMO, e.g. <a href='tabstat.1.html'><i>tabstat(1NEMO)</i></a>
  and <a href='ccdstat.1.html'><i>ccdstat(1NEMO)</i></a>
@@ -45,8 +45,8 @@ label=TAB
 </pre>
 <p> and a map, with some flux 
 <p> <br>
-<pre>    ccdgen "" - noise 0.2,1 size=100,100 seed=123 | ccdstat - qac=t label=CCD
-    QAC_STATS: CCD 0.208417 1.00315 -3.6169 4.1858  2084.17 0.255943  10000
+<pre>    ccdgen - noise 0.2,1 size=100,100 seed=123 | ccdstat - qac=t label=CCD
+    QAC_STATS: CCD 0.208417 1.00315 -3.6169 4.1858 2084.17  0.255943  10000
 </pre>
 <p> 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
@@ -64,6 +64,7 @@ Peter Teuben
 <h2><a name='sect6' href='#toc6'>Update History</a></h2>
 <br>
 <pre>4-dec-2021   document created     PJT
+19-jun-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;fix CCD example<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

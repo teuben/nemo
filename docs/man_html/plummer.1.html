@@ -6,44 +6,76 @@
 <title>PLUMMER(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 plummer - tabulate Osipkov-Merritt generalization of Plummer model 
-<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>plummer
-out=</b>out_file [parameter=value] ... 
-<h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>plummer</i> tabulates an Osipkov-Merritt-Plummer
-model.  The output file, written in binary format, may be used with <a href='mkommod.1.html'><i>mkommod</i>(1NEMO)</a>
-.
+<p>
 
+<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
+<b>plummer out=</b>out_file [parameter=value] ... 
+<p> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+<i>plummer</i> tabulates
+an Osipkov-Merritt-Plummer model.  The output file, written in binary format,
+may be used with <a href='mkommod.1.html'><i>mkommod</i>(1NEMO)</a>
+. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized. 
+The following parameters are
+recognized. 
 <dl>
 
 <dt><b>out=</b><i>out_file</i> </dt>
-<dd>Write binary
-<b>OsipkovMerrittModel</b> data to <i>out_file</i>. Default: <i>required</i>. </dd>
+<dd>Write binary <b>OsipkovMerrittModel</b> data to <i>out_file</i>.
+Default: <i>required</i>. </dd>
 
-<dt><b>anisorad=</b><i>anisotropy_radius</i>
-</dt>
-<dd>Radius at which the distribution function becomes significantly anisotropic.
- If negative, an isotropic model is tabulated.  Default: <b>-1.0</b>. </dd>
+<dt><b>anisorad=</b><i>anisotropy_radius</i> </dt>
+<dd>Radius at which the distribution
+function becomes significantly anisotropic.  If negative, an isotropic model
+is tabulated.  Default: <b>-1.0</b>. </dd>
 
-<dt><b>mcutoff=</b><i>frac_mass_cutoff</i>
-</dt>
-<dd>The output tables extend to the radius corresponding to this fraction of
-the total mass.  Default: <b>0.999999</b>. </dd>
+<dt><b>mcutoff=</b><i>frac_mass_cutoff</i> </dt>
+<dd>The output tables extend
+to the radius corresponding to this fraction of the total mass.  Default:
+<b>0.999999</b>. </dd>
+
+<dt><b>ntab=</b> </dt>
+<dd>Number of table entries. A compiled maximum (MXTB=10000) is
+the maximum allowed value. Default: <b>512</b> 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Example</a></h2>
+
+<p> Here is an example of a
+rather large 100,000 Plummer sphere. This will take about 30 minutes of
+integration time on a 2020 style CPU. Adjust appropriately: <br>
+<pre># generate OM model table and snapshot
+    plummer out=plummer.tab anisorad=1
+    mkommod plummer.tab plummer.snap nbody=100000
+# integrate this plummer model (needs about 500 MB disk space)
+    gyrfalcON plummer.snap plummer.out eps=0.025 tstop=100 step=0.5 kmax=7
+# plot lagrangian radii to confirm the model is in equilibrium
+    snapmradii plummer.out 0.01,0.1:0.9:0.1,0.99 log=t |\
+         tabplot  - 1 2:12 line=1,1 xlab=Radius ylab="log(MassFraction)"
+</pre>
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='mkommod.1.html'>mkommod(1NEMO)</a>
+, <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Joshua E.
-Barnes <p>
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+Joshua E. Barnes 
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
+<br>
+<pre>2-jun-1988<tt> </tt>&nbsp;<tt> </tt>&nbsp;original<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
+5-jun-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;add example<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+</pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>
@@ -52,8 +84,10 @@ Barnes <p>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
+<li><a name='toc4' href='#sect4'>Example</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

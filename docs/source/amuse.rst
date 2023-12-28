@@ -99,7 +99,7 @@ The AMUSE manual has some
 Installation
 ~~~~~~~~~~~~
 
-For the benefit of NEMO users, AMUSE can usually be installed *easily* as follows:
+AMUSE can usually be installed *easily* as follows:
 
 .. code-block::
 

@@ -1,4 +1,4 @@
-.TH BENCH 5NEMO "26 July 2023"
+.TH BENCH 5NEMO "21 December 2023"
 
 .SH "NAME"
 bench \- various NEMO benchmarks
@@ -14,23 +14,42 @@ nemobench COMMAND
 There are several methods to compare the performance of NEMO on different processors or environments:
 
 .RS 2
+
+.IP 0.
+The command \fBmake bench5\fP from the $NEMO directory runs a small number of benchmarks designed
+to each takae 5 seconds on a given CPU. An average \fIspeed\fP is then computed to compare different
+compilers and/or CPU's, an idea simular to the \fIgeekbench\fP suite of tests.
+
 .IP 1.
 The command \fBmake bench\fP from the $NEMO directory runs a standard benchmark of about a dozen 
 selected NEMO programs.  It should run in about 30 seconds on a ~2020 computer. A short
 table (see below in RESULTS) lists results from some recent computers.
 
 .IP 2.
-Various \fBBenchfile\fP filles scattered through the $NEMO source tree contain benchmarks. There is
-no  wrapper like "make check" has for Testfile's
+The command \fBmake bench5\fP from the $NEMO directory runs a standard benchmark of (currently) 6
+nbody runs, all calibrated to take 5 seconds on a specific machine. the average of those will
+result in a rating (speed) of 1000. Most machines post ~2020 should get a \fInemobench5\fP (SEE BELOW)
+of over 1000.
+
 
 .IP 3.
+Various \fBBenchfile\fP filles scattered through the $NEMO source tree contain benchmarks. There is
+no wrapper like "make check" has for Testfile's
+
+.IP 4.
 Selected man pages have some examples. Over time these should be moved into the Benchfile in
 the source directory where this program is maintained. Some are mentioned below in this man page.
+
+.RS -2
+.PP
+Unless otherwise noted, benchmarks are always performed at the max power settings of a laptop. In many
+cases the compiler version also will make a difference. An example is the NEMOBENCH5, which lost 10% in
+speed going from gcc-11 to gcc-12!
 
 .SH "NEMOBENCH5"
 
 The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs a number (currently 6) N-body codes all calibrated to
-take 5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating
+take 5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz) using gcc-11. The NEMOBENCH5 rating
 is defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7 has
 a score of 1000.  This definition can be adjusted to 10s runs when the time comes that processors
 run too fast, there is a parameter internal to the nemo.bench script, and could also
@@ -41,7 +60,7 @@ be adjusted if more codes are used.
 
 i9-13900K	-	2133
 i9-12900K	-	n/a ~2000
-M2	~1450	n/a 1919, 1899
+M2	~1450?	n/a 1919, 1899
 i9-12900H	-	n/a 1851
 M1-Max	-	n/a 1785
 i7-12800H	-	n/a 1654
@@ -50,24 +69,30 @@ i9-12900K	1330	jansky gcc 11.2.0
 i7-1260P	1261	k2
 i5-1240P	1155	chromebook
 M1 (Macbook Air)	1269	n/a 1750 / 7xxxx
+i7-1260P	1250	k2 - but only on full power
+i5-1240P	1155	chromebook (frameworks)
 i7-11800H		n/a	1474
 i7-1185G7	1060	Dell Latitude 5420
 i5-1135G7	1000	XPS13 1460 /
 AMD threadripper 3960x	896	AlexBox
-i5-10400H		700	Dell Precision 3351 (astroumd)
+AMD Ryzen 7 5800H	891	beelink 
+i5-10400H	700	Dell Precision 3351 (astroumd)
 AMD EPYC 7302 @ 3.0GHz	630	lma 1000/ 28000
 Intel Core i9-9900X	-	geminid 1214 / 9467
 Xeon Gold 5218 @ 2.30 GHz	761	unity/node99 1100 / 8610
-i5-10210U CPU @ 1.60 GHz	732 	X1Y4  1029 / 3194
+i5-10210U @ 1.60 GHz	822 	X1Y4  clang-18
+i5-10210U @ 1.60 GHz	732 	X1Y4  1029 / 3194
 Xeon(R) Silver 4114 @ 2.20GHz	-	terra 777 / 10213
-i7-8550U CPU @ 1.80 GHz	548 	T480 (1600) 696 / 1935
+i7-8550U @ 1.80 GHz	548 	T480 (1600) 696 / 1935
 Xeon E-2186G 3.80 GHz	- 	aurora 1313 / 6721
 i7-3820QM @ 2.70 GHz	498	MacBookPro (Retina, Mid 2012)
-i7-3820 CPU @ 3.60 GHz	414 	dante 833 / 3693
-Xeon(R) CPU E3-1280 @ 3.50 GHz	384	chara 828 / 3117
-i7-3630QM CPU @ 2.40 GHz	429	T530 (1200) 762 / 3006 
+i7-3820 @ 3.60 GHz	414 	dante 833 / 3693
+Xeon(R) E3-1280 @ 3.50 GHz	384	chara 828 / 3117
+i7-3630QM @ 2.40 GHz	429	T530 (1200) 762 / 3006 
 Xeon E5-2623 v4 @ 2.60 GHz	-	kraken 782 / 5800
 Xeon X5550  @ 2.67 GHz	256	sdp 566 / 3938
+AMD Opteron(tm) 6380	234	yorp (2023)
+
 .fi
 
 A typical output of bench5 might look as follows:
@@ -157,6 +182,33 @@ In addition each data file that is produced is checksummed and compared
 to a baseline version using \fIbsf(1NEMO)\fP if the argument
 \fBbsf=1\fP is added.
 
+.SH "BENCH8"
+The \fBbench8\fP measures how well your CPU performs simple OpenMP algorithm
+as more cores are employed. This can be an effective way to determine how
+well your CPU adjusts under increased power demands, for example laptops with
+thermal protection will scale down their cpu frequency as more cores are
+employed or as a long benchmark heats up the CPU.
+
+.nf
+   scaling2 umax=20000 np=1 iter=20
+   scaling2 umax=20000 np=2 iter=40
+   scaling2 umax=20000 np=4 iter=80
+.fi
+
+Look at the elapsed time to follow how well a particular CPU performs at increased load:
+
+.nf
+.ta +3.0i +0.75i +0.75i +0.75i +0.75i
+CPU     	1	2	4	8	16
+
+i7-1260P (pow)	7.0	7.1	8.5	18.7	24.6
+i7-1260P (bat)	10.2	13.0	17.6	40.4	59.9
+jansky   	6.4	6.5	6.5	6.7	17.4
+lma     	12.2	12.3	12.2	12.3	12.4
+M2      	6.9	7.2	7.6	9.4	19.3
+.fi
+
+
 
 .SH "BENCH10"
 Not really implemented, but this will be benchmarks orchestrated via the \fBBenchfile\fP's
@@ -177,7 +229,7 @@ Now, nearly 35 years later, my laptop runs this about 50,000 times faster.
 Looking in more detail at the original NEMO manual:
 
 .nf
-.ta +1i
+.ta +2.5i
                        cpu/steps
 sun 3/60:  20 MHz	2.28        
 i5-1135G7: 4200 MHz	0.0000875   
@@ -321,4 +373,5 @@ Benchfile	A Makefile that can orchestrate series of benchmarks
 6-jan-2018	updated for V4, more balanced benchmarks 	PJT
 27-dec-2019	nemo.bench; updated with potcode and orbint	PJT
 26-jul-2020	added timings / added geekbench5 	PJT
+31-aug-2023	added bench8	PJT
 .fi

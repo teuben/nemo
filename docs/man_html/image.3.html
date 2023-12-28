@@ -6,12 +6,14 @@
 <title>IMAGE(3NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 image, read_image, write_image, create_image, create_cube, copy_image,
-free_image - high level image i/o 
+copy_image_header, free_image - high level image i/o 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;#include &lt;image.h&gt;int read_image(instr, iptr)stream instr;imageptr
@@ -21,11 +23,13 @@ int create_image
 (iptr, nx, ny)imageptr *iptr;int nx,ny;
 int copy_image (iptr, optr)imageptr
 iptr;imageptr *optr;
-int create_cube (iptr, nx, ny, nz)imageptr *iptr;int
-nx,ny,nz;
-int free_image (iptr)imageptr iptr;
-DescriptionThese routines provide
-a high-level interface to a CCD-like image  structure. read_image() reads
+int copy_image_header (iptr, optr)imageptr iptr;imageptr
+optr;
+int create_cube (iptr, nx, ny, nz)imageptr *iptr;int nx,ny,nz;
+int
+free_image (iptr)imageptr iptr;
+DescriptionThese routines provide a simple
+high-level interface to a CCD-like image structure (2/3 D) read_image() reads
 in a full image (which may be a cube), pointed to by the pointer iptr from
 a file pointed to by the stream instr. It returns 0 in case of an error
 (allocation), 1 if OK. On success iptr contains a valid address for an image.
@@ -35,10 +39,12 @@ to by iptr to a file outstr. create_image() is like read_image, but only
 allocates space and sets most image header (except the size) variables
 to zero. create_cube() is the extension of create_image() for 3D images.
 copy_image copies an image, but not the image elements.  All header elements
-are copied. AuthorPeter Teuben See Alsoimage(5NEMO), fits(5NEMO) Files
+are copied. copy_image_header copies an image header, and leaves the data
+untouched.  AuthorPeter Teuben  See Alsoimage(5NEMO), fits(5NEMO)  Files
 ~/src/pjt/image         image.c image.h image.3 image.5
 </pre>
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>xx-jul-87       original version        PJT
 23-dec-88       V2.3 velocity added     PJT
@@ -57,7 +63,7 @@ are copied. AuthorPeter Teuben See Alsoimage(5NEMO), fits(5NEMO) Files
 <li><a name='toc3' href='#sect3'>Author</a></li>
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>History</a></li>
 </ul>
 </body>
 </html>

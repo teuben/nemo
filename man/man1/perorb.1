@@ -1,10 +1,13 @@
-.TH PERORB 1NEMO "29 October 2019"
-.SH NAME
+.TH PERORB 1NEMO "24 December 2023"
+
+.SH "NAME"
 perorb \- find periodic orbits in symmetric potentials
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBperorb \fBout=\fPorbit [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIperorb\fP searches for periodic orbits in two ways:
 .PP
 In the iterative mode it will integrate an orbit for a half or
@@ -32,9 +35,10 @@ Henon (1965, Ann.Astr. 28, 499). See also
 El-Sabaa & Sherief (1990) Ap&SS 167, 305 for some more recent work.
 .PP
 Alternatives approaches are the Particle Swarm Optimization
-(Skokos et al. 2005). There is also code by T.S.v Albada, but
-not yet released in NEMO.
-.SH PARAMETERS
+(Skokos et al. 2005). There is also the \fIHenyey\fP based code, implemented
+by T.S.v Albada, see \fIhenyey(1NEMO)\fP.
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword is also
 given:
 .TP
@@ -151,10 +155,12 @@ the last. Default: \fBf\fP.
 .TP
 \fBheadline=\fP
 Random user verbiage added to the output file. Default:none
-.SH CAVEATS
+
+.SH "CAVEATS"
 The potential (potname= etc) needs to have a proper potential defined
 for this routine to work.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 By default, perorb will find a circular orbit in a plummer potential
 near R=1:
 .nf
@@ -248,21 +254,29 @@ orbstat(1NEMO), potlist(1NEMO), orbint(1NEMO), newton0(1NEMO), potential(5NEMO)
 .nf
 Particle Swarm Optimization (PSO): Skokos et al. - 2005MNRAS.359..251S
 .fi
-.SH AUTHOR
+
+.SH "ADS"
+
+@ads 1985MNRAS.212..257T
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+
+.SH "FILES"
 .nf
 .ta +2.5i
-pjt/orbit	original sources
+NEMO/orbit/misc	original sources
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 1980s       	V0.x Teuben's thesis work (written in SHELTRAN)	PJT
 22-may-90	V1.0 created from old Cyber CDC-7600 program 'PERORB'  PJT
-24-may-91	V1.1 rotating XY-frames, fixed energy option  PJT
+24-may-91	V1.1 rotating XY-frames, fixed energy option	PJT
 19-apr-95	V1.5 various, rk4 is now default integrator	PJT
-1-mar-03	minor code cleanup, less lies in the man page, added etot_err	PJT
+1-mar-03	minor code cleanup, fixed man page, added etot_err	PJT
 19-aug-04	V1.6 added last= and fixed an allocation problem	PJT
 29-oct-2019	V1.7 allow phase= with 2 or 3 values	PJT
 .fi

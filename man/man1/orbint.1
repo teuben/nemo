@@ -1,15 +1,17 @@
 .TH ORBINT 1NEMO "10 February 2004"
-.SH NAME
+
+.SH "NAME"
 orbint \- integrating single stellar orbit
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 .PP
 \fBorbint in=\fPorbit \fBout=\fPorbit [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBorbint\fP will integrate a stellar orbit. It is currently implemented
 with a few simple constant-timestepping algorithms with
 minimal support for diagnostics and restart options. For fancy
 integrators see for example
-\fIorbintvq(1NEMO)\fP or 
+\fIorbintv(1NEMO)\fP or 
 the \fInewton0(1NEMO)\fP family of orbit integrators.
 .PP
 Non-rotating potentials are also supported, but only with the
@@ -20,8 +22,7 @@ stop time is given, but the number of steps is used to terminate
 the integration.
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword is also
-given:
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIorbit(5NEMO)\fP format [no default]
@@ -122,30 +123,31 @@ mkorbit(1NEMO), orblist(1NEMO), orbintv(1NEMO), epic5(1NEMO), potential(5NEMO), 
 GALA: Galactic astronomy and gravitational dynamics (ascl:1707.006) - https://github.com/adrn/gala
 .fi
 
-.SH TIMING
+.SH "TIMING"
 .nf
 .ta +2.0i
 With fpa on SUN 3/50 (~16Mhz) 1000 integration steps
-potential=harmonic	1"
-potential=plummer	1"
-potential=bar83  	3"
-potential=hackforce	10" (100 bodies, standard Plummer model)
-potential=hackforce	30" (500 bodies)
-potential=hackforce	50" (2000 bodies)
-potential=hackforce	80" (8000 bodies)
+potential=harmonic	1s
+potential=plummer	1s
+potential=bar83  	3s
+potential=hackforce	10s (100 bodies, standard Plummer model)
+potential=hackforce	30s (500 bodies)
+potential=hackforce	50s (2000 bodies)
+potential=hackforce	80s (8000 bodies)
+.fi
 
-.SH AUTHOR
+.SH "AUTHOR"
 Peter Teuben
 
-.SH FILES
+.SH "FILES"
 .nf
 .ta +2.5i
 src/orbit/misc  	orbint.c
 .fi
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 xx-jul-87	V1.0: Created: simple Eulerian	PJT
 2-May-88	V2.2: many changes + doc; leapfrog implemented	PJT
 2-Jun-88	V2.3: new filestruct, code same   	PJT

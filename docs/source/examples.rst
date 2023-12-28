@@ -40,7 +40,7 @@ on your CPU and test your patience and integrator.
 These models are produced in so-called RMS-units in which the
 gravitational constant :math:`G=1`, the total mass :math:`M=1`, and binding energy
 :math:`E=-1/2`.
-In case you would like virial units
+In case you would like virial units (also known as N-body units)
 (see also:
 Heggie & Mathieu, :math:`E=-1/4`,
 in: *The use of supercomputers in stellar
@@ -163,14 +163,14 @@ As an example consider:
 .. code-block::
 
     12% snapplot in=r001.dat xvar=r yvar="x*vy-y*vx" xrange=0:10 yrange=-2:2 \
-                 "visib=-0.2<z&&z<0.2&&i%2==0"
+                 "visib=-0.2<z&z<0.2&i%2==0"
 
     
-plots the angular momentum of the particles along the z axis,
+plots the angular momentum of the particles along the :math:`z` axis,
 :math:`J_z = x.v_y - y.v_x` ,
 against their radius, :math:`r`, but only for the even numbered particles,
 (``i%2==0``) within
-a distance of ``0.2`` of the X-Y plane (:math:`-0.2<z && z<0.2`).
+a distance of ``0.2`` of the X-Y plane (:math:`-0.2<z \& z<0.2`).
 Again note that some of the expressions are within quotes, to prevent
 the shell of giving them a special meaning. 
 
@@ -180,8 +180,8 @@ dynamically loaded into the program for
 execution.
 The expressions must contain legal C expressions and depending
 on their nature must return a value in the context of the
-program. {\it E.g.} {\tt xvar} and {\tt yvar} must return a 
-real value, whereas {\tt visib} must return a boolean (false/true or
+program. *E.g.* ``xvar`` and ``yvar`` must return a 
+real value, whereas ``visib`` must return a boolean (false/true or
 0/non-0) value. This should be explained in the manual page of the
 corresponding programs.
 
@@ -189,28 +189,28 @@ In the context of snapshots, the expression can contain
 basic body variables which
 are understood to the *bodytrans(3NEMO)* routine.
 The real
-variables {\tt x, y, z, vx, vy, vz} are the cartesian phase-space
-coordinates, {\tt t} the time,
-{\tt m} the mass, {\tt phi} the potential,
-{\tt ax,ay,az} the cartesian acceleration and {\tt aux} 
+variables ``x, y, z, vx, vy, vz`` are the cartesian phase-space
+coordinates, ``t`` the time,
+``m`` the mass, ``phi`` the potential,
+``ax,ay,az`` the cartesian acceleration and ``aux``
 some auxiliary information.
 The integer variables are
-{\tt i}, the index of the particle in the snapshot (0 being the
-first one in the usual C tradition) and {\tt key}, another
+``i``, the index of the particle in the snapshot (0 being the
+first one in the usual C tradition) and ``key``, another
 spare slot.
 
 
 For convenience a number of expressions have already been pre-compiled
 (see also Table \ref{t:bodytrans}),
 *e.g.* the radius  r= :math:`\sqrt{x^2+y^2+z^2}` = ``sqrt(x*x+y*y+z*z)``,
-and velocity v = :math:`\sqrt{v_x^2+v_y^2+v_z^2}` = ``sqrt(vx*vx+vy*vy+vz*vz)``. Note that {\tt r} and
-{\tt v} themselves cannot be used in expressions, only the basic
+and velocity v = :math:`\sqrt{v_x^2+v_y^2+v_z^2}` = ``sqrt(vx*vx+vy*vy+vz*vz)``. Note that ``r`` and
+``v`` themselves cannot be used in expressions, only the basic
 body variables listed above can be used in an expression. 
 
 When you need a complex expression that has be used over and
 over again, it is handy to be able to store these expression under
 an alias for later retrieval. 
-With the program {\tt bodytrans}
+With the program ``bodytrans``
 it is possible to save such compiled expressions object files under
 a new name. 
 
@@ -357,20 +357,20 @@ As usual an example:
     13% bodytrans expr="x*vy-y*vz" type=real file=jz
 
 saves the expression for the angular momentum in a real
-valued bodytrans expression file, {\tt btr\_jz.o} which can in future programs
-be referenced as {\tt expr=jz} (whenever a real-valued bodytrans
-expression is required), {\it e.g.}
+valued bodytrans expression file, ``btr_jz.o`` which can in future programs
+be referenced as ``expr=jz`` (whenever a real-valued bodytrans
+expression is required), *e.g.*
 
 .. code-block::
 
     14% snapplot i001.dat xvar=r yvar=jz xrange=0:5
 
-Alternatively, one can handcode a {\it bodytrans} function, compile it,
+Alternatively, one can handcode a *bodytrans* function, compile it,
 and reference it locally. This is useful when you have truly complicated
 expressions that do not easily write themselves down on the commandline.
 The $(x,y)$ AITOFF projection are an example of
 this. For example, consider the following code in a (local working directory)
-file {\tt btr\_r2.c}:
+file ``btr_r2.c``:
 
 
 .. code-block::
@@ -391,18 +391,18 @@ By compiling this:
 
     15% cc -c btr_r2.c
 
-an object file {\tt btr\_r2.o} is created in the local directory,
+an object file ``btr_r2.o`` is created in the local directory,
 which could be used in any real-valued bodytrans expression:
 
 .. code-block::
 
     16% snapplot i001.dat xvar=r2 yvar=jz xrange=0:5
 
-For this your environment variable {\bf BTRPATH}
+For this your environment variable **BTRPATH**
 must have been set to include the local working directory,
 designated by a dot.  Normally your NEMO system manager will have set
 the search path such that the local working directory is searched before
-the system one (in {\tt \$NEMOOBJ/bodytrans}).
+the system one (in ``$NEMOOBJ/bodytrans``).
 
 .. \subsection{Movies}
 
@@ -443,15 +443,15 @@ then passed on for a quick and dirty plot (shown below).
 Handling large datasets
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-One of NEMOs weaknesses is also it's strong point: programs must
+One of NEMOs weaknesses is arguably also its strong point: programs must
 generally be able to fit all their data in (virtual) memory.
 Although programs usually free memory associated with data
 that is not needed anymore, there is a very clear maximum
 to the number of particles it can handle in a snapshot. By 
 default\footnote{one can recompile NEMO in single precision and define
-{\tt body.h} with less wastefull members}
+``body.h`` with less wastefull members}
 a particle takes up about 100 bytes, which limits the size of a 
-snapshots on workstations.
+snapshots.
 
 It may happen that your data was generated on a machine which had
 a lot more memory
@@ -488,12 +488,6 @@ code snippet:
 
     A% mkplummer - 1000 | tcppipe
     B% tcppipe A | tsf -
-
-
-Images
-------
-
-.. todo:: examples/Images
 
 
 Tables

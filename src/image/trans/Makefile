@@ -14,7 +14,8 @@ SRCFILES =
 OBJFILES=  
 LOBJFILES= 
 BINFILES = ccdsmooth ccdmath ccdflip ccdfill ccdsharp ccdsharp3 \
-	ccdclip ccdintpol ccdmedian ccdpot ccdgen ccdsky
+	ccdclip ccdintpol ccdmedian ccdpot ccdgen ccdsky \
+        ccdflatten ccdstretch
 TESTFILES= 
 
 help:

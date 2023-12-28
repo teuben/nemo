@@ -22,7 +22,6 @@ include $(NEMOLIB)/makedefs
 
 #MYFLIBS = $(FFLAGS) $(XLIBS) -L$(NEMOLIB) -lpgplot
 MYFLIBS = $(FFLAGS) $(XLIBS) -lpgplot 
-
 MYCLAGS = $(CFLAGS) -DRINGASCII -DASCII
 
 ALLFILES= dbh genhalo genbulge gendisk diskdf tobinary \

@@ -6,7 +6,7 @@
 <title>IMAGE(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -48,7 +48,21 @@ There
 is some experimental code in image.c to compile with -DUSE_IARRAY (Iliffe
 vectors). 
 <p> 
-<h2><a name='sect3' href='#toc3'>Format</a></h2>
+<h2><a name='sect3' href='#toc3'>Fits</a></h2>
+For no good reason NEMO grew names different from FITS, so
+here&rsquo;s the dictionary between them <br>
+<pre>     NAXISi     nx,ny,nz
+     CRVALi     xmin,ymin,zmin
+     CDELTi     dx,dy,dz
+     CRPIXi     xref,yref,xref
+     CTYPEi     namex,namey,namez
+     CUNITi     unitx,unity,unitz
+     BUNIT      unit
+     BMAJ       beamx
+     BMIN       beamy
+</pre>
+<p> 
+<h2><a name='sect4' href='#toc4'>Format</a></h2>
 <br>
 <pre>typedef struct {
     real   *frame;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* pointer to datablock */
@@ -56,34 +70,37 @@ vectors).
     real   ***cube;      /* 3D special case: ptr to ptr to ptr&rsquo;s  */
     int    axis;         /* axis type (0=old, no ref pixel; 1=with Xref
 */
-    int    nx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* number of pixels along x-axis */
-    int    ny;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* number of pixels along y-axis */
-    int    nz;           /* number of pixels along z-axis */
-    real   xmin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* x-value belonging to reference x-pixel */
-    real   ymin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* y-value belonging to reference y-pixel */
-    real   zmin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* z-value belonging to reference z-pixel */
-    real   dx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in x-pixel */
-    real   dy;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in y_pixel */
-    real   dz;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in z_pixel */
-    real   xref;         /* reference pixel in X (0 the first) */
-    real   yref;         /* reference pixel in Y */
-    real   zref;         /* reference pixel in Z */
-    real   map_min; <tt> </tt>&nbsp;<tt> </tt>&nbsp;/* minimum map value */
-    real   map_max;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* maximum map value */
+    int    nx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* number of pixels along x-axis NAXIS1 */
+    int    ny;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* number of pixels along y-axis NAXIS2 */
+    int    nz;           /* number of pixels along z-axis NAXIS3 */
+    real   xmin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* x-value belonging to reference x-pixel CRVAL1 */
+    real   ymin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* y-value belonging to reference y-pixel CRVAL2 */
+    real   zmin;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* z-value belonging to reference z-pixel CRVAL3 */
+    real   dx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in x-pixel CDELT1 */
+    real   dy;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in y_pixel CDELT2 */
+    real   dz;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp; /* step in z_pixel CDELT3 */
+    real   xref;         /* reference pixel in X (0 the first) CRPIX1 */
+    real   yref;         /* reference pixel in Y CRPIX2 */
+    real   zref;         /* reference pixel in Z CRPIX3 */
+    real   map_min; <tt> </tt>&nbsp;<tt> </tt>&nbsp; /* minimum map value */
+    real   map_max; <tt> </tt>&nbsp;<tt> </tt>&nbsp; /* maximum map value */
     int    beamtype;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* type of beam used for beam smoothing */
     real   beamx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* beamwidth along x (if used) */
     real   beamy;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* beamwidth along y (if used) */
     real   beamz;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* beamwidth along z (if used) */
-    string namex;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to x-axis name string */
-    string namey;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to y-axis name string */
-    string namez;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to z-axis name string */
-    string unit;
+    string namex;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to x-axis name string CTYPE1 */
+    string namey;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to y-axis name string CTYPE2 */
+    string namez;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to z-axis name string CTYPE3 */
+    string unitx;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to x-axis unit string CUNIT1 */
+    string unity;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to y-axis unit string CUNIT2 */
+    string unitz;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to z-axis unit string CUNIT3 */
+    string unit;                /* BUNIT */
     real   time;
     string storage;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;/* pointer to storage fashion string */
 } image, *imageptr;
 </pre>
 <p> 
-<h2><a name='sect4' href='#toc4'>Access-macros</a></h2>
+<h2><a name='sect5' href='#toc5'>Access-macros</a></h2>
 Accessing the individual structure components can be done
 through some pre-define macros (in <b>image.h</b>): <br>
 <pre>#define Frame(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;frame)
@@ -123,7 +140,7 @@ through some pre-define macros (in <b>image.h</b>): <br>
 #endif 
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Array Notation</a></h2>
+<h2><a name='sect6' href='#toc6'>Array Notation</a></h2>
 The <i>MapValue</i> and <i>CubeValue</i> macros are sometimes cumbersome
 typography, and using two image library routines,  <b>map2_image</b> and <b>map3_image</b>
 these can be converted to the commonly used array syntax: <br>
@@ -146,7 +163,7 @@ In CDef mode: <br>
 ... 123.000
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Limitations</a></h2>
+<h2><a name='sect7' href='#toc7'>Limitations</a></h2>
 The current default images (axis=0) have their origin at the
 first (lower-left = 0,0) pixel. In FITS parlance, there is no freedom in
 the location of the reference pixel, it&rsquo;s (0,0). For axis=1 (most programs
@@ -157,13 +174,13 @@ will go away, but only simple cartesian coordinate systems are supported.
 There is no astronomical WCS support, other than labeling it. Perhaps this
 will be for a future axis=2. 
 <p> 
-<h2><a name='sect7' href='#toc7'>Future Expansions</a></h2>
+<h2><a name='sect8' href='#toc8'>Future Expansions</a></h2>
 Code could be modified to
 use <a href='dynamem.3.html'>dynamem(3NEMO)</a>
 . Allows more flexable use by addressing image[i][j] instead
 of slower (?) macros MapValue(iptr,i,j) 
 <p> 
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 , <a href='image.3.html'>image(3NEMO)</a>
 ,
@@ -174,15 +191,15 @@ of slower (?) macros MapValue(iptr,i,j)
 https://en.wikipedia.org/wiki/Iliffe_vector
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect10' href='#toc10'>Files</a></h2>
+<h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>~/src/pjt/image   <tt> </tt>&nbsp;<tt> </tt>&nbsp;image.c image.h image.3 image.5
 </pre>
 <p> 
-<h2><a name='sect11' href='#toc11'>Update History</a></h2>
+<h2><a name='sect12' href='#toc12'>Update History</a></h2>
 <br>
 <pre>29-Jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Original created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-Jun-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0: use struct as interface<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -203,15 +220,16 @@ Peter Teuben
 <li><a name='toc0' href='#sect0'>Name</a></li>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
-<li><a name='toc3' href='#sect3'>Format</a></li>
-<li><a name='toc4' href='#sect4'>Access-macros</a></li>
-<li><a name='toc5' href='#sect5'>Array Notation</a></li>
-<li><a name='toc6' href='#sect6'>Limitations</a></li>
-<li><a name='toc7' href='#sect7'>Future Expansions</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Files</a></li>
-<li><a name='toc11' href='#sect11'>Update History</a></li>
+<li><a name='toc3' href='#sect3'>Fits</a></li>
+<li><a name='toc4' href='#sect4'>Format</a></li>
+<li><a name='toc5' href='#sect5'>Access-macros</a></li>
+<li><a name='toc6' href='#sect6'>Array Notation</a></li>
+<li><a name='toc7' href='#sect7'>Limitations</a></li>
+<li><a name='toc8' href='#sect8'>Future Expansions</a></li>
+<li><a name='toc9' href='#sect9'>See Also</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Files</a></li>
+<li><a name='toc12' href='#sect12'>Update History</a></li>
 </ul>
 </body>
 </html>

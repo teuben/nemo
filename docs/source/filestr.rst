@@ -1,7 +1,7 @@
 .. _filestr:
 
-Filestructure (*)
-=================
+Filestructure
+=============
 
 .. note::
    NEMO stores its persistent data in binary files, which under most circumstances
@@ -288,6 +288,7 @@ A very peculiar data file format encountered in NEMO is that of the
 function descriptors. They present themselves to the user through
 one or more keywords, and in reality point to a compiled
 piece of code that will get loaded by NEMO (using *loadobj(3NEMO)*).
+They normally live in ``$NEMOOBJ``.
 We currently have 4 of these in NEMO:
 
 
@@ -357,3 +358,5 @@ Rotation Curves Fitting Functions, except they are peculiar to the
 result of a projected circular streaming model. The program
 *rotcurshape(1NEMO)* is the only program that uses these functions, the
 manual page has a lot more details.
+
+.. include:: fits.rst

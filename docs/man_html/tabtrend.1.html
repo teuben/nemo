@@ -6,7 +6,7 @@
 <title>TABTREND(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -31,7 +31,7 @@ to compute the phase structure function of the signal (see EXAMPLES below).
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following parameters are recognized in order; they may
-be given in any order if the keyword is also given. Use --help to confirm
+be given in any order if the keyword is also given. Use <b>--help</b> to confirm
 this man page is up to date.  
 <dl>
 
@@ -61,23 +61,23 @@ column  [f] </dd>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 Create 10000
-numbers gaussian distributed with dispersion 1, observe the following:
-<br>
-<pre>set n = 10000
+numbers gaussian distributed with dispersion 1, here are a few sequences
+showing a few operations that modify the observed dispersion: <br>
+<pre>n=10000
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 |                             tabhist
-- 1 -2 2 nmax=$n
+- 
 # sigma=1
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 | tabsmooth - |               tabhist
-- 1 -2 2 nmax=$n
-# sigma=0.612 (sqrt(3/8))
+-
+# sigma=0.612 (sqrt(3/8)?)
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 | tabtrend -  |               tabhist
-- 1 -2 2 nmax=$n
+-
 # sigma=1.414 (sqrt(2))
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 | tabsmooth - | tabtrend -  | tabhist
-- 1 -2 2 nmax=$n
+-
 # sigma=0.5
 seq $n | tabmath - - &rsquo;rang(0,1)&rsquo; all seed=-1 | tabtrend -  | tabsmooth - | tabhist
-- 1 -2 2 nmax=$n
+-
 # sigma=0.5
 </pre>Note that smoothing and trending are related, so their resulting dispersions
 in the last two  examples do not multiply. <p>

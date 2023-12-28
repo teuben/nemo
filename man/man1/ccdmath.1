@@ -1,4 +1,4 @@
-.TH CCDMATH 1NEMO "17 December 2022"
+.TH CCDMATH 1NEMO "17 August 2023"
 
 .SH "NAME"
 ccdmath \- map arithmetic using function expressions
@@ -110,6 +110,10 @@ from the mean:
   set s = 0.19
   cddmath map0 map0s "sign(%1)*$s*log(1+abs(%1)/$s)"
 .fi
+A test \fBcube234.fits\fP with value x + 10y + 100z can be made as follows:
+.nf
+  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
+.fi
 
 .SH "TIMING"
 Performance on Rigel (SUN 3/160, 16Mhz):
@@ -142,7 +146,7 @@ src/image/trans  	ccdmath.c ccdmath.1
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
  1-Jul-87	V1.0: Created	PJT
  6-jul-87	V1.1: order keywords changed for future enhancements	PJT
  1-jun-88	V2.0: new filestruct, although code is same         	PJT

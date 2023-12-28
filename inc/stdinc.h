@@ -544,7 +544,7 @@ dprintf_pter get_dprintf(const_string, int);
          reallocate() MUST #include this file.
 
    NOTE  With C++ this will not work, as the C++ std header file <new>
-         has a member function allocate() (so that our macror definition
+         has a member function allocate() (so that our macro definition
 	 causes a compilation error). Therefore, under C++, we simply
 	 define allocate and reallocate as inline functions, which however
 	 never report source file and line number.

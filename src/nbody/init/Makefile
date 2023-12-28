@@ -17,7 +17,8 @@ LOBJFILES=
 BINFILES = mkplummer mkdisk mkconfig mkexpdisk \
 	   mkbaredisk mkommod mkpolytrope mktabdisk mktestdisk \
 	   plummer mkexphot snapenter mkspiral mkhom mkhomsph \
-	   mkop73 mkcube mksphere mkflowdisk magalie
+	   mkop73 mkcube mksphere mkflowdisk magalie \
+	   mkhernquist mktt72
 TESTFILES= 
 
 help:

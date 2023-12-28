@@ -1,7 +1,7 @@
 .. _codes:
 
-Related Codes (*)
-=================
+Related Codes
+=============
 
 Here we summarize some codes used in stellar dynamics that are similar to NEMO.
 We only list codes that are (publically) available. SPH/hydro codes are currently
@@ -113,7 +113,7 @@ List of Related Codes
       | http://ascl.net/1904.002
   
   galpy
-      Galactic dynamics package (python)
+      Galactic dynamics package (python) - also support NEMO's potential format
       | http://ascl.net/1411.008
   
   GalPot

@@ -6,7 +6,7 @@
 <title>TIPSYSNAP(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -58,22 +58,22 @@ in this case, data with 28 byte headers can still be read. Equally so, the
 opposite can also happen, in which case offset=4 is needed. Some version
 of the format use the last 4 bytes as a version ID, an integer that can
 be 1 or 2. See <a href='tipsy.5.html'><i>tipsy(5NEMO)</i></a>
-. Default: 0 </dd>
+. The <b>hexdump -C</b> program may help identify problems.
+Default: 0 </dd>
 
 <dt><b>boom=t|f</b> </dt>
-<dd>If the tipsy file has extra
-accellerations and potentials stored, the version should be 6. Default:
-
-<p>f 
+<dd>If the tipsy file has extra accellerations and potentials
+stored, the version should be 6. Default: f 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-In case multiple flavors of particles are read, they are deposited
-in different SnapShot&rsquo;s in the file. <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
- needs to be used to
-make one snapshot. For example the standard <b>run99.bin</b> from the tipsy source
-code distrution has all 3 flavors: <br>
+In case multiple flavors
+of particles are read, they are deposited in different SnapShot&rsquo;s in the
+file. <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
+ needs to be used to make one snapshot. For example
+the standard <b>run99.bin</b> from the tipsy source code distrution has all 3 flavors:
+<br>
 <pre>   tipsysnap run99.bin -  |  snapmerge - run99.snap
    ### nemo Debug Info: time=14.9708 N=8579 (1049,1021,6509) for gas,dark,star
    version=0
@@ -129,25 +129,31 @@ EPS(d), EPS(s)
 <p> 
 <h2><a name='sect6' href='#toc6'>Bugs</a></h2>
 In <b>mode=binary</b> the gas, dark and star particles are output in separate
-snapshots. 
+snapshots. Use <a href='csf.1.html'><i>csf(1NEMO)</i></a>
+ and/or <a href='snapmerge.1.html'><i>snapmerge(1NEMO)</i></a>
+ if some or all need to
+be a a single snapshot. Some properties may be lost in the merging though.
+
 <p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='snaptipsy.1.html'>snaptipsy(1NEMO)</a>
+, <a href='snapmerge.1.html'>snapmerge(1NEMO)</a>
+, <a href='csf.1.html'>csf(1NEMO)</a>
 , <a href='stoa_tip.1ZENO.html'>stoa_tip(1ZENO)</a>
-, <a href='tipsy.5.html'>tipsy(5NEMO)</a>
+,
+<a href='tipsy.5.html'>tipsy(5NEMO)</a>
  
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Peter
-
-<p>Teuben 
+Peter Teuben 
 <p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>02-Sep-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-aug-00<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 add mode= to allow binary files, added swap= <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-aug-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.1 process binary data, added offset= (replaces shortlived fix32=t|f)<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-4-feb-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 add boom= and make mode=binary the default <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+4-feb-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 add boom= and make mode=binary the default <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+16-jan-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.3 fix swap= for particle data<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

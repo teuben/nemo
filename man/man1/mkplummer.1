@@ -1,23 +1,24 @@
-.TH MKPLUMMER 1NEMO "31 March 2023"
+.TH MKPLUMMER 1NEMO "20 November 2023"
 
 .SH "NAME"
-mkplummer \- generates a snapshot according to a truncated Plummer model
+mkplummer \- construct a Plummer model
 
 .SH "SYNOPSIS"
 \fBmkplummer\fP [parameters=values...]
 
 .SH "DESCRIPTION"
-\fImkplummer\fP constructs a Plummer model, with a spatial or mass
-cut-off, after which it performs a coordinate transformation to the
+\fImkplummer\fP constructs an N-body realization of a Plummer model,
+with a spatial or mass based
+cut-off, after which it (optionally) performs a coordinate transformation to the
 center-of-mass coordinate system. The data are then written into a
-file \fIsnap-file\fP, in a standard N-body snapshot format.  
+file \fIsnap-file\fP, in a standard N-body \fIsnapshot(5NEMO)\fP format.  
 The model
 is constructed in VIRIAL units (M=G=-4E=1, with E the total energy),
 and finite spatial extent which can be regulated by specifying
 \fImfrac\fP or \fIrfrac\fP or using their default values.  The
 distribution function of a Plummer model is spherically symmetric and
 isotropic, and is a polytrope of index n = 5. 
-See also Aarseth et al. (1974) and Plummer (1911)
+See also Aarseth et al. (1974) and Plummer (1911).
 .PP
 There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
 .PP
@@ -27,10 +28,10 @@ For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
 .so man1/parameters
 .TP 25
 \fBout=\fP\fIsnapfile\fP
-Output data is written into \fIsnapfile\fP, in standard snapshot format.
+Output data is written into \fIsnapfile\fP, in standard \fIsnapshot(5NEMO)\fP format.
 .TP
 \fBnbody=\fP\fIinteger\fP
-Number of particles \fInobj\fP in Nbody snapshot realization of the
+Number of particles \fInobj\fP in N-body snapshot realization of the
 Plummer model.
 .TP
 \fBmlow=\fP\fIreal\fP
@@ -38,11 +39,13 @@ inner core mass fraction within which no stars will be populated.
 (Default: 0)
 .TP
 \fBmfrac=\fP\fIreal\fP
-mass fraction of the (infinitely extended) Plummer model;
-see  rfrac immediately below (Default: \fIrfrac\fP=22.8042468).
+mass fraction of the (otherwise infinitely extended) Plummer model;
+see  rfrac immediately below 
+Note that the total mass is still normalized to 1.
+(Default: \fIrfrac\fP=22.8042468).
 .TP
 \fBrfrac=\fP\fIreal\fP
-radius fraction of the (infinitely extended) Plummer model. If
+radius fraction of the (otherwise infinitely extended) Plummer model. If
 \fImfrac = 1.0\fP then particles will be sprinkled in all over
 space. If \fImfrac\fP < 1.0 or \fIrfrac\fP > 0.0 then each particle is
 constrained to lie within both the radial and (cumulative) mass bound.
@@ -55,9 +58,9 @@ Beware! (Default: \fImfrac\fP=0.999; \fIrfrac\fP=22.8042468 , chosen
 so that the cumulative mass at \fIrfrac\fP is \fImfrac\fP).
 .TP
 \fBseed=\fP\fIinteger\fP
-seed for the random number generator (default: a value 0, which will
+seed for the random number generator (default: 0, which will
 be converted into a unique new value using UNIX's clock time, in
-seconds since once-upon-a-time-in-the-seventies). See also
+seconds since 1970.0). See also
 \fIxrandom(1NEMO)\fP.
 .TP
 \fBtime=\fP\fItime\fP
@@ -75,7 +78,7 @@ disperson.
 [Default: \fB-1\fP].
 .TP
 \fBquiet=\fIlevel\fP
-Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet
+Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet. See "QUIET START" below
 [default: \fB0\fP].
 .TP
 \fBmassname=\fIname\fP
@@ -104,12 +107,12 @@ file, the next item being the snapshot itself. [default: not used].
 \fBnmodel=\fP\fIinteger\fP
 Number of models to generate. Although mostly meant for benchmarks,
 generating more then 1 model can be useful to process very large
-snapshots (which won't fit in memory) in a serialized fashion. See
-also \fIsnapsplit\fP. 
+snapshots (that normally won't fit in memory) in a serialized fashion. See
+also \fIsnapsplit\fP. Most NEMO programs will
 Default: \fB1\fP.
 .TP
 \fBmode=0|1|2\fP
-The processing mode, purely for debugging.
+The processing mode, purely for debugging benchmarks.
 0=no data written.
 1=data written, but no extra analysis.
 2=data written, and extra analysis done.
@@ -117,13 +120,34 @@ The processing mode, purely for debugging.
 
 .SH "VIRIAL UNITS"
 The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
-~ 0.589.  As an example this should plot the same "rotation" curve:
-.nf
+~ 0.589.  As an example the following two commands
+should plot the same "rotation" curve:
+.EX
 
-     mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
-     rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
+ mkplummer - 10000 | radprof - tab=t | tabplot - 1 3 0 2 0 1 yapp=1/xs
+ rotcurves plummer '0,1,3*pi/16' xrange=0:2 yrange=0:1       yapp=2/xs 
 
-.fi
+.EE
+
+.SH "QUIET START"
+For small N-body systems it can easily happen that small random fluctuations
+cause a unacceptabel large deviation from an ideal Plummer sphere. One way to
+achieve more "quiet" initial conditions is by positioning the particles more uniformly in
+their 1/N mass shells, instead of uniformly filling the space between 0 and 1. This is
+controlled by the \fBquiet=1\fP setting.   An even more quiet start can be achieved
+by placing the particles on exactly the radius compatible with its mass fraction, this is
+achieved with the the \fBquiet=2\fP setting.
+.PP
+In this example you can clearly see the difference between the radii selected:
+.EX
+
+ mkplummer - 10 quiet=0 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+ mkplummer - 10 quiet=1 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+ mkplummer - 10 quiet=2 zerocm=f | snapsort - - r | snapprint - r | tabplot - 0 1 line=1,1 point=2,0.1
+
+.EE
+Important to note that with \fBzerocm=f\fP the center of mass will drift, while the "mathematical center"
+was placed at the origin. This will counter the quietness, if you will.
 
 .SH "BUGS"
 A non-delta function mass-spectrum will not create a properly
@@ -136,43 +160,50 @@ using a valid [0,1] range.
 .SH "EXAMPLES"
 mkplummer can also be used to create a plummer sphere with a mass spectrum, e.g.
 a Salpeter mass spectrum with
-.nf
+.EX
 
-% mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
+ mkplummer salpeter.dat 10000 massname='n(m)' massexpr='pow(m,p)' masspars=p,-2.35 massrange=0.1,10
 
-.fi
+.EE
 Another method to create a Plummer sphere is by using the Osipkov-Merritt tables in NEMO, e.g.
-.nf
+.EX
 
-  % plummer plum.dat ntab=1024
-  % mkommod plum.dat plum.snap nbody=10000
+ plummer plum.dat ntab=1024
+ mkommod plum.dat plum.snap nbody=10000
 
-.fi
-or the new General Spherical Profile in ZENO:
-.nf
+.EE
+or in ZENO the new General Spherical Profile:
+.EX
 
-  % plumgsp plum.gsp
-  % gsprealize plum.gsp plum.snap zerocm=true
-  % snapcopy plum.snap plum2.snap
+plumsnap plum1.snap
 
-.fi
-with a note that ZENO files may need an extra \fIsnapcopy(1NENO)\fP to be compatible with NEMO
+plumgsp plum.gsp
+gsprealize plum.gsp plum.snap zerocm=true
+snapcopy plum.snap plum2.snap
+
+.EE
+with a note that ZENO files may need an extra \fIsnapcopy(1NEMO)\fP to be compatible with NEMO
 \fIsnapshot(5NEMO)\fP files.
 
 .SH "BENCHMARKS"
 The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double precision,
 with and without writing to a local file:
-.nf
-	make -f Benchfile bench0 bench1
-   or
-	/usr/bin/time mkplummer . 10000000
-	/usr/bin/time mkplummer bench1.snap 10000000
-.fi
+.EX
+
+cd $NEMO/nemo/src/nbody/init/
+make -f Benchfile bench0 bench1
+
+    or
+    
+/usr/bin/time mkplummer . 10000000
+/usr/bin/time mkplummer bench1.snap 10000000
+
+.EE
 with some sample CPU for bench0:
-.nf
+.EX
    xps13       3.1s  or 171 MB/s
    t480        4.9s  or  72 MB/s
-.fi
+.EE
 the time difference betweeen bench0 and bench1 can be interpreted as
 the time needed to write 535MB (for 10M particles)
 
@@ -205,7 +236,7 @@ Piet Hut (Peter Teuben)
 ~/src/nbody/init	mkplummer.c
 .fi
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
 23-Apr-87	Version 1.0: created         	PIET
@@ -219,5 +250,5 @@ xx-Mar-89	V2.0: full new snapshot version	+ doc PJT
 15-sep-10	V2.9: clarified rfrac and allow rfrac<0		PJT
 2-dec-2017	documented mcluster	PJT
 29-mar-2021	benchmark	PJT
-5-jun-2023	
+25-sep-2023	describe quiet starts	PJT
 .fi

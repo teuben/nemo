@@ -3,76 +3,170 @@
 
 <html>
 <head>
-<title>TEST(1NEMO) manual page</title>
+<title>HENYEY(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 henyey - search for periodic orbits in a potential (Henyey&rsquo;s method)
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>henyey</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>henyey</b> compute periodic orbits
-using the Henyey method of searching for periodic solutions of a system
-of  differential equations in an (optionally rotating) 2D potential. <p>
-The
-method has been used first by T.S. v. Albada &amp;  R.H. Sanders (1982) MNRAS, 201,
-303.  For more details see also: Henyey (1964) ApJ 139, 309 <p>
-<i>Note: this program
-is under construction, and should not be used without consultation with
-the author</i> 
+<b>henyey</b> computes periodic
+orbits using the Henyey method of searching for periodic solutions of a
+system of  differential equations in an (optionally rotating) 2D potential.
+It needs a potential with first and seconds derivatives. <p>
+The method has
+been used first by T.S. v. Albada &amp; R.H. Sanders (1982) MNRAS, 201, 303.  For
+more details see also: Henyey et al.(1964) ApJ 139, 309. <p>
+The method originated
+from the same equations as looking for periodic solutions in what become
+pulsation stars (RR Lyr, Cepheids). See e.g. van Albada and Baker (1971) 
+<p>
+<p>
+The operation of the program is as follows:  The first orbit is launched
+perpendicular from either the X or Y axis with a reasonable launching velocity.
+Depending on the orbit type, will be integrated for the 1/4, 1/2 or full
+period, with given non-zero launching coordinates.   Currently implemented
+are  
+<p>   type=1    x0=   y0=0  u0=0  v0=     # 1/4 orbit launched from X
+axis<br>
+   type=2    x0=0  y0=   u0=   v0=0    # 1/4 orbit launched from Y axis<br>
+   type=2    x0=0  y0=   u0=   v0=0    # 1/2 orbit launched from Y axis<br>
+   <br>
+  Type 3 orbits are needed to handle the SPO and LPO orbits around the
+stable lagrangian points perpendicular to a rotating bar. Although type
+3 orbits also handle the X1..X4 orbits, integrating for 2x or 4x the period
+only make the computing time longer and possibly at the cost of some instabilities
+in the algorithm. 
+<p> <p>
+A stability parameter of the orbit is also computed. 
+Periodic orbits in potentials with chaos generally makes their islands
+in the surface of section shrink, and correspondingly finding the orbits
+becomes more difficult (i.e. needs good initial conditions). The same holds
+for the method used in <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
+ so you can&rsquo;t win. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order
-if the keyword is also given: 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>x0=</b> </dt>
-<dd>Initial x coordinate      </dd>
+<dd>Initial launching x coordinate  [1] </dd>
 
 <dt><b>y0=</b> </dt>
-<dd>Initial
-y coordinate      </dd>
+<dd>Initial launching y coordinate
+[0]  </dd>
 
 <dt><b>u0=</b> </dt>
-<dd>Initial u velocity      </dd>
+<dd>Initial launching u velocity [0] </dd>
 
 <dt><b>v0=</b> </dt>
-<dd>Initial v velocity  
-   </dd>
+<dd>Initial launching v velocity
+ [1] </dd>
 
 <dt><b>per=</b> </dt>
-<dd>Period        </dd>
+<dd>Period, corresponding to the orbit <b>type</b>. For a type=1 1/4 orbit
+the period given should be 1/4 of the full period.  [3] 
+<p> </dd>
 
 <dt><b>type=</b> </dt>
-<dd>Type of orbit {1,2,3}     </dd>
+<dd>Type of orbit
+{1,2,3} [1] </dd>
 
 <dt><b>ome=</b> </dt>
-<dd>Pattern speed
-of potential     </dd>
+<dd>Pattern speed of potential    [0] </dd>
 
 <dt><b>norbit=</b> </dt>
-<dd>Number of orbits to compute    </dd>
+<dd>Number of extra
+orbits to compute.   [0] </dd>
 
 <dt><b>step=</b> </dt>
-<dd>Step to increase
-non-zero position    </dd>
+<dd>Step to increase the non-zero (x or y) position
+for extra orbits. Each new orbits will inherit the initial conditions of
+the previous periodic orbit. [0.1] 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='perorb.1.html'>perorb(1NEMO)</a>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+
+<p> Here is a benchmark orbit computed
+with three different methods:  
+<p>   # henyey:<br>
+   ./henyey 0.6 0 0 1.9 1.0 1 0.0 0 &gt; bench1.log<br>
+   tabcomment bench1.log | tabplot - 3 4 -1 1 -1 1 line=1,1 yapp=1/xs<br>
  
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-Peter Teuben, Tjeerd van
-Albada 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p>     n   tau      x       y       u       v<br>
+     1  0.00  0.6000  0.0000  0.0000  1.8900 <br>
+   201  1.00  0.0000  0.5951 -1.1203 -0.0001<br>
+ 
+<p>   # perorb:<br>
+   perorb phase=0.6,0,0,0,1.9,0 dir=x potname=bar83 potpars=0,1,1,0.2,1  out=o2<br>
+   # x0     v0       y1       u1     NPT NITER  PERIOD  ETOT     LZ_MEAN
+ ETOT_ERR<br>
+   0.611285 1.866136 0.599541 -1.128240 146 3 2.882204 -0.860843 0.801766 0.0035907<br>
+   orbplot o2 xrange=-1:1 yrange=-1:1  yapp=2/xs<br>
+ 
+<p>   # orbint<br>
+   mkorbit - 0.6 0 0 0 1.9 0 potname=bar83 potpars=0,1,1,0.2,1 | orbint - -  1000
+0.01 | orbplot -<br>
+ 
+<p>  
+<p> where the latter orbit with the <a href='orbint.1.html'><i>orbint(1NEMO)</i></a>
+ integrator is only approximately
+periodic. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+For a bar-only model this code has been confirmed to produce
+the same orbits as <a href='perorb.1.html'><i>perorb(1NEMO)</i></a>
+. <p>
+Unlike other NEMO orbit related programs,
+the potential has been hard-coded. The corresponding Makefile makes it relatively
+easy to plug in another potential. Parameters are passed through FORTRAN
+common blocks, but again, hard-coded and not available via the command line
+interface yet, with the exception of the pattern speed. <p>
+The default parameters
+for the Makefile is a double precision (P=8) bar6 (B=6). 
+<p> 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
-<pre>1980?      <tt> </tt>&nbsp;<tt> </tt>&nbsp;original version        <tt> </tt>&nbsp;<tt> </tt>&nbsp;TVA
+<pre>NEMO/src/orbit/misc/henyey<tt> </tt>&nbsp;<tt> </tt>&nbsp;source code
+fort.20 - output of (I,t/T,X,Y) for more detailed plotting
+</pre>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<a href='perorb.1.html'>perorb(1NEMO)</a>
+, <a href='mkorbit.1.html'>mkorbit(1NEMO)</a>
+, <a href='orbint.1.html'>orbint(1NEMO)</a>
+, <a href='orbplot.1.html'>orbplot(1NEMO)</a>
+ <br>
+<pre>1964ApJ...139..306H - A New Method of Automatic Computation of Stellar Evolution.
+1982MNRAS.201..303V -  Periodic orbits and gas flow in barred spirals 
+</pre>
+<p> 
+<h2><a name='sect8' href='#toc8'>Ads</a></h2>
+
+<p> @ads 1982MNRAS.201..303V 
+<p> 
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
+Tjeerd van Albada, Peter Teuben (NEMO
+adaptation) 
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
+<br>
+<pre>28-may-1979<tt> </tt>&nbsp;<tt> </tt>&nbsp;original version as SBORB<tt> </tt>&nbsp;<tt> </tt>&nbsp;TVA
 1981?     <tt> </tt>&nbsp;<tt> </tt>&nbsp;Cyber7600 version - sheltran<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-xx-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ported to NEMO     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 ported to work with NEMO     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. working, but not in CVS yet ..<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-dec-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 cleanup, added to git, confirm with perorb<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -82,9 +176,13 @@ xx-mar-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.01 .. and still working ..<tt> </tt>
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Ads</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>

@@ -19,11 +19,11 @@
 import sphinx_rtd_theme
 
 project = 'NEMO'
-copyright = '2022, teuben'
+copyright = '2024, teuben'
 author = 'teuben'
 
 # The full version, including alpha/beta/rc tags
-release = '4.3'
+release = '4.4'
 
 
 # -- General configuration ---------------------------------------------------
@@ -32,8 +32,17 @@ release = '4.3'
 # extensions coming with Sphinx (named 'sphinx.ext.*') or your custom
 # ones.
 extensions = [
+    'sphinx.ext.mathjax',
     'sphinx.ext.todo',
+    'sphinx_inline_tabs',
+    # 'sphinx_tabs.tabs',
+    #'sphinxcontrib.mermaid',
 ]
+
+# perhaps...(pjt)
+sphinx_tabs_valid_builders = ['linkcheck']
+sphinx_tabs_disable_tab_closing = True
+
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']

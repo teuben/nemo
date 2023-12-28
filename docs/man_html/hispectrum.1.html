@@ -6,85 +6,86 @@
 <title>HISPECTRUM(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 hispectrum - HI spectrum extraction and gridder 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>hispectrum</b> [parameter=value]
-
+<b>hispectrum</b>
+[parameter=value] 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>hispectrum</i> can perform any of the following functions: <p>
-1) List
-the scan positions of a given HI survey dataset.  <p>
-2) Extract a single spectrum
-from the combined HI surveys.  It does this by simply searching through
-the databases until the distance to the requested position is less than
-a required miniumum distance. It can also report the nearest or take an
-average of the spectra within a search radius. See the <b>mode=</b> keyword below.
-<p>
-3) Combine, weigh and grid spectra from the combined HI surveys into a
-velocity-position-position (VLB) datacube. This is  generally a  time- and
-disk-consuming task, since a temporary list of relevant scans is written
-to disk into a scratch file. Note that creating a datacube is done by gridding
-in X and Y, while the Velocity axis is sampled (interpolated) from a predefined
-set of values (normally regular, like the grid in X and Y). <p>
-The HI survey
-databases live in either your current directory or the directory given
-by the environment variable <b>HI_DIR</b>, and can be compressed (.Z or .gz) (see
-<a href='hi.5.html'><i>hi(5NEMO)</i></a>
+<i>hispectrum</i> can perform any of the following
+functions: <p>
+1) List the scan positions of a given HI survey dataset.  <p>
+2)
+Extract a single spectrum from the combined HI surveys.  It does this by
+simply searching through the databases until the distance to the requested
+position is less than a required miniumum distance. It can also report the
+nearest or take an average of the spectra within a search radius. See the
+<b>mode=</b> keyword below. <p>
+3) Combine, weigh and grid spectra from the combined
+HI surveys into a velocity-position-position (VLB) datacube. This is  generally
+a  time- and disk-consuming task, since a temporary list of relevant scans
+is written to disk into a scratch file. Note that creating a datacube is
+done by gridding in X and Y, while the Velocity axis is sampled (interpolated)
+from a predefined set of values (normally regular, like the grid in X and
+Y). <p>
+The HI survey databases live in either your current directory or the
+directory given by the environment variable <b>HI_DIR</b>, and can be compressed
+(.Z or .gz) (see <a href='hi.5.html'><i>hi(5NEMO)</i></a>
 ). 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order
-if the keyword is also given: 
+The following parameters are recognized
+in any order if the keyword is also given: 
 <dl>
 
 <dt><b>hi=</b><i>HI_id</i> </dt>
-<dd>Input dataset id&rsquo;s to combine {hh,pk,ar,bl,ww,kj,lb}.
- Minimum match is applied. See also <a href='hi.5.html'><i>hi(5NEMO)</i></a>
- for survey id&rsquo;s. [No default].
-</dd>
+<dd>Input dataset id&rsquo;s to
+combine {hh,pk,ar,bl,ww,kj,lb}.  Minimum match is applied. See also <a href='hi.5.html'><i>hi(5NEMO)</i></a>
+
+for survey id&rsquo;s. [No default]. </dd>
 
 <dt><b>lon=</b><i>l</i> </dt>
 <dd>Desired galactic <a href='longitude.l.html'>longitude (l)</a>
- to find a single spectrum. Must be
-in the range 0..360 degrees. If none supplied, all scan positions  in the
-database will be shown. This keyword is only active when cube gridding (see
-<b>cube=</b> below) has not been selected. </dd>
+ to find
+a single spectrum. Must be in the range 0..360 degrees. If none supplied, all
+scan positions  in the database will be shown. This keyword is only active
+when cube gridding (see <b>cube=</b> below) has not been selected. </dd>
 
 <dt><b>lat=</b><i>b</i> </dt>
-<dd>Desired galactic latitude (b)
-to find a single spectrum. Must be in the range -90..90 degrees. See comments
-above. </dd>
+<dd>Desired
+galactic latitude (b) to find a single spectrum. Must be in the range -90..90
+degrees. See comments above. </dd>
 
 <dt><b>vlsr=</b><i>vmin:vmax:vstep</i> </dt>
-<dd>Velocity value samples (km/s, in LSR units),
-on which the output spectrum is interpolated. If none choosen, the original
-raw data will be shown.  When gridding a datacube (see <b>cube=</b> below),  you
-<b>must</b> specify these output velocities since different datasets are on different
-velocity scales (note: the user should compensate for interpolation using
-the <b>bscale/bzero</b> keywords below). When a requested velocity is outside the
-range of the raw data, 0.0 is returned in the spectrum.  Default: none. </dd>
+<dd>Velocity value samples
+(km/s, in LSR units), on which the output spectrum is interpolated. If none
+choosen, the original raw data will be shown.  When gridding a datacube
+(see <b>cube=</b> below),  you <b>must</b> specify these output velocities since different
+datasets are on different velocity scales (note: the user should compensate
+for interpolation using the <b>bscale/bzero</b> keywords below). When a requested
+velocity is outside the range of the raw data, 0.0 is returned in the spectrum.
+ Default: none. </dd>
 
-<dt><b>cube=</b><i>fits_file</i>
+<dt><b>cube=</b><i>fits_file</i> </dt>
+<dd>Output cube, if requested.  This file will
+be in standard <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ format.  Default: none, a single spectrum or
+all scan positions are listed (see <b>lat=</b> and <b>lon=</b> above). </dd>
+
+<dt><b>xgrid=</b><i>xmin,xmax,step</i>
 </dt>
-<dd>Output cube, if requested.  This file will be in standard <a href='fits.5.html'><i>fits(5NEMO)</i></a>
- format.
- Default: none, a single spectrum or all scan positions are listed (see
-<b>lat=</b> and <b>lon=</b> above). </dd>
+<dd>X-range (min and max) and step, in the output cube (see also <b>projection=</b>).
+If <i>xmin</i> is negative, the galactic center will be properly placed  somewhere
+in the middle of the grid. Note these values are the centers of the first
+and last pixel requested, not the edges of the pixels. Default: none. </dd>
 
-<dt><b>xgrid=</b><i>xmin,xmax,step</i> </dt>
-<dd>X-range (min and max) and step,
-in the output cube (see also <b>projection=</b>). If <i>xmin</i> is negative, the galactic
-center will be properly placed  somewhere in the middle of the grid. Note
-these values are the centers of the first and last pixel requested, not
-the edges of the pixels. Default: none. </dd>
-
-<dt><b>ygrid=</b><i>ymin,ymax,step</i> </dt>
-<dd>Y-range (min
-and max) and step, in the output cube  Note these values are the centers
-of the first and last pixel requested. Default: none. </dd>
+<dt><b>ygrid=</b><i>ymin,ymax,step</i>
+</dt>
+<dd>Y-range (min and max) and step, in the output cube  Note these values are
+the centers of the first and last pixel requested. Default: none. </dd>
 
 <dt><b>bscale=</b><i>scale_factor(s)</i>
 </dt>
@@ -208,6 +209,7 @@ has been made yet.
 $NEMO/usr/bima/hi  <tt> </tt>&nbsp;<tt> </tt>&nbsp;source code
 hiXXXXXX           <tt> </tt>&nbsp;<tt> </tt>&nbsp;scratch file (see mktemp) with scans for the cube gridding
 </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='hi.5.html'>hi(5NEMO)</a>
 , <a href='fitsio.3.html'>fitsio(3NEMO)</a>
@@ -215,9 +217,15 @@ hiXXXXXX           <tt> </tt>&nbsp;<tt> </tt>&nbsp;scratch file (see mktemp) wit
 , <a href='himap.1.html'>himap(1NEMO)</a>
 , <a href='fitstohi.1.html'>fitstohi(1NEMO)</a>
 
+<p>
 
+<p><a href='https://www.astro.uni-bonn.de/hisurvey/euhou/LABprofile/index.php'>https://www.astro.uni-bonn.de/hisurvey/euhou/LABprofile/index.php</a>
+ 
+<p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
-Peter Teuben, William T. Reach (decode.f) 
+Peter
+Teuben, William T. Reach (decode.f) 
+<p> 
 <h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>29-Jun-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 Created: simple spectrum extraction<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -229,6 +237,7 @@ Peter Teuben, William T. Reach (decode.f)
 6-apr-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 sigma=0 now default; delete scratchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-sep-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 added npolar/spolar projection options <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 x-mar-96<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 added cosb averagin, gridding options<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+24-jul-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;added URL to web simulator<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

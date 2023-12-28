@@ -6,32 +6,35 @@
 <title>ORBINT(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 orbint - integrating single stellar orbit 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>orbint in=</b>orbit <b>out=</b>orbit
 [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>orbint</b> will integrate a stellar orbit. It is
-currently implemented with a few simple constant-timestepping algorithms
+<b>orbint</b> will integrate a stellar orbit. It
+is currently implemented with a few simple constant-timestepping algorithms
 with minimal support for diagnostics and restart options. For fancy integrators
-see for example <a href='orbintvq.1.html'><i>orbintvq(1NEMO)</i></a>
+see for example <a href='orbintv.1.html'><i>orbintv(1NEMO)</i></a>
  or  the <a href='newton0.1.html'><i>newton0(1NEMO)</i></a>
- family of orbit
-integrators. <p>
-Non-rotating potentials are also supported, but only with the
-rotation axis defined along the Z-axis. <p>
-Integrations backwards in time can
-be achieved by setting dt&lt;0, since no stop time is given, but the number
-of steps is used to terminate the integration. 
+ family of orbit integrators.
+<p>
+Non-rotating potentials are also supported, but only with the rotation axis
+defined along the Z-axis. <p>
+Integrations backwards in time can be achieved
+by setting dt&lt;0, since no stop time is given, but the number of steps is
+used to terminate the integration. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b>
@@ -147,18 +150,24 @@ Read orbit with 10001 phase-points
 <h2><a name='sect6' href='#toc6'>Timing</a></h2>
 <br>
 <pre>With fpa on SUN 3/50 (~16Mhz) 1000 integration steps
-potential=harmonic<tt> </tt>&nbsp;<tt> </tt>&nbsp;1"
-potential=plummer<tt> </tt>&nbsp;<tt> </tt>&nbsp;1"
-potential=bar83  <tt> </tt>&nbsp;<tt> </tt>&nbsp;3"
-potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;10" (100 bodies, standard Plummer model)
-potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;30" (500 bodies)
-potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;50" (2000 bodies)
-potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;80" (8000 bodies)
-AuthorPeter Teuben  Files
-src/orbit/misc  <tt> </tt>&nbsp;<tt> </tt>&nbsp;orbint.c
+potential=harmonic<tt> </tt>&nbsp;<tt> </tt>&nbsp;1s
+potential=plummer<tt> </tt>&nbsp;<tt> </tt>&nbsp;1s
+potential=bar83  <tt> </tt>&nbsp;<tt> </tt>&nbsp;3s
+potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;10s (100 bodies, standard Plummer model)
+potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;30s (500 bodies)
+potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;50s (2000 bodies)
+potential=hackforce<tt> </tt>&nbsp;<tt> </tt>&nbsp;80s (8000 bodies)
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<br>
+<pre>src/orbit/misc  <tt> </tt>&nbsp;<tt> </tt>&nbsp;orbint.c
+</pre>
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>xx-jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created: simple Eulerian<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 2-May-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2: many changes + doc; leapfrog implemented<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -185,7 +194,7 @@ src/orbit/misc  <tt> </tt>&nbsp;<tt> </tt>&nbsp;orbint.c
 <li><a name='toc6' href='#sect6'>Timing</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

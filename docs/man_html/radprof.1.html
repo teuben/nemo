@@ -6,7 +6,7 @@
 <title>RADPROF(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -23,14 +23,14 @@ radprof - tabulate or display radial profiles of an N-body snapshot
 spherically averaged density (and some derived quantities) of  an N-body
 realization.  Although it can plot, it is often more useful to store the
 data in a table (<b>tab=t</b>) and use other programs to plot. One can optionally
-plot the density, cumulative mass or rotational velocity as a function
-of radius.  <p>
-Using table output (<b>tab=t</b>) the intrinsic cumulative mass profile
-is transformed to a spatial and surface density, using 3D-angle averaging
-(hence assuming a spherical system, <a href='snapscale.1.html'><i>snapscale(1NEMO)</i></a>
- has to be used  first
-if the averaging is to be done on triaxial shells).  The density at radius
-of radius-sorted star <i>i</i> (i=0..NBODY-1) is given by: <br>
+plot the density, cumulative mass or centrifugally balanced circular velocity
+as a function of radius.  <p>
+Using table output (<b>tab=t</b>) the intrinsic cumulative
+mass profile is transformed to a spatial and surface density, using 3D-angle
+averaging (hence assuming a spherical system, <a href='snapscale.1.html'><i>snapscale(1NEMO)</i></a>
+ has to be
+used  first if the averaging is to be done on triaxial shells).  The density
+at radius of radius-sorted star <i>i</i> (i=0..NBODY-1) is given by: <br>
 <pre>                sum_{i-k}^{i+k} M(j)  -  0.5*(M(i-k)+M(i+k))
     rho(i) = -----------------------------------------------
                     4/3 * PI * ( r(i+k)^3 - r(i-k)^3 )
@@ -49,7 +49,7 @@ The table will contain 7 columns:
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following parameters
 are recognized in order; they may be given in any order if the keyword
-is also given. Use --help to confirm this man page is up to date.  
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b>
@@ -114,10 +114,11 @@ Plot: no logarithmic scaling can be done.
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapdens.1.html'>snapdens(1NEMO)</a>
 , <a href='hackdens.1.html'>hackdens(1NEMO)</a>
+, <a href='snapshell.1.html'>snapshell(1NEMO)</a>
 , <a href='tabplot.1.html'>tabplot(1NEMO)</a>
-, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
-
-
+,
+<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+ 
 <p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 

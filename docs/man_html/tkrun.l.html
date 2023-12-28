@@ -6,24 +6,29 @@
 <title>TKRUN(1) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tkrun - automatic GUI builder and frontend to run shell scripts or programs
+tkrun - automatic GUI builder and frontend to run shell scripts or
 
+<p>programs 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tkrun</b> [-option value...] <i>script</i> 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>tkrun</i> presents an interactive
-graphical user interface to a shell <i>script</i> or program that conforms to
-a &lsquo;&lsquo;key=val&rsquo;&rsquo; interface. It does this by extracting named keywords from the
-shell script and building a Tcl/Tk run script that provideds the interface
-to running the script itself (or any program for that matter, see the <b>-r</b>
-option below). 
+<i>tkrun</i> presents
+an interactive graphical user interface to a shell <i>script</i> or program that
+conforms to a &lsquo;&lsquo;key=val&rsquo;&rsquo; interface. It does this by extracting named keywords
+from the shell script and building a Tcl/Tk run script that provideds the
+interface to running the script itself (or any program for that matter,
+see the <b>-r</b> option below). 
+<p> 
 <h2><a name='sect3' href='#toc3'>Options</a></h2>
-The following options parameters are recognized (the
-ones with a * still have to be implemented): 
+The following options parameters are recognized
+(the ones with a * still have to be implemented): 
 <dl>
 
 <dt><b>-r </b><i>run_path</i> </dt>
@@ -75,6 +80,8 @@ a keyword <br>
     #&gt; CHECK    key=val     opt1,opt2,opt3,...
     #&gt; IFILE    key=val     
     #&gt; OFILE    key=val
+    #&gt; IDIR     key=val     
+    #&gt; ODIR     key=val
     #&lt;      -tkopt1 tkval1 -tkopt2 -tkval2 ... 
     #
     #&gt; HELP  key    One-line helpers for this particular keyword
@@ -87,33 +94,45 @@ a keyword <br>
 in e.g. c-shell scripts, e.g.: <br>
 <pre>    set a=1    #&gt; SCALE  a=1     0:10:0.1
 </pre>but this is a new feature and will possibly be modified to not have to
-specify the variable setting "a=1"  twice. 
+specify the variable setting "a=1"  twice. <p>
+In the upcoming <b>tkrun</b> V2 version
+of this format is expected to allow help, as well as normalize the keyword
+specification as follows: <br>
+<pre>    set a=1   # some help on this keyword        #&gt; SCALE  0:10:0.1
+</pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Resetting (right click
-on the keyword) a checkbutton doesn&rsquo;t work properly. <p>
-checkbuttons and radiobuttons
-do not layout their buttons efficiently, and the overal layout is limited
-to fit your (vertical) screensize. Planned fix is to use the <a href='grid.3.html'><i>grid(3)</i></a>
- geometry
-manager, instead of <a href='pack.3.html'><i>pack(3)</i></a>
+Resetting (right click on the keyword) a checkbutton doesn&rsquo;t work
+properly. <p>
+checkbuttons and radiobuttons do not layout their buttons efficiently,
+and the overal layout is limited to fit your (vertical) screensize. Planned
+fix is to use the <a href='grid.3.html'><i>grid(3)</i></a>
+ geometry manager, instead of <a href='pack.3.html'><i>pack(3)</i></a>
 . <p>
-The additional Tcl/Tk options (on a <b>#&lt;</b> line
-immediately following the <b>#&gt;</b> line) are not working. <p>
-The code is horribly
-non-defensive, and does not handle syntax errors on the <b>#&gt;</b> tag lines very
-well. 
+The additional
+Tcl/Tk options (on a <b>#&lt;</b> line immediately following the <b>#&gt;</b> line) are not working.
+<p>
+The code is horribly non-defensive, and does not handle syntax errors on
+the <b>#&gt;</b> tag lines very well. 
+<p> 
 <h2><a name='sect6' href='#toc6'>Todo</a></h2>
-Help is not implemented yet. Neither is the -EXEC/+EXEC section
-to block out sections of the script. 
+Help is not implemented yet. Neither is the
+-EXEC/+EXEC section to block out sections of the script. There is a tooltip
+available, but not implemented since the <i>help</i> portion of the GUI specification
+in V2 has not been implemented here. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='wish.1.html'>wish(1)</a>
 , <a href='zenity.1.html'>zenity(1)</a>
- <p>
+, <a href='qtrun.1.html'>qtrun(1NEMO)</a>
+
+<p>
 <br>
 <pre>http://sunscript.sun.com/<tt> </tt>&nbsp;<tt> </tt>&nbsp;Home Page of Tcl/Tk (now gone)
 http://www.neosoft.com/<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;Archive of Tcl/Tk tools 
 http://tcl.sourceforge.net/<tt> </tt>&nbsp;<tt> </tt>&nbsp;Current home page and source code repo
 </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>Examples</a></h2>
 <br>
 <pre>    % tkrun design
@@ -136,7 +155,6 @@ Here is a very simple script, called <b>testscript</b> in the source code distri
 #&gt;  CHECK   options=mean,sigma      sum,mean,sigma,skewness,kurtosis
 #&gt;  SCALE   n=3.141592              0:10:0.01
 #&lt;          -digits 2
-#&lt;  
 #<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;parse named arguments
 foreach a ($*)
    set $a
@@ -155,21 +173,46 @@ again:
   shift argv
   goto again
 </pre>
-<h2><a name='sect9' href='#toc9'>Author</a></h2>
-Peter Teuben (teuben@astro.umd.edu) Astronomy Department,University
-of Maryland,College Park,MD,USA) 
-<h2><a name='sect10' href='#toc10'>Files</a></h2>
+<p> 
+<p> 
+<h2><a name='sect9' href='#toc9'>Tkrun V2</a></h2>
+In version 2 of this format we have implemented this via a new
+python based qt (and pySimpleGui) driver. Here the format can be run via
+bash, csh and python in the <br>
+<pre>    key=val  # help    #&gt; GUI
+</pre>specification, but the client software (bash/csh/python/....) is responsible
+to properly parse the <i>key=val</i> command line arguments.  Here are the proposed
+
+<p>GUI tags with generic key=val/help sections 
+<p> <br>
+<pre>   in=foo        # input file      #&gt; IFILE
+   out=bar       # output file     #&gt; OFILE
+   text=hello    # some text       #&gt; ENTRY
+   mode=gauss    # the mode        #&gt; RADIO gauss,newton,leibniz
+   stats=mean    # what to show    #&gt; CHECK sum,mean,sigma,skewness,kurtosis
+   n=3.141592    # the n value     #&gt; SCALE 0:10:0.01
+   k=3.141592    # k, use n        #&gt; LINK  n
+</pre>
+<p> 
+<h2><a name='sect10' href='#toc10'>Author</a></h2>
+Peter Teuben 
+<p> 
+<h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>~/.tkrunrc<tt> </tt>&nbsp;<tt> </tt>&nbsp;(optional) global configuration file
 $run.key<tt> </tt>&nbsp;<tt> </tt>&nbsp;keyword file in which key=val pairs are maintained
+$NEMO/scripts/templates <tt> </tt>&nbsp;<tt> </tt>&nbsp;example templates of key=val parsing
 </pre>
-<h2><a name='sect11' href='#toc11'>Update History</a></h2>
+<p> 
+<h2><a name='sect12' href='#toc12'>Update History</a></h2>
 <br>
 <pre>18-aug-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 released for ADASS97 paper (tcl/tk 7.6/4.2) <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-jan-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 added -e, and some minor features<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-apr-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 added option to share the set and #&gt; comment on one line<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 12-jun-08<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 updated doc and minor code cleanup<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 24-dec-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.7 implemented the load/save of key=val files    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-jul-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;rudimentary tooltips
+3-aug-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;proposing the new V2 GUI format    <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -184,9 +227,10 @@ $run.key<tt> </tt>&nbsp;<tt> </tt>&nbsp;keyword file in which key=val pairs are 
 <li><a name='toc6' href='#sect6'>Todo</a></li>
 <li><a name='toc7' href='#sect7'>See Also</a></li>
 <li><a name='toc8' href='#sect8'>Examples</a></li>
-<li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Files</a></li>
-<li><a name='toc11' href='#sect11'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>Tkrun V2</a></li>
+<li><a name='toc10' href='#sect10'>Author</a></li>
+<li><a name='toc11' href='#sect11'>Files</a></li>
+<li><a name='toc12' href='#sect12'>Update History</a></li>
 </ul>
 </body>
 </html>

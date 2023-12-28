@@ -6,7 +6,7 @@
 <title>gyrfalcON(1falcON) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -21,14 +21,17 @@ gyrfalcON - a superberb N-body code (public version)
 requires NEMO version 3.2.1 or higher, see
 <a href='http://www.astro.umd.edu/nemo.'>http://www.astro.umd.edu/nemo.</a>
  It is recommended to configure NEMO with <b>configure
---enable-single --enable-lfs</b>. 
+--enable-single --enable-lfs</b>. <p>
+This version is a NEMO based frozen version, currently
+limiting the C++ version with <b>-std=c++03</b>. For an updated version contact
+the author, Walter Dehnen directly. 
 <p> 
 <h2><a name='sect3' href='#toc3'>description</a></h2>
-<b>gyrfalcON</b> stands for "GalaxY simulatoR
-using <b>falcON</b>". It is a full-fledged N-body code using Walter Dehnen&rsquo;s force
-algorithm of complexity O(N) (<b>falcON</b>), which is about 10 times faster than
-an optimally coded tree code. <b>gyrfalcON</b> features individual adaptive time
-steps and individual (but fixed) softening lengths. 
+<b>gyrfalcON</b> stands for "GalaxY
+simulatoR using <b>falcON</b>". It is a full-fledged N-body code using Walter Dehnen&rsquo;s
+force algorithm of complexity O(N) (<b>falcON</b>), which is about 10 times faster
+than an optimally coded tree code. <b>gyrfalcON</b> features individual adaptive
+time steps and individual (but fixed) softening lengths. 
 <p> 
 <h2><a name='sect4' href='#toc4'>parameters controlling
 I/O</a></h2>

@@ -6,14 +6,17 @@
 <title>CCDSKY(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdsky - lazy (cosmology) sky scaling calculator 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdsky</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdsky</b> is a lazy sky scaling calculator. It will give you the
 scaling parameters for a FITS file (which uses degrees for angles, and
@@ -31,7 +34,7 @@ in z, Wright&rsquo;s (2006) cosmology calculator is used.
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
  The following
 parameters are recognized in order; they may be given in any order if the
-keyword is also given. Use --help to confirm this man page is up to date. 
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
 
 <dl>
 
@@ -69,28 +72,40 @@ of the source. Based on the distance, it will the compute the HI and H2
 (given some reasonable X factor) masses, in units of solar masses. Default:
 1 </dd>
 
+<dt><b>freq=</b> </dt>
+<dd>Observing frequency in GHz [115] </dd>
+
+<dt><b>beam=</b> </dt>
+<dd>Beam size in arcsec [not
+used] [12.65] </dd>
+
+<dt><b>dish=</b> </dt>
+<dd>Dish size in meter. For given dish size and frequency,
+the beam and conversions from K to Jy/beam is given. [50] </dd>
+
 <dt><b>scale=#</b> </dt>
-<dd>Scale the intensity values in the data itself. Default: 1. </dd>
+<dd>Scale
+the intensity values in the data itself. Default: 1. </dd>
 
 <dt><b>H=</b> </dt>
-<dd>Specify
-the cosmology model, with up to 3 parameters. Only used when units in <b>d=</b>
-are &rsquo;z&rsquo; were specified. The first parameter is the Hubble Constant. Optionally
-followed by the WM (Omega(matter)) and WV (Omega(vacuum)), for different
-cosmologies. If only H0 and WM are given, a flat universe (WV=0) is used.
-See also Wright(2006). WMAP-9 values: H=71,0.27,0.73 (2011?), Planck-1 values:
-H=67.15,0.317,0.683 (2013) [Default:  71,0.27,0.73] </dd>
+<dd>Specify the cosmology
+model, with up to 3 parameters. Only used when units in <b>d=</b> are &rsquo;z&rsquo; were specified.
+The first parameter is the Hubble Constant. Optionally followed by the WM
+(Omega(matter)) and WV (Omega(vacuum)), for different cosmologies. If only
+H0 and WM are given, a flat universe (WV=0) is used. See also Wright(2006).
+WMAP-9 values: H=71,0.27,0.73 (2011?), Planck-1 values: H=67.15,0.317,0.683 (2013)
+[Default:  71,0.27,0.73] </dd>
 
 <dt><b>nsteps=</b> </dt>
-<dd>Max. number of integration
-steps in the cosmo code to achieve accuracy. [Default: 1000] 
+<dd>Max. number of integration steps in the cosmo
+code to achieve accuracy. [Default: 1000] 
 <p> 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>H</a></h2>
-It will
-be amusing to see the evolution of H: <br>
+It will be amusing to see the
+evolution of H: <br>
 <pre>WMAP-9 (2011)<tt> </tt>&nbsp;<tt> </tt>&nbsp;71<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.27<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.73
 Planck (2013)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.15<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.317<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.683
 Planck (2018)<tt> </tt>&nbsp;<tt> </tt>&nbsp;67.66<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.3111<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.6889
@@ -172,10 +187,12 @@ Universe at desired redshift z
  - Look-back time to z (Ga*):                             10.826436
  - Critical density at z (g/cm^3):                        9.177897e-29
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 Although the conversion from an observed HI flux to mass is not
 too controversial (sans optical depth effects), the conversion  from CO
 to a mass is still under debate. We use the X value 2e20 cm-2/K km/s. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See
 Also</a></h2>
 <a href='ccdgen.1.html'>ccdgen(1NEMO)</a>
@@ -195,20 +212,25 @@ CosmoCalc website</i> <p>
 <a href='https://ui.adsabs.harvard.edu/abs/2013ARA%26A..51..207B/abstract'>https://ui.adsabs.harvard.edu/abs/2013ARA%26A..51..207B/abstract</a>
 
 <p>
-<a href='https://ascl.net/gnuastro'>https://ascl.net/gnuastro</a>
+
+<p><a href='https://ascl.net/gnuastro'>https://ascl.net/gnuastro</a>
  
+<p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 NEMO/src/image/trans<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdsky.c - source code
 
+<p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect10' href='#toc10'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>17-Aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 23-aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added sdv=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-aug-2012<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 implemented scale=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-feb-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2 more verbose, added H=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-mar-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added Wright&rsquo;s cosmology calculator<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+21-dec-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1 add some Jy/K support<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -224,7 +246,7 @@ Peter Teuben
 <li><a name='toc7' href='#sect7'>See Also</a></li>
 <li><a name='toc8' href='#sect8'>Files</a></li>
 <li><a name='toc9' href='#sect9'>Author</a></li>
-<li><a name='toc10' href='#sect10'>Update History</a></li>
+<li><a name='toc10' href='#sect10'>History</a></li>
 </ul>
 </body>
 </html>

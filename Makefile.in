@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 2-aug-2023 PJT
+VERSION = NEMO V4.4 31-aug-2023 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -647,9 +647,18 @@ bench1:
 bench2:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=2)
 
+## bench4:    4 times the flops benchmarks
+bench4:
+	(source nemo_start.sh; cd src/tutor/bench; make flops; ./flops 4)
+
+
 ## bench5:    special nemobench5
 bench5:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=5 | tee -a install.log )
+
+## bench8:    OpenMP test
+bench8:
+	(source nemo_start.sh; cd src/tutor/mp; make scaling2 bench8)
 
 bench10:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench mode=10) | grep ^NEMOBENCH
@@ -670,8 +679,12 @@ bench12:
 
 ## bench12a:  like bench12 but run forever
 bench12a:
-	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128 
+	mkplummer - 200000 seed=123 | /usr/bin/time -f %Usec hackcode1 - . eps=0.05 tstop=999999 freq=128
 
+
+## bench13:    sorting a plummer sphere
+bench13:
+	@t0=`xrandom -1`;mkplummer - 1000000 seed=123 | snapsort - - r | hackdens - . debug=-1; t1=`xrandom -1`; nemoinp "($$t1-$$t0)/100"
 
 #
 TEST=""

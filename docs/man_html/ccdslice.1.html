@@ -6,14 +6,17 @@
 <title>CCDSLICE(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdslice - takes slices and/or re-orient an image cube 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdslice</b>
 [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdslice</b> takes slices from an image cube,
 along any (orthogonal) axis and can thereby also reorder the axes, or remove
@@ -28,28 +31,31 @@ alternative. <p>
 writing out a <a href='fits.5.html'><i>fits(5NEMO)</i></a>
  file. <p>
 Using the <b>zslabs=</b> keyword one or more sections
-based on the WCS along that axis can be selected. 
+based on the WCS along that axis can be selected, but for a regular selection
+(e.g. 30:50:2) it will do the right thing. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in=</b>
-</dt>
-<dd>Input filename, in <a href='image.5.html'><i>image(5NEMO)</i></a>
+<dt><b>in=</b> </dt>
+<dd>Input
+filename, in <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. [no default] </dd>
 
 <dt><b>out=</b> </dt>
-<dd>Output filename
-[no default] </dd>
+<dd>Output filename [no
+default] </dd>
 
 <dt><b>zvar=x|y|z</b> </dt>
-<dd>Slice variable (x, y, or z), along which axis the
-cube is sliced. This axis will then become the 3rd axis. [<b>z</b>]. </dd>
+<dd>Slice variable (x, y, or z), along which axis the cube
+is sliced. This axis will then become the 3rd axis. [<b>z</b>]. </dd>
 
 <dt><b>zrange=</b> </dt>
-<dd>Slices
-to select. Multiple planes can be selected, but must be in the range 1..N<b>zvaR</b>.
+<dd>Slices to
+select. Multiple planes can be selected, but must be in the range 1..N<b>zvaR</b>.
 If none given, all planes will be selected. Any <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  expression
 can be given, but only regular ranges will result in a correct coordinate
@@ -66,7 +72,8 @@ applied to <b>zslabs</b> to match the WCS in the header. Default: 1 </dd>
 <dt><b>select=t|f</b> </dt>
 <dd>A
 boolean to signify of the selected planes are selected for output (t) or
-the ones to ignore for output (f) - Not Implemented yet. </dd>
+the ones to ignore for output (f) - Not Implemented yet. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
@@ -78,21 +85,25 @@ a cube, in which only the 2nd plane (z=1) is selected, the output  <br>
 </pre>and here a somewhat cumbersome three-step process to select a  subset of
 the X axis, but leaving the cube intact: <br>
 <pre>    ccdslice cube.in - x 2:10:2 | ccdslice - - x | ccdslice - cube.out x
-</pre>and the same for selecting a subset of the Y axis, now in two steps: </pre> 
-  ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y<br>
- </pre>Here an example to select some ranges in Z, where the input FITS file
+</pre>and the same for selecting a subset of the Y axis, now in two steps: </pre>
+<p> 
+   ccdslice cube.in - y 2:10:2 | ccdslice - cube.out y<br>
+ 
+<p> </pre>Here an example to select some ranges in Z, where the input FITS file
 is in m/s, but the selection is done in km/s. After this a noise map is
 computed for the selected planes: <br>
 <pre>    fitsccd cube.fits - | ccdslice - - zslabs=100,200,500,600 zscale=1000 | ccdmom
 - cube.mom2 mom=-2
 </pre>
-<h2><a name='sect5' href='#toc5'>Bugs/Caveats</a></h2>
-This code depends on the fact that the data is 3-dimensional,
-i.e. an image cube. This is a limitation of the <a href='image.5.html'><i>image(5NEMO)</i></a>
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+This code depends on the fact that the data is 3-dimensional, i.e.
+an image cube. This is a limitation of the <a href='image.5.html'><i>image(5NEMO)</i></a>
  format. <p>
 The coordinate
 system description of the new <i>zvar</i> axis can easily  be corrupted by choosing
 an irregular layout with <b>xrange=</b>. 
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdsub.1.html'>ccdsub(1NEMO)</a>
 , <a href='ccdfits.1.html'>ccdfits(1NEMO)</a>
@@ -100,12 +111,15 @@ an irregular layout with <b>xrange=</b>.
  <a href='image.5.html'>image(5NEMO)</a>
 , <a href='fits.5.html'>fits(5NEMO)</a>
  
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
-<pre>6-May-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created    PJT
+<pre>6-May-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-feb-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2  add zslabs= and zscale=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+11-may-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3  better WCS handling<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -116,7 +130,7 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Bugs/Caveats</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>Update History</a></li>

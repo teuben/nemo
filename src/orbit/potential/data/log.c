@@ -7,7 +7,7 @@
 
 /*CTEX
  *    {\bf potname=log
- *       potpars={\it $\Omega,M_c,r_c,q$}} 
+ *       potpars={\it $\Omega,M_c,r_c,q,r$}} 
  *
  * The Logarithmic Potential (BT, pp.45, eq. 2.54 and eq. 3.77) has
  * been often used in orbit calculations because of its flat rotation
@@ -19,6 +19,10 @@
  * $$
  *
  * with $ M_c \equiv {1\over 2} r_c v_0^2 $ defined as the ``core mass''.
+ *
+ * This implementation adds a $q<r$ flattening in the 3rd dimension, effectively
+ * turning a prolate into a trixial halo, as well as allowing for an oblate
+ * with $q=1$ and $r<1$.
  */
 
 #include <stdinc.h>
@@ -32,7 +36,7 @@ static double rc = 1.0;		/* core radius */
 static double q  = 1.0;		/* asphericity (q<=1)	*/
 static double r;		/* default: r=q (prolate) */
 
-static double mor, r2, iq2[3];  /* scratch variables  */
+static double mor, rc2, iq2[3];  /* scratch variables  */
 
 void inipotential (int *npar, double *par, char *name)
 {
@@ -41,19 +45,20 @@ void inipotential (int *npar, double *par, char *name)
     if (*npar>2) rc = par[2];
     if (*npar>3) q = par[3];
     if (*npar>4)
-	r = par[4];		/* if it's there: make triaxial */
+	r = par[4];		/* if it's there: make it triaxial */
     else
     	r = q;			/* default: prolate */
 
-    dprintf(1,"INI_POTENTIAL Logarithmic potential (prolate) %s\n",name);
+    dprintf(1,"INI_POTENTIAL Logarithmic potential (triaxial) %s\n",name);
     dprintf(1,"  Parameters : Pattern Speed = %f\n",omega);
-    dprintf(1,"  m_c, r_c, q= %f %f %f %f\n",mc,rc,q,r);
+    dprintf(1,"  m_c, r_c, q, r= %f %f %f %f\n",mc,rc,q,r);
+    if (q < r) warning("log: triaxial intermediate axis smaller?   %g < %g", q,r);
 
     if (rc>0)    
         mor = mc/rc;
     else
     	mor = mc;
-    r2 = rc*rc;
+    rc2 = rc*rc;
     iq2[0] = 1.0;
     iq2[1] = 1.0/sqr(q);
     iq2[2] = 1.0/sqr(r);
@@ -64,7 +69,7 @@ void inipotential (int *npar, double *par, char *name)
 void potential_double (int *ndim, double *pos, double *acc, double *pot, double *time)
 {
     double f;
-    double rad = r2;
+    double rad = rc2;
     int    i;
     
     //#pragma omp 

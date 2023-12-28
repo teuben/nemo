@@ -6,88 +6,94 @@
 <title>MKVH60(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkvh60 - create a uniform sphere of equal mass stars using von Hoerner&rsquo;s
-1960 recipe 
+
+<p>1960 recipe 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkvh60</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Sebastian von Hoerner
-(1960ZA.....50..184V) describes - in beautiful German - four steps how his equal
-mass virialized homogenous sphere was constructed. It also uses a random
-number generator he himself designed. Here&rsquo;s my interpretation of these steps:
-<blockquote>
+Sebastian von
+Hoerner (1960ZA.....50..184V) describes - in beautiful German - four steps how his
+equal mass virialized homogenous sphere was constructed. It also uses a
+random number generator he himself designed. Here&rsquo;s my interpretation of
+these steps: <blockquote>
 <dl>
 
 <dt>1.</dt>
 <dd>Get random numbers between 0 and 1 (see <a href='ran_svh57.3.html'>ran_svh57(3NEMO)</a>
-). </dd>
+).
+</dd>
 
 <dt>2.</dt>
-<dd>Ensure positions
-and velocities are uniformly distributed in a sphere of radius 1 (in both
-x,y,z and vx,vy,vz) </dd>
+<dd>Ensure positions and velocities are uniformly distributed in a sphere
+of radius 1 (in both x,y,z and vx,vy,vz) </dd>
 
 <dt>3.</dt>
-<dd>Shift center of mass to exactly 0.0 </dd>
+<dd>Shift center of mass to exactly
+0.0 </dd>
 
 <dt>4.</dt>
-<dd>Rescale velocities
-such that the virial (2Ek/Ep) </dd>
+<dd>Rescale velocities such that the virial (2Ek/Ep) </dd>
 </dl>
 is exactly 1.0 </blockquote>
 
-<p> Note that the velocities would
-not be gaussian if my interpretation is correct (cf. his eq.(22) and (71)),
-thus the initial conditions are not in the final phase space configuration,
-yet the models are fun to play with. <p>
-Since the simulations were done on
-the Siemens 2002 computer, with about 2000 FLOPS, the number of particles
-was limited to 16 in his 1960 paper, though his followup paper in 1963
-discussed the case nbody=25! <p>
-The seed is special in von Hoerner. It is a
-random number between 0.57 and 0.91, and uses is own 1957 method, implemented
-in <a href='ran_svh57.3.html'><i>ran_svh57(3NEMO)</i></a>
-. By default this code will use NEMO&rsquo;s default random
-numbers, set by <b>seed=</b>, however if <b>seed57</b> is given, his code is used. See
-also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
+<p> Note
+that the velocities would not be gaussian if my interpretation is correct
+(cf. his eq.(22) and (71)), thus the initial conditions are not in the final
+phase space configuration, yet the models are fun to play with. <p>
+Since the
+simulations were done on the Siemens 2002 computer, with about 2000 FLOPS,
+the number of particles was limited to 16 in his 1960 paper, though his
+followup paper in 1963 discussed the case nbody=25! <p>
+The seed is special
+in von Hoerner. It is a random number between 0.57 and 0.91, and uses is own
+1957 method, implemented in <a href='ran_svh57.3.html'><i>ran_svh57(3NEMO)</i></a>
+. By default this code will
+use NEMO&rsquo;s default random numbers, set by <b>seed=</b>, however if <b>seed57</b> is given,
+his code is used. See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
 . 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>out=</b> </dt>
-<dd>Output file name, in standard
-<a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<dd>Output file
+name, in standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  format. No default. </dd>
 
 <dt><b>nbody=</b> </dt>
-<dd>Number of particles [16]     </dd>
+<dd>Number of particles
+[16]     </dd>
 
-<dt><b>seed57=</b>
-</dt>
-<dd>Von Hoerners 1957 seed, must be (0.57 - 0.91). Default: not used. </dd>
+<dt><b>seed57=</b> </dt>
+<dd>Von Hoerners 1957 seed, must be (0.57 - 0.91). Default: not
+used. </dd>
 
 <dt><b>seed=</b> </dt>
-<dd>NEMO&rsquo;s
-Random number seed, if used. [0]  </dd>
+<dd>NEMO&rsquo;s Random number seed, if used. [0]  </dd>
 
 <dt><b>zerocm=</b> </dt>
-<dd>Center c.o.m. ? [t]     </dd>
+<dd>Center c.o.m. ?
+[t]     </dd>
 
-<dt><b>headline=</b>
-</dt>
-<dd>Text headline for output. By default not used. </dd>
+<dt><b>headline=</b> </dt>
+<dd>Text headline for output. By default not used. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is a default
-n=16 sphere, first using the NEMO random number generator, and then the
-von Hoerner ran57 method: 
+Here
+is a default n=16 sphere, first using the NEMO random number generator,
+and then the von Hoerner ran57 method: 
 <p> <br>
 <pre>mkvh60 . 16 seed=123
 ### nemo Debug Info: virial radius: 0.740663    v2=0.821627   ek=0.218607
@@ -128,12 +134,15 @@ random number generator. My interpretation of eq.(44) in 1960ZA.....50..184V is
 2001ASPC..228...11V  How it all started
 Siemens 2002 computer: https://dl.acm.org/doi/10.1145/1458043.1458076
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/nbody/init 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Sebastian von Hoerner (1960), Peter Teuben (NEMO
-re-implementation) 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+Sebastian von Hoerner (1960), Peter Teuben
+(NEMO re-implementation) 
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>19-Apr-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -150,7 +159,7 @@ re-implementation)
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

@@ -11,11 +11,14 @@
  *
  * For a realistic galaxy model, see e.g. http://arxiv.org/abs/1502.00627
  *
+ * For projection properties, see https://arxiv.org/abs/2308.09615
+ *
  *  March 90 Stefano Casertano, University of Pittsburgh
  * 10-Nov-90 inserted omega as first parameter for standard Nemo  PJT
  *  6-oct-91 fixed bug - and made code accept both XYZ and XZY versions (pjt)
  *  7-mar-92 merged sun and 3b1 versions once more			 pjt
  *    oct-93 get_pattern
+ *    dec-2023   re-arranged parameters as omega,mass,a,b to be consistent    PJT
  *
  */
 
@@ -34,9 +37,9 @@
 #include <potential_float.h>
 
 local double omega = 0.0;		/* pattern speed */
+local double miya_mass = 1.0;
 local double miya_ascal = 0.0;
 local double miya_bscal = 1.0;
-local double miya_mass = 1.0;
 
 #if !defined(Y) && !defined(Z)
 /*                                          default: XZY setup (re-oriented) */
@@ -56,14 +59,14 @@ void inipotential (int *npar, double *par, string name)
 
     n = *npar;
     if (n>0) omega = par[0];
-    if (n>1) miya_ascal = par[1];
-    if (n>2) miya_bscal = par[2];
-    if (n>3) miya_mass  = par[3];
+    if (n>1) miya_mass  = par[1];
+    if (n>2) miya_ascal = par[2];
+    if (n>3) miya_bscal = par[3];
     if (n>4) warning("Miyamoto: only first 4 parameters recognized");
 
     dprintf (1,"INIPOTENTIAL Miyamoto-Nagai: X=%d Y=%d Z=%d\n",X,Y,Z);
-    dprintf (1,"  Parameters : omega, ascale, bscale, mass = ");
-    dprintf (1,"  %f %f %f %f \n", omega, miya_ascal, miya_bscal, miya_mass);
+    dprintf (1,"  Parameters : omega, mass, ascale, bscale = ");
+    dprintf (1,"  %f %f %f %f \n", omega, miya_mass, miya_ascal, miya_bscal);
     par[0] = omega;
 }
     

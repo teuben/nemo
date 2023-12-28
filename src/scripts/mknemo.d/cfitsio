@@ -1,18 +1,23 @@
 #! /bin/bash
-
-# version is now hidden in the filename with "latest"
+# version is now hidden in the filename with "latest", unless github is used
 version=4.2.0
 wget=wgetc
+git=0
+url=https://github.com/HEASARC/cfitsio
 
 for arg in $*; do
   export $arg
 done
 
 cd $NEMO/local
-$wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
-
-tar zxf cfitsio_latest.tar.gz
-version=$(echo cfitsio-*.* | sed s/cfitsio-//)
+if [ $git = 0 ]; then
+    $wget  http://heasarc.gsfc.nasa.gov/FTP/software/fitsio/c/cfitsio_latest.tar.gz
+    tar zxf cfitsio_latest.tar.gz
+    version=$(echo cfitsio-*.* | sed s/cfitsio-//)
+else
+    version=git
+    git clone $url cfitsio-git
+fi
 cd cfitsio-$version
 ./configure --prefix=$NEMO/opt --includedir=$NEMO/opt/include/cfitsio
 

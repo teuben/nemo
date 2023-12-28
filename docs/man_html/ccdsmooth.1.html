@@ -6,99 +6,115 @@
 <title>CCDSMOOTH(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdsmooth - smoothing of an image map (2D or 3D) 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>ccdsmooth in=</b>image
-<b>out=</b>image [parameter=value] 
+<b>ccdsmooth
+in=</b>image <b>out=</b>image [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>ccdsmooth</i> will smooth an image
-cube through a simple direct convolution (no FFT). The smoothing beam must
-be circular/spherical, or smoothing must be done independantly per coordinate
-by calling <i>ccdsmooth</i> multiple times using the <b>dir=</b> keyword (see below).
-<p>
-For more artistic versions of a smoothing operation, such as added noise
-and diffraction spikes for bright stars, see <a href='ccddiffract.1.html'><i>ccddiffract(1NEMO)</i></a>
+<i>ccdsmooth</i> will smooth
+an image (cube) through a simple direct convolution (no FFT). The smoothing
+beam must be circular/spherical, or smoothing must be done independantly
+per coordinate by calling <i>ccdsmooth</i> multiple times using the <b>dir=</b> keyword
+(see below). <p>
+Spatial smoothing in X-Y can also be done by creating an image
+of a beam, which is then convolved with the input image. For example, non-circular
+beams with a non-zero positon angle (in FITS: <b>BPA</b>) will need to create a
+beam file using <a href='ccdgen.1.html'><i>ccdgen(1NEMO)</i></a>
+. <p>
+For more artistic versions of a smoothing
+operation, such as added noise and diffraction spikes for bright stars,
+see <a href='ccddiffract.1.html'><i>ccddiffract(1NEMO)</i></a>
 . 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-
-The following parameters are recognized in order; they may be given in
-any order if the keyword is also given. Use --help to confirm this man page
-is up to date.  
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+<b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, in <a href='Image.5.html'><i>Image(5)</i></a>
- format [no default] </dd>
 
-<dt><b>out=<i>out-file</i></b>
-</dt>
+format [no default] </dd>
+
+<dt><b>out=<i>out-file</i></b> </dt>
 <dd>output file, will be in <a href='Image.5.html'><i>Image(5)</i></a>
- format [no default] </dd>
+ format
+[no default] </dd>
 
 <dt><b>gauss=<i>value</i></b> </dt>
-<dd>Beam size
-(FWHM, note FWHM = 2*sqrt(2*<a href='ln.2.html'>ln(2)</a>
-) = 2.355 * sigma) of a  gaussian smoothing
-kernel, in WCS units. Note this is size of the used smoothing kernel, NOT
-the resulting beam in the output map, which generally will be bigger depending
-on the pre-existing beam.  If this parameter is used, the parameter <b>smooth</b>
-is ignored [default: not used]. </dd>
+<dd>Beam size (FWHM, note FWHM = 2*sqrt(2*<a href='ln.2.html'>ln(2)</a>
+) =
+2.355 * sigma) of a  gaussian smoothing kernel, in WCS units. Note this is
+size of the used smoothing kernel, NOT the resulting beam in the output
+map, which generally will be bigger depending on the pre-existing beam. 
+If this parameter is used, the parameter <b>smooth</b> is ignored [default: not
+used]. </dd>
 
 <dt><b>moffat=<i>value</i></b> </dt>
-<dd>If given, this will be the
-FWHM of the Moffat smoothing function. </dd>
+<dd>If given, this will be the FWHM of the Moffat smoothing
+function. </dd>
 
 <dt><b>dir=x|y|z</b> </dt>
-<dd>Direction of smoothing. This
-gives the flexibility of smoothing in x, y and/or z separately. Note that
-when smoothing in more than one coordinate the <i>beam</i> is forced to be the
-same in each dimension [default: xy]. </dd>
+<dd>Direction of smoothing. This gives the flexibility of smoothing
+in x, y and/or z separately. Note that when smoothing in more than one coordinate
+the <i>beam</i> is forced to be the same in each dimension [default: xy]. </dd>
 
-<dt><b>smooth=<i>array</i></b> </dt>
-<dd>Smoothing array, should
-be at least 1 number, prefarably normalized  to unity for sake for conservation
-of units (mass per unit square length). The program does not normalize the
-beam to unity. Example is e.g. the Hanning smoothing: "0.25,0.5,0.25". [default:
-<b>0.25,0.5,0.25</b>]. This parameter is only used if <b>gauss</b> parameter is not used.
-</dd>
+<dt><b>smooth=<i>array</i></b>
+</dt>
+<dd>Smoothing array, should be at least 1 number, prefarably normalized  to
+unity for sake for conservation of units (mass per unit square length).
+The program does not normalize the beam to unity. Example is e.g. the Hanning
+smoothing: "0.25,0.5,0.25". [default: <b>0.25,0.5,0.25</b>]. This parameter is only used
+if <b>gauss</b> parameter is not used. </dd>
 
 <dt><b>wiener=<i>value</i></b> </dt>
-<dd>If used, this will be the (square) size of the Wiener filter.
-</dd>
+<dd>If used, this will be the (square)
+size of the Wiener filter. </dd>
 
 <dt><b>nsmooth=<i>value</i></b> </dt>
-<dd>Number of times the above smoothing kernel is applied over
-the data. [default: <b>1</b>]. </dd>
+<dd>Number of times the above smoothing
+kernel is applied over the data. [default: <b>1</b>]. </dd>
 
 <dt><b>bad=<i>bad_value</i></b> </dt>
-<dd>Input pixel value which to skip in
-smoothing. [Default: not used] </dd>
+<dd>Input pixel
+value which to skip in smoothing. [Default: not used] </dd>
 
 <dt><b>beta=<i>moffat_beta</i></b> </dt>
-<dd>If used, this is the <i>beta</i>
-parameter for the MOffat smoothing function. [Default: 4.765] </dd>
+<dd>If
+used, this is the <i>beta</i> parameter for the Moffat smoothing function. [Default:
+4.765] </dd>
 
-<dt><b>cut=<i>cutoff_value</i></b>
-</dt>
-<dd>Value at which to cutoff the gaussian beam.  [Default: <b>0.01</b>] </dd>
+<dt><b>cut=<i>cutoff_value</i></b> </dt>
+<dd>Value at which to cutoff the gaussian beam.  [Default:
+<b>0.01</b>] </dd>
 
-<dt><b>mode=<i>edge_mode</i></b>
-</dt>
+<dt><b>beam=</b> </dt>
+<dd>Optional 2D spatial beam, in <a href='Image.5.html'><i>Image(5)</i></a>
+ format. This should be
+a map with an odd number of pixels, ideally where the central pixel value
+is 1. Normalization by the beam volume is done automatically, such that
+smoothing conserves flux.  The WCS of the beam is ignored, it&rsquo;s the pixels
+that count. 
+<p> </dd>
+
+<dt><b>mode=<i>edge_mode</i></b> </dt>
 <dd>Special edge smoothing mode (testing). [0] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example to
-compute the noise of an image with unity noise that has been smoothed with
-a beam/pixel (B/P) ratio of 2.0 : <br>
+Here
+is an example to compute the noise of an image with unity noise that has
+been smoothed with a beam/pixel (B/P) ratio of 2.0 : <br>
 <pre>  ccdgen "" -  noise 0,1 size=1000,1000 seed=123 | ccdsmooth - - 2.0 | ccdstat
 - | grep dispersion
   Mean and dispersion    : -0.000116 0.334048
@@ -118,6 +134,12 @@ the B/P ratio <br>
 </pre>caveat/TBD:   this does not follow the expected (?) 1/sqrt(1.1309)/(B/P)
 
 <p> sigma_smooth = -0.133 + 1.52 / beam 
+<p> <p>
+Here is an example of creating a beam
+image, with 5 x 2.5 beam, and a position angle of 30 degrees, by creating
+a disk at pa=-30 and inclination the cos(bmin/bmaj): <br>
+<pre>    ccdgen beam1 gauss 1,5 size=33,33 pa=-30 inc="acosd(0.5)"
+</pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>Timing</a></h2>
 <br>
@@ -197,6 +219,7 @@ Peter
 12-mar-98<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.1: added cut=, fixed fwhm=0.0         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 23-jun-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;add EXAMPLE with smoothing noise<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-may-22<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented missing parameters<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+20-sep-23<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0 add beam=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

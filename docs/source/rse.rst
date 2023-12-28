@@ -31,7 +31,7 @@ a few peculiar aspects.
 * In terms of documentation there are the unix manual (``man``) pages, very hyperlinked,
   and the old *Users and Programmers Guide* (in latex).  The man pages are still used,
   but also made available via html (see https://teuben.github.io/nemo/man_html/index1.html),
-  and the newer sphinx based documentation shared on https://astronemo.readthedocs.io.
+  and the newer sphinx based documentation shared on https://astronemo.readthedocs.io/en/latest.
   There is also the experimental TLDR suport and the classic "motd" via the **fortune**
   program.
 
@@ -63,7 +63,7 @@ a few peculiar aspects.
 * Q: What are lessons learned to keep this code going?
 
 * Q: How many users are using it? There is probably a small core group, and there is good competition from python based
-  environments (yt, amuse, galpy, gala, pynbody). In philosphy. `AMUSE <https://amusecode.github.io/>`_ comes closest
+  environments (yt, amuse, galpy, gala, pynbody). In philosphy. `AMUSE <https://www.amusecode.org/>`_ comes closest
   to NEMO.
 
 * Q: How many citations are there?
@@ -72,7 +72,7 @@ a few peculiar aspects.
 * Some innovative aspects of NEMO perhaps not seen widely used:
    * connect code with papers via an `ADS bibcode <https://ui.adsabs.harvard.edu/help/actions/bibcode>`_.
      See our `bibcode <https://teuben.github.io/nemo/man_html/bibcode.html>`_ table
-   * help= vs. man and **checkpars** 
+   * help= vs. --man vs. man and **checkpars** 
    * loadobj:   body, potential, ...
    * data are binary, but name and type tagged and hierarchical, a bit like binary XML if you like. The **tsf** program
      will show the contents of such files in a more human readable format

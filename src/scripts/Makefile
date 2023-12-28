@@ -5,7 +5,9 @@ include $(NEMOLIB)/makedefs
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
-	wgetc yapp_query nemoplot nemopars sbatch_nemo.sh nemo_functions.sh
+	wgetc yapp_query nemoplot nemopars \
+        sbatch_nemo.sh nemo_functions.sh progress_bar.sh \
+	python/tabplot.py python/fitsplot.py
 MAKES = Makefile.lib 
 
 help:
@@ -13,17 +15,6 @@ help:
 	@echo No more specific help here
 
 ####		install by NEMO (done by top level directly)
-#
-# CC is somewhat of an exception: it should be installed before
-# everything else by a seperate call from the top-level Makefile
-#
-#nemo_startup: cc make
-#	cp $? $(NEMOBIN)
-#
-####
-# mycc.c, which should be still in this directory, has become obsolete
-# when using the shell script, Ultrix does not support -L flag, causing
-# Makefiles to explicitely name the libraries.....
 
 nemo_lib:
 	cp Makefile.lib $(NEMOLIB)/Makefile

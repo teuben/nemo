@@ -6,7 +6,7 @@
 <title>BENCH(5NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <p> 
@@ -24,35 +24,59 @@ nemobench COMMAND
 There are several methods to compare the performance of NEMO
 on different processors or environments: 
 <p> <blockquote>
+<p> 
 <dl>
 
-<dt>1.</dt>
-<dd>The command <b>make bench</b> from
-the $NEMO directory runs a standard benchmark of about a dozen  selected
-NEMO programs.  It should run in about 30 seconds on a ~2020 computer. A
-short table (see below in RESULTS) lists results from some recent computers.
+<dt>0.</dt>
+<dd>The command <b>make bench5</b> from
+the $NEMO directory runs a small number of benchmarks designed to each
+takae 5 seconds on a given CPU. An average <i>speed</i> is then computed to compare
+different compilers and/or CPU&rsquo;s, an idea simular to the <i>geekbench</i> suite
+of tests. 
+<p> </dd>
 
+<dt>1.</dt>
+<dd>The command <b>make bench</b> from the $NEMO directory runs a standard
+benchmark of about a dozen  selected NEMO programs.  It should run in about
+30 seconds on a ~2020 computer. A short table (see below in RESULTS) lists
+results from some recent computers. 
 <p> </dd>
 
 <dt>2.</dt>
-<dd>Various <b>Benchfile</b> filles scattered through the $NEMO source tree contain
-benchmarks. There is no  wrapper like "make check" has for Testfile&rsquo;s 
+<dd>The command <b>make bench5</b> from the $NEMO
+directory runs a standard benchmark of (currently) 6 nbody runs, all calibrated
+to take 5 seconds on a specific machine. the average of those will result
+in a rating (speed) of 1000. Most machines post ~2020 should get a <i>nemobench5</i>
+(SEE BELOW) of over 1000. 
+<p> 
 <p> </dd>
 
 <dt>3.</dt>
-<dd>Selected
-man pages have some examples. Over time these should be moved into the Benchfile
-in the source directory where this program is maintained. Some are mentioned
-below in this man page. 
+<dd>Various <b>Benchfile</b> filles scattered through
+the $NEMO source tree contain benchmarks. There is no wrapper like "make
+check" has for Testfile&rsquo;s 
 <p> </dd>
+
+<dt>4.</dt>
+<dd>Selected man pages have some examples. Over time
+these should be moved into the Benchfile in the source directory where
+this program is maintained. Some are mentioned below in this man page. 
+<p> <blockquote></dd>
 </dl>
+<p>
+Unless
+otherwise noted, benchmarks are always performed at the max power settings
+of a laptop. In many cases the compiler version also will make a difference.
+An example is the NEMOBENCH5, which lost 10% in speed going from gcc-11
+to gcc-12! 
+<p> </blockquote>
 </blockquote>
 
 <h2><a name='sect3' href='#toc3'>Nemobench5</a></h2>
 
-<p> The NEMOBENCH5 benchmark (cd $NEMO;make
-bench5) runs a number (currently 6) N-body codes all calibrated to take
-5.0 seconds on an i5-1135G7 in turbo mode (4.2GHz). The NEMOBENCH5 rating is
+<p> The NEMOBENCH5 benchmark (cd $NEMO;make bench5) runs
+a number (currently 6) N-body codes all calibrated to take 5.0 seconds on
+an i5-1135G7 in turbo mode (4.2GHz) using gcc-11. The NEMOBENCH5 rating is
 defined as 5000 divided by the average of those CPU times. Thus the i5-1135G7
 has a score of 1000.  This definition can be adjusted to 10s runs when the
 time comes that processors run too fast, there is a parameter internal
@@ -60,31 +84,38 @@ to the nemo.bench script, and could also be adjusted if more codes are used.
 <br>
 <pre>i9-13900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;2133
 i9-12900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a ~2000
-M2<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1919, 1899
+M2<tt> </tt>&nbsp;<tt> </tt>&nbsp;~1450?<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1919, 1899
 i9-12900H<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1851
 M1-Max<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1785
 i7-12800H<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1654
 i9-11980HK<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1616
 i9-12900K<tt> </tt>&nbsp;<tt> </tt>&nbsp;1330<tt> </tt>&nbsp;<tt> </tt>&nbsp;jansky gcc 11.2.0
+i7-1260P<tt> </tt>&nbsp;<tt> </tt>&nbsp;1261<tt> </tt>&nbsp;<tt> </tt>&nbsp;k2
+i5-1240P<tt> </tt>&nbsp;<tt> </tt>&nbsp;1155<tt> </tt>&nbsp;<tt> </tt>&nbsp;chromebook
 M1 (Macbook Air)<tt> </tt>&nbsp;<tt> </tt>&nbsp;1269<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a 1750 / 7xxxx
+i7-1260P<tt> </tt>&nbsp;<tt> </tt>&nbsp;1250<tt> </tt>&nbsp;<tt> </tt>&nbsp;k2 - but only on full power
+i5-1240P<tt> </tt>&nbsp;<tt> </tt>&nbsp;1155<tt> </tt>&nbsp;<tt> </tt>&nbsp;chromebook (frameworks)
 i7-11800H<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<tt> </tt>&nbsp;<tt> </tt>&nbsp;1474
 i7-1185G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;1060<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dell Latitude 5420
 i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;1000<tt> </tt>&nbsp;<tt> </tt>&nbsp;XPS13 1460 /
 AMD threadripper 3960x<tt> </tt>&nbsp;<tt> </tt>&nbsp;896<tt> </tt>&nbsp;<tt> </tt>&nbsp;AlexBox
-i5-10400H<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;700<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dell Precision 3351 (astroumd)
+AMD Ryzen 7 5800H<tt> </tt>&nbsp;<tt> </tt>&nbsp;891<tt> </tt>&nbsp;<tt> </tt>&nbsp;beelink 
+i5-10400H<tt> </tt>&nbsp;<tt> </tt>&nbsp;700<tt> </tt>&nbsp;<tt> </tt>&nbsp;Dell Precision 3351 (astroumd)
 AMD EPYC 7302 @ 3.0GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;630<tt> </tt>&nbsp;<tt> </tt>&nbsp;lma 1000/ 28000
 Intel Core i9-9900X<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;geminid 1214 / 9467
 Xeon Gold 5218 @ 2.30 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;761<tt> </tt>&nbsp;<tt> </tt>&nbsp;unity/node99 1100 / 8610
-i5-10210U CPU @ 1.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;732 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  1029 / 3194
+i5-10210U @ 1.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;822 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  clang-18
+i5-10210U @ 1.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;732 <tt> </tt>&nbsp;<tt> </tt>&nbsp;X1Y4  1029 / 3194
 Xeon(R) Silver 4114 @ 2.20GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;terra 777 / 10213
-i7-8550U CPU @ 1.80 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;548 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T480 (1600) 696 / 1935
+i7-8550U @ 1.80 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;548 <tt> </tt>&nbsp;<tt> </tt>&nbsp;T480 (1600) 696 / 1935
 Xeon E-2186G 3.80 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;- <tt> </tt>&nbsp;<tt> </tt>&nbsp;aurora 1313 / 6721
 i7-3820QM @ 2.70 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;498<tt> </tt>&nbsp;<tt> </tt>&nbsp;MacBookPro (Retina, Mid 2012)
-i7-3820 CPU @ 3.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;414 <tt> </tt>&nbsp;<tt> </tt>&nbsp;dante 833 / 3693
-Xeon(R) CPU E3-1280 @ 3.50 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;384<tt> </tt>&nbsp;<tt> </tt>&nbsp;chara 828 / 3117
-i7-3630QM CPU @ 2.40 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;429<tt> </tt>&nbsp;<tt> </tt>&nbsp;T530 (1200) 762 / 3006 
+i7-3820 @ 3.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;414 <tt> </tt>&nbsp;<tt> </tt>&nbsp;dante 833 / 3693
+Xeon(R) E3-1280 @ 3.50 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;384<tt> </tt>&nbsp;<tt> </tt>&nbsp;chara 828 / 3117
+i7-3630QM @ 2.40 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;429<tt> </tt>&nbsp;<tt> </tt>&nbsp;T530 (1200) 762 / 3006 
 Xeon E5-2623 v4 @ 2.60 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;kraken 782 / 5800
 Xeon X5550  @ 2.67 GHz<tt> </tt>&nbsp;<tt> </tt>&nbsp;256<tt> </tt>&nbsp;<tt> </tt>&nbsp;sdp 566 / 3938
+AMD Opteron(tm) 6380<tt> </tt>&nbsp;<tt> </tt>&nbsp;234<tt> </tt>&nbsp;<tt> </tt>&nbsp;yorp (2023)
 </pre>
 <p> A typical output of bench5 might look as follows: 
 <p> <br>
@@ -161,12 +192,35 @@ to a baseline version using <a href='bsf.1.html'><i>bsf(1NEMO)</i></a>
  if the argument <b>bsf=1</b> is added. 
 <p>
 
+<h2><a name='sect5' href='#toc5'>Bench8</a></h2>
+The <b>bench8</b> measures how well your CPU performs simple OpenMP algorithm
+as more cores are employed. This can be an effective way to determine how
+well your CPU adjusts under increased power demands, for example laptops
+with thermal protection will scale down their cpu frequency as more cores
+are employed or as a long benchmark heats up the CPU. 
+<p> <br>
+<pre>   scaling2 umax=20000 np=1 iter=20
+   scaling2 umax=20000 np=2 iter=40
+   scaling2 umax=20000 np=4 iter=80
+</pre>
+<p> Look at the elapsed time to follow how well a particular CPU performs
+at increased load: 
+<p> <br>
+<pre>CPU     <tt> </tt>&nbsp;<tt> </tt>&nbsp;1<tt> </tt>&nbsp;<tt> </tt>&nbsp;2<tt> </tt>&nbsp;<tt> </tt>&nbsp;4<tt> </tt>&nbsp;<tt> </tt>&nbsp;8<tt> </tt>&nbsp;<tt> </tt>&nbsp;16
+i7-1260P (pow)<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.1<tt> </tt>&nbsp;<tt> </tt>&nbsp;8.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;18.7<tt> </tt>&nbsp;<tt> </tt>&nbsp;24.6
+i7-1260P (bat)<tt> </tt>&nbsp;<tt> </tt>&nbsp;10.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;13.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;17.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;40.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;59.9
+jansky   <tt> </tt>&nbsp;<tt> </tt>&nbsp;6.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.7<tt> </tt>&nbsp;<tt> </tt>&nbsp;17.4
+lma     <tt> </tt>&nbsp;<tt> </tt>&nbsp;12.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;12.3<tt> </tt>&nbsp;<tt> </tt>&nbsp;12.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;12.3<tt> </tt>&nbsp;<tt> </tt>&nbsp;12.4
+M2      <tt> </tt>&nbsp;<tt> </tt>&nbsp;6.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;7.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;9.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;19.3
+</pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Bench10</a></h2>
+<p> 
+<p> 
+<h2><a name='sect6' href='#toc6'>Bench10</a></h2>
 Not really implemented, but this will be benchmarks orchestrated
 via the <b>Benchfile</b>&rsquo;s found in the source tree. 
 <p> 
-<h2><a name='sect6' href='#toc6'>Oldest Bench</a></h2>
+<h2><a name='sect7' href='#toc7'>Oldest Bench</a></h2>
 At the inception
 of NEMO in 1986 there was no real benchmark, so for a while (as computers
 were relatively slow still) we used the default <a href='hackcode1.1.html'><i>hackcode1(1NEMO)</i></a>
@@ -188,7 +242,7 @@ very impressive factor of 120 improvement in chip and possibly some compiler
 technology. The NEMO users guide has an appendix in which this benchmark
 is listed for a variety of computers since 1986. 
 <p> 
-<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
+<h2><a name='sect8' href='#toc8'>Caveats</a></h2>
 Defining and running
 a benchmark can be very tricky stuff. It might be important to separate
 disk I/O from CPU usage.   The unix <a href='time.1.html'><i>time(1)</i></a>
@@ -222,7 +276,7 @@ Rule of thumb: always run a benchmark a few times to see if a hot
 CPU slows down the benchmark. If I/O is cached. Other tasks are interfering.
 
 <p> 
-<h2><a name='sect8' href='#toc8'> "others"</a></h2>
+<h2><a name='sect9' href='#toc9'> "others"</a></h2>
 A few other man pages in NEMO also maintain their own list how
 its program compares under different compilers/options/cpu options: <br>
 <pre>CGS(1NEMO)
@@ -234,7 +288,7 @@ Other industry benchmarks: <br>
     SPEC CPU 2017 ($$$) benchmark - 
 </pre>
 <p> 
-<h2><a name='sect9' href='#toc9'>Tabbench</a></h2>
+<h2><a name='sect10' href='#toc10'>Tabbench</a></h2>
 The table I/O benchmark uses a 100M row dataset with 3 columns,
 representing X,Y,Z of which the radius R=sqrt(X^2+Y^2+Z^2) is computed. This
 table is about 2.7 GB in size. Of course reading the table is all dependent
@@ -257,7 +311,7 @@ drawing random numbers and writing them using printf(3) , which is slow.
     
 </pre>
 <p> 
-<h2><a name='sect10' href='#toc10'>Parallel</a></h2>
+<h2><a name='sect11' href='#toc11'>Parallel</a></h2>
 The GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
  tool can be of great use if your tasks are
 pure single core and you have enough cores (most laptops have at least
@@ -281,12 +335,12 @@ be highly parallizable:
 <p> which follows Amdahl&rsquo;s law close to 100%! 
 <p> 
 <p> 
-<h2><a name='sect11' href='#toc11'>Considerations</a></h2>
+<h2><a name='sect12' href='#toc12'>Considerations</a></h2>
 Most programs
 that need an output file, can use <b>out=-</b> to pass the data into a standard
 Unix pipe, or even <b>out=.</b> to use a sink.  
 <p> 
-<h2><a name='sect12' href='#toc12'>See Also</a></h2>
+<h2><a name='sect13' href='#toc13'>See Also</a></h2>
 <a href='gyrfalcON.1.html'>gyrfalcON(1NEMO)</a>
 , <a href='data.5.html'>data(5NEMO)</a>
 ,
@@ -308,10 +362,10 @@ Unix pipe, or even <b>out=.</b> to use a sink.
 <p><a href='https://browser.geekbench.com/processor-benchmarks'>https://browser.geekbench.com/processor-benchmarks</a>
  
 <p> 
-<h2><a name='sect13' href='#toc13'>Author</a></h2>
+<h2><a name='sect14' href='#toc14'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect14' href='#toc14'>Files</a></h2>
+<h2><a name='sect15' href='#toc15'>Files</a></h2>
 <br>
 <pre>$NEMO/src/scripts/nemo.bench<tt> </tt>&nbsp;<tt> </tt>&nbsp;Script uses by make bench/bench5/bench10
 $NEMO/data   <tt> </tt>&nbsp;<tt> </tt>&nbsp;standard repository area for (small) data files.
@@ -319,7 +373,7 @@ Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series 
 /tmp/nemobench.log<tt> </tt>&nbsp;<tt> </tt>&nbsp;The nemobench keeps logfile
 </pre>
 <p> 
-<h2><a name='sect15' href='#toc15'>Update History</a></h2>
+<h2><a name='sect16' href='#toc16'>Update History</a></h2>
 <br>
 <pre>12-may-97<tt> </tt>&nbsp;<tt> </tt>&nbsp;created  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-nov-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;finally added some data<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -330,6 +384,7 @@ Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series 
 6-jan-2018<tt> </tt>&nbsp;<tt> </tt>&nbsp;updated for V4, more balanced benchmarks <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;nemo.bench; updated with potcode and orbint<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added timings / added geekbench5 <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+31-aug-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;added bench8<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -340,17 +395,18 @@ Benchfile<tt> </tt>&nbsp;<tt> </tt>&nbsp;A Makefile that can orchestrate series 
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Nemobench5</a></li>
 <li><a name='toc4' href='#sect4'>Bench</a></li>
-<li><a name='toc5' href='#sect5'>Bench10</a></li>
-<li><a name='toc6' href='#sect6'>Oldest Bench</a></li>
-<li><a name='toc7' href='#sect7'>Caveats</a></li>
-<li><a name='toc8' href='#sect8'> "others"</a></li>
-<li><a name='toc9' href='#sect9'>Tabbench</a></li>
-<li><a name='toc10' href='#sect10'>Parallel</a></li>
-<li><a name='toc11' href='#sect11'>Considerations</a></li>
-<li><a name='toc12' href='#sect12'>See Also</a></li>
-<li><a name='toc13' href='#sect13'>Author</a></li>
-<li><a name='toc14' href='#sect14'>Files</a></li>
-<li><a name='toc15' href='#sect15'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Bench8</a></li>
+<li><a name='toc6' href='#sect6'>Bench10</a></li>
+<li><a name='toc7' href='#sect7'>Oldest Bench</a></li>
+<li><a name='toc8' href='#sect8'>Caveats</a></li>
+<li><a name='toc9' href='#sect9'> "others"</a></li>
+<li><a name='toc10' href='#sect10'>Tabbench</a></li>
+<li><a name='toc11' href='#sect11'>Parallel</a></li>
+<li><a name='toc12' href='#sect12'>Considerations</a></li>
+<li><a name='toc13' href='#sect13'>See Also</a></li>
+<li><a name='toc14' href='#sect14'>Author</a></li>
+<li><a name='toc15' href='#sect15'>Files</a></li>
+<li><a name='toc16' href='#sect16'>Update History</a></li>
 </ul>
 </body>
 </html>

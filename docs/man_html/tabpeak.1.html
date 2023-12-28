@@ -6,7 +6,7 @@
 <title>TABPEAK(1NEMO) manual page</title>
 </head>
 <body bgcolor='white'>
-HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A><br>
+This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
@@ -30,7 +30,7 @@ The default is to search for local 3 point extrema. Using
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 
 The following parameters are recognized in order; they may be given in
-any order if the keyword is also given. Use --help to confirm this man page
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
 is up to date.  
 <dl>
 
@@ -47,49 +47,94 @@ is up to date.
 <dt><b>clip=</b> </dt>
 <dd>Only consider points above this [0] </dd>
 
+<dt><b>delta=</b> </dt>
+<dd>If a
+positive value is used, single peaks larger than this value on either side
+of this peak are reported. [0] </dd>
+
 <dt><b>pmin=</b> </dt>
-<dd>[EXPERIMENTAL]
-Require the peak to contain at least <b>pmin</b> points. By default, only 3 are
-required, in which case a polynomial is fit (though this is an exact fit).
- By setting this higher, more points are required to be part of a peak
-which is then required to be monotonously decreasing. <b>edge=</b> Number of points
-near the edge to skip for a peak finder.   For the simplest 3-point peak
-finder this should be at least 1. [1] </dd>
+<dd>[EXPERIMENTAL] Require the peak to
+contain at least <b>pmin</b> points. By default, only 3 are required, in which
+case a polynomial is fit (though this is an exact fit).  By setting this
+higher, more points are required to be part of a peak which is then required
+to be monotonously decreasing. <b>edge=</b> Number of points near the edge to skip
+for a peak finder.   For the simplest 3-point peak finder this should be
+at least 1. [1] </dd>
 
 <dt><b>valley=t|f</b> </dt>
-<dd>Also fit valleys, in which
-case the signal has to be below -clip. [Default: f] </dd>
+<dd>Also fit valleys, in which case the signal has
+to be below -clip. [Default: f] </dd>
 
 <dt><b>mean=t|f</b> </dt>
-<dd></dd>
+<dd>Use intensity weighted mean ?  [Default:
+f] </dd>
+
+<dt><b>npeak=</b> </dt>
+<dd>extract the Nth peak (N&gt;0). If npeak=0, no extraction done. Other
+keywords will be ignored if a peak is ectracted for further analysis.  [Default:
+0] </dd>
+
+<dt><b>epeak=</b> </dt>
+<dd>expand around the N-th peak extracted by npeak&gt;0 by this factor.
+By default the segment around a peak is defined until the first point away
+from the peak will increase again. [Default: 1] </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>max size
-if a pipe [100000]   
+<dd>max size if a pipe
+[100000]   
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-<br>
-<pre>% nemoinp 1:3 | tabmath - - &rsquo;-(2.2-%1)**2+10&rsquo; | tabpeak -
-2.200000 10.000000
+The peak in a simple paraboloid: <br>
+<pre>  $ nemoinp 1:3 | tabmath - - &rsquo;-(2.2-%1)**2+10&rsquo; | tabpeak -
+  2.200000 10.000000
+  
+</pre>Here is a pipeline extracting the first peak, fitting a gaussian to it,
+and plotting the data and residuals (in the PGPLOT driver the data will
+be in red, the residuals in green, and the fit in blue): <br>
+<pre>  $ tabpeak spec.tab | tabnllsqfit - fit=gauss1d out=- | tee fit.log | tabcomment
+- | tabplot - 1 2,3,4 color=2,3,4 line=1,1
+  $ cat fit.log
+   
+</pre><p>
+Finding single peaks by setting an appropriate delta (related to a robust
+dispersion of the differences of the data): 
+<p> <br>
+<pre>  $ tabtrend L1157-B1_109989__1.bstats.tab  2 | tabhist - robust=t
+  ...
+  Robust Mean Disp     : 1.52724e-05 0.00640417
+  
+  $ tabpeak L1157-B1_109989__1.bstats.tab  delta=0.05
+  #  X       Y       Ypeak    Delta    Delta
+  166.000000 1.591776  0.083979 0.087718 0.080239
+  286.000000 26.544859  25.062155 25.063228 25.061082
+  452.000000 1.838022  0.324911 0.324182 0.325639
+  ...
+  3524.000000 1.520718  0.229133 0.229248 0.229019
+  3810.000000 0.427400  -0.871551 0.870384 0.872717
 </pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
+, <a href='tabnllsqfit.1.html'>tabnllsqfit(1NEMO)</a>
+, <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
+, <a href='tabhist.1.html'>tabhist(1NEMO)</a>
+,
+<a href='tabplot.1.html'>tabplot(1NEMO)</a>
  
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect7' href='#toc7'>Update History</a></h2>
 <br>
 <pre>28-May-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 30-may-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 added valley=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 23-mar-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 added pmin=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-mar-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added edge=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+23-jan-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added npeak, epeak=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+25-may-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.8 added delta=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -101,9 +146,8 @@ Peter Teuben
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>Update History</a></li>
 </ul>
 </body>
 </html>

@@ -1,7 +1,7 @@
 .. _graphics:
 
-Graphics and Image Display (*)
-==============================
+Graphics and Image Display
+==========================
 
 .. note::
    Most NEMO graphics programs select their graphics output with

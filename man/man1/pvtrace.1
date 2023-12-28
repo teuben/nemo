@@ -1,9 +1,12 @@
 .TH PVTRACE 1NEMO "9 June 2009"
-.SH NAME
+
+.SH "NAME"
 pvtrace \- PV diagram envelope tracing 
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBpvtrace\fP in=image [parameter=value] 
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBpvtrace\fP tries to recover the rotation curve from a single 
 position-velocity (PV) diagram, by tracing the outer edges of
 the signal that, after correction for a velocity dispersion
@@ -45,7 +48,8 @@ the ISM, instrumental resolution and beam smearing.
 .PP
 WAMET = WArped Modified Envelope-Tracing method
 
-.SH PARAMETERS
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
 Input image file - must be an PV \fIimage(5NEMO)\fP with position
@@ -105,7 +109,8 @@ Output file in case input file was a cube and output is now a map, not a table.
 \fBmode=\fP
 Which of the output modes (see OUTPUT below) will be used for the output map.
 [Default: 2]
-.SH OUTPUT
+
+.SH "OUTPUT"
 Output of the program will be an ASCII table, with various derived velocities
 as function of position along the P axis in the PV-diagram. The following
 columns are returned (see also \fBmode=\fP above):
@@ -121,13 +126,15 @@ columns are returned (see also \fBmode=\fP above):
 7	half gaussian fit
 8	half gaussian fit, with for MET correction
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 Position axis must be carefully created such that the galaxy center is at P=0,
 whereas for velocity it can be corrected with VSYS=. This is easy for theoretical
 data, but cumbersome for real data.
 .PP
 The MET mode is still not very robust, clipping helps.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 rotcur(1NEMO), runvelfitss07(1NEMO), ccdvel(1NEMO), snapgrid(1NEMO), ccdmom(1NEMO), ccdsub(1NEMO)
 .PP
 .nf
@@ -137,15 +144,19 @@ Sofue et al 1997 PASJ 49, 17
 Sofue et al 523, 136 
 Sofue et al (1997AJ....114.2428S)
 Gentile et al. (2004MNRAS.351..903G) - MET/WAMET method
+Aso & Sai - Spectral Line Analysis/Modeling (SLAM) - https://arxiv.org/abs/2311.07988
 .fi
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
 src/image/rotcur	sources
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1.0i +4.0i
 5-May-01	V1.0 Created	PJT

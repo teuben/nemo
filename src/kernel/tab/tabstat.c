@@ -13,6 +13,7 @@
  *      23-apr-22   V2.0    new table V2 interface                         PJT
  *
  *  @todo:   xcol=0 should use the first data row to figure out all columns
+ *  @todo:   if not in QAC mode, robust=t doesnt work
  */
 
 #include <stdinc.h>	

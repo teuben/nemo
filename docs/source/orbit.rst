@@ -9,8 +9,8 @@ although 3D orbits can be computed the number of utilities to
 analyze them is rather limited.
 
 Orbits are normally stored in datafile (see also
-{\it orbit(5NEMO)}), and a close conceptual relationship exists
-between a (single-particle type) {\bf snapshot} and an {\bf orbit}:
+*orbit(5NEMO)*), and a close conceptual relationship exists
+between a (single-particle type) **snapshot** and an **orbit**:
 an orbit is an ordered series of phase-space coordinates
 whereas a snapshot is a series of particles with no particular
 order, but all at the same time.
@@ -20,7 +20,7 @@ the remainder of this section that you have familiarized yourself with
 how to supply potentials to orbit integrator programs. They all share
 the same triple ``potname=, potpars=, potfile=`` keyword
 interface, as described in Section \ref{s:potential}. Many
-examples of the tricky {\tt potpars=} keyword are given in Appendix
+examples of the tricky **potpars=** keyword are given in Appendix
 \ref{a:potential}.
 
 Initializing
@@ -76,24 +76,24 @@ with no associated potential.
 - **stoo** is a program that can take a particle position from
   a snapshot, and turn it into an orbit. For example, sampling some
   initial conditions from the positions of stars in a Plummer sphere,
-  we could use the following small C-shell code to find some
+  we could use the following small (bash) shell code to find some
   statistical properties of this selected set of 
   orbits\footnote{For the careful reader:
-  {\tt mkplummer} and {\tt potname=plummer} actually
+  **mkplummer** and **potname=plummer** actually
   have different units, and as such this experiment is not 
   properly set up.}
 
 .. code-block::
 
     mkplummer out=p100 nbody=p100
-    foreach i (`nemoinp 0:100:10`)    
+    for i in $(nemoinp 0:100:10); do 
         stoo in=p100 out=orb$i ibody=$i
         orbint orb$i orb$i.out 10000 0.01 10000 potname=plummer
         orbstat orb$i.out
-    end
+    done
 
 
-The reverse program, {\tt otos} turns an orbit into a snapshot, and 
+The reverse program, **otos** turns an orbit into a snapshot, and 
 may come in handy since the snapshot package has far more advanced
 analysis programs.
 
@@ -103,7 +103,7 @@ Integration
 
 - **orbint** integrates orbits from given initial conditions. If the
   input orbit has more than 1 step, the last step is taken as the
-  initial conditions. Although the {\tt potname=, potpars=, potfile=}
+  initial conditions. Although the **potname=, potpars=, potfile=**
   keywords can be given, if the input orbit contains...
 
 .. caption{Sample orbit 1 ({\tt orb1.out})}
@@ -116,9 +116,9 @@ Integration
 
 
 - **henyey** also finds periodic orbits, but uses Henyey's 
-  method\footnote{see also van Albada \& Sanders, (1982, MNRAS, 201, 303)}.
+  method\footnote{see also van Albada & Sanders, (1982, MNRAS, 201, 303)}.
   This program has however not been released to the public version of
-  NEMO, and in fact it seem the source code was lost.
+  NEMO, and in fact it seems the source code was lost.
 
 
 Display
@@ -126,14 +126,14 @@ Display
 
 
 - **orbplot** is the only orbit plotting program we currently have.
-  For more sophisticated display {\tt tabplot} and/or
+  For more sophisticated display **tabplot** and/or
   {\tt snapplot} would have to be used after transforming the data.
-  Also {\tt snapplot} uses the powerful {\it bodytrans} expression
+  Also {\tt snapplot} uses the powerful *bodytrans* expression
   parser to plot arbitrary
-  body related expressions, although {\tt orbplot} can
-  handle both {\tt x, y, z} and {\tt vx, vy, vz} for the
-  {\tt xvar=} and {\tt yvar=} keywords. An example of the output of
-  {\tt orbplot} is given in Figure \ref{f:orbit1}.
+  body related expressions, although **orbplot** can
+  handle both **x, y, z** and **vx, vy, vz** for the
+  **xvar=** and **yvar=** keywords. An example of the output of
+  **orbplot** is given in Figure \ref{f:orbit1}.
 
 
 Analysis
@@ -211,7 +211,7 @@ will plot either a Y-VY or X-VX surface of section.
 
 - **otos** transforms an orbit back into a snapshot, thereby giving you
   the much richer set of analysis tools that are available for
-  {\it snapshot}'s.
+  **snapshot**s.
 
 
 

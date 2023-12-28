@@ -14,18 +14,25 @@
 #include <image.h>
 
 string defv[] = {
-  "in=???\n       Input image filename",
-  "scale=1\n      scale for cdelt, beam (3600 for fits images)",
-  "VERSION=1.6\n  21-dec-2022 PJT",
+  "in=???\n         Input image filename",
+  "scale=1\n        scale for cdelt, beam (3600 for fits images)",
+  "VERSION=1.6b\n   19-sep-2023 PJT",
   NULL,
 };
 
 string usage="print out image header";
 
-/*  convenience function to print out the true extent of an axis */
-void aminmax(real xm, real xr, real dx, int n, real *xmin, real *xmax) {
+/*  convenience function to print out the true extent of an axis, including the half pixel
+  xm = xmin  - like FITS crvalN
+  xr = xref  - like FITS crpixN, but 0 based, not 1
+  dx = dx    - like FITS cdeltN
+  nx = nx    - like FITS naxisN
+  
+*/
+
+void aminmax(real xm, real xr, real dx, int nx, real *xmin, real *xmax) {
   *xmin = xm - (xr+0.5)*dx;
-  *xmax = xm + (n-0.5-xr)*dx;
+  *xmax = xm + (nx-0.5-xr)*dx;
 }
 
 void nemo_main()

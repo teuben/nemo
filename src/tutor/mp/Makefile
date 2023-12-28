@@ -1,13 +1,14 @@
 #
 
-CC = gcc
+#   set defaults in case the makedefs does not
+CC    = gcc
 MPICC = mpicc
 
-TIME = /usr/bin/time
+TIME = /usr/bin/time -f "%U %S %e %P"
 
 include $(NEMOLIB)/makedefs
 
-BINS = hello1 hello2 heated_plate_openmp poisson_mpi scaling
+BINS = hello1 hello2 heated_plate_openmp poisson_mpi scaling scaling2
 
 all:  $(BINS)
 
@@ -49,7 +50,7 @@ bench4:
 scaling: scaling.c
 	$(CC) scaling.c -std=c99 -fopenmp -O3    -o scaling -lm
 
-ONT=1 2 4 8
+ONT=1 2 4 8 16
 bench5: scaling
 	@echo OMP_NUM_THREADS ONT=$(ONT)
 	-@for i in $(ONT); do\
@@ -69,3 +70,10 @@ bench7: python_openmp.py
 	@echo OMP_NUM_THREADS ONT=$(ONT)
 	-@for i in $(ONT); do\
 	   (echo $$i;OMP_NUM_THREADS=$$i $(TIME) ipython python_openmp.py); done
+
+bench8: scaling2
+	@echo "# OMP_NUM_THREADS ONT=$(ONT)"
+	-@for i in $(ONT); do\
+	   (echo -n "$$i ";$(TIME) ./scaling2 umax=20000 np=$$i iter=20*$$i debug=-1); done
+
+

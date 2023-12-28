@@ -5,6 +5,7 @@
 #include <stdinc.h>
 #include <vectmath.h>
 #include <assert.h>
+#include <extstring.h>
 
 /*
  * GLOBAL: pseudo-keyword for storage class.
