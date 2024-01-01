@@ -25,6 +25,8 @@ echo VERSION=$version
 
 cd gnuplot_i
 cp gnuplot_i.[ch] $NEMOLIB
+cd $NEMO/src/kernel/yapp
+make yapp_gnuplot.o && cp yapp_gnuplot.o $NEMOLIB
 
 echo Installed version=$version
 
