@@ -942,7 +942,7 @@ AC_SUBST(NEMOTARS)
 dnl -- some final YAPP stuff
 
 AC_ARG_WITH(yapp,
-	[  --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, ..)],
+	[  --with-yapp=YAPPNAME    Yapp module to make default (pgplot, ps, gnuplot, ...)],
 	yapp_name="$withval",
 	yapp_name="$yapp_default")
 
@@ -954,6 +954,10 @@ case $yapp_name in
           YAPP_LIBS=""
 	  YAPP_DEF="yapp.ps"
           ;;
+	gnuplot)
+	  YAPP_LIBS=
+	  YAPP_DEF=""
+	  ;;
 	cpgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
 	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
