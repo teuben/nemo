@@ -9,9 +9,11 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 newton0, newton0tree, newton0reg - nbody codes with equal time steps
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>newton0</b> [<b>in=</b>infile] [<b>lastout=</b>lastoutfile] [<b>out=</b>outfile] [<b>save=</b>savefile]
 [<b>restore=</b>restorefile] [<b>resume=</b>resumefile] [<b>restart=</b>restartfile] [<b>nbody=</b>integer]
@@ -57,65 +59,67 @@ with different integration, softening, timestep and diagnostics schemes.
 some of the unneeded embellishments, and to optimize the inner loops -- but
 remember: <i>premature optimization is the root of all evil</i> (or at least of
 most).   
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized; they may be
-given in any order. 
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>infile</i> </dt>
-<dd>If <i>infile</i> is specified, a nbody snapshot is
-read in from this file (a quick way of preparing a simple system for testing
-purposes is to use <i> <a href='snapenter.1.html'>snapenter(1NEMO)</i></a>
-). The command line parameters are used
-to determine the type and duration of the integration, and the modes of
-output. Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i> may be
-specified: if none are specified, a new Plummer model is generated (Default:
-no file specification). </dd>
-
-<dt><b>lastout=</b><i>lastoutfile</i> </dt>
-<dd>If <i>lastoutfile</i> is specified,
-then output data are written into this file in standard snapshot format
-at the end of the integration. Since only one output is performed, the integration
-can be viewed as a black box which maps an in-state to an out-state without
-any clutter of intermediate information.  This option is useful for testing
-purposes, since the <i>lastoutfile</i>s of two different runs can be compared
-directly, for example using <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
-; using snapdiff on two <i>outfile</i>s
-would only compare the echos of the initial states, and later states would
-have to be extracted using <a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
- before passing them to <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
-
+<dd>If <i>infile</i> is specified, a nbody
+snapshot is read in from this file (a quick way of preparing a simple system
+for testing purposes is to use <i> <a href='snapenter.1.html'>snapenter(1NEMO)</i></a>
+). The command line parameters
+are used to determine the type and duration of the integration, and the
+modes of output. Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i>
+may be specified: if none are specified, a new Plummer model is generated
 (Default: no file specification). </dd>
 
+<dt><b>lastout=</b><i>lastoutfile</i> </dt>
+<dd>If <i>lastoutfile</i> is
+specified, then output data are written into this file in standard snapshot
+format at the end of the integration. Since only one output is performed,
+the integration can be viewed as a black box which maps an in-state to an
+out-state without any clutter of intermediate information.  This option is
+useful for testing purposes, since the <i>lastoutfile</i>s of two different runs
+can be compared directly, for example using <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
+; using snapdiff
+on two <i>outfile</i>s would only compare the echos of the initial states, and
+later states would have to be extracted using <a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
+ before passing
+them to <a href='snapdiff.1.html'><i>snapdiff(1NEMO)</i></a>
+ (Default: no file specification). </dd>
+
 <dt><b>out=</b><i>outfile</i> </dt>
-<dd>If <i>outfile</i> is specified, then
-output data are written into this file in standard snapshot format, at
-time intervals regulated by <i>dt_min_out</i> and <i>dt_maj_out</i> (see below; Default:
-no file specification).  </dd>
+<dd>If
+<i>outfile</i> is specified, then output data are written into this file in standard
+snapshot format, at time intervals regulated by <i>dt_min_out</i> and <i>dt_maj_out</i>
+(see below; Default: no file specification).  </dd>
 
 <dt><b>save=</b><i>savefile</i> </dt>
-<dd>If <i>savefile</i> is specified, the whole
-system state is saved periodically at time intervals <i>dt_save</i>. (Default:
-no file specification).  </dd>
+<dd>If <i>savefile</i>
+is specified, the whole system state is saved periodically at time intervals
+<i>dt_save</i>. (Default: no file specification).  </dd>
 
 <dt><b>restore=</b><i>restorefile</i> </dt>
-<dd>If <i>restorefile</i> is specified,
-a previously saved system state is read in from this file.  The command
-line parameters are ignored (in contrast to the following option below),
-and the system is run to completion solely according to the information
-contained in <i>restorefile</i>. Thus, unless <i>restorefile</i> contains an interrupted
-run, no integration will take place since <i>t_end</i> will already have been
-reached. Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i> may be
-specified: if none are specified, a new Plummer model is generated (Default:
-no file specification).  </dd>
+<dd>If <i>restorefile</i>
+is specified, a previously saved system state is read in from this file.
+ The command line parameters are ignored (in contrast to the following
+option below), and the system is run to completion solely according to
+the information contained in <i>restorefile</i>. Thus, unless <i>restorefile</i> contains
+an interrupted run, no integration will take place since <i>t_end</i> will already
+have been reached. Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i>
+may be specified: if none are specified, a new Plummer model is generated
+(Default: no file specification).  </dd>
 
 <dt><b>resume=</b><i>resumefile</i> </dt>
-<dd>If <i>resumefile</i> is specified, a
-previously saved system state is read in from this file.  The command line
-parameters are used (in contrast to the previous option above) to determine
-the type and duration of the integration, and the modes of output. Only
-one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i> may be specified: if
-none are specified, a new Plummer model is generated (Default: no file
+<dd>If <i>resumefile</i> is specified,
+a previously saved system state is read in from this file.  The command
+line parameters are used (in contrast to the previous option above) to
+determine the type and duration of the integration, and the modes of output.
+Only one of the files <i>inputfile</i>, <i>restorefile</i>, <i>resumefile</i> may be specified:
+if none are specified, a new Plummer model is generated (Default: no file
 specification). </dd>
 
 <dt><b>restart=</b><i>restartfile</i> </dt>
@@ -297,44 +301,77 @@ of iterations performed in trying to arrive at the correct time to end
 the integration (since integration is with respect to pseudo-time, the end
 of an integration time step can only be predicted roughly with respect
 to real time; iterating with increasing smaller timestep helps to zoom
-in on the correct end-time; Default: <b>niter=</b>3). </dd>
+in on the correct end-time; Default: <b>niter=</b>3). 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+Here is an example
+of integrating a 10 body Plummer sphere, with and without regularization:
+    $ mkplummer p10 10 seed=123<br>
+    <br>
+    $ newton0 p10 out=p10.out t_end=100 dt_major=0.1<br>
+    t_now    T+U    T/U   (E-E0)/E0  dE/E0  nsteps  pair_min  cputime<br>
+    0.000 -0.1670 -0.4984       -0       -0      0     0.35         0<br>
+    0.100 -0.1670 -0.5041 -1.8e-10 -1.8e-10     10     0.33         0<br>
+    ...<br>
+    1.000 -0.1670 -0.5909    2e-10 -1.1e-09    100     0.23         0<br>
+    10.000 15.3983-122.1181      -93  1.3e-10   1000   0.0059   0.00033<br>
+    100.000 16.7514-716.4978   -1e+02        0  10000   0.0059    0.0035<br>
+ 
+<p>    $ newton0reg p10 out=p10reg.out t_end=100 dt_major=0.1<br>
+    t_now    T+U    T/U   (E-E0)/E0  dE/E0  nsteps  pair_min  cputime<br>
+    0.000 -0.1670 -0.4984       -0       -0      0     0.35         0<br>
+    0.100 -0.1670 -0.5041 -5.3e-10 -5.3e-10     10     0.33         0<br>
+    1.000 -0.1670 -0.5909 -1.9e-09 -1.9e-09    101     0.23    0.0005<br>
+    10.000 -0.1668 -0.5254  -0.0011  0.00014    958   0.0031    0.0055<br>
+    100.000 -0.0869 -0.7171    -0.48      0.3   9619   0.0027     0.056<br>
+ 
+<p>  Although energy conservation is not great at all in the regularized
+version, it behaves much better than the vanilla version of <b>newton0</b>. 
+<p> 
+<h2><a name='sect5' href='#toc5'>See
+Also</a></h2>
 <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
-,
-<a href='nbody0.1.html'>nbody0(1NEMO)</a>
+, <a href='nbody0.1.html'>nbody0(1NEMO)</a>
  <p>
 STARLAB: <a href='http://www.sns.ias.edu/~starlab/'>http://www.sns.ias.edu/~starlab/</a>
- 
-<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-<b>newton0</b> has
-not been maintained for a long time, the code was  revived in 2001 as version
-2.0, but for any serious research codes such as the <b>nbodyX</b> series written
-by S.Aarseth (see e.g. <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
-) or the <i>starlab</i> package should be used.
 
-<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
-Running the code with a file named <i>savefile</i> lying around tricks poor
-newton0 into assuming that it has just been restored to the land of the
-living and that it should resume the task of its previous reincarnation
-left undone according to the contents of <i>savefile</i>. Another bug: if intended
-to be restored automatically this way, simply reissuing the original command
-will revive the last saved system as advertised, but only after removing
-(or better: renaming) the old <i>outfile</i>, since <i>newton0</i> is civilized enough
-to refuse to overwrite the contents of the old <i>outfile</i>. One can then manually
-concatenate the new and old <i>outfile</i> after completion of the run. <p>
-The <i>Newton0
-Primer</i> is lost... 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Piet Hut 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+
+<p> 
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
+<b>newton0</b> has not been maintained for a long time, the code was 
+revived in 2001 as version 2.0, but for any serious research codes such
+as the <b>nbodyX</b> series written by S.Aarseth (see e.g. <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
+) or the
+<i>starlab</i> package should probably be used. 
+<p> 
+<h2><a name='sect7' href='#toc7'>Bugs</a></h2>
+Running the code with a file
+named <i>savefile</i> lying around tricks poor newton0 into assuming that it has
+just been restored to the land of the living and that it should resume
+the task of its previous reincarnation left undone according to the contents
+of <i>savefile</i>. Another bug: if intended to be restored automatically this
+way, simply reissuing the original command will revive the last saved system
+as advertised, but only after removing (or better: renaming) the old <i>outfile</i>,
+since <i>newton0</i> is civilized enough to refuse to overwrite the contents of
+the old <i>outfile</i>. One can then manually concatenate the new and old <i>outfile</i>
+after completion of the run. <p>
+The <i>Newton0 Primer</i> is lost... 
+<p> 
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Piet Hut
+
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>NEMO/src/nbody/evolve/newton0<tt> </tt>&nbsp;<tt> </tt>&nbsp;source code
 </pre>
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
 <pre>25-May-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;Version 1.0: created         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PIET
 5-feb-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0: converted for NEMO V3<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-feb-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.0a: integrated in NEMO V3, fixed an I/O problem<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+26-dec-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;add EXAMPLE<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 

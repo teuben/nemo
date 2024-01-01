@@ -24,13 +24,11 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "ntime=\n                   if used, pre-allocate this number of snapshots",
     "first=f\n                  only write first cube?",
     "format=binary\n            output format options (binary | fits | hdf )",
-    "VERSION=0.4\n		14-feb-2022 PJT",
+    "VERSION=0.5\n		20-jun-2022 PJT",
     NULL,
 };
 
 string usage="convert snapshot to a regular Particle-Attribute-Time image";
-
-string cvsid="$Id$";
 
 #define MAXOPT    64
 

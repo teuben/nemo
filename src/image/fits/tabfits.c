@@ -262,10 +262,12 @@ void init_data(int dcol)
 
 double get_next_data(int dcol)
 {
+    int nrow = 0;
     if (!active_row && !active_col) {
         while(1) {
+	    nrow++;
             if (get_line(instr, line) <= 0)
-            	error("No more data available");
+	      error("No more data available, dcol=%d, nrow=%d",dcol,nrow);
             if (line[0]!='#') break;
         }
         init_data(dcol);
