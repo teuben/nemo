@@ -211,7 +211,7 @@ will plot either a Y-VY or X-VX surface of section.
 
 - **otos** transforms an orbit back into a snapshot, thereby giving you
   the much richer set of analysis tools that are available for
-  **snapshot**s.
+  **snapshot**.
 
 
 

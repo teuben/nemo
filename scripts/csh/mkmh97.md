@@ -540,3 +540,13 @@ We can currently run 4 types of interactions between G1 (fixed mass=1) and G2 (m
 
 we cannot run the JSPAM style interactions, this requires knowning the orbit of two smooth potentials under
 their own gravity. Also JSPAM has an option to add tidal effect and 
+
+
+## Simplified setup
+
+Extracting an example of an interaction:
+
+mkplummer run.1 10000
+mkplummer - 10000 | snapscale - run.2 mscale=0.05 rscale=0.05**0.5 vscale=0.05**0.25
+snapstack run.1 run.2 run.3 deltar=16,0,0 deltav=-0.5,0,0
+gyrfalcON run.3 run.4 eps=0.05 kmax=7 step=1 tstop=100 give=mxvap  > run.4.log
