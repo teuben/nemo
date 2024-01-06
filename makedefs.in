@@ -1,5 +1,7 @@
 # -*- makefile -*-
 
+#  this file should get included by each Makefile in NEMO 
+
 #  ONLY EDIT THIS FILE IF IT'S $NEMOLIB/makedefs
 #    diff $NEMO/makedefs $NEMOLIB
 #  ((the one in $NEMO is the configure generated one that gets copied))
