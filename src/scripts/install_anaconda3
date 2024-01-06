@@ -19,10 +19,11 @@ version=2023.07-2  # 3.11.4
 version=2023.09-0  # 3.11.5
 
 
-   dir=$(pwd)/anaconda3       # where anaconda will be located
-  wget=wgetc                  # use wgetc is you have my cashing version (wget=curl is also allowed, 
-  os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
- cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
+  dir=$(pwd)/anaconda3       # where anaconda will be located
+ wget=wget                   # use wgetc is you have my cashing version (wget=curl is also allowed)
+   os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
+  cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
+  dry=0                      # dry run?
 
 # At the conclusion of the install, sourceable python_start.[c]sh scripts
 # are placed in the root directory (dir=) of anaconda3
@@ -49,8 +50,14 @@ fi
 mc3=$(printf $url $version $os $cpu)
 msh=$(basename $mc3)
 
+if [ $dry = 1 ]; then
+    echo $mc3
+    exit 0
+fi
+
 if [ $wget = "curl" ]; then
-    curl $mc3 -o $msh
+    # curl $mc3 -o $msh
+    curl -OL $mc3
 else
     $wget $mc3 
 fi
