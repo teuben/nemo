@@ -44,7 +44,7 @@ string defv[] = {
     "tab=f\n			  need a table ? ",
     "sort=t\n                     sort by radius (recommended, unless snapsort was done)",
     "headline=\n                  random verbiage for plot",
-    "VERSION=3.2\n		  8-aug-2022 PJT",
+    "VERSION=3.2a\n		  20-nov-2023 PJT",
     NULL,
 };
 
@@ -264,6 +264,8 @@ local void sort_rad(void)
         vel[i] = sqrt(cum_mass/rad[irad[i]]);
         velmax=MAX(vel[i], velmax);
         densmax=MAX(dens[i], densmax);
+	if (Qtab)
+	  printf("# rad dens vel cum_mass sum rad^(1/4) -2.5log(sum)\n");
         if (Qtab && i<nobj-1) {
             sum = 0.0;              /* add up to surface density */
             radius = rad[irad[i]] + drmin;  /* softened sur.den. */
