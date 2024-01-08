@@ -11,7 +11,7 @@ string defv[] = {
     "mode=1\n      Mode (1=uniform, 2=normal 3=constant 4=linear, 5=linear)",
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
-    "sep=space\n   column separator (s=space t=tab c=comma v=vertical bar)",
+    "sep=s\n       column separator (s=space t=tab c=comma v=vertical bar)",
     "VERSION=0.7\n 5-oct-2022 PJT",
     NULL,
 };
