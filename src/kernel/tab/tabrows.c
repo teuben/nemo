@@ -41,7 +41,7 @@ void nemo_main()
     if (Qsel) {
         // @todo   relic from old table interface, this needs a more dynamic interface
         nmax = nemo_file_lines(iname,getiparam("nmax"));
-	dprintf(0,"nmax=%d\n",nmax);
+	dprintf(1,"nmax=%d\n",nmax);
         if (nmax<0) error("Error opening %s",iname);
         if (nmax==0) error("No data in %s?",iname);
         dprintf(1,"NMAX=%d\n",nmax);
