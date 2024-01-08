@@ -14,6 +14,7 @@
 #include <stdinc.h>
 #include <getparam.h>
 #include <filestruct.h>
+#include <history.h>
 #include <mdarray.h>
 
 #include <snapshot/snapshot.h>
@@ -25,13 +26,12 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "m=-1\n			  angular momentum exponent ",
     "seed=0\n			  seed for random numbers ",
     "headline=\n		  verbiage for output ",
-    "VERSION=1.4\n		  19-feb-06 PJT",
+    "VERSION=1.4a\n		  6-jun-2023 PJT",
     NULL,
 };
 
 string usage="N-body realization of one of Henon's generalized polytropes";
 
-string cvsid="$Id$";
 
 local string headline;		/* random text message */
 
@@ -51,10 +51,14 @@ local real *mass;		/* masses of particles generated */
 local mdarray2 phase;		/* phase-space coordinates of particles */
 
 extern double xrandom(double, double);
-
 extern void pickshell(real *,int,double);
+extern void  zerocms(double *, int, double *, int, int);
 
-nemo_main()
+local void polymod0(void);
+local void writesnap(string name);
+
+
+void nemo_main()
 {
     string oname;		/* files for model, output */
 
@@ -75,7 +79,7 @@ nemo_main()
 
 #define SQRT2 1.414214
 
-polymod0()
+void polymod0()
 {
     int i, j;
     double ri, x, vi;
@@ -94,7 +98,7 @@ polymod0()
     zerocms(phase[0], 6, mass, nobj, nobj);
 }
 
-writesnap(string name)
+void writesnap(string name)
 {
     stream outstr;
     int coord = CSCode(Cartesian, 3, 2);
