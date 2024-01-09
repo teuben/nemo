@@ -40,3 +40,10 @@ bench2: $(JAR)
 
 out:
 	ls $(OUT)
+
+JSPAM/fortran/basic_run:
+	(cd JSPAM/fortran/; make)
+
+bench3: JSPAM/fortran/basic_run
+	(cd JSPAM/fortran/; ./basic_run)
+	tabtos JSPAM/fortran/a.101 bench3.dat block1=pos,vel

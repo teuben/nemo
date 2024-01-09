@@ -116,3 +116,81 @@ void nemo_main()
 
 #endif
 
+
+
+
+#ifdef TOOLBOX
+
+#include <getparam.h>
+#include <table.h>
+
+string defv[]={
+  "in=???\n       Table to check for progress",
+  "xcol=1\n       Column to use",
+  "xmax=100\n     Maximum value to normalize to",      
+  "sleep=0\n	  delay in seconds?",
+  "cpu=0\n        cpu delay?",
+  "mode=0\n       simple progress string",
+  "VERSION=0.1\n  6-oct-2023 PJT",
+  NULL,
+};
+
+string usage="progress ";
+
+void do_compute(int n)
+{
+  double a,b,c;
+  int i,j;
+
+  a = 2.0;
+  b = 3.0;
+  c = 0.0;
+  for (i=0; i<n; i++) {
+    for (j=0; j<n; j++)
+      c += sqrt(a)*sqrt(a) + sqrt(b)*sqrt(b);
+    progress(1.0,"computing %d",i);
+  }
+  dprintf(2,"c=%g\n",c);
+}
+
+real get_val(string infile)
+{
+  stream instr = stropen(infile,"r");
+
+  
+}
+
+
+void nemo_main()
+{
+  string infile = getparam("iname");
+  int k, n0, n = getiparam("n");
+  int m = getiparam("m");
+  int isleep = getiparam("sleep");
+  double cpu = getdparam("cpu");
+  int ncomp = getiparam("compute");
+  bool Qint = getbparam("int");
+  stream instr;
+
+  
+  
+
+  n0 = n;
+  dprintf(1,"Going to print:\n");
+  while(n-- > 0) {
+    if (n%m == 0) {
+      if (ncomp) do_compute(ncomp);
+      if (isleep) sleep(isleep);
+      if (Qint) {
+	k=progress(cpu,0);
+	if (k) dprintf(0,"Done %d/%d\r",n,n0);
+      } else
+	progress(cpu,"Done %d/%d",n,n0);
+    }
+  }
+  dprintf(1,"\n All done.\n");
+
+}
+
+#endif
+
