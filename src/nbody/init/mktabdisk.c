@@ -32,9 +32,9 @@ string defv[] = {
     "sign=1\n           Sign of Z-angular momentum vector of disk",
     "adc=f\n            Produce a table of Asymmetric Drift Corrections",
     "mode=1\n           1: regular r, random angles   2: cartesian",
-    "sigmaz=1.0\n       Factor for sigma_z",
+    "sigmaz=1.0\n       Factor sigma_z/sigma_xy",
     "headline=\n	Text headline for output",
-    "VERSION=0.6\n	27-may-2020 PJT",
+    "VERSION=0.7\n	8-sep-2023 PJT",
     NULL,
 };
 
@@ -58,8 +58,8 @@ extern int nemo_file_lines(string,int);
 
 local void readtable(string name, bool Qadc);
 local void writegalaxy(string name, string headline);
-local void testdisk1(real mass);
-local void testdisk2(real mass);
+local void testdisk1(real mass, int mode);
+local void testdisk2(real mass, int mode);
 local real ssqrt(real x);
   
 void nemo_main()
@@ -87,9 +87,9 @@ void nemo_main()
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
     if (mode==1)
-      testdisk1(mass);
+      testdisk1(mass,mode);
     else if (mode==2)
-      testdisk2(mass);
+      testdisk2(mass,mode);
     else
       error("no mode=%d",mode);
     writegalaxy(getparam("out"),getparam("headline"));
@@ -177,7 +177,7 @@ void writegalaxy(string name, string headline)
  * density test disk.  
  */
 
-void testdisk2(real totmas)
+void testdisk2(real totmas, int mode)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
@@ -239,7 +239,7 @@ void testdisk2(real totmas)
     }
 }
 
-void testdisk1(real totmas)
+void testdisk1(real totmas, int mode)
 {
     Body *dp;
     real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
