@@ -7,6 +7,7 @@ LOCAL_INC = -DYAPP_$(YAPP)
 #	26-oct-90	new Nemo dir.str. - put all Yapp's together, some
 #			don't work though
 #	9-jul-91	added untested YAPP_GT from Josh
+#       1-jan-2023      added gnuplot
 
 # Standard Yapp version for library
 YAPP =
@@ -61,7 +62,7 @@ TESTFILES = yapptest \
 	   yapptest_ps yapptest_ps_new yapptest_psg \
 	   yapptest_cg yapptest_cg_new \
 	   yapptest_sv yapptest_sm yapptest_gt yapptest_plplot \
-	   yapptest_x yapptest_giza 
+	   yapptest_x yapptest_giza
 
 # Target provided for helpless people.
 
@@ -171,6 +172,11 @@ yapptest_core: yapp_core.c testyapp.c
 #OK
 yapptest_ps: yapp_ps.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_ps yapp_ps.c testyapp.c \
+		$(NEMO_LIBS) $(EL) -lm
+
+#OK
+yapptest_gnuplot: yapp_gnuplot.c testyapp.c
+	$(CC) $(CFLAGS) -o yapptest_gnuplot yapp_gnuplot.c testyapp.c \
 		$(NEMO_LIBS) $(EL) -lm
 
 #OK
