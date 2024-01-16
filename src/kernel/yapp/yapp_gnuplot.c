@@ -5,6 +5,7 @@
  *      written by Nicolas Devillard) - 
  *      See https://github.com/longradix/gnuplot_i for the most recent
  *      implementation
+ *      Needs:             mknemo gnuplot_i
  *      
  *      NOTE: this version is the placeholder until actually implemented
  */
