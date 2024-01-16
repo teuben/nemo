@@ -22,7 +22,13 @@ install: $(REBOUND)
 		cp rebound $(NEMOBIN); cp rebound $(NEMOBIN)/rebound_$(PROBLEM))
 	@echo "Note: in NEMO you can also execute this as rebound_$(PROBLEM)"
 
+python:	pip
+
+pip: $(REBOUND)
+	pip install -e $(REBOUND)
+
 # -march=cpu-type      skylake-avx512
+# cat /proc/cpuinfo | grep avx512
 
 problems: $(REBOUND)
 	@echo "The following example PROBLEM's are in rebound/examples:"
