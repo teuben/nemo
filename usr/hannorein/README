@@ -25,3 +25,15 @@ or for your python:   pip install breathe
 2) simplest:    this is an example of the similarly named problem in rebound/examples/simplest,
    but now with an example Makefile that can compile your problem outside of the rebound
    source tree.
+   Deprecated because the Makefile does not work anymore, use selfgravity_plummer, since it is
+   a new implementation.
+
+3) selfgravity_plummer: NEMO-fied version of rebound/examples/selfgravity_plummer
+   Implemented in the 4.0.3 version of rebound
+
+4) The 2024 work with rebound 4.0 - we need the following tools for a better NEMO integration:
+   - snapshot to rebound
+   - rebound to snapshot
+   - visualize
+   - integrator
+   
