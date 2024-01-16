@@ -2,6 +2,10 @@ This is the NEMOfied rebound/examples/selfgravity_plummer/problem.c
 A total hack, as proof of concept how Rebound can be driven by a NEMO tool.
 
 Done:
+- Hacked the Makefile, works on Linux and Mac, but unlikely on Windows
+  Note this Makefile does not update the librebound, that needs to
+  be done with the top level "make install" in $NEMO/usr/hannorein
+  
 - added some command line parameters
 
 ToDo:
