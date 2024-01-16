@@ -1,0 +1,8 @@
+This is the NEMOfied rebound/examples/selfgravity_plummer/problem.c
+A total hack, as proof of concept how Rebound can be driven by a NEMO tool.
+
+Done:
+- added some command line parameters
+
+ToDo:
+- read in a NEMO snapshot
