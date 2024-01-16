@@ -7,14 +7,22 @@
  * encounters. An alternative integrator is IAS15 which
  * comes with adaptive timestepping.
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <nemo.h>
 #include "rebound.h"
+
+string defv[] = {
+    "in=\n                        input snapshot",
+    "nbody=100\n                  Number of bodies if default plummer",
+    "VERSION=0.1\n                15-jan-2024 PJT",
+    NULL,
+};
+
+string usage="rebound+NEMO nbody integrator (toy model)";
 
 void heartbeat(struct reb_simulation* r);
 
-int main(int argc, char* argv[]){
+void nemo_main()
+{
     struct reb_simulation* r = reb_simulation_create();
     
     // Start the REBOUND visualization server. This
