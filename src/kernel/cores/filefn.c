@@ -11,6 +11,7 @@
 /*                  20-jun-01 gcc3 - removed old BORLAND code  */
 /*                  17-mar-06 added fullname                   */
 /*                  27-Sep-10 MINGW32/WINDOWS support (JCL)    */
+/*                  17-jan-24 added fexist                     */
 /***************************************************************/
 
 #include <stdinc.h>
@@ -244,7 +245,7 @@ local string checkexists(string name, string dummy)
 bool fexist(string name)
 {
   string e = checkexists(name, NULL);
-  dprintf(1,"fexist %s -> %s\n",name,e);
+  // dprintf(1,"fexist %s -> %s\n",name,e);
   if (e == NULL) return FALSE;
   return TRUE;
 }
