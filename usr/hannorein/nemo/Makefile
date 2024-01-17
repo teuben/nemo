@@ -14,6 +14,10 @@ reb_viewer: reb_viewer.c
 	@echo "Compiling $< ..."
 	$(CCPROBLEM0) -o reb_viewer
 
+reb_integrate: reb_integrate.c
+	@echo "Compiling $< ..."
+	$(CCPROBLEM0) -o reb_integrate
+
 
 reb2s: reb2s.c
 	@echo "Compiling $< ..."
