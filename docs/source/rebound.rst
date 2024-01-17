@@ -39,6 +39,21 @@ NEMO has current 4 example programs that are linked with the REBOUND library:
      - view a SimulationArchive
 
 
+Example
+~~~~~~~
+
+With these tools a typical N-body simulation starting from a NEMO snapshot can be done as follows:
+
+.. code-block::
+
+    mkplummer - 128 seed=128 | s2reb - p128.in
+    reb_integrate p128.in p128.bin tstop=100 dt=1/32 dtout=1 eps=0.05 integrate=leapfrog
+    reb_viewer p128.bin
+    reb2s p128.bin - | snapplot - nxy=3,3
+
+
+Install
+~~~~~~~
 Installation can be done via ``mknemo rebound``, but the manual steps are as follows:     
      
 .. code-block::
