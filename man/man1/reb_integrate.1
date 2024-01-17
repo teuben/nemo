@@ -1,0 +1,63 @@
+.TH REB_INTEGRATE 1NEMO "17 January 2024"
+
+.SH "NAME"
+reb_integrate \- example Rebound integrator NEMO style
+
+.SH "SYNOPSIS"
+\fBreb_integrate\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBreb_integrate\fP integrates an N-body snapshot from a rebound SimulationArchive (SA)
+.PP
+In development.
+.PP
+While the integration is ongoing, results can be viewed in a browser by using a valid port
+number in \fBserver=\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+input SimulationArchive. No default. 
+.TP
+\fBout=\fP
+output snapshot;
+
+.SH "EXAMPLE"
+Here is 
+
+.SH "INSTALL"
+Before NEMO's rebound tools are installed, rebound needs to be installed within
+NEMO. A typical install can be:
+.EX
+
+  cd $NEMO/usr/hannorein
+  make install
+  cd ../nemo
+  make install
+  
+.EE
+although
+.EX
+
+  mknemo -a reb_integrate
+  
+.EE
+also works
+.SH "SEE ALSO"
+s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO),  snapshot(5NEMO),
+.nf
+https://rebound.readthedocs.io
+.fi
+
+.SH "FILES"
+NEMO/usr/hannorein/nemo/reb2s.c - source code
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-jan-20224	Created		PJT
+.fi
