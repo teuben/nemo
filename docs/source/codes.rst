@@ -18,7 +18,11 @@ that have a tighter connection to NEMO:
    
 .. include:: zeno.rst
 
-.. include:: starlab.rst   
+.. include:: starlab.rst
+
+.. include:: rebound.rst   
+
+.. include:: galpy.rst   
 
 .. include:: yt.rst
 
