@@ -1,4 +1,4 @@
-.. _galpy:
+.. _rebound:
 
 REBOUND
 -------
