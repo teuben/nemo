@@ -1,0 +1,61 @@
+.TH S2REB 1NEMO "17 January 2024"
+
+.SH "NAME"
+s2reb \- convert  NEMO snapshot to rebound SimulationArchive
+
+.SH "SYNOPSIS"
+\fBs2reb\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBs2reb\fP converts a NEMO \fIsnapshot(5NEMO)\fP to a
+rebound SimulationArchive (SA).
+It currently converts all snapshots, use \fIsnaptrim(1NEMO)\fP if you
+need to pre-select. Currently only mass, position and velocity are converted,
+the accellerations are still ignored.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+input NEMO snapshot. No default. 
+.TP
+\fBout=\fP
+output SimulationArchive. No default.
+Note that following Rebound convention, data are appended to any pre-existing
+filename, counter to the NEMO convention, which refused to overwrite.
+
+.SH "INSTALL"
+Before NEMO's rebound tools are installed, rebound needs to be installed within
+NEMO. A typical install can be:
+.EX
+
+  cd $NEMO/usr/hannorein
+  make install
+  cd ../nemo
+  make install
+  
+.EE
+although
+.EX
+
+  mknemo -u s2reb
+  
+.EE
+also works
+.SH "SEE ALSO"
+reb2s(1NEMO), reb_viewer(1NEMO), snapshot(5NEMO),
+.nf
+https://rebound.readthedocs.io
+.fi
+
+.SH "FILES"
+NEMO/usr/hannorein/nemo/s2reb.c - source code
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-jan-20224	Created		PJT
+.fi
