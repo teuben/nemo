@@ -6,10 +6,18 @@
  * It work with the web-based visualization as well as with OpenGL.
  *
  */
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
+#include <nemo.h>
 #include "rebound.h"
+
+string defv[] = {
+    "in=???\n                     input SimulationArchive",
+    "server=1234\n                server port",
+    "VERSION=0.1\n                17-jan-2024 PJT",
+    NULL,
+};
+
+string usage="view a SimulationArchive in a web browser app";
+
 
 struct reb_simulationarchive* sa;
 void heartbeat(struct reb_simulation* const r);
@@ -51,19 +59,15 @@ int key_callback(struct reb_simulation* r, int key){
     return 1;
 }
 
-int main(int argc, char* argv[]) {
-    if (argc!=2){
-        printf("Usage: rebound simulationarchive.bin\n");
-        return 1;
-    }
-    sa = reb_simulationarchive_create_from_file(argv[1]);
-    if (!sa){
-        printf("Error loading Simulationarchive from file `%s`.\n",argv[1]);
-        return 1;
-    }
+void nemo_main()
+{
+    string infile = getparam("in");
+    int server = getiparam("server");
+    sa = reb_simulationarchive_create_from_file(infile);
+    if (!sa) error("Error loading Simulationarchive from file `%s`",infile);
 
-    printf("Simulationarchive loaded from file `%s`.\n",argv[1]);
-    printf("Number of snapshots: %lld.\n", sa->nblobs);
+    printf("Simulationarchive loaded from file `%s`.\n",infile);
+    printf("Number of snapshots: %ld.\n", sa->nblobs);
     printf("You can step through the Simulationarchive using the following keys in the visualization window:\n");
     printf(" Right arrow: jump to next snapshot\n");
     printf(" Left arrow:  jump to previous snapshot\n");
@@ -73,19 +77,17 @@ int main(int argc, char* argv[]) {
     printf(" End key:     jump to last snapshot\n\n");
 
     while(1){
-        printf("Loading snapshot %lld.\n", current_snapshot);
+        printf("Loading snapshot %ld.\n", current_snapshot);
         struct reb_simulation* r = reb_simulation_create_from_simulationarchive(sa, current_snapshot);
-        if (!r){
-            printf("Error loading Simulation from Simulationarchive.\n");
-            return 1;
-        }
+        if (!r)
+            error("Error loading Simulation from Simulationarchive");
 
         r->key_callback = key_callback;
         r->status = REB_STATUS_PAUSED;
 
         // This allows you to connect to the simulation using
         // a web browser by pointing it to http://localhost:1234
-        reb_simulation_start_server(r, 1234);
+        reb_simulation_start_server(r, server);
 
         // Not actually integrating because simulation is paused. 
         reb_simulation_integrate(r, INFINITY);
@@ -98,5 +100,4 @@ int main(int argc, char* argv[]) {
         reb_simulation_free(r);
     }
     reb_simulationarchive_free(sa);
-    return 0; 
 }
