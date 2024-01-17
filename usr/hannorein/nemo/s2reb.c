@@ -4,6 +4,7 @@
  */
 
 #include <nemo.h>
+#include <filefn.h>
 #include <snapshot/snapshot.h>  
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
@@ -29,7 +30,8 @@ void nemo_main()
   double tsnap;
   struct reb_simulation* r = reb_simulation_create();
 
-  // warn if outfile exists, since it will append
+  if (fexist(outfile))
+    warning("Existing file %s will be appended to", outfile);
 
   get_history(instr);
   for (;;) {                          /* loop through snapshots */
