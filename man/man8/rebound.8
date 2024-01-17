@@ -1,0 +1,62 @@
+.TH REBOUND 8NEMO "17 January 2024"
+
+.SH "URL"
+Rebound documentation is here:    https://rebound.readthedocs.io
+
+.SH "DESCRIPTION"
+REBOUND is an N-body integrator, i.e. a software package that can
+integrate the motion of particles under the influence of gravity. The
+particles can represent stars, planets, moons, ring or dust
+particles. REBOUND is very flexible and can be customized to
+accurately and efficiently solve many problems in astrophysics.
+
+.PP
+
+REBOUND is a library, and tools will need to be written (typically in C) to
+create science applications. A python interface is also available.
+
+.PP
+NEMO has current 4 example programs that are linked with the REBOUND library:
+.nf
+.ta +2i
+
+reb2s		convert rebound to NEMO
+s2reb		convert NEMO to rebound
+reb_integrate	integrate a system and produce a SimulationArchive 
+reb_viewer	view a SimulationArchive 
+.fi
+
+.SH "INSTALL"
+
+Before NEMO's rebound tools are installed, rebound needs to be
+installed within NEMO. A typical install can be:
+
+.EX
+         cd $NEMO/usr/hannorein
+         make install
+         cd nemo
+         make install
+	 
+.EE
+The command \fBmknemo -a\fP can also be used to install, since the code
+lives in the NEMO/usr tree.
+
+.SH "FILES"
+.nf
+NEMO/usr/hannorein/   -  top of rebound + tools source code
+.fi
+
+.SH "AUTHOR"
+Hanno Rein, Shangfei Liu
+
+.SH "ADS"
+@ads 2012A&A...537A.128R
+
+.SH "SEE ALSO"
+s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO), reb_integrate(1NEMO)
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-jan-2024	Drafted		PJT
+.fi
