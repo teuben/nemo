@@ -9,27 +9,29 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 root, extension, head, tail, defext, pathopen, pathfind, _mappath,
-- file operations 
+fexist - file operations 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;#include &lt;filefn.h&gt;string root(filename)string extension(filename)string
 head(filename)string tail(filename)string fullname(filename)
 string defext(filename,ext)stream
 pathopen(path, filename, mode)string pathfind(path, filename)string _mappath(fn,
-path, filename, arg)
+path, filename, arg)bool fexist(filename)
 string filename, ext, mode, path;
-DescriptionThe first
-four functions  root(), extension(), head(), and tail(), returns a component
-of a file name and are equivalent to the C shell substitution characters
-:r, :e, :h, and :t, respectively.  fullname() returns the full name of a
-file, making it easier to find the file again if the user used chdir(2)
-during the program. 
-defext() adds an extension to a file name if none already
-exists.  Alternatively, if the extension field ext begins with a *, any
-old extension in filename is replaced with the given extension.        
-      
+DescriptionThe
+first four functions  root(), extension(), head(), and tail(), returns
+a component of a file name and are equivalent to the C shell substitution
+characters :r, :e, :h, and :t, respectively.  fullname() returns the full
+name of a file, making it easier to find the file again if the user used
+chdir(2) during the program. 
+defext() adds an extension to a file name if
+none already exists.  Alternatively, if the extension field ext begins with
+a *, any old extension in filename is replaced with the given extension.
+              
      defext(filename, ".xxx")   --  add .xxx if no ext       
      defext(filename, "*.xxx")  --  force .xxx as ext        
 </pre>Note:  defext returns a pointer to dynamically-allocated     string storage
@@ -62,20 +64,28 @@ the path,  or NULL if none exist.
 <i>_mappath()</i> maps the string function <b>fn</b> over each path/filename      combination,
 stopping when <b>fn(name, arg)</b> returns non-null.   That value is returned.  If
 the function always returns a NULL value for each element in the path,
-NULL is returned    from _mappath.                                     
-         
+NULL is returned    from _mappath. <p>
+<i>fexist</i> returns TRUE if the file exists,
+and  FALSE if not. By default NEMO&rsquo;s <a href='stropen.3.html'><i>stropen(3NEMO)</i></a>
+ will fail on read if
+the file does not exist, and fail on write if the file exist, so this function
+is rarely needed. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Author</a></h2>
 Eric Roberts 
+<p> 
 <h2><a name='sect4' href='#toc4'>Files</a></h2>
 <br>
 <pre>~/src/kernel/cores<tt> </tt>&nbsp;<tt> </tt>&nbsp;filefn.c
 </pre>
-<h2><a name='sect5' href='#toc5'>Update History</a></h2>
+<p> 
+<h2><a name='sect5' href='#toc5'>History</a></h2>
 <br>
 <pre>11-jan-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;Last modified   <tt> </tt>&nbsp;<tt> </tt>&nbsp;Roberts
 6-dec-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;Fixed some bugs and updated for Nemo<tt> </tt>&nbsp;<tt> </tt>&nbsp;Josh
 6-oct-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;Manual page written<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
 17-mar-06<tt> </tt>&nbsp;<tt> </tt>&nbsp;added fullname<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
+17-jan-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;added fexist<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
 </pre><p>
 
 <hr><p>
@@ -86,7 +96,7 @@ Eric Roberts
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Author</a></li>
 <li><a name='toc4' href='#sect4'>Files</a></li>
-<li><a name='toc5' href='#sect5'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>History</a></li>
 </ul>
 </body>
 </html>
