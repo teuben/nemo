@@ -35,6 +35,7 @@ extern char *defext     ( string, string );
 extern stream pathopen  ( string, string, string );
 extern string pathfind  ( string, string );
 extern string _mappath  ( strfn, string, string, string );
+extern bool   fexist    ( string );
 
 #endif
  

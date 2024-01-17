@@ -241,6 +241,14 @@ local string checkexists(string name, string dummy)
     return ((stat(name, &statbuf) == 0) ? name : NULL);
 }
 
+bool fexist(string name)
+{
+  string e = checkexists(name, NULL);
+  dprintf(1,"fexist %s -> %s\n",name,e);
+  if (e == NULL) return FALSE;
+  return TRUE;
+}
+
 
 
 /***************************************************************/
