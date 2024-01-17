@@ -1,0 +1,69 @@
+.TH REB_VIEWER 1NEMO "17 January 2024"
+
+.SH "NAME"
+reb_viewer \- view a Rebound SimulationArchive
+
+.SH "SYNOPSIS"
+\fBreb_viewer\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBreb_viewer\fP views Rebound SimulationArchive (SA) in a  browser app, typically
+pointed to by the URL \fIhttp://localhost:1234/\fP. One loaded the following keys
+are active:
+.nf
+
+ Right arrow: jump to next snapshot
+ Left arrow:  jump to previous snapshot
+ Page down:   jump 10 snapshots foward
+ Page up:     jump 10 snapshots backward
+ Home key:    jump to first snapshot
+ End key:     jump to last snapshot
+ 
+.fi
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+input SimulationArchive. No default. 
+.TP
+\fBserver=\fP\fIport\fP
+The port number used for the app.
+Default: 1234
+
+.SH "INSTALL"
+Before NEMO's rebound tools are installed, rebound needs to be installed within
+NEMO. A typical install can be:
+.EX
+
+  cd $NEMO/usr/hannorein
+  make install
+  cd ../nemo
+  make install
+  
+.EE
+although
+.EX
+
+  mknemo -u reb_viewer
+  
+.EE
+also works
+.SH "SEE ALSO"
+s2reb(1NEMO), reb2s(1NEMO), snapshot(5NEMO),
+.nf
+
+https://rebound.readthedocs.io - Rebound documentation
+.fi
+
+.SH "FILES"
+NEMO/usr/hannorein/nemo/reb2s.c - source code
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+17-jan-20224	Created		PJT
+.fi
