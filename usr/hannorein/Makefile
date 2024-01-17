@@ -1,26 +1,34 @@
 include $(NEMOLIB)/makedefs
 
+URL1 = http://github.com/hannorein/rebound
+URL2 = https://github.com/hannorein/reproducibility-paper
+
 REBOUND = rebound
 PROBLEM = simplest
 
 help:
-	@echo "install:         install NEMOBIN/rebound for PROBLEM=$(PROBLEM)"
+	@echo "install:         install rebound's lib and inc, test compile for PROBLEM=$(PROBLEM)"
+	@echo "python:          install the python interface in your python"
 	@echo "rebound:         grab the rebound code with as REBOUND=$(REBOUND) via github"
 	@echo "pull:            ensure the code was updated to the latest"
 	@echo "clean:           clean this directory"
 	@echo "problems:        show available problems in rebound"
 
 $(REBOUND):
-	git clone http://github.com/hannorein/rebound   $(REBOUND)
+	git clone $(URL1) $(REBOUND)
+
+reproducibility-paper:
+	git clone $(URL2)
 
 pull: $(REBOUND)
 	(cd $(REBOUND); git pull)
 
 
 install: $(REBOUND)
-	(cd $(REBOUND)/examples/$(PROBLEM); make ; cp librebound.so $(NEMOLIB); \
-		cp rebound $(NEMOBIN); cp rebound $(NEMOBIN)/rebound_$(PROBLEM))
-	@echo "Note: in NEMO you can also execute this as rebound_$(PROBLEM)"
+	(cd $(REBOUND)/examples/$(PROBLEM); \
+	make ; \
+	cp librebound.so $(NEMOLIB); \
+	cp ../../src/rebound.h $(NEMOINC))
 
 python:	pip
 
