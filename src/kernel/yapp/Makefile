@@ -178,6 +178,9 @@ yapptest_cairo: yapp_cairo.c testyapp.c
 	$(CC) $(CFLAGS) -I/usr/include/cairo -o yapptest_cairo yapp_cairo.c testyapp.c \
 		$(NEMO_LIBS) $(EL) -lcairo -lm
 
+yapptest_glfw: yapp_glfw.c testyapp.c
+	$(CC) $(CFLAGS) -o yapptest_glfw yapp_glfw.c testyapp.c \
+		$(NEMO_LIBS) $(EL) -lglfw -lm
 #OK
 yapptest_gnuplot: yapp_gnuplot.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_gnuplot yapp_gnuplot.c testyapp.c \
