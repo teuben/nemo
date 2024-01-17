@@ -19,6 +19,10 @@ reb2s: reb2s.c
 	@echo "Compiling $< ..."
 	$(CCPROBLEM0) -o reb2s
 
+s2reb: s2reb.c
+	@echo "Compiling $< ..."
+	$(CCPROBLEM0) -o s2reb
+
 clean:
 	@echo No clean here yet
 
