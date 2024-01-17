@@ -14,6 +14,32 @@
 int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 {
  dprintf(0,"[YAPP_GLFW (experimental)\n");
+
+ int major, minor, revision;
+ glfwGetVersion(&major, &minor, &revision);
+ dprintf(0,"Running against GLFW %i.%i.%i\n", major, minor, revision);
+ 
+ GLFWwindow* window;
+ if (!glfwInit())
+   return -1;
+ window = glfwCreateWindow(1000, 1000, "yapp_glfw3", NULL, NULL);
+ if (!window) {
+   glfwTerminate();
+   return -1;
+ }
+ glfwMakeContextCurrent(window);
+
+#if 1 
+ while (!glfwWindowShouldClose(window)) {
+   /* Render here */
+   //glClear(GL_COLOR_BUFFER_BIT);
+   /* Swap front and back buffers */
+   glfwSwapBuffers(window);
+   /* Poll for and process events */
+   glfwPollEvents();
+ }
+ glfwTerminate();
+#endif 
  return 0;
 }
 
