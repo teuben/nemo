@@ -4,18 +4,20 @@ include ../rebound/src/Makefile.defs
 
 # CCPROBLEM is defined in Makefile.defs to allow for
 # a compact cross platform Makefile
-#CCPROBLEM=$(CC) -I../rebound/src/ -Wl,-rpath,./ $(OPT) $(PREDEF) $< -L$(NEMOLIB) -lrebound $(LIB) -o rebound_plummer
-CCPROBLEM=$(CC) -I$(NEMOINC) -I$(NEMOLIB) -I../rebound/src/ $(OPT) $(PREDEF) $< -L$(NEMOLIB) -lnemo -lrebound $(LIB) 
+CCPROBLEM0=$(CC) -I$(NEMOINC) -I$(NEMOLIB) $(OPT) $(PREDEF) $< -L$(NEMOLIB) -lnemo -lrebound $(LIB)
 
 .PHONY: all librebound
-all: reb_viewer.c
+
+all:   reb_viewer reb2s
+
+reb_viewer: reb_viewer.c
 	@echo "Compiling $< ..."
-	$(CCPROBLEM) -o reb_viewer
+	$(CCPROBLEM0) -o reb_viewer
 
 
 reb2s: reb2s.c
 	@echo "Compiling $< ..."
-	$(CCPROBLEM) -o reb2s
+	$(CCPROBLEM0) -o reb2s
 
 clean:
 	@echo No clean here yet
