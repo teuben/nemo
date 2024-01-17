@@ -12,7 +12,7 @@
 string defv[] = {
     "in=???\n                     input SimulationArchive",
     "out=\n                       optional output snapshot; otherwise just scan",
-    "VERSION=0.2\n                16-jan-2024 PJT",
+    "VERSION=0.3\n                16-jan-2024 PJT",
     NULL,
 };
 
@@ -40,7 +40,7 @@ void nemo_main()
   // loop over all blobs (snapshots)
   for (int64_t j=0; j < sa->nblobs; j++) {
     struct reb_simulation* r = reb_simulation_create_from_simulationarchive(sa, j);
-    dprintf(0,"Snapshot %ld at time %g\n", j, r->t );
+    dprintf(0,"Snapshot %ld at time %g with nbody %d\n", j, r->t, r->N );
     if (!r) error("Error loading Simulation from Simulationarchive.\n");
 
     if (Qout) {
@@ -52,7 +52,10 @@ void nemo_main()
 
       for (bp=btab, i = 0; i < nbody; bp++, i++) {
 	struct reb_particle p = r->particles[i];
-	dprintf(1,"%ld %d %f %f %f %f\n", j, i, p.m, p.x, p.vx, p.ax);
+	if (i==0)
+	  dprintf(1,"%ld %d %f %f %f %f\n", j, i, p.m, p.x, p.vx, p.ax);
+	else
+	  dprintf(2,"%ld %d %f %f %f %f\n", j, i, p.m, p.x, p.vx, p.ax);
 	Mass(bp) = p.m;
 	Pos(bp)[0] = p.x;
 	Pos(bp)[1] = p.y;
