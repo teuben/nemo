@@ -1,7 +1,9 @@
-.TH FILEFN 3NEMO "24 March 1994"
-.SH NAME
-root, extension, head, tail, defext, pathopen, pathfind, _mappath, \- file operations
-.SH SYNOPSIS
+.TH FILEFN 3NEMO "17 January 2024"
+
+.SH "NAME"
+root, extension, head, tail, defext, pathopen, pathfind, _mappath, fexist \- file operations
+
+.SH "SYNOPSIS"
 .nf
 .B #include <stdinc.h>
 .B #include <filefn.h>
@@ -16,9 +18,11 @@ root, extension, head, tail, defext, pathopen, pathfind, _mappath, \- file opera
 .B stream pathopen(path, filename, mode)
 .B string pathfind(path, filename)
 .B string _mappath(fn, path, filename, arg)
+.B bool fexist(filename)
 .PP
 .B string filename, ext, mode, path;
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 The first four functions 
 .I root(),
 .I extension(),
@@ -79,19 +83,29 @@ maps the string function \fBfn\fP over each path/filename
 combination, stopping when \fBfn(name, arg)\fP returns non-null.  
 That value is returned.  If the function always returns a
 NULL value for each element in the path, NULL is returned   
-from _mappath.                                              
-.SH AUTHOR
+from _mappath.
+.PP
+.I fexist
+returns TRUE if the file exists, and  FALSE if not. By default
+NEMO's \fIstropen(3NEMO)\fP will fail on read if the file does
+not exist, and fail on write if the file exist, so this function
+is rarely needed.
+
+.SH "AUTHOR"
 Eric Roberts
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +1.5i
 ~/src/kernel/cores	filefn.c
 .fi
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 11-jan-86	Last modified   	Roberts
 6-dec-86	Fixed some bugs and updated for Nemo	Josh
 6-oct-90	Manual page written	Peter
 17-mar-06	added fullname	Peter
+17-jan-2023	added fexist	Peter
 .fi
