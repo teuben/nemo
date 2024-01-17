@@ -1,0 +1,21 @@
+#! /bin/bash
+#
+#   REBOUND and nemo tools
+
+version=git
+
+for arg in $*; do
+  export $arg
+done
+
+echo VERSION=$version
+
+cd $NEMO/usr/hannorein
+make rebound pull
+make install
+cd nemo
+make install
+
+echo Installed version=$version
+
+echo rebound $version `date` >> $NEMO/opt/mknemo.log
