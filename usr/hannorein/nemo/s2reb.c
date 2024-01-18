@@ -13,13 +13,12 @@
 string defv[] = {
   "in=???\n                     input snapshot",
   "out=???\n                    output SimulationArchive to be appended to",
-  "VERSION=0.1\n                17-jan-2024 PJT",
+  "VERSION=0.2\n                17-jan-2024 PJT",
   NULL,
 };
 
 string usage="convert a NEMO snapshot to a rebound SimulationArchive";
-
-
+
 void nemo_main()
 {
   string infile = getparam("in");
@@ -44,12 +43,9 @@ void nemo_main()
     }
     dprintf (1,"nbody=%d time=%f\n",nbody,tsnap);
 
-    reb_simulation_add_plummer(r, nbody, 1.0, 1.0);   // add a fake system
-    r->N = nbody;
-    r->t = tsnap;
-    // now replace the appropriate particle attributes
     for (bp=btab, i = 0; i < nbody; bp++, i++) {
-	struct reb_particle p = r->particles[i];
+        //struct reb_particle p = r->particles[i];
+        struct reb_particle p = {0};
 	p.m = Mass(bp);
 	p.x = Pos(bp)[0];
 	p.y = Pos(bp)[1];
@@ -57,6 +53,7 @@ void nemo_main()
 	p.vx = Vel(bp)[0];
 	p.vy = Vel(bp)[1];
 	p.vz = Vel(bp)[2];
+	reb_simulation_add(r, p);
 	// @todo   .ax .ay .az if requested (need new option)
 	// note rebound doesn't carry the potential
 	if (i==0) 
@@ -65,7 +62,15 @@ void nemo_main()
 	  dprintf(2,"%d %f %f %f %f\n", i, p.m, p.x, p.vx, p.ax);
     }
 
+#if 0
+    for (i = 0; i < nbody; i++) {
+      struct reb_particle p = r->particles[i];
+      dprintf(0,"%d %f %f %f %f\n", i, p.m, p.x, p.vx, p.ax);      
+    }
+#endif
+    
     reb_simulation_save_to_file(r, outfile);
+    dprintf(0,"Wrote %d bodies\n",r->N);
     
     free(btab);
     btab = NULL;
