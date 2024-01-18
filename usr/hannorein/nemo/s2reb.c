@@ -33,18 +33,17 @@ void nemo_main()
     warning("Existing file %s will be appended to", outfile);
 
   get_history(instr);
-  for (;;) {                          /* loop through snapshots */
+  for (;;) {                          /* loop through all snapshots */
     if (!get_tag_ok(instr, SnapShotTag))
       break;                           /* until done */
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
     if ((bits & MassBit) == 0 && (bits & PhaseSpaceBit) == 0) {
       dprintf (2,"Time= %f skipping, no particle data\n",tsnap);
-      continue;       /* just skip - it maybe diagnostics */
+      continue;       /* just skip - it may be diagnostics */
     }
     dprintf (1,"nbody=%d time=%f\n",nbody,tsnap);
 
     for (bp=btab, i = 0; i < nbody; bp++, i++) {
-        //struct reb_particle p = r->particles[i];
         struct reb_particle p = {0};
 	p.m = Mass(bp);
 	p.x = Pos(bp)[0];
@@ -61,16 +60,7 @@ void nemo_main()
 	else
 	  dprintf(2,"%d %f %f %f %f\n", i, p.m, p.x, p.vx, p.ax);
     }
-
-#if 0
-    for (i = 0; i < nbody; i++) {
-      struct reb_particle p = r->particles[i];
-      dprintf(0,"%d %f %f %f %f\n", i, p.m, p.x, p.vx, p.ax);      
-    }
-#endif
-    
     reb_simulation_save_to_file(r, outfile);
-    dprintf(0,"Wrote %d bodies\n",r->N);
     
     free(btab);
     btab = NULL;
