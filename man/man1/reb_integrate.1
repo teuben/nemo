@@ -66,14 +66,31 @@ Here is a comparison with NEMO's \fIdirectcode(1NEMO)\fP, which uses a leapfrog 
   s2reb p100.a p100.c
   reb_integrate p100.c p100.d tstop=1 dt=0.1 dtout=0.1 eps=0.05
   reb2s p100.d p100.e
-  snapcmp p100.b p100.e
-  
-0.1   1.07223e-07 6.2327e-05 0.000246797 0.000646361 0.00263568  0.000518528 0.000655015
-1   1.1049e-06 0.000718976 0.00256446 0.0159907 0.0707068  0.0112444 0.0170355
+
+  snapcopy p100.b p100.f times=0,0.1,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0
+  snapcopy p100.e p100.g times=0,0.1,0.2,0.4,0.5,0.6,0.7,0.8,0.9,1.0
+  snapcmp p100.f p100.g
 
 .EE
-though this does not appear to work quite yet. It also suffers from a roundoff error, the
-time=0.3 is never written.
+
+with result from \fIsnapcmp(1NEMO)\fP:
+.nf
+
+0.1   1.07223e-07 6.2327e-05 0.000246797 0.000646361 0.00263568  0.000518528 0.000655015
+0.2   2.14585e-07 0.000118829 0.000488151 0.00113191 0.00456865  0.000895096 0.00107481
+0.4   4.29719e-07 0.000223833 0.000732012 0.00238062 0.00814445  0.00175906 0.00222084
+0.5   5.37558e-07 0.000264628 0.000937241 0.00348549 0.0161293  0.00273714 0.00377185
+0.6   6.45826e-07 0.000335195 0.00118023 0.00479002 0.0265185  0.00403516 0.00609259
+0.7   7.55184e-07 0.000543983 0.00137947 0.00711976 0.0376623  0.00553559 0.00864033
+0.8   8.66855e-07 0.000569031 0.00166312 0.0106839 0.0480827  0.00731209 0.0113419
+0.9   9.82587e-07 0.000680878 0.00198077 0.0118269 0.0617785  0.00923201 0.0145423
+1     1.1049e-06  0.000718976 0.00256446 0.0159907 0.0707068  0.0112444 0.0170355
+
+.fi
+
+.EE
+so this does not appear to work quite yet. It also suffers from a roundoff error in time, plus
+the time=0.3 is never written, for which the peculiar \fIsnapcopy(1NEMO)\fP was needed.
 
 .SH "SEE ALSO"
 s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO),  snapshot(5NEMO),  rebound(8NEMO) 
@@ -90,5 +107,5 @@ Peter Teuben
 .SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
-17-jan-20224	Created		PJT
+17-jan-2024	Created		PJT
 .fi
