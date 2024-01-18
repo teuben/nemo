@@ -18,13 +18,62 @@ number in \fBserver=\fP.
 .so man1/parameters
 .TP 20
 \fBin=\fP
-input SimulationArchive. No default. 
+input SimulationArchive. The last snapshot in the file will be taken as
+the initial conditions for the integration.
+No default. 
 .TP
 \fBout=\fP
-output snapshot;
+output SimulationArchive.
+.TP
+\fBtstop=\fP
+Set, or let go forever [10]  
+.TP
+\fBdtout=\fP
+Optional interval to save simulation [1]  
+.TP
+\fBdt=\fP
+Integration Step [0.01]     
+.TP
+\fBeps=\fP
+Gravitational Softening Length [0.01]    
+.TP
+\fBintegrator=\fP
+rebound integrator [leapfrog]     
+.TP
+\fBgravity=\fP
+none, basic, compensated or tree [basic]  
+.TP
+\fBtolerance=\fP
+tree opening angle - in radians? [0.25] 
+.TP
+\fBbox=\fP
+Optional Simulation Box size - in terms or
+.TP
+\fBG=\fP
+Gravitational Constant [1]     
+.TP
+\fBserver=\fP
+Use web based server on this port (if
+
 
 .SH "EXAMPLE"
-Here is 
+Here is a comparison with NEMO's \fIdirectcode(1NEMO)\fP, which uses a leapfrog integrator.
+
+.EX
+  rm -f p100.?
+  mkplummer p100.a 100 seed=123
+  directcode p100.a p100.b freq=10 tstop=1 freqout=10 eps=0.05
+  s2reb p100.a p100.c
+  reb_integrate p100.c p100.d tstop=1 dt=0.1 dtout=0.1 eps=0.05
+  reb2s p100.d p100.e
+  snapcmp p100.b p100.e
+  
+0.1   1.07223e-07 6.2327e-05 0.000246797 0.000646361 0.00263568  0.000518528 0.000655015
+1   1.1049e-06 0.000718976 0.00256446 0.0159907 0.0707068  0.0112444 0.0170355
+
+.EE
+though this does not appear to work quite yet. It also suffers from a roundoff error, the
+time=0.3 is never written.
 
 .SH "SEE ALSO"
 s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO),  snapshot(5NEMO),  rebound(8NEMO) 
