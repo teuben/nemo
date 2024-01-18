@@ -13,7 +13,7 @@
 string defv[] = {
   "in=???\n                     input snapshot",
   "out=???\n                    output SimulationArchive to be appended to",
-  "VERSION=0.2\n                17-jan-2024 PJT",
+  "VERSION=0.3\n                17-jan-2024 PJT",
   NULL,
 };
 
@@ -28,6 +28,9 @@ void nemo_main()
   int i, nbody = -1, bits;
   double tsnap;
   struct reb_simulation* r = reb_simulation_create();
+
+  if (sizeof(real) != sizeof(double))
+    warning("NEMO compiled in single precision");
 
   if (fexist(outfile))
     warning("Existing file %s will be appended to", outfile);

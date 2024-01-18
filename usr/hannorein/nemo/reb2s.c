@@ -12,7 +12,7 @@
 string defv[] = {
     "in=???\n                     input SimulationArchive",
     "out=\n                       optional output snapshot; otherwise just scan",
-    "VERSION=0.4\n                17-jan-2024 PJT",
+    "VERSION=0.5\n                17-jan-2024 PJT",
     NULL,
 };
 
@@ -30,6 +30,10 @@ void nemo_main()
   int i, bits;
   bool Qout = hasvalue("out");
   stream  outstr;
+  
+  if (sizeof(real) != sizeof(double))
+    warning("NEMO compiled in single precision");
+  
   if (Qout) {
     outstr = stropen(outfile,"w");
     put_history(outstr);
