@@ -32,16 +32,70 @@ confirm this man page is up to date.
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input SimulationArchive. No default.
- </dd>
+<dd>input SimulationArchive. The last
+snapshot in the file will be taken as the initial conditions for the integration.
+No default.  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output snapshot; 
+<dd>output SimulationArchive. </dd>
+
+<dt><b>tstop=</b> </dt>
+<dd>Set, or let go forever
+[10]   </dd>
+
+<dt><b>dtout=</b> </dt>
+<dd>Optional interval to save simulation [1]   </dd>
+
+<dt><b>dt=</b> </dt>
+<dd>Integration
+Step [0.01]      </dd>
+
+<dt><b>eps=</b> </dt>
+<dd>Gravitational Softening Length [0.01]     </dd>
+
+<dt><b>integrator=</b>
+</dt>
+<dd>rebound integrator [leapfrog]      </dd>
+
+<dt><b>gravity=</b> </dt>
+<dd>none, basic, compensated or
+tree [basic]   </dd>
+
+<dt><b>tolerance=</b> </dt>
+<dd>tree opening angle - in radians? [0.25]  </dd>
+
+<dt><b>box=</b> </dt>
+<dd>Optional
+Simulation Box size - in terms or </dd>
+
+<dt><b>G=</b> </dt>
+<dd>Gravitational Constant [1]      </dd>
+
+<dt><b>server=</b>
+</dt>
+<dd>
+<p>Use web based server on this port (if 
+<p> 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-Here is  
+Here is a comparison with
+NEMO&rsquo;s <a href='directcode.1.html'><i>directcode(1NEMO)</i></a>
+, which uses a leapfrog integrator. 
+<p>    rm -f p100.?<br>
+   mkplummer p100.a 100 seed=123<br>
+   directcode p100.a p100.b freq=10 tstop=1 freqout=10 eps=0.05<br>
+   s2reb p100.a p100.c<br>
+   reb_integrate p100.c p100.d tstop=1 dt=0.1 dtout=0.1 eps=0.05<br>
+   reb2s p100.d p100.e<br>
+   snapcmp p100.b p100.e<br>
+   <br>
+ 0.1   1.07223e-07 6.2327e-05 0.000246797 0.000646361 0.00263568  0.000518528 0.000655015
+1   1.1049e-06 0.000718976 0.00256446 0.0159907 0.0707068  0.0112444 0.0170355
+
+<p>  though this does not appear to work quite yet. It also suffers from a
+roundoff error, the time=0.3 is never written. 
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='s2reb.1.html'>s2reb(1NEMO)</a>
