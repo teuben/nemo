@@ -12,20 +12,19 @@
 string defv[] = {
     "in=???\n                     input SimulationArchive",
     "out=\n                       optional output snapshot; otherwise just scan",
-    "VERSION=0.3\n                16-jan-2024 PJT",
+    "VERSION=0.4\n                17-jan-2024 PJT",
     NULL,
 };
 
 string usage="convert rebound SimulationArchive to NEMO snapshot";
-
-
+
 void nemo_main()
 {
   string infile = getparam("in");
   string outfile = getparam("out");
-  struct reb_simulationarchive* sa = reb_simulationarchive_create_from_file(infile);
+  struct reb_simulationarchive *sa=reb_simulationarchive_create_from_file(infile);
   if (!sa) error("Error loading Simulationarchive from file `%s`.",infile);
-  dprintf(0,"Loaded Rebound SimulationArchive from file `%s` with %ld snapshots\n",infile, sa->nblobs);
+  dprintf(0,"SimulationArchive `%s` with %ld snapshots\n",infile, sa->nblobs);
   Body    *btab, *bp;
   int nbody = -1;
   int i, bits;
