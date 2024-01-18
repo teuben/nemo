@@ -12,11 +12,14 @@
 string defv[] = {
     "in=???\n                     input SimulationArchive",
     "out=\n                       optional output snapshot; otherwise just scan",
-    "VERSION=0.5\n                17-jan-2024 PJT",
+    "verbose=f\n                  show more info from the simulation",
+    "VERSION=0.6\n                18-jan-2024 PJT",
     NULL,
 };
 
 string usage="convert rebound SimulationArchive to NEMO snapshot";
+
+local void reb_verbose(struct reb_simulation* r);
 
 void nemo_main()
 {
@@ -29,6 +32,7 @@ void nemo_main()
   int nbody = -1;
   int i, bits;
   bool Qout = hasvalue("out");
+  bool Qverbose = getbparam("verbose");
   stream  outstr;
   
   if (sizeof(real) != sizeof(double))
@@ -45,6 +49,7 @@ void nemo_main()
     struct reb_simulation* r = reb_simulation_create_from_simulationarchive(sa, j);
     dprintf(0,"Snapshot %ld at time %g with nbody %d\n", j, r->t, r->N );
     if (!r) error("Error loading Simulation from Simulationarchive.\n");
+    if (Qverbose) reb_verbose(r);
 
     if (Qout) {
       if (nbody < 0) {
@@ -77,4 +82,37 @@ void nemo_main()
   reb_simulationarchive_free(sa);
   if (Qout)
     strclose(outstr);
+}
+
+/*
+ *   something like this should be in rebound
+ */
+
+local void reb_verbose(struct reb_simulation* r)
+{
+  printf("\n");
+  printf("Time: %g\n", r->t);
+  printf("N:    %d\n", r->N);
+  printf("G:    %g\n", r->G);
+  printf("Softening:          %g\n", r->softening);
+  printf("dt_last_done:       %g\n", r->dt_last_done);
+  printf("steps_done:         %ld\n", r->steps_done);
+  printf("opening_angle2:     %g\n",r->opening_angle2);
+  printf("output_timing_last: %g\n",r->output_timing_last);
+  //double walltime;                // Cumulative walltime of entire integration.
+  //double walltime_last_step;      // Wall time of last step.
+  //double walltime_last_steps;     // Average wall time of last step (updated every 0.1s).
+  //double walltime_last_steps_sum;
+  //int walltime_last_steps_N;
+    
+  double e = reb_simulation_energy(r);
+  printf("Total Energy:       %g\n",e);    
+
+  struct reb_vec3d j = reb_simulation_angular_momentum(r);
+  printf("Angular Momentum:   %g %g %g\n", j.x, j.y, j.z);
+
+  struct reb_particle com = reb_simulation_com(r);
+  printf("Center of Mass:     %g %g %g  %g %g %g\n", com.x, com.y, com.z, com.vx, com.vy, com.vz);
+
+  
 }
