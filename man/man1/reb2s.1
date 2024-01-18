@@ -1,4 +1,4 @@
-.TH REB2S 1NEMO "16 January 2024"
+.TH REB2S 1NEMO "18 January 2024"
 
 .SH "NAME"
 reb2s \- convert rebound SimulationArchive to NEMO snapshot
@@ -20,6 +20,16 @@ input SimulationArchive. No default.
 \fBout=\fP
 optional output snapshot; If not specified, the input SA is scanned, and snapshot times
 are reported.  Default: only scan.
+.TP
+\fBverbose=t|f\fP
+If verbose is set, additional information for each snapshot in the SA is given
+(time, energy, angular momentum, center of mass, etc.).  [Default: \fBf\fP]
+
+.SH "CAVEAT"
+Since verbose output is on standard out, the following pipe will fail in unpredictable ways
+.EX
+   reb2s p100.reb - verbose=t | tsf -
+.EE
 
 .SH "SEE ALSO"
 s2reb(1NEMO), reb_viewer(1NEMO), reb_integrate(1NEMO), snapshot(5NEMO), rebound(8NEMO)
@@ -36,5 +46,6 @@ Peter Teuben
 .SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
-16-jan-20224	Created		PJT
+16-jan-2024	Created		PJT
+18-jan-2024	0.6 added a verbose option	PJT
 .fi
