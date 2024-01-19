@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # install anaconda3, plus a sourceable python_start script
-#
+# 18-jan-2024 PJT
 
 #--HELP
 # default parameters
@@ -72,6 +72,10 @@ bash $msh -b -p $dir
 export PATH="$dir/bin:$PATH"
 conda update -y conda
 pip3 install --upgrade pip
+
+#    ensure we have a bash kernel in jupyter notebooks
+pip install bash_kernel
+python -m bash_kernel.install
 
 #    write sourceable shell startup recipes
 echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
