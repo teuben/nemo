@@ -2,6 +2,7 @@ include $(NEMOLIB)/makedefs
 
 URL1 = http://github.com/hannorein/rebound
 URL2 = https://github.com/hannorein/reproducibility-paper
+URL3 = https://github.com/dtamayo/reboundx
 
 REBOUND = rebound
 PROBLEM = simplest
