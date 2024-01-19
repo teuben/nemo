@@ -11,37 +11,51 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-reb2s - convert rebound SimulationArchive to NEMO snapshot 
+reb2s - convert REBOUND SimulationArchive to NEMO snapshot 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>reb2s</b>
 [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>reb2s</b> converts a rebound SimulationArchive
-(SA) to a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+<b>reb2s</b> converts a REBOUND SimulationArchive
+(RSA) to a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 . It currently converts all snapshots from
-the SA. Currently only mass, position and velocity are converted, the accellerations
-are still ignored. 
+the RSA, and only converts mass, position and velocity are converted, the
+accellerations are still ignored. <p>
+Using <b>verbose=t</b> a number of additional
+(integration) variables present in an RSA are shown. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in
-order; they may be given in any order if the keyword is also given. Use
-<b>--help</b> to confirm this man page is up to date.  
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input SimulationArchive.
-No default.  </dd>
+<dd>input SimulationArchive. No default.  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>optional output snapshot; If not specified, the input
-SA is scanned, and snapshot times are reported.  Default: only scan. 
+<dd>optional output snapshot;
+If not specified, the input RSA is just scanned, and snapshot times are
+reported.  Default: only scan. </dd>
+
+<dt><b>verbose=t|f</b> </dt>
+<dd>If verbose is set, additional information
+for each snapshot in the RSA is given (time, energy, angular momentum,
+center of mass, etc.).  [Default: <b>f</b>] 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See
-Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveat</a></h2>
+Since verbose output is on standard
+out, the following pipe will fail in unpredictable ways     reb2s p100.reb
+- verbose=t | tsf -<br>
+  since now NEMO&rsquo;s snapshot as well as the verbose output are in the pipe.
+
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='s2reb.1.html'>s2reb(1NEMO)</a>
 , <a href='reb_viewer.1.html'>reb_viewer(1NEMO)</a>
 , <a href='reb_integrate.1.html'>reb_integrate(1NEMO)</a>
@@ -52,16 +66,17 @@ Also</a></h2>
 <pre>https://rebound.readthedocs.io
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 NEMO/usr/hannorein/nemo/reb2s.c - source code 
 <p> 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <p>
 
-<h2><a name='sect7' href='#toc7'>History</a></h2>
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
-<pre>16-jan-20224<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>16-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.6 added a verbose option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -71,10 +86,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>History</a></li>
+<li><a name='toc4' href='#sect4'>Caveat</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

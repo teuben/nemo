@@ -11,7 +11,7 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-s2reb - convert  NEMO snapshot to rebound SimulationArchive 
+s2reb - convert a NEMO snapshot to a REBOUND SimulationArchive 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>s2reb</b>
@@ -20,42 +20,44 @@ s2reb - convert  NEMO snapshot to rebound SimulationArchive
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>s2reb</b> converts a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
  to
-a rebound SimulationArchive (SA). It currently converts all snapshots, use
-<a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
- if you need to pre-select. Currently only mass, position
-and velocity are converted, the accellerations are still ignored. <p>
-Note that
-following the Rebound convention, data are appended to any pre-existing
-output filename (<b>out=</b>) that is specified, counter to the NEMO convention,
-which refuses to overwrite. 
+a REBOUND SimulationArchive (RSA). It currently converts all snapshots,
+use <a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
+ or <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
+ if you need to pre-select. Currently
+only mass, position and velocity are converted, the accellerations are
+still ignored. <p>
+Note that following the REBOUND convention, data are appended
+to any pre-existing output filename (<b>out=</b>) that is specified, counter to
+the NEMO convention, which refuses to overwrite. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized
-in order; they may be given in any order if the keyword is also given. Use
-<b>--help</b> to confirm this man page is up to date.  
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input NEMO snapshot. No
-default.  </dd>
+<dd>input NEMO snapshot. No default.  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output SimulationArchive. No default. Note output will be appended
-to any existing SA. 
+<dd>output SimulationArchive. No default.
+Note output will be appended to any existing RSA. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example of creating a NEMO style
-simulation archive, with 9 snapshots from 0 to 2.0 in steps of 0.25, and
-converting it to a Rebound  SimulationArchive.  
-<p>   hackcode1 out=plum16.out
-nbody=16 seed=16 fcells=2<br>
+Here is an example
+of creating a NEMO snapshot, with 9 snapshots of 16 particles in a Plummer
+sphere configuration, from times 0 to 2.0 in steps of 0.25, and converting
+it to a REBOUND  SimulationArchive.  
+<p>   hackcode1 out=plum16.out nbody=16
+seed=16 fcells=2<br>
    s2reb plum16.out plum16.bin debug=1<br>
  
 <p>  With <b>debug=1</b> you will also see the times and m, x, vx, ax of the first
-particle in each snapshot. Otherwise <b>s2reb</b> would be totally silent, except
-when warning it will append to an existing SimulationArchive. 
+particle in each snapshot. Otherwise <b>s2reb</b> would be totally silent. (except
+when warning it will append to an existing RSA) 
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='reb2s.1.html'>reb2s(1NEMO)</a>

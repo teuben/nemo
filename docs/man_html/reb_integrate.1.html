@@ -11,7 +11,7 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-reb_integrate - example Rebound integrator NEMO style 
+reb_integrate - example REBOUND integrator  
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>reb_integrate</b>
@@ -19,25 +19,33 @@ reb_integrate - example Rebound integrator NEMO style
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>reb_integrate</b> integrates an N-body snapshot
-from a rebound SimulationArchive (SA) <p>
-In development. <p>
-While the integration
-is ongoing, results can be viewed in a browser by using a valid port number
-in <b>server=</b>. 
+from a REBOUND SimulationArchive (RSA), and writes an RSA. Programs such
+as <a href='s2reb.1.html'><i>s2reb(1NEMO)</i></a>
+ and <a href='reb2s.1.html'><i>reb2s(1NEMO)</i></a>
+ need to be used to convert from an to
+an RSA. <p>
+The number of integrators and particle types is limited, since this
+program is still more geared towards NEMO type simulations. This is work
+in progress. <p>
+While the integration is ongoing, results can be viewed in
+a browser by using a valid port number in <b>server=</b>, typically 1234 is used.
+The default will not use this progress viewer. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in order;
-they may be given in any order if the keyword is also given. Use <b>--help</b> to
-confirm this man page is up to date.  
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input SimulationArchive. The last
-snapshot in the file will be taken as the initial conditions for the integration.
-No default.  </dd>
+<dd>input SimulationArchive. Currently the last snapshot in the file will
+be taken as the initial conditions for the integration. No default.  </dd>
 
-<dt><b>out=</b> </dt>
-<dd>output SimulationArchive. </dd>
+<dt><b>out=</b>
+</dt>
+<dd>output SimulationArchive. Note in REBOUND convention the integration results
+will be appended to an existing RSA. No default. </dd>
 
 <dt><b>tstop=</b> </dt>
 <dd>Set, or let go forever
@@ -71,18 +79,20 @@ Simulation Box size - in terms or </dd>
 <dt><b>G=</b> </dt>
 <dd>Gravitational Constant [1]      </dd>
 
-<dt><b>server=</b>
+<dt><b>server=</b><i>port</i>
 </dt>
 <dd>
-<p>Use web based server on this port (if 
+<p>Use web based server on this port where the viewer can be seen on <a href='https://localhost:port'><b>https://localhost:</b><i>port</i></a>
+
+
 <p> 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Example</a></h2>
-Here is a comparison with
-NEMO&rsquo;s <a href='directcode.1.html'><i>directcode(1NEMO)</i></a>
-, which uses a leapfrog integrator. 
+Here is a comparison with NEMO&rsquo;s <a href='directcode.1.html'><i>directcode(1NEMO)</i></a>
+, which uses
+a leapfrog integrator. 
 <p>    rm -f p100.?<br>
    mkplummer p100.a 100 seed=123<br>
    directcode p100.a p100.b freq=10 tstop=1 freqout=10 eps=0.05<br>
@@ -112,25 +122,33 @@ error in time, plus the time=0.3 is never written, for which the peculiar
 <a href='snapcopy.1.html'><i>snapcopy(1NEMO)</i></a>
  was needed. 
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+Even though dt and dtout may look commensurate,
+this may result in snapshot dump times which are not properly "even" <p>
+Units
+used are virial units, except the Gravitational Constant can be changed
+(but not as function of time yet). 
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='s2reb.1.html'>s2reb(1NEMO)</a>
 , <a href='reb2s.1.html'>reb2s(1NEMO)</a>
-, <a href='reb_viewer.1.html'>reb_viewer(1NEMO)</a>
 ,
- <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+<a href='reb_viewer.1.html'>reb_viewer(1NEMO)</a>
+,  <a href='snapshot.5.html'>snapshot(5NEMO)</a>
 ,  <a href='rebound.8.html'>rebound(8NEMO)</a>
   <br>
 <pre>https://rebound.readthedocs.io
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-NEMO/usr/hannorein/nemo/reb2s.c - source code 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+NEMO/usr/hannorein/nemo/reb_integrate.c - source code 
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Peter Teuben 
-<p>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Peter
 
-<h2><a name='sect8' href='#toc8'>History</a></h2>
+<p>Teuben 
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>17-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
@@ -143,10 +161,11 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Example</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>History</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>
