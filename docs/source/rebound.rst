@@ -4,7 +4,7 @@ REBOUND
 -------
 
 .. note::
-   See https://rebound.readthedocs.io
+   REBOUND Documentation on https://rebound.readthedocs.io 
 
 
 REBOUND is an N-body integrator, i.e. a software package that can
@@ -27,16 +27,16 @@ NEMO has current 4 example programs that are linked with the REBOUND library:
      - description
 
    * - reb2s
-     - convert rebound to NEMO
+     - convert a REBOUND SimulationArchive to a NEMO SnapShot
 
    * - s2reb
-     - convert NEMO to rebound
+     - convert a NEMO SnapShot to a REBOUND SimulationArchive
 
    * - reb_integrate
-     - integrate a system and produce a SimulationArchive
+     - integrate a system and produce a REBOUND SimulationArchive
 
    * - reb_viewer
-     - view a SimulationArchive
+     - view a REBOUND SimulationArchive
 
 
 Example
@@ -47,7 +47,7 @@ With these tools a typical N-body simulation starting from a NEMO snapshot can b
 .. code-block::
 
     mkplummer - 128 seed=128 | s2reb - p128.in
-    reb_integrate p128.in p128.bin tstop=100 dt=1/32 dtout=1 eps=0.05 integrate=leapfrog
+    reb_integrate p128.in p128.bin tstop=100 dt=1/32 dtout=1 eps=0.05 integrator=leapfrog
     reb_viewer p128.bin
     reb2s p128.bin - | snapplot - nxy=3,3
 
