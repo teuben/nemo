@@ -1,19 +1,20 @@
-.TH S2REB 1NEMO "17 January 2024"
+.TH S2REB 1NEMO "18 January 2024"
 
 .SH "NAME"
-s2reb \- convert  NEMO snapshot to rebound SimulationArchive
+s2reb \- convert a NEMO snapshot to a REBOUND SimulationArchive
 
 .SH "SYNOPSIS"
 \fBs2reb\fP [parameter=value]
 
 .SH "DESCRIPTION"
 \fBs2reb\fP converts a NEMO \fIsnapshot(5NEMO)\fP to a
-rebound SimulationArchive (SA).
-It currently converts all snapshots, use \fIsnaptrim(1NEMO)\fP if you
+REBOUND SimulationArchive (RSA).
+It currently converts all snapshots, use \fIsnaptrim(1NEMO)\fP or \fIsnapcopy(1NEMO)\fP
+if you
 need to pre-select. Currently only mass, position and velocity are converted,
 the accellerations are still ignored.
 .PP
-Note that following the Rebound convention, data are appended to any pre-existing
+Note that following the REBOUND convention, data are appended to any pre-existing
 output filename (\fBout=\fP) that is specified,
 counter to the NEMO convention, which refuses to overwrite.
 
@@ -25,11 +26,12 @@ input NEMO snapshot. No default.
 .TP
 \fBout=\fP
 output SimulationArchive. No default. Note output will be appended to
-any existing SA.
+any existing RSA.
 
 .SH "EXAMPLES"
-Here is an example of creating a NEMO style simulation archive, with 9 snapshots
-from 0 to 2.0 in steps of 0.25, and converting it to a Rebound  SimulationArchive.
+Here is an example of creating a NEMO snapshot, with 9 snapshots of 16 particles in
+a Plummer sphere configuration, from times 0 to 2.0 in steps of 0.25,
+and converting it to a REBOUND  SimulationArchive.
 .EX
 
   hackcode1 out=plum16.out nbody=16 seed=16 fcells=2
@@ -37,8 +39,8 @@ from 0 to 2.0 in steps of 0.25, and converting it to a Rebound  SimulationArchiv
 
 .EE
 With \fBdebug=1\fP you will also see the times and m, x, vx, ax of the first
-particle in each snapshot. Otherwise \fBs2reb\fP would be totally silent,
-except when warning it will append to an existing SimulationArchive.
+particle in each snapshot. Otherwise \fBs2reb\fP would be totally silent.
+(except when warning it will append to an existing RSA)
 
 .SH "SEE ALSO"
 reb2s(1NEMO), reb_viewer(1NEMO), reb_integrate(1NEMO), snapshot(5NEMO), rebound(8NEMO)

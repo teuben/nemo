@@ -1,15 +1,15 @@
-.TH REB_VIEWER 1NEMO "17 January 2024"
+.TH REB_VIEWER 1NEMO "18 January 2024"
 
 .SH "NAME"
-reb_viewer \- view a Rebound SimulationArchive
+reb_viewer \- view a REBOUND SimulationArchive
 
 .SH "SYNOPSIS"
 \fBreb_viewer\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBreb_viewer\fP views Rebound SimulationArchive (SA) in a  browser app, typically
-pointed to by the URL \fIhttp://localhost:1234/\fP. One loaded the following keys
-are active:
+\fBreb_viewer\fP views REBOUND SimulationArchive (RSA) in a  browser app, typically
+pointed to by the URL \fIhttp://localhost:1234/\fP, but see \fBserver=\fP.
+Once loaded the following keys are active:
 .nf
 
  Right arrow: jump to next snapshot
@@ -32,10 +32,10 @@ The port number used for the app.
 Default: 1234
 
 .SH "SEE ALSO"
-s2reb(1NEMO), reb2s(1NEMO), reb_integrate(1NEMO), snapshot(5NEMO), rebound(8NEMO)
+s2reb(1NEMO), reb2s(1NEMO), reb_integrate(1NEMO), snapshot(5NEMO), rebound(8NEMO), glnemo2(1NEMO), snapplot(1NEMO)
 .nf
 
-https://rebound.readthedocs.io - Rebound documentation
+https://rebound.readthedocs.io - REBOUND documentation
 .fi
 
 .SH "FILES"
