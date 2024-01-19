@@ -48,3 +48,9 @@ or for your python:   pip install breathe
    - visualize
    - integrator
    
+
+# Issues
+
+- as shown in rebound1.ipynb - a simple few steps with leapfrog does not compare well yet
+- total energy is always computed for eps=0 
+- gravity=tree failed
