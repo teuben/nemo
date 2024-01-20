@@ -55,13 +55,11 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "headline=\n                          header",
 #endif
     "time0=t\n                            Also print time=0 ?",
-    "VERSION=1.7\n			  27-feb-2020 PJT",
+    "VERSION=1.7a\n			  20-jan-2024 PJT",
     NULL,
 };
 
 string usage = "compare two N-body snapshots";
-
-string cvsid = "$Id$";
 
 rproc obsfunc;
 bool diffpart;
@@ -113,6 +111,7 @@ void nemo_main()
     headline = getparam("headline");
 #endif
 
+    int nout=0;
     for(;;) {
       do {
 	if (!get_snap_by_t(instr1, &btab1, &nbody1, &tsnap1, &bits1, time1))
@@ -138,6 +137,7 @@ void nemo_main()
 	  warning("times = %f, %f are different (%g)", tsnap1, tsnap2, dt);
       }
       if (!Qtime0 && time1==0 && time2==0) continue;
+      if (!Qtime0 && nout==0) continue;      
       if (bits1 != bits2)
 	warning("bits = 0x%x, 0x%x are different", bits1, bits2);
       result = snapcmp(btab1, btab2, nbody1, tsnap1);
@@ -150,6 +150,7 @@ void nemo_main()
 #if SCATTERPLOT
       snapcmpplot(result, btab1, nbody1, tsnap1);
 #endif
+      nout++;
     }
 }
 
@@ -197,7 +198,7 @@ local void printquart(real result[], int nbody, real tsnap)
 
   if (Qheader) {
     printf("# time  Min  Qlow Median Qhigh  Max   Mean Sigma\n");
-    printf("# obs=%s\n",getparam("obs"));
+    printf("# obs=%s (%s)\n",getparam("obs"), Qlog ?  "log scaling" : "linear scaling");
     Qheader = 0;
   }
   qsort(result, nbody, sizeof(real), cmpreal);
