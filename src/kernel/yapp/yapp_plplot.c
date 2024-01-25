@@ -565,6 +565,11 @@ void pllut(string fname, bool compress)
 
 #endif
 
+int pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
+{
+  warning("pl_contour not implemented yet for plplot");
+}
+
 int pl_cursor(real *x, real *y, char *c)
 {
   return 0;
