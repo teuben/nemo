@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # install anaconda3, plus a sourceable python_start script
-# 18-jan-2024 PJT
+# 23-jan-2024 NEMO/PJT
 
 #--HELP
 # default parameters
@@ -55,11 +55,13 @@ if [ $dry = 1 ]; then
     exit 0
 fi
 
-if [ $wget = "curl" ]; then
-    # curl $mc3 -o $msh
-    curl -OL $mc3
-else
-    $wget $mc3 
+if [ ! -e $msh ]; then
+    if [ $wget = "curl" ]; then
+	# curl $mc3 -o $msh
+	curl -OL $mc3
+    else
+	$wget $mc3 
+    fi
 fi
 
 if [ ! -e $msh ]; then
