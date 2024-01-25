@@ -12509,10 +12509,9 @@ fi
 
 echo "
 -------------------------------------------------------------------------
-All done, continue with your installation now as described in the
-output from the command
+All done configuring, continue with your installation with
 
-     make install
+     make build check bench5
 
 Users need to source the nemo_start.(c)sh file in their shell to
 enable NEMO commands and set up their NEMO environment.
