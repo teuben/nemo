@@ -69,6 +69,10 @@ extern void c_plsori(int);
 extern void c_plsfam(int, int, int);
 extern void c_plvasp(pl_real);
 extern void c_plsvpa(pl_real, pl_real, pl_real, pl_real);
+#if 0
+extern void c_plcont(pl_real *f, int nx, int ny, int kx, int lx, int ky, int ly, pl_real *clevel, int nlevel,
+		     PLTRANSFORM_callback pltr, PLPointer pltr_data );
+#endif
 
 extern void c_plgver(char *);
 extern void c_plgpage(int *,int *,int *,int *,int *,int *);
@@ -342,8 +346,10 @@ int pl_matrix(real *frame,int nx,int ny,
 {
     real x,y,f,grayscale,ds;
     int ix,iy;
-    
-    printf("PL_MATRIX is unsupported in plplot version of YAPP\n");
+#if 0
+     c_plimage(idata, xmin, xmax, ymin, ymax, zmin, zmax, Dxmin, Dxmax, Dymin, Dymax)
+#endif       
+    warning("PL_MATRIX is unsupported in plplot version of YAPP; needs c_plimage");
     return(0);
 }
 
@@ -567,7 +573,10 @@ void pllut(string fname, bool compress)
 
 int pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
 {
-  warning("pl_contour not implemented yet for plplot");
+  warning("pl_contour not implemented yet for plplot; needs c_plcont");
+#if 0
+  c_plcont(frame, nx, ny, 0, nx, 0, ny, cntval, ncntval,  xxx, yyy);
+#endif
 }
 
 int pl_cursor(real *x, real *y, char *c)
