@@ -1,4 +1,4 @@
-.TH CCDGEN 1NEMO "17 August 2023"
+.TH CCDGEN 1NEMO "25 January 2024"
 
 .SH "NAME"
 ccdgen \- create or add objects to an image
@@ -152,6 +152,11 @@ spiral, and as p gets larger, the arms get narrower.   By making sure \fBp\fP be
 non-integer, e.g. p=2.0001, the negative arm becomes 0.
 
 .SH "EXAMPLES"
+Here's how to make a exponential bar:
+.nf
+    ccdgen bar.ccd   object=bar spar=1,10,0.5,30 size=128,128
+.fi
+
 Here's how to make a simple barred galaxy by adding an exponential disk and
 a (smaller) exponential bar:
 .nf
