@@ -1,0 +1,34 @@
+#! /bin/bash
+#
+
+version=git
+url=https://github.com/PLplot/PLplot
+
+
+for arg in $*; do
+  export $arg
+done
+
+
+cd $NEMO/local
+if [ $version = "git" ]; then
+    if [ ! -d plplot ]; then
+        git clone $url plplot
+	cd plplot
+    else
+	cd plplot
+	git pull
+    fi
+fi
+   
+echo VERSION=$version
+
+mkdir -p build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt ..
+make
+make install
+
+echo "Installed version=$version"
+
+echo "plplot $version `date`" >> $NEMO/opt/mknemo.log
