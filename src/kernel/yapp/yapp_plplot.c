@@ -24,6 +24,8 @@
  *        pdf has very small default font - pdfqt arguably too big, but better
  *        tk driver has symbol size scaling error
  *        colors don't match pgplot yet
+ *        backdoor -- arguments for plplot library (e.g. -geometry 400x400)
+ *           See also: https://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/arguments.html
  *
  *  Ubuntu packages: libplplot-dev plplot-driver-xwin plplot-tcl-dev
  */
@@ -48,7 +50,10 @@
 
 extern string yapp_string;	/* a kludge, see: getparam.c */
 
+extern void c_plparseopts(int *, char **argv, int);
+
 extern void c_plinit(void);
+extern int  c_plsetopt(string, string);
 extern void c_plsdev(string);
 extern void c_plsfnam(string);
 extern void c_pladv(int);
@@ -110,6 +115,21 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     char ver[80];
 
     dprintf(1,"plinit (PLPLOT): %s\n",pl_nemoreal);
+
+#if 1
+    int argc = 3;
+    string argv[] = { "--", "-geometry", "800x800"};
+    int mode = 1+8;
+    c_plparseopts(&argc, argv, mode);
+    dprintf(0,"plparseopts (PLPLOT): %d\n",argc);
+#else
+    // @todo   this fails, *argv is getting a stack address, not the static
+    int mode = 1+8;    
+    int argc;
+    string *argv = getargv(&argc);
+    dprintf(0,"%d extra args given:\n",argc);
+    c_plparseopts(&argc, argv, mode);
+#endif
     
     if (yapp_string == NULL || *yapp_string == 0)
 	if (pltdev != NULL && *pltdev != 0)
