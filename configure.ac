@@ -566,7 +566,7 @@ AC_ARG_WITH(plplot-incdir,
 if test "$enable_plplot" != "no"; then
   ACX_PLPLOT($with_plplot_libdir,$with_plplot_incdir,
     [use_plplot="yes"]
-    [LIBS="$LIBS $PLPLOT_LIBS"],
+    [LIBS="$LIBS -lplplot $PLPLOT_LIB"],
     [use_plplot="no"]
     AC_MSG_WARN([PLPlot library not found/incomplete! Plotting deactivated.]))
 else
@@ -958,6 +958,10 @@ case $yapp_name in
 	  YAPP_LIBS=
 	  YAPP_DEF=""
 	  ;;
+	plplot)
+	  YAPP_LIBS="-lplplot"
+	  YAPP_DEF="xwin"
+	  ;;
 	cpgplot)
 	  if test "$PGPLOT_DIR" = "$NEMOLIB" ; then
 	    YAPP_LIBS="-L\$(NEMOLIB) -lcpgplot -lpgplot $PNG_LIB \$(XLIBS) \$(FLIBS)"
@@ -1043,10 +1047,9 @@ AC_OUTPUT
 
 echo "
 -------------------------------------------------------------------------
-All done, continue with your installation now as described in the
-output from the command
+All done configuring, continue with your installation with
 
-     make install
+     make build check bench5
 
 Users need to source the nemo_start.(c)sh file in their shell to
 enable NEMO commands and set up their NEMO environment.
