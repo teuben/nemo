@@ -12,7 +12,7 @@
 # g77:        -lfrtbegin -lg2c
 # gfortran:   -lgfortran
 
-# ubuntu requirements: swig	python-numpy	libhdf5-dev	libsqlite3-dev
+# ubuntu requirements: swig	python3-numpy	libhdf5-dev	libsqlite3-dev
 
 
 #  -DCMAKE_INSTALL_PREFIX=<dir>          installation directory [${NEMO}]
