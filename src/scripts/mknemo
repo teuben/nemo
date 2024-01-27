@@ -20,7 +20,7 @@
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
 #
-set version="MKNEMO Version 4.5 3-may-2023"
+set version="MKNEMO Version 4.5 26-jan-2024"
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -383,6 +383,6 @@ usage:
   echo "  -L        recompile the library by running 'make libs' from $NEMO"
   echo "  -g        explicitly use gmake, instead of make"
   echo "  -a        use all directories, usr and src, to find code to update"
-  echo "  -v        more verbose, it will report version and cvsid of program"
+  echo "  -v        more verbose, it will report version of mknemo"
   echo "  -D        show special projects from the mknemo.d directory"
   exit 1
