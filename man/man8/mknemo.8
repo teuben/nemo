@@ -1,23 +1,36 @@
-.TH MKNEMO 8NEMO "12 July 2020"
+.TH MKNEMO 8NEMO "26 January 2024"
 
 .SH "NAME"
-mknemo \- attempt to find NEMO (and related) programs and install them
+mknemo \- install NEMO (and related) libraries and programs 
 
 .SH "SYNOPSIS"
 .PP
-\fBmknemo \fIprogram(s)\fP 
+\fBmknemo [options] \fIprogram(s)\fP 
 
 .SH "DESCRIPTION"
+\fImknemo\fP was initially designed to quickly compile a NEMO program
+without the need to know where it is located, and build it locally
+and move it into $NEMOBIN.   Later on, \fImknemo\fP evolved
+to also become a convenient package manager, placing 3rd party software
+under \fI$NEMO/opt\fP, giving NEMO a convenient containerized
+option.
+
+.PP
 \fImknemo\fP attempts to find the source code of the program(s)
 specified on the command line, and tries to compile them.
 If successfull, the binary will be placed in \fB$NEMOBIN\fP.
 Add the '-u' flag if your NEMO is under git control, so you can
-force an update before the build.
+force a \fIgit pull\fP before the build.
 .PP
 Finding the method how to install \fIprogram\fP takes several paths:
 .PP
+Another option are 3rd party
+software, frequently used with NEMO. Example are libraries such as \fIgsl(3)\fP
+and programs such as \fImcluster(1NEMO)\fP.
+
+.PP
 First, if a file \fI$NEMO/src/scripts/mknemo.d/program\fP exists,
-it is assumed to be a shell script with directions how to install this
+it is assumed to be a (shell) script with directions how to install this
 program. \fPgyrfalcON\fP is an example of such a complex program. In
 this case \fIprogram\fP can also be a package name, in which case
 the script will be more complex.
@@ -63,8 +76,8 @@ All compile flags and libraries that are used should have been configured in the
 Here are some critical programs that you could use to test if that specific library was properly referenced
 in makedefs:
 .nf
-.ta +2i
-heated_plate_openmp	openmp
+.ta +2.5i
+heated_plate_openmp  	openmp
 cfitsio	        	sdfits  (no test data present in NEMO)
 fftw	        	-
 gsl	        	-
@@ -85,19 +98,23 @@ Here are some examples of the non-default control files in $NEMO/src/scripts/mkn
 .nf 
 .ta +2i
 firstn    	the very first (?) nbody code
-glnemo2   	glnemo graphics
+glnemo2   	glnemo graphics (binaries are available for this)
 gyrfalcON   	falcON tools (gyrfalcON, mkplum, the acc's and manip's)
-rotcur    	rotcur program (there is also a confusing rotcur \fIpotential(5NEMO)\fP)
+rotcur    	rotcur program (there is also a conflicting rotcur.c via \fIpotential(5NEMO)\fP)
 galaxy15	Sellwood's GALAXY V15.
 cfitsio		CFITSIO library
 .fi
-For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and being
-built with --prefix=$NEMO/opt.
+For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and 
+built with --prefix=$NEMO/opt. Thus non-NEMO user could use this \fIprefix\fP to their shell environment and
+borrow this environment.
 
 .SH "CAVEATS"
-The mknemo \fIattempts\fP to (re)install a program or package for NEMO, but there is no guarentee this works.
+mknemo \fIattempts\fP to (re)install a program or package for NEMO, but there is no guarentee this works.
 For programs it typically depends on a matching sourcecode (e.g. name.c) and a proper Makefile in the directory
 where this code lives, or in more complicated cases, a matching script name in $NEMO/src/scripts/mknemo.d
+.PP
+The scripts in \fImknemo.d\fP are guidelines that may have worked in the past, but may now fail and need
+some tinkering.
 
 .SH "SEE ALSO"
 bake(8NEMO), mkbin(8NEMO)
@@ -124,15 +141,14 @@ $NEMO/opt/{bin,include,lib}	--prefix location of <package> binaries and headers 
 
 .SH "UPDATE HISTORY"
 .nf
-.ta +1i +4i
-21-jun-91	V1.0: doc created       	PJT
+.ta +1.5i +5.5i
+21-jun-91	V1.0: doc created       	PJT
 25-jun-91	V1.1: added lockfile     	PJT
 4-apr-01	V1.3: added extension making for NEMO V3	PJT
 20-jun-03	V1.4: added -u flag	PJT
 16-dec-03	V1.5: added -l flag, also cloned sbin/mkstarlab	PJT
 11-jun-04	V2.4: added -a flag	PJT
-11-apr-2019	V4.0: git based
+11-apr-2019	V4.0: converted CVS -> git for -u		PJT
 dec-2019	document critical binaries	PJT
 jul-2020	added -L options, switch -L and -l meaning	PJT
 .fi
-
