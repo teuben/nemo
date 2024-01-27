@@ -3,6 +3,8 @@
 #  ubuntu packages:   libcairo2-dev  libx11-dev
 #
 #  old one:  wget http://cairographics.org/releases/cairo-1.8.10.tar.gz
+#
+#  Note:  this is not stable in NEMO, conflicts with pgplot and package management becomes broken
 
 
 url=https://github.com/danieljprice/giza

@@ -7,4 +7,56 @@ install methods, e.g.
 	 ./gsl git=1
 
 to install the git based version of GSL, instead of the standard one pointed
-to by the version= keyword in the nemo.d/gsl script
+to by the version= keyword in the nemo.d/gsl script. This would have been
+
+          mknemo gsl
+
+
+Here is a checklist with comments how easy these are to install. The list
+of tools can be obtained with "mknemo -D"
+
+ast            -
+barolo         -linking issues
+cfitsio        OK
+CGS            OK
+density2       -
+dice           -linking issues now
+diskfit        needs to manually obtain code
+etude          linking issues now
+falcON         OK
+fftw
+fftw2
+finufft
+firstn         OK
+fitscli        OK, but failing on U24
+funtools       OK
+gadget2
+gadget4
+galaxy15       needs source code manually obtained
+giza
+glnemo
+glnemo2
+gnuastro       -lot of preconditions
+gnuplot_i      OK
+gsl            OK
+gyrfalcON      OK
+hdf4           missing xdr stuff in linking
+hdf5           OK
+hypre          OK
+mcluster       OK
+miriad         OK
+montage        -linking issues
+netcdf4        OK  (git disappeared?)
+partiview      OK
+pgplot         OK
+plplot         OK
+rebound        OK
+rotcur         OK
+snapmerge_a    OK
+starlab        OK
+tipsy          OK
+unsio          OK
+uns_projects   -various fails
+velfitss07     needs to get source code first
+wcslib         OK
+wcstools       OK
