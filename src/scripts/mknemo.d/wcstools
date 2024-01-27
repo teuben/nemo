@@ -6,7 +6,7 @@
 #   note it contains a private (static) library of wcslib
 #
 url=http://tdc-www.harvard.edu/software/wcstools/wcstools-%s.tar.gz
-version=3.9.6
+version=3.9.7
 wget=wgetc
 
 for arg in $*; do
