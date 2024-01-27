@@ -116,7 +116,7 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
 
     dprintf(1,"plinit (PLPLOT): %s\n",pl_nemoreal);
 
-#if 1
+#if 0
     int argc = 3;
     string argv[] = { "--", "-geometry", "800x800"};
     int mode = 1+8;
@@ -124,6 +124,7 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     dprintf(0,"plparseopts (PLPLOT): %d\n",argc);
 #else
     // @todo   this fails, *argv is getting a stack address, not the static
+    // @todo   can an xrdb file help?
     int mode = 1+8;    
     int argc;
     string *argv = getargv(&argc);
