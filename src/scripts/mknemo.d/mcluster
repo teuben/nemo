@@ -3,14 +3,13 @@
 
 set dir=$NEMO/usr/kuepper/mcluster
 
-if (-e $dir) then
-  cd $dir
-  make mcluster
-  mv mcluster $NEMOBIN
-else
-  echo mknemo.d: $dir does not exist
-  echo mkdir -p $NEMO/usr/kuepper
-  echo cd $NEMO/usr/kuepper
-  echo git clone https://github.com/ahwkuepper/mcluster
+if (! -e $dir) then
+  echo "mknemo: $dir does not exist, creating it"
+  cd $NEMO/usr/kuepper
+  git clone https://github.com/ahwkuepper/mcluster
 endif
 
+cd $dir
+git pull
+make clean mcluster
+mv mcluster $NEMOBIN
