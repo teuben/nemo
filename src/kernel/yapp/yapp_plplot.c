@@ -24,6 +24,8 @@
  *        pdf has very small default font - pdfqt arguably too big, but better
  *        tk driver has symbol size scaling error
  *        colors don't match pgplot yet
+ *        backdoor -- arguments for plplot library (e.g. -geometry 400x400)
+ *           See also: https://plplot.sourceforge.net/docbook-manual/plplot-html-5.15.0/arguments.html
  *
  *  Ubuntu packages: libplplot-dev plplot-driver-xwin plplot-tcl-dev
  */
@@ -48,7 +50,10 @@
 
 extern string yapp_string;	/* a kludge, see: getparam.c */
 
+extern void c_plparseopts(int *, char **argv, int);
+
 extern void c_plinit(void);
+extern int  c_plsetopt(string, string);
 extern void c_plsdev(string);
 extern void c_plsfnam(string);
 extern void c_pladv(int);
@@ -69,6 +74,10 @@ extern void c_plsori(int);
 extern void c_plsfam(int, int, int);
 extern void c_plvasp(pl_real);
 extern void c_plsvpa(pl_real, pl_real, pl_real, pl_real);
+#if 0
+extern void c_plcont(pl_real *f, int nx, int ny, int kx, int lx, int ky, int ly, pl_real *clevel, int nlevel,
+		     PLTRANSFORM_callback pltr, PLPointer pltr_data );
+#endif
 
 extern void c_plgver(char *);
 extern void c_plgpage(int *,int *,int *,int *,int *,int *);
@@ -106,6 +115,21 @@ int plinit(string pltdev, real xmin, real xmax, real ymin, real ymax)
     char ver[80];
 
     dprintf(1,"plinit (PLPLOT): %s\n",pl_nemoreal);
+
+#if 1
+    int argc = 3;
+    string argv[] = { "--", "-geometry", "800x800"};
+    int mode = 1+8;
+    c_plparseopts(&argc, argv, mode);
+    dprintf(0,"plparseopts (PLPLOT): %d\n",argc);
+#else
+    // @todo   this fails, *argv is getting a stack address, not the static
+    int mode = 1+8;    
+    int argc;
+    string *argv = getargv(&argc);
+    dprintf(0,"%d extra args given:\n",argc);
+    c_plparseopts(&argc, argv, mode);
+#endif
     
     if (yapp_string == NULL || *yapp_string == 0)
 	if (pltdev != NULL && *pltdev != 0)
@@ -342,8 +366,10 @@ int pl_matrix(real *frame,int nx,int ny,
 {
     real x,y,f,grayscale,ds;
     int ix,iy;
-    
-    printf("PL_MATRIX is unsupported in plplot version of YAPP\n");
+#if 0
+     c_plimage(idata, xmin, xmax, ymin, ymax, zmin, zmax, Dxmin, Dxmax, Dymin, Dymax)
+#endif       
+    warning("PL_MATRIX is unsupported in plplot version of YAPP; needs c_plimage");
     return(0);
 }
 
@@ -564,6 +590,14 @@ void pllut(string fname, bool compress)
 }
 
 #endif
+
+int pl_contour (real *frame, int nx, int ny, int ncntval, real *cntval)
+{
+  warning("pl_contour not implemented yet for plplot; needs c_plcont");
+#if 0
+  c_plcont(frame, nx, ny, 0, nx, 0, ny, cntval, ncntval,  xxx, yyy);
+#endif
+}
 
 int pl_cursor(real *x, real *y, char *c)
 {

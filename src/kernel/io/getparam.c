@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7k 10-dec-2023 PJT"
+#define GETPARAM_VERSION_ID  "3.7l 25-jan-2024 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -875,9 +875,12 @@ local void report(char what)
   }
 
   if (what == 'm') {
-#if defined(linux)
+#if defined(linux_confusing)
+    /* @todo   this doesn't exist in older linux, e.g. redhat 7 */
+    /*         mallinfo is ok on redhat 8,
     /* http://www.gnu.org/software/libc/manual/html_node/Statistics-of-Malloc.html */
-    struct mallinfo2 mi = mallinfo2();
+    //struct mallinfo2 mi = mallinfo2();
+    struct mallinfo mi = mallinfo();
     dprintf(0,"mallinfo: hblks(d):%d %d uord=%d ford=%d keepcost=%d arena=%d ord=%d\n",
 	    mi.hblks,mi.hblkhd,mi.uordblks,mi.fordblks,mi.keepcost,mi.arena,mi.ordblks);
 #else
