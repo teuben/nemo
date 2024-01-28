@@ -1,6 +1,7 @@
 NEMO is a toolbox for stellar dynamics, particle simulations, stellar orbits,
 image processing and tabular data manipulation. Documentation is maintained
-in the github pages, https://teuben.github.io/nemo
+in the github pages, https://teuben.github.io/nemo , and a manual in
+https://astronemo.readthedocs.io
 
 ## History
 
@@ -21,7 +22,7 @@ Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 
 	 NEMO:      ascl:1010.051
 	 ZENO:      ascl:1102.027 (normally installed in $NEMO/usr/zeno)
-	 STARLAB:   ascl:1010.076
+	 STARLAB:   ascl:1010.076 (optionally installed in $NEMO/local/starlab)
 	 ACS:       https://artcompsci.org
 	 AMUSE:     ascl:1107.007
 	 
@@ -55,9 +56,8 @@ names for different linux distros that should lead to success.
 
 ## Installation
 
-There are a few different ways to install NEMO, here is a basic
-example that works most of the time on most Linux distros (assuming
-you have the preconditions):
+There are a few different ways to install NEMO. Here is a simple
+example that works most of the time on most Linux (including WSL) distros:
 
          git clone https://github.com/teuben/nemo
          cd nemo
@@ -116,7 +116,7 @@ use of Unix pipes, with a dash denoting the piped file:
          ccdgen out=- object=gauss spar=1,20 size=128 | ccdplot - 
          mkorbit - 0 1 0  0.4 0 0 potname=plummer | orbint - - nsteps=1000 dt=0.05 | orbplot - 
 
-or graphically
+or graphically showing the pipes through arrows:
 
 ```mermaid
    graph LR;
@@ -150,6 +150,7 @@ There are several additional entry points if you are starting out with NEMO:
 
 * readthedocs: https://astronemo.readthedocs.io/en/latest/
 * github pages: https://teuben.github.io/nemo
+* AAS 443 [iPoster](https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
 
