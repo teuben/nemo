@@ -24,18 +24,18 @@ dice           -linking issues now
 diskfit        needs to manually obtain code
 etude          linking issues now
 falcON         OK
-fftw
-fftw2
-finufft
+fftw           OK
+fftw2          OK
+finufft        OK
 firstn         OK
 fitscli        OK, but failing on U24
 funtools       OK
-gadget2
-gadget4
+gadget2        mpi based
+gadget4        mpi based
 galaxy15       needs source code manually obtained
-giza
-glnemo
-glnemo2
+giza           -
+glnemo         deprecated
+glnemo2        -
 gnuastro       -lot of preconditions
 gnuplot_i      OK
 gsl            OK
