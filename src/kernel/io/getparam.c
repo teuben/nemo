@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7l 25-jan-2024 PJT"
+#define GETPARAM_VERSION_ID  "3.7.1 30-jan-2024 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -547,7 +547,8 @@ void initparam(string argv[], string defv[])
             } else if (streq(argv[i],"-help") || streq(argv[i],"--help") ||
 		       streq(argv[i],"-h") || streq(argv[i],"help")) {
 	      set_help("");
-            } else if (streq(argv[i],"-version") || streq(argv[i],"--version")) {
+            } else if (streq(argv[i],"-version") || streq(argv[i],"--version") ||
+	               streq(argv[i],"-v")) {
 	      printhelp("V");    /* will also exit */
             } else {
 	      if (keys[i].indexed >= -1) 
@@ -1038,7 +1039,7 @@ local void save_history(string *argv)
 }
 
 /*
- * PRINTHELP: print out help message in various ways.
+ * PRINTHELP: print out help message in various ways, and potentially exit
  */
 
 local void printhelp(string help)
