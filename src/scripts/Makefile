@@ -5,7 +5,7 @@ include $(NEMOLIB)/makedefs
 
 SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
-	wgetc yapp_query nemoplot nemopars \
+	wgetc yapp_query nemoplot nemopars nemo \
         sbatch_nemo.sh nemo_functions.sh progress_bar.sh \
 	python/tabplot.py python/fitsplot.py
 MAKES = Makefile.lib 
