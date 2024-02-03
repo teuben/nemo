@@ -493,7 +493,7 @@ code snippet:
 Tables
 ------
 
-.. todo:: examples/Tables
+.. include:: table.rst   
 
 
 Potential
