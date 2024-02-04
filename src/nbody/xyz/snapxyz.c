@@ -31,7 +31,7 @@ string defv[] = {
 #endif
     "color=1\n			Expression for point color",
     "visib=1\n			Expression for point visibility",
-    "VERSION=2.1b\n		30-may-04 PJT",
+    "VERSION=2.1c\n	        3-feb-2023 PJT",
     NULL,
 };
 string usage = 	"Convert snapshot to xyzc data";
@@ -54,7 +54,7 @@ void convert(void);
 extern rproc btrtrans();    /* ??? */
 extern iproc btitrans();
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
 
@@ -132,7 +132,7 @@ void put_points(stream outstr)
 
 void convert(void)
 {
-    int visnow, vismax, new_color, i, ip, vis;
+    int visnow, vismax, new_color, i, vis;
     Body b;
 
     if (ptab == NULL) ptab = (vector *) allocate(nbody * sizeof(vector));
