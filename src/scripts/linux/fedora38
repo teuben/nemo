@@ -18,6 +18,8 @@ ncurses-devel
 # 
 libtirpc-devel 
 
+#/usr/bin/time
+time
 
 
 # if you use HDF4 (e.g. cmhog2) - note it uses /usr/include/hdf and /usr/lib/hdf
