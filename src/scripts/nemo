@@ -24,6 +24,7 @@ else
     _version=$(cat $NEMO/VERSION)
     gitbv $NEMO
     echo "NEMO:        $NEMO  - Version:$_version"
+    echo "YAPP:        $YAPP - default yapp plotting device"
     echo "git:         Branch:$_branch Counter:$_counter Date: $_lastdate"
 fi
 
