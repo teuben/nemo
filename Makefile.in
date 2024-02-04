@@ -144,6 +144,10 @@ help2:
 	@echo ""
 	@echo "Additional help targets: helpfind, helptar"
 
+## pull:      GIT pull to get the latest ('mknemo -u tsf' also does this)
+pull:
+	@git pull
+
 ## mknemos:   optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
 	@echo MKNEMOS=$(MKNEMOS)
