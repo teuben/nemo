@@ -17,6 +17,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 
@@ -33,13 +34,11 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS                 */
 #if defined(SPH)
     "mode=1\n		1: header has 4 items      2: header has 5 items",
 #endif
-    "VERSION=2.7\n      22-may-2010 PJT",
+    "VERSION=2.7a\n     3-feb-2024 PJT",
     NULL,
 };
 
 string usage = "convert ASCII N-body file to binary format";
-
-string cvsid="$Id$";
 
 stream instr, outstr;
 
@@ -60,8 +59,7 @@ void in_real(real *rptr);
 void in_vect(vector vptr);
 
 
-void
-nemo_main(void)
+void nemo_main(void)
 {
     int nbody, ngas;
     real tsnap;
@@ -122,8 +120,7 @@ nemo_main(void)
 
 #if !defined(SPH)
 
-bool 
-in_header(int *nbptr, int *ngptr, real *tsptr)
+bool in_header(int *nbptr, int *ngptr, real *tsptr)
 {
     int ndim;
     double dval;
@@ -165,8 +162,7 @@ bool in_header(int *nbptr, int *ngptr, real *tsptr)
 
 #endif
 
-void
-conv_real(string tag, int ndata)
+void conv_real(string tag, int ndata)
 {
     real *rbuf, *rp;
     int i;
@@ -181,8 +177,7 @@ conv_real(string tag, int ndata)
     free(rbuf);
 }
 
-void
-conv_vect(string tag, int ndata)
+void conv_vect(string tag, int ndata)
 {
     real *vbuf, *vp;
     int i;
@@ -197,8 +192,7 @@ conv_vect(string tag, int ndata)
     free(vbuf);
 }
 
-void
-conv_phase(string tag, int ndata)
+void conv_phase(string tag, int ndata)
 {
     real *pbuf, *pp;
     int i;
@@ -222,8 +216,7 @@ conv_phase(string tag, int ndata)
 local int hexmax;		/* max value of packed hex coordinates      */
 local double scale;		/* scale factor for packed hex coords.      */
 
-void 
-hexcheck(void)
+void hexcheck(void)
 {
     if (hexpack) {		        	/* packed hex data to read? */
         linecnt++;
@@ -235,8 +228,7 @@ hexcheck(void)
     }
 }
 
-void
-in_real(real *rptr)
+void in_real(real *rptr)
 {
     char line[128];
     double dval;
@@ -258,8 +250,7 @@ in_real(real *rptr)
     }	
 }
 
-void
-in_vect(vector vptr)
+void in_vect(vector vptr)
 {
     char line[128];
     double dx, dy, dz;
