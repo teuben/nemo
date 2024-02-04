@@ -12,8 +12,7 @@ is also advertised. A brief history of NEMO:
 
    * NEMO V1:	IAS release (Barnes, Hut & Teuben, 1987)
    * NEMO V2:	UMD release (Teuben, 1994)
-   * NEMO V3:	UMD release (Teuben, 2001) in CVS, with autoconf support and
-		hooks into manybody.org modules starlab and partiview
+   * NEMO V3:	UMD release (Teuben, 2001) in CVS, w/ autoconf, manybody, starlab and partiview
    * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
 A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes. 
