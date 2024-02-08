@@ -1,0 +1,4 @@
+The $NEMO/local directory is used for the source code
+of packages that normally get installed under $NEMO/opt,
+so if this directory gets to large, its subdirectories
+can probably be removed.
