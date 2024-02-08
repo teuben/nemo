@@ -14,12 +14,12 @@ column information (name, type, units) and sometimes
 even FITS-like provenance (e.g. IPAC tables).   NEMO has limited
 ways to process these, currently loosing much of this header and provenance.
 
-There is no good consistency if an **out=** keyword is needed,
-or if the table is written to *stdout* by default,
+There is no good consistency in the programs if an **out=** keyword is needed,
+or if the table is written to *stdout*,
 or if **out=-** is the last parameter.
-Otherwise table programs are well suited for working in pipes,
-as most NEMO programs are. Some examples are given below, with
-the caveat that the output pipe can be inconsistent.
+Otherwise table programs are well suited for working the {\tt pipe and filter}
+paradigm, as most NEMO programs are. Some examples are given below, with
+the caveat that the output pipe construction can be inconsistent.
 
 Columns are typically given through the **xcol=** and **ycol=** keywords,
 and are 1-based. Column 0 has a special meaning, it is the row number
@@ -175,14 +175,14 @@ Analysis
 .. code-block::
 
   % tabgen - nr=4 nc=3 | tabstat - 1:3
-  npt:     4 4 4
-  min:     0.0369577 0.126911 0.258931
-  max:     0.981766 0.965763 0.988963
-  sum:     1.66433 1.9912 2.40323
-  mean:    0.416083 0.4978 0.600808
-  disp:    0.382993 0.311225 0.262247
-  skew:    0.424316 0.39325 0.250172
-  kurt:   -1.43956 -1.19861 -1.07587
-  min/sig: -0.989902 -1.19171 -1.30365
-  max/sig: 1.47701 1.50362 1.48011
-  median:  0.322804 0.449262 0.577669
+  npt:      4         4         4
+  min:      0.0369577 0.126911  0.258931
+  max:      0.981766  0.965763  0.988963
+  sum:      1.66433   1.9912    2.40323
+  mean:     0.416083  0.4978    0.600808
+  disp:     0.382993  0.311225  0.262247
+  skew:     0.424316  0.39325   0.250172
+  kurt:    -1.43956  -1.19861  -1.07587
+  min/sig: -0.989902 -1.19171  -1.30365
+  max/sig:  1.47701   1.50362   1.48011
+  median:   0.322804  0.449262  0.577669
