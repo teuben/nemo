@@ -137,9 +137,9 @@ extern rproc   btrtrans(string);
 local void setparams(void);
 local void compfuncs(void);
 local int read_snap(void);
-local int allocate_image(void);
-local int clear_image(void);
-local int bin_data(int ivar);
+local void allocate_image(void);
+local void clear_image(void);
+local void bin_data(int ivar);
 local void free_snap(void);
 local void los_data(void);
 local void rescale_data(int ivar);
@@ -347,7 +347,7 @@ int read_snap()
 
 #define CV(i)  (CubeValue(i,ix,iy,iz))
 
-allocate_image()
+void allocate_image()
 {
     create_cube (&iptr,nx,ny,nz);
     if (iptr==NULL) error("No memory to allocate first image");
@@ -434,7 +434,7 @@ allocate_image()
     Beamz(iptr) = (zsig>0.0 ? zsig : 0.0);
 }
 
-clear_image()
+void clear_image()
 {
     int ix,iy,iz;
 
@@ -462,8 +462,9 @@ typedef struct point {
 local Point **map =NULL;
 
 local int pcomp(Point **a, Point **b);
+//local int pcomp(void *, void *);
 
-bin_data(int ivar)
+void bin_data(int ivar)
 {
     real brightness, cell_factor, x, y, z, z0, t,sum;
     real expfac, fac, sfac, flux, b, emtau, depth;
