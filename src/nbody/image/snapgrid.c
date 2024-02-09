@@ -77,14 +77,16 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)",
-	"VERSION=6.1\n			  19-mar-2022 PJT",
+	"VERSION=6.1a\n			  9-feb-2024 PJT",
 	NULL,
 };
 
 string usage="grid a snapshot into a 2/3D image-cube";
 
 
+#ifndef HUGE
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
+#endif
 #define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
@@ -138,14 +140,14 @@ local int read_snap(void);
 local int allocate_image(void);
 local int clear_image(void);
 local int bin_data(int ivar);
-local int free_snap(void);
+local void free_snap(void);
 local void los_data(void);
-local int rescale_data(int ivar);
+local void rescale_data(int ivar);
 local int xbox(real x);
 local int ybox(real y);
 local int zbox(real z);
 local real odepth(real tau);
-local int setaxis(string rexp, real range[3], int n, int *edge, real *beam);
+local void setaxis(string rexp, real range[3], int n, int *edge, real *beam);
 
 
 void wcs(real *x, real *y)
@@ -726,13 +728,13 @@ int pcomp(Point **a, Point **b)
   return (*a)->depth > (*b)->depth;
 }
 
-free_snap()
+void free_snap()
 {
     free(btab);         /* free snapshot */
     btab = NULL;        /* and make sure it can realloc at next get_snap() */
 }    
 
-rescale_data(int ivar)
+void rescale_data(int ivar)
 {
   real m_min, m_max, brightness, total, x, y, z, b, mean, sigma, h_factor;
   int    i, j, k, ix, iy, iz, nneg, ndata;
@@ -941,7 +943,7 @@ real odepth(real tau)
  *             -1           if no beam
  * 
  */
-setaxis (string rexp, real range[3], int n, int *edge, real *beam)
+void setaxis (string rexp, real range[3], int n, int *edge, real *beam)
 {
     char *cp;
     
