@@ -7,6 +7,18 @@ Initializing Images
 
 There are a few programs with which images can be initialized:
 
+- `ccdgen <https://teuben.github.io/nemo/man_html/ccdgen.1.html>`_
+  is the simplest program to generate images from scratch, much like 
+  `tabgen <https://teuben.github.io/nemo/man_html/tabgen.1.html>`_
+  for tables. Here is an example creating and visualizing an image
+
+.. code-block::
+
+  % ccdgen bar.ccd  object=bar spar=1,10,0.5,30 size=128,128
+  % ccdplot bar.ccd
+  % ccdfits bar.ccd  bar.fits
+  % ds9 bar.fits
+
 
 - **ccdmath** is the most straightforward program.  Here is an example
   of creating an image from scratch:
@@ -61,7 +73,9 @@ There are a few programs with which images can be initialized:
 - **snapgrid** converts a snapshot to an image.
 
 - **fitsccd** converts a FITS file to an image. The inverse of this,
-  **ccdfits** also exists.
+  **ccdfits** also exists. Storage model of FITS vs. NEMO's image
+  format is currently not optimal, and thus for very large images
+  a CPU penalty is incurred.
 
 
 .. code-block::
