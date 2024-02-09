@@ -229,6 +229,7 @@ dirs:
 
 	@cp text/README.local local
 	@cp text/README.opt   opt
+	@cp text/README.obj   obj
 	@echo Done with dirs at `date`
 
 ## docs:      built htmol docs
