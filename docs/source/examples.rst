@@ -490,22 +490,15 @@ code snippet:
     B% tcppipe A | tsf -
 
 
-Tables
-------
+   
 
 .. include:: table.rst   
 
-
-Potential
----------
-
-.. todo:: examples/Potential
-
-
-
 .. include:: orbit.rst
 
+.. include:: potential.rst
 
+.. include:: image.rst
 
 Exchanging data
 ---------------
@@ -513,9 +506,5 @@ Exchanging data
 .. todo:: examples/Exchanging Data
 
 
-
-.. include:: potential.rst
-
-.. include:: image.rst
 
 
