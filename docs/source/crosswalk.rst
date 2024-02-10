@@ -60,10 +60,13 @@ plus some sample commands one can in the respective package:
 
   # PYTHON
   In [1]: hdu = astropy.io.fits.open('ngc0001.fits')
+  In [2]: print(hdu[0].header)
+  In [2]: plt.imshow(hdu[0].data)
 
   # CASA
   CASA <1>: importfits('ngc0001.fits', 'ngc0001.im')
   CASA <2>: imhead('ngc0001.im')
+  CASA <2>: imview('ngc0001.im')   
 
   # MIRIAD
   $ fits in=ngc0001.fits out=ngc0001.mir op=xyin
