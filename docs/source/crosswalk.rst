@@ -46,9 +46,14 @@ helpful. Here are a few examples:
      - imstat()
      - imstat
 
+The CASA users guide has a more expanded table of this, just comparing CASA with MIRIAD
+and CLICK. There it is called  a CASA-MIRIAD and CASA-CLIC dictionary.
+
+Example
+~~~~~~~
+
 An expanded example how to read a FITS (image) into the respective systems is as follows,
 plus some sample commands one can in the respective package:
-
 
 	
 .. code-block::
