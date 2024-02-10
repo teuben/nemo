@@ -20,13 +20,11 @@ string defv[] = {
     "format=%g\n    Format used to print numbers",
     "niter=10\n     max #iterations to ",
     "eps=0.001\n    minimal fractional change in qt to abort iterations",
-    "VERSION=1.0c\n 8-feb-05 PJT",
+    "VERSION=1.0d\n 9-feb-2024 PJT",
     NULL,
 };
 
 string usage = "query a NEMO potential in the XY plane";
-
-string cvsid = "$Id$";
 
 #ifndef MAXPT
 #define MAXPT 10001
@@ -35,8 +33,8 @@ string cvsid = "$Id$";
 local potproc_double mypotd;     /* pointer to potential calculator function : double */
 local potproc_float  mypotf;     /* pointer to potential calculator function : float */
 
-int reset_q(void);
-int add_q(double rad, double phi);
+void reset_q(void);
+void add_q(double rad, double phi);
 local double report_q(int,double,int);
 
 void nemo_main(void)
@@ -105,14 +103,14 @@ double max_ft;
 int    nsum;
 int    iter;
 
-reset_q()
+void reset_q()
 {
   sum_fr = max_ft = 0.0;
   nsum = 0;
   iter = 0;
 }
 
-add_q (double rad, double phi)
+void add_q (double rad, double phi)
 {
   double pos[3], acc[3], pot, r, fr, ft, time = 0.0;
   int ndim = 3;

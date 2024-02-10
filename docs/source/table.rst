@@ -1,5 +1,8 @@
 .. _table:
 
+Tables
+------
+
 Tables are obiquitous in astronomy in general and in NEMO specifically. Often
 they are simple ASCII tables, each row on a separate line and
 columns separated by a space or a comma (CSV).

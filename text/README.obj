@@ -1,0 +1,3 @@
+The $NEMO/obj directory is used to store shared objects,
+typically loaded at runtime to provide functions not
+known until runtime.
