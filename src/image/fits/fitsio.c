@@ -58,6 +58,7 @@
 /*     8-nov-05 also recognize XTENSION = 'IMAGE'                       */
 /*    11-dec-06 store cvsID in output                                   */
 /*     7-nov-22 CFITSIO version in fitsio_nemo.c is now the default     */
+/*    10-feb-24 fixed types of offset,length for large images           */
 /* ToDo:                                                                */
 /*  - BLANK substitution                                                */
 /*  - deal with pipes                                                   */
@@ -66,8 +67,6 @@
 #include <stdinc.h>
 #include <ctype.h>
 #include <fitsio_nemo.h>
-
-static char *cvs_id="$Id$ fitsio.c";
 
 /* 
  * this next #def's obviously needs to be refined. 
@@ -92,7 +91,7 @@ typedef long int8;		/* some stupid fallback, probably wrong */
 #endif
 
 local int  fitsrch    (FITS *, char *, char *);
-local void fitpad     (FITS *, int, char),
+local void fitpad     (FITS *, off_t, char),
            fitput     (FITS *, char *),
            fitalloc   (FITS *),
            fitcvt_8i  (char *, byte *, int),
@@ -308,7 +307,8 @@ void fitclose(FITS *file)
 ----------------------------------------------------------------------*/
 {
   FITS *f;
-  int i,offset;
+  int i;
+  size_t offset;
 
   f = file;
   if(f->status == STATUS_NEW){
@@ -341,7 +341,8 @@ void fitread(FITS *file, int j, FLOAT *data)
   is converted into a FLOAT array that was passed to this routine
 ----------------------------------------------------------------------*/
 {
-  int i, offset,length,bytes;
+  int i, bytes;
+  off_t  offset, length;
   FITS *f;
   FLOAT bscale,bzero;
   short int *idat;
@@ -356,7 +357,7 @@ void fitread(FITS *file, int j, FLOAT *data)
   offset = bytes*j*f->axes[0] + f->offset;
   length = bytes * f->axes[0];
   fseek(f->fd,offset,0);
-  		dprintf(2,"fitread: offset(%d)=%d => %d\n",j,f->offset,offset);
+  		dprintf(2,"fitread: offset(%d)=%ld => %ld\n",j,f->offset,offset);
   if(j > f->axes[1])
     error("Attempt to read beyond image boundaries, in fitread");
   else if(f->status != STATUS_OLD)
@@ -425,7 +426,8 @@ void fitwrite(FITS *file, int j, FLOAT *data)
    format, which is then written to the fits file
 ----------------------------------------------------------------------*/
 {
-  int i,offset,length,bytes;
+  int i,bytes;
+  off_t offset, length;
   FITS *f;
   FLOAT bscale,bzero, *fdat;
   int *jdat;
@@ -534,7 +536,7 @@ void fitsetpl(FITS *file, int n, int *nsize)
   offset = 0;
   for(i=n-1; i >= 0; i--){
     if(nsize[i] >= f->axes[i+2]){
-      error("Illegal coordinate index, in fitsetpl, aborting ...");
+      error("fitsetpl: illegal coordinate index");
     }
     offset = offset * f->axes[i+2] + nsize[i];
   }
@@ -784,7 +786,7 @@ void fitwrhd(FITS *file, string keyword, string value)
 
 /*====================================================================*/
 /**********************************************************************/
-local void fitpad(FITS *f, int offset, char pad)
+local void fitpad(FITS *f, off_t offset, char pad)
 /*
   This pads a FITS file from location 'offset' (0-based) up to the 
   next 2880 block boundary.
@@ -792,7 +794,8 @@ local void fitpad(FITS *f, int offset, char pad)
 {
 #define MAXLEN 512
   char buf[MAXLEN];
-  int k,ktot,i,length;
+  int i;
+  off_t k,ktot,length;
   for(i=0; i < MAXLEN; i++) buf[i] = pad;
   k = offset;
   ktot = blocksize*((k + (blocksize-1))/blocksize);
@@ -800,9 +803,8 @@ local void fitpad(FITS *f, int offset, char pad)
   while(k < ktot){
     length = ktot - k;
     if(length > MAXLEN) length = MAXLEN;
-    if(length != fwrite(buf,1,length,f->fd)){
+    if(length != fwrite(buf,1,length,f->fd))
       error("I/O error while padding FITS file, aborting ...");
-    }
     k += length;
   }
 }
