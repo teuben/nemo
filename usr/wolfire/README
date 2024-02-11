@@ -1,0 +1,9 @@
+Original Meudon code:
+  wget https://ism.obspm.fr/files/PDRSourceCode/PDR1.5.4_210817_rev2095.tgz
+  cd PDR1.5.4_210817_rev2095
+  cd src
+  make
+  ./PDR
+
+Alpha release:
+  https://ism.obspm.fr/files/PDRSourceCode/PDR7_Berne2024_rev1999.tgz
