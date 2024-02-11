@@ -4,7 +4,7 @@ Crosswalk
 ---------
 
 Comparing functionality in NEMO with like-wise programs in other packages can be
-helpful. Here are a few examples:  
+helpful for onboarding. Here are a few examples:  
 
 .. list-table:: Comparing NEMO programs with those in other packages
    :header-rows: 1
@@ -31,7 +31,7 @@ helpful. Here are a few examples:
      - fits op=xyout
    * - ccdprint
      - print(hdu[0].data)
-     - N/A
+     - ???
      - imlist
    * - ccdmom
      - np.sum()
