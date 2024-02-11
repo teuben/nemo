@@ -121,7 +121,7 @@ int minmax_image (imageptr iptr)
   real dmin = data[0];
   real dmax = dmin;
   
-  int i, n = Nx(iptr)*Nx(iptr)*Nz(iptr);
+  int i, n = Nx(iptr)*Ny(iptr)*Nz(iptr);
 
   // @todo deal with isnan()
   for (i=1; i<n; i++) {
