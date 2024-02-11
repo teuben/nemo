@@ -121,7 +121,7 @@ int minmax_image (imageptr iptr)
   real dmin = data[0];
   real dmax = dmin;
   
-  int i, n = Nx(iptr)*Nx(iptr)*Nz(iptr);
+  int i, n = Nx(iptr)*Ny(iptr)*Nz(iptr);
 
   // @todo deal with isnan()
   for (i=1; i<n; i++) {
@@ -220,12 +220,12 @@ int read_image (stream instr, imageptr *iptr)
         
     if (*iptr==NULL) {		/* allocate image if neccessary */
     	*iptr = (imageptr ) allocate(sizeof(image));
-	dprintf (DLEV,"Allocated image @ %d ",*iptr);
+	dprintf (DLEV,"Allocated image @ %p ",*iptr);
     } else {
         nx = Nx(*iptr);
         ny = Ny(*iptr);
         nz = Nz(*iptr);
-    	dprintf (DLEV,"Image %dx%dx%d already allocated @ %d\n",
+    	dprintf (DLEV,"Image %dx%dx%d already allocated @ %p\n",
 		 nx,ny,nz,*iptr);
     }
     	
@@ -321,9 +321,9 @@ int read_image (stream instr, imageptr *iptr)
             if (Frame(*iptr)==NULL) {        /* check if allocated */
 	        nxyz = Nx(*iptr)*Ny(*iptr)*Nz(*iptr);
                 Frame(*iptr) = (real *) allocate(nxyz * sizeof(real));
-                dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
+                dprintf (DLEV,"Frame allocated @ %p ",Frame(*iptr));
             } else
-                dprintf (DLEV,"Frame already allocated @ %d\n",Frame(*iptr));
+                dprintf (DLEV,"Frame already allocated @ %p\n",Frame(*iptr));
 	    if (Nz(*iptr)==1)
                 get_data_coerced (instr,MapValuesTag,RealType, Frame(*iptr), 
                                 Nx(*iptr), Ny(*iptr), 0);
@@ -380,9 +380,9 @@ int create_image (imageptr *iptr, int nx, int ny)
 #else  
     size_t nxy = nx * ny;
     *iptr = (imageptr ) allocate(sizeof(image));
-    dprintf (DLEV,"create_image:Allocated image @ %d size=%d * %d",*iptr,nx,ny);
+    dprintf (DLEV,"create_image:Allocated image @ %p size=%d * %d",*iptr,nx,ny);
     Frame(*iptr) = (real *) allocate(nxy*sizeof(real));	
-    dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
+    dprintf (DLEV,"Frame allocated @ %p ",Frame(*iptr));
     Nx(*iptr) = nx;             /* old style ONE map, no cube */
     Ny(*iptr) = ny;
     Nz(*iptr) = 1;
@@ -435,13 +435,13 @@ int create_cube (imageptr *iptr, int nx, int ny, int nz)
 {
     size_t np = (size_t)nx*(size_t)ny*(size_t)nz;  
     *iptr = (imageptr ) allocate(sizeof(image));
-    dprintf (DLEV,"CREATE_CUBE: Allocated image @ cube %d size=%d * %d * %d (%ld)",
+    dprintf (DLEV,"CREATE_CUBE: Allocated image @ cube %p size=%d * %d * %d (%ld)",
 	     *iptr,nx,ny,nz,np);
     if (*iptr == NULL)
 	return 0;	/* no memory available */
     	
     Frame(*iptr) = (real *) allocate(np*sizeof(real));	
-    dprintf (DLEV,"Frame allocated @ %d ",Frame(*iptr));
+    dprintf (DLEV,"Frame allocated @ %p ",Frame(*iptr));
     
     Nx(*iptr) = nx;             /* cube dimensions */
     Ny(*iptr) = ny;
@@ -463,11 +463,11 @@ int create_image_mask(imageptr iptr, image_maskptr *mptr)
   size_t np = nx*ny*nz;
 
   *mptr = (image_maskptr ) allocate(sizeof(image_mask));
-  dprintf (DLEV,"create_image_mask:Allocated image_mask @ %d size=%d * %d * %d",*mptr,nx,ny,nz);
+  dprintf (DLEV,"create_image_mask:Allocated image_mask @ %p size=%d * %d * %d",*mptr,nx,ny,nz);
   if (*mptr == NULL) return 0;	/* no memory available */
     	
   Frame(*mptr) = (bool *) allocate(np*sizeof(bool));	
-  dprintf (DLEV,"Frame allocated @ %d ",Frame(*mptr));
+  dprintf (DLEV,"Frame allocated @ %p ",Frame(*mptr));
   if (Frame(*mptr)==NULL) {
     printf ("CREATE_IMAGE_MASK: Not enough memory to allocate image\n");
     return 0;
@@ -489,10 +489,10 @@ int copy_image (imageptr iptr, imageptr *optr)
   
 
   *optr = (imageptr ) allocate(sizeof(image));
-  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx,ny,nz);
+  dprintf (DLEV,"copy_image:Allocated image @ %p size=%d * %d * %d",*optr,nx,ny,nz);
     	
   Frame(*optr) = (real *) allocate(np*sizeof(real));	
-  dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
+  dprintf (DLEV,"Frame allocated @ %p ",Frame(*optr));
   Nx(*optr) = nx;
   Ny(*optr) = ny;
   Nz(*optr) = nz;
@@ -568,10 +568,10 @@ int sub_image (imageptr iptr, regionptr rptr, imageptr *optr)
   np1 = nx1*ny1*nz1;
 
   *optr = (imageptr ) allocate(sizeof(image));
-  dprintf (DLEV,"copy_image:Allocated image @ %d size=%d * %d * %d",*optr,nx1,ny1,nz1);
+  dprintf (DLEV,"copy_image:Allocated image @ %p size=%d * %d * %d",*optr,nx1,ny1,nz1);
     	
   Frame(*optr) = (real *) allocate(np1*sizeof(real));	
-  dprintf (DLEV,"Frame allocated @ %d ",Frame(*optr));
+  dprintf (DLEV,"Frame allocated @ %p ",Frame(*optr));
   Nx(*optr) = nx1;
   Ny(*optr) = ny1;
   Nz(*optr) = nz1;
@@ -675,7 +675,7 @@ char *mystrcpy(char *a)
 
 string defv[] = {
   "mode=w\n      	Read (r) or Write (w)",
-  "VERSION=8.0\n	20-dec-2022 pjt",
+  "VERSION=8.1\n	10-feb-2024 pjt",
   NULL
 };
 

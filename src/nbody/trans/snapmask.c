@@ -36,7 +36,7 @@ string defv[] = {
     "times=all\n		  times select string ",
     "keyfile=\n			  file with Key field to select from ",
     "keyoffset=0\n                offsets to be applied extra to outkey ",
-    "VERSION=1.9\n		  25-may-02 PJT",
+    "VERSION=1.9a\n		  9-feb-2024 PJT",
     NULL,
 };
 
@@ -58,11 +58,10 @@ local int    *sel=NULL;
 #define TIMEFUZZ	0.0001	      /* tolerance in time comparisons */
 
 
-nemo_main()
+void nemo_main()
 {
     char *fname;
     int  i, nbody_out, nbody_old, nbody_file, nbody_max, bits, offset, nret;
-    double ekin;
     Body  *bp, *bq;
     stream fstr;
     bool first = TRUE;
