@@ -1,4 +1,4 @@
-.TH YAPP 5NEMO "23 November 2023"
+.TH YAPP 5NEMO "10 February 2024"
 
 .SH "NAME"
 yapp \- Yet Another Plotting Package
@@ -34,6 +34,8 @@ very much, the keyword 'yapp=' or an environment variable
 options.
 
 .SH "AVAILABLE YAPP VERSIONS"
+This list is not only incomplete, in addition some of the ones
+listed here are not fully implemented.
 .TP 24
 \fByapp\fP
 wrapper, which attempts (with or without some help) to include the
@@ -59,14 +61,32 @@ The old original one (JEB), uses suncore, can have optional
 mouse interface (-DMOUSE) and retained segments (-DRETAINED).
 Working on color interface (-DCOLOR), see also yapp_cg below.
 .TP
+yapp_g2
+A 2D multi-plexing (X11,PNG,PS) library
+.TP
+yapp_mesa
+MESA 3D - almost GL
+.TP
 \fByapp_meta	\fP
 An ascii meta-file format.
+.TP
+\fByapp_giza	\fP
+Attempt to use the pgplot compatible giza library
+.TP
+yapp_gl
+.TP
+yapp_glfw
+.TP
+yapp_gnuplot
 .TP
 \fByapp_mongo	\fP
 for usage when mongo(87) is available. Uses
 environment varibiable \fBYAPP\fP, initialized in the
 \fIgetparam(3NEMO)\fP package, to select from a number
 of devices.	(PJT)
+.TP
+\fByapp_mpl\fP
+Initial coding for a matplotlib based  
 .TP
 \fByapp_null\fP
 a stubbed list of all required and optional routines which gets
@@ -77,11 +97,14 @@ uses Tim Pierson`s (Caltech) PGPLOT package. We now support PGPLOT V5
 as well as an experimental version of CPGPLOT (PJT)
 .TP
 \fByapp_plplot	\fP
-uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. (PJT)
+uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. Almost
+functional.
 .TP
 \fByapp_ps		\fP
 PostScript, merged with JEBs enhanced versions(PJT). Does not do color
 yet.
+.TP
+yapp_psg
 .TP
 \fByapp_sm	\fP
 Super Mongo - not very good yet since sm doesn't have good
@@ -97,6 +120,9 @@ SunView version, in so-called implicit dispatch mode. This version
 is really only intended to create small images, to be saved in 
 screendump 'frame's, which can be displayed with the sunview windows
 version \fImoview(1NEMO)\fP.  \fIdeprecated\fP.
+.TP
+\fByapp_svg\fP
+Not yet functional.
 .TP
 \fByapp_x11\fP
 Based on a standalone, now modified to handle singleprecision real (float).
