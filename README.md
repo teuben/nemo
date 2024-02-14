@@ -177,4 +177,5 @@ Please use the following citation if you use NEMO in your work
 
 
 ![A Real Bar](docs/figures/realbar1.png)
+
 [taken from this example script](https://teuben.github.io/nemo/examples/realbar.html)
