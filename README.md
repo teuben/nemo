@@ -151,7 +151,7 @@ and print the phase space coordinates of the first particle, use this:
 There are several additional entry points if you are starting out with NEMO:
 
 * readthedocs: https://astronemo.readthedocs.io/en/latest/
-* github pages: https://teuben.github.io/nemo
+* github pages: https://teuben.github.io/nemo  (yes, these are the 1990s style webpages we used to maintain)
 * AAS 443 [iPoster](https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
@@ -177,3 +177,4 @@ Please use the following citation if you use NEMO in your work
 
 
 ![A Real Bar](docs/figures/realbar1.png)
+[taken from this example script](https://teuben.github.io/nemo/examples/realbar.html)
