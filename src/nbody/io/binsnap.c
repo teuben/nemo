@@ -8,9 +8,9 @@
  */
  
 #include <nemo.h>
-
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
+#include <unfio.h>
 
 string defv[] = {
     "in=???\n                        Input rvc file",
@@ -24,14 +24,14 @@ string defv[] = {
     "dr=1.448e16\n                   Cell size for level=0",
     "mass=t\n                        Use density (f) or mass (t)",
     "headline=\n                     Random verbiage",
-    "VERSION=0.3\n                   22-sep-2011 PJT",
+    "VERSION=0.3a\n                  12-feb-2024 PJT",
     NULL,
 };
 
 string usage = "convert binary files to snapshot";
 
  
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     char buf[400];
@@ -46,7 +46,6 @@ nemo_main()
     real *p1, *m1, *pp, tsnap, *t1, *t2;
     real *phase, *mass;
     real mscale, pscale, vscale, dr, size;
-    float *rv, *rvp;
     bool Qmass;
 
     warning("Program only parses the KMM2007 data");
@@ -71,9 +70,7 @@ nemo_main()
     mass =  m1 = (real *)  allocate(nbody*sizeof(real));
     t1 = (real *)  allocate(nbody*sizeof(real));
     t2 = (real *)  allocate(nbody*sizeof(real));
-    pp = (real *) allocate(128*sizeof(real));
-
-
+    pp = (real *) allocate(128*sizeof(real));  // particle attributes
 
     for (i=0; i<nbody; i++) {
       nread = unfread(instr, buf, nbuf);
@@ -91,7 +88,7 @@ nemo_main()
       *m1++ = *pp++ / mscale;  /* mass */
       *t1++ = *pp++;  /* t1 */
       *t2++ = *pp++;  /* t2 */
-      sp    =  pp;
+      sp    =  (short *) pp;    // [-Wincompatible-pointer-types]
       l     = (short ) *sp;
       dprintf(1,"%d: l=%d (0x%x)\n",i+1,l,l);
       if (Qmass) {

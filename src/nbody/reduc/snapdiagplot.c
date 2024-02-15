@@ -27,7 +27,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
     "tab=\n                     If given, tabulate Time,Etot",
-    "VERSION=1.5a\n		6-may-2022 PJT",
+    "VERSION=1.5b\n		12-feb-2024 PJT",
     NULL,
 };
 
@@ -74,8 +74,10 @@ local real Erange[2]  = { -1.00, 1.00 };
 
 real ttrans(real), drtrans(real), Etrans(real), dEtrans(real);
 
+typedef real phase[2][NDIM];
+
 void setparams(void);
-real poten(real phsp[][2][NDIM], real mass[], int nobj);
+real poten(phase *phsp, real *mass, int nobj);
 void readinput(stream instr);
 void diagplot(void);
 void setlimits(void);
@@ -109,8 +111,7 @@ void setparams()
 }
 
 
-// phsp, mass, nobj
-real poten(real phsp[][2][NDIM], real mass[], int nobj)
+real poten(phase *phsp, real *mass, int nobj)
 {
     int i, j;
     real epssq, petot, *posi, pei, dpos[NDIM], dpossq;
@@ -159,7 +160,7 @@ void readinput(stream instr)
 	    get_data_coerced(instr, PhaseSpaceTag, RealType, pptr, nobj, 2, NDIM, 0);
 	    get_tes(instr, ParticlesTag);
 	    dfcount[npartfr] = ndiagfr;			/* save frame no. */
-	    ExactPE[npartfr] = poten(pptr, mptr, nobj);
+	    ExactPE[npartfr] = poten((phase *)pptr, mptr, nobj);
 	    npartfr++;
 	}
 	get_set(instr, DiagnosticsTag);
