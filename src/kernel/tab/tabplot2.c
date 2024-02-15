@@ -57,7 +57,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "first=f\n           Layout first or last?",
     "readline=f\n        Interactively reading commands",
     "pyplot=\n           Template python plotting script",
-    "VERSION=0.1\n	 15-feb-2024 PJT",
+    "VERSION=0.2\n	 15-feb-2024 PJT",
     NULL
 };
 
@@ -126,7 +126,9 @@ void nemo_main(void)
     setparams();
 
     if (hasvalue("pyplot")) {
-      warning("pyplot not supported yet");
+      stream pstr = pyplot_init(getparam("pyplot"));
+      pyplot_plot2(pstr, input1, input2, xcol, ycol, xrange, yrange);
+      pyplot_close(pstr);
     }
       
     read_data();
