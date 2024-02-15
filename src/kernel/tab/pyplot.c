@@ -55,6 +55,32 @@ void pyplot_plot(stream str, string tabname, int *xcol, int *ycol, int *dycol, r
   fprintf(str,"plt.show()\n");
 }
 
+void pyplot_plot2(stream str, string tabname1, string tabname2, int *xcol, int *ycol, real *xrange, real *yrange)
+{
+  fprintf(str,"tab1 = '%s'\n",tabname1);
+  fprintf(str,"data1 = np.loadtxt(tab1).T\n");
+  fprintf(str,"print(data1.shape)\n");
+  fprintf(str,"tab2 = '%s'\n",tabname2);
+  fprintf(str,"data2 = np.loadtxt(tab2).T\n");
+  fprintf(str,"print(data2.shape)\n");  
+  
+  fprintf(str,"#plt.figure(dpi=300,figsize=(20/2.54,20/2.54))\n");
+  fprintf(str,"plt.figure()\n"); 
+  fprintf(str,"plt.plot(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
+  fprintf(str,"plt.plot(data2[%d],data2[%d],label=tab2)\n",xcol[1]-1,ycol[1]-1);
+  fprintf(str,"#plt.step(data1[%d],data1[%d],label=tab1,where='mid')\n",xcol[0]-1,ycol[0]-1);
+  fprintf(str,"plt.scatter(data1[%d],data1[%d],label=tab1)\n",xcol[0]-1,ycol[0]-1);
+  fprintf(str,"plt.scatter(data2[%d],data2[%d],label=tab2)\n",xcol[1]-1,ycol[1]-1);
+  fprintf(str,"plt.xlabel('X')\n");
+  fprintf(str,"plt.ylabel('Y')\n");
+  fprintf(str,"#plt.xlim([0,1])\n");
+  fprintf(str,"#plt.ylim([0,1])\n");
+  fprintf(str,"plt.title('tabplot2')\n");
+  fprintf(str,"plt.legend()\n");
+  fprintf(str,"plt.savefig('pyplot.png')\n");  
+  fprintf(str,"plt.show()\n");
+}
+
 
 void pyplot_hist(stream str, string tabname, int *xcol, real *xrange, int bins)
 {
