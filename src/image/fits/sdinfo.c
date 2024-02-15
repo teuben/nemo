@@ -34,7 +34,7 @@ string defv[] = {
     "proc=\n             Reduction procedure (PS,FS,NOD,TP)",
     "nrows=\n            Override the nrows derived from the data",
     "nchan=\n            Override the nchan derived from the data",
-    "row=-1\n            Show ascii spectrum for this row (0=first)",
+    "row=-1\n            Show ascii spectrum for this row (1=first)",
     "raw=f\n             Do only raw I/O ?",
     "hdu=2\n             Which HDU (BINTABLE SINGLE DISH) to process (1=first)",
     "blfit=-1\n          Do a baseline fit of this order (-1 skips)",
@@ -42,7 +42,7 @@ string defv[] = {
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
     "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
     "tab=\n              If given, produce tabular output (datadim=1 or 2 only)",
-    "VERSION=1.1\n       18-oct-2023 PJT",
+    "VERSION=1.2\n       7-feb-2024 PJT",
     NULL,
 };
 
@@ -296,7 +296,7 @@ void nemo_main(void)
     dprintf(0,"Found %d files\n",nfiles);
     dprintf(0,"Found %d cols to check\n",ncolcheck);
 
-    row = getiparam("row");
+    row = getiparam("row") - 1;
 
     if (hasvalue("dims")) {
       ndims = nemoinpi(getparam("dims"),dims,MDMAXDIM);
