@@ -14,6 +14,25 @@
 
 <item>
 <title>
+nemo_4_4_2
+</title>
+<description>
+ (28-jan-2024)
+ NEMO V4.4.2 was released. Meant to be the AAS243,
+ it became the Route-tt release. Puzzle that one.
+ Numerous minor things added, so just the usual
+ incremental release.
+
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_4_2
+</link>
+</item>
+
+
+
+<item>
+<title>
 nemo_4_4_0
 </title>
 <description>
