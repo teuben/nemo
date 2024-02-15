@@ -23,7 +23,6 @@
 #endif
 
 #define MAXCOL  256
-#define MAXBIN  256
 #define MAXCOORD 16
 
 /**************** COMMAND LINE PARAMETERS **********************/
@@ -79,15 +78,11 @@ local int npcol;                                /* MAX(nxcol,nycol) */
 local real  *x[MAXCOL], *y[MAXCOL]; 			/* data from file */
 local int    npt1;				/* actual number of data points */
 local int    npt2;				/* actual number of data points */
-local int    np;                              /* actual number of rebinned data */
 
 local real xmin, xmax;			/* actual min and max as computed */
 local real ymin, ymax;
 local bool   Qautox0, Qautoy0, Qfull;		/* autoscale ? */
 local bool   Qautox1, Qautoy1;
-local bool   Qsigx, Qsigy;                    /* show error bars on data points ? */
-local real *xbin;                             /* boundaries for binned data */
-local int    nbin;                            /* number of boundaries " */
 
 local string headline;			/* text string above plot */
 local string xlab, ylab;			/* text string along axes */
@@ -95,7 +90,7 @@ local real xplot[2],yplot[2];		        /* borders of plot */
 local int    yapp_line[2*MAXCOL];            /* thickness and pattern of line */
 local int    yapp_color[MAXCOL];	      /* color per column */
 local real yapp_point[2*MAXCOL];             /* what sort of point to plot */
-//local string errorbars;                       /* x or y or both (xy) */
+
 local real xcoord[MAXCOORD], ycoord[MAXCOORD];/* coordinate lines */
 local int nxcoord, nycoord;
 local int nxticks, nyticks;                   /*& number of tickmarks */
@@ -112,7 +107,7 @@ void setparams(void);
 void read_data(void);
 void plot_data(void);
 void plot_points(int np, real xp[], real yp[], real pstyle,
-		 real psize, int lwidth, int lstyle, int color, int errorbars);
+		 real psize, int lwidth, int lstyle, int color);
 void parse_pairsi(string key, int *pairs, int nycol);
 void parse_pairsr(string key, real *pairs, int nycol);
 double my_sqrt(double x);
@@ -140,7 +135,6 @@ void nemo_main(void)
 
 void setparams(void)
 {
-    char *smin;
     int  i;
    
     input1 = getparam("in1");             /* input table file */
@@ -150,18 +144,21 @@ void setparams(void)
     tptr1 = table_open(instr1,0);         /* table */
     tptr2 = table_open(instr2,0);
     
-    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);
-    nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);
+    nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL);  // should be 1 or 2 
+    nycol = nemoinpi(getparam("ycol"),ycol,MAXCOL);  // should be 1 or 2 
     if (nxcol < 1) error("Error parsing xcol=%s",getparam("xcol"));
     if (nycol < 1) error("Error parsing ycol=%s",getparam("ycol"));
-    if (nxcol > 1 && nycol > 1 && nycol != nxcol) 
-      error("nxcol=%d nycol=%d cannot be paired properly",nxcol,nycol);
+    if (nxcol==1) {
+      xcol[1]=xcol[0];
+      nxcol=2;
+    }
+    if (nycol==1) {
+      ycol[1]=ycol[0];
+      nycol=2;
+    }
     npcol = MAX(nxcol,nycol);
-    
+    dprintf(1,"xcol: %d %d    ycol: %d %d\n",xcol[0],xcol[1],ycol[0],ycol[1]);
 
-    Qsigx = Qsigy = FALSE;
-    np = 0;   /* no binning anymore */
-    
     if (hasvalue("xmin") && hasvalue("xmax")) {
 	xrange[0] = getdparam("xmin");
 	xrange[1] = getdparam("xmax");
@@ -244,26 +241,27 @@ void setparams(void)
 
 void read_data(void)
 {
-    int i, j, k, colnr[1+MAXCOL];
+    int i, j, colnr[1+MAXCOL];
 		
     dprintf (2,"Reading datafile, xcol,ycol=%d..,%d,...\n",xcol[0],ycol[0]);
-    
-    for (j=0, k=0; j<nxcol; j++, k++)
-        colnr[k]  = xcol[j];
-    for (j=0; j<nycol; j++, k++) 
-        colnr[k]  = ycol[j];
-    int ncol = nxcol + nycol;
-    d1 = table_md2cr(tptr1, ncol,colnr,0,0);
-    d2 = table_md2cr(tptr2, ncol,colnr,0,0);
 
-    for (j=0, k=0; j<nxcol; j++, k++)
-        x[j] = &d1[k][0];
-    for (j=0; j<nycol; j++, k++)
-        y[j] = &d1[k][0];
+    colnr[0] = xcol[0];
+    colnr[1] = ycol[0];
+    d1 = table_md2cr(tptr1, 2,colnr,0,0);
+    colnr[0] = xcol[1];
+    colnr[1] = ycol[1];
+    d2 = table_md2cr(tptr2, 2,colnr,0,0);
+
+    x[0] = &d1[0][0];  // x[0] has npt1
+    x[1] = &d2[0][0];  // x[1] has npt2
+
+    y[0] = &d1[1][0];  // npt1
+    y[1] = &d2[1][0];  // npt2
 
     npt1 = table_nrows(tptr1);
     npt2 = table_nrows(tptr2);
 
+    // @todo
     if (xscale != 1.0) {
       for (j=0; j<nxcol; j++)
 	for (i=0; i<npt1; i++)
@@ -278,21 +276,23 @@ void read_data(void)
     xmin = ymin =  HUGE;
     xmax = ymax = -HUGE;
     for (i=0; i<npt1; i++) {     /* find global min and max in X and all Y */
-        for (j=0; j<nxcol; j++) {
-	  xmax=MAX(x[j][i],xmax);
-	  xmin=MIN(x[j][i],xmin);
-        }
-        for (j=0; j<nycol; j++) {
-	  ymax=MAX(y[j][i],ymax);
-	  ymin=MIN(y[j][i],ymin);
-        }
+      xmax=MAX(x[0][i],xmax);
+      xmin=MIN(x[0][i],xmin);
+      ymax=MAX(y[0][i],ymax);
+      ymin=MIN(y[0][i],ymin);
+    }
+    for (i=0; i<npt2; i++) {     /* find global min and max in X and all Y */
+      xmax=MAX(x[1][i],xmax);
+      xmin=MIN(x[1][i],xmin);
+      ymax=MAX(y[1][i],ymax);
+      ymin=MIN(y[1][i],ymin);
     }
 }
 
 
 void plot_data(void)
 {
-    int    i, j, k;
+    int    i, j;
     real xcur, ycur, edge;
     char c;
     stream cstr;
@@ -432,15 +432,14 @@ void plot_data(void)
     pltext(headline,xbox[1],ybox[1]+0.2,0.32,0.0);          /* headline */
     pljust(-1);     /* return to left just */
 
-    for (k=0, i=0, j=0; k<npcol; k++) {
-      plot_points( npt1, x[i], y[j], 
-		   yapp_point[2*k], yapp_point[2*k+1],
-		   yapp_line[2*k], yapp_line[2*k+1],
-		   ncolors > 0 ? yapp_color[k] : -1,
-		   0);
-      if (nxcol>1) i++;
-      if (nycol>1) j++;
-    }
+    plot_points( npt1, x[0], y[0], 
+		 yapp_point[0], yapp_point[1],
+		 yapp_line[0], yapp_line[1],
+		 ncolors > 0 ? yapp_color[0] : -1);
+    plot_points( npt2, x[1], y[1], 
+		 yapp_point[2], yapp_point[3],
+		 yapp_line[2], yapp_line[3],
+		 ncolors > 0 ? yapp_color[1] : -1);
 
     if (hasvalue("cursor")) {
         dprintf(0,"Interactive mode: enter coordinates with the cursor\n");
@@ -471,16 +470,16 @@ double my_sqrt(double x)
 /* PLOT_POINTS
  *
  *      Plot datapoints, optionally connecting them with lines,
- *      adding errorbars in X as well as Y
  *
- *      X,Y Points with value NaN are skipped, as well as their errorbars
+ *      X,Y Points with value NaN are skipped
  */
  
 void plot_points (int np, real *xp, real *yp, 
-		  real pstyle, real psize, int lwidth, int lstyle, int color, int errorbars)
+		  real pstyle, real psize, int lwidth, int lstyle, int color)
 {
     int i, ipstyle;
-    real p1, p2;
+    dprintf(1,"plot_points: %d  %g %g %d %d %d\n", np, pstyle, psize, lwidth, lstyle, color);
+	    
 
     if (color >= 0) {
         plcolor(color);
