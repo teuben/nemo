@@ -88,6 +88,10 @@ tabplot: tabplot.c
 	$(CC) $(CFLAGS) -o tabplot tabplot.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
 
+tabplot2: tabplot2.c
+	$(CC) $(CFLAGS) -o tabplot2 tabplot2.c \
+		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
+
 tabplot_command: tabplot_command.c
 	$(CC) $(CFLAGS) -o tabplot_command tabplot_command.c \
 		$(NEMO_LIBS) $(YAPPLIB) $(EL) -lm
