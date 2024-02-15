@@ -9,7 +9,7 @@ Python support in NEMO itself is still rudimentary, though the common
      pip3 install -e .
 
 will add the ``nemopy`` module to your python environment. Currently only
-a simple getparam interface is available.
+a simple getparam interface is available, to build NEMO style programs.
 
 
 There are good import and export routines to other N-body formats, through
@@ -44,3 +44,15 @@ data. We list a few
 
 * SnapGadget: https://github.com/regmachado/SnapGadget
 
+
+Examples
+~~~~~~~~
+
+.. todo::  more needed here
+
+1. 3rd party modules. Good examples are with unsio.
+
+2. qtrun is a GUI building app
+
+3. NEMO style apps that use the python version of getparam.
+   Examples are tabplot with matplotlib
