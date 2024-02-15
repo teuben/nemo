@@ -241,15 +241,12 @@ a new name.
    * - r
      - real
      - ``sqrt(x*x+y*y+z*z)``
-   * -
-     -
-     -  or: :math:`|\rvec|`
    * - ar
+     - real
+     - ``(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)``   or: (\rvec$\cdot$\avec)/$|$\rvec$|$ \\
+   * - at
      - real
      - ``sqrt(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)``
-   * - ar
-     - real
-     - ``(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)`` or: (\rvec$\cdot$\avec)/$|$\rvec$|$ \\
    * - aux
      - real
      - ``aux``
@@ -283,30 +280,18 @@ a new name.
    * - r
      - real
      - ``sqrt(x*x+y*y+z*z)``
-   * - 
-     -
-     - or: $|$\rvec$|$ \\
    * - t
      - real
      - ``t``
    * - v
      - real
      - ``sqrt(vx*vx+vy*vy+vz*vz)``
-   * - 
-     - 
-     -  or: $|$\vvec$|$ 
    * - vr
      - real
      - ``(x*vx+y*vy+z*vz)/sqrt(x*x+y*y+z*z)``
-   * - 
-     -
-     - or:  or: (\rvec$\cdot$\vvec)/$|$\rvec$|$ 
    * - vt
      - real
      - ``sqrt((vx*vx+vy*vy+vz*vz)-sqr(x*vx+y*vy+z*vz)/(x*x+y*y+z*z))``
-   * - 
-     -
-     - or: $\sqrt{}$(\vvec$^2$-(\rvec$\cdot$\vvec)$^2$/$|$\rvec$|^2$)\\
    * - vx 
      - real
      - ``vx``
