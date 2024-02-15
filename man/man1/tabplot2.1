@@ -1,0 +1,122 @@
+.TH TABPLOT2 1NEMO "15 February 2024"
+
+.SH "NAME"
+tabplot2 \- compare two tables
+
+.SH "SYNOPSIS"
+\fBtabplot2\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBtabplot2\fP shares most parameters with \fItabplot(1NEMO)\fP, except for binning, which is not implemented here.
+Instead there are two input tables, and each table needs an X column and Y column. This can also mean the two
+input tables are the same, but different X or Y columns are compared, or two different tables, with the same
+X and Y column (which is the default)
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin1=\fP
+Input first table [???]    
+.TP
+\fBin2=\fP
+Input second table [???]    
+.TP
+\fBxcol=\fP
+x coordinate column(s(). Up to two columns can be given [1,1]
+.TP
+\fBycol=\fP
+y coordinate column(s(). Up to two columns can be given [2,2]
+.TP
+\fBxmin=\fP
+X-min value if not autoscaled []  
+.TP
+\fBxmax=\fP
+X-max value if not autoscaled []  
+.TP
+\fBymin=\fP
+Y-min value if not autoscaled []  
+.TP
+\fBymax=\fP
+Y-max value if not autoscaled []  
+.TP
+\fBpoint=\fP
+point type and size pairs for each table
+.TP
+\fBline=\fP
+line width and style pairs for each table
+.TP
+\fBcolor=\fP
+colors for the symbols/lines for each table []
+.TP
+\fBxlab=\fP
+Label along X-axis []    
+.TP
+\fBylab=\fP
+Label along Y-axis []    
+.TP
+\fBxcoord=\fP
+Draw additional vertical coordinate lines along these X
+.TP
+\fBycoord=\fP
+Draw additional horizontal coordinate lines along these Y
+.TP
+\fBxbox=\fP
+extent of frame in x direction [2.0:18.0] 
+.TP
+\fBybox=\fP
+extent of frame in y direction [2.0:18.0] 
+.TP
+\fBnxticks=\fP
+Number of ticks on X axis [7] 
+.TP
+\fBnyticks=\fP
+Number of ticks on Y axis [7] 
+.TP
+\fBxscale=\fP
+Scale all X values by this [1] 
+.TP
+\fByscale=\fP
+Scale all Y values by this [1] 
+.TP
+\fBheadline=\fP
+headline in graph on top right [] 
+.TP
+\fBfullscale=\fP
+Use full autoscale in one axis if other
+.TP
+\fBcursor=\fP
+Optional output file to retrieve cursor coordinates []
+.TP
+\fBbacktrack=\fP
+Allow backtrack in line= option [t]  
+.TP
+\fBlayout=\fP
+Optional input layout file []   
+.TP
+\fBfirst=\fP
+Layout first or last? [f]   
+.TP
+\fBreadline=\fP
+Interactively reading commands [f]    
+.TP
+\fBpyplot=\fP
+Template python plotting script []   
+
+.SH "EXAMPLES"
+Here is an example comparing column 2 and 3 from the same file:
+.nf
+    tabgen - 20 3 | sort -n > random.tab
+    tabplot2 random.tab random.tab 1 2,3 line=1,1 color=2,4 point=2,0.1
+.fi
+
+.SH "SEE ALSO"
+tabplot(1NEMO), table(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+15-feb-2024m	Quick and Dirty conversion from tabplot		PJT
+.fi
