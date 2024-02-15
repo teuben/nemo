@@ -1,0 +1,2487 @@
+TESTSUITE started Thu Feb  1 17:42:03 EST 2024
+TESTSUITE version 19-jun-2023
+NEMO version 4.4.3 Jadonslaptop (x86_64-unknown-linux-gnu)
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/fits
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+BSF: OK     40.9321 31.4127 0 93 117 ccd.in
+Running ccdfits
+ccdfits ccd.in fits.in; nemo.coverage ccdfits.c
+Running fitsccd
+fitsccd fits.in ccd.out; nemo.coverage fitsccd.c
+### nemo Debug Info: FITS file: Image size 10 10
+### nemo Debug Info: There were no blank values set in the image
+Testing ccd-fits-ccd with FIE=10*%x+sqrt(%y)
+ccdmath ccd.in,ccd.out - %1-%2 | ccdstat -
+Number of points       : 100
+Min and Max            : -0.000004 0.000003
+Mean and dispersion    : -0.000000 0.000001
+Skewness and kurtosis  : -0.820134 3.622802
+Sum and Sum*Dx*Dy*     : -0.000027 -0.000027
+Points per beam (map)  : 1
+0/100 out-of-range points discarded
+BSF: OK     1.21403e+07 1.30754e+08 -1 1.42041e+09 117 ccd.out
+Running scanfits
+scanfits fits.in	; nemo.coverage scanfits.c
+__________________________________________________________
+______________________ FITS HEADER _______________________
+Primary header: standard SIMPLE
+BITPIX = -32
+NAXIS  = 3
+###	NAXIS#	CTYPE#  	CDELT#	CRVAL#	CRPIX#
+ 1:	10	X       	1	0	1
+ 2:	10	Y       	1	0	1
+ 3:	1	Z       	1	0	1
+headersize = 3120 bytes = 2 2880-records
+datasize = 400 bytes = 1 2880-records
+__________________________________________________________
+ccdmath "" - "rang(0,1)" size=10,10,1 seed=1 |  ccdfits - map001.fits ; nemo.coverage ccdfits.c
+ccdmath "" - "rang(0,1)" size=10,10,1 seed=2 |  ccdfits - map002.fits; nemo.coverage ccdfits.c
+ccdmath "" - "rang(0,1)" size=10,10,1 seed=3 |  ccdfits - map003.fits; nemo.coverage ccdfits.c
+Running fitsglue
+fitsglue map%03d.fits cube.fits inlist=1:3 ; nemo.coverage fitsglue.c
+### nemo Debug Info: Blanked out a total of 2 cards
+Output NAXIS3 = 3
+fitshead map001.fits | grep DATA; nemo.coverage fitshead.c
+DATAMIN =     -2.586638927E+00 /
+DATAMAX =      2.619837284E+00 /
+fitshead map002.fits | grep DATA
+DATAMIN =     -2.655572653E+00 /
+DATAMAX =      2.179121494E+00 /
+fitshead map003.fits | grep DATA
+DATAMIN =     -2.652021646E+00 /
+DATAMAX =      2.824515581E+00 /
+fitshead cube.fits | grep DATA ; nemo.coverage fitshead.c
+DATAMIN =         -2.655572653
+DATAMAX =          2.824515581
+Running fitshead
+fitshead map003.fits; nemo.coverage fitshead.c
+SIMPLE  =                    T /
+BITPIX  =                  -32 /
+NAXIS   =                    3 /
+NAXIS1  =                   10 /
+NAXIS2  =                   10 /
+NAXIS3  =                    1 /
+COMMENT  FITS (Flexible Image Transport System) format is defined in 'Astronomy
+COMMENT  and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
+COMMENT  nemo::fitsio.c $Id$
+CRPIX1  =      1.000000000E+00 /
+CRPIX2  =      1.000000000E+00 /
+CRPIX3  =      1.000000000E+00 /
+CRVAL1  =      0.000000000E+00 /
+CRVAL2  =      0.000000000E+00 /
+CRVAL3  =      0.000000000E+00 /
+CDELT1  =      1.000000000E+00 /
+CDELT2  =      1.000000000E+00 /
+CDELT3  =      1.000000000E+00 /
+CTYPE1  = 'X       '           /
+CTYPE2  = 'Y       '           /
+CTYPE3  = 'Z       '           /
+RESTFRQ =      1.420405760E+09 /
+BMAJ    =      0.000000000E+00 /
+BMIN    =      0.000000000E+00 /
+BPA     =      0.000000000E+00 /
+DATAMIN =     -2.652021646E+00 /
+DATAMAX =      2.824515581E+00 /
+ORIGIN  = 'NEMO ccdfits 6.6'
+SPECSYS = 'LSRK    '           /
+RADECSYS= 'FK5     '           /
+EQUINOX =      2.000000000E+03 /
+AUTHOR  = 'jadon   '           /
+OBSERVER= 'jadon   '           /
+DATE-OBS= '2024-02-01T17:42:05'
+COMMENT
+HISTORY  NEMO: History in reversed order
+HISTORY  ccdfits - map003.fits VERSION=6.6
+HISTORY  ccdmath  - rang(0,1) size=10,10,1 seed=3 VERSION=3.3
+END
+tabfits tab.in tab.fits nx=10 ny=10 nz=1; nemo.coverage tabfits.c
+### nemo Debug Info: Creating initial fits primary HDU 10*10*1
+### Warning [tabfits]: old get_line() is still used - it is being deprecated
+### nemo Debug Info: Read 0 header lines
+### nemo Debug Info: MinMax in map: 1 - 100
+fitshead tab.fits | grep bibcode
+COMMENT  and Astrophysics', volume 376, page 359; bibcode: 2001A&A...376..359H
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/io
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=10,10,1
+BSF: OK     40.9321 31.4127 0 93 117 ccd.in
+Running ccddump
+ccddump ccd.in . ; nemo.coverage ccddump.c
+### nemo Debug Info: linear scaling
+### nemo Debug Info: autoscaling.. 0 : 93
+### nemo Debug Info: write_dump_byte: range: 0:93 mode=0 map=10 * 10 * 1
+Running ccdprint
+ccdprint ccd.in x= y= format=%7.3f; nemo.coverage ccdprint.c
+  3.000  13.000  23.000  33.000  43.000  53.000  63.000  73.000  83.000  93.000 
+  2.828  12.828  22.828  32.828  42.828  52.828  62.828  72.828  82.828  92.828 
+  2.646  12.646  22.646  32.646  42.646  52.646  62.646  72.646  82.646  92.646 
+  2.449  12.449  22.449  32.449  42.449  52.449  62.449  72.449  82.449  92.449 
+  2.236  12.236  22.236  32.236  42.236  52.236  62.236  72.236  82.236  92.236 
+  2.000  12.000  22.000  32.000  42.000  52.000  62.000  72.000  82.000  92.000 
+  1.732  11.732  21.732  31.732  41.732  51.732  61.732  71.732  81.732  91.732 
+  1.414  11.414  21.414  31.414  41.414  51.414  61.414  71.414  81.414  91.414 
+  1.000  11.000  21.000  31.000  41.000  51.000  61.000  71.000  81.000  91.000 
+  0.000  10.000  20.000  30.000  40.000  50.000  60.000  70.000  80.000  90.000 
+Creating ccd3.in
+ccdgen out=ccd3.in object=noise spar=0,1  size=10,10,100 seed=123
+### nemo Debug Info: noise: disk with pa=0 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: noise: center pixel: 4.5 4.5
+### nemo Debug Info: noise:0 1
+BSF: OK     0.00961773 1.00596 -3.8169 4.5 10017 ccd3.in
+ccdspec ccd3.in | tail -3
+98 -0.0392291
+99 -0.296735
+# 5 5 100 min/mean/sig/max  -2.47015 -0.0505516 0.99584 2.65938    -0.00583119 1.42003   1.00831
+ccdhead ccd.in
+Size:      10 10 1
+Cell:      1 1 1
+Beam:      0 0 0
+AXIS=1:
+LL-Corner: 0 0 0
+TR-Corner: 9 9 0
+X-range:   -0.5 9.5
+Y-range:   -0.5 9.5
+Z-range:   -0.5 0.5
+MinMax:    0 93
+Restfreq:  0.000000
+VLSR:      0.000000
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/misc
+Creating ccd.in
+ccdmath out=ccd.in "fie=10/sqrt((abs(%x-31.5))**1.1+(abs(%y-31.5))**1.1)" size=64,64,1
+BSF: OK     1.70803 0.708814 0 10.3526 4113 ccd.in
+Running ccdplot
+ccdplot ccd.in 0.01,0.1,1:9,9.9,9.99  yapp=/xs ; nemo.coverage ccdplot.c
+/bin/sh: 1: ccdplot: not found
+Running ccdstat
+ccdstat ccd.in ; nemo.coverage ccdstat.c
+Number of points       : 4096
+Min and Max            : 1.060264 10.352649
+Mean and dispersion    : 1.711598 0.690818
+Skewness and kurtosis  : 4.406508 34.555856
+Sum and Sum*Dx*Dy*     : 7010.703997 7010.703997
+Points per beam (map)  : 1
+0/4096 out-of-range points discarded
+ccdstat ccd.in qac=t ; nemo.coverage ccdstat.c	
+QAC_STATS: ccd.in 1.7116 0.690818 1.06026 10.3526 7010.7  1  4096
+Creating ccdmom.in
+ccdmath out=ccdmom.in "fie=%x+2*%y+4*%z" size=2,2,2
+BSF: OK     1.52 2.31724 0 7 25 ccdmom.in
+Running ccdmom
+ccdmom ccdmom.in - 1 |  ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+Number of points       : 4
+Min and Max            : 1.000000 13.000000
+Mean and dispersion    : 7.000000 4.472136
+Skewness and kurtosis  : 0.000000 -1.360000
+Sum and Sum*Dy*Dz*     : 28.000000 28.000000
+Points per beam (map)  : 1
+0/4 out-of-range points discarded
+ccdmom ccdmom.in - 2 |  ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+Number of points       : 4
+Min and Max            : 2.000000 12.000000
+Mean and dispersion    : 7.000000 4.123106
+Skewness and kurtosis  : 0.000000 -1.778547
+Sum and Sum*Dx*Dz*     : 28.000000 28.000000
+Points per beam (map)  : 1
+0/4 out-of-range points discarded
+ccdmom ccdmom.in - 3 |  ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+Number of points       : 4
+Min and Max            : 4.000000 10.000000
+Mean and dispersion    : 7.000000 2.236068
+Skewness and kurtosis  : 0.000000 -1.360000
+Sum and Sum*Dx*Dy*     : 28.000000 28.000000
+Points per beam (map)  : 1
+0/4 out-of-range points discarded
+Running ccdsub
+ccdsub ccd.in - 10:20 10:20 |   ccdstat - ; nemo.coverage ccdsub.c ccdstat.c
+### Warning [ccdsub]: Sampling will be done
+### nemo Debug Info: WCS Corner: 0 0 0
+Number of points       : 121
+Min and Max            : 1.275806 1.762725
+Mean and dispersion    : 1.474749 0.106430
+Skewness and kurtosis  : 0.440182 -0.338585
+Sum and Sum*Dx*Dy*     : 178.444612 178.444612
+Points per beam (map)  : 1
+0/121 out-of-range points discarded
+Running ccdrow
+ccdrow ccd.in - row=0 |   ccdstat - ; nemo.coverage ccdrow.c ccdstat.c
+### Warning [ccdrow]: row hacking CLASSy off positions
+Number of points       : 4096
+Min and Max            : -0.380808 2.054667
+Mean and dispersion    : -0.010005 0.155828
+Skewness and kurtosis  : 4.098808 40.104149
+Sum and Sum*Dx*Dy*     : -40.981871 -40.981871
+Points per beam (map)  : 1
+0/4096 out-of-range points discarded
+Creating gauss1
+ccdgen out=gauss1 object=gauss spar=1,10 size=20,20
+### nemo Debug Info: gauss: disk with pa=0 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: gauss: center pixel: 9.5 9.5
+### nemo Debug Info: gauss: 1 10
+Creating gauss2
+ccdgen out=gauss2 object=gauss spar=1,20 size=10,10
+### nemo Debug Info: gauss: disk with pa=0 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: gauss: center pixel: 4.5 4.5
+### nemo Debug Info: gauss: 1 20
+Running ccdstack
+ccdstack gauss1,gauss2 - |  ccdstat -
+### nemo Debug Info: Using 2 images
+### nemo Debug Info: weight=1 1 ...
+### nemo Debug Info: Image 0: pixel size 1 1   minmax 0.405555 0.997503
+### nemo Debug Info: Image 1: pixel size 1 1   minmax 0.950635 0.999375
+### nemo Debug Info: Images stacked in the WCS of the first image
+### nemo Debug Info: Adding image 1
+### nemo Debug Info: z 0 0
+### nemo Debug Info: New min and max in map are: 0.405555 0.998439
+Number of points       : 400
+Min and Max            : 0.405555 0.998439
+Mean and dispersion    : 0.739732 0.155460
+Skewness and kurtosis  : 0.015958 -0.991263
+Sum and Sum*Dx*Dy*     : 295.892728 295.892728
+Points per beam (map)  : 1
+0/400 out-of-range points discarded
+ccdstack gauss2,gauss1 - |  ccdstat -
+### nemo Debug Info: Using 2 images
+### nemo Debug Info: weight=1 1 ...
+### nemo Debug Info: Image 0: pixel size 1 1   minmax 0.950635 0.999375
+### nemo Debug Info: Image 1: pixel size 1 1   minmax 0.405555 0.997503
+### nemo Debug Info: Images stacked in the WCS of the first image
+### nemo Debug Info: Adding image 1
+### nemo Debug Info: z 0 0
+### nemo Debug Info: New min and max in map are: 0.883661 0.998439
+Number of points       : 100
+Min and Max            : 0.883661 0.998439
+Mean and dispersion    : 0.950843 0.029730
+Skewness and kurtosis  : -0.306637 -0.658466
+Sum and Sum*Dx*Dy*     : 95.084319 95.084319
+Points per beam (map)  : 1
+0/100 out-of-range points discarded
+Creating ccdmom2.in
+ccdgen out=ccdmom2.in object=gauss spar=1,25 size=128,128
+### nemo Debug Info: gauss: disk with pa=0 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: gauss: center pixel: 63.5 63.5
+### nemo Debug Info: gauss: 1 25
+Running ccdellint
+ccdellint ccdmom2.in 0:50:10 tab=- ; nemo.coverage ccdellint.c
+### nemo Debug Info: Image 128 x 128 x 1 pixels = 128 x 128 x 1 size
+### nemo Debug Info: nppb = 1
+### nemo Debug Info: #  nppb=1 rscale=1 iscale=1
+### nemo Debug Info: Map 128 x 128 pixels, size 128 x 128
+### nemo Debug Info: Pixel size: 1 x 1
+### Warning [ccdellint]: no binary out=
+#  nppb=1 rscale=1 iscale=1
+# r npix int rms sum sumcum
+10 316 0.960839 0.0222903 303.625 303.625
+20 948 0.819764 0.057072 777.137 1080.76
+30 1564 0.597863 0.068607 935.058 2015.82
+40 2196 0.372785 0.0599843 818.636 2834.46
+50 2836 0.198133 0.0411041 561.905 3396.36
+### nemo Debug Info: Nundf=0/16384 Nout=8524 Nang=0 (sum=8524)
+### nemo Debug Info: Rmin/max = 0.707107 89.8026
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/rotcur
+Creating map1.den
+ccdvel map1.den radii=@map1.r vrot=@map1.d pa=30 inc=60 amp=t; nemo.coverage ccdvel.c
+### nemo Debug Info: Found 21 radii
+### nemo Debug Info: Found 21 rot velocities
+### nemo Debug Info: Found 1 inclinations
+### nemo Debug Info: Found 1 position angles
+### nemo Debug Info: Found 1 phase angles for rotation
+### nemo Debug Info: Found 1 phase angles for expansion
+### nemo Debug Info: gridding mode: sky->gal plane
+### Warning [ccdvel]: 3600/16384 cells with no signal
+Mapsize: 128 * 128 * 1
+Cell size: 1 * 1 * 1
+Center: 63.5 * 63.5 pixels
+BLC: 0 0
+Systemic velocity: 0
+Min and max in map: 0.00675153 0.965718
+Running ccdvel
+Creating map1.vel
+ccdvel map1.vel radii=@map1.r vrot=@map1.v pa=30 inc=60
+### nemo Debug Info: Found 21 radii
+### nemo Debug Info: Found 21 rot velocities
+### nemo Debug Info: Found 1 inclinations
+### nemo Debug Info: Found 1 position angles
+### nemo Debug Info: Found 1 phase angles for rotation
+### nemo Debug Info: Found 1 phase angles for expansion
+### nemo Debug Info: gridding mode: sky->gal plane
+### Warning [ccdvel]: 3600/16384 cells with no signal
+Mapsize: 128 * 128 * 1
+Cell size: 1 * 1 * 1
+Center: 63.5 * 63.5 pixels
+BLC: 0 0
+Systemic velocity: 0
+Min and max in map: -68.6195 68.6195
+Running rotcur1
+rotcur in=map1.vel radii=0:100:5 vrot=10,100 pa=30 inc=60 vsys=0 reuse=f \
+   tab=map1.rotcur units=sec,1 > /dev/null ; nemo.coverage rotcur.c
+### nemo Debug Info: rotcur: NEMO VERSION 2.14c
+### Warning [rotcur]: New feature: fitted points will not be reused: reuse=f
+### nemo Debug Info: Sicking (1997)'s error multiplication factor=1  (old_factor=1)
+### Warning [rotcur]: nllsqfit=-4<0: KGB must find better solution (npoints=30)
+### Warning [rotcur]: ROTCUR: problems with matrix inversion
+
+ Error correction factor: : 1
+ average inclination      :    59.92  (   0.240)  degrees
+ average position angle   :    30.05  (   0.216)  degrees
+ average systemic velocity:    -0.00  (   0.002)  km/s
+ average x-position       :    63.50  (   0.001)  grids
+ average y-position       :    63.50  (   0.003)  grids
+ccdprint map1.vel x= y= newline=t label=x,y | awk '{if (NF==3 && $3 != 0) print $1-63.5,$2-63.5,$3}' > map1.tab
+Running rotcur2
+rotcur in=map1.tab radii=0:100:5 vrot=10,100 pa=30 inc=60 vsys=0 reuse=f imagemode=f \
+   tab=map2.rotcur units=sec,1 > /dev/null ; nemo.coverage rotcur.c
+### nemo Debug Info: rotcur: NEMO VERSION 2.14c
+### Warning [rotcur]: New feature: fitted points will not be reused: reuse=f
+### nemo Debug Info: Sicking (1997)'s error multiplication factor=1  (old_factor=1)
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=0)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-3<0: KGB must find better solution (npoints=1)
+### Warning [rotcur]: ROTCUR: not enough degrees of freedom
+### Warning [rotcur]: nllsqfit=-4<0: KGB must find better solution (npoints=18)
+### Warning [rotcur]: ROTCUR: problems with matrix inversion
+### Warning [rotcur]: nllsqfit=-4<0: KGB must find better solution (npoints=39)
+### Warning [rotcur]: ROTCUR: problems with matrix inversion
+### Warning [rotcur]: nllsqfit=-4<0: KGB must find better solution (npoints=54)
+### Warning [rotcur]: ROTCUR: problems with matrix inversion
+### Warning [rotcur]: nllsqfit=-4<0: KGB must find better solution (npoints=67)
+### Warning [rotcur]: ROTCUR: problems with matrix inversion
+
+ Error correction factor: : 1
+ average inclination      :     0.00  (   0.000)  degrees
+ average position angle   :     0.00  (   0.000)  degrees
+ average systemic velocity:     0.00  (   0.000)  km/s
+ average x-position       :     0.00  (   0.000)  grids
+ average y-position       :     0.00  (   0.000)  grids
+rotcurshape in=map1.vel radii=0,60 pa=30 inc=60 vsys=0 \
+   tab=map1.rotcurshape units=sec,1 rotcur1=core1,100,20,1,1 > /dev/null; nemo.coverage rotcurshape.c
+### nemo Debug Info: ROTCUR1: name=core1 parameters=100 (free) 20 (free) 
+### nemo Debug Info: rotcurshape: NEMO VERSION 1.4e
+### nemo Debug Info: rotfit: scratch arrays with npts=16384
+
+VSYS: -5.66437e-16 0.00962557
+XPOS: 63.5 0.00653768
+YPOS: 63.5 0.00864389
+PA:   30.0013 0.00902789
+INC:  59.9993 0.0198592
+P1:  100.174 0.0640064
+P2:  19.41 0.0375674
+NPT:  5658
+
+ Error correction factor: : 1
+rotcurtab radii=0:5 rotcur1=linear,1 rotcur2=core,1,2,3; nemo.coverage rotcurtab.c
+### nemo Debug Info: ROTCUR1: name=linear parameters=1 
+### nemo Debug Info: ROTCUR2: name=core parameters=1 2 3 
+0  0
+1  1.10956
+2  2.15173
+3  3.13706
+4  4.11394
+5  5.09505
+Running velcube
+velcube cube1 map1.vel map1.den sigdefault=5
+### Warning [velcube]: 15728/16384 pixels outside your zrange -2 2
+### nemo Debug Info: Minvel=-88.6195 Maxvel=88.6195 (using 4 sigma) Minsig=5 Maxsig=5
+### Warning [velcube]: 838750/1048576 cells with no signal
+Min and max in map: 1.96029e-05 0.245919
+ccdmom cube1 cube1.den 3 0;  ccdmath map1.den,cube1.den - %1-%2 |  ccdstat - bad=0
+Number of points       : 12784
+Min and Max            : 0.006356 0.905361
+Mean and dispersion    : 0.089975 0.123527
+Skewness and kurtosis  : 2.696408 8.367398
+Sum and Sum*Dx*Dy*     : 1150.235121 1150.235121
+Points per beam (map)  : 1
+3600/16384 out-of-range points discarded
+ccdmom cube1 cube1.vel 3 1;  ccdmath map1.vel,cube1.vel - %1-%2 |  ccdstat - bad=0
+Number of points       : 12784
+Min and Max            : -68.619526 68.619526
+Mean and dispersion    : 0.008829 41.034336
+Skewness and kurtosis  : -0.000590 -1.299648
+Sum and Sum*Dx*Dy*     : 112.875000 112.875000
+Points per beam (map)  : 1
+3600/16384 out-of-range points discarded
+ccdmom cube1 cube1.sig 3 2;  ccdstat cube1.sig bad=0
+Number of points       : 3606
+Min and Max            : 0.000000 1.142285
+Mean and dispersion    : 0.973587 0.246885
+Skewness and kurtosis  : -2.214013 4.107167
+Sum and Sum*Dx*Dy*     : 3510.755396 3510.755396
+Points per beam (map)  : 1
+12778/16384 out-of-range points discarded
+velfit in=map1.vel radii=0:100:5 pa=30 inc=60 out=map2.vel
+### Warning [velfit]: New out= mode mode=vtan [0]
+### nemo Debug Info: Nundf=3600/16384 Nout=0 Nang=0 (sum=3600)
+### nemo Debug Info: Rmin/max = 0.774907 99.9645
+### nemo Debug Info: Data min/max = 0 84.9286
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/trans
+Creating ccd.in
+ccdmath out=ccd.in "fie=10*%x+sqrt(%y)"  size=5,5,1 ; nemo.coverage ccdmath.c
+BSF: OK     13.7079 15.5488 0 42 42 ccd.in
+Running ccdmath
+ccdmath ccd.in - %1 |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdmath.c
+  2.000  12.000  22.000  32.000  42.000 
+  1.732  11.732  21.732  31.732  41.732 
+  1.414  11.414  21.414  31.414  41.414 
+  1.000  11.000  21.000  31.000  41.000 
+  0.000  10.000  20.000  30.000  40.000 
+Running ccdflip
+ccdflip ccd.in - xy |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdflip.c
+ 40.000  41.000  41.414  41.732  42.000 
+ 30.000  31.000  31.414  31.732  32.000 
+ 20.000  21.000  21.414  21.732  22.000 
+ 10.000  11.000  11.414  11.732  12.000 
+  0.000   1.000   1.414   1.732   2.000 
+Running ccdsmooth
+ccdsmooth ccd.in - 1 |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
+### nemo Debug Info: dir=x sigma=0.424628 cell=1
+  2.295  11.319  20.763  30.207  36.925 
+  2.189  11.729  21.729  31.728  38.855 
+  1.886  11.409  21.409  31.408  38.553 
+  1.469  10.967  20.967  30.966  38.136 
+  0.577   9.500  18.945  28.389  35.207 
+Running ccdgen
+ccdgen out=- object=exp pa=30 |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdgen.c
+### nemo Debug Info: exp: disk with pa=30 inc=0
+### nemo Debug Info: Generating a map from scratch
+### nemo Debug Info: exp: center pixel: 4.5 4.5
+### nemo Debug Info: exp: 1 1
+  0.002   0.003   0.006   0.009   0.011   0.011   0.009   0.006   0.003   0.002 
+  0.003   0.007   0.014   0.022   0.029   0.029   0.022   0.014   0.007   0.003 
+  0.006   0.014   0.029   0.054   0.078   0.078   0.054   0.029   0.014   0.006 
+  0.009   0.022   0.054   0.120   0.206   0.206   0.120   0.054   0.022   0.009 
+  0.011   0.029   0.078   0.206   0.493   0.493   0.206   0.078   0.029   0.011 
+  0.011   0.029   0.078   0.206   0.493   0.493   0.206   0.078   0.029   0.011 
+  0.009   0.022   0.054   0.120   0.206   0.206   0.120   0.054   0.022   0.009 
+  0.006   0.014   0.029   0.054   0.078   0.078   0.054   0.029   0.014   0.006 
+  0.003   0.007   0.014   0.022   0.029   0.029   0.022   0.014   0.007   0.003 
+  0.002   0.003   0.006   0.009   0.011   0.011   0.009   0.006   0.003   0.002 
+Running ccdsharp
+ccdsharp ccd.in - |  ccdprint - x= y= format=%7.3f ; nemo.coverage ccdsmooth.c
+### nemo Debug Info: Image sharpening method #1
+  0.000   0.000   0.000   0.000   0.000 
+  0.000  -0.050  -0.050  -0.050   0.000 
+  0.000  -0.096  -0.096  -0.096   0.000 
+  0.000  -0.586  -0.586  -0.586   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+Creating ccd3.in
+ccdmath out=ccd3.in "fie=10*%x+sqrt(%y)+%z*%z"  size=5,5,5 ; nemo.coverage ccdmath.c
+BSF: OK     24.399 16.9762 0 58 142 ccd3.in
+Running ccdsharp3
+ccdsharp3 ccd3.in -|  ccdprint - x= y= z= format=%7.3f ; nemo.coverage ccdsmooth.c
+### nemo Debug Info: Image sharpening method #1
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000  14.497  14.497  14.497   0.000 
+  0.000  14.501  14.501  14.501   0.000 
+  0.000  14.532  14.532  14.532   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000  15.303  15.303  15.303   0.000 
+  0.000  15.306  15.306  15.306   0.000 
+  0.000  15.335  15.335  15.335   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000  16.558  16.558  16.558   0.000 
+  0.000  16.561  16.561  16.561   0.000 
+  0.000  16.588  16.588  16.588   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+  0.000   0.000   0.000   0.000   0.000 
+Running ccdsky
+ccdsky ccd.in ccd.sky
+d=1 pc
+r=1 AU
+v=1 km/s
+SdV=1 Jy.km/s
+rscale=0.000277785  (1.00003 arcsec)
+vscale=1000
+iscale=1
+Mass(HI) = 2.3595e-07  
+Mass(H2) = 1.05e-08  (alpha=4.3; includes 1.36 He contribution)
+Freq 115 Dish 50 Beam 12.3673 alpha 1.15 Jy/K 1.6553 1.65418 1.40566
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/image/wcs
+Running wcs
+wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pix=10,10
+18.2 18.2   1:12:48.000 018:11:60.000
+18.2 18.2 should be on the line before
+wcs ref=30,30 refpix=128,128 inc=0.1,0.1 pos=10,10
+-72 -72 
+-72 -72 should be on the line before
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/kernel/fortran
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/kernel/io
+Creating rsf.in
+Running rsf
+rsf rsf.in rsf.out; nemo.coverage rsf.c ; nemo.coverage rsf.c
+Running tsf
+tsf rsf.out maxprec=t			; nemo.coverage tsf.c
+int MyI 4 
+float MyF  1.23450005e+00 
+double MyD  9.8765432099999995e+00 
+char MyS[5] "nemo"
+set MySet
+  int MyI2 1 
+tes
+Checking size of tsf.out
+Running csf
+csf rsf.out csf.out MySet		; nemo.coverage csf.c
+### nemo Debug Info: On top-level: 1 items  read, 1 items written
+csf rsf.out - MyD |  tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+### nemo Debug Info: On top-level: 1 items  read, 1 items written
+double MyD  9.8765432099999995e+00 
+csf rsf.out - MyD convert=d2f |  tsf - maxprec=t ; nemo.coverage csf.c tsf.c
+### nemo Debug Info: On top-level: 1 items  read, 1 items written
+float MyD  9.87654305e+00 
+csf rsf.out - MyF |  tsf - maxprec=t	; nemo.coverage csf.c tsf.c
+### nemo Debug Info: On top-level: 1 items  read, 1 items written
+float MyF  1.23450005e+00 
+tsf csf.out				; nemo.coverage tsf.c
+set MySet
+  int MyI2 1 
+tes
+Running bsf
+bsf rsf.out  test="5.55552 4.32102 1.2345 9.87654 2"; nemo.coverage bsf.c
+BSF: OK     5.55552 4.32102 1.2345 9.87654 2 rsf.out
+Running hisf
+hisf csf.out				; nemo.coverage history.c
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/kernel/misc
+Running xrandom
+uniform seed=5 n=5
+xrandom seed=5 n=5 report=t		; nemo.coverage xrandom.c
+5
+0.283561
+0.56069
+0.53493
+0.109894
+0.481819
+Mean and dispersion  : 0.394179 0.172204
+Skewness and kurtosis: -0.636453 -1.202954
+gauss seed=5 n=5
+xrandom seed=5 n=5 gauss=t report=t	; nemo.coverage xrandom.c
+5
+-1.72184
+0.482803
+0.0881416
+-0.984386
+-0.0142263
+Mean and dispersion  : -0.429901 0.806317
+Skewness and kurtosis: -0.517217 -1.260559
+1.41421
+nemoinp 1:10:2 newline=f	 ; nemo.coverage nemoinp.c
+1 3 5 7 9
+
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/kernel/tab
+Creating tab.in
+nemoinp 1:100 > tab.in
+Running tabmath
+tabmath tab.in tab.out 'sqrt(%1)'; nemo.coverage tabmath.c
+Running tabplot
+tabmath tab.in - 'sqrt(%1)' |  tabplot - 1 2 ; nemo.coverage tabplot.c
+/bin/sh: 1: tabplot: not found
+tabmath tab.in - 'sqrt(%1)' |  tabplot - 0 2 ; nemo.coverage tabplot.c
+/bin/sh: 1: tabplot: not found
+Running
+nemoinp 1:1000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabhist - ; nemo.coverage tabhist.c
+/bin/sh: 1: tabhist: not found
+nemoinp 1:100000 nmax=100000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabhist - ; nemo.coverage tabhist.c
+/bin/sh: 1: tabhist: not found
+Running
+nemoinp 1:2:0.001 |  tabmath - - '%1*%1' |  tabspline - y=2;  nemo.coverage tabspline.c
+1.41421 2 Running
+nemoinp 1:2:0.001 |  tabmath - - '%1+rang(0,0.1)' seed=123 |  tablsqfit - ; nemo.coverage tablsqfit.c
+### nemo Debug Info: -: reading X column(s) 1 and Y column(s) 2
+      a  =    1.005893       uncertainty:  0.010997 
+      b  =    0.002476       uncertainty:  0.016798 
+      x0 =   -0.002461       uncertainty:  0.016700 
+      y0 =    0.002476       uncertainty:  0.016798 
+      chi-squared:       10.097401 
+      goodness-of-fit:    1.000000 (no Y errors supplied [dycol=])
+      r:  0.946412
+      prob:  0
+      z:  1.79621
+Running
+nemoinp 1:100 |  tabmath - - '4+exp(-(%1-50)**2/(200))+rang(0,0.1)' seed=123 |\
+	 tabnllsqfit - fit=gauss1d par=4,1,50,10; nemo.coverage tabnllsqfit.c
+nrt=11
+Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
+a= 4.02838 0.016115 
+b= 0.998781 0.0340908 
+c= 50.1135 0.37092
+d= 9.98555 0.43531
+npt= 100
+rms= 0.108136
+rms2/chi2= 1.16935
+rms/chi = 1
+Running
+Sat Sep  8 21:46:40 2001
+Sat Sep  8 21:46:40 2001
+Running
+tabfilter g tbb=1000
+1000 1.37419 -0.345113
+Running
+1 
+3 
+5 
+7 
+Running  with gauss1d(B=2 A=3 x0=1 b=1)
+nemoinp 0:4 | tabmath - - '0+3*exp(-((%1-1)**2)/2)+rang(0,0.01)' seed=123 > gauss1d.tab
+tablsqfit   gauss1d.tab fit=gauss1d
+### nemo Debug Info: gauss1d.tab: reading X column(s) 1 and Y column(s) 2
+gauss1d fit:
+0.616032 0.927376 -0.468122 
+
+  y = A * exp( -[(x-x0)^2]/2b^2 ):
+
+     A  = 2.93095
+     x0 = 0.990528
+     b  = 1.03349
+tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=0,1,1,1
+nrt=16
+Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
+a= 0 0 
+b= 3.00221 0.0152429 
+c= 0.999846 0.00609885
+d= 1.00554 0.00674677
+npt= 5
+rms= 0.0101949
+rms2/chi2= 0.000519684
+rms/chi = 0.981813
+tabnllsqfit gauss1d.tab fit=gauss1d par=0,3,2,1 free=1,1,1,1
+nrt=17
+Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
+a= 0.0166118 0.016841 
+b= 2.98866 0.0207508 
+c= 0.99911 0.00620267
+d= 0.99921 0.00928753
+npt= 5
+rms= 0.00728759
+rms2/chi2= 0.000265545
+rms/chi = 0.986999
+Running  with gauss2d(B=0 A=3 x0=1 y0=1 b=1)
+ccdmath "" - "0+3*exp(-((%x-1)**2+(%y-1)**2)/2)+rang(0,0.01)" seed=123 size=4,4 |\
+    ccdprint - x= y= label=x,y newline=t > gauss2d.tab
+tablsqfit   gauss2d.tab 1,2 3 fit=gauss2d
+### nemo Debug Info: gauss2d.tab: reading X column(s) 1,2 and Y column(s) 3
+gauss2d fit:
+0.144836 1.02734 1.0251 -0.519395 
+
+  y = A * exp( -[(x-x0)^2 + (y-y0)^2]/2b^2 ):
+
+     A  = 3.18558
+     x0 = 0.988977
+     y0 = 0.986818
+     b  = 0.981152
+tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=0,1,1,1,1
+nrt=11
+Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  
+a= 0 0 
+b= 3.01272 0.010921 
+c= 1.00106 0.00366741
+d= 1.00128 0.00366728
+e= 1.00131 0.00290391
+npt= 16
+rms= 0.0112984
+rms2/chi2= 0.00204246
+rms/chi = 1
+tabnllsqfit gauss2d.tab 1,2 3 fit=gauss2d par=0,3,1,1,1 free=1,1,1,1,1
+nrt=11
+Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  
+a= 0.00410364 0.0102845 
+b= 3.01048 0.0126704 
+c= 1.00085 0.00383922
+d= 1.00108 0.00383906
+e= 0.999476 0.00547795
+npt= 16
+rms= 0.0112185
+rms2/chi2= 0.00201367
+rms/chi = 1
+Running
+nemoinp 1:1000 |  tabmath - - 'rang(0,1)' all seed=123 |  meanmed - ; nemo.coverage meanmed.c
+  Npts       Median        Mean         Rms          Min          Max
+  550   0.294479   0.836967   0.627633   0.00052585   3.34828 
+Running
+nemoinp 1:1000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabstat - ; nemo.coverage tabstat.c
+npt:     1000
+min:     -2.73132
+max:     3.34828
+sum:     112.975
+mean:    0.112975
+disp:    1.00499
+skew:    0.0091138
+kurt:   -0.0715222
+min/sig: -2.83018
+max/sig: 3.21925
+median:  0.111046
+nemoinp 1:100000 nmax=100000 |  tabmath - - 'rang(0,1)' all seed=123 |  tabstat - ; nemo.coverage tabstat.c
+npt:     100000
+min:     -4.4138
+max:     4.41422
+sum:     -355.447
+mean:    -0.00355447
+disp:    0.999527
+skew:    0.00331146
+kurt:   0.000675738
+min/sig: -4.41233
+max/sig: 4.41986
+median:  -0.00518277
+Running
+txtpar txt.in p0=1,2; nemo.coverage txtpar.c
+1
+txtpar txt.in p0=a,2,2 p1=b,1,3 expr=%1,%2,%1+%2; nemo.coverage txtpar.c
+4 8 12 
+Creating tab2.in
+nemoinp 90.25::5 newline=f > tab2.in
+00:24:00.000 
+06:00:00.000 
+90 
+6 
+tabdms tab2.in - todms=1,-2 tohms=3,-4; nemo.coverage tabdms.c
+90:15:00.000 90:90:00:00.000 06:00:60.000 90:06:00:00.000 90.25 
+tabdms dms.in - fromhms=2 fromdms=3 center=12:00:00,60:00:00 scale=3600
+12:00:20 60:00:00   150 0
+12:00:20 60:00:10   150 10
+11:59:40 60:00:00   -150 0
+11:59:40 60:00:10   -150 10
+tabdms dms.in - fromdms=2,3 center=12:00:00,60:00:00 scale=3600
+12:00:20 60:00:00   10 0
+12:00:20 60:00:10   10 10
+11:59:40 60:00:00   -10 0
+11:59:40 60:00:10   -10 10
+tabgen tab123
+tabcsv tab123
+0.552584,0.126911,0.520753,0.0930232,0.563683
+0.258931,0.0369577,0.965763,0.634585,0.981766
+0.334841,0.988963,0.802354,0.0781159,0.670491
+0.0813695,0.406962,0.410499,0.0580781,0.00621213
+0.76675,0.916136,0.933575,0.232357,0.13957
+0.0119871,0.0043076,0.246779,0.298222,0.976148
+0.124062,0.495466,0.66104,0.395841,0.444194
+0.37393,0.561871,0.447876,0.253845,0.25011
+0.0599213,0.868871,0.141264,0.703102,0.940953
+0.552831,0.0700808,0.974204,0.164322,0.75846
+tabrows txt.in 2,3; nemo.coverage tabrows.c
+a  1 2 3
+a  4 5 6
+tabrows csv.in 2,3
+a, 1, 2, 3
+a, 4, 5, 6
+tabcols txt.in 2,3; nemo.coverage tabcols.c
+1 2
+4 5
+7 8
+101 102
+tabcols csv.in 2,3
+1 2
+4 5
+7 8
+101 102
+Running
+tabint tab.out ; nemo.coverage tabstat.c
+665.963
+tabint tab.out xmin=10 xmax=20 ; nemo.coverage tabstat.c
+37.2084
+Results should be 665.963 and 37.2084
+Running
+tabpeak gauss1d.tab ; nemo.coverage tabint.c
+### nemo Debug Info: Reading 2 column(s)
+0.998270 3.009534 
+0.998270 3.009534 should be the result
+tabnllsqfit tab.out
+nrt=0
+Fitting a+bx:  
+a= 2.71927 0.09061 
+b= 0.079116 0.00155773
+x0= -34.3706 1.33027
+y0= 2.71927 0.09061
+rms= 0.445137
+rms2/chi2= 19.8147
+rms/chi = 1
+npt= 100
+tabnllsqfit tab.out load=/home/jadon/nemo/obj/fit/myline.so par=1,1
+### nemo Debug Info: method line
+### nemo Debug Info: load_function: /home/jadon/nemo/obj/fit/myline.so with func_line [line]
+nrt=11
+Fitting LOADED function "line":  
+p0= 2.71927 0.09061
+p1= 0.079116 0.00155773
+rms= 0.445137
+rms2/chi2= 19.8147
+rms/chi = 1
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/cores
+Running bodytrans
+bodytrans x; nemo.coverage bodytrans.c
+x = 0.5 ()
+bodytrans y;  bodytrans z;  bodytrans r; 
+y = -0.5 ()
+z = 1 ()
+r = 1.22474 ()
+bodytrans 'sqrt(x*x+y*y)>0' int
+sqrt(x*x+y*y)>0 = 1 (bti__0)
+bodytrans 'sqrt(x*x+y*y)>1' int
+sqrt(x*x+y*y)>1 = 0 (bti__1)
+bodytrans 'sqrt(x*x+y*y)>2' int
+sqrt(x*x+y*y)>2 = 0 (bti__2)
+mkplummer - 128 seed=128 |\
+    snapmass - - 'sqrt(x*x+y*y)' |\
+    bsf - '0.00111483 0.691696 -6.34556 6.87197 897'
+### nemo Debug Info: Using a bodytrans mass expression
+### nemo Debug Info: Warning: existing masses overwritten
+### nemo Debug Info: Total mass: 118.859
+### nemo Debug Info: Rescaling total mass to 1
+BSF: OK     0.00111483 0.691696 -6.34556 6.87197 897 -
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/aarseth/nbody0
+Creating nbody0.in
+mkplummer nbody0.in 10 seed=123
+echo "10,0.02,0.05,2,0.0001,1"        > nbody0.tab
+snapprint nbody0.in m,x,y,z,vx,vy,vz                      >> nbody0.tab
+### nemo Debug Info: m x y z vx vy vz 
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 nbody0.in
+Running nbody0
+nbody0 nbody0.in nbody0.out tcrit=2 > nbody0.log 2>&1
+snaptrim nbody0.out - times=2 | tsf -
+### nemo Debug Info: time = 2	npart =   1	ndiag =   0	outputing particles
+char Headline[28] "init_xrandom: seed used 123"
+char History[43] "snaptrim nbody0.out - times=2 VERSION=2.2a"
+char History[49] "nbody0 nbody0.in nbody0.out tcrit=2 VERSION=2.0a"
+char History[45] "mkplummer nbody0.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 2.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] 0.133940 0.209280 0.290292 0.556729 
+      1.00067 -0.149692 5.59113 -0.246788 -1.04959 0.365171 0.120772 
+      0.244237 -0.107914 0.269903 0.167544 0.102670 -0.264229 0.272836 
+      -0.889557 0.697405 0.0178010 -0.270314 -0.136634 0.123734 
+      . . .
+  tes
+tes
+BSF: OK     0.0281791 0.943951 -4.80019 5.59113 639 nbody0.out
+Running nbody00
+nbody00 nbody0.in nbody00.out tcrit=2 > nbody00.log 2>&1
+snaptrim nbody00.out - times=2 | tsf -
+### nemo Debug Info: time = 2	npart =   1	ndiag =   0	outputing particles
+char Headline[28] "init_xrandom: seed used 123"
+char History[44] "snaptrim nbody00.out - times=2 VERSION=2.2a"
+char History[51] "nbody00 nbody0.in nbody00.out tcrit=2 VERSION=2.0a"
+char History[45] "mkplummer nbody0.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 2.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] 0.133940 0.209280 0.290292 0.556729 
+      1.00067 -0.149692 5.59113 -0.246788 -1.04959 0.365171 0.120772 
+      0.244237 -0.107914 0.269903 0.167544 0.102670 -0.264229 0.272836 
+      -0.889557 0.697405 0.0178010 -0.270314 -0.136634 0.123734 
+      . . .
+  tes
+tes
+BSF: OK     0.0281791 0.943951 -4.80019 5.59113 639 nbody00.out
+snapcmp nbody0.out nbody00.out
+# time  Min  Qlow Median Qhigh  Max   Mean Sigma
+# obs=r (linear scaling)
+0   0 0 0 0 0  0 0
+0.25   2.77556e-16 2.24906e-15 6.68492e-15 8.32399e-15 1.6596e-14  6.96701e-15 5.47605e-15
+0.5   7.82447e-15 1.04604e-14 1.38375e-14 3.03222e-14 5.69885e-14  2.21709e-14 1.48518e-14
+0.75   1.21724e-14 1.87691e-14 2.89351e-14 3.69477e-14 1.46236e-13  4.51881e-14 4.01695e-14
+1   1.30799e-14 2.23122e-14 4.59077e-14 5.93626e-14 1.67841e-12  2.22146e-13 4.88285e-13
+1.25   5.43805e-14 7.1537e-14 8.14891e-14 5.39117e-13 2.73078e-12  5.27571e-13 7.74337e-13
+1.5   3.22829e-14 9.088e-14 1.32879e-13 9.80402e-13 2.61598e-12  8.10631e-13 9.08899e-13
+1.75   4.52052e-14 1.45691e-13 3.43355e-13 1.37716e-12 3.93759e-12  1.21703e-12 1.36614e-12
+2   6.25024e-14 2.79404e-13 9.42968e-13 1.8739e-12 6.20089e-12  1.91814e-12 2.10124e-12
+nbody0  /home/jadon/nemo/data/figure8.dat - | tsf - | tail -13 
+char History[56] "nbody0 /home/jadon/nemo/data/figure8.dat - VERSION=2.
+  0a"
+char History[83] "tabtos figure8.mpv figure8.dat nbody,time mass,x,y,z,
+  vx,vy,vz error=1 VERSION=1.3d"
+nbody00 /home/jadon/nemo/data/figure8.dat - | tsf - | tail -13 
+### Warning [nbody00]: You have hit upon an F2DOT=0 case, correcting....
+### nemo Debug Info: time = 0   steps = 0   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: time = 0.25   steps = 17   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: time = 0.5   steps = 36   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: time = 0.75   steps = 55   energy = -1.28448 cpu =          0 min
+### nemo Debug Info: time = 1   steps = 73   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: time = 1.25   steps = 91   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: time = 1.5   steps = 111   energy = -1.28448 cpu =          0 min
+### nemo Debug Info: time = 1.75   steps = 129   energy = -1.28447 cpu =          0 min
+### nemo Debug Info: time = 2   steps = 148   energy = -1.28449 cpu =          0 min
+### nemo Debug Info: Time spent in searching for next advancement: 0
+### nemo Debug Info: Energy conservation: 4.37828e-06 / -1.28449 = -3.40859e-06
+### nemo Debug Info: Time resets needed 0 times / 9 dumps
+set SnapShot
+  set Parameters
+    int Nobj 3 
+    double Time 2.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[3] 1.00000 1.00000 1.00000 
+    double PhaseSpace[3][2][3] -0.107134 -0.0906970 0.00000 0.934759 
+      0.847420 0.00000 -0.919741 0.273173 0.00000 -0.609820 -0.395000 
+      0.00000 1.02687 -0.182481 0.00000 -0.324941 -0.452423 0.00000 
+  tes
+tes
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/aarseth/tools
+Running runbody1 testrun for NBODY1
+### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saving model 2 (nbody=25 time=2.82858)
+### nemo Debug Info: Saving model 3 (nbody=25 time=5.65689)
+### nemo Debug Info: Saving model 4 (nbody=25 time=8.48551)
+### nemo Debug Info: Saving model 5 (nbody=25 time=11.3144)
+### nemo Debug Info: Saving model 6 (nbody=25 time=14.1424)
+### nemo Debug Info: Saving model 7 (nbody=25 time=16.9707)
+### nemo Debug Info: Saving model 8 (nbody=25 time=19.799)
+### nemo Debug Info: Saving model 9 (nbody=25 time=22.6276)
+### nemo Debug Info: Saving model 10 (nbody=25 time=25.4561)
+### nemo Debug Info: Saving model 11 (nbody=25 time=28.2847)
+### nemo Debug Info: Saved 11 snapshots
+#@mkplummer - 10 seed=123 |\
+#  runbody1 - run2 10 kz=1,2,1,2,0,0,0,0,0,1,1 > run2.log
+### nemo Debug Info: get_nbody: 10 0.000000 7
+### nemo Debug Info: Grabbing nbody=10
+### nemo Debug Info: stou4 /home/jadon/nemo/tmp/test38039/run2.p nbody=10
+### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=10 time=0)
+### nemo Debug Info: Saving model 2 (nbody=10 time=1.30619)
+### nemo Debug Info: Saving model 3 (nbody=10 time=2.61187)
+### nemo Debug Info: Saving model 4 (nbody=10 time=3.91923)
+### nemo Debug Info: Saving model 5 (nbody=10 time=5.22389)
+### nemo Debug Info: Saving model 6 (nbody=10 time=6.52854)
+### nemo Debug Info: Saving model 7 (nbody=10 time=7.84395)
+### nemo Debug Info: Saving model 8 (nbody=10 time=9.14066)
+### nemo Debug Info: Saving model 9 (nbody=10 time=10.4463)
+### nemo Debug Info: Saved 9 snapshots
+### nemo Debug Info: nb3header_c: Opening run2/OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=10 time=0)
+### nemo Debug Info: Saving model 2 (nbody=10 time=1.30619)
+### nemo Debug Info: Saving model 3 (nbody=10 time=2.61187)
+### nemo Debug Info: Saving model 4 (nbody=10 time=3.91923)
+### nemo Debug Info: Saving model 5 (nbody=10 time=5.22389)
+### nemo Debug Info: Saving model 6 (nbody=10 time=6.52854)
+### nemo Debug Info: Saving model 7 (nbody=10 time=7.84395)
+### nemo Debug Info: Saving model 8 (nbody=10 time=9.14066)
+### nemo Debug Info: Saving model 9 (nbody=10 time=10.4463)
+### nemo Debug Info: Saved 9 snapshots
+### nemo Debug Info: time = 0	npart =   1	ndiag =   0	outputing particles
+### Warning [snapcmp]: bits = 0x7, 0x47 are different
+# time  Min  Qlow Median Qhigh  Max   Mean Sigma
+# obs=r (linear scaling)
+0   5.36818e-08 5.56612e-08 5.84371e-08 6.54397e-08 1.59336e-07  7.21995e-08 3.03095e-08
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 run2.p
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 run2/test1
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 run2/test2
+runbody4                     outdir=run4a nbody=25 tcrit=0 KZ5=0 KZ22=1 > run4a.log
+### nemo Debug Info: KZ 5=0
+### nemo Debug Info: KZ 22=1
+Note: The following floating-point exceptions are signalling: IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saved 1 snapshots
+u3tos    in=run4a/OUT3       out=run4a/input.snap  mode=4
+### nemo Debug Info: nb3header_c: Opening run4a/OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saved 1 snapshots
+runbody4                     outdir=run4b nbody=25 tcrit=10 KZ5=0 KZ22=1 deltat=1 > run4b.log
+### nemo Debug Info: KZ 5=0
+### nemo Debug Info: KZ 22=1
+Note: The following floating-point exceptions are signalling: IEEE_INVALID_FLAG IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saving model 2 (nbody=25 time=2)
+### nemo Debug Info: Saving model 3 (nbody=25 time=4)
+### nemo Debug Info: Saving model 4 (nbody=25 time=6)
+### nemo Debug Info: Saving model 5 (nbody=25 time=8)
+### nemo Debug Info: Saving model 6 (nbody=25 time=10)
+### nemo Debug Info: Saved 6 snapshots
+runbody4 in=run4a/input.snap outdir=run4c          tcrit=10              deltat=1 > run4c.log
+### Warning [runbody4]: patching kz[22]=1 since in= was given
+### nemo Debug Info: Using ascii printout with format=%g to convert data for nbody4
+Note: The following floating-point exceptions are signalling: IEEE_INVALID_FLAG IEEE_UNDERFLOW_FLAG IEEE_DENORMAL
+### nemo Debug Info: nb3header_c: Opening OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saving model 2 (nbody=25 time=2)
+### nemo Debug Info: Saving model 3 (nbody=25 time=4)
+### nemo Debug Info: Saving model 4 (nbody=25 time=6)
+### nemo Debug Info: Saving model 5 (nbody=25 time=8)
+### nemo Debug Info: Saving model 6 (nbody=25 time=10)
+### nemo Debug Info: Saved 6 snapshots
+u3tos    in=run4b/OUT3 out=run4b/out.snap mode=4
+### nemo Debug Info: nb3header_c: Opening run4b/OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saving model 2 (nbody=25 time=2)
+### nemo Debug Info: Saving model 3 (nbody=25 time=4)
+### nemo Debug Info: Saving model 4 (nbody=25 time=6)
+### nemo Debug Info: Saving model 5 (nbody=25 time=8)
+### nemo Debug Info: Saving model 6 (nbody=25 time=10)
+### nemo Debug Info: Saved 6 snapshots
+u3tos    in=run4c/OUT3 out=run4c/out.snap mode=4
+### nemo Debug Info: nb3header_c: Opening run4c/OUT3 using INTEGER*4 in native mode
+### nemo Debug Info: Saving model 1 (nbody=25 time=0)
+### nemo Debug Info: Saving model 2 (nbody=25 time=2)
+### nemo Debug Info: Saving model 3 (nbody=25 time=4)
+### nemo Debug Info: Saving model 4 (nbody=25 time=6)
+### nemo Debug Info: Saving model 5 (nbody=25 time=8)
+### nemo Debug Info: Saving model 6 (nbody=25 time=10)
+### nemo Debug Info: Saved 6 snapshots
+snapcmp run4b/out.snap  run4c/out.snap
+# time  Min  Qlow Median Qhigh  Max   Mean Sigma
+# obs=r (linear scaling)
+0   9.98385e-08 4.13826e-07 4.60009e-07 5.14684e-07 6.25139e-07  4.60075e-07 1.11534e-07
+2   5.39743e-07 1.63669e-06 3.4509e-06 7.6956e-06 4.12083e-05  8.6697e-06 1.09259e-05
+4   1.35002e-06 3.94546e-05 9.88536e-05 0.000461184 0.0194828  0.00149941 0.0044362
+6   4.78284e-05 0.00130801 0.0052773 0.0133538 0.115405  0.0184127 0.0312914
+8   0.000334069 0.0355219 0.0859291 0.220448 0.872589  0.163833 0.188268
+10   0.00212655 0.277043 0.546946 0.986654 25.46  1.84095 4.89701
+BSF: OK     -39.3365 1445.22 -53238.1 12.727 1356 run4b/out.snap
+BSF: OK     -39.4595 1450.66 -53438.8 14.2075 1356 run4c/out.snap
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/dehnen
+Running gyrfalcON
+mkplum p1024.in 1024 seed=1024
+gyrfalcON in=p1024.in out=p1024.out kmax=6 eps=0.05 tstop=2 > p1024.log
+# ----------------------------------------------------------------------------------------------------------------------
+# "gyrfalcON in=p1024.in out=p1024.out kmax=6 eps=0.05 tstop=2"
+#
+# run at  Thu Feb  1 17:42:22 2024
+#     by  "jadon"
+#     on  "Jadonslaptop"
+#     pid  38854
+#
+#      time       E=T+V        T         V_in       W        -2T/W    |L|   |v_cm| l2R  D  tree  grav  step  accumulated
+# ----------------------------------------------------------------------------------------------------------------------
+ 0.000000     -0.1539854968 0.1485343 -0.3025198 -0.3020617 0.9835 0.02787 0.01667   6 11  0.00  0.00  0.00   0:00:00.00
+ 0.0156250000 -0.1539898994 0.1484817 -0.3024716 -0.3020513 0.9832 0.02787 0.01667   6 11  0.00  0.00  0.00   0:00:00.00
+...
+ 1.9843750000 -0.1540080607 0.1497851 -0.3037932 -0.3035646 0.9868 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.14
+ 2.0000000000 -0.1540100387 0.1498393 -0.3038493 -0.3035896 0.9871 0.02789 0.01667   6 11  0.00  0.00  0.00   0:00:00.15
+snapscale p1024.in p1024.in2 mscale=0.5
+gyrfalcON in=p1024.in2 out=p1024.out2 kmax=6 eps=0.05 tstop=2 \
+	accname=Plummer accpars=0,0.5,1 > p1024.log2
+# ---------------------------------------------------------------------------------------------------------------------------------------
+# "gyrfalcON in=p1024.in2 out=p1024.out2 kmax=6 eps=0.05 tstop=2 accname=Plummer accpars=0,0.5,1"
+#
+# run at  Thu Feb  1 17:42:23 2024
+#     by  "jadon"
+#     on  "Jadonslaptop"
+#     pid  38860
+#
+#      time       E=T+V        T         V_in       V_ex       W        -2T/W    |L|   |v_cm| l2R  D  tree  grav  pext  step  accumulated
+# ---------------------------------------------------------------------------------------------------------------------------------------
+ 0.000000     -0.1507441419 0.0742672 -0.0756300 -0.1493813 -0.1480623 1.0032 0.01394 0.01667   6 11  0.00  0.00  0.00  0.00   0:00:00.00
+ 0.0156250000 -0.1507452397 0.0742426 -0.0756177 -0.1493702 -0.1480766 1.0028 0.01394 0.01668   6 11  0.00  0.00  0.00  0.00   0:00:00.00
+...
+ 1.9843750000 -0.1507520575 0.0734572 -0.0752389 -0.1489704 -0.1480077 0.9926 0.01394 0.01427   6 11  0.00  0.00  0.00  0.00   0:00:00.14
+ 2.0000000000 -0.1507535811 0.0734607 -0.0752429 -0.1489714 -0.1480196 0.9926 0.01394 0.01421   6 10  0.00  0.00  0.00  0.00   0:00:00.14
+snapmradii p1024.out  log=t > p1024.tab
+snapmradii p1024.out2 log=t > p1024.tab2
+To view lagrangian radii, redo test with larger TSTOP=2 and plot:
+tabplot p1024.tab 1 2:10 line=1,1
+tabplot p1024.tab2 1 2:10 line=1,1
+BSF: OK     0.00817902 1.20758 -15.9955 39.5529 14338 p1024.out
+BSF: OK     0.00796088 1.20788 -15.9955 39.5529 14338 p1024.out2
+mkhalo out=mkhalo1.dat nbody=1000 M=24 inner=7/9 outer=31/9 eta=4/9 r_s=6 r_t=60 r_c=0 b=0 r_a=0 seed=1 eps=0.02 giveF=f accname=Halo accpars=0,0.2,0.2,1,4,1,0,0  debug=2 > mkhalo1.log 
+### nemo Debug Info: Keyword file will be mkhalo.def
+### nemo Debug Info: savehist: progname=mkhalo help_level=0
+### nemo Debug Info: No OMP_NUM_THREADS used
+### nemo Debug Info: Found -1 output keywords
+### nemo Debug Info: set_xrandom(NUMREC portable) seed=1
+### nemo Debug Info: hasvalue: checking indexing on eps
+### nemo Debug Info: hasvalue: checking indexing on accname
+### nemo Debug Info: hasvalue: checking indexing on accpars
+### nemo Debug Info: hasvalue: checking indexing on accfile
+### nemo Debug Info: get_acceleration("Halo","0,0.2,0.2,1,4,1,0,0","(null)")
+### nemo Debug Info: single_acceleration("Halo", "0,0.2,0.2,1,4,1,0,0", "(null)")
+### nemo Debug Info: MySymbols: NULL code in loadobjDL
+### nemo Debug Info: loadobj: /home/jadon/nemo/usr/dehnen/falcON/acc//Halo.so
+### nemo Debug Info: findfn: looking up iniacceleration
+# falcON  Debug Info [inc/public/halo.h:445]:   ModifiedDoublePowerLawHalo: rh0=3.978874
+# falcON  Debug Info [src/public/lib/halo.cc:434]:   HaloPotential: minimum & maximum tabulated radii = 0.000390625, 102.4
+# falcON  Debug Info [src/public/acc/Halo.cc:88]: external potential "Halo" recognizes 8 parameters:
+   omega   pattern speed (ignored)   [0]
+   r_s     scale radius              [1]
+   m_t     total mass                [1]
+   g_i     inner power-law slope     [7/9]
+   g_o     outer power-law slope     [31/9]
+   eta     transition steepness      [4/9]
+   r_t     truncation radius (0->oo) [0]
+   r_c     core radius               [0]
+ The halo density proportional to
+
+      Model(x) * sech(r/r_t)
+
+ with x=sqrt(r^2+r_c^2)/r_s,
+ and
+                  -gi   eta    [gi-go]/eta
+      Model(x) = x    (x    + 1).
+
+ If file is given, it's interpreted as follows:
+   Plummer:   gi=0, go=5, eta=2
+   Jaffe:     gi=2, go=4, eta=1
+   Hernquist: gi=1, go=4, eta=1
+   Dehnen:          go=4, eta=1
+   NFW:       gi=1, go=4, eta=1
+   Moore:     gi=3/2, go=3, eta=3/2
+   DM:        gi=7/9, go=31/9, eta=4/9
+ and differing values are ignored.
+# falcON  Debug Info [src/public/acc/Halo.cc:118]: external potential "Halo" initialized with:
+   r_s = 0.2
+   m_t = 0.2
+   g_i = 1
+   g_o = 4
+   eta = 1
+   r_t = 0
+   r_c = 0
+### nemo Debug Info: hasvalue: checking indexing on inner
+### nemo Debug Info: hasvalue: checking indexing on outer
+### nemo Debug Info: hasvalue: checking indexing on eta
+### nemo Debug Info: hasvalue: checking indexing on r_2
+# falcON  Debug Info [inc/public/halo.h:445]:   ModifiedDoublePowerLawHalo: rh0=0.078427
+### nemo Debug Info: hasvalue: checking indexing on max_r
+# falcON  Debug Info [src/public/lib/halo.cc:434]:   HaloPotential: minimum & maximum tabulated radii = 1.14441e-05, 6144
+# falcON  Warning [src/public/lib/halo.cc:512]: HaloModel: PJT patched at 1386/1746
+# falcON  Debug Info [src/public/lib/body.cc:755]:   bodies::bodies(): constructing bodies @0x7ffee7d56c00: n=0,0,1000, bits=mxve
+### nemo Debug Info: hasvalue: checking indexing on eps
+# falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 m
+# falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 x
+# falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 v
+# falcON  Debug Info [src/public/lib/body.cc:1227]: bodies::write_snapshot(): written 1000 e
+# falcON  Debug Info [src/public/lib/body.cc:1231]: bodies::write_snapshot(): written=mxve for 0 SPH & 1000 STD bodies
+### nemo Debug Info: put_tes(SnapShot) flushing
+### nemo Debug Info: hasvalue: checking indexing on tabfile
+### nemo Debug Info: There were 16 parameters used on the commandline
+### Warning [mkhalo]: (finiparam) The following 7 keywords have never been read:
+### nemo Debug Info:  r_2  max_r  accfile  tabfile  prec  COMPILED  STATUS 
+### nemo Debug Info: NEMOKEYS: using ./nemokeys.dat
+### nemo Debug Info: finiparam: now freeup some final memory
+s2s p1024.in p1024.out3 filter='i<#0' params=512
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/directcode
+Running directcode
+directcode out=bench.dat > bench.log; nemo.coverage code.c
+
+Direct code: test data
+
+       nbody        freq         eps
+         128       32.00      0.0500
+
+	options: mass,phase
+
+        tnow       T+U       T/U   cputime
+       0.000   -0.2652   -0.5456      0.00
+
+	        cm pos   -0.0000    0.0000    0.0000
+	        cm vel   -0.0000    0.0000   -0.0000
+
+...
+
+        tnow       T+U       T/U   cputime
+       2.000   -0.2652   -0.4810      0.00
+
+	        cm pos    0.0000    0.0000   -0.0000
+	        cm vel   -0.0000    0.0000   -0.0000
+
+	particle data written
+BSF: OK     0.00207274 0.391917 -1.22155 2 10469 bench.dat
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/flowcode
+Copying vrtm51.c locally
+cp /home/jadon/nemo/src/nbody/evolve/flowcode/vrtm51.c .
+make -f /home/jadon/nemo/lib/Makefile.lib vrtm51.so
+make[2]: Entering directory '/home/jadon/nemo/tmp/test38039'
+gcc -g -O2 -D_FILE_OFFSET_BITS=64 -D_LARGEFILE_SOURCE -D_LARGEFILE64_SOURCE  -fpic -rdynamic  -Dlinux -DSYSV  -I/home/jadon/nemo/inc -I/home/jadon/nemo/lib -I/home/jadon/nemo/opt/include    -Wall -Wimplicit-function-declaration  -D_GNU_SOURCE -std=c99  -c vrtm51.c
+vrtm51.c: In function ‘potential’:
+vrtm51.c:194:15: warning: unused variable ‘rad0’ [-Wunused-variable]
+  194 |     real rad, rad0, rad1, phi, phase;
+      |               ^~~~
+ldso vrtm51
+CXX=g++
+make[2]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+nemoinp 0:360 | tabmath - - "0,1,1" > bench.tab
+mkflowdisk bench.in 100 \
+  seed=123 \
+  rmin=1 rmax=2 pitch=0.1 \
+  potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab
+### nemo Debug Info: table has 361 entries
+BSF: OK     -0.0541432 0.69194 -1.9487 1.97097 701 bench.in
+Running flowcode
+flowcode in=bench.in out=bench.dat \
+	freq=200 tstop=1 seed=123 \
+	potname=vrtm51 potpars=0,0.1,1,0,1,2 potfile=bench.tab  sigma=10 \
+	> bench.log; nemo.coverage flowcode.c
+### nemo Debug Info: table has 361 entries
+
+
+
+       nbody        freq         eta       sigma       ome          mode       tstop
+         100    200.0000      0.0000      0.1745      0.0000           0        1.00
+
+
+          tnow         T+U         T/U     cputime
+         0.000    1.500000      0.5000        0.00
+
+	        cm pos   -0.2535    0.0426    0.0000
+	        cm vel   -0.0324   -0.1463    0.0000
+
+	particle data written
+...
+
+          tnow         T+U         T/U     cputime
+         1.000    1.500000      0.5000        0.00
+
+	        cm pos   -0.2416   -0.1045    0.0000
+	        cm vel    0.0393   -0.1347    0.0000
+
+	particle data written
+BSF: OK     -0.0200055 0.681308 -1.95706 1.98711 4321 bench.dat
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/hackcode/hackcode1
+Running hackcode1
+hackcode1 out=bench.dat > bench.log; nemo.coverage hackcode1.c
+
+Hack code: test data
+
+       nbody        freq         eps         tol
+         128       32.00      0.0500      1.0000
+
+	options: mass,phase
+
+        tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
+       0.000   -0.2675   -0.5434      3864         9        20      0.00
+
+	        cm pos   -0.0000    0.0000    0.0000
+	        cm vel   -0.0000    0.0000   -0.0000
+
+...
+
+        tnow       T+U       T/U     nttot     nbavg     ncavg   cputime
+       2.000   -0.2647   -0.4857      4899        17        20      0.00
+
+	        cm pos    0.0002   -0.0018    0.0007
+	        cm vel    0.0003   -0.0019    0.0009
+
+	particle data written
+BSF: OK     0.00196205 0.391904 -1.22753 2 10469 bench.dat
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/hackcode/treecode1
+Running treecode1
+treecode1 out=bench.dat nbody=128 > bench.log; nemo.coverage treecode.c
+
+Hierarchical N-body code (theta scan)
+
+   nbody     dtime       eps     theta   usequad     dtout     tstop
+     128   0.03125    0.0250      1.00     false   0.25000    2.0000
+
+	   rsize  tdepth   ftree  actmax    nbbtot    nbctot   CPUfc
+	    16.0       7   2.671     177      8334      2176   0.000
+
+        time   |T+U|       T      -U    -T/U  |Vcom|  |Jtot|  CPUtot
+       0.000 0.23928 0.22889 0.46817 0.48890 0.00000 0.07133   0.000
+
+	data output to file bench.dat at time 0.000000
+
+...
+
+	   rsize  tdepth   ftree  actmax    nbbtot    nbctot   CPUfc
+	    16.0       7   2.671     176      8173      2182   0.000
+
+        time   |T+U|       T      -U    -T/U  |Vcom|  |Jtot|  CPUtot
+       2.000 0.23655 0.23686 0.47341 0.50032 0.00057 0.07147   0.000
+
+	data output to file bench.dat at time 2.000000
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/scfm
+Creating scfm.in
+mkplummer scfm.in 10 seed=123
+Running runscfm
+runscfm scfm.in scfm.run > scfm.log
+### nemo Debug Info: snapprint /home/jadon/nemo/tmp/test38039/scfm.in m,x,y,z,vx,vy,vz header=t > SCFBI
+### nemo Debug Info: m x y z vx vy vz 
+### nemo Debug Info: get_header(nskip=0)
+### nemo Debug Info: [reading 10 bodies at time 0.000000]
+### nemo Debug Info: get_header(nskip=0)
+### nemo Debug Info: [reading 10 bodies at time 1.000000]
+### nemo Debug Info: get_header(nskip=0)
+tsf scfm.run/scfm.dat
+char History[59] "tabtos - scfm.dat nbody,time mass,pos,vel,phi VERSION
+  =2.1b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+    double Potential[10] -1.15069 -0.224829 -1.73064 -1.87400 -1.26616 
+      -0.782686 -0.952477 -1.21731 -2.26835 -0.248411 
+  tes
+tes
+char History[59] "tabtos - scfm.dat nbody,time mass,pos,vel,phi VERSION
+  =2.1b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 1.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] -0.310119 -0.145262 0.109259 0.736628 
+      0.824936 0.761737 5.21154 -0.366933 -1.28922 0.386172 0.120057 
+      0.241886 -0.241640 0.0899310 0.235927 -0.373861 0.418829 
+      0.430021 -0.709579 -0.0954642 -0.0829982 -0.549090 -0.775607 
+      . . .
+    double Potential[10] -2.54358 -0.211332 -2.57691 -1.49914 -2.65320 
+      -1.09839 -0.830246 -5.85487 -5.74561 -0.253391 
+  tes
+tes
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 scfm.in
+BSF: OK     -0.218618 1.19229 -5.85487 5.21154 162 scfm.run/scfm.dat
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/evolve/sellwood/tools
+mkplummer run1.in 100 seed=100
+rungalaxy in=run1.in outdir=run1
+ galaxy V1.3 
+ Maximum number of particles (mbuff):       100000
+ Maximum gridsize:           33          33          33
+ Greens function creation complete
+         100           8         800       80000
+          25  particles outside the grid at the start
+ Run (re)started at time   0.00000000    
+   and will stop after the step at time    1.05000007    
+ Time-centering velocities
+ Starting step           0
+ Starting step           1
+ Starting step           2
+ Starting step           3
+ Starting step           4
+ Starting step           5
+ Starting step           6
+ Starting step           7
+ Starting step           8
+ Starting step           9
+ Starting step          10
+ Starting step          11
+ Starting step          12
+ Starting step          13
+ Starting step          14
+ Starting step          15
+ Starting step          16
+ Starting step          17
+ Starting step          18
+ Starting step          19
+ Starting step          20
+ Un-centering velocities
+Time=0
+Time=0.5
+Time=1
+tsf run1/galaxy.snap
+char Headline[28] "init_xrandom: seed used 100"
+char History[45] "rungalaxy in=run1.in outdir=run1 VERSION=3.0"
+char History[44] "mkplummer run1.in 100 seed=100 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 100 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double PhaseSpace[100][2][3] 0.501735 -0.116103 0.474412 -0.492017 
+      0.819692 0.692343 0.00000 0.00000 0.00000 0.00000 0.00000 
+      0.00000 -0.129538 -0.205455 -0.102016 -0.575834 -0.0653821 
+      0.421769 -0.141500 0.165252 0.564532 -0.938009 0.180047 0.182783 
+      . . .
+    double Potential[100] -1.05970 0.00000 -1.43452 -1.49790 -1.58442 
+      0.00000 -0.900548 -0.928050 -0.939411 -1.39964 -0.656945 0.00000 
+      -1.62395 -1.35905 -1.26607 -0.919588 -0.951674 -0.686321 0.00000 
+      0.00000 -1.18860 -1.35673 -0.684403 -1.19832 -1.28010 -0.929487 
+      . . .
+  tes
+tes
+set SnapShot
+  set Parameters
+    int Nobj 100 
+    double Time 0.500000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double PhaseSpace[100][2][3] 0.177930 0.304596 0.744044 -0.802478 
+      0.830269 0.363917 0.00000 0.00000 0.00000 0.00000 0.00000 
+      0.00000 -0.383253 -0.189923 0.221713 -0.312740 0.122146 0.671698 
+      -0.569361 0.204263 0.534626 -0.712894 0.0207681 -0.254223 
+      . . .
+    double Potential[100] -1.12891 0.00000 -1.42657 -1.21284 -1.54192 
+      0.00000 -0.930816 -0.920542 -0.783869 -1.48420 -0.622559 0.00000 
+      -1.37320 -1.28548 -1.48263 -0.914339 -0.793790 -0.716369 0.00000 
+      0.00000 -1.30497 -1.41456 -0.775565 -1.08431 -1.35257 -0.852330 
+      . . .
+  tes
+tes
+set SnapShot
+  set Parameters
+    int Nobj 100 
+    double Time 1.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double PhaseSpace[100][2][3] -0.241479 0.646629 0.837400 -0.847758 
+      0.552609 0.0325901 0.00000 0.00000 0.00000 0.00000 0.00000 
+      0.00000 -0.486160 -0.117969 0.528465 -0.133121 0.180348 0.533775 
+      -0.813465 0.191714 0.371111 -0.284666 -0.0665539 -0.370155 
+      . . .
+    double Potential[100] -0.816234 0.00000 -1.08106 -0.909049 
+      -1.34926 0.00000 -0.902268 -1.12527 0.00000 -0.935191 -0.594610 
+      0.00000 -1.20836 -1.51951 -0.903074 -0.844702 0.00000 0.00000 
+      0.00000 0.00000 -1.37066 -1.20486 -0.806002 -1.09535 -1.45053 
+      . . .
+  tes
+tes
+BSF: OK     -0.105414 0.49662 -1.71432 1.40336 2103 run1/galaxy.snap
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/image
+Creating snap.in
+mkplummer snap.in 10 seed=123
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 snap.in
+Running snapccd
+snapccd snap.in - | bsf - test='0.0713652 1.38255 0 31.5 4113' ; nemo.coverage snapccd.c
+BSF: OK     0.0713652 1.38255 0 31.5 4113 -
+Running snapgrid
+snapgrid snap.in - | bsf - test='4.86263e+16 3.11816e+18 0 2e+20 4113' ; nemo.coverage snapgrid.c
+BSF: OK     4.86263e+16 3.11816e+18 0 2e+20 4113 -
+Running snapslit
+snapslit snap.in  width=1 length=4 zvar=vy ; nemo.coverage snapsplit.c
+/bin/sh: 1: snapslit: not found
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/init
+Creating snapenter.in
+snapenter < snapenter.in verbose=f headline="test suite"  ; nemo.coverage snapenter.c
+### Warning [snapenter]: Center of mass not necessarily at the origin
+Snapshot with 2 particle(s) written to file snapenter.out
+Running tsf
+tsf snapenter.out
+char History[53] "snapenter verbose=f headline=test suite VERSION=2.2d"
+char Headline[11] "test suite"
+set SnapShot
+  set Parameters
+    int Nobj 2 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[2] 1.00000 0.500000 
+    double PhaseSpace[2][2][3] -1.00000 0.00000 0.00000 0.00000 
+      -0.125000 0.00000 2.00000 0.00000 0.00000 0.00000 0.250000 
+      0.00000 
+  tes
+tes
+Running snapprint
+snapprint snapenter.out m,x,y,z,vx,vy,vz
+### nemo Debug Info: m x y z vx vy vz 
+1 -1 0 0 0 -0.125 0 
+0.5 2 0 0 0 0.25 0 
+Comparing snapenter.out snapenter.cmp
+tsf snapenter.out octal=t |  rsf - snapenter.cmp ; cmp snapenter.cmp snapenter.out
+BSF: OK     0.175 0.6255 -1 2 15 snapenter.out
+Running mkplummer
+mkplummer mkplummer.out 10 seed=123 ; nemo.coverage mkplummer.c
+tsf mkplummer.out
+char Headline[28] "init_xrandom: seed used 123"
+char History[49] "mkplummer mkplummer.out 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+  tes
+tes
+mkplummer - 10 seed=123 |\
+	massname="n(m)" masspars=p,-2 massrange=0.5,10 |\
+	tsf - ;  nemo.coverage mkplummer.c
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 mkplummer.out
+Running mkexpdisk
+mkexpdisk mkexpdisk.out 10 seed=123 ; nemo.coverage mkexpdisk.c
+tsf mkexpdisk.out
+char History[49] "mkexpdisk mkexpdisk.out 10 seed=123 VERSION=1.3a"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.0959572 0.0959572 0.0959572 0.0959572 0.0959572 
+      0.0959572 0.0959572 0.0959572 0.0959572 0.0959572 
+    double PhaseSpace[10][2][3] 0.226717 -0.0961831 0.0305849 
+      -0.144963 -0.198199 0.186594 0.314932 0.221612 -0.0707257 
+      0.795526 -1.19916 -0.0549409 0.415623 -0.195386 0.00123767 
+      -0.630583 -0.818710 -0.151559 -0.0131403 -0.149846 0.00214669 
+      . . .
+  tes
+tes
+BSF: OK     0.0135151 0.39335 -1.19916 0.857764 71 mkexpdisk.out
+f2d conversion:
+mkplummer - 100 seed=123 |  csf - - convert=f2d |  snapplot - 
+### nemo Debug Info: On top-level: 3 items  read, 3 items written
+/bin/sh: 1: snapplot: not found
+make[1]: *** [/home/jadon/nemo/src/nbody/init/Testfile:101: real] Error 127
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/io
+Running stoa
+mkplummer - 10 seed=123 | stoa - stoa.out ; nemo.coverage stoa.a
+### nemo Debug Info: [stoa: writing 10 bodies at time 0.000000]
+Running atos
+atos stoa.out atos.out ; nemo.coverage atos.c
+### nemo Debug Info: [atos: reading 10 bodies at time 0.000000]
+stoa atos.out stoa.cmp ; nemo.coverage stoa.c
+### nemo Debug Info: [stoa: writing 10 bodies at time 0.000000]
+Running diff stoa.out stoa.cmp
+diff stoa.out stoa.cmp
+Running tabtos
+mkplummer - 10 seed=123  |  snapprint - m,x,y,z,vx,vy,vz > tabtos.in
+### nemo Debug Info: m x y z vx vy vz 
+tabtos tabtos.in tabtos.out "" mass,pos,vel times=0  ; nemo.coverage tabtos.c
+### nemo Debug Info: get_header(nskip=0)
+### nemo Debug Info: Assuming nbody=10
+### nemo Debug Info: [reading 10 bodies at time 0.000000]
+snapprint tabtos.out m,x,y,z,vx,vy,vz > tabtos.cmp
+### nemo Debug Info: m x y z vx vy vz 
+Running diff tabtos.in tabtos.cmp
+diff tabtos.in tabtos.cmp
+mkplummer mp.out 10 seed=123 
+Running snaptipsy:
+snaptipsy mp.out st.out mode=dark ; nemo.coverage snaptipsy.c
+Running tipsysnap
+tipsysnap st.out ts.out mode=binary options=dark ; nemo.coverage tipsysnap.c
+### Warning [tipsysnap]: TIPSY header = 32 bytes, not 28. You may need offset=
+### nemo Debug Info: ndim=3
+### nemo Debug Info: time=0 N=10 (0,10,0) for gas,dark,star    version=2
+### nemo Debug Info: header = 32  gas = 48   dark = 36  star = 44 bytes
+Running snapcmp
+snapcmp ts.out mp.out
+# time  Min  Qlow Median Qhigh  Max   Mean Sigma
+# obs=r (linear scaling)
+0   5.79208e-09 7.26423e-09 9.93596e-09 2.20485e-08 1.59336e-07  3.22352e-08 4.49276e-08
+Running snapgadget
+snapgadget mp.out sg.out N=10,0,0,0; nemo.coverage snapgadget.c
+Running gadgetsnap
+gadgetsnap sg.out gs.out ; nemo.coverage gadgetsnap.c
+### nemo Debug Info: reading `sg.out' ...
+### nemo Debug Info: Header: 
+npart:  0 10 0 0 0 0
+mass:  0 0.1 0 0 0 0
+time: 0
+redshift: 0
+flag_sfr: 0
+flag_feedback: 0
+npartTotal:  0 10 0 0 0 0
+flag_cooling: 0
+num_files: 0
+BoxSize: 128
+Omega0: 0.3
+OmegaLambda: 0.7
+HubbleParam: 0.75
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/io/starlab
+make[1]: Nothing to be done for 'all'.
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/io_nemo
+rm -rf io_nemo_run_test
+(cd /home/jadon/nemo/src/nbody/io_nemo ; make test  ; script/test_io_nemo.csh RT=io_nemo_run_test)
+make[2]: Entering directory '/home/jadon/nemo/src/nbody/io_nemo'
+make[2]: Leaving directory '/home/jadon/nemo/src/nbody/io_nemo'
+hackforce []
+snapmask []
+snapprint []
+mkplummer []
+Building test snapshot, wait....
+### nemo Debug Info: initial rsize: 4.000000    rmin: -2.000000  -2.000000  -2.000000
+### nemo Debug Info:   final rsize: 128.000000    rmin: -46.000000  -38.000000  -90.000000
+
+*** Running [compile/bin/io_nemo_test_float] with [compile/bin/snapmask_s] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+
+*** Running [compile/bin/io_nemo_test_double] with [compile/bin/snapmask_d] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+(cd /home/jadon/nemo/src/nbody/io_nemo ; make testf ; script/fortran_test_io_nemo.csh RT=io_nemo_run_test)
+make[2]: Entering directory '/home/jadon/nemo/src/nbody/io_nemo'
+make[2]: Leaving directory '/home/jadon/nemo/src/nbody/io_nemo'
+Building test snapshot, wait....
+### nemo Debug Info: initial rsize: 4.000000    rmin: -2.000000  -2.000000  -2.000000
+### nemo Debug Info:   final rsize: 128.000000    rmin: -86.000000  -86.000000  -74.000000
+
+*** Running [compile/bin/nemo_fortran_f_3n] with [compile/bin/snapmask_s] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+
+*** Running [compile/bin/nemo_fortran_d_3n] with [compile/bin/snapmask_d] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+
+*** Running [compile/bin/nemo_fortran_f_n3] with [compile/bin/snapmask_s] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+
+*** Running [compile/bin/nemo_fortran_d_n3] with [compile/bin/snapmask_d] ***
+Testing with seltp = [0:100:2,1000:4000:3,10000,15000:25000]
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/reduc
+Creating snap.in
+mkplummer snap.in 10 seed=123
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 snap.in
+Creating hack.out
+hackcode1 snap.in hack.out fcells=4 tstop=2 freqout=1 > /dev/null
+BSF: OK     0.013716 0.344151 -4.79931 5.59068 2615 hack.out
+Running snapplot
+snapplot hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage  snapplot.c
+/bin/sh: 1: snapplot: not found
+Running snapplot3
+snapplot3 hack.out ; nemo.coverage  snapplot3.c
+/bin/sh: 1: snapplot3: not found
+Running snapdiagplot
+snapdiagplot hack.out  ; nemo.coverage snapdiagplot.c
+/bin/sh: 1: snapdiagplot: not found
+Running snapplotv
+snapplotv hack.out nxy=2,2 nxticks=3 nyticks=3 ; nemo.coverage snapplotv.c
+/bin/sh: 1: snapplotv: not found
+Creating hack2.out
+hackcode1 snap.in hack2.out fcells=4 tstop=10 freqout=8 > /dev/null
+BSF: OK     0.0881821 1.00368 -4.81846 10 17547 hack2.out
+Running snapmradii
+snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
+/bin/sh: 1: tabplot: not found
+Running radprof
+radprof snap.in tab=t > /dev/null ; nemo.coverage radprof.c
+/bin/sh: 1: radprof: not found
+Checking d2f for snapfour
+mkplummer - 100 seed=123 |  csf - - convert=d2f |  snapfour - radii=0:2
+### nemo Debug Info: On top-level: 3 items  read, 3 items written
+### nemo Debug Info: <R> N A0 A1 A2 A3 A4 B1 B2 B3 B4 
+0.5 76 0.02257 0.0430464 0.106832 0.0378323 -0.0870279 0.0106452 -0.151254 -0.00847635 -0.176513
+1.5 16 -0.233933 -0.402085 -0.176371 0.291476 0.547148 -0.873766 -0.724156 0.123881 0.27142
+Checking f2d for snapfour
+mkplummer - 100 seed=123 |  csf - - convert=f2d |  snapfour - radii=0:2
+### nemo Debug Info: On top-level: 3 items  read, 3 items written
+### nemo Debug Info: <R> N A0 A1 A2 A3 A4 B1 B2 B3 B4 
+0.5 76 0.02257 0.0430464 0.106832 0.0378323 -0.0870279 0.0106452 -0.151254 -0.00847635 -0.176513
+1.5 16 -0.233933 -0.402085 -0.176371 0.291477 0.547148 -0.873766 -0.724156 0.123881 0.27142
+Creating cube.in
+snaprotate snap.in - 30,45,20 zyz |  snapgrid - cube.in nx=32 ny=32 nz=32 zrange=-2:2
+Running snapfit
+snapfit hack.out cube.in theta1=-30:30:10 theta2=-30:30:10
+### nemo Debug Info: 32768/32768 data (100%) from the cube used in fit
+### nemo Debug Info: Snapshot: time=0 Using 10/10 bodies
+### nemo Debug Info: Snapshot: time=1 Using 10/10 bodies
+### nemo Debug Info: Snapshot: time=2 Using 10/10 bodies
+2\1    -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+
+-30.0 :  0.59  0.59  0.60  0.51  0.50  0.49  0.48
+-20.0 :  0.60  0.60  0.61  0.55  0.53  0.52  0.51
+-10.0 :  0.60  0.61  0.61  0.57  0.56  0.55  0.54
+  0.0 :  0.61  0.61  0.62  0.60  0.59  0.58  0.56
+ 10.0 :  0.61  0.61  0.62  0.62  0.61  0.60  0.59
+ 20.0 :  0.62  0.62  0.62  0.63  0.63  0.62  0.61
+ 30.0 :  0.62  0.62  0.63  0.65  0.64  0.63  0.63
+
+        -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+Min: theta1= 30 theta2= -30 log10(sum)= 0.475478 time= 0 scale= 5.33122 3.11247 1.74664 0.246234
+2\1    -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+
+-30.0 :  0.58  0.59  0.59  0.60  0.61  0.51  0.49
+-20.0 :  0.59  0.59  0.60  0.61  0.62  0.54  0.52
+-10.0 :  0.59  0.60  0.60  0.61  0.62  0.56  0.55
+  0.0 :  0.60  0.60  0.61  0.62  0.63  0.58  0.57
+ 10.0 :  0.60  0.61  0.61  0.62  0.63  0.61  0.59
+ 20.0 :  0.61  0.61  0.62  0.63  0.63  0.62  0.61
+ 30.0 :  0.61  0.62  0.62  0.63  0.64  0.64  0.63
+
+        -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+Min: theta1= 30 theta2= -30 log10(sum)= 0.491302 time= 1 scale= 5.33122 3.11247 1.83645 0.330812
+2\1    -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+
+-30.0 :  0.60  0.60  0.61  0.61  0.61  0.62  0.62
+-20.0 :  0.60  0.61  0.61  0.62  0.62  0.63  0.63
+-10.0 :  0.61  0.61  0.62  0.62  0.63  0.63  0.64
+  0.0 :  0.61  0.62  0.62  0.63  0.63  0.64  0.64
+ 10.0 :  0.62  0.62  0.63  0.63  0.63  0.64  0.64
+ 20.0 :  0.62  0.62  0.63  0.63  0.64  0.64  0.65
+ 30.0 :  0.62  0.63  0.63  0.64  0.64  0.65  0.65
+
+        -30.0 -20.0 -10.0   0.0  10.0  20.0  30.0
+Min: theta1= -30 theta2= -30 log10(sum)= 0.596609 time= 2 scale= 5.33122 3.11247 2.29432 0.442077
+Running snapprint
+snapprint snap.in x+y,x+z,y+z
+### nemo Debug Info: x+y x+z y+z 
+-0.831173 -1.06045 -0.672651 
+4.32307 3.2835 -2.01193 
+0.62486 0.608538 0.142771 
+0.16389 0.365376 -0.225151 
+0.633704 0.0175 0.796005 
+-0.885373 0.6264 0.863452 
+-1.21501 -0.764112 -1.35454 
+0.524287 1.05154 0.836483 
+0.361728 0.0959956 0.245225 
+-3.69998 -4.22428 1.38034 
+snapprint snap.in x+y | head -1
+### nemo Debug Info: x+y 
+-0.831173 
+snapprint snap.in x+z | head -1
+### nemo Debug Info: x+z 
+-1.06045 
+snapprint snap.in y+z | head -1
+### nemo Debug Info: y+z 
+-0.672651 
+snapprint snap.in x-y | head -1
+### nemo Debug Info: x-y 
+-0.387799 
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/trans
+Creating snap.in
+mkplummer snap.in 10 seed=123
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 snap.in
+Running snapcenter
+snapcenter snap.in . weight=r report=t  ; nemo.coverage snapcenter.c
+0.086054 0.073293 -0.271331 0.149832 -0.039546 0.064694 
+Running snaprotate
+snaprotate snap.in - 45,60,45 xyz | csf - . ; nemo.coverage snaprotate.c
+### nemo Debug Info: On top-level: 4 items  read, 4 items written
+mkdisk - 10000 mass=1 seed=123 sign=1   | snaprotate - - -22,170 yz | snapgrid - m51.ccd moment=-1
+### Warning [snapgrid]: -1: mean=t requires moment=0
+mkdisk - 10000 mass=1 seed=123 sign=-1  | snaprotate - - 30,200  yz | snapgrid - m33.ccd moment=-1
+### Warning [snapgrid]: -1: mean=t requires moment=0
+ccdprint m51.ccd x=25 y=25
+0.140325 
+ccdprint m33.ccd x=25 y=25
+0.0927091 
+Running snaprect
+snaprect snap.in . ; nemo.coverage snaprect.c
+        e_x:     1.00000     0.96860    -0.13576    -0.20831   102.0   -8.0
+        e_y:     1.00000     0.22502     0.12223     0.96666    14.8   28.5
+        e_z:     1.00000    -0.10577    -0.98317     0.14894    81.4  -96.1
+Running snapinert
+snapinert snap.in - ; nemo.coverage snapintert.c
+Time: 0.000000
+      4.614957     -0.617361     -0.930503
+     -0.617361      0.275200      0.144610
+     -0.930503      0.144610      0.480631
+Eigenvalues:
+      4.901603  :        0.968595     -0.135763     -0.208306
+      0.282311  :        0.225021      0.122232      0.966657
+      0.186874  :        0.105775      0.983172     -0.148943
+Running snapsplit
+snapsplit snap.in - nbody=1 | csf - . ; nemo.coverage snapsplit.c
+### nemo Debug Info: Snapshot time=0.000000 to be copied
+### nemo Debug Info: mstropen: count=1
+### nemo Debug Info: mstropen: count=2
+### nemo Debug Info: mstropen: count=3
+### nemo Debug Info: mstropen: count=4
+### nemo Debug Info: mstropen: count=5
+### nemo Debug Info: mstropen: count=6
+### nemo Debug Info: mstropen: count=7
+### nemo Debug Info: mstropen: count=8
+### nemo Debug Info: mstropen: count=9
+### nemo Debug Info: mstropen: count=10
+### nemo Debug Info: Wrote 10 1-body snapshots
+### nemo Debug Info: On top-level: 13 items  read, 13 items written
+Running
+snapcopy snap.in - select=i | csf - . ; nemo.coverage snapcopy.c
+### nemo Debug Info: On top-level: 4 items  read, 4 items written
+Running
+snapadd snap.in,snap.in - | tsf -; nemo.coverage snapadd.c
+### nemo Debug Info: nbody1 = 10
+### nemo Debug Info: nbody2 = 10
+char Headline[28] "init_xrandom: seed used 123"
+char History[39] "snapadd snap.in,snap.in - VERSION=2.5d"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 20 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[20] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 
+    double PhaseSpace[20][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+  tes
+tes
+Running
+snapdens snap.in - | tsf -; nemo.coverage snapdens.c
+### nemo Debug Info:  0.095209  -0.040500  0.093614  0.345923  0.094748  0.631948  0.053128  6 
+char Headline[28] "init_xrandom: seed used 123"
+char History[32] "snapdens snap.in - VERSION=1.5c"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 
+    double PhaseSpace[10][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+    double Aux[10] 0.0324352 0.000811623 0.0433150 0.0947479 0.0301008 
+      0.0269386 0.0236871 0.0324352 0.0533073 0.000904492 
+  tes
+tes
+Running
+snapshift snap.in snap.in2 rshift=1,2,3 vshift=4,5,6;\
+ nemo.coverage snapshift.c
+BSF: OK     2.97183 2.18854 -3.6523 6.39656 71 snap.in2
+snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,0,0 | tsf -;\
+ nemo.coverage snapstack.c
+### Warning [snapstack]: zerocm=false is now the default!!
+char Headline[28] "init_xrandom: seed used 123"
+char History[69] "snapstack snap.in snap.in2 - deltar=10,0,0 deltav=-1,
+  0,0 VERSION=2.0"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+char History[66] "snapshift snap.in snap.in2 rshift=1,2,3 vshift=4,5,6 
+  VERSION=3.1b"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 20 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[20] 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 0.100000 
+      0.100000 
+    double PhaseSpace[20][2][3] 9.39051 -0.221687 -0.450963 -1.07668 
+      -0.209397 0.396561 14.8092 -0.486182 -1.52575 -0.581526 0.117766 
+      0.230193 10.5453 0.0795464 0.0632245 -0.913298 -0.109128 
+      -0.282036 10.3772 -0.213318 -0.0118330 -1.73998 0.649302 
+      . . .
+  tes
+tes
+snapmass snap.in - mass=2.0 norm=4 | tsf -;\
+ nemo.coverage snapmass.c
+### nemo Debug Info: Using a bodytrans mass expression
+### nemo Debug Info: Warning: existing masses overwritten
+### nemo Debug Info: Total mass: 20
+### nemo Debug Info: Rescaling total mass to 4
+char Headline[28] "init_xrandom: seed used 123"
+char History[47] "snapmass snap.in - mass=2.0 norm=4 VERSION=2.3"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+set SnapShot
+  set Parameters
+    int Nobj 10 
+    double Time 0.00000 
+  tes
+  set Particles
+    int CoordSystem 66306 
+    double Mass[10] 0.400000 0.400000 0.400000 0.400000 0.400000 
+      0.400000 0.400000 0.400000 0.400000 0.400000 
+    double PhaseSpace[10][2][3] -0.609486 -0.221687 -0.450963 
+      -0.0766784 -0.209397 0.396561 4.80925 -0.486182 -1.52575 
+      0.418474 0.117766 0.230193 0.545314 0.0795464 0.0632245 
+      0.0867019 -0.109128 -0.282036 0.377209 -0.213318 -0.0118330 
+      . . .
+  tes
+tes
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/nbody/xyz
+Creating snap.in
+mkplummer snap.in 10 seed=123
+BSF: OK     0.0140845 0.896875 -4.6523 4.80925 71 snap.in
+Running
+snapxyz snap.in -  color=i |  tsf -  ; nemo.coverage snapxyz.c
+### nemo Debug Info: [snapxyz: npoint = 10  time = 0.00]
+char Headline[28] "init_xrandom: seed used 123"
+char History[39] "snapxyz snap.in - color=i VERSION=2.1b"
+char History[43] "mkplummer snap.in 10 seed=123 VERSION=3.0b"
+set PointData
+  double Tpoint 0.00000 
+  int Npoint 10 
+  double Position[10][3] -0.609486 -0.221687 -0.450963 4.80925 
+    -0.486182 -1.52575 0.545314 0.0795464 0.0632245 0.377209 -0.213318 
+    -0.0118330 -0.0724005 0.706104 0.0899005 -0.561212 -0.324160 
+    1.18761 -0.312291 -0.902718 -0.451821 0.369670 0.154617 0.681866 
+    . . .
+  double Velocity[10][3] -0.0766784 -0.209397 0.396561 0.418474 
+    0.117766 0.230193 0.0867019 -0.109128 -0.282036 -0.739982 0.649302 
+    -0.0595349 0.158021 0.0702185 0.316083 0.379356 0.257397 0.0247723 
+    0.669557 -0.463708 -0.117066 -0.0283658 -0.0937881 -0.135925 
+    . . .
+  int Color[10] 0 1 2 3 4 5 6 7 8 9 
+tes
+### nemo Debug Info: [snapxyz: npoint = 10  time = 0.00]
+BSF: OK     1.04652e-17 0.966872 -4.6523 4.80925 61 snapxyz
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/orbit/misc
+Running mkorbit
+mkorbit orb1.in x=1 vy=1 potname=plummer
+### nemo Debug Info: Dvel=-1
+### nemo Debug Info: Using pattern speed = 0
+### nemo Debug Info: pos: 1.000000 0.000000 0.000000  
+vel: 0.000000 1.000000 0.000000  
+etot: -0.207107
+lz=1.000000
+BSF: OK     0.151791 0.486094 -0.707107 1 18 orb1.in
+mkorbit orb2.in x=1 vy=1 potname=plummer potpars=0.1
+### nemo Debug Info: Dvel=-1
+### nemo Debug Info: Using pattern speed = 0.1
+### nemo Debug Info: pos: 1.000000 0.000000 0.000000  
+vel: 0.000000 1.000000 0.000000  
+etot: -0.212107
+lz=1.000000
+BSF: OK     0.151513 0.4863 -0.707107 1 18 orb2.in
+Running orbint2
+orbint orb2.in orb2a.out nsteps=10000 dt=0.01 ndiag=1000 mode=euler   
+### nemo Debug Info: Pattern speed=0.1
+### nemo Debug Info: 0.000000 0.500000 -0.712107     -0.2121067811865 -0
+### nemo Debug Info: 10.000000 0.122590 -0.333583      -0.210993015313 -0.00525097
+### nemo Debug Info: 20.010000 0.235141 -0.445999     -0.2108586139413 -0.00588462
+### nemo Debug Info: 30.020000 0.311195 -0.521993     -0.2107982622476 -0.00616915
+### nemo Debug Info: 40.030000 0.311500 -0.522259     -0.2107590494357 -0.00635402
+### nemo Debug Info: 50.040000 0.235940 -0.446639     -0.2106987526707 -0.0066383
+### nemo Debug Info: 60.050000 0.123442 -0.334006     -0.2105643347108 -0.00727203
+### nemo Debug Info: 70.060000 0.503729 -0.713231     -0.2095018271894 -0.0122813
+### nemo Debug Info: 80.070000 0.126141 -0.334475     -0.2083339326716 -0.0177875
+### nemo Debug Info: 90.080000 0.244448 -0.452644      -0.208195988928 -0.0184378
+### nemo Debug Info: Energy conservation: 0.0184378
+orbint orb2.in orb2b.out nsteps=10000 dt=0.01 ndiag=1000 mode=leapfrog
+### nemo Debug Info: Pattern speed=0.1
+### nemo Debug Info: 0.000000 0.500000 -0.712107     -0.2121067811865 -0
+### nemo Debug Info: 10.000000 0.120960 -0.333087     -0.2121267224229 9.40151e-05
+### nemo Debug Info: 20.000000 0.230348 -0.442355     -0.2120074551372 -0.000468283
+### nemo Debug Info: 30.000000 0.301335 -0.513571     -0.2122356503309 0.000607567
+### nemo Debug Info: 40.000000 0.295910 -0.508027     -0.2121170551617 4.84377e-05
+### nemo Debug Info: 50.000000 0.215864 -0.427870     -0.2120061988938 -0.000474206
+### nemo Debug Info: 60.000000 0.111026 -0.323186     -0.2121599824053 0.000250823
+### nemo Debug Info: 70.000000 0.339124 -0.551149     -0.2120253159592 -0.000384076
+### nemo Debug Info: 80.000000 0.133957 -0.346106     -0.2121494367063 0.000201104
+### nemo Debug Info: 90.000000 0.244301 -0.456407      -0.212106572679 -9.83031e-07
+### nemo Debug Info: 100.000000 0.306604 -0.518571     -0.2119665533871 -0.000661119
+### nemo Debug Info: Energy conservation: 0.000661119
+orbint orb2.in orb2c.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk2
+### nemo Debug Info: Pattern speed=0.1
+### nemo Debug Info: 0.000000 0.500000 -0.712107     -0.2121067811865 -0
+### nemo Debug Info: 10.000000 0.121006 -0.333114     -0.2121082686395 7.01276e-06
+### nemo Debug Info: 20.010000 0.230617 -0.442725     -0.2121082770654 7.05248e-06
+### nemo Debug Info: 30.020000 0.302099 -0.514207     -0.2121082806122 7.0692e-06
+### nemo Debug Info: 40.030000 0.296899 -0.509008     -0.2121082803707 7.06806e-06
+### nemo Debug Info: 50.040000 0.216908 -0.429017     -0.2121082761904 7.04835e-06
+### nemo Debug Info: 60.050000 0.111513 -0.323621     -0.2121082678201 7.00889e-06
+### nemo Debug Info: 70.060000 0.348263 -0.560372     -0.2121082188079 6.77782e-06
+### nemo Debug Info: 80.070000 0.133393 -0.345501     -0.2121082411317 6.88307e-06
+### nemo Debug Info: 90.080000 0.243706 -0.455814     -0.2121082491258 6.92076e-06
+### nemo Debug Info: Energy conservation: 6.92076e-06
+orbint orb2.in orb2d.out nsteps=10000 dt=0.01 ndiag=1000 mode=rk4
+### nemo Debug Info: Pattern speed=0.1
+### nemo Debug Info: 0.000000 0.500000 -0.712107     -0.2121067811865 -0
+### nemo Debug Info: 10.000000 0.121008 -0.333115     -0.2121067811931 3.11007e-11
+### nemo Debug Info: 20.010000 0.230623 -0.442730     -0.2121067811932 3.11342e-11
+### nemo Debug Info: 30.020000 0.302112 -0.514219     -0.2121067811932 3.11392e-11
+### nemo Debug Info: 40.030000 0.296921 -0.509028     -0.2121067811932 3.11512e-11
+### nemo Debug Info: 50.040000 0.216937 -0.429044     -0.2121067811932 3.11355e-11
+### nemo Debug Info: 60.050000 0.111527 -0.323634     -0.2121067811931 3.10974e-11
+### nemo Debug Info: 70.060000 0.348571 -0.560678     -0.2121067811944 3.71693e-11
+### nemo Debug Info: 80.070000 0.133374 -0.345481     -0.2121067811933 3.17983e-11
+### nemo Debug Info: 90.080000 0.243693 -0.455800     -0.2121067811933 3.18255e-11
+### nemo Debug Info: Energy conservation: 3.18255e-11
+BSF: OK     4.28069 17.0096 -9.04051 100 110018 orb2a.out
+BSF: OK     4.33963 16.9909 -8.84718 100 110018 orb2b.out
+BSF: OK     4.29883 17.0019 -8.86182 100 110018 orb2c.out
+BSF: OK     4.29881 17.0019 -8.8621 100 110018 orb2d.out
+Running orbint
+orbint orb1.in orb1.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=euler   
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: 0.000000 0.500000 -0.707107     -0.2071067811865 -0
+### nemo Debug Info: 0.100000 0.500625 -0.705346     -0.2047206158586 -0.0115214
+### nemo Debug Info: 0.300000 0.495139 -0.695260     -0.2001203089163 -0.0337337
+### nemo Debug Info: 0.500000 0.481565 -0.677589     -0.1960241323472 -0.0535118
+### nemo Debug Info: 0.700000 0.461755 -0.654382     -0.1926260701012 -0.0699191
+### nemo Debug Info: 0.900000 0.437908 -0.627868     -0.1899592670596 -0.0827955
+### nemo Debug Info: Energy conservation: 0.0827955
+orbint orb1.in orb2.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=me      
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: Modified EULER integration
+### nemo Debug Info: 0.200000 0.492070 -0.701370     -0.2092997529772 -0
+### nemo Debug Info: 0.400000 0.476289 -0.687414     -0.2111245507602 0.00871859
+### nemo Debug Info: 0.600000 0.454630 -0.667046     -0.2124155841454 0.0148869
+### nemo Debug Info: 0.800000 0.429314 -0.642473     -0.2131590273133 0.018439
+### nemo Debug Info: 1.000000 0.402318 -0.615762     -0.2134439961266 0.0198005
+### nemo Debug Info: Energy conservation: inf
+orbint orb1.in orb3.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=leapfrog
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: 0.000000 0.500000 -0.707107     -0.2071067811865 -0
+### nemo Debug Info: 0.100000 0.498863 -0.705966     -0.2071030186555 -1.81671e-05
+### nemo Debug Info: 0.200000 0.495495 -0.702587     -0.2070921099494 -7.0839e-05
+### nemo Debug Info: 0.300000 0.490018 -0.697093     -0.2070751163741 -0.000152891
+### nemo Debug Info: 0.400000 0.482624 -0.689677     -0.2070535798874 -0.000256879
+### nemo Debug Info: 0.500000 0.473551 -0.680581     -0.2070292564812 -0.000374322
+### nemo Debug Info: 0.600000 0.463073 -0.670077     -0.2070038566341 -0.000496964
+### nemo Debug Info: 0.700000 0.451470 -0.658448      -0.206978848254 -0.000617715
+### nemo Debug Info: 0.800000 0.439016 -0.645971     -0.2069553469546 -0.000731189
+### nemo Debug Info: 0.900000 0.425967 -0.632901     -0.2069340894068 -0.00083383
+### nemo Debug Info: 1.000000 0.412551 -0.619466     -0.2069154675793 -0.000923744
+### nemo Debug Info: Energy conservation: 0.000923744
+orbint orb1.in orb4.out nsteps=10 dt=0.1 ndiag=1 potname=plummer mode=rk4
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: 0.000000 0.500000 -0.707107     -0.2071067811865 -0
+### nemo Debug Info: 0.100000 0.498861 -0.705968     -0.2071067847799 1.73504e-08
+### nemo Debug Info: 0.300000 0.489999 -0.697105     -0.2071068020562 1.00768e-07
+### nemo Debug Info: 0.500000 0.473504 -0.680610     -0.2071068241237 2.07319e-07
+### nemo Debug Info: 0.700000 0.451393 -0.658499     -0.2071068416337 2.91865e-07
+### nemo Debug Info: 0.900000 0.425866 -0.632973     -0.2071068514055 3.39047e-07
+### nemo Debug Info: Energy conservation: 3.39047e-07
+BSF: OK     0.146682 0.502794 -0.707107 1 128 orb1.out
+BSF: OK     0.155618 0.492162 -0.705346 1 128 orb2.out
+BSF: OK     0.231297 0.417577 -0.707107 1 128 orb3.out
+BSF: OK     0.144751 0.500719 -0.707107 1 128 orb4.out
+Running orbintv
+orbintv orb1.in orb1v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dopri5
+### nemo Debug Info: nsteps = 101
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: 0.000000 0.500000 -0.707107     -0.2071067811865 -0
+### nemo Debug Info: 1.000000 0.412441 -0.619548     -0.2071067963777 7.33495e-08
+### nemo Debug Info: 2.000000 0.286950 -0.494057     -0.2071067749052 -3.03291e-08
+### nemo Debug Info: 3.000000 0.200893 -0.408000     -0.2071067988784 8.54237e-08
+### nemo Debug Info: 4.000000 0.145329 -0.352435     -0.2071067351488 -2.2229e-07
+### nemo Debug Info: 5.000000 0.108126 -0.315233     -0.2071067309729 -2.42453e-07
+### nemo Debug Info: 6.000000 0.082256 -0.289363     -0.2071067206254 -2.92415e-07
+### nemo Debug Info: 7.000000 0.063824 -0.270931     -0.2071067292957 -2.50551e-07
+### nemo Debug Info: 8.000000 0.050596 -0.257702     -0.2071067302787 -2.45805e-07
+### nemo Debug Info: 9.000000 0.041235 -0.248341     -0.2071067274475 -2.59475e-07
+### nemo Debug Info: 10.000000 0.034927 -0.242034     -0.2071067271578 -2.60874e-07
+orbintv orb1.in orb2v.out dtout=0.1 ndiag=10 tstop=10 potname=plummer mode=dop853  
+### nemo Debug Info: nsteps = 101
+### nemo Debug Info: Pattern speed=0
+### nemo Debug Info: 0.000000 0.500000 -0.707107     -0.2071067811865 -0
+### nemo Debug Info: 1.000000 0.412441 -0.619548     -0.2071067643649 -8.12223e-08
+### nemo Debug Info: 2.000000 0.286950 -0.494057     -0.2071067790771 -1.01855e-08
+### nemo Debug Info: 3.000000 0.200893 -0.408000     -0.2071067781561 -1.46324e-08
+### nemo Debug Info: 4.000000 0.145329 -0.352435     -0.2071067798266 -6.56638e-09
+### nemo Debug Info: 5.000000 0.108126 -0.315233     -0.2071067748684 -3.05066e-08
+### nemo Debug Info: 6.000000 0.082256 -0.289363     -0.2071067777503 -1.65918e-08
+### nemo Debug Info: 7.000000 0.063824 -0.270931     -0.2071067769804 -2.03089e-08
+### nemo Debug Info: 8.000000 0.050596 -0.257702     -0.2071067777218 -1.67291e-08
+### nemo Debug Info: 9.000000 0.041235 -0.248341     -0.2071067772487 -1.90135e-08
+### nemo Debug Info: 10.000000 0.034927 -0.242034     -0.2071067777589 -1.65503e-08
+BSF: OK     0.606289 1.86465 -2.46954 10 1118 orb1v.out
+BSF: OK     0.606289 1.86465 -2.46954 10 1118 orb2v.out
+Running otos
+otos orb1.in snap1.in
+### nemo Debug Info: Read total of 1 phase points from 1 orbits into snapshot.
+potcode snap1.in snap1.out plummer freq=10 tstop=1 freqout=10 mode=0  > orb1.log
+### Warning [potcode]: No masses present: set all to 1.0
+potcode snap1.in snap2.out plummer freq=10 tstop=1 freqout=10 mode=6  > orb2.log
+### Warning [potcode]: No masses present: set all to 1.0
+potcode snap1.in snap3.out plummer freq=10 tstop=1 freqout=10 mode=5  > orb3.log
+### Warning [potcode]: No masses present: set all to 1.0
+potcode snap1.in snap4.out plummer freq=10 tstop=1 freqout=10 mode=4  > orb4.log
+### Warning [potcode]: No masses present: set all to 1.0
+BSF: OK     0.285714 0.451754 0 1 7 snap1.in
+BSF: OK     0.10131 0.417513 -1.03153 1.03153 474 snap1.out
+BSF: OK     0.10005 0.413643 -1 1 474 snap2.out
+BSF: OK     0.0998601 0.414066 -1 1 474 snap3.out
+BSF: OK     0.0999947 0.413788 -1 1 474 snap4.out
+Running orblist
+orblist   orb1.out
+### nemo Debug Info: Total number of steps = 11
+### nemo Debug Info: Mass = 1.000000 
+### nemo Debug Info: Key = 0 
+### nemo Debug Info: Integrals of Motion (IOM) =  -0.207107  0.000000  0.000000  (  0.000000  0.000000  0.000000  )
+### nemo Debug Info: ORBIT_PHI enabled -0.707107 -0.707107
+### nemo Debug Info: Potential: Name: plummer Pars:  File: 
+0 0 1 0 0 0 1 0  -0.707107 -0.353553 -0 -0 -0.207107
+1 0.1 1 0.1 0 -0.0353553 1 0  -0.705346 -0.350918 -0.0350918 -0 -0.204721
+2 0.2 0.996464 0.2 0 -0.0704472 0.996491 0  -0.701354 -0.343775 -0.068999 -0 -0.202376
+3 0.3 0.98942 0.299649 0 -0.104825 0.989591 0  -0.69526 -0.332523 -0.100706 -0 -0.20012
+4 0.4 0.978937 0.398608 0 -0.138077 0.97952 0  -0.687256 -0.317768 -0.12939 -0 -0.197993
+5 0.5 0.96513 0.49656 0 -0.169854 0.966581 0  -0.677589 -0.300251 -0.15448 -0 -0.196024
+6 0.6 0.948144 0.593218 0 -0.199879 0.951133 0  -0.666536 -0.280766 -0.175665 -0 -0.194232
+7 0.7 0.928156 0.688332 0 -0.227955 0.933567 0  -0.654382 -0.260084 -0.192882 -0 -0.192626
+8 0.8 0.905361 0.781688 0 -0.253964 0.914279 0  -0.641406 -0.238902 -0.206268 -0 -0.191204
+9 0.9 0.879964 0.873116 0 -0.277854 0.893652 0  -0.627868 -0.217806 -0.216111 -0 -0.189959
+10 1 0.852179 0.962481 0 -0.299635 0.872041 0  -0.613996 -0.197255 -0.222787 -0 -0.188878
+snapprint snap1.out
+### nemo Debug Info: x y z vx vy vz 
+1 0 0 0 1 0 
+1 0.1 0 -0.0353553 1 0 
+0.996464 0.2 0 -0.0704472 0.996491 0 
+0.98942 0.299649 0 -0.104825 0.989591 0 
+0.978937 0.398608 0 -0.138077 0.97952 0 
+0.96513 0.49656 0 -0.169854 0.966581 0 
+0.948144 0.593218 0 -0.199879 0.951133 0 
+0.928156 0.688332 0 -0.227955 0.933567 0 
+0.905361 0.781688 0 -0.253964 0.914279 0 
+0.879964 0.873116 0 -0.277854 0.893652 0 
+0.852179 0.962481 0 -0.299635 0.872041 0 
+orblist   orb2.out
+### nemo Debug Info: Total number of steps = 11
+### nemo Debug Info: Mass = 1.000000 
+### nemo Debug Info: Key = 0 
+### nemo Debug Info: Integrals of Motion (IOM) =  0.000000  0.000000  0.000000  (  0.000000  0.000000  0.000000  )
+### nemo Debug Info: ORBIT_PHI enabled 0 0
+### nemo Debug Info: Potential: Name: plummer Pars:  File: 
+0 0 1 0 0 0 1 0  0 0 0 0 0.5
+1 0.1 1 0.1 0 -0.0350918 0.996491 0  -0.705346 -0.350918 -0.0350918 -0 -0.208233
+2 0.2 0.996491 0.199649 0 -0.0694725 0.989603 0  -0.70137 -0.343807 -0.0688824 -0 -0.2093
+3 0.3 0.989544 0.298609 0 -0.102738 0.979564 0  -0.695323 -0.332655 -0.100384 -0 -0.210272
+4 0.4 0.97927 0.396566 0 -0.134548 0.966683 0  -0.687414 -0.318095 -0.128816 -0 -0.211125
+5 0.5 0.965815 0.493234 0 -0.164635 0.951317 0  -0.677895 -0.300872 -0.153653 -0 -0.211841
+6 0.6 0.949352 0.588366 0 -0.192812 0.933854 0  -0.667046 -0.28177 -0.174628 -0 -0.212416
+7 0.7 0.93007 0.681751 0 -0.218965 0.914684 0  -0.655148 -0.261537 -0.191709 -0 -0.212852
+8 0.8 0.908174 0.77322 0 -0.24305 0.894178 0  -0.642473 -0.240843 -0.205054 -0 -0.213159
+9 0.9 0.883869 0.862637 0 -0.265074 0.872683 0  -0.629271 -0.220242 -0.214952 -0 -0.213351
+10 1 0.857361 0.949906 0 -0.285091 0.850505 0  -0.615762 -0.200172 -0.221778 -0 -0.213444
+snapprint snap2.out
+### nemo Debug Info: x y z vx vy vz 
+1 0 0 0 1 0 
+1 0.1 0 -0.0350918 0.996491 0 
+0.996491 0.199649 0 -0.0694725 0.989603 0 
+0.989544 0.298609 0 -0.102738 0.979564 0 
+0.97927 0.396566 0 -0.134548 0.966683 0 
+0.965815 0.493234 0 -0.164635 0.951317 0 
+0.949352 0.588366 0 -0.192812 0.933854 0 
+0.93007 0.681751 0 -0.218965 0.914684 0 
+0.908174 0.77322 0 -0.24305 0.894178 0 
+0.883869 0.862637 0 -0.265074 0.872683 0 
+0.857361 0.949906 0 -0.285091 0.850505 0 
+orblist   orb3.out
+### nemo Debug Info: Total number of steps = 11
+### nemo Debug Info: Mass = 1.000000 
+### nemo Debug Info: Key = 0 
+### nemo Debug Info: Integrals of Motion (IOM) =  -0.207107  0.000000  0.000000  (  0.000000  0.000000  0.000000  )
+### nemo Debug Info: ORBIT_PHI enabled -0.707107 -0.707107
+### nemo Debug Info: Potential: Name: plummer Pars:  File: 
+0 0 1 0 0 0 1 0  -0.707107 -0.353553 -0 -0 -0.207107
+1 0.1 0.998232 0.1 0 -0.0352388 0.998241 0  0 0 0 0 0.498863
+2 0.2 0.992952 0.199648 0 -0.0700187 0.993019 0  0 0 0 0 0.495495
+3 0.3 0.984229 0.298604 0 -0.103907 0.9845 0  0 0 0 0 0.490018
+4 0.4 0.972171 0.396548 0 -0.136524 0.972938 0  0 0 0 0 0.482624
+5 0.5 0.956924 0.493191 0 -0.167552 0.95866 0  0 0 0 0 0.473551
+6 0.6 0.93866 0.58828 0 -0.196756 0.942037 0  0 0 0 0 0.463073
+7 0.7 0.917573 0.681599 0 -0.223974 0.923458 0  0 0 0 0 0.45147
+8 0.8 0.893866 0.772972 0 -0.249118 0.903311 0  0 0 0 0 0.439016
+9 0.9 0.867749 0.862261 0 -0.272164 0.881964 0  0 0 0 0 0.425967
+10 1 0.839433 0.949365 0 -0.293141 0.85975 0  0 0 0 0 0.412551
+snapprint snap3.out
+### nemo Debug Info: x y z vx vy vz 
+1 0 0 0 1 0 
+0.998236 0.0999118 0 -0.0352892 0.998236 0 
+0.992965 0.199474 0 -0.0701166 0.992999 0 
+0.984257 0.298346 0 -0.104048 0.984456 0 
+0.97222 0.396212 0 -0.136701 0.972864 0 
+0.956997 0.492783 0 -0.167759 0.958552 0 
+0.938759 0.587805 0 -0.196984 0.941894 0 
+0.917699 0.681064 0 -0.224217 0.923281 0 
+0.89402 0.772383 0 -0.24937 0.903101 0 
+0.867931 0.861624 0 -0.272421 0.881724 0 
+0.83964 0.948685 0 -0.2934 0.859484 0 
+orblist   orb4.out
+### nemo Debug Info: Total number of steps = 11
+### nemo Debug Info: Mass = 1.000000 
+### nemo Debug Info: Key = 0 
+### nemo Debug Info: Integrals of Motion (IOM) =  -0.207107  0.000000  0.000000  (  0.000000  0.000000  0.000000  )
+### nemo Debug Info: ORBIT_PHI enabled -0.707107 -0.707107
+### nemo Debug Info: Potential: Name: plummer Pars:  File: 
+0 0 1 0 0 0 1 0  -0.707107 -0.353553 -0 -0 -0.207107
+1 0.1 0.998234 0.0999411 0 -0.0352776 0.998237 0  -0.705968 -0.351226 -0.035164 -0 -0.207107
+2 0.2 0.99296 0.199532 0 -0.0700945 0.993005 0  -0.702593 -0.344384 -0.0692026 -0 -0.207107
+3 0.3 0.984245 0.298432 0 -0.104017 0.984468 0  -0.697105 -0.333425 -0.101097 -0 -0.207107
+4 0.4 0.972199 0.396324 0 -0.136662 0.972884 0  -0.689697 -0.318956 -0.130025 -0 -0.207107
+5 0.5 0.956966 0.492918 0 -0.167716 0.958582 0  -0.68061 -0.301712 -0.155407 -0 -0.207107
+6 0.6 0.938717 0.587962 0 -0.196938 0.941932 0  -0.670117 -0.28248 -0.17693 -0 -0.207107
+7 0.7 0.917645 0.681239 0 -0.224171 0.923327 0  -0.658499 -0.262024 -0.194521 -0 -0.207107
+8 0.8 0.893952 0.772575 0 -0.249326 0.903155 0  -0.646033 -0.241034 -0.208307 -0 -0.207107
+9 0.9 0.86785 0.86183 0 -0.272379 0.881783 0  -0.632973 -0.22009 -0.218563 -0 -0.207107
+10 1 0.839546 0.948903 0 -0.29336 0.859548 0  -0.619548 -0.19965 -0.225656 -0 -0.207107
+snapprint snap4.out
+### nemo Debug Info: x y z vx vy vz 
+1 0 0 0 1 0 
+0.998234 0.0999411 0 -0.0352776 0.998237 0 
+0.99296 0.199532 0 -0.0700945 0.993005 0 
+0.984245 0.298432 0 -0.104017 0.984468 0 
+0.972199 0.396324 0 -0.136662 0.972884 0 
+0.956966 0.492918 0 -0.167716 0.958582 0 
+0.938717 0.587962 0 -0.196938 0.941932 0 
+0.917645 0.681239 0 -0.224171 0.923327 0 
+0.893952 0.772575 0 -0.249326 0.903155 0 
+0.86785 0.86183 0 -0.272379 0.881783 0 
+0.839546 0.948903 0 -0.29336 0.859548 0 
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+Cleaning src/orbit/potential
+Running potlist
+potlist harmonic  x=1 dr=0.001 ; nemo.coverage potlist.c
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -1 -0 -0 0.5 1 1 1 0.238732 0.001 0 
+potlist plummer   x=1 dr=0.001 ; nemo.coverage potlist.c
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -0.353553 -0 -0 -0.707107 -0.176909 0.353553 0.353553 0.0421918 0.001 0 
+potlist isochrone x=1 dr=0.001 ; nemo.coverage potlist.c
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi phixx phiyy phizz rho dr time
+1 0 0 -0.12132 -0 -0 -0.414214 -0.0104751 0.12132 0.12132 0.0184751 0.001 0 
+potlist athan92   x=0.00001	 ; nemo.coverage potlist.c
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi time
+1e-05 0 0 -4.25374 -0 0 -252017 0 
+# New style accelleration
+potlist Plummer 0,1,1
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi time
+0 0 0 -0 -0 -0 -1 0 
+rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
+	radii=0:4:0.02 ;  nemo.coverage rotcurves.c
+/bin/sh: 1: rotcurves: not found
+potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05 ; nemo.coverage potccd.c
+### nemo Debug Info: Creating image 81 * 81 * 1
+### nemo Debug Info: using Omega = 0
+potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 |\
+	 ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
+### nemo Debug Info: Creating image 11 * 11 * 1
+### nemo Debug Info: using Omega = 0
+ Y\X -1.000 -0.800 -0.600 -0.400 -0.200 -0.000 0.200 0.400 0.600 0.800 1.000 
+
+1.000  1.000 0.820 0.680 0.580 0.520 0.500 0.520 0.580 0.680 0.820 1.000 
+0.800  0.820 0.640 0.500 0.400 0.340 0.320 0.340 0.400 0.500 0.640 0.820 
+0.600  0.680 0.500 0.360 0.260 0.200 0.180 0.200 0.260 0.360 0.500 0.680 
+0.400  0.580 0.400 0.260 0.160 0.100 0.080 0.100 0.160 0.260 0.400 0.580 
+0.200  0.520 0.340 0.200 0.100 0.040 0.020 0.040 0.100 0.200 0.340 0.520 
+-0.000  0.500 0.320 0.180 0.080 0.020 0.000 0.020 0.080 0.180 0.320 0.500 
+-0.200  0.520 0.340 0.200 0.100 0.040 0.020 0.040 0.100 0.200 0.340 0.520 
+-0.400  0.580 0.400 0.260 0.160 0.100 0.080 0.100 0.160 0.260 0.400 0.580 
+-0.600  0.680 0.500 0.360 0.260 0.200 0.180 0.200 0.260 0.360 0.500 0.680 
+-0.800  0.820 0.640 0.500 0.400 0.340 0.320 0.340 0.400 0.500 0.640 0.820 
+-1.000  1.000 0.820 0.680 0.580 0.520 0.500 0.520 0.580 0.680 0.820 1.000 
+potccd - harmonic x=-1:1:0.2 y=-1:1:0.2 dr=0.01 |\
+	 ccdprint - x= y= format=%4.3f label=x,y ; nemo.coverage potccd.c
+### nemo Debug Info: Creating image 11 * 11 * 1
+### nemo Debug Info: 3D-Poisson density map with delta-r=0.01 and nder=1
+### nemo Debug Info: using Omega = 0
+ Y\X -1.000 -0.800 -0.600 -0.400 -0.200 -0.000 0.200 0.400 0.600 0.800 1.000 
+
+1.000  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+0.800  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+0.600  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+0.400  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+0.200  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-0.000  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-0.200  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-0.400  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-0.600  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-0.800  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+-1.000  6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 6.000 
+potlist ccd potfile=plummer.ccd x=0:2:0.1 dr=0.001 | awk '{print $1,$4,$7,$11}' > plummer1.tab
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi phixx phiyy phizz rho dr time
+potlist plummer                 x=0:2:0.1 dr=0.001 | awk '{print $1,$4,$7,$11}' > plummer2.tab
+### nemo Debug Info: [potlist in double mode]
+### nemo Debug Info: x y z ax ay az phi phixx phiyy phizz rho dr time
+tabmath plummer1.tab,plummer2.tab - %1,%2-%6,%3-%7,%4-%8 all format=%f
+0.000000 0.000000 0.000000 -0.080270 
+0.100000 0.000600 0.000000 -0.079007 
+0.200000 0.001084 0.000000 -0.075480 
+0.300000 0.001381 0.000000 -0.070191 
+0.400000 0.001481 0.000000 -0.063790 
+0.500000 0.001427 0.000000 -0.056913 
+0.600000 0.001276 0.000000 -0.050072 
+0.700000 0.001082 0.000000 -0.043616 
+0.800000 0.000885 0.000000 -0.037746 
+0.900000 0.000705 0.000000 -0.032545 
+1.000000 0.000552 0.000000 -0.028017 
+1.100000 0.000429 0.000000 -0.024122 
+1.200000 0.000331 0.000000 -0.020797 
+1.300000 0.000255 0.000000 -0.017971 
+1.400000 0.000196 0.000000 -0.015574 
+1.500000 0.000151 0.000000 -0.013540 
+1.600000 0.000118 0.000000 -0.011814 
+1.700000 0.000092 0.000000 -0.010346 
+1.800000 0.000072 0.000000 -0.009094 
+1.900000 0.000056 0.000000 -0.008023 
+2.000000 0.178885 0.447214 -0.004275 
+nemoinp 0:10 |  tabmath - - '1/(sqrt(4+%1)' > map0.tab
+potccd map0.ccd rotcur 0 map0.tab x=-10:10:0.1 y=-10:10:0.1
+### nemo Debug Info: Creating image 201 * 201 * 1
+### nemo Debug Info: using Omega = 0
+ccdstat map0.ccd
+Number of points       : 40401
+Min and Max            : 0.000000 0.500000
+Mean and dispersion    : 0.243456 0.135323
+Skewness and kurtosis  : -1.045066 -0.403456
+Sum and Sum*Dx*Dy*     : 9835.884001 98.358840
+Points per beam (map)  : 1
+0/40401 out-of-range points discarded
+Running potq
+potq pfenniger84 r=1:10	
+1 0.497721 0 10
+2 0.517117 0.000606655 8
+3 0.426776 0.000922551 8
+4 0.275563 0.000832961 8
+5 0.10667 0.000569431 8
+6 0.0305462 0.000926259 6
+7 0.0177048 0.000573299 6
+8 0.0118711 0.000401105 6
+9 0.00860622 0.000298991 6
+10 0.00656493 0.000234145 6
+Running potrot
+potrot pfenniger84 r=1:10	
+1 -0.0266949 0.163386
+2 -0.0427561 0.292425
+3 -0.0460846 0.371825
+4 -0.0403306 0.401649
+5 -0.0303179 0.389345
+6 -0.0212746 0.357278
+7 -0.0164998 0.339851
+8 -0.0133471 0.326767
+9 -0.0110215 0.31495
+10 -0.00924088 0.303988
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+==========================================================
+make[1]: Entering directory '/home/jadon/nemo/tmp/test38039'
+rm -rf run000  run001 run002
+tests are disabled
+make[1]: Leaving directory '/home/jadon/nemo/tmp/test38039'
+TESTSUITE   ended Thu Feb  1 17:42:44 EST 2024

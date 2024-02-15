@@ -1,0 +1,4 @@
+io_nemo_run_test/plum.30k
+io_nemo_run_test/plum.30k.for
+0.0#
+0:100:2,1000:4000:3,10000,15000:25000#
