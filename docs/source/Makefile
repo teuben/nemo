@@ -27,6 +27,7 @@ pjt: lastmod html
 # PJT2 in case latexmk was not installed, the "make latexpdf" may fail, and manually may work here
 pjt2: lastmod html
 	make latexpdf; cd _build/latex/; pdflatex nemo.tex
+	@echo xdg-open _build/latex/nemo.pdf
 
 lastmod:
 	echo "Last modified `date`" > $(SOURCEDIR)/lastmod.rst
