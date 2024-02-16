@@ -10,6 +10,11 @@ Installation from github
 ------------------------
 
 Installation is normally done by getting the source code via github.
+
+
+The One Liners
+~~~~~~~~~~~~~~
+
 Here is an example, just 3 lines in
 your (bash) shell, using a configurable helper script:
 
@@ -36,6 +41,9 @@ script are optional, but a few are
 given to show some often use non-defaults. See that script for more details,
 or use the `-h` flag
 
+A more full example
+~~~~~~~~~~~~~~~~~~~
+
 A more manual install, bypassing this script, can be:
 
 .. code-block:: bash
@@ -61,6 +69,22 @@ enabled, the ``--disable-shared`` flag may need to be added.
 
 Disabling SIP is not recommended, so we've been told.	On a Mac you will also need to have
 Xcode installed, and gfortran (e.g. via brew). We need a special section on this
+
+Pre-conditions
+--------------
+
+For a minimal install a number of packages need to be present on your system. Compilers, the make
+utility, the csh shell, etc.   For some systems (e.g. Ubuntu) we keep a list of minimum
+requirements of the packages that you will need for a minimal install.n
+
+.. code-block:: bash
+
+   cd $NEMO
+   make install_apt
+   cat src/scripts/requirements/apt.txt
+   cat src/scripts/linux/ubuntu20.04
+
+where the last ``ubuntu20.04`` file is a more complete list of packages.
 
 
 Rebuilding
