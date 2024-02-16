@@ -704,4 +704,12 @@ sure:	libs bins
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
 
+## install_apt:   install apt packages (e.g. ubuntu, debian)
+install_apt:
+	sudo apt install `grep -v ^# src/scripts/requirements/apt.txt`
+
+## install_dnf:   install dnf packages (e.g. fedora, redhat)
+install_dnf:
+	sudo apt install `grep -v ^# src/scripts/requirements/dnf.txt`
+
 ## Alas, there are many more undocumented targets
