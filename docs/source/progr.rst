@@ -32,7 +32,7 @@ In summary, the essential changes to your environment consist of
 one simple additions to your local shell startup file
 or you can do it interactively in your shell (be it sh or csh like).
 
-.. code-block::
+.. code-block:: bash
 
       % source /opt/nemo/nemo_start.sh
    or
@@ -50,7 +50,7 @@ available to the programmer.  They reside in the form of header include
 files in a directory tree starting at ``$NEMOINC``.  Your application
 code would need references like:
 
-.. code-block::
+.. code-block:: C
 
     #include <nemo.h>              // this will include a few basic core NEMO include files
     #include <snapshot/body.h>
@@ -156,7 +156,7 @@ with the names and the default values for the keywords, and optionally,
 but STRONGLY recommended,
 a one line help string for that keyword:
 
-.. code-block::
+.. code-block:: C
 
     #include <nemo.h>       /*   every NEMO module needs this  */
 
@@ -178,7 +178,7 @@ string is available.
 ZENO uses a slightly different technique, where strings starting with ``;``
 are the help string. This example in ZENO would look as follows:
 
-.. code-block::
+.. code-block:: C
 
     string defv[] = {      "; example program",
         "in=???",          ";Input file (a snapshot)",
@@ -206,7 +206,7 @@ strings (``string defv[]``), and replace
 appropriate reset values for later retrieval. This is done by calling
 ``initparam`` as the first step in your MAIN program:
 
-.. code-block::
+.. code-block:: C
 
     main (int argc, string argv[])
     {
@@ -229,7 +229,7 @@ the proper startup code (``initparam(argv,defv)``), the worker routine
 ``nemo_main()`` itself, and the stop code (``finiparam()``). 
 The above section of code would then be replaced by a mere:
 
-.. code-block::
+.. code-block:: C
 
     void nemo_main()
     {
@@ -254,7 +254,7 @@ which returns a string
    they are direct references ``string defv[]``;
    this is something that may well be fixed in a future release.
 
-.. code-block::
+.. code-block:: C
 
     if (streq(getparam("n"),"0")
         printf(" You really mean zero or octal?\n");
@@ -265,7 +265,7 @@ parse the
 string in a value of one of the basic C types ``int, long, bool,``
 and ``real``. It returns that value in that type: 
 
-.. code-block::
+.. code-block:: C
 
     #include <getparam.h>     //   included by <nemo.h>
     . . .
@@ -280,7 +280,7 @@ and ``real``. It returns that value in that type:
 Finally, there is a macro called ``getargv0()``, which returns
 the name of the calling program, mostly used for identification:
 
-.. code-block::
+.. code-block:: C
 
     if (getbparam("quit"))
         error("%s: early quit", getargv0());
@@ -317,7 +317,7 @@ declared array, and know that all items will fit in there, the
 
 An example of usage:
 
-.. code-block::
+.. code-block:: C
 
     double *x = NULL;
     double y[NYMAX];
@@ -330,43 +330,38 @@ An example of usage:
 
 
    
-.. warning::
-   May 24, 2021: The text below here in this chapter has not been latex->rst sanitized
-
 
 In the first call the number of elements to be parsed
-from an input keyword {\tt y=} is limited to {\tt NYMAX}, and is useful
+from an input keyword ``y=`` is limited to ``NYMAX``, and is useful
 when the number of elements is expected to be small or more
 or less known. The actual
-number of elements returned in the array {\tt y[]} is {\tt nyret}.
+number of elements returned in the array ``y[]`` is ``nyret``.
 
 When the number of elements to be parsed is not known at all, or one needs
-complete freedom, the dynamic allocation feature of {\tt getdrange} can
-be used. The pointer {\tt x} is initialized to {\tt NULL}, as well as
-the item counter {\tt nxmax}.
+complete freedom, the dynamic allocation feature of *getdrange* can
+be used. The pointer ``x`` is initialized to ``NULL``, as well as
+the item counter ``nxmax``.
 After
-calling {\tt getdrange}, {\tt x} will point to an array of length
-{\tt nxmax}, in which the first {\tt nxret} element contain the parsed
-values of the input keyword {\tt x=}. Proper re-allocation will be done
+calling ``getdrange``, ``x`` will point to an array of length
+``nxmax``, in which the first ``nxret`` element contain the parsed
+values of the input keyword ``x=``. Proper re-allocation will be done
 when a larger space is need on subsequent calls.
 
-Both routines return negative error return codes, see {\it nemoinp(3NEMO)}.
+Both routines return negative error return codes, see *nemoinp(3NEMO)*.
 
-More complex parsing is also done by calling {\tt burststring} first
+More complex parsing is also done by calling ``burststring`` first
 to break a string in pieces, followed by a variety of functions.
 
 Alternatives to nemo_main
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-It is not required for your program to define with {\tt nemo\_main()}. There
+It is not required for your program to define with ``nemo_main()``. There
 are cases where the user needs more control.  An example of this is the
-{\tt falcON}\index{falcON} N-body code in {\tt \$NEMO/use/dehnen/falcON}.
-A header file (see e.g. {\tt inc/main.h}) now defines main, instead of
+``falcON`` N-body code in ``$NEMO/use/dehnen/falcON``.
+A header file (see e.g. ``inc/main.h``) now defines main, instead of
 through the NEMO library:
 
-.. code-block::
-
-
+.. code-block:: C
 
     // in main.h:
 
@@ -390,8 +385,7 @@ through the NEMO library:
 and the application includes this header file, and defines the keyword list
 in the usual way :
 
-
-.. code-block::
+.. code-block:: C
 
     // in application.cc
 
@@ -428,60 +422,56 @@ These objects come in two classes.  An *item*
 is a single instance or a regular array of one of the following C
 primitive types: ``char, short, int, long, float`` or ``double``.  A
 *set*
-is an unordered sequence of {\it items} and {\it sets}. This definition is
+is an unordered sequence of *items* and *sets*. This definition is
 recursive, so fully hierarchical file structures are allowed, and indeed
-encouraged.  Every set or item has a name {\it tag} \index{tag, item}
+encouraged.  Every set or item has a name *tag* 
 associated with it,
 used to label the contents of a file and to retrieve objects from a set. 
-Data items have a {\it type} \index{type, item}
-and array {\it dimension} \index{dimension, item} attributed
+Data items have a *type*
+and array *dimension* attributed
 associated with them as well. This of course means that there is a little
 overhead, which may become too large if many small amounts of data
 are to be handled. For example, a snapshot  with 128 bodies
-(created by {\tt mkplummer}) with double
+(created by ``mkplummer``) with double
 precision masses and full 6 dimensional phase space coordinates
 totals 7425 bytes, whereas a straight dump of only the essential
-information would be 7168 bytes, a mere 3.5\% overhead. After an
+information would be 7168 bytes, a mere 3.5% overhead. After an
 integration, with 9 full snapshots stored and 65 snapshots with only
 diagnostics output, the overhead is much larger: 98944 bytes of
 data, of which only 64512 bytes are masses and phase space coordinates:
-the overhead is 53\% (of which 29\% though are the diagnostics output,
+the overhead is 53% (of which 29% though are the diagnostics output,
 such conservation of energy and angular momentum, cputime, center
 of mass, etc.).
 
 
-The filestruct package uses ordinary {\it stdio(3)} streams to access
-input and output files; \index{stream}
+The filestruct package uses ordinary *stdio(3)* streams to access
+input and output files; 
 hence the first step in using filestruct is to
 open the file streams.  For this job we use the NEMO library routine
-{\tt stropen()}, \index{stropen}
-which itself is not part of filestruct.  {\tt
-stropen({\it name,mode})} is much like {\tt fopen()} of {\it stdio}, but
+``stropen()``,
+which itself is not part of filestruct.
+``stropen(name,mode)`` is much like ``fopen()`` of *stdio*, but
 slightly more clever; it will not open an existing file for output,
-unless the {\it mode} string is {\tt "w!"}. 
-% append ???
+unless the *mode* string is ``"w!"``. (append???)
 An additional oddity to
-{\tt stropen} is that it treats the dash filename {\tt "-"},
-\index{-,filename} as standard 
-in/output,\footnote{Older versions of 
-{\it filestruct} cannot handle binary files in pipes, since
-filestruct uses fseek(3)}
-and {\tt "s"} as a scratch file.
-Since {\it stdio} normally flushes all buffers on exit, it is
+``stropen`` is that it treats the dash filename ``"-"``
+as standard in/output,
+and ``"s"`` as a scratch file.
+Since *stdio* normally flushes all buffers on exit, it is
 often not necessary to explicitly close open streams, but if you do so,
-use the matching routine {\tt strclose()}. This\index{strclose}
+use the matching routine ``strclose()``. This
 also frees up the table
-entries on temporary memory used by the filestruct package. As in most
+entries on temporary memory used by the *filestruct* package. As in most
 applications/operating systems a task can have a limited set of
-open files associated with it. Scratch\index{scratch files} files 
+open files associated with it. Scratch files 
 are automatically deleted from disk
-when they are closed. \index{scratch files}
+when they are closed.
 
 Having opened the required streams, it is quite simple to use the basic
 data I/O routines.  For example, suppose the following declarations have
 been made:
 
-.. code-block::
+.. code-block:: C
 
     #include <stdinc.h>
     #include <filestruct.h>
@@ -494,13 +484,13 @@ been made:
     real    mass[MAXNBODY];
 
 
-(note the use of the {\tt stdinc.h} conventions).  And now suppose that, 
-after some computation, results have been stored in the first {\tt nbody}
-components of the {\tt mass} array, and a descriptive message has been
-placed in {\tt headline}.  The following piece of code will write the
+(note the use of the ``stdinc.h`` conventions).  And now suppose that, 
+after some computation, results have been stored in the first ``nbody``
+components of the ``mass`` array, and a descriptive message has been
+placed in ``headline``.  The following piece of code will write the
 data to a structured file:
 
-.. code-block::
+.. code-block:: C
 
     outstr = stropen("mass.dat", "w");
 
@@ -510,22 +500,22 @@ data to a structured file:
 
     strclose(outstr);    
 
-Data (the 4th argument in {\tt put\_data},
+Data (the 4th argument in ``put_data``,
 is always passed by address, even if one element is written. This
 not only holds for reading, but also for writing, as is apparent from
 the above example.
 Note that no error checking is needed when the file is opened for
-writing. If the file {\tt mass.dat}
-would already have existed, {\tt error()} would \index{error(3)}
-have been called inside {\tt stropen()} and aborted the
+writing. If the file ``mass.dat``
+would already have existed, ``error()`` would 
+have been called inside ``stropen()`` and aborted the
 program. Names of tags are arbitrary, but we encourage you to use
 descriptive names, although an arbitrary maximum of 64 is enforced
 by chopping any incoming string.
 
-The resulting contents of {\tt mass.dat} can be viewed with the
-{\tt tsf} utility: \index{tsf}
+The resulting contents of ``mass.dat`` can be viewed with the
+``tsf`` utility:
 
-.. code-block::
+.. code-block:: bash
 
     % tsf mass.dat
     int Nbody 010
@@ -535,14 +525,9 @@ The resulting contents of {\tt mass.dat} can be viewed with the
 
 Note the octal representation {\tt 010=8} of {\tt Nbody}. **OLD**
 
-% CANNOT DO THIS YET - CONCEPT NOT INTRODUCED HERE
-% Also note
-% that it is not {\bf required} to use sets, subsets, subsubsets etc.,
-% but such encapsulation has certain advantages.
-
 It is now trivial to read data from this file:
 
-.. code-block::
+.. code-block:: C
 
     instr = stropen("mass.dat", "r");
 
@@ -555,69 +540,66 @@ It is now trivial to read data from this file:
 Note that we read the data in the same order as they were written.
 
 During input, the filestruct routines normally perform strict type-checking;
-the tag, type and dimension supplied to {\tt get\_data()} must match
+the tag, type and dimension supplied to ``get_data()`` must match
 the attributes of the data item, written previously,
 exactly. Such strict checking helps
 prevent many common errors in using binary data. Alternatively, you can use
-{\tt get\_data\_coerced()}, which is called exactly like {\tt get\_data()}, but
-interconverts {\tt float} and {\tt double} 
-values\footnote{The implementors of NEMO will not be held responsible for
-any loss of precision resulting from the use of this feature.}.\index{real}
+``get_data_coerced()``, which is called exactly like ``get_data()``, but
+interconverts ``float`` and ``double`` 
+values.
 
 To provide more flexibility in programming I/O, a series of related items
 may be hierarchically wrapped into a set:
 
-.. code-block::
+.. code-block:: C
 
     outstr = stropen("mass.dat", "w");
 
-    put_set(outstr, "NotASnapShot");
+    put_set(outstr, "MySnapShot");
        put_data(outstr, "Nbody", IntType, &nbody, 0);
        put_data(outstr, "Mass", RealType, mass, nbody, 0);
        put_string(outstr, "Headline", headline);
-    put_tes(outstr, "NotASnapShot");
+    put_tes(outstr, "MySnapShot");
 
     strclose(outstr);    
 
 
-Note that each {\tt put\_set()}\index{put\_set}
-must be matched by an equivalent  {\tt put\_tes()}\index{put\_tes}.
-For input, corresponding routines {\tt get\_set()} and {\tt get\_tes()}
+Note that each ``put_set()``
+must be matched by an equivalent  ``put_tes()``.
+For input, corresponding routines ``get_set()`` and ``get_tes()``
 are used. These also introduce a significant additional functionality:
-between a {\tt get\_set()}\index{get\_set}
-and {\tt get\_tes()}\index{get\_tes}, the data items
+between a ``get_set()``
+and ``get_tes()``, the data items
 of the set may 
-be read in any order\footnote{tagnames must now be unique within an item,
-as in a C {\tt struct}},
-or not even read at all. For 
+be read in any order (tagnames must now be unique within an item,
+as in a C ``struct``,
+or not even read at all). For 
 example, the following is also a legal way to access 
-the {\tt NotASnapShot}\footnote{This is a toy model, shown for its
-simplicity. The full {\tt SnapShot} format is discussed in 
-Section \ref{ss:snapshot}}:
+the ``MySnapShot``:
 
-.. code-block::
+.. code-block:: C
 
     instr = stropen("mass.dat", "r");
 
-    if (!get_tag_ok(instr,"NotASnapShot"))
-        error("File mass.dat is not a NotASnapShot\n");
+    if (!get_tag_ok(instr,"MySnapShot"))
+        error("File mass.dat is not a MySnapShot");
 
-    get_set(instr,"NotASnapShot");
+    get_set(instr,"MySnapShot");
     headline = get_string(instr, "Headline");
-    get_tes(instr,"NotASnapShot");
+    get_tes(instr,"MySnapShot");
 
     strclose(instr);    
 
 This method of *filtering* a data input stream clearly opens up many
 ways of developing general-purpose programs. Also note that the 
-{\tt bool} routine {\tt get\_tag\_ok()} can be used to control the
-flow of the program, as {\tt get\_set()} would call {\tt error()} when
+``bool`` routine ``get_tag_ok()`` can be used to control the
+flow of the program, as ``get_set()`` would call ``error()`` when
 the wrong tag-name would be encountered, and abort the program.
 
 The UNIX program ``cat`` can also be used to catenate
 multiple binary data-sets into one,  *i.e.*
 
-.. code-block::
+.. code-block:: bash
 
     %   cat mass1.dat mass2.dat mass3.dat > mass.dat
 
@@ -625,21 +607,21 @@ The ``get_tag_ok`` routine can be used to handle such multi-set data
 files.  The following example shows how loop through such a combined
 data-file. 
 
-.. code-block::
+.. code-block:: C
 
     instr = stropen("mass.dat", "r");
 
-    while (get_tag_ok(instr, "NotASnapShot") {
-       get_set(instr, "NotASnapShot");
+    while (get_tag_ok(instr, "MySnapShot") {
+       get_set(instr, "MySnapShot");
        get_data(instr, "Nbody", IntType, &nbody, 0);
        if (nbody > MAXNBODY) {
             warning("Skipping data with too many (%d) items",nbody);
-            get_tes(instr,"NotASnapShot");
+            get_tes(instr,"MySnapShot");
             continue;
        }
        get_data(instr, "Mass", RealType, mass, nbody, 0);
        headline = get_string(instr, "Headline");
-       get_tes(instr,"NotASnapShot");
+       get_tes(instr,"MySnapShot");
        /*   process data   */
     }
 
@@ -647,31 +629,30 @@ data-file.
 
 
 The loop is terminated at either end-of-file, or if the next object in
-{\tt instr} is not a {\tt NotASnapShot}. 
+``instr`` is not a ``MySnapShot``. 
 
 It is easy to the skip for an item if you know if it is there:
 
-
 .. code-block::
 
-    while(get_tag_ok(instr,"NotASnapShot"))     /*  ??????? */
-        skip_item(instr,"NotASnapShot");
+    while(get_tag_ok(instr,"MySnapShot"))     /*  ??????? */
+        skip_item(instr,"MySnapShot");
 
-The routine {\tt skip\_item()} is only effective, or for that matter
-required, when doing input at the top level, {\it i.e.} not between
-a {\tt get\_set()} and matching {\tt get\_tes()}, since I/O at deeper
+The routine ``skip_item()`` is only effective, or for that matter
+required, when doing input at the top level, *i.e.* not between
+a ``get_set()`` and matching ``get_tes()``, since I/O at deeper
 levels is random w.r.t. items and sets. In other words,
 at the top level I/O is sequential, at lower levels random.
 
 A relative new feature in data access is the ability to
 do random and blocked access to the data. Instead of using
-a single call to {\tt get\_data} and {\tt put\_data}, the
+a single call to ``get_data`` and ``put_data``, the
 access can be sequentially blocked using 
-{\tt get\_data\_blocked} and {\tt put\_data\_blocked}, provided
-it is wrapped using {\tt get\_data\_set} and {\tt get\_data\_tes},
+``get_data_blocked`` and ``put_data_blocked``, provided
+it is wrapped using ``get_data_set`` and ``get_data_tes``,
 for example:
 
-.. code-block::
+.. code-block:: C
 
    get_data_set    (instr, "Mass", RealType, nbody, 0);
    real *mass = (real *) allocate((nbody/2)*sizeof(real));
@@ -679,37 +660,36 @@ for example:
    get_data_blocked(instr, "Mass", mass, nbody/2);
    get_data_tes    (instr, "Mass");
 
-would read in the {\tt Mass} data in two pieces into a smaller sized {\tt mass}
+would read in the ``Mass`` data in two pieces into a smaller sized ``mass``
 array. A similar mode exists to randomly access data with an item. A current
 limitation of this mode is that such access is only allowed on one item at a
 time. In this mode an item must be closed before the next one can be opened
-in such a mode.\index{blocked I/O}\index{filestruct,blocked I/O}
-\index{filestruct,random I/O}\index{random access}
+in such a mode.
 
 vectmath.h
 ~~~~~~~~~~
 
-The {\tt vectmath.h} macro package \index{vectmath.h}
+The ``vectmath.h`` macro package
 provides a set of macros to handle
-some elementary operations on two, three or general $N$ dimensional
+some elementary operations on two, three or general **N** dimensional
 vectors and matrices.  The dimension $N$ can be picked by providing the
-package with a value for the preprocessor macro {\bf NDIM}.  If this is
-not supplied, the presence of macros {\bf TWODIM} and {\bf THREEDIM} will
-be checked, in which case {\bf NDIM} is set to 2 or 3 respectively.
-The default of {\bf NDIM}
+package with a value for the preprocessor macro **NDIM**.  If this is
+not supplied, the presence of macros **TWODIM** and **THREEDIM** will
+be checked, in which case **NDIM** is set to 2 or 3 respectively.
+The default of **NDIM**
 when all of the above are absent,
-is 3. Of course, the macro {\bf NDIM} must be provided before
-{\tt vectmath.h} is included to have any effect.
-Resetting the value of {\bf NDIM} after that,
-if your compiler would allow it anyhow without an explicit {\tt \#undef},
+is 3. Of course, the macro **NDIM** must be provided before
+``vectmath.h`` is included to have any effect.
+Resetting the value of **NDIM** after that,
+if your compiler would allow it anyhow without an explicit ``#undef``,
 may produce unpredictable results.
 
 There are also a few of the macro's which can be used as a regular
-C function, returning a real value, {\it e.g.} {\tt absv()} for the
+C function, returning a real value, *e.g.*  ``absv()`` for the
 length of a vector.
 
-Operations such as {\bf SETV} (copying a vector) are properly defined for
-every dimension, but {\bf CROSSVP} (a vector cross product) has a
+Operations such as **SETV** (copying a vector) are properly defined for
+every dimension, but **CROSSVP** (a vector cross product) has a
 different meaning in 2 and 3 dimensions, and is
 absent in higher dimensions.
 
@@ -717,13 +697,13 @@ It should be noted that the matrices used here are true C
 matrices, a pointer to an array of pointers (to 1D arrays), unlike
 FORTRAN arrays, which only occupy a solid 2D block of memory. C
 arrays take slightly more memory. For an example how to make C arrays and
-FORTRAN arrays work closely together see e.g. {\it Numerical
-Recipes in C} by {\it Press et al.} (MIT Press, 1988).
-\index{Numerical Recipes} \index{Press W.}
+FORTRAN arrays work closely together see e.g. *Numerical
+Recipes in C* by *Press et al.* (MIT Press, 1988).
+and NEMO's *mdarray(3NEMO)* package.
 
 In the following example a 4 dimensional vector is cleared:
 
-.. code-block::
+.. code-block:: C
 
     #define NDIM 4
     #include <vectmath.h>
@@ -735,12 +715,14 @@ In the following example a 4 dimensional vector is cleared:
         CLRV(a);
     }
 
-{\it some more examples here - taken from some snap code}
+
+.. warning::
+   Feb 16, 2024: The text below here in this chapter has not been latex->rst sanitized
+
+		
 
 snapshots: get_snap.c and put_snap.c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-\mylabel{ss:snapshot}
 
 These routines exemplify an attempt to provide truly generic I/O of
 N-body data.  They read and write structured binary data files
@@ -813,7 +795,7 @@ opened for reading, the programmer should first read these data-history
 items. Conversely, when writing data, the history should
 be written first. In case of the {\tt get/put\_snap} package:
 
-.. code-block::
+.. code-block:: C
 
     get_history(instr);
     get_snap(instr, &btab, &nbody, &time, &bits);
@@ -831,7 +813,7 @@ the program should only be output
 the history once, before the first output of the snapshot, as in the
 following example:
 
-.. code-block::
+.. code-block:: C
 
     get_history(instr);
     put_history(outstr);
@@ -854,7 +836,6 @@ first, and would call {\tt error()} if no snapshot encountered).
 Building NEMO programs
 ----------------------
 
-\mylabel{s:example}
 
 Besides writing the actual code for a program, an application programmer
 has to take care of a few more items before the software can be added 
@@ -872,7 +853,7 @@ simple case however (no graphics or mathematical libraries needed),
 only the main NEMO library is needed, and the
 following command should suffice to produce an executable:
 
-.. code-block::
+.. code-block:: bash
 
     % cc -g -o snapprint snapprint $NEMOLIB/libnemo.a -lm
 
@@ -885,7 +866,7 @@ environment variable.
 
 An example of the compilation of a graphics program:
 
-.. code-block::
+.. code-block:: bash
 
     % cc -g -o snapplot snapplot.c -lnemo $YAPPLIB -lm
 
@@ -904,14 +885,14 @@ the N-body integrators, are almost like complicated packages themselves,
 and require their own Makefile or install script. For most
 programs you can compile it by:
 
-.. code-block::
+.. code-block:: bash
 
-    % bake snapprint
+    % bake snapprint  --deprecated???---
 
 or to install:\footnote{this assumes you have some 
 appropriate NEMO permissions}
 
-.. code-block::
+.. code-block:: bash
 
     % mknemo snapprint
 
@@ -924,7 +905,7 @@ use the ``template`` script that does all the initial tedious work of
 writing your *nemo_main*.  It also can write the initial manual page. Here
 is an example:
 
-.. code-block::
+.. code-block:: bash
 
     % $NEMO/src/scripts/template foobar a=1 b=2.3 n=10 m=10
     % mknemo foobar
@@ -1065,7 +1046,6 @@ writing Makefiles, in some next release of NEMO.
 An example NEMO program
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-\mylabel{ss-example}
 Under Table~\ref{src:hello}
 below you can find a listing of a very minimal NEMO program, 
 ``{\tt hello.c}'':\index{nemo\_main}\index{hello.c}
