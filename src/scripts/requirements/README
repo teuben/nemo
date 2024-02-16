@@ -1,0 +1,3 @@
+If your type of package manager is not listed
+here, also consult the files in $NEMO/src/scripts/linux
+or $NEMO/src/scripts/darwin.
