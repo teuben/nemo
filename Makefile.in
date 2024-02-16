@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 31-aug-2023 PJT
+VERSION = NEMO V4.4 15-feb-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -710,6 +710,6 @@ install_apt:
 
 ## install_dnf:   install dnf packages (e.g. fedora, redhat)
 install_dnf:
-	sudo apt install `grep -v ^# src/scripts/requirements/dnf.txt`
+	sudo dnf install `grep -v ^# src/scripts/requirements/dnf.txt`
 
 ## Alas, there are many more undocumented targets
