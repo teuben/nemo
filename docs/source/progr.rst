@@ -601,7 +601,7 @@ multiple binary data-sets into one,  *i.e.*
 
 .. code-block:: bash
 
-    %   cat mass1.dat mass2.dat mass3.dat > mass.dat
+    % cat mass1.dat mass2.dat mass3.dat > mass.dat
 
 The ``get_tag_ok`` routine can be used to handle such multi-set data
 files.  The following example shows how loop through such a combined
@@ -855,7 +855,7 @@ following command should suffice to produce an executable:
 
 .. code-block:: bash
 
-    % cc -g -o snapprint snapprint $NEMOLIB/libnemo.a -lm
+    % gcc -g -o snapprint snapprint $NEMOLIB/libnemo.a -lm
 
 
 For graphics programs a solution would be to use the **YAPPLIB**
@@ -868,7 +868,7 @@ An example of the compilation of a graphics program:
 
 .. code-block:: bash
 
-    % cc -g -o snapplot snapplot.c -lnemo $YAPPLIB -lm
+    % gcc -g -o snapplot snapplot.c -lnemo $YAPPLIB -lm
 
 Each user is given a subdirectory in {\tt \$NEMO/usr}, under which
 code may be donated which can be compiled into the running version
@@ -1176,7 +1176,7 @@ will follow, apply to the BSD convention of binding FORTRAN and C.
 
 In whatever language you program, 
 we do suggest that the startup of the program is done in C,
-preferably through \index{nemo\_main} the {\tt nemo\_main()} function (see
+preferably through the ``nemo_main()`` function (see
 Section~\ref{ss-example}).  
 As long as file I/O is
 avoided in the FORTRAN routines, character and boolean 
@@ -1187,20 +1187,20 @@ The only thing needed are C names of the FORTRAN routines to be called
 from C.  This can be handled automatically by a macro package. 
 
 Current examples can be found in the programs
-{\tt nbody0} and {\tt nbody2}. In both cases data
-file I/O is done in C in NEMO's  {\it snapshot(5NEMO)} format,
+``nbody0`` and ``nbody2``. In both cases data
+file I/O is done in C in NEMO's  *snapshot(5NEMO)* format,
 but the CPU is used in the FORTRAN code. 
 
 Examples of proposals for other FORTRAN interfaces can be found
-in the directory {\tt \$NEMOINC/fortran}.
+in the directory ``$NEMOINC/fortran``}.
 
-Again this remark: the {\it potential(5NEMO)} assumes for now a BSD type
+Again this remark: the *potential(5NEMO)* assumes for now a BSD type
 f2c interface, because character variables are passed.  This has not
 been updated yet.  You would have to provide your own f2c interface to
 use FORTRAN potential routines on other systems. 
 
 Simple FORTRAN interface workers within the snapshot interface are
-available in a routine {\tt snapwork(n,m,pos,vel,...)}.
+available in a routine ``snapwork(n,m,pos,vel,...)``.
 
 Calling NEMO C routines from FORTRAN
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1227,31 +1227,31 @@ example listed under Table~\ref{src:testf2c}
    :literal:
 
 
-The documentation section between {\tt C+} and {\tt C-} can be 
+The documentation section between ``C+`` and ``C-`` can be 
 extracted
-with a NEMO utility, {\tt ftoc}, to the appropriate C module as follows:
+with a NEMO utility, ``ftoc``, to the appropriate C module as follows:
 
-.. code-block::
+.. code-block:: bash
 
     % ftoc test.f test_main.c
 
-after which the new {\tt test\_main.c} file merely has to be included on
+after which the new ``test_main.c`` file merely has to be included on
 the commandline during compilation. To avoid having to include
 FORTRAN libraries explicitly on the commandline, easiest is
-to use the {\tt f77} command, instead of {\tt cc}:
+to use the ``gfortran`` command, instead of ``gcc``:
 
 .. code-block::
 
-    % g77 -o test test.f test_main.c -I$NEMOINC -L$NEMOLIB -lnemo
+    % gfortran -o test test.f test_main.c -I$NEMOINC -L$NEMOLIB -lnemo
 
 This only works if your operating supports mixing
 C and FORTRAN source code on one commandline. Otherwise try:
 
-.. code-block::
+.. code-block:: bash
 
 
     % gcc -c test_main.c
-    % g77 -o test test.f test_main.o -L$NEMOLIB -lnemo
+    % gfortran -o test test.f test_main.o -L$NEMOLIB -lnemo
 
 where the NEMO library is still needed to resolve the
 user interface of course.
@@ -1275,19 +1275,87 @@ Apart from the usual debugging methods that everybody knows about,  NEMO
 programs usually have the following additional properties which can cut
 down in debugging time. If not conclusive during runtime, you can either
 decide to compile the program with debugging flags turned on, and run
-the program through the debugger, or add more {\tt
-dprintf}\index{dprintf(3)} or {\tt error}\index{error(3)} function
-calls:
+the program through the debugger, or add more ``dprintf``, ``warning``
+or ``error`` function calls:
 
-- During runtime you can set the value for the {\tt debug=}\index{debug,
-  system keyword} (or use the equivalent {\tt DEBUG} environment variable)
+- During runtime you can set the value for the ``debug=``
+  (or use the equivalent ``DEBUG`` environment variable)
   system keyword to increase the amount of output. Note that only levels
   0 (the default) through 9 are supported. 9 should produce a lot of output.
   
-- During runtime you can set the value for the {\tt error=}\index{error,
-  system keyword} (or use the equivalent {\tt ERROR} environment variable)
+- During runtime you can set the value for the ``error=``
+  (or use the equivalent ``ERROR`` environment variable)
   system keyword to bypass a number of fatal error messages that you
   know are not important. For example, to overwrite an existing file
-  you would need to increase {\tt error} by 1.
+  you would need to increase ``error`` by 1.
+
+
+Examples
+--------
+
+Two examples, one with existing code (easier), and one about adding new code.
+
+Existing Code
+~~~~~~~~~~~~~
+To hack in existing code, no new directories, Makefiles or the like need to be added
+or modified.
+
+Lets say we want to add a new feature to an program, and lets say we picked
+``ccdprint``.   The first step would be to find the code and confirm it still compiles:
+
+.. code_block:: bash
+
+   % mknemo ccdprint
+   MKNEMO> Searching ccdprint.c: 
+   found one: /home/teuben/NEMO/nemo/src/image/io/ccdprint.c
+   gcc -g ...
+
+where it found the code in the ``src/image/io`` directory of NEMO.   In that directory
+there will also be Makefile, so an alternative is to do the usual edit-compile-debug
+cycle:
+
+.. code_block:: bash
+
+   %1 cd $NEMO/src/image/io
+   %2 edit ccdprint.c
+   %3 make ccdprint
+   %4 ccdgen junk.ccd
+   %5 ccdprint junk.ccd ...
+
+Now lets say the this version of ``ccdprint`` need a new function in the image library.
+This is located in ``$NEMO/src/image/io/image.c``, which was conveniently in the same
+directory as ``ccdprint.c``. Apart from editing the library code, the corresponding
+``$NEMOINC/image.h`` probably also needs to know about this new function.  So now the
+debug cycle is as follows:
+
+.. code_block:: bash
+
+   %1 edit $NEMOINC/image.h
+   %2 edit image.c
+   %3 make install
+
+   %4 edit snapprint.c
+   %5 make snapprint
+   %6 ccdprint junk.ccd ...
+
+where the new feature is being tested out.    For any important new features, it might be useful
+to add this to the ``Testfile`` in this directory.
+
+
+
+New Code
+~~~~~~~~
+
+A new program, or a new code for the library is something that can be discovered from looking
+at the library. Lets take the example of adding ``xyzio.c`` to the NEMO library. Looking at
+the library, this will likely be adding new xyz related references to the Makefile
+
+.. code_block::
+
+   INCFILES = image.h matdef.h xyio.h              xyzio.h
+   SRCFILES = image.c ccddump.c xyio.c             xyzio.c
+   OBJFILES = image.o xyio.o wcsio.o               xyzio.o
+   LOBJFILES= $L(image.o) $L(xyio.o) $L(wcsio.o)   $L(xyzio.o)
+   BINFILES = ccddump ccdprint ccdslice sigccd ccdspec ccdhead   ccdxyz
 
 
