@@ -1,3 +1,4 @@
+#   sudo apt install $(grep -v ^# apt.txt)
 gcc
 g++
 gfortran
@@ -7,4 +8,3 @@ git
 xorg-dev
 libpng-dev
 pgplot5
-
