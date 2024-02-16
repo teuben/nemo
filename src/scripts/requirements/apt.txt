@@ -1,0 +1,10 @@
+gcc
+g++
+gfortran
+tcsh
+make
+git
+xorg-dev
+libpng-dev
+pgplot5
+
