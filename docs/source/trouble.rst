@@ -1,5 +1,5 @@
-Troubleshooting (*)
-===================
+Troubleshooting
+===============
 
 Fatal errors are caught by most NEMO programs by calling the function
 *error*;
@@ -9,7 +9,7 @@ If the **$ERROR** level is larger than 0,
 an error call can postpone the exit for the specified amount of times.
 If the **$DEBUG** level is positive,
 programs also produce a coredump, which can be further examined with
-local system utilities such as {\it adb(1)} or {\it dbx(1)}.  
+local system utilities such as *gdb(1)*.
 Most of the error messages should be descriptive enough, 
 but a list is being compiled for the somewhat less obvious ones. 
 
@@ -39,11 +39,11 @@ Now the list of error messages and their possible cures:
 
 ``assertion failed: file f line n``
 
-The program was compiled with an active {\it assert(2)}
+The program was compiled with an active *assert(2)*
 macro. An expression was expected to be 
 true at this point in the program. Program exits when
 this was not the case. An infamous failed assertion
-is {\tt file load.c line 91} or thereabouts, part
+is ``file load.c line 91`` or thereabouts, part
 of the ``hackcode1`` N-body integrator. Two
 particles were too close (or on top of each other)
 such that space could not be subdivided within
@@ -54,34 +54,30 @@ such that space could not be subdivided within
 
 Too many open files. Either the program didn't cleanup (close) its
 files after usage, or your current application really needs more
-than the default 16 which is {\tt \#define}d in {\tt filesecret.h}
-by the macro {\tt StrTabLen}.
-Recompile the {\tt filesecret.c} and the appropriate application
-tasks.
+than the default 16 which is ``#define``d in ``filesecret.h``
+by the macro ``StrTabLen``.
+Recompile the ``filesecret.c`` and the appropriate application tasks.
 
 
 ``get_tes:        set=A tes=B``
 
 This points to a programming error or error in the logic during 
-{\it filestruct(3NEMO)} I/O. During program execution a hierarchical
+*filestruct(3NEMO)* I/O. During program execution a hierarchical
 set A was requested to be closed, but the program was still within
 set B (set B had not been closed yet).
 
 ``gethdr:         ItemFlag = 0164``
 
-Input was attempted on a file assumed to be in old {\it filestruct(5NEMO)} format.
+Input was attempted on a file assumed to be in old *filestruct(5NEMO)* format.
 Apparently it was not, file may also have been
-in new filestruct format. 
-{\bf Hints:} Try {\it tsf(1NEMO)}, {\it hd(1NEMO)},
-{\it od(1)} and as last resort {\it more(1)}.
-
+in new filestruct format.
+Try programs like tsf, hd, hexdump, od.
 
 ``gethdr:         bad magic: 0164``
 
-Input was attempted on a file assumed to be in {\it filestruct(5NEMO)} format.
-Apparently it was not. 
-{\bf Hints:} Try {\it tsf(1NEMO)}, {\it hd(1NEMO)},
-{\it od(1)} and as last resort {\it more(1)}.
+Input was attempted on a file assumed to be in *filestruct(5NEMO)* format.
+Apparently it was not.
+Try programs like tsf, hd, hexdump, od.
 
 
 
@@ -91,7 +87,7 @@ It is possible that the non-portable dynamic object loader (loadobj.c)
 indeed proves to be non-portable here. Either you requested a wrong
 file, which is not in object format, or this UNIX version has
 a different object file structure. 
-{\bf Cure:} a lot of hacking in loadobj.c, assuming no pilot error.
+**Cure:** probably some hacking in loadobj.c.
 
 
 ``loadobj:        undefined symbol _XXXX``
@@ -228,11 +224,6 @@ have some meaning to NEMO. A default is usually activated when the
 environment variable is absent.
 
 
-
-- **BELL**
-  If BELL is set (1), a number of user-interface routines
-  become noisy. The default is 0.
-
 - **BTRPATH**
   List of directories where {\it bodytrans(3NEMO)}
   functions can be stored for retrieval. 
@@ -315,20 +306,11 @@ environment variable is absent.
   Directory where nemo's libraries live.
   Normally set by NEMO. No default.
 
-- **NEMOLOG**
-  Filename used as logfile for tasks submitted
-  through ``nemotool``.
-
 
 - **NEMOOBJ**
   Directory were (binary) object files live. They
   are used by a variety of nemo programs, and generally do not 
   concern the user. Usually set by ``NEMORC``.
-
-
-- **NEMOPATH**
-  Same as NEMO, but kept for historical reasons.
-  It is normally defined in the ``NEMORC`` file. *--deprecated--*
 
 
 - **NEMOSITE**
@@ -349,10 +331,6 @@ environment variable is absent.
   functions can be stored. The default is ``/usr/nemo/obj/potential``.
 
 
-- **REVIEW**
-  If this variable is set, the REVIEW section is
-  entered before the program is run. [default: not set or 0]
-
 - **YAPP**
   Yapp graphics output device.
   Usage depends which {\it yapp(3NEMO)} the program was linked
@@ -362,7 +340,7 @@ environment variable is absent.
 
 
 
-See also the manual pages of {\it files(1NEMO)}.
+See also the manual pages of *files(1NEMO)*
 
 
 
