@@ -1,18 +1,15 @@
 /*
- *  A silly little header file for lazy programmers
- *  Should be enough for any standard Nemo program
- *  Does assume the presence of the whole Nemo kernel,
- *  hence the IO core program cannot use this
+ *  The core of NEMO that every program should need
  */
 
 #ifndef _nemo_h
 #define _nemo_h
 
 #include <stdinc.h>		/* also does <math.h> */
-#include <getparam.h>
-#include <vectmath.h>
+#include <getparam.h>           /* command line parser */
+#include <vectmath.h>           /* (re)defines NDIM */
 
-#include <filestruct.h>
-#include <history.h>
+#include <filestruct.h>         /* file I/O */
+#include <history.h>            /* processing history */
 
 #endif
