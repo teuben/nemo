@@ -3,7 +3,6 @@
 Benchmarking
 ============
 
-In this section we'll discuss some of the benchmarks. 
 How fast does the N-body treecode run?
 To what degree does optimization/vectorizing help? When do
 programs become I/O dominated? Some of the numbers quoted below should
@@ -14,21 +13,25 @@ A number of programs in NEMO have a command line parameter such as
 ``nmodel=N``, ``nbench=N`` or ``iter=N`` (N normally set to 1)
 but together with ``help=c`` or prefixing with ``/usr/bin/time`` will
 give an accurate measurement how long
-the code takes to execute ``N`` loops of a particular algorithm.
+the code takes to execute ``N`` loops of a particular algorithm. For
+some programas their respective man pages discuss a particular benchmark.
+
+On the top level we have ``make bench5`` and ``make bench``, the latter
+dynamically controlled with the scattered ``Benchfile``'s
 
 
 N-body integration
 ------------------
 
-The standard NEMO benchmark of the treecode integration is to run
-{\tt hackcode1} \index{hackcode1(1)}
+The standard NEMO benchmark of the treecode integration is to
+``hackcode1``
 without any parameters.  It will generate a spherical
 stellar system in virial equilibrium with 128 particles, and
-integrate it for 64 timesteps ({\tt tol=1 eps=0.05}).   
+integrate it for 64 timesteps (``tol=1 eps=0.05``).   
 In Table~\ref{t:bench1} the  amount
-of CPU (in seconds) needed for {\bf one} timestep is listed
+of CPU (in seconds) needed for **one** timestep is listed
 in column 2. When not otherwise mentioned,
-the code used is the standard NEMO {\tt hackcode1} with
+the code used is the standard NEMO ``hackcode1`` with
 default compilation on the machine quoted. Note that one can often
 obtain significant performance increase (factor of 2 on some sparc
 architectures) by studying the native compiler and
@@ -37,13 +40,45 @@ in particular its optimization options.
 
 .. Treecode Benchmarks}
 
-Machine        	      & cpu-sec/step & code        & comments \\ 
+.. list-table::    Treecode Benchmarks
+   :header-rows: 1
 
-i5-1135G6 @ 4.2 GHz          & 0.000089 & hackcode1 & 2020 laptop \\
-i7-8550U @ 4 GHz             & 0.000178 & hackcode1 & 2018 laptop \\
+   * - Machine
+     - cpu-sec/step
+     - code      
+     - comments
+
+   * - i5-1135G6 @ 4.2 GHz
+     - 0.000089
+     - hackcode1
+     - 2020 laptop
+
+   * - i7-8550U @ 4 GHz
+     - 0.000178
+     - hackcode1  -
+     - 2018 laptop
+
+   * - Sun-3/60
+     - 5.400
+     -
+     - -fswitch (orig development)
+   * - 3b1 (10Mhz 68010)
+     - 49.000
+     -
+     -
+   * - 386SX (16Mhz)
+     - 87.000
+     -
+     - (linux) software floating point
+   * - core 2 duo @ 2.0 GHz
+     - 0.0012
+     - hackcode1
+     - 2007 laptop
+     
+     
 i7-3630QM @ 3.4 GHz          & 0.000177 & hackcode1 & 2014 laptop \\
 i70-870 @ 2.93 GHz	     & 0.00030 & hackcode1 & 2010 desktop \\
-core 2 duo @ 2.0 GHz	     & 0.0012 & hackcode1 & 2007 laptop \\
+
 Dec-alpha		     & 0.0042 & hackcode1 & -O4 -fast \\
 Dec-alpha		     & 0.0048 & hackcode1 & default \\
 CRAY X/YMP48                 & 0.0060 & TREECODE V3 & estimate (1989) \\
@@ -84,9 +119,8 @@ VAX workstation 3500         & 0.970 & & \\
 Sun-4/60 Sparcstation 1      & 1.040 & treecode2   & cf. C-code @ 0.420 \\
 Sun-3/110                    & 1.660 & hackcode1 & fpa.il \\
 Sun-3/60                     & 2.280 & & \\
-Sun-3/60                     & 5.400 & & -fswitch \\
-3b1 (10Mhz 68010)            & 49.000 & & \\ \hline
-386SX (16Mhz) 		     & 87.000 & & (linux) software floating point\\
+
+
 
 
 The ``gravsim``
@@ -112,25 +146,32 @@ hardware floating point operation to perform {\tt 1/sqrt()}.
 Nbody0
 ~~~~~~
 
-The program is Aarseth's simplest\index{Aarseth S.}\index{nbody0}
-nbody code (contained in Binney\index{Binney J.}
-and\index{Tremaine S.}
-Tremaine, 1987, no regularization or nearest neighbors).  The input is
+The program is Aarseth's simplest
+nbody code (contained in Binney and Tremaine, 1987, no regularization or nearest neighbors).
+The input is
 a Hubble expanding cartesian lattice, w/ 925 pts, GMtot=1, expansion
 factor = 6 (omega = 1.2).  Long version followed for 60 time units,
-short version for 5. Results are summarized in 
-Table~\ref{t:bench2}\footnote{Table~\ref{t:bench2} 
-compiled by D. Richstone\index{Richstone D.}}
+short version for 5. Results are summarized in table below. First
+table compiled by D. Richstone.
 
-.. \caption[N-Body0 benchmarks]{N-Body0 Benchmarks}
-
-
-machine(name)  	&	time1 (sec)&	time2 (sec) &	speed \\
+It seems the input data have been lost.
 
 
-Sun-4/110(Pele - 8Mb)	&       21,753	&	     & 0.41 \\
+.. list-table::    N-Body0 Benchmarks
+   :header-rows: 1
 
-Vaxstation 3100(Miffy - M48, 24Meg)	&		& 1302 	&	0.65 \\
+   * - Machine
+     - time1 (sec)
+     - time2 (sec)
+     - speed
+   * - Sun-4/110(Pele - 8Mb)
+     - 
+     - 21,753
+     - 0.41
+   * - Vaxstation 3100(Miffy - M48, 24Meg)
+     -
+     - 1302
+     - 0.65
 
 Sparc 1			&		& 1023	&	0.83 \\
 
@@ -150,16 +191,16 @@ IBM Risc (wibm01)&	2,115	&		&	4.26 \\
 Convex		&		&	  172 	&	4.94 \\
 HP/UX 700     &                  &     26.2   &     \\
 
-Cray YMP	&		&	  19.1	&	44.5 \\ \hline
+Cray YMP	&		&	  19.1	&	44.5
 
 
 Orbit integration
 -----------------
 
 Benchmark is taking 100,000 leapfrog steps. For 2D optimized 
-potentials\footnote{Compiled with -DTWODIM} the timing on
-a Sparc-1 station is about 12" for {\tt log} or {\tt plummer}, and 
-23" for {\tt teusan85} in the core region (orbit remaining within
+potentials the timing on
+a Sparc-1 station is about 12" for ``log`` or ``plummer``, and 
+23" for ``teusan85`` in the core region (orbit remaining within
 the body of the bar).
 
 
