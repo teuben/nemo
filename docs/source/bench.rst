@@ -122,27 +122,6 @@ Sun-3/60                     & 2.280 & & \\
 
 
 
-
-The ``gravsim``
-code\footnote{C version code of the treecode
-written by Mark Bellon - Urbana, IL} is better suited for a
-multiprocessor machine.  Its user interface and
-database format are however different from NEMO's and interface scripts
-can be defined which make working with this code a little easier.  Both
-these C versions of the treecode ({\tt hackcode1} and {\tt gravsim}) are
-inherently slower because they are recursive and spend most of their CPU
-time in treewalking (with a lot of integer arithmetic).  
-The modified (vectorized) Hernquist
-fortran code (referred to as {\tt TREECODE V3}) \index{TREECODE}
-has an approximate speedup of about a factor 200-400 over
-the original VAX/Sun-3 speed on a CRAY supercomputer.
-
-It is also perhaps interesting to quote that replacing the
-{\tt sqrt} function by a very fast machine dependant one
-will increase the speed of the C version of the treecode by
-about 20\%. Some recent HP\index{HP} computers have a special
-hardware floating point operation to perform {\tt 1/sqrt()}.
-
 Nbody0
 ~~~~~~
 
