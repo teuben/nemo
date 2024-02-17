@@ -1,7 +1,12 @@
 .. _progr:
 
-Programmers Guide (*)
-=====================
+Programmers Guide
+=================
+
+.. warning::
+   There are still some relics of the old manual of features that
+   have been deprecated.
+
 
 In this section an introduction is given how to write programs within
 the NEMO environment.  It is based on an original report *NEMO:
@@ -13,12 +18,31 @@ and stellar dynamics in particular.  A basic knowledge how to program in
 C, and use the local operating system to get the job done, is assumed. 
 If you know how to work with *Makefile*'s, even better. 
 
-We start by looking at a typical *Hello Nemo* program:
+We start by looking at the *Hello Nemo* program:
 
-.. include:: hello.src
-   :literal:
+.. see also hello.src
 
- 
+.. code-block:: C
+   
+	#include <nemo.h>                         /* standard (NEMO) definitions */
+
+	string defv[] = {       /* standard keywords and default values and help */
+	    "n=10\n                    Number of interations",           /* key1 */
+	    "VERSION=1.2\n             25-may-1992 PJT",                 /* key2 */
+	    NULL,               /* standard terminator of defv[] vector          */
+	};
+
+	string usage = "Example NEMO program 'hello'";        /* usage help text */
+
+	void nemo_main()                   /* standard start of any NEMO program */
+	{
+	    int n = getiparam("n");                          /* get n            */
+    
+	    printf("Hello NEMO!\n");                         /* do some work ... */
+	    if (n < 0)                                       /* deal with fatal  */
+	       error("n=%d is now allowed, need >0",n);      /* errors           */
+	}
+        
 
 
 The NEMO Programming Environment
@@ -57,10 +81,10 @@ code would need references like:
     #include <snapshot/get_snap.c>
 
 Some of the macro packages are merely function prototypes, to
-facilitate modern C compilers (we strive to follow the C99 standard),
+facilitate modern C compilers (we still use the C99 standard),
 and  have associated object code in libraries in ``$NEMOLIB`` and programs
 need to be linked with the appropriate libraries (normally controlled
-via a Makefile).
+via a ``Makefile``).
 
 
 stdinc.h
@@ -68,7 +92,7 @@ stdinc.h
 
 The macro package ``stdinc.h`` provides all basic
 definitions that ALL of NEMO's code must include as the first include
-file.  It also replaces the often used {\tt stdio.h} include file in C
+file.  It also replaces the often used ``stdio.h`` include file in C
 programs.  The ``stdinc.h`` include file will provide us with a way to
 standardize on future expansions, and make code more
 machine/implementation independent (*e.g.* POSIX.1).  In
@@ -93,7 +117,8 @@ A few of the basic definitions in this package:
   saving ``char``.
 
 - ``TRUE, FALSE``:
-  macros for 1 and 0, respectively, following normal C conventions.
+  macros for 1 and 0, respectively, following normal C conventions,
+  though a non-zero value can also be used as *true*.
 
 - ``byte``:
   typedef for ``unsigned char``, used to specify byte-sized data.
@@ -115,10 +140,10 @@ A few of the basic definitions in this package:
   % This always confusing issue will become clear later on.
 
 - ``local, permanent``:
-  macros for {\tt static}. Use {\tt local} when declaring variables or
+  macros for ``static``. Use ``local`` when declaring variables or
   functions within a file to be local to that file. They will not appear
   in the symbol table be usable as external symbols. Use 
-  {\tt permanent} within  a function, to retain their value upon
+  ``permanent`` within  a function, to retain their value upon
   subsequent re-entries in that function.
 
 - ``PI, TWO_PI, FOUR_PI, HALF_PI, FRTHRD_PI``:]
@@ -239,7 +264,7 @@ This has the obvious advantage that various NEMO related
 administrative details
 are now hidden from the application programmers, and occur automatically.
 Remember that standard ``main()`` already shields the application
-programmer from a number of tedious setups (e.g. {\it stdio} etc.).
+programmer from a number of tedious setups (e.g. *stdio* etc.).
 Within NEMO we have taken this one step further. A recent example that
 was added to ``nemo_main`` is the management  of the number of processors
 in an OpenMP enhanced computing mode.
@@ -518,14 +543,12 @@ The resulting contents of ``mass.dat`` can be viewed with the
 .. code-block:: bash
 
     % tsf mass.dat
-    int Nbody 010
+    int Nbody 8
     double Mass[8] 1.0 1.0 1.0 1.0 1.0 1.0 1.0 1.0
     char Headline[20] "All masses are equal"
 
 
-Note the octal representation {\tt 010=8} of {\tt Nbody}. **OLD**
-
-It is now trivial to read data from this file:
+It is now straightforward to read data from this file:
 
 .. code-block:: C
 
@@ -716,10 +739,6 @@ In the following example a 4 dimensional vector is cleared:
     }
 
 
-.. warning::
-   Feb 16, 2024: The text below here in this chapter has not been latex->rst sanitized
-
-		
 
 snapshots: get_snap.c and put_snap.c
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -728,54 +747,45 @@ These routines exemplify an attempt to provide truly generic I/O of
 N-body data.  They read and write structured binary data files
 conforming to the overall form seen in earlier sections.
 Internally they
-operate on {\tt Body} structures; \index{Body, structure}
-A {\tt Body} has components accessed
-by macros such as {\tt Mass} for the mass, {\tt Pos} and {\tt Vel} for
-the position and velocity vectors, {\it etc.}.  Since {\tt get\_snap.c}
-and {\tt put\_snap.c} use only these macros to declare and access
-bodies, they can be used with any suitable {\tt Body} structure.  They
+operate on ``Body`` structures; 
+A ``Body`` has components accessed
+by macros such as ``Mass`` for the mass, ``Pos`` and ``Vel`` for
+the position and velocity vectors,  etc.  Since ``get_snap.c``
+and ``put_snap.c`` use only these macros to declare and access
+bodies, they can be used with any suitable ``Body`` structure.  They
 are thus provided as C source code to be included in the compilation of
 a program. Definitions concerning Body's and snapshots are obtained 
-by including the files {\tt snapshot/body.h} and {\tt snaphot/snapshot.h}.
-\index{snapshot.h}\index{body.h}
+by including the files ``snapshot/body.h`` and ``snaphot/snapshot.h``.
 
 A program which should handle a large number of particles, may decide to
-include a more simple {\tt Body} structure, as is {\it e.g.} provided by
-the {\tt snapshot/barebody.h} macro file.  This body only includes the
+include a more simple ``Body`` structure, as is e.g. provided by
+the ``snapshot/barebody.h`` macro file.  This body only includes the
 masses and phase space coordinates, which would only occupy 28 bytes 
 per particle (in single precision), as opposed to the 100/104
 bytes per particle
-for a double precision {\tt Body} from the standard {\tt snapshot/body.h} 
-macro file.  This last one contains {\tt Mass, PhaseSpace, Phi, Acc, Aux}
-and {\tt Key}.
+for a double precision ``Body`` from the standard ``snapshot/body.h`` 
+macro file.  This last one contains ``Mass, PhaseSpace, Phi, Acc, Aux``
+and ``Key``.
 
 In the example listed under Table~\ref{src:snapfirst}
 the first snapshot of an input file is
 copied to an output file. 
 
-\begin{table}[tb]
-\caption[source: snapfirst.c]{\$NEMO/src/tutor/snap/snapfirst.c}
-\mysrcfile{snapfirst.src}
-\mylabel{src:snapfirst}
-\small
-\verbatimlisting{snapfirst.src}
-\normalsize
-\end{table}
+..   $NEMO/src/tutor/snap/snapfirst.c}
 
 .. include:: snapfirst.src
    :literal:
 
 
-Notice that the first argument of {\tt stropen()}, the filename, is
+Notice that the first argument of ``stropen()``, the filename, is
 directly obtained from the user interface. The input file is
 opened for reading, and the output file for writing.
-Some history\footnote{See next section for more details on
-history processing}
+Some history (see below)
 is obtained from the input file (would we not have done
 this, and the input file would have contained history, 
-a subsequent {\tt get\_snap()} call would have failed to find
+a subsequent ``get_snap()`` call would have failed to find
 the snapshot), and the first snapshot is read into an array
-of bodies, pointed to by {\tt btab}. Then the output file
+of bodies, pointed to by ``btab``. Then the output file
 has the old history written to it (although any command line
 arguments were added to that), followed by that first snapshot.
 Both files are formally closed before the program then returns.
@@ -784,16 +794,16 @@ history.h
 ~~~~~~~~~
 
 When performing high-level data I/O, as is offered by a package such as
-{\tt get\_snap.c} and {\tt put\_snap.c}, there is an automated way to
-keep track of data history. \index{history.h}
+``get_snap.c`` and ``put_snap.c``, there is an automated way to
+keep track of data history. 
 
 When a NEMO program is invoked, the program name and command line
-arguments are saved by the {\tt initparam()} in a special history
+arguments are saved by the ``initparam()`` in a special history
 database.  Most NEMO programs will write such history items to their
 data-file(s) before the actual data.  Whenever a data-file is then
 opened for reading, the programmer should first read these data-history
 items. Conversely, when writing data, the history should
-be written first. In case of the {\tt get/put\_snap} package:
+be written first. In case of the ``get/put_snap`` package:
 
 .. code-block:: C
 
@@ -803,11 +813,8 @@ be written first. In case of the {\tt get/put\_snap} package:
     put_history(outstr);
     put_snap(outstr,&btab, &nbody, &time, &bits);
 
-\index{get\_history} \index{put\_history}
-Private comments should be added with the {\tt app\_history()}
-\index{app\_history}\index{add\_history}\index{readline, GNU}
-\footnote{The old name, {\tt add\_history} was already used by the
-GNU {\it readline} library}
+Private comments should be added with the ``app_history()``
+..   \footnote{The old name, {\tt add\_history} was already used by the GNU {\it readline} library}
 When a series of snapshot is to be processed, it is recommended that
 the program should only be output
 the history once, before the first output of the snapshot, as in the
@@ -824,14 +831,14 @@ following example:
         put_snap(outstr,&btab, &nbody, &time, &bits);
     }
 
-Note that the second call to {\tt get\_history()}, within the for-loop, 
+Note that the second call to ``get_history()``, within the for-loop, 
 is really in-active. If there happen to be history items sandwiched
 between snapshots, they will be read and added to the history stack,
-but not written to the output file, since {\tt put\_history()} was only 
+but not written to the output file, since ``put_history()`` was only 
 called before the for-loop. It is only a defensive call:
-{\tt get\_snap()} would fail since it expects only pure
-{\tt SnapShot} sets (in effect, it calls {\tt get\_set(instr,"SnapShot")}
-first, and would call {\tt error()} if no snapshot encountered).
+``get_snap()`` would fail since it expects only pure
+``SnapShot`` sets (in effect, it calls ``get_set(instr,"SnapShot")``
+first, and would call ``error()`` if no snapshot encountered).
 
 Building NEMO programs
 ----------------------
@@ -840,9 +847,9 @@ Building NEMO programs
 Besides writing the actual code for a program, an application programmer
 has to take care of a few more items before the software can be added 
 and formally be accepted to NEMO.  This concerns 
-writing\index{compiling, NEMO programs}\index{linking, NEMO programs}
+writing
 the documentation and possibly a Makefile, the former one preferably 
-in the form of standard UNIX manual pages ({\it man(5)}).
+in the form of standard UNIX manual pages.
 We have templates for both Makefile's and 
 manual pages. Both these are discussed in detail in the next subsections. 
 
@@ -858,39 +865,20 @@ following command should suffice to produce an executable:
     % gcc -g -o snapprint snapprint $NEMOLIB/libnemo.a -lm
 
 
-For graphics programs a solution would be to use the **YAPPLIB**
-environment variable. 
 
-.. warning::
-    YAPPLIB was deprecated a while back
-
-An example of the compilation of a graphics program:
-
-.. code-block:: bash
-
-    % gcc -g -o snapplot snapplot.c -lnemo $YAPPLIB -lm
-
-Each user is given a subdirectory in {\tt \$NEMO/usr}, under which
+Each user is given a subdirectory in ``$NEMO/usr``, under which
 code may be donated which can be compiled into the running version
 of NEMO. Stable code, which has been sufficiently tested and
-verified, can be placed in one of the appropriate {\tt \$NEMO/src} 
+verified, can be placed in one of the appropriate ``$NEMO/src`` 
 directories. For proper inclusion of user contributed software
-a few rules in the {\tt Makefile} have to be adhered to.
+a few rules in the ``Makefile`` have to be adhered to.
 
-The {\tt bake}\index{bake, make script}
-and {\tt mknemo}\index{mknemo, script}
+The ``mknemo``
 script should handle compilation and
 installation of most of the standard NEMO cases. Some programs, like 
 the N-body integrators, are almost like complicated packages themselves,
 and require their own Makefile or install script. For most
-programs you can compile it by:
-
-.. code-block:: bash
-
-    % bake snapprint  --deprecated???---
-
-or to install:\footnote{this assumes you have some 
-appropriate NEMO permissions}
+programs you can compile it by
 
 .. code-block:: bash
 
@@ -930,38 +918,37 @@ We encourage authors to have a MINIMUM set of sections in a man-page as
 listed below. The ones with a '*' are considered somewhat less 
 important:
 
-- \item[{\bf NAME}] the name of the beast.
-- \item[{\bf SYNOPSIS}]
-  command line format or function prototype, include
+- **NAME** the name of the program, or whichever applies
+- **SYNOPSIS**  command line format or function prototype, include
   files needed etc.
-- \item[{\bf DESCRIPTION}]
+- **DESCRIPTION**
   maybe a few lines of what it does, or not does.
-- \item[{\bf PARAMETERS}]
+- **PARAMETERS**
   description of parameters, their meaning and default values.
   This usually applies to programs only.
--   \item[{\bf EXAMPLES}]
-                (*) in case non-trivial, but recommended anyhow
--   \item[{\bf DEBUG}]
-                (*) at what {\tt debug} levels what output appears.
--   \item[{\bf SEE ALSO}]
-                (*) references to similar functions, more info
--   \item[{\bf BUGS}]
-                (*) one prefers not to have this of course
--   \item[{\bf TIMING}]
-                (*) performance, dependence on parameters if non-trivial
--   \item[{\bf STORAGE}]
-                (*) storage requirements - mostly of importance when programs
-                  allocate memory dynamically, or when applicable for the
-                  programmer.
--   \item[{\bf LIMITATIONS}]
-                 (*) does it have any obvious limitations?
--   \item[{\bf AUTHOR}]
-                who wrote it (a little credit is in its place) and/or who
-                is responsible.
--   \item[{\bf FILES}]
-           (*) in case non-trivial
--   \item[{\bf HISTORY}]
-    date, version numbers, why updated, by whom (when created)
+- **EXAMPLES**
+  in case non-trivial, but recommended anyhow
+- **DEBUG**
+  at what ``debug`` levels what output appears.
+- **SEE ALSO**
+  references to similar functions, more info
+- **BUGS**
+  one prefers not to have this of course
+- **TIMING**
+  performance, dependence on parameters if non-trivial
+- **STORAGE**
+  storage requirements - mostly of importance when programs
+  allocate memory dynamically, or when applicable for the
+  programmer.
+- **LIMITATIONS**
+  does it have any obvious limitations?
+- **AUTHOR**
+  who wrote it (a little credit is in its place) and/or who
+  is responsible.
+- **FILES**
+  in case non-trivial
+- **HISTORY**
+  date, version numbers, why updated, by whom (when created)
 
 
 Makefiles
@@ -977,8 +964,8 @@ to perform tasks that can be done by a Makefile.
 There are several types of Makefiles in NEMO:
 
 
-- \item{1.} The first (top) level Makefile. It lives in NEMO's root
-  directory (normally referred to as {\tt \$NEMO})
+- 1. The first (top) level Makefile. It lives in NEMO's root
+  directory (normally referred to as ``$NEMO``)
   and can steer installation on any of a number of selected machines,
   it includes some import and export facilities (tar/shar)
   and various other system maintenance utilities.
@@ -989,8 +976,8 @@ There are several types of Makefiles in NEMO:
   nor should it be modified without consent of the NEMO
   system manager.
 
-- \item{2.} Second level Makefiles, currently in {\tt \$NEMO/src}
-  and {\tt \$NEMO/usr},
+- 2. Second level Makefiles, currently in ``$NEMO/src``
+  and ``NEMO/usr``,
   steer the building of libraries and programs by calling Makefiles in
   subdirectories one more level down.  Both this 2nd level Makefile and
   the one described earlier are solely the responsibility of NEMO system
@@ -999,8 +986,8 @@ There are several types of Makefiles in NEMO:
   by one of the second level Makefiles. This interface will be described 
   next.
 
-- \item{3.} Third level Makefiles live in source or user directories
-  {\tt \$NEMO/src/topic} and {\tt \$NEMO/usr/name} (and possibly below). 
+- 3. Third level Makefiles live in source or user directories
+  ``$NEMO/src/topic`` and ``$NEMO/usr/name`` (and possibly below). 
   They steer the installation of user specific 
   programs and libraries, they may update NEMO libraries too.
   The user writes his own Makefile, he usually splits up his directory 
@@ -1010,18 +997,18 @@ There are several types of Makefiles in NEMO:
   The level 3 Makefiles normally have two kinds of entry points
   (or 'targets'): the user 'install' targets are used by the user, 
   and make sure this his sources, binaries, libraries, include files etc. are
-  copied to the proper places under {\tt \$NEMO}.
+  copied to the proper places under ``$NEMO``.
   The second kind of entry point
   are the 'nemo' targets and never called by you, the user;
   they are only called by Makefiles
-  one directory level up from within {\tt \$NEMO} below during the
-  rebuilding process of NEMO, {\it i.e.} a user never calls 
+  one directory level up from within ``$NEMO`` below during the
+  rebuilding process of NEMO, i.e. a user never calls 
   a nemo target, NEMO will do this during its installation.
   Currently we have NEMO install itself in two phases, resulting in
-  two 'nemo' targets: 'nemo\_lib' (phase 1) and 'nemo\_bin' (phase 2). 
+  two 'nemo' targets: 'nemo_lib' (phase 1) and 'nemo_bin' (phase 2). 
   A third 'nemo' target must be present to create a lookup
   table of directories and targets for system maintenance. 
-  This target must be called 'nemo\_src', and must also call lower
+  This target must be called 'nemo_src', and must also call lower
   level Makefiles if applicable.
 
 - **Testfile** : this is a Makefile for testing (the ``make test`` command will use it)
@@ -1029,11 +1016,11 @@ There are several types of Makefiles in NEMO:
 - **Benchfile** : this is a Makefile for benchmarks. Under development.
   
 This means
-that user Makefiles {\bf MUST} have at least these three targets in order
+that user Makefiles **MUST** have at least these three targets in order
 to rebuild itself from scratch. In case a user
 decides to split up his directories, the Makefiles must also
 visit each of those directories and make calls through the same
-entry points 'nemo\_lib' and 'nemo\_bin', 'nemo\_src'; 
+entry points 'nemo_lib' and 'nemo_bin', 'nemo_src'; 
 a sort of hierarchical install process.
    
 For more details see the template Makefiles in NEMO's sec subdirectories
@@ -1048,93 +1035,32 @@ An example NEMO program
 
 Under Table~\ref{src:hello}
 below you can find a listing of a very minimal NEMO program, 
-``{\tt hello.c}'':\index{nemo\_main}\index{hello.c}
+``hello.c``:
 
-\begin{table}[tb]
-\caption[source: hello.c]{\$NEMO/src/tutor/hello/hello.c}
-\mylabel{src:hello}
-\mysrcfile{hello.src}
-\small
-\verbatimlisting{hello.src}
-\normalsize
-\end{table}
+..   $NEMO/src/tutor/hello/hello.c}
 
 .. include:: hello.src
    :literal:
 
-and a corresponding example Makefile to install by {\em user} and 
-{\em nemo} could look like the one shown under Table~\ref{src:makefile}
+and a corresponding example Makefile to install by *user* and 
+*nemo* could look like the one shown under Table~\ref{src:makefile}
 
 Note that for this simple 
-example the {\tt Makefile} actually larger than
-the source code, {\tt hello.c}, itself. Fortunately 
+example the ``Makefile`` actually larger than
+the source code, ``hello.c``, itself. Fortunately 
 not every programs needs
 their own Makefile,  in fact most programs can be compiled with
-a default rule, via the {\tt bake}\index{bake, make script}
-script. This generic makefile is used by the {\tt bake} command, 
-and is normally installed in {\tt \$NEMOLIB/Makefile}, but check
-out your {\tt bake} command or alias.
+a default rule, via the ``bake``
+script. This generic makefile is used by the ``bake`` command, 
+and is normally installed in ``$NEMOLIB/Makefile``, but check
+out your ``bake`` command or alias.
 
-% \newpage
-% \centerline{\bf Example Makefile}
-
-\begin{table}[htb]
-\caption[source: makefile]{Sample makefile - cf. \$NEMOLIB/Makefile}
-\mylabel{src:makefile}
-\mysrcfile{makefile.src}
-\footnotesize
-\verbatimlisting{makefile.src}
-\normalsize
-\end{table}
+.. Sample makefile - cf. \$NEMOLIB/Makefile}
 
 .. include:: makefile.src
    :literal:
 
 
-{\bf Warning:}\ The structure of this
-so-called 'standard' NEMO Makefiles is still under 
-debate, and will probably drastically 
-change in some future release. Best is to check some
-local Makefiles. A possible candidate is the GNU\index{make, GNU}
-make\index{gmake, GNU} facility.
-
-Extending NEMO environment
---------------------------
-
-Let us now summarize the steps to follow to add and/or create new software to
-NEMO.  The examples below are suggested steps taken from adding
-Aarseth's {\tt nbody0} program to NEMO, and we assume him to have his
-original stuff in a directory {\tt \~/nbody0}. 
-
-
-- \item[1:] Create a new directory, {\tt "cd \$NEMO/usr ; mkdir aarseth"}
-        and inform the system manager of NEMO that a new user should be
-        added to the user list in {\tt \$NEMO/usr/Makefile}. You can also
-        do it yourself if the file is writable by you.
-
-- \item[2:] Create working subdirectories in your new user directory,
-        {\tt "cd aarseth ; mkdir nbody0"}.
-
-- \item[3:] Copy a third level Makefile from someone else, and substitute
-        the subdirectory names to be installed for you, i.e. your new
-        working subdirectories ({\tt 'nbody0'} in this case):
-        {\tt "cp ../pjt/Makefile . ; emacs Makefile"}.
-
-- \item[4:] Go 'home' and install, {\tt "cd \~/nbody0 ; make install"}, assuming
-        the Makefile there has the proper install targets. Check the
-        target Makefile in the directory 
-        {\tt \$NEMO/usr/aarseth/nbody0} what this last command
-        must have done.
-
-Actually, only step 1 is required. If a user cannot or does not want 
-to confirm to the level 3/4 separation, he may do so, as long as the 
-Makefile in level 3 (e.g. {\tt \$NEMO/usr/aarseth/Makefile}) contains the 
-nemo\_lib, nemo\_bin and nemo\_src install targets. An example of adding
-a foreign package that way is the {\tt GRAVSIM} package \index{GRAVSIM},
-which has it's own internal structure. In the directory tree starting
-at  {\tt \$NEMO/usr/mbellon/gravsim} an example of a different approach
-is given. Sometimes public domain packages have been added to NEMO, and
-its Makefiles have been adapted slightly to the NEMO install procedure.
 
 Programming in C++
 ------------------
@@ -1150,8 +1076,8 @@ through:
     }
 
 
-The only requirement is of course that the {\tt main()} be in C++.
-For this you have to link with the NEMO++ library {\bf before}
+The only requirement is of course that the ``main()`` be in C++.
+For this you have to link with the NEMO++ library **before**
 the regular NEMO library. So, assuming your header (-I) 
 and library (-L) include flags have been setup, you should be able to
 compile your C++ programs as follows:
@@ -1176,8 +1102,7 @@ will follow, apply to the BSD convention of binding FORTRAN and C.
 
 In whatever language you program, 
 we do suggest that the startup of the program is done in C,
-preferably through the ``nemo_main()`` function (see
-Section~\ref{ss-example}).  
+preferably through the ``nemo_main()`` function.
 As long as file I/O is
 avoided in the FORTRAN routines, character and boolean 
 variables are avoided in arguments of C callable FORTRAN functions, 
@@ -1206,29 +1131,22 @@ Calling NEMO C routines from FORTRAN
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The NEMO user interface, with limited capabilities, is 
-also available to FORTRAN\index{fortran, calling C}
+also available to FORTRAN
 programmers. First of all,
 the keywords, their defaults and a help string must be made
-available (see Section~\ref{ss:getparam}).
+available.
 This can be done by supplying them as comments
 in the FORTRAN source code, as is show in the following 
 example listed under Table~\ref{src:testf2c}
 
-\begin{table}[htb]
-\caption[testf2c.f]{\$NEMO/src/kernel/fortran/test.f}
-\mylabel{src:testf2c}
-\mysrcfile{testf2c.src}
-\small
-\verbatimlisting{testf2c.src}
-\normalsize
-\end{table}
+
+..  $NEMO/src/kernel/fortran/test.f}
 
 .. include:: testf2c.src
    :literal:
 
 
-The documentation section between ``C+`` and ``C-`` can be 
-extracted
+The documentation section between ``C+`` and ``C-`` can be extracted
 with a NEMO utility, ``ftoc``, to the appropriate C module as follows:
 
 .. code-block:: bash
@@ -1248,7 +1166,6 @@ This only works if your operating supports mixing
 C and FORTRAN source code on one commandline. Otherwise try:
 
 .. code-block:: bash
-
 
     % gcc -c test_main.c
     % gfortran -o test test.f test_main.o -L$NEMOLIB -lnemo
@@ -1271,7 +1188,7 @@ Debugging
 ---------
 
 
-Apart from the usual debugging methods that everybody knows about,  NEMO
+Apart from the usual debugging methods (gdb, ddd etc.),  NEMO
 programs usually have the following additional properties which can cut
 down in debugging time. If not conclusive during runtime, you can either
 decide to compile the program with debugging flags turned on, and run
@@ -1282,6 +1199,13 @@ or ``error`` function calls:
   (or use the equivalent ``DEBUG`` environment variable)
   system keyword to increase the amount of output. Note that only levels
   0 (the default) through 9 are supported. 9 should produce a lot of output.
+  In bash the following two constructs are equivalent:
+
+.. code-block:: bash
+
+    % DEBUG=2 mkplummer . 10
+    % mkplummer . 10 debug=10		
+
   
 - During runtime you can set the value for the ``error=``
   (or use the equivalent ``ERROR`` environment variable)
@@ -1297,24 +1221,27 @@ Two examples, one with existing code (easier), and one about adding new code.
 
 Existing Code
 ~~~~~~~~~~~~~
-To hack in existing code, no new directories, Makefiles or the like need to be added
+To hack an existing code, no new directories, Makefiles or the like need to be added
 or modified.
 
-Lets say we want to add a new feature to an program, and lets say we picked
-``ccdprint``.   The first step would be to find the code and confirm it still compiles:
+Lets say we want to add a new feature to a program, lets say 
+``ccdprint``.   The first step would be to find the code and confirm it still compiles.
+For this the ``mknemo`` script is probably the easiest:
 
-.. code_block:: bash
+.. code-block:: bash
 
    % mknemo ccdprint
    MKNEMO> Searching ccdprint.c: 
    found one: /home/teuben/NEMO/nemo/src/image/io/ccdprint.c
    gcc -g ...
 
-where it found the code in the ``src/image/io`` directory of NEMO.   In that directory
+where it found the code in the ``src/image/io`` directory of NEMO, after which
+it got compiled with `gcc`.
+In that directory
 there will also be Makefile, so an alternative is to do the usual edit-compile-debug
-cycle:
+cycle in that directory:
 
-.. code_block:: bash
+.. code-block:: bash
 
    %1 cd $NEMO/src/image/io
    %2 edit ccdprint.c
@@ -1322,13 +1249,18 @@ cycle:
    %4 ccdgen junk.ccd
    %5 ccdprint junk.ccd ...
 
+   %6 mknemo ccdprint
+
+Where the final ``mknemo`` was meant to copy the new binary to ``$NEMOBIN`` for
+general usage.
+
 Now lets say the this version of ``ccdprint`` need a new function in the image library.
 This is located in ``$NEMO/src/image/io/image.c``, which was conveniently in the same
 directory as ``ccdprint.c``. Apart from editing the library code, the corresponding
 ``$NEMOINC/image.h`` probably also needs to know about this new function.  So now the
-debug cycle is as follows:
+debug cycle is a two-step proccess:
 
-.. code_block:: bash
+.. code-block:: bash
 
    %1 edit $NEMOINC/image.h
    %2 edit image.c
@@ -1338,10 +1270,24 @@ debug cycle is as follows:
    %5 make snapprint
    %6 ccdprint junk.ccd ...
 
-where the new feature is being tested out.    For any important new features, it might be useful
-to add this to the ``Testfile`` in this directory.
+   %7 mknemo ccdprint		
+
+where the new feature is being tested out, and finally
+submitted for general usage.  For any important new features, it might be useful
+to add this to the self-explanatory ``Testfile`` in this directory.
 
 
+.. code-block:: bash
+
+   %1 edit Testfile
+   %2 make -f Testfile ccdprint
+		
+Finally, some man pages may need an update
+
+.. code-block:: bash
+
+   %1 edit $NEMO/man/man1/ccdprint.1
+   %2 edit $NEMO/man/man3/image.3
 
 New Code
 ~~~~~~~~
@@ -1350,12 +1296,63 @@ A new program, or a new code for the library is something that can be discovered
 at the library. Lets take the example of adding ``xyzio.c`` to the NEMO library. Looking at
 the library, this will likely be adding new xyz related references to the Makefile
 
-.. code_block::
+.. code-block::
 
-   INCFILES = image.h matdef.h xyio.h              xyzio.h
-   SRCFILES = image.c ccddump.c xyio.c             xyzio.c
-   OBJFILES = image.o xyio.o wcsio.o               xyzio.o
-   LOBJFILES= $L(image.o) $L(xyio.o) $L(wcsio.o)   $L(xyzio.o)
+   INCFILES = image.h matdef.h xyio.h                            xyzio.h
+   SRCFILES = image.c ccddump.c xyio.c                           xyzio.c
+   OBJFILES = image.o xyio.o wcsio.o                             xyzio.o
+   LOBJFILES= $L(image.o) $L(xyio.o) $L(wcsio.o)                 $L(xyzio.o)
    BINFILES = ccddump ccdprint ccdslice sigccd ccdspec ccdhead   ccdxyz
 
+and testing/compiling
 
+.. code-block:: bash
+
+   %1 edit Makefile
+   %2 edit $NEMOINC/xyzio.h
+   %3 edit xyzio.c
+   %4 make install
+
+   %5 edit ccdxyz.c
+   %6 mknemo ccdxyz
+
+and some man page updates:
+
+   %7 $NEMO/src/scripts/mknemo ccdxyz > $NEMO/man/man1/ccdxyz.1
+   %7 edit $NEMO/man/man1/ccdxyz.1
+   %7 edit $NEMO/man/man3/xyzio.3
+
+
+Extending NEMO environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Let us now summarize the steps to follow to add and/or create new software to
+NEMO.  The examples below are suggested steps taken from adding
+Aarseth's ``nbody0`` program to NEMO, and we assume him to have his
+original stuff in a directory ``~/nbody0``. 
+
+
+- 1: Create a new directory, ``"cd $NEMO/usr ; mkdir aarseth"``
+        and inform the system manager of NEMO that a new user should be
+        added to the user list in ``$NEMO/usr/Makefile``. You can also
+        do it yourself if the file is writable by you.
+
+- 2: Create working subdirectories in your new user directory,
+        ``"cd aarseth ; mkdir nbody0"``.
+
+- 3: Copy a third level Makefile from someone else, and substitute
+        the subdirectory names to be installed for you, i.e. your new
+        working subdirectories (``'nbody0'`` in this case):
+        ``"cp ../pjt/Makefile . ; edit Makefile"``.
+
+- 4: Go 'home' and install, ``"cd ~/nbody0 ; make install"``, assuming
+        the Makefile there has the proper install targets. Check the
+        target Makefile in the directory 
+        ``$NEMO/usr/aarseth/nbody0`` what this last command
+        must have done.
+
+Actually, only step 1 is required. If a user cannot or does not want 
+to confirm to the level 3/4 separation, he may do so, as long as the 
+Makefile in level 3 (e.g. ``$NEMO/usr/aarseth/Makefile``) contains the 
+nemo_lib, nemo_bin and nemo_src install targets. 
+which has it's own internal structure. 
