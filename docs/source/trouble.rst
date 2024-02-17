@@ -150,11 +150,11 @@ executable format the dynamic object loader thinks it should have.
 
 ``No manual entry for XXX``
 
-No online manual page for this, although perhaps
+No online manual page for this program, although perhaps
 the MANPATH  environment variable
 has not been properly set, or your UNIX version does not support
 multiple man-root directories, in which case consult the manual
-page of man(1). 
+page of man(1).
 
 ``put_snap_XXX:   not implemented``
 
