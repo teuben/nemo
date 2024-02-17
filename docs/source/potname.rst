@@ -1,5 +1,5 @@
-Potentials and Accellerations (*)
-=================================
+Potentials and Accellerations
+=============================
 
 Here we lists a number of potentials, taken from
 from CTEX comments in the
