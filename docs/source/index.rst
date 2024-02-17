@@ -49,7 +49,7 @@ Welcome to NEMO's documentation!
    crosswalk
    trouble
    .. history
-   .. bench
+   bench
    refs
    codes
    glossary
