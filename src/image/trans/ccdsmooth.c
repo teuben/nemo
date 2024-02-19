@@ -48,7 +48,7 @@ string defv[] = {
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"beam=\n                Optional 2D beam map",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=4.0a\n         20-sep-2023 PJT",
+	"VERSION=4.0b\n         18-feb-2024 PJT",
 	NULL,
 };
 
@@ -105,6 +105,7 @@ void nemo_main(void)
 
     instr = stropen(infile, "r");
     read_image(instr,&iptr);
+    strclose(instr);
 
     nx = Nx(iptr);	
     ny = Ny(iptr);
@@ -128,7 +129,6 @@ void nemo_main(void)
       if (nxb % 2 == 0) warning("your beam does not have an odd number of pixels");
       copy_image(iptr,&optr);
       smooth_bm();
-      write_image(outstr,optr);      
     } else {
       if(hasvalue("gauss"))
         make_gauss_beam(getparam("dir"));
@@ -143,11 +143,9 @@ void nemo_main(void)
 	wiener();
       else
 	smooth_it();
-      write_image(outstr,iptr);
     }
-      
-
-    strclose(instr);
+    minmax_image(optr);
+    write_image(outstr,optr);
     strclose(outstr);
 }
 
@@ -181,9 +179,8 @@ void smooth_bm()
 {
     real m_min, m_max, brightness, total;
     real sum, sum_beam;
-    int    i, ix, iy, iz, kounter, idir;
-    int  ix0, iy0, ixb, iyb;
-    char   *cp;
+    int    ix, iy, iz;
+    int   ixb, iyb;
 
     m_min = HUGE;
     m_max = -HUGE;
@@ -253,7 +250,7 @@ void smooth_bm()
 void smooth_it()
 {
     real m_min, m_max, brightness, total;
-    int    i, ix, iy, iz, kounter, idir;
+    int    i, ix, iy, iz, kounter, idir=0;
     char   *cp;
 
     m_min = HUGE;
@@ -402,7 +399,7 @@ int convolve_cube (a, nx, ny, nz, b, nb, idir)
 real *a, b[];
 int  nx,ny,nz,nb,idir;
 {
-    int ix,iy,iz, ier;
+    int ix,iy,iz, ier=0;
     
     if (idir==1)
         for (iy=0; iy<ny; iy++)
@@ -443,12 +440,13 @@ int    nx, ny, nz, nb, iy, iz;
 	for (ix=0; ix<nx; ix++) 
 	    for (jx=0; jx<nb; jx++) {
 	        kx = ix + jx - (nb-1)/2;
-		if (kx>=0)
+		if (kx>=0) {
 		    if (kx<nx) {
                         if (Qbad && c[ix]==bad) continue;
 		        *(a+iz+iy*nz+kx*ny*nz) += b[jx]*c[ix];
 		    } else
 			continue;
+		}
 	    }
 	return 1;
 }
@@ -474,12 +472,13 @@ int    nx, ny, nz, nb, ix, iz;
 	for (iy=0; iy<ny; iy++) 
     	    for (jy=0; jy<nb; jy++) {
 	        ky = iy + jy - (nb-1)/2;
-		if (ky>=0)
+		if (ky>=0) {
 		    if (ky<ny){
                         if (Qbad && c[iy]==bad) continue;
 		        *(a+iz+ky*nz+ix*ny*nz) += b[jy]*c[iy];
 		    } else
 			continue;
+		}
 	    }
 	return 1;
 }
@@ -505,12 +504,13 @@ int    nx, ny, nz, nb, ix, iy;
 	for (iz=0; iz<nz; iz++) 
             for (jz=0; jz<nb; jz++) {
 		kz = iz + jz - (nb-1)/2;
-		if (kz>=0)
+		if (kz>=0) {
 	            if (kz<nz) {
                         if (Qbad && c[iz]==bad) continue;
 			*(a+kz+iy*nz+ix*nz*ny) += b[jz]*c[iz];
 		    } else
 			continue;
+		}
 	    }
 	return 1;
 }
