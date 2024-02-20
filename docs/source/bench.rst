@@ -75,10 +75,27 @@ part of this no doubt (probably smaller) factor is due to improved compiler tech
      - 0.0012
      - hackcode1
      - 2007 laptop
+
    * - Sun Ultra-140
      - 0.012
      - hackcode1
      - -xO4 -xcg92 -dalign -xlibmil
+
+   * - G3 PowerPC 250Mhz
+     - 0.026
+     - hackcode1
+     - -O
+
+   * - 486DX4-100
+     - 0.068
+     - hackcode1
+     - (~1995 linux)
+
+   * - Sun-4/60 Sparcstation 1
+     - 0.420
+     -
+     -
+     
    * - Sun-3/60
      - 5.400
      -
@@ -91,6 +108,9 @@ part of this no doubt (probably smaller) factor is due to improved compiler tech
      - 87.000
      -
      - (linux) software floating point
+
+
+The rubbish below are from the old latex table, TBD which ones make it into the new table
      
 i7-3630QM @ 3.4 GHz          & 0.000177 & hackcode1 & 2014 laptop \\
 i70-870 @ 2.93 GHz	     & 0.00030 & hackcode1 & 2010 desktop \\
@@ -107,7 +127,7 @@ Sun 20/61                    & 0.020 & hackcode1 & \\
 HP/UX 700                    & 0.020 & hackcode1 &  \\
 Sun Ultra-140		     & 0.024 & hackcode1 & default \\
 Sun 20/??		     & 0.024 & hackcode1 & -xO4 -xcg92 -dalign -xlibmil \\
-G3 PowerPC 250Mhz	     & 0.026 & hackcode1 & -O \\
+
 Sun 10/51                    & 0.029 & hackcode1 & -O -fast -fsingle \\
 Cray-2                       & 0.029 & TREECODE2   & REAL - Pitt, oct 91\\
 % SGI ???                      & 0.030 & hackcode1   & John Wangs machine
@@ -117,7 +137,7 @@ SGI Indigo		     & 0.045 & hackcode1   & default compilation \\
 CRAY YMP                     & 0.059 & hackcode1   & default compilation \\
 % bootes:
 Sparc-10                     & 0.063 & hackcode1   & using {\tt acc -cg92} \\
-486DX4-100 (linux)           & 0.068 & hackcode1   & default \\
+
 486DX2-66 (linux)            & 0.093 & hackcode1   & -DSINGLEPREC \\
 Sparc-2	                     & 0.099 & gravsim V1  & \\
 IBM R/6000                   & 0.109 & hackcode1   & default cc compiler \\
@@ -128,13 +148,13 @@ Multiflow 14/300             & 0.190 & hackcode1   & \\
 Convex C220                  & 0.290 & & \\
 NeXT                         & 0.240 &             & [ganymede 68040, nov 91]\\
 Sparcstation1+               & 0.340 & & \\
-Sun-4/60 Sparcstation 1      & 0.420 & & \\
+
 Alliant FX??                 & 0.430 & gravsim V1 & \\
 Alliant FX4/w 3 proc's       & 0.590 & & \\
 VAX workstation 3500         & 0.970 & & \\
 Sun-4/60 Sparcstation 1      & 1.040 & treecode2   & cf. C-code @ 0.420 \\
 Sun-3/110                    & 1.660 & hackcode1 & fpa.il \\
-Sun-3/60                     & 2.280 & & \\
+
 
 
 
@@ -196,6 +216,10 @@ Benchmark is taking 100,000 leapfrog steps. For 2D optimized
 potentials the timing on
 a Sparc-1 station is about 12" for ``log`` or ``plummer``, and 
 23" for ``teusan85`` in the core region (orbit remaining within
-the body of the bar).
+the body of the bar).  See also "make bench5", where one of the
+benchmarks computes an orbit. Here we take about 80M steps, in
+5 seconds, or 200M in the same amount as a sparcstation-1, or
+about 2000x faster, or about 20,000x faster than a Sun 3/60.
+
 
 
