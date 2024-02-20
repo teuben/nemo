@@ -8,3 +8,7 @@ git
 xorg-dev
 libpng-dev
 pgplot5
+#         for some python modules
+libeigen3-dev
+libgsl-dev
+libglpk-dev
