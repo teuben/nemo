@@ -1,5 +1,7 @@
-Troubleshooting (*)
-===================
+.. _trouble:
+
+Troubleshooting
+===============
 
 Fatal errors are caught by most NEMO programs by calling the function
 *error*;
@@ -9,7 +11,7 @@ If the **$ERROR** level is larger than 0,
 an error call can postpone the exit for the specified amount of times.
 If the **$DEBUG** level is positive,
 programs also produce a coredump, which can be further examined with
-local system utilities such as {\it adb(1)} or {\it dbx(1)}.  
+local system utilities such as *gdb(1)*.
 Most of the error messages should be descriptive enough, 
 but a list is being compiled for the somewhat less obvious ones. 
 
@@ -39,11 +41,11 @@ Now the list of error messages and their possible cures:
 
 ``assertion failed: file f line n``
 
-The program was compiled with an active {\it assert(2)}
+The program was compiled with an active *assert(2)*
 macro. An expression was expected to be 
 true at this point in the program. Program exits when
 this was not the case. An infamous failed assertion
-is {\tt file load.c line 91} or thereabouts, part
+is ``file load.c line 91`` or thereabouts, part
 of the ``hackcode1`` N-body integrator. Two
 particles were too close (or on top of each other)
 such that space could not be subdivided within
@@ -54,34 +56,30 @@ such that space could not be subdivided within
 
 Too many open files. Either the program didn't cleanup (close) its
 files after usage, or your current application really needs more
-than the default 16 which is {\tt \#define}d in {\tt filesecret.h}
-by the macro {\tt StrTabLen}.
-Recompile the {\tt filesecret.c} and the appropriate application
-tasks.
+than the default 16 which is ``#define``d in ``filesecret.h``
+by the macro ``StrTabLen``.
+Recompile the ``filesecret.c`` and the appropriate application tasks.
 
 
 ``get_tes:        set=A tes=B``
 
 This points to a programming error or error in the logic during 
-{\it filestruct(3NEMO)} I/O. During program execution a hierarchical
+*filestruct(3NEMO)* I/O. During program execution a hierarchical
 set A was requested to be closed, but the program was still within
 set B (set B had not been closed yet).
 
 ``gethdr:         ItemFlag = 0164``
 
-Input was attempted on a file assumed to be in old {\it filestruct(5NEMO)} format.
+Input was attempted on a file assumed to be in old *filestruct(5NEMO)* format.
 Apparently it was not, file may also have been
-in new filestruct format. 
-{\bf Hints:} Try {\it tsf(1NEMO)}, {\it hd(1NEMO)},
-{\it od(1)} and as last resort {\it more(1)}.
-
+in new filestruct format.
+Try programs like tsf, hd, hexdump, od.
 
 ``gethdr:         bad magic: 0164``
 
-Input was attempted on a file assumed to be in {\it filestruct(5NEMO)} format.
-Apparently it was not. 
-{\bf Hints:} Try {\it tsf(1NEMO)}, {\it hd(1NEMO)},
-{\it od(1)} and as last resort {\it more(1)}.
+Input was attempted on a file assumed to be in *filestruct(5NEMO)* format.
+Apparently it was not.
+Try programs like tsf, hd, hexdump, od.
 
 
 
@@ -91,7 +89,7 @@ It is possible that the non-portable dynamic object loader (loadobj.c)
 indeed proves to be non-portable here. Either you requested a wrong
 file, which is not in object format, or this UNIX version has
 a different object file structure. 
-{\bf Cure:} a lot of hacking in loadobj.c, assuming no pilot error.
+**Cure:** probably some hacking in loadobj.c.
 
 
 ``loadobj:        undefined symbol _XXXX``
@@ -102,17 +100,16 @@ object file to a program, which happens to call a function which
 was not linked in by the calling program. Find out in which filestructure
 'group' (Nbody, Orbit, Image)
 your invoked program falls, and add appropriate dummy code to the library
-function. {\it E.g.} in the case of {\it potential(5NEMO)} data files,
+function. For example in the case of *potential(5NEMO)* data files,
 you might have to add a specific math function to
 ``$NEMO/inc/mathlinker.h``, or add some coding to the
 end of ``$NEMO/src/orbit/potential/potential.c`` and rebuild the
-appropriate {\it orbit(1/3NEMO)} library/commands. The standard UNIX utility
-{\it nm(1)} help finding all undefined symbols in an object file. Cross
+appropriate *orbit(3NEMO)* library. The standard UNIX utility
+*nm(1)* help finding all undefined symbols in an object file. Cross
 check this with the executable.
 
 The second possibility is that the executable was stripped,
-i.e. it had no symbol table. Try {\tt nm(1)} to find out, or use
-{\tt file(1)}.
+i.e. it had no symbol table. Try *nm(1)* to find out, or *file(1)*
 
 The last cause is much more serious: 
 the non-portable dynamic object loader (loadobj.c)
@@ -155,11 +152,11 @@ executable format the dynamic object loader thinks it should have.
 
 ``No manual entry for XXX``
 
-No online manual page for this, although perhaps
+No online manual page for this program, although perhaps
 the MANPATH  environment variable
 has not been properly set, or your UNIX version does not support
 multiple man-root directories, in which case consult the manual
-page of man(1). 
+page of man(1).
 
 ``put_snap_XXX:   not implemented``
 
@@ -167,37 +164,21 @@ Here 'XXX' may be 'key' or 'aux' or something else.
 You have an old version of the code, while the datastructure of the
 snapshot has an 'XXX' (You may confirm this with ``tsf``.
 Recompile the program with a more recent
-version of 
-$\langle$snapshot/put\_snap.c$\rangle$ and possibly 
-$\langle$snapshot/body.h$\rangle$.
+version of  ``put_snap.c`` and ``body.h``.
 
 
 
 ``readparam:      No interactive input allowed``
 
-The keyword {\bf help=} or the equivalent environment variable {\bf HELP} has
+The keyword **help=** or the equivalent environment variable **HELP** has
 been assigned a digit to request interactive input. In addition you
 requested some file I/O through either redirection or piping. Get rid of
 at least one of them.
 
 
-``rsh:            could not execute rsh``
-
-Program could not execute itself on a remote machine. It may have
-various reasons for failing. The {\tt rsh} program may not exist on
-your host, in which case the {\it getparam(3NEMO)} might as well
-have been compiled without the {\bf REMOTE} flag. The other possibility
-is that the {\tt .rhosts} file on your system does not contain an entry
-for the machine you wanted to rsh to. In interactive usage it will
-then ask for a password, executed through  {\it execvp(3)} normally
-fails. A third possibility is that the remote machine did not
-have the executable present.
-
-
 ``Badly placed ()'s``
 
 ``bash: syntax error near unexpected token (``
-
 
 
 You tried to pass an expression with parentheses, but since the
@@ -228,27 +209,22 @@ have some meaning to NEMO. A default is usually activated when the
 environment variable is absent.
 
 
-
-- **BELL**
-  If BELL is set (1), a number of user-interface routines
-  become noisy. The default is 0.
-
 - **BTRPATH**
-  List of directories where {\it bodytrans(3NEMO)}
+  List of directories where *bodytrans(3NEMO)*
   functions can be stored for retrieval. 
-  The default is {\tt /usr/nemo/obj/bodytrans}.
-  Normally set to {\tt ".:\$NEMOOBJ/bodytrans"} in {\tt NEMORC}.
+  The default is ``/usr/nemo/obj/bodytrans``.
+  Normally set to ``".:$NEMOOBJ/bodytrans"``
 
 - **DEBUG**
   Debug level, must be between 0 and 9. The higher the
-  number, the more debug output appear on {\it stderr}. The default is
-  0. See {\it getparam(3NEMO)}. DEBUG is also used as system keyword,
+  number, the more debug output appear on *stderr*. The default is 0.
+  See *getparam(3NEMO)*. DEBUG is also used as system keyword,
+  ``debug=``, 
   in which case the environment variable is ignored.
 
 - **EDITOR**
   Editor used when helplevel 4 is included. 
-  The default is {\tt vi} (see {\it vi(1)}). 
-  See also {\it getparam(3NEMO)}.
+  The default is **vi**.  See also *getparam(3NEMO)*
 
 - **ERROR** Error level for irrecoverable errors. If this environment
   variable is present, and its numeric value is positive, this is the
@@ -259,65 +235,55 @@ environment variable is absent.
 - **HELP**
   Help level, can be any combination of numerically
   adding 0, 1, 2, and 4, and any combination 
-  of '?', 'a', 'h', 'p', 'd', 'q', 't' and 'n'. See {\it getparam(3NEMO)}. 
-  HELP is also used as system keyword, 
+  of '?', 'a', 'h', 'p', 'd', 'q', 't' and 'n'. See *getparam(3NEMO)*. 
+  HELP is also used as system keyword, ``help=``,
   in which case the environment variable is ignored. The numeric 
   part of the help string should come first.
 
 
 - **HISTORY**
   Setting it to 0 causes history data NOT to be
-  written, the default is 1 (see {\it getparam(3NEMO)}). A few
-  old programs may use the keyword {\tt amnesia=} for this.
+  written, the default is 1 (see *getparam(3NEMO)*). 
 
 
 - **HOSTTYPE**
-  In case of multiCPU environment, which has to
-  be served from the same {\tt NEMORC}  and/or {\tt .cshrc} file, this
-  variable will have the CPU type in it, {\it e.g.} {\tt sun3} or
-  {\tt sun4}, which are used to break up the {\tt bin},
-  {\tt lib} and {\tt obj} directories. It is also used in some
-  Makefiles.
+  In case of multiCPU environment, this variable can be used
+  to differentiate the environment.
 
 
 - **MANPATH**
   Used by UNIX to be able to address more than one
-  area of manual pages. Normally set to {\tt \$NEMO/man:/usr/man}
-  by the {\tt NEMORC} file. Does not work in Ultrix 3.0, 
-  but perhaps the {\tt -P} switch may be used.
+  area of manual pages. Normally set to ``$NEMO/man:/usr/man``,
+  though operating systems may have different ways to set
+  multiple entries to the manpath.
 
 
 - **NEMO**
   The root directory for NEMO. Normally the only
-  environment variable which a user has to define himself, 
-  in his {\tt .cshrc} startup file. No default.
+  environment variable which a user has to define.
+  No default.
 
 
 - **NEMOBIN**
-  Directory where nemo's binaries live, defined
-  in {\tt NEMORC}. No default. 
+  Directory where nemo's binaries live, should be part
+  of the ``$PATH`
 
 
 - **NEMODOC**
   Directory where the *.doc files for mirtool
   and miriad shell should be looked for. The system default
-  is ``$NEMO/man/doc``, set by NEMORC. No default.
+  is ``$NEMO/man/doc``.
 
 
 - **NEMODEF**
   Directory where keyword files from 
-  {\tt mirtool/miriad } are
+  ``mirtool/miriad`` are
   stored/retrieved. The default is 
   the current directory.
 
 
 - **NEMOLIB**
   Directory where nemo's libraries live.
-  Normally set by NEMO. No default.
-
-- **NEMOLOG**
-  Filename used as logfile for tasks submitted
-  through ``nemotool``.
 
 
 - **NEMOOBJ**
@@ -326,43 +292,31 @@ environment variable is absent.
   concern the user. Usually set by ``NEMORC``.
 
 
-- **NEMOPATH**
-  Same as NEMO, but kept for historical reasons.
-  It is normally defined in the ``NEMORC`` file. *--deprecated--*
-
-
 - **NEMOSITE**
   The site name, which is also an alias used
   in case the import/export features with the central site are to
-  be maintained.
+  be maintained. See also **HOSTTYPE**
 
 
 - **PATH**
   UNIX search-path for executables,
   normally set in your own shell startup file (.cshrc or .login). 
-  Should contain NEMOBIN early in the path definition,
-  before /usr/bin and /bin to redefine the cc and make programs.
-  See Appendix~\ref{a:setup}
 
 - **POTPATH**
   List of directories where *potential(5NEMO)*
   functions can be stored. The default is ``/usr/nemo/obj/potential``.
 
 
-- **REVIEW**
-  If this variable is set, the REVIEW section is
-  entered before the program is run. [default: not set or 0]
-
 - **YAPP**
   Yapp graphics output device.
-  Usage depends which {\it yapp(3NEMO)} the program was linked
-  with. See also {\it getparam(3NEMO)} and {\it yapp(5NEMO)}.
+  Usage depends which *yapp(3NEMO)* the program was linked
+  with. See also *getparam(3NEMO)* and *yapp(5NEMO)*.
   YAPP is also used as system keyword, 
   in which case the environment variable is ignored.
 
 
 
-See also the manual pages of {\it files(1NEMO)}.
+See also the manual pages of *files(1NEMO)*
 
 
 

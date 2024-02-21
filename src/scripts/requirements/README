@@ -1,0 +1,14 @@
+If your type of package manager is not listed
+here, also consult the files in $NEMO/src/scripts/linux
+or $NEMO/src/scripts/darwin.
+
+The top-level Makefile also have targets to install these, 
+viz. for debian type systems:
+
+	make install_apt
+
+or for redhat type systems:
+
+	make install_dnf
+
+These are enough to get a very basic NEMO compiled.

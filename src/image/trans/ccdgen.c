@@ -179,6 +179,7 @@ void nemo_main(void)
     }
 #endif
   }
+  dprintf(1,"Shape: %d x %d x %d\n", size[0],size[1],size[2]);
 
 
   if (!Object(iptr))

@@ -2,7 +2,7 @@
 #
 #  see also    https://github.com/ampl/gsl
 
-version=2.7.1
+version=2.7.1     # dec 2021
 wget=wgetc
 url=https://git.savannah.gnu.org/git/gsl.git
 git=0

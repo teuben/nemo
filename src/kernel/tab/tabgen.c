@@ -12,7 +12,8 @@ string defv[] = {
     "seed=123\n    Random seed",
     "fmt=%g\n      Format statement for output",
     "sep=s\n       column separator (s=space t=tab c=comma v=vertical bar)",
-    "VERSION=0.7\n 5-oct-2022 PJT",
+    "addrow=f\n    Add row number (1=first) as first column?",
+    "VERSION=0.8\n 14-feb-2024 PJT",
     NULL,
 };
 
@@ -45,6 +46,7 @@ void nemo_main()
   string fmt = getparam("fmt");
   my_real_proc my_random = NULL;
   string seps = getparam("sep");
+  bool Qrow = getbparam("addrow");
   char sep[8];
 
   if (seps[0] == 'c') strcpy(sep,",");
@@ -81,6 +83,7 @@ void nemo_main()
   } else
     // output to file as well
     for (i=0; i<nr; i++) {
+      if (Qrow) fprintf(ostr,"%d ", i+1);
       for (j=0; j<nc; j++) {
 	if (j>0) fprintf(ostr, "%s", sep);
 	fprintf(ostr,fmt, my_random(0.0, 1.0));

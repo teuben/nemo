@@ -10,7 +10,8 @@ Graphics and Image Display
 NEMO programs also need to display their data of course.
 Here we will make a distinction between *graphics* and *image* data.
 A simple but flexible *graphics* interface has been defined in NEMO and is used
-extensively in programs that need such output.
+extensively in programs that need such output.  These are controlled by
+the user via the ``yapp=`` (system) keyword.
 
 To display *image* data we rely mostly (but see *ccdplot(1NEMO)* for an exception)
 on external software.
@@ -32,7 +33,7 @@ If your output device is not supported by the ones available
 in the current yapp directory
 (``$NEMO/src/kernel/yapp``), you may have to write a new one!
 A reasonably experienced programmer writes a functional yapp-interface in
-a few hours.
+an hour or so.
 
 Although this method results in a flexible graphics interface, a
 program can currently only be linked with one yapp-interface, which
@@ -41,7 +42,7 @@ This might
 result in the existence of more than one version of the same
 program, each for another graphics output device.  We use the 
 convention that the ones for a
-postscript printer have a {\tt \_ps} appended to their original name: the 
+postscript printer have a ``_ps`` appended to their original name: the 
 program which has the original name is the one whose display is the current
 screen,
 Hence we may see program names such as {\tt snapplot} (the default),
@@ -54,7 +55,10 @@ If programs are linked with the multiplexing libraries
 pgplot, and the system keyword ``yapp=`` is then used to select
 a device (a default can be set by using the **YAPP** environment
 variable). 
-See also Appendix~\ref{a:iface}. 
+See also the :ref:`iface` chapter
+or the
+`yapp <https://teuben.github.io/nemo/man_html/yapp.5.html>`_
+manual page.
 
 However, despite these grim sounding words, we currently
 almost exclusively use the PGPLOT implementation of yapp, which is very flexible.
@@ -68,6 +72,8 @@ An experimental ``pyplot=`` keyword has been added to
 ``tabplot`` and ``tabhist``, which creates a simple python script
 that reproduces (to some degree) what those program intended to do.
 The intent is that these can be edited and made more functionality.
+There are also pure python versions of tabplot and tabhist under
+development.
 
 General Graphics Display
 ------------------------

@@ -8,7 +8,7 @@ Using NEMO
    for using NEMO.
 
 In order to use NEMO, you will need to modify your
-shell environment, for example in the ``bash`` shell
+shell environment, for example in the ``bash`` (or ``zsh``) shell
 this could be
 
 .. code-block:: bash
@@ -47,7 +47,8 @@ write permission in the ``$NEMO`` directory tree:
    tsf --help
 		
 and an updated version should now be available. Check the value of the ``VERSION=``
-value in the output of ``--help`` of the recompiled program.
+value in the output of ``--help`` of the recompiled program, or use the
+``help=h`` for a bit more help even.
 
 Writing NEMO program programs is covered in :ref:`progr`, or see
 also :ref:`install`.

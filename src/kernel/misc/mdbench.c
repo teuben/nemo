@@ -7,7 +7,7 @@
  */
 
 
-#define USE_OMP
+//#define USE_OMP
 
 #include <nemo.h>
 #include <mdarray.h>
@@ -23,17 +23,18 @@ string defv[] = {
   "flip=f\n          Reverse traversal through array, for benchmarking",
   "iter=1\n          Number of times to do the work, for benchmarking",
   "free=f\n          Free things we don't need anymore",
-
-  "nprocs=-1\n       Number of processors (if compiled with OMP)",
-  "VERSION=1.1\n     21-dec-2019 PJT",
+#ifdef USE_OMP
+  "nprocs=1\n        Number of processors",
+#else
+  "nprocs=-1\n       No OMP enabled",
+#endif
+  "VERSION=1.2\n     11-feb-2024 PJT",
   NULL,
 };
 
 string usage = "multidimensional array benchmarking (4D now)";
 
-string cvsid = "$Id$";
-
-void init1(int *dim,mdarray1 x, bool flip)
+void init1(int *dim, mdarray1 x, bool flip)
 {
   int i;
 
@@ -42,7 +43,7 @@ void init1(int *dim,mdarray1 x, bool flip)
   
 }
 
-void work1(int *dim,mdarray1 x, bool flip)
+void work1(int *dim, mdarray1 x, bool flip)
 {
   int i;
   real sum=0;
@@ -53,22 +54,22 @@ void work1(int *dim,mdarray1 x, bool flip)
 }
 
 
-void init2(int *dim,mdarray2 x,bool flip)
+void init2(int *dim, mdarray2 x, bool flip)
 {
   int i,j;
 
   if (flip) {
     for (i=0; i<dim[0]; i++)
       for (j=0; j<dim[1]; j++)
-	x[j][i] = (real)i+j;
+	x[j][i] = (real)i+j*10;
   } else {
     for (j=0; j<dim[1]; j++)
       for (i=0; i<dim[0]; i++)
-	x[j][i] = (real)i+j;
+	x[j][i] = (real)i+j*10;
   }
 }
 
-void work2(int *dim,mdarray2 x,bool flip)
+void work2(int *dim, mdarray2 x, bool flip)
 {
   int i,j;
   real sum=0;
@@ -85,7 +86,7 @@ void work2(int *dim,mdarray2 x,bool flip)
   dprintf(1,"sum2=%g\n",sum);
 }
 
-void init3(int *dim,mdarray3 x, bool flip)
+void init3(int *dim, mdarray3 x, bool flip)
 {
   int i,j,k;
 
@@ -94,16 +95,16 @@ void init3(int *dim,mdarray3 x, bool flip)
     for (i=0; i<dim[0]; i++)
       for (j=0; j<dim[1]; j++)
 	for (k=0; k<dim[2]; k++)
-	  x[k][j][i] = (real)i+j+k;
+	  x[k][j][i] = (real)i+j*10+k*100;
   } else {
     for (k=0; k<dim[2]; k++)
       for (j=0; j<dim[1]; j++)
 	for (i=0; i<dim[0]; i++)
-	  x[k][j][i] = (real)i+j+k;
+	  x[k][j][i] = (real)i+j*10+k*100;
   }
 }
 
-void work3(int *dim,mdarray3 x, bool flip)
+void work3(int *dim, mdarray3 x, bool flip)
 {
   int i,j,k;
   real sum=0;
@@ -130,12 +131,12 @@ void sinit3(int *dim, real x[][4][4], bool flip)
     for (i=0; i<dim[0]; i++)
       for (j=0; j<dim[1]; j++)
 	for (k=0; k<dim[2]; k++)
-	  x[k][j][i] = (real)i+j+k;
+	  x[k][j][i] = (real)i+j*10+k*100;
   } else {
     for (k=0; k<dim[2]; k++)
       for (j=0; j<dim[1]; j++)
 	for (i=0; i<dim[0]; i++)
-	  x[k][j][i] = (real)i+j+k;
+	  x[k][j][i] = (real)i+j*10+k*100;
   }
 }
 
@@ -158,7 +159,7 @@ void swork3(int *dim, real x[][4][4], bool flip)
   dprintf(1,"sum3=%g\n",sum);
 }
 
-void init4(int *dim,mdarray4 x, bool flip)
+void init4(int *dim, mdarray4 x, bool flip)
 {
   int i,j,k,l;
 
@@ -167,17 +168,17 @@ void init4(int *dim,mdarray4 x, bool flip)
       for (j=0; j<dim[1]; j++)
 	for (k=0; k<dim[2]; k++)
 	  for (l=0; l<dim[3]; l++)
-	    x[l][k][j][i] = (real)i+j+k+l;
+	    x[l][k][j][i] = (real)i+j*10+k*100+l*1000;
   } else {
     for (l=0; l<dim[3]; l++)
       for (k=0; k<dim[2]; k++)
 	for (j=0; j<dim[1]; j++)
 	  for (i=0; i<dim[0]; i++)
-	    x[l][k][j][i] = (real)i+j+k+l;
+	    x[l][k][j][i] = (real)i+j*10+k*100+l*1000;
   }
 }
 
-void work4(int *dim,mdarray4 x, bool flip)
+void work4(int *dim, mdarray4 x, bool flip)
 {
   int i,j,k,l;
   real sum=0;
@@ -198,7 +199,7 @@ void work4(int *dim,mdarray4 x, bool flip)
   dprintf(1,"sum4=%g\n",sum);
 }
 
-void work5(int *dim,mdarray5 x, bool flip)
+void work5(int *dim, mdarray5 x, bool flip)
 {
   int i,j,k,l,m;
 
@@ -219,7 +220,7 @@ void work5(int *dim,mdarray5 x, bool flip)
   }
 }
 
-void work6(int *dim,mdarray6 x, bool flip)
+void work6(int *dim, mdarray6 x, bool flip)
 {
   int i,j,k,l,m,n;
 
@@ -242,7 +243,7 @@ void work6(int *dim,mdarray6 x, bool flip)
   }
 }
 
-void work7(int *dim,mdarray7 x, bool flip)
+void work7(int *dim, mdarray7 x, bool flip)
 {
   int i,j,k,l,m,n,o;
 
@@ -267,7 +268,7 @@ void work7(int *dim,mdarray7 x, bool flip)
   }
 }
 
-void nemo_main(void)
+void nemo_main()
 {
   int i,dim[MDMAXDIM];
   int ndim  = nemoinpi(getparam("dim"),dim,MDMAXDIM);
@@ -277,7 +278,11 @@ void nemo_main(void)
   int ntest = getiparam("ntest");
   int iwork = getiparam("work");
   int nprocs= getiparam("nprocs");
-  int test1 = 10, test2=20, test3[test2][test1];   // in C99 this is now allowed
+#if 1
+  int test1 = 20, test2=10, test3[test2][test1];   // in C99 this is now allowed   +x50
+#else
+  int test1 = 20, test2=10, test3[10][20];         // old K&R style
+#endif
   real sum;
   int i1,i2,i3,i4;
 
@@ -293,11 +298,25 @@ void nemo_main(void)
   if (nprocs < 0) nprocs = omp_get_max_threads();
   dprintf(0,"Using OMP with nprocs=%d (or use OMP_NUM_THREADS)\n",nprocs);
 #else  
-  dprintf(0,"Using single CPU\n");
+  dprintf(0,"Using single CPU, no OMP enables\n");
+  if (nprocs>1) warning("No OMP was enabled");
 #endif
 
   /* C99 now does it the way I wanted it to work */
-  dprintf(1,"test3: 0x%x 0x%x 0x%x 0x%x 0x%x 0x%x\n",test3,test3[0],&test3[0][0],&test3[0][1],test3[1],&test3[1][0]);
+  dprintf(1,"pointer test3: 0x%x 0x%x 0x%x    0x%x   0x%x 0x%x\n",test3,test3[0],&test3[0][0],&test3[0][1],test3[1],&test3[1][0]);
+  // @todo test if address differences are the right amount of sizeof(int) and test1*sizeof(int)
+  void *p1 = test3;
+  void *p2 = test3[0];
+  void *p3 = &test3[0][0];
+  if (p1 != p2) warning("p1!=p2");
+  if (p1 != p3) warning("p1!=p3");
+  void *p4 = &test3[0][1];
+  if (p4-p3 != sizeof(int)) warning("p4 != p3+%d",sizeof(int));
+  void *p5 = test3[1];  
+  void *p6 = &test3[1][0];
+  if (p5 != p6) warning("p5!=p6");
+  if (p4-p3 != sizeof(int)) warning("p4 != p3+%d",sizeof(int));
+  if (p5-p1 != test1*sizeof(int)) warning("p5 != p1+%d",test1*sizeof(int));
 
   if (ndim != 4) error("ndim=4 for now");
 

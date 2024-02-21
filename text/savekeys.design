@@ -136,3 +136,5 @@ sudo apt install libgdbm-dev
 
 could memcached be used ?
 https://github.com/memcached/memcached/wiki
+
+how can pipes be implemented in python

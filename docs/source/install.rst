@@ -10,12 +10,17 @@ Installation from github
 ------------------------
 
 Installation is normally done by getting the source code via github.
+
+
+The One Liners
+~~~~~~~~~~~~~~
+
 Here is an example, just 3 lines in
 your (bash) shell, using a configurable helper script:
 
 .. code-block:: bash
 
-   wget https://teuben.github.io/nemo/install_nemo.sh
+   wget --backups=1 https://teuben.github.io/nemo/install_nemo.sh
 		
 or
 
@@ -35,6 +40,9 @@ where the arguments to the
 script are optional, but a few are
 given to show some often use non-defaults. See that script for more details,
 or use the `-h` flag
+
+A Fuller Example
+~~~~~~~~~~~~~~~~
 
 A more manual install, bypassing this script, can be:
 
@@ -62,6 +70,23 @@ enabled, the ``--disable-shared`` flag may need to be added.
 Disabling SIP is not recommended, so we've been told.	On a Mac you will also need to have
 Xcode installed, and gfortran (e.g. via brew). We need a special section on this
 
+Pre-conditions
+--------------
+
+For a minimal install a number of packages need to be present on your system. Compilers, the make
+utility, the csh shell, etc.   For some systems (e.g. Ubuntu) we keep a list of minimum
+requirements of the packages that you will need for a minimal install.n
+
+.. code-block:: bash
+
+   cd $NEMO
+   make install_apt
+   cat src/scripts/requirements/apt.txt
+   cat src/scripts/linux/ubuntu20.04
+
+where the last ``ubuntu20.04`` file is a more complete list of packages. See below for some expanded
+information on packing.
+
 
 Rebuilding
 ----------
@@ -80,7 +105,7 @@ Or more importantly, if you had edited the ``$NEMOLIB/makedefs`` file.
 Advanced Installation
 ---------------------
 
-It's a fact of life that you will not be satisified with the compiler
+It's a fact of life that you will not always be satisified with the compiler
 or libraries that your system provides. Add to this that if you don't
 have admin privilages, and you might be in for a rude awakening.
 
@@ -94,14 +119,16 @@ can configure packages using
       --with-prefix=$NEMO/opt
 
 
-of for *cmake* based packages
+or for *cmake* based packages
 
 .. code-block::
 
       -DCMAKE_INSTALL_PREFIX=$NEMO/opt
 
 as NEMO generally adds the $NEMO/opt tree search for include and library files, as
-well as adding its binaries to the search path.
+well as adding its binaries to the search path.  Even if you would not use NEMO itself,
+building your other software with the ``$NEMO/opt`` could be useful.
+
 
 For some packages this has been automated using the ``mknemo`` command, described in
 the next section.
@@ -110,8 +137,8 @@ mknemo
 ------
 
 Although the ``mknemo`` script was intended to quickly compile a NEMO program
-(from any directory), and without the need to know where the source code lives.
-It is now also used to aid the installation
+(from any directory), and without the need to know where the source code lives,
+it is now also used to aid the installation
 of a number of supported libraries that
 can be used by NEMO. They are compiled within ``$NEMO/local``, and will be installed
 in ``$NEMO/opt``, as described
@@ -136,7 +163,7 @@ With so many useful python packages around, and so many different methods
 (anaconda, conda, venv etc.), we will not recommend a method, as this will
 likely depend on your own situation. The installation examples below
 should give you enough information how to adapt it for your python
-installation.  
+workflow.
 
 However, if you install python from within NEMO, there will be a
 ``$NEMO/anaconda3`` directory, that gets automatically activated once
@@ -147,7 +174,7 @@ NEMO is loaded. Here is how you can install that version:
       cd $NEMO
       make python
 
-This will install a few python modules we often wind up using:
+This could also install a few python modules we often wind up using:
 **amuse-framework**,
 **amuse-galactics**,
 **amuse-gadget2**,
@@ -194,7 +221,7 @@ but here we list a few common ones:
 
 .. tab:: Ubuntu
 
-   The package manager is called ``apt``
+   Ubuntu: the package manager is called ``apt``
 
    .. code:: bash
 
@@ -211,7 +238,7 @@ but here we list a few common ones:
 
 .. tab:: Fedora
 
-   The package manager is called ``dnf`` (formerly ``rpm``)
+   Fedora: the package manager is called ``dnf`` (formerly ``rpm``)
 
    .. code:: bash
 
@@ -244,7 +271,7 @@ but here we list a few common ones:
    The package manager is called ``brew``, but installation is done via https://brew.sh   
 
    Normally installed in the users own space. Prepend with the usual "sudo" if need be. Can be used
-   on both Linux and Mac.  Recent versions have barred pgplot, because of licencing issues.
+   on both Linux and Mac.  Recent versions have barred pgplot, because of Caltech licencing issues.
 
    .. code:: bash
 

@@ -1,0 +1,47 @@
+#! /bin/bash
+#
+#  Install lapack (linpack and blas) within NEMO
+#  See also: https://www.netlib.org/lapack/lapacke.html for a C interface
+#
+#  Takes about 3mins to compile
+
+version=3.11.0    # nov-2022
+version=3.12.0    # nov-2023
+wget=wgetc
+git=1
+branch=main
+url1=https://github.com/Reference-LAPACK/lapack/
+url2=https://github.com/Reference-LAPACK/lapack/archive/refs/tags/
+
+for arg in $*; do
+  export $arg
+done
+
+    
+cd $NEMO/local
+
+
+if [ $git == 1 ]; then
+    if [ ! -e lapack ]; then
+	git clone $url1 
+    fi
+    version=git
+else
+    targz=$(printf v$version.tar.gz)
+    url=$(printf $url2/$targz)
+    echo TODO: process $targz $url
+    exit 0
+fi    
+
+cd lapack
+git checkout $branch
+git pull
+
+mkdir -p build
+cd build
+
+# suggested by cmake folks:  (note only the 2 lib files are installed)
+cmake -DCMAKE_INSTALL_LIBDIR=$NEMO/opt/lib ..
+cmake --build . -j --target install
+
+echo lapack $version  `date` >> $NEMO/opt/mknemo.log

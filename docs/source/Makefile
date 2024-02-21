@@ -24,6 +24,11 @@ pjt: lastmod html
 	rsync -av _build/html  ssh.astro.umd.edu:public_html/nemo/readthedocs
 	@echo https://www.astro.umd.edu/~teuben/nemo/readthedocs/html
 
+# PJT2 in case latexmk was not installed, the "make latexpdf" may fail, and manually may work here
+pjt2: lastmod html
+	make latexpdf; cd _build/latex/; pdflatex nemo.tex
+	@echo xdg-open _build/latex/nemo.pdf
+
 lastmod:
 	echo "Last modified `date`" > $(SOURCEDIR)/lastmod.rst
 #	echo "`git rev-list --count HEAD` and Revision `git rev-parse master`" >>  $(SOURCEDIR)/lastmod.rst

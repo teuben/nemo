@@ -106,23 +106,19 @@ The additional Tcl/Tk options (on a \fB#<\fP line immediately following the
 The code is horribly non-defensive, and does not handle syntax errors on the
 \fB#>\fP tag lines very well.
 
-.SH "TODO"
-Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
-out sections of the script. There is a tooltip available, but not implemented
-since the \fIhelp\fP portion of the GUI specification in V2 has not been
-implemented here.
-
-.SH "SEE ALSO"
-wish(1), zenity(1), qtrun(1NEMO)
-.PP
+.SH "EXAMPLES"
+With the -e flag a very simple example can be created:
 .nf
-.ta +2i
-http://sunscript.sun.com/	Home Page of Tcl/Tk (now gone)
-http://www.neosoft.com/		Archive of Tcl/Tk tools 
-http://tcl.sourceforge.net/	Current home page and source code repo
+
+    % tkrun -e > try1.csh
+    % chmod +x try1.csh
+    % tkrun ./try.csh
 .fi
 
-.SH "EXAMPLES"
+.PP
+
+And more:
+
 .nf
     % \fBtkrun design\fP
 .fi
@@ -195,6 +191,24 @@ command line arguments.  Here are the proposed GUI tags with generic key=val/hel
    k=3.141592    # k, use n        #> LINK  n
 
 .fi
+
+.SH "TODO"
+Help is not implemented yet. Neither is the -EXEC/+EXEC section to block
+out sections of the script. There is a tooltip available, but not implemented
+since the \fIhelp\fP portion of the GUI specification in V2 has not been
+implemented here.
+
+.SH "SEE ALSO"
+wish(1), zenity(1), qtrun(1NEMO)
+.PP
+.nf
+.ta +2i
+http://sunscript.sun.com/	Home Page of Tcl/Tk (now gone)
+http://www.neosoft.com/		Archive of Tcl/Tk tools 
+http://tcl.sourceforge.net/	Current home page and source code repo
+.fi
+
+   
 
 .SH "AUTHOR"
 Peter Teuben

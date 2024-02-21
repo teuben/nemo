@@ -20,6 +20,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <history.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/barebody.h>
@@ -37,7 +38,7 @@ string defv[] = {
     "nmodel=1\n			  number of copies to generate",
     "headline=\n		  random verbiage for output file",
     "epsilon=1.0e-10\n		  roundoff control parameter",
-    "VERSION=2.0b\n		  1-apr-01 PJT",
+    "VERSION=2.0c\n		  9-feb-2024 PJT",
     NULL,
 };
 
@@ -72,11 +73,11 @@ extern double xrandom(double,double);
 
 local real rad_m(real), phi_r(real), pickspeed(void);
 local real g_v(real), f_e(real), vnpick(rproc, real, real, real, string);
-local readmodel(string);
-local anisomod(void);
-local initgmax(void);
-local snapcenter(void);
-local snapwrite(stream);
+local void readmodel(string);
+local void anisomod(void);
+local void initgmax(void);
+local void snapcenter(void);
+local void snapwrite(stream);
 
 void nemo_main()
 {
@@ -116,7 +117,7 @@ void nemo_main()
  * anisotropic "energy" and distribution function from a file.
  */
 
-local readmodel(string name)
+local void readmodel(string name)
 {
     stream instr;
     int i;
@@ -151,7 +152,7 @@ local readmodel(string name)
 
 local real phix;		/* for pickspeed and g_v */
 
-local anisomod(void)
+local void anisomod(void)
 {
     real ftrun, x, rx, vx, svt, vr;
     vector vrad;
@@ -193,7 +194,7 @@ local anisomod(void)
 
 local real pmax[NGMAX], gmax[NGMAX], gcoef[3*NGMAX];
 
-local initgmax(void)
+local void initgmax(void)
 {
     int i, j;
     real vmax, v, g;
@@ -303,7 +304,7 @@ local real vnpick(rproc fun, real xl, real xh, real fh, string name)
  * SNAPCENTER: transform to center-of mass coordinates.
  */
 
-local snapcenter(void)
+local void snapcenter(void)
 {
     vector cmpos, cmvel, tmp;
     real mtot;
@@ -333,7 +334,7 @@ local snapcenter(void)
  * SNAPWRITE: output completed N-body model.
  */
 
-local snapwrite(stream outstr)
+local void snapwrite(stream outstr)
 {
     real tzero = 0.0;
     int bits = TimeBit | MassBit | PhaseSpaceBit;

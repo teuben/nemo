@@ -1,7 +1,7 @@
 .. _examples:
 
-Examples (*)
-============
+Examples
+========
 
 Now that we have a reasonable idea how NEMO is structured and used, we
 should be ready to go through some real examples Some of the examples
@@ -103,14 +103,14 @@ We then run the collision for 20 time units, with the standard
 N-body integrator based on the Barnes  "hierarchical tree" 
 algorithm:
 
-.. code-block::
+.. code-block:: bash
 
     7% hackcode1 in=i001.dat out=r001.dat tstop=20 freqout=2 \
        freq=40 eps=0.05 tol=0.7 options=mass,phase,phi > r001.log
 
 The integration frequency relates to the integration timestep as
 ``freq=40``, the softening length ``eps=0.05``, and
-opening angle or tolerance ``tol=$\theta$``.  A major output of
+opening angle or tolerance ``tol=theta``. A major output of
 masses, positions and potentials of all particles is done every
 ``1/freqout = 0.5`` time units, which corresponds to about 1/5 of a
 crossing time.  The standard output of the calculation is diverted to a
@@ -160,7 +160,7 @@ which makes it possible to display any *projection* the user wants.
 
 As an example consider:
 
-.. code-block::
+.. code-block:: bash
 
     12% snapplot in=r001.dat xvar=r yvar="x*vy-y*vx" xrange=0:10 yrange=-2:2 \
                  "visib=-0.2<z&z<0.2&i%2==0"
@@ -241,15 +241,12 @@ a new name.
    * - r
      - real
      - ``sqrt(x*x+y*y+z*z)``
-   * -
-     -
-     -  or: :math:`|\rvec|`
    * - ar
+     - real
+     - ``(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)``   or: (\rvec$\cdot$\avec)/$|$\rvec$|$ \\
+   * - at
      - real
      - ``sqrt(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)``
-   * - ar
-     - real
-     - ``(x*ax+y*ay+z*az)/sqrt(x*x+y*y+z*z)`` or: (\rvec$\cdot$\avec)/$|$\rvec$|$ \\
    * - aux
      - real
      - ``aux``
@@ -283,30 +280,18 @@ a new name.
    * - r
      - real
      - ``sqrt(x*x+y*y+z*z)``
-   * - 
-     -
-     - or: $|$\rvec$|$ \\
    * - t
      - real
      - ``t``
    * - v
      - real
      - ``sqrt(vx*vx+vy*vy+vz*vz)``
-   * - 
-     - 
-     -  or: $|$\vvec$|$ 
    * - vr
      - real
      - ``(x*vx+y*vy+z*vz)/sqrt(x*x+y*y+z*z)``
-   * - 
-     -
-     - or:  or: (\rvec$\cdot$\vvec)/$|$\rvec$|$ 
    * - vt
      - real
      - ``sqrt((vx*vx+vy*vy+vz*vz)-sqr(x*vx+y*vy+z*vz)/(x*x+y*y+z*z))``
-   * - 
-     -
-     - or: $\sqrt{}$(\vvec$^2$-(\rvec$\cdot$\vvec)$^2$/$|$\rvec$|^2$)\\
    * - vx 
      - real
      - ``vx``
@@ -350,14 +335,14 @@ a new name.
      - real
      - Declination, converted from radians to degrees (y)
 
-As usual an example:
+Here is an example of its use:
 
 .. code-block::
 
     13% bodytrans expr="x*vy-y*vz" type=real file=jz
 
-saves the expression for the angular momentum in a real
-valued bodytrans expression file, ``btr_jz.o`` which can in future programs
+this saves the expression for the angular momentum in a real
+valued bodytrans expression file, ``btr_jz.so`` which can in future programs
 be referenced as ``expr=jz`` (whenever a real-valued bodytrans
 expression is required), *e.g.*
 
@@ -368,7 +353,7 @@ expression is required), *e.g.*
 Alternatively, one can handcode a *bodytrans* function, compile it,
 and reference it locally. This is useful when you have truly complicated
 expressions that do not easily write themselves down on the commandline.
-The $(x,y)$ AITOFF projection are an example of
+The (x,y) AITOFF projection are an example of
 this. For example, consider the following code in a (local working directory)
 file ``btr_r2.c``:
 
@@ -389,9 +374,9 @@ By compiling this:
 
 .. code-block::
 
-    15% cc -c btr_r2.c
+    15% bake btr_r2.so
 
-an object file ``btr_r2.o`` is created in the local directory,
+a shared object file ``btr_r2.so`` is created in the local directory,
 which could be used in any real-valued bodytrans expression:
 
 .. code-block::
@@ -409,8 +394,12 @@ the system one (in ``$NEMOOBJ/bodytrans``).
 Advanced Analysis
 ~~~~~~~~~~~~~~~~~
 
+more to come
+
 Generating models
 ~~~~~~~~~~~~~~~~~
+
+more to come
 
 Using Unix pipes
 ~~~~~~~~~~~~~~~~
@@ -421,7 +410,7 @@ files. Here is an example of plotting the measured and expected
 surface brightness of a homogeneous sphere of 1,000,000 particles with
 unit mass and unit radius:
 
-.. code-block::
+.. code-block:: bash
    :linenos:
    :emphasize-lines: 3,5
    
@@ -431,7 +420,8 @@ unit mass and unit radius:
         ccdprint - x=  newline=t label=x |\
         tabmath - - '1.5/pi*sqrt(1-%1**2)' |\
         tabplot -  1 2,3 color=2,3 line=0,0,1,1 point=2,0.1,0,0 \
-          xlab="Radius" ylab="Surface Brightness" headline="mkconfig shape=ball" yapp=ball.png/png
+          xlab="Radius" ylab="Surface Brightness" headline="mkconfig shape=ball" \
+	  yapp=ball.png/png
 
 A few comments on the highlighted lines:  In **line 3** the ``out=`` keyword is not the second keyword,
 hence the explicit way it was written with the ``out=-``.
@@ -448,9 +438,7 @@ generally be able to fit all their data in (virtual) memory.
 Although programs usually free memory associated with data
 that is not needed anymore, there is a very clear maximum
 to the number of particles it can handle in a snapshot. By 
-default\footnote{one can recompile NEMO in single precision and define
-``body.h`` with less wastefull members}
-a particle takes up about 100 bytes, which limits the size of a 
+default a particle takes up about 100 bytes, which limits the size of a 
 snapshots.
 
 It may happen that your data was generated on a machine which had
@@ -466,7 +454,7 @@ operate serially, will do this properly and know about it.
 Of course it's best to split the snapshots on the machine with
 more memory
 
-.. code-block::
+.. code-block:: bash
 
     % snapsplit in=run1.out out=run1s.out nbody=10000
 
@@ -474,7 +462,7 @@ more memory
 If it is just one particular program (e.g. snapgrid
 that needs a lot of extra memory, the following may work:
 
-.. code-block::
+.. code-block:: bash
 
     % snapsplit in=run1.out out=- nbody=1000 times=3.5 |\
         snapgrid in=- out=run1.ccd nx=1000 ny=1000 stack=t
@@ -484,28 +472,21 @@ Using *tcppipe(1NEMO)* one can also pipe data from the machine with large memory
 to your workstation with smaller memory (B), as can be demonstrate with the following
 code snippet:
 
-.. code-block::
+.. code-block:: bash
 
     A% mkplummer - 1000 | tcppipe
     B% tcppipe A | tsf -
 
 
-Tables
-------
+   
 
-.. todo:: examples/Tables
-
-
-Potential
----------
-
-.. todo:: examples/Potential
-
-
+.. include:: table.rst   
 
 .. include:: orbit.rst
 
+.. include:: potential.rst
 
+.. include:: image.rst
 
 Exchanging data
 ---------------
@@ -513,9 +494,5 @@ Exchanging data
 .. todo:: examples/Exchanging Data
 
 
-
-.. include:: potential.rst
-
-.. include:: image.rst
 
 

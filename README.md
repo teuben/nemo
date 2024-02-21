@@ -12,8 +12,7 @@ is also advertised. A brief history of NEMO:
 
    * NEMO V1:	IAS release (Barnes, Hut & Teuben, 1987)
    * NEMO V2:	UMD release (Teuben, 1994)
-   * NEMO V3:	UMD release (Teuben, 2001) in CVS, with autoconf support and
-		hooks into manybody.org modules starlab and partiview
+   * NEMO V3:	UMD release (Teuben, 2001) in CVS, w/ autoconf, manybody, starlab and partiview
    * NEMO V4:   UMD/ESO release (2017) now maintained in github
 
 A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes. 
@@ -152,7 +151,7 @@ and print the phase space coordinates of the first particle, use this:
 There are several additional entry points if you are starting out with NEMO:
 
 * readthedocs: https://astronemo.readthedocs.io/en/latest/
-* github pages: https://teuben.github.io/nemo
+* github pages: https://teuben.github.io/nemo  (yes, these are the 1990s style webpages we used to maintain)
 * AAS 443 [iPoster](https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
@@ -178,3 +177,5 @@ Please use the following citation if you use NEMO in your work
 
 
 ![A Real Bar](docs/figures/realbar1.png)
+
+[taken from this example script](https://teuben.github.io/nemo/examples/realbar.html)

@@ -1,4 +1,5 @@
 # "minimum"  sudo apt install build-essential gfortran xorg-dev git tcsh cmake pgplot5
+# warning: wcslib-dev seems to swap in  the giza library in place of pgplot5
 #
 # general
 time
@@ -8,6 +9,7 @@ g++
 gfortran
 # clang ???
 xorg-dev
+libpng-dev
 # xorg took care of the next 3
 #sudo apt install libx11-dev -y
 #sudo apt install libxt-dev -y

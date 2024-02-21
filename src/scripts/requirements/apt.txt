@@ -1,0 +1,14 @@
+#   sudo apt install $(grep -v ^# apt.txt)
+gcc
+g++
+gfortran
+tcsh
+make
+git
+xorg-dev
+libpng-dev
+pgplot5
+#         for some python modules
+libeigen3-dev
+libgsl-dev
+libglpk-dev

@@ -6,7 +6,7 @@ Installation of the core version of NEMO is roughly follows (your yapp selection
       git clone https://github.com/teuben/nemo
       cd nemo
       ./configure --with-yapp=pgplot
-      make build check
+      make build check bench5
       source nemo_start.sh
 
 many more details can be found below. The biggest caveat on this scheme is the use of the pgplot
@@ -25,6 +25,39 @@ A simple test to create and plot a 1911 Plummer sphere is the following:
       snapplot p10.dat
       tsf p10.dat
 
+Failing pgplot
+--------------
+
+One of the more common installation problems is with pgplot: didn't compile or link. Usually
+you can find out with the command
+
+      mknemo tabplot
+
+what is wrong/missing.   Sometimes it's the X libraries, sometimes the PNG library, or something  with PGPLOT alltogther.
+We keep a version of pgplot for manual compilation, which might work well on a mac. Here's a sample
+to try in that case:
+
+      mknemo pgplot
+      #   this needs to work, otherwise the next steps make no sense
+      #   it will have deposited a number of pgplot things in $NEMOLIB
+      
+      ./configure --with-yapp=pgplot --enable-png --with-pgplot-prefix=$NEMOLIB
+      source nemo_start.sh
+      make build check
+      mknemo tabplot
+      tabgen - | tabplot - point=2,0.5
+
+If this still fails, and you just want a non-graphical NEMO to work, use the PS driver:
+
+      ./configure --with-yapp=ps
+      source nemo_start.sh
+      make build check
+      mknemo tabplot
+      tabgen - | tabplot - point=2,0.5
+      open yapp.ps
+
+there should be a file "yapp.ps" which you might be able to open or xdg-open
+
 
 Preconditions for Installation
 ==============================
@@ -34,7 +67,7 @@ C++ and Fortran highly recommended.  You will also need the usual build tools
 (make, csh, cmake)
 
 C		essential
-C++		highly recommended
+C++		highly recommended (pretty much essential)
 Fortran    	highly recommended
 tcsh		essential (some scripts are still in csh)
 make 		essential
@@ -107,8 +140,8 @@ install_nemo script has a number of key=val type command line options that
 will aid in using some of the configure options.
 
 
-MANUAL INSTALLATION OVERVIEW:
-=============================
+MANUAL INSTALLATION BACKGROUND:
+===============================
 
 The remainder of this document gives some more examples and background
 information in case the more automated script(s) to install NEMO have
@@ -193,6 +226,10 @@ a2) Installing PGPLOT (native CALTECH version)
 	(you may need to get the pgplot522.tar.gz, or newer, file from
         Caltech (http://astro.caltech.edu/~tjp/pgplot/) or a local repository)
 
+   or the newer command in a current NEMO:
+
+        mknemo pgplot
+
    On some older linux systems may need to create the following symbolic link
 		 ln -s /usr/X11R6 /usr/X11
 
@@ -240,8 +277,11 @@ a4) Install PGPLOT (giza github installation) -
     My experience with this version of pgplot is not ideal yet.
 
 b1) Installing HDF4
+
+
+   Preferred command:    mknemo hdf4
     
-   You only need the HDF library if you plan to work with the ZEUS or CMHOG 
+   You only need the HDF library if you plan to work with the ZEUS or CMHOG
    hydrocodes.
 	
    This requires:
@@ -258,11 +298,14 @@ b1) Installing HDF4
    make
    make install
 
+   examples:
+
    https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.14/src/CMake-hdf-4.2.14.tar.gz
    https://support.hdfgroup.org/ftp/HDF/releases/HDF4.2.14/src/hdf-4.2.14.tar.gz
 
 b2) Installing HDF5
 
+   Preferred command:    mknemo hdf5
 
    https://support.hdfgroup.org/ftp/HDF5/releases/hdf5-1.10/hdf5-1.10.6/src/hdf5-1.10.6.tar.gz
 
@@ -304,16 +347,14 @@ d) If you are on a system where you need to install NEMO and other packages,
 	lib	
 	man	
 	share
-   Packages that NEMO can use can then be installed under this hierarchy:
+   Packages that NEMO can use can then be installed under this hierarchy
+   easiest with the "mknemo" command:
 
-	gsl:		configure --prefix=$NEMO
-	hdf ?
-	hdf5            	
-	pgplot ?
+	gsl		configure --prefix=$NEMO
 	cfitsio		configure --prefix=$NEMO
 	plplot
-	gcc
-
+	netcdf4
+	
    NEMO can then use these packages as follows:
 
 	configure --with-gsl-prefix=$NEMO/opt

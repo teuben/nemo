@@ -46,9 +46,10 @@ Welcome to NEMO's documentation!
    python
    .. dirs
    .. gls
+   crosswalk
    trouble
    .. history
-   .. bench
+   bench
    refs
    codes
    glossary

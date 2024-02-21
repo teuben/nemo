@@ -33,7 +33,7 @@ string  defv[] = {              /* DEFAULT INPUT PARAMETERS */
     "time=0.0\n     Time at which snapshot taken",
     "headline=\n    Verbiage for output",
     "verbose=t\n    Be verbose when input requested",
-    "VERSION=2.2d\n 2-feb-2022 PJT",
+    "VERSION=2.2e\n 9-feb-2024 PJT",
     NULL,
 };
 
@@ -44,7 +44,7 @@ local int    nobj;                    /* number of bodies in snapshot */
 local real   tsnap;                   /* associated time of snapshot */
 local Body   *btab = NULL;            /* pointer to Nbody snapshot */
 
-local writesnap(stream outpt);
+local void writesnap(stream outpt);
 local string  getstring(void);
 local string  ordinal(int i);
 
@@ -66,7 +66,6 @@ local string rfmt = "%lf";
 
 void nemo_main()
 {
-    char    c;
     string oname;
     bool    Qverbose;
     stream  outstr;
@@ -125,7 +124,7 @@ void nemo_main()
  *                 accepts:  name, the name of the output file
  *-----------------------------------------------------------------------------
  */
-local writesnap(stream outpt)
+local void writesnap(stream outpt)
 {
     int     bits = TimeBit | MassBit | PhaseSpaceBit;
 
@@ -152,10 +151,12 @@ local string  getstring(void)
         *bp++ = c;
     *bp = 0;  /* terminate string */
     if (i)
-        return (copxstr(buf, sizeof(char)));
+        return copxstr(buf, sizeof(char));
     else
         error("getstring: string length exceeds %d characters\n",
                                                 BUFFERLENGTH - 1);
+    // never reached
+    return NULL;
 }
 
 /*-----------------------------------------------------------------------------

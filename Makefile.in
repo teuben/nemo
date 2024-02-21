@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 31-aug-2023 PJT
+VERSION = NEMO V4.4 19-feb-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -8,7 +8,7 @@ SHELL = /bin/bash
 JOBS = 
 
 #  useful for MacOSX since it can't distinguish case for most users (grmpfff)
-.PHONY:  INSTALL install scripts docs
+.PHONY:  INSTALL install scripts docs nemopy
 
 
 # The following subdirectories (1&2) are needed for installation, although only
@@ -144,6 +144,10 @@ help2:
 	@echo ""
 	@echo "Additional help targets: helpfind, helptar"
 
+## pull:      GIT pull to get the latest ('mknemo -u tsf' also does this)
+pull:
+	@git pull
+
 ## mknemos:   optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
 	@echo MKNEMOS=$(MKNEMOS)
@@ -222,6 +226,10 @@ dirs:
 	    echo "$(NEMOLIB)/maxsizes.h exists:";\
 	    ls -l $(NEMOLIB)/maxsizes.h;\
 	fi
+
+	@cp text/README.local local
+	@cp text/README.opt   opt
+	@cp text/README.obj   obj
 	@echo Done with dirs at `date`
 
 ## docs:      built htmol docs
@@ -530,7 +538,6 @@ diff_new:
 #	useful if you want to start with a clean slate
 config_clean:
 	rm -f $(CONFIG_CLEAN)
-
 CLEAN = bin lib obj adm/TIMESTAMP etc/motd $(CONFIG_CLEAN)
 
 CONFIG_CLEAN = config.h makedefs config.cache config.log config.status \
@@ -696,5 +703,13 @@ sure:	libs bins
 
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
+
+## install_apt:   install apt packages (e.g. ubuntu, debian)
+install_apt:
+	sudo apt install `grep -v ^# src/scripts/requirements/apt.txt`
+
+## install_dnf:   install dnf packages (e.g. fedora, redhat)
+install_dnf:
+	sudo dnf install `grep -v ^# src/scripts/requirements/dnf.txt`
 
 ## Alas, there are many more undocumented targets

@@ -1,0 +1,13 @@
+#   sudo dnf install $(grep -v ^# dnf.txt)
+gcc
+gcc-gfortran
+gcc-g++
+clang
+tcsh
+make
+libtirpc-devel 
+time
+libXext-devel
+pgplot
+pgplot-devel
+

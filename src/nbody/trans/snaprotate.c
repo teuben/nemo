@@ -39,13 +39,11 @@ string defv[] = {
     "tscale=\n             If used, scalefactor for angles with time of snapshot",
     "spinvector=\n         Alternate way to specify order= for one given theta",
     "select=pos,vel,acc\n  Select the vectors for rotation",
-    "VERSION=6.0b\n        13-feb-2013 PJT",
+    "VERSION=6.0c\n        3-feb-2024 PJT",
     NULL,
 };
 
 string usage = "rotate a snapshot";
-
-string cvsid="$Id$";
 
 #define DEG2RAD PI/180.0
 
@@ -61,7 +59,7 @@ void rotatevec(vector vec, matrix mat);
 void vrotate(real *sv, real angle, Body *btab, int nbody, int vecmask);
 void ArbitraryRotate(real *p,real theta,real *r);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     char *op, *order;
@@ -72,7 +70,7 @@ nemo_main()
     bool   invert, need_hist = TRUE;
     bool   Qtscale = hasvalue("tscale");
     string rotvects = getparam("select");
-    bool Qpos, Qvel, Qacc, Qspinvector = FALSE;
+    bool Qspinvector = FALSE;
     int vecmask = 0;
     
     if (strstr(rotvects,"pos")) vecmask |= PosBit;
