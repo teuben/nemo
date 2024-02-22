@@ -18,7 +18,7 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.8 -- 6-oct-2023"
+echo "install_nemo.sh:  Version 1.9 -- 19-feb-2024"
 
  opt=0                                                # install some optional mknemos= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
@@ -32,6 +32,7 @@ echo "install_nemo.sh:  Version 1.8 -- 6-oct-2023"
  check=1                                              # "make check" at the end?
  bench=0                                              # "make bench" at the end?
  bench5=1                                             # "make bench5" at the end?
+ build=3                                              # highest build level
  v=""                                                 # append version (e.g. "-12" or "12" to gcc/clang)
 #--HELP
 
@@ -164,14 +165,13 @@ CC=gcc$v CXX=g++$v FC=gfortran$v ./configure $opt $with_yapp
 
 #            make build (=build1,2,3,4)
 make build1
-make build2
-make build3
-make build4
-
-[ $python = 1 ] && make testpython
-[ $check  = 1 ] && make check
-[ $bench  = 1 ] && make bench
-[ $bench5 = 1 ] && make bench5
+[ $build -gt 1 ] && make build2
+[ $build -gt 2 ] && make build3
+[ $build -gt 3 ] && make build4
+[ $python  = 1 ] && make testpython
+[ $check   = 1 ] && make check
+[ $bench   = 1 ] && make bench
+[ $bench5  = 1 ] && make bench5
 
 
 date1=$(date)

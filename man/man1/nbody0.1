@@ -1,9 +1,12 @@
 .TH NBODY0 1NEMO "9 February 2019"
-.SH NAME
+
+.SH "NAME"
 nbody0, nbody00, nbody0h4 - direct summation Aarseth N-body integrator
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 nbody0 in=snap_in out=snap_out [keyword=value ...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBnbody0\fP is the NEMO adaptation of version 0 (the \fIMicky Mouse\fP version)
 of Aarseth's N-body integrator, as published in Appendix 4B of Binney & Tremaine (1987).
 It is a direct N-body integrator, \fIi.e.\fP for
@@ -35,7 +38,8 @@ encounters.
 based on the f2c translated code (and hence will look odd and ugly in places).
 It has more debug output (debug=1 and higher) and also fixes problems with
 orbits like the Figure8 orbit (see BUGS below).
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order when the keyword
 is also given
 .TP 25
@@ -93,7 +97,8 @@ keywords. Currently implemented are: \fBstep\fP, outputs the current
 timestep per particle  in the \fIAux\fP array of 
 a \fIsnapshot(5NEMO)\fP.
 Default: none.
-.SH LIMITATIONS
+
+.SH "LIMITATIONS"
 The code has a hardcoded maximum number of particles in the fortran
 and C code (File: \fInmax.h\fP), change the relevant PARAMETER statement 
 to whatever is required. Using NEMO install the Makefile
@@ -121,7 +126,8 @@ needed in this case. See code comments labeled ``\fISED\fP''.
 A C version is also available, as nbody0.c, though the Makefile
 needs the target \fBnbody00\fP to install it. The user interface is
 as that of nbody0, except the keyword \fBf3dot=\fP was added.
-.SH BUGS
+
+.SH "BUGS"
 Starting time of initial conditions is (re)set to 0, even if the snapshot
 had another time.
 .PP
@@ -133,7 +139,8 @@ timestep for the 3rd particle blows up. Interestingly enough, some
 compilers (e.g. gnu) will happily work around this if optimization
 is turned on, but fail with pure debugging (OPT=-g) since only
 in this case the expression will compute as exactly 0.
-.SH STORAGE
+
+.SH "STORAGE"
 A total of order \fI600.NMAX\fP bytes is needed, for a given
 maximum of \fINMAX\fP particles. This breaks down as follows:
 .PP
@@ -145,9 +152,11 @@ up to \fI160.NMAX\fP bytes.
 The \fBC\fP I/O code allocates space dynamically; and through limitations
 of the fortran code, a maximum of \fI100.NMAX\fP double's are needed,
 which means \fI400.NMAX\fP bytes.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Sverre Aarseth (F77), Peter Teuben (C)
-.SH GENEALOGY
+
+.SH "GENEALOGY"
 The \fBnbody*\fP series of NBODY integrators were all originally written
 by Sverre Aarseth, and exist in many forms throughout the scientific
 community. The list
@@ -163,7 +172,8 @@ nbody5    	with regularization handling triples & binaries
 nbody6     	... for new parallel machine
 nbody7		... secret
 .fi
-.SH NBODY0H4
+
+.SH "NBODY0H4"
 On Sverre's CODES site, he also presents \fBnbody0\fP,
 a simple \fICompact fourth-order Hermite block-step code\fP.
 We include it here as \fBnbody0h4\fP. This code has an unusual interface, in that it reads
@@ -174,13 +184,15 @@ the input from standard input, the first line contains the usual
 (though note the softening EPS is entered in the square value). This is followed
 by \fBN\fP lines of m,x,y,z,vx,vy,vz for each of the particles each.
 At some point in the future we may provide a wrapper for this. 
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
 NEMO/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
 NEMO/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 hackcode1(1NEMO), runbody1(1NEMO), runbody2(1NEMO), gravidy(1NEMO), snapshot(5NEMO), atos(1NEMO), stoa(1NEMO)
 .PP
 Binney, J. & Tremaine, S. \fIGalactic Dynamics\fP.
@@ -199,9 +211,10 @@ http://adsabs.harvard.edu/abs/1999PASP..111.1333A
 S.J. Aarseth, 2003,
 "Gravitational N-Body Simulations : Tools and Algorithms"
 (Cambridge Univ. Press).
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 30-jun-89	V1.0 created + NEMO interfaces to fortran source	PJT
 3-jul-89	V1.1 mods to f2c interface, name of keywords       	PJT
 24-jan-90	V1.2 all in double precision                     	PJT
