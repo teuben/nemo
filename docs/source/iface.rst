@@ -16,7 +16,7 @@ can be executing by typing
 
 .. code-block::
 
-    mkplummer
+    mkplummer --help
 
 from your terminal shell. We first explain the command line interface to NEMO programs.
 Subsequently, followed by some of the more advanced concepts of this
