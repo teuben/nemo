@@ -1,12 +1,15 @@
 /*
  *  SNAPBENCH:  snapshot benchmark to scale masses
  *
- *    mkplummer p6 1000000 massname='n(m)' massrange=1,2
- *    time snapbench p6 'mass=3.1415'   bodytrans=f iter=10
- *    time snapbench p6 'mass=3.1415*m' bodytrans=f iter=10  
+ *    mkplummer p6 10000000 massname='n(m)' massrange=1,2
+ *    /usr/bin/time snapbench p6 'mass=3.1415'   bodytrans=f iter=1000    6.6"
+ *    /usr/bin/time snapbench p6 'mass=3.1415'   bodytrans=t iter=1000   13.6
+ *    /usr/bin/time snapbench p6 'mass=3.1415*m' bodytrans=t iter=1000    6.8
  *  
- *     13-mar-05  Created after Walter's comment at Vegas05          PJT
+ *     13-mar-05  Created after Walter's comment at Vegas05            PJT
+ *     25-feb-2024   ansi cleanup + documented odd behavior            PJT
  */
+
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
@@ -16,6 +19,7 @@
 #include <snapshot/body.h>
 #include <snapshot/get_snap.c>
 #include <snapshot/put_snap.c>
+#include <bodytrans.h>
 
 string defv[] = {
     "in=???\n		      input (snapshot) file",
@@ -23,47 +27,48 @@ string defv[] = {
     "bodytrans=t\n            Use bodytrans",
     "iter=10\n                Number of iterations to test",
     "out=\n                   output (snapshot) file, if needed",
-    "VERSION=1.0\n            13-mar-05 PJT",
+    "VERSION=1.1\n            25-feb-2024 PJT",
     NULL,
 };
 
-string usage="(re)assign masses to a snapshot";
+string usage="benchmark (re)assign masses to a snapshot";
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
+// using an inline made no difference
+inline real mult(real a, real b) { return a*b; }
 
-extern double frandom(double, double, rproc);
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     real   tsnap, mscale;
     Body  *btab = NULL, *bp;
-    int i, j, n, nbody, nbodymass, bits, bitsmass, seed;
-    rproc  bfunc, btrtrans();
+    int i, j, niter, nbody, bits;
+    bool Qtrans = getbparam("bodytrans");
+    rproc  bfunc;
 
     instr = stropen(getparam("in"), "r");
     outstr = hasvalue("out") ? stropen(getparam("out"),"w") : NULL;
 
-    n = getiparam("iter");
+    niter = getiparam("iter");
 
     get_history(instr);
     if (!get_tag_ok(instr, SnapShotTag)) 
       error("not a snapshot");
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
 
-    if (getbparam("bodytrans")) {
-      dprintf(0,"bodytrans scaling, iter=%d\n",n);
+    if (Qtrans) {
+      dprintf(0,"bodytrans scaling, iter=%d\n",niter);
       bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
 
-      for (j=0; j<n; j++)
+      for (j=0; j<niter; j++)
 	for (bp=btab, i=0; i<nbody; bp++,i++)
 	  Mass(bp) = bfunc(bp, tsnap, i);
     } else {
-      dprintf(0,"simple inline scaling, iter=%d\n",n);
-      mscale = getdparam("mass");
-      for (j=0; j<n; j++)
+      dprintf(0,"simple inline scaling, iter=%d\n",niter);
+      mscale = getdparam("mass");            // use it as scaling parameter
+      for (j=0; j<niter; j++)
 	for (bp=btab, i=0; i<nbody; bp++,i++)
-	  Mass(bp) = mscale*Mass(bp);
+	  Mass(bp) = mscale*Mass(bp);    // or use mult(mscale, Mass(bp));
     }
 
     strclose(instr);
