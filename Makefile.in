@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 19-feb-2024 PJT
+VERSION = NEMO V4.4 20-feb-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -519,6 +519,10 @@ helpconfig:
 	@echo config, configure, config_extra, config_clean
 
 postconfig:	dirs config_extra scripts
+
+## reconfig:  re-configure in case their dependent files changed (your call)
+reconfig:
+	./config.status
 
 config:	configure
 	./configure
