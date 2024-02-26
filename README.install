@@ -25,6 +25,8 @@ A simple test to create and plot a 1911 Plummer sphere is the following:
       snapplot p10.dat
       tsf p10.dat
 
+
+
 Failing pgplot
 --------------
 
@@ -33,8 +35,8 @@ you can find out with the command
 
       mknemo tabplot
 
-what is wrong/missing.   Sometimes it's the X libraries, sometimes the PNG library, or something  with PGPLOT alltogther.
-We keep a version of pgplot for manual compilation, which might work well on a mac. Here's a sample
+what is wrong/missing.   Sometimes it's the X libraries, sometimes the PNG library, or something  with PGPLOT alltogether.
+We keep a version of pgplot for manual compilation, which might work well on a mac. Here's an example
 to try in that case:
 
       mknemo pgplot
@@ -47,7 +49,7 @@ to try in that case:
       mknemo tabplot
       tabgen - | tabplot - point=2,0.5
 
-If this still fails, and you just want a non-graphical NEMO to work, use the PS driver:
+If this still fails, and you just want a non-graphical NEMO to work, use the PS driver instead:
 
       ./configure --with-yapp=ps
       source nemo_start.sh
@@ -56,7 +58,7 @@ If this still fails, and you just want a non-graphical NEMO to work, use the PS 
       tabgen - | tabplot - point=2,0.5
       open yapp.ps
 
-there should be a file "yapp.ps" which you might be able to open or xdg-open
+there should be a file "yapp.ps" which you might be able to open or xdg-open.
 
 
 Preconditions for Installation
@@ -64,10 +66,9 @@ Preconditions for Installation
 
 To build the basics of NEMO you need compilers (C/C++/Fortran).  C is essential,
 C++ and Fortran highly recommended.  You will also need the usual build tools
-(make, csh, cmake)
 
 C		essential
-C++		highly recommended (pretty much essential)
+C++		highly recommended (essential for gyrfalcON)
 Fortran    	highly recommended
 tcsh		essential (some scripts are still in csh)
 make 		essential
@@ -80,22 +81,34 @@ netcdf          recommended for some tools
 python3		recommended (a builtin anaconda3 is one option)
 boost           recommended (for uns_projects)
 swig            recommended (for unsio)
-x11, cairo      needed depending on the selected yapp graphics driver
+x11, cairo      essential, but depending on the selected yapp graphics driver
+
+
+For debian and redhat based systems, one of these may help to install packages:
+
+    make install_apt
+or
+    make install_dnf
+
+based on a package requirements style file in $NEMO/src/scripts/requirements.
+
+
+
 
 Depending on your packaging tools (apt, yum, dnf, brew, port, ....) these are hidden under
 various package names
 
-dpkg -L pgplot5
-dpkg -S /usr/include/cpgplot.h
-dpkg -l
+   dpkg -L pgplot5
+   dpkg -S /usr/include/cpgplot.h
+   dpkg -l
 
-rpm -ql pgplot
-rpm -qf /usr/lib64/libpgplot.so.5.2.2
-rpm -qa
+   rpm -ql pgplot
+   rpm -qf /usr/lib64/libpgplot.so.5.2.2
+   rpm -qa
 
 or your system manager has hidden them in a module
 
-module avail
+   module avail
 
 See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/brew (for Mac too)
 
@@ -112,7 +125,6 @@ See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/b
 -libhdf4-dev
 -libhdf5-dev
 -hdf5-tools
-
 
 
 DOWNLOAD and INSTALLATION: two examples 
