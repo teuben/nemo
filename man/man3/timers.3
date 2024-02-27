@@ -1,28 +1,37 @@
-.TH TIMERS 3NEMO "24 April 2004"
-.SH NAME
+.TH TIMERS 3NEMO "25 February 2024"
+
+.SH "NAME"
 init_timers, stamp_timers, diff_timers - routines to time your code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 .B #include <timers.h>
 .PP
 .B void init_timers(int maxtimers);
+.B void init_timers2(int maxtimers, int mode);
 .B void stamp_timers(int slot);
 .B long long diff_timers(int slot1, int slot2);
+.B double diff_timers2(int slot1, int slot2);
 .PP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIinit_timers\fP is used to allocate a set of \fBmaxtimers\fP slots to
 hold timer information. \fIstamp_timers\fP is used remember
 the timer info in a \fBslot\fP. The difference between
 \fBslot2\fP and \fBslot1\fP (slot2>slot1 is normally assumed) is 
 returned by \fIdiff_timers\fP.
 .PP
+\fIinit_timers2\fP (mode=1) was introduced to also use \fIcputime(3NEMO)\fP, at the slight cost
+of more ticks.  \fIdiff_timers2\fP will report the difference in CPU seconds (not minutes!).
+.PP
 Timers use a low level assembly routine to directly accces the TSC (Time Stamp Counter),
 and have the usual flaws on multi proccesing cores and multi-tasking operating systems
 how to translate this to a CPU usage.  For long term stability routines such as
 \fIcputime(3NEMO)\fP should be used,for short fine grained understanding, these routines
 could be useful.
-.SH EXAMPLE
+
+.SH "EXAMPLE"
 .nf
     init_timers(n+1);
     for (i=0; i<n; i++)
@@ -38,22 +47,28 @@ could be useful.
     }
 
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 Currently this function is only implemented on Intel hardware, where it
-uses the Time Stamp Counter. For other processors 0 is returned.
+uses the Time Stamp Counter. It seems to work on AMD as well.
+For other processors 0 is returned.
 .PP
 long long is assumed to hold 64 bits, where unsigned is assumed 32 bit.
-.SH SEE ALSO
-cputime(3NEMO)
-.SH AUTHOR
+
+.SH "SEE ALSO"
+cputime(3NEMO), clock(2), time(2)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +1.5i
 ~/src/kernel/misc  	timers.c
 .fi
-.SH UPDATE HISTORY
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.5i +5.5i
 23-apr-04	created		PJT
+25-feb-2024	added the cputime option	PJT
 .fi

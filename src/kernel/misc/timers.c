@@ -35,6 +35,7 @@ long long readTSC(void) {
 #endif
 
 static long long *timers = NULL;
+static double *cputimers = NULL;
 static int maxtimers = 0;
 
 void init_timers(int n)
@@ -58,11 +59,20 @@ void init_timers(int n)
   }
 }
 
+void init_timers2(int n, int mode)
+{
+  if (mode > 0) {
+    cputimers = (double *) allocate(n*sizeof(double));
+  }
+  init_timers(n);
+}
+
 void stamp_timers(int i)
 {
   if (maxtimers==0) error("init_timers not called");
   if (i >= maxtimers) error("i=%d maxtimers=%d",i,maxtimers);
   timers[i] = readTSC();
+  if (cputimers) cputimers[i] = 60*cputime();
 }
 
 long long diff_timers(int i, int j)
@@ -72,6 +82,16 @@ long long diff_timers(int i, int j)
   if (j >= maxtimers) error("j=%d maxtimers=%d",j,maxtimers);
   
   return timers[j]-timers[i];
+}
+
+double diff_timers2(int i, int j)
+{
+  if (cputimers == NULL) return 0.0;
+  if (maxtimers==0) error("init_timers not called");
+  if (i >= maxtimers) error("i=%d maxtimers=%d",i,maxtimers);
+  if (j >= maxtimers) error("j=%d maxtimers=%d",j,maxtimers);
+  
+  return cputimers[j]-cputimers[i];
 }
 
 
