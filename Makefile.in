@@ -647,7 +647,7 @@ bench:   benchtest
 
 benchtest:
 	(source nemo_start.sh; src/scripts/benchsuite)
-	@echo 'Testing Benchsuite: Success!'
+	@echo 'Found following timing results:"
 	@grep ^NEMOBENCH benchsuite.log
 
 bench0:
