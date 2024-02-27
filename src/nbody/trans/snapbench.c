@@ -23,12 +23,13 @@
 #include <bodytrans.h>
 
 string defv[] = {
-    "in=???\n		      input (snapshot) file",
-    "mass=1\n		      expression for new masses",
+    "in=???\n		      Input (snapshot) file",
+    "mass=1\n	              Expression for new masses",
     "bodytrans=t\n            Use bodytrans",
     "iter=10\n                Number of iterations to test",
+    "body=t\n                 Keep Body() structure, or simple array?",
     "out=\n                   output (snapshot) file, if needed",
-    "VERSION=1.1\n            25-feb-2024 PJT",
+    "VERSION=1.2\n            27-feb-2024 PJT",
     NULL,
 };
 
@@ -41,13 +42,15 @@ inline real mult(real a, real b) { return a*b; }
 void nemo_main()
 {
     stream instr, outstr;
-    real   tsnap, mscale;
+    real   tsnap, mscale, *mass;
     Body  *btab = NULL, *bp;
     int i, j, nbody, bits;
     rproc  bfunc;
-    real t0,t1,t2;
     bool Qtrans = getbparam("bodytrans");
+    bool Qbody = getbparam("body");
     int niter = getiparam("iter");
+
+    if (!Qbody) Qtrans=FALSE;
 
     init_timers2(niter,1);
     stamp_timers(0);
@@ -55,26 +58,39 @@ void nemo_main()
     instr = stropen(getparam("in"), "r");
     outstr = hasvalue("out") ? stropen(getparam("out"),"w") : NULL;
     
-
     get_history(instr);
     if (!get_tag_ok(instr, SnapShotTag)) 
       error("not a snapshot");
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
-    stamp_timers(1);
     
     if (Qtrans) {
       dprintf(0,"bodytrans scaling, iter=%d\n",niter);
       bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
-
+      stamp_timers(1);
       for (j=0; j<niter; j++)
 	for (bp=btab, i=0; i<nbody; bp++,i++)
 	  Mass(bp) = bfunc(bp, tsnap, i);
+      dprintf(2,"final mass:  %g\n", Mass(btab));
     } else {
-      dprintf(0,"simple inline scaling, iter=%d\n",niter);
-      mscale = getdparam("mass");            // use it as scaling parameter
-      for (j=0; j<niter; j++)
+      mscale = getdparam("mass");           // use it as adding parameter
+      if (Qbody) {
+	dprintf(0,"simple inline scaling, iter=%d mscale=%g\n",niter,mscale);
+	stamp_timers(1);	
+	for (j=0; j<niter; j++)
+	  for (bp=btab, i=0; i<nbody; bp++,i++)
+	    Mass(bp) += mscale;       // or use mult(mscale, Mass(bp));
+	dprintf(2,"final mass:  %g\n", Mass(btab));
+      } else {
+	dprintf(0,"simple array scaling, iter=%d mscale=%g\n",niter,mscale);
+	mass = (real *) allocate(nbody * sizeof(real));
 	for (bp=btab, i=0; i<nbody; bp++,i++)
-	  Mass(bp) = mscale*Mass(bp);    // or use mult(mscale, Mass(bp));
+	  mass[i] = Mass(bp);
+	stamp_timers(1);	
+	for (j=0; j<niter; j++)
+	  for (i=0; i<nbody; i++)
+	    mass[i] += mscale;
+	dprintf(2,"final mass: %g\n",mass[0]);
+      }
     }
     stamp_timers(2);
 
