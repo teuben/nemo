@@ -3,6 +3,9 @@ image processing and tabular data manipulation. Documentation is maintained
 in the github pages, https://teuben.github.io/nemo , and a manual in
 https://astronemo.readthedocs.io
 
+$$\ddot{ {\bf r}}_i \, = \, -G \sum_{j=1;\, j \not = \,i}^N {m_j \,({\bf r}_i - {\bf r}_j)  \over {(r_{ij}^2 + \epsi
+lon^2)^{3/2} } }$$
+
 ## History
 
 This is the 4th major release of NEMO,  and although data are compatible
