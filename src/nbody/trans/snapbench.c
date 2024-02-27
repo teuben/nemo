@@ -14,6 +14,7 @@
 #include <getparam.h>
 #include <vectmath.h>
 #include <filestruct.h>
+#include <timers.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -42,20 +43,25 @@ void nemo_main()
     stream instr, outstr;
     real   tsnap, mscale;
     Body  *btab = NULL, *bp;
-    int i, j, niter, nbody, bits;
-    bool Qtrans = getbparam("bodytrans");
+    int i, j, nbody, bits;
     rproc  bfunc;
+    real t0,t1,t2;
+    bool Qtrans = getbparam("bodytrans");
+    int niter = getiparam("iter");
+
+    init_timers(niter);
+    stamp_timers(0);
 
     instr = stropen(getparam("in"), "r");
     outstr = hasvalue("out") ? stropen(getparam("out"),"w") : NULL;
-
-    niter = getiparam("iter");
+    
 
     get_history(instr);
     if (!get_tag_ok(instr, SnapShotTag)) 
       error("not a snapshot");
     get_snap(instr, &btab, &nbody, &tsnap, &bits);
-
+    stamp_timers(1);
+    
     if (Qtrans) {
       dprintf(0,"bodytrans scaling, iter=%d\n",niter);
       bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
@@ -70,6 +76,7 @@ void nemo_main()
 	for (bp=btab, i=0; i<nbody; bp++,i++)
 	  Mass(bp) = mscale*Mass(bp);    // or use mult(mscale, Mass(bp));
     }
+    stamp_timers(2);
 
     strclose(instr);
     if (outstr) { 
@@ -77,4 +84,10 @@ void nemo_main()
       put_snap(outstr, &btab, &nbody, &tsnap, &bits);
       strclose(outstr);
     }
+    stamp_timers(3);
+    dprintf(0,"%Ld %Ld %Ld\n",
+	    diff_timers(0,1),
+	    diff_timers(1,2),
+	    diff_timers(2,3));
+	    
 }
