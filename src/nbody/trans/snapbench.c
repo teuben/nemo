@@ -49,7 +49,7 @@ void nemo_main()
     bool Qtrans = getbparam("bodytrans");
     int niter = getiparam("iter");
 
-    init_timers(niter);
+    init_timers2(niter,1);
     stamp_timers(0);
 
     instr = stropen(getparam("in"), "r");
@@ -85,9 +85,14 @@ void nemo_main()
       strclose(outstr);
     }
     stamp_timers(3);
-    dprintf(0,"%Ld %Ld %Ld\n",
+    dprintf(0,"%Ld %Ld %Ld ticks\n",
 	    diff_timers(0,1),
 	    diff_timers(1,2),
 	    diff_timers(2,3));
+	    
+    dprintf(0,"%g %g %g sec\n",
+	    diff_timers2(0,1),
+	    diff_timers2(1,2),
+	    diff_timers2(2,3));
 	    
 }
