@@ -5,8 +5,11 @@
 #set -x
 
 
+_version="28-feb-2024"
 if [ $# -eq 0 ]; then
-    echo Usage $0 cmd
+    echo "Usage $0 cmd [args]"
+    echo "Version $_version"
+    echo "Simplified user/system/elapses/percentage /usr/bin/time output for benchmarks"
     exit 0
 fi
 
