@@ -29,15 +29,15 @@ p6:
 	nemobench mkplummer p6 nbody="$(MBODY)*1000000"
 
 bench0:	p6
-	nemobench snapbench p6 'mass=3.1415'   iter=1000 mode=0
+	nemobench snapbench p6 'mass=1.0001'   iter=1000 mode=0
 
 bench1: p6
-	nemobench snapbench p6 'mass=3.1415'   iter=1000 mode=1
+	nemobench snapbench p6 'mass=1.0001*m' iter=1000 mode=1
 
 bench2: p6
-	nemobench snapbench p6 'mass=3.1415*m' iter=1000 mode=2
+	nemobench snapbench p6 'mass=1.0001'   iter=1000 mode=2
 
 bench3: p6
-	nemobench snapbench p6 'mass=3.1415*m' iter=1000 mode=3
+	nemobench snapbench p6 'mass=1.0001'   iter=1000 mode=3
 
 
