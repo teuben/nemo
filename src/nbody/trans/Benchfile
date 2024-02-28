@@ -1,7 +1,7 @@
 # -*- makefile -*-
 
 DIR       = src/nbody/trans
-BENCH     = bench0 bench1 bench2
+BENCH     = bench0 bench1 bench2 bench3
 BENCHDATA = p6
 LOG       = /tmp/nemobench.log
 BIN       = mkplummer snapbench
@@ -29,12 +29,15 @@ p6:
 	nemobench mkplummer p6 nbody="$(MBODY)*1000000"
 
 bench0:	p6
-	nemobench snapbench p6 'mass=3.1415'   bodytrans=f iter=1000
+	nemobench snapbench p6 'mass=3.1415'   iter=1000 mode=0
 
 bench1: p6
-	nemobench snapbench p6 'mass=3.1415'   bodytrans=t iter=1000
+	nemobench snapbench p6 'mass=3.1415'   iter=1000 mode=1
 
 bench2: p6
-	nemobench snapbench p6 'mass=3.1415*m' bodytrans=t iter=1000
+	nemobench snapbench p6 'mass=3.1415*m' iter=1000 mode=2
+
+bench3: p6
+	nemobench snapbench p6 'mass=3.1415*m' iter=1000 mode=3
 
 
