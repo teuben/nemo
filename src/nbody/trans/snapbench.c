@@ -1,5 +1,5 @@
 /*
- *  SNAPBENCH:  snapshot benchmark to scale masses
+ *  SNAPBENCH:  snapshot benchmark to scale masses (see also the broken testio.c)
  *
  *  
  *     13-mar-05  Created after Walter's comment at Vegas05            PJT
