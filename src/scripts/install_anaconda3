@@ -84,6 +84,5 @@ echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
 
 pip freeze > $dir/freeze.log
-echo Created python_start files for $version in $dir
+echo "Created python_start files for $version in $dir ; no modifications were made to your HOME startup files!"
 python --version
-
