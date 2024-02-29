@@ -11,25 +11,24 @@
  */
 
 typedef struct _snapshot {
-    int nbody;
-    int bits;           /* what's all present in here */
-    real time;
-    real *mass;        
-    real *phase;
+    int nbody;          /* length of arrays */
+    int bits;           /* bitmap of attributes */
+    real time;          /* time of snapshot */
+    real *mass;         /* mass[nbody] */    
+    real *phase;        /* phase[2][3] */
 } SS, *SSptr;
 
 
 
-get_snapshot(instr, ssptr)
-stream instr;			/* input stream, of course */
-SSptr ssptr;			/* pointer to body array */
+int get_snapshot(
+		 stream instr,   /* input stream */
+		 SSptr ssptr)    /* pointer to body array */
 {
     real time, *rbuf;
     int nbody, bits = 0;
-    char *realloc();
 
     if (get_tag_ok(instr, SnapShotTag)) {
-	get_set(instr, SnapShotTag);            /* open  the snapshot */
+	get_set(instr, SnapShotTag);            /* open the snapshot */
 
         if (get_tag_ok(instr, ParametersTag)) {
             get_set(instr, ParametersTag);
@@ -49,26 +48,20 @@ SSptr ssptr;			/* pointer to body array */
             rbuf = ssptr->mass;
             if (get_tag_ok(instr, MassTag)) {
                 if (rbuf==NULL)
-                  rbuf = (real *) malloc(nbody * sizeof(real));
+                  rbuf = (real *) allocate(nbody * sizeof(real));
                 else
-                  rbuf = (real *) realloc(rbuf, nbody * sizeof(real));
-                if (rbuf == NULL)
-                    error("get_snapshot: not enuf memory for %d masses\n",nbody);
-	        get_data_coerced(instr, MassTag, RealType, rbuf, 
-                        nbody, 0);
+                  rbuf = (real *) reallocate(rbuf, nbody * sizeof(real));
+	        get_data_coerced(instr, MassTag, RealType, rbuf, nbody, 0);
 	        bits |= MassBit;
                 ssptr->mass = rbuf;
             }
             rbuf = ssptr->phase;
             if (get_tag_ok(instr, PhaseSpaceTag)) {
                 if (rbuf==NULL)
-                  rbuf = (real *) malloc(NDIM*2*nbody * sizeof(real));
+                  rbuf = (real *) allocate(NDIM*2*nbody * sizeof(real));
                 else
-                  rbuf = (real *) realloc(rbuf, NDIM*2*nbody * sizeof(real));
-                if (rbuf == NULL)
-                    error("get_snapshot: not enuf memory for %d phases\n",nbody);
-	        get_data_coerced(instr, PhaseSpaceTag, RealType, rbuf, 
-                        nbody, 2, NDIM, 0);
+                  rbuf = (real *) reallocate(rbuf, NDIM*2*nbody * sizeof(real));
+	        get_data_coerced(instr, PhaseSpaceTag, RealType, rbuf, nbody, 2, NDIM, 0);
 	        bits |= PhaseSpaceBit;
                 ssptr->phase = rbuf;
             }
@@ -78,7 +71,7 @@ SSptr ssptr;			/* pointer to body array */
 
         get_tes(instr, SnapShotTag);
 	ssptr->bits = bits;
-        return(1);
+        return 1;
     } else
-        return(0);
+        return 0;
 }

@@ -86,3 +86,6 @@ echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
 pip freeze > $dir/freeze.log
 echo "Created python_start files for $version in $dir ; no modifications were made to your HOME startup files!"
 python --version
+echo "typically you would need to "
+echo "      source $dir/python_start.sh"
+echo "to add this python to your shell environment."
