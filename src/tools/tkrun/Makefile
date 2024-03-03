@@ -58,3 +58,5 @@ dist:
 	rm -rf tkrun-$(VERSION)
 	scp tkrun-$(VERSION).tar.gz $(FTPDIR)
 
+agui:
+	git clone https://github.com/teuben/agui
