@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "26 January 2024"
+.TH MKNEMO 8NEMO "3 March 2024"
 
 .SH "NAME"
 mknemo \- install NEMO (and related) libraries and programs 
@@ -27,6 +27,10 @@ Finding the method how to install \fIprogram\fP takes several paths:
 Another option are 3rd party
 software, frequently used with NEMO. Example are libraries such as \fIgsl(3)\fP
 and programs such as \fImcluster(1NEMO)\fP.
+.PP
+A novel action is to create a new NEMO program using the \fB-N\fP flag.
+Users will still need to edit the template code, but takes away the hassle
+of starting with brand new code.
 
 .PP
 First, if a file \fI$NEMO/src/scripts/mknemo.d/program\fP exists,
@@ -69,6 +73,7 @@ be mentioned there are many other options to solve this problem.
   -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
   -D        show special projects from the mknemo.d directory
+  -N p k=v  create and compile template program 'p.c' with set of 'key=val'
 .fi
 
 .SH "MAKEDEFS"
@@ -107,6 +112,22 @@ cfitsio		CFITSIO library
 For a 3rd party library system type library, such as cfitsio, the sources will be under $NEMO/local, and 
 built with --prefix=$NEMO/opt. Thus non-NEMO user could use this \fIprefix\fP to their shell environment and
 borrow this environment.
+.PP
+This command creates a new program "foo" in $NEMOBIN by creating foo.c in the current directory. It will
+accept two keywords with given defaults:b
+.nf
+
+    $ mknemo -N foo bar=10 fum=bar
+    $ foo --help
+    foo bar=10 fum=bar VERSION=0.0
+    
+.fi
+If this is a program to be added to NEMO, also make a template manual page:
+.nf
+
+    $NEMO/src/scripts/mkman foo > $NEMO/man/man1/foo.1
+    
+.fi
 
 .SH "CAVEATS"
 mknemo \fIattempts\fP to (re)install a program or package for NEMO, but there is no guarentee this works.
@@ -151,4 +172,5 @@ $NEMO/opt/{bin,include,lib}	--prefix location of <package> binaries and headers 
 11-apr-2019	V4.0: converted CVS -> git for -u		PJT
 dec-2019	document critical binaries	PJT
 jul-2020	added -L options, switch -L and -l meaning	PJT
+mar-2024	V4.6: added -N flag	PJT
 .fi
