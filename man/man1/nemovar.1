@@ -1,17 +1,19 @@
-.TH NEMOVAR 1NEMO "7 March 2024"
+.TH NEMOVAR 1NEMO "8 March 2024"
 
 .SH "NAME"
-nemovar \- display NEMO variable(s)
+nemovar \- get and set NEMO variables
 
 .SH "SYNOPSIS"
 \fBnemovar\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBnemovar\fP reads and writes text based variables to a small database of persistent variables
-that can cross different sessions, much like SHELL variables.
+\fBnemovar\fP gets and sets NEMO variables, for the purpose of providing another method to
+communicate (textual) information between tasks. These are persistent variables, and 
+can cross different sessions, much like SHELL variables.
 .PP
 The current implementation uses a simple text file, but future implementation may also be able to
-switch to shared memory, or whatever the environment provides.
+switch to shared memory, or whatever the operating system and environment provides, or what
+the users' workflow prefers.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -23,70 +25,102 @@ Name of the variable. Default: not used.
 If used, the variable is getting a new value. Default: not used.
 .TP
 \fBshow=f|t\fP
-If set, this will show all variables. If no var or value is given, the default is true, else false.
+If neither \fBvar\fP or \fBvalue\fP is given, the default is true, and all existing
+variables will be shown.
+.TP
+\fBdelete=f|t\fP
+Delete the named variable in \fBvar=\fP.
+.TP
+\fBload=\fP
+Load from a file. Need a replace/merge option?
+.TP
+\fBsave=\fP
+Save to a file.
 
 .SH "EXAMPLES"
-In the current implementation, the NEMOVAR environment variable will be used. No shared memory yet.
+The \fBNEMOVAR\fP environment variable is used to set the interprocess communication (currently only
+files are supported).
 For example on linux we might be able to use the shared memory as follows:
-.nf
+.EX
 
     export NEMOVAR=/dev/shm/nemovar.$USER
     nemovar a 10
     
-.fi
+.EE
 to set the value of 10 to a. Then
-.nf
+.EX
 
     nemovar a
     
-.fi
+.EE
 retrieves the value of a. And finally
-.nf
+.EX
 
     nemovar show=t
     
-.fi
-shows all variables
+.EE
+shows all variables. Output is always to \fIstdout\fP. This last example is also achieved by
+giving no parameters, so show= might actually not even be needed as keyword.
 
 .SH "FORMAT"
-Currently the format of the text file is a simple ASCII file, compatible with for example
-\fIbash(1)\fP and \fIpython(1)\fP. All variables are explictly shown as strings:
-.nf
+Currently the format of the text file is a simple ASCII file, where all named variables are explictly shown as strings:
+.EX
 
     a="10"
-    b="hello"
+    b="hello world"
     c="3.141592"
     
-.fi
-data type interpretation is left to the client.
+.EE
+to make it compatible with for example \fIbash(1)\fP and \fIpython(1)\fP clients.
+The data type interpretation is left to the client. This also open the option for small lists, e.g.
+.EX
+
+    d="1,2,10:20:2"
+
+.EE
 
 .SH "FUTURE"
-1. A future implementation is planned, where a direct retrieval of NEMO variables is possible from the command line
-(see \fIgetparam(3NEMO)\fP). For example:
-.nf
+1. A future implementation will allow direct retrieval of NEMO variables is possible via the command line
+(see \fIgetparam(3NEMO)\fP). For example, compare the two style, \fInemovar\fP on the left,
+shell variables on the right:
+.EX
 
-     nemovar eps 0.05
-     hackcode eps=%eps
+     nemovar eps 0.05                 eps=0.05
+     hackcode1 eps=%eps               hackcode1 eps=$eps
      
-.fi
-Note that some table programs used %0, %1, %2, .... to refer to column numbers, so variable names cannot start with
+.EE
+Note that some \fItable(5NEMO)\fP
+programs use %0, %1, %2, .... to refer to column numbers, so variable names cannot start with
 a digit. Upper and Lower case should be allowed.
 .PP
 Recall that the current command line interface already can refer to other keywords, e.g.
-.nf
+.EX
 
     foobar a=1 b='$a'
     
-.fi
+.EE
 would assign the same value to both a and b.
 
 2. An option should exist to remove a variable from the database.
+
+3. In case there is true shared memory not associated with a filename, there needs to be a way to save and load
+true files.
+
+4. When \fIoutkeys/savevars\fP are implemented, the following style of IPC is possible:
+
+.EX
+
+     ccdstat ccd1 outkeys=mean,rms
+     ccdplot ccd1 %mean
+    
+.EE
+plotting a single contour of the mean value in the image.
 
 .SH "SEE ALSO"
 getparam(3NEMO), table(3NEMO)
 
 .SH "FILES"
-$NEMOVAR
+$NEMOVAR - currently the filename, but could be used to set a more generic IPC method.
 
 .SH "AUTHOR"
 Peter Teuben
