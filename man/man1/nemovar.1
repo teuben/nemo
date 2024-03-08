@@ -1,0 +1,37 @@
+.TH NEMOVAR 1NEMO "7 March 2024"
+
+.SH "NAME"
+nemovar \- display NEMO variable(s)
+
+.SH "SYNOPSIS"
+\fBnemovar\fP [parameter=value]
+
+.SH "DESCRIPTION"
+No description available. This manual page was created by mkman
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBvar=\fP
+Name of variable(s) [???]    
+
+.SH "EXAMPLES"
+In the current simple implementation, the NEMOVAR environment variable is used. No shared memory yet.
+For example on linux we might be able to use the shared memory as follows:
+.nf
+    export NEMOVAR=/dev/shm/nemovar.$USER
+    nemovar a 10
+.fi
+
+.SH "SEE ALSO"
+
+.SH "FILES"
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+7-mar-2024	Created for NEMO2024	PJT
+.fi
