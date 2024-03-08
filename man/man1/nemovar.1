@@ -9,21 +9,24 @@ nemovar \- display NEMO variable(s)
 .SH "DESCRIPTION"
 \fBnemovar\fP reads and writes text based variables to a small database of persistent variables
 that can cross different sessions, much like SHELL variables.
+.PP
+The current implementation uses a simple text file, but future implementation may also be able to
+switch to shared memory, or whatever the environment provides.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBvar=\fP
-Name of variable(s) [???]
+Name of the variable. Default: not used.
 .TP
 \fBvalue=\fP
 If used, the variable is getting a new value. Default: not used.
 .TP
 \fBshow=f|t\fP
-If set, this will show all variables.
+If set, this will show all variables. If no var or value is given, the default is true, else false.
 
 .SH "EXAMPLES"
-In the current simple implementation, the NEMOVAR environment variable will be used. No shared memory yet.
+In the current implementation, the NEMOVAR environment variable will be used. No shared memory yet.
 For example on linux we might be able to use the shared memory as follows:
 .nf
 
@@ -46,18 +49,41 @@ retrieves the value of a. And finally
 shows all variables
 
 .SH "FORMAT"
-Currently the data format of the text file is a simple ASCII file, compatible with
-BASH and PYTHON:
+Currently the format of the text file is a simple ASCII file, compatible with for example
+\fIbash(1)\fP and \fIpython(1)\fP. All variables are explictly shown as strings:
 .nf
 
     a="10"
     b="hello"
     c="3.141592"
+    
 .fi
-data type interpretation is left to the clients reading.
+data type interpretation is left to the client.
+
+.SH "FUTURE"
+1. A future implementation is planned, where a direct retrieval of NEMO variables is possible from the command line
+(see \fIgetparam(3NEMO)\fP). For example:
+.nf
+
+     nemovar eps 0.05
+     hackcode eps=%eps
+     
+.fi
+Note that some table programs used %0, %1, %2, .... to refer to column numbers, so variable names cannot start with
+a digit. Upper and Lower case should be allowed.
+.PP
+Recall that the current command line interface already can refer to other keywords, e.g.
+.nf
+
+    foobar a=1 b='$a'
+    
+.fi
+would assign the same value to both a and b.
+
+2. An option should exist to remove a variable from the database.
 
 .SH "SEE ALSO"
-getparam(3NEMO)
+getparam(3NEMO), table(3NEMO)
 
 .SH "FILES"
 $NEMOVAR
