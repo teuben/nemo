@@ -7,25 +7,60 @@ nemovar \- display NEMO variable(s)
 \fBnemovar\fP [parameter=value]
 
 .SH "DESCRIPTION"
-No description available. This manual page was created by mkman
+\fBnemovar\fP reads and writes text based variables to a small database of persistent variables
+that can cross different sessions, much like SHELL variables.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBvar=\fP
-Name of variable(s) [???]    
+Name of variable(s) [???]
+.TP
+\fBvalue=\fP
+If used, the variable is getting a new value. Default: not used.
+.TP
+\fBshow=f|t\fP
+If set, this will show all variables.
 
 .SH "EXAMPLES"
-In the current simple implementation, the NEMOVAR environment variable is used. No shared memory yet.
+In the current simple implementation, the NEMOVAR environment variable will be used. No shared memory yet.
 For example on linux we might be able to use the shared memory as follows:
 .nf
+
     export NEMOVAR=/dev/shm/nemovar.$USER
     nemovar a 10
+    
 .fi
+to set the value of 10 to a. Then
+.nf
+
+    nemovar a
+    
+.fi
+retrieves the value of a. And finally
+.nf
+
+    nemovar show=t
+    
+.fi
+shows all variables
+
+.SH "FORMAT"
+Currently the data format of the text file is a simple ASCII file, compatible with
+BASH and PYTHON:
+.nf
+
+    a="10"
+    b="hello"
+    c="3.141592"
+.fi
+data type interpretation is left to the clients reading.
 
 .SH "SEE ALSO"
+getparam(3NEMO)
 
 .SH "FILES"
+$NEMOVAR
 
 .SH "AUTHOR"
 Peter Teuben
