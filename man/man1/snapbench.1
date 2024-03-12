@@ -1,0 +1,77 @@
+.TH SNAPBENCH 1NEMO "12 March 2024"
+
+.SH "NAME"
+snapbench \- benchmark (re)assigning masses to a snapshot
+
+.SH "SYNOPSIS"
+\fBsnapbench\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBsnapbench\fP performs a simple re-assigment of the masses in a snapshot
+in a number of methods, in order to measure its performance.
+.PP
+It also uses two memory models of keeping a snapshot:
+an array of structs (AOS) vs. a struct of arrays (SOA). snapshots'
+are normally stored on disk as SOA's, but most programs actually
+transpose them to an AOS, which can be very in-efficient.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input (snapshot) file. No default. [???]    
+.TP
+\fBmass=\fP
+Expression for new masses [1]   
+.TP
+\fBiter=\fP
+Number of iterations to test. A large number is useful
+to downweight the I/O contribution. [10]  
+.TP
+\fBmode=\fP
+reading input mode (1=body 2=arrays) [1]  
+.TP
+\fBout=\fP
+output (snapshot) file, if needed []  
+
+.SH "EXAMPLES"
+
+Here is the standard test that si part of NEMO's "make bench"
+
+.EX
+
+  make -f $NEMO/src/nbody/trans/Benchfile all
+
+  mkplummer p6 1000000
+  snapbench p6 'mass=1.0001'   iter=1000 mode=0
+  snapbench p6 'mass=1.0001*m' iter=1000 mode=1
+  snapbench p6 'mass=1.0001'   iter=1000 mode=2
+  snapbench p6 'mass=1.0001'   iter=1000 mode=3
+
+.EE
+with the following examples
+.nf
+
+    CPU     modes: 0     1     2     3
+  i9-12900K     0.20  4.42  3.30  0.23
+  i7-1260P      0.30  6.39  5.89  0.37
+  
+.fi
+
+.SH "CAVEATS"
+Only reading and assignment is measured. No options for output (if out= is given)
+
+.SH "SEE ALSO"
+snapshot(5NEMO)
+
+.SH "FILES"
+src/nbody/trans/snapbench.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+12-mar-2024	Finally documented	PJT
+.fi
