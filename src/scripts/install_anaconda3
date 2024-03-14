@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 #
 # install anaconda3, plus a sourceable python_start script
-# 23-jan-2024 NEMO/PJT
+# 14-mar-2024 NEMO/PJT
 
 #--HELP
 # default parameters
@@ -17,6 +17,7 @@ version=2023.03-0  # 3.10.9
 version=2023.03-1  # 3.10.9
 version=2023.07-2  # 3.11.4
 version=2023.09-0  # 3.11.5
+version=2024.02-1  # 3.11.7
 
 
   dir=$(pwd)/anaconda3       # where anaconda will be located
