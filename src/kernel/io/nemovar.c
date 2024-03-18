@@ -9,9 +9,8 @@
 
 string defv[] = {
   "var=\n             Name of  variable(s)",
-  "value=\n           Optional new value",
-  "show=f\n           Show all variables",
-  "VERSION=0.2\n      7-mar-2024 PJT",
+  "val=\n             Optional new value",
+  "VERSION=0.3\n      18-mar-2024 PJT",
   NULL,
 };
 
@@ -22,41 +21,49 @@ void nemo_main()
 {
   string var = getparam("var");
   bool hasVar = hasvalue("var");
-  string value = getparam("value");  
-  bool hasVal = hasvalue("value");
+  string value = getparam("val");  
+  bool hasVal = hasvalue("val");
   string nemovar = getenv("NEMOVAR");
-  stream tstr = stropen(nemovar,"r");
-  table *t = table_open(tstr, -1);      // read table as a dumb set of lines
-  int i, nrows = t->nr;
-  string s;
-
+  if (nemovar == NULL) error("$NEMOVAR was not set");
   dprintf(1,"nemovar: %s\n", nemovar);
   
-
-  if (!hasVar && !hasVal) { 
+  stream tstr = stropen(nemovar,"r");
+  table *t = table_open(tstr, -1);      // read table as a dumb set of lines
+  int i, nrows = t->nr; 
+  string s, vareq;
+  
+  // check if just to show all variables
+  if (!hasVar && !hasVal) {
+    dprintf(1,"Show all variables\n");
     for (i=0; i<nrows; i++)
 	    printf("%s\n", table_row(t, i));
     return;
   }
 
   //@TODO - Should use hash in the future?
+  // ensure we find the "var=" string
+  vareq = allocate(strlen(var) + 2);
+  sprintf(vareq,"%s=", var);
+  dprintf(1,"vareq:%s\n",vareq);
+
+  // @todo - this is where a delete= option would come out
   if (hasVar && !hasVal) { 
-    // writing code might need flock() to lock file
-    // loop over lines and find the keyword, then display it
-    bool found_var = FALSE;
-    for (i=0; i<nrows; i++) {
+    // loop over lines in reverse and find the last keyword, then display it
+    for (i=nrows-1; i>=0; i--) {
       s = table_row(t, i);
-      if (strncmp(s,var,strlen(var))==0) {
+      if (strncmp(s,vareq,strlen(vareq))==0) {
           printf("%s\n",s+strlen(var)+1);      
-          found_var = TRUE;  
+	  return;
       }    
     }
-
-    if (!found_var) {
-      error("Variable %s not found\n",var);
-    }
+    dprintf(0,"Variable %s not found\n",var);
+    return;
   }
 
+  // writing code might need flock() to lock file
+  // @todo currently this allows a variable to appear multiple times
+  //       but all var's will get the new value
+  //       'nemovar | sort | uniq' would solve that
 
   if (hasVar && hasVal) {
     stream write_stream = stropen(nemovar,"w!");
@@ -64,7 +71,7 @@ void nemo_main()
     
     for (i=0; i<nrows; i++) {
       s = table_row(t, i);
-      if (strncmp(s,var,strlen(var))==0) {
+      if (strncmp(s,vareq,strlen(vareq))==0) {
         fprintf(write_stream,"%s=\"%s\"\n",var,value);    
         found_var = TRUE;  
       } else {
@@ -75,14 +82,8 @@ void nemo_main()
     if (!found_var) {
       fprintf(write_stream,"%s=\"%s\"\n",var,value);    
     }
-
-    
-
-    
+    return;
   }
 
-  // loop over lines and find the keyword, then display it
-  
-  // printf("%s= TBD\n",var);
-
+  // nothing more to do yet
 }
