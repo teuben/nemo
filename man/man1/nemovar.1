@@ -1,4 +1,4 @@
-.TH NEMOVAR 1NEMO "8 March 2024"
+.TH NEMOVAR 1NEMO "18 March 2024"
 
 .SH "NAME"
 nemovar \- get and set NEMO variables
@@ -24,17 +24,13 @@ Name of the variable. Default: not used.
 \fBvalue=\fP
 If used, the variable is getting a new value. Default: not used.
 .TP
-\fBshow=f|t\fP
-If neither \fBvar\fP or \fBvalue\fP is given, the default is true, and all existing
-variables will be shown.
-.TP
-\fBdelete=f|t\fP
+\fB**delete=f|t\fP
 Delete the named variable in \fBvar=\fP.
 .TP
-\fBload=\fP
+\fB**load=\fP
 Load from a file. Need a replace/merge option?
 .TP
-\fBsave=\fP
+\fB**save=\fP
 Save to a file.
 
 .SH "EXAMPLES"
@@ -56,11 +52,10 @@ to set the value of 10 to a. Then
 retrieves the value of a. And finally
 .EX
 
-    nemovar show=t
+    nemovar 
     
 .EE
-shows all variables. Output is always to \fIstdout\fP. This last example is also achieved by
-giving no parameters, so show= might actually not even be needed as keyword.
+just shows all variables. Output is always to \fIstdout\fP. 
 
 .SH "FORMAT"
 Currently the format of the text file is a simple ASCII file, where all named variables are explictly shown as strings:
@@ -71,8 +66,8 @@ Currently the format of the text file is a simple ASCII file, where all named va
     c="3.141592"
     
 .EE
-to make it compatible with for example \fIbash(1)\fP and \fIpython(1)\fP clients.
-The data type interpretation is left to the client. This also open the option for small lists, e.g.
+to make it compatible with possible future \fIbash(1)\fP and \fIpython(1)\fP clients.
+The data type interpretation is left to the client. This also opens the option for small lists, e.g.
 .EX
 
     d="1,2,10:20:2"
