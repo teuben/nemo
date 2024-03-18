@@ -1,10 +1,12 @@
 /*
  *  SNAPBENCH:  snapshot benchmark to scale masses (see also the broken testio.c)
+ *              also benchmarks vectors of bodies (get_snap) vs. body of vectors (get_snapshot)
  *
  *  
- *     13-mar-05  Created after Walter's comment at Vegas05            PJT
- *     25-feb-2024   ansi cleanup + documented odd behavior            PJT
- *     27-feb-2024   overhaul, just using mode=0,1,2,3                 PJT
+ *     13-mar-2005  Created after Walter's comment at Vegas05         PJT
+ *                   (what comment?)
+ *     25-feb-2024  ansi cleanup + documented odd behavior            PJT
+ *     27-feb-2024  overhaul, just using mode=0,1,2,3                 PJT
  *
  * mode=0     snapshot I/O but keeping linear arrays
  *      1     body with a bodytrans function
@@ -36,7 +38,7 @@ string defv[] = {
     "iter=10\n                Number of iterations to test",
     "mode=1\n                 reading input mode (1=body 2=arrays)",
     "out=\n                   output (snapshot) file, if needed",
-    "VERSION=2.0\n            27-feb-2024 PJT",
+    "VERSION=2.0a\n           10-mar-2024 PJT",
     NULL,
 };
 
@@ -65,20 +67,19 @@ void nemo_main()
     rproc  bfunc;
     int mode = getiparam("mode");
     int niter = getiparam("iter");
-
+    
+    dprintf(0,"mode=%d\n",mode);
+    
     instr = stropen(getparam("in"), "r");
     outstr = hasvalue("out") ? stropen(getparam("out"),"w") : NULL;
-    get_history(instr);    
+    get_history(instr);
 
-    dprintf(0,"mode=%d\n",mode);
     init_timers2(niter,1);
     stamp_timers(0);
-    if (mode == 0) {
+    if (mode==0) {
       SS ss;
       ini_snapshot(&ss);
       if (get_snapshot(instr, &ss) == 0) return;
-      strclose(instr);
-      
       dprintf(2,"initial mass: %g\n",ss.mass[0]);
       mscale = getdparam("mass");           // use it as adding parameter
       nbody = ss.nbody;
@@ -89,8 +90,6 @@ void nemo_main()
       dprintf(2,"final mass: %g\n",ss.mass[0]);
     } else {
       get_snap(instr, &btab, &nbody, &tsnap, &bits);
-      strclose(instr);
-    
       if (mode == 1) {
 	dprintf(0,"bodytrans scaling, iter=%d\n",niter);
 	bfunc = btrtrans(getparam("mass"));     /* use bodytrans expression */
@@ -119,7 +118,7 @@ void nemo_main()
 	      mass[i] += mscale;
 	  dprintf(2,"final mass: %g\n",mass[0]);
 	} else {
-	  error("mode=%d not implemented");
+	  error("mode=%d not implemented",mode);
 	} /* 2,3, non */
       } /* 1 vs. non-1 */
     } /* 0 vs. non-0 */
