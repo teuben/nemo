@@ -5,7 +5,7 @@
 #include <nemo.h>
 #include <table.h>
 #include <extstring.h>
-
+#include <sys/file.h>     // for flock(2) - alternatively flock(2) for NFS files
 
 string defv[] = {
   "var=\n             Name of  variable(s)",
@@ -67,8 +67,10 @@ void nemo_main()
 
   if (hasVar && hasVal) {
     stream write_stream = stropen(nemovar,"w!");
-    bool found_var = FALSE;
+    int fd = fileno(write_stream);
+    flock(fd, LOCK_EX);   // get an exclusive lock
     
+    bool found_var = FALSE;
     for (i=0; i<nrows; i++) {
       s = table_row(t, i);
       if (strncmp(s,vareq,strlen(vareq))==0) {
@@ -82,6 +84,8 @@ void nemo_main()
     if (!found_var) {
       fprintf(write_stream,"%s=\"%s\"\n",var,value);    
     }
+    flock(fd, LOCK_UN);
+    strclose(write_stream);
     return;
   }
 
