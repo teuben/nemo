@@ -1,0 +1,37 @@
+# -*- makefile -*-
+
+DIR       = src/image/misc
+BENCH     = bench1
+BENCHDATA = cube1
+LOG       = /tmp/nemobench.log
+BIN       = ccdgen ccdbench
+NEED      = $(BIN) 
+FTEN      = 1
+TIME      = /usr/bin/time
+
+help:
+	@echo $(DIR)
+	@echo MBODY=$(MBODY)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+
+SIZE=512,512,512
+ITER=1
+
+cube1:
+	ccdgen cube1 noise spar=0,1 size=$(SIZE)
+
+bench1:	cube1
+	nemobench cube1_xyz ccdbench cube1 xyz iter=$(ITER)
+	nemobench cube1_yxz ccdbench cube1 yxz iter=$(ITER)
+	nemobench cube1_xzy ccdbench cube1 xzy iter=$(ITER)
+	nemobench cube1_yzx ccdbench cube1 yzx iter=$(ITER)
+	nemobench cube1_zxy ccdbench cube1 zxy iter=$(ITER)
+	nemobench cube1_zyx ccdbench cube1 zyx iter=$(ITER)
