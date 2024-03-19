@@ -25,7 +25,7 @@ bench:
 	    mkdir -p ICs;\
 	    pedit $(NEMO)/$(DIR)/Gadget/Gadget2/parameterfiles/galaxy.param TimeMax=0.1 TimeBetSnapshot=0.1 > galaxy.param ;\
 	    cp $(NEMO)/$(DIR)/Gadget/ICs/galaxy_littleendian.dat ICs;\
-	    nemobench mpirun -np $(NP) Gadget2.galaxy galaxy.param ;\
+	    nemobench gadget2 mpirun -np $(NP) Gadget2.galaxy galaxy.param ;\
 	    date >> galaxy/data.log;\
 	   ); \
 	else \

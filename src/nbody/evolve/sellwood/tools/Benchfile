@@ -28,5 +28,5 @@ bench1.in:
  
 bench1:	 bench1.in
 	 rm -rf bench1.run
-	 nemobench rungalaxy in=bench1.in outdir=bench1.run tstop=$(TSTOP)
+	 nemobench galaxy rungalaxy in=bench1.in outdir=bench1.run tstop=$(TSTOP)
 	 rm -rf bench1.in
