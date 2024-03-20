@@ -17,7 +17,8 @@ string defv[] = {
   "in=???\n       Input image file",
   "order=xyz\n    Order to loop over cube, where the last axis is innermost loop",
   "iter=1\n       How often to loop",
-  "VERSION=0.1\n  19-mar-2024 PJT",
+  "mode=0\n       0=CubeValue(i,j,k)  1=cube[i][k][k]",
+  "VERSION=0.2\n  19-mar-2024 PJT",
   NULL,
 };
 
@@ -36,6 +37,7 @@ void nemo_main()
   int      i,j,k,nx,ny,nz;
   int      iter = getiparam("iter");
   real     sum = 0.0;
+  int      mode = getiparam("mode");
   
   instr = stropen(getparam("in"), "r");
     
@@ -44,19 +46,41 @@ void nemo_main()
   ny = Ny(iptr);
   nz = Nz(iptr);
 
-  if (streq(order,"zyx"))
-    WHILE(iter) LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) sum += CubeValue(iptr,i,j,k);
-  else if (streq(order,"zxy"))
-    WHILE(iter) LOOP(k,nz) LOOP(i,nx) LOOP(j,ny) sum += CubeValue(iptr,i,j,k);    
-  else if (streq(order,"yxz"))
-    WHILE(iter) LOOP(j,ny) LOOP(i,nx) LOOP(k,nz) sum += CubeValue(iptr,i,j,k);    
-  else if (streq(order,"yzx"))
-    WHILE(iter) LOOP(j,ny) LOOP(k,nz) LOOP(i,nx) sum += CubeValue(iptr,i,j,k);    
-  else if (streq(order,"xyz"))
-    WHILE(iter) LOOP(i,nx) LOOP(j,ny) LOOP(k,nz) sum += CubeValue(iptr,i,j,k);    
-  else if (streq(order,"xzy"))
-    WHILE(iter) LOOP(i,nx) LOOP(k,nz) LOOP(j,ny) sum += CubeValue(iptr,i,j,k);    
-  else
-    warning("Cannot do order %s",order);
+  if (mode==1) {
+    real ***cube = map3_image(iptr);
+    dprintf(0,"cube[0][0][0]=%g\n",cube[0][0][0]);
+    if (streq(order,"zyx"))
+      WHILE(iter) LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) sum += cube[i][j][k];
+    else if (streq(order,"zxy"))
+      WHILE(iter) LOOP(k,nz) LOOP(i,nx) LOOP(j,ny) sum += cube[i][j][k];
+    else if (streq(order,"yxz"))
+      WHILE(iter) LOOP(j,ny) LOOP(i,nx) LOOP(k,nz) sum += cube[i][j][k];
+    else if (streq(order,"yzx"))
+      WHILE(iter) LOOP(j,ny) LOOP(k,nz) LOOP(i,nx) sum += cube[i][j][k];
+    else if (streq(order,"xyz"))
+      WHILE(iter) LOOP(i,nx) LOOP(j,ny) LOOP(k,nz) sum += cube[i][j][k];
+    else if (streq(order,"xzy"))
+      WHILE(iter) LOOP(i,nx) LOOP(k,nz) LOOP(j,ny) sum += cube[i][j][k];
+    else
+      warning("Cannot do order %s",order);
+  } else if (mode==0) {
+    if (streq(order,"zyx"))
+      WHILE(iter) LOOP(k,nz) LOOP(j,ny) LOOP(i,nx) sum += CubeValue(iptr,i,j,k);
+    else if (streq(order,"zxy"))
+      WHILE(iter) LOOP(k,nz) LOOP(i,nx) LOOP(j,ny) sum += CubeValue(iptr,i,j,k);    
+    else if (streq(order,"yxz"))
+      WHILE(iter) LOOP(j,ny) LOOP(i,nx) LOOP(k,nz) sum += CubeValue(iptr,i,j,k);    
+    else if (streq(order,"yzx"))
+      WHILE(iter) LOOP(j,ny) LOOP(k,nz) LOOP(i,nx) sum += CubeValue(iptr,i,j,k);    
+    else if (streq(order,"xyz"))
+      WHILE(iter) LOOP(i,nx) LOOP(j,ny) LOOP(k,nz) sum += CubeValue(iptr,i,j,k);    
+    else if (streq(order,"xzy"))
+      WHILE(iter) LOOP(i,nx) LOOP(k,nz) LOOP(j,ny) sum += CubeValue(iptr,i,j,k);    
+    else
+      warning("Cannot do order %s",order);
+  } else
+    warning("Cannot do mode %d",mode);
   printf("%s %d %s %g\n",order,getiparam("iter"),getparam("in"),sum);
+
+  
 }
