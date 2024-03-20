@@ -7,24 +7,47 @@ ccdbench \- benchmark taking moments along an axis of an image
 \fBccdbench\fP [parameter=value]
 
 .SH "DESCRIPTION"
-
+\fBccdbench\fP currently reads a cube (ideally the same dimensions in X, Y and Z)
+in 6 different looping patterns, not surprisingly showing huge variations in CPU
+as the stride misses the cache.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input image file [???]    
+Input \fIimage(5NEMO)\fP file. No default.
 .TP
 \fBorder=\fP
-Order to loop over cube, where the last
+Order to loop over cube, where the last dimension is the fastest
+running in memory. \fBxyz\fP should be the fastest.  [Default: xyz]
 .TP
 \fBiter=\fP
 How often to loop [1]   
 
-.SH "EXAMPLES"
+.SH "BENCH"
+The associated Benchfile runs all 6 access patterns on a 512 cube
+image. The size of the cube can be varied using SIZE=512,512,512:
+
+.EX
+
+   cd $NEMO/src/image/misc
+   make -f Benchfile SIZE=512,512,512  clean bench1
+   
+.EE
+with the following CPU results. The sys column in the overhead read time, quite possible disk cashing
+limited the damage here.
+.EX
+
+SIZE ccdgen   sys    xyz    yxz    xzy    yzx    zxy    zyx    CPU
+---- ------  ----   ----   ----   ---- ------  ----- ------    -------------
+ 512   2.16  0.40   0.07   0.10   0.45   1.31   1.72   2.16    i7-1260P
+1024  20.78  0.70   0.60   0.83   4.47  11.86  15.06  20.64    i7-1260P
+ 512  27.15  0.20   0.12   0.16   0.96  24.39   0.78  23.67    AMD EPYC 7302
+1024 247.59  1.46   1.01   1.17   7.64 194.57   6.08 192.77    AMD EPYC 7302
+.EE
 
 .SH "SEE ALSO"
-snapbench(1NEMO)
+snapbench(1NEMO), image(5NEMO)
 
 .SH "FILES"
 src/image/misc
@@ -35,5 +58,5 @@ Peter Teuben
 .SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
-18-mar-2024	Created ...	PJT
+18-mar-2024	Created in a rush	PJT
 .fi
