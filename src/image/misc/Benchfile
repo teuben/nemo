@@ -11,7 +11,7 @@ TIME      = /usr/bin/time
 
 help:
 	@echo $(DIR)
-	@echo MBODY=$(MBODY)
+	@echo SIZE=$(SIZE)
 
 need:
 	@echo $(NEED)
@@ -26,7 +26,7 @@ SIZE=512,512,512
 ITER=1
 
 cube1:
-	ccdgen cube1 noise spar=0,1 size=$(SIZE)
+	nemobench ccdgen ccdgen cube1 flat spar=1 size=$(SIZE)
 
 bench1:	cube1
 	nemobench cube1_xyz ccdbench cube1 xyz iter=$(ITER)
