@@ -28,7 +28,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "maxline=10000\n    Max number of lines in case a pipe was used",
 #endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.8\n      23-mar-2024 PJT",
+    "VERSION=0.8a\n     23-mar-2024 PJT",
     NULL
 };
 
@@ -155,7 +155,7 @@ local void setparams(void)
       string s = getparam("separ");
       separ = s[0];
     } else
-      separ = ',';
+      separ = ' ';
     
 }
 
