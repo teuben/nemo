@@ -28,7 +28,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "maxline=10000\n    Max number of lines in case a pipe was used",
 #endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.8a\n     23-mar-2024 PJT",
+    "VERSION=0.8b\n     23-mar-2024 PJT",
     NULL
 };
 
@@ -266,7 +266,7 @@ local void convert(stream instr)
       dprintf(3," dofie(%d) -> %g  %g\n",i+1,dval[nval+i], errval); //BUG
       strcat(line," ");
       printf(fmt,dval[nval+i]);
-      if (i>0 && i<nfies-1) printf("%c",separ);
+      if (i<nfies-1) printf("%c",separ);
       if (Qnewline)
 	printf("\n");
     }
