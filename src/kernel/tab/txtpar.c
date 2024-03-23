@@ -22,12 +22,13 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "expr=\n            formula for parameters after extraction",
     "format=%g\n        format for new output values",
     "seed=0\n           Initial random number",
+    "separ=\n           separator between output parameters",
     "newline=f\n        add newline between output parameters",
 #if 0    
     "maxline=10000\n    Max number of lines in case a pipe was used",
 #endif
     "p#=\n              The word,row,col tuples for given parameter",
-    "VERSION=0.7b\n     18-may-2022 PJT",
+    "VERSION=0.8\n      23-mar-2024 PJT",
     NULL
 };
 
@@ -56,6 +57,7 @@ int    nfies;                           /* number of fie pointers */
 bool   Qfie;				/* boolean if multiple fie's loaded */
 bool   Qnewline;                        /* boolean if newline is needed */
 bool   Qexpr;
+char   separ;
 
 int    nlines;
 
@@ -149,6 +151,12 @@ local void setparams(void)
 
     init_xrandom(getparam("seed"));
     Qnewline = getbparam("newline");
+    if (hasvalue("separ")) {
+      string s = getparam("separ");
+      separ = s[0];
+    } else
+      separ = ',';
+    
 }
 
 
@@ -232,7 +240,7 @@ local void convert(stream instr)
     if (!Qexpr) {
       // simple output of input parameters
       for (i=0; i<nval; i++) {
-	if (i>0 && !Qnewline) printf(" ");
+	if (i>0 && i<nval-1 && !Qnewline) printf("%c",separ);
 	printf("%s", sval[i]);
 	if (Qnewline) printf("\n");
       }
@@ -258,7 +266,7 @@ local void convert(stream instr)
       dprintf(3," dofie(%d) -> %g  %g\n",i+1,dval[nval+i], errval); //BUG
       strcat(line," ");
       printf(fmt,dval[nval+i]);
-      if (nfies>1) printf(" ");
+      if (i>0 && i<nfies-1) printf("%c",separ);
       if (Qnewline)
 	printf("\n");
     }
