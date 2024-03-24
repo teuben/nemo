@@ -1,0 +1,54 @@
+.TH TABRANGE 1NEMO "23 March 2024"
+
+.SH "NAME"
+tabrange \- keep rows where given column is in range
+
+.SH "SYNOPSIS"
+\fBtabrange\fP [parameter=value]
+
+.SH "DESCRIPTION"
+For a given column all rows where a given column is in a given range will
+be output to \fIstdout\fP.
+.PP
+If subset of rows of columns need to be used before,
+use \fItabrows(1NEMO)\fP or \fItabcols(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input file name. No default.
+.TP 20
+\fBxcol=\fP\fIcolumn_number\fP
+Column to use for range, where 1 is the first column. [1]
+.TP
+\fBxrange=\fP\fIxmin,xmax\fP
+Min and Max value of this column to keep in output.  Output will be the full line.
+
+.SH "EXAMPLES"
+Using the default \fItabgen(1NEMO)\fP program, and only show values where column 1 is between values 0 and 0.1:
+.EX
+
+     tabgen - | tabrange - 1 0,0.1
+     0.0813695 0.406962 0.410499 0.0580781 0.00621213
+     0.0119871 0.0043076 0.246779 0.298222 0.976148
+     0.0599213 0.868871 0.141264 0.703102 0.940953
+
+.EE
+of course this can also be done with \fIawk(1)\fP:
+.EX
+
+    tabgen - | awk '{if($1>=0 && $1<=0.1) print $0}'
+.EE
+
+.SH "SEE ALSO"
+tabmath(1NEMO), tabzoom(1NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+23-mar-2024	Created ...	PJT
+.fi
