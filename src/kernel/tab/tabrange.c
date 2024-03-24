@@ -19,8 +19,8 @@
 
 string defv[] = {
     "in=???\n                     Input file name",
-    "xcol=1\n                     Column for X to use for range",
-    "xrange=0,1\n                 Min and Max value to keep in range",
+    "xcol=1\n                     Columns to use for range",
+    "xrange=0,1\n                 Pairs of Min and Max value to keep in range",
     "counter=f\n                  Prepend line with row counter?",
     "VERSION=0.2\n		  23-mar-2024 PJT",
     NULL
