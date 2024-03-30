@@ -15,7 +15,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select",
     "colsep=SP\n        Column separator (SP,TAB,NL)",    
     "out=-\n            output file name",
-    "VERSION=2.1a\n     20-nov-2022 PJT",
+    "VERSION=2.2\n      30-mar-2023 PJT",
     NULL
 };
 
@@ -92,8 +92,11 @@ local void setparams(void)
         case 'N':       colsep = '\n';  break;
         case 'r':
         case 'R':       colsep = '\n';  break;
-        case ':':       colsep =  ':';  break;
-        case ',':       colsep =  ',';  break;
+        case ':':       
+        case ',':       
+        case '|':
+        case '\\':
+        case '/':       colsep = separator[0]; break;
         default:        error("Illegal separator: s t n r : ,");
     }
 }
