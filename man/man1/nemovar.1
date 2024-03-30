@@ -1,4 +1,4 @@
-.TH NEMOVAR 1NEMO "18 March 2024"
+.TH NEMOVAR 1NEMO "30 March 2024"
 
 .SH "NAME"
 nemovar \- get and set NEMO variables
@@ -7,8 +7,9 @@ nemovar \- get and set NEMO variables
 \fBnemovar\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBnemovar\fP gets and sets NEMO variables, for the purpose of providing another method to
-communicate (textual) information between tasks. These are persistent variables, and 
+\fBnemovar\fP maintains a NEMO key/value storage server.  It will providing another method to
+communicate (textual) information between tasks using key/value pairs.
+These are persistent variables, and 
 can cross different sessions, much like SHELL variables.
 .PP
 The current implementation uses a simple text file, but future implementation may also be able to
@@ -74,6 +75,45 @@ The data type interpretation is left to the client. This also opens the option f
 
 .EE
 
+.SH "BACKGROUND"
+There are several ways already to pass small textual information (outside of the large simulations files)
+between NEMO programs, usually aided by the shell.
+
+.PP
+First of all, shell variables can be an effective way to control a script, but sometimes they need to
+be extracted from a program, e.g. with some awk/grep/sed, or in this example with \fItxtpar(1NEMO)\fP
+.EX
+      ccdstat foo.ccd > foo.log
+      mean=$(txtpar foo.log p0=Mean,1,5)
+      disp=$(txtpar foo.log p0=Mean,1,6)
+      ccdplot foo.ccd $mean-$disp,$mean,$mean+$disp
+.EE
+here we extracted the mean and dispersion from a map, and plotted contours of the mean, and one dispersion around the mean.
+Assuming these variables from the previous example happen to be in a file called \fBnemopars.rc\fP, the following will
+work
+.EX
+      mean=$(nemopars mean)
+      disp=$(nemopars disp)
+.EE
+.PP
+Simulations can store results in a \fIkeyword=value\fP textual database, something that can be easily read
+by the shell, or python, or \fInemopars(1NEMO)\fP.
+.PP
+With the first version of nemovar you can do the following:
+.EX
+      export NEMOVAR=nemopars.rc
+      mean=$(nemovar mean)
+      disp=$(nemovar disp)
+.EE
+
+.PP
+The power of nemovar will come when the user interface shortcuts the use of the shell,as in this
+hypothetical example
+.EX
+     ccdstat foo.ccd nemovar=mean,disp
+     ccdplot foo.ccd %mean-%disp,%mean,%mean+%disp'
+.EE
+
 .SH "FUTURE"
 1. A future implementation will allow direct retrieval of NEMO variables is possible via the command line
 (see \fIgetparam(3NEMO)\fP). For example, compare the two style, \fInemovar\fP on the left,
@@ -111,8 +151,17 @@ true files.
 .EE
 plotting a single contour of the mean value in the image.
 
+.SH "CAVEAT"
+It is not possible to use nemovar's in a pipe, e.g. this is NOT reliable:
+.EX
+    program1 - outkeys=bar | program2 - foo=%bar
+.EE
+
+
 .SH "SEE ALSO"
-nemopars(8NEMO), getparam(3NEMO), table(3NEMO)
+txtpar(1NEMO), nemopars(8NEMO), getparam(3NEMO), table(3NEMO)
+.PP
+redis/valkey  https://github.com/valkey-io/valkey
 
 .SH "FILES"
 $NEMOVAR - currently the filename, but could be used to set a more generic IPC method.
