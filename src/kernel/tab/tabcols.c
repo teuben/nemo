@@ -15,7 +15,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "select=all\n       columns to select",
     "colsep=SP\n        Column separator (SP,TAB,NL)",    
     "out=-\n            output file name",
-    "VERSION=2.2\n      30-mar-2023 PJT",
+    "VERSION=2.3\n      30-mar-2024 PJT",
     NULL
 };
 
@@ -76,9 +76,14 @@ local void setparams(void)
         nkeep = nemoinpi(select,keep,MAX_COL);
         if (nkeep<=0 || nkeep>MAX_COL)
             error("Too many columns given (%d) to keep (MAX_COL %d)",nkeep,MAX_COL);
-        for (i=0; i<nkeep; i++){
+	// @todo allow -1 as the last columns
+	if (nkeep==1 && keep[0]==-1) {
+	  warning("new feature -1");
+	} else {
+	  for (i=0; i<nkeep; i++){
             if (keep[i]<0) error("Negative column number %d",keep[i]);
             maxcol = MAX(maxcol,keep[i]);
+	  }
         }
     }
 
