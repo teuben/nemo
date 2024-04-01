@@ -40,9 +40,18 @@ of course this can also be done with \fIawk(1)\fP:
 
     tabgen - | awk '{if($1>=0 && $1<=0.1) print $0}'
 .EE
+and of course in python this stuff is even easier to do (example soon coming)
+
+.SH FUTURE
+How about multiple columns?
+.nf
+    tabrange foo.tab   1,2,3   -1,1,-4,4,-10,10
+.fi
+could be an option how to do it. this scales
+
 
 .SH "SEE ALSO"
-tabmath(1NEMO), tabzoom(1NEMO)
+tabmath(1NEMO), tabzoom(1NEMO), tabrows(1NEMO), tabcols(1NEMO), table(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
