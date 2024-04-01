@@ -1,7 +1,7 @@
-.TH TABRANGE 1NEMO "23 March 2024"
+.TH TABRANGE 1NEMO "24 March 2024"
 
 .SH "NAME"
-tabrange \- keep rows where given column is in range
+tabrange \- keep rows where given column(s) are in range
 
 .SH "SYNOPSIS"
 \fBtabrange\fP [parameter=value]
@@ -19,11 +19,12 @@ use \fItabrows(1NEMO)\fP or \fItabcols(1NEMO)\fP.
 \fBin=\fP
 Input file name. No default.
 .TP 20
-\fBxcol=\fP\fIcolumn_number\fP
-Column to use for range, where 1 is the first column. [1]
+\fBxcol=\fP\fIcolumn_number(s\fP
+Column(s) to use for range, where 1 is the first column. [1]
 .TP
 \fBxrange=\fP\fIxmin,xmax\fP
-Min and Max value of this column to keep in output.  Output will be the full line.
+A Min and Max value pair for each column to keep in output. These are logically
+ANDed. Output will be the full line that matches the criterion
 
 .SH "EXAMPLES"
 Using the default \fItabgen(1NEMO)\fP program, and only show values where column 1 is between values 0 and 0.1:
@@ -60,4 +61,5 @@ Peter Teuben
 .nf
 .ta +1.5i +5.5i
 23-mar-2024	Created ...	PJT
+24-mar-2024	0.2 allow multiple columns	PJT
 .fi
