@@ -31,6 +31,6 @@ bench:	bench10
 bench10:
 	rm -rf p10k runCGS_p10k
 	mkplummer - $(NBODY) | snapscale - p10k vscale='sqrt(4.4971)'
-	nemobench runCGS runCGS_p10k in=p10k nemo=f maxstep=999999 tstop="6.12*$(FTEN)"
+	nemobench CGS runCGS runCGS_p10k in=p10k nemo=f maxstep=999999 tstop="6.12*$(FTEN)"
 	# snapmass run_p10k/snap.out - 1/10000.0 | snapmradii - 
 
