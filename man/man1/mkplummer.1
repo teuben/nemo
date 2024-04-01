@@ -29,19 +29,25 @@ For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
 .TP 25
 \fBout=\fP\fIsnapfile\fP
 Output data is written into \fIsnapfile\fP, in standard \fIsnapshot(5NEMO)\fP format.
+.br
+No default
 .TP
 \fBnbody=\fP\fIinteger\fP
 Number of particles \fInobj\fP in N-body snapshot realization of the
 Plummer model.
+.br
+No default.
 .TP
 \fBmlow=\fP\fIreal\fP
 inner core mass fraction within which no stars will be populated.
+.br
 (Default: 0)
 .TP
 \fBmfrac=\fP\fIreal\fP
 mass fraction of the (otherwise infinitely extended) Plummer model;
 see  rfrac immediately below 
 Note that the total mass is still normalized to 1.
+.br
 (Default: \fIrfrac\fP=22.8042468).
 .TP
 \fBrfrac=\fP\fIreal\fP
@@ -56,18 +62,25 @@ realization.  Note: specifying either value may have no effect if the
 default value of the other parameter is still the limiting factor;
 Beware! (Default: \fImfrac\fP=0.999; \fIrfrac\fP=22.8042468 , chosen
 so that the cumulative mass at \fIrfrac\fP is \fImfrac\fP).
+.br
+Default: ....
 .TP
 \fBseed=\fP\fIinteger\fP
-seed for the random number generator (default: 0, which will
-be converted into a unique new value using UNIX's clock time, in
-seconds since 1970.0). See also
-\fIxrandom(1NEMO)\fP.
+seed for the random number generator. A value of 0 (the default)
+will be converted into a unique new value using UNIX's clock time, in
+seconds since 1970.0). See also \fIxrandom(1NEMO)\fP for more options.
+.br
+[default: 0]
 .TP
 \fBtime=\fP\fItime\fP
-Time at which the snapshot applies (default: \fItime\fP=0.0).
+Time at which the snapshot applies
+.br
+(default: \fItime\fP=0.0).
 .TP
 \fBzerocm=t|f\fP
-Reset center of mass to zero? [default: \fBt\fP].
+Reset center of mass to zero?
+.br
+[default: \fBt\fP].
 .TP
 \fBscale=\fP\fIscale_factor\fP
 A scale factor or scale to virial units (M=G=-4E=1). Use -1 for
@@ -75,40 +88,52 @@ virial units (see also VIRIAL UNITS below),
 and 1 to get a model in structural (natural) units.
 Note: large scale factors means small systems with large velocity
 disperson.
+.br
 [Default: \fB-1\fP].
 .TP
 \fBquiet=\fIlevel\fP
 Level of quit start. 0 is noisy, 1=somewhat quiet, 2=more quiet. See "QUIET START" below
+.br
 [default: \fB0\fP].
 .TP
 \fBmassname=\fIname\fP
 Identification of the mass spectrum. It is normally only a function
 of mass, so \fBn(m)\fP will suffice. If nothing specified, all
-stars will have the same mass (total mass M=1). [default: not used].
+stars will have the same mass (total mass M=1).
+.br
+[default: not used].
 .TP
 \fBmassexpr=\fIexpr\fP
 Expression for the mass-spectrum. In addition to the mass \fIm\fP from
 the \fBmassname\fP it may contain any variables contained in the 
-\fBmasspars\fP to be specified next. [default: \fBpow(m,p)\fP].
+\fBmasspars\fP to be specified next.
+.br
+[default: \fBpow(m,p)\fP].
 .TP
 \fBmasspars=\fIpars\fP
 List of parameters and their values. They can be used by name in the
-\fBmassexpr\fP specified before. [default: \fBp,0.0\fP].
+\fBmassexpr\fP specified before.
+.br
+[default: \fBp,0.0\fP].
 .TP
 \fBmassrange=\fImlow,mhigh\fP
 Valid massrange. A lower and higher cutoff must be supplied. The massrange
 has arbitrary units, since all masses will be rescaled to set the total
-mass M=1. [default: \fB1,1\fP].
+mass M=1. .br
+[default: \fB1,1\fP].
 .TP
 \fBheadline=\fP\fIstring\fP
 Optional headline, which is written as the first item in the snapshot
-file, the next item being the snapshot itself. [default: not used].
+file, the next item being the snapshot itself.
+.br
+[default: not used].
 .TP
 \fBnmodel=\fP\fIinteger\fP
 Number of models to generate. Although mostly meant for benchmarks,
 generating more then 1 model can be useful to process very large
 snapshots (that normally won't fit in memory) in a serialized fashion. See
 also \fIsnapsplit\fP. Most NEMO programs will
+.br
 Default: \fB1\fP.
 .TP
 \fBmode=0|1|2\fP
@@ -116,6 +141,7 @@ The processing mode, purely for debugging benchmarks.
 0=no data written.
 1=data written, but no extra analysis.
 2=data written, and extra analysis done.
+.br
 [Default: 1].
 
 .SH "VIRIAL UNITS"
