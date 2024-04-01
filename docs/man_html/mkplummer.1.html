@@ -45,105 +45,115 @@ keyword is also given. Use <b>--help</b> to confirm this man page is up to date.
 <dt><b>out=</b><i>snapfile</i> </dt>
 <dd>Output data is written into <i>snapfile</i>, in standard <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 
-format. </dd>
+format. <br>
+No default </dd>
 
 <dt><b>nbody=</b><i>integer</i> </dt>
 <dd>Number of particles <i>nobj</i> in N-body snapshot realization
-of the Plummer model. </dd>
+of the Plummer model. <br>
+No default. </dd>
 
 <dt><b>mlow=</b><i>real</i> </dt>
-<dd>inner core mass fraction within which no
-stars will be populated. (Default: 0) </dd>
+<dd>inner core mass fraction within which no stars will
+be populated. <br>
+(Default: 0) </dd>
 
 <dt><b>mfrac=</b><i>real</i> </dt>
-<dd>mass fraction of the (otherwise
-infinitely extended) Plummer model; see  rfrac immediately below  Note
-that the total mass is still normalized to 1. (Default: <i>rfrac</i>=22.8042468).
-</dd>
+<dd>mass fraction of the (otherwise infinitely extended)
+Plummer model; see  rfrac immediately below  Note that the total mass is
+still normalized to 1. <br>
+(Default: <i>rfrac</i>=22.8042468). </dd>
 
 <dt><b>rfrac=</b><i>real</i> </dt>
-<dd>radius fraction of the (otherwise infinitely extended) Plummer
-model. If <i>mfrac = 1.0</i> then particles will be sprinkled in all over space.
-If <i>mfrac</i> &lt; 1.0 or <i>rfrac</i> &gt; 0.0 then each particle is constrained to lie within
-both the radial and (cumulative) mass bound. For example, if <i>rfrac</i>( <i>mfrac</i>
-) &gt; <i>rfrac</i> then <i>rfrac</i> is the limiting factor, but if <i>rfrac</i>( <i>mfrac</i> ) &lt; <i>rfrac</i>
-then <i>mfrac</i> limits the extent of the Plummer realization.  Note: specifying
-either value may have no effect if the default value of the other parameter
-is still the limiting factor; Beware! (Default: <i>mfrac</i>=0.999; <i>rfrac</i>=22.8042468
-, chosen so that the cumulative mass at <i>rfrac</i> is <i>mfrac</i>). </dd>
+<dd>radius fraction of the (otherwise
+infinitely extended) Plummer model. If <i>mfrac = 1.0</i> then particles will be
+sprinkled in all over space. If <i>mfrac</i> &lt; 1.0 or <i>rfrac</i> &gt; 0.0 then each particle
+is constrained to lie within both the radial and (cumulative) mass bound.
+For example, if <i>rfrac</i>( <i>mfrac</i> ) &gt; <i>rfrac</i> then <i>rfrac</i> is the limiting factor,
+but if <i>rfrac</i>( <i>mfrac</i> ) &lt; <i>rfrac</i> then <i>mfrac</i> limits the extent of the Plummer
+realization.  Note: specifying either value may have no effect if the default
+value of the other parameter is still the limiting factor; Beware! (Default:
+<i>mfrac</i>=0.999; <i>rfrac</i>=22.8042468 , chosen so that the cumulative mass at <i>rfrac</i>
+is <i>mfrac</i>). <br>
+Default: .... </dd>
 
 <dt><b>seed=</b><i>integer</i> </dt>
-<dd>seed
-for the random number generator (default: 0, which will be converted into
-a unique new value using UNIX&rsquo;s clock time, in seconds since 1970.0). See
-also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
-. </dd>
+<dd>seed for the random number generator. A value of
+0 (the default) will be converted into a unique new value using UNIX&rsquo;s clock
+time, in seconds since 1970.0). See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
+ for more options.
+<br>
+[default: 0] </dd>
 
 <dt><b>time=</b><i>time</i> </dt>
-<dd>Time at which the snapshot applies (default:
-<i>time</i>=0.0). </dd>
+<dd>Time at which the snapshot applies <br>
+(default: <i>time</i>=0.0). </dd>
 
 <dt><b>zerocm=t|f</b> </dt>
-<dd>Reset center of mass to zero? [default: <b>t</b>]. </dd>
+<dd>Reset center of mass to zero? <br>
+[default: <b>t</b>]. </dd>
 
-<dt><b>scale=</b><i>scale_factor</i>
-</dt>
-<dd>A scale factor or scale to virial units (M=G=-4E=1). Use -1 for virial units
-(see also VIRIAL UNITS below), and 1 to get a model in structural (natural)
-units. Note: large scale factors means small systems with large velocity
-disperson. [Default: <b>-1</b>]. </dd>
+<dt><b>scale=</b><i>scale_factor</i> </dt>
+<dd>A scale factor or scale to virial units
+(M=G=-4E=1). Use -1 for virial units (see also VIRIAL UNITS below), and 1
+to get a model in structural (natural) units. Note: large scale factors
+means small systems with large velocity disperson. <br>
+[Default: <b>-1</b>]. </dd>
 
 <dt><b>quiet=<i>level</i></b> </dt>
-<dd>Level of quit start. 0 is noisy, 1=somewhat
-quiet, 2=more quiet. See "QUIET START" below [default: <b>0</b>]. </dd>
+<dd>Level of quit start. 0 is noisy, 1=somewhat quiet,
+2=more quiet. See "QUIET START" below <br>
+[default: <b>0</b>]. </dd>
 
-<dt><b>massname=<i>name</i></b>
-</dt>
-<dd>Identification of the mass spectrum. It is normally only a function of mass,
-so <b>n(m)</b> will suffice. If nothing specified, all stars will have the same
-mass (total mass M=1). [default: not used]. </dd>
+<dt><b>massname=<i>name</i></b> </dt>
+<dd>Identification of the mass spectrum. It is normally
+only a function of mass, so <b>n(m)</b> will suffice. If nothing specified, all
+stars will have the same mass (total mass M=1). <br>
+[default: not used]. </dd>
 
 <dt><b>massexpr=<i>expr</i></b> </dt>
-<dd>Expression for
-the mass-spectrum. In addition to the mass <i>m</i> from the <b>massname</b> it may contain
-any variables contained in the  <b>masspars</b> to be specified next. [default:
-<b>pow(m,p)</b>]. </dd>
+<dd>Expression for the mass-spectrum. In addition
+to the mass <i>m</i> from the <b>massname</b> it may contain any variables contained
+in the  <b>masspars</b> to be specified next. <br>
+[default: <b>pow(m,p)</b>]. </dd>
 
 <dt><b>masspars=<i>pars</i></b> </dt>
-<dd>List of parameters and their values. They can be
-used by name in the <b>massexpr</b> specified before. [default: <b>p,0.0</b>]. </dd>
+<dd>List of parameters and their values. They
+can be used by name in the <b>massexpr</b> specified before. <br>
+[default: <b>p,0.0</b>]. </dd>
 
-<dt><b>massrange=<i>mlow,mhigh</i></b>
+<dt><b>massrange=<i>mlow,mhigh</i></b> </dt>
+<dd>Valid massrange. A lower and higher
+cutoff must be supplied. The massrange has arbitrary units, since all masses
+will be rescaled to set the total mass M=1. .br [default: <b>1,1</b>]. </dd>
+
+<dt><b>headline=</b><i>string</i>
 </dt>
-<dd>Valid massrange. A lower and higher cutoff must be supplied. The massrange
-has arbitrary units, since all masses will be rescaled to set the total
-mass M=1. [default: <b>1,1</b>]. </dd>
-
-<dt><b>headline=</b><i>string</i> </dt>
-<dd>Optional headline, which is written
-as the first item in the snapshot file, the next item being the snapshot
-itself. [default: not used]. </dd>
+<dd>Optional headline, which is written as the first item in the snapshot file,
+the next item being the snapshot itself. <br>
+[default: not used]. </dd>
 
 <dt><b>nmodel=</b><i>integer</i> </dt>
-<dd>Number of models to generate.
-Although mostly meant for benchmarks, generating more then 1 model can
-be useful to process very large snapshots (that normally won&rsquo;t fit in memory)
-in a serialized fashion. See also <i>snapsplit</i>. Most NEMO programs will Default:
-<b>1</b>. </dd>
+<dd>Number of models to generate. Although
+mostly meant for benchmarks, generating more then 1 model can be useful
+to process very large snapshots (that normally won&rsquo;t fit in memory) in a
+serialized fashion. See also <i>snapsplit</i>. Most NEMO programs will <br>
+Default: <b>1</b>. </dd>
 
 <dt><b>mode=0|1|2</b> </dt>
-<dd>The processing mode, purely for debugging benchmarks. 0=no data
-written. 1=data written, but no extra analysis. 2=data written, and extra
-analysis done. [Default: 1]. 
+<dd>The processing mode, purely for debugging benchmarks.
+0=no data written. 1=data written, but no extra analysis. 2=data written,
+and extra analysis done. <br>
+[Default: 1]. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Virial Units</a></h2>
-The scale length of a Plummer sphere
-in virial units is <b>3.pi/16</b> ~ 0.589.  As an example the following two commands
-should plot the same "rotation" curve:  
-<p>  mkplummer - 10000 | radprof - tab=t
-| tabplot - 1 3 0 2 0 1 yapp=1/xs<br>
+The scale length of a Plummer sphere in virial
+units is <b>3.pi/16</b> ~ 0.589.  As an example the following two commands should
+plot the same "rotation" curve:  
+<p>  mkplummer - 10000 | radprof - tab=t | tabplot
+- 1 3 0 2 0 1 yapp=1/xs<br>
   rotcurves plummer &rsquo;0,1,3*pi/16&rsquo; xrange=0:2 yrange=0:1       yapp=2/xs <br>
  
 <p>  
