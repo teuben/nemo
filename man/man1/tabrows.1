@@ -1,46 +1,51 @@
-.TH TABROWS 1NEMO "5 May 2022"
-.SH NAME
-tabrows \- select rows/lines from a file
-.SH SYNOPSIS
+.TH TABROWS 1NEMO "30 Mar 2024"
+
+.SH "NAME"
+tabrows \- select rows from a table
+
+.SH "SYNOPSIS"
 \fBtabrows\fP [parameter=value]
-.SH DESCRIPTION
-\fBtabrows\fP selective copies lines from an input (ASCII) table.
-Selection is done by line numbers, 1 being the first line. Syntax
-follows the \fInemofie(1NEMO)\fP rules.
+
+.SH "DESCRIPTION"
+\fBtabrows\fP selectively copies rows from an input (ASCII) \fItable(5NEMO)\fP.
+Selection is done by table row numbers, 1 being the first non-comment row.
+Syntax follows the \fInemofie(1NEMO)\fP rules. Row selection can be
+done in any order, e.g. \fBselect=3,2,1\fP, as long as \fBcomment=f\fP
+(see CAVEATS below)
 
 .SH "PARAMETERS"
-The following parameters are recognized in any order if the keyword
-is also given:
+.so man1/parameters
 .TP 20
 \fBin=\fP
 input file. No default.
 .TP
 \fBselect=\fP
-rows/lines to select. Any \fInemoinp(3NEMO)\fP expression can be used.
-First column is 1.
+rows to select. Any \fInemoinp(3NEMO)\fP expression can be used.
+First row is 1.  A special \fBselect=-1\fPq is allowed for the last row.
 [all]
 .TP
-\fBcomment=t|f\fP
-Count comment lines too? See also \fItabcomment(1NEMO)\fP to filter comments.
-Default: t
-.TP
 \fBnmax=\fP
-Default max allocation of the linecount in a table from
-a pipe  [10000].
+Default max allocation of how many can be selected in \fBselect=\fP  [10000].
+.TP
+\fBcomment=t|f\fP
+If set, comments will also be processed, but row numbers are only counted for true table rows.
+The default is that comments will be skipped.
 .TP
 \fBout=\fP
 output file. Default is standard output.
 
 .SH "CAVEATS"
 Although this program uses the new table interface, the \fBnmax=\fP parameter
-is still used and thus limits the row count.
+is still needed when \fBcomment=t\fP, and thus limits the row count.
+A better select counter is needed for this.
+.PP
+If \fBcomment=t\fP the file is currently processed in streaming mode, thus
+the \fBselect=\fP need to be ordered.
 
 .SH "EXAMPLES"
-To find the square root of any number \fIn\fP between 1 and 100:
+A contrived example to reverse the even lines in a file:
 .nf
-    nemoinp 1:100:1 > t1
-    tabmath t1 t2 'sqrt(%1)' all
-    tabrows t2 - select=\fIn\fP
+    nemoinp 1:10:1 | tabrows - 10:1:-2
 .fi
 .SH "SEE ALSO"
 tabcols(1NEMO), awk(1), tabmath(1NEMO), tabcomment(1NEMO), tabtab(1NEMO), table(5NEMO)
@@ -56,4 +61,5 @@ Peter Teuben
 .ta +1.5i +6.0i
 9-Mar-99	V0.9 Created 	PJT
 5-may-2022	V2.0 converted to table V2 interface, renamed from tablines	PJT
+30-mar-2024	V2.2 use in-memory table, and made comment=f the default	PJT
 .fi

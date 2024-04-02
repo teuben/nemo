@@ -1,0 +1,176 @@
+.TH NEMOVAR 1NEMO "30 March 2024"
+
+.SH "NAME"
+nemovar \- get and set NEMO variables
+
+.SH "SYNOPSIS"
+\fBnemovar\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBnemovar\fP maintains a NEMO key/value storage server.  It will providing another method to
+communicate (textual) information between tasks using key/value pairs.
+These are persistent variables, and 
+can cross different sessions, much like SHELL variables.
+.PP
+The current implementation uses a simple text file, but future implementation may also be able to
+switch to shared memory, or whatever the operating system and environment provides, or what
+the users' workflow prefers.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBvar=\fP
+Name of the variable. Default: not used.
+.TP
+\fBval=\fP
+If used, the variable is getting a new value. Default: not used.
+.TP
+\fB**delete=f|t\fP
+Delete the named variable in \fBvar=\fP.
+.TP
+\fB**load=\fP
+Load from a file. Need a replace/merge option?
+.TP
+\fB**save=\fP
+Save to a file.
+
+.SH "EXAMPLES"
+The \fBNEMOVAR\fP environment variable is used to set the interprocess communication (currently only
+files are supported).
+For example on linux we might be able to use the shared memory as follows:
+.EX
+
+    export NEMOVAR=/dev/shm/nemovar.$USER
+    nemovar a 10
+    
+.EE
+to set the value of 10 to a. Then
+.EX
+
+    nemovar a
+    
+.EE
+retrieves the value of a. And finally
+.EX
+
+    nemovar 
+    
+.EE
+just shows all variables. Output is always to \fIstdout\fP. 
+
+.SH "FORMAT"
+Currently the format of the text file is a simple ASCII file, where all named variables are explictly shown as strings:
+.EX
+
+    a="10"
+    b="hello world"
+    c="3.141592"
+    
+.EE
+to make it compatible with possible future \fIbash(1)\fP and \fIpython(1)\fP clients.
+The data type interpretation is left to the client. This also opens the option for small lists, e.g.
+.EX
+
+    d="1,2,10:20:2"
+
+.EE
+
+.SH "BACKGROUND"
+There are several ways already to pass small textual information (outside of the large simulations files)
+between NEMO programs, usually aided by the shell.
+
+.PP
+First of all, shell variables can be an effective way to control a script, but sometimes they need to
+be extracted from a program, e.g. with some awk/grep/sed, or in this example with \fItxtpar(1NEMO)\fP
+.EX
+      ccdstat foo.ccd > foo.log
+      mean=$(txtpar foo.log p0=Mean,1,5)
+      disp=$(txtpar foo.log p0=Mean,1,6)
+      ccdplot foo.ccd $mean-$disp,$mean,$mean+$disp
+.EE
+here we extracted the mean and dispersion from a map, and plotted contours of the mean, and one dispersion around the mean.
+Assuming these variables from the previous example happen to be in a file called \fBnemopars.rc\fP, the following will
+work
+.EX
+      mean=$(nemopars mean)
+      disp=$(nemopars disp)
+.EE
+.PP
+Simulations can store results in a \fIkeyword=value\fP textual database, something that can be easily read
+by the shell, or python, or \fInemopars(1NEMO)\fP.
+.PP
+With the first version of nemovar you can do the following:
+.EX
+      export NEMOVAR=nemopars.rc
+      mean=$(nemovar mean)
+      disp=$(nemovar disp)
+.EE
+
+.PP
+The power of nemovar will come when the user interface shortcuts the use of the shell,as in this
+hypothetical example
+.EX
+     ccdstat foo.ccd nemovar=mean,disp
+     ccdplot foo.ccd %mean-%disp,%mean,%mean+%disp'
+.EE
+
+.SH "FUTURE"
+1. A future implementation will allow direct retrieval of NEMO variables is possible via the command line
+(see \fIgetparam(3NEMO)\fP). For example, compare the two style, \fInemovar\fP on the left,
+shell variables on the right:
+.EX
+
+     nemovar eps 0.05                 eps=0.05
+     hackcode1 eps=%eps               hackcode1 eps=$eps
+     
+.EE
+Note that some \fItable(5NEMO)\fP
+programs use %0, %1, %2, .... to refer to column numbers, so variable names cannot start with
+a digit. Upper and Lower case should be allowed.
+.PP
+Recall that the current command line interface already can refer to other keywords, e.g.
+.EX
+
+    foobar a=1 b='$a'
+    
+.EE
+would assign the same value to both a and b.
+
+2. An option should exist to remove a variable from the database.
+
+3. In case there is true shared memory not associated with a filename, there needs to be a way to save and load
+true files.
+
+4. When \fIoutkeys/savevars\fP are implemented, the following style of IPC is possible:
+
+.EX
+
+     ccdstat ccd1 outkeys=mean,rms
+     ccdplot ccd1 %mean
+    
+.EE
+plotting a single contour of the mean value in the image.
+
+.SH "CAVEAT"
+It is not possible to use nemovar's in a pipe, e.g. this is NOT reliable:
+.EX
+    program1 - outkeys=bar | program2 - foo=%bar
+.EE
+
+
+.SH "SEE ALSO"
+txtpar(1NEMO), nemopars(8NEMO), getparam(3NEMO), table(3NEMO)
+.PP
+redis/valkey  https://github.com/valkey-io/valkey
+
+.SH "FILES"
+$NEMOVAR - currently the filename, but could be used to set a more generic IPC method.
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+7-mar-2024	Created for NEMO2024	PJT
+.fi

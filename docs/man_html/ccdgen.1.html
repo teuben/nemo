@@ -174,9 +174,12 @@ larger, the arms get narrower.   By making sure <b>p</b> becomes non-integer, e.
 p=2.0001, the negative arm becomes 0. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-Here&rsquo;s how to make a simple
-barred galaxy by adding an exponential disk and a (smaller) exponential
+Here&rsquo;s how to make a exponential
 bar: <br>
+<pre>    ccdgen bar.ccd   object=bar spar=1,10,0.5,30 size=128,128
+</pre>
+<p> Here&rsquo;s how to make a simple barred galaxy by adding an exponential disk
+and a (smaller) exponential bar: <br>
 <pre>ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256 |\
  ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
 </pre>or if you want them to be a bit more astronomical, you&rsquo;ll need to make the

@@ -5,9 +5,9 @@
 #set -x
 
 
-_version="28-feb-2024"
+_version="19-mar-2024"
 if [ $# -eq 0 ]; then
-    echo "Usage $0 cmd [args]"
+    echo "Usage $0 label cmd [args]"
     echo "Version $_version"
     echo "Simplified user/system/elapses/percentage /usr/bin/time output for benchmarks"
     exit 0
@@ -17,6 +17,9 @@ log=/tmp/nemobench$$.log                 # per process
 log=/tmp/nemobench.log                   # global
 log=$XDG_RUNTIME_DIR/nemobench.log       # per session (does not work on a mac)
 log=$NEMO/tmp/nemobench.log              # per NEMO
+
+label=$1
+shift
 
 if ! command -v $1 >/dev/null 2>&1; then
     echo "NEMOBENCH: FAIL to find $1"
@@ -36,13 +39,13 @@ if [ $linux = 1 ]; then
     /usr/bin/time --format="%U %S %e %P" $* >> $log 2>&1
 elif [ $linux = 2 ]; then
     # Linux emulating a mac (which has hardcoded real/usr/sys)
-    /usr/bin/time --format="%e real %U user %S sys"  $* >> $log 2>&1
+    /usr/bin/time --format="%e real %U user %S sys" $* >> $log 2>&1
 else
     /usr/bin/time $* >> $log 2>&1
 fi
 #echo CHRT
 #sudo chrt -f 99 /usr/bin/time $* >> $log 2>&1
-echo -n "NEMOBENCH: $1 "
+echo -n "NEMOBENCH: $label $1 "
 if [ $linux = 1 ]; then
     #    0.00user 0.00system 0:00.00elapsed 100%CPU (0avgtext+0avgdata 2628maxresident)k
     #tail -2 $log |grep elapsed

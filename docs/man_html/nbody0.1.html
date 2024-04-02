@@ -9,11 +9,14 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 nbody0, nbody00, nbody0h4 - direct summation Aarseth N-body integrator
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 nbody0 in=snap_in out=snap_out [keyword=value ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>nbody0</b>
 is the NEMO adaptation of version 0 (the <i>Micky Mouse</i> version) of Aarseth&rsquo;s
@@ -40,6 +43,7 @@ absence of close encounters. <p>
 on the f2c translated code (and hence will look odd and ugly in places).
 It has more debug output (debug=1 and higher) and also fixes problems with
 orbits like the Figure8 orbit (see BUGS below). 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
 The following
 parameters are recognized in any order when the keyword is also given 
@@ -96,12 +100,13 @@ both F and FDOT were 0 for the central particle. [f]. </dd>
 control options, specified as a comma separated list of keywords. Currently
 implemented are: <b>step</b>, outputs the current timestep per particle  in the
 <i>Aux</i> array of  a <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
-. Default: none. </dd>
+. Default: none. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Limitations</a></h2>
-The code has a
-hardcoded maximum number of particles in the fortran and C code (File:
+The code has
+a hardcoded maximum number of particles in the fortran and C code (File:
 <i>nmax.h</i>), change the relevant PARAMETER statement  to whatever is required.
 Using NEMO install the Makefile macro NMAX can also be used to do this
 automatically and  hence easily generate a new version with a different
@@ -125,6 +130,7 @@ A C version is also available,
 as nbody0.c, though the Makefile needs the target <b>nbody00</b> to install it.
 The user interface is as that of nbody0, except the keyword <b>f3dot=</b> was
 added. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Bugs</a></h2>
 Starting time of initial conditions is (re)set to 0, even if
 the snapshot had another time. <p>
@@ -135,6 +141,7 @@ will fail since the timestep for the 3rd particle blows up. Interestingly
 enough, some compilers (e.g. gnu) will happily work around this if optimization
 is turned on, but fail with pure debugging (OPT=-g) since only in this case
 the expression will compute as exactly 0. 
+<p> 
 <h2><a name='sect6' href='#toc6'>Storage</a></h2>
 A total of order <i>600.NMAX</i>
 bytes is needed, for a given maximum of <i>NMAX</i> particles. This breaks down
@@ -145,9 +152,11 @@ machines this adds up to <i>160.NMAX</i> bytes. <p>
 The <b>C</b> I/O code allocates space dynamically;
 and through limitations of the fortran code, a maximum of <i>100.NMAX</i> double&rsquo;s
 are needed, which means <i>400.NMAX</i> bytes. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Sverre Aarseth (F77), Peter
 Teuben (C) 
+<p> 
 <h2><a name='sect8' href='#toc8'>Genealogy</a></h2>
 The <b>nbody*</b> series of NBODY integrators were all originally
 written by Sverre Aarseth, and exist in many forms throughout the scientific
@@ -162,6 +171,7 @@ nbody5    <tt> </tt>&nbsp;<tt> </tt>&nbsp;with regularization handling triples &
 nbody6     <tt> </tt>&nbsp;<tt> </tt>&nbsp;... for new parallel machine
 nbody7<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;... secret
 </pre>
+<p> 
 <h2><a name='sect9' href='#toc9'>Nbody0h4</a></h2>
 On Sverre&rsquo;s CODES site, he also presents <b>nbody0</b>, a simple <i>Compact
 fourth-order Hermite block-step code</i>. We include it here as <b>nbody0h4</b>. This
@@ -171,12 +181,14 @@ input, the first line contains the usual <br>
 </pre>(though note the softening EPS is entered in the square value). This is
 followed by <b>N</b> lines of m,x,y,z,vx,vy,vz for each of the particles each.
 At some point in the future we may provide a wrapper for this.  
+<p> 
 <h2><a name='sect10' href='#toc10'>Files</a></h2>
 <br>
 <pre>NEMO/src/nbody/evolve/aarseth/nbody0<tt> </tt>&nbsp;<tt> </tt>&nbsp;official source code within NEMO
 NEMO/usr/aarseth/                      <tt> </tt>&nbsp;<tt> </tt>&nbsp;SJA&rsquo;s other nbodyX versions (not
 all exported)
 </pre>
+<p> 
 <h2><a name='sect11' href='#toc11'>See Also</a></h2>
 <a href='hackcode1.1.html'>hackcode1(1NEMO)</a>
 , <a href='runbody1.1.html'>runbody1(1NEMO)</a>
@@ -200,6 +212,7 @@ to NBODY6: The Growth of an Industry" <a href='http://adsabs.harvard.edu/abs/199
 <p>
 S.J. Aarseth, 2003, "Gravitational N-Body Simulations : Tools and Algorithms"
 (Cambridge Univ. Press). 
+<p> 
 <h2><a name='sect12' href='#toc12'>History</a></h2>
 <br>
 <pre>30-jun-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created + NEMO interfaces to fortran source<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

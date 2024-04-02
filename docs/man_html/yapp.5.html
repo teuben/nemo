@@ -39,81 +39,113 @@ or an environment variable <b>YAPP</b> will be used to select a device and it&rs
 possible options. 
 <p> 
 <h2><a name='sect2' href='#toc2'>Available Yapp Versions</a></h2>
-
+This list is not only incomplete,
+in addition some of the ones listed here are not fully implemented. 
 <dl>
 
-<dt><b>yapp</b> </dt>
-<dd>wrapper, which attempts (with
-or without some help) to include the correct yapp_xxx.c version (see below).
-</dd>
+<dt><b>yapp</b>
+</dt>
+<dd>wrapper, which attempts (with or without some help) to include the correct
+yapp_xxx.c version (see below). </dd>
 
 <dt><b>yapp_agl<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>uses Trieste/ESO&rsquo;s AGL package.  <i>Not implemented yet</i>. </dd>
+<dd>uses Trieste/ESO&rsquo;s AGL package.  <i>Not
+implemented yet</i>. </dd>
 
 <dt><b>yapp_cg<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>pure
-color graphics version for suncore (JEB) </dd>
+<dd>pure color graphics version for suncore (JEB) </dd>
 
-<dt><b>yapp_cg_old</b> </dt>
-<dd>slightly outdated
-color graphics (PSW &amp; JEB). </dd>
+<dt><b>yapp_cg_old</b>
+</dt>
+<dd>slightly outdated color graphics (PSW &amp; JEB). </dd>
 
 <dt><b>yapp_cg_new</b> </dt>
-<dd>??? seems to hang terminal (oct-90)
-</dd>
+<dd>??? seems to hang
+terminal (oct-90) </dd>
 
 <dt><b>yapp_cgi<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>old 1986 experiment, uses CGI; must be outdated by now (PJT) </dd>
+<dd>old 1986 experiment, uses CGI; must be outdated
+by now (PJT) </dd>
 
-<dt><b>yapp_core<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b>
-</dt>
-<dd>The old original one (JEB), uses suncore, can have optional mouse interface
-(-DMOUSE) and retained segments (-DRETAINED). Working on color interface (-DCOLOR),
-see also yapp_cg below. </dd>
+<dt><b>yapp_core<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>The old original one (JEB), uses suncore, can have
+optional mouse interface (-DMOUSE) and retained segments (-DRETAINED). Working
+on color interface (-DCOLOR), see also yapp_cg below. </dd>
+
+<dt>yapp_g2 </dt>
+<dd>A 2D multi-plexing
+(X11,PNG,PS) library </dd>
+
+<dt>yapp_mesa </dt>
+<dd>MESA 3D - almost GL </dd>
 
 <dt><b>yapp_meta<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>An ascii meta-file format. </dd>
+<dd>An ascii meta-file
+format. </dd>
+
+<dt><b>yapp_giza<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>Attempt to use the pgplot compatible giza library </dd>
+
+<dt>yapp_gl
+</dt>
+<dd></dd>
+
+<dt>yapp_glfw </dt>
+<dd></dd>
+
+<dt>yapp_gnuplot </dt>
+<dd></dd>
 
 <dt><b>yapp_mongo<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>for
-usage when mongo(87) is available. Uses environment varibiable <b>YAPP</b>, initialized
-in the <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- package, to select from a number of devices.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT)
-</dd>
+<dd>for usage when mongo(87) is available.
+Uses environment varibiable <b>YAPP</b>, initialized in the <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+ package,
+to select from a number of devices.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
+
+<dt><b>yapp_mpl</b> </dt>
+<dd>Initial coding for a matplotlib
+based   </dd>
 
 <dt><b>yapp_null</b> </dt>
-<dd>a stubbed list of all required and optional routines which gets
-you going on a machine with no proper yapp implementation yet. </dd>
-
-<dt><b>yapp_pgplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b>
-</dt>
-<dd>uses Tim Pierson&lsquo;s (Caltech) PGPLOT package. We now support PGPLOT V5 as
-well as an experimental version of CPGPLOT (PJT) </dd>
-
-<dt><b>yapp_plplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>uses the U.
-Texas PLPLOT package, a PGPLOT lookalike written in C. (PJT) </dd>
-
-<dt><b>yapp_ps<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>PostScript,
-merged with JEBs enhanced versions(PJT). Does not do color yet. </dd>
-
-<dt><b>yapp_sm<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>Super
-Mongo - not very good yet since sm doesn&rsquo;t have good callable provisions.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT)
+<dd>a stubbed list of all required and optional routines
+which gets you going on a machine with no proper yapp implementation yet.
 </dd>
 
+<dt><b>yapp_pgplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>uses Tim Pierson&lsquo;s (Caltech) PGPLOT package. We now support PGPLOT
+V5 as well as an experimental version of CPGPLOT (PJT) </dd>
+
+<dt><b>yapp_plplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>uses
+the U. Texas PLPLOT package, a PGPLOT lookalike written in C. Almost functional.
+</dd>
+
+<dt><b>yapp_ps<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>PostScript, merged with JEBs enhanced versions(PJT). Does not do
+color yet. </dd>
+
+<dt>yapp_psg </dt>
+<dd></dd>
+
+<dt><b>yapp_sm<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
+<dd>Super Mongo - not very good yet since sm doesn&rsquo;t
+have good callable provisions.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
+
 <dt><b>yapp_suntools</b> </dt>
-<dd>Suntools version with enhanced cursor interaction; has optional
--DMOUSE, -DCOLOR and -DRETAINED and autodetection of window vs. non-window mode
-under suntools. <i>deprecated</i>. </dd>
+<dd>Suntools version with
+enhanced cursor interaction; has optional -DMOUSE, -DCOLOR and -DRETAINED
+and autodetection of window vs. non-window mode under suntools. <i>deprecated</i>.
+</dd>
 
 <dt><b>yapp_sv</b> </dt>
-<dd>SunView version, in so-called implicit
-dispatch mode. This version is really only intended to create small images,
-to be saved in  screendump &rsquo;frame&rsquo;s, which can be displayed with the sunview
-windows version <a href='moview.1.html'><i>moview(1NEMO)</i></a>
-.  <i>deprecated</i>. </dd>
+<dd>SunView version, in so-called implicit dispatch mode. This version
+is really only intended to create small images, to be saved in  screendump
+&rsquo;frame&rsquo;s, which can be displayed with the sunview windows version <a href='moview.1.html'><i>moview(1NEMO)</i></a>
+.
+ <i>deprecated</i>. </dd>
+
+<dt><b>yapp_svg</b> </dt>
+<dd>Not yet functional. </dd>
 
 <dt><b>yapp_x11</b> </dt>
 <dd>Based on a standalone,
