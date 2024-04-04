@@ -11,9 +11,11 @@ L = $(NEMOLIB)/libnemo.a
 
 BINFILES = cpu-bench_f cpu-bench_d big big8 offt offt8 flops
 
-#	update the library: direct comparison with modules inside L
-help:
-	@echo Nemo makefile in `pwd`
+
+.PHONY : help
+## help:      This Help
+help : Makefile
+	@sed -n 's/^##//p' $<
 
 
 clean:
@@ -21,21 +23,25 @@ clean:
 
 all:	$(BINFILES)
 
+## flops:    old MFLOP estimate
 flops:	flops.c
 	$(CC) -DPOSIX1 $(CFLAGS) -o flops flops.c -lm
 
+## cpu-bench_f:
 cpu-bench_f:
 	$(CC) -DSINGLEPREC $(CFLAGS) -o cpu-bench_f  cpu-bench.c $(NEMO_LIBS)
 
+## cpu-bench_d:
 cpu-bench_d:
 	$(CC) -DDOUBLEPREC $(CFLAGS) -o cpu-bench_d  cpu-bench.c $(NEMO_LIBS)
 
-
+## bench:  runs cpu-bench_{f,d} and flops
 bench:	$(BINFILES)
 	time ./cpu-bench_f > cpu-bench_f.log
 	time ./cpu-bench_d > cpu-bench_d.log
 	time ./flops 
 
+## bench8:
 bench8:	big big8 offt offt64
 	@./big | wc
 	@./big8 | wc

@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 19-feb-2024 PJT
+VERSION = NEMO V4.4 20-feb-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -520,6 +520,10 @@ helpconfig:
 
 postconfig:	dirs config_extra scripts
 
+## reconfig:  re-configure in case their dependent files changed (your call)
+reconfig:
+	./config.status
+
 config:	configure
 	./configure
 
@@ -643,7 +647,8 @@ bench:   benchtest
 
 benchtest:
 	(source nemo_start.sh; src/scripts/benchsuite)
-	@echo 'Testing Benchsuite: Success!'
+	@echo 'Found following timing results:'
+	@grep ^NEMOBENCH benchsuite.log
 
 bench0:
 	(source nemo_start.sh; $(TIME) src/scripts/nemo.bench bsf=0)

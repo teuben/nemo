@@ -11,40 +11,55 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-mknemo - attempt to find NEMO (and related) programs and install them
-
+mknemo - install NEMO (and related) libraries and programs  
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
-<b>mknemo <i>program(s)</i></b>  
+<b>mknemo
+[options] <i>program(s)</i></b>  
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>mknemo</i> attempts to find the source
-code of the program(s) specified on the command line, and tries to compile
-them. If successfull, the binary will be placed in <b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag
-if your NEMO is under git control, so you can force an update before the
-build. <p>
-Finding the method how to install <i>program</i> takes several paths: <p>
-First,
-if a file <i>$NEMO/src/scripts/mknemo.d/program</i> exists, it is assumed to be
-a shell script with directions how to install this program. gyrfalcON is
-an example of such a complex program. In this case <i>program</i> can also be a
-package name, in which case the script will be more complex. <p>
-Next, within
-the $NEMO/src (optionally also the $NEMO/usr tree) a source file <i>program.c</i>
-(or C++ or Fortran) is looked for, which is compiled with a local <b>Makefile</b>
-(or a template if none is available).  <i>tsf</i> is an example of this type of
-program, but also more specialized plotting programs such as <i>snapplot</i> or
-<i>orboom</i>, which need an extra 3rd party library. <p>
-Finally, if still no source
-code is found, a directory with the name <i>program</i> is searched for,  and
-a local Makefile is then used to install the <i>program</i>. <b>hackcode1</b> is an example
-of this type of program. <p>
-Initially mknemo was nothing more than a convenience
-tool to build (new) binaries from your working directory, without having
-to remember where the source code lived... but since it has also acquired
-being a semi-package manager, it should be mentioned there are many other
-options to solve this problem. 
+<i>mknemo</i> was initially designed to quickly
+compile a NEMO program without the need to know where it is located, and
+build it locally and move it into $NEMOBIN.   Later on, <i>mknemo</i> evolved to
+also become a convenient package manager, placing 3rd party software under
+<i>$NEMO/opt</i>, giving NEMO a convenient containerized option. 
+<p> <p>
+<i>mknemo</i> attempts
+to find the source code of the program(s) specified on the command line,
+and tries to compile them. If successfull, the binary will be placed in
+<b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag if your NEMO is under git control, so you can force
+a <i>git pull</i> before the build. <p>
+Finding the method how to install <i>program</i> takes
+several paths: <p>
+Another option are 3rd party software, frequently used with
+NEMO. Example are libraries such as <a href='gsl.3.html'><i>gsl(3)</i></a>
+ and programs such as <a href='mcluster.1.html'><i>mcluster(1NEMO)</i></a>
+.
+<p>
+A novel action is to create a new NEMO program using the <b>-N</b> flag. Users will
+still need to edit the template code, but takes away the hassle of starting
+with brand new code. 
+<p> <p>
+First, if a file <i>$NEMO/src/scripts/mknemo.d/program</i>
+exists, it is assumed to be a (shell) script with directions how to install
+this program. gyrfalcON is an example of such a complex program. In this
+case <i>program</i> can also be a package name, in which case the script will
+be more complex. <p>
+Next, within the $NEMO/src (optionally also the $NEMO/usr
+tree) a source file <i>program.c</i> (or C++ or Fortran) is looked for, which is
+compiled with a local <b>Makefile</b> (or a template if none is available).  <i>tsf</i>
+is an example of this type of program, but also more specialized plotting
+programs such as <i>snapplot</i> or <i>orboom</i>, which need an extra 3rd party library.
+<p>
+Finally, if still no source code is found, a directory with the name <i>program</i>
+is searched for,  and a local Makefile is then used to install the <i>program</i>.
+<b>hackcode1</b> is an example of this type of program. <p>
+Initially mknemo was nothing
+more than a convenience tool to build (new) binaries from your working
+directory, without having to remember where the source code lived... but since
+it has also acquired being a semi-package manager, it should be mentioned
+there are many other options to solve this problem. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Options</a></h2>
 <br>
@@ -62,6 +77,7 @@ options to solve this problem.
   -a        also search $NEMO/usr 
   -v        more verbose, it will report version and cvsid of program (deprecated)
   -D        show special projects from the mknemo.d directory
+  -N p k=v  create and compile template program &rsquo;p.c&rsquo; with set of &rsquo;key=val&rsquo;
 </pre>
 <p> 
 <h2><a name='sect4' href='#toc4'>Makedefs</a></h2>
@@ -69,7 +85,7 @@ All compile flags and libraries that are used should have been
 configured in the $NEMOLIB/makedefs file. Here are some critical programs
 that you could use to test if that specific library was properly referenced
 in makedefs: <br>
-<pre>heated_plate_openmp<tt> </tt>&nbsp;<tt> </tt>&nbsp;openmp
+<pre>heated_plate_openmp  <tt> </tt>&nbsp;<tt> </tt>&nbsp;openmp
 cfitsio<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;sdfits  (no test data present in NEMO)
 fftw<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
 gsl<tt> </tt>&nbsp;<tt> </tt>&nbsp;        <tt> </tt>&nbsp;<tt> </tt>&nbsp;-
@@ -88,23 +104,39 @@ editing $NEMOLIB/makedefs directly.
 Here are some examples of the
 non-default control files in $NEMO/src/scripts/mknemo.d: <br>
 <pre>firstn    <tt> </tt>&nbsp;<tt> </tt>&nbsp;the very first (?) nbody code
-glnemo2   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics
+glnemo2   <tt> </tt>&nbsp;<tt> </tt>&nbsp;glnemo graphics (binaries are available for this)
 gyrfalcON   <tt> </tt>&nbsp;<tt> </tt>&nbsp;falcON tools (gyrfalcON, mkplum, the acc&rsquo;s and manip&rsquo;s)
-rotcur    <tt> </tt>&nbsp;<tt> </tt>&nbsp;rotcur program (there is also a confusing rotcur potential(5NEMO))
+rotcur    <tt> </tt>&nbsp;<tt> </tt>&nbsp;rotcur program (there is also a conflicting rotcur.c via potential(5NEMO))
 galaxy15<tt> </tt>&nbsp;<tt> </tt>&nbsp;Sellwood&rsquo;s GALAXY V15.
 cfitsio<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;CFITSIO library
 </pre>For a 3rd party library system type library, such as cfitsio, the sources
-will be under $NEMO/local, and being built with --prefix=$NEMO/opt. 
+will be under $NEMO/local, and  built with --prefix=$NEMO/opt. Thus non-NEMO
+user could use this <i>prefix</i> to their shell environment and borrow this environment.
+<p>
+This command creates a new program "foo" in $NEMOBIN by creating foo.c in
+the current directory. It will accept two keywords with given defaults:b
+<br>
+<pre>    $ mknemo -N foo bar=10 fum=bar
+    $ foo --help
+    foo bar=10 fum=bar VERSION=0.0
+    
+</pre>If this is a program to be added to NEMO, also make a template manual page:
+<br>
+<pre>    $NEMO/src/scripts/mkman foo &gt; $NEMO/man/man1/foo.1
+    
+</pre>
 <p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
-The
-mknemo <i>attempts</i> to (re)install a program or package for NEMO, but there
-is no guarentee this works. For programs it typically depends on a matching
-sourcecode (e.g. name.c) and a proper Makefile in the directory where this
-code lives, or in more complicated cases, a matching script name in $NEMO/src/scripts/mknemo.d
-
+mknemo <i>attempts</i> to (re)install a program or package for NEMO, but
+there is no guarentee this works. For programs it typically depends on a
+matching sourcecode (e.g. name.c) and a proper Makefile in the directory where
+this code lives, or in more complicated cases, a matching script name in
+$NEMO/src/scripts/mknemo.d <p>
+The scripts in <i>mknemo.d</i> are guidelines that may
+have worked in the past, but may now fail and need some tinkering. 
 <p> 
-<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See
+Also</a></h2>
 <a href='bake.8.html'>bake(8NEMO)</a>
 , <a href='mkbin.8.html'>mkbin(8NEMO)</a>
  
@@ -130,17 +162,17 @@ for public use
 <p> 
 <h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
-<pre>21-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: doc created       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+<pre>21-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: doc created       <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 25-jun-91<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added lockfile     <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 4-apr-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3: added extension making for NEMO V3<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 20-jun-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4: added -u flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-dec-03<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5: added -l flag, also cloned sbin/mkstarlab<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-jun-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.4: added -a flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-11-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0: git based
+11-apr-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.0: converted CVS -&gt; git for -u<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;document critical binaries<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;added -L options, switch -L and -l meaning<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-</pre>
-<p> <p>
+mar-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V4.6: added -N flag<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+</pre><p>
 
 <hr><p>
 <a name='toc'><b>Table of Contents</b></a><p>

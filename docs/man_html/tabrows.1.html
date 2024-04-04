@@ -9,56 +9,64 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-tabrows - select rows/lines from a file 
+tabrows - select rows from a table 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>tabrows</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>tabrows</b> selective copies lines from an input (ASCII) table. Selection
-is done by line numbers, 1 being the first line. Syntax follows the <a href='nemofie.1.html'><i>nemofie(1NEMO)</i></a>
-
-rules. 
+<b>tabrows</b> selectively copies rows from an input (ASCII) <a href='table.5.html'><i>table(5NEMO)</i></a>
+.
+Selection is done by table row numbers, 1 being the first non-comment row.
+Syntax follows the <a href='nemofie.1.html'><i>nemofie(1NEMO)</i></a>
+ rules. Row selection can be done in any
+order, e.g. <b>select=3,2,1</b>, as long as <b>comment=f</b> (see CAVEATS below) 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in any order if
-the keyword is also given: 
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
 <dd>input file. No default. </dd>
 
 <dt><b>select=</b> </dt>
-<dd>rows/lines
-to select. Any <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
- expression can be used. First column is 1. [all]
-</dd>
+<dd>rows to select. Any <a href='nemoinp.3.html'><i>nemoinp(3NEMO)</i></a>
 
-<dt><b>comment=t|f</b> </dt>
-<dd>Count comment lines too? See also <a href='tabcomment.1.html'><i>tabcomment(1NEMO)</i></a>
- to filter
-comments. Default: t </dd>
+expression can be used. First row is 1.  A special <b>select=-1</b>q is allowed for
+the last row. [all] </dd>
 
 <dt><b>nmax=</b> </dt>
-<dd>Default max allocation of the linecount in a
-table from a pipe  [10000]. </dd>
+<dd>Default max allocation of how many can be selected
+in <b>select=</b>  [10000]. </dd>
+
+<dt><b>comment=t|f</b> </dt>
+<dd>If set, comments will also be processed,
+but row numbers are only counted for true table rows. The default is that
+comments will be skipped. </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output file. Default is standard output.
-
+<dd>output file. Default is standard output. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Although this program uses the new table interface, the <b>nmax=</b> parameter
-is still used and thus limits the row count. 
+Although
+this program uses the new table interface, the <b>nmax=</b> parameter is still
+needed when <b>comment=t</b>, and thus limits the row count. A better select counter
+is needed for this. <p>
+If <b>comment=t</b> the file is currently processed in streaming
+mode, thus the <b>select=</b> need to be ordered. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-To find the square
-root of any number <i>n</i> between 1 and 100: <br>
-<pre>    nemoinp 1:100:1 &gt; t1
-    tabmath t1 t2 &rsquo;sqrt(%1)&rsquo; all
-    tabrows t2 - select=n
+A contrived example
+to reverse the even lines in a file: <br>
+<pre>    nemoinp 1:10:1 | tabrows - 10:1:-2
 </pre>
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabcols.1.html'>tabcols(1NEMO)</a>
@@ -80,6 +88,7 @@ Peter Teuben
 <br>
 <pre>9-Mar-99<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 Created <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 5-may-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 converted to table V2 interface, renamed from tablines<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+30-mar-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.2 use in-memory table, and made comment=f the default<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

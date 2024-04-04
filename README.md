@@ -1,7 +1,10 @@
+![A Real Bar](docs/figures/realbar1.png)
+
 NEMO is a toolbox for stellar dynamics, particle simulations, stellar orbits,
 image processing and tabular data manipulation. Documentation is maintained
 in the github pages, https://teuben.github.io/nemo , and a manual in
 https://astronemo.readthedocs.io
+
 
 ## History
 
@@ -71,16 +74,6 @@ If you plan to modify code and submit pull requests, the github CLI is recommend
 though you can of course also clone the upstream manually (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
-
-On the most recent apple controlled hardware, with SIP enabled, you might be in for a rude
-awakening. I use brew on a mac, and assuming you have gcc-10 (and related) and pgplot installed, this should
-work (there may be other ways to install tools on a mac, but don't get me started):
-
-         git clone https://github.com/teuben/nemo
-         cd nemo
-         CC=gcc-10 CXX=g++-10 FC=gfortran-10 ./configure --disable-shared --with-yapp=pgplot
-         make build check bench5
-         source nemo_start.sh
 
 After installation, rebuilding NEMO to ensure you have all updates can be done as follows:
 

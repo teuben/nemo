@@ -1,0 +1,43 @@
+# -*- makefile -*-
+
+DIR       = src/nbody/trans
+BENCH     = bench0 bench1 bench2 bench3
+BENCHDATA = p6
+LOG       = /tmp/nemobench.log
+BIN       = mkplummer snapbench
+NEED      = $(BIN) 
+FTEN      = 1
+TIME      = /usr/bin/time
+
+help:
+	@echo $(DIR)
+	@echo MBODY=$(MBODY)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+
+# Million-Body size
+MBODY = 1
+
+p6:
+	nemobench mkplummer mkplummer p6 nbody="$(MBODY)*1000000"
+
+bench0:	p6
+	nemobench snapbench0 snapbench p6 'mass=1.0001'   iter=1000 mode=0
+
+bench1: p6
+	nemobench snapbench1 snapbench p6 'mass=1.0001*m' iter=1000 mode=1
+
+bench2: p6
+	nemobench snapbench2 snapbench p6 'mass=1.0001'   iter=1000 mode=2
+
+bench3: p6
+	nemobench snapbench3 snapbench p6 'mass=1.0001'   iter=1000 mode=3
+
+

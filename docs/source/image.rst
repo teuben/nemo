@@ -12,7 +12,7 @@ There are a few programs with which images can be initialized:
   `tabgen <https://teuben.github.io/nemo/man_html/tabgen.1.html>`_
   for tables. Here is an example creating and visualizing an image
 
-.. code-block::
+.. code-block:: bash
 
   % ccdgen bar.ccd  object=bar spar=1,10,0.5,30 size=128,128
   % ccdplot bar.ccd
@@ -24,7 +24,7 @@ There are a few programs with which images can be initialized:
   of creating an image from scratch:
 
 
-.. code-block::
+.. code-block:: bash
 
   % ccdmath out=ccd1 fie=%x+%y size=2,4
   Generating a map from scratch
@@ -78,7 +78,7 @@ There are a few programs with which images can be initialized:
   a CPU penalty is incurred.
 
 
-.. code-block::
+.. code-block:: bash
 
   nx,ny	->    data[nx][ny]
 
@@ -109,7 +109,7 @@ characters allowed on the commandline}
 
 The following programs are available:
 
-.. code-block::
+.. code-block:: bash
 
 	ccdvel          create a model velocity field, from scratch
 	rotcur          tilted ring model velocity field fitting
@@ -137,7 +137,7 @@ create nice model velocity fields from any selected shape by
 *fitting* a rotation curve shape to a velocity field of all 0s
 and keeping all parameters fixed to the requested values:
 
-.. code-block::
+.. code-block:: bash
 
    % ccdmath out=map0.vel fie=0 size=128,128
    % rotcurshape map0.vel 0,40 30 45 0 blank=-999 resid=map.vel \

@@ -25,8 +25,6 @@ Welcome to NEMO's documentation!
    we also keep a local copy 
    `readthedocs on astroumd <https://www.astro.umd.edu/~teuben/nemo/readthedocs/html>`_.
 
-.. note::  **(*)** are sections that have not been fully cleaned up and can contain old latex markup
-
 .. toctree::
    :numbered:
    :maxdepth: 2

@@ -68,17 +68,20 @@ distribution of numbers: 1=uniform   2=normal   3=constant  4=linear &lt; 0
 <dt><b>sep=c|s|v|t</b> </dt>
 <dd>Separator between columns. c=comma  s=space  v=vertical bar
  t=tab. If none of these are given, the string is taken literal [Default:
-space] 
+space] </dd>
+
+<dt><b>addrow=t|f</b> </dt>
+<dd>add a row counter, 1 being the first. [f]    
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Performance</a></h2>
-On a typical 2020 machine it takes 0.23 seconds to create
-and output 1M random numbers, however most of the time is the output function.
-Using mode &lt; 0 you can test the speed of just producing random numbers. About
-95% of the time is spent in <a href='printf.3.html'><i>printf(3)</i></a>
-, as can be seen with this benchmark:
-<br>
+On
+a typical 2020 machine it takes 0.23 seconds to create and output 1M random
+numbers, however most of the time is the output function. Using mode &lt; 0
+you can test the speed of just producing random numbers. About 95% of the
+time is spent in <a href='printf.3.html'><i>printf(3)</i></a>
+, as can be seen with this benchmark: <br>
 <pre>    /usr/bin/time tabgen . 10000 10000 -1
     1.38user 0.29system 0:01.68elapsed 99%CPU
     
@@ -91,15 +94,16 @@ runs at 50 GFlops. <p>
 Generating a sequence of numbers is relatively slow in
 tabgen. To generate 10M numbers is slow compared ot the standard unix tool
 <a href='seq.1.html'><i>seq(1)</i></a>
-: <br>
+, however the new <b>addrow=</b> parameter makes it about 3x faster. <br>
 <pre>    /usr/bin/time tabgen - 10000000 1 4 fmt=%-10.f &gt; tab2
-    9.89user 0.07system 0:09.97elapsed 99%CPU
+    2.07user 0.10system 0:02.18elapsed 99%CPU
     /usr/bin/time seq 10000000 &gt; tab2
-    0.19user 0.22system 0:00.42elapsed 98%CPU
+    0.05user 0.04system 0:00.10elapsed 100%CPU (
+but
+    /usr/bin/time tabgen - 10000000 0 addrow=t &gt; tab2
+    0.65user 0.07system 0:00.73elapsed 99%CPU
     
-</pre>which is most likely the more complex operations of a floating point <a href='fprintf.3.html'><i>fprintf(3)</i></a>
-.
-<p>
+</pre><p>
 The <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  program can also generate a simple table, but the maximum
 number of elements in an implied list is limited (100,000 currently). This
@@ -133,6 +137,7 @@ Peter Teuben
 25-jul-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.4 changed meaning of mode=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 cleanup and tableV2 things <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 5-oct-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added sep=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-feb-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 added addrow=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

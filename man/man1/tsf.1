@@ -24,37 +24,46 @@ exercised. A \fIjson\fP mode has been considered.
 .TP 24
 \fBin=\fP\fIfile\fP
 Input data is read from \fIfile\fP, which must be a structured binary file.
+.br
 No default.
 .TP
 \fBmaxprec=t|f\fP
 If true, print float and double item data with maximum precision.
+.br
 [Default: \fBf\fP].
 .TP
 \fBmaxline=\fP\fIlines\fP
 Limits the number of lines of data typed for each item to \fIlines\fP.
-See \fBallline=\fP below.
+See also \fBallline=\fP below.
+.br
 [Default: \fB4\fP].
 .TP
 \fBallline=t|f\fP
 Print all lines, it overrides any value of \fBmaxline\fP.
 If xml format selected, allline will always be set to t.
+.br
 [Default: \fBf\fP].
 .TP
 \fBindent=\fP\fIset-indent\fP
 Amount to indent contents of item-sets.
+.br
 [Default: \fB2\fP].
 .TP
 \fBmargin=\fP\fIright-margin\fP
 Righthand margin for output. Set this to a high value to prevent
 possible string problems if file needs to be read by \fIrsf\fP.
+.br
 [Default: \fB72\fP].
 .TP
 \fBitem=\fP\fIitem-name\fP
-select only this item for output. Default: all items selected.
+select only this item for output.
+.br
+Default: all items selected.
 .TP
 \fBxml=t|f\fP
 Output in xml mode? 
 If not, old-style human readable tsf mode is selected.
+.br
 [Default: \fBf\fP].
 .TP
 \fBoctal=t|f\fP
@@ -64,6 +73,7 @@ by default to decimal (more human readable). By using
 \fBoctal=t\fP you can force this program back in the old
 mode. If take output of tsf to be read into rsf, you now
 need to force octal=t.
+.br
 [Default: \fBf\fP].
 
 .SH "SEE ALSO"
@@ -146,4 +156,5 @@ xx-apr-88	V2.0 new filestruct package	JEB
 21-mar-01	V2.7 experimental xml output option	PJT
 14-jun-02	V3.0 added octal=, default output is now decimal	PJT
 21-jun-21	experimenting with a TLDR section	PJT
-.fi<
+1-apr-2024	experimenting with how to place defaults	PJT
+.fi

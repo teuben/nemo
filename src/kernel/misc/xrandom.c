@@ -283,7 +283,7 @@ string defv[] = {
     "gsl=\n         If given, GSL distribution name",
     "pars=\n        Parameters for GSL distribution",
 #endif
-    "VERSION=2.5\n  23-sep-2023 PJT",
+    "VERSION=2.5a\n  25-feb-2024 PJT",
     NULL,
 };
 
@@ -326,9 +326,18 @@ void nemo_main()
 
   if (Q57) {
     real seed57 = getrparam("seed57");
-    dprintf(0,"von Hoerner seed57=%g first ran=%.9f\n",seed57,ran_svh57(seed57));
-    for (i=0; i<n; i++)
-      printf("%.9f\n",ran_svh57(0.0));
+    real sum57 = 0.0;
+    dprintf(0,"von Hoerner seed57=%g first ran=%.9f n=%d m=%d\n",
+	    seed57,ran_svh57(seed57),m,n);
+    for (j=0; j<m; j++) {
+      if (Qtab) {
+	for (i=0; i<n; i++)
+	  printf("%.9f\n",ran_svh57(0.0));
+      } else {
+	sum57 += ran_svh57(0.0);
+      }
+    }
+    dprintf(1,"Sum57=%g\n", sum57);
     return;
   }
   

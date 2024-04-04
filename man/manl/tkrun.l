@@ -112,7 +112,7 @@ With the -e flag a very simple example can be created:
 
     % tkrun -e > try1.csh
     % chmod +x try1.csh
-    % tkrun ./try.csh
+    % tkrun ./try1.csh
 .fi
 
 .PP
