@@ -48,7 +48,7 @@ string defv[] = {
 	"cut=0.01\n             Cutoff value for gaussian, if used",
 	"beam=\n                Optional 2D beam map",
 	"mode=0\n               Special edge smoothing modes (testing)",
-	"VERSION=4.0b\n         18-feb-2024 PJT",
+	"VERSION=4.0c\n         8-apr-2024 PJT",
 	NULL,
 };
 
@@ -129,6 +129,8 @@ void nemo_main(void)
       if (nxb % 2 == 0) warning("your beam does not have an odd number of pixels");
       copy_image(iptr,&optr);
       smooth_bm();
+      minmax_image(optr);
+      write_image(outstr,optr);      
     } else {
       if(hasvalue("gauss"))
         make_gauss_beam(getparam("dir"));
@@ -143,9 +145,9 @@ void nemo_main(void)
 	wiener();
       else
 	smooth_it();
+      minmax_image(iptr);
+      write_image(outstr,iptr);      
     }
-    minmax_image(optr);
-    write_image(outstr,optr);
     strclose(outstr);
 }
 
