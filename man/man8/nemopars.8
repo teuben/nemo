@@ -1,4 +1,4 @@
-.TH NEMOPARS 8NEMO "16 November 2022"
+.TH NEMOPARS 8NEMO "7 April 2024"
 
 .SH "NAME"
 nemopars \- extract parameters from a bash-style rc file
@@ -10,7 +10,7 @@ nemopars \- extract parameters from a bash-style rc file
 .SH "DESCRIPTION"
 \fBnemopars\fP will extract the values of \fIpar=val\fP constructs
 in a  bash-style rc file (it will also support python assignments).
-The convention is that in a run directory
+The convention is that in a \fIrun\fP directory
 NEMO stores these in a \fBnemopars.rc\fP file. For example with the
 following rc file
 .nf
@@ -47,8 +47,13 @@ This is a simple python script, the CLI does not adhere to the usual \fIgetparam
 .PP
 When a parameter is missing (or mis-spelled) from the rc file, the value "nan" is printed instead.
 
+.SH "CAVEATS"
+The current rc file is rather bash specific and allows multiple parameters on a line, as bash does.
+.PP
+Multi-word string variables are not captured, viz.
+
 .SH "SEE ALSO"
-nemo(1NEMO), awk(1)
+nemo(1NEMO), nemovar(1NEMO), awk(1)
 
 .SH "FILES"
 .nf
