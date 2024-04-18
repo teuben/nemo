@@ -12,7 +12,11 @@ if len(sys.argv) == 1:
     exit(0)
 
 prog = sys.argv[1]
-name = f"{prog}.c"
+if ("." in prog):
+    name = prog
+else:
+    name = f"{prog}.c"
+
 date = datetime.now().strftime("%d-%b-%Y")
 
 if os.path.exists(name):
@@ -28,7 +32,7 @@ with open(name, "w") as f:
 
     for arg in sys.argv[2:]:
         key, value = arg.split("=")
-        f.write(f'    "{key}\\n    some help",\n')
+        f.write(f'    "{arg}\\n    some help",\n')
 
     f.write(f'    "VERSION=0.0\\n       {date} XYZ",\n')
     f.write("    NULL,\n")
