@@ -1,0 +1,47 @@
+.TH falcON 5NEMO "19 April 2024"
+
+.SH "NAME"
+falcON \- falcON format to describe N-Body snapshot
+
+.SH "DESCRIPTION"
+In the first version of falcON the \fIsnapshot(5NEMO)\fP was used, although normally
+Position and Velocity was separately stored.
+.PP
+In the second version of falcON the HDF5 format was adopted, which we document here.
+
+.SH "DATA"
+Here is the output of h5dump -n
+.nf
+HDF5 "sim32.h5" {
+FILE_CONTENTS {
+ group      /
+ dataset    /history
+ group      /snapshot0
+ group      /snapshot0/std
+ dataset    /snapshot0/std/acc
+ dataset    /snapshot0/std/mass
+ dataset    /snapshot0/std/pos
+ dataset    /snapshot0/std/pot
+ dataset    /snapshot0/std/vel
+ group      /snapshot1
+ group      /snapshot1/std
+ dataset    /snapshot1/std/acc
+ dataset    /snapshot1/std/mass
+ dataset    /snapshot1/std/pos
+ dataset    /snapshot1/std/pot
+ dataset    /snapshot1/std/vel
+ }
+}
+.fi
+
+.SH "SEE ALSO"
+h5dump(1), snapshot(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "HISTORY"
+.nf
+.ta +1.5i +5.5i
+19-apr-2024	Created	PJT
+.fi
