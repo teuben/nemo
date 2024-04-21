@@ -23,7 +23,6 @@ GROUP "/" {
 
  */
 
-
 #include <nemo.h>
 #include <history.h>
 #include <snapshot/snapshot.h>
@@ -33,41 +32,36 @@ string defv[] = {
   "in=???\n            Input snapshot",
   "out=???\n           Output snapshot",
   // times=
-  // 
-  "VERSION=0.3\n       21-apr-2024 PJT",
+  // type=
+  "VERSION=0.4\n       21-apr-2024 PJT",
   NULL,
 };
 
-string usage="Process falcon HDF5 snapshots";
+string usage="Convert falcon HDF5 snapshot to NEMO snapshot";
 
-#define MAXBODY  1000000
+#if 1
+#define MAXBODY  10000000
+#endif
 
-void rdwt(string fin, string fout);
+#ifdef MAXBODY
+  float       mass[MAXBODY], pot[MAXBODY];
+  float       acc[MAXBODY][3], pos[MAXBODY][3], vel[MAXBODY][3];
+#else
+  // @todo use mdarray
+  float       *mass, *acc, *pot, *pos, *vel;
+#endif
+
 
 void nemo_main()
 {
-  string fin = getparam("in");
-  string fout = getparam("out");
-
-  rdwt(fin, fout);
-
-}
-
-
-
-void rdwt(string fin, string fout)
-{
-  
+  string      fin = getparam("in");
+  string      fout = getparam("out");
   hid_t       file_id, attr_id, group_id, group2_id, dataset_id;
   herr_t      status;
-  hsize_t     dims[2];
   stream      ostr;
-  int         i, j, cs = CSCode(Cartesian, NDIM, 2);
-  int         ntime, nbody, nbody2;
+  int         cs = CSCode(Cartesian, NDIM, 2);
+  int         ntime, nbody, nbody1, nbody2;
   double      stime;
-  double      mass[MAXBODY];
-  float       acc[MAXBODY][3], pot[MAXBODY], pos[MAXBODY][3], vel[MAXBODY][3];
-  
 
   file_id = H5Fopen(fin, H5F_ACC_RDONLY, H5P_DEFAULT);
   if (file_id == H5I_INVALID_HID) error("not valid file");
@@ -100,7 +94,7 @@ void rdwt(string fin, string fout)
     attr_id = H5Aopen(group_id, "time", H5P_DEFAULT);
     if (attr_id == H5I_INVALID_HID) error("not valid attribute2");      
     dprintf(2,"attr_id: %d\n", attr_id);
-    status = H5Aread(attr_id, H5T_IEEE_F64LE, &stime);
+    status = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &stime);
     H5Aclose(attr_id);
     
     // Nstd
@@ -123,36 +117,51 @@ void rdwt(string fin, string fout)
     H5Aclose(attr_id);
     if (nbody2 != nbody)
       warning("Cannot probably process non-std snapshots; nbody_std=%d",nbody2);
+    
+#ifdef MAXBODY
     if (nbody2 > MAXBODY)
       error("Not enough space for %d particles; MAXBODY=%d", nbody2, MAXBODY);
+#else
+    if (itime == 0) {
+      nbody1 = nbody2;
+      mass = (double *) allocate(nbody2*sizeof(double));
+      pos  = (float *)  allocate(nbody2*sizeof(double)*3);
+      vel  = (float *)  allocate(nbody2*sizeof(double)*3);
+      pot  = (float *)  allocate(nbody2*sizeof(double));
+      acc  = (float *)  allocate(nbody2*sizeof(double)*3);
+    } else {
+      if (nbody2 > nbody1) error("Cannot handle increasing particle number yet");
+    }
+#endif    
 
     dataset_id = H5Dopen2(group2_id, "mass", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid mass dataset");
-    status = H5Dread(dataset_id, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, mass);
+    status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, mass);
     H5Dclose(dataset_id);
     dprintf(1,"mass[0] = %g\n", mass[0]);
 
     dataset_id = H5Dopen2(group2_id, "pos", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid pos dataset");
-    status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, pos);
+    //status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, pos);
+    status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, pos);
     H5Dclose(dataset_id);
     dprintf(1,"pos[0] = %g %g %g\n", pos[0][0], pos[0][1], pos[0][2]);
 
     dataset_id = H5Dopen2(group2_id, "vel", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid vel dataset");
-    status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, vel);
+    status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, vel);
     H5Dclose(dataset_id);
     dprintf(1,"vel[0] = %g %g %g\n", vel[0][0], vel[0][1], vel[0][2]);
 
     dataset_id = H5Dopen2(group2_id, "pot", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid pot dataset");
-    status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, pot);
+    status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, pot);
     H5Dclose(dataset_id);
     dprintf(1,"pot[0] = %g\n", pot[0]);
 
     dataset_id = H5Dopen2(group2_id, "acc", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid acc dataset");
-    status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, acc);
+    status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, acc);
     H5Dclose(dataset_id);
     dprintf(1,"acc[0] = %g %g %g\n", acc[0][0], acc[0][1], acc[0][2]);
     
@@ -166,7 +175,7 @@ void rdwt(string fin, string fout)
     put_tes(ostr, ParametersTag);
     put_set(ostr, ParticlesTag);
     put_data(ostr, CoordSystemTag, IntType, &cs, 0);
-    put_data(ostr, MassTag, DoubleType, mass, nbody, 0);
+    put_data(ostr, MassTag, FloatType, mass, nbody, 0);
     put_data(ostr, PosTag, FloatType, pos[0], nbody, NDIM, 0);
     put_data(ostr, VelTag, FloatType, vel[0], nbody, NDIM, 0); 
     put_data(ostr, PotentialTag, FloatType, pot, nbody, 0);   
