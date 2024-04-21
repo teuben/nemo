@@ -8,13 +8,17 @@ falcon \- Process falcon HDF5 snapshots
 
 .SH "DESCRIPTION"
 Thi program convert the HDF5 based \fBfalcON\fP snapshot format
-into a NEMO format.
+into a NEMO format. It is still under development.
+.PP
+Selection by time or snapshot number, as well as particle type
+can be made eventually.  Note NEMO can only handle one particle type.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input \fPfalcon(5NEMO)\fP snapshot [???]     
+Input \fPfalcon(5NEMO)\fP snapshot.
+no default
 .TP 20
 \fBout=\fP
 Output snapshot. Not implemented yet.
@@ -28,7 +32,7 @@ src/nbody/io/falcon.c
 .SH "AUTHOR"
 Peter Teuben
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
 20-apr-2024	Created		PJT
