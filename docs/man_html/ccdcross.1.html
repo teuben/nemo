@@ -72,17 +72,21 @@ true offsets as all bets are off.
 
 <p> Here two gaussian shaped sources
 with noise are created with a small 1 pixel offset from each other. 
-<p> <br>
-<pre>    ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05
- in=-
-    ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05
- in=-
-    ccdcross g64,g65 shift.ccd box=16
-    ...
-    ### nemo Debug Info: max cross 12.2081 @ 17 17
-    ### nemo Debug Info: X,Y mean: -0.00853349 -0.00708124
-    ### nemo Debug Info: Shift: 0.991467 0.992919
-</pre>
+<p>  
+<p> 
+   ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05
+ in=-<br>
+     ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05
+ in=-<br>
+     ccdcross g64,g65 shift.ccd box=16<br>
+     ...<br>
+     ### nemo Debug Info: Max cross 13.968 @ 16 16<br>
+     ### nemo Debug Info: X,Y mean: 0.393391 0.412221<br>
+     ### nemo Debug Info: X,Y sig:  1.7885 1.76623<br>
+     ### nemo Debug Info: Center at: 0.393391 0.412221<br>
+     0.393391 0.412221  0.393391 0.412221  16 16  13.968<br>
+ 
+<p>  
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='ccdmath.1.html'>ccdmath(1NEMO)</a>
@@ -90,17 +94,17 @@ with noise are created with a small 1 pixel offset from each other.
  
 <p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/image/mics<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdcross.c 
+src/image/mics<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdcross.c
+
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Peter
-
-<p>Teuben 
+Peter Teuben 
 <p> 
 <h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>11-Apr-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 3-aug-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.2 fix absolute coordinate<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+18-apr-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 add peak flux in correlation map<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

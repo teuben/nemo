@@ -21,7 +21,7 @@ nemopars - extract parameters from a bash-style rc file
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>nemopars</b> will extract the values of <i>par=val</i>
 constructs in a  bash-style rc file (it will also support python assignments).
-The convention is that in a run directory NEMO stores these in a <b>nemopars.rc</b>
+The convention is that in a <i>run</i> directory NEMO stores these in a <b>nemopars.rc</b>
 file. For example with the following rc file <br>
 <pre># ./mkmh97.sh version=11-aug-2022
 run=run0 m=1 v0=1 seed=-3
@@ -48,21 +48,28 @@ usual <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
 When a parameter is missing (or mis-spelled)
 from the rc file, the value "nan" is printed instead. 
 <p> 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
+The current
+rc file is rather bash specific and allows multiple parameters on a line,
+as bash does. <p>
+Multi-word string variables are not captured, viz. 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='nemo.1.html'>nemo(1NEMO)</a>
 ,
-<a href='awk.1.html'>awk(1)</a>
+<a href='nemovar.1.html'>nemovar(1NEMO)</a>
+, <a href='awk.1.html'>awk(1)</a>
  
 <p> 
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>$NEMO/src/scripts/nemopars<tt> </tt>&nbsp;<tt> </tt>&nbsp;(python) script
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<h2><a name='sect8' href='#toc8'>Update History</a></h2>
 <br>
 <pre>17-aug-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-nov-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;Print "nan" when parameter missing<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -75,10 +82,11 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Caveats</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>
 </body>
 </html>

@@ -19,85 +19,118 @@ tabint - integrate a sorted table, optionally higher order moments
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabint</b> integrates a function
-Y=F(X) that is defined by a set of (X,Y) points obtained via an ASCII table.
-The function can either be resampled using a spline interpolation, or directly
-summed. <p>
+Y=F(X) that is defined by a set of (X,Y) points selected from two columns
+from an ASCII table. The function can either be resampled using a spline
+interpolation, or directly summed using the trapezoid rule. <p>
 See also <a href='tabhist.1.html'><i>tabhist(1NEMO)</i></a>
- with <b>cumul=t</b> for a visual display. <p>
-An optional
-scale factor can be applied, which folds in any X or Y scaling that might
-want to be applied. <p>
-Optionally the 1st or 2nd moment can be computed, though
-the step=, normalize= and cumulative= are then ignored. 
+
+with <b>cumul=t</b> for a visual display, though the cumulative option here can
+also produce a table for display to check the convergence of the integral.
+<p>
+An optional scale factor can be applied, which folds in any X or Y scaling
+that might want to be applied. This is particularly useful if you integrate
+the points themselves (i.e. without giving a <b>step=</b>)  but still want to scale
+the X coordinate. <p>
+Optionally the 1st or 2nd moment can be computed (step=,
+normalize= and cumulative= are then ignored). 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The
-following parameters are recognized in order; they may be given in any
-order if the keyword is also given. Use <b>--help</b> to confirm this man page is
-up to date.  
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input table file. No default. </dd>
+<dd>Input table file. <br>
+No default. </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>Column with X coordinate.
-If the X coordinates are not increasing, the array will be reversed. Default:
-1 </dd>
+<dd>Column with X coordinate. If the X coordinates are not
+increasing, the array will be reversed. <br>
+[Default: 1] </dd>
 
 <dt><b>ycol=</b> </dt>
-<dd>Column with Y coordinate of function [Default: 2] </dd>
+<dd>Column with Y coordinate of function <br>
+[Default: 2] </dd>
 
 <dt><b>xmin=</b> </dt>
-<dd>value if
-data below xmin to be discarded. By default it uses the first datapoint.
-</dd>
+<dd>if given, value below which data to be discarded <br>
+By default it uses the smallest datapoint from the table. </dd>
 
 <dt><b>xmax=</b> </dt>
-<dd>value if data above xmax to be discarded. By default it uses the last
-datapoint. </dd>
+<dd>if given,
+value above which data to be discarded <br>
+By default it uses the largest datapoint from the table. </dd>
 
 <dt><b>step=</b> </dt>
-<dd>Integration step if resampling used. By default the datapoints
-themselves are used, but by setting an integration <b>step</b> here, the function
-is resampled using a spline and numerically integrated that way. </dd>
+<dd>Integration
+step if resampling used. <br>
+By default the datapoints themselves are used, but by setting an integration
+<b>step</b> here, the function is resampled using a spline and numerically integrated
+that way. See also <b>scale=</b>. </dd>
 
-<dt><b>normalize=t|f</b>
-</dt>
-<dd>Normalize integral. If set, the integral is normalized by the integration
-interval. Default: f </dd>
+<dt><b>normalize=t|f</b> </dt>
+<dd>Normalize integral. If set, the integral
+is normalized by the integration interval. An output table contains the
+cumulative function. <br>
+[Default: f] </dd>
 
 <dt><b>cumulative=t|f</b> </dt>
 <dd>If set, it will show the invidual cumulative
-integrations instead. Only implemented for native steps. Default: f </dd>
+integrations instead. Only implemented for native steps. <br>
+[Default: <b>f</b>] </dd>
 
-<dt><b>scale=</b>
-</dt>
-<dd>scale factor to apply to the integral. [Default: 1] </dd>
+<dt><b>scale=</b> </dt>
+<dd>scale factor to apply to the integral. This is also
+to use a different step size if integrating the individual points. <br>
+[Default: 1] </dd>
 
 <dt><b>mom=0|1|2</b> </dt>
-<dd>The moment along
-the profile. mom=0 is the flux, mom=1 the first moment along the X axis,
-and mom=2 the dispersion.   [Default: 0] 
+<dd>The moment along the profile. mom=0 is the flux, mom=1
+the first moment along the X axis, and mom=2 the dispersion. <br>
+[Default: 0] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-<br>
-<pre> % nemoinp 0:1:0.1 | tabmath - - &rsquo;%1*%1&rsquo; | tabint -
- 0.335
- % nemoinp 0:1:0.1 | tabmath - - &rsquo;%1*%1&rsquo; | tabint - step=0.01
- 0.33335
-</pre>Here is an example to compute the line integral of a spectrum where the
-frequency axis is in GHz, and intensity in Kelvin. We want to get an answer
-in K.km/s instead. We also know the line is around 110.5 GHz: <br>
-<pre> % tabint rsr.33551.driver.sum.txt xmin=110.5-2*0.15 xmax=110.5+2*0.15  scale=c/110.5/1000
- 8.05
-</pre>recalling that <b>c</b> is in m/s and the requested line integral was requested
+Integrating the square function from 0 to 1 to get
+1/3:  
+<p>  % nemoinp 0:1:0.1 | tabmath - - &rsquo;%1*%1&rsquo; | tabint -<br>
+  0.335<br>
+  % nemoinp 0:1:0.1 | tabmath - - &rsquo;%1*%1&rsquo; | tabint - step=0.01<br>
+  0.33335<br>
+ 
+<p>  Here is an example to compute the line integral of a spectrum where
+the frequency axis is in GHz, and intensity in Kelvin. We want to get an
+answer in K.km/s instead. We know the line is (redshifted) around 110.5 GHz,
+and we take a window of 0.3 GHz around the line:  
+<p>  % tabint rsr.33551.driver.sum.txt
+xmin=110.5-0.3 xmax=110.5+0.3  scale=c/110.5/1000<br>
+  8.05<br>
+ 
+<p>  % tabint rsr.33551.driver.sum.txt xmin=110.5-0.3 xmax=110.5+0.3  scale=c/110.5/1000
+|\<br>
+    tabplot - 1 2 line=1,1 point=2,0.1 ycoord=0<br>
+ 
+<p>  recalling that <b>c</b> is in m/s and the requested line integral was requested
 in km/s. 
 <p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+The table needs to be (reverse) sorted in X. A future option
+might sort, though <a href='sort.1.html'><i>sort(1)</i></a>
+ might already work. Here&rsquo;s an example where the
+3rd column is an unsorted X coordinate. The 6th column is the data value:
+ 
+<p>    % sort -n +2 my.tab | tabint - 3 6<br>
+ 
+<p> perhaps easier 
+<p>    % tabcols my.tab 3,6 | sort -n | tabint -<br>
+  
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabfilter.1.html'>tabfilter(1NEMO)</a>
+, <a href='tabhist.1.html'>tabhist(1NEMO)</a>
 , <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabnllsqfit.1.html'>tabnllsqfit(1NEMO)</a>
 ¸
@@ -105,19 +138,20 @@ in km/s.
 , <a href='table.5.html'>table(5NEMO)</a>
  
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 src/kernel/tab 
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p>
 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<h2><a name='sect9' href='#toc9'>Update History</a></h2>
 <br>
 <pre>13-May-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 10-sep-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added cumulative=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 22-feb-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 added xmin=, xmax=, scale=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-jul-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 poor man&rsquo;s implementation of mom=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+6-apr-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 clarifications<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -128,10 +162,11 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Update History</a></li>
 </ul>
 </body>
 </html>

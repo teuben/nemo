@@ -56,13 +56,13 @@ No default. </dd>
 <dt><b>mlow=</b><i>real</i> </dt>
 <dd>inner core mass fraction within which no stars will
 be populated. <br>
-(Default: 0) </dd>
+[Default: 0] </dd>
 
 <dt><b>mfrac=</b><i>real</i> </dt>
 <dd>mass fraction of the (otherwise infinitely extended)
 Plummer model; see  rfrac immediately below  Note that the total mass is
 still normalized to 1. <br>
-(Default: <i>rfrac</i>=22.8042468). </dd>
+[Default: <i>rfrac</i>=22.8042468] </dd>
 
 <dt><b>rfrac=</b><i>real</i> </dt>
 <dd>radius fraction of the (otherwise
@@ -83,15 +83,15 @@ Default: .... </dd>
 time, in seconds since 1970.0). See also <a href='xrandom.1.html'><i>xrandom(1NEMO)</i></a>
  for more options.
 <br>
-[default: 0] </dd>
+[Default: 0] </dd>
 
 <dt><b>time=</b><i>time</i> </dt>
 <dd>Time at which the snapshot applies <br>
-(default: <i>time</i>=0.0). </dd>
+[Default: 0.0] </dd>
 
 <dt><b>zerocm=t|f</b> </dt>
 <dd>Reset center of mass to zero? <br>
-[default: <b>t</b>]. </dd>
+[Default: <b>t</b>]. </dd>
 
 <dt><b>scale=</b><i>scale_factor</i> </dt>
 <dd>A scale factor or scale to virial units
@@ -103,48 +103,48 @@ means small systems with large velocity disperson. <br>
 <dt><b>quiet=<i>level</i></b> </dt>
 <dd>Level of quit start. 0 is noisy, 1=somewhat quiet,
 2=more quiet. See "QUIET START" below <br>
-[default: <b>0</b>]. </dd>
+[Default: <b>0</b>]. </dd>
 
 <dt><b>massname=<i>name</i></b> </dt>
 <dd>Identification of the mass spectrum. It is normally
 only a function of mass, so <b>n(m)</b> will suffice. If nothing specified, all
 stars will have the same mass (total mass M=1). <br>
-[default: not used]. </dd>
+[Default: not used]. </dd>
 
 <dt><b>massexpr=<i>expr</i></b> </dt>
 <dd>Expression for the mass-spectrum. In addition
 to the mass <i>m</i> from the <b>massname</b> it may contain any variables contained
 in the  <b>masspars</b> to be specified next. <br>
-[default: <b>pow(m,p)</b>]. </dd>
+[Default: <b>pow(m,p)</b>]. </dd>
 
 <dt><b>masspars=<i>pars</i></b> </dt>
 <dd>List of parameters and their values. They
 can be used by name in the <b>massexpr</b> specified before. <br>
-[default: <b>p,0.0</b>]. </dd>
+[Default: <b>p,0.0</b>]. </dd>
 
 <dt><b>massrange=<i>mlow,mhigh</i></b> </dt>
 <dd>Valid massrange. A lower and higher
 cutoff must be supplied. The massrange has arbitrary units, since all masses
-will be rescaled to set the total mass M=1. .br [default: <b>1,1</b>]. </dd>
+will be rescaled to set the total mass M=1. .br [Default: <b>1,1</b>]. </dd>
 
 <dt><b>headline=</b><i>string</i>
 </dt>
 <dd>Optional headline, which is written as the first item in the snapshot file,
 the next item being the snapshot itself. <br>
-[default: not used]. </dd>
+[Default: not used]. </dd>
 
 <dt><b>nmodel=</b><i>integer</i> </dt>
 <dd>Number of models to generate. Although
 mostly meant for benchmarks, generating more then 1 model can be useful
 to process very large snapshots (that normally won&rsquo;t fit in memory) in a
 serialized fashion. See also <i>snapsplit</i>. Most NEMO programs will <br>
-Default: <b>1</b>. </dd>
+[Default: <b>1</b>] </dd>
 
 <dt><b>mode=0|1|2</b> </dt>
 <dd>The processing mode, purely for debugging benchmarks.
 0=no data written. 1=data written, but no extra analysis. 2=data written,
 and extra analysis done. <br>
-[Default: 1]. 
+[Default: 1] 
 <p> </dd>
 </dl>
 
