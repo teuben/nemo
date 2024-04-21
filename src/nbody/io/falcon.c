@@ -26,21 +26,21 @@ GROUP "/" {
 
 #include <nemo.h>
 #include <history.h>
-
 #include <snapshot/snapshot.h>
-
 #include <hdf5.h>
 
 string defv[] = {
   "in=???\n            Input snapshot",
   "out=???\n           Output snapshot",
-  "VERSION=0.2\n       21-apr-2024 PJT",
+  // times=
+  // 
+  "VERSION=0.3\n       21-apr-2024 PJT",
   NULL,
 };
 
 string usage="Process falcon HDF5 snapshots";
 
-#define MAXBODY  100000
+#define MAXBODY  1000000
 
 void rdwt(string fin, string fout);
 
@@ -123,6 +123,8 @@ void rdwt(string fin, string fout)
     H5Aclose(attr_id);
     if (nbody2 != nbody)
       warning("Cannot probably process non-std snapshots; nbody_std=%d",nbody2);
+    if (nbody2 > MAXBODY)
+      error("Not enough space for %d particles; MAXBODY=%d", nbody2, MAXBODY);
 
     dataset_id = H5Dopen2(group2_id, "mass", H5P_DEFAULT);
     if (dataset_id == H5I_INVALID_HID) error("not valid mass dataset");
