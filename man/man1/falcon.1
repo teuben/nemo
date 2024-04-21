@@ -23,7 +23,7 @@ No default.
 
 .SH "EXAMPLES"
 
-.EX
+.nf
 $ falcon sim32.h5  - | tsf -
 
 char History[30] "falcon sim32.h5 - VERSION=0.3"
@@ -62,7 +62,7 @@ set SnapShot
   tes
 tes
 
-.EE
+.fi
 
 .SH "CAVEATS"
 It only handles the "std" particles.
@@ -77,6 +77,8 @@ is stored for the number of particles, limiting the HDF data to 4,294,967,296 pa
 All real (float or double) values are converted to H5T_NATIVE_FLOAT
 .PP
 Does not convert the data \fBhistory\fP yet
+.PP
+There is no conversion tool from NEMO snapshot to falcon format.
 
 .SH "SEE ALSO"
 snapprint(1NEMO), tsf(1NEMO), falcON(5NEMO), snapshot(5NEMO)
