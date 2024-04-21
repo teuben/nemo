@@ -1,0 +1,35 @@
+.TH FALCON 1NEMO "20 April 2024"
+
+.SH "NAME"
+falcon \- Process falcon HDF5 snapshots
+
+.SH "SYNOPSIS"
+\fBfalcon\fP [parameter=value]
+
+.SH "DESCRIPTION"
+Thi program convert the HDF5 based \fBfalcON\fP snapshot format
+into a NEMO format.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input \fPfalcon(5NEMO)\fP snapshot [???]     
+.TP 20
+\fBout=\fP
+Output snapshot. Not implemented yet.
+
+.SH "SEE ALSO"
+falcON(5NEMO), snapshot(5NEMO)
+
+.SH "FILES"
+src/nbody/io/falcon.c
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.5i +5.5i
+20-apr-2024	Created		PJT
+.fi
