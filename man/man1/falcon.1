@@ -1,4 +1,4 @@
-.TH FALCON 1NEMO "20 April 2024"
+.TH FALCON 1NEMO "21 April 2024"
 
 .SH "NAME"
 falcon \- Process falcon HDF5 snapshots
@@ -7,7 +7,7 @@ falcon \- Process falcon HDF5 snapshots
 \fBfalcon\fP [parameter=value]
 
 .SH "DESCRIPTION"
-Thi program convert the HDF5 based \fBfalcON\fP snapshot format
+This program convert the HDF5 based \fBfalcON\fP snapshot format
 into a NEMO format. It is still under development.
 .PP
 Selection by time or snapshot number, as well as particle type
@@ -17,14 +17,15 @@ can be made eventually.  Note NEMO can only handle one particle type.
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input \fPfalcon(5NEMO)\fP snapshot.
-no default
+Input \fIfalcon(5NEMO)\fP snapshot filename.
+No default.
 .TP 20
 \fBout=\fP
-Output snapshot. Not implemented yet.
+Output \fIsnapshot(5NEMO)\fP filename.
+No default.
 
 .SH "SEE ALSO"
-falcON(5NEMO), snapshot(5NEMO)
+snapprint(1NEMO), tsf(1NEMO), falcON(5NEMO), snapshot(5NEMO)
 
 .SH "FILES"
 src/nbody/io/falcon.c
@@ -35,5 +36,5 @@ Peter Teuben
 .SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
-20-apr-2024	Created		PJT
+20-apr-2024	V0.1 Created		PJT
 .fi
