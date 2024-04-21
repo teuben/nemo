@@ -1,25 +1,30 @@
 .TH FALCON 1NEMO "21 April 2024"
 
 .SH "NAME"
-falcon \- Process falcon HDF5 snapshots
+falcon \- Convert falcON HDF5 snapshots to NEMO snapshots
 
 .SH "SYNOPSIS"
-\fBfalcon\fP [parameter=value]
+\fBfalcon\fP in=infile out=outfile [parameter=value]
 
 .SH "DESCRIPTION"
-This program convert the HDF5 based \fBfalcON\fP snapshot format
-into a NEMO format. It is still under development, see CAVEATS below.
+This program convert the HDF5 based \fIfalcON(1NEMO)\fP snapshot format
+into the NEMO \fIsnapshot(5NEMO)\fP format. It is still under development, see CAVEATS below.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input \fIfalcon(5NEMO)\fP snapshot filename.
+Input \fIfalcON(5NEMO)\fP snapshot filename. \fIstdin\fP is supported
+by giving the value \fBin=-\fP.
 No default.
-.TP 20
+.TP
 \fBout=\fP
 Output \fIsnapshot(5NEMO)\fP filename.
 No default.
+.TP
+\fBtype=\fP
+Particle type to select for conversion. Only "std" has been tested.
+[Default: std]
 
 .SH "EXAMPLES"
 
@@ -36,28 +41,18 @@ set SnapShot
     int CoordSystem 66306 
     float Mass[32] 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
       0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
-      0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
-      0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
       . . .
     float Position[32][3] -1.30477 1.59788e-16 0.00000 -1.29043e-16 
       -0.702476 -0.405575 1.15331e-16 1.88349 1.08744 0.486825 
-      -0.486825 -0.780658 -2.24382 2.24382 0.819326 0.395285 0.395285 
-      -0.144338 -0.771013 -0.771013 1.23637 -0.791278 -0.327758 
       . . .
     float Velocity[32][3] -7.22837e-33 -5.90241e-17 0.481969 0.403077 
       0.201539 0.116358 0.456809 0.228404 0.131869 0.155023 0.475764 
-      -0.417175 0.416389 -0.119249 0.119206 0.193513 0.675701 0.193444 
-      -0.0480904 0.0156698 -0.0421682 -0.463116 -0.303254 -0.0480676 
       . . .
     float Potential[32] -0.582861 -0.726016 -0.389024 -0.611265 
       -0.276467 -0.705942 -0.491554 -0.691435 -0.332174 -0.788165 
-      -0.519628 -0.725853 -0.430449 -0.625536 -0.196348 -0.556199 
-      -0.137574 -0.740651 -0.402583 -0.816317 -0.495621 -0.634114 
       . . .
     float Acceleration[32][3] 0.320830 -0.0112188 -0.0184059 
       -0.0932003 0.296048 0.227969 0.00853122 -0.126000 -0.0768895 
-      -0.180052 0.0678517 0.199119 0.0551343 -0.0512566 -0.0223483 
-      -0.157876 -0.199445 0.159103 0.124049 0.0825911 -0.223872 
       . . .
   tes
 tes
@@ -65,10 +60,16 @@ tes
 .fi
 
 .SH "CAVEATS"
-It only handles the "std" particles.
+It currently only handles the "std" particles, and only converts
+mass, pos, vel, pot, acc.
+.PP
+falcON support many IO fields, see file $FALCON/inc/fields.h.
+Currently 52 fields are supported and all except flag, aold, dlKo, talf are supported for I/O.
+Their I/O is done by giving the dataset the name associated with the
+field (3 or 4 letters wide, same as the field name in fieldbit).
 .PP
 All snapshots are converted, use \fIcsf(1NEMO)\fP or
-\fIsnaptrim(1NEMO)\fP to extract subsets.
+\fIsnaptrim(1NEMO)\fP to extract less.
 .PP
 A maximum number of particles (100,000) was hardcoded.
 It should be noted that H5T_STD_U32LE
@@ -79,6 +80,7 @@ All real (float or double) values are converted to H5T_NATIVE_FLOAT
 Does not convert the data \fBhistory\fP yet
 .PP
 There is no conversion tool from NEMO snapshot to falcon format.
+
 
 .SH "SEE ALSO"
 snapprint(1NEMO), tsf(1NEMO), falcON(5NEMO), snapshot(5NEMO)
