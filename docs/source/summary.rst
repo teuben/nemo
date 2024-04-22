@@ -41,4 +41,7 @@ Here we provide a brief reminder of NEMO's features.
 
 * NEMO follows a fairly traditional Unix source code hierarchy, with typical directories such as
   src, bin, lib, and man, with additional peculiar ones for nemo: obj, opt, local data, text, docs, etc.
+
+* NEMO has a number of legacy codes. There is a "run" interface for legacy codes, though not implemented for
+  all. An example is runbody1, which is the front-end for Aarseth's  NBODY1 code.
    
