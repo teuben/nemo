@@ -70,11 +70,15 @@ in a shell session:
    mkplummer p100 100
    snapplot p100 xvar=x yvar=vx
 
-or in the style of using pipes this can be a one liner
+or in the style of using pipes this can be a one liner. Here is that example, and a few
+followups with grey scale and contour plots:
 
 .. code-block::
 
    mkplummer - 100 | snapplot - xvar=x yvar=vx
+   mkplummer - 10000 | snapgrid - - xvar=x yvar=vx   | ccdplot  -
+   mkplummer - 10000 | snapgrid - - xvar=x yvar=vx   | ccdplot  - 0.01,0.1,0.3,0.6,0.9
+   mkplummer - 10000 | snapgrid - - xvar=x yvar=vx   | ccdsmooth -  - | ccdplot  - 0.01,0.1,0.3,0.6,0.9
 
 And in AMUSE the following python session can do something similar:
 
@@ -89,9 +93,15 @@ And in AMUSE the following python session can do something similar:
    convert_nbody = nbody_system.nbody_to_si(100.0 | units.MSun, 1 | units.parsec)
    plummer = new_plummer_sphere(1000, convert_nbody)
 
-
+   # gnuplot
    plotter = Gnuplot.Gnuplot()
    plotter.splot(plummer.position.value_in(units.parsec))
+
+   # matplotlib
+   x=p[:,0].value_in(units.pc)
+   y=p[:,1].value_in(units.pc)
+   plt.plot(x,y,'ok')
+
 
 The AMUSE manual has some
 `NEMO I/O examples <https://amuse.readthedocs.io/en/latest/reference/fileformat.html#nemo>`_.
