@@ -51,6 +51,7 @@ Welcome to NEMO's documentation!
    refs
    codes
    glossary
+   summary
    rse
    todo	      
    rst
