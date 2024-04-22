@@ -142,7 +142,10 @@ List of Related Codes
 
   GraviDy
       Gravitational Dynamics. Also usable via :term:`NEMO` with the **rungravidy** interface.
-      | http://ascl.net/1902.004 	
+      | http://ascl.net/1902.004
+
+  griffin
+      based on falcON V2.
   
   gsf
       galactic structure finder
