@@ -1134,7 +1134,10 @@ int mp_fdjac2(mp_func funct,
     }
 
     /* Skip parameters already done by user-computed partials */
-    if (dside && dsidei == 3) continue;
+    if (dside && dsidei == 3) {
+      ij += m; /* still need to advance fjac pointer */
+      continue;
+    }
 
     temp = x[ifree[j]];
     h = eps * fabs(temp);

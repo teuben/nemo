@@ -24,6 +24,7 @@ GROUP "/" {
  */
 
 #include <nemo.h>
+#include <strlib.h>
 #include <history.h>
 #include <snapshot/snapshot.h>
 #include <hdf5.h>
@@ -31,50 +32,58 @@ GROUP "/" {
 string defv[] = {
   "in=???\n            Input snapshot",
   "out=???\n           Output snapshot",
+  "type=std\n          Particle Group",
   // times=
-  // type=
-  "VERSION=0.4\n       21-apr-2024 PJT",
+  "VERSION=0.5\n       21-apr-2024 PJT",
   NULL,
 };
 
 string usage="Convert falcon HDF5 snapshot to NEMO snapshot";
 
-#if 1
+// @todo  undef this for trying dynamic arrays
 #define MAXBODY  10000000
-#endif
 
 #ifdef MAXBODY
   float       mass[MAXBODY], pot[MAXBODY];
   float       acc[MAXBODY][3], pos[MAXBODY][3], vel[MAXBODY][3];
 #else
-  // @todo use mdarray
-  float       *mass, *acc, *pot, *pos, *vel;
+  // @todo use mdarray, but figure out if real is float or double
+  mdarray1    *mass, *pot;
+  mdarray2    *acc, *pos, *vel;
 #endif
+
+string file_pipe();
 
 
 void nemo_main()
 {
   string      fin = getparam("in");
   string      fout = getparam("out");
+  string      type = getparam("type");
   hid_t       file_id, attr_id, group_id, group2_id, dataset_id;
   herr_t      status;
   stream      ostr;
   int         cs = CSCode(Cartesian, NDIM, 2);
   int         ntime, nbody, nbody1, nbody2;
   double      stime;
+  bool        Qpipe = streq(fin,"-");
+  char        ntype[32];
+
+  if (Qpipe)
+    fin = file_pipe();
 
   file_id = H5Fopen(fin, H5F_ACC_RDONLY, H5P_DEFAULT);
-  if (file_id == H5I_INVALID_HID) error("not valid file");
+  if (file_id == H5I_INVALID_HID) error("H5Fopen: not valid file");
 
   status = H5Aexists(file_id, "falcON");
-  if (status == 0) error("not a falcON file");
+  if (status == 0) error("H5Aexists: not a falcON file");
   // @todo:   check if value is 67329
 
   ostr = stropen(fout, "w");
   put_history(ostr);
     
   attr_id = H5Aopen(file_id, "num_snapshots", H5P_DEFAULT);
-  if (attr_id == H5I_INVALID_HID) error("not valid attribute1");  
+  if (attr_id == H5I_INVALID_HID) error("num_snapshots: not valid attribute1");  
   dprintf(2,"attr_id: %d\n", attr_id);
   status = H5Aread(attr_id, H5T_NATIVE_INT, &ntime);
   dprintf(1,"ntime = %d\n",ntime);
@@ -87,36 +96,37 @@ void nemo_main()
     char snapshot_name[20];
     sprintf(snapshot_name,"snapshot%d", itime);
     group_id = H5Gopen1(file_id, snapshot_name);
-    if (group_id == H5I_INVALID_HID) error("not valid group %s",snapshot_name);
+    if (group_id == H5I_INVALID_HID) error("%s: not valid group",snapshot_name);
     dprintf(2,"group_id: %d\n", group_id);
 
     // time
     attr_id = H5Aopen(group_id, "time", H5P_DEFAULT);
-    if (attr_id == H5I_INVALID_HID) error("not valid attribute2");      
+    if (attr_id == H5I_INVALID_HID) error("time: not valid attribute2");      
     dprintf(2,"attr_id: %d\n", attr_id);
     status = H5Aread(attr_id, H5T_NATIVE_DOUBLE, &stime);
     H5Aclose(attr_id);
     
-    // Nstd
-    attr_id = H5Aopen(group_id, "Nstd", H5P_DEFAULT);
-    if (attr_id == H5I_INVALID_HID) error("not valid attribute2");      
+    // Nstd (or type)
+    sprintf(ntype,"N%s", type);
+    attr_id = H5Aopen(group_id, ntype, H5P_DEFAULT);
+    if (attr_id == H5I_INVALID_HID) error("%s: not valid attribute2",ntype);      
     dprintf(2,"attr_id: %d\n", attr_id);
     status = H5Aread(attr_id, H5T_NATIVE_INT, &nbody);
     H5Aclose(attr_id);
     
-    dprintf(0,"time = %g   nbody = %d\n",stime, nbody);
+    dprintf(0,"time = %g   nbody = %d  type = %s\n",stime, nbody, type);
 
-    group2_id = H5Gopen1(group_id, "std"); 
-    if (group2_id == H5I_INVALID_HID) error("not valid group2");
+    group2_id = H5Gopen1(group_id, type); 
+    if (group2_id == H5I_INVALID_HID) error("%s: not valid group2", type);
 
     attr_id = H5Aopen(group2_id, "N", H5P_DEFAULT);
-    if (attr_id == H5I_INVALID_HID) error("not valid attribute3");      
+    if (attr_id == H5I_INVALID_HID) error("N: not valid attribute3");      
     dprintf(2,"attr_id: %d\n", attr_id);
     status = H5Aread(attr_id, H5T_NATIVE_INT, &nbody2);
     dprintf(1,"nbody_std = %d\n",nbody2);
     H5Aclose(attr_id);
     if (nbody2 != nbody)
-      warning("Cannot probably process non-std snapshots; nbody_std=%d",nbody2);
+      warning("Cannot probably process snapshots; nbody_%s=%d",type,nbody2);
     
 #ifdef MAXBODY
     if (nbody2 > MAXBODY)
@@ -135,32 +145,31 @@ void nemo_main()
 #endif    
 
     dataset_id = H5Dopen2(group2_id, "mass", H5P_DEFAULT);
-    if (dataset_id == H5I_INVALID_HID) error("not valid mass dataset");
+    if (dataset_id == H5I_INVALID_HID) error("mass: not valid dataset");
     status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, mass);
     H5Dclose(dataset_id);
     dprintf(1,"mass[0] = %g\n", mass[0]);
 
     dataset_id = H5Dopen2(group2_id, "pos", H5P_DEFAULT);
-    if (dataset_id == H5I_INVALID_HID) error("not valid pos dataset");
-    //status = H5Dread(dataset_id, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, pos);
+    if (dataset_id == H5I_INVALID_HID) error("pos: not valid dataset");
     status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, pos);
     H5Dclose(dataset_id);
     dprintf(1,"pos[0] = %g %g %g\n", pos[0][0], pos[0][1], pos[0][2]);
 
     dataset_id = H5Dopen2(group2_id, "vel", H5P_DEFAULT);
-    if (dataset_id == H5I_INVALID_HID) error("not valid vel dataset");
+    if (dataset_id == H5I_INVALID_HID) error("vel: not valid dataset");
     status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, vel);
     H5Dclose(dataset_id);
     dprintf(1,"vel[0] = %g %g %g\n", vel[0][0], vel[0][1], vel[0][2]);
 
     dataset_id = H5Dopen2(group2_id, "pot", H5P_DEFAULT);
-    if (dataset_id == H5I_INVALID_HID) error("not valid pot dataset");
+    if (dataset_id == H5I_INVALID_HID) error("pot: not valid dataset");
     status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, pot);
     H5Dclose(dataset_id);
     dprintf(1,"pot[0] = %g\n", pot[0]);
 
     dataset_id = H5Dopen2(group2_id, "acc", H5P_DEFAULT);
-    if (dataset_id == H5I_INVALID_HID) error("not valid acc dataset");
+    if (dataset_id == H5I_INVALID_HID) error("acc: not valid dataset");
     status = H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, acc);
     H5Dclose(dataset_id);
     dprintf(1,"acc[0] = %g %g %g\n", acc[0][0], acc[0][1], acc[0][2]);
@@ -185,5 +194,38 @@ void nemo_main()
   } // for(itime)
   status = H5Fclose(file_id);
   strclose(ostr);
+
+   if (Qpipe) remove(fin);
 }
 
+string file_pipe()
+{
+  stream istr, ostr;
+  char tempname[MAXPATHLEN];
+  char buffer[1024*1024];          /* 1 MB buffer */
+  int k, n, ndat = 1024*1024;      /* that buffer size */
+  int fds;
+
+  strcpy(tempname, "/tmp/scrNemo.XXXXXX");
+#if 1
+  fds = mkstemp(tempname);
+#endif
+  ostr = stropen(tempname,"w!");
+
+  fds = dup(fileno(stdin));
+  istr = (stream ) fdopen(fds, "r");
+
+  k = 0;
+  while (1) {
+    n = fread(buffer, 1, ndat, istr);
+    if (n<0) error("file_pipe: error reading data from pipe");
+    fwrite(buffer, 1, n, ostr);
+    k+=n;
+    if (n<ndat) break;
+  }
+  dprintf(0,"file_pipe: read %d bytes from HDF pipe, written to %s\n",k,tempname);
+  strclose(ostr);
+  strclose(istr);
+    
+  return scopy(tempname);
+}

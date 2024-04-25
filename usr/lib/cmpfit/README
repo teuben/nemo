@@ -25,6 +25,8 @@ SUMMARY of CHANGES
                              (thanks to M. Wojdyr)
  24 Jan 2020 - version 1.4 - bug fixes for 2-sided derivative calculation and
                              potential buffer overflow (thanks T. Larsen @ Oliasoft AS)
+ 09 Dec 2022 - version 1.5 - bug fix for mix of analytical + numerical derivatives
+                             (thanks to T. Greeniaus @ Phasesensors)
 
 $Id$
 
