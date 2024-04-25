@@ -59,6 +59,11 @@ List of Related Codes
       *Cosmological magnetohydrodynamical moving-mesh simulation code*.
       | http://ascl.net/1909.010
 
+  
+  AstrOmatic
+      *A Tool Suite for Image Processing*.
+      | https://www.astromatic.net/software
+
   bhint
       High-precision integrator for stellar systems
       | https://ascl.net/1206.005
