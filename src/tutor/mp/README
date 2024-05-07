@@ -21,3 +21,14 @@ No openmp:
 cool pages:
 
 https://zingale.github.io/phy504/openmp-relax.html
+
+
+To measure the performance an example of the output from /usr/bin/time on program with N threads
+can be processed with the amdahl.py script. Example is the heated plate, which is pretty good:
+
+# on an i5-1135G7 ./heated_plate_openmp
+1       9.21user 0.00system 0:09.21elapsed  99%CPU  1.00 1.00 1.00
+2       9.20user 0.00system 0:04.60elapsed 199%CPU  1.00 1.00 1.00
+4      10.49user 0.00system 0:02.62elapsed 399%CPU  1.14 1.14 0.95
+8      15.05user 0.02system 0:01.89elapsed 797%CPU  1.63 1.64 0.91
+16     23.20user 5.29system 0:05.82elapsed 489%CPU  2.52 10.11 0.39
