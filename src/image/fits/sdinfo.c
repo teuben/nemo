@@ -30,7 +30,7 @@ string defv[] = {
     "in=???\n            Input SDFITS fits file(s)",
     "mom=-1\n            Adding stats to this highest moment",
     "cols=\n             Column names to track - or names of the dimensions if given",
-    "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4]",
+    "dims=\n             Dimensions to reduce [ex1: 2,11,2,2,4   34,11,4,2,2,2",
     "proc=\n             Reduction procedure (PS,FS,NOD,TP)",
     "nrows=\n            Override the nrows derived from the data",
     "nchan=\n            Override the nchan derived from the data",
@@ -42,7 +42,7 @@ string defv[] = {
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
     "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
     "tab=\n              If given, produce tabular output (datadim=1 or 2 only)",
-    "VERSION=1.2\n       7-feb-2024 PJT",
+    "VERSION=1.4\n       2-may-2024 PJT",
     NULL,
 };
 
@@ -81,7 +81,7 @@ void ta(int ndata, real *sig, real *ref, real tsys, real *ta)
   //#pragma omp parallel shared(ndata, tsys, sig, ref, ta) private(i)
   //#pragma omp for
   for (i=0; i<ndata; i++)
-    ta[i] = tsys * (sig[i]/ref[i] - 1.0);
+    ta[i] = tsys * (sig[i]/ref[i] - 1.0);    //   (sig-ref)/ref
 }
 
 void ta2(int ndata, real *sig1, real *sig2, real *ref1, real *ref2, real tsys, real *ta)
@@ -370,25 +370,29 @@ void nemo_main(void)
       if (nchan < 0) warning("DATA with no nchan???");      
       real np = nrows * nchan * 4 / 1e6;
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d  nP: %g Mp\n",fname,nrows,ncols,nchan,np);
+      int col_scan  = keyindex(ncols, colnames, "SCAN") + 1;      
       int col_tcal  = keyindex(ncols, colnames, "TCAL") + 1;
       int col_cal   = keyindex(ncols, colnames, "CAL") + 1;
       int col_sig   = keyindex(ncols, colnames, "SIG") + 1;
       int col_fdnum = keyindex(ncols, colnames, "FDNUM") + 1;
       int col_ifnum = keyindex(ncols, colnames, "IFNUM") + 1;
       int col_plnum = keyindex(ncols, colnames, "PLNUM") + 1;
-      dprintf(0,"tcal: %d   cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
-	      col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
+      dprintf(0,"scan: %d tcal: %d cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
+	      col_scan, col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
 
       // get optional columns
+      int *scan_data  = get_column_int(fptr, "SCAN",  nrows, ncols, colnames);      
       int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
       int *ifnum_data = get_column_int(fptr, "IFNUM", nrows, ncols, colnames);
       int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
       int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);
       
-      int fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max;
+      int sc_min, sc_max, fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max;
+      minmaxi(nrows, scan_data,  &sc_min, &sc_max, "scan");
       minmaxi(nrows, fdnum_data, &fd_min, &fd_max, "fdnum");
       minmaxi(nrows, ifnum_data, &if_min, &if_max, "ifnum");
       minmaxi(nrows, plnum_data, &pl_min, &pl_max, "plnum");
+      printf("SCAN:  %d %d\n", sc_min, sc_max);      
       printf("FDNUM: %d %d\n", fd_min, fd_max);
       printf("IFNUM: %d %d\n", if_min, if_max);
       printf("PLNUM: %d %d\n", pl_min, pl_max);
@@ -415,8 +419,19 @@ void nemo_main(void)
 	    break;
 	  }
       }
-      printf("SIG:   %d  = %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
-      printf("CAL:   %d  = %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+      if (nsig==1)
+	printf("SIG:   %d  = %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
+      else if (nsig==2)
+	printf("SIG:   %d  = %c %c\n", nsig, sig_data[0][0], sig_data[1][0]);
+      else
+	printf("SIG:   %d  = %c\n", nsig, ' ');
+
+      if (ncal==1)
+	  printf("CAL:   %d  = %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+      else if (ncal==2)
+	printf("CAL:   %d  = %c %c\n", ncal, cal_data[0][0], cal_data[1][0]);
+      else
+	printf("CAL:   %d  = %c\n", ncal, ' ');
 
 
       // the 1st coordinate for SDFITS is important
@@ -581,7 +596,7 @@ void nemo_main(void)
 	  nchan = getiparam("nchan");
 	  warning("Re-using the dims analysis with nchan=%d",nchan);
 	}
-
+	// 33,11,4,2,2,2   for M33S in FS mode
 	if (ndims == 5) {
 	  /* test case for NGC5291 with dims=2,11,2,2,4                                   */
 	  warning("PS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
@@ -623,9 +638,9 @@ void nemo_main(void)
 		tsys = dcmeantsys(nchan, s2, s3, 1.42);
 		s4 = data4[i4][i2][i1];
 		ta2(nchan, s0, s1, s2, s3, tsys, s4);
-	      }
-	    }
-	  }
+	      } //int 
+	    } // pol
+	  } // scan
 	  
 	  if (FALSE) {   // one shot averaging over time,scan,pol
 
@@ -683,7 +698,51 @@ void nemo_main(void)
 	  free_mdarray4(data4,dims[4],        dims[2],dims[1],        nchan);
 	  free_mdarray3(data3,dims[4],        dims[2],                nchan);
 	  free_mdarray2(data2,                dims[2],                nchan);
-	  free_mdarray1(data1,                                        nchan);	  
+	  free_mdarray1(data1,                                        nchan);
+	} else if (ndims == 6) {	  // FS example
+	  warning("FS Reduction procedure in %d dimensions; data_col = %d",ndims,data_col);
+	  	// 34,11,4,2,2,2   for M33S in FS mode
+	  /*                                 scan    int     if      pol     sig     cal     chan */
+	  mdarray7 data7 = allocate_mdarray7(dims[5],dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
+	  mdarray6 data6 = allocate_mdarray6(dims[4],dims[3],dims[2],dims[1],dims[0],nchan);
+	  mdarray4 data4 = allocate_mdarray4(dims[4],        dims[2],dims[1],        nchan);
+	  mdarray3 data3 = allocate_mdarray3(dims[4],        dims[2],                nchan);
+	  mdarray2 data2 = allocate_mdarray2(                dims[2],                nchan);
+	  mdarray1 data1 = allocate_mdarray1(                                        nchan);
+	  double  *tcal  = (double *) allocate(nrows*sizeof(double));
+	  double nulval = 0.0;
+	  dprintf(0,"DIMSIZE: %d\n",dims[4]*dims[3]*dims[2]*dims[1]*dims[0]);
+	  
+	  // make sure nsize <= nrows
+	  fits_read_col(fptr, TDOUBLE, data_col, 1, 1, nchan*nsize, &nulval, &data7[0][0][0][0][0][0][0], &anynul, &status);
+	  if (col_tcal < 0)
+	    for(i=0; i<nsize; i++) tcal[i] = 1.0;
+	  fits_read_col(fptr, TDOUBLE, col_tcal, 1, 1,       nsize, &nulval, tcal, &anynul, &status);
+
+	  
+	  int i1,i2,i3,i4,i5;
+	  real *s0,*s1,*s2,*s3,*s4;
+	  real tsys_s, tsys_r;
+	  
+	  // calibration   34,11,4,2,2,2
+	  for (i5=0; i5<dims[5]; ++i5) {  //scan
+	    for (i4=0; i4<dims[4]; ++i4) { // int
+	      for (i3=0; i3<dims[3]; ++i3) { // if
+		for (i2=0; i2<dims[2]; ++i2) { // pol
+		  s0 = data7[i5][i4][i3][i2][0][0];        // sig_calon
+		  s1 = data7[i5][i4][i3][i2][0][1];        // sig_caloff
+		  s2 = data7[i5][i4][i3][i2][1][0];        // ref_calon
+		  s3 = data7[i5][i4][i3][i2][1][1];        // ref_caloff
+		  tsys_s = dcmeantsys(nchan, s0, s1, 1.42);
+		  tsys_r = dcmeantsys(nchan, s2, s3, 1.42);
+		  s4 = data4[i4][i2][i1];
+		  ta2(nchan, s0, s1, s2, s3, tsys, s4);
+		} // pol
+	      } /// if
+	    } //int 
+	  } // scan
+	  
+	  
 	} else if (ndims == 7) {	  // NOD example
 	  warning("NOD masochism example here?");
 	  /*                                   scan    sig     fd      if,     pol     int     cal     chan */
