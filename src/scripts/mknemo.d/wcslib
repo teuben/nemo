@@ -1,20 +1,21 @@
 #! /bin/bash
 #
-#  example: http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib-8.1.tar.bz2
+#  example: http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib-8.3.tar.bz2
+#  (as seen in May 2024)
 
-#   version is sadly (?) hidden in the filename
-version=8.1
 wget=wgetc
+url=http://www.atnf.csiro.au/people/mcalabre/WCS/wcslib-%s.tar.bz2
+version=8.3
 
 for arg in $*; do
   export $arg
 done
  
 cd $NEMO/local
-$wget  ftp://ftp.atnf.csiro.au/pub/software/wcslib/wcslib.tar.bz2
-version=$(tar jtf wcslib.tar.bz2 | head -1 | awk -F/ '{print $1}' | sed s/wcslib-//)
+url=$(printf $url $version)
+$wget  $url
 
-tar jxf wcslib.tar.bz2
+tar jxf wcslib-$version.tar.bz2
 cd wcslib-$version
 ./configure --prefix=$NEMO/opt
 make -j
@@ -23,3 +24,4 @@ make install
 echo Installed version=$version
 
 echo wcslib $version `date` >> $NEMO/opt/mknemo.log
+
