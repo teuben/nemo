@@ -1,17 +1,21 @@
-.TH RSF 1NEMO "16 December 1990"
+.TH RSF 1NEMO "26 May 2024"
 .ds e =\h'-0.0m'
-.SH NAME
+
+.SH "NAME"
 rsf \- read a structured file
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBrsf in=\fPfile \fBout=\fPfile
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIrsf\fP reads the ascii representation of a structured binary file 
 (ASF) as
 generated, for example, by \fItsf\fP(1NEMO), and writes a binary version.
 .PP
 In this fashion tsf/rsf can be used to port data between machines of a
 totally different binary data type (e.g. Cray's, Sun's, Convex, DECs, IBMs)
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 .so man1/parameters
 .TP 24
 \fBin=\fP\fIfile\fP
@@ -19,9 +23,8 @@ Input data is read from \fIfile\fP, which must be an ascii file.
 .TP
 \fBout=\fP\fIfile\fP
 Output data is written to \fIfile\fP in binary form.
-.SH SEE ALSO
-tsf(1NEMO), csf(1NEMO), filestruct(3NEMO).
-.SH DEBUG
+
+.SH "DEBUG"
 \fBdebug=2\fP reports values of \fIMaxTagLen\fP and \fIMaxVecDim\fP
 as defined in "\fBfilestruct.h\fP".
 For \fIMaxSetLen\fP see \fItsf(1NEMO)\fP.
@@ -38,14 +41,16 @@ the line break occured just before a white space in the string.
 This can be solved by running 
 \fItsf\fP with a different or 
 long enough linelength (using the \fBmargin=\fP keyword).
-.SH BUGS
+
+.SH "CAVEATS"
 \fBrsf\fP does not recognize decimal numbers, it assumes 
 they are always octal, and does not pay attention to a leading
 0 to distinguish. Thereforce, since \fItsf(1NEMO)\fP now
 defaults decimal integers by default, it has to be forced
 to output octal if \fBrsf\fP is part of the pipe to
 transfer information, e.g.:
-.nf
+.EX
+
     % mkplummer - 3 | tsf - | grep Coord
 	int CoordSystem 66306 \fB(good)\fP
 
@@ -58,11 +63,16 @@ transfer information, e.g.:
     % mkplummer - 3 | tsf - octal=t | rsf - - | tsf - | grep Coord
 	int CoordSystem 66306 \fB(good)\fP
 	
-.fi
-.SH AUTHORS
+.EE
+
+.SH "SEE ALSO"
+tsf(1NEMO), csf(1NEMO), filestruct(3NEMO).
+
+.SH "AUTHORS"
 Joshua E. Barnes, Panayotis Skordos.
-.SH HISTORY
-.ta +1i +4i
+
+.SH "HISTORY"
+.ta +1.25i +4.5i
 .nf
 xx-jun-87	V1.0 first implementation	PS
 xx-apr-88	V2.0 new filestruct package	JB
