@@ -77,3 +77,7 @@ bench8: scaling2
 	   (echo -n "$$i ";$(TIME) ./scaling2 umax=20000 np=$$i iter=20*$$i debug=-1); done
 
 
+bench9:	scaling2
+	@echo Long integration, see laptop performance drop, see core swaps
+	$(TIME) ./scaling2  iter=500 > bench9.log 2>&1
+	grep cputime bench9.log | sed s/###// | tabplot - 6 8 line=1,1 ycoord=0  ymin=0
