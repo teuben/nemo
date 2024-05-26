@@ -1,4 +1,4 @@
-.TH TSF 1NEMO "28 April 2023"
+.TH TSF 1NEMO "26 May 2024"
 
 .SH "NAME"
 tsf \- type a structured file
@@ -9,12 +9,12 @@ tsf \- type a structured file
 .SH "DESCRIPTION"
 \fItsf\fP types the contents of a structured binary file
 (see \fIfilestruct\fP(3NEMO)) in a human readable form
-on the standard output.
+on standard output.
 The type, tag, dimensions (if any) and contents of all items are listed.
 The contents of \fICharType\fP items are printed directly; 
 \fIFloatType\fP and \fIDoubleType\fP
 items are printed in floating-point notation; all other types are printed in 
-octal for portability reasons (see \fBoctal=\fP below).
+octal for portability reasons (but see \fBoctal=\fP below).
 \fIXML\fP format can optionally be selected as well, but this is not been well
 exercised. A \fIjson\fP mode has been considered.
 .PP
@@ -76,9 +76,6 @@ need to force octal=t.
 .br
 [Default: \fBf\fP].
 
-.SH "SEE ALSO"
-ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEMO).
-
 .SH "DEBUG"
 \fBdebug=2\fP reports values of \fIMaxSetLen\fP
 as defined in "\fBfilestruct.h\fP".
@@ -88,12 +85,12 @@ For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
 
 An example of converting all double precision numbers to single
 precision in a NEMO file:
-.nf
+.EX
     % tsf in=double.dat out=float.dat convert=d2f
-
-.fi
-And here is an N-body snapshot of a Plummer sphere with 10 particles:
-.nf
+    
+.EE
+Here is an N-body snapshot of a Plummer sphere with 10 particles:
+.EX
 
     mkplummer - 10 | tsf -
 
@@ -116,7 +113,7 @@ set SnapShot
   tes
 tes
 
-.fi
+.EE
 
 .SH "TLDR"
 
@@ -137,18 +134,21 @@ tsf {{file}}
 tsf {{file}} True allline=t
 
 
-.SH "BUGS"
+.SH "CAVEATS"
 The algorithm for implementing \fBmaxline\fP is crude.
 .PP
 If \fBindent=\fP and \fBmargin=\fP are choosen too large, resp. too
 small, they can bump into each other and cause illegable output, which
 cannot be read by \fIrsf\fP either.
 
+.SH "SEE ALSO"
+ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEMO).
+
 .SH "AUTHOR"
 Joshua E. Barnes.
 
 .SH "HISTORY"
-.ta +1.5i +5.5i
+.ta +1.25i +4.5i
 .nf
 xx-xxx-86	V1.0 original version	JEB
 xx-apr-88	V2.0 new filestruct package	JEB
