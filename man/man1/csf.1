@@ -1,4 +1,4 @@
-.TH CSF 1NEMO "19 April 2023"
+.TH CSF 1NEMO "26 May 2024"
 
 .SH "NAME"
 csf \- copy structured file
@@ -17,10 +17,10 @@ no data conversion is applied.
 .PP
 An overview of the top level items that are present in a structured
 file can be obtained with the following Unix pipe:
-.nf
-q
-    % \fBtsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk '{print $2}'
-.fi
+.EX
+
+    % tsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk '{print $2}'
+.EE
 .PP
 Although \fIstructured files\fP can always be read when they were created
 on a byte swapped machine, \fIcsf\fP can also be used to create a file
@@ -76,11 +76,12 @@ are not supported or are in danger of loosing more than just precision.
 .SH "EXAMPLES"
 An image with too much data-history can be cut by only copying the \fIImage\fP
 items:
-.nf
-   % csf in=map1.ccd out=map2.ccd select=Image
-.fi
+.EX
 
-.SH "BUGS"
+   % csf in=map1.ccd out=map2.ccd select=Image
+.EE
+
+.SH "CAVEATS"
 Items can only be selected (\fBselect=\fP) from the top level.
 
 .SH "SEE ALSO"
@@ -97,7 +98,7 @@ Peter Teuben, Joshua E. Barnes
 
 .SH "HISTORY"
 .nf
-.ta +1.5i +5.5i
+.ta +1.25i +4.5i
 xx-xxx-87	V1.0: created	JEB
 9-dec-89	V1.1 added select keyword	PJT
 10-oct-90	V1.3 select= is now item=: select= used for counting	PJT
