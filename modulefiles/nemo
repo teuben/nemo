@@ -1,6 +1,10 @@
 #%Module1.0###################################################################
 
-module-whatis "NEMO Stellar Dynamics Toolbox"
+module-whatis "
+ NEMO Stellar Dynamics Toolbox, particle simulations,
+ stellar orbits, image processing and tabular data manipulation.
+ Documentation is maintained in the github pages, https://teuben.github.io/nemo
+ Ref: https://ui.adsabs.harvard.edu/abs/1995ASPC...77..398T"
 
 # get full pathname for this script file
 set scriptpath "${ModulesCurrentModulefile}"
@@ -33,14 +37,14 @@ set oneapiroot "[file dirname "$componentroot"]"
 
 
 
-set nemo "[file dirname $modulefileroot]"
+set NEMO "[file dirname $modulefileroot]"
 
 
 
 # On load print component name and version being loaded
 if { [ module-info mode load ] } {
     puts stderr "Loading $modulefilename version $modulefilever"
-    puts stderr "found module NEMO=$nemo"
+    puts stderr "found module NEMO=$NEMO"
 }
 
 # On `module unload` print component module name and version being removed
@@ -53,23 +57,37 @@ if { [ module-info mode ] == "unload" || [ module-info mode ] == "remove" } {
 # it is better to keep this esoteric tcl code here, and not a nemo_start.tcl
 # since the load/unload need to work properly ?
 
-prepend-path PATH            $nemo/bin
-prepend-path LD_LIBRARY_PATH $nemo/lib
-prepend-path MANPATH         $nemo/man
+setenv NEMO      "$NEMO"
+setenv NEMOLIB   "$NEMO/lib"
+setenv NEMOBIN   "$NEMO/bin"
+setenv NEMOOBJ   "$NEMO/obj"
+setenv NEMODOC   "$NEMO/man/doc"
+setenv NEMODAT   "$NEMO/data"
+setenv NEMOINC   "$NEMO/inc"
+setenv NEMOSRC   "$NEMO/src"
+setenv BTRPATH   ".:$NEMO/obj/bodytrans"
+setenv POTPATH   ".:$NEMO/obj/potential:$NEMO/obj/acc"
+setenv MANIPPATH ".:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip"
+setenv NEMOVER   [string trim [read [open $NEMO/VERSION r]]]
 
-set nemover  [string trim [read [open $nemo/VERSION r]]]
-puts stderr "NEMO version $nemover"
+setenv NEMOSYS   [ uname sysname ] 
+setenv NEMOSITE  [ uname nodename ] 
 
-setenv NEMOOBJ     $nemo/obj
-setenv NEMODOC     $nemo/man/doc
-setenv NEMODAT     $nemo/data
-setenv NEMOINC     $nemo/inc
-setenv NEMOSRC     $nemo/src
-setenv BTRPATH   .:$nemo/obj/bodytrans
-setenv POTPATH   .:$nemo/obj/potential:$nemo/obj/acc
-setenv ACCPATH   .:$nemo/obj/potential:$nemo/obj/acc
-setenv MANIPPATH .:$nemo/obj/manip:$nemo/usr/dehnen/falcON/manip
-#setenv NEMOSYS     [uname -s]
-#setenv NEMOSITE    [hostname]
+setenv YAPP "/xs"
+# setenv PGPLOT_DIR  "/usr/lib64"
 
-setenv NEMOVER    $nemover
+set FALCON "$NEMO/usr/dehnen/falcON"
+setenv FALCON     "$FALCON"
+setenv FALCONLIB  "$FALCON/lib"
+setenv WDUTILSLIB "$FALCON/utils/lib"
+
+# set for both nemo and falcON at the same time
+setenv ACCPATH ".:$FALCON/acc/:$NEMO/obj/potential:$NEMO/obj/acc"
+
+prepend-path PATH "$FALCON/bin:$NEMO/bin"
+
+#   NEMO's special anaconda3 ?
+if { [ file exist $NEMO/anaconda3 ] } {
+    # puts stderr "Also found anaconda3"
+    prepend-path PATH $NEMO/anaconda3/bin
+}
