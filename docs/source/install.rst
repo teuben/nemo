@@ -211,6 +211,32 @@ as can be seen in the example below
 For a few packages, we have a few existing examples in the ``$NEMO/usr`` tree
 (e.g. amuse, martini, unsio and uns_projects)
 
+Module
+------
+
+The modules package is an alternative to manually sourcing a nemo_start script. This would
+be established instead with
+
+.. code-block::
+
+      module load nemo
+
+To enable this, you will need admin access to ``/usr/share/modules/modulefiles/nemo`` where
+a symlink to the actual module file in NEMO is needed, e.g.
+
+.. code-block::
+
+      ln -s `/usr/share/modules/modulefiles/nemo/git $NEMO/modulefiles/nemo
+
+different version can now be loaded as follows   
+
+.. code-block::
+
+      module load nemo/git
+      module load nemo/float
+      module load nemo/plplot
+     
+   
 
 Package Managers
 ----------------
