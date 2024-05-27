@@ -1,4 +1,4 @@
-.TH MKPLUMMER 1NEMO "20 November 2023"
+.TH MKPLUMMER 1NEMO "27 May 2024"
 
 .SH "NAME"
 mkplummer \- construct a Plummer model
@@ -13,14 +13,14 @@ cut-off, after which it (optionally) performs a coordinate transformation to the
 center-of-mass coordinate system. The data are then written into a
 file \fIsnap-file\fP, in a standard N-body \fIsnapshot(5NEMO)\fP format.  
 The model
-is constructed in VIRIAL units (M=G=-4E=1, with E the total energy),
+is constructed in VIRIAL or NBODY units (M=G=-4E=1, with E the total energy),
 and finite spatial extent which can be regulated by specifying
 \fImfrac\fP or \fIrfrac\fP or using their default values.  The
 distribution function of a Plummer model is spherically symmetric and
 isotropic, and is a polytrope of index n = 5. 
 See also Aarseth et al. (1974) and Plummer (1911).
 .PP
-There is also an implementation in Dehnen's falcON suite: \fImkplum(1NEMO)\fP
+There is also an implementation in Dehnen's falcON suite: \fImkplum(1falcON)\fP
 .PP
 For more advanced Plummer models, see \fImcluster(1NEMO)\fP.
 
@@ -33,8 +33,7 @@ Output data is written into \fIsnapfile\fP, in standard \fIsnapshot(5NEMO)\fP fo
 No default
 .TP
 \fBnbody=\fP\fIinteger\fP
-Number of particles \fInobj\fP in N-body snapshot realization of the
-Plummer model.
+Number of particles in the model.
 .br
 No default.
 .TP
@@ -84,7 +83,7 @@ Reset center of mass to zero?
 .TP
 \fBscale=\fP\fIscale_factor\fP
 A scale factor or scale to virial units (M=G=-4E=1). Use -1 for
-virial units (see also VIRIAL UNITS below),
+virial units (see also UNITS below),
 and 1 to get a model in structural (natural) units.
 Note: large scale factors means small systems with large velocity
 disperson.
@@ -119,7 +118,8 @@ List of parameters and their values. They can be used by name in the
 \fBmassrange=\fImlow,mhigh\fP
 Valid massrange. A lower and higher cutoff must be supplied. The massrange
 has arbitrary units, since all masses will be rescaled to set the total
-mass M=1. .br
+mass M=1.
+.br
 [Default: \fB1,1\fP].
 .TP
 \fBheadline=\fP\fIstring\fP
@@ -132,7 +132,8 @@ file, the next item being the snapshot itself.
 Number of models to generate. Although mostly meant for benchmarks,
 generating more then 1 model can be useful to process very large
 snapshots (that normally won't fit in memory) in a serialized fashion. See
-also \fIsnapsplit\fP. Most NEMO programs will
+also \fIsnapsplit\fP. Most NEMO programs will only read the first
+snapshot.
 .br
 [Default: \fB1\fP]
 .TP
@@ -144,7 +145,7 @@ The processing mode, purely for debugging benchmarks.
 .br
 [Default: 1]
 
-.SH "VIRIAL UNITS"
+.SH "UNITS"
 The scale length of a Plummer sphere in virial units is \fB3.pi/16\fP
 ~ 0.589.  As an example the following two commands
 should plot the same "rotation" curve:
@@ -158,7 +159,7 @@ should plot the same "rotation" curve:
 .SH "QUIET START"
 For small N-body systems it can easily happen that small random fluctuations
 cause a unacceptabel large deviation from an ideal Plummer sphere. One way to
-achieve more "quiet" initial conditions is by positioning the particles more uniformly in
+achieve more "quiet" initial conditions is by positioning the particles more "uniformly" in
 their 1/N mass shells, instead of uniformly filling the space between 0 and 1. This is
 controlled by the \fBquiet=1\fP setting.   An even more quiet start can be achieved
 by placing the particles on exactly the radius compatible with its mass fraction, this is
@@ -175,7 +176,7 @@ In this example you can clearly see the difference between the radii selected:
 Important to note that with \fBzerocm=f\fP the center of mass will drift, while the "mathematical center"
 was placed at the origin. This will counter the quietness, if you will.
 
-.SH "BUGS"
+.SH "CAVEATS"
 A non-delta function mass-spectrum will not create a properly
 virialized system yet. See \fIsnapvirial(1NEMO)\fP
 .PP
@@ -198,14 +199,14 @@ Another method to create a Plummer sphere is by using the Osipkov-Merritt tables
  mkommod plum.dat plum.snap nbody=10000
 
 .EE
-or in ZENO the new General Spherical Profile:
+or in ZENO their new General Spherical Profile:
 .EX
 
-plumsnap plum1.snap
+ plumsnap plum1.snap
 
-plumgsp plum.gsp
-gsprealize plum.gsp plum.snap zerocm=true
-snapcopy plum.snap plum2.snap
+ plumgsp plum.gsp
+ gsprealize plum.gsp plum.snap zerocm=true
+ snapcopy plum.snap plum2.snap
 
 .EE
 with a note that ZENO files may need an extra \fIsnapcopy(1NEMO)\fP to be compatible with NEMO
@@ -216,13 +217,13 @@ The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double pr
 with and without writing to a local file:
 .EX
 
-cd $NEMO/nemo/src/nbody/init/
-make -f Benchfile bench0 bench1
+ cd $NEMO/nemo/src/nbody/init/
+ make -f Benchfile bench0 bench1
 
     or
     
-/usr/bin/time mkplummer . 10000000
-/usr/bin/time mkplummer bench1.snap 10000000
+ /usr/bin/time mkplummer . 10000000
+ /usr/bin/time mkplummer bench1.snap 10000000
 
 .EE
 with some sample CPU for bench0:
