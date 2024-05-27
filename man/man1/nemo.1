@@ -1,8 +1,4 @@
-.\"
-.\"  This entry NEMO man page should hyperlink to most/all man pages....
-.\"
-
-.TH NEMO 1NEMO "17 March 2021"
+.TH NEMO 1NEMO "26 May 2024"
 
 .SH "NAME"
 nemo, astronemo \- outline the NEMO package
@@ -75,6 +71,7 @@ $NEMO/man/manX/*.* files):
 
 .nf
 \fBprogram --help\fP
+\fBprogram --man\fP
 \fBprogram help=h\fP
 \fBprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
 \fBrunprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
@@ -99,6 +96,13 @@ or for the die hard (t)csh users we still have
 If you need more control over your NEMO environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
 or consult one of your local friendly NEMO users.
+.PP
+For systems where this is supported, the \fImodule(1)\fP command may be able
+to load nemo, e.g.
+.nf
+      module load nemo
+      module load nemo/4.2.1
+.fi
 
 .SH "HOW TO RUN NEMO PROGRAMS"
 NEMO programs can be run just as any other command in Unix, in that sense
@@ -277,14 +281,14 @@ Workshop on N-body simulations:  http://paginapessoal.utfpr.edu.br/rubensmachado
 .SH "BUGS"
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these
-changeqs if they should. Keeping good cross references in the manual
+changes if they should. Keeping good cross references in the manual
 pages might help. However, the \fBhelp=\fP description should always
 be up to date, since it is derived from the code itself. See also
 \fIcheckpars(8NEMO)\fP. And there
 is always https://github.com/teuben/nemo/issues
 
 .SH "HISTORY"
-.ta +1i +5.5i
+.ta +1i +4.5i
 .nf
 1986	V1 Initial Development	Barnes/Hut/Teuben
 1994	V2 UMD release	Teuben
