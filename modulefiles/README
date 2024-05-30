@@ -19,4 +19,7 @@ more clear.
 See also the environment-modules package in either ubuntu or redhat.
 Source can be installed from https://github.com/cea-hpc/modules/
 
+You may also need to add an initialization line in your startup shell file,
+e.g. in bash
 
+     source /usr/share/modules/init/sh
