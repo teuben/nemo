@@ -42,7 +42,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Configure
-      run: ./configure --without-csh --disable-fortran
+      run: ./configure --without-csh --disable-fortran --with-yapp=ps
     - name: Build1
       run: make build1 
     - name: Build2
