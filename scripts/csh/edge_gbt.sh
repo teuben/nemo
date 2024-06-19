@@ -35,7 +35,6 @@ seed=0                 # random seed
 sigma=0                # random motion in plane  (km/s)                   #> SCALE 0:20:0.1
 
 noise=0                # add optional noise to cube                       #> ENTRY
-clip=0.1               # clipping level for cube                          #> ENTRY
 
 vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
 
