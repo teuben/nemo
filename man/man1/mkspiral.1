@@ -1,9 +1,12 @@
-.TH MKSPIRAL 1NEMO "24 October 2020"
-.SH NAME
+.TH MKSPIRAL 1NEMO "6 June 2024"
+
+.SH "NAME"
 mkspiral \- uniform-density test disk plus spiral in spherical potential
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkspiral out=\fPsnapshot [parameters=values ...]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fImkspiral\fP sets up a cold disk of test particles orbiting clockwise
 in the gravitational potential of a user-supplied potential (in
 \fIpotential(5NEMO)\fP format). In addition a spiral is added with
@@ -24,104 +27,146 @@ with programs like \fIhackcode3(1NEMO)\fP.
 .PP
 \fBmkspiral\fP is also used in the standard benchmark as to measure
 disk I/O speed on a file just over 2GB.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 25
 \fBout=\fIout_file\fP
 The data are written to this file in \fISnapShot(5NEMO)\fP 
-format [no default].
+format
+.br
+[no default].
 .TP
 \fBnbody=\fInum_bodies\fP
-Number of disk particles [default: \fB2048\fP]
+Number of disk particles
+.br
+[default: \fB2048\fP]
 .TP
 \fBpotname=\fIpotential_name\fP
 name of the potential, see $NEMO/obj/potential for the current
 repository. The user can supply his own, see potential(5NEMO).
+.br
 [default: \fBplummer\fP].
 .TP
 \fBpotpars=\fIpot_pars\fP
 Paramaters to the user supplied potential. The number of parameters
 depends on the potential supplied, the first parameter is reserved
 for a pattern speed in future implementation.
+.br
 [default: not supplied, parameters as defined by potential(5)].
 .TP
 \fBpotfile=\fIpot_file\fP
 Data_file(s) to the user supplied potential. The number of files depends
 on the potential supplied.
+.br
 [default: not supplied, datafile(s) defined by potential(5)].
 .TP
 \fBrmin=\fImin_disk_radius\fP
-Inner cutoff radius of test-particle disk. [Default: \fB0.0\fP].
+Inner cutoff radius of test-particle disk.
+.br
+[Default: \fB0.0\fP].
 .TP
 \fBrmax=\fImax_disk_radius\fP
-Outer cutoff radius of test-particle disk. [Default: \fB1.0\fP].
+Outer cutoff radius of test-particle disk.
+.br
+[Default: \fB1.0\fP].
 .TP
 \fBmass=\fP
-Total mass of the disk. [Default: 0]
+Total mass of the disk.
+.br
+[Default: 0]
 .TP
 \fBa=\fIratio\fP
-Ratio of maximum spiral perturbation w.r.t. base disk. [default: \fB1\fP].
+Ratio of maximum spiral perturbation w.r.t. base disk.
+.br
+[default: \fB1\fP].
 .TP
 \fBk=\fIinv_rad\fP
 Wavenumber of the spiral pattern, such that \fB2.pi.k.r\fP is the phase of
 the spiral density maximum.  Positive \fB\fP means trailing spiral pattern.
 (note that this is defined in term of \fBsign=\fP, see below)
+.br
 [default: \fB1\fP]. 
 .TP
 \fBw=\fIwidth\fP
 Width of the spiral arm along a galactic circle. Depending on the next keyword
 this width is either is degrees along a galactic circle if that is to be 
 constant, or in length units if the width of the spiral is to be constant.
+.br
 [default: \fB15\fP].
 .TP
 \fBangular=t|f\fP
 Is the width of the spiral defined in angular terms, in which case the
 physical real width linearly increases with distance from the galactic
-center, or is is constant as a function of radius. [default: \fBt\fP,
-i.e. defined in angular terms].
+center, or is is constant as a function of radius.
+.br
+[default: \fBt\fP, i.e. defined in angular terms].
 .TP
 \fBseed=\fIrandom_seed\fP
 Use random number seed. A zero seed will generate a system-time
-dependant seed. [default: \fB0\fP].
+dependant seed.
+.br
+[default: \fB0\fP].
 .TP
 \fBsign=-1|+1\fP
 Sign of the angular moment vector. Positive means counter-clock wise 
-rotation. Not
+rotation.
+.br
+[Default: 1]
 .TP
 \fBsigma=\fP\fIs1,s2,s3\fP
 Velocity dispersion (isotropic) in the X-Y plane, plus optionally
 an offset and exponential dropoff: s = s1 + s2 * exp(-r/s3).
-Default: 0
+.br
+[Default: 0]
 .TP
 \fBsigmator=\fP
 The ratio of the tangential to radial velocity dispersion. By default 1,
 but if you need realistic values, our local solar neighbor measures about
 0.5 but the best self-consistent (despite these models are NOT)
 estimate can be set by using the value -1, in which case 0.5*kappa/omega
-is used. Default: 1
+is used.
+.br
+[Default: 1]
 .TP
 \fBnmodel=\fP\fIn_models\fP
-Number of output models. [Default: \fB1\fP].
+Number of output models.
+.br
+[Default: \fB1\fP].
 .TP
 \fBheadline=\fImessage\fP
-Text headline for output file [default: not used].
+Text headline for output file
+.br
+[default: not used].
 .TP
 \fBlinear=t|f\fP
 Should the spiral be linear or logarithmic. Although spiral galaxies are
 mostly logarithmic, for historic reasons the default here is linear.
+.br
 [Default: \fBt\fP]
 .TP
 \fBtest=\fItest-mode\fP
-The mode for testing.   test=0 gives the normal test disk;  test=1 the 2D coordinates are uniform random (-1,1);
-test=2 the 2D coordinates are all set to 1.0; test=3 no initialization (everything 0) [0]
-.SH BENCHMARK
+The mode for testing, an integer.
+.br
+0: gives the normal test disk;
+.br
+1: the 2D coordinates are uniform random (-1,1);
+.br
+2: the 2D coordinates are all set to 1.0;
+.br
+3: no initialization (everything 0)
+.br
+[Default: 0]
+
+.SH "BENCHMARK"
 This program has been used as benchmark to test writing >2GB files
 (40 models of 1,000,000 particles creates a file just over this
-magic limit):
-.nf
+magic limit) at a time when this could be critical:
+.EX
+
     % time mkspiral s000 1000000 nmodel=40
-.fi
+    
+.EE
 Here is a sample on some 2002-class machines:
 .nf
   U-sparc IIi/440 MHz:  161.30u 42.59s 5:04.85 66.8%  
@@ -132,6 +177,7 @@ Here is a sample on some 2002-class machines:
   P4/1.6 GHz:           69.940u 18.470s 4:50.64 30.4% (laptop)
   P4/2.6 GHz + SATA     27.400u 16.320s 0:52.13 83.8%   0+0k 0+0io 300pf+0w (at no load of 0.0)
                         27.790u 20.020s 1:52.22 42.6%   0+0k 0+0io 300pf+0w
+  Ultra 155H            2.56user 1.26system 0:04.15elapsed 92%CPU
 
 sum: 79.35u  3.72s 2:17.64 60.3%   P2400
 tsf:  0.00u  7.59s 1:59.46  6.3%   P2400
@@ -151,8 +197,9 @@ And here a more modern benchmark on a i7-8550U CPU processor with different mode
    % time mkspiral $out 1000000 nmodel=40 seed=123 test=$test
 
    $test  $out  cpu:
-   0      .     3.05u 1.09           i5-1135G7
-   0      .     4.15u 1.56           i5-10xxx
+   0      .     2.45u 0.47s 0:02.91  ultra 7 155H
+   0      .     3.05u 1.09s          i5-1135G7
+   0      .     4.15u 1.56s          i5-10xxx
    0      s0    6.21u 2.16s 0:08.38  full computation on a  i7-8550U CPU
    0      .     6.40u 0.69s 0:07.10   
    1      .     3.49u 0.68s 0:04.17  only using 4 xrandom's calls
@@ -162,15 +209,17 @@ And here a more modern benchmark on a i7-8550U CPU processor with different mode
 .fi
 
 .SH "SEE ALSO"
+
 mkdisk(1NEMO), snapmass(1NEMO), snapcenter(1NEMO), hackcode3(1NEM0)
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.5i
+.ta +1.25i +4.25i
 13-mar-89	V1.0  created                   	PJT
 6-apr-89	V1.1 seed=0 implemented          	PJT
 7-apr-89	V1.2 angular keyword introduced  	PJT
 26-feb-93	V1.4 new potential keywrds	PJT
-16-sep-95	V1.5 added nmodel=, sign= ; radii now random	PJT
+16-sep-95	V1.5 added nmodel=, sign= ; radii random	PJT
 26-may-02	added benchmark data for >2GB files	PJT
 3-aug-09	V1.8 and documented forgotten stuff		PJT
 11-aug-09	V1.9 added sigmator=	PJT

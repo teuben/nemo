@@ -20,11 +20,15 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file name [???]    
+Input file name.
+.br
+No default
 .TP 
 \fBxcol=\fP
 Column(s) to use. Although multiple columns can be used, only those 
-columns are output to stdout.  [1]
+columns are output to stdout.
+.br
+[1]
 .TP
 \fBfilter=\fP
 Filter option. The way the options are set will likely change, this
@@ -39,6 +43,7 @@ is work in progress.
    5  SK4 1st derivative
 .fi
 The smoothing versions are normalized to conserve "flux".
+.br
 Default: 0
 .TP 
 \fBsmooth=\fP
@@ -46,11 +51,14 @@ Manually set the smoothing array. By default, the filter= is used to set the smo
 array.  Be sure to enter an odd number
 of array elements, for example a normalized Hanning would be
 smooth=0.25,0.5,0.25.
+.br
 Default: not provided.
 .TP 
 \fBtcol=\fP
 Optional column designating the independant variable. Currently the actual value is ignored,
-but this column will be output before the smoothed column(s).  Default: not used.
+but this column will be output before the smoothed column(s).
+.br
+Default: not used.
 
 .SH "EXAMPLES"
 Here we draw 100000 random values from a normal distribution (mean 0, dispersion 1) and smooth them
