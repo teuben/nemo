@@ -82,8 +82,7 @@ if [ $m0 != 0 ]; then
   echo "Creating brandt disk with $nbody particles times"    
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=brandt potpars=0,$v0,$r0,$m0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=exp(-r/$re)" |\
-    snapscale - - mscale=$nbody |\
+    snapmass - - "mass=exp(-r/$re)" norm=1 |\
     snaprotate - $run.20 "$inc,$pa" yz
   rotcurves  name1=brandt pars1=0,$v0,$r0,$m0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - "%1,1,%2,$sigma,exp(-%1/$re)" all  > $run.tab
@@ -140,6 +139,9 @@ ccdmom $run.31 - axis=1 mom=0 |\
     ccdmom - - axis=2 mom=0 |\
     ccdprint - x= y= z= label=z newline=t |\
     tabcomment - - punct=f delete=t > $run.spec
+
+echo -n "Total integral over spectrum: "
+tabint $run.spec
 
 # export for other programs, in decent units
 # this way the input spatial scale is in arcsec and km/s
