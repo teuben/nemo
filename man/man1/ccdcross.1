@@ -1,4 +1,4 @@
-.TH CCDCROSS 1NEMO "3 August 2023"
+.TH CCDCROSS 1NEMO "18 April 2024"
 
 .SH "NAME"
 ccdcross \- cross correlate images with a reference image
@@ -52,17 +52,19 @@ as all bets are off.
 Here two gaussian shaped sources with noise are created with a small 1 pixel offset from
 each other.
 
-.nf
+.EX
 
     ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05  in=-
     ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05  in=-
     ccdcross g64,g65 shift.ccd box=16
     ...
-    ### nemo Debug Info: max cross 12.2081 @ 17 17
-    ### nemo Debug Info: X,Y mean: -0.00853349 -0.00708124
-    ### nemo Debug Info: Shift: 0.991467 0.992919
+    ### nemo Debug Info: Max cross 13.968 @ 16 16
+    ### nemo Debug Info: X,Y mean: 0.393391 0.412221
+    ### nemo Debug Info: X,Y sig:  1.7885 1.76623
+    ### nemo Debug Info: Center at: 0.393391 0.412221
+    0.393391 0.412221  0.393391 0.412221  16 16  13.968
 
-.fi
+.EE
 
 .SH "SEE ALSO"
 ccdmath(1NEMO), image(5NEMO)
@@ -78,4 +80,5 @@ Peter Teuben
 .ta +1.5i +5.5i
 11-Apr-2022	V0.1 Created	PJT
 3-aug-2023	V0.2 fix absolute coordinate	PJT
+18-apr-2024	V0.3 add peak flux in correlation map	PJT
 .fi
