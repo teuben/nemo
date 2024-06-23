@@ -50,11 +50,14 @@ match to the filter name, as shown in the first column:
    4    SK4 7pt smooth
    5    SK4 1st derivative  (sum=0)
   11,b  boxcar, needs  pars=width
-  12,g  gaussian, needs pars=stdev[,nsigma=4,final=0]
+  12,g  gaussian, needs pars=width[,nsigma=4,old_width=0]
   13,t  trapezoidal, needs pars=width (width=1 is also the hanning)
 .fi
 The smoothing kernels are normalized to 1 to conserve "flux" (defined as the sum of values here),
-though there will be some flux loss at the edges of a table.
+though there will be some flux loss at the edges of a table.  The \fIwidth\fP is given in pixels.
+If the optional \fIold_width\fP is given, the smoothing kernel is determines from the usual
+\fIsqrt(new**2-old**2)\fP.
+
 .br
 Default: 0
 .TP 
@@ -83,8 +86,13 @@ If set, it  will show the smoothing kernel. No input file is needed in this case
 .br
 Default: f
 .TP
+\fBnsmooth=\fP
+Number of successive smoothings applied.
+.br
+Not implemented yet, just a single smoothing is applied.
+.TP
 \fBedge=0|1|2\fP
-how to deal with edges. See EDGE below.
+how to deal with edges. See EDGE below. Only a limited number have been implemented.
 .br
 Default: 0
 
@@ -157,23 +165,23 @@ Here is the gaussian smoothing kernel, then applied to the previous example usin
 a NEMO @file 
 .EX
 
-  $ tabsmooth . filter=12 pars=1,2 show=t
-  7.01191e-31
-  4.81855e-20
-  1.29347e-11
-  1.3563e-05
-  0.055554
-  0.888865
-  ...
-  
-  $ tabsmooth . filter=12 pars=1,2 show=t > smg.tab
+  $ tabsmooth . filter=12 pars=2 show=t
+  0.000917431
+  0.0293578
+  0.234862
+  0.469725
+  0.234862
+  0.0293578
+  0.000917431
+
+  $ tabsmooth . filter=12 pars=2 show=t > smg.tab
   $ tabgen - 100000 1 2 123| tabsmooth - 1 smooth=@smg.tab | tabstat - | grep disp
-  disp:    0.89408
+  disp:    0.577259
 
 .EE
 
 .SH "SEE ALSO"
-tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO), tabspline(1NEMO), ccdsmooth(1NEMO), table(5NEMO)b
+tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO), tabspline(1NEMO), ccdsmooth(1NEMO), table(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

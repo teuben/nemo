@@ -6,7 +6,8 @@
  *      may-13   smooth= added
  *   28-sep-23   0.5 filter= added
  *   29-sep-23   0.6 converted to table V2 format
- *   21-jan-24   0.8 added show= and pars=
+ *   21-jun-24   0.8 added show= and pars=
+ *   23-jun24    fixed gaussian
  *
  */
 
@@ -33,7 +34,7 @@ string defv[] = {
     "show=f\n                     Show the kernel",
     "nsmooth=1\n                  Number of smoothings (not implemented)",
     "edge=0\n                     How to deal with edge effects (not implemented yet)",
-    "VERSION=0.9\n		  22-jun-2024 PJT",
+    "VERSION=1.0\n		  23-jun-2024 PJT",
     NULL
 };
 
@@ -218,7 +219,7 @@ local void build_filter(int filter)
     real fac = 2*sqrt(2*log(2));
     nsm = 1 + 2*(int)(nsigma*conres/fac);
     if (nsm >  MAXSM) error("MAXSM=%d too small",MAXSM);
-    if (nsm < 11) nsm = 11;   // 11 is from GBTIDL 
+    // if (nsm < 11) nsm = 11;   // 11 is from GBTIDL 
     dprintf(1,"gaussian kernel: oldres=%d newres=%d conres=%g nsigma=%d  nsm=%d\n",
 	    oldres, newres, conres, nsigma, nsm);
     real stdev = conres / fac;
