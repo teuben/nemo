@@ -22,60 +22,63 @@ ccdcross - cross correlate images with a reference image
 more) images and a reference image based on the cross-correlation between
 two images.  By selecting a specific <b>center=</b> and half <b>box=</b> size, one can
 focus on a specific area, assuming the offset is less than the box-size.
-
+<p>
+The centroid is determined using an intensity weighted mean in the correllated
+image. A future version may fit a 2D gaussian or appropriate function to
+the correllation image. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in order; they may
-be given in any order if the keyword is also given. Use <b>--help</b> to confirm
-this man page is up to date.  
+ The following parameters are recognized
+in order; they may be given in any order if the keyword is also given. Use
+<b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>ref,im1,...</i> </dt>
-<dd>Input image files, first image
-is the reference image. At least two images need to be given. No default.
-</dd>
+<dd>Input image files,
+first image is the reference image. At least two images need to be given.
+No default. </dd>
 
 <dt><b>out=</b><i>im</i> </dt>
 <dd>Output cross image. No default. </dd>
 
 <dt><b>center=</b><i>x0,y0</i> </dt>
-<dd>X-Y Reference center around
-which a box (see <b>box=</b> below) is taken. The are 0-based integer pixels. By
-default the center of the image is used.  Default: center of first input
-image. </dd>
+<dd>X-Y Reference
+center around which a box (see <b>box=</b> below) is taken. The are 0-based integer
+pixels. By default the center of the image is used.  Default: center of first
+input image. </dd>
 
 <dt><b>box=</b><i>b2</i> </dt>
-<dd>Half size of correlation box. The output image is forced to
-have an odd pixel size, 2*box+1. The shift between the images should not
-exceed <b>box</b>. By default half the mapsize is used.  </dd>
+<dd>Half size of correlation box. The output image is forced
+to have an odd pixel size, 2*box+1. The shift between the images should
+not exceed <b>box</b>. By default half the mapsize is used.  </dd>
 
 <dt><b>clip=</b><i>c</i> </dt>
 <dd>Only use values
-above this clip level. By default values are not clipped. </dd>
+above this clip level in the original images. By default values are not
+clipped. </dd>
 
 <dt><b>bad=</b><i>b</i> </dt>
-<dd>bad value
-to ignore. By default there is no bad value recognized. 
+<dd>bad value to ignore. By default there is no bad value recognized.
+
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveat</a></h2>
-Only 2D images
-are handled. <p>
-The WCS is ignored, 0-based pixel coordinates are reported. <p>
-Images
-should ideally be the same size, but nothing will stop the program from
-running off without that. The user is then responsible for computing the
-true offsets as all bets are off. 
+Only 2D images are handled. <p>
+The WCS is ignored, 0-based pixel coordinates
+are reported. <p>
+Images should ideally be the same size, but nothing will stop
+the program from running off without that. The user is then responsible
+for computing the true offsets as all bets are off. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 
-<p> Here two gaussian shaped sources
-with noise are created with a small 1 pixel offset from each other. 
+<p> Here two gaussian
+shaped sources with noise are created with a small 1 pixel offset from
+each other. 
 <p>  
-<p> 
-   ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05
- in=-<br>
+<p>     ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64
+noise spar=0,0.05  in=-<br>
      ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05
  in=-<br>
      ccdcross g64,g65 shift.ccd box=16<br>

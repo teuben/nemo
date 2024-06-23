@@ -9,11 +9,14 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkspiral - uniform-density test disk plus spiral in spherical potential
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkspiral out=</b>snapshot [parameters=values ...] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>mkspiral</i>
 sets up a cold disk of test particles orbiting clockwise in the gravitational
@@ -36,121 +39,139 @@ like <a href='hackcode3.1.html'><i>hackcode3(1NEMO)</i></a>
 . <p>
 <b>mkspiral</b> is also used in the standard benchmark as
 to measure disk I/O speed on a file just over 2GB. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+ The following
+parameters are recognized in order; they may be given in any order if the
+keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
+
 <dl>
 
-<dt><b>out=<i>out_file</i></b>
-</dt>
+<dt><b>out=<i>out_file</i></b> </dt>
 <dd>The data are written to this file in <a href='SnapShot.5.html'><i>SnapShot(5NEMO)</i></a>
-  format [no default].
-</dd>
+  format
+<br>
+[no default]. </dd>
 
 <dt><b>nbody=<i>num_bodies</i></b> </dt>
-<dd>Number of disk particles [default: <b>2048</b>] </dd>
+<dd>Number of disk particles <br>
+[default: <b>2048</b>] </dd>
 
-<dt><b>potname=<i>potential_name</i></b>
-</dt>
-<dd>name of the potential, see $NEMO/obj/potential for the current repository.
-The user can supply his own, see <a href='potential.5.html'>potential(5NEMO)</a>
-. [default: <b>plummer</b>]. </dd>
+<dt><b>potname=<i>potential_name</i></b> </dt>
+<dd>name of the potential, see $NEMO/obj/potential
+for the current repository. The user can supply his own, see <a href='potential.5.html'>potential(5NEMO)</a>
+.
+<br>
+[default: <b>plummer</b>]. </dd>
 
-<dt><b>potpars=<i>pot_pars</i></b>
-</dt>
-<dd>Paramaters to the user supplied potential. The number of parameters depends
-on the potential supplied, the first parameter is reserved for a pattern
-speed in future implementation. [default: not supplied, parameters as defined
-by <a href='potential.5.html'>potential(5)</a>
+<dt><b>potpars=<i>pot_pars</i></b> </dt>
+<dd>Paramaters to the user supplied potential.
+The number of parameters depends on the potential supplied, the first parameter
+is reserved for a pattern speed in future implementation. <br>
+[default: not supplied, parameters as defined by <a href='potential.5.html'>potential(5)</a>
 ]. </dd>
 
-<dt><b>potfile=<i>pot_file</i></b> </dt>
-<dd>Data_file(s) to the user supplied potential.
-The number of files depends on the potential supplied. [default: not supplied,
-datafile(s) defined by <a href='potential.5.html'>potential(5)</a>
+<dt><b>potfile=<i>pot_file</i></b>
+</dt>
+<dd>Data_file(s) to the user supplied potential. The number of files depends
+on the potential supplied. <br>
+[default: not supplied, datafile(s) defined by <a href='potential.5.html'>potential(5)</a>
 ]. </dd>
 
-<dt><b>rmin=<i>min_disk_radius</i></b> </dt>
-<dd>Inner cutoff
-radius of test-particle disk. [Default: <b>0.0</b>]. </dd>
+<dt><b>rmin=<i>min_disk_radius</i></b>
+</dt>
+<dd>Inner cutoff radius of test-particle disk. <br>
+[Default: <b>0.0</b>]. </dd>
 
 <dt><b>rmax=<i>max_disk_radius</i></b> </dt>
-<dd>Outer cutoff
-radius of test-particle disk. [Default: <b>1.0</b>]. </dd>
+<dd>Outer cutoff radius of test-particle
+disk. <br>
+[Default: <b>1.0</b>]. </dd>
 
 <dt><b>mass=</b> </dt>
-<dd>Total mass of the disk.
+<dd>Total mass of the disk. <br>
 [Default: 0] </dd>
 
 <dt><b>a=<i>ratio</i></b> </dt>
 <dd>Ratio of maximum spiral perturbation w.r.t. base disk.
+<br>
 [default: <b>1</b>]. </dd>
 
 <dt><b>k=<i>inv_rad</i></b> </dt>
 <dd>Wavenumber of the spiral pattern, such that <b>2.pi.k.r</b>
 is the phase of the spiral density maximum.  Positive <b></b> means trailing spiral
-pattern. (note that this is defined in term of <b>sign=</b>, see below) [default:
-<b>1</b>].  </dd>
+pattern. (note that this is defined in term of <b>sign=</b>, see below) <br>
+[default: <b>1</b>].  </dd>
 
 <dt><b>w=<i>width</i></b> </dt>
-<dd>Width of the spiral arm along a galactic circle. Depending on
-the next keyword this width is either is degrees along a galactic circle
+<dd>Width of the spiral arm along a galactic circle. Depending
+on the next keyword this width is either is degrees along a galactic circle
 if that is to be  constant, or in length units if the width of the spiral
-is to be constant. [default: <b>15</b>]. </dd>
+is to be constant. <br>
+[default: <b>15</b>]. </dd>
 
 <dt><b>angular=t|f</b> </dt>
-<dd>Is the width of the spiral defined
-in angular terms, in which case the physical real width linearly increases
-with distance from the galactic center, or is is constant as a function
-of radius. [default: <b>t</b>, i.e. defined in angular terms]. </dd>
+<dd>Is the width of the spiral defined in angular
+terms, in which case the physical real width linearly increases with distance
+from the galactic center, or is is constant as a function of radius. <br>
+[default: <b>t</b>, i.e. defined in angular terms]. </dd>
 
 <dt><b>seed=<i>random_seed</i></b> </dt>
-<dd>Use
-random number seed. A zero seed will generate a system-time dependant seed.
+<dd>Use random number
+seed. A zero seed will generate a system-time dependant seed. <br>
 [default: <b>0</b>]. </dd>
 
 <dt><b>sign=-1|+1</b> </dt>
 <dd>Sign of the angular moment vector. Positive means
-counter-clock wise  rotation. Not </dd>
+counter-clock wise  rotation. <br>
+[Default: 1] </dd>
 
 <dt><b>sigma=</b><i>s1,s2,s3</i> </dt>
-<dd>Velocity dispersion (isotropic)
-in the X-Y plane, plus optionally an offset and exponential dropoff: s =
-s1 + s2 * exp(-r/s3). Default: 0 </dd>
+<dd>Velocity dispersion (isotropic) in the X-Y plane,
+plus optionally an offset and exponential dropoff: s = s1 + s2 * exp(-r/s3).
+<br>
+[Default: 0] </dd>
 
 <dt><b>sigmator=</b> </dt>
-<dd>The ratio of the tangential to
-radial velocity dispersion. By default 1, but if you need realistic values,
-our local solar neighbor measures about 0.5 but the best self-consistent
-(despite these models are NOT) estimate can be set by using the value -1,
-in which case 0.5*kappa/omega is used. Default: 1 </dd>
+<dd>The ratio of the tangential to radial velocity dispersion.
+By default 1, but if you need realistic values, our local solar neighbor
+measures about 0.5 but the best self-consistent (despite these models are
+NOT) estimate can be set by using the value -1, in which case 0.5*kappa/omega
+is used. <br>
+[Default: 1] </dd>
 
 <dt><b>nmodel=</b><i>n_models</i> </dt>
-<dd>Number
-of output models. [Default: <b>1</b>]. </dd>
+<dd>Number of output models. <br>
+[Default: <b>1</b>]. </dd>
 
 <dt><b>headline=<i>message</i></b> </dt>
-<dd>Text headline for output
-file [default: not used]. </dd>
+<dd>Text headline for output file <br>
+[default: not used]. </dd>
 
 <dt><b>linear=t|f</b> </dt>
 <dd>Should the spiral be linear or logarithmic.
 Although spiral galaxies are mostly logarithmic, for historic reasons the
-default here is linear. [Default: <b>t</b>] </dd>
+default here is linear. <br>
+[Default: <b>t</b>] </dd>
 
 <dt><b>test=<i>test-mode</i></b> </dt>
-<dd>The mode for testing.
-  test=0 gives the normal test disk;  test=1 the 2D coordinates are uniform
-random (-1,1); test=2 the 2D coordinates are all set to 1.0; test=3 no initialization
-(everything 0) [0] </dd>
+<dd>The mode for testing, an integer. <br>
+0: gives the normal test disk; <br>
+1: the 2D coordinates are uniform random (-1,1); <br>
+2: the 2D coordinates are all set to 1.0; <br>
+3: no initialization (everything 0) <br>
+[Default: 0] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Benchmark</a></h2>
-This program has been used as benchmark to
-test writing &gt;2GB files (40 models of 1,000,000 particles creates a file
-just over this magic limit): <br>
-<pre>    % time mkspiral s000 1000000 nmodel=40
-</pre>Here is a sample on some 2002-class machines: <br>
+This program has been used as benchmark to test
+writing &gt;2GB files (40 models of 1,000,000 particles creates a file just
+over this magic limit) at a time when this could be critical:  
+<p>     % time
+mkspiral s000 1000000 nmodel=40<br>
+     <br>
+  Here is a sample on some 2002-class machines: <br>
 <pre>  U-sparc IIi/440 MHz:  161.30u 42.59s 5:04.85 66.8%  
   PentiumIV 2.2 GHz:    29.54u 10.68s 2:40.14 25.1% 
   PentiumIV 2.4 GHz:    26.46u 10.14s 1:37.71 37.4%  
@@ -160,6 +181,7 @@ just over this magic limit): <br>
   P4/2.6 GHz + SATA     27.400u 16.320s 0:52.13 83.8%   0+0k 0+0io 300pf+0w
 (at no load of 0.0)
                         27.790u 20.020s 1:52.22 42.6%   0+0k 0+0io 300pf+0w
+  Ultra 155H            2.56user 1.26system 0:04.15elapsed 92%CPU
 sum: 79.35u  3.72s 2:17.64 60.3%   P2400
 tsf:  0.00u  7.59s 1:59.46  6.3%   P2400
 sum: 13.610u 4.130s 1:10.12 25.2%  P2600/SATA
@@ -172,8 +194,9 @@ tsf: 21.85u 30.73s 2:32.06 34.5%  U440
 modes: <br>
 <pre>   % time mkspiral $out 1000000 nmodel=40 seed=123 test=$test
    $test  $out  cpu:
-   0      .     3.05u 1.09           i5-1135G7
-   0      .     4.15u 1.56           i5-10xxx
+   0      .     2.45u 0.47s 0:02.91  ultra 7 155H
+   0      .     3.05u 1.09s          i5-1135G7
+   0      .     4.15u 1.56s          i5-10xxx
    0      s0    6.21u 2.16s 0:08.38  full computation on a  i7-8550U CPU
    0      .     6.40u 0.69s 0:07.10   
    1      .     3.49u 0.68s 0:04.17  only using 4 xrandom&rsquo;s calls
@@ -183,19 +206,21 @@ modes: <br>
 </pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
+
+<p> <a href='mkdisk.1.html'>mkdisk(1NEMO)</a>
 , <a href='snapmass.1.html'>snapmass(1NEMO)</a>
 , <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
 , <a href='hackcode3.1NEM0.html'>hackcode3(1NEM0)</a>
 
 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>History</a></h2>
 <br>
 <pre>13-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0  created                   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-apr-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 seed=0 implemented          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 7-apr-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.2 angular keyword introduced  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-feb-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.4 new potential keywrds<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-16-sep-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 added nmodel=, sign= ; radii now random<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+16-sep-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.5 added nmodel=, sign= ; radii random<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 26-may-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;added benchmark data for &gt;2GB files<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 3-aug-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.8 and documented forgotten stuff<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 11-aug-09<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.9 added sigmator=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -211,7 +236,7 @@ modes: <br>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Benchmark</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc6' href='#sect6'>History</a></li>
 </ul>
 </body>
 </html>

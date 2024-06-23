@@ -9,53 +9,89 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 qsf - query a structured file 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>qsf in=</b><i>in-file</i> 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>qsf</i> queries
-if a file is a proper <i>binary structured file</i>. If so, it returns a 0 status
-to the parent shell, if not, 1 is returned. Most <b>NEMO</b> programs will exit
-when structured files are expected, and no such thing was encountered. <p>
-<i>ascii
-structured files</i> can be converted to <i>binary</i> using <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
-. Other format
-converted are problem specific. 
+<i>qsf</i>
+queries if a file is a proper <i>binary structured file</i>. If so, it returns
+a 0 status to the parent shell, if not, 1 is returned. Most <b>NEMO</b> programs
+will exit when structured files are expected, and no such thing was encountered.
+<p>
+<i>ascii structured files</i> can be converted to <i>binary</i> using <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
+. Other
+format converted are problem specific. <p>
+A unix pipe (usually respresented
+by a "-" in NEMO) is never considered a structured file, and will thus return
+a 0. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are
-recognized in order; they may be given in any order if the keyword is also
-given. Use <b>--help</b> to confirm this man page is up to date.  
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in</b>=<i>in-file</i> </dt>
-<dd>Input
-filename to test [no default]. </dd>
+<dd>Input filename to test.  <br>
+[no default]. </dd>
+
+<dt><b>show=t|f</b> </dt>
+<dd>Show the return value on screen as well (0 or 1). <br>
+[Default: f] 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Debug</a></h2>
-The following debug levels are active
-in this program: 
-<dl>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
 
-<dt><b> 1 </b> </dt>
-<dd>Prints out a message if the file is structured or
-not. </dd>
-</dl>
-
+<p>   $ qsf $NEMODAT/iau.dat  ; echo $?<br>
+  0<br>
+  <br>
+  $ qsf $NEMODAT/iau.data  ; echo $?<br>
+  1<br>
+  <br>
+  $ if [ $(qsf $NEMODAT/iau25.dat show=t) = 0 ]; then<br>
+       echo "found a structured file"<br>
+    fi<tt> </tt>&nbsp;<tt> </tt>&nbsp;<br>
+  <br>
+  The signature of a binary file is a hex code "0b" and "92" as the first
+two bytes (the reverse is also allowed), viz.: 
+<p>   $ hexdump -C iau25.dat |
+head -2<br>
+  00000000 0b 92 63 00 48 65 61 64  6c 69 6e 65 00 00 00 00 |..c.Headline....|<br>
+  00000010 34 00 00 00 00 49 41 55  20 32 35 2d 62 6f 64 79 |4....IAU 25-body|<br>
+  
+<p> NEMO tries to be able to work with byte swapped data, but this hasn&rsquo;t
+been verified since Apple&rsquo;s M-chip was introduced. 
+<p> 
+<p> <p>
+The <a href='file.1.html'><i>file(1)</i></a>
+ command can
+also be made to work, but it would require a patch to <b>/etc/magic</b>. 
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='tsf.1.html'>tsf(1NEMO)</a>
-, <a href='rsf.1NEM0.html'>rsf(1NEM0)</a>
+,
+<a href='rsf.1NEM0.html'>rsf(1NEM0)</a>
+, <a href='file.1.html'>file(1)</a>
  
+<p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
-<pre>~/src/kernel/io  <tt> </tt>&nbsp;<tt> </tt>&nbsp;qsf.c
+<pre>$NEMO/src/kernel/io  <tt> </tt>&nbsp;<tt> </tt>&nbsp;qsf.c
+$NEMO/src/kernel/io  <tt> </tt>&nbsp;<tt> </tt>&nbsp;magic.nemo
 </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>13-feb-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+25-may-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added show= and EXAMPLES<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -65,7 +101,7 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Debug</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Author</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>

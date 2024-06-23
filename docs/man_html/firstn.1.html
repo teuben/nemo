@@ -9,15 +9,19 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 firstn - von Hoerners first N-body code 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 firstn &lt; firstn.in 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 Arguably
 the first N-body code was written by von Hoerner (1960). This version, <b>firstn</b>,
 currently only integrates an example internally-generated Plummer sphere,
 and was written by S. Aarseth. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Input</a></h2>
 The <b>firstn.in</b> input file contains 3 lines
 (See also <a href='nbody0.1.html'><i>nbody0(1NEMO)</i></a>
@@ -81,14 +85,15 @@ time.
 <h2><a name='sect5' href='#toc5'>Performance</a></h2>
 CPU should  scale as N^2. Here are some numbers from "make
 bench": <br>
-<pre>N<tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu"<tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu"
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;?<tt> </tt>&nbsp;<tt> </tt>&nbsp;p4/1600/gcc<tt> </tt>&nbsp;<tt> </tt>&nbsp;ifort   i5-1135G7
-16<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.79<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.23
-32<tt> </tt>&nbsp;<tt> </tt>&nbsp;62.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;33.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;19.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.67
-64<tt> </tt>&nbsp;<tt> </tt>&nbsp;93.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;27.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;84.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;16.11
-128<tt> </tt>&nbsp;<tt> </tt>&nbsp;642.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;108.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;75.1<tt> </tt>&nbsp;<tt> </tt>&nbsp;8.25
-256<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<tt> </tt>&nbsp;<tt> </tt>&nbsp;834.3<tt> </tt>&nbsp;<tt> </tt>&nbsp;746.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;44.8
+<pre>N<tt> </tt>&nbsp;<tt> </tt>&nbsp;cpu(sec)
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;?<tt> </tt>&nbsp;<tt> </tt>&nbsp;p4/1600<tt> </tt>&nbsp;<tt> </tt>&nbsp;ifort<tt> </tt>&nbsp;<tt> </tt>&nbsp;i5-1135G7<tt> </tt>&nbsp;<tt> </tt>&nbsp;i7-1260P
+16<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.9<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.79<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.23<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.32
+32<tt> </tt>&nbsp;<tt> </tt>&nbsp;62.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;33.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;19.0<tt> </tt>&nbsp;<tt> </tt>&nbsp;1.67<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.4
+64<tt> </tt>&nbsp;<tt> </tt>&nbsp;93.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;27.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;84.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;16.11<tt> </tt>&nbsp;<tt> </tt>&nbsp;21.72
+128<tt> </tt>&nbsp;<tt> </tt>&nbsp;642.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;108.4<tt> </tt>&nbsp;<tt> </tt>&nbsp;75.1<tt> </tt>&nbsp;<tt> </tt>&nbsp;8.25<tt> </tt>&nbsp;<tt> </tt>&nbsp;9.53
+256<tt> </tt>&nbsp;<tt> </tt>&nbsp;n/a<tt> </tt>&nbsp;<tt> </tt>&nbsp;834.3<tt> </tt>&nbsp;<tt> </tt>&nbsp;746.5<tt> </tt>&nbsp;<tt> </tt>&nbsp;44.8<tt> </tt>&nbsp;<tt> </tt>&nbsp;58.6
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 This historic code is meant to be educational. 
 <p> 
@@ -106,11 +111,14 @@ Z.f.Astrophys. 57, 47, 1963
 </pre>
 <p> 
 <h2><a name='sect9' href='#toc9'>Ads</a></h2>
-@ads <A HREF=https://ui.adsabs.harvard.edu/abs/1960ZA.....50..184V> 1960ZA.....50..184V </A>
+<br>
+<pre>@ads 1960ZA.....50..184V
+@ads <A HREF=https://ui.adsabs.harvard.edu/abs/1963ZA.....57...47V> 1963ZA.....57...47V </A>
+</pre>
 <p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
-S. von Hoerner (original),
-Sverre Aarseth (21st century adaptation) 
+S. von Hoerner (original), Sverre Aarseth (21st century adaptation)
+
 <p> 
 <h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
