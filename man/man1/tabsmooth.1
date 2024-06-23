@@ -1,4 +1,4 @@
-.TH TABSMOOTH 1NEMO "29 November 2023"
+.TH TABSMOOTH 1NEMO "22 June 2024"
 
 .SH "NAME"
 tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
@@ -7,54 +7,140 @@ tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
 \fBtabsmooth\fP [parameter=value]
 
 .SH "DESCRIPTION"
-Quick and dirty program to \fIsmooth\fP the column(s) of a table
-without paying attention to the X coordinate (meaning: a constant
-step size is assumed).
+\fItabsmooth\fP convolves selected column(s) of an ASCII table.
+It does this without paying attention to the actual
+X coordinate (meaning: a constant
+step size is assumed). Use \fItabspline(1NEMO)\fP to interpolate
+across an irregularly sampled table.
 .PP
-The filter= option is used to select the filter, for example
-a Hanning and a Savitzky-Golay filter (and some derivates)
-can be selected.   A pass-through is also allowed.
+The \fBfilter=\fP option is used to select the filter, for example
+a Hanning, Boxcar, Gaussian and a Savitzky-Golay filter (and some of their
+derivates) can be selected.   A pass-through is also allowed. Some of the
+filters need additional argument(s), given by \fBpars=\fP and are described
+below.
+.PP
+Optionally the smoothing kernel can be shown using \fPshow=t\fP
+without the need to read a table.
 
 .SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input file name [???]    
+Input file name.
+.br
+No default
 .TP 
 \fBxcol=\fP
 Column(s) to use. Although multiple columns can be used, only those 
-columns are output to stdout.  [1]
+columns are output to stdout.
+.br
+[1]
 .TP
 \fBfilter=\fP
 Filter option. The way the options are set will likely change, this
-is work in progress.
+is work in progress.  Either a number value can be given, or a minimum
+match to the filter name, as shown in the first column:
 .nf
-   -1 passthrough, the column is not modified
-   0  hanning (1,2,1)/4
-   1  SK2 5pt smooth
-   2  SK2 1st derivative with h=1
-   3  SK2 2nd derivative with h=1
-   4  SK4 7pt smooth
-   5  SK4 1st derivative
+   -1   passthrough, the column(s) not modified
+   0,h  hanning (1,2,1)
+   1    SK2 5pt smooth
+   2    SK2 1st derivative with h=1 (sum=0)
+   3    SK2 2nd derivative with h=1 (sum=0)
+   4    SK4 7pt smooth
+   5    SK4 1st derivative  (sum=0)
+  11,b  boxcar, needs  pars=width
+  12,g  gaussian, needs pars=stdev[,nsigma=4,final=0]
+  13,t  trapezoidal, needs pars=width (width=1 is also the hanning)
 .fi
-The smoothing versions are normalized to conserve "flux".
+The smoothing kernels are normalized to 1 to conserve "flux" (defined as the sum of values here),
+though there will be some flux loss at the edges of a table.
+.br
 Default: 0
+.TP 
+\fBpars=\fP\fIpar1,par2,...\fP
+Optional parameters some of the filters need. See \fBfilter=\fP for the filters that need
+parameters.
+.br
+Default: not used
 .TP 
 \fBsmooth=\fP
 Manually set the smoothing array. By default, the filter= is used to set the smoothing
 array.  Be sure to enter an odd number
 of array elements, for example a normalized Hanning would be
 smooth=0.25,0.5,0.25.
-Default: not provided.
+.br
+Default: not used.
 .TP 
 \fBtcol=\fP
 Optional column designating the independant variable. Currently the actual value is ignored,
-but this column will be output before the smoothed column(s).  Default: not used.
+but this column will be output before the smoothed column(s).
+.br
+Default: not used.
+.TP 
+\fBshow=t|f\fP
+If set, it  will show the smoothing kernel. No input file is needed in this case.
+.br
+Default: f
+.TP
+\fBedge=0|1|2\fP
+how to deal with edges. See EDGE below.
+.br
+Default: 0
+
+.SH "EDGE"
+Treatment of smoothing the edge has several options. In general the flux will not
+be conserved near the edge. Here we compare how this is handled in a few popular
+packages:
+.PP
+Following the options in the popular IDL package
+(see https://www.nv5geospatialsoftware.com/docs/CONVOL.html) we have:
+.TP
+EDGE_CONSTANT
+Set the outside edge to a specific value. If 0, that's EDGE_ZERO, if not
+we should capture that value.   -- not implemented here --
+.br
+"...CCCC|abcdefg|CCCC..."
+.TP
+EDGE_MIRROR
+Is this edge=1 ?
+.br
+"gfedcba|abcdefg|gfedcba"
+.TP
+EDGE_REFLECT
+reflection. like mirror, but shifted over one.
+.br
+"gfedcb|abcdefg|fedcba".
+.TP
+EDGE_TRUNCATE
+This is the default in gbtidl (\fBedge=2\fP) for the left side. Why the right
+side needs to inherit the left side is beyond me. Seems like a typo to me.
+.br
+"..aaa|abcdefg|aaa.."
+.TP
+EDGE_WRAP
+wrapping
+.br
+"abcdefg|abcdefg|abcdefg".
+.TP
+EDGE_ZERO
+Our \fBedge=0\fP
+.br
+"...0000|abcdefg|0000...".
+.PP
+Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html) we have:
+.TP
+boundary='extend'
+Constant extrapolation of the edge value beyond the boundary  (\fBedge=2\fP)
+.TP
+boundary='fill'
+Default fill value is 0.0  (\fBedge=0\fP)
+.PP
+Both these astropy cases were properly handled by \fBtabsmooth\fP.
 
 .SH "EXAMPLES"
 Here we draw 100000 random values from a normal distribution (mean 0, dispersion 1) and smooth them
-with various filters:
+with various filters, and observe what the resulting dispersion is:
 .nf
 
 tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
@@ -67,23 +153,38 @@ tabgen - 100000 1 2 123| tabsmooth - 1  4 | tabstat - | grep disp
 0.7537
 
 .fi
+Here is the gaussian smoothing kernel, then applied to the previous example using
+a NEMO @file 
+.EX
 
-.SH "CAVEATS"
-Near the edge the smoothing array is cut off, thus there is some loss of flux.
-Otherwise in general the smoothing filter is normalized and should conserve flux.
+  $ tabsmooth . filter=12 pars=1,2 show=t
+  7.01191e-31
+  4.81855e-20
+  1.29347e-11
+  1.3563e-05
+  0.055554
+  0.888865
+  ...
+  
+  $ tabsmooth . filter=12 pars=1,2 show=t > smg.tab
+  $ tabgen - 100000 1 2 123| tabsmooth - 1 smooth=@smg.tab | tabstat - | grep disp
+  disp:    0.89408
+
+.EE
 
 .SH "SEE ALSO"
-tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO), table(5NEMO)
+tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO), tabspline(1NEMO), ccdsmooth(1NEMO), table(5NEMO)b
 
 .SH "AUTHOR"
 Peter Teuben
 
 .SH "HISTORY"
 .nf
-.ta +1.5i +5.5i
-20-dec-2010	V0.1 Created	PJT
+.ta +1.25i +4.5i
+20-dec-2010	V0.1 Created, Q&D	PJT
 13-oct-2014	documented smooth=
 28-sep-2023	V0.5 added filter=	PJT
 29-sep-2023	V0.6 converted to table V2	PJT
 29-nov-2023	V0.7 added tcol=	PJT
+21-jun-2023	V0.8 added show= and pars= for filters 	PJT
 .fi
