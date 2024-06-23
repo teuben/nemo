@@ -11,6 +11,10 @@ ccdcross \- cross correlate images with a reference image
 cross-correlation between two images.  By selecting a specific \fBcenter=\fP and
 half \fBbox=\fP size, one can focus on a specific area, assuming the offset is less than
 the box-size.
+.PP
+The centroid is determined using an intensity weighted mean in the correllated image.
+A future version may fit
+a 2D gaussian or appropriate function to the correllation image.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -33,7 +37,7 @@ The shift between the images should not exceed \fBbox\fP.
 By default half the mapsize is used. 
 .TP
 \fBclip=\fP\fIc\fP
-Only use values above this clip level. By default values are not clipped.
+Only use values above this clip level in the original images. By default values are not clipped.
 .TP
 \fBbad=\fP\fIb\fP
 bad value to ignore. By default there is no bad value recognized.
@@ -78,4 +82,5 @@ Peter Teuben
 .ta +1.5i +5.5i
 11-Apr-2022	V0.1 Created	PJT
 3-aug-2023	V0.2 fix absolute coordinate	PJT
+28-mar-2024	V0.3 @todo fix output coordinates	PJT
 .fi
