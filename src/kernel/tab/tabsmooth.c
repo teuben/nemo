@@ -26,13 +26,14 @@
 string defv[] = {
     "in=???\n                     Input file name",
     "xcol=1\n			  Column(s) to use (1=first)",
-    "filter=0\n                   Select one of the test filters (-1,0,1,2,...)",
+    "filter=0\n                   Select one of the filters (-1,0,1,2,...,11,12)",
     "pars=\n                      Optional parameters for the smoothing filter",
     "smooth=\n                    Optional explicit smoothing array",
-    "tcol=\n                      Optional independant variable ('time')",
+    "tcol=\n                      Optional independant variable ('time column')",
     "show=f\n                     Show the kernel",
+    "nsmooth=1\n                  Number of smoothings (not implemented)",
     "edge=0\n                     How to deal with edge effects (not implemented yet)",
-    "VERSION=0.8\n		  21-jun-2024 PJT",
+    "VERSION=0.9\n		  22-jun-2024 PJT",
     NULL
 };
 
@@ -67,6 +68,9 @@ local bool Qshow;                       /* show the smoothing kernel */
 
 local real pars[MAXSM];                 /* (optional) smoothing kernel parameters */
 local int  npars;                       /* actual number of parameters given */
+
+local int  nsmooth;                     /* number of smoothings */
+local int  edge;                        /* treatment of edge */
 
 
 /* Savitzky-Golay tables for fixed stepsize */
@@ -109,7 +113,8 @@ void nemo_main()
       show_kernel();
     else {
       read_data();
-      smooth_data();
+      while (nsmooth--)
+	smooth_data();
     }
 }
 
@@ -117,11 +122,24 @@ local void setparams()
 {
     real sum;
     int i;
-    int filter = getiparam("filter");
+    int filter;
     int nrows, ncols;
+    string sfilter = getparam("filter");
+
+    // @todo fancy some min match routine?
+    // hanning, boxcar, gaussian,    trapezoidal, moffat
+    if (sfilter[0] == 'h')           // hanning
+      filter = 0;
+    else if (sfilter[0] == 'b')      // boxcar
+      filter = 11;
+    else if (sfilter[0] == 'g')      // gaussian
+      filter = 12;
+    else
+      filter = getiparam("filter");
+    
 
     Qshow = getbparam("show");
-     
+    
     if (!Qshow) {
       input = getparam("in");
       nxcol = nemoinpi(getparam("xcol"),xcol,MAXCOL+1);
@@ -138,6 +156,10 @@ local void setparams()
       dprintf(1,"Table: %d x %d\n", nrows, ncols);
     }
     npars = nemoinpr(getparam("pars"), pars, MAXSM);
+
+    nsmooth = getiparam("nsmooth");
+    if (nsmooth > 1) warning("bogus nsmooth");
+    edge = getiparam("edge");
  
     nsm = nemoinpr(getparam("smooth"),sm,MAXSM);
     if (nsm < 0) error("smooth=%s parsing error",getparam("smooth"));
@@ -189,15 +211,25 @@ local void build_filter(int filter)
       sm[i] = 1.0/nsm;
   } else if (filter == 12) {              // gauss
     if (npars < 1) error("%d need one pars=",npars);
-    int stdev = (int) pars[0];
+    int newres = (npars < 1 ? 1 : (int) pars[0]);  // actually FWHM for now
     int nsigma = (npars < 2 ? 4 : (int) pars[1]);
-    nsm = 1+2*nsigma*stdev;
+    int oldres = (npars < 3 ? 0 : (int) pars[2]);
+    real conres = sqrt(sqr(newres)-sqr(oldres));  // check if < 0
+    real fac = 2*sqrt(2*log(2));
+    nsm = 1 + 2*(int)(nsigma*conres/fac);
     if (nsm >  MAXSM) error("MAXSM=%d too small",MAXSM);
-    dprintf(1,"gaussian kernel: stdev=%d nsigma=%d  nsm=%d\n", stdev, nsigma, nsm);
-    double sum = 0.0;
-    for (i=0; i<nsm; i++) {
-      sm[i] = exp(-0.5*sqr((i-nsigma*stdev)/(1.0*stdev)));
-      sum += sm[i];
+    if (nsm < 11) nsm = 11;   // 11 is from GBTIDL 
+    dprintf(1,"gaussian kernel: oldres=%d newres=%d conres=%g nsigma=%d  nsm=%d\n",
+	    oldres, newres, conres, nsigma, nsm);
+    real stdev = conres / fac;
+    dprintf(1,"gaussian kernel: stdev=%g\n", stdev);
+    
+    double sum = sm[(nsm-1)/2] = 1.0;
+    double x;
+    for (i=1; i<=(nsm-1)/2; i++) {
+      x = i/stdev;
+      sm[(nsm-1)/2 + i] = sm[(nsm-1)/2 - i] = exp(-0.5*x*x);
+      sum += 2*sm[(nsm-1)/2 + i];
     }
     for (i=0; i<nsm; i++)
       sm[i] /= sum;
@@ -228,7 +260,17 @@ local void smooth_data(void)
       sum[j] = 0.0;
       for (k=-nsmh; k<=nsmh; k++) {
 	ipk = i+k;
-	if (ipk<0 || ipk>=npt) continue;   // @todo deal with edge=
+	if (ipk<0 || ipk>=npt) {    // https://www.nv5geospatialsoftware.com/docs/CONVOL.html
+	  if (edge==0) continue;           //  /EDGE_ZERO
+	  if (edge==1) {                   //  /EDGE_TRUNCATE
+	    if (ipk<0)    ipk = 0;
+	    if (ipk>=npt) ipk = npt-1;
+	  }
+	  if (edge==2) {                   //  /EDGE_REFLECT
+	    if (ipk<0)    ipk = -ipk;
+	    if (ipk>=npt) ipk = 2*npt-2-ipk;
+	  } 
+	}
 	sum[j] += x[j][ipk] * sm[k+nsmh];
       }
       printf("%g ",sum[j]);
