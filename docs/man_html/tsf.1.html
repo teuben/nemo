@@ -20,12 +20,12 @@ tsf - type a structured file
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>tsf</i> types the contents of a structured binary file (see <a href='filestruct.3.html'><i>filestruct</i>(3NEMO)</a>
 )
-in a human readable form on the standard output. The type, tag, dimensions
-(if any) and contents of all items are listed. The contents of <i>CharType</i>
-items are printed directly;  <i>FloatType</i> and <i>DoubleType</i> items are printed
-in floating-point notation; all other types are printed in  octal for portability
-reasons (see <b>octal=</b> below). <i>XML</i> format can optionally be selected as well,
-but this is not been well exercised. A <i>json</i> mode has been considered. <p>
+in a human readable form on standard output. The type, tag, dimensions (if
+any) and contents of all items are listed. The contents of <i>CharType</i> items
+are printed directly;  <i>FloatType</i> and <i>DoubleType</i> items are printed in floating-point
+notation; all other types are printed in  octal for portability reasons
+(but see <b>octal=</b> below). <i>XML</i> format can optionally be selected as well, but
+this is not been well exercised. A <i>json</i> mode has been considered. <p>
 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -84,51 +84,40 @@ rsf, you now need to force octal=t. <br>
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='ls.1v.html'>ls(1v)</a>
-, <a href='file.1.html'>file(1)</a>
-, <a href='rsf.1.html'>rsf(1NEMO)</a>
-, <a href='csf.1.html'>csf(1NEMO)</a>
-, <a href='qsf.1.html'>qsf(1NEMO)</a>
-,
-<a href='bsf.1.html'>bsf(1NEMO)</a>
-, <a href='filestruct.3.html'>filestruct(3NEMO)</a>
+<h2><a name='sect4' href='#toc4'>Debug</a></h2>
+<b>debug=2</b> reports values of <i>MaxSetLen</i> as defined in "<b>filestruct.h</b>".
+For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
 . 
 <p> 
-<h2><a name='sect5' href='#toc5'>Debug</a></h2>
-<b>debug=2</b> reports values of <i>MaxSetLen</i>
-as defined in "<b>filestruct.h</b>". For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
-.
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
 
+<p> An example of converting
+all double precision numbers to single precision in a NEMO file:      %
+tsf in=double.dat out=float.dat convert=d2f<br>
+     <br>
+  Here is an N-body snapshot of a Plummer sphere with 10 particles:  
+<p>  
+  mkplummer - 10 | tsf -<br>
+ 
+<p> char Headline[35] "init_xrandom: seed used 1582131517" char History[27]
+"mkplummer - 10 VERSION=3.0" set SnapShot   set Parameters<br>
+     int Nobj 10 <br>
+     double Time 0.00000 <br>
+   tes<br>
+   set Particles<br>
+     int CoordSystem 66306 <br>
+     double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 <br>
+       0.100000 0.100000 0.100000 0.100000 0.100000 <br>
+     double PhaseSpace[10][2][3] 0.394003 -1.98053 -0.836643 -0.466656 <br>
+       0.0439966 0.367178 -0.0762312 -0.0201540 0.0852010 0.238130 <br>
+       0.344608 0.379148 0.173722 0.311941 0.0433718 0.405117 0.747783 <br>
+       -0.555947 -0.778804 -0.580657 0.537069 -0.101942 0.0555890 <br>
+       . . .<br>
+   tes<br>
+ tes 
+<p>  
 <p> 
-<h2><a name='sect6' href='#toc6'>Examples</a></h2>
-
-<p> An example of converting all double precision numbers to single
-precision in a NEMO file: <br>
-<pre>    % tsf in=double.dat out=float.dat convert=d2f
-</pre>And here is an N-body snapshot of a Plummer sphere with 10 particles: <br>
-<pre>    mkplummer - 10 | tsf -
-char Headline[35] "init_xrandom: seed used 1582131517"
-char History[27] "mkplummer - 10 VERSION=3.0"
-set SnapShot
-  set Parameters
-    int Nobj 10 
-    double Time 0.00000 
-  tes
-  set Particles
-    int CoordSystem 66306 
-    double Mass[10] 0.100000 0.100000 0.100000 0.100000 0.100000 
-      0.100000 0.100000 0.100000 0.100000 0.100000 
-    double PhaseSpace[10][2][3] 0.394003 -1.98053 -0.836643 -0.466656 
-      0.0439966 0.367178 -0.0762312 -0.0201540 0.0852010 0.238130 
-      0.344608 0.379148 0.173722 0.311941 0.0433718 0.405117 0.747783 
-      -0.555947 -0.778804 -0.580657 0.537069 -0.101942 0.0555890 
-      . . .
-  tes
-tes
-</pre>
-<p> 
-<h2><a name='sect7' href='#toc7'>Tldr</a></h2>
+<h2><a name='sect6' href='#toc6'>Tldr</a></h2>
 
 <p> list brief contents of a binary structured file 
 <p> % tsf {{path/to/file}}
@@ -145,15 +134,26 @@ file, showing all lines, and in full precision
 
 <p> 
 <p> 
-<h2><a name='sect8' href='#toc8'>Bugs</a></h2>
+<h2><a name='sect7' href='#toc7'>Caveats</a></h2>
 The algorithm for implementing <b>maxline</b> is crude. <p>
-If <b>indent=</b> and <b>margin=</b>
-are choosen too large, resp. too small, they can bump into each other and
-cause illegable output, which cannot be read by <i>rsf</i> either. 
+If <b>indent=</b> and
+<b>margin=</b> are choosen too large, resp. too small, they can bump into each
+other and cause illegable output, which cannot be read by <i>rsf</i> either. 
+<p> 
+<h2><a name='sect8' href='#toc8'>See
+Also</a></h2>
+<a href='ls.1v.html'>ls(1v)</a>
+, <a href='file.1.html'>file(1)</a>
+, <a href='rsf.1.html'>rsf(1NEMO)</a>
+, <a href='csf.1.html'>csf(1NEMO)</a>
+, <a href='qsf.1.html'>qsf(1NEMO)</a>
+, <a href='bsf.1.html'>bsf(1NEMO)</a>
+, <a href='filestruct.3.html'>filestruct(3NEMO)</a>
+.
+
 <p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
-Joshua
-E. Barnes. 
+Joshua E. Barnes. 
 <p> 
 <h2><a name='sect10' href='#toc10'>History</a></h2>
 <br>
@@ -173,11 +173,11 @@ xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&n
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Debug</a></li>
-<li><a name='toc6' href='#sect6'>Examples</a></li>
-<li><a name='toc7' href='#sect7'>Tldr</a></li>
-<li><a name='toc8' href='#sect8'>Bugs</a></li>
+<li><a name='toc4' href='#sect4'>Debug</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>Tldr</a></li>
+<li><a name='toc7' href='#sect7'>Caveats</a></li>
+<li><a name='toc8' href='#sect8'>See Also</a></li>
 <li><a name='toc9' href='#sect9'>Author</a></li>
 <li><a name='toc10' href='#sect10'>History</a></li>
 </ul>

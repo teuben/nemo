@@ -11,31 +11,39 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-falcon - Process falcon HDF5 snapshots 
+falcon - Convert falcON HDF5 snapshots to NEMO snapshots 
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>falcon</b> [parameter=value]
-
+<b>falcon</b>
+in=infile out=outfile [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-This program convert the HDF5 based <b>falcON</b> snapshot format
-into a NEMO format. It is still under development, see CAVEATS below. 
+This program convert
+the HDF5 based <a href='falcON.1.html'><i>falcON(1NEMO)</i></a>
+ snapshot format into the NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+
+format. It is still under development, see CAVEATS below. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-
-The following parameters are recognized in order; they may be given in
-any order if the keyword is also given. Use <b>--help</b> to confirm this man page
-is up to date.  
+ The
+following parameters are recognized in order; they may be given in any
+order if the keyword is also given. Use <b>--help</b> to confirm this man page is
+up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input <a href='falcon.5.html'><i>falcon(5NEMO)</i></a>
- snapshot filename. No default. </dd>
+<dd>Input <a href='falcON.5.html'><i>falcON(5NEMO)</i></a>
+ snapshot filename. <i>stdin</i> is supported
+by giving the value <b>in=-</b>. No default. </dd>
 
-<dt><b>out=</b>
-</dt>
+<dt><b>out=</b> </dt>
 <dd>Output <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- filename. No default. 
+ filename.
+No default. </dd>
+
+<dt><b>type=</b> </dt>
+<dd>Particle type to select for conversion. Only "std" has
+been tested. [Default: std] 
 <p> </dd>
 </dl>
 
@@ -53,63 +61,59 @@ set SnapShot
     int CoordSystem 66306 
     float Mass[32] 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
       0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
-      0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
-      0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 0.0312500 
       . . .
     float Position[32][3] -1.30477 1.59788e-16 0.00000 -1.29043e-16 
       -0.702476 -0.405575 1.15331e-16 1.88349 1.08744 0.486825 
-      -0.486825 -0.780658 -2.24382 2.24382 0.819326 0.395285 0.395285 
-      -0.144338 -0.771013 -0.771013 1.23637 -0.791278 -0.327758 
       . . .
     float Velocity[32][3] -7.22837e-33 -5.90241e-17 0.481969 0.403077 
       0.201539 0.116358 0.456809 0.228404 0.131869 0.155023 0.475764 
-      -0.417175 0.416389 -0.119249 0.119206 0.193513 0.675701 0.193444 
-      -0.0480904 0.0156698 -0.0421682 -0.463116 -0.303254 -0.0480676 
       . . .
     float Potential[32] -0.582861 -0.726016 -0.389024 -0.611265 
       -0.276467 -0.705942 -0.491554 -0.691435 -0.332174 -0.788165 
-      -0.519628 -0.725853 -0.430449 -0.625536 -0.196348 -0.556199 
-      -0.137574 -0.740651 -0.402583 -0.816317 -0.495621 -0.634114 
       . . .
     float Acceleration[32][3] 0.320830 -0.0112188 -0.0184059 
       -0.0932003 0.296048 0.227969 0.00853122 -0.126000 -0.0768895 
-      -0.180052 0.0678517 0.199119 0.0551343 -0.0512566 -0.0223483 
-      -0.157876 -0.199445 0.159103 0.124049 0.0825911 -0.223872 
       . . .
   tes
 tes
 </pre>
 <p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-It only handles the "std" particles. <p>
-All snapshots are converted,
-use <a href='csf.1.html'><i>csf(1NEMO)</i></a>
+It currently only handles the "std" particles, and only converts
+mass, pos, vel, pot, acc. <p>
+falcON support many IO fields, see file $FALCON/inc/fields.h.
+Currently 52 fields are supported and all except flag, aold, dlKo, talf
+are supported for I/O. Their I/O is done by giving the dataset the name
+associated with the field (3 or 4 letters wide, same as the field name
+in fieldbit). <p>
+All snapshots are converted, use <a href='csf.1.html'><i>csf(1NEMO)</i></a>
  or <a href='snaptrim.1.html'><i>snaptrim(1NEMO)</i></a>
- to extract subsets. <p>
-A maximum number of
-particles (100,000) was hardcoded. It should be noted that H5T_STD_U32LE
-is stored for the number of particles, limiting the HDF data to 4,294,967,296
-particles. <p>
-All real (float or double) values are converted to H5T_NATIVE_FLOAT
-<p>
 
-<p>Does not convert the data <b>history</b> yet 
+to extract less. <p>
+A maximum number of particles (100,000) was hardcoded. It
+should be noted that H5T_STD_U32LE is stored for the number of particles,
+limiting the HDF data to 4,294,967,296 particles. <p>
+All real (float or double)
+values are converted to H5T_NATIVE_FLOAT <p>
+Does not convert the data <b>history</b>
+yet <p>
+There is no conversion tool from NEMO snapshot to falcon format. 
 <p> 
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<p> 
+<h2><a name='sect6' href='#toc6'>See
+Also</a></h2>
 <a href='snapprint.1.html'>snapprint(1NEMO)</a>
 , <a href='tsf.1.html'>tsf(1NEMO)</a>
-,
-<a href='falcON.5.html'>falcON(5NEMO)</a>
+, <a href='falcON.5.html'>falcON(5NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/nbody/io/falcon.c 
+src/nbody/io/falcon.c
+
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Peter
-
-<p>Teuben 
+Peter Teuben 
 <p> 
 <h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
