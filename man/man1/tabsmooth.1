@@ -1,4 +1,4 @@
-.TH TABSMOOTH 1NEMO "22 June 2024"
+.TH TABSMOOTH 1NEMO "24 June 2024"
 
 .SH "NAME"
 tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
@@ -101,7 +101,7 @@ Treatment of smoothing the edge has several options. In general the flux will no
 be conserved near the edge. Here we compare how this is handled in a few popular
 packages:
 .PP
-Following the options in the popular IDL package
+1) Following the EDGE options in the IDL package
 (see https://www.nv5geospatialsoftware.com/docs/CONVOL.html) we have:
 .TP
 EDGE_CONSTANT
@@ -111,7 +111,7 @@ we should capture that value.   -- not implemented here --
 "...CCCC|abcdefg|CCCC..."
 .TP
 EDGE_MIRROR
-Is this edge=1 ?
+This is out \fBedge=1\fP.
 .br
 "gfedcba|abcdefg|gfedcba"
 .TP
@@ -136,20 +136,20 @@ Our \fBedge=0\fP
 .br
 "...0000|abcdefg|0000...".
 .PP
-Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html) we have:
-.TP
-boundary='extend'
-Constant extrapolation of the edge value beyond the boundary  (\fBedge=2\fP)
+2) Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html) we have:
 .TP
 boundary='fill'
 Default fill value is 0.0  (\fBedge=0\fP)
-.PP
-Both these astropy cases were properly handled by \fBtabsmooth\fP.
+.br
+This is the default in astropy.
+.TP
+boundary='extend'
+Constant extrapolation of the edge value beyond the boundary  (\fBedge=2\fP)
 
 .SH "EXAMPLES"
 Here we draw 100000 random values from a normal distribution (mean 0, dispersion 1) and smooth them
 with various filters, and observe what the resulting dispersion is:
-.nf
+.EX
 
 tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
 1.0022
@@ -160,12 +160,12 @@ tabgen - 100000 1 2 123| tabsmooth - 1  1 | tabstat - | grep disp
 tabgen - 100000 1 2 123| tabsmooth - 1  4 | tabstat - | grep disp
 0.7537
 
-.fi
+.EE
 Here is the gaussian smoothing kernel, then applied to the previous example using
 a NEMO @file 
 .EX
 
-  $ tabsmooth . filter=12 pars=2 show=t
+  $ tabsmooth . filter=g pars=2 show=t
   0.000917431
   0.0293578
   0.234862
@@ -174,14 +174,26 @@ a NEMO @file
   0.0293578
   0.000917431
 
-  $ tabsmooth . filter=12 pars=2 show=t > smg.tab
+  $ tabsmooth . filter=g pars=2 show=t > smg.tab
   $ tabgen - 100000 1 2 123| tabsmooth - 1 smooth=@smg.tab | tabstat - | grep disp
   disp:    0.577259
 
+  $ nemoinp 1:20  | tabmath - - 'ifeq(%1,10,1,0)' |\\
+        tabsmooth - 2 g 4 tcol=1 | tabnllsqfit - fit=gauss1d
+  Fitting a+b*exp(-(x-c)^2/(2*d^2)):  
+  a= -9.44068e-06 4.59111e-06 
+  b= 0.234891 1.12118e-05 
+  c= 10 8.96171e-05
+  d= 1.69874 0.000101174
+
 .EE
 
+In the last example a delta-function is convolved with a gaussian of (fwhm) width=4, thus
+the (sigma) d parameter should fit as 4/2.355 = 1.698
+
 .SH "SEE ALSO"
-tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO), tabspline(1NEMO), ccdsmooth(1NEMO), table(5NEMO)
+tabmath(1NEMO), tabtrend(1NEMO), tabrows(1NEMO), tabcols(1NEMO),
+tabspline(1NEMO), ccdsmooth(1NEMO), table(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
@@ -190,7 +202,7 @@ Peter Teuben
 .nf
 .ta +1.25i +4.5i
 20-dec-2010	V0.1 Created, Q&D	PJT
-13-oct-2014	documented smooth=
+13-oct-2014	documented smooth=	PJT
 28-sep-2023	V0.5 added filter=	PJT
 29-sep-2023	V0.6 converted to table V2	PJT
 29-nov-2023	V0.7 added tcol=	PJT
