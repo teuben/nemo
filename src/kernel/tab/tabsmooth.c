@@ -34,7 +34,7 @@ string defv[] = {
     "show=f\n                     Show the kernel",
     "nsmooth=1\n                  Number of smoothings (not implemented)",
     "edge=0\n                     How to deal with edge effects (not implemented yet)",
-    "VERSION=1.0\n		  23-jun-2024 PJT",
+    "VERSION=1.0\n		  24-jun-2024 PJT",
     NULL
 };
 
@@ -51,7 +51,9 @@ string usage = "smooth columns of a table (Hanning, Savitzky-Golay)";
 #define MAXCOL 256
 #endif
 
-#define MAXSM    100
+#ifndef MAXSM
+#define MAXSM    1024
+#endif
 
 local string input;			/* filename */
 local stream instr;			/* input file */

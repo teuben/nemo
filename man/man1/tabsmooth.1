@@ -56,7 +56,7 @@ match to the filter name, as shown in the first column:
 The smoothing kernels are normalized to 1 to conserve "flux" (defined as the sum of values here),
 though there will be some flux loss at the edges of a table.  The \fIwidth\fP is given in pixels.
 If the optional \fIold_width\fP is given, the smoothing kernel is determines from the usual
-\fIsqrt(new**2-old**2)\fP.
+\fIsqrt(new**2-old**2)\fP. Note that for the gaussian \fIwidth\fP is meant to the FWHM = 2.355 * sigma
 
 .br
 Default: 0
