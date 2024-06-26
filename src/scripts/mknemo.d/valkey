@@ -1,0 +1,6 @@
+#
+
+url=https://github.com/valkey-io/valkey
+
+make distclean
+make PROG_SUFFIX="_nemo"  PREFIX=$NEMO/opt install
