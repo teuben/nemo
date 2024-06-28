@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 28-may-2024 PJT
+VERSION = NEMO V4.4 28-jun-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -711,6 +711,10 @@ sure:	libs bins
 
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
+
+## nemo-lesson:   NEMO lessons in carpentry format (a separate repo)
+nemo-lesson:
+	git clone -b gh-pages https://github.com/teuben/nemo-lesson
 
 ## install_apt:   install apt packages (e.g. ubuntu, debian)
 install_apt:
