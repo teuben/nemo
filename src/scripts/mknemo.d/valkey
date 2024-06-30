@@ -2,5 +2,9 @@
 
 url=https://github.com/valkey-io/valkey
 
+cd $NEMO/local
+git clone $url
+cd valkey
+
 make distclean
-make PROG_SUFFIX="_nemo"  PREFIX=$NEMO/opt install
+make PROG_SUFFIX="_nemo" PREFIX=$NEMO/opt  install
