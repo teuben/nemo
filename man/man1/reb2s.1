@@ -1,4 +1,4 @@
-.TH REB2S 1NEMO "18 January 2024"
+.TH REB2S 1NEMO "4 July 2024"
 
 .SH "NAME"
 reb2s \- convert REBOUND SimulationArchive to NEMO snapshot
@@ -8,7 +8,7 @@ reb2s \- convert REBOUND SimulationArchive to NEMO snapshot
 
 .SH "DESCRIPTION"
 \fBreb2s\fP converts a REBOUND SimulationArchive (RSA) to a NEMO \fIsnapshot(5NEMO)\fP. It currently
-converts all snapshots from the RSA, and only converts mass, position and velocity are converted,
+converts all snapshots from the RSA, and only converts mass, position and velocity,
 the accellerations are still ignored.
 .PP
 Using \fBverbose=t\fP a number of additional (integration) variables present in an RSA are shown.
@@ -17,15 +17,21 @@ Using \fBverbose=t\fP a number of additional (integration) variables present in 
 .so man1/parameters
 .TP 20
 \fBin=\fP
-input SimulationArchive. No default. 
+input SimulationArchive.
+.br
+No default. 
 .TP
 \fBout=\fP
 optional output snapshot; If not specified, the input RSA is just scanned, and snapshot times
-are reported.  Default: only scan.
+are reported.  
+.br
+Default: no output given, only scan the input.
 .TP
 \fBverbose=t|f\fP
 If verbose is set, additional information for each snapshot in the RSA is given
-(time, energy, angular momentum, center of mass, etc.).  [Default: \fBf\fP]
+(time, energy, angular momentum, center of mass, etc.).
+.br
+[Default: \fBf\fP]
 
 .SH "CAVEAT"
 Since verbose output is on standard out, the following pipe will fail in unpredictable ways

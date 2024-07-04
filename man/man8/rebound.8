@@ -1,4 +1,4 @@
-.TH REBOUND 8NEMO "17 January 2024"
+.TH REBOUND 8NEMO "4 July 2024"
 
 .SH "URL"
 Rebound documentation is here:    https://rebound.readthedocs.io
@@ -28,7 +28,7 @@ reb_viewer	view a SimulationArchive
 
 .SH "INSTALL"
 
-Before NEMO's rebound tools are installed, rebound needs to be
+Before NEMO's rebound tools are installed, the rebound library needs to be
 installed within NEMO. A typical install can be:
 
 .EX
@@ -38,12 +38,13 @@ installed within NEMO. A typical install can be:
          make install
 	 
 .EE
-The command \fBmknemo -a\fP can also be used to install, since the code
-lives in the NEMO/usr tree.
+The command \fBmknemo rebound\fP can also be used to install and/or
+update rebound.
 
 .SH "FILES"
 .nf
 NEMO/usr/hannorein/   -  top of rebound + tools source code
+NEMO/src/scripts/mknemo.d/rebound  - building via mknemo
 .fi
 
 .SH "AUTHOR"
