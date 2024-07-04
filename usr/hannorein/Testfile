@@ -14,6 +14,9 @@ all: $(ALL)
 
 all0:
 	@echo rebound not installed, tests disabled
+
+help:
+	@echo REB=$(REB)
 	
 all1: $(RUNS)
 
