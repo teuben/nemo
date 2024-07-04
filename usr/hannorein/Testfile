@@ -1,0 +1,31 @@
+
+RUNS = run1
+
+REB = $(shell grep ^rebound $(NEMO)/opt/mknemo.log | wc -l)
+
+ifeq ($(REB),0)
+  ALL = all0
+else
+  ALL = all1
+endif
+
+
+all: $(ALL)
+
+all0:
+	@echo rebound not installed, tests disabled
+	
+all1: $(RUNS)
+
+clean:
+	rm -rf $(RUNS)
+
+run1:
+	rm -f run1.*
+	mkplummer run1.1 100 seed=123
+	s2reb run1.1 run1.2
+	reb_integrate run1.2 run1.3 tstop=1 dt=0.1 dtout=0.1 eps=0.05
+	reb2s run1.3 run1.4
+	bsf run1.4 test="0.00216833 0.650161 -4.77863 5.57043 7010" label=rebound
+	
+
