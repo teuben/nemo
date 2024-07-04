@@ -21,7 +21,7 @@ help:
 all1: $(RUNS)
 
 clean:
-	rm -rf $(RUNS)
+	rm -rf run1.*
 
 run1:
 	rm -f run1.*
