@@ -9,12 +9,15 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 tabnllsqfit - general purpose non-linear least squares fitting program
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>tabnllsqfit in=</b>table-file [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>tabnllsqfit</b>
 takes a non-linear least squares fit (minimized ChiSquared) of a set of
@@ -39,36 +42,37 @@ This routine can also be used to plot the function,
 although only in 1D cases, see <b>x=</b>. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in=<i>in-file</i></b> </dt>
-<dd>(ascii)
-input file, a table of values from which data is taken. No default. </dd>
-
-<dt><b>xcol=<i>col,...</i></b>
+<dt><b>in=<i>in-file</i></b>
 </dt>
-<dd>The column(s) from which the (independant) X-values are taken. The first
-column is numbered 1 [default: <b>1</b>]. </dd>
+<dd>(ascii) input file, a table of values from which data is taken. No default.
+</dd>
+
+<dt><b>xcol=<i>col,...</i></b> </dt>
+<dd>The column(s) from which the (independant) X-values are taken.
+The first column is numbered 1 [default: <b>1</b>]. </dd>
 
 <dt><b>ycol=<i>col,...</i></b> </dt>
-<dd>The column(s) from which the
-(dependant) Y-values are taken  [default: <b>2</b>]. </dd>
+<dd>The column(s) from
+which the (dependant) Y-values are taken  [default: <b>2</b>]. </dd>
 
 <dt><b>dycol=<i>int</i></b> </dt>
-<dd>Optional column from
-which the weights will be derived. By default this column is meant to refer
-to an error bar, and normally  the inverse square of the errors are uses
-as weights for those fits where these are used (see <b>dypow=</b> next). [default:
-none assigned]. </dd>
+<dd>Optional
+column from which the weights will be derived. By default this column is
+meant to refer to an error bar, and normally  the inverse square of the
+errors are uses as weights for those fits where these are used (see <b>dypow=</b>
+next). [default: none assigned]. </dd>
 
 <dt><b>dypow=<i>power</i></b> </dt>
-<dd>By changing this value, you can adjust the weights
-column (<b>dycol</b>). Instead of the normal <i>weight = 1/sigma^2</i>, you will be able
-to use them as <i>weight^dypow</i>. The most common use is when your <b>dycol</b> does
-not refer to an error, but to the weight directly (e.g. an intensity), in
-which case <b>dypow=-0.5</b> is appropriate. [default: 1]. </dd>
+<dd>By changing this value, you
+can adjust the weights column (<b>dycol</b>). Instead of the normal <i>weight = 1/sigma^2</i>,
+you will be able to use them as <i>weight^dypow</i>. The most common use is when
+your <b>dycol</b> does not refer to an error, but to the weight directly (e.g. an
+intensity), in which case <b>dypow=-0.5</b> is appropriate. [default: 1]. </dd>
 
 <dt><b>xrange=<i>xmin:xmax,xmin:xmax,...</i></b>
 </dt>
@@ -184,7 +188,8 @@ arm3<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;y=p0+p1*cos(
 loren<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;y=p1/PI( (x-p0)^2 + p1^2 )
 psf<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;y=p1*x^p2*sin(y)^p3+p4
 </pre>
-<h2><a name='sect5' href='#toc5'>Example</a></h2>
+<p> 
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
 Here is an example of a linear fit: a straight  line, with some
 added noise and random weights between 1 and 2: <br>
 <pre>% nemoinp 1:100 |\
@@ -251,15 +256,29 @@ bootstrap= 3.11603 0.164922 1.96464 0.086429 0.00293632 0.00820007
              ^^^^    ^^^^^   ^^^^^    ^^^^^    ^^^^^^      ^^^^^^
               P0      dP0      P1      dP2       P3         dP3
 </pre>
+<p> <p>
+Here is an example of calling tabnllsqfit twice, once to fit a baseline,
+extract the fit parameters, and a second time to subtract the baseline
+using the parameters without a fit and using out=. The input table has two
+columns, velocity and intensity, but a bad baseline between -400 and +500.
+There is a spectral line between 0 and 25 km/s, so we fit a local high
+order baseline between -100 and +100 but excluding the line:  
+<p> tabplot MonR2_110433__0.txt
+line=1,1 tabnllsqfit MonR2_110433__0.txt xrange=-100:-20,45:150 fit=poly order=3
+&gt; pars0 p0=$(txtpar pars0 p0=p0=,1,2 p1=p1=,1,2 p2=p2=,1,2 p3=p3=,1,2) tabnllsqfit
+MonR2_110433__0.txt fit=poly order=3 out=- free=0,0,0,0 par="$p0" | tabcomment
+- &gt; tab0 tabplot tab0 1 3 -50 50  -1 15 line=1,1 ycoord=0  
+<p>  
 <p> 
 <h2><a name='sect6' href='#toc6'>Load Functions</a></h2>
-With the <b>load=</b> keyword dynamic object files can be loaded
-using the <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
- mechanism. The convention is that two functions
-must be externally visible, and named <i>func_</i><i>method</i> and <i>derv_</i><i>method</i>  (where
-<i>method</i> is the same as the <b>fit=</b> keyword. <p>
-Here is an example of the file <b>myline.c</b>
-that can be used with <b>fit=line load=myline.so</b> and compiled with <br>
+With
+the <b>load=</b> keyword dynamic object files can be loaded using the <a href='loadobj.3.html'><i>loadobj(3NEMO)</i></a>
+
+mechanism. The convention is that two functions must be externally visible,
+and named <i>func_</i><i>method</i> and <i>derv_</i><i>method</i>  (where <i>method</i> is the same as the
+<b>fit=</b> keyword. <p>
+Here is an example of the file <b>myline.c</b> that can be used with
+<b>fit=line load=myline.so</b> and compiled with <br>
 <pre><tt> </tt>&nbsp;<tt> </tt>&nbsp;bake myline.so
 </pre>
 <p> <br>
@@ -279,6 +298,7 @@ void derv_line(real *x, real *p, real *e, int np)
 a solution in complex cases, it is quite possible that this is not due
 to the fact that the function is complex, but due to noise or bad initial
 conditions. 
+<p> 
 <h2><a name='sect7' href='#toc7'>Derivatives Check</a></h2>
 A common debug problem is to check the analytical
 derivatives in your external loaded function. The <b>x=</b> keyword can be used
@@ -318,9 +338,11 @@ are well behaved (as they are linear), but the centroid (par 2) and width
 (par 3) of the gauss only slowly converge linearly with the step. The last
 number in square brackets is the error between numerical and analytical
 derivative. 
+<p> 
 <h2><a name='sect8' href='#toc8'>Caveats</a></h2>
 It will not recognize linear fits if the non-linear parameters
 are kept fixed, e.g. the offset 0 in <b>fit=gauss1d</b>. 
+<p> 
 <h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
 ,
@@ -346,14 +368,16 @@ A new scheme for calculating weights and describing
 correlations in nonlinear least squares fits. (Hessler, Curent &amp; Ogren, C.I.P.
 10, 186, 1996):  <a href='http://dx.doi.org/10.1063/1.168569'>http://dx.doi.org/10.1063/1.168569</a>
   
+<p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
 Peter Teuben 
+<p> 
 <h2><a name='sect11' href='#toc11'>Files</a></h2>
 <br>
 <pre>~/src/kernel/tab<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabnllsqfit.c
 ~/src/kernel/tab/fit<tt> </tt>&nbsp;<tt> </tt>&nbsp;example fitting functions
 </pre>
-<h2><a name='sect12' href='#toc12'>Update History</a></h2>
+<h2><a name='sect12' href='#toc12'>History</a></h2>
 <br>
 <pre>12-jul-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 cloned off tablsqfit<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 17-jul-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1 added load=, x=, numrec=<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -381,14 +405,14 @@ checker<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Fit Parameters</a></li>
-<li><a name='toc5' href='#sect5'>Example</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>Load Functions</a></li>
 <li><a name='toc7' href='#sect7'>Derivatives Check</a></li>
 <li><a name='toc8' href='#sect8'>Caveats</a></li>
 <li><a name='toc9' href='#sect9'>See Also</a></li>
 <li><a name='toc10' href='#sect10'>Author</a></li>
 <li><a name='toc11' href='#sect11'>Files</a></li>
-<li><a name='toc12' href='#sect12'>Update History</a></li>
+<li><a name='toc12' href='#sect12'>History</a></li>
 </ul>
 </body>
 </html>
