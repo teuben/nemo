@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "26 April 2020"
+.TH TABHIST 1NEMO "14 April 2024"
 
 .SH "NAME"
 tabplot \- general table plotter
@@ -216,21 +216,22 @@ If given, it will be the filename where a template python script that can serve 
 .br
 Default: none.
 
-.SH "SEE ALSO"
-tabhist(1NEMO), snapplot(1NEMO)
-
-.SH "BUGS"
-tab= doesn't work properly with multiple columns
-
 .SH "EXAMPLES"
+Here is an example plotting a spectrum:
+
+https://github.com/dvstark/himanga/blob/master/AGBT16A_095/TextFiles/8083-12704.txt
+
+vel=6844.5
+tabplot 8083-12704.txt xmin=$vel-1000 xmax=$vel+1000 line=1,1 ycoord=0 xcoord=$vel
+
 Here is an example working with layout files. 
-.nf
+.EX
 
   % nemoinp 1:20 | tabmath - -  'ranu(0,1),ranu(0,1)' all > ran.tab
   % tabmath ran.tab - '2+%1*16,2+%2*16,0.2' all | awk '{print "circle",$0}' > ran.layout
   % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
 
-.fi
+.EE
 It plots the data points from the file \fBran.tab\fP as dots, and
 converts, using tabmath and awk, these to a layout file where the
 same points as plotted as open circles in \fBran.layout\fP. Note that
@@ -241,7 +242,7 @@ in a more reasonably WCS.
 .PP
 Here are some examples of plotting multiple columns/rows, assuming each example
 of the tab1 and tab2 table has 2 columns:
-.nf
+.EX
 
    % paste tab1 tab2 | tabplot - 1 4                     headline=x1,y2
    % tabmath tab1,tab2 - %1-%3,%2-%4 all | tabplot - 1 2 headline=dx,dy
@@ -249,8 +250,14 @@ of the tab1 and tab2 table has 2 columns:
    % paste tab1 tab2 | tabplot - 1   2,4                 headline=x1,y1,y2
    % paste tab1 tab2 | tabplot - 1,2 3,4                 headline=(x1,y1),(x2,y2)
 
+.EE
+
+.SH "BUGS"
+tab= doesn't work properly with multiple columns
+
+
 .SH "SEE ALSO"
-tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO)
+tabhist(1NEMO), snapplot(1NEMO), tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO)
 .PP
 http://vostat.org
 .PP
