@@ -30,7 +30,7 @@ snapccd: snap.in
 
 snapgrid: snap.in
 	@echo Running $@
-	$(EXEC) snapgrid snap.in - | bsf - test='4.86263e+16 3.11816e+18 0 2e+20 4113' ; nemo.coverage snapgrid.c
+	$(EXEC) snapgrid snap.in - zrange=-1:1 | bsf - test='0.0718514 1.38288 0 31.5 4113' ; nemo.coverage snapgrid.c
 
 snapslit: snap.in
 	@echo Running $@

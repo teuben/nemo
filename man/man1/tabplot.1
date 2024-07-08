@@ -30,31 +30,37 @@ available to give some degree of interactive usage.
 .so man1/parameters
 .TP 20
 \fBin=\fIinfile\fP
-input file, in (ASCII) tabular format [no default].
+input file, in (ASCII) tabular format
+.br
+[no default].
 .TP
 \fBxcol=\fIx-column\fP
 column(s) from which the X values are taken. Multiple columns can be
 taken, but if so, the number of Y columns must be the same for
 pairwise plotting.
+.br
 [default \fB1\fP].
 .TP
 \fBycol=\fIy-column\fP
 column from which the Y values are taken. Multiple columns can be
 given. The number of X columns can either be 1 or must be equal to
 the number of Y columns.
+.br
 [default \fB2\fP].
 .TP
 \fBxmin=\fIx_min\fP
-Minimum value along X-axis to include [default: minimum of datapoints].
+Minimum value along X-axis to include
+.br
+[default: autoscaled]
 .TP
 \fBxmax=\fIx_max\fP
-Maximum value along X-axis to include [default: maximum of datapoints].
+Maximum value along X-axis to include
 .TP
 \fBymin=\fIy_min\fP
-Minimum value along y-axis to include [default: minimum of datapoints].
+Minimum value along y-axis to include
 .TP
 \fBymax=\fIy_max\fP
-Maximum value along y-axis to include [default: maximum of datapoints].
+Maximum value along y-axis to include
 .TP
 \fBxbin=\fIboundaries\fP
 When used either the number of datapoints used to average to a plotted
@@ -65,86 +71,111 @@ averaging, more than one means the numbers are bin boundaries. The output
 is controlled using \fBtab=\fP and contains the
 mean X, Y followed by the dispersion in X and Y and the number of
 points in that bin.
+.br
 [default: not used, datapoints from file are used].
 .TP
 \fBpoint=\fP\fItype,size\fP
 Pairs of integers, (one pair for each plotted column) describing the
 point type (0=none, 1=point, 2=circle, 3=plus, 4=square)
 and size in cm (see also \fIyapp(3NEMO)\fP). Pairs not specified
-inherit from the last one entered. Default: 1,0.1
+inherit from the last one entered.
+.br
+Default: 1,0.1
 .TP
 \fBline=\fP\fItype,width\fP
 Pairs of integers, (one pair for each plotted column) describing the
-line type and width (see \fIplltype(3NEMO)\fP). Default: 0,0
+line type and width (see \fIplltype(3NEMO)\fP).
+.br
+Default: 0,0
 .TP
 \fBcolor=\fP\fIcolor\fP
 Integer denoting color. This will be \fIyapp(3NEMO)\fP specific.
 Colors not specified will inherit from the last
 one entered.
+.br
 Default: not used (i.e. default drawing color used)
 .TP
 \fBerrors=x|y|xy\fP
 Specify which error bars to draw in case binning is used. If error bars
 are used in either raw X or Y columns, this option cannot be used.
+.br
 Default: none.
 .TP
 \fBxlab=\fIx-label\fP
-Label along the X-axis [default: \fBX\fP].
+Label along the X-axis
+.br
+[default: \fBX\fP].
 .TP
 \fBylab=\fIy-label\fP
-Label along the Y-axis [default: \fBY\fP].
+Label along the Y-axis
+.br
+[default: \fBY\fP].
 .TP
 \fBxcoord=\fP\fIx1,x2,...\fP
 A list of numbers (see \fInemoinp(3NEMO)\fP for valid syntax) that will
-cause vertical lines at these X coordinate to be drawn. Default: none
+cause vertical lines at these X coordinate to be drawn.
+.br
+Default: none
 .TP
 \fBycoord=\fP\fIy1,y2,...\fP
 Y coordinates for the horizontal lines, same as \fBxcoord=\fP.
 .TP
 \fBxbox=\fP
 Extent of the plotting frame in the X direction.
+.br
 [Default: 2:18]
 .TP
 \fBybox=\fP
 Extent of the plotting frame in the Y direction.
+.br
 [Default: 2:18]
 .TP
 \fBnxticks=\fP
 Number of tickmarks along the X axis. This divides the X axis in
-\fInxticks+1\fP pieces. [Default: \fB7\fP].
+\fInxticks+1\fP pieces.
+.br
+[Default: \fB7\fP].
 .TP
 \fBnyticks=\fP
 Same for Y.
 .TP
 \fBxscale=\fP
-Scaling factor applied to all X values. Default: 1
+Scaling factor applied to all X values.
+.br
+Default: 1
 .TP
 \fByscale=\fP
-Scaling factor applied to all Y values. Default: 1
+Scaling factor applied to all Y values.
+.br
+Default: 1
 .TP
 \fBdxcol=\fP
 Columns representing error bars in X. These currently need to match the \fBxcol=\fP.
-By default no error column(s) are used.
+.br
+Default: no error column(s) are used.
 .TP
 \fBdycol=\fP
 Columns representing error bars in Y. These currently need to match the \fBycol=\fP.
-By default no error column(s) are used.
-.TP
-\fBnmax=\fP
-Maximum number of lines that are allocated in pipes. [10000]
+.br
+Default: no error column(s) are used.
 .TP
 \fBmedian=f|t\fP
 Use median to compute "average" binning values. It is used to 
 compute the X as well as Y coordinates of the binned point, however
 error bars are still computed using the mean.
+.br
 Default: \fBf\fP.
 .TP
 \fBheadline=\fItext\fP
-Random verbiage, will be plotted along right top of plot for id. [default: none].
-The left top will contain the filename \fIinfile\fP.
+Random verbiage, will be plotted along right top of plot for id.
+.br
+[default: none].
+The top left will contain the filename \fIinfile\fP.
 .TP
 \fBtab=t|f\fP
-Output table to stdout if binning is used? Default: false;
+Output table to stdout if binning is used?
+.br
+Default: false;
 .TP
 \fBfullscale=t|f\fP
 Use full scale in one axis if other axis is autoscaled? In versions older
@@ -155,26 +186,34 @@ This will be the name of an ascii file that will contain coordinates
 that have been marked with the cursor,
 not the nearest datapoint (currently only implemented for
 PGPLOT). Cursor keys are in the usual definition: A=left mouse will mark,
-D=middle mouse has no function, X=right mouse will exit. 
+D=middle mouse has no function, X=right mouse will exit.
+.br
 Default: not used.
 .TP
 \fBbacktrack=t|f\fP
-Allow lines to backtrack? [Default: t]
+Allow lines to backtrack?
+.br
+[Default: t]
 .TP
 \fBlayout=\fP
-Optional Layout file that contains draw commands. Default: none.
+Optional Layout file that contains draw commands.
+.br
+Default: none.
 .TP
 \fBfirst=t|f\fP
 Should the layout file be called first or last ?  
+.br
 [\fBf\fP]
 .TP
 \fBreadline=t|f\fP
 After all batch plotting is done, should an interactive layout annotator
 (see also \fIlayout(5NEMO)\fP) be called.
+.br
 [\fBf\fP]
 .TP
 \fBpyplot=\fP
 If given, it will be the filename where a template python script that can serve as starting point for more elaborate plotting.
+.br
 Default: none.
 
 .SH "EXAMPLES"

@@ -16,17 +16,21 @@ the accellerations are still ignored.
 .PP
 Note that following the REBOUND convention, data are appended to any pre-existing
 output filename (\fBout=\fP) that is specified,
-counter to the NEMO convention, which refuses to overwrite.
+counter to the NEMO convention, which refuses to overwrite existing files.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP
-input NEMO snapshot. No default. 
+input NEMO snapshot.
+.br
+No default. 
 .TP
 \fBout=\fP
-output SimulationArchive. No default. Note output will be appended to
+output SimulationArchive. Note output will be appended to
 any existing RSA.
+.br
+No default.
 
 .SH "EXAMPLES"
 Here is an example of creating a NEMO snapshot, with 9 snapshots of 16 particles in
