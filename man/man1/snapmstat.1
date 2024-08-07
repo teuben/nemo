@@ -1,9 +1,12 @@
-.TH SNAPMSTAT 1NEMO "6 February 2010"
-.SH NAME
+.TH SNAPMSTAT 1NEMO "6 August 2023"
+
+.SH "NAME"
 snapmstat \- statistics of the masses in a snapshot
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapscale in=\fP\fIin_file\fP [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapmstat\fP runs through the masses of a snapshot, in
 sequential order or sorted by mass, and reports in each bin
 (to be defined later) how many stars there are and the total
@@ -22,58 +25,70 @@ also be of some use.
 The \fIglnemo2(1NEMO)\fP program uses a \fBselect=\fP keyword
 by which different mass groups can be given a different
 color.
-.SH PARAMETERS
-The following parameters are recognized:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fIin_file\fP
-input file, in \fIsnapshot\fP(5NEMO) format.  Default: none.
+input file, in \fIsnapshot\fP(5NEMO) format.
+.br
+Default: none.
 .TP
 \fBsort=\fBt|f\fP
 Should masses be sorted? Although this keyword has not been
 implemented yet, it's effect can be achieved with \fIsnapsort\fP.
+.br
 [default: \fBt\fP].
 .TP
 \fBspecies=\fImaxspecies\fP
 Maximum number of species allowed. This keyword is also not used,
 since the current table is build on the fly, and not saved.
+.br
 [default: \fB100\fP].
-.SH EXAMPLE
+.TP
+\fBshow=t|f\fP
+Show only the select= for glnemo2
+[default: \fBf\fP].
+
+.SH "EXAMPLE"
 The output of an SPH snapshot could look like:
 .PP
-.nf
+.EX
 0 0:8191  = 8192 Mass= 3.4332e-06 TotMas= 0.0281248 CumMas= 0.0281248
 1 8192:12287  = 4096 Mass= 1.5259e-05 TotMas= 0.0625009 CumMas= 0.0906256
 2 12288:28671  = 16384 Mass= 9.7275e-06 TotMas= .159375 CumMas= .250001
 3 28672:45055  = 16384 Mass= 6.1035e-05 TotMas= .999997 CumMas= 1.25
 4 45056:49151 = 4096 Mass= 0.00015259 TotMas= .625009 CumMas= 1.87501
 
-.fi
+.EE
 For \fBsort=f\fP it will also also report the optimal \fBselect=\fP string for \fIglnemo2(1NEMO)\fP,
 for example:
-.nf
+.EX
 
 # Found 6 species:
 select=0:7999,8000:11999,12000:17999,18000:25999,26000:29999,30000:35999
 
 # example to view all particle species by a different color
-glnemo2 snap.out $(snapmstat snap.out | grep select=)
+glnemo2 snap.out $(snapmstat snap.out show=t)
 
-.fi
+.EE
 
 .SH "SEE ALSO"
 snapstat(1NEMO), snapprint(1NEMO), snapcopy(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/pjt/nbody   	snapmstat.c snapmstat.1
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 18-Sep-90	V1.0: created          	PJT
 6-feb-2020	V2.0: add select= output example when sort=f	PJT
+28-mar-2023	V2.1: add show=	PJT
 .fi
-
-
