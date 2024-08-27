@@ -1,0 +1,5 @@
+# sudo pacman -S  <package>
+gcc
+gcc-fortran
+make
+tcsh
