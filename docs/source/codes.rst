@@ -59,6 +59,11 @@ List of Related Codes
       *Cosmological magnetohydrodynamical moving-mesh simulation code*.
       | http://ascl.net/1909.010
 
+  
+  AstrOmatic
+      *A Tool Suite for Image Processing*.
+      | https://www.astromatic.net/software
+
   bhint
       High-precision integrator for stellar systems
       | https://ascl.net/1206.005
@@ -142,7 +147,10 @@ List of Related Codes
 
   GraviDy
       Gravitational Dynamics. Also usable via :term:`NEMO` with the **rungravidy** interface.
-      | http://ascl.net/1902.004 	
+      | http://ascl.net/1902.004
+
+  griffin
+      based on falcON V2.
   
   gsf
       galactic structure finder

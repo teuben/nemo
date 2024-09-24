@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 20-feb-2024 PJT
+VERSION = NEMO V4.4 28-jun-2024 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -123,7 +123,6 @@ install:
 help : Makefile
 	@sed -n 's/^##//p' $<
 
-
 lsb:
 	@lsb_release -a
 
@@ -143,6 +142,10 @@ help2:
 	@echo MKNEMOS=$(MKNEMOS)
 	@echo ""
 	@echo "Additional help targets: helpfind, helptar"
+
+## start:     show how to source nemo_start with full path
+start:
+	@echo source $(NEMO)/nemo_start.sh
 
 ## pull:      GIT pull to get the latest ('mknemo -u tsf' also does this)
 pull:
@@ -708,6 +711,10 @@ sure:	libs bins
 
 .makedefs:
 	$(MAKE) -f src/Makefile makedefs_help
+
+## nemo-lesson:   NEMO lessons in carpentry format (a separate repo)
+nemo-lesson:
+	git clone -b gh-pages https://github.com/teuben/nemo-lesson
 
 ## install_apt:   install apt packages (e.g. ubuntu, debian)
 install_apt:

@@ -37,19 +37,21 @@ reb_viewer<tt> </tt>&nbsp;<tt> </tt>&nbsp;view a SimulationArchive
 <p> 
 <h2><a name='sect2' href='#toc2'>Install</a></h2>
 
-<p> Before NEMO&rsquo;s rebound tools are installed, rebound needs to be
-installed within NEMO. A typical install can be: 
-<p>           cd $NEMO/usr/hannorein<br>
+<p> Before NEMO&rsquo;s rebound tools are installed, the rebound library
+needs to be installed within NEMO. A typical install can be: 
+<p>          
+cd $NEMO/usr/hannorein<br>
           make install<br>
           cd nemo<br>
           make install<br>
  <tt> </tt>&nbsp;<tt> </tt>&nbsp; <br>
-  The command <b>mknemo -a</b> can also be used to install, since the code lives
-in the NEMO/usr tree. 
+  The command <b>mknemo rebound</b> can also be used to install and/or update
+rebound. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Files</a></h2>
 <br>
 <pre>NEMO/usr/hannorein/   -  top of rebound + tools source code
+NEMO/src/scripts/mknemo.d/rebound  - building via mknemo
 </pre>
 <p> 
 <h2><a name='sect4' href='#toc4'>Author</a></h2>
@@ -64,8 +66,10 @@ Hanno Rein, Shangfei Liu
 <a href='reb2s.1.html'>reb2s(1NEMO)</a>
 , <a href='reb_viewer.1.html'>reb_viewer(1NEMO)</a>
 , <a href='reb_integrate.1.html'>reb_integrate(1NEMO)</a>
- 
-<p> 
+ <p>
+<a href='https://rebound.readthedocs.io'>https://rebound.readthedocs.io</a>
+
+
 <h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>17-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;Drafted<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

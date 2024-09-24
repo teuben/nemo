@@ -1,4 +1,4 @@
-.TH TABINT 1NEMO "6 August 2023"
+.TH TABINT 1NEMO "6 April 2024"
 
 .SH "NAME"
 tabint \- integrate a sorted table, optionally higher order moments
@@ -8,79 +8,121 @@ tabint \- integrate a sorted table, optionally higher order moments
 
 .SH "DESCRIPTION"
 \fBtabint\fP integrates a function Y=F(X) that is defined by a set of (X,Y) points
-obtained via an ASCII table.
+selected from two columns from an ASCII table.
 The function can either be resampled using a spline interpolation,
-or directly summed.
+or directly summed using the trapezoid rule.
 .PP
-See also \fItabhist(1NEMO)\fP with \fBcumul=t\fP for a visual display.
+See also \fItabhist(1NEMO)\fP with \fBcumul=t\fP for a visual display, though the
+cumulative option here can also produce a table for display to check the
+convergence of the integral.
 .PP
 An optional scale factor can be applied, which folds in any X or Y scaling that might
-want to be applied.
+want to be applied. This is particularly useful if you integrate the points themselves
+(i.e. without giving a \fBstep=\fP)  but still want to scale the X coordinate.
 .PP
-Optionally the 1st or 2nd moment can be computed, though the step=, normalize= and cumulative=
-are then ignored.
+Optionally the 1st or 2nd moment can be computed (step=, normalize= and cumulative=
+are then ignored).
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP
-Input table file. No default.
+Input table file.
+.br
+No default.
 .TP
 \fBxcol=\fP
 Column with X coordinate. If the X coordinates are not increasing, the
-array will be reversed. Default: 1
+array will be reversed.
+.br
+[Default: 1]
 .TP
 \fBycol=\fP
-Column with Y coordinate of function [Default: 2]
+Column with Y coordinate of function
+.br
+[Default: 2]
 .TP
 \fBxmin=\fP
-value if data below xmin to be discarded. By default it uses the first datapoint.
+if given, value below which data to be discarded
+.br
+By default it uses the smallest datapoint from the table.
 .TP
 \fBxmax=\fP
-value if data above xmax to be discarded. By default it uses the last datapoint.
+if given, value above which data to be discarded
+.br
+By default it uses the largest datapoint from the table.
 .TP
 \fBstep=\fP
-Integration step if resampling used. By default the datapoints themselves
+Integration step if resampling used.
+.br
+By default the datapoints themselves
 are used, but by setting an integration \fBstep\fP here, the function
-is resampled using a spline and numerically integrated that way.
+is resampled using a spline and numerically integrated that way. See
+also \fBscale=\fP.
 .TP
 \fBnormalize=t|f\fP
 Normalize integral. If set, the integral is normalized by the integration
-interval. Default: f
+interval. An output table contains the cumulative function.
+.br
+[Default: f]
 .TP
 \fBcumulative=t|f\fP
 If set, it will show the invidual cumulative integrations instead. Only implemented
 for native steps.
-Default: f
+.br
+[Default: \fBf\fP]
 .TP
 \fBscale=\fP
-scale factor to apply to the integral. [Default: 1]
+scale factor to apply to the integral. This is also to use a different step size
+if integrating the individual points.
+.br
+[Default: 1]
 .TP
 \fBmom=0|1|2\fP
 The moment along the profile. mom=0 is the flux, mom=1 the first moment along the X axis,
-and mom=2 the dispersion.   [Default: 0]
+and mom=2 the dispersion.
+.br
+[Default: 0]
 
 .SH "EXAMPLES"
-.nf
+Integrating the square function from 0 to 1 to get 1/3:
+.EX
+
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint -
  0.335
  % nemoinp 0:1:0.1 | tabmath - - '%1*%1' | tabint - step=0.01
  0.33335
 
-.fi
+.EE
 Here is an example to compute the line integral of a spectrum where the frequency axis is in GHz,
-and intensity in Kelvin. We want to get an answer in K.km/s instead. We also know the line is
-around 110.5 GHz:
-.nf
+and intensity in Kelvin. We want to get an answer in K.km/s instead. We know the line is
+(redshifted) around 110.5 GHz, and we take a window of 0.3 GHz around the line:
+.EX
 
- % tabint rsr.33551.driver.sum.txt xmin=110.5-2*0.15 xmax=110.5+2*0.15  scale=c/110.5/1000
+ % tabint rsr.33551.driver.sum.txt xmin=110.5-0.3 xmax=110.5+0.3  scale=c/110.5/1000
  8.05
 
-.fi
+ % tabint rsr.33551.driver.sum.txt xmin=110.5-0.3 xmax=110.5+0.3  scale=c/110.5/1000 |\\
+   tabplot - 1 2 line=1,1 point=2,0.1 ycoord=0
+
+.EE
 recalling that \fBc\fP is in m/s and the requested line integral was requested in km/s.
 
+.SH "CAVEATS"
+The table needs to be (reverse) sorted in X. A future option might sort, though
+\fIsort(1)\fP might already work. Here's an example where the 3rd column is an unsorted X coordinate.
+The 6th column is the data value:
+.EX
+
+   % sort -n +2 my.tab | tabint - 3 6
+
+perhaps easier
+
+   % tabcols my.tab 3,6 | sort -n | tabint -
+.EE
+
 .SH "SEE ALSO"
-tabfilter(1NEMO), tabmath(1NEMO), tabnllsqfit(1NEMO)¸ tabpeak(1NEMO), table(5NEMO)
+tabfilter(1NEMO), tabhist(1NEMO), tabmath(1NEMO), tabnllsqfit(1NEMO)¸ tabpeak(1NEMO), table(5NEMO)
 
 .SH "FILES"
 src/kernel/tab
@@ -95,4 +137,5 @@ Peter Teuben
 10-sep-2022	V0.5 added cumulative=	PJT
 22-feb-2022	V0.6 added xmin=, xmax=, scale=	PJT
 31-jul-2023	V0.7 poor man's implementation of mom=	PJT
+6-apr-2024	V0.9 clarifications	PJT
 .fi

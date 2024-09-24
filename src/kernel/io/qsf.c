@@ -16,26 +16,32 @@
 
 string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "in=???\n                     input file name to test",
-    "VERSION=1.0c\n		  6-jun-08 PJT ",
+    "show=f\n                     show result as 0 or 1 in output",
+    "VERSION=1.1\n		  25-may-2024 PJT ",
     NULL,
 };
 
 string usage = "check if a file is a structured file";
 
-void nemo_main(void)
+void nemo_main()
 {
     string in = getparam("in");
     stream str= stropen(in,"r");
+    bool Qshow = getbparam("show");
 
     dprintf(2,"Fileno(\"%s\") = %d\n",in,fileno(str));
     if (isatty(fileno(str))) {
         dprintf(1,"File %s is not a proper file (isatty)\n",in);
+	if (Qshow) printf("1\n");
         stop(1);
     } else if (qsf(str)) {
         dprintf(1,"File %s is a proper binary structured file\n",in);
+	if (Qshow) printf("0\n");
         stop(0);
     } else {
         dprintf(1,"File %s is not a proper binary structured file\n",in);
+	if (Qshow) printf("1\n");
         stop(1);
     }
+    printf("-1\n");   /* should never get here */
 }

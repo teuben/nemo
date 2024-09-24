@@ -9,7 +9,7 @@
  *	{\bf potname=plummer
  *       potpars={\it $\Omega,M,R$}}
  *
- *  Plummer potential (BT, pp.42, eq. 2.47, see also MNRAS 71, 460 (1911))
+ *  Plummer potential (BT, pp.42, eq. 2.47, BT2, pp.65, eq. 2.44a; see also MNRAS 71, 460 (1911))
  *
  * $$
  *    \Phi = -  {  M  \over

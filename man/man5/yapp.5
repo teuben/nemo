@@ -71,7 +71,7 @@ MESA 3D - almost GL
 An ascii meta-file format.
 .TP
 \fByapp_giza	\fP
-Attempt to use the pgplot compatible giza library
+Attempt to use the pgplot compatible giza library (conflicts with pgplot)
 .TP
 yapp_gl
 .TP
@@ -126,14 +126,16 @@ Not yet functional.
 .TP
 \fByapp_x11\fP
 Based on a standalone, now modified to handle singleprecision real (float).
-.SH BUGS
+
+.SH "BUGS"
 There are no good provisions to make sure a plot comes out in landscape or
 portrait (e.g. plplot). Some devices have problems making sure that
 the plot comes out square when it is meant to be square.
 .PP
 Treatment of colors, in particular what the background and foreground
 color is, is not uniform. 
-.SH PGPLOT
+
+.SH "PGPLOT"
 PGPLOT uses a number of environment variables that control the behavior
 of the plotting device. The PGPLOT_DIR, PGPLOT_FONT and PGPLOT_LIB variables
 (should) have been set via the normal NEMO procedure, but the following
@@ -180,6 +182,17 @@ any old pgplot xwin_server has been killed:
     xkill pgxwin_server
     xrdb -merge ~/.Xdefaults
 .fi
+
+.SH "GIZA"
+\fIgiza\fP should be a drop-in replacement for pgplot, and does not depend on fortran. Despite this, there
+can be conflicts. On my ubuntu system it's sometimes sneaked in via another app, and I have to remove
+giza and re-install pgplot5:
+.EX
+
+  sudo apt remove giza-dev libcpgplot0 libgiza0 libpgplot0
+  sudo apt install pgplot5
+    
+.EE
 
 .SH "PLPLOT"
 Like PGPLOT, PLPLOT can also pick different graphics output devices, specified via the usual yapp= system

@@ -20,6 +20,9 @@ BINFILES = atos atos_sp atosph atosph_sp stoa stoa_sp tabtos \
 	   snaptipsy tipsysnap snaptipsy_acc tipsysnap_acc \
 	   gadgetsnap snapgadget binsnap
 
+#  not by default
+#           falcon
+
 TESTFILES = testss testio
 
 test:
@@ -111,6 +114,9 @@ xvpsnap: xvpsnap.c
 
 snap3dv: snap3dv.c
 	$(CC) $(CFLAGS) -o snap3dv snap3dv.c  $(NEMO_LIBS)
+
+falcon: falcon.c
+	$(CC) $(CFLAGS) $(HDF5_INC) -o falcon falcon.c $(NEMO_LIBS) $(HDF5_LIB) $(EL) 
 
 snaptipsy snaptipsy_acc: snaptipsy.c
 	$(CC) $(CFLAGS) -o snaptipsy snaptipsy.c  $(NEMO_LIBS)

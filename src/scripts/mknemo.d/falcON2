@@ -1,0 +1,18 @@
+#! /bin/csh -f
+#
+#  private falcON2 
+
+set url=git@bitbucket.org:WalterDehnen/falcon.git
+set url=git@bitbucket.org:astroteuben/falcon2.git
+set dir=falcon2
+
+cd $NEMO/local
+if (! -e $dir) then
+  git clone $url
+  cd $dir
+else
+  cd $dir
+  git pull
+endif
+
+echo "Installation is still manual. See INSTALL.md"

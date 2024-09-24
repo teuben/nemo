@@ -10,6 +10,9 @@
  *
  */
 
+#ifndef _h_mdarray
+#define _h_mdarray
+
 #define MDMAXDIM   8
 
 typedef real        *mdarray1;    /* v1[n1]                              */
@@ -39,3 +42,4 @@ void free_mdarray6(mdarray6 x, int n6, int n5, int n4, int n3, int n2, int n1);
 void free_mdarray7(mdarray7 x, int n7, int n6, int n5, int n4, int n3, int n2, int n1);
 void free_mdarray8(mdarray8 x, int n8, int n7, int n6, int n5, int n4, int n3, int n2, int n1);
 
+#endif

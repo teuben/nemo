@@ -24,6 +24,14 @@ assuming NEMO was installed in ``/opt/nemo/``, and
 for users of a ``csh`` like shell. Normally this
 line would be added to your ``~/.bashrc`` or ``/.cshrc`` file.
 
+If NEMO was installed with the modules environment, this command would also load
+NEMO, independent of the shell:
+
+.. code-block:: bash
+
+	module load nemo
+
+
 After this the following commands should work for you
 
 .. code-block:: bash

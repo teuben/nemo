@@ -87,4 +87,4 @@ a few peculiar aspects.
    * scattered Testfile to pick up tests for "make check" (like a Makefile)
    * scattered Benchfile to pick up benchmarks for "make bench" (like a Makefile)
    * the use of the **bsf** program to check reproducability to N digits.
-   * *surely there must be more*  
+   * *more*  

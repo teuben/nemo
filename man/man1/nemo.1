@@ -1,15 +1,11 @@
-.\"
-.\"  This entry NEMO man page should hyperlink to most/all man pages....
-.\"
-
-.TH NEMO 1NEMO "17 March 2021"
+.TH NEMO 1NEMO "27 May 2024"
 
 .SH "NAME"
 nemo, astronemo \- outline the NEMO package
 
 .SH "DESCRIPTION"
 \fBnemo\fP is a computer package, there is no program with that name. On linux
-there is also the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
+there is the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
 .PP
 \fBastronemo\fP is the name you may find in some package managers. If you google the name
 \fInemo\fP, you will find a lot of computer related tools with that name. We also
@@ -28,7 +24,7 @@ alphabetically (CAVEAT: these pages are not well maintained).
 
 .SH "NEMO vs. UNIX"
 
-\fBNEMO\fP is very much integrated into the Unix(tm) operating system,
+\fBNEMO\fP is very much modeled after the Unix(tm) operating system,
 so users are expected to use standard Unix commands as glue
 between the various tasks (cat, ls, rm, cp, awk, sm, \fIetc.\fP).
 Understanding of shell scripting (sh, csh, python, perl, \fIetc.\fP) can be
@@ -45,15 +41,15 @@ with the unix style of command line tools, piping etc.:
 
 - programs use a set of key=value command line arguments,
   minimum match works, but you cannot repeat keywords
-    = the --help or help=h are ways to get inline help from a program
+    * the --help or help=h are ways to get inline help from a program
       and remind you of the keyword names
-    = keyword values can be math expressions (see \fInemoinp(1NEMO)\fP)
-    = the UNIX \fIman(1)\fP command will get offline help
+    * keyword values can be math expressions (see \fInemoinp(1NEMO)\fP)
+    * the UNIX \fIman(1)\fP command will get offline help
 
 - NEMO can use pipes efficiently:
-    = The UNIX stdin and stdout are represented with a dash (-),
+    * The UNIX stdin and stdout are represented with a dash (-),
       so using pipes can become a little awkward
-    = The UNIX /dev/null is represented with a dot (.),
+    * The UNIX /dev/null is represented with a dot (.),
       like a black hole sucking up everything
 .fi
 
@@ -62,19 +58,20 @@ You are reading a man page, and since NEMO is using standard unix man pages, the
 has a lot of powerful ways to find the information (short of using grep on the 800+
 $NEMO/man/manX/*.* files):
 
-.nf
+.EX
    apropos keyword
    man -M $NEMO/man -k .
    man -f keyword                        also: program help=u
    man --regex <pattern>                 man --regex ".*network$"
    man -S <section_ID> <keyword>
    man -wK <keyword>
-.fi
+.EE
 
 .SH "SYNOPSIS"
 
 .nf
 \fBprogram --help\fP
+\fBprogram --man\fP
 \fBprogram help=h\fP
 \fBprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
 \fBrunprogram\fP [key1=]val1 [key2=]val2 .\!.\!.
@@ -85,38 +82,49 @@ $NEMO/man/manX/*.* files):
 What you need to do to set yourself up for \fBNEMO\fP:
 .PP
 The easiest way is to add the appropriate line to your \fI.cshrc\fP or
-\fI.bashrc\fP file. For example
-.nf
+\fI.bashrc\fP file, but you need to know the root directory
+where NEMO is installed.  For example
+.EX
 
-        \fBsource /opt/nemo/nemo_start.sh\fP
-	
-or for the die hard (t)csh users we still have
+   source /opt/nemo/nemo_start.sh
 
+.EE	
+or for (t)csh users we still have
+.EX
 
-        \fBsource /opt/nemo/nemo_start.csh\fP
-.fi
+   source /opt/nemo/nemo_start.csh
+
+.EE
 .PP
 If you need more control over your NEMO environment, there are other methods
 described elsewhere (The \fINEMO Users/Programmers Guide\fP, Appendix A),
 or consult one of your local friendly NEMO users.
+.PP
+For systems where this is supported, the \fImodule(1)\fP command may be able
+to load nemo, e.g.
+.EX
+
+   module load nemo
+   module load nemo/4.2.1
+.EE
 
 .SH "HOW TO RUN NEMO PROGRAMS"
 NEMO programs can be run just as any other command in Unix, in that sense
 NEMO is nothing more than an extension of Unix. NEMO programs usually
 read and/or write files, though these files can in most circumstances
 be replaced with a dash to designate a unix pipe, e.g.
-.nf
+.EX
 
-     mkplummer - 10 | snapprint -
+   mkplummer - 10 | snapprint -
      
-.fi
+.EE
 this would be identical to the two liner
-.nf
+.EX
 
-     mkplummer out=p10.snap nbody=10
-     snapprint in=p10.snap
+   mkplummer out=p10.snap nbody=10
+   snapprint in=p10.snap
      
-.fi
+.EE
 .PP
 NEMO programs all work by using a series of \fIkeyword=value\fP pairs
 on the commandline.
@@ -152,23 +160,29 @@ Examples: Consider the program \fImkplummer\fP, a program which creates
 an N-body realization of a Plummer sphere.
 To get online help, one types (we included three legacy program options,
 --man, --help, --version):
-.nf
-        \fIman mkplummer\fP
-        \fPmkplummer --man\fP
-.fi
+.EX
+
+   man mkplummer
+   mkplummer --man
+	
+.EE
 and to get various types of inline help:
-.nf
-        \fImkplummer --help\fP
-        \fImkplummer -h\fP		
-        \fImkplummer help=\fP
-        \fImkplummer help=h\fP
-        \fImkplummer help='?'\fP
-.fi
+.EX
+
+   mkplummer --help
+   mkplummer -h
+   mkplummer help=
+   mkplummer help=h
+   mkplummer help='?'
+	
+.EE
 and to get the version:
-.nf
-        \fImkplummer help=V\fP
-        \fImkplummer --version\fP
-.fi
+.EX
+
+   mkplummer help=V
+   mkplummer --version
+	
+.EE
 Note the literal quotes around the question-mark needed if you use
 a regular Unix shell as interface.
 The first \fIhelp=\fP reminds you of the order of the
@@ -182,17 +196,21 @@ data and/or prevent large amounts of disk access. Most keywords that operate
 on files (notably \fBin=\fP, \fBout=\fP, as long as
 \fIstropen(3NEMO)\fP is used) can use standard piped I/O by using
 the dash (\fB-\fP) to name the keyword, e.g.
-.nf
-    mkplummer - 10 | snapprint -
-.fi
+.EX
+
+   mkplummer - 10 | snapprint -
+
+.EE
 would create a snapshot of 10 bodies on the fly, and print
 positions and velocities to the user using \fBsnapprint\fP.
 The alternative would have been
-.nf
-    mkplummer out=tmp nbody=10
-    snapprint in=tmp
-    rm tmp
-.fi
+.EX
+
+   mkplummer out=tmp nbody=10
+   snapprint in=tmp
+   rm tmp
+    
+.EE
 
 .SH "HOW TO RUN non-NEMO PROGRAMS"
 
@@ -230,17 +248,19 @@ Some NEMO programs refer to non-NEMO programs in the "man" style. For example
 \fIccdpot(1NEMO)\fP refers to \fIpotential(GIPSY)\fP and
 \fIpotfft(MIRIAD)\fP. If those packages are in your shell environment,
 the following commands should give their version of the online help:
-.nf
+.EX
 
-      man -l  $MIRDOC/man/man1/potfft.1
-
-      more $gip_root/tsk/potential.dc1
-.fi
+   man -l  $MIRDOC/man/man1/potfft.1
+   more $gip_root/tsk/potential.dc1
+      
+.EE
 
 .SH "PROGRAMMING"
 You may need to do some sherlocking here.
 You have probably seen the $NEMO/configure.ac and $NEMO/makedefs file,
-though the $NEMOLIB/makedefs is the active file.  The \fImknemo(8NEMO)\fP script
+though the $NEMOLIB/makedefs is the active file. This is where you can hack to fix
+compilation errors.
+The \fImknemo(8NEMO)\fP script
 will help you (re)compile programs, though sometimes
 \fIbake(8NEMO)\fP can do a better job in a local directory.
 
@@ -267,24 +287,25 @@ file formats(5) and system management(8).
 .PP
 NEMO homepage \fIhttp://www.astro.umd.edu/nemo\fP and github page \fIhttps://github.com/teuben/nemo\fP.
 .PP
-readthedocs page:  \fIhttps://astronemo.readthedocs.io/en/latest/\fP
+readthedocs page:  \fIhttps://astronemo.readthedocs.io/en/latest/\fP  (this replaced the old latex manual)
 .PP
 Other introductions
 .nf
-Workshop on N-body simulations:  http://paginapessoal.utfpr.edu.br/rubensmachado/outros-1/simulacoes-de-n-corpos/NbodyTutorial.pdf
+Workshop on N-body simulations:  \\
+http://paginapessoal.utfpr.edu.br/rubensmachado/outros-1/simulacoes-de-n-corpos/NbodyTutorial.pdf
 .fi
 
-.SH "BUGS"
+.SH "CAVEATS"
 Since programs are being modified, and extended fairly regularly, 
 manual pages for related programs do not always know about these
-changeqs if they should. Keeping good cross references in the manual
+changes if they should. Keeping good cross references in the manual
 pages might help. However, the \fBhelp=\fP description should always
 be up to date, since it is derived from the code itself. See also
 \fIcheckpars(8NEMO)\fP. And there
 is always https://github.com/teuben/nemo/issues
 
 .SH "HISTORY"
-.ta +1i +5.5i
+.ta +1i +4.5i
 .nf
 1986	V1 Initial Development	Barnes/Hut/Teuben
 1994	V2 UMD release	Teuben

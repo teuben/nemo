@@ -5,20 +5,22 @@
 #include <nemo.h>
 #include <table.h>
 #include <extstring.h>
+#include <filefn.h>
 #include <sys/file.h>     // for flock(2) - alternatively flock(2) for NFS files
 
 string defv[] = {
   "var=\n             Name of  variable(s)",
   "val=\n             Optional new value",
-  "VERSION=0.3\n      18-mar-2024 PJT",
+  "VERSION=0.4\n      25-jun-2024 PJT",
   NULL,
 };
 
-string usage="display NEMO variable(s)";
+string usage="display NEMOVAR variable(s)";
 
 
 void nemo_main()
 {
+  int i;
   string var = getparam("var");
   bool hasVar = hasvalue("var");
   string value = getparam("val");  
@@ -26,10 +28,20 @@ void nemo_main()
   string nemovar = getenv("NEMOVAR");
   if (nemovar == NULL) error("$NEMOVAR was not set");
   dprintf(1,"nemovar: %s\n", nemovar);
+
+
+  // bug or feature, nemovar currently needs to exist
+  if (!fexist(nemovar)) {
+    warning("Creating dummy %s", nemovar);
+    stream ostr = stropen(nemovar,"w");
+    fprintf(ostr,"# nemovar\n");
+    strclose(ostr);
+  }
   
+  // read old nemovar
   stream tstr = stropen(nemovar,"r");
   table *t = table_open(tstr, -1);      // read table as a dumb set of lines
-  int i, nrows = t->nr; 
+  int nrows = t->nr; 
   string s, vareq;
   
   // check if just to show all variables

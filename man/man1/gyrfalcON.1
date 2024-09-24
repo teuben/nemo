@@ -1,12 +1,12 @@
 .TH gyrfalcON 1falcON "28 February 2007"
 
-.SH name
+.SH "NAME"
 gyrfalcON \- a superberb N-body code (public version)
 
-.SH synopsis
+.SH "SYNOPSIS"
 \fBgyrfalcON\fP [parameter=value]
 
-.SH requirement
+.SH "REQUIREMENT"
 requires NEMO version 3.2.1 or higher, see
 http://www.astro.umd.edu/nemo. It is recommended to configure NEMO
 with \fBconfigure --enable-single --enable-lfs\fP.
@@ -15,7 +15,7 @@ This version is a NEMO based frozen version, currently limiting
 the C++ version with \fB-std=c++03\fP. For an updated version contact
 the author, Walter Dehnen directly.
 
-.SH description
+.SH "DESCRIPTION"
 \fBgyrfalcON\fP stands for "GalaxY simulatoR using \fBfalcON\fP". It is a
 full-fledged N-body code using Walter Dehnen's force algorithm of
 complexity O(N) (\fBfalcON\fP), which is about 10 times faster than an
@@ -249,7 +249,7 @@ If \fBmanipname\fP is given, the path \fIpath\fP is searched for a file
 \fBmanipname.so\fP to lead the manipulator. By default, the path searched
 is ".:$FALCON/manip".
 
-.SH example
+.SH "EXAMPLE"
 
 In order to integrate a Plummer sphere with N=10^5 particles, you may
 issue the command
@@ -292,8 +292,8 @@ in which the \fIPhaseSpace\fP array has been split into a
 understand this flavor, but will - for now - convert the data back
 into the less flexible type with combined \fIPhaseSpace\fP coordinates.
 
-.SH see also
-addgravity(1falcON), getgravity(1falcON), griffin(1)
+.SH "SEE ALSO"
+addgravity(1falcON), getgravity(1falcON), griffin(1), falcon(1NEMO)
 .PP
 .nf
 Dehnen, W., 2000, ApJ, 536, L39
@@ -309,17 +309,19 @@ Dehnen, W., 2014, https://link.springer.com/article/10.1186/s40668-014-0001-7 (g
 falcON/doc/user_guide.pdf                         \fIUser Guide for falcON\fP
 .fi
 
-.SH ADS
+.SH "ADS"
 @ads 2002JCoPh.179...27D
 
-.SH author
+.SH "AUTHOR"
 .nf
 Walter Dehnen                              walter.dehnen@astro.le.ac.uk
-.SH update history of this man page
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +2.0i
+.ta +1.5i +5.5i
 18-may-2004	first version of manual    WD
 01-jul-2004	version 2.2 of gyrfalcON   WD
 27-sep-2005	version 3.0.4 of gyrfalcON WD
 28-feb-2007     version 3.0.9 of gyrfalcON WD
+21-apr-2024	notes on griffin and falcon	PJT
 .fi

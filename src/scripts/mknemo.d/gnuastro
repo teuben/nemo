@@ -1,17 +1,17 @@
 #! /bin/bash
 #
-# minimum packages needed:     gsl, wcslib   (ubuntu:  libgsl-dev  wcslib-dev)
-# optional:
+# minimum packages needed:     gsl, cfitsio, wcslib   (ubuntu: libgsl-dev libcfitsio-dev wcslib-dev)
+# optional:     
 #
-# note:   the git compile may not work yet (i didn't for me)
-#
+# note:   the git compile may not work yet (i didn't for me, still due to latex)
+#   needed packages:   texlive-latex-base   texlive-latex-recommended  texlive-bibtex-extra  texlive-pictures
 
 # example of alpha/beta-testing:
 #       https://alpha.gnu.org/gnu/gnuastro/gnuastro-0.17.81-1a40.tar.lz
 #       tar --lzip -xf gnuastro-0.17.81-1a40.tar.lz 
 
 # version is hidden in the filename, if not, use git
-version=0.22    # also uses 'latest' now
+version=0.23    # also uses 'latest' now
 wget=wgetc
 check=0
 url=https://git.savannah.gnu.org/git/gnuastro.git

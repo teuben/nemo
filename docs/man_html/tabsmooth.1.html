@@ -18,78 +18,191 @@ tabsmooth - smooth columns of a table (Hanning, Savitzky-Golay)
 [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-Quick and dirty program to <i>smooth</i> the column(s)
-of a table without paying attention to the X coordinate (meaning: a constant
-step size is assumed). <p>
-The filter= option is used to select the filter,
-for example a Hanning and a Savitzky-Golay filter (and some derivates) can
-be selected.   A pass-through is also allowed. 
+<i>tabsmooth</i> convolves selected column(s) of
+an ASCII table. It does this without paying attention to the actual X coordinate
+(meaning: a constant step size is assumed). Use <a href='tabspline.1.html'><i>tabspline(1NEMO)</i></a>
+ to interpolate
+across an irregularly sampled table. <p>
+The <b>filter=</b> option is used to select
+the filter, for example a Hanning, Boxcar, Gaussian and a Savitzky-Golay
+filter (and some of their derivates) can be selected.   A pass-through is
+also allowed. Some of the filters need additional argument(s), given by
+<b>pars=</b> and are described below. <p>
+Optionally the smoothing kernel can be shown
+using show=t without the need to read a table. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+The following
+parameters are recognized in any order if the keyword is also given: 
 <dl>
 
-<dt><b>in=</b> </dt>
-<dd>Input file
-name [???]     </dd>
+<dt><b>in=</b>
+</dt>
+<dd>Input file name. <br>
+No default </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>Column(s) to use. Although multiple columns can be
-used, only those  columns are output to stdout.  [1] </dd>
+<dd>Column(s) to use. Although multiple columns can be used,
+only those  columns are output to stdout. <br>
+[1] </dd>
 
 <dt><b>filter=</b> </dt>
-<dd>Filter option.
-The way the options are set will likely change, this is work in progress.
-<br>
-<pre>   -1 passthrough, the column is not modified
-   0  hanning (1,2,1)/4
-   1  SK2 5pt smooth
-   2  SK2 1st derivative with h=1
-   3  SK2 2nd derivative with h=1
-   4  SK4 7pt smooth
-   5  SK4 1st derivative
-</pre>The smoothing versions are normalized to conserve "flux". Default: 0 </dd>
+<dd>Filter option. The way the options are set will likely change,
+this is work in progress.  Either a number value can be given, or a minimum
+match to the filter name, as shown in the first column: <br>
+<pre>   -1   passthrough, the column(s) not modified
+   0,h  hanning (1,2,1)
+   1    SK2 5pt smooth
+   2    SK2 1st derivative with h=1 (sum=0)
+   3    SK2 2nd derivative with h=1 (sum=0)
+   4    SK4 7pt smooth
+   5    SK4 1st derivative  (sum=0)
+  11,b  boxcar, needs  pars=width
+  12,g  gaussian, needs pars=width[,nsigma=4,old_width=0]
+  13,t  trapezoidal, needs pars=width (width=1 is also the hanning)
+</pre>The smoothing kernels are normalized to 1 to conserve "flux" (defined as
+the sum of values here), though there will be some flux loss at the edges
+of a table.  The <i>width</i> is given in pixels. If the optional <i>old_width</i> is given,
+the smoothing kernel is determines from the usual <i>sqrt(new**2-old**2)</i>. Note
+that for the gaussian <i>width</i> is meant to the FWHM = 2.355 * sigma 
+<p> <br>
+Default: 0 </dd>
 
-<dt><b>smooth=</b>
-</dt>
-<dd>Manually set the smoothing array. By default, the filter= is used to set
-the smoothing array.  Be sure to enter an odd number of array elements,
-for example a normalized Hanning would be smooth=0.25,0.5,0.25. Default: not
-provided. </dd>
+<dt><b>pars=</b><i>par1,par2,...</i> </dt>
+<dd>Optional parameters some of the filters need.
+See <b>filter=</b> for the filters that need parameters. <br>
+Default: not used </dd>
+
+<dt><b>smooth=</b> </dt>
+<dd>Manually set the smoothing array. By default,
+the filter= is used to set the smoothing array.  Be sure to enter an odd
+number of array elements, for example a normalized Hanning would be smooth=0.25,0.5,0.25.
+<br>
+Default: not used. </dd>
 
 <dt><b>tcol=</b> </dt>
-<dd>Optional column designating the independant variable. Currently
-the actual value is ignored, but this column will be output before the
-smoothed column(s).  Default: not used. 
+<dd>Optional column designating the independant variable.
+Currently the actual value is ignored, but this column will be output before
+the smoothed column(s). <br>
+Default: not used. </dd>
+
+<dt><b>show=t|f</b> </dt>
+<dd>If set, it  will show the smoothing kernel. No
+input file is needed in this case. <br>
+Default: f </dd>
+
+<dt><b>nsmooth=</b> </dt>
+<dd>Number of successive smoothings applied. <br>
+Not implemented yet, just a single smoothing is applied. </dd>
+
+<dt><b>edge=0|1|2</b> </dt>
+<dd>how to
+deal with edges. See EDGE below. Only a limited number have been implemented.
+<br>
+Default: 0 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here we draw 100000 random
-values from a normal distribution (mean 0, dispersion 1) and smooth them
-with various filters: <br>
-<pre>tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
-1.0022
-tabgen - 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp
-0.6128
-tabgen - 100000 1 2 123| tabsmooth - 1  1 | tabstat - | grep disp
-0.6973
-tabgen - 100000 1 2 123| tabsmooth - 1  4 | tabstat - | grep disp
-0.7537
-</pre>
-<p> 
-<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-Near the edge the smoothing array is cut off, thus there is some
-loss of flux. Otherwise in general the smoothing filter is normalized and
-should conserve flux. 
+<h2><a name='sect4' href='#toc4'>Edge</a></h2>
+Treatment of smoothing the edge has several options. In
+general the flux will not be conserved near the edge. Here we compare how
+this is handled in a few popular packages: <p>
+1) Following the EDGE options
+in the IDL package (see https://www.nv5geospatialsoftware.com/docs/CONVOL.html)
+we have: 
+<dl>
+
+<dt>EDGE_CONSTANT </dt>
+<dd>Set the outside edge to a specific value. If 0, that&rsquo;s
+EDGE_ZERO, if not we should capture that value.   -- not implemented here
+-- <br>
+"...CCCC|abcdefg|CCCC..." </dd>
+
+<dt>EDGE_MIRROR </dt>
+<dd>This is out <b>edge=1</b>. <br>
+"gfedcba|abcdefg|gfedcba" </dd>
+
+<dt>EDGE_REFLECT </dt>
+<dd>reflection. like mirror, but shifted
+over one. <br>
+"gfedcb|abcdefg|fedcba". </dd>
+
+<dt>EDGE_TRUNCATE </dt>
+<dd>This is the default in gbtidl (<b>edge=2</b>)
+for the left side. Why the right side needs to inherit the left side is
+beyond me. Seems like a typo to me. <br>
+"..aaa|abcdefg|aaa.." </dd>
+
+<dt>EDGE_WRAP </dt>
+<dd>wrapping <br>
+"abcdefg|abcdefg|abcdefg". </dd>
+
+<dt>EDGE_ZERO </dt>
+<dd>Our <b>edge=0</b> <br>
+"...0000|abcdefg|0000...". </dd>
+</dl>
+<p>
+2) Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html)
+we have: 
+<dl>
+
+<dt>boundary=&rsquo;fill&rsquo; </dt>
+<dd>Default fill value is 0.0  (<b>edge=0</b>) <br>
+This is the default in astropy. </dd>
+
+<dt>boundary=&rsquo;extend&rsquo; </dt>
+<dd>Constant extrapolation of
+the edge value beyond the boundary  (<b>edge=2</b>) 
+<p> </dd>
+</dl>
+
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+Here we draw 100000
+random values from a normal distribution (mean 0, dispersion 1) and smooth
+them with various filters, and observe what the resulting dispersion is:
+ 
+<p> tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp 1.0022 tabgen
+- 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp 0.6128 tabgen - 100000
+1 2 123| tabsmooth - 1  1 | tabstat - | grep disp 0.6973 tabgen - 100000 1 2 123|
+tabsmooth - 1  4 | tabstat - | grep disp 0.7537 
+<p>  Here is the gaussian smoothing
+kernel, then applied to the previous example using a NEMO @file   
+<p>   $
+tabsmooth . filter=g pars=2 show=t<br>
+   0.000917431<br>
+   0.0293578<br>
+   0.234862<br>
+   0.469725<br>
+   0.234862<br>
+   0.0293578<br>
+   0.000917431<br>
+ 
+<p>   $ tabsmooth . filter=g pars=2 show=t &gt; smg.tab<br>
+   $ tabgen - 100000 1 2 123| tabsmooth - 1 smooth=@smg.tab | tabstat - | grep
+disp<br>
+   disp:    0.577259<br>
+ 
+<p>   $ nemoinp 1:20  | tabmath - - &rsquo;ifeq(%1,10,1,0)&rsquo; |\<br>
+         tabsmooth - 2 g 4 tcol=1 | tabnllsqfit - fit=gauss1d<br>
+   Fitting a+b*exp(-(x-c)^2/(2*d^2)):  <br>
+   a= -9.44068e-06 4.59111e-06 <br>
+   b= 0.234891 1.12118e-05 <br>
+   c= 10 8.96171e-05<br>
+   d= 1.69874 0.000101174<br>
+ 
+<p>  
+<p> In the last example a delta-function is convolved with a gaussian of
+(fwhm) width=4, thus the (sigma) d parameter should fit as 4/2.355 = 1.698
+
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
 , <a href='tabtrend.1.html'>tabtrend(1NEMO)</a>
 , <a href='tabrows.1.html'>tabrows(1NEMO)</a>
+, <a href='tabcols.1.html'>tabcols(1NEMO)</a>
 ,
-<a href='tabcols.1.html'>tabcols(1NEMO)</a>
+<a href='tabspline.1.html'>tabspline(1NEMO)</a>
+, <a href='ccdsmooth.1.html'>ccdsmooth(1NEMO)</a>
 , <a href='table.5.html'>table(5NEMO)</a>
  
 <p> 
@@ -98,11 +211,12 @@ Peter Teuben
 <p> 
 <h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
-<pre>20-dec-2010<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=
+<pre>20-dec-2010<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created, Q&amp;D<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added filter=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 converted to table V2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-nov-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added tcol=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+21-jun-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 added show= and pars= for filters <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -112,8 +226,8 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Examples</a></li>
-<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc4' href='#sect4'>Edge</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>History</a></li>

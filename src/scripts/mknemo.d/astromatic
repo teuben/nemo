@@ -1,0 +1,42 @@
+#! /bin/bash
+#
+#    add some AstroMatic packages
+#    See also: https://www.astromatic.net/software/
+#
+#    Packages covered here:    skymaker swarp
+#    Todo:   sextractor        needs ATLAS or --enable-openblas
+#                              --disable-model-fitting    bypasses them
+#    ubuntu pacakes:   fftw, libopenblas-dev
+#
+version=git
+url=https://github.com/astromatic
+use="skymaker swarp sextractor"
+
+for arg in $*; do
+  export $arg
+done
+
+mkdir -p $NEMO/local/astromatic
+
+
+
+for p in $use; do
+    opts=""
+    if [ $p == "sextractor" ]; then    opts="--disable-model-fitting"; fi
+    cd $NEMO/local/astromatic
+    if [ -e $p ]; then
+	cd $p
+	git pull
+    else
+	git clone $url/$p
+	cd $p
+    fi
+    sh autogen.sh
+    ./configure --prefix=$NEMO/opt $opts
+    make
+    make install
+done
+
+echo Installed version=$version use=$use
+
+echo AstroMatic $version `date` >> $NEMO/opt/mknemo.log

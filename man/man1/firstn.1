@@ -1,13 +1,17 @@
-.TH FIRSTN 1NEMO "19 April 2021"
-.SH NAME
+.TH FIRSTN 1NEMO "6 May 2024"
+
+.SH "NAME"
 firstn - von Hoerners first N-body code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 firstn < firstn.in
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 Arguably the first N-body code was written by von Hoerner (1960). This version,
 \fBfirstn\fP, currently only integrates an example internally-generated Plummer
 sphere, and was written by S. Aarseth.
-.SH INPUT 
+
+.SH "INPUT"
 The \fBfirstn.in\fP input file contains 3 lines (See also \fInbody0(1NEMO)\fP).
 .nf
 N ETA EPS DELTAT TCRIT
@@ -37,7 +41,7 @@ Q - Initial virial ratio (1  meant 2T/W=1)
 .TP
 ISCALE -
 
-.SH EXAMPLES
+.SH "EXAMPLES"
 The following parameter file should create the kind of spheres von Hoerner was using in his 1960 paper:
 .nf
 
@@ -49,28 +53,29 @@ The following parameter file should create the kind of spheres von Hoerner was u
 It should be noted in the 1960 paper N=4,8,10,12,16 were used, in the 1963 followup paper N=25 was used.
 Computational time should scale N^4 per relaxation time.
 
-.SH PERFORMANCE
+.SH "PERFORMANCE"
 CPU should  scale as N^2. Here are some numbers from "make bench":
 .nf
-.ta +1i +1i +1i
-N	cpu"	cpu"
-	?	p4/1600/gcc	ifort   i5-1135G7
+.ta +1i +1i +1i +1i +1i
+N	cpu(sec)
+	?	p4/1600	ifort	i5-1135G7	i7-1260P
 
-16	2.9	2.2	0.79	0.23
-32	62.0	33.2	19.0	1.67
-64	93.4	27.8	84.2	16.11
-128	642.6	108.4	75.1	8.25
-256	n/a	834.3	746.5	44.8
+16	2.9	2.2	0.79	0.23	0.32
+32	62.0	33.2	19.0	1.67	2.4
+64	93.4	27.8	84.2	16.11	21.72
+128	642.6	108.4	75.1	8.25	9.53
+256	n/a	834.3	746.5	44.8	58.6
 .fi
-.SH CAVEATS
+
+.SH "CAVEATS"
 This historic code is meant to be educational.
 
-.SH FILES
+.SH "FILES"
 .nf
 .ta +2.6i
 ~/usr/aarseth/firstn	original
 .fi
-.SH SEE ALSO
+.SH "SEE ALSO"
 nbody0(1NEMO), mkvh60(1NEMO)
 
 .nf
@@ -78,14 +83,16 @@ Z.f.Astrophys. 50, 184, 1960
 Z.f.Astrophys. 57, 47, 1963 
 .fi
 
-.SH ADS
+.SH "ADS"
+.nf
 @ads 1960ZA.....50..184V
 @ads 1963ZA.....57...47V
+.fi
 
-.SH AUTHOR
+.SH "AUTHOR"
 S. von Hoerner (original), Sverre Aarseth (21st century adaptation)
 
-.SH HISTORY
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 dec-2000	version from Aarseth			       	PJT

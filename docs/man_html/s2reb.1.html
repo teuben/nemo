@@ -28,31 +28,32 @@ only mass, position and velocity are converted, the accellerations are
 still ignored. <p>
 Note that following the REBOUND convention, data are appended
 to any pre-existing output filename (<b>out=</b>) that is specified, counter to
-the NEMO convention, which refuses to overwrite. 
+the NEMO convention, which refuses to overwrite existing files. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following
-parameters are recognized in order; they may be given in any order if the
-keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
 
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input NEMO snapshot. No default.  </dd>
+<dd>input NEMO snapshot. <br>
+No default.  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output SimulationArchive. No default.
-Note output will be appended to any existing RSA. 
+<dd>output SimulationArchive. Note output will be appended
+to any existing RSA. <br>
+No default. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Here is an example
-of creating a NEMO snapshot, with 9 snapshots of 16 particles in a Plummer
-sphere configuration, from times 0 to 2.0 in steps of 0.25, and converting
-it to a REBOUND  SimulationArchive.  
-<p>   hackcode1 out=plum16.out nbody=16
-seed=16 fcells=2<br>
+Here is an example of creating a NEMO snapshot, with
+9 snapshots of 16 particles in a Plummer sphere configuration, from times
+0 to 2.0 in steps of 0.25, and converting it to a REBOUND  SimulationArchive.
+ 
+<p>   hackcode1 out=plum16.out nbody=16 seed=16 fcells=2<br>
    s2reb plum16.out plum16.bin debug=1<br>
  
 <p>  With <b>debug=1</b> you will also see the times and m, x, vx, ax of the first

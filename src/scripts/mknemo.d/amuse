@@ -1,0 +1,17 @@
+#! /bin/csh -f
+#
+#  private falcON2 
+
+set url=https://github.com/amusecode/amuse
+set dir=amuse
+
+cd $NEMO/local
+if (! -e $dir) then
+  git clone $url
+  cd $dir
+else
+  cd $dir
+  git pull
+endif
+
+echo "Installation is still manual."

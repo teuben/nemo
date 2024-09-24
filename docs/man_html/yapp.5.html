@@ -84,10 +84,10 @@ on color interface (-DCOLOR), see also yapp_cg below. </dd>
 format. </dd>
 
 <dt><b>yapp_giza<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>Attempt to use the pgplot compatible giza library </dd>
+<dd>Attempt to use the pgplot compatible giza library (conflicts
+with pgplot) </dd>
 
-<dt>yapp_gl
-</dt>
+<dt>yapp_gl </dt>
 <dd></dd>
 
 <dt>yapp_glfw </dt>
@@ -97,43 +97,43 @@ format. </dd>
 <dd></dd>
 
 <dt><b>yapp_mongo<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>for usage when mongo(87) is available.
-Uses environment varibiable <b>YAPP</b>, initialized in the <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- package,
-to select from a number of devices.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
+<dd>for usage when mongo(87)
+is available. Uses environment varibiable <b>YAPP</b>, initialized in the <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+
+package, to select from a number of devices.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
 
 <dt><b>yapp_mpl</b> </dt>
-<dd>Initial coding for a matplotlib
-based   </dd>
+<dd>Initial coding
+for a matplotlib based   </dd>
 
 <dt><b>yapp_null</b> </dt>
-<dd>a stubbed list of all required and optional routines
-which gets you going on a machine with no proper yapp implementation yet.
-</dd>
+<dd>a stubbed list of all required and optional
+routines which gets you going on a machine with no proper yapp implementation
+yet. </dd>
 
 <dt><b>yapp_pgplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>uses Tim Pierson&lsquo;s (Caltech) PGPLOT package. We now support PGPLOT
-V5 as well as an experimental version of CPGPLOT (PJT) </dd>
+<dd>uses Tim Pierson&lsquo;s (Caltech) PGPLOT package. We now support
+PGPLOT V5 as well as an experimental version of CPGPLOT (PJT) </dd>
 
-<dt><b>yapp_plplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>uses
-the U. Texas PLPLOT package, a PGPLOT lookalike written in C. Almost functional.
-</dd>
+<dt><b>yapp_plplot<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b>
+</dt>
+<dd>uses the U. Texas PLPLOT package, a PGPLOT lookalike written in C. Almost
+functional. </dd>
 
 <dt><b>yapp_ps<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>PostScript, merged with JEBs enhanced versions(PJT). Does not do
-color yet. </dd>
+<dd>PostScript, merged with JEBs enhanced versions(PJT).
+Does not do color yet. </dd>
 
 <dt>yapp_psg </dt>
 <dd></dd>
 
 <dt><b>yapp_sm<tt> </tt>&nbsp;<tt> </tt>&nbsp;</b> </dt>
-<dd>Super Mongo - not very good yet since sm doesn&rsquo;t
-have good callable provisions.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
+<dd>Super Mongo - not very good yet since
+sm doesn&rsquo;t have good callable provisions.<tt> </tt>&nbsp;<tt> </tt>&nbsp;(PJT) </dd>
 
 <dt><b>yapp_suntools</b> </dt>
-<dd>Suntools version with
-enhanced cursor interaction; has optional -DMOUSE, -DCOLOR and -DRETAINED
+<dd>Suntools version
+with enhanced cursor interaction; has optional -DMOUSE, -DCOLOR and -DRETAINED
 and autodetection of window vs. non-window mode under suntools. <i>deprecated</i>.
 </dd>
 
@@ -149,7 +149,8 @@ is really only intended to create small images, to be saved in  screendump
 
 <dt><b>yapp_x11</b> </dt>
 <dd>Based on a standalone,
-now modified to handle singleprecision real (float). </dd>
+now modified to handle singleprecision real (float). 
+<p> </dd>
 </dl>
 
 <h2><a name='sect3' href='#toc3'>Bugs</a></h2>
@@ -159,6 +160,7 @@ Some devices have problems making sure that the plot comes out square when
 it is meant to be square. <p>
 Treatment of colors, in particular what the background
 and foreground color is, is not uniform.  
+<p> 
 <h2><a name='sect4' href='#toc4'>Pgplot</a></h2>
 PGPLOT uses a number of
 environment variables that control the behavior of the plotting device.
@@ -197,7 +199,17 @@ been killed: <br>
     xrdb -merge ~/.Xdefaults
 </pre>
 <p> 
-<h2><a name='sect5' href='#toc5'>Plplot</a></h2>
+<h2><a name='sect5' href='#toc5'>Giza</a></h2>
+<i>giza</i> should be a drop-in replacement for pgplot, and does not depend
+on fortran. Despite this, there can be conflicts. On my ubuntu system it&rsquo;s
+sometimes sneaked in via another app, and I have to remove giza and re-install
+pgplot5:  
+<p>   sudo apt remove giza-dev libcpgplot0 libgiza0 libpgplot0<br>
+   sudo apt install pgplot5<br>
+     <br>
+  
+<p> 
+<h2><a name='sect6' href='#toc6'>Plplot</a></h2>
 Like PGPLOT, PLPLOT can also pick different graphics output devices,
 specified via the usual yapp= system keyword, followed by a filename for
 the non-interactive devices. Here are a few, though specifying yapp=help
@@ -213,15 +225,15 @@ xwin
 tk
 </pre>
 <p> 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
 <br>
 <pre>NEMO/src/kernel/yapp<tt> </tt>&nbsp;<tt> </tt>&nbsp;various yapp_* implementations
 </pre>
 <p> 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect8' href='#toc8'>See Also</a></h2>
+<h2><a name='sect9' href='#toc9'>See Also</a></h2>
 <a href='catps.1.html'>catps(1NEMO)</a>
 , <a href='catpgps.1.html'>catpgps(1NEMO)</a>
 , <a href='yapp.1.html'>yapp(1NEMO)</a>
@@ -229,7 +241,7 @@ Peter Teuben
 <a href='yapp.3.html'>yapp(3NEMO)</a>
  
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>16-aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;document written - some are premature!<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 16-nov-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;yapp_suntools added             <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -246,11 +258,12 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Available Yapp Versions</a></li>
 <li><a name='toc3' href='#sect3'>Bugs</a></li>
 <li><a name='toc4' href='#sect4'>Pgplot</a></li>
-<li><a name='toc5' href='#sect5'>Plplot</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>See Also</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc5' href='#sect5'>Giza</a></li>
+<li><a name='toc6' href='#sect6'>Plplot</a></li>
+<li><a name='toc7' href='#sect7'>Files</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>See Also</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

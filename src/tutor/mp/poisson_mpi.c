@@ -122,7 +122,7 @@ int main ( int argc, char *argv[] )
     timestamp ( );
     printf ( "\n" );
     printf ( "POISSON_MPI:\n" );
-    printf ( "  C version\n" );
+    printf ( "  C version (NEMO)\n" );
     printf ( "  2-D Poisson equation using Jacobi algorithm\n" );
     printf ( "  ===========================================\n" );
     printf ( "  MPI version: 1-D domains, non-blocking send/receive\n" );
@@ -221,6 +221,8 @@ int main ( int argc, char *argv[] )
   {
     printf ( "\n" );
     printf ( "POISSON_MPI:\n" );
+    printf ( "  Number of processes         = %d\n", num_procs );
+    printf ( "  Number of interior vertices = %d\n", N );
     printf ( "  Normal end of execution.\n" );
     printf ( "\n" );
     timestamp ( );

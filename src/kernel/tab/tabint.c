@@ -6,6 +6,7 @@
  *      25-apr-22    convert to use the new table V2
  *      22-feb-23    add xmin,xmax,scale keywords
  *      31-jul-23    add mom=
+ *       6-apr-24    cleanup
  */
 
 #include <stdinc.h> 
@@ -21,22 +22,22 @@ string defv[] = {
   "ycol=2\n         Column with Y coordinate of function",
   "xmin=\n          value if data below xmin to be discarded",
   "xmax=\n          value if data above xmax to be discarded",
-  "step=\n          Integration step if resampling used (<0 for logarithmic steps)",
+  "step=\n          (override) Integration step, or if resampling used (<0 for logarithmic steps)",
   "normalize=f\n    Normalize integral",
   "cumulative=f\n   Show accumulation of integral",
   "scale=1\n        Scale factor to apply to integral",
   "mom=0\n          0=flux 1=weighted mean 2=dispersion",
-  "VERSION=0.8a\n   7-aug-2023 PJT",
+  "VERSION=0.9\n    6-apr-2024 PJT",
   NULL,
 
 };
 
-string usage="integrate a sorted table";
+string usage="integrate a (sorted) table";
 
 
 extern int minmax(int, real *, real *, real *);
-local void reverse(int n, real *x);
-
+local void reverse(int n, real *x, real *y);
+local void sortxy(int n, real *x, real *y);
 
 void nemo_main()
 {
@@ -48,13 +49,11 @@ void nemo_main()
   bool Qcum = getbparam("cumulative");
   bool Qmin = hasvalue("xmin");
   bool Qmax = hasvalue("xmax");
-  real yscale = getrparam("scale");
+  real scale = getrparam("scale");
   int mom = getiparam("mom");
   
   /* read the data */
 
-#if 1
-  // #ifdef TABLE2
   tableptr t = table_open(stropen(spectrum,"r"),0);
   n = nmax = table_nrows(t);
   int ncols = table_ncols(t);
@@ -64,31 +63,18 @@ void nemo_main()
   mdarray2 d = table_md2cr(t,2,colnr,0,0);
   xdat = &d[0][0];
   ydat = &d[1][0];
-#else
-  real *coldat[2];
-  nmax = nemo_file_lines(spectrum,MAXLINES);
-  xdat = coldat[0] = (real *) allocate(nmax*sizeof(real));
-  ydat = coldat[1] = (real *) allocate(nmax*sizeof(real));
-  colnr[0] = getiparam("xcol");
-  colnr[1] = getiparam("ycol");
-  stream instr = stropen(spectrum,"r");
-  n = get_atable(instr,2,colnr,coldat,nmax);
-  strclose(instr);
-#endif
 
   /* reverse arrays if not sorted properly */
-  if (xdat[0] > xdat[1]) {
-    reverse(n, xdat);
-    reverse(n, ydat);
-  }
+  if (xdat[0] > xdat[1])
+    reverse(n, xdat, ydat);
+
   /* check if array is now properly sorted */
   int nbad = 0;
   for (i=1; i<n; i++)
     if (xdat[i] < xdat[i-1]) nbad++;
-  if (nbad > 0) warning("There were %d/%d points not sorted properly",nbad, n);
-			       
+  if (nbad > 0) sortxy(n, xdat, ydat);
   
-  /* figure out some min/max */
+  /* figure out an appropriate min/max */
   minmax(n,xdat,&xmin,&xmax);
   minmax(n,ydat,&ymin,&ymax);
   dprintf(1,"X range: %g : %g\n",xmin,xmax);
@@ -112,7 +98,7 @@ void nemo_main()
 
   sum = sum0 = 0.0;
   nsteps = 0;
-  if (hasvalue("step")) {     /* resample the function using splines */
+  if (hasvalue("step")) {     /* resample the function using splines ? */
     dx = getdparam("step");
 
     /* setup a spline interpolation table into the function */
@@ -132,7 +118,7 @@ void nemo_main()
       y = ydat[n-1];
       sum  += 0.5*(yold+y)*(xmax-xold);     /* it's possible we never */
       sum0 += (xmax-xold);                  /* closed the interval */
-    } else if (xmin > 0 || xmax < 0) {     /* dx < 0: log steps */
+    } else if (xmin > 0 || xmax < 0) {      /* dx < 0: log steps */
       dz = -dx;
       s = xmin > 0 ? 1.0 : -1.0;
       zmin = log10(s*xmin);
@@ -155,12 +141,19 @@ void nemo_main()
       error("Cannot handle log steps with dx=%g xmin=%g xmax=%g",dx,xmin,xmax);
   } else {  /* use the datapoints itself */
     dx = xdat[1]-xdat[0];
+    real dxmin = dx;       // also keep track of any variable step size
+    real dxmax = dx;
     if (mom == 0) {
-      for (i=1; i<n; i++) {
-	sum  += 0.5*(ydat[i]+ydat[i-1])*(xdat[i]-xdat[i-1]);
-	sum0 += (xdat[i]-xdat[i-1]);
+      if (Qcum) printf("# X SUM SUM/SUM0\n");
+      for (i=1; i<n; i++) {   // integration loop using trapezoid rule
+	dx = xdat[i]-xdat[i-1];
+	sum  += 0.5*(ydat[i]+ydat[i-1])*dx;
+	sum0 += dx;
 	if (Qcum) printf("%g %g %g\n",xdat[i],sum,sum/sum0);
+	dxmin = MIN(dxmin,dx);
+	dxmax = MAX(dxmax,dx);
       }
+      dprintf(1,"dx min/max: %g %g\n",dxmin,dxmax);
     } else {
       double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, retval=0.0;
       
@@ -185,17 +178,19 @@ void nemo_main()
 	  xmin,xmax,dx,sum,sum0,nsteps);
   if (Qnorm)
     sum /= sum0;
-  printf("%s%g\n",  Qcum ? "# " : "",  sum * yscale);
+  printf("%s%g\n",  Qcum ? "# " : "",  sum * scale);
 }
 
-
-local void reverse(int n, real *x)
+local void reverse(int n, real *x, real *y)
 {
-  int i;
   real t;
-  for(i = 0; i<n/2; i++) {
-    t = x[i];
-    x[i] = x[n-i-1];
-    x[n-i-1] = t;
+  for (int i = 0; i<n/2; i++) {
+    t = x[i];  x[i] = x[n-i-1];  x[n-i-1] = t;
+    t = y[i];  y[i] = y[n-i-1];  y[n-i-1] = t;
   }
+}
+
+local void sortxy(int n, real *x, real *y)
+{
+  error("Your data were not sorted, and sortxy is not implemented yet");
 }

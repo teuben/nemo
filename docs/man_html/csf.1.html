@@ -26,10 +26,10 @@ a later stage.  Automatic data-conversion can also be done.  By default all
 items are copied, and no data conversion is applied.  <p>
 An overview of the
 top level items that are present in a structured file can be obtained with
-the following Unix pipe: <br>
-<pre>q
-    % tsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes" | awk &rsquo;{print $2}&rsquo;
-</pre><p>
+the following Unix pipe:  
+<p>     % tsf in_file | grep "^[a-z,A-Z]" | grep -v "^tes"
+| awk &rsquo;{print $2}&rsquo;<br>
+  <p>
 Although <i>structured files</i> can always be read when they were created on
 a byte swapped machine, <i>csf</i> can also be used to create a file in which
 the bytes are not swapped. <p>
@@ -91,22 +91,24 @@ are in danger of loosing more than just precision.
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
 An image with
-too much data-history can be cut by only copying the <i>Image</i> items: <br>
-<pre>   % csf in=map1.ccd out=map2.ccd select=Image
-</pre>
+too much data-history can be cut by only copying the <i>Image</i> items:  
+<p>    %
+csf in=map1.ccd out=map2.ccd select=Image<br>
+  
 <p> 
-<h2><a name='sect6' href='#toc6'>Bugs</a></h2>
+<h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 Items can only be selected (<b>select=</b>) from the top level. 
 <p> 
-<h2><a name='sect7' href='#toc7'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See
+Also</a></h2>
 <a href='cp.1.html'>cp(1)</a>
-,
-<a href='tsf.1.html'>tsf(1NEMO)</a>
+, <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
  
 <p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
-Peter Teuben, Joshua E. Barnes 
+Peter Teuben, Joshua E. Barnes
+
 <p> 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
@@ -135,7 +137,7 @@ Peter Teuben, Joshua E. Barnes
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Caveats</a></li>
 <li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>Bugs</a></li>
+<li><a name='toc6' href='#sect6'>Caveats</a></li>
 <li><a name='toc7' href='#sect7'>See Also</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
 <li><a name='toc9' href='#sect9'>Files</a></li>

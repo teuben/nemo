@@ -46,13 +46,11 @@ string defv[] = {
     "dual=f\n             Dual pass for large number",
     "blankval=\n          if used, use this as blankval",
     "scale=1\n            Scale factor for data",
-    "VERSION=1.1a\n	  11-mar-2022 PJT",
+    "VERSION=1.1b\n	  29-aug-2024 PJT",
     NULL
 };
 
 string usage = "General image statistics and histogram plotter";
-
-string cvsid = "$Id$";
 
 /**************** SOME GLOBAL VARIABLES ************************/
 
@@ -244,9 +242,9 @@ local void read_data()
 
 local void histogram(void)
 {
-  int i,j,k, l, kmin, kmax, lcount = 0;
+  int i,j,k, l, lcount = 0;
   real count[MAXHIST], under, over;
-  real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
+  real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax, kmax;
   real mean, sigma, skew, kurt, lmin, lmax, median;
   Moment m;
 
@@ -445,7 +443,9 @@ local void histogram(void)
       kmax = npt;
   }
   if (maxcount>0)		/* force scaling by user ? */
-    kmax=maxcount;	
+    kmax=maxcount;
+
+  dprintf(0,"kmax=%g\n",kmax);
   
   if (Qtab) {
     maxcount = 0;

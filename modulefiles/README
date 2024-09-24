@@ -1,15 +1,25 @@
-Depending on your module implemention
-you may need to add a nemo symlink in /usr/share/modules/modulefiles to
-your $NEMO/modulefiles/nemo or a subdirectory nemo with named files to
-your different nemo's, e.g.
+Depending on your module implemention you may need to add a nemo
+symlink in /usr/share/modules/modulefiles to your
+$NEMO/modulefiles/nemo
 
      cd /usr/share/modules/modulefiles
-
      ln -s ~/NEMO/nemo/modulefiles/nemo    nemo
 
+
+or a subdirectory nemo with named files to your different nemo's, e.g.
+
+     cd /usr/share/modules/modulefiles
      mkdir nemo
      ln -s ~/NEMO/nemo/modulefiles/nemo    nemo/git
-     ln -s ~/NEMO/nemo/modulefiles/nemo    nemo/git
+     ln -s ~/NEMO/float/modulefiles/nemo   nemo/float
 
+Using symlinks is the recommended method, as the provenance is
+more clear.
 
-See also ubuntu's environment-modules package, or install from ...
+See also the environment-modules package in either ubuntu or redhat.
+Source can be installed from https://github.com/cea-hpc/modules/
+
+You may also need to add an initialization line in your startup shell file,
+e.g. in bash
+
+     source /usr/share/modules/init/sh

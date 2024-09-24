@@ -21,6 +21,10 @@ helpful for onboarding. Here are a few examples:
      - plt.plot()
      - N/A
      - N/A
+   * - tabhist
+     - plt.hist()
+     - N/A
+     - N/A
    * - fitsccd
      - hdu=astropy.io.fits.open()
      - importfits()
@@ -34,7 +38,7 @@ helpful for onboarding. Here are a few examples:
      - ???
      - imlist
    * - ccdmom
-     - np.sum()
+     - numpy.sum()
      - immoments()
      - moment
    * - ccdmath
@@ -45,6 +49,10 @@ helpful for onboarding. Here are a few examples:
      - hdu[0].data.std()
      - imstat()
      - imstat
+   * - ccdplot
+     - numpy.contour
+     - imview()
+     - implot,cgdisp
 
 The CASA users guide has a more expanded table of this, just comparing CASA with MIRIAD
 and CLICK. There it is called  a CASA-MIRIAD and CASA-CLIC dictionary.

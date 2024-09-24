@@ -1,0 +1,13 @@
+#! /usr/bin/env bash
+
+url=https://github.com/valkey-io/valkey
+version=git
+
+cd $NEMO/local
+git clone $url
+cd valkey
+
+make distclean
+make PROG_SUFFIX="_nemo" PREFIX=$NEMO/opt  install
+
+echo valkey $version `date` >> $NEMO/opt/mknemo.log

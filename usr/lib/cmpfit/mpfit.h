@@ -25,7 +25,7 @@ extern "C" {
 #endif
 
 /* MPFIT version string */
-#define MPFIT_VERSION "1.4"
+#define MPFIT_VERSION "1.5"
 
 /* Definition of a parameter constraint structure */
 struct mp_par_struct {

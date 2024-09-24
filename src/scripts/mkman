@@ -7,7 +7,7 @@
 #
 # https://unix.stackexchange.com/questions/34516/can-i-create-a-man-page-for-a-script
 #
-set version="1.6  11-may-2022 PJT"
+set version="1.6a  25-may-2024 PJT"
 
 if ($#argv == 0) then
   echo "Usage: $0 [-section] name"
@@ -64,6 +64,10 @@ if ($section == 1) then
 endif
 echo
 echo '.SH "EXAMPLES"'
+echo 'An example...'
+echo '.EX'
+echo '  $ mkplummer --man'
+echo '.EE'
 echo
 echo '.SH "SEE ALSO"'
 echo
@@ -74,6 +78,6 @@ echo "mkman"
 echo
 echo '.SH "UPDATE HISTORY"'
 echo ".nf"
-echo ".ta +1.5i +5.5i"
+echo ".ta +1.25i +4.5i"
 echo "dd-mmm-yyyy	Created ...	XYZ"
 echo ".fi"

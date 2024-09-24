@@ -64,9 +64,9 @@ Here are the main *groups* of programs, clearly showing the structure of NEMO:
   manipulate, display and plot such table files, although there are
   many superior programs and packages outside of NEMO available with
   similar functionality. It is mostly through these table files that
-  we leave the NEMO environment, and persue analysis in a different
+  we leave the NEMO environment, and pursue analysis in a different
   environment.  The obvious advantage of storing tables in
-  binary form is the self-documenting nature of NEMO's binary
+  binary form is the self-describing nature of NEMO binary
   files. For historical reasons, most tables are displayed and created
   in ASCII, though you will find a few binary tables as well.
 
@@ -79,7 +79,7 @@ software into the package, and extend your own NEMO environment.
 
 The remaining chapters of this manual outline various concepts that
 you will find necessary to work with NEMO.  The :ref:`iface` outlines
-the user interface (commandline, shells etc.). NEMO stores most
+the user interface (command line, shells etc.). NEMO stores most
 data in files, and :ref:`filestr` explains how data is stored
 on disk and can be manipulated, including the concept of function
 descriptors in NEMO.  In :ref:`graphics` we details how data can be

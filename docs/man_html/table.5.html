@@ -33,46 +33,49 @@ NEMO tables
 can also contain commands that plot certainly variations of the table using
 the &rsquo;#PLOT&rsquo; directives and the <a href='nemoplot.8.html'><i>nemoplot(8NEMO)</i></a>
  command.  
-<p> <br>
-<pre>  HEADER
-  D11 D12 D13 ....
-  D21 D22 ...
-  ...
-</pre>Where <b>DIJ</b> refers to the I-th row and J-th column.  The HEADER can be in a
-number of formats (optional #, verbatim column names, with or without comma&rsquo;s
-etc.) 
+<p>  
+<p>   HEADER<br>
+   D11 D12 D13 ....<br>
+   D21 D22 ...<br>
+   ...<br>
+ 
+<p>  Where <b>DIJ</b> refers to the I-th row and J-th column.  The HEADER can be in
+a number of formats (optional #, verbatim column names, with or without
+comma&rsquo;s etc.) 
 <p> 
 <h2><a name='sect2' href='#toc2'>Example</a></h2>
-Here is an example of a table: <br>
-<pre>    # This is the first line of the table
-    # I    N     Q      # names of columns (some programs also understand
-this)
-    1.0   2.0   4.0
-    # 2.0 3.0   5.0     bad data, commented out.
-    3.0   5.1   6.32    # comment belonging to a line
-    # End of table
-    
-</pre>Here is an example how to make a table from scratch. It contains  one column,
-with even numbers 2 through 10, done with <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
+Here is an example of a table with only 2 valid rows
+and 3 columns:  
+<p>     # This is the first line of the table<br>
+     # I    N     Q      # names of columns in case they <br>
+     1.0   2.0   4.0<br>
+     # 2.0 3.0   5.0     bad data, commented out.<br>
+     3.0   5.1   6.32    # comment belonging to a line<br>
+     # End of table<br>
+     <br>
+  Here is an example how to make a table from scratch. It contains  one
+column, with even numbers 2 through 10, done with <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
  and <a href='seq.1.html'><i>seq(1)</i></a>
- <br>
-<pre>    nemoinp 2:10:2 newline=t &gt; even1.tab
-    seq 2 2 10 &gt; even2.tab
-    tabgen -  10 3 &gt; random.tab
-</pre>where for performance testing the <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
- program can be used to
-create random large tables. 
+
+ 
+<p>     nemoinp 2:10:2 newline=t &gt; even1.tab<br>
+     seq 2 2 10 &gt; even2.tab<br>
+     tabgen -  10 3 &gt; random.tab<br>
+ 
+<p>  where for performance testing the <a href='tabgen.1.html'><i>tabgen(1NEMO)</i></a>
+ program can be used
+to create random large tables. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Other Table Formats</a></h2>
-ESO/Midas, where all columns
-are separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
- will by default put a TAB
-between the columns (files). <p>
-FITS uses the &rsquo;TABLE&rsquo; (ascii tables) and &rsquo;BINTABLE&rsquo;
-(binary tables) format. See <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ESO/Midas, where all
+columns are separated by TABs. The unix program <a href='paste.1.html'><i>paste(1)</i></a>
+ will by default
+put a TAB between the columns (files). <p>
+FITS uses the &rsquo;TABLE&rsquo; (ascii tables)
+and &rsquo;BINTABLE&rsquo; (binary tables) format. See <a href='fits.5.html'><i>fits(5NEMO)</i></a>
 . <p>
-IPAC-table format: (often using the
-extension <b>.tbl</b>) <br>
+IPAC-table format: (often
+using the extension <b>.tbl</b>) <br>
 <pre>\HISTORY some history on the data processing
 \HISTORY infile=data3.fits
 \char Comment This table contains parameters for calibrating science data.

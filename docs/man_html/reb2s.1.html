@@ -21,39 +21,43 @@ reb2s - convert REBOUND SimulationArchive to NEMO snapshot
 <b>reb2s</b> converts a REBOUND SimulationArchive
 (RSA) to a NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 . It currently converts all snapshots from
-the RSA, and only converts mass, position and velocity are converted, the
-accellerations are still ignored. <p>
-Using <b>verbose=t</b> a number of additional
-(integration) variables present in an RSA are shown. 
+the RSA, and only converts mass, position and velocity, the accellerations
+are still ignored. <p>
+Using <b>verbose=t</b> a number of additional (integration)
+variables present in an RSA are shown. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following
-parameters are recognized in order; they may be given in any order if the
-keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
-
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>input SimulationArchive. No default.  </dd>
+<dd>input
+SimulationArchive. <br>
+No default.  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>optional output snapshot;
-If not specified, the input RSA is just scanned, and snapshot times are
-reported.  Default: only scan. </dd>
+<dd>optional output snapshot; If not specified, the input
+RSA is just scanned, and snapshot times are reported.   <br>
+Default: no output given, only scan the input. </dd>
 
 <dt><b>verbose=t|f</b> </dt>
-<dd>If verbose is set, additional information
-for each snapshot in the RSA is given (time, energy, angular momentum,
-center of mass, etc.).  [Default: <b>f</b>] 
+<dd>If verbose is
+set, additional information for each snapshot in the RSA is given (time,
+energy, angular momentum, center of mass, etc.). <br>
+[Default: <b>f</b>] 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveat</a></h2>
-Since verbose output is on standard
-out, the following pipe will fail in unpredictable ways     reb2s p100.reb
-- verbose=t | tsf -<br>
+Since verbose output is on standard out, the following
+pipe will fail in unpredictable ways     reb2s p100.reb - verbose=t | tsf
+-<br>
   since now NEMO&rsquo;s snapshot as well as the verbose output are in the pipe.
+<p>
 
+<p> 
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='s2reb.1.html'>s2reb(1NEMO)</a>

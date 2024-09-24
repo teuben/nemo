@@ -42,16 +42,18 @@ Welcome to NEMO's documentation!
    coordsys
    .. fits
    python
+   scripting
    .. dirs
    .. gls
    crosswalk
    trouble
    .. history
    bench
-   refs
    codes
    glossary
+   summary
    rse
+   refs
    todo	      
    rst
 
