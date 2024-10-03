@@ -13,9 +13,10 @@
 string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "in=???\n           input file name(s)",
     "select=all\n       columns to select",
-    "colsep=SP\n        Column separator (SP,TAB,NL)",    
+    "colsep=SP\n        Column separator for output (SP,TAB,NL)",
+    "colsepin=\n        Optional enforced character to separate columns in input",
     "out=-\n            output file name",
-    "VERSION=2.3\n      30-mar-2024 PJT",
+    "VERSION=2.5\n      10-sep-2024 PJT",
     NULL
 };
 
@@ -35,7 +36,8 @@ int    ninput;				/* number of input files */
 int    keep[MAX_COL+1];                 /* column numbers to keep */
 int    nkeep;                           /* actual number of skip columns */
 int    maxcol = 0;                      /* largest column number */
-char   colsep;                          /* character to separate columns */
+string colsepin;                        /* character(s) to separate columns on input */
+char   colsep;                          /* character to separate columns on output */
 bool   Qall;
 
 local void setparams(void);
@@ -104,6 +106,10 @@ local void setparams(void)
         case '/':       colsep = separator[0]; break;
         default:        error("Illegal separator: s t n r : ,");
     }
+    dprintf(1,"colsep:'%c'\n", colsep);
+
+    colsepin = getparam("colsepin");
+    dprintf(1,"colsepin:'%s'\n", colsepin);
 }
 
 
@@ -112,8 +118,13 @@ local void convert(stream instr, stream outstr)
     char   *line;
     int    i, nlines, noutv;
     string *outv;                   /* pointer to vector of strings to write */
-    char   *seps=", |\t";           /* column separators  */
-        
+    char   *seps;
+
+    if (strlen(colsepin) == 0)
+      seps = strdup(", |\t");
+    else
+      seps = strdup(colsepin);
+    
     nlines=0;               /* count lines read so far */
 
     for (;;) {
