@@ -14,6 +14,7 @@ string defv[] = {
     "sep=s\n       column separator (s=space t=tab c=comma v=vertical bar)",
     "addrow=f\n    Add row number (1=first) as first column?",
     "VERSION=0.8\n 14-feb-2024 PJT",
+    "header=None\n     Add a dummy header in a given style [ecsv, ipac]",
     NULL,
 };
 
@@ -34,6 +35,10 @@ local real linear(real c1, real c2)
   return count;
 }
 
+string add_header(string header)
+{
+  return header;
+}
 
 void nemo_main()
 {
@@ -48,6 +53,9 @@ void nemo_main()
   string seps = getparam("sep");
   bool Qrow = getbparam("addrow");
   char sep[8];
+  string header = getparam("header");
+
+  fprintf(ostr, "# %s\n", add_header(header));
 
   if (seps[0] == 'c') strcpy(sep,",");
   else if (seps[0] == 's') strcpy(sep," ");
