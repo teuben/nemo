@@ -21,6 +21,7 @@
    ften=1
      f5=1
      np=1
+  sleep=0
 
 for arg in $*; do\
    export $arg
@@ -29,7 +30,7 @@ done
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2022-09-14) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2024-10-18) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
@@ -90,21 +91,26 @@ if [ $mode == 5 ]; then
     echo "Tstop: $t1 $t2 $t3 $t4 $t5 $t6 [5sec CPU for each on a 11th Gen Intel(R) Core(TM) i5-1135G7 up to 4.2GHz using gcc-11]"
     echo -n .;
     echo -n 1;$time directcode nbody=$nbody0 out=. tstop=$t1 seed=123 $help                 > bench2.directcode.log  2>&1
+    sleep $sleep
     echo -n .;$time mkplummer p0 $nbody2 seed=123 $help                                     > bench0.mkplummer.log   2>&1
     echo -n 2;$time gyrfalcON p0 . kmax=6 tstop=$t2 eps=0.05 $help                          > bench2.gyrfalcon.log   2>&1
+    sleep $sleep
     echo -n 3;$time hackcode1 nbody=$nbody1  out=. seed=123 tstop=$t3 $help                 > bench2.hackcode1.log   2>&1
+    sleep $sleep
     echo -n .;$time mkorbit o0 x=1 e=1 lz=1 potname=log $help                               > bench0.mkorbit.log     2>&1
     echo -n 4;$time orbint o0 . tstop=$t4 dt=0.01 nsave=\$tstop ndiag=\$tstop/100 $help     > bench2.orbint.log      2>&1
+    sleep $sleep
     echo -n 5;$time potcode p0 . freqout=10 freq=1000 tstop=$t5 potname=plummer $help       > bench2.potcode.log     2>&1
+    sleep $sleep
     echo -n 6;$time treecode1 nbody=$nbody1  out=. seed=123 tstop=$t6 $help                 > bench2.treecode1.log   2>&1
     echo -n .; 
     echo ""
 
     cat bench2.*.log | perl -pe 's/(CPU_USAGE)/\n$1/' | grep CPU_USAGE > cpu_usage.log
     column -t cpu_usage.log
-    cpu_mean=$(awk '{print $4}' cpu_usage.log   | tabstat - | grep mean: | awk '{print $2}')
-    score=$(nemoinp 5000/$cpu_mean)
-    ntest=$(cat cpu_usage.log | wc -l)
+    _out=($(tabstat cpu_usage.log 4 bad=0 | txtpar - 5000/%1,%2 p0=mean,1,2 p1=npt,1,2))
+    score=${_out[0]}
+    ntest=${_out[1]}
     echo "NEMOBENCH5 score:   $score" 
     echo "$score $ntest   $(hostname)    $(date)" >> $NEMO/nemobench5.log
 
@@ -113,7 +119,7 @@ if [ $mode == 5 ]; then
 	cd ..
 	rm -rf $tmp
     else
-	echo 
+	echo "More detailed results in $tmp"
     fi
 
     exit 0
