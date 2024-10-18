@@ -12,13 +12,15 @@
 #include <filestruct.h>
 #include <image.h>
 #include <moment.h>
+#include <mdarray.h>
 
 string defv[] = {
   "in=???\n       Input image file",
   "order=xyz\n    Order to loop over cube, where the last axis is innermost loop",
   "iter=1\n       How often to loop",
   "mode=0\n       0=CubeValue(i,j,k)  1=cube[i][k][k]",
-  "VERSION=0.2\n  19-mar-2024 PJT",
+  "test=f\n       Show memory addresses for a small 2x3 array",
+  "VERSION=0.3\n  13-apr-2024 PJT",
   NULL,
 };
 
@@ -26,6 +28,8 @@ string usage = "benchmark taking moments along an axis of an image";
 
 #define LOOP(i,n)     for(i=0;i<n;i++)
 #define WHILE(iter)   while(iter--)
+
+local void test();
 
 
 
@@ -38,6 +42,11 @@ void nemo_main()
   int      iter = getiparam("iter");
   real     sum = 0.0;
   int      mode = getiparam("mode");
+
+  if (getbparam("test")) {
+    test();
+    return;
+  }
   
   instr = stropen(getparam("in"), "r");
     
@@ -81,6 +90,20 @@ void nemo_main()
   } else
     warning("Cannot do mode %d",mode);
   printf("%s %d %s %g\n",order,getiparam("iter"),getparam("in"),sum);
+}
 
-  
+// USE_IARRAY vs.   CDEF (row-major) or FORDEF (column-major)
+// CDEF is the default, i.e.  data[row][col] , row after row is stored
+local void test()
+{
+  static double is4[2][3];  // [ny][nx] - nx runs fastest
+  printf("test:\n");
+  printf("DD:  0x%x 0x%x  0x%x (0x%x)\n", &is4[0][0], &is4[0][1], &is4[1], is4[1]);
+
+  imageptr iptr = NULL;
+  create_image(&iptr, 3, 2);   // (nx,ny) - nx runs fastest
+  printf("CV:  0x%x 0x%x  0x%x\n", &MapValue(iptr,0,0), &MapValue(iptr,0,1),  &MapValue(iptr,1,0));
+
+  mdarray2 md2 = allocate_mdarray2(2,3);
+  printf("MD:  0x%x 0x%x  0x%x (0x%x)\n", &md2[0][0], &md2[0][1], &md2[1], md2[1]);
 }
