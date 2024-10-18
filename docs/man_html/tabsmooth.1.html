@@ -63,7 +63,8 @@ match to the filter name, as shown in the first column: <br>
 </pre>The smoothing kernels are normalized to 1 to conserve "flux" (defined as
 the sum of values here), though there will be some flux loss at the edges
 of a table.  The <i>width</i> is given in pixels. If the optional <i>old_width</i> is given,
-the smoothing kernel is determines from the usual <i>sqrt(new**2-old**2)</i>. 
+the smoothing kernel is determines from the usual <i>sqrt(new**2-old**2)</i>. Note
+that for the gaussian <i>width</i> is meant to the FWHM = 2.355 * sigma 
 <p> <br>
 Default: 0 </dd>
 
@@ -106,8 +107,8 @@ Default: 0
 Treatment of smoothing the edge has several options. In
 general the flux will not be conserved near the edge. Here we compare how
 this is handled in a few popular packages: <p>
-Following the options in the
-popular IDL package (see https://www.nv5geospatialsoftware.com/docs/CONVOL.html)
+1) Following the EDGE options
+in the IDL package (see https://www.nv5geospatialsoftware.com/docs/CONVOL.html)
 we have: 
 <dl>
 
@@ -118,7 +119,7 @@ EDGE_ZERO, if not we should capture that value.   -- not implemented here
 "...CCCC|abcdefg|CCCC..." </dd>
 
 <dt>EDGE_MIRROR </dt>
-<dd>Is this edge=1 ? <br>
+<dd>This is out <b>edge=1</b>. <br>
 "gfedcba|abcdefg|gfedcba" </dd>
 
 <dt>EDGE_REFLECT </dt>
@@ -141,37 +142,33 @@ beyond me. Seems like a typo to me. <br>
 "...0000|abcdefg|0000...". </dd>
 </dl>
 <p>
-Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html)
+2) Following astropy (see https://docs.astropy.org/en/stable/convolution/index.html)
 we have: 
 <dl>
 
-<dt>boundary=&rsquo;extend&rsquo; </dt>
-<dd>Constant extrapolation of the edge value beyond
-the boundary  (<b>edge=2</b>) </dd>
-
 <dt>boundary=&rsquo;fill&rsquo; </dt>
-<dd>Default fill value is 0.0  (<b>edge=0</b>)
-</dd>
+<dd>Default fill value is 0.0  (<b>edge=0</b>) <br>
+This is the default in astropy. </dd>
+
+<dt>boundary=&rsquo;extend&rsquo; </dt>
+<dd>Constant extrapolation of
+the edge value beyond the boundary  (<b>edge=2</b>) 
+<p> </dd>
 </dl>
-<p>
-Both these astropy cases were properly handled by <b>tabsmooth</b>. 
-<p> 
+
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-Here
-we draw 100000 random values from a normal distribution (mean 0, dispersion
-1) and smooth them with various filters, and observe what the resulting
-dispersion is: <br>
-<pre>tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp
-1.0022
-tabgen - 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp
-0.6128
-tabgen - 100000 1 2 123| tabsmooth - 1  1 | tabstat - | grep disp
-0.6973
-tabgen - 100000 1 2 123| tabsmooth - 1  4 | tabstat - | grep disp
-0.7537
-</pre>Here is the gaussian smoothing kernel, then applied to the previous example
-using a NEMO @file   
-<p>   $ tabsmooth . filter=12 pars=2 show=t<br>
+Here we draw 100000
+random values from a normal distribution (mean 0, dispersion 1) and smooth
+them with various filters, and observe what the resulting dispersion is:
+ 
+<p> tabgen - 100000 1 2 123| tabsmooth - 1 -1 | tabstat - | grep disp 1.0022 tabgen
+- 100000 1 2 123| tabsmooth - 1  0 | tabstat - | grep disp 0.6128 tabgen - 100000
+1 2 123| tabsmooth - 1  1 | tabstat - | grep disp 0.6973 tabgen - 100000 1 2 123|
+tabsmooth - 1  4 | tabstat - | grep disp 0.7537 
+<p>  Here is the gaussian smoothing
+kernel, then applied to the previous example using a NEMO @file   
+<p>   $
+tabsmooth . filter=g pars=2 show=t<br>
    0.000917431<br>
    0.0293578<br>
    0.234862<br>
@@ -180,12 +177,23 @@ using a NEMO @file
    0.0293578<br>
    0.000917431<br>
  
-<p>   $ tabsmooth . filter=12 pars=2 show=t &gt; smg.tab<br>
+<p>   $ tabsmooth . filter=g pars=2 show=t &gt; smg.tab<br>
    $ tabgen - 100000 1 2 123| tabsmooth - 1 smooth=@smg.tab | tabstat - | grep
 disp<br>
    disp:    0.577259<br>
  
+<p>   $ nemoinp 1:20  | tabmath - - &rsquo;ifeq(%1,10,1,0)&rsquo; |\<br>
+         tabsmooth - 2 g 4 tcol=1 | tabnllsqfit - fit=gauss1d<br>
+   Fitting a+b*exp(-(x-c)^2/(2*d^2)):  <br>
+   a= -9.44068e-06 4.59111e-06 <br>
+   b= 0.234891 1.12118e-05 <br>
+   c= 10 8.96171e-05<br>
+   d= 1.69874 0.000101174<br>
+ 
 <p>  
+<p> In the last example a delta-function is convolved with a gaussian of
+(fwhm) width=4, thus the (sigma) d parameter should fit as 4/2.355 = 1.698
+
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabmath.1.html'>tabmath(1NEMO)</a>
@@ -204,7 +212,7 @@ Peter Teuben
 <h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>20-dec-2010<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created, Q&amp;D<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=
+13-oct-2014<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented smooth=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 28-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 added filter=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 converted to table V2<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 29-nov-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 added tcol=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

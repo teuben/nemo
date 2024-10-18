@@ -1,4 +1,4 @@
-.TH CCDSLICE 1NEMO "11 May 2023"
+.TH CCDSLICE 1NEMO "26 August 2024"
 
 .SH "NAME"
 ccdslice \- takes slices and/or re-orient an image cube
@@ -27,15 +27,18 @@ along that axis can be selected, but for a regular selection
 .TP 20
 \fBin=\fP
 Input filename, in \fIimage(5NEMO)\fP format.
+.br
 [no default]
 .TP
 \fBout=\fP
 Output filename
+.br
 [no default]
 .TP
 \fBzvar=x|y|z\fP
 Slice variable (x, y, or z), along which axis the cube is sliced. This
 axis will then become the 3rd axis.
+.br
 [\fBz\fP].
 .TP
 \fBzrange=\fP
@@ -43,13 +46,21 @@ Slices to select. Multiple planes can be selected, but must be in the
 range 1..N\fBzvaR\fP. If none given, all planes will be selected.
 Any \fInemoinp(1NEMO)\fP expression can be given, but only regular
 ranges will result in a correct coordinate system.
+.br
+If a (single) negative value is used, the axis is decimated by the absolute
+value of this number.
+.br
 Default: the whole \fIzvar\fP axis is extracted.
 .TP
 \fBzslabs=\fP\fIz1,z2,...\fP
-Pairs of a Zmin,Zmax pairs in WCS to be selected. Default: not used.
+Pairs of a Zmin,Zmax pairs in WCS to be selected.
+.br
+Default: not used.
 .TP
 \fBzscale=\fP
-Scaling applied to \fBzslabs\fP to match the WCS in the header. Default: 1
+Scaling applied to \fBzslabs\fP to match the WCS in the header.
+.br
+Default: 1
 .TP
 \fBselect=t|f\fP
 A boolean to signify of the selected planes are selected for output (t)
@@ -88,6 +99,13 @@ planes:
 .nf
 
     fitsccd cube.fits - | ccdslice - - zslabs=100,200,500,600 zscale=1000 | ccdmom - cube.mom2 mom=-2
+    
+.fi
+Here is an example of smoothing a cube with a boxcar of 6 channels, and decimating the cube by 6:
+.nf
+
+    fitsccd cube.fits - | ccdsmooth - - dir=z smooth=1/6::6 | ccdslice - cube6s.ccd zrange=-6
+
 .fi
 
 .SH "CAVEATS"
@@ -109,4 +127,5 @@ Peter Teuben
 6-May-95	V1.0 Created		PJT
 27-feb-2021	V1.2  add zslabs= and zscale=	PJT
 11-may-2023	V1.3  better WCS handling	PJT
+26-aug-2024	V1.4  allow decimation with negative zrange	PJT
 .fi

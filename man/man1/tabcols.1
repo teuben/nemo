@@ -1,4 +1,4 @@
-.TH TABCOLS 1NEMO "20 November 2022"
+.TH TABCOLS 1NEMO "10 September 2024"
 
 .SH "NAME"
 tabcols \- Select columns, and optionally rearrange, from a table
@@ -7,13 +7,13 @@ tabcols \- Select columns, and optionally rearrange, from a table
 \fPtabcols\fP [parameter=value] ...
 
 .SH "DESCRIPTION"
-\fBtabcols\fP selects columns from a file, and can also re-arrange the
+\fBtabcols\fP selects columns from a file, and can thus also re-arrange the
 output column order. New column separators can be used on output.
 This way a newline on input can be converted into a space on 
 output and therefore creating a file with one long column from
-a table with mulitple columns.
+a table with multiple columns.
 .PP
-To select specific lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
+To select specific rows/lines, use \fItabrows(1NEMO)\fP or \fItabmath(1NEMO)\fP.
 .PP
 To align a table by column, use the \fIcolumn(1)\fP program with the \fB-t\fP
 option.
@@ -22,13 +22,16 @@ option.
 .so man1/parameters
 .TP 20
 \fBin=\fP
-input file name(s). No default.
+input file name(s).
+.br
+No default.
 .TP
 \fBselect=\fP
 list of columns to select. Any \fInemoinp(1NEMO)\fP  expression can be used.
 Columns can be repeated, and in any order. The output will be in exactly
 the same order as given with this keyword. First column is 1. Column 0 can also
 be added to the output, which is the row number (first row is 1).
+.br
 [all]    
 .TP
 \fBcolsep=\fP
@@ -36,14 +39,24 @@ Column separator. Valid are: \fBs\fP (space), \fBn\fP (newline),
 \fBt\fP (tab), 
 \fBr\fP (carriage return), as well as the literal symbols '\fB,\fP' 
 and '\fB:\fP'.
+.br
 [Default: \fBs\fP]
+
+.TP
+\fBcolsepin=\fP
+Column separator for input. By default an internal set (space, comma, tab, vertical bar)
+is used. A string can be specified here consistent of multiple characters.
+
+
 .TP
 \fBout=-\fP
 output file name. By default standard output it used.
+.br
+[-]
 
 .SH "CAVEATS"
 Although this program uses the new table interface, there are
-still some internal variables that limits the column count.
+still some internal variables that limit the column count.
 
 .SH "EXAMPLE"
 Here is an example of how to reverse the columns from a table with 4 columns:
@@ -55,9 +68,13 @@ re-arranges all the numbers in a table in one long column
 .nf
     tabcols in.tab all n > out.tab
 .fi
+or in one long row:
+.nf
+    tabcols in.tab all n | tabtranspose - - > out.tab
+.fi
 
 .SH "SEE ALSO"
-tabrows(1NEMO), tabmath(1NEMO), tabs(1NEMO), tabtab(1NEMO), awk(1), column(1)
+tabrows(1NEMO), tabtranspos(1NEMO), tabmath(1NEMO), tabs(1NEMO), tabtab(1NEMO), awk(1), column(1)
 
 .SH "FILES"
 src/kernel/tab/tabcols.c   source code
@@ -71,4 +88,5 @@ Peter Teuben
 26-Jan-00	V1.0 Created 	PJT
 9-apr-09	V2.0 out=- now default and last argument	PJT
 5-may-2022	V2.1 converted to table V2 interface	PJT
+10-sep-2024	V2.4 added colsepin=	PJT
 .fi

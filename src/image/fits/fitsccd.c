@@ -69,7 +69,7 @@ string defv[] = {
     "relcoords=f\n      Use relative (to crpix) coordinates instead abs",
     "axistype=1\n       Force axistype 0 (old, crpix==1) or 1 (new, crpix as is)",
     "altr=f\n           Switch to ALTR wcs",
-    "VERSION=5.5\n	6-sep-2023 PJT",
+    "VERSION=5.6\n	22-jul-2024 PJT",
     NULL,
 };
 
@@ -473,6 +473,13 @@ void make_fitheader(FITS *fitsfile, imageptr iptr, bool Qrel, bool Qout, bool Qa
       Dz(iptr) = cdelt3;
       Zmin(iptr) = altrval;
     }
+    if (fitexhd(fitsfile,"VLSR")) {
+      fitrdhdr(fitsfile,"VLSR",&tmpr,0.0);
+      dprintf(0,"VLSR %g\n",tmpr);
+      Vlsr(iptr) = tmpr;
+    }
+
+    
 
     fitrdhdr(fitsfile,"DATAMIN",&tmpr,0.0); 
     MapMin(iptr) = *data_min = tmpr;

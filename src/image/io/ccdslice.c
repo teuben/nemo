@@ -18,11 +18,11 @@ string defv[] = {	/* keywords + help string for user interface */
     "in=???\n       Input filename (image)",
     "out=???\n      Output filename (image)",
     "zvar=z\n       Slice variable (x,y,z)",
-    "zrange=\n      Slices to select (1..n)",
+    "zrange=\n      Slices to select (1..n) (<0 for every zrange'th)",
     "zslabs=\n      Zmin,Zmax pairs in WCS to select",
     "zscale=1\n     Scaling applied to zslabs",
     "select=t\n     Select the planes for output (t) or de-select those (f)",
-    "VERSION=1.3c\n 11-may-2023 PJT",
+    "VERSION=1.4\n  26-aug-2023 PJT",
     NULL,
 };
 
@@ -40,7 +40,7 @@ void nemo_main(void)
 {
     imageptr iptr=NULL, optr=NULL;
     stream instr, outstr;
-    int *planes, mode=-1, i;
+    int *planes, mode=-1, i, j;
     real *slabs, zscale;
     string zvar;
     int nx=0, ny=0, nz=0, maxplane=0;
@@ -82,11 +82,26 @@ void nemo_main(void)
     zscale = getrparam("zscale");
 
     if (hasvalue("zrange")) {
+        // @todo   nz re-used  !!!
         nz = nemoinpi(getparam("zrange"),planes,maxplane);
         if (nz<1) 
             error("Bad syntax %d for zrange=%s",nz,getparam("zrange"));
 	if (nz>1 && ABS(planes[1]-planes[0]) > 1)
 	  warning("Stepping assumed to be regular as %d for WCS correction", planes[1]-planes[0]);
+	if (nz==1 && planes[0] < 0) {
+	  int dz = -planes[0];
+	  warning("New option zrange=%d maxplane=%d", planes[0], maxplane);
+	  for (i=0, j=0;  ;  i++, j+=dz) {
+	    if (i >= maxplane || j >= maxplane) {
+	      maxplane = i;
+	      break;
+	    }
+	    //dprintf(0,"planes %d %d\n", i+1, j+1);
+	    planes[i] = j+1;
+	  }
+	  dprintf(0,"New maxplane=%d :  %d to %d\n", maxplane, planes[0], planes[maxplane-1]);
+	  nz = maxplane;
+	}
     } else if (hasvalue("zslabs")) {
         nz = nemoinpr(getparam("zslabs"),slabs,maxplane);
         if (nz<1) 

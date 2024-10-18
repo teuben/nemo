@@ -1,0 +1,34 @@
+#! /bin/bash
+#
+# https://zenodo.org/records/10766405
+# https://iopscience.iop.org/article/10.3847/1538-4365/ad36c8#new_tab
+#
+
+git=1
+url=https://github.com/GiuliaMurgia03/Spectral-Weighting
+name=SpectralWeighting
+
+for arg in $*; do
+  export $arg
+done
+
+cd $NEMO/local
+
+if [ $git == 1 ]; then
+    if [ ! -d Spectral-Weighting ]; then
+        git clone $url Spectral-Weighting
+    fi
+    version=git
+else
+    echo no non-git
+    exit 1
+fi    
+
+cd Spectral-Weighting
+git pull
+
+# @todo inherit compiler from $NEMOLIB/makedefs
+g++ -o $NEMOBIN/$name src/*.cpp -lcfitsio
+
+echo 'Spectral-Weighting installed as $NEMOBIN/$name'
+echo "SpectralWeighting git `date`" >> $NEMO/opt/mknemo.log

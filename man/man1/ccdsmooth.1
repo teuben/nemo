@@ -20,15 +20,22 @@ create a beam file using \fIccdgen(1NEMO)\fP.
 .PP
 For more artistic versions of a smoothing operation, such as added
 noise and diffraction spikes for bright stars, see \fIccddiffract(1NEMO)\fP.
+.PP
+To decimate a smoothed cube,
+\fIccdslice(1NEMO)\fP can be used to decimate the resulting cube. See EXAMPLES below.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
-input file, in \fIImage(5)\fP format [no default]
+input file, in \fIImage(5)\fP format
+.br
+[no default]
 .TP
 \fBout=\fIout-file\fP
-output file, will be in \fIImage(5)\fP format [no default]
+output file, will be in \fIImage(5)\fP format
+.br
+[no default]
 .TP
 \fBgauss=\fIvalue\fP
 Beam size (FWHM, note FWHM = 2*sqrt(2*ln(2)) = 2.355 * sigma) of a 
@@ -37,8 +44,9 @@ kernel, in WCS units.
 Note this is size of the used smoothing kernel, NOT the resulting
 beam in the output map, which generally will be bigger depending on
 the pre-existing beam. 
-If this parameter is used, the parameter \fBsmooth\fP is
-ignored [default: not used].
+If this parameter is used, the parameter \fBsmooth\fP is ignored
+.br
+[default: not used].
 .TP
 \fBmoffat=\fIvalue\fP
 If given, this will be the FWHM of the Moffat smoothing function.
@@ -47,6 +55,7 @@ If given, this will be the FWHM of the Moffat smoothing function.
 Direction of smoothing. This gives the flexibility of smoothing in
 x, y and/or z separately. Note that when smoothing in more than one
 coordinate the \fIbeam\fP is forced to be the same in each dimension
+.br
 [default: xy].
 .TP
 \fBsmooth=\fIarray\fP
@@ -62,17 +71,22 @@ If used, this will be the (square) size of the Wiener filter.
 .TP
 \fBnsmooth=\fIvalue\fP
 Number of times the above smoothing kernel is applied over the data.
+.br
 [default: \fB1\fP].
 .TP
 \fBbad=\fIbad_value\fP
 Input pixel value which to skip in smoothing.
+.br
 [Default: not used]
 .TP
 \fBbeta=\fImoffat_beta\fP
-If used, this is the \fIbeta\fP parameter for the Moffat smoothing function. [Default: 4.765]
+If used, this is the \fIbeta\fP parameter for the Moffat smoothing function.
+.br
+[Default: 4.765]
 .TP
 \fBcut=\fIcutoff_value\fP
 Value at which to cutoff the gaussian beam. 
+.br
 [Default: \fB0.01\fP]
 .TP
 \fBbeam=\fP
@@ -84,7 +98,9 @@ is ignored, it's the pixels that count.
 
 .TP
 \fBmode=\fIedge_mode\fP
-Special edge smoothing mode (testing). [0]
+Special edge smoothing mode (testing).
+.br
+[0]
 
 .SH "EXAMPLES"
 Here is an example to compute the noise of an image with unity noise that has been smoothed
@@ -122,6 +138,15 @@ the cos(bmin/bmaj):
 .nf
     ccdgen beam1 gauss 1,5 size=33,33 pa=-30 inc="acosd(0.5)"
 .fi
+
+When a cube is smoothed, it make sense to decimate the resulting cube. See \fIccdslice(1NEMO)\fP for a
+method how to decimate. Here is an example of smoothing a cube with a boxcar of 6 channels, and decimating the cube by 6:
+.nf
+
+    fitsccd cube.fits - | ccdsmooth - - dir=z smooth=1/6::6 | ccdslice - cube6s.ccd zrange=-6
+
+.fi
+
 
 .SH "TIMING"
 .nf

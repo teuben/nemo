@@ -1,9 +1,12 @@
 .TH SNAPCMP 1NEMO "16 July 2009"
-.SH NAME
+
+.SH "NAME"
 snapcmp \- compare two N-body snapshots
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBsnapcmp in1=\fPsnap_file \fBin2=\fPsnap_file [parameter=value] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIsnapcmp\fP is a flexible tool for comparing two N-body snapshots on
 a particle by particle basis.  An arbitrary ``observable'' defined in
 terms of the basic components of a \fIbody\fP(3NEMO) may be specified
@@ -16,25 +19,30 @@ configuration-space displacements between each pair of particles.
 The program simply outputs eight numbers: time of the first snapshot,
 are the minimum, lower quartile, median, upper quartile, 
 maximum of the measured differences, and the mean and dispersion of the distribution.
-.SH PARAMETERS
-The following parameters are recognized.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin1=\fP\fIsnap_file1\fP
 .TP
 \fBin2=\fP\fIsnap_file2\fP
 Input data is read from \fIsnap_file1\fP and \fIsnap_file2\fP, which
-must be in \fIsnapshot\fP(5NEMO) format.  Default: none.
+must be in \fIsnapshot\fP(5NEMO) format.
+.br
+Default: none.
 .TP
 \fBtime1=\fP\fItime_range1\fP
 .TP
 \fBtime2=\fP\fItime_range2\fP
 Data with time values within \fItime_range1\fP and \fItime_range2\fP
 will be read from \fIsnap_file1\fP and \fIsnap_file2\fP, respectively.
+.br
 [Default: \fBall\fP].
 .TP
 \fBobs=\fP\fIobs_expression\fP
 \fIobs_expression\fP is the observable used to compare the particles.
 See \fIbodytrans\fP(1NEMO) for the form of \fIobs_expression\fP.
+.br
 Default: \fBr\fP, which compares the positions of particles.
 .TP
 \fBdiffpart=\fP\fIflag\fP
@@ -42,28 +50,57 @@ If \fIflag\fP is true, particles are compared by subtracting the
 components of one from the components of the other, and evaluating the
 observable \fBobs\fP on this ``differenced particle''. Otherwise,
 \fBobs\fP is evaluated for each particle, and the results are
-differenced.  Default: \fBtrue\fP.
+differenced.
+.br
+Default: \fBtrue\fP.
 .TP
 \fBrelative=\fP\fIflag\fP
 If \fIflag\fP is true, the differenced observable is divided by the
 value of \fBobs\fP computed from the particle in \fIsnap_file1\fP.
-Otherwise, the differenced observable is used.  Default: \fBfalse\fP.
+Otherwise, the differenced observable is used.
+.br
+Default: \fBfalse\fP.
 .TP
 \fBlog=t|f\fP
 Show (10-base) logarithms of the values instead of their linear values
+.br
 Default: false.
+.TP
+\fBtime0=t|f\fP
+Also print time=0?
+.br
+Default: true
 
-.SH SEE ALSO
+.SH "EXAMPLES"
+
+Two random Plummer spheres are compared in the X coordinate:
+.EX
+
+   $ mkplummer p1 1000 seed=123
+   $ mkplummer p2 1000 seed=456
+   $ snapcmp p1 p2 obs=x
+
+     # time  Min  Qlow Median Qhigh  Max   Mean Sigma
+     # obs=x (linear scaling)
+     0   -12.7064 -0.565549 -0.0109623 0.611036 11.8118  -1.15463e-16 1.61843
+     
+.EE
+
+
+.SH "SEE ALSO"
 snapcmphist(1NEMO), snapdiff(1NEMO), bodytrans(3NEMO), snapshot(5NEMO)
-.SH FILES
+
+.SH "FILES"
 .nf
 src/nbody/reduc/snapcmp.c      source code for snapcmp, snapcmphist and snapcmpplot
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes.
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 23-may-88	V1.0 created?	Josh
 29-mar-94	V1.3 added time to output	Peter
 15-apr-04	V1.5 added headline= to the plotting versions and  mean,sigma  to the output	PJT

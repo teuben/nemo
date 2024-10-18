@@ -11,7 +11,7 @@
 #       tar --lzip -xf gnuastro-0.17.81-1a40.tar.lz 
 
 # version is hidden in the filename, if not, use git
-version=0.22    # also uses 'latest' now
+version=0.23    # also uses 'latest' now
 wget=wgetc
 check=0
 url=https://git.savannah.gnu.org/git/gnuastro.git

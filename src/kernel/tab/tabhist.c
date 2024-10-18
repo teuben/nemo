@@ -113,7 +113,7 @@ string defv[] = {
     "scale=1\n                    Scale factor for data",
     "out=\n                       Optional output file to select the robust points",
     "pyplot=\n                    Template python plotting script",    
-    "VERSION=8.0c\n		  18-oct-2023 PJT",
+    "VERSION=8.0d\n		  29-aug-2024 PJT",
     NULL
 };
 
@@ -357,10 +357,10 @@ local void read_data()
 
 local void histogram(void)
 {
-  int i,j,k, l, kmax, lcount = 0;
+  int i,j,k, l, lcount = 0;
   real count[MAXHIST];
   int under, over;
-  real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax;
+  real xdat,ydat,xplt,yplt,dx,r,sum,sigma2, q, qmax, kmax;
   real mean, sigma, skew, kurt, h3, h4, lmin, lmax, q1, q2, q3, mad=0;
   real meand, sigmad;
   real rmean, rsigma, rrange[2];
