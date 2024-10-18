@@ -23,7 +23,7 @@ string defv[] = {
   "n=3\n          Half size of box inside correlation box to find center",
   "clip=\n        Only use values above this clip level",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.2\n  4-aug-2023 PJT",
+  "VERSION=0.3\n  18-apr-2024 PJT",
   NULL,
 };
 
@@ -191,7 +191,7 @@ local void do_cross(int l0, int l, int n)
     real xcen = ix0-box+sumx;
     real ycen = iy0-box+sumy;
     dprintf(0,"Center at: %g %g\n",xcen,ycen);
-    printf("%g %g  %g %g  %d %d\n",xcen,ycen,sumx,sumy, ix0,iy0);	   
+    printf("%g %g  %g %g  %d %d  %g\n",xcen,ycen,sumx,sumy, ix0,iy0, MapMax(optr));	   
     
     if (badvalues)
     	warning("There were %d bad operations in dofie",badvalues);
