@@ -1,0 +1,42 @@
+#! /usr/bin/bash
+#
+# sudo apt install build-essential
+# sudo apt install libmpfr-dev libgmp3-dev libmpc-dev -y
+
+# --enable-checking=release (esp. useful for compile-time tests
+#      as it disables some consistency checks in the compile),
+# --disable-bootstrap (builds faster, but disables some consistency checks).
+#
+#  ~2h   dart76 just l=c and j=1
+
+v=14.1.0               # version
+a=x86_64-linux-gnu     # architecture
+j=4                    # number of processors for makea
+l=c,c++,fortran        # languages to compile
+l=c
+
+for arg in $*; do
+  export $arg
+done
+    
+cd $NEMO/local
+
+tgz=gcc-${v}.tar.gz
+if [ ! -e $tgz ]; then
+   wget http://ftp.gnu.org/gnu/gcc/gcc-${v}/$tgz
+fi
+
+tar -xf $tgz
+cd gcc-${v}
+./configure -v \
+            --build=${a} \
+            --host=${a} \
+            --target=${a} \
+            --prefix=$NEMO/opt/gcc-${v} \
+            --enable-checking=release \
+            --enable-languages=$l \
+            --disable-multilib \
+            --program-suffix=-${v}
+make -j $j
+make install
+
