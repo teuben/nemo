@@ -66,7 +66,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0b\n           2-sep-2021 PJT",
+    "VERSION=3.0c\n           6-jun-2024 PJT",
     NULL,
 };
 
@@ -74,7 +74,7 @@ string usage="construct a Plummer model";
 
 /*---------------------------------------------------------------------------
  *  main  --  a tool to make a Plummer model, by invoking mkplummer()
- *            note:  only for 3 dimensions and Carthesian coordinates
+ *            note:  only for 3 dimensions and Cartesian coordinates
  *---------------------------------------------------------------------------
  */
 void nemo_main(void)
@@ -136,8 +136,9 @@ void nemo_main(void)
 	init_xrandom(sseed);
       }
       btab[i] = mkplummer(nbody, mlow, mfrac, rfrac, seed, snap_time, zerocm, scale,
-		       quiet,mrange,mfunc);
+			  quiet,mrange,mfunc);
     }
+    
     if (mode > 0) {
       bits = (MassBit | PhaseSpaceBit | TimeBit);
       sprintf(hisline,"init_xrandom: seed used %d",seed);
