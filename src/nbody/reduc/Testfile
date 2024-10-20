@@ -14,7 +14,7 @@ clean:
 
 NBODY = 10
 
-all:	snap.in hack.out $(BIN)
+all:	snap.in snap2.in hack.out $(BIN)
 
 snap.in:
 	@echo Creating $@
