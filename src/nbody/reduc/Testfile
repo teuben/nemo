@@ -21,6 +21,11 @@ snap.in:
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 	@bsf snap.in  '0.0140845 0.896875 -4.6523 4.80925 71'
 
+snap2.in:
+	@echo Creating $@
+	$(EXEC) mkplummer snap2.in $(NBODY) seed=1234
+	@bsf snap2.in  '0.0140845 0.536539 -1.63453 1.89357 71'
+
 cube.in: snap.in
 	@echo Creating $@
 	$(EXEC) snaprotate snap.in - 30,45,20 zyz | $(EXEC) snapgrid - cube.in nx=32 ny=32 nz=32 zrange=-2:2
@@ -54,6 +59,11 @@ snapdiagplot:  hack.out
 snapmradii: hack2.out
 	@echo Running $@
 	$(EXEC) snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
+
+snapcmp: snap.in snap2.in
+	@echo Running $@
+	$(EXEC) snapcmp snap.in snap2.in ; nemo.coverage snapcmp.c
+	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
 
 radprof:   snap.in
 	@echo Running $@
