@@ -59,6 +59,9 @@ snapdiagplot:  hack.out
 snapmradii: hack2.out
 	@echo Running $@
 	$(EXEC) snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
+	$(EXEC) snapmradii snap.in
+	@echo '0 0.276882 0.43351 0.5547 0.715477 0.789928 0.790888 1.05668 1.35295 4.76802'
+
 
 snapcmp: snap.in snap2.in
 	@echo Running $@
