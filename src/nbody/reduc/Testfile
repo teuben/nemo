@@ -10,11 +10,11 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f snap.in cube.in hack.out hack2.out
+	@rm -f snap.in snap2.in cube.in hack.out hack2.out
 
 NBODY = 10
 
-all:	snap.in snap2.in hack.out $(BIN)
+all:	snap.in hack.out $(BIN)
 
 snap.in:
 	@echo Creating $@
