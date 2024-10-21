@@ -67,7 +67,7 @@ extern void pcstep(body *btab, int nb, real *tptr, force_proc force, real dt);
 extern void moveaccel(body *btab, int nb);
 
 /* quadforce.c */
-extern int quadforce(body *btab, int nb, real eps1, real eps2);
+extern void quadforce(body *btab, int nb, real eps1, real eps2);
 
 /* quadinter.c */
-extern int quadinter(Body *btab, int nb, real eps1, real eps2);
+extern void quadinter(Body *btab, int nb, real eps1, real eps2);

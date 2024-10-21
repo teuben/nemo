@@ -22,13 +22,15 @@ string defv[] = {
     "quad=\n			output file with field tables",
     "eps_r=0.05\n		radial softening parameter",
     "eps_t=0.07\n		tangential softening parameter",
-    "VERSION=1.4\n		6-jan-2022 PJT",
+    "VERSION=1.4a\n		20-oct-2024 PJT",
     NULL,
 };
 
 string usage="quadrupole-order force calculation of an N-body system.";
 
-nemo_main()
+void put_quadfield(stream quadstr, real tsnap, real eps1, real eps2);
+
+void nemo_main()
 {
     stream instr, outstr, quadstr;
     Body *btab = NULL, *bp;
@@ -64,9 +66,7 @@ nemo_main()
     }
 }
 
-put_quadfield(quadstr, tsnap, eps1, eps2)
-stream quadstr;
-real tsnap, eps1, eps2;
+void put_quadfield(stream quadstr, real tsnap, real eps1, real eps2)
 {
     put_set(quadstr, "QuadField");
     put_data(quadstr, "Time", RealType, &tsnap, 0);
