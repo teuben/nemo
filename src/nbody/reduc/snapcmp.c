@@ -136,6 +136,8 @@ void nemo_main()
 	if (dt > small_dt)
 	  warning("times = %f, %f are different (%g)", tsnap1, tsnap2, dt);
       }
+      dprintf(0,"time1,2: %g %g   %g %g nout %d\n",time1,time2,tsnap1,tsnap2,nout);
+      
       if (!Qtime0 && time1==0 && time2==0) continue;
       if (!Qtime0 && nout==0) continue;      
       if (bits1 != bits2)
@@ -151,7 +153,7 @@ void nemo_main()
       snapcmpplot(result, btab1, nbody1, tsnap1);
 #endif
       nout++;
-    }
+    } // for(;;)
 }
 
 local real *snapcmp(Body *btab1, Body *btab2, int nbody, real tsnap)
