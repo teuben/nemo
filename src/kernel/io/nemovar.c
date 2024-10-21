@@ -32,6 +32,8 @@ void nemo_main()
   if (nemovar == NULL) error("$NEMOVAR was not set");
   dprintf(1,"nemovar: %s\n", nemovar);
 
+  if (hasComment)
+    warning("comment %s not yet used", comment);
 
   // bug or feature, nemovar currently needs to exist
   if (!fexist(nemovar)) {
