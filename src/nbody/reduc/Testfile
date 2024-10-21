@@ -1,5 +1,5 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapplot3 snapdiagplot snapplotv snapmradii radprof real snapfit snapprint
+BIN = snapplot snapplot3 snapdiagplot snapplotv snapmradii snapmstat radprof real snapfit snapprint snapcmp
 NEED = $(BIN) hackcode1 mkplummer tabplot snapfour snapgrid snaprotate
 
 help:
@@ -62,11 +62,15 @@ snapmradii: hack2.out
 	$(EXEC) snapmradii snap.in
 	@echo '0 0.276882 0.43351 0.5547 0.715477 0.789928 0.790888 1.05668 1.35295 4.76802'
 
+snapmstat: snap.in
+	@echo Running $@
+	$(EXEC) snapmstat snap.in ; nemo.coverage snapmradii.c
+
 
 snapcmp: snap.in snap2.in
 	@echo Running $@
 	$(EXEC) snapcmp snap.in snap2.in ; nemo.coverage snapcmp.c
-	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
+<	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
 
 radprof:   snap.in
 	@echo Running $@
