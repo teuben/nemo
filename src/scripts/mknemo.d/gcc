@@ -22,7 +22,7 @@ l=c
 for arg in $*; do
   export $arg
 done
-    
+
 cd $NEMO/local
 
 tgz=gcc-${v}.tar.gz
@@ -44,3 +44,14 @@ cd gcc-${v}
 make -j $j
 make install
 
+
+
+rc=$NEMO/opt/gcc-${v}/gcc_start.sh
+
+echo "_r=$NEMO/opt/gcc-${v}"                               > $rc
+echo 'export PATH=$_r/bin:$PATH'                          >> $rc
+echo 'export LD_LIBRARY_PATH=$_r/lib64:$LD_LIBRARY_PATH'  >> $rc
+    
+echo "Wrote $rc"
+
+echo gcc '"'$v'"' `date` >> $NEMO/opt/mknemo.log
