@@ -58,7 +58,7 @@ string defv[] = {
     "contour=\n         Optional Output image file with chi-squared",
     "iter=0\n           number of more iterations after best on matrix",
     "times=all\n        Times selected from snapshot models",
-    "VERSION=0.7d\n     15-jul-04 PJT",
+    "VERSION=0.7e\n     20-oct-2024 PJT",
     NULL,
 };
 
@@ -102,8 +102,12 @@ void snap_fit(void);
 int write_snapshot(stream outstr, int nbody, body *btab, real t1, real t2, real rscale, real vscale);
 void yrotate(matrix mat, real theta);
 void zrotate(matrix mat, real theta);
-int eigenframe(vector frame[], matrix mat);
-int invert(vector frame[]);
+void eigenframe(vector frame[], matrix mat);
+void invert(vector frame[]);
+
+extern void eigsrt(); // (d,v,n)
+extern void matinv(); // real *, int, int,real *);
+extern void jacobi(); // (a,n,d,v,nrot)
 
 /* -------------------------------------------------------------------------- */
 
@@ -381,9 +385,7 @@ real start, incr;
     return a;
 }
 
-void printvec(name, vec)
-string name;
-vector vec;
+void printvec(string name, vector vec)
 {
         dprintf(my_debug,"%s  %10.5f  %10.5f  %10.5f  %10.5f\n",
                    name, absv(vec), vec[0], vec[1], vec[2]);
@@ -545,12 +547,8 @@ void snap_fit()
 				rscale/w_rscale, vscale/w_vscale);
 
 }
-
-write_snapshot( outstr, nbody, btab, t1, t2, rscale, vscale)
-stream outstr;
-int nbody;
-Body *btab;
-real t1, t2, rscale,vscale;
+//outstr, nbody, btab, t1, t2, rscale, vscale)
+int write_snapshot(stream outstr, int nbody, Body *btab, real t1, real t2, real rscale, real vscale)
 {
     warning("output snapshot not supported yet");
 }
@@ -564,9 +562,7 @@ real t1, t2, rscale,vscale;
  *          around the y-axis
  */
 
-void yrotate(mat,theta)
-matrix mat;
-real theta;
+void yrotate(matrix mat,real theta)
 {
     SETMI(mat);         /* unit matrix */
     mat[2][2] =    mat[0][0] = cos(DEG2RAD * theta);
@@ -580,9 +576,7 @@ real theta;
  *          around the y-axis
  */
 
-void zrotate(mat,theta)
-matrix mat;
-real theta;
+void zrotate(matrix mat, real theta)
 {
     SETMI(mat);         /* unit matrix */
     mat[1][1] =    mat[0][0] = cos(DEG2RAD * theta);
@@ -595,9 +589,7 @@ real theta;
 
 #if 1
 
-eigenframe(frame, mat)          /* float version */
-vector frame[];
-matrix mat;
+void eigenframe(vector frame[], matrix mat)
 {   
     float **q, *d, **v;
     int i, j, nrot;
@@ -617,9 +609,7 @@ matrix mat;
 
 #else
 
-eigenframe(frame, mat)          /* double version */
-vector frame[];
-matrix mat;
+void eigenframe(vector frame[], matrix mat)
 {   
     double **q, *d, **v;
     int i, j, nrot;
@@ -638,8 +628,7 @@ matrix mat;
 } 
 #endif 
 
-invert(frame)
-vector frame[];
+void invert(vector frame[])
 {
     real mat[NDIM*NDIM], det;
 

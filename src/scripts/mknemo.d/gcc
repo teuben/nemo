@@ -9,18 +9,24 @@
 #
 #  ~2h   dart76 just l=c and j=1
 
-v=14.1.0               # version
+V=10.5.0               # July 2023
+v=11.5.0
+v=12.4.0
+v=13.3.0
+v=14.2.0               # version (mid 2024)
 a=x86_64-linux-gnu     # architecture
+b=86                   # lib name
 j=4                    # number of processors for makea
 l=c,c++,fortran        # languages to compile
-l=c
 
 for arg in $*; do
   export $arg
 done
-    
+
 cd $NEMO/local
 
+root=$NEMO/opt/gcc-${v}
+lib=lib$b
 tgz=gcc-${v}.tar.gz
 if [ ! -e $tgz ]; then
    wget http://ftp.gnu.org/gnu/gcc/gcc-${v}/$tgz
@@ -37,6 +43,18 @@ cd gcc-${v}
             --enable-languages=$l \
             --disable-multilib \
             --program-suffix=-${v}
+make clean
 make -j $j
 make install
 
+
+
+rc=$NEMO/opt/gcc-${v}/gcc_start.sh
+
+echo "_r=$root"                                            > $rc
+echo 'export PATH=$_r/bin:$PATH'                          >> $rc
+echo 'export LD_LIBRARY_PATH=$_r/$lib:$LD_LIBRARY_PATH'   >> $rc
+    
+echo "Wrote $rc"
+
+echo gcc '"'$v'"' `date` >> $NEMO/opt/mknemo.log

@@ -28,7 +28,7 @@ string defv[] = {
     "sort=f\n       Sort masses before processing?",    
     "species=100\n  Maximum number of species",
     "show=f\n       Show only the select= for glnemo2",
-    "VERSION=2.1\n  28-nov-2023 PJT",
+    "VERSION=2.1a\n 20-oct-24 PJT",
     NULL,
 };
 
@@ -36,7 +36,7 @@ string usage="report some statistics of the masses in a snapshot";
 
 
 local void snapsort(Body *, int);
-local int rank_mass(Body *, Body *);
+local int rank_mass(const void *, const void *);
 
 void nemo_main(void)
 {
@@ -113,8 +113,11 @@ local void snapsort(Body *btab, int nbody)
     qsort(btab, nbody, sizeof(Body), rank_mass);
 }
 
-local int rank_mass(Body *a, Body *b)
+//local int rank_mass(Body *a, Body *b)
+local int rank_mass(const void *ap, const void *bp)
 {
+    Body *a = (Body *) ap;
+    Body *b = (Body *) bp;
     return (Mass(a) < Mass(b) ? -1 : Mass(a) > Mass(b) ? 1 : 0);
 }
 
