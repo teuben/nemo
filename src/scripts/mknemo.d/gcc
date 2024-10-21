@@ -15,6 +15,7 @@ v=12.4.0
 v=13.3.0
 v=14.2.0               # version (mid 2024)
 a=x86_64-linux-gnu     # architecture
+b=86                   # lib name
 j=4                    # number of processors for makea
 l=c,c++,fortran        # languages to compile
 
@@ -24,6 +25,8 @@ done
 
 cd $NEMO/local
 
+root=$NEMO/opt/gcc-${v}
+lib=lib$b
 tgz=gcc-${v}.tar.gz
 if [ ! -e $tgz ]; then
    wget http://ftp.gnu.org/gnu/gcc/gcc-${v}/$tgz
@@ -48,9 +51,9 @@ make install
 
 rc=$NEMO/opt/gcc-${v}/gcc_start.sh
 
-echo "_r=$NEMO/opt/gcc-${v}"                               > $rc
+echo "_r=$root"                                            > $rc
 echo 'export PATH=$_r/bin:$PATH'                          >> $rc
-echo 'export LD_LIBRARY_PATH=$_r/lib64:$LD_LIBRARY_PATH'  >> $rc
+echo 'export LD_LIBRARY_PATH=$_r/$lib:$LD_LIBRARY_PATH'   >> $rc
     
 echo "Wrote $rc"
 
