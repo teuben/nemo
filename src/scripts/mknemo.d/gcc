@@ -17,7 +17,6 @@ v=14.2.0               # version (mid 2024)
 a=x86_64-linux-gnu     # architecture
 j=4                    # number of processors for makea
 l=c,c++,fortran        # languages to compile
-l=c
 
 for arg in $*; do
   export $arg
@@ -41,6 +40,7 @@ cd gcc-${v}
             --enable-languages=$l \
             --disable-multilib \
             --program-suffix=-${v}
+make clean
 make -j $j
 make install
 
