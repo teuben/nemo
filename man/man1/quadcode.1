@@ -1,9 +1,12 @@
-.TH QUADCODE 1NEMO "6 May 1992"
-.SH NAME
+.TH QUADCODE 1NEMO "20 Oct 2024"
+
+.SH "NAME"
 quadcode \- global quadrupole-order N-body code integrator
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBquadcode\fP \fBin=\fP\fIsnapshot\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIquadcode\fP is an equal-timestep implementation of an
 N-body code where the forces and potential are computed
 from a potential expansion in spherical harmonics
@@ -12,8 +15,9 @@ it multipole expansion). See also a followup in
 Bontekoe & van Albada (MNRAS 224, 349 (1987)) and a rebuttal
 in Zaritsky & White (MNRAS 235, 289 (1988).
 See also Hernquist, L. & Barnes, J. \fIAp.J.\fP \fB349\fP, 562 (1990)
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin\fP=\fIin-file\fP
 Snapshot with initial conditions. No default.
@@ -82,25 +86,32 @@ to be recompiled, for example:
 (Note that all \fIquad*\fP programs need to (should)
 be recompiled if the maximum allowed number of bodies will
 be changed.
-.SH SEE ALSO
-quadforce(1NEMO), quadinter(1NEMO), CSG(1NEMO), octcode(1NEMO) 
-.SH ADS
+
+.SH "SEE ALSO"
+quadforce(1NEMO), quadinter(1NEMO), CSG(1NEMO), octcode(1NEMO)
+
+.SH "ADS"
 @ads 1983ApJ...274...53W closely derived code?  or should we link White's  1978MNRAS.184..185W paper
-.SH BUGS
+
+.SH "BUGS"
 When a \fBrestart\fP is specified, values must be given for \fBALL\fP
 legal parameters which do not take default values.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua E. Barnes.
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2i
 src/nbody/evolve/multicode/	exported source code
 usr/josh/nbody/multicode/	Josh' original source code
 .fi
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 4-mar-89	V1.2 some formal NEMO version	JEB
 12-nov-91	V1.3 new NEMO V2. location in $NEMO/src tree	PJT
 6-may-92	document improved	PJT
+20-oct-2024	V1.4a gcc-14 prototype fixed	PJT
 .fi
