@@ -70,7 +70,7 @@ snapmstat: snap.in
 snapcmp: snap.in snap2.in
 	@echo Running $@
 	$(EXEC) snapcmp snap.in snap2.in ; nemo.coverage snapcmp.c
-<	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
+	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
 
 radprof:   snap.in
 	@echo Running $@
