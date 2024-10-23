@@ -1,0 +1,17 @@
+#
+# How to Install the Boost Library in C++ on Ubuntu or any other Linux Distribution
+#  https://trendoceans.com/install-boost-library-for-c/
+
+#   sudo apt install libboost-all-dev
+
+wget=https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
+
+# https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2
+
+#h ttps://github.com/boostorg/boost/tags
+
+
+tar xvf boost_1_81_0.tar.gz 
+./bootstrap.sh --prefix=/usr/
+./b2
+sudo ./b2 install
