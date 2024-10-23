@@ -18,7 +18,7 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.9 -- 19-feb-2024"
+echo "install_nemo.sh:  Version 1.10 -- 20-oct-2024"
 
  opt=0                                                # install some optional mknemos= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
@@ -141,7 +141,7 @@ fi
 
 # pick a configure
 
-CC=gcc$v CXX=g++$v FC=gfortran$v ./configure $opt $with_yapp
+CC=gcc$v CXX=g++$v F77=gfortran$v ./configure $opt $with_yapp
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib     # ok
 #./configure $opt --enable-debug --with-yapp=pgplot --with-pgplot-prefix=/usr/lib   --enable-pedantic
 #./configure $opt --enable-debug --with-yapp=pgplot
