@@ -5,7 +5,8 @@
 
 #   sudo apt install libboost-all-dev
 
-#   but if you MUST do it from source
+#   but if you MUST do it from source, here's the recipe
+#   on a fast machine this takes about 2 mins
 
 v=1_81_0   # dec-2022
 v=1_86_0   # aug-2024
@@ -20,15 +21,17 @@ cd $NEMO/local
 vv=$(echo $v | sed s/_/./g)
 url=$(printf $w $vv $v)
 echo url=$url
-
-if [ ! -e  $url ]; then
-   wget $url
-fi
-
 tgz=$(basename $url)
 
+if [ ! -e  $tgz ]; then
+    wget $url
+else
+    echo "Reusing existing $tgz"
+fi
 
-tar xvf $tgz
+
+
+tar xf $tgz
 cd boost_$v
 
 # --with-toolset
