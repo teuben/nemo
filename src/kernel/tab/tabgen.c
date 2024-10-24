@@ -68,40 +68,6 @@ string add_header(int nc, string header)
 
 }
 
-string add_header(string header)
-{
-  char *token;
-  char *result = malloc(100);
-  result[0] = '\0';
-  int first = 1;
-  int arr_len = 0;
-
-  token = strtok(header, ",");
-
-  strcat(result, "| ");
-  while (token != NULL) {
-        if (!first) {
-            strcat(result, " | ");
-        }
-        strcat(result, token);
-        first = 0;
-        arr_len++;
-        token = strtok(NULL, ",");
-  }
-
-  strcat(result, " |");
-  strcat(result, "\n");
-  strcat(result, "| double");
-
-  for (int i = 1; i < arr_len; i++) {
-        strcat(result, " | double");
-  }
-
-  strcat(result, " |");
-
-  return result;
-}
-
 void nemo_main()
 {
   stream ostr = stropen(getparam("out"),"w");
