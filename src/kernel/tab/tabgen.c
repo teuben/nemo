@@ -35,6 +35,39 @@ local real linear(real c1, real c2)
   return count;
 }
 
+string add_header(int nc, string header)
+{
+  char *result = malloc(100);
+  result[0] = '\0';
+  int first = 1;
+  int arr_len = 0;
+
+  strcat(result, "| ");
+  for (int i = 0; i < nc; i++) {
+        char col_num[100];
+        if (!first) {
+            strcat(result, " | ");
+        }
+        sprintf(col_num, "col%d", (i+1));
+        strcat(result, col_num);
+        first = 0;
+        arr_len++;
+  }
+
+  strcat(result, " |");
+  strcat(result, "\n");
+  strcat(result, "| double");
+
+  for (int i = 1; i < arr_len; i++) {
+        strcat(result, " | double");
+  }
+
+  strcat(result, " |");
+
+  return result;
+
+}
+
 string add_header(string header)
 {
   char *token;
