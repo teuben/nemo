@@ -1,17 +1,40 @@
+#! /usr/bin/env bash
 #
 # How to Install the Boost Library in C++ on Ubuntu or any other Linux Distribution
 #  https://trendoceans.com/install-boost-library-for-c/
 
 #   sudo apt install libboost-all-dev
 
-wget=https://boostorg.jfrog.io/artifactory/main/release/1.82.0/source/boost_1_82_0.tar.bz2
+#   but if you MUST do it from source
 
-# https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.bz2
+v=1_81_0   # dec-2022
+v=1_86_0   # aug-2024
+w=https://boostorg.jfrog.io/artifactory/main/release/%s/source/boost_%s.tar.gz
 
-#h ttps://github.com/boostorg/boost/tags
+
+#https://github.com/boostorg/boost/tags
+
+cd $NEMO/local
 
 
-tar xvf boost_1_81_0.tar.gz 
-./bootstrap.sh --prefix=/usr/
+vv=$(echo $v | sed s/_/./g)
+url=$(printf $w $vv $v)
+echo url=$url
+
+if [ ! -e  $url ]; then
+   wget $url
+fi
+
+tgz=$(basename $url)
+
+
+tar xvf $tgz
+cd boost_$v
+
+# --with-toolset
+./bootstrap.sh --prefix=$NEMO/opt/
+
 ./b2
-sudo ./b2 install
+./b2 install
+
+echo boost $v `date` >> $NEMO/opt/mknemo.log
