@@ -14,7 +14,7 @@ string defv[] = {
     "sep=s\n       column separator (s=space t=tab c=comma v=vertical bar)",
     "addrow=f\n    Add row number (1=first) as first column?",
     "VERSION=0.8\n 14-feb-2024 PJT",
-    "header=None\n     Add a dummy header in a given style [ecsv, ipac]",
+    "header=\n     Add a dummy header in a given style [ecsv, ipac]",
     NULL,
 };
 
@@ -37,7 +37,32 @@ local real linear(real c1, real c2)
 
 string add_header(string header)
 {
-  return header;
+  char *token;
+  char *result = malloc(100);
+  result[0] = '\0';
+  int first = 1;
+  int arr_len = 0;
+
+  token = strtok(header, ",");
+
+  while (token != NULL) {
+        if (!first) {
+            strcat(result, " | ");
+        }
+        strcat(result, token);
+        first = 0;
+        arr_len++;
+        token = strtok(NULL, ",");
+  }
+
+  strcat(result, "\n");
+  strcat(result, "double");
+
+  for (int i = 1; i < arr_len; i++) {
+        strcat(result, " | double");
+  }
+
+  return result;
 }
 
 void nemo_main()
@@ -53,9 +78,11 @@ void nemo_main()
   string seps = getparam("sep");
   bool Qrow = getbparam("addrow");
   char sep[8];
-  string header = getparam("header");
 
-  fprintf(ostr, "# %s\n", add_header(header));
+  if (hasvalue("header")) {
+    string header = getparam("header");
+    fprintf(ostr, "# %s\n", add_header(header));
+  }
 
   if (seps[0] == 'c') strcpy(sep,",");
   else if (seps[0] == 's') strcpy(sep," ");
