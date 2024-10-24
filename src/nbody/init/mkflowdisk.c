@@ -46,7 +46,7 @@ string defv[] = {
     "test=f\n             test shape of spiral (all particles at 0 phase offset)",
     "constant=f\n         force vt constant in rotating frame ?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.5\n	  1-jan-04 PJT",
+    "VERSION=1.5a\n	  20-oct-2024 PJT",
     NULL,
 };
 
@@ -70,6 +70,11 @@ local Body *disk = NULL;
 local real theta[361], dens[361];
 
 local proc potential;
+
+void   writegalaxy(stream outstr);
+void   setdensity(void);
+double density(double t);
+void   testdisk(int n);
 
 
 void nemo_main()
@@ -123,7 +128,7 @@ void nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-writegalaxy(stream outstr)
+void writegalaxy(stream outstr)
 {
     real tsnap = 0.0;
     int bits = MassBit | PhaseSpaceBit | TimeBit;
@@ -132,7 +137,7 @@ writegalaxy(stream outstr)
     put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
 }
 
-setdensity(void) 
+void setdensity(void) 
 {
   int i, ndim=NDIM;
   double pos_d[NDIM], vel_d[NDIM], den_d, time_d = 0.0;
@@ -197,10 +202,10 @@ double density(double t)
  * density test disk.  
  */
 
-testdisk(int n)
+void testdisk(int n)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, mass_i, rring;
+    real rmin2, rmax2, r_i, theta_i, mass_i;
     real cost, sint;
     int i, ndim=NDIM;
     double pos_d[NDIM], vel_d[NDIM], pot_d, time_d = 0.0;
@@ -209,7 +214,6 @@ testdisk(int n)
     if (disk == NULL) disk = (Body *) allocate(ndisk * sizeof(Body));
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
-    rring = 0.5*(rmin+rmax);
     mass_i = 1.0 / (real)ndisk;
 
     for (dp=disk, i = 0; i < ndisk; dp++, i++) {

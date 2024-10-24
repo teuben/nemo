@@ -23,7 +23,7 @@ string defv[] = {
   "n=3\n          Half size of box inside correlation box to find center",
   "clip=\n        Only use values above this clip level",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.2\n  4-aug-2023 PJT",
+  "VERSION=0.3\n  18-oct-2024 PJT",
   NULL,
 };
 
@@ -72,8 +72,8 @@ void nemo_main()
     instr   = stropen(fnames[0],"r");    /* open file */
     iptr[0] = NULL;        /* make sure to init it right */
     read_image (instr, &iptr[0]);
-    dprintf(0,"Image %d: pixel size %g %g   minmax %g %g\n",
-		0, Dx(iptr[0]),Dy(iptr[0]),MapMin(iptr[0]),MapMax(iptr[0]));
+    dprintf(0,"Image %d: pixel size %g %g   minmax %g %g [%s]\n",
+	    0, Dx(iptr[0]),Dy(iptr[0]),MapMin(iptr[0]),MapMax(iptr[0]),fnames[0]);
     strclose(instr);
 
     if (hasvalue("center")) {
@@ -101,8 +101,8 @@ void nemo_main()
         instr   = stropen(fnames[ll],"r");    /* open file */
         iptr[ll] = NULL;        /* make sure to init it right */
         read_image (instr, &iptr[ll]);
-	dprintf(0,"Image %d: pixel size %g %g   minmax %g %g\n",
-		ll, Dx(iptr[ll]),Dy(iptr[ll]),MapMin(iptr[ll]),MapMax(iptr[ll]));
+	dprintf(0,"Image %d: pixel size %g %g   minmax %g %g [%s]\n",
+		ll, Dx(iptr[ll]),Dy(iptr[ll]),MapMin(iptr[ll]),MapMax(iptr[ll]),fnames[ll]);
         strclose(instr);        /* close input file */
 	do_cross(0,ll,n);
     }
@@ -191,7 +191,9 @@ local void do_cross(int l0, int l, int n)
     real xcen = ix0-box+sumx;
     real ycen = iy0-box+sumy;
     dprintf(0,"Center at: %g %g\n",xcen,ycen);
-    printf("%g %g  %g %g  %d %d\n",xcen,ycen,sumx,sumy, ix0,iy0);	   
+    // @todo (ix0-xcen-box, iy0-ycen-box) is a value expected to be around (0,0) for no offsets
+    // 
+    printf("%g %g  %g %g  %d %d  %g\n",xcen,ycen,sumx,sumy, ix0,iy0, MapMax(optr));	   
     
     if (badvalues)
     	warning("There were %d bad operations in dofie",badvalues);

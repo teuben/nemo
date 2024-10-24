@@ -55,7 +55,7 @@ string defv[] = {			/* DEFAULT INPUT PARAMETERS         */
     "headline=\n                          header",
 #endif
     "time0=t\n                            Also print time=0 ?",
-    "VERSION=1.7a\n			  20-jan-2024 PJT",
+    "VERSION=1.7b\n			  20-oct-2024 PJT",
     NULL,
 };
 
@@ -81,7 +81,7 @@ local bool Qlog, Qtime0;
 
 
 local real *snapcmp(Body*, Body*, int, real);
-local int cmpreal(real*, real*);
+local int cmpreal(const void*, const void*);
 local void printquart(real*, int, real);
 
 extern rproc btrtrans(string);
@@ -136,6 +136,8 @@ void nemo_main()
 	if (dt > small_dt)
 	  warning("times = %f, %f are different (%g)", tsnap1, tsnap2, dt);
       }
+      dprintf(0,"time1,2: %g %g   %g %g nout %d\n",time1,time2,tsnap1,tsnap2,nout);
+      
       if (!Qtime0 && time1==0 && time2==0) continue;
       if (!Qtime0 && nout==0) continue;      
       if (bits1 != bits2)
@@ -151,7 +153,7 @@ void nemo_main()
       snapcmpplot(result, btab1, nbody1, tsnap1);
 #endif
       nout++;
-    }
+    } // for(;;)
 }
 
 local real *snapcmp(Body *btab1, Body *btab2, int nbody, real tsnap)
@@ -217,13 +219,12 @@ local void printquart(real result[], int nbody, real tsnap)
 	 
 }
 
-/* should have prototype :: int (*compar)(const void *, const void *)) */
-
-local int cmpreal(real *ap, real *bp)
+local int cmpreal(const void *ap, const void *bp)
 {
-    return (*ap < *bp ? -1 : *ap > *bp ? 1 : 0);
+  real *a = (real *) ap;
+  real *b = (real *) bp;
+  return (*a < *b ? -1 : *a > *b ? 1 : 0);
 }
-
 
 
 

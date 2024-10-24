@@ -20,7 +20,7 @@ string defv[] = {
     "quad=???\n			input file with field tables",
     "in=???\n			input file with N-body snapshot",
     "out=\n			output file with forces and potentials",
-    "VERSION=1.4\n		12-nov-91 PJT",
+    "VERSION=1.4a\n		20-oct-2024 PJT",
     NULL,
 };
 

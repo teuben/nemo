@@ -9,14 +9,14 @@
 
 #include "quaddefs.h"
 
-local inter_field(real r);
-local force_eval(Body *b, real eps1, real eps2);
+local void inter_field(real r);
+local void force_eval(Body *b, real eps1, real eps2);
 
 /*
  * QUADINTER: interpolate field and evaluate force on array of particles.
  */
 
-quadinter(Body *btab, int nb, real eps1, real eps2)
+void quadinter(Body *btab, int nb, real eps1, real eps2)
 {
     Body *b;
 
@@ -59,7 +59,7 @@ local matrix Q22, P22;
  * INTER_FIELD: interpolate field tables to given radius.
  */
 
-local inter_field(real r)
+local void inter_field(real r)
 {
     int i, j, k;
     real f;
@@ -94,7 +94,7 @@ local inter_field(real r)
  * FORCE_EVAL: compute force and potential on particle.
  */
 
-local force_eval(Body *b, real eps1, real eps2)
+local void force_eval(Body *b, real eps1, real eps2)
 {
     real rsq, r1i, r2i, r2is, r2iq, q11r, rq22r, tmp;
     vector q22r, p22r, tmpv;

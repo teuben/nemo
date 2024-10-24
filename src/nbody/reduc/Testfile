@@ -1,5 +1,5 @@
 DIR = src/nbody/reduc
-BIN = snapplot snapplot3 snapdiagplot snapplotv snapmradii radprof real snapfit snapprint
+BIN = snapplot snapplot3 snapdiagplot snapplotv snapmradii snapmstat radprof real snapfit snapprint snapcmp
 NEED = $(BIN) hackcode1 mkplummer tabplot snapfour snapgrid snaprotate
 
 help:
@@ -10,7 +10,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f snap.in cube.in hack.out hack2.out
+	@rm -f snap.in snap2.in cube.in hack.out hack2.out
 
 NBODY = 10
 
@@ -20,6 +20,11 @@ snap.in:
 	@echo Creating $@
 	$(EXEC) mkplummer snap.in $(NBODY) seed=123
 	@bsf snap.in  '0.0140845 0.896875 -4.6523 4.80925 71'
+
+snap2.in:
+	@echo Creating $@
+	$(EXEC) mkplummer snap2.in $(NBODY) seed=1234
+	@bsf snap2.in  '0.0140845 0.536539 -1.63453 1.89357 71'
 
 cube.in: snap.in
 	@echo Creating $@
@@ -54,6 +59,18 @@ snapdiagplot:  hack.out
 snapmradii: hack2.out
 	@echo Running $@
 	$(EXEC) snapmradii hack2.out | tabplot - 1 2:9 line=1,1 ; nemo.coverage snapmradii.c
+	$(EXEC) snapmradii snap.in
+	@echo '0 0.276882 0.43351 0.5547 0.715477 0.789928 0.790888 1.05668 1.35295 4.76802'
+
+snapmstat: snap.in
+	@echo Running $@
+	$(EXEC) snapmstat snap.in ; nemo.coverage snapmradii.c
+
+
+snapcmp: snap.in snap2.in
+	@echo Running $@
+	$(EXEC) snapcmp snap.in snap2.in ; nemo.coverage snapcmp.c
+	@echo "0   0.548814 0.824836 1.96007 2.14353 5.33402  2.21031 1.5212  expected"
 
 radprof:   snap.in
 	@echo Running $@

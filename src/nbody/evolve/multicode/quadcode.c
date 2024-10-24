@@ -24,13 +24,12 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS		    */
     "minor_freqout=32.0\n	minor data-output frequency",
     "options=\n			misc options",
     "headline=\n		random mumble for humans",
-    "VERSION=1.4\n	        6-jan-2022 PJT",
+    "VERSION=1.4a\n	        20-oct-2024 PJT",
     NULL,
 };
 
 string usage = "Global quadrupole N-body integrator";
 
-string cvsid="$Id$";
 
 local void force(Body *, int , real);
 

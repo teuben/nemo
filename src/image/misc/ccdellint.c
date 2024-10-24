@@ -24,7 +24,7 @@ string defv[] = {
   "norm=f\n       Normalize RV image to number of pixels in ring",
   "out=\n         RV image",
   "tab=\n         Optional output table",
-  "rscale=1\n     Scale applied ot radii",
+  "rscale=1\n     Scale applied to radii",
   "iscale=1\n     Scale applied to intensities",
   "metric=2\n     radius metric : 2 = circle (2) or boxy (>>2) or pointy (<<1)",
   "VERSION=0.6\n  6-dec-2022 PJT",
@@ -168,6 +168,7 @@ void nemo_main(void)
     xpos = (Nx(velptr)-1.0)/2.0;
     ypos = (Ny(velptr)-1.0)/2.0;
   }
+  dprintf(0,"Center pixel: %g %g\n",xpos,ypos);
   pa    = getdparam("pa");
   inc   = getdparam("inc");
   vsys  = getdparam("vsys");
