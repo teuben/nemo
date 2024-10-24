@@ -38,8 +38,8 @@ local real linear(real c1, real c2)
 string add_header(string header)
 {
   char *token;
-  char *result = malloc(100);
-  result[0] = '\0';
+  char *res = malloc(100);
+  res[0] = '\0';
   int first = 1;
   int arr_len = 0;
 
@@ -47,22 +47,22 @@ string add_header(string header)
 
   while (token != NULL) {
         if (!first) {
-            strcat(result, " | ");
+            strcat(res, " | ");
         }
-        strcat(result, token);
+        strcat(res, token);
         first = 0;
         arr_len++;
         token = strtok(NULL, ",");
   }
 
-  strcat(result, "\n");
-  strcat(result, "double");
+  strcat(res, "\n");
+  strcat(res, "double");
 
   for (int i = 1; i < arr_len; i++) {
-        strcat(result, " | double");
+        strcat(res, " | double");
   }
 
-  return result;
+  return res;
 }
 
 void nemo_main()
