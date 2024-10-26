@@ -37,7 +37,7 @@ local real linear(real c1, real c2)
 
 string add_header(int nc, string header)
 {
-  char *result = malloc(100);
+  char *result = malloc(101);
   result[0] = '\0';
   int first = 1;
   int arr_len = 0;
