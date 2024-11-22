@@ -4,7 +4,7 @@
 #
 #
 _script=edge_gbt.sh
-_version=19-jun-2024
+_version=22-nov-2024
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -20,6 +20,7 @@ m0=0.5                 # brandt power  (0=flat)                           #> SCA
 r1=0.1                 # central unresolved bulge, bar or black hole
 v1=0                   # representative rotation speed at r1
 re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
+n=-1                   # n<1 exp disk; n>=0 PLEC disk                     #> SCALE -1:10:0.1
 rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 z0=0                   # scaleheight [@todo buggy]                        #> SCALE 0:10:0.5
@@ -78,11 +79,20 @@ rm -f $run.* >& /dev/null
 #  keep a log
 echo "`date` :: $*" > $run.history
 
+
+mmode=$(nemoinp "ifge($n,0,1,0)")
+if [ $mmode = 0 ]; then
+    mass="exp(-r/$re)"
+else
+    mass="pow(r/$re*exp(1-r/$re),$n)"
+fi
+echo MMODE=$mmode MASS=$mass
+
 if [ $m0 != 0 ]; then
   echo "Creating brandt disk with $nbody particles times"    
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=brandt potpars=0,$v0,$r0,$m0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=exp(-r/$re)" norm=1 |\
+    snapmass - - "mass=$mass" norm=1 |\
     snaprotate - $run.20 "$inc,$pa" yz
   rotcurves  name1=brandt pars1=0,$v0,$r0,$m0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - "%1,1,%2,$sigma,exp(-%1/$re)" all  > $run.tab
@@ -92,7 +102,7 @@ elif [ $v1 = 0 ]; then
   echo "Creating homogeneous disk with $nbody particles times"
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=exp(-r/$re)" |\
+    snapmass - - "mass=$mass" |\
     snapscale - - mscale=$nbody |\
     snaprotate - $run.20 "$inc,$pa" yz
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 plot=f |\
@@ -104,7 +114,7 @@ else
       tabmath - - %1,1,%2,$sigma all > $run.tab
 
   mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
-    snapmass - - "mass=exp(-r/$re)" |\
+    snapmass - - "mass=$mass" |\
     snapscale - - mscale=$nbody |\
     snaprotate - $run.20 "$inc,$pa" yz
 fi
