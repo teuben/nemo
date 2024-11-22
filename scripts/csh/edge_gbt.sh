@@ -21,6 +21,7 @@ r1=0.1                 # central unresolved bulge, bar or black hole
 v1=0                   # representative rotation speed at r1
 re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
 n=-1                   # n<1 exp disk; n>=0 PLEC disk                     #> SCALE -1:10:0.1
+rm=-1                  # if > 0: use it has R_mol^2 (see paper)           #> SCALE -1:50:0.1
 rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 z0=0                   # scaleheight [@todo buggy]                        #> SCALE 0:10:0.5
@@ -85,6 +86,10 @@ if [ $mmode = 0 ]; then
     mass="exp(-r/$re)"
 else
     mass="pow(r/$re*exp(1-r/$re),$n)"
+fi
+mmode=$(nemoinp "ifge($rm,0,2,$mmode)")
+if [ $mmode = 2 ]; then
+    mass="exp(-r/$re)/(1+$rm*exp(-1.6*r/$re))"
 fi
 echo MMODE=$mmode MASS=$mass
 
