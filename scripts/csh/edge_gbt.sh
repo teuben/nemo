@@ -21,7 +21,7 @@ r1=0.1                 # central unresolved bulge, bar or black hole
 v1=0                   # representative rotation speed at r1
 re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
 n=-1                   # n<1 exp disk; n>=0 PLEC disk                     #> SCALE -1:10:0.1
-rm=-1                  # if > 0: use it has R_mol^2 (see paper)           #> SCALE -1:50:0.1
+rm=-1                  # if > 0: use it has R_mol^2 - AMT model           #> SCALE -1:50:0.1
 rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 z0=0                   # scaleheight [@todo buggy]                        #> SCALE 0:10:0.5
@@ -124,6 +124,8 @@ else
     snaprotate - $run.20 "$inc,$pa" yz
 fi
 
+snapsort $run.20 - r | snapshell - radii=0:${rmax}:0.01 pvar=m > $run.shell
+    
 echo "Creating velocity moments"
 snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
 snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
@@ -171,6 +173,6 @@ if [[ "$plot" == *"profile"* ]]; then
     tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 if [[ "$plot" == *"density"* ]]; then    
-    tabplot $run.tab 1 5 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
+    tabplot $run.shell 1 4 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
 fi
 
