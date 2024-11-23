@@ -185,10 +185,14 @@ nemo_stamp tabint
 echo -n "Estimate of signal/noise in spectrum: "
 peak=$(tabstat $run.spec 2  qac=t | txtpar - p0=QAC,1,6)
 rms=$(tabtrend $run.spec 2 | tabstat - qac=t robust=t | txtpar - p0=QAC,1,4)
-echo "$peak $rms $(nemoinp $peak/$rms)"
+if [ $rms = 0 ]; then
+    echo "$peak 0 999999"
+else
+    echo "$peak $rms $(nemoinp $peak/$rms)"
+fi
 
 
-# export for other programs, in decent units
+# export to FITS, in decent units
 # this way the input spatial scale is in arcsec and km/s
 # SKIP for production
 # ccdfits $run.31 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
