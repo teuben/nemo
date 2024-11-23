@@ -2,7 +2,11 @@
 #
 #  edge_gbt.sh   simulate an EDGE GBT spectrum, derived from edge_aca.sh
 #
+#  bench:    /usr/bin/time ./edge_gbt.sh logn=7
+#  7.65user 5.29system 0:12.88elapsed 100%CPU    orig
+#  5.15user 3.21system 0:08.37elapsed 99%CPU     skip rotate, no moments
 #
+
 _script=edge_gbt.sh
 _version=23-nov-2024
 _pars=nemopars.rc
@@ -67,7 +71,6 @@ echo DEBUG=$DEBUG
 #  fixed now compared to edge_aca.sh
 range=$rmax          # gridding size
 nsize=1              # number of spatial pixels (px=py=2*range/nx)
-pa=0                 # PA of receding side disk (E through N)           
 
 
 #  derive some parameters that appear common or logically belong together
@@ -77,6 +80,7 @@ cell=`nemoinp "2*$range/$nsize*60"`
 cen=`nemoinp $nsize/2-0.5`
 restfreq=230.53800     # CO(2-1) in GHz
 nbody=`nemoinp "10**$logn" format=%d`
+sininc=`nemoinp "sind($inc)"`
 
 
 # ================================================================================ START
@@ -105,56 +109,40 @@ echo MMODE=$mmode MASS=$mass
 echo NBODY=$nbody
 
 if [ $m0 != 0 ]; then
-  echo "Creating brandt disk with $nbody particles times"    
+  echo "Creating brandt disk with $nbody particles."
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=brandt potpars=0,$v0,$r0,$m0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=$mass" norm=1 |\
-    snaprotate - $run.20 "$inc,$pa" yz
+    snapmass - $run.20 "mass=$mass" norm=1
   rotcurves  name1=brandt pars1=0,$v0,$r0,$m0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - "%1,1,%2,$sigma,exp(-%1/$re)" all  > $run.tab
   vmax=$(tabstat $run.tab 3 | txtpar - p0=max:,1,2)
   echo "Max rotcur: vmax=$vmax m0=$m0"
 elif [ $v1 = 0 ]; then
-  echo "Creating homogeneous disk with $nbody particles times"
+  echo "Creating homogeneous disk with $nbody particles."
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
     snapmass - - "mass=$mass" |\
     snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc,$pa" yz
+    snaprotate - $run.20 "$inc" y
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 else
   m1=`nemoinp "$r1*($v1/0.62)**2"`
-  echo "Creating homogeneous disk with $nbody particles times and a nuclear component m1=$m1"
+  echo "Creating homogeneous disk with $nbody particles and a nuclear component m1=$m1"
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  name2=plummer pars2=0,$m1,$r1 tab=t radii=0:${rmax}:0.01 |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 
   mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
     snapmass - - "mass=$mass" |\
     snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc,$pa" yz
+    snaprotate - $run.20 "$inc" y
 fi
 
 snapsort $run.20 - r | snapshell - radii=0:${rmax}:0.01 pvar=m > $run.shell
-    
-echo "Creating velocity moments"
-snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
-snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
-snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
-# skip smoothing
-ccdmath $run.21,$run.22,$run.23 $run.20d %1
-ccdmath $run.21,$run.22,$run.23 $run.20v "%2/%1"
-ccdmath $run.21,$run.22,$run.23 $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
-#  clipping
-ccdmath $run.20d,$run.21 $run.21d "ifgt(%2,0,%1,0)"
-ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
-ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
-
 
 echo "Creating a velocity field - method 2"
-snapgrid $run.20 - $grid_pars \
-	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m |\
-    ccdflip - $run.30 flip=$flip wcs=t
+snapgrid $run.20 $run.30 $grid_pars \
+	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m zvar=vy*$sininc
 ccdstat $run.30
 if [ $vbeam = 0 ]; then
   ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
@@ -163,17 +151,23 @@ else
 fi
 
 # single dish profile
+if [ 1 = 1 ]; then
 ccdmom $run.31 - axis=1 mom=0 |\
     ccdmom - - axis=2 mom=0 |\
     ccdprint - x= y= z= label=z newline=t |\
     tabcomment - - punct=f delete=t > $run.spec
-
+else
+    # faster, but normalization is off now
+    ccdprint $run.31 x= y= z= label=z newline=t |\
+    tabcomment - - punct=f delete=t > $run.spec
+fi
 echo -n "Total integral over spectrum: "
 tabint $run.spec
 
 # export for other programs, in decent units
 # this way the input spatial scale is in arcsec and km/s
-ccdfits $run.31 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
+# SKIP for production
+# ccdfits $run.31 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
 
 
 echo "PLOT: $plot"
