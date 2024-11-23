@@ -56,7 +56,7 @@ string defv[] = {
     "z0=0,0\n           Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
     "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
     "headline=\n	Text headline for output",
-    "VERSION=4.9i\n	19-jan-2018 PJT",
+    "VERSION=4.9j\n	23-nov-2024 PJT",
     NULL,
 };
 
@@ -77,6 +77,7 @@ local proc potential;
 local real z0_d;    /* the old z0 */
 local real z0_v;    /* dropoff in velocity */
 local real vloss;
+local bool Qrandom;
 
 /* old style */
 // #define OLD_BURKERT   1
@@ -166,6 +167,9 @@ void nemo_main()
       error("%d: bad parsing frac=%s",nfrac,getparam("frac"));
     }
     dprintf(1,"frac: %g %g %g\n",frac[0],frac[1],frac[2]);
+    Qrandom = (frac[0]>0 || frac[1]>0 || frac[2]>0);
+    if (!Qrandom)
+      dprintf(0,"No random motions\n");
 
     mass = getdparam("mass") / ndisk;
     if (mass==0.0)  {
@@ -266,18 +270,24 @@ void testdisk(void)
 
 #if 1
 	if (Qabs) {
-	  sigma_r = grandom(0.0,frac[0]);
-	  sigma_t = grandom(0.0,frac[1]);
-	  sigma_z = grandom(0.0,frac[2]);
+	  if (Qrandom) {
+	    sigma_r = grandom(0.0,frac[0]);
+	    sigma_t = grandom(0.0,frac[1]);
+	    sigma_z = grandom(0.0,frac[2]);
+	  } else
+	    sigma_r = sigma_t = sigma_z = 0.0;
 	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
 	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
 	  Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
 	  Vel(dp)[1] += sint*sigma_r + cost*sigma_t;
 	} else {
 	  do {                         /* iterate, if needed, to get vrandom */
-	    sigma_r = grandom(0.0,frac[0]*vcir_i);
-	    sigma_t = grandom(0.0,frac[1]*vcir_i);
-	    sigma_z = grandom(0.0,frac[2]*vcir_i);
+	    if (Qrandom) {
+	      sigma_r = grandom(0.0,frac[0]*vcir_i);
+	      sigma_t = grandom(0.0,frac[1]*vcir_i);
+	      sigma_z = grandom(0.0,frac[2]*vcir_i);
+	    } else
+	      sigma_r = sigma_t = sigma_z = 0.0;
 	    dv_t = sigma_t;
 	    dv_r = sigma_r * took(r_i) ;
 	    vrandom = sqrt(dv_t*dv_t + dv_r*dv_r);
@@ -291,9 +301,12 @@ void testdisk(void)
 	  Vel(dp)[1] += sint*dv_r + cost*dv_t;
 	}
 #else
-	sigma_r = grandom(0.0,frac[0]*vcir_i);
-	sigma_t = grandom(0.0,frac[1]*vcir_i);
-	sigma_z = grandom(0.0,frac[2]*vcir_i);
+	if (Qrandom) {
+	  sigma_r = grandom(0.0,frac[0]*vcir_i);
+	  sigma_t = grandom(0.0,frac[1]*vcir_i);
+	  sigma_z = grandom(0.0,frac[2]*vcir_i);
+	} else
+	  sigma_r = sigma_t = sigma_z = 0.0;
 	dv_t = sigma_t;
 	dv_r = sigma_r * took(r_i) ;
 
