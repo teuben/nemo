@@ -4,7 +4,7 @@
 #
 #
 _script=edge_gbt.sh
-_version=22-nov-2024
+_version=23-nov-2024
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -36,6 +36,8 @@ sigma=0                # random motion in plane  (km/s)                   #> SCA
 noise=0                # add optional noise to cube                       #> ENTRY
 vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
 
+debug=-1               # add debugging                                    #> SCALE -1:9:1
+
 plot=profile,rotcur    # show which plots can be made                     #> CHECK rotcur,profile,density
 
 #--HELP
@@ -53,6 +55,14 @@ for arg in "$@"; do
   export "$arg"
 done
 
+#  handle debugging
+debug=$(nemoinp $debug format=%d)
+if [ $debug -gt 0 ]; then
+    set -x
+fi
+export DEBUG=$debug
+echo DEBUG=$DEBUG
+
 
 #  fixed now compared to edge_aca.sh
 range=$rmax          # gridding size
@@ -66,7 +76,7 @@ grid_pars="xrange=-${range}:${range} yrange=-${range}:${range} nx=$nsize ny=$nsi
 cell=`nemoinp "2*$range/$nsize*60"`
 cen=`nemoinp $nsize/2-0.5`
 restfreq=230.53800     # CO(2-1) in GHz
-nbody=`nemoinp 10**$logn format=%d`
+nbody=`nemoinp "10**$logn" format=%d`
 
 
 # ================================================================================ START
@@ -92,6 +102,7 @@ if [ $mmode = 2 ]; then
     mass="exp(-r/$re)/(1+$rm*exp(-1.6*r/$re))"
 fi
 echo MMODE=$mmode MASS=$mass
+echo NBODY=$nbody
 
 if [ $m0 != 0 ]; then
   echo "Creating brandt disk with $nbody particles times"    
