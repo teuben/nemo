@@ -186,9 +186,9 @@ echo -n "Estimate of signal/noise in spectrum: "
 peak=$(tabstat $run.spec 2  qac=t | txtpar - p0=QAC,1,6)
 rms=$(tabtrend $run.spec 2 | tabstat - qac=t robust=t | txtpar - p0=QAC,1,4)
 if [ $rms = 0 ]; then
-    echo "$peak 0 999999"
+    echo "$peak / 0 = 999999"
 else
-    echo "$peak $rms $(nemoinp $peak/$rms)"
+    echo "$peak / $rms = $(nemoinp $peak/$rms)"
 fi
 
 
