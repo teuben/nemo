@@ -5,6 +5,7 @@
 #  bench:    /usr/bin/time ./edge_gbt.sh logn=7
 #  7.65user 5.29system 0:12.88elapsed 100%CPU    orig
 #  5.15user 3.21system 0:08.37elapsed 99%CPU     skip rotate, no moments
+#  3.74user 2.21system 0:05.98elapsed 99%CPU     skip snapsort (mkdisk was sorted)
 #
 
 _script=edge_gbt.sh
@@ -82,11 +83,18 @@ restfreq=230.53800     # CO(2-1) in GHz
 nbody=`nemoinp "10**$logn" format=%d`
 sininc=`nemoinp "sind($inc)"`
 
+function nemo_stamp {
+    if [ $debug -ge 0 ]; then
+	echo "$(date +%H:%M:%S.%N) $*"
+    fi
+}
+
 
 # ================================================================================ START
 
 #  Announce:
 echo "$0 version $_version"
+nemo_stamp start
 
 #  Clear old model
 rm -f $run.* >& /dev/null
@@ -107,48 +115,55 @@ if [ $mmode = 2 ]; then
 fi
 echo MMODE=$mmode MASS=$mass
 echo NBODY=$nbody
-
+nemo_stamp begin
 if [ $m0 != 0 ]; then
   echo "Creating brandt disk with $nbody particles."
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=brandt potpars=0,$v0,$r0,$m0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - $run.20 "mass=$mass" norm=1
+      snapmass - $run.20 "mass=$mass" norm=1
+  nemo_stamp mkdisk
   rotcurves  name1=brandt pars1=0,$v0,$r0,$m0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - "%1,1,%2,$sigma,exp(-%1/$re)" all  > $run.tab
+  nemo_stamp rotcurves
   vmax=$(tabstat $run.tab 3 | txtpar - p0=max:,1,2)
   echo "Max rotcur: vmax=$vmax m0=$m0"
+  nemo_stamp tabstat
 elif [ $v1 = 0 ]; then
-  echo "Creating homogeneous disk with $nbody particles."
+  echo "Creating homogeneous disk with $nbody particles.  (need optimizing test)"
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
     snapmass - - "mass=$mass" |\
-    snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc" y
+    snapscale - $run.20 mscale=$nbody
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 else
   m1=`nemoinp "$r1*($v1/0.62)**2"`
-  echo "Creating homogeneous disk with $nbody particles and a nuclear component m1=$m1"
+  echo "Creating homogeneous disk with $nbody particles and a nuclear component m1=$m1 (needs optimizing test)"
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  name2=plummer pars2=0,$m1,$r1 tab=t radii=0:${rmax}:0.01 |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 
   mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
     snapmass - - "mass=$mass" |\
-    snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc" y
+    snapscale - $run.20 mscale=$nbody
 fi
 
-snapsort $run.20 - r | snapshell - radii=0:${rmax}:0.01 pvar=m > $run.shell
+#snapsort $run.20 - r help=c | snapshell - radii=0:${rmax}:0.01 pvar=m help=c > $run.shell
+snapshell $run.20 radii=0:${rmax}:0.01 pvar=m help=c > $run.shell
+nemo_stamp snapshell
 
 echo "Creating a velocity field - method 2"
 snapgrid $run.20 $run.30 $grid_pars \
 	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m zvar=vy*$sininc
+nemo_stamp snapgrid
 ccdstat $run.30
+nemo_stamp ccdstat
+
 if [ $vbeam = 0 ]; then
   ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
 else
   ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam dir=z
 fi
+nemo_stamp ccdmath
 
 # single dish profile
 if [ 1 = 1 ]; then
@@ -161,8 +176,11 @@ else
     ccdprint $run.31 x= y= z= label=z newline=t |\
     tabcomment - - punct=f delete=t > $run.spec
 fi
+nemo_stamp ccdprint
+
 echo -n "Total integral over spectrum: "
 tabint $run.spec
+nemo_stamp tabint
 
 # export for other programs, in decent units
 # this way the input spatial scale is in arcsec and km/s
@@ -181,3 +199,4 @@ if [[ "$plot" == *"density"* ]]; then
     tabplot $run.shell 1 4 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
 fi
 
+nemo_stamp end
