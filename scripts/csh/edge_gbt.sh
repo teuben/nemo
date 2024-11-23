@@ -2,7 +2,7 @@
 #
 #  edge_gbt.sh   simulate an EDGE GBT spectrum, derived from edge_aca.sh
 #
-#  bench:    /usr/bin/time ./edge_gbt.sh logn=7
+#  bench:    /usr/bin/time ./edge_gbt.sh logn=7 plot=0 debug=0
 #  7.65user 5.29system 0:12.88elapsed 100%CPU    orig
 #  5.15user 3.21system 0:08.37elapsed 99%CPU     skip rotate, no moments
 #  3.74user 2.21system 0:05.98elapsed 99%CPU     skip snapsort (mkdisk was sorted)
@@ -82,6 +82,7 @@ cen=`nemoinp $nsize/2-0.5`
 restfreq=230.53800     # CO(2-1) in GHz
 nbody=`nemoinp "10**$logn" format=%d`
 sininc=`nemoinp "sind($inc)"`
+noise=`nemoinp $noise/$nbody`    # kludge
 
 function nemo_stamp {
     if [ $debug -ge 0 ]; then
@@ -181,6 +182,11 @@ nemo_stamp ccdprint
 echo -n "Total integral over spectrum: "
 tabint $run.spec
 nemo_stamp tabint
+echo -n "Estimate of signal/noise in spectrum: "
+peak=$(tabstat $run.spec 2  qac=t | txtpar - p0=QAC,1,6)
+rms=$(tabtrend $run.spec 2 | tabstat - qac=t robust=t | txtpar - p0=QAC,1,4)
+echo "$peak $rms $(nemoinp $peak/$rms)"
+
 
 # export for other programs, in decent units
 # this way the input spatial scale is in arcsec and km/s
@@ -193,7 +199,7 @@ if [[ "$plot" == *"rotcur"* ]]; then
     tabplot $run.tab 1 3 headline="Rotation Curve" yapp=1/xs
 fi
 if [[ "$plot" == *"profile"* ]]; then    
-    tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
+    tabplot $run.spec line=1,1  ycoord=0 headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 if [[ "$plot" == *"density"* ]]; then    
     tabplot $run.shell 1 4 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
