@@ -12,6 +12,7 @@
 #include <filestruct.h>
 #include <history.h>
 #include <potential.h>
+#include <grid.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
@@ -26,7 +27,8 @@ string defv[] = {
     
     "rmin=0\n		Inner disk radius",
     "rmax=1\n		Outer cutoff radius",
-    "model=0\n		Mass model (0=const 1=exp, 2=f... 3=dac)",
+    "model=0\n		Mass model (0=CONST 1=EXP, 2=PLEC... 3=AMT)",
+    "mpars=\n           Parameters for the mass model",
     
     "frac=0\n           Relative vel.disp w.r.t. local rotation speed",
     "seed=0\n		Usual random number seed",
@@ -35,8 +37,8 @@ string defv[] = {
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "abs=f\n            Use absolute vel.disp instead of fractional?",
-    "z0=0,0\n           Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
-    "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
+    "z0=0,0\n           ** Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
+    "vloss=-1\n         ** Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
 
     "inc=30\n           Inclination to observe the disk at",
 
@@ -45,7 +47,7 @@ string defv[] = {
     "nvel=200\n         number of spectral pixels",
     
     "headline=\n	Text headline for output",
-    "VERSION=0.1\n	27-nov-2024 PJT",
+    "VERSION=0.2\n	27-nov-2024 PJT",
     NULL,
 };
 
@@ -67,7 +69,16 @@ local real z0_v;    /* dropoff in velocity */
 local real vloss;
 local bool Qrandom;
 
-local real sininc = 1.0;
+local real inc, sininc;
+local real vbeam;
+local real vrange;
+local int  nvel;
+
+local int mmodel;
+local real mpars[16];
+// 1: EXP:   re
+// 2: PLEC:  rd,n
+// 3: AMT:   rd,Rm
 
 /* old style */
 // #define OLD_BURKERT   1
@@ -110,6 +121,8 @@ void nemo_main()
 {
     int nfrac, seed, nz;
     real z0[2];
+
+    warning("This program is under development");
     
     potential = get_potential(getparam("potname"),
                     getparam("potpars"), getparam("potfile"));
@@ -164,6 +177,12 @@ void nemo_main()
     Qangle = getbparam("angle");
     Qenergy = getbparam("energy");
     Qabs = getbparam("abs");
+    vbeam = getdparam("vbeam");
+    vrange = getdparam("vrange");
+    nvel = getiparam("nvel");
+    inc = getdparam("inc");
+    sininc = sin(inc/DR2D);
+    
     testdisk();
     spectrum();
 }
@@ -233,9 +252,9 @@ void testdisk(void)
 	    sigma_z = grandom(0.0,frac[2]);
 	  } else
 	    sigma_r = sigma_t = sigma_z = 0.0;
-	  Vel(dp)[0] =  -vcir_i * sint ;
+	  //Vel(dp)[0] =  -vcir_i * sint ;
 	  Vel(dp)[1] =   vcir_i * cost ;
-	  Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
+	  //Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
 	  Vel(dp)[1] += sint*sigma_r + cost*sigma_t;
 	} else {
 	  do {                         /* iterate, if needed, to get vrandom */
@@ -252,9 +271,9 @@ void testdisk(void)
 	  } while (Qenergy &&  vrandom > vcir_i);
 	  vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
 	  dv_r += vrad;
-	  Vel(dp)[0] =  -vcir_i * sint ;
+	  //Vel(dp)[0] =  -vcir_i * sint ;
 	  Vel(dp)[1] =   vcir_i * cost ;
-	  Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
+	  //Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
 	  Vel(dp)[1] += sint*dv_r + cost*dv_t;
 	}
 #else
@@ -273,12 +292,12 @@ void testdisk(void)
 
 	if (Qenergy)
 	  vcir_i = sqrt((vcir_i-dv_r)*(vcir_i+dv_r));
-	Vel(dp)[0] =  -vcir_i * sint ;
+	//Vel(dp)[0] =  -vcir_i * sint ;
 	Vel(dp)[1] =   vcir_i * cost ;
-	Vel(dp)[0] += cost*dv_r;
+	//Vel(dp)[0] += cost*dv_r;
 	Vel(dp)[1] += sint*dv_r;
 	if (!Qenergy) {
-	  Vel(dp)[0] += -sint*dv_t;
+	  //Vel(dp)[0] += -sint*dv_t;
 	  Vel(dp)[1] +=  cost*dv_t;
 	}
 
@@ -302,12 +321,31 @@ real took(real r)
 
 void spectrum(void)
 {
-  double mtot = 0.0;
+  real mtot = 0.0;
+  real vrad, vrad_max = -1.0;
   Body *dp;
-  int i;
+  int i, iv;
+  Grid g;
+  real *spectrum = (real *) allocate(nvel*sizeof(real));
+  // nvel needs to be even for symmetric profiles
+
+  inil_grid(&g, nvel, 0, vrange);
   
   for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop over all stars */
+    vrad = ABS(Vel(dp)[1]);
+    if (vrad > vrange) continue;
+    if (vrad > vrad_max) vrad_max = vrad;
     mtot += Mass(dp);
+    iv = index_grid(&g, vrad);
+    spectrum[iv] += Mass(dp);
   }
-  printf("Total mass: %g   ndisk=%d\n", mtot, ndisk);
+  printf("# Total mass: %g   ndisk=%d  vrad_max: %g\n", mtot, ndisk, vrad_max);
+  for (i=0; i<nvel; i++)
+    printf("%d %g\n",i,spectrum[i]);
+
+  //  now shift over the half spectrum and complement it
+  warning("only half spectrum shown");
+
+  //  now smooth the spectrum using vbeam=
+  if (vbeam > 0) warning("no smoothing done yet");
 }
