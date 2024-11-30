@@ -127,7 +127,7 @@ namespace falcON { namespace Manipulate {
   };
   //////////////////////////////////////////////////////////////////////////////
   inline void projprof::print_line(bool V) const {
-    OUT  <<"#--------------------------------------------------";
+    OUT  <<"#-----------------------------------------------------------------";
     if(V)
       OUT<<"----------------------------------------------------";
     OUT  <<'\n';
@@ -171,8 +171,12 @@ namespace falcON { namespace Manipulate {
     else   OUT<<'\n';
     if(X0) OUT<<"# xcen    = "<<(*X0)<<'\n';
     if(V0) OUT<<"# vcen    = "<<(*V0)<<'\n';
+    OUT << "# Nb      = " << PP.Nb() << '\n';
+    OUT << "# N       = " << PP.N() << '\n';
+    OUT << "# Mtot    = " << PP.Mtot() << '\n';
     OUT  <<"#\n"
 	 <<"#     radius        Sigma";
+    OUT<<"      Sigma_cum";
     if(PP.has_vels())
       OUT<<"        <v_l>      <v_rot>      sigma_l";
     OUT  <<"          b/a           PA";
@@ -182,7 +186,8 @@ namespace falcON { namespace Manipulate {
     print_line(PP.has_vels());
     for(int i=0; i!=PP.N(); ++i) {
       OUT  << std::setw(12) << PP.rad(i) <<' '
-	   << std::setw(12) << PP.Sig(i) <<' ';
+	   << std::setw(12) << PP.Sig(i) <<' '
+           << std::setw(12) << PP.Mr(i) / (Pi * square(PP.rad(i))) <<' ';
       if(PP.has_vels())
 	OUT<< std::setw(12) << PP.vlos(i)<<' '
 	   << std::setw(12) << PP.vrot(i)<<' '
