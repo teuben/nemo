@@ -3,7 +3,11 @@ FALCON2
 
 
 The falcon V2 package is still under development for a public release. The main
-integrator is now called griffin, replacing the old gyrfalcON from falcon V1.
+integrator is now called ``griffin``, replacing the older ``gyrfalcON`` from falcon V1.
+Although falcon V1 will be distributed with NEMO, it is not maintained and may eventually
+succumb to software rot.
+
+A paper describing the ``griffin`` code is in *arXiv* ...
 
 Installation
 ~~~~~~~~~~~~
@@ -16,7 +20,22 @@ Hopefully soon we can use
 
 but unless you are a close collaborator, this will likely not be working.
 
-This type of install would place the package in ``$NEMO/local/falcon2``.
+This type of install would place the package in ``$NEMO/local/falcon2``, the
+file ``INSTALL.md`` describes the installation procedure.
+
+
+
+Command Line Interface
+~~~~~~~~~~~~~~~~~~~~~~
+
+Although the CLI will look familiar to NEMO users, there are some salient differents.
+Some highlights:
+
+- the CLI is a set of ``key=val``, like NEMO. If given in order, the ``key=`` portion can be
+  omitted, leaving just a series of values. This not recommended in scripts.
+- ``--help`` describes the keywords and some help, much like the ``help=h`` option in NEMO
+- ``help=1`` shows hidden CLI options (NEMO doesn't have hidden options)
+
 
 
 
@@ -93,4 +112,12 @@ Surprises
   does not show the help we usually see, but seems to think --help is a file
 
 
-- griffin does 
+- griffin does
+
+- "griffin --help"
+
+  says: "please provide 'out', 'tau', 'eps'"
+  why complain, we didn't attempt to run.
+
+- mkplummer has a keyword 'q-ran', but itsn't it better to use q_ran, since that's
+  a more common one used in all falcon programs. keep it consistent.
