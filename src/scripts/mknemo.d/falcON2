@@ -4,15 +4,18 @@
 
 set url=git@bitbucket.org:WalterDehnen/falcon.git
 set url=git@bitbucket.org:astroteuben/falcon2.git
+set url=git@bitbucket.org:peter_teuben/falcon.git
 set dir=falcon2
+set branch=autoconf
 
 cd $NEMO/local
 if (! -e $dir) then
-  git clone $url
+  git clone $url $dir
   cd $dir
 else
   cd $dir
   git pull
 endif
+git checkout $branch
 
 echo "Installation is still manual. See INSTALL.md"
