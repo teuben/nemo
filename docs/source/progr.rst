@@ -24,17 +24,17 @@ We start by looking at the *Hello Nemo* program:
 
 .. code-block:: C
    
-	#include <nemo.h>                         /* standard (NEMO) definitions */
+	#include <nemo.h>                      /* 1. standard (NEMO) definitions */
 
-	string defv[] = {       /* standard keywords and default values and help */
+	string defv[] = {    /* 2. standard keywords and default values and help */
 	    "n=10\n                    Number of interations",           /* key1 */
 	    "VERSION=1.2\n             25-may-1992 PJT",                 /* key2 */
 	    NULL,               /* standard terminator of defv[] vector          */
 	};
 
-	string usage = "Example NEMO program 'hello'";        /* usage help text */
+	string usage = "Example NEMO program 'hello'";     /* 3. usage help text */
 
-	void nemo_main()                   /* standard start of any NEMO program */
+	void nemo_main()                /* 4. standard start of any NEMO program */
 	{
 	    int n = getiparam("n");                          /* get n            */
     
@@ -42,6 +42,18 @@ We start by looking at the *Hello Nemo* program:
 	    if (n < 0)                                       /* deal with fatal  */
 	       error("n=%d is now allowed, need >0",n);      /* errors           */
 	}
+
+
+Although this looks like C, there are four odd looking ways a typical NEMO program
+is structured.
+
+1. An include file that captures NEMO definitions (such as string)
+2. A global string array defv/[] that defines the command line user interface
+3. A global string that captures a usage
+4. A global function nemo_main() that defines the starting point of the NEMO program
+
+The standard C main() is present in the NEMO library, with which each program
+is linked, but ensures the program is set up for the NEMO environment.
         
 
 
@@ -50,20 +62,25 @@ The NEMO Programming Environment
 
 The modifications necessary to your UNIX environment in order to
 access NEMO are extensively described elsewhere.  This not only
-applies to a user, but also to the application programmer.
+applies to a user, but also to developers.
 
 In summary, the essential changes to your environment consist of
 one simple additions to your local shell startup file
-or you can do it interactively in your shell (be it sh or csh like).
+or you can do it interactively in your shell, viz.
 
 .. code-block:: bash
 
       % source /opt/nemo/nemo_start.sh
-   or
-      % source /opt/nemo/nemo_start.csh
 
 where the location of NEMO=/opt/nemo is something that will likely
-be different for you.
+be different for you. This example is for bash-like shells, there
+is a similar file for csh, and there is also an option so use modules,
+such that a command like this will work:
+
+.. code-block:: bash
+
+      % module load nemo
+
 
 
 The NEMO Macro Packages
