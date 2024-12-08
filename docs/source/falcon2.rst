@@ -4,13 +4,13 @@ FALCON2
 
 The falcon V2 package is still under development for a public release. The main
 integrator is now called ``griffin``, replacing the older ``gyrfalcON`` from falcon V1.
-Although falcon V1 will be distributed with NEMO, it is not maintained and may eventually
-succumb to software rot.
+Although falcon V1 is distributed with NEMO, it is not maintained and may eventually
+succumb to software rot. Users should switch to using ``griffin``.
 
-A paper describing the ``griffin`` code is in *arXiv* ...
+A paper describing the ``griffin`` FMM code is in Dehnen (2014)
 
 .. warning::
-   Adding FALCON2 to NEMO will result in some programs that have duplicated names, e.g. ``mkplummer``
+   Adding FALCON2 to NEMO will result in some programs that have duplicated names, e.g. **mkplummer**.
 
 
 Installation
@@ -118,8 +118,6 @@ to be resolved
 
   does not show the help we usually see, but seems to think --help is a file
 
-
-- griffin does
 
 - "griffin --help"
 
