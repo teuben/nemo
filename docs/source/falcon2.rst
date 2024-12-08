@@ -9,6 +9,10 @@ succumb to software rot.
 
 A paper describing the ``griffin`` code is in *arXiv* ...
 
+.. warning::
+   Adding FALCON2 to NEMO will result in some programs that have duplicated names, e.g. ``mkplummer``
+
+
 Installation
 ~~~~~~~~~~~~
 
@@ -28,13 +32,14 @@ file ``INSTALL.md`` describes the installation procedure.
 Command Line Interface
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Although the CLI will look familiar to NEMO users, there are some salient differents.
+Although the CLI will look familiar to NEMO users, there are some salient differences.
 Some highlights:
 
-- the CLI is a set of ``key=val``, like NEMO. If given in order, the ``key=`` portion can be
+- the CLI is a set of ``key=val``, like in NEMO. If given in order, the ``key=`` portion can be
   omitted, leaving just a series of values. This not recommended in scripts.
 - ``--help`` describes the keywords and some help, much like the ``help=h`` option in NEMO
 - ``help=1`` shows hidden CLI options (NEMO doesn't have hidden options)
+- ``debug=`` 
 
 
 
@@ -62,7 +67,7 @@ For details on a specific program, type
 
    dump p100.in
 
-- Convert falcon2 HDF5 files to NEMO snapshot, and recview junk like the dump program
+- Convert falcon2 HDF5 files to NEMO snapshot, and review like the ``dump`` program
 
   s2a p100.in  | tabcomment - - delete=t | tabtos - p100.bsf block1=m,pos,vel,skip nbody=100
   tsf p100.bsf
@@ -121,3 +126,5 @@ Surprises
 
 - mkplummer has a keyword 'q-ran', but itsn't it better to use q_ran, since that's
   a more common one used in all falcon programs. keep it consistent.
+
+- ..
