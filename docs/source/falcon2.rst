@@ -104,13 +104,15 @@ For details on a specific program, type
    snapprint p1.out2 times=$tstop format=%11.9e
 
 
-but where timescales need to be checked
+but griffin is more accurate and such a direct comparison may not be fair. In particular, is tau=2^-$kmax even fair?
 
 - Comparing X and Y
 
 
 Surprises
 ~~~~~~~~~
+
+to be resolved
 
 - dump --help
 
