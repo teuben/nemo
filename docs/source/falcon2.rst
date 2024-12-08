@@ -69,10 +69,28 @@ For details on a specific program, type
 
 - Convert falcon2 HDF5 files to NEMO snapshot, and review like the ``dump`` program
 
-  s2a p100.in  | tabcomment - - delete=t | tabtos - p100.bsf block1=m,pos,vel,skip nbody=100
-  tsf p100.bsf
+.. code-block::
 
+   s2a p100.in  | tabcomment - - delete=t | tabtos - p100.bsf block1=m,pos,vel,skip nbody=100
+   tsf p100.bsf
 
+- Comparing performance of griffin in parallel (oneTBB) mode:
+
+.. code-block::
+
+   rm -f p10k.*
+   mkplummer p10k.in 10000 time=0
+   /usr/bin/time griffin p10k.in p10k.out step=1 tstop=10 eps=0.05 tau=2^-4
+   threads=0    98.41user 19.02system 0:24.23elapsed 484%CPU 
+   threads=1    21.19user  0.79system 0:22.03elapsed  99%CPU     
+   threads=2    24.06user  2.90system 0:15.05elapsed 179%CPU
+   threads=4    33.37user  4.73system 0:13.77elapsed 276%CPU  40.70user 5.90system 0:16.47elapsed 282%CPU 
+   threads=8    62.97user 11.25system 0:21.23elapsed 349%CPU
+           12   82.25user 14.55system 0:24.61elapsed 393%CPU
+           16   93.44user 16.78system 0:25.63elapsed 430%CPU
+           20   97.90user 18.67system 0:23.95elapsed 486%CPU
+   
+   
 - Comparing falcon1 with falcon2
 
 .. code-block::
@@ -83,7 +101,7 @@ For details on a specific program, type
    kmax=8
    tstop=1
    #
-   rm p1.*
+   rm -f p1.*
    mkplummer p1.in $nbody time=0
    griffin p1.in p1.out step=1 tstop=$tstop eps=$eps tau=2^-$kmax
    # 8.7sec
