@@ -127,4 +127,6 @@ Surprises
 - mkplummer has a keyword 'q-ran', but itsn't it better to use q_ran, since that's
   a more common one used in all falcon programs. keep it consistent.
 
-- ..
+- mkplummer has a default time=1
+
+
