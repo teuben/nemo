@@ -1,0 +1,58 @@
+.TH LINEID 1NEMO "13 December 2024"
+
+.SH "NAME"
+lineid \- lineid draft
+
+.SH "SYNOPSIS"
+\fBlineid\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBlineid\fP attempts to identify spectral lines from an ascii spectrum. The units of the frequency
+axis will need to be specified (the default is GHz) in order for the fit to work.
+.PP
+See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input (table) file name [???]   
+.TP
+\fBxcol=\fP
+x coordinate column [1]    
+.TP
+\fBycol=\fP
+y coordinate column [2]    
+.TP
+\fBxunit=\fP
+X axis unit (GHz, MHz, A, nm) [GHz]
+.TP
+\fBminchan=\fP
+Minimum channels for a peak [3]  
+.TP
+\fBmaxchan=\fP
+Maximum channels for a peak []  
+.TP
+\fBvlsr=\fP
+VLSR of object. No default.  
+.TP
+\fBrestfreq=\fP
+If line is know, give restfreq in xunits. No default.
+
+.SH "EXAMPLES"
+An example...
+.EX
+  $ mkplummer --man
+.EE
+
+.SH "SEE ALSO"
+tablsqfit(1NEMO), table(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+13-dec-2024	0.1 Draft created	PJT
+.fi
