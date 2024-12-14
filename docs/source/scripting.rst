@@ -77,3 +77,47 @@ a --help command line option
 
 5. the body of the script, shell variables, nemopars variables etc. should be used
 where possible. 
+
+
+
+Example:  Extracting results from run directories
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A common workflow is to run many simulations, walking over a multi-dimensional parameter space.
+This usually results into running each simulations in its own run-directory. The directory name
+could contain the value of this parameter as well. Several common strategies have been seen in
+the wild:
+
+.. code-block::
+
+     # 1. simply enumerated (e.g id=001,002,003,....) parameters stored inside
+     run_${id}
+
+     # 2. linear list of directories
+     run_${a}_${b}_${c}
+
+     # 3. hierarchical directories
+     run/$a/$b/$c
+
+Although easier to visually identify the values of the parameters in 2. and 3., they don't scale very
+well if a new parameter is introduced.  In the first case a simple lookup table can be created using
+for example, making it easier to find which parameters are used in while run directory:
+
+.. code-block::
+
+     nemopars id,a,b,c run_*/nemopars.rc  > run.pars
+
+
+
+Summary
+~~~~~~~
+
+Summarizing, here are the recommended methods to maintain and extract NEMO variables.
+
+1. nemopars: extract parameters from a bash-style rc file (python should also be able to use it)
+
+2. nemovar:  get and set NEMOVAR variables
+
+3. show_vars:   alias via nemo_functions.sh
+
+   
