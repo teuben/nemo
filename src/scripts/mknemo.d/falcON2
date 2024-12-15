@@ -18,4 +18,4 @@ else
 endif
 git checkout $branch
 
-echo "Installation is still manual. See INSTALL.md"
+echo "Installation is still manual. See $NEMO/local/$dir/INSTALL.md"
