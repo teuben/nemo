@@ -1,23 +1,30 @@
-.TH LINEID 1NEMO "13 December 2024"
+.TH LINEID 1NEMO "14 December 2024"
 
 .SH "NAME"
-lineid \- lineid draft
+lineid \- Identify peaks in a spectrum and optionally find lines
 
 .SH "SYNOPSIS"
 \fBlineid\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBlineid\fP attempts to identify spectral lines from an ascii spectrum. The units of the frequency
-axis will need to be specified (the default is GHz) in order for the fit to work.
+\fBlineid\fP identifies peaks in a spectrum, and
+attempts to identify spectral lines. The units of the frequency
+axis will need to be specified (the default is GHz) in order for the line identification to work.
 .PP
-Operation can occur in several modes.  If the VLSR is given, a LineID is attempted. Either from a given
-restfreq, or from a linelist.   If the RESTFREQ is given, a VLSR is determined from the frequency of the
-fitted peak. If neither is given, just the peak(s) are reported.
+Operation can occur in several modes.
+.br
+1. If the VLSR is given, a LineID is attempted. Either from a given
+restfreq, or from a linelist.
+.br
+2. If the RESTFREQ is given, a VLSR is determined from the frequency of the
+fitted peak.
+.br
+3. If neither is given, just the peak(s) are reported.
 .PP
 See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
 an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
 .PP
-More sophisticated algorithms can be find in ADMIT's LineID task.
+More sophisticated algorithms can be find in for example ADMIT's LineID task.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -26,13 +33,16 @@ More sophisticated algorithms can be find in ADMIT's LineID task.
 Input (table) file name. No default.
 .TP
 \fBxcol=\fP
-x coordinate column [1]    
+X coordinate column, representing the frequency or wavelength axis.
+Units are GHz, unless specified with the \fBxunit\fP keyword.
+[1]
 .TP
 \fBycol=\fP
-y coordinate column [2]    
+Y coordinate column, reprepenting an intensity. [2] 
 .TP
 \fBxunit=\fP
-X axis unit (GHz, MHz, A, nm) [GHz]
+X axis unit (GHz, MHz, A, nm) -- not implemented yet.
+[GHz]
 .TP
 \fBminchan=\fP
 Minimum channels for a peak [3]   - not used yet 
@@ -44,7 +54,7 @@ Maximum channels for a peak []     - not used yet
 VLSR of object. Not set by default.
 .TP
 \fBrestfreq=\fP
-If line is know, give restfreq in xunits. Not set by default.
+If line is known, give restfreq in xunits. Not set by default.
 .TP
 \fBlinelist=\fP
 Table with frequencies and lines. Not set by default.
