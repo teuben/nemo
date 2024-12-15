@@ -1,7 +1,7 @@
 /*
  *  LINEID:   draft
  *
- *    13-dec-2024 0.2 simple brightest peak finder
+ *    13-dec-2024 0.2 simple brightest peak finder.
  */
 
 /**************** INCLUDE FILES ********************************/ 
