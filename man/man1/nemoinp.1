@@ -25,7 +25,7 @@ nemoinp		1:10:2
 matlab		1:2:10
 seq		1 2 10
 numpy.arange	1,10,2	last element (10) is never used
-IDL		findgen(5)*2+1
+IDL		findgen(5)*2+1  -or-  indgen(5)*2+1
 
 .fi
 
@@ -99,7 +99,7 @@ seq(1), tabgen(1NEMO), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), function
    nemoinp 'iflt(1,2,3,4)'   print 3, not 4, because 1 is less than 2
    nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal 30.5043
    nemoinp c,G,h,p,m         a few good constants
-   nemoinp 'p*pi/(3600*180)' 1 AU in km
+   nemoinp 'p*pi/(3600*180)' 1 AU in m
 .fi
 
 .SH "AUTHOR"
