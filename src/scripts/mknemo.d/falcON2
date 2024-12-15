@@ -8,6 +8,9 @@ set url=git@bitbucket.org:peter_teuben/falcon.git
 set dir=falcon2
 set branch=autoconf
 
+
+echo "falcON2: using url=$url"
+
 cd $NEMO/local
 if (! -e $dir) then
   git clone $url $dir
