@@ -66,6 +66,7 @@ void do_peak(real *xpeak, real *xerr, real *ypeak);
   
 void nemo_main()
 {
+  warning("Program in draft stage, don't expect it to be correct");
   setparams();
   read_data();
   peak_data();
