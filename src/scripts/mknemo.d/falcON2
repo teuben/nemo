@@ -6,10 +6,11 @@ set url=git@bitbucket.org:WalterDehnen/falcon.git
 set url=git@bitbucket.org:astroteuben/falcon2.git
 set url=git@bitbucket.org:peter_teuben/falcon.git
 set dir=falcon2
+set branch=master
 set branch=autoconf
 
 
-echo "falcON2: using url=$url"
+echo "falcON2: using url=$url and git branch=$branch"
 
 cd $NEMO/local
 if (! -e $dir) then
