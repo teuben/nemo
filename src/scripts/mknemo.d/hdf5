@@ -7,8 +7,6 @@
 #  17-mar-2020  wgetc
 #
 
-# if ($?NEMO == 0) set NEMO=`pwd`
-
 
 version=1.10.7      # 11-sep-2020
 version=1.12.1      # 06-jul-2021 <toltec default>
