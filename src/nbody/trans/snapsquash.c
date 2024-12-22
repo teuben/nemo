@@ -21,15 +21,12 @@ string defv[] = {
     "f=1.0\n        Factor to squash by",
     "omega=0.0\n    Pattern Speed",
     "times=all\n    Times to select snapshots from",
-    "VERSION=1.0\n  28-jul-06 PJT",
+    "VERSION=1.1\n  22-dec-2024 PJT",
     NULL,
 };
 
 string usage="squash a snapshot using Bosma's thesis recipe";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
 bool uscalar(real x)
 {
