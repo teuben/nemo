@@ -22,13 +22,12 @@ string defv[] = {
     "vel=\n         Velocity vector of LSR",
     "center=\n      Star # to represent LSR (0=first)",
     "times=all\n    Times to select snapshots from",
-    "VERSION=1.0\n  16-feb-03 PJT",
+    "VERSION=1.1\n  22-dec-2024 PJT",
     NULL,
 };
 
 string usage="coordinate transformations for galactic viewing";
 
-#define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
 void nemo_main()
 {
