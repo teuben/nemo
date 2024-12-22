@@ -55,7 +55,7 @@ string defv[] = {
     "ident=\n			ID message for display",
     "viewfile=view.dat\n	Output viewing parameters",
     "maxframe=100\n             Maximum frames for movie storage",
-    "VERSION=2.2\n		4-sep-00 PJT",
+    "VERSION=2.3\n		22-dec-2024 PJT",
     NULL,
 };
 
@@ -72,7 +72,7 @@ string usage = "Display 3-D velocity data";
 extern string *burststring();
 extern int xstrlen();
 
-nemo_main()
+void nemo_main()
 {
     init_display();
     if (hasvalue("colormap")) setcolors(getparam("colormap"));
@@ -188,8 +188,6 @@ int maxframe=0;
 int nframe=0, iframe=0;
 frame *saved;
 
-
-#define TIMEFUZZ  0.001
 
 bool get_xyz(save)
 bool save;          /* save it too ? */
