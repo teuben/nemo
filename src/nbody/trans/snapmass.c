@@ -46,15 +46,12 @@ string defv[] = {
     "ccd=\n                   Input CCD with mapvalues that represent mass",
     "norm=\n                  Normalization value for the total mass (if used)",
     "aux=f\n                  Store in Aux instead?",
-    "VERSION=2.3\n            14-aug-2020 PJT",
+    "VERSION=2.4\n            22-dec-2024 PJT",
     NULL,
 };
 
 string usage="(re)assign masses to a snapshot";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 extern real_proc getrfunc(string , string , string , int *);
 
