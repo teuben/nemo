@@ -32,13 +32,12 @@ string defv[] = {
     "scale=phase,acc\n  Items to scale (phase,pos,vel,acc) **not used**",
     "ndim=\n        Force dimensionality, if it can be overriden",
     "times=all\n    Times to select snapshots from",
-    "VERSION=1.0a\n 27-may-95 PJT",
+    "VERSION=1.1\n  22-dec-2024 PJT",
     NULL,
 };
 
 string usage="coordinate transformations of a snapshot";
 
-#define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
 extern void cartesian_spherical(real *, real *, real *);
 extern void spherical_cartesian(real *, real *, real *);
