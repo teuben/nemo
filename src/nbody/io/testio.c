@@ -27,11 +27,10 @@ string defv[] = {
     "out=\n		 output file name (optional)",
     "io=get_snapshot\n   mode of I/O {get_snapshot, get_snap}",
     "work=bodywork\n     which work routine?",
-    "VERSION=1.1\n       16-sep-90  PJT",
+    "VERSION=1.2\n       22-dec-2024  PJT",
     NULL,
 };
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 main(argc, argv)
 int argc;
