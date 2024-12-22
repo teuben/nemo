@@ -25,13 +25,12 @@ string defv[] = {
     "nbody=\n           Size of one (or more) snapshot(s)",
     "nsnap=\n           Number of pieces to cut a snapshot into",
     "times=all\n        Series of times-ranges to select",
-    "VERSION=2.1a\n	20-oct-2024 PJT/WD",
+    "VERSION=2.2\n	22-dec-2024 PJT",
     NULL,
 };
 
 string usage="cut an N-body snapshot in pieces for serial processing";
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 #define MAXSNAP 1024
 
