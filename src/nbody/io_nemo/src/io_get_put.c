@@ -42,7 +42,6 @@
 #include "parameters.h"
 
 
-#define TIMEFUZZ 0.0000001
 extern int maxbodies[];
 extern int CURRENT_IO;
 /* -----------------------------------------------------------------
