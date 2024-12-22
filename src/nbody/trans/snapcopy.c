@@ -35,14 +35,12 @@ string defv[] = {
     "precision=double\n Precision of results to store (double/single) [unused]",
     "keep=all\n         Items to copy in snapshot",
     "i=-1\n             Select one body to select (overrides select=)",
-    "VERSION=2.0a\n     8-aug-2022 PJT",
+    "VERSION=2.1\n      22-dec-2024 PJT",
     NULL,
 };
 
 string usage="copy an N-body snapshot";
 
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void nemo_main(void)
 {
