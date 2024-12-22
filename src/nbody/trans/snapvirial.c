@@ -34,15 +34,12 @@ string defv[] = {
     "vscale=t\n		Scale velocities ?",
     "times=all\n	Times of snapshots to select",
     "virial=\n		New virial ratio (|2T/W|), if to be changed",
-    "VERSION=2.1\n	2-dec-2017 PJT",
+    "VERSION=2.2\n	22-dec-2024 PJT",
     NULL,
 };
 
 string usage="rescale snapshot for re-virialization";
 
-string version="$Id: ";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void nemo_main()
 {
