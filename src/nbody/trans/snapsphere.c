@@ -36,13 +36,12 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "vrad=0:infinity\n            inner and outer radius in vel",
     "times=all\n                  times to select",
     "icen=\n                      overrid center by selecting a particle (1=first)",
-    "VERSION=1.9\n                23-oct-97 PJT",
+    "VERSION=1.10\n               22-dec-2024 PJT",
     NULL,
 };
 
 string usage="copy a selected number of particles from an N-body system";
 
-#define TIMEFUZZ        0.0001  /* tolerance in time comparisons */
 
 #if !defined(HUGE)
 #define HUGE 1e20
