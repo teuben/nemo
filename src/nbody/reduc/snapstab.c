@@ -23,15 +23,14 @@
 string defv[] = {
     "in=???\n           Input file name (snapshot)",
     "times=all\n        Times to select snapshots from",
-    "VERSION=1.2\n      16-feb-97 PJT",
+    "VERSION=1.3\n      22-dec-2024 PJT",
     NULL,
 };
 
 string usage = "report disk stability/virial";
 
-#define TIMEFUZZ        0.00001 /* tolerance in time comparisons */
 
-nemo_main()
+void nemo_main()
 {
     stream instr;
     real   inv_rscale, e_pot, e_kin, tsnap;
