@@ -15,6 +15,7 @@
  *      29-aug-06       c   prototypes for frandom() and getrfunc() properly used
  *      12-jul-2019     2.2 added ccd=
  *      14-aug-2020     2.3 allow Aux to be used
+ *       5-nov-2023     2.4 add timers
  *
  */
 #include <stdinc.h>
@@ -46,13 +47,11 @@ string defv[] = {
     "ccd=\n                   Input CCD with mapvalues that represent mass",
     "norm=\n                  Normalization value for the total mass (if used)",
     "aux=f\n                  Store in Aux instead?",
-    "VERSION=2.3\n            14-aug-2020 PJT",
+    "VERSION=2.4\n            5-nov-2023 PJT",
     NULL,
 };
 
 string usage="(re)assign masses to a snapshot";
-
-string cvsid="$Id$";
 
 #define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
@@ -72,6 +71,10 @@ void nemo_main(void)
     bool  Qnorm, first = TRUE;
     bool Qaux = getbparam("aux");
     string what = (Qaux ? strdup("aux") : strdup("mass"));
+    int itimers=0, ntimers = 100;
+
+    init_timers(ntimers+1);
+    stamp_timers(itimers++);                                                        // TIMERS
 
     instr = stropen(getparam("in"), "r");
     if (hasvalue("mass")) {
@@ -110,7 +113,6 @@ void nemo_main(void)
     Qnorm = hasvalue("norm");
     if (Qnorm) norm = getdparam("norm");
 
-
     for(;;) {
 					/* input main data */
     	get_history(instr);                    /* skip history & comments */
@@ -119,6 +121,7 @@ void nemo_main(void)
             error("Snapmass (in): Need a snapshot");
         }
         get_snap(instr, &btab, &nbody, &tsnap, &bits);
+        stamp_timers(itimers++);	                                                        // TIMERS	
         if (bits&MassBit) {
             dprintf(0,"Warning: existing masses overwritten\n");
             if (!Qnorm) {
@@ -132,7 +135,7 @@ void nemo_main(void)
             tsnap = 0.0;
         }
         
-        if (inmassstr) { 		/* input mass data from a file */
+        if (inmassstr) { 		/* input mass data from a different file */
     	    get_history(inmassstr);
             if (!get_tag_ok(inmassstr, SnapShotTag))
        		error("Snapmass (inmass): Need a snapshot");
@@ -148,6 +151,8 @@ void nemo_main(void)
                 error("essential mass data missing\tbits = %x\n", bits);
             }
         }
+
+        stamp_timers(itimers++);	                                                        // TIMERS
         				/* output */
         if (first) {
             put_history(outstr);
@@ -212,10 +217,17 @@ void nemo_main(void)
 	bits |= MassBit;    /* turn mass bit on anyways */
 	if (Qaux)
 	  bits |= AuxBit;
+        stamp_timers(itimers++);	                                            // TIMERS
         put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     }
-
+    stamp_timers(itimers++);                                                        // TIMERS
     strclose(instr);
     if (inmassstr) strclose(inmassstr);
     strclose(outstr);
+    stamp_timers(itimers++);                                                        // TIMERS
+    for (i=0; i<itimers; i++)
+      dprintf(1,"timers[%d]: %Ld0\n",i,diff_timers(i,i+1));
+    dprintf(1,"timersSUM: %Ld0\n",diff_timers(0,itimers));    
+    
+
 }
