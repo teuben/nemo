@@ -26,15 +26,12 @@ string defv[] = {
   "potpars=\n           parameters to potential",
   "potfile=\n           optional filename to potential",
   "times=all\n          Which times to work on",
-  "VERSION=1.0\n	4-apr-97 pjt",
+  "VERSION=1.1\n	22-dec-2024 PJT",
   NULL,
 };
 
 string usage="add analytical potentials/forces to an N-body system";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void nemo_main(void)
 {

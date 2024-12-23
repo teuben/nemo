@@ -42,13 +42,12 @@
 string defv[] = {
   "in1=???\n			Input NEMO snapshot",
   "in2=???\n			Input NEMO snapshot to append after in1",
-  "VERSION=1.22\n               6-Jun-08 pjt",
+  "VERSION=1.23\n               22-dec-2024 PJT",
   NULL,
 };
 
 string usage="Merge the second input snapshot at the end of the first one";
 
-#define TIMEFUZZ 0.00001
 
 real      
   * timeptr  = NULL,
@@ -270,7 +269,7 @@ int goto_end_1st_snap(stream   instr,
 /* -------------------------------------------------------------- *\
 |* Main program                                                     
 \* -------------------------------------------------------------- */ 
-nemo_main()         
+void nemo_main()         
 {
   stream in1,out,  
     in2;     

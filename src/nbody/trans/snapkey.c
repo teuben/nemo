@@ -26,16 +26,13 @@ string defv[] = {
     "keys=\n                  Manually supply all keys",
     "keyfile=\n		      ascii table with keys",
     "key=\n                   bodytrans expression",
-    "VERSION=0.3\n            17-feb-2020 PJT",
+    "VERSION=0.4\n            22-dec-2024 PJT",
     NULL,
 };
 
 string usage="(re)assign keys to a snapshot";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
-#define MAXNBODY        100000
+#define MAXNBODY        1000000
 
 extern btiproc btitrans(string);
 

@@ -46,15 +46,13 @@ string defv[] = {		/* keywords/default values/help */
   "stack=f\n		  Stack all selected snapshots?",
   "proj=\n                Sky projection (SIN,TAN,ARC,NCP,GLS,MER,AIT)",
   "emax=10\n              Maximum exp smoothing parameter",
-  "VERSION=2.1\n	  23-sep-2021 PJT",
+  "VERSION=2.2\n	  22-dec-2024 PJT",
   NULL,
 };
 
 string usage="grid a snapshot into a 2D map";
 
-string cvsid="$Id$";
 
-#define TIMEFUZZ  0.000001
 #define MAXVAR	  16		/* max evar's */
 
 #define SMODE_GAUSS  1

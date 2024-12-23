@@ -38,7 +38,7 @@ string defv[] = {
   "stack=f\n			  Stack all selected snapshots?",
   "periodic=f\n                   Periodic boundary conditions for smoothing?",
   "normalize=t\n                  Normalize smoothing to conserve mass (evar)",
-  "VERSION=0.5\n		  19-mar-2022 PJT",
+  "VERSION=0.6\n		  22-dec-2024 PJT",
   NULL,
 };
 
@@ -46,7 +46,6 @@ string usage="grid a snapshot into a 3D image-cube with adaptive smoothing";
 
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
-#define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
 

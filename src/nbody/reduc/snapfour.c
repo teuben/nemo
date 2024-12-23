@@ -31,13 +31,12 @@ string defv[] = {
     "weight=1\n            Weight applied to observable",
     "amode=t\n             Display sin/cos amps or amp/phase if possible?",
     "times=all\n           Snapshots to select",
-    "VERSION=1.2d\n        3-apr-2020 PJT",
+    "VERSION=1.3\n         22-dec-2024 PJT",
     NULL,
 };
 
 string usage = "Fourier coefficients of an N-body distribution";
 
-#define TIMEFUZZ        0.0001  /* tolerance in time comparisons */
 
 #define MAXRAD 513
 #define MAXORDER 8

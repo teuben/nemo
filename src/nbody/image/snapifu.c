@@ -38,16 +38,14 @@ string defv[] = {		/* keywords/default values/help */
   "moment=0\n			  moment in zvar (-2,-1,0,1,2...)",
   "mean=f\n			  mean (moment=0) or sum per cell",
   "stack=f\n			  Stack all selected snapshots?",
-  "VERSION=1.0\n		  8-apr-09 PJT",
+  "VERSION=1.1\n		  22-dec-2024 PJT",
   NULL,
 };
 
 string usage="take spectra from a snapshot at a set of specified grid points";
 
-string cvsid="$Id$"; 
 
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
-#define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
 #define MAXPOINTS 1024          /* max # gridpoints */

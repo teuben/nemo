@@ -36,13 +36,11 @@ string defv[] = {
     "weight=m\n		          factor to use in computing center/inertia  ",
     "per_weight=t\n		  flag to give inertia per weight basis  ",
     "tab=f\n			  flag to produce one-line output",
-    "VERSION=2.1a\n		  9-may-2023 PJT",
+    "VERSION=2.2\n		  22-dec-2024 PJT",
     NULL,
 };
 
 string usage="get inertia tensor & its eigenvectors, eigenvalues";
-
-#define TIMEFUZZ 0.001          /* slop tolerated in time comparisons */
 
 void snapinert(Body *, int, real, rproc_body, float i[3][3]);
 

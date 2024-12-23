@@ -76,7 +76,7 @@ string defv[] = {
     "maxframe=500\n             Maximum frames for movie storage",
     "orbit=\n                   Select this point/star always visible",
     "movie=f\n                  If true, start loading all frames",
-    "VERSION=3.0b\n		30-apr-2021 PJT",
+    "VERSION=3.1\n		22-dec-2024 PJT",
     NULL,
 };
 
@@ -249,8 +249,6 @@ int nframe=0, iframe=0;
 int orbit;
 frame *saved;
 
-
-#define TIMEFUZZ  0.001
 
 bool get_xyz(save)
 bool save;          /* save it too ? */
