@@ -38,11 +38,9 @@ string defv[] = {
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.2a\n               8-may-2023 PJT/WD",
+    "VERSION=2.3\n                23-dec-2024 PJT",
     NULL,
 };
-
-#define TimeFuzz  0.00001	  /* slop tolerated in time comparisons */
 
 string usage="cut a snapshot file down to size";
 
@@ -82,7 +80,8 @@ void nemo_main()
     if (!Qnear) 
       timefuzz = getdparam("timefuzz");
     else
-      timefuzz = TimeFuzz;
+      timefuzz = TIMEFUZZ;
+    dprintf(0,"Using timefuzz=%g\n", timefuzz);
 
     Qfirst = streq(times,"first");
     Qlast = streq(times,"last");
