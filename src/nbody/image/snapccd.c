@@ -36,11 +36,11 @@ string defv[] = {
 	"cell=0.0625\n			cellsize : 64 pixels if size=4",
 	"vrange=-infinity:infinity\n	range in velocity space",
 	"moment=0\n			velocity moment to weigh with",
-	"VERSION=4.7\n			27-jan-2021 PJT",
+	"VERSION=4.7a\n			9-oct-2023 PJT",
 	NULL,
 };
 
-string usage = "simple conversion of snapshot to image";
+string usage = "simple mass-based conversion of snapshot to image";
 
 #define EPS  0.00001
 #ifndef HUGE
@@ -55,10 +55,9 @@ local int    nobj;
 local real   tnow;
 local real   *mass=NULL;
 local real   *phase=NULL;
-local string headline;
 		/* IMAGE INTERFACE */
 local imageptr  iptr=NULL;		/* will be allocated dynamically */
-local int    nx,ny,nsize;		/* map-size */
+local int  nsize;		        /* map-size */
 local real origin[2];			/* of map in sky coordinates */
 local real size;			/* size of frame (square) */
 local real cell;			/* cell or pixel size (square) */
@@ -92,7 +91,7 @@ void setparams()
 
 	size = getdparam("size");
 	cell = getdparam("cell");
-	nsize = size/cell + EPS;    /* fudge factor to prevent unfavourable roundoff */
+	nsize = rint(size/cell);    /* use nearest integer */
 	dprintf (1,"size of CCD frame = %d square\n",nsize);
 
 	moment=getiparam("moment");
@@ -204,7 +203,7 @@ void bin_data()
 {
     real xsky, ysky, vrad;
     real m_min, m_max, brightness, inv_surden, total;
-    int  i, k, ix, iy, nx, ny, cnt, noutside, noutvel, ndata;
+    int  i, k, ix, iy, nx, ny, noutside, noutvel, ndata;
     real *pptr;
     
 	/* (re)initialize CCD and some other local  variables */
