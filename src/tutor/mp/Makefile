@@ -81,3 +81,4 @@ bench9:	scaling2
 	@echo Long integration, see laptop performance drop, see core swaps
 	$(TIME) ./scaling2  iter=500 > bench9.log 2>&1
 	grep cputime bench9.log | sed s/###// | tabplot - 6 8 line=1,1 ycoord=0  ymin=0
+	@echo "Jansky 0.077  k2 0.090 0.098"

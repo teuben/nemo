@@ -2,9 +2,15 @@
 #
 #  edge_gbt.sh   simulate an EDGE GBT spectrum, derived from edge_aca.sh
 #
-#
+#  bench:    /usr/bin/time ./edge_gbt.sh logn=7 plot=0 debug=0
+#  7.65user 5.29system 0:12.88elapsed 100%CPU    orig
+#  5.15user 3.21system 0:08.37elapsed 99%CPU     skip rotate, no moments
+#  3.74user 2.21system 0:05.98elapsed 99%CPU     skip snapsort (mkdisk was sorted)
+#  3.11user 2.30system 0:05.40elapsed 100%CPU    faster mkdisk
+#  1.04user 0.20system 0:01.24elapsed 100%CPU    slow (new) diskspectrum
+
 _script=edge_gbt.sh
-_version=19-jun-2024
+_version=23-nov-2024
 _pars=nemopars.rc
 _date=$(date +%Y-%m-%dT%H:%M:%S)
 
@@ -20,6 +26,8 @@ m0=0.5                 # brandt power  (0=flat)                           #> SCA
 r1=0.1                 # central unresolved bulge, bar or black hole
 v1=0                   # representative rotation speed at r1
 re=20                  # exponential scalelength of disk  (arcsec)        #> SCALE 1:100:1
+n=-1                   # n<1 exp disk; n>=0 PLEC disk                     #> SCALE -1:10:0.1
+rm=-1                  # if > 0: use it has R_mol^2 - AMT model           #> SCALE -1:50:0.1
 rmax=60                # edge of disk  (arcsec)                           #> SCALE 1:80:1
 inc=60                 # INC of disk                                      #> SCALE 0:90:1
 z0=0                   # scaleheight [@todo buggy]                        #> SCALE 0:10:0.5
@@ -33,6 +41,8 @@ sigma=0                # random motion in plane  (km/s)                   #> SCA
 
 noise=0                # add optional noise to cube                       #> ENTRY
 vlsr=0                 # optional VLSR if non-zero                        #> ENTRY
+
+debug=-1               # add debugging                                    #> SCALE -1:9:1
 
 plot=profile,rotcur    # show which plots can be made                     #> CHECK rotcur,profile,density
 
@@ -51,11 +61,18 @@ for arg in "$@"; do
   export "$arg"
 done
 
+#  handle debugging
+debug=$(nemoinp $debug format=%d)
+if [ $debug -gt 0 ]; then
+    set -x
+fi
+export DEBUG=$debug
+echo DEBUG=$DEBUG
+
 
 #  fixed now compared to edge_aca.sh
 range=$rmax          # gridding size
 nsize=1              # number of spatial pixels (px=py=2*range/nx)
-pa=0                 # PA of receding side disk (E through N)           
 
 
 #  derive some parameters that appear common or logically belong together
@@ -64,13 +81,22 @@ grid_pars="xrange=-${range}:${range} yrange=-${range}:${range} nx=$nsize ny=$nsi
 cell=`nemoinp "2*$range/$nsize*60"`
 cen=`nemoinp $nsize/2-0.5`
 restfreq=230.53800     # CO(2-1) in GHz
-nbody=`nemoinp 10**$logn format=%d`
+nbody=`nemoinp "10**$logn" format=%d`
+sininc=`nemoinp "sind($inc)"`
+noise=`nemoinp $noise/$nbody`    # kludge
+
+function nemo_stamp {
+    if [ $debug -ge 0 ]; then
+	echo "$(date +%H:%M:%S.%N) $*"
+    fi
+}
 
 
 # ================================================================================ START
 
 #  Announce:
 echo "$0 version $_version"
+nemo_stamp start
 
 #  Clear old model
 rm -f $run.* >& /dev/null
@@ -78,74 +104,99 @@ rm -f $run.* >& /dev/null
 #  keep a log
 echo "`date` :: $*" > $run.history
 
+
+mmode=$(nemoinp "ifge($n,0,1,0)")
+if [ $mmode = 0 ]; then
+    mass="exp(-r/$re)"
+else
+    mass="pow(r/$re*exp(1-r/$re),$n)"
+fi
+mmode=$(nemoinp "ifge($rm,0,2,$mmode)")
+if [ $mmode = 2 ]; then
+    mass="exp(-r/$re)/(1+$rm*exp(-1.6*r/$re))"
+fi
+echo MMODE=$mmode MASS=$mass
+echo NBODY=$nbody
+nemo_stamp begin
 if [ $m0 != 0 ]; then
-  echo "Creating brandt disk with $nbody particles times"    
+  echo "Creating brandt disk with $nbody particles."
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=brandt potpars=0,$v0,$r0,$m0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=exp(-r/$re)" norm=1 |\
-    snaprotate - $run.20 "$inc,$pa" yz
+      snapmass - $run.20 "mass=$mass" norm=1
+  nemo_stamp mkdisk
   rotcurves  name1=brandt pars1=0,$v0,$r0,$m0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - "%1,1,%2,$sigma,exp(-%1/$re)" all  > $run.tab
+  nemo_stamp rotcurves
   vmax=$(tabstat $run.tab 3 | txtpar - p0=max:,1,2)
   echo "Max rotcur: vmax=$vmax m0=$m0"
+  nemo_stamp tabstat
 elif [ $v1 = 0 ]; then
-  echo "Creating homogeneous disk with $nbody particles times"
+  echo "Creating homogeneous disk with $nbody particles.  (need optimizing test)"
   mkdisk out=- nbody=$nbody seed=$seed z0=$z0,$z0 \
        potname=rotcur0 potpars=0,$v0,$r0 mass=1 sign=-1 frac=$sigma abs=t rmax=$rmax |\
-    snapmass - - "mass=exp(-r/$re)" |\
-    snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc,$pa" yz
+    snapmass - - "mass=$mass" |\
+    snapscale - $run.20 mscale=$nbody
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  tab=t radii=0:${rmax}:0.01 plot=f |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 else
   m1=`nemoinp "$r1*($v1/0.62)**2"`
-  echo "Creating homogeneous disk with $nbody particles times and a nuclear component m1=$m1"
+  echo "Creating homogeneous disk with $nbody particles and a nuclear component m1=$m1 (needs optimizing test)"
   rotcurves  name1=rotcur0 pars1=0,$v0,$r0  name2=plummer pars2=0,$m1,$r1 tab=t radii=0:${rmax}:0.01 |\
       tabmath - - %1,1,%2,$sigma all > $run.tab
 
   mktabdisk $run.tab - nbody=$nbody seed=$seed rmax=$rmax sign=-1 |\
-    snapmass - - "mass=exp(-r/$re)" |\
-    snapscale - - mscale=$nbody |\
-    snaprotate - $run.20 "$inc,$pa" yz
+    snapmass - - "mass=$mass" |\
+    snapscale - $run.20 mscale=$nbody
 fi
 
-echo "Creating velocity moments"
-snapgrid $run.20 $run.21 $grid_pars moment=0 evar=m
-snapgrid $run.20 $run.22 $grid_pars moment=1 evar=m
-snapgrid $run.20 $run.23 $grid_pars moment=2 evar=m
-# skip smoothing
-ccdmath $run.21,$run.22,$run.23 $run.20d %1
-ccdmath $run.21,$run.22,$run.23 $run.20v "%2/%1"
-ccdmath $run.21,$run.22,$run.23 $run.20s "sqrt(%3/%1-%2*%2/(%1*%1))"
-#  clipping
-ccdmath $run.20d,$run.21 $run.21d "ifgt(%2,0,%1,0)"
-ccdmath $run.20v,$run.21 $run.21v "ifgt(%2,0,%1,0)"
-ccdmath $run.20s,$run.21 $run.21s "ifgt(%2,0,%1,0)"
-
+#snapsort $run.20 - r help=c | snapshell - radii=0:${rmax}:0.01 pvar=m help=c > $run.shell
+snapshell $run.20 radii=0:${rmax}:0.01 pvar=m help=c > $run.shell
+nemo_stamp snapshell
 
 echo "Creating a velocity field - method 2"
-snapgrid $run.20 - $grid_pars \
-	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m |\
-    ccdflip - $run.30 flip=$flip wcs=t
+snapgrid $run.20 $run.30 $grid_pars \
+	 zrange=-${vrange}:${vrange} nz=$nvel mean=f evar=m zvar=vy*$sininc
+nemo_stamp snapgrid
 ccdstat $run.30
+nemo_stamp ccdstat
+
 if [ $vbeam = 0 ]; then
   ccdmath $run.30 $run.31 "%1+rang(0,$noise)"
 else
   ccdmath $run.30 - "%1+rang(0,$noise)" | ccdsmooth - $run.31 $vbeam dir=z
 fi
+nemo_stamp ccdmath
 
 # single dish profile
+if [ 1 = 1 ]; then
 ccdmom $run.31 - axis=1 mom=0 |\
     ccdmom - - axis=2 mom=0 |\
     ccdprint - x= y= z= label=z newline=t |\
     tabcomment - - punct=f delete=t > $run.spec
+else
+    # faster, but normalization is off now
+    ccdprint $run.31 x= y= z= label=z newline=t |\
+    tabcomment - - punct=f delete=t > $run.spec
+fi
+nemo_stamp ccdprint
 
 echo -n "Total integral over spectrum: "
 tabint $run.spec
+nemo_stamp tabint
+echo -n "Estimate of signal/noise in spectrum: "
+peak=$(tabstat $run.spec 2  qac=t | txtpar - p0=QAC,1,6)
+rms=$(tabtrend $run.spec 2 | tabstat - qac=t robust=t | txtpar - p0=QAC,1,4)
+if [ $rms = 0 ]; then
+    echo "$peak / 0 = 999999"
+else
+    echo "$peak / $rms = $(nemoinp $peak/$rms)"
+fi
 
-# export for other programs, in decent units
+
+# export to FITS, in decent units
 # this way the input spatial scale is in arcsec and km/s
-ccdfits $run.31 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
+# SKIP for production
+# ccdfits $run.31 $run.fits radecvel=t scale=1/3600.0,1/3600.0,1.0 crval=$crval restfreq=$restfreq
 
 
 echo "PLOT: $plot"
@@ -153,9 +204,10 @@ if [[ "$plot" == *"rotcur"* ]]; then
     tabplot $run.tab 1 3 headline="Rotation Curve" yapp=1/xs
 fi
 if [[ "$plot" == *"profile"* ]]; then    
-    tabplot $run.spec line=1,1  headline="Spectrum around VLSR=$vlsr" yapp=2/xs
+    tabplot $run.spec line=1,1  ycoord=0 headline="Spectrum around VLSR=$vlsr" yapp=2/xs
 fi
 if [[ "$plot" == *"density"* ]]; then    
-    tabplot $run.tab 1 5 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
+    tabplot $run.shell 1 4 line=1,1  ymin=0 headline="Surface Density" yapp=3/xs
 fi
 
+nemo_stamp end

@@ -1,10 +1,13 @@
-.TH TABNLLSQFIT 1NEMO "9 October 2013"
-.SH NAME
+.TH TABNLLSQFIT 1NEMO "3 January 2024"
+
+.SH "NAME"
 tabnllsqfit \- general purpose non-linear least squares fitting program
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBtabnllsqfit in=\fPtable-file [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabnllsqfit\fP takes a non-linear least squares fit (minimized ChiSquared)
 of a set of datapoints (x(i),y(i)) where a functional
 form y=f(x;p0,p1,...,pN) is assumed. The function is not required to
@@ -31,9 +34,8 @@ the residuals are still computed correctly.
 This routine can also be used to plot the function, although only in 1D cases,
 see \fBx=\fP.
 
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 (ascii) input file, a table of values from which data is taken. No default.
@@ -155,7 +157,7 @@ Fitting method. Gipsy uses their \fInllsqfit(3NEMO)\fP, NumRec uses their
 \fImrqfit\fP and MINPACK uses \fImpfit(3NEMO)\fP.  Only first character
 is used, case insensitive.  [Default: \fBg\fP]
 
-.SH FIT PARAMETERS
+.SH "FIT PARAMETERS"
 Parameters are referred to as p0,p1,p2,p3,.....
 .nf
 .ta +1.5i 
@@ -171,7 +173,8 @@ arm3		y=p0+p1*cos(x)+p2*sin(x)+p3*cos(3*x)+p4*sin(3*x)
 loren		y=p1/PI( (x-p0)^2 + p1^2 )
 psf		y=p1*x^p2*sin(y)^p3+p4
 .fi
-.SH EXAMPLE
+
+.SH "EXAMPLES"
 Here is an example of a linear fit: a straight 
 line, with some added noise and random weights between 1 and 2:
 .nf
@@ -259,7 +262,25 @@ bootstrap= 3.11603 0.164922 1.96464 0.086429 0.00293632 0.00820007
               P0      dP0      P1      dP2       P3         dP3
 .fi
 
-.SH LOAD FUNCTIONS
+.PP
+Here is an example of calling tabnllsqfit twice, once to fit a baseline, extract the
+fit parameters, and a second
+time to subtract the baseline using the parameters without a fit and using out=.
+The input table has two columns, velocity
+and intensity, but a bad baseline between -400 and +500. There is a spectral line
+between 0 and 25 km/s, so we fit a local high order baseline between -100 and +100 but
+excluding the line:
+.EX
+
+tabplot MonR2_110433__0.txt line=1,1
+tabnllsqfit MonR2_110433__0.txt xrange=-100:-20,45:150 fit=poly order=3 > pars0
+p0=$(txtpar pars0 p0=p0=,1,2 p1=p1=,1,2 p2=p2=,1,2 p3=p3=,1,2)
+tabnllsqfit MonR2_110433__0.txt fit=poly order=3 out=- free=0,0,0,0 par="$p0" | tabcomment - > tab0
+tabplot tab0 1 3 -50 50  -1 15 line=1,1 ycoord=0 
+
+.EE
+
+.SH "LOAD FUNCTIONS"
 With the \fBload=\fP keyword dynamic object files can be loaded using the
 \fIloadobj(3NEMO)\fP mechanism. The convention is that two functions
 must be externally visible, and named \fIfunc_\fP\fImethod\fP and
@@ -295,7 +316,8 @@ One word of caution: if you find the program having a hard time finding
 a solution in complex cases, it is quite possible that this is not due to
 the fact that the function is complex, but due to noise or bad initial
 conditions.
-.SH DERIVATIVES CHECK
+
+.SH "DERIVATIVES CHECK"
 A common debug problem is to check the analytical derivatives in
 your external loaded function. The \fBx=\fP keyword can be used
 to check the function values (useful to plot up the function
@@ -336,10 +358,12 @@ is incremented by a decreasing factor of 0.1
 You can see that the offset (par 0) and amplitude (par 1) of the gauss are well behaved (as they are linear),
 but the centroid (par 2) and width (par 3) of the gauss only slowly converge linearly with the step. The last
 number in square brackets is the error between numerical and analytical derivative.
-.SH CAVEATS
+
+.SH "CAVEATS"
 It will not recognize linear fits if the non-linear parameters are kept fixed,
 e.g. the offset 0 in \fBfit=gauss1d\fP.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tablsqfit(1NEMO), tabhist(1NEMO), tabmath(1NEMO), 
 gaussfit(1NEMO), linreg(1NEMO), nllsqfit(3NEMO), fit.dc1(GIPSY)
 .PP
@@ -357,17 +381,19 @@ A new scheme for calculating weights and describing
 correlations in nonlinear least squares fits.
 (Hessler, Curent & Ogren, C.I.P. 10, 186, 1996): 
 http://dx.doi.org/10.1063/1.168569 
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/kernel/tab	tabnllsqfit.c
 ~/src/kernel/tab/fit	example fitting functions
 .fi
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.5i +5.5i
 12-jul-02	V1.0 cloned off tablsqfit	PJT
 17-jul-02	V1.1 added load=, x=, numrec=		PJT
 11-sep-02	V1.1e  changes error/warning to accomodate residual writen	PJT

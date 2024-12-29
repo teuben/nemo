@@ -6,6 +6,7 @@
  *	16-mar-90	PJT	made GCC happy
  *      20-may-94       pjt     remove allocate() decl. into headers
  *      25-dec-02       pjt     better ANSI C
+ *      20-oct-24       pjt     gcc-14 function pointer syntax fix
  */
 
 #include "quaddefs.h"
@@ -20,13 +21,13 @@ typedef struct {
 local void init_quad_field(shadow *, int, real);
 local void int_quad_force(shadow *, int);
 local void ext_quad_force(shadow *, int);
-local int rankrad(shadowptr, shadowptr);
+local int rankrad(const void *, const void *);
 
 /*
  * QUADFORCE: compute the force-field of a spheroidal distribution.
  */
 
-quadforce(Body *btab, int nb, real eps1, real eps2)
+void quadforce(Body *btab, int nb, real eps1, real eps2)
 {
     shadowptr shad;
     Body *b;
@@ -52,8 +53,11 @@ quadforce(Body *btab, int nb, real eps1, real eps2)
  * RANKRAD: ranking function for quicksort.
  */
 
-local int rankrad(shadowptr sp1, shadowptr sp2)
+//local int rankrad(shadowptr sp1, shadowptr sp2)
+local int rankrad(const void *p1, const void *p2)
 {
+    shadowptr sp1 = (shadowptr) p1;
+    shadowptr sp2 = (shadowptr) p2;
     return (sp1->rad0 < sp2->rad0 ? -1 : 1);	/* compare body radii       */
 }
 

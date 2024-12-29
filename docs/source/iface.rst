@@ -163,13 +163,16 @@ results in something like:
         fill_circle=t frame= VERSION=1.3f
 
 
-As you see, ``snapplot`` happens to be a program
+Compare the VERSION= with your version, and it will likely be different.
+
+
+As you can see, ``snapplot`` happens to be a program
 with quite an extensive parameter list.
 Also note that ``help`` itself is not listed in the above list of program
 keywords because it is a **system keyword**
 (more on these later).
 
-There are a few *short-cut*
+There are a few *short-cuts*
 in this user interface worth mentioning 
 at this
 stage.  First of all, keywords don't have to be specified 
@@ -178,7 +181,7 @@ order, they will be associated by the appropriate keyword.
 The order of program keywords can be seen with
 the keyword ``help=``.
 The moment you deviate from
-this order, or leave gaps, all 
+this order, or skip keywords, all 
 values must be accompanied by their keywords, *i.e.* in
 the example
 
@@ -301,7 +304,7 @@ In summary, the system keywords are:
   Deprecated
 
 - **np=**
-  Number of processors (for OpenMP) to maximally use. Default is max.
+  Number of processors (e.g. for OpenMP) to maximally use. Default is the max.
 
 For a more detailed description of the system keywords and all their options
 see :ref:`aiface`.  The actual degree of implementation of the system
@@ -326,15 +329,8 @@ shells like ``tcsh`` and ``bash``
 can be used very efficiently in this mode. 
 In batch mode shell scripts, if used properly, can provide a very
 powerful method of running complex simulations.
-Other plug-compatible
-interfaces that are available are ``mirtool`` and ``miriad``,
-described in more detail in
-Appendix~\ref{s:mirtool} and \ref{s:miriad} There was also a
-Khoros (cantata, under khoros V1)
-interface (``http://www.khoral.com``) available, but this product is not
-open source anymore.
 Lastly, lets not forget scripting languages like python, perl and ruby. 
-Although the class UNIX (c)sh shell is very WYSIWYG, with a modest amount
+Although the classic UNIX (c)sh shell is very WYSIWYG, with a modest amount
 of investment the programmability of higher level scripts can give you
 a very powerful programming environment.
 
@@ -391,9 +387,13 @@ caveat, here are various help options:
     keyword descriptions and more vertical space.
 
     The special ``--help`` option is allowed for those with gnu fingers.
+    Using ``-h`` is a short-cut.
 
     The special ``--man`` option delivers the unix style man
     page (see next item).
+
+    The special ``--version`` option displays the current version.
+    Using ``-v`` is a short-cut.  
 
 - Unix manual pages
     for programs, functions, and file
@@ -437,7 +437,8 @@ caveat, here are various help options:
     as well as advanced users, and at is being coverted to this RST
     manual, outdated.
 
-- This manual, in **reStructuredText** might be available in many different formats. html and pdf are the common ones.
+- The manual you are reading here,
+  in **reStructuredText** might be available in many different formats. html and pdf are the common ones.
     
 
 .. _aiface:

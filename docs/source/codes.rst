@@ -20,6 +20,8 @@ that have a tighter connection to NEMO:
 
 .. include:: starlab.rst
 
+.. include:: falcon2.rst 
+
 .. include:: rebound.rst   
 
 .. include:: galpy.rst   

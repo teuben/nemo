@@ -21,11 +21,10 @@
 string defv[] = {
     "in=???\n			input file name",
     "out=???\n			output file name",
-    "VERSION=1.0",		15-sep-90  PJT",
+    "VERSION=1.1\n		22-dec-2024 PJT",
     NULL,
 };
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 main(argc, argv)
 int argc;

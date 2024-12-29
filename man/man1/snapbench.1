@@ -1,4 +1,4 @@
-.TH SNAPBENCH 1NEMO "12 March 2024"
+.TH SNAPBENCH 1NEMO "9 July 2024"
 
 .SH "NAME"
 snapbench \- benchmark (re)assigning masses to a snapshot
@@ -14,6 +14,13 @@ It also uses two memory models of keeping a snapshot:
 an array of structs (AOS) vs. a struct of arrays (SOA). snapshots'
 are normally stored on disk as SOA's, but most programs actually
 transpose them to an AOS, which can be very in-efficient.
+.PP
+A hidden code \fIsnaprun\fP compares defining simple variables (x,y,z) in a
+structure with an array pos[3], and also looping over pos[] insted of
+hardcoding a simpler Eulerian type of update. Counter intuitive, looping
+made the code about 4-8 times slower.  Simple variables are slightly faster
+than using directly addressing the array.  Results vary a bit on different
+processors.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -63,11 +70,13 @@ with the following examples
 Only reading and assignment is measured. No options for output (if out= is given)
 
 .SH "SEE ALSO"
-snapshot(5NEMO)
+snaprun, snapshot(5NEMO)
 
 .SH "FILES"
+.nf
 src/nbody/trans/snapbench.c
-
+src/tutor/nbody/snaprun.c
+.fi
 .SH "AUTHOR"
 Peter Teuben
 

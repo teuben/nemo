@@ -1,0 +1,89 @@
+.TH LINEID 1NEMO "15 December 2024"
+
+.SH "NAME"
+lineid \- Identify peaks in a spectrum and optionally find lines
+
+.SH "SYNOPSIS"
+\fBlineid\fP [parameter=value]
+
+.SH "DESCRIPTION"
+\fBlineid\fP identifies peaks in a spectrum, and
+attempts to identify spectral lines. The units of the frequency
+axis will need to be specified (the default is GHz) in order for the line identification to work.
+.PP
+Operation can occur in several modes.
+.br
+1. If the VLSR is given, a LineID is attempted. Either from a given
+restfreq, or from a linelist.
+.br
+2. If the RESTFREQ is given, a VLSR is determined from the frequency of the
+fitted peak.
+.br
+3. If neither is given, just the peak(s) are reported.
+.PP
+See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
+an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
+.PP
+More sophisticated algorithms can be find in for example ADMIT's LineID task.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+Input (table) file name. No default.
+.TP
+\fBxcol=\fP
+X coordinate column, representing the frequency or wavelength axis.
+Units are GHz, unless specified with the \fBxunit\fP keyword.
+[1]
+.TP
+\fBycol=\fP
+Y coordinate column, reprepenting an intensity. [2] 
+.TP
+\fBxunit=\fP
+X axis unit (GHz, MHz, A, nm) -- not implemented yet.
+[GHz]
+.TP
+\fBminchan=\fP
+Minimum channels for a peak [3]   - not used yet 
+.TP
+\fBmaxchan=\fP
+Maximum channels for a peak []     - not used yet 
+.TP
+\fBvlsr=\fP
+VLSR of object. Not set by default.
+.TP
+\fBrestfreq=\fP
+If line is known, give restfreq in xunits. Not set by default.
+.TP
+\fBlinelist=\fP
+Table with frequencies and lines. Not set by default.
+
+.SH "EXAMPLES"
+The following example smoothes a set of random values by 10 channels to create a handful
+of peaks and investigates the strongest peak:
+.EX
+
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 
+  ### nemo Debug Info: Peak: 40.1222 0.169591
+
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 vlsr=10000
+  ### nemo Debug Info: Line at 40.1222, Look near freq = 41.5067 for a line
+
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 restfreq=115
+  ### nemo Debug Info: Line at 40.1222 has z=0.651112 or vlsr=...
+.EE  
+
+.SH "SEE ALSO"
+tablsqfit(1NEMO), table(5NEMO)
+.PP
+admit::LineID_AT()
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+13-dec-2024	0.1 Draft created	PJT
+.fi

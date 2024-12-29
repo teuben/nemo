@@ -27,7 +27,7 @@ string defv[] = {               /* DEFAULT INPUT PARAMETERS */
     "eps=0.05\n			using this softening",
     "formal=false\n		publication-style plot",
     "tab=\n                     If given, tabulate Time,Etot",
-    "VERSION=1.5b\n		12-feb-2024 PJT",
+    "VERSION=1.6\n		22-dec-2024 PJT",
     NULL,
 };
 
@@ -38,8 +38,6 @@ local string times;
 local bool exactpot;
 local real eps;
 local bool formal;
-
-#define TIMEFUZZ 0.00001
     
 /*
  * Arrays used to store diagnostic info.

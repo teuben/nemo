@@ -6,7 +6,10 @@
 #    Packages covered here:    skymaker swarp
 #    Todo:   sextractor        needs ATLAS or --enable-openblas
 #                              --disable-model-fitting    bypasses them
-#    ubuntu pacakes:   fftw, libopenblas-dev
+#    ubuntu packages:   fftw, libopenblas-dev
+#
+#    failing with the method here:     stiff, stuff, eye, psfex
+#
 #
 version=git
 url=https://github.com/astromatic

@@ -1,0 +1,107 @@
+#! /usr/bin/env bash
+#
+#  Install a miniconda3 python .   See also install_anaconda3
+#
+
+#--HELP
+#  default parameters
+    url=https://repo.anaconda.com/miniconda/Miniconda3-py%s-%s-%s.sh
+   url1=https://repo.anaconda.com/miniconda/Miniconda3-latest-%s-%s.sh
+    # various miniconda versions available:
+   version=latest                 # !! special. watch out for caching this file !!
+version=37_23.1.0-1            # 3.7.16
+version=38_23.11.0-2           # 3.8.18
+version=39_24.7.1-0            # 3.9.19
+version=310_24.7.1-0           # 3.10.15
+version=311_24.7.1-0           # 3.11.9
+version=312_24.7.1-0           # 3.12.4
+
+    dir=$(pwd)/miniconda3      # where miniconda will be located
+   wget=wget                   # use wgetc is you have my cashing version (wget=curl is also allowed)
+     os=$(uname -s)            # Handles Linux or Darwin, sorry no Windows
+    cpu=$(uname -m)            # Handles Linux or Darwin, sorry no Windows
+    dry=0                      # dry run?
+  quick=0                      # quick install without extra modules
+  
+#--HELP
+
+# some help?    
+ if [ "$1" == "--help" ] || [ "$1" == "-h" ]; then
+    set +x
+    awk 'BEGIN{s=0} {if ($1=="#--HELP") s=1-s;  else if(s) print $0; }' $0
+    exit 0
+fi
+    
+# override parameters
+for arg in "$@"; do
+  export "$arg"
+done
+
+if [ "$os" = "Darwin" ]; then
+    os=MacOSX
+fi
+
+if [ $version = "latest" ]; then
+    mc3=$(printf $url1 $os $cpu)
+else
+    mc3=$(printf $url $version $os $cpu)      # @todo to be implemented
+fi
+msh=$(basename $mc3)
+
+if [ $dry = 1 ]; then
+    echo $mc3
+    exit 0
+fi
+
+if [ -d $dir ]; then
+    echo "$dir already exists"
+    echo "Remove this directory, or use a new dir="
+    exit 1
+fi
+
+if [ ! -e $msh ]; then
+    if [ $wget = "curl" ]; then
+	# curl $mc3 -o $msh
+	curl -OL $mc3
+    else
+	$wget $mc3 
+    fi
+fi
+
+if [ ! -e $msh ]; then
+    echo "File $msh not found. Wrong version=$version ?"
+    exit 0
+fi
+
+echo "Using $msh"
+bash $msh -b -p $dir
+
+export PATH="$dir/bin:$PATH"
+conda update -y conda
+pip3 install --upgrade pip
+
+#    write sourceable shell startup recipes
+echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
+echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
+
+if [ $quick = 1 ]; then
+   echo Done.
+fi
+
+#    ensure we have a bash kernel in jupyter notebooks
+pip install bash_kernel
+python -m bash_kernel.install
+
+pip freeze > $dir/freeze.log
+echo "Created python_start files for $version in $dir ; no modifications were made to your HOME startup files!"
+python --version
+echo "typically you would need to "
+echo "      source $dir/python_start.sh"
+echo "to add this python to your shell environment."
+
+# conda install -y ipython numpy scipy matplotlib notebook jupyter astropy
+
+# pip install astroquery
+# conda -c astropy astroquery
+
+# pip install image_registration radio_beam reproject spectral_cube

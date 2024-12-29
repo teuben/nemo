@@ -77,7 +77,7 @@ string defv[] = {		/* keywords/default values/help */
 	"stack=f\n			  Stack all selected snapshots?",
 	"integrate=f\n                    Sum or Integrate along 'dvar'?",
 	"proj=\n                          Sky projection (SIN, TAN, ARC, NCP, GLS, CAR, MER, AIT)",
-	"VERSION=6.1a\n			  9-feb-2024 PJT",
+	"VERSION=6.2\n			  22-dec-2024 PJT",
 	NULL,
 };
 
@@ -87,7 +87,6 @@ string usage="grid a snapshot into a 2/3D image-cube";
 #ifndef HUGE
 #define HUGE      1.0e20        /* don't use INF, ccdfits writes bad headers */
 #endif
-#define TIMEFUZZ  0.000001
 #define CUTOFF    4.0		/* cutoff of gaussian in terms of sigma */
 #define MAXVAR	  16		/* max evar's */
 
@@ -461,8 +460,7 @@ typedef struct point {
 
 local Point **map =NULL;
 
-local int pcomp(Point **a, Point **b);
-//local int pcomp(void *, void *);
+local int pcomp(const void *, const void *);
 
 void bin_data(int ivar)
 {
@@ -724,9 +722,11 @@ void los_data(void)
     
 }
 
-int pcomp(Point **a, Point **b)
+int pcomp(const void *app, const void *bpp)
 {
-  return (*a)->depth > (*b)->depth;
+  Point *a = (Point *) app;
+  Point *b = (Point *) bpp;
+  return (a)->depth > (b)->depth;
 }
 
 void free_snap()

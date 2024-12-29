@@ -14,6 +14,7 @@
 |* V2.0   : imported in teuben's nemo CVS tree
 |* V2.1   : PosTag VelTag and KeyTag added
 |* V2.1a  : note that within() uses real, not double
+|* V2.2   : TIMEFUZZ now from stdinc.h
 
 \* -------------------------------------------------------------- */
 
@@ -40,13 +41,12 @@ string defv[] = {		/* DEFAULT INPUT PARAMETERS */
     "select=all\n		  selected particles",
     "times=all\n		  selected times",
     "step=1\n			  copy only step by step snapshots",
-    "VERSION=2.1\n		  09-Jul-02 JCL",
+    "VERSION=2.2\n		  22-dec-2024 PJT",
     NULL,
 };
 
 string usage = "mask out particles while copying snapshot data";
 
-#define TIMEFUZZ	0.00001
 /* -------------------------------------------------------------- *\ 
 |* save_parameter :
 |* Save ParametersTag

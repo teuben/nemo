@@ -331,6 +331,13 @@ typedef real (*float_proc)(float);
 #define DAS2R   4.848136811095359935899141e-6
 
 /*
+ * TIMEFUZZ
+ *     fuzzy time for snapshots; ideally really should not be hardcoded
+ *
+ */
+#define TIMEFUZZ 0.000001
+
+/*
  *  POS_ANGLE, SYM_ANGLE: bring angular variables into standard form.
  *    To map an angular variable 'phi' into the range [0, 2pi),
  *    keeping 'phi' invariant modulo 2pi, use the statement

@@ -39,13 +39,11 @@ string defv[] = {
     "tfactor=-1.0\n               conversion factor v->r [virial=sqrt(2)]",
     "nn=f\n                       add NN index to the Key field?",
     "ndim=3\n                     3dim or 2dim densities?",
-    "VERSION=1.5c\n		  5-apr-2006 PJT",
+    "VERSION=1.5d\n		  20-oct-2024 PJT",
     NULL,
 };
 
 string usage="density estimator using Kth-nearest neighbor";
-
-string cvsid="$Id$";
 
 
 #define FAC1   4.188790203	/* 4.pi/3 */
@@ -73,7 +71,7 @@ local real raddif(Body *, Body *);
 local void stat_nn(Body *);
 
 
-nemo_main()
+void nemo_main()
 {
     stream instr, outstr;
     real   tsnap, dm;

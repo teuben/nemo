@@ -1,27 +1,8 @@
 /*
- * MKDISK.C: set up a uniform-density test disk in a spherical potential(5)
- *           optional gaussian or sech2(z) thick disk
- *	
- *	original version: xx-jul-87	Peter Teuben
- *		V2.0: 8-feb-89	based on mktestdisk with Potential(5)  PJT
- *		V3.0: 12-may-90  new keywords for potential(5)		PJT
- *              V3.1:  2-nov-90  will not write masses when zero ...    PJT
- *		V3.2: 14-nov-90  NEMO 2.x
- *		V4.1: 11-jun-92  added sign of angular momentum vector  PJT
- *			 	 nbody= is now second parameter	
- *		V4.2b: 24-jul-98 bit more documentation			PJT
- *		** still broken for SINGLEPREC **
- *              V4.3:  12-jun-01 allow regularly spaced (with random start) PJT
- *              9-sep-01       a    gsl/xrandom
- *              8-apr-03      b     forgot timebit
- *              6-may-03  v4.4b   fixed bug when ndisk=1
- *              8-may-03  V4.5    added energy=
- *              5-jul-03  V4.6 fixed energy= bug ; also
- *                             store Acc and Phi of particles    PJT
- *             11-mar-14  abs= to control the vel.dispersions differently    PJT
- *                2017    V4.9 various tests with for Levy's paper           PJT
+ * DISKSPECTRUM.C:      combining mkdisk + snapmass + snaprotate + snapgriof
+ *                      to create a faster method for edge_gbt.sh
  *
- *  @todo     deal when sigma^2 < 0
+ *          24-nov-2024   cloned off mkdisk
  *
  */
 
@@ -31,39 +12,48 @@
 #include <filestruct.h>
 #include <history.h>
 #include <potential.h>
+#include <grid.h>
 
 #include <snapshot/snapshot.h>
 #include <snapshot/body.h>
-#include <snapshot/put_snap.c>
 
 string defv[] = {
-    "out=???\n		Output file name (snapshot)",
+    "out=???\n		Output file name (spectrum)",
     "nbody=2048\n	Number of disk particles",
+    
     "potname=plummer\n  Name of potential(5)",
     "potpars=\n         Parameters to potential(5); omega needed but not used",
     "potfile=\n         Optional data file with potential(5)",
+    
     "rmin=0\n		Inner disk radius",
     "rmax=1\n		Outer cutoff radius",
-    "mass=0\n		Total mass of disk (0 means no masses supplied)",
+    "model=0\n		Mass model (0=CONST 1=EXP, 2=PLEC... 3=AMT)",
+    "mpars=\n           Parameters for the mass model",
+    
     "frac=0\n           Relative vel.disp w.r.t. local rotation speed",
     "seed=0\n		Usual random number seed",
-    "sign=1\n           Sign of Z-angular momentum vector of disk",
-    "in=\n              If given, these are initial positions **not implemented**",
+
     "angle=f\n          Regular angular distribution?",
     "vrad=0\n           radial velocity",
     "energy=f\n         preserve energy if random motions added?",
     "abs=f\n            Use absolute vel.disp instead of fractional?",
-    "z0=0,0\n           Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
-    "vloss=-1\n         Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
+    "z0=0,0\n           ** Vertical scaleheight for density; use 2nd one for velocity dropoff if needed",
+    "vloss=-1\n         ** Fractional loss of orbital speed at the scaleheight (<1 => Burkert)",
+
+    "inc=30\n           Inclination to observe the disk at",
+
+    "vbeam=5\n          FWHM of smoothing beam in velocity",
+    "vrange=400\n       velocity gridding will be -vrange:vrange",
+    "nvel=200\n         number of spectral pixels",
+    
     "headline=\n	Text headline for output",
-    "VERSION=4.9j\n	23-nov-2024 PJT",
+    "VERSION=0.2\n	27-nov-2024 PJT",
     NULL,
 };
 
-string usage="set up a uniform-density test disk in a spherical potential";
+string usage="global spectrum of a rotating thin disk";
 
 local real rmin, rmax, mass;
-local int  jz_sign;
 local bool Qangle;
 local bool Qenergy;
 local bool Qabs;
@@ -79,6 +69,17 @@ local real z0_v;    /* dropoff in velocity */
 local real vloss;
 local bool Qrandom;
 
+local real inc, sininc;
+local real vbeam;
+local real vrange;
+local int  nvel;
+
+local int mmodel;
+local real mpars[16];
+// 1: EXP:   re
+// 2: PLEC:  rd,n
+// 3: AMT:   rd,Rm
+
 /* old style */
 // #define OLD_BURKERT   1
 
@@ -86,8 +87,8 @@ local bool Qrandom;
 extern double xrandom(double,double), grandom(double,double);
 
 local real took(real);
-local void writegalaxy(string name, string headline, bool Qmass);
 local void testdisk(void);
+local void spectrum(void);
   
 local real mysech2(real z)
 {
@@ -118,11 +119,11 @@ local real pick_dv(real r, real z, real z0)
 
 void nemo_main()
 {
-    bool Qmass;
     int nfrac, seed, nz;
     real z0[2];
+
+    warning("This program is under development");
     
-    if (hasvalue("in")) error("\"in=\" not implemented yet");
     potential = get_potential(getparam("potname"),
                     getparam("potpars"), getparam("potfile"));
     rmin = getdparam("rmin");
@@ -141,7 +142,7 @@ void nemo_main()
   
 
     vloss = getrparam("vloss");
-    if (z0_d > 0)
+    if (z0_d > 0) {
       if (vloss < 0)
 #ifdef OLD_BURKERT	
 	dprintf(0,"Burkert et al 2010 streaming(z) model\n");
@@ -150,8 +151,7 @@ void nemo_main()
 #endif
       else
 	dprintf(0,"Toy streaming(z) model with vloss=%g\n",vloss);
-    jz_sign = getiparam("sign");
-    if (ABS(jz_sign) != 1) error("%d: sign must be +1 or -1",jz_sign);
+    }
     nfrac = nemoinpr(getparam("frac"),frac,NDIM);
     switch (nfrac) {
     case 1:
@@ -171,43 +171,20 @@ void nemo_main()
     if (!Qrandom)
       dprintf(0,"No random motions\n");
 
-    mass = getdparam("mass") / ndisk;
-    if (mass==0.0)  {
-	Qmass=FALSE;
-	warning("mass=0 -- No masses created in output snapshot");
-    } else
-        Qmass=TRUE;
+    mass = 1.0 / ndisk;
     seed = init_xrandom(getparam("seed"));
     dprintf(1,"Seed=%d\n",seed);
     Qangle = getbparam("angle");
     Qenergy = getbparam("energy");
     Qabs = getbparam("abs");
+    vbeam = getdparam("vbeam");
+    vrange = getdparam("vrange");
+    nvel = getiparam("nvel");
+    inc = getdparam("inc");
+    sininc = sin(inc/DR2D);
+    
     testdisk();
-    writegalaxy(getparam("out"), getparam("headline"), Qmass);
-}
-
-/*
- * WRITEGALAXY: write galaxy model to output.
- */
-
-void writegalaxy(string name, string headline, bool Qmass)
-{
-    stream outstr;
-    real tsnap = 0.0;
-    int bits;
-
-    if (! streq(headline, ""))
-	set_headline(headline);
-    outstr = stropen(name, "w");
-    put_history(outstr);
-    if (Qmass)
-        bits = MassBit | PhaseSpaceBit | TimeBit;
-    else
-        bits = PhaseSpaceBit | TimeBit;
-    bits |= AuxBit;
-    bits |= PotentialBit;
-    put_snap(outstr, &disk, &ndisk, &tsnap, &bits);
-    strclose(outstr);
+    spectrum();
 }
 
 /*
@@ -218,8 +195,8 @@ void writegalaxy(string name, string headline, bool Qmass)
 void testdisk(void)
 {
     Body *dp;
-    real rmin2, rmax2, r_i, theta_i, vcir_i, pot_i, t;
-    real  dv_r, dv_t, sint, cost, theta_0, vrandom;
+    real rmin2, rmax2, r_i, theta_i, vcir_i;
+    real  dv_r, dv_t, sint, cost, vrandom;
     real sigma_r, sigma_t, sigma_z;
     vector acc_i;
     int i, ncirc, ndim=NDIM;
@@ -229,8 +206,7 @@ void testdisk(void)
     rmin2 = rmin * rmin;
     rmax2 = rmax * rmax;
     theta_i = xrandom(0.0, TWO_PI);
-    t = 0;    /* dummy time ; we do not support variable time */
-    for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop all stars */
+    for (dp=disk, i = 0, ncirc=0; i < ndisk; dp++, i++) {	/* loop over all stars */
 	Mass(dp) = mass;
 	if (ndisk == 1)
 	  r_i = rmin;
@@ -276,9 +252,9 @@ void testdisk(void)
 	    sigma_z = grandom(0.0,frac[2]);
 	  } else
 	    sigma_r = sigma_t = sigma_z = 0.0;
-	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	  Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
+	  //Vel(dp)[0] =  -vcir_i * sint ;
+	  Vel(dp)[1] =   vcir_i * cost ;
+	  //Vel(dp)[0] += cost*sigma_r - sint*sigma_t;  /* add dispersions */
 	  Vel(dp)[1] += sint*sigma_r + cost*sigma_t;
 	} else {
 	  do {                         /* iterate, if needed, to get vrandom */
@@ -295,9 +271,9 @@ void testdisk(void)
 	  } while (Qenergy &&  vrandom > vcir_i);
 	  vcir_i = sqrt((vcir_i-vrandom)*(vcir_i+vrandom));
 	  dv_r += vrad;
-	  Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	  Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	  Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
+	  //Vel(dp)[0] =  -vcir_i * sint ;
+	  Vel(dp)[1] =   vcir_i * cost ;
+	  //Vel(dp)[0] += cost*dv_r - sint*dv_t;  /* add dispersions */
 	  Vel(dp)[1] += sint*dv_r + cost*dv_t;
 	}
 #else
@@ -316,20 +292,18 @@ void testdisk(void)
 
 	if (Qenergy)
 	  vcir_i = sqrt((vcir_i-dv_r)*(vcir_i+dv_r));
-	Vel(dp)[0] =  -vcir_i * sint * jz_sign;
-	Vel(dp)[1] =   vcir_i * cost * jz_sign;
-	Vel(dp)[0] += cost*dv_r;
+	//Vel(dp)[0] =  -vcir_i * sint ;
+	Vel(dp)[1] =   vcir_i * cost ;
+	//Vel(dp)[0] += cost*dv_r;
 	Vel(dp)[1] += sint*dv_r;
 	if (!Qenergy) {
-	  Vel(dp)[0] += -sint*dv_t;
+	  //Vel(dp)[0] += -sint*dv_t;
 	  Vel(dp)[1] +=  cost*dv_t;
 	}
 
 #endif
 	Vel(dp)[2] = sigma_z;
-	/* store potential and total energy for debugging */
-	Phi(dp) = pot_d;
-	Aux(dp) = pot_d + 0.5*(sqr(Vel(dp)[0]) + sqr(Vel(dp)[1]) + sqr(Vel(dp)[2]));
+	Vel(dp)[1] *=  sininc;
     }
     if (ncirc) dprintf(0,"Had to respin random %d times\n",ncirc);
 }
@@ -342,4 +316,36 @@ void testdisk(void)
 real took(real r)
 {
     return  1.0;
+}
+
+
+void spectrum(void)
+{
+  real mtot = 0.0;
+  real vrad, vrad_max = -1.0;
+  Body *dp;
+  int i, iv;
+  Grid g;
+  real *spectrum = (real *) allocate(nvel*sizeof(real));
+  // nvel needs to be even for symmetric profiles
+
+  inil_grid(&g, nvel, 0, vrange);
+  
+  for (dp=disk, i = 0; i < ndisk; dp++, i++) {	/* loop over all stars */
+    vrad = ABS(Vel(dp)[1]);
+    if (vrad > vrange) continue;
+    if (vrad > vrad_max) vrad_max = vrad;
+    mtot += Mass(dp);
+    iv = index_grid(&g, vrad);
+    spectrum[iv] += Mass(dp);
+  }
+  printf("# Total mass: %g   ndisk=%d  vrad_max: %g\n", mtot, ndisk, vrad_max);
+  for (i=0; i<nvel; i++)
+    printf("%d %g\n",i,spectrum[i]);
+
+  //  now shift over the half spectrum and complement it
+  warning("only half spectrum shown");
+
+  //  now smooth the spectrum using vbeam=
+  if (vbeam > 0) warning("no smoothing done yet");
 }

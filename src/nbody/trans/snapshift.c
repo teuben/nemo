@@ -31,13 +31,12 @@ string defv[] = {
     "vshift=0,0,0\n         Shift in velocity",
     "times=all\n            Which times to work on",
     "mode=add\n             Add or subtract the shift? [add|sub]",
-    "VERSION=3.1b\n	    4-apr-97 pjt",
+    "VERSION=3.2\n	    22-dec-2024 PJT",
     NULL,
 };
 
 string usage="shift an N-body system";
 
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void nemo_main(void)
 {

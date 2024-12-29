@@ -45,15 +45,12 @@ string defv[] = {
     "dscale=1\n     Dens scale factor",
     "escale=1\n     Eps scale factor",
     "times=all\n    Times to select snapshots from",
-    "VERSION=3.2b\n 1-dec-05 PJT",
+    "VERSION=3.3\n  22-dec-2024 PJT",
     NULL,
 };
 
 string usage="rescale a snapshot";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.000001	/* tolerance in time comparisons */
 
 bool uscalar(real x)
 {

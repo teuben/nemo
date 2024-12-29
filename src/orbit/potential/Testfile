@@ -25,9 +25,12 @@ potlist:
 	# New style accelleration
 	$(EXEC) potlist Plummer 0,1,1
 
-rotcurves:
+rotcurves_old:
 	$(EXEC) rotcurves isochrone 0,1,1 - halo 0,1,1 - plummer 0,0.15,0.05 \
 		radii=0:4:0.02 ;  nemo.coverage rotcurves.c
+
+rotcurves:
+	$(EXEC) rotcurves plummer '0,1,3*pi/16' xrange=0,2 yrange=0,1; nemo.coverage rotcurves.c
 
 plummer.ccd:
 	$(EXEC) potccd out=plummer.ccd potname=plummer x=-2:2:0.05 y=-2:2:0.05 ; nemo.coverage potccd.c

@@ -1,8 +1,9 @@
-.\" pjt 
-.TH PROGRAMS 8NEMO "6 February 2021"
-.SH NAME
+.TH "PROGRAMS" 8NEMO "8 December 2024"
+
+.SH "NAME"
 programs \- list of currently available nemo(1NEMO) commands, ordered thematically
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 These are some of the tasks currently available under to run under NEMO. 
 If a program name is preceded by a dash (\fB-\fP) they 
 do not have NEMO's \fIgetparam(3NEMO)\fP user interface
@@ -19,6 +20,7 @@ yet.
 Programs we don't have are in \fIother(8NEMO)\fP ...
 .PP
 This thematic style was inspired by GIPSY.
+
 .SH "1. GENERAL INFORMATION (only doc/man)"
 .nf
 .ta +2.0i
@@ -32,15 +34,17 @@ usageeta10	some comments on ETA-10 usage [8]
 cookbook	a quick list of what to do to run (e.g.) treecode on the 205 [8]
 tricks    	useful tricks and bug detours [8]
 .fi
+
 .SH "2. UTILITY"
 .nf
 .ta +2.0i
 mknemo		compile NEMO progams, out of directory
--nemoshow    	check environment, show NEMO system variables/keywords
+-nemoshow    	check environment, show NEMO system variables/keywords [deprecated]
 nemoman		create a template man pages from a compiled program
-nemoinp  	test parsing of numbers
-units        	units conversion utility (unix)
+nemoinp  	test parsing of numbers (alias: \fBni\fP)
+units        	units conversion utility (unix)  [deprecated]
 .fi
+
 .SH "3. DATA CONVERSION"
 .nf
 .ta +2.0i
@@ -68,14 +72,16 @@ unfio    	access fortran unformatted I/O files
 units       	units conversion utility
 wcs       	(astronomical) world coordinate system transformations
 .fi
+
 .SH "4. N-BODY REALIZATIONS"
 .nf
 .ta +2.0i
-anisot    	create distribution function table for anistropic spherical models
+anisot    	create distribution function table for anistropic spherical models [deprecated]
 mkommod   	anisotropic velocity distribution (Merritt)
 mkplum		plummer model (falcON)
-mkplummer	plummer model 
+mkplummer	plummer model (falcON2 and ZENO as well)
 mkdisk  	uniform disk of test-particles in external potential
+mkdisc		make a disk (falcON2)
 mkspiral	uniform disk of test-particles with logarithmic spiral
 mkpolytrope  	polytrope sphere
 mkbaredisk	almost stable disk...
@@ -92,6 +98,7 @@ mkkd95		Kuijken-Dubinski-95 composite disk-bulge-halo model
 mkgalaxy	McMillan/Dehnen composite galaxy models (falcON)
 magalie		Boily et al. composite disk-bulge-halo model
 .fi
+
 .SH "5. N-BODY INTEGRATORS"
 .nf
 .ta +2.0i
@@ -108,10 +115,12 @@ nbody4		Hermite N-body code with optional stellar evolution
 newton0*    	multi-purpose N-body integrator
 gravsim0	frontend for the GRAVSIM family of integrators
 gyrfalcON	a superberb N-body tree code
+griffin		a better gyrfalcON
 galaxy		3D FFT N-body code
 scfm		N-body integrator using the self-consistent field method
 -mass99		SPH code
 .fi
+
 .SH "6. PLOTTING, PRINTING"
 .nf
 .ta +2.0i
@@ -131,6 +140,7 @@ plarrow_ps	plot an arrow in postscript
 pltext_ps	plot text in postscript
 -movie,movie_sv	display screendumps in orderly fashion
 mkcolor  	create color table
+
 .SH "7. 2D and 3D IMAGE UTILITIES"
 .nf
 .ta +2.0i
@@ -151,6 +161,7 @@ ccdsub      	subset/average of an image
 snapaxsym	Axisymetric image view of a snapshot
 -ds         	image display program (suntools)
 .fi
+
 .SH "8. ORBIT UTILITIES"
 .nf
 .ta +2.0i
@@ -165,6 +176,7 @@ potlist   	show potential and forces of \fIpotential(5NEM0)\fP file
 pspeed   	Tremaine & Weinberg pattern speed of system
 perorb  	search for periodic orbits
 .fi
+
 .SH "9. MANIPULATION"
 .nf
 .ta +2.0i
@@ -188,12 +200,14 @@ snapplotedit	interactive graphics editor for N-body snapshots
 snapdens	local density estimator using nearest neighbor
 hackdens	local density estimator using nearest neighbor and tree
 .fi
+
 .SH "10. COMBINATION"
 .nf
 .ta +2.0i
 snapstack   	add snapshots, optional offset them
 snapadd
 .fi
+
 .SH "11. ANALYSIS"
 .nf
 .ta +2.0i
@@ -211,6 +225,7 @@ unbind     	unbind stars from a system
 snapstab	report on stability of a stellar system
 snapfour	fourier analyze a snapshot
 .fi
+
 .SH "13. TABLE MANIPULATIONS"
 .nf
 .ta +2.0i
@@ -235,6 +250,7 @@ ccdfits     	write a fits file to disk
 fitsccd  	read a (fits) image file from disk
 sdinfo		info and benchmarking SDFITS files
 .fi
+
 .SH "15. MODEL FITTING and ANALYSIS"
 .nf
 .ta +2.0i
@@ -247,6 +263,7 @@ ccdvel    	create theoretical velocity field
 rotcurves	rotation curve of a composite potentials
 snapfit  	fit a (6D) snapshot to a (3D) data cube
 .fi
+
 .SH "16. STARLAB"
 .nf
 .ta +2.0i
@@ -254,24 +271,58 @@ dtos      	convert STARLAB dyn to NEMO snapshot
 stod      	convert a NEMO snapshot to a STARLAB dyn 
 tabpairs	analyze interaction histories of stars in a starlab simulation
 .fi
-.SH "17. ASTRONOMY"
+
+.SH "17. FALCON2"
+.nf
+.ta +2.0i
+a2s		ascii to HDF5 snapshot converter
+calc		a simple calculator
+corerad		find core radius & density 
+dump		dump a hdf5 snapshot file to stdout
+gravity		add gravity to snapshot(s)
+griffin		N-body code
+join		join falcON snapshot files
+manipulate	use manipulators on falcON snapshots
+mkdisc		make a simple circum-stellar gas disc
+mkgrid		construct (possibly perturbed) fcc packing
+mkparker	set up a parker wind
+mkplummer	construct plummer sphere
+mkpolytrope	construct a polytropic gas sphere
+mksphere	initial conditions from an equilibrium distribution function
+mkstar		make a single or binary star
+s2a		snapshot to ascii converter
+s2s		copy and manipulate falcON snapshots
+setH		adapt SPH smoothing lengths
+snapprop	evaluates bodies function over snapshot, reports to stdout
+sphinx		SPH code
+symmetrize	symmetrizes snapshots; can also be used to reduce N	
+.fi
+
+.SH "99. ASTRONOMY"
 .nf
 .ta +2.0i
 wcs       	(astronomical) world coordinate system transformations
+ccdfits		convert image to a fits file
+ccdsky		lazy sky scaling (cosmology) calculator
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
+
 .SH "SEE ALSO"
 .nf
 index(1NEMO), other(8NEMO), software(8NEMO)
-\fIThe NEMO Users/Programmers Manual\fP
+https://astronemo.readthedocs.io/en/latest/index.html
 .fi
+
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i 
+.ta +1.25i +4.5i 
 16-Mar-87	created    	PJT
 7-jun-88	..another update	PJT
 16-dec-88	..	PJT
 10-feb-90	..	PJT
 4-mar-92	updated	PJT
+8-dec-2024	added FALCON2	PJT
+
 .fi

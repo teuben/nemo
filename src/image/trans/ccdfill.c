@@ -9,6 +9,7 @@
  *       2-jun-03       1.4 trying out xmirror/ymirror          pjt
  *       1-aug-05       1.5 make it work on cubes too           pjt
  *       2-may-2017     2.0 also allow deviate pixels values    pjt
+ *       7-dec-2023     2.1 allow mask= to designate bad areas  pjt
  *                      
  */
 
@@ -23,14 +24,15 @@ string defv[] = {
         "in=???\n       Input image file",
 	"out=???\n      Output image file",
 	"n=1\n		Number of neighbor cells on all sides to use",
-	"bad=0.0\n	Value of a bad pixel to be patched",
+	"bad=0.0\n	Value of a bad pixel to be patched (see also mask=)",
 	"all=f\n        Force all points to be refitted?",
 	"m=3\n          Minimum number of neighbor pixels needed",
 	"iter=1\n       Number of iterations",
 	"xmirror=f\n    Use points mirrored in X to get near a border",
 	"ymirror=f\n    Use points mirrored in Y to get near a border",
 	"spike=\n       Spike value above the neighbors to be filled",
-	"VERSION=2.0\n  2-may-2017 PJT",
+	"mask=\n        If given, this file designates the bad pixels",  // @todo like maskfill?
+	"VERSION=2.1\n  7-dec-2023 PJT",
 	NULL,
 };
 

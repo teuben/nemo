@@ -1,18 +1,55 @@
-#! /bin/csh -f
+#! /bin/bash
 #
-#  private falcON2 
+#  this is still the private falcON2
+#
 
-set url=git@bitbucket.org:WalterDehnen/falcon.git
-set url=git@bitbucket.org:astroteuben/falcon2.git
-set dir=falcon2
+url=git@bitbucket.org:WalterDehnen/falcon.git
+url=git@bitbucket.org:astroteuben/falcon2.git
+url=git@bitbucket.org:peter_teuben/falcon.git     # during development
+dir=falcon2
+branch=master
+branch=autoconf                                   # during development
+cgal=0
+
+
+echo "falcON2: using url=$url and git branch=$branch"
 
 cd $NEMO/local
-if (! -e $dir) then
-  git clone $url
+if [ ! -e $dir ]; then
+  git clone $url $dir
   cd $dir
+  git remote add upstream git@bitbucket.org:WalterDehnen/falcon.git
 else
   cd $dir
   git pull
-endif
+fi
+git checkout $branch
 
-echo "Installation is still manual. See INSTALL.md"
+#   only for linux for now
+if [ ! -e tbb ]; then
+  echo "TBB not present, grabbing the linux one"
+  wget https://github.com/uxlfoundation/oneTBB/releases/download/v2020.3/tbb-2020.3-lin.tgz
+  tar zxf tbb-2020.3-lin.tgz
+fi
+
+./configure
+source falcon_start.sh
+
+#   if a local version is needed
+if [ $cgal = 1 ]; then
+    v=5.6.2
+    wget https://github.com/CGAL/cgal/releases/download/v${v}/CGAL-${v}.tar.xz
+    tar xf CGAL-${v}.tar.xz
+    cd CGAL-${v}
+    mkdir build
+    cd build
+    cmake  -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$FALCON ..
+    make install
+fi
+
+
+make -C utils2 inc/cachesize.h
+make -C h5pp
+make inc/utils inc/kepler inc/h5pp
+make clean
+make -j 4

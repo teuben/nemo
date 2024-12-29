@@ -72,6 +72,8 @@ clean:
 tar:
 	tar cvf flowcode.tar $(TARFILES)
 
+all:	$(BINFILES)
+
 # 	$(CC) $(CFLAGS) $(LOCAL_INC) -o $* $*.o $(NEMO_LIBS) $(LOCAL_LIB) $(FORLIBS) $(EL)
 
 flowcode: $(OBJFILES)

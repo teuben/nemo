@@ -32,19 +32,17 @@ string defv[] = {
     "tab=f\n			Full table of r,m(r) ? ",
     "log=f\n                    Print radii in log10() ? ",
     "sort=r\n                   Observerble to sort masses by",
-    "VERSION=1.6\n              1-apr-2021 PJT",
+    "VERSION=1.6a\n             20-oct-2024 PJT",
     NULL,
 };
 
 string usage="Langrangian mass-fraction radii of a snapshot";
 
-string cvsid="$Id$";
-
 
 #define MFRACT 256
 
 local void snapsort(Body *, int , real, rproc_body);
-local int rank_aux(Body *, Body *);
+local int rank_aux(const void *, const void *);
 
 
 void nemo_main()
@@ -126,8 +124,10 @@ void snapsort(Body *btab, int nbody, real tsnap, rproc_body sortptr)
     qsort(btab, nbody, sizeof(Body), rank_aux);
 }
 
-int rank_aux(Body *a, Body *b)
+int rank_aux(const void *ap, const void *bp)
 {
+    Body *a = (Body *) ap;
+    Body *b = (Body *) bp;
     return (Aux(a) < Aux(b) ? -1 : Aux(a) > Aux(b) ? 1 : 0);
 }
 

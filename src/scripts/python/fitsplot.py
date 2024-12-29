@@ -4,11 +4,16 @@
 
 import os
 import sys
-import aplpy
 import argparse
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+try:
+    import aplpy
+except:
+    print("sorry, aplpy not working")
+    sys.exit(1)
+
 
 
 help_main = ["Simple color plot of a FITS image",

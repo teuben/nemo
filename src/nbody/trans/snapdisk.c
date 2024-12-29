@@ -24,20 +24,19 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=1.0\n	3-aug-06 PJT",
+    "VERSION=1.1\n	22-dec-2024 PJT",
     NULL,
 };
 
 string usage="assign rotation to a disk";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void get_rotcur(string);
 real rotcur(real);
 
-nemo_main()
+#define MAXLINES 1000000
+
+void nemo_main()
 {
     stream instr, outstr;
     real   tsnap, omega, omega2, sign, r,v,f,v2, cost,sint;
@@ -126,7 +125,7 @@ void get_rotcur(string name)
     int  i,colnr[2], nmax;
     real *coldat[2];
 
-    nmax = nemo_file_lines(name);
+    nmax = nemo_file_lines(name, MAXLINES);
     if (nmax<1) error("No data to read from %s",name);
     rad = (real *) allocate(nmax*sizeof(real));
     vel = (real *) allocate(nmax*sizeof(real));

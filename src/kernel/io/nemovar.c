@@ -11,7 +11,8 @@
 string defv[] = {
   "var=\n             Name of  variable(s)",
   "val=\n             Optional new value",
-  "VERSION=0.4\n      25-jun-2024 PJT",
+  "comment=\n         Optional comment when new value was set",
+  "VERSION=0.5\n      26-jun-2024 PJT",
   NULL,
 };
 
@@ -25,10 +26,14 @@ void nemo_main()
   bool hasVar = hasvalue("var");
   string value = getparam("val");  
   bool hasVal = hasvalue("val");
+  string comment = getparam("comment");
+  bool hasComment = hasvalue("comment");  
   string nemovar = getenv("NEMOVAR");
   if (nemovar == NULL) error("$NEMOVAR was not set");
   dprintf(1,"nemovar: %s\n", nemovar);
 
+  if (hasComment)
+    warning("comment %s not yet used", comment);
 
   // bug or feature, nemovar currently needs to exist
   if (!fexist(nemovar)) {

@@ -39,15 +39,12 @@ string defv[] = {
     "sign=1\n           Sign of rotcur",
     "outflow=f\n        Outflow or Rotation/Spin",
     "times=all\n	times of snapshots to copy",
-    "VERSION=2.1\n	23-jul-2020 PJT",
+    "VERSION=2.2\n	22-dec-2024 PJT",
     NULL,
 };
 
 string usage="give a snapshot a spin around or outflow from the Z-axis";
 
-string cvsid="$Id$";
-
-#define TIMEFUZZ	0.0001	/* tolerance in time comparisons */
 
 void get_rotcur(string);
 real rotcur(real);
