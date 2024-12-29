@@ -1,4 +1,4 @@
-.TH FITSCCD 1NEMO "6 September 2023"
+.TH FITSCCD 1NEMO "6 July 2024"
 
 .SH "NAME"
 fitsccd \- read a (fits) image file from disk
@@ -188,7 +188,7 @@ continue the data analysis, e.g.
     % scanfits abc.fits abc1.fits hdu=2
     % ccdfits abc1.fits abc1.ccd
 .fi
-Note that FITS files in NEMO do now allow the use of pipes.
+Note that FITS files in NEMO do now allow the use of pipes (yet).
 
 .SH "SEE ALSO"
 ccdfits(1NEMO), snapccd(1NEMO), iofits(1NEMO), scanfits(1NEMO), image(5NEMO), fits(5NEMO), dd(1)
@@ -215,4 +215,5 @@ Peter Teuben
 23-nov-04	V4.9 added axistype=  for new image format	PJT
 19-feb-2015	V5.1 added box= to select a subregion in XY	PJT
 6-sep-2023	V5.5 implemented a simple altr=t wcs converson	PJT
+jul-2024	V5.6 fix header for VLSR	PJT
 .fi
