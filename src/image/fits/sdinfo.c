@@ -42,7 +42,7 @@ string defv[] = {
     "mode=-1\n           Mode how much to process the SDFITS files (-1 means all)",
     "datadim=2\n         1: DATA[nrows*nchan]   2: DATA[nrows][nchan]",
     "tab=\n              If given, produce tabular output (datadim=1 or 2 only)",
-    "VERSION=1.4\n       2-may-2024 PJT",
+    "VERSION=1.5\n       30-jul-2024 PJT",
     NULL,
 };
 
@@ -241,7 +241,8 @@ char **get_column_str(fitsfile *fptr, char *colname, int nrows, int ncols, char 
   fits_make_keyn("TFORM", col, keyword, &fstatus);
   fits_read_key(fptr, TSTRING, keyword, data_fmt, NULL, &fstatus);	
   int slen = atoi(data_fmt);  // 1 extra for terminating 0
-  printf("DATA in column %d  slen=%d\n",col,slen);
+  if (slen==0) slen=1;
+  dprintf(1,"%s in column %d  slen=%d\n",colname,col,slen);
   // allocate the full block of chars for (slen+1)*nrows
   char *vals = (char *) allocate(nrows*(slen+1)*sizeof(char));
   for (int i=0; i<nrows; i++)
@@ -370,68 +371,81 @@ void nemo_main(void)
       if (nchan < 0) warning("DATA with no nchan???");      
       real np = nrows * nchan * 4 / 1e6;
       dprintf(0,"%s : Nrows: %d   Ncols: %d  Nchan: %d  nP: %g Mp\n",fname,nrows,ncols,nchan,np);
-      int col_scan  = keyindex(ncols, colnames, "SCAN") + 1;      
+      int col_scan  = keyindex(ncols, colnames, "SCAN") + 1;
+      int col_ps    = keyindex(ncols, colnames, "PROCSEQN") + 1;
       int col_tcal  = keyindex(ncols, colnames, "TCAL") + 1;
       int col_cal   = keyindex(ncols, colnames, "CAL") + 1;
       int col_sig   = keyindex(ncols, colnames, "SIG") + 1;
       int col_fdnum = keyindex(ncols, colnames, "FDNUM") + 1;
       int col_ifnum = keyindex(ncols, colnames, "IFNUM") + 1;
       int col_plnum = keyindex(ncols, colnames, "PLNUM") + 1;
-      dprintf(0,"scan: %d tcal: %d cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d\n",
-	      col_scan, col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum);
+      dprintf(0,"scan: %d tcal: %d cal: %d sig: %d fdnum: %d ifnum: %d plnum: %d procseq: %d\n",
+	      col_scan, col_tcal, col_cal, col_sig, col_fdnum, col_ifnum, col_plnum, col_ps);
 
       // get optional columns
-      int *scan_data  = get_column_int(fptr, "SCAN",  nrows, ncols, colnames);      
-      int *fdnum_data = get_column_int(fptr, "FDNUM", nrows, ncols, colnames);
-      int *ifnum_data = get_column_int(fptr, "IFNUM", nrows, ncols, colnames);
-      int *plnum_data = get_column_int(fptr, "PLNUM", nrows, ncols, colnames);
-      int *int_data   = get_column_int(fptr, "INT",   nrows, ncols, colnames);
+      int *scan_data  = get_column_int(fptr, "SCAN",     nrows, ncols, colnames);
+      int *pseq_data  = get_column_int(fptr, "PROCSEQN", nrows, ncols, colnames);
+      int *fdnum_data = get_column_int(fptr, "FDNUM",    nrows, ncols, colnames);
+      int *ifnum_data = get_column_int(fptr, "IFNUM",    nrows, ncols, colnames);
+      int *plnum_data = get_column_int(fptr, "PLNUM",    nrows, ncols, colnames);
+      int *int_data   = get_column_int(fptr, "INT",      nrows, ncols, colnames);
       
-      int sc_min, sc_max, fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max;
+      int sc_min, sc_max, fd_min, fd_max, if_min, if_max, pl_min, pl_max, int_min, int_max, ps_min, ps_max;
       minmaxi(nrows, scan_data,  &sc_min, &sc_max, "scan");
+      minmaxi(nrows, pseq_data,  &ps_min, &ps_max, "procseqn");
       minmaxi(nrows, fdnum_data, &fd_min, &fd_max, "fdnum");
       minmaxi(nrows, ifnum_data, &if_min, &if_max, "ifnum");
       minmaxi(nrows, plnum_data, &pl_min, &pl_max, "plnum");
-      printf("SCAN:  %d %d\n", sc_min, sc_max);      
-      printf("FDNUM: %d %d\n", fd_min, fd_max);
-      printf("IFNUM: %d %d\n", if_min, if_max);
-      printf("PLNUM: %d %d\n", pl_min, pl_max);
+      printf("SCAN:     %d %d\n", sc_min, sc_max);
+      printf("PROCSEQN: %d %d\n", ps_min, ps_max);
+      printf("FDNUM:    %d %d\n", fd_min, fd_max);
+      printf("IFNUM:    %d %d\n", if_min, if_max);
+      printf("PLNUM:    %d %d\n", pl_min, pl_max);
 
       if (int_data) {
 	minmaxi(nrows, int_data, &int_min, &int_max, "int");
-	printf("INT:   %d %d\n", int_min, int_max);	
+	printf("INT:      %d %d\n", int_min, int_max);	
       }
       char **sig_data = get_column_str(fptr, "SIG", nrows, ncols, colnames);
       char **cal_data = get_column_str(fptr, "CAL", nrows, ncols, colnames);
       int nsig=0, ncal=0;
       if (sig_data && cal_data) {
+	// only allow up to two states in CAL and SIG (T/F)
 	nsig = ncal = 1;
-	for (i=1; i<nrows; i++)
+	for (i=1; i<nrows; i++) {
+	  //dprintf(0,"<sig>%d  %c\n", i, sig_data[i][0]);
 	  if (sig_data[i][0] != sig_data[0][0]) {
-	    printf("ODD SIG %d = %s %s\n",i,sig_data[0],sig_data[i]);
+	    printf("ODD SIG[0,%d] = %c %c\n",i,sig_data[0][0],sig_data[i][0]);
+	    //printf("ODD SIG4 = %c_%c_%c_%c\n",sig_data[0][0],sig_data[1][0],sig_data[2][0],sig_data[3][0]);
 	    nsig++;
 	    break;
 	  }
-	for (i=1; i<nrows; i++)
+	}
+	for (i=1; i<nrows; i++) {
+	  //dprintf(0,"<cal>%d  %c\n", i, sig_data[i][0]);	  
 	  if (cal_data[i][0] != cal_data[0][0]) {
-	    printf("ODD CAL %d = %s %s\n",i,cal_data[0],cal_data[i]);	    
+	    printf("ODD CAL[0,%d] = %c %c\n",i,cal_data[0][0],cal_data[i][0]);
+	    //printf("ODD CAL4 = %c_%c_%c_%c\n",cal_data[0][0],cal_data[1][0],cal_data[2][0],cal_data[3][0]);
 	    ncal++;
 	    break;
 	  }
-      }
+	}
+      } else
+	error("VERY ODD: cannot handle a missing SIG or CAL");
+      
       if (nsig==1)
-	printf("SIG:   %d  = %c\n", nsig, nsig==1 ? sig_data[0][0] : ' ');
+	printf("SIG:   %d  = %c\n", nsig, sig_data[0][0]);
       else if (nsig==2)
 	printf("SIG:   %d  = %c %c\n", nsig, sig_data[0][0], sig_data[1][0]);
       else
-	printf("SIG:   %d  = %c\n", nsig, ' ');
+	printf("SIG:   %d  = %c (*)\n", nsig, ' ');
 
       if (ncal==1)
-	  printf("CAL:   %d  = %c\n", ncal, ncal==1 ? cal_data[0][0] : ' ');
+	  printf("CAL:   %d  = %c\n", ncal, cal_data[0][0]);
       else if (ncal==2)
 	printf("CAL:   %d  = %c %c\n", ncal, cal_data[0][0], cal_data[1][0]);
       else
-	printf("CAL:   %d  = %c\n", ncal, ' ');
+	printf("CAL:   %d  = %c  (*)\n", ncal, ' ');
 
 
       // the 1st coordinate for SDFITS is important
