@@ -17,6 +17,9 @@ echo "falcON2: using url=$url and git branch=$branch"
 cd $NEMO/local
 if [ ! -e $dir ]; then
   git clone $url $dir
+  if [ ! -e $dir ]; then
+      exit 1
+  fi
   cd $dir
   git remote add upstream git@bitbucket.org:WalterDehnen/falcon.git
 else
