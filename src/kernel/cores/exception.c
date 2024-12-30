@@ -172,7 +172,7 @@ PushPointer (MemElem* head, void* ptr)
     MemElem*	memElem = NULL;
 
     if ((memElem = (MemElem *) calloc (1, (sizeof(MemElem)))) == NULL)
-	return NULL;
+      return NULL;   // cppcheck:  Memory leak: memElem [memleak]
 
     memElem->ptr = ptr;
     memElem->next = head;
@@ -206,7 +206,7 @@ PushStream (StreamElem* head, stream str)
     StreamElem*	streamElem = NULL;
 
     if ((streamElem = (StreamElem *)calloc(1, (sizeof(StreamElem)))) == NULL)
-	return NULL;
+        return NULL;      // cppcheck:   error: Memory leak: streamElem [memleak]
 
     streamElem->str = str;
     streamElem->next = head;
