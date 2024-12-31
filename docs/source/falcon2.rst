@@ -1,8 +1,7 @@
 FALCON2
 -------
 
-
-The falcon V2 package is still under development for a public release. The main
+Tmem he falcon V2 package is still under development for a public release. The main
 integrator is now called ``griffin``, replacing the older ``gyrfalcON`` from falcon V1.
 Although falcon V1 is distributed with NEMO, it is not maintained and may eventually
 succumb to software rot. Users should switch to using ``griffin``.
@@ -11,6 +10,7 @@ A paper describing the ``griffin`` FMM code is in Dehnen (2014)
 
 .. warning::
    Adding FALCON2 to NEMO will result in some programs that have duplicated names, e.g. **mkplummer**.
+   The **sphinx** program is another example of a python program to build documentation.
 
 
 Installation
@@ -124,7 +124,34 @@ For details on a specific program, type
 
 but griffin is more accurate and such a direct comparison may not be fair. In particular, is tau=2^-$kmax even fair?
 
-- Comparing X and Y
+
+Programs
+~~~~~~~~
+
+By default there are currently 21 programs installed:
+
+
+* a2s -- ascii to snapshot converter
+* calc -- a simple calculator  *[name conflicts with a common linux program]*
+* corerad -- find core radius & density following Casertano & Hut (1985) and McMillan, Hut & Makino (1990)
+* dump -- dump a hdf5 snapshot file to stdout  *[name conflicts with a common linux program]*
+* gravity -- add gravity to snapshot(s)
+* griffin -- N-body code
+* join -- join falcON snapshot files   *[name conflicts with a common linux program]*
+* manipulate -- use manipulators on falcON snapshots
+* mkdisc -- make a simple circum-stellar gas disc
+* mkgrid -- construct (possibly perturbed) fcc packing
+* mkparker -- set up a parker wind
+* mkplummer -- construct plummer sphere *[name conflicts with a NEMO program]*
+* mkpolytrope -- construct a polytropic gas sphere
+* mksphere -- initial conditions from an equilibrium distribution function
+* mkstar -- make a single or binary star
+* s2a -- snapshot to ascii converter
+* s2s -- copy and manipulate falcON snapshots
+* setH -- adapt SPH smoothing lengths
+* snapprop -- evaluates bodies function over snapshot, reports to stdout
+* sphinx -- SPH code  *[name conflicts with a common linux program]*
+* symmetrize -- symmetrizes snapshots; can also be used to reduce N
 
 
 Surprises
@@ -145,6 +172,6 @@ to be resolved
 - mkplummer has a keyword 'q-ran', but itsn't it better to use q_ran, since that's
   a more common one used in all falcon programs. keep it consistent.
 
-- mkplummer has a default time=1
+- mkplummer has a default time=1  (e.g. mkdisc does the expected time=0)
 
 - ..
