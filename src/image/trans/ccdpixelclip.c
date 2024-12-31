@@ -13,7 +13,7 @@
  *     state.  It restores dynamic range to that of the camera and recovers 
  *     the blown-out star cores. 
  *
- *	24-aug-2022    drafted      - Peter Teuben
+ *	24-aug-2022    drafted for NEMO     - Peter Teuben
  *                      
  */
 
@@ -31,7 +31,7 @@ string defv[] = {
   "size=1\n       size around clip pixel to average around (-size..+size)",
   "matchclip=t\n  Also fix data where it matches the clip value?",
   "jwst=t\n       JWST mode? (only true is accepted now)",
-  "VERSION=0.2\n  24-aug-2022 PJT",
+  "VERSION=0.3\n  25-aug-2022 PJT",
   NULL,
 };
 
@@ -90,7 +90,7 @@ void nemo_main()
       }
     }
     dprintf(0,"Clipped %d/%d %g%% values %s %g\n",
-	    countclip,nx*ny*nz, (1.0*countclip)/(nx*ny*nz),
+	    countclip,nx*ny*nz, (100.0*countclip)/(nx*ny*nz),
 	    Qjwst ? (Qmatch ? "equal or below" : "below") :
 	            (Qmatch ? "equal or above" : "above"),
 	    clip);

@@ -23,6 +23,9 @@
 #include <stdinc.h>
 #include <errno.h>
 
+/*   _FL are versions that report File and Line ; see WD notes in stdinc.h   */
+/*  @todo    consider mm_malloc() for efficiency ?    */
+
 void *allocate_FL(size_t nb, const_string file, int line)
 {
     void *mem;

@@ -7,6 +7,7 @@
 #  5.15user 3.21system 0:08.37elapsed 99%CPU     skip rotate, no moments
 #  3.74user 2.21system 0:05.98elapsed 99%CPU     skip snapsort (mkdisk was sorted)
 #  3.11user 2.30system 0:05.40elapsed 100%CPU    faster mkdisk
+#  1.04user 0.20system 0:01.24elapsed 100%CPU    slow (new) diskspectrum
 
 _script=edge_gbt.sh
 _version=23-nov-2024

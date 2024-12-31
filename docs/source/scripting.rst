@@ -1,14 +1,11 @@
 Scripting
 ---------
 
-
-.. todo::  more scripting examples needed here
-
-We will focus on **bash** scripting here, basing comments
-on the **mkmh97.sh** script.
+We will focus on **bash** scripting here, for an example see the
+**mkmh97.sh** script.
 A typical script will contain the following components
 
-1. *hash-bang* the first line of the script, and optionally include nemo_functions.sh
+1. *hash-bang* the first line of the script, and optionally include ``nemo_functions.sh``
    where various convenience functions are maintained
 
    
@@ -32,8 +29,9 @@ and make the script executable
 
       run=run1       # directory and run ID       #> ENTRY 
       nbody=1000     # number of bodies           #> RADIO 1000,10000,100000,1000000
+      eps=0.05       # softening                  #> SCALE 0:1:0.01
 
-and the parsing could be achieved as follows
+and then parsing could be achieved as follows
 
 .. code-block:: bash
 
@@ -42,7 +40,7 @@ and the parsing could be achieved as follows
       done
 
 3. optionally, but highly recommended, some matching **--HELP** tags that can be retrieved using
-a --help command line option
+the --help command line option
 
 
 .. code-block:: bash
@@ -83,25 +81,27 @@ where possible.
 Example:  Extracting results from run directories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-A common workflow is to run many simulations, walking over a multi-dimensional parameter space.
-This usually results into running each simulations in its own run-directory. The directory name
-could contain the value of this parameter as well. Several common strategies have been seen in
-the wild:
+A common workflow is to run a series of simulations and  walking over a multi-dimensional parameter space.
+This usually results into running each simulations in its own run-directory, plus storing
+parameters and possibly resulting values in a parameter file for later extraction. The directory name
+could even contain the value of these parameters as well. Several common strategies have been seen in
+the wild, we list three:
 
 .. code-block::
 
      # 1. simply enumerated (e.g id=001,002,003,....) parameters stored inside
      run_${id}
 
-     # 2. linear list of directories
+     # 2. linear list of directories, parameters stored inside
      run_${a}_${b}_${c}
 
-     # 3. hierarchical directories
+     # 3. hierarchical directories, parameters stored inside
      run/$a/$b/$c
 
 Although easier to visually identify the values of the parameters in 2. and 3., they don't scale very
 well if a new parameter is introduced.  In the first case a simple lookup table can be created using
-for example, making it easier to find which parameters are used in while run directory:
+``nemopars``,  thus making it easier to find which parameters are used in while run directory. Here's
+an example:
 
 .. code-block::
 
@@ -114,10 +114,10 @@ Summary
 
 Summarizing, here are the recommended methods to maintain and extract NEMO variables.
 
-1. nemopars: extract parameters from a bash-style rc file (python should also be able to use it)
+1. **nemopars**: extract parameters from a bash-style rc file (python should also be able to use it)
 
-2. nemovar:  get and set NEMOVAR variables
+2. **nemovar**:  get and set NEMOVAR variables
 
-3. show_vars:   alias via nemo_functions.sh
+3. **show_vars**:   alias via nemo_functions.sh
 
    

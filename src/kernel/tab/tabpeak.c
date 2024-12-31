@@ -38,7 +38,7 @@ string defv[] = {
     "npeak=0\n                    extract the Nth peak (N>0)",
     "epeak=1\n                    expand around the peak by this factor",
     "nmax=100000\n                max size if a pipe",
-    "VERSION=0.8\n		  25-may-2023 PJT",
+    "VERSION=0.8a\n		  25-dec-2024 PJT",
     NULL
 };
 
@@ -163,12 +163,20 @@ local void singles(void)
   n=0;
   for (i=edge; i<npt-edge; i++) {
     if (dcol[i] > delta && dcol[i+1] > delta) {
+#if 0
+      // try to reject astrophysical signals
+      // also needs:  edge = edge + pmin/2 ?
+      if (pmin > 1) {   /* peak needs to be a single channel peak */
+	if (dcol[i-1] > delta) continue;
+	if (dcol[i+2] > delta) continue;
+      }
+#endif      
       printf("%f %f  %f %f %f\n",xcol[i], ycol[i],
 	     ycol[i] - 0.5*(ycol[i-1]+ycol[i+1]),dcol[i],dcol[i+1]);
       n++;
     } 
   }
-  dprintf(1,"Found %d singles\n",n);
+  dprintf(1,"Found %d singles; pmin=%d\n",n,pmin);
 }
 
 local void peak_data(void)

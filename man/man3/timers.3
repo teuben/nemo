@@ -38,12 +38,12 @@ could be useful.
 	stamp_timers(i);
     stamp_timers(n);
     for (i=0; i<n; i++)
-	printf("Method-1: %Ld\n",diff_timers(i,i+1));
+	printf("Method-1: %Ld\\n",diff_timers(i,i+1));
 
     stamp_timers(0);
     for (i=0; i<n; i++) {
 	stamp_timers(i+1);
-	printf("Method-2: %Ld\n",diff_timers(i,i+1));
+	printf("Method-2: %Ld\\n",diff_timers(i,i+1));
     }
 
 .fi

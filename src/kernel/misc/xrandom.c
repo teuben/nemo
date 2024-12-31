@@ -190,6 +190,8 @@ double xrandom(double xl, double xh)
 {
     double retval;
 
+    if (xl==xh) return xl;
+
     for(;;) {
 #if defined(HAVE_GSL)
         if (my_r == NULL) error("GSL init_xrandom was never called");
@@ -236,6 +238,8 @@ double grandom(double mean, double sdev)
 {
     static double v1, v2, s;
     static int gcount = 0;
+
+    if (sdev <= 0) return mean;
 
     if (gcount) {
         gcount = 0;
