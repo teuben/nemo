@@ -9,4 +9,6 @@ although there are probably a few more than needed
 
 Version 3 of homebrew does not support pgplot, because of the obscure caltech license.
 In this case the "mknemo pgplot" to install a local source code based may work, as
-well as giza (mknemo giza,   recoconfigure --with-yapp=giza)
+well as giza (mknemo giza,   reconfigure --with-yapp=giza)
+
+Another option is to use brew install kazuakiyama/pgplot/pgplot
