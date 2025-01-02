@@ -1,5 +1,5 @@
-Potentials and Accellerations
-=============================
+Potentials and Accelerations
+============================
 
 Here we lists a number of potentials, taken from
 from CTEX comments in the
@@ -31,8 +31,8 @@ Mostly **G=1**, unless otherwise mentioned.
    
 .. include:: potctex.rst
 
-Accellerations
---------------
+Accelerations
+-------------
 
 This is a falcON addition. They are defined in ``$FALCON/src/public/acc``,
 where their list (for installation) is defined in ``$FALCON/makepub``.
