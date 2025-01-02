@@ -43,7 +43,7 @@
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *        27-Sep-10   jcl    MINGW32/WINDOWS support
  *   3.5   8-jun-13   pjt    eltcnt type fixed for 64bit so it handles > 2GB
- *   3.6   2-jan-24   pjt    subtle  64bit; now using off_t and size_t 
+ *   3.6   2-jan-24   pjt    subtle fix for items > 64bit; now using off_t and size_t 
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -140,7 +140,8 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item_cvt: %s with dlen=%d",tag,dlen);
-	dprintf(0,"copy_item_cvt: %ld\n",dlen);	
+	//PJT
+	dprintf(1,"copy_item_cvt: %ld\n",dlen);	
 	bufin = (byte *) calloc(dlen,1);	/*   get space for a buffer */
 	if (bufin == NULL)			/*   and check for error    */
 	    error("copy_item_cvt: item %s: not enuf memory", tag);
@@ -1228,10 +1229,10 @@ local void copydata(
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (char *) ItemDat(ipt) + off;	/*   get pointer to source  */
     	len *= ItemLen(ipt);			/* number of bytes to copy  */
-	// dprintf(0,"COPYDATA2: len=%ld src=0x%x dat=0x%x\n",len, src, dat);
 #if 0
 	//   this while loop will hit through 0, and eventually segfault in the copy
 	//   compiler bug ?
+	//   this pattern happened a few times below, where they've all been converted to the for() loop
 	while (--len >= 0) {			/*   loop copying data      */
 	    *dat++ = *src++;			/*     byte by byte         */
 	}
@@ -1261,13 +1262,13 @@ local void copydata_f2d(
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (float *) ItemDat(ipt) + off;	/*   get pointer to source  */
 	/*    	len *= ItemLen(ipt);		==> BUG */
-	while (--len >= 0)			/*   loop converting data   */
+	for (size_t i=0; i<len; i++)
 	    *dat++ = (double) *src++;		/*     float to double      */
     } else {					/* time to read data in     */
 	oldpos = ftello(str);                   /*   save this position     */
 	safeseek(str, ItemPos(ipt) + off, 0);	/*   seek back to data      */
-	while (--len >= 0)			/*   loop reading data      */
-	    *dat++ = (double) getflt(str);	/*     float to double      */
+	for (size_t i=0; i<len; i++)
+	    *dat++ = (double) getflt(str);	/*     float to double      */	  
 	safeseek(str, oldpos, 0);               /*   reset file pointer     */
     }
 } /* copydata_f2d */
@@ -1286,13 +1287,13 @@ local void copydata_d2f(
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (double *) ItemDat(ipt) + off;	/*   get pointer to source  */
     	/* len *= ItemLen(ipt);		BUG <===	*/
-	while (--len >= 0)			/*   loop converting data   */
-	    *dat++ = (float) *src++;		/*     double to float      */
+	for (size_t i=0; i<len; i++)
+	    *dat++ = (double) *src++;		/*     float to double      */	
     } else {					/* time to read data in     */
 	oldpos = ftello(str);                   /*   save this position     */
 	safeseek(str, ItemPos(ipt) + off, 0);	/*   seek back to data      */
-	while (--len >= 0)			/*   loop reading data      */
-	    *dat++ = (float) getdbl(str);	/*     double to float      */
+	for (size_t i=0; i<len; i++)	
+	    *dat++ = (float) getdbl(str);	/*     double to float      */	
 	safeseek(str, oldpos, 0);               /*   reset file pointer     */
     }
 } /* copydata_d2f */
