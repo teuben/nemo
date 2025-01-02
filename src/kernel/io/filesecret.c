@@ -42,7 +42,8 @@
  * V 3.3  25-may-07   pjt    handle > 2GB objects in memory (Pierre Fortin <pierre.fortin@oamp.fr>)
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *        27-Sep-10   jcl    MINGW32/WINDOWS support
- *   3.5   8-jun-13   pjt    eltcnt type fixed for 64bit so it handles > 2B
+ *   3.5   8-jun-13   pjt    eltcnt type fixed for 64bit so it handles > 2GB
+ *   3.6   2-jan-24   pjt    subtle  64bit; now using off_t and size_t 
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -92,6 +93,7 @@ void copy_item(stream ostr, stream istr, string tag)
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item: %s with dlen=%d",tag,dlen);    /* yuck */
+	dprintf(0,"copy_item: %ld\n",dlen);
 	buf = (byte *) calloc(dlen,1);		/*   get space for a buffer */
 	if (buf == NULL)			/*   and check for error    */
 	    error("copy_item: item %s: not enuf memory", tag);
@@ -137,7 +139,8 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
     if (! streq(type, SetType)) {		/* a basic type or array?   */
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
-	if(dlen<0) error("copy_item_cvt: %s with dlen=%d",tag,dlen); 
+	if(dlen<0) error("copy_item_cvt: %s with dlen=%d",tag,dlen);
+	dprintf(0,"copy_item_cvt: %ld\n",dlen);	
 	bufin = (byte *) calloc(dlen,1);	/*   get space for a buffer */
 	if (bufin == NULL)			/*   and check for error    */
 	    error("copy_item_cvt: item %s: not enuf memory", tag);
@@ -727,14 +730,14 @@ string get_string(
 	  dp == NULL || *dp++ == 0 || *dp != 0)	/* and shape of data        */
 	error("get_string: item %s: not plural char", tag);
     dlen = datlen(ipt,0);
-    if(dlen<0) error("get_string: %s with dlen=%d",tag,dlen);       /* yuck */
+    if(dlen<0) error("get_string: %s with dlen=%ld",tag,dlen);      /* yuck */
     dat = (char *) calloc(dlen,1);        	/* alloc memory for string  */
     if (dat == NULL)				/* did alloc fail?          */
 	error("get_string: item %s: not enuf memory", tag);
     copydata(dat, 0, dlen, ipt, str);		/* copy string from input   */
     if (sspt->ss_stp == -1)			/* item read at top level?  */
 	freeitem(ipt, TRUE);			/*   yes, so free it up     */
-    return (dat);				/* return string as value   */
+    return dat; 				/* return string as value   */
 }
 
 /*
@@ -752,10 +755,10 @@ bool get_tag_ok(
     sspt = findstream(str);			/* lookup associated entry  */
     if (sspt->ss_stp == -1) {			/* input from top level?    */
 	ipt = nextitem(sspt);			/*   look at next item      */
-	return (ipt != NULL && streq(tag, ItemTag(ipt)));
+	return ipt != NULL && streq(tag, ItemTag(ipt));
 						/*   test existance and tag */
     } else					/* input within a set?      */
-	return (finditem(sspt, tag) != NULL);	/*   test success of scan   */
+	return finditem(sspt, tag) != NULL;	/*   test success of scan   */
 }
 
 /*
@@ -773,7 +776,7 @@ stream str
     if (sspt->ss_stp == -1) {			/* input from top level?    */
 	ipt = nextitem(sspt);			/*   get next item read in  */
 	if (ipt == NULL)			/*   nothing left in input? */
-	    return (NULL);			/*     then return nothing  */
+	    return NULL;			/*     then return nothing  */
 	*tpt++ = (string) copxstr(ItemTag(ipt), sizeof(char));
 						/*   make copy of item tag  */
     } else {					/* input within a set?      */
@@ -784,7 +787,7 @@ stream str
 						/*   make copy of item tag  */
     }
     *tpt = NULL;				/* terminate string of tags */
-    return ((string *) copxstr(tags, sizeof(string)));
+    return (string *) copxstr(tags, sizeof(string));
     						/* return copy of copies    */
 }	
 
@@ -806,7 +809,7 @@ string get_type(
 	error("get_type: at EOF");
     if (sspt->ss_stp == -1)			/* was input at top level?  */
 	sspt->ss_stk[0] = ipt;			/*   put back for next time */
-    return ((string) copxstr(ItemTyp(ipt), sizeof(char)));
+    return (string) copxstr(ItemTyp(ipt), sizeof(char));
 						/* return copy of type      */
 }
 
@@ -824,7 +827,7 @@ int *get_dims(
     if (sspt->ss_stp == -1)			/* was input at top level?  */
 	sspt->ss_stk[0] = ipt;			/*   put back for next time */
     if (ItemDim(ipt) != NULL)			/* any dimensions to item?  */
-	return ((int *) copxstr(ItemDim(ipt), sizeof(int)));
+	return (int *) copxstr(ItemDim(ipt), sizeof(int));
 						/*   return copy of dims    */
     else
 	return NULL;
@@ -884,19 +887,19 @@ local bool writeitem(stream str, itemptr ipt)
     itemptr *setp, tesp;
 
     if (! streq(ItemTyp(ipt), SetType))		/* just a simple item?      */
-	return (putitem(str, ipt));		/*   then write it out      */
+	return putitem(str, ipt);		/*   then write it out      */
     else {					/* recursively handle set   */
 	if (! putitem(str, ipt))		/*   write out set item     */
-	    return (FALSE);
+	    return FALSE;
 	setp = (itemptr*) ItemDat(ipt);		/*   point to item string   */
 	while (*setp != NULL)			/*   loop over the items    */
 	    writeitem(str, *setp++);		/*     write each one out   */
 	tesp = makeitem(TesType, NULL, NULL, NULL);
 						/*   create closing item    */
 	if (! putitem(str, tesp))		/*   write out tes item     */
-	    return (FALSE);
+	    return FALSE;
 	freeitem(tesp, FALSE);			/*   and reclaim memory     */
-	return (TRUE);				/*   indicate success       */
+	return TRUE;				/*   indicate success       */
     }
 }
 
@@ -907,12 +910,12 @@ local bool writeitem(stream str, itemptr ipt)
 local bool putitem(stream str, itemptr ipt)
 {
     if (! puthdr(str, ipt))                     /* write item header        */
-        return (FALSE);
+        return FALSE;
     if (! streq(ItemTyp(ipt), SetType) && ! streq(ItemTyp(ipt), TesType))
 						/* an ordinary data item?   */
 	if (! putdat(str, ipt))                 /*   write item data        */
-	    return (FALSE);
-    return (TRUE);                              /* indicate success         */
+	    return FALSE;
+    return TRUE  ;                              /* indicate success         */
 }
 
 /*
@@ -927,22 +930,22 @@ local bool puthdr(stream str, itemptr ipt)
     num = (ItemDim(ipt) == NULL) ? SingMagic : PlurMagic;
     						/* determine magic number   */
     if (fwrite((char *)&num, sizeof(short), 1, str) != 1)
-	return (FALSE);				/* return FALSE on failure  */
+	return FALSE;				/* return FALSE on failure  */
     if (! putxstr(str, ItemTyp(ipt), sizeof(char)))
-	return (FALSE);
+	return FALSE;
     if (ItemTag(ipt) != NULL) {                 /* is item tagged?          */
         if (xstrlen(ItemTag(ipt), sizeof(char)) > MaxTagLen)
             error("puthdr: tag too long");
         if (! putxstr(str, ItemTag(ipt), sizeof(char)))
-	    return (FALSE);                     /*   write item tag         */
+	    return FALSE;                       /*   write item tag         */
     }
     if (ItemDim(ipt) != NULL) {                 /* a vectorized item?       */
         if (xstrlen(ItemDim(ipt), sizeof(int)) > MaxVecDim)
             error("puthdr: too many dimensions");
         if (! putxstr(str, ItemDim(ipt), sizeof(int)))
-	    return (FALSE);                     /*   write vect dims        */
+	    return FALSE;                       /*   write vect dims        */
     }
-    return(TRUE);                               /* indicate success         */
+    return TRUE;                                /* indicate success         */
 }
 
 /*
@@ -956,7 +959,7 @@ local bool putdat(stream str, itemptr ipt)
     if (ItemDat(ipt) == NULL)			/* no data to write?        */
 	error("putdat: item %s has no data", ItemTag(ipt));
     len = datlen(ipt, 0);			/* count bytes to output  */
-    return (fwrite((char*)ItemDat(ipt), sizeof(byte), len, str) == len);
+    return fwrite((char*)ItemDat(ipt), sizeof(byte), len, str) == len;
 						/* write data to stream   */
 }
 
@@ -986,7 +989,7 @@ local itemptr scantag(strstkptr sspt, string tag)
 	    error("scantag: item %s not found in set %s",
 		  tag, ItemTag(sspt->ss_stk[sspt->ss_stp]));
     }
-    return (ipt);				/* return item found	  */
+    return ipt; 				/* return item found	  */
 }
 
 local itemptr nextitem(strstkptr sspt)
@@ -999,7 +1002,7 @@ local itemptr nextitem(strstkptr sspt)
 	ipt = readitem(sspt->ss_str, NULL);	/*   read next item in      */
 	sspt->ss_stk[0] = ipt;			/*   and save for later     */
     }
-    return (ipt);				/* supply item to caller    */
+    return ipt; 	 			/* supply item to caller    */
 }
 
 local itemptr finditem(strstkptr sspt, string tag)
@@ -1013,7 +1016,7 @@ local itemptr finditem(strstkptr sspt, string tag)
 	    break;				/*     done with loop	    */
 	ivec++;					/*   on to next item	    */
     }
-    return (*ivec);				/* return item or NULL      */
+    return *ivec;				/* return item or NULL      */
 }
 
 /*
@@ -1027,7 +1030,7 @@ local itemptr readitem(stream str, itemptr first)
     ip = first != NULL ? first : getitem(str);	/* use 1st or next item     */
     if (ip == NULL ||				/* EOF detected by getitem  */
 	  ! streq(ItemTyp(ip), SetType))	/* or item not a set?       */
-	return (ip);				/*   just return it	    */
+	return ip;				/*   just return it	    */
     bufp = &ibuf[0];				/* prepare item buffer	    */
     for ( ; ; ) {				/* loop reading items in    */
 	if (bufp >= &ibuf[MaxSetLen])		/*   no room for next?	    */
@@ -1045,7 +1048,7 @@ local itemptr readitem(stream str, itemptr first)
 						/* construct compound item  */
     freeitem(ip, TRUE);				/* reclaim orig. header     */
     freeitem(np, TRUE);
-    return (res);				/* return compound item     */
+    return res; 				/* return compound item     */
 }
 
 /*
@@ -1058,11 +1061,11 @@ local itemptr getitem(stream str)
 
     ipt = gethdr(str);				/* try reading header in    */
     if (ipt == NULL)				/* did gethdr detect EOF?   */
-        return (NULL);				/*   return NULL on EOF     */
+        return NULL;				/*   return NULL on EOF     */
     if (! streq(ItemTyp(ipt), SetType) &&	/* if item does not start   */
 	  ! streq(ItemTyp(ipt), TesType))	/* or terminate a set       */
 	getdat(ipt, str);			/*   try reading data in    */
-    return (ipt);                               /* return resulting item */
+    return ipt;                                 /* return resulting item */
 }
 
 /*
@@ -1072,7 +1075,7 @@ local itemptr getitem(stream str)
 local itemptr gethdr(stream str)
 {
     short num;
-    string typ, tag;
+    string tag, typ = NULL;
     int *dim, *ip;  /* ISSWAP */
     permanent bool firsttime = TRUE;
 
@@ -1128,7 +1131,7 @@ local itemptr gethdr(stream str)
 #endif
     } else
 	dim = NULL;
-    return (makeitem(typ, tag, NULL, dim));	/* return item less data    */
+    return makeitem(typ, tag, NULL, dim);  	/* return item less data    */
 } /* gethdr */
 /*
  * GETHDR: read a item header from a stream.
@@ -1213,18 +1216,21 @@ local copyproc copyfun(string srctyp, string destyp)
 
 local void copydata(
     void *vdat,
-    int off,
-    int len,
+    off_t off,
+    size_t len,
     itemptr ipt,
     stream str)
 {
     char *src, *dat = (char *) vdat;
     off_t oldpos;
+
+    dprintf(0,"COPYDATA: off=%ld len=%ld\n", off, len);
       
     off *= ItemLen(ipt);                        /* offset bytes from start  */
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (char *) ItemDat(ipt) + off;	/*   get pointer to source  */
     	len *= ItemLen(ipt);			/* number of bytes to copy  */
+	dprintf(0,"COPYDATA2: len=%ld src=0x%x dat=0x%x\n",len, src, dat);
 	while (--len >= 0)			/*   loop copying data      */
 	    *dat++ = *src++;			/*     byte by byte         */
     } else {					/* time to read data in     */
@@ -1237,8 +1243,8 @@ local void copydata(
 
 local void copydata_f2d(
     double *dat,
-    int off,
-    int len,
+    off_t off,
+    size_t len,
     itemptr ipt,
     stream str)
 {
@@ -1262,8 +1268,8 @@ local void copydata_f2d(
 
 local void copydata_d2f(
     float *dat,
-    int off,
-    int len,
+    off_t off,
+    size_t len,
     itemptr ipt,
     stream str)
 {
@@ -1303,8 +1309,8 @@ local double getdbl(stream str)
 
 local void saferead(
     void *dat,
-    int siz,
-    int cnt,
+    size_t siz,
+    size_t cnt,
     stream str)
 {
     if (fread(dat, siz, cnt, str) != cnt)
@@ -1330,20 +1336,19 @@ local void safeseek(
 
 /*
  * ELTCNT: compute number of basic elements in subspace of item.
- *  @todo:    long vs. size_t
  */
 
-local long eltcnt(
+local size_t eltcnt(
     itemptr ipt,            	/* pointer to item w/ possible vector dims */
-    int skp)                	/* num of dims to skip, starting with dimN */
+    int dimskp)                	/* num of dims to skip, starting with dimN */
 {
     register int *ip;
-    register long prod;
+    register size_t prod;
 
     prod = 1;                                   /* scalers have one         */
     if (ItemDim(ipt) != NULL) {                 /* a vectorized item?       */
         for (ip = ItemDim(ipt); *ip != 0; ip++) /*   loop over dimensions   */
-            if (--skp < 0)                      /*     past 1st skp dims?   */
+            if (--dimskp < 0)                   /*     past 1st skp dims?   */
                 prod *= *ip;                    /*       include this dim   */
     }
     return prod;				/* return product of dims   */
@@ -1355,9 +1360,9 @@ local long eltcnt(
 
 local size_t datlen(
     itemptr ipt,            	/* pointer to item w/ possible vector dims */
-    int skp)                	/* num of dims to skip, starting with dimN */
+    int dimskp)                	/* num of dims to skip, starting with dimN */
 {
-    return (ItemLen(ipt) * eltcnt(ipt, skp));	/* find byte-len needed     */
+    return ItemLen(ipt) * eltcnt(ipt, dimskp);	/* find byte-len needed     */
 }
 
 /*
@@ -1384,7 +1389,7 @@ local itemptr makeitem(
 	ItemDim(ipt) = NULL;			/*   clear out dimensions   */
     ItemDat(ipt) = dat;				/* set pointer to data      */
     ItemPos(ipt) = 0;				/* clear out file position  */
-    return (ipt);                               /* return complete item     */
+    return ipt;                                 /* return complete item     */
 }
 
 /*
@@ -1433,15 +1438,15 @@ local typlen tl_tab[] = {
     { NULL,	  0,              },
 };
 
-local int baselen(string typ)
+local size_t baselen(string typ)
 {
     typlenptr tp;
 
     for (tp = tl_tab; tp->tl_typ != NULL; tp++)	/* loop over basic types    */
-	if (streq(typ, tp->tl_typ))		/*   found type we want?    */
-	    return (tp->tl_len);		/*     return byte length   */
+      if (streq(typ, tp->tl_typ))       	/*   found type we want?    */
+	return tp->tl_len;	        	/*     return byte length   */
     error("baselen: type %s unknown", typ);	/* bad type string          */
-    return (0);                                 /* will never get here      */
+    return 0;                                   /* will never get here      */
 }
 
 /************************************************************************/
@@ -1488,13 +1493,13 @@ local strstkptr findstream(stream str)
     strstkptr stfree, sspt;
 
     if (last!=NULL && last->ss_str == str)
-        return(last);
+        return last;
     stfree = NULL;				/* remember free slot	    */
     for (sspt = strtable; sspt < strtable+StrTabLen; sspt++) {
 						/* loop over the table	    */
 	if (sspt->ss_str == str) {		/*   found that stream?	    */
             last = sspt;
-	    return (sspt);			/*     then return slot	    */
+	    return sspt;			/*     then return slot	    */
         }
 	if (stfree == NULL && sspt->ss_str == NULL)
 						/*   first empty slot?	    */
@@ -1512,7 +1517,7 @@ local strstkptr findstream(stream str)
     stfree->ss_pos = 0L;                        /* set at start of file     */
 #endif
     last = stfree;                              /* mark for quick access    */
-    return (stfree);				/* return new slot	    */
+    return stfree;				/* return new slot	    */
 }
 
 local void ss_push(strstkptr sspt, itemptr ipt)
