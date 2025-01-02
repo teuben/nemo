@@ -1224,15 +1224,21 @@ local void copydata(
     char *src, *dat = (char *) vdat;
     off_t oldpos;
 
-    dprintf(0,"COPYDATA: off=%ld len=%ld\n", off, len);
-      
     off *= ItemLen(ipt);                        /* offset bytes from start  */
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (char *) ItemDat(ipt) + off;	/*   get pointer to source  */
     	len *= ItemLen(ipt);			/* number of bytes to copy  */
-	dprintf(0,"COPYDATA2: len=%ld src=0x%x dat=0x%x\n",len, src, dat);
-	while (--len >= 0)			/*   loop copying data      */
+	// dprintf(0,"COPYDATA2: len=%ld src=0x%x dat=0x%x\n",len, src, dat);
+#if 0
+	//   this while loop will hit through 0, and eventually segfault in the copy
+	//   compiler bug ?
+	while (--len >= 0) {			/*   loop copying data      */
 	    *dat++ = *src++;			/*     byte by byte         */
+	}
+#else
+	for (size_t i=0; i<len; i++)
+	  *dat++ = *src++;
+#endif
     } else {					/* time to read data in     */
 	oldpos = ftello(str);                   /*   save current place     */
 	safeseek(str, ItemPos(ipt) + off, 0);   /*   seek back to data      */
