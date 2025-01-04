@@ -33,7 +33,7 @@
 
 int debug_level=0;	/* needs to be global; see also getparam.c */
 
-static char *nemo_file = "dprintf.c: debugging stuff";
+// static char *nemo_file = "dprintf.c: debugging stuff";
 
 bool nemo_debug(int debug) 
 {

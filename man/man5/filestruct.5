@@ -1,7 +1,9 @@
-.TH FILESTRUCT 5NEMO "16 May 1992"
-.SH NAME
+.TH FILESTRUCT 5NEMO "2 January 2024"
+
+.SH "NAME"
 filestruct \- binary structured file format 
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 \fB#include <stdinc.h>\fP
 \fB#include "filesecret.h"\fP        \fI only for local code\fP
@@ -19,11 +21,12 @@ filestruct \- binary structured file format
 .PP
 \fB struct item {\fP
 \fB    string itemtyp;\fP
-\fB    int    itemlen;\fP
+\fB    size_t itemlen;\fP
 \fB    string itemtag;\fP
 \fB    int   *itemdim;\fP
-\fB    byte  *itemdat;\fP
-\fB    long   itempos;\fP
+\fB    void  *itemdat;\fP
+\fB    off_t  itempos;\fP
+\fB    off_t  itemoff;\fP
 \fB };\fP
 .PP
 \fB struct strstk {\fP
@@ -31,11 +34,13 @@ filestruct \- binary structured file format
 \fB    item   *ss_stk[SetStkLen];\fP
 \fB    int     ss_stp;\fP
 \fB    bool    ss_seek;\fP
-\fB    long    ss_pos;\fP            \fI/* only if RANDOM access allowed */\fP
+\fB    int     ss_mode;\fP           \fI/* only if RANDOM access allowed */\fP
+\fB    off_t   ss_pos;\fP            \fI/* only if RANDOM access allowed */\fP
 \fB    itemptr ss_ran;\fP            \fI/* only if RANDOM access allowed */\fP
 \fB };\fP
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIfilestruct\fP is a method for storing data files largely
 consisting of character strings, booleans, and possible
 multi-dimensional arrays of data.  This data may be structured in a
@@ -74,7 +79,8 @@ otherwise. This is essentially the reason why pipes cannot be used in
 The actual internal format is governed how the application programmer 
 uses the \fIget_XXX\fP and \fPput_XXX\fP routines (see 
 \fIfilestruct(3NEMO)\fP).
-.SH EXPERIMENTAL FEATURES
+
+.SH "EXPERIMENTAL FEATURES"
 If compiled with \fB-DRANDOM\fP 
 some limited random access to data within a data-item is possible.
 .PP
@@ -83,22 +89,27 @@ little/big endian machines. Otherwise,
 data on disk exist in the host format, and no effort has been made to make
 it machine independant (e.g. IEEE floating points and twos-compliment
 integers). This is however expected in some future release.
-.SH ZENO FORMAT
+
+.SH "ZENO FORMAT"
 The \fIzeno(1NEMO)\fP package also used this format, but there are some
-subtle differences to be described.
-.SH FILES
+subtle differences still to be described here.
+
+.SH "FILES"
 .nf
 .ta +2.0i
 ~/src/kernel/io   	filesecret.[ch] filestruct.h
 ~/inc              	filestruct.h
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tsf(1NEMO), rsf(1NEMO), csf(1NEMO), filestruct(3NEMO), zeno(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua Barnes, Lyman Hurd, Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 dark-ages	V0.0 precurser (filestr)	JEB
 xx-apr-87	V1.0 basic operators     	JEB
 xx-jul-87	V1.x added f-d coercion, deferred output	Lyman Hurd
@@ -108,4 +119,5 @@ xx-xxx-87	V2.0 new types, operators, external fmt  	JEB
 16-may-92	V3.0 finalized random access                        	PJT
 6-jul -01	documented the new uNEMO   	PJT
 27-dec-2019	documented ZENO		PJT
-.fi
+2-jan-2024	V3.6 fix remaining 64bit issues by using off_t, size_t	PJT
+

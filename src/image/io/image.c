@@ -33,7 +33,8 @@
  *  13-feb-13   V8.1 added region and sub_image()                        PJT
  *  22-may-21   V8.2 deal with Object
  *  19-mar-22   V8.3 deprecate Axis=0 images
- *  17-dec-22        deal with Telescope/Object/Unit 
+ *  17-dec-22        deal with Telescope/Object/Unit
+ *   2-jan-24        fix alloc large cubes
  *			
  *
  *	  Example of usage: see snapccd.c	for writing
@@ -319,7 +320,9 @@ int read_image (stream instr, imageptr *iptr)
 
          get_set (instr,MapTag);
             if (Frame(*iptr)==NULL) {        /* check if allocated */
-	        nxyz = Nx(*iptr)*Ny(*iptr)*Nz(*iptr);
+	        nxyz  = Nx(*iptr);
+		nxyz *= Ny(*iptr);
+		nxyz *= Nz(*iptr);
                 Frame(*iptr) = (real *) allocate(nxyz * sizeof(real));
                 dprintf (DLEV,"Frame allocated @ %p ",Frame(*iptr));
             } else

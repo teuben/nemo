@@ -32,7 +32,7 @@
 
 typedef struct {
   string itemtyp;		/* type string, listed in filestruct.h */
-  long   itemlen;		/* length associated with above type */
+  size_t itemlen;		/* length associated with above type */
   string itemtag;		/* name given this item by application */
   int   *itemdim;		/* int-string of dimensions, or NULL */
   void  *itemdat;		/* the real goodies, if any, or NULL */
@@ -74,16 +74,16 @@ typedef struct {
 
 typedef struct {
     string tl_typ;			/* type string (see filestruct.h)   */
-    int    tl_len;			/* length of elements in bytes      */
+    size_t tl_len;			/* length of elements in bytes      */
 } typlen, *typlenptr;
 
 /* PROC_COPY's :
  *    replaces the old "proc" type unsafe stuff  (for 
  *    good practice for C, but needed for C++)
  */
-typedef void (*copyproc)  (void *,   int, int, itemptr, stream);
-typedef void (*copyproc_d)(double *, int, int, itemptr, stream);
-typedef void (*copyproc_f)(float *,  int, int, itemptr, stream);
+typedef void (*copyproc)  (void *,   off_t, size_t, itemptr, stream);
+typedef void (*copyproc_d)(double *, off_t, size_t, itemptr, stream);
+typedef void (*copyproc_f)(float *,  off_t, size_t, itemptr, stream);
 
 
 /*
@@ -104,18 +104,18 @@ local itemptr getitem  ( stream str );
 local itemptr gethdr   ( stream str );
 local void getdat      ( itemptr ipt, stream str );
 local copyproc copyfun ( string srctyp, string destyp );
-local void copydata    ( void *dat,   int off, int len, itemptr ipt, stream str );
-local void copydata_f2d( double *dat, int off, int len, itemptr ipt, stream str );
-local void copydata_d2f( float  *dat, int off, int len, itemptr ipt, stream str );
+local void copydata    ( void *dat,   off_t off, size_t len, itemptr ipt, stream str );
+local void copydata_f2d( double *dat, off_t off, size_t len, itemptr ipt, stream str );
+local void copydata_d2f( float  *dat, off_t off, size_t len, itemptr ipt, stream str );
 local float getflt     ( stream str );
 local double getdbl    ( stream str );
-local void saferead    ( void *dat, int siz, int cnt, stream str );
+local void saferead    ( void *dat, size_t siz, size_t cnt, stream str );
 local void safeseek    ( stream str, off_t offset, int key );
-local long eltcnt      ( itemptr ipt, int skp );
-local size_t datlen    ( itemptr ipt, int skp );
+local size_t eltcnt    ( itemptr ipt, int dimskp );
+local size_t datlen    ( itemptr ipt, int dimskp );
 local itemptr makeitem ( string typ, string tag, void *dat, int *dim );
 local void freeitem    ( itemptr ipt, bool flg);
-local int baselen      ( string typ );
+local size_t baselen   ( string typ );
 local strstkptr findstream ( stream str );
 local void ss_push     ( strstkptr sspt, itemptr ipt );
 local void ss_pop      ( strstkptr sspt );
