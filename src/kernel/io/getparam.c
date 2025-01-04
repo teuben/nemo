@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7.1 30-jan-2024 PJT"
+#define GETPARAM_VERSION_ID  "3.7.2 4-jan-2025 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -876,14 +876,28 @@ local void report(char what)
   }
 
   if (what == 'm') {
-#if defined(linux_confusing)
-    /* @todo   this doesn't exist in older linux, e.g. redhat 7 */
-    /*         mallinfo is ok on redhat 8,
+#if defined(linux) && defined(HAVE_MALLINFO2)
+    /* @todo   this doesn't exist in older linux, e.g. redhat 7   */
+    /*         mallinfo is ok on redhat 8, but old int based mallinfo in deprecated */
     /* http://www.gnu.org/software/libc/manual/html_node/Statistics-of-Malloc.html */
-    //struct mallinfo2 mi = mallinfo2();
-    struct mallinfo mi = mallinfo();
-    dprintf(0,"mallinfo: hblks(d):%d %d uord=%d ford=%d keepcost=%d arena=%d ord=%d\n",
+    struct mallinfo2 mi = mallinfo2();      // this uses size_t elements , not int
+    dprintf(0,"mallinfo: hblks(d):%ld %ld uord=%ld ford=%ld keepcost=%ld arena=%ld ord=%ld\n",
 	    mi.hblks,mi.hblkhd,mi.uordblks,mi.fordblks,mi.keepcost,mi.arena,mi.ordblks);
+    //  mkplummer . 100 help=m
+    //  hblks(d):0 0 uord=26272 ford=108896 keepcost=104592 arena=135168 ord=3
+    //
+    //  struct mallinfo2
+    //     size_t arena;     /* =Non-mmapped space allocated (bytes) */
+    //     size_t ordblks;   /* =Number of free chunks */
+    //     size_t smblks;    /*  Number of free fastbin blocks */ 
+    //     size_t hblks;     /* =Number of mmapped regions */
+    //     size_t hblkhd;    /* =Space allocated in mmapped regions (bytes) */
+    //     size_t usmblks;   /*  See below */
+    //     size_t fsmblks;   /*  Space in freed fastbin blocks (bytes) */
+    //     size_t uordblks;  /* =Total allocated space (bytes) */
+    //     size_t fordblks;  /* =Total free space (bytes) */
+    //     size_t keepcost;  /* =Top-most, releasable space (bytes) */
+   
 #else
     dprintf(0,"report_mem not implemented for non-linux\n");
 #endif      
