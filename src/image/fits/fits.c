@@ -151,7 +151,8 @@ size_t fts_rhead(fits_header *fh, stream instr)
 {
     char buf[FTSLINSIZ+2];                /* buffer to hold one card image */
     char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
-    int k, n, i, icard;
+    int k, i, icard;
+    size_t n;
     struct arglist *p;
 
     if (fh->naxis >= 0) {         /* we could force a fts_zero here, but ala */
@@ -175,10 +176,9 @@ size_t fts_rhead(fits_header *fh, stream instr)
             n = FTSLINSIZ;
         } else {               /* this is of course the legal way to get cards */
           if ((n=fread(buf,1,FTSLINSIZ,instr)) != FTSLINSIZ) {     /* get card */
-            if (n==0)
-                return -1;         /* error - nothing read -- never -- */
-            else 
-                return -n-1;       /* return some negative number, but < -1 */
+            if (n != 0)
+	      warning("Incomplete read %ld bytes in header", n);
+	    return 0;
           } else {
             buf[FTSLINSIZ] = 0;      /* be sure it's terminated */
             dprintf(5,"RECORD[%d]%65s\n",icard,buf);
@@ -458,7 +458,7 @@ size_t fts_rhead(fits_header *fh, stream instr)
     
     /* process some additional checks */
     fts_lhead(fh);            /* process a few more sanity checks */
-    return fts_dsize(fh);     /* return the size of upcoming data */
+    return fts_dsize(fh);     /* return the size of upcoming data (could be 0 too) */
 }
 
 /*
@@ -1257,7 +1257,7 @@ int fts_phead(fits_header *fh, string *print)
     printf("headersize = %d bytes = %d %d-records\n",
             (int) fh->hlen, ((int) fh->hlen - 1)/ftsblksiz_i + 1, ftsblksiz_i);
     if (dsize > 0) 
-      printf("datasize = %ld bytes = %ld %d-records\n",
+      printf("datasize = %ld bytes = %ld %ld-records\n",
             dsize, (dsize-1)/ftsblksiz_i + 1, ftsblksiz_i);
     else
       printf("datasize = 0 bytes = 0 %d-records\n", ftsblksiz_i);
@@ -2038,11 +2038,14 @@ int fts_sdata(
 
     if (nskip % ftsblksiz_i) {
         ntail = ftsblksiz_i - nskip % ftsblksiz_i;
-        dprintf(1,"Skipping %ld bytes for empty tail\n",ntail);        
+        dprintf(1,"Skipping %ld bytes for empty tail in data\n",ntail);        
         nskip += ntail;
     }
     nskip -= fh->nread;
-    if (nskip>0) fseek(instr, nskip, 1);
+    if (nskip>0) {
+      dprintf(1,"fseek %ld from %ld\n", nskip, fh->nread);
+      fseek(instr, nskip, 1); // SEEK_CUR=1
+    }
     return 1;
 }
 
@@ -2058,7 +2061,7 @@ int fts_cdata(
 	      bool trailr,			/* (i) need to read trailing end too ? */
 	      bool trailw)			/* (i) need to write trailing end too ? */
 {
-    int  nread, nwrite, n, ntowrite, ntoread, itemlen, nitems;
+    size_t  n, nread, nwrite, ntowrite, ntoread, itemlen, nitems;
     char buffer[CONVBUFLEN];
 
     itemlen = ABS(fh->bitpix)/8;        /* # bytes in an item */
@@ -2073,7 +2076,7 @@ int fts_cdata(
       ntowrite = n;
     if (n==0) ntoread=0;                /* no data? */
     if (fh->flip) dprintf(1,"fts_cdata: Swapping bytes\n");
-    dprintf(2,"fts_data: ntoread=%d   ntowrite=%d\n",ntoread,ntowrite);
+    dprintf(2,"fts_data: ntoread=%ld   ntowrite=%ld\n",ntoread,ntowrite);
     while (ntoread > 0) {
         if (ntoread > CONVBUFLEN)
             n = CONVBUFLEN;
@@ -2081,17 +2084,17 @@ int fts_cdata(
             n = ntoread;
         nread = fread(buffer,sizeof(char),n,instr);
         if (nread != n) /* should be a warning in raw mode */
-            error("Tried to read %d, could only read %d",n,nread);
+            error("Tried to read %ld, could only read %ld",n,nread);
 	fh->nread += nread;
 	if (fh->flip) {
             nitems = nread/itemlen;
-            if (nread%itemlen) error("Bad bufsize %d for byteswap",nread);
+            if (nread%itemlen) error("Bad bufsize %ld for byteswap",nread);
             bswap(buffer,itemlen, nitems);
         }
 /****FIX****/
         nwrite = fwrite(buffer,sizeof(char),n,outstr);
         if (nwrite != n) 
-            error("Tried to write %d, could only write %d\n",n,nwrite);
+            error("Tried to write %ld, could only write %ld\n",n,nwrite);
         ntoread -= nread;
     }
     return 1;
@@ -2146,9 +2149,10 @@ int fts_cdata816(
  *             See also eq. (x.y.z) in the NOST manual
  */
 
-int fts_dsize(fits_header *fh)
+size_t fts_dsize(fits_header *fh)
 {
-    int i, size;
+    int i;
+    size_t size = 0;
 
     if (fh->naxis > 0) {
         if (fh->naxisn[0] == 0) {       /* NAXIS1=0 is for random groups */
@@ -2164,6 +2168,7 @@ int fts_dsize(fits_header *fh)
         size *= fh->gcount * ABS(fh->bitpix) / 8;
     } else
         size = 0;
+    dprintf(1,"fts_dsize:  %ld\n", size);    
     return size;
 }
 
@@ -2171,10 +2176,10 @@ int fts_dsize(fits_header *fh)
  *  fts_tsize: return trailing size of useable data portion
  */
 
-int fts_tsize(fits_header *fh)
+size_t fts_tsize(fits_header *fh)
 {
-  int n = fts_dsize(fh);
-  int tail = ROUNDUP(n,ftsblksiz_o);
+  size_t n = fts_dsize(fh);
+  size_t tail = ROUNDUP(n,ftsblksiz_o);
   return tail - n;
 }
 

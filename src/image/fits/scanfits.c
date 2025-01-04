@@ -54,7 +54,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "blocking=1,1\n  	   Two blocking factors (blocksize/2880) for i&o",
     "select=header,data\n  Select header, data, ...?",
     "split=f\n             Split fits file into HDU pieces '<out>.#'",
-    "VERSION=1.8d\n        13-jul-2021 PJT",
+    "VERSION=1.8e\n        3-jan-2024 PJT",
     NULL,
 };
 
@@ -67,7 +67,8 @@ extern string *burststring(string, string);
 void nemo_main()
 {
     stream instr, outstr;
-    int    i, n, nfile, blocking[2];
+    int    i,n,nfile, blocking[2];
+    size_t size;
     string outfile, hdselect, *insert, *fix, *deletes, *keep, *print;
     char   basename[128];
     struct fits_header fh;
@@ -115,15 +116,17 @@ void nemo_main()
        fts_zero(&fh);			             /* reset header */
        fh.hdu = i;                                   /* keep track of HDU (1=first) */
        
-       n = fts_rhead(&fh,instr);	              /* read header */
-       if (n<0)				              /* if no data (EOF) .. */
+       size = fts_rhead(&fh,instr);	              /* read header */
+       if (size == 0 ) {        		      /* if no data (EOF) .. */
+	  dprintf(1," no more data\n");
           break;			              /* ... quit */
+       }
        if (outstr) dprintf(1,"Working on FITS file %d\n",i);
-       fts_dhead(&fh,deletes);                     /* delete= headers */
-       fts_khead(&fh,keep);                        /* keep= headers */
-       fts_ihead(&fh,insert);                      /* insert= headers */
-       fts_fhead(&fh,fix);                         /* fix= headers */
-       if (!outstr && !split) fts_phead(&fh,print);  /* ? print header */
+       fts_dhead(&fh,deletes);                        /* delete= headers */
+       fts_khead(&fh,keep);                           /* keep= headers */
+       fts_ihead(&fh,insert);                         /* insert= headers */
+       fts_fhead(&fh,fix);                            /* fix= headers */
+       if (!outstr && !split) fts_phead(&fh,print);   /* ? print header */
        if ((outstr && (nfile==0 || nfile==i)) || split) {
           if (split) {
           	if (strchr(outfile,'%'))
