@@ -173,6 +173,9 @@
 /* Define if you have the z library (-lz).  */
 #undef HAVE_LIBZ
 
+/* Define if you have the <mallinfo.h> header file.  */
+#undef HAVE_MALLINFO2
+
 /* Define this if your machine is big endian (like Sparcs) */
 #undef WORDS_BIGENDIAN
 
