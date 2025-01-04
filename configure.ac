@@ -892,6 +892,10 @@ AC_SEARCH_LIBS(sin, m)
 AC_SEARCH_LIBS(cblas_daxpy, gslcblas)
 AC_SEARCH_LIBS(gsl_version, gsl)
 
+dnl mallinfo is optional; the code can compile (minus features) without it
+AC_SEARCH_LIBS(mallinfo2,malloc,AC_DEFINE([HAVE_MALLINFO2],[1],
+               [Define if mallinfo2() is available on this platform.]))
+
 dnl AC_CHECK_LIB(c, strsignal)
 
 dnl Checks for header files.
