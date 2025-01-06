@@ -899,7 +899,7 @@ local void report(char what)
     //     size_t keepcost;  /* =Top-most, releasable space (bytes) */
    
 #else
-    dprintf(0,"report_mem not implemented for non-linux\n");
+    dprintf(0,"report_mem not implemented\n");
 #endif      
     return;
   }
