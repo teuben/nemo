@@ -93,7 +93,7 @@ The (bash) array ${PIPESTATUS[@]} contains the status ($?) for each program in
 a unix pipe. In this example it should return "0 0 0".
 
 .SH "PARALLEL and OpenMP"
-Most programs in NEMO are still single-core, but many current machines have a number of cores. If a program only
+Most programs in NEMO are still single-core, but many current machines have multiple cores. If a program only
 uses a fraction of the memory on the machine, the GNU \fIparallel(1)\fP program can be used to spread the load,
 e.g.
 .nf
@@ -109,6 +109,8 @@ created here, a well crafted Runfile can be created, and with
        make -f Runfile -j 2
 .fi
 should achieve the same result.
+.PP
+The \fBmkrunfile.py\fP script can help making such runfiles by looping over a set of parameters.
 
 .PP
 Although NEMO can be configured using \fB--with-openmp\fP to take advantage of multi-cores OpenMP
@@ -129,7 +131,8 @@ should be aware of the user interface implications of controlling how many cores
 .SH "SLURM"
 
 slurm is a popular package you will find on large computer clusters. See also
-\fIsbatch_nemo.sh(8NEMO)\fP for a helper script in NEMO to use slurm.
+\fIsbatch_nemo.sh(8NEMO)\fP for a helper script in NEMO to use slurm. It will likely
+have to be tailored for your specific situation.
 
 .SH "TABLES"
 

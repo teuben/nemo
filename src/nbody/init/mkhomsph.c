@@ -26,7 +26,7 @@
 #include <snapshot/body.h>
 #include <snapshot/put_snap.c>
 
-string defv[] = {	/* DEFAULT INPUT PARAMETERS */
+string defv[] = {
     "out=???\n      Output file name",
     "nbody=2048\n   Number of particles",
     "rmin=0\n       Inner cutoff radius",
@@ -37,13 +37,11 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       Random number seed",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.4c\n 29-aug-2018 PJT",
+    "VERSION=1.4d\n 2-jan-2024 PJT",
     NULL,
 };
 
 string usage = "create a uniform sphere of equal massive stars";
-
-string cvsid="$Id$";
 
 
 local real rmin, rmax;
@@ -76,6 +74,7 @@ void nemo_main(void)
     power = getdparam("power");
     if (power >= 3.0) error("Illegal power=%g, must be  < 3.0",power);
     seed = init_xrandom(getparam("seed"));
+    dprintf(0,"seed=%d\n",seed);
     zerocm = getbparam("zerocm");
     mksphere();
     writegalaxy(getparam("out"), getparam("headline"));
@@ -107,7 +106,6 @@ void mksphere(void)
 {
     Body *bp;
     real rmin3, rmax3, r_i, v_i, theta_i, phi_i, mass_i, sigma = 0.0;
-    real sinp, cosp, sint, cost;
     int i;
 
     btab = (Body *) allocate(nbody * sizeof(Body));
@@ -126,7 +124,8 @@ void mksphere(void)
         dprintf(1,"Gaussian isotropic velocities: sigma=%g\n",sigma);
     } else if (vmax > 0.0) {
         dprintf(1,"Vmax isotropic velocities: vmax=%g\n",vmax);
-    } 
+    }
+    // @todo   use local sin/cos variables to make it more efficient
     for (bp=btab, i = 0; i < nbody; bp++, i++) {
 	Mass(bp) = mass_i;
 #ifdef OLD

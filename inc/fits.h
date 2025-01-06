@@ -1,8 +1,10 @@
 /*
- *  definitions and declarations for nemo's FITS.C
+ *  definitions and declarations for nemo's src/image/fits/fits.c
+ *
  *  22-feb-94  ansi- and C++ safe
  *  10-aug-09  size_t instead of int for 2GB+ files
  *  25-oct-20  add hdu counter
+ *   3-jan-24  more proper usage of size_t instead of int
  */
 
 #ifndef _fits_h_
@@ -129,7 +131,7 @@ static struct arglist {
 typedef struct fits_header {
     int hdu;            /* keep track with HDU this is (1 being the first) */
     /* Optionally we could store the buffer in the first structure too... */
-    char *buffer;       /* pointer to exact header copy */
+    char *buffer;       /* pointer to exact header copy , if present */
     size_t buflen;      /* current length of buffer */
     size_t hlen;        /* length of header (bytes, through the END keyword) */
     size_t dlen;        /* length of data (bytes) */
@@ -200,8 +202,8 @@ typedef struct fits_header {
 } fits_header;
 
 
-size_t fts_rhead    (fits_header *, stream);
-char *fts_shead    (fits_header *, string);
+size_t fts_rhead (fits_header *, stream);
+char *fts_shead  (fits_header *, string);
 int fts_lhead    (fits_header *);
 int fts_chead    (fits_header *, stream);
 int fts_thead    (fits_header *);
@@ -211,7 +213,7 @@ int fts_ihead    (fits_header *, string *);
 int fts_fhead    (fits_header *, string *);
 int fts_phead    (fits_header *, string *);
 int fts_whead    (fits_header *, stream);
-size_t fts_xhead    (fits_header *, stream, int, int, int *, int);
+size_t fts_xhead (fits_header *, stream, int, int, int *, int);
 
 int fts_ptable   (fits_header *, stream, string *, string, int *, int);
 int fts_pgroup   (fits_header *, stream, string *, string, int *, int);
@@ -220,8 +222,8 @@ int fts_buf      (int);
 
 int fts_sdata    (fits_header *, stream);
 int fts_cdata    (fits_header *, stream, stream, bool, bool);
-int fts_dsize    (fits_header *);
-int fts_tsize    (fits_header *);
+size_t fts_dsize (fits_header *);
+size_t fts_tsize (fits_header *);
 int fts_rdata    (fits_header *, stream, int, char *);
 int fts_wdata    (fits_header *, stream, int, char *);
 int fts_rrow     (fits_header *, stream, int, char *);

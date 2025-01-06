@@ -77,6 +77,46 @@ the --help command line option
 where possible. 
 
 
+Example:  Creating a runfile
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+A runfile is a simple text file, where each line in this file can be executed, for example using 
+bash in a serial fashion.  If each line is independant from all others, they can be executed in parallel using
+``gnu parallel`` or ``sbatch`` (a common HPC batch queue system).  For example the following command
+in NEMO produces a runfile with 4 lines:
+
+.. code-block::
+
+     mkrunfile.py progname a=1,2 b=2,4 c=10 > example1.run
+
+     progname a=1 b=2 c=10
+     progname a=2 b=2 c=10
+     progname a=1 b=4 c=10
+     progname a=2 b=4 c=10
+
+where the ``example1.run`` file can be executed with any of the following commands. Depending on your
+resources of course. Memory, number of cores etc.
+
+.. code-block::
+
+     bash example1.run
+     parallel -j 4 < example1.run
+     sbatch_nemo.sh example1.run
+
+in particular the last ``sbatch_nemo.sh`` example will likely need to be tailored for your HPC system.
+
+.. note::
+   Unless the parameters take care of this, you will need to ensure data are written to files that do not
+   collide with each other.  For example a directory or file that encodes the values of the parameters,
+   or are numerically sorted (e.g. run010, run011)
+   Currently ``mkrunfile.py`` does not have an automated way for this yet.
+
+And here is an example of creating a runfile from a table with values
+
+.. code-block::
+
+     awk '{printf("progname runfile=run_%s a=%s b=%s\n", $1,$2,$3) }' example1.tab
+
 
 Example:  Extracting results from run directories
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
