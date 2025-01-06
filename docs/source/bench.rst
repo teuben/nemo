@@ -5,9 +5,10 @@ Benchmarking
 
 How fast does the N-body treecode run?
 To what degree does optimization/vectorizing help? When do
-programs become I/O dominated? Some of the numbers quoted below should
+programs become I/O dominated? Benchmarking is a black art, and
+some of the numbers quoted below should
 be taken with great care, since a lot of other factors can go into
-the timing result. 
+their timing.
 
 A number of programs in NEMO have a command line parameter such as
 ``nmodel=N``, ``nbench=N`` or ``iter=N`` (N normally set to 1)
@@ -18,6 +19,10 @@ some programas their respective man pages discuss a particular benchmark.
 
 On the top level we have ``make bench5`` and ``make bench``, the latter
 dynamically controlled with the scattered ``Benchfile``'s
+
+See also
+`bench(5NEMO) <https://teuben.github.io/nemo/man_html/bench.5.html>`_
+for more benchmarks.
 
 
 N-body integration
@@ -110,55 +115,55 @@ part of this no doubt (probably smaller) factor is due to improved compiler tech
      - (linux) software floating point
 
 
-The rubbish below are from the old latex table, TBD which ones make it into the new table
+The rubbish below is from the old latex table::
      
-i7-3630QM @ 3.4 GHz          & 0.000177 & hackcode1 & 2014 laptop \\
-i70-870 @ 2.93 GHz	     & 0.00030 & hackcode1 & 2010 desktop \\
+   i7-3630QM @ 3.4 GHz          & 0.000177 & hackcode1 & 2014 laptop \\
+   i70-870 @ 2.93 GHz	        & 0.00030 & hackcode1 & 2010 desktop \\
 
-Dec-alpha		     & 0.0042 & hackcode1 & -O4 -fast \\
-Dec-alpha		     & 0.0048 & hackcode1 & default \\
-CRAY X/YMP48                 & 0.0060 & TREECODE V3 & estimate (1989) \\
-Onyx-2			     & 0.0088 & hackcode1 & default (1996) \\
-ETA-10                       & 0.010 & TREECODE V2 & estimate (1987)  \\
+   Dec-alpha		        & 0.0042 & hackcode1 & -O4 -fast \\
+   Dec-alpha		        & 0.0048 & hackcode1 & default \\
+   CRAY X/YMP48                 & 0.0060 & TREECODE V3 & estimate (1989) \\
+   Onyx-2			& 0.0088 & hackcode1 & default (1996) \\
+   ETA-10                       & 0.010 & TREECODE V2 & estimate (1987)  \\
 
-Sun 20/62                    & 0.013 & hackcode1 & default (1994) \\
-Cyber 205                    & 0.018 & TREECODE V2 & estimate (1986) \\
-Sun 20/61                    & 0.020 & hackcode1 & \\
-HP/UX 700                    & 0.020 & hackcode1 &  \\
-Sun Ultra-140		     & 0.024 & hackcode1 & default \\
-Sun 20/??		     & 0.024 & hackcode1 & -xO4 -xcg92 -dalign -xlibmil \\
+   Sun 20/62                    & 0.013 & hackcode1 & default (1994) \\
+   Cyber 205                    & 0.018 & TREECODE V2 & estimate (1986) \\
+   Sun 20/61                    & 0.020 & hackcode1 & \\
+   HP/UX 700                    & 0.020 & hackcode1 &  \\
+   Sun Ultra-140		& 0.024 & hackcode1 & default \\
+   Sun 20/??		        & 0.024 & hackcode1 & -xO4 -xcg92 -dalign -xlibmil \\
 
-Sun 10/51                    & 0.029 & hackcode1 & -O -fast -fsingle \\
-Cray-2                       & 0.029 & TREECODE2   & REAL - Pitt, oct 91\\
-% SGI ???                      & 0.030 & hackcode1   & John Wangs machine
-DEC DS3000/400 alpha         & 0.036 & hackcode1   & default compilation \\
-Pentium-100                  & 0.038 & hackcode1   & default \\
-SGI Indigo		     & 0.045 & hackcode1   & default compilation \\
-CRAY YMP                     & 0.059 & hackcode1   & default compilation \\
-% bootes:
-Sparc-10                     & 0.063 & hackcode1   & using {\tt acc -cg92} \\
+   Sun 10/51                    & 0.029 & hackcode1 & -O -fast -fsingle \\
+   Cray-2                       & 0.029 & TREECODE2   & REAL - Pitt, oct 91\\
+   % SGI ???                    & 0.030 & hackcode1   & John Wangs machine
+   DEC DS3000/400 alpha         & 0.036 & hackcode1   & default compilation \\
+   Pentium-100                  & 0.038 & hackcode1   & default \\
+   SGI Indigo		        & 0.045 & hackcode1   & default compilation \\
+   CRAY YMP                     & 0.059 & hackcode1   & default compilation \\
+   % bootes:
+   Sparc-10                     & 0.063 & hackcode1   & using {\tt acc -cg92} \\
 
-486DX2-66 (linux)            & 0.093 & hackcode1   & -DSINGLEPREC \\
-Sparc-2	                     & 0.099 & gravsim V1  & \\
-IBM R/6000                   & 0.109 & hackcode1   & default cc compiler \\
-Dec 5000/200		     & 0.116 & hackcode1   & \\
-Sparc-2                      & 0.130 & hackcode1   & -DSINGLEPREC -fsingle \\
-Sparc-2                      & 0.180 & hackcode1   & \\
-Multiflow 14/300             & 0.190 & hackcode1   & \\
-Convex C220                  & 0.290 & & \\
-NeXT                         & 0.240 &             & [ganymede 68040, nov 91]\\
-Sparcstation1+               & 0.340 & & \\
+   486DX2-66 (linux)            & 0.093 & hackcode1   & -DSINGLEPREC \\
+   Sparc-2	                & 0.099 & gravsim V1  & \\
+   IBM R/6000                   & 0.109 & hackcode1   & default cc compiler \\
+   Dec 5000/200		        & 0.116 & hackcode1   & \\
+   Sparc-2                      & 0.130 & hackcode1   & -DSINGLEPREC -fsingle \\
+   Sparc-2                      & 0.180 & hackcode1   & \\
+   Multiflow 14/300             & 0.190 & hackcode1   & \\
+   Convex C220                  & 0.290 & & \\
+   NeXT                         & 0.240 &             & [ganymede 68040, nov 91]\\
+   Sparcstation1+               & 0.340 & & \\
 
-Alliant FX??                 & 0.430 & gravsim V1 & \\
-Alliant FX4/w 3 proc's       & 0.590 & & \\
-VAX workstation 3500         & 0.970 & & \\
-Sun-4/60 Sparcstation 1      & 1.040 & treecode2   & cf. C-code @ 0.420 \\
-Sun-3/110                    & 1.660 & hackcode1 & fpa.il \\
-
-
+   Alliant FX??                 & 0.430 & gravsim V1 & \\
+   Alliant FX4/w 3 proc's       & 0.590 & & \\
+   VAX workstation 3500         & 0.970 & & \\
+   Sun-4/60 Sparcstation 1      & 1.040 & treecode2   & cf. C-code @ 0.420 \\
+   Sun-3/110                    & 1.660 & hackcode1 & fpa.il \\
 
 
-Nbody0
+
+
+nbody0
 ~~~~~~
 
 The program is Aarseth's simplest
@@ -187,26 +192,56 @@ It seems the input data have been lost.
      -
      - 1302
      - 0.65
+   * - Sparc 1
+     -
+     - 1023
+     - 0.83
+   * - Sparc IPC(Courage - 16 Mb)
+     - 9,015
+     - 850
+     - 1.000
+   * - Sparc 2
+     - 4,483
+     -
+     - 2.01
+   * - Sparc 2'	
+     -
+     - 417
+     - 2.04
 
-Sparc 1			&		& 1023	&	0.83 \\
+   * - Dec 5000/200
+     -
+     - 318
+     - 2.67
 
-Sparc IPC(Courage - 16 Mb) &	9,015	&	  850	&	1.000 \\
+   * - Stardent(ism)
+     -
+     - 211
+     - 4.03
 
-Sparc 2 	&	4,483	&		&	2.01 \\
-
-Sparc 2'	&		&	  417	&	2.04 \\
-
-Dec 5000/200 	&		&	  318	&	2.67 \\
-
-Stardent(ism)	&		&	  211 	&	4.03 \\
-
-IBM Risc (Juno)	&	2,117	&	  198	&	4.27 \\
+   * - IBM Risc (Juno)
+     - 2,117
+     - 198
+     - 4.27
 					
-IBM Risc (wibm01)&	2,115	&		&	4.26 \\
-Convex		&		&	  172 	&	4.94 \\
-HP/UX 700     &                  &     26.2   &     \\
+   * - IBM Risc (wibm01)
+     - 2,115
+     -
+     - 4.26
+   * - Convex
+     -
+     - 172 
+     - 4.94
+   * - HP/UX 700
+     -
+     - 26.2 
+     -
 
-Cray YMP	&		&	  19.1	&	44.5
+   * - Cray YMP	
+     -
+     - 19.1
+     - 44.5
+
 
 
 Orbit integration

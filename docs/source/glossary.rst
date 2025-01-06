@@ -6,10 +6,10 @@ Glossary
 .. glossary::
 
 
-  accelleration
+  acceleration
       Dataformat used in the :term:`falcon` package. Related to the
       :term:`potential` in NEMO, except one can use multiple
-      accelleration descriptors, normally separated by a semi-colon.
+      acceleration descriptors, normally separated by a semi-colon.
 
   bodytrans
       Dataformat (normally a C function) that is used to
@@ -87,7 +87,7 @@ Glossary
       Dataformat in NEMO used to represent a
       potential; most programs in NEMO which handle potentials start
       or end with *pot*, for example ``potlist``.
-      Related to the :term:`accelleration`
+      Related to the :term:`acceleration`
 
   program keyword
       Keywords that are defined by the

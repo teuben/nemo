@@ -7,6 +7,9 @@
 #    gfortran compiler needs an extra  -fallow-argument-mismatch  flag.
 #    issue #110
 #
+#    See also:     https://salsa.debian.org/debian/pgplot5
+#                  https://github.com/mohawk2/pgplot/
+#
 version=5.2.2-git
 
 for arg in $*; do

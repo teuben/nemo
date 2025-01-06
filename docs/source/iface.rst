@@ -243,6 +243,8 @@ are both equivalent.
 .. A third interesting shortcut is something new and introduced in version 3.2,
    which allows keyword references using the \% symbol to cut accross programs.
 
+.. _system_keywords:
+
 System Keywords
 ~~~~~~~~~~~~~~~
 

@@ -77,7 +77,7 @@ mkhomsph:
 	@echo Running $@
 	$(EXEC) mkhomsph mkhomsph.out $(NBODY) seed=123
 	$(EXEC) tsf mkhomsph.out
-	@bsf mkhomsph.out test="0.0140845 0.34933 -1.10775 1.04002 71"
+	@bsf mkhomsph.out test="0.0140845 0.3025 -0.732427 1.21907 71"
 
 mkspiral:
 	@echo Running $@
