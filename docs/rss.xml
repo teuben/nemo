@@ -14,6 +14,22 @@
 
 <item>
 <title>
+nemo_4_5_0
+</title>
+<description>
+ (2-jan-2025)
+ NEMO V4.5.0 was released.  Highlights are a final 64bit fix for filestruct items as well as large fits cubes.
+ Also support for falcON V2, although the code itself is not public yet. A number of programs are now used
+ in the LMTOY pipeline.
+</description>
+<link>
+https://teuben.github.io/nemo/whatsnew.html#4_5_0
+</link>
+</item>
+
+
+<item>
+<title>
 nemo_4_4_2
 </title>
 <description>
