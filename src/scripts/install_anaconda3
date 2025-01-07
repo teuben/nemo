@@ -93,6 +93,9 @@ pip3 install --upgrade pip
 pip install bash_kernel
 python -m bash_kernel.install
 
+#    remember how we started
+echo $mc3 > $dir/README.pjt
+
 #    write sourceable shell startup recipes
 echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
