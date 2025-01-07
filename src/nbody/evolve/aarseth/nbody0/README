@@ -33,5 +33,5 @@ Later additions:
 (apr-2021) Noted the name is nbody0h4.f, not nbody0_sja.f - I change the maxnbody
            hardcoded as 50 to 256, e.g. as follows:
 	   cat nbody0_sja.f  | sed 's/50)/256)/g' > nbody0_256.f
-(jan-2025) Retrieved the original as nbody0_sja.f - RIP Sverre.
-           Somehow the 2018 version disappeared?
+(jan-2025) Retrieved the original again as nbody0_sja.f - RIP Sverre.
+           (same as nbody0h4.f except for maximum number of bodies)
