@@ -6,6 +6,7 @@
 #
 # 18-mar-2024  NEMO/PJT original
 # 14-oct-2024  NEMO/PJT - older ones now fail on newer linux versions
+#  6-jan-2024  NEMO/PJT - add 2024.10-1
 
 #--HELP
 # default parameters
@@ -13,8 +14,8 @@
                    # anaconda3 versions available:
 version=2020.07    # 3.8.3
 version=2020.11    # 3.8.5
-version=2021.04    # 3.8.8  failing on U22+
-version=2021.11    # 3.9.8  failing on U22+ - sphinx not working?
+version=2021.04    # 3.8.8  now failing on U22+
+version=2021.11    # 3.9.8  now failing on U22+ - sphinx not working?
 version=2022.05    # 3.9.12 sphinx?
 version=2022.10    # 3.9.13 sphinx
 version=2023.03-0  # 3.10.9
@@ -23,7 +24,7 @@ version=2023.07-2  # 3.11.4
 version=2023.09-0  # 3.11.5
 version=2024.02-1  # 3.11.7
 version=2024.06-1  # 3.12.4
-
+version=2024.10-1  # 3.12.7   6.6G
 
   dir=$(pwd)/anaconda3       # where anaconda will be located
  wget=wget                   # use wgetc is you have my cashing version (wget=curl is also allowed)
@@ -91,6 +92,9 @@ pip3 install --upgrade pip
 #    ensure we have a bash kernel in jupyter notebooks
 pip install bash_kernel
 python -m bash_kernel.install
+
+#    remember how we started
+echo $mc3 > $dir/README.pjt
 
 #    write sourceable shell startup recipes
 echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
