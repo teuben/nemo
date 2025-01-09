@@ -43,7 +43,8 @@
  * V 3.4  12-dec-09   pjt    support the new halfp type for I/O (see also csf)
  *        27-Sep-10   jcl    MINGW32/WINDOWS support
  *   3.5   8-jun-13   pjt    eltcnt type fixed for 64bit so it handles > 2GB
- *   3.6   2-jan-24   pjt    subtle fix for items > 64bit; now using off_t and size_t 
+ *   3.6   2-jan-24   pjt    subtle fix for items > 64bit; now using off_t and size_t
+ *                           note that the removed while() loop can be 2-3 faster then for() when len > 1e5
  *
  *  Although the SWAP test is done on input for every item - for deferred
  *  input it may fail if in the mean time another file was read which was
@@ -93,7 +94,7 @@ void copy_item(stream ostr, stream istr, string tag)
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item: %s with dlen=%d",tag,dlen);    /* yuck */
-	dprintf(0,"copy_item: %ld\n",dlen);
+	dprintf(0,"copy_item: %lu\n",dlen);
 	buf = (byte *) calloc(dlen,1);		/*   get space for a buffer */
 	if (buf == NULL)			/*   and check for error    */
 	    error("copy_item: item %s: not enuf memory", tag);
@@ -141,7 +142,7 @@ void copy_item_cvt(stream ostr, stream istr, string tag, string *cvt)
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item_cvt: %s with dlen=%d",tag,dlen);
 	//PJT
-	dprintf(1,"copy_item_cvt: %ld\n",dlen);	
+	dprintf(1,"copy_item_cvt: %lu\n",dlen);	
 	bufin = (byte *) calloc(dlen,1);	/*   get space for a buffer */
 	if (bufin == NULL)			/*   and check for error    */
 	    error("copy_item_cvt: item %s: not enuf memory", tag);
@@ -731,7 +732,7 @@ string get_string(
 	  dp == NULL || *dp++ == 0 || *dp != 0)	/* and shape of data        */
 	error("get_string: item %s: not plural char", tag);
     dlen = datlen(ipt,0);
-    if(dlen<0) error("get_string: %s with dlen=%ld",tag,dlen);      /* yuck */
+    if(dlen<0) error("get_string: %s with dlen=%lu",tag,dlen);      /* yuck */
     dat = (char *) calloc(dlen,1);        	/* alloc memory for string  */
     if (dat == NULL)				/* did alloc fail?          */
 	error("get_string: item %s: not enuf memory", tag);
@@ -1229,17 +1230,8 @@ local void copydata(
     if (ItemDat(ipt) != NULL) {			/* data already in core?    */
 	src = (char *) ItemDat(ipt) + off;	/*   get pointer to source  */
     	len *= ItemLen(ipt);			/* number of bytes to copy  */
-#if 0
-	//   this while loop will hit through 0, and eventually segfault in the copy
-	//   compiler bug ?
-	//   this pattern happened a few times below, where they've all been converted to the for() loop
-	while (--len >= 0) {			/*   loop copying data      */
-	    *dat++ = *src++;			/*     byte by byte         */
-	}
-#else
-	for (size_t i=0; i<len; i++)
+	for (size_t i=0; i<len; i++)            /* old while() now a for()  */
 	  *dat++ = *src++;
-#endif
     } else {					/* time to read data in     */
 	oldpos = ftello(str);                   /*   save current place     */
 	safeseek(str, ItemPos(ipt) + off, 0);   /*   seek back to data      */
