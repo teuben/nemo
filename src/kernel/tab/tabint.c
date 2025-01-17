@@ -7,6 +7,7 @@
  *      22-feb-23    add xmin,xmax,scale keywords
  *      31-jul-23    add mom=
  *       6-apr-24    cleanup
+ *      17-jan-25    add higher moments 3,4
  */
 
 #include <stdinc.h> 
@@ -26,13 +27,13 @@ string defv[] = {
   "normalize=f\n    Normalize integral",
   "cumulative=f\n   Show accumulation of integral",
   "scale=1\n        Scale factor to apply to integral",
-  "mom=0\n          0=flux 1=weighted mean 2=dispersion",
-  "VERSION=0.9\n    6-apr-2024 PJT",
+  "mom=0\n          0=flux 1=weighted mean 2=dispersion 3=skewness 4=kurtosis",
+  "VERSION=1.0\n    17-jan-2025 PJT",
   NULL,
 
 };
 
-string usage="integrate a (sorted) table";
+string usage="integrate or compute moments of a (sorted) table";
 
 
 extern int minmax(int, real *, real *, real *);
@@ -155,7 +156,7 @@ void nemo_main()
       }
       dprintf(1,"dx min/max: %g %g\n",dxmin,dxmax);
     } else {
-      double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, retval=0.0;
+      double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, sum3 = 0.0, sum4 = 0.0, retval=0.0;
       
       for (i=0; i<n; i++) {
 	sum0 +=  ydat[i];
@@ -164,12 +165,25 @@ void nemo_main()
       }
       sum1 /= sum0;
       sum2 /= sum0;
+      dprintf(1,"sum0=%g\n",      sum0);
       dprintf(1,"sum1/sum0=%g\n", sum1);
       dprintf(1,"sum2/sum0=%g\n", sum2);
       sum2 = sqrt(sum2 - sum1*sum1);
       dprintf(1,"dispersion=%g\n", sum2);
       if (mom==1) retval=sum1;
       if (mom==2) retval=sum2;
+      if (mom==3) {
+	sum3 = 0.0;
+	for (i=0; i<n; i++)
+	  sum3 += ydat[i]*qbe(xdat[i]-sum1);
+	retval = sum3/qbe(sum2)/sum0;
+      }
+      if (mom==4) {
+	sum4 = 0.0;
+	for (i=0; i<n; i++)
+	  sum4 += ydat[i]*sqr(sqr(xdat[i]-sum1));
+	retval = sum4/sqr(sqr(sum2))/sum0;
+      }
       printf("%g\n",retval);
       return;
     }
