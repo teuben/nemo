@@ -156,6 +156,7 @@ void nemo_main()
       }
       dprintf(1,"dx min/max: %g %g\n",dxmin,dxmax);
     } else {
+      // this is for mom > 0
       double sum0 = 0.0, sum1 = 0.0, sum2 = 0.0, sum3 = 0.0, sum4 = 0.0, retval=0.0;
       
       for (i=0; i<n; i++) {
@@ -165,6 +166,7 @@ void nemo_main()
       }
       sum1 /= sum0;
       sum2 /= sum0;
+      dprintf(1,"dx=%g\n", xdat[1]-xdat[0]);
       dprintf(1,"sum0=%g\n",      sum0);
       dprintf(1,"sum1/sum0=%g\n", sum1);
       dprintf(1,"sum2/sum0=%g\n", sum2);
@@ -172,17 +174,20 @@ void nemo_main()
       dprintf(1,"dispersion=%g\n", sum2);
       if (mom==1) retval=sum1;
       if (mom==2) retval=sum2;
+      if (mom>2) warning("new unchecked feature");
       if (mom==3) {
+	// skewness is 0 for symmetric
 	sum3 = 0.0;
 	for (i=0; i<n; i++)
 	  sum3 += ydat[i]*qbe(xdat[i]-sum1);
 	retval = sum3/qbe(sum2)/sum0;
       }
       if (mom==4) {
+	// kurtosis is 0 for gaussian,   < 0 
 	sum4 = 0.0;
 	for (i=0; i<n; i++)
 	  sum4 += ydat[i]*sqr(sqr(xdat[i]-sum1));
-	retval = sum4/sqr(sqr(sum2))/sum0;
+	retval = -3.0 + sum4/sqr(sqr(sum2))/sum0;
       }
       printf("%g\n",retval);
       return;
