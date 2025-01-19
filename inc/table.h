@@ -58,6 +58,7 @@ typedef struct {
 
   string *comments; // pointer to 'nh' (header/comment) lines
   string *lines;    // pointer to 'nr' lines (depends on mode)   lines[0], lines[1], ....
+  char   separ;     // optional enforced column separator
 
   size_t linelen;   // see Posix getline(3)
   char  *line;      // see Posix getline(3)
@@ -69,6 +70,7 @@ table  *table_open(stream instr, int mode);
 table  *table_open1(stream instr, int mode, int nlines);
 table  *table_cat(table *tp1, table *tp2, int mode);
 void    table_close(tableptr tptr);
+void    table_set(int mode, void *value);
 string  table_line(tableptr tptr);
 ssize_t table_line1(tableptr tptr, char **line, size_t *linelen, int newline);
 size_t  table_nrows(tableptr tprt);
