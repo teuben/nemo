@@ -119,8 +119,9 @@ nbody0.o:  nbody0.f nmax.inc
 nbody0_ff:  main.f nbodyio.f nmax.inc nbody0.f
 	$(FC) $(FFLAGS) -o nbody0_ff main.f nbodyio.f nbody0.f
 
+#   gnu compiler -std=legacy
 nbody0_bt87:  nbody0_bt87.f
-	$(FC) $(FFLAGS) -o nbody0_bt87 nbody0_bt87.f
+	$(FC) -std=legacy -o nbody0_bt87 nbody0_bt87.f
 
 #  hermite code
 
