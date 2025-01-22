@@ -185,6 +185,14 @@ the input from standard input, the first line contains the usual
 by \fBN\fP lines of m,x,y,z,vx,vy,vz for each of the particles each.
 At some point in the future we may provide a wrapper for this. 
 
+.SH "NBODY0_BT87"
+The original NBODY code from Binney & Tremaine's 1987 book is included here as
+\fBnbody0_bt87.f\fP, in all its 162 lines of glory.
+We added some indentation and variables are in lower
+case to help the debugger. It still compiled in 2025 with the
+default gfortran compiler options, though which a fair number of warnings about
+deleted features. With the option \fB-std=legacy\fP it passes without warnings.
+
 .SH "FILES"
 .nf
 .ta +4.5i
