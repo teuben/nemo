@@ -149,7 +149,7 @@ between them there is unavoidable duplication, but here they are:
 * all unix style man pages for all levels: https://teuben.github.io/nemo/man_html/index1.html
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * AAS 443 [iPoster](https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
-* an installation example in bash jupyter notebook style: https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
+* an installation example in bash jupyter notebook style: https://github.com/teuben/nemo/blob/master/scripts/notebooks/installing.ipynb
 * contributing to NEMO: https://github.com/teuben/nemo/blob/master/CONTRIBUTING.md
 
 ## Citation
