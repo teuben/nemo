@@ -8,6 +8,7 @@ include $(NEMOLIB)/makedefs
 #			made default flags -O
 #	 9-mar-98	both include files now created via makefile
 #        6-jan-00	fixes for F77_FUNC
+#       22-jan-2025     add the very orginal BT87 of NBODY0
 
 #CFLAGS = -O
 #FFLAGS = -O
@@ -31,7 +32,7 @@ SRC = nbody0.f nbodyio.c nbodyio.f main.c main.f \
       fdefs.inc nmax.inc \
       nbody00.c nbody0.h \
       Makefile Testfile README
-BIN = nbody0 nbody00 nbody0_ff nbody0h4
+BIN = nbody0 nbody00 nbody0_ff nbody0_bt87 nbody0h4
 BINFILES = $(BIN)
 MAN1= nbody0.1
 MAN = $(MAN1)
@@ -117,6 +118,10 @@ nbody0.o:  nbody0.f nmax.inc
 
 nbody0_ff:  main.f nbodyio.f nmax.inc nbody0.f
 	$(FC) $(FFLAGS) -o nbody0_ff main.f nbodyio.f nbody0.f
+
+#   gnu compiler -std=legacy
+nbody0_bt87:  nbody0_bt87.f
+	$(FC) -std=legacy -o nbody0_bt87 nbody0_bt87.f
 
 #  hermite code
 
