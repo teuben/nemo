@@ -60,7 +60,8 @@ names for different linux distros that should lead to success.
 
 There are a few different ways to install NEMO.
 We cover an annotated example in this
-[bash notebook](example.ipynb)
+[bash notebook](example.ipynb) or the updated
+[bash notebook](scripts/notebooks/installing.ipynb).
 And here is a simple
 example that works most of the time on most Linux (including WSL) distros:
 
@@ -71,7 +72,8 @@ example that works most of the time on most Linux (including WSL) distros:
          source nemo_start.sh
 
 If you plan to modify code and submit pull requests, the github CLI is recommended,
-though you can of course also clone the upstream manually (see also [CONTRIBUTING.md](CONTRIBUTING.md)):
+though you can of course also clone the upstream manually
+(see also [CONTRIBUTING.md](CONTRIBUTING.md)):
 
          gh repo fork https://github.com/teuben/nemo
 
@@ -80,6 +82,8 @@ After installation, rebuilding NEMO to ensure you have all updates can be done a
          cd $NEMO
          git pull
          make rebuild
+
+this may be overkill for some situations, but gets the job done.
 
 ### python
 
