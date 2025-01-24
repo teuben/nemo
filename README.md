@@ -60,8 +60,10 @@ names for different linux distros that should lead to success.
 
 There are a few different ways to install NEMO.
 We cover an annotated example in this
-[bash notebook](example.ipynb) or the updated
-[bash notebook](scripts/notebooks/installing.ipynb).
+[bash notebook](scripts/notebooks/installing.ipynb)
+or the deprecated
+[bash notebook](example.ipynb).
+
 And here is a simple
 example that works most of the time on most Linux (including WSL) distros:
 
