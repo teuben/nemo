@@ -6,6 +6,7 @@ WGET = wget
 
 URL1 = ftp://ftp.ast.cam.ac.uk/pub/sverre/nbody6/nbody6.tar.gz
 URL2 = https://github.com/nbodyx/Nbody6ppGPU
+URL3 = https://ftp.ast.cam.ac.uk/pub/sverre/nbody5/nbody5.tar.Z
 
 help:
 	@echo "install:           install NEMOBIN/gravidy"
@@ -19,7 +20,12 @@ install:	install_nbody6 install_nbody6++ install_nbody6++.avx
 
 nbody6:
 	$(WGET) $(URL1)
-	(mkdir nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
+	(mkdir -p nbody6 ; cd nbody6; tar zxf ../nbody6.tar.gz)
+
+nbody5:
+	$(WGET) $(URL3)
+	(mkdir -p nbody5 ; cd nbody5; tar zxf ../nbody5.tar.Z)
+
 
 
 nbody6++: Nbody6ppGPU
@@ -32,6 +38,11 @@ Nbody6ppGPU:
 install_nbody6:  nbody6
 	(cd nbody6/GPU2 ;  make clean; make sse ; cp run/nbody7.sse $(NEMOBIN))
 	(cd nbody6/Ncode ; make clean; make     ; cp nbody6         $(NEMOBIN))
+
+install_nbody5:  nbody5
+	(cd nbody5/Chain  ; make ; cp *.o ../Ncode)
+	(cd nbody5/Nchain ; make ; cp *.o ../Ncode)
+	(cd nbody5/Ncode  ; make ; cp nbody5 $(NEMOBIN))
 
 # just an example on a simple laptop
 # the avx option may not work in some XEON's, watch out for the outut of configure

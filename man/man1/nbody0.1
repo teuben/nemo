@@ -1,13 +1,19 @@
-.TH NBODY0 1NEMO "9 February 2019"
+.TH NBODY0 1NEMO "19 January 2025"
 
 .SH "NAME"
 nbody0, nbody00, nbody0h4 - direct summation Aarseth N-body integrator
 
 .SH "SYNOPSIS"
-nbody0 in=snap_in out=snap_out [keyword=value ...]
+.nf
+nbody0  in=snap_in out=snap_out [keyword=value ...]
+nbody00 in=snap_in out=snap_out [keyword=value ...]
+nbody0_ff < input > output
+nbody0h4 < input4 > output4
+.fi
 
 .SH "DESCRIPTION"
-\fBnbody0\fP is the NEMO adaptation of version 0 (the \fIMicky Mouse\fP version)
+\fBnbody0\fP (and \fBnbody00\fP)
+is the NEMO adaptation of version 0 (the \fIMicky Mouse\fP version)
 of Aarseth's N-body integrator, as published in Appendix 4B of Binney & Tremaine (1987).
 It is a direct N-body integrator, \fIi.e.\fP for
 each particle it computes the force due to all other N-1 particles,
@@ -35,9 +41,10 @@ one part in 10000 over one crossing time, in the absence of close
 encounters.
 .PP
 \fBnbody00\fP is the C version of \fBnbody0\fP, 
-based on the f2c translated code (and hence will look odd and ugly in places).
+based on the f2c translated FORTRAN code (and hence will look odd and ugly in places).
 It has more debug output (debug=1 and higher) and also fixes problems with
-orbits like the Figure8 orbit (see BUGS below).
+orbits like the Figure8 orbit (see BUGS below), but tends to be a bit slower
+than the FORTRAN code after all.
 
 .SH "PARAMETERS"
 The following parameters are recognized in any order when the keyword
@@ -46,29 +53,39 @@ is also given
 \fBin=\fIin_name\fP
 Input file in \fIsnapshot(5NEMO)\fP format. Depending on how \fBnbody0\fP
 was compiled, other input formats are supported.
-[no default]. 
+.br
+[no default]
 .TP
 \fBout=\fIout_name\fP
-Output file in snapshot format [no default].
+Output file in snapshot format
+.br
+[no default]
 .TP
 \fBeta=\fIvalue\fP
 Accurracy parameter, which automatically determines the integration step. 
 For small enough values of \fBdeltat\fP the Heisenberg principle
 applies and the accuracy is determined by the integration
-step itself! [0.02].
+step itself!
+.br
+[0.02]
 .TP
 \fBdeltat=\fIvalue\fP
 Time interval of a major output. Although the timestep is determined from
 \fBeta\fP, the accurracy parameter, for small enough values of
 \fBdeltat=\fP this parameter will determine the integration step, and
 hence accuracy.
-[Default: 0.25].
+.br
+[Default: 0.25]
 .TP
 \fBtcrit=\fIvalue\fP
-Final integration time [2.0].
+Final integration time
+.br
+[2.0]
 .TP
 \fBeps=\fP\fIvalue\fP
-Gravitational softening length [0.05].
+Gravitational softening length
+.br
+[0.05]
 .TP
 \fBreset=t|f\fP
 Selects if the integration time of the next particle 
@@ -78,6 +95,7 @@ requested output time if that preceded the integration time
 This is highly recommended,
 as for high output frequencies (small \fBdeltat=\fP cf. the 
 \fIeta\fP-derived timestep \fIdt\fP)
+.br
 [t].
 .TP
 \fBf3dot=t|f\fP
@@ -89,17 +107,21 @@ F3DOT (and also FDOT) are used, which mimic the behavior
 of \fInbody1(1NEMO)\fP. This keyword was introduced to
 integrate nice orbits like the Figure8 orbit, in which
 both F and FDOT were 0 for the central particle.
+.br
 [f].
 .TP
 \fBoptions=\fP\fBstep\fP
 Miscellaneous control options, specified as a comma separated list of
-keywords. Currently implemented are: \fBstep\fP, outputs the current
+keywords. Currently implemented are:
+.br
+\fBstep\fP, outputs the current
 timestep per particle  in the \fIAux\fP array of 
 a \fIsnapshot(5NEMO)\fP.
+.br
 Default: none.
 
 .SH "LIMITATIONS"
-The code has a hardcoded maximum number of particles in the fortran
+The code has a hardcoded maximum number of particles in the FORTRAN
 and C code (File: \fInmax.h\fP), change the relevant PARAMETER statement 
 to whatever is required. Using NEMO install the Makefile
 macro NMAX can also be used to do this automatically and 
@@ -119,7 +141,7 @@ A side-effect of the variable and particle-unique timesteps is that
 the final snapshot will not be exactly identical for two runs
 with different choices of \fBdeltat\fP.
 .PP
-In order to save time, all calculations in the fortran code (nbody0.f)
+In order to save time, all calculations in the FORTRAN code (nbody0.f)
 can be done in single precision.  A different version of nbody0.f is
 needed in this case. See code comments labeled ``\fISED\fP''.
 .PP
@@ -144,13 +166,13 @@ in this case the expression will compute as exactly 0.
 A total of order \fI600.NMAX\fP bytes is needed, for a given
 maximum of \fINMAX\fP particles. This breaks down as follows:
 .PP
-The \fBFORTRAN\fP I/O code uses \fI10.NMAX\fP double precision
+The FORTRAN I/O code uses \fI10.NMAX\fP double precision
 and \fI20.NMAX\fP real storage units for a maximum compiled
 number of \fINMAX\fP particles. On most machines this adds
 up to \fI160.NMAX\fP bytes.
 .PP
 The \fBC\fP I/O code allocates space dynamically; and through limitations
-of the fortran code, a maximum of \fI100.NMAX\fP double's are needed,
+of the FORTRAN code, a maximum of \fI100.NMAX\fP double's are needed,
 which means \fI400.NMAX\fP bytes.
 
 .SH "AUTHOR"
@@ -174,16 +196,17 @@ nbody7		... secret (Sverre's words)
 .fi
 
 .SH "NBODY0H4"
-On Sverre's CODES site, he also presents \fBnbody0\fP,
-a simple \fICompact fourth-order Hermite block-step code\fP.
+On Sverre's CODES site, he also presents \fBnbody0\fP, labeled as 
+a simple \fICompact fourth-order Hermite block-step code\fP, and not to be confused
+with our nbody0 here.
 We include it here as \fBnbody0h4\fP. This code has an unusual interface, in that it reads
 the input from standard input, the first line contains the usual
 .nf
       N, ETA, DELTAT, TCRIT, EPS2
 .fi
 (though note the softening EPS is entered in the square value). This is followed
-by \fBN\fP lines of m,x,y,z,vx,vy,vz for each of the particles each.
-At some point in the future we may provide a wrapper for this. 
+by \fBN\fP lines of m,x,y,z,vx,vy,vz for each of the particles.
+At some point in the future we may provide a wrapper for this as well.
 
 .SH "NBODY0_BT87"
 The original NBODY code from Binney & Tremaine's 1987 book is included here as
@@ -195,9 +218,9 @@ deleted features. With the option \fB-std=legacy\fP it passes without warnings.
 
 .SH "FILES"
 .nf
-.ta +4.5i
+.ta +4i
 NEMO/src/nbody/evolve/aarseth/nbody0	official source code within NEMO
-NEMO/usr/aarseth/                      	SJA's other nbodyX versions (not all exported)
+NEMO/usr/aarseth/			SJA's other nbodyX versions (not all exported)
 .fi
 
 .SH "SEE ALSO"
@@ -223,7 +246,7 @@ S.J. Aarseth, 2003,
 .SH "HISTORY"
 .nf
 .ta +1.25i +4.5i
-30-jun-89	V1.0 created + NEMO interfaces to fortran source	PJT
+30-jun-89	V1.0 created + NEMO interfaces to FORTRAN source	PJT
 3-jul-89	V1.1 mods to f2c interface, name of keywords       	PJT
 24-jan-90	V1.2 all in double precision                     	PJT
 15-nov-91	fixed up pure nbody0_ff version                 	PJT

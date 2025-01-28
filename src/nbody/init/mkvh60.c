@@ -23,32 +23,29 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "seed=0\n       NEMO's Random number seed (if used)",
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=0.2\n  19-apr-2021 PJT",
+    "VERSION=0.3\n  8-jan-2025 PJT",
     NULL,
 };
 
 string usage = "create a uniform sphere of equal mass stars using von Hoerner's 1960 recipe";
 
-string cvsid="$Id$";
 
-
-local real virial=1, power=0;
+local real virial=1;
 local bool zerocm;
-local bool exact = TRUE;
 local bool Q57;
 
 local Body *btab;
 local int nbody;
 
-extern double xrandom(double,double), grandom(double,double);
 extern double ran_svh57(double);
 
-void writegalaxy(string name, string headline);
-void mksphere(void);
-void centersnap(body *btab, int nb);
-void snapvscale(body *btab, int nb, double vscale);
-double get_vr(body *btab, int nb);
-double get_ek(Body *btab, int nb);
+
+local void mksphere(void);
+local void writegalaxy(string name, string headline);
+local void centersnap(body *btab, int nb);
+local void snapvscale(body *btab, int nb, double vscale);
+local double get_vr(body *btab, int nb);
+local double get_ek(Body *btab, int nb);
 
 void nemo_main(void)
 {
@@ -62,7 +59,8 @@ void nemo_main(void)
     if (Q57) {
       seed57 = getrparam("seed57");
       dprintf(0,"von Hoerner seed57=%g first ran=%g\n",seed57,ran_svh57(seed57));
-    }
+    } else
+      dprintf(0,"regular seed=%d\n",seed);
     mksphere();
     writegalaxy(getparam("out"), getparam("headline"));
 }
@@ -71,7 +69,7 @@ void nemo_main(void)
  * WRITEGALAXY: write galaxy model to output.
  */
 
-void writegalaxy(string name, string headline)
+local void writegalaxy(string name, string headline)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -89,11 +87,10 @@ void writegalaxy(string name, string headline)
  * MKSPHERE: homogeneous sphere
  */
 
-void mksphere(void)
+local void mksphere(void)
 {
     Body *bp;
-    real r_i, v_i, theta_i, phi_i, mass_i, sigma = 0.0;
-    real sinp, cosp, sint, cost;
+    real r_i, theta_i, phi_i, mass_i, sigma = 0.0;
     real rmax = 1.0;
     real ot = 1.0/3.0;
     int i;
@@ -161,7 +158,7 @@ void mksphere(void)
 }
 
 
-void centersnap(Body *btab, int nb)
+local void centersnap(Body *btab, int nb)
 {
     real mtot;
     vector cmphase[2], tmp;
@@ -185,10 +182,8 @@ void centersnap(Body *btab, int nb)
     }
 }
 
-void snapvscale(Body *btab, int nb, real vscale)
+local void snapvscale(Body *btab, int nb, real vscale)
 {
-    real mtot;
-    vector cmphase[2], tmp;
     Body *bp;
 
     dprintf(0,"snapvscale: %g\n",vscale);
@@ -197,7 +192,7 @@ void snapvscale(Body *btab, int nb, real vscale)
       SMULVS(Phase(bp)[1], vscale);
 }
 
-double get_vr(Body *btab, int nb)
+local double get_vr(Body *btab, int nb)
 {
   real sum;
   Body *bp, *qp;
@@ -212,7 +207,7 @@ double get_vr(Body *btab, int nb)
   return 1.0/sum;
 }
 
-double get_ek(Body *btab, int nb)
+local double get_ek(Body *btab, int nb)
 {
   real sum;
   Body *bp;

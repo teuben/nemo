@@ -36,7 +36,7 @@ BIN = nbody0 nbody00 nbody0_ff nbody0_bt87 nbody0h4
 BINFILES = $(BIN)
 MAN1= nbody0.1
 MAN = $(MAN1)
-TAR = $(SRC) $(MAN) nbody0.man
+TAR = $(SRC) $(MAN) nbody0.man nbody0.pdf
 help:
 	@echo "Aarseth programs - from Binney and Tremaine"
 	@echo "Various Fortran and C versions available"
@@ -136,18 +136,20 @@ double:
 	@(cd tmp;tar cvf ../double.tar *;cd ..;rm -r tmp)
 	@echo All done, file double.tar created
 
-tar: nbody0.man
+tar: nbody0.man nbody0.pdf
+	@cp $(NEMO)/man/man1/nbody0.1 .
 	@tar cvf nbody0.tar $(TAR)
-	@echo Testing if your man page is not out of date....
-	@diff nbody0.1 $(NEMO)/man/man1
+
+nbody0.man: nbody0.1
+	groff -M$(NEMO)/man -Tascii -man nbody0.1 > nbody0.man
+
+nbody0.pdf: nbody0.1
+	groff -man -Tpdf nbody0.1 > nbody0.pdf
 
 # this is only for the NEMO maintainer
 
 pjt:
 	gzip nbody0.tar; mv nbody0.tar.gz /home/ftp/progs/nemo
-
-nbody0.man: nbody0.1
-	groff -M$(NEMO)/man -Tascii -man nbody0.1 > nbody0.man
 
 
 nmax:	.dummy
