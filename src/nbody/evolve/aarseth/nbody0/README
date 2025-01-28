@@ -34,5 +34,5 @@ Later additions:
 	   cat nbody0_sja.f  | sed 's/50)/256)/g' > nbody0_256.f
 (jan-2025) Retrieved the original again as nbody0_sja.f - RIP Sverre.
            (same as nbody0h4.f except for maximum number of bodies)
-           The BT87 code is preserved as nbody0_bt87.f, exactly all 262 lines,
+           The BT87 code is preserved as nbody0_bt87.f, exactly all 162 lines,
 	   but note Sverre never archived this version.
