@@ -4,19 +4,18 @@ patch/experiment with something more recent, here are the
 recipes:
 
 
-unsio:   (see also: http://projets.lam.fr/projects/unsio/)
-`   git clone https://gitlab.lam.fr/jclamber/unsio
+unsio:   (see also: https://simutools.docs.lam.fr/unsio/)
+`   git clone https://gitlab.lam.fr/simutools/unsio/
     mknemo unsio
     
-python-unsio:
+python wrapper for unsio: (see also : https://pypi.org/project/unsio/)
     To read/write in NEMO format or Gadget1,2,3 or RAMSES 
     install unsio python wrapper with a simple command
     
-    pip install python-unsio --user
+    pip install unsio --user
     
     and visit :
-    https://projets.lam.fr/projects/unsio/wiki/PythonReadData  (to read  snapshot)
-    https://projets.lam.fr/projects/unsio/wiki/PythonWriteData (to write snapshot)
+    https://simutools.docs.lam.fr/unsio/Guide/python_guide_reading/
 
 glnemo2: (see also: http://projets.lam.fr/projects/glnemo2)
     git clone https://gitlab.lam.fr/jclamber/glnemo2.git
@@ -25,3 +24,7 @@ glnemo2: (see also: http://projets.lam.fr/projects/glnemo2)
 uns_projects (see also: https://projets.lam.fr/projects/uns_projects)
     git clone https://gitlab.lam.fr/jclamber/uns_projects
     mknemo uns_projects
+
+python wrapper for falcON and unsio tools (see https://pypi.org/project/python-unsiotools/)
+    pip install python-unsiotools -U
+    
