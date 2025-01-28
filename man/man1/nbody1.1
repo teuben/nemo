@@ -1,9 +1,12 @@
-.TH NBODY1 1NEMO "9 February 2019"
-.SH NAME
+.TH NBODY1 1NEMO "20 January 2025"
+
+.SH "NAME"
 nbody1 - direct summation N-body integrator with variable timestep
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBnbody1  <  parameter_file > log_file\fP
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fInbody1\fP is a direct N-body integrator, \fIi.e.\fP for
 each particle the force due to all other N-1 particles is calculated,
 hence the computational time grows approximately as N*N.
@@ -16,7 +19,8 @@ This version is the formal release of the toy code, as published
 in Binney & Tremaine (1987)(see also \fInbody0(1NEMO)\fP), and
 was written by Sverre Aarseth.
 .PP
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The input parameters are given in a small ASCII \fBparameter_file\fP
 (which can also be read from standard input) in the 
 order as detailed below
@@ -144,7 +148,8 @@ Eccentricity of binary.
  15  Code units for tcrit/deltat
 .fi
 .br
-.SH INPUT ORDER
+
+.SH "INPUT ORDER"
 The order of the input lines is very important, 
 and can depend on previous lines. Here's
 a sketch that hopefully helps you in creating input parameter
@@ -191,7 +196,8 @@ else
     endif
 endif
 .fi
-.SH BENCHMARK
+
+.SH "BENCHMARK"
 The following machines have been used to time this routine on the standard
 benchmark as described in the PARAMETERS section before:
 .nf
@@ -214,21 +220,24 @@ SS2 4/...                    	9.3
 SS1 4/60                   	20.6
 SUN 3/60                    	71.7              
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Sverre Aarseth
-.SH FILES
+
+.SH "FILES"
 .nf
-.ta +0.5i
+.ta +2qi
 fort.1	common block restart dump file (option 1)
 fort.2	common block restart dump file (option 2)
 OUT3	output file (option 3)
 fort.4	initial conditions input or output file  (option 4)
 fort.7	formatted frame files (option 7)
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 u3tos(1NEMO), u4tos(1NEMO), stou4(1NEMO)
 .PP
-Website of all codes: https://www.ast.cam.ac.uk/~sverre/web/pages/nbody.htm
+Website of all codes: https://people.ast.cam.ac.uk/~sverre/web/pages/nbody.htm
 .PP
 Aarseth, S.J. IAU colloquium 16, 
 \fI The Gravitational N-Body Problem\fP, ed. M. Lecar, p.373.
@@ -242,9 +251,10 @@ NBODY0 source code in Binney & Tremaine's \fIGalactic Dynamics\fP
 .PP
 \fISmall-N Systems\fP by S.J. Aarseth in: \fIXXX\fP
 eds. Benz, Barnes and XXX (\fIto be published\fP, 1994)
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 6-apr-93	manual page written	PJT
 9-apr-93	unit.4 I/O now full REAL*4	PJT/SJA
 25-may-93	man	PJT

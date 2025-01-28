@@ -1,13 +1,18 @@
 .TH NBODY5 1NEMO "23 May 1995"
-.SH NAME
-nbody5 - Regularized AC N-body code with triple & binary collisions.
-.SH SYNOPSIS
+
+.SH "NAME"
+nbody5 - Regularized AC N-body code with triple & binary collisions
+
+.SH "SYNOPSIS"
 \fBnbody5  <  parameter_file > log_file\fP
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fInbody5\fP is a regularized Ahmed-Cohen N-body code with 
 triple & binary collisions.
 .PP
-.SH PARAMETERS
+Maintenance has stopped a while back, \fInbody6(1NEMO)\fP is the recommended replacement.
+
+.SH "PARAMETERS"
 The input parameters are given in a small ASCII \fBparameter_file\fP
 (which can also be read from standard input) in the 
 order as detailed below
@@ -16,7 +21,7 @@ Example input \fBparameter_file\fP for the standard
 internal benchmark
 (a 100-body problem integrated for 20 crossing times):
 .nf
-.ta +3i
+.ta +4.5i
 1 1000.0                            	\fBKSTART TCOMP\fP
 100 5 10 30 35 1                    	\fBN NFIX NCRIT NRAND NNBMAX NRUN\fP
 0.02 0.03 0.4 1.0 1.0 20.0 5.0e-05 1.0 0.6	\fBETAI ETAR RS0 DTADJ DELTAT TCRIT QE RBAR ZMBAR\fP
@@ -31,7 +36,7 @@ internal benchmark
 .fi
 (for comparison the original NBODY1 default parameter set:)
 .nf
-.ta +3i
+.ta +4.5i
 
 1 1.0                             	\fBKSTART TCOMP\fP
 25 1 10 1                           	\fBN NFIX NRAND NRUN\fP
@@ -176,7 +181,8 @@ Eccentricity of binary.
  15  --read but not used--
 .fi
 .br
-.SH INPUT ORDER
+
+.SH "INPUT ORDER"
 The order of the input lines is very important, 
 and can depend on previous lines. Here's
 a sketch that hopefully helps you in creating input parameter
@@ -223,7 +229,12 @@ else
     endif
 endif
 .fi
-.SH BENCHMARK
+
+.SH "CAVEAT"
+The code NBODY5 has been used frequently but is no longer updated.
+It is therefore recommended to use NBODY6 instead.
+
+.SH "BENCHMARK"
 The above benchmark 100-body 20 crossing time experiment takes:
 .nf
 .ta +2i +i
@@ -231,8 +242,10 @@ The above benchmark 100-body 20 crossing time experiment takes:
 sparc 10/30 (bootes)      	250"	-O
 sparc 20/50? (phoenix)      	 90"	-O
 sparc 20/50? (phoenix)      	 96"!!	-O4 -libmil -cg92 (bizarre!)
+Ultra 7 155H (laptop)		0.22	-O3 (default; gfortran 11.4.0)
 .fi
-.SH NEMO
+
+.SH "NEMO"
 For NEMO the following modifications would have to be made in order
 for other programs to work:
 .TP 20
@@ -241,13 +254,22 @@ The INTEGER*2 NAME(NMAX) array, defined in common5.h should not be
 output to OUT3, instead a local INTEGER NAMEO(NMAX) is used for this.
 This in order for \fIu3tos(1NEMO)\fP to work.
 .TP
-xxx
-Various as yet undocumented changes by pjtl (and es).
-.SH AUTHOR
-Sverre Aarseth - sverre@mail.ast.cam.ac.uk
-.SH FILES
+\fBNcode/roche.f\P the MAX() function in the line
 .nf
-.ta +0.5i
+     KT = MAX(2.001*STEP(I1)/DT,1)
+.fi
+needs to have a real argument, thus 1.0, not 1
+.TP
+Various as yet undocumented changes by pjt (and es).
+.TP
+It seem the u1tos tool has disappeared while moving to CVS.
+
+.SH "AUTHOR"
+Sverre Aarseth - sverre@mail.ast.cam.ac.uk
+
+.SH "FILES"
+.nf
+.ta +0.9i
 fort.1	common block restart dump file (option 1)
 fort.2	common block restart dump file (option 2)
 OUT3	output file (option 3)
@@ -257,7 +279,8 @@ OUT9	???
 ESC	ascii file containing the times of each escaper
 STOP	control file, when exists, program will prematurely stop.
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 u1tos(1NEMO), u3tos(1NEMO), u4tos(1NEMO), stou4(1NEMO)
 .PP
 \fIDirect Methods for N-Body
@@ -270,8 +293,12 @@ NBODY0 source code in Binney & Tremaine's \fIGalactic Dynamics\fP
 .PP
 \fISmall-N Systems\fP by S.J. Aarseth in: \fIXXX\fP
 eds. Benz, Barnes and XXX (\fIto be published\fP, 1994)
-.SH HISTORY
+.PP
+https://ftp.ast.cam.ac.uk/pub/sverre/nbody5/nbody5.tar.Z (4-apr-2004 version)
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 22-may-95	manual page written	PJT
+19-jan-2024	format fix	PJT
 .fi
