@@ -139,13 +139,11 @@ string defv[] = {
     "format=%g\n      Format used for fort.10 input conditions if in= used",
     "KZ#=\n           [indexed] Override some kz= keywords",
 
-    "VERSION=0.6b\n   4-jun-2021 PJT",
+    "VERSION=0.7\n    8-jan-2024 PJT",
     NULL,
 };
 
 string usage="Hermite N-body code";
-
-string cvsid="$Id$";
 
 #define KZ_MAX  40
 
@@ -157,10 +155,10 @@ string cvsid="$Id$";
 
 void nemo_main(void)
 {
-  int nbody, nfix, ncrit, nrand, nnbmax, nrun, kstart, gpid, nbin0, n2;
-  real eta, dtadj, deltat, tcrit, qe, eps, tcomp;
-  int k, nkz, kz[KZ_MAX], KZ[KZ_MAX];
-  int maxidx, bits;
+  int nbody=0, nfix, ncrit, nrand, nrun, kstart, gpid, nbin0, n2;
+  real eta, dtadj, deltat, tcrit, qe, tcomp;
+  int k, nkz, kz[KZ_MAX];
+  int  bits;
   real dtmin,rmin,etau,eclose,gmin,gmax, tsnap;
   real alpha, body1, bodyn, zmet, epoch0, dtplot;
   real q, rbar, zmbar;
@@ -171,7 +169,6 @@ void nemo_main(void)
   string parfile = "nbody4.in";
   string rundir = getparam("outdir");
   string fmt = getparam("format");
-  string infile;
   char dname[256], runcmd[256], fmt7[256];
   stream datstr, histr, instr, outstr;
 
@@ -256,8 +253,6 @@ void nemo_main(void)
      by lack of Cambridge time 
   */
 
-
-
   run_mkdir(rundir);
 
   sprintf(dname,"%s/%s",rundir,parfile);
@@ -312,6 +307,7 @@ void nemo_main(void)
 
     if (hasvalue("in")) {
 #if 0
+      string infile;
       dprintf(0,"Using stou4 to convert data for nbody4\n");
       infile = getparam("in");
       if (*infile == '-') {           /* do something special for pipes */
