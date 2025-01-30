@@ -32,7 +32,7 @@
 #include <snapshot/put_snap.c>
 
 #include <bodytrans.h>
-
+#include <timers.h>
 
 string defv[] = {
     "in=???\n		      input (snapshot) file",
@@ -47,7 +47,7 @@ string defv[] = {
     "ccd=\n                   Input CCD with mapvalues that represent mass",
     "norm=\n                  Normalization value for the total mass (if used)",
     "aux=f\n                  Store in Aux instead?",
-    "VERSION=2.5\n            22-dec-2024 PJT",
+    "VERSION=2.5a\n           30-jan-2025 PJT",
     NULL,
 };
 
@@ -59,7 +59,7 @@ extern real_proc getrfunc(string , string , string , int *);
 void nemo_main(void)
 {
     stream instr, inmassstr, outstr, ccdstr;
-    real   tsnap, tsnapmass, mass_star, mtot, mrange[2], norm;
+    real   tsnap, tsnapmass, mtot, mrange[2], norm;
     real   xpos, ypos, xmin, ymin, idx, idy;
     Body  *btab = NULL, *bp;
     Body  *bmasstab = NULL, *bmassp;
@@ -109,6 +109,7 @@ void nemo_main(void)
     	error("One of: mass=, massname=, inmass=, ccd= must be given");
     outstr = stropen(getparam("out"), "w");
     seed = init_xrandom(getparam("seed"));
+    dprintf(1,"seed=%d\n",seed);
     Qnorm = hasvalue("norm");
     if (Qnorm) norm = getdparam("norm");
 
