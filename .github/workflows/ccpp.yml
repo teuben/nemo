@@ -5,9 +5,10 @@ on: [push]
 jobs:
   build:
 
-    # https://github.com/actions/virtual-environments/blob/main/images/linux/Ubuntu2004-README.md
+    # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2004-Readme.md
+    # https://github.com/actions/runner-images/blob/main/images/ubuntu/Ubuntu2404-Readme.md
     # runs-on: ubuntu-latestq
-    runs-on: ubuntu-22.04 
+    runs-on: ubuntu-24.04 
     
     steps:
     - uses: actions/checkout@v1
@@ -19,7 +20,8 @@ jobs:
       run:  autoconf
     - name: configure
       # run: ./configure --with-yapp=pgplot --enable-debug
-      run: ./configure --without-csh
+      # run: ./configure --without-csh
+      run: ./configure 
     - name: build1
       run: make build1 
     - name: build2
