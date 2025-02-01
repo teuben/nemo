@@ -21,7 +21,7 @@ jobs:
     - name: configure
       # run: ./configure --with-yapp=pgplot --enable-debug
       # run: ./configure --without-csh
-      run: ./configure 
+      run: CC=gcc-14 CXX=g++-14 F77=gfortran-14 ./configure 
     - name: build1
       run: make build1 
     - name: build2
@@ -44,7 +44,7 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Configure
-      run: ./configure --without-csh --with-yapp=ps
+      run: CC=gcc-14 CXX=g++-14 F77=gfortran-14 ./configure --without-csh --with-yapp=ps
     - name: Build1
       run: make build1 
     - name: Build2
