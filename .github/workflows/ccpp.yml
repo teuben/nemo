@@ -44,7 +44,28 @@ jobs:
     steps:
     - uses: actions/checkout@v1
     - name: Configure
-      run: ./configure --without-csh --disable-fortran --with-yapp=ps
+      run: ./configure --without-csh --with-yapp=ps
+    - name: Build1
+      run: make build1 
+    - name: Build2
+      run: make build2
+    - name: Build3
+      run: make build3
+    - name: make check
+      run: make check checklog
+    - name: make bench
+      run: make bench
+    - name: make bench5
+      run: make bench5
+
+  build3:
+
+    runs-on: macos-15-arm64
+    
+    steps:
+    - uses: actions/checkout@v1
+    - name: Configure
+      run: ./configure --without-csh --with-yapp=ps
     - name: Build1
       run: make build1 
     - name: Build2
