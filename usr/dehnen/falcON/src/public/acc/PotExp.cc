@@ -19,6 +19,8 @@
 // Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.                   |
 //                                                                             |
 //-----------------------------------------------------------------------------+
+// issue105
+#include <stdinc.h>
 #include <defacc.h>
 #include <ctime>
 #ifndef falcON_NEMO

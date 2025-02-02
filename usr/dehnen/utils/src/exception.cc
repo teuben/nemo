@@ -171,17 +171,8 @@ WDutils::RunInfo::RunInfo()
       SNprintf(_m_name,104,"unknown.name");
     }
 #endif
-    // set # proc available for openMP
-    {
-#ifdef _OPENMP
-      if(omp_in_parallel())
-	WDutils_ErrorF("called inside OMP parallel region\n");
-      _m_omp_proc = omp_get_num_procs();
-#else
-      _m_omp_proc = 1;
-#endif
-      _m_omp_size = _m_omp_proc;
-    }
+
+
     // set # threads used by TBB
     {
 #ifdef WDutilsTBB
@@ -195,52 +186,7 @@ WDutils::RunInfo::RunInfo()
   catch(WDutils::exception& ex) { WDutils_RETHROW(ex); }
 }
 //
-void WDutils::RunInfo::set_omp(int 
-#ifdef _OPENMP
-			       n
-#endif
-			       )
-{
-#ifdef _OPENMP
-  Info._m_omp_size = n;
-  if(Info._m_omp_size < 1) {
-    Info._m_omp_size = 1;
-    WDutils_WarningN("RunInfo::set_omp('%d') assume '1'\n",n);
-  }
-  omp_set_num_threads(Info._m_omp_size);
-#else
-  Info._m_omp_size = 1;
-#endif
-}
-//
-void WDutils::RunInfo::set_omp(const char*
-#ifdef _OPENMP
-			       arg
-#endif
-			       )
-{
-#ifdef _OPENMP
-  if(arg==0 || arg[0]==0 || arg[0]=='t')
-    Info._m_omp_size = Info._m_omp_proc;
-  else if(arg[0] == 'f')
-    Info._m_omp_size = 1;
-  else if(arg && arg[0]) {
-    Info._m_omp_size = strtol(arg,0,10);
-    if(errno == EINVAL)
-      WDutils_THROWN("RunInfo::set_omp('%s') (errno=EINVAL)\n",arg,errno);
-    if(errno == ERANGE)
-      WDutils_THROWN("RunInfo::set_omp('%s') (errno=ERANGE)\n",arg,errno);
-    if(Info._m_omp_size < 1) {
-      Info._m_omp_size = 1;
-      WDutils_WarningN("RunInfo::set_omp('%s') assume '1'\n",arg);
-    }
-  }
-  omp_set_num_threads(Info._m_omp_size);
-#else
-  Info._m_omp_size = 1;
-#endif
-}
-//
+
 WDutils::RunInfo::~RunInfo()
 {
 #ifdef WDutilsTBB
