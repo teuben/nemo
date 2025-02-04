@@ -93,6 +93,10 @@ void nemo_main()
     xrange[1] = nx;
     yrange[0] = 0;
     yrange[1] = ny;
+    nbpos = 2;
+    bpos[0] = nx/2;
+    bpos[1] = ny/2;
+    warning("Setting pos=%d,%d\n",bpos[0],bpos[1]);
   }
   data = (real *) allocate(box*box*sizeof(real));
   ini_moment(&m, 2, box*box);
