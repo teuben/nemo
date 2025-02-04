@@ -6,8 +6,6 @@
  *	quick and dirty:  15-feb-2020	pjt
  */
 
-
-
 #include <stdinc.h>
 #include <getparam.h>
 #include <vectmath.h>
@@ -18,20 +16,19 @@
 
 string defv[] = {
   "in=???\n       Input image file",
-  "pos=\n         (x,y) position, or use max in map",
+  "pos=\n         (x,y) position (1-based), or use max in map",
   "box=32\n       Box size to use around pos",
   "clip=\n        Use only values above clip",
   "wcs=t\n        Use WCS of the cube (else use integer 0-based coordinates)",
   "radecvel=f\n   Split the RA/DEC from VEL",
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
-  "VERSION=0.1\n  15-feb-2020 PJT",
+  "scale=1\n      Scale factor to be applied to radii",
+  "VERSION=0.2\n  3-feb-2025 PJT",
   NULL,
 };
 
 string usage = "shape of a 2D or 3D distribution based on moments of inertia";
-
-string cvsid="$Id$";
 
 vector oldframe[3] = {
     { 1.0, 0.0, 0.0, },
@@ -54,8 +51,9 @@ void nemo_main()
   int     nbpos, bpos[2], box;
   int     xrange[2], yrange[2], zrange[2];
   imageptr iptr=NULL;             /* pointer to image */
-  real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
+  real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
   real    *spec, cv, clip[2];
+  real    scale = getdparam("scale");
   bool    Qclip = hasvalue("clip");
   bool    Qwcs = getbparam("wcs");
   bool    Qrdv = getbparam("radecvel");
@@ -95,6 +93,10 @@ void nemo_main()
     xrange[1] = nx;
     yrange[0] = 0;
     yrange[1] = ny;
+    nbpos = 2;
+    bpos[0] = nx/2;
+    bpos[1] = ny/2;
+    warning("Setting pos=%d,%d\n",bpos[0],bpos[1]);
   }
   data = (real *) allocate(box*box*sizeof(real));
   ini_moment(&m, 2, box*box);
@@ -196,7 +198,7 @@ void nemo_main()
   printvec("e_z:", frame[2]);
   inc = printeig("qpole:",w_qpole, &a_k, &b_k, &c_k);
   if (Qcross) {
-    printf("a,b:  %g %g\n",a_k,b_k);
+    printf("a,b:  %g %g\n",a_k*scale,b_k*scale);
     printf("inc:  %g (meaningless without radecvel)\n",inc);
     printf("pa:   %g (meaningless without radecvel)\n",pa_k);
   } else {
