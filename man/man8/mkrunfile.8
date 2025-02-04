@@ -1,0 +1,66 @@
+.TH MKRUNFILE 8NEMO "4 February 2025"
+
+.SH "NAME"
+mkrunfile \- create a runfile looping over selected parameters of a program
+
+.SH "SYNOPSIS"
+.PP
+\fBmkrunfile.py [options] program\fP \fIp1=v11,v12,... p2=...\fP
+
+.SH "DESCRIPTION"
+\fImkrunfile\fP helps writing a runfile, which is a script in which
+each line can be run serially or in parallel.
+.PP
+runfiles are useful if your code is single-core but you still want to make
+use of modern multi-core systems, or how HPC systems set up their virtual CPUs.
+
+
+.SH "OPTIONS"
+Options are not parsed yet.
+.nf
+  -r rundir        add a rundir
+  -l logfile       add a logfile
+.fi
+
+
+.SH "EXAMPLES"
+Here is an example running looping over 2 values in 2 parameters, while keep one parameter constant.
+.EC
+
+  % mkrunfile.py hackcode1 eps=0.025,0.05 tol=0.5,1 seed=1   > test.run
+  % cat test.run
+  hackcode1 rundir=run_0001 eps=0.025 tol=0.5 seed=1
+  hackcode1 rundir=run_0002 eps=0.05 tol=0.5 seed=1
+  hackcode1 rundir=run_0003 eps=0.025 tol=1 seed=1
+  hackcode1 rundir=run_0004 eps=0.05 tol=1 seed=1
+
+.EE
+after this there are currently three ways to process these runfiles:
+.EC
+
+     # simple bash
+     bash test.run
+
+     # gnu parallel
+     parallel -j 4 < test.run
+
+     # nemo's sbatch frontend
+     sbatch_nemo.sh test.run
+.EE
+
+.SH "CAVEATS"
+Need to ensure each command in the runfile can also be run in parallel, so there should be
+no data overlap.
+
+
+.SH "SEE ALSO"
+parallel(1), sbatch(1), tricks(8NEMO)
+
+.SH "AUTHOR"
+Peter Teuben.
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+4-feb-2025	drafted, many features no implemented	PJT
+.fi
