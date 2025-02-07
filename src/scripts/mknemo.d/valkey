@@ -1,5 +1,6 @@
 #! /usr/bin/env bash
 
+url=https://github.com/redis/hiredis
 url=https://github.com/valkey-io/valkey
 version=git
 
