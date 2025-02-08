@@ -1,0 +1,25 @@
+#! /usr/bin/env bash
+#
+#   note that redis needs -I$NEMO/opt/include/hiredis
+#
+
+url=https://github.com/redis/hiredis
+version=git
+
+
+cd $NEMO/local
+if [ ! -d hiredis ]; then
+    git clone $url
+    cd hiredis    
+else
+    cd hiredis
+    git pull
+fi
+
+mkdir -p build
+cd build
+cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt ..
+
+make install
+
+echo hiredis $version `date` >> $NEMO/opt/mknemo.log
