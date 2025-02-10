@@ -1,5 +1,6 @@
 /*
  * benchmark openmp vs. pthreads
+*  issue 105 - no longer relevant
  * 
  * example taken from
  * http://www.futurechips.org/tips-for-power-coders/open-mp-pthreads.html
@@ -24,7 +25,6 @@ string usage = "bench openmp";
 void sum_st(int *A, int *B, int *C)
 {
   int i;
-  #pragma omp parallel for
   for(i = 0; i < M; i++)
     A[i] = B[i] + C[i];
 }
