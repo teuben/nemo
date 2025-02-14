@@ -4,6 +4,8 @@
  *      (based off ccdshape)
  *
  *	quick and dirty:  15-feb-2020	pjt
+ *
+ * @todo    check if box= not too big
  */
 
 #include <stdinc.h>
@@ -24,7 +26,7 @@ string defv[] = {
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.2\n  3-feb-2025 PJT",
+  "VERSION=0.3\n  13-feb-2025 PJT",
   NULL,
 };
 
@@ -43,30 +45,31 @@ real printvec(string name, vector vec);
 
 void nemo_main()
 {
-  stream  instr;
-  string  oper;
-  int     i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
-  int     nclip, apeak, apeak1, cnt;
-  int     ixmax, iymax, ixmin, iymin;
-  int     nbpos, bpos[2], box;
-  int     xrange[2], yrange[2], zrange[2];
+  stream   instr;
+  string   oper;
+  int      i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
+  int      nclip, apeak, apeak1, cnt;
+  int      ixmax, iymax, ixmin, iymin;
+  int      nbpos, bpos[2], box;
+  int      xrange[2], yrange[2], zrange[2];
   imageptr iptr=NULL;             /* pointer to image */
-  real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
-  real    *spec, cv, clip[2];
-  real    scale = getdparam("scale");
-  bool    Qclip = hasvalue("clip");
-  bool    Qwcs = getbparam("wcs");
-  bool    Qrdv = getbparam("radecvel");
-  bool    Qiwm = getbparam("weight");
-  bool    Qcross = getbparam("cross");
-  vector  tmpv, w_pos, pos, pos_b, ds, frame[3];
-  matrix  tmpm, w_qpole;
-  real    w_sum, dmin, dmax;
-  real    inc, pa_k, pa_m, dPA, a_m, b_m, c_m, a_k, b_k, c_k, dvdr;
-  real    *data;
-  Moment  m;
+  real     tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
+  real     *spec, cv, clip[2];
+  real     scale = getdparam("scale");
+  bool     Qclip = hasvalue("clip");
+  bool     Qwcs = getbparam("wcs");
+  bool     Qrdv = getbparam("radecvel");
+  bool     Qiwm = getbparam("weight");
+  bool     Qcross = getbparam("cross");
+  vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
+  matrix   tmpm, w_qpole;
+  real     w_sum, dmin, dmax;
+  real     inc, pa_k, pa_m, dPA, a_m, b_m, c_m, a_k, b_k, c_k, dvdr;
+  real     *data;
+  Moment   m;
 
   instr = stropen(getparam("in"), "r");
+  
   if (Qclip) {
     nclip = nemoinpr(getparam("clip"),clip,2);
     if (nclip<1) error("error parsing clip=%s",getparam("clip"));
@@ -74,7 +77,8 @@ void nemo_main()
       clip[1] =  clip[0];
       clip[0] = -clip[1];
     }
-  }
+  } else
+    warning("Using all data, no clip used");
   
   read_image( instr, &iptr);            /* read the cube */
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
@@ -82,21 +86,20 @@ void nemo_main()
 
   box = getiparam("box");
   nbpos = nemoinpi(getparam("pos"),bpos,2);
-  if (nbpos == 2) {
+  if (nbpos == 2) {                        // fix center at/near bpos
     xrange[0] = bpos[0] - box/2;
     xrange[1] = bpos[0] + box/2;
     yrange[0] = bpos[1] - box/2;
     yrange[1] = bpos[1] + box/2;
   } else {
-    warning("Scanning full image for the maximum intensity");
-    xrange[0] = 0;
-    xrange[1] = nx;
-    yrange[0] = 0;
-    yrange[1] = ny;
     nbpos = 2;
     bpos[0] = nx/2;
     bpos[1] = ny/2;
-    warning("Setting pos=%d,%d\n",bpos[0],bpos[1]);
+    xrange[0] = bpos[0] - box/2;
+    xrange[1] = bpos[0] + box/2;
+    yrange[0] = bpos[1] - box/2;
+    yrange[1] = bpos[1] + box/2;
+    warning("Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
   }
   data = (real *) allocate(box*box*sizeof(real));
   ini_moment(&m, 2, box*box);
@@ -128,6 +131,7 @@ void nemo_main()
 	  }
 	}
 	if (nbpos==2) {
+	  dprintf(1,"%d @ %d %d %d\n", cnt, i,j,k);
 	  data[cnt] = cv;
 	  accum_moment(&m, cv, 1.0);
 	}
