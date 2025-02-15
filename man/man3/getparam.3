@@ -1,7 +1,9 @@
-.TH GETPARAM 3NEMO "24 November 2007"
-.SH NAME
+.TH GETPARAM 3NEMO "1 February 2025"
+
+.SH "NAME"
 getXparam, hasvalue, isaparam, initparam, finiparam, stop \- main startup and command line processing.
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 .B #include <stdinc.h>
 .B #include <getparam.h>
@@ -60,7 +62,8 @@ string usage="Example usage for program";
 .PP
 
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 These functions provide a simple and uniform mechanism for 
 command line processing (see also nemomain(3NEMO) for
 an even simpler approach). Input as well
@@ -170,13 +173,15 @@ square brackets before the string is output.
 The optional \fBusage\fP and \fBcvsid\fP strings, that will need to
 be defined by the user, can be
 queried with the \fBhelp=u\fP and \fBhelp=I\fP options.
-.SH REQUIRED ARGUMENTS
+
+.SH "REQUIRED ARGUMENTS"
 Arguments with default values (as listed in \fIdefv\fP) of "\|???"
 are required; \fIinitparam\fP will print an informative message and
 quit if no value for such an argument can be obtained from \fIargv\fP.
 This feature is handy for things which must be specified or for which
 no reasonable default exists.
-.SH VERSION
+
+.SH "VERSION"
 It is good (NEMO) programming practice to give your program a
 VERSION id. We refer to this as the \fIinternal\fP VERSION
 id. The NEMO technique has historically been by adding
@@ -202,7 +207,8 @@ programs to refuse execution if the internal and
 external VERSION id do not match. We do not currently employ this
 technique. Most NEMO programs have a section labeled \fBUPDATE HISTORY\fP
 in which old version ID's are labeled by time, comment and author.
-.SH INDEXED KEYWORDS
+
+.SH "INDEXED KEYWORDS"
 The \fBindexparam\fP and \fBgetparam_idx\fP family provides one way
 of access to indexed keywords. Indexed keywords are defined in the \fBdefv\fP vector
 by a basename that ends in with the \fB#\fP symbol, which can at runtime
@@ -215,8 +221,15 @@ programmer to decipher missing elements (e.g. using \fBisaparam\fP or
 \fIindexparam(basename,-1)\fP returns the largest index that was found,
 \fIindexparam(basename,-2)\fP returns 0 if the keyword is not an indexed
 keyword, and  \fIindexparam(basename,idx)\fP, for \fIidx >= 0\fP,
-will check existence (1=true) for a specific index. 
-.SH HELP FUNCTIONS
+will check existence (1=true) for a specific index.
+.PP
+There is no rule for this, but it's a convenient convention
+to upper case an indexed keyword.
+For example in \fIrunbody1(1NEMO)\fP the \fBkz=\fP keyword is a vector
+of 15 values, whereas each individual one can be overriden with
+for example \fBKZ3=0\fP.
+
+.SH "HELP FUNCTIONS"
 Besides interpreting the command line, \fIinitparam\fP provides some
 assistance to the user via an additional argument (in addition to those
 defined in \fIdefv\fP), namely
@@ -307,11 +320,13 @@ program (not recommended).
 An environment variable \fBHELP\fP or the system keyword \fBhelp=\fP
 can be set to a non-zero number to change to
 various levels of interactive input if implemented.
-.SH OUTPUT KEYS
+
+.SH "OUTPUT KEYS"
 The system keyword \fBoutkeys=\fP\fIkey1,key2,...\fP controls which 
 pre-defined output keys (see \fIoutparam(3NEMO)\fP) are going to 
 output to NEMO's persistent global keyword database.
-.SH DEBUGGING
+
+.SH "DEBUGGING"
 The system keyword \fBdebug=\fP\fIdebug_level\fP is checked
 for by the \fIinitparam\fP call. It sets the \fBdebug_level\fP to the
 requested value. Any calls to \fIdprintf(3NEMO)\fP will only
@@ -319,19 +334,23 @@ be send to the standard error output device,(\fIstderr\fP), if
 \fBdebug\fP is less or equal than \fBdebug_level\fP. Any initial
 setting of \fBdebug_level\fP is also done through an environment variable
 \fBDEBUG\fP, but overriden by the \fBdebug=\fP keyword.
-.SH FILES
+
+.SH "FILES"
 .ta +1i
 .nf
 ~/src/kernel/io   	getparam.c 
 ~/src/kernel/cores	error.c (stop)
 .fi
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 environ(5), dprintf(3NEMO), error(3NEMO), nemoinp(3NEMO), nemomain(3NEMO), outparam(3NEMO)
-.SH DIAGNOSTICS
+
+.SH "DIAGNOSTICS"
 Complains via \fIerror(3NEMO)\fP or the \fIlocal_error()\fP function
 about extra arguments, unknown arguments,  etc.  This will generally result
 in a stopped program.
-.SH BUGS
+
+.SH "BUGS"
 The code to access \fIenviron\fP has only been implemented for the system
 environment variables \fBDEBUG, YAPP, HISTORY, BELL, REVIEW, ERROR, ARGV\fP 
 and \fBHELP\fP. 
@@ -342,7 +361,8 @@ more complete.
 A key-less parameter that contains an '=' sign confuses the parser and will
 most likely complain about an unknown parameter. E.g. "i%%128==0"
 will return \fIParameter "i%128" unknown\fP.
-.SH EXAMPLES
+
+.SH "EXAMPLES"
 Here are some examples of usage of such a user interface. Assume we have
 a program \fBp\fP, which has keywords \fBa\fP, \fBb\fP and \fBc\fP, of
 which \fBc\fP is an indexed keyword
@@ -363,9 +383,11 @@ VERSION          : PJT [0.1]
 CPU_USAGE mkplummer : 7.84    6.99 0.42  0.00 0.00  6202936
 
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Joshua Barnes, Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +3.5i
 xx-nov-86	created                         	Joshua Barnes
