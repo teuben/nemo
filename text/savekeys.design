@@ -138,3 +138,8 @@ could memcached be used ?
 https://github.com/memcached/memcached/wiki
 
 how can pipes be implemented in python
+
+---
+
+Old redis, and now valkey, could be a way to use a fast keyval storage. How to
+solve parallel usage. 
