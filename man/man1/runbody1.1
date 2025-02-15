@@ -1,4 +1,4 @@
-.TH RUNBODY1 1NEMO "4 June 2021"
+.TH RUNBODY1 1NEMO "1 February 2025"
 
 .SH "NAME"
 runbody1, nbody1 \- (frontend to) Aarseth N-body code
@@ -11,7 +11,8 @@ runbody1, nbody1 \- (frontend to) Aarseth N-body code
 
 .SH "DESCRIPTION"
 \fBrunbody1\fP is a NEMO frontend to Aarseth's NBODY1 (fortran) program,
-running the code in a run directory where all files are stored.
+running the code in a run directory where all files are stored. See
+also \fInbody1(1NEMO)\fP.
 .PP
 The new version 2.x interface tries to mimic to run NBODY1 in virial units
 with a default input and output.
@@ -164,7 +165,7 @@ variables. Only new runs are currently supported.
 not supposed to be used, but counts max computing time alotted.
 .TP
 \fBKZ#=\fP
-NEMO indexed keyword to override \fBkz=\fP, for example KZ4=1, while keeping all other \fBkz=\fP's.
+NEMO indexed keyword (see \fIgetparam(3NEMO)\fP) to override \fBkz=\fP, for example KZ4=1, while keeping all other \fBkz=\fP's.
 .br
 Default: not used
 .TP
@@ -225,10 +226,12 @@ as opposed to code times for the default run with kz(15)=1.
 .SH "BENCHMARK"
 The command
 .nf
+     cd $NEMO/src/nbody/evolve/aarseth/nbody1/
      make bench
 .fi
-will run a standard 1280 body plummer sphere benchark to T=10.
-.SH CAVEATS
+will run a standard 1280 body plummer sphere benchark to T=10, typically taking 5-10 seconds.
+
+.SH "CAVEATS"
 \fBnbody1\fP still uses the old-style individual time-steps with force polynomials, not the
 \fIimproved\fP hermite integrater that is embedded in later versions of the NBODYx series. However,
 Sverre has made versions available with a hermite integrator, see for example
