@@ -7,8 +7,8 @@ nemovar \- get and set NEMOVAR variables
 \fBnemovar\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBnemovar\fP maintains a NEMO key/value storage server.  It will providing another method to
-communicate (textual) information between tasks using key/value pairs.
+\fBnemovar\fP maintains a NEMO key/val storage server.  It will providing another method to
+communicate (textual) information between tasks using key/val pairs.
 These are persistent variables, and 
 can cross different sessions, much like SHELL variables.
 .PP
@@ -20,23 +20,32 @@ the users' workflow prefers.
 .so man1/parameters
 .TP 20
 \fBvar=\fP
-Name of the variable. Default: not used.
+Name of the variable.
+.br
+Default: not used.
 .TP
 \fBval=\fP
-If used, the variable is getting a new value. Default: not used.
+If used, the variable is getting a new value.
+.br
+Default: not used.
 .TP
 \fB**delete=f|t\fP
 Delete the named variable in \fBvar=\fP.
+.br
+**\fInot implemented yet\fP
 .TP
 \fB**load=\fP
 Load from a file. Need a replace/merge option?
+.br
+**\fInot implemented yet\fP
 .TP
 \fB**save=\fP
 Save to a file.
-
+.br
+**\fInot implemented yet\fP
 .SH "EXAMPLES"
-The \fBNEMOVAR\fP environment variable is used to set the interprocess communication (currently only
-files are supported).
+The \fBNEMOVAR\fP environment variable is used to set the interprocess communication, though
+currently only files are supported.
 For example on linux we might be able to use the shared memory as follows:
 .EX
 
@@ -74,6 +83,7 @@ The data type interpretation is left to the client. This also opens the option f
     d="1,2,10:20:2"
 
 .EE
+which again leaves the client to parse the string, much like \fIgetparam(3NEMO)\fP.
 
 .SH "BACKGROUND"
 There are several ways already to pass small textual information (outside of the large simulations files)
@@ -107,7 +117,7 @@ With the first version of nemovar you can do the following:
 .EE
 
 .PP
-The power of nemovar will come when the user interface shortcuts the use of the shell,as in this
+The power of nemovar will come when the user interface shortcuts the use of the shell, as in this
 hypothetical example
 .EX
      ccdstat foo.ccd nemovar=mean,disp
@@ -116,7 +126,7 @@ hypothetical example
 
 .SH "FUTURE"
 1. A future implementation will allow direct retrieval of NEMO variables is possible via the command line
-(see \fIgetparam(3NEMO)\fP). For example, compare the two style, \fInemovar\fP on the left,
+(see \fIgetparam(3NEMO)\fP). For example, compare the two styles, \fInemovar\fP on the left,
 shell variables on the right:
 .EX
 
@@ -126,9 +136,9 @@ shell variables on the right:
 .EE
 Note that some \fItable(5NEMO)\fP
 programs use %0, %1, %2, .... to refer to column numbers, so variable names cannot start with
-a digit. Upper and Lower case should be allowed.
+a digit. Upper and Lower case should be allowed, and be different.
 .PP
-Recall that the current command line interface already can refer to other keywords, e.g.
+Recall that the current command line interface can already refer to other keywords, e.g.
 .EX
 
     foobar a=1 b='$a'
