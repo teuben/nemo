@@ -1,9 +1,12 @@
-.TH CCDBLOB 1NEMO "15 February 2020"
-.SH NAME
+.TH CCDBLOB 1NEMO "14 February 2025"
+
+.SH "NAME"
 ccdblob \- properties of a blob in an image
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBccdblob\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdblob\fP is a poor man's source extractor and 
 computes some properties of a blob ("star") in an image. With given rough pixel coordinates
 and a box size, it will determine the peak, shape and flux of the blob, assuming the background signal (box
@@ -14,53 +17,114 @@ The current draft version is based off \fIccdshape(1NEMO)\fP and thus inherits s
 that may disappear or change meaning.
 .PP
 Pixel coordinates are 1-based.
-.SH PARAMETERS
+.PP
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input NEMO image file [???]    
+Input NEMO image file
+.br
+No default.
 .TP
 \fBpos=\fP
-(x,y) position, or use max in map. Integers, and are 1-based. []
+(x,y) center of the \fBbox\fP, or use maximum in image (?). Positions are 1-based integers.
+.br
+Default is center of image, but there should be an option to use the maximum in the image?
 .TP
 \fBbox=\fP
-Box size to use around pos [32] 
+Box size to use around \fBpos\fP.
+.br
+Default: 32
 .TP
 \fBclip=\fP
-Use only values above clip [] 
+Use only values above \fBclip\fP. 
+.br
+Default will use all values
 .TP
-\fBwcs=\fP
-Use WCS of the cube (else use pixel coordinates)
+\fBwcs=t|f\fP
+Use WCS of the cube (otherwise use pixel coordinates 1..N).
 .TP
-\fBradecvel=\fP
-Split the RA/DEC from VEL [f]  
+\fBradecvel=t|f\fP
+Split the RA/DEC from VEL
+.br
+[f]  
 .TP
-\fBweight=\fP
-Weights by intensity [t]    
+\fBweight=t|f\fP
+Weigh moments of inertia by intensity?
+.br
+[t]    
 .TP
 \fBcross=\fP
-Use cross correlations between X and Y to
-.SH EXAMPLES
-Analysing some Betelgeuse images from an all-sky camera:
-.nf
+Use cross correlations between X and Y to...
+.TP
+\fBpeak=N\fP
+Find the N-th peak. Only used if \fBpos\fP is not given.
+For \fBpeak=0\fP the center of the map is used, otherwise
+it will find the N-th peak.
+.br
+Default: 1
+.br
+\fInot implemented yet\fP
 
-% fitsccd ASC/MASN-01/archive/201601/20160102/IMG00700.FIT - | ccdblob - 724,305
+
+.SH "EXAMPLES"
+Analysing a Betelgeuse images from an all-sky camera:
+.EX
+
+% file=ASC/MASN-01/archive/201601/20160102/IMG00700.FIT
+% fitsccd $file - | ccdblob - 724,305
  BLOB 726 305  724.573 305.38 32   6546 42731 139121
 
-.fi
+.EE
 Where the BLOB line lists the peak position (pixels are 1-based), followed
 by an intensity weighted position, the box size around the estimated center,
 followed by the median, peak and total blob flux (corrected for the median
 background).
-.SH SEE ALSO
+.PP
+An example of creation a gaussian blob with a given Signal/Noise (ns=) and running it
+through ccdblob:
+.EX
+
+sn=10
+ccdgen - gauss 1,3 128,128  | ccdgen - noise 0,1/$sn in=- | ccdblob -
+Npoints:    1024
+DataMinMax: -0.359968 1.08932
+Min at:     53 71 (1 based)
+Max at:     64 65
+Mean:       0.0559946
+Median:     0.0673992
+DataSum:    57.3385
+Flux:       -11.6783
+ImSize:     128 128 1
+Center:     63.1595 63.5957 0 [wcs]
+BLOB:  64 65  64.1595 64.5957 32   0.0673992 1.08932 -11.6783
+        e_x:     1.00000     0.99981     0.01968     0.00000    90.0    1.1
+        e_y:     1.00000    -0.01968     0.99981     0.00000    90.0   91.1
+        e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
+      qpole:    13.07941     0.99981     0.01968     0.00000
+                 5.93258    -0.01968     0.99981     0.00000
+                 0.00000     0.00000     0.00000     1.00000
+a,b:  3.61655 2.43569
+inc:  47.6634 (meaningless without radecvel)
+pa:   91.1275 (meaningless without radecvel)
+
+
+.EE
+
+.SH "SEE ALSO"
 ccdstat(1NEMO), image(5NEMO)
-.SH FILES
+
+.SH "FILES"
 src/image/misc/ccdblob.c
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 15-feb-2020	V0.1 Created	PJT
+14-feb-2025	V0.3 fix boxsize when no pos given	PJT
 .fi
