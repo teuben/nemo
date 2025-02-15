@@ -1,0 +1,31 @@
+#! /usr/bin/env bash
+#
+#  Peter Erwin's fitting program
+#
+url=https://github.com/perwin/imfit
+version=git
+
+cd $NEMO/local
+git clone $url
+cd imfit
+git pull
+counter=$(git rev-list --count HEAD)
+
+opts=()
+#    --header-path=
+#    --lib-path=
+#    --no-openmp
+#    --cpp=
+#    --clang-openmp       (this needs libomp to be installed)
+#    --no-threading
+opts=--no-nlopt
+
+progs="imfit imfit-mcmc makeimage"
+for p in $progs; do
+    scons $opts $p
+done
+
+echo $progs were installed
+cp $progs $NEMOBIN
+
+echo imfit ${version}_${counter} `date` >> $NEMO/opt/mknemo.log
