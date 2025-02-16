@@ -120,7 +120,11 @@ MY_GSL = -lgsl -lgslcblas
 
 tablsqfit_gsl: tablsqfit.c
 	$(CC) -DHAVE_GSL $(CFLAGS) -o tablsqfit_gsl tablsqfit.c \
-		$(NEMO_LIBS) $(GSL_LIBS) $(EL) -lm
+		$(NEMO_LIBS) $(GSL_LIB) $(EL) -lm
+
+tabgaussfit: tabgaussfit.c
+	$(CC) -DHAVE_GSL $(CFLAGS) -o tabgaussfit tabgaussfit.c \
+		mqgaus2d.o $(NEMO_LIBS) $(GSL_LIB) $(EL) -lm
 
 tabnllsqfit: tabnllsqfit.c
 	$(CC) $(CFLAGS) -o tabnllsqfit tabnllsqfit.c \
