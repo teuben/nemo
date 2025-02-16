@@ -1,5 +1,8 @@
 # ccdgen - gauss 1,3 100,100 center=20,30 | ccdgen - noise 10,0.01 in=- | ccdfits - imfit_gauss.fits  ndim=2
-# imfit -c imfit_config.dat imfit_gauss.fits 
+# imfit -c imfit_config.dat imfit_gauss.fits
+#
+# Note:    fits file needs to be 2D, and cannot have negative numbers
+#          variables in this file are case sensitive
 
 GAIN             1
 
