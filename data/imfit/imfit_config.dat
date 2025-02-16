@@ -1,0 +1,17 @@
+# ccdgen - gauss 1,3 100,100 center=20,30 | ccdgen - noise 10,0.01 in=- | ccdfits - imfit_gauss.fits  ndim=2
+# imfit -c imfit_config.dat imfit_gauss.fits 
+
+GAIN             1
+
+X0   20  10,50
+Y0   30  20,60
+
+FUNCTION Gaussian
+
+PA     0   fixed
+ell    0   fixed
+I_0    1   0,2
+sigma  2  0.5,4.0
+
+FUNCTION FlatSky
+I_0    9   1,20
