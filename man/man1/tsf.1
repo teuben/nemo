@@ -1,4 +1,4 @@
-.TH TSF 1NEMO "26 May 2024"
+.TH TSF 1NEMO "16 February 2025"
 
 .SH "NAME"
 tsf \- type a structured file
@@ -82,13 +82,6 @@ as defined in "\fBfilestruct.h\fP".
 For \fIMaxTagLen\fP and \fIMaxVecDim\fP see \fIrsf(1NEMO)\fP.
 
 .SH "EXAMPLES"
-
-An example of converting all double precision numbers to single
-precision in a NEMO file:
-.EX
-    % tsf in=double.dat out=float.dat convert=d2f
-    
-.EE
 Here is an N-body snapshot of a Plummer sphere with 10 particles:
 .EX
 
@@ -139,7 +132,7 @@ The algorithm for implementing \fBmaxline\fP is crude.
 .PP
 If \fBindent=\fP and \fBmargin=\fP are choosen too large, resp. too
 small, they can bump into each other and cause illegable output, which
-cannot be read by \fIrsf\fP either.
+cannot be read by \fIrsf(1NEMO)\fP either.
 
 .SH "SEE ALSO"
 ls(1v), file(1), rsf(1NEMO), csf(1NEMO), qsf(1NEMO), bsf(1NEMO), filestruct(3NEMO).
@@ -155,6 +148,4 @@ xx-apr-88	V2.0 new filestruct package	JEB
 9-dec-90	V2.3 helpvec and other minor things	PJT
 21-mar-01	V2.7 experimental xml output option	PJT
 14-jun-02	V3.0 added octal=, default output is now decimal	PJT
-21-jun-21	experimenting with a TLDR section	PJT
-1-apr-2024	experimenting with how to place defaults	PJT
 .fi
