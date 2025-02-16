@@ -1,4 +1,4 @@
-.TH NEMOVAR 1NEMO "24 June 2024"
+.TH NEMOVAR 1NEMO "15 February 2025"
 
 .SH "NAME"
 nemovar \- get and set NEMOVAR variables
@@ -83,7 +83,11 @@ The data type interpretation is left to the client. This also opens the option f
     d="1,2,10:20:2"
 
 .EE
-which again leaves the client to parse the string, much like \fIgetparam(3NEMO)\fP.
+which again leaves the client to parse the string, much like \fIgetparam(3NEMO)\fP. Here is the
+way it can be done using \fInemoinp(1NEMO)\fP
+.EX
+    nemoinp $(nemovar d)
+.EE
 
 .SH "BACKGROUND"
 There are several ways already to pass small textual information (outside of the large simulations files)
@@ -184,4 +188,5 @@ Peter Teuben
 .ta +1.5i +5.5i
 7-mar-2024	Created for NEMO2024	PJT
 24-jun-2024	0.4:    write dummy if NEMOVAR does not exist	PJT
+15-feb-2025	0.6:	remove quotes when single variables requested	PJT
 .fi
