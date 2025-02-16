@@ -12,7 +12,7 @@ string defv[] = {
   "var=\n             Name of  variable(s)",
   "val=\n             Optional new value",
   "comment=\n         Optional comment when new value was set",
-  "VERSION=0.5\n      26-jun-2024 PJT",
+  "VERSION=0.6\n      15-feb-2025 PJT",
   NULL,
 };
 
@@ -29,7 +29,8 @@ void nemo_main()
   string comment = getparam("comment");
   bool hasComment = hasvalue("comment");  
   string nemovar = getenv("NEMOVAR");
-  if (nemovar == NULL) error("$NEMOVAR was not set");
+  if (nemovar == NULL)
+    error("$NEMOVAR was not set. Example: export NEMOVAR=/dev/shm/nemovar.$USER");
   dprintf(1,"nemovar: %s\n", nemovar);
 
   if (hasComment)
@@ -47,13 +48,13 @@ void nemo_main()
   stream tstr = stropen(nemovar,"r");
   table *t = table_open(tstr, -1);      // read table as a dumb set of lines
   int nrows = t->nr; 
-  string s, vareq;
+  string s, sv, si, vareq;
   
   // check if just to show all variables
   if (!hasVar && !hasVal) {
     dprintf(1,"Show all variables\n");
     for (i=0; i<nrows; i++)
-	    printf("%s\n", table_row(t, i));
+      printf("%s\n", table_row(t, i));
     return;
   }
 
@@ -69,8 +70,16 @@ void nemo_main()
     for (i=nrows-1; i>=0; i--) {
       s = table_row(t, i);
       if (strncmp(s,vareq,strlen(vareq))==0) {
-          printf("%s\n",s+strlen(var)+1);      
-	  return;
+	sv = s+strlen(var)+1;
+	if (*sv == '"') {
+	  sv++;
+	  si=sv;
+	  while (*si != '"')
+	    si++;
+	  *si=0;
+	}
+	printf("%s\n",sv);
+	return;
       }    
     }
     dprintf(0,"Variable %s not found\n",var);
@@ -108,3 +117,4 @@ void nemo_main()
 
   // nothing more to do yet
 }
+ 
