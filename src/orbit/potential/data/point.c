@@ -37,6 +37,8 @@ void inipotential (int *npar, double *par, string name)
     dprintf (1,"INIPOTENTIAL Point: [3d version]\n");
     dprintf (1,"  Parameters : Pattern Speed = %f\n",omega);
     dprintf (1,"  mass, eps = %f %f \n",mass,eps);
+    if (eps != 0)
+      dprintf (1,"  Pseudo-Newtonian active\n");
 	
     par[0] = omega;
 }
