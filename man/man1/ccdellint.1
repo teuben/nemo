@@ -75,6 +75,12 @@ this is usually 1 / (1.133*(beam/pixel)**2).  [1]
 \fBmetric=N\fP 
 The exponent of the r^N = x^N + y^N metric to compute a radius. N=2 is the traditional cartesian [2]
 
+.SH "DISKY vs BOXY"
+
+The parameter \fBmetric=\fP described the type of ellipse to be integrated over. For metric<2 disky
+isophotes are used, for metric>2 they are boxy. See also Athanassoula et al. 1990 MNRAS_245:130, although
+they used c0=metric-2.
+
 .SH "CAVEATS"
 As with most of these codes, the center of pixel determines to which ring the pixel belongs in it total.
 .PP
