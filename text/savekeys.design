@@ -1,28 +1,28 @@
 "savekeys" design (external)
 
 
-The idea is to not only be able to set input parameters to a program,
-the ones that control the program and its output, but also have
-output parameters be set, that can be used in programs along the pipe.
+The idea is to not only be able to set input parameters to a program, i.e.
+    program key1=val1 key2=val2 ...
+but also have output parameters be set, that can be used in programs along the pipe.
 
 To take a example from python, where one often does:
 
      v = foo(p1, p1)
      w = bar(v['a1'], v['a2'])
+     x,y,z = foobar(p1, p2, p3)
 
 So in NEMO, which uses the shell, there is no such easy construct.
+
 Imagine NEMO to have a pool of variables, controlled by $NEMOVAR
 (e.g. ~/.nemovar)
 
-A reminder of some of the more advanced features of the command line interface:
+A reminder of some of the more advanced features of NEMO's CLI interface:
 
 1) An example of internal parameters re-use within a program:
 
-   snapgrid in=snap.dat out=ccd.dat nx=200 ny=\$nx
-   or 
    snapgrid in=snap.dat out=ccd.dat nx=200 ny='$nx'
 
-there often is not a good reason for this, as this can also be done with
+there often is not a good reason for this, as this can also be achieved with
 
    np=200
    snapgrid in=snap.dat out=ccd.dat nx=$np ny=$np
@@ -31,7 +31,6 @@ there often is not a good reason for this, as this can also be done with
 
    nemoinp 1:10:2 > c.lis
    ccdplot in=ccd.dat contour=@c.lis
-
 
 
 
@@ -45,27 +44,29 @@ of keywords that can be exported. Sort of as follows:
 in getparam.c)
 
 string savekeys[] = {
-	"rms=d\n	RMS value in a selection region of the map",
-	"mean=d\n	MEAN value in a selection region of the map",
-	"n=i\n          Number of pixels in selected region of map",
-	"quartiles=d4\n Quartiles (an array)",
-	NULL,
+   "rms=d\n          RMS value in a selection region of the map",
+   "mean=d\n         MEAN value in a selection region of the map",
+   "n=i\n            Number of pixels in selected region of map",
+   "quartiles=d4\n   Quartiles (an array)",
+    NULL,
 };
 
 
 User code would do something like this:
 
 
-  double rms, q[4];
+    double rms, q[4];
 
-  save_key("rms",1, &rms);
-  save_key("quartiles", 4, q);
+    save_key("rms",       1, &rms);
+    save_key("quartiles", 4, q);
   
 It also turns out I once did write a prototype for this
-	void kprintf(string key, const string fmt, ...)
+
+    void kprintf(string key, const string fmt, ...)
+    
 but this was designed to store keywords in ascii format, which we are
 now arguing we should do in binary using NEMO's filestruct(3NEMO)
-format. Also , the function name is in use in the kernel and may cause confusion.
+format. Also, the function name is in use in the kernel and may cause confusion.
 
 Where the data is written is another matter.  In it's simplest form this could
 be a file named via the PPID. The file can be local or sit in /dev/shm (where this
@@ -75,7 +76,7 @@ macos as well)
 
 Example use:
        # make an image of a gauss and plot it
-       ccdgen "" ccd1 gauss 100,100 500
+       ccdgen  ccd1 gauss 100,100 500
        ccdplot ccd1
        
        # get stats from an image
