@@ -1,4 +1,4 @@
-.TH QTRUN 1 "8 December 2023"
+.TH QTRUN l "8 December 2023"
 
 .SH "NAME"
 qtrun \- automatic GUI builder and frontend to run shell scripts or programs
@@ -50,7 +50,7 @@ command line arguments.  Here are the proposed GUI tags with generic key=val/hel
 .EE
 
 .SH "SEE ALSO"
-wish(1), zenity(1), qtun(1NEMO)
+wish(1), zenity(1), tkun(1NEMO)
 .nf
 https://github.com/teuben/agui - development version 
 .fi
