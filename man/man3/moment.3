@@ -1,6 +1,6 @@
-.TH MOMENT 3NEMO "14 November 2021"
+.TH MOMENT 3NEMO "18 January 2025"
 .SH NAME
-ini_moment, accum_moment, decr_moment, 
+ini_moment, slow_moment, accum_moment, decr_moment, 
 reset_moment, show_moment, n_moment, sum_moment, sratio_moment,
 mean_moment, sigma_moment, skewness_moment, kurtosis_moment, mad_moment, mard_moment, robust_moment,
 min_moment, max_moment \- various (moving) moment and minmax routines
@@ -10,6 +10,7 @@ min_moment, max_moment \- various (moving) moment and minmax routines
 #include <moment.h>
 .PP
 .B void ini_moment(m, mom, ndat)
+.B void slow_moment(m, slow)
 .B void accum_moment(m, x, w)
 .B void decr_moment(m, x, w)
 .B void reset_moment(m)
@@ -53,14 +54,18 @@ opaque datastructure. All information should be obtained through the
 interface routines described below.
 .PP
 If only a datamin/max is needed, setting \fBmom<0\fP can be used to prevent
-the more expensive moment calculations. 
+the more expensive moment calculations.  See also \fBslow_moment\fP.
 .PP
 Moving or running averages (or moments) can be done by supplying \fBndat>0\fP
 to ini_moment. It will keep a memory of the last \fBndat\fP data values
-and the moments now become running moments.
+and the moments now become running moments. This is also the only way
+the slow_moment (more accurate for large values) will work.
 .PP
 Note that the \fImedian_moment\fP can only be used in \fBx\fP (the weights are
 ignored) and moving moment where \fBndat>0\fP.
+.PP
+\fBslow_moment\fP can be set with \fBslow=TRUE\fP to force re-computing higher order
+moments based on the value of the mean. This only will work when \fBndat>0\fP.
 .PP
 \fBmean_moment\fP returns the mean value, where \fBsigma_moment\fP returns
 the square root of the variance
@@ -141,7 +146,7 @@ Peter Teuben
 .fi
 .SH UPDATE HISTORY
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 30-oct-93	Created   	PJT
 8-nov-93	fixed init bug 	PJT
 13-jun-95	added decr_moment	PJT
@@ -152,4 +157,5 @@ Peter Teuben
 11-jun-14	clarified MAD and MARD (the old MAD was really MARD)	PJT
 12-jul-20	added min/max for robust moment		PJT
 14-nov-21	added sratio	PJT
+18-jan-25	added slow option	PJT
 .fi

@@ -20,6 +20,7 @@
  *  12-jul-20   add min/max for robust
  *  10-oct-20   median improvement via inline sort
  *  14-nov-21   add sratio
+ *     feb-25   implement slow mode
  *
  * @todo    iterative robust by using a mask
  *          ? robust factor, now hardcoded at 1.5
@@ -56,6 +57,7 @@ void ini_moment(Moment *m, int mom, int ndat)
       for (i=0; i<=mom; i++) m->sum[i] = 0.0;
     }
     m->ndat = ndat;
+    dprintf(1,"ini_moment: mom=%d ndat=%d\n", mom, ndat);
 
     if (ndat > 0) {     /* moving moments */
       m->idat = -1;
@@ -64,6 +66,7 @@ void ini_moment(Moment *m, int mom, int ndat)
     }
 
     m->sumn = m->sump = 0.0;
+    m->slow = FALSE;    
 }
 
 void free_moment(Moment *m)
@@ -73,7 +76,14 @@ void free_moment(Moment *m)
      free(m->dat);
      free(m->wgt);
    }
-} 
+}
+
+void slow_moment(Moment *m, bool slow)
+{
+  if (slow)
+      warning("experimental slow mode");
+  m->slow = slow;
+}
 
 void accum_moment(Moment *m, real x, real w)
 {
@@ -92,7 +102,7 @@ void accum_moment(Moment *m, real x, real w)
         m->sum[i] += sum;
         sum *= x;
     }
-    if (x<0) m->sumn += x;
+    if (x<0) m->sumn += x;   /* formally should use diff from mean */
     if (x>0) m->sump += x;
     if (m->ndat > 0) {                   /* if moving moments .... */
       if (m->idat < 0)                        /* first time around */
@@ -367,16 +377,23 @@ real median_moment(Moment *m)
   return smedian(n,m->dat);
 }
 
-
 real sigma_moment(Moment *m)
 {
     real mean, tmp;
+    
     if (m->mom < 2)
         error("sigma_moment cannot be computed with mom=%d",m->mom);
-    if (m->n == 0) return 0;
+    if (m->n == 0) return 0.0;
     mean=sum1/sum0;
     if (m->datamin == m->datamax) return 0.0;
-    tmp = sum2/sum0 - mean*mean;
+    if (m->slow) {
+      tmp = 0.0;
+      for (int i=0; i<m->n; i++) {
+	tmp += sqr(m->dat[i]-mean);
+      }
+      tmp = tmp/sum0;
+    } else
+      tmp = sum2/sum0 - mean*mean;
     if (tmp <= 0.0) return 0.0;
     return sqrt(tmp);
 }
@@ -462,11 +479,18 @@ real skewness_moment(Moment *m)
     if (m->n == 0) return 0.0;
     if (m->datamin == m->datamax) return 0.0;
     mean = sum1/sum0;
-    sigma = sum2/sum0 - mean*mean;
-    if (sigma < 0.0) sigma = 0.0;
-    sigma = sqrt(sigma);    
-    tmp = ((sum3-3*sum2*mean)/sum0 + 2*mean*mean*mean) /
-            (sigma*sigma*sigma);
+    if (m->slow) {
+      tmp = 0.0;
+      for (int i=0; i<m->ndat; i++)
+	tmp += qbe(m->dat[i]-mean);
+      error("slow skewness not implemented yet");
+    } else {
+      sigma = sum2/sum0 - mean*mean;
+      if (sigma < 0.0) sigma = 0.0;
+      sigma = sqrt(sigma);    
+      tmp = ((sum3-3*sum2*mean)/sum0 + 2*mean*mean*mean) /
+	(sigma*sigma*sigma);
+    }
     return tmp;
 }
 
