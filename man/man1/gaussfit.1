@@ -1,9 +1,12 @@
 .TH GAUSSFIT 1NEMO "19 July 1994"
-.SH NAME
+
+.SH "NAME"
 gaussfit \- Least Squares and Robust Estimation
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBgaussfit\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBgaussfit\fP is a least squares and robust estimator of an
 arbitrary parameterized model to observed data. This program
 is a slight NEMO adapation of the University of Texas program
@@ -38,7 +41,10 @@ interactively to files that have data in columnar format.  \fIcjoin\fP will
 strip off leading lines, and extract columns from different datafiles and
 put them into a single file. See also \fItabs(1NEMO)\fP for converting
 ascii tables to MIDAS format within NEMO.
-.SH PARAMETERS
+.PP
+\fIit appears the NEMO interface didn't survive the pre-CVS era.\fP
+
+.SH "PARAMETERS"
 The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
@@ -165,7 +171,8 @@ the program in run in NEMO mode. Default: \fBf\fP.
 \fBreport=t|f\fP
 If set, at the end of the run, the parameter file is read and the
 parameters and their errors (if available) are reported, one at a line.
-.SH MODEL FILE
+
+.SH "MODEL FILE"
 Here is a sample \fImodel\fP file for the linear least squares problem:
 (\fIy=a+bx\fP, with no errors in \fIx\fP):
 .nf
@@ -181,7 +188,8 @@ main()
 }
 
 .fi
-.SH DATA
+
+.SH "DATA"
 Input datafiles are in MIDAS format: columns separated by a TAB,
 the first row containing the names of the columns, the second
 row their types, and subsequent rows form the data.
@@ -195,7 +203,8 @@ contains 4 columns:
 .nf
     % tabs in=test.table out=test.tab col=x,y,x_x,y_y
 .fi
-.SH DEFICIENCES
+
+.SH "DEFICIENCES"
 The NEMO approach cannot easily handle cases where the parameters
 are indexed.
 .PP
@@ -203,20 +212,23 @@ Fixing parameters can only be done by editing the model file, and
 either changing a \fBparameter\fP into a \fBconstant\fP (this keeps
 the paramter in the parameter file, or \fBparams=\fP keyword), or
 adding constraints to the model file. Examples are in the manual.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 linreg(1NEMO), tablsqfit(1NEMO), tabs(1NEMO), mkgf(1gaussfit), cjoin(1gaussfit)
 .PP
 \fIGaussFit: A System of Least Squares and Robust Estimation\fP, USERS MANUAL,
 by William H. Jeffreys, Micheal J. Fitzpatrick., Barbara E. McArthur,
 and James E. McCartney. University of Texas at Austin.
 .fi
-.SH FILES
+
+.SH "FILES"
 .nf
 $NEMO/usr/tools/gaussfit/ 	V3.04 release
 $NEMODAT/gaussfit         	repository of some example model files
 ftp://clyde.as.utexas.edu/pub/gaussfit/  	official (anonymous ftp) release
+http://clyde.as.utexas.edu/gaussfit.tar.gz      as still seen in 2025 (release 3.55)
 .fi
-.SH ENVIRONMENT
+.SH "ENVIRONMENT"
 The following UNIX environment variables are used by \fIgaussfit\fP:
 .ta +1i
 .nf
@@ -224,7 +236,7 @@ The following UNIX environment variables are used by \fIgaussfit\fP:
 \fBGAUSSFIT\fP  	colon separated list of directories searched for model files
 
 .fi
-.SH AUTHOR
+.SH "AUTHOR"
 .nf
 Barbara McArthur (mca@astro.as.utexas.edu0)
         Source Code Copyright (C) 1987 by William H. Jefferys,
@@ -232,11 +244,13 @@ Barbara McArthur (mca@astro.as.utexas.edu0)
         All Rights Reserved.
 Peter Teuben (this NEMO interface)
 .fi
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 11-aug-92	first nemo version	pjt
 xx-apr-94	v3.04 new improved compiler, wobble fix, more env,... 	mca
 14-Jul-94	(nemo) added second mode option to run gaussfit  	pjt
 26-may-96	installed the 3.53 version (sep 95)	pjt
+15-feb-2025	installed the 3.55 version - NEMO code lost ?	PJT
 .fi

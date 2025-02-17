@@ -147,7 +147,7 @@ By default there are currently 21 programs installed:
 * mksphere -- initial conditions from an equilibrium distribution function
 * mkstar -- make a single or binary star
 * s2a -- snapshot to ascii converter
-* s2s -- copy and manipulate falcON snapshots
+* s2s -- copy and manipulate falcON snapshots *[name conflict with the falcON1 version]*
 * setH -- adapt SPH smoothing lengths
 * snapprop -- evaluates bodies function over snapshot, reports to stdout
 * sphinx -- SPH code  *[name conflicts with a common linux program]*
