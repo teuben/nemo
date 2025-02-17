@@ -7,13 +7,8 @@
  */
 
 
-//#define USE_OMP
-
 #include <nemo.h>
 #include <mdarray.h>
-#ifdef USE_OMP
-#include <omp.h>
-#endif
 
 string defv[] = {
   "dim=10,20,30,40\n Dimensions of array A[dim1][dim2][dim3][dim4]....",
@@ -22,12 +17,8 @@ string defv[] = {
 
   "flip=f\n          Reverse traversal through array, for benchmarking",
   "iter=1\n          Number of times to do the work, for benchmarking",
-  "free=f\n          Free things we don't need anymore",
-#ifdef USE_OMP
-  "nprocs=1\n        Number of processors",
-#else
+  "free=f\n          Free things we don't need anymore"
   "nprocs=-1\n       No OMP enabled",
-#endif
   "VERSION=1.2\n     11-feb-2024 PJT",
   NULL,
 };
@@ -294,13 +285,8 @@ void nemo_main()
   mdarray6 x6;
   mdarray7 x7;
 
-#ifdef USE_OMP
-  if (nprocs < 0) nprocs = omp_get_max_threads();
-  dprintf(0,"Using OMP with nprocs=%d (or use OMP_NUM_THREADS)\n",nprocs);
-#else  
   dprintf(0,"Using single CPU, no OMP enables\n");
   if (nprocs>1) warning("No OMP was enabled");
-#endif
 
   /* C99 now does it the way I wanted it to work */
   dprintf(1,"pointer test3: 0x%x 0x%x 0x%x    0x%x   0x%x 0x%x\n",test3,test3[0],&test3[0][0],&test3[0][1],test3[1],&test3[1][0]);
@@ -339,10 +325,6 @@ void nemo_main()
   //  80^4 * 10 -> 3.832"
   //  90^4 * 1  ->  0.63
   // 100^4 * 1  ->  1.00
-#ifdef USE_OMP
-  #pragma omp parallel shared(x4,ntest,dim) private(i,i4,i3,i2,i1)
-  #pragma omp for
-#endif  
   for (i=0; i<ntest; i++) {
     for (i4=0; i4<dim[3]; i4++) 
       for (i3=0; i3<dim[2]; i3++)
@@ -360,10 +342,6 @@ void nemo_main()
     // 90^4:  0.62   1.60
     // 95^4:  0.74   2.00 
     y4 = allocate_mdarray4(dim[3],dim[1],dim[0],dim[2]);
-#ifdef USE_OMP
-    #pragma omp parallel shared(x4,y4,ntest,dim) private(i,i4,i3,i2,i1)
-    #pragma omp for
-#endif    
     for (i=0; i<ntest; i++) {
       for (i4=0; i4<dim[3]; i4++) 
 	for (i3=0; i3<dim[2]; i3++)
@@ -375,10 +353,6 @@ void nemo_main()
     if (free) free_mdarray4(x4,dim[3],dim[2],dim[1],dim[0]);
     if (iwork>1) {
       y3 = allocate_mdarray3(dim[3],dim[1],dim[0]);
-#ifdef USE_OMP
-      #pragma omp parallel shared(x4,y3,ntest,dim) private(i,i4,i3,i2,i1,sum)
-      #pragma omp for
-#endif    
       for (i=0; i<ntest; i++) {
 	for (i4=0; i4<dim[3]; i4++) 
 	  for (i2=0; i2<dim[1]; i2++)
