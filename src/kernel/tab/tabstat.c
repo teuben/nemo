@@ -42,9 +42,11 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "xmax=\n             Set maximum ",
     "bad=\n              Skip this bad value if one is given",
     "robust=f\n          robust stats?",
+    "slow=f\n            slow more accurate mode (experimental)",
     "qac=f\n             QAC mode listing mean,rms,min,max",
     "label=\n            QAC label",
-    "VERSION=2.2a\n	 5-oct-2022 PJT",
+    "maxorder=4\n        3: add skewness   4: add kurtosis",
+    "VERSION=2.4\n	 17-feb-2025 PJT",
     NULL
 };
 
@@ -69,6 +71,7 @@ local bool   Qverbose;
 local bool   Qmad;
 local bool   Qac;
 local bool   Qrobust;
+local bool   Qslow;
 local bool   Qbad;
 local real   badval;
 local int    nmax;			 	 /* lines to allocate */
@@ -80,6 +83,7 @@ local int    method;
 local bool   Qmin, Qmax;
 local real   xmin, xmax;
 local string qac_label;
+local int    maxorder;
 
 extern void sortptr (real *x ,int *idx, int n);
 
@@ -125,6 +129,7 @@ void setparams(void)
     Qmad = getbparam("mad");
     Qac = getbparam("qac");
     Qrobust = getbparam("robust");
+    Qslow = getbparam("slow");
     if (hasvalue("width")) {
         width = getiparam("width");
         sprintf(outfmt,"%%%ds",width);
@@ -144,6 +149,7 @@ void setparams(void)
       qac_label = getparam("label");
     else
       qac_label = getparam("in");
+    maxorder = getiparam("maxorder");
 }
 
 void read_data(void)
@@ -164,10 +170,11 @@ void stat_data(void)
     ix = (int *) allocate(sizeof(int)*npt);     /* pointer array */
 
     ndat = 0;
-    if (Qmad || Qac || Qrobust) ndat = npt;
+    if (Qmad || Qac || Qrobust || Qslow) ndat = npt;
 
     for (j=0; j<nxcol; j++) {           /* initialize moments for all data */
-        ini_moment(&m[j],4,ndat);
+        ini_moment(&m[j],maxorder,ndat);
+	slow_moment(&m[j],Qslow);
         for (i=0; i<npt; i++) {                          /* loop over rows */
 	  if (Qbad && x[j][i]==badval) continue;
 	  if (Qmin && x[j][i]<xmin) continue;
@@ -249,20 +256,23 @@ void stat_data(void)
 	      printf("\n");
 	    }
 
-            printf("skew:   ");
-            for (j=0; j<nxcol; j++) {
+	    if (maxorder > 2) {
+	      printf("skew:   ");
+	      for (j=0; j<nxcol; j++) {
                 sprintf(fmt," %g",skewness_moment(&m[j]));        
                 out(fmt);
-            }
-            printf("\n");
+	      }
+	      printf("\n");
 
-            printf("kurt:  ");
-            for (j=0; j<nxcol; j++) {
-                sprintf(fmt," %g",kurtosis_moment(&m[j]));        
-                out(fmt);
-            }
-            printf("\n");
-
+	      if (maxorder > 3) {
+		printf("kurt:  ");
+		for (j=0; j<nxcol; j++) {
+		  sprintf(fmt," %g",kurtosis_moment(&m[j]));        
+		  out(fmt);
+		}
+		printf("\n");
+	      }
+	    }
 
 	    printf("min/sig:");
             for (j=0; j<nxcol; j++) {

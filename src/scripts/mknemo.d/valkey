@@ -1,14 +1,23 @@
 #! /usr/bin/env bash
+#
+#   valkey: the OSS replacement for redis
+#   redis:  https://github.com/redis/hiredis
 
-url=https://github.com/redis/hiredis
 url=https://github.com/valkey-io/valkey
 version=git
 
 cd $NEMO/local
-git clone $url
-cd valkey
+if [ ! -d valkey ]; then
+  git clone $url
+  cd valkey
+else
+  cd valkey
+  git pull
+fi
 
 make distclean
 make PROG_SUFFIX="_nemo" PREFIX=$NEMO/opt  install
+
+# make test
 
 echo valkey $version `date` >> $NEMO/opt/mknemo.log

@@ -14,9 +14,11 @@ typedef struct moment {
     bool *msk;              /* optional mask (@todo) */
     real datamin, datamax;  /* min & max of data */
     real sumn, sump;        /* separate sum of negative and positive numbers */
+    bool slow;              /* slow recompute from the mean, avoiding potential roundoff */
 } Moment, *MomentPtr; 
 
 void ini_moment   (Moment *, int, int);		/* allocates */
+void slow_moment  (Moment *, bool);             /* set slowness */
 void accum_moment (Moment *, real, real);	/* accumulates */
 void decr_moment  (Moment *, real, real);	/* decrements (dangerous) */
 void reset_moment (Moment *);       	        /* resets */
