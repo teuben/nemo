@@ -80,9 +80,13 @@ void free_moment(Moment *m)
 
 void slow_moment(Moment *m, bool slow)
 {
-  if (slow)
-      warning("experimental slow mode");
-  m->slow = slow;
+  if (m->ndat > 0) {
+    m->slow = slow;
+  } else {
+    if (slow)
+      error("slow mode cannot be set with ndat=0");
+    m->slow = FALSE;    
+  }
 }
 
 void accum_moment(Moment *m, real x, real w)
@@ -379,7 +383,7 @@ real median_moment(Moment *m)
 
 real sigma_moment(Moment *m)
 {
-    real mean, tmp;
+    real mean, tmp2;
     
     if (m->mom < 2)
         error("sigma_moment cannot be computed with mom=%d",m->mom);
@@ -387,15 +391,17 @@ real sigma_moment(Moment *m)
     mean=sum1/sum0;
     if (m->datamin == m->datamax) return 0.0;
     if (m->slow) {
-      tmp = 0.0;
-      for (int i=0; i<m->n; i++) {
-	tmp += sqr(m->dat[i]-mean);
+      if (m->ndat==0)
+	error("slow sigma cannot be computed with ndat=%d",m->ndat);
+      tmp2 = 0.0;
+      for (int i=0; i<m->ndat; i++) {
+	tmp2 += sqr(m->dat[i]-mean);
       }
-      tmp = tmp/sum0;
+      tmp2 = tmp2/sum0;
     } else
-      tmp = sum2/sum0 - mean*mean;
-    if (tmp <= 0.0) return 0.0;
-    return sqrt(tmp);
+      tmp2 = sum2/sum0 - mean*mean;
+    if (tmp2 <= 0.0) return 0.0;
+    return sqrt(tmp2);
 }
 
 // MARD = Mean Absolute Relative Difference
@@ -472,7 +478,7 @@ real rms_moment(Moment *m)
 
 real skewness_moment(Moment *m)
 {
-    real mean, sigma, tmp;
+    real mean, sigma, tmp, tmp2, tmp3;
 
     if (m->mom < 3)
         error("skewness_moment cannot be computed with mom=%d",m->mom);
@@ -480,10 +486,15 @@ real skewness_moment(Moment *m)
     if (m->datamin == m->datamax) return 0.0;
     mean = sum1/sum0;
     if (m->slow) {
-      tmp = 0.0;
-      for (int i=0; i<m->ndat; i++)
-	tmp += qbe(m->dat[i]-mean);
-      error("slow skewness not implemented yet");
+      tmp2 = tmp3 = 0.0;
+      for (int i=0; i<m->ndat; i++) {
+	tmp2 += sqr(m->dat[i]-mean);
+	tmp3 += qbe(m->dat[i]-mean);
+      }
+      sigma = tmp2/sum0;
+      if (sigma < 0.0) sigma = 0.0;
+      sigma = sqrt(sigma);
+      tmp = (tmp3/sum0 ) / (sigma*sigma*sigma);      
     } else {
       sigma = sum2/sum0 - mean*mean;
       if (sigma < 0.0) sigma = 0.0;
@@ -496,18 +507,27 @@ real skewness_moment(Moment *m)
 
 real kurtosis_moment(Moment *m)
 {
-    real mean, sigma2, tmp;
+    real mean, sigma2, tmp, tmp2, tmp4;
 
     if (m->mom < 4)
     error("kurtosis_moment cannot be computed with mom=%d",m->mom);
     if (m->datamin == m->datamax) return 0.0;
     if (m->n == 0) return 0.0;
     mean = sum1/sum0;
-    sigma2 = sum2/sum0 - mean*mean;
-
-    tmp = -3.0 +
-           ((sum4-4*sum3*mean+6*sum2*mean*mean)/sum0 - 3*mean*mean*mean*mean) /
-           (sigma2*sigma2);
+    if (m->slow) {
+      tmp2 = tmp4 = 0.0;
+      for (int i=0; i<m->ndat; i++) {
+	tmp2 += sqr(m->dat[i]-mean);
+	tmp4 += sqr(sqr(m->dat[i]-mean));
+      }
+      sigma2 = tmp2/sum0;
+      tmp = -3.0 + (tmp4/sum0 ) / (sigma2*sigma2);
+    } else {
+      sigma2 = sum2/sum0 - mean*mean;
+      tmp = -3.0 +
+	    ((sum4-4*sum3*mean+6*sum2*mean*mean)/sum0 - 3*mean*mean*mean*mean) /
+            (sigma2*sigma2);
+    }
     return tmp;
 }
 
