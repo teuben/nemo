@@ -27,10 +27,15 @@ for arg in $*; do\
    export $arg
 done
 
+# work around SIP on a Mac (grrrr)
+if [ -z $DYLD_LIBRARY_PATH ]; then
+    source $NEMO/nemo_start.sh;
+fi
+
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2024-10-18) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2025-02-18) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
