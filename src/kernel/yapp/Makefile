@@ -218,6 +218,10 @@ yapptest_mesa: yapp_mesa.c testyapp.c
 	$(CC) -DMESA $(CFLAGS) -o yapptest_mesa yapp_mesa.c testyapp.c \
 		$(NEMO_LIBS) $(LIBMESA) -lm
 
+yapptest_meta: yapp_meta.c testyapp.c
+	$(CC) -DMETA $(CFLAGS) -o yapptest_meta yapp_meta.c testyapp.c \
+		$(NEMO_LIBS) -lm
+
 yapptest_sm: yapp_sm.c testyapp.c
 	$(CC) $(CFLAGS) -o yapptest_sm yapp_sm.c testyapp.c \
 		$(NEMO_LIBS) $(LIBSM) -lm
