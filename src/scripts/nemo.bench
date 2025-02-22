@@ -32,10 +32,15 @@ if [ -z $DYLD_LIBRARY_PATH ]; then
     source $NEMO/nemo_start.sh;
 fi
 
+# protect when /usr/bin/time doesn't exist anymore (e.g. on modern darwin)
+if [ ! -e /usr/bin/time ]; then
+    time=""
+fi
+
 mkdir $tmp
 cd $tmp
 
-echo "NEMOBENCH: (2025-02-18) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
+echo "NEMOBENCH: (2025-02-21) $tmp : nbody0=$nbody0 nbody1=$nbody1 nbody3=$nbody3 size=$size ften=$ften clean=$clean bsf=$bsf tmp=$tmp"
 echo `hostname` 
 echo `uname -a`  
 echo `date`
