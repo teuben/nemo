@@ -29,12 +29,10 @@ done
 
 # work around SIP on a Mac (grrrr)
 if [ -z $DYLD_LIBRARY_PATH ]; then
-    source $NEMO/nemo_start.sh;
-fi
-
-# protect when /usr/bin/time doesn't exist anymore (e.g. on modern darwin)
-if [ ! -e /usr/bin/time ]; then
-    time=""
+    source $NEMO/nemo_start.sh
+    if [ $time = "/usr/bin/time" ]; then
+	time=""
+    fi
 fi
 
 mkdir $tmp
