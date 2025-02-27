@@ -70,11 +70,6 @@
 #    include <type_traits>
 #  endif
 #endif
-#if __cplusplus >= 201103L && defined(_OPENMP) && \
-  !defined(WDutils_included_omp_h)
-#  include <omp.h>
-#  define WDutils_included_omp_h
-#endif
 
 //                                                                              
 //  WDutils                                                                     
@@ -141,27 +136,7 @@ namespace WDutils {
       Info._m_mpi_size=s;
     }
 
-    /// \name openMP stuff
-    //@{
-    /// set \# openMP threads
-    /// \note If @a arg[0] == 't', we set \# threads to \# processors.
-    ///       If @a arg[0] == 'f', we set \# threads to 1 (no openMP).
-    ///       Otherwise, we try to convert @a arg to an integer number and
-    ///       take that. This may exceed the \# processors.
-    static void set_omp(const char*arg);
-    /// set number of openMP threads
-    static void set_omp(int n);
-    /// maximum \# processors available for openMP
-    static int max_omp_proc()
-    { return Info._m_omp_proc; }
-    /// number of openMP threads to be used, may exceed @a max_omp_proc()
-    /// \note defaults to max_omp_proc, implying openMP is used if available
-    static int omp_threads()
-    { return Info._m_omp_size; }
-    /// shall openMP parallelism be used?
-    static bool use_omp()
-    { return Info._m_omp_size > 1; }
-    //@}
+
 
     /// \name TBB stuff
     //@{
