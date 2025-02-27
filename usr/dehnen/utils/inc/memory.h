@@ -71,6 +71,8 @@
 #  include <inline.h>
 #endif
 
+
+
 #if __cplusplus < 201103L
 #  define noexcept
 #  define constexpr
@@ -248,7 +250,8 @@ namespace WDutils {
 }
 //
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
-#  include <mm_malloc.h>
+//#  include <mm_malloc.h>
+//#  include <xmmintrin.h>
 #endif
 //
 namespace WDutils {
@@ -372,7 +375,9 @@ namespace WDutils {
     void*t;
     bool failed=0;
     try {
-      t = _mm_malloc(nbytes,K);
+      //t = _mm_malloc(nbytes,K);
+      posix_memalign(&t, K, nbytes);
+      //alligned_alloc(K, nbytes);
     } catch(...) {
       t = 0;
       failed = 1;
@@ -454,7 +459,8 @@ namespace WDutils {
 	("WDutils::DelArrayAligned<%d,%s>(%p): not aligned",K,nameof(T),array);
     }
     try {
-      _mm_free(const_cast<T*>(array));
+      //_mm_free(const_cast<T*>(array));
+      free(const_cast<T*>(array));
     } catch(...) {
       throw Thrower(file,line)
 	("WDutils::DelArrayAligned<%d,%s>(%p): de-allocation failed\n",
@@ -1959,11 +1965,14 @@ namespace WDutils {
 	throw std::bad_alloc();
       void*ret =
 #if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
-	_mm_malloc
+	//_mm_malloc
+  posix_memalign(&ret, alignment, n);
+  //aligned_alloc(alignment, n)
 #else
+  posix_memalign(&ret, alignment, n);
 	_aligned_malloc
 #endif
-	(n,alignment);
+	//(n,alignment);
       if(!ret)
 	throw std::bad_alloc();
       DebugInfoN(WDutilsAllocDebugLevel,
@@ -1977,11 +1986,11 @@ namespace WDutils {
 		 "static_allocator<%lu>: trying to de-allocated memory @ %p\n",
 		 alignment,p);
 #if defined(__clang__) || defined(__GNUC__) || defined (__INTEL_COMPILER)
-      _mm_free
+      //_mm_free
+      free(p);
 #else
       _aligned_free
 #endif
-	(p);
       DebugInfoN(WDutilsAllocDebugLevel,
 		 "static_allocator<%lu>: de-allocated memory @ %p\n",
 		 alignment,p);
