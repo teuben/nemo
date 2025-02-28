@@ -10,6 +10,7 @@
 # -----------------
 
 PLATFORM 	:= $(shell uname -m)
+OS      	:= $(shell uname)
 
 # --------------------
 # maximum tensor order

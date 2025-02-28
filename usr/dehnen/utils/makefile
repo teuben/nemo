@@ -4,7 +4,7 @@
 # Makefile for WDutils
 #
 ################################################################################
-
+OS      	:= $(shell uname)
 SHELL		:= csh
 
 default		: library
@@ -158,6 +158,9 @@ $(LIB)libWDutils.a	:	$(LIBOBJECTS)
 ifeq ($(NO_SHARED_LIBS),0)
 $(LIB)libWDutils.so	:	$(LIBOBJECTS)
 				$(CXX) $^ $(LDFLAGS) $(LINKLIBS) -o $@
+ifeq ($(OS),Darwin)
+				install_name_tool -id $(NEMO)/usr/dehnen/utils/lib/libWDutils.so $(LIB)libWDutils.so
+endif
 else
 $(LIB)libWDutils.so	:	$(LIBOBJECTS)
 				@echo Skipping libWDutils.so

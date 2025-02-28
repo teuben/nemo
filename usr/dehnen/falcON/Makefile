@@ -150,7 +150,10 @@ $(LIB)lib$(LIBNAME).a:	$(falcON_objs)
 
 ifeq ($(NO_SHARED_LIBS),0)
 $(LIB)lib$(LIBNAME).so:	$(falcON_objs)
-			$(CXX) $^ -Lutils/lib -lWDutils $(LNEMO) -shared -o $@
+			$(CXX) $^ -L$(NEMO)/usr/dehnen/utils/lib -lWDutils $(LNEMO) -shared -o $@
+ifeq ($(OS),Darwin)
+			install_name_tool -id $(NEMO)/usr/dehnen/falcON/lib/lib$(LIBNAME).so $(LIB)lib$(LIBNAME).so
+endif
 else
 $(LIB)lib$(LIBNAME).so:
 			@echo Skipping lib$(LIBNAME).so:
