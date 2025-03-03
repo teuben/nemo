@@ -83,7 +83,7 @@ string defv[] = {
 
 string usage="testing mstropen";
 
-nemo_main()
+void nemo_main()
 {
   mstr *mp;
   int i, n = getiparam("n");

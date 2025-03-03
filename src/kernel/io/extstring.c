@@ -104,7 +104,7 @@ bool xstreq(             /* returns TRUE if equal */
 
 #ifdef TESTBED
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
     register int i;
     long lstr[32], *lcop;

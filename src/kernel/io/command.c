@@ -284,7 +284,7 @@ void do_e(void) {
   printf("e::\n");
 }
 
-nemo_main()
+void nemo_main()
 {
   int i, n = getiparam("n");
   int na, ivar;
