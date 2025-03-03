@@ -82,8 +82,6 @@ string defv[] = {
 
 string usage="frandom test";
 
-string cvsid="$Id$";
-
 real gauss(real x)
 {
    return exp(-0.5*x*x);  /* gauss: mean 0, sigma: 1 */
@@ -94,7 +92,7 @@ real power(real x)
   return pow(x,-2.5);
 }
 
-nemo_main()
+void nemo_main()
 {
    double a,b;
    int n;

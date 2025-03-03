@@ -25,6 +25,7 @@ void unwrap(real w, int n, real *p, int idx, int mode, real fixval)
 #ifdef TESTBED
 
 #include <getparam.h>
+#include <table.h>
 
 string defv[] = {
     "in=???\n       Table with phases in column 1",
@@ -43,7 +44,7 @@ string defv[] = {
 
 string usage="unwrap phases";
 
-nemo_main()
+void nemo_main()
 {
     real *coldat[1], *p, period, psum=0.0;
     int i, n, nmax, colnr[1];
@@ -55,7 +56,7 @@ nemo_main()
     instr = stropen(getparam("in"),"r");
     outstr = stropen(getparam("out"),"w");
 
-    nmax = file_lines(getparam("in"),getiparam("nmax"));
+    nmax = nemo_file_lines(getparam("in"),getiparam("nmax"));
     if (nmax<1) error("Problem reading input file");
 
         

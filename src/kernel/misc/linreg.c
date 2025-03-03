@@ -255,7 +255,7 @@ string cvsid="$Id$";
 #define MAXCOL  256
 
 
-patch_line(char *cp)      /* replace TAB and CR/NL with spaces */
+void patch_line(char *cp)      /* replace TAB and CR/NL with spaces */
 {
   while (*cp) {
     if (*cp == '\t' || *cp == '\n' || *cp == '\r') *cp = ' ';
@@ -263,7 +263,7 @@ patch_line(char *cp)      /* replace TAB and CR/NL with spaces */
   }
 }
 
-nemo_main()
+void nemo_main()
 {
     stream fp;
     char   line[256];

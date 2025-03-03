@@ -194,7 +194,7 @@ local int interval(real u, real *x, int n)
 #define fpr2(x0) (-0.75*cos(PI*x0)/(sqrt(x0)*x0) - PI*cos(PI*x0)/(2*sqrt(x0)) \
     - PI*sin(PI*x0)/(2*sqrt(x0)) - PI*PI*sqrt(x0)*cos(PI*x0))
 
-main()
+int main()
 {
     int i;
     real x[N], y[N], coef[3*N], x0;

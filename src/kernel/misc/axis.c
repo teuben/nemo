@@ -249,7 +249,7 @@ string defv[] = {
 
 real xrange[] = { -2.0, 2.0 }, yrange[] = { 0.0, 4.0 };
 
-nemo_main()
+void nemo_main()
 {
     real xtrans(real), ytrans(real);
 
