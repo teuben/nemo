@@ -82,7 +82,7 @@ string defv[] = {
     NULL,
 };
 
-nemo_main()
+void nemo_main()
 {
     char *name, newname[80];
     stream fstr;
