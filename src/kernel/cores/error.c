@@ -194,9 +194,14 @@ string defv[]={
     NULL,
 };
 
-nemo_main()
+void fun()
 {
-    int fun(), n;
+    printf("Fun Fun Fun - a recoverable error occurred\n");
+}
+
+void nemo_main()
+{
+    int n;
 
     if (getbparam("recover"))
         recover( (proc) fun );
@@ -205,9 +210,5 @@ nemo_main()
       error("error: foo=%f  bar=%d  fum=\"%s\"", 3.1415, 32768, "waldo");
 }
 
-fun()
-{
-    printf("Fun Fun Fun - a recoverable error occurred\n");
-}
 #endif
 
