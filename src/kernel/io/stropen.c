@@ -332,7 +332,7 @@ void testing(string name, string mode, string text, bool del)
 }
     
 
-nemo_main()
+void nemo_main()
 {
     testing(getparam("name"),
 	    getparam("mode"),
