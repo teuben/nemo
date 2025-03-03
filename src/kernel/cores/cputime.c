@@ -190,7 +190,11 @@ string defv[] =  {
 
 string usage="cpu benchmark of sorts";
 
-void nemo_main(void)
+void float_test(int cnt);
+void int_test(int cnt);
+void dummy(real a, real b, real c, real d, real e, real f, real g);
+
+void nemo_main()
 {
     int cnt = getiparam("count") * 1000;
     string mode = getparam("mode");
@@ -203,7 +207,7 @@ void nemo_main(void)
         error("Invalid mode: choose f or i");
 }
 
-float_test(int cnt)
+void float_test(int cnt)
 {
     int  i;
     real a, b, c, d, e, f, g;
@@ -280,7 +284,7 @@ float_test(int cnt)
 	   subspeed/mulspeed, 1.0, divspeed/mulspeed, sqrtspeed/mulspeed);
 }
 
-int_test(int cnt)
+void int_test(int cnt)
 {
     int  i;
     int a, b, c, d, e, f, g;
@@ -355,7 +359,7 @@ int_test(int cnt)
 	   subspeed/mulspeed, 1.0, divspeed/mulspeed, sqrtspeed/mulspeed);
 }
 
-dummy(real a, real b, real c, real d, real e, real f, real g) {}
+void dummy(real a, real b, real c, real d, real e, real f, real g) {}
 
 
 #endif

@@ -17,7 +17,7 @@ extern double funcf(double *);
 extern double funcc(double *);
 
 
-nemo_main()
+void nemo_main()
 {
     double x = getdparam("x");
 

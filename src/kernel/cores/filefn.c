@@ -345,7 +345,7 @@ string path, name;
 
 char line[MAXLINE];
 
-nemo_main()
+void nemo_main()
 {
     stream infile;
 

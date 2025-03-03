@@ -66,7 +66,7 @@ string defv[] = {
 
 string usage="test within()";
 
-nemo_main()
+void nemo_main()
 {
     if (within(getdparam("val"), getparam("range"), getdparam("fuzz")))
         printf("within returns TRUE\n");
