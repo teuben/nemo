@@ -11,6 +11,10 @@ To take a example from python, where one often does:
      w = bar(v['a1'], v['a2'])
      x,y,z = foobar(p1, p2, p3)
 
+and in matlab you define a function with input and output, e.g.
+
+     function [out1,out2,out3] = foobar(in1,in2,in3)
+
 So in NEMO, which uses the shell, there is no such easy construct.
 
 Imagine NEMO to have a pool of variables, controlled by $NEMOVAR
