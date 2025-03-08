@@ -20,11 +20,11 @@ endif
 
 if (! -e $dir) then
   cd $NEMO/usr/jcl
+  # new:  https://gitlab.lam.fr/jclamber/uns_projects.git/
   git clone https://gitlab.lam.fr/jclamber/uns_projects
 endif
 
 if (-e $dir) then
-  rm -rf $dir/build
   mkdir -p $dir/build
   cd $dir/build
   cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
@@ -37,4 +37,7 @@ if (-e $dir) then
 endif
 
 
-echo  pip install python-unsiotools -U
+echo  "See $dir for code"
+echo  "pip install python-unsiotools -U"
+
+echo "uns_projects git `date`" >> $NEMO/opt/mknemo.log
