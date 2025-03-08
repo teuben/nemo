@@ -20,21 +20,17 @@ endif
 
 if (! -e $dir) then
   cd $NEMO/usr/jcl
-  # new:  https://gitlab.lam.fr/jclamber/uns_projects.git/
   git clone https://gitlab.lam.fr/jclamber/uns_projects
 endif
 
-if (-e $dir) then
-  mkdir -p $dir/build
-  cd $dir/build
-  cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
-  make -i
-  make -i install
-  #  somehow a few binaries from usr/jcl/uns_projects/build/bin were not copied to $NEMOBIN
-  cp bin/* $NEMOBIN
+mkdir -p $dir/build
+cd $dir/build
+cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
+make -i
+make -i install
+#  somehow a few binaries from usr/jcl/uns_projects/build/bin were not copied to $NEMOBIN
+cp bin/* $NEMOBIN
 
-  echo mknemo.d: $dir does not exist
-endif
 
 
 echo  "See $dir for code"
