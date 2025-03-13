@@ -51,3 +51,8 @@ libccfits0v5
 parallel
 pv
 
+#
+saods9
+xpa-tools
+# funtools    # for binary tables q
+
