@@ -1,0 +1,16 @@
+
+ALL = run1
+
+all: $(ALL)
+
+help:
+	@echo no help here yet
+	
+clean:
+	rm -rf run1.*
+
+run1:
+	rm -f run1.*
+	mkplummer run1.1 100 seed=123
+	uns_info run1.1
+
