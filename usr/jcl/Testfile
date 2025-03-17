@@ -4,7 +4,8 @@ DIR = usr/jcl
 BIN = uns_info uns_density
 NEED = $(BIN) mkplummer
 
-ALL = run1 run2
+#ALL = run1 run2
+ALL = $(BIN) 
 
 
 all: $(ALL)
@@ -19,12 +20,13 @@ clean:
 need:
 	@echo $(NEED)
 
-run1:
+# unsio provides this
+uns_info:
 	mkplummer run1.1 100 seed=123
 	uns_info run1.1
 
-
-run2:
+# uns_projects provides this
+uns_density:
 	uns_tonemo run1.1 run2.1 all
         # uns_2dplot run2.1 all
 	uns_density run2.1 run2.2 all
