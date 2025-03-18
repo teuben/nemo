@@ -7,6 +7,8 @@ recipes:
 unsio:   (see also: https://simutools.docs.lam.fr/unsio/)
 `   git clone https://gitlab.lam.fr/simutools/unsio/
     mknemo unsio
+
+    this also needs libsqlite3-dev (ubuntu) or libsq3-devel (fedora)
     
 python wrapper for unsio: (see also : https://pypi.org/project/unsio/)
     To read/write in NEMO format or Gadget1,2,3 or RAMSES 
