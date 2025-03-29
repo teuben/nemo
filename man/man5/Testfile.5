@@ -1,0 +1,45 @@
+.TH TESTFILE 5NEMO "28 March 2025" 
+.SH "NAME"
+Testfile \- a Makefile for regression testing
+
+.SH "DESCRIPTION"
+NEMO uses a \fBTestfile\fP in specific directories to orechestrate
+a series of regression tests via the "make check" command.
+In local directories one tyically does
+.EX
+
+    make -f Testfile clean all
+
+.EE
+to test and set up the tests.  An example of a test could be
+the following make \fItarget\fP in the Testfile:
+.EX
+
+      mkplummer:
+            mkplummer mkplummer.100 100 seed=123
+            bsf mkplummer.100 test="0.00142653 0.648292 -4.67407 5.57043 701"
+      
+.EE
+It is important to pick descriptive filenames, because these would show up
+in the summary of "cd $NEMO; make check"  and help location the trouble spot.
+The file \fI$NEMO/testsuite.log\fP also contains the output logs of running
+the testsuite.
+
+.SH "SEE ALSO"
+nemo(1NEMO), bsf(1NEMO), Benchfile(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
+.nf
+.ta +2.5i
+~/src/scripts/testsuite		script that orchestrates running all Testfile's
+.fi
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+jan-2000	testsuite written	PJT
+28-mar-2025	documentation finally written    	PJT
+.fi
+
