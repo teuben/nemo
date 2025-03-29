@@ -5,6 +5,7 @@ Testfile \- a Makefile for regression testing
 .SH "DESCRIPTION"
 NEMO uses a \fBTestfile\fP in specific directories to orechestrate
 a series of regression tests via the "make check" command.
+A \fBTestfile\fP follows the Makefile (see \fImake(1)\fP) format.
 In local directories one tyically does
 .EX
 
@@ -15,9 +16,9 @@ to test and set up the tests.  An example of a test could be
 the following make \fItarget\fP in the Testfile:
 .EX
 
-      mkplummer:
-            mkplummer mkplummer.100 100 seed=123
-            bsf mkplummer.100 test="0.00142653 0.648292 -4.67407 5.57043 701"
+   mkplummer:
+       mkplummer mkplummer.100 100 seed=123
+       bsf mkplummer.100 test="0.00142653 0.648292 -4.67407 5.57043 701"
       
 .EE
 It is important to pick descriptive filenames, because these would show up
@@ -26,7 +27,7 @@ The file \fI$NEMO/testsuite.log\fP also contains the output logs of running
 the testsuite.
 
 .SH "SEE ALSO"
-nemo(1NEMO), bsf(1NEMO), Benchfile(5NEMO)
+make(1), nemo(1NEMO), bsf(1NEMO), Benchfile(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
@@ -36,7 +37,8 @@ Peter Teuben
 .ta +2.5i
 ~/src/scripts/testsuite		script that orchestrates running all Testfile's
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +1.25i +4.5i
 jan-2000	testsuite written	PJT
