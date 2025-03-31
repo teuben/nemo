@@ -20,7 +20,7 @@ endif
 
 if (! -e $dir) then
   cd $NEMO/usr/jcl
-  git clone https://gitlab.lam.fr/jclamber/uns_projects
+  git clone https://gitlab.lam.fr/simutools/uns_projects
 endif
 
 mkdir -p $dir/build

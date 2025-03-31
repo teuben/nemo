@@ -40,7 +40,7 @@ if ( ! -e ${dir} ) then
   #echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
   # we clone first time
   cd $NEMO/usr/jcl
-  git clone https://gitlab.lam.fr/jclamber/unsio
+  git clone https://gitlab.lam.fr/simutools/unsio
 endif
 
 if ( -e $dir ) then
