@@ -1,14 +1,32 @@
 #! /usr/bin/env bash
+#
+# 
+# paper:     https://academic.oup.com/mnras/article/510/4/6201/6501217
+# docs:      https://exp-docs.readthedocs.io/en/jupyter/
+# install:   https://github.com/EXP-code/EXP/blob/main/INSTALL.md
+# examples:  https://github.com/EXP-code/EXP-examples.git
 
-# https://github.com/EXP-code/EXP/blob/main/INSTALL.md
-# paper:  https://academic.oup.com/mnras/article/510/4/6201/6501217
-
-url=https://github.com/EXP-code/EXP
+url1=https://github.com/EXP-code/EXP
+url2=https://github.com/EXP-code/EXP-examples
+cmake=0
 
 cd $NEMO/local
 
+if [ $cmake == 1 ]; then
+    # cmake needs to be 3.25 or up
+    # 
+    # compiling from source takes time
+    git clone https://gitlab.kitware.com/cmake/cmake
+    cd cmake
+    #  not sure how to 'make install' install in $NEMO/opt tree
+    ./bootstrap
+    make
+    # make install
+    bin/cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt .
+fi
+
 if [ ! -d EXP ]; then
-   git clone $url
+   git clone $url1
    cd EXP
    git submodule update --init --recursive
 else
@@ -19,10 +37,25 @@ mkdir -p build
 cd build
 
 
-# cmake needs to be 3.25 or up
+# on e.g. ubuntu /usr can be used, others might need /usr/local or $NEMO/opt/
+EIGEN_BASE=/usr
 
-# no CUDA
+
+# popular options to consider:
+# -DENABLE_CUDA=YES
+# -DENABLE_SLURM=ON
+# -DENABLE_PNG=ON and/or -DENABLE_VTK=ON
 cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_USER=YES -DEigen3_DIR=$EIGEN_BASE/share/eigen3/cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt -Wno-dev ..
 
 make -j 4
 make install
+#   this will install 96 binaries -- at last count -- in $NEMO/opt/bin
+
+
+if [ ! -d EXP-examples ]; then
+   git clone $url2    
+fi
+
+
+
+echo "EXP git `date`" >> $NEMO/opt/mknemo.log
