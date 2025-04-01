@@ -1,0 +1,28 @@
+#! /usr/bin/env bash
+
+# https://github.com/EXP-code/EXP/blob/main/INSTALL.md
+# paper:  https://academic.oup.com/mnras/article/510/4/6201/6501217
+
+url=https://github.com/EXP-code/EXP
+
+cd $NEMO/local
+
+if [ ! -d EXP ]; then
+   git clone $url
+   cd EXP
+   git submodule update --init --recursive
+else
+   cd EXP
+fi
+
+mkdir -p build
+cd build
+
+
+# cmake needs to be 3.25 or up
+
+# no CUDA
+cmake -DCMAKE_BUILD_TYPE=Release -DENABLE_USER=YES -DEigen3_DIR=$EIGEN_BASE/share/eigen3/cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt -Wno-dev ..
+
+make -j 4
+make install
