@@ -9,6 +9,7 @@
 # gfortran:   -lgfortran
 
 set dir=$NEMO/usr/jcl/uns_projects
+set url=https://gitlab.lam.fr/simutools/uns_projects
 set branch=master
 set branch=develop   # or use master when merged
 
@@ -22,7 +23,7 @@ endif
 
 if (! -e $dir) then
   cd $NEMO/usr/jcl
-  git clone -b $branch https://gitlab.lam.fr/simutools/uns_projects
+  git clone -b $branch $url
 endif
 
 mkdir -p $dir/build
