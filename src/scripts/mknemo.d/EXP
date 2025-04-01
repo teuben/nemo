@@ -25,6 +25,12 @@ if [ $cmake == 1 ]; then
     bin/cmake -DCMAKE_INSTALL_PREFIX=$NEMO/opt .
 fi
 
+
+if [ ! -d EXP-examples ]; then
+   git clone $url2    
+fi
+
+
 if [ ! -d EXP ]; then
    git clone $url1
    cd EXP
@@ -51,10 +57,6 @@ make -j 4
 make install
 #   this will install 96 binaries -- at last count -- in $NEMO/opt/bin
 
-
-if [ ! -d EXP-examples ]; then
-   git clone $url2    
-fi
 
 
 
