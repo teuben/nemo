@@ -9,6 +9,9 @@
 # gfortran:   -lgfortran
 
 set dir=$NEMO/usr/jcl/uns_projects
+set url=https://gitlab.lam.fr/simutools/uns_projects
+set branch=master
+set branch=develop   # or use master when merged
 
 # for linux
 set args=""
@@ -20,12 +23,12 @@ endif
 
 if (! -e $dir) then
   cd $NEMO/usr/jcl
-  git clone https://gitlab.lam.fr/jclamber/uns_projects
+  git clone -b $branch $url
 endif
 
 mkdir -p $dir/build
 cd $dir/build
-#    mysteriously this has to run twice
+#    mysteriously (?) this has to run twice
 cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
 cmake .. -DCMAKE_INSTALL_PREFIX=${NEMO}
 make -i

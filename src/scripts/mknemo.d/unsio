@@ -21,6 +21,7 @@
 #  -DCMAKE_DISABLE_FORTRAN=1
 
 set dir=$NEMO/usr/jcl/unsio
+set url=https://gitlab.lam.fr/simutools/unsio
 
 # for linux
 set args=""
@@ -40,11 +41,11 @@ if ( ! -e ${dir} ) then
   #echo '    (cd $NEMO/usr/jcl; make unsio; mknemo unsio)'
   # we clone first time
   cd $NEMO/usr/jcl
-  git clone https://gitlab.lam.fr/jclamber/unsio
+  git clone $url
 endif
 
 if ( -e $dir ) then
-  rm -rf $dir/build
+  # rm -rf $dir/build
   mkdir -p $dir/build
   cd $dir/build
   cmake -DCMAKE_INSTALL_PREFIX=$NEMO $h5 ..

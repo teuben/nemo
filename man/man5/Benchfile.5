@@ -1,0 +1,50 @@
+.TH BENCHFILE 5NEMO "28 March 2025" 
+.SH "NAME"
+Benchfile \- a Makefile for benchmark testing
+
+.SH "DESCRIPTION"
+NEMO uses a \fBBenchfile\fP in specific directories to orchestrate
+a series of benchmarks via the "make bench" command.
+A \fBBenchfile\fP follows the Makefile (see \fImake(1)\fP) format.
+In local directories one tyically does
+.EX
+
+    make -f Benchfile clean all
+
+.EE
+to test and set up the tests.  An example of a test could be
+the following make \fItarget\fP in the Benchfile:
+.EX
+
+   mkplummer:
+         nemobench my_label mkplummer . 10000000 
+      
+.EE
+Like in Testfile's, it is important to pick a descriptive and unique label
+for the final report.
+.PP
+The file \fI$NEMO/benchsuite.log\fP also contains the output logs of running
+the benchsuite.
+.PP
+To collect benchmark q
+
+.SH "SEE ALSO"
+make(1), nemo(1NEMO), bsf(1NEMO), Testfile(5NEMO)
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "FILES"
+.nf
+.ta +2.5i
+~/src/scripts/benchsuite		script that orchestrates running all Benchfile's
+~/src/scripts/nemobench		command to collect benchmark info
+.fi
+
+.SH "HISTORY"
+.nf
+.ta +1.25i +4.5i
+aug-2021	cloned off testsuite	VB/PJT
+28-mar-2025	documentation written    	PJT
+.fi
+
