@@ -103,7 +103,7 @@ resources of course. Memory, number of cores etc.
      parallel -j 4 < example1.run
      sbatch_nemo.sh example1.run
 
-in particular the last ``sbatch_nemo.sh`` example will likely need to be tailored for your HPC system.
+in particular the last ``sbatch_nemo.sh`` example will likely need to be tailored for your sbatch based (HPC) system.
 
 .. note::
    Unless the parameters take care of this, you will need to ensure data are written to files that do not

@@ -18,7 +18,7 @@ Some other comments:
   different integrators would find anywhere from 1 to 5 escaping stars in this simulation.
   He decided the number of escapers was 3 plus or minus 2!
 
-- the JPL (PIcket et al. 1998) catalogue used by tabpp can be installed with the script
+- the JPL (Picket et al. 1998) catalogue used by tabpp can be installed with the script
   $NEMO/src/scripts/get_jplcatalog
 
 - Intel is little endian, (bytes "92 0b" are the first two), where big endian are "0b 92".

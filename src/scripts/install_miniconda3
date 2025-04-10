@@ -16,6 +16,7 @@ version=310_24.7.1-0           # 3.10.15
 version=311_24.7.1-0           # 3.11.9
 version=312_24.7.1-0           # 3.12.4
 version=312_24.11.1-0          # 3.12.8
+version=312_25.1.1-2           # 3.12.9
 
     dir=$(pwd)/miniconda3      # where miniconda will be located
    wget=wget                   # use wgetc is you have my cashing version (wget=curl is also allowed)

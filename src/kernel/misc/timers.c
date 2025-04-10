@@ -99,7 +99,7 @@ double diff_timers2(int i, int j)
 #ifdef TESTBED
 
 
-nemo_main()
+void nemo_main()
 {
   int i, n=10;
     init_timers(n+1);

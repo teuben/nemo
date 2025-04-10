@@ -1,4 +1,4 @@
-.TH MKNEMO 8NEMO "3 March 2024"
+.TH MKNEMO 8NEMO "8 March 2025"
 
 .SH "NAME"
 mknemo \- install NEMO (and related) libraries and programs 
@@ -13,7 +13,7 @@ without the need to know where it is located, and build it locally
 and move it into $NEMOBIN.   Later on, \fImknemo\fP evolved
 to also become a convenient package manager, placing 3rd party software
 under \fI$NEMO/opt\fP, giving NEMO a convenient containerized
-option.
+option using recipe files in $NEMO/src/scripts/mknemo.d
 
 .PP
 \fImknemo\fP attempts to find the source code of the program(s)
@@ -146,7 +146,7 @@ Peter Teuben
 .SH "FILES"
 .nf
 .ta +3.0i
-$NEMO/src/scripts/mknemo.d	directory with non-default control files for mknemo
+$NEMO/src/scripts/mknemo.d	directory with recipe files for mknemo
 $NEMO/src/scripts/template	NEMO program template generator
 $NEMO/src/scripts/mkman		NEMO man page template generator
 $NEMOLIB/makedefs	make variables

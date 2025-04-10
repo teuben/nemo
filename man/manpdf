@@ -15,10 +15,17 @@
 #     mandoc mandoc -T pdf -man manpage.1  > manpage.1.pdf
 #          but doesn't look at good.
 #     pandoc - doesn't seem to read man files, it can create them
+#
+# groff: fatal error: cannot load 'DESC' description file for device 'pdf'
+#    on ubuntu, both groff and groff-base need to be installed
+#    see 
+
+set o=ps      # PostScript, good backup if pdf is not working
+set o=pdf     # PDF
 
 foreach file ($*)
   if (-e $file) then
-    groff -man -Tpdf $file > $file.pdf
-    echo xdg-open $file.pdf
+    groff -man -T$o $file > $file.$o
+    echo xdg-open $file.$o
   endif
 end

@@ -49,7 +49,7 @@ LOBJFILES= $L(axis.o) $L(besselfunc.o) $L(erf.o) $L(fie.o) $L(layout.o) \
 
 BINFILES = nemoinp layout xrandom scanopt linreg
 
-TESTFILES = vecttest axistest splinetest withintest \
+TESTFILES = axistest splinetest withintest \
 	matchtest linreg momenttest gridtest unwraptest frandomtest \
 	mdarraytest timerstest runtest
 
@@ -175,7 +175,7 @@ mdarraytest: mdarray.c
 	$(CC) $(CFLAGS) -o mdarraytest -DTESTBED mdarray.c $(NEMO_LIBS)
 
 axistest: axis.c
-	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(NEMO_LIBS)
+	$(CC) $(CFLAGS) -o axistest -DTESTBED axis.c $(NEMO_LIBS) $(YAPPLIB) -lpng
 
 axistest_ps: axis.c
 	$(CC) $(CFLAGS) -o axistest_ps -DTESTBED axis.c $(NEMO_LIBS)

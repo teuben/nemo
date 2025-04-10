@@ -1,0 +1,41 @@
+#  -*- makefile -*-
+
+DIR = usr/jcl
+BIN = uns_info uns_density
+NEED = $(BIN) mkplummer
+
+#ALL = run1 run2
+ALL = $(BIN)
+
+DATA = uns_data
+
+
+all: $(ALL)
+
+help:
+	@echo no help here yet
+
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(DATA).*
+
+need:
+	@echo $(NEED)
+
+$(DATA).1:
+	mkplummer $(DATA).1 100 seed=123
+
+# unsio provides this
+uns_info: $(DATA).1
+	uns_info $(DATA).1
+	bsf $(DATA).1 test="0.00142653 0.648292 -4.67407 5.57043 701"
+
+# uns_projects provides this
+uns_density: $(DATA).1
+	@rm -f $(DATA).2 $(DATA).3
+	uns_tonemo $(DATA).1 $(DATA).2 all
+        # uns_2dplot run2.1 all
+	uns_density $(DATA).2 $(DATA).3 all
+	tsf $(DATA).3
+	bsf $(DATA).3 test="0.155012 0.769858 -4.67407 7.26991 901"
+

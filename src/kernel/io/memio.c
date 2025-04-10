@@ -120,7 +120,7 @@ string defv[] = {
 
 string usage = "misaligned data/memory routines with optional disk I/O";
 
-nemo_main()
+void nemo_main()
 {
     stream ostr;
     string itype = getparam("itype");

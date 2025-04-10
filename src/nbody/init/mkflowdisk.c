@@ -46,7 +46,7 @@ string defv[] = {
     "test=f\n             test shape of spiral (all particles at 0 phase offset)",
     "constant=f\n         force vt constant in rotating frame ?",
     "headline=\n	  text headline for output ",
-    "VERSION=1.5a\n	  20-oct-2024 PJT",
+    "VERSION=1.5b\n	  2-mar-2025 PJT",
     NULL,
 };
 
@@ -69,7 +69,7 @@ local int  jz_sign;
 local Body *disk = NULL;
 local real theta[361], dens[361];
 
-local proc potential;
+local potproc_real potential;
 
 void   writegalaxy(stream outstr);
 void   setdensity(void);

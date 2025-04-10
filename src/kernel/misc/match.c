@@ -178,7 +178,7 @@ string defv[] = {
 };
 string usage="testbed for match.c";
 
-nemo_main()
+void nemo_main()
 {
 	string compare=getparam("compar");
         string word=getparam("istring");
