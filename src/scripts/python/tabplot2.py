@@ -13,7 +13,7 @@ from nemopy import getparam
 #pdb.set_trace()
 
 
-keyval = [
+keyval = [  # list of key values
     "in=???\n       input fits cube",
     "xcol=1\n       X column(s) (1=first column)",
     "ycol=2\n       Y column(s)",
@@ -27,7 +27,7 @@ keyval = [
     "VERSION=0.1\n  3-apr-2023 PJT",
 ]
 
-usage = """
+usage = """  
 plot a table like tabplot
 """
 
@@ -35,17 +35,44 @@ p = getparam.Param(keyval,usage)
 
 # get CLI parameters
 infile = p.get("in")
-xcol = int(p.get("xcol"))
-ycol = int(p.get("ycol"))
+xinput = p.get("xcol")
+yinput = p.get("ycol")
+
+# split string to get ints for xcol and ycol
+xcols = [int(x) for x in xinput.split(',')]
+ycols = [int(y) for y in yinput.split(',')]
 
 # gather data
 data = np.loadtxt(infile).T
 
-xdata = data[xcol-1]
-ydata = data[ycol-1]
+xdata = []
+ydata = []
+
+for i in range(len(xcols)): # Read x data
+    xdata[i] = data[xcols[i]-1]
+
+for i in range(len(ycols)): # Read y data
+    ydata[i] = data[ycols[i]-1]
+
+
+
+    #xdata = data[xcol-1]
+    #ydata = data[ycol-1]
 
 # plot!
 
 plt.figure()
-plt.plot(xdata, ydata)
+#plt.plot(xdata, ydata)
+
+if len(xdata) == 1: # Case: only 1 xcol, plot each y against the only x
+    for i in range (len(ydata)):
+        plt.plot(xdata[0], ydata[i])
+else:               # Case: more than 1 xcol, plot each ycol with its xcol at the same index
+    for i in range (len(xdata)):
+        try:
+            plt.plot(xdata[i], ydata[i])
+        except IndexError:
+            print("ERROR: xcols and ycols don't match\n")
+            sys.exit()
+
 plt.show()
