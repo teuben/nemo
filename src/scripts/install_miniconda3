@@ -86,6 +86,12 @@ pip3 install --upgrade pip
 echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
 
+#    keep copy of script
+cp $0 $dir
+python --version                                                > $dir/VERSION.pjt
+echo "Used install_anaconda3 with version=$version on $(date)" >> $dir/VERSION.pjt
+
+
 if [ $quick = 1 ]; then
    echo Done.
 fi
