@@ -1,5 +1,16 @@
-#
-include $(NEMOLIB)/makedefs
+# include $(NEMOLIB)/makedefs
+
+FC=gfortran
+CC=gcc
+
+FFLAGS=-g
+CFLAGS=-g
+
+SRCC=func_va_arg.c 
+SRCF=main_va_arg.F
+
+OBJC := ${SRCC:.c=.o} #substitute .f90 with .o
+OBJF := ${SRCF:.F=.o} #substitute .f90 with .o
 #   Example Makefile for hello.c within NEMO environment
 #CFLAGS = -g
 #LDFLAGS = -g
@@ -24,6 +35,18 @@ big:	big.f
 	@echo "      REAL array(NA,NB,NB)"                    >> big.inc
 	@echo Created big.inc with NA,NB,NC
 	$(FC) $(FFLAGS) -o big big.f
+
+%.o: %.F #wildcard rule, creation of *.o depends on *.F
+	$(FC) $(FFLAGS) -o $@ -c $<
+
+%.o: %.c #wildcard rule, creation of *.o depends on *.c
+	$(CC) $(CFLAGS) -o $@ -c $<
+
+test_va_arg : $(OBJC) $(OBJF)
+	$(FC) $(FFLAGS) -o $@ $(OBJC) $(OBJF)
+
+test: test_va_arg
+	@./test_va_arg && echo "va_arg est passed" || echo "va_arg test failed"
 
 clean:
 	rm -f *.o *.a core $(BIN)

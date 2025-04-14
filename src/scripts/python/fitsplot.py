@@ -4,9 +4,9 @@
 
 import os
 import sys
+import aplpy
 import argparse
 import numpy as np
-import matplotlib.pyplot as plt
 from astropy.io import fits
 try:
     import aplpy
@@ -14,6 +14,7 @@ except:
     print("sorry, aplpy not working")
     sys.exit(1)
 
+ 
 
 
 help_main = ["Simple color plot of a FITS image",
@@ -40,6 +41,7 @@ parser.add_argument('--color',     help="\n".join(help_color),    default='gist_
 parser.add_argument('--ext',       help="plot type ([png],pdf)",  default='png')
 parser.add_argument('--hist',      help="add histogram",          action="store_true")
 parser.add_argument('--size',      help="plot size (inch)",       default=8,             type=float)
+parser.add_argument('--screen',    help="on screen?",             action="store_true")
 
 args  = parser.parse_args()
 
@@ -50,6 +52,20 @@ color    = args.color
 ext      = args.ext
 pvar     = args.pvar
 size     = args.size
+
+import matplotlib
+if args.screen:
+    matplotlib.use('qt5agg')
+else:
+    # if the next statement was not used on unity, occasionally it would find Qt5Agg, and thus fail
+    # this else clause is NOT used in rsr_tsys.py, which has the same patters as this routine, and
+    # never failed making a Tsys plot, go figure unity!
+    # 30 aug 2024: DISPLAY was not valid before this explicit args.screen was used.
+    matplotlib.use('agg')
+import matplotlib.pyplot as plt
+print('mpl backend spectra',matplotlib.get_backend())
+print('screen',args.screen)
+
 
 if pvar == 'z':
     dims = [0,1]   # ra-dec
@@ -135,7 +151,12 @@ if plane < 0:
     pfile = fitsfile[:idx] + ".%s" % ext
 else:
     pfile = fitsfile[:idx] + ".%04d.%s" % (plane,ext)
-# fig.subplots_adjust(right=0.15)   
-fig.savefig(pfile)
-print("Writing ",pfile)
-# plt.show()
+# fig.subplots_adjust(right=0.15)
+
+
+if args.screen:
+    plt.show()
+else:
+    fig.savefig(pfile)
+    print("Writing ",pfile)    
+
