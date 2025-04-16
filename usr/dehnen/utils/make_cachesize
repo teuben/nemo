@@ -1,10 +1,10 @@
-#! /bin/csh
+#! /usr/bin/env bash
 #
-# source this file to generate cachesize.h
+# execute this file to generate cachesize.h on stdout
 #
 echo ///
 echo /// auto generated on `date`
-echo /// don\'t edit this file but file \"make_cachesize\"
+echo /// don\'t edit this file but the file \"make_cachesize\"
 echo ///
 echo '#ifndef' WDutils_included_cachesize_h
 echo '#define' WDutils_included_cachesize_h
@@ -12,11 +12,11 @@ echo
 echo namespace WDutils {
 echo
 
-if($?VENDOR && $VENDOR == apple) then
+if [ -v $VENDOR ] && [ $VENDOR == apple ]; then
   echo '#define' LEVEL1_DCACHE_LINESIZE `sysctl -an hw.cachelinesize`
 else
   echo '#define' LEVEL1_DCACHE_LINESIZE `getconf LEVEL1_DCACHE_LINESIZE`
-endif
+fi
 
 echo
 echo '  'static const std::size_t sizeof_cache_line = LEVEL1_DCACHE_LINESIZE';'

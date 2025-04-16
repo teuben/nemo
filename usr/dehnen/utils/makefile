@@ -88,7 +88,7 @@ MAKE_EXE		= $(MAKE) $(LIBRARIES)
 # -----------------------
 
 $(INC)cachesize.h	: make_cachesize
-			tcsh ./make_cachesize > $@
+			bash ./make_cachesize > $@
 cachesize_h		:= $(INC)cachesize.h
 Pi_h			:= $(INC)Pi.h
 timer_h			:= $(INC)timer.h
