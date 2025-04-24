@@ -2,7 +2,8 @@
 #
 #    test how to parse sections of a CLI
 #    Using docopt, but should be no different from e.g. argparse
-#
+# For example:
+#    ./test_docopt.py -i file1 -x 2 -y 1 -i file2 -x 10 -i file3 
 
 """Usage: rsr_fit.py [options]
 
