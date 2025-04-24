@@ -42,11 +42,17 @@ yinput = p.get("ycol")
 xcols = [int(x) for x in xinput.split(',')]
 ycols = [int(y) for y in yinput.split(',')]
 
+# if no xcol or ycol specified, assume col 1 is x and col 2 is y
+if len(xcols) == 0:
+    xcols = [1]
+if len(ycols) == 0:
+    ycols = [2]
+
 # gather data
 data = np.loadtxt(infile).T
 
-xdata = []
-ydata = []
+xdata = [0] * len(xcols)
+ydata = [0] * len(ycols)
 
 for i in range(len(xcols)): # Read x data
     xdata[i] = data[xcols[i]-1]
@@ -54,11 +60,8 @@ for i in range(len(xcols)): # Read x data
 for i in range(len(ycols)): # Read y data
     ydata[i] = data[ycols[i]-1]
 
-
-
-    #xdata = data[xcol-1]
-    #ydata = data[ycol-1]
-
+print(xdata[0])
+print(ydata[0])
 # plot!
 
 plt.figure()
