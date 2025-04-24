@@ -29,9 +29,11 @@ set args=""
 # wrapper compiler: h5cc h5pcc
 
 if (-e $NEMO/opt/include/hdf5.h) then
-  echo Found HDF5 under NEMO/opt
+  echo "Warning: Found HDF5 under NEMO/opt - does not always work"
   # HDF5_LIBRARIES
   set h5=(-DHDF5_INCLUDE_DIRS=$NEMO/opt/include -DHDF5_CXX_LIBRARIES=$NEMO/lib)
+  # feb-2025:    a locally build HDF5 now fails
+  set h5=()
 else
   set h5=()
 endif
