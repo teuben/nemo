@@ -14,6 +14,7 @@ v=11.5.0
 v=12.4.0
 v=13.3.0
 v=14.2.0               # version (mid 2024)
+v=15.1.0               # april 2025
 a=x86_64-linux-gnu     # architecture
 b=86                   # lib name
 j=4                    # number of processors for makea
@@ -52,6 +53,7 @@ make install
 rc=$NEMO/opt/gcc-${v}/gcc_start.sh
 
 echo "_r=$root"                                            > $rc
+echo "lib=$lib"                                           >> $rc
 echo 'export PATH=$_r/bin:$PATH'                          >> $rc
 echo 'export LD_LIBRARY_PATH=$_r/$lib:$LD_LIBRARY_PATH'   >> $rc
     
