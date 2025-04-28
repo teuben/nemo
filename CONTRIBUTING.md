@@ -286,6 +286,6 @@ Some references on git workflows:
 * https://docs.astropy.org/en/latest/development/development_details.html
 * https://www.atlassian.com/git/tutorials/comparing-workflows
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
-* https://physics.mnstate.edu/craig/git-novice-pyastro/ - gone
+* https://physics.mnstate.edu/craig/git-novice or the new-style https://swcarpentry.github.io/git-novice/
 * https://www.sitepoint.com/quick-tip-sync-your-fork-with - gone
 * https://how-to.dev/how-git-stores-data
