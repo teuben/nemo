@@ -8,15 +8,25 @@
 # --disable-bootstrap (builds faster, but disables some consistency checks).
 #
 #  ~2h   dart76 just l=c and j=1
+#  32m   jansky l=c,c++,fortran and j=4
+#
+# An example install could be
+#    mknemo gcc
+#    source $NEMO/opt/gcc-15.1.0/gcc_start.sh
+#    mkcd $NEMO/redo
+#    ../docs/install_nemo.sh v=-15.1.0 nemo=nemo15
+#    source nemo15/nemo_start.sh
+#
 
 V=10.5.0               # July 2023
 v=11.5.0
 v=12.4.0
 v=13.3.0
 v=14.2.0               # version (mid 2024)
+v=15.1.0               # april 2025
 a=x86_64-linux-gnu     # architecture
-b=86                   # lib name
-j=4                    # number of processors for makea
+b=64                   # lib name
+j=4                    # number of processors for make
 l=c,c++,fortran        # languages to compile
 
 for arg in $*; do
@@ -52,6 +62,7 @@ make install
 rc=$NEMO/opt/gcc-${v}/gcc_start.sh
 
 echo "_r=$root"                                            > $rc
+echo "lib=$lib"                                           >> $rc
 echo 'export PATH=$_r/bin:$PATH'                          >> $rc
 echo 'export LD_LIBRARY_PATH=$_r/$lib:$LD_LIBRARY_PATH'   >> $rc
     
