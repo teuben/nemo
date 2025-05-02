@@ -1,0 +1,105 @@
+.TH SDMATH 1NEMO "2 May 2025"
+
+.SH "NAME"
+sdmath \- SD math and file I/O bench
+
+.SH "SYNOPSIS"
+\fBsdmath\fP [parameter=value]
+
+.SH "DESCRIPTION"
+This is a benchmark for OpenMP parallellizable Single Dish vector math in a typical
+ON/OFF with noise diodes CalON/CalOff to provide a system temperature.
+.PP
+Each spectrum (called row below) has \fBnchan\fP channels, Each \fBnscan\fP has 4 rows, with
+the CalOn and CalOff for the Ref and the Sig.  The following math is needed to construct a
+spectrum, taking 7 row operations, thus the total operations is 7*nscan*nchan*iter
+.nf
+
+    Tsys =  Tc * <row3> / <row4-row3>      <cold> / <hot>-<cold>
+    off = row1 + row2
+    on  = row3 + row4
+    Ta = Tsys * (on/off - 1)
+    
+.fi
+
+The benchmark here is very basic. A slightly more realistic one can be found in \fIsdinfo(1NEMO)\fP
+reading actual \fIsdfits(5NEMO)\fP files and selecting a set of operations.
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBnscan=\fP
+Number of scans. Can be used to time-average (see \fBaver=\fP below).
+.br
+[1000]    
+.TP
+\fBnchan=\fP
+Number of channels.
+.br
+[100000]    
+.TP
+\fBiter=\fP
+How many times to iterate (0 means do nothing).
+.br
+[20]
+.TP
+\fBmode=\fP
+Mode of math (not implemented yet). Currently the equivalent of a 4-phase PS observation
+is simulated, but a simpler 2-phase TP observation should be implemented as well.
+.br
+[1]  
+.TP
+\fBaver=t|f\fP
+Add time average over nscan.
+.br
+[f]  
+.TP
+\fBin=\fP
+If given, read this file into memory. Meant to measure disk I/O
+.br
+Not provided.
+.TP
+\fBbs=\fP
+Blocksize in kB to read with.
+.br
+[16]
+.TP
+\fBmaxbuf=\fP
+Maximum buffer size (in MB) for reading buffer. If 0 is given, the full filesize is used.
+.br
+[0]
+
+
+.SH "EXAMPLES"
+An example performance on an Ultra 7 155H, measured in wall clock
+time seconds, and iter=20:
+
+.EX
+OMP_NUM_THREADS=2 /usr/bin/time sdmath  1000 160000 iter=20
+
+
+nscan  nchan      1      2      4      8     12     16     20 
+----- ------    ---    ---    ---    ---    ---    ---    ---
+ 1000 160000    7.8    5.0    3.9    4.2    3.7    3.6    5.7
+ 2000  80000    7.8
+ 4000  40000    7.8 
+ 8000  20000    7.8
+16000  10000    8.0    5.4    4.4    5.3    5.2    9.5    9.9
+----- ------    ---    ---    ---    ---    ---    ---    ---
+
+.EE
+this implies around 4 Gop/sec. 
+
+.SH "SEE ALSO"
+sdinfo(1NEMO), fits(5NEMO)
+
+.SH "FILES"
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+30-apr-2025	Created		PJT
+.fi
