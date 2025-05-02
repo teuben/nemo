@@ -1,5 +1,8 @@
 /*
  * benchmark some SD match
+ *
+ * The defaukt nscan=1000 nchan=100000 iter=20 needs 14 Gop, and takes about 4.6s -> 3 Gop/sec
+
  * 
  *     30-apr-2025    Created  // PJT
  */
@@ -8,9 +11,9 @@
 
 
 string defv[] = {
-  "nscan=100\n         Number of scans",
-  "nchan=32768\n       Number of channels",
-  "iter=1\n            How many times to iterate (0 means do nothing)",
+  "nscan=1000\n        Number of scans",
+  "nchan=100000\n      Number of channels",
+  "iter=20\n           How many times to iterate (0 means do nothing)",
   "mode=1\n            Mode of math (not implemented)",
   "aver=f\n            Add time average over nscan",
   "in=\n               Read a file into memory",
@@ -92,7 +95,7 @@ void file_read(string fname)
 
 
 
-void nemo_main(void)
+!void nemo_main(void)
 {
   size_t nchan = getiparam("nchan");
   size_t nscan = getiparam("nscan");
@@ -118,6 +121,7 @@ void nemo_main(void)
 
   printf("data size: %ld bytes ~ %g MB  nscan=%ld nchan=%ld iter=%ld\n",
 	 ndata, (real)ndata/1024/1024, nscan, nchan, iter);
+  printf("# ops = %ld  %g Gop\n",7*nchan*nscan*iter,  (7.0*nchan*nscan*iter)/1e9);
     
 
   // only random one row, xrandom() is expensive
