@@ -95,7 +95,7 @@ void file_read(string fname)
 
 
 
-!void nemo_main(void)
+void nemo_main(void)
 {
   size_t nchan = getiparam("nchan");
   size_t nscan = getiparam("nscan");
