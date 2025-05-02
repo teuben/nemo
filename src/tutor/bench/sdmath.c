@@ -1,5 +1,5 @@
 /*
- * benchmark SD match
+ * benchmark some SD match
  * 
  *     30-apr-2025    Created  // PJT
  */
@@ -10,16 +10,16 @@
 string defv[] = {
   "nscan=100\n         Number of scans",
   "nchan=32768\n       Number of channels",
-  "mode=1\n            Mode of math",
-  "aver=f\n            Add time average over nscan",
   "iter=1\n            How many times to iterate (0 means do nothing)",
+  "mode=1\n            Mode of math (not implemented)",
+  "aver=f\n            Add time average over nscan",
   "in=\n               Read a file into memory",
   "bs=16\n             Blocksize in kB to read",
-  "VERSION=1.2\n       1-may-2025",
+  "VERSION=1.3\n       1-may-2025",
   NULL,
 };
 
-string usage = "SD bench";
+string usage = "SD math bench";
 
 
 // n OPS
@@ -28,7 +28,7 @@ real mean1(int n, real *data)
   real sum = 0.0;
   #pragma omp parallel for reduction(+:sum)
   for (int i=0; i<n; i++) sum += data[i];
-  return sum;  //  no need to normalize, since they divide out later
+  return sum; 
 }
 
 // 2*n OPS
@@ -37,7 +37,7 @@ real mean2(int n, real *data1, real *data2)
   real sum = 0.0;
   #pragma omp parallel for reduction(+:sum)
   for (int i=0; i<n; i++) sum += data1[i]-data2[i];
-  return sum;  //  no need to normalize, since they divide out later
+  return sum; 
 }
 
 
@@ -146,13 +146,15 @@ void nemo_main(void)
       for (j=0; j<nchan; j++) {
 	spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
         //spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan
-#if 0	
+#if 1
        	if (Qaver)
 	  aver[j] = aver[j] + spec[j];
 #endif	
-      }
-    }
-  }
+      } // j
+    } // i
+  } // iter
+  
+  dprintf(1,"aver=%g\n",mean1(nchan,aver));
 }
 
 
