@@ -71,12 +71,14 @@ real tsys(int n, real *hot, real *cold)
 void file_read(string fname)
 {
   size_t nread, n = nemo_file_size(fname);
-  printf("file size: %ld bytes ~ %g MB\n",n, (real)n/1024/1024);  
   char *data = allocate(n);
   size_t i;
   off_t o;
   int bs = getiparam("bs");
   int bufsize = bs*1024;   // bs in kB
+
+  printf("file size: %ld bytes ~ %g MB\n",n, (real)n/1024/1024);  
+  
   
   stream fp = stropen(fname,"r");
   for(i=0, o=0; ; i++) {
@@ -92,12 +94,11 @@ void file_read(string fname)
 
 void nemo_main(void)
 {
-  int i, j;
   size_t nchan = getiparam("nchan");
   size_t nscan = getiparam("nscan");
-  int mode = getiparam("mode");
-  int iter = getiparam("iter");
+  size_t iter = getiparam("iter");
   size_t n = nchan * nscan * 4;
+  int i, j, mode = getiparam("mode");
   real *data, *row0, *row1, *row2, *row3, *row4;
   real *aver, *spec, *onn, *off, t_onn, t_off;
   size_t ndata = n * sizeof(real);
@@ -115,7 +116,8 @@ void nemo_main(void)
   aver = (real *) allocate(nchan * sizeof(real));
   
 
-  printf("data size: %ld bytes ~ %g MB\n",ndata, (real)ndata/1024/1024);
+  printf("data size: %ld bytes ~ %g MB  nscan=%ld nchan=%ld iter=%ld\n",
+	 ndata, (real)ndata/1024/1024, nscan, nchan, iter);
     
 
   // only random one row, xrandom() is expensive
