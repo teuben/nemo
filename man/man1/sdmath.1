@@ -88,7 +88,16 @@ nscan  nchan      1      2      4      8     12     16     20
 ----- ------    ---    ---    ---    ---    ---    ---    ---
 
 .EE
-this implies around 4 Gop/sec. 
+this implies around 4 Gop/sec.
+.PP
+A read benchmark can be done with a large series of Plummer models. The example file created
+here is about 5GB in size:
+.EX
+   mkplummer p1M 1000000 nmodel=100
+   /usr/bin/time sdmath  in=p1M
+   /usr/bin/time sdmath  in=p1M maxbuf=1000
+.EE
+the latter resets the buffer 5 times, where the last read is partial.
 
 .SH "SEE ALSO"
 sdinfo(1NEMO), fits(5NEMO)
