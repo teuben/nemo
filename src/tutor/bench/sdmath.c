@@ -12,13 +12,16 @@ string defv[] = {
   "nchan=32768\n       Number of channels",
   "mode=1\n            Mode of math",
   "iter=1\n            How many times to iterate (0 means do nothing)",
-  "VERSION=1\n         30-apr-2013",
+  "in=\n               Read a file into memory",
+  "bs=16\n             Blocksize in kB to read",
+  "VERSION=1.1\n       1-may-2025",
   NULL,
 };
 
 string usage = "SD bench";
 
 
+// n OPS
 real mean1(int n, real *data)
 {
   real sum = 0.0;
@@ -27,6 +30,7 @@ real mean1(int n, real *data)
   return sum;  //  no need to normalize, since they divide out later
 }
 
+// 2*n OPS
 real mean2(int n, real *data1, real *data2)
 {
   real sum = 0.0;
@@ -36,12 +40,53 @@ real mean2(int n, real *data1, real *data2)
 }
 
 
+
+
+// this one went slower!!!
+// 2*n OPS
+real tsys2(int n, real *hot, real *cold)
+{
+  real a, b;
+  // @todo these two can be done in parallel
+#pragma omp parallel
+  {
+#pragma omp sections 
+    {
+#pragma omp section
+      a = mean1(n, hot);
+#pragma omp section
+      b = mean2(n, hot, cold);
+    }
+  }
+  return a/b;
+}
+
 real tsys(int n, real *hot, real *cold)
 {
-  int i;
+  // @todo these two can be done in parallel
   return mean1(n, hot) / mean2(n, hot, cold);
 }
+
+void file_read(string fname)
+{
+  size_t nread, n = nemo_file_size(fname);
+  printf("file size: %ld bytes ~ %g MB\n",n, (real)n/1024/1024);  
+  char *data = allocate(n);
+  size_t i;
+  off_t o;
+  int bs = getiparam("bs");
+  int bufsize = bs*1024;   // bs in kB
   
+  stream fp = stropen(fname,"r");
+  for(i=0, o=0; ; i++) {
+    nread = fread(&data[o], bufsize, 1, fp);
+    if (nread<=0) break;
+    o += bufsize;
+  }
+  strclose(fp);
+  printf("Last block %ld of %d\n", i, bufsize);
+}
+
 
 
 void nemo_main(void)
@@ -55,6 +100,11 @@ void nemo_main(void)
   real *data, *row0, *row1, *row2, *row3, *row4;
   real *spec, *onn, *off, t_onn, t_off;
   size_t ndata = n * sizeof(real);
+
+  if (hasvalue("in")) {
+    file_read(getparam("in"));
+    return;
+  }
 
   data = (real *) allocate(n * sizeof(real));
   onn  = (real *) allocate(nchan * sizeof(real));
@@ -85,13 +135,17 @@ void nemo_main(void)
       row3 = row2 + nchan;
       row4 = row3 + nchan;
       // tsys = <hot> / <hot-cold>
-      t_onn = tsys(nchan, row1, row2);
-      t_off = tsys(nchan, row3, row4);
-      // Ta = tsys * (on/off-1)
+      t_onn = tsys(nchan, row1, row2);          // 3*nchan
+      t_off = tsys(nchan, row3, row4);       // 3*nchan
+      // Ta = tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
       #pragma omp parallel for
       for (j=0; j<nchan; j++)
-	spec[j] = t_onn*(row1[j]/row3[j]-1);
+	//spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
+	spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan	
     }
   }
-
 }
+
+
+// 1st version:   7n
+// 2nd version:   7n
