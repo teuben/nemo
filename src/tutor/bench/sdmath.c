@@ -1,8 +1,10 @@
 /*
  * benchmark some SD match
  *
- * The defaukt nscan=1000 nchan=100000 iter=20 needs 14 Gop, and takes about 4.6s -> 3 Gop/sec
-
+ * The default nscan=1000 nchan=100000 iter=20 needs 14 Gop
+ * d76:    4.6s -> 3 Gop/sec128
+ * lma:    7.3s    2
+ * jansky: 3.4s    4
  * 
  *     30-apr-2025    Created  // PJT
  */
@@ -18,7 +20,8 @@ string defv[] = {
   "aver=f\n            Add time average over nscan",
   "in=\n               Read a file into memory",
   "bs=16\n             Blocksize in kB to read",
-  "VERSION=1.3\n       1-may-2025",
+  "maxbuf=0\n          Max buffer for file data in MB",
+  "VERSION=1.4\n       2-may-2025",
   NULL,
 };
 
@@ -74,23 +77,37 @@ real tsys(int n, real *hot, real *cold)
 void file_read(string fname)
 {
   size_t nread, n = nemo_file_size(fname);
-  char *data = allocate(n);
-  size_t i;
+  char *data;
+  size_t i, nreset=0;
   off_t o;
-  int bs = getiparam("bs");
-  int bufsize = bs*1024;   // bs in kB
+  int bs = getiparam("bs");   // "bs" in kB
+  size_t bufsize = bs*1024;   
+  size_t maxbuf = 1024*1024*getiparam("maxbuf"); // "maxbuf" was in MB
 
-  printf("file size: %ld bytes ~ %g MB\n",n, (real)n/1024/1024);  
-  
+  if (maxbuf == 0) {
+    data = allocate(n);
+    maxbuf = n;
+  } else
+    data = allocate(maxbuf);
+
+  printf("file size: %ld bytes ~ %g MB   bufsize=%ld ~ %g MB\n",n, (real)n/1024/1024, bufsize, (real)bufsize/1024/1024);
+  printf("maxbuf:    %ld bytes = %d MB\n",maxbuf, getiparam("maxbuf"));
   
   stream fp = stropen(fname,"r");
   for(i=0, o=0; ; i++) {
+    //o=0;
     nread = fread(&data[o], bufsize, 1, fp);
     if (nread<=0) break;
     o += bufsize;
+    if (o >= maxbuf) {
+      nreset++;
+      o = 0;
+      dprintf(1,"buffer RESET at i=%ld\n",i+1);
+    } else
+      dprintf(2,"buffer at i=%ld at o=%ld maxbuf=%ld\n",i+1,o,maxbuf);
   }
   strclose(fp);
-  printf("Last block %ld of %d\n", i, bufsize);
+  printf("Last block# %ld of %ld,  #resets %ld\n", i, bufsize, nreset);
 }
 
 
@@ -106,6 +123,7 @@ void nemo_main(void)
   real *aver, *spec, *onn, *off, t_onn, t_off;
   size_t ndata = n * sizeof(real);
   bool Qaver = getbparam("aver");
+  int nphase = 4;
 
   if (hasvalue("in")) {
     file_read(getparam("in"));
@@ -125,14 +143,14 @@ void nemo_main(void)
     
 
   // only random one row, xrandom() is expensive
-  for (i=0; i<nchan*4; i++) data[i] = xrandom(0.0,1.0);
+  for (i=0; i<nphase*nchan; i++) data[i] = xrandom(0.0,1.0);
   // duplicate other rows, so we fill memory out of the caching
   row0 = data;
-  row1 = data + 4*nchan;
+  row1 = data + nphase*nchan;
   for (j=1; j<nscan; j++) {
-    for (i=0; i<nchan*4; i++) row1[i] = row0[i];
+    for (i=0; i<nphase*nchan; i++) row1[i] = row0[i];
     row0 = row1;
-    row1 = row0 + 4*nchan;
+    row1 = row0 + nphase*nchan;
   }
 
   
@@ -143,26 +161,22 @@ void nemo_main(void)
       row2 = row1 + nchan;
       row3 = row2 + nchan;
       row4 = row3 + nchan;
-      // tsys = <hot> / <hot-cold>
+      // Tsys =  Tc * <cold> / <hot-cold>
       t_onn = tsys(nchan, row1, row2);          // 3*nchan
       // t_off = tsys(nchan, row3, row4);       // 3*nchan
-      // Ta = tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
+      // Ta = Tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
 
       #pragma omp parallel for
       for (j=0; j<nchan; j++) {
 	spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
         //spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan
-#if 1
        	if (Qaver)
 	  aver[j] = aver[j] + spec[j];
-#endif	
       } // j
     } // i
   } // iter
-  
+
+  dprintf(1,"data[first..last] = %g %g\n", data[0], data[n-1]);
   dprintf(1,"aver=%g\n",mean1(nchan,aver));
+  
 }
-
-
-// 1st version:   7n
-// 2nd version:   7n
