@@ -168,8 +168,11 @@ void nemo_main(void)
 
       #pragma omp parallel for
       for (j=0; j<nchan; j++) {
-	spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
-        //spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan
+	spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);  // 4*nchan      3.90user 0.89system 0:04.79elapsed 99%CPU
+	//spec[j] = ((row1[j]+row2[j])/(row3[j]+row4[j])-1);      // check-1      3.85user 0.90system 0:04.76elapsed 99%CPU
+	//spec[j] = (row1[j]+row2[j])/(row3[j]+row4[j]);          // check-2      3.81user 0.88system 0:04.70elapsed 99%CPU 
+	//spec[j] = row1[j]/row3[j];                              // check-3      3.77user 0.91system 0:04.69elapsed 99%CPU 
+	//spec[j] = row1[j];                                      // check-4      3.37user 0.88system 0:04.26elapsed 99%CPU 
        	if (Qaver)
 	  aver[j] = aver[j] + spec[j];
       } // j
