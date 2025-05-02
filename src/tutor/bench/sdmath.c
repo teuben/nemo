@@ -11,10 +11,11 @@ string defv[] = {
   "nscan=100\n         Number of scans",
   "nchan=32768\n       Number of channels",
   "mode=1\n            Mode of math",
+  "aver=f\n            Add time average over nscan",
   "iter=1\n            How many times to iterate (0 means do nothing)",
   "in=\n               Read a file into memory",
   "bs=16\n             Blocksize in kB to read",
-  "VERSION=1.1\n       1-may-2025",
+  "VERSION=1.2\n       1-may-2025",
   NULL,
 };
 
@@ -98,8 +99,9 @@ void nemo_main(void)
   int iter = getiparam("iter");
   size_t n = nchan * nscan * 4;
   real *data, *row0, *row1, *row2, *row3, *row4;
-  real *spec, *onn, *off, t_onn, t_off;
+  real *aver, *spec, *onn, *off, t_onn, t_off;
   size_t ndata = n * sizeof(real);
+  bool Qaver = getbparam("aver");
 
   if (hasvalue("in")) {
     file_read(getparam("in"));
@@ -109,7 +111,8 @@ void nemo_main(void)
   data = (real *) allocate(n * sizeof(real));
   onn  = (real *) allocate(nchan * sizeof(real));
   off  = (real *) allocate(nchan * sizeof(real));
-  spec = (real *) allocate(nchan * sizeof(real));  
+  spec = (real *) allocate(nchan * sizeof(real));
+  aver = (real *) allocate(nchan * sizeof(real));
   
 
   printf("data size: %ld bytes ~ %g MB\n",ndata, (real)ndata/1024/1024);
@@ -136,12 +139,18 @@ void nemo_main(void)
       row4 = row3 + nchan;
       // tsys = <hot> / <hot-cold>
       t_onn = tsys(nchan, row1, row2);          // 3*nchan
-      t_off = tsys(nchan, row3, row4);       // 3*nchan
+      // t_off = tsys(nchan, row3, row4);       // 3*nchan
       // Ta = tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
+
       #pragma omp parallel for
-      for (j=0; j<nchan; j++)
-	//spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
-	spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan	
+      for (j=0; j<nchan; j++) {
+	spec[j] = t_onn*((row1[j]+row2[j])/(row3[j]+row4[j])-1);    // 4*nchan
+        //spec[j] = t_onn*(row1[j]/row3[j]-1);    // 1*nchan
+#if 0	
+       	if (Qaver)
+	  aver[j] = aver[j] + spec[j];
+#endif	
+      }
     }
   }
 }
