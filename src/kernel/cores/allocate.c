@@ -18,10 +18,17 @@
  *      12-jun-08       removed tests for size_t < 0            WD
  *      03-oct-08       debugged error in debug_info reporting  WD
  *       4-jan-11       add local/static arrays to show where they go in the TESTBED version
+ *
+ *  @todo   ?? should we be using posix_memalign() and friends - malloc is deprecated since C++11
  */
 
 #include <stdinc.h>
 #include <errno.h>
+
+//void *allocate_FL(size_t nb, const_string file, int line);
+//void *reallocate_FL(void *bp, size_t nb, const_string file, int line);
+//void *my_calloc(size_t nmemb, size_t size);
+
 
 /*   _FL are versions that report File and Line ; see WD notes in stdinc.h   */
 /*  @todo    consider mm_malloc() for efficiency ?    */
@@ -75,8 +82,7 @@ void *reallocate_FL(void *bp, size_t nb, const_string file, int line)
     return mem;
 }
 
-void *
-my_calloc(size_t nmemb, size_t size)
+void *my_calloc(size_t nmemb, size_t size)
 {
   static int my_counter = 0;
 
