@@ -602,7 +602,7 @@ void freestrings(string *strptr);
 int splitstring(int maxout, string out[], string lst, string sep);
 
 /* core/file_size.c */
-size_t nemo_file_size(char *name);
+off_t nemo_file_size(char *name);
 int nemo_file_time(char *name);
 int nemo_file_lines(char *name, int deflen);
  
