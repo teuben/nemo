@@ -178,7 +178,7 @@
 	opag      http://www.zero-based.org/software/opag/
  */
 
-#define GETPARAM_VERSION_ID  "3.7.1 30-jan-2024 PJT"
+#define GETPARAM_VERSION_ID  "3.7.2 3-may-2025 PJT"
 
 /*************** BEGIN CONFIGURATION TABLE *********************/
 
@@ -426,9 +426,7 @@ local void report(char);
 
 /* external NEMO functions */
 
-extern int nemo_file_size(string);
 extern string date_id(void);
-extern double cputime(void);
 
 /* Mask values for help levels */
 
