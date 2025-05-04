@@ -31,6 +31,7 @@ setenv ACCPATH   .:$NEMO/obj/potential:$NEMO/obj/acc
 setenv MANIPPATH .:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 setenv NEMOVER   `cat $NEMO/VERSION`
 setenv NEMOSYS   `uname -s`
+setenv NEMOARCH  `uname -m`
 setenv NEMOSITE  `hostname`
 
 setenv YAPP          @YAPP_DEF@
