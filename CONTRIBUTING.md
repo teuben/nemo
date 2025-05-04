@@ -25,7 +25,7 @@ set the *upstream* manually if you used github.com. See also the
 that does actually work fine, except it's a frozen snapshot and cannot
 be efficiently used to collaborate. However, if you cannot install git,
 this is probably the only way to bootstrap yourself. For example
-https://github.com/teuben/nemo/archive/refs/heads/master.zip, which
+https://github.com/teuben/nemo/archive/refs/heads/master.zip , which
 will create a directory *nemo-master*. Other branches are available
 through similar zip file construct.
 
@@ -36,14 +36,15 @@ are some links at the bottom of this document.
 ## gh:   github CLI
 
 You can safely skip this section if you prefer to work via github.com, though the **gh** command
-described here is by far the fastest and easiest way to work with the github ecosystem. You just
+described here is by far the fastest and easiest way to work with the github ecosystem, because it
+works from the command line. You just
 have to intall yet another tool for this.
 
 If you can use conda, installation can be done as follows:
 
       conda install gh --channel conda-forge  
 
-but see also [manual installing instructions](https://cli.github.com/manual/installation),
+but see also [manual installing instructions](https://github.com/cli/cli#installation),
 after this you need to authenticate once via your github account:
 
       gh auth login
