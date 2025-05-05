@@ -8,8 +8,9 @@ dnl will show which m4's are present and used
 dnl git clone https://github.com/autoconf-archive/autoconf-archive
 dnl ---------------------------------------------------------------------------------
 
-AC_PREREQ(2.69)
-AC_INIT(nemo_start.sh.in)
+AC_PREREQ([2.71])
+AC_INIT
+AC_CONFIG_SRCDIR([nemo_start.sh.in])
 
 AC_MSG_CHECKING([NEMO config])
 
@@ -27,8 +28,10 @@ dnl ax_lib_readline.m4
 dnl ax_mpi.m4
 dnl ax_pkg_swig.m4
 dnl ax_prog_python_version.m4
+dnl ax_check_x86_features
+ax_ext
 
-AC_CONFIG_HEADER([config.h:config.h.in])
+AC_CONFIG_HEADERS([config.h:config.h.in])
 
 dnl -- checks for programs
 dnl -- checks for libraries
@@ -93,7 +96,15 @@ AC_CHECK_SIZEOF(long)
 AC_CHECK_SIZEOF(long long)
 
 
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_CHECK_FUNCS(strchr memcpy)
 
 dnl AC_PROG_CPP
@@ -583,10 +594,10 @@ dnl == doesn't work - confusion with pgplot stuff ==
 
 dnl if test -n "$F77"; then
 dnl         AC_LANG_SAVE
-dnl         AC_LANG_FORTRAN77
+dnl         AC_LANG([Fortran 77])
 dnl         AC_MSG_CHECKING([for Fortran idate function])
-dnl         AC_TRY_LINK(,[idate(imon,iday,iyear)],[AC_DEFINE(HAVE_IDATE)
-dnl                 AC_MSG_RESULT(yes)],AC_MSG_RESULT(no))
+dnl         AC_LINK_IFELSE([AC_LANG_PROGRAM([[]], [[idate(imon,iday,iyear)]])],[AC_DEFINE(HAVE_IDATE)
+dnl                 AC_MSG_RESULT(yes)],[AC_MSG_RESULT(no)])
 dnl         AC_LANG_RESTORE
 dnl fi        
 
@@ -691,8 +702,7 @@ if test "$ok" = "yes"; then
 
   cfdefault=/usr
  
-  AC_ARG_WITH(cfitsio-prefix, AC_HELP_STRING([--with-cfitsio-prefix=PFX],
-        [CFITSIO installation prefix (default: $cfdefault)]),
+  AC_ARG_WITH(cfitsio-prefix, AS_HELP_STRING([--with-cfitsio-prefix=PFX],[CFITSIO installation prefix (default: $cfdefault)]),
         cfitsio_config_prefix="$withval", cfitsio_config_prefix="use_default")
  
   if test "$cfitsio_config_prefix" = "use_default"; then
@@ -898,7 +908,15 @@ dnl Checks for header files.
 
 
 AC_HEADER_DIRENT
-AC_HEADER_STDC
+m4_warn([obsolete],
+[The preprocessor macro `STDC_HEADERS' is obsolete.
+  Except in unusual embedded environments, you can safely include all
+  ISO C90 headers unconditionally.])dnl
+# Autoupdate added the next two lines to ensure that your configure
+# script's behavior did not change.  They are probably safe to remove.
+AC_CHECK_INCLUDES_DEFAULT
+AC_PROG_EGREP
+
 AC_HEADER_SYS_WAIT
 AC_CHECK_HEADERS(fcntl.h limits.h malloc.h sgtty.h strings.h sys/file.h sys/ioctl.h sys/time.h unistd.h)
 
@@ -907,7 +925,20 @@ AC_C_CONST
 AC_C_INLINE
 AC_TYPE_OFF_T
 AC_TYPE_SIZE_T
-AC_HEADER_TIME
+m4_warn([obsolete],
+[Update your code to rely only on HAVE_SYS_TIME_H,
+then remove this warning and the obsolete code below it.
+All current systems provide time.h; it need not be checked for.
+Not all systems provide sys/time.h, but those that do, all allow
+you to include it and time.h simultaneously.])dnl
+AC_CHECK_HEADERS_ONCE([sys/time.h])
+# Obsolete code to be removed.
+if test $ac_cv_header_sys_time_h = yes; then
+  AC_DEFINE([TIME_WITH_SYS_TIME],[1],[Define to 1 if you can safely include both <sys/time.h>
+	     and <time.h>.  This macro is obsolete.])
+fi
+# End of obsolete code.
+
 AC_STRUCT_TM
 
 AC_SYS_LONG_FILE_NAMES
@@ -919,8 +950,20 @@ AC_TYPE_GETGROUPS
 AC_PROG_GCC_TRADITIONAL
 AC_FUNC_MEMCMP
 AC_FUNC_MMAP
-AC_TYPE_SIGNAL
-AC_FUNC_VFORK
+m4_warn([obsolete],
+[your code may safely assume C89 semantics that RETSIGTYPE is void.
+Remove this warning and the `AC_CACHE_CHECK' when you adjust the code.])dnl
+AC_CACHE_CHECK([return type of signal handlers],[ac_cv_type_signal],[AC_COMPILE_IFELSE(
+[AC_LANG_PROGRAM([#include <sys/types.h>
+#include <signal.h>
+],
+		 [return *(signal (0, 0)) (0) == 1;])],
+		   [ac_cv_type_signal=int],
+		   [ac_cv_type_signal=void])])
+AC_DEFINE_UNQUOTED([RETSIGTYPE],[$ac_cv_type_signal],[Define as the return type of signal handlers
+		    (`int' or `void').])
+
+AC_FUNC_FORK
 AC_FUNC_VPRINTF
 AC_CHECK_FUNCS(ftime gethostname gettimeofday getwd mkdir select strdup strtod strtol strtoul dprintf log2)
 
