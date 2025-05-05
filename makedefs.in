@@ -67,10 +67,10 @@ MIRIAD_INC = @MIRIAD_INC@
 MIRIAD_LIB = @MIRIAD_LIB@
 
 #  GSL library:   -lgsl -lgslcblas -lm
+GSL_INC = `pkg-config --cflags gsl`
+GSL_LIB = `pkg-config --libs gsl`
 #GSL_INC = @GSL_CFLAGS@
 #GSL_LIB = @GSL_LIBS@
-GSL_INC = 
-GSL_LIB =
 
 #	PLPLOT: -lplplot
 #PLPLOT_INC = -I/usr/include/plplot
@@ -88,7 +88,7 @@ FFTW_LIB =
 
 
 #	READLINE
-RDL_LIBS   = @RDL_LIBS@
+RDL_LIB   = @RDL_LIBS@
 
 # LOADOBJ stuff; -DMACH=.....
 
@@ -129,8 +129,8 @@ INC_FLAGS = -I$(NEMOINC) -I$(NEMOLIB) -I$(NEMO)/opt/include @HDF_INC@ @HDF5_INC@
 NEMO_CFLAGS = @NEMO_CFLAGS@  $(MACH) $(NEMO_CFLAGS1) $(INC_FLAGS)
 NEMO_FFLAGS = @NEMO_FFLAGS@  $(INC_FLAGS)
 NEMO_LDFLAGS = 
-NEMO_LIBS   = -L$(NEMOLIB) -L$(NEMO)/opt/lib          -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
-NEMO_LIBSPP = -L$(NEMOLIB) -L$(NEMO)/opt/lib -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIBS) $(RDL_LIBS) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
+NEMO_LIBS   = -L$(NEMOLIB) -L$(NEMO)/opt/lib          -lnemo @LOADOBJ_LIBS@ $(GSL_LIB) $(RDL_LIB) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
+NEMO_LIBSPP = -L$(NEMOLIB) -L$(NEMO)/opt/lib -lnemo++ -lnemo @LOADOBJ_LIBS@ $(GSL_LIB) $(RDL_LIB) $(CFITSIO_LIB) @MATH_LIBS@ @MACOS_LIBS@
 
 #			some graphics libraries:
 GLLIBS = @GLLIBS@
