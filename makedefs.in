@@ -115,6 +115,9 @@ F77_CMAIN_FFLAGS = @F77_CMAIN_FFLAGS@
 #  via configure.
 YAPPLIB = $(NEMOLIB)/yapp_@YAPP_NAME@.o @YAPP_LIBS@
 
+## check
+TEST_FLAG = @X86_FEATURE_CFLAGS@
+
 ## C compiler:
 #set opts="-rdynamic -ansi -fwritable-strings -Wconversion -Wnested-externs"
 #exec gcc -fPIC -Dlinux -DSYSV -I$NEMOINC -I$NEMOLIB -L$NEMOLIB $opts $* $link
