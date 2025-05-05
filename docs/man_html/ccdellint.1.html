@@ -102,16 +102,23 @@ N=2 is the traditional cartesian [2]
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-As with most of these codes,
-the center of pixel determines to which ring the pixel belongs in it total.
+<h2><a name='sect4' href='#toc4'>DISKY vs BOXY</a></h2>
+
+<p> The parameter <b>metric=</b>
+described the type of ellipse to be integrated over. For metric&lt;2 disky isophotes
+are used, for metric&gt;2 they are boxy. See also Athanassoula et al. 1990 MNRAS_245:130,
+although they used c0=metric-2. 
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveats</a></h2>
+As with most of these codes, the
+center of pixel determines to which ring the pixel belongs in it total.
 <p>
 A value of <b>metric=1</b> can be interesting, though the position angle may need
 to be adjusted, as the box is mis-aligned by 45 degrees from the major axis.
 For large values of <b>metric</b> the box is aligned along the major axis. 
 <p> 
 <p> 
-<h2><a name='sect5' href='#toc5'>Examples</a></h2>
+<h2><a name='sect6' href='#toc6'>Examples</a></h2>
 Example
 of generating a gaussian profile from a 2D gauss image <br>
 <pre>% ccdgen out=- object=gauss spar=1,50 size=256,256 | ccdellint - 0:100:5 tab=-
@@ -141,7 +148,7 @@ Some examples of PPV-&gt;RV <br>
       ccdellint - 0:1000/3600:10/3600 pa=-60 inc=40 center=163,122 out=ngc6503.rv.ccd
 norm=f
 </pre>
-<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='ccdzshift.1.html'>ccdzshift(1NEMO)</a>
 , <a href='ellipse.1.html'>ellipse(1NEMO)</a>
 , <a href='snapshell.1.html'>snapshell(1NEMO)</a>
@@ -149,13 +156,13 @@ norm=f
 
 
 <p> 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Files</a></h2>
 NEMO/src/image/misc/ccdellint.c 
 <p> 
-<h2><a name='sect8' href='#toc8'>Author</a></h2>
+<h2><a name='sect9' href='#toc9'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<h2><a name='sect10' href='#toc10'>Update History</a></h2>
 <br>
 <pre>30-nov-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 drafted<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 23-nov-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 confirmed 2D images, added table output<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -169,12 +176,13 @@ Peter Teuben
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>Caveats</a></li>
-<li><a name='toc5' href='#sect5'>Examples</a></li>
-<li><a name='toc6' href='#sect6'>See Also</a></li>
-<li><a name='toc7' href='#sect7'>Files</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>DISKY vs BOXY</a></li>
+<li><a name='toc5' href='#sect5'>Caveats</a></li>
+<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc7' href='#sect7'>See Also</a></li>
+<li><a name='toc8' href='#sect8'>Files</a></li>
+<li><a name='toc9' href='#sect9'>Author</a></li>
+<li><a name='toc10' href='#sect10'>Update History</a></li>
 </ul>
 </body>
 </html>

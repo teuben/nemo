@@ -24,41 +24,48 @@ performance. <p>
 It also uses two memory models of keeping a snapshot: an array
 of structs (AOS) vs. a struct of arrays (SOA). snapshots&rsquo; are normally stored
 on disk as SOA&rsquo;s, but most programs actually transpose them to an AOS, which
-can be very in-efficient. 
+can be very in-efficient. <p>
+A hidden code <i>snaprun</i> compares defining simple
+variables (x,y,z) in a structure with an array pos[3], and also looping
+over pos[] insted of hardcoding a simpler Eulerian type of update. Counter
+intuitive, looping made the code about 4-8 times slower.  Simple variables
+are slightly faster than using directly addressing the array.  Results vary
+a bit on different processors. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized
-in order; they may be given in any order if the keyword is also given. Use
-<b>--help</b> to confirm this man page is up to date.  
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input (snapshot) file.
-No default. [???]     </dd>
+<dd>Input (snapshot)
+file. No default. [???]     </dd>
 
 <dt><b>mass=</b> </dt>
 <dd>Expression for new masses [1]    </dd>
 
-<dt><b>iter=</b> </dt>
-<dd>Number
-of iterations to test. A large number is useful to downweight the I/O contribution.
-[10]   </dd>
+<dt><b>iter=</b>
+</dt>
+<dd>Number of iterations to test. A large number is useful to downweight the
+I/O contribution. [10]   </dd>
 
 <dt><b>mode=</b> </dt>
-<dd>reading input mode (1=body 2=arrays) [1]   </dd>
+<dd>reading input mode (1=body 2=arrays) [1]
+  </dd>
 
 <dt><b>out=</b> </dt>
-<dd>output (snapshot)
-file, if needed []   
+<dd>output (snapshot) file, if needed []   
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
 
-<p> Here is the standard test that si part of
-NEMO&rsquo;s "make bench" 
+<p> Here is the standard
+test that si part of NEMO&rsquo;s "make bench" 
 <p>  
-<p>   make -f $NEMO/src/nbody/trans/Benchfile all<br>
+<p>   make -f $NEMO/src/nbody/trans/Benchfile
+all<br>
  
 <p>   mkplummer p6 1000000<br>
    snapbench p6 &rsquo;mass=1.0001&rsquo;   iter=1000 mode=0<br>
@@ -79,13 +86,14 @@ Only reading and assignment is measured. No options for output (if
 out= is given) 
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='snapshot.5.html'>snapshot(5NEMO)</a>
+snaprun, <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  
 <p> 
 <h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/nbody/trans/snapbench.c
-
-<p> 
+<br>
+<pre>src/nbody/trans/snapbench.c
+src/tutor/nbody/snaprun.c
+</pre>
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
 <p> 

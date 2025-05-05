@@ -23,43 +23,45 @@ mknemo - install NEMO (and related) libraries and programs
 compile a NEMO program without the need to know where it is located, and
 build it locally and move it into $NEMOBIN.   Later on, <i>mknemo</i> evolved to
 also become a convenient package manager, placing 3rd party software under
-<i>$NEMO/opt</i>, giving NEMO a convenient containerized option. 
+<i>$NEMO/opt</i>, giving NEMO a convenient containerized option using recipe files
+
+<p>in $NEMO/src/scripts/mknemo.d 
 <p> <p>
-<i>mknemo</i> attempts
-to find the source code of the program(s) specified on the command line,
-and tries to compile them. If successfull, the binary will be placed in
-<b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag if your NEMO is under git control, so you can force
-a <i>git pull</i> before the build. <p>
-Finding the method how to install <i>program</i> takes
-several paths: <p>
-Another option are 3rd party software, frequently used with
-NEMO. Example are libraries such as <a href='gsl.3.html'><i>gsl(3)</i></a>
+<i>mknemo</i> attempts to find the source code of
+the program(s) specified on the command line, and tries to compile them.
+If successfull, the binary will be placed in <b>$NEMOBIN</b>. Add the &rsquo;-u&rsquo; flag if
+your NEMO is under git control, so you can force a <i>git pull</i> before the
+build. <p>
+Finding the method how to install <i>program</i> takes several paths: <p>
+Another
+option are 3rd party software, frequently used with NEMO. Example are libraries
+such as <a href='gsl.3.html'><i>gsl(3)</i></a>
  and programs such as <a href='mcluster.1.html'><i>mcluster(1NEMO)</i></a>
-.
-<p>
-A novel action is to create a new NEMO program using the <b>-N</b> flag. Users will
-still need to edit the template code, but takes away the hassle of starting
-with brand new code. 
+. <p>
+A novel action is to
+create a new NEMO program using the <b>-N</b> flag. Users will still need to edit
+the template code, but takes away the hassle of starting with brand new
+code. 
 <p> <p>
-First, if a file <i>$NEMO/src/scripts/mknemo.d/program</i>
-exists, it is assumed to be a (shell) script with directions how to install
-this program. gyrfalcON is an example of such a complex program. In this
-case <i>program</i> can also be a package name, in which case the script will
-be more complex. <p>
-Next, within the $NEMO/src (optionally also the $NEMO/usr
-tree) a source file <i>program.c</i> (or C++ or Fortran) is looked for, which is
-compiled with a local <b>Makefile</b> (or a template if none is available).  <i>tsf</i>
-is an example of this type of program, but also more specialized plotting
-programs such as <i>snapplot</i> or <i>orboom</i>, which need an extra 3rd party library.
+First, if a file <i>$NEMO/src/scripts/mknemo.d/program</i> exists, it is
+assumed to be a (shell) script with directions how to install this program.
+gyrfalcON is an example of such a complex program. In this case <i>program</i>
+can also be a package name, in which case the script will be more complex.
 <p>
-Finally, if still no source code is found, a directory with the name <i>program</i>
-is searched for,  and a local Makefile is then used to install the <i>program</i>.
-<b>hackcode1</b> is an example of this type of program. <p>
-Initially mknemo was nothing
-more than a convenience tool to build (new) binaries from your working
-directory, without having to remember where the source code lived... but since
-it has also acquired being a semi-package manager, it should be mentioned
-there are many other options to solve this problem. 
+Next, within the $NEMO/src (optionally also the $NEMO/usr tree) a source
+file <i>program.c</i> (or C++ or Fortran) is looked for, which is compiled with
+a local <b>Makefile</b> (or a template if none is available).  <i>tsf</i> is an example
+of this type of program, but also more specialized plotting programs such
+as <i>snapplot</i> or <i>orboom</i>, which need an extra 3rd party library. <p>
+Finally, if
+still no source code is found, a directory with the name <i>program</i> is searched
+for,  and a local Makefile is then used to install the <i>program</i>. <b>hackcode1</b>
+is an example of this type of program. <p>
+Initially mknemo was nothing more
+than a convenience tool to build (new) binaries from your working directory,
+without having to remember where the source code lived... but since it has
+also acquired being a semi-package manager, it should be mentioned there
+are many other options to solve this problem. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Options</a></h2>
 <br>
@@ -146,7 +148,7 @@ Peter Teuben
 <p> 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
-<pre>$NEMO/src/scripts/mknemo.d<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory with non-default control files for mknemo
+<pre>$NEMO/src/scripts/mknemo.d<tt> </tt>&nbsp;<tt> </tt>&nbsp;directory with recipe files for mknemo
 $NEMO/src/scripts/template<tt> </tt>&nbsp;<tt> </tt>&nbsp;NEMO program template generator
 $NEMO/src/scripts/mkman<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;NEMO man page template generator
 $NEMOLIB/makedefs<tt> </tt>&nbsp;<tt> </tt>&nbsp;make variables

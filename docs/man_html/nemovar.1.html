@@ -18,9 +18,9 @@ nemovar - get and set NEMOVAR variables
 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>nemovar</b> maintains a NEMO key/value storage server.  It will
-providing another method to communicate (textual) information between tasks
-using key/value pairs. These are persistent variables, and  can cross different
+<b>nemovar</b> maintains a NEMO key/val storage server.  It will providing
+another method to communicate (textual) information between tasks using
+key/val pairs. These are persistent variables, and  can cross different
 sessions, much like SHELL variables. <p>
 The current implementation uses a simple
 text file, but future implementation may also be able to switch to shared
@@ -35,29 +35,32 @@ in order; they may be given in any order if the keyword is also given. Use
 
 <dt><b>var=</b> </dt>
 <dd>Name of the variable.
+<br>
 Default: not used. </dd>
 
 <dt><b>val=</b> </dt>
-<dd>If used, the variable is getting a new value. Default:
-not used. </dd>
+<dd>If used, the variable is getting a new value. <br>
+Default: not used. </dd>
 
 <dt><b>**delete=f|t</b> </dt>
-<dd>Delete the named variable in <b>var=</b>. </dd>
+<dd>Delete the named variable in <b>var=</b>. <br>
+**<i>not implemented yet</i> </dd>
 
 <dt><b>**load=</b> </dt>
-<dd>Load from
-a file. Need a replace/merge option? </dd>
+<dd>Load from a file. Need a replace/merge option?
+<br>
+**<i>not implemented yet</i> </dd>
 
 <dt><b>**save=</b> </dt>
-<dd>Save to a file. 
-<p> </dd>
+<dd>Save to a file. <br>
+**<i>not implemented yet</i> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-The
-<b>NEMOVAR</b> environment variable is used to set the interprocess communication
-(currently only files are supported). For example on linux we might be able
-to use the shared memory as follows:  
+The <b>NEMOVAR</b> environment variable is used
+to set the interprocess communication, though currently only files are
+supported. For example on linux we might be able to use the shared memory
+as follows:  
 <p>     export NEMOVAR=/dev/shm/nemovar.$USER<br>
      nemovar a 10<br>
      <br>
@@ -84,7 +87,12 @@ The data type interpretation is left to the client. This also opens the
 option for small lists, e.g.  
 <p>     d="1,2,10:20:2"<br>
  
-<p>  
+<p>  which again leaves the client to parse the string, much like <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+.
+Here is the way it can be done using <a href='nemoinp.1.html'><i>nemoinp(1NEMO)</i></a>
+      nemoinp $(nemovar
+d)<br>
+  
 <p> 
 <h2><a name='sect6' href='#toc6'>Background</a></h2>
 There are several ways already to pass small textual information
@@ -115,7 +123,8 @@ the first version of nemovar you can do the following:        export NEMOVAR=nem
   
 <p> <p>
 The power of nemovar will come when the user interface shortcuts the
-use of the shell,as in this hypothetical example       ccdstat foo.ccd nemovar=mean,disp<br>
+use of the shell, as in this hypothetical example       ccdstat foo.ccd
+nemovar=mean,disp<br>
       ccdplot foo.ccd %mean-%disp,%mean,%mean+%disp&rsquo;<br>
   
 <p> 
@@ -123,7 +132,7 @@ use of the shell,as in this hypothetical example       ccdstat foo.ccd nemovar=m
 1. A future implementation will allow direct retrieval of NEMO
 variables is possible via the command line (see <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
 ). For example,
-compare the two style, <i>nemovar</i> on the left, shell variables on the right:
+compare the two styles, <i>nemovar</i> on the left, shell variables on the right:
  
 <p>      nemovar eps 0.05                 eps=0.05<br>
       hackcode1 eps=%eps               hackcode1 eps=$eps<br>
@@ -131,9 +140,9 @@ compare the two style, <i>nemovar</i> on the left, shell variables on the right:
   Note that some <a href='table.5.html'><i>table(5NEMO)</i></a>
  programs use %0, %1, %2, .... to refer to column
 numbers, so variable names cannot start with a digit. Upper and Lower case
-should be allowed. <p>
-Recall that the current command line interface already
-can refer to other keywords, e.g.  
+should be allowed, and be different. <p>
+Recall that the current command line
+interface can already refer to other keywords, e.g.  
 <p>     foobar a=1 b=&rsquo;$a&rsquo;<br>
      <br>
   would assign the same value to both a and b. 
@@ -180,6 +189,7 @@ Peter
 <br>
 <pre>7-mar-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created for NEMO2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 24-jun-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.4:    write dummy if NEMOVAR does not exist<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+15-feb-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.6:<tt> </tt>&nbsp;<tt> </tt>&nbsp;remove quotes when single variables requested<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

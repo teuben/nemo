@@ -9,11 +9,14 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 snapcmp - compare two N-body snapshots 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>snapcmp in1=</b>snap_file
 <b>in2=</b>snap_file [parameter=value] ... 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <i>snapcmp</i> is a flexible tool
 for comparing two N-body snapshots on a particle by particle basis.  An arbitrary
@@ -28,32 +31,37 @@ The program simply outputs
 eight numbers: time of the first snapshot, are the minimum, lower quartile,
 median, upper quartile,  maximum of the measured differences, and the mean
 and dispersion of the distribution. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are
-recognized. 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
-<dt><b>in1=</b><i>snap_file1</i> </dt>
+<dt><b>in1=</b><i>snap_file1</i>
+</dt>
 <dd></dd>
 
 <dt><b>in2=</b><i>snap_file2</i> </dt>
-<dd>Input data is read from <i>snap_file1</i>
-and <i>snap_file2</i>, which must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
- format.  Default: none.
-</dd>
+<dd>Input data is read from <i>snap_file1</i> and <i>snap_file2</i>, which
+must be in <a href='snapshot.5.html'><i>snapshot</i>(5NEMO)</a>
+ format. <br>
+Default: none. </dd>
 
 <dt><b>time1=</b><i>time_range1</i> </dt>
 <dd></dd>
 
 <dt><b>time2=</b><i>time_range2</i> </dt>
-<dd>Data with time values within <i>time_range1</i>
-and <i>time_range2</i> will be read from <i>snap_file1</i> and <i>snap_file2</i>, respectively.
+<dd>Data with time values
+within <i>time_range1</i> and <i>time_range2</i> will be read from <i>snap_file1</i> and <i>snap_file2</i>,
+respectively. <br>
 [Default: <b>all</b>]. </dd>
 
 <dt><b>obs=</b><i>obs_expression</i> </dt>
 <dd><i>obs_expression</i> is the observable used
 to compare the particles. See <a href='bodytrans.1.html'><i>bodytrans</i>(1NEMO)</a>
  for the form of <i>obs_expression</i>.
+<br>
 Default: <b>r</b>, which compares the positions of particles. </dd>
 
 <dt><b>diffpart=</b><i>flag</i> </dt>
@@ -61,35 +69,59 @@ Default: <b>r</b>, which compares the positions of particles. </dd>
 <i>flag</i> is true, particles are compared by subtracting the components of one
 from the components of the other, and evaluating the observable <b>obs</b> on
 this &lsquo;&lsquo;differenced particle&rsquo;&rsquo;. Otherwise, <b>obs</b> is evaluated for each particle,
-and the results are differenced.  Default: <b>true</b>. </dd>
+and the results are differenced. <br>
+Default: <b>true</b>. </dd>
 
 <dt><b>relative=</b><i>flag</i> </dt>
-<dd>If <i>flag</i> is
-true, the differenced observable is divided by the value of <b>obs</b> computed
-from the particle in <i>snap_file1</i>. Otherwise, the differenced observable is
-used.  Default: <b>false</b>. </dd>
+<dd>If <i>flag</i> is true, the differenced observable
+is divided by the value of <b>obs</b> computed from the particle in <i>snap_file1</i>.
+Otherwise, the differenced observable is used. <br>
+Default: <b>false</b>. </dd>
 
 <dt><b>log=t|f</b> </dt>
-<dd>Show (10-base) logarithms of the values instead
-of their linear values Default: false. 
+<dd>Show (10-base) logarithms of the values instead of
+their linear values <br>
+Default: false. </dd>
+
+<dt><b>time0=t|f</b> </dt>
+<dd>Also print time=0? <br>
+Default: true 
 <p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+
+<p> Two random Plummer spheres are compared in the
+X coordinate:  
+<p>    $ mkplummer p1 1000 seed=123<br>
+    $ mkplummer p2 1000 seed=456<br>
+    $ snapcmp p1 p2 obs=x<br>
+ 
+<p>      # time  Min  Qlow Median Qhigh  Max   Mean Sigma<br>
+      # obs=x (linear scaling)<br>
+      0   -12.7064 -0.565549 -0.0109623 0.611036 11.8118  -1.15463e-16 1.61843<br>
+      <br>
+  
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapcmphist.1.html'>snapcmphist(1NEMO)</a>
 , <a href='snapdiff.1.html'>snapdiff(1NEMO)</a>
-,
-<a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
+, <a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
- 
-<h2><a name='sect5' href='#toc5'>Files</a></h2>
+
+
+<p> 
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>src/nbody/reduc/snapcmp.c      source code for snapcmp, snapcmphist and
 snapcmpplot
 </pre>
-<h2><a name='sect6' href='#toc6'>Author</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Author</a></h2>
 Joshua E. Barnes. 
-<h2><a name='sect7' href='#toc7'>History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>23-may-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 created?<tt> </tt>&nbsp;<tt> </tt>&nbsp;Josh
 29-mar-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.3 added time to output<tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter
@@ -105,10 +137,11 @@ the output<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Files</a></li>
-<li><a name='toc6' href='#sect6'>Author</a></li>
-<li><a name='toc7' href='#sect7'>History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Files</a></li>
+<li><a name='toc7' href='#sect7'>Author</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

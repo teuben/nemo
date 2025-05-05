@@ -21,45 +21,48 @@ tabint - integrate a sorted table, optionally higher order moments
 <b>tabint</b> integrates a function
 Y=F(X) that is defined by a set of (X,Y) points selected from two columns
 from an ASCII table. The function can either be resampled using a spline
-interpolation, or directly summed using the trapezoid rule. <p>
+interpolation, or directly summed using the trapezoid rule. X values need
+to sorted increasing or decreasing.  <p>
 See also <a href='tabhist.1.html'><i>tabhist(1NEMO)</i></a>
-
-with <b>cumul=t</b> for a visual display, though the cumulative option here can
-also produce a table for display to check the convergence of the integral.
+ with <b>cumul=t</b>
+for a visual display, though the cumulative option here can also produce
+a table for display to check the convergence of the integral. <p>
+An optional
+scale factor can be applied, which folds in any X or Y scaling that might
+need to be applied. This is particularly useful if you integrate the points
+themselves (i.e. without giving a <b>step=</b>)  but still want to scale the X coordinate.
 <p>
-An optional scale factor can be applied, which folds in any X or Y scaling
-that might want to be applied. This is particularly useful if you integrate
-the points themselves (i.e. without giving a <b>step=</b>)  but still want to scale
-the X coordinate. <p>
-Optionally the 1st or 2nd moment can be computed (step=,
-normalize= and cumulative= are then ignored). 
+Optionally higher order moments (1 through 4) can be also computed (step=,
+normalize= and cumulative= are then ignored). <br>
+0: integrated sum  1: mean X value  2: dispersion in X  3: skewness (0=symmetric)
+ 4: kurtosis (0 means normal) 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following
-parameters are recognized in order; they may be given in any order if the
-keyword is also given. Use <b>--help</b> to confirm this man page is up to date. 
-
+ The following parameters are
+recognized in order; they may be given in any order if the keyword is also
+given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input table file. <br>
+<dd>Input table
+file. <br>
 No default. </dd>
 
 <dt><b>xcol=</b> </dt>
-<dd>Column with X coordinate. If the X coordinates are not
-increasing, the array will be reversed. <br>
+<dd>Column with sorted X coordinates. If the X coordinates
+are not increasing, the array will be reversed. <br>
 [Default: 1] </dd>
 
 <dt><b>ycol=</b> </dt>
-<dd>Column with Y coordinate of function <br>
+<dd>Column with Y coordinate of the function <br>
 [Default: 2] </dd>
 
 <dt><b>xmin=</b> </dt>
-<dd>if given, value below which data to be discarded <br>
+<dd>If given, value below which data to be discarded <br>
 By default it uses the smallest datapoint from the table. </dd>
 
 <dt><b>xmax=</b> </dt>
-<dd>if given,
+<dd>If given,
 value above which data to be discarded <br>
 By default it uses the largest datapoint from the table. </dd>
 
@@ -86,9 +89,9 @@ integrations instead. Only implemented for native steps. <br>
 to use a different step size if integrating the individual points. <br>
 [Default: 1] </dd>
 
-<dt><b>mom=0|1|2</b> </dt>
-<dd>The moment along the profile. mom=0 is the flux, mom=1
-the first moment along the X axis, and mom=2 the dispersion. <br>
+<dt><b>mom=0|1|2|3|4</b> </dt>
+<dd>The moment along the profile. mom=0 is the flux,
+mom=1 the first moment along the X axis, and mom=2 the dispersion. <br>
 [Default: 0] 
 <p> </dd>
 </dl>
@@ -113,7 +116,7 @@ xmin=110.5-0.3 xmax=110.5+0.3  scale=c/110.5/1000<br>
 |\<br>
     tabplot - 1 2 line=1,1 point=2,0.1 ycoord=0<br>
  
-<p>  recalling that <b>c</b> is in m/s and the requested line integral was requested
+<p>  Recall that <b>c</b> is in m/s and the requested line integral was requested
 in km/s. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
@@ -126,7 +129,9 @@ might sort, though <a href='sort.1.html'><i>sort(1)</i></a>
  
 <p> perhaps easier 
 <p>    % tabcols my.tab 3,6 | sort -n | tabint -<br>
-  
+  All moments, expecially the higher order ones, are susceptible to the
+correct window if the shape of a line feature is to be determined accurately.
+
 <p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
 <a href='tabfilter.1.html'>tabfilter(1NEMO)</a>
@@ -152,6 +157,7 @@ Peter Teuben
 22-feb-2022<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.6 added xmin=, xmax=, scale=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 31-jul-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.7 poor man&rsquo;s implementation of mom=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-apr-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.9 clarifications<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+17-jan-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 added mom=3,4 options<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -9,79 +9,124 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdblob - properties of a blob in an image 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdblob</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdblob</b> is a poor man&rsquo;s source extractor and  computes some properties
-of a blob ("star") in an image. With given rough pixel coordinates and a
-box size, it will determine the peak, shape and flux of the blob, assuming
-the background signal (box needs to be big enough for this) is well characterised
-by the median value. This current algorithm thus does not work in crowded
-fields. <p>
+<b>ccdblob</b> is a poor man&rsquo;s source extractor and  computes some
+properties of a blob ("star") in an image. With given rough pixel coordinates
+and a box size, it will determine the peak, shape and flux of the blob,
+assuming the background signal (box needs to be big enough for this) is
+well characterised by the median value. This current algorithm thus does
+not work in crowded fields. <p>
 The current draft version is based off <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
- and thus
-inherits some keywords and output that may disappear or change meaning.
-<p>
-Pixel coordinates are 1-based. 
+
+and thus inherits some keywords and output that may disappear or change
+meaning. <p>
+Pixel coordinates are 1-based. <p>
+
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input NEMO image file [???]
-    </dd>
+<dd>Input NEMO
+image file <br>
+No default. </dd>
 
 <dt><b>pos=</b> </dt>
-<dd>(x,y) position, or use max in map. Integers, and are 1-based. []
-</dd>
+<dd>(x,y) center of the <b>box</b>, or use maximum in image (?). Positions
+are 1-based integers. <br>
+Default is center of image, but there should be an option to use the maximum
+in the image? </dd>
 
 <dt><b>box=</b> </dt>
-<dd>Box size to use around pos [32]  </dd>
+<dd>Box size to use around <b>pos</b>. <br>
+Default: 32 </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Use only values above clip
-[]  </dd>
+<dd>Use only values above <b>clip</b>.  <br>
+Default will use all values </dd>
 
-<dt><b>wcs=</b> </dt>
-<dd>Use WCS of the cube (else use pixel coordinates) </dd>
+<dt><b>wcs=t|f</b> </dt>
+<dd>Use WCS of the cube (otherwise use pixel
+coordinates 1..N). </dd>
 
-<dt><b>radecvel=</b> </dt>
-<dd>Split
-the RA/DEC from VEL [f]   </dd>
+<dt><b>radecvel=t|f</b> </dt>
+<dd>Split the RA/DEC from VEL <br>
+[f]   </dd>
 
-<dt><b>weight=</b> </dt>
-<dd>Weights by intensity [t]     </dd>
+<dt><b>weight=t|f</b> </dt>
+<dd>Weigh moments of inertia by intensity? <br>
+[t]     </dd>
 
 <dt><b>cross=</b> </dt>
-<dd>Use
-cross correlations between X and Y to </dd>
+<dd>Use cross correlations between X and Y to... </dd>
+
+<dt><b>peak=N</b> </dt>
+<dd>Find the
+N-th peak. Only used if <b>pos</b> is not given. For <b>peak=0</b> the center of the map
+is used, otherwise it will find the N-th peak. <br>
+Default: 1 <br>
+
+<p><i>not implemented yet</i> 
+<p> 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Analysing some Betelgeuse
-images from an all-sky camera: <br>
-<pre>% fitsccd ASC/MASN-01/archive/201601/20160102/IMG00700.FIT - | ccdblob - 724,305
- BLOB 726 305  724.573 305.38 32   6546 42731 139121
-</pre>Where the BLOB line lists the peak position (pixels are 1-based), followed
+Analysing a Betelgeuse images from an all-sky
+camera:  
+<p> % file=ASC/MASN-01/archive/201601/20160102/IMG00700.FIT % fitsccd
+$file - | ccdblob - 724,305  BLOB 726 305  724.573 305.38 32   6546 42731 139121<br>
+ 
+<p>  Where the BLOB line lists the peak position (pixels are 1-based), followed
 by an intensity weighted position, the box size around the estimated center,
 followed by the median, peak and total blob flux (corrected for the median
-background). 
+background). <p>
+An example of creation a gaussian blob with a given Signal/Noise
+(ns=) and running it through ccdblob:  
+<p> sn=10 ccdgen - gauss 1,3 128,128
+ | ccdgen - noise 0,1/$sn in=- | ccdblob - Npoints:    1024 DataMinMax: -0.359968
+1.08932 Min at:     53 71 (1 based) Max at:     64 65 Mean:       0.0559946
+Median:     0.0673992 DataSum:    57.3385 Flux:       -11.6783 ImSize:    
+128 128 1 Center:     63.1595 63.5957 0 [wcs] BLOB:  64 65  64.1595 64.5957
+32   0.0673992 1.08932 -11.6783         e_x:     1.00000     0.99981     0.01968
+    0.00000    90.0    1.1<br>
+         e_y:     1.00000    -0.01968     0.99981     0.00000    90.0   91.1<br>
+         e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0<br>
+       qpole:    13.07941     0.99981     0.01968     0.00000<br>
+                  5.93258    -0.01968     0.99981     0.00000<br>
+                  0.00000     0.00000     0.00000     1.00000<br>
+ a,b:  3.61655 2.43569 inc:  47.6634 (meaningless without radecvel) pa:  
+91.1275 (meaningless without radecvel) 
+<p> 
+<p>  
+<p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='ccdstat.1.html'>ccdstat(1NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
- 
-<h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/image/misc/ccdblob.c
 
+<br>
+<pre>https://github.com/perwin/imfit
+</pre>
+<h2><a name='sect6' href='#toc6'>Files</a></h2>
+src/image/misc/ccdblob.c 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>15-feb-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-feb-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 fix boxsize when no pos given<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -95,7 +140,7 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>
