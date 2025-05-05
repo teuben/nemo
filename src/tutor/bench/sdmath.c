@@ -15,21 +15,30 @@
 string defv[] = {
   "nscan=1000\n        Number of scans",
   "nchan=100000\n      Number of channels",
-  "iter=20\n           How many times to iterate (0 means do nothing)",
-  "mode=1\n            Mode of math (not implemented)",
+  "iter=10\n           How many times to iterate (0 means do nothing)",
+  "mode=1\n            Mode to init the data (0=random 1=arange)",
   "aver=f\n            Add time average over nscan",
   "in=\n               Read a file into memory",
   "bs=16\n             Blocksize in kB to read",
   "maxbuf=0\n          Max buffer for file data in MB",
-  "VERSION=1.4\n       2-may-2025",
+  "seed=0\n            Seed, if need be",
+  "VERSION=1.5\n       5-may-2025",
   NULL,
 };
 
 string usage = "SD math bench";
 
 
+//   order:   on_cold, on_hot, off_cold, off_hot
+//
+//   Tsys =  Tc * <row1> / <row2-row1>      <cold> / <hot>-<cold>
+//   on  = row1 + row2
+//   off = row3 + row4
+//   Ta = Tsys * (on/off - 1)
+
+
 // n OPS
-real mean1(int n, real *data)
+real sum1(int n, real *data)
 {
   real sum = 0.0;
   #pragma omp parallel for reduction(+:sum)
@@ -38,11 +47,11 @@ real mean1(int n, real *data)
 }
 
 // 2*n OPS
-real mean2(int n, real *data1, real *data2)
+real sum2(int n, real *data1, real *data2)
 {
   real sum = 0.0;
   #pragma omp parallel for reduction(+:sum)
-  for (int i=0; i<n; i++) sum += data1[i]-data2[i];
+  for (int i=0; i<n; i++) sum += data2[i]-data1[i];
   return sum; 
 }
 
@@ -51,7 +60,7 @@ real mean2(int n, real *data1, real *data2)
 
 // this one went slower!!!
 // 2*n OPS
-real tsys2(int n, real *hot, real *cold)
+real tsys2(int n, real *cold, real *hot)
 {
   real a, b;
   // @todo these two can be done in parallel
@@ -60,18 +69,19 @@ real tsys2(int n, real *hot, real *cold)
 #pragma omp sections 
     {
 #pragma omp section
-      a = mean1(n, hot);
+      a = sum1(n, cold);
 #pragma omp section
-      b = mean2(n, hot, cold);
+      b = sum2(n, cold, hot);
     }
   }
   return a/b;
 }
 
-real tsys(int n, real *hot, real *cold)
+real tsys(int n, real *cold, real *hot)
 {
+  static real tc = 10.0;
   // @todo these two can be done in parallel
-  return mean1(n, hot) / mean2(n, hot, cold);
+  return tc * sum1(n, cold) / sum2(n, cold, hot);
 }
 
 void file_read(string fname)
@@ -120,7 +130,7 @@ void nemo_main(void)
   size_t n = nchan * nscan * 4;
   int i, j, mode = getiparam("mode");
   real *data, *row0, *row1, *row2, *row3, *row4;
-  real *aver, *spec, *onn, *off, t_onn, t_off;
+  real *aver, *spec, t_onn;
   size_t ndata = n * sizeof(real);
   bool Qaver = getbparam("aver");
   int nphase = 4;
@@ -131,19 +141,24 @@ void nemo_main(void)
   }
 
   data = (real *) allocate(n * sizeof(real));
-  onn  = (real *) allocate(nchan * sizeof(real));
-  off  = (real *) allocate(nchan * sizeof(real));
   spec = (real *) allocate(nchan * sizeof(real));
   aver = (real *) allocate(nchan * sizeof(real));
   
 
   printf("data size: %ld bytes ~ %g MB  nscan=%ld nchan=%ld iter=%ld\n",
 	 ndata, (real)ndata/1024/1024, nscan, nchan, iter);
-  printf("# ops = %ld  %g Gop\n",7*nchan*nscan*iter,  (7.0*nchan*nscan*iter)/1e9);
+  printf("# ops = %ld  %g PSop\n",nchan*nscan*iter,  (1.0*nchan*nscan*iter)/1e9);
     
 
-  // only random one row, xrandom() is expensive
-  for (i=0; i<nphase*nchan; i++) data[i] = xrandom(0.0,1.0);
+  // only random one scan, xrandom() is expensive
+  if (mode==1) {
+    int seed = init_xrandom(getparam("seed"));
+    dprintf(1,"seed used = %d\n",seed);
+    for (i=0; i<nphase*nchan; i++) data[i] = xrandom(0.0,1.0);
+  } else {
+    // simple 0,1,2 for reproducing python
+    for (i=0; i<nphase*nchan; i++) data[i] = i;
+  }
   // duplicate other rows, so we fill memory out of the caching
   row0 = data;
   row1 = data + nphase*nchan;
@@ -152,17 +167,18 @@ void nemo_main(void)
     row0 = row1;
     row1 = row0 + nphase*nchan;
   }
-
   
   while (iter--) {
     row0 = data;
     for (i=0; i<nscan; i++) {
-      row1 = row0 + nchan;
+      row1 = row0;
       row2 = row1 + nchan;
       row3 = row2 + nchan;
       row4 = row3 + nchan;
+      row0 = row4;  // for the next iter
       // Tsys =  Tc * <cold> / <hot-cold>
       t_onn = tsys(nchan, row1, row2);          // 3*nchan
+      // printf("Tsys:%g\n",t_onn);
       // t_off = tsys(nchan, row3, row4);       // 3*nchan
       // Ta = Tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
 
@@ -179,7 +195,7 @@ void nemo_main(void)
     } // i
   } // iter
 
-  dprintf(1,"data[first..last] = %g %g\n", data[0], data[n-1]);
-  dprintf(1,"aver=%g\n",mean1(nchan,aver));
+  dprintf(1,"data[first..last] = %g %g %g\n", data[0], data[1], data[n-1]);
+  dprintf(1,"sum=%g\n",sum1(nchan,aver));
   
 }
