@@ -30,8 +30,10 @@
 ////////////////////////////////////////////////////////////////////////////////
 ///
 /// \version 18-Nov-2009  Created, based on Combined.cc
+///           4-may-2025  Only allow compilation if autoconf found SSE 
 ///
 ////////////////////////////////////////////////////////////////////////////////
+#ifdef HAVE_SSE_INSTRUCTIONS
 #include <iostream>
 #include <fstream>
 #include <acceleration.h>
@@ -454,3 +456,4 @@ void iniacceleration(const double*pars,      // I:  array with parameters
   *accel = Accs[AccN++];
 }
 ////////////////////////////////////////////////////////////////////////////////
+#endif
