@@ -1,7 +1,7 @@
 /*
- * benchmark some SD match
+ * benchmark some SD : math and I/O
  *
- * The default nscan=1000 nchan=100000 iter=20 needs 14 Gop
+ * The default nscan=1000 nchan=100000 iter=10
  * d76:    4.6s -> 3 Gop/sec128
  * lma:    7.3s    2
  * jansky: 3.4s    4
@@ -29,12 +29,13 @@ string defv[] = {
 string usage = "SD math bench";
 
 
-//   order:   on_cold, on_hot, off_cold, off_hot
+//   assumed order:   on_cold, on_hot, off_cold, off_hot
 //
 //   Tsys =  Tc * <row1> / <row2-row1>      <cold> / <hot>-<cold>
 //   on  = row1 + row2
 //   off = row3 + row4
 //   Ta = Tsys * (on/off - 1)
+//   Spectrum = <Ta>
 
 
 // n OPS
@@ -127,11 +128,11 @@ void nemo_main(void)
   size_t nchan = getiparam("nchan");
   size_t nscan = getiparam("nscan");
   size_t iter = getiparam("iter");
-  size_t n = nchan * nscan * 4;
+  size_t n4 = nchan * nscan * 4;
   int i, j, mode = getiparam("mode");
   real *data, *row0, *row1, *row2, *row3, *row4;
   real *aver, *spec, t_onn;
-  size_t ndata = n * sizeof(real);
+  size_t ndata = n4 * sizeof(real);
   bool Qaver = getbparam("aver");
   int nphase = 4;
 
@@ -140,14 +141,14 @@ void nemo_main(void)
     return;
   }
 
-  data = (real *) allocate(n * sizeof(real));
+  data = (real *) allocate(n4 * sizeof(real));
   spec = (real *) allocate(nchan * sizeof(real));
   aver = (real *) allocate(nchan * sizeof(real));
   
 
   printf("data size: %ld bytes ~ %g MB  nscan=%ld nchan=%ld iter=%ld\n",
 	 ndata, (real)ndata/1024/1024, nscan, nchan, iter);
-  printf("# ops = %ld  %g PSop\n",nchan*nscan*iter,  (1.0*nchan*nscan*iter)/1e9);
+  printf("# rops = %ld  ~ %g Grops\n",nchan*nscan*iter,  (nchan*nscan*iter)/1e9);
     
 
   // only random one scan, xrandom() is expensive
@@ -178,9 +179,6 @@ void nemo_main(void)
       row0 = row4;  // for the next iter
       // Tsys =  Tc * <cold> / <hot-cold>
       t_onn = tsys(nchan, row1, row2);          // 3*nchan
-      // printf("Tsys:%g\n",t_onn);
-      // t_off = tsys(nchan, row3, row4);       // 3*nchan
-      // Ta = Tsys * (on/off-1)  - but on and off are their Calon&Caloff averaged
 
       #pragma omp parallel for
       for (j=0; j<nchan; j++) {
@@ -191,11 +189,11 @@ void nemo_main(void)
 	//spec[j] = row1[j];                                      // check-4      3.37user 0.88system 0:04.26elapsed 99%CPU 
        	if (Qaver)
 	  aver[j] = aver[j] + spec[j];
-      } // j
-    } // i
+      } // j-chan
+    } // i-scan
   } // iter
 
-  dprintf(1,"data[first..last] = %g %g %g\n", data[0], data[1], data[n-1]);
+  dprintf(1,"data[0,1..last] = %g %g %g\n", data[0], data[1], data[n4-1]);
   dprintf(1,"sum=%g\n",sum1(nchan,aver));
   
 }
