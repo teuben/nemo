@@ -20,17 +20,14 @@ string defv[] = {
     "out=???\n      Output file (snapshot(5NEMO) format)",
     "nbody=\n       Input Number of particles",
     "header=\n      if used, force unfio header size (4 or 8)",
-    "VERSION=1.2\n  4-mar-06 PJT",
+    "VERSION=1.2a\n 4-may-2025 PJT",
     NULL,
 };
 
 string usage = "Convert NBODY unit-4 file to snapshot";
 
-string cvsid="$Id$";
-
 #define SIZEPP  36      /* 36 bytes per particle on fort.4 = 28 data + 8 header */
 
-extern int nemo_file_size(string);
 
 void nemo_main(void)
 {
