@@ -25,7 +25,8 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "zerocm=t\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
     "bench=0\n      Add a number of benchmarks",
-    "VERSION=1.1\n  2-oct-2022 PJT",
+    "nmodel=1\n     number of models to produce",
+    "VERSION=1.2\n  6-may-2025 PJT",
     NULL,
 };
 
@@ -41,7 +42,7 @@ local int nbody;
 
 extern double xrandom(double,double), grandom(double,double);
 
-void writegalaxy(string name, string headline);
+void writegalaxy(string name, string headline, int nmodel);
 void mkcube(void);
 void do_bench(void);
 void centersnap(Body *btab, int nb);
@@ -61,7 +62,7 @@ void nemo_main()
     
     mkcube();
     if (bench) do_bench();
-    writegalaxy(getparam("out"), getparam("headline"));
+    writegalaxy(getparam("out"), getparam("headline"), getiparam("nmodel"));
     free(btab);
 }
 
@@ -69,7 +70,7 @@ void nemo_main()
  * WRITEGALAXY: write galaxy model to output.
  */
 
-void writegalaxy(string name, string headline)
+void writegalaxy(string name, string headline, int nmodel)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -79,7 +80,8 @@ void writegalaxy(string name, string headline)
 	set_headline(headline);
     outstr = stropen(name, "w");
     put_history(outstr);
-    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+    while (nmodel--)
+      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     strclose(outstr);
 }
 
