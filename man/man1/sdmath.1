@@ -1,51 +1,69 @@
-.TH SDMATH 1NEMO "2 May 2025"
+.TH SDMATH 1NEMO "6 May 2025"
 
 .SH "NAME"
-sdmath \- SD math and file I/O bench
+sdmath \- SD math and file I/O benchmark
 
 .SH "SYNOPSIS"
 \fBsdmath\fP [parameter=value]
 
 .SH "DESCRIPTION"
-This is a benchmark for OpenMP parallellizable Single Dish vector math in a typical
-ON/OFF with noise diodes CalON/CalOff to provide a system temperature.
+This program benchmarks some OpenMP parallellizable Single Dish vector math in a typical
+4-phase calibration cycle with an ON/OFF with a separate COLD/HOT in each pointing.
+
 .PP
 Each spectrum (called row below) has \fBnchan\fP channels, Each \fBnscan\fP has 4 rows, with
-the CalOn and CalOff for the Ref and the Sig.  The following math is needed to construct a
-spectrum, taking 7 row operations, thus the total operations is 7*nscan*nchan*iter
-.nf
+the CalOn and CalOff (Hot and Cold if you wish)
+for the Sig and the Ref (On and Off if you wish).
+The following math is needed to construct a
+spectrum, thus the total operations scales as nscan*nchan*iter.
+.EX
 
-    Tsys =  Tc * <row3> / <row4-row3>      <cold> / <hot>-<cold>
-    off = row1 + row2
-    on  = row3 + row4
-    Ta = Tsys * (on/off - 1)
+    Tsys =  Tc * <row1> / <row2-row1>                 <cold> / <hot>-<cold>
+    Ta = Tsys * ( (row1+row2)/(row3+row4) - 1)            on/off - 1
+    Spectrum = <Ta>                                    time-averaging
     
-.fi
+.EE
 
-The benchmark here is very basic. A slightly more realistic one can be found in \fIsdinfo(1NEMO)\fP
+This block of memory of size 4*nchan*nscan can be iteratively visited, to get a more
+reliable measure of the CPU usage. It can make a huge difference if this block fits
+in one of the CPU caches.
+
+.PP
+
+The benchmark here is very basic, and only deals with the math with simulated data without
+the need to pass through a fitsio type library. The file I/O bench portion of this benchmark
+reads a large file to get an idea of I/O overhead.
+.PP
+A slightly more realistic one can be found in \fIsdinfo(1NEMO)\fP
 reading actual \fIsdfits(5NEMO)\fP files and selecting a set of operations.
+
+.PP
+The standard benchmark loops 10 times over 1000 scans of 100,000 channels (thus 1e9 row operations)
+in about 2-3 secs. We call this 1 GRop.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
-\fBnscan=\fP
+\fBnscan=\fP\fIint\fP
 Number of scans. Can be used to time-average (see \fBaver=\fP below).
 .br
 [1000]    
 .TP
-\fBnchan=\fP
-Number of channels.
+\fBnchan=\fP\fIint\fP
+Number of channels per spectrum.
 .br
 [100000]    
 .TP
-\fBiter=\fP
+\fBiter=\fP\fIint\fP
 How many times to iterate (0 means do nothing).
 .br
-[20]
+[10]
 .TP
-\fBmode=\fP
-Mode of math (not implemented yet). Currently the equivalent of a 4-phase PS observation
+\fBmode=\fP\fIint\fP
+Mode of math. Currently the equivalent of a 4-phase PS observation
 is simulated, but a simpler 2-phase TP observation should be implemented as well.
+mode=1:  random numbers   mode=2: sequence numbers, easier to compare with a python
+implementation.
 .br
 [1]  
 .TP
@@ -54,24 +72,46 @@ Add time average over nscan.
 .br
 [f]  
 .TP
-\fBin=\fP
+\fBin=\fP\fIfilename\fP
 If given, read this file into memory. Meant to measure disk I/O
 .br
 Not provided.
 .TP
-\fBbs=\fP
-Blocksize in kB to read with.
+\fBbs=\fP\fIint\fP
+Blocksize in kB to read file with.
 .br
 [16]
 .TP
-\fBmaxbuf=\fP
-Maximum buffer size (in MB) for reading buffer. If 0 is given, the full filesize is used.
+\fBmaxbuf=\fP\fIint\fP
+Maximum buffer size (in MB) for reading buffer. If 0 is given, the full filesize is used,
+which for large files can  potentially run into the swap.
 .br
 [0]
+.TP
+\fBseed=\fP\fIint\fP
+seed for the random number generator. A value of 0 (the default)
+will be converted into a unique new value using UNIX's clock time, in
+seconds since 1970.0). See also \fIxrandom(1NEMO)\fP for more options.
+.br
+[Default: 0]
 
 
 .SH "EXAMPLES"
-An example performance on an Ultra 7 155H, measured in wall clock
+
+Standard benchmark was extended to iter=100 to avoid system time. These are 10 Grops. CPU times are user space
+seconds [nemobench5 scores listed where available]
+.EX
+
+Xeon E5620  @ 2.40GHz (fourier) - 115.1  [218]
+AMD EPYC 7302 @ 3.0 GHz (lma)   -  34.1  [675]
+Ultra 7 155H @ 4.5 GHz (d76)    -  21.8  [~1200]
+M4 air                          -  15.4  [~2000]
+
+.PP
+
+.EE
+
+To view the impact of OpenMP, here is an example performance on an Ultra 7 155H, measured in wall clock
 time seconds, and iter=20:
 
 .EX
@@ -88,7 +128,8 @@ nscan  nchan      1      2      4      8     12     16     20
 ----- ------    ---    ---    ---    ---    ---    ---    ---
 
 .EE
-this implies around 4 Gop/sec.
+Somewhat surprisingly that barely a factor of 2 can be gained by going multi-core.
+
 .PP
 A read benchmark can be done with a large series of Plummer models. The example file created
 here is about 5GB in size:
@@ -97,13 +138,13 @@ here is about 5GB in size:
    /usr/bin/time sdmath  in=p1M
    /usr/bin/time sdmath  in=p1M maxbuf=1000
 .EE
-the latter resets the buffer 5 times, where the last read is partial.
+the latter resets the buffer 5 times, where the last read is a partial one.
 
 .SH "SEE ALSO"
 sdinfo(1NEMO), fits(5NEMO)
 
 .SH "FILES"
-$NEMO/src/tutor/bench/sdmath.c - code
+$NEMO/src/tutor/bench/sdmath.c
 
 .SH "AUTHOR"
 Peter Teuben
