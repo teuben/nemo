@@ -1,4 +1,5 @@
-The $NEMO/opt directory is used to install 3rd party
-software, usually alternative versions to what normally
-might be installed on your system. 
-For example hdf5, cfitsio etc.
+The $NEMO/opt directory is used to install 3rd party software, usually
+alternative versions to what normally might be installed on your
+system.  For example hdf5, cfitsio etc. 
+
+The file mknemo.log contains a log of the packages installed here.
