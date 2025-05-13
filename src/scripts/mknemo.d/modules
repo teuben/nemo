@@ -28,7 +28,7 @@ fi
 tcldir=/usr/lib/tclConfig.sh
 
 ./configure --prefix=$NEMO/opt \
-	    --modulefilesdir=$NEMO/modulefiles \
+	    --modulefilesdir=$NEMO/opt/modulefiles \
 	    --with-tcl=$tcldir
 make
 make install
