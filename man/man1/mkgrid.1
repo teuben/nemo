@@ -1,4 +1,4 @@
-.TH MKGRID 1NEMO "26 January 2006"
+.TH MKGRID 1NEMO "6 May 2025"
 
 .SH "NAME"
 mkgrid \- create a cube of equal massive stars equally spaced in space
@@ -37,6 +37,17 @@ Center c.o.m. ?
 Text headline for output    
 .br
 Default: none.
+.TP
+\fBnmodel=\fP\fIinteger\fP
+Number of models to generate. All models will be different here.
+Although mostly meant for benchmarks,
+generating more then 1 model can be useful to process very large
+snapshots (that normally won't fit in memory) in a serialized fashion. See
+also \fIsnapsplit\fP. Most NEMO programs will only read the first
+snapshot. See also \fBmkgrid nmodel=\fP for a faster way to benchmark.
+.br
+[Default: \fB1\fP]
+
 
 .SH "EXAMPLES"
 The curious \fBnmodel=\fP parameter was added for benchmarking the creation of large files. Very large Nbody snapshots
