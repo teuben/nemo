@@ -90,14 +90,9 @@ For <i>MaxTagLen</i> and <i>MaxVecDim</i> see <a href='rsf.1.html'><i>rsf(1NEMO)
 . 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-
-<p> An example of converting
-all double precision numbers to single precision in a NEMO file:      %
-tsf in=double.dat out=float.dat convert=d2f<br>
-     <br>
-  Here is an N-body snapshot of a Plummer sphere with 10 particles:  
-<p>  
-  mkplummer - 10 | tsf -<br>
+Here is an N-body snapshot
+of a Plummer sphere with 10 particles:  
+<p>     mkplummer - 10 | tsf -<br>
  
 <p> char Headline[35] "init_xrandom: seed used 1582131517" char History[27]
 "mkplummer - 10 VERSION=3.0" set SnapShot   set Parameters<br>
@@ -138,19 +133,20 @@ file, showing all lines, and in full precision
 The algorithm for implementing <b>maxline</b> is crude. <p>
 If <b>indent=</b> and
 <b>margin=</b> are choosen too large, resp. too small, they can bump into each
-other and cause illegable output, which cannot be read by <i>rsf</i> either. 
+other and cause illegable output, which cannot be read by <a href='rsf.1.html'><i>rsf(1NEMO)</i></a>
+ either.
+
 <p> 
-<h2><a name='sect8' href='#toc8'>See
-Also</a></h2>
+<h2><a name='sect8' href='#toc8'>See Also</a></h2>
 <a href='ls.1v.html'>ls(1v)</a>
 , <a href='file.1.html'>file(1)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
 , <a href='csf.1.html'>csf(1NEMO)</a>
 , <a href='qsf.1.html'>qsf(1NEMO)</a>
 , <a href='bsf.1.html'>bsf(1NEMO)</a>
-, <a href='filestruct.3.html'>filestruct(3NEMO)</a>
-.
-
+,
+<a href='filestruct.3.html'>filestruct(3NEMO)</a>
+. 
 <p> 
 <h2><a name='sect9' href='#toc9'>Author</a></h2>
 Joshua E. Barnes. 
@@ -162,8 +158,6 @@ xx-apr-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new filestruct package<tt> </tt>&n
 9-dec-90<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.3 helpvec and other minor things<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 21-mar-01<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.7 experimental xml output option<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 14-jun-02<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 added octal=, default output is now decimal<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-21-jun-21<tt> </tt>&nbsp;<tt> </tt>&nbsp;experimenting with a TLDR section<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-1-apr-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;experimenting with how to place defaults<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>

@@ -21,7 +21,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 
-int nemo_file_size(char *name)
+off_t nemo_file_size(char *name)
 {
   struct stat buf;
   

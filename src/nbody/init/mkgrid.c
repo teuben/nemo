@@ -22,13 +22,12 @@ string defv[] = {	/* DEFAULT INPUT PARAMETERS */
     "size=1.0\n     Size of cube",
     "zerocm=f\n     Center c.o.m. ?",
     "headline=\n    Text headline for output",
-    "VERSION=1.1\n  13-feb-2020 JJF",
+    "nmodel=1\n     number of models to produce",
+    "VERSION=1.2\n  6-may-2024 JJF",
     NULL,
 };
 
 string usage = "create a cube of equal massive stars equally spaced in space";
-
-string cvsid="$Id$";
 
 
 local real rmin, rmax;
@@ -37,22 +36,20 @@ local bool zerocm;
 local Body *btab;
 local int ngrid, nbody;
 
-void writegalaxy(string name, string headline);
+void writegalaxy(string name, string headline, int nmodel);
 void mkgrid(void);
 void centersnap(body *btab, int nb);
 
 
 void nemo_main(void)
 {
-    int seed;
-
     rmin = -0.5 * getdparam("size");
     rmax = -rmin;
     ngrid = getiparam("ngrid");
     nbody = ngrid * ngrid * ngrid ;
     zerocm = getbparam("zerocm");
     mkgrid();
-    writegalaxy(getparam("out"), getparam("headline"));
+    writegalaxy(getparam("out"), getparam("headline"), getiparam("nmodel"));
     free(btab);
 }
 
@@ -60,7 +57,7 @@ void nemo_main(void)
  * WRITEGALAXY: write galaxy model to output.
  */
 
-void writegalaxy(string name, string headline)
+void writegalaxy(string name, string headline, int nmodel)
 {
     stream outstr;
     real tsnap = 0.0;
@@ -70,7 +67,8 @@ void writegalaxy(string name, string headline)
 	set_headline(headline);
     outstr = stropen(name, "w");
     put_history(outstr);
-    put_snap(outstr, &btab, &nbody, &tsnap, &bits);
+    while (nmodel--)
+      put_snap(outstr, &btab, &nbody, &tsnap, &bits);
     strclose(outstr);
 }
 
@@ -81,8 +79,8 @@ void writegalaxy(string name, string headline)
 void mkgrid()
 {
     Body *bp;
-    real rmin3, rmax3, r_i, theta_i, phi_i, mass_i, delta;
-    int i, j, k, l, ndim=NDIM;
+    real mass_i, delta;
+    int i, j, k, l;
 
     btab = (Body *) allocate(nbody * sizeof(Body));
     mass_i = 2.0/nbody;

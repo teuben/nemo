@@ -9,22 +9,28 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-nbody5 - Regularized AC N-body code with triple &amp; binary collisions. 
-<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>nbody5
- &lt;  parameter_file &gt; log_file</b> 
-<h2><a name='sect2' href='#toc2'>Description</a></h2>
-<i>nbody5</i> is a regularized Ahmed-Cohen
-N-body code with  triple &amp; binary collisions. <p>
+nbody5 - Regularized AC N-body code with triple &amp; binary collisions 
+<p>
 
+<h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
+<b>nbody5  &lt;  parameter_file &gt; log_file</b> 
+<p> 
+<h2><a name='sect2' href='#toc2'>Description</a></h2>
+<i>nbody5</i> is a regularized
+Ahmed-Cohen N-body code with  triple &amp; binary collisions. <p>
+Maintenance has stopped
+a while back, <a href='nbody6.1.html'><i>nbody6(1NEMO)</i></a>
+ is the recommended replacement. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The input parameters
-are given in a small ASCII <b>parameter_file</b> (which can also be read from
-standard input) in the  order as detailed below <p>
-Example input <b>parameter_file</b>
-for the standard  internal benchmark (a 100-body problem integrated for
-20 crossing times): <br>
+The
+input parameters are given in a small ASCII <b>parameter_file</b> (which can also
+be read from standard input) in the  order as detailed below <p>
+Example input
+<b>parameter_file</b> for the standard  internal benchmark (a 100-body problem
+integrated for 20 crossing times): <br>
 <pre>1 1000.0                            <tt> </tt>&nbsp;<tt> </tt>&nbsp;KSTART TCOMP
 100 5 10 30 35 1                    <tt> </tt>&nbsp;<tt> </tt>&nbsp;N NFIX NCRIT NRAND NNBMAX NRUN
 0.02 0.03 0.4 1.0 1.0 20.0 5.0e-05 1.0 0.6<tt> </tt>&nbsp;<tt> </tt>&nbsp;ETAI ETAR RS0 DTADJ DELTAT TCRIT QE RBAR
@@ -200,7 +206,8 @@ OUT3
  14  Adjustment of coordinates &amp; velocities to c.m. condition.
  15  --read but not used--
 </pre><br>
-</dd>
+
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Input Order</a></h2>
@@ -243,15 +250,22 @@ else
     endif
 endif
 </pre>
-<h2><a name='sect5' href='#toc5'>Benchmark</a></h2>
-The above benchmark 100-body 20 crossing time experiment takes:
-<br>
+<p> 
+<h2><a name='sect5' href='#toc5'>Caveat</a></h2>
+The code NBODY5 has been used frequently but is no longer updated.
+It is therefore recommended to use NBODY6 instead. 
+<p> 
+<h2><a name='sect6' href='#toc6'>Benchmark</a></h2>
+The above benchmark
+100-body 20 crossing time experiment takes: <br>
 <pre>486dx2-66 linux 1.2.3      <tt> </tt>&nbsp;<tt> </tt>&nbsp;433"<tt> </tt>&nbsp;<tt> </tt>&nbsp;-O
 sparc 10/30 (bootes)      <tt> </tt>&nbsp;<tt> </tt>&nbsp;250"<tt> </tt>&nbsp;<tt> </tt>&nbsp;-O
 sparc 20/50? (phoenix)      <tt> </tt>&nbsp;<tt> </tt>&nbsp; 90"<tt> </tt>&nbsp;<tt> </tt>&nbsp;-O
 sparc 20/50? (phoenix)      <tt> </tt>&nbsp;<tt> </tt>&nbsp; 96"!!<tt> </tt>&nbsp;<tt> </tt>&nbsp;-O4 -libmil -cg92 (bizarre!)
+Ultra 7 155H (laptop)<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;0.22<tt> </tt>&nbsp;<tt> </tt>&nbsp;-O3 (default; gfortran 11.4.0)
 </pre>
-<h2><a name='sect6' href='#toc6'>Nemo</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>Nemo</a></h2>
 For NEMO the following modifications would have to be made in order
 for other programs to work: 
 <dl>
@@ -262,15 +276,26 @@ defined in common5.h should not be output to OUT3, instead a local INTEGER
 NAMEO(NMAX) is used for this. This in order for <a href='u3tos.1.html'><i>u3tos(1NEMO)</i></a>
  to work. </dd>
 
-<dt>xxx
-</dt>
-<dd>Various as yet undocumented changes by pjtl (and es). </dd>
+<dt><b>Ncode/roche.fP
+the MAX() function in the line </b></dt>
+<dd><br>
+<pre>     KT = MAX(2.001*STEP(I1)/DT,1)
+</pre>needs to have a real argument, thus 1.0, not 1 </dd>
+
+<dt>Various as yet undocumented
+changes by pjt (and es). </dt>
+<dd></dd>
+
+<dt>It seem the u1tos tool has disappeared while moving
+to CVS. </dt>
+<dd>
+<p> </dd>
 </dl>
 
-<h2><a name='sect7' href='#toc7'>Author</a></h2>
-Sverre Aarseth
-- sverre@mail.ast.cam.ac.uk 
-<h2><a name='sect8' href='#toc8'>Files</a></h2>
+<h2><a name='sect8' href='#toc8'>Author</a></h2>
+Sverre Aarseth - sverre@mail.ast.cam.ac.uk 
+<p> 
+<h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>fort.1<tt> </tt>&nbsp;<tt> </tt>&nbsp;common block restart dump file (option 1)
 fort.2<tt> </tt>&nbsp;<tt> </tt>&nbsp;common block restart dump file (option 2)
@@ -282,23 +307,28 @@ OUT9<tt> </tt>&nbsp;<tt> </tt>&nbsp;???
 ESC<tt> </tt>&nbsp;<tt> </tt>&nbsp;ascii file containing the times of each escaper
 STOP<tt> </tt>&nbsp;<tt> </tt>&nbsp;control file, when exists, program will prematurely stop.
 </pre>
-<h2><a name='sect9' href='#toc9'>See Also</a></h2>
+<p> 
+<h2><a name='sect10' href='#toc10'>See Also</a></h2>
 <a href='u1tos.1.html'>u1tos(1NEMO)</a>
 , <a href='u3tos.1.html'>u3tos(1NEMO)</a>
 , <a href='u4tos.1.html'>u4tos(1NEMO)</a>
 , <a href='stou4.1.html'>stou4(1NEMO)</a>
  <p>
-<i>Direct Methods
-for N-Body Simulations</i> by S.J. Aarseth in:  <i>Multiple Time Scales</i>, eds. J.U. Brackbill
-&amp; B.L. Cohen,  Academic Press, p. 377 (1984). <p>
-NBODY0 source code in Binney &amp;
-Tremaine&rsquo;s <i>Galactic Dynamics</i>  (Princeton University Press, 1987). pp.678. <p>
-<i>Small-N
-Systems</i> by S.J. Aarseth in: <i>XXX</i> eds. Benz, Barnes and XXX (<i>to be published</i>,
-1994) 
-<h2><a name='sect10' href='#toc10'>History</a></h2>
+<i>Direct
+Methods for N-Body Simulations</i> by S.J. Aarseth in:  <i>Multiple Time Scales</i>,
+eds. J.U. Brackbill &amp; B.L. Cohen,  Academic Press, p. 377 (1984). <p>
+NBODY0 source
+code in Binney &amp; Tremaine&rsquo;s <i>Galactic Dynamics</i>  (Princeton University Press,
+1987). pp.678. <p>
+<i>Small-N Systems</i> by S.J. Aarseth in: <i>XXX</i> eds. Benz, Barnes and XXX
+(<i>to be published</i>, 1994) <p>
+https://ftp.ast.cam.ac.uk/pub/sverre/nbody5/nbody5.tar.Z
+(4-apr-2004 version) 
+<p> 
+<h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
 <pre>22-may-95<tt> </tt>&nbsp;<tt> </tt>&nbsp;manual page written<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+19-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;format fix<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -309,12 +339,13 @@ Systems</i> by S.J. Aarseth in: <i>XXX</i> eds. Benz, Barnes and XXX (<i>to be p
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Input Order</a></li>
-<li><a name='toc5' href='#sect5'>Benchmark</a></li>
-<li><a name='toc6' href='#sect6'>Nemo</a></li>
-<li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Files</a></li>
-<li><a name='toc9' href='#sect9'>See Also</a></li>
-<li><a name='toc10' href='#sect10'>History</a></li>
+<li><a name='toc5' href='#sect5'>Caveat</a></li>
+<li><a name='toc6' href='#sect6'>Benchmark</a></li>
+<li><a name='toc7' href='#sect7'>Nemo</a></li>
+<li><a name='toc8' href='#sect8'>Author</a></li>
+<li><a name='toc9' href='#sect9'>Files</a></li>
+<li><a name='toc10' href='#sect10'>See Also</a></li>
+<li><a name='toc11' href='#sect11'>History</a></li>
 </ul>
 </body>
 </html>

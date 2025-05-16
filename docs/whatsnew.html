@@ -22,8 +22,12 @@ contains a timestamp of that creation.
 -->
 
 <A NAME=4_5_0>
-  <H2> 4.5.0/4.5.1:  in git (a.k.a. the Aarseth Release) </H2>
+  <H2> 4.5.x:  in git (a.k.a. the Aarseth Release) </H2>
   <UL>
+    <LI> (May 4, 2025) $NEMOARCH introduced, version bumped to 4.5.3, triggered by using
+      <A HREF=https://github.com/teuben/nemo/issues/185>NEMO on an M4.</A>
+    <LI> (May 2, 2025)  new <A HREF=man_html/sdmath.1.html>sdmath</A> to benchmark math and file I/O
+      baselines for Single Dish operations.
     <LI> (Apr 26, 2025) Fixed important typo in the "mknemo gcc" procedure, the new gcc-15.1 makes
       bench5 run an impressive 100pts faster on an Ultra 7 155H
     <LI> (Mar 20, 2025)  Ubuntu 25.04 with gcc-15 seems to pass check, with promising performance 
@@ -35,7 +39,7 @@ contains a timestamp of that creation.
            and
            <A HREF=https://simutools.docs.lam.fr/unsio/>https://simutools.docs.lam.fr/unsio/</A>.
     <LI> (Jan 3, 2025)   added mkrunfile.py to create runfiles looping over parameters
-    <LI> (Jan 3, 2025)   fixed very old 64bit itemsize limitation [issue17],
+    <LI> (Jan 3, 2025)   fixed very old 64bit itemsize limitation [issue17],https://github.com/teuben/nemo/issues/17
  	   this affected at least ccdfits, fitsccd and scanfits.
   </UL>
 

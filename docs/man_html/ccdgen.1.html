@@ -18,104 +18,114 @@ ccdgen - create or add objects to an image
 [parameter=value] 
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdgen</b> creates or <a href='modified.2D.html'>modified (2D)</a>
- images by
- adding simple parameterized two-dimensional objects. For arbitrary expressions
-use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
+<b>ccdgen</b> creates or modifies (2D/3D) images
+by  adding simple parameterized two/three-dimensional objects. For arbitrary
+expressions use <a href='ccdmath.1.html'><i>ccdmath(1NEMO)</i></a>
  instead.  <p>
-An added feature is that the objects can be
-added as if they are in a "galactic" disk with given inclination and position
-angle. The default is a "face-on" view (<b>inc=0</b>).  No corrections for brightness
-due to inclination are made however. <p>
-3D images are supported if <b>size=</b> contains
-a 3rd non-1 value. 
+An added feature is that the objects
+can be added as if they are in a "galactic" disk with given inclination
+and position angle. The default is a "face-on" view (<b>inc=0</b>).  No corrections
+for brightness due to inclination are made however. <p>
+3D image cubes are supported
+if <b>size=</b> contains a 3rd non-1 value. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
- The following parameters are recognized in
-order; they may be given in any order if the keyword is also given. Use
-<b>--help</b> to confirm this man page is up to date.  
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>out=</b> </dt>
-<dd>Output file, in standard
-<a href='image.5.html'><i>image(5NEMO)</i></a>
- format. No default.      </dd>
+<dd>Output
+file, in standard <a href='image.5.html'><i>image(5NEMO)</i></a>
+ format. <br>
+No default.      </dd>
 
 <dt><b>object=</b> </dt>
-<dd>Object type. Valid are flat,
-exp, gauss, bar, spiral, noise, test, blobs. See below for an explanation
-and their parameters. Default: flat </dd>
+<dd>Object type. Valid are flat, exp, gauss, bar, spiral,
+noise, test, blobs. See below for an explanation and their parameters. <br>
+Default: flat </dd>
 
 <dt><b>spar=</b> </dt>
-<dd>Parameters for this object. The
-first parameter is often the peak  value, and the second one a scale length.
-Some object have more complex geometries and require more parameters. The
-meaning of the peak value can be modified by setting <b>totflux=t</b> (see below).
-The defaults are defined per object, but are typically 1,1... <br>
+<dd>Parameters for this object. The first parameter is often
+the peak  value, and the second one a scale length. Some object have more
+complex geometries and require more parameters. The meaning of the peak
+value can be modified by setting <b>totflux=t</b> (see below).  <br>
 For certain objects, the multiple objects can be given, and the sequence
 of parameters can be repeated. Currently <b>object=blobs</b> has this option for
-3D cubes. </dd>
+3D cubes. <br>
+Defaults are defined per object, but are typically 1,1... (see below) <br>
+The center location of the object is controlled by <b>center=</b> (see below),
+but defaults to the center of the image. </dd>
 
 <dt><b>size=</b> </dt>
-<dd>Mapsize. It is allowed to have a different size in X and
-Y. </dd>
+<dd>Image size. It is allowed
+to have a different size in X and Y. <br>
+[10,10,1] </dd>
 
 <dt><b>cell=</b> </dt>
 <dd>Cellsize [1]      *not used yet* </dd>
 
 <dt><b>pa=</b> </dt>
-<dd>Position Angle of disk in
-which the object lives. Counted positive starting at North through East
-in the standard astronomical fashion. Default: 0 </dd>
+<dd>Position Angle of
+disk in which the object lives. Counted positive starting at North through
+East in the standard astronomical fashion. <br>
+Default: 0 </dd>
 
 <dt><b>inc=</b> </dt>
-<dd>Inclination Angle
-of disk in which object lives. 0 is face on. Default: 0 </dd>
+<dd>Inclination Angle of disk in which object lives. 0 is face
+on. <br>
+Default: 0 </dd>
 
 <dt><b>totflux=t|f</b> </dt>
-<dd>If set
-to true, the amplitude (always the first parameter in <b>spar</b>) is interpreted
-as the total integrated intensity instead of the peak value of the object.
+<dd>If set to true, the amplitude (always the first parameter
+in <b>spar</b>) is interpreted as the total integrated intensity instead of the
+peak value of the object. <br>
 Default: <b>f</b>. </dd>
 
 <dt><b>factor=</b> </dt>
 <dd>The factor by which an image is multiplied before the
 object is added. Warning: if the amplitude (usually the first of the spar=
 numbers) is 0, this will not apply, and the output would equal the input.
+<br>
 Default: 1 </dd>
 
 <dt><b>center=</b> </dt>
 <dd>Center of object (in 0-based pixel coordinates). The lower
-left corner is counted as (0,0) here. Default: mapcenter. </dd>
+left corner is counted as (0,0) here. <br>
+Default: image center. </dd>
 
 <dt><b>crpix=</b> </dt>
-<dd>Override/Set
-crpix (1,1,1)  </dd>
+<dd>Override/Set crpix <br>
+Default: image center </dd>
 
 <dt><b>crval=</b> </dt>
-<dd>Override/Set crval (0,0,0)  </dd>
+<dd>Override/Set crval <br>
+(0,0,0)  </dd>
 
 <dt><b>cdelt=</b> </dt>
-<dd>Override/Set cdelt
+<dd>Override/Set cdelt <br>
 (1,1,1)  </dd>
 
 <dt><b>seed=</b> </dt>
-<dd>Random seed [0]     </dd>
+<dd>Random seed <br>
+[0]     </dd>
 
 <dt><b>headline=</b> </dt>
-<dd>Random verbiage added to the
-image. Default: none </dd>
+<dd>Random verbiage added to the image. <br>
+Default: none </dd>
 
 <dt><b>in=</b> </dt>
-<dd>Input file (optional) to be added to the output
-file. Default: none, map is generated. 
+<dd>Input file (optional) to be added to the output file.
+<br>
+Default: none, image is generated. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Object</a></h2>
-The <b>object=</b> keyword allows
-for the following objects, and <b>spar=</b> for their parameters <br>
-<pre>OBJECT<tt> </tt>&nbsp;<tt> </tt>&nbsp;-<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPAR
+The <b>object=</b> keyword allows for
+the following objects, and <b>spar=</b> for their parameters <br>
+<pre>OBJECT<tt> </tt>&nbsp;<tt> </tt>&nbsp;EXPR<tt> </tt>&nbsp;<tt> </tt>&nbsp;SPAR
 flat<tt> </tt>&nbsp;<tt> </tt>&nbsp;A<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;A
 exp<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r/h)<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
 gauss<tt> </tt>&nbsp;<tt> </tt>&nbsp;A.exp(-r^2/(2h^2))<tt> </tt>&nbsp;<tt> </tt>&nbsp;A,h
@@ -132,7 +142,8 @@ comet<tt> </tt>&nbsp;<tt> </tt>&nbsp;2d proj
 jet<tt> </tt>&nbsp;<tt> </tt>&nbsp;jet model w/ power law brightness
 shell<tt> </tt>&nbsp;<tt> </tt>&nbsp;2d proj of shell
 poisson 
-</pre>A few object that are in MIRIAD&rsquo;s <a href='imgen.1MIRIAD.html'><i>imgen(1MIRIAD)</i></a>
+</pre><p>
+A few objects that are in MIRIAD&rsquo;s <a href='imgen.1MIRIAD.html'><i>imgen(1MIRIAD)</i></a>
  program and not listed
  here directly, can be simulated or replaced by: <br>
 <pre>level<tt> </tt>&nbsp;<tt> </tt>&nbsp;same as our flat
@@ -141,7 +152,7 @@ noise<tt> </tt>&nbsp;<tt> </tt>&nbsp;notice we have a mean, miriad doesn&rsquo;t
 approximation
 point<tt> </tt>&nbsp;<tt> </tt>&nbsp;use exp with a very small scale length h
 gaussian<tt> </tt>&nbsp;<tt> </tt>&nbsp;our gauss, but bmin/bmaj via inc
-gauss3<tt> </tt>&nbsp;<tt> </tt>&nbsp;no equivalent, ccdgen does not support 3D models yet
+gauss3<tt> </tt>&nbsp;<tt> </tt>&nbsp;no equivalent, ccdgen does not support all 3D models yet
 disk<tt> </tt>&nbsp;<tt> </tt>&nbsp;use ferrers with p=0
 </pre><p>
 Most of these objects have a peak or representative intensity value as
@@ -174,44 +185,51 @@ larger, the arms get narrower.   By making sure <b>p</b> becomes non-integer, e.
 p=2.0001, the negative arm becomes 0. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-Here&rsquo;s how to make a exponential
-bar: <br>
-<pre>    ccdgen bar.ccd   object=bar spar=1,10,0.5,30 size=128,128
-</pre>
-<p> Here&rsquo;s how to make a simple barred galaxy by adding an exponential disk
-and a (smaller) exponential bar: <br>
-<pre>ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256 |\
- ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45
-</pre>or if you want them to be a bit more astronomical, you&rsquo;ll need to make the
-units come out in degrees for the conversion to FITS, viz.: <br>
-<pre>ccdgen - object=exp spar=1,40/3600 pa=60 inc=45 size=256 cdelt=-1/3600,1/3600
-|\
- ccdgen - object=bar spar=10,6/3600,0.5,70 pa=60 inc=45 in=- |\
- ccdfits - bar.fits radecvel=t
-</pre>and the option to fill your cube with some random blobs and noise is a
-bit more involved: <br>
-<pre>nemoinp 1:100 |\
-  tabmath - - &rsquo;ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)&rsquo;
-all &gt; b100.tab
-ccdgen - blobs @b100.tab size=128,128,128 |\
-  ccdgen - noise 0,0.02 in=- |\
-  ccdsmooth - - 5   |\
-  ccdsky - -  |\
-  ccdfits - junk2.fits radecvel=t ndim=4
-</pre>Here is an example of making a new data section (in this case just noise)
-by stealing the header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a>
- file.  In <i>bash</i> notation:
-<br>
-<pre>  fitshead NGC5194_91112.fits &gt; tmp.fitshead
-  nx=$(grep NAXIS1 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
-  ny=$(grep NAXIS2 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
-  nz=$(grep NAXIS3 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)
-  ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\
-     ccdfits - noise.fits fitshead=NGC5194_91112.fits
+Make a exponential bar:  
+ccdgen bar.ccd   object=bar spar=1,10,0.5,30 size=128,128<br>
+  ccdplot bar.ccd<br>
   
-</pre>A test cube234.fits with value x + 10y + 100z can be made as follows: <br>
-<pre>  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits
-</pre>
+<p> Make a simple barred galaxy by adding an exponential disk and a (smaller)
+exponential bar:  
+<p>  ccdgen - object=exp spar=1,40 pa=60 inc=45 size=256
+|\<br>
+  ccdgen in=- out=bar.ccd object=bar spar=10,6,0.5,70 pa=60 inc=45<br>
+ 
+<p>  or if you want them to be a bit more astronomical, you&rsquo;ll need to make
+the units come out in degrees for the conversion to FITS, viz.:  
+<p>  d=3600<br>
+  ccdgen - object=exp spar=1,40/$d pa=60 inc=45 size=256 cdelt=-1/$d,1/$d
+|\<br>
+  ccdgen - object=bar spar=10,6/$d,0.5,70 pa=60 inc=45 in=- |\<br>
+  ccdfits - bar.fits radecvel=t<br>
+ 
+<p>  and the option to fill your cube with some random blobs and noise is
+a bit more involved. We create a simple text file <b>b100.tab</b> containing the
+random parameters of the blobs (Amplitude, x, y, z, size):  
+<p> nemoinp 1:100
+|\   tabmath - - &rsquo;ranu(0,1),ranu(10,100),ranu(10,100),ranu(10,100),ranu(0,5)&rsquo;
+all\<br>
+               &gt; b100.tab<br>
+ 
+<p> ccdgen - blobs @b100.tab size=128,128,128 |\   ccdgen - noise 0,0.02 in=- |\<br>
+   ccdsmooth - - 5   |\<br>
+   ccdsky - -  |\<br>
+   ccdfits - junk2.fits radecvel=t ndim=4<br>
+ 
+<p>  Making a new data section (in this case just noise) by stealing the
+header from existing <a href='fits.5.html'><i>fits(5NEMO)</i></a>
+ file.  In <i>bash</i> notation:  
+<p>  fitshead NGC5194_91112.fits
+&gt; tmp.fitshead<br>
+  nx=$(grep NAXIS1 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)<br>
+  ny=$(grep NAXIS2 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)<br>
+  nz=$(grep NAXIS3 tmp.fitshead|awk &rsquo;{print $3}&rsquo;)<br>
+  ccdgen - object=noise spar=0,1 size=$nx,$ny,$nz |\<br>
+      ccdfits - noise.fits fitshead=NGC5194_91112.fits<br>
+   <br>
+  A test cube234.fits with value x + 10y + 100z can be made as follows:
+  ccdmath out=- fie=%x+10*%y+100*%z size=2,3,4 | ccdfits - cube234.fits<br>
+  
 <p> 
 <h2><a name='sect6' href='#toc6'>Caveats</a></h2>
 Seting the WCS is not working well. There is cell=, there is crpix,cdelt,crval

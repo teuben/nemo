@@ -1,4 +1,4 @@
-.TH MKCUBE 1NEMO "25 March 2022"
+.TH MKCUBE 1NEMO "6 May 2025"
 
 .SH "NAME"
 mkcube \- create a uniform cube of equal massive stars (\fIthe borg\fP)
@@ -44,6 +44,17 @@ Center c.o.m. ?
 \fBheadline=\fP
 Text headline for output    
 Default: none.
+.TP
+\fBnmodel=\fP\fIinteger\fP
+Number of models to generate. All models will be different here.
+Although mostly meant for benchmarks,
+generating more then 1 model can be useful to process very large
+snapshots (that normally won't fit in memory) in a serialized fashion. See
+also \fIsnapsplit\fP. Most NEMO programs will only read the first
+snapshot. See also \fBmkgrid nmodel=\fP for a faster way to benchmark.
+.br
+[Default: \fB1\fP]
+
 
 .SH "SEE ALSO"
 mkgrid(1NEMO), mkplummer(1NEMO), snapshot(5NEMO)

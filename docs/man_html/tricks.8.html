@@ -114,11 +114,10 @@ in a unix pipe. In this example it should return "0 0 0".
 <p> 
 <h2><a name='sect3' href='#toc3'>PARALLEL and OpenMP</a></h2>
 Most
-programs in NEMO are still single-core, but many current machines have a
-number of cores. If a program only uses a fraction of the memory on the
-machine, the GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
- program can be used to spread the load, e.g.
-<br>
+programs in NEMO are still single-core, but many current machines have multiple
+cores. If a program only uses a fraction of the memory on the machine, the
+GNU <a href='parallel.1.html'><i>parallel(1)</i></a>
+ program can be used to spread the load, e.g. <br>
 <pre>       echo mkplummer . 10000 &gt; run.txt
        echo mkplummer . 10000 &gt;&gt; run.txt
        parallel --jobs 2 &lt; run.txt
@@ -127,13 +126,15 @@ One can also use the <b>-j</b> flag of <b>make</b>
 of running commands in parallel. Similar to the run.txt file created here,
 a well crafted Runfile can be created, and with <br>
 <pre>       make -f Runfile -j 2
-</pre>should achieve the same result. 
+</pre>should achieve the same result. <p>
+The <b>mkrunfile.py</b> script can help making such
+runfiles by looping over a set of parameters. 
 <p> <p>
-Although NEMO can be configured using <b>--with-openmp</b>
-to take advantage of multi-cores OpenMP computing, there are really no programs
-in NEMO taking advantage of this yet. However, programs using <i>nemo_main()</i>
-should be aware of the user interface implications of controlling how many
-cores are used: <br>
+Although NEMO can be configured
+using <b>--with-openmp</b> to take advantage of multi-cores OpenMP computing, there
+are really no programs in NEMO taking advantage of this yet. However, programs
+using <i>nemo_main()</i> should be aware of the user interface implications of
+controlling how many cores are used: <br>
 <pre>   0.  the number of cores as per omp_get_num_procs().  We actually take
 a short-cut and use
        omp_get_max_threads() since it listens to OMP_NUM_THREADS (see next
@@ -152,21 +153,22 @@ OMP_NUM_THREADS
 <p> slurm is a popular package you will find on large computer clusters.
 See also <a href='sbatch_nemo.sh.8.html'><i>sbatch_nemo.sh(8NEMO)</i></a>
  for a helper script in NEMO to use slurm.
-
+It will likely have to be tailored for your specific situation. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Tables</a></h2>
 
-<p> Tables (<a href='table.5.html'><i>table(5NEMO)</i></a>
-) come in many forms. Here are some TLDR type
-reminder on manipulating and displaying tables <br>
+<p>
+Tables (<a href='table.5.html'><i>table(5NEMO)</i></a>
+) come in many forms. Here are some TLDR type reminder
+on manipulating and displaying tables <br>
 <pre>  # align a table for viewing
   csvlook data.csv
   column -s, -t data.csv
   python -c "import sys,prettytable; print(prettytable.from_csv(sys.stdin))"
 &lt; data.csv
 See Alsonemo(1NEMO), bench(5NEMO), table(5NEMO), tcppipe(1NEMO), sbatch_nemo(8NEMO),
-tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1), vipe(1)  AuthorPeter
-Teuben.  Update History
+mkrunfile(8NEMO), tee(1), pee(1), netcat(1), zrun(1), parallel(1), sponge(1),
+vipe(1)  AuthorPeter Teuben.  Update History
 18-Aug-88<tt> </tt>&nbsp;<tt> </tt>&nbsp;Document created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT 
 5-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;tabccd added         <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-mar-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;ds added          <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

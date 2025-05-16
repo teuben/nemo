@@ -9,8 +9,10 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 filestruct - binary structured file format  
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;
@@ -28,11 +30,12 @@ filestruct - binary structured file format
  };
  struct item {
     string itemtyp;
-    int    itemlen;
+    size_t itemlen;
     string itemtag;
     int   *itemdim;
-    byte  *itemdat;
-    long   itempos;
+    void  *itemdat;
+    off_t  itempos;
+    off_t  itemoff;
  };
 
  struct strstk {
@@ -40,10 +43,12 @@ filestruct - binary structured file format
     item   *ss_stk[SetStkLen];
     int     ss_stp;
     bool    ss_seek;
-    long    ss_pos;            /* only if RANDOM access allowed */
+    int     ss_mode;           /* only if RANDOM access allowed */
+    off_t   ss_pos;            /* only if RANDOM access allowed */
     itemptr ss_ran;            /* only if RANDOM access allowed */
  };
 </pre>
+<p> 
 <h2><a name='sect3' href='#toc3'>Description</a></h2>
 <i>filestruct</i> is a method for storing data files largely consisting
 of character strings, booleans, and possible multi-dimensional arrays of
@@ -78,6 +83,7 @@ The actual internal format
 is governed how the application programmer  uses the <i>get_XXX</i> and put_XXX
 routines (see  <a href='filestruct.3.html'><i>filestruct(3NEMO)</i></a>
 ). 
+<p> 
 <h2><a name='sect4' href='#toc4'>Experimental Features</a></h2>
 If compiled with
 <b>-DRANDOM</b>  some limited random access to data within a data-item is possible.
@@ -87,15 +93,18 @@ endian machines. Otherwise, data on disk exist in the host format, and no
 effort has been made to make it machine independant (e.g. IEEE floating points
 and twos-compliment integers). This is however expected in some future release.
 
+<p> 
 <h2><a name='sect5' href='#toc5'>Zeno Format</a></h2>
 The <a href='zeno.1.html'><i>zeno(1NEMO)</i></a>
  package also used this format, but there are
-some subtle differences to be described. 
+some subtle differences still to be described here. 
+<p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>~/src/kernel/io   <tt> </tt>&nbsp;<tt> </tt>&nbsp;filesecret.[ch] filestruct.h
 ~/inc              <tt> </tt>&nbsp;<tt> </tt>&nbsp;filestruct.h
 </pre>
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='tsf.1.html'>tsf(1NEMO)</a>
 , <a href='rsf.1.html'>rsf(1NEMO)</a>
@@ -104,9 +113,11 @@ some subtle differences to be described.
 , <a href='zeno.1.html'>zeno(1NEMO)</a>
 
 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Joshua Barnes, Lyman Hurd, Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>dark-ages<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.0 precurser (filestr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
 xx-apr-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0 basic operators     <tt> </tt>&nbsp;<tt> </tt>&nbsp;JEB
@@ -117,21 +128,4 @@ xx-xxx-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2.0 new types, operators, external fmt
 16-may-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.0 finalized random access                        <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 6-jul -01<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented the new uNEMO   <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 27-dec-2019<tt> </tt>&nbsp;<tt> </tt>&nbsp;documented ZENO<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
-</pre><p>
-
-<hr><p>
-<a name='toc'><b>Table of Contents</b></a><p>
-<ul>
-<li><a name='toc0' href='#sect0'>Name</a></li>
-<li><a name='toc1' href='#sect1'>Synopsis</a></li>
-<li><a name='toc2' href='#sect2'>Format</a></li>
-<li><a name='toc3' href='#sect3'>Description</a></li>
-<li><a name='toc4' href='#sect4'>Experimental Features</a></li>
-<li><a name='toc5' href='#sect5'>Zeno Format</a></li>
-<li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>See Also</a></li>
-<li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
-</ul>
-</body>
-</html>
+2-jan-2024<tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.6 fix remaining 64bit issues by using off_t, size_t<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT

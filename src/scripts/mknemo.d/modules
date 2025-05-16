@@ -1,0 +1,39 @@
+#! /bin/bash
+#
+#  envmodules/modules for NEMO
+#
+#  on ubuntu: environment-modules tcl-dev
+#  to load:
+#             .  /usr/share/modules/init/sh
+#  to load in nemo:
+#             .  $NEMO/opt/init/sh
+#
+
+url=https://github.com/cea-hpc/modules/releases/download/v5.5.0/modules-5.5.0.tar.gz
+url=https://github.com/envmodules/modules
+version=git
+
+
+cd $NEMO/local
+
+if [ -d modules ]; then
+    cd modules
+    git pull
+else
+    git clone $url
+    cd modules
+fi
+
+#  needs a location where  tclConfig.sh lives, normally installed via tcl
+tcldir=/usr/lib/tclConfig.sh
+
+./configure --prefix=$NEMO/opt \
+	    --modulefilesdir=$NEMO/opt/modulefiles \
+	    --with-tcl=$tcldir
+make
+make install
+
+
+echo Installed version=$version
+
+echo modules $version `date` >> $NEMO/opt/mknemo.log

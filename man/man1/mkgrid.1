@@ -1,39 +1,87 @@
-.TH MKGRID 1NEMO "26 January 2006"
-.SH NAME
+.TH MKGRID 1NEMO "6 May 2025"
+
+.SH "NAME"
 mkgrid \- create a cube of equal massive stars equally spaced in space
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBmkgrid\fP \fBout=\fP\fIsnapshot\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkgrid\fP generates a distribution of particles in a cube on a
 regular lattice.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
 Output file name, in \fIsnapshot(5NEMO)\fP format. 
+.br
 No default.
 .TP
 \fBngrid=\fP
-Number of particles per axis [Default: \fB2\fP].
+Number of particles per axis
+.br
+[Default: \fB2\fP].
 .TP
 \fBsize=\fP
 Size of cube. 
+.br
 [Default: \fB1\fP].
 .TP
 \fBzerocm=t|f\fP
 Center c.o.m. ? 
+.br
 [Default: \fBt\fP].
 .TP
 \fBheadline=\fP
 Text headline for output    
+.br
 Default: none.
-.SH SEE ALSO
+.TP
+\fBnmodel=\fP\fIinteger\fP
+Number of models to generate. All models will be different here.
+Although mostly meant for benchmarks,
+generating more then 1 model can be useful to process very large
+snapshots (that normally won't fit in memory) in a serialized fashion. See
+also \fIsnapsplit\fP. Most NEMO programs will only read the first
+snapshot. See also \fBmkgrid nmodel=\fP for a faster way to benchmark.
+.br
+[Default: \fB1\fP]
+
+
+.SH "EXAMPLES"
+The curious \fBnmodel=\fP parameter was added for benchmarking the creation of large files. Very large Nbody snapshots
+would likely not fit in memory, so this routine writes more (otherwise identical) snapshots. There is a similar keyword
+in \fImkplummer(1NEMO)\fP but the CPU overhead is killing the I/O bottleneck one likes to see with this keyword.
+.PP
+Here are examples of making 1000 snapshot of 1e6 particles each, totalling 5GB with both mkgrid and mkplummer, showing
+the impact of the CPU.
+
+.EX
+/usr/bin/time mkgrid  c1M 100 nmodel=100
+1.61user 3.85system 0:29.52elapsed 18%CPU
+
+/usr/bin/time mkgrid  .   100 nmodel=100
+1.17user 1.21system 0:02.39elapsed 99%CPU
+
+/usr/bin/time mkplummer  p1M 1000000 nmodel=100
+25.31user 6.36system 0:56.65elapsed 55%CPU
+
+/usr/bin/time mkplummer  . 1000000 nmodel=100
+24.29user 4.47system 0:28.78elapsed 99%CPU 
+
+.EE
+
+
+.SH "SEE ALSO"
 mkcube(1NEMO), mkplummer(1NEMO), snapshot(5NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 J.J. Fleck
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 20-dec-05	created		JJF
+6-may-2025	added nmodel=	PJT
 .fi

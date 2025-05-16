@@ -12,7 +12,8 @@ echo
 echo namespace WDutils {
 echo
 
-if [ -v $VENDOR ] && [ $VENDOR == apple ]; then
+#if [ -v $VENDOR ] && [ $VENDOR == apple ]; then
+if [ $(uname -s) == Darwin ]; then
   echo '#define' LEVEL1_DCACHE_LINESIZE `sysctl -an hw.cachelinesize`
 else
   echo '#define' LEVEL1_DCACHE_LINESIZE `getconf LEVEL1_DCACHE_LINESIZE`
