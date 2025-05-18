@@ -2,33 +2,17 @@
  * SNAPCENTERS: shrinking sphere algorithm
  *
 
- (from Power et. al 2003, S2.5)
- 
-The centre of each halo is determined using an iterative technique in
-which the centre of mass of particles within a shrinking sphere is
-computed recursively until a convergence criterion is met. At each
-step of the iteration, the centre of the sphere is reset to the last
-computed barycentre and the radius of the sphere is reduced by 2.5 per
-cent. The iteration is stopped when a specified number of particles
-(typically either 1000 particles or 1 per cent of the particles within
-the high-resolution region, whichever is smaller) is reached within
-the sphere.
-
-Halo centres identified with this procedure are quite independent of
-the parameters chosen to initiate the iteration, provided that the
-initial sphere is large enough to encompass a large fraction of the
-system. In a multi-component system, such as a dark halo with
-substructure, this procedure isolates the densest region within the
-largest subcomponent. In more regular systems, the centre so obtained
-is in good agreement with centres obtained by weighing the centre of
-mass by the local density or gravitational potential of each
-particle. We have explicitly checked that none of the results
-presented here are biased by our particular choice of centering
-procedure.
-
 NOTE: the authors make no arugments why this elaborate scheme is
 favored to e.g. a weighted density/potential method - see our table in
 hackdens.1
+
+typical test:
+
+mkplummer - 2000 | snapshift - - 5,0,0 | snapcenters -  . report=t 
+
+mkplummer - 1000 nmodel=100 | snapshift - - 0,0,0 | snapcenters -  . report=t  debug=-1  | tabhist - 4 -0.2 0.2
+-> 0.020
+
 
  * 
  */
@@ -50,15 +34,15 @@ string defv[] = {
     "out=???\n      output file name",
     "weight=m\n	    weight factor used finding center",
     "times=all\n    range of times to process",
-    "report=f\n	    report the c.o.m shift",
-    "eta=0.001\n    Convergence stop criterion",
+    "report=f\n	    report the center",
+    "eta=0\n        Optional convergence stop criterion in position",
     "fn=0.025\n     Reduction fraction for sphere per iteration",
     "iter=20\n      Maximum number of iterations to use",
     "center=0,0,0\n Initial estimate for the center",
-    "nmax=1000\n    Stop iteration for this #particles too",
+    "nmin=1000\n    Minimum #particles needed in shrinking rmax area",
     "rmax=10\n      Initial radius to shrink from",
     "one=f\n        Only output COM as a snapshot? [not implemented]",
-    "VERSION=0.1\n  16-may-2025 PJT",
+    "VERSION=0.2\n  18-may-2025 PJT",
     NULL,
 };
 
@@ -78,7 +62,7 @@ void nemo_main()
   bool Qreport, Qone;
   vector n_pos, n_vel, o_pos, o_vel;
   real pos[NDIM];
-  int nmax, nleft, nleft0, mode;
+  int nmin, nleft, nleft0, mode;
   real rmax, fn;
 
   warning("Under development");
@@ -86,7 +70,7 @@ void nemo_main()
   instr = stropen(getparam("in"), "r");
   outstr = stropen(getparam("out"), "w");
   weight = btrtrans(getparam("weight"));
-  nmax = getiparam("nmax");
+  nmin = getiparam("nmin");
   rmax = getrparam("rmax");
   fn = getrparam("fn");
   eta = getrparam("eta");
@@ -109,27 +93,28 @@ void nemo_main()
   
   do {
     get_snap_by_t(instr, &btab, &nbody, &tsnap, &bits, times);
+    rmax = getrparam("rmax");
+    nmin = getiparam("nmin");
     if (bits & PhaseSpaceBit) {
       CLRV(n_pos);
       CLRV(n_vel);
       if (np > 0) SETV(n_pos, pos);
       nleft0 = nbody;
-      mode=0;
+      mode=0;  // log the reason why it converged
       for (i=0;i<iter;i++) {
-	nleft = snapcenter(btab, nbody, tsnap, weight, n_pos, n_vel, nmax, rmax, Qreport);
+	nleft = snapcenter(btab, nbody, tsnap, weight, n_pos, n_vel, nmin, rmax, Qreport);
 	if (i>0) {
 	  dr = distv(o_pos,n_pos);
 	  dprintf(1,"%d ",i);
 	  for (j=0; j<NDIM; j++)  dprintf(1,"%f ",n_pos[j]);
-	  //for (j=0; j<NDIM; j++)  dprintf(1,"%f ",n_vel[j]);
 	  dprintf(1,"%f\n", dr);
-	  mode=1;
+	  mode=1;    // 1: eta was reached
 	  if (dr < eta) break;
-	  if (i == iter-1) 
-	    warning("eta=%g too small?  dr=%g after iter=%d\n",eta,dr,iter);
-	  mode=2;	  
-	  if (nleft < nmax) break;
-	  mode=3;	  
+          mode=2;    // 2: iteration max reached
+	  if (i == iter-1) break;
+	  mode=3;    // 3: nmin was reached
+	  if (nleft < nmin) break;
+	  mode=4;    // 4: nleft didn't change (the goal of Power2003)
 	  if (nleft == nleft0) break;
 	  nleft0 = nleft;
 	} 
@@ -140,9 +125,8 @@ void nemo_main()
 	
       }
       if (Qreport) {
-	printf("%d  ",mode);
+	printf("%d %d %g    ",mode, i, rmax);
 	for (j=0; j<NDIM; j++)  printf("%f ",n_pos[j]);
-	//for (j=0; j<NDIM; j++)  printf("%f ",n_vel[j]);
 	printf("\n");
       }
       // write output
@@ -158,7 +142,7 @@ int snapcenter(
 	       rproc_body weight,
 	       vector o_pos, 
 	       vector o_vel,
-	       int nmax,
+	       int nmin,
 	       real rmax,
 	       bool Qreport)
 {
@@ -202,5 +186,5 @@ int snapcenter(
 	SSUBV(Vel(b), w_vel);
     }
 #endif
-    return cnt;
+    return cnt;  // return how many left within rmax of the new center
 }
