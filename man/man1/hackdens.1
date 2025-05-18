@@ -1,4 +1,4 @@
-.TH HACKDENS 1NEMO "12 October 2023"
+.TH HACKDENS 1NEMO "18 May 2025"
 
 .SH "NAME"
 hackdens \- local density estimator using tree algorithm
@@ -126,13 +126,14 @@ centering, and compute the center in two ways:
    hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t
    
 .EE
-Note that in this case the Plummer sphere should have the correct mathematical center, and not \fIcentered\fP.
+Note that in this case the Plummer sphere should have the correct mathematical center, and not \fIre-centered\fP.
 This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh, in which these different methods
-can also be applied to different models, as expanded in the following table.
+can also be applied to different models, where some are expanded in the table below:
 .EX
 
     nbody=100 models:     Plummer   King1   King3   King5  DeVauc  Dehnen
     ---------------------------------------------------------------------
+    halfmass radius:        0.769   0.427   0.418   0.408   1.3
     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299   2.75
     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*  0.074*
     snapcenter  on phi:     0.053
@@ -153,7 +154,8 @@ A (*) denotes the best method for that model. Values scale as 1/sqrt(nbody)
 
 .fi
 Although for a Plummer sphere the best method is more than twice as good than the worst method,
-this does not apply to other models.
+this does not apply to other models. A normal mass-weighted centering for Dehnen and deVaucouleurs
+models is quite bad.
 .PP
 \fIdensity(1falcON)\fP is considerable faster, about twice with their K=32 default. 
 .EX
