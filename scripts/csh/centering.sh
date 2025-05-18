@@ -13,7 +13,7 @@ seed=-3
 n=10
 shift=0
 nfrac=3
-model=0     # 0=plummer    via mkommod:  1,3,5 king   -1 plummer -2 devauc
+model=0     # 0=plummer    via mkommod:  1,3,5 king   -1 plummer -2 devauc     6  dehnen
 
 for _a in $*; do
     export $_a
@@ -34,6 +34,8 @@ for i in $(seq $n); do
 	mkommod $NEMODAT/k${model}isot.dat - nbody=$nbody seed=$seed zerocm=f | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat
     elif [ $model = 5 ]; then
 	mkommod $NEMODAT/k${model}isot.dat - nbody=$nbody seed=$seed zerocm=f | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat
+    elif [ $model = 6 ]; then
+	mkdehnen - nbody=$nbody seed=$seed gamma=1 | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat	
     else
 	echo "Not a model=$model"
 	exit 0
@@ -46,7 +48,7 @@ for i in $(seq $n); do
    c6=$(hackforce p.dat - fcells=3 | snapsort - - phi | snapcopy - - "i<$nbody/$nfrac" | snapcenter - . report=t)
    #c7=$(hackforce p.dat - fcells=3 | snapsort - - phi | snapcopy - - "i<$nbody/$nfrac" | snapcenter - . weight="-phi*phi*phi" report=t)
    #c8=$(hackforce p.dat - fcells=3 | snapcenter - . weight="phi*phi" report=t)
-   #c9=$(hackforce p.dat - fcells=3 | snapcenter - . weight="-phi" report=t)   
+   #c9=$(hackforce p.dat - fcells=3 | snapcenter - . weight="-phi" report=t)
    echo $c1 $c2 $c3 $c6
    
    #  snapcenterp

@@ -26,3 +26,14 @@ Some other comments:
   will not swap bytes natively.
       mkplummer - 10 | hexdump -C | head
   is the native data format.
+
+- some interesting small Nbody systems
+
+  - figure8 - 3 stars on a figure 8 orbit (Montgomery)
+  - pyth - 3 stars at rest on a 3-4-5 pythagoran triangle. very difficult
+  - star_of_david - two double stars tracing a star of david (Robert Vanderbei)
+
+   mpv files are simple ASCII files and are converted to NEMO format as follows:
+       
+    tabtos in= out= header=nbody,time block1=mass,x,y,z,vx,vy,vz
+
