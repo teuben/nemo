@@ -1,0 +1,166 @@
+.TH SNAPCENTERS 1NEMO "18 May 2025"
+
+.SH "NAME"
+snapcenters \- Center position of a snapshot based on shrinking sphere method (Power2003)
+
+.SH "SYNOPSIS"
+\fBsnapcenters\fP [parameter=value]
+
+.SH "DESCRIPTION"
+
+\fBsnapcenters\fP estimates the center of a snapshot
+(\fIfollowing the discussion in Power et al. (2003)\fP)
+using an iterative technique in
+which the center of mass of particles within a shrinking sphere is
+computed recursively until a convergence criterion is met. At each
+step of the iteration, the center of the sphere is reset to the last
+computed barycentre and the radius of the sphere is reduced by 2.5 per
+cent. The iteration is stopped when a specified number of particles
+(typically either 1000 particles or 1 per cent of the particles within
+the high-resolution region, whichever is smaller) is reached within
+the sphere.
+.PP
+Halo centers identified with this procedure are quite independent of
+the parameters chosen to initiate the iteration, provided that the
+initial sphere is large enough to encompass a large fraction of the
+system. In a multi-component system, such as a dark halo with
+substructure, this procedure isolates the densest region within the
+largest subcomponent. In more regular systems, the centre so obtained
+is in good agreement with centres obtained by weighing the centre of
+mass by the local density or gravitational potential of each
+particle. We have explicitly checked that none of the results
+presented here are biased by our particular choice of centering
+procedure.
+.PP
+For \fBsnapcenters\fP an additional weight-factor can be applied
+to each particle. See also \fIsnapcenter(1NEMO)\fP and
+\fIsnapcenterp(1NEMO)\fP for alternative approaches. In the examples
+of \fIhackdens(1NEMO)\fP a table compares the different approaches.
+
+
+.SH "PARAMETERS"
+.so man1/parameters
+.TP 20
+\fBin=\fP
+input snapshot file name, containing one or more snapshots.
+.br
+No default
+.TP
+\fBout=\fP
+output snapshot file name 
+.br
+No default
+.TP
+\fBweight=\fP
+weight factor used finding center
+.br
+[m]  
+.TP
+\fBtimes=\fP
+range of times to process
+.br
+[all]  
+.TP
+\fBreport=\fP
+report the center (in addition to some convergence paramters, see below)
+.br
+[f]    
+.TP
+\fBeta=\fP
+Optional additional convergence stop criterion in position. Unless relaxed tolerance is allowed,
+it''s best to leave \fBeta=0\fP (the default).
+.br
+[0] 
+.TP
+\fBfn=\fP
+Reduction fraction for the rmax sphere per iteration
+.br
+[0.025] 
+.TP
+\fBiter=\fP
+Maximum number of iterations to use
+.br
+[20] 
+.TP
+\fBcenter=\fP
+Initial estimate for the center. If the true center is not within
+\fBrmax\fP of \fBcenter\fP, it is unlikely the center will be found.
+.br
+[0,0,0]  
+.TP
+\fBnmin=\fP
+Minimum #particles needed in shrinking rmax area. It is adviced
+to keep at least 1%
+.br
+[1000]
+.TP
+\fBrmax=\fP
+Initial radius to shrink from, should be a good size fraction of the system size.
+.br
+[10]  
+.TP
+\fBone=\fP
+Only output COM as a snapshot?
+.br
+[not implemented]
+
+.SH "CONVERGENCE"
+
+For each iteration the radius is shrunk, and if convergence is reached,
+it is reported. E.g.
+
+.EX
+
+% mkplummer - 2000 seed=123 | snapcenters -  . report=t 
+### nemo Debug Info: Rmax=10 n=1995
+### nemo Debug Info: Rmax=9.75 n=1995
+### nemo Debug Info: Rmax=9.50625 n=1994
+### nemo Debug Info: Rmax=9.26859 n=1994
+4 3 9.26859    -0.005191 0.023738 0.015025
+
+Printed are: convergence reason, #iters, rmax, xcenter, ycenter, zcenter
+
+  convergence reason:
+  0 - unexpected convergence (should never occur)
+  1 - eta was reached. By setting eta=0 [the default] this should never happen
+  2 - iteration max was reached
+  3 - nmin was reached
+  4 - number in shrinking sphere hasn't changed
+  
+
+.EE
+
+
+
+.SH "CAVEATS"
+This program is still being developed.
+
+
+
+.SH "EXAMPLES"
+An example...
+.EX
+  $ mkplummer --man
+.EE
+
+.SH "SEE ALSO"
+snapcenterp(1NEMO), snapcenter(1NEMO), bodytrans(3NEMO), hackdens(1NEMO), snapshot(5NEMO)
+.nf
+Power et al (2003) - 2003MNRAS.338...14P - shrinking sphere method, S2.5
+.fi
+
+.SH "FILES"
+NEMO/src/nbody/trans/snapcenters.c
+
+.SH "ADS"
+@ads 2003MNRAS.338...14P 
+
+
+.SH "AUTHOR"
+Peter Teuben
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+18-may-2025	0.2 Drafted 	PJT
+.fi
