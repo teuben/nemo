@@ -30,12 +30,17 @@ is in good agreement with centres obtained by weighing the centre of
 mass by the local density or gravitational potential of each
 particle. We have explicitly checked that none of the results
 presented here are biased by our particular choice of centering
-procedure.
+procedure. \fIend-quote\fP.
 .PP
 For \fBsnapcenters\fP an additional weight-factor can be applied
 to each particle. See also \fIsnapcenter(1NEMO)\fP and
 \fIsnapcenterp(1NEMO)\fP for alternative approaches. In the examples
 of \fIhackdens(1NEMO)\fP a table compares the different approaches.
+.PP
+Convergence can be sped up by using a larger shrinking factor (the default
+is only 2.5%), by setting a finite tolerance on the centering (eta=),
+since the default is 0, or by increasing the minimum number of particles
+via fn=.
 
 
 .SH "PARAMETERS"
@@ -72,7 +77,7 @@ it''s best to leave \fBeta=0\fP (the default).
 .br
 [0] 
 .TP
-\fBfn=\fP
+\fBshrink=\fP
 Reduction fraction for the rmax sphere per iteration
 .br
 [0.025] 
@@ -88,11 +93,12 @@ Initial estimate for the center. If the true center is not within
 .br
 [0,0,0]  
 .TP
-\fBnmin=\fP
-Minimum #particles needed in shrinking rmax area. It is adviced
-to keep at least 1%
+\fBfn=\fP
+Minimum fraction of particles needed in shrinking rmax area. It is adviced
+to keep at least 1%. If a value > 1 is given, it is assumed to be the number
+of particles instead.
 .br
-[1000]
+[0.01]
 .TP
 \fBrmax=\fP
 Initial radius to shrink from, should be a good size fraction of the system size.
@@ -124,23 +130,36 @@ Printed are: convergence reason, #iters, rmax, xcenter, ycenter, zcenter
   0 - unexpected convergence (should never occur)
   1 - eta was reached. By setting eta=0 [the default] this should never happen
   2 - iteration max was reached
-  3 - nmin was reached
-  4 - number in shrinking sphere hasn't changed
+  3 - nmin was reached (the goal of Power2003)
+  4 - number in shrinking sphere hasn't changed (not tested for, should rarely occur)
   
 
 .EE
 
+100/50     0.119
+400/200    0.062
+1600/800   0.031
 
+1000/500   0.040
+2000/1000  0.032
+4000/2000  0.021
+8000/4000  0.015 /2000 0.017   /1000 0.020
 
 .SH "CAVEATS"
 This program is still being developed.
+.PP
+Searching is done in Pos space using rmax, there is no eqv. vmax search.
 
 
 
 .SH "EXAMPLES"
 An example...
 .EX
-  $ mkplummer --man
+  $ mkplummer - 2000 | snapshift - - 5,0,0 | snapcenters -  . report=t 
+
+mkplummer - 1000 nmodel=100 | snapshift - - 0,0,0 | snapcenters -  . report=t  debug=-1  | tabhist - 4 -0.2 0.2
+-> 0.020
+
 .EE
 
 .SH "SEE ALSO"
@@ -162,5 +181,6 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.25i +4.5i
-18-may-2025	0.2 Drafted 	PJT
+16-may-2025	0.1 Drafted 	PJT
+19-may-2025	0.4 renamed keywords to shrink= and fn=		PJT
 .fi
