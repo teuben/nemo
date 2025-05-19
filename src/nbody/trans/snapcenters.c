@@ -36,20 +36,20 @@ string defv[] = {
     "times=all\n    range of times to process",
     "report=f\n	    report the center",
     "eta=0\n        Optional convergence stop criterion in position",
-    "fn=0.025\n     Reduction fraction for sphere per iteration",
+    "shrink=0.05\n  Reduction fraction for sphere per iteration",
     "iter=20\n      Maximum number of iterations to use",
     "center=0,0,0\n Initial estimate for the center",
-    "nmin=1000\n    Minimum #particles needed in shrinking rmax area",
+    "fn=0.1\n       Minimum fraction of particles needed, or absolute number if > 1",
     "rmax=10\n      Initial radius to shrink from",
     "one=f\n        Only output COM as a snapshot? [not implemented]",
-    "VERSION=0.2\n  18-may-2025 PJT",
+    "VERSION=0.4\n  19-may-2025 PJT",
     NULL,
 };
 
 string usage="Center position of a snapshot based on shrinking sphere method (Power2003)";
 
 
-int snapcenter(Body*, int, real, rproc_body, vector, vector, int, real, bool);
+int snapcenter(Body*, int, real, rproc_body, vector, vector, real, bool);
 
 void nemo_main()
 {
@@ -63,16 +63,16 @@ void nemo_main()
   vector n_pos, n_vel, o_pos, o_vel;
   real pos[NDIM];
   int nmin, nleft, nleft0, mode;
-  real rmax, fn;
+  real rmax, shrink, fn;
 
   warning("Under development");
     
   instr = stropen(getparam("in"), "r");
   outstr = stropen(getparam("out"), "w");
   weight = btrtrans(getparam("weight"));
-  nmin = getiparam("nmin");
-  rmax = getrparam("rmax");
   fn = getrparam("fn");
+  rmax = getrparam("rmax");
+  shrink = getrparam("shrink");
   eta = getrparam("eta");
   iter = getiparam("iter");
   times = getparam("times");
@@ -86,7 +86,6 @@ void nemo_main()
     dprintf(1,"Using center=%g,%g,%g\n", pos[0],pos[1],pos[2]);
   } else
     np = 0;
-
   
   get_history(instr);
   put_history(outstr);
@@ -94,15 +93,20 @@ void nemo_main()
   do {
     get_snap_by_t(instr, &btab, &nbody, &tsnap, &bits, times);
     rmax = getrparam("rmax");
-    nmin = getiparam("nmin");
+    if (fn < 1)
+      nmin = (int) (fn*nbody);
+    else
+      nmin = (int) fn;
+    dprintf(1,"nbody=%d nmin=%d rmax=%g eta=%g iter=%d\n", nbody, nmin, rmax, eta, iter);
+    if (nmin >= nbody) error("Cannot use nmin=%d since nbody=%d", nmin, nbody);
     if (bits & PhaseSpaceBit) {
       CLRV(n_pos);
       CLRV(n_vel);
       if (np > 0) SETV(n_pos, pos);
       nleft0 = nbody;
-      mode=0;  // log the reason why it converged
+      mode=0;  // log the reason why it converged (0 should never happen)
       for (i=0;i<iter;i++) {
-	nleft = snapcenter(btab, nbody, tsnap, weight, n_pos, n_vel, nmin, rmax, Qreport);
+	nleft = snapcenter(btab, nbody, tsnap, weight, n_pos, n_vel, rmax, Qreport);
 	if (i>0) {
 	  dr = distv(o_pos,n_pos);
 	  dprintf(1,"%d ",i);
@@ -112,20 +116,19 @@ void nemo_main()
 	  if (dr < eta) break;
           mode=2;    // 2: iteration max reached
 	  if (i == iter-1) break;
-	  mode=3;    // 3: nmin was reached
+	  mode=3;    // 3: nmin was reached (the goal of Power2003)
 	  if (nleft < nmin) break;
-	  mode=4;    // 4: nleft didn't change (the goal of Power2003)
-	  if (nleft == nleft0) break;
+	  //mode=4;    // 4: nleft didn't change
+	  //if (nleft == nleft0) break;
 	  nleft0 = nleft;
 	} 
 	SETV(o_pos,n_pos);
 	SETV(o_vel,n_vel);
 
-	rmax *= (1-fn);
-	
+	rmax *= (1-shrink);
       }
       if (Qreport) {
-	printf("%d %d %g    ",mode, i, rmax);
+	printf("%d %d %g %d   ",mode, i, rmax, nleft0);
 	for (j=0; j<NDIM; j++)  printf("%f ",n_pos[j]);
 	printf("\n");
       }
@@ -135,16 +138,21 @@ void nemo_main()
   } while (bits != 0);
 }
 
+/*
+ *   At input position (o_pos,o_vel) it uses all particles within rmax
+ *   and compute new a weighted (pos,vel) and return that in (o_pos,o_vel)
+ *
+ */
+
 int snapcenter(
-	       Body *btab,
-	       int nbody,
-	       real tsnap,
-	       rproc_body weight,
-	       vector o_pos, 
-	       vector o_vel,
-	       int nmin,
-	       real rmax,
-	       bool Qreport)
+	       Body *btab,        // in
+	       int nbody,         // in
+	       real tsnap,        // in
+	       rproc_body weight, // in
+	       vector o_pos,      // in, out
+	       vector o_vel,      // in, out
+	       real rmax,         // in
+	       bool Qreport)      // in
 {
     int i;
     Body *b;
@@ -159,8 +167,7 @@ int snapcenter(
 	SUBV(tmpv,o_pos,Pos(b));
 	DOTVP(s,tmpv,tmpv);
 	if (s > rmax*rmax) continue;
-
-	cnt++;
+	cnt++; // count the stars with rmax of o_pos
 
 	w_i = (weight)(b, tsnap, i);    // should be mass
 	if (w_i < 0.0) warning("weight[%d] = %g < 0\n", i, w_i);
@@ -173,7 +180,7 @@ int snapcenter(
 	SADDV(w_vel, tmpv);
     }
     if (w_sum == 0.0) error("total weight is zero");
-    dprintf(0,"Rmax=%g n=%d\n",rmax,cnt);
+    dprintf(1,"Rmax=%g n=%d\n",rmax,cnt);
     SDIVVS(w_pos, w_sum);
     SDIVVS(w_vel, w_sum);
 
@@ -181,6 +188,7 @@ int snapcenter(
     SETV(o_vel,w_vel);
 
 #if 0
+    // correct the snapshot too?   no!
     for (i = 0, b = btab; i < nbody; i++, b++) {
 	SSUBV(Pos(b), w_pos);
 	SSUBV(Vel(b), w_vel);
