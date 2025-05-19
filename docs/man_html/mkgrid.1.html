@@ -47,7 +47,17 @@ No default. </dd>
 
 <dt><b>headline=</b> </dt>
 <dd>Text headline for output     <br>
-Default: none. 
+Default: none. </dd>
+
+<dt><b>nmodel=</b><i>integer</i> </dt>
+<dd>Number of models to generate. All models will
+be different here. Although mostly meant for benchmarks, generating more
+then 1 model can be useful to process very large snapshots (that normally
+won&rsquo;t fit in memory) in a serialized fashion. See also <i>snapsplit</i>. Most NEMO
+programs will only read the first snapshot. See also <b>mkgrid nmodel=</b> for
+a faster way to benchmark. <br>
+[Default: <b>1</b>] 
+<p> 
 <p> </dd>
 </dl>
 

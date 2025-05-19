@@ -89,7 +89,9 @@ time, in seconds since 1970.0). See also <a href='xrandom.1.html'><i>xrandom(1NE
 [Default: 0.0] </dd>
 
 <dt><b>zerocm=t|f</b> </dt>
-<dd>Reset center of mass to zero? <br>
+<dd>Reset center of mass to zero? If not centered,
+the (0,0,0) is the mathematical origin of the Plummer model, but due to
+finite-N noise not at the center of mass. <br>
 [Default: <b>t</b>]. </dd>
 
 <dt><b>scale=</b><i>scale_factor</i> </dt>

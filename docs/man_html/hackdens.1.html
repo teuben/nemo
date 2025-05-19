@@ -142,35 +142,40 @@ in two ways:
     hackforce p.dat - | snapcenter - . weight="phi*phi*phi*phi" report=t<br>
     <br>
   Note that in this case the Plummer sphere should have the correct mathematical
-center, and not <i>centered</i>. This snippet of code is expanded in a script $NEMO/scripts/csh/centering.sh,
-in which these different methods can also be applied to different models,
-as expanded in the following table.  
-<p>     nbody=100 models:     Plummer
-  King1   King3   King5  DeVauc<br>
-     -------------------------------------------------------------<br>
-     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299<br>
-     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*<br>
+center, and not <i>re-centered</i>. This snippet of code is expanded in a script
+$NEMO/scripts/csh/centering.sh, in which these different methods can also
+be applied to different models, where some are expanded in the table below:
+ 
+<p>     nbody=100 models:     Plummer   King1   King3   King5  DeVauc  Dehnen<br>
+     ---------------------------------------------------------------------<br>
+     halfmass radius:        0.769   0.427   0.418   0.408   1.3<br>
+     snapcenter  on m:       0.102   0.029*  0.030*  0.033   0.299   2.75<br>
+     snapcenter  on dens:    0.060   0.039   0.036   0.030   0.030*  0.074*<br>
      snapcenter  on phi:     0.053<br>
      snapcenter  on phi^2:   0.050*<br>
-     snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035<br>
-     snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031<br>
+     snapcenter  on phi^3:   0.052   0.032   0.030   0.026*  0.035   0.079<br>
+     snapcenter  on phi^4:   0.054   0.034   0.032   0.027   0.031   0.110<br>
      snapcenterp:            0.080<br>
+     snapcenters:            0.119:<br>
      snapmnmx on min phi:    0.122<br>
      snapmnmx on m 50% phi:  0.058<br>
      snapmnmx on m 33% phi:  0.063                           0.053<br>
      snapmnmx on m 25% phi:  0.067<br>
-     rockstart on m:         0.082:<br>
+     rockstar on m:          0.082:<br>
  
-<p> A (*) denotes the best method for that model. 
+<p> A (*) denotes the best method for that model. Values scale as 1/<a href='sqrt.nbody.html'>sqrt(nbody)</a>
+
+
+<p> 
 <p>  
-<p> </pre>Although for a Plummer
-sphere the best method is more than twice as good than the worst method,
-this does not apply to other models. <p>
+<p> </pre>Although for a Plummer sphere the best method is more than twice as
+good than the worst method, this does not apply to other models. A normal
+mass-weighted centering for Dehnen and deVaucouleurs models is quite bad.
+<p>
 <a href='density.1falcON.html'><i>density(1falcON)</i></a>
- is considerable faster,
-about twice with their K=32 default.   
-<p> mkplummer - 100000 |\  snapscale - -
-mscale=10 |\<br>
+ is considerable faster, about twice with their K=32 default.
+  
+<p> mkplummer - 100000 |\  snapscale - - mscale=10 |\<br>
   snapsort - - |\<br>
   density - - give=mxvr |\<br>
   snapshell - &rsquo;10**[-4:4:0.1]&rsquo; dens  |\<br>
@@ -208,25 +213,27 @@ a Plummer sphere in virial (nbody) units should have a central density
 <a href='hackforce.1.html'>hackforce(1NEMO)</a>
 , <a href='snapdens.1.html'>snapdens(1NEMO)</a>
 , <a href='snapcenterp.1.html'>snapcenterp(1NEMO)</a>
-, <a href='density.1falcON.html'>density(1falcON)</a>
+, <a href='snapcenters.1.html'>snapcenters(1NEMO)</a>
 ,
-<a href='snapshell.1.html'>snapshell(1NEMO)</a>
+<a href='density.1falcON.html'>density(1falcON)</a>
+, <a href='snapshell.1.html'>snapshell(1NEMO)</a>
  <p>
 <a href='https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/'>https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C/</a>
- - Casertano
-&amp; Hut (1985) 
+
+- Casertano &amp; Hut (1985) 
 <p> 
 <h2><a name='sect8' href='#toc8'>Ads</a></h2>
 @ads <A HREF=https://ui.adsabs.harvard.edu/abs/1985ApJ...298...80C> 1985ApJ...298...80C </A>
 <p> 
 <p> 
 <h2><a name='sect9' href='#toc9'>Timing</a></h2>
-N=4096, merger remnant <p>
-Presorted
-snapshot: 5 minutes on Sun-3/60, particles are presorted by the distance
-from the center of mass of the system. <p>
-Random snapshot: 60 minutes Sun-3/60
+N=4096, merger remnant
+<p>
+Presorted snapshot: 5 minutes on Sun-3/60, particles are presorted by the
+distance from the center of mass of the system. <p>
+Random snapshot: 60 minutes
 
+<p>Sun-3/60 
 <p> 
 <h2><a name='sect10' href='#toc10'>Author</a></h2>
 Jun Makino 

@@ -26,74 +26,82 @@ precisely, real-valued weights are specified for each body, and used to
 compute a weighted phase-space centroid, which becomes the new origin of
 the coordinate system.  <p>
 Alternatively a new snapshot with a single particle
-of total mass and these new center-of-mass coordintes can be produced. 
+of total mass and these new center-of-mass coordinates can be produced using
+<b>one=t</b>. 
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-
-The following parameters are recognized in order; they may be given in
-any order if the keyword is also given. Use <b>--help</b> to confirm this man page
-is up to date.  
+ The following parameters are recognized in order; they
+may be given in any order if the keyword is also given. Use <b>--help</b> to confirm
+this man page is up to date.  
 <dl>
 
 <dt><b>in=</b><i>snap-file</i> </dt>
-<dd>Input data is read from <i>snap-file</i>, which must
-be in snapshot format. No default. </dd>
+<dd>Input data is read from <i>snap-file</i>,
+which must be in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
+ format. <br>
+No default. </dd>
 
 <dt><b>out=</b><i>snap-file</i> </dt>
-<dd>Output data is written to
-<i>snap-file</i>. No default. </dd>
+<dd>Output data is written to <i>snap-file</i>. <br>
+No default. </dd>
 
 <dt><b>weight=</b><i>expression</i> </dt>
-<dd>The value of <i>expression</i> is used to
-compute the centroid. <i>expression</i> is a real-valued C language expression over
-the real values <b>x</b>, <b>y</b>, <b>z</b>, <b>vx</b>, <b>vy</b>, <b>vz</b>, <b>phi</b>, <b>m</b>, <b>t</b>, and the integer value <b>i</b>.
+<dd>The value of <i>expression</i> is used to compute
+the centroid. <i>expression</i> is a real-valued C language expression over the
+real values <b>x</b>, <b>y</b>, <b>z</b>, <b>vx</b>, <b>vy</b>, <b>vz</b>, <b>phi</b>, <b>m</b>, <b>t</b>, and the integer value <b>i</b>. <br>
 [Default <b>1</b>]. </dd>
 
 <dt><b>times=</b><i>time-range</i> </dt>
 <dd>Only data frames with time values within <i>time-range</i>,
-which is of the form, eg, "1.0:1.5,2.5,3.0", will be translated. [Default: <b>all</b>].
-</dd>
+which is of the form, eg, "1.0:1.5,2.5,3.0", will be translated. <br>
+[Default: <b>all</b>]. </dd>
 
 <dt><b>report=t|f</b> </dt>
-<dd>Report the center of mass coordinates. These are 2*NDIM numbers,
-position and velocity, of the new center of mass in the old coordinates.
-If you want to use <i>snapcenter</i> in a pipe, you need to reset <b>report=f</b>, since
-both standard output and filestruct output will get merged, and become
-illegable for the next program in the pipe. [Default: <b>f</b>]. </dd>
+<dd>Report the center of mass coordinates. These are
+2*NDIM numbers, position and velocity, of the new center of mass in the
+old coordinates. If you want to use <i>snapcenter</i> in a pipe, you need to reset
+<b>report=f</b>, since both standard output and filestruct output will get merged,
+and become illegable for the next program in the pipe. <br>
+[Default: <b>f</b>]. </dd>
 
 <dt><b>one=t|f</b> </dt>
-<dd>Write output
-center of mass (COM) as a single body with total mass and COM coordinates
-as computed from <b>weight=</b>. [Default: <b>f</b>]. 
+<dd>Write output center of mass (COM) as a single body
+with total mass and COM coordinates as computed from <b>weight=</b>. <br>
+[Default: <b>f</b>]. 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-To just see the center of
-mass of a system without creating an output file: <br>
+To view the center of mass of a system without ac
+atually creating an output file: <br>
 <pre>   % mkplummer - nbody=100 zerocm=f seed=123 | snapcenter - . report=t
    0.073515 0.006338 0.068154 0.005858 0.014697 0.059333
    
-   mkplummer - nbody=100 zerocm=f seed=123 | snapcenterp - . report=t
+   % mkplummer - nbody=100 zerocm=f seed=123 | snapcenterp - . report=t
    0.058525 0.087385 0.099227 
-</pre>and to analyze a whole series: <br>
-<pre>    % mkplummer - nbody=100 zerocm=f nmodel=100 seed=123 | snapcenter - . report=t
-| tabstat  - 1:6
-    npt:     100 100 100 100 100 100
-    min:     -0.25276 -0.233932 -0.239581 -0.094354 -0.127564 -0.128537
-    max:     0.259662 0.297318 0.42111 0.099852 0.101441 0.088769
-    sum:     -0.476577 0.634456 0.928364 0.272159 -0.074268 -0.074884
-    mean:    -0.00476577 0.00634456 0.00928364 0.00272159 -0.00074268 -0.00074884
-    disp:    0.0997349 0.0970942 0.103345 0.0386814 0.045105 0.0440842
-    skew:    0.0784864 -0.189295 0.702539 0.0190448 -0.223761 -0.157901
-    kurt:   -0.0980693 0.039727 2.47228 -0.22483 -0.0507929 -0.106209
-    min/sig: -2.48653 -2.47468 -2.40809 -2.50962 -2.81169 -2.89873
-    max/sig: 2.65131 2.99682 3.98496 2.51103 2.26546 2.03061
-    median:  -0.0011355 0.0115855 0.010902 0.0022755 0.0001605 -0.002766
-</pre>
+</pre>(notice <a href='snapcenterp.1.html'><i>snapcenterp(1NEMO)</i></a>
+ does not compute the velocity centroid). <p>
+
+<p> Here
+is an example to analyze a whole series::   
+<p> % mkplummer - nbody=100 zerocm=f
+nmodel=100 seed=123 | snapcenter - . report=t | tabstat  - 1:6 npt:     100
+100 100 100 100 100 min:     -0.25276    -0.233932   -0.239581 -0.094354   -0.127564
+  -0.128537 max:      0.259662    0.297318   0.42111    0.099852    0.101441 
+  0.088769 sum:     -0.476577    0.634456   0.928364   0.272159   -0.074268   -0.074884
+mean:    -0.00476577  0.00634456 0.00928364 0.00272159 -0.00074268 -0.00074884 disp:
+    0.0997349   0.0970942  0.103345   0.0386814   0.045105    0.0440842 skew:
+    0.0784864  -0.189295   0.702539   0.0190448  -0.223761   -0.157901 kurt:   
+-0.0980693   0.039727   2.47228   -0.22483    -0.0507929  -0.106209 min/sig: -2.48653
+   -2.47468   -2.40809   -2.50962    -2.81169    -2.89873 max/sig:  2.65131     2.99682
+   3.98496    2.51103     2.26546     2.03061 median:  -0.0011355   0.0115855
+ 0.010902   0.0022755   0.0001605  -0.002766 
+<p>  
 <p> 
 <h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='snapcenterp.1.html'>snapcenterp(1NEMO)</a>
+,
+<a href='snapcenters.1.html'>snapcenters(1NEMO)</a>
 , <a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
 , <a href='hackdens.1.html'>hackdens(1NEMO)</a>
 , <a href='hackforce.1.html'>hackforce(1NEMO)</a>
@@ -104,12 +112,14 @@ W.L.Sweatman - (1993) MNRAS 261, 497.   1993MNRAS.261..497S (n-body)
 <p>
 Picard,A. and Johnston, H.M. - (1994) A&amp;A, 76.     1994A%26A...283...76P  (observational)
 <p>
-Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225 (n-body) 
+Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225 (n-body) <p>
+Power et al (2003)
+- 2003MNRAS.338...14P - shrinking sphere method, S2.5 
 <p> 
 <h2><a name='sect6' href='#toc6'>Author</a></h2>
-Joshua
-E. Barnes. 
-<p> 
+Joshua E. Barnes. 
+<p>
+
 <h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>3-jul-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;Created ?<tt> </tt>&nbsp;<tt> </tt>&nbsp;Josh

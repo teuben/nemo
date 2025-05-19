@@ -56,7 +56,17 @@ dispersion. [Default: <b>0.0</b>]. </dd>
 
 <dt><b>headline=</b> </dt>
 <dd>Text headline for output     Default:
-none. 
+none. </dd>
+
+<dt><b>nmodel=</b><i>integer</i> </dt>
+<dd>Number of models to generate. All models will be different
+here. Although mostly meant for benchmarks, generating more then 1 model
+can be useful to process very large snapshots (that normally won&rsquo;t fit in
+memory) in a serialized fashion. See also <i>snapsplit</i>. Most NEMO programs will
+only read the first snapshot. See also <b>mkgrid nmodel=</b> for a faster way to
+benchmark. <br>
+[Default: <b>1</b>] 
+<p> 
 <p> </dd>
 </dl>
 
@@ -64,16 +74,17 @@ none.
 <a href='mkgrid.1.html'>mkgrid(1NEMO)</a>
 , <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
- <p>
-<a href='http://arxiv.org/abs/1206.3857'>http://arxiv.org/abs/1206.3857</a>
 
- (The gravitational field of a cube, Chappel et al.) 
+<p>
+<a href='http://arxiv.org/abs/1206.3857'>http://arxiv.org/abs/1206.3857</a>
+  (The gravitational field of a cube, Chappel
+et al.) 
 <p> 
 <h2><a name='sect5' href='#toc5'>Benchmark</a></h2>
-The following
-benchmark creates a large nbody cube, is gridded in an image cube and converted
-to a fits file (the fits file is normally half the size of the ccd file,
-since the latter uses double precision): 
+The following benchmark creates a large nbody cube, is
+gridded in an image cube and converted to a fits file (the fits file is
+normally half the size of the ccd file, since the latter uses double precision):
+
 <p> <br>
 <pre>    nbody=10000000
     nx=128

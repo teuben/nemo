@@ -97,7 +97,8 @@ a D.MS to D:M:S <br>
 </pre>and to convert a D:M:S string to D.MS: <br>
 <pre>    echo 12:34:56.789 | tabdms - - fromdms=1 format=%.10f
     12.5824413889
-    
+or
+    nemoinp 12:34:56.789  dms=t format=%.10f
 </pre>
 <p> 
 <p> <p>
@@ -121,7 +122,8 @@ The sexagesimal notation has many forms.  Apart from the H:M:S we don&rsquo;t su
 others yet. Here are some examples : <br>
 <pre>FITS DATE_OBS   2021-12-29T15:51:19.004800615       date -u +%Y-%m-%dT%H:%M:%S.%N
 NED             00h07m15.84s, +27d42m29.1s       
-CASA            12:22:55.212, +15.49.15.500
+CASA            12:22:55.212, +15.49.15.500         note : for HMS and . for
+DMS
 SIMBAD gives the following guidelines to allowed coordinate input:
  20 54 05.689 +37 01 17.38
  10:12:45.3-45:17:50
