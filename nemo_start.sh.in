@@ -101,5 +101,8 @@ export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 export FALCON=$NEMO/usr/dehnen/falcON
 source $FALCON/falcON_start.sh
 
+# modules
+test -f $NEMO/opt/init/bash && source $NEMO/opt/init/bash
+
 # aliases
 alias ni=nemoinp
