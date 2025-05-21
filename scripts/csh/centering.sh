@@ -7,6 +7,7 @@
 #  tabstat c10000.tab 1,2,3,7,8,9,13,14,15,19,20,21
 #  tabstat c10000.tab 4,5,6,10,11,12,16,17,18,22,23,24
 
+#  @todo   add half mass radius:   mkplummer - nbody=$nbody seed=$seed zerocm=f | snapmradii - 0.5
 
 nbody=100
 seed=-3
@@ -23,7 +24,7 @@ export DEBUG=-1
 
 for i in $(seq $n); do
     if [ $model = 0 ]; then
-	mkplummer - nbody=$nbody seed=$seed zerocm=f | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat
+	mkplummer                          - nbody=$nbody seed=$seed zerocm=f | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat
     elif [ $model = -1 ]; then
 	mkommod $NEMODAT/plum.dat          - nbody=$nbody seed=$seed zerocm=f | snapsort - - rank=r | snapshift - - $shift,0,0 > p.dat
     elif [ $model = -2 ]; then
