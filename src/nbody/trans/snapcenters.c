@@ -42,7 +42,7 @@ string defv[] = {
     "fn=0.1\n       Minimum fraction of particles needed, or absolute number if > 1",
     "rmax=10\n      Initial radius to shrink from",
     "one=f\n        Only output COM as a snapshot? [not implemented]",
-    "VERSION=0.4\n  19-may-2025 PJT",
+    "VERSION=0.5\n  20-may-2025 PJT",
     NULL,
 };
 
@@ -65,8 +65,6 @@ void nemo_main()
   int nmin, nleft, nleft0, mode;
   real rmax, shrink, fn;
 
-  warning("Under development");
-    
   instr = stropen(getparam("in"), "r");
   outstr = stropen(getparam("out"), "w");
   weight = btrtrans(getparam("weight"));
@@ -86,6 +84,8 @@ void nemo_main()
     dprintf(1,"Using center=%g,%g,%g\n", pos[0],pos[1],pos[2]);
   } else
     np = 0;
+  dprintf(0,"rmax=%g fn=%g shrink=%g  eta=%g iter=%d\n", rmax, fn, shrink, eta, iter);
+  
   
   get_history(instr);
   put_history(outstr);
@@ -109,7 +109,7 @@ void nemo_main()
 	nleft = snapcenter(btab, nbody, tsnap, weight, n_pos, n_vel, rmax, Qreport);
 	if (i>0) {
 	  dr = distv(o_pos,n_pos);
-	  dprintf(1,"%d ",i);
+	  dprintf(1,"%d %g %d  ",i,rmax,nleft);
 	  for (j=0; j<NDIM; j++)  dprintf(1,"%f ",n_pos[j]);
 	  dprintf(1,"%f\n", dr);
 	  mode=1;    // 1: eta was reached
@@ -180,7 +180,7 @@ int snapcenter(
 	SADDV(w_vel, tmpv);
     }
     if (w_sum == 0.0) error("total weight is zero");
-    dprintf(1,"Rmax=%g n=%d\n",rmax,cnt);
+    dprintf(2,"Rmax=%g n=%d\n",rmax,cnt);
     SDIVVS(w_pos, w_sum);
     SDIVVS(w_vel, w_sum);
 
