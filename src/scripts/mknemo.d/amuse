@@ -1,6 +1,20 @@
 #! /bin/csh -f
 #
-#  private falcON2 
+# Python 3 version >=3.7 
+# apt-get install build-essential curl g++ gfortran gettext zlib1g-dev
+
+#The following libraries need to be installed:
+
+#    HDF (version 1.6.5 - 1.12.x)
+#    MPI (OpenMPI or MPICH)
+
+#The following are needed for some codes:
+
+#    FFTW (version >= 3.0)
+#    GSL
+#    CMake (version >= 2.4)
+#    GMP (version >= 4.2.1)
+#    MPFR (version >= 2.3.1)
 
 set url=https://github.com/amusecode/amuse
 set dir=amuse
@@ -15,3 +29,10 @@ else
 endif
 
 echo "Installation is still manual."
+echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html"
+
+
+#  my openmpi seems to be in the way.  config problem?
+#  pip install -e .
+#     this seems to install some of the modules
+#
