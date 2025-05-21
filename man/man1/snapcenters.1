@@ -1,4 +1,4 @@
-.TH SNAPCENTERS 1NEMO "18 May 2025"
+.TH SNAPCENTERS 1NEMO "20 May 2025"
 
 .SH "NAME"
 snapcenters \- Center position of a snapshot based on shrinking sphere method (Power2003)
@@ -118,13 +118,9 @@ it is reported. E.g.
 .EX
 
 % mkplummer - 2000 seed=123 | snapcenters -  . report=t 
-### nemo Debug Info: Rmax=10 n=1995
-### nemo Debug Info: Rmax=9.75 n=1995
-### nemo Debug Info: Rmax=9.50625 n=1994
-### nemo Debug Info: Rmax=9.26859 n=1994
-4 3 9.26859    -0.005191 0.023738 0.015025
+2 19 3.77354 1940   -0.005382 0.028057 0.020065 
 
-Printed are: convergence reason, #iters, rmax, xcenter, ycenter, zcenter
+Printed are: convergence reason, #iters, rmax, nleft, xcenter, ycenter, zcenter
 
   convergence reason:
   0 - unexpected convergence (should never occur)
@@ -132,33 +128,17 @@ Printed are: convergence reason, #iters, rmax, xcenter, ycenter, zcenter
   2 - iteration max was reached
   3 - nmin was reached (the goal of Power2003)
   4 - number in shrinking sphere hasn't changed (not tested for, should rarely occur)
-  
 
 .EE
 
-100/50     0.119
-400/200    0.062
-1600/800   0.031
-
-1000/500   0.040
-2000/1000  0.032
-4000/2000  0.021
-8000/4000  0.015 /2000 0.017   /1000 0.020
-
 .SH "CAVEATS"
-This program is still being developed.
-.PP
 Searching is done in Pos space using rmax, there is no eqv. vmax search.
 
-
-
 .SH "EXAMPLES"
-An example...
+An example of shifting a Plummer sphere and playing with the essential parameters to find the center:
 .EX
-  $ mkplummer - 2000 | snapshift - - 5,0,0 | snapcenters -  . report=t 
 
-mkplummer - 1000 nmodel=100 | snapshift - - 0,0,0 | snapcenters -  . report=t  debug=-1  | tabhist - 4 -0.2 0.2
--> 0.020
+$ mkplummer - 10000 | snapshift - - 5,0,0 | snapcenters -  . report=t shrink=0.3 fn=0.1 rmax=20
 
 .EE
 
