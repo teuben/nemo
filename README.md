@@ -22,15 +22,14 @@ A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes.
 Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 (see also https://ascl.net for code references):
 
-	 NEMO:      ascl:1010.051
-	 ZENO:      ascl:1102.027 (normally installed in $NEMO/usr/zeno)
-	 STARLAB:   ascl:1010.076 (optionally installed in $NEMO/local/starlab)
-	 ACS:       https://artcompsci.org
-	 AMUSE:     ascl:1107.007
+   * NEMO:      ascl:1010.051
+   * ZENO:      ascl:1102.027 (normally installed in $NEMO/usr/zeno)
+   * STARLAB:   ascl:1010.076 (optionally installed in $NEMO/local/starlab)
+   * ACS:       [https://artcompsci.org](https://web.archive.org/web/20240206050455/http://www.artcompsci.org)
+   * AMUSE:     ascl:1107.007
 	 
 ## Optional Packages
 
-Packages we optionally use (sometimes also installed in $NEMO/opt with source code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
