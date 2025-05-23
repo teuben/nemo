@@ -139,7 +139,7 @@ samplelog_g5:  nbody_g5
 	nbody_g5 -i samplein > samplelog_g5
 
 clean:
-	rm *.o
+	rm -f *.o
 
 bak:	export.tar.gz
 	mv export.tar.gz nbody.tar.gz
