@@ -1,10 +1,13 @@
 .TH BHTREE 1NEMO "23 May 2025"
 
 .SH "NAME"
-bhtree \- Barnes-Hut treecode with an optional GRAPE-4 interface
+bhtree, BHTC \- Barnes-Hut treecode with an optional GRAPE-4 interface
 
 .SH "SYNOPSIS"
+.nf
 \fBbhtree\fP [-options]
+\fBBHTC\fP [-options]
+.fi
 
 .SH "DESCRIPTION"
 
@@ -17,7 +20,8 @@ the memory usage. It requires about 8+200(N/106 ) MB of
 memory, where N is the number of particles.
 .PP
 During a build of the commmunity/bhtree code in AMUSE, a (worker) executable \fBBHTC\fP is
-created, which should be close to the current version of \fBbhtree\fP.
+created, which should be close to the current version of \fBbhtree\fP. It would need to
+be copied into $NEMOBIN if needed for benchmarking.
 
 .SH "PARAMETERS"
 \fBbhtree\fP does not have the usual NEMO \fIgetparam(3NEMO)\fP interface,
@@ -27,6 +31,7 @@ are in the "205" format.
 -a
 flag to control if output accelaration to snapshot output file as well.
 By default only mass, position, velocity and potentials are output.
+Note that BHTC does not have this option.
 .TP
 -i \fIfile\fP
 name of snapshot input file, in \fIstoa(1NEMO)\fP format  (no default)
@@ -102,6 +107,8 @@ command to be executed each time snapshot are output (default: no output)
 
 .SH "CAVEATS"
 Files are silently appended to.
+.PP
+BHTC is only available
 
 .SH "EXAMPLES"
 An example of integrating a 1024 body Plummer sphere to time 10, and plotting
