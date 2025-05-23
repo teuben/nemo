@@ -122,12 +122,11 @@ of the system size. <br>
 and if convergence is reached, it is reported. E.g. 
 <p>  
 <p> % mkplummer - 2000 seed=123
-| snapcenters -  . report=t  ### nemo Debug Info: Rmax=10 n=1995 ### nemo
-Debug Info: Rmax=9.75 n=1995 ### nemo Debug Info: Rmax=9.50625 n=1994 ###
-nemo Debug Info: Rmax=9.26859 n=1994 4 3 9.26859    -0.005191 0.023738 0.015025
+| snapcenters -  . report=t  2 19 3.77354 1940   -0.005382 0.028057 0.020065  
+<p>
+Printed are: convergence reason, #iters, rmax, nleft, xcenter, ycenter,
 
-<p> Printed are: convergence reason, #iters, rmax, xcenter, ycenter, zcenter
-
+<p>zcenter 
 <p>   convergence reason:<br>
    0 - unexpected convergence (should never occur)<br>
    1 - eta was reached. By setting eta=0 [the default] this should never
@@ -136,34 +135,25 @@ happen<br>
    3 - nmin was reached (the goal of Power2003)<br>
    4 - number in shrinking sphere hasn&rsquo;t changed (not tested for, should
 rarely occur)<br>
-   <br>
  
 <p>  
-<p> 100/50     0.119 400/200    0.062 1600/800   0.031 
-<p> 1000/500   0.040 2000/1000
- 0.032 4000/2000  0.021 8000/4000  0.015 /2000 0.017   /1000 0.020 
 <p> 
 <h2><a name='sect5' href='#toc5'>Caveats</a></h2>
-This
-program is still being developed. <p>
-Searching is done in Pos space using rmax,
-there is no eqv. vmax search. 
-<p> 
-<p> 
+Searching is done in Pos space using rmax, there is no eqv. vmax
+search. 
 <p> 
 <h2><a name='sect6' href='#toc6'>Examples</a></h2>
-An example...    $ mkplummer - 2000
-| snapshift - - 5,0,0 | snapcenters -  . report=t <br>
- 
-<p> mkplummer - 1000 nmodel=100 | snapshift - - 0,0,0 | snapcenters -  . report=t
- debug=-1  | tabhist - 4 -0.2 0.2 -&gt; 0.020 
+An example of shifting a Plummer sphere and playing with
+the essential parameters to find the center:  
+<p> $ mkplummer - 10000 | snapshift
+- - 5,0,0 | snapcenters -  . report=t shrink=0.3 fn=0.1 rmax=20 
 <p>  
 <p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='snapcenterp.1.html'>snapcenterp(1NEMO)</a>
-, <a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
 ,
-<a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
+<a href='snapcenter.1.html'>snapcenter(1NEMO)</a>
+, <a href='bodytrans.3.html'>bodytrans(3NEMO)</a>
 , <a href='hackdens.1.html'>hackdens(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
  <br>
