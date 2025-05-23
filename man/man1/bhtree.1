@@ -127,6 +127,14 @@ part of the Benchfile:
   $time bhtree -i p1024.a  -T 20    -t 0.75  -d 0.015625 -e 0.025   > p1024_b.log 2>&1
 .EE
 
+here are some results:
+.nf
+.ta +2i +1i
+CPU	hackcode1	bhtree
+Ultra 7 155H	2.44	2.69
+i5-10210U      	5.79	6.99
+.fi
+
 .SH "AMUSE"
 Since \fBbhcode\fP is also absorbed in \fIamuse\fP, we can compare a typical  integration
 in both NEMO and AMUSE.
