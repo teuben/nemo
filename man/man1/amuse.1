@@ -1,0 +1,80 @@
+.TH AMUSE 1NEMO "23 May 2025"
+
+.SH "DESCRIPTION"
+\fBAMUSE\fP is the Astrophysical Multipurpose Software Environment.
+With it, you can simulate many astrophysical systems. It is written
+in python, so there is currently no \fBamuse\fP command, instead you
+will want to import this module in python and go from there.
+
+
+.SH "EXAMPLES"
+
+Here is an example snippet of python code integrating a Plummer sphere
+and writing the resulting snapshot as a table
+
+.EX
+
+ N=128
+ TIME=10
+ FILENAME='p.txt'
+
+ from amuse.units import nbody_system
+ from amuse.ic.plummer import new_plummer_model
+ from amuse.community.bhtree import Bhtree
+ from amuse.io import write_set_to_file,read_set_from_file
+
+ stars = new_plummer_model(N)
+ gravity = Bhtree()
+
+ eps = 0.025 | nbody_system.length
+ tstop = 10  | nbody_system.time
+
+ gravity.parameters.opening_angle  = 0.75
+ gravity.parameters.epsilon_squared = eps * eps
+ gravity.parameters.dt_dia          = 1.0      | nbody_system.time
+ gravity.parameters.timestep        = 0.015625 | nbody_system.time 
+
+ stars_in_gravity = gravity.particles.add_particles(stars)
+ gravity.evolve_model(tstop)
+ write_set_to_file(stars_in_gravity, FILENAME, format='txt')
+
+.EE
+
+This table has mass, radius, velocity and position, one per star. Thus the
+following NEMO command will convert it to the standard
+\fIsnapshot(5NEMO)\fP file:
+
+.EX
+
+ nbody=$(tabcols p.txt | wc -l)
+ tabcols p.txt | tabtos - p.snap block1=mass,skip,vx,vy,vz,x,y,z nbody=$nbody
+
+.EE
+
+
+.SH "INSTALL"
+
+Within NEMO the command
+.EX
+
+   mknemo amuse
+
+.EE
+will get you started on the install.  More to come.  Note there is a user release, which
+can be a set of \fIpip install\fP only, as well as a developer install.
+
+.SH "FILES"
+.nf
+$NEMO/src/scripts/mknemo.d/amuse - example install script (can be run via mknemo)
+$NEMO/local/amuse - root of source code after install
+.fi
+
+.SH "SEE ALSO"
+nemo(1NEMO), zeno(1NEMO)
+
+.SH "HISTORY"
+
+.nf
+
+may-2025 - man page written
+.fi
