@@ -31,6 +31,6 @@ p1k:
 bench:	bench10
 
 bench10: p1k
-	nemobench bhtree    bhtree -i p1k.a -T 10 -t 0.75 -d 0.015625 -e 0.025 
-	nemobench hackcode1 hackcode1 p1k . tstop=10 tol=0.75 freq=64 eps=0.025
+	nemobench bhtree bhtree -i p1k.a -T 20 -t 0.75 -d 0.015625 -e 0.025 
+	nemobench bhtree hackcode1 p1k . tstop=20 tol=0.75 freq=64 eps=0.025
 
