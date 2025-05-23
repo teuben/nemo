@@ -11,101 +11,108 @@ This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpag
 
 <p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
-bhtree - Barnes-Hut treecode with an optional GRAPE-4 interface 
+bhtree, BHTC - Barnes-Hut treecode with an optional GRAPE-4 interface
+
 <p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
-<b>bhtree</b>
-[-options] 
+<br>
+<pre>bhtree [-options]
+BHTC [-options]
+</pre>
 <p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 
-<p> <b>bhtree</b> (formerly called <b>nbody</b>) is a C++ version
-of the Barnes-Hut treecode and its optional GRAPE-4 variant.  This program
-was intended as the replacement for the old FORTRAN version of treecode
-developed by the author (v_code). The algorithm used in nbody and v_code
-are essentially the same. The main goal in the design of nbody is to minimize
-the memory usage. It requires about 8+200(N/106 ) MB of memory, where N
-is the number of particles.  
+<p> <b>bhtree</b> (formerly called <b>nbody</b>) is a C++ version of the Barnes-Hut
+treecode and its optional GRAPE-4 variant.  This program was intended as
+the replacement for the old FORTRAN version of treecode developed by the
+author (v_code). The algorithm used in nbody and v_code are essentially
+the same. The main goal in the design of nbody is to minimize the memory
+usage. It requires about 8+200(N/106 ) MB of memory, where N is the number
+of particles. <p>
+During a build of the commmunity/bhtree code in AMUSE, a (worker)
+executable <b>BHTC</b> is created, which should be close to the current version
+of <b>bhtree</b>. It would need to be copied into $NEMOBIN if needed for benchmarking.
+
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-<b>bhtree</b> does not have the usual NEMO
-<a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
- interface, instead uses a private version of the <i>pgetopt</i>.
-snapshot files are in the "205" format. 
+<b>bhtree</b> does not have the usual NEMO <a href='getparam.3.html'><i>getparam(3NEMO)</i></a>
+ interface,
+instead uses a private version of the <i>pgetopt</i>. snapshot files are in the
+"205" format. 
 <dl>
 
 <dt>-a </dt>
-<dd>flag to control if output accelaration
-to snapshot output file as well. By default only mass, position, velocity
-and potentials are output. </dd>
+<dd>flag to control if output accelaration to snapshot output
+file as well. By default only mass, position, velocity and potentials are
+output. Note that BHTC does not have this option. </dd>
 
 <dt>-i <i>file</i> </dt>
-<dd>name of snapshot input file, in <a href='stoa.1.html'><i>stoa(1NEMO)</i></a>
-
-format  (no default) </dd>
+<dd>name of snapshot
+input file, in <a href='stoa.1.html'><i>stoa(1NEMO)</i></a>
+ format  (no default) </dd>
 
 <dt>-o <i>file</i> </dt>
-<dd>name of snapshot output file      (default:
-no output) </dd>
+<dd>name of snapshot
+output file      (default: no output) </dd>
 
 <dt>-D <i>float</i> </dt>
-<dd>time interval for snapshot output (default: 1) </dd>
+<dd>time interval for snapshot
+output (default: 1) </dd>
 
-<dt>-l <i>float</i>
-</dt>
-<dd>interval for log output (default: 1: all step) </dd>
+<dt>-l <i>float</i> </dt>
+<dd>interval for log output (default: 1: all step)
+</dd>
 
 <dt>-T <i>float</i> </dt>
-<dd>time to stop integration
-         (default: 10) </dd>
+<dd>time to stop integration          (default: 10) </dd>
 
 <dt>-d <i>float</i> </dt>
-<dd>timestep (default: 0.015625) </dd>
+<dd>timestep
+(default: 0.015625) </dd>
 
 <dt>-e <i>float</i> </dt>
-<dd>softening
-parameter (default: 0.025) </dd>
+<dd>softening parameter (default: 0.025) </dd>
 
-<dt>-t <i>float</i> </dt>
-<dd>opening angle theta               (default:
-0.75) </dd>
+<dt>-t <i>float</i>
+</dt>
+<dd>opening angle theta               (default: 0.75) </dd>
 
 <dt>-n <i>int</i> </dt>
-<dd>ncrit for Barnes&rsquo; vectorization  = maximum number of particles
-sharing an interaction list (default: 1024) (ONLY used with GRAPE/HARP
-implementation) - AMUSE::ncrit_for_tree </dd>
+<dd>ncrit for Barnes&rsquo;
+vectorization  = maximum number of particles sharing an interaction list
+(default: 1024) (ONLY used with GRAPE/HARP implementation) - AMUSE::ncrit_for_tree
+</dd>
 
 <dt>-N <i>int</i> </dt>
-<dd>cell division criterion  
- (default: 8 or 8 * # of pseudo particle) divide cell until it contains
-&gt;N particles smaller memory requirement for larger N </dd>
+<dd>cell division criterion    (default: 8 or 8 * # of pseudo particle)
+divide cell until it contains &gt;N particles smaller memory requirement for
+larger N </dd>
 
 <dt>-w  <i>float</i> </dt>
-<dd>window size
-for PGPLOT snapshot plot (default: 10) </dd>
+<dd>window size for PGPLOT snapshot plot (default: 10) </dd>
 
-<dt>-c </dt>
+<dt>-c
+</dt>
 <dd>flag for collision run </dd>
 
 <dt>-x <i>xyz</i> </dt>
-<dd>relative
-position vector for collision run (no default) </dd>
+<dd>relative position vector for collision run
+(no default) </dd>
 
 <dt>-v <i>uvw</i> </dt>
-<dd>relative velocity
-vector for collision run (no default) </dd>
+<dd>relative velocity vector for collision run (no default)
+</dd>
 
 <dt>-s <i>float</i> </dt>
-<dd>scale factor for position
-scaling (default: 1) </dd>
+<dd>scale factor for position scaling (default: 1) </dd>
 
 <dt>-S <i>float</i> </dt>
-<dd>scale factor for velocity scaling (default:
-1) </dd>
+<dd>scale factor
+for velocity scaling (default: 1) </dd>
 
 <dt>-p <i>int</i> </dt>
-<dd>order of multipole expansion (default: 1)           (ONLY used
-with P2M2 implementation)<br>
+<dd>order of multipole expansion (default:
+1)           (ONLY used with P2M2 implementation)<br>
  </dd>
 
 <dt>-r <i>float</i> </dt>
@@ -131,14 +138,16 @@ passed to the command.<br>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-Files are silently appended to. 
+Files are silently appended to. <p>
+BHTC
+
+<p>is only available 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-An
-example of integrating a 1024 body Plummer sphere to time 10, and plotting
-the Lagrangian radii 0.1..0.9 as function of time:  
-<p>   mkplummer - 1024 | stoa
-- p1024<br>
+An example of integrating a 1024 body Plummer
+sphere to time 10, and plotting the Lagrangian radii 0.1..0.9 as function of
+time:  
+<p>   mkplummer - 1024 | stoa - p1024<br>
    rm -f p1024.out p1024.snap<br>
    bhtree -i p1024 -o p1024.out -D 0.1 -T 10 &gt; p1024.log 2&gt;&amp;1 <br>
    atos p1024.out p1024.snap mass,phase,phi <br>
@@ -149,16 +158,23 @@ the Lagrangian radii 0.1..0.9 as function of time:
 <h2><a name='sect6' href='#toc6'>Benchmark</a></h2>
 
 <p> To compare the original hackcode1 with bhtree, the following
-example is part of the Benchfile: 
-<p>    rm -f p1024 p1024.a<br>
-   mkplummer p1024 1024 seed=123<br>
-   stoa p1024  p1024.a<br>
+example is part of the Benchfile, integrating a 1024 body Plummer model
+for 1280 steps. 
+<p>    rm -f p1k.1 p1k.2<br>
+   mkplummer p1k.1 1024 seed=123<br>
+   stoa p1k.1 p1k.2<br>
    time=/usr/bin/time<br>
-   $time hackcode1 p1024 .  tstop=20 tol=0.75 freq=64     eps=0.025  &gt; p1024_h.log
+   $time hackcode1 p1k.1 . tstop=20 tol=0.75 freq=64     eps=0.025  &gt; p1.log
 2&gt;&amp;1<br>
-   $time bhtree -i p1024.a  -T 20    -t 0.75  -d 0.015625 -e 0.025   &gt; p1024_b.log
-2&gt;&amp;1<br>
+   $time bhtree -i p1k.2   -T 20    -t 0.75  -d 0.015625 -e 0.025   &gt; p2.log 2&gt;&amp;1<br>
   
+<p> here are some results: 
+<p> <br>
+<pre>CPU<tt> </tt>&nbsp;<tt> </tt>&nbsp;hackcode1<tt> </tt>&nbsp;<tt> </tt>&nbsp;bhtree<tt> </tt>&nbsp;<tt> </tt>&nbsp;BHTC
+Ultra 7 155H<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.44<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.69<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.51
+i7-1260P<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.75<tt> </tt>&nbsp;<tt> </tt>&nbsp;2.85<tt> </tt>&nbsp;<tt> </tt>&nbsp;5.43
+i5-10210U      <tt> </tt>&nbsp;<tt> </tt>&nbsp;5.79<tt> </tt>&nbsp;<tt> </tt>&nbsp;6.99<tt> </tt>&nbsp;<tt> </tt>&nbsp;?
+</pre>
 <p> 
 <h2><a name='sect7' href='#toc7'>Amuse</a></h2>
 Since <b>bhcode</b> is also absorbed in <i>amuse</i>, we can compare a typical
