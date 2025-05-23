@@ -6,7 +6,8 @@
  *
  * Jun Makino 89/09/20 Ver. 1.00 (created)
  *            89/10/02 Ver. 1.01 debugged on UNIX system.
- * Peter T    25/05/22 proper prototypes
+ * Peter T    25/05/22 proper prototypes by reordering functions;
+ *                     also took _WIN32 from the amuse bhtree code
  *
  * functions :
  *             void timer_init() : reset the timer
