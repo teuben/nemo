@@ -32,7 +32,15 @@ endif
 
 echo "Installation is still manual."
 echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html"
-
+echo ""
+echo "Example user install bypassing this code: (skipping setting up venv)"
+echo " pip install amuse-framework"
+echo " pip install amuse-bhtree"
+echo ""
+echo "Example developer install:"
+echo " cd $NEMO/local/amuse"
+echo " pip install -e ."
+echo " make bhtree.code"
 
 #  my openmpi seems to be in the way.  config problem?
 #  pip install -e .
