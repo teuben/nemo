@@ -1,0 +1,156 @@
+.TH BHTREE 1NEMO "22 May 2025"
+
+.SH "NAME"
+bhtree \- Barnes-Hut treecode with optional Grape interfaces
+
+.SH "SYNOPSIS"
+\fBbhtree\fP [-options]
+
+.SH "DESCRIPTION"
+
+\fBbhtree\fP (formerly called \fBnbody\fP) is a C++
+version of treecode and its GRAPE-4 variant. 
+This program was intended as the replacement for the old FORTRAN version of treecode
+developed by the author (v_code). The algorithm used in nbody and v_code
+are essentially the same. The main goal in the design of nbody is to minimize
+the memory usage. It requires about 8+200(N/106 ) MB of
+memory, where N is the number of particles. 
+
+.SH "PARAMETERS"
+\fBbhtree\fP does not have the usual NEMO \fIgetparam(3NEMO)\fP interface,
+instead uses a private version of the \fIpgetopt\fP. snapshot files
+are in the "205" format.
+.TP 10
+-a
+output accelaration to snapshot output file as well. By default only
+mass, position, velocity and potentials are output.
+.TP
+-i \fIfile\fP
+name of snapshot input file, in \fIstoa(1NEMO)\fP format  (no default)
+.TP
+-o \fIfile\fP
+name of snapshot output file      (default: no output)
+.TP
+-D \fIfloat\fP
+time interval for snapshot output (default: 1)
+.TP
+-l \fIfloat\fP
+interval for log output (default: 1: all step)
+.TP
+-T \fIfloat\fP
+time to stop integration          (default: 10)
+.TP
+-d \fIfloat\fP
+timestep (default: 0.015625)
+.TP
+-e \fIfloat\fP
+softening parameter (default: 0.025)
+.TP
+-t \fIfloat\fP
+opening angle theta               (default: 0.75)
+.TP
+-n \fIint\fP
+ncrit for Barnes' vectorization    (default: 1024)
+(ONLY used with GRAPE/HARP implementation)
+.TP
+-N \fIint\fP
+cell division criterion    (default: 8 or 8 * # of pseudo particle)
+divide cell until it contains >N particles
+smaller memory requirement for larger N
+.TP
+-w  \fIfloat\fP
+window size for PGPLOT snapshot plot (default: 10)
+.TP
+-c
+flag for collision run
+.TP
+-x
+relative position vector for collision run (no default)
+.TP
+-v
+relative velocity vector for collision run (no default)
+.TP
+-s \fIfloat\fP
+scale factor for position scaling (default: 1)
+.TP
+-S \fIfloat\fP
+scale factor for velocity scaling (default: 1)
+.TP
+-p \fIint\fP
+order of multipole expansion (default: 1)
+          (ONLY used with P2M2 implementation)
+.TP
+-r \fIfloat\fP
+sphere radius on which pseudo particles are distributed (default: 0.2)
+          (ONLY used with P2M2 implementation)
+.TP
+-F
+never use full degree of freedom of pseudo particle even when p < 3
+          (ONLY used with P2M2 implementation)
+.TP
+-X \fIstring\fP
+command to be executed each time snapshot are output (default: no output) 
+          snapshot file name and its ID (counting from 0) is passed to the command.
+.TP
+-h        print this help
+
+
+.SH "CAVEATS"
+Files are silently appended to.
+.PP
+(quoting Makino in V1)
+Currently, nbody is rather slow. The force calculation routine runs at
+the speed essentially the same as that of v_code, but tree construction
+phase take roughly twice longer time. This is because the \fIqsort(3)\fP
+routine used in BHtree.C is less than optimal. A handcoded version
+would significantly improve the performance.
+.PP
+In V1.1 the qsort(3) routine was replaced by a more usual quicksort (taken from
+Handbook of Algorithms and Data Structures, http://www.thunderstone.com/jump/demos/algorithms/
+The performance problem disappered.
+
+.SH "EXAMPLES"
+An example of integrating a 1024 body Plummer sphere to time 10, and plotting
+the Lagrangian radii 0.1..0.9 as function of time:
+.EX
+
+  mkplummer - 1024 | stoa - p1024
+  rm -f p1024.out p1024.snap
+  bhtree -i p1024 -o p1024.out -D 0.1 -T 10 > p1024.log 2>&1 
+  atos p1024.out p1024.snap mass,phase,phi 
+  snapmradii p1024.snap  | tabplot - 1 2:10 line=1,1
+ 
+.EE
+
+.SH "BENCHMARK"
+
+To compare the original hackcode1 with bhtree:
+
+.EX
+  rm -f p1024 p1024.a
+  mkplummer p1024 1024 
+  stoa p1024  p1024.a
+  /usr/bin/time hackcode1 p1024 .  tstop=10 tol=0.75 freq=64     eps=0.025  > p1024_h.log 2>&1
+  /usr/bin/time bhtree -i p1024.a  -T 10    -t 0.75  -d 0.015625 -e 0.025   > p1024_b.log 2>&1
+.EE
+
+.SH "SEE ALSO"
+hackcode1(1NEMO), amuse::bhtree, atos(1NEMO), stoa(1NEMO)
+
+.SH "FILES"
+.nf
+$NEMO/usr/kawai/nbody
+$AMUSE_DIR/src/amuse/community/bhtree/src
+.fi
+Note if amuse is installed with \fBmknemo(1NEMO)\fP, AMUSE_DIR=$NEMO/local/amuse
+
+
+.SH "AUTHOR"
+Jun Makino
+
+.SH "UPDATE HISTORY"
+.nf
+.ta +1.25i +4.5i
+21-dec-1998	V1 written	Jun Makino
+22-may-2025	man page written while renaming nbody to bhtree (MODEST25-SPZ)	PJT
+.fi
