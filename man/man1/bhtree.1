@@ -1,7 +1,7 @@
 .TH BHTREE 1NEMO "22 May 2025"
 
 .SH "NAME"
-bhtree \- Barnes-Hut treecode with optional Grape interfaces
+bhtree \- Barnes-Hut treecode with an optional GRAPE-4 interface
 
 .SH "SYNOPSIS"
 \fBbhtree\fP [-options]
@@ -9,7 +9,7 @@ bhtree \- Barnes-Hut treecode with optional Grape interfaces
 .SH "DESCRIPTION"
 
 \fBbhtree\fP (formerly called \fBnbody\fP) is a C++
-version of treecode and its GRAPE-4 variant. 
+version of the Barnes-Hut treecode and its optional GRAPE-4 variant. 
 This program was intended as the replacement for the old FORTRAN version of treecode
 developed by the author (v_code). The algorithm used in nbody and v_code
 are essentially the same. The main goal in the design of nbody is to minimize
@@ -22,8 +22,8 @@ instead uses a private version of the \fIpgetopt\fP. snapshot files
 are in the "205" format.
 .TP 10
 -a
-output accelaration to snapshot output file as well. By default only
-mass, position, velocity and potentials are output.
+flag to control if output accelaration to snapshot output file as well.
+By default only mass, position, velocity and potentials are output.
 .TP
 -i \fIfile\fP
 name of snapshot input file, in \fIstoa(1NEMO)\fP format  (no default)
@@ -50,8 +50,10 @@ softening parameter (default: 0.025)
 opening angle theta               (default: 0.75)
 .TP
 -n \fIint\fP
-ncrit for Barnes' vectorization    (default: 1024)
-(ONLY used with GRAPE/HARP implementation)
+ncrit for Barnes' vectorization  =
+maximum number of particles sharing an interaction list
+(default: 1024)
+(ONLY used with GRAPE/HARP implementation) - AMUSE::ncrit_for_tree
 .TP
 -N \fIint\fP
 cell division criterion    (default: 8 or 8 * # of pseudo particle)
@@ -64,10 +66,10 @@ window size for PGPLOT snapshot plot (default: 10)
 -c
 flag for collision run
 .TP
--x
+-x \fIxyz\fP
 relative position vector for collision run (no default)
 .TP
--v
+-v \fIuvw\fP
 relative velocity vector for collision run (no default)
 .TP
 -s \fIfloat\fP
@@ -97,17 +99,6 @@ command to be executed each time snapshot are output (default: no output)
 
 .SH "CAVEATS"
 Files are silently appended to.
-.PP
-(quoting Makino in V1)
-Currently, nbody is rather slow. The force calculation routine runs at
-the speed essentially the same as that of v_code, but tree construction
-phase take roughly twice longer time. This is because the \fIqsort(3)\fP
-routine used in BHtree.C is less than optimal. A handcoded version
-would significantly improve the performance.
-.PP
-In V1.1 the qsort(3) routine was replaced by a more usual quicksort (taken from
-Handbook of Algorithms and Data Structures, http://www.thunderstone.com/jump/demos/algorithms/
-The performance problem disappered.
 
 .SH "EXAMPLES"
 An example of integrating a 1024 body Plummer sphere to time 10, and plotting
@@ -124,18 +115,31 @@ the Lagrangian radii 0.1..0.9 as function of time:
 
 .SH "BENCHMARK"
 
-To compare the original hackcode1 with bhtree:
+To compare the original hackcode1 with bhtree, the following example is
+part of the Benchfile:
 
 .EX
   rm -f p1024 p1024.a
-  mkplummer p1024 1024 
+  mkplummer p1024 1024 seed=123
   stoa p1024  p1024.a
-  /usr/bin/time hackcode1 p1024 .  tstop=10 tol=0.75 freq=64     eps=0.025  > p1024_h.log 2>&1
-  /usr/bin/time bhtree -i p1024.a  -T 10    -t 0.75  -d 0.015625 -e 0.025   > p1024_b.log 2>&1
+  time=/usr/bin/time
+  $time hackcode1 p1024 .  tstop=20 tol=0.75 freq=64     eps=0.025  > p1024_h.log 2>&1
+  $time bhtree -i p1024.a  -T 20    -t 0.75  -d 0.015625 -e 0.025   > p1024_b.log 2>&1
 .EE
 
+.SH "AMUSE"
+Since \fBbhcode\fP is also absorbed in \fIamuse\fP, we can compare a typical  integration
+in both NEMO and AMUSE.
+
 .SH "SEE ALSO"
-hackcode1(1NEMO), amuse::bhtree, atos(1NEMO), stoa(1NEMO)
+hackcode1(1NEMO), atos(1NEMO), stoa(1NEMO)
+.nf
+Barnes, J. & Hut, P. 1986. Nature 324, 446.
+http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
+.fi
+
+.SH "ADS"
+@ads 1986Natur.324..446B
 
 .SH "FILES"
 .nf
