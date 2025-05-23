@@ -1,0 +1,36 @@
+# -*- makefile -*-
+
+DIR       = usr/kawai/nbody
+BENCH     = bench10
+BENCHDATA = p1k p1k.a
+LOG       = /tmp/nemobench.log
+BIN       = mkplummer bhtree hackcode1 stoa
+NEED      = $(BIN)
+TIME      = /usr/bin/time
+FTEN      = 1
+NBODY     = 1024
+SEED      = 123
+
+help:
+	@echo $(DIR)
+	@echo NBODY=$(NBODY)
+
+need:
+	@echo $(NEED)
+clean:
+	@echo Cleaning $(DIR)
+	rm -rf $(BENCHDATA)
+
+all:    $(BENCHDATA) $(BENCH) 
+
+p1k:
+	@rm -f p1k p1k.a
+	mkplummer p1k $(NBODY) seed=$(SEED)
+	stoa p1k p1k.a
+
+bench:	bench10
+
+bench10: p1k
+	nemobench bhtree    bhtree -i p1k.a -T 10 -t 0.75 -d 0.015625 -e 0.025 
+	nemobench hackcode1 hackcode1 p1k . tstop=10 tol=0.75 freq=64 eps=0.025
+
