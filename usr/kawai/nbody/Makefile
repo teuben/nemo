@@ -99,6 +99,9 @@ library_g5.o:	library.C nbody_particle.h
 library_g4.o:	library.C nbody_particle.h
 	$(CXX) -DHARP3 $(CXXFLAGS) -o library_g4.o -c library.C
 
+bhtree: nbody
+	cp nbody $(NEMOBIN)/bhtree
+
 nbody.o : nbody.C  nbody_particle.h design.c
 	$(CXX)  -c    $(CXXFLAGS)  nbody.C 
 nbody : nbody.C  nbody_particle.h $(LIBOBJS) design.c
