@@ -1,0 +1,4 @@
+#! /bin/csh -f
+#
+#  make
+mkspiral sp1 rmin=0.02 rmax=2 a=30 k=0.5 w=100 ndisk=10000

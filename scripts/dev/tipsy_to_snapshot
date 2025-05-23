@@ -1,0 +1,31 @@
+#! /usr/bin/bash
+#
+
+#    bonsai's v2
+t2s=tipsysnap
+#    bonsai's v6 dialect
+t2s=tipsysnap_acc
+
+if [ "$#" == "0" ]; then
+    echo "Usage:  $0 out.snap tipsy1 tipsy2 ...."
+    echo "This version uses $t2s"
+    exit 0
+fi
+
+out=$1
+if [ -e "$out" ]; then
+    echo "Cannot overwrite $out"
+    exit 1
+fi
+
+shift
+
+for f in $*; do
+    # tipsysnap_acc $f - | csf - - item=SnapShot >> tmp.snap
+    if [ "$out" == "-" ]; then
+	$t2s $f -	
+    else
+	$t2s $f -  >> $out
+    fi
+done
+

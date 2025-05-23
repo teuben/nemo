@@ -1,0 +1,9 @@
+#
+#  This file needs to be sourced if you want to make
+#	the miriad shell unstand NEMO commands as opposed
+#	to MIRIAD commands
+#
+setenv MIRBIN $NEMOBIN
+setenv MIRPDOC $NEMO/man/doc
+#
+echo "The command 'miriad' will from now on use NEMO defs"

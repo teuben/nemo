@@ -1,0 +1,31 @@
+#! /bin/csh -f
+#
+#	plot the bound and unbound particles of a system
+#	THIS IS A TEMP KLUDGE AS JOSH WANTS TO MODIFY MEANING OF
+#	YAPP_PS_NEW ( I hacked hish SNAPPLOT)
+#
+if ($#argv == 0) then
+   echo "Usage: $0 <file> [snapplot_ps parameters except psize]"
+   echo "Plots bound as filled circles, unbound as open"
+   echo "Snapshot must have potentials in them"
+   exit 0
+endif
+
+set psize=0.05
+
+set file=$1
+shift
+if (! -e $file) then
+   echo File $file does not exist
+   exit 1
+endif
+
+set tmp=/tmp/do-$$
+unbind $file $tmp-u bind=f
+unbind $file $tmp-b bind=t
+
+snapplot_ps $tmp-u $* psize=$psize fill_circle=f ; mv yapp.ps $tmp.ups
+snapplot_ps $tmp-b $* psize=$psize fill_circle=t ; mv yapp.ps $tmp.bps
+catps $tmp.ups $tmp.bps > yapp.ps
+rm -f $tmp*
+echo "yapp.ps created"

@@ -1,0 +1,79 @@
+#! /bin/csh -f
+#
+# make an mpeg movie (see also: ftp://mm-ftp.cs.berkeley.edu/pub/mpeg)
+#     --> this can't be right, given the src rpm's i found via rpmfind.net
+#         but those i got to work, not the ones from this ftp site.
+# more recently, this URL worked better:
+#   http://bmrc.berkeley.edu/frame/research/mpeg/index.html
+# See also a pleyer plugin on
+#   http://www.mplayerhq.hu/DOCS/HTML/en/menc-feat-mpeg.html
+# see also ppm2fli (http://vento.pi.tu-berlin.de/ppm2fli/main.html)
+# or http://www.lcdf.org/~eddietwo/gifsicle/
+
+# pixel size of the animation
+set size=256
+
+# physical range of snapshot (will plot -range:range)
+set range=2
+
+# files to process, one is ok, more is possible (all times will be used)
+# e.g. in=(p1.dat p2.dat)
+set in=(p1.dat)
+
+# set output filename
+set out=test1.mpg
+
+# poor man's command line parser
+
+foreach arg ($*)
+    set $arg
+end
+# 
+
+# set these to control the size of a PPM window from PGPLOT 
+setenv PGPLOT_PPM_WIDTH  $size
+setenv PGPLOT_PPM_HEIGHT $size
+set r=-${range}:${range}
+
+set n=0
+
+foreach f ($in)
+ foreach t (`snaptrim $f . diagcyc=0 |& awk '{print $3}'`)
+   set nnn=`nemoinp $n format=%03.f`
+   set ppm=try$nnn.ppm
+
+   echo ${n}: File: $f frame: $nnn time: $t
+   if (! -e $ppm) then
+     snaptrim $f - times=$t |\
+        snapplot in=- xrange=$r yrange=$r yapp=$ppm/ppm 
+   else
+     echo SKIPPING
+   endif
+   @ n++
+ end
+end
+
+#  now make the mpg file
+
+cat <<EOF > parfile
+PATTERN IBBPBBPBBPBBPB
+OUTPUT  $out
+INPUT_DIR .
+INPUT
+try*.ppm [001-${nnn}]
+END_INPUT
+BASE_FILE_FORMAT PNM
+INPUT_CONVERT *
+GOP_SIZE 1
+SLICES_PER_FRAME 1
+PIXEL HALF
+RANGE 8
+PSEARCH_ALG LOGARITHMIC
+BSEARCH_ALG SIMPLE
+IQSCALE 6
+PQSCALE 6
+BQSCALE 6
+REFERENCE_FRAME ORIGINAL
+EOF
+
+mpeg_encode parfile

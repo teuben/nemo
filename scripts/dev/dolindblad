@@ -1,0 +1,40 @@
+#! /bin/csh -f
+# create a Lindblad diagram (R,Omega,Omega-Kappa/2) table
+# for a potential along one of its principle axes
+#
+if ($#argv == 0) then
+  echo "Usage: $0 <potname> <potpars> <axisname> <radii>"
+  echo "Outputs table of Lindblad diagram"
+  exit 0
+endif
+
+set potname=$1
+set potpars=$2
+set axis=$3
+set radii=$4
+set tmp=tmp$$
+
+switch ($axis)
+ case 'x':
+	set c=1
+        set f=4
+        set d=8
+	breaksw
+ case 'y':
+	set c=2
+        set f=5
+        set d=9
+	breaksw
+ default:
+	echo "Illegal axisname, must be x or y"
+        exit 1
+endsw
+
+potlist potname=$potname potpars=$potpars $axis=$radii > $tmp.1
+tabmath in=$tmp.1 out=$tmp.2 delcol=1:13 \
+    newcol=%$c,-%$f/%$c,%8+%9-2'*'%$f/%$c
+tabmath in=$tmp.2 out=$tmp.3 delcol=2,3 \
+    newcol='sqrt(%2),sqrt(%3)'
+tabmath in=$tmp.3 out=- \
+    newcol='%2+0.5*%3,%2-0.5*%3'
+rm -f $tmp.*

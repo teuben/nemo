@@ -1,0 +1,157 @@
+#! /bin/csh -f
+#
+#  populate an exponential disk with a set of clusters (as fractionally virialized
+#  plummer spheres) for a range of shapes and masses, but following some 
+#  size-linewidth relation
+#
+#  The total mass of the galaxy is always 1.
+#
+#  
+#  20-jul-2012  (43rd moon landing anniversary!)     Peter Teuben
+#  10-feb-2013  handle single particle clusters      PJT
+#  13-feb-2013  normalization mass=1 properly done   PJT
+
+#  root name of files, and mode of running
+set run     = run000
+#  1=start by creating snapshot
+#  2=start with the gridding
+set mode    = 1
+
+#  number of clusters in the disk
+set nc      = 100
+#  number of points per cluster
+set nppc    = 100
+#  mass fraction of plummer to use for each cluster (to keep them not too extended)
+set mfrac   = 0.5
+#  disk exponential scale length (alpha = 1/scale_length)
+set alpha   = 4.0
+#  cutoff radius of the disk
+set rcut    = 1.5
+#  relative heat of the clusters (circular rotation seems more appropriate)
+set Qtoomre = 0.0
+#  thickness of disk
+set z0      = 0.01
+#  inclination of disk (line of nodes will be along X axis)
+set inc     = 60
+#  size range of clusters, and their virial ratio
+set r0      = 0.01
+set r1      = 0.1
+set virial  = 0.25
+# 
+set debug   = 0 
+#  gridding (the position and velocity scales are hardcoded -2:2)
+#  center is a new keyword, to enforce center reference pixel
+set nxy     = 512
+set nz      = 256
+set beam    = 0.01
+set center  = 1
+#  random seed
+set seed    = 123
+
+
+# ===========================================================================
+
+foreach arg ($*)
+  set $arg
+end
+
+# 0) start with a clean slate in case previous run
+#    and set some derived variables
+
+if ($mode == 1) then
+   rm -rf $run.*
+endif
+
+if ($mode == 2) goto gridding
+
+
+# 1) create an exponential disk where the clusters are going to be
+#    also save a (x,y,-vz) table that contain the expected answer 
+#    after clumpfind has run
+mkexpdisk $run.1 $nc alpha=$alpha rcut=$rcut \
+    Qtoomre=$Qtoomre z0=$z0 zerocm=f seed=$seed
+snapprint $run.1 > $run.2a
+snaprotate $run.1 - $inc x | snapprint - x,y,-vz > $run.2b
+
+if ($nppc > 1) then
+  # 2) create a small plummer sphere for each point in the disk, and
+  #    accumulate that in a final big snapshot file ($run.4)
+  echo "Creating nc=$nc clusters of nppc=$nppc particles each ($run.4)"
+  echo "# i     pos(3)  vel(3)    radius" > $run.2c
+  foreach i (`seq $nc`)
+    echo -n .
+    set pv=(`getline $run.2a $i`)
+    #  @todo: set random size and mass, then virialize, always random
+    set r=`nemoinp "ranu($r0,$r1)" seed=-1`
+
+    #  @todo mass always same ??
+    set ms=`nemoinp 1/$nc`
+    set rs=`nemoinp $r`
+    set vs=`nemoinp "sqrt(1/$nc/$r)"`
+
+    echo $i $pv $r >> $run.2c
+
+    if ($i == 1) then
+      set items=SnapShot,History
+    else
+      set items=SnapShot
+    endif
+
+    mkplummer - $nppc mfrac=$mfrac seed=-1 |\
+      snapscale - - mscale=$ms rscale=$rs |\
+      hackforce - - fcells=4 debug=-1 |\
+      snapvirial - - mscale=f rscale=f vscale=t virial=$virial debug=-1 |\
+      snapshift - - $pv[1],$pv[2],$pv[3]  $pv[4],$pv[5],$pv[6] |\
+      csf - - $items debug=-1 >> $run.4
+  end
+  echo ""
+else
+  snapmass $run.1 $run.4 mass=1 norm=1.0
+endif
+
+# 3) merge the snapshot and rotate it to be viewed along a given inclination
+#
+echo "Merge and Rotate ($run.5)"
+snapmerge $run.4 - |\
+  snaprotate - $run.5 $inc x
+
+#  entry point when mode=2 (reuses the big snapshot, but gets a different grid)
+gridding:
+
+# 4) grid and view the snapshot in a variety of ways
+#
+echo "Gridding ($run.7)  nxy=$nxy  nz=$nz beam=$beam"
+rm -f $run.6* $run.7*
+snapgrid $run.5 $run.6a nx=$nxy ny=$nxy moment=0 svar=$beam
+snapgrid $run.5 $run.6b nx=$nxy ny=$nxy moment=1 svar=$beam
+snapgrid $run.5 $run.7  nx=$nxy ny=$nxy nz=$nz zrange=-2:2
+echo "Smoothing ($run.7b)"
+#ccdsmooth $run.7 $run.7a dir=xyz nsmooth=1
+ccdsmooth $run.7 $run.7b dir=xyz nsmooth=4
+echo "Slicing ($run.7c)"
+ccdslice $run.7b $run.7c y
+echo "Moments ($run.8x)"
+rm -rf $run.8*
+ccdmom $run.7b $run.8a axis=3 mom=0
+ccdmom $run.7b $run.8b axis=3 mom=1
+ccdmom $run.7b $run.8c axis=3 mom=2
+ccdmom $run.7b $run.8d axis=3 mom=3
+ccdrt  $run.7b $run.8e peak=f
+ccdrt  $run.7b $run.8f peak=t
+
+if ($?MIR) then
+  set wcs=()
+  if ($center) then
+    set wcs=(crpix=$nxy/2+0.5,$nxy/2+0.5,$nz/2+0.5 crval=0,0,0)
+  endif
+  ccdsky $run.7b - 10,Mpc 10,kpc 100,km/s |\
+     ccdfits - $run.7b.fits radecvel=t $wcs
+  fits in=$run.7b.fits out=$run.7b.mir op=xyin
+  # mask out 0 values, otherwise clfind often has too much data to handle
+  maths exp="<$run.7b.mir>" mask="<$run.7b.mir>".gt.0 out=$run.7bm.mir
+  # rm -rf $run.7b.fits $run.7b.mir
+  #
+  moment in=$run.7bm.mir out=$run.7bm.mom0 mom=0
+  imsad in=$run.7bm.mom0 clip=0.1 out=$run.7bm.imsad out=$run.7bm.imsad.out > $run.7bm.imsad.log 
+endif
+

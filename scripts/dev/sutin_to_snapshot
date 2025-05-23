@@ -1,0 +1,39 @@
+#! /bin/csh -f
+#  convert (m,x,y,z,u,v,w) to 205 file format
+#  <written before tabtos existed, now one would use tabtos>
+#
+
+set in=$1
+set out=junk
+set sout=$2
+
+if (! -e $in) then
+   echo In-File $in does not exist
+   exit
+endif
+
+if (-e $sout) then
+    echo Out-File $sout does already exist
+    exit
+endif
+touch $out ; rm -f $out
+
+set wcu=`wc -l $in`
+set nbody=$wcu[1]
+echo nbody=$nbody
+
+#	split file using awk (tabmath also works)
+
+echo $nbody >$out
+echo 3     >>$out
+echo 0.0   >>$out
+awk '{print $1}' INIT          >>$out
+awk '{print $2,$3,$4}' INIT    >>$out
+awk '{print $5,$6,$7}' INIT    >>$out
+
+#	convert to snapshot
+
+atos $out $sout
+
+$	clean up mess
+rm $out

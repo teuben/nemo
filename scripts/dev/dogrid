@@ -1,0 +1,40 @@
+#! /bin/csh -f
+#	transform table into image - DEMO version : no bells and whistles
+#	This scripts uses awk to extract information from the ascii
+#	tables to rearrange it into an 'atos(1NEMO)' understandable
+#	table. This is for large number of points (>10000) very slow,
+#	since three passes through the data are needed.
+if ($#argv != 11) then
+  echo "Usage:  $0 in out xcol ycol mcol xrange yrange nx ny sx sy"
+  echo " grids a table"
+  exit 0
+endif
+set in=$1               # infile (table)
+set out=$2              # outfile (image)
+set xcol=$3             # columns from table to use
+set ycol=$4
+set mcol=$5
+set xrange=$5           # gridding area
+set yrange=$6
+set nx=$7               # number of pixels to use
+set ny=$8
+set sx=$9               # some smoothing 
+set sy=$10
+
+set tmp=tmp$$
+#                       convert table to ascii "205" snapshot
+awk  "END {print NR}"                $in     > $tmp.1
+echo "3"                                    >> $tmp.1
+echo "0.0"                                  >> $tmp.1
+awk '{print $'$mcol'}'               $in    >> $tmp.1
+awk '{print $'$xcol',$'$ycol',0.0}'  $in    >> $tmp.1
+awk '{print 0.0,0.0,0.0}'            $in    >> $tmp.1
+#                       convert to snapshot
+atos $tmp.1 $tmp.2
+#                       convert to image
+snapgrid $tmp.2 $tmp.3 xrange=$xrange yrange=$yrange nx=$nx ny=$ny zvar=vz
+#                       smooth image a bit
+ccdsmooth $tmp.3 $tmp.4 gauss=$sx dir=x
+ccdsmooth $tmp.4 $out  gauss=$sy dir=y
+#			clean up the mess
+#rm -f $tmp.*

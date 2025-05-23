@@ -1,0 +1,45 @@
+#! /bin/csh -f
+#
+#
+# example use:
+#     mk_3body I.A.1 | tail -4 | tabtos - orb1.in nbody,time m,pos,vel nbody=3
+#     directcode orb1.in orb1.out freq=10000 eps=0 tstop=10 freqout=100
+#     (by lack of a better code)
+# 
+set tab=$NEMODAT/3body.tab
+
+if ($#argv == 0) then
+  echo Valid orbit names are:
+  grep -v ^\# $tab | awk '{print $4}'
+  echo And a 3 body Mass Pos Vel table will be produced
+  echo ""
+  echo "Example use:"
+  echo '  mk_3body I.A.1 | tail -4 | tabtos - orb1.in nbody,time m,pos,vel nbody=3'
+  echo '  directcode orb1.in orb1.out freq=10000 eps=0 tstop=10 freqout=100'
+  exit 0
+endif
+
+
+set name=$1
+
+set orb=(`grep -w $name $tab`)
+
+set x1=-1.0
+set x2=1.0
+set x3=0.0
+set vx1=$orb[1]
+set vx2=$vx1
+set vx3=`nemoinp "-2*$vx1"`
+set y1=0
+set y2=0
+set y3=0
+set vy1=$orb[2]
+set vy2=$vy1
+set vy3=`nemoinp "-2*$vy1"`
+
+
+echo "# $orb"
+echo "3  0.0"
+echo "1.0    $x1 $y1  0.0    $vx1 $vy1  0.0"
+echo "1.0    $x2 $y2  0.0    $vx2 $vy2  0.0"
+echo "1.0    $x3 $y3  0.0    $vx3 $vy3  0.0"

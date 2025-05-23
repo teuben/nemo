@@ -1,0 +1,59 @@
+#! /bin/bash
+#
+#    A tale of two Plummers:   collision or collapse?
+#
+#    See e.g.:
+#              van Albaba       https://ui.adsabs.harvard.edu/abs/1982MNRAS.201..939V
+#              Villumsen        https://ui.adsabs.harvard.edu/abs/1982MNRAS.199..493V
+#              McGlynn          https://ui.adsabs.harvard.edu/abs/1984ApJ...281...13M
+#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1985ApJ...295..374A
+#              Aguilar & White  https://ui.adsabs.harvard.edu/abs/1986ApJ...307...97A
+#              Makino & Hut     https://ui.adsabs.harvard.edu/abs/1997ApJ...481...83M
+#
+#    Example benchmark, with all default parameters:
+#      i5-1135G7         545.63user 0.19system 9:05.86elapsed 99%CPU
+#
+# version: 25-apr-
+
+set -x
+
+#               Parameters for the script that can be overriden via the commandline
+run=run0        # basename of the files belonging to this simulation
+nbody=10000     # number of bodies in one plummer
+tstop=100       # stop time of the integration
+step=1          # dump time
+seed=0          # random seed
+
+dr=0            # separation along X
+dy=0            # offset along Y (the impact parameter)
+dv=0            # separation along X in velocity (approaching)
+vs=1            # V scale for input models
+
+
+#               Commandline Parser: simple keyword=value 
+for arg in $*; do
+  export $arg
+done
+
+if [ -d $run ]; then
+    echo Run directory run=$run already exists
+    exit 1
+fi
+mkdir -p $run
+cd $run
+
+
+# seed=0 is allowed as well
+mkplummer - $nbody seed="$seed"   | snapscale - p1 vscale=$vs
+mkplummer - $nbody seed="2*$seed" | snapscale - p2 vscale=$vs
+
+snapstack p1 p1 p3 deltar=$dr,$dy,0 deltav=-$dv,0,0 zerocm=t
+
+gyrfalcON p3 p3.out tstop=$tstop step=$step eps=0.05 kmax=8 give=mxvp > p3.log
+
+
+tabplot p3.log yapp=fig1.ps/vps >> p3.log 2>&1
+tabtrend p3.log 2 | tabhist - yapp=fig2.ps/vps >> p3.log 2>&1
+snapmradii p3.out 0.1:0.9:0.1 | tee p3.mrad | tabplot - 1 2:10 line=1,1 yapp=fig3.ps/vps >> p3.log 2>&1
+
+#snapplot p3.out  xrange=-16:16 yrange=-2:2 xvar=x yvar=vx   color=etot crange=0:1 yapp=fig3.ps/vps 

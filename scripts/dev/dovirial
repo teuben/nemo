@@ -1,0 +1,24 @@
+#! /bin/csh -f
+#	Lists out virial ratio as function of time
+
+set file=$1
+
+if ($#argv == 0) then
+   echo "Usage: $0 snapshot"
+   echo "Prints out a table of virial ratio (2T/|W|) vs. time"
+   echo "of the file 'snapshot' - column 1=time 2=2T/|W|"
+   exit 0
+endif
+
+if (! -e $file) then
+   echo Error in dovirial: file $file does not exist
+   exit 1
+endif
+
+set tmp=/tmp/dovirial-$$
+tsf $file | grep Time | awk '{print $3}'  >$tmp.1
+tsf $file | grep Energy | awk '{print -2*$4/$5}' > $tmp.2
+
+tabmath $tmp.1 - in2=$tmp.2
+rm -f $tmp.1 $tmp.2
+

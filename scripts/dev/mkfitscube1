@@ -1,0 +1,10 @@
+#! /bin/csh  -f
+#
+
+# 	Create a fits cube
+
+set n=32			# size
+set fie=%x+%y+%z		# function
+set fits=cube.fits		# filename
+
+ccdmath out=- fie=$fie size=$n,$n,$n | ccdfits - $fits comment=$0

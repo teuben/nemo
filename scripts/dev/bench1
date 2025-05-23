@@ -1,0 +1,40 @@
+#! /bin/csh -f
+#
+#   benchmark of some snapshot I/O related operations
+#   to show the difference between disk based and pipe based I/O
+#
+
+# set default keywords
+set nbody=16384
+set tmp=tmp
+set pipe=1
+
+# read commandline where defaults can be overriden
+foreach a ($argv)
+  set $a
+end
+
+rm -f $tmp.* >& /dev/null
+
+#time mkplummer out=. nbody=$nbody
+#time mkplummer out=$tmp.1 nbody=$nbody
+
+if ($pipe) then
+ date
+ mkplummer - $nbody zerocm=f |\
+  snapscale - - 0.1 |\
+  snapcenter - - report=f |\
+  snapshift - - 1,1,1 |\
+  snapspin - - 0.1 |\
+  snaprotate - $tmp.1 45 z 
+date
+else
+    date
+    mkplummer $tmp.1 $nbody zerocm=f 
+    snapscale $tmp.1 $tmp.2 0.1 
+    snapcenter $tmp.2 $tmp.3 report=f 
+    snapshift $tmp.3 $tmp.4 1,1,1 
+    snapspin $tmp.4 $tmp.5 0.1 
+    snaprotate $tmp.5 $tmp.6 45 z 
+    date
+endif

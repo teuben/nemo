@@ -1,0 +1,39 @@
+#! /bin/csh -f
+
+#	make smoothed logarithmic fits file for DS
+#
+if ($#argv < 4) then
+   echo "Usage: dof <npixels> <radius> <beam> <file1> <file2> ...."
+   echo "Makes fits versions of <file1> <file2> ... into <file1>.fits  <file2>.fits ..."
+   echo "Snaphot(s) will be gridded using <npixels> from -<radius>:<radius>"
+   echo "Data will also be smoothed using a gaussian beam width FWHM <beam>"
+   echo "Display program ds displays very nice on color SUNS"
+   exit 1
+endif
+
+set n=$1    ; shift
+set r=$1    ; shift
+set beam=$1 ; shift
+
+set range=-$r\:$r
+
+foreach file ($*)
+   if (-e $file.fits) then
+      rm -f $file.fits
+   endif
+   if (! -e $file) then
+     echo $file : file does not exist
+   else
+      touch tmp1 tmp2 tmp3 ; rm tmp1 tmp2 tmp3
+      echo -n $file : gridding...
+      snapgrid $file tmp1 xrange=$range yrange=$range nx=$n ny=$n zvar=vz
+      echo -n smoothing...
+      ccdsmooth tmp1 tmp2 $beam
+      echo -n taking log...
+      ccdmath tmp2 tmp3 "log(%1)"
+      echo -n writing fits file...
+      ccdfits tmp3 $file.fits
+      echo done!
+      rm tmp1 tmp2 tmp3
+   endif
+end

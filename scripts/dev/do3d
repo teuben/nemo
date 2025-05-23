@@ -1,0 +1,23 @@
+#! /bin/csh -f
+#
+#	3d plot of snapshot
+#  Usage:   do3d snap_in [all other snapplot par's,
+#				 except xvar,yvar,xbox,ybox]
+
+set in=$1
+if (! -e $in) then
+  echo "File $in does not exist"
+  echo "Usage: $0 snap_in [snapplot pars, except ?box and ?var]"
+  exit
+endif
+shift
+set tmp=ps-$$
+
+snapplot_ps in=$in xvar=x yvar=y xbox=2:9   ybox=2:9  $*  
+mv yapp.ps $tmp.1
+snapplot_ps in=$in xvar=z yvar=y xbox=11:18 ybox=2:9  $*
+mv yapp.ps $tmp.2
+snapplot_ps in=$in xvar=x yvar=z xbox=2:9   ybox=11:18 $*
+mv yapp.ps $tmp.3
+catps $tmp.1 $tmp.2 $tmp.3 > $tmp.4
+lpr $tmp.4
