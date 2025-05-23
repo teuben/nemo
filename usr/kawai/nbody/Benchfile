@@ -24,13 +24,21 @@ clean:
 all:    $(BENCHDATA) $(BENCH) 
 
 p1k:
-	@rm -f p1k p1k.a
-	mkplummer p1k $(NBODY) seed=$(SEED)
-	stoa p1k p1k.a
+	@rm -f p1k.1 p1k.2
+	mkplummer p1k.1 $(NBODY) seed=$(SEED)
+	stoa p1k.1 p1k.2
 
 bench:	bench10
 
 bench10: p1k
-	nemobench bhtree bhtree -i p1k.a -T 20 -t 0.75 -d 0.015625 -e 0.025 
-	nemobench bhtree hackcode1 p1k . tstop=20 tol=0.75 freq=64 eps=0.025
-
+	@rm -f p1k.??
+	nemobench bhtree hackcode1 p1k.1 p1k.11 tstop=20 tol=0.75 freq=64 eps=0.025 freqout=1 options=mass,phase,phi fcells=2
+	nemobench bhtree bhtree -i p1k.2 -o p1k.21 -T 20 -t 0.75 -d 0.015625 -e 0.025 
+	nemobench bhtree BHTC   -i p1k.2 -o p1k.22 -T 20 -t 0.75 -d 0.015625 -e 0.025 
+	atos p1k.21 p1k.31 mass,phase,phi debug=-1
+	atos p1k.22 p1k.32 mass,phase,phi debug=-1
+	snapcmp p1k.31 p1k.32 debug=-1
+	snapcmp p1k.31 p1k.11 debug=-1 time2=1:20:1
+	@bsf p1k.31  label=bhtree/bhtree
+	@bsf p1k.32  label=bhtree/BHTC
+	@bsf p1k.11  label=bhtree/hackcode1
