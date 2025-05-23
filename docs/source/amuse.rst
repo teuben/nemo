@@ -109,7 +109,7 @@ The AMUSE manual has some
 Installation
 ~~~~~~~~~~~~
 
-AMUSE can usually be installed *easily* as follows:
+AMUSE can usually be installed *easily* as follows (as a user):
 
 .. code-block::
 
@@ -126,9 +126,22 @@ the AMUSE frame work and then the selected module(s):
 .. code-block::
 
    pip install amuse-framework
-   pip install amuse-seba amuse-brutus
+   pip install amuse-bhtree amuse-seba amuse-brutus
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
+
+
+As a developer, it is easier to install the source code via github, and follow the
+following recipe somewhere in your workflow (skipping details where your python/virtual environment
+is)
+
+.. code-block::
+
+   git clone https://github.com/amusecode/amuse
+   cd amuse
+   pip install -e .
+   make bhtree.code
+
 
 
