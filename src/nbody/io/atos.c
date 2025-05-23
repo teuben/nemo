@@ -126,13 +126,14 @@ bool in_header(int *nbptr, int *ngptr, real *tsptr)
     double dval;
 
     linecnt++;
+    dprintf(1,"linecnt: %d\n", linecnt);
     if (fscanf(instr, " %d %d %lf\n", nbptr, &ndim, &dval) != 3)
-	return (FALSE);
+	return FALSE;
     if (ndim != NDIM)
 	error("%s: got ndim = %d, not %d\n", getargv0(), ndim, NDIM);
     *ngptr = 0;
     *tsptr = dval;
-    return (TRUE);
+    return TRUE;
 }
 
 #else
@@ -143,6 +144,7 @@ bool in_header(int *nbptr, int *ngptr, real *tsptr)
     double dval;
 
     linecnt++;
+    dprintf(1,"linecnt: %d mode %d\n", linecnt,mode);    
     if (mode==1) {
         /* old 'standard' format: NBODY, NGAS, NDIM, TIME */
         if (fscanf(instr, " %d %d %d %lf\n", 
