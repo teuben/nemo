@@ -18,9 +18,11 @@
 
 set url=https://github.com/amusecode/amuse
 set dir=amuse
+set src=$NEMO/local
 
-cd $NEMO/local
+cd $src
 if (! -e $dir) then
+  echo "mknemo>> Creating $NEMO/local/$dir"
   git clone $url
   cd $dir
 else
