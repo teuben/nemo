@@ -10,6 +10,7 @@
 //                          Coding for 1.1 started on 1998/12/31
 // Version 1.0 Jun Makino : First publisized version, parameters
 //                          read in from the standard input
+// Version 2.0 Peter Teuben : append to files, instead of overwrite  (may-2025)
 
 #ifndef NOGRAPHICS
 #ifndef FINAL_PLOT
@@ -24,6 +25,7 @@
 
 #include  <cstdlib>
 #include  <math.h>
+#include  <string.h>
 #include  <iostream>
 #include  <fstream>
 
@@ -755,7 +757,8 @@ main(int argc, char ** argv)
     else
 #endif // IONEMO
     {
-	fsnapin.open(finame,ios::in);
+        //fsnapin.open(finame,ios::in);
+        fsnapin.open(finame,ios::app);      
 	pb.atos(fsnapin);
     }
     fsnapin.close();
@@ -906,7 +909,8 @@ main(int argc, char ** argv)
 		else
 #endif // IONEMO
 		{
-		    fs.open(fn, ios::out); 
+		    //fs.open(fn, ios::out);
+                    fs.open(fn, ios::app);
 		    pb.stoa(fs);
 		    fs.close();
 		}
@@ -949,7 +953,8 @@ main(int argc, char ** argv)
 	else
 #endif // IONEMO
 	{
-	    fs.open(fn, ios::out); 
+  	    //fs.open(fn, ios::out);
+            fs.open(fn, ios::app);
 	    pb.stoa(fs);
 	    fs.close();
 	}
@@ -995,7 +1000,8 @@ main(int argc, char ** argv)
 		else
 #endif // IONEMO
 		{
-		    fs.open(fn, ios::out); 
+		    //fs.open(fn, ios::out);
+		    fs.open(fn, ios::app);
 		    pb.stoa(fs);
 		    fs.close();
 		}
