@@ -1,4 +1,4 @@
-.TH SDINFO 1NEMO "18 October 2023"
+.TH SDINFO 1NEMO "30 April 2025"
 
 .SH "NAME"
 sdinfo \- sdfits (BINTABLE) info and benchmark
@@ -22,6 +22,7 @@ in classic "SDFITS".
 .TP 20
 \fBin=\fP
 Input SDFITS fits file(s). Multiple files can be given as well, as a space or comma separated list.
+.br
 No default.
 .TP
 \fBmom=\fP\fI
@@ -32,12 +33,16 @@ You also need this option if a row (see row= below) is output.
 [-1].
 .TP
 \fBcols=\fP
-Column names to track. Currently it just gives the column number and format used.  Default: not used.
+Column names to track. Currently it just gives the column number and format used.
+.br
+Default: not used.
 .TP
 \fBdims=\fP
 A list of dimensions how the data-block should be processed. The procedure of processing is
 set by the \fBproc=\fP keyword.  For example dims=2,11,2,2,4.   The product
-of the dimensions should be NAXIS2 (or less than) from the BINTABLE. Default: not used.
+of the dimensions should be NAXIS2 (or less than) from the BINTABLE.
+.br
+Default: not used.
 .TP
 \fBproc=\fP
 The procedure of processing can be set with this. Currently only one specific example
@@ -56,11 +61,14 @@ columns: channel number (0 being the first) and the spectrum value, native units
 Do only raw I/O?   If selected, no SDFITS processing
 is done, the file is just read in blocks of 2880 bytes.
 See also \fIcsf(1NEMO)\fP with \fBblocksize=\fP.
-[f]
+.br
+[Default: f]
 .TP
 \fBhdu=\fP
 Which HDU to process. Normally hdu=2 should contain the BINTABLE, but it's possible
-there are more. [2]
+there are more.
+.br
+[Default: 2]
 .TP
 \fBblfit=\fP
 Another benchmark option:  setting the blfit (baseline fit order) to a non-negative
@@ -68,7 +76,9 @@ number, a baseline of that order will be fitted to each spectrum. [-1]
 .TP
 \fBbench=\fP
 How many times the procedure should be processed. This will only re-execute the procedure,
-not the alloc/free that are needed for this. Using 0 will bypass the procedure. Default: 1
+not the alloc/free that are needed for this. Using 0 will bypass the procedure.
+.br
+Default: 1
 .TP
 \fBmode=\fP
 Another benchmark option: setting this to a non-negative value will restrict how far the
@@ -77,13 +87,15 @@ SDFITS is processed.
 \fBdatadim=1|2\fP
 Another benchmark option: allowing all data to appear in one long one dimensional
 DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array.
-[1]
+.br
+[Default: 1]
 
 .TP
 \fBtab=\fP
 If given, this will be the (ascii) table to which either 1dim or 2dim data (see datadim=) is written.
 For 1dim the x,y values printed are assumed Hz converted to GHz and raw intensity. For 2dim the row,x,y are printed,
 where row=1 is the first row. Apologies to non-radio users.
+.br
 Default: none.
 
 
