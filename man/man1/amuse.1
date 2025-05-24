@@ -1,4 +1,4 @@
-.TH AMUSE 1NEMO "23 May 2025"
+.TH AMUSE 1NEMO "24 May 2025"
 
 .SH "DESCRIPTION"
 \fBAMUSE\fP is the Astrophysical Multipurpose Software Environment.
@@ -7,6 +7,9 @@ With it, you can simulate many astrophysical systems.
 It is written
 in python, so there is currently no \fBamuse\fP command, instead you
 will want to import this module in python and go from there.
+.PP
+A NEMO script \fBamuse_convert.py\fP can be used to convert between
+snapshot format, as long as the format is supported by AMUSE.
 
 
 .SH "EXAMPLES"
@@ -62,16 +65,48 @@ Within NEMO the command
 
 .EE
 will get you started on the install.  More to come.  Note there is a user release, which
-can be a set of \fIpip install\fP only, as well as a developer install.
+can be a set of \fIpip install\fP only, as well as a developer install. A developer release
+is recommended, the start of which will likely look as follows:
+.EX
+
+    cd $NEMO/local/amuse
+    pip install -e .
+    make bhtree.code
+    
+.EE
+
+.SH "SNAPSHOT"
+As described in the help (-h) of amuse_convert.py, the following formats are supported by AMUSE:
+.nf
+.ta +1.5i
+amuse		HDF5 file
+amuse-txt	text files with AMUSE header format
+csv		comma separated files
+dyn		Starlab binary structured file
+gadget		Gadget binary data file
+hdf5		HDF5 file
+nemo		NEMO binary structured file
+starlab		Starlab binary structured file
+tsf		NEMO binary structured file
+txt		text file containing a table of values separated by a predefined
+vts		text file containing a table of values separated by a predefined character
+vtu		text file containing a table of values separated by a predefined character
+
+.fi
 
 .SH "FILES"
 .nf
 $NEMO/src/scripts/mknemo.d/amuse - example install script (can be run via mknemo)
 $NEMO/local/amuse - root of source code after install
+$NEMO/src/scripts/python/amuse_convert.py - also copied to $NEMOBIN during install
 .fi
 
 .SH "SEE ALSO"
-nemo(1NEMO), zeno(1NEMO)
+nemo(1NEMO), zeno(1NEMO), starlab(1NEMO)
+.PP
+.nf
+https://www.amusecode.org/
+.fi
 
 .SH "HISTORY"
 
