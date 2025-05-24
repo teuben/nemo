@@ -1,7 +1,7 @@
 AMUSE
 -----
 
-AMUSE (Astrophysical Multipurpose Software Environment) originates some ideas
+AMUSE (Astrophysical MUltipurpose Software Environment) originates some ideas
 from its predecessors: ACS, StarLab and NEMO, but uses the python language.
 Another feature of AMUSE is that
 python is also the *glue* shell between legacy codes that can orchestrate
@@ -9,7 +9,7 @@ simulations taking components from different codes, whereas in NEMO legacy codes
 have a NEMO CLI interface, at best.
 
 For seasoned
-`AMUSE <https://amuse.readthedocs.io/en/latest>`_
+`AMUSE <https://amusecode.org>`_
 users, here we highlight some differences between the two, and give some examples
 how to achieve the same task in NEMO and AMUSE.
 
@@ -18,7 +18,8 @@ Differences
 ~~~~~~~~~~~
 
 - **Shell**:
-  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).  A neat way to start
+  an interative amuse is via:  `ipython -profile amuse`
 
 - **Community Code**:
   Both packages maintain a tight connection to legacy software and community codes. You can find
@@ -28,8 +29,9 @@ Differences
   resp., though the latter has some supporting script in **$NEMO/src/scripts/mknemo.d**
 
 - **Units**:
-  NEMO uses dimensionless values, and units are implied. 
-  Most programs actually use virial units (a.k.a N-body units, or Henon units) where G=1, but there are a few programs
+  NEMO uses dimensionless values, and units are implied.
+  Most programs actually use virial units (a.k.a N-body units, or Henon units) where G=1,
+  but there are a few programs
   (e.g. galaxy, nbodyX) that use other units. The
   `units(1NEMO)  <https://teuben.github.io/nemo/man_html/units.1.html>`_
   tries to help you converting.
@@ -144,4 +146,4 @@ is)
    make bhtree.code
 
 
-
+this is the recommended way for NEMO users.
