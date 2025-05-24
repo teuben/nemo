@@ -1,40 +1,48 @@
 .TH AMUSE 1NEMO "24 May 2025"
 
 .SH "DESCRIPTION"
-\fBAMUSE\fP is the Astrophysical Multipurpose Software Environment.
+\fBAMUSE\fP is the Astrophysical MUltipurpose Software Environment.
 With it, you can simulate many astrophysical systems.
 .PP
-It is written
-in python, so there is currently no \fBamuse\fP command, instead you
-will want to import this module in python and go from there.
+The user interacts with AMUSE in python, so there is currently no \fBamuse\fP command, though
+one could imagine
+.EX
+
+       ipython --profile=amuse
+
+.EE
+instead you will want to import this module (see example below) in your python code and go from there.
+Internally many components in AMUSE are legacy codes (C,C++,Fortran) running at fantastic speeds.
 .PP
-A NEMO script \fBamuse_convert.py\fP can be used to convert between
-snapshot format, as long as the format is supported by AMUSE.
+An example is shown below, and within NEMO there the script \fBamuse_convert.py\fP
+can be used to convert between different
+snapshot formats, as long as the format is supported by AMUSE. 
+See also \fIunsio(3NEMO)\fP for another approach to such snapshot conversion.
 
 
 .SH "EXAMPLES"
 
-Here is an example snippet of python code integrating a Plummer sphere
-and writing the resulting snapshot as a table
+Here is an example snippet of AMUSE python code integrating a Plummer sphere
+and writing the resulting snapshot as a table:
 
 .EX
 
- N=128
- TIME=10
- FILENAME='p.txt'
+ NBODY    = 128
+ TIME     = 10
+ FILENAME = 'p.txt'
 
  from amuse.units import nbody_system
  from amuse.ic.plummer import new_plummer_model
  from amuse.community.bhtree import Bhtree
  from amuse.io import write_set_to_file,read_set_from_file
 
- stars = new_plummer_model(N)
+ stars = new_plummer_model(NBODY)
  gravity = Bhtree()
 
- eps = 0.025 | nbody_system.length
- tstop = 10  | nbody_system.time
+ eps   = 0.05 | nbody_system.length
+ tstop = 10   | nbody_system.time
 
- gravity.parameters.opening_angle  = 0.75
+ gravity.parameters.opening_angle   = 0.75
  gravity.parameters.epsilon_squared = eps * eps
  gravity.parameters.dt_dia          = 1.0      | nbody_system.time
  gravity.parameters.timestep        = 0.015625 | nbody_system.time 
@@ -45,7 +53,8 @@ and writing the resulting snapshot as a table
 
 .EE
 
-This table has mass, radius, velocity and position, one per star. Notice velocity comes before position!
+This table has mass, radius, velocity and position, one star per row.
+Notice velocity comes before position!
 Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)\fP file:
 
 .EX
@@ -64,21 +73,22 @@ Within NEMO the command
    mknemo amuse
 
 .EE
-will get you started on the install.  More to come.  Note there is a user release, which
-can be a set of \fIpip install\fP only, as well as a developer install. A developer release
-is recommended, the start of which will likely look as follows:
+will get you started on the install.  Note there is a user release that does not need NEMO, which
+can be a set of \fIpip install\fP. A developer release
+is recommended with NEMO, the start of which will likely look as follows:
 .EX
 
-    cd $NEMO/local/amuse
-    pip install -e .
-    make bhtree.code
+   cd $NEMO/local/amuse
+   pip install -e .
+   make bhtree.code
     
 .EE
 
 .SH "SNAPSHOT"
-As described in the help (-h) of amuse_convert.py, the following formats are supported by AMUSE:
+As described in the help (-h) of \fBamuse_convert.py\fP, the following formats are supported by AMUSE:
 .nf
 .ta +1.5i
+
 amuse		HDF5 file
 amuse-txt	text files with AMUSE header format
 csv		comma separated files
@@ -111,6 +121,6 @@ https://www.amusecode.org/
 .SH "HISTORY"
 
 .nf
-
-may-2025 - man page written
+.ta +1.25i +4.5i
+25-may-2025	man page and amuse_convert.py written (MODEST25-SPZ)	PJT
 .fi
