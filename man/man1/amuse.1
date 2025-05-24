@@ -2,7 +2,9 @@
 
 .SH "DESCRIPTION"
 \fBAMUSE\fP is the Astrophysical Multipurpose Software Environment.
-With it, you can simulate many astrophysical systems. It is written
+With it, you can simulate many astrophysical systems.
+.PP
+It is written
 in python, so there is currently no \fBamuse\fP command, instead you
 will want to import this module in python and go from there.
 
@@ -40,9 +42,8 @@ and writing the resulting snapshot as a table
 
 .EE
 
-This table has mass, radius, velocity and position, one per star. Thus the
-following NEMO command will convert it to the standard
-\fIsnapshot(5NEMO)\fP file:
+This table has mass, radius, velocity and position, one per star. Notice velocity comes before position!
+Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)\fP file:
 
 .EX
 
