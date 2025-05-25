@@ -65,6 +65,17 @@ Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)
 
 .EE
 
+.SH "BUGS"
+
+The follow round trip exercise on the \fBtxt\fP format causes an error:
+.EX
+
+amuse_convert.py -o junk1 -O txt -n 100
+amuse_convert.py -i junk1 -I txt -o junk2 -O csv
+amuse.io.base.IoException: IO exception: Number of values on line
+  '0.01 0.0 -0.319149817818 0.911387278048 0.00131274766207 -1.22528821614 -0.310636170602 0.0257190619401' is 8, expected 0
+
+.EE
 
 .SH "INSTALL"
 
