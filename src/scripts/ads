@@ -1,0 +1,11 @@
+#! /usr/bin/env bash
+#
+#
+
+ads=https://ui.adsabs.harvard.edu/abs/
+
+for arg in $*; do
+  echo ${ads}/$arg
+done
+
+
