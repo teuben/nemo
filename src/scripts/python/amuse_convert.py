@@ -92,8 +92,9 @@ if ifile is None and ofile is not None:
     print(f"Wrote Plummer model w/ nbody={nbody} to {ofile} in {ofmt} format")
 elif ifile is not None:
     # read old
-    print(f"Reading snapshot from {ifile} in {ifmt} format")
     stars = read_set_from_file(ifile, format=ifmt)
+    nbody = len(stars)
+    print(f"Reading snapshot from {ifile} in {ifmt} format, found {nbody} stars")
     if ofile is not None:
         # re-write old
         write_set_to_file(stars, ofile, format=ofmt, overwrite=wmode)
@@ -102,4 +103,5 @@ else:
     # no input or output, just make a model in memory
     np.random.seed(seed)
     stars = new_plummer_model(nbody)
-    print(f"Created Plummer model w/ nbody={nbody} in memory. No I/O")
+    print(f"Created Plummer model w/ nbody={nbody} in memory, no I/O.")
+    print("Use -h or --help to get help on various options.")
