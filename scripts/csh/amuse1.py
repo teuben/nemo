@@ -1,18 +1,26 @@
 #! /usr/bin/env python
 #
+#   Example of integrating a Plummer sphere with AMUSE
+#
 # See also $AMUSE_DIR/doc/interactive_tutorial/06-Using_a_community_code.ipynb
+#
 
-N=128
-TIME=10
-FILENAME='p.txt'
-FMT='txt'
+NBODY = 128
+SEED  = 123
+TIME  = 10
+BASE  = 'plummer'
+FMT   = 'txt'
 
+filename = f"{BASE}.{FMT}"
+
+import numpy as np
 from amuse.units import nbody_system
 from amuse.ic.plummer import new_plummer_model
 from amuse.community.bhtree import Bhtree
-from amuse.io import write_set_to_file,read_set_from_file
+from amuse.io import write_set_to_file
 
-stars = new_plummer_model(N)
+np.random.seed(SEED)
+stars = new_plummer_model(NBODY)
 gravity = Bhtree()
 
 eps = 0.025 | nbody_system.length
@@ -26,5 +34,5 @@ gravity.parameters.timestep        = 0.015625 | nbody_system.time       # 1/64
 
 stars_in_gravity = gravity.particles.add_particles(stars)
 gravity.evolve_model(tstop)
-write_set_to_file(stars_in_gravity, FILENAME, format=FMT)
-print(f"Wrote {FILENAME} in {FMT} format")
+write_set_to_file(stars_in_gravity, filename, format=FMT)
+print(f"Wrote {filename} in {FMT} format, nbody={NBODY}, seed={SEED}")
