@@ -4,6 +4,12 @@
 
 ads=https://ui.adsabs.harvard.edu/abs/
 
+if [ -z "$1" ]; then
+    echo "Usage: ads bibcode1 bibcode2 ..."
+    echo "Return the full urls of bibcodes using $ads"
+    exit 0
+fi
+
 for arg in $*; do
   echo ${ads}/$arg
 done
