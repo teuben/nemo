@@ -70,13 +70,15 @@ Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)
 The follow round trip exercise on the \fBtxt\fP format causes an error:
 .EX
 
-amuse_convert.py -o junk1 -O txt -n 100
-amuse_convert.py -i junk1 -I txt -o junk2 -O csv
+fmt=txt
+amuse_convert.py -o junk1 -O $fmt -n 100
+amuse_convert.py -i junk1 -I $fmt -o junk2 -O $fmt
 amuse.io.base.IoException: IO exception: Number of values on line
   '0.01 0.0 -0.319149817818 0.911387278048 0.00131274766207 -1.22528821614 -0.310636170602 0.0257190619401' is 8, expected 0
 
 .EE
 
+formats like csv, amuse-txt, tsf, dyn all seem to work.
 .SH "INSTALL"
 
 Within NEMO the command
@@ -95,6 +97,8 @@ is recommended with NEMO, the start of which will likely look as follows:
    make bhtree.code
     
 .EE
+The AMUSE bhtree code should be the same as the original program \fIbhtree(1NEMO)\fP in NEMO, allowing
+for a closer comparison.
 
 .SH "SNAPSHOT"
 As described in the help (-h) of \fBamuse_convert.py\fP, the following formats are supported by AMUSE:
@@ -124,7 +128,7 @@ $NEMO/src/scripts/python/amuse_convert.py - also copied to $NEMOBIN during insta
 .fi
 
 .SH "SEE ALSO"
-nemo(1NEMO), zeno(1NEMO), starlab(1NEMO)
+nemo(1NEMO), zeno(1NEMO), starlab(1NEMO), bhtree(1NEMO)
 .PP
 .nf
 https://www.amusecode.org/
