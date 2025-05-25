@@ -88,7 +88,7 @@ if ifile is None and ofile is not None:
     # write new
     np.random.seed(seed)
     stars = new_plummer_model(nbody)
-    write_set_to_file(stars, ofile, format=ofmt, overwrite=wmode)
+    write_set_to_file(stars, ofile, format=ofmt, overwrite_file=wmode)
     print(f"Wrote Plummer model w/ nbody={nbody} to {ofile} in {ofmt} format")
 elif ifile is not None:
     # read old
