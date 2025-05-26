@@ -1,7 +1,8 @@
+include $(NEMOLIB)/makedefs
 # Makefile for HOP.  Follow the checklist:
 #
 # 1) Compiler choice:
-CC = cc
+#CC = cc
 
 # 2) Compiler flags: optimization, debugging, profiling, etc.
 # For debugging:
@@ -10,7 +11,7 @@ CC = cc
 # SGI:
 #CFLAGS	=   -O3
 # Solaris:
-CFLAGS	=   -fast -xO4 -fsimple=2 -fsingle 
+#CFLAGS	=   -fast -xO4 -fsimple=2 -fsingle 
 
 # 3) Libraries: (if you have some replacement for math.h)
 LIBS	=   -lm
@@ -26,6 +27,9 @@ default:	hop regroup
 
 clean:
 	rm -f hop.o hop_input.o kd.o smooth.o regroup.o slice.o
+
+install: default
+	cp hop regroup $(NEMOBIN)
 
 hop: hop.o kd.o smooth.o hop_input.o
 	$(CC) $(CFLAGS) -o hop hop.o kd.o smooth.o hop_input.o $(LIBS)
