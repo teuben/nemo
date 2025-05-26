@@ -1,0 +1,11 @@
+This is HOP version 1.1 adapted for NEMO.   Also note there is
+an AMUSE implementation
+
+modified: see also git log
+
+
+Makefile      trivial changes for NEMO's use of compiler names and flags
+regroup.c     using FLT_MAX from <float.h> now
+hop.c         using FLT_MAX instead of HUGE
+hop_input.c   prototype fix for gcc14   
+
