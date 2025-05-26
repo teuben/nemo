@@ -1,0 +1,16 @@
+
+# HOP: A Group-finding Algorithm for N-body Simulations
+
+
+code: http://www.cfa.harvard.edu/~deisenst/hop/hop_v1.1.tar.gz
+
+site: https://lweb.cfa.harvard.edu/~deisenst/hop/
+
+ads:  http://adsabs.harvard.edu/abs/1998ApJ...498..137E
+
+ascl: https://ascl.net/1102.019
+
+there is also a version in AMUSE
+and this example to use is:
+
+https://github.com/amusecode/amuse/blob/main/examples/simple/clump_finding.py
