@@ -71,6 +71,7 @@ void usage(void)
     fprintf(stderr,"    [-nodensity] [-nohop] [-nogbound] Turn off output of these files.\n");
     fprintf(stderr,"    [-densityonly] Compute the densities and quit.\n");
     fprintf(stderr,"    [-b <int>] Performance tuning in kd-tree search.\n");
+    fprintf(stderr,"\nNote this is the NEMO version with ASCII input\n");
     exit(1);
 }
 
