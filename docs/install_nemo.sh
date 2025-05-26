@@ -18,7 +18,7 @@
 #   opt=1 python=1                          14'00"
 #
 
-echo "install_nemo.sh:  Version 1.10 -- 20-oct-2024"
+echo "install_nemo.sh:  Version 1.11 -- 25-may-2025"
 
  opt=0                                                # install some optional mknemos= packages
  nemo=nemo                                            # root directory where NEMO will be installed (. = here)
@@ -120,8 +120,12 @@ if [ $python -gt 0 ]; then
     make build1
     NEMO=`pwd` make python
     source anaconda3/python_start.sh
+    source nemo_start.sh
     make nemopy
-    if [ $python  -gt 1 ]; then
+    if [ $python  -eq 1 ]; then
+	mknemo amuse
+	(cd $NEMO/local/amuse; pip install -e .; make bhtree.code)
+    elif [ $python  -eq 2 ]; then
 	src/scripts/install_python_modules amuse=$amuse
     fi
 else
