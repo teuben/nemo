@@ -16,3 +16,5 @@ and this example to use is:
 https://github.com/amusecode/amuse/blob/main/examples/simple/clump_finding.py
 
 See also hop.C in starlab
+
+There is an interesting ssort() routine hidden in hop.c - are there better ones now?
