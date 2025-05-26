@@ -5,7 +5,8 @@ modified: see also git log
 
 
 Makefile      trivial changes for NEMO's use of compiler names and flags
+              also added to handle non-equal masses, just in case
 regroup.c     using FLT_MAX from <float.h> now
 hop.c         using FLT_MAX instead of HUGE
-hop_input.c   prototype fix for gcc14   
+hop_input.c   prototype fix for gcc14    - using ReadASCII() instead of ReadTPM()
 
