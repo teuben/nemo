@@ -65,6 +65,24 @@ Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)
 
 .EE
 
+.PP
+Here is a more NEMO like example, running from the (shell) commandline. If AMUSE is
+properly installed, the first
+example creates a Plummer model in memory, the second example creates a text file, of
+which the first particle is displayed as the 3rd line in this table:
+
+.EX
+ amuse_convert.py
+ amuse_convert.py -o plummer.txt
+ 
+ head -3 plummer.txt
+#mass radius vx vy vz x y z
+#mass length length * time**-1 length * time**-1 length * time**-1 length length length
+0.0078125 0.0 -0.256557735045 0.0863119421344 -0.0484937398944 -0.609540735858 -0.854122523728 0.736476012616
+ 
+
+.EE
+
 .SH "BUGS"
 
 The follow round trip exercise on the \fBtxt\fP format causes an error:
