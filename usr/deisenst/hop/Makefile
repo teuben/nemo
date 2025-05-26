@@ -13,6 +13,9 @@ include $(NEMOLIB)/makedefs
 # Solaris:
 #CFLAGS	=   -fast -xO4 -fsimple=2 -fsingle 
 
+
+CFLAGS += -DDIFFERENT_MASSES
+
 # 3) Libraries: (if you have some replacement for math.h)
 LIBS	=   -lm
 
