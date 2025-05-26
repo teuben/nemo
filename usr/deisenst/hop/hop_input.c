@@ -73,11 +73,15 @@ has to be done. */
 #include <assert.h>
 #include "kd.h"
 
+int ReadTPM(KD kd,FILE *fp);
+int ReadASCII(KD kd,FILE *fp);
+int ReadSimple(KD kd,FILE *fp);
+
+
 int ReadSimulationFile(KD kd, FILE *fp)
 /* Alter this as needed as described above */
 {
-    int ReadTPM(KD kd,FILE *fp);
-    ReadTPM(kd, fp);
+    ReadASCII(kd, fp);
     return 0;
 }
 
