@@ -1,10 +1,13 @@
-.TH SNAPPRINT 1NEMO "8 June 2005"
-.SH NAME
+.TH SNAPPRINT 1NEMO "28 May 2025"
+
+.SH "NAME"
 snapprint \- print out items of a snapshot in table format
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBsnapprint in=\fPsnap_in  [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBsnapprint\fP produces a table of values of requested quantities
 of the bodies in a snapshot. These can be processed with programs
 such as \fBtabhist, tablsqfit\fP or packages such as \fBmongo\fP,
@@ -13,58 +16,72 @@ is able to read other types of nbody formats, look at programs
 such as \fIsnapgadget(1NEMO)\fP, \fIsnaprv(1NEMO)\fP, or 
 \fIsnaptipsy(1NEMO)\fP.
 .PP
-\fBsnapprint\fP also has an option of producing a table of separations
+\fBsnapprint\fP also has an quaint option of producing a table of separations
 between all bodies of the system. For N bodies this table will have
 a length of N(N-1)/2, hence the keyword \fBsepar\fP will for any non-zero
 value produce a list which is \fInsep\fP times smaller and print only
 \fInsep\fP'th interaction.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
-input file, in \fIsnapshot(5NEMO)\fP format [no default]
+input file, in \fIsnapshot(5NEMO)\fP format
+.br
+[no default]
 .TP
 \fBoptions=\fIoption_list\fP
 List of data-items which will be listed, any of the \fIbodytrans(3NEM0)\fP
 functions can be used in an arbitry expression.
+.br
 [default: \fBx,y,z,vx,vy,vz\fP].
 .TP
 \fBformat=\fIstring\fP
 Valid C-format descriptor used in \fIprintf(3)\fP to output
 the numbers. 
+.br
 [default: \fB%g\fP].
 .TP
 \fBsepar=\fInsep\fP
 \fInsep\fP will for any non-zero value turn off all above options
 and produce a single table of the logarithm of the separations
 between the bodies. Only every \fInsep\fPth entry (the stride) of all
-N(N-1)/2 combinations will be listed [default: \fB0\fP].
+N(N-1)/2 combinations will be listed
+.br
+[default: \fB0\fP].
 .TP
 \fBtimes=\fItimes-string\fP
-Time values/intervals of which snapshots should be used. Default is
-empty string, which will only extract the first snapshot.
+Time values/intervals of which snapshots should be used.
+.br
+Default is empty string, which will only extract the first snapshot.
 .TP
 \fBtab=\fItab-file\fP
 If a filename is specified, the table is output to this file. If none,
-output will be standard output. [default: no file].
+output will be standard output.
+.br
+[default: no file].
 .TP
-\fBheader=f|t\fP
-Add a header to the output? The header will contain the number of particles,
-followed by the timestamp, of the snapshot. If masses, position and velocities
+\fBheader=nbody|time\fP
+Add header items to the output? Currently \fBnbody\fP and \fBtime\fP are
+recognized.
+If masses, position and velocities
 are output in the table, this format is also referred to
 as the \fIntmpv(5NEMO)\fP format.
-[Default: \fBf\fP]
+[Default: \fBnbody,time\fP]
 .TP
 \fBnewline=f|t\fP
-Should newlines be added between the header elements?
+Should newlines be added between the header elements? A newline is always added
+between header and body.
+.br
 [Default: \fBf\fP]
 .TP
 \fBcsv=f|t\fP
 Use CSV (comma separated values) output style. This means a comma, instead of
 a space, will be used to separate the values in the output stream.
+.br
 Default: false.
-.SH BUGS
+
+.SH "BUGS"
 Times=time-string does not work, returns btab=NULL, bits=1, i.e.
 something weird here. Code is identical to snapcenter, which uses same
 technique.
@@ -75,20 +92,23 @@ route is the somewhat complicated ascii file,
 consisting of a number of catenated tables, that has to be created with 
 a little header. See the "205" format in atos(1NEMO) or stoa(1NEMO).
 There are shell scripts which handle some of the cases here.
-.SH BUGS
+.TP
 A single expression like \fIatan2(y,x)\fP is parsed into two.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tabhist(1NEMO), tabtos(1NEMO), mongo users-manual
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +3.0i
 ~/src/pjt/nbody     snapprint.c snapprint.1
 .fi
 .SH "UPDATE HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 18-Mar-88	V1.0: created          	PJT
 15-Apr-88	V1.1: more options	PJT
 6-jun-88	V1.2: new filestruct, added separ keyword	PJT
@@ -98,5 +118,6 @@ Peter Teuben
 25-may-90	V1.8: added tab= keyword	PJT
 7-jul-97	(V2.0) documented header=	PJT
 4-sep-03	V2.2: added csv=	PJT
+25-may-2025	V3.0: changed header= meaning with words	PJT
 .fi
 
