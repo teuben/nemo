@@ -21,10 +21,16 @@ http://www.sns.ias.edu/~eisenste/hop/hop_doc.html */
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include <float.h>
 #include "kd.h"
 #include "smooth.h"
 /* To give info to the user: INFORM("info"); */
 #define INFORM(string) printf(string); fflush(stdout)
+
+#ifndef HUGE
+//#define HUGE 3.40282e+38
+#define HUGE FLT_MAX
+#endif
 
 int ReadSimulationFile(KD, FILE *);
 

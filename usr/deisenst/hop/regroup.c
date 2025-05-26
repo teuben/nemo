@@ -12,6 +12,7 @@ http://www.sns.ias.edu/~eisenste/hop/hop_doc.html */
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
+#include <float.h>
 
 #define MINDENS (-FLT_MAX/3.0)
 /* This is the most negative density that can be accomodated.  Note
