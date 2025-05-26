@@ -17,6 +17,7 @@ import numpy as np
 from amuse.units import nbody_system
 from amuse.ic.plummer import new_plummer_model
 from amuse.community.bhtree import Bhtree
+# from amuse.community.bhtree.interface import BHTree   # why this also possible?
 from amuse.io import write_set_to_file
 
 np.random.seed(SEED)
@@ -35,4 +36,5 @@ gravity.parameters.timestep        = 0.015625 | nbody_system.time       # 1/64
 stars_in_gravity = gravity.particles.add_particles(stars)
 gravity.evolve_model(tstop)
 write_set_to_file(stars_in_gravity, filename, format=FMT)
-print(f"Wrote {filename} in {FMT} format, nbody={NBODY}, seed={SEED}")
+print(f"Wrote {filename} at {gravity.model_time} using {gravity.model_name} in {FMT} format, nbody={NBODY}, seed={SEED}")
+gravity.stop()
