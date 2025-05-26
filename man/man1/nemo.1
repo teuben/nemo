@@ -1,4 +1,4 @@
-.TH NEMO 1NEMO "27 May 2024"
+.TH NEMO 1NEMO "25 May 2025"
 
 .SH "NAME"
 nemo, astronemo \- outline the NEMO package
@@ -255,14 +255,23 @@ the following commands should give their version of the online help:
       
 .EE
 
+.SH "INSTALL"
+Installing NEMO it outlined in the top level README file. The file \fBdocs/install_nemo.sh\fP
+has an easy entry point to automate some of the most common installations from the commandline,
+e.g.
+.EX
+
+    install_nemo.sh nemo=nemo_test python=1 amuse=1 yapp=ps
+    
+.EE
+
 .SH "PROGRAMMING"
 You may need to do some sherlocking here.
 You have probably seen the $NEMO/configure.ac and $NEMO/makedefs file,
 though the $NEMOLIB/makedefs is the active file. This is where you can hack to fix
 compilation errors.
 The \fImknemo(8NEMO)\fP script
-will help you (re)compile programs, though sometimes
-\fIbake(8NEMO)\fP can do a better job in a local directory.
+will help you (re)compile programs. 
 
 .SH "SEE ALSO"
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
