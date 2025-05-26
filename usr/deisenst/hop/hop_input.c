@@ -78,7 +78,7 @@ int ReadSimulationFile(KD kd, FILE *fp)
 {
     int ReadTPM(KD kd,FILE *fp);
     ReadTPM(kd, fp);
-    return;
+    return 0;
 }
 
 /* ================================================================ */
