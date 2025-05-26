@@ -10,3 +10,6 @@ regroup.c     using FLT_MAX from <float.h> now
 hop.c         using FLT_MAX instead of HUGE
 hop_input.c   prototype fix for gcc14    - using ReadASCII() instead of ReadTPM()
 
+@todo   it makes more sense to make the format something closer to what NEMO wants
+        or e.g. modify snapprint to do it in one line, viz.
+	mkplummer - 100 | snapprint - m,x,y,z header=nbody > plummer.tab
