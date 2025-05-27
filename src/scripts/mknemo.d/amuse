@@ -43,18 +43,13 @@ echo " pip install amuse-bhtree"
 echo ""
 echo "Example developer install:"
 echo " cd $NEMO/local/amuse"
-echo " CC= CXX= FC= ./configure         # only if nonstd compilers"
-echo " pip install -e ."
-echo " make bhtree.code"
+echo " ./setup"
+echo " ./setup develop amuse-framework"
+echo " ./setup develop amuse-bhtree"
 echo ""
-echo " python setup.py develop_build    # if try your luck on all codes"
+echo " ./setup develop all"
 
 #  my openmpi seems to be in the way.  config problem?
 #  pip install -e .
 #     this seems to install some of the modules
 #
-
-# new style
-#    ./setup install amuse-framework
-# brew detected ???
-#     setup install bhtree
