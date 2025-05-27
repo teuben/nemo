@@ -2,6 +2,9 @@
 #
 # Python 3 version >=3.7 
 # apt-get install build-essential curl g++ gfortran gettext zlib1g-dev
+#
+# useful install tips in:   https://github.com/LourensVeen/amuse-course
+# 
 
 #The following libraries need to be installed:
 
@@ -32,6 +35,7 @@ endif
 
 echo "Installation is still manual."
 echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html"
+echo "and   https://github.com/LourensVeen/amuse-course"
 echo ""
 echo "Example user install bypassing this code: (skipping setting up venv)"
 echo " pip install amuse-framework"
@@ -46,3 +50,8 @@ echo " make bhtree.code"
 #  pip install -e .
 #     this seems to install some of the modules
 #
+
+# new style
+#    ./setup install amuse-framework
+# brew detected ???
+#     setup install bhtree
