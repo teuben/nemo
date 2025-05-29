@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 8-mar-2025 PJT
+VERSION = NEMO V4.4 29-may-2025 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -474,6 +474,8 @@ build:   build1 build2 build3
 
 ## build1:    postconfig and mknemos
 build1:
+	@echo "Updating ~/.nemorc"
+	@echo "NEMO=`pwd`" >> ~/.nemorc
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
 	@echo 'Continue with "make build2 (or build2a build2b)"'
 

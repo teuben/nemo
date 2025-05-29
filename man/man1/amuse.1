@@ -1,4 +1,4 @@
-.TH AMUSE 1NEMO "25 May 2025"
+.TH AMUSE 1NEMO "27 May 2025"
 
 .SH "DESCRIPTION"
 \fBAMUSE\fP is the Astrophysical MUltipurpose Software Environment.
@@ -27,30 +27,13 @@ in \fInbody units\fP
 and writing the resulting snapshot as a table:
 
 .EX
-
- NBODY    = 128
- TIME     = 10
- FILENAME = 'p.txt'
-
  from amuse.units import nbody_system
  from amuse.ic.plummer import new_plummer_model
- from amuse.community.bhtree import Bhtree
- from amuse.io import write_set_to_file,read_set_from_file
+ from amuse.io import write_set_to_file
 
- stars = new_plummer_model(NBODY)
- gravity = Bhtree()
+ stars = new_plummer_model(10)
 
- eps   = 0.05 | nbody_system.length
- tstop = 10   | nbody_system.time
-
- gravity.parameters.opening_angle   = 0.75
- gravity.parameters.epsilon_squared = eps * eps
- gravity.parameters.dt_dia          = 1.0      | nbody_system.time
- gravity.parameters.timestep        = 0.015625 | nbody_system.time 
-
- stars_in_gravity = gravity.particles.add_particles(stars)
- gravity.evolve_model(tstop)
- write_set_to_file(stars_in_gravity, FILENAME, format='txt')
+ write_set_to_file(stars, 'plummer.txt', format='txt')
 
 .EE
 
@@ -60,8 +43,8 @@ Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)
 
 .EX
 
- nbody=$(tabcols p.txt | wc -l)
- tabcols p.txt | tabtos - p.snap block1=mass,skip,vx,vy,vz,x,y,z nbody=$nbody
+ nbody=$(tabcols plummer.txt | wc -l)
+ tabcols plummer.txt | tabtos - plummer.snap block1=mass,skip,vx,vy,vz,x,y,z nbody=$nbody
 
 .EE
 
@@ -111,8 +94,9 @@ is recommended with NEMO, the start of which will likely look as follows:
 .EX
 
    cd $NEMO/local/amuse
-   pip install -e .
-   make bhtree.code
+   ./setup develop amuse-framework
+   ./setup develop amuse-bhtree
+
     
 .EE
 The AMUSE bhtree code should be the same as the original program \fIbhtree(1NEMO)\fP in NEMO, allowing
@@ -163,4 +147,5 @@ https://www.amusecode.org/
 .nf
 .ta +1.25i +4.5i
 25-may-2025	man page and amuse_convert.py written (MODEST25-SPZ)	PJT
+27-mar-2025	overhauled installation method		PJT
 .fi
