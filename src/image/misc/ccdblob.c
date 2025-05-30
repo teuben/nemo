@@ -26,7 +26,7 @@ string defv[] = {
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.3\n  13-feb-2025 PJT",
+  "VERSION=0.5\n  30-may-2025 PJT",
   NULL,
 };
 
@@ -40,7 +40,10 @@ vector oldframe[3] = {
 
 real printeig(string name, matrix mat, real *a, real *b, real *c);
 real printvec(string name, vector vec);
-
+void xyz2rtp(vector xyz, vector rtp);
+void eigsrt(float *d,float **v, int n);
+void eigenframe(vector frame[], matrix mat);
+void jacobi(float **a,int n,float *d,float **v,int *nrot);
 
 
 void nemo_main()
@@ -78,29 +81,34 @@ void nemo_main()
       clip[0] = -clip[1];
     }
   } else
-    warning("Using all data, no clip used");
+    dprintf(1,"Using all data, no clip used");
   
   read_image( instr, &iptr);            /* read the cube */
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
   if (nz > 1) error("Cannot handle cubes");
 
+  // @todo differentiate between even and odd box size
   box = getiparam("box");
   nbpos = nemoinpi(getparam("pos"),bpos,2);
   if (nbpos == 2) {                        // fix center at/near bpos
-    xrange[0] = bpos[0] - box/2;
-    xrange[1] = bpos[0] + box/2;
-    yrange[0] = bpos[1] - box/2;
-    yrange[1] = bpos[1] + box/2;
+    dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
   } else {
+    // @todo have option to use the peak
     nbpos = 2;
-    bpos[0] = nx/2;
+    bpos[0] = nx/2;  // use center
     bpos[1] = ny/2;
-    xrange[0] = bpos[0] - box/2;
-    xrange[1] = bpos[0] + box/2;
-    yrange[0] = bpos[1] - box/2;
-    yrange[1] = bpos[1] + box/2;
-    warning("Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
   }
+  xrange[0] = bpos[0] - (box-1)/2;
+  xrange[1] = bpos[0] + (box-1)/2;
+  yrange[0] = bpos[1] - (box-1)/2;
+  yrange[1] = bpos[1] + (box-1)/2;
+  if (box%2 == 0) {
+    xrange[1]++;  // could have done [0]-- as well
+    yrange[1]++;
+  }
+  dprintf(1,"Xrange: %d..%d Yrange: %d..%d\n",
+	  xrange[0], xrange[1], yrange[0] ,yrange[1]);
   data = (real *) allocate(box*box*sizeof(real));
   ini_moment(&m, 2, box*box);
   
@@ -110,9 +118,9 @@ void nemo_main()
   CLRV(w_pos);
   for (k=0; k<nz; k++) {
     pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
-    for (j=yrange[0]; j<yrange[1]; j++) {
+    for (j=yrange[0]; j<=yrange[1]; j++) {
       pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
-      for (i=xrange[0]; i<xrange[1]; i++) {
+      for (i=xrange[0]; i<=xrange[1]; i++) {
 	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
@@ -144,7 +152,9 @@ void nemo_main()
     }
   }
   DIVVS(w_pos,w_pos,w_sum);
+  
   printf("Npoints:    %d\n",cnt);
+  printf("Box:        %d\n", box);
   printf("DataMinMax: %g %g\n",dmin,dmax);
   printf("Min at:     %d %d (1 based)\n",ixmin+1,iymin+1);
   printf("Max at:     %d %d\n",ixmax+1,iymax+1);
@@ -167,9 +177,9 @@ void nemo_main()
   CLRM(w_qpole);
   for (k=0; k<nz; k++) {
     pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
-    for (j=yrange[0]; j<yrange[1]; j++) {    
+    for (j=yrange[0]; j<=yrange[1]; j++) {    
       pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
-      for (i=xrange[0]; i<xrange[1]; i++) {      
+      for (i=xrange[0]; i<=xrange[1]; i++) {      
 	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
@@ -269,7 +279,7 @@ void nemo_main()
 
 #include "nrutil.h"
 
-eigenframe(vector frame[], matrix mat)
+void eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -331,7 +341,7 @@ real printvec(string name, vector vec)
 }
 
 
-xyz2rtp(vector xyz, vector rtp)
+void xyz2rtp(vector xyz, vector rtp)
 {
   real z = xyz[2];
   real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));
