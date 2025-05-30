@@ -13,6 +13,7 @@ gitbv() {
     _branch=$(cd $1;git branch --show-current)
     _counter=$(cd $1;git rev-list --count HEAD)
     _lastdate=$(cd $1;git log -1 --format="%at" | xargs -I{} date -d @{} +%Y/%m/%d_%H:%M:%S)
+    _remote=$(cd $1;git remote -v | tail -1)
     _branch="$(printf %-10s $_branch)"
     _counter="$(printf %-10s $_counter)"
 }    
@@ -41,6 +42,19 @@ gitbv $NEMO
 # this is a relatively new git option, disable until we all have it
 # (cd $LMTOY; make branch)
 
+if [ -d $NEMO/local/starlab ]; then
+    gitbv $NEMO/local/starlab
+    echo "Found starlab: $_remote $_branch $_counter $_lastdate "
+    
+fi
+if [ -d $NEMO/local/amuse ]; then
+    gitbv $NEMO/local/amuse    
+    echo "Found amuse: $_remote $_branch $_counter $_lastdate "
+fi
+if [ -d $NEMO/local/miriad ]; then
+    gitbv $NEMO/local/miriad    
+    echo "Found miriad: $_remote $_branch $_counter $_lastdate "
+fi
 
 if [ "$1" == pull ]; then
     cd $NEMO
