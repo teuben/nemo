@@ -19,8 +19,9 @@
 #
 #  todo:    bug not doing cvs update when new mknemo detected ?
 #           safeguard if disk is full
-#
-set version="MKNEMO Version 4.6a 31-dec-2024"
+
+set version="MKNEMO Version 4.7 27-may-2025"
+
 if ($#argv == 0) goto usage
 set old_argv=($*)
 
@@ -195,13 +196,12 @@ if (1) then
 endif
 
 if ($D) then
-  set d=$NEMO/src/scripts/mknemo.d
-  ls $d | grep -v '(README|*~)' 
-  foreach p (`ls $d | grep -v '(README|*~)' `)
-     if ( -e $d/$p ) then
-       echo "$p --"
-     endif
-  end
+  echo "# mknemo.d targets"
+  ls $NEMO/src/scripts/mknemo.d  | egrep -v '(README|*~)'
+  echo "# NEMO/opt installed"
+  tabcols $NEMO/opt/mknemo.log 1 | sort | uniq
+  echo "# NEMO/local working area"  
+  ls $NEMO/local
   rm -f $lockfile >& /dev/null
   exit 0
 endif

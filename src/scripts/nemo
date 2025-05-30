@@ -16,15 +16,26 @@ gitbv() {
     _remote=$(cd $1;git remote -v | tail -1)
     _branch="$(printf %-10s $_branch)"
     _counter="$(printf %-10s $_counter)"
-}    
+}
+
+nemorc() {
+    if [ -e ~/.nemorc ]; then
+	_nemo=$(source ~/.nemorc ; echo $NEMO)
+    else
+	_nemo="not present"
+    fi
+}
 
 if [ -z $NEMO ]; then
     echo "NEMO environment not loaded (odd)"
+    nemorc
     exit 0
 else
     _version=$(cat $NEMO/VERSION)
     gitbv $NEMO
-    echo "NEMO:        $NEMO  - Version:$_version"
+    nemorc
+    echo "NEMO:        $NEMO  - Version:$_version"       # current NEMO
+    echo "~/.nemorc:   $_nemo"                           # official NEMO
     echo "YAPP:        $YAPP - default yapp plotting device"
     echo "git:         Branch:$_branch Counter:$_counter Date: $_lastdate"
 fi
