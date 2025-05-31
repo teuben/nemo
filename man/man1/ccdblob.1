@@ -1,4 +1,4 @@
-.TH CCDBLOB 1NEMO "30 May 2025"
+.TH CCDBLOB 1NEMO "31 May 2025"
 
 .SH "NAME"
 ccdblob \- properties of a blob in an image
@@ -24,7 +24,7 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input NEMO image file
+Input \fIimage(5NEMO)\fP file
 .br
 No default.
 .TP
@@ -35,12 +35,12 @@ With the special value \fBpos=max\fP the location of the maximum in the image is
 Default is center of image. 
 .TP
 \fBbox=\fP
-Box size to use around \fBpos\fP.
+Box size (in pixels) to use around \fBpos\fP. For even box ssize, the center pixel will be in the upper-right quadrant.
 .br
 Default: 32
 .TP
 \fBclip=\fP
-Use only values above \fBclip\fP. 
+Use only values above \fBclip\fP from the selected area.
 .br
 Default will use all values within the box.
 .TP
@@ -60,14 +60,16 @@ Weigh moments of inertia by intensity?
 \fBcross=\fP
 Use cross correlations between X and Y to...
 .TP
-\fBpeak=N\fP
-Find the N-th peak. Only used if \fBpos\fP is not given.
-For \fBpeak=0\fP the center of the map is used, otherwise
-it will find the N-th peak.
+\fBscale=\fP
+Scale factor to be applied to output radii. A common value is 3600 if the input
+units are degrees.
 .br
 Default: 1
 .br
-\fInot implemented yet\fP
+.TP
+\fBout=\fP
+Optional output file. If given, the pixel coordinates and intensities are written out,
+for programs such as \fItabnlllsqfit(1NEMO)\fP to fit models.
 
 
 .SH "EXAMPLES"
@@ -88,33 +90,58 @@ An example of creation a gaussian blob with a given Signal/Noise (ns=) and runni
 through ccdblob:
 .EX
 
-sn=10
-ccdgen - gauss 1,3 128,128  | ccdgen - noise 0,1/$sn in=- seed=123 | ccdblob -
-
+sn=100
+ccdgen - gauss 1,3 127,127  | ccdgen - noise 0,1/$sn in=- seed=123 | ccdblob -
 Npoints:    1024
 Box:        32
-DataMinMax: -0.278395 1.07276
-Min at:     77 51 (1 based)
-Max at:     66 65
-Mean:       0.0541314
-Median:     -0.0910571
-DataSum:    55.4305
-Flux:       148.673
-ImSize:     128 128 1
-Center:     63.7424 62.9733 0 [wcs]
-BLOB:  66 65  63.7424 62.9733 32   -0.0910571 1.07276 148.673
-        e_x:     1.00000     0.97453    -0.22426     0.00000    90.0  -13.0
-        e_y:     1.00000     0.22426     0.97453    -0.00000   -90.0   77.0
+DataMinMax: -0.0316674 1.00188
+Min at:     76 57 (1 based)
+Max at:     64 64
+Mean:       0.0549987
+Median:     -0.0101503
+DataSum:    56.3187
+Flux:       66.7126
+ImSize:     127 127 1
+Center:     -0.0734071 0.0983847 0 [wcs]
+BLOB:  64 64  -0.0734071 0.0983847 32   -0.0101503 1.00188 66.7126
+        e_x:     1.00000     0.70709     0.70712     0.00000    90.0   45.0
+        e_y:     1.00000    -0.70712     0.70709     0.00000    90.0  135.0
         e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
-      qpole:    20.25961     0.97453    -0.22426     0.00000
-                 1.23397     0.22426     0.97453     0.00000
+      qpole:  7945.70166     0.70709     0.70712     0.00000
+                 8.46289     0.70712    -0.70709     0.00000
                  0.00000     0.00000     0.00000     1.00000
-a,b:  4.50107 1.11084
-inc:  75.712 (meaningless without radecvel)
-pa:   77.0407 (meaningless without radecvel)
+a,b:  89.1387 2.9091
+inc:  88.1298 (meaningless without radecvel)
+pa:   135.001 (meaningless without radecvel)
+
 
 .EE
+.PP
+The same example as before, but now feeding a table with 37 points to a 2d gaussfit. These fits
+are often very dependant on the initial guess:
+.EX
 
+ns=100
+ccdgen - gauss 1,3 127,127  | ccdgen - noise 0,1/$sn in=- seed=123 | ccdblob - clip=0.5 out=gauss.tab
+tabnllsqfit gauss.tab 1,2 3 fit=gauss2d par=1,2,64,64,2
+
+nrt=16
+Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  
+
+rt=16
+Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  
+a= -0.076949 0.126768 
+b= 1.07709 0.123398 
+c= 63.0009 0.0110594
+d= 62.9887 0.011061
+e= 3.15046 0.244319
+npt= 37
+rms= 0.00801193
+rms2/chi2= 0.00237507
+rms/chi = 1
+
+
+.EE
 .SH "SEE ALSO"
 ccdshape(1NEMO), ccdstat(1NEMO), image(5NEMO)
 .nf
