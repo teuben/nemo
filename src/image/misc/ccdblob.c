@@ -21,12 +21,12 @@ string defv[] = {
   "pos=\n         (x,y) position (1-based), or use max in map",
   "box=32\n       Box size to use around pos",
   "clip=\n        Use only values above clip",
-  "wcs=t\n        Use WCS of the cube (else use integer 0-based coordinates)",
+  "wcs=t\n        Use WCS of the cube (else use integer 1-based coordinates)",
   "radecvel=f\n   Split the RA/DEC from VEL",
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.5\n  30-may-2025 PJT",
+  "VERSION=0.6\n  30-may-2025 PJT",
   NULL,
 };
 
@@ -44,6 +44,8 @@ void xyz2rtp(vector xyz, vector rtp);
 void eigsrt(float *d,float **v, int n);
 void eigenframe(vector frame[], matrix mat);
 void jacobi(float **a,int n,float *d,float **v,int *nrot);
+
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum);
 
 
 void nemo_main()
@@ -64,6 +66,7 @@ void nemo_main()
   bool     Qrdv = getbparam("radecvel");
   bool     Qiwm = getbparam("weight");
   bool     Qcross = getbparam("cross");
+  bool     Qmax = FALSE;
   vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
   matrix   tmpm, w_qpole;
   real     w_sum, dmin, dmax;
@@ -87,17 +90,20 @@ void nemo_main()
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
   if (nz > 1) error("Cannot handle cubes");
 
-  // @todo differentiate between even and odd box size
   box = getiparam("box");
-  nbpos = nemoinpi(getparam("pos"),bpos,2);
-  if (nbpos == 2) {                        // fix center at/near bpos
-    dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
+  if (streq(getparam("pos"),"max")) {
+    whereis_max(iptr, &bpos[0], &bpos[1], FALSE);
   } else {
-    // @todo have option to use the peak
-    nbpos = 2;
-    bpos[0] = nx/2;  // use center
-    bpos[1] = ny/2;
-    dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    nbpos = nemoinpi(getparam("pos"),bpos,2);
+    if (nbpos == 2) {                        // fix center at/near bpos
+      dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
+    } else {
+      // @todo have option to use the peak
+      nbpos = 2;
+      bpos[0] = nx/2;  // use center
+      bpos[1] = ny/2;
+      dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    }
   }
   xrange[0] = bpos[0] - (box-1)/2;
   xrange[1] = bpos[0] + (box-1)/2;
@@ -152,6 +158,8 @@ void nemo_main()
     }
   }
   DIVVS(w_pos,w_pos,w_sum);
+  if (!Qwcs)
+    ADDVS(w_pos, w_pos, 1.0);    // convert to 1-based pixel coordinates
   
   printf("Npoints:    %d\n",cnt);
   printf("Box:        %d\n", box);
@@ -167,7 +175,7 @@ void nemo_main()
   printf("Center:     %g %g %g %s\n",w_pos[0], w_pos[1], w_pos[2],
 	 Qwcs ? "[wcs]" : "[grid]");
   printf("BLOB:  %d %d  %g %g %d   %g %g %g\n",
-	 ixmax+1,iymax+1, w_pos[0]+1, w_pos[1]+1, box,
+	 ixmax+1,iymax+1, w_pos[0], w_pos[1], box,
 	 median_moment(&m),
 	 dmax,
 	 show_moment(&m,1) - cnt * median_moment(&m));
@@ -351,3 +359,24 @@ void xyz2rtp(vector xyz, vector rtp)
   rtp[0] = sqrt(z*z+w*w);
 }
 
+// loop over the full image
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum)
+{
+  int i , nx = Nx(iptr);
+  int j , ny = Ny(iptr);
+  real dmax = CubeValue(iptr,0,0,0);
+  // no support for 3D
+  for (i=0; i<nx; i++)
+    for (j=0; j<ny; j++) {
+      if (CubeValue(iptr,i,j,0) > dmax) {
+	dmax = CubeValue(iptr,i,j,0);
+	*ix = i;
+	*iy = j;
+      }
+    }
+  dprintf(1,"max %g at %d %d\n", dmax, *ix + 1, *iy + 1);
+
+  if (Qsum) {
+    warning("2D downhill summing not implemented yet");
+  }
+}
