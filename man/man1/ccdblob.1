@@ -1,4 +1,4 @@
-.TH CCDBLOB 1NEMO "14 February 2025"
+.TH CCDBLOB 1NEMO "30 May 2025"
 
 .SH "NAME"
 ccdblob \- properties of a blob in an image
@@ -28,10 +28,11 @@ Input NEMO image file
 .br
 No default.
 .TP
-\fBpos=\fP
-(x,y) center of the \fBbox\fP, or use maximum in image (?). Positions are 1-based integers.
+\fBpos=\fP\fIx,y\fP
+(x,y) center of the \fBbox\fP. Positions are 1-based integers
+With the special value \fBpos=max\fP the location of the maximum in the image is used.
 .br
-Default is center of image, but there should be an option to use the maximum in the image?
+Default is center of image. 
 .TP
 \fBbox=\fP
 Box size to use around \fBpos\fP.
@@ -41,7 +42,7 @@ Default: 32
 \fBclip=\fP
 Use only values above \fBclip\fP. 
 .br
-Default will use all values
+Default will use all values within the box.
 .TP
 \fBwcs=t|f\fP
 Use WCS of the cube (otherwise use pixel coordinates 1..N).
@@ -88,33 +89,34 @@ through ccdblob:
 .EX
 
 sn=10
-ccdgen - gauss 1,3 128,128  | ccdgen - noise 0,1/$sn in=- | ccdblob -
-Npoints:    1024
-DataMinMax: -0.359968 1.08932
-Min at:     53 71 (1 based)
-Max at:     64 65
-Mean:       0.0559946
-Median:     0.0673992
-DataSum:    57.3385
-Flux:       -11.6783
-ImSize:     128 128 1
-Center:     63.1595 63.5957 0 [wcs]
-BLOB:  64 65  64.1595 64.5957 32   0.0673992 1.08932 -11.6783
-        e_x:     1.00000     0.99981     0.01968     0.00000    90.0    1.1
-        e_y:     1.00000    -0.01968     0.99981     0.00000    90.0   91.1
-        e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
-      qpole:    13.07941     0.99981     0.01968     0.00000
-                 5.93258    -0.01968     0.99981     0.00000
-                 0.00000     0.00000     0.00000     1.00000
-a,b:  3.61655 2.43569
-inc:  47.6634 (meaningless without radecvel)
-pa:   91.1275 (meaningless without radecvel)
+ccdgen - gauss 1,3 128,128  | ccdgen - noise 0,1/$sn in=- seed=123 | ccdblob -
 
+Npoints:    1024
+Box:        32
+DataMinMax: -0.278395 1.07276
+Min at:     77 51 (1 based)
+Max at:     66 65
+Mean:       0.0541314
+Median:     -0.0910571
+DataSum:    55.4305
+Flux:       148.673
+ImSize:     128 128 1
+Center:     63.7424 62.9733 0 [wcs]
+BLOB:  66 65  63.7424 62.9733 32   -0.0910571 1.07276 148.673
+        e_x:     1.00000     0.97453    -0.22426     0.00000    90.0  -13.0
+        e_y:     1.00000     0.22426     0.97453    -0.00000   -90.0   77.0
+        e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
+      qpole:    20.25961     0.97453    -0.22426     0.00000
+                 1.23397     0.22426     0.97453     0.00000
+                 0.00000     0.00000     0.00000     1.00000
+a,b:  4.50107 1.11084
+inc:  75.712 (meaningless without radecvel)
+pa:   77.0407 (meaningless without radecvel)
 
 .EE
 
 .SH "SEE ALSO"
-ccdstat(1NEMO), image(5NEMO)
+ccdshape(1NEMO), ccdstat(1NEMO), image(5NEMO)
 .nf
 https://github.com/perwin/imfit
 .fi
@@ -129,4 +131,5 @@ Peter Teuben
 .ta +1.25i +4.5i
 15-feb-2020	V0.1 Created	PJT
 14-feb-2025	V0.3 fix boxsize when no pos given	PJT
+30-may-2025	V0.5 allow pos=max	PJT
 .fi
