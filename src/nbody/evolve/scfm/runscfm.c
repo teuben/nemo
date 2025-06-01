@@ -96,7 +96,7 @@ void nemo_main()
 
     if (hasvalue("in")) {
 	if (*infile == '-') {		/* do something special for pipes */
-	  sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI");
+	  sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=nbody,time > SCFBI");
 	} else {
 	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=nbody,time > SCFBI",fname);
         } 
