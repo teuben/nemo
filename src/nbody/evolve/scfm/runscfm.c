@@ -35,7 +35,7 @@ string defv[] = {
     "zeroeven=f\n     ",
     "fixacc=f\n       ",
     "headline=\n      run comment",
-    "VERSION=1.4\n    17-sep-2013 PJT",
+    "VERSION=1.5\n    1-jun-2025 PJT",
     NULL,
 };
 
@@ -98,7 +98,7 @@ void nemo_main()
 	if (*infile == '-') {		/* do something special for pipes */
 	  sprintf(runcmd,"snapprint - m,x,y,z,vx,vy,vz header=t > SCFBI");
 	} else {
-	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=t > SCFBI",fname);
+	  sprintf(runcmd,"snapprint %s m,x,y,z,vx,vy,vz header=nbody,time > SCFBI",fname);
         } 
         dprintf(0,"%s\n",runcmd);
         if (run_sh(runcmd)) error("Error converting input data");
@@ -110,8 +110,9 @@ void nemo_main()
 #endif
     run_sh(runcmd);
 
+    int nbody=10;
     sprintf(runcmd,
-        "cat SNAP??? | tabtos - scfm.dat nbody,time mass,pos,vel,phi");
+	    "cat SNAP??? | tabtos - scfm.dat nbody,time mass,pos,vel,phi nbody=%d",nbody);
     run_sh(runcmd);
 
 }
