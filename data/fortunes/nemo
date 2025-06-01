@@ -80,3 +80,9 @@ Although you can compile it from scratch, it's easier to download the binaries
 A recent tutorial is here:  https://www.youtube.com/watch?v=wfkfxvcYcX0
 
 
+%
+the bsf program computes some statistics of floating point numbers in a 
+binary structured file, which can be used in benchmarking and regression. Example
+     mkplummer - 128 seed=123 | bsf -
+     BSF: 0.00111483 0.713141 -6.56685 5.72763 897 -
+
