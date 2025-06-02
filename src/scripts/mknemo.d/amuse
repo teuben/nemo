@@ -1,7 +1,9 @@
 #! /bin/csh -f
 #
-# Python 3 version >=3.7 
-# apt-get install build-essential curl g++ gfortran gettext zlib1g-dev
+# sudo apt install build-essential curl g++ gfortran gettext zlib1g-dev
+#
+# native python on ubuntu may need:    sudo apt install python3-venv ipython3 python3-pip
+
 #
 # useful install tips in:   https://github.com/LourensVeen/amuse-course
 # 
