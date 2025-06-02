@@ -96,3 +96,9 @@ To get a nice PDF output of a manual page, do:
     cd $NEMO/man
     ./manpdf man1/mkplummer.1
     xdg-open man1/mkplummer.1.pdf
+
+%
+the bsf program computes some statistics of floating point numbers in a 
+binary structured file, which can be used in benchmarking and regression. Example
+     mkplummer - 128 seed=123 | bsf -
+     BSF: 0.00111483 0.713141 -6.56685 5.72763 897 -

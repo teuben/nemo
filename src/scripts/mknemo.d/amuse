@@ -6,7 +6,9 @@
 
 #
 # useful install tips in:   https://github.com/LourensVeen/amuse-course
-# 
+# also on Ubuntu
+# mkdir -p ~/.openmpi
+# echo 'btl_tcp_if_include=lo' >>  ~/.openmpi/mca-params.conf
 
 #The following libraries need to be installed:
 
@@ -51,7 +53,9 @@ echo " ./setup develop amuse-bhtree"
 echo ""
 echo " ./setup develop all"
 
-#  my openmpi seems to be in the way.  config problem?
-#  pip install -e .
-#     this seems to install some of the modules
+
+# testing also via:
 #
+# git clone https://gist.github.com/teuben/e60844254172bbe5d5e9e10417ad5277  install_amuse2
+# git clone https://gist.github.com/teuben/1e42049f020c11149b6c68b4dc1a14a0  install_amuse1
+
