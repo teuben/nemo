@@ -1,7 +1,7 @@
 Executive Summary
 =================
 
-Installation of the core version of NEMO is roughly follows (your yapp selection may vary):
+Installation of the core version of NEMO is roughly as follows (your choice of yapp may vary):
 
       git clone https://github.com/teuben/nemo
       cd nemo
@@ -9,10 +9,11 @@ Installation of the core version of NEMO is roughly follows (your yapp selection
       make build check bench5
       source nemo_start.sh
 
-many more details can be found below. The biggest caveat on this scheme is the use of the pgplot
-driver for the yapp plotting interface. By default it would install a safe but fairly useless
-postscript-only driver. The pgplot driver is probably the most functional, but We also have (fairly)
-functional plplot and giza drivers. 
+The biggest caveat on this scheme is the use of the pgplot driver for
+the yapp plotting interface. By default it would install a safe but
+fairly useless postscript-only driver. The pgplot driver is probably
+the most functional, but We also have (fairly) functional plplot and
+giza drivers.
 
 The configure line can be complex, for example for a Mac it could be:
 
@@ -25,6 +26,8 @@ A simple test to create and plot a 1911 Plummer sphere is the following:
       snapplot p10.dat
       tsf p10.dat
 
+A more flexible installation script can be found in docs/install_nemo.sh
+
 
 
 Failing pgplot
@@ -35,9 +38,10 @@ you can find out with the command
 
       mknemo tabplot
 
-what is wrong/missing.   Sometimes it's the X libraries, sometimes the PNG library, or something  with PGPLOT alltogether.
-We keep a version of pgplot for manual compilation, which might work well on a mac. Here's an example
-to try in that case:
+what is wrong/missing.  Sometimes it's the X libraries, sometimes the
+PNG library, or something with PGPLOT alltogether.  We keep a version
+of pgplot for manual compilation, which might work well on a
+mac. Here's an example to try in that case:
 
       mknemo pgplot
       #   this needs to work, otherwise the next steps make no sense
@@ -130,11 +134,11 @@ See examples of package names in $NEMO/src/scripts/linux and $NEMO/src/scripts/b
 DOWNLOAD and INSTALLATION: two examples 
 =======================================
 
-Perhaps the easiest way to install nemo is using the docs/install_nemo
+Perhaps the easiest way to install nemo is using the docs/install_nemo.sh
 script. The following example shows how to bootstrap this:
 
-    wget https://teuben.github.io/nemo/install_nemo
-    csh -f install_nemo nemo=nemo
+    wget https://teuben.github.io/nemo/install_nemo.sh
+    bash install_nemo.sh nemo=nemo
     source nemo/nemo_start.sh
 
 
@@ -383,8 +387,8 @@ well be useful in case of issues with the instructions listed above:
 
 
 
-Some old notes
-==============
+Some very old notes
+===================
 
 
 *) pieces of configure out of date?  Encountering a new machine?
