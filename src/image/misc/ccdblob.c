@@ -4,6 +4,7 @@
  *      (based off ccdshape)
  *
  *	quick and dirty:  15-feb-2020	pjt
+ *      fix various wcs issues:     31-may-2025    PJT
  *
  * @todo    check if box= not too big
  */
@@ -26,7 +27,8 @@ string defv[] = {
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.6\n  30-may-2025 PJT",
+  "out=\n         Optional output table of selected points",
+  "VERSION=0.7\n  31-may-2025 PJT",
   NULL,
 };
 
@@ -50,7 +52,7 @@ void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum);
 
 void nemo_main()
 {
-  stream   instr;
+  stream   instr, outstr;
   string   oper;
   int      i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
   int      nclip, apeak, apeak1, cnt;
@@ -67,6 +69,7 @@ void nemo_main()
   bool     Qiwm = getbparam("weight");
   bool     Qcross = getbparam("cross");
   bool     Qmax = FALSE;
+  bool     Qout = hasvalue("out");
   vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
   matrix   tmpm, w_qpole;
   real     w_sum, dmin, dmax;
@@ -75,6 +78,7 @@ void nemo_main()
   Moment   m;
 
   instr = stropen(getparam("in"), "r");
+  if (Qout) outstr = stropen(getparam("out"), "w");
   
   if (Qclip) {
     nclip = nemoinpr(getparam("clip"),clip,2);
@@ -123,32 +127,26 @@ void nemo_main()
   w_sum = 0.0;
   CLRV(w_pos);
   for (k=0; k<nz; k++) {
-    pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
+    pos[2] = Qwcs ? (k-Zref(iptr))*Dz(iptr) + Zmin(iptr)  :  k;
+    pos[2] = Qwcs ? (k-CRPIX3(iptr))*CDELT3(iptr) + CRVAL3(iptr)  :  k;    
     for (j=yrange[0]; j<=yrange[1]; j++) {
-      pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
+      pos[1] = Qwcs ? (j-CRPIX2(iptr))*CDELT2(iptr) + CRVAL2(iptr)  :  j;
       for (i=xrange[0]; i<=xrange[1]; i++) {
-	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
+	pos[0] = Qwcs ? (i-CRPIX1(iptr))*CDELT1(iptr) + CRVAL1(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
 	if (cnt==0) {
 	  dmin = dmax = cv;
 	} else {
-	  if (cv < dmin) {
-	    dmin = cv;
-	    ixmin=i;
-	    iymin=j;
-	  }
-	  if (cv > dmax) {
-	    dmax = cv;
-	    ixmax=i;
-	    iymax=j;
-	  }
+	  if (cv < dmin) {  dmin = cv;  ixmin=i; iymin=j; }
+	  if (cv > dmax) {  dmax = cv;  ixmax=i; iymax=j; }
 	}
 	if (nbpos==2) {
 	  dprintf(1,"%d @ %d %d %d\n", cnt, i,j,k);
 	  data[cnt] = cv;
 	  accum_moment(&m, cv, 1.0);
 	}
+	if (Qout) fprintf(outstr,"%d %d %g\n", i,j,cv);
 	cnt++;
 	if (!Qiwm) cv = 1.0;
 	w_sum += cv;
