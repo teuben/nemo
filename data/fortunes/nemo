@@ -80,3 +80,6 @@ Although you can compile it from scratch, it's easier to download the binaries
 A recent tutorial is here:  https://www.youtube.com/watch?v=wfkfxvcYcX0
 
 
+%
+To select rows from an ascii table, select by row number using tabrows,
+or a range of X values using e.g. tabmath selfie=range(%1,$xmin,$xmax)
