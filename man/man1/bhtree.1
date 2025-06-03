@@ -151,6 +151,9 @@ i5-10210U      	5.79	6.99	?
 Since \fBbhcode\fP is also absorbed in \fIamuse\fP, we can compare a typical  integration
 in both NEMO and AMUSE.
 
+.SH "RUN"
+There is no \fIrun(3NEMO)\fP interface for bhtree.
+
 .SH "SEE ALSO"
 hackcode1(1NEMO), atos(1NEMO), stoa(1NEMO)
 .nf
@@ -163,8 +166,9 @@ http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
 
 .SH "FILES"
 .nf
-$NEMO/usr/kawai/nbody
-$AMUSE_DIR/src/amuse/community/bhtree/src
+$NEMO/usr/kawai/nbody   (this is historic)
+$AMUSE_DIR/src/amuse/community/bhtree/src  
+$AMUSE_DIR/src/amuse_bhtree (new 2025 version)
 .fi
 Note if amuse is installed with \fBmknemo(1NEMO)\fP, AMUSE_DIR=$NEMO/local/amuse
 
@@ -172,9 +176,10 @@ Note if amuse is installed with \fBmknemo(1NEMO)\fP, AMUSE_DIR=$NEMO/local/amuse
 .SH "AUTHOR"
 Jun Makino
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.25i +4.5i
 21-dec-1998	V1 written	Jun Makino
 22-may-2025	man page written while renaming nbody to bhtree (MODEST25-SPZ)	PJT
+22-may-2025	gcc14 prototype fixes (amuse also changed theirs)	PJT
 .fi

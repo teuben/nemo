@@ -21,7 +21,7 @@ string defv[] = {
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.5\n  3-feb-2025 PJT",
+  "VERSION=0.6n   29-may-2025 PJT",
   NULL,
 };
 
@@ -35,7 +35,10 @@ vector oldframe[3] = {
 
 real printeig(string name, matrix mat, real *a, real *b, real *c);
 real printvec(string name, vector vec);
-
+void xyz2rtp(vector xyz, vector rtp);
+void eigsrt(float *d,float **v, int n);
+void eigenframe(vector frame[], matrix mat);
+void jacobi(float **a,int n,float *d,float **v,int *nrot);
 
 
 void nemo_main()
@@ -211,7 +214,7 @@ void nemo_main()
 
 #include "nrutil.h"
 
-eigenframe(vector frame[], matrix mat)
+void eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -273,7 +276,7 @@ real printvec(string name, vector vec)
 }
 
 
-xyz2rtp(vector xyz, vector rtp)
+void xyz2rtp(vector xyz, vector rtp)
 {
   real z = xyz[2];
   real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));

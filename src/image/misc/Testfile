@@ -1,5 +1,5 @@
 DIR = src/image/misc
-BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint
+BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint ccdblob
 NEED = $(BIN)  ccdmath ccdgen
 
 help:
@@ -51,6 +51,10 @@ ccdmom: ccdmom.in
 	$(EXEC) ccdmom ccdmom.in - 1 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 	$(EXEC) ccdmom ccdmom.in - 2 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 	$(EXEC) ccdmom ccdmom.in - 3 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
+
+ccdblob: ccd.in
+	 @echo Running $@
+	 $(EXEC) ccdblob ccd.in pos=max box=8; nemo.coverage ccdblob.c
 
 N2 = 100
 ccdmom2.in:

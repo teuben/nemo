@@ -1,4 +1,4 @@
-.TH CCDBLOB 1NEMO "14 February 2025"
+.TH CCDBLOB 1NEMO "31 May 2025"
 
 .SH "NAME"
 ccdblob \- properties of a blob in an image
@@ -13,8 +13,10 @@ and a box size, it will determine the peak, shape and flux of the blob, assuming
 needs to be big enough for this) is well characterised by the median value. This current algorithm thus does not
 work in crowded fields.
 .PP
-The current draft version is based off \fIccdshape(1NEMO)\fP and thus inherits some keywords and output
-that may disappear or change meaning.
+Selection of the pixels involved in the \fIfitting\fP is via two keywords:  \fBbox=\fP and \fBclip=\fP. Apart
+from visual inspection, a good strategy could be to clip at a fraction of (datamax-datamin)
+.PP
+See also \fIccdshape(1NEMO)\fP from which this program was derived.
 .PP
 Pixel coordinates are 1-based.
 .PP
@@ -24,24 +26,25 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input NEMO image file
+Input \fIimage(5NEMO)\fP file
 .br
 No default.
 .TP
-\fBpos=\fP
-(x,y) center of the \fBbox\fP, or use maximum in image (?). Positions are 1-based integers.
+\fBpos=\fP\fIx,y\fP
+(x,y) center of the \fBbox\fP. Positions are 1-based integers
+With the special value \fBpos=max\fP the location of the maximum in the image is used.
 .br
-Default is center of image, but there should be an option to use the maximum in the image?
+Default is center of image. 
 .TP
-\fBbox=\fP
-Box size to use around \fBpos\fP.
+\fBbox=\fP\fIsize\fP
+Box size (in pixels) to use around \fBpos\fP. For even box ssize, the center pixel will be in the upper-right quadrant.
 .br
 Default: 32
 .TP
 \fBclip=\fP
-Use only values above \fBclip\fP. 
+Use only values above \fBclip\fP from the selected area.
 .br
-Default will use all values
+Default will use all values within the box.
 .TP
 \fBwcs=t|f\fP
 Use WCS of the cube (otherwise use pixel coordinates 1..N).
@@ -59,17 +62,80 @@ Weigh moments of inertia by intensity?
 \fBcross=\fP
 Use cross correlations between X and Y to...
 .TP
-\fBpeak=N\fP
-Find the N-th peak. Only used if \fBpos\fP is not given.
-For \fBpeak=0\fP the center of the map is used, otherwise
-it will find the N-th peak.
+\fBscale=\fP
+Scale factor to be applied to output radii. A common value is 3600 if the input
+units are degrees.
 .br
 Default: 1
 .br
-\fInot implemented yet\fP
+.TP
+\fBout=\fP
+Optional output file. If given, the pixel coordinates and intensities are written out,
+for programs such as \fItabnlllsqfit(1NEMO)\fP to fit models.
 
 
 .SH "EXAMPLES"
+An example of creating a gaussian blob with a given Signal/Noise (sn=) and running it
+through ccdblob:
+.EX
+
+sn=100
+ccdgen - gauss 1,3 127,127  |\\
+  ccdgen - noise 0,1/$sn in=- seed=123 |\\
+  ccdblob -
+
+Npoints:    1024
+Box:        32
+DataMinMax: -0.0316674 1.00188
+Min at:     76 57 (1 based)
+Max at:     64 64
+Mean:       0.0549987
+Median:     -0.0101503
+DataSum:    56.3187
+Flux:       66.7126
+ImSize:     127 127 1
+Center:     -0.0734071 0.0983847 0 [wcs]
+BLOB:  64 64  -0.0734071 0.0983847 32   -0.0101503 1.00188 66.7126
+        e_x:     1.00000     0.70709     0.70712     0.00000    90.0   45.0
+        e_y:     1.00000    -0.70712     0.70709     0.00000    90.0  135.0
+        e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
+      qpole:  7945.70166     0.70709     0.70712     0.00000
+                 8.46289     0.70712    -0.70709     0.00000
+                 0.00000     0.00000     0.00000     1.00000
+a,b:  89.1387 2.9091
+inc:  88.1298 (meaningless without radecvel)
+pa:   135.001 (meaningless without radecvel)
+
+
+.EE
+.PP
+The same example as before, but now feeding a table with 37 points to a 2d gaussfit. These fits
+are often very dependant on the initial guess, but it does a pretty good job here:
+.EX
+
+ns=100
+ccdgen - gauss 1,3 127,127  |\\
+  ccdgen - noise 0,1/$sn in=- seed=123 |\\
+  ccdblob - clip=0.5 out=gauss.tab
+tabnllsqfit gauss.tab 1,2 3 fit=gauss2d par=1,2,64,64,2
+
+nrt=16
+Fitting a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):  
+a= -0.076949 0.126768 
+b= 1.07709 0.123398 
+c= 63.0009 0.0110594
+d= 62.9887 0.011061
+e= 3.15046 0.244319
+npt= 37
+rms= 0.00801193
+rms2/chi2= 0.00237507
+rms/chi = 1
+
+.EE
+
+.PP
+
+
 Analysing a Betelgeuse images from an all-sky camera:
 .EX
 
@@ -82,39 +148,9 @@ Where the BLOB line lists the peak position (pixels are 1-based), followed
 by an intensity weighted position, the box size around the estimated center,
 followed by the median, peak and total blob flux (corrected for the median
 background).
-.PP
-An example of creation a gaussian blob with a given Signal/Noise (ns=) and running it
-through ccdblob:
-.EX
-
-sn=10
-ccdgen - gauss 1,3 128,128  | ccdgen - noise 0,1/$sn in=- | ccdblob -
-Npoints:    1024
-DataMinMax: -0.359968 1.08932
-Min at:     53 71 (1 based)
-Max at:     64 65
-Mean:       0.0559946
-Median:     0.0673992
-DataSum:    57.3385
-Flux:       -11.6783
-ImSize:     128 128 1
-Center:     63.1595 63.5957 0 [wcs]
-BLOB:  64 65  64.1595 64.5957 32   0.0673992 1.08932 -11.6783
-        e_x:     1.00000     0.99981     0.01968     0.00000    90.0    1.1
-        e_y:     1.00000    -0.01968     0.99981     0.00000    90.0   91.1
-        e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
-      qpole:    13.07941     0.99981     0.01968     0.00000
-                 5.93258    -0.01968     0.99981     0.00000
-                 0.00000     0.00000     0.00000     1.00000
-a,b:  3.61655 2.43569
-inc:  47.6634 (meaningless without radecvel)
-pa:   91.1275 (meaningless without radecvel)
-
-
-.EE
 
 .SH "SEE ALSO"
-ccdstat(1NEMO), image(5NEMO)
+ccdshape(1NEMO), ccdstat(1NEMO), image(5NEMO)
 .nf
 https://github.com/perwin/imfit
 .fi
@@ -129,4 +165,5 @@ Peter Teuben
 .ta +1.25i +4.5i
 15-feb-2020	V0.1 Created	PJT
 14-feb-2025	V0.3 fix boxsize when no pos given	PJT
+30-may-2025	V0.5 allow pos=max	PJT
 .fi

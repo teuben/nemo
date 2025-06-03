@@ -4,6 +4,7 @@
  *      (based off ccdshape)
  *
  *	quick and dirty:  15-feb-2020	pjt
+ *      fix various wcs issues:     31-may-2025    PJT
  *
  * @todo    check if box= not too big
  */
@@ -21,12 +22,13 @@ string defv[] = {
   "pos=\n         (x,y) position (1-based), or use max in map",
   "box=32\n       Box size to use around pos",
   "clip=\n        Use only values above clip",
-  "wcs=t\n        Use WCS of the cube (else use integer 0-based coordinates)",
+  "wcs=t\n        Use WCS of the cube (else use integer 1-based coordinates)",
   "radecvel=f\n   Split the RA/DEC from VEL",
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.5\n  30-may-2025 PJT",
+  "out=\n         Optional output table of selected points",
+  "VERSION=0.7\n  31-may-2025 PJT",
   NULL,
 };
 
@@ -44,11 +46,13 @@ void xyz2rtp(vector xyz, vector rtp);
 void eigsrt(float *d,float **v, int n);
 void eigenframe(vector frame[], matrix mat);
 void jacobi(float **a,int n,float *d,float **v,int *nrot);
+
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum);
 
 
 void nemo_main()
 {
-  stream   instr;
+  stream   instr, outstr;
   string   oper;
   int      i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
   int      nclip, apeak, apeak1, cnt;
@@ -64,6 +68,8 @@ void nemo_main()
   bool     Qrdv = getbparam("radecvel");
   bool     Qiwm = getbparam("weight");
   bool     Qcross = getbparam("cross");
+  bool     Qmax = FALSE;
+  bool     Qout = hasvalue("out");
   vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
   matrix   tmpm, w_qpole;
   real     w_sum, dmin, dmax;
@@ -72,6 +78,7 @@ void nemo_main()
   Moment   m;
 
   instr = stropen(getparam("in"), "r");
+  if (Qout) outstr = stropen(getparam("out"), "w");
   
   if (Qclip) {
     nclip = nemoinpr(getparam("clip"),clip,2);
@@ -87,17 +94,20 @@ void nemo_main()
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
   if (nz > 1) error("Cannot handle cubes");
 
-  // @todo differentiate between even and odd box size
   box = getiparam("box");
-  nbpos = nemoinpi(getparam("pos"),bpos,2);
-  if (nbpos == 2) {                        // fix center at/near bpos
-    dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
+  if (streq(getparam("pos"),"max")) {
+    whereis_max(iptr, &bpos[0], &bpos[1], FALSE);
   } else {
-    // @todo have option to use the peak
-    nbpos = 2;
-    bpos[0] = nx/2;  // use center
-    bpos[1] = ny/2;
-    dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    nbpos = nemoinpi(getparam("pos"),bpos,2);
+    if (nbpos == 2) {                        // fix center at/near bpos
+      dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
+    } else {
+      // @todo have option to use the peak
+      nbpos = 2;
+      bpos[0] = nx/2;  // use center
+      bpos[1] = ny/2;
+      dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    }
   }
   xrange[0] = bpos[0] - (box-1)/2;
   xrange[1] = bpos[0] + (box-1)/2;
@@ -117,32 +127,26 @@ void nemo_main()
   w_sum = 0.0;
   CLRV(w_pos);
   for (k=0; k<nz; k++) {
-    pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
+    pos[2] = Qwcs ? (k-Zref(iptr))*Dz(iptr) + Zmin(iptr)  :  k;
+    pos[2] = Qwcs ? (k-CRPIX3(iptr))*CDELT3(iptr) + CRVAL3(iptr)  :  k;    
     for (j=yrange[0]; j<=yrange[1]; j++) {
-      pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
+      pos[1] = Qwcs ? (j-CRPIX2(iptr))*CDELT2(iptr) + CRVAL2(iptr)  :  j;
       for (i=xrange[0]; i<=xrange[1]; i++) {
-	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
+	pos[0] = Qwcs ? (i-CRPIX1(iptr))*CDELT1(iptr) + CRVAL1(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
 	if (cnt==0) {
 	  dmin = dmax = cv;
 	} else {
-	  if (cv < dmin) {
-	    dmin = cv;
-	    ixmin=i;
-	    iymin=j;
-	  }
-	  if (cv > dmax) {
-	    dmax = cv;
-	    ixmax=i;
-	    iymax=j;
-	  }
+	  if (cv < dmin) {  dmin = cv;  ixmin=i; iymin=j; }
+	  if (cv > dmax) {  dmax = cv;  ixmax=i; iymax=j; }
 	}
 	if (nbpos==2) {
 	  dprintf(1,"%d @ %d %d %d\n", cnt, i,j,k);
 	  data[cnt] = cv;
 	  accum_moment(&m, cv, 1.0);
 	}
+	if (Qout) fprintf(outstr,"%d %d %g\n", i,j,cv);
 	cnt++;
 	if (!Qiwm) cv = 1.0;
 	w_sum += cv;
@@ -152,6 +156,8 @@ void nemo_main()
     }
   }
   DIVVS(w_pos,w_pos,w_sum);
+  if (!Qwcs)
+    ADDVS(w_pos, w_pos, 1.0);    // convert to 1-based pixel coordinates
   
   printf("Npoints:    %d\n",cnt);
   printf("Box:        %d\n", box);
@@ -167,7 +173,7 @@ void nemo_main()
   printf("Center:     %g %g %g %s\n",w_pos[0], w_pos[1], w_pos[2],
 	 Qwcs ? "[wcs]" : "[grid]");
   printf("BLOB:  %d %d  %g %g %d   %g %g %g\n",
-	 ixmax+1,iymax+1, w_pos[0]+1, w_pos[1]+1, box,
+	 ixmax+1,iymax+1, w_pos[0], w_pos[1], box,
 	 median_moment(&m),
 	 dmax,
 	 show_moment(&m,1) - cnt * median_moment(&m));
@@ -351,3 +357,24 @@ void xyz2rtp(vector xyz, vector rtp)
   rtp[0] = sqrt(z*z+w*w);
 }
 
+// loop over the full image
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum)
+{
+  int i , nx = Nx(iptr);
+  int j , ny = Ny(iptr);
+  real dmax = CubeValue(iptr,0,0,0);
+  // no support for 3D
+  for (i=0; i<nx; i++)
+    for (j=0; j<ny; j++) {
+      if (CubeValue(iptr,i,j,0) > dmax) {
+	dmax = CubeValue(iptr,i,j,0);
+	*ix = i;
+	*iy = j;
+      }
+    }
+  dprintf(1,"max %g at %d %d\n", dmax, *ix + 1, *iy + 1);
+
+  if (Qsum) {
+    warning("2D downhill summing not implemented yet");
+  }
+}

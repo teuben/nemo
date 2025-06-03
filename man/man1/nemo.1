@@ -1,11 +1,11 @@
-.TH NEMO 1NEMO "25 May 2025"
+.TH NEMO 1NEMO "31 May 2025"
 
 .SH "NAME"
 nemo, astronemo \- outline the NEMO package
 
 .SH "DESCRIPTION"
-\fBnemo\fP is a computer package, there is no program with that name. On linux
-there is the \fInemo\fP file manager, which is a fork of \fInautilus\fP.
+\fBnemo\fP is a computer package, there is no program with that name. On Linux
+there is the \fInemo\fP file manager, which is a fork of \fInautilus\fP. 
 .PP
 \fBastronemo\fP is the name you may find in some package managers. If you google the name
 \fInemo\fP, you will find a lot of computer related tools with that name. We also
@@ -39,18 +39,20 @@ with the unix style of command line tools, piping etc.:
 
 .nf
 
-- programs use a set of key=value command line arguments,
+- NEMO is loaded into your shell environment by sourcing the nemo_start.sh file
+
+- NEMO programs use a set of key=value command line arguments,
   minimum match works, but you cannot repeat keywords
     * the --help or help=h are ways to get inline help from a program
       and remind you of the keyword names
     * keyword values can be math expressions (see \fInemoinp(1NEMO)\fP)
-    * the UNIX \fIman(1)\fP command will get offline help
+    * the UNIX \fIman(1)\fP command will get offline help, though --man also works.
 
 - NEMO can use pipes efficiently:
     * The UNIX stdin and stdout are represented with a dash (-),
-      so using pipes can become a little awkward
+      so using pipes can become a little awkward. E.g. mkplummer - 100 | tsf -
     * The UNIX /dev/null is represented with a dot (.),
-      like a black hole sucking up everything
+      like a black hole sucking up everything.  E.g. mkplummer . 100
 .fi
 
 .SH "MAN PAGES"
@@ -66,6 +68,9 @@ $NEMO/man/manX/*.* files):
    man -S <section_ID> <keyword>
    man -wK <keyword>
 .EE
+
+There are also 3rd party application helping you to browse man pages, e.g.
+\fIqman(1)\fP, or programs like tldr(1) or cheat(1)
 
 .SH "SYNOPSIS"
 
@@ -83,7 +88,7 @@ What you need to do to set yourself up for \fBNEMO\fP:
 .PP
 The easiest way is to add the appropriate line to your \fI.cshrc\fP or
 \fI.bashrc\fP file, but you need to know the root directory
-where NEMO is installed.  For example
+where NEMO is installed.  For example (check also your ~/.nemorc file):
 .EX
 
    source /opt/nemo/nemo_start.sh
@@ -106,6 +111,7 @@ to load nemo, e.g.
 
    module load nemo
    module load nemo/4.2.1
+   
 .EE
 
 .SH "HOW TO RUN NEMO PROGRAMS"
@@ -276,8 +282,8 @@ will help you (re)compile programs.
 .SH "SEE ALSO"
 index(1NEMO), programs(8NEMO), tricks(8NEMO), mkplummer(1NEMO), files(8NEMO),
 nemoinp(1NEMO), stropen(3NEMO), getparam(3NEMO), run(1NEMO), run(3NEMO), mknemo(8NEMO),
-mkman(8NEMO), template(8NEMO), history(8NEMO),
-pipestatus(l)
+mkman(8NEMO), template(8NEMO), history(8NEMO), amuse(1NEMO),
+pipestatus(l), qman(1), man(1)
 
 .nf
 https://www.unix.com/man-page-repository.php - Man Page Repository
