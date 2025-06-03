@@ -2,6 +2,7 @@
 #
 #   note that redis needs -I$NEMO/opt/include/hiredis
 #
+#   where is valkey's  PROG_SUFFIX="_nemo" 
 
 url=https://github.com/redis/hiredis
 version=git
