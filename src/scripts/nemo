@@ -13,29 +13,17 @@ gitbv() {
     _branch=$(cd $1;git branch --show-current)
     _counter=$(cd $1;git rev-list --count HEAD)
     _lastdate=$(cd $1;git log -1 --format="%at" | xargs -I{} date -d @{} +%Y/%m/%d_%H:%M:%S)
-    _remote=$(cd $1;git remote -v | tail -1)
     _branch="$(printf %-10s $_branch)"
     _counter="$(printf %-10s $_counter)"
-}
-
-nemorc() {
-    if [ -e ~/.nemorc ]; then
-	_nemo=$(source ~/.nemorc ; echo $NEMO)
-    else
-	_nemo="not present"
-    fi
-}
+}    
 
 if [ -z $NEMO ]; then
     echo "NEMO environment not loaded (odd)"
-    nemorc
     exit 0
 else
     _version=$(cat $NEMO/VERSION)
     gitbv $NEMO
-    nemorc
-    echo "NEMO:        $NEMO  - Version:$_version"       # current NEMO
-    echo "~/.nemorc:   $_nemo"                           # official NEMO
+    echo "NEMO:        $NEMO  - Version:$_version"
     echo "YAPP:        $YAPP - default yapp plotting device"
     echo "git:         Branch:$_branch Counter:$_counter Date: $_lastdate"
 fi
@@ -54,17 +42,13 @@ gitbv $NEMO
 # (cd $LMTOY; make branch)
 
 if [ -d $NEMO/local/starlab ]; then
-    gitbv $NEMO/local/starlab
-    echo "Found starlab: $_remote $_branch $_counter $_lastdate "
-    
+   echo "Found starlab" 
 fi
 if [ -d $NEMO/local/amuse ]; then
-    gitbv $NEMO/local/amuse    
-    echo "Found amuse: $_remote $_branch $_counter $_lastdate "
+    echo "Found amuse"
 fi
 if [ -d $NEMO/local/miriad ]; then
-    gitbv $NEMO/local/miriad    
-    echo "Found miriad: $_remote $_branch $_counter $_lastdate "
+    echo "Found miriad"
 fi
 
 if [ "$1" == pull ]; then
