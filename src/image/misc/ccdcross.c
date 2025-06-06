@@ -24,7 +24,7 @@ string defv[] = {
   "clip=\n        Only use values above this clip level from input",
   "clop=\n        Clip from correllation image to finder center",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.4\n  5-jun-2024 PJT",
+  "VERSION=0.5\n  6-jun-2024 PJT",
   NULL,
 };
 
@@ -81,11 +81,12 @@ void nemo_main()
     strclose(instr);
 
     if (hasvalue("center")) {
+      //  @todo  :   allow "max" and "ref" ???
       nc = nemoinpi(getparam("center"),center,2);
       if (nc != 2) error("center= needs 2 values");
     } else {
-      center[0] = Nx(iptr[0])/2;
-      center[1] = Ny(iptr[0])/2;
+      center[0] = (Nx(iptr[0])-0)/2;
+      center[1] = (Ny(iptr[0])-0)/2;
       dprintf(0,"center=%d,%d\n",center[0],center[1]);
     }
 
@@ -95,10 +96,9 @@ void nemo_main()
       box    = Nx(iptr[0])/2;
     nx = ny = 2*box + 1;
     dprintf(0,"Full box size %d\n",nx);
-      
-
+    
     optr = NULL;
-    create_cube(&optr, nx, ny, 1);
+    copy_image(iptr[0],&optr);
     outstr = stropen (getparam("out"),"w");  /* open output file first ... */
 
     for (ll=1; ll<nimage; ll++) {
@@ -204,10 +204,10 @@ local void do_cross(int l0, int l, int n)
     dprintf(0,"X,Y sig:  %g %g\n", sumxx, sumyy);    
     real xcen = ix0-box+sumx;
     real ycen = iy0-box+sumy;
-    dprintf(0,"Center at: %g %g\n",xcen,ycen);
+    dprintf(0,"Center at: %g %g from center\n",xcen,ycen);
     // @todo (ix0-xcen-box, iy0-ycen-box) is a value expected to be around (0,0) for no offsets
     // 
-    printf("%g %g  %g %g  %d %d  %g\n",xcen,ycen,sumx,sumy, ix0,iy0, MapMax(optr));	   
+    printf("%g %g  %g %g  %d %d  %g\n",xcen+cx,ycen+cy,sumx,sumy, ix0,iy0, MapMax(optr));	   
     
     if (badvalues)
     	warning("There were %d bad operations in dofie",badvalues);
