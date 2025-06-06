@@ -1,4 +1,4 @@
-.TH CCDCROSS 1NEMO "18 April 2024"
+.TH CCDCROSS 1NEMO "5 June 2025"
 
 .SH "NAME"
 ccdcross \- cross correlate images with a reference image
@@ -15,41 +15,64 @@ the box-size.
 The centroid is determined using an intensity weighted mean in the correllated image.
 A future version may fit
 a 2D gaussian or appropriate function to the correllation image.
+.PP
+Some caution is warrented as the results can depend on the size of the box and number of pixels to look around
+the correllation peak.
+
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP\fIref,im1,...\fP
 Input image files, first image is the reference image. At least two images need
-to be given. No default.
+to be given.
+.br
+No default.
 .TP
 \fBout=\fP\fIim\fP
-Output cross image. No default.
+Output cross image.
+.br
+No default.
 .TP
 \fBcenter=\fP\fIx0,y0\fP
 X-Y Reference center around which a box (see \fBbox=\fP below) is taken.
 The are 0-based integer pixels. By default the center of the image
-is used.  Default: center of first input image.
+is used.
+.br
+Default: center of first input image.
 .TP
 \fBbox=\fP\fIb2\fP
 Half size of correlation box. The output image is forced to have an odd pixel size, 2*box+1.
-The shift between the images should not exceed \fBbox\fP.
-By default half the mapsize is used. 
+The shift between the images should not exceed \fBbox\fP, or it will not find the center.
+.br
+By default half the mapsize is used.
 .TP
-\fBclip=\fP\fIc\fP
-Only use values above this clip level in the original images. By default values are not clipped.
+\fBn=\fP
+Half size of box insize correllation box to find the center
+.TP
+\fBclop=\fP\fIc\fP
+Only use values above this clip level in the final correlation image. Since the peak
+value will depend on 
+.br
+By default values are not clipped.
+
 .TP
 \fBbad=\fP\fIb\fP
-bad value to ignore. By default there is no bad value recognized.
+bad value to ignore.
+.br
+By default there is no bad value recognized.
 
 .SH "CAVEAT"
 Only 2D images are handled.
 .PP
-The WCS is ignored, 0-based pixel coordinates are reported.
+The WCS of the output image is copied from the reference image.
 .PP
 Images should ideally be the same size, but nothing will stop the program from
 running off without that. The user is then responsible for computing the true offsets
 as all bets are off.
+.PP
+A wrong choice of box= and n= can cause a bias in the center. Using clop= can help
+making it more robust.
 
 .SH "EXAMPLES"
 
@@ -58,15 +81,23 @@ each other.
 
 .EX
 
-    ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05  in=-
-    ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05  in=-
+    ccdgen - gauss 1,2 size=128,128 center=64,64 | ccdgen g64 noise spar=0,0.05 seed=64 in=-
+    ccdgen - gauss 1,2 size=128,128 center=65,65 | ccdgen g65 noise spar=0,0.05 seed=65 in=-
     ccdcross g64,g65 shift.ccd box=16
     ...
-    ### nemo Debug Info: Max cross 13.968 @ 16 16
-    ### nemo Debug Info: X,Y mean: 0.393391 0.412221
-    ### nemo Debug Info: X,Y sig:  1.7885 1.76623
-    ### nemo Debug Info: Center at: 0.393391 0.412221
-    0.393391 0.412221  0.393391 0.412221  16 16  13.968
+    ### nemo Debug[0]: Using 2 images
+    ### nemo Debug[0]: Image 0: pixel size 1 1   minmax -0.22856 0.971157 [g64]
+    ### nemo Debug[0]: center=64,64
+    ### nemo Debug[0]: Full box size 33
+    ### nemo Debug[0]: Image 1: pixel size 1 1   minmax -0.20781 0.927271 [g65]
+    ### nemo Debug[0]: 128 128  16  0 1
+    ### nemo Debug[0]: New min and max in correlation image are: -0.597157 11.907974
+    ### nemo Debug[0]: Max cross 11.908 @ 17 17
+    ### nemo Debug[0]: MinMax in 49 pts: 3.40988 11.908, use clop= to clip the corr out image
+    ### nemo Debug[0]: X,Y mean: -0.0561799 -0.0237276
+    ### nemo Debug[0]: X,Y sig:  1.81226 1.81864
+    ### nemo Debug[0]: Center at: 0.94382 0.976272
+    0.94382 0.976272  -0.0561799 -0.0237276  17 17  11.908
 
 .EE
 
