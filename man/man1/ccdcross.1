@@ -1,4 +1,4 @@
-.TH CCDCROSS 1NEMO "5 June 2025"
+.TH CCDCROSS 1NEMO "6 June 2025"
 
 .SH "NAME"
 ccdcross \- cross correlate images with a reference image
@@ -7,17 +7,17 @@ ccdcross \- cross correlate images with a reference image
 \fBccdcross\fP [parameter=value]
 
 .SH "DESCRIPTION"
-\fBccdcross\fP finds the optimal offset one (or more) images and a reference image based on the
-cross-correlation between two images.  By selecting a specific \fBcenter=\fP and
-half \fBbox=\fP size, one can focus on a specific area, assuming the offset is less than
-the box-size.
+\fBccdcross\fP finds the offset between a reference image and one (or more) images
+based on the cross-correlation between two images.  By selecting a specific \fBcenter=\fP and
+a \fBbox=\fP size, one can save compute time and focus on a specific area.
+All assuming the offset is less than the box-size.
 .PP
 The centroid is determined using an intensity weighted mean in the correllated image.
 A future version may fit
 a 2D gaussian or appropriate function to the correllation image.
 .PP
-Some caution is warrented as the results can depend on the size of the box and number of pixels to look around
-the correllation peak.
+Some caution is warrented as the results can depend on the size of the box (box=) and number of pixels (n=)
+to look around the correllation peak. See also \fBclop=\fP below.
 
 
 .SH "PARAMETERS"
@@ -30,14 +30,15 @@ to be given.
 No default.
 .TP
 \fBout=\fP\fIim\fP
-Output cross image.
+Output cross image. This image will be square and have a smaller size, \fB2*box+1\fP.
 .br
 No default.
 .TP
 \fBcenter=\fP\fIx0,y0\fP
 X-Y Reference center around which a box (see \fBbox=\fP below) is taken.
-The are 0-based integer pixels. By default the center of the image
-is used.
+These are 0-based integer pixels. By default the center of the image
+is used, but future options could be the reference pixel, or the pixel
+with the maximum value.
 .br
 Default: center of first input image.
 .TP
@@ -45,17 +46,27 @@ Default: center of first input image.
 Half size of correlation box. The output image is forced to have an odd pixel size, 2*box+1.
 The shift between the images should not exceed \fBbox\fP, or it will not find the center.
 .br
-By default half the mapsize is used.
+By default half the mapsize is used, which can be computationally expensive.
 .TP
 \fBn=\fP
-Half size of box insize correllation box to find the center
+Half size of box insize correllation box to find the center.
+See also \fBclop=\fP to limit the clip level in this
+correlation image.
+.br
+By default half the box is used.
 .TP
-\fBclop=\fP\fIc\fP
-Only use values above this clip level in the final correlation image. Since the peak
-value will depend on 
+\fBclip=\fP\fIc\fP
+Only use values above this clip level in the input images will be used for the
+correlation.
 .br
 By default values are not clipped.
-
+.TP
+\fBclop=\fP\fIc\fP
+Only use values above this clip level in the final correlation image. Units
+are loosely related to those of the input image times the number of pixels squared
+in the comparison area.
+.br
+By default values are not clipped.
 .TP
 \fBbad=\fP\fIb\fP
 bad value to ignore.
@@ -65,7 +76,7 @@ By default there is no bad value recognized.
 .SH "CAVEAT"
 Only 2D images are handled.
 .PP
-The WCS of the output image is copied from the reference image.
+The WCS of the output image 
 .PP
 Images should ideally be the same size, but nothing will stop the program from
 running off without that. The user is then responsible for computing the true offsets
@@ -97,15 +108,9 @@ each other.
     ### nemo Debug[0]: X,Y mean: -0.0561799 -0.0237276
     ### nemo Debug[0]: X,Y sig:  1.81226 1.81864
     ### nemo Debug[0]: Center at: 0.94382 0.976272
-    0.94382 0.976272  -0.0561799 -0.0237276  17 17  11.908
-
-.EE
 
 .SH "SEE ALSO"
-ccdmath(1NEMO), image(5NEMO)
-
-.SH "FILES"
-src/image/mics	ccdcross.c
+ccdblob(1NEMO), image(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben
