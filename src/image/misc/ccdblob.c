@@ -28,7 +28,7 @@ string defv[] = {
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
   "out=\n         Optional output table of selected points",
-  "VERSION=0.7\n  31-may-2025 PJT",
+  "VERSION=0.8\n  7-jun-2025 PJT",
   NULL,
 };
 
@@ -319,9 +319,9 @@ real printeig(string name, matrix mat,  real *a, real *b, real *c)
     eigsrt(d, v, 3);
     printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", name,
 	   d[1], v[1][1], v[2][1], v[3][1]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
+    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "          :",
 	   d[2], v[1][2], v[2][2], v[3][2]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
+    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "          :",
 	   d[3], v[1][3], v[2][3], v[3][3]);
 
     inc = acos(sqrt(d[2]/d[1]))*180.0/PI;
