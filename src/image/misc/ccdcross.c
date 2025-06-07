@@ -20,7 +20,7 @@ string defv[] = {
   "out=???\n      Output cross correlated image",
   "center=\n      X-Y Reference center (0-based pixels)",
   "box=\n         Half size of correlation box",
-  "n=3\n          Half size of box inside correlation box to find center",
+  "n=\n          Half size of box inside correlation box to find center",
   "clip=\n        Only use values above this clip level from input",
   "clop=\n        Clip from correllation image to finder center",
   "bad=0\n        bad value to ignore",
@@ -66,7 +66,6 @@ void nemo_main()
     if (Qclip) clip[0] = getrparam("clip");
     Qclop = hasvalue("clop");
     if (Qclop) clop = getrparam("clop");
-    n = getiparam("n");
  
     fnames = burststring(getparam("in"), ", ");  /* input file names */
     nimage = xstrlen(fnames, sizeof(string)) - 1;
@@ -95,21 +94,21 @@ void nemo_main()
     else {
       box = (Nx(iptr[0])-1)/2;
       if (Ny(iptr[0]) < Nx(iptr[0]))
-	  box = (Ny(iptr[0])-1)/2;   
+	  box = (Ny(iptr[0])-1)/2;
+      // @todo this can fail if off-center is used
     }
+    if (hasvalue("n"))
+      n = getiparam("n");
+    else
+      n = box/2;
+
     
     nx = ny = 2*box + 1;
     dprintf(0,"Full box size %d (square), n=%d\n",nx,n);
     
     optr = NULL;
-#if 1
     create_cube(&optr, nx, ny, 1);
-    //CRPIX1(optr) = CRPIX1(iptr[0]) - center[0] + box + 1;
-    //CRPIX2(optr) = CRPIX2(iptr[0]) - center[1] + box + 1;
-#else
-    copy_image(iptr[0],&optr);
-#endif
-    outstr = stropen (getparam("out"),"w");  /* open output file first ... */
+    outstr = stropen(getparam("out"),"w");  /* open output file first ... */
 
     for (ll=1; ll<nimage; ll++) {
         instr   = stropen(fnames[ll],"r");    /* open file */
