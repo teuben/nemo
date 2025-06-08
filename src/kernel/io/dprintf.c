@@ -78,9 +78,9 @@ int __nemo_dprintf(int debug, const_string fmt, ...)
         /* START changes WD 12th June 2008 */
         if(print_head) {
 	    if(mpi_proc)
-	        fprintf(stderr,"### nemo Debug Info @%d: ",mpi_rank);
+	        fprintf(stderr,"### nemo Debug[%d] @%d: ",debug,mpi_rank);
 	    else
-	        fprintf(stderr,"### nemo Debug Info: ");
+	        fprintf(stderr,"### nemo Debug[%d]: ",debug);
 	    if(debug_file && debug_level >= DEBUG_LEVEL_FOR_REPORTING_FILE)
 	        fprintf(stderr,"[%s:%d]: ",debug_file,debug_line);
 	}
