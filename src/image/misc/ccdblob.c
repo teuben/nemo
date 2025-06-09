@@ -53,26 +53,23 @@ void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum);
 void nemo_main()
 {
   stream   instr, outstr;
-  string   oper;
-  int      i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
-  int      nclip, apeak, apeak1, cnt;
-  int      ixmax, iymax, ixmin, iymin;
+  int      i,j,k,nx, ny, nz;
+  int      nclip, cnt;
+  int      ixmax=0, iymax=0, ixmin=0, iymin=0;
   int      nbpos, bpos[2], box;
-  int      xrange[2], yrange[2], zrange[2];
+  int      xrange[2], yrange[2];
   imageptr iptr=NULL;             /* pointer to image */
-  real     tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
-  real     *spec, cv, clip[2];
+  real     cv, clip[2];
   real     scale = getdparam("scale");
   bool     Qclip = hasvalue("clip");
   bool     Qwcs = getbparam("wcs");
   bool     Qrdv = getbparam("radecvel");
   bool     Qiwm = getbparam("weight");
   bool     Qcross = getbparam("cross");
-  bool     Qmax = FALSE;
   bool     Qout = hasvalue("out");
-  vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
+  vector   tmpv, w_pos, pos, pos_b, frame[3];
   matrix   tmpm, w_qpole;
-  real     w_sum, dmin, dmax;
+  real     w_sum, dmin=0, dmax=0;
   real     inc, pa_k, pa_m, dPA, a_m, b_m, c_m, a_k, b_k, c_k, dvdr;
   real     *data;
   Moment   m;
