@@ -24,7 +24,7 @@
 
 /*CTEX
  *  {\bf potname=miyamoto
- *       potpars={\it $\Omega,a,b,M$}}
+ *       potpars={\it $\Omega,M,a,b$}}
  *
  *  $$
  *    \Phi = -  {  M  \over
@@ -32,6 +32,8 @@
  *		}
  * $$
  */
+//   \Phi(R,z) = -\frac{\mathrm{amp}}{\sqrt{R^2+(a+\sqrt{z^2+b^2})^2}}
+
 
 #include <stdinc.h>
 #include <potential_float.h>
