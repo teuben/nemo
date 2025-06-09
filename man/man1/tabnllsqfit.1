@@ -1,4 +1,4 @@
-.TH TABNLLSQFIT 1NEMO "3 January 2024"
+.TH TABNLLSQFIT 1NEMO "8 June 2025"
 
 .SH "NAME"
 tabnllsqfit \- general purpose non-linear least squares fitting program
@@ -166,6 +166,7 @@ plane       	z=p0+p1*x+p2*y                   (example order=2)
 polynomial  	y=p0+p1*x+p2*x^2+p3*x^3...       (example order=3)
 gauss1d       	y=p0+p1*exp(-(x-p2)^2/(2*p3^2))
 gauss2d       	y=p0+p1*exp(-[(x-p2)^2+(x-p3)^2]/(2*p4^2))
+peak2d		y=p0+p1*(x-p3)**2+p2*(y-p4)**2
 exp		y=p0+p1*exp(-(x-p2)/p3)
 grow		y=p0*(exp(x/p1)-1)
 arm		y=p0+p1*cos(x)+p2*sin(x)
