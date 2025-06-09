@@ -1,4 +1,4 @@
-.TH CCDBLOB 1NEMO "31 May 2025"
+.TH CCDBLOB 1NEMO "8 June 2025"
 
 .SH "NAME"
 ccdblob \- properties of a blob in an image
@@ -18,7 +18,7 @@ from visual inspection, a good strategy could be to clip at a fraction of (datam
 .PP
 See also \fIccdshape(1NEMO)\fP from which this program was derived.
 .PP
-Pixel coordinates are 1-based.
+Pixel coordinates are 0-based.
 .PP
 
 .SH "PARAMETERS"
@@ -26,20 +26,22 @@ The following parameters are recognized in any order if the keyword
 is also given:
 .TP 20
 \fBin=\fP
-Input \fIimage(5NEMO)\fP file
+Input \fIimage(5NEMO)\fP file.
 .br
 No default.
 .TP
 \fBpos=\fP\fIx,y\fP
-(x,y) center of the \fBbox\fP. Positions are 1-based integers
+(x,y) center of the \fBbox\fP. Positions are 0-based integers
 With the special value \fBpos=max\fP the location of the maximum in the image is used.
 .br
 Default is center of image. 
 .TP
 \fBbox=\fP\fIsize\fP
-Box size (in pixels) to use around \fBpos\fP. For even box ssize, the center pixel will be in the upper-right quadrant.
+Box size (in pixels) to use around \fBpos\fP. It is best to choose something odd,
+for an even box size, the center pixel will be in the upper-right quadrant.
+gi
 .br
-Default: 32
+Default: 7.
 .TP
 \fBclip=\fP
 Use only values above \fBclip\fP from the selected area.
@@ -84,28 +86,27 @@ ccdgen - gauss 1,3 127,127  |\\
   ccdgen - noise 0,1/$sn in=- seed=123 |\\
   ccdblob -
 
-Npoints:    1024
-Box:        32
-DataMinMax: -0.0316674 1.00188
-Min at:     76 57 (1 based)
-Max at:     64 64
-Mean:       0.0549987
-Median:     -0.0101503
-DataSum:    56.3187
-Flux:       66.7126
+Npoints:    49
+Box:        7
+DataMinMax: 0.345445 1.00188
+Min at:     60 66 (0 based)
+Max at:     63 63
+Mean:       0.6649
+Median:     1.00188
+DataSum:    32.5801
+Flux:       -16.5122
 ImSize:     127 127 1
-Center:     -0.0734071 0.0983847 0 [wcs]
-BLOB:  64 64  -0.0734071 0.0983847 32   -0.0101503 1.00188 66.7126
-        e_x:     1.00000     0.70709     0.70712     0.00000    90.0   45.0
-        e_y:     1.00000    -0.70712     0.70709     0.00000    90.0  135.0
+Center:     0.000935206 -0.00434081 0 [wcs]
+BLOB:  63 63  0.000935206 -0.00434081 7   1.00188 1.00188 -16.5122
+        e_x:     1.00000     0.70711     0.70711     0.00000    90.0   45.0
+        e_y:     1.00000    -0.70711     0.70711     0.00000    90.0  135.0
         e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0
-      qpole:  7945.70166     0.70709     0.70712     0.00000
-                 8.46289     0.70712    -0.70709     0.00000
-                 0.00000     0.00000     0.00000     1.00000
-a,b:  89.1387 2.9091
-inc:  88.1298 (meaningless without radecvel)
-pa:   135.001 (meaningless without radecvel)
-
+      qpole:  7941.36475     0.70711     0.70711     0.00000
+           :     3.35181     0.70711    -0.70711     0.00000
+           :     0.00000     0.00000     0.00000     1.00000
+a,b:  89.1143 1.83079
+inc:  88.8228 (meaningless without radecvel)
+pa:   135 (meaningless without radecvel)
 
 .EE
 .PP
@@ -131,26 +132,24 @@ rms= 0.00801193
 rms2/chi2= 0.00237507
 rms/chi = 1
 
+tabnllsqfit gauss.tab 1,2 3 fit=peak2d par=1,-1,-1,63,63
+Fitting : y = a+b*(x-d)**2+*c*(y-e)**2:  
+a= 0.977191 0.00428134 
+b= -0.0414872 0.000758877 
+c= -0.0408268 0.000758877
+d= 63.0008 0.0148635
+e= 62.9876 0.0151057
+FWZP= 0.206048 0.204401
+npt= 37
+rms= 0.0119193
+rms2/chi2= 0.00525659
+rms/chi = 1
+
 .EE
 
-.PP
-
-
-Analysing a Betelgeuse images from an all-sky camera:
-.EX
-
-% file=ASC/MASN-01/archive/201601/20160102/IMG00700.FIT
-% fitsccd $file - | ccdblob - 724,305
- BLOB 726 305  724.573 305.38 32   6546 42731 139121
-
-.EE
-Where the BLOB line lists the peak position (pixels are 1-based), followed
-by an intensity weighted position, the box size around the estimated center,
-followed by the median, peak and total blob flux (corrected for the median
-background).
 
 .SH "SEE ALSO"
-ccdshape(1NEMO), ccdstat(1NEMO), image(5NEMO)
+ccdshape(1NEMO), ccdstat(1NEMO), ccdcross(1NEMO), image(5NEMO)
 .nf
 https://github.com/perwin/imfit
 .fi
@@ -166,4 +165,5 @@ Peter Teuben
 15-feb-2020	V0.1 Created	PJT
 14-feb-2025	V0.3 fix boxsize when no pos given	PJT
 30-may-2025	V0.5 allow pos=max	PJT
+7-jun-2025	V0.8 WCS fixes,and use 0-based pixels	PJT
 .fi
