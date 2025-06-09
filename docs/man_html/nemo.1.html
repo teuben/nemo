@@ -15,8 +15,8 @@ nemo, astronemo - outline the NEMO package
 <p> 
 <h2><a name='sect1' href='#toc1'>Description</a></h2>
 <b>nemo</b> is a computer
-package, there is no program with that name. On linux there is the <i>nemo</i>
-file manager, which is a fork of <i>nautilus</i>. <p>
+package, there is no program with that name. On Linux there is the <i>nemo</i>
+file manager, which is a fork of <i>nautilus</i>.  <p>
 <b>astronemo</b> is the name you may
 find in some package managers. If you google the name <i>nemo</i>, you will find
 a lot of computer related tools with that name. We also adopted this name
@@ -47,17 +47,20 @@ Here are some useful reminders of
 using NEMO when you are familiar with the unix style of command line tools,
 piping etc.: 
 <p> <br>
-<pre>- programs use a set of key=value command line arguments,
+<pre>- NEMO is loaded into your shell environment by sourcing the nemo_start.sh
+file
+- NEMO programs use a set of key=value command line arguments,
   minimum match works, but you cannot repeat keywords
     * the --help or help=h are ways to get inline help from a program
       and remind you of the keyword names
     * keyword values can be math expressions (see nemoinp(1NEMO))
-    * the UNIX man(1) command will get offline help
+    * the UNIX man(1) command will get offline help, though --man also works.
 - NEMO can use pipes efficiently:
     * The UNIX stdin and stdout are represented with a dash (-),
-      so using pipes can become a little awkward
+      so using pipes can become a little awkward. E.g. mkplummer - 100 | tsf
+-
     * The UNIX /dev/null is represented with a dot (.),
-      like a black hole sucking up everything
+      like a black hole sucking up everything.  E.g. mkplummer . 100
 </pre>
 <p> 
 <h2><a name='sect3' href='#toc3'>Man Pages</a></h2>
@@ -72,6 +75,11 @@ information (short of using grep on the 800+ $NEMO/man/manX/*.* files):
     man -S &lt;section_ID&gt; &lt;keyword&gt;<br>
     man -wK &lt;keyword&gt;<br>
   
+<p> There are also 3rd party application helping you to browse man pages,
+e.g. <a href='qman.1.html'><i>qman(1)</i></a>
+, or programs like <a href='tldr.1.html'>tldr(1)</a>
+ or <a href='cheat.1.html'>cheat(1)</a>
+ 
 <p> 
 <h2><a name='sect4' href='#toc4'>Synopsis</a></h2>
 
@@ -88,9 +96,9 @@ run program ...
 What you need to do to set yourself up for <b>NEMO</b>: <p>
 The easiest
 way is to add the appropriate line to your <i>.cshrc</i> or <i>.bashrc</i> file, but you
-need to know the root directory where NEMO is installed.  For example  
-<p>
-   source /opt/nemo/nemo_start.sh<br>
+need to know the root directory where NEMO is installed.  For example (check
+also your ~/.nemorc file):  
+<p>    source /opt/nemo/nemo_start.sh<br>
  
 <p>  or for (t)csh users we still have  
 <p>    source /opt/nemo/nemo_start.csh<br>
@@ -105,6 +113,7 @@ this is supported, the <a href='module.1.html'><i>module(1)</i></a>
 
 <p>    module load nemo<br>
     module load nemo/4.2.1<br>
+    <br>
   
 <p> 
 <h2><a name='sect6' href='#toc6'>How to Run Nemo Programs</a></h2>
@@ -224,16 +233,23 @@ help:
        <br>
   
 <p> 
-<h2><a name='sect9' href='#toc9'>Programming</a></h2>
+<h2><a name='sect9' href='#toc9'>Install</a></h2>
+Installing NEMO it outlined in the top level README file. The
+file <b>docs/install_nemo.sh</b> has an easy entry point to automate some of the
+most common installations from the commandline, e.g.  
+<p>     install_nemo.sh
+nemo=nemo_test python=1 amuse=1 yapp=ps<br>
+     <br>
+  
+<p> 
+<h2><a name='sect10' href='#toc10'>Programming</a></h2>
 You may need to do some sherlocking here. You have probably
 seen the $NEMO/configure.ac and $NEMO/makedefs file, though the $NEMOLIB/makedefs
 is the active file. This is where you can hack to fix compilation errors.
 The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
- script will help you (re)compile programs, though sometimes
-<a href='bake.8.html'><i>bake(8NEMO)</i></a>
- can do a better job in a local directory. 
+ script will help you (re)compile programs.  
 <p> 
-<h2><a name='sect10' href='#toc10'>See Also</a></h2>
+<h2><a name='sect11' href='#toc11'>See Also</a></h2>
 <a href='index.1.html'>index(1NEMO)</a>
 ,
 <a href='programs.8.html'>programs(8NEMO)</a>
@@ -251,17 +267,21 @@ The <a href='mknemo.8.html'><i>mknemo(8NEMO)</i></a>
 <a href='mkman.8.html'>mkman(8NEMO)</a>
 , <a href='template.8.html'>template(8NEMO)</a>
 , <a href='history.8.html'>history(8NEMO)</a>
+, <a href='amuse.1.html'>amuse(1NEMO)</a>
 , <a href='pipestatus.l.html'>pipestatus(l)</a>
+,
+<a href='qman.1.html'>qman(1)</a>
+, <a href='man.1.html'>man(1)</a>
  
 <p> <br>
 <pre>https://www.unix.com/man-page-repository.php - Man Page Repository
 https://man7.org/linux/man-pages/man1/man.1.html - The Linux man-pages project
 </pre>
 <p> 
-<h2><a name='sect11' href='#toc11'>Author</a></h2>
+<h2><a name='sect12' href='#toc12'>Author</a></h2>
 Peter Teuben 
 <p> 
-<h2><a name='sect12' href='#toc12'>Further Information</a></h2>
+<h2><a name='sect13' href='#toc13'>Further Information</a></h2>
 The <i>NEMO Users/Programmers Guide</i>
 contains most of the information you need to get down to the guts of the
 system. <p>
@@ -283,7 +303,7 @@ Other introductions <br>
 http://paginapessoal.utfpr.edu.br/rubensmachado/outros-1/simulacoes-de-n-corpos/NbodyTutorial.pdf
 </pre>
 <p> 
-<h2><a name='sect13' href='#toc13'>Caveats</a></h2>
+<h2><a name='sect14' href='#toc14'>Caveats</a></h2>
 Since programs are being modified, and extended fairly regularly,
  manual pages for related programs do not always know about these changes
 if they should. Keeping good cross references in the manual pages might
@@ -294,7 +314,7 @@ it is derived from the code itself. See also <a href='checkpars.8.html'><i>check
 <p>is always <a href='https://github.com/teuben/nemo/issues'>https://github.com/teuben/nemo/issues</a>
  
 <p> 
-<h2><a name='sect14' href='#toc14'>History</a></h2>
+<h2><a name='sect15' href='#toc15'>History</a></h2>
 <br>
 <pre>1986<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1 Initial Development<tt> </tt>&nbsp;<tt> </tt>&nbsp;Barnes/Hut/Teuben
 1994<tt> </tt>&nbsp;<tt> </tt>&nbsp;V2 UMD release<tt> </tt>&nbsp;<tt> </tt>&nbsp;Teuben
@@ -314,12 +334,13 @@ it is derived from the code itself. See also <a href='checkpars.8.html'><i>check
 <li><a name='toc6' href='#sect6'>How to Run Nemo Programs</a></li>
 <li><a name='toc7' href='#sect7'>HOW TO RUN non-NEMO PROGRAMS</a></li>
 <li><a name='toc8' href='#sect8'>HELP on GIPSY and MIRIAD</a></li>
-<li><a name='toc9' href='#sect9'>Programming</a></li>
-<li><a name='toc10' href='#sect10'>See Also</a></li>
-<li><a name='toc11' href='#sect11'>Author</a></li>
-<li><a name='toc12' href='#sect12'>Further Information</a></li>
-<li><a name='toc13' href='#sect13'>Caveats</a></li>
-<li><a name='toc14' href='#sect14'>History</a></li>
+<li><a name='toc9' href='#sect9'>Install</a></li>
+<li><a name='toc10' href='#sect10'>Programming</a></li>
+<li><a name='toc11' href='#sect11'>See Also</a></li>
+<li><a name='toc12' href='#sect12'>Author</a></li>
+<li><a name='toc13' href='#sect13'>Further Information</a></li>
+<li><a name='toc14' href='#sect14'>Caveats</a></li>
+<li><a name='toc15' href='#sect15'>History</a></li>
 </ul>
 </body>
 </html>
