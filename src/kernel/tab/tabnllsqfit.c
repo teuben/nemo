@@ -74,7 +74,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3f\n     7-jun-2025 PJT",
+    "VERSION=4.3g\n     9-jun-2025 PJT",
     NULL
 };
 
@@ -110,8 +110,6 @@ int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr;
 real dypow;
 a_column            xcol[MAXCOL],   ycol[MAXCOL], dycol,  bcol;
 a_range    xrange;
-
-/* real xrange[MAXCOL*2];      /* ??? */
 
 string fit_method;          /* fit method (gipsy, numrec, minpack) */
 string fit_object;          /* fit method (line, poly, ....) */
@@ -231,7 +229,7 @@ static real func_dgauss1d(real *x, real *p, int np)
   
   arg1 = a1*a1/(2*b1*b1);
   arg2 = a2*a2/(2*b2*b2);
-  return p[0] + p[1] * exp(-arg1); + p[4] * exp(-arg2);
+  return p[0] + p[1] * exp(-arg1) + p[4] * exp(-arg2);
 }
 
 static void derv_dgauss1d(real *x, real *p, real *e, int np)
@@ -282,7 +280,7 @@ static void derv_gauss2d(real *x, real *p, real *e, int np)
 //  peak2d     p0+p1*(x-p3)**2+p2*(y-p4)**2
 static real func_peak2d(real *x, real *p, int np)
 {
-  real a,b,c,arg;
+  real a,b;
   a = x[0]-p[3];
   b = x[1]-p[4];
   return p[0] + p[1]*a*a + p[2]*b*b;
@@ -290,7 +288,7 @@ static real func_peak2d(real *x, real *p, int np)
 
 static void derv_peak2d(real *x, real *p, real *e, int np)
 {
-  real a,b,c,arg;
+  real a,b;
   a = x[0]-p[3];
   b = x[1]-p[4];
 
@@ -848,7 +846,7 @@ void load_function(string fname,string method)
 void do_function(string method)
 {
   real *x, *y, *dy, *d;
-  int i,j,k,nrt, mpar[MAXPAR];
+  int i,k,nrt, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = npar;        /* MUST be set */
 
@@ -988,8 +986,7 @@ void random_permute1(int n, int *idx)
 
 void random_permute2(int n, int *idx) 
 {
-  int i, j, k, tmp;
-  double xn = n;
+  int i, j, tmp;
 
   for (i=0; i<n-2; i++) {
     j = (int) xrandom(i+1.0,n+0.0);
@@ -1141,9 +1138,9 @@ void bootstrap3(int nboot,
 
 void do_line()
 {
-  real *x, *y, *dy, *d, *y1, *d1;
-  int i,j, nrt, npt1, iter, mpar[2], *perm;
-  real fpar[2], epar[2], sigma, s, bpar[2];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[2];
+  real fpar[2], epar[2];
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1203,7 +1200,6 @@ void do_line()
 void do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  real **xp;
   int i,j,k,nrt, npt1,iter,mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
@@ -1275,8 +1271,8 @@ void do_plane()
  
 void do_gauss1d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[4];
   real sum, dmin, dmax, xmin, xmax, fpar[4], epar[4];
   int lpar = 4;
 
@@ -1372,8 +1368,8 @@ void do_gauss1d()
  
 void do_dgauss1d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[7];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[7];
   real sum, dmin, dmax, xmin, xmax, fpar[7], epar[7];
   int lpar = 7;
 
@@ -1471,8 +1467,8 @@ void do_dgauss1d()
  
 void do_gauss2d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j,k, nrt, npt1, iter, mpar[5];
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5];
   int lpar = 5;
 
@@ -1531,8 +1527,8 @@ void do_gauss2d()
  
 void do_peak2d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j,k, nrt, npt1, iter, mpar[5];
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5];
   int lpar = 5;
 
@@ -1595,8 +1591,8 @@ void do_peak2d()
  
 void do_exp()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 
@@ -1651,8 +1647,8 @@ void do_exp()
  
 void do_grow()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[2];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[2];
   real fpar[2], epar[2];
   int lpar = 2;
 
@@ -1680,7 +1676,7 @@ void do_grow()
   for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
     printf("nrt=%d\n",nrt);
-    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1]);
     if (nrt==-2)
       warning("No free parameters");
     else if (nrt<0)
@@ -1708,7 +1704,7 @@ void do_grow()
 void do_poly()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
     
@@ -1764,7 +1760,7 @@ void do_poly()
 void do_poly2()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = 4;
   
@@ -1821,7 +1817,7 @@ void do_poly2()
 void do_poly3()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = 4;
   
@@ -1881,7 +1877,7 @@ void do_poly3()
 void do_arm()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[3];
+  int i, nrt, npt1, iter, mpar[3];
   real fpar[3], epar[3],amp,pha,amperr,phaerr;
   int lpar = 3;
     
@@ -1945,8 +1941,8 @@ void do_arm()
 void do_loren()
 {
   real *x, *y, *dy, *d, *y1, *d1;
-  int i,j, nrt, npt1, iter, mpar[2], *perm;
-  real fpar[2], epar[2], sigma, s, bpar[2];
+  int i, nrt, npt1, iter, mpar[2], *perm;
+  real fpar[2], epar[2];
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1997,7 +1993,7 @@ void do_loren()
 void do_arm3()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[5];
+  int i, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5],amp,pha,amperr,phaerr,amp3,pha3,amperr3,phaerr3;
   int lpar = 5;
     
@@ -2068,8 +2064,8 @@ void do_arm3()
  
 void do_psf()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j,k, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 
