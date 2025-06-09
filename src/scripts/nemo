@@ -42,13 +42,13 @@ gitbv $NEMO
 # (cd $LMTOY; make branch)
 
 if [ -d $NEMO/local/starlab ]; then
-   echo "Found starlab" 
+    echo 'Found starlab in $NEMO/local/starlab'
 fi
 if [ -d $NEMO/local/amuse ]; then
-    echo "Found amuse"
+    echo 'Found amuse   in $NEMO/local/amuse'
 fi
 if [ -d $NEMO/local/miriad ]; then
-    echo "Found miriad"
+    echo 'Found miriad  in $NEMO/local/miriad'
 fi
 
 if [ "$1" == pull ]; then
