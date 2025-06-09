@@ -19,8 +19,8 @@
 
 string defv[] = {
   "in=???\n       Input image file",
-  "pos=\n         (x,y) position (1-based), or use max in map",
-  "box=32\n       Box size to use around pos",
+  "pos=\n         (x,y) position (0-based), or use max in map",
+  "box=7\n        Box size to use around pos (odd is better)",
   "clip=\n        Use only values above clip",
   "wcs=t\n        Use WCS of the cube (else use integer 1-based coordinates)",
   "radecvel=f\n   Split the RA/DEC from VEL",
@@ -88,7 +88,7 @@ void nemo_main()
       clip[0] = -clip[1];
     }
   } else
-    dprintf(1,"Using all data, no clip used");
+    dprintf(1,"Using all data, no clip used\n");
   
   read_image( instr, &iptr);            /* read the cube */
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
@@ -104,8 +104,8 @@ void nemo_main()
     } else {
       // @todo have option to use the peak
       nbpos = 2;
-      bpos[0] = nx/2;  // use center
-      bpos[1] = ny/2;
+      bpos[0] = (nx-1)/2;  // use center
+      bpos[1] = (ny-1)/2;
       dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
     }
   }
@@ -142,7 +142,7 @@ void nemo_main()
 	  if (cv > dmax) {  dmax = cv;  ixmax=i; iymax=j; }
 	}
 	if (nbpos==2) {
-	  dprintf(1,"%d @ %d %d %d\n", cnt, i,j,k);
+	  dprintf(2,"%d @ %d %d %d\n", cnt, i,j,k);
 	  data[cnt] = cv;
 	  accum_moment(&m, cv, 1.0);
 	}
@@ -156,14 +156,12 @@ void nemo_main()
     }
   }
   DIVVS(w_pos,w_pos,w_sum);
-  if (!Qwcs)
-    ADDVS(w_pos, w_pos, 1.0);    // convert to 1-based pixel coordinates
   
   printf("Npoints:    %d\n",cnt);
   printf("Box:        %d\n", box);
   printf("DataMinMax: %g %g\n",dmin,dmax);
-  printf("Min at:     %d %d (1 based)\n",ixmin+1,iymin+1);
-  printf("Max at:     %d %d\n",ixmax+1,iymax+1);
+  printf("Min at:     %d %d (0 based)\n",ixmin,iymin);
+  printf("Max at:     %d %d\n",ixmax,iymax);
   printf("Mean:       %g\n",mean_moment(&m));
   if (nbpos==2)
     printf("Median:     %g\n",median_moment(&m));
@@ -173,7 +171,7 @@ void nemo_main()
   printf("Center:     %g %g %g %s\n",w_pos[0], w_pos[1], w_pos[2],
 	 Qwcs ? "[wcs]" : "[grid]");
   printf("BLOB:  %d %d  %g %g %d   %g %g %g\n",
-	 ixmax+1,iymax+1, w_pos[0], w_pos[1], box,
+	 ixmax,iymax, w_pos[0], w_pos[1], box,
 	 median_moment(&m),
 	 dmax,
 	 show_moment(&m,1) - cnt * median_moment(&m));
@@ -357,12 +355,13 @@ void xyz2rtp(vector xyz, vector rtp)
   rtp[0] = sqrt(z*z+w*w);
 }
 
-// loop over the full image
+// loop over the full image, find 0-based location of max
 void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum)
 {
   int i , nx = Nx(iptr);
   int j , ny = Ny(iptr);
   real dmax = CubeValue(iptr,0,0,0);
+  
   // no support for 3D
   for (i=0; i<nx; i++)
     for (j=0; j<ny; j++) {
@@ -372,7 +371,7 @@ void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum)
 	*iy = j;
       }
     }
-  dprintf(1,"max %g at %d %d\n", dmax, *ix + 1, *iy + 1);
+  dprintf(1,"max %g at %d %d\n", dmax, *ix, *iy);
 
   if (Qsum) {
     warning("2D downhill summing not implemented yet");
