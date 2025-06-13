@@ -43,11 +43,11 @@ string defv[] = {
     "separ=0\n			Special table of interparticle distances",
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
-    "header=nbody,time\n	Header elements (nbody,time) to output?",
+    "header=\n	                Header elements (nbody,time) to also add to output?",
     "newline=f\n                add newline(s) in the header?",
     "csv=f\n                    Use Comma Separated Values format",
     "comment=f\n                Add table columns as common, instead of debug",
-    "VERSION=3.0\n		25-may-2025 PJT",
+    "VERSION=3.1\n		13-jun-2025 PJT",
     NULL,
 };
 
@@ -65,6 +65,7 @@ void nemo_main()
     bool   Qcsv = getbparam("csv");
     bool   Qcomment = getbparam("comment");
     bool   Qnewline = getbparam("newline");
+    bool   Qheader = hasvalue("header");
     int i, n, nbody, bits, nsep, isep, nopt, nhead, ParticlesBit;
     char fmt[20],*pfmt;
     string *opt, *head;
@@ -84,19 +85,24 @@ void nemo_main()
             break;
         }
     }
-    head = burststring(getparam("header"),", ");
-    nhead = xstrlen(head, sizeof(string))-1;
-    if (Qcomment) {
-      printf("# ");
-      for (i=0; i<nopt; i++)
-        printf("\t%s",opt[i]);
-      printf("\n");
-    } else {
-      for (i=0; i<nopt; i++)
-        dprintf(0,"%s ",opt[i]);
-      dprintf(0,"\n");
-    }
-
+    
+    if (Qheader) {
+      dprintf(0,"header\n");
+      head = burststring(getparam("header"),", ");
+      nhead = xstrlen(head, sizeof(string))-1;
+      if (Qcomment) {
+	printf("# ");
+	for (i=0; i<nopt; i++)
+	  printf("\t%s",opt[i]);
+	printf("\n");
+      } else {
+	for (i=0; i<nopt; i++)
+	  dprintf(0,"%s ",opt[i]);
+	dprintf(0,"\n");
+      }
+    } else
+      dprintf(0,"no header\n");
+    
     if (hasvalue("tab")) {
 	pfmt = getparam("tab");
 	dprintf(0,"Saving table in %s\n",pfmt);
@@ -139,7 +145,7 @@ void nemo_main()
 	        if (head[i][0] == 't') fprintf(tabstr,"%g ",tsnap);
 	        if (Qnewline) fprintf(tabstr,"\n");
 	    }
-	    if (!Qnewline)fprintf(tabstr,"\n");
+	    if (!Qnewline && Qheader)fprintf(tabstr,"\n");
             for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
                 for (n=0; n<nopt; n++) {
                     aux = fopt[n](bp,tsnap,i);
