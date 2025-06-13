@@ -32,43 +32,44 @@ No default.
 \fBout=\fP\fIim\fP
 Output cross image. This image will be square and have a smaller size, \fB2*box+1\fP.
 .br
-No default.
+By default no image is written.
 .TP
 \fBcenter=\fP\fIx0,y0\fP
 X-Y Reference center around which a box (see \fBbox=\fP below) is taken.
-These are 0-based integer pixels. By default the center of the image
-is used, but future options could be the reference pixel, or the pixel
-with the maximum value.
+These are 0-based integer pixels. 
 .br
 Default: center of first input image.
 .TP
-\fBbox=\fP\fIb2\fP
-Half size of correlation box. The output image is forced to have an odd pixel size, 2*box+1.
+\fBbox=\fP\fIb_half\fP
+(Half) Size of correlation box. The output image is then forced to have an odd pixel size, 2*box+1.
 The shift between the images should not exceed \fBbox\fP, or it will not find the center.
+.br
+Although \fBbox=\fP and \fBcenter=\fP can be used to subset an image on the fly, another approach is
+to use \fIccdsub(1NEMO)\fP and make new images. This might be needed for large shifts.
 .br
 By default half the mapsize is used, which can be computationally expensive.
 .TP
-\fBn=\fP
-Half size of box insize correllation box to find the center.
+\fBn=\fP\fIn_half\fP
+Half size of box inside correllation box to find the center.
 See also \fBclop=\fP to limit the clip level in this
 correlation image.
 .br
 By default half the box is used.
 .TP
-\fBclip=\fP\fIc\fP
+\fBclip=\fP\fIclip_value\fP
 Only use values above this clip level in the input images will be used for the
 correlation.
 .br
 By default values are not clipped.
 .TP
-\fBclop=\fP\fIc\fP
+\fBclop=\fP\fIclip_value\fP
 Only use values above this clip level in the final correlation image. Units
 are loosely related to those of the input image times the number of pixels squared
 in the comparison area.
 .br
 By default values are not clipped.
 .TP
-\fBbad=\fP\fIb\fP
+\fBbad=\fP\fIbad_value\fP
 bad value to ignore.
 .br
 By default there is no bad value recognized.
@@ -76,7 +77,10 @@ By default there is no bad value recognized.
 .SH "CAVEAT"
 Only 2D images are handled.
 .PP
-The WCS of the output image 
+The WCS of the output image is not meaningfull, and remains in pixel space.
+Since the number of pixels is odd,
+the reported shift between the images is the shift from the central pixel, which
+is made the reference pixel.
 .PP
 Images should ideally be the same size, but nothing will stop the program from
 running off without that. The user is then responsible for computing the true offsets
@@ -84,6 +88,8 @@ as all bets are off.
 .PP
 A wrong choice of box= and n= can cause a bias in the center. Using clop= can help
 making it more robust.
+.PP
+Only one \fBclip=\fP value can be given, ideally each input image should have it's own clip
 
 .SH "EXAMPLES"
 
@@ -109,8 +115,10 @@ each other.
     ### nemo Debug[0]: X,Y sig:  1.81226 1.81864
     ### nemo Debug[0]: Center at: 0.94382 0.976272
 
+.EE
+
 .SH "SEE ALSO"
-ccdblob(1NEMO), image(5NEMO)
+ccdblob(1NEMO), ccdsub(1NEMO), image(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

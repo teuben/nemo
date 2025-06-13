@@ -37,6 +37,7 @@
  *  loren      (p1/PI) / ( (x-p0)^2 + p1^2 )
  *  gauss1d    p0+p1*exp(-(x-p2)^2/(2*p3^2))
  *  gauss2d    p0+p1*exp(-[(x-x0)^2 + (y-y0)^2]/2b^2)
+ *  peak2d     p0+p1*(x-p3)**2+p2*(y-p4)**2
  *  psf        p0*x**p1*sin(y)**p2+p3
  *  
  */ 
@@ -73,7 +74,7 @@ string defv[] = {
     "seed=0\n           Random seed initializer",
     "method=gipsy\n     method:   Gipsy(nllsqfit), Numrec(mrqfit), MINPACK(mpfit)",
     "bench=1\n          bench mode",
-    "VERSION=4.3e\n     10-jun-2023 PJT",
+    "VERSION=4.3g\n     9-jun-2025 PJT",
     NULL
 };
 
@@ -109,8 +110,6 @@ int nxcol, nycol, xcolnr[MAXCOL], ycolnr[MAXCOL], dycolnr;
 real dypow;
 a_column            xcol[MAXCOL],   ycol[MAXCOL], dycol,  bcol;
 a_range    xrange;
-
-/* real xrange[MAXCOL*2];      /* ??? */
 
 string fit_method;          /* fit method (gipsy, numrec, minpack) */
 string fit_object;          /* fit method (line, poly, ....) */
@@ -174,6 +173,7 @@ void do_plane(void);
 void do_gauss1d(void);
 void do_dgauss1d(void);
 void do_gauss2d(void);
+void do_peak2d(void);
 void do_exp(void);
 void do_grow(void);
 void do_poly(void);
@@ -229,7 +229,7 @@ static real func_dgauss1d(real *x, real *p, int np)
   
   arg1 = a1*a1/(2*b1*b1);
   arg2 = a2*a2/(2*b2*b2);
-  return p[0] + p[1] * exp(-arg1); + p[4] * exp(-arg2);
+  return p[0] + p[1] * exp(-arg1) + p[4] * exp(-arg2);
 }
 
 static void derv_dgauss1d(real *x, real *p, real *e, int np)
@@ -275,6 +275,28 @@ static void derv_gauss2d(real *x, real *p, real *e, int np)
   e[2] = -p[1]*e[1] * a / (c*c);
   e[3] = -p[1]*e[1] * b / (c*c);
   e[4] =  p[1]*e[1] * (a*a+b*b) / (c*c*c);
+}
+
+//  peak2d     p0+p1*(x-p3)**2+p2*(y-p4)**2
+static real func_peak2d(real *x, real *p, int np)
+{
+  real a,b;
+  a = x[0]-p[3];
+  b = x[1]-p[4];
+  return p[0] + p[1]*a*a + p[2]*b*b;
+}
+
+static void derv_peak2d(real *x, real *p, real *e, int np)
+{
+  real a,b;
+  a = x[0]-p[3];
+  b = x[1]-p[4];
+
+  e[0] = 1.0;
+  e[1] = a*a;
+  e[2] = b*b;
+  e[3] = -2*p[1]*a;
+  e[4] = -2*p[2]*b;
 }
 
 
@@ -559,6 +581,8 @@ void nemo_main()
     	do_dgauss1d();
     } else if (scanopt(fit_object,"gauss2d")) {
     	do_gauss2d();
+    } else if (scanopt(fit_object,"peak2d")) {
+    	do_peak2d();
     } else if (scanopt(fit_object,"exp")) {
     	do_exp();
     } else if (scanopt(fit_object,"grow")) {
@@ -822,7 +846,7 @@ void load_function(string fname,string method)
 void do_function(string method)
 {
   real *x, *y, *dy, *d;
-  int i,j,k,nrt, mpar[MAXPAR];
+  int i,k,nrt, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = npar;        /* MUST be set */
 
@@ -962,8 +986,7 @@ void random_permute1(int n, int *idx)
 
 void random_permute2(int n, int *idx) 
 {
-  int i, j, k, tmp;
-  double xn = n;
+  int i, j, tmp;
 
   for (i=0; i<n-2; i++) {
     j = (int) xrandom(i+1.0,n+0.0);
@@ -1115,9 +1138,9 @@ void bootstrap3(int nboot,
 
 void do_line()
 {
-  real *x, *y, *dy, *d, *y1, *d1;
-  int i,j, nrt, npt1, iter, mpar[2], *perm;
-  real fpar[2], epar[2], sigma, s, bpar[2];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[2];
+  real fpar[2], epar[2];
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1177,7 +1200,6 @@ void do_line()
 void do_plane()
 {
   real *x1, *x2, *x, *y, *dy, *d;
-  real **xp;
   int i,j,k,nrt, npt1,iter,mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
@@ -1249,8 +1271,8 @@ void do_plane()
  
 void do_gauss1d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[4];
   real sum, dmin, dmax, xmin, xmax, fpar[4], epar[4];
   int lpar = 4;
 
@@ -1346,8 +1368,8 @@ void do_gauss1d()
  
 void do_dgauss1d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[7];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[7];
   real sum, dmin, dmax, xmin, xmax, fpar[7], epar[7];
   int lpar = 7;
 
@@ -1445,8 +1467,8 @@ void do_dgauss1d()
  
 void do_gauss2d()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j,k, nrt, npt1, iter, mpar[5];
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5];
   int lpar = 5;
 
@@ -1497,6 +1519,70 @@ void do_gauss2d()
   printf("rms/chi = %g\n",data_rms(npt,d,dy,5));
 }
 
+/*
+ * PEAK2d:       y = a + b ...
+ *  peak2d     p0+p1*(x-p3)**2+p2*(y-p4)**2 
+ *
+ */
+ 
+void do_peak2d()
+{
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[5];
+  real fpar[5], epar[5];
+  int lpar = 5;
+
+  if (nxcol != 2) error("bad nxcol=%d",nxcol);
+  if (nycol<1) error("Need 1 value for ycol=");
+  if (tol < 0) tol = 0.0;
+  if (lab < 0) lab = 0.01;
+  //  peak2d     a+b*(x-d)**2+*(y-p4)**2  
+  sprintf(fmt,"Fitting : y = a+b*(x-d)**2+*c*(y-e)**2:  \n"
+	  "a= %s %s \nb= %s %s \nc= %s %s\nd= %s %s\ne= %s %s\n",
+	  format,format,format,format,format,format,format,format,format,format);
+
+  y = ycol[0].dat;
+  dy = (dycolnr>0 ? dycol.dat : NULL);
+  d = (real *) allocate(npt * sizeof(real));
+  x = (real *) allocate(2 * npt * sizeof(real));
+  for (i=0, j=0; i<npt; i++) {
+    for (k=0; k<2; k++)
+      x[j++] = xcol[k].dat[i];
+  }
+
+  for (i=0; i<lpar; i++) {
+    mpar[i] = mask[i];
+    fpar[i] = par[i];
+  }
+  
+  fitfunc = func_peak2d;
+  fitderv = derv_peak2d;
+
+  for (iter=0; iter<=msigma; iter++) {
+    nrt = (*my_nllsqfit)(x,2,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
+    printf("nrt=%d\n",nrt);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3],fpar[4],epar[4]);
+#if 1
+    printf("FWZP= %g %g\n",sqrt(-fpar[1]/fpar[0]), sqrt(-fpar[2]/fpar[0]));
+#endif
+    if (nrt==-2)
+      warning("No free parameters");
+    else if (nrt<0)
+      error("Bad fit, nrt=%d",nrt);
+
+    npt1 = remove_data(x,2,y,dy,d,npt,nsigma[iter]);
+    if (npt1 == npt) iter=msigma+1;       /* signal early bailout */
+    npt = npt1;
+  }
+  printf("npt= %d\n",npt);
+  bootstrap(nboot, npt,2,x,y,dy,d, lpar,fpar,epar,mpar);    
+
+  if (outstr)
+    for (i=0; i<npt; i++)
+      fprintf(outstr,"%g %g %g %g\n",x[i],y[i],d[i],y[i]-d[i]);  
+  printf("rms/chi = %g\n",data_rms(npt,d,dy,5));
+}
+
 
 /*
  * EXP:       y = a + b * exp(-(x-c)/d)
@@ -1505,8 +1591,8 @@ void do_gauss2d()
  
 void do_exp()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 
@@ -1561,8 +1647,8 @@ void do_exp()
  
 void do_grow()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[2];
+  real *x, *y, *dy, *d;
+  int i, nrt, npt1, iter, mpar[2];
   real fpar[2], epar[2];
   int lpar = 2;
 
@@ -1590,7 +1676,7 @@ void do_grow()
   for (iter=0; iter<=msigma; iter++) {
     nrt = (*my_nllsqfit)(x,1,y,dy,d,npt,  fpar,epar,mpar,lpar,  tol,itmax,lab, fitfunc,fitderv);
     printf("nrt=%d\n",nrt);
-    printf(fmt,fpar[0],epar[0],fpar[1],epar[1],fpar[2],epar[2],fpar[3],epar[3]);
+    printf(fmt,fpar[0],epar[0],fpar[1],epar[1]);
     if (nrt==-2)
       warning("No free parameters");
     else if (nrt<0)
@@ -1618,7 +1704,7 @@ void do_grow()
 void do_poly()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = order+1;
     
@@ -1674,7 +1760,7 @@ void do_poly()
 void do_poly2()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = 4;
   
@@ -1731,7 +1817,7 @@ void do_poly2()
 void do_poly3()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[MAXPAR];
+  int i, nrt, npt1, iter, mpar[MAXPAR];
   real fpar[MAXPAR], epar[MAXPAR];
   int lpar = 4;
   
@@ -1791,7 +1877,7 @@ void do_poly3()
 void do_arm()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[3];
+  int i, nrt, npt1, iter, mpar[3];
   real fpar[3], epar[3],amp,pha,amperr,phaerr;
   int lpar = 3;
     
@@ -1855,8 +1941,8 @@ void do_arm()
 void do_loren()
 {
   real *x, *y, *dy, *d, *y1, *d1;
-  int i,j, nrt, npt1, iter, mpar[2], *perm;
-  real fpar[2], epar[2], sigma, s, bpar[2];
+  int i, nrt, npt1, iter, mpar[2], *perm;
+  real fpar[2], epar[2];
   int lpar = 2;
     
   if (nxcol < 1) error("nxcol=%d",nxcol);
@@ -1907,7 +1993,7 @@ void do_loren()
 void do_arm3()
 {
   real *x, *y, *dy, *d;
-  int i,j, nrt, npt1, iter, mpar[5];
+  int i, nrt, npt1, iter, mpar[5];
   real fpar[5], epar[5],amp,pha,amperr,phaerr,amp3,pha3,amperr3,phaerr3;
   int lpar = 5;
     
@@ -1978,8 +2064,8 @@ void do_arm3()
  
 void do_psf()
 {
-  real *x1, *x2, *x, *y, *dy, *d;
-  int i,j,k, nrt, npt1, iter, mpar[4];
+  real *x, *y, *dy, *d;
+  int i, j, k, nrt, npt1, iter, mpar[4];
   real fpar[4], epar[4];
   int lpar = 4;
 

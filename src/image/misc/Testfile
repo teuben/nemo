@@ -93,5 +93,36 @@ ccdstacktest:
 	ccdstack ccd3,ccd1,ccd2 ccd12
 	ccdstack ccd3,ccd2,ccd1 ccd21
 
+# gauss1 centered on 0-based (9.5,9.5) - the ref pixels
+# gauss3 centered on 0-based (11,11) - offset
+
+
+gauss10:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss10 object=gauss spar=1,10 size=128,128 center=65,65
+
+gauss11:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss11 object=gauss spar=2,10 size=128,128 center=66,66
+
+gauss12:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss12 object=gauss spar=2,10 size=128,128 center=67,67
+
+gauss13:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss13 object=gauss spar=2,10 size=128,128 center=68,68
+
+gauss14:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss14 object=gauss spar=2,10 size=128,128 center=72,72
+
+gauss15:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss15 object=gauss spar=2,10 size=128,128 center=72,72 crpix=64,64
+
+
 ccdcross:	gauss1 gauss3
-	$(EXEC) ccdcross gauss1,gauss3 - | $(EXEC) ccdstat -
+	@rm -f cross1
+	$(EXEC) ccdcross gauss1,gauss3 cross1 # box=6 n=4
+	# | $(EXEC) ccdstat -

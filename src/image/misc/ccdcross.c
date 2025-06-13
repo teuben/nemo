@@ -17,7 +17,7 @@
 
 string defv[] = {
   "in=???\n       Input image files, first image sets the WCS",
-  "out=???\n      Output cross correlated image",
+  "out=.\n        Output cross correlated image",
   "center=\n      X-Y Reference center (0-based pixels)",
   "box=\n         Half size of correlation box",
   "n=\n          Half size of box inside correlation box to find center",
@@ -46,6 +46,7 @@ int      center[2];              /* center of reference point image */
 int      box;
 bool     Qclip, Qclop;
 real     clip[MAXIMAGE];       // @todo
+int      nclip;
 real     clop;
 
 
@@ -102,12 +103,15 @@ void nemo_main()
     else
       n = box/2;
 
-    
     nx = ny = 2*box + 1;
     dprintf(0,"Full box size %d (square), n=%d\n",nx,n);
     
     optr = NULL;
     create_cube(&optr, nx, ny, 1);
+    CRPIX1(optr) = (nx-1)/2;  // 0 based!
+    CRPIX2(optr) = (ny-1)/2;
+    //CDELT1(optr) = CDELT1(iptr[0]);
+    //CDELT2(optr) = CDELT2(iptr[0]);
     outstr = stropen(getparam("out"),"w");  /* open output file first ... */
 
     for (ll=1; ll<nimage; ll++) {

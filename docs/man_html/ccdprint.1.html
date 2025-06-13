@@ -9,12 +9,15 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdprint - print out map values 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <p>
 <b>ccdprint in=</b><i>image</i> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>ccdprint</b> prints out map values in an image. The grid is specified
 in x, y and z independantly, and can be any integer array, including implied
@@ -29,93 +32,105 @@ right. This effect can also be achieved by an appropriate choice of <b>y=NY-1:1:
 but the user is then required to know <b>NY</b>! <p>
 The physical coordinates can
 be printed out optionally, where the output format is controlled by the
-<b>newline=</b> parameter. 
+<b>newline=</b> parameter. See also <a href='xy2sky.1.html'><i>xy2sky(1)</i></a>
+ from <a href='wcstools.5.html'>wcstools(5NEMO)</a>
+. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized in
-any order if the keyword is also given: 
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>in=<i>in-file</i></b> </dt>
 <dd>input file, in <a href='image.5.html'><i>image(5NEMO)</i></a>
-
-format [no default]. </dd>
-
-<dt><b>x=<i>x1,x2,...</i></b> </dt>
-<dd>Grid coordinates in X to display.  If no values
-given, all gridpoints along this axis will be selected. Note the first gridpoint
-is 0. By default this program will thus display the first pixel value. [Default:
-<b>0</b>]. </dd>
-
-<dt><b>y=<i>y1,y2,...</i></b> </dt>
-<dd>Grid coordinates in Y to display. See <b>x=</b>. [Default: <b>0</b>]. </dd>
-
-<dt><b>z=<i>z1,z2,...</i></b>
-</dt>
-<dd>Grid coordinates in Z to display. See <b>x=</b>. [Default: <b>0</b>]. </dd>
-
-<dt><b>scale=<i>scale_factor</i></b>
-</dt>
-<dd>scale factor with which the data is multiplied before being displayed [default:
-<b>1</b>]. </dd>
-
-<dt><b>format=<i>fmt-expr</i></b> </dt>
-<dd>Real-valued C-format expression (see also <a href='printf.3.html'>printf(3)</a>
-,  e.g.
-%10.6e, %5.2f) with which data and optional coordinate values are displayed
-[default: <b>%g</b>]. </dd>
-
-<dt><b>newline=t|f</b> </dt>
-<dd>Add a newline between each map value printed?
-If false, all rows are printed on one line, and a blank line separates
-different planes. [Default: <b>f</b>] </dd>
-
-<dt><b>label=</b><i>x,y,z</i> </dt>
-<dd>Any combination of <b>x</b>, <b>y</b> and/or
-<b>z</b> can be given, which labels the output with their X, Y and/or Z physical
-values.  If <b>newline</b> has been set to true, the selected labels are printed
-for each coordinate selected (this produces a nicely formatted table that
-can be easily used by subsequent analysis programs), whereas the default
-value would print a row of X coordinates before each printed plane , and
-a left column of Y coordinates, if selected. Each new plane is preceded
-with a plane coordinate also. This option is more readable for humans, but
-not easily processed by other programs. [Default: no labels]. </dd>
-
-<dt><b>offset=0|1</b> </dt>
-<dd>Should
-X,Y,Z be 0- or 1- based. NEMO images use 0-based images, but to appease fortran
-users, 1-based input can be given here if this parameter is set to 1. Default:
-0 </dd>
-
-<dt><b>yreverse=t|f</b> </dt>
-<dd>Reverse printing the Y values. By default this is true, such
-that the printed layout resembles how it is normally displayed in an image
-display (at least astronomically).  [Default: <b>t</b>] </dd>
-
-<dt><b>pixel=t|f</b> </dt>
-<dd>Print out X,Y,Z
-labels in physical or pixel coordinates. By default physical. [Default: <b>f</b>]
+ format [no default].
 </dd>
 
+<dt><b>x=<i>x1,x2,...</i></b> </dt>
+<dd>Grid coordinates in X to display.  If no values given, all gridpoints
+along this axis will be selected. Note the first gridpoint is 0. By default
+this program will thus display the first pixel value. [Default: <b>0</b>]. </dd>
+
+<dt><b>y=<i>y1,y2,...</i></b>
+</dt>
+<dd>Grid coordinates in Y to display. See <b>x=</b>. [Default: <b>0</b>]. </dd>
+
+<dt><b>z=<i>z1,z2,...</i></b> </dt>
+<dd>Grid coordinates
+in Z to display. See <b>x=</b>. [Default: <b>0</b>]. </dd>
+
+<dt><b>scale=<i>scale_factor</i></b> </dt>
+<dd>scale factor with
+which the data is multiplied before being displayed [default: <b>1</b>]. </dd>
+
+<dt><b>format=<i>fmt-expr</i></b>
+</dt>
+<dd>Real-valued C-format expression (see also <a href='printf.3.html'>printf(3)</a>
+,  e.g. %10.6e, %5.2f) with
+which data and optional coordinate values are displayed [default: <b>%g</b>]. </dd>
+
+<dt><b>newline=t|f</b>
+</dt>
+<dd>Add a newline between each map value printed? If false, all rows are printed
+on one line, and a blank line separates different planes. [Default: <b>f</b>] </dd>
+
+<dt><b>label=</b><i>x,y,z</i>
+</dt>
+<dd>Any combination of <b>x</b>, <b>y</b> and/or <b>z</b> can be given, which labels the output
+with their X, Y and/or Z physical values.  If <b>newline</b> has been set to true,
+the selected labels are printed for each coordinate selected (this produces
+a nicely formatted table that can be easily used by subsequent analysis
+programs), whereas the default value would print a row of X coordinates
+before each printed plane , and a left column of Y coordinates, if selected.
+Each new plane is preceded with a plane coordinate also. This option is
+more readable for humans, but not easily processed by other programs. [Default:
+no labels]. </dd>
+
+<dt><b>offset=0|1</b> </dt>
+<dd>Should X,Y,Z be 0- or 1- based. NEMO images use 0-based
+images, but to appease fortran users, 1-based input can be given here if
+this parameter is set to 1. Default: 0 </dd>
+
+<dt><b>yreverse=t|f</b> </dt>
+<dd>Reverse printing the
+Y values. By default this is true, such that the printed layout resembles
+how it is normally displayed in an image display (at least astronomically).
+ [Default: <b>t</b>] </dd>
+
+<dt><b>pixel=t|f</b> </dt>
+<dd>Print out X,Y,Z labels in physical or pixel coordinates.
+By default physical. [Default: <b>f</b>] </dd>
+
 <dt><b>pair=t|f</b> </dt>
-<dd>Should input (x,y,z) be paired up [f] </dd>
+<dd>Should input (x,y,z) be paired
+up [f] </dd>
 
 <dt><b>seq=</b> </dt>
-<dd>Print a sequence using
-access shortcut [0] </dd>
+<dd>Print a sequence using access shortcut [0] 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>See Also</a></h2>
-<a href='printf.3.html'>printf(3)</a>
+<a href='xy2sky.1.html'>xy2sky(1)</a>
+,
+<a href='sky2xy.1.html'>sky2xy(1)</a>
+, <a href='printf.3.html'>printf(3)</a>
+, <a href='wcstools.5.html'>wcstools(5NEMO)</a>
 , <a href='image.5.html'>image(5NEMO)</a>
  
+<p> 
 <h2><a name='sect5' href='#toc5'>Author</a></h2>
 Peter Teuben
 
+<p> 
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
 <br>
 <pre>~src/image/io<tt> </tt>&nbsp;<tt> </tt>&nbsp;ccdprint.c ccdprint.1
 </pre>
-<h2><a name='sect7' href='#toc7'>Update History</a></h2>
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>23-jan-89<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.0: Created             <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 8-jul-93<tt> </tt>&nbsp;<tt> </tt>&nbsp;V1.1: added defaults &rsquo;all&rsquo; for blank x=, y=, z=  <tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -135,7 +150,7 @@ Peter Teuben
 <li><a name='toc4' href='#sect4'>See Also</a></li>
 <li><a name='toc5' href='#sect5'>Author</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
-<li><a name='toc7' href='#sect7'>Update History</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

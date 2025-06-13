@@ -9,11 +9,14 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdshape - shape of a 2D or 3D distribution based on moments of inertia
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdshape</b> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 Based on intensity weighted
 moments of inertia, the center, primary axes and their angles (position
@@ -24,24 +27,26 @@ cubes the first two (RA-DEC) are different from the third (VEL). In this
 case the third axis is decoupled, and instead of sizes and euler angles,
 the largest velocity gradient dV/dR and a position angle between kinematic
 and  morphological major axis is used. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters
-are recognized in any order if the keyword is also given: 
+ The following parameters
+are recognized in order; they may be given in any order if the keyword
+is also given. Use <b>--help</b> to confirm this man page is up to date.  
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input image
-file [???]     </dd>
+<dd>Input
+image file [???]     </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Use only values above clip, and below -clip, if only
-one value given. If two values given, exclude this range of values. Setting
-clip=0 should be sufficient to discard all pixels with the value 0.0. Default:
-all values used. </dd>
+<dd>Use only values above clip, and below -clip,
+if only one value given. If two values given, exclude this range of values.
+Setting clip=0 should be sufficient to discard all pixels with the value
+0.0. Default: all values used. </dd>
 
 <dt><b>wcs=t|f</b> </dt>
-<dd>Use axis world coordinate system descriptors or
-the 0-based coordinate axis numbers. Default: true. </dd>
+<dd>Use axis world coordinate system descriptors
+or the 0-based coordinate axis numbers. Default: true. </dd>
 
 <dt><b>radecvel=t|f</b> </dt>
 <dd>Treat the
@@ -80,17 +85,22 @@ Center:  -6.25e-05 0.0113125 -0.009375 [wcs]
                  0.06310     0.86218     0.50653    -0.00821
                  0.00034    -0.32652     0.56803     0.75546
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>See Also</a></h2>
-<a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
+<a href='ccdblob.1.html'>ccdblob(1NEMO)</a>
+, <a href='snapkinem.1.html'>snapkinem(1NEMO)</a>
 , <a href='snaprect.1.html'>snaprect(1NEMO)</a>
 , <a href='snapinert.1.html'>snapinert(1NEMO)</a>
- 
-<h2><a name='sect7' href='#toc7'>Files</a></h2>
-src/image/misc/ccdshape.c
 
+
+<p> 
+<h2><a name='sect7' href='#toc7'>Files</a></h2>
+src/image/misc/ccdshape.c 
+<p> 
 <h2><a name='sect8' href='#toc8'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect9' href='#toc9'>Update History</a></h2>
+<p> 
+<h2><a name='sect9' href='#toc9'>History</a></h2>
 <br>
 <pre>16-May-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 19-May-2013<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 added weight= and radecvel=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
@@ -108,7 +118,7 @@ Peter Teuben
 <li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Files</a></li>
 <li><a name='toc8' href='#sect8'>Author</a></li>
-<li><a name='toc9' href='#sect9'>Update History</a></li>
+<li><a name='toc9' href='#sect9'>History</a></li>
 </ul>
 </body>
 </html>

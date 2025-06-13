@@ -108,13 +108,13 @@ through some pre-define macros (in <b>image.h</b>): <br>
 #define Ny(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;ny)
 #define Nz(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;nz)
 #define Axis(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;axis)
-#define Xmin(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;xmin)
+#define Xmin(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;xmin)       // CRVAL1(iptr) 
 #define Ymin(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;ymin)
 #define Zmin(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;zmin)
-#define Dx(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;dx)
+#define Dx(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;dx)         // CDELT1(iptr)
 #define Dy(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;dy)
 #define Dz(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;dz)
-#define Xref(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;xref)
+#define Xref(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;xref)       // CRPIX1(iptr) 
 #define Yref(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;yref)
 #define Zref(iptr) <tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;zref)
 #define MapMin(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;map_min)
@@ -123,7 +123,7 @@ through some pre-define macros (in <b>image.h</b>): <br>
 #define Beamx(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;beamx)
 #define Beamy(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;beamy)
 #define Beamz(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;beamz)
-#define Namex(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;namex)
+#define Namex(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;namex)      // CUNIT1(iptr)
 #define Namey(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;namey)
 #define Namez(iptr)<tt> </tt>&nbsp;<tt> </tt>&nbsp;((iptr)-&gt;namez)
 #define Unit(iptr)      ((iptr)-&gt;unit)
@@ -138,12 +138,15 @@ through some pre-define macros (in <b>image.h</b>): <br>
 #define MapValue(iptr,ix,iy)<tt> </tt>&nbsp;<tt> </tt>&nbsp; (*( (iptr)-&gt;frame + ix + Nx(iptr)*iy) )
 #define CubeValue(iptr,ix,iy,iz)<tt> </tt>&nbsp;<tt> </tt>&nbsp;(*( (iptr)-&gt;frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
 #endif 
-</pre>
+</pre>Note that the astronomical (FITS) convention of CRPIX/CRVAL/CDELT are now
+also available (as of 2023) 
+<p> 
 <p> 
 <h2><a name='sect6' href='#toc6'>Array Notation</a></h2>
-The <i>MapValue</i> and <i>CubeValue</i> macros are sometimes cumbersome
-typography, and using two image library routines,  <b>map2_image</b> and <b>map3_image</b>
-these can be converted to the commonly used array syntax: <br>
+The <i>MapValue</i> and <i>CubeValue</i>
+macros are sometimes cumbersome typography, and using two image library
+routines,  <b>map2_image</b> and <b>map3_image</b> these can be converted to the commonly
+used array syntax: <br>
 <pre>    image *iptr = open_image(....);
     real **a = map2_image(iptr);
     for (i=0; i&lt;nx; i++)
@@ -212,6 +215,7 @@ Peter Teuben
 8-may-04<tt> </tt>&nbsp;<tt> </tt>&nbsp;V5.0: added reference pixel for axis type 1<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 7-may-13<tt> </tt>&nbsp;<tt> </tt>&nbsp;added benchmark example
 27-jan-2021<tt> </tt>&nbsp;<tt> </tt>&nbsp;noted axis=1 now becoming standard<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+sep-2023<tt> </tt>&nbsp;<tt> </tt>&nbsp;add CRPIX/CRVAL/CDELT macros for FITS users<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre> <p>
 
 <hr><p>

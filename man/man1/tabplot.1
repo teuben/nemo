@@ -1,4 +1,4 @@
-.TH TABHIST 1NEMO "14 April 2024"
+.TH TABHIST 1NEMO "9 June 2025"
 
 .SH "NAME"
 tabplot \- general table plotter
@@ -227,14 +227,15 @@ tabplot 8083-12704.txt xmin=$vel-1000 xmax=$vel+1000 line=1,1 ycoord=0 xcoord=$v
 Here is an example working with layout files. 
 .EX
 
-  % nemoinp 1:20 | tabmath - -  'ranu(0,1),ranu(0,1)' all > ran.tab
-  % tabmath ran.tab - '2+%1*16,2+%2*16,0.2' all | awk '{print "circle",$0}' > ran.layout
+  % tabgen - 20 3 seed=123 > ran.tab
+  % tabmath ran.tab - '2+%1*16,2+%2*16,%3' all | awk '{print "circle",$0}' > ran.layout
   % tabplot ran.tab 1 2 0 1 0 1 layout=ran.layout
 
 .EE
 It plots the data points from the file \fBran.tab\fP as dots, and
 converts, using tabmath and awk, these to a layout file where the
-same points as plotted as open circles in \fBran.layout\fP. Note that
+same points as plotted as open circles with
+a size given by column 3, in \fBran.layout\fP. Note that
 currently the user has to convert to \fIyapp\fP (cm) units, and 
 actually know that most yapp plots runs from 2 to 18 cm in both X and Y.
 This will likely change in a future version where points can be given
@@ -257,9 +258,9 @@ tab= doesn't work properly with multiple columns
 
 
 .SH "SEE ALSO"
-tabhist(1NEMO), snapplot(1NEMO), tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO)
+tabhist(1NEMO), snapplot(1NEMO), tablsqfit(1NEMO), tabmath(1NEMO), yapp(5NEMO), stilts(1)
 .PP
-http://vostat.org
+http://vostat.org (expired)
 .PP
 http://www.star.bris.ac.uk/~mbt/stilts/
 
