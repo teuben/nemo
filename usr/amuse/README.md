@@ -36,8 +36,8 @@ Timings are from `/usr/bin/time` on an Ultra 7 155H.
 
 
       a:  6.26user 8.58system 0:13.58elapsed 109%CPU 
-      n:  2.75user 0.00system 0:02.75elapsed 99%CPU
-      b:  1.64user 0.03system 0:01.67elapsed 99%CPU 
+      n:  3.61user 0.00system 0:03.61elapsed 99%CPU 
+      b:  1.45user 0.02system 0:01.47elapsed 100%CPU 
 
 
 ## 2019 notes:
