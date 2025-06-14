@@ -15,7 +15,7 @@ import time
 import argparse
 import numpy as np
 
-my_version = "24-may-2025"
+my_version = "14-jun-2025"
 
 my_help = [f"Version: {my_version}",
            "",
@@ -53,6 +53,8 @@ def commandLine():
     parser.add_argument('--nbody',     '-n',  help="nbody if creating",      default=128)
     parser.add_argument('--seed',      '-s',  help='seed if creating',       default=123)
     parser.add_argument('--overwrite', '-w',  help='force overwrite output', action="store_true")
+    parser.add_argument('--time',      '-t',  help='extract time (-1=last)', default=-1)
+    
     parser.add_argument('--debug',     '-d',  help='add some debugging',     action="store_true")
     # @todo plummer creation has some options
     # :argument radius_cutoff: Cutoff value for the radius (defaults to 22.8042468)
@@ -72,12 +74,14 @@ ofile = args.ofile
 ifmt  = args.ifmt
 ofmt  = args.ofmt
 wmode = args.overwrite
+ntime = int(args.time)    # -1=last   0=first
 
 
 try:
     from amuse.units import nbody_system
     from amuse.ic.plummer import new_plummer_model
-    from amuse.io import write_set_to_file, read_set_from_file
+    from amuse.io import read_set_from_file
+    from amuse.io import write_set_to_file
 except:
     print("no AMUSE found in your python environment")
     sys.exit(1)
@@ -88,20 +92,35 @@ if ifile is None and ofile is not None:
     # write new
     np.random.seed(seed)
     stars = new_plummer_model(nbody)
-    write_set_to_file(stars, ofile, format=ofmt, overwrite_file=wmode)
+    write_set_to_file(stars, ofile, format=ofmt, overwrite=wmode)
     print(f"Wrote Plummer model w/ nbody={nbody} to {ofile} in {ofmt} format")
 elif ifile is not None:
-    # read old
-    stars = read_set_from_file(ifile, format=ifmt)
-    nbody = len(stars)
-    print(f"Reading snapshot from {ifile} in {ifmt} format, found {nbody} stars")
-    if ofile is not None:
-        # re-write old
-        write_set_to_file(stars, ofile, format=ofmt, overwrite=wmode)
-        print(f"Wrote snapshot to {ofile} in {ofmt} format")
+    snapshots = read_set_from_file(ifile, format=ifmt)
+    itime = 0
+    for bodies in list(snapshots.history):
+        itime = itime + 1
+        model_time = bodies.get_timestamp()
+        nbody = len(bodies)
+        if ofile is not None:
+            # re-write old
+            write_set_to_file(bodies, ofile, format=ofmt, overwrite=wmode)
+            if ntime >= 0 and itime == ntime:
+                print(f"Wrote selected snapshot {model_time} with {nbody} to {ofile} in {ofmt} format {wmode}")
+                break
+            else:
+                print(f"Processing snapshot {model_time} with {nbody}")
+    if ntime < 0:
+        print(f"Last snapshot {model_time} written")
 else:
     # no input or output, just make a model in memory
     np.random.seed(seed)
     stars = new_plummer_model(nbody)
     print(f"Created Plummer model w/ nbody={nbody} in memory, no I/O.")
     print("Use -h or --help to get help on various options.")
+
+
+
+# close shop but don't report provenance
+
+from amuse.support import literature
+literature.TrackLiteratureReferences.suppress_output()
