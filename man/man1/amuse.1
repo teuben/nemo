@@ -1,8 +1,8 @@
-.TH AMUSE 1NEMO "27 May 2025"
+.TH AMUSE 1NEMO "14 June 2025"
 
 .SH "DESCRIPTION"
 \fBAMUSE\fP is the Astrophysical MUltipurpose Software Environment.
-With it, you can simulate many astrophysical systems.
+With it, you can simulate many types of astrophysical systems.
 .PP
 The user interacts with AMUSE in python, so there is currently no \fBamuse\fP command, though
 one could imagine
@@ -11,7 +11,7 @@ one could imagine
        ipython --profile=amuse
 
 .EE
-instead you will want to import this module (see example below) in your python code and go from there.
+instead you will want to import modules (see example below) in your python code and go from there.
 Internally many components in AMUSE are legacy codes (C,C++,Fortran) running at fantastic speeds.
 .PP
 An example is shown below, and within NEMO there the script \fBamuse_convert.py\fP
@@ -89,14 +89,21 @@ Within NEMO the command
 
 .EE
 will get you started on the install.  Note there is a user release that does not need NEMO, which
-can be a set of \fIpip install\fP. A developer release
-is recommended with NEMO, the start of which will likely look as follows:
+can be a set of \fIpip install\fP:
+
+.EX
+   pip install amuse-framework
+   pip install amuse-bhtree
+
+.EE
+
+A developer release is recommended with NEMO, the start of which will likely look as follows:
 .EX
 
    cd $NEMO/local/amuse
    ./setup develop amuse-framework
-   ./setup develop amuse-bhtree
-
+   ./setup develop bhtree
+   ./setup test bhtree
     
 .EE
 The AMUSE bhtree code should be the same as the original program \fIbhtree(1NEMO)\fP in NEMO, allowing
@@ -113,9 +120,9 @@ csv		comma separated files
 dyn		Starlab binary structured file
 gadget		Gadget binary data file
 hdf5		HDF5 file
-nemo		NEMO binary structured file
+nemo		NEMO structured file, binary version?
 starlab		Starlab binary structured file
-tsf		NEMO binary structured file
+tsf		NEMO structured file, ascii version 
 txt		text file containing a table of values separated by a predefined
 vts		text file containing a table of values separated by a predefined character
 vtu		text file containing a table of values separated by a predefined character
@@ -126,7 +133,7 @@ vtu		text file containing a table of values separated by a predefined character
 .nf
 $NEMO/src/scripts/mknemo.d/amuse - example install script (can be run via mknemo)
 $NEMO/local/amuse - root of source code after install
-$NEMO/src/scripts/python/amuse_convert.py - also copied to $NEMOBIN during install
+$NEMO/usr/amuse - amuse_convert.py, amuse_integrate.py - also copied to $NEMOBIN during install
 .fi
 
 .SH "ADS"
@@ -147,5 +154,6 @@ https://www.amusecode.org/
 .nf
 .ta +1.25i +4.5i
 25-may-2025	man page and amuse_convert.py written (MODEST25-SPZ)	PJT
-27-mar-2025	overhauled installation method		PJT
+27-mar-2025	overhauled AMUSE installation method		PJT
+14-jun-2025	added scripts to $NEMO/usr/amuse	PJT
 .fi
