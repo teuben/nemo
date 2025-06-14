@@ -27,6 +27,9 @@ set url=https://github.com/amusecode/amuse
 set dir=amuse
 set src=$NEMO/local
 
+# always install for $NEMOBIN
+(cd $NEMO/usr/amuse ; make install)
+
 cd $src
 if (! -e $dir) then
   echo "mknemo>> Creating $NEMO/local/$dir"
@@ -42,6 +45,7 @@ echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.h
 echo "and   https://github.com/LourensVeen/amuse-course"
 echo ""
 echo "Example user install bypassing this code: (skipping setting up venv)"
+echo "       python3 -m venv amuse_venv; source amuse_venv/bin/activate"
 echo " pip install amuse-framework"
 echo " pip install amuse-bhtree"
 echo ""
@@ -49,7 +53,8 @@ echo "Example developer install:"
 echo " cd $NEMO/local/amuse"
 echo " ./setup"
 echo " ./setup develop amuse-framework"
-echo " ./setup develop amuse-bhtree"
+echo " ./setup develop bhtree"
+echo " ./setup test    bhtree"
 echo ""
 echo " ./setup develop all"
 
