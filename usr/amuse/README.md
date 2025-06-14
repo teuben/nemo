@@ -1,6 +1,18 @@
 The command "mknemo amuse" is now aimed to steer the install of AMUSE within NEMO
 
+## spring 2025
 
+Early 2025, although the new install (which is laborious) works, there is the old
+less intrusive pip install.  Here are the steps in a fresh NEMO install:
+
+```
+cd $NEMO
+make python
+source anaconda3/python_start.sh
+mknemo amuse
+pip install amuse-framework
+pip install amuse-bhtree
+```
 
 ## older 2019 notes that need to be updated:
 
