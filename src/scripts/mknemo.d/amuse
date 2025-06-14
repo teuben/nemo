@@ -41,16 +41,17 @@ else
 endif
 
 echo "Installation is still manual."
-echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html"
+echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html (seems old)"
+echo "      https://amuse.readthedocs.io/en/latest/install/installing.html          (more recent)"
 echo "and   https://github.com/LourensVeen/amuse-course"
 echo ""
-echo "Example user install bypassing this code: (skipping setting up venv)"
-echo "       python3 -m venv amuse_venv; source amuse_venv/bin/activate"
+echo "Example user install:  (venv optional)"
+echo " python3 -m venv amuse_venv; source amuse_venv/bin/activate"
 echo " pip install amuse-framework"
 echo " pip install amuse-bhtree"
 echo ""
-echo "Example developer install:"
-echo " cd $NEMO/local/amuse"
+echo "Example developer install:   (this needs more prereqs)"
+echo ' cd $NEMO/local/amuse'
 echo " ./setup"
 echo " ./setup develop amuse-framework"
 echo " ./setup develop bhtree"
