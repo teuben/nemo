@@ -1,7 +1,8 @@
+# -*- makefile -*-
 
 RUNS = run000  run001 run002
 
-all: 
+all: test0
 	@echo tests in progress
 
 all0: $(RUNS)
@@ -9,5 +10,6 @@ all0: $(RUNS)
 clean:
 	rm -rf $(RUNS)
 
+#
 test0:
 	python -m amuse
