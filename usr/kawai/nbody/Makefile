@@ -100,7 +100,8 @@ library_g4.o:	library.C nbody_particle.h
 	$(CXX) -DHARP3 $(CXXFLAGS) -o library_g4.o -c library.C
 
 bhtree: nbody
-	cp nbody $(NEMOBIN)/bhtree
+	cp nbody bhtree
+	cp bhtree $(NEMOBIN)
 
 nbody.o : nbody.C  nbody_particle.h design.c
 	$(CXX)  -c    $(CXXFLAGS)  nbody.C 
