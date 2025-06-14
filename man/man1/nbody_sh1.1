@@ -1,4 +1,4 @@
-.TH NBODY_SH1 1ACS "25 February 2004"
+.TH NBODY_SH1 1ACS "14 June 2025"
 
 .SH "NAME"
 nbody_sh1 - hermite integrator with shared but variable time step
@@ -14,6 +14,9 @@ using the Hermite integration scheme.
 .PP
 Related is the \fBnbody0h4\fP program written by Aarseth. See \fInbody0(1NEMO)\fP.
 
+.PP
+This program is also known as \fBhermite\fP in \fIamuse(1)\fP
+
 .SH "USAGE"
 .nf
  usage: nbody_sh1 [-h (for help)] [-d step_size_control_parameter]
@@ -21,19 +24,19 @@ Related is the \fBnbody0h4\fP program written by Aarseth. See \fInbody0(1NEMO)\f
                   [-t total_duration] [-i (start output at t = 0)]
                   [-x (extra debugging diagnostics)]
 .fi
-\fI"step_size_control_parameter"\fP
+\fI-d "step_size_control_parameter"\fP
 is a coefficient determining the
 the size of the shared but variable time step for all particles
 .PP
-\fI"diagnostics_interval"\fP
+\fI-e "diagnostics_interval"\fP
 is the time between output of diagnostics,
 in the form of kinetic, potential, and total energy; with the
 -x option, a dump of the internal particle data is made as well
 .PP
-\fI"output_interval"\fP
+\fI-o "output_interval"\fP
 is the time between successive snapshot outputs
 .PP
-\fI"total_duration"\fP
+\fI-t "total_duration"\fP
 is the integration time, until the program stops
 .PP
 Input/output are read/written from/to the standard i/o streams.
@@ -47,10 +50,12 @@ snapshots:
 .fi
 The diagnostics information will then appear on the screen.
 To capture the diagnostics information in a file, capture the
-standard error stream as follows:
+standard error stream as follows in csh and bash
 .nf
 
             (nbody_sh1 < data.in > data.out) >& data.err
+
+            nbody_sh1 < data.in > data.out  2> data.err
 
 .fi
 Note: if any of the times specified in the -e, -o, or -t options are not an
@@ -61,7 +66,7 @@ are integer multiples, round-off error may induce one extra step.
 .SH  "EXTERNAL DATA FORMAT"
 The program expects input of a single snapshot of an N-body system,
 in the following format: the number of particles in the snapshot n;
-the time t; mass mi, position (x,y,z) and velocity (vx,vy,vz)
+the time t; mass mi, position (xi,yi,zi) and velocity (vxi,vyi,vzi)
 for each particle i, 
 with position and velocity given through their three Cartesian
 coordinates, divided over separate lines as follows:
@@ -89,14 +94,14 @@ the following example:
 .EX
 
 	mkplummer p100 nbody=100
-	snapprint p100 m,x,y,z,vx,vy,vz header=t newline=t > p100.tab
+	snapprint p100 m,x,y,z,vx,vy,vz header=nbody,time newline=t > p100.tab
 	nbody_sh1 < p100.tab | tabtos - nbody,time m,x,y,z,vx,vy,vz nbody=100
 
 .EE
 or here in more traditional unix pipe example the famous figure 8 orbit:
 .EX
 
-	snapprint $NEMODAT/figure8.dat m,x,y,z,vx,vy,vz header=t newline=t |\\
+	snapprint $NEMODAT/figure8.dat m,x,y,z,vx,vy,vz header=nbody,time newline=t |\\
 	      nbody_sh1 -i -o 0.01 -t 20 |\\
 	      tabtos - figure8.out nbody,time m,x,y,z,vx,vy,vz nbody=3
 	snapplot figure8.out trak=t
@@ -118,14 +123,15 @@ src/nbody/evolve/ACS
 
 .SH "SEE ALSO"
 nbody0(1NEMO), snapprint(1NEMO), tabtos(1NEMO), snapshot(5NEMO)
-.br
-Hut, P., Makino, J. & McMillan, S., 1995, Astrophysical Journal Letters 443, L93-L96.
-.br
+.PP
 .nf
+Hut, P., Makino, J. & McMillan, S., 1995, Astrophysical Journal Letters 443, L93-L96.
 http://www.ids.ias.edu/~piet/act/comp/algorithms/starter/index.html (seems gone)
 .fi
+
 .SH "HISTORY"
 .nf
 .ta +1.25i +3.5i
 jan-2002	Version 1:	Piet Hut, Jun Makino
+jun-2025	updated examples for new snapprint	PJT
 .fi
