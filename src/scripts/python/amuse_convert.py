@@ -98,19 +98,19 @@ elif ifile is not None:
     snapshots = read_set_from_file(ifile, format=ifmt)
     itime = 0
     for bodies in list(snapshots.history):
-        itime = itime + 1
         model_time = bodies.get_timestamp()
         nbody = len(bodies)
         if ofile is not None:
             # re-write old
             write_set_to_file(bodies, ofile, format=ofmt, overwrite=wmode)
             if ntime >= 0 and itime == ntime:
-                print(f"Wrote selected snapshot {model_time} with {nbody} to {ofile} in {ofmt} format {wmode}")
+                print(f"Wrote selected snapshot {itime} at {model_time} with {nbody} bodies to {ofile} in {ofmt} format {wmode}")
                 break
             else:
-                print(f"Processing snapshot {model_time} with {nbody}")
+                print(f"Processing snapshot number {itime} at {model_time} with {nbody} bodies")
+        itime = itime + 1
     if ntime < 0:
-        print(f"Last snapshot {model_time} written")
+        print(f"Last snapshot {model_time} written, use -t to select a number < {itime-1}")
 else:
     # no input or output, just make a model in memory
     np.random.seed(seed)
