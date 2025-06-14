@@ -54,12 +54,8 @@ args = commandLine()
 # 
 nbody = int(args.nbody)
 seed  = int(args.seed)
-BASE  = 'plummer'
-FMT   = 'txt'
-FMT   = 'amuse'
 code  = args.code
-
-filename = f"{BASE}.{FMT}"
+ofile = args.ofile
    
 # code control
 eps   = float(args.eps)   | nbody_system.length
@@ -73,7 +69,7 @@ theta = float(args.theta)
 if seed != 0:
     np.random.seed(seed)
 stars = new_plummer_model(nbody)
-write_set_to_file(stars.savepoint(tnow), filename, format=FMT, overwrite_file = True)
+write_set_to_file(stars.savepoint(tnow), ofile, overwrite_file = True)
 print("Writing snapshot",tnow)
 
 # set up gravity solver
@@ -104,15 +100,15 @@ else:
     sys.exit(1)
 
 
-print('PARAMETERS:',gravity.parameters)
-
+print('GRAVITY PARAMETERS:',gravity.parameters)
 
 
 stars_in_gravity = gravity.particles.add_particles(stars)
 
-Qchan = True    # do we still need this ?
+Qchan = True    # do we still need this ? -> yes, stars_in_gravity can't use savepoint()
 
-# channel = gravity.particles.new_channel_to(stars)
+# channel_from_gravity_to_framework = gravity.particles.new_channel_to(bodies)
+# channel_from_gravity_to_framework.copy()
 
 while gravity.model_time < tstop:
     gravity.evolve_model(gravity.model_time + (step))
@@ -120,20 +116,14 @@ while gravity.model_time < tstop:
     if Qchan:
         stars_in_gravity.new_channel_to(stars).copy()
         stars.savepoint(timestamp=tnow)
-        write_set_to_file(stars.savepoint(tnow), filename, format=FMT, append_to_file = True)
+        write_set_to_file(stars.savepoint(tnow), ofile, append_to_file = True)
     else:
-        write_set_to_file(stars_in_gravity, filename, format=FMT, append_to_file = True)        
+        write_set_to_file(stars_in_gravity, ofile, append_to_file = True)        
     print("Writing snapshot",tnow)
 
-print(f"Wrote {filename} at {gravity.model_time} using {gravity.model_name} in {FMT} format, nbody={nbody}, seed={seed}")
+print(f"Wrote {ofile} at {gravity.model_time} using {gravity.model_name} in amuse format, nbody={nbody}, seed={seed}")
 gravity.stop()
 
 if True:
     from amuse.support import literature
     literature.TrackLiteratureReferences.suppress_output()
-
-"""
-channel_from_gravity_to_framework = gravity.particles.new_channel_to(bodies)
-channel_from_gravity_to_framework.copy()
-
-"""
