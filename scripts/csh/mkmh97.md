@@ -23,6 +23,12 @@ In this script we extend this with a few options:
 Some additional analysis is performed as well, see also **mh16.sh** for an example
 for further time-dependant analysis.
 
+## Related papers
+
+
+* https://arxiv.org/pdf/2506.09136   -   Mergers of galaxies
+
+
 ## Input parameters
 
 All input parameters are of the form *keyword=value*, like most NEMO programs, but with
