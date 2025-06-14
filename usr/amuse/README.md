@@ -19,18 +19,18 @@ pip install amuse-bhtree
 See https://amusecode.github.io/
 
 On ubuntu some preconditions are needed (and a choice of MPI:  mpich vs.openmpi)
-
+```
 sudo apt-get install build-essential gfortran python-dev \
   libopenmpi-dev openmpi-bin \
   libgsl-dev cmake libfftw3-3 libfftw3-dev \
   libgmp3-dev libmpfr6 libmpfr-dev \
   libhdf5-serial-dev hdf5-tools \
   git
-
+```
 recommended are also
 
+```
 pip install numpy nose docutils mpi4py h5py
-
 pip install scipy astropy jupyter pandas seaborn
 
 # this can have issues
@@ -47,9 +47,11 @@ pip install amuse-bse
 pip install amuse-fractalcluster 
 pip install amuse-gadget2 
 
+```
 
 Example comparing two codes:
 
+```
 from amuse.community.brutus.interface import Brutus
 from amuse.community.bhtree.interface import BHTree
 from amuse.datamodel import Particles
@@ -95,3 +97,4 @@ print(earth.position.as_quantity_in(units.AU)[0])
 instance.stop()
 
 
+```
