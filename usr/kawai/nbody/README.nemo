@@ -17,6 +17,9 @@ If bhtree/BHTC is needed, the following recipe should work in the old-style amus
    make
    cp build/BHTC $NEMOBIN
 
-The new style 2025 install probably uses something like
+The new style 2025 install uses the following
 
+   mknemo amuse
+   cd $NEMO/local/amuse
    ./setup developer bhtree
+   cp src/amuse_bhtree/build/BHTC $NEMOBIN 
