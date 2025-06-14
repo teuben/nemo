@@ -56,7 +56,7 @@ def commandLine():
     parser.add_argument('--time',      '-t',  help='extract time (-1=last)', default=-1)
     
     parser.add_argument('--debug',     '-d',  help='add some debugging',     action="store_true")
-    # @todo plummer creation has some options
+    # @todo plummer creation has some options we don't expose here
     # :argument radius_cutoff: Cutoff value for the radius (defaults to 22.8042468)
     # :argument mass_cutoff: Mass percentage inside radius of 1
     args = parser.parse_args()
