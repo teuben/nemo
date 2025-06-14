@@ -48,7 +48,7 @@ def commandLine():
 
     parser.add_argument('--ifile',     '-i',  help="input snapshot name",    default=None)
     parser.add_argument('--ofile',     '-o',  help="output snapshot name",   default=None)
-    parser.add_argument('--ifmt',      '-I',  help="input file format",      default='csv')
+    parser.add_argument('--ifmt',      '-I',  help="input file format",      default='amuse')
     parser.add_argument('--ofmt',      '-O',  help='output file format',     default='txt')
     parser.add_argument('--nbody',     '-n',  help="nbody if creating",      default=128)
     parser.add_argument('--seed',      '-s',  help='seed if creating',       default=123)
@@ -60,11 +60,11 @@ def commandLine():
     # :argument radius_cutoff: Cutoff value for the radius (defaults to 22.8042468)
     # :argument mass_cutoff: Mass percentage inside radius of 1
     args = parser.parse_args()
+    if args.debug:
+        print(args)
     return args
    
 args = commandLine()
-if args.debug:
-    print(args)
 
 nbody = int(args.nbody)
 seed  = int(args.seed)

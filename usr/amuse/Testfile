@@ -1,0 +1,13 @@
+# -*- makefile -*-
+
+RUNS = run000  run001 run002
+
+all: test0
+
+
+clean:
+	rm -rf $(RUNS)
+
+#
+test0:
+	@./amuse_test.py

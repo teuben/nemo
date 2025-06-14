@@ -7,7 +7,7 @@ SCRIPTS = mknemo mkpdoc manlaser nemoman nemobench ldso nemo.version \
 	fitsedit fitsmerge nds9 shtool nemo.coverage showvar mir2nemo getline pedit \
 	wgetc yapp_query nemoplot nemopars nemo ads \
         sbatch_nemo.sh nemo_functions.sh progress_bar.sh \
-	python/tabplot.py python/fitsplot.py python/mkrunfile.py python/amuse_convert.py
+	python/tabplot.py python/fitsplot.py python/mkrunfile.py 
 MAKES = Makefile.lib 
 
 help:

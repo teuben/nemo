@@ -123,7 +123,7 @@ massive amounts of code. Some of these can easily fail if you don't have the cor
 (e.g. MPI).
 
 A potentially faster way is to first install
-the AMUSE frame work and then the selected module(s):
+the AMUSE framework and then the selected module(s):
 
 .. code-block::
 
@@ -142,8 +142,11 @@ is)
 
    git clone https://github.com/amusecode/amuse
    cd amuse
-   pip install -e .
-   make bhtree.code
+   ./setup install amuse-framework
+   ./setup install bhtree
+   ./setup test    bhtree
 
 
 this is the recommended way for NEMO users.
+
+The directory ``$NEMO/usr/amuse`` has some example supporting code.
