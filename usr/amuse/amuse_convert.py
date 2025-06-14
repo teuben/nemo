@@ -70,7 +70,6 @@ nbody = int(args.nbody)
 seed  = int(args.seed)
 ifile = args.ifile
 ofile = args.ofile
-
 ifmt  = args.ifmt
 ofmt  = args.ofmt
 wmode = args.overwrite
@@ -85,7 +84,6 @@ try:
 except:
     print("no AMUSE found in your python environment")
     sys.exit(1)
-
 
 
 if ifile is None and ofile is not None:
@@ -117,7 +115,6 @@ else:
     stars = new_plummer_model(nbody)
     print(f"Created Plummer model w/ nbody={nbody} in memory, no I/O.")
     print("Use -h or --help to get help on various options.")
-
 
 
 # close shop but don't report provenance
