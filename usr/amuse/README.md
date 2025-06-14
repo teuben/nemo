@@ -1,9 +1,9 @@
 The command "mknemo amuse" is now aimed to steer the install of AMUSE within NEMO
 
-## spring 2025
+## 2025 notes:
 
-Early 2025, although the new install (which is laborious) works, there is the old
-less intrusive pip install.  Here are the steps in a fresh NEMO install:
+Early 2025, although the new developer install (which is laborious) works, there is the old
+less intrusive user based *pip install* .  Here are the steps in a fresh NEMO install:
 
 ```
 cd $NEMO
@@ -12,13 +12,41 @@ source anaconda3/python_start.sh
 mknemo amuse
 pip install amuse-framework
 pip install amuse-bhtree
+cd $NEMO/usr/amuse
+make test1
 ```
 
-## older 2019 notes that need to be updated:
+### benchmarking
+
+These benchmarks (see Makefile) don't use the same input data yet. TBD.
+
+Timings are from `/usr/bin/time` on an Ultra 7 155H.
+
+
+* bench1:   creating a large 1M Plummer sphere in memory (0), and also writing it (1)
+
+      a0:  6.37user 7.06system 0:11.59elapsed 115%CPU
+      a1: 43.93user 7.55system 0:49.78elapsed 103%CPU  (writing seems expensive in AMUSE)
+      n0:  2.42user 0.47system 0:02.89elapsed 99%CPU
+      n1:  2.38user 0.74system 0:03.13elapsed 99%CPU 
+
+
+* bench2:   integrating an N=2048 Plummer sphere for 640 timesteps using **amuse-bhtree** (a), comparing to **hackcode1** (n),
+            but also compare to **nemo-bhtree** itself (b)
+
+
+      a:  6.26user 8.58system 0:13.58elapsed 109%CPU 
+      n:  2.75user 0.00system 0:02.75elapsed 99%CPU
+      b:  1.64user 0.03system 0:01.67elapsed 99%CPU 
+
+
+## 2019 notes:
 
 See https://amusecode.github.io/
 
 On ubuntu some preconditions are needed (and a choice of MPI:  mpich vs.openmpi)
+
+
 ```
 sudo apt-get install build-essential gfortran python-dev \
   libopenmpi-dev openmpi-bin \
@@ -27,74 +55,5 @@ sudo apt-get install build-essential gfortran python-dev \
   libhdf5-serial-dev hdf5-tools \
   git
 ```
-recommended are also
-
-```
-pip install numpy nose docutils mpi4py h5py
-pip install scipy astropy jupyter pandas seaborn
-
-# this can have issues
-# pip install amuse
-
-# then just the framework
-pip install amuse-framework
-
-# and whatever community codes you need
-
-pip install amuse-brutus
-pip install amuse-bhtree
-pip install amuse-bse
-pip install amuse-fractalcluster 
-pip install amuse-gadget2 
-
-```
-
-Example comparing two codes:
-
-```
-from amuse.community.brutus.interface import Brutus
-from amuse.community.bhtree.interface import BHTree
-from amuse.datamodel import Particles
-from amuse.units import nbody_system
-from amuse.units import units
-
-convert_nbody = nbody_system.nbody_to_si(1.0 | units.MSun, 149.5e6 | units.km)
 
 
-instance = BHTree(convert_nbody)
-instance.parameters.epsilon_squared = 0.001 | units.AU**2
-
-or:
-
-instance = Brutus(convert_nbody)
-
-
-stars = Particles(2)
-sun = stars[0]
-sun.mass = 1.0 | units.MSun
-sun.position = [0.0,0.0,0.0] | units.m
-sun.velocity = [0.0,0.0,0.0] | units.m / units.s
-sun.radius = 1.0 | units.RSun
-earth = stars[1]
-earth.mass = 5.9736e24 | units.kg
-earth.radius = 6371.0 | units.km 
-earth.position = [1.0, 0.0, 0.0] | units.AU
-earth.velocity = [0.0, 29783, 0.0] | units.m / units.s
-instance.particles.add_particles(stars)
-
-channel = instance.particles.new_channel_to(stars)
-
-print(earth.position[0])
-print(earth.position.as_quantity_in(units.AU)[0])
-instance.evolve_model(1.0 | units.yr)
-print(earth.position.as_quantity_in(units.AU)[0])
-channel.copy()
-print(earth.position.as_quantity_in(units.AU)[0])
-instance.evolve_model(1.5 | units.yr)
-channel.copy()
-print(earth.position.as_quantity_in(units.AU)[0])
-
-instance.stop()
-
-
-```
