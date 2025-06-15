@@ -24,20 +24,27 @@ What options do we have?
 * write a matplotlib based yapp, so we can use dynamic pan/zoom/save
 * fix plplot?   https://github.com/teuben/nemo/issues/21
 
+Guiding principles:
+
+* do one thing, and do it well
+* low entry barrier, one or two command line arguments get you going
+
 ## tabplot
 
 The most common plotting program in NEMO is **tabplot**, but cannot easily combine
-data from different tables. It also has a large number (>30) of keywords, which
-makes it hard to use, and prone to bugs.
+data from different tables. However, it can plot multiple columns, paired up as well.
+It also has a large number (>30) of keywords, which
+makes it hard to use, and prone to bugs. 
 
 To overcome the single table approach, the NEMO *getparam* command line user interface
-would need to be abandoned (short of rewriting it). The standard *parsargs* module
-in python - with a minor hack - will allow parsing the commandline in sections.
+would need to be abandoned (short of rewriting it). The standard *parseargs* module
+in python - with a minor hack - will allow parsing the commandline in sections
+identified with the input table
 
 Below is that new approach to tabplot, currently being implemented in **tabplot3.py**
 and (soon) available for testing.
 
-The originting issue is written up here:  https://github.com/teuben/nemo/issues/87
+The originating issue is written up here:  https://github.com/teuben/nemo/issues/87
 
 
 ```
@@ -47,7 +54,7 @@ One (or more) tables can be plotted in a scatter diagram using matplotlib
 
 * options per input table
 
--x --xcol     column number(s) for X axis
+-x --xcol     column number(s) for X axis. Some tables might allow colnames?
 -y --ycol     column number(s) for Y axis
 -X --dxcol    column(s) with errors in X. Must match the X set. 0 to skip
 -Y --dycol    column(s) with errors in Y. Must match the Y set. 0 to skip
@@ -74,7 +81,9 @@ Other thoughts:
   or rely on rcParams
 ? need a generic class to read table, like panda's ?
 ? need a generic class to contain the scatterplot parameters (-x...-L)
-
+? template generator (current tabplot has the pyplot= keyword for this)
+? make classes and functions available for derivate products?
+  (e.g. a spectrum plotter where one can switch between freq/wave/velo)
 
 Examples:
 
@@ -87,11 +96,12 @@ Generate some tables with 10 rows and 4 columns, sorted in the first columns:
 
 ./tabplot3.py -i tab1 -c red \
               -i tab2 -y 2,3 -l 1 -c green \
-              -i tab3 -c blue -p 10
+              -i tab3 -c blue -p 10 \
+	      --out fig1.png 
 
 ```
 
-###   Table and Scatter
+###   Table and Scatter classes?
 
 Python classes, one for reading tables (or is pandas good enough?) and a scatter plot
 (since each table can do one) seems a good way to modularize the code.
