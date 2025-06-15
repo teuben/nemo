@@ -1,19 +1,21 @@
 # Plotting in NEMO
 
 Plotting in NEMO is generally done by using the *yapp* API. At installation time
-NEMO will be compiled and linked with a specific choice, e.g.
+NEMO will be configured with a specific choice, e.g.
 
       ./configure --with-yapp=pgplot
 
 but most current yapp implementations (in $NEMO/src/kernel/yapp) are either old
 or not very flexible. Currently pgplot is the most used, since it can handle
-a variety of output formats, including plotting in different window panels. However,
-many people now use matplotlib, which has some big advantages:
+a variety of output formats, including plotting in different window panels.
+
+However, these days many people now use matplotlib, which has some big
+advantages:
 
 * can plot to different screens
-* plot can be zoomed/panned (but still needs a connection to the program)
-* saving in many formats
-* support pipeline batch mode
+* plot can be zoomed/panned (as long as it keeps a connection to the program)
+* saving in many formats (e.g. png, pdf)
+* support pipeline batch mode using a proper backend (i.e. interactive vs. non-interactive)
 
 
 What options do we have?
@@ -23,6 +25,7 @@ What options do we have?
 * write a new yapp.   SVG ?  https://github.com/teuben/nemo/issues/166
 * write a matplotlib based yapp, so we can use dynamic pan/zoom/save
 * fix plplot?   https://github.com/teuben/nemo/issues/21
+* multiplex yapp
 
 Guiding principles:
 
@@ -34,12 +37,12 @@ Guiding principles:
 The most common plotting program in NEMO is **tabplot**, but cannot easily combine
 data from different tables. However, it can plot multiple columns, paired up as well.
 It also has a large number (>30) of keywords, which
-makes it hard to use, and prone to bugs. 
+makes it hard to use, and prone to bugs when amending code.
 
 To overcome the single table approach, the NEMO *getparam* command line user interface
 would need to be abandoned (short of rewriting it). The standard *parseargs* module
 in python - with a minor hack - will allow parsing the commandline in sections
-identified with the input table
+identified with each input table
 
 Below is that new approach to tabplot, currently being implemented in **tabplot3.py**
 and (soon) available for testing.
@@ -50,7 +53,8 @@ The originating issue is written up here:  https://github.com/teuben/nemo/issues
 ```
 tabplot3.py -i table1 [options] [-i table2 ...] ...
 
-One (or more) tables can be plotted in a scatter diagram using matplotlib
+One (or more) tables can be plotted in a scatter diagram using matplotlib,
+each in their own style
 
 * options per input table
 
@@ -70,8 +74,8 @@ One (or more) tables can be plotted in a scatter diagram using matplotlib
 --ylab        Label along Y axis
 --xrange      Min/Max along X
 --yrange      Min/Max along Y
---title       label along Y axis
---bigtitle    label along Y axis
+--title       title above the plot
+--suptitle    super title above the title
 --out         plotting file, default is on screen
 
 Other thoughts:
@@ -84,10 +88,11 @@ Other thoughts:
 ? template generator (current tabplot has the pyplot= keyword for this)
 ? make classes and functions available for derivate products?
   (e.g. a spectrum plotter where one can switch between freq/wave/velo)
+? how to deal with interactive vs. non-interactive
 
 Examples:
 
-Generate some tables with 10 rows and 4 columns, sorted in the first columns:
+Generate some tables, sorted by the first column:
 
    tabgen - 10 4 seed=1 | sort -n > tab1
    tabgen - 20 6 seed=2 | sort -n > tab2
@@ -118,3 +123,19 @@ Python classes, one for reading tables (or is pandas good enough?) and a scatter
 * https://www.nature.com/articles/s41556-025-01684-z
 
 * https://hyperfit.readthedocs.io/en/latest/
+
+* supermongo,
+
+* xmgrace,  https://plasma-gate.weizmann.ac.il/Grace/
+
+* gnuplot,
+
+* veusz, https://veusz.github.io/
+
+* SciEnPlot
+
+* https://kst-plot.kde.org/
+
+* https://scidavis.sourceforge.net/
+
+* https://labplot.org/
