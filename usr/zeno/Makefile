@@ -75,9 +75,9 @@ bench1: bench.ascii
 
 # benchmark noted in bhtree(1NEMO)
 bench2:
-	@rm -f p2k p2k.out
-	plumsnap p2k 2048
-	$(TIME) treecode    p2k p2k.out dtime=1/64 theta=0.75 usequad=false tstop=10
-	$(TIME) treecode    p2k p2k.out dtime=1/64 theta=0.75 usequad=true  tstop=10
-	$(TIME) treecode_dp p2k p2k.out dtime=1/64 theta=0.75 usequad=false tstop=10
-	$(TIME) treecode_dp p2k p2k.out dtime=1/64 theta=0.75 usequad=true  tstop=10
+	@rm -f p1k p1k.out
+	plumsnap p1k 1024
+	$(TIME) treecode    p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > /dev/null
+	$(TIME) treecode    p1k p1k.out dtime=1/64 theta=0.75 usequad=true  tstop=10 > /dev/null
+	$(TIME) treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > /dev/null
+	$(TIME) treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=true  tstop=10 > /dev/null
