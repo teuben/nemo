@@ -49,7 +49,7 @@ interval for log output (default: 1: all step)
 time to stop integration          (default: 10)
 .TP
 -d \fIfloat\fP
-timestep (default: 0.015625)
+timestep (default: 0.015625 = 1/64)
 .TP
 -e \fIfloat\fP
 softening parameter (default: 0.025)
@@ -108,7 +108,7 @@ command to be executed each time snapshot are output (default: no output)
 .SH "CAVEATS"
 Files are silently appended to.
 .PP
-BHTC is only available
+BHTC is only available within AMUSE, has to be manually copied to $NEMOBIN
 
 .SH "EXAMPLES"
 An example of integrating a 1024 body Plummer sphere to time 10, and plotting
@@ -129,21 +129,22 @@ To compare the original hackcode1 with bhtree, the following example is
 part of the Benchfile, integrating a 1024 body Plummer model for 1280 steps.
 
 .EX
-  rm -f p1k.1 p1k.2
+  rm -f p1k.1 p1k.2 p1k.3
   mkplummer p1k.1 1024 seed=123
   stoa p1k.1 p1k.2
   time=/usr/bin/time
   $time hackcode1 p1k.1 . tstop=20 tol=0.75 freq=64     eps=0.025  > p1.log 2>&1
   $time bhtree -i p1k.2   -T 20    -t 0.75  -d 0.015625 -e 0.025   > p2.log 2>&1
+  plumsnap p1k.3 2048
+  $time treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > p3.log
 .EE
 
-here are some results, including the equivalent treecode from ZENO, in single and
-double precision
+here are some results, including the equivalent treecode from ZENO in double precision.
 
 .nf
 .ta +2i +1i +1i +1i
 CPU	hackcode1	bhtree	BHTC	ZENO/treecode
-Ultra 7 155H	2.44	2.69	5.51	4.43 (8.11)
+Ultra 7 155H	2.44	2.69	5.51	2.85
 i7-1260P	2.75	2.85	5.43	?
 i5-10210U      	5.79	6.99	?	?
 .fi
