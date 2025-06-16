@@ -1,4 +1,4 @@
-.TH BHTREE 1NEMO "23 May 2025"
+.TH BHTREE 1NEMO "15 June 2025"
 
 .SH "NAME"
 bhtree, BHTC \- Barnes-Hut treecode with an optional GRAPE-4 interface
@@ -137,29 +137,27 @@ part of the Benchfile, integrating a 1024 body Plummer model for 1280 steps.
   $time bhtree -i p1k.2   -T 20    -t 0.75  -d 0.015625 -e 0.025   > p2.log 2>&1
 .EE
 
-here are some results:
+here are some results, including the equivalent treecode from ZENO, in single and
+double precision
 
 .nf
-.ta +2i +1i +1i
-CPU	hackcode1	bhtree	BHTC
-Ultra 7 155H	2.44	2.69	5.51
-i7-1260P	2.75	2.85	5.43
-i5-10210U      	5.79	6.99	?
+.ta +2i +1i +1i +1i
+CPU	hackcode1	bhtree	BHTC	ZENO/treecode
+Ultra 7 155H	2.44	2.69	5.51	4.43 (8.11)
+i7-1260P	2.75	2.85	5.43	?
+i5-10210U      	5.79	6.99	?	?
 .fi
-
-.SH "AMUSE"
-Since \fBbhcode\fP is also absorbed in \fIamuse\fP, we can compare a typical  integration
-in both NEMO and AMUSE.
 
 .SH "INSTALL"
 Can be done using \fBmknemo -a bhtree\fP.
 
-.SH "RUN"
+.SH "CAVEATS"
 There is no \fIrun(3NEMO)\fP interface for bhtree.
 
 
 .SH "SEE ALSO"
 hackcode1(1NEMO), atos(1NEMO), stoa(1NEMO)
+.PP
 .nf
 Barnes, J. & Hut, P. 1986. Nature 324, 446.
 http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
@@ -171,8 +169,7 @@ http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
 .SH "FILES"
 .nf
 $NEMO/usr/kawai/nbody   (this is historic)
-$AMUSE_DIR/src/amuse/community/bhtree/src  
-$AMUSE_DIR/src/amuse_bhtree (new 2025 version)
+$AMUSE_DIR/src/amuse_bhtree/src  (including BHTC.C)
 .fi
 Note if amuse is installed with \fBmknemo(1NEMO)\fP, AMUSE_DIR=$NEMO/local/amuse
 
