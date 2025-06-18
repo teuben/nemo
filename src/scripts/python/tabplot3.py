@@ -7,7 +7,10 @@ import sys
 import argparse
 import numpy as np
 import numpy.ma as ma
+import pandas as pd
+import json
 import matplotlib.pyplot as plt
+from io import StringIO
 
 #import pdb
 #pdb.set_trace()
@@ -28,31 +31,37 @@ else:
 # Defining parser
 # add_argument attaches individual assignment specifications to the parser
 
+
+
 # Add help
 parser = argparse.ArgumentParser(
-    usage = """ 
-    -i --input ???          input fits cube
-    -x --xcol 1             X column(s) (1=first column)
-    -y --ycol 2             Y column(s)
-    -l --line 0,...         Line Width(s)
-    -c --color black,...    Colum Color(s)
-    -p --point 1,...        Point Size(s)
-    -lb --label ,...        Labels for each plot (required for legend)
-    -lg --legend            Add a legend
-    -VERSION 0.1            3-apr-2023 PJT
-    """,
-
-    description = "plots a table like tabplot"
+    description = "plots a table like tabplot", 
+     formatter_class=lambda prog: argparse.HelpFormatter(prog, max_help_position=40, width=100) #Widens the available width so it all prints on the same line
 )
 
-parser.add_argument('-i', '--input', required=True) # -i/--input argument
-parser.add_argument('-x', '--xcol', default='1', type=str)
-parser.add_argument('-y', '--ycol', default='2', type=str)
-parser.add_argument('-c', '--color', default="black,", type=str)
-parser.add_argument('-l', "--line", default="0,", type=str)   
-parser.add_argument('-p', "--point", default="1,", type=str)  
-parser.add_argument('-lb', "--labels", default=",", type = str)
-parser.add_argument('-lg', "--legend", action = "store_true")
+parser.add_argument('-i', '--input', default = "", help = "inupt fits cube") # -i/--input argument
+
+parser.add_argument('-x', '--xcol', default='1', type=str, help = "X column(s)")
+parser.add_argument('-y', '--ycol', default='2', type=str, help = "Y column(s)")
+parser.add_argument('-c', '--color', default="black,", type=str, help = "Line Width(s)")
+parser.add_argument('-l', "--line", default="0,", type=str, help = "Color(s)")   
+parser.add_argument('-p', "--point", default="1,", type=str, help = "Point size(s)")  
+parser.add_argument('-lb', "--labels", default=",", type = str, help = "Labels for each plot (required for legend)")
+parser.add_argument('-lg', "--legend", action = "store_true", help = "Add a legend")
+parser.add_argument('-t', '--title', default = "", type = str, help = "Add a title")
+parser.add_argument('-o', '--out', default='', type=str, help = "Save to file")
+
+
+
+#Gets defaults - needed for when there's errors with extracting arguments
+def get_defaults():
+    defaults = {}
+    for action in parser._actions:
+        if action.dest != 'help':  # skip help
+            defaults[action.dest] = action.default
+    return defaults
+
+
 
 # Store parsed results
 avs = []
@@ -61,15 +70,27 @@ for i in range(len(inputs)):
     av = parser.parse_args(section_args)
     avs.append(av)
 
-#Show help if input not provided
-if(len(avs) == 0):
-    parser.print_help()
-    sys.exit()
+
+if len(avs) == 0:
+    avs = [None]
+
+
+plt.figure()
+out = False; outpath = None; title = None
 
 
 #Creating a separate plot for each varset
 for varset in avs:
-    p = vars(varset)
+    p = get_defaults()
+    try:
+        p = vars(varset); 
+    except Exception as e:
+        if not sys.stdin.isatty():
+            data_str = sys.stdin.read()
+            p['input'] = StringIO(data_str)
+        else:
+            parser.print_help()
+            sys.exit()
 
     #Declare cli params
     infile = p['input']
@@ -80,6 +101,17 @@ for varset in avs:
     pointinput = p['point']
     labels = p['labels']
     legend = p['legend']
+    out_arg = p['out']
+    ttl = p['title']
+
+
+    #Saving output path if we want it (title too)
+    if out_arg != "" and not out:
+        out = True; outpath = out_arg
+    
+    if title == None:
+        title = ttl
+
 
 
     # get indexes for xcol and ycol
@@ -119,11 +151,12 @@ for varset in avs:
     labels = labels[:numlines] if len(labels) > numlines else labels + ["" for _ in range(numlines - len(labels))]
 
 
+    # gather data + check for pipe
 
-    print({ "pointsizes" : pointsizes, "colors" : colors, "linewidths" : linewidths })
-
-    # gather data
-    data = np.loadtxt(infile).T
+    df = pd.read_csv(infile, sep=None, engine='python', header=None)
+    df = df.apply(pd.to_numeric, errors='coerce')
+    df = df.select_dtypes(include="number").dropna(axis=1, how='all')
+    data = df.values
 
     xdata = [0] * len(xcols)
     ydata = [0] * len(ycols)
@@ -135,7 +168,6 @@ for varset in avs:
         ydata[i] = data[ycols[i]-1]
 
     # Plotting
-    plt.figure()
 
     if len(xdata) == 1: # Case: only 1 xcol, plot each y against the only x
         for i in range (len(ydata)):
@@ -156,5 +188,12 @@ for varset in avs:
     if legend:
         plt.legend()
 
-#Showing all figures at once
-plt.show()
+#Showing all figures at once (or saving)
+if title is not None:
+    plt.title(title)
+
+if out:
+    plt.savefig(outpath)
+
+else:
+    plt.show()
