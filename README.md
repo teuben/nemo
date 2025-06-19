@@ -22,15 +22,14 @@ A related package, ZENO, was spun off NEMO V1, and is maintained by Josh Barnes.
 Other packages that geneologically came after NEMO are StarLab, ACS and AMUSE
 (see also https://ascl.net for code references):
 
-	 NEMO:      ascl:1010.051
-	 ZENO:      ascl:1102.027 (normally installed in $NEMO/usr/zeno)
-	 STARLAB:   ascl:1010.076 (optionally installed in $NEMO/local/starlab)
-	 ACS:       https://artcompsci.org
-	 AMUSE:     ascl:1107.007
+   * NEMO:      ascl:1010.051
+   * ZENO:      ascl:1102.027 (normally installed in $NEMO/usr/zeno)
+   * STARLAB:   ascl:1010.076 (optionally installed in $NEMO/local/starlab)
+   * ACS:       [https://artcompsci.org](https://web.archive.org/web/20240206050455/http://www.artcompsci.org)
+   * AMUSE:     ascl:1107.007
 	 
 ## Optional Packages
 
-Packages we optionally use (sometimes also installed in $NEMO/opt with source code in $NEMO/local):
 
 	 PGPLOT:    ascl:1103.002
 	 CFITSIO:   ascl:1010.001
@@ -153,6 +152,7 @@ between them there is unavoidable duplication, but here they are:
 * readthedocs: https://astronemo.readthedocs.io/en/latest/
 * github pages: https://teuben.github.io/nemo  (yes, these are the 1990s style webpages we used to maintain)
 * all unix style man pages for all levels: https://teuben.github.io/nemo/man_html/index1.html
+* the nemo man page https://teuben.github.io/nemo/man_html/nemo.1.html
 * software carpentry: https://teuben.github.io/nemo-lesson 
 * AAS 443 [iPoster](https://aas243-aas.ipostersessions.com/?s=85-F6-32-6F-83-00-4E-79-54-7F-C0-25-77-D7-0D-7B)
 * an installation example in bash jupyter notebook style: https://github.com/teuben/nemo/blob/master/scripts/notebooks/installing.ipynb

@@ -127,7 +127,7 @@ string defv[] = {
     "endian=\n      assume 'Little' (l) or 'Big' (b) endian input file",
     "memcpy=f\n     Testing swapping double another way with memcpy",
     "repeat=0\n     How many times to repeat the swapping (speed testing)",
-    "VERSION=2.0\n  14-may-2012 PJT",
+    "VERSION=2.0a\n 4-may-2025 PJT",
     NULL,
 };
 
@@ -136,10 +136,6 @@ string usage="swap bytes in a file - fast";
 #else
 string usage="swap bytes in a file - generic";
 #endif
-
-string cvsid="$Id$";
-
-extern int nemo_file_size(string);
 
 
 void byteswap_doubles(double *a)

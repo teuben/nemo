@@ -22,15 +22,12 @@ string defv[] = {
     "out=\n                       output file name [fort.4]",
     "nbody=0\n                    test if this nbody is ok (0=no test)",
     "header=\n                    if used, force unfio header size (4 or 8)",
-    "VERSION=1.3\n		  4-mar-06 PJT",
+    "VERSION=1.3a\n		  4-may-2025 PJT",
     NULL,
 };
 
 string usage = "convert snapshot to unit-4 for NBODYx";
 
-string cvsid="$Id$";
-
-extern int nemo_file_size(string);
 
 void nemo_main(void)
 {

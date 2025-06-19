@@ -1,13 +1,11 @@
 #! /bin/bash
 #
 #   runs configure and all three build phases, outputting results into one log file.
+#
+#   although this works, this is not normally how you want to install NEMO, instead
+#   look at the docs/nemo_install.sh script for more flexibilty. 
 
 # ============================================================================================
-
-#    Poor man's command line parser
-for arg in $*; do\
-  export $arg
-done
 
 #   Run configure step and build1+2
 ./configure

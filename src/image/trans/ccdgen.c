@@ -41,10 +41,11 @@ string defv[] = {
   "crpix=\n        Override/Set crpix (1,1,1) // ignored ** mapcenter if left blank **",
   "crval=\n        Override/Set crval (0,0,0) // ignored",
   "cdelt=\n        Override/Set cdelt (1,1,1) // ignored",
+  "radecvel=f\n    Fake some RA,DEC,VEL axis types",
   "seed=0\n        Random seed",
   "headline=\n     Random veriage for the history",
   "in=\n           Input file (optional) to be added to the new file",
-  "VERSION=2.0\n   8-dec-2022 PJT",
+  "VERSION=2.1\n   6-jun-2023 PJT",
   NULL,
 };
 
@@ -73,6 +74,8 @@ real sinp, cosp, sini, cosi;
 bool Qtotflux;
 real factor;
 real surface=1.0;
+
+bool Qradecvel;
 
 
 local void do_create(int nx, int ny, int nz);
@@ -119,6 +122,8 @@ void nemo_main(void)
 
   Qtotflux = getbparam("totflux");
   factor = getdparam("factor");
+
+  Qradecvel = getbparam("radecvel");
 
   pa = getdparam("pa");
   inc = getdparam("inc");
@@ -298,6 +303,13 @@ local void do_create(int nx, int ny, int nz)
     
     MapMin(iptr) = m_min;
     MapMax(iptr) = m_max;
+
+    if (Qradecvel) {
+      Namex(iptr) = strdup("RA---SIN");
+      Namey(iptr) = strdup("DEC--SIN");
+      Namez(iptr) = strdup("VELO-LSR");
+    }
+     
 
     dprintf(1,"New min and max in map are: %f %f\n",m_min,m_max);
     dprintf(1,"New total brightness/mass is %f\n",

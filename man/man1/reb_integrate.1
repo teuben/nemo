@@ -1,4 +1,4 @@
-.TH REB_INTEGRATE 1NEMO "18 January 2024"
+.TH REB_INTEGRATE 1NEMO "25 May 2025"
 
 .SH "NAME"
 reb_integrate \- example REBOUND integrator 
@@ -16,6 +16,9 @@ more geared towards NEMO type simulations. This is work in progress.
 .PP
 While the integration is ongoing, results can be viewed in a browser by using a valid port
 number in \fBserver=\fP, typically 1234 is used. The default will not use this progress viewer.
+.PP
+The \fBrebound\fP integrator is also available
+in the \fIamuse(1NEMO)\fP environment.
 
 .SH "PARAMETERS"
 .so man1/parameters
@@ -42,7 +45,9 @@ Integration Step [0.01]
 Gravitational Softening Length [0.01]    
 .TP
 \fBintegrator=\fP
-rebound integrator [leapfrog]     
+rebound integrator. A list of valid integrators is given below.
+.br
+[leapfrog]     
 .TP
 \fBgravity=\fP
 none, basic, compensated or tree [basic]  
@@ -60,6 +65,21 @@ Gravitational Constant [1]
 Use web based server on this port where the viewer can be seen on
 \fBhttps://localhost:\fP\fIport\fP
 
+.SH "INTEGRATORS"
+The \fBintegrator=\fP keyword selects an integrator. Valid options are:
+.nf
+
+ias15
+whfast
+sei
+leapfrog     (the default)
+hermes
+whfast-helio
+none
+janus
+
+.fi
+Not all of these make equal sense in this application.
 
 .SH "EXAMPLE"
 Here is a comparison with NEMO's \fIdirectcode(1NEMO)\fP, which uses a leapfrog integrator.
@@ -104,7 +124,7 @@ are not properly "even"
 Units used are virial units, except the Gravitational Constant can be changed (but not as function of time yet).
 
 .SH "SEE ALSO"
-s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO),  snapshot(5NEMO),  rebound(8NEMO) 
+s2reb(1NEMO), reb2s(1NEMO), reb_viewer(1NEMO),  snapshot(5NEMO),  rebound(8NEMO), amuse(1NEMO)
 .nf
 https://rebound.readthedocs.io
 .fi

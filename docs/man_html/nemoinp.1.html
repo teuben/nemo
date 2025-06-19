@@ -32,6 +32,7 @@ subtle differences: <br>
 matlab<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;1:2:10
 seq<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;1 2 10
 numpy.arange<tt> </tt>&nbsp;<tt> </tt>&nbsp;1,10,2<tt> </tt>&nbsp;<tt> </tt>&nbsp;last element (10) is never used
+IDL<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;findgen(5)*2+1  -or-  indgen(5)*2+1
 </pre>
 <p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
@@ -93,18 +94,7 @@ array is limited, currently hardcoded to 32678 in <a href='nemoinp.3.html'><i>ne
 use <a href='seq.1.html'><i>seq(1)</i></a>
 . 
 <p> 
-<p> 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='seq.1.html'>seq(1)</a>
-, <a href='tabgen.1.html'>tabgen(1NEMO)</a>
-, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
-, <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
-,
-<a href='getrange.3.html'>getrange(3NEMO)</a>
-, <a href='functions.5.html'>functions(5NEMO)</a>
- 
-<p> 
-<h2><a name='sect6' href='#toc6'>Examples</a></h2>
+<h2><a name='sect5' href='#toc5'>Examples</a></h2>
 <br>
 <pre>   nemoinp 4.2+3.1           simple math
    nemoinp &rsquo;sqrt(2)&rsquo;         math functions
@@ -120,8 +110,23 @@ use <a href='seq.1.html'><i>seq(1)</i></a>
    nemoinp 30:30:15 dms=t    convert hexasegimal 30:30:15 into decimal
 30.5043
    nemoinp c,G,h,p,m         a few good constants
-   nemoinp &rsquo;p*pi/(3600*180)&rsquo; 1 AU in km
+   nemoinp &rsquo;p*pi/(3600*180)&rsquo; 1 AU in m
+</pre>things that it cannot do are sometimes captured with little known unix
+commands. Here are some examples: <br>
+<pre>   echo "ibase=2; obase=8; 101101" | bc           # convert binary to octal
+   echo 1.2/4.5 | bc -l                           # floating point math
+   z=$((x + y))                                   # sum integers in bash
 </pre>
+<p> 
+<h2><a name='sect6' href='#toc6'>See Also</a></h2>
+<a href='seq.1.html'>seq(1)</a>
+, <a href='tabgen.1.html'>tabgen(1NEMO)</a>
+, <a href='tabmath.1.html'>tabmath(1NEMO)</a>
+, <a href='nemoinp.3.html'>nemoinp(3NEMO)</a>
+, <a href='getrange.3.html'>getrange(3NEMO)</a>
+,
+<a href='functions.5.html'>functions(5NEMO)</a>
+ 
 <p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
@@ -146,8 +151,8 @@ Peter Teuben
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
 <li><a name='toc4' href='#sect4'>Caveats</a></li>
-<li><a name='toc5' href='#sect5'>See Also</a></li>
-<li><a name='toc6' href='#sect6'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>Examples</a></li>
+<li><a name='toc6' href='#sect6'>See Also</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
 <li><a name='toc8' href='#sect8'>Update History</a></li>
 </ul>

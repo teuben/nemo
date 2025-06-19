@@ -56,7 +56,7 @@ string defv[] = {               ";Hierarchical N-body/SPH code " SCANNER,
     "nnbr=32",                  ";Requested number of neighbors",
     "nmax=42",                  ";Maximum number of neighbors",
     "nmin=22",                  ";Minimum number of neighbors",
-    "VERSION=1.8",              ";Jin Koda    PJT 23-oct-2007",
+    "VERSION=1.8a,              ";Jin Koda    PJT 23-oct-2007",
     NULL, 
 };
 
@@ -66,6 +66,8 @@ local void calcforce(void);                     /* do force calculation     */
 local void stepsystem(void);                    /* advance by one time-step */
 local real settimestep(void);                   /* set time step 'dt'       */
 local void startrun(void);                      /* initialize system state  */
+
+extern void managetree(void);
 
 /*
  * MAIN: toplevel routine for hierarchical N-body code.

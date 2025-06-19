@@ -4,8 +4,8 @@ Research Software Engineering
 NEMO was rooted with a Unix philosopy, and by now can be called
 legacy. There has been a constant change in the software engineering
 (SE) aspects it was using. This page hopes to summarize those,
-especially useful for those with no domain knowledge. We also highlight
-a few peculiar aspects.
+especially useful for those with no domain knowledge, and are
+new to the project. We also highlight a few peculiar aspects.
 
 * Like many research programming projects, NEMO grew organically but over
   the years has tried to absorb good modern SE habbits to make the project
@@ -22,7 +22,7 @@ a few peculiar aspects.
    * We started out with email (1987) and *shar* files, then moved to *CVS* in 2000, and finally
      to *git* in 2017, hosted on github for the moment
    * issues (for bug reports) and pull requests are the preferred way to collaborate
-   * projects (in github) discuss a few ideas we have where changes could be expected
+   * projects (in github) discuss a few ideas we have where changes could be expected in kanban style
 
 * installing NEMO occurs in place, we use an Autoconf based **configure** script
   to track down the system

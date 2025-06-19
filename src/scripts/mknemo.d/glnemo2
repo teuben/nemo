@@ -1,5 +1,7 @@
 #! /bin/csh -f
 #
+# For binary downloads, https://projets.lam.fr/projects/glnemo2/wiki/download
+#
 # a quick hack       - June 2009
 # added cmake option - Jan 2012
 # for QT5            - Mar 2014

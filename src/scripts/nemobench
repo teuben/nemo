@@ -1,11 +1,11 @@
 #! /bin/bash
 #
 #   typically called via a Benchfile as in:
-#          nemobench mkplummer . 10000
+#          nemobench label mkplummer . 10000
 #set -x
 
 
-_version="19-mar-2024"
+_version="22-may-2025"
 if [ $# -eq 0 ]; then
     echo "Usage $0 label cmd [args]"
     echo "Version $_version"

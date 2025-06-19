@@ -1,0 +1,196 @@
+.TH AMUSE 1NEMO "16 June 2025"
+
+.SH "DESCRIPTION"
+\fBAMUSE\fP is the Astrophysical MUltipurpose Software Environment,
+with which you can simulate many types of astrophysical systems.
+.PP
+The user interacts with AMUSE in python, for example you can set up an amuse
+profile in ipython that preloads some common imports
+.EX
+
+       ipython --profile=amuse
+
+.EE
+Internally many components in AMUSE are legacy codes (C,C++,Fortran) running at fantastic speeds,
+but the user will interact via python interfaces.
+.PP
+An example is shown below, and within NEMO there the script \fBamuse_convert.py\fP
+can be used to convert between different
+snapshot formats that AMUSE supports.
+See also \fIunsio(3NEMO)\fP for another approach to such snapshot conversion.
+
+
+.SH "EXAMPLES"
+
+.B 1.
+Here is an example snippet of AMUSE python code creating a Plummer sphere
+(see also \fImkplummer(1NEMO)\fP),
+in \fInbody units\fP and writing the resulting snapshot as an ascii table:
+
+
+.EX
+ from amuse.ic.plummer import new_plummer_model
+ from amuse.io import write_set_to_file
+
+ stars = new_plummer_model(10)
+ write_set_to_file(stars, 'plummer.txt', format='txt')
+
+.EE
+
+This table has mass, radius, velocity and position, one star per row.
+Notice velocity comes before position!
+Thus the following NEMO command will convert it to a standard \fIsnapshot(5NEMO)\fP file:
+
+.EX
+
+ nbody=$(tabcols plummer.txt | wc -l)
+ tabcols plummer.txt |\\
+      tabtos - plummer.snap block1=mass,skip,vx,vy,vz,x,y,z nbody=$nbody
+
+.EE
+
+(the current version of \fPtabtos(1NEMO)\fP is not smart enough to skip comment
+lines.
+
+.PP
+.B 2.
+Here is a more NEMO like example, running from the (shell) commandline. If AMUSE is
+properly installed, the first
+example creates a Plummer model in memory, the second example creates a text file, of
+which the first particle is displayed as the 3rd line in this table:
+
+.EX
+ amuse_convert.py
+ amuse_convert.py -o plummer.txt
+ head -3 plummer.txt
+ 
+#mass radius vx vy vz x y z
+#mass length length * time**-1 length * time**-1 length * time**-1 length length length
+0.0078125 0.0 -0.256557735045 0.0863119421344 -0.0484937398944 -0.609540735858 -0.854122523728 0.736476012616
+ 
+
+.EE
+
+
+.B 3.
+Here is an not-yet-working example of creating initial conditions in
+NEMO, using an integration method in AMUSE, and returning the data
+back to NEMO for further analysis:
+
+.EX
+   mkplummer - 20 | snapprint - m,0.0,vx,vy,vz,x,y,z format=%16.13f csv=t > p20.csv
+   amuse_convert.py -i p20.csv -I csv -o p20.amuse -O amuse
+   amuse_integrate.py -i p20.amuse -o p20a.amuse -T 10 -t 1 -c hermite
+   amuse_convert.py -i p20a.amuse
+.EE
+
+
+
+.SH "BUGS"
+
+The follow round trip exercise on the \fBtxt\fP format causes an error:
+.EX
+
+fmt=txt
+amuse_convert.py -o junk1 -O $fmt -n 100
+amuse_convert.py -i junk1 -I $fmt -o junk2 -O $fmt
+amuse.io.base.IoException: IO exception: Number of values on line
+  '0.01 0.0 -0.319149817818 0.911387278048 0.00131274766207 -1.22528821614 -0.310636170602 0.0257190619401' is 8, expected 0
+
+.EE
+
+formats like csv, amuse-txt, tsf, dyn all seem to work.
+
+.SH "INSTALL"
+
+Within NEMO the command
+.EX
+
+   mknemo amuse
+
+.EE
+will get you started on the install.  Note there is a user release that does not need NEMO, which
+can be a set of \fIpip install\fP:
+
+.EX
+   pip install amuse-framework
+   pip install amuse-bhtree
+
+.EE
+
+A developer release is recommended with NEMO, the start of which will likely look as follows:
+.EX
+
+   cd $NEMO/local/amuse
+   ./setup develop amuse-framework
+   ./setup develop bhtree
+   ./setup test bhtree
+    
+.EE
+The AMUSE \fBbhtree\fP code should be the same as the original program \fIbhtree(1NEMO)\fP in NEMO, allowing
+for a closer comparison was it not for some output timing bug. AMUSE will also install the
+\fBBHTC\fP program, which should be the same as our \fIbhtree(1NEMO)\fP.
+
+.SH "SNAPSHOT"
+As described in the help (-h) of \fBamuse_convert.py\fP, the following formats are supported by AMUSE:
+.nf
+.ta +1.5i
+
+amuse		HDF5 file
+amuse-txt	text files with AMUSE header format
+csv		comma separated files
+dyn		Starlab binary structured file
+gadget		Gadget binary data file
+hdf5		HDF5 file
+nemo		NEMO structured file, binary version?
+starlab		Starlab binary structured file
+tsf		NEMO structured file, ascii version 
+txt		text file containing a table of values separated by a predefined
+vts		text file containing a table of values separated by a predefined character
+vtu		text file containing a table of values separated by a predefined character
+
+.fi
+
+.SH "PROGRAMS"
+
+.TP 20
+.B amuse_convert.py
+converts snapshots using AMUSE, 
+optionally create a Plummer sphere if only output is requested.
+
+
+.TP
+.B amuse_integrate.py
+integrates a snapshot using AMUSE.
+Only a few codes are supported:  bhtree (default),  hermite, smalln and  brutus.
+For convenience it will generate a Plummer sphere if no input file (-i) is provided.
+
+
+.SH "FILES"
+.nf
+$NEMO/src/scripts/mknemo.d/amuse - example install script (can be run via mknemo)
+$NEMO/usr/amuse - amuse_convert.py, amuse_integrate.py - also copied to $NEMOBIN during install
+$NEMO/local/amuse - root of source code after install via mknemo
+.fi
+
+.SH "ADS"
+.nf
+@ads 2013A&A...557A..84P
+@ads 2013CoPhC.184..456P
+.fi
+
+.SH "SEE ALSO"
+nemo(1NEMO), zeno(1NEMO), starlab(1NEMO), bhtree(1NEMO)
+.PP
+.nf
+https://www.amusecode.org/
+.fi
+
+.SH "HISTORY"
+
+.nf
+.ta +1.25i +4.5i
+25-may-2025	man page and amuse_convert.py written (MODEST25-SPZ)	PJT
+27-mar-2025	overhauled AMUSE installation method		PJT
+14-jun-2025	added scripts to $NEMO/usr/amuse	PJT
+.fi

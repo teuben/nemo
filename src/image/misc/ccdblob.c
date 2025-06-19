@@ -4,6 +4,7 @@
  *      (based off ccdshape)
  *
  *	quick and dirty:  15-feb-2020	pjt
+ *      fix various wcs issues:     31-may-2025    PJT
  *
  * @todo    check if box= not too big
  */
@@ -18,15 +19,16 @@
 
 string defv[] = {
   "in=???\n       Input image file",
-  "pos=\n         (x,y) position (1-based), or use max in map",
-  "box=32\n       Box size to use around pos",
+  "pos=\n         (x,y) position (0-based), or use max in map",
+  "box=7\n        Box size to use around pos (odd is better)",
   "clip=\n        Use only values above clip",
-  "wcs=t\n        Use WCS of the cube (else use integer 0-based coordinates)",
+  "wcs=t\n        Use WCS of the cube (else use integer 1-based coordinates)",
   "radecvel=f\n   Split the RA/DEC from VEL",
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
   "scale=1\n      Scale factor to be applied to radii",
-  "VERSION=0.3\n  13-feb-2025 PJT",
+  "out=\n         Optional output table of selected points",
+  "VERSION=0.8\n  7-jun-2025 PJT",
   NULL,
 };
 
@@ -40,35 +42,40 @@ vector oldframe[3] = {
 
 real printeig(string name, matrix mat, real *a, real *b, real *c);
 real printvec(string name, vector vec);
+void xyz2rtp(vector xyz, vector rtp);
+void eigsrt(float *d,float **v, int n);
+void eigenframe(vector frame[], matrix mat);
+void jacobi(float **a,int n,float *d,float **v,int *nrot);
 
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum);
 
 
 void nemo_main()
 {
-  stream   instr;
-  string   oper;
-  int      i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
-  int      nclip, apeak, apeak1, cnt;
-  int      ixmax, iymax, ixmin, iymin;
+  stream   instr, outstr;
+  int      i,j,k,nx, ny, nz;
+  int      nclip, cnt;
+  int      ixmax=0, iymax=0, ixmin=0, iymin=0;
   int      nbpos, bpos[2], box;
-  int      xrange[2], yrange[2], zrange[2];
+  int      xrange[2], yrange[2];
   imageptr iptr=NULL;             /* pointer to image */
-  real     tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
-  real     *spec, cv, clip[2];
+  real     cv, clip[2];
   real     scale = getdparam("scale");
   bool     Qclip = hasvalue("clip");
   bool     Qwcs = getbparam("wcs");
   bool     Qrdv = getbparam("radecvel");
   bool     Qiwm = getbparam("weight");
   bool     Qcross = getbparam("cross");
-  vector   tmpv, w_pos, pos, pos_b, ds, frame[3];
+  bool     Qout = hasvalue("out");
+  vector   tmpv, w_pos, pos, pos_b, frame[3];
   matrix   tmpm, w_qpole;
-  real     w_sum, dmin, dmax;
+  real     w_sum, dmin=0, dmax=0;
   real     inc, pa_k, pa_m, dPA, a_m, b_m, c_m, a_k, b_k, c_k, dvdr;
   real     *data;
   Moment   m;
 
   instr = stropen(getparam("in"), "r");
+  if (Qout) outstr = stropen(getparam("out"), "w");
   
   if (Qclip) {
     nclip = nemoinpr(getparam("clip"),clip,2);
@@ -78,29 +85,37 @@ void nemo_main()
       clip[0] = -clip[1];
     }
   } else
-    warning("Using all data, no clip used");
+    dprintf(1,"Using all data, no clip used\n");
   
   read_image( instr, &iptr);            /* read the cube */
   nx = Nx(iptr);  ny = Ny(iptr);  nz = Nz(iptr);
   if (nz > 1) error("Cannot handle cubes");
 
   box = getiparam("box");
-  nbpos = nemoinpi(getparam("pos"),bpos,2);
-  if (nbpos == 2) {                        // fix center at/near bpos
-    xrange[0] = bpos[0] - box/2;
-    xrange[1] = bpos[0] + box/2;
-    yrange[0] = bpos[1] - box/2;
-    yrange[1] = bpos[1] + box/2;
+  if (streq(getparam("pos"),"max")) {
+    whereis_max(iptr, &bpos[0], &bpos[1], FALSE);
   } else {
-    nbpos = 2;
-    bpos[0] = nx/2;
-    bpos[1] = ny/2;
-    xrange[0] = bpos[0] - box/2;
-    xrange[1] = bpos[0] + box/2;
-    yrange[0] = bpos[1] - box/2;
-    yrange[1] = bpos[1] + box/2;
-    warning("Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    nbpos = nemoinpi(getparam("pos"),bpos,2);
+    if (nbpos == 2) {                        // fix center at/near bpos
+      dprintf(1,"Using pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);    
+    } else {
+      // @todo have option to use the peak
+      nbpos = 2;
+      bpos[0] = (nx-1)/2;  // use center
+      bpos[1] = (ny-1)/2;
+      dprintf(1,"Setting pos=%d,%d and using box=%d\n",bpos[0],bpos[1],box);
+    }
   }
+  xrange[0] = bpos[0] - (box-1)/2;
+  xrange[1] = bpos[0] + (box-1)/2;
+  yrange[0] = bpos[1] - (box-1)/2;
+  yrange[1] = bpos[1] + (box-1)/2;
+  if (box%2 == 0) {
+    xrange[1]++;  // could have done [0]-- as well
+    yrange[1]++;
+  }
+  dprintf(1,"Xrange: %d..%d Yrange: %d..%d\n",
+	  xrange[0], xrange[1], yrange[0] ,yrange[1]);
   data = (real *) allocate(box*box*sizeof(real));
   ini_moment(&m, 2, box*box);
   
@@ -109,32 +124,26 @@ void nemo_main()
   w_sum = 0.0;
   CLRV(w_pos);
   for (k=0; k<nz; k++) {
-    pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
-    for (j=yrange[0]; j<yrange[1]; j++) {
-      pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
-      for (i=xrange[0]; i<xrange[1]; i++) {
-	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
+    pos[2] = Qwcs ? (k-Zref(iptr))*Dz(iptr) + Zmin(iptr)  :  k;
+    pos[2] = Qwcs ? (k-CRPIX3(iptr))*CDELT3(iptr) + CRVAL3(iptr)  :  k;    
+    for (j=yrange[0]; j<=yrange[1]; j++) {
+      pos[1] = Qwcs ? (j-CRPIX2(iptr))*CDELT2(iptr) + CRVAL2(iptr)  :  j;
+      for (i=xrange[0]; i<=xrange[1]; i++) {
+	pos[0] = Qwcs ? (i-CRPIX1(iptr))*CDELT1(iptr) + CRVAL1(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
 	if (cnt==0) {
 	  dmin = dmax = cv;
 	} else {
-	  if (cv < dmin) {
-	    dmin = cv;
-	    ixmin=i;
-	    iymin=j;
-	  }
-	  if (cv > dmax) {
-	    dmax = cv;
-	    ixmax=i;
-	    iymax=j;
-	  }
+	  if (cv < dmin) {  dmin = cv;  ixmin=i; iymin=j; }
+	  if (cv > dmax) {  dmax = cv;  ixmax=i; iymax=j; }
 	}
 	if (nbpos==2) {
-	  dprintf(1,"%d @ %d %d %d\n", cnt, i,j,k);
+	  dprintf(2,"%d @ %d %d %d\n", cnt, i,j,k);
 	  data[cnt] = cv;
 	  accum_moment(&m, cv, 1.0);
 	}
+	if (Qout) fprintf(outstr,"%d %d %g\n", i,j,cv);
 	cnt++;
 	if (!Qiwm) cv = 1.0;
 	w_sum += cv;
@@ -144,10 +153,12 @@ void nemo_main()
     }
   }
   DIVVS(w_pos,w_pos,w_sum);
+  
   printf("Npoints:    %d\n",cnt);
+  printf("Box:        %d\n", box);
   printf("DataMinMax: %g %g\n",dmin,dmax);
-  printf("Min at:     %d %d (1 based)\n",ixmin+1,iymin+1);
-  printf("Max at:     %d %d\n",ixmax+1,iymax+1);
+  printf("Min at:     %d %d (0 based)\n",ixmin,iymin);
+  printf("Max at:     %d %d\n",ixmax,iymax);
   printf("Mean:       %g\n",mean_moment(&m));
   if (nbpos==2)
     printf("Median:     %g\n",median_moment(&m));
@@ -157,7 +168,7 @@ void nemo_main()
   printf("Center:     %g %g %g %s\n",w_pos[0], w_pos[1], w_pos[2],
 	 Qwcs ? "[wcs]" : "[grid]");
   printf("BLOB:  %d %d  %g %g %d   %g %g %g\n",
-	 ixmax+1,iymax+1, w_pos[0]+1, w_pos[1]+1, box,
+	 ixmax,iymax, w_pos[0], w_pos[1], box,
 	 median_moment(&m),
 	 dmax,
 	 show_moment(&m,1) - cnt * median_moment(&m));
@@ -167,9 +178,9 @@ void nemo_main()
   CLRM(w_qpole);
   for (k=0; k<nz; k++) {
     pos[2] = Qwcs ? k*Dz(iptr) + Zmin(iptr)  :  k;
-    for (j=yrange[0]; j<yrange[1]; j++) {    
+    for (j=yrange[0]; j<=yrange[1]; j++) {    
       pos[1] = Qwcs ? j*Dy(iptr) + Ymin(iptr)  :  j;
-      for (i=xrange[0]; i<xrange[1]; i++) {      
+      for (i=xrange[0]; i<=xrange[1]; i++) {      
 	pos[0] = Qwcs ? i*Dx(iptr) + Xmin(iptr)  :  i;
 	cv = CubeValue(iptr,i,j,k);
 	if (Qclip && (clip[0]<=cv && cv<=clip[1])) continue;
@@ -269,7 +280,7 @@ void nemo_main()
 
 #include "nrutil.h"
 
-eigenframe(vector frame[], matrix mat)
+void eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -303,9 +314,9 @@ real printeig(string name, matrix mat,  real *a, real *b, real *c)
     eigsrt(d, v, 3);
     printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", name,
 	   d[1], v[1][1], v[2][1], v[3][1]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
+    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "          :",
 	   d[2], v[1][2], v[2][2], v[3][2]);
-    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "            ",
+    printf("%12s  %10.5f  %10.5f  %10.5f  %10.5f\n", "          :",
 	   d[3], v[1][3], v[2][3], v[3][3]);
 
     inc = acos(sqrt(d[2]/d[1]))*180.0/PI;
@@ -331,7 +342,7 @@ real printvec(string name, vector vec)
 }
 
 
-xyz2rtp(vector xyz, vector rtp)
+void xyz2rtp(vector xyz, vector rtp)
 {
   real z = xyz[2];
   real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));
@@ -341,3 +352,25 @@ xyz2rtp(vector xyz, vector rtp)
   rtp[0] = sqrt(z*z+w*w);
 }
 
+// loop over the full image, find 0-based location of max
+void whereis_max(imageptr iptr, int *ix, int *iy, bool Qsum)
+{
+  int i , nx = Nx(iptr);
+  int j , ny = Ny(iptr);
+  real dmax = CubeValue(iptr,0,0,0);
+  
+  // no support for 3D
+  for (i=0; i<nx; i++)
+    for (j=0; j<ny; j++) {
+      if (CubeValue(iptr,i,j,0) > dmax) {
+	dmax = CubeValue(iptr,i,j,0);
+	*ix = i;
+	*iy = j;
+      }
+    }
+  dprintf(1,"max %g at %d %d\n", dmax, *ix, *iy);
+
+  if (Qsum) {
+    warning("2D downhill summing not implemented yet");
+  }
+}

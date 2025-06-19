@@ -11,10 +11,10 @@
 
 version=n/a
 wget=wgetc
-git=1
+git=1          # versions not maintained anymore
 branch=main
 branch=teuben1
-url=https://github.com/amusecode/starlab
+url=https://github.com/amusecode/starlab      # git remote add upstream ...
 url=https://github.com/teuben/starlab
 
 for arg in $*; do
@@ -22,16 +22,17 @@ for arg in $*; do
 done
 
     
-cd $NEMO/local
-
+src=$NEMO/local
+cd $src
 
 if [ $git == 1 ]; then
     if [ ! -e starlab ]; then
+	echo "mknemo>> Creating $NEMO/local/starlab"
 	git clone $url 
     fi
     version=git
 else
-    echo there is no versioned starlab
+    echo "there is no versioned starlab here"
     exit 0
 fi    
 

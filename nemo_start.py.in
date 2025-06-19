@@ -49,6 +49,7 @@ if not 'NEMO' in os.environ:
 #    export MANIPPATH=.:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 #    export NEMOVER=`cat $NEMO/VERSION`
 #    export NEMOSYS=`uname -s`
+#    export NEMOARCH=`uname -m`
 #    export NEMOSITE=`hostname`
 
 # export PYTHONPATH=$NEMO/py/modules              # ??  do we still need this

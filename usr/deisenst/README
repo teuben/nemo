@@ -1,0 +1,49 @@
+
+# HOP: A Group-finding Algorithm for N-body Simulations
+(Daniel Eistenstein)
+
+code: http://www.cfa.harvard.edu/~deisenst/hop/hop_v1.1.tar.gz
+
+site: https://lweb.cfa.harvard.edu/~deisenst/hop/
+
+ads:  http://adsabs.harvard.edu/abs/1998ApJ...498..137E
+
+ascl: https://ascl.net/1102.019
+
+there is also a version in AMUSE
+and this example to use is:
+
+https://github.com/amusecode/amuse/blob/main/examples/simple/clump_finding.py
+
+See also hop.C in starlab
+
+There is an interesting ssort() routine hidden in hop.c - are there better ones now?
+
+
+The default input format used the TPM examples, see e.g.
+https://web.archive.org/web/20120225093350/http://www.astro.princeton.edu/~bode/TPM/index.html
+NEMO's unfio can read them,  use swap=t on the TPM examples.
+There are example for readSimple(), readASCII() and readTPM()
+
+
+NEMO example:
+-------------
+n=100
+out=plummer.tab
+mkplummer - $n seed=123 | snapprint - i,x,y,z,m header=nbody > $out
+hop -in $out
+
+cat output_hop.gbound 
+1
+# Number of Particles: 100
+# Number of Groups: 1
+# Number of Particles not in a Group: 0
+# nSmooth = 65, nHop = 64, nMerge = 4, fDensThresh = -1.000.
+# 1) Group ID.
+# 2) Number of Particles in Group.
+# 3) Densest Particle ID (zero-offset).
+# 4-6) Position of that Particle.
+# 7) Density at that Particle.
+#
+   0   100      87 -0.0144 0.0805 0.0303   0.37
+### Begin list of boundaries. Group, Group, Average Density.

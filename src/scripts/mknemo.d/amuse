@@ -1,12 +1,38 @@
 #! /bin/csh -f
 #
-#  private falcON2 
+# sudo apt install build-essential curl g++ gfortran gettext zlib1g-dev
+#
+# native python on ubuntu may need:    sudo apt install python3-venv ipython3 python3-pip
+
+#
+# useful install tips in:   https://github.com/LourensVeen/amuse-course
+# also on Ubuntu
+# mkdir -p ~/.openmpi
+# echo 'btl_tcp_if_include=lo' >>  ~/.openmpi/mca-params.conf
+
+#The following libraries need to be installed:
+
+#    HDF (version 1.6.5 - 1.12.x)
+#    MPI (OpenMPI or MPICH)
+
+#The following are needed for some codes:
+
+#    FFTW (version >= 3.0)
+#    GSL
+#    CMake (version >= 2.4)
+#    GMP (version >= 4.2.1)
+#    MPFR (version >= 2.3.1)
 
 set url=https://github.com/amusecode/amuse
 set dir=amuse
+set src=$NEMO/local
 
-cd $NEMO/local
+# always install for $NEMOBIN
+(cd $NEMO/usr/amuse ; make install)
+
+cd $src
 if (! -e $dir) then
+  echo "mknemo>> Creating $NEMO/local/$dir"
   git clone $url
   cd $dir
 else
@@ -15,3 +41,27 @@ else
 endif
 
 echo "Installation is still manual."
+echo "See:  https://amuse.readthedocs.io/en/latest/install/howto-install-AMUSE.html (seems old)"
+echo "      https://amuse.readthedocs.io/en/latest/install/installing.html          (more recent)"
+echo "and   https://github.com/LourensVeen/amuse-course"
+echo ""
+echo "Example user install:  (venv optional)"
+echo " python3 -m venv amuse_venv; source amuse_venv/bin/activate"
+echo " pip install amuse-framework"
+echo " pip install amuse-bhtree"
+echo ""
+echo "Example developer install:   (this needs more prereqs)"
+echo ' cd $NEMO/local/amuse'
+echo " ./setup"
+echo " ./setup develop amuse-framework"
+echo " ./setup develop bhtree"
+echo " ./setup test    bhtree"
+echo ""
+echo " ./setup develop all"
+
+
+# testing also via:
+#
+# git clone https://gist.github.com/teuben/e60844254172bbe5d5e9e10417ad5277  install_amuse2
+# git clone https://gist.github.com/teuben/1e42049f020c11149b6c68b4dc1a14a0  install_amuse1
+

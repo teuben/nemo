@@ -12,7 +12,7 @@ FDPS:
 PIKG:
 	git clone $(URL2)
 
-# April 17-19, 2023. Honering Jun's 60th.
+# April 17-19, 2023. Honoring Jun's 60th.
 test1:  FDPS
 	(cd FDPS/sample/c++/nbody; make clean; make; \
 	cp nbody.out $(NEMOBIN); \

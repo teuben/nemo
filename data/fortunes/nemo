@@ -1,3 +1,4 @@
+%
 NEMO command line arguments do not need to be given if given in the correct order.
 For example:
 	mkplummer out=p10 nbody=10
@@ -11,6 +12,8 @@ Each NEMO program should have a Unix style manual page, but the --man command li
 will also call this man page
         man mkplummer
 	mkplummer --man
+As well as
+   	apropos plummer
 %
 A unix pipe becomes a '-' in NEMO:
 
@@ -61,6 +64,8 @@ $NEMO/src/scripts/mknemo.d. E.g.
 The -u flag will update ("git pull") your NEMO before the program is
 recompiled. The -a flag will also search in $NEMO/usr.
 See -h for other options.
+%
+The template script generates a new NEMO template program from scratch
 	
 %
 The yapp= system keyword selects for programs that need a graphics output
@@ -78,5 +83,25 @@ glnemo2 is a program originally developed for NEMO to view a simulation in 3D.
 Although you can compile it from scratch, it's easier to download the binaries
 
 A recent tutorial is here:  https://www.youtube.com/watch?v=wfkfxvcYcX0
+%
+If you get a "PROG: command not found" error message on a supposedly< NEMO command,
+the command
+      mknemo PROG
+should compile and make PROG available.
 
+To see which packages were installed with mknemo, see the file $NEMO/opt/mknemo.log
+   
+%
+To get a nice PDF output of a manual page, do:
+    cd $NEMO/man
+    ./manpdf man1/mkplummer.1
+    xdg-open man1/mkplummer.1.pdf
 
+%
+To select rows from an ascii table, select by row number using tabrows,
+or a range of X values using e.g. tabmath selfie=range(%1,$xmin,$xmax)
+%
+the bsf program computes some statistics of floating point numbers in a 
+binary structured file, which can be used in benchmarking and regression. Example
+     mkplummer - 128 seed=123 | bsf -
+     BSF: 0.00111483 0.713141 -6.56685 5.72763 897 -

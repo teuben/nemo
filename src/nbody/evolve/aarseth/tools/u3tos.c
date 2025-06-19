@@ -64,19 +64,15 @@ string defv[] = {
     "header= \n     if used, force unfio header size (4 or 8)",
     "integer=4\n    Size of integers in dataset (2 or 4) ** 2 is deprecated **",
     "nbody=0\n      Limit the nbody number (name) [for nbody6]",
-    "VERSION=1.7b\n 11-apr-2019 PJT",
+    "VERSION=1.7c\n 4-may-2025 PJT",
     NULL,
 };
 
 string usage = "Convert NBODY OUT3 output to snapshot";
 
-string cvsid="$Id$";
-
 
 #define MAXFRAME  512
 #define MAXHEADER  32
-
-extern int nemo_file_size(string);
 
 
 void nemo_main(void)

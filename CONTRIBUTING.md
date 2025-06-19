@@ -8,7 +8,9 @@ Building NEMO requires following minimum dependencies:
 
 # git
 
+
 There are two ways you could have obtained the NEMO source code:
+
 
 1. You cloned from the *upstream* : https://github.com/teuben/nemo . This is fine
 if you just want to compile and run, but not ideal if you make modifications and
@@ -25,25 +27,29 @@ set the *upstream* manually if you used github.com. See also the
 that does actually work fine, except it's a frozen snapshot and cannot
 be efficiently used to collaborate. However, if you cannot install git,
 this is probably the only way to bootstrap yourself. For example
-https://github.com/teuben/nemo/archive/refs/heads/master.zip, which
+https://github.com/teuben/nemo/archive/refs/heads/master.zip , which
 will create a directory *nemo-master*. Other branches are available
 through similar zip file construct.
 
 Familiarize yourself with the concept of a pull request on github. There
 are some links at the bottom of this document.
 
+For those github tokens will use the https://github.com/teuben/nemo adress,
+whereas ssh keys will use git@github.com:teuben/nemo as the URL.
+
 
 ## gh:   github CLI
 
 You can safely skip this section if you prefer to work via github.com, though the **gh** command
-described here is by far the fastest and easiest way to work with the github ecosystem. You just
+described here is by far the fastest and easiest way to work with the github ecosystem, because it
+works from the command line. You just
 have to intall yet another tool for this.
 
 If you can use conda, installation can be done as follows:
 
       conda install gh --channel conda-forge  
 
-but see also [manual installing instructions](https://cli.github.com/manual/installation),
+but see also [manual installing instructions](https://github.com/cli/cli#installation),
 after this you need to authenticate once via your github account:
 
       gh auth login
@@ -277,9 +283,10 @@ would create an alternate (and as it happens twice as fast as with gfortran) of 
 Some references on git workflows:
 
 * https://docs.github.com/en/github/getting-started-with-github/fork-a-repo
-* http://docs.astropy.org/en/stable/development/workflow/development_workflow.html
+* https://github.blog/open-source/git/how-the-github-cli-can-now-enable-triangular-workflows/
+* https://docs.astropy.org/en/latest/development/development_details.html
 * https://www.atlassian.com/git/tutorials/comparing-workflows
 * https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow
-* http://physics.mnstate.edu/craig/git-novice-pyastro/
-* https://www.sitepoint.com/quick-tip-sync-your-fork-with
+* https://physics.mnstate.edu/craig/git-novice or the new-style https://swcarpentry.github.io/git-novice/
+* https://www.sitepoint.com/quick-tip-sync-your-fork-with - gone
 * https://how-to.dev/how-git-stores-data

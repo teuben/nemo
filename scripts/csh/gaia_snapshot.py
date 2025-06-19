@@ -17,10 +17,11 @@
 #  GAIA archive (for manual downloads)      https://gea.esac.esa.int/archive/
 #  astroquery (for programmatic downloads)  https://astroquery.readthedocs.io/en/latest/gaia/gaia.html
 #
-#  7-may-2022 - created on a rainy cold windy Greenman Festival in Greenbelt while playing Mahjong - PJT
+#   7-may-2022 - created on a rainy cold windy Greenman Festival in Greenbelt while playing Mahjong - PJT
 #  10-may-2022 - merged in JCL's unsio method - if it fails, the old method will be attempted
 #  14-may-2022 - select by error in parallax (didn't seem to make a difference)
-#  13-jun-2022 - make DR3 the default
+#  13-jun-2022 - make DR3 the default (DR4 supposedly mid-2026)
+#   6-jun-2025 - Gaia.login() is strictly not needed
 #
 #
 
@@ -31,7 +32,9 @@ import argparse
 import numpy as np
 try:
     from astroquery.gaia import Gaia
-    Gaia.login()
+    if False:
+        print("It is safe to hit enter and bypass the login")
+        Gaia.login()
 except:
     print("astroquery is not installed in your python. we cannot proceed")
     print("e.g.:     pip3 install astroquery")
@@ -49,7 +52,7 @@ except:
 
 # defaults
 def_db    = "gaiadr3.gaia_source"    #   others:  "gaiadr2.gaia_source" "gaiaedr3.gaia_source"
-def_pmax  = 25
+def_pmax  = 25   # in mas
 def_dump  = False
 def_dens  = False
 def_nemo  = Qtools
@@ -84,7 +87,9 @@ def process(args):
     dump  = args.dump
     nemo  = args.nemo
 
-    print("Using %s with parallax > %g mas" % (db,pmax), file=sys.stderr)
+    dmax = 1000/pmax
+
+    print("Using %s with parallax > %g mas (< %g parsec)" % (db,pmax,dmax), file=sys.stderr)
 
     if os.path.exists(args.filename):
         print(f'File {args.filename} already exists', file=sys.stderr)
@@ -187,7 +192,7 @@ def commandLine():
                                      formatter_class=argparse.ArgumentDefaultsHelpFormatter)    
 
     parser.add_argument('filename',    help="output snapshot name",    default=None)
-    parser.add_argument('--pmax',      help="pmax value",              default=def_pmax,type=float)
+    parser.add_argument('--pmax',      help="pmax value (mas)",        default=def_pmax,type=float)
     parser.add_argument('--db',        help="Gaia DB",                 default=def_db)
     parser.add_argument('--dump',      help='force ECSV dump',         dest="dump",  action="store_true" , default=def_dump)
     parser.add_argument('--density',   help='compute local density',   dest="dens",  action="store_true",  default=def_dens)

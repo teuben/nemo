@@ -15,17 +15,19 @@ and used to compute a weighted phase-space centroid, which becomes the
 new origin of the coordinate system. 
 .PP
 Alternatively a new snapshot with a single particle of total mass and these
-new center-of-mass coordintes can be produced.
+new center-of-mass coordinates can be produced using \fBone=t\fP.
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin=\fP\fIsnap-file\fP
-Input data is read from \fIsnap-file\fP, which must be in snapshot format.
+Input data is read from \fIsnap-file\fP, which must be in \fIsnapshot(5NEMO)\fP format.
+.br
 No default.
 .TP
 \fBout=\fP\fIsnap-file\fP
 Output data is written to \fIsnap-file\fP.
+.br
 No default.
 .TP
 \fBweight=\fP\fIexpression\fP
@@ -33,11 +35,13 @@ The value of \fIexpression\fP is used to compute the centroid.
 \fIexpression\fP is a real-valued C language expression over the
 real values \fBx\fP, \fBy\fP, \fBz\fP, \fBvx\fP, \fBvy\fP, \fBvz\fP,
 \fBphi\fP, \fBm\fP, \fBt\fP, and the integer value \fBi\fP.
+.br
 [Default \fB1\fP].
 .TP
 \fBtimes=\fP\fItime-range\fP
 Only data frames with time values within \fItime-range\fP, which
 is of the form, eg, "1.0:1.5,2.5,3.0", will be translated.
+.br
 [Default: \fBall\fP].
 .TP
 \fBreport=t|f\fP
@@ -48,56 +52,64 @@ If you want to use \fIsnapcenter\fP in a pipe, you need to reset
 \fBreport=f\fP, since both standard output and filestruct output
 will get merged, and become illegable for the next program in the
 pipe.
+.br
 [Default: \fBf\fP].
 .TP
 \fBone=t|f\fP
 Write output center of mass (COM) as a single body with total mass
 and COM coordinates as computed from \fBweight=\fP.
+.br
 [Default: \fBf\fP].
 
 .SH "EXAMPLES"
-To just see the center of mass of a system without creating an output file:
+To view the center of mass of a system without ac atually creating an output file:
 .nf
 
    % mkplummer - nbody=100 zerocm=f seed=123 | snapcenter - . report=t
    0.073515 0.006338 0.068154 0.005858 0.014697 0.059333
    
-   mkplummer - nbody=100 zerocm=f seed=123 | snapcenterp - . report=t
+   % mkplummer - nbody=100 zerocm=f seed=123 | snapcenterp - . report=t
    0.058525 0.087385 0.099227 
 
 .fi
-and to analyze a whole series:
-.nf
+(notice \fIsnapcenterp(1NEMO)\fP does not compute the velocity centroid).
+.PP
 
-    % mkplummer - nbody=100 zerocm=f nmodel=100 seed=123 | snapcenter - . report=t | tabstat  - 1:6
-    npt:     100 100 100 100 100 100
-    min:     -0.25276 -0.233932 -0.239581 -0.094354 -0.127564 -0.128537
-    max:     0.259662 0.297318 0.42111 0.099852 0.101441 0.088769
-    sum:     -0.476577 0.634456 0.928364 0.272159 -0.074268 -0.074884
-    mean:    -0.00476577 0.00634456 0.00928364 0.00272159 -0.00074268 -0.00074884
-    disp:    0.0997349 0.0970942 0.103345 0.0386814 0.045105 0.0440842
-    skew:    0.0784864 -0.189295 0.702539 0.0190448 -0.223761 -0.157901
-    kurt:   -0.0980693 0.039727 2.47228 -0.22483 -0.0507929 -0.106209
-    min/sig: -2.48653 -2.47468 -2.40809 -2.50962 -2.81169 -2.89873
-    max/sig: 2.65131 2.99682 3.98496 2.51103 2.26546 2.03061
-    median:  -0.0011355 0.0115855 0.010902 0.0022755 0.0001605 -0.002766
+Here is an example to analyze a whole series::
+.EX
+.ps 10
 
-.fi
+% mkplummer - nbody=100 zerocm=f nmodel=100 seed=123 | snapcenter - . report=t | tabstat  - 1:6
+npt:     100 100 100 100 100 100
+min:     -0.25276    -0.233932   -0.239581 -0.094354   -0.127564   -0.128537
+max:      0.259662    0.297318   0.42111    0.099852    0.101441    0.088769
+sum:     -0.476577    0.634456   0.928364   0.272159   -0.074268   -0.074884
+mean:    -0.00476577  0.00634456 0.00928364 0.00272159 -0.00074268 -0.00074884
+disp:     0.0997349   0.0970942  0.103345   0.0386814   0.045105    0.0440842
+skew:     0.0784864  -0.189295   0.702539   0.0190448  -0.223761   -0.157901
+kurt:    -0.0980693   0.039727   2.47228   -0.22483    -0.0507929  -0.106209
+min/sig: -2.48653    -2.47468   -2.40809   -2.50962    -2.81169    -2.89873
+max/sig:  2.65131     2.99682    3.98496    2.51103     2.26546     2.03061
+median:  -0.0011355   0.0115855  0.010902   0.0022755   0.0001605  -0.002766
+
+.EE
 
 .SH "SEE ALSO"
-snapcenterp(1NEMO), bodytrans(3NEMO), hackdens(1NEMO), hackforce(1NEMO), snapshot(5NEMO)
+snapcenterp(1NEMO), snapcenters(1NEMO), bodytrans(3NEMO), hackdens(1NEMO), hackforce(1NEMO), snapshot(5NEMO)
 .PP
 W.L.Sweatman - (1993) MNRAS 261, 497.   1993MNRAS.261..497S (n-body)
 .PP
 Picard,A. and Johnston, H.M. - (1994) A&A, 76.     1994A%26A...283...76P  (observational)
 .PP
 Cruz., F et al. - (2002) Rev.Mex.de Astr.y Astr. 38, 225 (n-body)
+.PP
+Power et al (2003) - 2003MNRAS.338...14P - shrinking sphere method, S2.5
 
 .SH "AUTHOR"
 Joshua E. Barnes.
 
 .SH "HISTORY"
-.ta +1.5i +5.5i
+.ta +1.25i +4.5i
 .nf
 3-jul-87	Created ?	Josh
 26-aug-93	1.4 added tab= for displaying center (@Tokyo)	Peter

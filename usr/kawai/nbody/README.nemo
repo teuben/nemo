@@ -1,3 +1,25 @@
 History:
 
 April 2004:	version 1 and 2.0 added via CVS
+May 2025:       gcc14 prototype fixes - some comparison with the bhtree (BHTC) version
+
+
+Benchmark notes:
+
+If bhtree/BHTC is needed, the following recipe should work in the old-style amuse install
+
+   mknemo amuse
+   cd $NEMO/local/amuse
+   ./configure
+   pip install -e
+   cd src/amuse/community/bhtree
+   make clean
+   make
+   cp build/BHTC $NEMOBIN
+
+The new style 2025 install uses the following
+
+   mknemo amuse
+   cd $NEMO/local/amuse
+   ./setup developer bhtree
+   cp src/amuse_bhtree/build/BHTC $NEMOBIN 

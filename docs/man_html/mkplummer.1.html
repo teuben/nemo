@@ -89,7 +89,9 @@ time, in seconds since 1970.0). See also <a href='xrandom.1.html'><i>xrandom(1NE
 [Default: 0.0] </dd>
 
 <dt><b>zerocm=t|f</b> </dt>
-<dd>Reset center of mass to zero? <br>
+<dd>Reset center of mass to zero? If not centered,
+the (0,0,0) is the mathematical origin of the Plummer model, but due to
+finite-N noise not at the center of mass. <br>
 [Default: <b>t</b>]. </dd>
 
 <dt><b>scale=</b><i>scale_factor</i> </dt>
@@ -134,11 +136,12 @@ first item in the snapshot file, the next item being the snapshot itself.
 [Default: not used]. </dd>
 
 <dt><b>nmodel=</b><i>integer</i> </dt>
-<dd>Number of models to generate. Although
-mostly meant for benchmarks, generating more then 1 model can be useful
-to process very large snapshots (that normally won&rsquo;t fit in memory) in a
-serialized fashion. See also <i>snapsplit</i>. Most NEMO programs will only read
-the first snapshot. <br>
+<dd>Number of models to generate. All models
+will be different here. Although mostly meant for benchmarks, generating
+more then 1 model can be useful to process very large snapshots (that normally
+won&rsquo;t fit in memory) in a serialized fashion. See also <i>snapsplit</i>. Most NEMO
+programs will only read the first snapshot. See also <b>mkgrid nmodel=</b> for
+a faster way to benchmark. <br>
 [Default: <b>1</b>] </dd>
 
 <dt><b>mode=0|1|2</b> </dt>
@@ -218,7 +221,7 @@ compatible with NEMO <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
 The default benchmark
 (see Benchfile) creates a 10,000,000 snapshot in double precision, with
 and without writing to a local file:  
-<p>  cd $NEMO/nemo/src/nbody/init/<br>
+<p>  cd $NEMO/src/nbody/init/<br>
   make -f Benchfile bench0 bench1<br>
  
 <p>     or<br>
@@ -243,16 +246,17 @@ NEMO/src/nbody/init/mkplummer.c
 , <a href='snapmass.1.html'>snapmass(1NEMO)</a>
 ,
 <a href='snapsplit.1NEM0.html'>snapsplit(1NEM0)</a>
+, <a href='mkgrid.1.html'>mkgrid(1NEMO)</a>
 , <a href='mkplum.1.html'>mkplum(1NEMO)</a>
 , <a href='mcluster.1.html'>mcluster(1NEMO)</a>
 , <a href='xrandom.3.html'>xrandom(3NEMO)</a>
- <p>
-H.C.Plummer
-(1911), <i>MNRAS</i>, <b>71</b>, 460. <p>
-S.J. Aarseth, M. Henon and R.  Wielen (1974),  <i>Astron.
-and Astrophys.<b> 37</b></i>, p. 183. <p>
-A.H.W. Kuepper, Th. Maschberger, P. Kroupa and H. Baumgardt,
-2011, MNRAS, 417, 2300 (McLuster) <p>
+
+<p>
+H.C.Plummer (1911), <i>MNRAS</i>, <b>71</b>, 460. <p>
+S.J. Aarseth, M. Henon and R.  Wielen (1974),
+ <i>Astron. and Astrophys.<b> 37</b></i>, p. 183. <p>
+A.H.W. Kuepper, Th. Maschberger, P. Kroupa and
+H. Baumgardt, 2011, MNRAS, 417, 2300 (McLuster) <p>
 Arnold et al. (2022) - <a href='https://arxiv.org/abs/2207.10681'>https://arxiv.org/abs/2207.10681</a>
 
 -  <a href='https://github.com/r-j-arnold/gen_fractal_star_clusters'>https://github.com/r-j-arnold/gen_fractal_star_clusters</a>

@@ -1,0 +1,187 @@
+.TH BHTREE 1NEMO "15 June 2025"
+
+.SH "NAME"
+bhtree, BHTC \- Barnes-Hut treecode with an optional GRAPE-4 interface
+
+.SH "SYNOPSIS"
+.nf
+\fBbhtree\fP [-options]
+\fBBHTC\fP [-options]
+.fi
+
+.SH "DESCRIPTION"
+
+\fBbhtree\fP (formerly called \fBnbody\fP) is a C++
+version of the Barnes-Hut treecode and its optional GRAPE-4 variant. 
+This program was intended as the replacement for the old FORTRAN version of treecode
+developed by the author (v_code). The algorithm used in nbody and v_code
+are essentially the same. The main goal in the design of nbody is to minimize
+the memory usage. It requires about 8+200(N/106 ) MB of
+memory, where N is the number of particles.
+.PP
+During a build of the commmunity/bhtree code in AMUSE, a (worker) executable \fBBHTC\fP is
+created, which should be close to the current version of \fBbhtree\fP. It would need to
+be copied into $NEMOBIN if needed for benchmarking.
+
+.SH "PARAMETERS"
+\fBbhtree\fP does not have the usual NEMO \fIgetparam(3NEMO)\fP interface,
+instead uses a private version of the \fIpgetopt\fP. snapshot files
+are in the "205" format.
+.TP 10
+-a
+flag to control if output accelaration to snapshot output file as well.
+By default only mass, position, velocity and potentials are output.
+Note that BHTC does not have this option.
+.TP
+-i \fIfile\fP
+name of snapshot input file, in \fIstoa(1NEMO)\fP format  (no default)
+.TP
+-o \fIfile\fP
+name of snapshot output file      (default: no output)
+.TP
+-D \fIfloat\fP
+time interval for snapshot output (default: 1)
+.TP
+-l \fIfloat\fP
+interval for log output (default: 1: all step)
+.TP
+-T \fIfloat\fP
+time to stop integration          (default: 10)
+.TP
+-d \fIfloat\fP
+timestep (default: 0.015625 = 1/64)
+.TP
+-e \fIfloat\fP
+softening parameter (default: 0.025)
+.TP
+-t \fIfloat\fP
+opening angle theta               (default: 0.75)
+.TP
+-n \fIint\fP
+ncrit for Barnes' vectorization  =
+maximum number of particles sharing an interaction list
+(default: 1024)
+(ONLY used with GRAPE/HARP implementation) - AMUSE::ncrit_for_tree
+.TP
+-N \fIint\fP
+cell division criterion    (default: 8 or 8 * # of pseudo particle)
+divide cell until it contains >N particles
+smaller memory requirement for larger N
+.TP
+-w  \fIfloat\fP
+window size for PGPLOT snapshot plot (default: 10)
+.TP
+-c
+flag for collision run
+.TP
+-x \fIxyz\fP
+relative position vector for collision run (no default)
+.TP
+-v \fIuvw\fP
+relative velocity vector for collision run (no default)
+.TP
+-s \fIfloat\fP
+scale factor for position scaling (default: 1)
+.TP
+-S \fIfloat\fP
+scale factor for velocity scaling (default: 1)
+.TP
+-p \fIint\fP
+order of multipole expansion (default: 1)
+          (ONLY used with P2M2 implementation)
+.TP
+-r \fIfloat\fP
+sphere radius on which pseudo particles are distributed (default: 0.2)
+          (ONLY used with P2M2 implementation)
+.TP
+-F
+never use full degree of freedom of pseudo particle even when p < 3
+          (ONLY used with P2M2 implementation)
+.TP
+-X \fIstring\fP
+command to be executed each time snapshot are output (default: no output) 
+          snapshot file name and its ID (counting from 0) is passed to the command.
+.TP
+-h        print this help
+
+
+.SH "CAVEATS"
+Files are silently appended to.
+.PP
+BHTC is only available within AMUSE, has to be manually copied to $NEMOBIN
+
+.SH "EXAMPLES"
+An example of integrating a 1024 body Plummer sphere to time 10, and plotting
+the Lagrangian radii 0.1..0.9 as function of time:
+.EX
+
+  mkplummer - 1024 | stoa - p1024
+  rm -f p1024.out p1024.snap
+  bhtree -i p1024 -o p1024.out -D 0.1 -T 10 > p1024.log 2>&1 
+  atos p1024.out p1024.snap mass,phase,phi 
+  snapmradii p1024.snap  | tabplot - 1 2:10 line=1,1
+ 
+.EE
+
+.SH "BENCHMARK"
+
+To compare the original hackcode1 with bhtree, the following example is
+part of the Benchfile, integrating a 1024 body Plummer model for 1280 steps.
+
+.EX
+  rm -f p1k.1 p1k.2 p1k.3
+  mkplummer p1k.1 1024 seed=123
+  stoa p1k.1 p1k.2
+  time=/usr/bin/time
+  $time hackcode1 p1k.1 . tstop=20 tol=0.75 freq=64     eps=0.025  > p1.log 2>&1
+  $time bhtree -i p1k.2   -T 20    -t 0.75  -d 0.015625 -e 0.025   > p2.log 2>&1
+  plumsnap p1k.3 2048
+  $time treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > p3.log
+.EE
+
+here are some results, including the equivalent treecode from ZENO in double precision.
+
+.nf
+.ta +2i +1i +1i +1i
+CPU	hackcode1	bhtree	BHTC	ZENO/treecode
+Ultra 7 155H	2.44	2.69	5.51	2.85
+i7-1260P	2.75	2.85	5.43	?
+i5-10210U      	5.79	6.99	?	?
+.fi
+
+.SH "INSTALL"
+Can be done using \fBmknemo -a bhtree\fP.
+
+.SH "CAVEATS"
+There is no \fIrun(3NEMO)\fP interface for bhtree.
+
+
+.SH "SEE ALSO"
+hackcode1(1NEMO), atos(1NEMO), stoa(1NEMO)
+.PP
+.nf
+Barnes, J. & Hut, P. 1986. Nature 324, 446.
+http://jun.artcompsci.org//softwares/C++tree/index.html (now deprecated)
+.fi
+
+.SH "ADS"
+@ads 1986Natur.324..446B
+
+.SH "FILES"
+.nf
+$NEMO/usr/kawai/nbody   (this is historic)
+$AMUSE_DIR/src/amuse_bhtree/src  (including BHTC.C)
+.fi
+Note if amuse is installed with \fBmknemo(1NEMO)\fP, AMUSE_DIR=$NEMO/local/amuse
+
+
+.SH "AUTHOR"
+Jun Makino
+
+.SH "HISTORY"
+.nf
+.ta +1.25i +4.5i
+21-dec-1998	V1 written	Jun Makino
+22-may-2025	man page written while renaming nbody to bhtree (MODEST25-SPZ)	PJT
+22-may-2025	gcc14 prototype fixes (amuse also changed theirs)	PJT
+.fi

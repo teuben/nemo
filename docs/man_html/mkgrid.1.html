@@ -9,51 +9,95 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 mkgrid - create a cube of equal massive stars equally spaced in space
 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>mkgrid</b> <b>out=</b><i>snapshot</i> [parameter=value] 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>mkgrid</b> generates
 a distribution of particles in a cube on a regular lattice. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The
-following parameters are recognized in any order if the keyword is also
-given: 
+
+The following parameters are recognized in order; they may be given in
+any order if the keyword is also given. Use <b>--help</b> to confirm this man page
+is up to date.  
 <dl>
 
 <dt><b>out=</b> </dt>
 <dd>Output file name, in <a href='snapshot.5.html'><i>snapshot(5NEMO)</i></a>
- format.  No default. </dd>
+ format.  <br>
+No default. </dd>
 
-<dt><b>ngrid=</b>
-</dt>
-<dd>Number of particles per axis [Default: <b>2</b>]. </dd>
+<dt><b>ngrid=</b> </dt>
+<dd>Number of particles per axis <br>
+[Default: <b>2</b>]. </dd>
 
 <dt><b>size=</b> </dt>
-<dd>Size of cube.  [Default:
-<b>1</b>]. </dd>
+<dd>Size of cube.  <br>
+[Default: <b>1</b>]. </dd>
 
 <dt><b>zerocm=t|f</b> </dt>
-<dd>Center c.o.m. ?  [Default: <b>t</b>]. </dd>
+<dd>Center c.o.m. ?  <br>
+[Default: <b>t</b>]. </dd>
 
 <dt><b>headline=</b> </dt>
-<dd>Text headline for output
-    Default: none. </dd>
+<dd>Text headline for output     <br>
+Default: none. </dd>
+
+<dt><b>nmodel=</b><i>integer</i> </dt>
+<dd>Number of models to generate. All models will
+be different here. Although mostly meant for benchmarks, generating more
+then 1 model can be useful to process very large snapshots (that normally
+won&rsquo;t fit in memory) in a serialized fashion. See also <i>snapsplit</i>. Most NEMO
+programs will only read the first snapshot. See also <b>mkgrid nmodel=</b> for
+a faster way to benchmark. <br>
+[Default: <b>1</b>] 
+<p> 
+<p> </dd>
 </dl>
 
-<h2><a name='sect4' href='#toc4'>See Also</a></h2>
+<h2><a name='sect4' href='#toc4'>Examples</a></h2>
+The curious <b>nmodel=</b> parameter was added for benchmarking
+the creation of large files. Very large Nbody snapshots would likely not
+fit in memory, so this routine writes more (otherwise identical) snapshots.
+There is a similar keyword in <a href='mkplummer.1.html'><i>mkplummer(1NEMO)</i></a>
+ but the CPU overhead is
+killing the I/O bottleneck one likes to see with this keyword. <p>
+Here are
+examples of making 1000 snapshot of 1e6 particles each, totalling 5GB with
+both mkgrid and mkplummer, showing the impact of the CPU. 
+<p>  /usr/bin/time
+mkgrid  c1M 100 nmodel=100 1.61user 3.85system 0:29.52elapsed 18%CPU 
+<p> /usr/bin/time
+mkgrid  .   100 nmodel=100 1.17user 1.21system 0:02.39elapsed 99%CPU 
+<p> /usr/bin/time
+mkplummer  p1M 1000000 nmodel=100 25.31user 6.36system 0:56.65elapsed 55%CPU
+
+<p> /usr/bin/time mkplummer  . 1000000 nmodel=100 24.29user 4.47system 0:28.78elapsed
+99%CPU  
+<p>  
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
 <a href='mkcube.1.html'>mkcube(1NEMO)</a>
 , <a href='mkplummer.1.html'>mkplummer(1NEMO)</a>
 , <a href='snapshot.5.html'>snapshot(5NEMO)</a>
+ 
+<p> 
+<h2><a name='sect6' href='#toc6'>Author</a></h2>
+J.J.
 
-
-<h2><a name='sect5' href='#toc5'>Author</a></h2>
-J.J. Fleck 
-<h2><a name='sect6' href='#toc6'>Update History</a></h2>
+<p>Fleck 
+<p> 
+<h2><a name='sect7' href='#toc7'>History</a></h2>
 <br>
 <pre>20-dec-05<tt> </tt>&nbsp;<tt> </tt>&nbsp;created<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;<tt> </tt>&nbsp;JJF
+6-may-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;added nmodel=<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -63,9 +107,10 @@ J.J. Fleck
 <li><a name='toc1' href='#sect1'>Synopsis</a></li>
 <li><a name='toc2' href='#sect2'>Description</a></li>
 <li><a name='toc3' href='#sect3'>Parameters</a></li>
-<li><a name='toc4' href='#sect4'>See Also</a></li>
-<li><a name='toc5' href='#sect5'>Author</a></li>
-<li><a name='toc6' href='#sect6'>Update History</a></li>
+<li><a name='toc4' href='#sect4'>Examples</a></li>
+<li><a name='toc5' href='#sect5'>See Also</a></li>
+<li><a name='toc6' href='#sect6'>Author</a></li>
+<li><a name='toc7' href='#sect7'>History</a></li>
 </ul>
 </body>
 </html>

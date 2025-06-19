@@ -1,4 +1,4 @@
-.TH TABPLOT2 1NEMO "15 February 2024"
+.TH TABPLOT2 1NEMO "9 June 2025"
 
 .SH "NAME"
 tabplot2 \- compare two tables
@@ -10,16 +10,16 @@ tabplot2 \- compare two tables
 \fBtabplot2\fP shares most parameters with \fItabplot(1NEMO)\fP, except for binning, which is not implemented here.
 Instead there are two input tables, and each table needs an X column and Y column. This can also mean the two
 input tables are the same, but different X or Y columns are compared, or two different tables, with the same
-X and Y column (which is the default)
+X and Y column (which is the default).
 
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
 \fBin1=\fP
-Input first table [???]    
+Input first table. No default.
 .TP
 \fBin2=\fP
-Input second table [???]    
+Input second table. No default
 .TP
 \fBxcol=\fP
 x coordinate column(s(). Up to two columns can be given [1,1]
@@ -104,13 +104,23 @@ Template python plotting script []
 
 .SH "EXAMPLES"
 Here is an example comparing column 2 and 3 from the same file:
-.nf
-    tabgen - 20 3 | sort -n > random.tab
-    tabplot2 random.tab random.tab 1 2,3 line=1,1 color=2,4 point=2,0.1
-.fi
+.EX
+    tabgen - 20 3 seed=1 | sort -n > random1.tab
+    tabgen - 20 3 seed=2 | sort -n > random2.tab
+    tabplot2 random1.tab random2.tab 1,1 2,3 line=1,1 color=2,4 point=2,0.1
+.EE
+where the \fIpaste(1)\fP program can achieve the same as follows:
+.EX
+
+paste random1.tab random2.tab |\\
+	tabplot - 1,4 2,6 line=1,1 color=2,4 point=2,0.1 yapp=2/xs
+
+.EE
+except it is harder to keep track of column numbers in he 2nd file.
+
 
 .SH "SEE ALSO"
-tabplot(1NEMO), table(5NEMO)
+tabplot(1NEMO), table(5NEMO), paste(1)
 
 .SH "AUTHOR"
 Peter Teuben
@@ -118,5 +128,5 @@ Peter Teuben
 .SH "UPDATE HISTORY"
 .nf
 .ta +1.5i +5.5i
-15-feb-2024m	Quick and Dirty conversion from tabplot		PJT
+15-feb-2024	Quick and Dirty conversion from tabplot		PJT
 .fi

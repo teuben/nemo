@@ -37,95 +37,98 @@ up to date.
 
 <dt><b>in=</b> </dt>
 <dd>Input SDFITS fits file(s). Multiple files can be given as
-well, as a space or comma separated list. No default. </dd>
+well, as a space or comma separated list. <br>
+No default. </dd>
 
 <dt><b>mom=</b><i> </i></dt>
-<dd>If set to a non-negative
-value, this is the max. moment of the stats being computed.  mom=0 is a special
-case, and will just sum, and be much faster than general moment computation.
-You also need this option if a row (see row= below) is output. [-1]. </dd>
+<dd>If set to a non-negative value, this is the max. moment of
+the stats being computed.  mom=0 is a special case, and will just sum, and
+be much faster than general moment computation. You also need this option
+if a row (see row= below) is output. [-1]. </dd>
 
-<dt><b>cols=</b>
-</dt>
-<dd>Column names to track. Currently it just gives the column number and format
-used.  Default: not used. </dd>
+<dt><b>cols=</b> </dt>
+<dd>Column names to track. Currently
+it just gives the column number and format used. <br>
+Default: not used. </dd>
 
 <dt><b>dims=</b> </dt>
-<dd>A list of dimensions how the data-block should
-be processed. The procedure of processing is set by the <b>proc=</b> keyword.  For
+<dd>A list of dimensions how the data-block should be
+processed. The procedure of processing is set by the <b>proc=</b> keyword.  For
 example dims=2,11,2,2,4.   The product of the dimensions should be NAXIS2
-(or less than) from the BINTABLE. Default: not used. </dd>
+(or less than) from the BINTABLE. <br>
+Default: not used. </dd>
 
 <dt><b>proc=</b> </dt>
-<dd>The procedure
-of processing can be set with this. Currently only one specific example
-(see EXAMPLES below) for ngc5291 is implemented. Options would be PS (Position
-Switching), FS (frequency switching), NOD (nodding), TP (total power). NOT
-IMPLEMENTED YET, if ever. </dd>
+<dd>The procedure of processing can be set with this.
+Currently only one specific example (see EXAMPLES below) for ngc5291 is
+implemented. Options would be PS (Position Switching), FS (frequency switching),
+NOD (nodding), TP (total power). NOT IMPLEMENTED YET, if ever. </dd>
 
 <dt><b>nchan=</b> </dt>
-<dd>Override the number of channels found in
-the data. Some dataset will find nchan=0 and it will be useful to set this
-here. This number is related to NAXIS1 in the BINTABLE. </dd>
+<dd>Override
+the number of channels found in the data. Some dataset will find nchan=0
+and it will be useful to set this here. This number is related to NAXIS1
+in the BINTABLE. </dd>
 
 <dt><b>row=</b> </dt>
-<dd>If used, this
-row (0 being the first) will be output as an ascii spectrum. This spectrum
-has two columns: channel number (0 being the first) and the spectrum value,
-native units. </dd>
+<dd>If used, this row (0 being the first) will be output
+as an ascii spectrum. This spectrum has two columns: channel number (0 being
+the first) and the spectrum value, native units. </dd>
 
 <dt><b>raw=</b> </dt>
-<dd>Do only raw I/O?   If selected, no SDFITS processing
-is done, the file is just read in blocks of 2880 bytes. See also <a href='csf.1.html'><i>csf(1NEMO)</i></a>
-
-with <b>blocksize=</b>. [f] </dd>
+<dd>Do only raw I/O? 
+ If selected, no SDFITS processing is done, the file is just read in blocks
+of 2880 bytes. See also <a href='csf.1.html'><i>csf(1NEMO)</i></a>
+ with <b>blocksize=</b>. <br>
+[Default: f] </dd>
 
 <dt><b>hdu=</b> </dt>
-<dd>Which HDU to process. Normally hdu=2 should contain
-the BINTABLE, but it&rsquo;s possible there are more. [2] </dd>
+<dd>Which HDU to process. Normally hdu=2 should contain the
+BINTABLE, but it&rsquo;s possible there are more. <br>
+[Default: 2] </dd>
 
 <dt><b>blfit=</b> </dt>
-<dd>Another benchmark
-option:  setting the blfit (baseline fit order) to a non-negative number,
-a baseline of that order will be fitted to each spectrum. [-1] </dd>
+<dd>Another benchmark option:  setting the blfit (baseline
+fit order) to a non-negative number, a baseline of that order will be fitted
+to each spectrum. [-1] </dd>
 
 <dt><b>bench=</b> </dt>
-<dd>How
-many times the procedure should be processed. This will only re-execute the
-procedure, not the alloc/free that are needed for this. Using 0 will bypass
-the procedure. Default: 1 </dd>
+<dd>How many times the procedure should be processed.
+This will only re-execute the procedure, not the alloc/free that are needed
+for this. Using 0 will bypass the procedure. <br>
+Default: 1 </dd>
 
 <dt><b>mode=</b> </dt>
-<dd>Another benchmark option: setting this to
-a non-negative value will restrict how far the SDFITS is processed. </dd>
+<dd>Another benchmark option: setting this to a non-negative
+value will restrict how far the SDFITS is processed. </dd>
 
-<dt><b>datadim=1|2</b>
-</dt>
-<dd>Another benchmark option: allowing all data to appear in one long one dimensional
-DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array. [1]
-
+<dt><b>datadim=1|2</b> </dt>
+<dd>Another
+benchmark option: allowing all data to appear in one long one dimensional
+DATA[nrows*nchan] array vs. a two dimensional DATA[nrows][nchan] array. <br>
+[Default: 1] 
 <p> </dd>
 
 <dt><b>tab=</b> </dt>
-<dd>If given, this will be the (ascii) table to which either 1dim or
-2dim data (see datadim=) is written. For 1dim the x,y values printed are
-assumed Hz converted to GHz and raw intensity. For 2dim the row,x,y are
-printed, where row=1 is the first row. Apologies to non-radio users. Default:
-none. 
+<dd>If given, this will be the (ascii) table to which either
+1dim or 2dim data (see datadim=) is written. For 1dim the x,y values printed
+are assumed Hz converted to GHz and raw intensity. For 2dim the row,x,y
+are printed, where row=1 is the first row. Apologies to non-radio users. <br>
+Default: none. 
 <p> 
 <p> 
 <p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Caveats</a></h2>
-By default NEMO compiles in double precision. The DATA1[nrows*nchan]
-"ONEDIM" mode will this occupy half the memory of a DATA2[nrows][nchan]
-array. NEMO will need to be compiled in single mode to have them use the
-same memory. 
+By default NEMO compiles in double precision. The
+DATA1[nrows*nchan] "ONEDIM" mode will this occupy half the memory of a
+DATA2[nrows][nchan] array. NEMO will need to be compiled in single mode
+to have them use the same memory. 
 <p> 
 <h2><a name='sect5' href='#toc5'>Examples</a></h2>
-The following example takes all fits files matching
-a particular pattern and summarize their contents. <br>
+The following example takes all
+fits files matching a particular pattern and summarize their contents. <br>
 <pre>    ls *.?.fits &gt; dirin.lis
     sdinfo in=@dirin.lis
 AGBT15B_287_35.raw.vegas.A.fits : Nrows: 2168   Ncols: 70  Nchan: 32768

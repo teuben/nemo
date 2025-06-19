@@ -1,10 +1,13 @@
 .TH CCDPRINT 1NEMO "26 January 2021"
-.SH NAME
+
+.SH "NAME"
 ccdprint \- print out map values
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .PP
 \fBccdprint in=\fP\fIimage\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBccdprint\fP prints out map values in an image. The grid is
 specified in x, y and z independantly, and can be any
 integer array, including implied do loops, e.g.
@@ -23,10 +26,11 @@ choice of \fBy=NY-1:1:-1\fP, but the user is then required
 to know \fBNY\fP!
 .PP
 The physical coordinates can be printed out optionally, where the output
-format is controlled by the \fBnewline=\fP parameter.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword is also
-given:
+format is controlled by the \fBnewline=\fP parameter. See also
+\fIxy2sky(1)\fP from \fiwcstools(5NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fIin-file\fP
 input file, in \fIimage(5NEMO)\fP format [no default].
@@ -95,18 +99,22 @@ Should input (x,y,z) be paired up [f]
 .TP
 \fBseq=\fP
 Print a sequence using access shortcut [0]
+
 .SH "SEE ALSO"
-printf(3), image(5NEMO)
-.SH AUTHOR
+xy2sky(1), sky2xy(1), printf(3), wcstools(5NEMO), image(5NEMO)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~src/image/io	ccdprint.c ccdprint.1
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 23-jan-89	V1.0: Created             	PJT
 8-jul-93	V1.1: added defaults 'all' for blank x=, y=, z=  	PJT
 9-jul-93	V1.2: added label=	PJT

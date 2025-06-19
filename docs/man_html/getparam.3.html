@@ -9,9 +9,11 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 getXparam, hasvalue, isaparam, initparam, finiparam, stop - main startup
 and command line processing. 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <br>
 <pre>#include &lt;stdinc.h&gt;#include &lt;getparam.h&gt;string defv[]={
@@ -41,24 +43,26 @@ int debug_level;extern int yapp_level;extern int help_level;
     undocumented:
 _bell_level_history_review_flag_yapp_dev_yapp_string_help_string_argv_string
 </pre>
+<p>
+
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-These
-functions provide a simple and uniform mechanism for  command line processing
-(see also <a href='nemomain.3.html'>nemomain(3NEMO)</a>
- for an even simpler approach). Input as well as
-output (storage) of selected parameters can be controlled via command line
-parameters. First, <i>initparam</i> is called to set up values associated with
-a set of possible keyword names;  after this <i>getparam</i> and any of its relatives
-may be called to access and/or parse the value associated with a specified
- keyword. <i>finiparam</i>  should be called before the program ends, to ensure
-any outstanding requests are dealt with (e.g. writing updated keyword files,
-see HELP and DEBUG below), or optionally complain about unprocessed command
-line arguments. Output of parameters is described in <a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
+These functions provide a simple and uniform mechanism for 
+command line processing (see also <a href='nemomain.3.html'>nemomain(3NEMO)</a>
+ for an even simpler approach).
+Input as well as output (storage) of selected parameters can be controlled
+via command line parameters. First, <i>initparam</i> is called to set up values
+associated with a set of possible keyword names;  after this <i>getparam</i> and
+any of its relatives may be called to access and/or parse the value associated
+with a specified  keyword. <i>finiparam</i>  should be called before the program
+ends, to ensure any outstanding requests are dealt with (e.g. writing updated
+keyword files, see HELP and DEBUG below), or optionally complain about
+unprocessed command line arguments. Output of parameters is described in
+<a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
 . <p>
-<i>initparam</i>
-is called with two arguments: the argument vector <i>argv</i> which is passed
-to <i>main</i>, and a similar vector <i>defv</i> which determines the set of legal keyword
-names and their default values. More precisely, <i>defv</i> is of the form <p>
+<i>initparam</i> is called with two arguments: the argument vector
+<i>argv</i> which is passed to <i>main</i>, and a similar vector <i>defv</i> which determines
+the set of legal keyword names and their default values. More precisely,
+<i>defv</i> is of the form <p>
 <blockquote><br>
 <pre>string defv[] = { "name=value\nhelp", . . ., "VERSION=x.y", NULL };
 </pre></blockquote>
@@ -129,12 +133,14 @@ name in square brackets before the string is output.  <p>
 The optional <b>usage</b>
 and <b>cvsid</b> strings, that will need to be defined by the user, can be queried
 with the <b>help=u</b> and <b>help=I</b> options. 
+<p> 
 <h2><a name='sect3' href='#toc3'>Required Arguments</a></h2>
 Arguments with default
 values (as listed in <i>defv</i>) of "???" are required; <i>initparam</i> will print
 an informative message and quit if no value for such an argument can be
 obtained from <i>argv</i>. This feature is handy for things which must be specified
 or for which no reasonable default exists. 
+<p> 
 <h2><a name='sect4' href='#toc4'>Version</a></h2>
 It is good (NEMO) programming
 practice to give your program a VERSION id. We refer to this as the <i>internal</i>
@@ -156,6 +162,7 @@ task. This would make it possible for  programs to refuse execution if the
 internal and  external VERSION id do not match. We do not currently employ
 this technique. Most NEMO programs have a section labeled <b>UPDATE HISTORY</b>
 in which old version ID&rsquo;s are labeled by time, comment and author. 
+<p> 
 <h2><a name='sect5' href='#toc5'>Indexed
 Keywords</a></h2>
 The <b>indexparam</b> and <b>getparam_idx</b> family provides one way of access
@@ -167,12 +174,18 @@ to the programmer to decipher missing elements (e.g. using <b>isaparam</b> or <b
 <p>
 <i>indexparam(basename,-1)</i> returns the largest index that was found, <i>indexparam(basename,-2)</i>
 returns 0 if the keyword is not an indexed keyword, and  <i>indexparam(basename,idx)</i>,
-for <i>idx &gt;= 0</i>, will check existence (1=true) for a specific index.  
+for <i>idx &gt;= 0</i>, will check existence (1=true) for a specific index. <p>
+There is
+no rule for this, but it&rsquo;s a convenient convention to upper case an indexed
+keyword. For example in <a href='runbody1.1.html'><i>runbody1(1NEMO)</i></a>
+ the <b>kz=</b> keyword is a vector of 15
+values, whereas each individual one can be overriden with for example <b>KZ3=0</b>.
+
+<p> 
 <h2><a name='sect6' href='#toc6'>Help Functions</a></h2>
-Besides
-interpreting the command line, <i>initparam</i> provides some assistance to the
-user via an additional argument (in addition to those defined in <i>defv</i>),
-namely <p>
+Besides interpreting the command line, <i>initparam</i> provides
+some assistance to the user via an additional argument (in addition to
+those defined in <i>defv</i>), namely <p>
 <blockquote><br>
 <pre>help=option,option,...
 </pre></blockquote>
@@ -246,24 +259,28 @@ case help processing is left to the applications program (not recommended).
 An environment variable <b>HELP</b> or the system keyword <b>help=</b> can be set to
 a non-zero number to change to various levels of interactive input if implemented.
 
+<p> 
 <h2><a name='sect7' href='#toc7'>Output Keys</a></h2>
 The system keyword <b>outkeys=</b><i>key1,key2,...</i> controls which  pre-defined
 output keys (see <a href='outparam.3.html'><i>outparam(3NEMO)</i></a>
 ) are going to  output to NEMO&rsquo;s persistent
 global keyword database. 
+<p> 
 <h2><a name='sect8' href='#toc8'>Debugging</a></h2>
-The system keyword <b>debug=</b><i>debug_level</i> is
-checked for by the <i>initparam</i> call. It sets the <b>debug_level</b> to the requested
+The system keyword <b>debug=</b><i>debug_level</i>
+is checked for by the <i>initparam</i> call. It sets the <b>debug_level</b> to the requested
 value. Any calls to <a href='dprintf.3.html'><i>dprintf(3NEMO)</i></a>
  will only be send to the standard error
 output device,(<i>stderr</i>), if <b>debug</b> is less or equal than <b>debug_level</b>. Any
 initial setting of <b>debug_level</b> is also done through an environment variable
 <b>DEBUG</b>, but overriden by the <b>debug=</b> keyword. 
+<p> 
 <h2><a name='sect9' href='#toc9'>Files</a></h2>
 <br>
 <pre>~/src/kernel/io   <tt> </tt>&nbsp;<tt> </tt>&nbsp;getparam.c 
 ~/src/kernel/cores<tt> </tt>&nbsp;<tt> </tt>&nbsp;error.c (stop)
 </pre>
+<p> 
 <h2><a name='sect10' href='#toc10'>See Also</a></h2>
 <a href='environ.5.html'>environ(5)</a>
 , <a href='dprintf.3.html'>dprintf(3NEMO)</a>
@@ -273,11 +290,13 @@ initial setting of <b>debug_level</b> is also done through an environment variab
 ,
 <a href='outparam.3.html'>outparam(3NEMO)</a>
  
+<p> 
 <h2><a name='sect11' href='#toc11'>Diagnostics</a></h2>
 Complains via <a href='error.3.html'><i>error(3NEMO)</i></a>
  or the <i>local_error()</i>
 function about extra arguments, unknown arguments,  etc.  This will generally
 result in a stopped program. 
+<p> 
 <h2><a name='sect12' href='#toc12'>Bugs</a></h2>
 The code to access <i>environ</i> has only been
 implemented for the system environment variables <b>DEBUG, YAPP, HISTORY,
@@ -287,6 +306,7 @@ Users Guide</i> is often more complete. <p>
 A key-less parameter that contains an
 &rsquo;=&rsquo; sign confuses the parser and will most likely complain about an unknown
 parameter. E.g. "i%%128==0" will return <i>Parameter "i%128" unknown</i>. 
+<p> 
 <h2><a name='sect13' href='#toc13'>Examples</a></h2>
 Here
 are some examples of usage of such a user interface. Assume we have a program
@@ -303,9 +323,11 @@ VERSION          : PJT [0.1]
 % mkplummer . 1000000 help=c
 CPU_USAGE mkplummer : 7.84    6.99 0.42  0.00 0.00  6202936
 </pre>
+<p> 
 <h2><a name='sect14' href='#toc14'>Author</a></h2>
 Joshua Barnes, Peter Teuben 
-<h2><a name='sect15' href='#toc15'>Update History</a></h2>
+<p> 
+<h2><a name='sect15' href='#toc15'>History</a></h2>
 <br>
 <pre>xx-nov-86<tt> </tt>&nbsp;<tt> </tt>&nbsp;created                         <tt> </tt>&nbsp;<tt> </tt>&nbsp;Joshua Barnes
 16-oct-87<tt> </tt>&nbsp;<tt> </tt>&nbsp;add system keyword host=        <tt> </tt>&nbsp;<tt> </tt>&nbsp;Peter Teuben
@@ -339,7 +361,7 @@ Joshua Barnes, Peter Teuben
 <li><a name='toc12' href='#sect12'>Bugs</a></li>
 <li><a name='toc13' href='#sect13'>Examples</a></li>
 <li><a name='toc14' href='#sect14'>Author</a></li>
-<li><a name='toc15' href='#sect15'>Update History</a></li>
+<li><a name='toc15' href='#sect15'>History</a></li>
 </ul>
 </body>
 </html>

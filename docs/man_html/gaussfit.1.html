@@ -9,11 +9,14 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 gaussfit - Least Squares and Robust Estimation 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>gaussfit</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
 <b>gaussfit</b> is a least squares and robust estimator of an arbitrary
 parameterized model to observed data. This program is a slight NEMO adapation
@@ -40,10 +43,13 @@ come with the <i>gaussfit</i> distribution are <a href='mkgf.1gaussfit.html'><i>
 in columnar format.  <i>cjoin</i> will strip off leading lines, and extract columns
 from different datafiles and put them into a single file. See also <a href='tabs.1.html'><i>tabs(1NEMO)</i></a>
 
-for converting ascii tables to MIDAS format within NEMO. 
+for converting ascii tables to MIDAS format within NEMO. <p>
+<i>it appears the
+NEMO interface didn&rsquo;t survive the pre-CVS era.</i> 
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following
-parameters are recognized in any order if the keyword is also given: 
+The following parameters
+are recognized in any order if the keyword is also given: 
 <dl>
 
 <dt><b>model=</b><i>model_file</i>
@@ -172,7 +178,8 @@ Default: <b>f</b>. </dd>
 <dt><b>report=t|f</b> </dt>
 <dd>If set, at the end of the run, the parameter file
 is read and the parameters and their errors (if available) are reported,
-one at a line. </dd>
+one at a line. 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Model File</a></h2>
@@ -187,6 +194,7 @@ main()
                 export(y - (a + b*x));
 }
 </pre>
+<p> 
 <h2><a name='sect5' href='#toc5'>Data</a></h2>
 Input datafiles are in MIDAS format: columns separated by a TAB, the
 first row containing the names of the columns, the second row their types,
@@ -199,6 +207,7 @@ how to create a MIDAS table from an ascii table which contains 4 columns:
 <br>
 <pre>    % tabs in=test.table out=test.tab col=x,y,x_x,y_y
 </pre>
+<p> 
 <h2><a name='sect6' href='#toc6'>Deficiences</a></h2>
 The NEMO approach cannot easily handle cases where the parameters
 are indexed. <p>
@@ -206,6 +215,7 @@ Fixing parameters can only be done by editing the model file,
 and either changing a <b>parameter</b> into a <b>constant</b> (this keeps the paramter
 in the parameter file, or <b>params=</b> keyword), or adding constraints to the
 model file. Examples are in the manual. 
+<p> 
 <h2><a name='sect7' href='#toc7'>See Also</a></h2>
 <a href='linreg.1.html'>linreg(1NEMO)</a>
 , <a href='tablsqfit.1.html'>tablsqfit(1NEMO)</a>
@@ -218,11 +228,14 @@ model file. Examples are in the manual.
 Squares and Robust Estimation</i>, USERS MANUAL, by William H. Jeffreys, Micheal
 J. Fitzpatrick., Barbara E. McArthur, and James E. McCartney. University of
 Texas at Austin. </pre>
+<p> 
 <h2><a name='sect8' href='#toc8'>Files</a></h2>
 <br>
 <pre>$NEMO/usr/tools/gaussfit/ <tt> </tt>&nbsp;<tt> </tt>&nbsp;V3.04 release
 $NEMODAT/gaussfit         <tt> </tt>&nbsp;<tt> </tt>&nbsp;repository of some example model files
 ftp://clyde.as.utexas.edu/pub/gaussfit/  <tt> </tt>&nbsp;<tt> </tt>&nbsp;official (anonymous ftp) release
+http://clyde.as.utexas.edu/gaussfit.tar.gz      as still seen in 2025 (release
+3.55)
 </pre>
 <h2><a name='sect9' href='#toc9'>Environment</a></h2>
 The following UNIX environment variables are used by <i>gaussfit</i>:
@@ -237,12 +250,14 @@ The following UNIX environment variables are used by <i>gaussfit</i>:
         All Rights Reserved.
 Peter Teuben (this NEMO interface)
 </pre>
-<h2><a name='sect11' href='#toc11'>Update History</a></h2>
+<p> 
+<h2><a name='sect11' href='#toc11'>History</a></h2>
 <br>
 <pre>11-aug-92<tt> </tt>&nbsp;<tt> </tt>&nbsp;first nemo version<tt> </tt>&nbsp;<tt> </tt>&nbsp;pjt
 xx-apr-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;v3.04 new improved compiler, wobble fix, more env,... <tt> </tt>&nbsp;<tt> </tt>&nbsp;mca
 14-Jul-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;(nemo) added second mode option to run gaussfit  <tt> </tt>&nbsp;<tt> </tt>&nbsp;pjt
 26-may-96<tt> </tt>&nbsp;<tt> </tt>&nbsp;installed the 3.53 version (sep 95)<tt> </tt>&nbsp;<tt> </tt>&nbsp;pjt
+15-feb-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;installed the 3.55 version - NEMO code lost ?<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -259,7 +274,7 @@ xx-apr-94<tt> </tt>&nbsp;<tt> </tt>&nbsp;v3.04 new improved compiler, wobble fix
 <li><a name='toc8' href='#sect8'>Files</a></li>
 <li><a name='toc9' href='#sect9'>Environment</a></li>
 <li><a name='toc10' href='#sect10'>Author</a></li>
-<li><a name='toc11' href='#sect11'>Update History</a></li>
+<li><a name='toc11' href='#sect11'>History</a></li>
 </ul>
 </body>
 </html>

@@ -32,14 +32,13 @@ string defv[] = {			/* Standard NEMO keyword+help */
 
 string usage = "convert fits table or random groups to ascii table";
 
-string cvsid="$Id$";
-
-extern string *burststring(string,string);
+//extern string *burststring(string,string);
 
 void nemo_main()
 {
     stream instr;
-    int    i, n, nfile, maxrow, nrow, *row=NULL;
+    off_t  n;
+    int    i, nfile, maxrow, nrow, *row=NULL;
     string *col, select;
     struct fits_header fh;
     bool   scanopt();

@@ -68,7 +68,7 @@ void nemo_main()
 {
     stream instr, outstr;
     int    i,n,nfile, blocking[2];
-    size_t size;
+    off_t  size;
     string outfile, hdselect, *insert, *fix, *deletes, *keep, *print;
     char   basename[128];
     struct fits_header fh;
@@ -112,13 +112,15 @@ void nemo_main()
     fts_setiblk(blocking[0]);    /* set input blocking factor */
     fts_setoblk(blocking[1]);    /* set input blocking factor */
 	
-    for (i=1;;i++) {			             /* loop over all HDU's */
-       fts_zero(&fh);			             /* reset header */
-       fh.hdu = i;                                   /* keep track of HDU (1=first) */
+    for (i=1;;i++) {			              /* loop over all HDU's */
+       fts_zero(&fh);			              /* reset header */
+       fh.hdu = i;                                    /* keep track of HDU (1=first) */
        
        size = fts_rhead(&fh,instr);	              /* read header */
-       if (size == 0 ) {        		      /* if no data (EOF) .. */
+       dprintf(2,"size=%ld\n",size); 
+       if (size < 0 ) {        		              /* if no data (EOF) .. */
 	  dprintf(1," no more data\n");
+	  if (i==1) warning("No data... this is unexpected");
           break;			              /* ... quit */
        }
        if (outstr) dprintf(1,"Working on FITS file %d\n",i);

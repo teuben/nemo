@@ -83,7 +83,10 @@ and to convert a D:M:S string to D.MS:
 
     echo 12:34:56.789 | tabdms - - fromdms=1 format=%.10f
     12.5824413889
-    
+or
+
+    nemoinp 12:34:56.789  dms=t format=%.10f
+
 .fi
 
 
@@ -119,7 +122,7 @@ Here are some examples :
 
 FITS DATE_OBS   2021-12-29T15:51:19.004800615       \fIdate -u +%Y-%m-%dT%H:%M:%S.%N\fP
 NED             00h07m15.84s, +27d42m29.1s       
-CASA            12:22:55.212, +15.49.15.500
+CASA            12:22:55.212, +15.49.15.500         note : for HMS and . for DMS
 
 SIMBAD gives the following guidelines to allowed coordinate input:
 

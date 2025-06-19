@@ -46,11 +46,11 @@ be useful.
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i);
     stamp_timers(n);
     for (i=0; i&lt;n; i++)
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-1: %Ld0,diff_timers(i,i+1));
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-1: %Ld\n",diff_timers(i,i+1));
     stamp_timers(0);
     for (i=0; i&lt;n; i++) {
 <tt> </tt>&nbsp;<tt> </tt>&nbsp;stamp_timers(i+1);
-<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-2: %Ld0,diff_timers(i,i+1));
+<tt> </tt>&nbsp;<tt> </tt>&nbsp;printf("Method-2: %Ld\n",diff_timers(i,i+1));
     }
 </pre>
 <p> 

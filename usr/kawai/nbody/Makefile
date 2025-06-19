@@ -99,6 +99,10 @@ library_g5.o:	library.C nbody_particle.h
 library_g4.o:	library.C nbody_particle.h
 	$(CXX) -DHARP3 $(CXXFLAGS) -o library_g4.o -c library.C
 
+bhtree: nbody
+	cp nbody bhtree
+	cp bhtree $(NEMOBIN)
+
 nbody.o : nbody.C  nbody_particle.h design.c
 	$(CXX)  -c    $(CXXFLAGS)  nbody.C 
 nbody : nbody.C  nbody_particle.h $(LIBOBJS) design.c
@@ -136,7 +140,7 @@ samplelog_g5:  nbody_g5
 	nbody_g5 -i samplein > samplelog_g5
 
 clean:
-	rm *.o
+	rm -f *.o
 
 bak:	export.tar.gz
 	mv export.tar.gz nbody.tar.gz

@@ -20,13 +20,12 @@ string defv[] = {
   "radecvel=f\n   Split the RA/DEC from VEL",
   "weight=t\n     Weights by intensity",
   "cross=t\n      Use cross correlations between X and Y to get angles",
-  "VERSION=0.4\n  12-jun-2013 PJT",
+  "scale=1\n      Scale factor to be applied to radii",
+  "VERSION=0.6n   29-may-2025 PJT",
   NULL,
 };
 
 string usage = "shape of a 2D or 3D distribution based on moments of inertia";
-
-string cvsid="$Id$";
 
 vector oldframe[3] = {
     { 1.0, 0.0, 0.0, },
@@ -36,7 +35,10 @@ vector oldframe[3] = {
 
 real printeig(string name, matrix mat, real *a, real *b, real *c);
 real printvec(string name, vector vec);
-
+void xyz2rtp(vector xyz, vector rtp);
+void eigsrt(float *d,float **v, int n);
+void eigenframe(vector frame[], matrix mat);
+void jacobi(float **a,int n,float *d,float **v,int *nrot);
 
 
 void nemo_main()
@@ -46,8 +48,9 @@ void nemo_main()
   int     i,j,k,nx, ny, nz, nx1, ny1, nz1, mom;
   int     nclip, apeak, apeak1, cnt;
   imageptr iptr=NULL;             /* pointer to image */
-  real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, scale, offset;
+  real    tmp0, tmp1, tmp2, tmp00, newvalue, peakvalue, offset;
   real    *spec, cv, clip[2];
+  real    scale = getdparam("scale");  
   bool    Qclip = hasvalue("clip");
   bool    Qwcs = getbparam("wcs");
   bool    Qrdv = getbparam("radecvel");
@@ -144,7 +147,7 @@ void nemo_main()
   printvec("e_z:", frame[2]);
   inc = printeig("qpole:",w_qpole, &a_k, &b_k, &c_k);
   if (Qcross) {
-    printf("a,b:  %g %g\n",a_k,b_k);
+    printf("a,b:  %g %g\n",a_k*scale,b_k*scale);
     printf("inc:  %g (meaningless without radecvel)\n",inc);
     printf("pa:   %g (meaningless without radecvel)\n",pa_k);
   } else {
@@ -191,7 +194,7 @@ void nemo_main()
     printvec("e_z:", frame[2]);
     inc = printeig("qpole:",w_qpole, &a_m, &b_m, &c_m);
 
-    printf("a,b:   %g %g\n",a_m,b_m);
+    printf("a,b:   %g %g\n",a_m*scale,b_m*scale);
     printf("inc:   %g\n",inc);
     printf("pa_m:  %g\n",pa_m);
     printf("pa_k:  %g\n",pa_k);
@@ -211,7 +214,7 @@ void nemo_main()
 
 #include "nrutil.h"
 
-eigenframe(vector frame[], matrix mat)
+void eigenframe(vector frame[], matrix mat)
 {
     float **q, *d, **v;
     int i, j, nrot;
@@ -273,7 +276,7 @@ real printvec(string name, vector vec)
 }
 
 
-xyz2rtp(vector xyz, vector rtp)
+void xyz2rtp(vector xyz, vector rtp)
 {
   real z = xyz[2];
   real w = sqrt(sqr(xyz[0])+sqr(xyz[1]));

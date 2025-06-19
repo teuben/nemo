@@ -8,8 +8,10 @@ unsio:   (see also: https://simutools.docs.lam.fr/unsio/)
 `   git clone https://gitlab.lam.fr/simutools/unsio/
     mknemo unsio
 
-    this also needs: libsqlite3-dev (ubuntu) or libsq3-devel (fedora)
-    as well as HDF5: libhdf5-serial-dev hdf5-tools (ubuntu)
+    this also needs: libsqlite3-dev (ubuntu) or libsq3-devel (fedora)   sqlite (brew)
+    as well as HDF5: libhdf5-serial-dev hdf5-tools (ubuntu)  hdf5 (brew)
+
+    May also need (on Mac) an RPC library (brew: libtirpc)
     
 python wrapper for unsio: (see also : https://pypi.org/project/unsio/)
     To read/write in NEMO format or Gadget1,2,3 or RAMSES 

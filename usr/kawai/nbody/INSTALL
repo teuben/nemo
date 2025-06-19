@@ -3,3 +3,5 @@
 2) type 'make nbody_g5' or 'make nbody_g4' if you have GRAPE-4 or 5.
 
 3) try 'nbody -h' to see available options.
+
+4) in NEMO we now call it 'bhtree' since that's the name in amuse as well

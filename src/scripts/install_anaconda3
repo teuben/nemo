@@ -4,9 +4,9 @@
 #
 # See also https://repo.anaconda.com/archive for old versions
 #
-# 18-mar-2024  NEMO/PJT original
+# 18-mar-2024  NEMO/PJT original, written for NEMO
 # 14-oct-2024  NEMO/PJT - older ones now fail on newer linux versions
-#  6-jan-2024  NEMO/PJT - add 2024.10-1
+#  6-jan-2025  NEMO/PJT - add 2024.10-1
 
 #--HELP
 # default parameters
@@ -99,6 +99,11 @@ echo $mc3 > $dir/README.pjt
 #    write sourceable shell startup recipes
 echo "set path = ($dir/bin "'$path); rehash'  > $dir/python_start.csh
 echo "export PATH=${dir}/bin:"'$PATH'         > $dir/python_start.sh
+
+#    keep copy of script
+cp $0 $dir
+python --version                                                > $dir/VERSION.pjt
+echo "Used install_anaconda3 with version=$version on $(date)" >> $dir/VERSION.pjt
 
 pip freeze > $dir/freeze.log
 echo "Created python_start files for $version in $dir ; no modifications were made to your HOME startup files!"

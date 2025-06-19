@@ -6,6 +6,8 @@
  *
  * Jun Makino 89/09/20 Ver. 1.00 (created)
  *            89/10/02 Ver. 1.01 debugged on UNIX system.
+ * Peter T    25/05/22 proper prototypes by reordering functions;
+ *                     also took _WIN32 from the amuse bhtree code
  *
  * functions :
  *             void timer_init() : reset the timer
@@ -13,7 +15,7 @@
  *             void cpumin(&double): returns the cpu minutes
  */
  
-#ifdef MSC
+#if defined(MSC) || defined(_WIN32)
 #include <time.h>
 
 static long start_time;
@@ -23,16 +25,14 @@ void timer_init()
 	time(&start_time);
 }
 
-second(dtime)
-double * dtime;
+void second(double * dtime)
 {
 	long int timenow;
 	time(&timenow);
 	*dtime = timenow - start_time;
 }
 
-cpumin(dmin)
-double *dmin ;
+cpumin(double *dmin)
 {
 	double sec;
 	second(&sec);
@@ -56,7 +56,8 @@ static double tstart;
 static struct timeval timearg;
 static struct timezone zonearg;
 
-#define RETURN_CPU    
+#define RETURN_CPU
+
 
 void timer_init()
 {
@@ -85,33 +86,7 @@ void tminit_()
     timer_init();
 }
 
-cpumin(t)
-double * t;
-{
-	xcpumin_(t);
-}
-
-double cpusec()
-{
-    double t;
-    second(&t);
-    return t;
-}
-second(t)
-double * t;
-{
-	second_(t);
-}
-xcpumin_(t)
-    double*t;
-{
-    double sec;
-    second_(&sec);
-    *t=sec/60.0;
-}
-
-second_(t)			
-double *t;
+void second_(double *t)
 {
 #ifdef RETURN_CPU    
 #ifdef SOLARIS
@@ -148,8 +123,39 @@ double *t;
 }
 #endif
 
+
+void second(double *t)
+{
+	second_(t);
+}
+
+
+double cpusec()
+{
+    double t;
+    second(&t);
+    return t;
+}
+
+
+void xcpumin_(double *t)
+{
+    double sec;
+    second_(&sec);
+    *t=sec/60.0;
+}
+
+
+void cpumin(double * t)
+{
+	xcpumin_(t);
+}
+
+
+
+
 #ifdef TEST
-main()
+void main()
 {
 	double t;
 	timer_init();

@@ -1,5 +1,7 @@
+# -*- makefile -*-
+
 DIR = src/image/misc
-BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint
+BIN = ccdplot ccdstat ccdmom ccdsub ccdrow ccdstack ccdellint ccdblob ccdcross
 NEED = $(BIN)  ccdmath ccdgen
 
 help:
@@ -10,7 +12,7 @@ need:
 
 clean:
 	@echo Cleaning $(DIR)
-	@rm -f ccd.in ccdmom.in ccdmom2.in gauss1 gauss2 gauss12 gauss21
+	@rm -f ccd.in ccdmom.in ccdmom2.in gauss1 gauss2 gauss12 gauss21 gauss3
 
 #	power of function and contour levels to plot with
 P = 1.1
@@ -52,6 +54,10 @@ ccdmom: ccdmom.in
 	$(EXEC) ccdmom ccdmom.in - 2 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 	$(EXEC) ccdmom ccdmom.in - 3 | $(EXEC) ccdstat - ; nemo.coverage ccdmom.c ccdstat.c
 
+ccdblob: ccd.in
+	 @echo Running $@
+	 $(EXEC) ccdblob ccd.in pos=max box=8; nemo.coverage ccdblob.c
+
 N2 = 100
 ccdmom2.in:
 	@echo Creating $@
@@ -68,7 +74,11 @@ gauss1:
 gauss2:
 	@echo Creating $@
 	$(EXEC) ccdgen out=gauss2 object=gauss spar=1,20 size=10,10
-	
+
+gauss3:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss3 object=gauss spar=2,20 size=20,20 center=11,11
+
 ccdstack: gauss1 gauss2
 	@echo Running $@
 	$(EXEC) ccdstack gauss1,gauss2 - | $(EXEC) ccdstat -
@@ -82,3 +92,37 @@ ccdstacktest:
 	ccdgen "" ccd3 spar=0 size=64,64 cdelt=4/64,4/64
 	ccdstack ccd3,ccd1,ccd2 ccd12
 	ccdstack ccd3,ccd2,ccd1 ccd21
+
+# gauss1 centered on 0-based (9.5,9.5) - the ref pixels
+# gauss3 centered on 0-based (11,11) - offset
+
+
+gauss10:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss10 object=gauss spar=1,10 size=128,128 center=65,65
+
+gauss11:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss11 object=gauss spar=2,10 size=128,128 center=66,66
+
+gauss12:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss12 object=gauss spar=2,10 size=128,128 center=67,67
+
+gauss13:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss13 object=gauss spar=2,10 size=128,128 center=68,68
+
+gauss14:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss14 object=gauss spar=2,10 size=128,128 center=72,72
+
+gauss15:
+	@echo Creating $@
+	$(EXEC) ccdgen out=gauss15 object=gauss spar=2,10 size=128,128 center=72,72 crpix=64,64
+
+
+ccdcross:	gauss1 gauss3
+	@rm -f cross1
+	$(EXEC) ccdcross gauss1,gauss3 cross1 # box=6 n=4
+	# | $(EXEC) ccdstat -

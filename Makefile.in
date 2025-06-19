@@ -1,4 +1,4 @@
-VERSION = NEMO V4.4 8-mar-2025 PJT
+VERSION = NEMO V4.4 29-may-2025 PJT
 # ###############################################################################
 # 	$(NEMO)/Makefile: top level Makefile for full NEMO installation
 #       do not edit, it is derived from Makefile.in
@@ -348,6 +348,9 @@ upstream:
 	@echo "  git merge upstream/master"
 	@echo "  git status"
 	@echo "Always make sure you work in a branch, to keep your local master same as upstream/master"
+	@echo ""
+	@echo "Reminder on renaming from https to git:"
+	@echo "  git remote set-url origin git@github.com:teuben/nemo"
 
 # autoconf/GIT based export
 #
@@ -471,6 +474,8 @@ build:   build1 build2 build3
 
 ## build1:    postconfig and mknemos
 build1:
+	@echo "Updating ~/.nemorc"
+	@echo "NEMO=`pwd`" >> ~/.nemorc
 	(source nemo_start.sh ; $(MAKE) postconfig mknemos)
 	@echo 'Continue with "make build2 (or build2a build2b)"'
 

@@ -77,7 +77,8 @@ Time at which the snapshot applies
 [Default: 0.0]
 .TP
 \fBzerocm=t|f\fP
-Reset center of mass to zero?
+Reset center of mass to zero? If not centered, the (0,0,0) is the mathematical
+origin of the Plummer model, but due to finite-N noise not at the center of mass.
 .br
 [Default: \fBt\fP].
 .TP
@@ -129,11 +130,12 @@ file, the next item being the snapshot itself.
 [Default: not used].
 .TP
 \fBnmodel=\fP\fIinteger\fP
-Number of models to generate. Although mostly meant for benchmarks,
+Number of models to generate. All models will be different here.
+Although mostly meant for benchmarks,
 generating more then 1 model can be useful to process very large
 snapshots (that normally won't fit in memory) in a serialized fashion. See
 also \fIsnapsplit\fP. Most NEMO programs will only read the first
-snapshot.
+snapshot. See also \fBmkgrid nmodel=\fP for a faster way to benchmark.
 .br
 [Default: \fB1\fP]
 .TP
@@ -217,7 +219,7 @@ The default benchmark (see Benchfile) creates a 10,000,000 snapshot in double pr
 with and without writing to a local file:
 .EX
 
- cd $NEMO/nemo/src/nbody/init/
+ cd $NEMO/src/nbody/init/
  make -f Benchfile bench0 bench1
 
     or
@@ -239,7 +241,7 @@ the time needed to write 535MB (for 10M particles)
 NEMO/src/nbody/init/mkplummer.c
 
 .SH "SEE ALSO"
-mkpolytrope(1NEMO), snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
+mkpolytrope(1NEMO), snapvirial(1NEMO), mkplummer(3NEMO), snapmass(1NEMO), snapsplit(1NEM0), mkgrid(1NEMO), mkplum(1NEMO), mcluster(1NEMO), xrandom(3NEMO)
 .PP
 H.C.Plummer (1911), \fIMNRAS\fP, \fB71\fP, 460.
 .PP

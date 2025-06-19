@@ -32,7 +32,7 @@ string defv[] = {			/* Standard NEMO keyword+help */
     "compact=f\n           Compact (move) dummy axes to the end",
     "inlist=\n             optional nemoinp(1) list expression for in=",
     "wcs=f\n               try and copy a reasonably WCS from input to output",
-    "VERSION=1.5a\n        4-may-04 PJT",
+    "VERSION=1.5b\n        19-jun-2025 PJT",
     NULL,
 };
 
@@ -63,7 +63,8 @@ void fts_setwcs(fits_header *,int ,fts_wcs *);
 void nemo_main()
 {
     stream instr, outstr;
-    int    i,j, n, planesize, totsize;
+    off_t  n;
+    int    i,j, planesize, totsize;
     int    zbufsiz, ninfiles, naxis, naxis1, naxis2, naxis3, naxisn[3], ntmp;
     bool   Qmultiple, Qcompact = getbparam("compact"), Qwcs = getbparam("wcs");
     struct fits_header fh, fh_out;

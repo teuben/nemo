@@ -17,17 +17,18 @@
 
 string defv[] = {
   "in=???\n       Input image files, first image sets the WCS",
-  "out=???\n      Output cross correlated image",
+  "out=.\n        Output cross correlated image",
   "center=\n      X-Y Reference center (0-based pixels)",
   "box=\n         Half size of correlation box",
-  "n=3\n          Half size of box inside correlation box to find center",
-  "clip=\n        Only use values above this clip level",
+  "n=\n          Half size of box inside correlation box to find center",
+  "clip=\n        Only use values above this clip level from input",
+  "clop=\n        Clip from correllation image to finder center",
   "bad=0\n        bad value to ignore",
-  "VERSION=0.3\n  18-oct-2024 PJT",
+  "VERSION=0.6\n  6-jun-2024 PJT",
   NULL,
 };
 
-string usage = "cross correlate images to find the offset";
+string usage = "cross correlate images to find the offset between images";
 
 
 #ifndef HUGE
@@ -43,8 +44,10 @@ real     badval;
 int      nimage;                /* actual number of input images */
 int      center[2];              /* center of reference point image */
 int      box;
-bool     Qclip;
-real     clip;
+bool     Qclip, Qclop;
+real     clip[MAXIMAGE];       // @todo
+int      nclip;
+real     clop;
 
 
 local void do_cross(int l0, int l, int n);
@@ -61,8 +64,9 @@ void nemo_main()
     
     badval = getrparam("bad");
     Qclip = hasvalue("clip");
-    if (Qclip) clip = getrparam("clip");
-    n = getiparam("n");
+    if (Qclip) clip[0] = getrparam("clip");
+    Qclop = hasvalue("clop");
+    if (Qclop) clop = getrparam("clop");
  
     fnames = burststring(getparam("in"), ", ");  /* input file names */
     nimage = xstrlen(fnames, sizeof(string)) - 1;
@@ -77,25 +81,38 @@ void nemo_main()
     strclose(instr);
 
     if (hasvalue("center")) {
+      //  @todo  :   allow "max" and "ref" ???
       nc = nemoinpi(getparam("center"),center,2);
       if (nc != 2) error("center= needs 2 values");
     } else {
-      center[0] = Nx(iptr[0])/2;
-      center[1] = Ny(iptr[0])/2;
+      center[0] = (Nx(iptr[0])-0)/2;
+      center[1] = (Ny(iptr[0])-0)/2;
       dprintf(0,"center=%d,%d\n",center[0],center[1]);
     }
 
     if (hasvalue("box"))
-      box    = getiparam("box");
+      box = getiparam("box");
+    else {
+      box = (Nx(iptr[0])-1)/2;
+      if (Ny(iptr[0]) < Nx(iptr[0]))
+	  box = (Ny(iptr[0])-1)/2;
+      // @todo this can fail if off-center is used
+    }
+    if (hasvalue("n"))
+      n = getiparam("n");
     else
-      box    = Nx(iptr[0])/2;
-    nx = ny = 2*box + 1;
-    dprintf(0,"Full box size %d\n",nx);
-      
+      n = box/2;
 
+    nx = ny = 2*box + 1;
+    dprintf(0,"Full box size %d (square), n=%d\n",nx,n);
+    
     optr = NULL;
     create_cube(&optr, nx, ny, 1);
-    outstr = stropen (getparam("out"),"w");  /* open output file first ... */
+    CRPIX1(optr) = (nx-1)/2;  // 0 based!
+    CRPIX2(optr) = (ny-1)/2;
+    //CDELT1(optr) = CDELT1(iptr[0]);
+    //CDELT2(optr) = CDELT2(iptr[0]);
+    outstr = stropen(getparam("out"),"w");  /* open output file first ... */
 
     for (ll=1; ll<nimage; ll++) {
         instr   = stropen(fnames[ll],"r");    /* open file */
@@ -119,7 +136,7 @@ void nemo_main()
  */
 local void do_cross(int l0, int l, int n)
 {
-    real   sum;
+    real   sum, imval;
     int    i, j, ix, iy, nx, ny;
     int    ix1,iy1,ix2,iy2;
     int    cx,cy;
@@ -134,6 +151,7 @@ local void do_cross(int l0, int l, int n)
     cx = center[0];
     cy = center[1];
 
+    // make the cross corr image
     for (j=-box; j<=box; j++) {
       for (i=-box; i<=box; i++) {
 	sum = 0.0;
@@ -147,8 +165,8 @@ local void do_cross(int l0, int l, int n)
 	    if (ix1 < 0 || ix2 < 0 || ix1 >= nx || ix2 >= nx) continue;
 	    // @todo   handle bad values
 	    if (Qclip) {
-	      if (CubeValue(iptr[l0],ix1,iy1,0) < clip) continue;
-	      if (CubeValue(iptr[l], ix2,iy2,0) < clip) continue;
+	      if (CubeValue(iptr[l0],ix1,iy1,0) < clip[0]) continue;
+	      if (CubeValue(iptr[l], ix2,iy2,0) < clip[0]) continue;
 	    }
 	    sum += CubeValue(iptr[l0],ix1,iy1,0) * CubeValue(iptr[l],ix2,iy2,0);
 	  }
@@ -157,6 +175,7 @@ local void do_cross(int l0, int l, int n)
       }
     }
 
+    // find where the peak is
     int ix0=0, iy0=0;
     minmax_image(optr);
     dprintf(0,"New min and max in correlation image are: %f %f\n",MapMin(optr) ,MapMax(optr) );
@@ -167,30 +186,41 @@ local void do_cross(int l0, int l, int n)
 	  iy0 = iy;
 	  dprintf(0,"Max cross %g @ %d %d\n",MapMax(optr),ix,iy);
 	}
-    
-    real sumx=0, sumy=0, sumxx=0, sumxy=0, sumyy=0;
+
+    // find the weighted mean center
+    real sum0=0, sumx=0, sumy=0, sumxx=0, sumxy=0, sumyy=0;
+    real smin=0, smax=0;
     int dx, dy;
     sum = 0;
     for (dy=-n; dy<=n; dy++) {        // look around (ix0,iy0) by just a few pixels 
       iy = iy0+dy;  
       for (dx=-n; dx<=n; dx++) {      // to find the 
 	ix = ix0+dx;
-	sum   = sum   + CubeValue(optr,ix,iy,0);
-	sumx  = sumx  + CubeValue(optr,ix,iy,0) * dx;
-	sumy  = sumy  + CubeValue(optr,ix,iy,0) * dy;
-	sumxx = sumxx + CubeValue(optr,ix,iy,0) * dx*dx;
-	sumxy = sumxy + CubeValue(optr,ix,iy,0) * dx*dy;
-	sumyy = sumyy + CubeValue(optr,ix,iy,0) * dy*dy;
+	imval = CubeValue(optr,ix,iy,0);
+	if (Qclop && imval < clop) continue;
+	dprintf(1,"clop %g %g\n",sum0,imval);
+	if (sum0 == 0)
+	  smin = smax = imval;
+	smin = MIN(smin, imval);
+	smax = MAX(smax, imval);
+	sum0  = sum0  + 1;
+	sum   = sum   + imval;
+	sumx  = sumx  + imval * dx;
+	sumy  = sumy  + imval * dy;
+	sumxx = sumxx + imval * dx*dx;
+	sumxy = sumxy + imval * dx*dy;
+	sumyy = sumyy + imval * dy*dy;
       }
     }
     sumx /= sum;   sumy /= sum;
     sumxx = sqrt(sumxx/sum - sumx*sumx);
-    sumyy = sqrt(sumyy/sum - sumy*sumy);    
+    sumyy = sqrt(sumyy/sum - sumy*sumy);
+    dprintf(0,"MinMax in %g pts: %g %g, use clop= to clip the corr out image\n", sum0, smin, smax);
     dprintf(0,"X,Y mean: %g %g\n", sumx,  sumy);
     dprintf(0,"X,Y sig:  %g %g\n", sumxx, sumyy);    
     real xcen = ix0-box+sumx;
     real ycen = iy0-box+sumy;
-    dprintf(0,"Center at: %g %g\n",xcen,ycen);
+    dprintf(0,"Center at: %g %g from center\n",xcen,ycen);
     // @todo (ix0-xcen-box, iy0-ycen-box) is a value expected to be around (0,0) for no offsets
     // 
     printf("%g %g  %g %g  %d %d  %g\n",xcen,ycen,sumx,sumy, ix0,iy0, MapMax(optr));	   

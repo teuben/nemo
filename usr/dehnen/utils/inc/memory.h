@@ -246,7 +246,7 @@ namespace WDutils {
 #define WDutils_DEL_O(P) \
   WDutils::DelObject(P,__FILE__,__LINE__)
 }
-//
+//  @todo  mm_malloc.h vs. posix_memalign.h
 #if defined(__GNUC__) && !defined(__INTEL_COMPILER)
 #  include <mm_malloc.h>
 #endif

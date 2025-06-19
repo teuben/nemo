@@ -1,0 +1,86 @@
+.TH STILTS 1NEMO "10 June 2025"
+
+.SH "SYNOPSIS"
+.B stilts program [key1=]val1 [key2=]val2 .\!.\!.
+.br
+.B stilts program -h
+
+.SH "DESCRIPTION"
+
+The STIL Tool Set (stilts) is a set of command-line tools based on STIL, the
+Starlink Tables Infrastructure Library. It deals with the processing
+of tabular data; the package has been designed for, but is not
+restricted to, astronomical tables such as source catalogues. Some of
+the tools are generic and can work with multiple formats (including
+FITS, VOTable, CDF, ECSV, CSV, PDS4, Parquet, MRT, Feather, GBIN, SQL
+and ASCII), and others are specific to the VOTable format. STILTS is
+the command-line counterpart of the GUI table analysis tool
+TOPCAT. The package is robust, fully documented, and designed for
+efficiency, especially with very large datasets.
+
+
+.SH "STILTS PROGRAMS"
+
+The command \fBstilts\fP without argument will remind users what programs exist.
+.PP
+Below the current programs are listed, and a related/equivalent program in NEMO that
+is functionally similar to what the stilts program does.
+.nf
+.ta +1.5i
+
+program		NEMO related
+
+calc		nemoinp
+cdsskymatch
+cone
+coneskymatch
+datalinklint
+funcs		tabmath
+pixfoot
+pixsample
+plot2d		tabplot, snapplot
+plot3d		snapplot3d, glnemo2
+plothist	tabhist, tabstat
+regquery
+sqlclient
+sqlskymatch
+sqlupdate
+taplint
+tapquery
+tapresume
+tapskymatch
+tcat
+tcatn
+tcopy
+tcube
+tgridmap	snapgrid
+tjoin		join(1)q
+tloop		tabcols, tabrows
+tmatch1
+tmatch2
+tmatchn
+tmulti
+tmultin
+tpipe
+tskymap		snapgrid, ccdsky
+tskymatch2
+votcopy
+votlint
+plot2plane	tabplot, snapplot
+plot2sky
+plot2cube
+plot2sphere
+plot2time
+
+.fi
+
+
+.SH "AUTHOR"
+Mark Taylor
+
+.SH "FURTHER INFORMATION"
+.nf
+http://www.star.bris.ac.uk/~mbt/stilts/
+https://www.star.bristol.ac.uk/mbt/topcat/
+.fi
+

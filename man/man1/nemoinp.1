@@ -80,10 +80,6 @@ Default: \fBf\fP.
 The number of elements in an array is limited, currently hardcoded to 32678 in
 \fInemoinp(3NEMO)\fP. If possible, use \fIseq(1)\fP.
 
-
-.SH "SEE ALSO"
-seq(1), tabgen(1NEMO), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), functions(5NEMO)
-
 .SH "EXAMPLES"
 .nf
    nemoinp 4.2+3.1           simple math
@@ -101,6 +97,16 @@ seq(1), tabgen(1NEMO), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), function
    nemoinp c,G,h,p,m         a few good constants
    nemoinp 'p*pi/(3600*180)' 1 AU in m
 .fi
+things that it cannot do are sometimes captured with little known unix commands. Here
+are some examples:
+.nf
+   echo "ibase=2; obase=8; 101101" | bc           # convert binary to octal
+   echo 1.2/4.5 | bc -l                           # floating point math
+   z=$((x + y))                                   # sum integers in bash
+.fi
+
+.SH "SEE ALSO"
+seq(1), tabgen(1NEMO), tabmath(1NEMO), nemoinp(3NEMO), getrange(3NEMO), functions(5NEMO)
 
 .SH "AUTHOR"
 Peter Teuben

@@ -107,13 +107,13 @@ pre-define macros (in \fBimage.h\fP):
 #define Ny(iptr)	((iptr)->ny)
 #define Nz(iptr)	((iptr)->nz)
 #define Axis(iptr)	((iptr)->axis)
-#define Xmin(iptr) 	((iptr)->xmin)
+#define Xmin(iptr) 	((iptr)->xmin)       // CRVAL1(iptr) 
 #define Ymin(iptr) 	((iptr)->ymin)
 #define Zmin(iptr) 	((iptr)->zmin)
-#define Dx(iptr)	((iptr)->dx)
+#define Dx(iptr)	((iptr)->dx)         // CDELT1(iptr)
 #define Dy(iptr)	((iptr)->dy)
 #define Dz(iptr)	((iptr)->dz)
-#define Xref(iptr) 	((iptr)->xref)
+#define Xref(iptr) 	((iptr)->xref)       // CRPIX1(iptr) 
 #define Yref(iptr) 	((iptr)->yref)
 #define Zref(iptr) 	((iptr)->zref)
 #define MapMin(iptr)	((iptr)->map_min)
@@ -122,7 +122,7 @@ pre-define macros (in \fBimage.h\fP):
 #define Beamx(iptr)	((iptr)->beamx)
 #define Beamy(iptr)	((iptr)->beamy)
 #define Beamz(iptr)	((iptr)->beamz)
-#define Namex(iptr)	((iptr)->namex)
+#define Namex(iptr)	((iptr)->namex)      // CUNIT1(iptr)
 #define Namey(iptr)	((iptr)->namey)
 #define Namez(iptr)	((iptr)->namez)
 #define Unit(iptr)      ((iptr)->unit)
@@ -138,6 +138,8 @@ pre-define macros (in \fBimage.h\fP):
 #define CubeValue(iptr,ix,iy,iz)	(*( (iptr)->frame + ix + Nx(iptr)*(iy+Ny(iptr)*iz)))
 #endif 
 .fi
+Note that the astronomical (FITS) convention of CRPIX/CRVAL/CDELT are now also available (as of 2023)
+
 
 .SH "ARRAY NOTATION"
 The \fIMapValue\fP and \fICubeValue\fP macros are sometimes cumbersome
@@ -211,4 +213,5 @@ Peter Teuben
 8-may-04	V5.0: added reference pixel for axis type 1	PJT
 7-may-13	added benchmark example
 27-jan-2021	noted axis=1 now becoming standard	PJT
+sep-2023	add CRPIX/CRVAL/CDELT macros for FITS users	PJT
 .fi

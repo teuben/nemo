@@ -20,6 +20,7 @@
  *      31-dec-02       V2.1 gcc3/SINGLEPREC             pjt
  *       4-sep-03       V2.2 allow CSV output based      pjt
  *      24-feb-04       V2.4 add newline=t               pjt
+ *      25-may-2025     V3.0 allow header= to have words PJT
  */
 
 #include <stdinc.h>
@@ -28,6 +29,7 @@
 #include <vectmath.h>
 #include <filestruct.h>
 #include <history.h>
+#include <extstring.h>
 
 #include <snapshot/snapshot.h>	
 #include <snapshot/body.h>
@@ -41,11 +43,11 @@ string defv[] = {
     "separ=0\n			Special table of interparticle distances",
     "times=all\n		Times to select snapshot",
     "tab=\n			Standard output or table file?",
-    "header=f\n			Add header (nbody,time)to output?",
-    "newline=f\n                add newline in the header?",
+    "header=\n	                Header elements (nbody,time) to also add to output?",
+    "newline=f\n                add newline(s) in the header?",
     "csv=f\n                    Use Comma Separated Values format",
     "comment=f\n                Add table columns as common, instead of debug",
-    "VERSION=2.4\n		24-feb-04 PJT",
+    "VERSION=3.1\n		13-jun-2025 PJT",
     NULL,
 };
 
@@ -53,21 +55,20 @@ string usage="tabulate a snapshot";
 
 #define MAXOPT    50
 
-extern string *burststring(string,string);
-
 void nemo_main()
 {
     stream instr, tabstr;
     real   tsnap, dr, aux;
     string times;
     Body *btab = NULL, *bp, *bq;
-    bool   Qsepar, Qhead = getbparam("header");
+    bool   Qsepar;
     bool   Qcsv = getbparam("csv");
     bool   Qcomment = getbparam("comment");
     bool   Qnewline = getbparam("newline");
-    int i, n, nbody, bits, nsep, isep, nopt, ParticlesBit;
+    bool   Qheader = hasvalue("header");
+    int i, n, nbody, bits, nsep, isep, nopt, nhead, ParticlesBit;
     char fmt[20],*pfmt;
-    string *opt;
+    string *opt, *head;
     rproc_body fopt[MAXOPT];
 
     ParticlesBit = (MassBit | PhaseSpaceBit | PotentialBit | AccelerationBit |
@@ -84,17 +85,24 @@ void nemo_main()
             break;
         }
     }
-    if (Qcomment) {
-      printf("# ");
-      for (i=0; i<nopt; i++)
-        printf("\t%s",opt[i]);
-      printf("\n");
-    } else {
-      for (i=0; i<nopt; i++)
-        dprintf(0,"%s ",opt[i]);
-      dprintf(0,"\n");
-    }
-
+    
+    if (Qheader) {
+      dprintf(0,"header\n");
+      head = burststring(getparam("header"),", ");
+      nhead = xstrlen(head, sizeof(string))-1;
+      if (Qcomment) {
+	printf("# ");
+	for (i=0; i<nopt; i++)
+	  printf("\t%s",opt[i]);
+	printf("\n");
+      } else {
+	for (i=0; i<nopt; i++)
+	  dprintf(0,"%s ",opt[i]);
+	dprintf(0,"\n");
+      }
+    } else
+      dprintf(0,"no header\n");
+    
     if (hasvalue("tab")) {
 	pfmt = getparam("tab");
 	dprintf(0,"Saving table in %s\n",pfmt);
@@ -131,11 +139,13 @@ void nemo_main()
         if ( (bits & ParticlesBit) == 0)
             continue;                   /* skip work, only diagnostics here */
 	if (!Qsepar) {				/* printf options */
-	    if (Qhead) {
-	      fprintf(tabstr,"%d ",nbody);
-	      if (Qnewline) fprintf(tabstr,"\n");
-	      fprintf(tabstr,"%g\n",tsnap);
+	    for (i=0; i<nhead; i++) {
+	        // n->nbody    t->time
+	        if (head[i][0] == 'n') fprintf(tabstr,"%d ",nbody);
+	        if (head[i][0] == 't') fprintf(tabstr,"%g ",tsnap);
+	        if (Qnewline) fprintf(tabstr,"\n");
 	    }
+	    if (!Qnewline && Qheader)fprintf(tabstr,"\n");
             for (bp = btab, i=0; bp < btab+nbody; bp++, i++) {
                 for (n=0; n<nopt; n++) {
                     aux = fopt[n](bp,tsnap,i);

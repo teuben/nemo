@@ -9,79 +9,149 @@
 This HTML automatically generated with <A HREF=http://manpages.ubuntu.com/manpages/bionic/man1/rman.1.html>rman</A> for <A HREF=https://astronemo.readthedocs.io>NEMO</A><br>
 <a href='#toc'>Table of Contents</a><p>
 
+<p> 
 <h2><a name='sect0' href='#toc0'>Name</a></h2>
 ccdblob - properties of a blob in an image 
+<p> 
 <h2><a name='sect1' href='#toc1'>Synopsis</a></h2>
 <b>ccdblob</b> [parameter=value]
 
+<p> 
 <h2><a name='sect2' href='#toc2'>Description</a></h2>
-<b>ccdblob</b> is a poor man&rsquo;s source extractor and  computes some properties
-of a blob ("star") in an image. With given rough pixel coordinates and a
-box size, it will determine the peak, shape and flux of the blob, assuming
-the background signal (box needs to be big enough for this) is well characterised
-by the median value. This current algorithm thus does not work in crowded
-fields. <p>
-The current draft version is based off <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
- and thus
-inherits some keywords and output that may disappear or change meaning.
-<p>
-Pixel coordinates are 1-based. 
+<b>ccdblob</b> is a poor man&rsquo;s source extractor and  computes some
+properties of a blob ("star") in an image. With given rough pixel coordinates
+and a box size, it will determine the peak, shape and flux of the blob,
+assuming the background signal (box needs to be big enough for this) is
+well characterised by the median value. This current algorithm thus does
+not work in crowded fields. <p>
+Selection of the pixels involved in the <i>fitting</i>
+is via two keywords:  <b>box=</b> and <b>clip=</b>. Apart from visual inspection, a good
+strategy could be to clip at a fraction of (datamax-datamin) <p>
+See also <a href='ccdshape.1.html'><i>ccdshape(1NEMO)</i></a>
+
+from which this program was derived. <p>
+Pixel coordinates are 0-based. <p>
+
+<p> 
 <h2><a name='sect3' href='#toc3'>Parameters</a></h2>
-The following parameters are recognized
-in any order if the keyword is also given: 
+The
+following parameters are recognized in any order if the keyword is also
+given: 
 <dl>
 
 <dt><b>in=</b> </dt>
-<dd>Input NEMO image file [???]
-    </dd>
+<dd>Input <a href='image.5.html'><i>image(5NEMO)</i></a>
+ file. <br>
+No default. </dd>
 
-<dt><b>pos=</b> </dt>
-<dd>(x,y) position, or use max in map. Integers, and are 1-based. []
-</dd>
+<dt><b>pos=</b><i>x,y</i> </dt>
+<dd>(x,y) center of the <b>box</b>. Positions are 0-based integers
+With the special value <b>pos=max</b> the location of the maximum in the image
+is used. <br>
+Default is center of image.  </dd>
 
-<dt><b>box=</b> </dt>
-<dd>Box size to use around pos [32]  </dd>
+<dt><b>box=</b><i>size</i> </dt>
+<dd>Box size (in pixels) to use around
+<b>pos</b>. It is best to choose something odd, for an even box size, the center
+pixel will be in the upper-right quadrant. gi <br>
+Default: 7. </dd>
 
 <dt><b>clip=</b> </dt>
-<dd>Use only values above clip
-[]  </dd>
+<dd>Use only values above <b>clip</b> from the selected area. <br>
+Default will use all values within the box. </dd>
 
-<dt><b>wcs=</b> </dt>
-<dd>Use WCS of the cube (else use pixel coordinates) </dd>
+<dt><b>wcs=t|f</b> </dt>
+<dd>Use WCS of the cube (otherwise
+use pixel coordinates 1..N). </dd>
 
-<dt><b>radecvel=</b> </dt>
-<dd>Split
-the RA/DEC from VEL [f]   </dd>
+<dt><b>radecvel=t|f</b> </dt>
+<dd>Split the RA/DEC from VEL <br>
+[f]   </dd>
 
-<dt><b>weight=</b> </dt>
-<dd>Weights by intensity [t]     </dd>
+<dt><b>weight=t|f</b> </dt>
+<dd>Weigh moments of inertia by intensity? <br>
+[t]     </dd>
 
 <dt><b>cross=</b> </dt>
-<dd>Use
-cross correlations between X and Y to </dd>
+<dd>Use cross correlations between X and Y to... </dd>
+
+<dt><b>scale=</b> </dt>
+<dd>Scale factor
+to be applied to output radii. A common value is 3600 if the input units
+are degrees. <br>
+Default: 1 <br>
+</dd>
+
+<dt><b>out=</b> </dt>
+<dd>Optional output file. If given, the pixel coordinates and intensities
+are written out, for programs such as <a href='tabnlllsqfit.1.html'><i>tabnlllsqfit(1NEMO)</i></a>
+ to fit models.
+
+<p> 
+<p> </dd>
 </dl>
 
 <h2><a name='sect4' href='#toc4'>Examples</a></h2>
-Analysing some Betelgeuse
-images from an all-sky camera: <br>
-<pre>% fitsccd ASC/MASN-01/archive/201601/20160102/IMG00700.FIT - | ccdblob - 724,305
- BLOB 726 305  724.573 305.38 32   6546 42731 139121
-</pre>Where the BLOB line lists the peak position (pixels are 1-based), followed
-by an intensity weighted position, the box size around the estimated center,
-followed by the median, peak and total blob flux (corrected for the median
-background). 
-<h2><a name='sect5' href='#toc5'>See Also</a></h2>
-<a href='ccdstat.1.html'>ccdstat(1NEMO)</a>
-, <a href='image.5.html'>image(5NEMO)</a>
+An example of creating a gaussian blob with a given Signal/Noise
+(sn=) and running it through ccdblob:  
+<p> sn=100 ccdgen - gauss 1,3 127,127
+ |\   ccdgen - noise 0,1/$sn in=- seed=123 |\<br>
+   ccdblob -<br>
  
+<p> Npoints:    49 Box:        7 DataMinMax: 0.345445 1.00188 Min at:     60
+66 (0 based) Max at:     63 63 Mean:       0.6649 Median:     1.00188 DataSum:
+   32.5801 Flux:       -16.5122 ImSize:     127 127 1 Center:     0.000935206
+-0.00434081 0 [wcs] BLOB:  63 63  0.000935206 -0.00434081 7   1.00188 1.00188
+-16.5122         e_x:     1.00000     0.70711     0.70711     0.00000    90.0
+  45.0<br>
+         e_y:     1.00000    -0.70711     0.70711     0.00000    90.0  135.0<br>
+         e_z:     1.00000     0.00000     0.00000     1.00000     0.0    0.0<br>
+       qpole:  7941.36475     0.70711     0.70711     0.00000<br>
+            :     3.35181     0.70711    -0.70711     0.00000<br>
+            :     0.00000     0.00000     0.00000     1.00000<br>
+ a,b:  89.1143 1.83079 inc:  88.8228 (meaningless without radecvel) pa:  
+135 (meaningless without radecvel) 
+<p>  <p>
+The same example as before, but now
+feeding a table with 37 points to a 2d gaussfit. These fits are often very
+dependant on the initial guess, but it does a pretty good job here:  
+<p> ns=100
+ccdgen - gauss 1,3 127,127  |\   ccdgen - noise 0,1/$sn in=- seed=123 |\<br>
+   ccdblob - clip=0.5 out=gauss.tab<br>
+ tabnllsqfit gauss.tab 1,2 3 fit=gauss2d par=1,2,64,64,2 
+<p> nrt=16 Fitting
+a+b*exp(-[(x-c)^2+(y-d)^2]/(2*e^2)):   a= -0.076949 0.126768  b= 1.07709 0.123398
+ c= 63.0009 0.0110594 d= 62.9887 0.011061 e= 3.15046 0.244319 npt= 37 rms= 0.00801193
+rms2/chi2= 0.00237507 rms/chi = 1 
+<p> tabnllsqfit gauss.tab 1,2 3 fit=peak2d
+par=1,-1,-1,63,63 Fitting : y = a+b*(x-d)**2+*c*(y-e)**2:   a= 0.977191 0.00428134
+ b= -0.0414872 0.000758877  c= -0.0408268 0.000758877 d= 63.0008 0.0148635 e= 62.9876
+0.0151057 FWZP= 0.206048 0.204401 npt= 37 rms= 0.0119193 rms2/chi2= 0.00525659
+rms/chi = 1 
+<p>  
+<p> 
+<p> 
+<h2><a name='sect5' href='#toc5'>See Also</a></h2>
+<a href='ccdshape.1.html'>ccdshape(1NEMO)</a>
+, <a href='ccdstat.1.html'>ccdstat(1NEMO)</a>
+, <a href='ccdcross.1.html'>ccdcross(1NEMO)</a>
+,
+<a href='image.5.html'>image(5NEMO)</a>
+ <br>
+<pre>https://github.com/perwin/imfit
+</pre>
 <h2><a name='sect6' href='#toc6'>Files</a></h2>
-src/image/misc/ccdblob.c
-
+src/image/misc/ccdblob.c 
+<p> 
 <h2><a name='sect7' href='#toc7'>Author</a></h2>
 Peter Teuben 
-<h2><a name='sect8' href='#toc8'>Update History</a></h2>
+<p> 
+<h2><a name='sect8' href='#toc8'>History</a></h2>
 <br>
 <pre>15-feb-2020<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.1 Created<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+14-feb-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.3 fix boxsize when no pos given<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+30-may-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.5 allow pos=max<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
+7-jun-2025<tt> </tt>&nbsp;<tt> </tt>&nbsp;V0.8 WCS fixes,and use 0-based pixels<tt> </tt>&nbsp;<tt> </tt>&nbsp;PJT
 </pre><p>
 
 <hr><p>
@@ -95,7 +165,7 @@ Peter Teuben
 <li><a name='toc5' href='#sect5'>See Also</a></li>
 <li><a name='toc6' href='#sect6'>Files</a></li>
 <li><a name='toc7' href='#sect7'>Author</a></li>
-<li><a name='toc8' href='#sect8'>Update History</a></li>
+<li><a name='toc8' href='#sect8'>History</a></li>
 </ul>
 </body>
 </html>

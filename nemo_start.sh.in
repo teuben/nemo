@@ -33,6 +33,7 @@ export ACCPATH=.:$NEMO/obj/potential:$NEMO/obj/acc
 export MANIPPATH=.:$NEMO/obj/manip:$NEMO/usr/dehnen/falcON/manip
 export NEMOVER=`cat $NEMO/VERSION`
 export NEMOSYS=`uname -s`
+export NEMOARCH=`uname -m`
 export NEMOSITE=`hostname`
 
 export YAPP=@YAPP_DEF@
@@ -99,6 +100,9 @@ export PATH=$NEMOBIN:$NEMO/opt/bin:$PATH
 # falcON 
 export FALCON=$NEMO/usr/dehnen/falcON
 source $FALCON/falcON_start.sh
+
+# modules
+test -f $NEMO/opt/init/bash && source $NEMO/opt/init/bash
 
 # aliases
 alias ni=nemoinp

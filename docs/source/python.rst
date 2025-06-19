@@ -45,8 +45,18 @@ data. We list a few
 * SnapGadget: https://github.com/regmachado/SnapGadget
 
 
-Examples
-~~~~~~~~
+Examples: unsio
+~~~~~~~~~~~~~~~
+
+more to come here about unsio: no reminder needed on installing.
+
+
+Examples: qtrun
+~~~~~~~~~~~~~~~
+
+qtrun is a powerful way to give an existing script a GUI interface.  But it proabbly doesn't belong here,, but
+in the scripting section.
+
 
 .. todo::  more needed here
 
@@ -55,4 +65,4 @@ Examples
 2. qtrun is a GUI building app
 
 3. NEMO style apps that use the python version of getparam.
-   Examples are tabplot with matplotlib
+   Examples are tabplot with matplotlib, i.e. tabplot.py
