@@ -1,8 +1,8 @@
 #	~/src/lars
 include $(NEMOLIB)/makedefs
 
-CFLAGS = 
-FFLAGS = 
+#CFLAGS = 
+#FFLAGS = 
 
 #	maximum number of particles which can be integrated by treecode
 NMAX = 1024
@@ -71,7 +71,7 @@ install_bin: $(BIN)
 treecode: main.c treecode.o treeio.o treegr3d.o treeload.o
 	$(CC) $(CFLAGS) -o treecode main.c \
                 treecode.o treeio.o treegr3d.o treeload.o \
- 		$(L) $(LIBF77) -lm
+		$(L) $(LIBF77) -lm
 
 treeio.o: treeio.c $(CINC)
 	$(CC) $(CFLAGS) -c treeio.c
