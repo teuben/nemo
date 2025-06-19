@@ -147,7 +147,7 @@ static int colmask(int n, string key[],string col[],int colsel[]);
  *  use fts_xhead
  */
 
-size_t fts_rhead(fits_header *fh, stream instr)
+off_t fts_rhead(fits_header *fh, stream instr)
 {
     char buf[FTSLINSIZ+2];                /* buffer to hold one card image */
     char a1[9], a2[2], a3[FTSLINSIZ+1],a4[FTSLINSIZ+1],a5[FTSLINSIZ+1];  /* args */
@@ -178,9 +178,10 @@ size_t fts_rhead(fits_header *fh, stream instr)
           if ((n=fread(buf,1,FTSLINSIZ,instr)) != FTSLINSIZ) {     /* get card */
             if (n != 0)
 	      warning("Incomplete read %ld bytes in header", n);
-	    return 0;
+	    //error("bad read %d",n);
+	    return -1;
           } else {
-            buf[FTSLINSIZ] = 0;      /* be sure it's terminated */
+            buf[FTSLINSIZ] = 0;      /* be sure ascii record is terminated */
             dprintf(5,"RECORD[%d]%65s\n",icard,buf);
 	  }
 	}

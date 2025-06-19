@@ -22,7 +22,7 @@
 #include <nemo.h>
 #include <history.h>
 #include <nemo_fitsio.h> /* for processing output file */
-#include <fits.h>   /* for processing input file */
+#include <fits.h>        /* for processing input file */
 
 string defv[] = {
     "in=???\n              Input fits BINTABLE file (HDU=2)",
@@ -36,7 +36,7 @@ string defv[] = {
     "ncell=0\n             Number of neighbor cells to use",
     "sigma=0\n             Core weighting scale (if >0) for neighbor cells",
     "moment=1\n            Moment 1 (mean in cell) or 2 (dispersion) map? ",
-    "VERSION=1.3c\n        12-apr-04 PJT",
+    "VERSION=1.3d\n        19-jun-2025 PJT",
     NULL,
 };
 
@@ -85,7 +85,8 @@ void fitwral();     /* should go to fitsio */
 void nemo_main()
 {
     stream instr, outstr;
-    int    i, n, naxis1, naxis2, naxis[2], moment;
+    off_t  n;
+    int    i, naxis1, naxis2, naxis[2], moment;
     double edges[2];
     struct fits_header fh;
     struct my_table_header r;
