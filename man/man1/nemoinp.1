@@ -78,7 +78,14 @@ Default: \fBf\fP.
 
 .SH "CAVEATS"
 The number of elements in an array is limited, currently hardcoded to 32678 in
-\fInemoinp(3NEMO)\fP. If possible, use \fIseq(1)\fP.
+\fInemoinp(3NEMO)\fP. If possible, use \fIseq(1)\fP or \fItabgen(1NEMO)\fP. Here
+is an example creating a list of numbers 1 .. 10 with these three modes.
+The \fBseq\fP method is the fastest.
+.EX
+      nemoinp 1:10
+      seq 10
+      tabgen - 10 1 mode=4
+.EE
 
 .SH "EXAMPLES"
 .nf
