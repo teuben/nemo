@@ -381,9 +381,10 @@ C=======================================================================
         DOUBLE PRECISION cpu
         REAL etime,utime,stime,x
 
-        x=etime(utime,stime)
+c        x=etime(utime,stime)
+c        cpu=utime+stime
 
-        cpu=utime+stime     
+        cpu = 0
 
         RETURN 
         END

@@ -29,6 +29,7 @@ C***********************************************************************
 C
 C
 C     Function to return random numbers.
+C     drand is legacy now.                           
 C
 C
 C=======================================================================
@@ -36,7 +37,9 @@ C=======================================================================
         DOUBLE PRECISION ranf,drand
         INTEGER iran
 
-        ranf=DRAND(iran)
+c     ranf=DRAND(iran)
+        CALL random_number(drand)
+        ranf = drand
 
         RETURN 
         END
@@ -58,9 +61,9 @@ C=======================================================================
         DOUBLE PRECISION cpu
         REAL etime,utime,stime,x
 
-        x=etime(utime,stime)
-
-        cpu=utime+stime     
+c        x=etime(utime,stime)
+c        cpu=utime+stime
+        cpu = 0
 
         RETURN 
         END

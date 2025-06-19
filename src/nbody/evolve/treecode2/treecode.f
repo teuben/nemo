@@ -391,7 +391,8 @@ C            --------
 
 C   Finish timing, close data files.
 C   --------------------------------
-        CALL SECOND(cputime1)
+c     CALL SECOND(cputime1)
+        cputime1 = SECOND()
 
         CALL outcpu
 C            ------
@@ -1070,7 +1071,8 @@ C=======================================================================
 
 C   Begin timing.
 C   -------------
-        CALL SECOND(cputime0)
+c        CALL SECOND(cputime0)
+        cputime0 = SECOND()
 
 C-----------------------------------------------------------------------
 C   Open data files, read input parameters and initial system state,
@@ -1514,7 +1516,8 @@ C-----------------------------------------------------------------------
         WRITE(ulog,50) (cmpos(k),k=1,ndim)
         WRITE(ulog,60) (cmvel(k),k=1,ndim)
 
-        CALL SECOND(cpunew)
+c        CALL SECOND(cpunew)
+        cpunew = SECOND()
         cpustep=cpunew-cpuold
         cpuold=cpunew
         WRITE(ulog,70) cpustep
@@ -2066,7 +2069,8 @@ C   Stop timing, output timing data, close files, terminate the
 C   simulation.
 C-----------------------------------------------------------------------
 
-        CALL SECOND(cputime1)
+c        CALL SECOND(cputime1)
+        cputime1 = SECOND()
 
         CALL outcpu
 C            ------
