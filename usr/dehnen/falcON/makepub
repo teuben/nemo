@@ -406,6 +406,8 @@ $(BIN)mkhalo:		$(SEXE)mkhalo.cc $(main_h) $(LIB)halo.o $(makefiles)
 			$(MAKE_EXE) $(LIB)halo.o $(NEMO_EXE_FLGS)
 $(BIN)mkking:		$(SEXE)mkking.cc $(BINT) $(main_h) $(body_h) $(king_h) $(random_h) $(Pi_h) $(LIB)king.o $(makefiles)
 			$(MAKE_EXE) $(LIB)king.o $(NEMO_EXE_FLGS)
+$(BIN)mkcold:		$(SEXE)mkcold.cc $(BINT) $(main_h) $(sample_h) $(makefiles)
+			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mkplum:		$(SEXE)mkplum.cc $(BINT) $(main_h) $(sample_h) $(makefiles)
 			$(MAKE_EXE) $(NEMO_EXE_FLGS)
 $(BIN)mksingle:		$(SEXE)mksingle.cc $(BINT) $(main_h) $(makefiles)
@@ -467,6 +469,7 @@ mkdehnen	:	$(falcON) $(BIN)mkdehnen
 mkgalaxy	:	$(BIN)mkgalaxy
 mkhalo 		:	$(falcON) $(BIN)mkhalo
 mkking		:	$(falcON) $(BIN)mkking
+mkcold		:	$(falcON) $(BIN)mkcold
 mkplum		:	$(falcON) $(BIN)mkplum
 mksingle	:	$(falcON) $(BIN)mksingle
 mkWD99disc	:	$(falcON) $(BIN)mkWD99disc

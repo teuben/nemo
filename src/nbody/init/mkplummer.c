@@ -66,7 +66,7 @@ string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "headline=\n	      Verbiage for output",
     "nmodel=1\n               number of models to produce",
     "mode=1\n                 0=no data,  1=data, no analysis 2=data, analysis",
-    "VERSION=3.0c\n           6-jun-2024 PJT",
+    "VERSION=3.0d\n           16-may-2025 PJT",
     NULL,
 };
 
@@ -288,6 +288,7 @@ rproc mf;
         error("mkplummer: NDIM = %d but should be 3", NDIM);
 
     btab = (Body *) allocate ((size_t)nbody * sizeof(Body));
+    real vmax0  = 0.0;
 
 /*
  *  Calculating the coordinates is easiest in STRUCTURAL units;
@@ -380,13 +381,14 @@ rproc mf;
  *  If y < g(x), proceed to calculate the velocity components:
  */
 	velocity = x * sqrt(2.0) * pow( 1.0 + radius*radius, -0.25);
+	if (velocity > vmax0) vmax0 = velocity;
 	theta = acos(xrandom(-1.0, 1.0));
 	phi = xrandom(0.0,TWO_PI);
 	Vel(bp)[0] = velocity * sin( theta ) * cos( phi );
 	Vel(bp)[1] = velocity * sin( theta ) * sin( phi );
 	Vel(bp)[2] = velocity * cos( theta );
     }
-    dprintf(1,"Total mass (before scaling) = %g\n",mtot);
+    dprintf(1,"Total mass (before scaling) = %g  vmax=%g\n",mtot,vmax0);
 /*
  * Now transform to the VIRIAL coordinates by applying
  * the scaling factors to the positions and velocities:
