@@ -61,7 +61,7 @@ tmatch2
 tmatchn
 tmulti
 tmultin
-tpipe
+tpipe		table pipeline processing
 tskymap		snapgrid, ccdsky
 tskymatch2
 votcopy
@@ -74,6 +74,21 @@ plot2time
 
 .fi
 
+.SH "EXAMPLES"
+
+Converting tables via a Unix pipe may be the most useful function to get tables into
+a more manageable version for NEMO's limited \fPtable(5)\fP format. Here's an example
+grabing a huge table with over 500,000 rows and 99 columns
+
+.EX
+
+stilts tpipe  \\
+    ifmt='ecsv(header=http://cdn.gea.esac.esa.int/Gaia/gedr3/ECSV_headers/gaia_source.header)' \\
+    in=http://cdn.gea.esac.esa.int/Gaia/gedr3/gaia_source/GaiaSource_000000-003111.csv.gz \\
+    cmd='keepcols "ra dec l b"' \\
+    ofmt=csv 
+
+.EE
 
 .SH "AUTHOR"
 Mark Taylor
