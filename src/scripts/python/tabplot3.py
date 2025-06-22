@@ -19,14 +19,7 @@ isScatter = False
 numlines = 0
 
 argv = sys.argv[1:]
-inputs = [i for i, x in enumerate(argv) if x == '-i' or x == '--input']
 
-# loop over the input files
-nf = len(inputs)
-if nf == 1:
-    inputs2 = [len(argv)]
-else:
-    inputs2 = inputs[1:] + [len(argv)]
 
 # Defining parser
 # add_argument attaches individual assignment specifications to the parser
@@ -63,16 +56,20 @@ def get_defaults():
 
 
 
-# Store parsed results
+# Store parsed results + handle pipes for missing results
+# Manually splitting here so -i or --input can be set to "" when needed for piping
 avs = []
-for i in range(len(inputs)):
-    section_args = argv[inputs[i]:inputs2[i]]
-    av = parser.parse_args(section_args)
-    avs.append(av)
+sublist = [argv[0]]
+for el in argv[1:]:
+    if el == '-i' or el == '--input':
+        av = parser.parse_args(sublist)
+        avs.append(av)
+        sublist = []
+    
+    sublist.append(el)
 
+avs.append(parser.parse_args(sublist))
 
-if len(avs) == 0:
-    avs = [None]
 
 
 plt.figure()
@@ -81,16 +78,7 @@ out = False; outpath = None; title = None
 
 #Creating a separate plot for each varset
 for varset in avs:
-    p = get_defaults()
-    try:
-        p = vars(varset); 
-    except Exception as e:
-        if not sys.stdin.isatty():
-            data_str = sys.stdin.read()
-            p['input'] = StringIO(data_str)
-        else:
-            parser.print_help()
-            sys.exit()
+    p = vars(varset) 
 
     #Declare cli params
     infile = p['input']
@@ -103,6 +91,16 @@ for varset in avs:
     legend = p['legend']
     out_arg = p['out']
     ttl = p['title']
+
+
+    #Handling pipe by making infile a readble stream if not detected
+    if not infile or infile == "":
+        if not sys.stdin.isatty():
+            data_str = sys.stdin.read()
+            infile = StringIO(data_str)
+        else:
+            parser.print_help()
+            sys.exit()
 
 
     #Saving output path if we want it (title too)
@@ -151,12 +149,17 @@ for varset in avs:
     labels = labels[:numlines] if len(labels) > numlines else labels + ["" for _ in range(numlines - len(labels))]
 
 
-    # gather data + check for pipe
+    # gather data 
 
     df = pd.read_csv(infile, sep=None, engine='python', header=None)
     df = df.apply(pd.to_numeric, errors='coerce')
     df = df.select_dtypes(include="number").dropna(axis=1, how='all')
-    data = df.values
+    data = df.values.T
+
+
+    #data = np.loadtxt(infile).T  #w np
+
+    #print(f"\nRead the following:\n{data}\n")
 
     xdata = [0] * len(xcols)
     ydata = [0] * len(ycols)
