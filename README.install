@@ -384,6 +384,8 @@ Here is a list of peer (astronomy) packages install instructions that could
 well be useful in case of issues with the instructions listed above:
 
 * cloudy:  https://gitlab.nublado.org/cloudy/cloudy/-/wikis/CompilingCloudyNext
+* cfitsio?
+* wcslib
 
 
 
