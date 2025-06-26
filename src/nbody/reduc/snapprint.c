@@ -47,7 +47,7 @@ string defv[] = {
     "newline=f\n                add newline(s) in the header?",
     "csv=f\n                    Use Comma Separated Values format",
     "comment=f\n                Add table columns as common, instead of debug",
-    "VERSION=3.1\n		13-jun-2025 PJT",
+    "VERSION=3.1a\n		26-jun-2025 PJT",
     NULL,
 };
 
@@ -66,7 +66,7 @@ void nemo_main()
     bool   Qcomment = getbparam("comment");
     bool   Qnewline = getbparam("newline");
     bool   Qheader = hasvalue("header");
-    int i, n, nbody, bits, nsep, isep, nopt, nhead, ParticlesBit;
+    int i, n, nbody, bits, nsep, isep, nopt, nhead=0, ParticlesBit;
     char fmt[20],*pfmt;
     string *opt, *head;
     rproc_body fopt[MAXOPT];
@@ -87,7 +87,7 @@ void nemo_main()
     }
     
     if (Qheader) {
-      dprintf(0,"header\n");
+      dprintf(1,"header\n");
       head = burststring(getparam("header"),", ");
       nhead = xstrlen(head, sizeof(string))-1;
       if (Qcomment) {
@@ -100,8 +100,10 @@ void nemo_main()
 	  dprintf(0,"%s ",opt[i]);
 	dprintf(0,"\n");
       }
-    } else
-      dprintf(0,"no header\n");
+    } else {
+      dprintf(1,"no header\n");
+      nhead = 0;
+    }
     
     if (hasvalue("tab")) {
 	pfmt = getparam("tab");
