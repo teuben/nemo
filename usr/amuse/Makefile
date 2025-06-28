@@ -54,6 +54,12 @@ bench1n:
 	$(TIME) mkplummer .           10000000
 	$(TIME) mkplummer big.nemo    10000000
 
+## bench1g:    bench1 falcon mkplum
+bench1g:
+	@rm -f big.nemo
+	$(TIME) mkplum .              10000000
+	$(TIME) mkplum big.nemo       10000000
+
 ## bench2a:    bench2 AMUSE bhtree
 bench2a:
 	$(TIME) ./amuse_integrate.py -o sim.amuse -n $(NBODY) -s 123 -T 10
@@ -61,7 +67,7 @@ bench2a:
 
 ## bench2n:    bench2 NEMO hackcode1
 bench2n:
-	@echo "Make sure bench2a was run before bench2n"
+	@echo "Make sure bench2a was run before bench2n, it needs plummer0.txt"
 	@rm -f plummer0.dat plummer1.dat
 	tabcols plummer0.txt | tabtos - plummer0.dat block1=mass,skip,vx,vy,vz,x,y,z nbody=$(NBODY)
 	$(TIME) hackcode1 plummer0.dat plummer1.dat tol=0.75 tstop=10 freq=64 eps=0.025 > /dev/null
@@ -71,7 +77,7 @@ bench2n:
 # pick bhtree or BHTC (see usr/kawai/nbody)
 BHTREE = bhtree
 
-## bench2b:    bench2 NEMO/bhtree
+## bench2b:    bench2 NEMO/bhtree : use BHTREE=bhtree or BHTC
 bench2b:
 	@mkplummer - $(NBODY) | snapprint - header=nbody,time newline=t format=%16.13f >p2k.tab
 	@rm -f p2k.out p2k.dat
