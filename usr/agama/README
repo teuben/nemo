@@ -17,3 +17,13 @@ ASCL ID:  1805.008
 
 
 See also:  TACT, SMILE, Forstrand (https://arxiv.org/abs/1912.04288)
+
+The examples in the Makefile cover the section "Nemo plugin" in the
+AGAMA reference guide (Vasiliev, -2025)
+
+#   - this needs GSL ;  libgsl-dev
+#   - needs EIGEN   libeigen3-dev didn't do it
+#   - needs CVXOPT  python3-cvxopt    or:   pip install cvxopt
+#   - needs UNSIO - but my previous pip install didn't work
+#   - GLPK library (optional) is not found, ignored  -  libglpk-dev 
+
