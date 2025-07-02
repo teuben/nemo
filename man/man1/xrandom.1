@@ -1,4 +1,4 @@
-.TH XRANDOM 1NEMO "27 September 2023"
+.TH XRANDOM 1NEMO "1 July 2025"
 
 .SH "NAME"
 xrandom \- Return seed for random numbers and optionally random numbers
@@ -21,7 +21,7 @@ can be selected, as well as many more distribution types.
 \fBseed=\fP
 Initial seed. Values 0 and below are special:
 
-0 for the current time (seconds since 1970.00, see also \fItime(2)\fP)
+0 for the current time (seconds since 1970.00, see also \fItime(2)\fP) and $EPOCHSECONDS
 
 -1 for the number of centiseconds since boot (see \fItimes(2)\fP) 
 
@@ -35,47 +35,60 @@ generator type (default: mt19937). See \fIxrandom(3)\fP for more
 details.
 .TP 
 \fBn=\fP
-Number of random numbers to draw 
+Number of random numbers to draw
+.br
 [Default: 0].
 .TP
 \fBm=\fP
 Number of times to repeat the experiment. If more than 1, tabulating
 is turned off, and reporting is now doine at the end of all tests,
 and the statistics of the mean's from each \fBn\fP sample is shown.
+.br
 [Default: 1].
 .TP
 \fBgauss=\fP
 Return gaussian numbers instead of uniform?
+.br
 [Default: f]
 .TP
 .TP
 \fBexp=\fP
 Return exponential random numbers instead. Setting this will override the \fBgauss=\fP parameter.
+.br
 [Default: f]
 .TP
 \fBreport=\fP
 Report mean/dispersion/skewness/kurtosis? 
+.br
 [Default: f]
 .TP
 \fBtab=t|f\fP
-Tabulate all random numbers [t]
+Tabulate all random numbers
+.br
+[t]
 .TP
 \fBoffset=\fP
-Offset of distribution from 0. Default: 0.0
+Offset of distribution from 0.
+.br
+Default: 0.0
 .TP
 \fBgsl=\fP
 Name of the random number distribution requested. They follow the name convention
 of the same-name functions \fIgsl_random_xxx\fP in the \fIgsl(3)\fP library.
 Only available if compiled with GSL.
+.br
 No default.
 .TP
 \fBpars=\fP
 Parameters belonging to the selected \fBgsl\fP name. They need to match
-exactly (0, 1, 2 or 3 currently). No default.
+exactly (0, 1, 2 or 3 currently).
+.br
+No default.
 .TP
 \fBseed57=\fP
 This quaint option will activate von Hoerner's 1957 algorithm of drawing random numbers.
 It needs a seed between 0.57 and 0.91. See also \fImkvh60(1NEMO)\fP.
+.br
 Default: not used.
 
 .SH "EXAMPLES"
@@ -180,6 +193,7 @@ echo $$
 shuf -i 1-100 -n 5
 awk -v n=5 -v seed="$RANDOM" 'BEGIN {srand(seed); for(i=0; i<n; ++i) printf("%.3f\\n",rand())}'
 tr -cd "[:digit:]" < /dev/urandom | head -c 6
+echo $EPOCHSECONDS
 
 .fi
 Note that /dev/urandom is only available on Linux
@@ -187,7 +201,7 @@ Note that /dev/urandom is only available on Linux
 .SH "AUTHOR"
 Peter Teuben
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
 26-Nov-96	V1.0 turned TESTBED into a TOOLBOX program	PJT
