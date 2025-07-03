@@ -36,6 +36,7 @@ test2: center.txt sat.nemo
 	snaptrim sat_out2.nemo - times=50 | bsf - "-4.50823 10.815 -36.6663 50 70001"
 
 
+#   convert back to host centered coordinate system
 test2b:
 	snapprint sat_out2.nemo x,y,z header=time |\
 	awk '{print $$2-cos(0.6*$$1),$$3-sin(0.6*$$1),$$4;}' |\
