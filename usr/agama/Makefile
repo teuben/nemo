@@ -9,6 +9,7 @@ agama:
 
 install:
 	pip install -e Agama
+	cp Agama/agama.so $(NEMOOBJ)/potential
 
 #
 
