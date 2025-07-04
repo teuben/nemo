@@ -94,7 +94,7 @@ void copy_item(stream ostr, stream istr, string tag)
 	dims = get_dims(istr, tag);		/*   find out about shape   */
 	dlen = get_dlen(istr, tag);		/*   and length in bytes    */
 	if(dlen<0) error("copy_item: %s with dlen=%d",tag,dlen);    /* yuck */
-	dprintf(0,"copy_item: %lu\n",dlen);
+	dprintf(1,"copy_item: %lu\n",dlen);
 	buf = (byte *) calloc(dlen,1);		/*   get space for a buffer */
 	if (buf == NULL)			/*   and check for error    */
 	    error("copy_item: item %s: not enuf memory", tag);
