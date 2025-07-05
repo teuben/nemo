@@ -1,18 +1,32 @@
 #
 #
 #
-
 URL1 = https://github.com/GalacticDynamics-Oxford/Agama
 
-agama:
-	git clone $(URL1)
+TIME = /usr/bin/time
 
-install: agama
+.PHONY : help
+
+
+## help:      This Help
+help : Makefile
+	@sed -n 's/^##//p' $<
+
+## Agama:     Grab code from github
+Agama:
+	git clone $(URL1)
+	ln -s Agama/doc/reference.pdf
+
+agama:	Agama
+
+## install:   Install developer version (including agama.so) into current python
+install: Agama
+	(cd Agama; git pull)
 	pip install -e Agama
 	@echo Agama/agama.so copied to $(NEMOOBJ)/acc 
-
 #
 
+## clean:     Clean all test files
 clean:
 	rm -f sat.nemo sat_shift.nemo sat_out1.nemo sat_out2.nemo sat_out3.nemo  center.txt accel.txt
 
@@ -24,15 +38,16 @@ sat.nemo sat_shift.nemo:
 center.txt accel.txt:
 	./mk_center.py
 
-
+## test1:     Example 1
 test1:  sat_shift.nemo
-	gyrfalcON sat_shift.nemo sat_out1.nemo eps=0.02 kmax=5 step=0.25 tstop=50 accname=agama accfile=pot1.ini
+	$(TIME) gyrfalcON sat_shift.nemo sat_out1.nemo eps=0.02 kmax=5 step=0.25 tstop=50 accname=agama accfile=pot1.ini
 	snaptrim sat_out1.nemo - times=50 | bsf - "-0.115841 1.03215 -33.2085 50 70001"
 
 
 
+## test2:     Example 2
 test2: center.txt sat.nemo
-	gyrfalcON sat.nemo sat_out2.nemo eps=0.02 kmax=5 step=0.25 tstop=50 accname=agama accfile=pot2.ini
+	$(TIME) gyrfalcON sat.nemo sat_out2.nemo eps=0.02 kmax=5 step=0.25 tstop=50 accname=agama accfile=pot2.ini
 	snaptrim sat_out2.nemo - times=50 | bsf - "-4.50823 10.815 -36.6663 50 70001"
 
 
