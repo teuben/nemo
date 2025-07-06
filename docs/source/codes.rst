@@ -24,7 +24,9 @@ that have a tighter connection to NEMO:
 
 .. include:: rebound.rst   
 
-.. include:: galpy.rst   
+.. include:: galpy.rst
+
+.. include:: agama.rst	     
 
 .. include:: yt.rst
 
