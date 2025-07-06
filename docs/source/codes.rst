@@ -118,7 +118,7 @@ List of Related Codes
 
   Gala
       *Galactic astronomy and gravitational dynamics*.
-      | http://ascl.net/1302.011
+      | http://ascl.net/1707.006
   
   galaxy
       *N-body simulation software for isolated, collisionless stellar systems*.
@@ -154,14 +154,14 @@ List of Related Codes
       | http://ascl.net/1902.004
 
   griffin
-      based on falcON V2.
+      based on falcON V2. This code is not public yet.
   
   gsf
       galactic structure finder
       | http://ascl.net/1806.008 	
       
   gyrfalcON
-      Dehnen's code. Included in :term:`NEMO`
+      Dehnen's N-body code. Included in :term:`NEMO`
       | http://ascl.net/1402.031 	
   
   hermite
