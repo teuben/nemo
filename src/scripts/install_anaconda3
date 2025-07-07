@@ -25,6 +25,8 @@ version=2023.09-0  # 3.11.5
 version=2024.02-1  # 3.11.7
 version=2024.06-1  # 3.12.4
 version=2024.10-1  # 3.12.7   6.6G
+version=2025.06-0  # 3.13.5   7.1G
+
 
   dir=$(pwd)/anaconda3       # where anaconda will be located
  wget=wget                   # use wgetc is you have my cashing version (wget=curl is also allowed)
