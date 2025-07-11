@@ -1,0 +1,11 @@
+mkplummer constructs an N-body realization of a Plummer model, with a
+spatial or mass based cut-off, after which it (optionally) performs a
+coordinate transformation to the center-of-mass coordinate system. The
+data are then written into a file snap-file, in a standard N- body
+snapshot(5NEMO) format.  The model is constructed in VIRIAL or NBODY
+units (M=G=-4E=1, with E the total energy), and finite spatial extent
+which can be regulated by specifying mfrac or rfrac or using their
+default values.  The distribution function of a Plummer model is
+spherically symmetric and isotropic, and is a polytrope of index n =
+5.  See also Aarseth et al. (1974) and Plummer (1911).
+

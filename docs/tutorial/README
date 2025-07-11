@@ -1,0 +1,5 @@
+These are small tutorials that can be displayed in NEMO's tutorial level.
+A call to
+		tutorial(0,"tut001")
+would display the file $NEMO/docs/tutorial/tut001.tut to stderr. Currently
+the level (0) here is ignored.

@@ -1,0 +1,3 @@
+snapshot is the format used to store N-body particle data.  The format
+is that of the general binary structured fileformat as described in
+filestruct(3NEMO). Multiple

@@ -1,0 +1,8 @@
+tsf types the contents of a (binary) structured file (see
+filestruct(5NEMO)) in a human readable form on standard output.  The
+type, tag, dimensions (if any) and contents of all items are listed.
+The contents of CharType items are printed directly; FloatType and
+DoubleType items are printed in floating-point notation; all other
+types are printed in octal for portability reasons (but see octal=
+below).  XML format can optionally be selected as well, but this is
+not been well exercised. A json mode has been considered.
