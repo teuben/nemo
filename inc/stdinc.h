@@ -485,6 +485,8 @@ int progress(double dtime, string, ...);
 /* is a given depth below the current debugging level ? */
 bool nemo_debug(int depth);
 
+void tutorial(int level, string name);
+
 /*
  * WD 12th June 2008
    improved debugging info: report [file:line]
