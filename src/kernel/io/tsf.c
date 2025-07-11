@@ -134,6 +134,8 @@ void nemo_main(void)
 	free((char *)tags);
     }
     if (xml) printf("</nemo>\n");
+
+    tutorial(0, "tsf");
 }
 
 void print_item(string tag)
