@@ -343,6 +343,7 @@ typedef struct keyword_out {  /* a simple keyword, only meant for outkeys=   */
 /*      some defined here, others defined elsewhere        */
 
 extern int debug_level; /* see dprintf.c   from DEBUG env.var. */
+extern int tutorial_level; /* see tutorial.c */
 extern bool mpi_proc;   /* dprintf.c */
 extern int  mpi_rank;   /* dprintf.c */
 extern int error_level; /* see error.c     from ERROR env.var. */
