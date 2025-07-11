@@ -45,6 +45,11 @@ local string headline;		/* random text message */
 
 #define MAXNGR2 100
 
+local void my_tutorials() {
+  tutorial(0,"mkplummer");
+  tutorial(0,"snapshot");
+}
+
 
 string  defv[] = {                        /* DEFAULT INPUT PARAMETERS */
     "out=???\n		      Output file name",
@@ -149,7 +154,7 @@ void nemo_main(void)
       for (i=0; i<nmodel; i++)
 	put_snap (outstr, &btab[i], &nbody, &snap_time, &bits);
       strclose(outstr);
-      if (mode==1) return;
+      if (mode==1) return my_tutorials();
       dprintf(0,"mode=2: data is stored, analysis now following\n");
     } else
       dprintf(0,"mode=0: no data stored, analysis now following\n");      
@@ -209,6 +214,8 @@ void nemo_main(void)
 	     n_moment(&mmgv2[j]),
 	     n_moment(&mmgvz[j]));
     }
+
+    my_tutorials();
     
 }
 
