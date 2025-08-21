@@ -604,14 +604,14 @@ namespace falcON {
   //
   tNX inline void
   shift_by(symset3D<N,X>&C, falcONVec<3,X>&x)
-  { meta3D::__shift<N,N,0>::by(static_cast<X*>(C), static_cast<X*>(x)); }
+  { meta3D::__shift<N,N,0>::by(static_cast<X*>(C), x.data()); }
   //
   tNX inline void
   eval_expn(symset3D<1,X>&G, symset3D<N,X> const&C, falcONVec<3,X> const&x)
   {
     meta3D::__shift<N,N,0>::at(static_cast<X*>(G),
 			       static_cast<const X*>(C),
-			       static_cast<const X*>(x));
+			       x.data());
   }
   //
   namespace meta3D {
@@ -891,11 +891,11 @@ namespace falcON {
 #else
   tNX inline void
   set_dPhi(symset3D<N,X>&C, falcONVec<3,X> const&v, X const D[N+1])
-  { meta3D::__grav<N>::ass(C,static_cast<const X*>(v),D); }
+  { meta3D::__grav<N>::ass(C,v.data(),D); }
   //
   tNX inline void
   add_dPhi(symset3D<N,X>&C, falcONVec<3,X> const&v, X const D[N+1])
-  { meta3D::__grav<N>::add(C,static_cast<const X*>(v),D); }
+  { meta3D::__grav<N>::add(C,v.data(),D); }
 #endif
   //
   namespace meta3D {

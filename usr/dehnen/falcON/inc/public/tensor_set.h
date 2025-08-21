@@ -53,10 +53,12 @@ namespace falcON {
     typedef meta::taux<X,NDAT-1>  L;               // meta looping (k,l,m)
     typedef falcONVec<3,X>        V;               // vector
     // static methods (type conversions to X* and const X*)
+    static X*      pX(falcONVec<3,X>      &x) { return x.data(); }
+    static const X*pX(falcONVec<3,X> const&x) { return x.data(); }
     template<class A>
-    static X*      pX(A      &x) { return static_cast<      X*>(x); }
+    static X*      pX(A      &x) { return (      X*)(x); }
     template<class A>
-    static const X*pX(A const&x) { return static_cast<const X*>(x); }
+    static const X*pX(A const&x) { return (const X*)(x); }
     // datum
     X a[NDAT];
   public:
@@ -123,10 +125,12 @@ namespace falcON {
     typedef meta::taux<X,NDAT-1>  L;               // meta looping (k,l,m)
     typedef falcONVec<3,X>        V;               // vector
     // static methods (type conversions to X* and const X*)
+    static       X*pX(falcONVec<3,X>      &x) { return x.data(); }
+    static const X*pX(falcONVec<3,X> const&x) { return x.data(); }
     template<class A>
     static       X*pX(A      &x) { return static_cast<      X*>(x); }
     template<class A>
-    static const X*pX(A const&x) { return static_cast<const X*>(x); }
+    static const X*pX(A const&x) { return (const X*)(x); }
     // datum
     X a[NDAT];
   public:

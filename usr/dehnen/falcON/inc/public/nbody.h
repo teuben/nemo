@@ -128,14 +128,14 @@ namespace falcON {
     /// tensor computation as outer product or two vectors                      
     static void AddTensor(double t[Ndim][Ndim], vect_d const&x, vect const&y) {
       meta::_addt<Ndim-1>::a(t,
-			      static_cast<const double*> (x),
-			      static_cast<const real  *> (y));
+			      x.data(),
+			      y.data());
     }
     /// tensor computation as outer product or two vectors                      
     static void AddTensor(float t[Ndim][Ndim], vect_f const&x, vect const&y) {
       meta::_addt<Ndim-1>::a(t,
-			      static_cast<const float*> (x),
-			      static_cast<const real *> (y));
+			      x.data(),
+			      y.data());
     }
     /// asymmetric angular momentum tensor (funny idea, not mine anyway)        
     static real as_angmom     (vect const&L,

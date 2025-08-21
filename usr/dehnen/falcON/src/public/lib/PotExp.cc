@@ -46,7 +46,7 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 #if   defined(WDutils_included_tupel_h)
   using   falcON::tupel;
-# define  vector tupel
+
 #elif defined(WDutils_included_vector_h)
   using   WDutils::vector;
 #else
