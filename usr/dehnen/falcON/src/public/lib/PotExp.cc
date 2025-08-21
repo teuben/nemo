@@ -44,14 +44,7 @@ namespace {
   // types                                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#if   defined(WDutils_included_tupel_h)
-  using   falcON::tupel;
-
-#elif defined(WDutils_included_vector_h)
   using   WDutils::vector;
-#else
-# error neither utils/tupel.h nor utils/vector.h
-#endif
   using   falcON::fvec4;
   typedef PotExp::scalar   scalar;
   typedef PotExp::symmetry symmetry;

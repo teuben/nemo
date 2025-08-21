@@ -245,8 +245,8 @@ double WD99disc::PlanarOrbit::CashKarp(vect_d&W_, double dt, double eps)
   Ws += cs0*Kx0+cs2*Kx2+cs3*Kx3+cs4*Kx4+cs5*Kx5;
   W_ += c0*Kx0+c2*Kx2+c3*Kx3+c5*Kx5;
   
-  double h = maxnorm(W_-Ws);
-  if(h>1.e-19*maxnorm(W_) ) h = pow(eps/h,0.2);
+  double h = WDutils::max_abs(W_-Ws);
+  if(h>1.e-19*WDutils::max_abs(W_) ) h = pow(eps/h,0.2);
   else                      h = 1.e3;
   return min(h,2.);
 }

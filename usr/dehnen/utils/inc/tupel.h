@@ -174,7 +174,7 @@ namespace WDutils {
       /// from 2 elements (for N=2)
       tupel(X x0, X x1)
       {
-	WDutilsStaticAssert(N==2);
+	static_assert(N==2, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
       }
