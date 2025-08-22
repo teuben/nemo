@@ -187,7 +187,7 @@ namespace falcON {
     //--------------------------------------------------------------------------
     void give_coeffs(grav::cell_pter const&C) const {
       if(COEFF_POOL && !hasCoeffs(C)) {
-	register grav::Cset*X = static_cast<grav::Cset*>(COEFF_POOL->alloc());
+	 grav::Cset*X = static_cast<grav::Cset*>(COEFF_POOL->alloc());
 	X->set_zero();
 	C->setCoeffs(X);
 	++NC;

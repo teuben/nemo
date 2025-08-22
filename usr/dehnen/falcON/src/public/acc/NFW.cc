@@ -79,7 +79,7 @@ namespace {
 		scalar      &P,
 		scalar      &fR) const
     {
-      register scalar
+       scalar
 	R = std::sqrt(Rq),
 	iR= 1/R;
       fR  = std::log(1+iA*R) * iR;

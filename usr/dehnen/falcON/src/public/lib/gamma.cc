@@ -39,7 +39,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline void subyceg(double y, double&f, double&df)
   { 
-    register double yg1 = pow(y,g1);
+     double yg1 = pow(y,g1);
     f  = 0.5*y*yg1*(g2*y-g4) + 1. - eg2;
     df = 0.5*g2*(g3*y-g4)*yg1;
   }
@@ -68,7 +68,7 @@ double DehnenModel::YcofE(double E) const
 namespace {
   inline void subyclg(double y, double&f, double&df)
   { 
-    register double yg3 = pow(y,g3);
+     double yg3 = pow(y,g3);
     f  = (yg3+lq)*y-lq;
     df = g4*yg3+lq;
   }
@@ -92,13 +92,13 @@ double DehnenModel::SigIsoQ(double x) const
 {
   if(g>2. && x==0.)
     falcON_Error("DehnenModel: SigIsotropicSquared() diverges at x=0");
-  register double x1=x+1;
+   double x1=x+1;
   if(g==0.)  return (6.*x+1.)/(30.*x1*x1);
-  register double y=x/x1;
+   double y=x/x1;
   if(g==0.5) return 0.2*sqrt(y)/x1;
   if(x>=10.) { // use formula (9) of Tremaine et al. (1994)
     double xi=1./x, al=2.*g-6., fac=1., xi5=power<5>(xi), sum=0.2*xi5;
-    for(register int k=1; k<10; k++)
+    for( int k=1; k<10; k++)
       {
 	al  -= 1.;
 	fac *= al/double(k);
@@ -114,13 +114,13 @@ double DehnenModel::SigIsoQ(double x) const
       * (((-1./3.*y+2.)*y-6.)*y+1./y+10./3.+4.*log(y));
   if(g==2.) {
     if(x==0.) return 0.5;
-    register double y2 = y * y;
+     double y2 = y * y;
     return y2 * power<4>(x1) * (0.5/y2*(1.-y2)*((y-8.)*y+1)-6.*log(y));
   }
   if(g==2.5)
     return power<4>(x1) / sqrt(y)
       * ((((-y+(4.*log(y)-10./3.))*y+6.)*y-2.)*y+1./3.);
-  register double g2n=g2-g, ygn=pow(y,g2n), sum;
+   double g2n=g2-g, ygn=pow(y,g2n), sum;
   sum = (1.-ygn) / g2n;
   sum-= 4.*(1.-(ygn*=y)) / (g2n+=1.);
   sum+= 6.*(1.-(ygn*=y)) / (g2n+=1.);
@@ -144,7 +144,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline double subsur(double t)
   { 
-    register double tq = t*t;
+     double tq = t*t;
     return pow(s+tq,g1) * power<2>(1-tq) / sqrt(ts+sa*tq);
   }
 }
@@ -163,7 +163,7 @@ double DehnenModel::SurfaceDensity(double R) const
 namespace {
   inline double subdsu(double t)
   { 
-    register double tq = t*t;
+     double tq = t*t;
     return (g4*tq + fsg) * power<4>(1.-tq) / (pow(s+tq,ga) * sqrt(ts+sa*tq));
   }
 }
@@ -183,7 +183,7 @@ double DehnenModel::DSurfaceDensityDR(double R) const
 namespace {
   inline double subcsd(double t)
   {
-    register double tq = t*t;
+     double tq = t*t;
     return pow(s+tq,g1) * tq * sqrt(ts+sa*tq);
   }
 }
@@ -223,7 +223,7 @@ double DehnenModel::EffectiveRadius() const
 namespace {
   inline double subsip(double t)
   {
-    register double tq = t*t;
+     double tq = t*t;
     return pow(s+tq,g12) * power<3>(1-tq) * tq * sqrt(ts+sa*tq);
   }
 }
@@ -246,7 +246,7 @@ double DehnenModel::SigIsotropicProj(double R) const
 namespace {
   inline double subscp(double t)
   {
-    register double tq = t*t;
+     double tq = t*t;
     return pow(s+tq,g12) * power<5>(1-tq) / sqrt(ts+sa*tq);
   }
 }
@@ -283,7 +283,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline double subfei(double t)
   {
-    register double y = subyofp(e*(1-t*t));
+     double y = subyofp(e*(1-t*t));
     return power<2>(1-y) * (Ag+y*(Bg+Cg*y)) / pow(y,Pg);
   }
 }
@@ -304,7 +304,7 @@ double DehnenModel::Fsub(double E, double _G) const
   if(dg<0.)
     falcON_Error("DehnenModel: G > gamma in F(E,G)");
   if(g==0. && dg==0.) {
-    register double e1=sqrt(e+e), e2=1-e-e, e3=sqrt(e2);
+     double e1=sqrt(e+e), e2=1-e-e, e3=sqrt(e2);
     return 1.5/Pi3*(e1*(2+1./e2)-3.*std::log((1+e1)/e3));
   }
   ::g2 = g2;
@@ -351,16 +351,16 @@ namespace {
   inline double sub_geA(double t)
   {
     // for gamma < 2
-    register double tq = t*t;
-    register double z  = eg2-tq;
+     double tq = t*t;
+     double z  = eg2-tq;
     if(z<=0. || z>=1.) return 0;
     return pow(z,g1) * tq/power<4>(1-pow(z,ig2));
   }
   inline double sub_geB(double t)
   {
     // for gamma > 2
-    register double tq = t*t;
-    register double y  = pow(eg2*(1-tq),-ig2);
+     double tq = t*t;
+     double y  = pow(eg2*(1-tq),-ig2);
     if(y<=0. || y>=1.) return 0;
     return pow(y,g1) * tq/power<4>(1-y);
   }
@@ -368,8 +368,8 @@ namespace {
   {
     // for gamma = 2
     if(z<=0. || z>=1.) return 0.;
-    register double z1 = 1-z;
-    register double y  = exp(-e-square(z/z1));
+     double z1 = 1-z;
+     double y  = exp(-e-square(z/z1));
     return y*square(y*z/square(z1*(1-y)));
   }
 }

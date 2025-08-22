@@ -55,14 +55,14 @@ namespace falcON { namespace Manipulate {
     const Random3 Ran;
     //--------------------------------------------------------------------------
     static void rotate(vect&x, real const&c, real const&s) {
-      register real 
+       real 
 	t0 = c*x[0] + s*x[1];
       x[1] = c*x[1] - s*x[0];
       x[0] = t0;
     }
     //--------------------------------------------------------------------------
     static void rotate(vect&x, vect const&o, real const&c, real const&s) {
-      register real 
+       real 
 	t0 = o[0] + c*(x[0]-o[0]) + s*(x[1]-o[1]);
       x[1] = o[1] + c*(x[1]-o[1]) - s*(x[0]-o[0]);
       x[0] = t0;

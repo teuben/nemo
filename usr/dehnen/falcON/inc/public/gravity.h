@@ -246,7 +246,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       void normalize_grav () {                     // acc,pot     /= mass       
 	if(mass()>zero) {
-	  register real im = one/mass();
+	   real im = one/mass();
 	  pot() *= im;
 	  acc() *= im;
 	}

@@ -89,7 +89,7 @@ namespace {
 	}
       } while(isspace(*line));
       // 2. read line until EOL
-      register char*l=line+1;
+       char*l=line+1;
       const    char*L=line+n;
       while(l != L) {
 	from.get(*l);

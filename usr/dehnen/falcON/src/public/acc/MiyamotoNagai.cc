@@ -94,7 +94,7 @@ namespace {
 	       scalar             &pot,
 	       scalar             *acc)
     {
-      register scalar
+       scalar
 	ZB   = std::sqrt(pos[2]*pos[2]+POT.Bq),
 	AZ   = POT.A+ZB,
 	F    = 1/(pos[0]*pos[0]+pos[1]*pos[1]+AZ*AZ);
@@ -113,7 +113,7 @@ namespace {
 	       scalar             &pot,
 	       scalar             *acc)
     {
-      register scalar
+       scalar
 	F    = 1/(pos[0]*pos[0]+pos[1]*pos[1]+POT.ABq);
       pot    = POT.GM * sqrt(F);
       F     *= pot;

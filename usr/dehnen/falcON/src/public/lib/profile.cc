@@ -131,7 +131,7 @@ spherical_profile::spherical_profile(const bodies*B,
   double mcum=0.;                                  // cumulate mass             
   int j=0;                                         // body index                
   for(int i=0; i!=n; ++i) {                        // LOOP bins                 
-    register int 
+     int 
       s  = i==0? ir[i+1]+1 : ir[i+1]+ir[i-1],      //   lower + upper rank      
       sh = s/2;                                    //   mean rank               
     for(; j!=sh; ++j)                              //   LOOP ranks up to mean   
@@ -293,7 +293,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
   double mcum=0.;                                  // cumulate mass             
   int j=0;                                         // body index                
   for(int i=0; i!=n; ++i) {                        // LOOP bins                 
-    register int 
+     int 
       s  = i==0? ir[i+1]+1 : ir[i+1]+ir[i-1],      //   lower + upper rank      
       sh = s/2;                                    //   mean rank               
     for(; j!=sh; ++j)                              //   LOOP ranks up to mean   

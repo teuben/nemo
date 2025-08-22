@@ -270,7 +270,7 @@ namespace falcON {
     /// \param CPU (output) time since \c c0 is added to CPU in seconds
     static void record_cpu(std::clock_t& c0, double& CPU)
     {
-      register std::clock_t c1 = std::clock();
+       std::clock_t c1 = std::clock();
       CPU += (c1-c0)/real(CLOCKS_PER_SEC);
       c0   = c1;
     }
@@ -302,7 +302,7 @@ namespace falcON {
   protected:
     /// record a CPU timing and cumulative CPU time after a full step
     void add_to_cpu_step() const {
-      register std::clock_t c1 = clock();
+       std::clock_t c1 = clock();
       CPU_STEP    += (c1-C_OLD)/real(CLOCKS_PER_SEC);
       CPU_TOTAL   += (c1-C_OLD)/real(CLOCKS_PER_SEC);
       C_OLD        = c1;

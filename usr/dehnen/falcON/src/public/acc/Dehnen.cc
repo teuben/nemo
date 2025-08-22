@@ -79,7 +79,7 @@ namespace {
 		scalar      &P,
 		scalar      &T) const
     {
-      register scalar R=std::sqrt(Eq+Rq);
+       scalar R=std::sqrt(Eq+Rq);
       T = 1/(R+Rs);
       switch(model) {
       case hernquist: {
@@ -94,7 +94,7 @@ namespace {
       } break;
       default: {
 	// general gamma!=2
-	register scalar Q = std::pow(double(R*T),g2);
+	 scalar Q = std::pow(double(R*T),g2);
 	P  = Pf*(1-Q);
 	T *= GM*Q/(R*R);
       } break;
