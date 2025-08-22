@@ -62,7 +62,7 @@ WARNING		+= -Wold-style-cast
 endif
 endif
 #WARNING		+= -Wno-unknown-pragmas
-WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-deprecated -Wno-expansion-to-defined -Wno-write-strings
+WARNING		:= #-Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-indentation -Wno-deprecated -Wno-expansion-to-defined -Wno-write-strings
 
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
@@ -73,7 +73,7 @@ WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-in
 #OPTFLAGS	:= -mfpmath=sse 
 #OPTFLAGS	:= \
 		--param inline-unit-growth=50
-OPTFLAGS	:= -ggdb3 $(WARNING) -O2 -fPIC \
+OPTFLAGS	:= $(WARNING) -O2 -fPIC \
 		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 ifeq ($(NO_ARCH_NATIVE),1)

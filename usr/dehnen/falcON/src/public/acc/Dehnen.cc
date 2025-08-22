@@ -39,7 +39,7 @@ namespace {
 	   const char  *file)
     {
       if(npar < 5)
-	warning("%s: recognizing 5 parameters:\n"
+	warning((char*)"%s: recognizing 5 parameters:\n"
 		" omega        pattern speed (ignored)           [0]\n"
 		" gamma        inner density slope               [1]\n"
 		" G*M          mass;                             [1]\n"
@@ -52,7 +52,7 @@ namespace {
 		"with\n\n"
 		"    r   = sqrt(x^2+e^2)\n\n",name());
       if(file && file[0])
-	warning("%s: file \"%s\" ignored",name(),file);
+	warning((char*)"%s: file \"%s\" ignored",name(),file);
       double o,e,m;
       o     = npar>0? pars[0] : 0.;
       g     = npar>1? pars[1] : 1.;
@@ -64,7 +64,7 @@ namespace {
       GM    = -m;
       Pf    = g==1? GM        : g==2? m/Rs  : -m/Rs/g2;
       model = g==1? hernquist : g==2? jaffe : general;
-      if(npar>5) warning("%s: skipped parameters beyond 5",name());
+      if(npar>5) warning((char*)"%s: skipped parameters beyond 5",name());
       nemo_dprintf (1,
 		    "initializing %s\n"
 		    " parameters : pattern speed = %f (ignored)\n"

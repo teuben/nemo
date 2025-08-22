@@ -69,7 +69,7 @@ namespace {
       GM  =-m;
       Bq  = b*b;
       ABq = (A+b)*(A+b);
-      if(npar>4) warning("%s: skipped parameters beyond 4",name());
+      if(npar>4) warning((char*)"%s: skipped parameters beyond 4",name());
       nemo_dprintf (1,
 		    " initializing %s:\n"
 		    " parameters : pattern speed = %f (ignored)\n"

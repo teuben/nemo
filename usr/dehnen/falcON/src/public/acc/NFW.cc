@@ -50,16 +50,16 @@ namespace {
 	   const char  *file)
     {
       if(npar < 3)
-	warning("%s: recognizing 3 parameters:\n"
-		" omega        pattern speed (ignored)           [0]\n"
-		" a            scale radius;                     [1]\n"
-		" vc_max       maximum circular speeed           [1]\n"
-		"the density is proportional to\n\n"
-		"        1    \n"
-                "    -------- \n" 
+	warning((char*)"%s: recognizing 3 parameters:\n"\
+		" omega        pattern speed (ignored)           [0]\n"\
+		" a            scale radius;                     [1]\n"\
+		" vc_max       maximum circular speeed           [1]\n"\
+		"the density is proportional to\n\n"\
+		"        1    \n"\
+                "    -------- \n"\
 		"    r (r+a)^2\n\n",name());
       if(file)
-	warning("%s: file \"%s\" ignored",name(),file);
+	warning((char*)"%s: file \"%s\" ignored",name(),file);
       double
 	o   = npar>0? pars[0] : 0.;
       A     = npar>1? pars[1] : 1.;
@@ -67,7 +67,7 @@ namespace {
       double
 	v   = npar>2? pars[2] : 1.;
       Fac   = A * v*v / 0.2162165954;
-      if(npar>3) warning("%s: skipped parameters beyond 3",name());
+      if(npar>3) warning((char*)"%s: skipped parameters beyond 3",name());
       nemo_dprintf (1,"initializing %s\n",name());
       nemo_dprintf (1," parameters : pattern speed = %f (ignored)\n",o);
       nemo_dprintf (1,"              scale radius  = %f\n",A);

@@ -91,7 +91,7 @@ namespace {
 	}
 	++l;
       }
-      error("Combined: line longer than expected\n");
+      error((char *) "Combined: line longer than expected\n");
     }
     //--------------------------------------------------------------------------
     static void read_line(std::istream& from, char*line, int const&n)
@@ -196,7 +196,7 @@ namespace {
 	     const char  *file) : NEEDM(0), NEEDV(0)
     {
       if(npar < 4 || file==0)
-	warning("Combined: recognizes 3 parameters and requires a data file.\n"
+	warning((char*)"Combined: recognizes 3 parameters and requires a data file.\n"
 		"parameters:\n"
 		"  par[0] = controlling growth factor, see below         [9]\n"
 		"  par[1] = t0: start time for growth                    [0]\n"
@@ -219,7 +219,7 @@ namespace {
 		timer::describe(timer::exponential),
 		timer::describe(timer::constant),
 		NMAX);
-      if(file == 0) error("Combined: not data file given");
+      if(file == 0) error((char*)"Combined: not data file given");
       // initialize timer
       timer::index
 	timin = (timer::index)(npar>0? int(pars[0]) : 9);
@@ -228,7 +228,7 @@ namespace {
 	_tau   = npar>2? pars[2] : 1.,
 	_t1    = npar>3? pars[3] : 10.;
       timer::init(timin,_t0,_tau,_t1);
-      if(npar>4) warning("Combined: skipped parameters beyond 4");
+      if(npar>4) warning((char*)"Combined: skipped parameters beyond 4");
       nemo_dprintf (1,
 		    "initializing Combined\n"
 		    " parameters : timer::index  = %f -> %s\n"
@@ -240,14 +240,14 @@ namespace {
       const int size=200;
       std::ifstream inpt(file);
       if(!inpt.good())
-	error("Combined: couldn't open file \"%s\" for input\n",file);
+	error((char*)"Combined: couldn't open file \"%s\" for input\n",file);
       char Line[size], AccName[size], AccPars[size], AccFile[size];
       char*accname=0, *accpars=0, *accfile=0, unknown[9];
       read_line(inpt,Line,size);
       if(*Line == 0)
-	error("Combined: couldn't read data from file \"%s\"\n",file);
+	error((char*)"Combined: couldn't read data from file \"%s\"\n",file);
       if(strncmp(Line,"accname=",8))
-	error("Combined: first entry in file \"%s\" isn't \"accname=...\"\n",
+	error((char*)"Combined: first entry in file \"%s\" isn't \"accname=...\"\n",
 	      file);
       N = 0;
       nemo_dprintf (1," sub-potentials:\n");
@@ -261,7 +261,7 @@ namespace {
 	read_line(inpt,Line,size);
 	if        (*Line == 0 || 0==strncmp(Line,"accname=",8)) {
 	  if(N == NMAX)
-	    error("Combined: file \"%s\" contains more accname= "
+	    error((char*)"Combined: file \"%s\" contains more accname= "
 		  "than anticipated\n",file);
 	  //       // TEST
 	  //       std::cerr<<"loading acceleration "<<N<<": \n"
@@ -281,25 +281,25 @@ namespace {
 	  accname=0;
 	} else if(0==strncmp(Line,"accpars=",8)) {
 	  if(accpars)
-	    warning("Combined: additional \"accpars=\""
-		    " in file \"%s\" ignored\n",file);
+	    warning((char*)"Combined: additional \"accpars=\""
+					" in file \"%s\" ignored\n",file);
 	  else {
 	    strcpy(AccPars,Line+8);
 	    accpars = AccPars;
 	  }
 	} else if(0==strncmp(Line,"accfile=",8)) {
 	  if(accfile)
-	    warning("Combined: additional \"accfile=\""
-		    " in file \"%s\" ignored\n",file);
+	    warning((char*)"Combined: additional \"accfile=\""
+					" in file \"%s\" ignored\n",file);
 	  else {
 	    strcpy(AccFile,Line+8);
 	    accfile = AccFile;
 	    if(0==strcmp(file,accfile))
-	      error("Combined: recursion accfile=datafile not allowed\n");
+	      error((char*)"Combined: recursion accfile=datafile not allowed\n");
 	  }
 	} else {
 	  strncpy(unknown,Line,8); unknown[8]=0;
-	  warning("Combined: entry \"%s\" in file \"%s\" ignored\n",
+	  warning((char*)"Combined: entry \"%s\" in file \"%s\" ignored\n",
 		  unknown,file);
 	}
       } while(*Line != 0);
@@ -336,7 +336,7 @@ namespace {
 				static_cast<      float*>(p),
 				static_cast<      float*>(a),
 				add);
-	default: error("Combined: unsupported ndim: %d",ndim);
+	default: error((char*)"Combined: unsupported ndim: %d",ndim);
 	}
 	break;
       case 'd':
@@ -357,10 +357,10 @@ namespace {
 				static_cast<      double*>(p),
 				static_cast<      double*>(a),
 				add);
-	default: error("Combined: unsupported ndim: %d",ndim);
+	default: error((char*)"Combined: unsupported ndim: %d",ndim);
 	}
 	break;
-      default: error("Combined: unknown type \"%c\"",type);
+      default: error((char*)"Combined: unknown type \"%c\"",type);
       }
     } // Combined::acc()
   } *MyAcc[AccMax] = {0};
@@ -410,8 +410,8 @@ void iniacceleration(const double*pars,      // I:  array with parameters
 		     bool        *needV)     // O:  acceleration() needs vel's? 
 {
   if(AccN == AccMax) {
-    warning("iniacceleration(): request to initialize "
-	    "more than %d accelerations of type \"Combined\"", AccMax);
+    warning((char*)"iniacceleration(): request to initialize "
+		"more than %d accelerations of type \"Combined\"", AccMax);
     *accel = 0;
     return;
   }

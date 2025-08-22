@@ -96,7 +96,7 @@ namespace {
 	if(from.eof() || (*l)=='\n') { *l=0; return; }
 	++l;
       }
-      error("Shrink: line longer than expected\n");
+      error((char*)"Shrink: line longer than expected\n");
     }
     /// read line of size n; skip lines whose first non-space character is #
     static void read_line(std::istream& from, char*line, int const&n)
@@ -172,7 +172,7 @@ namespace {
       scalar alpha = Alpha(time);
       // if alpha = 0: issue warning! and set zero velocities
       if(alpha == 0) {
-	warning("Shrink: alpha(t=%f) = 0\n",time);
+	warning((char *) "Shrink: alpha(t=%f) = 0\n",time);
 	if(! (add&1))
 	  for(int n=0; n!=nbod; ++n)
 	    if(f==0 || f[n] & 1) 
@@ -231,13 +231,13 @@ namespace {
 	   const char  *file) : NEEDM(0), NEEDV(0)
     {
       if(npar < 5 || file==0)
-	warning("Shrink: recognizes 3 parameters and requires a data file.\n"
+	warning((char*)"Shrink: recognizes 3 parameters and requires a data file.\n"
 		"parameters:\n"
 		"  par[0] = initial value for alpha                    [???]\n"
 		"  par[1] = final value for alpha                      [???]\n"
 		"  par[2] = controlling growth factor, see below         [9]\n"
 		"  par[3] = t0: start time for growth                    [0]\n"
-		"  par[4] = tau: time scale for growth                   [1]\n"
+		"  par[4] = tau: time constant for growth                   [1]\n"
 		"  with par[2]=0: %s\n"
 		"       par[2]=1: %s\n"
 		"       par[2]=2: %s\n"
@@ -253,7 +253,7 @@ namespace {
 		timer::describe(timer::linear),
 		timer::describe(timer::constant),
 		NMAX);
-      if(file == 0) error("Shrink: not data file given");
+      if(file == 0) error((char*)"Shrink: not data file given");
       // initialize parameters
       AlfaI = pars[0];
       AlfaF = pars[1];
@@ -263,7 +263,7 @@ namespace {
 	_t0    = npar>3? pars[3] : 0.,
 	_tau   = npar>4? pars[4] : 1.;
       timer::init(timin,_t0,_tau);
-      if(npar>5) warning("Shrink: skipped parameters beyond 5");
+      if(npar>5) warning((char*)"Shrink: skipped parameters beyond 5");
       nemo_dprintf (1,
 		    "initializing Shrink\n"
 		    " parameters : alpha_i       = %f\n"
@@ -276,7 +276,7 @@ namespace {
       const int size=1024;
       std::ifstream inpt(file);
       if(!inpt.good())
-	error("Shrink: couldn't open file \"%s\" for input\n",file);
+	error((char*)"Shrink: couldn't open file \"%s\" for input\n",file);
       char Line[size], AccName[size], AccPars[size], AccFile[size];
       char*accname=0, *accpars=0, *accfile=0;
       nemo_dprintf (1,"sub-potentials:\n");
@@ -289,7 +289,7 @@ namespace {
 	  copy2ws(AccName,accname+8);
 	  accname=AccName;
 	} else {
-	  warning("Shrink: entry \"%s\" in file \"%s\" ignored\n",
+	  warning((char*) "Shrink: entry \"%s\" in file \"%s\" ignored\n",
 		  Line,file);
 	  continue;
 	}
@@ -317,15 +317,15 @@ namespace {
 	N++;
       }
       if(N==0)
-	error("Shrink: couldn't read data from file \"%s\"\n",file);
+	error((char*)"Shrink: couldn't read data from file \"%s\"\n",file);
       else if(N==NMAX) {
 	read_line(inpt,Line,size);
 	if(*Line)
-	  error("Shrink: file \"%s\" contains more \"accname=...\" "
+	  error((char*)"Shrink: file \"%s\" contains more \"accname=...\" "
 		"than anticipated\n",file);
       }
-      if(NEEDM) warning("Shrink: need_masses() = true:\n");
-      if(NEEDV) warning("Shrink: need_velocities() = true:\n");
+      if(NEEDM) warning((char*)"Shrink: need_masses() = true:\n");
+      if(NEEDV) warning((char*)"Shrink: need_velocities() = true:\n");
     }
     /// compute accelerations
     /// \param[in]  ndim  # dimensions  
@@ -362,7 +362,7 @@ namespace {
 				static_cast<      float*>(p),
 				static_cast<      float*>(a),
 				add);
-	default: error("Shrink: unsupported ndim: %d",ndim);
+	default: error((char*)"Shrink: unsupported ndim: %d",ndim);
 	}
 	break;
       case 'd':
@@ -383,10 +383,10 @@ namespace {
 				static_cast<      double*>(p),
 				static_cast<      double*>(a),
 				add);
-	default: error("Shrink: unsupported ndim: %d",ndim);
+	default: error((char*)"Shrink: unsupported ndim: %d",ndim);
 	}
 	break;
-      default: error("Shrink: unknown type \"%c\"",type);
+      default: error((char*)"Shrink: unknown type \"%c\"",type);
       }
     }
     /// dtor
@@ -443,8 +443,8 @@ void iniacceleration(const double*pars,      // I:  array with parameters
 		     bool        *needV)     // O:  acceleration() needs vel's? 
 {
   if(AccN == AccMax) {
-    warning("iniacceleration(): request to initialize "
-	    "more than %d accelerations of type \"Shrink\"", AccMax);
+    warning((char*) "iniacceleration(): request to initialize "
+		"more than %d accelerations of type \"Shrink\"", AccMax);
     *accel = 0;
     return;
   }
