@@ -113,7 +113,7 @@ namespace falcON {
     static bool print_db(std::ostream&out);
     /// ctor from expression (see man pages)
     /// \param[in] expr  suitable expression (see man pages)
-    explicit bodyfunc(const char*expr) throw(falcON::exception);
+    explicit bodyfunc(const char*expr) noexcept(false);
     /// copy ctor
     bodyfunc(bodyfunc const&bf)
       : FUNC(bf.FUNC), TYPE(bf.TYPE), NPAR(bf.NPAR), NEED(bf.NEED), EXPR(0)
@@ -194,27 +194,27 @@ namespace falcON {
   class Bodyfunc : protected bodyfunc {
     real P[MAXPAR];
     char*PARS;
-    void getpars(const real*, int) throw(falcON::exception);
+    void getpars(const real*, int) noexcept(false);
   public:
     /// construction from bodyfunc expression (can be empty)
     /// \param[in] expr_ bodyfunc (5falcON) expression --- or NULL
     /// \param[in] pars_ comma separated list of parameters
     Bodyfunc(const char*expr_, const char*pars_)
-      throw(falcON::exception);
+      noexcept(false);
     /// construction from bodyfunc expression (can be empty)
     /// \param[in] expr_  bodyfunc (5falcON) expression --- or NULL
     /// \param[in] pars_  array with parameters 
     /// \param[in] npar_  number of parameters
     /// \note there must be enough parameters given
     Bodyfunc(const char*expr_, const real*pars_, int npar_)
-      throw(falcON::exception)
+      noexcept(false)
       : bodyfunc(expr_), PARS(0) { getpars(pars_,npar_); }
     /// construction from bodyfunc and parameters
     /// \param[in] bf    bodyfunc
     /// \param[in] pars  array with parameters, if any 
     /// \note the number of parameter is expected to match bf.npar()
     Bodyfunc(bodyfunc const&bf, const real*pars)
-      throw(falcON::exception)
+      noexcept(false)
       : bodyfunc(bf), PARS(0) { getpars(pars,NPAR); }
     /// ctor from function and parameters
     /// \param[in] func_  pter to function to be used
@@ -230,7 +230,7 @@ namespace falcON {
     template<typename Type>
     Bodyfunc(Type(*func_)(body const&, double, const real*),
 	     int npar_, fieldset need_, const char*expr_, const real*pars_)
-      throw(falcON::exception)
+      noexcept(false)
       : bodyfunc(func_,npar_,need_,expr_), PARS(0) { getpars(pars_,npar_); }
     /// dtor: delete data
     ~Bodyfunc() { if(PARS) falcON_DEL_A(PARS); PARS=0; }
@@ -281,14 +281,14 @@ namespace falcON {
   //
   // ///////////////////////////////////////////////////////////////////////////
   template<typename T> class BodyFunc : private Bodyfunc {
-    void checktype() const throw(falcON::exception);
+    void checktype() const noexcept(false);
   public:
     /// construction from bodyfunc expression (can be empty)
     /// \param[in] expr_  body_func (5falcON) expression --- or NULL
     /// \param[in] pars_  comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr_, const char*pars_)
-      throw(falcON::exception)
+      noexcept(false)
       : Bodyfunc(expr_,pars_) { checktype(); }
     /// construction from bodyfunc expression (can be empty)
     /// \param[in] expr_  body_func (5falcON) expression --- or NULL
@@ -297,14 +297,14 @@ namespace falcON {
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFunc(const char*expr_, const real*pars_, int npar_)
-      throw(falcON::exception)
+      noexcept(false)
       : Bodyfunc(expr_,pars_,npar_) { checktype(); }
     /// construction from bodyfunc and parameters
     /// \param[in] bf    bodyfunc
     /// \param[in] pars  array with parameters, if any 
     /// \note the number of parameter is expected to match bf.npar()
     BodyFunc(bodyfunc const&bf, const real*pars)
-      throw(falcON::exception)
+      noexcept(false)
       : Bodyfunc(bf,pars) { checktype(); }
     /// ctor from function and parameters
     /// \param[in] func_  pter to function to be used
@@ -320,7 +320,7 @@ namespace falcON {
     template<typename Type>
     BodyFunc(Type(*func_)(body const&, double, const real*),
 	     int npar_, fieldset need_, const char*expr_, const real*pars_)
-      throw(falcON::exception)
+      noexcept(false)
       : Bodyfunc(func_,npar_,need_,expr_,pars_) { checktype(); }
     /// return number of parameters used
     using Bodyfunc::npar;
@@ -395,7 +395,7 @@ namespace falcON {
     /// \param[in] f pter to Bodyfunc
     /// \param[in] t time to use
     BodyProp(const Bodyfunc*f, double t) 
-      throw(falcON::exception) : F(f), T(t)
+      noexcept(false) : F(f), T(t)
     {
       if(!F->is_type<functype>())
 	throw falcON::exception("BodyProp<%c>: type mismatch: "
@@ -451,7 +451,7 @@ namespace falcON {
     /// \param[in] pars comma separated list of parameters
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const char*pars)
-      throw(falcON::exception);
+      noexcept(false);
     /// construction from bodyfunc expression (can be empty)
     /// \param[in] expr body_func (5falcON) expression --- or NULL
     /// \param[in] pars array with parameters
@@ -459,7 +459,7 @@ namespace falcON {
     /// \note there must be enough parameters given
     /// \note the bodyfunc expression must return the type T
     BodyFilter(const char*expr, const real*pars, int npar)
-      throw(falcON::exception);
+      noexcept(false);
     /// set the time for future function calls
     /// \param[in] t (input) simulation time
     void set_time(double t)
@@ -526,7 +526,7 @@ namespace falcON {
     /// \param  out  ostream to print to
     static bool print_db(std::ostream&out);
     /// construction from bodyfunc expression
-    explicit bodiesfunc(const char*) throw(falcON::exception);
+    explicit bodiesfunc(const char*) noexcept(false);
     /// return type: 'b', 'i', 'r', 'v' for bool, int, real, vect
     char const&type() const { return TYPE; }
     /// check return type
