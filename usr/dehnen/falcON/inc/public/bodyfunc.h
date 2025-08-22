@@ -65,13 +65,15 @@ namespace falcON {
     typedef T(*const bf_pter)(body const&, double, const real*);
     static T func(void(*const f)(body const&, double, const real*),
 		  body const&b, double t, const real*p) {
-      return f? (*(bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
+      if (f) { f(b,t,p); }
+      return bf_type_base<T>::default_value();
     }
     //--------------------------------------------------------------------------
     typedef T(*const Bf_pter)(bodies const&, double, const real*);
     static T func(void(*const f)(bodies const&, double, const real*),
 		  bodies const&b, double t, const real*p) {
-      return f? (*(Bf_pter)(f))(b,t,p) : bf_type_base<T>::default_value();
+      if (f) { f(b,t,p); }
+      return bf_type_base<T>::default_value();
     }
   };
   // ///////////////////////////////////////////////////////////////////////////

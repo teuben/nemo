@@ -552,6 +552,13 @@ namespace falcON {
 	C = static_cast<CELL*>(I.c_pter());
 	return *this;
       }
+      CellIter& operator=(CellIter const&I) {
+        if (this != &I) {
+          T = I.T;
+          C = I.C;
+        }
+        return *this;
+      }
       //------------------------------------------------------------------------
       /// \name forward iteration
       //@{

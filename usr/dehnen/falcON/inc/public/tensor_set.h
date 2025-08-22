@@ -137,6 +137,7 @@ namespace falcON {
     // construction
     symset3D()                   {}
     explicit symset3D(X const&x) { L::s_as(a,x); }
+    symset3D(C const&c) { L::v_as(a, c.a); }
     // element access
     template<int K> typename meta3D::ONE3D<K,X>::Tensor
     const&tensor () const { return meta3D::ONE3D<K,X>::tens(a); }

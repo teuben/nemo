@@ -145,6 +145,7 @@ namespace WDutils {
     mutable unsigned long ix;
     unsigned              actl,bits;
     unsigned long         *v;
+    unsigned long         *v_allocated;
     double                fac;
   public:
     /// which sequence is ours?
