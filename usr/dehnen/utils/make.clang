@@ -24,13 +24,13 @@ ostype:
 # set following variable to 1 if gcc > 700
 #API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
-STDAPI=-std=c++03
+STDAPI=#-std=c++03
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
+WARNING		:= #$(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 else
-WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
+WARNING		:= #-Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
@@ -38,7 +38,7 @@ WARNING		+= -Wold-style-cast
 endif
 endif
 #WARNING		+= -Wno-unknown-pragmas 
-
+WARNING += -Wno-unused-command-line-argument -Wno-redeclared-class-member
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
 #PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
