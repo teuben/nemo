@@ -2,6 +2,9 @@
 include $(NEMOLIB)/makedefs
 #	some routines exist in single as well as double precision
 
+# gnu time
+TIME = /usr/bin/time -f '%Uuser %Ssystem %Eelapsed %PCPU'
+
 
 #	NUNEMO Library, and make it a precious one
 L = $(NEMOLIB)/libnemo.a
@@ -47,6 +50,20 @@ bench8:	big big8 offt offt64
 	@./big8 | wc
 	offt
 	offt8
+
+
+NP = 1 2 4 6 8 10 12 14 16 18 20 22 24
+## bench10:   sdmath for bunch of NP's via NP=
+bench10:
+	rm -f bench10.1.log bench10.2.log
+	for np in $(NP); do\
+	   echo -n ":: $$np :: ";\
+           echo "$$np " >> bench10.1.log;\
+	   $(TIME) sdmath iter=100 np=$$np 2>>bench10.2.log;\
+	done
+	@paste bench10.1.log bench10.2.log > bench10.log
+	@echo "See bench10.log for results"
+	@../../scripts/python/amdahl.py bench10.log
 
 #
 big:	big.f
