@@ -45,7 +45,7 @@ API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
 # c++98 c++03 c++11 c++14 c++17 c++20
 ifeq "$(API_GCC_7)" "1"
-    STDAPI=#-std=c++14#-std=c++03
+    STDAPI=-std=c++11#-std=c++14#-std=c++03
 else
     STDAPI=
 endif
@@ -72,10 +72,7 @@ WARNING		:= #-Wextra -Winit-self -Wshadow -Wno-format-security -Wno-misleading-i
 # OPTFLAGS	:= -mfpmath=sse -mpreferred-stack-boundary=4 
 #OPTFLAGS	:= -mfpmath=sse 
 #OPTFLAGS	:= \
-		--param inline-unit-growth=50
-OPTFLAGS	:= $(WARNING) -O2 -fPIC \
-		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
-
+		#--param inline-unit-growth=50
 ifeq ($(NO_ARCH_NATIVE),1)
    ARCH_NATIVE =
 else
@@ -84,7 +81,12 @@ endif
 
 ifneq ($(OSTYPE),Darwin)
 OPTFLAGS	+= -rdynamic $(ARCH_NATIVE)
+else
+WARNING         += -Wno-redeclared-class-member -Wno-deprecated-declarations -Wno-dangling-else -Wno-return-stack-address
 endif
+
+OPTFLAGS	:= $(WARNING) -O2 -fPIC \
+		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)
