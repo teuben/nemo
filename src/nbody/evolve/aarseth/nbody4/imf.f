@@ -147,7 +147,7 @@
  35      XX = RAN2(KDUM)
 *
          IF(KZ(20).EQ.3)THEN
-            ZM = 0.3D0*XX/(1.D0 - XX)**0.55
+            ZM = 0.3D0*(XX/(1.D0 - XX))**0.55
          ELSEIF(KZ(20).EQ.4.OR.KZ(20).EQ.5)THEN
             XX1 = 1.0 - XX
             IF(KZ(20).EQ.5.AND.I.LE.NBIN0)THEN
