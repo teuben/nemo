@@ -8,7 +8,7 @@
 *
 *     0,1 Salpeter power-law with exponent ALPHA.
 *       2 Scalo (see Eggleton, Fitchett & Tout, Ap.J. 347, 998)
-*       3 Eggleton book
+*       3 Eggleton book  (use -3 for the old typo version)
 *       4 KTG 93
 *       5 KTG93 and binary masses from KTG91
 *       6 Pavel99 extending to Brown-dwarf regime
@@ -147,6 +147,8 @@
  35      XX = RAN2(KDUM)
 *
          IF(KZ(20).EQ.3)THEN
+            ZM = 0.3D0*(XX/(1.D0 - XX))**0.55
+         ELSEIF(KZ(20).EQ.-3)THEN
             ZM = 0.3D0*XX/(1.D0 - XX)**0.55
          ELSEIF(KZ(20).EQ.4.OR.KZ(20).EQ.5)THEN
             XX1 = 1.0 - XX
