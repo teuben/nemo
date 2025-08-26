@@ -1,7 +1,9 @@
-.TH NBODY4 5NEMO "13 March 2006"
-.SH NAME
+.TH NBODY4 5NEMO "25 August 2025"
+
+.SH "NAME"
 nbody4 \- input parameter file for nbody4
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 .nf
 *
 *
@@ -332,17 +334,35 @@ nbody4 \- input parameter file for nbody4
 *      15       Massless supernova remnant.
 *       ---------------------------------------------------------------------
 .fi
-.SH AUTHOR
+
+.SH "IMF"
+As described in Sverre's imf.f, the KZ(20) parameter controls the IMF:
+.nf
+*     0,1 Salpeter power-law with exponent ALPHA.
+*       2 Scalo (see Eggleton, Fitchett & Tout, Ap.J. 347, 998)
+*      -3 Eggleton book (but w/ Sverre's typo: 0.3 (u / (1-u))**0.55
+*       3 Eggleton book (corrected: 0.3 u / (1-u)**0.5) - eq. (1.17)
+*       4 KTG 93
+*       5 KTG93 and binary masses from KTG91
+*       6 Pavel99 extending to Brown-dwarf regime
+.fi
+
+
+.SH "AUTHOR"
 Sverre Aarseth
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 runbody4(1NEMO)
-.SH FILES
+
+.SH "FILES"
 .nf
 define.f  - dummy, but is the actual text in the DESCRIPTION part of this man page!
 .fi
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1i +4i
+.ta +1.25i +4.5i
 1-mar-06	documented	PJT
 13-mar-06	minor updates via Sverre	PJT/SJA
+26-aug-2025	fixed up KZ(20) options		PJT/SAV
 .fi
