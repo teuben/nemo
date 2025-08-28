@@ -475,8 +475,8 @@ namespace {
   }
 } // namespace {
 ////////////////////////////////////////////////////////////////////////////////
-falcON_TRAITS(::dot,"{tree.cc}::dot");
-falcON_TRAITS(::box,"{tree.cc}::box");
+falcON_TRAITS(struct dot,"{tree.cc}::dot");
+falcON_TRAITS(struct box,"{tree.cc}::box");
 ////////////////////////////////////////////////////////////////////////////////
 namespace {
   //////////////////////////////////////////////////////////////////////////////
@@ -1114,7 +1114,7 @@ namespace {
   void TreeBuilder::report_infnan() const falcON_THROWING
   {
     for(const dot*D=D0; D!=DN; ++D)
-      if(D->pos().isinf() || D->pos().isnan())
+      if(isinf(D->pos()) || isnan(D->pos()))
 	falcON_THROW("TreeBuilder: body %d: x=%g,%g,%g\n",
 		     TREE->my_bodies()->bodyindex(D->LINK),
 		     D->pos()[0],D->pos()[1],D->pos()[2]);
@@ -1147,7 +1147,7 @@ namespace {
       }
     DN    = Di;
     XAVE /= real(DN-D0);
-    if(XAVE.isnan() || XAVE.isinf()) report_infnan();
+    if(isnan(XAVE) || isinf(XAVE)) report_infnan();
     if(xmin) XMIN = *xmin;
     if(xmax) XMAX = *xmax;
   }
@@ -1183,7 +1183,7 @@ namespace {
 	}
     DN    = Di;
     XAVE /= real(DN-D0);
-    if(XAVE.isnan() || XAVE.isinf()) report_infnan();
+    if(isnan(XAVE) || isinf(XAVE)) report_infnan();
   }
   //----------------------------------------------------------------------------
   // constructor 1                                                              

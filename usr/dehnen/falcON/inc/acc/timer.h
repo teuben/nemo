@@ -111,7 +111,7 @@ namespace {
       if(t <= t0) return 0.;
       if(t >= t1) return 1.;
       const double a0=0.1875, a1=0.625, a2=0.9375;
-      register double
+       double
 	xi  = twice(t-t0)*itau-1,
 	xq  = xi*xi;
       xi *= ((a0*xq - a1)*xq + a2);

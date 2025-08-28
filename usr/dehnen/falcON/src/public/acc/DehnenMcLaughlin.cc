@@ -69,15 +69,15 @@ namespace {
 	  "    eta= 2*(e-2)*(2-b0)/(6+e)  [4/9]\n"
 	  "    g0 = 1-eta/2+b0            [7/9]\n\n";
       if(file)
-	warning("acceleration \"%s\": file \"%s\" ignored",name(),file);
+	warning((char*)"acceleration \"%s\": file \"%s\" ignored",name(),file);
       if(a<=0.)
-	error("acceleration \"%s\": a=%f <= 0\n",name(),a);
+	error((char*)"acceleration \"%s\": a=%f <= 0\n",name(),a);
       if(e<=2.)
-	error("acceleration \"%s\": e=%f <= 2\n",name(),e);
+	error((char*)"acceleration \"%s\": e=%f <= 2\n",name(),e);
       if(b0>1.)
-	error("acceleration \"%s\": b0=%f > 1\n",name(),b0);
-      if(npar>5) warning("acceleration \"%s\":"
-			 " skipped parameters beyond 5",name());
+	error((char*)"acceleration \"%s\": b0=%f > 1\n",name(),b0);
+      if(npar>5) warning((char*)"acceleration \"%s\":"
+                        " skipped parameters beyond 5",name());
     }
     ///                                                                         
     /// routine used by class SphericalPot<DehnenMcLaughlin> of defacc.h        

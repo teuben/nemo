@@ -132,7 +132,7 @@ namespace {
   }
   //////////////////////////////////////////////////////////////////////////////
   inline fieldset get_type_and_need(char&type, const char*name, const char*expr)
-    throw(BfErr)
+    noexcept(false)
   {
     // finds function name and determines type
     bt_pter Type = (bt_pter)findfn(name);
@@ -150,7 +150,7 @@ namespace {
   // "-DfalcON_DOUBLE") as are used to compile this file, since otherwise 
   // loading the running the generated code will result in rubbish (at best).
   void compile(const char*flags, const char*fname)
-    throw(BfErr) {
+    noexcept(false) {
     // compiles a falcON C++ program in fname using compiler flags              
     const char* falcON_path = falcON::directory();
     if(falcON_path == 0) throw BfErr("cannot locate falcON directory");
@@ -238,7 +238,7 @@ namespace {
 			         char*&to,         // O:     output             
 			   const char* toUP,       // I:     end for output     
 			   int       & npar)       // I/O: # parameters         
-    throw(ParseErr)
+    noexcept(false)
   {
     if(*in==ParInd) {                              // IF parameter indicator    
       ++in;                                        //   read indicator          
@@ -260,7 +260,7 @@ namespace {
 			 char*      &to,           // O:     output             
 			 const char* toUP,         // I:     end for output     
 			 int        &npar)         // I/O: # parameters         
-    throw(ParseErr)
+    noexcept(false)
   {
     try {
       while(*in)
@@ -284,7 +284,7 @@ namespace {
     // - set fullfile = $FALCONLIB/subdir/file                                  
     // - make sure that directory $FALCONLIB/subdir/ exists                     
     BF_database(const char*subdir,
-		const char*file) throw(DataBaseErr) : locked(0)
+		const char*file) noexcept(false) : locked(0)
     {
       // get falcON library directory
       const char*falcONlib = falcON::libdir();
@@ -384,7 +384,7 @@ namespace {
     // - otherwise:                 - copy to backup file and lock it           
     //                              - loop database, count functions            
     //                              - return count                              
-    int counter() throw(DataBaseErr) {             // R: valid function counter 
+    int counter() noexcept(false) {             // R: valid function counter 
       char cmmd[STR_LENGTH];
       // check for existence of backup-file
       SNprintf(cmmd,STR_LENGTH,"ls %s.bak > /dev/null 2>&1",fullfile);
@@ -442,7 +442,7 @@ namespace {
 	     char     const&type,                  // I: function type          
 	     int      const&npar,                  // I: number of parameters   
 	     fieldset const&need)                  // I: function need          
-      throw(DataBaseErr)
+      noexcept(false)
     {
       if(!locked) throw DataBaseErr("not locked, cannot put()");
       char cmmd[STR_LENGTH];
@@ -485,7 +485,7 @@ namespace {
   void get_type(char       &type,            // O: return type
 		fieldset   &need,            // O: body data required 
 		const char *expr)            // I: C-expression encoded in func 
-    throw(BfErr)
+    noexcept(false)
   {
     // P   preparations
     if (!havesyms) {
@@ -557,7 +557,7 @@ namespace {
 		    const char*ftype,       // I: function return type          
 		    const char*fname,       // I: file base name                
 		    const char*funcn)       //[I: function name]                
-    throw(BfErr)
+    noexcept(false)
   {
     // P   preparations
     if (!havesyms) {
@@ -660,7 +660,7 @@ namespace {
   //----------------------------------------------------------------------------
   bool ParseExpr(                                  // R: finished with '}' ?    
 		 const char*&expr)                 // bodiesfunc expression     
-    throw(ParseErr)
+    noexcept(false)
   {
     int we    = sub++;                             // remember sexpr counter    
     scond[we] = 0;                                 // reset subconditional      
@@ -716,7 +716,7 @@ namespace {
     return false;                                  // end of expr               
   } // ParseExpr
   //----------------------------------------------------------------------------
-  inline void parse_expr(const char*expr) throw(ParseErr)
+  inline void parse_expr(const char*expr) noexcept(false)
   {
     sub = 0;
     par = 0;
@@ -749,7 +749,7 @@ namespace {
   // needs.                                                                   //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  void get_types(fieldset&need) throw(BfErr) {
+  void get_types(fieldset&need) noexcept(false) {
     // 0 preparations
     if (!havesyms) {
       localsymbols();
@@ -831,7 +831,7 @@ namespace {
   // The files "/tmp/name.cc" and "/tmp/name.log" will NOT be deleted         //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-  inline void make_mean(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_mean(std::ostream&file, int s) noexcept(false) {
     if(stype[s] == 'b')
       throw ParseErr("operator 'Mean' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
@@ -854,7 +854,7 @@ namespace {
 	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
-  inline void make_mmean(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_mmean(std::ostream&file, int s) noexcept(false) {
     if(stype[s] == 'b')
       throw ParseErr("operator 'Mmean' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
@@ -876,7 +876,7 @@ namespace {
 	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
-  inline void make_sum(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_sum(std::ostream&file, int s) noexcept(false) {
     if(stype[s] == 'b')
       throw ParseErr("operator 'Sum' must have non-boolean expression");
     file  <<"    // encoding \"Sum{"<<sexpr[s];
@@ -892,7 +892,7 @@ namespace {
 	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
-  inline void make_max(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_max(std::ostream&file, int s) noexcept(false) {
     if(stype[s] == 'b')
       throw ParseErr("operator 'Max' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
@@ -921,7 +921,7 @@ namespace {
 	  <<"    return _X;\n";
   }
   //----------------------------------------------------------------------------
-  inline void make_min(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_min(std::ostream&file, int s) noexcept(false) {
     if(stype[s] == 'b')
       throw ParseErr("operator 'Min' must have non-boolean expression");
     const char *space = scond[s]? "      " : "    ";
@@ -976,7 +976,7 @@ namespace {
 	  <<"    return false;\n";
   }
   //----------------------------------------------------------------------------
-  inline void make_num(std::ostream&file, int s) throw(ParseErr) {
+  inline void make_num(std::ostream&file, int s) noexcept(false) {
     if(scond[s]==0 || scond[s][0]==0)
       throw ParseErr("empty condition for operator 'Num'");
     file  <<"    // encoding \"Num{"<<scond[s]<<"}\"\n"
@@ -986,7 +986,7 @@ namespace {
 	  <<"    return _N;\n";
   }
   //----------------------------------------------------------------------------
-  void make_sub(std::ostream&file, int s) throw(ParseErr) {
+  void make_sub(std::ostream&file, int s) noexcept(false) {
     file<<"\n  inline "<<TypeName(stype[s])<<' '<<sname[s]<<'F'
 	<<"(bodies const&B, double t, const real*_P) {\n";
     switch(soper[s]) {
@@ -1007,7 +1007,7 @@ namespace {
   Bf_pter make_func(                        // R: bodiesfunc                    
 		    const char*fname,       // I: file base name                
 		    const char*funcn)       //[I: function name]                
-    throw (BfErr)
+    noexcept(false)
   {
     // P   preparations
     if (!havesyms) {
@@ -1079,7 +1079,7 @@ namespace {
 //
 // implementing falcON::bodyfunc::bodyfunc(const char*)
 //
-bodyfunc::bodyfunc(const char*oexpr) throw(falcON::exception)
+bodyfunc::bodyfunc(const char*oexpr) noexcept(false)
   : FUNC(0), TYPE(0), NPAR(0), NEED(fieldset::empty), EXPR(0)
 {
   if(oexpr == 0 || *oexpr == 0) return;
@@ -1186,7 +1186,7 @@ bool bodyfunc::print_db(std::ostream&out)
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
-  throw(falcON::exception)
+  noexcept(false)
   : bodyfunc(expr), PARS(0)
 {
   if(is_empty()) return;
@@ -1214,7 +1214,7 @@ falcON::Bodyfunc::Bodyfunc(const char*expr, const char*pars)
 }
 //
 void falcON::Bodyfunc::getpars(const real*pars, int _npar)
-  throw(falcON::exception)
+  noexcept(false)
 {
   if(NPAR) {
     if(_npar == 0 || pars == 0)
@@ -1265,7 +1265,7 @@ namespace {
 }
 //
 template<typename T>
-void falcON::BodyFunc<T>::checktype() const throw(falcON::exception)
+void falcON::BodyFunc<T>::checktype() const noexcept(false)
 {
   if(is_empty()) return;
   if(TYPE != bf_type<T>::type )
@@ -1283,18 +1283,18 @@ template class falcON::BodyFunc<vect>;
 //                                                                              
 ////////////////////////////////////////////////////////////////////////////////
 falcON::BodyFilter::BodyFilter(const char*expr, const char*pars)
-  throw(falcON::exception)
+  noexcept(false)
   : BodyFunc<bool>(expr,pars), TIME(0.) {}
 ////////////////////////////////////////////////////////////////////////////////
 falcON::BodyFilter::BodyFilter(const char*expr, const real*pars, int _npar)
-  throw(falcON::exception)
+  noexcept(false)
   : BodyFunc<bool>(expr,pars,_npar), TIME(0.) {}
 ////////////////////////////////////////////////////////////////////////////////
 //                                                                            //
 // implementing falcON::bodiesfunc::bodiesfunc()                              //
 //                                                                            //
 ////////////////////////////////////////////////////////////////////////////////
-bodiesfunc::bodiesfunc(const char*oexpr) throw(falcON::exception)
+bodiesfunc::bodiesfunc(const char*oexpr) noexcept(false)
 {
   // 0 eliminate white space from expression
   shrink(nexpr,MAX_LENGTH_EXPR,oexpr);
@@ -1422,7 +1422,7 @@ namespace {
 		      const char*ftype,     // I: function return type          
 		      const char*fname,     // I: file base name                
 		      const char*funcn)     //[I: function name]                
-    throw(BfErr)
+    noexcept(false)
   {
     // P   preparations
     if (!havesyms) {

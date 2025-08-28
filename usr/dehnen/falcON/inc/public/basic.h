@@ -84,7 +84,7 @@ namespace falcON {
   //----------------------------------------------------------------------------
 #ifdef WDutils_EXCEPTIONS
 #  define falcON_EXCEPTIONS
-#  define falcON_THROWING      throw(falcON::exception)
+#  define falcON_THROWING      noexcept(false)
 #  define falcON_THROWER       throw WDutils::Thrower
 #  define falcON_THROWN        throw falcON::exception
 #  define falcON_RETHROW(E)    WDutils_RETHROW(E)

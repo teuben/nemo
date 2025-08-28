@@ -330,7 +330,7 @@ namespace falcON {
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
   inline void check_sufficient(fieldset const&read, fieldset const&need)
-    throw(falcON::exception) {
+    noexcept(false) {
     if(! read.contain(need)) {
       fieldset::wlist wneed(&need);
       fieldset::wlist wread(&read);

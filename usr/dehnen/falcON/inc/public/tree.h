@@ -196,7 +196,7 @@ namespace falcON {
       void dump(std::ostream&o) const {
 	o<<' '<<std::setw(3) << FLAGS
 	 <<' '<<std::setw(2) << LINK.no()<<' '<<std::setw(6)<<LINK.in();
-	for(register int d=0; d!=Ndim; ++d)
+	for(int d=0; d!=Ndim; ++d)
 	  o<<' '<<std::setw(9)<<std::setprecision(4)<<POS[d];
       }
     }; // class Leaf
@@ -349,7 +349,7 @@ namespace falcON {
 	 <<' '<<std::setw(5)<<FCLEAF
 	 <<' '<<std::setw(5)<<NLEAFS
 	 <<' '<<std::setw(6)<<NUMBER;
-	for(register int d=0; d!=Ndim; ++d)
+	for(int d=0; d!=Ndim; ++d)
 	  o<<' '<<std::setw(8)<<std::setprecision(4)<<CENTRE[d];
       }
       //------------------------------------------------------------------------
@@ -551,6 +551,13 @@ namespace falcON {
 	T = I.my_tree();
 	C = static_cast<CELL*>(I.c_pter());
 	return *this;
+      }
+      CellIter& operator=(CellIter const&I) {
+        if (this != &I) {
+          T = I.T;
+          C = I.C;
+        }
+        return *this;
       }
       //------------------------------------------------------------------------
       /// \name forward iteration
@@ -872,7 +879,7 @@ namespace falcON {
   void OctTree::dump_leafs(std::ostream&o) const {
     LEAF_TYPE::dump_head(o);
     o <<'\n';
-    for(register leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li) {
+    for(leaf_iterator Li=begin_leafs(); Li!=end_leafs(); ++Li) {
       o <<' '<< std::setw(5)<<index(Li);
       static_cast<LEAF_TYPE*>(Li)->dump(o);
       o <<'\n';

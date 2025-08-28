@@ -17,6 +17,11 @@ PLATFORM 	:= $(shell uname -m)
 empty:=
 space:= $(empty) $(empty)
 
+# detect default c++ standard supported
+CXX_STD_DEFAULT := $(shell $(CXX) -dM -E -x c++ /dev/null | grep __cplusplus | awk '{print $$3}')
+stddefault:
+	@echo "OSTYPE = " $(CXX_STD_DEFAULT)
+
 # detect OSTYPE (Linux or Darwin) 
 OSTYPE := $(shell uname)
 ostype:
@@ -24,13 +29,13 @@ ostype:
 # set following variable to 1 if gcc > 700
 #API_GCC_7 := $(shell expr `echo $(GCCVERSION)` \>= 700)
 
-STDAPI=-std=c++03
+STDAPI=-std=c++11#-std=c++17#-std=c++03
 
 # warning flags
 ifdef LIMITED_WARNINGS
-WARNING		:= $(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
+WARNING		:= #$(LIMITED_WARNINGS) -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 else
-WARNING		:= -Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
+WARNING		:= #-Wextra -Winit-self -Wshadow -Wno-format-security -Wno-unused-variable -Wno-unused-parameter -Wno-redeclared-class-member -Wno-c++11-compat-deprecated-writable-strings -Wno-shadow
 endif
 ifndef TBBROOT
 ifdef WDutilsDevel
@@ -38,16 +43,12 @@ WARNING		+= -Wold-style-cast
 endif
 endif
 #WARNING		+= -Wno-unknown-pragmas 
-
+WARNING += -Wno-unused-command-line-argument -Wno-redeclared-class-member -Wno-deprecated-declarations -Wno-dangling-else -Wno-return-stack-address
 # it seem that coverage (to be combined with gcov) does not work for openmp)
 #ifdef WDutilsDevel
 #PROFLAGS	:= --coverage -fprofile-use -Wcoverage-mismatch
 #endif
 # general optimisation and warning flags
-OPTFLAGS	:= -mfpmath=sse \
-		$(WARNING) -O2 -fPIC \
-		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
-
 ifeq ($(NO_ARCH_NATIVE),1)
    ARCH_NATIVE =
 else
@@ -57,6 +58,10 @@ endif
 ifneq ($(OSTYPE),Darwin)
 OPTFLAGS	+= -rdynamic $(ARCH_NATIVE)
 endif
+
+OPTFLAGS	+= \
+		$(WARNING) -O2 -fPIC \
+		-funroll-loops -fforce-addr $(PROFLAGS) $(RDYNAMIC)
 
 # these are actually to be set
 CFLAGS		:= $(OPTFLAGS)

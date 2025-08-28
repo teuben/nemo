@@ -96,7 +96,7 @@ void falcON::main() falcON_THROWING
   // 2. rescale model to mass and core/tidal radius wanted                      
   //----------------------------------------------------------------------------
   const    double vf = 0.977775320024919, mf = 2.2228847e5;
-  register double mass = getdparam("mass");
+   double mass = getdparam("mass");
   if(getbparam("WD_units")) mass /= mf;
   if(hasvalue("r_t"))
     KM.reset_scales_tidal(mass, getdparam("r_t"));

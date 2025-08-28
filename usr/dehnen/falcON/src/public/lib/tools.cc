@@ -92,9 +92,9 @@ void falcON::find_centre_alpha(const bodies*B,
     W = 0.;                                        //   reset Sum w_i           
     X = 0.;                                        //   reset Sum w_i x_i       
     N = 0u;                                        //   reset # bodies          
-    register double Q(0.);                         //   reset Sum w_i x^2_i     
+     double Q(0.);                         //   reset Sum w_i x^2_i     
     LoopSubsetBodies(B,b) {                        //   LOOP bodies             
-      register double w = weight(b,alpha);         //     w_i = m_i*p_i^alpha   
+       double w = weight(b,alpha);         //     w_i = m_i*p_i^alpha   
       W+= w;                                       //     Sum w_i               
       X+= w * vect_d(pos(b));                      //     Sum w_i x_i           
       Q+= w * norm(pos(b));                        //     Sum w_i x_i^2         
@@ -115,7 +115,7 @@ void falcON::find_centre_alpha(const bodies*B,
     N = 0u;                                        //   reset # bodies          
     LoopSubsetBodies(B,b)                          //   LOOP bodies             
       if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
-	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
+	 double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
 	X+= w * vect_d(pos(b));                    //       Sum w_i x_i         
 	N++;                                       //       count               
@@ -132,7 +132,7 @@ void falcON::find_centre_alpha(const bodies*B,
     LoopSubsetBodies(B,b)                          //   LOOP bodies             
       if(dist_sq(pos(b),Xc) < Rq) {                //     IF |X-Xc| < R         
 	M+= mass(b);                               //       Sum m_i             
-	register double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
+	 double w = weight(b,alpha);       //       w_i = m_i*p_i^alpha 
 	W+= w;                                     //       Sum w_i             
 	V+= w * vect_d(vel(b));                    //       Sum w_i v_i         
       }                                            //   END LOOP                
@@ -187,7 +187,7 @@ void falcON::estimate_density_peak(OctTree *TREE,
   DensCell_iter max_cell;
   real          rho_max = zero;
   LoopCellsUp(DensCell_iter,TREE,Ci) {
-    register real w=0.;
+     real w=0.;
     LoopLeafKids(DensCell_iter,Ci,l) w += wght(l);
     LoopCellKids(DensCell_iter,Ci,c) w += wght(c);
     Ci->wght() = w;
@@ -217,13 +217,13 @@ namespace {
   template<> struct ferrers<3> {
     static double norm() { return FPi / 19.6875; }
     static void   diff(double const&m, double const&xq, double D[3]) {
-      register double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
+       double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
       D[2] = 24*d;
       D[1] =-6*d2;
       D[0] = d3;
     }
     static void   diff1(double const&m, double const&xq, double D[2]) {
-      register double t = 1.-xq, d2=m*t*t, d3=d2*t;
+       double t = 1.-xq, d2=m*t*t, d3=d2*t;
       D[1] =-6*d2;
       D[0] = d3;
     }
@@ -293,8 +293,8 @@ namespace {
   {
     const double rq = r*r, irq=1./rq;
     const double hqirq = norm(h) * irq;
-    register double _d1 = 0.;
-    register double _d2 = 0.;
+     double _d1 = 0.;
+     double _d2 = 0.;
     LoopSubsetBodies(B,b) {
       vect_d R(x); R -= pos(b);
       double tmp = norm(R);
