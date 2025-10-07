@@ -147,9 +147,10 @@
 // v 3.5    15/06/2011  WD recompute forces if manipulator changes masses
 // v 3.5.1  30/06/2011  WD eps required (no default value)
 // v 3.6    19/06/2011  WD happy gcc 4.7.0
+// v 3.7    07/10/2025  JCL support for std++11
 ////////////////////////////////////////////////////////////////////////////////
-#define falcON_VERSION   "3.6"
-#define falcON_VERSION_D "19-jun-2012 Walter Dehnen                          "
+#define falcON_VERSION   "3.7"
+#define falcON_VERSION_D "7-oct-2025 Walter Dehnen                             "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
