@@ -182,8 +182,8 @@ real GravKernBase::Psi(kern_type k, real Xq, real Eq)
 #define P1(MUM)					\
   x  = one/(Rq+EQ);				\
   D0 = MUM*sqrt(x);				\
-  register real D1 = D0*x;			\
-  register real hq = half*EQ;			\
+   real D1 = D0*x;			\
+   real hq = half*EQ;			\
   D0+= hq*D1;					\
   D1+= hq*3*D1*x;				\
   R *= D1;
@@ -191,8 +191,8 @@ real GravKernBase::Psi(kern_type k, real Xq, real Eq)
 #define P2(MUM)						\
   x  = one/(Rq+EQ);					\
   D0 = MUM*sqrt(x);					\
-  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x;	\
-  register real hq = half*EQ;				\
+   real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x;	\
+   real hq = half*EQ;				\
   D0+= hq*(D1+hq*D2);					\
   D1+= hq*(D2+hq*D3);					\
   R *= D1;
@@ -200,9 +200,9 @@ real GravKernBase::Psi(kern_type k, real Xq, real Eq)
 #define P3(MUM)							\
   x  = one/(Rq+EQ);						\
   D0 = MUM*sqrt(x);						\
-  register real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x, D4= 7*D3*x;	\
-  register real hq = half*EQ;					\
-  register real qq = half*hq;					\
+   real D1 = D0*x, D2= 3*D1*x, D3= 5*D2*x, D4= 7*D3*x;	\
+   real hq = half*EQ;					\
+   real qq = half*hq;					\
   D0+= ((hq*D3+D2)*qq+D1)*hq;					\
   D1+= ((hq*D4+D3)*qq+D2)*hq;					\
   R *= D1;
@@ -310,7 +310,7 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
 //                                                                              
 //==============================================================================
 # define DSINGL_P0_G				\
-  register real					\
+   real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
   D1  = XX * D0;
@@ -318,7 +318,7 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   DSINGL_P0_G
 //------------------------------------------------------------------------------
 # define DSINGL_P1_G				\
-  register real					\
+   real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
   D1  = XX * D0;				\
@@ -330,11 +330,11 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   DSINGL_P1_G
 //------------------------------------------------------------------------------
 # define DSINGL_P2_G				\
-  register real					\
+   real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
   D1  = XX * D0;				\
-  register real					\
+   real					\
   D2  = 3 * XX * D1;				\
   XX *= 5 * D2;           /* XX == T3 */	\
   D0 += HQ*(D1+HQ*D2);				\
@@ -344,13 +344,13 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   DSINGL_P2_G
 //------------------------------------------------------------------------------
 # define DSINGL_P3_G				\
-  register real					\
+   real					\
   XX  = one/D1;					\
   D0 *= sqrt(XX);				\
   D1  =     XX * D0;				\
-  register real					\
+   real					\
   D2  = 3 * XX * D1;				\
-  register real					\
+   real					\
   D3  = 5 * XX * D2;				\
   XX *= 7 * D3;           /* XX == T4 */	\
   D0 += HQ*(D1+QQ*(D2+HQ*D3));			\
@@ -420,14 +420,14 @@ void GravKernAll::single(leaf_iter const &A, leaf_iter const&B) const
   }
 //------------------------------------------------------------------------------
 #define GRAV_ALL(LOAD,DSINGL,PUT)		\
-for(register leaf_iter B=B0; B!=BN; ++B) {	\
+for( leaf_iter B=B0; B!=BN; ++B) {	\
   LOAD						\
   DSINGL					\
   PUT						\
 } 
 //------------------------------------------------------------------------------
 #define GRAV_FEW(LOAD,DSINGL)			\
-for(register leaf_iter B=B0; B!=BN; ++B)	\
+for( leaf_iter B=B0; B!=BN; ++B)	\
   if(is_active(B)) {				\
     LOAD					\
     DSINGL					\
@@ -438,14 +438,14 @@ for(register leaf_iter B=B0; B!=BN; ++B)	\
   const    real      M0=mass(A);		\
   const    vect      X0=cofm(A);		\
            vect      dR;			\
-  register real      D0,D1;
+   real      D0,D1;
 //------------------------------------------------------------------------------
 #define START_I					\
   const    real      E0=eph(A);			\
   const    real      M0=mass(A);		\
   const    vect      X0=cofm(A);		\
            vect      dR;			\
-  register real      D0,D1;
+   real      D0,D1;
 //==============================================================================
 // now defining auxiliary inline functions for the computation of  N            
 // interactions. There are the following 10 cases:                              
@@ -457,17 +457,17 @@ namespace {
   //////////////////////////////////////////////////////////////////////////////
 #define DIRECT(START,LOAD,DSINGL)				\
     static void many_YA(ARGS) {					\
-      START; register real P0(zero); vect F0(zero);		\
+      START;  real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_BOTH)				\
       A->pot()+=P0;  A->acc()+=F0;				\
     }								\
     static void many_YS(ARGS) {					\
-      START; register real P0(zero); vect F0(zero);		\
+      START;  real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_SOME)				\
       A->pot()+=P0; A->acc()+=F0;				\
     }								\
     static void many_YN(ARGS) {					\
-      START; register real P0(zero); vect F0(zero);		\
+      START;  real P0(zero); vect F0(zero);		\
       GRAV_ALL(LOAD,DSINGL,PUT_LEFT)				\
       A->pot()+=P0; A->acc()+=F0;				\
     }								\

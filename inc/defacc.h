@@ -379,7 +379,7 @@ namespace {
 	try {
 	  Pars = new double[npar];
 	} catch(std::bad_alloc& E) {
-	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
+	  error((char*) "[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
 	}
 	for(int n=0; n!=npar; ++n) Pars[n] = pars[n];
       } else
@@ -391,7 +391,7 @@ namespace {
 	try {
 	  File = new char[n];
 	} catch(std::bad_alloc& E) {
-	  error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
+	  error((char*) "[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);
 	}
 	strncpy(File,file,n);
       } else
@@ -418,7 +418,7 @@ namespace {
 	  Acc.template set_time<3>(Time,nbod,mas,pos,vel);
 	  break;
 	default:
-	  ::error("acceleration: ndim=%d not supported", ndim);
+	  ::error((char *) "acceleration: ndim=%d not supported", ndim);
 	}
       }
     }
@@ -496,12 +496,12 @@ namespace {
       if(need_mass)
 	*need_mass = Acc.NeedMass();
       else if(Acc.NeedMass())
-	::error("inipotential: cannot use \"%s\", since masses are needed",
+	::error((char *) "inipotential: cannot use \"%s\", since masses are needed",
 		Acceleration::name());
       if(need_vels)
 	*need_vels = Acc.NeedVels();
       else if(Acc.NeedVels())
-	::error("inipotential: cannot use \"%s\", since velocities are needed",
+	::error((char *) "inipotential: cannot use \"%s\", since velocities are needed",
 		Acceleration::name());
     }
     //--------------------------------------------------------------------------
@@ -547,7 +547,7 @@ namespace {
 				  static_cast<double*>(p),
 				  static_cast<double*>(a),
 				  add);
-	default: ::error("acceleration \"%s\": unknown type ('%s')",
+	default: ::error((char *) "acceleration \"%s\": unknown type ('%s')",
 			 Acceleration::name(),type);
 	} break;
       case 3:
@@ -568,10 +568,10 @@ namespace {
 				  static_cast<double*>(p),
 				  static_cast<double*>(a),
 				  add);
-	default: ::error("acceleration \"%s\": unknown type ('%s')",
+	default: ::error((char *) "acceleration \"%s\": unknown type ('%s')",
 			 Acceleration::name(),type);
 	} break;
-      default: ::error("acceleration \"%s\": ndim=%d unsupported",
+      default: ::error((char *) "acceleration \"%s\": ndim=%d unsupported",
 		       Acceleration::name(),nd);
       }
     }
@@ -595,7 +595,7 @@ namespace {
       case 3: Acc.template acc<3>(static_cast<const scalar*>(0), __pos, 
 				  static_cast<const scalar*>(0), *__pot, __acc);
 	break;
-      default: ::error("potential \"%s\": ndim=%d not supported",
+      default: ::error((char *) "potential \"%s\": ndim=%d not supported",
 		       Acceleration::name(),__ndim);
       }
     }
@@ -667,7 +667,7 @@ void iniacceleration(const double*pars,					\
 {									\
   nemo_dprintf(4,"iniacceleration() called\n");				\
   if(AccN == AccMax) {							\
-    ::warning("iniacceleration(): request to initialize "		\
+    ::warning((char *) "iniacceleration(): request to initialize "		\
 	      "more than %d accelerations of type \"%s\"",		\
 	      AccMax, MyAccInstall::name());				\
     *accel = 0;								\
@@ -676,7 +676,7 @@ void iniacceleration(const double*pars,					\
   try {									\
     MyAcc[AccN] = new MyAccInstall(pars,npar,file,need_m,need_v);	\
   } catch(std::bad_alloc& E) {						\
-    ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+    ::error((char *) "[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
   *accel = Accs[AccN++];						\
 }
@@ -703,11 +703,11 @@ void inipotential(const int   *npar,					\
 {									\
   if(MyPot) {								\
     if(MyPot->differ(pars,*npar,file))					\
-      ::warning("inipotential(): re-initializing \"%s\" "		\
+      ::warning((char *) "inipotential(): re-initializing \"%s\" "		\
 		"with different parameters or data file",		\
 		MyPotInstall::name());					\
     else								\
-      ::warning("inipotential(): re-initializing \"%s\" "		\
+      ::warning((char *) "inipotential(): re-initializing \"%s\" "		\
 		"with identical parameters and data file",		\
 		MyPotInstall::name());					\
     delete MyPot;							\
@@ -715,7 +715,7 @@ void inipotential(const int   *npar,					\
   try {									\
     MyPot = new MyPotInstall(pars,*npar,file,0,0);			\
   } catch(std::bad_alloc& E) {						\
-    ::error("[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
+    ::error((char *) "[%s:%d]: caught std::bad_alloc\n",__FILE__,__LINE__);	\
   }									\
 }									\
 void potential_double(const int   *ndim,				\

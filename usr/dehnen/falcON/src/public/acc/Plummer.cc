@@ -38,23 +38,23 @@ namespace {
 	    const char  *file)
     {
       if(npar < 3)
-	warning("%s: recognizing 3 parameters:\n"
-		" omega        pattern speed (ignored)           [0]\n"
-		" G*M          mass;                             [1]\n"
-		" a            scale radius;                     [1]\n"
-		"\nthe potential is given by\n\n"
-		"                 G*M\n"
-                "    Phi = - ---------------\n"
+	warning((char*)"%s: recognizing 3 parameters:\n"\
+		" omega        pattern speed (ignored)           [0]\n"\
+		" G*M          mass;                             [1]\n"\
+		" a            scale radius;                     [1]\n"\
+		"\nthe potential is given by\n\n"\
+		"                 G*M\n"\
+                "    Phi = - ---------------\n"\
 		"            sqrt(a^2 + r^2)\n\n",name());
       if(file && file[0])
-	warning("%s: file \"%s\" ignored",name(),file);
+	warning((char*)"%s: file \"%s\" ignored",name(),file);
       double
 	o   = npar>0? pars[0] : 0.,
 	m   = npar>1? pars[1] : 1.,
 	a   = npar>2? pars[2] : 1.;
       Aq    = a*a;
       GM    = -m;
-      if(npar>3) warning("%s: skipped parameters beyond 3",name());
+      if(npar>3) warning((char*)"%s: skipped parameters beyond 3",name());
       nemo_dprintf (1,
 		    "initializing %s\n"
 		    " parameters : pattern speed = %f (ignored)\n"

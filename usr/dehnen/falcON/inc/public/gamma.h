@@ -336,7 +336,7 @@ namespace falcON {
   { 
     if(p==0.) return 1.;
     if(g==2.) return exp(-p);
-    register double pg2=p*g2;
+     double pg2=p*g2;
     if(g2>0. && pg2>1.) falcON_Error("DehnenModel: psi out of range");
     return pow(1.-pg2, ig2);
   }
@@ -379,7 +379,7 @@ namespace falcON {
       dP = - square(1-y)/y;
       return -std::log(y);
     } else {
-      register double t = pow(y,g1);
+       double t = pow(y,g1);
       dP = - square(1-y)*t;
       return ig2 * (1.-y*t);
     }
@@ -400,7 +400,7 @@ namespace falcON {
       d2P = - square(d1P);
       return -std::log(y);
     } else {
-      register double t = pow(y,-g), y1=1-y, u=y1*y1*t;
+       double t = pow(y,-g), y1=1-y, u=y1*y1*t;
       d1P = - u * y;
       d2P =   u * y1 * (g3*y-g1);
       return ig2 * (1.-y*y*t);
@@ -607,7 +607,7 @@ namespace falcON {
   //----------------------------------------------------------------------------
   inline double DehnenModel::XofELC(double e, double l, double cet) const
   {
-    register double ye = Yc<ec>(e);
+     double ye = Yc<ec>(e);
     return Xc<yc>(ye) * pow(1 + cet*sqrt(1-l*l/Lq<yc>(ye)),0.5*Gm<yc>(ye));
   }
   //----------------------------------------------------------------------------
@@ -716,7 +716,7 @@ namespace falcON {
   template<> inline
   double ScaledDehnenModel::Ps1<DehnenModel::ym>(double y, double&dP) const
   {
-    register double _ps = sE*DehnenModel::Ps1<ym>(y,dP);
+     double _ps = sE*DehnenModel::Ps1<ym>(y,dP);
     dP *= sA;
     return _ps;
   }
@@ -731,7 +731,7 @@ namespace falcON {
 						 double&d1P,
 						 double&d2P) const
   {
-    register double _ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
+     double _ps = sE*DehnenModel::Ps2<ym>(y,d1P,d2P);
     d1P *= sA;
     d2P *= sS;
     return _ps;
@@ -756,7 +756,7 @@ namespace falcON {
   template<> inline
   double ScaledDehnenModel::Rh1<DehnenModel::ym>(double y, double&dR) const
   {
-    register double rh = sD*DehnenModel::Rh1<ym>(y,dR);
+     double rh = sD*DehnenModel::Rh1<ym>(y,dR);
     dR *= sB;
     return rh;
   }
@@ -771,7 +771,7 @@ namespace falcON {
 						 double&d1R,
 						 double&d2R) const
   {
-    register double rh = sD*DehnenModel::Rh2<ym>(y,d1R,d2R);
+     double rh = sD*DehnenModel::Rh2<ym>(y,d1R,d2R);
     d1R *= sB;
     d2R *= sC;
     return rh;
@@ -1032,7 +1032,7 @@ namespace falcON {
   // provide the abstract functions and more                                    
   //----------------------------------------------------------------------------
   inline double DehnenModelSampler::DF (double e) const {
-    register double ye = ScaledDehnenModel::Y<DehnenModel::ps>(e);
+     double ye = ScaledDehnenModel::Y<DehnenModel::ps>(e);
     if(ye >= 1.   ) return 0.;
     if(ye < y[0]  ) return exp(f[0]   + fi*log(ye/y[0]) );
     if(ye > y[n-1]) return exp(f[n-1] + fo*log((1-ye)/(1-y[n-1])) );
