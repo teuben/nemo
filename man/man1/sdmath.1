@@ -104,6 +104,7 @@ seconds [nemobench5 scores listed where available]
 
 Xeon E5620  @ 2.40GHz (fourier) - 115.1  [218]
 AMD EPYC 7302 @ 3.0 GHz (lma)   -  34.1  [675]
+AMD Ryzen AI 9 HX PRO 370       -  23.4  [~1170]
 Ultra 7 155H @ 4.5 GHz (d76)    -  21.8  [~1200]
 M4 air                          -  15.4  [~2000]
 
@@ -111,8 +112,8 @@ M4 air                          -  15.4  [~2000]
 
 .EE
 
-To view the impact of OpenMP, here is an example performance on an Ultra 7 155H, measured in wall clock
-time seconds, and iter=20:
+To view the impact of OpenMP, here is an example performance on an Ultra 7 155H,
+measured in wall clock time seconds, and iter=20:
 
 .EX
 OMP_NUM_THREADS=2 /usr/bin/time sdmath  1000 160000 iter=20
@@ -128,7 +129,10 @@ nscan  nchan      1      2      4      8     12     16     20
 ----- ------    ---    ---    ---    ---    ---    ---    ---
 
 .EE
-Somewhat surprisingly that barely a factor of 2 can be gained by going multi-core.
+Somewhat surprisingly that barely a factor of 2 can be gained by going multi-core
+on an typical laptop intel CPU.  An AMD CPU fares much better. The 
+Ryzen AI 9 HX PRO 370 is able to lower the wall clock time all the way up to
+12 cores.
 
 .PP
 A read benchmark can be done with a large series of Plummer models. The example file created
