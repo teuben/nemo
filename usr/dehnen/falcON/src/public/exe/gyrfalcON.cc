@@ -150,7 +150,7 @@
 // v 3.7    07/10/2025  JCL support for std++11
 ////////////////////////////////////////////////////////////////////////////////
 #define falcON_VERSION   "3.7"
-#define falcON_VERSION_D "7-oct-2025 Walter Dehnen                             "
+#define falcON_VERSION_D "7-oct-2025 Walter Dehnen                           "
 //------------------------------------------------------------------------------
 #ifndef falcON_NEMO
 #  error You need "NEMO" to compile gyrfalcON
