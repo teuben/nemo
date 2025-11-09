@@ -151,7 +151,7 @@ namespace falcON {
     /// direction of rotation axis
     vect_d drot(int i) const { 
       vect_d t(vp[i]);
-      return t.normalize();
+      return t.normalise();
     }
     /// direction of major axis
     const vect_d&major_axis(int i) const { return xa[i]; }

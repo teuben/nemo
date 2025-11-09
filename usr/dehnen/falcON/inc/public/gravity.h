@@ -246,7 +246,7 @@ namespace falcON {
       //------------------------------------------------------------------------
       void normalize_grav () {                     // acc,pot     /= mass       
 	if(mass()>zero) {
-	  register real im = one/mass();
+	   real im = one/mass();
 	  pot() *= im;
 	  acc() *= im;
 	}
@@ -642,10 +642,10 @@ namespace falcON {
     return mass(C)!=zero;
   }
   inline real xmin(const GravEstimator::Cell*C) {
-    return cofm(C).min() - rmax(C);
+    return min(cofm(C)) - rmax(C);
   }
   inline real xmax(const GravEstimator::Cell*C) {
-    return cofm(C).max() + rmax(C);
+    return max(cofm(C)) + rmax(C);
   }
   // ///////////////////////////////////////////////////////////////////////////
   //                                                                          //

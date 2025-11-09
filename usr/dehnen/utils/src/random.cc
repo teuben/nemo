@@ -144,7 +144,8 @@ Sobol::Sobol(int ACTL, unsigned BITS)
   // Finally the direction numbers are Vi = 2^(bits-i) * Mi                     
   unsigned i,i2,ip,l;
   unsigned long vi;
-  v = WDutils_NEW(unsigned long,bits)-1;
+  v_allocated = WDutils_NEW(unsigned long,bits);
+  v = v_allocated - 1;
   for(i=1,i2=2; i<=degs; i++,i2<<=1) {
     if(i2<=poly) 
       vi = 1;
@@ -172,7 +173,7 @@ Sobol::Sobol(int ACTL, unsigned BITS)
 }
 //------------------------------------------------------------------------------
 Sobol::~Sobol() {
-  WDutils_DEL_A(v+1);
+  WDutils_DEL_A(v_allocated);
   sobol_f[actl]  = 0;
 }
 //------------------------------------------------------------------------------

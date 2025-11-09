@@ -73,13 +73,13 @@ namespace {
 	return NDIM == 2? 0.25*Pi : 4*Pi / 19.6875;
       }
       static void   diff(double const&m, double const&xq, double D[3]) {
-	register double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
+	 double t = 1.-xq, d=m*t, d2=d*t, d3=d2*t;
 	D[2] = 24*d;
 	D[1] =-6*d2;
 	D[0] = d3;
       }
       static void   diff1(double const&m, double const&xq, double D[2]) {
-	register double t = 1.-xq, d2=m*t*t, d3=d2*t;
+	 double t = 1.-xq, d2=m*t*t, d3=d2*t;
 	D[1] =-6*d2;
 	D[0] = d3;
       }

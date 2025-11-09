@@ -70,10 +70,10 @@ namespace {
     GalaxyFile(const char*file)
     {
       if(file==0 || file[0]==0) 
-	::error("Need data file to initialize GalPot");
+	::error((char*)"Need data file to initialize GalPot");
       from.open(file);
       if(!from.is_open())
-	::error("GalPot: cannot open file \"%s\"",file);
+	::error((char*)"GalPot: cannot open file \"%s\"",file);
       nemo_dprintf(4,"file \"%s\" opened\n",file);
     }
   };

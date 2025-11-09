@@ -174,14 +174,14 @@ namespace WDutils {
       /// from 2 elements (for N=2)
       tupel(X x0, X x1)
       {
-	WDutilsStaticAssert(N==2);
+	static_assert(N==2, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
       }
       /// from 3 elements (for N=3)
       tupel(X x0, X x1, X x2)
       {
-	WDutilsStaticAssert(N==3);
+	static_assert(N==3, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -189,7 +189,7 @@ namespace WDutils {
       /// from 4 elements (for N=4)
       tupel(X x0, X x1, X x2, X x3)
       {
-	WDutilsStaticAssert(N==4);
+	static_assert(N==4, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -198,7 +198,7 @@ namespace WDutils {
       /// from 5 elements (for N=5)
       tupel(X x0, X x1, X x2, X x3, X x4)
       {
-	WDutilsStaticAssert(N==5);
+	static_assert(N==5, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -208,7 +208,7 @@ namespace WDutils {
       /// from 6 elements (for N=6)
       tupel(X x0, X x1, X x2, X x3, X x4, X x5)
       { 
-	WDutilsStaticAssert(N==6);
+	static_assert(N==6, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -219,7 +219,7 @@ namespace WDutils {
       /// from 7 elements (for N=7)
       tupel(X x0, X x1, X x2, X x3, X x4, X x5, X x6)
       {
-	WDutilsStaticAssert(N==7);
+	static_assert(N==7, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -231,7 +231,7 @@ namespace WDutils {
       /// from 8 elements (for N=8)
       tupel(X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7)
       {
-	WDutilsStaticAssert(N==8);
+	static_assert(N==8, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -243,7 +243,7 @@ namespace WDutils {
       }
       /// from 9 elements (for N=9)
       tupel(X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7, X x8) {
-	WDutilsStaticAssert(N==9);
+	static_assert(N==9, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;
@@ -257,7 +257,7 @@ namespace WDutils {
       /// from 10 elements (for N=10)
       tupel(X x0, X x1, X x2, X x3, X x4, X x5, X x6, X x7, X x8, X x9) 
       {
-	WDutilsStaticAssert(N==10);
+	static_assert(N==10, "Static assertion failed");
 	a[0]=x0;
 	a[1]=x1;
 	a[2]=x2;

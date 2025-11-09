@@ -5,6 +5,9 @@
 #
 ################################################################################
 
+# detect OSTYPE (Linux or Darwin) 
+OSTYPE := $(shell uname)
+
 # -----------
 # directories
 # -----------
@@ -320,8 +323,12 @@ $(ACC)Point.so:			$(SACC)Point.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
 $(ACC)PotExp.so:                $(SACC)PotExp.cc $(ACCT) $(PotExp_cc) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) -I$(SRC) $(NBDYFLAGS)
+ifneq ($(OSTYPE),Darwin)
 $(ACC)Shrink.so:		$(SACC)Shrink.cc $(ACCT) $(timer_h) $(defacc_h) $(makefiles)
 				$(MAKE_ACC)
+else
+$(ACC)Shrink.so:		
+endif
 $(ACC)SoftKernel.so:		$(SACC)SoftKernel.cc $(ACCT) $(defacc_h) $(makefiles)
 				$(MAKE_ACC) $(NBDYFLAGS)
 $(ACC)GasPotential.so:		$(SACC)GasPotential.cc $(ACCT) $(defacc_h) $(makefiles)

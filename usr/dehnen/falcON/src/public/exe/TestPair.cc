@@ -34,7 +34,7 @@ void dmintmin(const bodies *BODS,
     tmin = zero;
     dmin = sqrt(dist_sq(BODS->pos(A),BODS->pos(B)));
   } else {
-    register vect R = BODS->pos(A)-BODS->pos(B), V=BODS->vel(A)-BODS->vel(B);
+     vect R = BODS->pos(A)-BODS->pos(B), V=BODS->vel(A)-BODS->vel(B);
     tmin = max(zero, min(T, -(R*V)/norm(V)));
     dmin = sqrt(norm(R+tmin*V));
   }
@@ -59,8 +59,8 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
     exit(1);
   }
 
-  register clock_t      cpu0 = clock(), cpu1;
-  register real         time_prep, time_tree, time_subt;
+   clock_t      cpu0 = clock(), cpu1;
+   real         time_prep, time_tree, time_subt;
   int                   p=1, T=0, Mx=1, Count=0;
   long                  Seed;
   unsigned              N, NS, Ncrit=Default::Ncrit;
@@ -80,7 +80,7 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
 
   bodies         *BODIES = new bodies(N,fieldset(bodies::DefBits),NS);
   const    real   mass=1./real(N);
-  register double M,r,rq,P,Pot,veq,f0,v,vq,fs,R,cth,phi;
+   double M,r,rq,P,Pot,veq,f0,v,vq,fs,R,cth,phi;
   LoopAllBodies(BODIES,Bi) {
     M   = pow(drand48(),twothird);
     rq  = M/(1-M);
@@ -141,7 +141,7 @@ void falcON::main(int argc, char* argv[]) falcON_THROWING
   time_subt = (cpu1 - cpu0) / real(CLOCKS_PER_SEC);
   cerr<<" tree.make_iaction_list() used "<<time_subt<<" seconds \n";
 
-  register unsigned i;
+   unsigned i;
   if(TAU<zero) {
     ofstream out("pairs.c++");
     for(i=0; i!=min(NS,Na); ++i) {
