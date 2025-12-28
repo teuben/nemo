@@ -1,15 +1,16 @@
 #! /usr/bin/env python
 #
-#  Amdahl's law:   a fraction of the code can be parallized
+#  Amdahl's law:   a fraction of the code can be parallelized
 #  Output are, for each N (where N is number of processors)
-#       r_u,  r_e, f_p
+#       r_u,  r_e, f_p, r_s
 #  where both r_u (user_ratio) and r_e (elapsed_ratio) should ideally
 #  be 1, else there is overhead of running in parallel, and
 #  f_p (parallel fraction) is the derived fraction of code that's parallized.
 #  If e.g. f_p depends a lot on N, something is not ideal.
+#  r_s is the ratio of system to user time
 #
-#  Code that does parallize has r_u=1 r_e=N and f_p=0
-#  Perfect parallel code        r_u=1 r_e=1 and f_p=1
+#  Code that does parallelize has r_u=1 r_e=N and f_p=0
+#  Perfect parallel code          r_u=1 r_e=1 and f_p=1
 #  
 #
 #  nov 22, 2020:   first version
@@ -25,14 +26,17 @@ def par(u1,e1,np,un,en):
     r1 = user ratio (r_u)
     r2 = elapsed ratio (r_e)
     fp = parallel fraction (f_p)
+    fs = scalign factor (1/r_e)
     """
     r1 = un/u1
     r2 = en/(e1/np)
     if np > 1:
         fp = (np-r2)/(np-1)
+        fs = 1/r2
     else:
         fp = 1.0
-    return (r1,r2,fp)
+        fs = 1.0
+    return (r1,r2,fp,fs)
 
 def hms2s(hms):
     w = hms.split(':')
@@ -46,7 +50,7 @@ def hms2s(hms):
         return -1.0
 
 def readf1(filename):
-    """  example line:
+    """  example lines it handles:
          2  72.24 10.58 1:47.36
          1  19.72user 0.13system 0:19.95elapsed   99%CPU
     """
@@ -62,13 +66,14 @@ def readf1(filename):
         u0 = float(w[1])
         s0 = float(w[2])
         e0 = hms2s(w[3])
+        r_s = s0/u0
         if n == 1:
             un0 = u0
             sn0 = s0
             en0 = e0
-        (r10,r20,fp0) = par(un0,en0,n,u0,e0)
+        (r10,r20,fp0,fs0) = par(un0,en0,n,u0,e0)
         # print("%d %g %g %g  %g %g %g" % (n,u0,s0,e0, r10,r20,fp0))
-        print("%s %.2f %.2f %.2f" % (pline,r10,r20,fp0))
+        print("%s %.2f %.2f %.2f %.3f %.3f" % (pline,r10,r20,fp0,r_s,fs0))
     
 
 def readf2(filename):
