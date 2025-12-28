@@ -82,17 +82,17 @@ namespace falcON { namespace Manipulate {
     void draw(double&r, double&vr, double&vt) const
     {
       // 1. get radius from cumulative mass
-      register double x = std::pow(Ran(),0.66666666666666666667), P = 1-x;
+       double x = std::pow(Ran(),0.66666666666666666667), P = 1-x;
       r = std::sqrt(x/P);
       // 2. get velocity using rejection method
-      register double ve= std::sqrt(2*P), f0= std::pow(P,3.5),f,v;
+       double ve= std::sqrt(2*P), f0= std::pow(P,3.5),f,v;
       do {
 	v = ve * std::pow(Ran(),0.333333333333333333333);
 	f = std::pow(P-0.5*v*v,3.5);
       } while(f0 * Ran() > f);
       r *= R;
       v *= V;
-      register double c = Ran(-1.,1.);
+       double c = Ran(-1.,1.);
       vr = v * c;
       vt = v * std::sqrt(1.-c*c);
     }
@@ -103,7 +103,7 @@ namespace falcON { namespace Manipulate {
       double r,vr,vt;
       draw(r,vr,vt);
       // 2. set position
-      register double
+       double
 	cth = Ran(-1.,1.),
 	sth = std::sqrt(1.-cth*cth),
 	phi = Ran(0.,TPi),
@@ -113,7 +113,7 @@ namespace falcON { namespace Manipulate {
       pos[1] = r * sth * sph;
       pos[2] = r * cth;
       // 2. set velocity
-      register double
+       double
 	psi = Ran(0.,TPi),
 	vth = vt * std::cos(psi),
 	vph = vt * std::sin(psi),

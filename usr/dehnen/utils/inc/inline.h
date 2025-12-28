@@ -165,8 +165,8 @@ namespace WDutils {
   template<typename _Tp> inline
   _Tp pow(const _Tp &x, unsigned int n) {
     if(n==0) return _Tp(1);
-    register _Tp z=x, y=(n%2)? x : _Tp(1);
-    for(register unsigned int i=n>>1; i; i>>=1) { z*=z; if(i%2) y*=z; }
+     _Tp z=x, y=(n%2)? x : _Tp(1);
+    for( unsigned int i=n>>1; i; i>>=1) { z*=z; if(i%2) y*=z; }
     return y;
   }
   template<typename _Tp> inline

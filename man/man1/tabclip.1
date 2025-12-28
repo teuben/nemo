@@ -1,9 +1,12 @@
 .TH TABCLIP 1NEMO "27 November 2002"
-.SH NAME
+
+.SH "NAME"
 tabclip \- clip a table
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBtabclip\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBtabclip\fP removes points from a table based on some "smoothness"
 criteria. Examples are when there is a jump larger than a
 critical amount it can be flagged. Or when the derivative exceeds
@@ -11,47 +14,63 @@ a certain amount.
 .PP
 Fitting programs, such \fItabnllsqfit(1NEMO)\fP can also be used
 to remove points that are not close to a global model.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBin=\fP
-Input file name (an ascii table) [???] 
+Input file name (an ascii table).
+.br
+No default
 .TP
 \fBout=\fP
-Output table [???]     
+Output table
+.br
+No default
 .TP
 \fBxcol=\fP
-x coordinate column [1]    
+x coordinate column
+.br
+[1]    
 .TP
 \fBycol=\fP
-y coordinate column [2]    
+y coordinate column
+.br
+[2]    
 .TP
 \fBderiv=\fP
-Clipping if abs(derivative) exceeds this value [] 
+Clipping if abs(derivative) exceeds this value
 .TP
 \fBeta=\fP
 Clipping if the value predicted from a 2nd order polynomial value exceeds
 the Y value by more than \fIeta\fP.
+.br
 Default: not used.
 .TP
 \fBlogic=and|or\fP
 When a left and right side criteria is applied, this determines
 the outcome of the clipping. \fBand\fP requires both to be satisfied,
-\fBor\fP requires only one. [Default: \fBand\fP].
+\fBor\fP requires only one.
+.br
+[Default: \fBand\fP].
 .TP
 \fBnmax=\fP
-Hardcoded allocation space, if needed for piped data.TP
+Hardcoded allocation space, if needed for piped data.
+.TP
 \fBcomment=t|f\fP
 Keep the clipped points as comments in the output file? By
 default they are left out.
-.SH SEE ALSO
+
+.SH "SEE ALSO"
 tabmath(1NEMO), tabnllsqfit(1NEMO)
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 23-Nov-02	V0.1 Created	PJT
 27-nov-02	V0.3 added eta=	PJT
+22-dec-2025	V0.4 ANSI C clean up	PJT
 .fi

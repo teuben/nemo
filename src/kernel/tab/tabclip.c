@@ -3,12 +3,14 @@
  *
  *    23-nov-2002  0.1 Simple version, with just beta=
  *    27-nov-2002  0.3 merged 0.2 with Rahul/Stuart's afternoon hacking
+ *    22-dec-2025  0.4 ANSI C
  */
 
 /**************** INCLUDE FILES ********************************/ 
 
 #include <stdinc.h>	
 #include <getparam.h>
+#include <table.h>
 
 #define MAXCOL  256
 
@@ -24,7 +26,7 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "logic=and\n         Use AND or OR",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
     "comment=f\n         Keep clipped points as commented lines?",
-    "VERSION=0.3\n	 27-nov-02 PJT",
+    "VERSION=0.4\n	 22-dec-2025 PJT",
     NULL
 };
 
@@ -49,19 +51,7 @@ local bool Qand;
 
 /****************************** START OF PROGRAM **********************/
 
-nemo_main()
-{
-    setparams();
-
-    instr = stropen(input,"r");
-    outstr = stropen(output,"w");
-    read_data();
-    if (hasvalue("deriv")) deriv_data();
-    if (hasvalue("eta"))     eta_data();
-    write_data();
-}
-
-setparams()
+void setparams()
 {
   string  logic = getparam("logic");
 
@@ -82,7 +72,7 @@ setparams()
   y = (real *) allocate(sizeof(real) * (nmax+1));   /* Y data */
 }
 
-read_data()
+void read_data()
 {
   real *coldat[1+MAXCOL];
   int i, j, k, colnr[1+MAXCOL];
@@ -116,7 +106,7 @@ read_data()
 }
 
 
-deriv_data()
+void deriv_data()
 {
   int    i;
   real d1, d2, d1a, d2a, dmin = getdparam("deriv");
@@ -165,7 +155,7 @@ deriv_data()
   dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
 }
 
-delta_data()
+void delta_data()
 {
   int    i;
   real d1, d2, d1a, d2a, dmin = getdparam("deriv");
@@ -236,7 +226,7 @@ real get_av(int i0, int i1, int i2, int i3)
   return x;
 }
 
-eta_data()
+void eta_data()
 {
   int    i;
   real d1, d2, d1a, d2a, dmin = getdparam("deriv");
@@ -261,7 +251,7 @@ eta_data()
   }
 }
 
-write_data()
+void write_data()
 {
   int i, nok=0;
   bool Qcomment = getbparam("comment");
@@ -275,3 +265,18 @@ write_data()
   }
   dprintf(0,"Wrote %d/%d points\n",nok,npt);
 }
+
+
+
+void nemo_main()
+{
+    setparams();
+
+    instr = stropen(input,"r");
+    outstr = stropen(output,"w");
+    read_data();
+    if (hasvalue("deriv")) deriv_data();
+    if (hasvalue("eta"))     eta_data();
+    write_data();
+}
+

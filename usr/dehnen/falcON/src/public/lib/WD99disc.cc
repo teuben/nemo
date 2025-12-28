@@ -212,7 +212,7 @@ PlanarOrbit::sample(Random const&RNG,         // I: random
 void WD99disc::PlanarOrbit::CashKarpStep(vect_d&W_, double  eps)
 {
   vect_d W0=W_;
-  register double h;
+   double h;
   do {
     h   = CashKarp(W0,dT,eps);
     dT *= h;
@@ -245,8 +245,8 @@ double WD99disc::PlanarOrbit::CashKarp(vect_d&W_, double dt, double eps)
   Ws += cs0*Kx0+cs2*Kx2+cs3*Kx3+cs4*Kx4+cs5*Kx5;
   W_ += c0*Kx0+c2*Kx2+c3*Kx3+c5*Kx5;
   
-  double h = maxnorm(W_-Ws);
-  if(h>1.e-19*maxnorm(W_) ) h = pow(eps/h,0.2);
+  double h = WDutils::max_abs(W_-Ws);
+  if(h>1.e-19*WDutils::max_abs(W_) ) h = pow(eps/h,0.2);
   else                      h = 1.e3;
   return min(h,2.);
 }
@@ -263,7 +263,7 @@ vect_d WD99disc::PlanarOrbit::Dt(const vect_d&w)
 //------------------------------------------------------------------------------
 void WD99disc::PlanarOrbit::step_back_to_R_equal(double R, vect_d&y)
 {
-  register double dR=R-y[1];
+   double dR=R-y[1];
   vect_d dy, y0(y);
   y+=( dy=dR*DR(y0)        )/6.;
   y+=( dy=dR*DR(y0+0.5*dy) )/3.;
@@ -570,7 +570,7 @@ void WD99disc::sample( bodies const&B,           // I/O: bodies to sample
 	
 	Bi.mass() = mpart;                         //     set mass           
 	Mcum += mpart;                             //     cumulate total mass
-	register double cph=cos(ph), sph=sin(ph);  //
+	 double cph=cos(ph), sph=sin(ph);  //
 	Bi.pos()[0] = R * cph;                     //     x=r*sin(th)*cos(ph)   
 	Bi.pos()[1] = R * sph;                     //     y=r*sin(th)*sin(ph)   
 	Bi.pos()[2] = z;                           //     z=r*cos(th)   
@@ -666,7 +666,7 @@ void WD99disc::coldsample(bodies const&B,            // I/O: bodies to sample
 	
 	  Bi.mass() = mpart;                          //     set mass           
 	  Mcum += mpart;                              //     cumulate total mass
-	  register double cph=cos(phi), sph=sin(phi); //
+	   double cph=cos(phi), sph=sin(phi); //
 	  Bi.pos()[0] = Re * cph;                     //    x=r*sin(th)*cos(ph) 
 	  Bi.pos()[1] = Re * sph;                     //    y=r*sin(th)*sin(ph) 
 	  Bi.pos()[2] = z;                            //    z=r*cos(th)   

@@ -41,7 +41,7 @@ namespace {
   {
     const double f1  =1.1283791670955125739, f2=2./3.;  // sqrt(4/Pi)           
     if(Psi<=0.) return 0.;
-    register double sPsi=sqrt(Psi);
+     double sPsi=sqrt(Psi);
     return exp(Psi)*erf(sPsi) - f1*sPsi*(1+f2*Psi);
   }
   //--------------------------------------------------------------------------
@@ -150,8 +150,8 @@ void king_model::reset_scales_core(const double M, const double R0)
 //==============================================================================
 double king_model::rms_radius() const
 {
-  register double dM,y=0.;
-  for(register unsigned i=0,j=1; j!=N; ++i,++j) {
+   double dM,y=0.;
+  for( unsigned i=0,j=1; j!=N; ++i,++j) {
     dM  = m[j]-m[i];
     y  += (square(r[j])+square(r[i]))*dM;
   }
@@ -169,8 +169,8 @@ double king_model::half_mass_radius() const
 //==============================================================================
 double king_model::Etot() const
 {
-  register double dM, psi,e=0.;
-  for(register unsigned i=0,j=1; j!=N; ++i,++j) {
+   double dM, psi,e=0.;
+  for( unsigned i=0,j=1; j!=N; ++i,++j) {
     dM  = m[j]-m[i];
     psi = ps[j]+ps[i];
     e  += dM*psi;
@@ -191,7 +191,7 @@ void king_model::write_table(const char* file) const
   if(! open(table,file) )  return;
   table.setf(ios::left, ios::adjustfield);
   table<<"#        r     Phi(r)     rho(r)       M(r)\n";
-  for(register unsigned i=0; i<N; i++)
+  for( unsigned i=0; i<N; i++)
     table<<setw(10)<<setprecision(6)<<rscal*r[i]      <<" "  // r     
 	 <<setw(10)<<setprecision(6)<<Pscal*(P0-ps[i])<<" "  // Phi(r)
 	 <<setw(10)<<setprecision(6)<<rhscl*rh[i]     <<" "  // rho(r)
@@ -216,7 +216,7 @@ namespace {
     // its derivative p(v|r) = 4Pi f(v|r) v^2                                   
     const double sqh = 0.70710678118654752440,
                  sq2p= 0.79788456080286535588;     // sqrt(2/Pi)                
-    register double vq=v*v;
+     double vq=v*v;
     P = exp(psi)*erf(v*sqh)-sq2p*(vq*v/3.+v*exp(psi-0.5*vq)) - rhi;
     p = FPi * feps(psi-0.5*vq) * vq;
   }
@@ -225,7 +225,7 @@ namespace {
 double king_model::random(const double R1, const double R2,
 			  double &rad, double &vel) const {
   // 1. find radius from cumulative mass                                        
-  register double mi = R1*m[N-1];             // mass(<rad)                     
+   double mi = R1*m[N-1];             // mass(<rad)                     
   rad = polev(mi,m,r, N);                     // corresponding radius           
   // 2. find velocity from cumulative mass at given radius                      
   psi = polev(mi,m,ps,N);                     // psi(rad)                       
@@ -246,7 +246,7 @@ namespace {
   //----------------------------------------------------------------------------
   inline double sd_integrand(const double z)
   {
-    register double radius = sqrt(Rq+z*z);
+     double radius = sqrt(Rq+z*z);
     return (radius >= rt)? 0.0 : polev(radius,rad,rho,K);
   }
 }

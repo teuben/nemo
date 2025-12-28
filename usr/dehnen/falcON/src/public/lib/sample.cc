@@ -55,7 +55,7 @@ inline void SphericalSampler::setis()
   const double de =Pi/Ne1;
   double _eta = 0.;
   _p = 1-b0-b0;
-  for(register int i=1; i!=Ne; ++i) {
+  for( int i=1; i!=Ne; ++i) {
     Is[i]    = rk4(Is[i-1],_eta,de,dI);
     _eta   += de;
     Xe[i][0] = sin(_eta);
@@ -203,7 +203,7 @@ void SphericalSampler::sample(body   const&B0,
     for(int i=0; i!=n && Bi!=BN; ++i,++k,++Bi) {
       Bi.mass() = mu;
       Mcum     += mu;
-      register double
+       double
 	cth = q? R(2,-1.,1.):R(-1.,1.),
 	sth = std::sqrt(1.-cth*cth),
 	phi = q? R(3,0.,TPi):R(0.,TPi),
@@ -212,7 +212,7 @@ void SphericalSampler::sample(body   const&B0,
       Bi.pos()[0] = r * sth * cph;
       Bi.pos()[1] = r * sth * sph;
       Bi.pos()[2] = r * cth;
-      register double
+       double
 	psi = q? R(4,0.,TPi):R(0.,TPi),
         vth = vt * std::cos(psi),
         vph = vt * std::sin(psi),

@@ -77,7 +77,7 @@ namespace GalPot {                                  // v0.4
   template <class ALLOCTYPE>
   inline int Alloc2D(ALLOCTYPE** &A, const int N[2])
   {
-    register int i, iN1;
+     int i, iN1;
     A    = new ALLOCTYPE*[N[0]];	 if(!A) return 1;
     A[0] = new ALLOCTYPE [N[0]*N[1]];  if(!A[0]) return 1;
     for(i=1, iN1=N[1]; i<N[0]; i++,iN1+=N[1])
@@ -193,8 +193,8 @@ namespace GalPot {                                  // v0.4
 	      int const natn=0)	// input:   natural spline at x[n-1] ?
   { 
     const S  zero=0., half=0.5, one=1., two=2., three=3., six=6.;
-    register int i;
-    register S   qn,p,sig,dx,dx1,dx2;
+     int i;
+     S   qn,p,sig,dx,dx1,dx2;
     T   un,dy,dy1;
     T *u = new T[n-1];
     S *v = new S[n-1];
@@ -246,24 +246,24 @@ namespace GalPot {                                  // v0.4
   {
     // computes K splines simultaneously
     const    S   zero=0., one=1., three=3., six=6.;
-    register T   *Y=y, *Yl=yl, *Yh=yh, *Y2l=y2l, *Y2h=y2h, *YK=y+K;
-    register S   h,h6,hh,A,B,Aq,Bq,Ap,Bp;
+     T   *Y=y, *Yl=yl, *Yh=yh, *Y2l=y2l, *Y2h=y2h, *YK=y+K;
+     S   h,h6,hh,A,B,Aq,Bq,Ap,Bp;
     if((h=xh-xl)==zero) error("splinTarr bad X input");
     h6=h/six;
     hh=h*h6;
     A =(xh-xi)/h;  Aq=A*A;  Ap=(Aq-one)*A*hh;
     B =one-A;      Bq=B*B;  Bp=(Bq-one)*B*hh;
     if(d2y) {
-      register T *dY=dy, *d2Y=d2y;
-      register S Au=h6*(three*Aq-one), Bu=h6*(three*Bq-one);
+       T *dY=dy, *d2Y=d2y;
+       S Au=h6*(three*Aq-one), Bu=h6*(three*Bq-one);
       for(; Y<YK; Y++,Yl++,Yh++,Y2l++,Y2h++,dY++,d2Y++) {
 	*Y   = A**Yl+B**Yh+Ap**Y2l+Bp**Y2h;
 	*dY  = (*Yh-*Yl)/h + Bu**Y2h-Au**Y2l;
 	*d2Y = A**Y2l + B**Y2h;
       }
     } else if(dy) {
-      register T *dY=dy;
-      register S Au=h6*(three*Aq-one), Bu=h6*(three*Bq-one);
+       T *dY=dy;
+       S Au=h6*(three*Aq-one), Bu=h6*(three*Bq-one);
       for(; Y<YK; Y++,Yl++,Yh++,Y2l++,Y2h++,dY++) {
 	*Y   = A**Yl+B**Yh+Ap**Y2l+Bp**Y2h;
 	*dY  = (*Yh-*Yl)/h + Bu**Y2h-Au**Y2l;
@@ -287,9 +287,9 @@ namespace GalPot {                                  // v0.4
   // value at the grid points. At the grid boundaries  d^3y/dx^3=0  is adopted.
   {
     const S      zero=0.,one=1.,three=3.,seven=7.,ten=10.,twelve=12.; 
-    register int i;
-    register S   p,sig,dx,dx1,dx2;
-    register T   dy=Y[1]-Y[0], dy1=dy;
+     int i;
+     S   p,sig,dx,dx1,dx2;
+     T   dy=Y[1]-Y[0], dy1=dy;
     S *v = new S[n-1];
     dx   = x[1]-x[0];
     Y3[0]= v[0] = zero;
@@ -328,7 +328,7 @@ namespace GalPot {                                  // v0.4
 	    T* d2Yi=0)			// output:  d^2y/d^2x(xi) if d2y != 0
   {
     const    S zero=0.,one=1.,two=2.,five=5.,six=6.,nine=9.,fe=48.;
-    register S h,hi,hf, A,B,C,D,Aq,Bq;
+     S h,hi,hf, A,B,C,D,Aq,Bq;
     if((h=x1-x0)==zero) error("PsplinT bad X input");
     hi = one/h;
     hf = h*h;
@@ -336,17 +336,17 @@ namespace GalPot {                                  // v0.4
     B  = one-A;      Bq = B*B;
     C  = h*Aq*B;
     D  =-h*Bq*A;
-    register T 	t1 = hi*(Y1-Y0),
+     T 	t1 = hi*(Y1-Y0),
       C2 = Y10-t1,
       C3 = Y11-t1,
       t2 = six*(Y10+Y11-t1-t1)/hf,
       C4 = Y30-t2,
       C5 = Y31-t2;
     hf/= fe;
-    register T 	Yi = A*Y0+ B*Y1+ C*C2+ D*C3+ 
+     T 	Yi = A*Y0+ B*Y1+ C*C2+ D*C3+ 
       hf*(C*(Aq+Aq-A-one)*C4+ D*(Bq+Bq-B-one)*C5);
     if(dYi) {
-      register S BAA=B-A-A, ABB=A-B-B;
+       S BAA=B-A-A, ABB=A-B-B;
       hf  += hf;
       *dYi = t1 + (A*ABB)*C2 + (B*BAA)*C3
 	+ hf*A*B*((one+A-five*Aq)*C4+ (one+B-five*Bq)*C5);
@@ -377,9 +377,9 @@ namespace GalPot {                                  // v0.4
 		  T* d2y=0)		// output:  d^2y_k/d^2x(xi) if d2y != 0
   {
     const    S zero=0.,one=1.,two=2.,five=5.,six=6.,nine=9.,fe=48.;
-    register S h,hi,hq,hf, A,B,C,D,E,F,Aq,Bq;
-    register T C2=*yl,C3=C2,C4=C2,C5=C2, t1=C2,t2=C2;
-    register T *Y=y,*Yl=yl,*Yh=yh,*Y1l=y1l,*Y1h=y1h,*Y3l=y3l,*Y3h=y3h,*YK=y+K;
+     S h,hi,hq,hf, A,B,C,D,E,F,Aq,Bq;
+     T C2=*yl,C3=C2,C4=C2,C5=C2, t1=C2,t2=C2;
+     T *Y=y,*Yl=yl,*Yh=yh,*Y1l=y1l,*Y1h=y1h,*Y3l=y3l,*Y3h=y3h,*YK=y+K;
     if((h=xh-xl)==zero) error("PsplinTarr(): bad X input");
     hi = one/h;
     hq = h*h;
@@ -391,11 +391,11 @@ namespace GalPot {                                  // v0.4
     E  = hf*C*(Aq+Aq-A-one);
     F  = hf*D*(Bq+Bq-B-one);
     if(d2y) {
-      register S hf2= hf+hf, BAA=B-A-A, ABB=A-B-B,
+       S hf2= hf+hf, BAA=B-A-A, ABB=A-B-B,
 	AB=A*B, ABh=hf2*AB, Cp=Aq-AB-AB, Dp=Bq-AB-AB,
 	Ep=ABh*(one+A-five*Aq), Fp=ABh*(one+B-five*Bq),
 	Epp=hf2*(two*Aq*(nine*B-A)-one), Fpp=hf2*(two*Bq*(B-nine*A)+one);
-      register T *dY=dy, *d2Y=d2y;
+       T *dY=dy, *d2Y=d2y;
       for(; Y<YK; Y++,Yl++,Yh++,Y1l++,Y1h++,Y3l++,Y3h++,dY++,d2Y++) {
 	t1   = hi*(*Yh-*Yl);
 	C2   = *Y1l-t1;
@@ -410,9 +410,9 @@ namespace GalPot {                                  // v0.4
 	*d2Y*= hi;
       }
     } else if(dy) {
-      register S AB=A*B, ABh=(hf+hf)*AB, Cp=Aq-AB-AB, Dp=Bq-AB-AB,
+       S AB=A*B, ABh=(hf+hf)*AB, Cp=Aq-AB-AB, Dp=Bq-AB-AB,
 	Ep=ABh*(one+A-five*Aq), Fp=ABh*(one+B-five*Bq);
-      register T *dY=dy;
+       T *dY=dy;
       for(; Y<YK; Y++,Yl++,Yh++,Y1l++,Y1h++,Y3l++,Y3h++,dY++) {
 	t1  = hi*(*Yh-*Yl);
 	C2  = *Y1l-t1;
@@ -444,9 +444,9 @@ namespace GalPot {                                  // v0.4
 		 T** a[4])        // output: tables: coeffs a[0],a[1],a[2],a[3]
   {
     // 2D Pspline with natural boundary conditions
-    register   T   z=y[0][0][0];
+       T   z=y[0][0][0];
     z = 0.;
-    register int i,j;
+     int i,j;
     T *t = new T[n[0]];
     T *t1= new T[n[0]];
     T *t3= new T[n[0]];
@@ -485,7 +485,7 @@ namespace GalPot {                                  // v0.4
     static int l0=0, l1=0;
     find(l0,n[0],x[0],xi[0]);
     find(l1,n[1],x[1],xi[1]);
-    register int k0=l0+1, k1=l1+1;
+     int k0=l0+1, k1=l1+1;
 
     T fl[2] ={y[0][l0][l1], y[0][k0][l1]}, fh[2] ={y[0][l0][k1], y[0][k0][k1]},
       f1l[2]={y[2][l0][l1], y[2][k0][l1]}, f1h[2]={y[2][l0][k1], y[2][k0][k1]},
@@ -525,8 +525,8 @@ namespace GalPot {                                  // v0.4
     // based on a routine from J.J. Binney
     // evaluates even Legendre Polys up to l=2*(N-1) at x
   {
-    register int    n,l,l2;
-    register double x2=x*x;
+     int    n,l,l2;
+     double x2=x*x;
     p[0] = 1.;
     p[1] = 1.5*x2-0.5;
     for(n=2; n<N; n++) {
@@ -543,8 +543,8 @@ namespace GalPot {                                  // v0.4
     // based on a routine from J.J. Binney
     // evaluates even Legendre Polys and its derivs up to l=2*(N-1) at x
   {
-    register int    n,l,l2;
-    register double x2=x*x;
+     int    n,l,l2;
+     double x2=x*x;
     p[0] = 1.;
     d[0] = 0.;
     p[1] = 1.5*x2-0.5;
@@ -711,7 +711,7 @@ namespace GalPot {                                  // v0.4
 
   double I0(const double x)
   {
-    register double ax=abs(x),y;
+     double ax=abs(x),y;
     if(ax < 3.75) {
       y = x/3.75;
       y*= y;
@@ -727,7 +727,7 @@ namespace GalPot {                                  // v0.4
 
   double I1(const double x)
   {
-    register double ans,ax=abs(x),y;
+     double ans,ax=abs(x),y;
     if(ax < 3.75) {
       y = x/3.75;
       y*= y;
@@ -747,7 +747,7 @@ namespace GalPot {                                  // v0.4
   double K0(const double x)
   {
     if(x<0.) error("negative argument in K0(x)");
-    register double y;
+     double y;
     if(x <= 2.) {
       y = x*x/4.;
       return (-log(x/2.0)*I0(x))+(-0.57721566+y*(0.42278420
@@ -763,7 +763,7 @@ namespace GalPot {                                  // v0.4
   double K1(const double x)
   {
     if(x<0.) error("negative argument in K1(x)");
-    register double y;
+     double y;
     if(x <= 2.) {
       y=x*x/4.0;
       return (log(x/2.0)*I1(x))+(1.0/x)*(1.0+y*(0.15443144
@@ -782,8 +782,8 @@ namespace GalPot {                                  // v0.4
     if(x<0.) error("negative argument in Kn(x)");
     if(n==0) return K0(x);
     if(n==1) return K1(x);
-    register int j;
-    register double bk,bkm,bkp,tox;
+     int j;
+     double bk,bkm,bkp,tox;
 
     tox = 2./x;
     bkm = K0(x);
@@ -900,14 +900,14 @@ double DiskAnsatz::Residual(double r, double st, double ct) const
 // gives aimed Laplace(Phi_multipole)
 {
   if(ct==0. || S0==0.) return 0;
-  register double R=r*st, z=r*ct, g,gp,gpp, F,f,fp,fpp;
+   double R=r*st, z=r*ct, g,gp,gpp, F,f,fp,fpp;
   // deal with the vertical part
   if(thin) {
     g   = abs(z);
     gp  = sign(z);
     gpp = 0.;
   } else if(isothermal) {
-    register double x,sh1;
+     double x,sh1;
     x   = abs(z/zd);
     gpp = exp(-x);
     sh1 = 1.+gpp;
@@ -915,7 +915,7 @@ double DiskAnsatz::Residual(double r, double st, double ct) const
     gp  = sign(z)*(1.-gpp)/sh1;
     gpp/= 0.5*sh1*sh1*zd;
   } else {
-    register double x;
+     double x;
     x   = abs(z/zd);
     gpp = exp(-x);
     g   = zd*(gpp-1+x);
@@ -926,14 +926,14 @@ double DiskAnsatz::Residual(double r, double st, double ct) const
   if(hollow && r==0.) F=f=fp=fpp=0.;
   else if(eps) {
     if(hollow) {
-      register double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
+       double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
       F   = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
       f   = exp(-R0/r-r/Rd+eps*cr);
       fp  = R0/rq-(1.+eps*sr)/Rd;
       fpp = (fp*fp-2.*R0/(rq*r)-eps*cr/Rd2)*f;
       fp *= f;
     } else {
-      register double cr=cos(r/Rd),sr=sin(r/Rd);
+       double cr=cos(r/Rd),sr=sin(r/Rd);
       F   = exp(-R/Rd+eps*cos(R/Rd));
       f   = exp(-r/Rd+eps*cr);
       fp  = -(1.+eps*sr)/Rd;
@@ -942,7 +942,7 @@ double DiskAnsatz::Residual(double r, double st, double ct) const
     }
   } else {
     if(hollow) {
-      register double rq=r*r;
+       double rq=r*r;
       F   = (R==0)? 0. : exp(-R0/R-R/Rd);
       f   = exp(-R0/r-r/Rd);
       fp  = R0/rq-1./Rd;
@@ -965,21 +965,21 @@ double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
     if(dP) dP[0]=dP[1]=0.;
     return 0.;
   }
-  register double g,f;
+   double g,f;
   if(dP) {
-    register double gp,fp;
+     double gp,fp;
     if(thin) {
       g  = abs(z);
       gp = sign(z);
     } else if(isothermal) {
-      register double x,ex,sh1;
+       double x,ex,sh1;
       x  = abs(z/zd);
       ex = exp(-x);
       sh1= 1.+ex;
       g  = 2*zd*(0.5*x+log(0.5*sh1));
       gp = sign(z)*(1.-ex)/sh1;
     } else {
-      register double x,ex;
+       double x,ex;
       x  = abs(z/zd);
       ex = exp(-x);
       g  = zd*(ex-1+x);
@@ -989,17 +989,17 @@ double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
     if(hollow && r==0.) f=fp=0.;
     else if(eps) {
       if(hollow) {
-	register double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
+	 double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
 	f   = exp(-R0/r-r/Rd+eps*cr);
 	fp  = (R0/rq-(1.+eps*sr)/Rd)*f;
       } else {
-	register double cr=cos(r/Rd),sr=sin(r/Rd);
+	 double cr=cos(r/Rd),sr=sin(r/Rd);
 	f   = exp(-r/Rd+eps*cr);
 	fp  = -(1.+eps*sr)*f/Rd;
       }
     } else {
       if(hollow) {
-	register double rq=r*r;
+	 double rq=r*r;
 	f   = exp(-R0/r-r/Rd);
 	fp  = (R0/rq-1./Rd)*f;
       } else {
@@ -1013,13 +1013,13 @@ double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
     if(thin) {
       g  =abs(z);
     } else if(isothermal) {
-      register double x,ex,sh1;
+       double x,ex,sh1;
       x  = abs(z/zd);
       ex = exp(-x);
       sh1= 1.+ex;
       g  = 2*zd*(0.5*x+log(0.5*sh1));
     } else {
-      register double x,ex;
+       double x,ex;
       x  = abs(z/zd);
       ex = exp(-x);
       g  = zd*(ex-1+x);
@@ -1041,14 +1041,14 @@ double DiskAnsatz::operator() (double R, double z, double r, double* dP) const
 double DiskAnsatz::Laplace(double R, double z) const
 {
   if(S0==0.) return 0;
-  register double r=hypot(R,z), g,gp,gpp, f,fp,fpp;
+   double r=hypot(R,z), g,gp,gpp, f,fp,fpp;
   // deal with the vertical part
   if(thin) {
     g  =abs(z);
     gp =sign(z);
     gpp=0.;
   } else if(isothermal) {
-    register double x,sh1;
+     double x,sh1;
     x   = abs(z/zd);
     gpp = exp(-x);
     sh1 = 1.+gpp;
@@ -1056,7 +1056,7 @@ double DiskAnsatz::Laplace(double R, double z) const
     gp  = sign(z)*(1.-gpp)/sh1;
     gpp/= 0.5*sh1*sh1*zd;
   } else {
-    register double x;
+     double x;
     x   = abs(z/zd);
     gpp = exp(-x);
     g   = zd*(gpp-1+x);
@@ -1067,14 +1067,14 @@ double DiskAnsatz::Laplace(double R, double z) const
   if(hollow && r==0.) f=fp=fpp=0.;
   else if(eps) {
     if(hollow) {
-      register double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
+       double rq=r*r,cr=cos(r/Rd),sr=sin(r/Rd);
 //       F   = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
       f   = exp(-R0/r-r/Rd+eps*cr);
       fp  = R0/rq-(1.+eps*sr)/Rd;
       fpp = (fp*fp-2.*R0/(rq*r)-eps*cr/Rd2)*f;
       fp *= f;
     } else {
-      register double cr=cos(r/Rd),sr=sin(r/Rd);
+       double cr=cos(r/Rd),sr=sin(r/Rd);
 //       F   = exp(-R/Rd+eps*cos(R/Rd));
       f   = exp(-r/Rd+eps*cr);
       fp  = -(1.+eps*sr)/Rd;
@@ -1083,7 +1083,7 @@ double DiskAnsatz::Laplace(double R, double z) const
     }
   } else {
     if(hollow) {
-      register double rq=r*r;
+       double rq=r*r;
 //       F   = (R==0)? 0. : exp(-R0/R-R/Rd);
       f   = exp(-R0/r-r/Rd);
       fp  = R0/rq-1./Rd;
@@ -1103,7 +1103,7 @@ Frequs DiskAnsatz::kapnuom(double R) const
 // returns dPhi/dR, d^2Phi/dR^2, d^2Phi/dz^2 at z=0
 {
   if(S0==0.) return Frequs(0.);
-  register double er, gpp;
+   double er, gpp;
   if(hollow) er = (R==0)? 0. : exp(-R0/R-R/Rd+eps*cos(R/Rd));
   else   er = exp(-R/Rd+eps*cos(R/Rd));
   if(thin) {                          // vertically thin disk
@@ -1190,7 +1190,7 @@ void SpheroidDensity::setup(const SphrPar& d)
 
 double SpheroidDensity::Density(double R, double z) const
 {
-  register double m = hypot(R,z*qi), m0=m*r0i, rho=rh0;
+   double m = hypot(R,z*qi), m0=m*r0i, rho=rh0;
   if(gam==0.5)   rho /= sqrt(m0);
   else if(gam==1.)    rho /= m0;
   else if(gam==2.)    rho /= m0*m0;
@@ -1363,8 +1363,8 @@ void Multipole::setup(double      ri,
   const    DBN    Zero=DBN(0.);
   const    double half=0.5, three=3., sixth=1./6.,
     dlr =(lRmax-lRmin)/double(K[0]-1);
-  register int    i,l,k,ll,lli1;
-  register double dx,dx2,xl_ll,xh_ll,risq,ril2,dP;
+   int    i,l,k,ll,lli1;
+   double dx,dx2,xl_ll,xh_ll,risq,ril2,dP;
   DBN    A[4],P2l,dP2l,EX;
   //
   // 0  check for inconsistencies in input
@@ -1603,7 +1603,7 @@ double Multipole::operator() (double r, double ct, double st, double* dP) const
     if(dP) dP[0] =-Phi;
   }
   if(dP) {
-    register double temp;
+     double temp;
     dP[0]/= r;
     dP[1]*=-st/r;
     temp  = ct*dP[0] - st*dP[1];
@@ -1717,8 +1717,8 @@ Frequs Multipole::kapnuom(double R) const
 
 double GalaxyPotential::operator() (double R, double z) const
 {
-  register double r  =hypot(R,z), pot=M(r,z/r,R/r);
-  for(register DiskAnsatz *p=D; p<Dup; p++) pot+= (*p)(R,z,r);
+   double r  =hypot(R,z), pot=M(r,z/r,R/r);
+  for( DiskAnsatz *p=D; p<Dup; p++) pot+= (*p)(R,z,r);
   return pot;
 }
 
@@ -1726,9 +1726,9 @@ double GalaxyPotential::operator() (double R, double z,
                                     double&dR, double&dz) const
 {
   double d[2];
-  register double r  =hypot(R,z), pot=M(r,z/r,R/r,d);
+   double r  =hypot(R,z), pot=M(r,z/r,R/r,d);
   dR = d[0]; dz = d[1];
-  for(register DiskAnsatz *p=D; p<Dup; p++) {
+  for( DiskAnsatz *p=D; p<Dup; p++) {
     pot += (*p)(R,z,r,d);
     dR  += d[0];
     dz  += d[1];
@@ -1747,8 +1747,8 @@ void GalaxyPotential::OortConstants(double R, double &A, double &B) const
 
 double GalaxyPotential::Laplace(double R, double z) const
 {
-  register double r=hypot(R,z), L=M.Laplace(r,z/r);
-  register DiskAnsatz *p=D;
+   double r=hypot(R,z), L=M.Laplace(r,z/r);
+   DiskAnsatz *p=D;
   for(; p<Dup; p++) L += p->Laplace(R,z);
   return L;
 }
@@ -1756,7 +1756,7 @@ double GalaxyPotential::Laplace(double R, double z) const
 Frequs GalaxyPotential::KapNuOm  (double R) const
 {
   Frequs Om = M.kapnuom(R);
-  for(register DiskAnsatz *p=D; p<Dup; p++) Om += p->kapnuom(R);
+  for( DiskAnsatz *p=D; p<Dup; p++) Om += p->kapnuom(R);
   Om[2]/= R;
   Om[0]+= 3*Om(2);
   Om.apply(&sqrt);

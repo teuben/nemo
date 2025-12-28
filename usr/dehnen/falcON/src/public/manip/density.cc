@@ -36,7 +36,7 @@
 // v 0.4.1  20/05/2008  WD renamed routine from neighbour.h
 // v 0.4.2  11/06/2008  WD new DebugInfo and falcON_Warning
 // v 0.4.3  25/09/2008  WD debugged (debug output only)
-// v 0.5    05/11/2008  WD register time of manipulation under trho
+// v 0.5    05/11/2008  WD time of manipulation under trho
 // v 0.5.1  13/04/2010  WD removed use of initial_time()
 // v 0.6    25/06/2010  WD manipulation if time=integer*step (or step==0)
 ////////////////////////////////////////////////////////////////////////////////

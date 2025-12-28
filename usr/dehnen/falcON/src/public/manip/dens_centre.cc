@@ -188,7 +188,7 @@ namespace falcON { namespace Manipulate {
 	    << std::setw(15) << std::setprecision(8) << VCEN[1]   << ' '
 	    << std::setw(15) << std::setprecision(8) << VCEN[2]   << "  "
 	    << std::setw(15) << std::setprecision(8) << RHO       << std::endl;
-      // register pointers to centre
+      //  pointers to centre
       S->set_pointer(&XCEN,"xcen");
       S->set_pointer(&VCEN,"vcen");
     } else {

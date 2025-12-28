@@ -51,13 +51,13 @@ namespace {
       : VQ ( npar>1? pars[1] : 1),
       	RQ ( npar>2? pars[2] : 0)
     {
-      if(VQ<=0) error("LogPot: circular speed <=0\n");
-      if(RQ< 0) error("LogPot: core radius <0\n");
+      if(VQ<=0) error((char *) "LogPot: circular speed <=0\n");
+      if(RQ< 0) error((char *) "LogPot: core radius <0\n");
       double CA = npar>3? pars[3] : 1;
       double BA = npar>4? pars[4] : 1;
-      if(CA<=0 || CA> 1) error("LogPot: major axis ratio = %g",CA);
-      if(BA<=0) error("LogPot: minor axis ratio = %g",BA);
-      if(BA>CA) error("LogPot: minor axis ratio = %g > %g = major axis ratio",
+      if(CA<=0 || CA> 1) error((char *) "LogPot: major axis ratio = %g",CA);
+      if(BA<=0) error((char *) "LogPot: minor axis ratio = %g",BA);
+      if(BA>CA) error((char *) "LogPot: minor axis ratio = %g > %g = major axis ratio",
 		      BA,CA);
       iQ[0] = std::pow(CA*BA,2./3.);
       iQ[1] = iQ[0] / (BA*BA);
@@ -101,7 +101,7 @@ namespace {
 	A[2]*= sQ;
       } else
 	P = A[0] = A[1] = A[2] = 0;
-	error("LogPot: wrong number (%d) of dimensions, only allow 3D\n",NDIM);
+	error((char *) "LogPot: wrong number (%d) of dimensions, only allow 3D\n",NDIM);
     }
   };
 } // namespace {

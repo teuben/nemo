@@ -46,15 +46,15 @@ namespace {
       Kl ( npar>3? int(pars[3]) : 0 )
     {
       if(npar < 3)
-	warning("%s: recognizing 4 parameters:\n"
-		" omega        pattern speed (ignored)           [0]\n"
-		" G*M          mass;                             [1]\n"
-		" a            scale radius;                     [1]\n"
+	warning((char*)"%s: recognizing 4 parameters:\n"\
+		" omega        pattern speed (ignored)           [0]\n"\
+		" G*M          mass;                             [1]\n"\
+		" a            scale radius;                     [1]\n"\
 		" kernel       use falcON's P_n kernel           [0]\n",
 		name());
       if(file)
-	warning("%s: file \"%s\" ignored",name(),file);
-      if(npar>4) warning("%s: skipped parameters beyond 4",name());
+	warning((char*)"%s: file \"%s\" ignored",name(),file);
+      if(npar>4) warning((char*)"%s: skipped parameters beyond 4",name());
       nemo_dprintf (1,
 		    "initializing %s\n"
 		    " parameters : mass          = %f\n"

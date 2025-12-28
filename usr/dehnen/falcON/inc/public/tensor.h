@@ -149,6 +149,8 @@ namespace falcON {
     typedef const T         cT;                    // const tensor
     typedef meta::taux<X,KK> M;                    // meta looping (l,m) to K
     // static methods (type conversions to X* and const X*)
+    static X*      pX(falcONVec<3,X>      &x) { return x.data(); }
+    static const X*pX(falcONVec<3,X> const&x) { return x.data(); }
     template<class A>
     static X*      pX(A      &x) { return static_cast<      X*>(x); }
     template<class A>
@@ -293,6 +295,8 @@ namespace falcON {
     typedef const T         cT;                    // const tensor
     typedef meta::taux<X,5>  M;                    // meta looping (l,m) to K
     // static methods (type conversions to X* and const X*)
+    static X*      pX(falcONVec<3,X>      &x) { return x.data(); }
+    static const X*pX(falcONVec<3,X> const&x) { return x.data(); }
     template<class A>
     static X*      pX(A      &x) { return static_cast<      X*>(x); }
     template<class A>

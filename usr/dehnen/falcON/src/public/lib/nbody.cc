@@ -435,7 +435,7 @@ BlockStepCode::BlockStepCode(int      km,          // I: tau_max = 2^-kmax
 ////////////////////////////////////////////////////////////////////////////////
 namespace falcON {
   inline std::ostream& put_char(std::ostream&o, const char c, const int s) {
-    if(s>0) for(register int i=0; i<s; ++i) o<<c;
+    if(s>0) for( int i=0; i<s; ++i) o<<c;
     return o;
   }
 }
@@ -569,7 +569,7 @@ void ForceDiagGrav::diagnose_grav() const
   vect_d x(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
-      register double mi = mass(b);                //     m                     
+       double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
@@ -579,7 +579,7 @@ void ForceDiagGrav::diagnose_grav() const
     }                                              //   END LOOP                
   } else {                                         // ELSE: no external pot     
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
-      register double mi = mass(b);                //     m                     
+       double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vect_d mx = mi * vect_d(pos(b));             //     m * x                 
@@ -629,7 +629,7 @@ void ForceDiagGrav::diagnose_vels() const falcON_THROWING
   double m(0.), k[Ndim][Ndim]={{0.}};
   vect_d v(0.), l(0.);
   LoopAllBodies(snap_shot(),b) {                   // LOOP bodies               
-    register double mi = mass(b);                  //   m                       
+     double mi = mass(b);                  //   m                       
     m  += mi;                                      //   add: total mass         
     vect_d mv = mi * vect_d(vel(b));               //   m * v                   
     AddTensor(k,mv,vel(b));                        //   add to K_ij             
@@ -670,7 +670,7 @@ void ForceDiagGrav::diagnose_full() const
   vect_d x(0.), v(0.), l(0.);
   if(snap_shot()->have(fieldbit::q)) {             // IF have external pot      
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
-      register double mi = mass(b);                //     m                     
+       double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vex+= mi * pex(b);                           //     add: ext pot energy   
@@ -684,7 +684,7 @@ void ForceDiagGrav::diagnose_full() const
     }                                              //   END LOOP                
   } else {                                         // ELSE: no external pot     
     LoopAllBodies(snap_shot(),b) {                 //   LOOP bodies             
-      register double mi = mass(b);                //     m                     
+       double mi = mass(b);                //     m                     
       m  += mi;                                    //     add: total mass       
       vin+= mi * pot(b);                           //     add: int pot energy   
       vect_d mx = mi * vect_d(pos(b));             //     m * x                 

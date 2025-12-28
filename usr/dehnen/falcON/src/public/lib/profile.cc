@@ -131,7 +131,7 @@ spherical_profile::spherical_profile(const bodies*B,
   double mcum=0.;                                  // cumulate mass             
   int j=0;                                         // body index                
   for(int i=0; i!=n; ++i) {                        // LOOP bins                 
-    register int 
+     int 
       s  = i==0? ir[i+1]+1 : ir[i+1]+ir[i-1],      //   lower + upper rank      
       sh = s/2;                                    //   mean rank               
     for(; j!=sh; ++j)                              //   LOOP ranks up to mean   
@@ -198,7 +198,7 @@ spherical_profile::spherical_profile(const bodies*B,
       ba[i] = sqrt(ID[1]/ID[0]);
       xa[i] = vect_d(IV[0][0],IV[1][0],IV[2][0]);
       xi[i] = vect_d(IV[0][2],IV[1][2],IV[2][2]);
-      vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
+      vect_d erot = norm(Mvp)>0.? normalised(Mvp) : vect_d(0.,0.,1.);
       double Mvpq(0.), Mvtq(0.);
       for(j=i? ir[i-1]:0; j<=ir[i+1]; ++j) {       // 2nd LOOP of bodies in bin 
 	double mi  = ((i!=0 && j==ir[i-1])  ||  j==ir[i+1]) ?
@@ -207,8 +207,8 @@ spherical_profile::spherical_profile(const bodies*B,
 	vect_d vi  = v0? B->vel(I[j])-(*v0) : B->vel(I[j]);
 	if(R[j]>zero) {
 	  vect_d er  = ri/R[j];
-	  vect_d ep  = normalized(er^erot);
-	  vect_d et  = normalized(er^ep);
+	  vect_d ep  = normalised(er^erot);
+	  vect_d et  = normalised(er^ep);
 	  Mvpq += mi * square(vi*ep);
 	  Mvtq += mi * square(vi*et);
 	}
@@ -252,13 +252,13 @@ projected_profile::projected_profile(const bodies*B,
 				     const vect  *x0,
 				     const vect  *v0)
   falcON_THROWING :
-kmin(__nmin/2), dmax(0.5*__dmax), elos(normalized(__proj)),
+kmin(__nmin/2), dmax(0.5*__dmax), elos(normalised(__proj)),
 mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
 {
   if(elos == 0.)
     falcON_THROW("projected_profile: projection along null vector\n");
   vect_d eY = elos == vect_d(1.,0.,0.) ?
-    normalized(elos ^ vect_d(0.,0.,1.)) : normalized(elos ^ vect_d(1.,0.,0.));
+    normalised(elos ^ vect_d(0.,0.,1.)) : normalised(elos ^ vect_d(1.,0.,0.));
   vect_d eX = eY ^ elos;
   if(!B->have_all(fieldset(fieldset::m|fieldset::x)))
     falcON_THROW("projected_profile: need \"mx\" to estimate density\n");
@@ -293,7 +293,7 @@ mr(0), rr(0), sd(0), vl(0), vr(0), sl(0), ba(0), ph(0), al(0)
   double mcum=0.;                                  // cumulate mass             
   int j=0;                                         // body index                
   for(int i=0; i!=n; ++i) {                        // LOOP bins                 
-    register int 
+     int 
       s  = i==0? ir[i+1]+1 : ir[i+1]+ir[i-1],      //   lower + upper rank      
       sh = s/2;                                    //   mean rank               
     for(; j!=sh; ++j)                              //   LOOP ranks up to mean   

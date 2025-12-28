@@ -139,6 +139,11 @@ namespace WDutils {				\
 #  include <public/tensor.h>
 #endif
 
+# ifndef WDutils_included_vector_h
+#  include <utils/vector.h>
+# endif
+# define falcONVec vector
+
 namespace falcON {
   typedef falcONVec<Ndim,real  > vect;          ///< a vector of 3 reals
   typedef falcONVec<Ndim,float>  vect_f;        ///< a vector of 3 floats
