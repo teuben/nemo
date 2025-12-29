@@ -169,11 +169,12 @@ void deriv_data2(int nf)
   bool first = TRUE;
   real sum0, sum1, sum2, sigma;
 
+  /*   initial loop to estimate sigma based on the clip value */
+  /*   also note that d[] is initialized here !!              */
   sum0 = sum1 = sum2 = 0.0;
-
   for (i=1; i<npt; i++) {                  /* loop over all points */
     d1 = y[i]-y[i-1];
-    d[i] = fabs(d1);
+    d[i] = fabs(d1);                       
     if (d[i] > clip) continue;             /* ignore obvious outliers */
     if (first) {
       d_min = d_max = d1;
@@ -192,6 +193,12 @@ void deriv_data2(int nf)
   dprintf(0,"Min/Max for deriv = %g %g (with clip=%g)\n",d_min,d_max,clip);
   dprintf(0,"Sigma = %g    clip/sigma=%g\n",sigma,clip/sigma);
 
+  /* now run over the points and find single, double or triple outliers  */
+  /* note we use adjacent differentials (the array d[]) here, not w.r.t. */
+  /* the "baseline" - that is another algorithm:                         */
+  /* this would be where d[i+1] is replaced with y[i+1] - y[i-1] in the  */
+  /* the second if(); shoul works better for asymmetric 2/3 outliers     */
+  /* also eqv. to d[i+1] + d[i]                                          */
   i = 1;
   while (i < npt-1-nf) {
     if (d[i] > clip && d[i+2] < clip) {
@@ -200,21 +207,33 @@ void deriv_data2(int nf)
       continue;
     }
     if (d[i] > clip && d[i+1] > clip && d[i+3] < clip) {
+      /*         y[i+1]-y[i-1]> clip          */
+      //if (nf<2) continue;
       ok[i] = FALSE;
       ok[i+1] = FALSE;
       i += 3;
       continue;
     }
     if (d[i] > clip && d[i+1] > clip && d[i+2] > clip && d[i+4] < clip) {
+      /*         y[i+1]-y[i-1]> clip  y[i+2]-y[i-1]>clip             */
+      //if (nf<3) continue;
       ok[i] = FALSE;
       ok[i+1] = FALSE;
       ok[i+2] = FALSE;
       i += 4;
       continue;
     }
+    if (d[i] > clip && d[i+1] > clip && d[i+2] > clip && d[i+3] > clip && d[i+5] < clip) {
+      ok[i] = FALSE;
+      ok[i+1] = FALSE;
+      ok[i+2] = FALSE;
+      ok[i+3] = FALSE;
+      i += 5;
+      continue;
+    }
     i += 1;
   }
-  warning("This code can handle up to 3 contiguous outlier channels");
+  warning("This code can handle up to 4 contiguous outlier channels");
 }
 
 void delta_data()
