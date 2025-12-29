@@ -21,12 +21,13 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
     "out=???\n           Output table",
     "xcol=1\n		 x coordinate column",
     "ycol=2\n		 y coordinate column",
-    "deriv=\n            Clipping if abs(derivative) exceeds this value",
+    "clip=\n             Clipping if abs(derivative) exceeds this value",
     "eta=\n              Max deviation of local 2nd order polynomial allowed",
     "logic=and\n         Use AND or OR",
     "nmax=100000\n       Hardcoded allocation space, if needed for piped data",
-    "comment=f\n         Keep clipped points as commented lines?",
-    "VERSION=0.4\n	 22-dec-2025 PJT",
+    "nf=3\n              Max number of channels of contiguous outliers",
+    "comment=t\n         Keep clipped points as commented lines?",
+    "VERSION=0.5\n	 28-dec-2025 PJT",
     NULL
 };
 
@@ -39,14 +40,16 @@ local stream instr, outstr;		/* input file */
 
 local int xcol, ycol;                   /* columns for X and Y */
 
-local real  *x, *y; 			/* data from file */
+local real *x, *y; 			/* data from file */
 local real  xmin,xmax,ymin,ymax;        /* min and max from the table */
 local bool *ok;                         /* masking array */
+local real *d;                          /* difference array */
 
-local int    npt;			/* actual number of data points */
-local int    nmax;			/* lines to allocate */
+local int   npt;			/* actual number of data points */
+local int   nmax;			/* lines to allocate */
+local int   nf;
 
-local bool Qand;
+local bool Qand;                        /* logic and/or dealing with both sides */
 
 
 /****************************** START OF PROGRAM **********************/
@@ -55,8 +58,8 @@ void setparams()
 {
   string  logic = getparam("logic");
 
-  input = getparam("in");             /* input table file */
-  output = getparam("out");             /* input table file */
+  input = getparam("in");               /* input table file */
+  output = getparam("out");             /* output table file */
   xcol = getiparam("xcol");
   ycol = getiparam("ycol");
   if (streq(logic,"and"))
@@ -65,6 +68,8 @@ void setparams()
     Qand = FALSE;
   else 
     error("logic %s must be 'and' or 'or'",logic);
+  nf = getiparam("nf");
+  if (nf > 3) error("Code cannot handle nf > 3");
 
   nmax = nemo_file_lines(input,getiparam("nmax"));
   dprintf(1,"Allocated %d lines for table\n",nmax);
@@ -90,6 +95,7 @@ void read_data()
   }
   ok = (bool *) allocate(npt*sizeof(bool));     /* boolean array if we're keeping this point */
   for (i=0; i<npt; i++) ok[i] = TRUE;
+  d = (real *) allocate(npt * sizeof(real));
   
   xmin = ymin =  HUGE;
   xmax = ymax = -HUGE;
@@ -109,7 +115,7 @@ void read_data()
 void deriv_data()
 {
   int    i;
-  real d1, d2, d1a, d2a, dmin = getdparam("deriv");
+  real d1, d2, d1a, d2a, dmin = getdparam("clip");
   real d_min, d_max;
   bool first = TRUE;
 
@@ -155,10 +161,66 @@ void deriv_data()
   dprintf(0,"Min/Max for deriv = %g %g (dmin=%g)\n",d_min,d_max,dmin);
 }
 
+void deriv_data2(int nf)
+{
+  int  i;
+  real d1, d2, d1a, d2a, clip = getdparam("clip");
+  real d_min, d_max;
+  bool first = TRUE;
+  real sum0, sum1, sum2, sigma;
+
+  sum0 = sum1 = sum2 = 0.0;
+
+  for (i=1; i<npt; i++) {                  /* loop over all points */
+    d1 = y[i]-y[i-1];
+    d[i] = fabs(d1);
+    if (d[i] > clip) continue;             /* ignore obvious outliers */
+    if (first) {
+      d_min = d_max = d1;
+      first = FALSE;
+    } else {
+      d_min = MIN(d_min, d1);
+      d_max = MAX(d_max, d1);
+    }
+    sum0 += 1.0;
+    sum1 += d1;
+    sum2 += d1*d1;
+  }
+  sigma = sum2/sum0 - sum1*sum1/(sum0*sum0);
+  if (sigma <= 0.0) error("Bad sigma^2 = %g\n", sigma);
+  sigma = sqrt(sigma);
+  dprintf(0,"Min/Max for deriv = %g %g (with clip=%g)\n",d_min,d_max,clip);
+  dprintf(0,"Sigma = %g    clip/sigma=%g\n",sigma,clip/sigma);
+
+  i = 1;
+  while (i < npt-1-nf) {
+    if (d[i] > clip && d[i+2] < clip) {
+      ok[i] = FALSE;
+      i += 2;
+      continue;
+    }
+    if (d[i] > clip && d[i+1] > clip && d[i+3] < clip) {
+      ok[i] = FALSE;
+      ok[i+1] = FALSE;
+      i += 3;
+      continue;
+    }
+    if (d[i] > clip && d[i+1] > clip && d[i+2] > clip && d[i+4] < clip) {
+      ok[i] = FALSE;
+      ok[i+1] = FALSE;
+      ok[i+2] = FALSE;
+      i += 4;
+      continue;
+    }
+    i += 1;
+  }
+  warning("This code can handle up to 3 contiguous outlier channels");
+}
+
 void delta_data()
 {
   int    i;
-  real d1, d2, d1a, d2a, dmin = getdparam("deriv");
+  real d1, d2, d1a, d2a, dmin = getdparam("clip");
   real d_min, d_max;
   bool first = TRUE;
 
@@ -166,7 +228,7 @@ void delta_data()
     if (i>1 ) {
       d1 = (y[i]-y[i-1])/(x[i]-x[i-1]);
       if (first) {
-	d_min = d_max = ABS(d1);
+	d_min = d_max = fabs(d1);
 	first = FALSE;
       }
     } else
@@ -182,7 +244,7 @@ void delta_data()
     if (i<npt-1) {
       d2 = (y[i]-y[i+1])/(x[i]-x[i+1]);
       if (first) {
-	d_min = d_max = ABS(d1);
+	d_min = d_max = fabs(d1);
 	first = FALSE;
       }
     } else
@@ -229,7 +291,7 @@ real get_av(int i0, int i1, int i2, int i3)
 void eta_data()
 {
   int    i;
-  real d1, d2, d1a, d2a, dmin = getdparam("deriv");
+  real d1, d2, d1a, d2a, dmin = getdparam("clip");
   real eta = getdparam("eta");
   real d_min, d_max;
   bool first = TRUE;
@@ -275,7 +337,7 @@ void nemo_main()
     instr = stropen(input,"r");
     outstr = stropen(output,"w");
     read_data();
-    if (hasvalue("deriv")) deriv_data();
+    if (hasvalue("clip")) deriv_data2(nf);
     if (hasvalue("eta"))     eta_data();
     write_data();
 }
