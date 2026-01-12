@@ -313,7 +313,7 @@ namespace falcON { namespace Manipulate {
 	  double mi = SHOT->mass(T[i]);
 	  vect_d ri = SHOT->pos(T[i]) - X0;
 	  vect_d vi = SHOT->vel(T[i]) - V0;
-	  vect_d er = normalized(ri);
+	  vect_d er = normalised(ri);
 	  Mvp      += mi * (er^vi);
 	  Rq[j]     = norm(ri);
 	  Mi[j]     = mi;
@@ -333,15 +333,15 @@ namespace falcON { namespace Manipulate {
 	Rm = sqrt( (FP.Position(Lo)*(Mhi-Mh) +
 		    FP.Position(Hi)*(Mh-Mlo) ) / (Mhi-Mlo) );
 	// 4.3.3 measure for all accumulated: mean velocities and dispersion
-	vect_d erot = norm(Mvp)>0.? normalized(Mvp) : vect_d(0.,0.,1.);
+	vect_d erot = norm(Mvp)>0.? normalised(Mvp) : vect_d(0.,0.,1.);
 	double Mvr(0.), Mvrq(0.), Mvpq(0.), Mvtq(0.);
 	for(unsigned i=Cum0; i!=CumK; ++i) {
 	  double mi = SHOT->mass(T[i]);
 	  vect_d ri = SHOT->pos(T[i]) - X0;
 	  vect_d vi = SHOT->vel(T[i]) - V0;
-	  vect_d er = normalized(ri);
-	  vect_d ep = normalized(er^erot);
-	  vect_d et = normalized(er^ep);
+	  vect_d er = normalised(ri);
+	  vect_d ep = normalised(er^erot);
+	  vect_d et = normalised(er^ep);
 	  double ui = er*vi;
 	  Mvr      += mi * ui;
 	  Mvrq     += mi * ui*ui;

@@ -38,7 +38,7 @@ string defv[] = {
 #if defined(INTERACT)
     "more=y\n                     needs interactive SETPARAM part",
 #endif
-    "VERSION=2.3\n                23-dec-2024 PJT",
+    "VERSION=2.3a\n               2-jul-2025 PJT",
     NULL,
 };
 
@@ -81,7 +81,7 @@ void nemo_main()
       timefuzz = getdparam("timefuzz");
     else
       timefuzz = TIMEFUZZ;
-    dprintf(0,"Using timefuzz=%g\n", timefuzz);
+    dprintf(1,"Using timefuzz=%g\n", timefuzz);
 
     Qfirst = streq(times,"first");
     Qlast = streq(times,"last");

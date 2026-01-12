@@ -1,7 +1,8 @@
 /*
  *  LINEID:   draft
  *
- *    13-dec-2024 0.2 simple brightest peak finder.
+ *    13-dec-2024   0.2 simple brightest peak finder.
+ *     3-jul-2025   0.3 add mode=
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -30,7 +31,8 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "restfreq=\n           RESTFREQ in xunits, if known",
   "linelist=\n           ASCII linelist (freq,label)",
   "rms=\n                Do not fit peaks when this RMS is reached",
-  "VERSION=0.2\n	 13-dec-2024 PJT",
+  "mode=1\n              0: peaks already given  1: fit peak(s)",
+  "VERSION=0.3\n	 3-jul-2025 PJT",
   NULL
 };
 
@@ -46,18 +48,25 @@ local mdarray2 d2;                              /* data[col][row] */
 
 local int xcol, ycol;
 
-local real  *x, *y;    			/* data from file */
+local real  *x, *y;    			        /* data from file */
 local int    npt;				/* actual number of data points */
+
+local int mode;
 
 local bool Qvlsr, Qrest;
 local real vlsr;
 local real restfreq;
 local string linelist = NULL;
 
+local string xunit;
+local int xunit_mode = 0;
+
 #define UNIT_MHZ 1
 #define UNIT_GHZ 2
 #define UNIT_A   3
-#define UNIT_nm  4
+#define UNIT_NM  4
+#define UNIT_KMS 6
+#define UNIT_Z   7
 
 void setparams(void);
 void read_data(void);
@@ -74,12 +83,16 @@ void nemo_main()
 
 void setparams()
 {
+  mode = getiparam("mode");
   input = getparam("in");             /* input table file */
   instr = stropen (input,"r");
   tptr = table_open(instr,0);
   
   xcol = getiparam("xcol");
-  ycol = getiparam("ycol");
+  if (mode==0)
+    ycol = 0;
+  else
+    ycol = getiparam("ycol");
 
   Qvlsr = hasvalue("vlsr");
   if (Qvlsr) vlsr = getdparam("vlsr");
@@ -89,6 +102,11 @@ void setparams()
 
   if (hasvalue("linelist"))
     linelist = getparam("linelist");
+
+  xunit = getparam("xunit");
+  if (streq(xunit,"GHz"))  xunit_mode = UNIT_GHZ;
+  if (streq(xunit,"km/s")) xunit_mode = UNIT_KMS;
+  if (xunit_mode == 0) error("xunit  %s not supported yet",xunit);
 }
 
 #define MVAL 		 64
@@ -104,7 +122,7 @@ void read_data(void)
   colnr[1]  = ycol;
   d2 = table_md2cr(tptr, 2, colnr,0,0);
   npt = table_nrows(tptr);
-  dprintf(0,"Found %d channels\n", npt);
+  dprintf(0,"Found %d rows\n", npt);
   
   x = &d2[0][0];
   y = &d2[1][0];
@@ -117,24 +135,60 @@ void read_data(void)
 void peak_data(void)
 {
   real xpeak, xerr, ypeak;
-  real z;
+  real z, z1, z2, f2, rf2, sf2;
+  int i;
   
   dprintf(1,"C(mks)=%g\n",c_MKS);
+  dprintf(0,"xunit=%s\n",xunit);
 
-  // simple brightest peak finder
-  do_peak(&xpeak, &xerr, &ypeak);
+  if (mode == 1 ) {
+    warning("Lines from peak fits in table:");    
+    // simple brightest peak finder
+    do_peak(&xpeak, &xerr, &ypeak);
+  } else if (mode == 0) {
+    warning("Direct line from table:");
+    xpeak = x[0];
+    ypeak = y[0];
+  } else
+    error("mode=%d not implemented", mode);
 
-  if (Qrest) {
-    z = 1 - xpeak/restfreq;   // @todo fix
-    dprintf(0,"Line at %g has z=%g or vlsr=...\n",xpeak,z);
-  } else if (Qvlsr) {
-    z = vlsr/c_MKS*1000.0;
-    restfreq = xpeak / (1-z);  // @todo fix
-    dprintf(0,"Line at %g, Look near freq = %g for a line\n", xpeak, restfreq);
-  } else {
-    dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
+  if (mode == 1) {
+    if (Qrest) {
+      z = 1 - xpeak/restfreq;   // @todo fix
+      dprintf(0,"Line at %g has z=%g or vlsr=...\n",xpeak,z);
+    } else if (Qvlsr) {
+      z = vlsr/c_MKS*1000.0;
+      restfreq = xpeak / (1-z);  // @todo fix
+      dprintf(0,"Line at %g, Look near freq = %g %s for a line\n", xpeak, restfreq, xunit);
+    } else {
+      dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
+    }
+  } else { // mode=0
+    if (xunit_mode == UNIT_KMS) {
+      if (Qrest) {
+	z1 = x[0]*1000/c_MKS;
+	for (i=0; i<npt; i++) {
+	  z2 = x[i]*1000/c_MKS;
+	  rf2 = restfreq * (1+z1)/(1+z2);
+	  f2 = restfreq / (1+z2);
+	  dprintf(0,"Line at %f %s has skyfreq %f restfreq %f\n",x[i],xunit,f2,rf2);
+	}
+      }
+    } else if (xunit_mode == UNIT_GHZ) {
+      if (Qrest) {
+	for (i=0; i<npt; i++) {
+	  z2 = restfreq/x[i] - 1.0;
+	  dprintf(0,"Line at %f %s has z %f vlsr %f km/s\n",x[i],xunit,z2,z2*c_MKS/1000.0);
+	
+	}
+      } else if (Qvlsr) {
+	for (i=0; i<npt; i++) {
+	  sf2 = x[i] / (1+vlsr*1000/c_MKS);
+	  dprintf(0,"Line at %f %s has skyfreq %f \n",x[i],xunit,sf2);
+	}
+      }
+    }
   }
-
 }
 
 

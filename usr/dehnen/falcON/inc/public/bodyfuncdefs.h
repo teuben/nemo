@@ -123,17 +123,17 @@ namespace {
   inline real mtot(body const&b) { return mtot(*(b.my_bodies())); }
 
   inline real vrad(body const&b) {
-    register real r = abs(pos(b));
+     real r = abs(pos(b));
     if(r==zero) return zero;
     return (pos(b)*vel(b))/r;
   }
   inline real vtan(body const&b) {
-    register real r = abs(pos(b));
+     real r = abs(pos(b));
     if(r==zero) return zero;
     return abs(pos(b)^vel(b))/r;
   }
   inline real vphi(body const&b) {
-    register real R = sqrt(square(pos(b)[0])+square(pos(b)[1]));
+     real R = sqrt(square(pos(b)[0])+square(pos(b)[1]));
     if(R==zero) return zero;
     return (pos(b)[0]*vel(b)[1] - pos(b)[1]*vel(b)[0])/R;
   }

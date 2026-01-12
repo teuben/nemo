@@ -1626,7 +1626,7 @@ namespace falcON {
     /// that two or more manipulators may communicate data, for instance one
     /// manipulator determines the centre with respect to which another
     /// manipulator analyses the snapshot. For this purpose, the first
-    /// manipulator registers a pointer to the centre position with the pointer
+    /// manipulator s a pointer to the centre position with the pointer
     /// bank under a handle, say \c "xcen", using members add_pointer() or
     /// set_pointer(). Any other manipulator may access that pointer with the
     /// same handle using the member pointer() or get_pointer().\n

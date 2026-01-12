@@ -1,5 +1,6 @@
-.TH ORBIT 3NEMO "24 May 1992" 
-.SH NAME
+.TH ORBIT 3NEMO "24 May 2025" 
+
+.SH "NAME"
 read_orbit, write_orbit, allocate_orbit, list_orbit \- basic orbit i/o routines
 .SH SYNOPSIS
 .nf
@@ -26,7 +27,8 @@ read_orbit, write_orbit, allocate_orbit, list_orbit \- basic orbit i/o routines
 .B double tend;
 .B int n;
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIorbit(3NEMO)\fP provide a few utility functions which handle the i/o of
 \fIorbit(5NEMO)\fP datafile. They subsequently call lower level filestructure 
 routines, as described in \fIfilestruct(3NEMO)\fP.
@@ -48,22 +50,29 @@ to call this routine, since \fIread_orbit\fP takes care of the allocation.
 .PP
 \fIlist_orbit\fP lists the coordinates of an orbit between two given
 times.
+
 .SH "SEE ALSO"
 \fIorbit(5NEMO)\fP
-.SH BUGS
+
+.SH "BUGS"
 No proper dynamic allocation of orbits yet; space has to be allocated
 before it's used in the orbit calculation.
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .nf
 .ta +2.5i
 ~/src/pjt/orbit  	authors original sources
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 13-Jul-87	V1.0: Original created	PJT
 28-jul-87	V2.0: new orbit(5) structure	PJT
 24-may-92	V3.0: added potential to orbit	PJT
+dec-2019	V4.0: support for storing Phi/Acc	PJT
+jul-2023	V5.1: support storing key	PJT
 .fi

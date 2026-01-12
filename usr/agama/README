@@ -17,3 +17,26 @@ ASCL ID:  1805.008
 
 
 See also:  TACT, SMILE, Forstrand (https://arxiv.org/abs/1912.04288)
+
+The examples in the Makefile cover the section "Nemo plugin" in the
+AGAMA reference guide (Vasiliev, -2025)
+
+- this needs GSL ;  libgsl-dev
+- needs EIGEN   libeigen3-dev didn't do it
+- needs CVXOPT  python3-cvxopt    or:   pip install cvxopt
+- needs UNSIO - but my previous pip install didn't work
+- GLPK library (optional) is not found, ignored  -  libglpk-dev 
+
+
+## Benchmark
+
+The command `make test1` runs a benchmark, also performs a BSF regression test:
+
+          BSF: OK     -0.115841 1.03215 -33.2085 50 70001 -
+
+The test1 also report a CPU, but laptops with thermal protection may show
+different CPU times between different runs.
+
+- I5-10210U :      28.9 sec
+- Ultra 7 155H :   15.9
+- i9-12900K :      13.7

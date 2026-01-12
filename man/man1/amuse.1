@@ -1,8 +1,10 @@
-.TH AMUSE 1NEMO "16 June 2025"
+.TH AMUSE 1NEMO "27 June 2025"
 
 .SH "DESCRIPTION"
 \fBAMUSE\fP is the Astrophysical MUltipurpose Software Environment,
-with which you can simulate many types of astrophysical systems.
+with which you can simulate many types of astrophysical systems. Within
+NEMO we focus on Gravitational Dynamics, as this is the prime focus
+in NEMO.
 .PP
 The user interacts with AMUSE in python, for example you can set up an amuse
 profile in ipython that preloads some common imports
@@ -14,7 +16,7 @@ profile in ipython that preloads some common imports
 Internally many components in AMUSE are legacy codes (C,C++,Fortran) running at fantastic speeds,
 but the user will interact via python interfaces.
 .PP
-An example is shown below, and within NEMO there the script \fBamuse_convert.py\fP
+An example is shown below, and within NEMO the script \fBamuse_convert.py\fP
 can be used to convert between different
 snapshot formats that AMUSE supports.
 See also \fIunsio(3NEMO)\fP for another approach to such snapshot conversion.
@@ -54,9 +56,9 @@ lines.
 
 .PP
 .B 2.
-Here is a more NEMO like example, running from the (shell) commandline. If AMUSE is
+Here is a more NEMO like example, running from the commandline. If AMUSE is
 properly installed, the first
-example creates a Plummer model in memory, the second example creates a text file, of
+example creates a Plummer model in memory, the second example creates an output text file, of
 which the first particle is displayed as the 3rd line in this table:
 
 .EX
@@ -110,7 +112,7 @@ Within NEMO the command
 
 .EE
 will get you started on the install.  Note there is a user release that does not need NEMO, which
-can be a set of \fIpip install\fP:
+can be a series of \fIpip install\fP:
 
 .EX
    pip install amuse-framework
@@ -153,6 +155,8 @@ vtu		text file containing a table of values separated by a predefined character
 
 .SH "PROGRAMS"
 
+The following AMUSE scripts are available via NEMO:
+
 .TP 20
 .B amuse_convert.py
 converts snapshots using AMUSE, 
@@ -170,7 +174,9 @@ For convenience it will generate a Plummer sphere if no input file (-i) is provi
 .nf
 $NEMO/src/scripts/mknemo.d/amuse - example install script (can be run via mknemo)
 $NEMO/usr/amuse - amuse_convert.py, amuse_integrate.py - also copied to $NEMOBIN during install
-$NEMO/local/amuse - root of source code after install via mknemo
+$NEMO/usr/amuse/95-amuse.py - example ipython profile file for ~/.ipython/profile_amuse/startup/
+$NEMO/local/amuse - root of AMUSE source code after install via mknemo (a.k.a. $AMUSE_DIR to some)
+95-amuse.py
 .fi
 
 .SH "ADS"
@@ -180,13 +186,16 @@ $NEMO/local/amuse - root of source code after install via mknemo
 .fi
 
 .SH "SEE ALSO"
-nemo(1NEMO), zeno(1NEMO), starlab(1NEMO), bhtree(1NEMO)
+nemo(1NEMO), zeno(1NEMO), starlab(1NEMO), bhtree(1NEMO), tabtos(1NEMO), unsio(3NEMO)
 .PP
 .nf
 https://www.amusecode.org/
 .fi
 
 .SH "HISTORY"
+
+Geneology: arguably AMUSE is derived from \fIstarlab\fP, which in itself
+was an outcome of \fINEMO\fP.
 
 .nf
 .ta +1.25i +4.5i

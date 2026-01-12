@@ -137,7 +137,7 @@ namespace {
 				static_cast<      float*>(p),
 				static_cast<      float*>(a),
 				add);
-	default: error("Monopole: unsupported ndim: %d",ndim);
+	default: error((char*)"Monopole: unsupported ndim: %d",ndim);
 	}
 	break;
       case 'd':
@@ -158,10 +158,10 @@ namespace {
 				static_cast<      double*>(p),
 				static_cast<      double*>(a),
 				add);
-	default: error("Monopole: unsupported ndim: %d",ndim);
+	default: error((char*)"Monopole: unsupported ndim: %d",ndim);
 	}
 	break;
-      default: error("Monopole: unknown type \"%c\"",type);
+      default: error((char*)"Monopole: unknown type \"%c\"",type);
       }
     }
     //--------------------------------------------------------------------------
@@ -197,7 +197,7 @@ namespace {
     } while(isspace(*line));
     // 2. read line until first white-space character
     //    swallow rest til EOL, if necessary 
-    register char*l=line+1;
+     char*l=line+1;
     const    char*L=line+n;
     while(l != L) {
       from.get(*l);
@@ -209,7 +209,7 @@ namespace {
       }
       ++l;
     }
-    error("Combined: line longer than expected\n");
+    error((char *)("Combined: line longer than expected\n"));
   }
   //////////////////////////////////////////////////////////////////////////////
   bool read_line(std::istream& from, char*line, int const&n)
@@ -286,7 +286,7 @@ namespace {
       klo = int( (xi-x[0]) / (x[n-1]-x[0]) * (n-1) );
       klo = hunt(x,n,xi,klo);
       if(klo<0 || klo>=n) 
-	error("[%s.%d]: in %s: %s",__FILE__,__LINE__,"x out of range","find()");
+	error((char*)"[%s.%d]: in %s: %s",__FILE__,__LINE__,(char*)"x out of range",(char*)"find()");
     }
   }
   //////////////////////////////////////////////////////////////////////////////
@@ -351,7 +351,7 @@ namespace {
     {
       const scalar_type ife=1./48.;
       scalar_type h =x1-x0;
-      if(h==0) error("penta_splines::evaluate(): bad x input");
+      if(h==0) error((char*)"penta_splines::evaluate(): bad x input");
       scalar_type
 	hi = scalar_type(1)/h,
 	hf = h*h,
@@ -512,15 +512,15 @@ namespace {
 	"  par[3] = outermost radius in table for monopole       [1000]\n"
 	"  par[4] = number of points in table for monopole       [1001]\n\n";
     if(npar>5)
-      warning("Monopole: skipped parameters beyond 6\n");
+      warning((char*)("Monopole: skipped parameters beyond 6\n"));
     nemo_dprintf(4,"Monopole: timer set to: %s with t0=%f, tau=%f\n",
 		 timer::describe(), timer::T0(), timer::TAU());
     if(NR < 2)
-      error("Monopole: NR=%d < 2\n",NR);
+      error((char*)"Monopole: NR=%d < 2\n",NR);
     if(NR < 10)
-      warning("Monopole: NR=%d < 10\n",NR);
+      warning((char*) "Monopole: NR=%d < 10\n",NR);
     if(file==0|| file[0]==0)
-      error("Monopole: no accfile given\n");
+      error((char*)"Monopole: no accfile given\n");
     //
     // 1. scan data file for accname, accpars, accfile, and initialize Phi
     //
@@ -528,42 +528,42 @@ namespace {
     const int size=256;
     std::ifstream inpt(file);
     if(! inpt.good())
-      error("Monopole: couldn't open file \"%s\" for input\n",file);
+      error((char*)"Monopole: couldn't open file \"%s\" for input\n",file);
     char Line[size], AccName[size], AccPars[size], AccFile[size];
     char*accname=0, *accpars=0, *accfile=0, unknown[9];
     if(! read_line(inpt,Line,size))
-      error("Monopole: couldn't read data from file \"%s\"\n",file);
+      error((char*)"Monopole: couldn't read data from file \"%s\"\n",file);
     do {
       if       (0==strncmp(Line,"accname=",8)) {
 	if(accname)
-	  error("Monopole: >1 accname= entry in file \"%s\"\n",file);
+	  error((char*)"Monopole: >1 accname= entry in file \"%s\"\n",file);
 	else {
 	  strcpy(AccName,Line+8);
 	  accname=AccName;
 	}
       } else if(0==strncmp(Line,"accpars=",8)) {
 	if(accpars)
-	  warning("Monopole: extra accpars= in file \"%s\" ignored\n",file);
+	  warning((char*) "Monopole: extra accpars= in file \"%s\" ignored\n",file);
 	else {
 	  strcpy(AccPars,Line+8);
 	  accpars=AccPars;
 	}
       } else if(0==strncmp(Line,"accfile=",8)) {
 	if(accfile)
-	  warning("Monopole: extra accfile= in file \"%s\" ignored\n",file);
+	  warning((char*)"Monopole: extra accfile= in file \"%s\" ignored\n",file);
 	else {
 	  strcpy(AccFile,Line+8);
 	  accfile=AccFile;
 	}
       } else {
 	strncpy(unknown,Line,8); unknown[8]=0;
-	warning("Monopole: entry \"%s\" in file \"%s\" ignored\n",
+	warning((char*)"Monopole: entry \"%s\" in file \"%s\" ignored\n",
 		unknown,file);
       }
     }
     while(read_line(inpt,Line,size));
     if(accname == 0)
-      error("Monopole: no accname= entry found in file \"%s\"\n",file);
+      error((char*)"Monopole: no accname= entry found in file \"%s\"\n",file);
     nemo_dprintf(4,"Monopole: successfully scanned accfile:\n");
     nemo_dprintf(4,"	       accname=%s\n",accname);
     if(accpars) nemo_dprintf(4,"	       accpars=%s\n",accpars);
@@ -572,9 +572,9 @@ namespace {
     bool m(0),v(0);
     PHI = get_acceleration(accname,accpars,accfile,&m,&v);
     if(PHI==0)
-      error("Monopole: cannot obtain conservative potential\n");
+      error((char*) "Monopole: cannot obtain conservative potential\n");
     if(m || v)
-      error("Monopole: Phi(x) not conservative\n");
+      error((char*)"Monopole: Phi(x) not conservative\n");
     //
     // 2. initialize tables and compute monopole
     //
@@ -773,8 +773,8 @@ void iniacceleration(const double*pars,      // I:  array with parameters
 		     bool        *needV)     // O:  acceleration() needs vel's? 
 {
   if(AccN == AccMax) {
-    warning("iniacceleration(): request to initialize "
-	    "more than %d accelerations of type \"Monopole\"", AccMax);
+    warning((char*)"iniacceleration(): request to initialize "
+		"more than %d accelerations of type \"Monopole\"", AccMax);
     *accel = 0;
     return;
   }

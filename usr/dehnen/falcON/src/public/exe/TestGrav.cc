@@ -47,7 +47,7 @@ using namespace falcON;
 namespace {
   double ms_Force_gamma(const double gamma)
   {
-    register double x=5-3*gamma,f;
+     double x=5-3*gamma,f;
     if(x < 0.) return 0.;
     f =1/x;
     f-=4/(x+=1);
@@ -112,7 +112,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       " DUMP (default   0)  : [0/1] dump nodes to tree.cells and tree.leafs\n";
     std::exit(1);
   }
-  register clock_t  cpu0 = clock(), cpu1;
+   clock_t  cpu0 = clock(), cpu1;
 #ifdef falcON_ADAP
   real              Nsoft=zero,emin=zero;
   unsigned          NREF;
@@ -237,7 +237,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
   if(indiv_soft) {
     std::cerr<<" indiv_soft = "<<indiv_soft<<'\n';
     std::cerr<<" epar       = "<<EPAR<<'\n';
-    register double emean=0.;
+     double emean=0.;
     LoopAllBodies(BODIES,Bi) {
       Bi.eps() = min(EPS, real(EPAR*pow(RH[bodyindex(Bi)]*rho,-1./3.)));
       emean   += eps(Bi);
@@ -271,7 +271,7 @@ void falcON::main(int argc, const char* argv[]) falcON_THROWING
       <<(cpu1 - cpu0)/real(CLOCKS_PER_SEC)<<endl;
   cpu0 = cpu1;
   forces falcon(BODIES,EPS,theta,K,indiv_soft,one,MAC,EPS,one,DIR);
-  for(register unsigned ig=0; ig<=Ngrow; ++ig) {
+  for( unsigned ig=0; ig<=Ngrow; ++ig) {
 #if (0)
     if(Ncut) falcon.re_grow(Ncut,Ncrit);
     else     

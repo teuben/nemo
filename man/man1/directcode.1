@@ -1,9 +1,12 @@
 .TH DIRECTCODE1 1NEMO "30 July 2009"
-.SH NAME
+
+.SH "NAME"
 directcode \- simple direct N-body code
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 \fBdirectcode\fP [\fIparameter\fP=\fIvalue\fP] .\|.\|.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIdirectcode\fP is a simple leapfrog equal-timestepping direct N-body code.
 .PP
 The infra-structure of the code is derived from \fIhackcode1(1NEMO)\fP,
@@ -12,9 +15,9 @@ the code simple.
 .PP
 It is possible with this code to change the softening to mean a pseudo-Newtonian
 interaction, using 1/r -> 1/(r-eps), where eps=3GM/c^2.
-.SH PARAMETERS
-The following parameters are recognized; they may be given in any order
-if supplied with their keyword.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 24
 \fBin=\fP\fIin-file\fP
 If given, initial conditions will be read from \fIin-file\fP in
@@ -27,23 +30,28 @@ If given, results are written to \fIout-file\fP in snapshot format.
 \fBnbody=\fP\fInbody-value\fP
 Number of bodies for test data, generated only if none of
 \fBin\fP, \fBrestart\fP, or \fBcontinue\fP are specified.
+.br
 Default is \fB128\fP.
 .TP
 \fBseed=\fP\fIrandom-seed\fP
 Random number seed used in generating initial conditions.
+.br
 Default is \fB123\fP.
 .TP
 \fBcencon=\fP\fIcencon-flag\fP
 If \fBtrue\fP, generate centrally concentrated test system.
+.br
 Default is \fBfalse\fP.
 .TP
 \fBfreq=\fP\fIinteg-freq\fP
 Inverse time-step, to be used with a leap-frog integrator.
+.br
 Default is \fB32.0\fP (32 steps per unit time).
 .TP
 \fBeps=\fP\fIsoft-length\fP
 Force softening parameter. If a negative value is given, the potential
 is turned into a pseudo-Newtonian one with the meaning of -eps = 3GM/c^2.
+.br
 Default is \fB0.05\fP.
 .TP
 \fBoptions=\fP\fIoption-string\fP
@@ -56,42 +64,51 @@ Currently recognized keywords are:
 acceleration data with major data outputs. The phase space coordinates
 are always output.  It also seems that the reset_time and new_tout
 options have not been implemented yet.
+.br
 Default: \fBmass,phase\fP.
 .TP
 \fBtstop=\fP\fIstop-time\fP
 Time to stop integration in N-body model units.
+.br
 Default is \fB2.0\fP.
 .TP
 \fBfreqout=\fP\fIout-freq\fP
 Frequency of major N-body data outputs.
+.br
 Default is \fB4.0\fP (4 frames per unit time).
 .TP
 \fBminor_freqout=\fP\fIout-freq\fP
 Frequency of minor diagnostic outputs.
 If this frequency is not a simple fraction of \fBfreq\fP (see above),
 the program can waiste significant amounts of time.
+.br
 Default is \fB32.0\fP (32 diagnostic measurements per unit time).
 .TP
 \fBgravc=\fP
 Value for the gravitational constant. Although normally 1 in N-body units
 (see also \fIunits(1NEMO)\fP), this allows you to work in more natural units.
-[Default: 1]
+.br
+Default: 1
 
-.SH CAVEATS
+.SH "CAVEATS"
 Using eps<0 to activate the pseudo-Newtonian option does not change
 the units, all units need to be absorbed into eps. For example, for given
 eps<0, the precession rate of a planet around a star should then be
 \fI2.pi.eps/(a*(1-e^2))\fP.
-.SH SEE ALSO
-newton0(1NEMO), hackcode1(1NEMO)
-.SH AUTHOR
+
+.SH "SEE ALSO"
+newton0(1NEMO), hackcode1(1NEMO), brutus(1AMUSE)
+
+.SH "AUTHOR"
 Peter Teuben
-.SH FILES
+
+.SH "FILES"
 .ta +1.5i
 .nf
 src/nbody/evolve/directcode/	source code
 .fi
-.SH HISTORY
+
+.SH "HISTORY"
 .nf
 .ta +1i +4i
 17-feb-04	V1.0  code written, cloned off hackcode1	PJT

@@ -265,7 +265,7 @@ namespace falcON {
     tm<int N> struct po<2,N> {                     // a+=b=m*(v op v) & cont
       tX sv ad(X*a, X*b, cX*v, cX&m)
       {
-	register X tmp  = m * v[0];
+	X tmp  = m * v[0];
 	a[0] += b[0] = v[0] * tmp;
 	a[1] += b[1] = v[1] * tmp;
 	a[2] += b[2] = v[2] * tmp;
@@ -279,7 +279,7 @@ namespace falcON {
     tm<> struct po<2,2> {                          // a+=m*(v op v)  DONE
       tX sv ad(X*a, cX*v, cX&m)
       {
-	register X tmp  = m * v[0];
+	X tmp  = m * v[0];
 	a[0] += v[0] * tmp;
 	a[1] += v[1] * tmp;
 	a[2] += v[2] * tmp;
@@ -426,7 +426,7 @@ namespace falcON {
     tm<int N> struct __norm<2,N> {
       tX sv job(poles3D<N,X>&M, cX&x)
       {
-	register X ix = X(1)/x;
+	X ix = X(1)/x;
 	M.template pole<2>() *= (ix*iF[2]);
 	__norm<3,N>::job(M,ix);
       }
@@ -604,14 +604,14 @@ namespace falcON {
   //
   tNX inline void
   shift_by(symset3D<N,X>&C, falcONVec<3,X>&x)
-  { meta3D::__shift<N,N,0>::by(static_cast<X*>(C), static_cast<X*>(x)); }
+  { meta3D::__shift<N,N,0>::by(static_cast<X*>(C), x.data()); }
   //
   tNX inline void
   eval_expn(symset3D<1,X>&G, symset3D<N,X> const&C, falcONVec<3,X> const&x)
   {
     meta3D::__shift<N,N,0>::at(static_cast<X*>(G),
 			       static_cast<const X*>(C),
-			       static_cast<const X*>(x));
+			       x.data());
   }
   //
   namespace meta3D {
@@ -743,7 +743,7 @@ namespace falcON {
       tX sv __ass(X*a, const X*v, D_ARG)
       {
 	a[ 0] = __D(0,J);
-	register X t =-__D(1,J);
+	X t =-__D(1,J);
 	a[ 1] = v[0]*t;
 	a[ 2] = v[1]*t;
 	a[ 3] = v[2]*t;
@@ -753,7 +753,7 @@ namespace falcON {
       tX sv __add(X*a, const X*v, D_ARG)
       {
 	a[ 0]+= __D(0,J);
-	register X t =-__D(1,J);
+	X t =-__D(1,J);
 	a[ 1]+= v[0]*t;
 	a[ 2]+= v[1]*t;
 	a[ 3]+= v[2]*t;
@@ -766,7 +766,7 @@ namespace falcON {
       tX sv __ass(X*a, const X*v, D_ARG)
       {
 	a[ 0] = __D(0,J);
-	register X t =-__D(1,J);
+	X t =-__D(1,J);
 	a[ 1] = v[0]*t;
 	a[ 2] = v[1]*t;
 	a[ 3] = v[2]*t;
@@ -785,7 +785,7 @@ namespace falcON {
       tX sv __add(X*a, const X*v, D_ARG)
       {
 	a[ 0]+= __D(0,J);
-	register X t =-__D(1,J);
+	X t =-__D(1,J);
 	a[ 1]+= v[0]*t;
 	a[ 2]+= v[1]*t;
 	a[ 3]+= v[2]*t;
@@ -807,7 +807,7 @@ namespace falcON {
       tX sv __ass(X*a, const X*v, D_ARG)
       {
 	a[ 0] = __D(0,J);
-	register X t =-__D(1,J);
+	X t =-__D(1,J);
 	a[ 1] = v[0]*t;
 	a[ 2] = v[1]*t;
 	a[ 3] = v[2]*t;
@@ -820,7 +820,7 @@ namespace falcON {
 	a[ 8] = t*v[2];
 	t     = __D(2,J)*v[2];
 	a[ 9] = t*v[2] - __D(1,J);
-	register X D2_3 = times<3>(__D(2,J));
+	X D2_3 = times<3>(__D(2,J));
 	t     = __D(3,J)*v[0]*v[0];
 	a[10] = (D2_3-t)*v[0];
 	a[11] = (__D(2,J)-t)*v[1];
@@ -840,7 +840,7 @@ namespace falcON {
       tX sv __add(X*a, const X*v, D_ARG)
       {
 	a[ 0]+= __D(0,J);
-	register X t = __D(1,J);
+	X t = __D(1,J);
 	a[ 1]-= v[0]*t;
 	a[ 2]-= v[1]*t;
 	a[ 3]-= v[2]*t;
@@ -853,7 +853,7 @@ namespace falcON {
 	a[ 8]+= t*v[2];
 	t     = __D(2,J)*v[2];
 	a[ 9]+= t*v[2] - __D(1,J);
-	register X D2_3 = times<3>(__D(2,J));
+	X D2_3 = times<3>(__D(2,J));
 	t     = __D(3,J)*v[0]*v[0];
 	a[10]+= (D2_3-t)*v[0];
 	a[11]+= (__D(2,J)-t)*v[1];
@@ -891,11 +891,11 @@ namespace falcON {
 #else
   tNX inline void
   set_dPhi(symset3D<N,X>&C, falcONVec<3,X> const&v, X const D[N+1])
-  { meta3D::__grav<N>::ass(C,static_cast<const X*>(v),D); }
+  { meta3D::__grav<N>::ass(C,v.data(),D); }
   //
   tNX inline void
   add_dPhi(symset3D<N,X>&C, falcONVec<3,X> const&v, X const D[N+1])
-  { meta3D::__grav<N>::add(C,static_cast<const X*>(v),D); }
+  { meta3D::__grav<N>::add(C,v.data(),D); }
 #endif
   //
   namespace meta3D {

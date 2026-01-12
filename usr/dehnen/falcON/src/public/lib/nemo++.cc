@@ -155,7 +155,7 @@ double falcON::getdparam(const char*p) {
 
 falcON::vect falcON::getvparam(const char*p) {
   vect X;
-  int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
+  int  N = nemoinp(getparam(p), X.data(), Ndim);
   if(N!=Ndim) {
     if(N<0) falcON_THROW("parse error: processing parameter \"%s\"\n",p);
     else    falcON_THROW("parameter \"%s\" requires %d values, but %d given\n",
@@ -166,7 +166,7 @@ falcON::vect falcON::getvparam(const char*p) {
 
 falcON::vect falcON::getvrparam(const char* p) {
   vect X;
-  int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
+  int  N = nemoinp(getparam(p), X.data(), Ndim);
   if(N==1) for(int d=1; d!=Ndim; ++d) X[d]=X[0];
   else if(N!=Ndim) {
     if(N<0) falcON_THROW("parse error: processing parameter \"%s\"\n",p);
@@ -178,7 +178,7 @@ falcON::vect falcON::getvrparam(const char* p) {
 
 falcON::vect* falcON::getvparam_z(const char* p, vect&X) {
   if(!hasvalue(p)) return 0;
-  int N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
+  int N = nemoinp(getparam(p), X.data(), Ndim);
   if(Ndim != N) {
     if(N<0) falcON_THROW("parse error: processing parameter \"%s\"\n",p);
     else  falcON_Warning("parameter \"%s\" requires %d values, but %d given\n",
@@ -190,7 +190,7 @@ falcON::vect* falcON::getvparam_z(const char* p, vect&X) {
 
 falcON::vect* falcON::getvrparam_z(const char* p, vect&X) {
   if(!hasvalue(p)) return 0;
-  int  N = nemoinp(getparam(p), static_cast<real*>(X), Ndim);
+  int  N = nemoinp(getparam(p), X.data(), Ndim);
   if(N==1) for(int d=1; d!=Ndim; ++d) X[d]=X[0];
   else if(N!=Ndim) {
     if(N<0) falcON_THROW("parse error: processing parameter \"%s\"\n",p);

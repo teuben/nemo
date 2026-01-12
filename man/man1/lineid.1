@@ -1,15 +1,17 @@
-.TH LINEID 1NEMO "15 December 2024"
+.TH LINEID 1NEMO "3 July 2025"
 
 .SH "NAME"
 lineid \- Identify peaks in a spectrum and optionally find lines
 
 .SH "SYNOPSIS"
-\fBlineid\fP [parameter=value]
+\fBlineid\fP in=file [parameter=value]
 
 .SH "DESCRIPTION"
-\fBlineid\fP identifies peaks in a spectrum, and
-attempts to identify spectral lines. The units of the frequency
+\fBlineid\fP identifies peaks in a spectrum (or can be directly given), 
+and attempts to identify spectral lines. The units of the frequency
 axis will need to be specified (the default is GHz) in order for the line identification to work.
+.PP
+It will also inter-operate between sky-freq, rest-freq and doppler velocity.
 .PP
 Operation can occur in several modes.
 .br
@@ -20,6 +22,10 @@ restfreq, or from a linelist.
 fitted peak.
 .br
 3. If neither is given, just the peak(s) are reported.
+.br
+4. The input table can also be a list of already identified peaks (mode=0). The first
+line is the one associated with the restfreq, if that's relevant. Appropriate values
+(depending on if restfreq= or vlsr= is given) are returned for the other lines.
 .PP
 See also \fItablsqfit(1NEMO)\fP with the option \fBfit=peak\fP, and \fIccdmom(1NEMO)\fP has
 an algorithm to find (properties of) the Nth peak using mom=3,30,31,32,33,34
@@ -29,19 +35,23 @@ More sophisticated algorithms can be find in for example ADMIT's LineID task.
 .SH "PARAMETERS"
 .so man1/parameters
 .TP 20
-\fBin=\fP
-Input (table) file name. No default.
+\fBin=\fP\fIfile\fPq
+Input (table) file name. Should have two columns. See below. No default.
 .TP
-\fBxcol=\fP
+\fBxcol=\fP\fIx-column\fP
 X coordinate column, representing the frequency or wavelength axis.
 Units are GHz, unless specified with the \fBxunit\fP keyword.
+.br
 [1]
 .TP
-\fBycol=\fP
-Y coordinate column, reprepenting an intensity. [2] 
+\fBycol=\fP\fIy-column\fP
+Y coordinate column, reprepenting an intensity. For mode=0 this column is not used.
+.br
+[2] 
 .TP
 \fBxunit=\fP
-X axis unit (GHz, MHz, A, nm) -- not implemented yet.
+X axis unit (GHz, MHz, A, nm, km/s, z) -- not all are implemented yet.
+.br
 [GHz]
 .TP
 \fBminchan=\fP
@@ -51,13 +61,33 @@ Minimum channels for a peak [3]   - not used yet
 Maximum channels for a peak []     - not used yet 
 .TP
 \fBvlsr=\fP
-VLSR of object. Not set by default.
+VLSR of object, in km/s, independent of \fBxunit\fP.q
+.br
+Not set by default.
 .TP
 \fBrestfreq=\fP
-If line is known, give restfreq in xunits. Not set by default.
+If line is known, give restfreq in \fBxunit\fP.
+.br
+Not set by default.
 .TP
 \fBlinelist=\fP
-Table with frequencies and lines. Not set by default.
+Table with frequencies and lines. There is a simple list in $NEMODAT/z_lines.list
+with some common high-Z lines.
+.br
+Not set by default.
+.TP
+\fBrms=\fP
+Do not fit peaks when this RMS is reached
+.TP
+\fBmode=0|1\fP
+Fitting mode:  0=no fit, the table contains the frequencies (or doppler velocities)
+of the lines.    1=peak fit
+.br
+[1]
+
+.SH "CAVEATS"
+Currently frequency conversions are done using the \fI(1+z)\fP formula
+with \fIz=VLSR/c\fP
 
 .SH "EXAMPLES"
 The following example smoothes a set of random values by 10 channels to create a handful
@@ -70,9 +100,22 @@ of peaks and investigates the strongest peak:
   tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 vlsr=10000
   ### nemo Debug Info: Line at 40.1222, Look near freq = 41.5067 for a line
 
-  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 restfreq=115
+  tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5tabgen - 115 1 2 123 | tabsmooth - 1 12 10,5| lineid - 0 1 restfreq=115
   ### nemo Debug Info: Line at 40.1222 has z=0.651112 or vlsr=...
-.EE  
+.EE
+
+and some \fBmode=0\fP examples specifying either velocity or frequency in various modes:
+
+.EX
+  echo 5000 | lineid - mode=0 restfreq=1.420405751786 xunit=km/s
+  Line at 5000.000000 km/s has skyfreq 1.397105 restfreq 1.420406
+
+  echo 1.420405751786 | lineid - mode=0 vlsr=5000 xunit=GHz
+  Line at 1.420406 GHz has skyfreq 1.397105
+
+  echo 1.397105 | lineid - mode=0 restfreq=1.420405751786 xunit=GHz
+  Line at 1.397105 GHz has z 0.016678 vlsr 4999.903122 km/s
+.EE
 
 .SH "SEE ALSO"
 tablsqfit(1NEMO), table(5NEMO)
@@ -86,4 +129,5 @@ Peter Teuben
 .nf
 .ta +1.25i +4.5i
 13-dec-2024	0.1 Draft created	PJT
+3-jul-2025	0.3 add mode=	PJT
 .fi

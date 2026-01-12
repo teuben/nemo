@@ -1761,7 +1761,7 @@ namespace {
     /// \param  rec  size of Fortran record header (must be 4 or 8)
     /// \param  swap (output) need byte-swap?
     bool Read(input& in, unsigned rec, bool& swap)
-      throw(falcON::exception);
+      noexcept(false);
     /// check whether two GadgetHeaders could possibly come from different data
     /// files for the same snapshot
     bool mismatch(GadgetHeader const&H) const;
@@ -1785,7 +1785,7 @@ namespace {
   }
   //
   bool GadgetHeader::Read(input& in, unsigned rec, bool& swap)
-    throw(falcON::exception)
+    noexcept(false)
   {
     swap = 0;
     // read record header and determine swapping necessity

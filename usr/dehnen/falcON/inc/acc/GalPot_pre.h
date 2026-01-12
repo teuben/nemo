@@ -230,7 +230,7 @@ namespace GalPot {                               // v0.4
     SphrPar Parameter        (int i) const { return (S+i)->parameter(); }
   };
   inline bool Spheroids::massive() const {
-    for(register SpheroidDensity *p=S; p!=Sup; ++p)
+    for( SpheroidDensity *p=S; p!=Sup; ++p)
       if(p->scale_density()) return true;
     return false;
   }

@@ -110,7 +110,7 @@ namespace falcON {
     fvec4& operator*=(float t)            { W*=t;    X*=t;    Y*=t;    Z*=t;
                                             return *this; }
     //--------------------------------------------------------------------------
-    fvec4& operator/=(float t)            { register float x=1./t;
+    fvec4& operator/=(float t)            {  float x=1./t;
                                             return operator*=(x);  }
     //--------------------------------------------------------------------------
     fvec4& ass_sum (fvec4 const&v, fvec4 const&w) {

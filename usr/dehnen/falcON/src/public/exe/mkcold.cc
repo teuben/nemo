@@ -88,8 +88,8 @@ void nbdy::main()
   Gaussian Gy (&RNG,&RNG,getdparam("b"));
   Gaussian Gz (&RNG,&RNG,getdparam("c"));
   Gaussian Gv (&RNG,&RNG,sigma);
-  register nbdy::real x[3], v[3] = {0.,0.,0.};
-  for(register int n=0; n!=N; ) {
+   nbdy::real x[3], v[3] = {0.,0.,0.};
+  for( int n=0; n!=N; ) {
     x[0] = Gx();
     x[1] = Gy();
     x[2] = Gz();
@@ -99,7 +99,7 @@ void nbdy::main()
       v[2] = Gv();
     }
     if(symmetric)
-      for(register int i=0; i!=8; ++i, ++n) {
+      for( int i=0; i!=8; ++i, ++n) {
 	BB.mass(n)   = mass;
 	BB.pos(n)[0] = i&1 ? x[0] : -x[0];
 	BB.pos(n)[1] = i&2 ? x[1] : -x[1];

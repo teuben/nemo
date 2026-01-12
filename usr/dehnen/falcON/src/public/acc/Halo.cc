@@ -41,8 +41,9 @@ namespace {
       if(def == DPLH::null_value())
 	return par?  *par : 7./9.;
       else if(par && *par != def)
-	falcON_WarningN("external potential \"Halo\": "
+	falcON_WarningN((char*)"external potential \"Halo\": "
 			"par[3]=g_i=%g ignored, using g_i=%g for model '%s'",
+
 			*par, def, model);
       return def;
     }
@@ -53,8 +54,9 @@ namespace {
       if(def == DPLH::null_value())
 	return par?  *par : 31./9.;
       else if(par && *par != def)
-	falcON_WarningN("external potential \"Halo\": "
+	falcON_WarningN((char*)"external potential \"Halo\": "
 			"par[4]=g_o=%g ignored, using g_o=%g for model '%s'",
+
 			*par, def, model);
       return def;
     }
@@ -65,8 +67,9 @@ namespace {
       if(def == DPLH::null_value())
 	return par?  *par : 4./9.;
       else if(par && *par != def)
-	falcON_WarningN("external potential \"Halo\": "
+	falcON_WarningN((char*)"external potential \"Halo\": "
 			"par[5]=eta=%g ignored, using eta=%g for model '%s'",
+
 			*par, def, model);
       return def;
     }
@@ -126,7 +129,7 @@ namespace {
 	  "   r_c = "<<core_radius() <<'\n';
       }
       if(npar>8)
-	falcON_Warning("external potential \"Halo\": "
+	falcON_Warning((char*)"external potential \"Halo\": "
 		       "skipping parameters beyond 8\n");
     }
     //--------------------------------------------------------------------------

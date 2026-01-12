@@ -170,11 +170,11 @@ void falcON::report::close_file()
 falcON::report::report(const char* fmt, ... )
 {
   if(REPORT && REPORT->STREAM) {
-    register clock_t NOW = clock();
+     clock_t NOW = clock();
     REPORT->SECONDS += (NOW - REPORT->LAST)/double(CLOCKS_PER_SEC);
     REPORT->LAST = NOW;
     fprintf(REPORT->STREAM,"%10.2f: ",REPORT->SECONDS);
-    for(register int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
+    for( int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
     fprintf(REPORT->STREAM,"begin: ");
     va_list  ap;
     va_start(ap,fmt);
@@ -195,11 +195,11 @@ falcON::report::report(const char* fmt, ... )
 void falcON::report::info(const char* fmt, ... )
 {
   if(REPORT && REPORT->STREAM) {
-    register clock_t NOW = clock();
+     clock_t NOW = clock();
     REPORT->SECONDS += (NOW - REPORT->LAST)/double(CLOCKS_PER_SEC);
     REPORT->LAST = NOW;
     fprintf(REPORT->STREAM,"%10.2f: ",REPORT->SECONDS);
-    for(register int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
+    for( int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
     fprintf(REPORT->STREAM,"doing: ");
     va_list  ap;
     va_start(ap,fmt);
@@ -219,12 +219,12 @@ void falcON::report::info(const char* fmt, ... )
 falcON::report::~report()
 {
   if(REPORT && REPORT->STREAM) {
-    register clock_t NOW = clock();
+     clock_t NOW = clock();
     REPORT->SECONDS += (NOW - REPORT->LAST)/double(CLOCKS_PER_SEC);
     REPORT->LAST = NOW;
     --(REPORT->LEVEL);
     fprintf(REPORT->STREAM,"%10.2f: ",REPORT->SECONDS);
-    for(register int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
+    for( int l=0; l!=REPORT->LEVEL; ++l) fprintf(REPORT->STREAM,"  ");
     fprintf(REPORT->STREAM,"done\n");
     fflush(REPORT->STREAM);
     fpos_t here;

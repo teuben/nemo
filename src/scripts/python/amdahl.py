@@ -50,6 +50,7 @@ def readf1(filename):
          2  72.24 10.58 1:47.36
          1  19.72user 0.13system 0:19.95elapsed   99%CPU
     """
+    print("#                                               r_u,  r_e, f_p ")
     lines = open(filename).readlines()
     for line in lines:
         if line[0] == '#':

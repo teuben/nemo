@@ -1,9 +1,11 @@
 .TH MKKD95 1NEMO "5 August 2006"
-.SH NAME
+
+.SH "NAME"
 mkkd95 \- Kuijken-Dubinski-95 composite disk-bulge-halo model
-.SH SYNOPSIS
+.SH "SYNOPSIS"
 \fBmkkd95\fP [parameter=value]
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fBmkkd95\fP creates a composite Disk-Bulge-Halo galaxy in 
 near equilibrium following the procedure described in
 Kuijken & Dubinksi (1995). This program is merely a NEMO wrapper
@@ -28,45 +30,55 @@ leaving out the halo probably won't work.
 Two new versions have been published since the current 1995 K&D version:
 Widrow & Dubinski (2005) and Widrow, Pym and Dubinski (2008). These are
 not (yet) supported in the current \fBmkkd95\fP program.
-.SH PARAMETERS
-The following parameters are recognized in any order if the keyword
-is also given:
+.PP
+The GalactICS package is also available within \fIamuse(1NEMO)\fP.
+
+.SH "PARAMETERS"
+.so man1/parameters
 .TP 20
 \fBout=\fP
-output snapshot (a rundirectory $out.tmpdir is also created). 
+output snapshot (a rundirectory $out.tmpdir is also created).
+.br
 No default.
 .TP
 \fBndisk=\fP
 Number of particles in disk. Set them to 0 to leave out this
 component.
 Notice these are the first set (of three) of particles in the snapshot.
- [8000]  
+.br
+[8000]  
 .TP
 \fBnbulge=\fP
 Number of particles in bulge, the second set of particles in
-the output snapshot. [4000]  
+the output snapshot.
+.br
+[4000]  
 .TP
 \fBnhalo=\fP
 Number of particles in halo. 
 Notice these are the thirds and last set of particles in the snapshot.
+.br
 [6000]  
 .TP
 \fBpsi0=\fP
 in.dbh: Psi0 (HALO) 
 central potential - the smaller (the more negative) this parameter
 the deeper the potential and the more extended the halo
+.br
 [-4.6]    
 .TP
 \fBv0=\fP
 in.dbh:
 v0 = sqrt(2.0)*sigma0 where sigma0 is the central velocity
 dispersion. roughly the velocity where the halo rotation curve peaks
+.br
 [1.42]     
 .TP
 \fBq=\fP
 in.dbh: q 
 an optional flattening parameter for the potential - generally
 0.7 < q < 1.05 - q=1.0 will give a nearly spherical halo
+.br
 [1]     
 .TP
 \fBrck2=\fP
@@ -76,6 +88,7 @@ derived King radius for halo only models set this
 to 1.0.  For multicomponent models, this can be a smaller
 number 0.0 to 0.1.  I've found that with this parameter=0.0 the
 program can crash.
+.br
 [0.1]     
 .TP
 \fBra=\fP
@@ -83,113 +96,144 @@ in.dbh:
 Ra   - a scaling radius for the halo -
 The halo Ra radius is the radius at which the halo rotation curve, at its
 initial slope ignoring cutoffs and the other components, reaches v0.
- [0.8]     
+.br
+[0.8]     
 .TP
 \fBmd=\fP
 in.dbh:
 M_d - mass of the exponential disk ignoring cutoffs
+.br
 [0.867]    
 .TP
 \fBrd=\fP
 in.dbh:
 R_d - exponential scale length
+.br
 [1]     
 .TP
 \fBrouter=\fP
 in.dbh: 
 R_outer - outer radius where we begin to truncate the disk density
+.br
 [5]     
 .TP
 \fBzd=\fP
 in.dbh: 
 z_d - disk scale height assuming a sech^2(z/zd) vertical density law
+.br
 [0.1]     
 .TP
 \fBdrtrunc=\fP
 in.dbh: 
 dR_trunc - truncation width - the disk density smoothly drops to zero in
 the range R_outer < R < ~R_outer + 2*dR_trunc.
+.br
 [0.5]     
 .TP
 \fBrhob=\fP
 in.dbh: 
 rho_b    - bulge central density
+.br
 [14.45]    
 .TP
 \fBpsicut=\fP
 in.dbh: 
 psi_cut  - bulge cut-off potential psi0 < psi_cut < 0.0
          - energy cut-off for the bulge
+.br
 [-2.3]     
 .TP
 \fBsigb=\fP
 in.dbh: 
 sig_b    - bulge central potential
+.br
 [0.714]     
 .TP
 \fBdr=\fP
 in.dbh: delta_r 
 the width of the radial bins used to calculate the potential
+.br
 [0.01]     
 .TP
 \fBnr=\fP
 in.dbh: nr -
 number of radial bins - initially a guess since we don't know
 the radial extent of the system
+.br
 [2400]     
 .TP
 \fBlmax=\fP
 in.dbh: the largest value in the potential harmonic expansion - use
 lmax=2 to get a quick look at the mass profile and lmax=10 for
 the final calculation of the model
- number of harmonics [10]   
+ number of harmonics
+.br
+[10]
 .TP
 \fBsigvr0=\fP
-in.diskdf: central radial velocity dispersion [0.47]  
+in.diskdf: central radial velocity dispersion
+.br
+[0.47]
 .TP
 \fBsigr0=\fP
-in.diskdf: scalelength of sig_r^2 [1.0]   
+in.diskdf: scalelength of sig_r^2
+.br
+[1.0]
 .TP
 \fBncorr=\fP
-in.diskdf: number of intervals for correction function [50]
+in.diskdf: number of intervals for correction function
+.br
+[50]
 .TP
 \fBniter=\fP
-in.diskdf: number of iterations [10]   
+in.diskdf: number of iterations
+.br
+[10]
 .TP
 \fBfstreamb=\fP
 in.bulge: the streaming fraction of stars with L_z > 0.
 This controls the  rotation of the bulge and the halo,
 with f=0.5 the non-rotating case.
+.br
 [0.75]      
 .TP
 \fBfstreamh=\fP
-in.halo: see above, for the halo. [0.5]      
+in.halo: see above, for the halo.
+.br
+[0.5]
 .TP
 \fBiseed=\fP
 in.- Random Seed - KD95 convention. Notice this seed is shared
-by all 3 components. [-1]    
+by all 3 components.
+.br
+[-1]
 .TP
 \fBzerocm=\fP
 in.- Center the snapshot? Notice again this is shared by all
-three components. [t]   
+three components.
+.br
+[t]
 .TP
 \fBbin=\fP
 directory in which KD95 binaries live. Unless your binaries 
 have been added  to your search PATH, you need to specify
 the directory where these live.
- [.] 
+.br
+[.] 
 .TP
 \fBmodel=A|B|C|D\fP
 Base K&D95 model. The default model parameters above are 
 already for model-A,
 but with this keyword another one of the 4 published models can
 be quickly loaded. After that specific parameters can still
-be overriden by setting their value explicitly. By default
-model is not set via this method.
+be overriden by setting their value explicitly.
+.br
+By default model is not set via this method.
 .TP
 \fBnmodel=\fP
 Number of models computed. Useful if you want to stack a large
 number of models to increase signal to noise.
+.br
 Default: 1.
 .TP
 \fBcleanup=t|f\fP
@@ -197,8 +241,10 @@ Cleanup the temporary run directory after usage. The
 contents of this directory is probably only useful for 
 debugging, it contains the output of all the individual programs
 and temporary files before final conversion to the \fIout\fP file.
+.br
 Default: t
-.SH PROCEDURE
+
+.SH "PROCEDURE"
 Creating a galaxy model from these parameters is sort of a black art
 since the halo and bulge models are not parameterized in terms of
 their mass profiles but rather properties of their distribution
@@ -247,7 +293,8 @@ potential is insufficient to generate a potential well as deep as
 requested. If this persists over many iterations, again increase the
 number or size of the radial bins.
 .PP
-.SH PROGRAMS
+
+.SH "PROGRAMS"
 Although \fBmkkd95\fP calls a number of KD95 programs, here is a brief
 explanation of some of them:
 .PP
@@ -279,7 +326,7 @@ building tables, which is independantly of the number of particles.
 .SH EXAMPLES
 The default keywords are for Kuijken-Dubinski's model-A.
 
-.nf
+.EX
 % mkkd95 A0.dat
 % snapmstat A0.dat sort=f
 0 0:7999  = 8000 Mass= 0.000108822 TotMas= 0.87058 CumMas= 0.87058
@@ -296,8 +343,9 @@ The default keywords are for Kuijken-Dubinski's model-A.
 
 % mkkd95 D0.dat model=D
 % snapplot D0.dat color='i<1000?2.0/16.0:(i<2000?3.0/16.0:4.0/16.0)' yvar=z
-.fi
-.SH SEE ALSO
+.EE
+
+.SH "SEE ALSO"
 gendisk, genbulge, genhalo, dbh, getfreqs, diskdf, snapmstat(1NEMO), tabtos(1NEMO), magalie(1NEMO)
 .nf
 http://www.astro.rug.nl/~kuijken/galactics.html     original GalactICS distribution
@@ -315,13 +363,15 @@ makegalaxy     https://bitbucket.org/lutorm/makegalaxy
 .nf
 GalIC	[ascl:1408.008] GALIC: Galaxy initial conditions construction 
 .nf
-makediskgalaxy  Springel et. al 2005 - 2005MNRAS.361..776S 
+makediskgalaxy  Springel et. al 2005 - 2005MNRAS.361..776S
+.nf
+AGAMA - https://github.com/GalacticDynamics-Oxford/Agama
 .fi
 
-.SH ADS
+.SH "ADS"
 @ads 1995MNRAS.277.1341K
 
-.SH FILES
+.SH "FILES"
 .nf
 NEMO/src/nbody/init/mkkd95.c
 NEMO/usr/kuijken/GalactICS-exp/
@@ -333,12 +383,14 @@ $out.tmdir/h.dat              same as above, but only for halo
 $out.tmdir/b.dat              same as above, but only for bulge
 $out.tmdir/mr.dat             mass and radial extent (or edge) of disk, bulge and halo
 .fi
-.SH AUTHOR
+
+.SH "AUTHOR"
 Konrad Kuijken & John Dubinski (fortran programs - 1995)
 Peter Teuben (NEMO interface) -
-.SH UPDATE HISTORY
+
+.SH "HISTORY"
 .nf
-.ta +1.0i +4.0i
+.ta +1.25i +4.5i
 06-Mar-04	V1.0 Created, using kd95's  README file 	PJT
 11-mar-04	V1.2 added nmodel= and warns about using model= 	PJT
 23-mar-04	V1.4 use logfile in tmpdir, added cleanup=, some key reorder	PJT
