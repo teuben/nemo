@@ -23,15 +23,14 @@ string defv[] = {	/* Standard NEMO keyword+help */
     "blocking=1\n          Blocking factor (blocking/2880)",
     "out=\n                Convert input text to output fits header",
     "counter=f\n           Add line counter to output?",
-    "VERSION=1.3c\n        6-jan-2021 PJT",
+    "VERSION=1.3d\n        19-jun-2025 PJT",
     NULL,
 };
 
 string usage = "display, or convert to, a fits header";
 
-string cvsid="$Id$";
 
-extern string *burststring(string, string);
+// extern string *burststring(string, string);
 
 void read_fits_header(void);
 void convert_to_header(void);
@@ -48,7 +47,7 @@ void read_fits_header()
 {
     stream instr, outstr;
     int    i,n,nfile, sel_data, sel_head, blocking, counter;
-    size_t dsize;
+    off_t  dsize;
     string outfile, select, *fix, *delete, *keep, *print;
     char   basename[128];
     struct fits_header fh;

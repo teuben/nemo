@@ -1,4 +1,4 @@
-.TH TABSMOOTH 1NEMO "24 June 2024"
+.TH TABSMOOTH 1NEMO "6 August 2025"
 
 .SH "NAME"
 tabsmooth \- smooth columns of a table (Hanning, Savitzky-Golay)
@@ -18,6 +18,8 @@ a Hanning, Boxcar, Gaussian and a Savitzky-Golay filter (and some of their
 derivates) can be selected.   A pass-through is also allowed. Some of the
 filters need additional argument(s), given by \fBpars=\fP and are described
 below.
+.PP
+The default is a Hanning smoothing.
 .PP
 Optionally the smoothing kernel can be shown using \fPshow=t\fP
 without the need to read a table.
@@ -43,7 +45,7 @@ is work in progress.  Either a number value can be given, or a minimum
 match to the filter name, as shown in the first column:
 .nf
    -1   passthrough, the column(s) not modified
-   0,h  hanning (1,2,1)
+   0,h  hanning (1,2,1)  [default]
    1    SK2 5pt smooth
    2    SK2 1st derivative with h=1 (sum=0)
    3    SK2 2nd derivative with h=1 (sum=0)

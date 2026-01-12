@@ -40,7 +40,7 @@ It also has a large number (>30) of keywords, which
 makes it hard to use, and prone to bugs when amending code.
 
 To overcome the single table approach, the NEMO *getparam* command line user interface
-would need to be abandoned (short of rewriting it). The standard *parseargs* module
+would need to be abandoned (short of rewriting it). The standard *argparse* module
 in python - with a minor hack - will allow parsing the commandline in sections
 identified with each input table
 
@@ -79,7 +79,7 @@ each in their own style
 --out         plotting file, default is on screen
 
 Other thoughts:
-? logarithmic axes
+? logarithmic axes    --xlog  --ylog
 ? object oriented plotting vs. pyplot
 ? allow parameter file for other global things (fonts, ...)
   or rely on rcParams
@@ -88,7 +88,8 @@ Other thoughts:
 ? template generator (current tabplot has the pyplot= keyword for this)
 ? make classes and functions available for derivate products?
   (e.g. a spectrum plotter where one can switch between freq/wave/velo)
-? how to deal with interactive vs. non-interactive
+? how to deal with interactive vs. non-interactive plt.ion() and plt.ioff()
+? how to select a mpl backend for batch work?
 
 Examples:
 

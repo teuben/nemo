@@ -21,16 +21,22 @@ clean:
 all:    $(BENCHDATA) $(BENCH) 
 
 
-# Million-Body size
+# Million-Body size or number of models for 1 million
 MBODY = 10
+NBODY = 1000000
 
 bench0:
-	nemobench mkplummer0 mkplummer . nbody="$(MBODY)*1000000"
+	nemobench mkplummer0 mkplummer .           nbody="$(MBODY)*$(NBODY)"
 
 bench1:
 	@rm -rf bench1.snap
-	nemobench mkplummer1 mkplummer bench1.snap nbody="$(MBODY)*1000000"
-	@echo bench1.snap: 535MB for nbody=10M MBODY=$(MBODY)
+	nemobench mkplummer1 mkplummer bench1.snap nbody="$(MBODY)*$(NBODY)"
+	@echo bench1.snap: 535MB for nbody=$(NBODY) MBODY=$(MBODY)
+
+bench2:
+	@rm -rf bench2.snap
+	nemobench mkplummer1 mkplummer bench2.snap nbody="$(NBODY)" nmodel=$(MBODY)
+	@echo bench2.snap: 535MB for nbody=$(NBODY) MBODY=$(MBODY)
 
 #  xps13:  3.13" -> 172 MB/sec
 

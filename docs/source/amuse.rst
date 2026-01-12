@@ -18,8 +18,8 @@ Differences
 ~~~~~~~~~~~
 
 - **Shell**:
-  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...).  A neat way to start
-  an interative amuse is via:  `ipython -profile amuse`
+  NEMO uses a Unix shell, AMUSE uses python (ipython, jupyter, ...), although commandline
+  scripts do exist. A neat way to start an interative amuse is via:  `ipython --profile amuse`
 
 - **Community Code**:
   Both packages maintain a tight connection to legacy software and community codes. You can find
@@ -84,7 +84,7 @@ followups with grey scale and contour plots:
 
 And in AMUSE the following python session can do something similar:
 
-.. todo:: figure out the right py-gnuplot
+.. todo:: switch to using matplotlib
 
 .. code-block::
 
@@ -128,7 +128,7 @@ the AMUSE framework and then the selected module(s):
 .. code-block::
 
    pip install amuse-framework
-   pip install amuse-bhtree amuse-seba amuse-brutus
+   pip install amuse-bhtree amuse-hermite amuse-seba amuse-brutus
 
 There are many more details in the
 `AMUSE installation manual <https://amuse.readthedocs.io/en/latest/install/index.html>`_.
@@ -142,11 +142,20 @@ is)
 
    git clone https://github.com/amusecode/amuse
    cd amuse
-   ./setup install amuse-framework
-   ./setup install bhtree
+   ./setup develop amuse-framework
+   ./setup develop bhtree
    ./setup test    bhtree
 
 
 this is the recommended way for NEMO users.
 
-The directory ``$NEMO/usr/amuse`` has some example supporting code.
+The directory ``$NEMO/usr/amuse`` has some example supporting code.  A quick commandline script
+to generate a Plummer sphere and convert it back to NEMO is the following:
+
+.. code-block::
+
+   amuse_convert.py -o plummer.txt -n 1024
+   tabcols plummer.txt | tabtos - plummer.snap block1=mass,skip,vx,vy,vz,x,y,z nbody=1024
+
+
+

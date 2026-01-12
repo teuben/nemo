@@ -29,3 +29,5 @@ foreach file ($*)
     echo xdg-open $file.$o
   endif
 end
+
+# man -t ascii | ps2pdf - > ascii.pdf

@@ -1,4 +1,4 @@
-.TH SDMATH 1NEMO "6 May 2025"
+.TH SDMATH 1NEMO "31 July 2025"
 
 .SH "NAME"
 sdmath \- SD math and file I/O benchmark
@@ -7,7 +7,7 @@ sdmath \- SD math and file I/O benchmark
 \fBsdmath\fP [parameter=value]
 
 .SH "DESCRIPTION"
-This program benchmarks some OpenMP parallellizable Single Dish vector math in a typical
+This program benchmarks some OpenMP parallelizable Single Dish vector math in a typical
 4-phase calibration cycle with an ON/OFF with a separate COLD/HOT in each pointing.
 
 .PP
@@ -32,7 +32,8 @@ in one of the CPU caches.
 
 The benchmark here is very basic, and only deals with the math with simulated data without
 the need to pass through a fitsio type library. The file I/O bench portion of this benchmark
-reads a large file to get an idea of I/O overhead.
+reads a large file to get an idea of I/O overhead, even though many other tools exist
+to measure disk I/O, from \fIhdparm(1)\fP to \fIiozone(1)\fP.
 .PP
 A slightly more realistic one can be found in \fIsdinfo(1NEMO)\fP
 reading actual \fIsdfits(5NEMO)\fP files and selecting a set of operations.
@@ -75,7 +76,7 @@ Add time average over nscan.
 \fBin=\fP\fIfilename\fP
 If given, read this file into memory. Meant to measure disk I/O
 .br
-Not provided.
+[Not used]
 .TP
 \fBbs=\fP\fIint\fP
 Blocksize in kB to read file with.
@@ -98,12 +99,14 @@ seconds since 1970.0). See also \fIxrandom(1NEMO)\fP for more options.
 
 .SH "EXAMPLES"
 
-Standard benchmark was extended to iter=100 to avoid system time. These are 10 Grops. CPU times are user space
+Standard benchmark was extended to iter=100 to avoid system time. These are 10 Grops.
+CPU times are user space
 seconds [nemobench5 scores listed where available]
 .EX
 
 Xeon E5620  @ 2.40GHz (fourier) - 115.1  [218]
 AMD EPYC 7302 @ 3.0 GHz (lma)   -  34.1  [675]
+AMD Ryzen AI 9 HX PRO 370       -  23.4  [~1170]
 Ultra 7 155H @ 4.5 GHz (d76)    -  21.8  [~1200]
 M4 air                          -  15.4  [~2000]
 
@@ -111,8 +114,8 @@ M4 air                          -  15.4  [~2000]
 
 .EE
 
-To view the impact of OpenMP, here is an example performance on an Ultra 7 155H, measured in wall clock
-time seconds, and iter=20:
+To view the impact of OpenMP, here is an example performance on an Ultra 7 155H,
+measured in wall clock time seconds, and iter=20:
 
 .EX
 OMP_NUM_THREADS=2 /usr/bin/time sdmath  1000 160000 iter=20
@@ -128,10 +131,30 @@ nscan  nchan      1      2      4      8     12     16     20
 ----- ------    ---    ---    ---    ---    ---    ---    ---
 
 .EE
-Somewhat surprisingly that barely a factor of 2 can be gained by going multi-core.
+Somewhat surprisingly that barely a factor of 2 can be gained by going multi-core
+on an typical laptop intel CPU.  An AMD CPU fares much better. The 
+Ryzen AI 9 HX PRO 370 is able to lower the wall clock time all the way up to
+12 cores.
 
 .PP
-A read benchmark can be done with a large series of Plummer models. The example file created
+To see the effect of the CPU cache, pick a case where nscan*nchan*iter is constant,
+but
+.EX
+nscan nchan iter
+1e1   1e1   1e7   1.52sec
+1e1   1e2   1e6   1.42
+1e1   1e3   1e5   1.77
+1e1   1e4   1e4   1.82      3 MB
+1e1   1e5   1e3   2.33     30 MB
+1e1   1e6   1e2   2.52    300 MB
+1e1   1e7   1e1   3.23   3000 MB
+1e2   1e6   1e1   2.69   3000 MB
+1e2   1e5   1e2   2.31    300 MB
+
+.EE
+
+.PP
+A read benchmark can be done with a large series of dummy Plummer models. The example file created
 here is about 5GB in size:
 .EX
    mkplummer p1M 1000000 nmodel=100
@@ -149,7 +172,7 @@ $NEMO/src/tutor/bench/sdmath.c
 .SH "AUTHOR"
 Peter Teuben
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.25i +4.5i
 30-apr-2025	Created		PJT

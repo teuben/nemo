@@ -94,7 +94,7 @@ namespace {
 	  "   h(z) = delta(z)                       if z_d = 0\n"
 	  "          sech^2(z/2|z_d|) / (4|z_d|)    if z_d < 0\n\n";
       if (npar>6)
-	warning("Skipped potential parameters for DiscPot beyond %d", npar);
+	warning((char*)"Skipped potential parameters for DiscPot beyond %d", npar);
       if(nemo_debug(2))
 	std::cerr<<
 	  "### nemo debug info:\n"

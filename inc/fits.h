@@ -202,7 +202,7 @@ typedef struct fits_header {
 } fits_header;
 
 
-size_t fts_rhead (fits_header *, stream);
+off_t fts_rhead  (fits_header *, stream);
 char *fts_shead  (fits_header *, string);
 int fts_lhead    (fits_header *);
 int fts_chead    (fits_header *, stream);

@@ -60,7 +60,7 @@ On a typical 2020 machine it takes 0.23 seconds to create and output 1M random n
 however most of the time is the output function. Using mode < 0 you can test the speed
 of just producing random numbers. About 95% of the time is spent in \fIprintf(3)\fP,
 as can be seen with this benchmark:
-.nf
+.EX
 
     /usr/bin/time tabgen . 10000 10000 -1
     1.38user 0.29system 0:01.68elapsed 99%CPU
@@ -68,7 +68,7 @@ as can be seen with this benchmark:
     /usr/bin/time tabgen . 10000 10000 1
     28.60user 0.14system 0:28.77elapsed 99%CPU
     
-.fi
+.EE
 The raw production of random numbers is thus about 72 Mrups (same speed as numpy.random.normal),
 where the Linpack benchmark claims this machine runs at 50 GFlops.
 .PP
@@ -76,7 +76,7 @@ Generating a sequence of numbers is relatively slow in tabgen.
 To generate 10M numbers is slow compared
 ot the standard unix tool \fIseq(1)\fP, however
 the new \fBaddrow=\fP parameter makes it about 3x faster.
-.nf
+.EX
 
     /usr/bin/time tabgen - 10000000 1 4 fmt=%-10.f > tab2
     2.07user 0.10system 0:02.18elapsed 99%CPU
@@ -89,12 +89,12 @@ but
     /usr/bin/time tabgen - 10000000 0 addrow=t > tab2
     0.65user 0.07system 0:00.73elapsed 99%CPU
     
-.fi
+.EE
 .PP
 The \fInemoinp(1NEMO)\fP program can also generate a simple table, but
 the maximum number of elements in an implied list is limited (100,000 currently).
 This is where \fBtabgen\fP might be useful:
-.nf
+.EX
 
      nemoinp 1:200000 > tab1
      ### Fatal error [nemoinp]: Too many items in list, use a bigger nmax=100000
@@ -103,7 +103,22 @@ This is where \fBtabgen\fP might be useful:
      wc -l tab1
      200000 tab1
 
-.fi
+.EE
+
+
+.SH "EXAMPLES"
+An example showing off Unix pipes: generate a table, sorting the first column,
+and smoothing and plotting the second column divided by the first column, which winds up
+showing an interesting \fI"spectrum"\fP:
+.EX
+
+tabgen - 100 2 |\\
+     sort -n |\\
+     tabmath - - %1/%2 |\\
+     tabsmooth - 3 tcol=1 |\\
+     tabplot - line=1,1
+
+.EE
 
 .SH "SEE ALSO"
 seq(1), tabhead(1NEMO), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(3NEMO), printf(3)
@@ -111,7 +126,7 @@ seq(1), tabhead(1NEMO), tabmath(1NEMO), xrandom(1NEMO), nemoinp(1NEMO), xrandom(
 .SH "AUTHOR"
 Peter Teuben
 
-.SH "UPDATE HISTORY"
+.SH "HISTORY"
 .nf
 .ta +1.5i +5.5i
 12-Jul-2020	V0.1 Created	PJT

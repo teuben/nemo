@@ -9,24 +9,24 @@
 
 #include <stdinc.h>
 #include <getparam.h>
+#include <fits.h>
 
 string defv[] = {			/* Standard NEMO keyword+help */
     "in=???\n              Input fits file",
     "out=???\n	           Basename for output fits file",
     "file=0\n              Select which planes(s)? [0=all]",
     "blocking=1,1\n        Blocking factors for I/O",
-    "VERSION=1.2a\n        25-mar-94 PJT",
+    "VERSION=1.2b\n        19-jun-2025 PJT",
     NULL,
 };
 
 string usage = "split fits image dataset into subsets";
 
-#include "fits.h"
-
 void nemo_main()
 {
     stream instr, outstr;
-    int    i,n,nfile, blocking[2], planesize, totsize;
+    off_t  n;
+    int    i, nfile, blocking[2], planesize, totsize;
     int    zbufsiz;
     struct fits_header fh;
     char  *basename;

@@ -1,7 +1,9 @@
-.TH FILES 8NEMO "6 February 2021"
-.SH NAME
+.TH FILES 8NEMO "30 June 2025"
+
+.SH "NAME"
 files \- summary of all special files, environment variables, programmers etc.
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 A number of files and environment variables are essential to certain
 operations in NEMO. They may sometimes conflict when a user has set 
 up various other software packages. See also Appendix G.2 in the 
@@ -10,10 +12,7 @@ up various other software packages. See also Appendix G.2 in the
 Also listed are the shorthands sometimes used for some of the 
 known authors/contributors of NEMO software. They often go by cryptic
 three letter abreviations. The table here lists their full names.
-.PP
-Possible conflicts may occur when NEMO's cc-compiler (cc(1NEMO)) or
-make-shell script are used, or other packages happened to use the same
-environment variable for similar purposes.
+
 .SH "LIST OF FILES"
 .nf
 .ta +2.5i
@@ -21,26 +20,29 @@ $NEMO/nemo_start.csh	source this, and you're all set (\fIlocal\fP
 $NEMO/nemo_start.sh	source this, and you're all set (\fIlocal\fP)
 $NEMO/etc/motd      	message of the day (alias: motd) (\fIlocal\fP)
 .fi
+
 .SH "LIST OF ENVIRONMENT VARIABLES"
 .nf
 .ta +2.5i
-NEMO                      	top directory where NEMO resides.
+NEMO                      	top directory where NEMO resides. (NEMOBIN, NEMOLIB, etc. also exist)
 MANPATH                 	manual search path, should include $NEMO/man
-YAPPLIB                  	default graphics linking libraries
 HELP                        	default help level in initparam(3NEMO)
 DEBUG                        	default debug level in initparam(3NEMO)
 ERROR                    	default allowed error count in initparam(3NEMO)
 YAPP                        	default yapp device in initparam(3NEMO)
 BTRPATH                   	directory path for bodytrans(3NEMO) functions
 POTPATH                   	directory path for potential(3NEMO) functions
-CFLAGS                  	used by on-the-fly compilers
+
 .SH "LIST OF AUTHORS"
 See \fIauthors(5NEMO)\fP
+
 .SH "SEE ALSO"
 intro(1NEMO), \fIThe NEMO Users/Programmers Guide\fP
-.SH AUTHOR
+
+.SH "AUTHOR"
 Peter Teuben
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +2.0i ++4.0i
 16-Mar-87	created             	PJT

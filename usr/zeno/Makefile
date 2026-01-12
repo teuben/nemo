@@ -3,6 +3,10 @@ URL0 = http://legacy.ifa.hawaii.edu/faculty/barnes/
 URL1 = https://github.com/joshuabarnes/zeno/
 URL2 = https://github.com/teuben/zeno
 
+TIME = /usr/bin/time
+
+UBUNTU = libgsl-dev openmpi-bin freeglut3-dev libopenmpi-dev
+
 
 zeno:  zeno_jeb zeno_pjt
 	@echo 'You will need to create a symlink zeno -> zeno_XYZ'
@@ -42,6 +46,10 @@ zbin:
 gsl:
 	mknemo gsl
 
+#  install for ubuntu
+ubuntu:
+	sudo apt install $(UBUNTU)
+
 # IFA has changed their access
 WFLAGS = --no-check-certificate
 
@@ -64,3 +72,12 @@ bench.ascii:
 
 bench1: bench.ascii
 	code_c/code < bench.in > bench.log   2 > bench.err
+
+# benchmark noted in bhtree(1NEMO)
+bench2:
+	@rm -f p1k p1k.out
+	plumsnap p1k 1024
+	$(TIME) treecode    p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > /dev/null
+	$(TIME) treecode    p1k p1k.out dtime=1/64 theta=0.75 usequad=true  tstop=10 > /dev/null
+	$(TIME) treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=false tstop=10 > /dev/null
+	$(TIME) treecode_dp p1k p1k.out dtime=1/64 theta=0.75 usequad=true  tstop=10 > /dev/null

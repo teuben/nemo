@@ -151,6 +151,14 @@ start:
 pull:
 	@git pull
 
+## remotes:   List all branches and their latest commit http://stackoverflow.com/a/2514279
+remotes:
+	for branch in `git branch -r | grep -v HEAD`;do echo -e `git show --format="%ci %cr" $$branch | head -n 1` \\t$$branch; done | sort -r
+
+remotes2:
+	git branch -r --sort=-committerdate --format='%(HEAD)%(color:yellow)%(refname:short)|%(color:bold green)%(committerdate:relative)|%(color:blue)%(subject)|%(color:magenta)%(authorname)%(color:reset)' --color=always | column -ts'|'
+
+
 ## mknemos:   optional package installs, usually in $NEMO/opt via $NEMO/local during bootstrap
 mknemos:
 	@echo MKNEMOS=$(MKNEMOS)

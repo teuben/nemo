@@ -1,7 +1,9 @@
-.TH POTENTIAL 5NEMO "28 October 2005"
-.SH NAME
+.TH POTENTIAL 5NEMO "5 July 2025"
+
+.SH "NAME"
 acceleration \- format for accelerations description (functors)
-.SH SYNOPSIS
+
+.SH "SYNOPSIS"
 .nf
 .B #include <acceleration.h>
 .PP
@@ -26,10 +28,12 @@ acceleration \- format for accelerations description (functors)
 .B	bool      *,   /* output: need masses?           */
 .B	bool      *);  /* output: need velocities?       */
 .fi
-.SH DESCRIPTION
+
+.SH "DESCRIPTION"
 \fIacceleration(5NEMO)\fP are implemented as an improvement to the 
 nearly-compatible \fIpotential(5NEMO)\fP format.
-.SH PARAMETERS
+
+.SH "PARAMETERS"
 The 4th argument to get_acceleration() is boolean and returns whether
 masses are required as input for acceleration(). If they are not
 required a NULL pointer may be given.
@@ -56,10 +60,7 @@ If bit 1 is set, the acceleration is added, otherwise assigned.
 So, 0 means both are assigned.
 
 
-
-
-
-.SH EXAMPLES
+.SH "EXAMPLES"
 The following table lists the non-pattern speed parameters 
 for a few example potentials
 found in \fB$NEMOOBJ/potential\fP. \fINote: the pattern
@@ -76,7 +77,8 @@ speed is not listed here\fP
 A full listing, including their mathematical expression can be
 found in the NEMO manual, see also \fI$NEMO/text/manuals/potential.inc,\fP,
 and of course in \fI$NEMO/src/orbit/potential/data\fP.
-.SH BUGS
+
+.SH "BUGS"
 Since the later introduction of a third character valued
 parameter in \fIinipotential()\fP
 a Fortran-to-C interface cannot be used in as portable a way as
@@ -103,18 +105,23 @@ by most other potential/orbit programs.
 .SH "ENVIRONMENT"
 The environment variable \fBACCPATH\fP can be used to search for accelerations
 in other than the local directory. 
+
 .SH "SEE ALSO"
 acceleration(3NEMO), potential(5NEMO), manipulator(5NEMO),gyrfalcON(1NEMO)
+
 .SH "AUTHOR"
 Peter Teuben
+
 .SH "FILES"
 .nf
 .ta +2.5i
 ~/src/orbit/potential   potential.c, potential.h potentialf.c
 ~/text/manuals      	potential.inc (latex description)
 .fi
-.SH "UPDATE HISTORY"
+
+.SH "HISTORY"
 .nf
 .ta +2.0i +2.0i
 28-oct-05	man page finally written	PJT
+5-jul-2025	AGAMA reference added	PJT
 .fi

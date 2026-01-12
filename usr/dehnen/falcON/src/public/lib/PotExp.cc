@@ -44,14 +44,7 @@ namespace {
   // types                                                                    //
   //                                                                          //
   //////////////////////////////////////////////////////////////////////////////
-#if   defined(WDutils_included_tupel_h)
-  using   falcON::tupel;
-# define  vector tupel
-#elif defined(WDutils_included_vector_h)
   using   WDutils::vector;
-#else
-# error neither utils/tupel.h nor utils/vector.h
-#endif
   using   falcON::fvec4;
   typedef PotExp::scalar   scalar;
   typedef PotExp::symmetry symmetry;
@@ -396,10 +389,10 @@ namespace {
     //--------------------------------------------------------------------------
     template<class Connector>
     static void Connect(Anlm&A, AnlRec const&P, YlmRec const&Y, scalar x) {
-      register       scalar*Ai = p(A);
-      register const scalar*Pi = p(P);
+             scalar*Ai = p(A);
+       const scalar*Pi = p(P);
       for(int n=0; n!=N1(A); ++n) {
-	register const scalar*Yi = p(Y);
+	 const scalar*Yi = p(Y);
 	for(int l=0; l<L1(A); ++l,++Pi) {
 	  const scalar Pnl = *Pi;
 	  for(int m=-l; m<=l; ++m,++Ai,++Yi)
@@ -410,14 +403,14 @@ namespace {
     //--------------------------------------------------------------------------
 #if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int i=0; i!=L1Q(A); ++i)
 	x += e(A,i)*e(B,i);
       return x;
     }
     //--------------------------------------------------------------------------
     static scalar Dot(AnlRec const&A, AnlRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int i=0; i!=N1(A)*L1(A); ++i)
 	x += e(A,i)*e(B,i);
       return x;
@@ -425,7 +418,7 @@ namespace {
 #endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int i=0; i!=N1(A)*L1Q(A); ++i)
 	x += e(A,i)*e(B,i);
       return x;
@@ -439,7 +432,7 @@ namespace {
       for(int n=0; n!=N1(A); ++n) {
 	const scalar*Yi = p(Y);
 	for(int l=0; l<L1(A); ++l,++Pi) {
-	  register scalar y=0;
+	   scalar y=0;
 	  for(int m=-l; m<=l; ++m,++Ai,++Yi)
 	    y += *Ai * *Yi;
 	  x += *Pi * y;
@@ -463,7 +456,7 @@ namespace {
 	const scalar*Ti = p(T);
 	const scalar*Qi = p(Q);
 	for(int l=0; l<L1(A); ++l,++Pi,++Ri) {
-	  register scalar y=0,yt=0,yp=0;
+	   scalar y=0,yt=0,yp=0;
 	  for(int m=-l; m<=l; ++m,++Ai,++Yi,++Ti,++Qi) {
 	    y  += *Ai * *Yi;
 	    yt += *Ai * *Ti;
@@ -562,8 +555,8 @@ namespace {
     static void SetYlm(YlmRec&Y,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       SetPlm(Y,ct,st);                             // set Plm(theta)            
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       for(int m=1; m<L1(Y); ++m) {                 // LOOP m=1...L              
 	Cp = cp * _Cp + sp * _Cm;                  //   C( m) := cas( m*phi)    
 	Cm = cp * _Cm - sp * _Cp;                  //   C(-m) := cas(-m*phi)    
@@ -585,8 +578,8 @@ namespace {
     static void SetYlm(YlmRec&Y, YlmRec&T, YlmRec&P,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       SetPlm(Y,T,ct,st);                           // set Plm(the), dPlm/dthe   
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       for(int l=0; l<L1(Y); ++l) e(P,l*(l+1))=0;   // dY(l,m=0)/dp=0            
       for(int m=1; m<L1(Y); ++m) {                 // LOOP m=1...L              
 	Cp = cp * _Cp + sp * _Cm;                  //   C( m) := cas( m*phi)    
@@ -629,15 +622,15 @@ namespace {
       for(int l=0,lp=1; lp<L1(P); ++l,++lp)        // LOOP lp=dl...L,1          
 	e(P,lp) = fi * e(P,l);                     //   P(0,l+1) = fi*P(0,l)    
       if(N1(P)==1) return;                         // no terms n>0 --> DONE     
-      register scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
+       scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
       const    scalar Dtl = 4*AL;                  // 2*(lambda(l+1)-lambda(l)) 
       const    scalar xi2 = xi+xi;                 // 2*xi                      
       for(int l=0,ln=L1(P);                        // LOOP l=0...L,1            
 	  l<L1(P);                                 //   l+1 runs to L           
 	  ++l,++ln,tlm+=Dtl) {                     //   increment stuff         
 	e(P,ln) = tlm * xi * e(P,l);               //   P(1,l) = 2*lam*xi*P(0,l)
-	register scalar tlmn2xi = (tlm+2)*xi;      //   2*(lam+n)*xi            
-	register scalar tlm1n   = tlm;             //   2*lam+n-1               
+	 scalar tlmn2xi = (tlm+2)*xi;      //   2*(lam+n)*xi            
+	 scalar tlm1n   = tlm;             //   2*lam+n-1               
 	for(int n1= 2,                             //   LOOP n+1=2...N          
 	      im  = l,                             //     i(n-1,l)              
 	      i   = im+L1(P),                      //     i(n  ,l)              
@@ -667,7 +660,7 @@ namespace {
 	e(D,lp) = fi*e(D,l) + dfi*e(P,l);          //   D(0,l+1) = dP(0,l+1)/dr 
       }                                            // END LOOP(l)               
       if(N1(P)==1) return;                         // no terms n>0 --> DONE     
-      register scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
+       scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
       const    scalar Dtl  = 4*AL;                 // 2*(lambda(l+1)-lambda(l)) 
       const    scalar xi2  = xi+xi;                // 2*xi                      
       const    scalar dxi2 = dxi+dxi;              // d(2*xi)/dr                
@@ -676,9 +669,9 @@ namespace {
 	  ++l,++ln,tlm+=Dtl) {                     //   increment stuff         
 	e(P,ln) = tlm * xi*e(P,l);                 //   P(1,l) = 2*lam*xi*P(0,l)
 	e(D,ln) = tlm *(xi*e(D,l)+dxi*e(P,l));     //   D(1,l) = dP(1,l)/dr     
-	register scalar tlmn2xi  = (tlm+2)*xi;     //   2*(lam+n)*xi            
-	register scalar dtlmn2xi = (tlm+2)*dxi;    //   d(2*(lam+n)*xi)/dr      
-	register scalar tlm1n    = tlm;            //   2*lam+n-1               
+	 scalar tlmn2xi  = (tlm+2)*xi;     //   2*(lam+n)*xi            
+	 scalar dtlmn2xi = (tlm+2)*dxi;    //   d(2*(lam+n)*xi)/dr      
+	 scalar tlm1n    = tlm;            //   2*lam+n-1               
 	for(int n1= 2,                             //   LOOP n+1=2...N          
 	      im  = l,                             //     i(n-1,l)              
 	      i   = im+L1(P),                      //     i(n  ,l)              
@@ -785,7 +778,7 @@ namespace {
     //--------------------------------------------------------------------------
 #if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
 	for(int m=-l; m<=l; m+=2)
 	  x += e(A,i+m) * e(B,i+m);
@@ -793,7 +786,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     static scalar Dot(AnlRec const&A, AnlRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int n=0,j=0; n!=N1(A); ++n,j+=L1(A))
 	for(int l=0,i=j; l<L1(A); l+=2,i+=2)
 	  x += e(A,i) * e(B,i);
@@ -802,7 +795,7 @@ namespace {
 #endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int n=0,j=0; n!=N1(A); ++n,j+=L1Q(A))
 	for(int l=0; l<L1(A); l+=2)
 	  for(int m=-l,i=j+l*l; m<=l; m+=2,i+=2)
@@ -820,7 +813,7 @@ namespace {
 	const scalar*Pi = Pn;
 	const scalar*Yl = p(Y);
 	for(int l=0; l<L1(A); l+=2,Al+=4*l-2,Pi+=2,Yl+=4*l-2) {
-	  register scalar y=0;
+	   scalar y=0;
 	  for(int m=-l; m<=l; m+=2)
 	    y += Al[m] * Yl[m];
 	  x += *Pi * y;
@@ -848,7 +841,7 @@ namespace {
 	const scalar*Ql = p(Q);
 	for(int l=0; l<L1(A);
 	    l+=2,Al+=4*l-2,Pi+=2,Ri+=2,Yl+=4*l-2,Tl+=4*l-2,Ql+=4*l-2) {
-	  register scalar y=0,yt=0,yp=0;
+	   scalar y=0,yt=0,yp=0;
 	  for(int m=-l; m<=l; m+=2) {
 	    y  += Al[m] * Yl[m];
 	    yt += Al[m] * Tl[m];
@@ -947,8 +940,8 @@ namespace {
     static void SetYlm(YlmRec&Y,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       SetPlm(Y,ct,st);                             // set Plm(theta)            
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       const scalar cc=cp*cp-sp*sp, ss=2*cp*sp;
       for(int m=2; m<L1(Y); m+=2) {                // LOOP m=2...L,2            
 	Cp = cc * _Cp + ss * _Cm;                  //   C( m) := cas( m*phi)    
@@ -973,8 +966,8 @@ namespace {
     static void SetYlm(YlmRec&Y, YlmRec&T, YlmRec&P,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       SetPlm(Y,T,ct,st);                           // set Plm(the), dPlm/dthe   
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       const scalar cc=cp*cp-sp*sp, ss=2*cp*sp;
       for(int l=0; l<L1(Y); l+=2) e(P,l*(l+1))=0;  // dY(l,m=0)/dp=0            
       for(int m=2; m<L1(Y); m+=2) {                // LOOP m=2...L,2            
@@ -1021,15 +1014,15 @@ namespace {
       for(int l=0,lp=2; lp<L1(P); l+=2,lp+=2)      // LOOP lp=dl...L,2          
 	e(P,lp) = fi * e(P,l);                     //   P(0,l+2) = fi^2*P(0,l)  
       if(N1(P)==1) return;                         // no terms n>0 --> DONE     
-      register scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
+       scalar tlm = twice(lambda(0));      // 2*lambda(l=0)             
       const    scalar Dtl = 8*AL;                  // 2*(lambda(l+dl)-lambda(l))
       const    scalar xi2 = xi+xi;                 // 2*xi                      
       for(int l=0,ln=L1(P);                        // LOOP l=0...L,1            
 	  l<L1(P);                                 //   l+1 runs to L           
 	  l+=2,ln+=2,tlm+=Dtl) {                   //   increment stuff         
 	e(P,ln) = tlm * xi * e(P,l);               //   P(1,l) = 2*lam*xi*P(0,l)
-	register scalar tlmn2xi = (tlm+2)*xi;      //   2*(lam+n)*xi            
-	register scalar tlm1n   = tlm;             //   2*lam+n-1               
+	 scalar tlmn2xi = (tlm+2)*xi;      //   2*(lam+n)*xi            
+	 scalar tlm1n   = tlm;             //   2*lam+n-1               
 	for(int n1= 2,                             //   LOOP n+1=2...N          
 	      im  = l,                             //     i(n-1,l)              
 	      i   = im+L1(P),                      //     i(n  ,l)              
@@ -1063,7 +1056,7 @@ namespace {
 	e(D,lp) = fi*e(D,l) + dfi*e(P,l);          //   D(0,l+2) = dP(0,l+2)/dr 
       }                                            // END LOOP(l)               
       if(N1(P)==1) return;                         // no terms n>0 --> DONE     
-      register scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
+       scalar tlm  = twice(lambda(0));     // 2*lambda(l=0)             
       const    scalar Dtl  = 8*AL;                 // 2*(lambda(l+dl)-lambda(l))
       const    scalar xi2  = xi+xi;                // 2*xi                      
       const    scalar dxi2 = dxi+dxi;              // d(2*xi)/dr                
@@ -1072,9 +1065,9 @@ namespace {
 	  l+=2,ln+=2,tlm+=Dtl) {                   //   increment stuff         
 	e(P,ln) = tlm* xi*e(P,l);                  //   P(1,l) = 2*lam*xi*P(0,l)
 	e(D,ln) = tlm*(xi*e(D,l)+dxi*e(P,l));      //   D(1,l) = dP(1,l)/dr     
-	register scalar tlmn2xi  = (tlm+2)*xi;     //   2*(lam+n)*xi            
-	register scalar dtlmn2xi = (tlm+2)*dxi;    //   d(2*(lam+n)*xi)/dr      
-	register scalar tlm1n    = tlm;            //   2*lam+n-1               
+	 scalar tlmn2xi  = (tlm+2)*xi;     //   2*(lam+n)*xi            
+	 scalar dtlmn2xi = (tlm+2)*dxi;    //   d(2*(lam+n)*xi)/dr      
+	 scalar tlm1n    = tlm;            //   2*lam+n-1               
 	for(int n1= 2,                             //   LOOP n+1=2...N          
 	      im  = l,                             //     i(n-1,l)              
 	      i   = im+L1(P),                      //     i(n  ,l)              
@@ -1141,7 +1134,7 @@ namespace {
     //--------------------------------------------------------------------------
 #if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2) {
 	x += e(A,i) * e(B,i);
 	for(int m=2; m<=l; m+=2)
@@ -1156,7 +1149,7 @@ namespace {
 #endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int n=0,j=0; n!=N1(A); ++n,j+=L1Q(A))
 	for(int l=0; l<L1(A); l+=2)
 	  for(int m=0,i=j+l*l+l; m<=l; m+=2,i+=2)
@@ -1174,7 +1167,7 @@ namespace {
 	const scalar*Pi = Pn;
 	const scalar*Yl = p(Y);
 	for(int l=0; l<L1(A); l+=2,Al+=4*l-2,Pi+=2,Yl+=4*l-2) {
-	  register scalar y=0;
+	   scalar y=0;
 	  for(int m=0; m<=l; m+=2)
 	    y += (m==0)? Al[m]*Yl[m] : twice(Al[m]*Yl[m]);
 	  x += *Pi * y;
@@ -1202,7 +1195,7 @@ namespace {
 	const scalar*Ql = p(Q);
 	for(int l=0; l<L1(A);
 	    l+=2,Al+=4*l-2,Pi+=2,Ri+=2,Yl+=4*l-2,Tl+=4*l-2,Ql+=4*l-2) {
-	  register scalar y=0,yt=0,yp=0;
+	   scalar y=0,yt=0,yp=0;
 	  for(int m=0; m<=l; m+=2)
 	    if(m==0) {
 	      y  += Al[m] * Yl[m];
@@ -1227,8 +1220,8 @@ namespace {
     static void SetYlm(YlmRec&Y,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       AUX<PotExp::reflexion>::SetPlm(Y,ct,st);     // set Plm(theta)            
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       const scalar cc=cp*cp-sp*sp, ss=2*cp*sp;
       for(int m=2; m<L1(Y); m+=2) {                // LOOP m=2...L,2            
 	Cp = cc * _Cp + ss * _Cm;                  //   cas[ m) := cas( m*phi)  
@@ -1250,8 +1243,8 @@ namespace {
     static void SetYlm(YlmRec&Y, YlmRec&T, YlmRec&P,
 		       scalar ct, scalar st, scalar cp, scalar sp) {
       AUX<PotExp::reflexion>::SetPlm(Y,T,ct,st);   // set Plm(the), dPlm/dthe   
-      register scalar _Cp=1.,Cp;                   // cas( m*phi)               
-      register scalar _Cm=1.,Cm;                   // cas(-m*phi)               
+       scalar _Cp=1.,Cp;                   // cas( m*phi)               
+       scalar _Cm=1.,Cm;                   // cas(-m*phi)               
       const scalar cc=cp*cp-sp*sp, ss=2*cp*sp;
       for(int l=0; l<L1(Y); l+=2) e(P,l*(l+1))=0;  // dY(l,m=0)/dp=0            
       for(int m=2; m<L1(Y); m+=2) {                // LOOP m=2...L,2            
@@ -1324,7 +1317,7 @@ namespace {
     //--------------------------------------------------------------------------
 #if 0 // not used
     static scalar Dot(YlmRec const&A, YlmRec const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int l=0,i=0; l<L1(A); l+=2,i+=4*l-2)
 	x += e(A,i) * e(B,i);
       return x;
@@ -1336,7 +1329,7 @@ namespace {
 #endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
-      register scalar x=0.;
+       scalar x=0.;
       for(int n=0,j=0; n!=N1(A); ++n,j+=L1Q(A))
 	for(int l=0,i=j; l<L1(A); l+=2, i+=4*l-2)
 	  x += e(A,i)*e(B,i);
@@ -1486,7 +1479,7 @@ namespace {
     }
     //--------------------------------------------------------------------------
     static scalar Dot(AnlRec const&A, AnlRec const&B) {
-      register scalar x=0;
+       scalar x=0;
       for(int n=0,i=0; n!=N1(A); ++n,i+=L1(A))
 	x += e(A,i)*e(B,i);
       return x;
@@ -1494,7 +1487,7 @@ namespace {
 #endif
     //--------------------------------------------------------------------------
     static scalar Dot(Anlm const&A, Anlm const&B) {
-      register scalar x=0;
+       scalar x=0;
       for(int n=0,i=0; n!=N1(A); ++n,i+=L1Q(A))
 	x += e(A,i)*e(B,i);
       return x;
@@ -1570,8 +1563,8 @@ namespace {
       const scalar tlm = twice(lambda(0));         // 2*lambda(l=0)             
       const scalar xi2 = xi+xi;                    // 2*xi                      
       e(P,L1(P)) = tlm * xi * e(P,0);              // P(1,0) = 2*lam*xi*P(0,0)  
-      register scalar tlmn2xi = (tlm+2)*xi;        // 2*(lam+n)*xi              
-      register scalar tlm1n   = tlm;               // 2*lam+n-1                 
+       scalar tlmn2xi = (tlm+2)*xi;        // 2*(lam+n)*xi              
+       scalar tlm1n   = tlm;               // 2*lam+n-1                 
       for(int n1= 2,                               // LOOP n+1=2...N            
 	    im  = 0,                               //   i(n-1,l)                
 	    i   = im+L1(P),                        //   i(n  ,l)                
@@ -1599,9 +1592,9 @@ namespace {
       const scalar dxi2 = dxi+dxi;                 // 2*dxi/dr                  
       e(P,L1(P)) = tlm* xi*e(P,0);                 // P(1,0) = 2*lam*xi*P(0,0)  
       e(D,L1(P)) = tlm*(xi*e(D,0)+dxi*e(P,0));     // D(1,0) = dP(1,0)/dr       
-      register scalar tlmn2xi  = (tlm+2)*xi;       // 2*(lam+n)*xi              
-      register scalar dtlmn2xi = (tlm+2)*dxi;      // 2*(lam+n)*dxi             
-      register scalar tlm1n    = tlm;              // 2*lam+n-1                 
+       scalar tlmn2xi  = (tlm+2)*xi;       // 2*(lam+n)*xi              
+       scalar dtlmn2xi = (tlm+2)*dxi;      // 2*(lam+n)*dxi             
+       scalar tlm1n    = tlm;              // 2*lam+n-1                 
       for(int n1= 2,                               // LOOP n+1=2...N            
 	    im  = 0,                               //   i(n-1,l)                
 	    i   = im+L1(P),                        //   i(n  ,l)                
@@ -1707,7 +1700,7 @@ namespace {
   template<typename X, typename Y>
   inline void Spherical(X&rd, X&ct, X&st, X&cp, X&sp,
 			vector<3,Y> const& x) {
-    register X
+     X
       A  = x[0]*x[0]+x[1]*x[1],                    // R^2= x^2 + y^2
       B  = sqrt(A);                                // R  = sqrt(x^2 + y^2)
     A   += x[2]*x[2];                              // r^2= x^2 + y^2 + z^2
@@ -1733,7 +1726,7 @@ namespace {
   template<typename X, typename Y>
   inline void Cartesian(vector<3,Y> &a, X rd, X ct, X st, X cp, X sp) {
     if(rd) {
-      register X ir = IR0/rd;
+       X ir = IR0/rd;
       a[1] *= ir;
       if(st) a[2] *= ir/st;
       else   a[2]  = Y(0);
@@ -1741,7 +1734,7 @@ namespace {
       a[1] = Y(0);
       a[2] = Y(0);
     }
-    register Y
+     Y
       am = a[0] * st + a[1] * ct,                  // am = ar*st + at*ct        
       az = a[0] * ct - a[1] * st;                  // az = ar*ct - at*st        
     a[0] = am   * cp - a[2] * sp;                  // ax = am*cp - ap*sp        
@@ -3070,12 +3063,12 @@ int main()
     for(int i=0; i!=4; ++i)
       X[4*n+i] = Y[i];
 
-  register clock_t cpu0;
+   clock_t cpu0;
 
   cpu0 = clock();
   for(int i=0; i!=N4; ++i)
     Spherical(S[i],X[i]);
-  register real t1 = (clock() - cpu0)/real(CLOCKS_PER_SEC);
+   real t1 = (clock() - cpu0)/real(CLOCKS_PER_SEC);
   for(int i=0; i!=N4; ++i) S1 += S[i];
   cout<<" PotExp::Spherical():\n"
       <<"   time      = "<<t1<<" sec\n"
@@ -3084,7 +3077,7 @@ int main()
   cpu0 = clock();
   for(int i=0; i!=N4; i+=4)
     Spherical4(S+i,X+i);
-  register real t2 = (clock() - cpu0)/real(CLOCKS_PER_SEC);
+   real t2 = (clock() - cpu0)/real(CLOCKS_PER_SEC);
   for(int i=0; i!=N4; ++i) S2 += S[i];
   cout<<" PotExp::Spherical4():\n"
       <<"   time      = "<<t2<<" sec\n"

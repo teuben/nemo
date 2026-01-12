@@ -21,7 +21,8 @@ jobs:
     - name: configure
       # run: ./configure --with-yapp=pgplot --enable-debug
       # run: ./configure --without-csh
-      run: CC=gcc-14 CXX=g++-14 F77=gfortran-14 ./configure 
+      # run: CC=gcc-14 CXX=g++-14 F77=gfortran-14 ./configure --w
+      run: ./configure --with-yapp=ps
     - name: build1
       run: make build1 
     - name: build2
