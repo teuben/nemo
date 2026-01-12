@@ -39,6 +39,9 @@ Timings are from `/usr/bin/time` on an Ultra 7 155H.
       n:  3.61user 0.00system 0:03.61elapsed 99%CPU 
       b:  1.45user 0.02system 0:01.47elapsed 100%CPU 
 
+Note that bench2b can't be compared yet, "as is" snapshots are saved at near-integer times
+1.066532, .... 9.076927, and of course nothing over 10.
+
 
 ## 2019 notes:
 
