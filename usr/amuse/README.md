@@ -47,7 +47,9 @@ Timings are from `/usr/bin/time` on an Ultra 7 155H.
       g0:  4.95user 0.10system 0:05.06elapsed 99%CPU
       g1:  4.81user 0.19system 0:05.01elapsed 99%CPU
 
-This shows I/O in amuse is overly expensive. CPU wise AMUSE is almost 2x slower in creating a Plummer sphere,
+This shows I/O in AMUSE is overly expensive, AMUSE also has a huge overall system overhead,
+but it does not go away when sitting in an ipython session.
+CPU wise AMUSE is almost 2x slower in creating a Plummer sphere,
 but oddly enough the equivalent \fIfalcon\fP tool is more than 2x slower than NEMO.
 
 
@@ -60,9 +62,18 @@ but oddly enough the equivalent \fIfalcon\fP tool is more than 2x slower than NE
       n:  3.61user 0.00system 0:03.61elapsed 99%CPU    2.98user 0.00system 0:02.99elapsed 99%CPU
       b:  1.45user 0.02system 0:01.47elapsed 100%CPU
       z:                                               2.27user 0.00system 0:02.27elapsed 99%CPU
+      g: (0.91user 0.00system 0:00.91elapsed 100%CPU)
 
-A more careful comparison is needed if the parameters all agree. How do we compare. Do we
+A more careful comparison is needed if the parameters all agree, notably the opening angle
+and the use of quadrupole corrections. How do we compare. Do we
 calibrate on the force errors, which we know as function of opening angle for a tree code.
+
+The gyrfalcon(g) is added for show, since it's an O(N) code, not O(NlogN),
+and should not be compared to the "true" treecodes.
+
+The amuse compiled BHTC is slow (50sec) and looks like it's totally wrong (E not conserved).
+The nemo compiled bhtree might seem better, but doesn't save snapshots at the correct time. Energy
+is not conserved well either, and a Plummer seems not maintained properly.
 
 ### alternative python workflows
 
