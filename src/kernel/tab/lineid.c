@@ -1,8 +1,9 @@
 /*
- *  LINEID:   draft
+ *  LINEID:   spectral line ID tool
  *
  *    13-dec-2024   0.2 simple brightest peak finder.
  *     3-jul-2025   0.3 add mode=
+ *    15-jan-206    0.4 all modes now work, added simple nearest neighbor ID
  */
 
 /**************** INCLUDE FILES ********************************/ 
@@ -24,19 +25,21 @@ string defv[] = {                /* DEFAULT INPUT PARAMETERS */
   "in=???\n            Input (table) file name",
   "xcol=1\n		 x coordinate column", 
   "ycol=2\n		 y coordinate column",
-  "xunit=GHz\n           X axis unit (GHz, MHz, A, nm)",
-  "minchan=3\n           Minimum channels for a peak",
-  "maxchan=\n            Maximum channels for a peak",
-  "vlsr=\n               VLSR of object, if known (km/s)",
-  "restfreq=\n           RESTFREQ in xunits, if known",
+  "xunit=GHz\n           X axis unit (GHz, km/s)",
+  "minchan=3\n           Minimum channels for a peak (not implemented)",
+  "maxchan=\n            Maximum channels for a peak (not implemented)",
+  "vel=\n                VEL of object, if known (km/s)",
+  "restfreq=\n           RESTFREQ (or RESTWAVE?) in xunits, if known",
   "linelist=\n           ASCII linelist (freq,label)",
-  "rms=\n                Do not fit peaks when this RMS is reached",
+  "dv=10\n               Slop in velocity to allow in line_id (km/s)",
+  "clip=\n               Do not fit peaks below this clip level",
   "mode=1\n              0: peaks already given  1: fit peak(s)",
-  "VERSION=0.3\n	 3-jul-2025 PJT",
+  "velmode=OPT\n         OPT, RAD or REL (not implemented)",
+  "VERSION=0.4\n	 15-jan-2026 PJT",
   NULL
 };
 
-string usage = "lineid draft";
+string usage = "spectral line ID tool";
 
 
 /**************** GLOBAL VARIABLES ************************/
@@ -48,6 +51,9 @@ local mdarray2 d2;                              /* data[col][row] */
 
 local int xcol, ycol;
 
+local real *rfreq;                              /* restfreq estimated go here */
+local int nrfreq;                               /* active length of this array */
+
 local real  *x, *y;    			        /* data from file */
 local int    npt;				/* actual number of data points */
 
@@ -56,7 +62,13 @@ local int mode;
 local bool Qvlsr, Qrest;
 local real vlsr;
 local real restfreq;
+local real dv;
 local string linelist = NULL;
+
+#define MAXL 100
+local real   lfreq[MAXL];
+local string lname[MAXL];
+local int    lnum = 0;
 
 local string xunit;
 local int xunit_mode = 0;
@@ -69,16 +81,18 @@ local int xunit_mode = 0;
 #define UNIT_Z   7
 
 void setparams(void);
-void read_data(void);
+void read_data(void); 
 void peak_data(void);
+void line_id(void);
 void do_peak(real *xpeak, real *xerr, real *ypeak);
   
 void nemo_main()
 {
-  warning("Program in draft stage, don't expect it to be correct");
+  //warning("version %s in draft stage, don't expect it to be correct",getparam("VERSION"));
   setparams();
   read_data();
   peak_data();
+  line_id();
 }
 
 void setparams()
@@ -94,11 +108,13 @@ void setparams()
   else
     ycol = getiparam("ycol");
 
-  Qvlsr = hasvalue("vlsr");
-  if (Qvlsr) vlsr = getdparam("vlsr");
-  
+  Qvlsr = hasvalue("vel");
   Qrest = hasvalue("restfreq");
+  if (Qvlsr) vlsr = getdparam("vel");
   if (Qrest) restfreq = getdparam("restfreq");
+  if (Qvlsr && Qrest) error("Cannot give both vel= and restfreq=");
+
+  dv = getdparam("dv");
 
   if (hasvalue("linelist"))
     linelist = getparam("linelist");
@@ -106,7 +122,7 @@ void setparams()
   xunit = getparam("xunit");
   if (streq(xunit,"GHz"))  xunit_mode = UNIT_GHZ;
   if (streq(xunit,"km/s")) xunit_mode = UNIT_KMS;
-  if (xunit_mode == 0) error("xunit  %s not supported yet",xunit);
+  if (xunit_mode == 0) error("xunit %s not supported yet",xunit);
 }
 
 #define MVAL 		 64
@@ -122,72 +138,125 @@ void read_data(void)
   colnr[1]  = ycol;
   d2 = table_md2cr(tptr, 2, colnr,0,0);
   npt = table_nrows(tptr);
-  dprintf(0,"Found %d rows\n", npt);
+  dprintf(1,"Found %d rows\n", npt);
   
   x = &d2[0][0];
   y = &d2[1][0];
 
-
-
   // get minmax in X and Y
+
+  rfreq = (real *) allocate(npt * sizeof(real));
+  nrfreq = 0;
+
+
+  if (linelist != NULL) {
+    char line[MAX_LINELEN];
+    string *words;
+    int nw;
+
+    instr = stropen(linelist,"r");
+    while (fgets(line, MAX_LINELEN, instr) != NULL) {
+      if (line[0] == '#') continue;
+      //printf("LINE: %s", line);
+      words = burststring(line," \n");
+      nw = xstrlen(words,sizeof(string))-1;
+      printf("%d: %g %s\n", nw, atof(words[0]), words[1]);
+      lfreq[lnum] = atof(words[0]);
+      lname[lnum] = strdup(words[1]);
+      lnum++;
+    }
+    strclose(instr);
+    dprintf(0,"Found %d lines in the listlist %s\n",lnum,linelist);
+  }
 }
 
 void peak_data(void)
 {
   real xpeak, xerr, ypeak;
-  real z, z1, z2, f2, rf2, sf2;
+  real v, z, z1, z2, f2, rf2, sf2;
   int i;
   
   dprintf(1,"C(mks)=%g\n",c_MKS);
-  dprintf(0,"xunit=%s\n",xunit);
+  dprintf(1,"xunit=%s\n",xunit);
 
   if (mode == 1 ) {
-    warning("Lines from peak fits in table:");    
+    //warning("Lines from peak fits in table:");    
     // simple brightest peak finder
     do_peak(&xpeak, &xerr, &ypeak);
   } else if (mode == 0) {
-    warning("Direct line from table:");
+    //warning("Direct line from table:");
     xpeak = x[0];
     ypeak = y[0];
   } else
     error("mode=%d not implemented", mode);
 
-  if (mode == 1) {
+  if (mode == 1) {  // peak fit to (xcol,ycol)
     if (Qrest) {
-      z = 1 - xpeak/restfreq;   // @todo fix
-      dprintf(0,"Line at %g has z=%g or vlsr=...\n",xpeak,z);
+      z = restfreq/xpeak - 1;
+      v = z*c_MKS/1000.0;
+      dprintf(0,"1a: Line at %f %s has z=%g or vel=%g km/s (cz)\n",xpeak,xunit,z,v);
     } else if (Qvlsr) {
       z = vlsr/c_MKS*1000.0;
-      restfreq = xpeak / (1-z);  // @todo fix
-      dprintf(0,"Line at %g, Look near freq = %g %s for a line\n", xpeak, restfreq, xunit);
+      restfreq = xpeak * (1+z);
+      dprintf(0,"1b: Line at %f, Look near freq = %f %s for a lineid; vel=%g\n", xpeak, restfreq, xunit,vlsr);
+      // add
+      rfreq[nrfreq++] = restfreq;
     } else {
       dprintf(0,"Peak: %g %g\n", xpeak, ypeak);
     }
-  } else { // mode=0
+  } else { // mode=0:    (xcol has freq/vel; ycol not used)
     if (xunit_mode == UNIT_KMS) {
       if (Qrest) {
-	z1 = x[0]*1000/c_MKS;
 	for (i=0; i<npt; i++) {
 	  z2 = x[i]*1000/c_MKS;
-	  rf2 = restfreq * (1+z1)/(1+z2);
-	  f2 = restfreq / (1+z2);
-	  dprintf(0,"Line at %f %s has skyfreq %f restfreq %f\n",x[i],xunit,f2,rf2);
+	  sf2 = restfreq/(1+z2);
+	  dprintf(0,"0a: Line at %f %s has skyfreq %f   (z=%f)\n",x[i],xunit,sf2,z2);
 	}
+      } else if (Qvlsr) {
+	error("not implementable");
       }
     } else if (xunit_mode == UNIT_GHZ) {
       if (Qrest) {
 	for (i=0; i<npt; i++) {
 	  z2 = restfreq/x[i] - 1.0;
-	  dprintf(0,"Line at %f %s has z %f vlsr %f km/s\n",x[i],xunit,z2,z2*c_MKS/1000.0);
-	
+	  dprintf(0,"0b: Line at %f %s has z=%f or vel=%f km/s (cz)\n",x[i],xunit,z2,z2*c_MKS/1000.0);
 	}
       } else if (Qvlsr) {
 	for (i=0; i<npt; i++) {
-	  sf2 = x[i] / (1+vlsr*1000/c_MKS);
-	  dprintf(0,"Line at %f %s has skyfreq %f \n",x[i],xunit,sf2);
+	  z2 = vlsr*1000/c_MKS;
+	  rf2 = x[i] * (1+z2);
+	  dprintf(0,"0c: Line at %f %s has restfreq %f %s z=%g\n",x[i],xunit,rf2,xunit,z2);
+	  // add
+	  rfreq[nrfreq++] = rf2;
 	}
       }
     }
+  }
+}
+
+void line_id(void)
+{
+  int i, j, lmin;
+  real dfmin, df;
+  
+  if (nrfreq==0) return;
+  printf("# There are %d restfreq's to identify:\n",nrfreq);
+  printf("guess    ID  LINE    dFreq    NAME\n");
+  for (i=0; i<nrfreq; i++) {
+    dfmin = -1.0;
+    for (j=0; j<lnum; j++) {
+      if (dfmin < 0) {
+	dfmin = ABS(lfreq[j] - rfreq[i]);
+	lmin = j;
+	continue;
+      }
+      df = ABS(lfreq[j] - rfreq[i]);
+      if (df < dfmin) {
+	dfmin = df;
+	lmin = j;
+      }
+    }
+    printf("%f   %d %f %f %s\n",rfreq[i], lmin, lfreq[lmin], dfmin, lname[lmin]);
   }
 }
 
