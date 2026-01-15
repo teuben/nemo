@@ -3,7 +3,7 @@
 DIR = src/kernel/tab
 BIN = tabmath tabplot tabhist tabspline tablsqfit tabnllsqfit tabdate \
       tabfilter tabtrend gauss1d gauss2d meanmed tabstat txtpar tabdms tabcsv \
-      tabrows tabcols tabint tabpeak
+      tabrows tabcols tabint tabpeak lineid
 
 NEED = $(BIN) nemoinp
 
@@ -136,6 +136,10 @@ tabfilter:
 tabtrend:
 	@echo Running $*
 	@nemoinp 0:4 | $(EXEC) tabmath - - '%1*%1' all | $(EXEC) tabtrend -
+
+lineid:
+	@echo Running $*
+	@echo 5000 | lineid - mode=0 restfreq=1.420405751786 xunit=km/s
 
 #   testing object loading load= in tabnlsqfit from the fit/ directory
 fitmyline_local:
