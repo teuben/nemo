@@ -61,6 +61,9 @@ but oddly enough the equivalent \fIfalcon\fP tool is more than 2x slower than NE
       b:  1.45user 0.02system 0:01.47elapsed 100%CPU
       z:                                               2.27user 0.00system 0:02.27elapsed 99%CPU
 
+Note that bench2b can't be compared yet, "as is" snapshots are saved at near-integer times
+1.066532, .... 9.076927, and of course nothing over 10.
+
 A more careful comparison is needed if the parameters all agree. How do we compare. Do we
 calibrate on the force errors, which we know as function of opening angle for a tree code.
 
